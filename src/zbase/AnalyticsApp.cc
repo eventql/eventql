@@ -588,6 +588,40 @@ AnalyticsApp::AnalyticsApp(
       [this] (const AnalyticsQuerySpec& params) -> RefPtr<dproc::Task> {
     return new AnalyticsQueryReducer(params, tsdb_node_, &queries_);
   });
+
+  registerProtoRDDFactory<zbase::TSDBTableScanSpec>(
+      "reco_engine.ECommercePreferenceSetsFeed",
+      [this] (const zbase::TSDBTableScanSpec& params)
+          -> RefPtr<dproc::Task> {
+        auto report = new ECommercePreferenceSetsFeed(
+            new TSDBTableScanSource<JoinedSession>(params, partition_map_),
+            new JSONSink());
+
+        return report;
+      });
+
+
+  registerProtoRDDFactory<zbase::TSDBTableScanSpec>(
+      "reco_engine.ECommerceRecoQueriesFeed",
+      [this] (const zbase::TSDBTableScanSpec& params)
+          -> RefPtr<dproc::Task> {
+        auto report = new ECommerceRecoQueriesFeed(
+            new TSDBTableScanSource<JoinedSession>(params, partition_map_),
+            new JSONSink());
+
+        return report;
+      });
+
+  registerProtoRDDFactory<zbase::TSDBTableScanSpec>(
+      "search.ECommerceSearchQueriesFeed",
+      [this] (const zbase::TSDBTableScanSpec& params)
+          -> RefPtr<dproc::Task> {
+        auto report = new ECommerceSearchQueriesFeed(
+            new TSDBTableScanSource<JoinedSession>(params, partition_map_),
+            new JSONSink());
+
+        return report;
+      });
 }
 
 void AnalyticsApp::configureFeed(const FeedConfig& cfg) {
@@ -687,48 +721,46 @@ dproc::TaskSpec AnalyticsApp::buildFeedQuery(
       const String& customer,
       const String& feed,
       uint64_t sequence) {
-  RAISE(kNotImplementedError);
+  auto cfg_iter = feeds_.find(
+      StringUtil::format(
+          "$0~$1",
+          feed,
+          customer));
 
-  //auto cfg_iter = feeds_.find(
-  //    StringUtil::format(
-  //        "$0~$1",
-  //        feed,
-  //        customer));
+  if (cfg_iter == feeds_.end()) {
+    RAISEF(
+        kRuntimeError,
+        "feed '$0' not configured for customer '$1'",
+        feed,
+        customer);
+  }
 
-  //if (cfg_iter == feeds_.end()) {
-  //  RAISEF(
-  //      kRuntimeError,
-  //      "feed '$0' not configured for customer '$1'",
-  //      feed,
-  //      customer);
-  //}
+  const auto& cfg = cfg_iter->second;
+  auto ts =
+      cfg.first_partition() +
+      cfg.partition_size() * (sequence / cfg.num_shards());
 
-  //const auto& cfg = cfg_iter->second;
-  //auto ts =
-  //    cfg.first_partition() +
-  //    cfg.partition_size() * (sequence / cfg.num_shards());
+  auto table_name = cfg.table_name();
+  auto partition_key = zbase::TimeWindowPartitioner::partitionKeyFor(
+      table_name,
+      ts,
+      cfg.partition_size());
 
-  //auto table_name = cfg.table_name();
-  //auto partition_key = zbase::TimeWindowPartitioner::partitionKeyFor(
-  //    table_name,
-  //    ts,
-  //    cfg.partition_size());
+  zbase::TSDBTableScanSpec params;
+  params.set_tsdb_namespace(customer);
+  params.set_table_name(table_name);
+  params.set_partition_key(partition_key.toString());
+  params.set_sample_modulo(cfg.num_shards());
+  params.set_sample_index(sequence % cfg.num_shards());
 
-  //zbase::TSDBTableScanSpec params;
-  //params.set_tsdb_namespace(customer);
-  //params.set_table_name(table_name);
-  //params.set_partition_sha1(partition_key.toString());
-  //params.set_sample_modulo(cfg.num_shards());
-  //params.set_sample_index(sequence % cfg.num_shards());
+  auto params_buf = msg::encode(params);
 
-  //auto params_buf = msg::encode(params);
+  dproc::TaskSpec task;
+  task.set_application(name());
+  task.set_task_name(feed);
+  task.set_params((char*) params_buf->data(), params_buf->size());
 
-  //dproc::TaskSpec task;
-  //task.set_application(name());
-  //task.set_task_name(feed);
-  //task.set_params((char*) params_buf->data(), params_buf->size());
-
-  //return task;
+  return task;
 }
 
 RefPtr<csql::ExecutionStrategy> AnalyticsApp::getExecutionStrategy(

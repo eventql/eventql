@@ -74,6 +74,7 @@ protected:
       http::HTTPResponseStream* res_stream);
 
   void fetchFeed(
+      const AnalyticsSession& session,
       const URI& uri,
       const http::HTTPRequest* req,
       http::HTTPResponse* res);
