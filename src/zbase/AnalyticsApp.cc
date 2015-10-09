@@ -594,7 +594,7 @@ AnalyticsApp::AnalyticsApp(
       [this] (const zbase::TSDBTableScanSpec& params)
           -> RefPtr<dproc::Task> {
         auto report = new ECommercePreferenceSetsFeed(
-            new TSDBTableScanSource<JoinedSession>(params, partition_map_),
+            new TSDBTableScanSource<NewJoinedSession>(params, partition_map_),
             new JSONSink());
 
         return report;
