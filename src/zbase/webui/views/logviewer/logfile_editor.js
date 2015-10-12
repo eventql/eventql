@@ -10,7 +10,9 @@ ZBase.registerView((function() {
   }
 
   var load = function() {
-    $.httpGet("/api/v1/logfiles/get_definition?logfile=" + logfile, function(r) {
+    var url =
+        "/api/v1/logfiles/get_definition?logfile=" + encodeURIComponent(logfile);
+    $.httpGet(url, function(r) {
       if (r.status == 200) {
         render(JSON.parse(r.response));
       } else {
@@ -83,7 +85,8 @@ ZBase.registerView((function() {
       renderDelete(field.name, "Delete Source Field", function(def) {
         var url =
             "/api/v1/logfiles/remove_source_field?logfile=" +
-            logfile + "&name=" + field.name;
+            encodeURIComponent(logfile) + "&name=" +
+            encodeURIComponent(field.name);
 
         $.httpPost(url, "", function(r) {
           if (r.status == 201) {
@@ -109,7 +112,7 @@ ZBase.registerView((function() {
       renderAdd("Add Source Field", function(field) {
         var url =
             "/api/v1/logfiles/add_source_field?logfile=" +
-            logfile + "&" + $.buildQueryString(field);
+            encodeURIComponent(logfile) + "&" + $.buildQueryString(field);
 
         $.httpPost(url, "", function(r) {
           if (r.status == 201) {
@@ -133,7 +136,8 @@ ZBase.registerView((function() {
       renderDelete(field.name, "Delete Row Field", function(def) {
         var url =
             "/api/v1/logfiles/remove_row_field?logfile=" +
-            logfile + "&name=" + field.name;
+            encodeURIComponent(logfile) + "&name=" +
+            encodeURIComponent(field.name);
 
         $.httpPost(url, "", function(r) {
           if (r.status == 201) {
@@ -159,7 +163,7 @@ ZBase.registerView((function() {
       renderAdd("Add Row Field", function(field) {
         var url =
             "/api/v1/logfiles/add_row_field?logfile=" +
-            logfile + "&" + $.buildQueryString(field);
+            encodeURIComponent(logfile) + "&" + $.buildQueryString(field);
 
         $.httpPost(url, "", function(r) {
           if (r.status == 201) {
