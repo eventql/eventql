@@ -223,3 +223,19 @@ z-button[data-size='big']  {
   background: #cee1e8;
   color: #333;
 }
+
+.z-button.loading {
+  opacity: 0.7;
+}
+
+.z-button.loading:hover {
+  cursor: default;
+}
+
+.z-button.primary.loading:hover {
+  background: #3498db;
+}
+
+.z-button.secondary.lading:hover {
+  color: #888;
+}
