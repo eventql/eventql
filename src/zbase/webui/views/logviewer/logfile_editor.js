@@ -1,5 +1,6 @@
 ZBase.registerView((function() {
   var logfile;
+  var info_message;
 
   var init = function(path) {
     var path_prefix = "/a/logs/";
@@ -23,6 +24,7 @@ ZBase.registerView((function() {
         "views/logviewer",
         "zbase_logviewer_logfile_editor_tpl");
 
+    info_message = ZbaseInfoMessage(page);
     $("h1", page).innerHTML = def.name;
 
     renderRegexPane($(".editor_pane.regex", page), def.regex);
@@ -48,15 +50,16 @@ ZBase.registerView((function() {
     var textarea = $("textarea", elem);
     textarea.value = regex;
 
-    $.onClick($("button.submit", elem), function() {
+    var button = $("button.submit", elem);
+    $.onClick(button, function() {
+      button.classList.add("loading");
       var url =
         "/api/v1/logfiles/set_regex?logfile=" + encodeURIComponent(logfile) +
         "&regex=" + encodeURIComponent(textarea.value);
 
       $.httpPost(url, "", function(r) {
         if (r.status == 201) {
-          console.log(r);
-          //load();
+          info_message.render("Your changes has been saved");
         } else {
           $.fatalError();
         }
@@ -165,7 +168,7 @@ ZBase.registerView((function() {
       if (!error) {
         $.httpPost(get_post_url(def), "", function(r) {
           if (r.status == 201) {
-            load();
+            console.log(r);
           } else {
             $.fatalError(r.statusText);
           }
