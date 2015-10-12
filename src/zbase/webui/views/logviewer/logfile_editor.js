@@ -29,17 +29,15 @@ ZBase.registerView((function() {
 
     renderRegexPane($(".editor_pane.regex", page), def.regex);
 
-    renderFields(
+    renderSourceFields(
         $(".editor_pane.source_fields", page),
-        def.source_fields,
-        deleteSourceField);
+        def.source_fields);
 
     renderFields(
         $(".editor_pane.row_fields", page),
         def.row_fields,
         deleteRowField);
 
-    $.onClick($(".editor_pane.source_fields .add_field", page), addSourceField);
     $.onClick($(".editor_pane.row_fields .add_field", page), addRowField);
 
     $.handleLinks(page);
@@ -48,14 +46,15 @@ ZBase.registerView((function() {
 
   var renderRegexPane = function(elem, regex) {
     var textarea = $("textarea", elem);
-    textarea.value = regex;
+    renderRegexContent(textarea, regex);
 
     var submit_button = $("button.submit", elem);
     var saving_button = $("button.saving", elem);
+
     $.onClick(submit_button, function() {
       saving_button.classList.remove("hidden");
       submit_button.classList.add("hidden");
-      var new_regex = textarea.value;
+
       var url =
         "/api/v1/logfiles/set_regex?logfile=" + encodeURIComponent(logfile) +
         "&regex=" + encodeURIComponent(textarea.value);
@@ -65,16 +64,71 @@ ZBase.registerView((function() {
           saving_button.classList.add("hidden");
           submit_button.classList.remove("hidden");
           info_message.renderSuccess("Your changes have been saved.");
-          regex = new_regex;
+          regex = textarea.value;
         } else {
           info_message.renderError(
               "An error occured, your changes have not been saved.");
-          textarea.value = regex;
           saving_button.classList.add("hidden");
           submit_button.classList.remove("hidden");
         }
+
+        renderRegexContent(textarea, regex);
       });
     });
+  };
+
+  var renderRegexContent = function(textarea, content) {
+    textarea.value = content;
+  };
+
+  var renderSourceFields = function(elem, fields) {
+    var onDelete = function(field) {
+      renderDelete(field.name, "Delete Source Field", function(def) {
+        var url =
+            "/api/v1/logfiles/remove_source_field?logfile=" +
+            logfile + "&name=" + field.name;
+
+        $.httpPost(url, "", function(r) {
+          if (r.status == 201) {
+            //remove field from fields
+            for (var i = 0; i < fields.length; i++) {
+              if (fields[i].name == field.name) {
+                fields.splice(i, 1);
+                break;
+              }
+            }
+
+            info_message.renderSuccess("Your changes have been saved.");
+            renderFields(elem, fields, onDelete);
+          } else {
+            info_message.renderError(
+              "An error occured, your changes have not been saved.");
+          }
+        });
+      });
+    };
+
+    $.onClick($(".add_field", elem), function() {
+      renderAdd("Add Source Field", function(field) {
+        var url =
+            "/api/v1/logfiles/add_source_field?logfile=" +
+            logfile + "&" + $.buildQueryString(field);
+
+        $.httpPost(url, "", function(r) {
+          if (r.status == 201) {
+            fields.push(field);
+            info_message.renderSuccess("Your changes have been saved.");
+            renderFields(elem, fields, onDelete);
+          } else {
+            info_message.renderError(
+              "An error occured, your changes have not been saved.");
+          }
+        });
+
+      });
+    });
+
+    renderFields(elem, fields, onDelete);
   };
 
   var renderFields = function(elem, fields, onDelete) {
@@ -83,6 +137,7 @@ ZBase.registerView((function() {
         "views/logviewer",
         "zbase_logviewer_logfile_editor_row_tpl");
 
+    tbody.innerHTML = "";
     fields.forEach(function(field) {
       var tr = tr_tpl.cloneNode(true);
       $(".name", tr).innerHTML = field.name;
@@ -96,13 +151,7 @@ ZBase.registerView((function() {
   };
 
 
-  var addSourceField = function() {
-    renderAdd("Add Source Field", function(field) {
-      return (
-          "/api/v1/logfiles/add_source_field?logfile=" +
-          logfile + "&" + $.buildQueryString(field));
-    });
-  };
+
 
   var addRowField = function() {
     renderAdd("Add Row Field", function(field) {
@@ -112,13 +161,6 @@ ZBase.registerView((function() {
     });
   };
 
-  var deleteSourceField = function(field) {
-    renderDelete(field.name, "Delete Source Field", function(def) {
-      return (
-          "/api/v1/logfiles/remove_source_field?logfile=" +
-          logfile + "&name=" + field.name);
-    });
-  };
 
   var deleteRowField = function(field) {
     renderDelete(field.name, "Delete Row Field", function() {
@@ -128,7 +170,7 @@ ZBase.registerView((function() {
     });
   };
 
-  var renderAdd = function(header, get_post_url) {
+  var renderAdd = function(header, callback) {
     var modal = $(".zbase_logviewer .logfile_editor z-modal.edit_field");
     var tpl = $.getTemplate(
         "views/logviewer",
@@ -176,13 +218,8 @@ ZBase.registerView((function() {
       }
 
       if (!error) {
-        $.httpPost(get_post_url(def), "", function(r) {
-          if (r.status == 201) {
-            console.log(r);
-          } else {
-            $.fatalError(r.statusText);
-          }
-        });
+        modal.close();
+        callback(def);
       }
     });
 
@@ -191,7 +228,7 @@ ZBase.registerView((function() {
     name_input.focus();
   };
 
-  var renderDelete = function(field_name, header, get_post_url) {
+  var renderDelete = function(field_name, header, onDelete) {
     var modal =  $(".zbase_logviewer .logfile_editor z-modal.delete_field");
     var tpl = $.getTemplate(
         "views/logviewer",
@@ -205,13 +242,8 @@ ZBase.registerView((function() {
     });
 
     $.onClick($("button.submit", tpl), function() {
-      $.httpPost(get_post_url(), "", function(r) {
-        if (r.status == 201) {
-          load();
-        } else {
-          $.fatalError(r.statusText);
-        }
-      });
+      onDelete();
+      modal.close();
     });
 
     $.replaceContent($(".container", modal), tpl);
