@@ -55,6 +55,7 @@ ZBase.registerView((function() {
     $.onClick(submit_button, function() {
       saving_button.classList.remove("hidden");
       submit_button.classList.add("hidden");
+      var new_regex = textarea.value;
       var url =
         "/api/v1/logfiles/set_regex?logfile=" + encodeURIComponent(logfile) +
         "&regex=" + encodeURIComponent(textarea.value);
@@ -63,9 +64,14 @@ ZBase.registerView((function() {
         if (r.status == 201) {
           saving_button.classList.add("hidden");
           submit_button.classList.remove("hidden");
-          info_message.render("Your changes has been saved");
+          info_message.renderSuccess("Your changes have been saved.");
+          regex = new_regex;
         } else {
-          $.fatalError();
+          info_message.renderError(
+              "An error occured, your changes have not been saved.");
+          textarea.value = regex;
+          saving_button.classList.add("hidden");
+          submit_button.classList.remove("hidden");
         }
       });
     });
