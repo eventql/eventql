@@ -1,9 +1,24 @@
 var ZbaseInfoMessage = function(elem) {
-  var render = function(message) {
+  var renderSuccess = function(message) {
     $(".inner", tpl).innerHTML = message;
-    tpl.classList.remove("hidden");
-
+    display();
     window.setTimeout(hide, 3000);
+  };
+
+  var renderError = function(message) {
+    var inner = $(".inner", tpl);
+    inner.classList.add("error");
+    inner.innerHTML = message;
+    display();
+
+    window.setTimeout(function() {
+      hide();
+      inner.classList.remove("error");
+    }, 4000);
+  };
+
+  var display = function() {
+    tpl.classList.remove("hidden");
   };
 
   var hide = function() {
@@ -19,6 +34,7 @@ var ZbaseInfoMessage = function(elem) {
   elem.appendChild(tpl);
 
   return {
-    render: render
+    renderSuccess: renderSuccess,
+    renderError: renderError
   }
 };

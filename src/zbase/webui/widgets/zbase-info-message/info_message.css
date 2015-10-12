@@ -24,3 +24,7 @@
   font-weight: 500;
   color: #3498db;
 }
+
+.zbase_info_message .inner.error {
+  color: #a94442;
+}
