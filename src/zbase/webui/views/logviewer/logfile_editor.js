@@ -33,12 +33,9 @@ ZBase.registerView((function() {
         $(".editor_pane.source_fields", page),
         def.source_fields);
 
-    renderFields(
+    renderRowFields(
         $(".editor_pane.row_fields", page),
-        def.row_fields,
-        deleteRowField);
-
-    $.onClick($(".editor_pane.row_fields .add_field", page), addRowField);
+        def.row_fields);
 
     $.handleLinks(page);
     $.replaceViewport(page);
@@ -131,6 +128,56 @@ ZBase.registerView((function() {
     renderFields(elem, fields, onDelete);
   };
 
+  var renderRowFields = function(elem, fields) {
+    var onDelete = function(field) {
+      renderDelete(field.name, "Delete Row Field", function(def) {
+        var url =
+            "/api/v1/logfiles/remove_row_field?logfile=" +
+            logfile + "&name=" + field.name;
+
+        $.httpPost(url, "", function(r) {
+          if (r.status == 201) {
+            //remove field from fields
+            for (var i = 0; i < fields.length; i++) {
+              if (fields[i].name == field.name) {
+                fields.splice(i, 1);
+                break;
+              }
+            }
+
+            info_message.renderSuccess("Your changes have been saved.");
+            renderFields(elem, fields, onDelete);
+          } else {
+            info_message.renderError(
+              "An error occured, your changes have not been saved.");
+          }
+        });
+      });
+    };
+
+    $.onClick($(".add_field", elem), function() {
+      renderAdd("Add Row Field", function(field) {
+        var url =
+            "/api/v1/logfiles/add_row_field?logfile=" +
+            logfile + "&" + $.buildQueryString(field);
+
+        $.httpPost(url, "", function(r) {
+          if (r.status == 201) {
+            fields.push(field);
+            info_message.renderSuccess("Your changes have been saved.");
+            renderFields(elem, fields, onDelete);
+          } else {
+            info_message.renderError(
+              "An error occured, your changes have not been saved.");
+          }
+        });
+
+      });
+    });
+
+    renderFields(elem, fields, onDelete);
+  };
+
   var renderFields = function(elem, fields, onDelete) {
     var tbody = $("tbody", elem);
     var tr_tpl = $.getTemplate(
@@ -147,26 +194,6 @@ ZBase.registerView((function() {
       $.onClick($(".delete", tr), function() {onDelete(field);});
 
       tbody.appendChild(tr);
-    });
-  };
-
-
-
-
-  var addRowField = function() {
-    renderAdd("Add Row Field", function(field) {
-      return (
-          "/api/v1/logfiles/add_row_field?logfile=" +
-          logfile + "&" + $.buildQueryString(field));
-    });
-  };
-
-
-  var deleteRowField = function(field) {
-    renderDelete(field.name, "Delete Row Field", function() {
-     return (
-          "/api/v1/logfiles/remove_row_field?logfile=" +
-          logfile + "&name=" + field.name);
     });
   };
 
