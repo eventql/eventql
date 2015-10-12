@@ -173,7 +173,7 @@ void AnalyticsServlet::handle(
 
   if (uri.path() == "/api/v1/feeds/fetch") {
     req_stream->readBody();
-    fetchFeed(uri, &req, &res);
+    fetchFeed(session, uri, &req, &res);
     res_stream->writeResponse(res);
     return;
   }
@@ -453,6 +453,7 @@ void AnalyticsServlet::executeQuery(
 }
 
 void AnalyticsServlet::fetchFeed(
+    const AnalyticsSession& session,
     const URI& uri,
     const http::HTTPRequest* req,
     http::HTTPResponse* res) {
@@ -465,13 +466,6 @@ void AnalyticsServlet::fetchFeed(
     return;
   }
 
-  String customer;
-  if (!URI::getParam(params, "customer", &customer)) {
-    res->setStatus(http::kStatusBadRequest);
-    res->addBody("missing ?customer=... parameter");
-    return;
-  }
-
   String sequence;
   if (!URI::getParam(params, "sequence", &sequence)) {
     res->setStatus(http::kStatusBadRequest);
@@ -479,7 +473,11 @@ void AnalyticsServlet::fetchFeed(
     return;
   }
 
-  auto task = app_->buildFeedQuery(customer, feed, std::stoull(sequence));
+  auto task = app_->buildFeedQuery(
+      session.customer(),
+      feed,
+      std::stoull(sequence));
+
   auto task_future = dproc_->run(task);
   auto result = task_future->result().waitAndGet();
   auto result_data = result->getData(); // FIXPAUL

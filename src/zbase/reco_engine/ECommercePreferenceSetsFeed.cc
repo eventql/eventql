@@ -14,7 +14,7 @@ using namespace stx;
 namespace zbase {
 
 ECommercePreferenceSetsFeed::ECommercePreferenceSetsFeed(
-    RefPtr<TSDBTableScanSource<JoinedSession>> input,
+    RefPtr<TSDBTableScanSource<NewJoinedSession>> input,
     RefPtr<JSONSink> output) :
     ReportRDD(input.get(), output.get()),
     input_(input),
@@ -31,16 +31,16 @@ void ECommercePreferenceSetsFeed::onInit() {
   output_->json()->beginArray();
 }
 
-void ECommercePreferenceSetsFeed::onSession(const JoinedSession& session) {
+void ECommercePreferenceSetsFeed::onSession(const NewJoinedSession& session) {
   auto json = output_->json();
 
   Set<String> visited_products;
-  for (const auto& item_visit : session.page_views()) {
+  for (const auto& item_visit : session.event().page_view()) {
     visited_products.emplace(item_visit.item_id());
   }
 
   Set<String> bought_products;
-  for (const auto& cart_item : session.cart_items()) {
+  for (const auto& cart_item : session.event().cart_items()) {
     if (cart_item.checkout_step() != 1) {
       continue;
     }
@@ -57,10 +57,10 @@ void ECommercePreferenceSetsFeed::onSession(const JoinedSession& session) {
   json->addInteger(WallClock::unixMicros() / kMicrosPerSecond);
   json->addComma();
   json->addObjectEntry("session_id");
-  json->addString(session.customer_session_id());
+  json->addString(session.session_id());
   json->addComma();
   json->addObjectEntry("ab_test_group");
-  json->addString(StringUtil::toString(session.ab_test_group()));
+  json->addString(StringUtil::toString(session.attr().ab_test_group()));
   json->addComma();
   json->addObjectEntry("visited_products");
   json::toJSON(visited_products, json);
