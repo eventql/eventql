@@ -50,15 +50,19 @@ ZBase.registerView((function() {
     var textarea = $("textarea", elem);
     textarea.value = regex;
 
-    var button = $("button.submit", elem);
-    $.onClick(button, function() {
-      button.classList.add("loading");
+    var submit_button = $("button.submit", elem);
+    var saving_button = $("button.saving", elem);
+    $.onClick(submit_button, function() {
+      saving_button.classList.remove("hidden");
+      submit_button.classList.add("hidden");
       var url =
         "/api/v1/logfiles/set_regex?logfile=" + encodeURIComponent(logfile) +
         "&regex=" + encodeURIComponent(textarea.value);
 
       $.httpPost(url, "", function(r) {
         if (r.status == 201) {
+          saving_button.classList.add("hidden");
+          submit_button.classList.remove("hidden");
           info_message.render("Your changes has been saved");
         } else {
           $.fatalError();
