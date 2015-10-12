@@ -297,7 +297,7 @@ int main(int argc, const char** argv) {
     fc.set_partition_size(kMicrosPerHour * 4);
     fc.set_first_partition(1430438400000000); // 2015-05-01 00:00:00Z
     fc.set_num_shards(128);
-    fc.set_table_name("logjoin.joined_sessions");
+    fc.set_table_name("sessions");
 
     analytics_app->configureFeed(fc);
   }
@@ -309,7 +309,7 @@ int main(int argc, const char** argv) {
     fc.set_partition_size(kMicrosPerHour * 4);
     fc.set_first_partition(1432785600000000);
     fc.set_num_shards(32);
-    fc.set_table_name("logjoin.joined_sessions");
+    fc.set_table_name("sessions");
 
     analytics_app->configureFeed(fc);
   }
@@ -321,7 +321,7 @@ int main(int argc, const char** argv) {
     fc.set_partition_size(kMicrosPerHour * 4);
     fc.set_first_partition(1430438400000000); // 2015-05-01 00:00:00Z
     fc.set_num_shards(32);
-    fc.set_table_name("logjoin.joined_sessions");
+    fc.set_table_name("sessions");
 
     analytics_app->configureFeed(fc);
   }

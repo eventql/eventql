@@ -22,7 +22,7 @@ class ECommercePreferenceSetsFeed : public ReportRDD {
 public:
 
   ECommercePreferenceSetsFeed(
-      RefPtr<TSDBTableScanSource<JoinedSession>> input,
+      RefPtr<TSDBTableScanSource<NewJoinedSession>> input,
       RefPtr<JSONSink> output);
 
   void onInit();
@@ -31,10 +31,10 @@ public:
   String contentType() const override;
 
 protected:
-  void onSession(const JoinedSession& session);
+  void onSession(const NewJoinedSession& session);
 
   size_t n_;
-  RefPtr<TSDBTableScanSource<JoinedSession>> input_;
+  RefPtr<TSDBTableScanSource<NewJoinedSession>> input_;
   RefPtr<JSONSink> output_;
 };
 
