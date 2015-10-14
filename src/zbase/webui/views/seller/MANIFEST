@@ -1,3 +1,5 @@
 js_file: "overview.js"
+js_file: "per_seller_stats.js"
 html_file: "overview.html"
+html_file: "per_seller_stats.html"
 css_file: "overview.css"
