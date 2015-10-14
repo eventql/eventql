@@ -29,9 +29,9 @@ ZBase.registerView((function() {
 
   return {
     name: "seller_overview",
-    loadView: load,
+    loadView: function(params) {load();},
     unloadView: function() {},
-    handleNavigationChange: load
+    handleNavigationChange: function() {load();}
   };
 
 })());
