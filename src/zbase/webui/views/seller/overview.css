@@ -15,3 +15,11 @@
 .zbase_seller_stats table.z-table tbody tr td {
   line-height: 24px;
 }
+
+.zbase_seller_stats table.z-table tbody tr td.icon {
+  text-align: center;
+}
+
+.zbase_seller_stats table.z-table tbody tr td.icon i {
+  color: #999;
+}
