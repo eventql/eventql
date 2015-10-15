@@ -52,8 +52,28 @@ void MapReduceAPIServlet::executeMapPartitionTask(
     const URI& uri,
     const http::HTTPRequest* req,
     http::HTTPResponse* res) {
+  const auto& params = uri.queryParams();
+
+  String table_name;
+  if (!URI::getParam(params, "table", &table_name)) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody("missing ?table=... parameter");
+    return;
+  }
+
+  String partition_key;
+  if (!URI::getParam(params, "partition", &partition_key)) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody("missing ?partition=... parameter");
+    return;
+  }
+
+  service_->mapPartition(
+      session,
+      table_name,
+      SHA1Hash::fromHexString(partition_key));
+
   res->setStatus(http::kStatusOK);
-  res->addBody("hello world");
 }
 
 }
