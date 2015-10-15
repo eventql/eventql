@@ -61,6 +61,7 @@ AnalyticsServlet::AnalyticsServlet(
     customer_dir_(customer_dir),
     logfile_api_(app->logfileService(), customer_dir, cachedir),
     events_api_(app->eventsService(), customer_dir, cachedir),
+    mapreduce_api_(app->mapreduceService(), customer_dir, cachedir),
     documents_api_(docdb) {}
 
 void AnalyticsServlet::handleHTTPRequest(
@@ -140,6 +141,11 @@ void AnalyticsServlet::handle(
 
   if (StringUtil::beginsWith(uri.path(), "/api/v1/events")) {
     events_api_.handle(session, req_stream, res_stream);
+    return;
+  }
+
+  if (StringUtil::beginsWith(uri.path(), "/api/v1/mapreduce")) {
+    mapreduce_api_.handle(session, req_stream, res_stream);
     return;
   }
 
