@@ -284,7 +284,14 @@ void AnalyticsServlet::handle(
     res_stream->writeResponse(res);
     return;
   }
-  
+
+  if (uri.path() == "/api/v1/tables/insert") {
+    req_stream->readBody();
+    insertIntoTable(session, &req, &res);
+    res_stream->writeResponse(res);
+    return;
+  }
+
   if (uri.path() == "/api/v1/tables/create_table") {
     req_stream->readBody();
     createTable(session, &req, &res);
@@ -840,6 +847,13 @@ void AnalyticsServlet::createTable(
     return;
   }
 
+  res->setStatus(http::kStatusCreated);
+}
+
+void AnalyticsServlet::insertIntoTable(
+    const AnalyticsSession& session,
+    const http::HTTPRequest* req,
+    http::HTTPResponse* res) {
   res->setStatus(http::kStatusCreated);
 }
 
