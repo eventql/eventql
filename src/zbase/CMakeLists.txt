@@ -204,7 +204,7 @@ add_executable(zbase
     WebUIServlet.cc
     zbase.cc)
 
-target_link_libraries(zbase chartsql cplot sstable cstable stx-http stx-json stx-protobuf stx-base)
+target_link_libraries(zbase ${CMAKE_BINARY_DIR}/3rdparty/mozjs/dist/lib/libjs_static.a chartsql cplot sstable cstable stx-http stx-json stx-protobuf stx-base z)
 
 add_executable(zbasectl
     $<TARGET_OBJECTS:stx-mdb>
