@@ -182,11 +182,12 @@ void TSDBService::insertRecord(
   Buffer record;
   msg::MessageEncoder::encode(data.data(), *data.schema(), &record);
 
-  iputs("insert into: $0/$1/$2 -> $3", tsdb_namespace, table_name, partition_key.toString(), data.debugPrint());
-
-  Vector<RecordRef> records;
-  records.emplace_back(record_id, record);
-  insertRecords(tsdb_namespace, table_name, partition_key, records);
+  insertRecord(
+      tsdb_namespace,
+      table_name,
+      partition_key,
+      record_id,
+      record);
 }
 
 void TSDBService::insertRecords(
@@ -194,11 +195,41 @@ void TSDBService::insertRecords(
     const String& table_name,
     const SHA1Hash& partition_key,
     const Vector<RecordRef>& records) {
-  if (repl_->hasLocalReplica(partition_key)) {
-    insertRecordsLocal(tsdb_namespace, table_name, partition_key, records);
-  } else {
-    insertRecordsRemote(tsdb_namespace, table_name, partition_key, records);
+  Vector<String> errors;
+  auto hosts = repl_->replicasFor(partition_key);
+  for (const auto& host : hosts) {
+
+    try {
+      if (host.is_local) {
+        insertRecordsLocal(
+            tsdb_namespace,
+            table_name,
+            partition_key,
+            records);
+      } else {
+        insertRecordsRemote(
+            tsdb_namespace,
+            table_name,
+            partition_key,
+            records,
+            host);
+      }
+
+      return;
+    } catch (const StandardException& e) {
+      logError(
+          "zbase",
+          e,
+          "TSDBService::insertRecordsRemote failed");
+
+      errors.emplace_back(e.what());
+    }
   }
+
+  RAISEF(
+      kRuntimeError,
+      "TSDBService::insertRecordsRemote failed: $0",
+      StringUtil::join(errors, ", "));
 }
 
 void TSDBService::insertRecordsLocal(
@@ -239,9 +270,18 @@ void TSDBService::insertRecordsRemote(
     const String& tsdb_namespace,
     const String& table_name,
     const SHA1Hash& partition_key,
-    const Vector<RecordRef>& records) {
-  RecordEnvelopeList envelope;
+    const Vector<RecordRef>& records,
+    const ReplicaRef& host) {
+  logDebug(
+      "z1.core",
+      "Inserting $0 records into tsdb://$1/$2/$3/$4",
+      records.size(),
+      host.name,
+      tsdb_namespace,
+      table_name,
+      partition_key.toString());
 
+  RecordEnvelopeList envelope;
   for (const auto& r : records) {
     auto record = envelope.add_records();
     record->set_tsdb_namespace(tsdb_namespace);
@@ -251,55 +291,9 @@ void TSDBService::insertRecordsRemote(
     record->set_record_data(r.record.toString());
   }
 
-  Vector<String> errors;
-  auto hosts = repl_->replicasFor(partition_key);
-  for (const auto& host : hosts) {
-    if (host.is_local) {
-      continue;
-    }
-
-    try {
-      logDebug(
-          "z1.core",
-          "Inserting $0 records into tsdb://$1/$2/$3/$4",
-          records.size(),
-          host.name,
-          tsdb_namespace,
-          table_name,
-          partition_key.toString());
-
-      insertRecordsRemote(
-          tsdb_namespace,
-          table_name,
-          partition_key,
-          envelope,
-          host.addr);
-
-      return;
-    } catch (const StandardException& e) {
-      logError(
-          "zbase",
-          e,
-          "TSDBService::insertRecordsRemote failed");
-
-      errors.emplace_back(e.what());
-    }
-  }
-
-  RAISEF(
-      kRuntimeError,
-      "TSDBService::insertRecordsRemote failed: $0",
-      StringUtil::join(errors, ", "));
-}
-
-void TSDBService::insertRecordsRemote(
-    const String& tsdb_namespace,
-    const String& table_name,
-    const SHA1Hash& partition_key,
-    const RecordEnvelopeList& envelope,
-    const InetAddr& host) {
-
-  auto uri = URI(StringUtil::format("http://$0/tsdb/insert", host.ipAndPort()));
+  auto uri = URI(StringUtil::format(
+      "http://$0/tsdb/insert",
+      host.addr.ipAndPort()));
 
   http::HTTPRequest req(http::HTTPMessage::M_POST, uri.pathAndQuery());
   req.addHeader("Host", uri.hostAndPort());
