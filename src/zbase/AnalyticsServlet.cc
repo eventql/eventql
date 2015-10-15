@@ -190,13 +190,6 @@ void AnalyticsServlet::handle(
     return;
   }
 
-  if (uri.path() == "/api/v1/push_events") {
-    req_stream->readBody();
-    pushEvents(uri, &req, &res);
-    res_stream->writeResponse(res);
-    return;
-  }
-
   if (uri.path() == "/api/v1/pipeline_info") {
     req_stream->readBody();
     pipelineInfo(session, &req, &res);
@@ -292,10 +285,9 @@ void AnalyticsServlet::handle(
     return;
   }
   
-  /* TABLES */
-  if (uri.path() == "/api/v1/tables") {
+  if (uri.path() == "/api/v1/tables/create_table") {
     req_stream->readBody();
-    listTables(session, &req, &res);
+    createTable(session, &req, &res);
     res_stream->writeResponse(res);
     return;
   }
@@ -655,37 +647,6 @@ void AnalyticsServlet::downloadReport(
   res_stream->finishResponse();
 }
 
-
-void AnalyticsServlet::pushEvents(
-    const URI& uri,
-    const http::HTTPRequest* req,
-    http::HTTPResponse* res) {
-  const auto& params = uri.queryParams();
-
-  String customer;
-  if (!URI::getParam(params, "customer", &customer)) {
-    res->setStatus(http::kStatusBadRequest);
-    res->addBody("error: missing ?customer=... parameter");
-    return;
-  }
-
-  String event_type;
-  if (!URI::getParam(params, "type", &event_type)) {
-    res->setStatus(http::kStatusBadRequest);
-    res->addBody("error: missing ?type=... parameter");
-    return;
-  }
-
-  if (req->body().size() == 0) {
-    res->setStatus(http::kStatusBadRequest);
-    res->addBody("error: empty record (body_size == 0)");
-  }
-
-  RAISE(kNotImplementedError);
-  //ingress_->insertEvents(customer, event_type, req->body());
-  res->setStatus(http::kStatusCreated);
-}
-
 void AnalyticsServlet::insertIntoMetric(
     const URI& uri,
     const AnalyticsSession& session,
@@ -819,15 +780,26 @@ void AnalyticsServlet::createTable(
   if (table_name.isEmpty()) {
     res->setStatus(http::kStatusBadRequest);
     res->addBody("missing field: table_name");
+    return;
   }
 
   auto jschema = json::objectLookup(jreq, "schema");
   if (jschema == jreq.end()) {
     res->setStatus(http::kStatusBadRequest);
     res->addBody("missing field: schema");
+    return;
   }
 
   auto num_shards = json::objectGetUInt64(jreq, "num_shards");
+
+  String table_type = "static";
+  auto jtable_type = json::objectGetString(jreq, "table_type");
+  if (!jtable_type.isEmpty()) {
+    table_type = jtable_type.get();
+  }
+
+  auto update_param = json::objectGetBool(jreq, "update");
+  auto force = !update_param.isEmpty() && update_param.get();
 
   try {
     msg::MessageSchema schema(nullptr);
@@ -839,12 +811,26 @@ void AnalyticsServlet::createTable(
 
     auto tblcfg = td.mutable_config();
     tblcfg->set_schema(schema.encode().toString());
-    tblcfg->set_partitioner(zbase::TBL_PARTITION_FIXED);
-    tblcfg->set_storage(zbase::TBL_STORAGE_STATIC);
     tblcfg->set_num_shards(num_shards.isEmpty() ? 1 : num_shards.get());
 
-    auto update_param = json::objectGetBool(jreq, "update");
-    auto force = !update_param.isEmpty() && update_param.get();
+    if (table_type == "timeseries") {
+      tblcfg->set_partitioner(zbase::TBL_PARTITION_TIMEWINDOW);
+      tblcfg->set_storage(zbase::TBL_STORAGE_LOG);
+
+      auto partition_size = json::objectGetUInt64(jreq, "partition_size");
+      auto partcfg = tblcfg->mutable_time_window_partitioner_config();
+      partcfg->set_partition_size(
+          partition_size.isEmpty() ? 4 * kMicrosPerHour : partition_size.get());
+    }
+
+    else if (table_type == "static") {
+      tblcfg->set_partitioner(zbase::TBL_PARTITION_FIXED);
+      tblcfg->set_storage(zbase::TBL_STORAGE_STATIC);
+    }
+
+    else {
+      RAISEF(kIllegalArgumentError, "invalid table type: $0", table_type);
+    }
 
     app_->updateTable(td, force);
   } catch (const StandardException& e) {
