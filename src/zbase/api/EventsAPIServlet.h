@@ -44,6 +44,12 @@ protected:
       http::HTTPRequestStream* req_stream,
       http::HTTPResponseStream* res_stream);
 
+  void insertEvents(
+      const AnalyticsSession& session,
+      const URI& uri,
+      const http::HTTPRequest* req,
+      http::HTTPResponse* res);
+
   EventsService* service_;
   ConfigDirectory* cdir_;
   String cachedir_;
