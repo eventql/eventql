@@ -1,25 +1,36 @@
-.zbase_seller_stats table.z-table {
+.zbase_seller_stats.overview .zbase_page_title h2.pagetitle {
+  display: inline-block;
+}
+
+.zbase_seller_stats.overview .zbase_page_title z-search {
+  font-size: 13px;
+  float: right;
+  width: 250px;
+  margin-top: 10px;
+}
+
+.zbase_seller_stats.overview table.z-table {
   font-size: 13px;
 }
 
-.zbase_seller_stats table.z-table thead tr th:first-child,
-.zbase_seller_stats table.z-table tbody tr td:first-child {
+.zbase_seller_stats.overview table.z-table thead tr th:first-child,
+.zbase_seller_stats.overview table.z-table tbody tr td:first-child {
   padding-left: 20px;
 }
 
-.zbase_seller_stats table.z-table thead tr th {
+.zbase_seller_stats.overview table.z-table thead tr th {
   font-weight: 400;
   color: #888;
 }
 
-.zbase_seller_stats table.z-table tbody tr td {
+.zbase_seller_stats.overview table.z-table tbody tr td {
   line-height: 24px;
 }
 
-.zbase_seller_stats table.z-table tbody tr td.icon {
+.zbase_seller_stats.overview table.z-table tbody tr td.icon {
   text-align: center;
 }
 
-.zbase_seller_stats table.z-table tbody tr td.icon i {
+.zbase_seller_stats.overview table.z-table tbody tr td.icon i {
   color: #999;
 }
