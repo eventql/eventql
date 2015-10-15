@@ -131,6 +131,7 @@ add_executable(zbase
     api/EventsService.cc
     api/EventsAPIServlet.cc
     api/MapReduceService.cc
+    api/MapReduceAPIServlet.cc
     LogfileScanResult.cc
     EventScanResult.cc
     Report.cc
