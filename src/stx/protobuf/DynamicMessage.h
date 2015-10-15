@@ -28,9 +28,15 @@ public:
   bool addDateTimeField(uint32_t id, const UnixTime& val);
   bool addStringField(const String& name, const String& val);
   bool addBoolField(const String& name, bool val);
-
-
   bool addObject(const String& name, Function<void (DynamicMessage* msg)> fn);
+
+  Option<String> getField(const String& name) const;
+  Option<String> getField(uint32_t id) const;
+  Option<uint32_t> getUInt32Field(const String& name) const;
+  Option<uint64_t> getUInt64Field(const String& name) const;
+  Option<UnixTime> getDateTimeField(const String& name) const;
+  Option<String> getStringField(const String& name) const;
+  Option<bool> getBoolField(const String& name) const;
 
   void toJSON(json::JSONOutputStream* json) const;
   void fromJSON(
