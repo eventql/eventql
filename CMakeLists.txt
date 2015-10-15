@@ -48,7 +48,7 @@ include_directories(src/)
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/src)
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/3rdparty/)
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/3rdparty/pcre)
-include_directories(${CMAKE_CURRENT_BINARY_DIR}/3rdparty/v8)
+include_directories(${CMAKE_CURRENT_BINARY_DIR}/3rdparty/mozjs/dist/include)
 
 add_subdirectory(3rdparty/pcre)
 include_directories(3rdparty/pcre)
@@ -58,9 +58,9 @@ include(ExternalProject)
 ExternalProject_Add(mozjs_build
     URL ${PROJECT_SOURCE_DIR}/3rdparty/mozjs
     SOURCE_DIR ${PROJECT_SOURCE_DIR}/3rdparty/mozjs
-    BUILD_COMMAND sh -c "cd js/src/build && CC=${CMAKE_C_COMPILER} CXX=${CMAKE_CXX_COMPILER} AR=${CMAKE_AR} RANLIB=${CMAKE_RANLIB} CFLAGS=\"${CMAKE_C_FLAGS}\" CXXFLAGS=\"${CMAKE_CXX_FLAGS}\" LDFLAGS=\"${CMAKE_EXE_LINKER_FLAGS}\" make"
-    CONFIGURE_COMMAND sh -c "mkdir -p js/src/build && cd js/src/build && CC=${CMAKE_C_COMPILER} CXX=${CMAKE_CXX_COMPILER} AR=${CMAKE_AR} RANLIB=${CMAKE_RANLIB} CFLAGS=\"${CMAKE_C_FLAGS}\" CXXFLAGS=\"${CMAKE_CXX_FLAGS}\" LDFLAGS=\"${CMAKE_EXE_LINKER_FLAGS}\" ../configure --disable-shared-js"
-    BUILD_IN_SOURCE True
+    BINARY_DIR ${PROJECT_BINARY_DIR}/3rdparty/mozjs
+    BUILD_COMMAND sh -c "CC=${CMAKE_C_COMPILER} CXX=${CMAKE_CXX_COMPILER} AR=${CMAKE_AR} RANLIB=${CMAKE_RANLIB} CFLAGS=\"${CMAKE_C_FLAGS}\" CXXFLAGS=\"${CMAKE_CXX_FLAGS}\" LDFLAGS=\"${CMAKE_EXE_LINKER_FLAGS}\" make"
+    CONFIGURE_COMMAND sh -c "CC=${CMAKE_C_COMPILER} CXX=${CMAKE_CXX_COMPILER} AR=${CMAKE_AR} RANLIB=${CMAKE_RANLIB} CFLAGS=\"${CMAKE_C_FLAGS}\" CXXFLAGS=\"${CMAKE_CXX_FLAGS}\" LDFLAGS=\"${CMAKE_EXE_LINKER_FLAGS}\" ../../../../../3rdparty/mozjs/js/src/configure --disable-shared-js"
     INSTALL_COMMAND "true")
 
 include(src/stx/cmake/libstx.cmake)
