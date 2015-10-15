@@ -116,6 +116,11 @@ protected:
       const http::HTTPRequest* req,
       http::HTTPResponse* res);
 
+  void insertIntoTable(
+      const AnalyticsSession& session,
+      const http::HTTPRequest* req,
+      http::HTTPResponse* res);
+
   void uploadTable(
       const URI& uri,
       const AnalyticsSession& session,
