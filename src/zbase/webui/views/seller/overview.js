@@ -37,6 +37,22 @@ ZBase.registerView((function() {
     setParamPremiumSeller(UrlUtil.getParamValue(path, "premium"));
 
     $.onClick($(".zbase_seller_stats z-checkbox.premium"), paramChanged);
+
+    var category_search = $(".zbase_seller_stats z-search.category");
+    category_search.addEventListener(
+        "z-search-submit",
+        paramChanged,
+        false);
+    category_search.addEventListener(
+        "z-search-autocomplete",
+        categoryAutocomplete,
+        false);
+
+    var seller_search = $(".zbase_seller_stats z-search.seller");
+    seller_search.addEventListener(
+        "z-search-submit",
+        paramChanged,
+        false);
   };
 
   var setParamSeller = function(value) {
@@ -67,6 +83,29 @@ ZBase.registerView((function() {
 
   var paramChanged = function() {
     $.navigateTo("/a/seller?" + $.buildQueryString(getQueryString()));
+  };
+
+  var categoryAutocomplete = function(e) {
+    var term = e.detail.value;
+
+    //REMOVEME
+    var suggestions = [
+      {
+        data_value: 1,
+        query: "Mode (1)"
+      },
+      {
+        data_value: 1,
+        query: "Mode (1)"
+      },
+      {
+        data_value: 1,
+        query: "Mode (1)"
+      }
+    ];
+    //REMOVEME END
+
+    this.autocomplete(term, suggestions);
   };
 
   return {
