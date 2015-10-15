@@ -24,6 +24,7 @@
 #include "zbase/ReportParams.pb.h"
 #include "zbase/api/LogfileService.h"
 #include "zbase/api/EventsService.h"
+#include "zbase/api/MapReduceService.h"
 #include "zbase/AnalyticsSession.pb.h"
 #include "csql/runtime/ExecutionStrategy.h"
 #include "zbase/ConfigDirectory.h"
@@ -94,6 +95,7 @@ public:
 
   LogfileService* logfileService();
   EventsService* eventsService();
+  MapReduceService* mapreduceService();
 
 protected:
 
@@ -113,6 +115,7 @@ protected:
 
   LogfileService logfile_service_;
   EventsService events_service_;
+  MapReduceService mapreduce_service_;
 };
 
 zbase::TableDefinition tableDefinitionToTableConfig(const TableDefinition& tbl);

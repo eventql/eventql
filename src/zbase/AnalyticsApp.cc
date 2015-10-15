@@ -95,7 +95,13 @@ AnalyticsApp::AnalyticsApp(
         tsdb_node,
         partition_map,
         replication_scheme,
-        sql) {
+        sql),
+    mapreduce_service_(
+        cdb,
+        auth,
+        tsdb_node,
+        partition_map,
+        replication_scheme) {
   cdb_->onCustomerConfigChange(
       std::bind(
           &AnalyticsApp::configureCustomer,
@@ -870,6 +876,10 @@ LogfileService* AnalyticsApp::logfileService() {
 
 EventsService* AnalyticsApp::eventsService() {
   return &events_service_;
+}
+
+MapReduceService* AnalyticsApp::mapreduceService() {
+  return &mapreduce_service_;
 }
 
 } // namespace zbase
