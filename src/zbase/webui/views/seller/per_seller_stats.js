@@ -1,13 +1,22 @@
 ZBase.registerView((function() {
+  var path_prefix = "/a/seller/";
+  var seller_id;
 
   var load = function(path) {
-
-    var path_prefix = "/a/seller/";
-    var seller_id = path.substr(path_prefix.length);
+    seller_id = path.substr(path_prefix.length);
 
     var page = $.getTemplate(
         "views/seller",
         "per_seller_stats_main_tpl");
+
+    $("z-daterangepicker", page).addEventListener("select", paramChanged, false);
+
+    $.handleLinks(page);
+    $.replaceViewport(page);
+
+    setParamsFromAndUntil(
+        UrlUtil.getParamValue(path, "from"),
+        UrlUtil.getParamValue(path, "until"));
 
     //REMOVE ME
     var data = {
@@ -46,6 +55,10 @@ ZBase.registerView((function() {
     };
     //REMOVEME END
 
+    render(data);
+  };
+
+  var render = function(data) {
     var sparkline_values = {};
     data.timeseries.forEach(function(serie) {
       for (metric in serie) {
@@ -57,17 +70,34 @@ ZBase.registerView((function() {
     });
 
     for (var metric in data.aggregates) {
-      $("." + metric + " .num", page).innerHTML = data.aggregates[metric];
-      $("." + metric + " z-sparkline", page).setAttribute(
+      $(".zbase_seller_stats ." + metric + " .num").innerHTML = data.aggregates[metric];
+      $(".zbase_seller_stats ." + metric + " z-sparkline").setAttribute(
           "data-sparkline",
           sparkline_values[metric].join(","));
     }
-
-    $.handleLinks(page);
-    $.replaceViewport(page);
-    $.hideLoader();
   };
 
+  var setParamsFromAndUntil = function(from, until) {
+    if (!until) {
+      until = DateUtil.getStartOfDay(Date.now());
+    }
+
+    if (!from) {
+      from = until - DateUtil.millisPerDay * 30;
+    }
+
+    $(".zbase_seller_stats z-daterangepicker").setValue(
+        from, until);
+  };
+
+  var getUrl = function() {
+    var params = $(".zbase_seller_stats z-daterangepicker").getValue();
+    return path_prefix + seller_id + "?" + $.buildQueryString(params);
+  };
+
+  var paramChanged = function(e) {
+    $.navigateTo(getUrl());
+  };
 
 
   return {
