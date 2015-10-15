@@ -64,7 +64,7 @@ Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildLocalSequential
 
   if (partition.isEmpty()) {
     return Option<ScopedPtr<csql::TableExpression>>(
-        mkScoped(new csql::EmptyTable()));
+        mkScoped(new csql::EmptyTable(node->columnNames())));
   }
 
   auto snap = partition.get()->getSnapshot();
@@ -72,7 +72,7 @@ Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildLocalSequential
   auto cstable = reader->fetchCSTableFilename();
   if (cstable.isEmpty()) {
     return Option<ScopedPtr<csql::TableExpression>>(
-        mkScoped(new csql::EmptyTable()));
+        mkScoped(new csql::EmptyTable(node->columnNames())));
   }
 
   auto scan = mkScoped(

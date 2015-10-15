@@ -87,6 +87,16 @@ Set<String> SequentialScanNode::selectedColumns() const {
   return columns;
 }
 
+Vector<String> SequentialScanNode::columnNames() const {
+  Vector<String> columns;
+
+  for (const auto& sl : select_list_) {
+    columns.emplace_back(sl->columnName());
+  }
+
+  return columns;
+}
+
 AggregationStrategy SequentialScanNode::aggregationStrategy() const {
   return aggr_strategy_;
 }
