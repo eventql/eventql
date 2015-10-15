@@ -64,6 +64,7 @@ route {
   require_module: "widgets/z-input"
   require_module: "widgets/z-dropdown"
   require_module: "widgets/z-textarea"
+  require_module: "widgets/zbase-info-message"
   require_module: "widgets/zbase-header"
   require_module: "views/logviewer"
 }

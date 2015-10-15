@@ -142,6 +142,29 @@ void TSDBService::insertRecord(
   insertRecords(tsdb_namespace, table_name, partition_key, records);
 }
 
+void TSDBService::insertRecord(
+    const String& tsdb_namespace,
+    const String& table_name,
+    const json::JSONObject::const_iterator& data_begin,
+    const json::JSONObject::const_iterator& data_end) {
+  auto table = pmap_->findTable(tsdb_namespace, table_name);
+  if (table.isEmpty()) {
+    RAISEF(kNotFoundError, "table not found: $0", table_name);
+  }
+
+  msg::DynamicMessage record(table.get()->schema());
+  record.fromJSON(data_begin, data_end);
+  insertRecord(tsdb_namespace, table_name, record);
+}
+
+void TSDBService::insertRecord(
+    const String& tsdb_namespace,
+    const String& table_name,
+    const msg::DynamicMessage& data) {
+  iputs("insert into: $0/$1 -> $2", tsdb_namespace, table_name, data.debugPrint());
+  RAISE(kNotImplementedError);
+}
+
 void TSDBService::insertRecords(
     const String& tsdb_namespace,
     const String& table_name,

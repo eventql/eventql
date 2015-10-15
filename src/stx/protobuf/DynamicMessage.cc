@@ -11,6 +11,7 @@
 #include <stx/human.h>
 #include <stx/protobuf/DynamicMessage.h>
 #include <stx/protobuf/JSONEncoder.h>
+#include <stx/protobuf/MessagePrinter.h>
 
 namespace stx {
 namespace msg {
@@ -277,6 +278,10 @@ void DynamicMessage::setData(msg::MessageObject data) {
 
 RefPtr<msg::MessageSchema> DynamicMessage::schema() const {
   return schema_;
+}
+
+String DynamicMessage::debugPrint() const {
+  return msg::MessagePrinter::print(data_, *schema_);
 }
 
 } // namespace msg

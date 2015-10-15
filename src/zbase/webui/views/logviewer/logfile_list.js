@@ -25,7 +25,6 @@ ZBase.registerView((function() {
 
     var tbody = $("tbody", page);
     logfiles.forEach(function(def) {
-      console.log(def);
       var tr = tr_tpl.cloneNode(true);
       $(".name", tr).innerHTML = def.name;
 
@@ -39,6 +38,10 @@ ZBase.registerView((function() {
             $.navigateTo("/a/logs/" + def.name);
             return;
         }
+      });
+
+      $.onClick($("tr", tr), function() {
+        $.navigateTo("/a/logs/view/" + def.name);
       });
 
       tbody.appendChild(tr);
