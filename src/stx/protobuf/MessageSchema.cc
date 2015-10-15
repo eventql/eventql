@@ -543,28 +543,17 @@ void MessageSchema::fromJSON(
     }
 
     auto type_size = json::objectGetUInt64(col, end, "type_size");
-    if (type_size.isEmpty()) {
-      RAISE(kRuntimeError, "missing field: type_size");
-    }
-
     auto optional = json::objectGetBool(col, end, "optional");
-    if (optional.isEmpty()) {
-      RAISE(kRuntimeError, "missing field: optional");
-    }
-
     auto repeated = json::objectGetBool(col, end, "repeated");
-    if (repeated.isEmpty()) {
-      RAISE(kRuntimeError, "missing field: repeated");
-    }
 
     addField(
         MessageSchemaField(
             id.get(),
             name.get(),
             fieldTypeFromString(type.get()),
-            type_size.get(),
-            repeated.get(),
-            optional.get()));
+            type_size.isEmpty() ? 0 : type_size.get(),
+            repeated.isEmpty() ? false : repeated.get(),
+            optional.isEmpty() ? false : optional.get()));
   }
 }
 
