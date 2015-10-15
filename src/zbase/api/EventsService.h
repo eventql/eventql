@@ -35,7 +35,17 @@ public:
       csql::Runtime* sql);
 
   /**
-   * Scan a logfile, returns the "limit" newest rows that match the condition
+   * Scan a table, returns the "limit" newest rows that match the condition
+   * and are older than end_time
+   */
+  void insertRow(
+      const AnalyticsSession& session,
+      const String& table_name,
+      const json::JSONObject::const_iterator& data_begin,
+      const json::JSONObject::const_iterator& data_end);
+
+  /**
+   * Scan a table, returns the "limit" newest rows that match the condition
    * and are older than end_time
    */
   void scanTable(
@@ -46,7 +56,7 @@ public:
       Function<void (bool done)> on_progress);
 
   /**
-   * Scan a single logfile partition. This method must be executed on a host
+   * Scan a single table partition. This method must be executed on a host
    * that actually stores this partition
    */
   void scanLocalTablePartition(
@@ -57,7 +67,7 @@ public:
       EventScanResult* result);
 
   /**
-   * Scan a single logfile partition. This method must be executed on a host
+   * Scan a single table partition. This method must be executed on a host
    * that actually stores this partition
    */
   EventScanResult scanLocalTablePartition(
@@ -67,7 +77,7 @@ public:
       const EventScanParams& params);
 
   /**
-   * Scan a single remote logfile partition, try all hosts in order from first
+   * Scan a single remote table partition, try all hosts in order from first
    * to last
    */
   void scanRemoteTablePartition(
@@ -79,7 +89,7 @@ public:
       EventScanResult* result);
 
   /**
-   * Scan a single remote logfile partition on a specific host
+   * Scan a single remote table partition on a specific host
    */
   bool scanRemoteTablePartition(
       const AnalyticsSession& session,

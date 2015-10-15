@@ -525,7 +525,7 @@ void MessageSchema::fromJSON(
 
   auto ncols = json::arrayLength(cols, end);
   for (size_t i = 0; i < ncols; ++i) {
-    auto col = json::arrayLookup(cols, end, i);
+    auto col = json::arrayLookup(cols, end, i); // O(N^2) but who cares...
 
     auto id = json::objectGetUInt64(col, end, "id");
     if (id.isEmpty()) {

@@ -854,6 +854,29 @@ void AnalyticsServlet::insertIntoTable(
     const AnalyticsSession& session,
     const http::HTTPRequest* req,
     http::HTTPResponse* res) {
+  auto jreq = json::parseJSON(req->body());
+
+  auto ncols = json::arrayLength(jreq.begin(), jreq.end());
+  for (size_t i = 0; i < ncols; ++i) {
+    auto jrow = json::arrayLookup(jreq.begin(), jreq.end(), i); // O(N^2) but who cares...
+
+    auto data = json::objectLookup(jrow, jreq.end(), "data");
+    if (data == jreq.end()) {
+      RAISE(kRuntimeError, "missing field: data");
+    }
+
+    auto table = json::objectGetString(jrow, jreq.end(), "table");
+    if (table.isEmpty()) {
+      RAISE(kRuntimeError, "missing field: table");
+    }
+
+    app_->eventsService()->insertRow(
+        session,
+        table.get(),
+        data,
+        data + data->size);
+  }
+
   res->setStatus(http::kStatusCreated);
 }
 
