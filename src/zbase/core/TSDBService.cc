@@ -10,9 +10,11 @@
 #include <stx/util/Base64.h>
 #include <stx/fnv.h>
 #include <stx/protobuf/msg.h>
+#include <stx/protobuf/MessageEncoder.h>
 #include <stx/io/fileutil.h>
 #include <sstable/sstablereader.h>
 #include <zbase/core/TSDBService.h>
+#include <zbase/core/TimeWindowPartitioner.h>
 #include <zbase/core/PartitionState.pb.h>
 
 using namespace stx;
@@ -161,8 +163,30 @@ void TSDBService::insertRecord(
     const String& tsdb_namespace,
     const String& table_name,
     const msg::DynamicMessage& data) {
-  iputs("insert into: $0/$1 -> $2", tsdb_namespace, table_name, data.debugPrint());
-  RAISE(kNotImplementedError);
+  auto table = pmap_->findTable(tsdb_namespace, table_name);
+  if (table.isEmpty()) {
+    RAISEF(kNotFoundError, "table not found: $0", table_name);
+  }
+
+  auto partition_key_field_name = "time";
+  auto partition_key_field = data.getField(partition_key_field_name);
+  if (partition_key_field.isEmpty()) {
+    RAISEF(kNotFoundError, "missing field: $0", partition_key_field_name);
+  }
+
+  auto partitioner = table.get()->partitioner();
+  auto partition_key = partitioner->partitionKeyFor(partition_key_field.get());
+
+  auto record_id = Random::singleton()->sha1();
+
+  Buffer record;
+  msg::MessageEncoder::encode(data.data(), *data.schema(), &record);
+
+  iputs("insert into: $0/$1/$2 -> $3", tsdb_namespace, table_name, partition_key.toString(), data.debugPrint());
+
+  Vector<RecordRef> records;
+  records.emplace_back(record_id, record);
+  insertRecords(tsdb_namespace, table_name, partition_key, records);
 }
 
 void TSDBService::insertRecords(
