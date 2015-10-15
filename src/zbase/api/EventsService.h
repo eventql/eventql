@@ -38,16 +38,6 @@ public:
    * Scan a table, returns the "limit" newest rows that match the condition
    * and are older than end_time
    */
-  void insertRow(
-      const AnalyticsSession& session,
-      const String& table_name,
-      const json::JSONObject::const_iterator& data_begin,
-      const json::JSONObject::const_iterator& data_end);
-
-  /**
-   * Scan a table, returns the "limit" newest rows that match the condition
-   * and are older than end_time
-   */
   void scanTable(
       const AnalyticsSession& session,
       const String& table_name,

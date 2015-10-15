@@ -42,6 +42,8 @@ public:
 
   RefPtr<msg::MessageSchema> schema() const;
 
+  String debugPrint() const;
+
 protected:
   RefPtr<msg::MessageSchema> schema_;
   msg::MessageObject data_;

@@ -39,14 +39,6 @@ EventsService::EventsService(
     repl_(repl),
     sql_(sql) {}
 
-void EventsService::insertRow(
-    const AnalyticsSession& session,
-    const String& table_name,
-    const json::JSONObject::const_iterator& data_begin,
-    const json::JSONObject::const_iterator& data_end) {
-  iputs("insert into: $0 -> $1", table_name, json::JSONObject(data_begin, data_end));
-}
-
 void EventsService::scanTable(
     const AnalyticsSession& session,
     const String& table_name,
