@@ -53,6 +53,8 @@
 #include "csql/defaults.h"
 #include "zbase/ConfigDirectory.h"
 
+#include <jsapi.h>
+
 using namespace stx;
 using namespace zbase;
 
@@ -254,6 +256,9 @@ int main(int argc, const char** argv) {
   auto sql = csql::Runtime::getDefaultRuntime();
   sql->setCacheDir(flags.getString("cachedir"));
 
+  /* spidermonkey */
+  JS_Init();
+
   /* analytics core */
   AnalyticsAuth auth(&customer_dir);
 
@@ -350,6 +355,8 @@ int main(int argc, const char** argv) {
 
   local_scheduler->stop();
   customer_dir.stopWatcher();
+
+  JS_ShutDown();
 
   exit(0);
 }

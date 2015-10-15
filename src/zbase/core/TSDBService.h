@@ -116,20 +116,15 @@ protected:
       const String& tsdb_namespace,
       const String& table_name,
       const SHA1Hash& partition_key,
-      const Vector<RecordRef>& recods);
+      const Vector<RecordRef>& records);
 
   void insertRecordsRemote(
       const String& tsdb_namespace,
       const String& table_name,
       const SHA1Hash& partition_key,
-      const Vector<RecordRef>& recods);
+      const Vector<RecordRef>& records,
+      const ReplicaRef& host);
 
-  void insertRecordsRemote(
-      const String& tsdb_namespace,
-      const String& table_name,
-      const SHA1Hash& partition_key,
-      const RecordEnvelopeList& envelope,
-      const InetAddr& host);
 
   PartitionMap* pmap_;
   ReplicationScheme* repl_;
