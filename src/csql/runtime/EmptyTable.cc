@@ -11,6 +11,10 @@
 
 namespace csql {
 
+EmptyTable::EmptyTable(
+    const Vector<String>& column_names) :
+    column_names_(column_names) {}
+
 void EmptyTable::prepare(ExecutionContext* context) {}
 
 void EmptyTable::execute(
@@ -18,11 +22,11 @@ void EmptyTable::execute(
     Function<bool (int argc, const SValue* argv)> fn) {}
 
 Vector<String> EmptyTable::columnNames() const {
-  return Vector<String>();
+  return column_names_;
 }
 
 size_t EmptyTable::numColumns() const {
-  return 0;
+  return column_names_.size();
 }
 
 }

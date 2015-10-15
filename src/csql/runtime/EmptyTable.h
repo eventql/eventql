@@ -17,6 +17,8 @@ namespace csql {
 class EmptyTable : public TableExpression {
 public:
 
+  EmptyTable(const Vector<String>& column_names);
+
   void prepare(ExecutionContext* context) override;
 
   void execute(
@@ -27,6 +29,8 @@ public:
 
   size_t numColumns() const override;
 
+protected:
+  Vector<String> column_names_;
 };
 
 }
