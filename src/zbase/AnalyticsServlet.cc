@@ -287,14 +287,18 @@ void AnalyticsServlet::handle(
 
   if (uri.path() == "/api/v1/tables/insert") {
     req_stream->readBody();
-    insertIntoTable(session, &req, &res);
+    catchAndReturnErrors(&res, [this, &session, &req, &res] {
+      insertIntoTable(session, &req, &res);
+    });
     res_stream->writeResponse(res);
     return;
   }
 
   if (uri.path() == "/api/v1/tables/create_table") {
     req_stream->readBody();
-    createTable(session, &req, &res);
+    catchAndReturnErrors(&res, [this, &session, &req, &res] {
+      createTable(session, &req, &res);
+    });
     res_stream->writeResponse(res);
     return;
   }
@@ -870,8 +874,8 @@ void AnalyticsServlet::insertIntoTable(
       RAISE(kRuntimeError, "missing field: table");
     }
 
-    app_->eventsService()->insertRow(
-        session,
+    tsdb_->insertRecord(
+        session.customer(),
         table.get(),
         data,
         data + data->size);

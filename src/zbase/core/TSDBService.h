@@ -12,6 +12,7 @@
 #include <stx/stdtypes.h>
 #include <stx/random.h>
 #include <stx/option.h>
+#include <stx/protobuf/DynamicMessage.h>
 #include <stx/thread/queue.h>
 #include <stx/thread/eventloop.h>
 #include <zbase/util/mdb/MDB.h>
@@ -38,7 +39,14 @@ public:
   void createTable(const TableDefinition& config);
 
   void insertRecords(const RecordEnvelopeList& records);
+
   void insertRecords(const Vector<RecordEnvelope>& records);
+
+  void insertRecords(
+      const String& tsdb_namespace,
+      const String& table_name,
+      const SHA1Hash& partition_key,
+      const Vector<RecordRef>& recods);
 
   void insertRecord(
       const String& tsdb_namespace,
@@ -47,11 +55,16 @@ public:
       const SHA1Hash& record_id,
       const Buffer& record);
 
-  void insertRecords(
+  void insertRecord(
       const String& tsdb_namespace,
       const String& table_name,
-      const SHA1Hash& partition_key,
-      const Vector<RecordRef>& recods);
+      const json::JSONObject::const_iterator& data_begin,
+      const json::JSONObject::const_iterator& data_end);
+
+  void insertRecord(
+      const String& tsdb_namespace,
+      const String& table_name,
+      const msg::DynamicMessage& data);
 
   void updatePartitionCSTable(
       const String& tsdb_namespace,
