@@ -30,10 +30,30 @@ void MapReduceService::mapPartition(
     const SHA1Hash& partition_key) {
   logDebug(
       "z1.mapreduce",
-      "Mapping partition: $0/$1/$2 => $3",
+      "Executing map shard; partition=$0/$1/$2 output=$3",
       session.customer(),
       table_name,
       partition_key.toString());
+
+  auto partition = pmap_->findPartition(
+      session.customer(),
+      table_name,
+      partition_key);
+
+  if (partition.isEmpty()) {
+    RAISEF(
+        kNotFoundError,
+        "partition not found: $0/$1/$2",
+        session.customer(),
+        table_name,
+        partition_key.toString());
+  }
+
+  auto reader = partition.get()->getReader();
+
+  reader->fetchRecords([] (const Buffer& record) {
+    iputs("scan record: $0", record.size());
+  });
 }
 
 } // namespace zbase
