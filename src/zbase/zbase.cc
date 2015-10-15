@@ -256,8 +256,12 @@ int main(int argc, const char** argv) {
   auto sql = csql::Runtime::getDefaultRuntime();
   sql->setCacheDir(flags.getString("cachedir"));
 
-  /* spidermonkey */
+  /* spidermonkey javascript runtime */
   JS_Init();
+  JSRuntime *js_runtime = JS_NewRuntime(8 * 1024 * 1024);
+  if (!js_runtime) {
+    RAISE(kRuntimeError, "error while initializing JavaScript runtime");
+  }
 
   /* analytics core */
   AnalyticsAuth auth(&customer_dir);
@@ -356,6 +360,7 @@ int main(int argc, const char** argv) {
   local_scheduler->stop();
   customer_dir.stopWatcher();
 
+  JS_DestroyRuntime(js_runtime);
   JS_ShutDown();
 
   exit(0);
