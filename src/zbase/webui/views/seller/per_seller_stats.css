@@ -1,0 +1,25 @@
+.zbase_seller_stats .metric_pane {
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0,0,0,.2);
+  border: 1px solid #ddd;
+  margin: 20px;
+  padding: 15px 20px;
+  overflow: auto;
+}
+
+.zbase_seller_stats .metric_pane h2.pagetitle {
+  font-size: 16px;
+  float: left;
+  line-height: 40px;
+}
+
+.zbase_seller_stats .metric_pane z-sparkline {
+  float: right;
+}
+
+.zbase_seller_stats .metric_pane .num {
+  font-size: 19px;
+  line-height: 40px;
+  float: right;
+  margin-right: 20px;
+}

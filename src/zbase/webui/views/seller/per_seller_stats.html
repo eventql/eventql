@@ -17,27 +17,27 @@
     </section>
 
     <div class="zbase_content_pane fullwidth">
-      <div class="inner_chart">
-        <z-dropdown class="input" data-resolved>
-          <z-dropdown-flyout>
-            <z-dropdown-items>
-              <z-dropdown-item data-value="product_page_impressions">Product Page Impressions</z-dropdown-item>
-              <z-dropdown-item data-value="product_listview_impressions">Product Listview Impressions</z-dropdown-item>
-              <z-dropdown-item data-value="product_listview_click">Product Listview Clicks</z-dropdown-item>
-              <z-dropdown-item data-value="product_listview_ctr">Product Listview CTR</z-dropdown-item>
-              <z-dropdown-item data-value="product_buy_to_detail_rate">Product Buy to Detail Rate</z-dropdown-item>
-              <z-dropdown-item data-value="product_cart_to_detail_rate">Product Cart to Detail Rate</z-dropdown-item>
-              <z-dropdown-item data-value="unique_purchases">Unique Purchases</z-dropdown-item>
-              <z-dropdown-item data-value="refunded_purchases">Refunded Purchases</z-dropdown-item>
-              <z-dropdown-item data-value="refund_rate">Refund Rate</z-dropdown-item>
-              <z-dropdown-item data-value="gmv_eurcent">GMV</z-dropdown-item>
-              <z-dropdown-item data-value="refunded_gmv_eurcent">Refunded GMV</z-dropdown-item>
-              <z-dropdown-item data-value="gmv_per_transaction">GMV Per Transaction</z-dropdown-item>
-              <z-dropdown-item data-value="order_items_count">Ordered Items</z-dropdown-item>
-            </z-dropdown-items>
-          </z-dropdown-flyout>
-        </z-dropdown>
+
+      <div class="metric_pane product_page_impressions">
+        <h2 class="pagetitle">Product Page Impressions</h2>
+        <z-sparkline width='150' height='40'></z-sparkline>
+        <span class="num"></span>
       </div>
+
+      <div class="metric_pane product_listview_impressions">
+        <h2 class="pagetitle">Product Listview Impressions</h2>
+        <z-sparkline width='150' height='40'></z-sparkline>
+        <span class="num"></span>
+      </div>
+
+      <div class="metric_pane product_listview_clicks">
+        <h2 class="pagetitle">Product Listview Clicks</h2>
+        <z-sparkline width='150' height='40'></z-sparkline>
+        <span class="num"></span>
+      </div>
+
     </div>
   </div>
 </template>
+
+

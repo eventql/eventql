@@ -283,6 +283,10 @@ route {
 route {
   path_prefix: "/a/seller/"
   view: "per_seller_stats"
+  require_module: "widgets/z-dropdown"
+  require_module: "widgets/z-checkbox"
+  require_module: "widgets/z-button"
+  require_module: "widgets/z-sparkline"
   require_module: "widgets/zbase-header"
   require_module: "views/seller"
 }
