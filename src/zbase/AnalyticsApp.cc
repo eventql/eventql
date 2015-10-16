@@ -72,6 +72,7 @@ AnalyticsApp::AnalyticsApp(
     ConfigDirectory* cdb,
     AnalyticsAuth* auth,
     csql::Runtime* sql,
+    JSRuntime* js_runtime,
     const String& datadir) :
     dproc::DefaultApplication("cm.analytics"),
     tsdb_node_(tsdb_node),
@@ -101,7 +102,8 @@ AnalyticsApp::AnalyticsApp(
         auth,
         tsdb_node,
         partition_map,
-        replication_scheme) {
+        replication_scheme,
+        js_runtime) {
   cdb_->onCustomerConfigChange(
       std::bind(
           &AnalyticsApp::configureCustomer,

@@ -11,6 +11,7 @@
 #include "zbase/AnalyticsAuth.h"
 #include "zbase/CustomerConfig.h"
 #include "zbase/ConfigDirectory.h"
+#include <jsapi.h>
 
 using namespace stx;
 
@@ -24,7 +25,8 @@ public:
       AnalyticsAuth* auth,
       zbase::TSDBService* tsdb,
       zbase::PartitionMap* pmap,
-      zbase::ReplicationScheme* repl);
+      zbase::ReplicationScheme* repl,
+      JSRuntime* js_runtime);
 
   void mapPartition(
       const AnalyticsSession& session,
@@ -37,6 +39,7 @@ protected:
   zbase::TSDBService* tsdb_;
   zbase::PartitionMap* pmap_;
   zbase::ReplicationScheme* repl_;
+  JSRuntime* js_runtime_;
 };
 
 } // namespace zbase

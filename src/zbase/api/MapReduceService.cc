@@ -17,12 +17,14 @@ MapReduceService::MapReduceService(
     AnalyticsAuth* auth,
     zbase::TSDBService* tsdb,
     zbase::PartitionMap* pmap,
-    zbase::ReplicationScheme* repl) :
+    zbase::ReplicationScheme* repl,
+    JSRuntime* js_runtime) :
     cdir_(cdir),
     auth_(auth),
     tsdb_(tsdb),
     pmap_(pmap),
-    repl_(repl) {}
+    repl_(repl),
+    js_runtime_(js_runtime) {}
 
 void MapReduceService::mapPartition(
     const AnalyticsSession& session,

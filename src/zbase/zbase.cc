@@ -52,7 +52,6 @@
 #include "zbase/DefaultServlet.h"
 #include "csql/defaults.h"
 #include "zbase/ConfigDirectory.h"
-
 #include <jsapi.h>
 
 using namespace stx;
@@ -258,7 +257,7 @@ int main(int argc, const char** argv) {
 
   /* spidermonkey javascript runtime */
   JS_Init();
-  JSRuntime *js_runtime = JS_NewRuntime(8 * 1024 * 1024);
+  JSRuntime* js_runtime = JS_NewRuntime(8 * 1024 * 1024);
   if (!js_runtime) {
     RAISE(kRuntimeError, "error while initializing JavaScript runtime");
   }
@@ -275,6 +274,7 @@ int main(int argc, const char** argv) {
           &customer_dir,
           &auth,
           sql.get(),
+          js_runtime,
           flags.getString("datadir")));
 
   dproc::DispatchService dproc;
