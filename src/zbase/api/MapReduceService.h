@@ -11,7 +11,7 @@
 #include "zbase/AnalyticsAuth.h"
 #include "zbase/CustomerConfig.h"
 #include "zbase/ConfigDirectory.h"
-#include <jsapi.h>
+#include "zbase/JavaScriptContext.h"
 
 using namespace stx;
 

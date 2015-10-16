@@ -53,6 +53,8 @@ void MapReduceService::mapPartition(
 
   auto reader = partition.get()->getReader();
 
+  auto js_ctx = mkRef(new JavaScriptContext(js_runtime_));
+
   reader->fetchRecords([] (const Buffer& record) {
     iputs("scan record: $0", record.size());
   });
