@@ -20,22 +20,36 @@
 
     <div class="zbase_content_pane fullwidth">
 
-      <div class="metric_pane product_page_impressions">
-        <h2 class="pagetitle">Product Page Impressions</h2>
-        <z-sparkline width='150' height='40'></z-sparkline>
-        <span class="num"></span>
-      </div>
+      <div class="zbase_stats_sidebar"></div>
 
-      <div class="metric_pane product_listview_impressions">
-        <h2 class="pagetitle">Product Listview Impressions</h2>
-        <z-sparkline width='150' height='40'></z-sparkline>
-        <span class="num"></span>
-      </div>
+      <div class="zbase_stats_content">
 
-      <div class="metric_pane product_listview_clicks">
-        <h2 class="pagetitle">Product Listview Clicks</h2>
-        <z-sparkline width='150' height='40'></z-sparkline>
-        <span class="num"></span>
+        <div class="metric_pane product_page_impressions">
+          <h2 class="pagetitle">Product Page Impressions</h2>
+          
+          <span class="num"></span>
+          <div class="clearfix"></div>
+          <z-sparkline width='100%' height='40'></z-sparkline>
+          <div class="time_line">
+            <span class="start">2015-09-15</span>
+            <span class="end">Today</span>
+          </div>
+        </div>
+
+        <div class="metric_pane product_listview_impressions">
+          <h2 class="pagetitle">Product Listview Impressions</h2>
+          <span class="num"></span>
+          <z-sparkline width='100%' height='40'></z-sparkline>
+        </div>
+
+        <div class="metric_pane product_listview_clicks">
+          <h2 class="pagetitle">Product Listview Clicks</h2>
+          
+          <span class="num"></span>
+          
+          <z-sparkline width='100%' height='40'></z-sparkline>
+        </div>
+
       </div>
 
     </div>

@@ -7,6 +7,30 @@
   margin-top: 3px;
 }
 
+.zbase_seller_stats .zbase_content_pane {
+  display: table;
+  table-layout: fixed;
+  width: 100%;
+  min-height: 900px;
+}
+
+.zbase_seller_stats .zbase_stats_sidebar {
+  display: table-cell;
+  vertical-align: top;
+  width: 320px;
+  padding: 20px 20px 0;
+  background: #fff;
+  box-shadow: 0 0 2px rgba(0,0,0,0.4);
+}
+
+.zbase_seller_stats .zbase_stats_content {
+  display: table-cell;
+  vertical-align: top;
+  width: auto;
+  border-left: 1px solid #ddd;
+  border-right: 1px solid #ddd;
+}
+
 .zbase_seller_stats button.z-button {
   font-size: 13px;
 }
@@ -18,6 +42,8 @@
   margin: 20px;
   padding: 15px 20px;
   overflow: auto;
+  width: 30%;
+  float: left;
 }
 
 .zbase_seller_stats .metric_pane h2.pagetitle {
@@ -27,12 +53,31 @@
 }
 
 .zbase_seller_stats .metric_pane z-sparkline {
-  float: right;
+  display: block;
 }
 
 .zbase_seller_stats .metric_pane .num {
-  font-size: 19px;
+  font-size: 22px;
   line-height: 40px;
   float: right;
   margin-right: 20px;
+}
+
+.zbase_seller_stats .metric_pane .time_line {
+  border-top: 1px solid #ddd;
+}
+
+.zbase_seller_stats .metric_pane .time_line .start,
+.zbase_seller_stats .metric_pane .time_line .end {
+  font-size: 12px;
+  color: #888;
+  margin-top: 2px;
+}
+
+.zbase_seller_stats .metric_pane .time_line .start {
+  float: left;
+}
+
+.zbase_seller_stats .metric_pane .time_line .end {
+  float: right;
 }
