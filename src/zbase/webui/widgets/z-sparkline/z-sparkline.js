@@ -60,8 +60,8 @@ var SparklineComponent = function() {
     this.appendChild(tpl);
 
     var svg = this.querySelector("svg");
-    svg.style.height = height;
-    svg.style.width = width;
+    svg.style.height = height + "px";
+    svg.style.width = width + "px";
 
     var path = this.querySelector("path");
     path.setAttribute("d", svg_line.join(" "));
