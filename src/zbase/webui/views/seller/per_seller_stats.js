@@ -65,6 +65,10 @@ ZBase.registerView((function() {
     render(data);
   };
 
+  var destroy = function() {
+    window.removeEventListener("resize", resizeSparklines);
+  };
+
   var render = function(data) {
     var sparkline_values = {};
     data.timeseries.forEach(function(serie) {
@@ -109,11 +113,19 @@ ZBase.registerView((function() {
     $.navigateTo(getUrl());
   };
 
+  var resizeSparklines = function() {
+    var sparklines = document.querySelectorAll(".zbase_seller_stats z-sparkline");
+    for (var i = 0; i < sparklines.length; i++) {
+      sparklines[i].render();
+    }
+  };
+
+  window.addEventListener("resize", resizeSparklines);
 
   return {
     name: "per_seller_stats",
     loadView: function(params) {load(params.path)},
-    unloadView: function() {},
+    unloadView: destroy,
     handleNavigationChange: load
   };
 

@@ -57,6 +57,7 @@ var SparklineComponent = function() {
         "widgets/z-sparkline",
         "z-sparkline-tpl");
 
+    this.innerHTML = "";
     this.appendChild(tpl);
 
     var svg = this.querySelector("svg");
