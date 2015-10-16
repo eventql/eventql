@@ -1,10 +1,16 @@
-.zbase_seller_stats .zbase_page_title zbase-breadcrumbs {
+.zbase_seller_stats .zbase_stats_title {
+  overflow: visible;
+  height: 80px;
+  padding: 10px 0;
+}
+
+.zbase_seller_stats .zbase_stats_title h2.pagetitle {
   float: left;
 }
 
-.zbase_seller_stats .zbase_page_title z-daterangepicker {
+.zbase_seller_stats .zbase_stats_title z-daterangepicker {
   float: right;
-  margin-top: 3px;
+  margin-top: 13px;
 }
 
 .zbase_seller_stats button.z-button {
@@ -17,54 +23,67 @@
   border: 1px solid #ddd;
   padding: 15px 20px;
   overflow: auto;
-  width: 23%;
+  width: 23.5%;
   margin: 1%;
   float: left;
 }
 
-.zbase_seller_stats .metric_pane h2.pagetitle {
+.zbase_seller_stats .zbase_stats .metric_pane:first-child,
+.zbase_seller_stats .zbase_stats .metric_pane:nth-child(5n) {
+  margin-left: 0px;
+}
+
+.zbase_seller_stats .zbase_stats .metric_pane:nth-child(4n) {
+  margin-right: 0px;
+}
+
+.zbase_seller_stats .zbase_stats .metric_pane:nth-child(-n+4) {
+  margin-top: 0px;
+}
+
+.zbase_seller_stats .zbase_stats .metric_pane h2.pagetitle {
   font-size: 16px;
   float: left;
   line-height: 40px;
 }
 
-.zbase_seller_stats .metric_pane i.help {
+.zbase_seller_stats .zbase_stats .metric_pane i.help {
   font-size: 13px;
   color: #888;
   margin-left: 3px
 }
 
-.zbase_seller_stats .metric_pane i.help:hover {
+.zbase_seller_stats .zbase_stats .metric_pane i.help:hover {
   cursor: pointer;
   color: #3498db;
 }
 
-.zbase_seller_stats .metric_pane z-sparkline {
+.zbase_seller_stats .zbase_stats .metric_pane z-sparkline {
   display: block;
 }
 
-.zbase_seller_stats .metric_pane .num {
+.zbase_seller_stats .zbase_stats .metric_pane .num {
   font-size: 22px;
   line-height: 40px;
   float: right;
   margin-right: 20px;
 }
 
-.zbase_seller_stats .metric_pane .time_line {
+.zbase_seller_stats .zbase_stats .metric_pane .time_line {
   border-top: 1px solid #ddd;
 }
 
-.zbase_seller_stats .metric_pane .time_line .start,
-.zbase_seller_stats .metric_pane .time_line .end {
+.zbase_seller_stats .zbase_stats .metric_pane .time_line .start,
+.zbase_seller_stats .zbase_stats .metric_pane .time_line .end {
   font-size: 12px;
   color: #888;
   margin-top: 2px;
 }
 
-.zbase_seller_stats .metric_pane .time_line .start {
+.zbase_seller_stats .zbase_stats .metric_pane .time_line .start {
   float: left;
 }
 
-.zbase_seller_stats .metric_pane .time_line .end {
+.zbase_seller_stats .zbase_stats .metric_pane .time_line .end {
   float: right;
 }

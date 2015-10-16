@@ -9,6 +9,7 @@ ZBase.registerView((function() {
         "views/seller",
         "per_seller_stats_main_tpl");
 
+    $(".zbase_stats_title h2 em", page).innerHTML = seller_id;
     $("z-daterangepicker", page).addEventListener("select", paramChanged, false);
 
     $.handleLinks(page);
