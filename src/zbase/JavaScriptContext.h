@@ -21,9 +21,9 @@ public:
   JavaScriptContext();
   ~JavaScriptContext();
 
-  void execute(const String& program);
+  void loadProgram(const String& program);
 
-  void callMethodWithJSON(
+  void callMapFunction(
       const String& method_name,
       const String& json_string);
 

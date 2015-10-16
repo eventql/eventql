@@ -52,46 +52,48 @@ JavaScriptContext::~JavaScriptContext() {
   JS_DestroyRuntime(runtime_);
 }
 
-void JavaScriptContext::execute(const String& program) {
-  JS_BeginRequest(ctx_);
+void JavaScriptContext::loadProgram(const String& program) {
+  JSAutoRequest js_req(ctx_);
+  JSAutoCompartment ac(ctx_, global_);
+
   JS::RootedValue rval(ctx_);
 
-  {
-    JSAutoCompartment ac(ctx_, global_);
+  JS::CompileOptions opts(ctx_);
+  opts.setFileAndLine("<mapreduce>", 1);
 
-    JS::CompileOptions opts(ctx_);
-    opts.setFileAndLine("<mapreduce>", 1);
-
-    if (!JS::Evaluate(
-          ctx_,
-          global_,
-          opts,
-          program.c_str(),
-          program.size(),
-          &rval)) {
-      JS_EndRequest(ctx_);
-      RAISE(kRuntimeError, "JavaScript execution failed");
-    }
+  if (!JS::Evaluate(
+        ctx_,
+        global_,
+        opts,
+        program.c_str(),
+        program.size(),
+        &rval)) {
+    JS_EndRequest(ctx_);
+    RAISE(kRuntimeError, "JavaScript execution failed");
   }
-
-  String str = JS_EncodeString(ctx_, rval.toString());
-  stx::iputs("result: $0", str);
-  JS_EndRequest(ctx_);
 }
 
-void JavaScriptContext::callMethodWithJSON(
+void JavaScriptContext::callMapFunction(
     const String& method_name,
     const String& json_string) {
   auto json_wstring = StringUtil::convertUTF8To16(json_string);
 
-  JS_BeginRequest(ctx_);
+  JSAutoRequest js_req(ctx_);
+  JSAutoCompartment js_comp(ctx_, global_);
 
   JS::RootedValue json(ctx_);
-  if (!JS_ParseJSON(ctx_, json_wstring.data(), json_wstring.size(), &json)) {
+  if (!JS_ParseJSON(ctx_, json_wstring.c_str(), json_wstring.size(), &json)) {
     RAISE(kRuntimeError, "invalid JSON");
   }
 
-  JS_EndRequest(ctx_);
+  JS::AutoValueArray<1> argv(ctx_);
+  argv[0].set(json);
+
+  JS::RootedValue rval(ctx_);
+  JS_CallFunctionName(ctx_, global_, method_name.c_str(), argv, &rval);
+
+  String str = JS_EncodeString(ctx_, rval.toString());
+  stx::iputs("call $0 with $1 -> result: $2", method_name, json_string, str);
 }
 
 } // namespace zbase

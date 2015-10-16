@@ -71,16 +71,21 @@ void MapReduceService::mapPartition(
   //jsval json = JSVAL_NULL;
 
   auto js_ctx = mkRef(new JavaScriptContext());
-  js_ctx->execute( "'hello'+'world, it is '+new Date()");
+  js_ctx->loadProgram(
+      R"(
+        function mymapper(obj) {
+          return "blah: " + obj;
+        }
+      )");
 
-  reader->fetchRecords([&schema] (const Buffer& record) {
+  reader->fetchRecords([&schema, &js_ctx] (const Buffer& record) {
     msg::MessageObject msgobj;
     msg::MessageDecoder::decode(record, *schema, &msgobj);
     Buffer msgjson;
     json::JSONOutputStream msgjsons(BufferOutputStream::fromBuffer(&msgjson));
     msg::JSONEncoder::encode(msgobj, *schema, &msgjsons);
 
-    iputs("scan record: $0 -> $1", record.size(), msgjson.toString());
+    js_ctx->callMapFunction("mymapper", msgjson.toString());
   });
 }
 
