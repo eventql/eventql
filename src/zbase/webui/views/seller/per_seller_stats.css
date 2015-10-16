@@ -7,30 +7,6 @@
   margin-top: 3px;
 }
 
-.zbase_seller_stats .zbase_content_pane {
-  display: table;
-  table-layout: fixed;
-  width: 100%;
-  min-height: 900px;
-}
-
-.zbase_seller_stats .zbase_stats_sidebar {
-  display: table-cell;
-  vertical-align: top;
-  width: 320px;
-  padding: 20px 20px 0;
-  background: #fff;
-  box-shadow: 0 0 2px rgba(0,0,0,0.4);
-}
-
-.zbase_seller_stats .zbase_stats_content {
-  display: table-cell;
-  vertical-align: top;
-  width: auto;
-  border-left: 1px solid #ddd;
-  border-right: 1px solid #ddd;
-}
-
 .zbase_seller_stats button.z-button {
   font-size: 13px;
 }
@@ -39,10 +15,10 @@
   background: #fff;
   box-shadow: 0 1px 2px rgba(0,0,0,.2);
   border: 1px solid #ddd;
-  margin: 20px;
   padding: 15px 20px;
   overflow: auto;
-  width: 30%;
+  width: 23%;
+  margin: 1%;
   float: left;
 }
 
@@ -50,6 +26,17 @@
   font-size: 16px;
   float: left;
   line-height: 40px;
+}
+
+.zbase_seller_stats .metric_pane i.help {
+  font-size: 13px;
+  color: #888;
+  margin-left: 3px
+}
+
+.zbase_seller_stats .metric_pane i.help:hover {
+  cursor: pointer;
+  color: #3498db;
 }
 
 .zbase_seller_stats .metric_pane z-sparkline {

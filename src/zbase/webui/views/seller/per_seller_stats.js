@@ -23,33 +23,39 @@ ZBase.registerView((function() {
       aggregates: {
         product_page_impressions: 64,
         product_listview_impressions: 58,
-        product_listview_clicks: 37
+        product_listview_clicks: 37,
+        product_listview_ctr: 0.34
       },
       timeseries: [
         {
           product_page_impressions: 3,
           product_listview_impressions: 10,
-          product_listview_clicks: 9
+          product_listview_clicks: 9,
+          product_listview_ctr: 0.34
         },
         {
           product_page_impressions: 12,
           product_listview_impressions: 8,
-          product_listview_clicks: 3
+          product_listview_clicks: 3,
+          product_listview_ctr: 0.34
         },
         {
           product_page_impressions: 10,
           product_listview_impressions: 7,
-          product_listview_clicks: 10
+          product_listview_clicks: 10,
+          product_listview_ctr: 0.34
         },
         {
           product_page_impressions: 17,
           product_listview_impressions: 14,
-          product_listview_clicks: 11
+          product_listview_clicks: 11,
+          product_listview_ctr: 0.34
         },
         {
           product_page_impressions: 18,
           product_listview_impressions: 16,
-          product_listview_clicks: 12
+          product_listview_clicks: 12,
+          product_listview_ctr: 0.34
         }
       ]
     };
@@ -70,10 +76,13 @@ ZBase.registerView((function() {
     });
 
     for (var metric in data.aggregates) {
-      $(".zbase_seller_stats ." + metric + " .num").innerHTML = data.aggregates[metric];
-      $(".zbase_seller_stats ." + metric + " z-sparkline").setAttribute(
+      var pane = $(".zbase_seller_stats ." + metric);
+      $(".num", pane).innerHTML = data.aggregates[metric];
+      $("z-sparkline", pane).setAttribute(
           "data-sparkline",
           sparkline_values[metric].join(","));
+
+      $(".zbase_seller_stats z-tooltip." + metric).init($("i.help", pane));
     }
   };
 

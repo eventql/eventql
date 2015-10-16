@@ -18,15 +18,12 @@
       </div>
     </section>
 
-    <div class="zbase_content_pane fullwidth">
-
-      <div class="zbase_stats_sidebar"></div>
-
+    <div class="zbase_content_pane">
       <div class="zbase_stats_content">
 
         <div class="metric_pane product_page_impressions">
           <h2 class="pagetitle">Product Page Impressions</h2>
-          
+          <i class="fa fa-question-circle help"></i>
           <span class="num"></span>
           <div class="clearfix"></div>
           <z-sparkline width='100%' height='40'></z-sparkline>
@@ -38,21 +35,52 @@
 
         <div class="metric_pane product_listview_impressions">
           <h2 class="pagetitle">Product Listview Impressions</h2>
+          <i class="fa fa-question-circle help"></i>
           <span class="num"></span>
           <z-sparkline width='100%' height='40'></z-sparkline>
+          <div class="time_line">
+            <span class="start">2015-09-15</span>
+            <span class="end">Today</span>
+          </div>
         </div>
 
         <div class="metric_pane product_listview_clicks">
           <h2 class="pagetitle">Product Listview Clicks</h2>
-          
+          <i class="fa fa-question-circle help"></i>
           <span class="num"></span>
-          
           <z-sparkline width='100%' height='40'></z-sparkline>
+          <div class="time_line">
+            <span class="start">2015-09-15</span>
+            <span class="end">Today</span>
+          </div>
+        </div>
+
+        <div class="metric_pane product_listview_ctr">
+          <h2 class="pagetitle">Product Listview CTR</h2>
+          <i class="fa fa-question-circle help"></i>
+          <span class="num"></span>
+          <z-sparkline width='100%' height='40'></z-sparkline>
+          <div class="time_line">
+            <span class="start">2015-09-15</span>
+            <span class="end">Today</span>
+          </div>
         </div>
 
       </div>
-
     </div>
+
+    <z-tooltip class="product_page_impressions" data-pointer="center">
+      Aggregate number of product page impressions for all products from this seller in this time window
+    </z-tooltip>
+    <z-tooltip class="product_listview_impressions" data-pointer="center">
+      Aggregate number of total listview impressions for all products from this seller in this time window
+    </z-tooltip>
+    <z-tooltip class="product_listview_clicks" data-pointer="center">
+      Aggregate number of total listview clicks for all products from this seller in this time window
+    </z-tooltip>
+    <z-tooltip class="product_listview_ctr" data-pointer="center">
+      Aggregate listview CTR for all products from this seller in this time window
+    </z-tooltip>
   </div>
 </template>
 
