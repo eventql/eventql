@@ -15,18 +15,18 @@ ZBase.registerView((function() {
     var tbody = $("tbody", page);
     seller.forEach(function(s) {
       var tr = document.createElement("tr");
-      var html = "<td>" + s.name + "</td><td>" + s.id;
+      var url = "/a/seller/" + s.id;
+      var html =
+        "<td><a href='" + url + "'>" + s.name +
+        "</a></td><td><a href='" + url + "'>" + s.id;
       if (s.is_premium) {
-        html += "</td><td class='icon'><i class='fa fa-star'></i>";
+        html += "</a></td><td class='icon'><a href='" + url +
+          "'><i class='fa fa-star'></i></a>";
       } else {
-        html += "</td><td></td>";
+        html += "</a></td><td><a href='" + url + "'></a></td>";
       }
       tr.innerHTML = html;
       tbody.appendChild(tr);
-
-      $.onClick(tr, function() {
-        $.navigateTo("/a/seller/" + s.id);
-      });
     });
 
     $.handleLinks(page);
