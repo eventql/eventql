@@ -18,10 +18,13 @@ namespace zbase {
 class JavaScriptContext : public RefCounted {
 public:
 
-  JavaScriptContext(JSRuntime* runtime);
+  JavaScriptContext();
   ~JavaScriptContext();
 
+  void execute(const String& program);
+
 protected:
+  JSRuntime* runtime_;
   JSContext* ctx_;
   JS::PersistentRooted<JSObject*> global_;
 };

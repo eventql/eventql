@@ -6,6 +6,7 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
+#include "stx/inspect.h"
 #include "zbase/JavaScriptContext.h"
 
 using namespace stx;
@@ -14,11 +15,18 @@ namespace zbase {
 
 static JSClass global_class = { "global", JSCLASS_GLOBAL_FLAGS };
 
-JavaScriptContext::JavaScriptContext(JSRuntime* runtime) {
-  ctx_ = JS_NewContext(runtime, 8192);
+JavaScriptContext::JavaScriptContext() {
+  runtime_ = JS_NewRuntime(8 * 1024 * 1024);
+  if (!runtime_) {
+    RAISE(kRuntimeError, "error while initializing JavaScript runtime");
+  }
+
+  ctx_ = JS_NewContext(runtime_, 8192);
   if (!ctx_) {
     RAISE(kRuntimeError, "error while initializing JavaScript context");
   }
+
+  JS_BeginRequest(ctx_);
 
   global_ = JS_NewGlobalObject(
       ctx_,
@@ -27,13 +35,48 @@ JavaScriptContext::JavaScriptContext(JSRuntime* runtime) {
       JS::FireOnNewGlobalHook);
 
   if (!global_) {
+    JS_EndRequest(ctx_);
     RAISE(kRuntimeError, "error while initializing JavaScript context");
   }
-}
 
+  {
+    JSAutoCompartment ac(ctx_, global_);
+    JS_InitStandardClasses(ctx_, global_);
+  }
+
+  JS_EndRequest(ctx_);
+}
 
 JavaScriptContext::~JavaScriptContext() {
   JS_DestroyContext(ctx_);
+  JS_DestroyRuntime(runtime_);
+}
+
+void JavaScriptContext::execute(const String& program) {
+  JS_BeginRequest(ctx_);
+  JS::RootedValue rval(ctx_);
+
+  {
+    JSAutoCompartment ac(ctx_, global_);
+
+    JS::CompileOptions opts(ctx_);
+    opts.setFileAndLine("<mapreduce>", 1);
+
+    if (!JS::Evaluate(
+          ctx_,
+          global_,
+          opts,
+          program.c_str(),
+          program.size(),
+          &rval)) {
+      JS_EndRequest(ctx_);
+      RAISE(kRuntimeError, "JavaScript execution failed");
+    }
+  }
+
+  String str = JS_EncodeString(ctx_, rval.toString());
+  stx::iputs("result: $0", str);
+  JS_EndRequest(ctx_);
 }
 
 } // namespace zbase

@@ -53,7 +53,8 @@ void MapReduceService::mapPartition(
 
   auto reader = partition.get()->getReader();
 
-  auto js_ctx = mkRef(new JavaScriptContext(js_runtime_));
+  auto js_ctx = mkRef(new JavaScriptContext());
+  js_ctx->execute( "'hello'+'world, it is '+new Date()");
 
   reader->fetchRecords([] (const Buffer& record) {
     iputs("scan record: $0", record.size());

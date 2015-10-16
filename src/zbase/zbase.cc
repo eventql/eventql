@@ -257,10 +257,6 @@ int main(int argc, const char** argv) {
 
   /* spidermonkey javascript runtime */
   JS_Init();
-  JSRuntime* js_runtime = JS_NewRuntime(8 * 1024 * 1024);
-  if (!js_runtime) {
-    RAISE(kRuntimeError, "error while initializing JavaScript runtime");
-  }
 
   /* analytics core */
   AnalyticsAuth auth(&customer_dir);
@@ -274,7 +270,7 @@ int main(int argc, const char** argv) {
           &customer_dir,
           &auth,
           sql.get(),
-          js_runtime,
+          nullptr,
           flags.getString("datadir")));
 
   dproc::DispatchService dproc;
@@ -360,7 +356,6 @@ int main(int argc, const char** argv) {
   local_scheduler->stop();
   customer_dir.stopWatcher();
 
-  JS_DestroyRuntime(js_runtime);
   JS_ShutDown();
 
   exit(0);
