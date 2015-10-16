@@ -39,8 +39,8 @@ var SparklineComponent = function() {
   };
 
   this.renderWithData = function(values, ymin, ymax) {
-    var height = this.getAttribute('height');
-    var width = this.getAttribute('width');
+    var height = this.getDimension('height');
+    var width = this.getDimension("width");
     var padding_x = 0;
     var padding_y = 5;
 
@@ -65,6 +65,17 @@ var SparklineComponent = function() {
 
     var path = this.querySelector("path");
     path.setAttribute("d", svg_line.join(" "));
+  };
+
+  this.getDimension = function(dimension) {
+    var value = this.getAttribute(dimension);
+
+    var idx = value.indexOf("%");
+    if (idx > -1) {
+      return this.offsetWidth * (parseInt(value.substr(0, idx), 10) / 100);
+    }
+
+    return value;
   };
 
   this.scaleValues = function(axes) {
