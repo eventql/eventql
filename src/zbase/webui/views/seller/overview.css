@@ -2,33 +2,36 @@
   display: inline-block;
 }
 
-.zbase_seller_stats.overview .zbase_page_title .controls {
-  float: right;
-  padding-top: 10px;
+.zbase_seller_stats.overview  .controls {
+  padding: 10px 20px;
+  border-bottom: 1px solid #d1d1d1;
+  background: #fff;
+  overflow: auto;;
 }
 
-.zbase_seller_stats.overview .zbase_page_title .controls .control {
+.zbase_seller_stats.overview .controls .control {
   display: inline-block;
   height: 38px;
   margin-top: 2px;
+  float: right;
 }
 
-.zbase_seller_stats.overview .zbase_page_title .controls .control z-checkbox {
+.zbase_seller_stats.overview .controls .control z-checkbox {
   margin-top: 3px;
 }
 
-.zbase_seller_stats.overview .zbase_page_title .controls .control label {
+.zbase_seller_stats.overview .controls .control label {
   font-size: 12px;
-  color: #fff;
   line-height: 38px;
   font-weight: 400;
 }
 
-.zbase_seller_stats.overview .zbase_page_title .controls .search {
+.zbase_seller_stats.overview .controls .search {
   display: inline-block;
+  float: right;
 }
 
-.zbase_seller_stats.overview .zbase_page_title label.search_label {
+.zbase_seller_stats.overview label.search_label {
   position: absolute;
   display: inline-block;
   height: 35px;
@@ -51,24 +54,21 @@
   margin-top: 1px;
 }
 
-.zbase_seller_stats.overview .zbase_page_title .controls .search z-search {
+.zbase_seller_stats.overview .controls .search z-search {
   font-size: 13px;
   margin-right: 10px;
   display: block;
 }
 
-.zbase_seller_stats.overview .zbase_page_title .controls .search z-search z-input input {
+.zbase_seller_stats.overview .controls .search z-search z-input input {
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
   box-shadow: inset 1px 1px 1px rgba(0,0,0,.1);
   border: 1px solid #bdbdbd;
 }
 
-.zbase_seller_stats.overview .zbase_page_title z-search.category {
-  width: 180px;
-}
 
-.zbase_seller_stats.overview .zbase_page_title z-search.seller {
+.zbase_seller_stats.overview z-search.seller {
   width: 200px;
 }
 

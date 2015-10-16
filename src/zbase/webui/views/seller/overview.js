@@ -58,7 +58,6 @@ ZBase.registerView((function() {
   var getQueryString = function() {
     return {
       seller: $(".zbase_seller_stats z-search.seller").getValue(),
-      category: $(".zbase_seller_stats z-search.category").getValue(),
       premium: $(".zbase_seller_stats z-checkbox.premium").hasAttribute(
           "data-active")
     }
