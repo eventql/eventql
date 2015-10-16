@@ -8,6 +8,7 @@
  */
 #include "stx/inspect.h"
 #include "zbase/JavaScriptContext.h"
+#include "js/Conversions.h"
 
 using namespace stx;
 
@@ -26,7 +27,7 @@ JavaScriptContext::JavaScriptContext() {
     RAISE(kRuntimeError, "error while initializing JavaScript context");
   }
 
-  JS_BeginRequest(ctx_);
+  JSAutoRequest js_req(ctx_);
 
   global_ = JS_NewGlobalObject(
       ctx_,
@@ -35,7 +36,6 @@ JavaScriptContext::JavaScriptContext() {
       JS::FireOnNewGlobalHook);
 
   if (!global_) {
-    JS_EndRequest(ctx_);
     RAISE(kRuntimeError, "error while initializing JavaScript context");
   }
 
@@ -43,8 +43,6 @@ JavaScriptContext::JavaScriptContext() {
     JSAutoCompartment ac(ctx_, global_);
     JS_InitStandardClasses(ctx_, global_);
   }
-
-  JS_EndRequest(ctx_);
 }
 
 JavaScriptContext::~JavaScriptContext() {
@@ -68,14 +66,14 @@ void JavaScriptContext::loadProgram(const String& program) {
         program.c_str(),
         program.size(),
         &rval)) {
-    JS_EndRequest(ctx_);
     RAISE(kRuntimeError, "JavaScript execution failed");
   }
 }
 
 void JavaScriptContext::callMapFunction(
     const String& method_name,
-    const String& json_string) {
+    const String& json_string,
+    Vector<Pair<String, String>>* tuples) {
   auto json_wstring = StringUtil::convertUTF8To16(json_string);
 
   JSAutoRequest js_req(ctx_);
@@ -90,10 +88,60 @@ void JavaScriptContext::callMapFunction(
   argv[0].set(json);
 
   JS::RootedValue rval(ctx_);
-  JS_CallFunctionName(ctx_, global_, method_name.c_str(), argv, &rval);
+  if (!JS_CallFunctionName(ctx_, global_, method_name.c_str(), argv, &rval)) {
+    RAISE(kRuntimeError, "map function failed");
+  }
 
-  String str = JS_EncodeString(ctx_, rval.toString());
-  stx::iputs("call $0 with $1 -> result: $2", method_name, json_string, str);
+  if (!rval.isObject()) {
+    RAISE(kRuntimeError, "map function must return a list/array of tuples");
+  }
+
+  JS::RootedObject list(ctx_, &rval.toObject());
+  JS::AutoIdArray list_enum(ctx_, JS_Enumerate(ctx_, list));
+  for (size_t i = 0; i < list_enum.length(); ++i) {
+    JS::RootedValue elem(ctx_);
+    JS::RootedValue elem_key(ctx_);
+    JS::RootedValue elem_value(ctx_);
+    JS::Rooted<jsid> elem_id(ctx_, list_enum[i]);
+    if (!JS_GetPropertyById(ctx_, list, elem_id, &elem)) {
+      RAISE(kIllegalStateError);
+    }
+
+    if (!elem.isObject()) {
+      RAISE(kRuntimeError, "map function must return a list/array of tuples");
+    }
+
+    JS::RootedObject elem_obj(ctx_, &elem.toObject());
+
+    if (!JS_GetProperty(ctx_, elem_obj, "0", &elem_key)) {
+      RAISE(kRuntimeError, "map function must return a list/array of tuples");
+    }
+
+    if (!JS_GetProperty(ctx_, elem_obj, "1", &elem_value)) {
+      RAISE(kRuntimeError, "map function must return a list/array of tuples");
+    }
+
+    auto tkey_jstr = JS::ToString(ctx_, elem_key);
+    if (!tkey_jstr) {
+      RAISE(kRuntimeError, "first tuple element must be a string");
+    }
+
+    auto tkey_cstr = JS_EncodeString(ctx_, tkey_jstr);
+    String tkey(tkey_cstr);
+    JS_free(ctx_, tkey_cstr);
+
+    auto tval_jstr = JS_ValueToSource(ctx_, elem_value);
+    if (!tval_jstr) {
+      RAISE(kRuntimeError, "first tuple element must be a string");
+    }
+
+    auto tval_cstr = JS_EncodeString(ctx_, tval_jstr);
+    String tval(tval_cstr);
+    JS_free(ctx_, tval_cstr);
+
+    tuples->emplace_back(tkey, tval);
+  }
+
 }
 
 } // namespace zbase

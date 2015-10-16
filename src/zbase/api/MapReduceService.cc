@@ -74,7 +74,7 @@ void MapReduceService::mapPartition(
   js_ctx->loadProgram(
       R"(
         function mymapper(obj) {
-          return "blah: " + obj;
+          return [[1, "blah"]];
         }
       )");
 
@@ -85,8 +85,11 @@ void MapReduceService::mapPartition(
     json::JSONOutputStream msgjsons(BufferOutputStream::fromBuffer(&msgjson));
     msg::JSONEncoder::encode(msgobj, *schema, &msgjsons);
 
-    js_ctx->callMapFunction("mymapper", msgjson.toString());
+    Vector<Pair<String, String>> tuples;
+    js_ctx->callMapFunction("mymapper", msgjson.toString(), &tuples);
+    iputs("tuples: $0", tuples);
   });
+
 }
 
 } // namespace zbase

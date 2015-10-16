@@ -25,7 +25,8 @@ public:
 
   void callMapFunction(
       const String& method_name,
-      const String& json_string);
+      const String& json_string,
+      Vector<Pair<String, String>>* tuples);
 
 protected:
   JSRuntime* runtime_;
