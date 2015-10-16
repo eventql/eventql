@@ -87,3 +87,22 @@
 .zbase_seller_stats .zbase_stats .metric_pane .time_line .end {
   float: right;
 }
+
+@media (max-width: 1420px) {
+  .zbase_seller_stats .metric_pane {
+    width: 31.3332%;
+  }
+
+  .zbase_seller_stats .zbase_stats .metric_pane:first-child,
+  .zbase_seller_stats .zbase_stats .metric_pane:nth-child(4n) {
+    margin-left: 0px;
+  }
+
+  .zbase_seller_stats .zbase_stats .metric_pane:nth-child(3n) {
+    margin-right: 0px;
+  }
+
+  .zbase_seller_stats .zbase_stats .metric_pane:nth-child(-n+3) {
+    margin-top: 0px;
+  }
+}
