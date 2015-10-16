@@ -7,6 +7,8 @@
  * permission is obtained.
  */
 #include "zbase/api/MapReduceService.h"
+#include "stx/protobuf/MessageDecoder.h"
+#include "stx/protobuf/JSONEncoder.h"
 
 using namespace stx;
 
@@ -37,6 +39,18 @@ void MapReduceService::mapPartition(
       table_name,
       partition_key.toString());
 
+  auto table = pmap_->findTable(
+      session.customer(),
+      table_name);
+
+  if (table.isEmpty()) {
+    RAISEF(
+        kNotFoundError,
+        "table not found: $0/$1/$2",
+        session.customer(),
+        table_name);
+  }
+
   auto partition = pmap_->findPartition(
       session.customer(),
       table_name,
@@ -51,13 +65,22 @@ void MapReduceService::mapPartition(
         partition_key.toString());
   }
 
+  auto schema = table.get()->schema();
   auto reader = partition.get()->getReader();
+
+  //jsval json = JSVAL_NULL;
 
   auto js_ctx = mkRef(new JavaScriptContext());
   js_ctx->execute( "'hello'+'world, it is '+new Date()");
 
-  reader->fetchRecords([] (const Buffer& record) {
-    iputs("scan record: $0", record.size());
+  reader->fetchRecords([&schema] (const Buffer& record) {
+    msg::MessageObject msgobj;
+    msg::MessageDecoder::decode(record, *schema, &msgobj);
+    Buffer msgjson;
+    json::JSONOutputStream msgjsons(BufferOutputStream::fromBuffer(&msgjson));
+    msg::JSONEncoder::encode(msgobj, *schema, &msgjsons);
+
+    iputs("scan record: $0 -> $1", record.size(), msgjson.toString());
   });
 }
 

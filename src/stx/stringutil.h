@@ -334,8 +334,17 @@ public:
   static std::string formatNumberScientific(T value);
 
 
-  static std::wstring convertUTF8To16(const std::string& str);
-  static std::string convertUTF16To8(const std::wstring& str);
+  static std::basic_string<char32_t> convertUTF8To32(
+      const std::basic_string<char>& str);
+
+  static std::basic_string<char16_t> convertUTF8To16(
+      const std::basic_string<char>& str);
+
+  static std::basic_string<char> convertUTF32To8(
+      const std::basic_string<char32_t>& str);
+
+  static std::basic_string<char> convertUTF16To8(
+      const std::basic_string<char16_t>& str);
 
 protected:
 

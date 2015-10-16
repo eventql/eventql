@@ -79,5 +79,20 @@ void JavaScriptContext::execute(const String& program) {
   JS_EndRequest(ctx_);
 }
 
+void JavaScriptContext::callMethodWithJSON(
+    const String& method_name,
+    const String& json_string) {
+  auto json_wstring = StringUtil::convertUTF8To16(json_string);
+
+  JS_BeginRequest(ctx_);
+
+  JS::RootedValue json(ctx_);
+  if (!JS_ParseJSON(ctx_, json_wstring.data(), json_wstring.size(), &json)) {
+    RAISE(kRuntimeError, "invalid JSON");
+  }
+
+  JS_EndRequest(ctx_);
+}
+
 } // namespace zbase
 

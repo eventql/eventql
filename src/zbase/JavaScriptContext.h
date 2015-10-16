@@ -23,6 +23,10 @@ public:
 
   void execute(const String& program);
 
+  void callMethodWithJSON(
+      const String& method_name,
+      const String& json_string);
+
 protected:
   JSRuntime* runtime_;
   JSContext* ctx_;
