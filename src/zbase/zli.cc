@@ -18,7 +18,7 @@
 #include "stx/wallclock.h"
 #include "stx/json/json.h"
 #include "stx/json/jsonrpc.h"
-#include "stx/http/httpconnectionpool.h"
+#include "stx/http/httpclient.h"
 #include "stx/cli/CLI.h"
 #include "stx/cli/flagparser.h"
 
@@ -32,7 +32,26 @@ void cmd_mr_execute(const cli::FlagParser& flags) {
     RAISE(kUsageError, "usage: $ zli mr-execute <script.js>");
   }
 
-  iputs("execute mr: $0", argv[0]);
+  auto program_source = FileUtil::read(argv[0]);
+
+  auto url = StringUtil::format(
+      "http://$0/api/v1/mapreduce/execute",
+      flags.getString("api_host"));
+
+  auto auth_token = flags.getString("auth_token");
+
+  http::HTTPMessage::HeaderList auth_headers;
+  auth_headers.emplace_back(
+      "Authorization",
+      StringUtil::format("Token $0", auth_token));
+
+  http::HTTPClient http_client;
+  auto req = http::HTTPRequest::mkPost(url, program_source, auth_headers);
+  auto res = http_client.executeRequest(req);
+
+  if (res.statusCode() != 201) {
+    RAISEF(kRuntimeError, "execution failed: $0", res.body().toString());
+  }
 }
 
 int main(int argc, const char** argv) {
@@ -60,6 +79,15 @@ int main(int argc, const char** argv) {
   /* command: mr_execute */
   auto mr_execute_cmd = cli.defineCommand("mr-execute");
   mr_execute_cmd->onCall(std::bind(&cmd_mr_execute, std::placeholders::_1));
+
+  mr_execute_cmd->flags().defineFlag(
+      "api_host",
+      stx::cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      "api.zscale.io",
+      "api host",
+      "<host>");
 
   mr_execute_cmd->flags().defineFlag(
       "auth_token",
