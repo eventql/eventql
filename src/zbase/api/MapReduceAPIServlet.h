@@ -32,6 +32,12 @@ public:
 
 protected:
 
+  void executeMapReduceScript(
+      const AnalyticsSession& session,
+      const URI& uri,
+      const http::HTTPRequest* req,
+      http::HTTPResponse* res);
+
   void executeMapPartitionTask(
       const AnalyticsSession& session,
       const URI& uri,

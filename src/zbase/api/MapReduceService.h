@@ -29,6 +29,10 @@ public:
       JSRuntime* js_runtime,
       const String& cachedir);
 
+  void executeScript(
+      const AnalyticsSession& session,
+      const String& program_source);
+
   SHA1Hash mapPartition(
       const AnalyticsSession& session,
       const String& table_name,

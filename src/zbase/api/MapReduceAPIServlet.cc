@@ -34,6 +34,13 @@ void MapReduceAPIServlet::handle(
   http::HTTPResponse res;
   res.populateFromRequest(req);
 
+  if (uri.path() == "/api/v1/mapreduce/execute") {
+    req_stream->readBody();
+    executeMapReduceScript(session, uri, &req, &res);
+    res_stream->writeResponse(res);
+    return;
+  }
+
   if (uri.path() == "/api/v1/mapreduce/tasks/map_partition") {
     req_stream->readBody();
     executeMapPartitionTask(session, uri, &req, &res);
@@ -91,6 +98,19 @@ void MapReduceAPIServlet::executeMapPartitionTask(
 
   res->setStatus(http::kStatusOK);
   res->addBody(shard_id.toString());
+}
+
+void MapReduceAPIServlet::executeMapReduceScript(
+    const AnalyticsSession& session,
+    const URI& uri,
+    const http::HTTPRequest* req,
+    http::HTTPResponse* res) {
+
+  service_->executeScript(
+      session,
+      req->body().toString());
+
+  res->setStatus(http::kStatusCreated);
 }
 
 }
