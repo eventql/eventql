@@ -14,14 +14,14 @@ add_executable(ztracker
     $<TARGET_OBJECTS:brokerd-client>
     $<TARGET_OBJECTS:customerdirectory>
     $<TARGET_OBJECTS:tsdb-server>
-    $<TARGET_OBJECTS:auth>
     ${CMAKE_CURRENT_BINARY_DIR}/ztracker_trackjs.cc
     TrackerServlet.cc
     ztrackid.cc
     ztracker.cc)
 
-add_dependencies(ztracker ztracker-assets)
 target_link_libraries(ztracker chartsql cplot sstable cstable stx-http stx-protobuf stx-json stx-json stx-base)
+add_dependencies(ztracker ztracker-assets)
+add_dependencies(ztracker customerdirectory)
 
 
 add_executable(test-ztrackid

@@ -27,19 +27,13 @@ add_library(customerdirectory OBJECT
     ConfigDirectory.cc
     SessionSchema.cc
     TableDefinition.cc
+    AnalyticsAuth.cc
     ${PROTO_SRCS}
     ${ZBASE_ASSETS_SRCS})
 
 configure_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/buildconfig.h.cmake
     ${CMAKE_CURRENT_BINARY_DIR}/buildconfig.h)
-
-add_dependencies(customerdirectory tsdb-server)
-
-add_library(auth OBJECT
-    AnalyticsAuth.cc)
-
-add_dependencies(auth customerdirectory)
 
 file(GLOB COREPROTO_FILES core/*.proto)
 PROTOBUF_GENERATE_CPP(COREPROTO_SRCS COREPROTO_HDRS ${COREPROTO_FILES})
@@ -79,11 +73,12 @@ add_library(tsdb-server OBJECT
     core/StaticPartitionReplication.cc
     ${COREPROTO_SRCS})
 
+add_dependencies(tsdb-server customerdirectory)
+
 add_executable(test-recordset
     $<TARGET_OBJECTS:stx-mdb>
     $<TARGET_OBJECTS:tsdb-server>
     $<TARGET_OBJECTS:dproc>
-    $<TARGET_OBJECTS:auth>
     $<TARGET_OBJECTS:customerdirectory>
     core/RecordSet_test.cc)
 
@@ -93,7 +88,6 @@ add_executable(test-tsdb-timewindowpartitioner
     $<TARGET_OBJECTS:stx-mdb>
     $<TARGET_OBJECTS:tsdb-server>
     $<TARGET_OBJECTS:dproc>
-    $<TARGET_OBJECTS:auth>
     $<TARGET_OBJECTS:customerdirectory>
     core/TimeWindowPartitioner_test.cc)
 
@@ -103,7 +97,6 @@ add_executable(test-replicationscheme
     $<TARGET_OBJECTS:stx-mdb>
     $<TARGET_OBJECTS:tsdb-server>
     $<TARGET_OBJECTS:dproc>
-    $<TARGET_OBJECTS:auth>
     $<TARGET_OBJECTS:customerdirectory>
     core/ReplicationScheme_test.cc)
 
@@ -123,7 +116,6 @@ add_executable(zbase
     $<TARGET_OBJECTS:customerdirectory>
     #$<TARGET_OBJECTS:fnord-afx>
     $<TARGET_OBJECTS:dproc>
-    $<TARGET_OBJECTS:auth>
     $<TARGET_OBJECTS:pcre>
     #sstable/SSTableServlet.cc
     api/LogfileService.cc
@@ -142,6 +134,7 @@ add_executable(zbase
     AnalyticsServlet.cc
     HTTPAuth.cc
     JSONSink.cc
+    AnalyticsAuth.cc
     AnalyticsApp.cc
     AnalyticsQuery.cc
     AnalyticsQueryResult.cc
@@ -207,7 +200,7 @@ add_executable(zbase
 
 target_link_libraries(zbase chartsql cplot sstable cstable stx-http stx-json stx-protobuf stx-base js_static.a z)
 target_link_libraries(zbase -L${CMAKE_BINARY_DIR}/3rdparty/mozjs/dist/lib -ljs_static)
-add_dependencies(zbase mozjs_build)
+add_dependencies(zbase customerdirectory mozjs_build)
 
 add_executable(zbasectl
     $<TARGET_OBJECTS:stx-mdb>
@@ -218,23 +211,25 @@ add_executable(zbasectl
     $<TARGET_OBJECTS:customerdirectory>
     #$<TARGET_OBJECTS:fnord-afx>
     $<TARGET_OBJECTS:dproc>
-    $<TARGET_OBJECTS:auth>
+    AnalyticsAuth.cc
     #sstable/SSTableServlet.cc
     zbasectl.cc)
 
 target_link_libraries(zbasectl chartsql cplot sstable cstable stx-http stx-json stx-protobuf stx-base)
+add_dependencies(zbasectl customerdirectory)
 
 add_executable(zmaster
     $<TARGET_OBJECTS:stx-mdb>
     $<TARGET_OBJECTS:stx-rpc>
     $<TARGET_OBJECTS:customerdirectory>
     $<TARGET_OBJECTS:tsdb-server>
-    $<TARGET_OBJECTS:auth>
+    AnalyticsAuth.cc
     master/ConfigDirectoryMaster.cc
     master/MasterServlet.cc
     zmaster.cc)
 
 target_link_libraries(zmaster chartsql cplot sstable cstable stx-http stx-protobuf stx-json stx-json stx-base)
+add_dependencies(zmaster customerdirectory)
 
 add_executable(zen-csv-upload ${COREPROTO_SRCS} zen-csv-upload.cc)
 target_link_libraries(zen-csv-upload stx-http stx-protobuf stx-json stx-base)
