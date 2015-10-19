@@ -13,6 +13,7 @@ add_executable(ztracker
     $<TARGET_OBJECTS:stx-mdb>
     $<TARGET_OBJECTS:brokerd-client>
     $<TARGET_OBJECTS:customerdirectory>
+    $<TARGET_OBJECTS:coreprotos>
     $<TARGET_OBJECTS:tsdb-server>
     ${CMAKE_CURRENT_BINARY_DIR}/ztracker_trackjs.cc
     TrackerServlet.cc

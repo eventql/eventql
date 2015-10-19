@@ -22,15 +22,6 @@ else()
   endif()
 endif()
 
-add_library(customerdirectory OBJECT
-    CustomerConfig.cc
-    ConfigDirectory.cc
-    SessionSchema.cc
-    TableDefinition.cc
-    AnalyticsAuth.cc
-    ${PROTO_SRCS}
-    ${ZBASE_ASSETS_SRCS})
-
 configure_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/buildconfig.h.cmake
     ${CMAKE_CURRENT_BINARY_DIR}/buildconfig.h)
@@ -43,6 +34,20 @@ add_library(tsdb-client OBJECT
     core/TimeWindowPartitioner.cc
     core/FixedShardPartitioner.cc
     ${COREPROTO_SRCS})
+
+add_library(coreprotos OBJECT
+    ${COREPROTO_SRCS})
+
+add_library(customerdirectory OBJECT
+    CustomerConfig.cc
+    ConfigDirectory.cc
+    SessionSchema.cc
+    TableDefinition.cc
+    AnalyticsAuth.cc
+    ${PROTO_SRCS}
+    ${ZBASE_ASSETS_SRCS})
+
+add_dependencies(customerdirectory coreprotos)
 
 add_library(tsdb-server OBJECT
     core/TSDBClient.cc
@@ -70,14 +75,15 @@ add_library(tsdb-server OBJECT
     core/ReplicationState.cc
     core/RemoteTSDBScan.cc
     core/StaticPartitionWriter.cc
-    core/StaticPartitionReplication.cc
-    ${COREPROTO_SRCS})
+    core/StaticPartitionReplication.cc)
 
 add_dependencies(tsdb-server customerdirectory)
+add_dependencies(tsdb-server coreprotos)
 
 add_executable(test-recordset
     $<TARGET_OBJECTS:stx-mdb>
     $<TARGET_OBJECTS:tsdb-server>
+    $<TARGET_OBJECTS:coreprotos>
     $<TARGET_OBJECTS:dproc>
     $<TARGET_OBJECTS:customerdirectory>
     core/RecordSet_test.cc)
@@ -87,6 +93,7 @@ target_link_libraries(test-recordset chartsql cplot sstable cstable stx-http stx
 add_executable(test-tsdb-timewindowpartitioner
     $<TARGET_OBJECTS:stx-mdb>
     $<TARGET_OBJECTS:tsdb-server>
+    $<TARGET_OBJECTS:coreprotos>
     $<TARGET_OBJECTS:dproc>
     $<TARGET_OBJECTS:customerdirectory>
     core/TimeWindowPartitioner_test.cc)
@@ -96,6 +103,7 @@ target_link_libraries(test-tsdb-timewindowpartitioner chartsql cplot sstable cst
 add_executable(test-replicationscheme
     $<TARGET_OBJECTS:stx-mdb>
     $<TARGET_OBJECTS:tsdb-server>
+    $<TARGET_OBJECTS:coreprotos>
     $<TARGET_OBJECTS:dproc>
     $<TARGET_OBJECTS:customerdirectory>
     core/ReplicationScheme_test.cc)
@@ -113,6 +121,7 @@ add_executable(zbase
     $<TARGET_OBJECTS:logjoin-common>
     $<TARGET_OBJECTS:dxa-docdb>
     $<TARGET_OBJECTS:tsdb-server>
+    $<TARGET_OBJECTS:coreprotos>
     $<TARGET_OBJECTS:customerdirectory>
     #$<TARGET_OBJECTS:fnord-afx>
     $<TARGET_OBJECTS:dproc>
@@ -134,7 +143,6 @@ add_executable(zbase
     AnalyticsServlet.cc
     HTTPAuth.cc
     JSONSink.cc
-    AnalyticsAuth.cc
     AnalyticsApp.cc
     AnalyticsQuery.cc
     AnalyticsQueryResult.cc
@@ -208,10 +216,10 @@ add_executable(zbasectl
     $<TARGET_OBJECTS:brokerd-client>
     $<TARGET_OBJECTS:logjoin-common>
     $<TARGET_OBJECTS:tsdb-server>
+    $<TARGET_OBJECTS:coreprotos>
     $<TARGET_OBJECTS:customerdirectory>
     #$<TARGET_OBJECTS:fnord-afx>
     $<TARGET_OBJECTS:dproc>
-    AnalyticsAuth.cc
     #sstable/SSTableServlet.cc
     zbasectl.cc)
 
@@ -223,7 +231,7 @@ add_executable(zmaster
     $<TARGET_OBJECTS:stx-rpc>
     $<TARGET_OBJECTS:customerdirectory>
     $<TARGET_OBJECTS:tsdb-server>
-    AnalyticsAuth.cc
+    $<TARGET_OBJECTS:coreprotos>
     master/ConfigDirectoryMaster.cc
     master/MasterServlet.cc
     zmaster.cc)
