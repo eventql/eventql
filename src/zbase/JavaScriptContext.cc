@@ -16,6 +16,13 @@ namespace zbase {
 
 static JSClass global_class = { "global", JSCLASS_GLOBAL_FLAGS };
 
+static bool write_json_to_buf(const char16_t* str, uint32_t strlen, void* out) {
+  *static_cast<String*>(out) += StringUtil::convertUTF16To8(
+      std::basic_string<char16_t>(str, strlen));
+
+  return true;
+}
+
 JavaScriptContext::JavaScriptContext() {
   runtime_ = JS_NewRuntime(8 * 1024 * 1024);
   if (!runtime_) {
@@ -130,18 +137,46 @@ void JavaScriptContext::callMapFunction(
     String tkey(tkey_cstr);
     JS_free(ctx_, tkey_cstr);
 
-    auto tval_jstr = JS_ValueToSource(ctx_, elem_value);
-    if (!tval_jstr) {
-      RAISE(kRuntimeError, "first tuple element must be a string");
+    String tval;
+    JS::RootedObject replacer(ctx_);
+    JS::RootedValue space(ctx_);
+    if (!JS_Stringify(
+            ctx_,
+            &elem_value,
+            replacer,
+            space,
+            &write_json_to_buf,
+            &tval)) {
+      RAISE(kRuntimeError, "second tuple element must be convertible to JSON");
     }
-
-    auto tval_cstr = JS_EncodeString(ctx_, tval_jstr);
-    String tval(tval_cstr);
-    JS_free(ctx_, tval_cstr);
 
     tuples->emplace_back(tkey, tval);
   }
+}
 
+Option<String> JavaScriptContext::getMapReduceJobJSON() {
+  JSAutoRequest js_req(ctx_);
+  JSAutoCompartment js_comp(ctx_, global_);
+
+  JS::RootedValue job_def(ctx_);
+  if (!JS_GetProperty(ctx_, global_, "__z1_mr_job", &job_def)) {
+    return None<String>();
+  }
+
+  String json_str;
+  JS::RootedObject replacer(ctx_);
+  JS::RootedValue space(ctx_);
+  if (!JS_Stringify(
+          ctx_,
+          &job_def,
+          replacer,
+          space,
+          &write_json_to_buf,
+          &json_str)) {
+    RAISE(kRuntimeError, "illegal job definition");
+  }
+
+  return Some(json_str);
 }
 
 } // namespace zbase

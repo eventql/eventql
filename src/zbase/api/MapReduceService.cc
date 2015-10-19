@@ -31,6 +31,25 @@ MapReduceService::MapReduceService(
     js_runtime_(js_runtime),
     cachedir_(cachedir) {}
 
+void MapReduceService::executeScript(
+    const AnalyticsSession& session,
+    const String& program_source) {
+  logDebug(
+      "z1.mapreduce",
+      "Launching mapreduce job; customer=$0",
+      session.customer());
+
+  auto js_ctx = mkRef(new JavaScriptContext());
+  js_ctx->loadProgram(program_source);
+
+  auto job_json = js_ctx->getMapReduceJobJSON();
+  if (job_json.isEmpty()) {
+    return;
+  }
+
+  iputs("executing job: $0", job_json.get());
+}
+
 SHA1Hash MapReduceService::mapPartition(
     const AnalyticsSession& session,
     const String& table_name,

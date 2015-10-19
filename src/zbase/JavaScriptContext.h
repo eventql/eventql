@@ -9,6 +9,7 @@
 #pragma once
 #include "stx/stdtypes.h"
 #include "stx/autoref.h"
+#include "stx/option.h"
 #include <jsapi.h>
 
 using namespace stx;
@@ -27,6 +28,8 @@ public:
       const String& method_name,
       const String& json_string,
       Vector<Pair<String, String>>* tuples);
+
+  Option<String> getMapReduceJobJSON();
 
 protected:
   JSRuntime* runtime_;
