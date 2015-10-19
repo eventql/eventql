@@ -8,6 +8,7 @@
  */
 #include "zbase/mapreduce/MapReduceTask.h"
 #include "zbase/mapreduce/tasks/MapTableTask.h"
+#include "zbase/mapreduce/tasks/ReduceTask.h"
 
 using namespace stx;
 
@@ -23,6 +24,10 @@ RefPtr<MapReduceTask> MapReduceTask::fromJSON(
 
   if (op.get() == "map_table") {
     return MapTableTask::fromJSON(begin, end);
+  }
+
+  if (op.get() == "reduce") {
+    return ReduceTask::fromJSON(begin, end);
   }
 
   RAISEF(kRuntimeError, "unknown operation: $0", op.get());
