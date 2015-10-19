@@ -8,6 +8,7 @@
  */
 #include "zbase/api/MapReduceService.h"
 #include "zbase/mapreduce/MapReduceTask.h"
+#include "zbase/mapreduce/MapReduceTaskBuilder.h"
 #include "stx/protobuf/MessageDecoder.h"
 #include "stx/protobuf/JSONEncoder.h"
 #include "sstable/SSTableWriter.h"
@@ -49,7 +50,9 @@ void MapReduceService::executeScript(
   }
 
   auto job_json = json::parseJSON(job_json_str.get());
-  auto task = MapReduceTask::fromJSON(job_json.begin(), job_json.end());
+
+  MapReduceTaskBuilder task_builder;
+  auto task = task_builder.fromJSON(job_json.begin(), job_json.end());
 }
 
 SHA1Hash MapReduceService::mapPartition(

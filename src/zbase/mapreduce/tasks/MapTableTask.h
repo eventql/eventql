@@ -17,10 +17,6 @@ namespace zbase {
 class MapTableTask : public MapReduceTask {
 public:
 
-  static RefPtr<MapReduceTask> fromJSON(
-      const json::JSONObject::const_iterator& begin,
-      const json::JSONObject::const_iterator& end);
-
 };
 
 } // namespace zbase

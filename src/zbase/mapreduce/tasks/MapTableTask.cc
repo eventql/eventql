@@ -12,12 +12,6 @@ using namespace stx;
 
 namespace zbase {
 
-RefPtr<MapReduceTask> MapTableTask::fromJSON(
-    const json::JSONObject::const_iterator& begin,
-    const json::JSONObject::const_iterator& end) {
-  RAISE(kNotYetImplementedError, "not yet implemented");
-}
-
 
 } // namespace zbase
 
