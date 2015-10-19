@@ -9,6 +9,7 @@
 #include "zbase/api/MapReduceService.h"
 #include "stx/protobuf/MessageDecoder.h"
 #include "stx/protobuf/JSONEncoder.h"
+#include "sstable/SSTableWriter.h"
 
 using namespace stx;
 
@@ -20,13 +21,15 @@ MapReduceService::MapReduceService(
     zbase::TSDBService* tsdb,
     zbase::PartitionMap* pmap,
     zbase::ReplicationScheme* repl,
-    JSRuntime* js_runtime) :
+    JSRuntime* js_runtime,
+    const String& cachedir) :
     cdir_(cdir),
     auth_(auth),
     tsdb_(tsdb),
     pmap_(pmap),
     repl_(repl),
-    js_runtime_(js_runtime) {}
+    js_runtime_(js_runtime),
+    cachedir_(cachedir) {}
 
 void MapReduceService::mapPartition(
     const AnalyticsSession& session,
@@ -74,6 +77,9 @@ void MapReduceService::mapPartition(
 
   auto js_ctx = mkRef(new JavaScriptContext());
   js_ctx->loadProgram(program_source);
+
+  //auto writer = sstable::SSTableWriter::create(
+  //      FileUtil::joinPaths(cachedir_, "_log"), nullptr, 0);
 
   reader->fetchRecords([&schema, &js_ctx, &method_name] (const Buffer& record) {
     msg::MessageObject msgobj;

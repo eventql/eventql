@@ -271,7 +271,8 @@ int main(int argc, const char** argv) {
           &auth,
           sql.get(),
           nullptr,
-          flags.getString("datadir")));
+          flags.getString("datadir"),
+          flags.getString("cachedir")));
 
   dproc::DispatchService dproc;
   dproc.registerApp(analytics_app.get(), local_scheduler.get());

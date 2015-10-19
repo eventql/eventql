@@ -26,7 +26,8 @@ public:
       zbase::TSDBService* tsdb,
       zbase::PartitionMap* pmap,
       zbase::ReplicationScheme* repl,
-      JSRuntime* js_runtime);
+      JSRuntime* js_runtime,
+      const String& cachedir);
 
   void mapPartition(
       const AnalyticsSession& session,
@@ -42,6 +43,7 @@ protected:
   zbase::PartitionMap* pmap_;
   zbase::ReplicationScheme* repl_;
   JSRuntime* js_runtime_;
+  String cachedir_;
 };
 
 } // namespace zbase

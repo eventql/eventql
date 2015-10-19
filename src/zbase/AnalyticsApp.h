@@ -46,7 +46,8 @@ public:
       AnalyticsAuth* auth,
       csql::Runtime* sql,
       JSRuntime* js_runtime,
-      const String& datadir);
+      const String& datadir,
+      const String& cachedir);
 
   /**
    * Build a "feed" query
