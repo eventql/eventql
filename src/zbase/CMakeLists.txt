@@ -239,6 +239,9 @@ add_executable(zmaster
 target_link_libraries(zmaster chartsql cplot sstable cstable stx-http stx-protobuf stx-json stx-json stx-base)
 add_dependencies(zmaster customerdirectory)
 
+add_executable(zli zli.cc)
+target_link_libraries(zli stx-http stx-json stx-protobuf stx-base)
+
 add_executable(zen-csv-upload ${COREPROTO_SRCS} zen-csv-upload.cc)
 target_link_libraries(zen-csv-upload stx-http stx-protobuf stx-json stx-base)
 
