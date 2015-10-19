@@ -73,8 +73,6 @@ SHA1Hash MapReduceService::mapPartition(
   auto schema = table.get()->schema();
   auto reader = partition.get()->getReader();
 
-  //jsval json = JSVAL_NULL;
-
   auto js_ctx = mkRef(new JavaScriptContext());
   js_ctx->loadProgram(program_source);
 
