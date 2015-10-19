@@ -25,9 +25,11 @@ if [[ "${BUILD_ARCH}" == "x86_64" ]]; then
   ARCHFLAGS="-m64 -march=x86-64";
 fi
 
-MAKETOOL="make"
-if which ninja > /dev/null; then
-  MAKETOOL="ninja"
+if [[ -z "$MAKETOOL" ]]; then
+  MAKETOOL="make"
+  if which ninja > /dev/null; then
+    MAKETOOL="ninja"
+  fi
 fi
 
 echo    "======================  zScale Z1 ======================="
@@ -37,6 +39,7 @@ echo -e "    Build-Type:    ${BUILD_TYPE}"
 echo -e "    Build-Target:  ${BUILD_OS}/${BUILD_ARCH}"
 echo -e "    Build Assets:  ${BUILD_ASSETS}"
 echo -e "    Build Docs:    ${BUILD_DOCUMENTATION}"
+echo -e "    Maketool:      ${MAKETOOL}"
 echo -e "                                                         "
 echo    "========================================================="
 
