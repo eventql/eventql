@@ -7,6 +7,7 @@
  * permission is obtained.
  */
 #include "zbase/api/MapReduceService.h"
+#include "zbase/mapreduce/MapReduceTask.h"
 #include "stx/protobuf/MessageDecoder.h"
 #include "stx/protobuf/JSONEncoder.h"
 #include "sstable/SSTableWriter.h"
@@ -42,12 +43,13 @@ void MapReduceService::executeScript(
   auto js_ctx = mkRef(new JavaScriptContext());
   js_ctx->loadProgram(program_source);
 
-  auto job_json = js_ctx->getMapReduceJobJSON();
-  if (job_json.isEmpty()) {
+  auto job_json_str = js_ctx->getMapReduceJobJSON();
+  if (job_json_str.isEmpty()) {
     return;
   }
 
-  iputs("executing job: $0", job_json.get());
+  auto job_json = json::parseJSON(job_json_str.get());
+  auto task = MapReduceTask::fromJSON(job_json.begin(), job_json.end());
 }
 
 SHA1Hash MapReduceService::mapPartition(
