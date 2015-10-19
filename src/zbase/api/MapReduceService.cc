@@ -31,7 +31,7 @@ MapReduceService::MapReduceService(
     js_runtime_(js_runtime),
     cachedir_(cachedir) {}
 
-void MapReduceService::mapPartition(
+SHA1Hash MapReduceService::mapPartition(
     const AnalyticsSession& session,
     const String& table_name,
     const SHA1Hash& partition_key,
@@ -78,10 +78,19 @@ void MapReduceService::mapPartition(
   auto js_ctx = mkRef(new JavaScriptContext());
   js_ctx->loadProgram(program_source);
 
-  //auto writer = sstable::SSTableWriter::create(
-  //      FileUtil::joinPaths(cachedir_, "_log"), nullptr, 0);
+  auto output_id = Random::singleton()->sha1(); // FIXME
+  auto output_path = FileUtil::joinPaths(
+      cachedir_,
+      StringUtil::format("mr-shard-$0.sst", output_id.toString()));
 
-  reader->fetchRecords([&schema, &js_ctx, &method_name] (const Buffer& record) {
+  auto writer = sstable::SSTableWriter::create(output_path, nullptr, 0);
+
+  reader->fetchRecords([
+      &schema,
+      &js_ctx,
+      &method_name,
+      &writer] (
+      const Buffer& record) {
     msg::MessageObject msgobj;
     msg::MessageDecoder::decode(record, *schema, &msgobj);
     Buffer msgjson;
@@ -90,9 +99,13 @@ void MapReduceService::mapPartition(
 
     Vector<Pair<String, String>> tuples;
     js_ctx->callMapFunction(method_name, msgjson.toString(), &tuples);
-    iputs("tuples: $0", tuples);
+
+    for (const auto& t : tuples) {
+      writer->appendRow(t.first, t.second);
+    }
   });
 
+  return output_id;
 }
 
 } // namespace zbase

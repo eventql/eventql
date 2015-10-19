@@ -82,7 +82,7 @@ void MapReduceAPIServlet::executeMapPartitionTask(
     return;
   }
 
-  service_->mapPartition(
+  auto shard_id = service_->mapPartition(
       session,
       table_name,
       SHA1Hash::fromHexString(partition_key),
@@ -90,6 +90,7 @@ void MapReduceAPIServlet::executeMapPartitionTask(
       method_name);
 
   res->setStatus(http::kStatusOK);
+  res->addBody(shard_id.toString());
 }
 
 }
