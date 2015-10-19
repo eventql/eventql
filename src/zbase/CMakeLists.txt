@@ -133,6 +133,8 @@ add_executable(zbase
     api/EventsAPIServlet.cc
     api/MapReduceService.cc
     api/MapReduceAPIServlet.cc
+    mapreduce/MapReduceTask.cc
+    mapreduce/tasks/MapTableTask.cc
     LogfileScanResult.cc
     EventScanResult.cc
     Report.cc
