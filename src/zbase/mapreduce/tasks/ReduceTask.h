@@ -17,6 +17,10 @@ namespace zbase {
 class ReduceTask : public MapReduceTask {
 public:
 
+  ReduceTask(Vector<RefPtr<MapReduceTask>> sources);
+
+protected:
+  Vector<RefPtr<MapReduceTask>> sources_;
 };
 
 } // namespace zbase

@@ -36,13 +36,25 @@ RefPtr<MapReduceTask> MapReduceTaskBuilder::fromJSON(
 RefPtr<MapReduceTask> MapReduceTaskBuilder::mapTableTaskFromJSON(
     const json::JSONObject::const_iterator& begin,
     const json::JSONObject::const_iterator& end) {
-  RAISE(kNotYetImplementedError, "not yet implemented");
+  return new MapTableTask();
 }
 
 RefPtr<MapReduceTask> MapReduceTaskBuilder::reduceTaskFromJSON(
     const json::JSONObject::const_iterator& begin,
     const json::JSONObject::const_iterator& end) {
-  RAISE(kNotYetImplementedError, "not yet implemented");
+  auto src_begin = json::objectLookup(begin, end, "sources");
+  if (src_begin == end) {
+    RAISE(kRuntimeError, "missing field: sources");
+  }
+
+  Vector<RefPtr<MapReduceTask>> sources;
+  auto nsrc_begin = json::arrayLength(src_begin, end);
+  for (size_t i = 0; i < nsrc_begin; ++i) {
+    auto src = json::arrayLookup(src_begin, end, i); // O(N^2) but who cares...
+    sources.emplace_back(fromJSON(src, src + src->size));
+  }
+
+  return new ReduceTask(sources);
 }
 
 } // namespace zbase

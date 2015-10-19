@@ -12,6 +12,9 @@ using namespace stx;
 
 namespace zbase {
 
+ReduceTask::ReduceTask(
+    Vector<RefPtr<MapReduceTask>> sources) :
+    sources_(sources) {}
 
 
 } // namespace zbase
