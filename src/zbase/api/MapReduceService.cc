@@ -31,7 +31,9 @@ MapReduceService::MapReduceService(
 void MapReduceService::mapPartition(
     const AnalyticsSession& session,
     const String& table_name,
-    const SHA1Hash& partition_key) {
+    const SHA1Hash& partition_key,
+    const String& program_source,
+    const String& method_name) {
   logDebug(
       "z1.mapreduce",
       "Executing map shard; partition=$0/$1/$2 output=$3",
@@ -71,14 +73,9 @@ void MapReduceService::mapPartition(
   //jsval json = JSVAL_NULL;
 
   auto js_ctx = mkRef(new JavaScriptContext());
-  js_ctx->loadProgram(
-      R"(
-        function mymapper(obj) {
-          return [[1, "blah"]];
-        }
-      )");
+  js_ctx->loadProgram(program_source);
 
-  reader->fetchRecords([&schema, &js_ctx] (const Buffer& record) {
+  reader->fetchRecords([&schema, &js_ctx, &method_name] (const Buffer& record) {
     msg::MessageObject msgobj;
     msg::MessageDecoder::decode(record, *schema, &msgobj);
     Buffer msgjson;
@@ -86,7 +83,7 @@ void MapReduceService::mapPartition(
     msg::JSONEncoder::encode(msgobj, *schema, &msgjsons);
 
     Vector<Pair<String, String>> tuples;
-    js_ctx->callMapFunction("mymapper", msgjson.toString(), &tuples);
+    js_ctx->callMapFunction(method_name, msgjson.toString(), &tuples);
     iputs("tuples: $0", tuples);
   });
 

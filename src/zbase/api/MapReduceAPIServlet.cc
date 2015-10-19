@@ -68,10 +68,26 @@ void MapReduceAPIServlet::executeMapPartitionTask(
     return;
   }
 
+  String program_source;
+  if (!URI::getParam(params, "program_source", &program_source)) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody("missing ?program_source=... parameter");
+    return;
+  }
+
+  String method_name;
+  if (!URI::getParam(params, "method_name", &method_name)) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody("missing ?method_name=... parameter");
+    return;
+  }
+
   service_->mapPartition(
       session,
       table_name,
-      SHA1Hash::fromHexString(partition_key));
+      SHA1Hash::fromHexString(partition_key),
+      program_source,
+      method_name);
 
   res->setStatus(http::kStatusOK);
 }

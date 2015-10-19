@@ -31,7 +31,9 @@ public:
   void mapPartition(
       const AnalyticsSession& session,
       const String& table_name,
-      const SHA1Hash& partition_key);
+      const SHA1Hash& partition_key,
+      const String& program_source,
+      const String& method_name);
 
 protected:
   ConfigDirectory* cdir_;
