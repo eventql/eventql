@@ -42,7 +42,7 @@ public:
 
   virtual Vector<size_t> build(MapReduceShardList* shards) = 0;
 
-  virtual MapReduceShardResult execute(
+  virtual Option<MapReduceShardResult> execute(
       RefPtr<MapReduceTaskShard> shard,
       RefPtr<MapReduceScheduler> job) = 0;
 

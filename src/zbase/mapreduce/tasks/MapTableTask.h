@@ -34,13 +34,13 @@ public:
 
   Vector<size_t> build(MapReduceShardList* shards) override;
 
-  MapReduceShardResult execute(
+  Option<MapReduceShardResult> execute(
       RefPtr<MapReduceTaskShard> shard,
       RefPtr<MapReduceScheduler> job) override;
 
 protected:
 
-  MapReduceShardResult executeRemote(
+  Option<MapReduceShardResult> executeRemote(
       RefPtr<MapTableTaskShard> shard,
       RefPtr<MapReduceScheduler> job,
       const ReplicaRef& host);

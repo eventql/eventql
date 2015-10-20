@@ -100,8 +100,12 @@ void MapReduceAPIServlet::executeMapPartitionTask(
       program_source,
       method_name);
 
-  res->setStatus(http::kStatusOK);
-  res->addBody(shard_id.toString());
+  if (shard_id.isEmpty()) {
+    res->setStatus(http::kStatusNoContent);
+  } else {
+    res->setStatus(http::kStatusCreated);
+    res->addBody(shard_id.toString());
+  }
 }
 
 void MapReduceAPIServlet::executeMapReduceScript(

@@ -34,7 +34,7 @@ public:
       const AnalyticsSession& session,
       const String& program_source);
 
-  SHA1Hash mapPartition(
+  Option<SHA1Hash> mapPartition(
       const AnalyticsSession& session,
       const String& table_name,
       const SHA1Hash& partition_key,

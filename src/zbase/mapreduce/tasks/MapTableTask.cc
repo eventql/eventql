@@ -53,7 +53,7 @@ Vector<size_t> MapTableTask::build(MapReduceShardList* shards) {
   return indexes;
 }
 
-MapReduceShardResult MapTableTask::execute(
+Option<MapReduceShardResult> MapTableTask::execute(
     RefPtr<MapReduceTaskShard> shard_base,
     RefPtr<MapReduceScheduler> job) {
   auto shard = shard_base.asInstanceOf<MapTableTaskShard>();
@@ -79,7 +79,7 @@ MapReduceShardResult MapTableTask::execute(
       StringUtil::join(errors, ", "));
 }
 
-MapReduceShardResult MapTableTask::executeRemote(
+Option<MapReduceShardResult> MapTableTask::executeRemote(
     RefPtr<MapTableTaskShard> shard,
     RefPtr<MapReduceScheduler> job,
     const ReplicaRef& host) {
@@ -111,18 +111,23 @@ MapReduceShardResult MapTableTask::executeRemote(
   auto req = http::HTTPRequest::mkGet(url, auth_headers);
   auto res = http_client.executeRequest(req);
 
+  if (res.statusCode() == 204) {
+    return None<MapReduceShardResult>();
+  }
+
   if (res.statusCode() != 201) {
     RAISEF(
         kRuntimeError,
         "received non-201 response: $0", res.body().toString());
   }
 
+  auto result_id = ;
   MapReduceShardResult result {
     .host = host,
     .result_id = SHA1Hash::fromHexString(res.body().toString())
   };
 
-  return result;
+  return Some(result);
 }
 
 } // namespace zbase

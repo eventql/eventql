@@ -75,7 +75,7 @@ void MapReduceService::executeScript(
   scheduler->execute();
 }
 
-SHA1Hash MapReduceService::mapPartition(
+Option<SHA1Hash> MapReduceService::mapPartition(
     const AnalyticsSession& session,
     const String& table_name,
     const SHA1Hash& partition_key,
@@ -106,12 +106,7 @@ SHA1Hash MapReduceService::mapPartition(
       partition_key);
 
   if (partition.isEmpty()) {
-    RAISEF(
-        kNotFoundError,
-        "partition not found: $0/$1/$2",
-        session.customer(),
-        table_name,
-        partition_key.toString());
+    return None<SHA1Hash>();
   }
 
   auto schema = table.get()->schema();
@@ -147,7 +142,7 @@ SHA1Hash MapReduceService::mapPartition(
     }
   });
 
-  return output_id;
+  return Some(output_id);
 }
 
 } // namespace zbase
