@@ -27,38 +27,90 @@ MapReduceScheduler::MapReduceScheduler(
     num_shards_completed_(0) {}
 
 void MapReduceScheduler::execute() {
-  startJobs();
-
   std::unique_lock<std::mutex> lk(mutex_);
-  while (!done_) {
+
+  for (;;) {
     logDebug(
         "z1.mapreduce",
-        "Running job; progress=$0/$1",
+        "Running job; progress=$0/$1 ($2 runnning)",
         num_shards_completed_,
-        shards_.size());
+        shards_.size(),
+        num_shards_running_);
+
+    if (done_) {
+      break;
+    }
+
+    if (startJobs() > 0) {
+      continue;
+    }
 
     cv_.wait(lk);
   }
 }
 
-void MapReduceScheduler::startJobs() {
-  std::unique_lock<std::mutex> lk(mutex_);
-
+size_t MapReduceScheduler::startJobs() {
   if (num_shards_running_ >= max_concurrent_tasks_) {
-    return;
+    return 0;
   }
 
   if (num_shards_completed_ + num_shards_running_ >= shards_.size()) {
-    return;
+    return 0;
   }
 
+  size_t num_started = 0;
   for (size_t i = 0; i < shards_.size(); ++i) {
     if (shard_status_[i] != MapReduceShardStatus::PENDING) {
       continue;
     }
 
-    iputs("start task $0", i);
+    bool ready = true;
+    for (auto dep : shards_[i].dependencies) {
+      if (shard_status_[dep] != MapReduceShardStatus::COMPLETED) {
+        ready = false;
+      }
+    }
+
+    if (!ready) {
+      continue;
+    }
+
+    ++num_shards_running_;
+    ++num_started;
+    shard_status_[i] = MapReduceShardStatus::RUNNING;
+    auto shard = shards_[i];
+
+    tpool_->run([this, i, shard] {
+      bool error = false;
+
+      try {
+        shard.task->execute(shard, this);
+      } catch (const StandardException& e) {
+        error = true;
+      }
+
+      {
+        std::unique_lock<std::mutex> lk(mutex_);
+        shard_status_[i] = error
+            ? MapReduceShardStatus::ERROR
+            : MapReduceShardStatus::COMPLETED;
+
+        --num_shards_running_;
+        if (++num_shards_completed_ == shards_.size()) {
+          done_ = true;
+        }
+
+        lk.unlock();
+        cv_.notify_all();
+      }
+    });
+
+    if (num_shards_running_ >= max_concurrent_tasks_) {
+      break;
+    }
   }
+
+  return num_started;
 }
 
 } // namespace zbase

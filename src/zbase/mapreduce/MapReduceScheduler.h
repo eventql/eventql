@@ -30,7 +30,7 @@ protected:
 
   enum class MapReduceShardStatus { PENDING, RUNNING, COMPLETED, ERROR };
 
-  void startJobs();
+  size_t startJobs();
 
   MapReduceShardList shards_;
   Vector<MapReduceShardStatus> shard_status_;

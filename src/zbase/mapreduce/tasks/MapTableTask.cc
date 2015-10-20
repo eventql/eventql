@@ -46,5 +46,11 @@ Vector<size_t> MapTableTask::build(MapReduceShardList* shards) {
   return indexes;
 }
 
+MapReduceShardResult MapTableTask::execute(
+    const MapReduceTaskShard& shard,
+    MapReduceScheduler* job) {
+  iputs("execute map...", 1);
+}
+
 } // namespace zbase
 
