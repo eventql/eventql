@@ -87,7 +87,9 @@ fi
 # build c++ with make
 if [[ $MAKETOOL == "make" ]]; then
   if [[ ! -e ${TARGET_DIR}/Makefile ]]; then
-    CFLAGS="${ARCHFLAGS}" CXXFLAGS="${ARCHFLAGS}" ZBASE_BUILD_ID="${BUILD_ID}" cmake \
+    CFLAGS="${ARCHFLAGS} ${CFLAGS}" \
+    CXXFLAGS="${ARCHFLAGS} ${CXXFLAGS}" \
+    ZBASE_BUILD_ID="${BUILD_ID}" cmake \
         -G "Unix Makefiles" \
         -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
         -B${TARGET_DIR_REAL} \
@@ -99,8 +101,8 @@ if [[ $MAKETOOL == "make" ]]; then
 # build c++ with ninja
 elif [[ $MAKETOOL == "ninja" ]]; then
   if [[ ! -e ${TARGET_DIR}/build.ninja ]]; then
-    CFLAGS="${ARCHFLAGS} -fcolor-diagnostics" \
-    CXXFLAGS="${ARCHFLAGS} -fcolor-diagnostics" \
+    CFLAGS="${ARCHFLAGS} ${CFLAGS}" \
+    CXXFLAGS="${ARCHFLAGS} ${CXXFLAGS}" \
     ZBASE_BUILD_ID="${BUILD_ID}" cmake \
         -G "Ninja" \
         -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
