@@ -42,6 +42,7 @@ protected:
   bool error_;
   size_t num_shards_running_;
   size_t num_shards_completed_;
+  Vector<String> errors_;
 
   std::mutex mutex_;
   std::condition_variable cv_;

@@ -39,7 +39,10 @@ void MapReduceScheduler::execute() {
         num_shards_running_);
 
     if (error_) {
-      RAISE(kRuntimeError, "mapreduce failed");
+      RAISEF(
+          kRuntimeError,
+          "MapReduce execution failed: $0",
+          StringUtil::join(errors_, ", "));
     }
 
     if (done_) {
@@ -87,10 +90,11 @@ size_t MapReduceScheduler::startJobs() {
 
     tpool_->run([this, i, shard] {
       bool error = false;
-
+      String error_str;
       try {
         shard->task->execute(shard, this);
       } catch (const StandardException& e) {
+        error_str = e.what();
         error = true;
       }
 
@@ -107,6 +111,7 @@ size_t MapReduceScheduler::startJobs() {
 
         if (error) {
           error_ = true;
+          errors_.emplace_back(error_str);
         }
 
         lk.unlock();
