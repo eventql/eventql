@@ -57,7 +57,7 @@ MapReduceShardResult MapTableTask::execute(
   auto shard = shard_base.asInstanceOf<MapTableTaskShard>();
 
   Vector<String> errors;
-  auto hosts = repl_->replicasFor(table_ref_.partition_key.get());
+  auto hosts = repl_->replicasFor(shard->table_ref.partition_key.get());
   for (const auto& host : hosts) {
     try {
       return executeRemote(shard, job, host);
@@ -71,33 +71,29 @@ MapReduceShardResult MapTableTask::execute(
     }
   }
 
-  if (!errors.empty()) {
-    RAISEF(
-        kRuntimeError,
-        "MapTableTask::execute failed: $0",
-        StringUtil::join(errors, ", "));
-  }
+  RAISEF(
+      kRuntimeError,
+      "MapTableTask::execute failed: $0",
+      StringUtil::join(errors, ", "));
 }
 
 MapReduceShardResult MapTableTask::executeRemote(
-    RefPtr<MapTableTaskShard> shard_base,
+    RefPtr<MapTableTaskShard> shard,
     RefPtr<MapReduceScheduler> job,
     const ReplicaRef& host) {
-  iputs("tbl ref: $0", table_ref_.partition_key);
-
   logDebug(
       "z1.mapreduce",
       "Executing map table shard on $0/$1/$2 on $3",
       session_.customer(),
-      table_ref_.table_key,
-      table_ref_.partition_key.get().toString(),
+      shard->table_ref.table_key,
+      shard->table_ref.partition_key.get().toString(),
       host.addr.hostAndPort());
 
   auto url = StringUtil::format(
       "http://$0/api/v1/mapreduce/tasks/map_partition?table=$1&partition=$2",
       host.addr.ipAndPort(),
-      URI::urlEncode(table_ref_.table_key),
-      table_ref_.partition_key.get().toString());
+      URI::urlEncode(shard->table_ref.table_key),
+      shard->table_ref.partition_key.get().toString());
 
   auto api_token = auth_->encodeAuthToken(session_);
 
