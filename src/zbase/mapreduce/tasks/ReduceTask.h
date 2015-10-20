@@ -9,6 +9,8 @@
 #pragma once
 #include "stx/stdtypes.h"
 #include "zbase/mapreduce/MapReduceTask.h"
+#include "zbase/core/TSDBService.h"
+#include "zbase/AnalyticsAuth.h"
 
 using namespace stx;
 
@@ -17,7 +19,11 @@ namespace zbase {
 class ReduceTask : public MapReduceTask {
 public:
 
-  ReduceTask(Vector<RefPtr<MapReduceTask>> sources);
+  ReduceTask(
+      const AnalyticsSession& session,
+      RefPtr<MapReduceJobSpec> job_spec,
+      Vector<RefPtr<MapReduceTask>> sources,
+      AnalyticsAuth* auth);
 
   Vector<size_t> build(MapReduceShardList* shards) override;
 
@@ -26,7 +32,10 @@ public:
       MapReduceScheduler* job) override;
 
 protected:
+  AnalyticsSession session_;
+  RefPtr<MapReduceJobSpec> job_spec_;
   Vector<RefPtr<MapReduceTask>> sources_;
+  AnalyticsAuth* auth_;
 };
 
 } // namespace zbase

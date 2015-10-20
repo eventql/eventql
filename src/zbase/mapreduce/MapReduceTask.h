@@ -29,6 +29,10 @@ struct MapReduceShardResult {
   SHA1Hash result_id;
 };
 
+struct MapReduceJobSpec : public RefCounted {
+  String program_source;
+};
+
 using MapReduceShardList = Vector<MapReduceTaskShard>;
 
 class MapReduceScheduler;

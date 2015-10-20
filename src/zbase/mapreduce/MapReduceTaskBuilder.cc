@@ -20,11 +20,13 @@ namespace zbase {
 
 MapReduceTaskBuilder::MapReduceTaskBuilder(
     const AnalyticsSession& session,
+    RefPtr<MapReduceJobSpec> job_spec,
     AnalyticsAuth* auth,
     zbase::PartitionMap* pmap,
     zbase::ReplicationScheme* repl,
     const String& cachedir) :
     session_(session),
+    job_spec_(job_spec),
     auth_(auth),
     pmap_(pmap),
     repl_(repl),
@@ -77,6 +79,7 @@ RefPtr<MapReduceTask> MapReduceTaskBuilder::mapTableTaskFromJSON(
 
   return new MapTableTask(
       session_,
+      job_spec_,
       table_ref,
       auth_,
       pmap_,
@@ -98,7 +101,7 @@ RefPtr<MapReduceTask> MapReduceTaskBuilder::reduceTaskFromJSON(
     sources.emplace_back(fromJSON(src, src + src->size));
   }
 
-  return new ReduceTask(sources);
+  return new ReduceTask(session_, job_spec_, sources, auth_);
 }
 
 RefPtr<MapReduceTask> MapReduceTaskBuilder::returnResultsTaskFromJSON(

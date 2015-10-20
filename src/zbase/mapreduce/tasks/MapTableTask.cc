@@ -15,11 +15,13 @@ namespace zbase {
 
 MapTableTask::MapTableTask(
     const AnalyticsSession& session,
+    RefPtr<MapReduceJobSpec> job_spec,
     const TSDBTableRef& table_ref,
     AnalyticsAuth* auth,
     zbase::PartitionMap* pmap,
     zbase::ReplicationScheme* repl) :
     session_(session),
+    job_spec_(job_spec),
     table_ref_(table_ref),
     auth_(auth),
     pmap_(pmap),

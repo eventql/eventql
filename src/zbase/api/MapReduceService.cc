@@ -52,7 +52,17 @@ void MapReduceService::executeScript(
 
   auto job_json = json::parseJSON(job_json_str.get());
 
-  MapReduceTaskBuilder task_builder(session, auth_, pmap_, repl_, cachedir_);
+  auto job_spec = mkRef(new MapReduceJobSpec{});
+  job_spec->program_source = program_source;
+
+  MapReduceTaskBuilder task_builder(
+      session,
+      job_spec,
+      auth_,
+      pmap_,
+      repl_,
+      cachedir_);
+
   auto task = task_builder.fromJSON(job_json.begin(), job_json.end());
 
   MapReduceShardList task_shards;

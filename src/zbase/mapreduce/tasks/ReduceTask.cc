@@ -13,8 +13,14 @@ using namespace stx;
 namespace zbase {
 
 ReduceTask::ReduceTask(
-    Vector<RefPtr<MapReduceTask>> sources) :
-    sources_(sources) {}
+    const AnalyticsSession& session,
+    RefPtr<MapReduceJobSpec> job_spec,
+    Vector<RefPtr<MapReduceTask>> sources,
+    AnalyticsAuth* auth) :
+    session_(session),
+    job_spec_(job_spec),
+    sources_(sources),
+    auth_(auth) {}
 
 Vector<size_t> ReduceTask::build(MapReduceShardList* shards) {
   Vector<size_t> out_indexes;

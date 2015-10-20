@@ -23,6 +23,7 @@ public:
 
   MapReduceTaskBuilder(
       const AnalyticsSession& session,
+      RefPtr<MapReduceJobSpec> job_spec,
       AnalyticsAuth* auth,
       zbase::PartitionMap* pmap,
       zbase::ReplicationScheme* repl,
@@ -47,6 +48,7 @@ protected:
       const json::JSONObject::const_iterator& end);
 
   AnalyticsSession session_;
+  RefPtr<MapReduceJobSpec> job_spec_;
   AnalyticsAuth* auth_;
   zbase::PartitionMap* pmap_;
   zbase::ReplicationScheme* repl_;

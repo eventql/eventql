@@ -21,6 +21,7 @@ public:
 
   MapTableTask(
       const AnalyticsSession& session,
+      RefPtr<MapReduceJobSpec> job_spec,
       const TSDBTableRef& table,
       AnalyticsAuth* auth,
       zbase::PartitionMap* pmap,
@@ -34,6 +35,7 @@ public:
 
 protected:
   AnalyticsSession session_;
+  RefPtr<MapReduceJobSpec> job_spec_;
   TSDBTableRef table_ref_;
   AnalyticsAuth* auth_;
   zbase::PartitionMap* pmap_;
