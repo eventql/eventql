@@ -22,6 +22,7 @@ class MapReduceTaskBuilder {
 public:
 
   MapReduceTaskBuilder(
+      const AnalyticsSession& session,
       AnalyticsAuth* auth,
       zbase::PartitionMap* pmap,
       zbase::ReplicationScheme* repl,
@@ -45,6 +46,7 @@ protected:
       const json::JSONObject::const_iterator& begin,
       const json::JSONObject::const_iterator& end);
 
+  AnalyticsSession session_;
   AnalyticsAuth* auth_;
   zbase::PartitionMap* pmap_;
   zbase::ReplicationScheme* repl_;

@@ -19,10 +19,12 @@ using namespace stx;
 namespace zbase {
 
 MapReduceTaskBuilder::MapReduceTaskBuilder(
+    const AnalyticsSession& session,
     AnalyticsAuth* auth,
     zbase::PartitionMap* pmap,
     zbase::ReplicationScheme* repl,
     const String& cachedir) :
+    session_(session),
     auth_(auth),
     pmap_(pmap),
     repl_(repl),
@@ -54,7 +56,31 @@ RefPtr<MapReduceTask> MapReduceTaskBuilder::fromJSON(
 RefPtr<MapReduceTask> MapReduceTaskBuilder::mapTableTaskFromJSON(
     const json::JSONObject::const_iterator& begin,
     const json::JSONObject::const_iterator& end) {
-  return new MapTableTask(auth_, pmap_, repl_);
+  TSDBTableRef table_ref;
+
+  auto table_name = json::objectGetString(begin, end, "table_name");
+  if (table_name.isEmpty()) {
+    RAISE(kRuntimeError, "missing field: table_name");
+  } else {
+    table_ref.table_key = table_name.get();
+  }
+
+  auto from = json::objectGetUInt64(begin, end, "from");
+  if (!from.isEmpty()) {
+    table_ref.timerange_begin = UnixTime(from.get());
+  }
+
+  auto until = json::objectGetUInt64(begin, end, "until");
+  if (!until.isEmpty()) {
+    table_ref.timerange_limit = UnixTime(until.get());
+  }
+
+  return new MapTableTask(
+      session_,
+      table_ref,
+      auth_,
+      pmap_,
+      repl_);
 }
 
 RefPtr<MapReduceTask> MapReduceTaskBuilder::reduceTaskFromJSON(

@@ -51,8 +51,7 @@ void MapReduceService::executeScript(
 
   auto job_json = json::parseJSON(job_json_str.get());
 
-  MapReduceTaskBuilder task_builder(auth_, pmap_, repl_, cachedir_);
-
+  MapReduceTaskBuilder task_builder(session, auth_, pmap_, repl_, cachedir_);
   auto task = task_builder.fromJSON(job_json.begin(), job_json.end());
 
   MapReduceShardList task_shards;

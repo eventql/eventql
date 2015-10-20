@@ -20,6 +20,8 @@ class MapTableTask : public MapReduceTask {
 public:
 
   MapTableTask(
+      const AnalyticsSession& session,
+      const TSDBTableRef& table,
       AnalyticsAuth* auth,
       zbase::PartitionMap* pmap,
       zbase::ReplicationScheme* repl);
@@ -27,6 +29,8 @@ public:
   Vector<size_t> build(MapReduceShardList* shards) override;
 
 protected:
+  AnalyticsSession session_;
+  TSDBTableRef table_ref_;
   AnalyticsAuth* auth_;
   zbase::PartitionMap* pmap_;
   zbase::ReplicationScheme* repl_;

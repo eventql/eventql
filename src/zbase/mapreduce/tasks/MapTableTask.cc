@@ -14,16 +14,25 @@ using namespace stx;
 namespace zbase {
 
 MapTableTask::MapTableTask(
+    const AnalyticsSession& session,
+    const TSDBTableRef& table_ref,
     AnalyticsAuth* auth,
     zbase::PartitionMap* pmap,
     zbase::ReplicationScheme* repl) :
+    session_(session),
+    table_ref_(table_ref),
     auth_(auth),
     pmap_(pmap),
     repl_(repl) {}
 
 Vector<size_t> MapTableTask::build(MapReduceShardList* shards) {
+  auto table = pmap_->findTable(session_.customer(), table_ref_.table_key);
+  if (table.isEmpty()) {
+    RAISEF(kNotFoundError, "table not found: $0", table_ref_.table_key);
+  }
 
-  Vector<SHA1Hash> partitions;
+  auto partitioner = table.get()->partitioner();
+  auto partitions = partitioner->partitionKeysFor(table_ref_);
 
   Vector<size_t> indexes;
   for (const auto& partition : partitions) {
