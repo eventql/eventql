@@ -11,6 +11,7 @@
 #include "stx/autoref.h"
 #include "stx/option.h"
 #include "stx/json/json.h"
+#include "zbase/core/ReplicationScheme.h"
 
 using namespace stx;
 
@@ -23,12 +24,23 @@ struct MapReduceTaskShard {
   Vector<size_t> dependencies;
 };
 
+struct MapReduceShardResult {
+  ReplicaRef host;
+  SHA1Hash result_id;
+};
+
 using MapReduceShardList = Vector<MapReduceTaskShard>;
+
+class MapReduceScheduler;
 
 class MapReduceTask : public RefCounted {
 public:
 
   virtual Vector<size_t> build(MapReduceShardList* shards) = 0;
+
+  virtual MapReduceShardResult execute(
+      const MapReduceTaskShard& shard,
+      MapReduceScheduler* job) = 0;
 
 };
 

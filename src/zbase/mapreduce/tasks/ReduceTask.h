@@ -21,6 +21,10 @@ public:
 
   Vector<size_t> build(MapReduceShardList* shards) override;
 
+  MapReduceShardResult execute(
+      const MapReduceTaskShard& shard,
+      MapReduceScheduler* job) override;
+
 protected:
   Vector<RefPtr<MapReduceTask>> sources_;
 };

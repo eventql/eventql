@@ -34,6 +34,7 @@ protected:
 
   MapReduceShardList shards_;
   Vector<MapReduceShardStatus> shard_status_;
+  Vector<Option<MapReduceShardResult>> shard_results_;
   thread::ThreadPool* tpool_;
 
   size_t max_concurrent_tasks_;

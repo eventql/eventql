@@ -19,6 +19,7 @@ MapReduceScheduler::MapReduceScheduler(
     size_t max_concurrent_tasks /* = kDefaultMaxConcurrentTasks */) :
     shards_(shards),
     shard_status_(shards_.size(), MapReduceShardStatus::PENDING),
+    shard_results_(shards_.size()),
     tpool_(tpool),
     max_concurrent_tasks_(max_concurrent_tasks),
     done_(false),
