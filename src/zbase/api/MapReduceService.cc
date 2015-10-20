@@ -9,6 +9,7 @@
 #include "zbase/api/MapReduceService.h"
 #include "zbase/mapreduce/MapReduceTask.h"
 #include "zbase/mapreduce/MapReduceTaskBuilder.h"
+#include "zbase/mapreduce/MapReduceScheduler.h"
 #include "stx/protobuf/MessageDecoder.h"
 #include "stx/protobuf/JSONEncoder.h"
 #include "sstable/SSTableWriter.h"
@@ -57,7 +58,8 @@ void MapReduceService::executeScript(
   MapReduceShardList task_shards;
   task->build(&task_shards);
 
-  iputs("got $0 tasks", task_shards.size());
+  MapReduceScheduler scheduler(task_shards);
+  scheduler.execute();
 }
 
 SHA1Hash MapReduceService::mapPartition(
