@@ -77,10 +77,16 @@ RefPtr<MapReduceTask> MapReduceTaskBuilder::mapTableTaskFromJSON(
     table_ref.timerange_limit = UnixTime(until.get());
   }
 
+  auto method_name = json::objectGetString(begin, end, "method_name");
+  if (method_name.isEmpty()) {
+    RAISE(kRuntimeError, "missing field: method_name");
+  }
+
   return new MapTableTask(
       session_,
       job_spec_,
       table_ref,
+      method_name.get(),
       auth_,
       pmap_,
       repl_);

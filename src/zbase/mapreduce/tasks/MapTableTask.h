@@ -27,6 +27,7 @@ public:
       const AnalyticsSession& session,
       RefPtr<MapReduceJobSpec> job_spec,
       const TSDBTableRef& table,
+      const String& method_name,
       AnalyticsAuth* auth,
       zbase::PartitionMap* pmap,
       zbase::ReplicationScheme* repl);
@@ -47,6 +48,7 @@ protected:
   AnalyticsSession session_;
   RefPtr<MapReduceJobSpec> job_spec_;
   TSDBTableRef table_ref_;
+  String method_name_;
   AnalyticsAuth* auth_;
   zbase::PartitionMap* pmap_;
   zbase::ReplicationScheme* repl_;

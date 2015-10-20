@@ -18,12 +18,14 @@ MapTableTask::MapTableTask(
     const AnalyticsSession& session,
     RefPtr<MapReduceJobSpec> job_spec,
     const TSDBTableRef& table_ref,
+    const String& method_name,
     AnalyticsAuth* auth,
     zbase::PartitionMap* pmap,
     zbase::ReplicationScheme* repl) :
     session_(session),
     job_spec_(job_spec),
     table_ref_(table_ref),
+    method_name_(method_name),
     auth_(auth),
     pmap_(pmap),
     repl_(repl) {}
@@ -90,10 +92,13 @@ MapReduceShardResult MapTableTask::executeRemote(
       host.addr.hostAndPort());
 
   auto url = StringUtil::format(
-      "http://$0/api/v1/mapreduce/tasks/map_partition?table=$1&partition=$2",
+      "http://$0/api/v1/mapreduce/tasks/map_partition?table=$1&partition=$2" \
+      "&program_source=$3&method_name=$4",
       host.addr.ipAndPort(),
       URI::urlEncode(shard->table_ref.table_key),
-      shard->table_ref.partition_key.get().toString());
+      shard->table_ref.partition_key.get().toString(),
+      URI::urlEncode(job_spec_->program_source),
+      URI::urlEncode(method_name_));
 
   auto api_token = auth_->encodeAuthToken(session_);
 
