@@ -7,7 +7,7 @@
  * permission is obtained.
  */
 #pragma once
-#include "stx/thread/ThreadPool.h"
+#include "stx/thread/threadpool.h"
 #include "zbase/core/TSDBService.h"
 #include "zbase/AnalyticsAuth.h"
 #include "zbase/CustomerConfig.h"

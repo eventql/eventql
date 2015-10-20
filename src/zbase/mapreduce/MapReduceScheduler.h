@@ -8,7 +8,7 @@
  */
 #pragma once
 #include "stx/stdtypes.h"
-#include "stx/thread/ThreadPool.h"
+#include "stx/thread/threadpool.h"
 #include "zbase/mapreduce/MapReduceTask.h"
 
 using namespace stx;
