@@ -65,7 +65,7 @@ size_t MapReduceScheduler::startJobs() {
     }
 
     bool ready = true;
-    for (auto dep : shards_[i].dependencies) {
+    for (auto dep : shards_[i]->dependencies) {
       if (shard_status_[dep] != MapReduceShardStatus::COMPLETED) {
         ready = false;
       }
@@ -84,7 +84,7 @@ size_t MapReduceScheduler::startJobs() {
       bool error = false;
 
       try {
-        shard.task->execute(shard, this);
+        shard->task->execute(shard, this);
       } catch (const StandardException& e) {
         error = true;
       }

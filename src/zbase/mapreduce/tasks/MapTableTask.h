@@ -16,6 +16,10 @@ using namespace stx;
 
 namespace zbase {
 
+struct MapTableTaskShard : public MapReduceTaskShard {
+  TSDBTableRef table_ref;
+};
+
 class MapTableTask : public MapReduceTask {
 public:
 
@@ -30,7 +34,7 @@ public:
   Vector<size_t> build(MapReduceShardList* shards) override;
 
   MapReduceShardResult execute(
-      const MapReduceTaskShard& shard,
+      RefPtr<MapReduceTaskShard> shard,
       MapReduceScheduler* job) override;
 
 protected:

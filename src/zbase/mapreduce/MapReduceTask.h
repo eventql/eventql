@@ -19,10 +19,12 @@ namespace zbase {
 
 class MapReduceTask;
 
-struct MapReduceTaskShard {
+struct MapReduceTaskShard : public RefCounted {
   RefPtr<MapReduceTask> task;
   Vector<size_t> dependencies;
 };
+
+using MapReduceShardList = Vector<RefPtr<MapReduceTaskShard>>;
 
 struct MapReduceShardResult {
   ReplicaRef host;
@@ -33,8 +35,6 @@ struct MapReduceJobSpec : public RefCounted {
   String program_source;
 };
 
-using MapReduceShardList = Vector<MapReduceTaskShard>;
-
 class MapReduceScheduler;
 
 class MapReduceTask : public RefCounted {
@@ -43,7 +43,7 @@ public:
   virtual Vector<size_t> build(MapReduceShardList* shards) = 0;
 
   virtual MapReduceShardResult execute(
-      const MapReduceTaskShard& shard,
+      RefPtr<MapReduceTaskShard> shard,
       MapReduceScheduler* job) = 0;
 
 };

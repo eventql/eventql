@@ -38,19 +38,23 @@ Vector<size_t> MapTableTask::build(MapReduceShardList* shards) {
 
   Vector<size_t> indexes;
   for (const auto& partition : partitions) {
-    MapReduceTaskShard shard;
-    shard.task = this;
+    auto shard = mkRef(new MapTableTaskShard());
+    shard->task = this;
+    shard->table_ref = table_ref_;
+    shard->table_ref.partition_key = partition;
 
     indexes.emplace_back(shards->size());
-    shards->emplace_back(shard);
+    shards->emplace_back(shard.get());
   }
 
   return indexes;
 }
 
 MapReduceShardResult MapTableTask::execute(
-    const MapReduceTaskShard& shard,
+    RefPtr<MapReduceTaskShard> shard_base,
     MapReduceScheduler* job) {
+  //auto shard = shard_base.asInstanceOf<MapTableTaskShard>();
+
   iputs("execute map...", 1);
 }
 

@@ -33,9 +33,9 @@ Vector<size_t> ReduceTask::build(MapReduceShardList* shards) {
 
   size_t nshards = 1;
   for (size_t shard_idx = 0; shard_idx < nshards; shard_idx++) {
-    MapReduceTaskShard shard;
-    shard.task = this;
-    shard.dependencies = in_indexes;
+    auto shard = mkRef(new MapReduceTaskShard());
+    shard->task = this;
+    shard->dependencies = in_indexes;
 
     out_indexes.emplace_back(shards->size());
     shards->emplace_back(shard);
@@ -45,7 +45,7 @@ Vector<size_t> ReduceTask::build(MapReduceShardList* shards) {
 }
 
 MapReduceShardResult ReduceTask::execute(
-    const MapReduceTaskShard& shard,
+    RefPtr<MapReduceTaskShard> shard,
     MapReduceScheduler* job) {
   iputs("execute reduce", 1);
 }
