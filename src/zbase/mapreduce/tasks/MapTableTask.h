@@ -38,6 +38,12 @@ public:
       MapReduceScheduler* job) override;
 
 protected:
+
+  MapReduceShardResult executeRemote(
+      RefPtr<MapTableTaskShard> shard,
+      MapReduceScheduler* job,
+      const ReplicaRef& host);
+
   AnalyticsSession session_;
   RefPtr<MapReduceJobSpec> job_spec_;
   TSDBTableRef table_ref_;

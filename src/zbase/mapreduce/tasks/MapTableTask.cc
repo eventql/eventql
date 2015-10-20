@@ -53,9 +53,72 @@ Vector<size_t> MapTableTask::build(MapReduceShardList* shards) {
 MapReduceShardResult MapTableTask::execute(
     RefPtr<MapReduceTaskShard> shard_base,
     MapReduceScheduler* job) {
-  //auto shard = shard_base.asInstanceOf<MapTableTaskShard>();
+  auto shard = shard_base.asInstanceOf<MapTableTaskShard>();
 
-  iputs("execute map...", 1);
+  Vector<String> errors;
+  auto hosts = repl_->replicasFor(table_ref_.partition_key.get());
+  for (const auto& host : hosts) {
+    try {
+      return executeRemote(shard, job, host);
+    } catch (const StandardException& e) {
+      logError(
+          "z1.mapreduce",
+          e,
+          "MapTableTask::execute failed");
+
+      errors.emplace_back(e.what());
+    }
+  }
+
+  if (!errors.empty()) {
+    RAISEF(
+        kRuntimeError,
+        "MapTableTask::execute failed: $0",
+        StringUtil::join(errors, ", "));
+  }
+}
+
+MapReduceShardResult MapTableTask::executeRemote(
+    RefPtr<MapTableTaskShard> shard_base,
+    MapReduceScheduler* job,
+    const ReplicaRef& host) {
+  logDebug(
+      "z1.mapreduce",
+      "Executing map table shard on $0/$1/$2 on $3",
+      session_.customer(),
+      table_ref_.table_key,
+      table_ref_.partition_key.get().toString(),
+      host.addr.hostAndPort());
+
+  auto url = StringUtil::format(
+      "http://$0/api/v1/mapreduce/tasks/map_partition?table=$1&partition=$2",
+      host.addr.ipAndPort(),
+      URI::urlEncode(table_ref_.table_key),
+      table_ref_.partition_key.get().toString());
+
+  auto api_token = auth_->encodeAuthToken(session_);
+
+  http::HTTPMessage::HeaderList auth_headers;
+  auth_headers.emplace_back(
+      "Authorization",
+      StringUtil::format("Token $0", api_token));
+
+  http::HTTPClient http_client;
+  auto req = http::HTTPRequest::mkGet(url, auth_headers);
+  auto res = http_client.executeRequest(req);
+
+  if (res.statusCode() != 201) {
+    RAISEF(
+        kRuntimeError,
+        "received non-201 response: $0", res.body().toString());
+  }
+
+  MapReduceShardResult result {
+    .host = host,
+    .result_id = SHA1Hash::fromHexString(res.body().toString())
+  };
+
+  return result;
 }
 
 } // namespace zbase

@@ -39,6 +39,7 @@ protected:
 
   size_t max_concurrent_tasks_;
   bool done_;
+  bool error_;
   size_t num_shards_running_;
   size_t num_shards_completed_;
 

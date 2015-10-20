@@ -23,6 +23,7 @@ MapReduceScheduler::MapReduceScheduler(
     tpool_(tpool),
     max_concurrent_tasks_(max_concurrent_tasks),
     done_(false),
+    error_(false),
     num_shards_running_(0),
     num_shards_completed_(0) {}
 
@@ -36,6 +37,10 @@ void MapReduceScheduler::execute() {
         num_shards_completed_,
         shards_.size(),
         num_shards_running_);
+
+    if (error_) {
+      RAISE(kRuntimeError, "mapreduce failed");
+    }
 
     if (done_) {
       break;
@@ -98,6 +103,10 @@ size_t MapReduceScheduler::startJobs() {
         --num_shards_running_;
         if (++num_shards_completed_ == shards_.size()) {
           done_ = true;
+        }
+
+        if (error) {
+          error_ = true;
         }
 
         lk.unlock();
