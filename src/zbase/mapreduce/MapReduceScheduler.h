@@ -20,6 +20,7 @@ public:
   static const size_t kDefaultMaxConcurrentTasks = 16;
 
   MapReduceScheduler(
+      RefPtr<MapReduceJobSpec> job,
       const MapReduceShardList& shards,
       thread::ThreadPool* tpool,
       size_t max_concurrent_tasks = kDefaultMaxConcurrentTasks);
@@ -32,6 +33,7 @@ protected:
 
   size_t startJobs();
 
+  RefPtr<MapReduceJobSpec> job_;
   MapReduceShardList shards_;
   Vector<MapReduceShardStatus> shard_status_;
   Vector<Option<MapReduceShardResult>> shard_results_;

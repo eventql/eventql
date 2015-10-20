@@ -118,28 +118,61 @@ void MapReduceAPIServlet::executeMapReduceScript(
   auto job_spec = mkRef(new MapReduceJobSpec{});
   job_spec->program_source = req_stream->request().body().toString();
 
+  job_spec->onProgress([this, &sse_stream] (const MapReduceJobStatus& s) {
+    if (sse_stream.isClosed()) {
+      stx::logDebug("z1.mapreduce", "Aborting Job...");
+      return;
+    }
+
+    Buffer buf;
+    json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
+    json.beginObject();
+    json.addObjectEntry("status");
+    json.addString("running");
+    json.addComma();
+    json.addObjectEntry("progress");
+    json.addFloat(s.num_tasks_total > 0
+        ? s.num_tasks_completed / (double) s.num_tasks_total
+        : 0);
+    json.addComma();
+    json.addObjectEntry("num_tasks_total");
+    json.addInteger(s.num_tasks_total);
+    json.addComma();
+    json.addObjectEntry("num_tasks_completed");
+    json.addInteger(s.num_tasks_completed);
+    json.addComma();
+    json.addObjectEntry("num_tasks_running");
+    json.addInteger(s.num_tasks_running);
+    json.endObject();
+
+    sse_stream.sendEvent(buf, Some(String("status")));
+  });
+
   try {
     service_->executeScript(session, job_spec);
   } catch (const StandardException& e) {
     Buffer buf;
     json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
     json.beginObject();
+    json.addObjectEntry("status");
+    json.addString("error");
+    json.addComma();
     json.addObjectEntry("error");
     json.addString(e.what());
     json.endObject();
 
-    sse_stream.sendEvent(buf, Some(String("mapreduce_error")));
+    sse_stream.sendEvent(buf, Some(String("status")));
   }
 
   {
     Buffer buf;
     json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
     json.beginObject();
-    json.addObjectEntry("success");
-    json.addTrue();
+    json.addObjectEntry("status");
+    json.addString("success");
     json.endObject();
 
-    sse_stream.sendEvent(buf, Some(String("mapreduce_success")));
+    sse_stream.sendEvent(buf, Some(String("status")));
   }
 
   sse_stream.finish();

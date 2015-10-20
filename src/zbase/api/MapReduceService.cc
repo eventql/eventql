@@ -68,7 +68,7 @@ void MapReduceService::executeScript(
   MapReduceShardList task_shards;
   task->build(&task_shards);
 
-  auto scheduler = mkRef(new MapReduceScheduler(task_shards, &tpool_));
+  auto scheduler = mkRef(new MapReduceScheduler(job, task_shards, &tpool_));
   scheduler->execute();
 }
 

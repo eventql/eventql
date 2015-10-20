@@ -31,8 +31,21 @@ struct MapReduceShardResult {
   SHA1Hash result_id;
 };
 
-struct MapReduceJobSpec : public RefCounted {
+struct MapReduceJobStatus {
+  size_t num_tasks_total;
+  size_t num_tasks_completed;
+  size_t num_tasks_running;
+};
+
+class MapReduceJobSpec : public RefCounted {
+public:
+
+  void onProgress(Function<void (const MapReduceJobStatus& status)> fn);
+  void updateProgress(const MapReduceJobStatus& status);
+
   String program_source;
+protected:
+  Function<void (const MapReduceJobStatus& status)> on_progress_;
 };
 
 class MapReduceScheduler;

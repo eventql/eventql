@@ -14,9 +14,11 @@ using namespace stx;
 namespace zbase {
 
 MapReduceScheduler::MapReduceScheduler(
+    RefPtr<MapReduceJobSpec> job,
     const MapReduceShardList& shards,
     thread::ThreadPool* tpool,
     size_t max_concurrent_tasks /* = kDefaultMaxConcurrentTasks */) :
+    job_(job),
     shards_(shards),
     shard_status_(shards_.size(), MapReduceShardStatus::PENDING),
     shard_results_(shards_.size()),
@@ -38,6 +40,12 @@ void MapReduceScheduler::execute() {
         shards_.size(),
         num_shards_running_);
 
+    job_->updateProgress(MapReduceJobStatus{
+      .num_tasks_total = shards_.size(),
+      .num_tasks_completed = num_shards_completed_,
+      .num_tasks_running = num_shards_running_
+    });
+
     if (error_) {
       auto err_str = StringUtil::join(errors_, ", ");
       RAISEF(
@@ -45,6 +53,7 @@ void MapReduceScheduler::execute() {
           "MapReduce execution failed: $0",
           err_str);
     }
+
 
     if (done_) {
       break;
