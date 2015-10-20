@@ -27,6 +27,8 @@ public:
 
   void execute();
 
+  void sendResult(const String& key, const String& value);
+
 protected:
 
   enum class MapReduceShardStatus { PENDING, RUNNING, COMPLETED, ERROR };

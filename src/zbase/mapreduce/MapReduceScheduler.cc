@@ -143,5 +143,10 @@ size_t MapReduceScheduler::startJobs() {
   return num_started;
 }
 
+void MapReduceScheduler::sendResult(const String& key, const String& value) {
+  job_->sendResult(key, value);
+}
+
+
 } // namespace zbase
 
