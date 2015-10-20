@@ -29,7 +29,7 @@ public:
 
   MapReduceShardResult execute(
       RefPtr<MapReduceTaskShard> shard,
-      MapReduceScheduler* job) override;
+      RefPtr<MapReduceScheduler> job) override;
 
 protected:
   AnalyticsSession session_;

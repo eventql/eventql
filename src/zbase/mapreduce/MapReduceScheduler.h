@@ -15,7 +15,7 @@ using namespace stx;
 
 namespace zbase {
 
-class MapReduceScheduler {
+class MapReduceScheduler : public RefCounted {
 public:
   static const size_t kDefaultMaxConcurrentTasks = 16;
 

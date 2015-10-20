@@ -8,6 +8,7 @@
  */
 #include "stx/SHA1.h"
 #include "zbase/mapreduce/tasks/MapTableTask.h"
+#include "zbase/mapreduce/MapReduceScheduler.h"
 
 using namespace stx;
 
@@ -52,7 +53,7 @@ Vector<size_t> MapTableTask::build(MapReduceShardList* shards) {
 
 MapReduceShardResult MapTableTask::execute(
     RefPtr<MapReduceTaskShard> shard_base,
-    MapReduceScheduler* job) {
+    RefPtr<MapReduceScheduler> job) {
   auto shard = shard_base.asInstanceOf<MapTableTaskShard>();
 
   Vector<String> errors;
@@ -80,8 +81,10 @@ MapReduceShardResult MapTableTask::execute(
 
 MapReduceShardResult MapTableTask::executeRemote(
     RefPtr<MapTableTaskShard> shard_base,
-    MapReduceScheduler* job,
+    RefPtr<MapReduceScheduler> job,
     const ReplicaRef& host) {
+  iputs("tbl ref: $0", table_ref_.partition_key);
+
   logDebug(
       "z1.mapreduce",
       "Executing map table shard on $0/$1/$2 on $3",

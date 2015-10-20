@@ -42,15 +42,18 @@ void MapReduceService::executeScript(
       "Launching mapreduce job; customer=$0",
       session.customer());
 
-  auto js_ctx = mkRef(new JavaScriptContext());
-  js_ctx->loadProgram(program_source);
+  json::JSONObject job_json;
+  {
+    auto js_ctx = mkRef(new JavaScriptContext());
+    js_ctx->loadProgram(program_source);
 
-  auto job_json_str = js_ctx->getMapReduceJobJSON();
-  if (job_json_str.isEmpty()) {
-    return;
+    auto job_json_str = js_ctx->getMapReduceJobJSON();
+    if (job_json_str.isEmpty()) {
+      return;
+    }
+
+    job_json = json::parseJSON(job_json_str.get());
   }
-
-  auto job_json = json::parseJSON(job_json_str.get());
 
   auto job_spec = mkRef(new MapReduceJobSpec{});
   job_spec->program_source = program_source;
@@ -68,8 +71,8 @@ void MapReduceService::executeScript(
   MapReduceShardList task_shards;
   task->build(&task_shards);
 
-  MapReduceScheduler scheduler(task_shards, &tpool_);
-  scheduler.execute();
+  auto scheduler = mkRef(new MapReduceScheduler(task_shards, &tpool_));
+  scheduler->execute();
 }
 
 SHA1Hash MapReduceService::mapPartition(

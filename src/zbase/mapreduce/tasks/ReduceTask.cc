@@ -46,7 +46,7 @@ Vector<size_t> ReduceTask::build(MapReduceShardList* shards) {
 
 MapReduceShardResult ReduceTask::execute(
     RefPtr<MapReduceTaskShard> shard,
-    MapReduceScheduler* job) {
+    RefPtr<MapReduceScheduler> job) {
   iputs("execute reduce", 1);
 }
 

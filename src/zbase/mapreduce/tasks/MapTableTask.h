@@ -35,13 +35,13 @@ public:
 
   MapReduceShardResult execute(
       RefPtr<MapReduceTaskShard> shard,
-      MapReduceScheduler* job) override;
+      RefPtr<MapReduceScheduler> job) override;
 
 protected:
 
   MapReduceShardResult executeRemote(
       RefPtr<MapTableTaskShard> shard,
-      MapReduceScheduler* job,
+      RefPtr<MapReduceScheduler> job,
       const ReplicaRef& host);
 
   AnalyticsSession session_;

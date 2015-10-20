@@ -44,7 +44,7 @@ public:
 
   virtual MapReduceShardResult execute(
       RefPtr<MapReduceTaskShard> shard,
-      MapReduceScheduler* job) = 0;
+      RefPtr<MapReduceScheduler> job) = 0;
 
 };
 

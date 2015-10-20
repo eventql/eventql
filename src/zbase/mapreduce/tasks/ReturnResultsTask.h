@@ -23,7 +23,7 @@ public:
 
   MapReduceShardResult execute(
       RefPtr<MapReduceTaskShard> shard,
-      MapReduceScheduler* job) override {}
+      RefPtr<MapReduceScheduler> job) override {}
 
 protected:
   Vector<RefPtr<MapReduceTask>> sources_;
