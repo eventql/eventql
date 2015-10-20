@@ -19,6 +19,8 @@ public:
 
   ReduceTask(Vector<RefPtr<MapReduceTask>> sources);
 
+  Vector<size_t> build(MapReduceShardList* shards) override;
+
 protected:
   Vector<RefPtr<MapReduceTask>> sources_;
 };

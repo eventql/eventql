@@ -8,30 +8,23 @@
  */
 #pragma once
 #include "stx/stdtypes.h"
-#include "stx/autoref.h"
-#include "stx/option.h"
-#include "stx/json/json.h"
+#include "zbase/mapreduce/MapReduceTask.h"
 
 using namespace stx;
 
 namespace zbase {
 
-class MapReduceTask;
-
-struct MapReduceTaskShard {
-  RefPtr<MapReduceTask> task;
-  Vector<size_t> dependencies;
-};
-
-using MapReduceShardList = Vector<MapReduceTaskShard>;
-
-class MapReduceTask : public RefCounted {
+class ReturnResultsTask : public MapReduceTask {
 public:
 
-  virtual Vector<size_t> build(MapReduceShardList* shards) = 0;
+  ReturnResultsTask(Vector<RefPtr<MapReduceTask>> sources);
 
+  Vector<size_t> build(MapReduceShardList* shards) override {}
+
+protected:
+  Vector<RefPtr<MapReduceTask>> sources_;
 };
 
-
 } // namespace zbase
+
 

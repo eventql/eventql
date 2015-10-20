@@ -6,20 +6,16 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#pragma once
-#include "stx/stdtypes.h"
-#include "zbase/mapreduce/MapReduceTask.h"
+#include "zbase/mapreduce/tasks/ReturnResultsTask.h"
 
 using namespace stx;
 
 namespace zbase {
 
-class MapTableTask : public MapReduceTask {
-public:
+ReturnResultsTask::ReturnResultsTask(
+    Vector<RefPtr<MapReduceTask>> sources) :
+    sources_(sources) {}
 
-  Vector<size_t> build(MapReduceShardList* shards) override;
-
-};
 
 } // namespace zbase
 

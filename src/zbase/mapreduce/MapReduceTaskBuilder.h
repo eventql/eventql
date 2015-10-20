@@ -31,6 +31,10 @@ protected:
       const json::JSONObject::const_iterator& begin,
       const json::JSONObject::const_iterator& end);
 
+  RefPtr<MapReduceTask> returnResultsTaskFromJSON(
+      const json::JSONObject::const_iterator& begin,
+      const json::JSONObject::const_iterator& end);
+
 };
 
 } // namespace zbase

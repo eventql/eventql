@@ -53,6 +53,11 @@ void MapReduceService::executeScript(
 
   MapReduceTaskBuilder task_builder;
   auto task = task_builder.fromJSON(job_json.begin(), job_json.end());
+
+  MapReduceShardList task_shards;
+  task->build(&task_shards);
+
+  iputs("got $0 tasks", task_shards.size());
 }
 
 SHA1Hash MapReduceService::mapPartition(
