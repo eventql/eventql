@@ -32,6 +32,17 @@ public:
 
 protected:
 
+  void catchAndReturnErrors(
+      http::HTTPResponse* resp,
+      Function<void ()> fn) const {
+    try {
+      fn();
+    } catch (const StandardException& e) {
+      resp->setStatus(http::kStatusInternalServerError);
+      resp->addBody(e.what());
+    }
+  }
+
   void executeMapReduceScript(
       const AnalyticsSession& session,
       const URI& uri,

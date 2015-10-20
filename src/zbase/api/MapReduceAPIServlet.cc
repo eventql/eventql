@@ -36,14 +36,18 @@ void MapReduceAPIServlet::handle(
 
   if (uri.path() == "/api/v1/mapreduce/execute") {
     req_stream->readBody();
-    executeMapReduceScript(session, uri, &req, &res);
+    catchAndReturnErrors(&res, [this, &session, &uri, &req, &res] {
+      executeMapReduceScript(session, uri, &req, &res);
+    });
     res_stream->writeResponse(res);
     return;
   }
 
   if (uri.path() == "/api/v1/mapreduce/tasks/map_partition") {
     req_stream->readBody();
-    executeMapPartitionTask(session, uri, &req, &res);
+    catchAndReturnErrors(&res, [this, &session, &uri, &req, &res] {
+      executeMapPartitionTask(session, uri, &req, &res);
+    });
     res_stream->writeResponse(res);
     return;
   }
