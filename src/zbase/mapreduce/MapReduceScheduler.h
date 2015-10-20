@@ -16,14 +16,30 @@ namespace zbase {
 
 class MapReduceScheduler {
 public:
+  static const size_t kDefaultMaxConcurrentTasks = 16;
 
-  MapReduceScheduler(const MapReduceShardList& shards);
+  MapReduceScheduler(
+      const MapReduceShardList& shards,
+      size_t max_concurrent_tasks = kDefaultMaxConcurrentTasks);
 
   void execute();
 
 protected:
+
+  enum class MapReduceShardStatus { PENDING, RUNNING, COMPLETED, ERROR };
+
+  void startJobs();
+
   MapReduceShardList shards_;
+  Vector<MapReduceShardStatus> shard_status_;
+
+  size_t max_concurrent_tasks_;
+  bool done_;
+  size_t num_shards_running_;
   size_t num_shards_completed_;
+
+  std::mutex mutex_;
+  std::condition_variable cv_;
 };
 
 } // namespace zbase
