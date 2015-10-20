@@ -36,7 +36,7 @@ MapReduceService::MapReduceService(
 
 void MapReduceService::executeScript(
     const AnalyticsSession& session,
-    const String& program_source) {
+    RefPtr<MapReduceJobSpec> job) {
   logDebug(
       "z1.mapreduce",
       "Launching mapreduce job; customer=$0",
@@ -45,7 +45,7 @@ void MapReduceService::executeScript(
   json::JSONObject job_json;
   {
     auto js_ctx = mkRef(new JavaScriptContext());
-    js_ctx->loadProgram(program_source);
+    js_ctx->loadProgram(job->program_source);
 
     auto job_json_str = js_ctx->getMapReduceJobJSON();
     if (job_json_str.isEmpty()) {
@@ -55,12 +55,9 @@ void MapReduceService::executeScript(
     job_json = json::parseJSON(job_json_str.get());
   }
 
-  auto job_spec = mkRef(new MapReduceJobSpec{});
-  job_spec->program_source = program_source;
-
   MapReduceTaskBuilder task_builder(
       session,
-      job_spec,
+      job,
       auth_,
       pmap_,
       repl_,

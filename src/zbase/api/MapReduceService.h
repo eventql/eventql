@@ -13,6 +13,7 @@
 #include "zbase/CustomerConfig.h"
 #include "zbase/ConfigDirectory.h"
 #include "zbase/JavaScriptContext.h"
+#include "zbase/mapreduce/MapReduceTask.h"
 
 using namespace stx;
 
@@ -32,7 +33,7 @@ public:
 
   void executeScript(
       const AnalyticsSession& session,
-      const String& program_source);
+      RefPtr<MapReduceJobSpec> job);
 
   Option<SHA1Hash> mapPartition(
       const AnalyticsSession& session,

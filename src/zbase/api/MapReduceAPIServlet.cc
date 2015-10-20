@@ -11,6 +11,7 @@
 #include "stx/protobuf/msg.h"
 #include "stx/io/BufferedOutputStream.h"
 #include "zbase/api/MapReduceAPIServlet.h"
+#include "zbase/mapreduce/MapReduceTask.h"
 
 using namespace stx;
 
@@ -114,9 +115,10 @@ void MapReduceAPIServlet::executeMapReduceScript(
     const http::HTTPRequest* req,
     http::HTTPResponse* res) {
 
-  service_->executeScript(
-      session,
-      req->body().toString());
+  auto job_spec = mkRef(new MapReduceJobSpec{});
+  job_spec->program_source = req->body().toString();
+
+  service_->executeScript(session, job_spec);
 
   res->setStatus(http::kStatusCreated);
 }
