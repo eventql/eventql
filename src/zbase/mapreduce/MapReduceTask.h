@@ -43,9 +43,13 @@ public:
   void onProgress(Function<void (const MapReduceJobStatus& status)> fn);
   void updateProgress(const MapReduceJobStatus& status);
 
+  void onResult(Function<void (const String& key, const String& value)> fn);
+  void sendResult(const String& key, const String& value);
+
   String program_source;
 protected:
   Function<void (const MapReduceJobStatus& status)> on_progress_;
+  Function<void (const String& key, const String& value)> on_result_;
 };
 
 class MapReduceScheduler;

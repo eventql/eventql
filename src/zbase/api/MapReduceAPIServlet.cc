@@ -148,6 +148,27 @@ void MapReduceAPIServlet::executeMapReduceScript(
     sse_stream.sendEvent(buf, Some(String("status")));
   });
 
+  job_spec->onResult([this, &sse_stream] (
+      const String& key,
+      const String& value) {
+    if (sse_stream.isClosed()) {
+      stx::logDebug("z1.mapreduce", "Aborting Job...");
+      return;
+    }
+
+    Buffer buf;
+    json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
+    json.beginObject();
+    json.addObjectEntry("key");
+    json.addString(key);
+    json.addComma();
+    json.addObjectEntry("value");
+    json.addString(value);
+    json.endObject();
+
+    sse_stream.sendEvent(buf, Some(String("result")));
+  });
+
   try {
     service_->executeScript(session, job_spec);
   } catch (const StandardException& e) {

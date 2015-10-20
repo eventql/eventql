@@ -28,5 +28,20 @@ void MapReduceJobSpec::updateProgress(const MapReduceJobStatus& status) {
   }
 }
 
+void MapReduceJobSpec::onResult(
+    Function<void (const String& key, const String& value)> fn) {
+  on_result_ = fn;
+}
+
+void MapReduceJobSpec::sendResult(const String& key, const String& value) {
+  try {
+    if (on_result_) {
+      on_result_(key, value);
+    }
+  } catch (const StandardException& e) {
+    logError("z1.mapreduce", e, "MapReduceJob on_result callback crashed");
+  }
+}
+
 } // namespace zbase
 
