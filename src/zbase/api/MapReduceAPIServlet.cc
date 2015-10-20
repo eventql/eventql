@@ -36,11 +36,7 @@ void MapReduceAPIServlet::handle(
   res.populateFromRequest(req);
 
   if (uri.path() == "/api/v1/mapreduce/execute") {
-    req_stream->readBody();
-    catchAndReturnErrors(&res, [this, &session, &uri, &req, &res] {
-      executeMapReduceScript(session, uri, &req, &res);
-    });
-    res_stream->writeResponse(res);
+    executeMapReduceScript(session, uri, req_stream.get(), res_stream.get());
     return;
   }
 
@@ -112,15 +108,41 @@ void MapReduceAPIServlet::executeMapPartitionTask(
 void MapReduceAPIServlet::executeMapReduceScript(
     const AnalyticsSession& session,
     const URI& uri,
-    const http::HTTPRequest* req,
-    http::HTTPResponse* res) {
+    http::HTTPRequestStream* req_stream,
+    http::HTTPResponseStream* res_stream) {
+  req_stream->readBody();
+
+  http::HTTPSSEStream sse_stream(req_stream, res_stream);
+  sse_stream.start();
 
   auto job_spec = mkRef(new MapReduceJobSpec{});
-  job_spec->program_source = req->body().toString();
+  job_spec->program_source = req_stream->request().body().toString();
 
-  service_->executeScript(session, job_spec);
+  try {
+    service_->executeScript(session, job_spec);
+  } catch (const StandardException& e) {
+    Buffer buf;
+    json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
+    json.beginObject();
+    json.addObjectEntry("error");
+    json.addString(e.what());
+    json.endObject();
 
-  res->setStatus(http::kStatusCreated);
+    sse_stream.sendEvent(buf, Some(String("mapreduce_error")));
+  }
+
+  {
+    Buffer buf;
+    json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
+    json.beginObject();
+    json.addObjectEntry("success");
+    json.addTrue();
+    json.endObject();
+
+    sse_stream.sendEvent(buf, Some(String("mapreduce_success")));
+  }
+
+  sse_stream.finish();
 }
 
 }

@@ -46,8 +46,8 @@ protected:
   void executeMapReduceScript(
       const AnalyticsSession& session,
       const URI& uri,
-      const http::HTTPRequest* req,
-      http::HTTPResponse* res);
+      http::HTTPRequestStream* req_stream,
+      http::HTTPResponseStream* res_stream);
 
   void executeMapPartitionTask(
       const AnalyticsSession& session,
