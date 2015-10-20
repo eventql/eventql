@@ -9,6 +9,8 @@
 #pragma once
 #include "stx/stdtypes.h"
 #include "zbase/mapreduce/MapReduceTask.h"
+#include "zbase/core/TSDBService.h"
+#include "zbase/AnalyticsAuth.h"
 
 using namespace stx;
 
@@ -17,8 +19,17 @@ namespace zbase {
 class MapTableTask : public MapReduceTask {
 public:
 
+  MapTableTask(
+      AnalyticsAuth* auth,
+      zbase::PartitionMap* pmap,
+      zbase::ReplicationScheme* repl);
+
   Vector<size_t> build(MapReduceShardList* shards) override;
 
+protected:
+  AnalyticsAuth* auth_;
+  zbase::PartitionMap* pmap_;
+  zbase::ReplicationScheme* repl_;
 };
 
 } // namespace zbase

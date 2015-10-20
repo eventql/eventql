@@ -10,10 +10,23 @@
 #include "zbase/mapreduce/tasks/MapTableTask.h"
 #include "zbase/mapreduce/tasks/ReduceTask.h"
 #include "zbase/mapreduce/tasks/ReturnResultsTask.h"
+#include "zbase/AnalyticsAuth.h"
+#include "zbase/CustomerConfig.h"
+#include "zbase/ConfigDirectory.h"
 
 using namespace stx;
 
 namespace zbase {
+
+MapReduceTaskBuilder::MapReduceTaskBuilder(
+    AnalyticsAuth* auth,
+    zbase::PartitionMap* pmap,
+    zbase::ReplicationScheme* repl,
+    const String& cachedir) :
+    auth_(auth),
+    pmap_(pmap),
+    repl_(repl),
+    cachedir_(cachedir) {}
 
 RefPtr<MapReduceTask> MapReduceTaskBuilder::fromJSON(
     const json::JSONObject::const_iterator& begin,
@@ -41,7 +54,7 @@ RefPtr<MapReduceTask> MapReduceTaskBuilder::fromJSON(
 RefPtr<MapReduceTask> MapReduceTaskBuilder::mapTableTaskFromJSON(
     const json::JSONObject::const_iterator& begin,
     const json::JSONObject::const_iterator& end) {
-  return new MapTableTask();
+  return new MapTableTask(auth_, pmap_, repl_);
 }
 
 RefPtr<MapReduceTask> MapReduceTaskBuilder::reduceTaskFromJSON(

@@ -13,6 +13,14 @@ using namespace stx;
 
 namespace zbase {
 
+MapTableTask::MapTableTask(
+    AnalyticsAuth* auth,
+    zbase::PartitionMap* pmap,
+    zbase::ReplicationScheme* repl) :
+    auth_(auth),
+    pmap_(pmap),
+    repl_(repl) {}
+
 Vector<size_t> MapTableTask::build(MapReduceShardList* shards) {
 
   Vector<SHA1Hash> partitions;
