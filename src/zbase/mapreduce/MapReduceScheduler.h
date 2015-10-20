@@ -8,6 +8,7 @@
  */
 #pragma once
 #include "stx/stdtypes.h"
+#include "stx/thread/ThreadPool.h"
 #include "zbase/mapreduce/MapReduceTask.h"
 
 using namespace stx;
@@ -20,6 +21,7 @@ public:
 
   MapReduceScheduler(
       const MapReduceShardList& shards,
+      thread::ThreadPool* tpool,
       size_t max_concurrent_tasks = kDefaultMaxConcurrentTasks);
 
   void execute();
@@ -32,6 +34,7 @@ protected:
 
   MapReduceShardList shards_;
   Vector<MapReduceShardStatus> shard_status_;
+  thread::ThreadPool* tpool_;
 
   size_t max_concurrent_tasks_;
   bool done_;

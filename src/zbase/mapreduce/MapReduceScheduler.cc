@@ -15,9 +15,11 @@ namespace zbase {
 
 MapReduceScheduler::MapReduceScheduler(
     const MapReduceShardList& shards,
+    thread::ThreadPool* tpool,
     size_t max_concurrent_tasks /* = kDefaultMaxConcurrentTasks */) :
     shards_(shards),
     shard_status_(shards_.size(), MapReduceShardStatus::PENDING),
+    tpool_(tpool),
     max_concurrent_tasks_(max_concurrent_tasks),
     done_(false),
     num_shards_running_(0),

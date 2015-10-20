@@ -7,6 +7,7 @@
  * permission is obtained.
  */
 #pragma once
+#include "stx/thread/ThreadPool.h"
 #include "zbase/core/TSDBService.h"
 #include "zbase/AnalyticsAuth.h"
 #include "zbase/CustomerConfig.h"
@@ -48,6 +49,7 @@ protected:
   zbase::ReplicationScheme* repl_;
   JSRuntime* js_runtime_;
   String cachedir_;
+  thread::ThreadPool tpool_;
 };
 
 } // namespace zbase

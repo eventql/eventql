@@ -58,7 +58,7 @@ void MapReduceService::executeScript(
   MapReduceShardList task_shards;
   task->build(&task_shards);
 
-  MapReduceScheduler scheduler(task_shards);
+  MapReduceScheduler scheduler(task_shards, &tpool_);
   scheduler.execute();
 }
 
