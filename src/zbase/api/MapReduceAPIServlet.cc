@@ -104,7 +104,7 @@ void MapReduceAPIServlet::executeMapPartitionTask(
     res->setStatus(http::kStatusNoContent);
   } else {
     res->setStatus(http::kStatusCreated);
-    res->addBody(shard_id.toString());
+    res->addBody(shard_id.get().toString());
   }
 }
 

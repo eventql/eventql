@@ -121,7 +121,6 @@ Option<MapReduceShardResult> MapTableTask::executeRemote(
         "received non-201 response: $0", res.body().toString());
   }
 
-  auto result_id = ;
   MapReduceShardResult result {
     .host = host,
     .result_id = SHA1Hash::fromHexString(res.body().toString())
