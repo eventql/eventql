@@ -10,6 +10,8 @@
 #include "stx/stdtypes.h"
 #include "stx/thread/threadpool.h"
 #include "zbase/mapreduce/MapReduceTask.h"
+#include "zbase/core/TSDBService.h"
+#include "zbase/AnalyticsAuth.h"
 
 using namespace stx;
 
@@ -20,14 +22,19 @@ public:
   static const size_t kDefaultMaxConcurrentTasks = 16;
 
   MapReduceScheduler(
+      const AnalyticsSession& session,
       RefPtr<MapReduceJobSpec> job,
       const MapReduceShardList& shards,
       thread::ThreadPool* tpool,
+      AnalyticsAuth* auth,
+      const String& cachedir,
       size_t max_concurrent_tasks = kDefaultMaxConcurrentTasks);
 
   void execute();
 
   void sendResult(const String& key, const String& value);
+
+  Option<String> downloadResult(size_t task_index);
 
 protected:
 
@@ -35,11 +42,14 @@ protected:
 
   size_t startJobs();
 
+  AnalyticsSession session_;
   RefPtr<MapReduceJobSpec> job_;
   MapReduceShardList shards_;
   Vector<MapReduceShardStatus> shard_status_;
   Vector<Option<MapReduceShardResult>> shard_results_;
   thread::ThreadPool* tpool_;
+  AnalyticsAuth* auth_;
+  String cachedir_;
 
   size_t max_concurrent_tasks_;
   bool done_;

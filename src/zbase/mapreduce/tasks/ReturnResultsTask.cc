@@ -39,7 +39,15 @@ Vector<size_t> ReturnResultsTask::build(MapReduceShardList* shards) {
 Option<MapReduceShardResult> ReturnResultsTask::execute(
     RefPtr<MapReduceTaskShard> shard,
     RefPtr<MapReduceScheduler> job) {
-  job->sendResult("fixme", "here be dragons");
+  for (const auto& input : shard->dependencies) {
+    auto input_sst = job->downloadResult(input);
+    if (input_sst.isEmpty()) {
+      continue;
+    }
+
+    job->sendResult("fixme", input_sst.get());
+  }
+
   return None<MapReduceShardResult>();
 }
 

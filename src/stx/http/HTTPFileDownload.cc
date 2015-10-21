@@ -27,6 +27,14 @@ Future<HTTPResponse> HTTPFileDownload::download(HTTPConnectionPool* http) {
       });
 }
 
+HTTPResponse HTTPFileDownload::download(HTTPClient* http) {
+  return http->executeRequest(
+      http_req_,
+      [this] (const Promise<HTTPResponse> promise) -> HTTPResponseFuture* {
+        return new HTTPFileDownload::ResponseFuture(promise, std::move(file_));
+      });
+}
+
 HTTPFileDownload::ResponseFuture::ResponseFuture(
     Promise<HTTPResponse> promise,
     File&& file) :
