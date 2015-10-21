@@ -384,20 +384,48 @@ std::string StringUtil::formatv(
   return str;
 }
 
-std::wstring StringUtil::convertUTF8To16(const std::string& str) {
-  WString out;
+std::basic_string<char32_t> StringUtil::convertUTF8To32(
+    const std::basic_string<char>& str) {
+  std::basic_string<char32_t> out;
 
   const char* cur = str.data();
   const char* end = cur + str.length();
   char32_t chr;
   while ((chr = UTF8::nextCodepoint(&cur, end)) > 0) {
-    out += (wchar_t) chr;
+    out += chr;
   }
 
   return out;
 }
 
-std::string StringUtil::convertUTF16To8(const std::wstring& str) {
+
+std::basic_string<char16_t> StringUtil::convertUTF8To16(
+    const std::basic_string<char>& str) {
+  std::basic_string<char16_t> out;
+
+  const char* cur = str.data();
+  const char* end = cur + str.length();
+  char16_t chr;
+  while ((chr = UTF8::nextCodepoint(&cur, end)) > 0) {
+    out += chr;
+  }
+
+  return out;
+}
+
+std::basic_string<char> StringUtil::convertUTF32To8(
+    const std::basic_string<char32_t>& str) {
+  String out;
+
+  for (const auto& c : str) {
+    UTF8::encodeCodepoint(c, &out);
+  }
+
+  return out;
+}
+
+std::basic_string<char> StringUtil::convertUTF16To8(
+    const std::basic_string<char16_t>& str) {
   String out;
 
   for (const auto& c : str) {
