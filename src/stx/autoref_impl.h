@@ -13,28 +13,28 @@
 namespace stx {
 
 template <typename T>
-RefPtr<T>::RefPtr() : ref_(nullptr) {}
+AutoRef<T>::AutoRef() : ref_(nullptr) {}
 
 template <typename T>
-RefPtr<T>::RefPtr(std::nullptr_t) : ref_(nullptr) {}
+AutoRef<T>::AutoRef(std::nullptr_t) : ref_(nullptr) {}
 
 template <typename T>
-RefPtr<T>::RefPtr(T* ref) : ref_(ref) {
+AutoRef<T>::AutoRef(T* ref) : ref_(ref) {
   if (ref_) ref_->incRef();
 }
 
 template <typename T>
-RefPtr<T>::RefPtr(const RefPtr<T>& other) : ref_(other.ref_) {
+AutoRef<T>::AutoRef(const AutoRef<T>& other) : ref_(other.ref_) {
   if (ref_) ref_->incRef();
 }
 
 template <typename T>
-RefPtr<T>::RefPtr(RefPtr<T>&& other) : ref_(other.ref_) {
+AutoRef<T>::AutoRef(AutoRef<T>&& other) : ref_(other.ref_) {
   other.ref_ = nullptr;
 }
 
 template <typename T>
-RefPtr<T>& RefPtr<T>::operator=(const RefPtr<T>& other) {
+AutoRef<T>& AutoRef<T>::operator=(const AutoRef<T>& other) {
   if (ref_ != nullptr) {
     ref_->decRef();
   }
@@ -48,54 +48,48 @@ RefPtr<T>& RefPtr<T>::operator=(const RefPtr<T>& other) {
 }
 
 template <typename T>
-RefPtr<T>::~RefPtr() {
+AutoRef<T>::~AutoRef() {
   if (ref_ != nullptr) {
     ref_->decRef();
   }
 }
 
 template <typename T>
-T& RefPtr<T>::operator*() const {
+T& AutoRef<T>::operator*() const {
   return *ref_;
 }
 
 template <typename T>
-T* RefPtr<T>::operator->() const {
+T* AutoRef<T>::operator->() const {
   return ref_;
 }
 
 template <typename T>
-T* RefPtr<T>::get() const {
+T* AutoRef<T>::get() const {
   return ref_;
 }
 
 template <typename T>
-T* RefPtr<T>::release() {
+T* AutoRef<T>::release() {
   auto ref = ref_;
   ref_ = nullptr;
   return ref;
 }
 
 template <typename T>
-template<typename U>
-RefPtr<U> RefPtr<T>::as() const {
-  return RefPtr<U>(static_cast<U*>(ref_));
-}
-
-template <typename T>
 template <typename T_>
-RefPtr<T_> RefPtr<T>::asInstanceOf() const {
+AutoRef<T_> AutoRef<T>::asInstanceOf() const {
   auto cast = dynamic_cast<T_*>(ref_);
   if (cast == nullptr) {
     RAISE(kTypeError, "can't make referenced pointer into requested type");
   }
 
-  return RefPtr<T_>(cast);
+  return AutoRef<T_>(cast);
 }
 
 template <typename T>
-RefPtr<T> mkRef(T* ptr) {
-  return RefPtr<T>(ptr);
+AutoRef<T> mkRef(T* ptr) {
+  return AutoRef<T>(ptr);
 }
 
 template <typename T>

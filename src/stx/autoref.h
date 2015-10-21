@@ -7,8 +7,8 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _STX_BASE_REFPTR_H
-#define _STX_BASE_REFPTR_H
+#ifndef _STX_BASE_AUTOREF_H
+#define _STX_BASE_AUTOREF_H
 #include <functional>
 #include <memory>
 #include <mutex>
@@ -19,19 +19,19 @@
 namespace stx {
 
 template <typename T>
-class RefPtr {
+class AutoRef {
 public:
   using ValueType = T;
 
-  RefPtr();
-  RefPtr(std::nullptr_t);
-  RefPtr(T* ref);
+  AutoRef();
+  AutoRef(std::nullptr_t);
+  AutoRef(T* ref);
 
-  RefPtr(const RefPtr<T>& other);
-  RefPtr(RefPtr<T>&& other);
+  AutoRef(const AutoRef<T>& other);
+  AutoRef(AutoRef<T>&& other);
 
-  ~RefPtr();
-  RefPtr<T>& operator=(const RefPtr<T>& other);
+  ~AutoRef();
+  AutoRef<T>& operator=(const AutoRef<T>& other);
 
   T& operator*() const;
   T* operator->() const;
@@ -39,29 +39,39 @@ public:
   T* get() const;
   T* release();
 
-  template<typename U>
-  RefPtr<U> as() const;
-
   template <typename T_>
-  RefPtr<T_> asInstanceOf() const;
+  AutoRef<T_> asInstanceOf() const;
 
 protected:
   T* ref_;
 };
 
-template <typename T>
-using AutoRef = RefPtr<T>;
+class RefCounted {
+public:
+  RefCounted();
+  virtual ~RefCounted() {}
+
+  void incRef();
+  bool decRef();
+protected:
+  mutable std::atomic<unsigned> refcount_;
+};
 
 template <typename T>
-using RefPtrVector = Vector<RefPtr<T>>;
+using RefPtr = AutoRef<T>;
 
 template <typename T>
-RefPtr<T> mkRef(T* ptr);
+using RefPtrVector = Vector<AutoRef<T>>;
+
+using AnyRef = RefPtr<RefCounted>;
+
+template <typename T>
+AutoRef<T> mkRef(T* ptr);
 
 template <typename T>
 ScopedPtr<T> mkScoped(T* ptr);
 
 } // namespace stx
 
-#include "RefPtr_impl.h"
+#include "autoref_impl.h"
 #endif
