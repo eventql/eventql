@@ -1,8 +1,7 @@
 namespace stx {
 
 constexpr UnixTime::UnixTime(uint64_t utc_time) :
-    utc_micros_(utc_time) {
-}
+    utc_micros_(utc_time) {}
 
 constexpr bool UnixTime::operator==(const UnixTime& other) const {
   return utc_micros_ == other.utc_micros_;

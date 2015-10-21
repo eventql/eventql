@@ -18,8 +18,7 @@
 namespace stx {
 
 UnixTime::UnixTime() :
-    utc_micros_(WallClock::unixMicros()) {
-}
+    utc_micros_(WallClock::unixMicros()) {}
 
 UnixTime::UnixTime(const CivilTime& civil) {
   uint64_t days = civil.day() - 1;
