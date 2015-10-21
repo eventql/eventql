@@ -17,9 +17,8 @@
 
 namespace stx {
 
-UnixTime::UnixTime() : utc_micros_(WallClock::unixMicros()) {}
-
-UnixTime::UnixTime(uint64_t utc_time) : utc_micros_(utc_time) {}
+UnixTime::UnixTime() :
+    utc_micros_(WallClock::unixMicros()) {}
 
 UnixTime::UnixTime(const CivilTime& civil) {
   uint64_t days = civil.day() - 1;
@@ -43,44 +42,7 @@ UnixTime::UnixTime(const CivilTime& civil) {
 
 UnixTime& UnixTime::operator=(const UnixTime& other) {
   utc_micros_ = other.utc_micros_;
-  tz_offset_ = other.tz_offset_;
   return *this;
-}
-
-bool UnixTime::operator==(const UnixTime& other) const {
-  return utc_micros_ < other.utc_micros_;
-}
-
-bool UnixTime::operator<(const UnixTime& other) const {
-  return utc_micros_ < other.utc_micros_;
-}
-
-bool UnixTime::operator>(const UnixTime& other) const {
-  return utc_micros_ > other.utc_micros_;
-}
-
-bool UnixTime::operator<=(const UnixTime& other) const {
-  return utc_micros_ <= other.utc_micros_;
-}
-
-bool UnixTime::operator>=(const UnixTime& other) const {
-  return utc_micros_ >= other.utc_micros_;
-}
-
-UnixTime::operator uint64_t() const {
-  return utc_micros_;
-}
-
-UnixTime::operator double() const {
-  return utc_micros_;
-}
-
-uint64_t UnixTime::unixMicros() const {
-  return utc_micros_;
-}
-
-UnixTime UnixTime::epoch() {
-  return UnixTime(0);
 }
 
 UnixTime UnixTime::now() {
