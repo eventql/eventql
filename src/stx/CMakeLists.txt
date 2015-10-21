@@ -81,6 +81,8 @@ if(NOT HAVE_PCRE)
     find_package(PCRE)
     if (PCRE_FOUND)
       set(HAVE_PCRE 1)
+      message(STATUS "PCRE include dir: ${PCRE_INCLUDE_DIR}")
+      include_directories(${PCRE_INCLUDE_DIR})
     endif()
   endif()
 endif()
@@ -148,7 +150,7 @@ add_library(stx-base STATIC
     csv/CSVInputStream.cc
     csv/BinaryCSVInputStream.cc
     UnixTime.cc
-    duration.cc
+    Duration.cc
     exception.cc
     exceptionhandler.cc
     fnv.cc
@@ -171,6 +173,8 @@ add_library(stx-base STATIC
     Language.cc
     logging.cc
     logging/logoutputstream.cc
+    MonotonicClock.cc
+    MonotonicTime.cc
     net/dnscache.cc
     net/tcpserver.cc
     net/udpserver.cc
