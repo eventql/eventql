@@ -42,6 +42,12 @@ public:
       const String& program_source,
       const String& method_name);
 
+  Option<SHA1Hash> reduceTables(
+      const AnalyticsSession& session,
+      const Vector<String>& input_tables,
+      const String& program_source,
+      const String& method_name);
+
   Option<String> getResultFilename(
       const SHA1Hash& result_id);
 

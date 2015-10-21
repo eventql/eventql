@@ -69,7 +69,7 @@ Option<MapReduceShardResult> ReduceTask::execute(
   auto hosts = repl_->replicasFor(output_id);
   for (const auto& host : hosts) {
     try {
-      return executeRemote(shard, job, input_tables, output_id, host);
+      return executeRemote(shard, job, input_tables, host);
     } catch (const StandardException& e) {
       logError(
           "z1.mapreduce",
@@ -90,13 +90,11 @@ Option<MapReduceShardResult> ReduceTask::executeRemote(
     RefPtr<MapReduceTaskShard> shard,
     RefPtr<MapReduceScheduler> job,
     const Vector<String>& input_tables,
-    const SHA1Hash& output_id,
     const ReplicaRef& host) {
   logDebug(
       "z1.mapreduce",
-      "Executing reduce shard $0/$1 with $2 input tables on $3",
+      "Executing remote reduce shard on $2; customer=$0 input_tables=$1",
       session_.customer(),
-      output_id.toString(),
       input_tables.size(),
       host.addr.hostAndPort());
 

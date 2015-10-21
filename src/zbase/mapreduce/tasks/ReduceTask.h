@@ -40,7 +40,6 @@ protected:
       RefPtr<MapReduceTaskShard> shard,
       RefPtr<MapReduceScheduler> job,
       const Vector<String>& input_tables,
-      const SHA1Hash& output_id,
       const ReplicaRef& host);
 
   AnalyticsSession session_;
