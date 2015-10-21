@@ -112,7 +112,7 @@ void JavaScriptContext::callReduceFunction(
 
   auto val_array_ptr = JS_NewArrayObject(ctx_, values.size());
   if (!val_array_ptr) {
-    RAISE(kRuntimeError, "reduce function execution error");
+    RAISE(kRuntimeError, "reduce function execution error: out of memory");
   }
 
   JS::RootedObject val_array(ctx_, val_array_ptr);
@@ -122,18 +122,18 @@ void JavaScriptContext::callReduceFunction(
         values[i].data(),
         values[i].size());
     if (!val_str_ptr) {
-      RAISE(kRuntimeError, "reduce function execution error");
+      RAISE(kRuntimeError, "reduce function execution error: out of memory");
     }
 
     JS::RootedString val_str(ctx_, val_str_ptr);
     if (!JS_SetElement(ctx_, val_array, i, val_str)) {
-      RAISE(kRuntimeError, "reduce function execution error");
+      RAISE(kRuntimeError, "reduce function execution error: out of memory");
     }
   }
 
   auto key_str_ptr = JS_NewStringCopyN(ctx_, key.data(), key.size());
   if (!key_str_ptr) {
-    RAISE(kRuntimeError, "reduce function execution error");
+    RAISE(kRuntimeError, "reduce function execution error: out of memory");
   }
 
   JS::AutoValueArray<2> argv(ctx_);
