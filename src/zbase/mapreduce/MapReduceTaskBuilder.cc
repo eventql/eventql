@@ -123,7 +123,8 @@ RefPtr<MapReduceTask> MapReduceTaskBuilder::reduceTaskFromJSON(
       method_name.get(),
       sources,
       num_shards.get(),
-      auth_);
+      auth_,
+      repl_);
 }
 
 RefPtr<MapReduceTask> MapReduceTaskBuilder::returnResultsTaskFromJSON(

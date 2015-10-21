@@ -157,6 +157,31 @@ void MapReduceScheduler::sendResult(const String& key, const String& value) {
   job_->sendResult(key, value);
 }
 
+Option<String> MapReduceScheduler::getResultURL(size_t task_index) {
+  std::unique_lock<std::mutex> lk(mutex_);
+  if (task_index >= shards_.size()) {
+    RAISEF(kIndexError, "invalid task index: $0", task_index);
+  }
+
+  if (shard_status_[task_index] != MapReduceShardStatus::COMPLETED) {
+    RAISEF(kIndexError, "task is not completed: $0", task_index);
+  }
+
+  const auto& result = shard_results_[task_index];
+  if (result.isEmpty()) {
+    return None<String>();
+  }
+
+  auto result_path = FileUtil::joinPaths(
+      cachedir_,
+      StringUtil::format("mr-result-$0", result.get().result_id.toString()));
+
+  return Some(StringUtil::format(
+      "http://$0/api/v1/mapreduce/result/$1",
+      result.get().host.addr.ipAndPort(),
+      result.get().result_id.toString()));
+}
+
 Option<String> MapReduceScheduler::downloadResult(size_t task_index) {
   std::unique_lock<std::mutex> lk(mutex_);
   if (task_index >= shards_.size()) {

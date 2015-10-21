@@ -25,7 +25,8 @@ public:
       const String& method_name,
       Vector<RefPtr<MapReduceTask>> sources,
       size_t num_shards,
-      AnalyticsAuth* auth);
+      AnalyticsAuth* auth,
+      zbase::ReplicationScheme* repl);
 
   Vector<size_t> build(MapReduceShardList* shards) override;
 
@@ -34,12 +35,21 @@ public:
       RefPtr<MapReduceScheduler> job) override;
 
 protected:
+
+  Option<MapReduceShardResult> executeRemote(
+      RefPtr<MapReduceTaskShard> shard,
+      RefPtr<MapReduceScheduler> job,
+      const Vector<String>& input_tables,
+      const SHA1Hash& output_id,
+      const ReplicaRef& host);
+
   AnalyticsSession session_;
   RefPtr<MapReduceJobSpec> job_spec_;
   String method_name_;
   Vector<RefPtr<MapReduceTask>> sources_;
   size_t num_shards_;
   AnalyticsAuth* auth_;
+  zbase::ReplicationScheme* repl_;
 };
 
 } // namespace zbase

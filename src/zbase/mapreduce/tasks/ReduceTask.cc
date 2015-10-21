@@ -7,6 +7,7 @@
  * permission is obtained.
  */
 #include "zbase/mapreduce/tasks/ReduceTask.h"
+#include "zbase/mapreduce/MapReduceScheduler.h"
 
 using namespace stx;
 
@@ -18,13 +19,15 @@ ReduceTask::ReduceTask(
     const String& method_name,
     Vector<RefPtr<MapReduceTask>> sources,
     size_t num_shards,
-    AnalyticsAuth* auth) :
+    AnalyticsAuth* auth,
+    zbase::ReplicationScheme* repl) :
     session_(session),
     job_spec_(job_spec),
     method_name_(method_name),
     sources_(sources),
     num_shards_(num_shards),
-    auth_(auth) {}
+    auth_(auth),
+    repl_(repl) {}
 
 Vector<size_t> ReduceTask::build(MapReduceShardList* shards) {
   Vector<size_t> out_indexes;
@@ -50,8 +53,91 @@ Vector<size_t> ReduceTask::build(MapReduceShardList* shards) {
 Option<MapReduceShardResult> ReduceTask::execute(
     RefPtr<MapReduceTaskShard> shard,
     RefPtr<MapReduceScheduler> job) {
-  iputs("execute reduce", 1);
-  return None<MapReduceShardResult>();
+  Vector<String> input_tables;
+  for (const auto& input : shard->dependencies) {
+    auto input_tbl = job->getResultURL(input);
+    if (input_tbl.isEmpty()) {
+      continue;
+    }
+
+    input_tables.emplace_back(input_tbl.get());
+  }
+
+  auto output_id = Random::singleton()->sha1(); // FIXME
+
+  Vector<String> errors;
+  auto hosts = repl_->replicasFor(output_id);
+  for (const auto& host : hosts) {
+    try {
+      return executeRemote(shard, job, input_tables, output_id, host);
+    } catch (const StandardException& e) {
+      logError(
+          "z1.mapreduce",
+          e,
+          "MapTableTask::execute failed");
+
+      errors.emplace_back(e.what());
+    }
+  }
+
+  RAISEF(
+      kRuntimeError,
+      "MapTableTask::execute failed: $0",
+      StringUtil::join(errors, ", "));
+}
+
+Option<MapReduceShardResult> ReduceTask::executeRemote(
+    RefPtr<MapReduceTaskShard> shard,
+    RefPtr<MapReduceScheduler> job,
+    const Vector<String>& input_tables,
+    const SHA1Hash& output_id,
+    const ReplicaRef& host) {
+  logDebug(
+      "z1.mapreduce",
+      "Executing reduce shard $0/$1 with $2 input tables on $3",
+      session_.customer(),
+      output_id.toString(),
+      input_tables.size(),
+      host.addr.hostAndPort());
+
+  auto url = StringUtil::format(
+      "http://$0/api/v1/mapreduce/tasks/reduce?" \
+      "program_source=$1&method_name=$2",
+      host.addr.ipAndPort(),
+      URI::urlEncode(job_spec_->program_source),
+      URI::urlEncode(method_name_));
+
+  for (const auto& input_table : input_tables) {
+    url += "&input_table=" + URI::urlEncode(input_table);
+  }
+
+  auto api_token = auth_->encodeAuthToken(session_);
+
+  http::HTTPMessage::HeaderList auth_headers;
+  auth_headers.emplace_back(
+      "Authorization",
+      StringUtil::format("Token $0", api_token));
+
+  http::HTTPClient http_client;
+  auto req = http::HTTPRequest::mkGet(url, auth_headers);
+  auto res = http_client.executeRequest(req);
+
+  if (res.statusCode() == 204) {
+    return None<MapReduceShardResult>();
+  }
+
+  if (res.statusCode() != 201) {
+    RAISEF(
+        kRuntimeError,
+        "received non-201 response: $0", res.body().toString());
+  }
+
+  MapReduceShardResult result {
+    .host = host,
+    .result_id = SHA1Hash::fromHexString(res.body().toString())
+  };
+
+  return Some(result);
 }
 
 } // namespace zbase
