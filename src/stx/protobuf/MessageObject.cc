@@ -362,5 +362,25 @@ UnixTime MessageObject::getUnixTime(uint32_t id) const {
   RAISEF(kIndexError, "no such field: $0", id);
 }
 
+double MessageObject::getDouble(uint32_t id) const {
+  for (const auto& f : asObject()) {
+    if (f.id == id) {
+      return f.asDouble();
+    }
+  }
+
+  RAISEF(kIndexError, "no such field: $0", id);
+}
+
+bool MessageObject::getBool(uint32_t id) const {
+  for (const auto& f : asObject()) {
+    if (f.id == id) {
+      return f.asBool();
+    }
+  }
+
+  RAISEF(kIndexError, "no such field: $0", id);
+}
+
 } // namespace msg
 } // namespace stx

@@ -11,6 +11,7 @@
 #include <stx/human.h>
 #include <stx/protobuf/DynamicMessage.h>
 #include <stx/protobuf/JSONEncoder.h>
+#include <stx/protobuf/MessagePrinter.h>
 
 namespace stx {
 namespace msg {
@@ -201,6 +202,45 @@ bool DynamicMessage::addObject(
   return true;
 }
 
+Option<String> DynamicMessage::getField(const String& name) const {
+  if (!schema_->hasField(name)) {
+    return None<String>();
+  }
+
+  return getField(schema_->fieldId(name));
+}
+
+Option<String> DynamicMessage::getField(uint32_t field_id) const {
+  if (!schema_->hasField(field_id)) {
+    return None<String>();
+  }
+
+  switch (schema_->fieldType(field_id)) {
+
+    case msg::FieldType::BOOLEAN:
+      return Some(StringUtil::toString(data_.getBool(field_id)));
+
+    case msg::FieldType::UINT32:
+      return Some(StringUtil::toString(data_.getUInt32(field_id)));
+
+    case msg::FieldType::UINT64:
+      return Some(StringUtil::toString(data_.getUInt64(field_id)));
+
+    case msg::FieldType::DOUBLE:
+      return Some(StringUtil::toString(data_.getDouble(field_id)));
+
+    case msg::FieldType::DATETIME:
+      return Some(StringUtil::toString((uint64_t) data_.getUnixTime(field_id)));
+
+    case msg::FieldType::STRING:
+      return Some(data_.getString(field_id));
+
+    case msg::FieldType::OBJECT:
+      return None<String>();
+
+  }
+}
+
 void DynamicMessage::toJSON(json::JSONOutputStream* json) const {
   msg::JSONEncoder::encode(data_, *schema_, json);
 }
@@ -277,6 +317,10 @@ void DynamicMessage::setData(msg::MessageObject data) {
 
 RefPtr<msg::MessageSchema> DynamicMessage::schema() const {
   return schema_;
+}
+
+String DynamicMessage::debugPrint() const {
+  return msg::MessagePrinter::print(data_, *schema_);
 }
 
 } // namespace msg
