@@ -1,5 +1,5 @@
 #include <stx/MonotonicClock.h>
-#include <stx/Duration.h>
+#include <stx/duration.h>
 #include <stx/exception.h>
 #include <stx/defines.h>
 #include <stx/sysconfig.h>

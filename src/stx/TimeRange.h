@@ -11,7 +11,7 @@
 #define sw_x0_TimeRange_h
 
 #include <stx/UnixTime.h>
-#include <stx/Duration.h>
+#include <stx/duration.h>
 #include <cstdio>
 
 namespace stx {

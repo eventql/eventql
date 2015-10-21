@@ -8,7 +8,7 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <stx/Duration.h>
+#include <stx/duration.h>
 #include <stx/StringUtil.h>
 #include <sstream>
 
