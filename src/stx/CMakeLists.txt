@@ -150,7 +150,7 @@ add_library(stx-base STATIC
     csv/CSVInputStream.cc
     csv/BinaryCSVInputStream.cc
     UnixTime.cc
-    Duration.cc
+    duration.cc
     exception.cc
     exceptionhandler.cc
     fnv.cc
