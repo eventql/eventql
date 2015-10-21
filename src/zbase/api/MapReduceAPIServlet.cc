@@ -60,6 +60,15 @@ void MapReduceAPIServlet::handle(
     return;
   }
 
+  if (uri.path() == "/api/v1/mapreduce/tasks/reduce") {
+    req_stream->readBody();
+    catchAndReturnErrors(&res, [this, &session, &uri, &req, &res] {
+      executeReduceTask(session, uri, &req, &res);
+    });
+    res_stream->writeResponse(res);
+    return;
+  }
+
   res.setStatus(http::kStatusNotFound);
   res.addHeader("Content-Type", "text/html; charset=utf-8");
   res.addBody(Assets::getAsset("zbase/webui/404.html"));
@@ -113,6 +122,48 @@ void MapReduceAPIServlet::executeMapPartitionTask(
   } else {
     res->setStatus(http::kStatusCreated);
     res->addBody(shard_id.get().toString());
+  }
+}
+
+void MapReduceAPIServlet::executeReduceTask(
+    const AnalyticsSession& session,
+    const URI& uri,
+    const http::HTTPRequest* req,
+    http::HTTPResponse* res) {
+  const auto& params = uri.queryParams();
+
+  Vector<String> input_tables;
+  for (const auto& p : params) {
+    if (p.first == "input_table") {
+      input_tables.emplace_back(p.second);
+    }
+  }
+
+  String program_source;
+  if (!URI::getParam(params, "program_source", &program_source)) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody("missing ?program_source=... parameter");
+    return;
+  }
+
+  String method_name;
+  if (!URI::getParam(params, "method_name", &method_name)) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody("missing ?method_name=... parameter");
+    return;
+  }
+
+  auto result_id = service_->reduceTables(
+      session,
+      input_tables,
+      program_source,
+      method_name);
+
+  if (result_id.isEmpty()) {
+    res->setStatus(http::kStatusNoContent);
+  } else {
+    res->setStatus(http::kStatusCreated);
+    res->addBody(result_id.get().toString());
   }
 }
 

@@ -86,12 +86,14 @@ Option<SHA1Hash> MapReduceService::mapPartition(
     const SHA1Hash& partition_key,
     const String& program_source,
     const String& method_name) {
+  auto output_id = Random::singleton()->sha1(); // FIXME
   logDebug(
       "z1.mapreduce",
       "Executing map shard; partition=$0/$1/$2 output=$3",
       session.customer(),
       table_name,
-      partition_key.toString());
+      partition_key.toString(),
+      output_id.toString());
 
   auto table = pmap_->findTable(
       session.customer(),
@@ -120,7 +122,6 @@ Option<SHA1Hash> MapReduceService::mapPartition(
   auto js_ctx = mkRef(new JavaScriptContext());
   js_ctx->loadProgram(program_source);
 
-  auto output_id = Random::singleton()->sha1(); // FIXME
   auto output_path = FileUtil::joinPaths(
       cachedir_,
       StringUtil::format("mr-shard-$0.sst", output_id.toString()));
@@ -148,6 +149,22 @@ Option<SHA1Hash> MapReduceService::mapPartition(
   });
 
   return Some(output_id);
+}
+
+Option<SHA1Hash> MapReduceService::reduceTables(
+    const AnalyticsSession& session,
+    const Vector<String>& input_tables,
+    const String& program_source,
+    const String& method_name) {
+  auto output_id = Random::singleton()->sha1(); // FIXME
+  logDebug(
+      "z1.mapreduce",
+      "Executing reduce shard; customer=$0 input_tables=$1 output=$2",
+      session.customer(),
+      input_tables.size(),
+      output_id.toString());
+
+  return None<SHA1Hash>();
 }
 
 Option<String> MapReduceService::getResultFilename(
