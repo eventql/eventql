@@ -89,11 +89,11 @@ const Buffer& HTTPMessage::body() const {
 }
 
 void HTTPMessage::addBody(const std::string& body) {
-  body_ = std::move(Buffer(body.c_str(), body.length()));
+  body_ = Buffer(body.c_str(), body.length());
 }
 
 void HTTPMessage::addBody(const void* data, size_t size) {
-  body_ = std::move(Buffer(data, size));
+  body_ = Buffer(data, size);
 }
 
 void HTTPMessage::addBody(const Buffer& buf) {
