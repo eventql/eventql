@@ -49,19 +49,25 @@ bool SHA1Hash::operator==(const SHA1Hash& other) const {
 }
 
 bool SHA1Hash::operator<(const SHA1Hash& other) const {
-  return StringUtil::compare(
-      (char*) hash,
-      kSize,
-      (char*) other.hash,
-      kSize) < 0;
+  return compare(other) < 0;
 }
 
 bool SHA1Hash::operator>(const SHA1Hash& other) const {
-  return StringUtil::compare(
-      (char*) hash,
-      kSize,
-      (char*) other.hash,
-      kSize) > 0;
+  return compare(other) > 0;
+}
+
+int SHA1Hash::compare(const SHA1Hash& other) const {
+  for (int i = kSize - 1; i >= 0; --i) {
+    if (hash[i] < other.hash[i]) {
+      return -1;
+    }
+
+    if (hash[i] > other.hash[i]) {
+      return 1;
+    }
+  }
+
+  return 0;
 }
 
 SHA1Hash::SHA1Hash(const void* data, size_t size) {
