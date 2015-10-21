@@ -15,7 +15,7 @@
 #include <string>
 #include "stx/time_constants.h"
 #include "stx/CivilTime.h"
-#include "stx/Duration.h"
+#include "stx/duration.h"
 #include "stx/option.h"
 
 namespace stx {

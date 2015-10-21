@@ -1,5 +1,5 @@
 #include <stx/MonotonicTime.h>
-#include <stx/StringUtil.h>
+#include <stx/stringutil.h>
 
 namespace stx {
 

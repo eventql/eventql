@@ -1,7 +1,7 @@
 #pragma once
 
 #include <stdint.h>
-#include <stx/Duration.h>
+#include <stx/duration.h>
 
 namespace stx {
 

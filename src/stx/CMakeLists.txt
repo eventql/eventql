@@ -150,7 +150,7 @@ add_library(stx-base STATIC
     csv/CSVInputStream.cc
     csv/BinaryCSVInputStream.cc
     UnixTime.cc
-    Duration.cc
+    duration.cc
     exception.cc
     exceptionhandler.cc
     fnv.cc
@@ -173,8 +173,6 @@ add_library(stx-base STATIC
     Language.cc
     logging.cc
     logging/logoutputstream.cc
-    MonotonicClock.cc
-    MonotonicTime.cc
     net/dnscache.cc
     net/tcpserver.cc
     net/udpserver.cc
