@@ -9,7 +9,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <stx/duration.h>
-#include <stx/StringUtil.h>
+#include <stx/stringutil.h>
 #include <sstream>
 
 namespace stx {
