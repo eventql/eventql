@@ -105,7 +105,7 @@ public:
   static inline Duration fromNanoseconds(uint64_t v);
 
 protected:
-  const uint64_t micros_;
+  uint64_t micros_;
 };
 
 std::string inspect(const Duration& value);
