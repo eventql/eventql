@@ -8,6 +8,7 @@
  */
 #include "zbase/mapreduce/tasks/ReturnResultsTask.h"
 #include "zbase/mapreduce/MapReduceScheduler.h"
+#include "sstable/sstablereader.h"
 
 using namespace stx;
 
@@ -45,7 +46,18 @@ Option<MapReduceShardResult> ReturnResultsTask::execute(
       continue;
     }
 
-    job->sendResult("fixme", input_sst.get());
+    sstable::SSTableReader reader(input_sst.get());
+    auto cursor = reader.getCursor();
+
+    while (cursor->valid()) {
+      job->sendResult(
+          cursor->getKeyString(),
+          cursor->getDataString());
+
+      if (!cursor->next()) {
+        break;
+      }
+    }
   }
 
   return None<MapReduceShardResult>();
