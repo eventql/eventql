@@ -119,7 +119,7 @@ fi
 
 # test
 if [[ $RUN_TESTS == "true" ]]; then
-  find ${TARGET_DIR} -name "test-*" -type f -exec ./{} \;
+  find ${TARGET_DIR} -maxdepth 1 -name "test-*" -type f -exec ./{} \;
 fi
 
 # pack artifacts
