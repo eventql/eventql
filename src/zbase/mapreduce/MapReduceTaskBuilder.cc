@@ -100,6 +100,16 @@ RefPtr<MapReduceTask> MapReduceTaskBuilder::reduceTaskFromJSON(
     RAISE(kRuntimeError, "missing field: sources");
   }
 
+  auto method_name = json::objectGetString(begin, end, "method_name");
+  if (method_name.isEmpty()) {
+    RAISE(kRuntimeError, "missing field: method_name");
+  }
+
+  auto num_shards = json::objectGetUInt64(begin, end, "num_shards");
+  if (num_shards.isEmpty()) {
+    RAISE(kRuntimeError, "missing field: num_shards");
+  }
+
   Vector<RefPtr<MapReduceTask>> sources;
   auto nsrc_begin = json::arrayLength(src_begin, end);
   for (size_t i = 0; i < nsrc_begin; ++i) {
@@ -107,7 +117,13 @@ RefPtr<MapReduceTask> MapReduceTaskBuilder::reduceTaskFromJSON(
     sources.emplace_back(fromJSON(src, src + src->size));
   }
 
-  return new ReduceTask(session_, job_spec_, sources, auth_);
+  return new ReduceTask(
+      session_,
+      job_spec_,
+      method_name.get(),
+      sources,
+      num_shards.get(),
+      auth_);
 }
 
 RefPtr<MapReduceTask> MapReduceTaskBuilder::returnResultsTaskFromJSON(

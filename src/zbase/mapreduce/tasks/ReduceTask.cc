@@ -15,11 +15,15 @@ namespace zbase {
 ReduceTask::ReduceTask(
     const AnalyticsSession& session,
     RefPtr<MapReduceJobSpec> job_spec,
+    const String& method_name,
     Vector<RefPtr<MapReduceTask>> sources,
+    size_t num_shards,
     AnalyticsAuth* auth) :
     session_(session),
     job_spec_(job_spec),
+    method_name_(method_name),
     sources_(sources),
+    num_shards_(num_shards),
     auth_(auth) {}
 
 Vector<size_t> ReduceTask::build(MapReduceShardList* shards) {
@@ -31,8 +35,7 @@ Vector<size_t> ReduceTask::build(MapReduceShardList* shards) {
     in_indexes.insert(in_indexes.end(), src_indexes.begin(), src_indexes.end());
   }
 
-  size_t nshards = 1;
-  for (size_t shard_idx = 0; shard_idx < nshards; shard_idx++) {
+  for (size_t shard_idx = 0; shard_idx < num_shards_; shard_idx++) {
     auto shard = mkRef(new MapReduceTaskShard());
     shard->task = this;
     shard->dependencies = in_indexes;

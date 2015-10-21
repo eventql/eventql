@@ -22,7 +22,9 @@ public:
   ReduceTask(
       const AnalyticsSession& session,
       RefPtr<MapReduceJobSpec> job_spec,
+      const String& method_name,
       Vector<RefPtr<MapReduceTask>> sources,
+      size_t num_shards,
       AnalyticsAuth* auth);
 
   Vector<size_t> build(MapReduceShardList* shards) override;
@@ -34,7 +36,9 @@ public:
 protected:
   AnalyticsSession session_;
   RefPtr<MapReduceJobSpec> job_spec_;
+  String method_name_;
   Vector<RefPtr<MapReduceTask>> sources_;
+  size_t num_shards_;
   AnalyticsAuth* auth_;
 };
 
