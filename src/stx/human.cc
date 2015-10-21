@@ -59,6 +59,11 @@ Option<UnixTime> Human::parseTime(
     return Some(UnixTime(civil.get()));
   }
 
+  auto civil_time = CivilTime::parseString(str);
+  if (!civil_time.isEmpty()) {
+    return Some(UnixTime(civil_time.get()));
+  }
+
   return None<UnixTime> ();
 }
 
