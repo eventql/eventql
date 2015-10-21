@@ -112,5 +112,5 @@ std::string inspect(const Duration& value);
 
 }
 
-#include <stx/Duration_impl.h>
+#include <stx/duration_impl.h>
 #endif
