@@ -237,7 +237,7 @@ void MapReduceAPIServlet::fetchResult(
   res.addHeader("Content-Length", StringUtil::toString(filesize));
   res_stream->startResponse(res);
 
-  Buffer buf(8192);
+  Buffer buf(1024 * 1024 * 4);
   for (;;) {
     auto chunk = file.read(buf.data(), buf.size());
     if (chunk == 0) {
@@ -245,6 +245,7 @@ void MapReduceAPIServlet::fetchResult(
     }
 
     res_stream->writeBodyChunk(buf.data(), chunk);
+    res_stream->waitForReader();
   }
 
   res_stream->finishResponse();
