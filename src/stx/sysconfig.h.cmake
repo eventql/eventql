@@ -96,5 +96,6 @@
 #cmakedefine HAVE_CLOCK_GETTIME
 #cmakedefine HAVE_PTHREAD_SETNAME_NP
 #cmakedefine HAVE_PTHREAD_SETAFFINITY_NP
+#cmakedefine HAVE_GETHOSTBYNAME_R
 
 #endif

@@ -45,6 +45,7 @@ CHECK_FUNCTION_EXISTS(backtrace HAVE_BACKTRACE)
 CHECK_INCLUDE_FILES(pthread.h HAVE_PTHREAD_H)
 CHECK_LIBRARY_EXISTS(pthread pthread_setname_np "" HAVE_PTHREAD_SETNAME_NP)
 CHECK_LIBRARY_EXISTS(pthread pthread_setaffinity_np "" HAVE_PTHREAD_SETAFFINITY_NP)
+CHECK_FUNCTION_EXISTS("gethostbyname_r" HAVE_GETHOSTBYNAME_R)
 
 CHECK_LIBRARY_EXISTS(stdc++ __cxa_pure_virtual "" COMPILER_RT_HAS_LIBSTDCXX)
 CHECK_LIBRARY_EXISTS(m pow "" COMPILER_RT_HAS_LIBM)
@@ -75,12 +76,14 @@ if(HAVE_BZLIB_H)
 endif(HAVE_BZLIB_H)
 
 option(ENABLE_PCRE "With PCRE support [default: on]" ON)
-if(ENABLE_PCRE)
-  find_package(PCRE)
-  if (PCRE_FOUND)
-    set(HAVE_PCRE 1)
-    message(STATUS "PCRE include dir: ${PCRE_INCLUDE_DIR}")
-    include_directories(${PCRE_INCLUDE_DIR})
+if(NOT HAVE_PCRE)
+  if(ENABLE_PCRE)
+    find_package(PCRE)
+    if (PCRE_FOUND)
+      set(HAVE_PCRE 1)
+      message(STATUS "PCRE include dir: ${PCRE_INCLUDE_DIR}")
+      include_directories(${PCRE_INCLUDE_DIR})
+    endif()
   endif()
 endif()
 
@@ -119,7 +122,6 @@ set(STX_INCLUDE
     ${CMAKE_CURRENT_SOURCE_DIR})
 
 include_directories(${STX_INCLUDE})
-include_directories(${STX_INCLUDE}/compat)
 set(STX_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 set(STX_LDFLAGS "${STX_LDFLAGS} ${STX_PROTOBUF_LIBS}")
 set(CMAKE_CXX_LINK_EXECUTABLE "${CMAKE_CXX_LINK_EXECUTABLE} ${STX_LDFLAGS}")
@@ -135,6 +137,7 @@ add_library(stx-base STATIC
     3rdparty/simdcomp/simdintegratedbitpacking.c
     3rdparty/simdcomp/simdcomputil.c
     application.cc
+    autoref.cc
     assets.cc
     buffer.cc
     bufferutil.cc
@@ -150,13 +153,6 @@ add_library(stx-base STATIC
     Duration.cc
     exception.cc
     exceptionhandler.cc
-    executor/SafeCall.cc
-    executor/Executor.cc
-    executor/DirectExecutor.cc
-    executor/PosixScheduler.cc
-    executor/Scheduler.cc
-    executor/ThreadedExecutor.cc
-    executor/ThreadPool.cc
     fnv.cc
     HMAC.cc
     human.cc
@@ -186,7 +182,6 @@ add_library(stx-base STATIC
     net/inetaddr.cc
     net/tcpconnection.cc
     random.cc
-    RefCounted.cc
     RegExp.cc
     rpc/RPCRequest.cc
     rpc/RPCContext.cc
@@ -202,6 +197,7 @@ add_library(stx-base STATIC
     stringutil.cc
     thread/eventloop.cc
     thread/signalhandler.cc
+    thread/threadpool.cc
     thread/FixedSizeThreadPool.cc
     thread/wakeup.cc
     uri.cc
@@ -265,12 +261,6 @@ add_library(stx-protobuf STATIC
     protobuf/DynamicMessage.cc
     protobuf/JSONEncoder.cc
     ${PROTO_SRCS})
-
-add_executable(test-executor-PosixScheduler executor/PosixScheduler-test.cc)
-target_link_libraries(test-executor-PosixScheduler stx-base)
-
-add_executable(test-executor-ThreadPool executor/ThreadPool-test.cc)
-target_link_libraries(test-executor-ThreadPool stx-base)
 
 add_executable(test-inputstream io/inputstream_test.cc)
 target_link_libraries(test-inputstream stx-base)
