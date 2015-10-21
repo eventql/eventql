@@ -29,9 +29,20 @@ public:
       const String& json_string,
       Vector<Pair<String, String>>* tuples);
 
+  void callReduceFunction(
+      const String& method_name,
+      const String& key,
+      const Vector<String>& values,
+      Vector<Pair<String, String>>* tuples);
+
   Option<String> getMapReduceJobJSON();
 
 protected:
+
+  void enumerateTuples(
+      JS::RootedValue* src,
+      Vector<Pair<String, String>>* dst) const;
+
   JSRuntime* runtime_;
   JSContext* ctx_;
   JS::PersistentRooted<JSObject*> global_;

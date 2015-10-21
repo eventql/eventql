@@ -12,7 +12,9 @@
 #include "zbase/mapreduce/MapReduceScheduler.h"
 #include "stx/protobuf/MessageDecoder.h"
 #include "stx/protobuf/JSONEncoder.h"
+#include "stx/http/HTTPFileDownload.h"
 #include "sstable/SSTableWriter.h"
+#include "sstable/sstablereader.h"
 
 using namespace stx;
 
@@ -164,7 +166,66 @@ Option<SHA1Hash> MapReduceService::reduceTables(
       input_tables.size(),
       output_id.toString());
 
-  return None<SHA1Hash>();
+  // FIXME MOST NAIVE IMPLEMENTATION AHEAD !!
+  HashMap<String, Vector<String>> groups;
+
+  for (const auto& input_table_url : input_tables) {
+    auto result_path = FileUtil::joinPaths(
+        cachedir_,
+        StringUtil::format("mr-result-$0", Random::singleton()->sha1().toString()));
+
+    auto api_token = auth_->encodeAuthToken(session);
+
+    http::HTTPMessage::HeaderList auth_headers;
+    auth_headers.emplace_back(
+        "Authorization",
+        StringUtil::format("Token $0", api_token));
+
+    auto req = http::HTTPRequest::mkGet(input_table_url, auth_headers);
+
+    http::HTTPClient http_client;
+    http::HTTPFileDownload download(req, result_path);
+    auto res = download.download(&http_client);
+    if (res.statusCode() != 200) {
+      RAISEF(kRuntimeError, "received non-201 response for $0", input_table_url);
+    }
+
+    sstable::SSTableReader reader(result_path);
+    auto cursor = reader.getCursor();
+
+    while (cursor->valid()) {
+      auto& lst = groups[cursor->getKeyString()];
+      lst.emplace_back(cursor->getDataString());
+
+      if (!cursor->next()) {
+        break;
+      }
+    }
+  }
+
+  if (groups.size() == 0) {
+    return None<SHA1Hash>();
+  }
+
+  auto js_ctx = mkRef(new JavaScriptContext());
+  js_ctx->loadProgram(program_source);
+
+  auto output_path = FileUtil::joinPaths(
+      cachedir_,
+      StringUtil::format("mr-shard-$0.sst", output_id.toString()));
+
+  auto writer = sstable::SSTableWriter::create(output_path, nullptr, 0);
+
+  for (const auto& g : groups) {
+    Vector<Pair<String, String>> tuples;
+    js_ctx->callReduceFunction(method_name, g.first, g.second, &tuples);
+
+    for (const auto& t : tuples) {
+      writer->appendRow(t.first, t.second);
+    }
+  }
+
+  return Some(output_id);
 }
 
 Option<String> MapReduceService::getResultFilename(

@@ -99,11 +99,63 @@ void JavaScriptContext::callMapFunction(
     RAISE(kRuntimeError, "map function failed");
   }
 
-  if (!rval.isObject()) {
-    RAISE(kRuntimeError, "map function must return a list/array of tuples");
+  enumerateTuples(&rval, tuples);
+}
+
+void JavaScriptContext::callReduceFunction(
+    const String& method_name,
+    const String& key,
+    const Vector<String>& values,
+    Vector<Pair<String, String>>* tuples) {
+  JSAutoRequest js_req(ctx_);
+  JSAutoCompartment js_comp(ctx_, global_);
+
+  auto val_array_ptr = JS_NewArrayObject(ctx_, values.size());
+  if (!val_array_ptr) {
+    RAISE(kRuntimeError, "reduce function execution error");
   }
 
-  JS::RootedObject list(ctx_, &rval.toObject());
+  JS::RootedObject val_array(ctx_, val_array_ptr);
+  for (size_t i = 0; i < values.size(); ++i) {
+    auto val_str_ptr = JS_NewStringCopyN(
+        ctx_,
+        values[i].data(),
+        values[i].size());
+    if (!val_str_ptr) {
+      RAISE(kRuntimeError, "reduce function execution error");
+    }
+
+    JS::RootedString val_str(ctx_, val_str_ptr);
+    if (!JS_SetElement(ctx_, val_array, i, val_str)) {
+      RAISE(kRuntimeError, "reduce function execution error");
+    }
+  }
+
+  auto key_str_ptr = JS_NewStringCopyN(ctx_, key.data(), key.size());
+  if (!key_str_ptr) {
+    RAISE(kRuntimeError, "reduce function execution error");
+  }
+
+  JS::AutoValueArray<2> argv(ctx_);
+  argv[0].setString(key_str_ptr);
+  argv[1].setObject(*val_array);
+
+  JS::RootedValue rval(ctx_);
+  if (!JS_CallFunctionName(ctx_, global_, method_name.c_str(), argv, &rval)) {
+    RAISE(kRuntimeError, "reduce function failed");
+  }
+
+  enumerateTuples(&rval, tuples);
+}
+
+void JavaScriptContext::enumerateTuples(
+    JS::RootedValue* src,
+    Vector<Pair<String, String>>* dst) const {
+  if (!src->isObject()) {
+    RAISE(kRuntimeError, "reduce function must return a list/array of tuples");
+  }
+
+  JS::RootedObject list(ctx_, &src->toObject());
   JS::AutoIdArray list_enum(ctx_, JS_Enumerate(ctx_, list));
   for (size_t i = 0; i < list_enum.length(); ++i) {
     JS::RootedValue elem(ctx_);
@@ -115,17 +167,17 @@ void JavaScriptContext::callMapFunction(
     }
 
     if (!elem.isObject()) {
-      RAISE(kRuntimeError, "map function must return a list/array of tuples");
+      RAISE(kRuntimeError, "reduce function must return a list/array of tuples");
     }
 
     JS::RootedObject elem_obj(ctx_, &elem.toObject());
 
     if (!JS_GetProperty(ctx_, elem_obj, "0", &elem_key)) {
-      RAISE(kRuntimeError, "map function must return a list/array of tuples");
+      RAISE(kRuntimeError, "reduce function must return a list/array of tuples");
     }
 
     if (!JS_GetProperty(ctx_, elem_obj, "1", &elem_value)) {
-      RAISE(kRuntimeError, "map function must return a list/array of tuples");
+      RAISE(kRuntimeError, "reduce function must return a list/array of tuples");
     }
 
     auto tkey_jstr = JS::ToString(ctx_, elem_key);
@@ -150,7 +202,7 @@ void JavaScriptContext::callMapFunction(
       RAISE(kRuntimeError, "second tuple element must be convertible to JSON");
     }
 
-    tuples->emplace_back(tkey, tval);
+    dst->emplace_back(tkey, tval);
   }
 }
 
