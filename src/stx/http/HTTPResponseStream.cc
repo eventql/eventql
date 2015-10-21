@@ -49,8 +49,12 @@ void HTTPResponseStream::startResponse(const HTTPResponse& resp) {
 }
 
 void HTTPResponseStream::writeBodyChunk(const VFSFile& buf) {
+  writeBodyChunk(buf.data(), buf.size());
+}
+
+void HTTPResponseStream::writeBodyChunk(const void* data, size_t size) {
   std::unique_lock<std::mutex> lk(mutex_);
-  buf_.append(buf.data(), buf.size());
+  buf_.append(data, size);
   onStateChanged(&lk);
 }
 

@@ -44,6 +44,7 @@ public:
    * zero or more times before calling finishResponse
    */
   void writeBodyChunk(const VFSFile& buf);
+  void writeBodyChunk(const void* data, size_t size);
 
   /**
    * Finish the http response. Must be called iff the HTTP response was started
