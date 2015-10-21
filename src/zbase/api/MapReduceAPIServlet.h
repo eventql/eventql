@@ -49,6 +49,12 @@ protected:
       http::HTTPRequestStream* req_stream,
       http::HTTPResponseStream* res_stream);
 
+  void fetchResult(
+      const AnalyticsSession& session,
+      const String& result_id,
+      http::HTTPRequestStream* req_stream,
+      http::HTTPResponseStream* res_stream);
+
   void executeMapPartitionTask(
       const AnalyticsSession& session,
       const URI& uri,

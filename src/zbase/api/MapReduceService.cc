@@ -142,4 +142,17 @@ Option<SHA1Hash> MapReduceService::mapPartition(
   return Some(output_id);
 }
 
+Option<String> MapReduceService::getResultFilename(
+    const SHA1Hash& result_id) {
+  auto result_path = FileUtil::joinPaths(
+      cachedir_,
+      StringUtil::format("mr-shard-$0.sst", result_id.toString()));
+
+  if (FileUtil::exists(result_path)) {
+    return Some(result_path);
+  } else {
+    return None<String>();
+  }
+}
+
 } // namespace zbase

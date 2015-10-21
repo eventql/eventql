@@ -42,6 +42,9 @@ public:
       const String& program_source,
       const String& method_name);
 
+  Option<String> getResultFilename(
+      const SHA1Hash& result_id);
+
 protected:
   ConfigDirectory* cdir_;
   AnalyticsAuth* auth_;

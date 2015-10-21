@@ -25,6 +25,8 @@ MapReduceAPIServlet::MapReduceAPIServlet(
     cdir_(cdir),
     cachedir_(cachedir) {}
 
+static const String kResultPathPrefix = "/api/v1/mapreduce/result/";
+
 void MapReduceAPIServlet::handle(
     const AnalyticsSession& session,
     RefPtr<stx::http::HTTPRequestStream> req_stream,
@@ -37,6 +39,15 @@ void MapReduceAPIServlet::handle(
 
   if (uri.path() == "/api/v1/mapreduce/execute") {
     executeMapReduceScript(session, uri, req_stream.get(), res_stream.get());
+    return;
+  }
+
+  if (StringUtil::beginsWith(uri.path(), kResultPathPrefix)) {
+    fetchResult(
+        session,
+        uri.path().substr(kResultPathPrefix.size()),
+        req_stream.get(),
+        res_stream.get());
     return;
   }
 
@@ -197,6 +208,46 @@ void MapReduceAPIServlet::executeMapReduceScript(
   }
 
   sse_stream.finish();
+}
+
+void MapReduceAPIServlet::fetchResult(
+    const AnalyticsSession& session,
+    const String& result_id,
+    http::HTTPRequestStream* req_stream,
+    http::HTTPResponseStream* res_stream) {
+  req_stream->readBody();
+
+  auto filename = service_->getResultFilename(
+      SHA1Hash::fromHexString(result_id));
+
+  if (filename.isEmpty()) {
+    http::HTTPResponse res;
+    res.populateFromRequest(req_stream->request());
+    res.setStatus(http::kStatusNotFound);
+    res_stream->writeResponse(res);
+    return;
+  }
+
+  auto filesize = FileUtil::size(filename.get());
+  auto file = File::openFile(filename.get(), File::O_READ);
+
+  http::HTTPResponse res;
+  res.populateFromRequest(req_stream->request());
+  res.setStatus(http::kStatusOK);
+  res.addHeader("Content-Length", StringUtil::toString(filesize));
+  res_stream->startResponse(res);
+
+  Buffer buf(8192);
+  for (;;) {
+    auto chunk = file.read(buf.data(), buf.size());
+    if (chunk == 0) {
+      break;
+    }
+
+    res_stream->writeBodyChunk(buf.data(), chunk);
+  }
+
+  res_stream->finishResponse();
 }
 
 }
