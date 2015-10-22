@@ -16,7 +16,7 @@ using namespace stx;
 
 namespace zbase {
 
-static JSClass global_class = { "global", JSCLASS_GLOBAL_FLAGS };
+JSClass JavaScriptContext::kGlobalJSClass = { "global", JSCLASS_GLOBAL_FLAGS };
 
 static bool write_json_to_buf(const char16_t* str, uint32_t strlen, void* out) {
   *static_cast<String*>(out) += StringUtil::convertUTF16To8(
@@ -66,7 +66,7 @@ JavaScriptContext::JavaScriptContext(
 
     global_ = JS_NewGlobalObject(
         ctx_,
-        &global_class,
+        &kGlobalJSClass,
         nullptr,
         JS::FireOnNewGlobalHook);
 

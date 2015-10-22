@@ -19,6 +19,7 @@ namespace zbase {
 class JavaScriptContext : public RefCounted {
 public:
   static const size_t kDefaultMemLimit = 1024 * 1024 * 128;
+  static JSClass kGlobalJSClass;
 
   JavaScriptContext(size_t memlimit = kDefaultMemLimit);
   ~JavaScriptContext();
