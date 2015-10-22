@@ -7,6 +7,7 @@
  * permission is obtained.
  */
 #include "stx/inspect.h"
+#include "stx/assets.h"
 #include "zbase/JavaScriptContext.h"
 #include "js/Conversions.h"
 
@@ -23,39 +24,52 @@ static bool write_json_to_buf(const char16_t* str, uint32_t strlen, void* out) {
   return true;
 }
 
+static void handle_js_error(
+    JSContext* ctx,
+    const char* message,
+    JSErrorReport* report) {
+  iputs("error: $0", String(message));
+}
+
 JavaScriptContext::JavaScriptContext(
     size_t memlimit /* = kDefaultMemLimit */) {
-  runtime_ = JS_NewRuntime(memlimit);
-  if (!runtime_) {
-    RAISE(kRuntimeError, "error while initializing JavaScript runtime");
-  }
-
-  JS::RuntimeOptionsRef(runtime_)
-      .setBaseline(true)
-      .setIon(true)
-      .setAsmJS(true);
-
-  ctx_ = JS_NewContext(runtime_, 8192);
-  if (!ctx_) {
-    RAISE(kRuntimeError, "error while initializing JavaScript context");
-  }
-
-  JSAutoRequest js_req(ctx_);
-
-  global_ = JS_NewGlobalObject(
-      ctx_,
-      &global_class,
-      nullptr,
-      JS::FireOnNewGlobalHook);
-
-  if (!global_) {
-    RAISE(kRuntimeError, "error while initializing JavaScript context");
-  }
-
   {
-    JSAutoCompartment ac(ctx_, global_);
-    JS_InitStandardClasses(ctx_, global_);
+    runtime_ = JS_NewRuntime(memlimit);
+    if (!runtime_) {
+      RAISE(kRuntimeError, "error while initializing JavaScript runtime");
+    }
+
+    JS::RuntimeOptionsRef(runtime_)
+        .setBaseline(true)
+        .setIon(true)
+        .setAsmJS(true);
+
+    JS_SetErrorReporter(runtime_, handle_js_error);
+
+    ctx_ = JS_NewContext(runtime_, 8192);
+    if (!ctx_) {
+      RAISE(kRuntimeError, "error while initializing JavaScript context");
+    }
+
+    JSAutoRequest js_req(ctx_);
+
+    global_ = JS_NewGlobalObject(
+        ctx_,
+        &global_class,
+        nullptr,
+        JS::FireOnNewGlobalHook);
+
+    if (!global_) {
+      RAISE(kRuntimeError, "error while initializing JavaScript context");
+    }
+
+    {
+      JSAutoCompartment ac(ctx_, global_);
+      JS_InitStandardClasses(ctx_, global_);
+    }
   }
+
+  loadProgram(Assets::getAsset("zbase/mapreduce/prelude.js"));
 }
 
 JavaScriptContext::~JavaScriptContext() {

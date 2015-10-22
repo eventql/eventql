@@ -114,6 +114,12 @@ add_subdirectory(util)
 add_subdirectory(util/mysql)
 add_subdirectory(util/mdb)
 
+add_custom_command(
+    OUTPUT mapreduce_preludejs.cc
+    COMMAND 
+        echo 'zbase/mapreduce/prelude.js:${CMAKE_CURRENT_SOURCE_DIR}/mapreduce/prelude.js' | ${CMAKE_SOURCE_DIR}/src/stx/assets.sh mapreduce_preludejs.cc
+    DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/mapreduce/prelude.js")
+
 add_executable(zbase
     $<TARGET_OBJECTS:stx-mdb>
     $<TARGET_OBJECTS:stx-rpc>
@@ -210,6 +216,7 @@ add_executable(zbase
     reco_engine/RecoEngineStatsReport.cc
     reco_engine/RecoStats.cc
     WebUIServlet.cc
+    ${CMAKE_CURRENT_BINARY_DIR}/mapreduce_preludejs.cc
     zbase.cc)
 
 target_link_libraries(zbase chartsql cplot sstable cstable stx-http stx-json stx-protobuf stx-base js_static.a z)
