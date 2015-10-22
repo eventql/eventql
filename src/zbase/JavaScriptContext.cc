@@ -25,22 +25,6 @@ static bool write_json_to_buf(const char16_t* str, uint32_t strlen, void* out) {
   return true;
 }
 
-void JavaScriptContext::dispatchError(
-    JSContext* ctx,
-    const char* message,
-    JSErrorReport* report) {
-  auto rt = JS_GetRuntime(ctx);
-  auto rt_userdata = JS_GetRuntimePrivate(rt);
-  if (rt_userdata) {
-    auto req = static_cast<JavaScriptContext*>(rt_userdata);
-    req->storeError(StringUtil::format(
-        "<script:$0:$1> $2",
-        report->lineno,
-        report->column,
-        String(message)));
-  }
-}
-
 JavaScriptContext::JavaScriptContext(
     size_t memlimit /* = kDefaultMemLimit */) {
   {
@@ -77,6 +61,14 @@ JavaScriptContext::JavaScriptContext(
     {
       JSAutoCompartment ac(ctx_, global_);
       JS_InitStandardClasses(ctx_, global_);
+
+      JS_DefineFunction(
+          ctx_,
+          global_,
+          "z1_log",
+          &JavaScriptContext::dispatchLog,
+          0,
+          0);
     }
   }
 
@@ -94,6 +86,50 @@ void JavaScriptContext::storeError(const String& error) {
 
 void JavaScriptContext::raiseError() {
   RAISEF("JavaScriptError", "$0", current_error_);
+}
+
+void JavaScriptContext::dispatchError(
+    JSContext* ctx,
+    const char* message,
+    JSErrorReport* report) {
+  auto rt = JS_GetRuntime(ctx);
+  auto rt_userdata = JS_GetRuntimePrivate(rt);
+  if (rt_userdata) {
+    auto req = static_cast<JavaScriptContext*>(rt_userdata);
+    req->storeError(StringUtil::format(
+        "<script:$0:$1> $2",
+        report->lineno,
+        report->column,
+        String(message)));
+  }
+}
+
+void JavaScriptContext::storeLogline(const String& logline) {
+  iputs("jslog: $0", logline);
+}
+
+bool JavaScriptContext::dispatchLog(
+    JSContext* ctx,
+    unsigned argc,
+    JS::Value* vp) {
+  auto args = JS::CallArgsFromVp(argc, vp);
+  if (args.length() < 1 || !args[0].isString()) {
+    return false;
+  }
+
+  auto rt = JS_GetRuntime(ctx);
+  auto rt_userdata = JS_GetRuntimePrivate(rt);
+  if (rt_userdata) {
+    auto log_cstr = JS_EncodeString(ctx, args[0].toString());
+    String log_str(log_cstr);
+    JS_free(ctx, log_cstr);
+
+    auto req = static_cast<JavaScriptContext*>(rt_userdata);
+    req->storeLogline(log_str);
+  }
+
+  args.rval().set(JSVAL_TRUE);
+  return true;
 }
 
 void JavaScriptContext::loadProgram(const String& program) {

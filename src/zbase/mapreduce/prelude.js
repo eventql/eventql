@@ -1,3 +1,9 @@
+var console = {
+  log: function(str) {
+    z1_log(str);
+  }
+};
+
 var Z1 = (function(global) {
   var seq = 0;
   var jobs = (global["__z1_mr_jobs"] = []);

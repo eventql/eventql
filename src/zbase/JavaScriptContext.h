@@ -24,11 +24,6 @@ public:
   JavaScriptContext(size_t memlimit = kDefaultMemLimit);
   ~JavaScriptContext();
 
-  static void dispatchError(
-      JSContext* ctx,
-      const char* message,
-      JSErrorReport* report);
-
   void loadProgram(const String& program);
 
   void callMapFunction(
@@ -56,6 +51,18 @@ protected:
 
   void storeError(const String& error);
   void raiseError();
+
+  static void dispatchError(
+      JSContext* ctx,
+      const char* message,
+      JSErrorReport* report);
+
+  void storeLogline(const String& logline);
+
+  static bool dispatchLog(
+      JSContext* ctx,
+      unsigned argc,
+      JS::Value* vp);
 
   void enumerateTuples(
       JS::RootedValue* src,
