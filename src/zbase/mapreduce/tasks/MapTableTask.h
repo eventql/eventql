@@ -28,11 +28,10 @@ public:
       RefPtr<MapReduceJobSpec> job_spec,
       const TSDBTableRef& table,
       const String& method_name,
+      MapReduceShardList* shards,
       AnalyticsAuth* auth,
       zbase::PartitionMap* pmap,
       zbase::ReplicationScheme* repl);
-
-  Vector<size_t> build(MapReduceShardList* shards) override;
 
   Option<MapReduceShardResult> execute(
       RefPtr<MapReduceTaskShard> shard,

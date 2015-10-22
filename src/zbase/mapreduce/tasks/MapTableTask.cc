@@ -19,6 +19,7 @@ MapTableTask::MapTableTask(
     RefPtr<MapReduceJobSpec> job_spec,
     const TSDBTableRef& table_ref,
     const String& method_name,
+    MapReduceShardList* shards,
     AnalyticsAuth* auth,
     zbase::PartitionMap* pmap,
     zbase::ReplicationScheme* repl) :
@@ -28,9 +29,7 @@ MapTableTask::MapTableTask(
     method_name_(method_name),
     auth_(auth),
     pmap_(pmap),
-    repl_(repl) {}
-
-Vector<size_t> MapTableTask::build(MapReduceShardList* shards) {
+    repl_(repl) {
   auto table = pmap_->findTable(session_.customer(), table_ref_.table_key);
   if (table.isEmpty()) {
     RAISEF(kNotFoundError, "table not found: $0", table_ref_.table_key);
@@ -39,18 +38,14 @@ Vector<size_t> MapTableTask::build(MapReduceShardList* shards) {
   auto partitioner = table.get()->partitioner();
   auto partitions = partitioner->partitionKeysFor(table_ref_);
 
-  Vector<size_t> indexes;
   for (const auto& partition : partitions) {
     auto shard = mkRef(new MapTableTaskShard());
     shard->task = this;
     shard->table_ref = table_ref_;
     shard->table_ref.partition_key = partition;
 
-    indexes.emplace_back(shards->size());
-    shards->emplace_back(shard.get());
+    addShard(shard.get(), shards);
   }
-
-  return indexes;
 }
 
 Option<MapReduceShardResult> MapTableTask::execute(

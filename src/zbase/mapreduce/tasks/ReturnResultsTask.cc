@@ -15,26 +15,21 @@ using namespace stx;
 namespace zbase {
 
 ReturnResultsTask::ReturnResultsTask(
-    Vector<RefPtr<MapReduceTask>> sources) :
-    sources_(sources) {}
-
-Vector<size_t> ReturnResultsTask::build(MapReduceShardList* shards) {
-  Vector<size_t> out_indexes;
-  Vector<size_t> in_indexes;
+    Vector<RefPtr<MapReduceTask>> sources,
+    MapReduceShardList* shards) :
+    sources_(sources) {
+  Vector<size_t> input;
 
   for (const auto& src : sources_) {
-    auto src_indexes = src->build(shards);
-    in_indexes.insert(in_indexes.end(), src_indexes.begin(), src_indexes.end());
+    auto src_indexes = src->shards();
+    input.insert(input.end(), src_indexes.begin(), src_indexes.end());
   }
 
   auto shard = mkRef(new MapReduceTaskShard());
   shard->task = this;
-  shard->dependencies = in_indexes;
+  shard->dependencies = input;
 
-  out_indexes.emplace_back(shards->size());
-  shards->emplace_back(shard);
-
-  return out_indexes;
+  addShard(shard, shards);
 }
 
 Option<MapReduceShardResult> ReturnResultsTask::execute(

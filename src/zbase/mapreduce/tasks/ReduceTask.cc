@@ -19,6 +19,7 @@ ReduceTask::ReduceTask(
     const String& method_name,
     Vector<RefPtr<MapReduceTask>> sources,
     size_t num_shards,
+    MapReduceShardList* shards,
     AnalyticsAuth* auth,
     zbase::ReplicationScheme* repl) :
     session_(session),
@@ -27,27 +28,21 @@ ReduceTask::ReduceTask(
     sources_(sources),
     num_shards_(num_shards),
     auth_(auth),
-    repl_(repl) {}
-
-Vector<size_t> ReduceTask::build(MapReduceShardList* shards) {
-  Vector<size_t> out_indexes;
-  Vector<size_t> in_indexes;
+    repl_(repl) {
+  Vector<size_t> input;
 
   for (const auto& src : sources_) {
-    auto src_indexes = src->build(shards);
-    in_indexes.insert(in_indexes.end(), src_indexes.begin(), src_indexes.end());
+    auto src_indexes = src->shards();
+    input.insert(input.end(), src_indexes.begin(), src_indexes.end());
   }
 
   for (size_t shard_idx = 0; shard_idx < num_shards_; shard_idx++) {
     auto shard = mkRef(new MapReduceTaskShard());
     shard->task = this;
-    shard->dependencies = in_indexes;
+    shard->dependencies = input;
 
-    out_indexes.emplace_back(shards->size());
-    shards->emplace_back(shard);
+    addShard(shard, shards);
   }
-
-  return out_indexes;
 }
 
 Option<MapReduceShardResult> ReduceTask::execute(

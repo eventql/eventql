@@ -13,6 +13,19 @@ using namespace stx;
 
 namespace zbase {
 
+Vector<size_t> MapReduceTask::shards() const {
+  return shards_;
+}
+
+size_t MapReduceTask::addShard(
+    RefPtr<MapReduceTaskShard> shard,
+    MapReduceShardList* shards) {
+  auto idx = shards->size();
+  shards_.emplace_back(idx);
+  shards->emplace_back(shard);
+  return idx;
+}
+
 void MapReduceJobSpec::onProgress(
     Function<void (const MapReduceJobStatus& status)> fn) {
   on_progress_ = fn;

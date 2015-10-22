@@ -25,10 +25,9 @@ public:
       const String& method_name,
       Vector<RefPtr<MapReduceTask>> sources,
       size_t num_shards,
+      MapReduceShardList* shards,
       AnalyticsAuth* auth,
       zbase::ReplicationScheme* repl);
-
-  Vector<size_t> build(MapReduceShardList* shards) override;
 
   Option<MapReduceShardResult> execute(
       RefPtr<MapReduceTaskShard> shard,

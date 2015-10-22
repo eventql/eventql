@@ -57,12 +57,19 @@ class MapReduceScheduler;
 class MapReduceTask : public RefCounted {
 public:
 
-  virtual Vector<size_t> build(MapReduceShardList* shards) = 0;
-
   virtual Option<MapReduceShardResult> execute(
       RefPtr<MapReduceTaskShard> shard,
       RefPtr<MapReduceScheduler> job) = 0;
 
+  Vector<size_t> shards() const;
+
+protected:
+
+  size_t addShard(
+      RefPtr<MapReduceTaskShard> shard,
+      MapReduceShardList* shards);
+
+  Vector<size_t> shards_;
 };
 
 

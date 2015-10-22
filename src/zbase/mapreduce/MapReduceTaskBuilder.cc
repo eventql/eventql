@@ -135,6 +135,7 @@ RefPtr<MapReduceTask> MapReduceTaskBuilder::buildMapTableTask(
       job_spec_,
       table_ref,
       method_name.get(),
+      shards,
       auth_,
       pmap_,
       repl_);
@@ -177,6 +178,7 @@ RefPtr<MapReduceTask> MapReduceTaskBuilder::buildReduceTask(
       method_name.get(),
       sources,
       num_shards.get(),
+      shards,
       auth_,
       repl_);
 }
@@ -202,7 +204,7 @@ RefPtr<MapReduceTask> MapReduceTaskBuilder::buildReturnResultsTask(
     sources.emplace_back(getJob(src_id.get(), shards, job_definitions, jobs));
   }
 
-  return new ReturnResultsTask(sources);
+  return new ReturnResultsTask(sources, shards);
 }
 
 } // namespace zbase

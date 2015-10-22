@@ -17,9 +17,9 @@ namespace zbase {
 class ReturnResultsTask : public MapReduceTask {
 public:
 
-  ReturnResultsTask(Vector<RefPtr<MapReduceTask>> sources);
-
-  Vector<size_t> build(MapReduceShardList* shards) override;
+  ReturnResultsTask(
+      Vector<RefPtr<MapReduceTask>> sources,
+      MapReduceShardList* shards);
 
   Option<MapReduceShardResult> execute(
       RefPtr<MapReduceTaskShard> shard,
