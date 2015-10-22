@@ -23,6 +23,11 @@ public:
   JavaScriptContext(size_t memlimit = kDefaultMemLimit);
   ~JavaScriptContext();
 
+  static void dispatchError(
+      JSContext* ctx,
+      const char* message,
+      JSErrorReport* report);
+
   void loadProgram(const String& program);
 
   void callMapFunction(
@@ -40,6 +45,9 @@ public:
 
 protected:
 
+  void storeError(const String& error);
+  void raiseError();
+
   void enumerateTuples(
       JS::RootedValue* src,
       Vector<Pair<String, String>>* dst) const;
@@ -47,6 +55,7 @@ protected:
   JSRuntime* runtime_;
   JSContext* ctx_;
   JS::PersistentRooted<JSObject*> global_;
+  String current_error_;
 };
 
 } // namespace zbase

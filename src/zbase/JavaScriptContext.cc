@@ -10,6 +10,7 @@
 #include "stx/assets.h"
 #include "zbase/JavaScriptContext.h"
 #include "js/Conversions.h"
+#include "jsapi.h"
 
 using namespace stx;
 
@@ -24,11 +25,20 @@ static bool write_json_to_buf(const char16_t* str, uint32_t strlen, void* out) {
   return true;
 }
 
-static void handle_js_error(
+void JavaScriptContext::dispatchError(
     JSContext* ctx,
     const char* message,
     JSErrorReport* report) {
-  iputs("error: $0", String(message));
+  auto rt = JS_GetRuntime(ctx);
+  auto rt_userdata = JS_GetRuntimePrivate(rt);
+  if (rt_userdata) {
+    auto req = static_cast<JavaScriptContext*>(rt_userdata);
+    req->storeError(StringUtil::format(
+        "<script:$0:$1> $2",
+        report->lineno,
+        report->column,
+        String(message)));
+  }
 }
 
 JavaScriptContext::JavaScriptContext(
@@ -44,7 +54,8 @@ JavaScriptContext::JavaScriptContext(
         .setIon(true)
         .setAsmJS(true);
 
-    JS_SetErrorReporter(runtime_, handle_js_error);
+    JS_SetRuntimePrivate(runtime_, this);
+    JS_SetErrorReporter(runtime_, &JavaScriptContext::dispatchError);
 
     ctx_ = JS_NewContext(runtime_, 8192);
     if (!ctx_) {
@@ -77,6 +88,14 @@ JavaScriptContext::~JavaScriptContext() {
   JS_DestroyRuntime(runtime_);
 }
 
+void JavaScriptContext::storeError(const String& error) {
+  current_error_ = error;
+}
+
+void JavaScriptContext::raiseError() {
+  RAISEF("JavaScriptError", "$0", current_error_);
+}
+
 void JavaScriptContext::loadProgram(const String& program) {
   JSAutoRequest js_req(ctx_);
   JSAutoCompartment ac(ctx_, global_);
@@ -93,7 +112,7 @@ void JavaScriptContext::loadProgram(const String& program) {
         program.c_str(),
         program.size(),
         &rval)) {
-    RAISE(kRuntimeError, "JavaScript execution failed");
+    raiseError();
   }
 }
 
@@ -108,7 +127,7 @@ void JavaScriptContext::callMapFunction(
 
   JS::RootedValue json(ctx_);
   if (!JS_ParseJSON(ctx_, json_wstring.c_str(), json_wstring.size(), &json)) {
-    RAISE(kRuntimeError, "invalid JSON");
+    raiseError();
   }
 
   JS::AutoValueArray<1> argv(ctx_);
@@ -116,7 +135,7 @@ void JavaScriptContext::callMapFunction(
 
   JS::RootedValue rval(ctx_);
   if (!JS_CallFunctionName(ctx_, global_, method_name.c_str(), argv, &rval)) {
-    RAISE(kRuntimeError, "map function failed");
+    raiseError();
   }
 
   enumerateTuples(&rval, tuples);
@@ -162,7 +181,7 @@ void JavaScriptContext::callReduceFunction(
 
   JS::RootedValue rval(ctx_);
   if (!JS_CallFunctionName(ctx_, global_, method_name.c_str(), argv, &rval)) {
-    RAISE(kRuntimeError, "reduce function failed");
+    raiseError();
   }
 
   enumerateTuples(&rval, tuples);
