@@ -63,3 +63,14 @@ var Z1 = (function(global) {
     downloadResults: mkDownloadResultsTask
   };
 })(this);
+
+function __call_with_iter(method, key, iter) {
+  var iter_wrap = (function(iter) {
+    return {
+      hasNext: function() { return iter.hasNext.apply(iter, arguments); },
+      next: function() { return iter.next.apply(iter, arguments); },
+    };
+  })(iter);
+
+  return this[method].call(this, key, iter_wrap);
+}

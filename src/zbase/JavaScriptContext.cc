@@ -149,38 +149,47 @@ void JavaScriptContext::callReduceFunction(
   JSAutoRequest js_req(ctx_);
   JSAutoCompartment js_comp(ctx_, global_);
 
-  auto val_array_ptr = JS_NewArrayObject(ctx_, values.size());
-  if (!val_array_ptr) {
+  JS::AutoValueArray<3> argv(ctx_);
+  auto method_str_ptr = JS_NewStringCopyN(
+      ctx_,
+      method_name.data(),
+      method_name.size());
+  if (!method_str_ptr) {
     RAISE(kRuntimeError, "reduce function execution error: out of memory");
-  }
-
-  JS::RootedObject val_array(ctx_, val_array_ptr);
-  for (size_t i = 0; i < values.size(); ++i) {
-    auto val_str_ptr = JS_NewStringCopyN(
-        ctx_,
-        values[i].data(),
-        values[i].size());
-    if (!val_str_ptr) {
-      RAISE(kRuntimeError, "reduce function execution error: out of memory");
-    }
-
-    JS::RootedString val_str(ctx_, val_str_ptr);
-    if (!JS_SetElement(ctx_, val_array, i, val_str)) {
-      RAISE(kRuntimeError, "reduce function execution error: out of memory");
-    }
+  } else {
+    argv[0].setString(method_str_ptr);
   }
 
   auto key_str_ptr = JS_NewStringCopyN(ctx_, key.data(), key.size());
   if (!key_str_ptr) {
     RAISE(kRuntimeError, "reduce function execution error: out of memory");
+  } else {
+    argv[1].setString(key_str_ptr);
   }
 
-  JS::AutoValueArray<2> argv(ctx_);
-  argv[0].setString(key_str_ptr);
-  argv[1].setObject(*val_array);
+  ReduceCollectionIter val_iter;
+  val_iter.data = &values;
+  val_iter.cur = 0;
+
+  auto val_iter_obj_ptr = JS_NewObject(ctx_, &ReduceCollectionIter::kJSClass);
+  if (!val_iter_obj_ptr) {
+    RAISE(kRuntimeError, "reduce function execution error: out of memory");
+  }
+
+  JS::RootedObject val_iter_obj(ctx_, val_iter_obj_ptr);
+  JS_SetPrivate(val_iter_obj, &val_iter);
+  argv[2].setObject(*val_iter_obj);
+
+  JS_DefineFunction(
+      ctx_,
+      val_iter_obj,
+      "hasNext",
+      &ReduceCollectionIter::hasNext,
+      0,
+      0);
 
   JS::RootedValue rval(ctx_);
-  if (!JS_CallFunctionName(ctx_, global_, method_name.c_str(), argv, &rval)) {
+  if (!JS_CallFunctionName(ctx_, global_, "__call_with_iter", argv, &rval)) {
     raiseError();
   }
 
@@ -268,6 +277,40 @@ Option<String> JavaScriptContext::getMapReduceJobJSON() {
   }
 
   return Some(json_str);
+}
+
+JSClass JavaScriptContext::ReduceCollectionIter::kJSClass = {
+  "global",
+  JSCLASS_HAS_PRIVATE
+};
+
+bool JavaScriptContext::ReduceCollectionIter::hasNext(
+    JSContext* ctx,
+    unsigned argc,
+    JS::Value* vp) {
+  auto args = JS::CallArgsFromVp(argc, vp);
+  if (!args.thisv().isObject()) {
+     return false;
+  }
+
+  auto thisv = args.thisv();
+  if (JS_GetClass(&thisv.toObject()) != &kJSClass) {
+    return false;
+  }
+
+  auto iter = static_cast<ReduceCollectionIter*>(
+      JS_GetPrivate(&thisv.toObject()));
+  if (!iter) {
+    return false;
+  }
+
+  if (iter->cur < iter->data->size()) {
+    args.rval().set(JSVAL_TRUE);
+  } else {
+    args.rval().set(JSVAL_FALSE);
+  }
+
+  return true;
 }
 
 } // namespace zbase
