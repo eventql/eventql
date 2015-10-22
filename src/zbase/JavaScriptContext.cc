@@ -23,11 +23,17 @@ static bool write_json_to_buf(const char16_t* str, uint32_t strlen, void* out) {
   return true;
 }
 
-JavaScriptContext::JavaScriptContext() {
-  runtime_ = JS_NewRuntime(8 * 1024 * 1024);
+JavaScriptContext::JavaScriptContext(
+    size_t memlimit /* = kDefaultMemLimit */) {
+  runtime_ = JS_NewRuntime(memlimit);
   if (!runtime_) {
     RAISE(kRuntimeError, "error while initializing JavaScript runtime");
   }
+
+  JS::RuntimeOptionsRef(runtime_)
+      .setBaseline(true)
+      .setIon(true)
+      .setAsmJS(true);
 
   ctx_ = JS_NewContext(runtime_, 8192);
   if (!ctx_) {
