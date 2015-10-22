@@ -39,6 +39,10 @@ MapReduceScheduler::MapReduceScheduler(
 void MapReduceScheduler::execute() {
   std::unique_lock<std::mutex> lk(mutex_);
 
+  if (shards_.size() == 0) {
+    return;
+  }
+
   for (;;) {
     logDebug(
         "z1.mapreduce",

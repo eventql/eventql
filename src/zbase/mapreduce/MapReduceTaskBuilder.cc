@@ -32,52 +32,100 @@ MapReduceTaskBuilder::MapReduceTaskBuilder(
     repl_(repl),
     cachedir_(cachedir) {}
 
-RefPtr<MapReduceTask> MapReduceTaskBuilder::fromJSON(
+MapReduceShardList MapReduceTaskBuilder::fromJSON(
     const json::JSONObject::const_iterator& begin,
     const json::JSONObject::const_iterator& end) {
-  auto op = json::objectGetString(begin, end, "op");
+  MapReduceShardList shards;
+  HashMap<String, json::JSONObject> job_definitions;
+  HashMap<String, RefPtr<MapReduceTask>> jobs;
+
+  auto njobs = json::arrayLength(begin, end);
+  for (size_t i = 0; i < njobs; ++i) {
+    auto job = json::arrayLookup(begin, end, i); // O(N^2) but who cares...
+
+    auto id = json::objectGetString(job, end, "id");
+    if (id.isEmpty()) {
+      RAISE(kRuntimeError, "illegal job definition: missing id field");
+    }
+
+    job_definitions.emplace(id.get(), json::JSONObject(job, job + job->size));
+  }
+
+  for (const auto& job : job_definitions) {
+    getJob(job.first, &shards, &job_definitions, &jobs);
+  }
+
+  return shards;
+}
+
+RefPtr<MapReduceTask> MapReduceTaskBuilder::getJob(
+    const String& job_name,
+    MapReduceShardList* shards,
+    HashMap<String, json::JSONObject>* job_definitions,
+    HashMap<String, RefPtr<MapReduceTask>>* jobs) {
+  const auto& job_iter = jobs->find(job_name);
+  if (job_iter != jobs->end()) {
+    return job_iter->second;
+  }
+
+  const auto& job_def_iter = job_definitions->find(job_name);
+  if (job_def_iter == job_definitions->end()) {
+    RAISEF(kNotFoundError, "job not found: $0", job_name);
+  }
+
+  const auto& job_def = job_def_iter->second;
+  auto op = json::objectGetString(job_def, "op");
   if (op.isEmpty()) {
     RAISE(kRuntimeError, "illegal job definition: missing op field");
   }
 
-  if (op.get() == "return_results") {
-    return returnResultsTaskFromJSON(begin, end);
-  }
+  RefPtr<MapReduceTask> job;
 
   if (op.get() == "map_table") {
-    return mapTableTaskFromJSON(begin, end);
+    job = buildMapTableTask(job_def, shards, job_definitions, jobs);
   }
 
   if (op.get() == "reduce") {
-    return reduceTaskFromJSON(begin, end);
+    job = buildReduceTask(job_def, shards, job_definitions, jobs);
   }
 
-  RAISEF(kRuntimeError, "unknown operation: $0", op.get());
+  if (op.get() == "return_results") {
+    job = buildReturnResultsTask(job_def, shards, job_definitions, jobs);
+  }
+
+  if (job.get() == nullptr) {
+    RAISEF(kRuntimeError, "unknown operation: $0", op.get());
+  }
+
+  jobs->emplace(job_name, job);
+  return job;
 }
 
-RefPtr<MapReduceTask> MapReduceTaskBuilder::mapTableTaskFromJSON(
-    const json::JSONObject::const_iterator& begin,
-    const json::JSONObject::const_iterator& end) {
+RefPtr<MapReduceTask> MapReduceTaskBuilder::buildMapTableTask(
+    const json::JSONObject& job,
+    MapReduceShardList* shards,
+    HashMap<String, json::JSONObject>* job_definitions,
+    HashMap<String, RefPtr<MapReduceTask>>* jobs) {
   TSDBTableRef table_ref;
 
-  auto table_name = json::objectGetString(begin, end, "table_name");
+  auto table_name = json::objectGetString(job, "table_name");
   if (table_name.isEmpty()) {
     RAISE(kRuntimeError, "missing field: table_name");
   } else {
     table_ref.table_key = table_name.get();
   }
 
-  auto from = json::objectGetUInt64(begin, end, "from");
+  auto from = json::objectGetUInt64(job, "from");
   if (!from.isEmpty()) {
     table_ref.timerange_begin = UnixTime(from.get());
   }
 
-  auto until = json::objectGetUInt64(begin, end, "until");
+  auto until = json::objectGetUInt64(job, "until");
   if (!until.isEmpty()) {
     table_ref.timerange_limit = UnixTime(until.get());
   }
 
-  auto method_name = json::objectGetString(begin, end, "method_name");
+  auto method_name = json::objectGetString(job, "method_name");
   if (method_name.isEmpty()) {
     RAISE(kRuntimeError, "missing field: method_name");
   }
@@ -92,29 +140,35 @@ RefPtr<MapReduceTask> MapReduceTaskBuilder::mapTableTaskFromJSON(
       repl_);
 }
 
-RefPtr<MapReduceTask> MapReduceTaskBuilder::reduceTaskFromJSON(
-    const json::JSONObject::const_iterator& begin,
-    const json::JSONObject::const_iterator& end) {
-  auto src_begin = json::objectLookup(begin, end, "sources");
-  if (src_begin == end) {
+RefPtr<MapReduceTask> MapReduceTaskBuilder::buildReduceTask(
+    const json::JSONObject& job,
+    MapReduceShardList* shards,
+    HashMap<String, json::JSONObject>* job_definitions,
+    HashMap<String, RefPtr<MapReduceTask>>* jobs) {
+  auto src_begin = json::objectLookup(job, "sources");
+  if (src_begin == job.end()) {
     RAISE(kRuntimeError, "missing field: sources");
   }
 
-  auto method_name = json::objectGetString(begin, end, "method_name");
+  auto method_name = json::objectGetString(job, "method_name");
   if (method_name.isEmpty()) {
     RAISE(kRuntimeError, "missing field: method_name");
   }
 
-  auto num_shards = json::objectGetUInt64(begin, end, "num_shards");
+  auto num_shards = json::objectGetUInt64(job, "num_shards");
   if (num_shards.isEmpty()) {
     RAISE(kRuntimeError, "missing field: num_shards");
   }
 
   Vector<RefPtr<MapReduceTask>> sources;
-  auto nsrc_begin = json::arrayLength(src_begin, end);
+  auto nsrc_begin = json::arrayLength(src_begin, job.end());
   for (size_t i = 0; i < nsrc_begin; ++i) {
-    auto src = json::arrayLookup(src_begin, end, i); // O(N^2) but who cares...
-    sources.emplace_back(fromJSON(src, src + src->size));
+    auto src_id = json::arrayGetString(src_begin, job.end(), i); // O(N^2) but who cares...
+    if (src_id.isEmpty()) {
+      RAISE(kRuntimeError, "illegal source definition");
+    }
+
+    sources.emplace_back(getJob(src_id.get(), shards, job_definitions, jobs));
   }
 
   return new ReduceTask(
@@ -127,19 +181,25 @@ RefPtr<MapReduceTask> MapReduceTaskBuilder::reduceTaskFromJSON(
       repl_);
 }
 
-RefPtr<MapReduceTask> MapReduceTaskBuilder::returnResultsTaskFromJSON(
-    const json::JSONObject::const_iterator& begin,
-    const json::JSONObject::const_iterator& end) {
-  auto src_begin = json::objectLookup(begin, end, "sources");
-  if (src_begin == end) {
+RefPtr<MapReduceTask> MapReduceTaskBuilder::buildReturnResultsTask(
+    const json::JSONObject& job,
+    MapReduceShardList* shards,
+    HashMap<String, json::JSONObject>* job_definitions,
+    HashMap<String, RefPtr<MapReduceTask>>* jobs) {
+  auto src_begin = json::objectLookup(job, "sources");
+  if (src_begin == job.end()) {
     RAISE(kRuntimeError, "missing field: sources");
   }
 
   Vector<RefPtr<MapReduceTask>> sources;
-  auto nsrc_begin = json::arrayLength(src_begin, end);
+  auto nsrc_begin = json::arrayLength(src_begin, job.end());
   for (size_t i = 0; i < nsrc_begin; ++i) {
-    auto src = json::arrayLookup(src_begin, end, i); // O(N^2) but who cares...
-    sources.emplace_back(fromJSON(src, src + src->size));
+    auto src_id = json::arrayGetString(src_begin, job.end(), i); // O(N^2) but who cares...
+    if (src_id.isEmpty()) {
+      RAISE(kRuntimeError, "illegal source definition");
+    }
+
+    sources.emplace_back(getJob(src_id.get(), shards, job_definitions, jobs));
   }
 
   return new ReturnResultsTask(sources);

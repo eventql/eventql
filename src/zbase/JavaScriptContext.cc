@@ -217,7 +217,7 @@ Option<String> JavaScriptContext::getMapReduceJobJSON() {
   JSAutoCompartment js_comp(ctx_, global_);
 
   JS::RootedValue job_def(ctx_);
-  if (!JS_GetProperty(ctx_, global_, "__z1_mr_job", &job_def)) {
+  if (!JS_GetProperty(ctx_, global_, "__z1_mr_jobs", &job_def)) {
     return None<String>();
   }
 

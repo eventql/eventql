@@ -231,6 +231,7 @@ void MapReduceAPIServlet::executeMapReduceScript(
     sse_stream.sendEvent(buf, Some(String("result")));
   });
 
+  bool error = false;
   try {
     service_->executeScript(session, job_spec);
   } catch (const StandardException& e) {
@@ -245,9 +246,10 @@ void MapReduceAPIServlet::executeMapReduceScript(
     json.endObject();
 
     sse_stream.sendEvent(buf, Some(String("status")));
+    error = true;
   }
 
-  {
+  if (!error) {
     Buffer buf;
     json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
     json.beginObject();

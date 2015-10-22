@@ -29,23 +29,35 @@ public:
       zbase::ReplicationScheme* repl,
       const String& cachedir);
 
-  RefPtr<MapReduceTask> fromJSON(
+  MapReduceShardList fromJSON(
       const json::JSONObject::const_iterator& begin,
       const json::JSONObject::const_iterator& end);
 
 protected:
 
-  RefPtr<MapReduceTask> mapTableTaskFromJSON(
-      const json::JSONObject::const_iterator& begin,
-      const json::JSONObject::const_iterator& end);
+  RefPtr<MapReduceTask> getJob(
+      const String& job_name,
+      MapReduceShardList* shards,
+      HashMap<String, json::JSONObject>* job_definitions,
+      HashMap<String, RefPtr<MapReduceTask>>* jobs);
 
-  RefPtr<MapReduceTask> reduceTaskFromJSON(
-      const json::JSONObject::const_iterator& begin,
-      const json::JSONObject::const_iterator& end);
+  RefPtr<MapReduceTask> buildMapTableTask(
+      const json::JSONObject& job,
+      MapReduceShardList* shards,
+      HashMap<String, json::JSONObject>* job_definitions,
+      HashMap<String, RefPtr<MapReduceTask>>* jobs);
 
-  RefPtr<MapReduceTask> returnResultsTaskFromJSON(
-      const json::JSONObject::const_iterator& begin,
-      const json::JSONObject::const_iterator& end);
+  RefPtr<MapReduceTask> buildReduceTask(
+      const json::JSONObject& job,
+      MapReduceShardList* shards,
+      HashMap<String, json::JSONObject>* job_definitions,
+      HashMap<String, RefPtr<MapReduceTask>>* jobs);
+
+  RefPtr<MapReduceTask> buildReturnResultsTask(
+      const json::JSONObject& job,
+      MapReduceShardList* shards,
+      HashMap<String, json::JSONObject>* job_definitions,
+      HashMap<String, RefPtr<MapReduceTask>>* jobs);
 
   AnalyticsSession session_;
   RefPtr<MapReduceJobSpec> job_spec_;

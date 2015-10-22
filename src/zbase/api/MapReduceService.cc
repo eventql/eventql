@@ -65,10 +65,7 @@ void MapReduceService::executeScript(
       repl_,
       cachedir_);
 
-  auto task = task_builder.fromJSON(job_json.begin(), job_json.end());
-
-  MapReduceShardList task_shards;
-  task->build(&task_shards);
+  auto task_shards = task_builder.fromJSON(job_json.begin(), job_json.end());
 
   auto scheduler = mkRef(
       new MapReduceScheduler(
