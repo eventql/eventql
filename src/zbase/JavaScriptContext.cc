@@ -188,6 +188,14 @@ void JavaScriptContext::callReduceFunction(
       0,
       0);
 
+  JS_DefineFunction(
+      ctx_,
+      val_iter_obj,
+      "next",
+      &ReduceCollectionIter::getNext,
+      0,
+      0);
+
   JS::RootedValue rval(ctx_);
   if (!JS_CallFunctionName(ctx_, global_, "__call_with_iter", argv, &rval)) {
     raiseError();
@@ -311,6 +319,42 @@ bool JavaScriptContext::ReduceCollectionIter::hasNext(
   }
 
   return true;
+}
+
+bool JavaScriptContext::ReduceCollectionIter::getNext(
+    JSContext* ctx,
+    unsigned argc,
+    JS::Value* vp) {
+  auto args = JS::CallArgsFromVp(argc, vp);
+  if (!args.thisv().isObject()) {
+     return false;
+  }
+
+  auto thisv = args.thisv();
+  if (JS_GetClass(&thisv.toObject()) != &kJSClass) {
+    return false;
+  }
+
+  auto iter = static_cast<ReduceCollectionIter*>(
+      JS_GetPrivate(&thisv.toObject()));
+  if (!iter) {
+    return false;
+  }
+
+  if (iter->cur >= iter->data->size()) {
+    return false;
+  }
+
+  const auto& value = (*iter->data)[iter->cur];
+  ++iter->cur;
+
+  auto val_str_ptr = JS_NewStringCopyN(ctx, value.data(), value.size());
+  if (val_str_ptr) {
+    args.rval().setString(val_str_ptr);
+    return true;
+  } else {
+    return false;
+  }
 }
 
 } // namespace zbase

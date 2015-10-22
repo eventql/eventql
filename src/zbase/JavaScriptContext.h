@@ -48,6 +48,7 @@ protected:
   struct ReduceCollectionIter {
     static JSClass kJSClass;
     static bool hasNext(JSContext* ctx, unsigned argc, JS::Value* vp);
+    static bool getNext(JSContext* ctx, unsigned argc, JS::Value* vp);
     size_t cur;
     const Vector<String>* data;
   };
