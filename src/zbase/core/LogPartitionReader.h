@@ -22,7 +22,14 @@ class Partition;
 class LogPartitionReader : public PartitionReader {
 public:
 
-  LogPartitionReader(RefPtr<PartitionSnapshot> head);
+  LogPartitionReader(
+      RefPtr<Table> table,
+      RefPtr<PartitionSnapshot> head);
+
+  void fetchRecords(
+      Function<void (
+          const SHA1Hash& record_id,
+          const msg::MessageObject& record)> fn) override;
 
   void fetchRecords(
       size_t offset,
@@ -39,6 +46,8 @@ public:
       size_t sample_index,
       Function<void (const Buffer& record)> fn);
 
+protected:
+  RefPtr<Table> table_;
 };
 
 } // namespace tdsb

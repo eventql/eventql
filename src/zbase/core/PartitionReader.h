@@ -29,10 +29,10 @@ public:
   Option<SHA1Hash> cstableVersion() const;
   Option<String> cstableFilename() const;
 
-  void fetchRecords(
+  virtual void fetchRecords(
       Function<void (
           const SHA1Hash& record_id,
-          const msg::MessageObject& record)> fn);
+          const msg::MessageObject& record)> fn) = 0;
 
 protected:
   RefPtr<PartitionSnapshot> snap_;

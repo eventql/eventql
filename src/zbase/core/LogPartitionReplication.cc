@@ -76,7 +76,7 @@ void LogPartitionReplication::replicateTo(
     RAISE(kIllegalStateError, "can't replicate to myself");
   }
 
-  LogPartitionReader reader(snap_);
+  LogPartitionReader reader(partition_->getTable(), snap_);
 
   size_t batch_size = 0;
   RecordEnvelopeList batch;

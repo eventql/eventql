@@ -9,16 +9,43 @@
  */
 #include <stx/fnv.h>
 #include <stx/io/fileutil.h>
+#include <stx/protobuf/MessageDecoder.h>
 #include <sstable/sstablereader.h>
 #include <zbase/core/LogPartitionReader.h>
+#include <zbase/core/Table.h>
 
 using namespace stx;
 
 namespace zbase {
 
 LogPartitionReader::LogPartitionReader(
+    RefPtr<Table> table,
     RefPtr<PartitionSnapshot> head) :
-    PartitionReader(head) {}
+    PartitionReader(head),
+    table_(table) {}
+
+void LogPartitionReader::fetchRecords(
+    Function<void (
+        const SHA1Hash& record_id,
+        const msg::MessageObject& record)> fn) {
+  auto schema = table_->schema();
+
+  fetchRecords(
+      0,
+      -1,
+      [
+        &fn,
+        &schema
+      ] (
+        const SHA1Hash& record_id,
+        const void* record_data,
+        size_t record_size
+      ) {
+    msg::MessageObject msgobj;
+    msg::MessageDecoder::decode(record_data, record_size, *schema, &msgobj);
+    fn(record_id, msgobj);
+  });
+}
 
 void LogPartitionReader::fetchRecords(
     size_t offset,
