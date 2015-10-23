@@ -8,6 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <zbase/core/LogPartitionReplication.h>
+#include <zbase/core/LogPartitionReader.h>
 #include <zbase/core/ReplicationScheme.h>
 #include <stx/logging.h>
 #include <stx/io/fileutil.h>
@@ -75,7 +76,7 @@ void LogPartitionReplication::replicateTo(
     RAISE(kIllegalStateError, "can't replicate to myself");
   }
 
-  PartitionReader reader(snap_);
+  LogPartitionReader reader(snap_);
 
   size_t batch_size = 0;
   RecordEnvelopeList batch;

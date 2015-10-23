@@ -16,6 +16,7 @@
 #include <zbase/core/CSTableIndex.h>
 #include <zbase/core/CSTableIndexBuildState.pb.h>
 #include <zbase/core/RecordSet.h>
+#include <zbase/core/LogPartitionReader.h>
 #include <stx/protobuf/MessageDecoder.h>
 #include <cstable/CSTableBuilder.h>
 
@@ -66,7 +67,7 @@ bool CSTableIndex::needsUpdate(
 
 void CSTableIndex::buildCSTable(RefPtr<Partition> partition) {
   auto table = partition->getTable();
-  if (table->storage() == zbase::TBL_STORAGE_STATIC) {
+  if (table->storage() != zbase::TBL_STORAGE_LOG) {
     return;
   }
 
@@ -91,8 +92,10 @@ void CSTableIndex::buildCSTable(RefPtr<Partition> partition) {
   {
     cstable::CSTableBuilder cstable(schema.get());
 
-    auto reader = partition->getReader();
-    reader->fetchRecords([&schema, &cstable] (const Buffer& record) {
+    auto reader_ptr = partition->getReader();
+    auto& reader = dynamic_cast<LogPartitionReader&>(*reader_ptr);
+
+    reader.fetchRecords([&schema, &cstable] (const Buffer& record) {
         msg::MessageObject obj;
         msg::MessageDecoder::decode(record.data(), record.size(), *schema, &obj);
         cstable.addRecord(obj);

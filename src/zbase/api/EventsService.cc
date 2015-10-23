@@ -172,15 +172,19 @@ void EventsService::scanLocalTablePartition(
 
   size_t nrows = 0;
   reader->fetchRecords(
-      [&result, &nrows, &schema, time_field_id] (const Buffer& record) {
-
-    msg::MessageObject msg;
-    msg::MessageDecoder::decode(record, *schema, &msg);
-
-    auto time = msg.getUnixTime(time_field_id);
+      [
+        &result,
+        &nrows,
+        &schema,
+        time_field_id
+      ] (
+        const SHA1Hash& record_id,
+        const msg::MessageObject& record
+      ) {
+    auto time = record.getUnixTime(time_field_id);
     auto row = result->addRow(time);
     if (row) {
-      row->obj.setData(msg);
+      row->obj.setData(record);
     }
 
     if (++nrows % 10000 == 0) {
