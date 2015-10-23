@@ -390,11 +390,6 @@
   top: -4px;
 }
 
-.zbase_logviewer .logfile_list {
-  border-left: 1px solid #ddd;
-  border-right: 1px solid #ddd;
-  min-height: 900px; /* FIXME */
-}
 
 .zbase_logviewer .logfile_list table.z-table {
   border-top: 1px solid #e1e1e1;

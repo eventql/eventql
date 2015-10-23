@@ -55,6 +55,8 @@ ZBase.registerView((function() {
       add_modal.close();
     });
 
+    var main_menu = ZBaseMainMenu();
+    main_menu.render($(".zbase_main_menu", page), "/a//logs");
 
     $.handleLinks(page);
     $.replaceViewport(page);
