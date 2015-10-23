@@ -1,5 +1,6 @@
 <template id="zbase_sql_editor_overview_main_tpl">
   <div class="zbase_sql_editor">
+
     <section class='zbase_page_title medium'>
       <div>
         <button class="z-button primary" data-action="new-query">
@@ -8,21 +9,24 @@
         <h2 class="pagetitle">SQL Editor</h2>
       </div>
     </section>
-    <div class="zbase_content_pane fullwidth">
-      <div class="zbase_sql_editor_overview">
-        <div class="zbase_sql_editor_content">
-          <table class="z-table zbase_clickable_table">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Type</th>
-                <th>Last modified</th>
-              </tr>
-            </thead>
-            <tbody>
-            </tbody>
-          </table>
-        </div>
+
+    <div class="zbase_content_pane fullwidth main_menu">
+      <div class="zbase_main_menu"></div>
+
+      <div class="zbase_content main_menu zbase_sql_editor_overview">
+
+        <table class="z-table zbase_clickable_table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Type</th>
+              <th>Last modified</th>
+            </tr>
+          </thead>
+          <tbody>
+          </tbody>
+        </table>
+
       </div>
     </div>
   </div>
