@@ -127,7 +127,6 @@ Option<SHA1Hash> MapReduceService::mapPartition(
 
   auto writer = sstable::SSTableWriter::create(output_path, nullptr, 0);
 
-  iputs("starting  fetch...", 1);
   reader->fetchRecords(
       [
         &schema,

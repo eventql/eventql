@@ -284,6 +284,9 @@ std::string JSONOutputStream::escapeString(const std::string& string) const {
       case '\n':
         new_str += "\\n";
         break;
+      case 0x0b:
+        new_str += "\\u000b";
+        break;
       case '\f':
         new_str += "\\f";
         break;
