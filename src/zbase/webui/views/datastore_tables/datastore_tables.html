@@ -1,28 +1,32 @@
 <template id="zbase_datastore_tables_list_tpl">
-  <section class='zbase_page_title medium'>
-    <div>
-      <h2 class="pagetitle zbase_datastore_menu_pagetitle">Tables</h2>
+  <div class="zbase_datastore_tables">
+    <section class='zbase_page_title medium'>
+      <div>
+        <h2 class="pagetitle zbase_datastore_menu_pagetitle">Tables</h2>
+      </div>
+    </section>
+
+    <div class="zbase_content_pane fullwidth main_menu">
+      <div class="zbase_main_menu"></div>
+
+      <div class="zbase_content main_menu">
+        <h2 class="pagetitle"><em>All Tables</em></h2>
+
+        <table class="z-table zbase_clickable_table" data-clickable>
+          <thead>
+            <tr>
+              <th>Table</th>
+              <th style="width: 160px;">Size</th>
+              <th style="width: 40px;">&nbsp;</th>
+            </tr>
+          </thead>
+
+          <tbody></tbody>
+        </table>
+
+      </div>
     </div>
-  </section>
-
-  <div class="zbase_content_pane zbase_datastore zbase_datastore_wrap">
-    <div class="zbase_datastore_tables">
-      <h2 class="pagetitle"><em>All Tables</em></h2>
-
-      <table class="z-table zbase_clickable_table" data-clickable>
-        <thead>
-          <tr>
-            <th>Table</th>
-            <th style="width: 160px;">Size</th>
-            <th style="width: 40px;">&nbsp;</th>
-          </tr>
-        </thead>
-
-        <tbody></tbody>
-      </table>
-
-    </div>
-  </div>
+  <div>
 </template>
 
 <template id="zbase_datastore_tables_list_row_tpl">
