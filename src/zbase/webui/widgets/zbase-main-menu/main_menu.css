@@ -1,8 +1,22 @@
+#zbase_viewport .zbase_content_pane.main_menu {
+  display: table;
+  table-layout: fixed;
+  width: 100%;
+  min-height: 900px;
+}
+
+.zbase_content.main_menu {
+  display: table-cell;
+  vertical-align: top;
+  padding: 20px;
+}
+
 .zbase_main_menu {
   display: table-cell;
   width: 220px;
   vertical-align: top;
   background: #fff;
+  border-right: 1px solid #ddd;
 }
 
 .zbase_main_menu z-menu {
