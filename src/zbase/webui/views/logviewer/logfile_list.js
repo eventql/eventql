@@ -1,11 +1,11 @@
 ZBase.registerView((function() {
 
-  var load = function() {
+  var load = function(path) {
     $.showLoader();
 
     $.httpGet("/api/v1/logfiles", function(r) {
       if (r.status == 200) {
-        render(JSON.parse(r.response).logfile_definitions);
+        render(JSON.parse(r.response).logfile_definitions, path);
       } else {
         $.fatalError();
       }
@@ -14,7 +14,7 @@ ZBase.registerView((function() {
     });
   }
 
-  var render = function(logfiles) {
+  var render = function(logfiles, path) {
     var page = $.getTemplate(
         "views/logviewer",
         "zbase_logviewer_logfile_list_tpl");
@@ -56,7 +56,7 @@ ZBase.registerView((function() {
     });
 
     var main_menu = ZBaseMainMenu();
-    main_menu.render($(".zbase_main_menu", page), "/a/logs");
+    main_menu.render($(".zbase_main_menu", page), path);
 
     $.handleLinks(page);
     $.replaceViewport(page);
@@ -97,7 +97,7 @@ ZBase.registerView((function() {
 
   return {
     name: "logviewer_logfile_list",
-    loadView: function(params) { load(); },
+    loadView: function(params) { load(params.path); },
     unloadView: function() {},
     handleNavigationChange: load
   };
