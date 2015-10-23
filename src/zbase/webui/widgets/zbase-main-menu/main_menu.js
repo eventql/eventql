@@ -4,9 +4,8 @@ var ZBaseMainMenu = function() {
         "widgets/zbase-main-menu",
         "zbase_main_menu_tpl");
 
-    setActiveMenuItem(tpl, "/a/sql");
-
-    elem.appendChild(tpl);
+    setActiveMenuItem(tpl, path);
+    $.replaceContent(elem, tpl);
   };
 
   var setActiveMenuItem = function(tpl, path) {
@@ -23,7 +22,9 @@ var ZBaseMainMenu = function() {
       }
     }
 
-    active_item.setAttribute("data-active", "active");
+    if (active_item) {
+      active_item.setAttribute("data-active", "active");
+    }
   };
 
   return {
