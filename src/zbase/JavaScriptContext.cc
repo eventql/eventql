@@ -160,6 +160,7 @@ void JavaScriptContext::callMapFunction(
     const String& method_name,
     const String& json_string,
     Vector<Pair<String, String>>* tuples) {
+  iputs("jsonmap: $0", json_string);
   auto json_wstring = StringUtil::convertUTF8To16(json_string);
 
   JSAutoRequest js_req(ctx_);
