@@ -1,17 +1,18 @@
-.zbase_datastore_wrap {
-  display: table-cell;
-  min-height: 900px; /* FIXME */
-  padding: 0 20px 20px 20px;
+.zbase_datastore_tables h2.pagetitle {
+  margin-left: 20px;
+}
+
+.zbase_datastore_tables .zbase_content {
   background: #fff;
 }
 
-.zbase_datastore_wrap zbase-breadcrumbs {
+.zbase_datastore zbase-breadcrumbs {
   padding: 0;
   margin: -4px 0 -6px 0;
   opacity: 0.6;
 }
 
-.zbase_datastore_wrap zbase-breadcrumbs + h2.pagetitle {
+.zbase_datastore zbase-breadcrumbs + h2.pagetitle {
   margin-top: -10px;
 }
 

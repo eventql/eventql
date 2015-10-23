@@ -5,7 +5,7 @@ ZBase.registerView((function() {
 
     $.httpGet("/api/v1/tables", function(r) {
       if (r.status == 200) {
-        render(JSON.parse(r.response).tables);
+        render(JSON.parse(r.response).tables, url);
       } else {
         $.fatalError();
       }
@@ -17,7 +17,7 @@ ZBase.registerView((function() {
     //abort http request
   };
 
-  var render = function(tables) {
+  var render = function(tables, url) {
     var page = $.getTemplate(
         "views/datastore_tables",
         "zbase_datastore_tables_list_tpl");
@@ -26,6 +26,9 @@ ZBase.registerView((function() {
     tables.forEach(function(table) {
       renderRow(tbody, table);
     });
+
+    var main_menu = ZBaseMainMenu();
+    main_menu.render($(".zbase_main_menu", page), url);
 
     $.handleLinks(page);
     $.replaceViewport(page);
@@ -50,7 +53,7 @@ ZBase.registerView((function() {
 
   return {
     name: "datastore_tables",
-    loadView: function(params) { load(params.url); },
+    loadView: function(params) { load(params.path); },
     unloadView: destroy,
     handleNavigationChange: render
   };

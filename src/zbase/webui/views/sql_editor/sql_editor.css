@@ -6,7 +6,6 @@
   border-bottom: 1px solid #ddd;
 }
 
-
 .zbase_sql_editor .zbase_sql_editor_sidebar {
   width: 320px;
   min-height: 200px;
@@ -44,6 +43,10 @@
   background: #fff;
 }
 
+.zbase_sql_editor .zbase_content.main_menu {
+  background: #fff;
+}
+
 .zbase_sql_editor .zbase_sql_editor_content.with_sidebar {
   display: table-cell;
   vertical-align: top;
@@ -57,7 +60,7 @@
 }
 
 .zbase_sql_editor .zbase_page_title .z-button {
-  margin-top: 20px;
+  margin-top: 14px;
   margin-right: 3px;
 }
 
