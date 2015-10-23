@@ -110,7 +110,7 @@ private:
   const char* file_;
   int line_;
   const char* func_;
-  char message_[1024 * 1024];
+  char message_[1024];
 };
 
 } // namespace stx
