@@ -84,8 +84,8 @@ void JavaScriptContext::storeError(const String& error) {
   current_error_ = error;
 }
 
-void JavaScriptContext::raiseError() {
-  RAISEF("JavaScriptError", "$0", current_error_);
+void JavaScriptContext::raiseError(const String& input) {
+  RAISEF("JavaScriptError", "$0 for input $1", current_error_, input);
 }
 
 void JavaScriptContext::dispatchError(
@@ -148,7 +148,7 @@ void JavaScriptContext::loadProgram(const String& program) {
         program.c_str(),
         program.size(),
         &rval)) {
-    raiseError();
+    raiseError("<script>");
   }
 }
 
@@ -163,7 +163,7 @@ void JavaScriptContext::callMapFunction(
 
   JS::RootedValue json(ctx_);
   if (!JS_ParseJSON(ctx_, json_wstring.c_str(), json_wstring.size(), &json)) {
-    raiseError();
+    raiseError(json_string);
   }
 
   JS::AutoValueArray<1> argv(ctx_);
@@ -171,7 +171,7 @@ void JavaScriptContext::callMapFunction(
 
   JS::RootedValue rval(ctx_);
   if (!JS_CallFunctionName(ctx_, global_, method_name.c_str(), argv, &rval)) {
-    raiseError();
+    raiseError(json_string);
   }
 
   enumerateTuples(&rval, tuples);
@@ -234,7 +234,7 @@ void JavaScriptContext::callReduceFunction(
 
   JS::RootedValue rval(ctx_);
   if (!JS_CallFunctionName(ctx_, global_, "__call_with_iter", argv, &rval)) {
-    raiseError();
+    raiseError(key);
   }
 
   enumerateTuples(&rval, tuples);
