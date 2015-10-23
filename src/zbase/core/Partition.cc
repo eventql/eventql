@@ -21,6 +21,7 @@
 #include <zbase/core/LogPartitionReader.h>
 #include <zbase/core/LogPartitionWriter.h>
 #include <zbase/core/LogPartitionReplication.h>
+#include <zbase/core/StaticPartitionReader.h>
 #include <zbase/core/StaticPartitionWriter.h>
 #include <zbase/core/StaticPartitionReplication.h>
 
@@ -137,6 +138,9 @@ RefPtr<PartitionReader> Partition::getReader() {
 
     case zbase::TBL_STORAGE_LOG:
       return new LogPartitionReader(table_, head_.getSnapshot());
+
+    case zbase::TBL_STORAGE_STATIC:
+      return new StaticPartitionReader(table_, head_.getSnapshot());
 
     default:
       RAISE(kRuntimeError, "invalid storage class");
