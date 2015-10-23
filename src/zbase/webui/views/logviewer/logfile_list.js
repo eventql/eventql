@@ -56,7 +56,7 @@ ZBase.registerView((function() {
     });
 
     var main_menu = ZBaseMainMenu();
-    main_menu.render($(".zbase_main_menu", page), "/a//logs");
+    main_menu.render($(".zbase_main_menu", page), "/a/logs");
 
     $.handleLinks(page);
     $.replaceViewport(page);
