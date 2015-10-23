@@ -286,3 +286,14 @@ TEST_CASE(JSONTest, TestJSONReencoding1, [] () {
   auto obj2 = stx::json::fromJSON<TestJSONObject>(obj_json);
   EXPECT_EQ(obj2.data, orig_str);
 });
+
+TEST_CASE(JSONTest, TestJSONOutputStreamStringEncoding, [] () {
+  stx::Buffer json;
+  stx::json::JSONOutputStream jsons(stx::BufferOutputStream::fromBuffer(&json));
+
+  const char teststr[] ="b\"la\x00ht\x0cx\x1bxe\nxs\rx\tx\\xt";
+  jsons.addString(std::string(teststr, sizeof(teststr) - 1));
+  EXPECT_EQ(
+      json.toString(),
+      "\"b\\\"la\\u0000ht\\fx\\u001bxe\\nxs\\rx\\tx\\\\xt\"");
+});
