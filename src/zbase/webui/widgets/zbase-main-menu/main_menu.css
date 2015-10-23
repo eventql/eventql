@@ -1,18 +1,24 @@
-z-menu.zbase_main_menu {
+.zbase_main_menu {
+  display: table-cell;
+  width: 220px;
+  vertical-align: top;
+  background: #fff;
+}
+
+.zbase_main_menu z-menu {
   position: relative;
   margin-right: 10px;
   width: auto;
   font-family: "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif;
-  background: #fff;
 }
 
-z-menu.zbase_main_menu z-menu-section {
+.zbase_main_menu z-menu z-menu-section {
   padding: 0;
   margin-left: 10px;
   margin-bottom: 20px;
 }
 
-z-menu.zbase_main_menu z-menu-title {
+.zbase_main_menu z-menu z-menu-title {
   margin: 0;
   line-height: 32px;
   padding: 0 20px 0 14px;
@@ -22,19 +28,19 @@ z-menu.zbase_main_menu z-menu-title {
   font-weight: 400;
 }
 
-z-menu.zbase_main_menu z-menu-item {
+.zbase_main_menu z-menu z-menu-item {
   margin: 0;
   padding: 0;
 }
 
-z-menu.zbase_main_menu z-menu-item a {
+.zbase_main_menu z-menu z-menu-item a {
   line-height: 34px;
   padding: 0 20px 0 28px;
   font-size: 13px;
   color: #444;
 }
 
-z-menu.zbase_main_menu z-menu-item a[data-active] {
+.zbase_main_menu z-menu z-menu-item a[data-active] {
   background: #3498db;
   color: #fff;
 }
