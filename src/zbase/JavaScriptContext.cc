@@ -85,7 +85,11 @@ void JavaScriptContext::storeError(const String& error) {
 }
 
 void JavaScriptContext::raiseError(const String& input) {
-  RAISEF("JavaScriptError", "$0 for input $1", current_error_, input);
+  RAISEF(
+      "JavaScriptError", "$0 for input >$1< ($2)",
+      current_error_,
+      input,
+      input.size());
 }
 
 void JavaScriptContext::dispatchError(
