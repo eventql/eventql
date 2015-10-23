@@ -30,9 +30,7 @@ public:
   Option<String> cstableFilename() const;
 
   virtual void fetchRecords(
-      Function<void (
-          const SHA1Hash& record_id,
-          const msg::MessageObject& record)> fn) = 0;
+      Function<void (const msg::MessageObject& record)> fn) = 0;
 
 protected:
   RefPtr<PartitionSnapshot> snap_;

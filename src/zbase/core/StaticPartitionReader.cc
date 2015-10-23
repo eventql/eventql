@@ -10,9 +10,10 @@
 #include <stx/fnv.h>
 #include <stx/io/fileutil.h>
 #include <stx/protobuf/MessageDecoder.h>
-#include <sstable/sstablereader.h>
 #include <zbase/core/StaticPartitionReader.h>
 #include <zbase/core/Table.h>
+#include <cstable/CSTableReader.h>
+#include <cstable/RecordMaterializer.h>
 
 using namespace stx;
 
@@ -25,11 +26,25 @@ StaticPartitionReader::StaticPartitionReader(
     table_(table) {}
 
 void StaticPartitionReader::fetchRecords(
-    Function<void (
-        const SHA1Hash& record_id,
-        const msg::MessageObject& record)> fn) {
+    Function<void (const msg::MessageObject& record)> fn) {
   auto schema = table_->schema();
-  RAISE(kNotYetImplementedError, "not yet implemented");
+
+  auto cstable = fetchCSTable();
+  if (cstable.isEmpty()) {
+    return;
+  }
+
+  cstable::CSTableReader reader(cstable.get());
+  cstable::RecordMaterializer materializer(
+      schema.get(),
+      &reader);
+
+  auto rec_count = reader.numRecords();
+  for (size_t i = 0; i < rec_count; ++i) {
+    msg::MessageObject robj;
+    materializer.nextRecord(&robj);
+    fn(robj);
+  }
 }
 
 } // namespace tdsb

@@ -177,10 +177,7 @@ void EventsService::scanLocalTablePartition(
         &nrows,
         &schema,
         time_field_id
-      ] (
-        const SHA1Hash& record_id,
-        const msg::MessageObject& record
-      ) {
+      ] (const msg::MessageObject& record) {
     auto time = record.getUnixTime(time_field_id);
     auto row = result->addRow(time);
     if (row) {

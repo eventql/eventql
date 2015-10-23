@@ -25,9 +25,7 @@ LogPartitionReader::LogPartitionReader(
     table_(table) {}
 
 void LogPartitionReader::fetchRecords(
-    Function<void (
-        const SHA1Hash& record_id,
-        const msg::MessageObject& record)> fn) {
+    Function<void (const msg::MessageObject& record)> fn) {
   auto schema = table_->schema();
 
   fetchRecords(
@@ -43,7 +41,7 @@ void LogPartitionReader::fetchRecords(
       ) {
     msg::MessageObject msgobj;
     msg::MessageDecoder::decode(record_data, record_size, *schema, &msgobj);
-    fn(record_id, msgobj);
+    fn(msgobj);
   });
 }
 

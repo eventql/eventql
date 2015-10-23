@@ -134,10 +134,7 @@ Option<SHA1Hash> MapReduceService::mapPartition(
         &js_ctx,
         &method_name,
         &writer
-      ] (
-        const SHA1Hash& record_id,
-        const msg::MessageObject& record
-      ) {
+      ] (const msg::MessageObject& record) {
     Buffer json;
     json::JSONOutputStream jsons(BufferOutputStream::fromBuffer(&json));
     msg::JSONEncoder::encode(record, *schema, &jsons);

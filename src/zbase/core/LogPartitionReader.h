@@ -27,9 +27,7 @@ public:
       RefPtr<PartitionSnapshot> head);
 
   void fetchRecords(
-      Function<void (
-          const SHA1Hash& record_id,
-          const msg::MessageObject& record)> fn) override;
+      Function<void (const msg::MessageObject& record)> fn) override;
 
   void fetchRecords(
       size_t offset,
