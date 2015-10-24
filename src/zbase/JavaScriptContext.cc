@@ -171,6 +171,9 @@ void JavaScriptContext::callMapFunction(
       (js::ExclusiveContext*) ctx_,
       json_string.data(),
       &json_wstring_len);
+  if (!json_wstring) {
+    RAISE(kRuntimeError, "maap function execution error: out of memory");
+  }
 
   JS::RootedValue json(ctx_);
   if (JS_ParseJSON(ctx_, json_wstring, json_wstring_len, &json)) {
