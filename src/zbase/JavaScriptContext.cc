@@ -164,8 +164,6 @@ void JavaScriptContext::callMapFunction(
   JSAutoRequest js_req(ctx_);
   JSAutoCompartment js_comp(ctx_, global_);
 
-  iputs("jsonmap: ($1) >> $0 <<", json_string, json_string.size());
-
   size_t json_wstring_len = json_string.size();
   auto json_wstring = js::InflateString(
       (js::ExclusiveContext*) ctx_,
