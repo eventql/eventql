@@ -11,6 +11,7 @@
 #include "zbase/JavaScriptContext.h"
 #include "js/Conversions.h"
 #include "jsapi.h"
+#include "jsstr.h"
 
 using namespace stx;
 
@@ -160,14 +161,22 @@ void JavaScriptContext::callMapFunction(
     const String& method_name,
     const String& json_string,
     Vector<Pair<String, String>>* tuples) {
-  iputs("jsonmap: >> $0 <<", json_string);
-  auto json_wstring = StringUtil::convertUTF8To16(json_string);
-
   JSAutoRequest js_req(ctx_);
   JSAutoCompartment js_comp(ctx_, global_);
 
+  iputs("jsonmap: ($1) >> $0 <<", json_string, json_string.size());
+
+  size_t json_wstring_len = json_string.size();
+  auto json_wstring = js::InflateString(
+      (js::ExclusiveContext*) ctx_,
+      json_string.data(),
+      &json_wstring_len);
+
   JS::RootedValue json(ctx_);
-  if (!JS_ParseJSON(ctx_, json_wstring.c_str(), json_wstring.size(), &json)) {
+  if (JS_ParseJSON(ctx_, json_wstring, json_wstring_len, &json)) {
+    JS_free(ctx_, json_wstring);
+  } else {
+    JS_free(ctx_, json_wstring);
     raiseError(json_string);
   }
 
