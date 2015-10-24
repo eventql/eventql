@@ -19,7 +19,7 @@ namespace zbase {
 
 class MapReduceScheduler : public RefCounted {
 public:
-  static const size_t kDefaultMaxConcurrentTasks = 16;
+  static const size_t kDefaultMaxConcurrentTasks = 32;
 
   MapReduceScheduler(
       const AnalyticsSession& session,
