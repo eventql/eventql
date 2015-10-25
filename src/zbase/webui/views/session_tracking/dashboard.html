@@ -1,64 +1,65 @@
 <template id="zbase_session_tracking_dashboard_tpl">
   <div class="zbase_session_tracking zbase_session_tracking_dashboard">
-  <section class="zbase_page_title medium">
-    <div>
-      <!--<zbase-breadcrumbs style="margin-top: 20px; margin-bottom: -6px;">
-        <zbase-breadcrumbs-section>
-          <a href="/a/">Apps</a>
-        </zbase-breadcrumbs-section>
-        <zbase-breadcrumbs-section>
-          <a href="/a/session_tracking">User Journeys</a>
-        </zbase-breadcrumbs-section>
-        <zbase-breadcrumbs-section>
-          <a href="/a/session_tracking">Dashboard</a>
-        </zbase-breadcrumbs-section>
-      </zbase-breadcrumbs>-->
-      <z-daterangepicker data-resolved class="open_left"></z-daterangepicker>
-      <h2 class="pagetitle">Dashboard</h2>
-    </div>
-  </section>
+    <section class="zbase_page_title medium">
+      <div>
+        <!--<zbase-breadcrumbs style="margin-top: 20px; margin-bottom: -6px;">
+          <zbase-breadcrumbs-section>
+            <a href="/a/">Apps</a>
+          </zbase-breadcrumbs-section>
+          <zbase-breadcrumbs-section>
+            <a href="/a/session_tracking">User Journeys</a>
+          </zbase-breadcrumbs-section>
+          <zbase-breadcrumbs-section>
+            <a href="/a/session_tracking">Dashboard</a>
+          </zbase-breadcrumbs-section>
+        </zbase-breadcrumbs>-->
+        <z-daterangepicker data-resolved class="open_left"></z-daterangepicker>
+        <h2 class="pagetitle">Tracking</h2>
+      </div>
+    </section>
 
-  <div class="zbase_content_pane fullwidth main_menu">
-    <div class="zbase_main_menu"></div>
+    <div class="zbase_content_pane fullwidth main_menu">
+      <div class="zbase_main_menu"></div>
 
-    <div class='zbase_content main_menu'>
-      <div class="dashboard">
-        <div class="chart_panel">
-          <label>Display:</label>
-          <z-dropdown data-resolved class="input metric" name="metric">
-            <z-dropdown-flyout>
-              <z-dropdown-items>
-                <z-dropdown-item data-value="num_sessions" data-title="Number of Sessions" data-selected>Number of Sessions</z-dropdown-item>
-              </z-dropdown-items>
-            </z-dropdown-flyout>
-          </z-dropdown>
+      <div class='zbase_content main_menu'>
+        <div class="dashboard">
+          <div class="chart_panel">
+            <label>Display:</label>
+            <z-dropdown data-resolved class="input metric" name="metric">
+              <z-dropdown-flyout>
+                <z-dropdown-items>
+                  <z-dropdown-item data-value="num_sessions" data-title="Number of Sessions" data-selected>Number of Sessions</z-dropdown-item>
+                </z-dropdown-items>
+              </z-dropdown-flyout>
+            </z-dropdown>
 
-          <z-dropdown data-resolved class="time_window" name="time_window">
-            <z-dropdown-flyout>
-              <z-dropdown-items>
-                <z-dropdown-item data-value="3600" data-selected>Hourly</z-dropdown-item>
-                <z-dropdown-item data-value="86400">Daily</z-dropdown-item>
-                <z-dropdown-item data-value="604800">Weekly</z-dropdown-item>
-              </z-dropdown-items>
-            </z-dropdown-flyout>
-          </z-dropdown>
+            <z-dropdown data-resolved class="time_window" name="time_window">
+              <z-dropdown-flyout>
+                <z-dropdown-items>
+                  <z-dropdown-item data-value="3600" data-selected>Hourly</z-dropdown-item>
+                  <z-dropdown-item data-value="86400">Daily</z-dropdown-item>
+                  <z-dropdown-item data-value="604800">Weekly</z-dropdown-item>
+                </z-dropdown-items>
+              </z-dropdown-flyout>
+            </z-dropdown>
 
-          <div class="chart_legend"></div>
-        </div>
+            <div class="chart_legend"></div>
+          </div>
 
-        <div class="chart_container">
-          <div class="zbase_loader">
-            <div class="spinner_outer">
-              <div class="spinner">
-                <div class="rect1"></div>
-                <div class="rect2"></div>
-                <div class="rect3"></div>
-                <div class="rect4"></div>
-                <div class="rect5"></div>
+          <div class="chart_container">
+            <div class="zbase_loader">
+              <div class="spinner_outer">
+                <div class="spinner">
+                  <div class="rect1"></div>
+                  <div class="rect2"></div>
+                  <div class="rect3"></div>
+                  <div class="rect4"></div>
+                  <div class="rect5"></div>
+                </div>
               </div>
             </div>
+            <div class="inner_chart" id="dashboard_chart"></div>
           </div>
-          <div class="inner_chart" id="dashboard_chart"></div>
         </div>
       </div>
     </div>
