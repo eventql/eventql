@@ -59,16 +59,17 @@ void TSDBTableScanSource<ProtoType>::scanWithoutIndex(
 
   auto preader = partition.get()->getReader();
 
-  preader->fetchRecordsWithSampling(
-      params_.sample_modulo(),
-      params_.sample_index(),
-      [this, context] (const Buffer& buf) {
-    if (context->isCancelled()) {
-      RAISE(kRuntimeError, "task cancelled");
-    }
+  RAISE(kNotImplementedError);
+  //preader->fetchRecordsWithSampling(
+  //    params_.sample_modulo(),
+  //    params_.sample_index(),
+  //    [this, context] (const Buffer& buf) {
+  //  if (context->isCancelled()) {
+  //    RAISE(kRuntimeError, "task cancelled");
+  //  }
 
-    fn_(msg::decode<ProtoType>(buf));
-  });
+  //  fn_(msg::decode<ProtoType>(buf));
+  //});
 }
 
 template <typename ProtoType>

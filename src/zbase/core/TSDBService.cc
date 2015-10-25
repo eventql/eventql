@@ -15,6 +15,7 @@
 #include <sstable/sstablereader.h>
 #include <zbase/core/TSDBService.h>
 #include <zbase/core/TimeWindowPartitioner.h>
+#include <zbase/core/LogPartitionReader.h>
 #include <zbase/core/PartitionState.pb.h>
 
 using namespace stx;
@@ -358,7 +359,14 @@ void TSDBService::fetchPartitionWithSampling(
   }
 
   auto reader = partition.get()->getReader();
-  reader->fetchRecordsWithSampling(sample_modulo, sample_index, fn);
+  auto log_reader = dynamic_cast<LogPartitionReader*>(reader.get());
+  if (!log_reader) {
+    RAISE(
+        kRuntimeError,
+        "raw record fetches are supported only on LOG partitions");
+  }
+
+  log_reader->fetchRecordsWithSampling(sample_modulo, sample_index, fn);
 }
 
 Option<PartitionInfo> TSDBService::partitionInfo(

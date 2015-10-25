@@ -11,29 +11,26 @@
 #include <stx/stdtypes.h>
 #include <stx/autoref.h>
 #include <stx/option.h>
-#include <stx/protobuf/MessageObject.h>
 #include <zbase/core/PartitionSnapshot.h>
+#include <zbase/core/PartitionReader.h>
 
 using namespace stx;
 
 namespace zbase {
 class Partition;
 
-class PartitionReader : public RefCounted {
+class StaticPartitionReader : public PartitionReader {
 public:
 
-  PartitionReader(RefPtr<PartitionSnapshot> head);
+  StaticPartitionReader(
+      RefPtr<Table> table,
+      RefPtr<PartitionSnapshot> head);
 
-  Option<RefPtr<VFSFile>> fetchCSTable() const;
-  Option<String> fetchCSTableFilename() const;
-  Option<SHA1Hash> cstableVersion() const;
-  Option<String> cstableFilename() const;
-
-  virtual void fetchRecords(
-      Function<void (const msg::MessageObject& record)> fn) = 0;
+  void fetchRecords(
+      Function<void (const msg::MessageObject& record)> fn) override;
 
 protected:
-  RefPtr<PartitionSnapshot> snap_;
+  RefPtr<Table> table_;
 };
 
 } // namespace tdsb

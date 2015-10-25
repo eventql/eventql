@@ -11,6 +11,7 @@
 #include "zbase/JavaScriptContext.h"
 #include "js/Conversions.h"
 #include "jsapi.h"
+#include "jsstr.h"
 
 using namespace stx;
 
@@ -84,8 +85,12 @@ void JavaScriptContext::storeError(const String& error) {
   current_error_ = error;
 }
 
-void JavaScriptContext::raiseError() {
-  RAISEF("JavaScriptError", "$0", current_error_);
+void JavaScriptContext::raiseError(const String& input) {
+  RAISEF(
+      "JavaScriptError", "$0 for input >$1< ($2)",
+      current_error_,
+      input,
+      input.size());
 }
 
 void JavaScriptContext::dispatchError(
@@ -148,7 +153,7 @@ void JavaScriptContext::loadProgram(const String& program) {
         program.c_str(),
         program.size(),
         &rval)) {
-    raiseError();
+    raiseError("<script>");
   }
 }
 
@@ -156,14 +161,24 @@ void JavaScriptContext::callMapFunction(
     const String& method_name,
     const String& json_string,
     Vector<Pair<String, String>>* tuples) {
-  auto json_wstring = StringUtil::convertUTF8To16(json_string);
-
   JSAutoRequest js_req(ctx_);
   JSAutoCompartment js_comp(ctx_, global_);
 
+  size_t json_wstring_len = json_string.size();
+  auto json_wstring = js::InflateString(
+      (js::ExclusiveContext*) ctx_,
+      json_string.data(),
+      &json_wstring_len);
+  if (!json_wstring) {
+    RAISE(kRuntimeError, "maap function execution error: out of memory");
+  }
+
   JS::RootedValue json(ctx_);
-  if (!JS_ParseJSON(ctx_, json_wstring.c_str(), json_wstring.size(), &json)) {
-    raiseError();
+  if (JS_ParseJSON(ctx_, json_wstring, json_wstring_len, &json)) {
+    JS_free(ctx_, json_wstring);
+  } else {
+    JS_free(ctx_, json_wstring);
+    raiseError(json_string);
   }
 
   JS::AutoValueArray<1> argv(ctx_);
@@ -171,7 +186,7 @@ void JavaScriptContext::callMapFunction(
 
   JS::RootedValue rval(ctx_);
   if (!JS_CallFunctionName(ctx_, global_, method_name.c_str(), argv, &rval)) {
-    raiseError();
+    raiseError(json_string);
   }
 
   enumerateTuples(&rval, tuples);
@@ -234,7 +249,7 @@ void JavaScriptContext::callReduceFunction(
 
   JS::RootedValue rval(ctx_);
   if (!JS_CallFunctionName(ctx_, global_, "__call_with_iter", argv, &rval)) {
-    raiseError();
+    raiseError(key);
   }
 
   enumerateTuples(&rval, tuples);

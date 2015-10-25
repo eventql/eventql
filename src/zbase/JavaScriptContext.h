@@ -50,7 +50,7 @@ protected:
   };
 
   void storeError(const String& error);
-  void raiseError();
+  void raiseError(const String& input);
 
   static void dispatchError(
       JSContext* ctx,
