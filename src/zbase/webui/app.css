@@ -389,6 +389,14 @@ section.zbase_page_title zbase-breadcrumbs a {
 }
 
 /**
+  * zbase_content_title
+  */
+.zbase_content_title {
+  padding: 0 20px;
+  border-bottom: 1px solid #ddd;
+}
+
+/**
  * h2.pagetitle
  */
 h2.pagetitle {
