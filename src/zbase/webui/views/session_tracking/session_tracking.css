@@ -1,3 +1,8 @@
+.zbase_session_tracking z-tabbable {
+  font-size: 13px;
+  background: transparent;
+}
+
 .zbase_session_tracking .add_pane,
 .zbase_session_tracking .add_session_event,
 .zbase_session_tracking .add_session_attribute {
