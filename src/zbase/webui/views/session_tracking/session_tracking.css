@@ -1,24 +1,3 @@
-.zbase_session_tracking {
-  display: table;
-  table-layout: fixed;
-  width: 100%;
-  min-height: 900px;
-}
-
-.zbase_session_tracking .session_tracking_sidebar {
-  display: table-cell;
-  width: 220px;
-  vertical-align: top;
-  background: #fff;
-}
-
-.zbase_session_tracking .session_tracking_content {
-  display: table-cell;
-  vertical-align: top;
-  border-left: 1px solid #ddd;
-  padding: 0 20px;
-}
-
 .zbase_session_tracking .session_tracking_sidebar z-menu {
   position: relative;
   margin-right: 10px;
