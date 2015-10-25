@@ -393,7 +393,7 @@ section.zbase_page_title zbase-breadcrumbs a {
   */
 .zbase_content_title {
   padding: 0 20px;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 2px solid #ddd;
 }
 
 .zbase_content_title z-dropdown,
