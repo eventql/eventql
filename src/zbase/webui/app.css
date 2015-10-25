@@ -393,7 +393,7 @@ section.zbase_page_title zbase-breadcrumbs a {
   * zbase_content_title
   */
 .zbase_content_title {
-  padding: 0 20px;
+  padding: 0 20px 0 240px;
   border-bottom: 1px solid #c9d0d4;
   box-shadow: 0 1px 1px rgba(0,0,0,0.1);
   background-color: #3498db;
