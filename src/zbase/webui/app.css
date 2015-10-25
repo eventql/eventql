@@ -185,6 +185,7 @@ template {
   display: inline-block;
 }
 
+
 /**
  * fatal error
  */
@@ -385,6 +386,19 @@ section.zbase_page_title zbase-breadcrumbs {
 section.zbase_page_title zbase-breadcrumbs,
 section.zbase_page_title zbase-breadcrumbs a {
   color: #fff;
+}
+
+/**
+  * zbase_content_title
+  */
+.zbase_content_title {
+  padding: 0 20px;
+  border-bottom: 2px solid #ddd;
+}
+
+.zbase_content_title z-dropdown,
+.zbase_content_title button.z-button {
+  margin-top: 14px;
 }
 
 /**
