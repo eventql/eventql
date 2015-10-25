@@ -1,33 +1,42 @@
 <template id="zbase_session_tracking_journey_viewer_tpl">
-  <div class='zbase_settings zbase_user_journey_viewer'>
-    <div class="journey_list">
-      <zbase-breadcrumbs style="margin-top: 20px; margin-bottom: -6px;">
+  <div class='zbase_session_tracking zbase_user_journey_viewer'>
+
+    <section class="zbase_page_title medium">
+      <div>
+        <!--<zbase-breadcrumbs style="margin-top: 20px; margin-bottom: -6px;">
         <zbase-breadcrumbs-section>
           <a href="/a/">Apps</a>
         </zbase-breadcrumbs-section>
         <zbase-breadcrumbs-section>
           <a href="/a/">User Journeys</a>
         </zbase-breadcrumbs-section>
-      </zbase-breadcrumbs>
+      </zbase-breadcrumbs>-->
+        <h2 class='pagetitle'>Tracking</h2>
+      </div>
+    </section>
 
-      <h2 class='pagetitle'><em>Journey Viewer</em></h2>
+    <div class="zbase_content_pane fullwidth main_menu">
+      <div class="zbase_main_menu"></div>
 
-      <ul class="journeys">
-        <li class="loading_bar">
-          <h3>
-            <div class="loaderanim-outer">
-              <div class="loaderanim">
-                <div class="rect1"></div>
-                <div class="rect2"></div>
-                <div class="rect3"></div>
-                <div class="rect4"></div>
-                <div class="rect5"></div>
+      <div class='zbase_content main_menu journey_list'>
+
+        <ul class="journeys">
+          <li class="loading_bar">
+            <h3>
+              <div class="loaderanim-outer">
+                <div class="loaderanim">
+                  <div class="rect1"></div>
+                  <div class="rect2"></div>
+                  <div class="rect3"></div>
+                  <div class="rect4"></div>
+                  <div class="rect5"></div>
+                </div>
               </div>
-            </div>
-            Scanning...
-          </h3>
-        </li>
-      </ul>
+              Scanning...
+            </h3>
+          </li>
+        </ul>
+      </div>
     </div>
   </div>
 </template>
