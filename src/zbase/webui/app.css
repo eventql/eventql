@@ -334,7 +334,7 @@ template {
 }
 
 .zbase_page_title > div {
-  padding: 1px 20px;
+  padding: 1px 20px 1px 240px;
   margin: auto;
   max-width: 2048px;
   min-width: 960px;
@@ -389,25 +389,6 @@ section.zbase_page_title zbase-breadcrumbs a {
   color: #fff;
 }
 
-/**
-  * zbase_content_title
-  */
-.zbase_content_title {
-  padding: 0 20px 0 240px;
-  border-bottom: 1px solid #c9d0d4;
-  box-shadow: 0 1px 1px rgba(0,0,0,0.1);
-  background-color: #3498db;
-  color: #fff;
-}
-
-.zbase_content_title h2.pagetitle {
-  color: #fff;
-}
-
-.zbase_content_title z-dropdown,
-.zbase_content_title button.z-button {
-  margin-top: 14px;
-}
 
 /**
  * h2.pagetitle

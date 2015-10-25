@@ -1,22 +1,24 @@
 <template id="zbase_documents_main_tpl">
   <div class="zbase_documents">
-    <div class="zbase_content_title">
-      <z-dropdown class="input primary" data-resolved data-hover>
-        <z-dropdown-header>
-          <z-dropdown-header-value data-static>
-              <span style="margin-left:4px; margin-right: 10px;">New Document</span>
-          </z-dropdown-header-value>
-        </z-dropdown-header>
-        <z-dropdown-flyout>
-          <z-dropdown-items>
-            <z-dropdown-item data-value='sql_query'>SQL Query</z-dropdown-item>
-            <z-dropdown-item data-value='report'>Report</z-dropdown-item>
-          </z-dropdown-items>
-        </z-dropdown-flyout>
-      </z-dropdown>
+    <section class="zbase_page_title medium">
+      <div>
+        <z-dropdown class="input primary" data-resolved data-hover>
+          <z-dropdown-header>
+            <z-dropdown-header-value data-static>
+                <span style="margin-left:4px; margin-right: 10px;">New Document</span>
+            </z-dropdown-header-value>
+          </z-dropdown-header>
+          <z-dropdown-flyout>
+            <z-dropdown-items>
+              <z-dropdown-item data-value='sql_query'>SQL Query</z-dropdown-item>
+              <z-dropdown-item data-value='report'>Report</z-dropdown-item>
+            </z-dropdown-items>
+          </z-dropdown-flyout>
+        </z-dropdown>
 
-      <h2 class="pagetitle">Reports</h2>
-    </div>
+        <h2 class="pagetitle">Reports</h2>
+      </div>
+    </section>
     <div class="zbase_content_pane fullwidth main_menu">
 
 
