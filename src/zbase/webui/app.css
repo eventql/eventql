@@ -396,6 +396,11 @@ section.zbase_page_title zbase-breadcrumbs a {
   border-bottom: 1px solid #ddd;
 }
 
+.zbase_content_title z-dropdown,
+.zbase_content_title button.z-button {
+  margin-top: 14px;
+}
+
 /**
  * h2.pagetitle
  */
