@@ -142,6 +142,7 @@ template {
   position: absolute;
   z-index: 99999;
   font-family: "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  border-bottom: 1px solid #ddd;
 }
 
 .zbase_header .navigation_inner {
@@ -393,7 +394,14 @@ section.zbase_page_title zbase-breadcrumbs a {
   */
 .zbase_content_title {
   padding: 0 20px;
-  border-bottom: 2px solid #ddd;
+  border-bottom: 1px solid #c9d0d4;
+  box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+  background-color: #3498db;
+  color: #fff;
+}
+
+.zbase_content_title h2.pagetitle {
+  color: #fff;
 }
 
 .zbase_content_title z-dropdown,
