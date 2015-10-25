@@ -8,15 +8,10 @@ ZBase.registerView((function() {
 
     var page = $.getTemplate(
         "views/session_tracking",
-        "zbase_session_tracking_main_tpl");
-
-    var content = $.getTemplate(
-        "views/session_tracking",
         "zbase_session_tracking_dashboard_tpl");
 
     var main_menu = ZBaseMainMenu();
     main_menu.render($(".zbase_main_menu", page), path);
-    $(".zbase_content_pane .session_tracking_content", page).appendChild(content);
 
     $.handleLinks(page);
     $.replaceViewport(page);
