@@ -161,12 +161,6 @@
   overflow: auto;
 }
 
-/**
-  * Overview
-  */
-.zbase_sql_editor .zbase_sql_editor_overview table.z-table {
-  border-top: 1px solid #e1e1e1;
-}
 
 /**
   * Editor
