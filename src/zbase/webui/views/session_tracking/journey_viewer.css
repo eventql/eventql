@@ -1,17 +1,10 @@
-.zbase_user_journey_viewer .journey_detail_pane {
-  background: #fff;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  padding: 20px;
-}
-
 .zbase_user_journey_viewer > .hidden {
   display: none;
 }
 
 .zbase_user_journey_viewer ul.journeys {
   list-style-type: none;
-  padding: 0;
+  padding: 20px;
   margin: 0;
 }
 

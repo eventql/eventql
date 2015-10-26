@@ -1,34 +1,47 @@
 <template id="zbase_session_tracking_edit_event_tpl">
-  <div class="edit_event">
-    
-    <zbase-breadcrumbs style="margin-top: 20px; margin-bottom: -6px;">
-      <zbase-breadcrumbs-section>
-        <a href="/a/">Apps</a>
-      </zbase-breadcrumbs-section>
-      <zbase-breadcrumbs-section>
-        <a href="/a/session_tracking">User Journeys</a>
-      </zbase-breadcrumbs-section>
-      <zbase-breadcrumbs-section>
-        <a href="/a/session_tracking/settings/schema">Session Schema</a>
-      </zbase-breadcrumbs-section>
-      <zbase-breadcrumbs-section>
-        <a href="/a/session_tracking/settings/schema"><span class="event_name"></span></a>
-      </zbase-breadcrumbs-section>
-    </zbase-breadcrumbs>
-    <button class="z-button secondary back" style="float: right; margin-top: 20px;"><i class="fa fa-arrow-left"></i> Back</button>
+  <div class='zbase_content_pane fullwidth main_menu zbase_session_tracking'>
 
-    <h2 class='pagetitle edit_event'>
-      <i class="fa fa-cube"></i> Schema <em class="event_name"></em>
-    </h2>
+    <div class="zbase_main_menu"></div>
 
-    <div class="table_container">
-      <table class="z-table edit_event">
+    <div class="zbase_content main_menu">
 
-        <tbody></tbody>
-      </table>
+      <section class="zbase_page_title large">
+        <div>
+          <h2 class="pagetitle">Tracking</h2>
+          <z-tabbable>
+            <z-tab class="link">
+              <a href="/a/session_tracking">Dashboard</a>
+            </z-tab>
+            <z-tab class="link">
+              <a href="/a/session_tracking/journey_viewer">Journey Viewer</a>
+            </z-tab>
+            <z-tab class="link" data-active>
+              <a href="/a/session_tracking/settings/schema">Schema</a>
+            </z-tab>
+            <z-tab class="link">
+              <a href="/a/session_tracking/settings/tracking_pixel">Tracking Pixel</a>
+            </z-tab>
+          </z-tabbable>
+        </div>
+      </section>
 
-      <div class="add_pane">
-        <a class="link add_field"><i class="fa fa-plus"></i> Add Field</a>
+      <div class="edit_session_event">
+        <button class="z-button secondary back"><i class="fa fa-arrow-left"></i> Back</button>
+
+        <h2 class='pagetitle edit_event'>
+          <i class="fa fa-cube"></i> Schema <em class="event_name"></em>
+        </h2>
+
+        <div class="table_container">
+          <table class="z-table edit_event">
+
+            <tbody></tbody>
+          </table>
+
+          <div class="add_pane">
+            <a class="link add_field"><i class="fa fa-plus"></i> Add Field</a>
+          </div>
+        </div>
       </div>
     </div>
 

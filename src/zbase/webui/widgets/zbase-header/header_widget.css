@@ -181,3 +181,27 @@
 .zbase_header .userid_info {
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
+
+.zbase_header.blue {
+  background-color: #3498db;
+}
+
+.zbase_header.blue .logo_app {
+  display: none;
+}
+
+.zbase_header.blue .sep {
+  display: none;
+}
+
+.zbase_header.blue ul.main_menu {
+  display: none;
+}
+
+.zbase_header.blue ul.main_menu.user {
+  display: block;
+}
+
+.zbase_header.blue ul.main_menu.user .dropdown_header {
+  color: #fff;
+}

@@ -1,78 +1,33 @@
-.zbase_session_tracking {
-  display: table;
-  table-layout: fixed;
-  width: 100%;
-  min-height: 900px;
+.zbase_session_tracking .zbase_page_title.large {
+  height: 98px;
+  background: #f9f9f9;
 }
 
-.zbase_session_tracking .session_tracking_sidebar {
-  display: table-cell;
-  width: 220px;
-  vertical-align: top;
-  background: #fff;
+.zbase_session_tracking .zbase_page_title.large h2.pagetitle {
+  color: #444;
 }
 
-.zbase_session_tracking .session_tracking_content {
-  display: table-cell;
-  vertical-align: top;
-  border-left: 1px solid #ddd;
-  padding: 0 20px;
-}
-
-.zbase_session_tracking .session_tracking_sidebar z-menu {
-  position: relative;
-  margin-right: 10px;
-  width: auto;
-  font-family: "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif;
-}
-
-.zbase_session_tracking .session_tracking_sidebar z-menu-section {
-  padding: 0;
-  margin-left: 10px;
-  margin-bottom: 20px;
-}
-
-.zbase_session_tracking .session_tracking_sidebar z-menu-title {
-  margin: 0;
-  line-height: 32px;
-  padding: 0 20px 0 14px;
-  font-size: 11px;
-  color: #777;
-  text-transform: uppercase;
-  font-weight: 400;
-}
-
-.zbase_session_tracking .session_tracking_sidebar z-menu-item {
-  margin: 0;
-  padding: 0;
-}
-
-.zbase_session_tracking .session_tracking_sidebar z-menu-item a {
-  line-height: 34px;
-  padding: 0 20px 0 28px;
+.zbase_session_tracking z-tabbable {
   font-size: 13px;
-  color: #444;
+  background: transparent;
+  border-bottom: none;
 }
 
-.zbase_session_tracking .session_tracking_sidebar z-menu-item a[data-active] {
-  background: #3498db;
-  color: #fff;
+.zbase_session_tracking z-tabbable z-tab.link a {
+  padding: 0.9em 1.4em;
+}
+
+.zbase_session_tracking z-tabbable z-tab[data-active] {
+  border-radius: 0px;
+  border-top: 2px solid #3498db;
 }
 
 
-.zbase_session_tracking .zbase_settings_title {
-  font-weight: 500;
-  font-size: 18px;
-  color: #444;
-  margin: 25px 0 5px 10px;
-}
 
 .zbase_session_tracking .add_pane,
 .zbase_session_tracking .add_session_event,
 .zbase_session_tracking .add_session_attribute {
-  border-left: 1px solid #e1e1e1;
-  border-right: 1px solid #e1e1e1;
-  border-bottom: 1px solid #e1e1e1;
+  border: 1px solid #3498db;
   padding: 20px;
   text-align: center;
   font-size: 14px;

@@ -4,6 +4,10 @@ var JourneyDetail = function() {
         "views/session_tracking",
         "zbase_session_tracking_journey_detail_tpl");
 
+    var path_prefix = "/a/session_tracking/journey_viewer";
+    var main_menu = ZBaseMainMenu();
+    main_menu.render($(".zbase_main_menu", tpl), path_prefix);
+
     $(".session_id", tpl).innerHTML = data.event.session_id;
     $(".session_json", tpl).innerHTML = prettyPrintJSON(JSON.stringify(data));
 

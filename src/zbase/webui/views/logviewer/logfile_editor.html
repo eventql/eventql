@@ -1,105 +1,108 @@
 <template id="zbase_logviewer_logfile_editor_tpl">
-  <div class="zbase_logviewer" style="background: transparent">
-    <section class='zbase_page_title large'>
-      <div>
-        <zbase-breadcrumbs>
-          <zbase-breadcrumbs-section>
-            <a href="/a/">Applications</a>
-          </zbase-breadcrumbs-section>
-          <zbase-breadcrumbs-section>
-            <a href="/a/logs">Logfiles</a>
-          </zbase-breadcrumbs-section>
-          <zbase-breadcrumbs-section>
-            <a href="/a/logs">Logfile Editor</a>
-          </zbase-breadcrumbs-section>
-        </zbase-breadcrumbs>
-        <h1></h1>
+  <div class="zbase_content_pane fullwidth main_menu zbase_logviewer">
+    <div class="zbase_main_menu"></div>
+
+    <div class="zbase_content main_menu logfile_editor">
+
+      <section class='zbase_page_title medium'>
+        <div>
+          <h2 class="pagetitle">
+            <zbase-breadcrumbs>
+              <zbase-breadcrumbs-section>
+                <a href="/a/logs">Logfiles</a>
+              </zbase-breadcrumbs-section>
+              <zbase-breadcrumbs-section>
+                <a href="/a/logs">Logfile Editor</a>
+              </zbase-breadcrumbs-section>
+              <zbase-breadcrumbs-section class="logfile_name">
+                <a></a>
+              </zbase-breadcrumbs-section>
+            </zbase-breadcrumbs>
+          </h2>
+        </div>
+      </section>
+
+
+      <div class="editor_pane source_fields">
+        <div class="editor_pane_header">
+          <h2 class="pagetitle">Source Fields</h2>
+        </div>
+
+        <div class="editor_pane_inner">
+          <table class="z-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Type</th>
+                <th>Format</th>
+                <th></th>
+              </tr>
+            </thead>
+
+            <tbody></tbody>
+          </table>
+
+          <div class="add_field">
+            <a class="link add"><i class="fa fa-plus"></i> Add Field</a>
+          </div>
+        </div>
+
       </div>
-    </section>
-    <div class="zbase_content_pane fullwidth">
-      <div class="logfile_editor">
 
-        <div class="editor_pane source_fields">
-          <div class="editor_pane_header">
-            <h2 class="pagetitle">Source Fields</h2>
-          </div>
-
-          <div class="editor_pane_inner">
-            <table class="z-table">
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Type</th>
-                  <th>Format</th>
-                  <th></th>
-                </tr>
-              </thead>
-
-              <tbody></tbody>
-            </table>
-
-            <div class="add_field">
-              <a class="link add"><i class="fa fa-plus"></i> Add Field</a>
-            </div>
-          </div>
-
+      <div class="editor_pane regex">
+        <div class="editor_pane_header">
+          <h2 class="pagetitle">Row Regex</h2>
         </div>
 
-        <div class="editor_pane regex">
-          <div class="editor_pane_header">
-            <h2 class="pagetitle">Row Regex</h2>
-          </div>
-
-          <div class="editor_pane_inner">
-            <textarea class="z-textarea regex" rows="3" ></textarea>
-            <button class="z-button primary submit">Save</button>
-            <button class="z-button primary loading saving hidden" style="width: 60px;">
-              <i class="fa fa-spinner fa-spin"></i>
-            </button>
-          </div>
+        <div class="editor_pane_inner">
+          <textarea class="z-textarea regex" rows="3" ></textarea>
+          <button class="z-button primary submit">Save</button>
+          <button class="z-button primary loading saving hidden" style="width: 60px;">
+            <i class="fa fa-spinner fa-spin"></i>
+          </button>
         </div>
-
-
-        <div class="editor_pane row_fields">
-          <div class="editor_pane_header">
-            <h2 class="pagetitle">Row Fields</h2>
-          </div>
-
-          <div class="editor_pane_inner">
-            <table class="z-table">
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Type</th>
-                  <th>Format</th>
-                  <th></th>
-                </tr>
-              </thead>
-
-              <tbody></tbody>
-            </table>
-
-            <div class="add_field">
-              <a class="link add"><i class="fa fa-plus"></i> Add Field</a>
-            </div>
-          </div>
-
-        </div>
-
-        <z-modal class="edit_field">
-          <z-modal-box>
-            <z-modal-close-icon></z-modal-close-icon>
-            <div class="container"></div>
-          </z-modal-box>
-        </z-modal>
-
-        <z-modal class="delete_field">
-          <z-modal-box>
-            <z-modal-close-icon></z-modal-close-icon>
-            <div class="container"></div>
-          </z-modal-box>
-        </z-modal>
       </div>
+
+
+      <div class="editor_pane row_fields">
+        <div class="editor_pane_header">
+          <h2 class="pagetitle">Row Fields</h2>
+        </div>
+
+        <div class="editor_pane_inner">
+          <table class="z-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Type</th>
+                <th>Format</th>
+                <th></th>
+              </tr>
+            </thead>
+
+            <tbody></tbody>
+          </table>
+
+          <div class="add_field">
+            <a class="link add"><i class="fa fa-plus"></i> Add Field</a>
+          </div>
+        </div>
+
+      </div>
+
+      <z-modal class="edit_field">
+        <z-modal-box>
+          <z-modal-close-icon></z-modal-close-icon>
+          <div class="container"></div>
+        </z-modal-box>
+      </z-modal>
+
+      <z-modal class="delete_field">
+        <z-modal-box>
+          <z-modal-close-icon></z-modal-close-icon>
+          <div class="container"></div>
+        </z-modal-box>
+      </z-modal>
     </div>
   </div>
 </template>
