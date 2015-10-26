@@ -26,7 +26,6 @@ ZBase.registerView((function() {
     var table_breadcrumb = $("zbase-breadcrumbs-section.table_name a", page);
     table_breadcrumb.innerHTML = schema.name;
     table_breadcrumb.href = kPathPrefix + schema.name;
-    $(".pagetitle em", page).innerHTML = schema.name;
 
     var tbody = $("tbody", page);
 

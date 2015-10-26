@@ -2,16 +2,6 @@
   background: #fff;
 }
 
-.zbase_datastore zbase-breadcrumbs {
-  padding: 0;
-  margin: -4px 0 -6px 0;
-  opacity: 0.6;
-}
-
-.zbase_datastore zbase-breadcrumbs + h2.pagetitle {
-  margin-top: -10px;
-}
-
 .zbase_datastore_tables table.z-table {
   font-size: 13px;
   table-layout: fixed;
