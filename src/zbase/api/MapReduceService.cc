@@ -167,7 +167,22 @@ Option<SHA1Hash> MapReduceService::reduceTables(
     const Vector<String>& input_tables,
     const String& program_source,
     const String& method_name) {
-  auto output_id = Random::singleton()->sha1(); // FIXME
+  auto output_id = SHA1::compute(
+      StringUtil::format(
+          "$0~$1~$2~$3",
+          session.customer(),
+          StringUtil::join(input_tables, "|"),
+          SHA1::compute(program_source).toString(),
+          method_name));
+
+  auto output_path = FileUtil::joinPaths(
+      cachedir_,
+      StringUtil::format("mr-shard-$0.sst", output_id.toString()));
+
+  if (FileUtil::exists(output_path)) {
+    return Some(output_id);
+  }
+
   logDebug(
       "z1.mapreduce",
       "Executing reduce shard; customer=$0 input_tables=$1 output=$2",
@@ -175,7 +190,7 @@ Option<SHA1Hash> MapReduceService::reduceTables(
       input_tables.size(),
       output_id.toString());
 
-  // FIXME MOST NAIVE IMPLEMENTATION AHEAD !!
+  // FIXME MOST NAIVE IN MEMORY MERGE AHEAD !!
   HashMap<String, Vector<String>> groups;
   for (const auto& input_table_url : input_tables) {
     auto api_token = auth_->encodeAuthToken(session);
@@ -203,10 +218,6 @@ Option<SHA1Hash> MapReduceService::reduceTables(
 
   auto js_ctx = mkRef(new JavaScriptContext());
   js_ctx->loadProgram(program_source);
-
-  auto output_path = FileUtil::joinPaths(
-      cachedir_,
-      StringUtil::format("mr-shard-$0.sst", output_id.toString()));
 
   auto writer = sstable::SSTableWriter::create(output_path, nullptr, 0);
 
