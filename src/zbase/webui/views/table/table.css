@@ -1,3 +1,11 @@
+.zbase_datastore_table_detail {
+  background: #fff;
+}
+
+.zbase_datastore_table_detail h2.pagetitle {
+  margin-left: 20px;
+}
+
 .zbase_datastore_table_detail table.z-table {
   font-size: 13px;
   table-layout: fixed;

@@ -15,14 +15,18 @@ var ModalComponent = function() {
       _this.close();
     };
 
-    this.querySelector("z-modal-close-icon").onclick = function() {
+    this.querySelector("z-modal-close-icon").onclick = function(e) {
       _this.close();
     };
 
     this.querySelector("z-modal-box").onclick = function(e) {
+      var target = e.srcElement || e.target;
+      if (target.tagName == "Z-MODAL-CLOSE-ICON") {
+        _this.close();
+        return;
+      }
       e.stopPropagation();
     };
-
   };
 
   this.show = function() {

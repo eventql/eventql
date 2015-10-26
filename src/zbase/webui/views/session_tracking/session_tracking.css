@@ -1,5 +1,10 @@
 .zbase_session_tracking .zbase_page_title.large {
   height: 98px;
+  background: #f9f9f9;
+}
+
+.zbase_session_tracking .zbase_page_title.large h2.pagetitle {
+  color: #444;
 }
 
 .zbase_session_tracking z-tabbable {
@@ -22,9 +27,7 @@
 .zbase_session_tracking .add_pane,
 .zbase_session_tracking .add_session_event,
 .zbase_session_tracking .add_session_attribute {
-  border-left: 1px solid #e1e1e1;
-  border-right: 1px solid #e1e1e1;
-  border-bottom: 1px solid #e1e1e1;
+  border: 1px solid #3498db;
   padding: 20px;
   text-align: center;
   font-size: 14px;
