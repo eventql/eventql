@@ -13,6 +13,9 @@ ZBase.registerView((function() {
         "views/session_tracking",
         "zbase_session_tracking_edit_event_tpl");
 
+    var main_menu = ZBaseMainMenu();
+    main_menu.render($(".zbase_main_menu", page), path_prefix);
+
     $.onClick($("button.back", page), function() {
       $.navigateTo("/a/session_tracking/settings/schema");
     });
