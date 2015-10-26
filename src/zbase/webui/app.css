@@ -397,6 +397,19 @@ section.zbase_page_title zbase-breadcrumbs a {
   color: #fff;
 }
 
+section.zbase_page_title h2.pagetitle zbase-breadcrumbs {
+  margin: 0;
+}
+
+section.zbase_page_title h2.pagetitle zbase-breadcrumbs zbase-breadcrumbs-section:after {
+  margin-bottom: 4px;
+}
+
+.zbase_content.main_menu section.zbase_page_title zbase-breadcrumbs,
+.zbase_content.main_menu section.zbase_page_title zbase-breadcrumbs a {
+  color: #444;
+}
+
 
 /**
  * h2.pagetitle
