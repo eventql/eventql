@@ -41,6 +41,12 @@
   height: 250px;
 }
 
+.zbase_session_tracking.zbase_session_tracking_dashboard .inner_chart .error_msg {
+  text-align: center;
+  padding-top: 80px;
+  font-size: 20px;
+}
+
 .zbase_session_tracking.zbase_session_tracking_dashboard z-daterangepicker {
   float: right;
 }
