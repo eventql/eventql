@@ -51,6 +51,12 @@ public:
   Option<String> getResultFilename(
       const SHA1Hash& result_id);
 
+  bool saveResultToTable(
+      const AnalyticsSession& session,
+      const SHA1Hash& result_id,
+      const String& table_name,
+      const SHA1Hash& partition);
+
   static void downloadResult(
       const http::HTTPRequest& req,
       Function<void (const void*, size_t, const void*, size_t)> fn);

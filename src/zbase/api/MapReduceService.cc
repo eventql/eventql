@@ -303,4 +303,19 @@ void MapReduceService::downloadResult(
   }
 }
 
+bool MapReduceService::saveResultToTable(
+    const AnalyticsSession& session,
+    const SHA1Hash& result_id,
+    const String& table_name,
+    const SHA1Hash& partition) {
+  logDebug(
+      "z1.mapreduce",
+      "Saving result shard to table; shard=$0 table=$1/$2/$3",
+      result_id.toString(),
+      session.customer(),
+      table_name,
+      partition.toString());
+  return true;
+}
+
 } // namespace zbase

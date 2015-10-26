@@ -33,7 +33,7 @@ SaveToTableTask::SaveToTableTask(
       auto shard = mkRef(new SaveToTableTaskShard());
       shard->task = this;
       shard->dependencies.emplace_back(idx);
-      shard->shard = nshard++;
+      shard->partition = SHA1::compute(StringUtil::toString(nshard++));
       addShard(shard.get(), shards);
     }
   }
@@ -52,15 +52,16 @@ Option<MapReduceShardResult> SaveToTableTask::execute(
   auto result_id = job->getResultID(deps[0]);
   if (host.isEmpty() || result_id.isEmpty()) {
     // FIXME save empty shard
+    return None<MapReduceShardResult>();
   }
 
   logDebug(
       "z1.mapreduce",
-      "Executing save to table on $0; customer=$1 table=$2 shard=$3/$4",
+      "Saving result shard to table; result_id=$4 target=$0/$1/$2/$3",
       host.get().addr.hostAndPort(),
       session_.customer(),
       table_name_,
-      shard->shard,
+      shard->partition.toString(),
       result_id.get().toString());
 
   auto url = StringUtil::format(
@@ -68,9 +69,9 @@ Option<MapReduceShardResult> SaveToTableTask::execute(
       host.get().addr.ipAndPort());
 
   String params = StringUtil::format(
-      "result_id=$0&table_shard=$1&table_name=$2",
+      "result_id=$0&partition=$1&table_name=$2",
       result_id.get().toString(),
-      shard->shard,
+      shard->partition.toString(),
       table_name_);
 
   auto api_token = auth_->encodeAuthToken(session_);

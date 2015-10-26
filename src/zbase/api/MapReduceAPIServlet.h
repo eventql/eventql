@@ -67,6 +67,12 @@ protected:
       const http::HTTPRequest* req,
       http::HTTPResponse* res);
 
+  void executeSaveToTableTask(
+      const AnalyticsSession& session,
+      const URI& uri,
+      const http::HTTPRequest* req,
+      http::HTTPResponse* res);
+
   MapReduceService* service_;
   ConfigDirectory* cdir_;
   String cachedir_;

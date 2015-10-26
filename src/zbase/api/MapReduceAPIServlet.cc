@@ -71,6 +71,15 @@ void MapReduceAPIServlet::handle(
     return;
   }
 
+  if (uri.path() == "/api/v1/mapreduce/tasks/save_to_table") {
+    req_stream->readBody();
+    catchAndReturnErrors(&res, [this, &session, &uri, &req, &res] {
+      executeSaveToTableTask(session, uri, &req, &res);
+    });
+    res_stream->writeResponse(res);
+    return;
+  }
+
   res.setStatus(http::kStatusNotFound);
   res.addHeader("Content-Type", "text/html; charset=utf-8");
   res.addBody(Assets::getAsset("zbase/webui/404.html"));
@@ -168,6 +177,49 @@ void MapReduceAPIServlet::executeReduceTask(
   } else {
     res->setStatus(http::kStatusCreated);
     res->addBody(result_id.get().toString());
+  }
+}
+
+void MapReduceAPIServlet::executeSaveToTableTask(
+    const AnalyticsSession& session,
+    const URI& uri,
+    const http::HTTPRequest* req,
+    http::HTTPResponse* res) {
+  URI::ParamList params;
+  URI::parseQueryString(req->body().toString(), &params);
+
+  String result_id;
+  if (!URI::getParam(params, "result_id", &result_id)) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody("missing ?result_id=... parameter");
+    return;
+  }
+
+  String table_name;
+  if (!URI::getParam(params, "table_name", &table_name)) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody("missing ?table_name=... parameter");
+    return;
+  }
+
+
+  String partition;
+  if (!URI::getParam(params, "partition", &partition)) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody("missing ?partition=... parameter");
+    return;
+  }
+
+  bool saved = service_->saveResultToTable(
+      session,
+      SHA1Hash::fromHexString(result_id),
+      table_name,
+      SHA1Hash::fromHexString(partition));
+
+  if (saved) {
+    res->setStatus(http::kStatusCreated);
+  } else {
+    res->setStatus(http::kStatusNoContent);
   }
 }
 

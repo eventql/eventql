@@ -17,7 +17,7 @@ using namespace stx;
 namespace zbase {
 
 struct SaveToTableTaskShard : public MapReduceTaskShard {
-  size_t shard;
+  SHA1Hash partition;
 };
 
 class SaveToTableTask : public MapReduceTask {
