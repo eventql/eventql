@@ -40,11 +40,14 @@ ZBase.registerView((function() {
         "views/datastore_tables",
         "zbase_datastore_tables_list_row_tpl");
 
-    var url = "/a/datastore/tables/" + table.name;
-
     var table_name = $(".table_name", elem);
     table_name.innerHTML = table.name;
-    table_name.href = url;
+
+    var url = "/a/datastore/tables/" + table.name;
+    var links = elem.querySelectorAll("a");
+    for (var i = 0; i < links.length; i++) {
+      links[i].href = url;
+    }
     //$(".table_description", elem).innerHTML = table[1];
 
     tbody.appendChild(elem);

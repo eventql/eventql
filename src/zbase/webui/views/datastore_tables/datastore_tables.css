@@ -35,10 +35,13 @@
 
 .zbase_datastore_tables table.z-table tbody tr td {
   line-height: 24px;
+  padding: 0;
 }
 
 .zbase_datastore_tables table.z-table tbody tr a {
   color: #888;
+  padding: .7em .8em;
+  display: block;
 }
 
 .zbase_datastore_tables table.z-table tbody tr td:first-child a {
