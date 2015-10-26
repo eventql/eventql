@@ -352,10 +352,11 @@ bool MapReduceService::saveResultToTable(
       size_t data_size;
       cursor->getData(&data, &data_size);
 
-      msg::MessageObject msg;
-      msg::MessageDecoder::decode(data, data_size, *schema, &msg);
+      auto json = json::parseJSON(String((const char*) data, data_size));
+      msg::DynamicMessage msg(schema);
+      msg.fromJSON(json.begin(), json.end());
 
-      cstable.addRecord(msg);
+      cstable.addRecord(msg.data());
 
       if (!cursor->next()) {
         break;
