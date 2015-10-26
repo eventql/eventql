@@ -64,10 +64,12 @@ route {
   require_module: "widgets/z-table"
   require_module: "widgets/z-modal"
   require_module: "widgets/z-input"
+  require_module: "widgets/z-menu"
   require_module: "widgets/z-dropdown"
   require_module: "widgets/z-textarea"
   require_module: "widgets/zbase-info-message"
   require_module: "widgets/zbase-header"
+  require_module: "widgets/zbase-main-menu"
   require_module: "views/logviewer"
 }
 
