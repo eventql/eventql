@@ -3,6 +3,12 @@
   background: transparent;
 }
 
+.zbase_session_tracking z-tabbable z-tab[data-active] {
+  border-left: none;
+  border-top: none;
+  border-radius: 0px;
+}
+
 .zbase_session_tracking .add_pane,
 .zbase_session_tracking .add_session_event,
 .zbase_session_tracking .add_session_attribute {

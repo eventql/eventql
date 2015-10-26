@@ -1,15 +1,20 @@
+.zbase_session_tracking.zbase_session_tracking_dashboard .dashboard {
+  background: #fff;
+}
+
 .zbase_session_tracking.zbase_session_tracking_dashboard .inner_chart.hidden {
   display: none;
 }
 
 .zbase_session_tracking.zbase_session_tracking_dashboard .chart_panel {
   position: relative;
-  top: 10px;
+  top: 50px;
   padding: 10px 15px;
   background: #fff;
-  border: 1px solid #eee;
+  border-bottom: 1px solid #eee;
+  /**border: 1px solid #eee;
   border-top-left-radius: 5px;
-  border-top-right-radius: 5px;
+  border-top-right-radius: 5px;**/
 }
 
 .zbase_session_tracking.zbase_session_tracking_dashboard .chart_panel label {
@@ -26,6 +31,7 @@
 }
 
 .zbase_session_tracking.zbase_session_tracking_dashboard .chart_container {
+  margin-top: 50px;
   background: #fff;
   border: 1px solid #eee;
   padding: 10px 15px;
