@@ -66,10 +66,14 @@ Option<MapReduceShardResult> ReduceTask::execute(
             shard->shard));
   }
 
-  auto output_id = Random::singleton()->sha1(); // FIXME
+  auto placement_id = SHA1::compute(
+      StringUtil::format(
+          "$0~$1",
+          StringUtil::join(input_tables, "~"),
+          shard->shard));
 
   Vector<String> errors;
-  auto hosts = repl_->replicasFor(output_id);
+  auto hosts = repl_->replicasFor(placement_id);
   for (const auto& host : hosts) {
     try {
       return executeRemote(shard.get(), job, input_tables, host);
