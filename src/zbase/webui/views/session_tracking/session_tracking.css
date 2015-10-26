@@ -1,5 +1,10 @@
 .zbase_session_tracking .zbase_page_title.large {
   height: 98px;
+  background: #f9f9f9;
+}
+
+.zbase_session_tracking .zbase_page_title.large h2.pagetitle {
+  color: #444;
 }
 
 .zbase_session_tracking z-tabbable {
