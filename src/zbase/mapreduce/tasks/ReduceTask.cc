@@ -81,7 +81,7 @@ Option<MapReduceShardResult> ReduceTask::execute(
       logError(
           "z1.mapreduce",
           e,
-          "MapTableTask::execute failed");
+          "ReduceTask::execute failed");
 
       errors.emplace_back(e.what());
     }
@@ -89,7 +89,7 @@ Option<MapReduceShardResult> ReduceTask::execute(
 
   RAISEF(
       kRuntimeError,
-      "MapTableTask::execute failed: $0",
+      "ReduceTask::execute failed: $0",
       StringUtil::join(errors, ", "));
 }
 
@@ -106,14 +106,16 @@ Option<MapReduceShardResult> ReduceTask::executeRemote(
       host.addr.hostAndPort());
 
   auto url = StringUtil::format(
-      "http://$0/api/v1/mapreduce/tasks/reduce?" \
-      "program_source=$1&method_name=$2",
-      host.addr.ipAndPort(),
+      "http://$0/api/v1/mapreduce/tasks/reduce",
+      host.addr.ipAndPort());
+
+  auto params = StringUtil::format(
+      "program_source=$0&method_name=$1",
       URI::urlEncode(job_spec_->program_source),
       URI::urlEncode(method_name_));
 
   for (const auto& input_table : input_tables) {
-    url += "&input_table=" + URI::urlEncode(input_table);
+    params += "&input_table=" + URI::urlEncode(input_table);
   }
 
   auto api_token = auth_->encodeAuthToken(session_);
@@ -124,7 +126,7 @@ Option<MapReduceShardResult> ReduceTask::executeRemote(
       StringUtil::format("Token $0", api_token));
 
   http::HTTPClient http_client;
-  auto req = http::HTTPRequest::mkGet(url, auth_headers);
+  auto req = http::HTTPRequest::mkPost(url, params, auth_headers);
   auto res = http_client.executeRequest(req);
 
   if (res.statusCode() == 204) {

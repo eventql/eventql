@@ -87,13 +87,16 @@ Option<MapReduceShardResult> MapTableTask::executeRemote(
       host.addr.hostAndPort());
 
   auto url = StringUtil::format(
-      "http://$0/api/v1/mapreduce/tasks/map_partition?table=$1&partition=$2" \
-      "&program_source=$3&method_name=$4",
-      host.addr.ipAndPort(),
+      "http://$0/api/v1/mapreduce/tasks/map_partition",
+      host.addr.ipAndPort());
+
+  auto params = StringUtil::format(
+      "table=$0&partition=$1&program_source=$2&method_name=$3",
       URI::urlEncode(shard->table_ref.table_key),
       shard->table_ref.partition_key.get().toString(),
       URI::urlEncode(job_spec_->program_source),
       URI::urlEncode(method_name_));
+
 
   auto api_token = auth_->encodeAuthToken(session_);
 
@@ -103,7 +106,7 @@ Option<MapReduceShardResult> MapTableTask::executeRemote(
       StringUtil::format("Token $0", api_token));
 
   http::HTTPClient http_client;
-  auto req = http::HTTPRequest::mkGet(url, auth_headers);
+  auto req = http::HTTPRequest::mkPost(url, params, auth_headers);
   auto res = http_client.executeRequest(req);
 
   if (res.statusCode() == 204) {

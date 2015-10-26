@@ -82,7 +82,8 @@ void MapReduceAPIServlet::executeMapPartitionTask(
     const URI& uri,
     const http::HTTPRequest* req,
     http::HTTPResponse* res) {
-  const auto& params = uri.queryParams();
+  URI::ParamList params;
+  URI::parseQueryString(req->body().toString(), &params);
 
   String table_name;
   if (!URI::getParam(params, "table", &table_name)) {
@@ -132,7 +133,8 @@ void MapReduceAPIServlet::executeReduceTask(
     const URI& uri,
     const http::HTTPRequest* req,
     http::HTTPResponse* res) {
-  const auto& params = uri.queryParams();
+  URI::ParamList params;
+  URI::parseQueryString(req->body().toString(), &params);
 
   Vector<String> input_tables;
   for (const auto& p : params) {
