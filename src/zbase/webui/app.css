@@ -334,7 +334,7 @@ template {
 }
 
 .zbase_page_title > div {
-  padding: 1px 20px 1px 240px;
+  padding: 1px 20px;
   margin: auto;
   max-width: 2048px;
   min-width: 960px;
@@ -353,6 +353,14 @@ template {
 
 .zbase_page_title h2.pagetitle {
   color: #fff;
+}
+
+.zbase_content.main_menu .zbase_page_title {
+  background: #f9f9f9;
+}
+
+.zbase_content.main_menu .zbase_page_title h2.pagetitle {
+  color: #444;
 }
 
 .zbase_page_title.large h1 {
