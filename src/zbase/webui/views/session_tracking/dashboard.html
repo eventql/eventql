@@ -5,37 +5,25 @@
       <div class="zbase_main_menu"></div>
 
       <div class='zbase_content main_menu'>
-        <section class="zbase_page_title medium">
+        <section class="zbase_page_title large">
           <div>
-            <!--<zbase-breadcrumbs style="margin-top: 20px; margin-bottom: -6px;">
-              <zbase-breadcrumbs-section>
-                <a href="/a/">Apps</a>
-              </zbase-breadcrumbs-section>
-              <zbase-breadcrumbs-section>
-                <a href="/a/session_tracking">User Journeys</a>
-              </zbase-breadcrumbs-section>
-              <zbase-breadcrumbs-section>
-                <a href="/a/session_tracking">Dashboard</a>
-              </zbase-breadcrumbs-section>
-            </zbase-breadcrumbs>-->
-            <z-daterangepicker data-resolved class="open_left"></z-daterangepicker>
             <h2 class="pagetitle">Tracking</h2>
+            <z-tabbable>
+              <z-tab class="link" data-active>
+                <a href="/a/session_tracking">Dashboard</a>
+              </z-tab>
+              <z-tab class="link">
+                <a href="/a/session_tracking/journey_viewer">Journey Viewer</a>
+              </z-tab>
+              <z-tab class="link">
+                <a href="/a/session_tracking/settings/schema">Schema</a>
+              </z-tab>
+              <z-tab class="link">
+                <a href="/a/session_tracking/settings/tracking_pixel">Tracking Pixel</a>
+              </z-tab>
+            </z-tabbable>
           </div>
         </section>
-        <z-tabbable>
-          <z-tab class="link" data-active>
-            <a href="/a/session_tracking">Dashboard</a>
-          </z-tab>
-          <z-tab class="link">
-            <a href="/a/session_tracking/journey_viewer">Journey Viewer</a>
-          </z-tab>
-          <z-tab class="link">
-            <a href="/a/session_tracking/settings/schema">Schema</a>
-          </z-tab>
-          <z-tab class="link">
-            <a href="/a/session_tracking/settings/tracking_pixel">Tracking Pixel</a>
-          </z-tab>
-        </z-tabbable>
 
         <div class="dashboard">
           <div class="chart_panel">
@@ -58,10 +46,12 @@
               </z-dropdown-flyout>
             </z-dropdown>
 
-            <div class="chart_legend"></div>
+            <z-daterangepicker data-resolved class="open_left"></z-daterangepicker>
           </div>
 
           <div class="chart_container">
+            <div class="chart_legend"></div>
+            <div class="clearfix"></div>
             <div class="zbase_loader">
               <div class="spinner_outer">
                 <div class="spinner">

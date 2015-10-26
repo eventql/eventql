@@ -1,13 +1,23 @@
+.zbase_session_tracking .zbase_page_title.large {
+  height: 98px;
+}
+
 .zbase_session_tracking z-tabbable {
   font-size: 13px;
   background: transparent;
+  border-bottom: none;
+}
+
+.zbase_session_tracking z-tabbable z-tab.link a {
+  padding: 0.9em 1.4em;
 }
 
 .zbase_session_tracking z-tabbable z-tab[data-active] {
-  border-left: none;
-  border-top: none;
   border-radius: 0px;
+  border-top: 2px solid #3498db;
 }
+
+
 
 .zbase_session_tracking .add_pane,
 .zbase_session_tracking .add_session_event,
