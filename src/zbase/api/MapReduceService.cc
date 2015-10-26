@@ -177,39 +177,24 @@ Option<SHA1Hash> MapReduceService::reduceTables(
 
   // FIXME MOST NAIVE IMPLEMENTATION AHEAD !!
   HashMap<String, Vector<String>> groups;
-
   for (const auto& input_table_url : input_tables) {
-    auto result_path = FileUtil::joinPaths(
-        cachedir_,
-        StringUtil::format("mr-result-$0", Random::singleton()->sha1().toString()));
-
     auto api_token = auth_->encodeAuthToken(session);
-
     http::HTTPMessage::HeaderList auth_headers;
     auth_headers.emplace_back(
         "Authorization",
         StringUtil::format("Token $0", api_token));
 
     auto req = http::HTTPRequest::mkGet(input_table_url, auth_headers);
-
-    http::HTTPClient http_client;
-    http::HTTPFileDownload download(req, result_path);
-    auto res = download.download(&http_client);
-    if (res.statusCode() != 200) {
-      RAISEF(kRuntimeError, "received non-201 response for $0", input_table_url);
-    }
-
-    sstable::SSTableReader reader(result_path);
-    auto cursor = reader.getCursor();
-
-    while (cursor->valid()) {
-      auto& lst = groups[cursor->getKeyString()];
-      lst.emplace_back(cursor->getDataString());
-
-      if (!cursor->next()) {
-        break;
-      }
-    }
+    MapReduceService::downloadResult(
+        req,
+        [&groups] (
+            const void* key,
+            size_t key_len,
+            const void* val,
+            size_t val_len) {
+      auto& lst = groups[String((const char*) key, key_len)];
+      lst.emplace_back(String((const char*) val, val_len));
+    });
   }
 
   if (groups.size() == 0) {
@@ -247,6 +232,62 @@ Option<String> MapReduceService::getResultFilename(
     return Some(result_path);
   } else {
     return None<String>();
+  }
+}
+
+void MapReduceService::downloadResult(
+    const http::HTTPRequest& req,
+    Function<void (const void*, size_t, const void*, size_t)> fn) {
+  Buffer buffer;
+  bool eos = false;
+  auto handler = [&buffer, &eos, &fn] (const void* data, size_t size) {
+    buffer.append(data, size);
+    size_t consumed = 0;
+
+    util::BinaryMessageReader reader(buffer.data(), buffer.size());
+    while (reader.remaining() >= (sizeof(uint32_t) * 2)) {
+      auto key_len = *reader.readUInt32();
+      auto val_len = *reader.readUInt32();
+      auto rec_len = key_len + val_len;
+
+      if (rec_len > reader.remaining()) {
+        break;
+      }
+
+      if (rec_len == 0) {
+        eos = true;
+      } else {
+        auto key = reader.read(key_len);
+        auto val = reader.read(val_len);
+        fn(key, key_len, val, val_len);
+      }
+
+      consumed = reader.position();
+    }
+
+    Buffer remaining(
+        (char*) buffer.data() + consumed,
+        buffer.size() - consumed);
+    buffer.clear();
+    buffer.append(remaining);
+  };
+
+  auto handler_factory = [&handler] (
+      const Promise<http::HTTPResponse> promise)
+      -> http::HTTPResponseFuture* {
+    return new http::StreamingResponseFuture(promise, handler);
+  };
+
+  http::HTTPClient http_client;
+  auto res = http_client.executeRequest(req, handler_factory);
+  handler(nullptr, 0);
+
+  if (!eos) {
+    RAISE(kRuntimeError, "unexpected EOF");
+  }
+
+  if (res.statusCode() != 200) {
+    RAISEF(kRuntimeError, "received non-200 response for $0", req.uri());
   }
 }
 

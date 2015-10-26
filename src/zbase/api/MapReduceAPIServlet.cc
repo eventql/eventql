@@ -8,10 +8,12 @@
  */
 #include "stx/wallclock.h"
 #include "stx/assets.h"
+#include <stx/fnv.h>
 #include "stx/protobuf/msg.h"
 #include "stx/io/BufferedOutputStream.h"
 #include "zbase/api/MapReduceAPIServlet.h"
 #include "zbase/mapreduce/MapReduceTask.h"
+#include "sstable/sstablereader.h"
 
 using namespace stx;
 
@@ -268,38 +270,77 @@ void MapReduceAPIServlet::fetchResult(
     const String& result_id,
     http::HTTPRequestStream* req_stream,
     http::HTTPResponseStream* res_stream) {
+  http::HTTPResponse res;
+  res.populateFromRequest(req_stream->request());
   req_stream->readBody();
+
+  URI uri(req_stream->request().uri());
+  const auto& params = uri.queryParams();
 
   auto filename = service_->getResultFilename(
       SHA1Hash::fromHexString(result_id));
 
   if (filename.isEmpty()) {
-    http::HTTPResponse res;
-    res.populateFromRequest(req_stream->request());
     res.setStatus(http::kStatusNotFound);
     res_stream->writeResponse(res);
     return;
   }
 
-  auto filesize = FileUtil::size(filename.get());
-  auto file = File::openFile(filename.get(), File::O_READ);
+  size_t sample_mod = 0;
+  size_t sample_idx = 0;
+  String sample_str;
+  if (URI::getParam(params, "sample", &sample_str)) {
+    auto parts = StringUtil::split(sample_str, ":");
 
-  http::HTTPResponse res;
-  res.populateFromRequest(req_stream->request());
-  res.setStatus(http::kStatusOK);
-  res.addHeader("Content-Length", StringUtil::toString(filesize));
-  res_stream->startResponse(res);
-
-  Buffer buf(1024 * 1024 * 4);
-  for (;;) {
-    auto chunk = file.read(buf.data(), buf.size());
-    if (chunk == 0) {
-      break;
+    if (parts.size() != 2) {
+      res.setStatus(stx::http::kStatusBadRequest);
+      res.addBody("invalid ?sample=... parameter, format is <mod>:<idx>");
+      res_stream->writeResponse(res);
+      return;
     }
 
-    res_stream->writeBodyChunk(buf.data(), chunk);
-    res_stream->waitForReader();
+    sample_mod = std::stoull(parts[0]);
+    sample_idx = std::stoull(parts[1]);
   }
+
+  res.setStatus(http::kStatusOK);
+  res.addHeader("Content-Type", "application/octet-stream");
+  res.addHeader("Connection", "close");
+  res_stream->startResponse(res);
+
+  sstable::SSTableReader reader(filename.get());
+  auto cursor = reader.getCursor();
+
+  while (cursor->valid()) {
+    void* key;
+    size_t key_size;
+    cursor->getKey((void**) &key, &key_size);
+
+    FNV<uint64_t> fnv;
+    if (sample_mod == 0 ||
+        (fnv.hash(key, key_size) % sample_mod) == sample_idx) {
+      void* data;
+      size_t data_size;
+      cursor->getData(&data, &data_size);
+
+      util::BinaryMessageWriter buf;
+      buf.appendUInt32(key_size);
+      buf.appendUInt32(data_size);
+      buf.append(key, key_size);
+      buf.append(data, data_size);
+      res_stream->writeBodyChunk(Buffer(buf.data(), buf.size()));
+      res_stream->waitForReader();
+    }
+
+    if (!cursor->next()) {
+      break;
+    }
+  }
+
+  util::BinaryMessageWriter buf;
+  buf.appendUInt32(0);
+  buf.appendUInt32(0);
+  res_stream->writeBodyChunk(Buffer(buf.data(), buf.size()));
 
   res_stream->finishResponse();
 }

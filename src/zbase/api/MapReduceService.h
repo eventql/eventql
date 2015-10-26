@@ -51,6 +51,10 @@ public:
   Option<String> getResultFilename(
       const SHA1Hash& result_id);
 
+  static void downloadResult(
+      const http::HTTPRequest& req,
+      Function<void (const void*, size_t, const void*, size_t)> fn);
+
 protected:
   ConfigDirectory* cdir_;
   AnalyticsAuth* auth_;

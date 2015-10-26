@@ -34,8 +34,10 @@ public:
 
   void sendResult(const String& key, const String& value);
 
-  Option<String> downloadResult(size_t task_index);
   Option<String> getResultURL(size_t task_index);
+  void downloadResult(
+      size_t task_index,
+      Function<void (const void*, size_t, const void*, size_t)> fn);
 
 protected:
 

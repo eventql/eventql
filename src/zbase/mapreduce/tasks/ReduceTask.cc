@@ -37,17 +37,20 @@ ReduceTask::ReduceTask(
   }
 
   for (size_t shard_idx = 0; shard_idx < num_shards_; shard_idx++) {
-    auto shard = mkRef(new MapReduceTaskShard());
+    auto shard = mkRef(new ReduceTaskShard());
     shard->task = this;
     shard->dependencies = input;
+    shard->shard = shard_idx;
 
-    addShard(shard, shards);
+    addShard(shard.get(), shards);
   }
 }
 
 Option<MapReduceShardResult> ReduceTask::execute(
-    RefPtr<MapReduceTaskShard> shard,
+    RefPtr<MapReduceTaskShard> shard_base,
     RefPtr<MapReduceScheduler> job) {
+  auto shard = shard_base.asInstanceOf<ReduceTaskShard>();
+
   Vector<String> input_tables;
   for (const auto& input : shard->dependencies) {
     auto input_tbl = job->getResultURL(input);
@@ -55,7 +58,12 @@ Option<MapReduceShardResult> ReduceTask::execute(
       continue;
     }
 
-    input_tables.emplace_back(input_tbl.get());
+    input_tables.emplace_back(
+        StringUtil::format(
+            "$0?sample=$1:$2",
+            input_tbl.get(),
+            num_shards_,
+            shard->shard));
   }
 
   auto output_id = Random::singleton()->sha1(); // FIXME
@@ -64,7 +72,7 @@ Option<MapReduceShardResult> ReduceTask::execute(
   auto hosts = repl_->replicasFor(output_id);
   for (const auto& host : hosts) {
     try {
-      return executeRemote(shard, job, input_tables, host);
+      return executeRemote(shard.get(), job, input_tables, host);
     } catch (const StandardException& e) {
       logError(
           "z1.mapreduce",

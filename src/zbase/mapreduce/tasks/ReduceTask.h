@@ -16,6 +16,10 @@ using namespace stx;
 
 namespace zbase {
 
+struct ReduceTaskShard : public MapReduceTaskShard {
+  size_t shard;
+};
+
 class ReduceTask : public MapReduceTask {
 public:
 
