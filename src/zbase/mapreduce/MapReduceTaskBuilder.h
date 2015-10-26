@@ -59,6 +59,12 @@ protected:
       HashMap<String, json::JSONObject>* job_definitions,
       HashMap<String, RefPtr<MapReduceTask>>* jobs);
 
+  RefPtr<MapReduceTask> buildSaveToTableTask(
+      const json::JSONObject& job,
+      MapReduceShardList* shards,
+      HashMap<String, json::JSONObject>* job_definitions,
+      HashMap<String, RefPtr<MapReduceTask>>* jobs);
+
   AnalyticsSession session_;
   RefPtr<MapReduceJobSpec> job_spec_;
   AnalyticsAuth* auth_;

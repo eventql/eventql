@@ -55,6 +55,19 @@ var Z1 = (function(global) {
     return job_id;
   };
 
+  var mkSaveToTableTask = function(opts) {
+    var job_id = mkJobID();
+
+    jobs.push({
+      id: job_id,
+      op: "save_to_table",
+      table_name: opts["table"],
+      sources: opts["sources"]
+    });
+
+    return job_id;
+  };
+
   var mkJobID = function() {
     return "job-" + ++seq;
   };
@@ -66,7 +79,8 @@ var Z1 = (function(global) {
   return {
     mapTable: mkMapTableTask,
     reduce: mkReduceTask,
-    downloadResults: mkDownloadResultsTask
+    downloadResults: mkDownloadResultsTask,
+    saveToTable: mkSaveToTableTask
   };
 })(this);
 
