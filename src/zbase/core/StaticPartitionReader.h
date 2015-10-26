@@ -29,6 +29,8 @@ public:
   void fetchRecords(
       Function<void (const msg::MessageObject& record)> fn) override;
 
+  SHA1Hash version() const override;
+
 protected:
   RefPtr<Table> table_;
 };

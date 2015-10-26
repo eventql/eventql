@@ -32,6 +32,8 @@ public:
   virtual void fetchRecords(
       Function<void (const msg::MessageObject& record)> fn) = 0;
 
+  virtual SHA1Hash version() const = 0;
+
 protected:
   RefPtr<PartitionSnapshot> snap_;
 };

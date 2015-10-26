@@ -85,15 +85,6 @@ Option<SHA1Hash> MapReduceService::mapPartition(
     const SHA1Hash& partition_key,
     const String& program_source,
     const String& method_name) {
-  auto output_id = Random::singleton()->sha1(); // FIXME
-  logDebug(
-      "z1.mapreduce",
-      "Executing map shard; partition=$0/$1/$2 output=$3",
-      session.customer(),
-      table_name,
-      partition_key.toString(),
-      output_id.toString());
-
   auto table = pmap_->findTable(
       session.customer(),
       table_name);
@@ -118,12 +109,34 @@ Option<SHA1Hash> MapReduceService::mapPartition(
   auto schema = table.get()->schema();
   auto reader = partition.get()->getReader();
 
-  auto js_ctx = mkRef(new JavaScriptContext());
-  js_ctx->loadProgram(program_source);
+  auto output_id = SHA1::compute(
+      StringUtil::format(
+          "$0~$1~$2~$3~$4~$5",
+          session.customer(),
+          table_name,
+          partition_key.toString(),
+          reader->version().toString(),
+          SHA1::compute(program_source).toString(),
+          method_name));
 
   auto output_path = FileUtil::joinPaths(
       cachedir_,
       StringUtil::format("mr-shard-$0.sst", output_id.toString()));
+
+  if (FileUtil::exists(output_path)) {
+    return Some(output_id);
+  }
+
+  logDebug(
+      "z1.mapreduce",
+      "Executing map shard; partition=$0/$1/$2 output=$3",
+      session.customer(),
+      table_name,
+      partition_key.toString(),
+      output_id.toString());
+
+  auto js_ctx = mkRef(new JavaScriptContext());
+  js_ctx->loadProgram(program_source);
 
   auto writer = sstable::SSTableWriter::create(output_path, nullptr, 0);
 

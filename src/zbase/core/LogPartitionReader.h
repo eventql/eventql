@@ -44,6 +44,8 @@ public:
       size_t sample_index,
       Function<void (const Buffer& record)> fn);
 
+  SHA1Hash version() const override;
+
 protected:
   RefPtr<Table> table_;
 };
