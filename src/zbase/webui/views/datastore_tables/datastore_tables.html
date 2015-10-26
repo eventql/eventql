@@ -23,8 +23,26 @@
           <tbody></tbody>
         </table>
 
+        <div class="add_pane create_table">
+          <i class="fa fa-plus"></i> Create Table
+        </div>
+
       </div>
     </div>
+
+    <z-modal class="create_table">
+      <z-modal-box>
+        <z-modal-close-icon></z-modal-close-icon>
+        <div class="z-modal-header">
+          Create a new table
+        </div>
+        <div class="z-modal-content"></div>
+        <div class="z-modal-footer">
+          <button class="z-button primary submit">Save</button>
+          <button class="z-button secondary close">Cancel</button>
+        </div>
+      </z-modal-box>
+    </z-modal>
   <div>
 </template>
 
@@ -41,4 +59,12 @@
       </a>
     </td>
   </tr>
+</template>
+
+<template id="zbase_datastore_tables_add_modal_tpl">
+  <div class="field">
+    <label>Table Name:</label>
+    <input class="z-input" type="text" />
+    <div class="error_note hidden">Please insert a name</div>
+  </div>
 </template>

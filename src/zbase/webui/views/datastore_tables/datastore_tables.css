@@ -5,8 +5,6 @@
 .zbase_datastore_tables table.z-table {
   font-size: 13px;
   table-layout: fixed;
-  border-bottom: 2px solid #d4d4d4;
-  margin-bottom: 20px;
 }
 
 .zbase_datastore_tables .table_definition .table_config {
@@ -14,9 +12,6 @@
   word-wrap: break-word;
 }
 
-.zbase_datastore_tables table.z-table {
-  font-size: 13px;
-}
 
 .zbase_datastore_tables table.z-table thead th {
   font-weight: 400;
@@ -45,4 +40,58 @@
 
 .zbase_datastore_tables table.z-table tbody tr:hover td:first-child a {
   color: #3498db;
+}
+
+.zbase_datastore_tables .add_pane {
+  border: 1px solid #e1e1e1;
+  padding: 15px;
+  text-align: center;
+  font-size: 14px;
+  background: rgba(0, 0, 0, 0.03);
+  color: #3498db;
+  text-decoration: underline;
+}
+
+.zbase_datastore_tables .add_pane:hover {
+  cursor: pointer;
+}
+
+.zbase_datastore_tables z-modal.create_table .field {
+  margin-top: 18px;
+}
+
+.zbase_datastore_tables z-modal.create_table .field:last-child {
+  margin-bottom: 20px;
+}
+
+.zbase_datastore_tables z-modal.create_table .field label {
+  display: inline-block;
+  vertical-align: top;
+  color: #333;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 34px;
+  width: 90px;
+}
+
+.zbase_datastore_tables z-modal.create_table .field input.z-input {
+  font-size: 13px;
+  display: inline-block;
+  width: auto;
+}
+
+.zbase_datastore_tables z-modal.create_table button.z-button {
+  float: right;
+  font-size: 13px;
+}
+
+.zbase_datastore_tables z-modal.create_table .field .error_note {
+  display: inline-block;
+  font-size: 13px;
+  line-height: 34px;
+  color: #a94442;
+}
+
+.zbase_datastore_tables z-modal.create_table .field .error_note.hidden {
+  display: none;
 }
