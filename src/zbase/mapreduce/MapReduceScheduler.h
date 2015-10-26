@@ -35,6 +35,9 @@ public:
   void sendResult(const String& key, const String& value);
 
   Option<String> getResultURL(size_t task_index);
+  Option<SHA1Hash> getResultID(size_t task_index);
+  Option<ReplicaRef> getResultHost(size_t task_index);
+
   void downloadResult(
       size_t task_index,
       Function<void (const void*, size_t, const void*, size_t)> fn);

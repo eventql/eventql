@@ -63,6 +63,7 @@ void MapReduceService::executeScript(
       auth_,
       pmap_,
       repl_,
+      tsdb_,
       cachedir_);
 
   auto task_shards = task_builder.fromJSON(job_json.begin(), job_json.end());

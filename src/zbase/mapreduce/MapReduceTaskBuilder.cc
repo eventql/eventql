@@ -25,12 +25,14 @@ MapReduceTaskBuilder::MapReduceTaskBuilder(
     AnalyticsAuth* auth,
     zbase::PartitionMap* pmap,
     zbase::ReplicationScheme* repl,
+    TSDBService* tsdb,
     const String& cachedir) :
     session_(session),
     job_spec_(job_spec),
     auth_(auth),
     pmap_(pmap),
     repl_(repl),
+    tsdb_(tsdb),
     cachedir_(cachedir) {}
 
 MapReduceShardList MapReduceTaskBuilder::fromJSON(
@@ -238,7 +240,13 @@ RefPtr<MapReduceTask> MapReduceTaskBuilder::buildSaveToTableTask(
     sources.emplace_back(getJob(src_id.get(), shards, job_definitions, jobs));
   }
 
-  return new SaveToTableTask(table_name.get(), sources, shards);
+  return new SaveToTableTask(
+      session_,
+      table_name.get(),
+      sources,
+      shards,
+      auth_,
+      tsdb_);
 }
 
 } // namespace zbase

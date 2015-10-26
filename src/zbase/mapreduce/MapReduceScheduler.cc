@@ -187,6 +187,42 @@ Option<String> MapReduceScheduler::getResultURL(size_t task_index) {
       result.get().result_id.toString()));
 }
 
+Option<SHA1Hash> MapReduceScheduler::getResultID(size_t task_index) {
+  std::unique_lock<std::mutex> lk(mutex_);
+  if (task_index >= shards_.size()) {
+    RAISEF(kIndexError, "invalid task index: $0", task_index);
+  }
+
+  if (shard_status_[task_index] != MapReduceShardStatus::COMPLETED) {
+    RAISEF(kIndexError, "task is not completed: $0", task_index);
+  }
+
+  const auto& result = shard_results_[task_index];
+  if (result.isEmpty()) {
+    return None<SHA1Hash>();
+  }
+
+  return Some(result.get().result_id);
+}
+
+Option<ReplicaRef> MapReduceScheduler::getResultHost(size_t task_index) {
+  std::unique_lock<std::mutex> lk(mutex_);
+  if (task_index >= shards_.size()) {
+    RAISEF(kIndexError, "invalid task index: $0", task_index);
+  }
+
+  if (shard_status_[task_index] != MapReduceShardStatus::COMPLETED) {
+    RAISEF(kIndexError, "task is not completed: $0", task_index);
+  }
+
+  const auto& result = shard_results_[task_index];
+  if (result.isEmpty()) {
+    return None<ReplicaRef>();
+  }
+
+  return Some(result.get().host);
+}
+
 void MapReduceScheduler::downloadResult(
     size_t task_index,
     Function<void (const void*, size_t, const void*, size_t)> fn) {

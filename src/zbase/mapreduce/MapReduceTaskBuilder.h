@@ -27,6 +27,7 @@ public:
       AnalyticsAuth* auth,
       zbase::PartitionMap* pmap,
       zbase::ReplicationScheme* repl,
+      TSDBService* tsdb,
       const String& cachedir);
 
   MapReduceShardList fromJSON(
@@ -70,6 +71,7 @@ protected:
   AnalyticsAuth* auth_;
   zbase::PartitionMap* pmap_;
   zbase::ReplicationScheme* repl_;
+  TSDBService* tsdb_;
   String cachedir_;
 };
 

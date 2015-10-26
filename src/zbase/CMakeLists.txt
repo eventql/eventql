@@ -147,6 +147,7 @@ add_executable(zbase
     mapreduce/tasks/MapTableTask.cc
     mapreduce/tasks/ReduceTask.cc
     mapreduce/tasks/ReturnResultsTask.cc
+    mapreduce/tasks/SaveToTableTask.cc
     LogfileScanResult.cc
     EventScanResult.cc
     Report.cc
