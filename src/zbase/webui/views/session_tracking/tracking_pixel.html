@@ -1,48 +1,64 @@
 <template id="zbase_session_tracking_tracking_pixel_tpl">
   <div class='zbase_session_tracking zbase_tracking_pixel'>
 
-    <section class="zbase_page_title medium">
-      <div>
-        <h2 class="pagetitle">Tracking</h2>
-      </div>
-    </section>
-
     <div class="zbase_content_pane fullwidth main_menu">
       <div class="zbase_main_menu"></div>
 
-      <div class='zbase_content main_menu tracking_pixel_pane'>
+      <div class='zbase_content main_menu'>
+        <section class="zbase_page_title large">
+          <div>
+            <h2 class="pagetitle">Tracking</h2>
+            <z-tabbable>
+              <z-tab class="link">
+                <a href="/a/session_tracking">Dashboard</a>
+              </z-tab>
+              <z-tab class="link">
+                <a href="/a/session_tracking/journey_viewer">Journey Viewer</a>
+              </z-tab>
+              <z-tab class="link">
+                <a href="/a/session_tracking/settings/schema">Schema</a>
+              </z-tab>
+              <z-tab class="link" data-active>
+                <a href="/a/session_tracking/settings/tracking_pixel">Tracking Pixel</a>
+              </z-tab>
+            </z-tabbable>
+          </div>
+        </section>
 
-        <div style="width: 30%; float: right;">
-          <h3>Status</h3>
-          <p>Receiving Data</p>
+        <div class="tracking_pixel_pane">
+
+          <div style="width: 30%; float: right;">
+            <h3>Status</h3>
+            <p>Receiving Data</p>
+          </div>
+
+          <div style="width: 40%; float: right;">
+            <h3>Tracking Domain</h3>
+            <p class="data">zsrpc.net (default)</p>
+          </div>
+
+          <div style="width: 30%;">
+            <h3>Tracking ID</h3>
+            <p class="data">5BEVQE6RP4F18</p>
+          </div>
+
+          <hr />
+
+          <h3>Web Tracking Pixel</h3>
+          <p>This is your tracking code. Copy and paste it into the code of every page you want to track.</p>
+
+          <textarea readonly>
+    <script>
+      (function(c,e,w,d,n){w=window,d=w.document,n="ztrack",w[n]=w[n]||function(){
+        (w[n].q=w[n].q||[]).push(arguments)},w[n].c=c,e=d.createElement('script'),
+        e.async=1,e.src='//zsrpc.net/api-'+c.id+'.js',d.head.appendChild(e)})({
+          id: "<TRACK-ID>"
+      });
+
+      ztrack("page_view", {});
+    </script>
+          </textarea>
         </div>
-
-        <div style="width: 40%; float: right;">
-          <h3>Tracking Domain</h3>
-          <p class="data">zsrpc.net (default)</p>
-        </div>
-
-        <div style="width: 30%;">
-          <h3>Tracking ID</h3>
-          <p class="data">5BEVQE6RP4F18</p>
-        </div>
-
-        <hr />
-
-        <h3>Web Tracking Pixel</h3>
-        <p>This is your tracking code. Copy and paste it into the code of every page you want to track.</p>
-
-        <textarea readonly>
-  <script>
-    (function(c,e,w,d,n){w=window,d=w.document,n="ztrack",w[n]=w[n]||function(){
-      (w[n].q=w[n].q||[]).push(arguments)},w[n].c=c,e=d.createElement('script'),
-      e.async=1,e.src='//zsrpc.net/api-'+c.id+'.js',d.head.appendChild(e)})({
-        id: "<TRACK-ID>"
-    });
-
-    ztrack("page_view", {});
-  </script>
-        </textarea>
       </div>
     </div>
   </div>

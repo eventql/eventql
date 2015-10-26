@@ -1,24 +1,29 @@
 <template id="zbase_session_tracking_journey_viewer_tpl">
   <div class='zbase_session_tracking zbase_user_journey_viewer'>
 
-    <section class="zbase_page_title medium">
-      <div>
-        <!--<zbase-breadcrumbs style="margin-top: 20px; margin-bottom: -6px;">
-        <zbase-breadcrumbs-section>
-          <a href="/a/">Apps</a>
-        </zbase-breadcrumbs-section>
-        <zbase-breadcrumbs-section>
-          <a href="/a/">User Journeys</a>
-        </zbase-breadcrumbs-section>
-      </zbase-breadcrumbs>-->
-        <h2 class='pagetitle'>Tracking</h2>
-      </div>
-    </section>
-
     <div class="zbase_content_pane fullwidth main_menu">
       <div class="zbase_main_menu"></div>
 
       <div class='zbase_content main_menu journey_list'>
+        <section class="zbase_page_title large">
+          <div>
+            <h2 class="pagetitle">Tracking</h2>
+            <z-tabbable>
+              <z-tab class="link">
+                <a href="/a/session_tracking">Dashboard</a>
+              </z-tab>
+              <z-tab class="link" data-active>
+                <a href="/a/session_tracking/journey_viewer">Journey Viewer</a>
+              </z-tab>
+              <z-tab class="link">
+                <a href="/a/session_tracking/settings/schema">Schema</a>
+              </z-tab>
+              <z-tab class="link">
+                <a href="/a/session_tracking/settings/tracking_pixel">Tracking Pixel</a>
+              </z-tab>
+            </z-tabbable>
+          </div>
+        </section>
 
         <ul class="journeys">
           <li class="loading_bar">
