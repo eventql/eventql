@@ -1,6 +1,7 @@
 /**
  * This file is part of the "libfnord" project
  *   Copyright (c) 2015 Paul Asmuth
+ *   Copyright (c) 2015 Laura Schlimmer
  *
  * FnordMetric is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License v3.0. You should have received a
@@ -753,5 +754,83 @@ TEST_CASE(RuntimeTest, TestStringLowercaseExpression, [] () {
   {
     auto v = runtime->evaluateStaticExpression("lcase('FnOrD')");
     EXPECT_EQ(v.toString(), "fnord");
+  }
+});
+
+TEST_CASE(RuntimeTest, TestDateTimeDateTruncExpression, [] () {
+  auto runtime = Runtime::getDefaultRuntime();
+
+  {
+    auto v = runtime->evaluateStaticExpression(
+        "date_trunc('milliseconds', 1444229262.983758)");
+    EXPECT_EQ(double(v.getTimestamp()), 1444229262000000.000000);
+  }
+
+  {
+    auto v = runtime->evaluateStaticExpression(
+        "date_trunc('seconds', 1444229262.983758)");
+    EXPECT_EQ(double(v.getTimestamp()), 1444229262000000.000000);
+  }
+
+  {
+    auto v = runtime->evaluateStaticExpression(
+        "date_trunc('minutes', 1444229262)");
+    EXPECT_EQ(v.toString(), "2015-10-07 14:47:00");
+  }
+
+  {
+    auto v = runtime->evaluateStaticExpression(
+        "date_trunc('30minutes', 1444229262)");
+    EXPECT_EQ(v.toString(), "2015-10-07 14:30:00");
+  }
+
+  {
+    auto v = runtime->evaluateStaticExpression(
+        "date_trunc('hours', 1444229262)");
+    EXPECT_EQ(v.toString(), "2015-10-07 14:00:00");
+  }
+
+  {
+    auto v = runtime->evaluateStaticExpression(
+        "date_trunc('5hours', 1444229262.598)");
+    EXPECT_EQ(v.toString(), "2015-10-07 10:00:00");
+  }
+
+  {
+    auto v = runtime->evaluateStaticExpression("date_trunc('days', 1444229262)");
+    EXPECT_EQ(v.toString(), "2015-10-07 00:00:00");
+  }
+
+  {
+    auto v = runtime->evaluateStaticExpression("date_trunc('7days', 1444229262)");
+    EXPECT_EQ(v.toString(), "2015-10-01 00:00:00");
+  }
+
+  {
+    auto v = runtime->evaluateStaticExpression("date_trunc('week', 1444229262)");
+    EXPECT_EQ(v.toString(), "2015-10-01 00:00:00");
+  }
+
+  {
+    auto v = runtime->evaluateStaticExpression("date_trunc('month', 1444229262)");
+    EXPECT_EQ(v.toString(), "2015-10-01 00:00:00");
+  }
+
+  {
+    //date_trunc returns last day of previous month for months with 30 days
+    auto v = runtime->evaluateStaticExpression("date_trunc('month', 1441836754)");
+    EXPECT_EQ(v.toString(), "2015-08-31 00:00:00");
+  }
+
+  {
+    auto v = runtime->evaluateStaticExpression("date_trunc('year', 1444229262)");
+    //returns first of year - number of leap years until now
+    EXPECT_EQ(v.toString(), "2014-12-21 00:00:00");
+  }
+
+  {
+    auto v = runtime->evaluateStaticExpression("date_trunc('2years', 1444229262)");
+    //returns first of year - number of leap years until now
+    EXPECT_EQ(v.toString(), "2013-12-21 00:00:00");
   }
 });
