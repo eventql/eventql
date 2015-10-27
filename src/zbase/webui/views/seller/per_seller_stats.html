@@ -2,25 +2,31 @@
   <div class="zbase_seller_stats">
     <section class='zbase_page_title small' style="none">
       <div style="overflow: visible;">
-        <zbase-breadcrumbs>
-          <zbase-breadcrumbs-section>
-            <a href="/a/">Applications</a>
-          </zbase-breadcrumbs-section>
-          <zbase-breadcrumbs-section>
-            <a href="/a/seller">Seller</a>
-          </zbase-breadcrumbs-section>
-          <zbase-breadcrumbs-section>
-            <a href="/a/seller" class="seller_name_crumb">Per Seller Stats</a>
-          </zbase-breadcrumbs-section>
-        </zbase-breadcrumbs>
+        Shop Stats
       </div>
     </section>
 
-    <div class="zbase_content_pane">
+    <div class="zbase_content_pane fullwidth">
       <div class="zbase_stats_title">
-        <h2 class="pagetitle">Seller <em></em></h2>
+        <h2 class="pagetitle">
+          <zbase-breadcrumbs>
+            <zbase-breadcrumbs-section>
+              <a href="/a/seller">Shop Stats</a>
+            </zbase-breadcrumbs-section>
+            <zbase-breadcrumbs-section>
+              <a href="/a/seller" class="seller_name_crumb">
+                Shop <span class="shop_name"></span>
+              </a>
+            </zbase-breadcrumbs-section>
+          </zbase-breadcrumbs>
+        </h2>
         <z-daterangepicker class="open_left"></z-daterangepicker>
       </div>
+
+      <z-tabbable>
+        <z-tab data-active>Overview</z-tab>
+        <z-tab>Per Product</z-tab>
+      </z-tabbable>
 
       <div class="zbase_stats">
         <div class="metric_pane product_page_impressions">

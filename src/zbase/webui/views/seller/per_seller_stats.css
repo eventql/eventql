@@ -1,7 +1,7 @@
 .zbase_seller_stats .zbase_stats_title {
   overflow: visible;
   height: 80px;
-  padding: 10px 0;
+  padding: 10px 20px;
 }
 
 .zbase_seller_stats .zbase_stats_title h2.pagetitle {
@@ -13,8 +13,20 @@
   margin-top: 13px;
 }
 
+.zbase_seller_stats z-tabbable {
+  padding-left: 20px;
+  font-size: 14px;
+  background: transparent;
+}
+
 .zbase_seller_stats button.z-button {
   font-size: 13px;
+}
+
+.zbase_seller_stats .zbase_stats {
+  overflow: auto;
+  padding: 20px;
+  background: #fff;
 }
 
 .zbase_seller_stats .metric_pane {
