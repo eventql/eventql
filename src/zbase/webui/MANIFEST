@@ -342,7 +342,9 @@ route {
   require_module: "widgets/z-search"
   require_module: "widgets/z-checkbox"
   require_module: "widgets/z-table"
+  require_module: "widgets/z-menu"
   require_module: "widgets/zbase-header"
+  require_module: "widgets/zbase-main-menu"
   require_module: "views/seller"
 }
 

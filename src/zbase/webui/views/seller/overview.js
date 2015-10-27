@@ -4,6 +4,9 @@ ZBase.registerView((function() {
         "views/seller",
         "seller_overview_main_tpl");
 
+    var main_menu = ZBaseMainMenu();
+    main_menu.render($(".zbase_main_menu", page), path);
+
     //REMOVEME
     var seller = [
       {id: 13008, name: "meko", is_premium: true},
