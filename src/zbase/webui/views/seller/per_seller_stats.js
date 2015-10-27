@@ -25,38 +25,62 @@ ZBase.registerView((function() {
         product_page_impressions: 64,
         product_listview_impressions: 58,
         product_listview_clicks: 37,
-        product_listview_ctr: 0.34
+        product_listview_ctr: 0.34,
+        product_buy_to_detail_rate: 0.3,
+        product_cart_to_detail_rate: 0.23,
+        unique_purchases: 7,
+        refunded_purchases: 0
       },
       timeseries: [
         {
           product_page_impressions: 3,
           product_listview_impressions: 10,
           product_listview_clicks: 9,
-          product_listview_ctr: 0.34
+          product_listview_ctr: 0.34,
+          product_buy_to_detail_rate: 0.5,
+          product_cart_to_detail_rate: 0.22,
+          unique_purchases: 2,
+          refunded_purchases: 0
         },
         {
           product_page_impressions: 12,
           product_listview_impressions: 8,
           product_listview_clicks: 3,
-          product_listview_ctr: 0.34
+          product_listview_ctr: 0.34,
+          product_buy_to_detail_rate: 0.2,
+          product_cart_to_detail_rate: 0.21,
+          unique_purchases: 0,
+          refunded_purchases: 0
         },
         {
           product_page_impressions: 10,
           product_listview_impressions: 7,
           product_listview_clicks: 10,
-          product_listview_ctr: 0.34
+          product_listview_ctr: 0.34,
+          product_buy_to_detail_rate: 0.3,
+          product_cart_to_detail_rate: 0.25,
+          unique_purchases: 1,
+          refunded_purchases: 0
         },
         {
           product_page_impressions: 17,
           product_listview_impressions: 14,
           product_listview_clicks: 11,
-          product_listview_ctr: 0.34
+          product_listview_ctr: 0.34,
+          product_buy_to_detail_rate: 0.3,
+          product_cart_to_detail_rate: 0.25,
+          unique_purchases: 3,
+          refunded_purchases: 0
         },
         {
           product_page_impressions: 18,
           product_listview_impressions: 16,
           product_listview_clicks: 12,
-          product_listview_ctr: 0.34
+          product_listview_ctr: 0.34,
+          product_buy_to_detail_rate: 0.3,
+          product_cart_to_detail_rate: 0.23,
+          unique_purchases: 1,
+          refunded_purchases: 0
         }
       ]
     };
