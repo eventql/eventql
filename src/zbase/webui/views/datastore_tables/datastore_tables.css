@@ -108,6 +108,21 @@
   width: 90px;
 }
 
+.zbase_datastore_tables z-modal .field .icon {
+  display: inline-block;
+  padding: 0 5px;
+  vertical-align: top;
+  color: #888;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 34px;
+}
+
+.zbase_datastore_tables z-modal .field .icon:hover {
+  cursor: pointer;
+ color: #3498db; 
+}
+
 .zbase_datastore_tables z-modal .field input.z-input {
   font-size: 13px;
   display: inline-block;
@@ -136,4 +151,36 @@
   margin: 0;
   color: #333;
   font-weight: 500;
+}
+
+.zbase_datastore_tables z-modal .field.inline {
+  float: left;
+  margin-right: 20px;
+}
+
+.zbase_datastore_tables z-modal .field.inline label {
+  width: auto;
+  margin-right: 5px;
+}
+
+.zbase_datastore_tables z-modal .columns {
+  margin-top: 35px;
+}
+
+.zbase_datastore_tables z-modal .columns label {
+  color: #333;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.zbase_datastore_tables z-modal .column {
+  overflow: visible;
+  height: 72px;
+}
+
+.zbase_datastore_tables z-modal .link.add_column {
+  font-size: 14px;
+  text-align: center;
+  margin-top: 30px;
+  text-decoration: underline;
 }

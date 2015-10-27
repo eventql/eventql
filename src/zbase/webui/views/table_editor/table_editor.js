@@ -35,6 +35,9 @@ ZBase.registerView((function() {
     $.onClick($("button.close", delete_modal), function() {
       delete_modal.close();
     });
+    $.onClick($("button.submit", delete_modal), function() {
+      deleteColumn();
+    });
 
     var tbody = $("tbody", page);
     var row_tpl = $.getTemplate(
@@ -93,9 +96,19 @@ ZBase.registerView((function() {
     input.focus();
   };
 
+  var deleteColumn;
+
+  var onDelete = function(table_name, column_name) {
+    console.log("delete column ", column_name);
+  };
+
   var displayDeleteColumnModal = function(table_name, column_name) {
     var modal = $(".zbase_table_editor z-modal.delete_column");
     $(".column_name", modal).innerHTML = column_name;
+
+    deleteColumn = function() {
+      onDelete(table_name, column_name);
+    };
 
     modal.show();
   };

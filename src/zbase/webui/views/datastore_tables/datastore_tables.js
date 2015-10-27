@@ -80,26 +80,71 @@ ZBase.registerView((function() {
         "views/datastore_tables",
         "zbase_datastore_tables_add_modal_tpl");
 
+    var columns = $(".columns", tpl);
+    addTableCreationColumn(columns);
+
+    $.onClick($(".add_column", tpl), function() {
+      addTableCreationColumn(columns);
+    });
+
+
     $.replaceContent($(".z-modal-content", modal), tpl);
     modal.show();
     $("input", modal).focus();
   };
 
+  var addTableCreationColumn = function(elem) {
+    var tpl = $.getTemplate(
+        "views/datastore_tables",
+        "zbase_datastore_tables_add_modal_column_tpl");
+
+    elem.appendChild(tpl);
+  };
+
   var createTable = function() {
-    var input = $(".zbase_datastore_tables z-modal.create_table input");
+    var modal = $(".zbase_datastore_tables z-modal.create_table");
+    var input = $("input.table_name", modal);
 
     if (input.value == 0) {
-      $(".zbase_datastore_tables z-modal.create_table .error_note")
-          .classList.remove("hidden");
+      $(".error_note.table_name", modal).classList.remove("hidden");
       input.classList.add("error");
       input.focus();
       return;
     }
 
-    var url = "/api/v1/tables/add_table?table=" + input.value;
-    $.httpPost(url, "", function(r) {
+    var json = {
+      table_name: input.value,
+      table_type: $("z-dropdown.table_type", modal).getValue(),
+      schema: {
+        columns: []
+      }
+    };
+
+    var columns = modal.querySelectorAll(".column");
+    for (var i = 0; i < columns.length; i++) {
+      var c_input = $("input", columns[i]);
+      if (c_input.value == 0) {
+        continue;
+      }
+
+      json.schema.columns.push({
+        name: c_input.value,
+        type: $("z-dropdown.type", columns[i]).getValue()
+      });
+    }
+
+    for (var i = 0; i < json.schema.columns.length; i++) {
+      json.schema.columns[i].id = i + 1;
+    }
+
+    console.log(json);
+    return;
+
+
+    $.httpPost("/api/v1/tables/create_table", json, function(r) {
       if (r.status == 201) {
         var table = JSON.parse(r.response);
+        console.log(table);
         //$.navigateTo("/a/tables/" + table.name);
       } else {
         $.fatalError();
