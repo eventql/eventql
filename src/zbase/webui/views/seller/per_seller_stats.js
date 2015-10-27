@@ -33,7 +33,13 @@ ZBase.registerView((function() {
         product_buy_to_detail_rate: 0.3,
         product_cart_to_detail_rate: 0.23,
         unique_purchases: 7,
-        refunded_purchases: 0
+        refunded_purchases: 0,
+        gmv_eurcent: 192,
+        num_active_products: 128,
+        num_listed_products: 194,
+        refund_rate: 0.0,
+        refunded_gmv_eurcent: 0,
+        gmv_per_transaction_eurcent: 40
       },
       timeseries: [
         {
@@ -44,7 +50,13 @@ ZBase.registerView((function() {
           product_buy_to_detail_rate: 0.5,
           product_cart_to_detail_rate: 0.22,
           unique_purchases: 2,
-          refunded_purchases: 0
+          refunded_purchases: 0,
+          gmv_eurcent: 50,
+          num_active_products: 128,
+          num_listed_products: 194,
+          refund_rate: 0.0,
+          refunded_gmv_eurcent: 0,
+          gmv_per_transaction_eurcent: 27
         },
         {
           product_page_impressions: 12,
@@ -54,7 +66,13 @@ ZBase.registerView((function() {
           product_buy_to_detail_rate: 0.2,
           product_cart_to_detail_rate: 0.21,
           unique_purchases: 0,
-          refunded_purchases: 0
+          refunded_purchases: 0,
+          gmv_eurcent: 0,
+          num_active_products: 128,
+          num_listed_products: 194,
+          refund_rate: 0.0,
+          refunded_gmv_eurcent: 0,
+          gmv_per_transaction_eurcent: 0
         },
         {
           product_page_impressions: 10,
@@ -64,7 +82,13 @@ ZBase.registerView((function() {
           product_buy_to_detail_rate: 0.3,
           product_cart_to_detail_rate: 0.25,
           unique_purchases: 1,
-          refunded_purchases: 0
+          refunded_purchases: 0,
+          gmv_eurcent: 50,
+          num_active_products: 128,
+          num_listed_products: 194,
+          refund_rate: 0.0,
+          refunded_gmv_eurcent: 0,
+          gmv_per_transaction_eurcent: 50
         },
         {
           product_page_impressions: 17,
@@ -74,7 +98,13 @@ ZBase.registerView((function() {
           product_buy_to_detail_rate: 0.3,
           product_cart_to_detail_rate: 0.25,
           unique_purchases: 3,
-          refunded_purchases: 0
+          refunded_purchases: 0,
+          gmv_eurcent: 82,
+          num_active_products: 128,
+          num_listed_products: 194,
+          refund_rate: 0.0,
+          refunded_gmv_eurcent: 0,
+          gmv_per_transaction_eurcent: 32
         },
         {
           product_page_impressions: 18,
@@ -84,7 +114,13 @@ ZBase.registerView((function() {
           product_buy_to_detail_rate: 0.3,
           product_cart_to_detail_rate: 0.23,
           unique_purchases: 1,
-          refunded_purchases: 0
+          refunded_purchases: 0,
+          gmv_eurcent: 10,
+          num_active_products: 128,
+          num_listed_products: 194,
+          refund_rate: 0.0,
+          refunded_gmv_eurcent: 0,
+          gmv_per_transaction_eurcent: 10
         }
       ]
     };
@@ -115,7 +151,10 @@ ZBase.registerView((function() {
           "data-sparkline",
           sparkline_values[metric].join(","));
 
-      $(".zbase_seller_stats z-tooltip." + metric).init($("i.help", pane));
+      //remove if
+      if ($(".zbase_seller_stats z-tooltip." + metric)) {
+        $(".zbase_seller_stats z-tooltip." + metric).init($("i.help", pane));
+      }
     }
   };
 

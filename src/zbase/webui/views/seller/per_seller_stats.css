@@ -87,7 +87,12 @@
   font-size: 22px;
   line-height: 40px;
   float: right;
-  margin-right: 20px;
+}
+
+.zbase_seller_stats .zbase_stats .metric_pane .unit {
+  float: right;
+  font-size: 22px;
+  line-height: 40px;
 }
 
 .zbase_seller_stats .zbase_stats .metric_pane .time_line {
