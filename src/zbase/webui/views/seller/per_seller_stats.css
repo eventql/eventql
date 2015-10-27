@@ -8,6 +8,15 @@
   float: left;
 }
 
+.zbase_seller_stats .zbase_stats_title zbase-breadcrumbs zbase-breadcrumbs-section::after {
+  font-size: 1.5em;
+  margin-bottom: 5px;
+}
+
+.zbase_seller_stats .zbase_stats_title zbase-breadcrumbs a.shop_name_crumb {
+  color: #3498db;
+}
+
 .zbase_seller_stats .zbase_stats_title z-daterangepicker {
   float: right;
   margin-top: 13px;

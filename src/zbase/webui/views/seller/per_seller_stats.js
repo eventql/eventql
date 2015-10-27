@@ -4,12 +4,16 @@ ZBase.registerView((function() {
 
   var load = function(path) {
     seller_id = path.substr(path_prefix.length);
+    //REMOVE ME
+    var seller_name = "Meko";
+    //REMOVEME END
 
     var page = $.getTemplate(
         "views/seller",
         "per_seller_stats_main_tpl");
 
-    $(".zbase_stats_title h2 em", page).innerHTML = seller_id;
+    $(".zbase_stats_title .shop_name", page).innerHTML =
+        seller_id + " (" + seller_name + ")";
     $("z-daterangepicker", page).addEventListener("select", paramChanged, false);
 
     $.handleLinks(page);
