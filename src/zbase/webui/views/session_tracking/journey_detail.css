@@ -1,3 +1,11 @@
+.zbase_user_journey_viewer .journey_detail_pane {
+  background: #fff;
+  padding: 20px;
+}
+
 .zbase_session_tracking .journey_detail .session_json {
   font-size: 14px;
+  border-top: 1px solid #ddd;
+  padding: 20px;
+  line-height: 1.4;
 }

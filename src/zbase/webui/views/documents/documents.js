@@ -31,14 +31,14 @@ ZBase.registerView((function() {
     $.showLoader();
     $.httpGet("/api/v1/documents?" + $.buildQueryString(qparams), function(r) {
       if (r.status == 200) {
-        render(JSON.parse(r.response), qparams);
+        render(JSON.parse(r.response), qparams, url);
       } else {
         $.fatalError();
       }
     });
   }
 
-  var render = function(data, qparams) {
+  var render = function(data, qparams, path) {
     var documents = data.documents;
     var categories = data.categories;
 
@@ -46,11 +46,8 @@ ZBase.registerView((function() {
         "views/documents",
         "zbase_documents_main_tpl");
 
-    var menu = DocsMenu(categories, data.num_docs_total, data.num_docs_user);
-    menu.render($(".docs_sidebar", page));
-    menu.setActiveMenuItem(
-        qparams.category_prefix ? qparams.category_prefix :
-            qparams.author == "self" ? "my_documents" : "all_documents");
+    var main_menu = ZBaseMainMenu();
+    main_menu.render($(".zbase_main_menu", page), path);
 
     renderDocumentsList(
         page.querySelector(".zbase_documents tbody"),

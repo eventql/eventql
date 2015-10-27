@@ -1,11 +1,8 @@
-.zbase_session_tracking .zbase_settings_title.edit_event {
-  margin-left: 20px;
+.zbase_session_tracking .edit_session_event {
+  padding: 20px;
+  background: #fff;
 }
 
-.zbase_session_tracking .zbase_settings_title.edit_event i {
-  font-size: 14px;
-  margin: 0 5px;
-}
 
 .zbase_session_tracking table.edit_event {
   table-layout: fixed;
@@ -30,7 +27,6 @@
 }
 
 .zbase_session_tracking table.edit_event tr.table_attached {
-  background: #f9f9f9;
   border-left: none;
 }
 
@@ -47,11 +43,6 @@
 
 .zbase_session_tracking table.edit_event tr.table_attached table tr {
   border-right: none;
-}
-
-.zbase_session_tracking table.edit_event tr.table_attached .add_pane {
-  border-right: none;
-  border-bottom: none;
 }
 
 .zbase_session_tracking .edit_event .add_pane {

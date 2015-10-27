@@ -142,6 +142,7 @@ template {
   position: absolute;
   z-index: 99999;
   font-family: "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  border-bottom: 1px solid #ddd;
 }
 
 .zbase_header .navigation_inner {
@@ -184,6 +185,7 @@ template {
 .zbase_header ul li {
   display: inline-block;
 }
+
 
 /**
  * fatal error
@@ -353,6 +355,14 @@ template {
   color: #fff;
 }
 
+.zbase_content.main_menu .zbase_page_title {
+  background: #f9f9f9;
+}
+
+.zbase_content.main_menu .zbase_page_title h2.pagetitle {
+  color: #444;
+}
+
 .zbase_page_title.large h1 {
   font-weight: 500;
   font-size: 20px;
@@ -386,6 +396,20 @@ section.zbase_page_title zbase-breadcrumbs,
 section.zbase_page_title zbase-breadcrumbs a {
   color: #fff;
 }
+
+section.zbase_page_title h2.pagetitle zbase-breadcrumbs {
+  margin: 0;
+}
+
+section.zbase_page_title h2.pagetitle zbase-breadcrumbs zbase-breadcrumbs-section:after {
+  margin-bottom: 4px;
+}
+
+.zbase_content.main_menu section.zbase_page_title zbase-breadcrumbs,
+.zbase_content.main_menu section.zbase_page_title zbase-breadcrumbs a {
+  color: #444;
+}
+
 
 /**
  * h2.pagetitle
