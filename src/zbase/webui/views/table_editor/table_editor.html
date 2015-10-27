@@ -1,5 +1,5 @@
-<template id="zbase_datastore_table_detail_tpl">
-  <div class="zbase_content_pane fullwidth main_menu zbase_datastore zbase_datastore_table_detail">
+<template id="zbase_table_editor_tpl">
+  <div class="zbase_content_pane fullwidth main_menu zbase_table_editor">
     <div class="zbase_main_menu"></div>
 
     <div class="zbase_content main_menu">
@@ -29,6 +29,60 @@
 
         <tbody></tbody>
       </table>
+
+      <div class="add_pane">
+        <i class="fa fa-plus"></i> Add Column
+      </div>
     </div>
+
+    <z-modal class="add_column">
+      <z-modal-box>
+        <z-modal-close-icon></z-modal-close-icon>
+        <div class="container"></div>
+      </z-modal-box>
+    </z-modal>
+  </div>
+</template>
+
+<template id="zbase_table_editor_add_modal_tpl">
+  <div class="z-modal-header">Add Column</div>
+  <div class="z-modal-content">
+    <div class="field">
+      <label>Name:</label>
+      <input class="z-input name" type="text" />
+      <div class="error_note name hidden">Please insert a name</div>
+    </div>
+
+    <div class="field">
+      <label>Type:</label>
+      <z-dropdown class="input type" data-resolved>
+        <z-dropdown-flyout>
+          <z-dropdown-items>
+            <z-dropdown-item data-value="STRING" data-selected>STRING</z-dropdown-item>
+            <z-dropdown-item data-value="DOUBLE">DOUBLE</z-dropdown-item>
+            <z-dropdown-item data-value="UINT32">UINT32</z-dropdown-item>
+            <z-dropdown-item data-value="UINT64">UINT64</z-dropdown-item>
+            <z-dropdown-item data-value="BOOLEAN">BOOLEAN</z-dropdown-item>
+            <z-dropdown-item data-value="DATETIME">DATETIME</z-dropdown-item>
+          </z-dropdown-items>
+        </z-dropdown-flyout>
+      </z-dropdown>
+    </div>
+
+    <div class="field">
+      <label>NULL:</label>
+      <z-dropdown class="input is_nullable" data-resolved>
+        <z-dropdown-flyout>
+          <z-dropdown-items>
+            <z-dropdown-item data-value="true" data-selected>TRUE</z-dropdown-item>
+            <z-dropdown-item data-value="false">FALSE</z-dropdown-item>
+          </z-dropdown-items>
+        </z-dropdown-flyout>
+      </z-dropdown>
+    </div>
+  </div>
+  <div class="z-modal-footer">
+    <button class="z-button primary submit">Save</button>
+    <button class="z-button secondary close">Cancel</button>
   </div>
 </template>
