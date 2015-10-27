@@ -267,8 +267,15 @@ ASTNode* Parser::binaryExpr(ASTNode* lhs, int precedence) {
     case Token::T_CIRCUMFLEX:
       return powExpr(lhs, precedence);
 
-    // FIXPAUL: lshift, rshift, ampersand, pipe, tilde, noq, and, or
+    /* REGEX operator */
+    case Token::T_REGEX:
+      return regexExpr(lhs, precedence);
 
+    /* LIKE operator */
+    case Token::T_LIKE:
+      return likeExpr(lhs, precedence);
+
+    // FIXPAUL: lshift, rshift, ampersand, pipe, tilde, noq, and, or
     default:
       return nullptr;
 
@@ -1078,6 +1085,42 @@ ASTNode* Parser::powExpr(ASTNode* lhs, int precedence) {
   }
 
   auto e = new ASTNode(ASTNode::T_POW_EXPR);
+  e->appendChild(lhs);
+  e->appendChild(rhs);
+  return e;
+}
+
+ASTNode* Parser::regexExpr(ASTNode* lhs, int precedence) {
+  if (precedence < 6) {
+    consumeToken();
+  } else {
+    return nullptr;
+  }
+
+  auto rhs = expr(6);
+  if (rhs == nullptr) {
+    RAISE(kRuntimeError, "REGEX operator needs second argument");
+  }
+
+  auto e = new ASTNode(ASTNode::T_REGEX_EXPR);
+  e->appendChild(lhs);
+  e->appendChild(rhs);
+  return e;
+}
+
+ASTNode* Parser::likeExpr(ASTNode* lhs, int precedence) {
+  if (precedence < 6) {
+    consumeToken();
+  } else {
+    return nullptr;
+  }
+
+  auto rhs = expr(6);
+  if (rhs == nullptr) {
+    RAISE(kRuntimeError, "LIKE operator needs second argument");
+  }
+
+  auto e = new ASTNode(ASTNode::T_LIKE_EXPR);
   e->appendChild(lhs);
   e->appendChild(rhs);
   return e;

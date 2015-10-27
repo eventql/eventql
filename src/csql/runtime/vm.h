@@ -24,7 +24,8 @@ public:
     X_CALL_AGGREGATE,
     X_LITERAL,
     X_INPUT,
-    X_IF
+    X_IF,
+    X_REGEX
   };
 
   struct Instruction {

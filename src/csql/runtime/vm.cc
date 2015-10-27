@@ -14,6 +14,7 @@
 #include <csql/svalue.h>
 #include <csql/runtime/vm.h>
 #include <stx/exception.h>
+#include <stx/RegExp.h>
 
 namespace csql {
 
@@ -228,6 +229,10 @@ void VM::freeProgram(
       ((SValue*) e->arg0)->~SValue();
       break;
 
+    case X_REGEX:
+      ((RegExp*) e->arg0)->~RegExp();
+      break;
+
     default:
       break;
   }
@@ -319,6 +324,17 @@ void VM::evaluate(
       }
 
       *out = argv[index];
+      return;
+    }
+
+    case X_REGEX: {
+      SValue subj;
+      auto subj_expr = expr->child;
+      evaluate(program, instance, subj_expr, argc, argv, &subj);
+
+      auto match = ((RegExp*) expr->arg0)->match(subj.toString());
+      *out = SValue(SValue::BoolType(match));
+
       return;
     }
 

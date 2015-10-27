@@ -133,7 +133,6 @@ add_executable(zbase
     $<TARGET_OBJECTS:customerdirectory>
     #$<TARGET_OBJECTS:fnord-afx>
     $<TARGET_OBJECTS:dproc>
-    $<TARGET_OBJECTS:pcre>
     #sstable/SSTableServlet.cc
     api/LogfileService.cc
     api/LogfileAPIServlet.cc
@@ -222,7 +221,7 @@ add_executable(zbase
     ${CMAKE_CURRENT_BINARY_DIR}/mapreduce_preludejs.cc
     zbase.cc)
 
-target_link_libraries(zbase chartsql cplot sstable cstable stx-http stx-json stx-protobuf stx-base js_static.a z)
+target_link_libraries(zbase chartsql cplot sstable cstable stx-http stx-json stx-protobuf stx-base js_static.a z pcre)
 target_link_libraries(zbase -L${CMAKE_BINARY_DIR}/3rdparty/mozjs/dist/lib -ljs_static)
 add_dependencies(zbase customerdirectory mozjs_build)
 

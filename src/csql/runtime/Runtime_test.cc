@@ -833,4 +833,14 @@ TEST_CASE(RuntimeTest, TestDateTimeDateTruncExpression, [] () {
     //returns first of year - number of leap years until now
     EXPECT_EQ(v.toString(), "2013-12-21 00:00:00");
   }
+
+  {
+    auto v = runtime->evaluateStaticExpression("'blah' REGEX '^b'");
+    EXPECT_EQ(v.toString(), "true");
+  }
+
+  {
+    auto v = runtime->evaluateStaticExpression("'false' REGEX '^b'");
+    EXPECT_EQ(v.toString(), "false");
+  }
 });

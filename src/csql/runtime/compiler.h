@@ -14,6 +14,8 @@
 #include <csql/qtree/CallExpressionNode.h>
 #include <csql/qtree/LiteralExpressionNode.h>
 #include <csql/qtree/IfExpressionNode.h>
+#include <csql/qtree/RegexExpressionNode.h>
+#include <csql/qtree/LikeExpressionNode.h>
 #include <csql/runtime/symboltable.h>
 #include <csql/runtime/ValueExpression.h>
 #include <csql/runtime/vm.h>
@@ -62,6 +64,19 @@ protected:
       size_t* dynamic_storage_size,
       ScratchMemory* static_storage,
       SymbolTable* symbol_table);
+
+  static VM::Instruction* compileRegexOperator(
+      RefPtr<RegexExpressionNode> node,
+      size_t* dynamic_storage_size,
+      ScratchMemory* static_storage,
+      SymbolTable* symbol_table);
+
+  static VM::Instruction* compileLikeOperator(
+      RefPtr<LikeExpressionNode> node,
+      size_t* dynamic_storage_size,
+      ScratchMemory* static_storage,
+      SymbolTable* symbol_table);
+
 
 };
 

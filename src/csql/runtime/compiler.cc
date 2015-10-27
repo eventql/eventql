@@ -8,6 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <stdlib.h>
+#include <stx/RegExp.h>
 #include <csql/parser/astnode.h>
 #include <csql/parser/token.h>
 #include <csql/runtime/compiler.h>
@@ -66,6 +67,22 @@ VM::Instruction* Compiler::compileValueExpression(
   if (dynamic_cast<CallExpressionNode*>(node.get())) {
     return compileMethodCall(
         node.asInstanceOf<CallExpressionNode>(),
+        dynamic_storage_size,
+        static_storage,
+        symbol_table);
+  }
+
+  if (dynamic_cast<RegexExpressionNode*>(node.get())) {
+    return compileRegexOperator(
+        node.asInstanceOf<RegexExpressionNode>(),
+        dynamic_storage_size,
+        static_storage,
+        symbol_table);
+  }
+
+  if (dynamic_cast<LikeExpressionNode*>(node.get())) {
+    return compileLikeOperator(
+        node.asInstanceOf<LikeExpressionNode>(),
         dynamic_storage_size,
         static_storage,
         symbol_table);
@@ -181,6 +198,34 @@ VM::Instruction* Compiler::compileIfStatement(
   }
 
   return op;
+}
+
+VM::Instruction* Compiler::compileRegexOperator(
+    RefPtr<RegexExpressionNode> node,
+    size_t* dynamic_storage_size,
+    ScratchMemory* static_storage,
+   SymbolTable* symbol_table) {
+  auto ins = static_storage->construct<VM::Instruction>();
+  ins->type = VM::X_REGEX;
+  ins->arg0 = static_storage->construct<RegExp>(node->pattern());
+  ins->next  = nullptr;
+  ins->child = compileValueExpression(
+      node->subject(),
+      dynamic_storage_size,
+      static_storage,
+      symbol_table);
+
+  return ins;
+}
+
+VM::Instruction* Compiler::compileLikeOperator(
+    RefPtr<LikeExpressionNode> node,
+    size_t* dynamic_storage_size,
+    ScratchMemory* static_storage,
+   SymbolTable* symbol_table) {
+  RAISE(
+      kNotYetImplementedError,
+      "LIKE is not yet implemented, use REGEX instead");
 }
 
 }
