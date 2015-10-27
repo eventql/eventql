@@ -2,16 +2,6 @@
   background: #fff;
 }
 
-.zbase_datastore zbase-breadcrumbs {
-  padding: 0;
-  margin: -4px 0 -6px 0;
-  opacity: 0.6;
-}
-
-.zbase_datastore zbase-breadcrumbs + h2.pagetitle {
-  margin-top: -10px;
-}
-
 .zbase_datastore_tables table.z-table {
   font-size: 13px;
   table-layout: fixed;
@@ -35,10 +25,13 @@
 
 .zbase_datastore_tables table.z-table tbody tr td {
   line-height: 24px;
+  padding: 0;
 }
 
 .zbase_datastore_tables table.z-table tbody tr a {
   color: #888;
+  padding: .7em .8em;
+  display: block;
 }
 
 .zbase_datastore_tables table.z-table tbody tr td:first-child a {

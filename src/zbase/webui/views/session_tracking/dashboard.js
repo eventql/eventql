@@ -61,6 +61,9 @@ ZBase.registerView((function() {
     query.addEventListener('result', function(e) {
       query_mgr.close("sql_query");
       var data = JSON.parse(e.data);
+      if (!data.results[0].rows || data.results[0].rows.length == 0) {
+        renderError();
+      }
       renderChart(data.results);
       hideLoader();
     });
@@ -120,6 +123,11 @@ ZBase.registerView((function() {
     });
     chart.renderTimeseries("dashboard_chart");
     chart.renderLegend($(".zbase_session_tracking_dashboard .chart_legend"));
+  };
+
+  var renderError = function() {
+    var inner_chart = $(".zbase_session_tracking_dashboard .inner_chart");
+    inner_chart.innerHTML = "<div class='error_msg'>No Data Returned</div>";
   };
 
   var renderLoader = function() {

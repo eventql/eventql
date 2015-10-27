@@ -1,6 +1,10 @@
 ZBase.registerView((function() {
 
   var render = function(path) {
+    //redirect to reports overview
+    $.navigateTo("/a/reports");
+    return;
+
     var page = $.getTemplate("views/appstore", "zbase_appstore_main_tpl");
 
     var main_menu = ZBaseMainMenu();

@@ -1,33 +1,34 @@
 <template id="zbase_datastore_table_detail_tpl">
-  <section class='zbase_page_title small'>
-    <div>
-      <zbase-breadcrumbs>
-        <zbase-breadcrumbs-section>
-          <a href="/a/datastore">Datastore</a>
-        </zbase-breadcrumbs-section>
-        <zbase-breadcrumbs-section>
-          <a href="/a/datastore/tables">Tables</a>
-        </zbase-breadcrumbs-section>
-        <zbase-breadcrumbs-section class="table_name">
-          <a></a>
-        </zbase-breadcrumbs-section>
-      </zbase-breadcrumbs>
+  <div class="zbase_content_pane fullwidth main_menu zbase_datastore zbase_datastore_table_detail">
+    <div class="zbase_main_menu"></div>
+
+    <div class="zbase_content main_menu">
+      <section class='zbase_page_title medium'>
+        <div>
+          <h2 class="pagetitle">
+            <zbase-breadcrumbs>
+              <zbase-breadcrumbs-section>
+                <a href="/a/datastore/tables">Tables</a>
+              </zbase-breadcrumbs-section>
+              <zbase-breadcrumbs-section class="table_name">
+                <a></a>
+              </zbase-breadcrumbs-section>
+            </zbase-breadcrumbs>
+          </h2>
+        </div>
+      </section>
+
+      <table class="z-table">
+        <thead>
+          <tr>
+            <th>Column Name</th>
+            <th>Type</th>
+            <th>NULL</th>
+          </tr>
+        </thead>
+
+        <tbody></tbody>
+      </table>
     </div>
-  </section>
-
-  <div class="zbase_content_pane fullwidth zbase_datastore zbase_datastore_table_detail">
-    <h2 class="pagetitle"><em></em></h2>
-
-    <table class="z-table">
-      <thead>
-        <tr>
-          <th>Column Name</th>
-          <th>Type</th>
-          <th>NULL</th>
-        </tr>
-      </thead>
-
-      <tbody></tbody>
-    </table>
   </div>
 </template>

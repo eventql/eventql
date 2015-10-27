@@ -1,9 +1,9 @@
 ZBase.registerView((function() {
+  var path_prefix = "/a/logs/";
   var logfile;
   var info_message;
 
   var init = function(path) {
-    var path_prefix = "/a/logs/";
     logfile = path.substr(path_prefix.length);
 
     load();
@@ -27,7 +27,12 @@ ZBase.registerView((function() {
         "zbase_logviewer_logfile_editor_tpl");
 
     info_message = ZbaseInfoMessage(page);
-    $("h1", page).innerHTML = def.name;
+
+    var main_menu = ZBaseMainMenu();
+    main_menu.render($(".zbase_main_menu", page), path_prefix);
+
+    var name_breadcrumb = $("zbase-breadcrumbs .logfile_name a", page);
+    name_breadcrumb.innerHTML = def.name;
 
     renderRegexPane($(".editor_pane.regex", page), def.regex);
 
