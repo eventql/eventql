@@ -50,7 +50,7 @@
 }
 
 .zbase_seller_stats .zbase_stats .metric_pane:first-child,
-.zbase_seller_stats .zbase_stats .metric_pane:nth-child(5n) {
+.zbase_seller_stats .zbase_stats .metric_pane:nth-child(4n+1) {
   margin-left: 0px;
 }
 
