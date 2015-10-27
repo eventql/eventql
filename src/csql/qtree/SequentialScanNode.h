@@ -67,6 +67,7 @@ public:
 
   Vector<RefPtr<SelectListNode>> selectList() const;
   Set<String> selectedColumns() const;
+  Vector<String> columnNames() const;
 
   Option<RefPtr<ValueExpressionNode>> whereExpression() const;
 

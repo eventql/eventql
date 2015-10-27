@@ -284,6 +284,16 @@ route {
 route {
   path_prefix: "/a/seller/"
   view: "per_seller_stats"
+  require_module: "util/z-date-util"
+  require_module: "util/z-url-util"
+  require_module: "widgets/z-dropdown"
+  require_module: "widgets/z-checkbox"
+  require_module: "widgets/z-button"
+  require_module: "widgets/z-input"
+  require_module: "widgets/z-sparkline"
+  require_module: "widgets/z-tooltip"
+  require_module: "widgets/z-daterangepicker"
+  require_module: "widgets/z-calendar-group"
   require_module: "widgets/zbase-header"
   require_module: "views/seller"
 }
@@ -291,6 +301,10 @@ route {
 route {
   path_match: "/a/seller"
   view: "seller_overview"
+  require_module: "util/z-url-util"
+  require_module: "widgets/z-input"
+  require_module: "widgets/z-search"
+  require_module: "widgets/z-checkbox"
   require_module: "widgets/z-table"
   require_module: "widgets/zbase-header"
   require_module: "views/seller"

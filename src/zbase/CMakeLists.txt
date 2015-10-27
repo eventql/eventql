@@ -130,6 +130,8 @@ add_executable(zbase
     api/LogfileAPIServlet.cc
     api/EventsService.cc
     api/EventsAPIServlet.cc
+    api/MapReduceService.cc
+    api/MapReduceAPIServlet.cc
     LogfileScanResult.cc
     EventScanResult.cc
     Report.cc
@@ -202,7 +204,9 @@ add_executable(zbase
     WebUIServlet.cc
     zbase.cc)
 
-target_link_libraries(zbase chartsql cplot sstable cstable stx-http stx-json stx-protobuf stx-base)
+target_link_libraries(zbase chartsql cplot sstable cstable stx-http stx-json stx-protobuf stx-base js_static.a z)
+target_link_libraries(zbase -L${CMAKE_BINARY_DIR}/3rdparty/mozjs/dist/lib -ljs_static)
+add_dependencies(zbase mozjs_build)
 
 add_executable(zbasectl
     $<TARGET_OBJECTS:stx-mdb>

@@ -23,6 +23,7 @@
 #include "zbase/core/TSDBService.h"
 #include "zbase/api/LogfileAPIServlet.h"
 #include "zbase/api/EventsAPIServlet.h"
+#include "zbase/api/MapReduceAPIServlet.h"
 #include "zbase/docdb/DocumentDB.h"
 #include "zbase/docdb/DocumentDBServlet.h"
 #include "zbase/RemoteTSDBScanParams.pb.h"
@@ -112,6 +113,11 @@ protected:
       http::HTTPResponse* res);
 
   void createTable(
+      const AnalyticsSession& session,
+      const http::HTTPRequest* req,
+      http::HTTPResponse* res);
+
+  void insertIntoTable(
       const AnalyticsSession& session,
       const http::HTTPRequest* req,
       http::HTTPResponse* res);
@@ -247,6 +253,7 @@ protected:
 
   LogfileAPIServlet logfile_api_;
   EventsAPIServlet events_api_;
+  MapReduceAPIServlet mapreduce_api_;
   DocumentDBServlet documents_api_;
 };
 

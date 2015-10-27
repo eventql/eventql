@@ -11,17 +11,17 @@
 #include "stx/http/httpservice.h"
 #include "stx/http/HTTPSSEStream.h"
 #include "zbase/AnalyticsSession.pb.h"
-#include "zbase/api/EventsService.h"
+#include "zbase/api/MapReduceService.h"
 
 using namespace stx;
 
 namespace zbase {
 
-class EventsAPIServlet {
+class MapReduceAPIServlet {
 public:
 
-  EventsAPIServlet(
-      EventsService* service,
+  MapReduceAPIServlet(
+      MapReduceService* service,
       ConfigDirectory* cdir,
       const String& cachedir);
 
@@ -32,25 +32,13 @@ public:
 
 protected:
 
-  void scanTable(
-      const AnalyticsSession& session,
-      const URI& uri,
-      http::HTTPRequestStream* req_stream,
-      http::HTTPResponseStream* res_stream);
-
-  void scanTablePartition(
-      const AnalyticsSession& session,
-      const URI& uri,
-      http::HTTPRequestStream* req_stream,
-      http::HTTPResponseStream* res_stream);
-
-  void insertEvents(
+  void executeMapPartitionTask(
       const AnalyticsSession& session,
       const URI& uri,
       const http::HTTPRequest* req,
       http::HTTPResponse* res);
 
-  EventsService* service_;
+  MapReduceService* service_;
   ConfigDirectory* cdir_;
   String cachedir_;
 };
