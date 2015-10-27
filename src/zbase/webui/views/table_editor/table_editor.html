@@ -24,6 +24,7 @@
             <th>Column Name</th>
             <th>Type</th>
             <th>NULL</th>
+            <th style="width: 60px;"></th>
           </tr>
         </thead>
 
@@ -41,7 +42,34 @@
         <div class="container"></div>
       </z-modal-box>
     </z-modal>
+
+    <z-modal class="delete_column">
+      <z-modal-box>
+        <z-modal-close-icon></z-modal-close-icon>
+        <div class="z-modal-header">
+          Delete Column
+        </div>
+        <div class="z-modal-content">
+          <h4>Are you sure you want to delete the column <span class="column_name"></span>?</h4>
+        </div>
+        <div class="z-modal-footer">
+          <button class="z-button primary submit">Yes</button>
+          <button class="z-button secondary close">Cancel</button>
+        </div>
+      </z-modal-box>
+    </z-modal>
   </div>
+</template>
+
+<template id="zbase_table_editor_row_tpl">
+  <tr>
+    <td class="name"></td>
+    <td class="type"></td>
+    <td class="is_nullable"></td>
+    <td class="icon delete">
+      <i class="fa fa-trash-o"></i>
+    </td>
+  </tr>
 </template>
 
 <template id="zbase_table_editor_add_modal_tpl">

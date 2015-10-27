@@ -32,6 +32,16 @@
   color: #000;
 }
 
+.zbase_table_editor table.z-table td.icon {
+  width: 60px;
+  text-align: center;
+}
+
+.zbase_table_editor table.z-table td.icon:hover {
+  cursor: pointer;
+  color: #3498db;
+}
+
 .zbase_table_editor .add_pane {
   border: 1px solid #e1e1e1;
   padding: 15px;
@@ -86,3 +96,10 @@
   display: none;
 }
 
+.zbase_table_editor z-modal h4 {
+  font-size: 14px;
+  line-height: 34px;
+  margin: 0;
+  color: #333;
+  font-weight: 500;
+}

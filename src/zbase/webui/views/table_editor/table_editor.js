@@ -31,22 +31,25 @@ ZBase.registerView((function() {
         displayAddColumnModal(schema.name);
     });
 
+    var delete_modal = $("z-modal.delete_column", page);
+    $.onClick($("button.close", delete_modal), function() {
+      delete_modal.close();
+    });
+
     var tbody = $("tbody", page);
+    var row_tpl = $.getTemplate(
+        "views/table_editor",
+        "zbase_table_editor_row_tpl");
 
     schema.columns.forEach(function(column) {
-      var tr = document.createElement("tr");
+      var tr = row_tpl.cloneNode(true);
+      $(".name", tr).innerHTML = column.column_name;
+      $(".type", tr).innerHTML = column.type;
+      $(".is_nullable", tr).innerHTML = column.is_nullable;
 
-      var name_td = document.createElement("td");
-      name_td.innerHTML = column.column_name;
-      tr.appendChild(name_td);
-
-      var type_td = document.createElement("td");
-      type_td.innerHTML = column.type;
-      tr.appendChild(type_td);
-
-      var nullable_td = document.createElement("td");
-      nullable_td.innerHTML = column.is_nullable;
-      tr.appendChild(nullable_td);
+      $.onClick($(".delete", tr), function() {
+        displayDeleteColumnModal(schema.name, column.column_name);
+      });
 
       tbody.appendChild(tr);
     });
@@ -88,6 +91,13 @@ ZBase.registerView((function() {
     $.replaceContent($(".container", modal), tpl);
     modal.show();
     input.focus();
+  };
+
+  var displayDeleteColumnModal = function(table_name, column_name) {
+    var modal = $(".zbase_table_editor z-modal.delete_column");
+    $(".column_name", modal).innerHTML = column_name;
+
+    modal.show();
   };
 
   return {
