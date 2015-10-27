@@ -840,7 +840,32 @@ TEST_CASE(RuntimeTest, TestDateTimeDateTruncExpression, [] () {
   }
 
   {
-    auto v = runtime->evaluateStaticExpression("'false' REGEX '^b'");
+    auto v = runtime->evaluateStaticExpression("'fubar' REGEX '^b'");
+    EXPECT_EQ(v.toString(), "false");
+  }
+
+  {
+    auto v = runtime->evaluateStaticExpression("'abc' LIKE 'abc'");
+    EXPECT_EQ(v.toString(), "true");
+  }
+
+  {
+    auto v = runtime->evaluateStaticExpression("'abc' LIKE 'a%'");
+    EXPECT_EQ(v.toString(), "true");
+  }
+
+  {
+    auto v = runtime->evaluateStaticExpression("'abc' LIKE '_b_'");
+    EXPECT_EQ(v.toString(), "true");
+  }
+
+  {
+    auto v = runtime->evaluateStaticExpression("'abc' LIKE '%bc'");
+    EXPECT_EQ(v.toString(), "true");
+  }
+
+  {
+    auto v = runtime->evaluateStaticExpression("'abc' LIKE 'c'");
     EXPECT_EQ(v.toString(), "false");
   }
 });

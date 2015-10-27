@@ -89,6 +89,7 @@ add_library(chartsql STATIC
     runtime/ExecutionStrategy.cc
     runtime/TableExpression.cc
     runtime/QueryBuilder.cc
+    runtime/LikePattern.cc
     runtime/charts/areachartbuilder.cc
     runtime/charts/barchartbuilder.cc
     runtime/charts/domainconfig.cc

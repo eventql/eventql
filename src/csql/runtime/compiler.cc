@@ -13,6 +13,7 @@
 #include <csql/parser/token.h>
 #include <csql/runtime/compiler.h>
 #include <csql/runtime/symboltable.h>
+#include <csql/runtime/LikePattern.h>
 #include <csql/svalue.h>
 
 namespace csql {
@@ -223,9 +224,17 @@ VM::Instruction* Compiler::compileLikeOperator(
     size_t* dynamic_storage_size,
     ScratchMemory* static_storage,
    SymbolTable* symbol_table) {
-  RAISE(
-      kNotYetImplementedError,
-      "LIKE is not yet implemented, use REGEX instead");
+  auto ins = static_storage->construct<VM::Instruction>();
+  ins->type = VM::X_LIKE;
+  ins->arg0 = static_storage->construct<LikePattern>(node->pattern());
+  ins->next  = nullptr;
+  ins->child = compileValueExpression(
+      node->subject(),
+      dynamic_storage_size,
+      static_storage,
+      symbol_table);
+
+  return ins;
 }
 
 }
