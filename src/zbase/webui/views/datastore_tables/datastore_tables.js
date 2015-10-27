@@ -31,16 +31,22 @@ ZBase.registerView((function() {
     main_menu.render($(".zbase_main_menu", page), url);
 
     $.onClick($(".add_pane.create_table", page), displayCreateTableModal);
-    var modal = $("z-modal.create_table", page);
-    $.onClick($("button.submit", modal), createTable);
-    $.onClick($("button.close", modal), function() {
-      modal.close();
+    var create_modal = $("z-modal.create_table", page);
+    $.onClick($("button.submit", create_modal), createTable);
+    $.onClick($("button.close", create_modal), function() {
+      create_modal.close();
     });
+
+    var delete_modal = $("z-modal.delete_table", page);
+    $.onClick($("button.submit", delete_modal), deleteTable);
+    $.onClick($("button.close", delete_modal), function() {
+      delete_modal.close();
+    });
+
 
     $.handleLinks(page);
     $.replaceViewport(page);
   };
-
 
   var renderRow = function(tbody, table) {
     var elem = $.getTemplate(
@@ -55,7 +61,12 @@ ZBase.registerView((function() {
     for (var i = 0; i < links.length; i++) {
       links[i].href = url;
     }
-    //$(".table_description", elem).innerHTML = table[1];
+
+    $("z-dropdown", elem).addEventListener("change", function() {
+      if (this.getValue() == "delete") {
+        displayDeleteTableModal(table.name);
+      }
+    }, false);
 
     tbody.appendChild(elem);
   };
@@ -91,6 +102,19 @@ ZBase.registerView((function() {
         $.fatalError();
       }
     });
+  };
+
+  var deleteTable;
+
+  var displayDeleteTableModal = function(table_name) {
+    var modal = $(".zbase_datastore_tables z-modal.delete_table");
+    $(".table_name", modal).innerHTML = table_name;
+
+    deleteTable = function() {
+      console.log(table_name);
+    };
+
+    modal.show();
   };
 
   return {
