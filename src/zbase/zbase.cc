@@ -52,7 +52,6 @@
 #include "zbase/DefaultServlet.h"
 #include "csql/defaults.h"
 #include "zbase/ConfigDirectory.h"
-
 #include <jsapi.h>
 
 using namespace stx;
@@ -256,7 +255,7 @@ int main(int argc, const char** argv) {
   auto sql = csql::Runtime::getDefaultRuntime();
   sql->setCacheDir(flags.getString("cachedir"));
 
-  /* spidermonkey */
+  /* spidermonkey javascript runtime */
   JS_Init();
 
   /* analytics core */
@@ -271,7 +270,9 @@ int main(int argc, const char** argv) {
           &customer_dir,
           &auth,
           sql.get(),
-          flags.getString("datadir")));
+          nullptr,
+          flags.getString("datadir"),
+          flags.getString("cachedir")));
 
   dproc::DispatchService dproc;
   dproc.registerApp(analytics_app.get(), local_scheduler.get());

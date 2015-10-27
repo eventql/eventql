@@ -21,6 +21,7 @@ struct HTTPStatus {
 
 const HTTPStatus kStatusOK(200, "OK");
 const HTTPStatus kStatusCreated(201, "Created");
+const HTTPStatus kStatusNoContent(204, "No Content");
 const HTTPStatus kStatusBadRequest(400, "Bad request");
 const HTTPStatus kStatusUnauthorized(401, "Unauthorized");
 const HTTPStatus kStatusForbidden(403, "Forbidden");

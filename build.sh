@@ -25,9 +25,11 @@ if [[ "${BUILD_ARCH}" == "x86_64" ]]; then
   ARCHFLAGS="-m64 -march=x86-64";
 fi
 
-MAKETOOL="make"
-if which ninja > /dev/null; then
-  MAKETOOL="ninja"
+if [[ -z "$MAKETOOL" ]]; then
+  MAKETOOL="make"
+  if which ninja > /dev/null; then
+    MAKETOOL="ninja"
+  fi
 fi
 
 echo    "======================  zScale Z1 ======================="
@@ -37,6 +39,7 @@ echo -e "    Build-Type:    ${BUILD_TYPE}"
 echo -e "    Build-Target:  ${BUILD_OS}/${BUILD_ARCH}"
 echo -e "    Build Assets:  ${BUILD_ASSETS}"
 echo -e "    Build Docs:    ${BUILD_DOCUMENTATION}"
+echo -e "    Maketool:      ${MAKETOOL}"
 echo -e "                                                         "
 echo    "========================================================="
 
@@ -84,7 +87,9 @@ fi
 # build c++ with make
 if [[ $MAKETOOL == "make" ]]; then
   if [[ ! -e ${TARGET_DIR}/Makefile ]]; then
-    CFLAGS="${ARCHFLAGS}" CXXFLAGS="${ARCHFLAGS}" ZBASE_BUILD_ID="${BUILD_ID}" cmake \
+    CFLAGS="${ARCHFLAGS} ${CFLAGS}" \
+    CXXFLAGS="${ARCHFLAGS} ${CXXFLAGS}" \
+    ZBASE_BUILD_ID="${BUILD_ID}" cmake \
         -G "Unix Makefiles" \
         -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
         -B${TARGET_DIR_REAL} \
@@ -96,7 +101,9 @@ if [[ $MAKETOOL == "make" ]]; then
 # build c++ with ninja
 elif [[ $MAKETOOL == "ninja" ]]; then
   if [[ ! -e ${TARGET_DIR}/build.ninja ]]; then
-    CFLAGS="${ARCHFLAGS}" CXXFLAGS="${ARCHFLAGS}" ZBASE_BUILD_ID="${BUILD_ID}" cmake \
+    CFLAGS="${ARCHFLAGS} ${CFLAGS}" \
+    CXXFLAGS="${ARCHFLAGS} ${CXXFLAGS}" \
+    ZBASE_BUILD_ID="${BUILD_ID}" cmake \
         -G "Ninja" \
         -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
         -B${TARGET_DIR_REAL} \
@@ -112,7 +119,7 @@ fi
 
 # test
 if [[ $RUN_TESTS == "true" ]]; then
-  find ${TARGET_DIR} -name "test-*" -type f -exec ./{} \;
+  find ${TARGET_DIR} -maxdepth 1 -name "test-*" -type f -exec ./{} \;
 fi
 
 # pack artifacts

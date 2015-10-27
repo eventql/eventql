@@ -32,7 +32,42 @@ public:
 
 protected:
 
+  void catchAndReturnErrors(
+      http::HTTPResponse* resp,
+      Function<void ()> fn) const {
+    try {
+      fn();
+    } catch (const StandardException& e) {
+      resp->setStatus(http::kStatusInternalServerError);
+      resp->addBody(e.what());
+    }
+  }
+
+  void executeMapReduceScript(
+      const AnalyticsSession& session,
+      const URI& uri,
+      http::HTTPRequestStream* req_stream,
+      http::HTTPResponseStream* res_stream);
+
+  void fetchResult(
+      const AnalyticsSession& session,
+      const String& result_id,
+      http::HTTPRequestStream* req_stream,
+      http::HTTPResponseStream* res_stream);
+
   void executeMapPartitionTask(
+      const AnalyticsSession& session,
+      const URI& uri,
+      const http::HTTPRequest* req,
+      http::HTTPResponse* res);
+
+  void executeReduceTask(
+      const AnalyticsSession& session,
+      const URI& uri,
+      const http::HTTPRequest* req,
+      http::HTTPResponse* res);
+
+  void executeSaveToTableTask(
       const AnalyticsSession& session,
       const URI& uri,
       const http::HTTPRequest* req,

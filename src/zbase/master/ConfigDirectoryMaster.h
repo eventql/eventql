@@ -52,6 +52,7 @@ protected:
   mutable std::mutex mutex_;
   String customerdb_path_;
   String userdb_path_;
+  String clusterdb_path_;
   HashMap<String, uint64_t> heads_;
 };
 

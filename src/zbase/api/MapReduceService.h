@@ -7,10 +7,13 @@
  * permission is obtained.
  */
 #pragma once
+#include "stx/thread/threadpool.h"
 #include "zbase/core/TSDBService.h"
 #include "zbase/AnalyticsAuth.h"
 #include "zbase/CustomerConfig.h"
 #include "zbase/ConfigDirectory.h"
+#include "zbase/JavaScriptContext.h"
+#include "zbase/mapreduce/MapReduceTask.h"
 
 using namespace stx;
 
@@ -24,12 +27,39 @@ public:
       AnalyticsAuth* auth,
       zbase::TSDBService* tsdb,
       zbase::PartitionMap* pmap,
-      zbase::ReplicationScheme* repl);
+      zbase::ReplicationScheme* repl,
+      JSRuntime* js_runtime,
+      const String& cachedir);
 
-  void mapPartition(
+  void executeScript(
+      const AnalyticsSession& session,
+      RefPtr<MapReduceJobSpec> job);
+
+  Option<SHA1Hash> mapPartition(
       const AnalyticsSession& session,
       const String& table_name,
-      const SHA1Hash& partition_key);
+      const SHA1Hash& partition_key,
+      const String& program_source,
+      const String& method_name);
+
+  Option<SHA1Hash> reduceTables(
+      const AnalyticsSession& session,
+      const Vector<String>& input_tables,
+      const String& program_source,
+      const String& method_name);
+
+  Option<String> getResultFilename(
+      const SHA1Hash& result_id);
+
+  bool saveResultToTable(
+      const AnalyticsSession& session,
+      const SHA1Hash& result_id,
+      const String& table_name,
+      const SHA1Hash& partition);
+
+  static void downloadResult(
+      const http::HTTPRequest& req,
+      Function<void (const void*, size_t, const void*, size_t)> fn);
 
 protected:
   ConfigDirectory* cdir_;
@@ -37,6 +67,9 @@ protected:
   zbase::TSDBService* tsdb_;
   zbase::PartitionMap* pmap_;
   zbase::ReplicationScheme* repl_;
+  JSRuntime* js_runtime_;
+  String cachedir_;
+  thread::ThreadPool tpool_;
 };
 
 } // namespace zbase

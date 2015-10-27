@@ -13,19 +13,6 @@
 
 namespace stx {
 
-CivilTime::CivilTime() :
-    year_(0),
-    month_(0),
-    day_(0),
-    hour_(0),
-    minute_(0),
-    second_(0),
-    millisecond_(0),
-    offset_(0) {}
-
-
-CivilTime::CivilTime(std::nullptr_t) : CivilTime() {}
-
 Option<CivilTime> CivilTime::parseString(
     const String& str,
     const char* fmt /* = "%Y-%m-%d %H:%M:%S" */) {
@@ -51,38 +38,6 @@ Option<CivilTime> CivilTime::parseString(
     ct.setYear(t.tm_year + 1900);
     return Some(ct);
   }
-}
-
-uint16_t CivilTime::year() const {
-  return year_;
-}
-
-uint8_t CivilTime::month() const {
-  return month_;
-}
-
-uint8_t CivilTime::day() const {
-  return day_;
-}
-
-uint8_t CivilTime::hour() const {
-  return hour_;
-}
-
-uint8_t CivilTime::minute() const {
-  return minute_;
-}
-
-uint8_t CivilTime::second() const {
-  return second_;
-}
-
-uint16_t CivilTime::millisecond() const {
-  return millisecond_;
-}
-
-int32_t CivilTime::offset() const {
-  return offset_;
 }
 
 void CivilTime::setYear(uint16_t value) {

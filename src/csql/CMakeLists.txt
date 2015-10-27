@@ -42,6 +42,8 @@ add_library(chartsql STATIC
     qtree/SelectExpressionNode.cc
     qtree/LiteralExpressionNode.cc
     qtree/IfExpressionNode.cc
+    qtree/RegexExpressionNode.cc
+    qtree/LikeExpressionNode.cc
     qtree/TableExpressionNode.cc
     qtree/SelectListNode.cc
     qtree/GroupByNode.cc
@@ -87,6 +89,7 @@ add_library(chartsql STATIC
     runtime/ExecutionStrategy.cc
     runtime/TableExpression.cc
     runtime/QueryBuilder.cc
+    runtime/LikePattern.cc
     runtime/charts/areachartbuilder.cc
     runtime/charts/barchartbuilder.cc
     runtime/charts/domainconfig.cc
@@ -98,8 +101,13 @@ add_library(chartsql STATIC
     ${PROTO_SRCS}
     defaults.cc)
 
+set(CSQL_LIBS chartsql cplot cstable stx-http stx-protobuf stx-json stx-base)
+if(HAVE_PCRE)
+  set(CSQL_LIBS ${CSQL_LIBS} ${PCRE_LIBRARIES})
+endif()
+
 add_executable(test-chartsql-runtime runtime/Runtime_test.cc)
-target_link_libraries(test-chartsql-runtime chartsql cplot cstable stx-http stx-protobuf stx-json stx-base)
+target_link_libraries(test-chartsql-runtime ${CSQL_LIBS})
 
 add_executable(test-chartsql-parser parser/Parser_test.cc)
-target_link_libraries(test-chartsql-parser chartsql cplot stx-http stx-protobuf stx-json stx-base)
+target_link_libraries(test-chartsql-parser ${CSQL_LIBS})

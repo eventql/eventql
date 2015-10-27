@@ -11,6 +11,7 @@
 #include <stx/stdtypes.h>
 #include <stx/autoref.h>
 #include <stx/option.h>
+#include <stx/protobuf/MessageObject.h>
 #include <zbase/core/PartitionSnapshot.h>
 
 using namespace stx;
@@ -26,23 +27,12 @@ public:
   Option<RefPtr<VFSFile>> fetchCSTable() const;
   Option<String> fetchCSTableFilename() const;
   Option<SHA1Hash> cstableVersion() const;
-
-  void fetchRecords(
-      size_t offset,
-      size_t limit,
-      Function<void (
-          const SHA1Hash& record_id,
-          const void* record_data,
-          size_t record_size)> fn);
-
-  void fetchRecords(Function<void (const Buffer& record)> fn);
-
-  void fetchRecordsWithSampling(
-      size_t sample_modulo,
-      size_t sample_index,
-      Function<void (const Buffer& record)> fn);
-
   Option<String> cstableFilename() const;
+
+  virtual void fetchRecords(
+      Function<void (const msg::MessageObject& record)> fn) = 0;
+
+  virtual SHA1Hash version() const = 0;
 
 protected:
   RefPtr<PartitionSnapshot> snap_;

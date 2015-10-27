@@ -128,6 +128,10 @@ protected:
 
   ValueExpressionNode* buildMethodCall(ASTNode* ast);
 
+  ValueExpressionNode* buildRegex(ASTNode* ast);
+
+  ValueExpressionNode* buildLike(ASTNode* ast);
+
   /**
    * expand all column names + wildcard to tablename->columnanme
    */

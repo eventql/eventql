@@ -16,6 +16,7 @@
 #include "stx/http/httpresponse.h"
 #include "stx/http/httpstats.h"
 #include "stx/http/httpconnectionpool.h"
+#include "stx/http/httpclient.h"
 #include <string>
 
 namespace stx {
@@ -29,6 +30,7 @@ public:
       const String& output_file_);
 
   Future<HTTPResponse> download(HTTPConnectionPool* http);
+  HTTPResponse download(HTTPClient* http);
 
 protected:
   class ResponseFuture : public HTTPResponseFuture {

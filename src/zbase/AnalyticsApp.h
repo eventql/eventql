@@ -28,6 +28,7 @@
 #include "zbase/AnalyticsSession.pb.h"
 #include "csql/runtime/ExecutionStrategy.h"
 #include "zbase/ConfigDirectory.h"
+#include <jsapi.h>
 
 using namespace stx;
 
@@ -44,7 +45,9 @@ public:
       ConfigDirectory* cdb,
       AnalyticsAuth* auth,
       csql::Runtime* sql,
-      const String& datadir);
+      JSRuntime* js_runtime,
+      const String& datadir,
+      const String& cachedir);
 
   /**
    * Build a "feed" query
