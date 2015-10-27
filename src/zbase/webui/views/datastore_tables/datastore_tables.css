@@ -42,6 +42,31 @@
   color: #3498db;
 }
 
+.zbase_datastore_tables table.z-table td.icon {
+  text-align: center;
+}
+
+.zbase_datastore_tables table.z-table td.icon z-dropdown {
+  margin-top: 10px;
+}
+
+.zbase_datastore_tables table.z-table td.icon z-dropdown-header {
+  height: 17px;
+}
+
+.zbase_datastore_tables table.z-table td.icon z-dropdown-flyout {
+  left: -60px;
+}
+
+.zbase_datastore_tables .dot {
+  display: block;
+  height: 4px;
+  width: 4px;
+  border-radius: 50%;
+  background-color: #888;
+  margin-bottom: 2px;
+}
+
 .zbase_datastore_tables .add_pane {
   border: 1px solid #e1e1e1;
   padding: 15px;

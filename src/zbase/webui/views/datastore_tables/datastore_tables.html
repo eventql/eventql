@@ -53,10 +53,23 @@
     </td>
     <td>
       <a style="color: #888;">0.0 TB</a></td>
-    <td>
-      <a style="text-align:center;">
-        <i class="fa fa-cog" style="margin-left: 5px;"></i>
-      </a>
+    <td class="icon">
+      <z-dropdown class="edit" data-resolved="">
+        <z-dropdown-header>
+          <z-dropdown-header-value data-static="">
+            <i class="dot"></i>
+            <i class="dot"></i>
+            <i class="dot"></i>
+          </z-dropdown-header-value>
+          <z-dropdown-header-icon></z-dropdown-header-icon>
+        </z-dropdown-header>
+        <z-dropdown-flyout>
+          <z-dropdown-items>
+            <z-dropdown-item data-value="edit">Edit Table</z-dropdown-item>
+            <z-dropdown-item data-value="delete">Delete Table</z-dropdown-item>
+          </z-dropdown-items>
+        </z-dropdown-flyout>
+      </z-dropdown>
     </td>
   </tr>
 </template>
