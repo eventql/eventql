@@ -68,6 +68,21 @@ var Z1 = (function(global) {
     return job_id;
   };
 
+  var mkSaveToTablePartitionTask = function(opts) {
+    var job_id = mkJobID();
+
+    jobs.push({
+      id: job_id,
+      op: "save_to_table_partition",
+      table_name: opts["table"],
+      partition_key: opts["partition"],
+      sources: opts["sources"]
+    });
+
+    return job_id;
+  };
+
+
   var mkJobID = function() {
     return "job-" + ++seq;
   };
@@ -80,7 +95,8 @@ var Z1 = (function(global) {
     mapTable: mkMapTableTask,
     reduce: mkReduceTask,
     downloadResults: mkDownloadResultsTask,
-    saveToTable: mkSaveToTableTask
+    saveToTable: mkSaveToTableTask,
+    saveToTablePartition: mkSaveToTablePartitionTask
   };
 })(this);
 
