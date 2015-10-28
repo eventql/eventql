@@ -8,6 +8,7 @@
  */
 #include "zbase/mapreduce/tasks/ReduceTask.h"
 #include "zbase/mapreduce/MapReduceScheduler.h"
+#include <algorithm>
 
 using namespace stx;
 
@@ -39,9 +40,8 @@ ReduceTask::ReduceTask(
   for (size_t shard_idx = 0; shard_idx < num_shards_; shard_idx++) {
     auto shard = mkRef(new ReduceTaskShard());
     shard->task = this;
-    shard->dependencies = input;
     shard->shard = shard_idx;
-
+    shard->dependencies = input;
     addShard(shard.get(), shards);
   }
 }
@@ -66,6 +66,7 @@ Option<MapReduceShardResult> ReduceTask::execute(
             shard->shard));
   }
 
+  std::sort(input_tables.begin(), input_tables.end());
   auto placement_id = SHA1::compute(
       StringUtil::format(
           "$0~$1",

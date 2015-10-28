@@ -15,6 +15,7 @@
 #include "stx/http/HTTPFileDownload.h"
 #include "sstable/SSTableWriter.h"
 #include "sstable/sstablereader.h"
+#include <algorithm>
 
 using namespace stx;
 
@@ -165,9 +166,12 @@ Option<SHA1Hash> MapReduceService::mapPartition(
 
 Option<SHA1Hash> MapReduceService::reduceTables(
     const AnalyticsSession& session,
-    const Vector<String>& input_tables,
+    const Vector<String>& input_tables_ref,
     const String& program_source,
     const String& method_name) {
+  auto input_tables = input_tables_ref;
+  std::sort(input_tables.begin(), input_tables.end());
+
   auto output_id = SHA1::compute(
       StringUtil::format(
           "$0~$1~$2~$3",
@@ -190,6 +194,8 @@ Option<SHA1Hash> MapReduceService::reduceTables(
       session.customer(),
       input_tables.size(),
       output_id.toString());
+
+  std::random_shuffle(input_tables.begin(), input_tables.end());
 
   // FIXME MOST NAIVE IN MEMORY MERGE AHEAD !!
   HashMap<String, Vector<String>> groups;
