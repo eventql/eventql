@@ -38,6 +38,11 @@
   background: #fff;
 }
 
+.zbase_seller_stats .metric_group {
+  overflow: auto;
+  margin-bottom: 10px;
+}
+
 .zbase_seller_stats .metric_pane {
   background: #fff;
   box-shadow: 0 1px 2px rgba(0,0,0,.2);
@@ -45,22 +50,24 @@
   padding: 15px 20px;
   overflow: auto;
   width: 23.5%;
-  margin: 1%;
+  margin: 8px 1% 13px 1%;
   float: left;
 }
 
-.zbase_seller_stats .zbase_stats .metric_pane:first-child,
-.zbase_seller_stats .zbase_stats .metric_pane:nth-child(4n+1) {
+.zbase_seller_stats .metric_group h3 {
+  font-weight: 300;
+  font-size: 16px;
+  color: #454545;
+}
+
+.zbase_seller_stats .metric_group .metric_pane.first {
   margin-left: 0px;
 }
 
-.zbase_seller_stats .zbase_stats .metric_pane:nth-child(4n) {
+.zbase_seller_stats .zbase_stats .metric_group .metric_pane:last-child {
   margin-right: 0px;
 }
 
-.zbase_seller_stats .zbase_stats .metric_pane:nth-child(-n+4) {
-  margin-top: 0px;
-}
 
 .zbase_seller_stats .zbase_stats .metric_pane h2.pagetitle {
   font-size: 16px;
