@@ -165,12 +165,13 @@
 
 .zbase_datastore_tables z-modal .columns {
   margin-top: 35px;
-  overflow: auto;
+  overflow: visible;
 }
 
 .zbase_datastore_tables z-modal .table {
   margin-top: 12px;
-  overflow: auto;
+  height: 100px;
+  overflow: visible;
 }
 
 .zbase_datastore_tables z-modal .table h3,
@@ -181,13 +182,12 @@
   margin-top: 0;
 }
 
-.zbase_datastore_tables z-modal .column {
-  overflow: visible;
+.zbase_datastore_tables z-modal .table table.z-table {
+  float: left;
 }
 
 .zbase_datastore_tables z-modal table.z-table {
   width: auto;
-  float: left;
 }
 
 .zbase_datastore_tables z-modal table.z-table tbody tr td {

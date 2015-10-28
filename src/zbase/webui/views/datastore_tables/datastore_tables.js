@@ -98,7 +98,8 @@ ZBase.registerView((function() {
       table_type: $("z-dropdown.table_type", modal).getValue(),
       schema: {
         columns: []
-      }
+      },
+      update: false
     };
 
     var columns = modal.querySelectorAll(".column");
@@ -115,19 +116,14 @@ ZBase.registerView((function() {
       });
     }
 
+    //set column ids
     for (var i = 0; i < json.schema.columns.length; i++) {
       json.schema.columns[i].id = i + 1;
     }
 
-    console.log(json);
-    return;
-
-
-    $.httpPost("/api/v1/tables/create_table", json, function(r) {
+    $.httpPost("/api/v1/tables/create_table", JSON.stringify(json), function(r) {
       if (r.status == 201) {
-        var table = JSON.parse(r.response);
-        console.log(table);
-        //$.navigateTo("/a/tables/" + table.name);
+        $.navigateTo("/a/datastore/tables");
       } else {
         $.fatalError();
       }
