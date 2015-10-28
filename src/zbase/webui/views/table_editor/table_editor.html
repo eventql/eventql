@@ -40,7 +40,7 @@
                 <z-dropdown-icon><i class="fa fa-plus"></i></z-dropdown-icon>
                 Add Column
               </z-dropdown-item>
-              <z-dropdown-item data-value='remove_column'>
+              <z-dropdown-item data-value='delete_column'>
                 <z-dropdown-icon><i class="fa fa-trash-o"></i></z-dropdown-icon>
                 Remove Column
               </z-dropdown-item>
@@ -73,16 +73,7 @@
     <z-modal class="delete_column">
       <z-modal-box>
         <z-modal-close-icon></z-modal-close-icon>
-        <div class="z-modal-header">
-          Delete Column
-        </div>
-        <div class="z-modal-content">
-          <h4>Are you sure you want to delete the column <span class="column_name"></span>?</h4>
-        </div>
-        <div class="z-modal-footer">
-          <button class="z-button primary submit">Yes</button>
-          <button class="z-button secondary close">Cancel</button>
-        </div>
+        <div class="container"></div>
       </z-modal-box>
     </z-modal>
   </div>
@@ -94,6 +85,24 @@
     <td class="type"></td>
     <td class="is_nullable"></td>
   </tr>
+</template>
+
+<template id="zbase_table_editor_delete_modal_tpl">
+  <div class="z-modal-header">Remove Column</div>
+
+  <div class="z-modal-content">
+    <h3>Please note that this action is irreversable!</h3>
+    <p>Please type in the name of the column that you want to remove.</p>
+    <div class="error_note hidden">
+      The column you entered does not exist. Please type in an existing column.
+    </div>
+    <input class="z-input" />
+  </div>
+
+  <div class="z-modal-footer">
+    <button class="z-button primary submit">Remove this column</button>
+    <button class="z-button secondary close">Cancel</button>
+  </div>
 </template>
 
 <template id="zbase_table_editor_add_modal_tpl">

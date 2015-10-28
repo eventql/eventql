@@ -30,48 +30,47 @@ ZBase.registerView((function() {
     $("z-tab.schema a", page).href = kPathPrefix + schema.name;
     $("z-tab.settings a", page).href = kPathPrefix + schema.name;
 
+    $("z-dropdown.edit", page).addEventListener("change", function() {
+      switch (this.getValue()) {
+        case "add_column":
+          displayAddColumnModal(schema);
+          break;
 
-    $.onClick($(".add_pane", page), function() {
-        displayAddColumnModal(schema.name);
-    });
+        case "delete_column":
+          displayDeleteColumnModal(schema);
+          break;
+      }
+      this.setValue([]);
+    }, false);
 
-    var delete_modal = $("z-modal.delete_column", page);
-    $.onClick($("button.close", delete_modal), function() {
-      delete_modal.close();
-    });
-    $.onClick($("button.submit", delete_modal), function() {
-      deleteColumn();
-    });
-
-    var tbody = $("tbody", page);
-    var row_tpl = $.getTemplate(
-        "views/table_editor",
-        "zbase_table_editor_row_tpl");
-
-    schema.columns.forEach(function(column) {
-      var tr = row_tpl.cloneNode(true);
-      $(".name", tr).innerHTML = column.column_name;
-      $(".type", tr).innerHTML = column.type;
-      $(".is_nullable", tr).innerHTML = column.is_nullable;
-
-      $.onClick($(".delete", tr), function() {
-        displayDeleteColumnModal(schema.name, column.column_name);
-      });
-
-      tbody.appendChild(tr);
-    });
+    renderTable(schema.columns, $("tbody", page));
 
     $.handleLinks(page);
     $.replaceViewport(page);
   };
 
-  var displayAddColumnModal = function(table_name) {
+  var renderTable = function(columns, tbody) {
+    var row_tpl = $.getTemplate(
+        "views/table_editor",
+        "zbase_table_editor_row_tpl");
+
+    columns.forEach(function(column) {
+      var tr = row_tpl.cloneNode(true);
+      $(".name", tr).innerHTML = column.column_name;
+      $(".type", tr).innerHTML = column.type;
+      $(".is_nullable", tr).innerHTML = column.is_nullable;
+
+      tbody.appendChild(tr);
+    });
+  };
+
+  var displayAddColumnModal = function(schema) {
     var modal = $(".zbase_table_editor z-modal.add_column");
     var tpl = $.getTemplate(
         "views/table_editor", 
         "zbase_table_editor_add_modal_tpl");
 
-    var input = $("input", tpl);;
+    var input = $("input", tpl);
 
     $.onClick($("button.submit", tpl), function() {
       if (input.value.length == 0) {
@@ -81,11 +80,21 @@ ZBase.registerView((function() {
         return;
       }
 
-      var url = "/api/v1/tables/add_column?table=" + table_name + "&" +
-        $.buildQueryString({
-          column_name: input.value,
+      console.log(schema);
+      return;
+
+      var json = {
+        table_name: schema.name,
+        schema: {
+          columns: schema.columns
+        },
+        update: true
+      };
+
+      json.schema.columns.push({
+          name: input.value,
           type: $("z-dropdown.type", modal).getValue(),
-          is_nullable: $("z-dropdown.is_nullable", modal).getValue()});
+          optional: $("z-dropdown.is_nullable", modal).getValue()});
 
       //TODO httpPost
 
@@ -100,21 +109,38 @@ ZBase.registerView((function() {
     input.focus();
   };
 
-  var deleteColumn;
-
-  var onDelete = function(table_name, column_name) {
-    console.log("delete column ", column_name);
-  };
-
-  var displayDeleteColumnModal = function(table_name, column_name) {
+  var displayDeleteColumnModal = function(schema) {
     var modal = $(".zbase_table_editor z-modal.delete_column");
-    $(".column_name", modal).innerHTML = column_name;
+    var tpl = $.getTemplate(
+        "views/table_editor",
+        "zbase_table_editor_delete_modal_tpl");
 
-    deleteColumn = function() {
-      onDelete(table_name, column_name);
-    };
+    var input = $("input", tpl);
+
+    $.onClick($("button.submit", tpl), function() {
+      var column_name = input.value;
+      if (column_name.length > 0) {
+        schema.columns.forEach(function(column) {
+          if (column.column_name == column_name) {
+            console.log("delete ", column);
+          }
+        });
+      }
+
+      $(".error_note", modal).classList.remove("hidden");
+      input.classList.add("error");
+      input.focus();
+      return;
+    });
+
+    $.onClick($("button.close", tpl), function() {
+      modal.close();
+    });
+
+    $.replaceContent($(".container", modal), tpl);
 
     modal.show();
+    input.focus();
   };
 
   return {
