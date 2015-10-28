@@ -27,6 +27,27 @@
         </z-tabbable>
       </section>
 
+      <div class="dropdown_container">
+        <z-dropdown class="input primary edit" data-resolved>
+          <z-dropdown-header>
+            <z-dropdown-header-value data-static>
+                <span style="margin-left:4px; margin-right: 10px;">Edit</span>
+            </z-dropdown-header-value>
+          </z-dropdown-header>
+          <z-dropdown-flyout>
+            <z-dropdown-items>
+              <z-dropdown-item data-value='add_column'>
+                <z-dropdown-icon><i class="fa fa-plus"></i></z-dropdown-icon>
+                Add Column
+              </z-dropdown-item>
+              <z-dropdown-item data-value='remove_column'>
+                <z-dropdown-icon><i class="fa fa-trash-o"></i></z-dropdown-icon>
+                Remove Column
+              </z-dropdown-item>
+            </z-dropdown-items>
+          </z-dropdown-flyout>
+        </z-dropdown>
+      </div>
 
 
       <table class="z-table">
@@ -35,16 +56,11 @@
             <th>Column Name</th>
             <th>Type</th>
             <th>NULL</th>
-            <th style="width: 60px;"></th>
           </tr>
         </thead>
 
         <tbody></tbody>
       </table>
-
-      <div class="add_pane">
-        <i class="fa fa-plus"></i> Add Column
-      </div>
     </div>
 
     <z-modal class="add_column">
@@ -77,9 +93,6 @@
     <td class="name"></td>
     <td class="type"></td>
     <td class="is_nullable"></td>
-    <td class="icon delete">
-      <i class="fa fa-trash-o"></i>
-    </td>
   </tr>
 </template>
 

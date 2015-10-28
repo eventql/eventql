@@ -17,6 +17,21 @@
   border-bottom: none;
 }
 
+.zbase_table_editor .dropdown_container {
+  padding: 20px;
+  height: 80px;
+  overflow: visible;
+  border-bottom: 1px solid #e1e1e1;
+}
+
+.zbase_table_editor .dropdown_container z-dropdown.edit {
+  float: right;
+}
+
+.zbase_table_editor .dropdown_container z-dropdown.input.edit z-dropdown-header {
+  min-width: 140px;
+}
+
 .zbase_table_editor table.z-table {
   font-size: 13px;
   table-layout: fixed;
