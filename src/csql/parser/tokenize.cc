@@ -364,6 +364,16 @@ next:
     goto next;
   }
 
+  if (token == "LIKE") {
+    token_list->emplace_back(Token::T_LIKE);
+    goto next;
+  }
+
+  if (token == "REGEX") {
+    token_list->emplace_back(Token::T_REGEX);
+    goto next;
+  }
+
   if (token == "BEGIN") {
     token_list->emplace_back(Token::T_BEGIN);
     goto next;

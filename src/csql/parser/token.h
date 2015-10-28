@@ -64,6 +64,8 @@ public:
     T_LTE,
     T_GT,
     T_GTE,
+    T_LIKE,
+    T_REGEX,
     T_BEGIN,
     T_CREATE,
     T_WITH,

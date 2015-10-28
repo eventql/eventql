@@ -93,7 +93,7 @@ Option<SHA1Hash> MapReduceService::mapPartition(
   if (table.isEmpty()) {
     RAISEF(
         kNotFoundError,
-        "table not found: $0/$1/$2",
+        "table not found: $0/$1",
         session.customer(),
         table_name);
   }
@@ -308,13 +308,71 @@ bool MapReduceService::saveResultToTable(
     const SHA1Hash& result_id,
     const String& table_name,
     const SHA1Hash& partition) {
+  auto table = pmap_->findTable(
+      session.customer(),
+      table_name);
+
+  if (table.isEmpty()) {
+    RAISEF(
+        kNotFoundError,
+        "table not found: $0/$1",
+        session.customer(),
+        table_name);
+  }
+
+  auto sstable_file = getResultFilename(result_id);
+  if (sstable_file.isEmpty()) {
+    RAISEF(
+        kNotFoundError,
+        "result not found: $0/$1",
+        session.customer(),
+        result_id.toString());
+  }
+
   logDebug(
       "z1.mapreduce",
-      "Saving result shard to table; shard=$0 table=$1/$2/$3",
+      "Saving result shard to table; result_id=$0 table=$1/$2/$3",
       result_id.toString(),
       session.customer(),
       table_name,
       partition.toString());
+
+  auto schema = table.get()->schema();
+
+  auto tmpfile_path = FileUtil::joinPaths(
+      cachedir_,
+      StringUtil::format("mr-shard-$0.cst", Random::singleton()->hex128()));
+
+  {
+    cstable::CSTableBuilder cstable(schema.get());
+    sstable::SSTableReader sstable(sstable_file.get());
+    auto cursor = sstable.getCursor();
+    while (cursor->valid()) {
+      void* data;
+      size_t data_size;
+      cursor->getData(&data, &data_size);
+
+      auto json = json::parseJSON(String((const char*) data, data_size));
+      msg::DynamicMessage msg(schema);
+      msg.fromJSON(json.begin(), json.end());
+
+      cstable.addRecord(msg.data());
+
+      if (!cursor->next()) {
+        break;
+      }
+    }
+
+    cstable.write(tmpfile_path);
+  }
+
+  tsdb_->updatePartitionCSTable(
+      session.customer(),
+      table_name,
+      partition,
+      tmpfile_path,
+      WallClock::unixMicros());
+
   return true;
 }
 

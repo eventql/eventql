@@ -1,6 +1,7 @@
 /**
  * This file is part of the "libfnord" project
  *   Copyright (c) 2015 Paul Asmuth
+ *   Copyright (c) 2015 Laura Schlimmer
  *
  * FnordMetric is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License v3.0. You should have received a
@@ -63,6 +64,7 @@ void installDefaultSymbols(SymbolTable* rt) {
   rt->registerFunction(
       "FROM_TIMESTAMP",
       PureFunction(&expressions::fromTimestamp));
+  rt->registerFunction("date_trunc", PureFunction(&expressions::dateTruncExpr));
 
   /* expressions/math.h */
   rt->registerFunction("add", PureFunction(&expressions::addExpr));

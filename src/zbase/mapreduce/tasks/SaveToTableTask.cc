@@ -8,6 +8,7 @@
  */
 #include "zbase/mapreduce/tasks/SaveToTableTask.h"
 #include "zbase/mapreduce/MapReduceScheduler.h"
+#include "zbase/core/FixedShardPartitioner.h"
 #include "sstable/sstablereader.h"
 
 using namespace stx;
@@ -33,7 +34,10 @@ SaveToTableTask::SaveToTableTask(
       auto shard = mkRef(new SaveToTableTaskShard());
       shard->task = this;
       shard->dependencies.emplace_back(idx);
-      shard->partition = SHA1::compute(StringUtil::toString(nshard++));
+      shard->partition = FixedShardPartitioner::partitionKeyFor(
+          table_name,
+          nshard++);
+
       addShard(shard.get(), shards);
     }
   }

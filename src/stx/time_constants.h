@@ -16,6 +16,7 @@
 
 namespace stx {
 
+constexpr const uint64_t kMicrosPerMilli = 1000;
 constexpr const uint64_t kMicrosPerSecond = 1000000;
 constexpr const uint64_t kMillisPerSecond = 1000;
 constexpr const uint64_t kSecondsPerMinute = 60;
