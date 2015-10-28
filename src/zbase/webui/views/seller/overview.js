@@ -7,30 +7,16 @@ ZBase.registerView((function() {
     var main_menu = ZBaseMainMenu();
     main_menu.render($(".zbase_main_menu", page), path);
 
-    //REMOVEME
-    var seller = [
-      {id: 13008, name: "meko", is_premium: true},
-      {id: 13008, name: "meko", is_premium: false},
-      {id: 13008, name: "meko", is_premium: true}
-    ];
-    //REMOVEME END
 
     var tbody = $("tbody", page);
-    seller.forEach(function(s) {
-      var tr = document.createElement("tr");
-      var url = "/a/seller/" + s.id;
-      var html =
-        "<td><a href='" + url + "'>" + s.name +
-        "</a></td><td><a href='" + url + "'>" + s.id;
-      if (s.is_premium) {
-        html += "</a></td><td class='icon'><a href='" + url +
-          "'><i class='fa fa-star'></i></a>";
-      } else {
-        html += "</a></td><td><a href='" + url + "'></a></td>";
-      }
-      tr.innerHTML = html;
-      tbody.appendChild(tr);
-    });
+    var tr_tpl = $.getTemplate(
+        "views/seller_overview",
+        "seller_overview_row_tpl");
+
+    for (var i = 0; i < 10; i++) {
+      tbody.appendChild(tr_tpl.cloneNode(true));
+    }
+
 
     $.handleLinks(page);
     $.replaceViewport(page);
