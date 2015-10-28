@@ -401,8 +401,73 @@ bool MapReduceService::saveRemoteResultsToTable(
     const AnalyticsSession& session,
     const String& table_name,
     const SHA1Hash& partition,
-    const Vector<String>& input_tables) {
-  return false;
+    const Vector<String>& input_tables_ref) {
+  auto input_tables = input_tables_ref;
+  std::random_shuffle(input_tables.begin(), input_tables.end());
+
+  auto table = pmap_->findTable(
+      session.customer(),
+      table_name);
+
+  if (table.isEmpty()) {
+    RAISEF(
+        kNotFoundError,
+        "table not found: $0/$1",
+        session.customer(),
+        table_name);
+  }
+
+  logDebug(
+      "z1.mapreduce",
+      "Saving results to table; input_tables=$0 table=$1/$2/$3",
+      input_tables.size(),
+      session.customer(),
+      table_name,
+      partition.toString());
+
+  auto schema = table.get()->schema();
+
+  auto tmpfile_path = FileUtil::joinPaths(
+      cachedir_,
+      StringUtil::format("mr-shard-$0.cst", Random::singleton()->hex128()));
+
+  {
+    cstable::CSTableBuilder cstable(schema.get());
+
+    for (const auto& input_table_url : input_tables) {
+      auto api_token = auth_->encodeAuthToken(session);
+      http::HTTPMessage::HeaderList auth_headers;
+      auth_headers.emplace_back(
+          "Authorization",
+          StringUtil::format("Token $0", api_token));
+
+      auto req = http::HTTPRequest::mkGet(input_table_url, auth_headers);
+      MapReduceService::downloadResult(
+          req,
+          [&cstable, &schema] (
+              const void* key,
+              size_t key_len,
+              const void* val,
+              size_t val_len) {
+        auto json = json::parseJSON(String((const char*) val, val_len));
+        msg::DynamicMessage msg(schema);
+        msg.fromJSON(json.begin(), json.end());
+
+        cstable.addRecord(msg.data());
+      });
+    }
+
+    cstable.write(tmpfile_path);
+  }
+
+  tsdb_->updatePartitionCSTable(
+      session.customer(),
+      table_name,
+      partition,
+      tmpfile_path,
+      WallClock::unixMicros());
+
+  return true;
 }
 
 } // namespace zbase
