@@ -64,6 +64,11 @@ protected:
       unsigned argc,
       JS::Value* vp);
 
+  static bool listPartitions(
+      JSContext* ctx,
+      unsigned argc,
+      JS::Value* vp);
+
   void enumerateTuples(
       JS::RootedValue* src,
       Vector<Pair<String, String>>* dst) const;

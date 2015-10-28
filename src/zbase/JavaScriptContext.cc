@@ -70,6 +70,14 @@ JavaScriptContext::JavaScriptContext(
           &JavaScriptContext::dispatchLog,
           0,
           0);
+
+      JS_DefineFunction(
+          ctx_,
+          global_,
+          "z1_listpartitions",
+          &JavaScriptContext::listPartitions,
+          0,
+          0);
     }
   }
 
@@ -131,6 +139,22 @@ bool JavaScriptContext::dispatchLog(
 
     auto req = static_cast<JavaScriptContext*>(rt_userdata);
     req->storeLogline(log_str);
+  }
+
+  args.rval().set(JSVAL_TRUE);
+  return true;
+}
+
+bool JavaScriptContext::listPartitions(
+    JSContext* ctx,
+    unsigned argc,
+    JS::Value* vp) {
+  auto args = JS::CallArgsFromVp(argc, vp);
+  if (args.length() != 3 ||
+      !args[0].isString() ||
+      !args[1].isString() ||
+      !args[2].isString()) {
+    return false;
   }
 
   args.rval().set(JSVAL_TRUE);

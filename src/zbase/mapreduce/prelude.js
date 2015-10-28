@@ -82,6 +82,14 @@ var Z1 = (function(global) {
     return job_id;
   };
 
+  var processStream = function(opts) {
+    var partitions = z1_listpartitions(
+        "" + opts["table"],
+        "" + opts["from"],
+        "" + opts["until"]);
+
+    z1_log("map partitions: " + JSON.stringify(partitions))
+  }
 
   var mkJobID = function() {
     return "job-" + ++seq;
@@ -96,7 +104,8 @@ var Z1 = (function(global) {
     reduce: mkReduceTask,
     downloadResults: mkDownloadResultsTask,
     saveToTable: mkSaveToTableTask,
-    saveToTablePartition: mkSaveToTablePartitionTask
+    saveToTablePartition: mkSaveToTablePartitionTask,
+    processStream: processStream
   };
 })(this);
 
