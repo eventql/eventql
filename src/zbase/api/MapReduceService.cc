@@ -235,13 +235,15 @@ Option<SHA1Hash> MapReduceService::reduceTables(
 
   auto writer = sstable::SSTableWriter::create(output_path, nullptr, 0);
 
-  for (const auto& g : groups) {
+  for (auto cur = groups.begin(); cur != groups.end(); ) {
     Vector<Pair<String, String>> tuples;
-    js_ctx->callReduceFunction(method_name, g.first, g.second, &tuples);
+    js_ctx->callReduceFunction(method_name, cur->first, cur->second, &tuples);
 
     for (const auto& t : tuples) {
       writer->appendRow(t.first, t.second);
     }
+
+    cur = groups.erase(cur);
   }
 
   return Some(output_id);
