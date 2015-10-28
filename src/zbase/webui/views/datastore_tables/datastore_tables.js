@@ -37,15 +37,6 @@ ZBase.registerView((function() {
       create_modal.close();
     });
 
-    var delete_modal = $("z-modal.delete_table", page);
-    $.onClick($("button.submit", delete_modal), function() {
-      deleteTable();
-    });
-    $.onClick($("button.close", delete_modal), function() {
-      delete_modal.close();
-    });
-
-
     $.handleLinks(page);
     $.replaceViewport(page);
   };
@@ -63,13 +54,6 @@ ZBase.registerView((function() {
     for (var i = 0; i < links.length; i++) {
       links[i].href = url;
     }
-
-    $("z-dropdown", elem).addEventListener("change", function() {
-      if (this.getValue() == "delete") {
-        displayDeleteTableModal(table.name);
-      }
-      this.setValue([]);
-    }, false);
 
     tbody.appendChild(elem);
   };
@@ -150,28 +134,6 @@ ZBase.registerView((function() {
         $.fatalError();
       }
     });
-  };
-
-  var deleteTable;
-  var onDelete = function(table_name) {
-    var url = "/api/v1/tables/delete_table?table=" + table_name;
-    $.httpPost(url, "", function(r) {
-      if (r.status == 201) {
-        console.log(JSON.parse(r.response));
-      } else {
-        $.fatalError();
-      }
-    });
-  };
-
-  var displayDeleteTableModal = function(table_name) {
-    var modal = $(".zbase_datastore_tables z-modal.delete_table");
-    $(".table_name", modal).innerHTML = table_name;
-
-    deleteTable = function() {
-      onDelete(table_name);
-    }
-    modal.show();
   };
 
   return {
