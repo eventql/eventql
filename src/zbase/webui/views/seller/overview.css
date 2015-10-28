@@ -20,7 +20,7 @@
   float: right;
 }
 
-.zbase_seller_stats.overview .controls .control z-checkbox {
+.zbase_seller_stats.overview .controls .control > z-checkbox {
   margin-top: 3px;
 }
 
@@ -28,6 +28,7 @@
   font-size: 12px;
   line-height: 38px;
   font-weight: 400;
+  vertical-align: top;
 }
 
 .zbase_seller_stats.overview .controls .search {

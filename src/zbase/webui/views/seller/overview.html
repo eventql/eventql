@@ -24,6 +24,78 @@
             </z-input>
           </z-search>
         </div>
+
+        <div class="clearfix"></div>
+
+        <div class="control">
+          <label style="line-height: 30px;">Display:</label>
+          <z-dropdown class="input checkbox" data-multiselect>
+            <z-dropdown-flyout>
+              <z-dropdown-items>
+                <z-dropdown-item data-value="gmv_eurcent">
+                  <z-checkbox></z-checkbox> GMV
+                </z-dropdown-item>
+                <z-dropdown-item data-value="gmv_per_transaction_eurcent">
+                  <z-checkbox></z-checkbox> GMV Per Transaction
+                </z-dropdown-item>
+                <z-dropdown-item data-value="num_purchases">
+                  <z-checkbox></z-checkbox> Purchases
+                </z-dropdown-item>
+                <z-dropdown-item data-value="num_active_products">
+                  <z-checkbox></z-checkbox> Active Products
+                </z-dropdown-item>
+                <z-dropdown-item data-value="num_listed_products">
+                  <z-checkbox></z-checkbox> Listed Products
+                </z-dropdown-item>
+                <z-dropdown-item data-value="num_refunds">
+                  <z-checkbox></z-checkbox> Refunds
+                </z-dropdown-item>
+                <z-dropdown-item data-value="refund_rate">
+                  <z-checkbox></z-checkbox> Refund Rate
+                </z-dropdown-item>
+                <z-dropdown-item data-value="refunded_gmv_eurcent">
+                  <z-checkbox></z-checkbox> Refunded GMV
+                </z-dropdown-item>
+                <z-dropdown-item data-value="shop_page_views">
+                  <z-checkbox></z-checkbox> Shop Page Views
+                </z-dropdown-item>
+                <z-dropdown-item data-value="product_page_views">
+                  <z-checkbox></z-checkbox> Product Page Views
+                </z-dropdown-item>
+                <z-dropdown-item data-value="listview_ctr_search_page">
+                  <z-checkbox></z-checkbox> Search Page CTR
+                </z-dropdown-item>
+                <z-dropdown-item data-value="listview_clicks_search_page">
+                  <z-checkbox></z-checkbox> Search Page Clicks
+                </z-dropdown-item>
+                <z-dropdown-item data-value="listview_ctr_catalog_page">
+                  <z-checkbox></z-checkbox> Catalog Page CTR
+                </z-dropdown-item>
+                <z-dropdown-item data-value="listview_clicks_catalog_page">
+                  <z-checkbox></z-checkbox> Catalog Page Clicks
+                </z-dropdown-item>
+                <z-dropdown-item data-value="listview_ctr_shop_page">
+                  <z-checkbox></z-checkbox> Shop Page CTR
+                </z-dropdown-item>
+                <z-dropdown-item data-value="listview_clicks_shop_page">
+                  <z-checkbox></z-checkbox> Shop Page Clicks
+                </z-dropdown-item>
+                <z-dropdown-item data-value="listview_ctr_ads">
+                  <z-checkbox></z-checkbox> Ad CTR
+                </z-dropdown-item>
+                <z-dropdown-item data-value="listview_clicks_ads">
+                  <z-checkbox></z-checkbox> Ad Clicks
+                </z-dropdown-item>
+                <z-dropdown-item data-value="listview_ctr_recos">
+                  <z-checkbox></z-checkbox> Reco CTR
+                </z-dropdown-item>
+                <z-dropdown-item data-value="listview_clicks_recos">
+                  <z-checkbox></z-checkbox> Reco Clicks
+                </z-dropdown-item>
+
+              </z-dropdown-items>
+            </z-dropdown-flyout>
+          </z-dropdown>
       </div>
 
       <div class="zbase_content_pane fullwidth" style="background: #fff;">
@@ -33,6 +105,11 @@
               <tr>
                 <th>Name</th>
                 <th>ID</th>
+                <th>GMV</th>
+                <th>Purchases</th>
+                <th>Search CTR</th>
+                <th>Catalog CTR</th>
+                <th>Shop CTR</th>
                 <th style="width: 60px;"></th>
               </tr>
             </thead>
@@ -44,4 +121,33 @@
 
     </div>
   </div>
+</template>
+
+<template id="seller_overview_row_tpl">
+  <tr>
+    <td>
+      <a href="/a/seller/13008">Meko</a>
+    </td>
+    <td>
+      <a href="/a/seller/13008">13008</a>
+    </td>
+    <td>
+      <a href="/a/seller/13008">294&euro;</a>
+    </td>
+    <td>
+      <a href="/a/seller/13008">123</a>
+    </td>
+    <td>
+      <a href="/a/seller/13008">0.12</a>
+    </td>
+    <td>
+      <a href="/a/seller/13008">0.14</a>
+    </td>
+    <td>
+      <a href="/a/seller/13008">0.48</a>
+    </td>
+    <td class="icon">
+      <a href="/a/seller/13008"><i class="fa fa-star"></i></a>
+    </td>
+  </tr>
 </template>
