@@ -192,7 +192,7 @@ bool JavaScriptContext::listPartitions(
 
   JS::RootedObject part_array(ctx, part_array_ptr);
   for (size_t i = 0; i < partitions.size(); ++i) {
-    auto pkey = partitions[i].toString();
+    auto pkey = partitions[i].partition_key.toString();
     auto val_str_ptr = JS_NewStringCopyN(ctx, pkey.data(), pkey.size());
     if (!val_str_ptr) {
       RAISE(kRuntimeError, "JavaScript execution error: out of memory");

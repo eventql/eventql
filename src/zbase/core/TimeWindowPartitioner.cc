@@ -64,10 +64,41 @@ Vector<SHA1Hash> TimeWindowPartitioner::partitionKeysFor(
   return res;
 }
 
+Vector<TimeseriesPartition> TimeWindowPartitioner::partitionsFor(
+    const String& table_name,
+    UnixTime from,
+    UnixTime until,
+    Duration window_size) {
+  auto cs = window_size.microseconds();
+  auto first_chunk = (from.unixMicros() / cs) * cs;
+  auto last_chunk = (until.unixMicros() / cs) * cs;
+
+  Vector<TimeseriesPartition> res;
+  for (auto t = first_chunk; t <= last_chunk; t += cs) {
+    res.emplace_back(TimeseriesPartition {
+      .time_begin = t,
+      .time_limit = t + window_size.microseconds(),
+      .partition_key = partitionKeyFor(table_name, t, window_size)
+    });
+  }
+
+  return res;
+}
+
 Vector<SHA1Hash> TimeWindowPartitioner::partitionKeysFor(
     UnixTime from,
     UnixTime until) {
   return partitionKeysFor(
+      table_name_,
+      from,
+      until,
+      config_.partition_size());
+}
+
+Vector<TimeseriesPartition> TimeWindowPartitioner::partitionsFor(
+    UnixTime from,
+    UnixTime until) {
+  return partitionsFor(
       table_name_,
       from,
       until,

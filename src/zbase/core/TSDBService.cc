@@ -14,7 +14,6 @@
 #include <stx/io/fileutil.h>
 #include <sstable/sstablereader.h>
 #include <zbase/core/TSDBService.h>
-#include <zbase/core/TimeWindowPartitioner.h>
 #include <zbase/core/LogPartitionReader.h>
 #include <zbase/core/PartitionState.pb.h>
 
@@ -427,7 +426,7 @@ Option<RefPtr<TablePartitioner>> TSDBService::tablePartitioner(
   }
 }
 
-Vector<SHA1Hash> TSDBService::listPartitions(
+Vector<TimeseriesPartition> TSDBService::listPartitions(
     const String& tsdb_namespace,
     const String& table_key,
     const UnixTime& from,
@@ -445,7 +444,7 @@ Vector<SHA1Hash> TSDBService::listPartitions(
     RAISEF(kRuntimeError, "table is not timeseries-partitioned: $0", table_key);
   }
 
-  return time_partitioner->partitionKeysFor(from, until);
+  return time_partitioner->partitionsFor(from, until);
 }
 
 //const String& TSDBService::dbPath() const {

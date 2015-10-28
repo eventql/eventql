@@ -23,6 +23,7 @@
 #include <zbase/core/PartitionInfo.pb.h>
 #include <zbase/core/RecordEnvelope.pb.h>
 #include <zbase/core/PartitionMap.h>
+#include <zbase/core/TimeWindowPartitioner.h>
 
 using namespace stx;
 
@@ -87,7 +88,7 @@ public:
       size_t sample_index,
       Function<void (const Buffer& record)> fn);
 
-  Vector<SHA1Hash> listPartitions(
+  Vector<TimeseriesPartition> listPartitions(
       const String& tsdb_namespace,
       const String& table_key,
       const UnixTime& from,
