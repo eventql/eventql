@@ -7,7 +7,6 @@ ZBase.registerView((function() {
     var main_menu = ZBaseMainMenu();
     main_menu.render($(".zbase_main_menu", page), path);
 
-
     var tbody = $("tbody", page);
     var tr_tpl = $.getTemplate(
         "views/seller_overview",
@@ -23,6 +22,7 @@ ZBase.registerView((function() {
 
     setParamSeller(UrlUtil.getParamValue(path, "seller"));
     setParamPremiumSeller(UrlUtil.getParamValue(path, "premium"));
+    setParamMetrics(UrlUtil.getParamValue(path, "metrics"));
 
     $.onClick($(".zbase_seller_stats z-checkbox.premium"), paramChanged);
     $(".zbase_seller_stats z-search.seller").addEventListener(
@@ -42,6 +42,17 @@ ZBase.registerView((function() {
     } else {
       $(".zbase_seller_stats z-checkbox.premium").removeAttribute("data-active");
     }
+  };
+
+  var setParamMetrics = function(metrics) {
+    if (!metrics) {
+      //default selection
+      metrics = [
+        "gmv_eurcent", "num_purchases", "listview_ctr_search_page",
+        "listview_ctr_catalog_page", "listview_ctr_shop_page"];
+    }
+
+    $(".zbase_seller_stats z-dropdown.metrics").setValue(metrics);
   };
 
   var getQueryString = function() {
