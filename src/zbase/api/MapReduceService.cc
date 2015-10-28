@@ -186,13 +186,15 @@ Option<SHA1Hash> MapReduceService::reduceTables(
 
   logDebug(
       "z1.mapreduce",
-      "Executing reduce shard; customer=$0 input_tables=$1 output=$2",
+      "Executing reduce shard; customer=$0 input_tables=0/$1 output=$2",
       session.customer(),
       input_tables.size(),
       output_id.toString());
 
   // FIXME MOST NAIVE IN MEMORY MERGE AHEAD !!
   HashMap<String, Vector<String>> groups;
+  size_t num_input_tables_read = 0;
+  size_t num_bytes_read = 0;
   for (const auto& input_table_url : input_tables) {
     auto api_token = auth_->encodeAuthToken(session);
     http::HTTPMessage::HeaderList auth_headers;
@@ -203,14 +205,25 @@ Option<SHA1Hash> MapReduceService::reduceTables(
     auto req = http::HTTPRequest::mkGet(input_table_url, auth_headers);
     MapReduceService::downloadResult(
         req,
-        [&groups] (
+        [&groups, &num_bytes_read] (
             const void* key,
             size_t key_len,
             const void* val,
             size_t val_len) {
       auto& lst = groups[String((const char*) key, key_len)];
       lst.emplace_back(String((const char*) val, val_len));
+      num_bytes_read += key_len + val_len;
     });
+
+    ++num_input_tables_read;
+    logDebug(
+      "z1.mapreduce",
+      "Executing reduce shard; customer=$0 input_tables=$1/$2 output=$3 mem_used=$4MB",
+      session.customer(),
+      input_tables.size(),
+      num_input_tables_read,
+      output_id.toString(),
+      num_bytes_read / 1024.0 / 1024.0);
   }
 
   if (groups.size() == 0) {
