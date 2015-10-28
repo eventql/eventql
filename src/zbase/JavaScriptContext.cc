@@ -157,7 +157,44 @@ bool JavaScriptContext::listPartitions(
     return false;
   }
 
-  args.rval().set(JSVAL_TRUE);
+  auto table_name_cstr = JS_EncodeString(ctx, args[0].toString());
+  String table_name(table_name_cstr);
+  JS_free(ctx, table_name_cstr);
+
+  auto from_cstr = JS_EncodeString(ctx, args[1].toString());
+  String from(from_cstr);
+  JS_free(ctx, from_cstr);
+
+  auto until_cstr = JS_EncodeString(ctx, args[2].toString());
+  String until(until_cstr);
+  JS_free(ctx, until_cstr);
+
+  iputs("$0 $1-$2", table_name, from, until);
+
+  Vector<String> partitions = {"a", "b", "c"};
+
+  auto part_array_ptr = JS_NewArrayObject(ctx, partitions.size());
+  if (!part_array_ptr) {
+    RAISE(kRuntimeError, "JavaScript execution error: out of memory");
+  }
+
+  JS::RootedObject part_array(ctx, part_array_ptr);
+  for (size_t i = 0; i < partitions.size(); ++i) {
+    auto val_str_ptr = JS_NewStringCopyN(
+        ctx,
+        partitions[i].data(),
+        partitions[i].size());
+    if (!val_str_ptr) {
+      RAISE(kRuntimeError, "JavaScript execution error: out of memory");
+    }
+
+    JS::RootedString val_str(ctx, val_str_ptr);
+    if (!JS_SetElement(ctx, part_array, i, val_str)) {
+      RAISE(kRuntimeError, "JavaScript execution error: out of memory");
+    }
+  }
+
+  args.rval().setObject(*part_array);
   return true;
 }
 
