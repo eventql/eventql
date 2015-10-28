@@ -47,5 +47,14 @@ void StaticPartitionReader::fetchRecords(
   }
 }
 
+SHA1Hash StaticPartitionReader::version() const {
+  auto cstable_version = cstableVersion();
+  if (cstable_version.isEmpty()) {
+    return SHA1Hash{};
+  } else {
+    return cstable_version.get();
+  }
+}
+
 } // namespace tdsb
 

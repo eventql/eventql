@@ -54,6 +54,7 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR}/3rdparty/mozjs/js/src)
 add_subdirectory(3rdparty/pcre)
 include_directories(3rdparty/pcre)
 set(HAVE_PCRE true)
+set(PCRE_LIBRARIES "pcre")
 
 include(ExternalProject)
 ExternalProject_Add(mozjs_build

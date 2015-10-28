@@ -21,6 +21,8 @@
 #include <csql/qtree/ChartStatementNode.h>
 #include <csql/qtree/ShowTablesNode.h>
 #include <csql/qtree/DescribeTableNode.h>
+#include <csql/qtree/RegexExpressionNode.h>
+#include <csql/qtree/LikeExpressionNode.h>
 
 namespace csql {
 
@@ -1032,6 +1034,12 @@ ValueExpressionNode* QueryPlanBuilder::buildValueExpression(ASTNode* ast) {
     case ASTNode::T_POW_EXPR:
       return buildOperator("pow", ast);
 
+    case ASTNode::T_REGEX_EXPR:
+      return buildRegex(ast);
+
+    case ASTNode::T_LIKE_EXPR:
+      return buildLike(ast);
+
     case ASTNode::T_LITERAL:
       return buildLiteral(ast);
 
@@ -1169,6 +1177,46 @@ ValueExpressionNode* QueryPlanBuilder::buildColumnIndex(ASTNode* ast) {
   }
 
   return new ColumnReferenceNode(token->getInteger());
+}
+
+ValueExpressionNode* QueryPlanBuilder::buildRegex(ASTNode* ast) {
+  const auto& args = ast->getChildren();
+  if (args.size() != 2) {
+    RAISE(kRuntimeError, "internal error: corrupt ast");
+  }
+
+  if (args[1]->getType() != ASTNode::T_LITERAL ||
+      args[1]->getToken() == nullptr ||
+      args[1]->getToken()->getType() != Token::T_STRING) {
+    RAISE(
+        kRuntimeError,
+        "second argument to REGEX operator must be a string literal");
+  }
+
+  auto pattern = args[1]->getToken()->getString();
+  auto subject = mkRef(buildValueExpression(args[0]));
+
+  return new RegexExpressionNode(subject, pattern);
+}
+
+ValueExpressionNode* QueryPlanBuilder::buildLike(ASTNode* ast) {
+  const auto& args = ast->getChildren();
+  if (args.size() != 2) {
+    RAISE(kRuntimeError, "internal error: corrupt ast");
+  }
+
+  if (args[1]->getType() != ASTNode::T_LITERAL ||
+      args[1]->getToken() == nullptr ||
+      args[1]->getToken()->getType() != Token::T_STRING) {
+    RAISE(
+        kRuntimeError,
+        "second argument to LIKE operator must be a string literal");
+  }
+
+  auto pattern = args[1]->getToken()->getString();
+  auto subject = mkRef(buildValueExpression(args[0]));
+
+  return new LikeExpressionNode(subject, pattern);
 }
 
 SelectListNode* QueryPlanBuilder::buildSelectList(ASTNode* ast) {

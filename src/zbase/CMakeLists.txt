@@ -90,7 +90,7 @@ add_executable(test-recordset
     $<TARGET_OBJECTS:customerdirectory>
     core/RecordSet_test.cc)
 
-target_link_libraries(test-recordset chartsql cplot sstable cstable stx-http stx-protobuf stx-json stx-base)
+target_link_libraries(test-recordset chartsql cplot sstable cstable stx-http stx-protobuf stx-json stx-base pcre)
 
 add_executable(test-tsdb-timewindowpartitioner
     $<TARGET_OBJECTS:stx-mdb>
@@ -100,7 +100,7 @@ add_executable(test-tsdb-timewindowpartitioner
     $<TARGET_OBJECTS:customerdirectory>
     core/TimeWindowPartitioner_test.cc)
 
-target_link_libraries(test-tsdb-timewindowpartitioner chartsql cplot sstable cstable stx-http stx-protobuf stx-json stx-base)
+target_link_libraries(test-tsdb-timewindowpartitioner chartsql cplot sstable cstable stx-http stx-protobuf stx-json stx-base pcre)
 
 add_executable(test-replicationscheme
     $<TARGET_OBJECTS:stx-mdb>
@@ -110,7 +110,7 @@ add_executable(test-replicationscheme
     $<TARGET_OBJECTS:customerdirectory>
     core/ReplicationScheme_test.cc)
 
-target_link_libraries(test-replicationscheme chartsql cplot sstable cstable stx-http stx-protobuf stx-json stx-base)
+target_link_libraries(test-replicationscheme chartsql cplot sstable cstable stx-http stx-protobuf stx-json stx-base pcre)
 
 add_subdirectory(util)
 add_subdirectory(util/mysql)
@@ -133,7 +133,6 @@ add_executable(zbase
     $<TARGET_OBJECTS:customerdirectory>
     #$<TARGET_OBJECTS:fnord-afx>
     $<TARGET_OBJECTS:dproc>
-    $<TARGET_OBJECTS:pcre>
     #sstable/SSTableServlet.cc
     api/LogfileService.cc
     api/LogfileAPIServlet.cc
@@ -147,6 +146,8 @@ add_executable(zbase
     mapreduce/tasks/MapTableTask.cc
     mapreduce/tasks/ReduceTask.cc
     mapreduce/tasks/ReturnResultsTask.cc
+    mapreduce/tasks/SaveToTableTask.cc
+    mapreduce/tasks/SaveToTablePartitionTask.cc
     LogfileScanResult.cc
     EventScanResult.cc
     Report.cc
@@ -221,7 +222,7 @@ add_executable(zbase
     ${CMAKE_CURRENT_BINARY_DIR}/mapreduce_preludejs.cc
     zbase.cc)
 
-target_link_libraries(zbase chartsql cplot sstable cstable stx-http stx-json stx-protobuf stx-base js_static.a z)
+target_link_libraries(zbase chartsql cplot sstable cstable stx-http stx-json stx-protobuf stx-base js_static.a z pcre)
 target_link_libraries(zbase -L${CMAKE_BINARY_DIR}/3rdparty/mozjs/dist/lib -ljs_static)
 add_dependencies(zbase customerdirectory mozjs_build)
 
@@ -238,7 +239,7 @@ add_executable(zbasectl
     #sstable/SSTableServlet.cc
     zbasectl.cc)
 
-target_link_libraries(zbasectl chartsql cplot sstable cstable stx-http stx-json stx-protobuf stx-base)
+target_link_libraries(zbasectl chartsql cplot sstable cstable stx-http stx-json stx-protobuf stx-base pcre)
 add_dependencies(zbasectl customerdirectory)
 
 add_executable(zmaster
@@ -251,20 +252,20 @@ add_executable(zmaster
     master/MasterServlet.cc
     zmaster.cc)
 
-target_link_libraries(zmaster chartsql cplot sstable cstable stx-http stx-protobuf stx-json stx-json stx-base)
+target_link_libraries(zmaster chartsql cplot sstable cstable stx-http stx-protobuf stx-json stx-json stx-base pcre)
 add_dependencies(zmaster customerdirectory)
 
 add_executable(zli zli.cc)
-target_link_libraries(zli stx-http stx-json stx-protobuf stx-base)
+target_link_libraries(zli stx-http stx-json stx-protobuf stx-base pcre)
 
 add_executable(zen-csv-upload ${COREPROTO_SRCS} zen-csv-upload.cc)
-target_link_libraries(zen-csv-upload stx-http stx-protobuf stx-json stx-base)
+target_link_libraries(zen-csv-upload stx-http stx-protobuf stx-json stx-base pcre)
 
 add_executable(zen-logfile-upload ${COREPROTO_SRCS} zen-logfile-upload.cc)
-target_link_libraries(zen-logfile-upload stx-http stx-protobuf stx-json stx-base)
+target_link_libraries(zen-logfile-upload stx-http stx-protobuf stx-json stx-base pcre)
 
 add_executable(zen-statsd-upload ${COREPROTO_SRCS} zen-statsd-upload.cc)
-target_link_libraries(zen-statsd-upload stx-http stx-protobuf stx-json stx-base)
+target_link_libraries(zen-statsd-upload stx-http stx-protobuf stx-json stx-base pcre)
 
 if(MYSQL_FOUND)
   add_executable(zen-mysql-upload
@@ -273,7 +274,7 @@ if(MYSQL_FOUND)
       ${PROTO_SRCS}
       zen-mysql-upload.cc)
 
-  target_link_libraries(zen-mysql-upload stx-http stx-protobuf stx-json stx-base ${MYSQL_CLIENT_LIBS} z)
+  target_link_libraries(zen-mysql-upload stx-http stx-protobuf stx-json stx-base ${MYSQL_CLIENT_LIBS} z pcre)
 endif()
 
 add_subdirectory(tracker)

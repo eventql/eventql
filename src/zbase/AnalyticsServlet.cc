@@ -830,7 +830,7 @@ void AnalyticsServlet::createTable(
     tblcfg->set_schema(schema.encode().toString());
     tblcfg->set_num_shards(num_shards.isEmpty() ? 1 : num_shards.get());
 
-    if (table_type == "timeseries") {
+    if (table_type == "timeseries" || table_type == "log_timeseries") {
       tblcfg->set_partitioner(zbase::TBL_PARTITION_TIMEWINDOW);
       tblcfg->set_storage(zbase::TBL_STORAGE_LOG);
 
@@ -840,9 +840,19 @@ void AnalyticsServlet::createTable(
           partition_size.isEmpty() ? 4 * kMicrosPerHour : partition_size.get());
     }
 
-    else if (table_type == "static") {
+    else if (table_type == "static" || table_type == "static_fixed") {
       tblcfg->set_partitioner(zbase::TBL_PARTITION_FIXED);
       tblcfg->set_storage(zbase::TBL_STORAGE_STATIC);
+    }
+
+    else if (table_type == "static_timeseries") {
+      tblcfg->set_partitioner(zbase::TBL_PARTITION_TIMEWINDOW);
+      tblcfg->set_storage(zbase::TBL_STORAGE_STATIC);
+
+      auto partition_size = json::objectGetUInt64(jreq, "partition_size");
+      auto partcfg = tblcfg->mutable_time_window_partitioner_config();
+      partcfg->set_partition_size(
+          partition_size.isEmpty() ? 4 * kMicrosPerHour : partition_size.get());
     }
 
     else {

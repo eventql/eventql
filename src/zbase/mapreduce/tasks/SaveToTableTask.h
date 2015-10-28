@@ -16,42 +16,30 @@ using namespace stx;
 
 namespace zbase {
 
-struct ReduceTaskShard : public MapReduceTaskShard {
-  size_t shard;
+struct SaveToTableTaskShard : public MapReduceTaskShard {
+  SHA1Hash partition;
 };
 
-class ReduceTask : public MapReduceTask {
+class SaveToTableTask : public MapReduceTask {
 public:
 
-  ReduceTask(
+  SaveToTableTask(
       const AnalyticsSession& session,
-      RefPtr<MapReduceJobSpec> job_spec,
-      const String& method_name,
+      const String& table_name,
       Vector<RefPtr<MapReduceTask>> sources,
-      size_t num_shards,
       MapReduceShardList* shards,
       AnalyticsAuth* auth,
-      zbase::ReplicationScheme* repl);
+      TSDBService* tsdb);
 
   Option<MapReduceShardResult> execute(
       RefPtr<MapReduceTaskShard> shard,
       RefPtr<MapReduceScheduler> job) override;
 
 protected:
-
-  Option<MapReduceShardResult> executeRemote(
-      RefPtr<MapReduceTaskShard> shard,
-      RefPtr<MapReduceScheduler> job,
-      const Vector<String>& input_tables,
-      const ReplicaRef& host);
-
   AnalyticsSession session_;
-  RefPtr<MapReduceJobSpec> job_spec_;
-  String method_name_;
+  String table_name_;
   Vector<RefPtr<MapReduceTask>> sources_;
-  size_t num_shards_;
   AnalyticsAuth* auth_;
-  zbase::ReplicationScheme* repl_;
 };
 
 } // namespace zbase

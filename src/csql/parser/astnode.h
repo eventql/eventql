@@ -66,6 +66,8 @@ public:
     T_DIV_EXPR,
     T_MOD_EXPR,
     T_POW_EXPR,
+    T_REGEX_EXPR,
+    T_LIKE_EXPR,
 
     T_SHOW_TABLES,
     T_DESCRIBE_TABLE,

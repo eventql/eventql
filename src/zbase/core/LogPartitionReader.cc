@@ -151,5 +151,9 @@ void LogPartitionReader::fetchRecordsWithSampling(
   }
 }
 
+SHA1Hash LogPartitionReader::version() const {
+  return SHA1::compute(StringUtil::toString(snap_->nrecs));
+}
+
 } // namespace tdsb
 

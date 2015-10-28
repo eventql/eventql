@@ -121,6 +121,9 @@ protected:
   ASTNode* modExpr(ASTNode* lhs, int precedence);
   ASTNode* powExpr(ASTNode* lhs, int precedence);
 
+  ASTNode* likeExpr(ASTNode* lhs, int precedence);
+  ASTNode* regexExpr(ASTNode* lhs, int precedence);
+
   bool assertExpectation(Token::kTokenType expectation);
 
   inline Token* consumeToken() {

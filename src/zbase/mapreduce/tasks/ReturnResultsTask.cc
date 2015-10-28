@@ -36,23 +36,17 @@ Option<MapReduceShardResult> ReturnResultsTask::execute(
     RefPtr<MapReduceTaskShard> shard,
     RefPtr<MapReduceScheduler> job) {
   for (const auto& input : shard->dependencies) {
-    auto input_sst = job->downloadResult(input);
-    if (input_sst.isEmpty()) {
-      continue;
-    }
-
-    sstable::SSTableReader reader(input_sst.get());
-    auto cursor = reader.getCursor();
-
-    while (cursor->valid()) {
+    job->downloadResult(
+        input,
+        [&job] (
+            const void* key,
+            size_t key_len,
+            const void* val,
+            size_t val_len) {
       job->sendResult(
-          cursor->getKeyString(),
-          cursor->getDataString());
-
-      if (!cursor->next()) {
-        break;
-      }
-    }
+          String((const char*) key, key_len),
+          String((const char*) val, val_len));
+    });
   }
 
   return None<MapReduceShardResult>();

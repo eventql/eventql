@@ -51,6 +51,22 @@ public:
   Option<String> getResultFilename(
       const SHA1Hash& result_id);
 
+  bool saveLocalResultToTable(
+      const AnalyticsSession& session,
+      const String& table_name,
+      const SHA1Hash& partition,
+      const SHA1Hash& result_id);
+
+  bool saveRemoteResultsToTable(
+      const AnalyticsSession& session,
+      const String& table_name,
+      const SHA1Hash& partition,
+      const Vector<String>& input_tables);
+
+  static void downloadResult(
+      const http::HTTPRequest& req,
+      Function<void (const void*, size_t, const void*, size_t)> fn);
+
 protected:
   ConfigDirectory* cdir_;
   AnalyticsAuth* auth_;
