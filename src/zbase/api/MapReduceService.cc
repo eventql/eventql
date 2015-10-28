@@ -324,11 +324,11 @@ void MapReduceService::downloadResult(
   }
 }
 
-bool MapReduceService::saveResultToTable(
+bool MapReduceService::saveLocalResultToTable(
     const AnalyticsSession& session,
-    const SHA1Hash& result_id,
     const String& table_name,
-    const SHA1Hash& partition) {
+    const SHA1Hash& partition,
+    const SHA1Hash& result_id) {
   auto table = pmap_->findTable(
       session.customer(),
       table_name);
@@ -395,6 +395,14 @@ bool MapReduceService::saveResultToTable(
       WallClock::unixMicros());
 
   return true;
+}
+
+bool MapReduceService::saveRemoteResultsToTable(
+    const AnalyticsSession& session,
+    const String& table_name,
+    const SHA1Hash& partition,
+    const Vector<String>& input_tables) {
+  return false;
 }
 
 } // namespace zbase

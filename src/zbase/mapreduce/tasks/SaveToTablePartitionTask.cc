@@ -90,6 +90,47 @@ Option<MapReduceShardResult> SaveToTablePartitionTask::executeRemote(
       partition_key_.toString(),
       host.addr.hostAndPort());
 
+  auto url = StringUtil::format(
+      "http://$0/api/v1/mapreduce/tasks/save_to_table_partition",
+      host.addr.ipAndPort());
+
+  auto params = StringUtil::format(
+      "table_name=$0&partition=$1",
+      URI::urlEncode(table_name_),
+      partition_key_.toString());
+
+  for (const auto& input_table : input_tables) {
+    params += "&input_table=" + URI::urlEncode(input_table);
+  }
+
+  auto api_token = auth_->encodeAuthToken(session_);
+
+  http::HTTPMessage::HeaderList auth_headers;
+  auth_headers.emplace_back(
+      "Authorization",
+      StringUtil::format("Token $0", api_token));
+
+  http::HTTPClient http_client;
+  auto req = http::HTTPRequest::mkPost(url, params, auth_headers);
+  auto res = http_client.executeRequest(req);
+
+  if (res.statusCode() == 204) {
+    return None<MapReduceShardResult>();
+  }
+
+  if (res.statusCode() != 201) {
+    RAISEF(
+        kRuntimeError,
+        "received non-201 response: $0", res.body().toString());
+  }
+
+  //MapReduceShardResult result {
+  //  .host = host,
+  //  .result_id = SHA1Hash::fromHexString(res.body().toString())
+  //};
+
+  //return Some(result);
+
   return None<MapReduceShardResult>();
 }
 
