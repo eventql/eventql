@@ -11,16 +11,10 @@ ZBase.registerView((function() {
 
     var page = $.getTemplate(
         "views/session_tracking",
-        "zbase_session_tracking_main_tpl");
-
-    var content = $.getTemplate(
-        "views/session_tracking",
         "zbase_session_tracking_journey_viewer_tpl");
 
-    var menu = SessionTrackingMenu(path);
-    menu.render($(".zbase_content_pane .session_tracking_sidebar", page));
-
-    $(".zbase_content_pane .session_tracking_content", page).appendChild(content);
+    var main_menu = ZBaseMainMenu();
+    main_menu.render($(".zbase_main_menu", page), path);
 
     $.handleLinks(page);
     $.replaceViewport(page);

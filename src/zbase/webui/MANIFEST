@@ -30,9 +30,11 @@ route {
   require_module: "widgets/z-codeeditor"
   require_module: "widgets/z-modal"
   require_module: "widgets/z-table"
+  require_module: "widgets/z-menu"
   require_module: "widgets/z-progressbar"
   require_module: "widgets/zbase-header"
   require_module: "widgets/zbase-query-progress"
+  require_module: "widgets/zbase-main-menu"
   require_module: "views/sql_editor"
 }
 
@@ -62,10 +64,12 @@ route {
   require_module: "widgets/z-table"
   require_module: "widgets/z-modal"
   require_module: "widgets/z-input"
+  require_module: "widgets/z-menu"
   require_module: "widgets/z-dropdown"
   require_module: "widgets/z-textarea"
   require_module: "widgets/zbase-info-message"
   require_module: "widgets/zbase-header"
+  require_module: "widgets/zbase-main-menu"
   require_module: "views/logviewer"
 }
 
@@ -83,7 +87,30 @@ route {
   require_module: "widgets/z-table"
   require_module: "widgets/z-button"
   require_module: "widgets/z-modal"
+  require_module: "widgets/z-menu"
   require_module: "widgets/z-calendar"
+  require_module: "widgets/zbase-main-menu"
+  require_module: "widgets/zbase-header"
+  require_module: "views/logviewer"
+}
+
+route {
+  path_match: "/a/logviewer"
+  view: "logviewer_logfile_list"
+  require_module: "util/z-date-util"
+  require_module: "util/z-url-util"
+  require_module: "util/event_source_handler"
+  require_module: "widgets/z-checkbox"
+  require_module: "widgets/z-dropdown"
+  require_module: "widgets/z-input"
+  require_module: "widgets/z-search"
+  require_module: "widgets/z-pager"
+  require_module: "widgets/z-table"
+  require_module: "widgets/z-button"
+  require_module: "widgets/z-modal"
+  require_module: "widgets/z-menu"
+  require_module: "widgets/z-calendar"
+  require_module: "widgets/zbase-main-menu"
   require_module: "widgets/zbase-header"
   require_module: "views/logviewer"
 }
@@ -91,6 +118,7 @@ route {
 route {
   path_match: "/a/datastore/events"
   view: "datastore_events"
+  require_module: "widgets/zbase-main-menu"
   require_module: "widgets/zbase-header"
   require_module: "widgets/z-menu"
   require_module: "views/datastore_events"
@@ -118,7 +146,7 @@ route {
   path_prefix: "/a/datastore/tables/"
   view: "table"
   require_module: "widgets/zbase-header"
-  require_module: "widgets/zbase-datastore-menu"
+  require_module: "widgets/zbase-main-menu"
   require_module: "widgets/z-menu"
   require_module: "widgets/z-table"
   require_module: "views/table"
@@ -129,7 +157,7 @@ route {
   view: "datastore_tables"
   require_module: "util/event_source_handler"
   require_module: "widgets/zbase-header"
-  require_module: "widgets/zbase-datastore-menu"
+  require_module: "widgets/zbase-main-menu"
   require_module: "widgets/z-menu"
   require_module: "widgets/z-table"
   require_module: "views/datastore_tables"
@@ -141,7 +169,7 @@ route {
   require_module: "util/z-date-util"
   require_module: "util/z-url-util"
   require_module: "widgets/zbase-header"
-  require_module: "widgets/zbase-home-menu"
+  require_module: "widgets/zbase-main-menu"
   require_module: "widgets/z-menu"
   require_module: "widgets/z-table"
   require_module: "widgets/z-dropdown"
@@ -186,10 +214,12 @@ route {
   require_module: "widgets/z-button"
   require_module: "widgets/z-dropdown"
   require_module: "widgets/z-table"
+  require_module: "widgets/z-tabbable"
   require_module: "widgets/z-progressbar"
   require_module: "widgets/z-calendar-group"
   require_module: "widgets/z-daterangepicker"
   require_module: "widgets/zbase-header"
+  require_module: "widgets/zbase-main-menu"
   require_module: "widgets/zbase-c3-chart"
   require_module: "widgets/zbase-query-progress"
   require_module: "views/session_tracking"
@@ -205,6 +235,7 @@ route {
   require_module: "widgets/z-table"
   require_module: "widgets/z-button"
   require_module: "widgets/zbase-header"
+  require_module: "widgets/zbase-main-menu"
   require_module: "views/session_tracking"
 }
 
@@ -220,6 +251,7 @@ route {
   require_module: "widgets/z-input"
   require_module: "widgets/z-checkbox"
   require_module: "widgets/zbase-header"
+  require_module: "widgets/zbase-main-menu"
   require_module: "views/session_tracking"
 }
 
@@ -230,6 +262,7 @@ route {
   require_module: "widgets/z-tabbable"
   require_module: "widgets/z-table"
   require_module: "widgets/zbase-header"
+  require_module: "widgets/zbase-main-menu"
   require_module: "views/session_tracking"
 }
 
@@ -262,8 +295,10 @@ route {
   require_module: "widgets/z-button"
   require_module: "widgets/z-modal"
   require_module: "widgets/z-input"
+  require_module: "widgets/z-tabbable"
   require_module: "widgets/z-checkbox"
   require_module: "widgets/zbase-header"
+  require_module: "widgets/zbase-main-menu"
   require_module: "views/session_tracking"
 }
 
@@ -325,6 +360,7 @@ route {
   require_module: "util/z-url-util"
   require_module: "widgets/zbase-header"
   require_module: "widgets/zbase-home-menu"
+  require_module: "widgets/zbase-main-menu"
   require_module: "widgets/z-menu"
   require_module: "widgets/z-table"
   require_module: "widgets/z-dropdown"

@@ -1,7 +1,14 @@
+.zbase_datastore_table_detail {
+  background: #fff;
+}
+
+.zbase_datastore_table_detail .zbase_content.main_menu zbase-breadcrumbs-section.table_name a {
+  color: #3498db;
+}
+
 .zbase_datastore_table_detail table.z-table {
   font-size: 13px;
   table-layout: fixed;
-  border-top: 1px solid #d4d4d4;
   border-bottom: 2px solid #d4d4d4;
   margin-bottom: 20px;
 }

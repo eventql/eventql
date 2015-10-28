@@ -1,11 +1,11 @@
 ZBase.registerView((function() {
 
-  var load = function() {
+  var load = function(path) {
     $.showLoader();
     $.httpGet("/api/v1/documents?type=sql_query", function(r) {
       if (r.status == 200) {
         var documents = JSON.parse(r.response).documents;
-        render(documents);
+        render(documents, path);
       } else {
         $.fatalError();
       }
@@ -29,7 +29,7 @@ ZBase.registerView((function() {
     });
   };
 
-  var render = function(documents) {
+  var render = function(documents, path) {
     var page = $.getTemplate(
         "views/sql_editor",
         "zbase_sql_editor_overview_main_tpl");
@@ -37,6 +37,9 @@ ZBase.registerView((function() {
     renderDocumentsList(
         page.querySelector(".zbase_sql_editor_overview tbody"),
         documents);
+
+    var main_menu = ZBaseMainMenu();
+    main_menu.render($(".zbase_main_menu", page), path);
 
     $.onClick(
         page.querySelector("button[data-action='new-query']"),
@@ -63,7 +66,7 @@ ZBase.registerView((function() {
 
   return {
     name: "sql_editor_query_list",
-    loadView: function(params) { load(); },
+    loadView: function(params) { load(params.path); },
     unloadView: function() {},
     handleNavigationChange: load
   };
