@@ -6,6 +6,17 @@
   color: #3498db;
 }
 
+.zbase_table_editor .zbase_page_title {
+  height: 97px;
+}
+
+.zbase_table_editor z-tabbable {
+  font-size: 14px;
+  padding-left: 20px;
+  background: transparent;
+  border-bottom: none;
+}
+
 .zbase_table_editor table.z-table {
   font-size: 13px;
   table-layout: fixed;

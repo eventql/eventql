@@ -27,6 +27,10 @@ ZBase.registerView((function() {
     table_breadcrumb.innerHTML = schema.name;
     table_breadcrumb.href = kPathPrefix + schema.name;
 
+    $("z-tab.schema a", page).href = kPathPrefix + schema.name;
+    $("z-tab.settings a", page).href = kPathPrefix + schema.name;
+
+
     $.onClick($(".add_pane", page), function() {
         displayAddColumnModal(schema.name);
     });

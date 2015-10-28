@@ -3,7 +3,7 @@
     <div class="zbase_main_menu"></div>
 
     <div class="zbase_content main_menu">
-      <section class='zbase_page_title medium'>
+      <section class='zbase_page_title '>
         <div>
           <h2 class="pagetitle">
             <zbase-breadcrumbs>
@@ -16,7 +16,18 @@
             </zbase-breadcrumbs>
           </h2>
         </div>
+
+        <z-tabbable>
+          <z-tab class="link schema" data-active>
+            <a>Schema</a>
+          </z-tab>
+          <z-tab class="link settings">
+            <a>Settings</a>
+          </z-tab>
+        </z-tabbable>
       </section>
+
+
 
       <table class="z-table">
         <thead>
