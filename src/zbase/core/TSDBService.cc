@@ -427,6 +427,27 @@ Option<RefPtr<TablePartitioner>> TSDBService::tablePartitioner(
   }
 }
 
+Vector<SHA1Hash> TSDBService::listPartitions(
+    const String& tsdb_namespace,
+    const String& table_key,
+    const UnixTime& from,
+    const UnixTime& until) {
+  auto table = pmap_->findTable(tsdb_namespace, table_key);
+  if (table.isEmpty()) {
+    RAISEF(kNotFoundError, "table not found: $0", table_key);
+  }
+
+  auto partitioner = table.get()->partitioner();
+  auto time_partitioner = dynamic_cast<TimeWindowPartitioner*>(
+      partitioner.get());
+
+  if (!time_partitioner) {
+    RAISEF(kRuntimeError, "table is not timeseries-partitioned: $0", table_key);
+  }
+
+  return time_partitioner->partitionKeysFor(from, until);
+}
+
 //const String& TSDBService::dbPath() const {
 //  return db_path_;
 //}

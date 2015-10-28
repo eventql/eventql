@@ -40,6 +40,10 @@ public:
       UnixTime until,
       Duration window_size);
 
+  Vector<SHA1Hash> partitionKeysFor(
+      UnixTime from,
+      UnixTime until);
+
   SHA1Hash partitionKeyFor(const String& partition_key) const override;
 
   Vector<SHA1Hash> partitionKeysFor(

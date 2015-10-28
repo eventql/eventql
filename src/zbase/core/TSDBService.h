@@ -87,7 +87,7 @@ public:
       size_t sample_index,
       Function<void (const Buffer& record)> fn);
 
-  Vector<String> listPartitions(
+  Vector<SHA1Hash> listPartitions(
       const String& tsdb_namespace,
       const String& table_key,
       const UnixTime& from,

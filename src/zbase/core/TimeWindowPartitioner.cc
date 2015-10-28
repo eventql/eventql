@@ -64,6 +64,16 @@ Vector<SHA1Hash> TimeWindowPartitioner::partitionKeysFor(
   return res;
 }
 
+Vector<SHA1Hash> TimeWindowPartitioner::partitionKeysFor(
+    UnixTime from,
+    UnixTime until) {
+  return partitionKeysFor(
+      table_name_,
+      from,
+      until,
+      config_.partition_size());
+}
+
 SHA1Hash TimeWindowPartitioner::partitionKeyFor(
     const String& partition_key) const {
   return partitionKeyFor(

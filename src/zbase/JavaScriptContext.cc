@@ -27,7 +27,11 @@ static bool write_json_to_buf(const char16_t* str, uint32_t strlen, void* out) {
 }
 
 JavaScriptContext::JavaScriptContext(
-    size_t memlimit /* = kDefaultMemLimit */) {
+    const String& customer,
+    TSDBService* tsdb,
+    size_t memlimit /* = kDefaultMemLimit */) :
+    customer_(customer),
+    tsdb_(tsdb) {
   {
     runtime_ = JS_NewRuntime(memlimit);
     if (!runtime_) {
@@ -157,6 +161,12 @@ bool JavaScriptContext::listPartitions(
     return false;
   }
 
+  auto rt = JS_GetRuntime(ctx);
+  auto self = (JavaScriptContext*) JS_GetRuntimePrivate(rt);
+  if (!self) {
+    return false;
+  }
+
   auto table_name_cstr = JS_EncodeString(ctx, args[0].toString());
   String table_name(table_name_cstr);
   JS_free(ctx, table_name_cstr);
@@ -169,9 +179,11 @@ bool JavaScriptContext::listPartitions(
   String until(until_cstr);
   JS_free(ctx, until_cstr);
 
-  iputs("$0 $1-$2", table_name, from, until);
-
-  Vector<String> partitions = {"a", "b", "c"};
+  auto partitions = self->tsdb_->listPartitions(
+      self->customer_,
+      table_name,
+      std::stoull(from),
+      std::stoull(until));
 
   auto part_array_ptr = JS_NewArrayObject(ctx, partitions.size());
   if (!part_array_ptr) {
@@ -180,10 +192,8 @@ bool JavaScriptContext::listPartitions(
 
   JS::RootedObject part_array(ctx, part_array_ptr);
   for (size_t i = 0; i < partitions.size(); ++i) {
-    auto val_str_ptr = JS_NewStringCopyN(
-        ctx,
-        partitions[i].data(),
-        partitions[i].size());
+    auto pkey = partitions[i].toString();
+    auto val_str_ptr = JS_NewStringCopyN(ctx, pkey.data(), pkey.size());
     if (!val_str_ptr) {
       RAISE(kRuntimeError, "JavaScript execution error: out of memory");
     }

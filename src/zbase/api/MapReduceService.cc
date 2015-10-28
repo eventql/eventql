@@ -47,7 +47,7 @@ void MapReduceService::executeScript(
 
   json::JSONObject job_json;
   {
-    auto js_ctx = mkRef(new JavaScriptContext());
+    auto js_ctx = mkRef(new JavaScriptContext(session.customer(), tsdb_));
     js_ctx->loadProgram(job->program_source);
 
     auto job_json_str = js_ctx->getMapReduceJobJSON();
@@ -137,7 +137,7 @@ Option<SHA1Hash> MapReduceService::mapPartition(
       partition_key.toString(),
       output_id.toString());
 
-  auto js_ctx = mkRef(new JavaScriptContext());
+  auto js_ctx = mkRef(new JavaScriptContext(session.customer(), tsdb_));
   js_ctx->loadProgram(program_source);
 
   auto writer = sstable::SSTableWriter::create(output_path, nullptr, 0);
@@ -236,7 +236,7 @@ Option<SHA1Hash> MapReduceService::reduceTables(
     return None<SHA1Hash>();
   }
 
-  auto js_ctx = mkRef(new JavaScriptContext());
+  auto js_ctx = mkRef(new JavaScriptContext(session.customer(), tsdb_));
   js_ctx->loadProgram(program_source);
 
   auto writer = sstable::SSTableWriter::create(output_path, nullptr, 0);
