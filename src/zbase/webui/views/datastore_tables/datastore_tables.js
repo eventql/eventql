@@ -112,7 +112,7 @@ ZBase.registerView((function() {
       json.schema.columns.push({
         name: c_input.value,
         type: $("z-dropdown.type", columns[i]).getValue(),
-        is_nullable: $("z-dropdown.is_nullable", columns[i]).getValue()
+        optional: $("z-dropdown.is_nullable", columns[i]).getValue()
       });
     }
 
@@ -122,10 +122,19 @@ ZBase.registerView((function() {
     }
 
     $.httpPost("/api/v1/tables/create_table", JSON.stringify(json), function(r) {
-      if (r.status == 201) {
-        $.navigateTo("/a/datastore/tables");
-      } else {
-        $.fatalError();
+      switch (r.status) {
+        case 201:
+          $.navigateTo("/a/datastore/tables");
+          break;
+
+        case 500:
+          $(".error_message .error_text", modal).innerHTML = r.responseText;
+          $(".error_message", modal).classList.remove("hidden");
+          break;
+
+        default:
+          $.fatalError();
+          break;
       }
     });
   };
@@ -134,6 +143,6 @@ ZBase.registerView((function() {
     name: "datastore_tables",
     loadView: function(params) { load(params.path); },
     unloadView: destroy,
-    handleNavigationChange: render
+    handleNavigationChange: load
   };
 })());
