@@ -99,28 +99,48 @@
 
       <div class="zbase_content_pane fullwidth" style="background: #fff;">
         <div class="zbase_seller_overview">
-          <table class="z-table zbase_clickable_table">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>ID</th>
-                <th>GMV</th>
-                <th>Purchases</th>
-                <th>Search CTR</th>
-                <th>Catalog CTR</th>
-                <th>Shop CTR</th>
-                <th style="width: 60px;"></th>
-              </tr>
-            </thead>
-            <tbody>
-            </tbody>
-          </table>
         </div>
       </div>
 
     </div>
   </div>
 </template>
+
+<template id="seller_overview_table_tpl">
+  <table class="z-table zbase_clickable_table">
+    <thead>
+      <tr>
+        <th class="shop_name">Name</th>
+        <th class="shop_id">ID</th>
+        <th class="hidden gmv_eurcent">GMV</th>
+        <th class="hidden num_purchases">Purchases</th>
+        <th class="hidden listview_ctr_search_page">Search CTR</th>
+        <th class="hidden listview_ctr_catalog_page">Catalog CTR</th>
+        <th class="hidden listview_ctr_shop_page">Shop CTR</th>
+        <th class="hidden num_listed_products">Listed Products</th>
+        <th class="hidden num_active_products">Active Products</th>
+        <th class="hidden num_refunds">Refunds</th>
+        <th class="hidden refund_rate">Refund Rate</th>
+        <th class="hidden refunded_gmv_eurcent">Refunded GMV</th>
+        <th class="hidden gmv_per_transaction_eurcent">GMV Per Transaction</th>
+        <th class="hidden shop_page_views">Shop Views</th>
+        <th class="hidden product_page_views">Product Views</th>
+        <th class="hidden listview_clicks_search_page">Search Clicks</th>
+        <th class="hidden listview_clicks_catalog_page">Catalog Clicks</th>
+        <th class="hidden listview_clicks_shop_page">Shop Clicks</th>
+        <th class="hidden listview_ctr_ads">Ad CTR</th>
+        <th class="hidden listview_clicks_ads">Ad Clicks</th>
+        <th class="hidden listview_ctr_recos">Reco CTR</th>
+        <th class="hidden listview_clicks_recos">Reco Clicks</th>
+        <th style="width: 60px;"></th>
+      </tr>
+    </thead>
+
+    <tbody>
+    </tbody>
+  </table>
+</template>
+
 
 <template id="seller_overview_row_tpl">
   <tr>
