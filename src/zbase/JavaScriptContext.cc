@@ -192,16 +192,53 @@ bool JavaScriptContext::listPartitions(
 
   JS::RootedObject part_array(ctx, part_array_ptr);
   for (size_t i = 0; i < partitions.size(); ++i) {
-    auto pkey = partitions[i].partition_key.toString();
-    auto val_str_ptr = JS_NewStringCopyN(ctx, pkey.data(), pkey.size());
-    if (!val_str_ptr) {
+    auto part_obj_ptr = JS_NewObject(ctx, NULL);
+    if (!part_obj_ptr) {
+      RAISE(kRuntimeError, "reduce function execution error: out of memory");
+    }
+
+    JS::RootedObject part_obj(ctx, part_obj_ptr);
+    if (!JS_SetElement(ctx, part_array, i, part_obj)) {
       RAISE(kRuntimeError, "JavaScript execution error: out of memory");
     }
 
-    JS::RootedString val_str(ctx, val_str_ptr);
-    if (!JS_SetElement(ctx, part_array, i, val_str)) {
+    auto pkey = partitions[i].partition_key.toString();
+    JS::RootedValue pkey_str(ctx);
+    auto pkey_str_ptr = JS_NewStringCopyN(ctx, pkey.data(), pkey.size());
+    if (!pkey_str_ptr) {
       RAISE(kRuntimeError, "JavaScript execution error: out of memory");
+    } else {
+      pkey_str.setString(pkey_str_ptr);
     }
+    JS_SetProperty(ctx, part_obj, "partition_key", pkey_str);
+
+    auto time_begin = StringUtil::toString(
+        partitions[i].time_begin.unixMicros());
+    JS::RootedValue time_begin_str(ctx);
+    auto time_begin_str_ptr = JS_NewStringCopyN(
+        ctx,
+        time_begin.data(),
+        time_begin.size());
+    if (!time_begin_str_ptr) {
+      RAISE(kRuntimeError, "JavaScript execution error: out of memory");
+    } else {
+      time_begin_str.setString(time_begin_str_ptr);
+    }
+    JS_SetProperty(ctx, part_obj, "time_begin", time_begin_str);
+
+    auto time_limit = StringUtil::toString(
+        partitions[i].time_limit.unixMicros());
+    JS::RootedValue time_limit_str(ctx);
+    auto time_limit_str_ptr = JS_NewStringCopyN(
+        ctx,
+        time_limit.data(),
+        time_limit.size());
+    if (!time_limit_str_ptr) {
+      RAISE(kRuntimeError, "JavaScript execution error: out of memory");
+    } else {
+      time_limit_str.setString(time_limit_str_ptr);
+    }
+    JS_SetProperty(ctx, part_obj, "time_limit", time_limit_str);
   }
 
   args.rval().setObject(*part_array);
