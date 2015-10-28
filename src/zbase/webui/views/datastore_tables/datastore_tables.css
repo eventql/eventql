@@ -33,12 +33,12 @@
   color: #000;
 }
 
-.zbase_datastore_tables table.z-table tbody tr:hover td {
+.zbase_datastore_tables table.z-table.zbase_clickable_table tbody tr:hover td {
   border-top: 1px solid rgba(52, 152, 219, 0.3);
   border-bottom: 1px solid rgba(52, 152, 219, 0.3);
 }
 
-.zbase_datastore_tables table.z-table tbody tr:hover td:first-child a {
+.zbase_datastore_tables table.z-table.zbase_clickable_table tbody tr:hover td:first-child a {
   color: #3498db;
 }
 
@@ -123,7 +123,7 @@
  color: #3498db; 
 }
 
-.zbase_datastore_tables z-modal .field input.z-input {
+.zbase_datastore_tables z-modal input.z-input {
   font-size: 13px;
   display: inline-block;
   width: auto;
@@ -134,14 +134,14 @@
   font-size: 13px;
 }
 
-.zbase_datastore_tables z-modal .field .error_note {
+.zbase_datastore_tables z-modal .error_note {
   display: inline-block;
   font-size: 13px;
   line-height: 34px;
   color: #a94442;
 }
 
-.zbase_datastore_tables z-modal .field .error_note.hidden {
+.zbase_datastore_tables z-modal .error_note.hidden {
   display: none;
 }
 
@@ -165,22 +165,68 @@
 
 .zbase_datastore_tables z-modal .columns {
   margin-top: 35px;
+  overflow: auto;
 }
 
-.zbase_datastore_tables z-modal .columns label {
-  color: #333;
-  font-size: 14px;
-  font-weight: 500;
+.zbase_datastore_tables z-modal .table {
+  margin-top: 12px;
+  overflow: auto;
+}
+
+.zbase_datastore_tables z-modal .table h3,
+.zbase_datastore_tables z-modal .columns h3 {
+  color: #454545;
+  font-size: 15px;
+  font-weight: 400;
+  margin-top: 0;
 }
 
 .zbase_datastore_tables z-modal .column {
   overflow: visible;
-  height: 72px;
+}
+
+.zbase_datastore_tables z-modal table.z-table {
+  width: auto;
+  float: left;
+}
+
+.zbase_datastore_tables z-modal table.z-table tbody tr td {
+  padding: .7em .8em;
+  border-top: none;
+}
+
+.zbase_datastore_tables z-modal table.z-table thead tr th {
+  box-shadow: none;
+  border-bottom: none;
+  width: 230px;
+  color: #454545;
+  padding-bottom: 0.2em;
+}
+
+.zbase_datastore_tables z-modal table.z-table thead tr th:first-child,
+.zbase_datastore_tables z-modal table.z-table tbody tr td:first-child {
+  padding-left: 0;
+}
+
+.zbase_datastore_tables z-modal table.z-table z-dropdown {
+  vertical-align: middle;
+}
+
+.zbase_datastore_tables z-modal table.z-table z-dropdown-header {
+  vertical-align: bottom;
+}
+
+.zbase_datastore_tables z-modal table.z-table z-dropdown-flyout {
+  margin-top: 0px;
+}
+
+.zbase_datastore_tables z-modal table.z-table + .error_note {
+  margin-top: 35px;
 }
 
 .zbase_datastore_tables z-modal .link.add_column {
   font-size: 14px;
   text-align: center;
-  margin-top: 30px;
+  margin-top: 40px;
   text-decoration: underline;
 }

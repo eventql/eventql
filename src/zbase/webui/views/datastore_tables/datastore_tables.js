@@ -64,25 +64,22 @@ ZBase.registerView((function() {
         "views/datastore_tables",
         "zbase_datastore_tables_add_modal_tpl");
 
-    var columns = $(".columns", tpl);
-    addTableCreationColumn(columns);
+    var column_tpl = $.getTemplate(
+        "views/datastore_tables",
+        "zbase_datastore_tables_add_modal_column_tpl");
+
+    var columns = $(".columns tbody", tpl);
+    columns.appendChild(column_tpl.cloneNode(true));
+    columns.appendChild(column_tpl.cloneNode(true));
 
     $.onClick($(".add_column", tpl), function() {
-      addTableCreationColumn(columns);
+      columns.appendChild(column_tpl.cloneNode(true));
     });
 
 
     $.replaceContent($(".z-modal-content", modal), tpl);
     modal.show();
     $("input", modal).focus();
-  };
-
-  var addTableCreationColumn = function(elem) {
-    var tpl = $.getTemplate(
-        "views/datastore_tables",
-        "zbase_datastore_tables_add_modal_column_tpl");
-
-    elem.appendChild(tpl);
   };
 
   var createTable = function() {
@@ -113,7 +110,8 @@ ZBase.registerView((function() {
 
       json.schema.columns.push({
         name: c_input.value,
-        type: $("z-dropdown.type", columns[i]).getValue()
+        type: $("z-dropdown.type", columns[i]).getValue(),
+        is_nullable: $("z-dropdown.is_nullable", columns[i]).getValue()
       });
     }
 

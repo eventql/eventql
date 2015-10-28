@@ -90,43 +90,61 @@
 </template>
 
 <template id="zbase_datastore_tables_add_modal_tpl">
-  <div class="field">
-    <label>Table Name:</label>
-    <input class="z-input table_name" type="text" />
-    <div class="error_note hidden table_name">Please insert a name</div>
-  </div>
+  <div class="table">
+    <h3>Table</h3>
 
-  <div class="field">
-    <label>Table Type:</label>
-    <z-dropdown class="input table_type" data-resolved>
-      <z-dropdown-flyout>
-        <z-dropdown-items>
-          <z-dropdown-item data-value="static" data-selected>static</z-dropdown-item>
-          <z-dropdown-item data-value="log">log</z-dropdown-item>
-        </z-dropdown-items>
-      </z-dropdown-flyout>
-    </z-dropdown>
+    <table class="z-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr>
+          <td><input class="z-input table_name" type="text" /></td>
+          <td>
+            <z-dropdown class="input table_type" data-resolved>
+              <z-dropdown-flyout>
+                <z-dropdown-items>
+                  <z-dropdown-item data-value="static" data-selected>static</z-dropdown-item>
+                  <z-dropdown-item data-value="log">log</z-dropdown-item>
+                </z-dropdown-items>
+              </z-dropdown-flyout>
+            </z-dropdown>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="error_note hidden table_name">Please insert a name</div>
   </div>
 
 
   <div class="columns">
-    <label>Columns</label>
+    <h3>Columns</h3>
 
+    <table class="z-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Is Nullable</th>
+        </tr>
+      </thead>
+
+      <tbody></tbody>
+    </table>
   </div>
 
   <div class="link add_column"><i class="fa fa-plus"></i> Add Column</div>
 </template>
 
 <template id="zbase_datastore_tables_add_modal_column_tpl">
-  <div class="column">
-    <div class="field inline">
-      <label>Name:</label>
-      <input class="z-input name" type="text" />
-      <div class="error_note name hidden column_name">Please insert a name</div>
-    </div>
-
-    <div class="field inline">
-      <label>Type:</label>
+  <tr class="column">
+    <td><input class="z-input name" type="text" /></td>
+    <td>
       <z-dropdown class="input type" data-resolved>
         <z-dropdown-flyout>
           <z-dropdown-items>
@@ -139,10 +157,9 @@
           </z-dropdown-items>
         </z-dropdown-flyout>
       </z-dropdown>
-    </div>
+    </td>
 
-    <div class="field inline">
-      <label>NULL:</label>
+    <td>
       <z-dropdown class="input is_nullable" data-resolved>
         <z-dropdown-flyout>
           <z-dropdown-items>
@@ -151,6 +168,6 @@
           </z-dropdown-items>
         </z-dropdown-flyout>
       </z-dropdown>
-    </div>
-  </div>
+    </td>
+  </tr>
 </template>
