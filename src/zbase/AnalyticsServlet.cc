@@ -309,6 +309,15 @@ void AnalyticsServlet::handle(
     return;
   }
 
+  if (uri.path() == "/api/v1/tables/add_column") {
+    req_stream->readBody();
+    catchAndReturnErrors(&res, [this, &session, &req, &res] {
+      addTableColumn(session, &req, &res);
+    });
+    res_stream->writeResponse(res);
+    return;
+  }
+
   if (uri.path() == "/api/v1/tables/upload_table") {
     expectHTTPPost(req);
     uploadTable(uri, session, req_stream.get(), &res);
@@ -785,6 +794,29 @@ void AnalyticsServlet::fetchTableDefinition(
   res->setStatus(http::kStatusOK);
   res->setHeader("Content-Type", "application/json; charset=utf-8");
   res->addBody(buf);
+}
+
+void AnalyticsServlet::addTableColumn(
+    const AnalyticsSession& session,
+    const http::HTTPRequest* req,
+    http::HTTPResponse* res) {
+
+  auto jreq = json::parseJSON(req->body());
+
+  auto table_name = json::objectGetString(jreq, "table_name");
+  if (table_name.isEmpty()) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody("missing field: table_name");
+    return;
+  }
+
+  auto table_provider = app_->getTableProvider(session.customer());
+  auto table_opt = table_provider->describe(table_name.get());
+  if (table_opt.isEmpty()) {
+    res->setStatus(http::kStatusNotFound);
+    res->addBody("table not found");
+    return;
+  }
 }
 
 void AnalyticsServlet::createTable(
