@@ -68,6 +68,45 @@ var Z1 = (function(global) {
     return job_id;
   };
 
+  var mkSaveToTablePartitionTask = function(opts) {
+    var job_id = mkJobID();
+
+    jobs.push({
+      id: job_id,
+      op: "save_to_table_partition",
+      table_name: opts["table"],
+      partition_key: opts["partition"],
+      sources: opts["sources"]
+    });
+
+    return job_id;
+  };
+
+  var processStream = function(opts) {
+    var calculate_fn = opts["calculate_fn"];
+
+    var partitions = z1_listpartitions(
+        "" + opts["table"],
+        "" + opts["from"],
+        "" + opts["until"]);
+
+    partitions.forEach(function(partition) {
+      var partition_sources = calculate_fn(
+          parseInt(partition.time_begin, 10),
+          parseInt(partition.time_limit, 10));
+
+      if (typeof partition_sources != "object") {
+        throw "Z1.processStream calculate_fn must return a list of jobs";
+      }
+
+      mkSaveToTablePartitionTask({
+        table: opts["table"],
+        partition: partition.partition_key,
+        sources: partition_sources
+      });
+    });
+  }
+
   var mkJobID = function() {
     return "job-" + ++seq;
   };
@@ -80,7 +119,9 @@ var Z1 = (function(global) {
     mapTable: mkMapTableTask,
     reduce: mkReduceTask,
     downloadResults: mkDownloadResultsTask,
-    saveToTable: mkSaveToTableTask
+    saveToTable: mkSaveToTableTask,
+    saveToTablePartition: mkSaveToTablePartitionTask,
+    processStream: processStream
   };
 })(this);
 

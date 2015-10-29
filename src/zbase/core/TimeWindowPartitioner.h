@@ -20,6 +20,12 @@ using namespace stx;
 
 namespace zbase {
 
+struct TimeseriesPartition {
+  UnixTime time_begin;
+  UnixTime time_limit;
+  SHA1Hash partition_key;
+};
+
 class TimeWindowPartitioner : public TablePartitioner {
 public:
 
@@ -39,6 +45,20 @@ public:
       UnixTime from,
       UnixTime until,
       Duration window_size);
+
+  static Vector<TimeseriesPartition> partitionsFor(
+      const String& table_name,
+      UnixTime from,
+      UnixTime until,
+      Duration window_size);
+
+  Vector<SHA1Hash> partitionKeysFor(
+      UnixTime from,
+      UnixTime until);
+
+  Vector<TimeseriesPartition> partitionsFor(
+      UnixTime from,
+      UnixTime until);
 
   SHA1Hash partitionKeyFor(const String& partition_key) const override;
 

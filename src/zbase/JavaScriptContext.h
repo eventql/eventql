@@ -10,6 +10,7 @@
 #include "stx/stdtypes.h"
 #include "stx/autoref.h"
 #include "stx/option.h"
+#include "zbase/core/TSDBService.h"
 #include <jsapi.h>
 
 using namespace stx;
@@ -21,7 +22,11 @@ public:
   static const size_t kDefaultMemLimit = 1024 * 1024 * 128;
   static JSClass kGlobalJSClass;
 
-  JavaScriptContext(size_t memlimit = kDefaultMemLimit);
+  JavaScriptContext(
+      const String& customer,
+      TSDBService* tsdb,
+      size_t memlimit = kDefaultMemLimit);
+
   ~JavaScriptContext();
 
   void loadProgram(const String& program);
@@ -64,10 +69,17 @@ protected:
       unsigned argc,
       JS::Value* vp);
 
+  static bool listPartitions(
+      JSContext* ctx,
+      unsigned argc,
+      JS::Value* vp);
+
   void enumerateTuples(
       JS::RootedValue* src,
       Vector<Pair<String, String>>* dst) const;
 
+  String customer_;
+  TSDBService* tsdb_;
   JSRuntime* runtime_;
   JSContext* ctx_;
   JS::PersistentRooted<JSObject*> global_;
