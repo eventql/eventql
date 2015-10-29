@@ -6,18 +6,26 @@
   background: #fff;
 }
 
-.zbase_seller_stats.overview  .controls {
-  padding: 10px 20px;
+.zbase_seller_stats.overview .controls {
+  padding: 20px;
   border-bottom: 1px solid #d1d1d1;
   background: #fff;
   overflow: auto;;
 }
 
+.zbase_seller_stats.overview .controls .left {
+  float: left;
+}
+
+.zbase_seller_stats.overview .controls .right {
+  float: right;
+}
+
+
 .zbase_seller_stats.overview .controls .control {
   display: inline-block;
   height: 38px;
   margin-top: 2px;
-  float: right;
 }
 
 .zbase_seller_stats.overview .controls .control > z-checkbox {
@@ -29,11 +37,6 @@
   line-height: 38px;
   font-weight: 400;
   vertical-align: top;
-}
-
-.zbase_seller_stats.overview .controls .search {
-  display: inline-block;
-  float: right;
 }
 
 .zbase_seller_stats.overview label.search_label {
