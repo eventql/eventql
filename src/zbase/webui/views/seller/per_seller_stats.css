@@ -38,6 +38,14 @@
   background: #fff;
 }
 
+.zbase_seller_stats .controls {
+  overflow: auto;
+}
+
+.zbase_seller_stats .controls button {
+  float: right;
+}
+
 .zbase_seller_stats .metric_group {
   overflow: auto;
   margin-bottom: 10px;
