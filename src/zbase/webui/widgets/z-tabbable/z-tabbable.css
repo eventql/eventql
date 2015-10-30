@@ -167,6 +167,7 @@ z-tabbable[data-content-attached] z-tab-content[data-active],
   border-radius: 0;
   line-height: 38px;
   margin-right: 10px;
+  padding: 0 10px;
 }
 
 .zbase_app z-tabbable.slim_tabs z-tab a {
