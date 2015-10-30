@@ -159,6 +159,7 @@ z-tabbable[data-content-attached] z-tab-content[data-active],
   border-bottom: 1px solid #ddd;
   padding: 0;
   font-family: Roboto;
+  font-size: 14px;
 }
 
 .zbase_app z-tabbable.slim_tabs z-tab {
