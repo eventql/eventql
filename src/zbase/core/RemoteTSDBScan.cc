@@ -126,10 +126,10 @@ void RemoteTSDBScan::executeOnHost(
             csql::SValue val;
             val.decode(&is);
             row.emplace_back(val);
+          }
 
-            if (!fn(row.size(), row.data())) {
-              done = true;
-            }
+          if (!fn(row.size(), row.data())) {
+            done = true;
           }
         }
 

@@ -14,7 +14,6 @@
 #include <stx/io/fileutil.h>
 #include <sstable/sstablereader.h>
 #include <zbase/core/TSDBService.h>
-#include <zbase/core/TimeWindowPartitioner.h>
 #include <zbase/core/LogPartitionReader.h>
 #include <zbase/core/PartitionState.pb.h>
 
@@ -425,6 +424,27 @@ Option<RefPtr<TablePartitioner>> TSDBService::tablePartitioner(
   } else {
     return Some(table.get()->partitioner());
   }
+}
+
+Vector<TimeseriesPartition> TSDBService::listPartitions(
+    const String& tsdb_namespace,
+    const String& table_key,
+    const UnixTime& from,
+    const UnixTime& until) {
+  auto table = pmap_->findTable(tsdb_namespace, table_key);
+  if (table.isEmpty()) {
+    RAISEF(kNotFoundError, "table not found: $0", table_key);
+  }
+
+  auto partitioner = table.get()->partitioner();
+  auto time_partitioner = dynamic_cast<TimeWindowPartitioner*>(
+      partitioner.get());
+
+  if (!time_partitioner) {
+    RAISEF(kRuntimeError, "table is not timeseries-partitioned: $0", table_key);
+  }
+
+  return time_partitioner->partitionsFor(from, until);
 }
 
 //const String& TSDBService::dbPath() const {

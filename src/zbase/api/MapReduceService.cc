@@ -15,6 +15,7 @@
 #include "stx/http/HTTPFileDownload.h"
 #include "sstable/SSTableWriter.h"
 #include "sstable/sstablereader.h"
+#include <algorithm>
 
 using namespace stx;
 
@@ -46,7 +47,7 @@ void MapReduceService::executeScript(
 
   json::JSONObject job_json;
   {
-    auto js_ctx = mkRef(new JavaScriptContext());
+    auto js_ctx = mkRef(new JavaScriptContext(session.customer(), tsdb_));
     js_ctx->loadProgram(job->program_source);
 
     auto job_json_str = js_ctx->getMapReduceJobJSON();
@@ -136,7 +137,7 @@ Option<SHA1Hash> MapReduceService::mapPartition(
       partition_key.toString(),
       output_id.toString());
 
-  auto js_ctx = mkRef(new JavaScriptContext());
+  auto js_ctx = mkRef(new JavaScriptContext(session.customer(), tsdb_));
   js_ctx->loadProgram(program_source);
 
   auto writer = sstable::SSTableWriter::create(output_path, nullptr, 0);
@@ -165,9 +166,12 @@ Option<SHA1Hash> MapReduceService::mapPartition(
 
 Option<SHA1Hash> MapReduceService::reduceTables(
     const AnalyticsSession& session,
-    const Vector<String>& input_tables,
+    const Vector<String>& input_tables_ref,
     const String& program_source,
     const String& method_name) {
+  auto input_tables = input_tables_ref;
+  std::sort(input_tables.begin(), input_tables.end());
+
   auto output_id = SHA1::compute(
       StringUtil::format(
           "$0~$1~$2~$3",
@@ -186,13 +190,17 @@ Option<SHA1Hash> MapReduceService::reduceTables(
 
   logDebug(
       "z1.mapreduce",
-      "Executing reduce shard; customer=$0 input_tables=$1 output=$2",
+      "Executing reduce shard; customer=$0 input_tables=0/$1 output=$2",
       session.customer(),
       input_tables.size(),
       output_id.toString());
 
+  std::random_shuffle(input_tables.begin(), input_tables.end());
+
   // FIXME MOST NAIVE IN MEMORY MERGE AHEAD !!
   HashMap<String, Vector<String>> groups;
+  size_t num_input_tables_read = 0;
+  size_t num_bytes_read = 0;
   for (const auto& input_table_url : input_tables) {
     auto api_token = auth_->encodeAuthToken(session);
     http::HTTPMessage::HeaderList auth_headers;
@@ -203,32 +211,45 @@ Option<SHA1Hash> MapReduceService::reduceTables(
     auto req = http::HTTPRequest::mkGet(input_table_url, auth_headers);
     MapReduceService::downloadResult(
         req,
-        [&groups] (
+        [&groups, &num_bytes_read] (
             const void* key,
             size_t key_len,
             const void* val,
             size_t val_len) {
       auto& lst = groups[String((const char*) key, key_len)];
       lst.emplace_back(String((const char*) val, val_len));
+      num_bytes_read += key_len + val_len;
     });
+
+    ++num_input_tables_read;
+    logDebug(
+      "z1.mapreduce",
+      "Executing reduce shard; customer=$0 input_tables=$1/$2 output=$3 mem_used=$4MB",
+      session.customer(),
+      input_tables.size(),
+      num_input_tables_read,
+      output_id.toString(),
+      num_bytes_read / 1024.0 / 1024.0);
   }
 
   if (groups.size() == 0) {
     return None<SHA1Hash>();
   }
 
-  auto js_ctx = mkRef(new JavaScriptContext());
+  auto js_ctx = mkRef(new JavaScriptContext(session.customer(), tsdb_));
   js_ctx->loadProgram(program_source);
 
   auto writer = sstable::SSTableWriter::create(output_path, nullptr, 0);
 
-  for (const auto& g : groups) {
+  for (auto cur = groups.begin(); cur != groups.end(); ) {
     Vector<Pair<String, String>> tuples;
-    js_ctx->callReduceFunction(method_name, g.first, g.second, &tuples);
+    js_ctx->callReduceFunction(method_name, cur->first, cur->second, &tuples);
 
     for (const auto& t : tuples) {
       writer->appendRow(t.first, t.second);
     }
+
+    cur = groups.erase(cur);
   }
 
   return Some(output_id);
@@ -303,11 +324,11 @@ void MapReduceService::downloadResult(
   }
 }
 
-bool MapReduceService::saveResultToTable(
+bool MapReduceService::saveLocalResultToTable(
     const AnalyticsSession& session,
-    const SHA1Hash& result_id,
     const String& table_name,
-    const SHA1Hash& partition) {
+    const SHA1Hash& partition,
+    const SHA1Hash& result_id) {
   auto table = pmap_->findTable(
       session.customer(),
       table_name);
@@ -361,6 +382,79 @@ bool MapReduceService::saveResultToTable(
       if (!cursor->next()) {
         break;
       }
+    }
+
+    cstable.write(tmpfile_path);
+  }
+
+  tsdb_->updatePartitionCSTable(
+      session.customer(),
+      table_name,
+      partition,
+      tmpfile_path,
+      WallClock::unixMicros());
+
+  return true;
+}
+
+bool MapReduceService::saveRemoteResultsToTable(
+    const AnalyticsSession& session,
+    const String& table_name,
+    const SHA1Hash& partition,
+    const Vector<String>& input_tables_ref) {
+  auto input_tables = input_tables_ref;
+  std::random_shuffle(input_tables.begin(), input_tables.end());
+
+  auto table = pmap_->findTable(
+      session.customer(),
+      table_name);
+
+  if (table.isEmpty()) {
+    RAISEF(
+        kNotFoundError,
+        "table not found: $0/$1",
+        session.customer(),
+        table_name);
+  }
+
+  logDebug(
+      "z1.mapreduce",
+      "Saving results to table; input_tables=$0 table=$1/$2/$3",
+      input_tables.size(),
+      session.customer(),
+      table_name,
+      partition.toString());
+
+  auto schema = table.get()->schema();
+
+  auto tmpfile_path = FileUtil::joinPaths(
+      cachedir_,
+      StringUtil::format("mr-shard-$0.cst", Random::singleton()->hex128()));
+
+  {
+    cstable::CSTableBuilder cstable(schema.get());
+
+    for (const auto& input_table_url : input_tables) {
+      auto api_token = auth_->encodeAuthToken(session);
+      http::HTTPMessage::HeaderList auth_headers;
+      auth_headers.emplace_back(
+          "Authorization",
+          StringUtil::format("Token $0", api_token));
+
+      auto req = http::HTTPRequest::mkGet(input_table_url, auth_headers);
+      MapReduceService::downloadResult(
+          req,
+          [&cstable, &schema] (
+              const void* key,
+              size_t key_len,
+              const void* val,
+              size_t val_len) {
+        auto json = json::parseJSON(String((const char*) val, val_len));
+        msg::DynamicMessage msg(schema);
+        msg.fromJSON(json.begin(), json.end());
+
+        cstable.addRecord(msg.data());
+      });
     }
 
     cstable.write(tmpfile_path);
