@@ -1,22 +1,15 @@
 <template id="zbase_logviewer_main_tpl">
   <div class="zbase_logviewer">
     <section class='zbase_page_title small'>
-      <div>
-        <zbase-breadcrumbs>
-          <zbase-breadcrumbs-section>
-            <a href="/a/">Applications</a>
-          </zbase-breadcrumbs-section>
-          <zbase-breadcrumbs-section>
-            <a href="/a/logs">Logfiles</a>
-          </zbase-breadcrumbs-section>
-          <zbase-breadcrumbs-section>
-            <a href="/a/logs">LogViewer</a>
-          </zbase-breadcrumbs-section>
-          <zbase-breadcrumbs-section>
-            <a href="/a/logs" class="logfile_name_crumb">-</a>
-          </zbase-breadcrumbs-section>
-        </zbase-breadcrumbs>
-      </div>
+      <a href="/a/logs" class="back_btn"></a>
+      <zbase-breadcrumbs>
+        <zbase-breadcrumbs-section>
+          <a href="/a/logs">Log Viewer</a>
+        </zbase-breadcrumbs-section>
+        <zbase-breadcrumbs-section>
+          <a href="/a/logs" class="logfile_name_crumb" style="font-weight: 300;">-</a>
+        </zbase-breadcrumbs-section>
+      </zbase-breadcrumbs>
     </section>
 
     <div class="zbase_content_pane">

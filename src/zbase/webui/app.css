@@ -142,7 +142,8 @@ template {
   z-index: 99999;
   font-family: "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif;
   border-bottom: 1px solid #ddd;
-  box-shadow: 0 0 1px rgba(0,0,0,0.1);
+  box-shadow: 0 1px 1px rgba(0,0,0,0.08);
+
 }
 
 .zbase_header .navigation_inner {
