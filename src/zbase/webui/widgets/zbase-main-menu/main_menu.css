@@ -12,9 +12,9 @@
 
 .zbase_main_menu {
   display: table-cell;
-  width: 220px;
+  width: 180px;
   vertical-align: top;
-  background: #f9f9f9;
+  background: rgba(63,144,170,.08);
   border-right: 1px solid #ddd;
 }
 
@@ -51,9 +51,22 @@
   padding: 0 20px 0 28px;
   font-size: 13px;
   color: #444;
+  border-left: 4px solid transparent;
+  position: relative;
+  padding-left: 28px;
+  margin-left: -10px;
+}
+
+.zbase_main_menu z-menu z-menu-item a[data-active],
+.zbase_main_menu z-menu z-menu-item a:hover {
+  color: #3498db;
+  border-left: 4px solid #3498db;
 }
 
 .zbase_main_menu z-menu z-menu-item a[data-active] {
-  background: #3498db;
-  color: #fff;
+  font-weight: 500;
+}
+
+.zbase_main_menu z-menu z-menu-item:hover {
+  background: transparent;
 }

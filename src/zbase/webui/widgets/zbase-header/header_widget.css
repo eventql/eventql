@@ -176,6 +176,7 @@
 .zbase_header .main_menu > li.user_info .nav {
   padding: 0;
   margin-left: 6px;
+  margin-top: 1px;
 }
 
 .zbase_header .userid_info {
@@ -204,4 +205,35 @@
 
 .zbase_header.blue ul.main_menu.user .dropdown_header {
   color: #fff;
+}
+
+.zbase_header input.search {
+  color: rgba(0, 0, 0, 0.8);
+  outline: none;
+  -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
+  text-align: left;
+  line-height: 30px;
+  height: 31px;
+  margin-top: 7px;
+  margin-left: 10px;
+  padding: 0 1em;
+  background: #ffffff;
+  border-radius: 3px;
+  border: 1px solid rgba(0,0,0,.17);
+  box-shadow: inset 1px 1px 1px rgba(0,0,0,.08); font-size: 13px;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 13px;
+  font-stretch: normal;
+  font-style: normal;
+  font-variant: normal;
+  font-weight: normal;
+  margin-left: 10px;
+  width: 580px;
+}
+
+.zbase_header input.search::-webkit-input-placeholder {
+  color: rgba(0, 0, 0, 0.4);
+}
+.zbase_header input.search::-moz-placeholder {
+  color: rgba(0, 0, 0, 0.4);
 }

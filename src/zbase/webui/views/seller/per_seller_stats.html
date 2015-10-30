@@ -1,16 +1,18 @@
 <template id="per_seller_stats_main_tpl">
   <div class="zbase_seller_stats">
     <section class='zbase_page_title small' style="none">
-      <div style="overflow: visible;">
-        <zbase-breadcrumbs>
-          <zbase-breadcrumbs-section>
-            <a href="/a/seller">Shop Stats</a>
-          </zbase-breadcrumbs-section>
-        </zbase-breadcrumbs>
-      </div>
+      <a href="/a/seller" class="back_btn"></a>
+      <zbase-breadcrumbs>
+        <zbase-breadcrumbs-section>
+          <a href="/a/seller">DaWanda Seller Analytics</a>
+        </zbase-breadcrumbs-section>
+        <zbase-breadcrumbs-section>
+          <a href="/a/seller">Seller XXX</a>
+        </zbase-breadcrumbs-section>
+      </zbase-breadcrumbs>
     </section>
 
-    <div class="zbase_content_pane fullwidth">
+    <div class="zbase_content_pane fullwidth" style="padding: 0 20px;">
       <div class="zbase_stats_title">
         <h2 class="pagetitle">
           <zbase-breadcrumbs>
@@ -27,7 +29,7 @@
         <z-daterangepicker class="open_left"></z-daterangepicker>
       </div>
 
-      <z-tabbable>
+      <z-tabbable class="slim_tabs">
         <z-tab data-active>Overview</z-tab>
         <z-tab>Per Product</z-tab>
       </z-tabbable>

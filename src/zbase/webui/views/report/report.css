@@ -3,6 +3,7 @@
   table-layout: fixed;
   width: 100%;
   min-height: 900px; /* FIXME  firefox ignores min-height*/
+  background: #f9f9f9;
 }
 
 /** Sidebar **/
@@ -365,4 +366,10 @@
 
 h2.report_widget_title {
   font-size: 18px;
+  line-height: 60px;
+  font-size: 20px;
+  font-weight: 300;
+  color: #454545;
+  margin: 0;
+  padding: 0;
 }

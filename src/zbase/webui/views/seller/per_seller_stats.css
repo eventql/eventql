@@ -1,7 +1,6 @@
 .zbase_seller_stats .zbase_stats_title {
   overflow: visible;
   height: 80px;
-  padding: 10px 20px;
 }
 
 .zbase_seller_stats .zbase_stats_title h2.pagetitle {
@@ -20,12 +19,6 @@
 .zbase_seller_stats .zbase_stats_title z-daterangepicker {
   float: right;
   margin-top: 13px;
-}
-
-.zbase_seller_stats z-tabbable {
-  padding-left: 20px;
-  font-size: 14px;
-  background: transparent;
 }
 
 .zbase_seller_stats button.z-button {
