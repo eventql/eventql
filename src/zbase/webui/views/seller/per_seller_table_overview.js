@@ -4,23 +4,30 @@ var PerSellerTableOverview = (function() {
         "views/seller",
         "per_seller_table_overview_main_tpl");
 
-    var tbody = $("tbody", tpl);
-    result.rows.forEach(function(row) {
-      var tr = document.createElement("tr");
+    var tr_tpl = $.getTemplate(
+        "views/seller",
+        "per_seller_table_overview_row_tpl");
 
-      for (var i = 1; i < row.length; i++) {
-        var td = document.createElement("td");
-        td.innerHTML = row[i];
-        tr.appendChild(td);
+    var tbody = $("tbody", tpl);
+
+    //renderHEADER
+
+    for (var i = 0; i < result.timeseries.time.length; i++) {
+      var tr = tr_tpl.cloneNode(true);
+
+      for (var metric in result.timeseries) {
+        var td = $("td." + metric, tr);
+
+        if (td) {
+          td.innerHTML = result.timeseries[metric][i];
+          tr.appendChild(td);
+        }
       }
 
       tbody.appendChild(tr);
-    });
+    }
 
     $.replaceContent(elem, tpl);
-    console.log(result);
-
-    console.log("render table view");
   };
 
   return {

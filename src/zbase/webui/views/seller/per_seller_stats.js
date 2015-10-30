@@ -1,10 +1,11 @@
 ZBase.registerView((function() {
   var path_prefix = "/a/seller/";
+  var result = null;
   var query_mgr;
   var seller_id;
 
   var load = function(path) {
-    seller_id = path.substr(path_prefix.length);
+    seller_id = UrlUtil.getPath(path).substr(path_prefix.length);
     //REMOVE ME
     var seller_name = "Meko";
     //REMOVEME END
@@ -17,6 +18,9 @@ ZBase.registerView((function() {
         seller_id + " (" + seller_name + ")";
     $("z-daterangepicker", page).addEventListener("select", paramChanged, false);
 
+    $.onClick($("button.view.sparkline", page), onViewButtonClick);
+    $.onClick($("button.view.table", page), onViewButtonClick);
+
 
     $.handleLinks(page);
     $.replaceViewport(page);
@@ -24,9 +28,15 @@ ZBase.registerView((function() {
     query_mgr = EventSourceHandler();
 
     var query_str =
-        "select * from shop_stats.last30d where shop_id = " +
-        seller_id + "order by time asc limit 100;";
+      "select * from shop_stats.last30d where shop_id = " +
+      seller_id + "order by time asc limit 100;";
 
+
+    setParamsFromAndUntil(
+        UrlUtil.getParamValue(path, "from"),
+        UrlUtil.getParamValue(path, "until"));
+
+    setParamView(UrlUtil.getParamValue(path, "view"));
 
     var query = query_mgr.get(
         "sql_query",
@@ -34,8 +44,30 @@ ZBase.registerView((function() {
 
     query.addEventListener("result", function(e) {
       query_mgr.close("sql_query");
-      var data = JSON.parse(e.data);
-      render(path, data.results[0]);
+      var data = JSON.parse(e.data).results[0];
+
+      var values = [];
+      for (var i = 0; i < data.rows[0].length; i++) {
+        values.push([]);
+      };
+
+      for (var i = 0; i < data.rows.length; i++) {
+        for (var j = 0; j < data.rows[i].length; j++) {
+          values[j].push(data.rows[i][j]);
+        }
+      }
+
+      result = {
+        aggregates: {},
+        timeseries: {},
+      };
+      for (var i = 0; i < data.columns.length; i++) {
+        result.timeseries[data.columns[i]] = values[i];
+      }
+
+      //TODO get aggregates
+
+      renderView();
     }, false);
 
     query.addEventListener("error", function(e) {
@@ -44,13 +76,8 @@ ZBase.registerView((function() {
     }, false);
 
     query.addEventListener("status", function(e) {
-      //TODO render loader
+      renderQueryProgress(JSON.parse(e.data));
     }, false);
-
-    setParamsFromAndUntil(
-        UrlUtil.getParamValue(path, "from"),
-        UrlUtil.getParamValue(path, "until"));
-
   };
 
   var destroy = function() {
@@ -58,45 +85,23 @@ ZBase.registerView((function() {
     query_mgr.closeAll();
   };
 
-  var render = function(path, result) {
-    var view = UrlUtil.getParamValue(path, "view");
-    if (!view || view == "table") {
+  var renderQueryProgress = function(progress) {
+    QueryProgressWidget.render(
+        $(".zbase_seller_overview"),
+        progress);
+  };
+
+  var renderView = function() {
+    if (result == null) {
+      $.fatalError();
+    }
+
+    var view = getParamView();
+    if (view == "table") {
       PerSellerTableOverview.render($(".zbase_seller_overview"), result);
     } else {
-      //PerSellerSparklineOverview.render($(".zbase_seller_overview"), result);
+      PerSellerSparklineOverview.render($(".zbase_seller_overview"), result);
     }
-
-
-  };
-
-  var renderSparklines = function(data) {
-    console.log(data);
-    var sparkline_values = {};
-    data.timeseries.forEach(function(serie) {
-      for (metric in serie) {
-        if (!sparkline_values[metric]) {
-          sparkline_values[metric] = [];
-        }
-        sparkline_values[metric].push(serie[metric]);
-      }
-    });
-
-    for (var metric in data.aggregates) {
-      var pane = $(".zbase_seller_stats ." + metric);
-      $(".num", pane).innerHTML = data.aggregates[metric];
-      $("z-sparkline", pane).setAttribute(
-          "data-sparkline",
-          sparkline_values[metric].join(","));
-
-      //remove if
-      if ($(".zbase_seller_stats z-tooltip." + metric)) {
-        $(".zbase_seller_stats z-tooltip." + metric).init($("i.help", pane));
-      }
-    }
-  };
-
-  var renderTable = function(result) {
-    console.log(result);
   };
 
   var setParamsFromAndUntil = function(from, until) {
@@ -112,13 +117,37 @@ ZBase.registerView((function() {
         from, until);
   };
 
+  var setParamView = function(view) {
+    if (view == null) {
+      view = "sparkline"
+    }
+
+    $(".zbase_seller_stats button.view." + view)
+        .setAttribute("data-state", "active");
+  };
+
+  var getParamView = function() {
+    return $(".zbase_seller_stats button.view[data-state='active']").getAttribute(
+        "data-value");
+  };
+
   var getUrl = function() {
     var params = $(".zbase_seller_stats z-daterangepicker").getValue();
+    params.view = $(".zbase_seller_stats button.view[data-state='active']")
+        .getAttribute("data-value");
     return path_prefix + seller_id + "?" + $.buildQueryString(params);
   };
 
-  var paramChanged = function(e) {
+  var paramChanged = function() {
     $.navigateTo(getUrl());
+  };
+
+  var onViewButtonClick = function() {
+    $(".zbase_seller_stats button.view[data-state='active']").removeAttribute(
+        "data-state");
+
+    this.setAttribute("data-state", "active");
+    renderView();
   };
 
   var resizeSparklines = function() {
