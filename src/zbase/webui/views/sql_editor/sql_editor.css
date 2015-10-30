@@ -11,6 +11,7 @@
   min-height: 200px;
   display: table-cell;
   vertical-align: top;
+  background: rgba(63,144,170,.08);
 }
 
 .zbase_sql_editor .zbase_sql_editor_sidebar .sidebar_section:first-child {
