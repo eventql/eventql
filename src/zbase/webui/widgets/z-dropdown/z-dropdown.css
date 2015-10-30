@@ -156,14 +156,12 @@ z-dropdown-item,
   border: none;
   height: auto;
   color: rgba(0, 0, 0, 0.8);
-  padding: 0.65em 1.1em 0.65em 1.1em!important;
+  padding: 0.65em 1.1em 0.65em 1.1em;
   text-transform: none;
   font-weight: normal;
   box-shadow: none;
   -webkit-touch-callout: none;
   margin: 0;
-  padding: 0;
-  border: 0;
   font: inherit;
   line-height: inherit;
   vertical-align: baseline;
@@ -171,11 +169,8 @@ z-dropdown-item,
   text-align:left;
   white-space: nowrap;
   border-top: 1px solid rgba(0, 0, 0, 0.05);
-  padding-left: 1.1em !important;
 
 /* Add in spacing for scroll bar */
-  padding-right:  !important;
-  padding-right:  !important;
   white-space: nowrap;
   word-wrap: normal;
 }

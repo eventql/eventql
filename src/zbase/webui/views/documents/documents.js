@@ -4,7 +4,7 @@ ZBase.registerView((function() {
     var qparams = {
       with_categories: true,
       type: "report",
-      author: "self"
+      author: "all"
     };
 
     var owner_param = UrlUtil.getParamValue(url, "owner");
