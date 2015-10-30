@@ -11,6 +11,7 @@
   min-height: 200px;
   display: table-cell;
   vertical-align: top;
+  background: rgba(63,144,170,.08);
 }
 
 .zbase_sql_editor .zbase_sql_editor_sidebar .sidebar_section:first-child {
@@ -101,11 +102,6 @@
 
 .zbase_sql_editor table.z-table tbody tr a {
   color: #888;
-}
-
-.zbase_sql_editor table.z-table thead tr th:first-child,
-.zbase_sql_editor table.z-table tbody tr td:first-child {
-  padding-left: 20px;
 }
 
 .zbase_sql_editor table.z-table tbody tr td:first-child a {

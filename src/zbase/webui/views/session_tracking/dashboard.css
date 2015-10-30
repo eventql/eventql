@@ -7,8 +7,7 @@
 }
 
 .zbase_session_tracking.zbase_session_tracking_dashboard .chart_panel {
-  position: relative;
-  top: 50px;
+  margin-top: 10px;
   padding: 10px 15px;
   background: #fff;
   border-bottom: 1px solid #eee;
@@ -31,7 +30,7 @@
 }
 
 .zbase_session_tracking.zbase_session_tracking_dashboard .chart_container {
-  margin-top: 50px;
+  margin-top: 10px;
   background: #fff;
   padding: 10px 15px;
 }
