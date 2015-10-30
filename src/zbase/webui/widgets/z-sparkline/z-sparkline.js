@@ -45,17 +45,14 @@ var SparklineComponent = function() {
     var padding_y = 5;
 
     var points = this.scaleValues(values, ymin, ymax);
-    console.log(points);
 
     var svg_line = [];
     for (var i = 0; i < points.length; ++i) {
-      var dx = padding_x + (points[i].x * (width - padding_x * 2));
-      var dy = padding_y + ((1.0 - points[i].y) * (height - padding_y * 2));
-      //FIXME handle y = 0, y = NULL
-      if (isNaN(dy)) {
-        dy = 0;
+      if (!isNaN(points[i].y)) {
+        var dx = padding_x + (points[i].x * (width - padding_x * 2));
+        var dy = padding_y + ((1.0 - points[i].y) * (height - padding_y * 2));
+        svg_line.push(i == 0 ? "M" : "L", dx, dy);
       }
-      svg_line.push(i == 0 ? "M" : "L", dx, dy);
     }
 
     var tpl = $.getTemplate(
@@ -101,7 +98,11 @@ var SparklineComponent = function() {
         continue;
       }
 
-      scaled.push({x: x, y:(v - axes.y.min) / (axes.y.max - axes.y.min)});
+      if (axes.y.max - axes.y.min == 0) {
+        scaled.push({x: x, y: v});
+      } else {
+        scaled.push({x: x, y:(v - axes.y.min) / (axes.y.max - axes.y.min)});
+      }
     }
 
     return scaled;
