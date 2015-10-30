@@ -7,10 +7,11 @@
 }
 
 .zbase_seller_stats.overview .controls {
-  padding: 20px;
+  padding: 10px 20px;
+  border-top: 1px solid #d1d1d1;
   border-bottom: 1px solid #d1d1d1;
-  background: #fff;
-  overflow: auto;;
+  background: rgba(63,144,170,.08);
+  overflow: auto;
 }
 
 .zbase_seller_stats.overview .controls .left {
