@@ -12,12 +12,12 @@
         <z-tab class="link schema" data-active>
           <a>Schema</a>
         </z-tab>
-        <z-tab class="link settings">
+        <z-tab class="link settings" style="display: none;">
           <a>Settings</a>
         </z-tab>
       </z-tabbable>
 
-      <div class="dropdown_container">
+      <div class="dropdown_container" style="display: none;">
         <z-dropdown class="input primary edit" data-resolved>
           <z-dropdown-header>
             <z-dropdown-header-value data-static>
@@ -39,8 +39,9 @@
         </z-dropdown>
       </div>
 
+      <h3 style="font-weight: 400;">Table Schema</h3>
 
-      <table class="z-table">
+      <table class="z-table" style="border-top: 1px solid #ddd; margin-top: 12px;">
         <thead>
           <tr>
             <th>Column Name</th>
