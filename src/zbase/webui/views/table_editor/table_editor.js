@@ -23,7 +23,7 @@ ZBase.registerView((function() {
     var main_menu = ZBaseMainMenu();
     main_menu.render($(".zbase_main_menu", page), kPathPrefix);
 
-    var table_breadcrumb = $("zbase-breadcrumbs-section.table_name a", page);
+    var table_breadcrumb = $(".table_name_breadcrumb", page);
     table_breadcrumb.innerHTML = schema.name;
     table_breadcrumb.href = kPathPrefix + schema.name;
 

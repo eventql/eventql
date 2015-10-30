@@ -512,6 +512,37 @@ h2.pagetitle.border_bottom {
   border-bottom: 1px solid #ddd;
 }
 
+h2.pagetitle a.back_btn {
+  float: left;
+  padding-right: 10px;
+  padding-left: 6px;
+  margin-right: 6px;
+}
+
+h2.pagetitle a.back_btn:before {
+  position: relative;
+  display: inline-block;
+  opacity: .91;
+  color: #fff;
+  top: -3px;
+  font-weight: normal;
+  font-family: FontAwesome;
+  content: "\f104";
+  font-size: 12px;
+  background: rgba(63,144,170,.3);
+  height: 20px;
+  width: 20px;
+  border-radius: 20px;
+  line-height: 20px;
+  padding-left: 7px;
+}
+
+h2.pagetitle a.back_btn:hover:before {
+  background: rgba(0,0,0,.8);
+  color: #fff;
+}
+
+
 
 /**
  * zbase_footer

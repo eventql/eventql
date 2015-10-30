@@ -154,3 +154,28 @@ z-tabbable[data-content-attached] z-tab-content[data-active],
   background: #fff;
   height: 41px;
 }
+
+.zbase_app z-tabbable.slim_tabs {
+  border-bottom: 1px solid #ddd;
+  padding: 0;
+  font-family: Roboto;
+}
+
+.zbase_app z-tabbable.slim_tabs z-tab {
+  border: none;
+  border-radius: 0;
+  line-height: 38px;
+  margin-right: 10px;
+}
+
+.zbase_app z-tabbable.slim_tabs z-tab a {
+  padding: 0 10px;
+}
+
+.zbase_app z-tabbable.slim_tabs z-tab[data-active] {
+  border-bottom: 2px solid #3498db;
+}
+
+.zbase_app z-tabbable.slim_tabs z-tab[data-active] a {
+  color: #3498db;
+}

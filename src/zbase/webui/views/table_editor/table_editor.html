@@ -2,30 +2,20 @@
   <div class="zbase_content_pane fullwidth main_menu zbase_table_editor">
     <div class="zbase_main_menu"></div>
 
-    <div class="zbase_content main_menu">
-      <section class='zbase_page_title '>
-        <div>
-          <h2 class="pagetitle">
-            <zbase-breadcrumbs>
-              <zbase-breadcrumbs-section>
-                <a href="/a/datastore/tables">Tables</a>
-              </zbase-breadcrumbs-section>
-              <zbase-breadcrumbs-section class="table_name">
-                <a></a>
-              </zbase-breadcrumbs-section>
-            </zbase-breadcrumbs>
-          </h2>
-        </div>
+    <div class="zbase_content main_menu" style="padding: 0 20px;">
+      <h2 class="pagetitle" style="overflow:hidden;">
+        <a href="/a/datastore/tables" class="back_btn"></a>
+        <em>Table: </em><a class="table_name_breadcrumb"></a>
+      </h2>
 
-        <z-tabbable>
-          <z-tab class="link schema" data-active>
-            <a>Schema</a>
-          </z-tab>
-          <z-tab class="link settings">
-            <a>Settings</a>
-          </z-tab>
-        </z-tabbable>
-      </section>
+      <z-tabbable class="slim_tabs">
+        <z-tab class="link schema" data-active>
+          <a>Schema</a>
+        </z-tab>
+        <z-tab class="link settings">
+          <a>Settings</a>
+        </z-tab>
+      </z-tabbable>
 
       <div class="dropdown_container">
         <z-dropdown class="input primary edit" data-resolved>
