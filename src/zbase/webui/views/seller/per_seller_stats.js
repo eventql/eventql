@@ -35,7 +35,7 @@ ZBase.registerView((function() {
     query.addEventListener("result", function(e) {
       query_mgr.close("sql_query");
       var data = JSON.parse(e.data);
-      renderTable(data.results[0]);
+      render(path, data.results[0]);
     }, false);
 
     query.addEventListener("error", function(e) {
@@ -56,6 +56,17 @@ ZBase.registerView((function() {
   var destroy = function() {
     window.removeEventListener("resize", resizeSparklines);
     query_mgr.closeAll();
+  };
+
+  var render = function(path, result) {
+    var view = UrlUtil.getParamValue(path, "view");
+    if (!view || view == "table") {
+      PerSellerTableOverview.render($(".zbase_seller_overview"), result);
+    } else {
+      //PerSellerSparklineOverview.render($(".zbase_seller_overview"), result);
+    }
+
+
   };
 
   var renderSparklines = function(data) {
