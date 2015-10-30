@@ -69,10 +69,8 @@ ZBase.registerView((function() {
     if (!view || view == "table") {
       PerSellerTableOverview.render($(".zbase_seller_overview"), result);
     } else {
-      //PerSellerSparklineOverview.render($(".zbase_seller_overview"), result);
+      PerSellerSparklineOverview.render($(".zbase_seller_overview"), result);
     }
-
-
   };
 
   var renderSparklines = function(data) {
