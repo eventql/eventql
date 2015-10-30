@@ -1,29 +1,26 @@
 <template id="zbase_sql_editor_overview_main_tpl">
   <div class="zbase_sql_editor">
-
     <div class="zbase_content_pane fullwidth main_menu">
       <div class="zbase_main_menu"></div>
 
-      <div class="zbase_content main_menu zbase_sql_editor_overview">
-        <section class="zbase_page_title medium">
-          <div>
-            <button class="z-button primary" data-action="new-query">
-              <i class="fa fa-plus"></i> &nbsp;New Query
-            </button>
-            <h2 class="pagetitle">SQL Editor</h2>
-          </div>
-        </section>
-        <table class="z-table zbase_clickable_table">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Type</th>
-              <th>Last modified</th>
-            </tr>
-          </thead>
-          <tbody>
-          </tbody>
-        </table>
+      <div class="zbase_content main_menu zbase_sql_editor_overview" style="padding: 0 20px;">
+        <button class="z-button primary" data-action="new-query" style="margin-top: 12px;">
+          <i class="fa fa-plus"></i> &nbsp;New Query
+        </button>
+        <h2 class="pagetitle">SQL Editor</h2>
+        <div style="border-top: 1px solid #ddd; min-height: 900px;">
+          <table class="z-table zbase_clickable_table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Type</th>
+                <th>Last modified</th>
+              </tr>
+            </thead>
+            <tbody>
+            </tbody>
+          </table>
+        </div>
 
       </div>
     </div>

@@ -14,7 +14,7 @@
   display: table-cell;
   width: 220px;
   vertical-align: top;
-  background: #f9f9f9;
+  background: rgba(63,144,170,.08);
   border-right: 1px solid #ddd;
 }
 

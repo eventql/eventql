@@ -107,8 +107,7 @@ template {
   min-width: 960px;
   min-height: 100%;
   width: 100%;
-  margin-top: 39px;
-  background: #f9f9f9;
+  margin-top: 46px;
   padding-bottom: 10px;
 }
 
@@ -137,12 +136,13 @@ template {
 .zbase_header {
   width: 100%;
   background: #fff;
-  height: 39px;]
-  line-height: 30px;
+  height: 46px;
+  line-height: 42px;
   position: absolute;
   z-index: 99999;
   font-family: "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif;
   border-bottom: 1px solid #ddd;
+  box-shadow: 0 0 1px rgba(0,0,0,0.1);
 }
 
 .zbase_header .navigation_inner {
@@ -160,7 +160,7 @@ template {
 }
 
 .zbase_header .logo_app {
-  margin-top: 9px;
+  margin-top: 8px;
   display: block;
   float: left;
   width: 30px;
