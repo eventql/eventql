@@ -18,9 +18,6 @@ var PerSellerTableOverview = (function() {
     });
 
     $.replaceContent(elem, tpl);
-    console.log(result);
-
-    console.log("render table view");
   };
 
   return {

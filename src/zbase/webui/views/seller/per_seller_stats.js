@@ -35,7 +35,7 @@ ZBase.registerView((function() {
     query.addEventListener("result", function(e) {
       query_mgr.close("sql_query");
       var data = JSON.parse(e.data);
-      render(path, data.results[0]);
+      renderView(path, data.results[0]);
     }, false);
 
     query.addEventListener("error", function(e) {
@@ -44,7 +44,7 @@ ZBase.registerView((function() {
     }, false);
 
     query.addEventListener("status", function(e) {
-      //TODO render loader
+      renderQueryProgress(JSON.parse(e.data));
     }, false);
 
     setParamsFromAndUntil(
@@ -58,7 +58,13 @@ ZBase.registerView((function() {
     query_mgr.closeAll();
   };
 
-  var render = function(path, result) {
+  var renderQueryProgress = function(progress) {
+    QueryProgressWidget.render(
+        $(".zbase_seller_overview"),
+        progress);
+  };
+
+  var renderView = function(path, result) {
     var view = UrlUtil.getParamValue(path, "view");
     if (!view || view == "table") {
       PerSellerTableOverview.render($(".zbase_seller_overview"), result);
