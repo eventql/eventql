@@ -481,6 +481,10 @@ h2.pagetitle a:hover {
   color: #3498db;
 }
 
+h2.pagetitle.main {
+  color: #3498db;
+}
+
 h2.pagetitle.editable {
   line-height: 26px;
   margin: 17px 0;
