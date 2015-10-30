@@ -65,6 +65,8 @@ ZBase.registerView((function() {
         result.timeseries[data.columns[i]] = values[i];
       }
 
+      aggregate(result.timeseries);
+
       //TODO get aggregates
 
       renderView();
@@ -78,6 +80,53 @@ ZBase.registerView((function() {
     query.addEventListener("status", function(e) {
       renderQueryProgress(JSON.parse(e.data));
     }, false);
+  };
+
+  var aggregate = function(timeseries) {
+    var aggregates = {};
+    var add = function(a, b) {
+      return parseFloat(a), parseFloat(b);
+    };
+
+    var sum = function(values) {
+      return values.reduce(add, 0);
+    };
+
+    //arithmetic mean
+    var mean = function(values) {
+      return (sum(values) / values.length);
+    }
+
+    var toPrecision = function(num, precision) {
+      return Math.round(num * Math.pow(10, precision)) / Math.pow(10, precision);
+    };
+
+    var aggr = function(values, fn, precision) {
+      return toPrecision(fn(values), precision);
+    }
+
+
+    var metrics = {
+      gmv_eurcent: {
+        fn: sum,
+        precision: 2
+      },
+      gmv_per_transaction_eurcent: {
+        fn: mean,
+        precision: 2
+      }
+    };
+
+    for (var metric in timeseries) {
+      if (metrics.hasOwnProperty(metric)) {
+        aggregates[metric] = aggr(
+          timeseries[metric],
+          metrics[metric].fn,
+          metrics[metric].precision);
+      }
+    }
+
+    console.log(aggregates);
   };
 
   var destroy = function() {
