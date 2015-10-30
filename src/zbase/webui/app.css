@@ -383,6 +383,7 @@ template {
 
 .zbase_page_title.small {
   height: 41px;
+  line-height: 40px;
 }
 
 section.zbase_page_title zbase-breadcrumbs {
@@ -405,9 +406,57 @@ section.zbase_page_title h2.pagetitle zbase-breadcrumbs zbase-breadcrumbs-sectio
   margin-bottom: 4px;
 }
 
+section.zbase_page_title.small zbase-breadcrumbs {
+  font-size: 13px;
+  font-weight: 300;
+  font-family: "Roboto";
+  line-height: 41px;
+}
+
+section.zbase_page_title.small zbase-breadcrumbs a:hover {
+  text-decoration: underline;
+}
+
+section.zbase_page_title.small zbase-breadcrumbs zbase-breadcrumbs-section::after {
+  padding: 0 .2rem 0 .4rem;
+  color: rgba(255,255,255,.4);
+  opacity: 1;
+}
+
 .zbase_content.main_menu section.zbase_page_title zbase-breadcrumbs,
 .zbase_content.main_menu section.zbase_page_title zbase-breadcrumbs a {
   color: #444;
+}
+
+.zbase_page_title a.back_btn {
+  float: left;
+  padding-right: 12px;
+  padding-left: 11px;
+  margin-left: 10px;
+  margin-right: 11px;
+}
+
+.zbase_page_title a.back_btn:before {
+  position: relative;
+  display: inline-block;
+  opacity: .91;
+  color: #fff;
+  top: -1px;
+  font-weight: normal;
+  font-family: FontAwesome;
+  content: "\f104";
+  font-size: 12px;
+  background: rgba(255,255,255,.3);
+  height: 20px;
+  width: 20px;
+  border-radius: 20px;
+  line-height: 20px;
+  padding-left: 7px;
+}
+
+.zbase_page_title a.back_btn:hover:before {
+  background: rgba(255,255,255,.8);
+  color: #3498db;
 }
 
 
