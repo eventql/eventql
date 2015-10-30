@@ -24,8 +24,15 @@ ZBase.registerView((function() {
     query_mgr = EventSourceHandler();
 
     var query_str =
-        "select * from shop_stats.last30d where shop_id = " +
-        seller_id + "order by time asc limit 100;";
+      "select FROM_TIMESTAMP(time / 1000), gmv_eurcent, gmv_per_transaction_eurcent, " +
+      "num_purchases, num_refunds, refund_rate, refunded_gmv_eurcent, listview_views_ads, " +
+      "listview_ctr_ads, listview_clicks_ads, listview_views_recos, listview_ctr_recos, " +
+      "listview_clicks_recos, listview_views_search_page, listview_ctr_search_page, " +
+      "listview_clicks_search_page, listview_views_catalog_page, listview_ctr_catalog_page, " +
+      "listview_clicks_catalog_page, shop_page_views, product_page_views, listview_views_shop_page, " +
+      "listview_ctr_shop_page, listview_clicks_shop_page, num_active_products, " +
+      "num_listed_products from shop_stats.last30d where shop_id = " +
+      seller_id + "order by time asc limit 100;";
 
 
     var query = query_mgr.get(
