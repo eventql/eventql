@@ -4,7 +4,7 @@ ZBase.registerView((function() {
   var seller_id;
 
   var load = function(path) {
-    seller_id = path.substr(path_prefix.length);
+    seller_id = UrlUtil.getPath(path).substr(path_prefix.length);
     //REMOVE ME
     var seller_name = "Meko";
     //REMOVEME END
@@ -17,6 +17,9 @@ ZBase.registerView((function() {
         seller_id + " (" + seller_name + ")";
     $("z-daterangepicker", page).addEventListener("select", paramChanged, false);
 
+    $.onClick($("button.view.sparkline", page), onViewButtonClick);
+    $.onClick($("button.view.table", page), onViewButtonClick);
+
 
     $.handleLinks(page);
     $.replaceViewport(page);
@@ -24,8 +27,8 @@ ZBase.registerView((function() {
     query_mgr = EventSourceHandler();
 
     var query_str =
-      "select FROM_TIMESTAMP(time / 1000), gmv_eurcent, gmv_per_transaction_eurcent, " +
-      "num_purchases, num_refunds, refund_rate, refunded_gmv_eurcent, listview_views_ads, " +
+      "select FROM_TIMESTAMP(time / 1000), gmv_eurcent / 100, gmv_per_transaction_eurcent / 100, " +
+      "num_purchases, num_refunds, refund_rate, refunded_gmv_eurcent / 100, listview_views_ads, " +
       "listview_ctr_ads, listview_clicks_ads, listview_views_recos, listview_ctr_recos, " +
       "listview_clicks_recos, listview_views_search_page, listview_ctr_search_page, " +
       "listview_clicks_search_page, listview_views_catalog_page, listview_ctr_catalog_page, " +
@@ -35,6 +38,12 @@ ZBase.registerView((function() {
       seller_id + "order by time asc limit 100;";
 
 
+    setParamsFromAndUntil(
+        UrlUtil.getParamValue(path, "from"),
+        UrlUtil.getParamValue(path, "until"));
+
+    setParamView( UrlUtil.getParamValue(path, "view"));
+
     var query = query_mgr.get(
         "sql_query",
         "/api/v1/sql_stream?query=" + encodeURIComponent(query_str));
@@ -42,7 +51,7 @@ ZBase.registerView((function() {
     query.addEventListener("result", function(e) {
       query_mgr.close("sql_query");
       var data = JSON.parse(e.data);
-      renderView(path, data.results[0]);
+      renderView(data.results[0]);
     }, false);
 
     query.addEventListener("error", function(e) {
@@ -53,11 +62,6 @@ ZBase.registerView((function() {
     query.addEventListener("status", function(e) {
       renderQueryProgress(JSON.parse(e.data));
     }, false);
-
-    setParamsFromAndUntil(
-        UrlUtil.getParamValue(path, "from"),
-        UrlUtil.getParamValue(path, "until"));
-
   };
 
   var destroy = function() {
@@ -71,43 +75,13 @@ ZBase.registerView((function() {
         progress);
   };
 
-  var renderView = function(path, result) {
-    var view = UrlUtil.getParamValue(path, "view");
+  var renderView = function(result) {
+    var view = getParamView();
     if (!view || view == "table") {
       PerSellerTableOverview.render($(".zbase_seller_overview"), result);
     } else {
       PerSellerSparklineOverview.render($(".zbase_seller_overview"), result);
     }
-  };
-
-  var renderSparklines = function(data) {
-    console.log(data);
-    var sparkline_values = {};
-    data.timeseries.forEach(function(serie) {
-      for (metric in serie) {
-        if (!sparkline_values[metric]) {
-          sparkline_values[metric] = [];
-        }
-        sparkline_values[metric].push(serie[metric]);
-      }
-    });
-
-    for (var metric in data.aggregates) {
-      var pane = $(".zbase_seller_stats ." + metric);
-      $(".num", pane).innerHTML = data.aggregates[metric];
-      $("z-sparkline", pane).setAttribute(
-          "data-sparkline",
-          sparkline_values[metric].join(","));
-
-      //remove if
-      if ($(".zbase_seller_stats z-tooltip." + metric)) {
-        $(".zbase_seller_stats z-tooltip." + metric).init($("i.help", pane));
-      }
-    }
-  };
-
-  var renderTable = function(result) {
-    console.log(result);
   };
 
   var setParamsFromAndUntil = function(from, until) {
@@ -123,13 +97,36 @@ ZBase.registerView((function() {
         from, until);
   };
 
+  var setParamView = function(view) {
+    if (view == null) {
+      view = "sparkline"
+    }
+
+    $(".zbase_seller_stats button.view." + view)
+        .setAttribute("data-state", "active");
+  };
+
+  var getParamView = function() {
+    $(".zbase_seller_stats button.view[data-state='active']").getAttribute(
+        "data-value");
+  };
+
   var getUrl = function() {
     var params = $(".zbase_seller_stats z-daterangepicker").getValue();
+    params.view = $(".zbase_seller_stats button.view[data-state='active']")
+        .getAttribute("data-value");
     return path_prefix + seller_id + "?" + $.buildQueryString(params);
   };
 
-  var paramChanged = function(e) {
+  var paramChanged = function() {
     $.navigateTo(getUrl());
+  };
+
+  var onViewButtonClick = function() {
+    $(".zbase_seller_stats button.view[data-state='active']").removeAttribute(
+        "data-state");
+
+    this.setAttribute("data-state", "active");
   };
 
   var resizeSparklines = function() {

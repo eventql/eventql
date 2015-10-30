@@ -23,15 +23,23 @@ var PerSellerTableOverview = (function() {
 
     $.replaceContent(elem, tpl);
 
-    console.log(metric_panes.length, metric_values.length);
 
-    for (var i = 0; i < metric_panes.length; i++) {
-      //$(".num", pane).innerHTML = data.aggregates[metric];
+    for (var i = 0; i < metric_values.length; i++) {
+      //$(".num", metric_panes[i]).innerHTML = sum;
+
       $("z-sparkline", metric_panes[i]).setAttribute(
           "data-sparkline",
           metric_values[i].join(","));
 
     }
+  };
+
+  var add = function(a, b) {
+    return parseFloat(a) + parseFloat(b);
+  };
+
+  var toPrecision = function(num, precision) {
+    return Math.round(num * Math.pow(10, precision)) / Math.pow(10, precision);
   };
 
 
