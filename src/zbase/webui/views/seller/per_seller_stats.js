@@ -1,5 +1,6 @@
 ZBase.registerView((function() {
   var path_prefix = "/a/seller/";
+  var query_mgr;
   var seller_id;
 
   var load = function(path) {
@@ -16,137 +17,49 @@ ZBase.registerView((function() {
         seller_id + " (" + seller_name + ")";
     $("z-daterangepicker", page).addEventListener("select", paramChanged, false);
 
+
     $.handleLinks(page);
     $.replaceViewport(page);
+
+    query_mgr = EventSourceHandler();
+
+    var query_str =
+        "select * from shop_stats.last30d where shop_id = " +
+        seller_id + "order by time asc limit 100;";
+
+
+    var query = query_mgr.get(
+        "sql_query",
+        "/api/v1/sql_stream?query=" + encodeURIComponent(query_str));
+
+    query.addEventListener("result", function(e) {
+      query_mgr.close("sql_query");
+      var data = JSON.parse(e.data);
+      renderTable(data.results[0]);
+    }, false);
+
+    query.addEventListener("error", function(e) {
+      query_mgr.close("sql_query");
+      console.log("error", e);
+    }, false);
+
+    query.addEventListener("status", function(e) {
+      //TODO render loader
+    }, false);
 
     setParamsFromAndUntil(
         UrlUtil.getParamValue(path, "from"),
         UrlUtil.getParamValue(path, "until"));
 
-    //REMOVE ME
-    var data = {
-      aggregates: {
-        unique_purchases: 7,
-        refunded_purchases: 0,
-        gmv_eurcent: 192,
-        num_active_products: 128,
-        num_listed_products: 194,
-        refund_rate: 0.0,
-        refunded_gmv_eurcent: 0,
-        gmv_per_transaction_eurcent: 40,
-        listview_ctr_ads: 0.18,
-        listview_clicks_ads: 12,
-        listview_ctr_recos: 0.19,
-        listview_clicks_recos: 21,
-        listview_ctr_search_page: 0.09,
-        listview_clicks_search_page: 54,
-        listview_ctr_catalog_page: 0.1,
-        listview_clicks_catalog_page: 71
-      },
-      timeseries: [
-        {
-          unique_purchases: 2,
-          refunded_purchases: 0,
-          gmv_eurcent: 50,
-          num_active_products: 128,
-          num_listed_products: 194,
-          refund_rate: 0.0,
-          refunded_gmv_eurcent: 0,
-          gmv_per_transaction_eurcent: 27,
-          listview_ctr_ads: 0.179,
-          listview_clicks_ads: 3,
-          listview_ctr_recos: 0.17,
-          listview_clicks_recos: 5,
-          listview_clicks_recos: 5,
-          listview_ctr_search_page: 0.078,
-          listview_clicks_search_page: 11,
-          listview_ctr_catalog_page: 0.09,
-          listview_clicks_catalog_page: 21
-        },
-        {
-          unique_purchases: 0,
-          refunded_purchases: 0,
-          gmv_eurcent: 0,
-          num_active_products: 128,
-          num_listed_products: 194,
-          refund_rate: 0.0,
-          refunded_gmv_eurcent: 0,
-          gmv_per_transaction_eurcent: 0,
-          listview_ctr_ads: 0.19,
-          listview_clicks_ads: 2,
-          listview_ctr_recos: 0.1,
-          listview_clicks_recos: 4,
-          listview_ctr_search_page: 0.087,
-          listview_clicks_search_page: 8,
-          listview_ctr_catalog_page: 0.1,
-          listview_clicks_catalog_page: 14
-        },
-        {
-          unique_purchases: 1,
-          refunded_purchases: 0,
-          gmv_eurcent: 50,
-          num_active_products: 128,
-          num_listed_products: 194,
-          refund_rate: 0.0,
-          refunded_gmv_eurcent: 0,
-          gmv_per_transaction_eurcent: 50,
-          listview_ctr_ads: 0.191,
-          listview_clicks_ads: 4,
-          listview_ctr_recos: 0.18,
-          listview_clicks_recos: 7,
-          listview_ctr_search_page: 0.091,
-          listview_clicks_search_page: 12,
-          listview_ctr_catalog_page: 0.11,
-          listview_clicks_catalog_page: 12
-        },
-        {
-          unique_purchases: 3,
-          refunded_purchases: 0,
-          gmv_eurcent: 82,
-          num_active_products: 128,
-          num_listed_products: 194,
-          refund_rate: 0.0,
-          refunded_gmv_eurcent: 0,
-          gmv_per_transaction_eurcent: 32,
-          listview_ctr_ads: 0.184,
-          listview_clicks_ads: 1,
-          listview_ctr_recos: 0.15,
-          listview_clicks_recos: 8,
-          listview_ctr_search_page: 0.092,
-          listview_clicks_search_page: 13,
-          listview_ctr_catalog_page: 0.08,
-          listview_clicks_catalog_page: 13
-        },
-        {
-          unique_purchases: 1,
-          refunded_purchases: 0,
-          gmv_eurcent: 10,
-          num_active_products: 128,
-          num_listed_products: 194,
-          refund_rate: 0.0,
-          refunded_gmv_eurcent: 0,
-          gmv_per_transaction_eurcent: 10,
-          listview_ctr_ads: 0.179,
-          listview_clicks_ads: 2,
-          listview_ctr_recos: 0.17,
-          listview_clicks_recos: 6,
-          listview_ctr_search_page: 0.087,
-          listview_clicks_search_page: 11,
-          listview_ctr_catalog_page: 0.089,
-          listview_clicks_catalog_page: 18
-        }
-      ]
-    };
-    //REMOVEME END
-
-    render(data);
   };
 
   var destroy = function() {
     window.removeEventListener("resize", resizeSparklines);
+    query_mgr.closeAll();
   };
 
-  var render = function(data) {
+  var renderSparklines = function(data) {
+    console.log(data);
     var sparkline_values = {};
     data.timeseries.forEach(function(serie) {
       for (metric in serie) {
@@ -169,6 +82,10 @@ ZBase.registerView((function() {
         $(".zbase_seller_stats z-tooltip." + metric).init($("i.help", pane));
       }
     }
+  };
+
+  var renderTable = function(result) {
+    console.log(result);
   };
 
   var setParamsFromAndUntil = function(from, until) {
