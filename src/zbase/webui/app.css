@@ -107,7 +107,7 @@ template {
   min-width: 960px;
   min-height: 100%;
   width: 100%;
-  margin-top: 46px;
+  margin-top: 51px;
   padding-bottom: 10px;
 }
 
@@ -136,8 +136,8 @@ template {
 .zbase_header {
   width: 100%;
   background: #fff;
-  height: 46px;
-  line-height: 42px;
+  height: 51px;
+  line-height: 47px;
   position: absolute;
   z-index: 99999;
   font-family: "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif;
