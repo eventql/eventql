@@ -1,5 +1,6 @@
 ZBase.registerView((function() {
   var path_prefix = "/a/seller/";
+  var result = null;
   var query_mgr;
   var seller_id;
 
@@ -42,7 +43,7 @@ ZBase.registerView((function() {
         UrlUtil.getParamValue(path, "from"),
         UrlUtil.getParamValue(path, "until"));
 
-    setParamView( UrlUtil.getParamValue(path, "view"));
+    setParamView(UrlUtil.getParamValue(path, "view"));
 
     var query = query_mgr.get(
         "sql_query",
@@ -50,8 +51,8 @@ ZBase.registerView((function() {
 
     query.addEventListener("result", function(e) {
       query_mgr.close("sql_query");
-      var data = JSON.parse(e.data);
-      renderView(data.results[0]);
+      result = JSON.parse(e.data).results[0];
+      renderView();
     }, false);
 
     query.addEventListener("error", function(e) {
@@ -75,9 +76,13 @@ ZBase.registerView((function() {
         progress);
   };
 
-  var renderView = function(result) {
+  var renderView = function() {
+    if (result == null) {
+      $.fatalError();
+    }
+
     var view = getParamView();
-    if (!view || view == "table") {
+    if (view == "table") {
       PerSellerTableOverview.render($(".zbase_seller_overview"), result);
     } else {
       PerSellerSparklineOverview.render($(".zbase_seller_overview"), result);
@@ -107,7 +112,7 @@ ZBase.registerView((function() {
   };
 
   var getParamView = function() {
-    $(".zbase_seller_stats button.view[data-state='active']").getAttribute(
+    return $(".zbase_seller_stats button.view[data-state='active']").getAttribute(
         "data-value");
   };
 
@@ -127,6 +132,7 @@ ZBase.registerView((function() {
         "data-state");
 
     this.setAttribute("data-state", "active");
+    renderView();
   };
 
   var resizeSparklines = function() {

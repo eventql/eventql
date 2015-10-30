@@ -1,4 +1,4 @@
-var PerSellerTableOverview = (function() {
+var PerSellerSparklineOverview = (function() {
   var render = function(elem, result) {
     var tpl = $.getTemplate(
       "views/seller",
