@@ -331,6 +331,10 @@ void DocumentDBServlet::listDocuments(
     type_filter.clear();
   }
 
+  /* param: search */
+  String search_filter;
+  URI::getParam(params, "search", &search_filter);
+
   /* scan documents */
   Buffer buf;
   json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
@@ -367,6 +371,7 @@ void DocumentDBServlet::listDocuments(
       return true;
     }
 
+
     if (!category_prefix_filter.empty() &&
         !StringUtil::beginsWith(doc.category(), category_prefix_filter)) {
       return true;
@@ -378,6 +383,11 @@ void DocumentDBServlet::listDocuments(
 
     if (!author_filter.empty() &&
         !isDocumentAuthoredByUser(doc, author_filter)) {
+      return true;
+    }
+
+    if (!search_filter.empty() &&
+        !StringUtil::includesi(doc.name(), search_filter)) {
       return true;
     }
 
