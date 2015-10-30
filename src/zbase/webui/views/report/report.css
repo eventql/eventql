@@ -3,6 +3,7 @@
   table-layout: fixed;
   width: 100%;
   min-height: 900px; /* FIXME  firefox ignores min-height*/
+  background: #f9f9f9;
 }
 
 /** Sidebar **/

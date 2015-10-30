@@ -56,4 +56,5 @@
 .zbase_main_menu z-menu z-menu-item a[data-active] {
   background: #3498db;
   color: #fff;
+  border-radius: 3px;
 }
