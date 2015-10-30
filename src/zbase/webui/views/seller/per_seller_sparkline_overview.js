@@ -4,34 +4,19 @@ var PerSellerSparklineOverview = (function() {
       "views/seller",
       "per_seller_sparkline_overview_tpl");
 
-    var metric_values = [];
+    $.replaceContent(elem, tpl);
 
-    console.log(result);
+    for (var metric in result.timeseries) {
+      var pane = $(".zbase_seller_stats .metric_pane." + metric);
 
-    for (var i = 1; i < result.rows[0].length; i++) {
-      metric_values.push([]);
-    };
-
-    for (var i = 0; i < result.rows.length; i++) {
-      for (var j = 1; j < result.rows[i].length; j++) {
-        metric_values[j-1].push(result.rows[i][j]);
+      if (pane) {
+        $("z-sparkline", pane).setAttribute(
+            "data-sparkline",
+            result.timeseries[metric].join(","));
       }
     }
 
-
-    var metric_panes = tpl.querySelectorAll(".metric_pane");
-
-    $.replaceContent(elem, tpl);
-
-
-    for (var i = 0; i < metric_values.length; i++) {
       //$(".num", metric_panes[i]).innerHTML = sum;
-
-      $("z-sparkline", metric_panes[i]).setAttribute(
-          "data-sparkline",
-          metric_values[i].join(","));
-
-    }
   };
 
   var add = function(a, b) {

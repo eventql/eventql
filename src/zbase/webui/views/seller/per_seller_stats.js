@@ -28,14 +28,7 @@ ZBase.registerView((function() {
     query_mgr = EventSourceHandler();
 
     var query_str =
-      "select FROM_TIMESTAMP(time / 1000), gmv_eurcent / 100, gmv_per_transaction_eurcent / 100, " +
-      "num_purchases, num_refunds, refund_rate, refunded_gmv_eurcent / 100, listview_views_ads, " +
-      "listview_ctr_ads, listview_clicks_ads, listview_views_recos, listview_ctr_recos, " +
-      "listview_clicks_recos, listview_views_search_page, listview_ctr_search_page, " +
-      "listview_clicks_search_page, listview_views_catalog_page, listview_ctr_catalog_page, " +
-      "listview_clicks_catalog_page, shop_page_views, product_page_views, listview_views_shop_page, " +
-      "listview_ctr_shop_page, listview_clicks_shop_page, num_active_products, " +
-      "num_listed_products from shop_stats.last30d where shop_id = " +
+      "select * from shop_stats.last30d where shop_id = " +
       seller_id + "order by time asc limit 100;";
 
 
@@ -51,7 +44,29 @@ ZBase.registerView((function() {
 
     query.addEventListener("result", function(e) {
       query_mgr.close("sql_query");
-      result = JSON.parse(e.data).results[0];
+      var data = JSON.parse(e.data).results[0];
+
+      var values = [];
+      for (var i = 0; i < data.rows[0].length; i++) {
+        values.push([]);
+      };
+
+      for (var i = 0; i < data.rows.length; i++) {
+        for (var j = 0; j < data.rows[i].length; j++) {
+          values[j].push(data.rows[i][j]);
+        }
+      }
+
+      result = {
+        aggregates: {},
+        timeseries: {},
+      };
+      for (var i = 0; i < data.columns.length; i++) {
+        result.timeseries[data.columns[i]] = values[i];
+      }
+
+      //TODO get aggregates
+
       renderView();
     }, false);
 
