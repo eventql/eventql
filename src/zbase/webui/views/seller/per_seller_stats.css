@@ -118,6 +118,30 @@
   float: right;
 }
 
+.zbase_seller_stats .controls {
+  overflow: visible;
+  height: 40px;
+}
+
+.zbase_seller_stats .controls .control {
+  height: 38px;
+}
+
+.zbase_seller_stats .controls .right {
+  float: right;
+}
+
+.zbase_seller_stats .controls .control label {
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 30px;
+  vertical-align: top;
+}
+
+.zbase_seller_stats table td.hidden {
+  display: none;
+}
+
 @media (max-width: 1420px) {
   .zbase_seller_stats .metric_pane {
     width: 31.3332%;

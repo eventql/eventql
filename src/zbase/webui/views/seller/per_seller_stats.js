@@ -66,7 +66,7 @@ ZBase.registerView((function() {
 
       result.aggregates = aggregate(result.timeseries);
 
-      renderView();
+      renderView(path);
     }, false);
 
     query.addEventListener("error", function(e) {
@@ -160,14 +160,14 @@ ZBase.registerView((function() {
         progress);
   };
 
-  var renderView = function() {
+  var renderView = function(path) {
     if (result == null) {
       $.fatalError();
     }
 
     var view = getParamView();
     if (view == "table") {
-      PerSellerTableOverview.render($(".zbase_seller_overview"), result);
+      PerSellerTableOverview.render($(".zbase_seller_overview"), result, path);
     } else {
       PerSellerSparklineOverview.render($(".zbase_seller_overview"), result);
     }
