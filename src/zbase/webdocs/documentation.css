@@ -111,8 +111,6 @@ template {
 
 .zbase_docs_header .navigation_inner {
   margin: auto;
-  max-width: 2048px;
-  min-width: 960px;
   box-sizing: border-box;
   padding: 0 20px;
 }
@@ -139,8 +137,6 @@ template {
 .zbase_docs_page_title > div {
   padding: 1px 20px;
   margin: auto;
-  max-width: 2048px;
-  min-width: 960px;
 }
 
 .zbase_docs_page_title h2.pagetitle {
@@ -245,6 +241,7 @@ zbase-breadcrumbs zbase-breadcrumbs-section[data-link]:hover,
 
 .zbase_docs_viewport {
   display: table;
+  table-layout: fixed;
   width: 100%;
 }
 
@@ -259,7 +256,7 @@ zbase-breadcrumbs zbase-breadcrumbs-section[data-link]:hover,
 .zbase_docs_sidebar {
   display: table-cell;
   vertical-align: top;
-  width: 17%;
+  width: 260px;
   background: rgba(63,144,170,.08);
   padding-left: 10px;
   padding-right: 20px;
@@ -281,7 +278,7 @@ zbase-breadcrumbs zbase-breadcrumbs-section[data-link]:hover,
   margin-left: 0;
   border-bottom: 1px solid #eee;
   padding-bottom: 10px;
-  margin-bottom: 10px;
+  margin-bottom: 20px;
 }
 
 .zbase_docs_menu > z-menu-item > a {
@@ -303,8 +300,8 @@ zbase-breadcrumbs zbase-breadcrumbs-section[data-link]:hover,
 }
 
 .zbase_docs_content {
-  max-width: 800px;
-  margin: 0 auto;
+  max-width: 980px;
+  padding: 0 60px;
   color: #333;
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
   line-height: 1.6;
@@ -327,14 +324,14 @@ zbase-breadcrumbs zbase-breadcrumbs-section[data-link]:hover,
   color: #333;
   position: relative;
   margin-bottom: 16px;
-  font-weight: bold;
   height: initial;
+  font-weight: 500;
+  font-family: "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
 .zbase_docs_content h1,
 .zbase_docs_content h2 {
   padding-bottom: .3em;
-  border-bottom: 1px solid #eee;
   margin: .67em 0;
 }
 
@@ -467,4 +464,10 @@ zbase-breadcrumbs zbase-breadcrumbs-section[data-link]:hover,
   font-size: 100%;
   white-space: pre;
   background: transparent;
+}
+
+.zbase_docs_footer {
+  border-top: 1px solid #ddd;
+  height: 20px;
+  margin-top: 160px;
 }
