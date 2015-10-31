@@ -1,0 +1,73 @@
+.zbase_settings {
+  background: #fff;
+}
+
+.zbase_settings .zbase_settings_section {
+  margin-right: 40px;
+  margin-bottom: 40px;
+}
+
+.zbase_settings .zbase_settings_section:before,
+.zbase_settings .zbase_settings_section:after {
+    content: " "; /* 1 */
+    display: table; /* 2 */
+}
+
+.zbase_settings .zbase_settings_section:after {
+    clear: both;
+}
+
+
+.zbase_settings .app_card {
+  width: 200px;
+  height: 180px;
+  overflow: hidden;
+  display: block;
+  text-align: center;
+  float: left;
+  border-radius: 4px;
+}
+
+.zbase_settings .app_card:hover {
+  background: #f6f6f6;
+}
+
+.zbase_settings .app_card img {
+  margin-top: 36px;
+  opacity: 0.9;
+  height: 48px;
+  width: 48px;
+}
+
+.zbase_settings .app_card .app_title {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  padding-top: 12px;
+  color: #111;
+  margin-bottom: -1px;
+  font-family: "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+.zbase_settings .app_card .app_subtitle {
+  color: #666;
+  font-size: 12px;
+}
+
+.zbase_settings .app_card:hover .hexagon {
+  background-color: #f2f8fa;
+}
+
+.zbase_settings .app_card:hover .app_title {
+  color: #333;
+}
+
+.zbase_settings_section h2 {
+  font-size: 14px;
+  line-height: 22px;
+  font-weight: 300;
+  padding: 0;
+  margin-bottom: -6px;
+  padding-bottom: 6px;
+  margin-bottom: 2px;
+}
