@@ -553,6 +553,7 @@ h2.pagetitle a.back_btn:hover:before {
  * zbase_footer
  */
 .zbase_footer {
+  display: none;
   clear: both;
   font-size: 70%;
   padding: 6px 20px;

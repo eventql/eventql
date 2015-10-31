@@ -364,10 +364,6 @@ var ZBase = (function() {
   var renderLayout = function() {
     var conf = $.getConfig();
 
-    // viewport min height
-    document.getElementById("zbase_viewport").style.minHeight =
-        window.innerHeight + "px";
-
     // render footer
     document.getElementById("zbase_build_id").innerHTML = conf.zbase_build_id;
     document.getElementById("zbase_domain").innerHTML = conf.zbase_domain;
