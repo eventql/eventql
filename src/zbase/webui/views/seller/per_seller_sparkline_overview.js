@@ -22,6 +22,12 @@ var PerSellerSparklineOverview = (function() {
         $(".num", pane).innerHTML = result.aggregates[metric];
         $(".start", pane).innerHTML = start;
         $(".end", pane).innerHTML = end;
+
+        var tooltip = $(".zbase_seller_stats z-tooltip." + metric);
+        //REMOVE IF
+        if (tooltip) {
+          tooltip.init($(".help", pane));
+        }
       }
     }
   };
