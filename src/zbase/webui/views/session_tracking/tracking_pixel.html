@@ -1,14 +1,23 @@
 <template id="zbase_session_tracking_tracking_pixel_tpl">
+  <section class='zbase_page_title small'>
+    <a href="/a/settings" class="back_btn"></a>
+    <zbase-breadcrumbs>
+      <zbase-breadcrumbs-section>
+        <a href="/a/settings">Settings</a>
+      </zbase-breadcrumbs-section>
+      <zbase-breadcrumbs-section>
+        <a href="/a/settings/session_tracking">User Tracking</a>
+      </zbase-breadcrumbs-section>
+    </zbase-breadcrumbs>
+  </section>
   <div class='zbase_session_tracking zbase_tracking_pixel'>
 
     <div class="zbase_content_pane fullwidth main_menu">
-      <div class="zbase_main_menu"></div>
-
-      <div class='zbase_content main_menu' style="padding: 0 20px;">
+      <div style="padding: 0 20px;">
         <h2 class="pagetitle main"><em>User Tracking</em></h2>
         <z-tabbable class="slim_tabs" style="margin-top: -2px;">
           <z-tab class="link">
-            <a href="/a/session_tracking">Dashboard</a>
+            <a href="/a/session_tracking">Status</a>
           </z-tab>
           <z-tab class="link" data-active>
             <a href="/a/session_tracking/settings/tracking_pixel">Tracking Pixel</a>
