@@ -6,6 +6,11 @@ var PerSellerSparklineOverview = (function() {
 
     $.replaceContent(elem, tpl);
 
+    var start = DateUtil.printDate(Math.round(
+        result.timeseries.time[0] / 1000));
+    var end = DateUtil.printDate(Math.round(
+        result.timeseries.time[result.timeseries.time.length - 1] / 1000));
+
     for (var metric in result.timeseries) {
       var pane = $(".zbase_seller_stats .metric_pane." + metric);
 
@@ -15,6 +20,8 @@ var PerSellerSparklineOverview = (function() {
             result.timeseries[metric].join(","));
 
         $(".num", pane).innerHTML = result.aggregates[metric];
+        $(".start", pane).innerHTML = start;
+        $(".end", pane).innerHTML = end;
       }
     }
   };
