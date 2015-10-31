@@ -26,15 +26,15 @@
             </zbase-breadcrumbs-section>
           </zbase-breadcrumbs>
         </h2>
-        <z-daterangepicker class="open_left"></z-daterangepicker>
+        <z-daterangepicker class="open_left" style="display: none;"></z-daterangepicker>
       </div>
 
       <z-tabbable class="slim_tabs">
         <z-tab data-active>Overview</z-tab>
-        <z-tab>Per Product</z-tab>
+        <z-tab style="display: none;">Per Product</z-tab>
       </z-tabbable>
 
-      <div class="zbase_stats">
+      <div class="zbase_stats per_seller">
         <div class="controls">
           <button class="z-button view table" data-value="table"><i class="fa fa-table"></i></button>
           <button class="z-button view sparkline" data-value="sparkline"><i class="fa fa-line-chart"></i></button>
@@ -44,31 +44,28 @@
       </div>
     </div>
 
-    <z-tooltip class="product_page_impressions" data-pointer="center">
-      Aggregate number of product page impressions for all products from this seller in this time window
+    <z-tooltip class="gmv_eurcent" data-pointer="center">
+      Total GMV for this seller in this time window
     </z-tooltip>
-    <z-tooltip class="product_listview_impressions" data-pointer="center">
-      Aggregate number of total listview impressions for all products from this seller in this time window
+    <z-tooltip class="gmv_per_transaction_eurcent" data-pointer="center">
+      Average GMV per Transaction (Avg. Basket Size)
     </z-tooltip>
-    <z-tooltip class="product_listview_clicks" data-pointer="center">
-      Aggregate number of total listview clicks for all products from this seller in this time window
+    <z-tooltip class="num_purchases" data-pointer="center">
+      Average GMV per Transaction (Avg. Basket Size)
     </z-tooltip>
-    <z-tooltip class="product_listview_ctr" data-pointer="center">
-      Aggregate listview CTR for all products from this seller in this time window
+    <z-tooltip class="num_refunds" data-pointer="center">
+      Average GMV per Transaction (Avg. Basket Size)
+    </z-tooltip>
+    <z-tooltip class="refund_rate" data-pointer="center">
+      Average GMV per Transaction (Avg. Basket Size)
+    </z-tooltip>
+    <z-tooltip class="refunded_gmv_eurcent" data-pointer="center">
+      Average GMV per Transaction (Avg. Basket Size)
+    </z-tooltip>
+    <z-tooltip class="refund_rate" data-pointer="center">
+      Average GMV per Transaction (Avg. Basket Size)
     </z-tooltip>
 
-    <z-tooltip class="product_buy_to_detail_rate" data-pointer="center">
-      Aggregate listview CTR for all products from this seller in this time window
-    </z-tooltip>
-    <z-tooltip class="product_cart_to_detail_rate" data-pointer="center">
-      Aggregate listview CTR for all products from this seller in this time window
-    </z-tooltip>
-    <z-tooltip class="unique_purchases" data-pointer="center">
-      Aggregate listview CTR for all products from this seller in this time window
-    </z-tooltip>
-    <z-tooltip class="refunded_purchases" data-pointer="center">
-      Aggregate listview CTR for all products from this seller in this time window
-    </z-tooltip>
   </div>
 </template>
 

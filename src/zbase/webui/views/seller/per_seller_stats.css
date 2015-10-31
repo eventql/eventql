@@ -31,10 +31,6 @@
   background: #fff;
 }
 
-.zbase_seller_stats .controls {
-  overflow: auto;
-}
-
 .zbase_seller_stats .controls button {
   float: right;
 }
@@ -116,6 +112,39 @@
 
 .zbase_seller_stats .zbase_stats .metric_pane .time_line .end {
   float: right;
+}
+
+.zbase_seller_stats .per_seller .controls {
+  overflow: visible;
+  height: 40px;
+}
+
+.zbase_seller_stats .per_seller .controls .control {
+  height: 38px;
+}
+
+.zbase_seller_stats .per_seller .controls .right {
+  float: right;
+}
+
+.zbase_seller_stats .per_seller .controls .control label {
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 30px;
+  vertical-align: top;
+}
+
+.zbase_seller_stats table th.hidden,
+.zbase_seller_stats table td.hidden {
+  display: none;
+}
+
+.zbase_seller_stats table {
+  font-size: 13px;
+}
+
+.zbase_seller_stats table.z-table th {
+  color: #888;
 }
 
 @media (max-width: 1420px) {

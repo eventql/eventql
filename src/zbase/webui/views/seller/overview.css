@@ -11,7 +11,8 @@
   border-top: 1px solid #d1d1d1;
   border-bottom: 1px solid #d1d1d1;
   background: rgba(63,144,170,.08);
-  overflow: auto;
+  height: 62px;
+  overflow: visible;
 }
 
 .zbase_seller_stats.overview .controls .left {
