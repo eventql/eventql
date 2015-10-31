@@ -304,9 +304,10 @@ zbase-breadcrumbs zbase-breadcrumbs-section[data-link]:hover,
 .zbase_docs_content {
   max-width: 980px;
   padding: 0 60px;
-  color: #333;
+  color: #444;
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
   line-height: 1.6;
+  font-size: 15px;
 }
 
 .zbase_docs_content * {
@@ -338,22 +339,50 @@ zbase-breadcrumbs zbase-breadcrumbs-section[data-link]:hover,
 }
 
 .zbase_docs_content h1 {
-  font-size: 2.25em;
-  line-height: 1.2;
+  font-size: 28px;
+  line-height: 32px;
+  color: #3498db;
+  font-weight: 400;
+  margin-bottom: 10px;
+}
+
+.zbase_docs_content h1 + h2 {
+  margin-top: 0;
 }
 
 .zbase_docs_content h2 {
-  font-size: 1.75em;
-  line-height: 1.225;
+  font-size: 20px;
+  line-height: 32px;
+  font-weight: 400;
+  margin-top: 40px;
+  margin-bottom: 10px;
+  color: #444;
+}
+
+.zbase_docs_content h2 + h3 {
+  margin-top: 0;
+}
+
+.zbase_docs_content h2 + h4 {
+  margin-top: 0;
 }
 
 .zbase_docs_content h3 {
-  font-size: 1.3em;
-  line-height: 1.33;
+  font-size: 16px;
+  line-height: 28px;
+  font-weight: 500;
+  margin-top: 20px;
+  margin-bottom: 6px;
+  color: #444;
 }
 
 .zbase_docs_content h4 {
-  font-size: 1.25em;
+  font-size: 16px;
+  line-height: 28px;
+  font-weight: 500;
+  margin-top: 20px;
+  margin-bottom: 6px;
+  color: #666;
 }
 
 .zbase_docs_content h5 {
