@@ -34,9 +34,9 @@ void WebDocsServlet::handle(
     http::HTTPResponse* response) {
   URI uri(request->uri());
 
-  static const String kDocumentationPathPrefix = "/docs/_/d/";
-  if (StringUtil::beginsWith(uri.path(), kDocumentationPathPrefix)) {
-    auto asset_path = uri.path().substr(kDocumentationPathPrefix.size());
+  static const String kDocumentationAjaxPathPrefix = "/docs/_/d/";
+  if (StringUtil::beginsWith(uri.path(), kDocumentationAjaxPathPrefix)) {
+    auto asset_path = uri.path().substr(kDocumentationAjaxPathPrefix.size());
 
     // FIXME validate path
     response->setStatus(http::kStatusOK);
@@ -45,17 +45,26 @@ void WebDocsServlet::handle(
     return;
   }
 
-  //Buffer app_config;
-  //json::JSONOutputStream app_config_json(
-  //    BufferOutputStream::fromBuffer(&app_config));
-  //renderConfig(request, session, &app_config_json);
+  static const String kDocumentationPathPrefix = "/docs/";
+  if (!StringUtil::beginsWith(uri.path(), kDocumentationPathPrefix)) {
+    RAISE(kRuntimeError, "invalid path");
+  }
+
+  auto page_path = uri.path().substr(kDocumentationPathPrefix.size());
+  String content;
+  String title;
+  try {
+    content = Assets::getAsset("zbase/docs/" + page_path + ".html");
+  } catch (const StandardException& e) {
+    title = page_path;
+    content = StringUtil::format("<h1>page not found: $0</h1>", page_path);
+  }
 
   auto app_html = loadFile("documentation.html");
   StringUtil::replaceAll(&app_html, "{{app_css}}", loadFile("documentation.css"));
   StringUtil::replaceAll(&app_html, "{{app_js}}", loadFile("documentation.js"));
-  //StringUtil::replaceAll(&app_html, "{{config_json}}", app_config.toString());
-  StringUtil::replaceAll(&app_html, "{{doc_content}}", Assets::getAsset("zbase/docs/async_session_tracking.html"));
-
+  StringUtil::replaceAll(&app_html, "{{doc_content}}", content);
+  StringUtil::replaceAll(&app_html, "{{doc_title}}", title);
 
   response->setStatus(http::kStatusOK);
   response->addHeader("Content-Type", "text/html; charset=utf-8");

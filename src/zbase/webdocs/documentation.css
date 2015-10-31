@@ -251,6 +251,7 @@ zbase-breadcrumbs zbase-breadcrumbs-section[data-link]:hover,
   padding: 40px 0 40px 0;
   border-left: 1px solid #e8e8e8;
   background-color: #fff;
+  padding-bottom: 180px;
 }
 
 .zbase_docs_sidebar {
@@ -468,6 +469,7 @@ zbase-breadcrumbs zbase-breadcrumbs-section[data-link]:hover,
 
 .zbase_docs_footer {
   border-top: 1px solid #ddd;
-  height: 20px;
-  margin-top: 160px;
+  height: 60px;
+  margin-top: -60px;
+  margin-left: 260px;
 }
