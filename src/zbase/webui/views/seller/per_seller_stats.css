@@ -65,10 +65,6 @@
   margin-left: 0px;
 }
 
-.zbase_seller_stats .zbase_stats .metric_group .metric_pane:last-child {
-  margin-right: 0px;
-}
-
 
 .zbase_seller_stats .zbase_stats .metric_pane h2.pagetitle {
   font-size: 16px;
