@@ -347,7 +347,10 @@ zbase-breadcrumbs zbase-breadcrumbs-section[data-link]:hover,
 }
 
 .zbase_docs_content h1 + h2,
-.zbase_docs_content h1 + h3 {
+.zbase_docs_content h1 + h3,
+.zbase_docs_content h1 + h4,
+.zbase_docs_content h1 + h5,
+.zbase_docs_content h1 + h6 {
   margin-top: 0;
 }
 
