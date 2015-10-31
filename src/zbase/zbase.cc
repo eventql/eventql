@@ -41,6 +41,7 @@
 #include "zbase/util/mdb/MDBUtil.h"
 #include "zbase/AnalyticsServlet.h"
 #include "zbase/WebUIServlet.h"
+#include "zbase/WebDocsServlet.h"
 #include "zbase/ReportFactory.h"
 #include "zbase/AnalyticsApp.h"
 #include "zbase/EventIngress.h"
@@ -278,6 +279,7 @@ int main(int argc, const char** argv) {
   dproc.registerApp(analytics_app.get(), local_scheduler.get());
 
   zbase::WebUIServlet webui_servlet(&auth);
+  zbase::WebDocsServlet webdocs_servlet;
 
   zbase::AnalyticsServlet analytics_servlet(
       analytics_app,
@@ -294,6 +296,7 @@ int main(int argc, const char** argv) {
 
   http_router.addRouteByPrefixMatch("/a/", &webui_servlet);
   http_router.addRouteByPrefixMatch("/api/", &analytics_servlet, &tpool);
+  http_router.addRouteByPrefixMatch("/docs/", &webdocs_servlet);
   http_router.addRouteByPrefixMatch("/", &default_servlet);
 
   {

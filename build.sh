@@ -56,6 +56,7 @@ SOURCE_DIR_REAL=$(pwd)
 if [[ $BUILD_ASSETS == "true" ]]; then
   (
     cat ./src/zbase/webui/PACKFILE;
+    cat ./src/zbase/webdocs/PACKFILE;
     find src/zbase/webui/assets -type f | while read l; do echo ${l/src\//}:$l; done
     find src/zbase/webui/views -type f | while read l; do echo ${l/src\//}:$l; done
     find src/zbase/webui/widgets -type f | while read l; do echo ${l/src\//}:$l; done
