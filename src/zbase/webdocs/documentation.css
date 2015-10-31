@@ -406,7 +406,14 @@ zbase-breadcrumbs zbase-breadcrumbs-section[data-link]:hover,
 }
 
 .zbase_docs_content hr {
+  margin-top: 40px;
+  margin-bottom: 30px;
   background-color: #000;
+}
+
+.zbase_docs_content h1 + hr,
+.zbase_docs_content h2 + hr {
+  margin-top: 0;
 }
 
 .zbase_docs_content blockquote {
