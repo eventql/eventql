@@ -343,6 +343,7 @@ zbase-breadcrumbs zbase-breadcrumbs-section[data-link]:hover,
   line-height: 32px;
   color: #3498db;
   margin-bottom: 10px;
+  font-weight: 400;
 }
 
 .zbase_docs_content h1 + h2 {
@@ -355,6 +356,7 @@ zbase-breadcrumbs zbase-breadcrumbs-section[data-link]:hover,
   margin-top: 44px;
   margin-bottom: 10px;
   color: #444;
+  font-weight: 400;
 }
 
 .zbase_docs_content h2 + h3 {
