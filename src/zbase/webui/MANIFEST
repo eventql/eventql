@@ -326,28 +326,6 @@ route {
 }
 
 route {
-  path_prefix: "/a/documentation/"
-  view: "documentation"
-  require_module: "widgets/z-menu"
-  require_module: "widgets/zbase-header"
-  require_module: "widgets/z-input"
-  require_module: "widgets/zbase-settings-menu"
-  require_module: "widgets/zbase-documentation-menu"
-  require_module: "views/documentation"
-}
-
-route {
-  path_match: "/a/documentation"
-  view: "documentation"
-  require_module: "widgets/z-menu"
-  require_module: "widgets/zbase-header"
-  require_module: "widgets/z-input"
-  require_module: "widgets/zbase-settings-menu"
-  require_module: "widgets/zbase-documentation-menu"
-  require_module: "views/documentation"
-}
-
-route {
   is_public: true
   path_match: "/a/login"
   view: "login"
