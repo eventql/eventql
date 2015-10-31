@@ -9,14 +9,14 @@ var PerSellerTableOverview = (function() {
       renderTable(table, result.timeseries);
       var new_path = UrlUtil.addOrModifyUrlParam(
           path,
-          "table_metrics",
+          "metrics",
           encodeURIComponent(this.getValue()));
       history.pushState({path: new_path}, "", new_path);
     }, false);
 
     $.replaceContent(elem, tpl);
 
-    setParamTableMetrics(UrlUtil.getParamValue(path, "table_metrics"));
+    setParamTableMetrics(UrlUtil.getParamValue(path, "metrics"));
     renderTable(table, result.timeseries);
   };
 
