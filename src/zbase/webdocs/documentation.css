@@ -37,11 +37,6 @@ body{
   color:#545758;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: subpixel-antialiased;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  -o-user-select: none;
-  user-select: none;
 }
 body, input, textarea, button{ font:16px/24px 'Helvetica Neue', Helvetica, Arial, sans-serif; font-weight:400; }
 h1,h2,h3{
