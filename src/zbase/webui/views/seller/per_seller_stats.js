@@ -201,7 +201,8 @@ ZBase.registerView((function() {
   };
 
   var getUrl = function() {
-    var params = $(".zbase_seller_stats z-daterangepicker").getValue();
+    //var params = $(".zbase_seller_stats z-daterangepicker").getValue();
+    var params = {};
     params.view = $(".zbase_seller_stats button.view[data-state='active']")
         .getAttribute("data-value");
     return path_prefix + seller_id + "?" + $.buildQueryString(params);
@@ -216,7 +217,11 @@ ZBase.registerView((function() {
         "data-state");
 
     this.setAttribute("data-state", "active");
+
     renderView();
+
+    var path = getUrl();
+    history.pushState({path: path}, "", path);
   };
 
   var resizeSparklines = function() {
