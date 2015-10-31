@@ -4,9 +4,6 @@ ZBase.registerView((function() {
         "views/settings_api_token",
         "zbase_settings_api_token_main_tpl");
 
-    var menu = SettingsMenu();
-    menu.render($(".zbase_settings_menu_sidebar", page));
-
     $.handleLinks(page);
     $.replaceViewport(page);
 

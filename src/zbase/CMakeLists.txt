@@ -219,6 +219,7 @@ add_executable(zbase
     reco_engine/RecoEngineStatsReport.cc
     reco_engine/RecoStats.cc
     WebUIServlet.cc
+    WebDocsServlet.cc
     ${CMAKE_CURRENT_BINARY_DIR}/mapreduce_preludejs.cc
     zbase.cc)
 
