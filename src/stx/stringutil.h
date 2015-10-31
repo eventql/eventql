@@ -214,6 +214,15 @@ public:
   static bool includes(const std::string& str, const std::string& subject);
 
   /**
+   * Returns true iff str contains the subject or is equal ot the subject,
+   * matches in a case-insensitive fashion
+   *
+   * @param str the str to be searched
+   * @param subject the substring to search for
+   */
+  static bool includesi(const std::string& str, const std::string& subject);
+
+  /**
    * Print the contents of the pointed to memory as a series of hexadecimal
    * bytes (hexdump):
    *

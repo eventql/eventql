@@ -360,6 +360,14 @@ bool StringUtil::includes(const std::string& str, const std::string& subject) {
   return str.find(subject) != std::string::npos;
 }
 
+bool StringUtil::includesi(const std::string& str, const std::string& subject) {
+  auto str_i = str;
+  StringUtil::toLower(&str_i);
+  auto subject_i = subject;
+  StringUtil::toLower(&subject_i);
+  return includes(str_i, subject_i);
+}
+
 std::string StringUtil::hexPrint(
     const void* data,
     size_t size,
