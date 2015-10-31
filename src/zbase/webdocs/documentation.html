@@ -47,6 +47,8 @@
 
     <div class="zbase_docs_viewport">
       <div class="zbase_docs_sidebar">
+        <z-menu class="zbase_docs_menu">
+        </z-menu>
       </div>
 
       <div class="zbase_docs_content_outer">
@@ -56,6 +58,11 @@
       </div>
     </div>
 
+    <script type="text/javascript">{{app_js}}</script>
+    <script>
+      var menu = DocumentationMenu();
+      menu.render(document.getElementsByClassName("zbase_docs_menu")[0]);
+    </script>
   </body>
 </html>
 

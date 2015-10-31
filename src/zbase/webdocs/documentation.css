@@ -243,59 +243,50 @@ zbase-breadcrumbs zbase-breadcrumbs-section[data-link]:hover,
   color: #00b2f3;
 }
 
+.zbase_docs_viewport {
+  display: table;
+  width: 100%;
+}
 
 .zbase_docs_content_outer {
-  display: block;
-  margin-left: 300px;
-  padding: 20px 0 40px 0;
+  display: table-cell;
+  vertical-align: top;
+  padding: 40px 0 40px 0;
   border-left: 1px solid #e8e8e8;
   background-color: #fff;
 }
 
-.zbase_docs_sidebar z-menu {
-  position: initial;
-  float: left;
+.zbase_docs_sidebar {
+  display: table-cell;
+  vertical-align: top;
   width: 300px;
-  margin-left: 0px;
-  margin-top: 0px;
-  box-sizing: content-box;
+  background: rgba(63,144,170,.08);
+}
+
+.zbase_docs_sidebar z-menu {
   border-right: 1px solid #e8e8e8;
 }
 
-.zbase_documentation_menu_content {
-  margin-left: 300px;
-  border-left: 1px solid #ddd;
-  min-height: 900px;
-  padding-left: 0px;
+.zbase_docs_sidebar z-menu-item {
+  display: block;
+  margin-left: 20px;
+  padding-right: 0;
+  border-left: 0;
 }
 
-.zbase_docs_sidebar z-menu-item.doc_section {
-  margin-left: 20px !important;
-  padding-right: 0 !important;
-  border-left: 0 !important;
-  cursor: default;
+.zbase_docs_menu > z-menu-item {
+  margin-left: 0;
 }
 
-.zbase_docs_sidebar z-menu-section > z-menu-item.doc_section {
-  margin-left: 0 !important;
-  padding-right: 0 !important;
-  font-size: 14px;
-}
-
-.zbase_docs_sidebar z-menu-item.doc_section a {
+.zbase_docs_sidebar z-menu-item a {
   display: block;
   padding: 8px 15px;
   line-height: 20px;
-  color: #364149 !important;
+  color: #364149 ;
   font-size: 14px;
 }
 
-.zbase_docs_sidebar z-menu-item.doc_section a:hover,
-.zbase_docs_sidebar z-menu-item.doc_section a.current {
-  color: #008cff !important;
-}
-
-.zbase_docs_sidebar z-menu-item.doc_section span.index {
+.zbase_docs_sidebar z-menu-item span.index {
   font-weight: 700;
   margin-right: 5px;
 }
