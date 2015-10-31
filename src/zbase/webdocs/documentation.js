@@ -13,7 +13,7 @@ var DocumentationMenu = function() {
 
       var link = document.createElement("a");
       if(key == current) link.classList.add("current");
-      link.href = "/a/documentation/" + key;
+      link.href = "/docs/" + key;
       var indexSpan = document.createElement("span");
       var textSpan = document.createElement("span");
       indexSpan.classList.add("index");

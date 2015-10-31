@@ -259,12 +259,15 @@ zbase-breadcrumbs zbase-breadcrumbs-section[data-link]:hover,
 .zbase_docs_sidebar {
   display: table-cell;
   vertical-align: top;
-  width: 300px;
+  width: 17%;
   background: rgba(63,144,170,.08);
+  padding-left: 10px;
+  padding-right: 20px;
 }
 
 .zbase_docs_sidebar z-menu {
   border-right: 1px solid #e8e8e8;
+  font-family: "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
 .zbase_docs_sidebar z-menu-item {
@@ -276,6 +279,13 @@ zbase-breadcrumbs zbase-breadcrumbs-section[data-link]:hover,
 
 .zbase_docs_menu > z-menu-item {
   margin-left: 0;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+}
+
+.zbase_docs_menu > z-menu-item > a {
+  font-weight: 500;
 }
 
 .zbase_docs_sidebar z-menu-item a {
@@ -287,8 +297,9 @@ zbase-breadcrumbs zbase-breadcrumbs-section[data-link]:hover,
 }
 
 .zbase_docs_sidebar z-menu-item span.index {
-  font-weight: 700;
+  font-weight: 300;
   margin-right: 5px;
+  color: #888;
 }
 
 .zbase_docs_content {
