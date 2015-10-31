@@ -369,6 +369,15 @@ DateUtil.printTimestampShort = function(ts, timezone) {
     this.appendLeadingZero(this.getSeconds(ts, timezone))].join("");
 };
 
+DateUtil.printDate = function(ts, timezone) {
+  var date = new Date(ts);
+
+  return [
+    date.getFullYear(), "-",
+    this.appendLeadingZero(date.getMonth() + 1), "-",
+    this.appendLeadingZero(date.getDate()), " "].join("");
+};
+
 DateUtil.appendLeadingZero = function (num) {
   var num = num;
   if (typeof num == 'string') {

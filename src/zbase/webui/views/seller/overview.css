@@ -1,0 +1,118 @@
+.zbase_seller_stats.overview .zbase_page_title h2.pagetitle {
+  display: inline-block;
+}
+
+.zbase_seller_stats.overview .zbase_content {
+  background: #fff;
+}
+
+.zbase_seller_stats.overview .controls {
+  padding: 10px 20px;
+  border-top: 1px solid #d1d1d1;
+  border-bottom: 1px solid #d1d1d1;
+  background: rgba(63,144,170,.08);
+  overflow: auto;
+}
+
+.zbase_seller_stats.overview .controls .left {
+  float: left;
+}
+
+.zbase_seller_stats.overview .controls .right {
+  float: right;
+}
+
+
+.zbase_seller_stats.overview .controls .control {
+  display: inline-block;
+  height: 38px;
+  margin-top: 2px;
+}
+
+.zbase_seller_stats.overview .controls .control > z-checkbox {
+  margin-top: 3px;
+}
+
+.zbase_seller_stats.overview .controls .control label {
+  font-size: 12px;
+  line-height: 38px;
+  font-weight: 400;
+  vertical-align: top;
+}
+
+.zbase_seller_stats.overview label.search_label {
+  position: absolute;
+  display: inline-block;
+  height: 35px;
+  line-height: 35px;
+  background-color: #F4F4F4;
+  background-image: -webkit-gradient(linear, left top, left bottom, from(#fefefe), to(#e9e9e9));
+  background-image: -webkit-linear-gradient(top, #fefefe, #e9e9e9);
+  background-image: -moz-linear-gradient(top, #fefefe, #e9e9e9);
+  background-image: -ms-linear-gradient(top, #fefefe, #e9e9e9);
+  background-image: -o-linear-gradient(top, #fefefe, #e9e9e9);
+  background-image: linear-gradient(top, #fefefe, #e9e9e9);
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorStr='#fefefe', EndColorStr='#e9e9e9');
+  color: #333;
+  border: 1px solid #bdbdbd;
+  box-shadow: 0 0 2px rgba(0,0,0,.1);
+  font-weight: 500;
+  font-size: 12px;
+  padding: 0px 11px;
+  border-radius: 0.2857rem;
+  margin-top: 1px;
+}
+
+.zbase_seller_stats.overview .controls .search z-search {
+  font-size: 13px;
+  margin-right: 10px;
+  display: block;
+}
+
+.zbase_seller_stats.overview .controls .search z-search z-input input {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  box-shadow: inset 1px 1px 1px rgba(0,0,0,.1);
+  border: 1px solid #bdbdbd;
+}
+
+
+.zbase_seller_stats.overview z-search.seller {
+  width: 200px;
+}
+
+.zbase_seller_stats.overview table.z-table {
+  font-size: 13px;
+}
+
+.zbase_seller_stats.overview table.z-table thead tr th:first-child,
+.zbase_seller_stats.overview table.z-table tbody tr td:first-child a {
+  padding-left: 20px;
+}
+
+.zbase_seller_stats.overview table.z-table thead tr th {
+  font-weight: 400;
+  color: #888;
+}
+
+.zbase_seller_stats.overview table.z-table thead tr th.hidden {
+  display: none;
+}
+
+.zbase_seller_stats.overview table.z-table tbody tr td {
+  padding: 0;
+}
+
+.zbase_seller_stats.overview table.z-table tbody tr td a {
+  display: block;
+  padding: .7em .8em;
+  line-height: 24px;
+}
+
+.zbase_seller_stats.overview table.z-table tbody tr td.icon {
+  text-align: center;
+}
+
+.zbase_seller_stats.overview table.z-table tbody tr td.icon i {
+  color: #999;
+}
