@@ -237,3 +237,21 @@
 .zbase_header input.search::-moz-placeholder {
   color: rgba(0, 0, 0, 0.4);
 }
+
+.zbase_header .btn_documentation,
+.zbase_header .btn_new_query,
+.zbase_header .btn_settings {
+  float: right;
+  border-right: 1px solid #eee;
+  height: 32px;
+  line-height: 33px;
+  margin-top: 10px;
+  padding: 0 16px;
+  color: #444;
+}
+
+.zbase_header .btn_documentation:hover,
+.zbase_header .btn_new_query:hover,
+.zbase_header .btn_settings:hover {
+  color: #3498db;
+}
