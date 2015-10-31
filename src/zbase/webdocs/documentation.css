@@ -346,28 +346,49 @@ zbase-breadcrumbs zbase-breadcrumbs-section[data-link]:hover,
   font-weight: 400;
 }
 
-.zbase_docs_content h1 + h2 {
+.zbase_docs_content h1 + h2,
+.zbase_docs_content h1 + h3 {
   margin-top: 0;
 }
 
-.zbase_docs_content h2 {
+.zbase_docs_content h2,
+.zbase_docs_content h3 {
   font-size: 20px;
   line-height: 32px;
   margin-top: 44px;
   margin-bottom: 10px;
-  color: #444;
   font-weight: 400;
 }
 
-.zbase_docs_content h2 + h3 {
-  margin-top: 0;
-}
-
-.zbase_docs_content h2 + h4 {
-  margin-top: 0;
+.zbase_docs_content h2{
+  color: #3498db;
+  font-size: 22px;
+  line-height: 34px;
 }
 
 .zbase_docs_content h3 {
+  color: #444;
+}
+
+.zbase_docs_content h2 + h4,
+.zbase_docs_content h2 + h5,
+.zbase_docs_content h2 + h6,
+.zbase_docs_content h3 + h4,
+.zbase_docs_content h3 + h5,
+.zbase_docs_content h3 + h6 {
+  margin-top: 0;
+}
+
+.zbase_docs_content h4 {
+  font-size: 17px;
+  line-height: 28px;
+  font-weight: 500;
+  margin-top: 26px;
+  margin-bottom: 6px;
+  color: #444;
+}
+
+.zbase_docs_content h5 {
   font-size: 15px;
   line-height: 26px;
   font-weight: 500;
@@ -376,22 +397,13 @@ zbase-breadcrumbs zbase-breadcrumbs-section[data-link]:hover,
   color: #444;
 }
 
-.zbase_docs_content h4 {
+.zbase_docs_content h6 {
   font-size: 15px;
   line-height: 26px;
   font-weight: 500;
   margin-top: 20px;
   margin-bottom: 6px;
   color: #666;
-}
-
-.zbase_docs_content h5 {
-  font-size: 1em;
-}
-
-.zbase_docs_content h6 {
-  font-size: 1em;
-  color: #777;
 }
 
 .zbase_docs_content ol,
