@@ -243,6 +243,7 @@ zbase-breadcrumbs zbase-breadcrumbs-section[data-link]:hover,
   display: table;
   table-layout: fixed;
   width: 100%;
+  min-height: 1400px;
 }
 
 .zbase_docs_content_outer {
