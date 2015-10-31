@@ -138,8 +138,17 @@
   vertical-align: top;
 }
 
+.zbase_seller_stats table th.hidden,
 .zbase_seller_stats table td.hidden {
   display: none;
+}
+
+.zbase_seller_stats table {
+  font-size: 13px;
+}
+
+.zbase_seller_stats table.z-table th {
+  color: #888;
 }
 
 @media (max-width: 1420px) {

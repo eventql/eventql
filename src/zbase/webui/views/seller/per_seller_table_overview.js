@@ -4,29 +4,41 @@ var PerSellerTableOverview = (function() {
         "views/seller",
         "per_seller_table_overview_main_tpl");
 
-    setParamTableMetrics(UrlUtil.getParamValue("table_metrics", path));
-
+    var table = $("table", tpl);
     $("z-dropdown.metrics", tpl).addEventListener("change", function() {
-      console.log("render table");
-      //set param table metrics
+      renderTable(table, result.timeseries);
+      var new_path = UrlUtil.addOrModifyUrlParam(
+          path,
+          "table_metrics",
+          encodeURIComponent(this.getValue()));
+      history.pushState({path: new_path}, "", new_path);
     }, false);
 
     $.replaceContent(elem, tpl);
 
-    renderTable(result.timeseries);
+    setParamTableMetrics(UrlUtil.getParamValue(path, "table_metrics"));
+    renderTable(table, result.timeseries);
   };
 
-  var renderTable = function(timeseries) {
-    var tbody = $(".per_seller_table tbody");
+  var renderTable = function(elem, timeseries) {
+    var table_tpl = $.getTemplate(
+        "views/seller",
+        "per_seller_table_overview_table_tpl");
+
     var tr_tpl = $.getTemplate(
         "views/seller",
         "per_seller_table_overview_row_tpl");
 
-    var metrics = {};
+    var tbody = $("tbody", table_tpl);
+
+    var metrics = {time: true};
     getParamTableMetrics().split(",").forEach(function(metric) {
       metrics[metric] = true;
     });
-    console.log(metrics);
+
+    for (var metric in metrics) {
+      $("th." + metric, table_tpl).classList.remove("hidden");
+    }
 
     for (var i = 0; i < timeseries.time.length; i++) {
       var tr = tr_tpl.cloneNode(true);
@@ -40,7 +52,7 @@ var PerSellerTableOverview = (function() {
         }
         //REMOVEME END
 
-        if (metric == "time" || metrics.hasOwnProperty(metric)) {
+        if (metrics.hasOwnProperty(metric)) {
           td.classList.remove("hidden");
           td.innerHTML = timeseries[metric][i];
         }
@@ -49,6 +61,7 @@ var PerSellerTableOverview = (function() {
       tbody.appendChild(tr);
     }
 
+    $.replaceContent(elem, table_tpl);
   };
 
   var setParamTableMetrics = function(metrics) {
