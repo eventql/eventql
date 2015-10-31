@@ -423,8 +423,19 @@ zbase-breadcrumbs zbase-breadcrumbs-section[data-link]:hover,
   background-color: #000;
 }
 
-.zbase_docs_content h1 + hr,
-.zbase_docs_content h2 + hr {
+.zbase_docs_content hr + h1,
+.zbase_docs_content hr + h2,
+.zbase_docs_content hr + h3,
+.zbase_docs_content hr + h4,
+.zbase_docs_content hr + h5 {
+  margin-top: 0;
+}
+
+.zbase_docs_content h1 + hr ,
+.zbase_docs_content h2 + hr ,
+.zbase_docs_content h3 + hr ,
+.zbase_docs_content h4 + hr ,
+.zbase_docs_content h5 + hr  {
   margin-top: 0;
 }
 
