@@ -13,10 +13,10 @@ var PerSellerSparklineOverview = (function() {
         $("z-sparkline", pane).setAttribute(
             "data-sparkline",
             result.timeseries[metric].join(","));
+
+        $(".num", pane).innerHTML = result.aggregates[metric];
       }
     }
-
-      //$(".num", metric_panes[i]).innerHTML = sum;
   };
 
   var add = function(a, b) {

@@ -58,16 +58,13 @@ ZBase.registerView((function() {
       }
 
       result = {
-        aggregates: {},
         timeseries: {},
       };
       for (var i = 0; i < data.columns.length; i++) {
         result.timeseries[data.columns[i]] = values[i];
       }
 
-      aggregate(result.timeseries);
-
-      //TODO get aggregates
+      result.aggregates = aggregate(result.timeseries);
 
       renderView();
     }, false);
@@ -97,36 +94,59 @@ ZBase.registerView((function() {
       return (sum(values) / values.length);
     }
 
+    //FIXME
     var toPrecision = function(num, precision) {
       return Math.round(num * Math.pow(10, precision)) / Math.pow(10, precision);
     };
 
-    var aggr = function(values, fn, precision) {
-      return toPrecision(fn(values), precision);
-    }
-
-
     var metrics = {
-      gmv_eurcent: {
-        fn: sum,
-        precision: 2
-      },
-      gmv_per_transaction_eurcent: {
-        fn: mean,
-        precision: 2
-      }
-    };
+      gmv_eurcent: {unit: "eurcent", fn: sum},
+      gmv_per_transaction_eurcent: {unit: "eurcent", fn: mean},
+      num_purchases: {fn: sum, precision: 0},
+      num_refunds: {fn: sum, precision: 0},
+      refund_rate: {fn: sum, precision: 2},
+      refunded_gmv_eurcent: {unit: "eurcent", fn: sum},
+      listview_views_ads: {fn: sum, precision: 0},
+      listview_views_search_page: {fn: sum, precision: 0},
+      listview_views_catalog_page: {fn: sum, precision: 0},
+      listview_views_recos: {fn: sum, precision: 0},
+      listview_views_shop_page: {fn: sum, precision: 0},
+      listview_clicks_ads: {fn: sum, precision: 0},
+      listview_clicks_search_page: {fn: sum, precision: 0},
+      listview_clicks_catalog_page: {fn: sum, precision: 0},
+      listview_clicks_recos: {fn: sum, precision: 0},
+      listview_clicks_shop_page: {fn: sum, precision: 0},
+      listview_ctr_ads: {fn: mean, precision: 3},
+      listview_ctr_search_page: {fn: mean, precision: 3},
+      listview_ctr_catalog_page: {fn: mean, precision: 3},
+      listview_ctr_recos: {fn: mean, precision: 3},
+      listview_ctr_shop_page: {fn: mean, precision: 3},
+      num_active_products: {fn: sum, precision: 0},
+      num_listed_products: {fn: sum, precision: 0},
+      shop_page_views: {fn: sum, precision: 0},
+      product_page_views: {fn: sum, precision: 0}
+    }
 
     for (var metric in timeseries) {
       if (metrics.hasOwnProperty(metric)) {
-        aggregates[metric] = aggr(
-          timeseries[metric],
-          metrics[metric].fn,
-          metrics[metric].precision);
+        var aggr = metrics[metric].fn(timeseries[metric]);
+
+        if (isNaN(aggr)) {
+          aggregates[metric] = "-";
+          continue;
+        }
+
+        if (metrics[metric].unit == "eurcent") {
+          aggr = toPrecision(aggr / 100, 3) + "&euro;";
+        } else {
+          aggr = toPrecision(aggr, metrics[metric].precision);
+        }
+
+        aggregates[metric] = aggr;
       }
     }
 
-    console.log(aggregates);
+    return aggregates;
   };
 
   var destroy = function() {
