@@ -306,7 +306,7 @@ zbase-breadcrumbs zbase-breadcrumbs-section[data-link]:hover,
   padding: 0 60px;
   color: #444;
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-  line-height: 1.6;
+  line-height: 23px;
   font-size: 15px;
 }
 
@@ -342,7 +342,6 @@ zbase-breadcrumbs zbase-breadcrumbs-section[data-link]:hover,
   font-size: 28px;
   line-height: 32px;
   color: #3498db;
-  font-weight: 400;
   margin-bottom: 10px;
 }
 
@@ -353,8 +352,7 @@ zbase-breadcrumbs zbase-breadcrumbs-section[data-link]:hover,
 .zbase_docs_content h2 {
   font-size: 20px;
   line-height: 32px;
-  font-weight: 400;
-  margin-top: 40px;
+  margin-top: 44px;
   margin-bottom: 10px;
   color: #444;
 }
@@ -368,8 +366,8 @@ zbase-breadcrumbs zbase-breadcrumbs-section[data-link]:hover,
 }
 
 .zbase_docs_content h3 {
-  font-size: 16px;
-  line-height: 28px;
+  font-size: 15px;
+  line-height: 26px;
   font-weight: 500;
   margin-top: 20px;
   margin-bottom: 6px;
@@ -377,8 +375,8 @@ zbase-breadcrumbs zbase-breadcrumbs-section[data-link]:hover,
 }
 
 .zbase_docs_content h4 {
-  font-size: 16px;
-  line-height: 28px;
+  font-size: 15px;
+  line-height: 26px;
   font-weight: 500;
   margin-top: 20px;
   margin-bottom: 6px;
