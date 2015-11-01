@@ -20,6 +20,7 @@ ZBase.registerView((function() {
 
     $.onClick($("button.view.sparkline", page), onViewButtonClick);
     $.onClick($("button.view.table", page), onViewButtonClick);
+    $("z-dropdown.metrics", page).addEventListener("change", onMetricsParamChanged);
 
 
     $.handleLinks(page);
@@ -59,12 +60,12 @@ ZBase.registerView((function() {
       " from shop_stats.last30d where shop_id = " + seller_id // FIXME escaping
       " order by time asc;";
 
-    console.log(query_str);
     setParamsFromAndUntil(
         UrlUtil.getParamValue(path, "from"),
         UrlUtil.getParamValue(path, "until"));
 
     setParamView(UrlUtil.getParamValue(path, "view"));
+    setParamMetrics(UrlUtil.getParamValue(path, "metrics"));
 
     var query = query_mgr.get(
         "sql_query",
@@ -140,10 +141,17 @@ ZBase.registerView((function() {
     }
 
     var view = getParamView();
+    var metrics = getMetrics();
     if (view == "table") {
-      PerSellerTableOverview.render($(".zbase_seller_overview"), result, path);
+      PerSellerTableOverview.render(
+          $(".zbase_seller_overview"),
+          result,
+          metrics);
     } else {
-      PerSellerSparklineOverview.render($(".zbase_seller_overview"), result);
+      PerSellerSparklineOverview.render(
+          $(".zbase_seller_overview"),
+          result,
+          metrics);
     }
   };
 
@@ -174,11 +182,32 @@ ZBase.registerView((function() {
         "data-value");
   };
 
+  var setParamMetrics = function(metrics) {
+    if (metrics) {
+      $(".zbase_seller_stats z-dropdown.metrics").setValue(
+          decodeURIComponent(metrics).split(","));
+    }
+  };
+
+  var getMetrics = function() {
+    var metrics = {time: true};
+    $(".zbase_seller_stats z-dropdown.metrics")
+        .getValue()
+        .split(",")
+        .forEach(function(metric) {
+          metrics[metric] = true;
+        });
+
+    return metrics;
+  };
+
   var getUrl = function() {
     //var params = $(".zbase_seller_stats z-daterangepicker").getValue();
     var params = {};
     params.view = $(".zbase_seller_stats button.view[data-state='active']")
         .getAttribute("data-value");
+    params.metrics = encodeURIComponent(
+        $(".zbase_seller_stats z-dropdown.metrics").getValue());
     return path_prefix + seller_id + "?" + $.buildQueryString(params);
   };
 
@@ -192,6 +221,13 @@ ZBase.registerView((function() {
 
     this.setAttribute("data-state", "active");
 
+    renderView();
+
+    var path = getUrl();
+    history.pushState({path: path}, "", path);
+  };
+
+  var onMetricsParamChanged = function() {
     renderView();
 
     var path = getUrl();
