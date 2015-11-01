@@ -1,12 +1,3 @@
-.zbase_seller_stats .zbase_stats_title {
-  overflow: visible;
-  height: 80px;
-}
-
-.zbase_seller_stats .zbase_stats_title h2.pagetitle {
-  float: left;
-}
-
 .zbase_seller_stats .zbase_stats_title zbase-breadcrumbs zbase-breadcrumbs-section::after {
   font-size: 1.5em;
   margin-bottom: 5px;
@@ -27,12 +18,7 @@
 
 .zbase_seller_stats .zbase_stats {
   overflow: auto;
-  padding: 20px;
   background: #fff;
-}
-
-.zbase_seller_stats .controls button {
-  float: right;
 }
 
 .zbase_seller_stats .metric_group {
@@ -116,7 +102,16 @@
 
 .zbase_seller_stats .per_seller .controls {
   overflow: visible;
-  height: 40px;
+  border-bottom: 1px solid #ddd;
+  height: 56px;
+  line-height: 56px;
+  font-family: "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+.zbase_seller_stats .per_seller .controls label {
+  font-size: 13px;
+  margin: 0 10px;
+  color: #888;
 }
 
 .zbase_seller_stats .per_seller .controls .control {
