@@ -38,9 +38,20 @@
     <a class="btn_documentation" href="/docs/" target="_blank">
       <i class="fa fa-book"></i>
     </a>
-    <a class="btn_new_query">
-      <i class="fa fa-plus"></i>
-    </a>
+    <z-dropdown data-resolved data-hover class="new_query">
+      <z-dropdown-header>
+        <z-dropdown-header-value data-static>
+          <i class="fa fa-plus"></i>
+        </z-dropdown-header-value>
+        <z-dropdown-header-icon></z-dropdown-header-icon>
+      </z-dropdown-header>
+      <z-dropdown-flyout>
+        <z-dropdown-items>
+          <z-dropdown-item data-value='sql_query'>New Query</z-dropdown-item>
+          <z-dropdown-item data-value='report'>New Report</z-dropdown-item>
+        </z-dropdown-items>
+      </z-dropdown-flyout>
+    </z-dropdown>
   </div>
 </template>
 
