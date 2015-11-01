@@ -239,6 +239,12 @@
   color: rgba(0, 0, 0, 0.4);
 }
 
+.zbase_header z-search ul li {
+  display: list-item;
+  font-size: 13px;
+  color: #444;
+}
+
 .zbase_header .btn_documentation,
 .zbase_header .btn_new_query,
 .zbase_header .btn_settings {

@@ -55,6 +55,7 @@ var HeaderWidget = (function() {
     $(".namespace_info", tpl).innerHTML = conf.current_user.namespace;
     $(".change_namespace", tpl).addEventListener("click", showSelectNamespacePopup);
     $.onClick($(".dropdown", tpl), toggleDropdown);
+    $("z-search", tpl).addEventListener("z-search-autocomplete", searchAutocomplete);
 
     var elem = $("#zbase_header");
     $.replaceContent(elem, tpl);
@@ -70,6 +71,30 @@ var HeaderWidget = (function() {
     });
 
     $.handleLinks(elem);
+  };
+
+  var searchAutocomplete = function(e) {
+    var term = e.detail.value;
+    var search_widget = this;
+
+    $.httpGet("/api/v1/documents?search=" + term, function(r) {
+      if (r.status == 200) {
+        var documents = JSON.parse(r.response).documents;
+        var items = [];
+
+        for (var i = 0; i < documents.length; i++) {
+          if (i > 10) {
+            break;
+          }
+
+          items.push({
+            query: documents[i].name,
+            data_value: documents[i].name});
+        }
+
+        search_widget.autocomplete(term, items);
+      }
+    });
   };
 
   var setActiveMenuItem = function() {
