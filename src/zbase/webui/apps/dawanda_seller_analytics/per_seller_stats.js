@@ -7,7 +7,7 @@ ZBase.registerView((function() {
   var load = function(path) {
     seller_id = UrlUtil.getPath(path).substr(path_prefix.length);
     //REMOVE ME
-    var seller_name = "Meko";
+    var seller_name = "-";
     //REMOVEME END
 
     var page = $.getTemplate(
