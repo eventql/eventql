@@ -69,13 +69,12 @@ var InputComponent = function() {
   };
 
   this.setValue = function(value) {
-    if (value) {
+    if (value != null && value != undefined) {
       if (value.constructor === Array) {
         value = value.join(",");
       }
 
       this.querySelector("input").value = value;
-
     } else {
       var value = this.getAttribute('data-value');
       var value_elems = this.querySelectorAll("z-input-value");
