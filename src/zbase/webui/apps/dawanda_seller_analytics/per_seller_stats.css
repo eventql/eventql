@@ -159,7 +159,7 @@
 }
 
 .zbase_seller_stats table.z-table th {
-  color: #888;
+  background: #f9f9f9;
 }
 
 @media (max-width: 1420px) {

@@ -5,7 +5,7 @@ var PerSellerTableOverview = (function() {
         "per_seller_table_overview_main_tpl");
 
     var table = $("table", tpl);
-    $("z-dropdown.metrics", tpl).addEventListener("change", function() {
+    $("z-dropdown.metrics").addEventListener("change", function() {
       renderTable(table, result.timeseries);
       var new_path = UrlUtil.addOrModifyUrlParam(
           path,
@@ -71,7 +71,7 @@ var PerSellerTableOverview = (function() {
   };
 
   var getParamTableMetrics = function() {
-    return $(".per_seller_table z-dropdown.metrics").getValue();
+    return $(".zbase_seller_stats z-dropdown.metrics").getValue();
   };
 
   return {
