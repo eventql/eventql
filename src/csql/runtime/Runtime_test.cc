@@ -835,7 +835,7 @@ TEST_CASE(RuntimeTest, TestDateTimeDateTruncExpression, [] () {
   }
 
   {
-    auto v = runtime->evaluateStaticExpression("'blah' REGEX '^b'");
+    auto v = runtime->evaluateStaticExpression("'blah' REGEXP '^b'");
     EXPECT_EQ(v.toString(), "true");
   }
 

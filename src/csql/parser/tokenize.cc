@@ -369,7 +369,7 @@ next:
     goto next;
   }
 
-  if (token == "REGEX") {
+  if (token == "REGEX" || token == "REGEXP") {
     token_list->emplace_back(Token::T_REGEX);
     goto next;
   }
