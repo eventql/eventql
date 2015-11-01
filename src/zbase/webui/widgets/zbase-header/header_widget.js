@@ -56,6 +56,7 @@ var HeaderWidget = (function() {
     elem.appendChild(tpl);
     $.onClick($(".dropdown", elem), toggleDropdown);
     $(".change_namespace", elem).addEventListener("click", showSelectNamespacePopup);
+    $("z-dropdown.new_query").addEventListener("change", createNewDocument);
 
     elem.querySelector(".userid_info").innerHTML = conf.current_user.userid;
     elem.querySelector(".namespace_info").innerHTML = conf.current_user.namespace;
@@ -71,6 +72,12 @@ var HeaderWidget = (function() {
     });
 
     $.handleLinks(elem);
+  };
+
+  var createNewDocument = function() {
+    var doc_type = this.getValue();
+    this.setValue([]);
+    $.createNewDocument(doc_type);
   };
 
   var setActiveMenuItem = function() {
