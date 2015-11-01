@@ -114,6 +114,10 @@
   background: #fff;
 }
 
+.zbase_seller_stats .per_seller .controls.hidden {
+  display: none;
+}
+
 .zbase_seller_stats .per_seller .controls > button {
   background-color: #F4F4F4;
   background-image: -webkit-gradient(linear, left top, left bottom, from(#fefefe), to(#e9e9e9));
