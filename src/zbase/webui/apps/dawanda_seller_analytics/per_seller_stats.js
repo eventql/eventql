@@ -1,5 +1,5 @@
 ZBase.registerView((function() {
-  var path_prefix = "/a/seller/";
+  var path_prefix = "/a/apps/dawanda_seller_analytics/";
   var result = null;
   var query_mgr;
   var seller_id;
@@ -46,8 +46,9 @@ ZBase.registerView((function() {
       query_mgr.close("sql_query");
       var data = JSON.parse(e.data).results[0];
 
+      console.log(data);
       var values = [];
-      for (var i = 0; i < data.rows[0].length; i++) {
+      for (var i = 0; i < data.columns.length; i++) {
         values.push([]);
       };
 
