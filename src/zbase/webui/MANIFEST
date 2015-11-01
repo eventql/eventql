@@ -403,6 +403,7 @@ route {
   path_match: "/a/apps/dawanda_seller_analytics"
   view: "seller_overview"
   require_module: "util/z-url-util"
+  require_module: "util/event_source_handler"
   require_module: "widgets/z-input"
   require_module: "widgets/z-search"
   require_module: "widgets/z-checkbox"
@@ -410,8 +411,10 @@ route {
   require_module: "widgets/z-button"
   require_module: "widgets/z-table"
   require_module: "widgets/z-menu"
+  require_module: "widgets/z-progressbar"
   require_module: "widgets/zbase-header"
   require_module: "widgets/zbase-main-menu"
+  require_module: "widgets/zbase-query-progress"
   require_module: "apps/dawanda_seller_analytics"
 }
 
