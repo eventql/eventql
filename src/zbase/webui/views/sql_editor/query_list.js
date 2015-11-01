@@ -12,23 +12,6 @@ ZBase.registerView((function() {
     });
   }
 
-  var createNewQuery = function() {
-    var postdata = $.buildQueryString({
-      name: "Unnamed SQL Query",
-      type: "sql_query"
-    });
-
-    $.httpPost("/api/v1/documents", postdata, function(r) {
-      if (r.status == 201) {
-        var response = JSON.parse(r.response);
-        $.navigateTo("/a/sql/" + response.uuid);
-        return;
-      } else {
-        $.fatalError();
-      }
-    });
-  };
-
   var render = function(documents, path) {
     var page = $.getTemplate(
         "views/sql_editor",
@@ -41,9 +24,9 @@ ZBase.registerView((function() {
     var main_menu = ZBaseMainMenu();
     main_menu.render($(".zbase_main_menu", page), path);
 
-    $.onClick(
-        page.querySelector("button[data-action='new-query']"),
-        createNewQuery);
+    $.onClick($("button[data-action='new-query']", page), function() {
+      $.createNewDocument("sql_query");
+    });
 
     $.handleLinks(page);
     $.replaceViewport(page)

@@ -55,7 +55,7 @@ ZBase.registerView((function() {
 
     var new_doc_dropdown = $("z-dropdown", page);
     new_doc_dropdown.addEventListener("change", function(e) {
-      createNewDocument(e.detail.value);
+      $.createNewDocument(e.detail.value);
     });
 
     $.handleLinks(page);
@@ -92,39 +92,6 @@ ZBase.registerView((function() {
       default:
         return "#";
     }
-  };
-
-  var createNewDocument = function(doc_type) {
-    var name;
-
-    switch (doc_type) {
-      case "sql_query":
-        name = "Unnamed SQL Query";
-        break;
-
-      case "report":
-        name = "Unnamed Report";
-        break;
-
-      default:
-        $.fatalError();
-        return;
-    }
-
-    var postdata = $.buildQueryString({
-      name: name,
-      type: doc_type
-    });
-
-    $.httpPost("/api/v1/documents", postdata, function(r) {
-      if (r.status == 201) {
-        var response = JSON.parse(r.response);
-        $.navigateTo(getUrlForDocument(response));
-        return;
-      } else {
-        $.fatalError();
-      }
-    });
   };
 
   return {

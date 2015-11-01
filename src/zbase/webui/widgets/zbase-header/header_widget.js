@@ -57,6 +57,7 @@ var HeaderWidget = (function() {
     $.onClick($(".dropdown", tpl), toggleDropdown);
     $("z-search", tpl).addEventListener("z-search-autocomplete", searchAutocomplete);
     $("z-search", tpl).addEventListener("z-search-submit", searchSubmit);
+    $("z-dropdown.new_query", tpl).addEventListener("change", createNewDocument);
 
     var elem = $("#zbase_header");
     $.replaceContent(elem, tpl);
@@ -72,6 +73,12 @@ var HeaderWidget = (function() {
     });
 
     $.handleLinks(elem);
+  };
+
+  var createNewDocument = function() {
+    var doc_type = this.getValue();
+    this.setValue([]);
+    $.createNewDocument(doc_type);
   };
 
   var searchAutocomplete = function(e) {

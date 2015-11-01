@@ -383,6 +383,42 @@ var ZBase = (function() {
     }
   };
 
+  var createNewDocument = function(doc_type) {
+    var name;
+    var path;
+
+    switch (doc_type) {
+      case "sql_query":
+        name = "Unnamed SQL Query";
+        path = "/a/sql/";
+        break;
+
+      case "report":
+        name = "Unnamed Report";
+        path = "/a/reports/";
+        break;
+
+      default:
+        $.fatalError();
+        return;
+    }
+
+    var postdata = $.buildQueryString({
+      name: name,
+      type: doc_type
+    });
+
+    $.httpPost("/api/v1/documents", postdata, function(r) {
+      if (r.status == 201) {
+        var response = JSON.parse(r.response);
+        $.navigateTo(path + response.uuid);
+        return;
+      } else {
+        $.fatalError();
+      }
+    });
+  };
+
   return {
     init: init,
     loadModules: loadModules,
@@ -394,7 +430,8 @@ var ZBase = (function() {
     getTemplate: getTemplate,
     fatalError: showFatalError,
     showLoader: showLoader,
-    hideLoader: hideLoader
+    hideLoader: hideLoader,
+    createNewDocument: createNewDocument
   };
 })();
 
@@ -412,6 +449,7 @@ $.getTemplate = ZBase.getTemplate;
 $.fatalError = ZBase.fatalError;
 $.showLoader = ZBase.showLoader;
 $.hideLoader = ZBase.hideLoader;
+$.createNewDocument = ZBase.createNewDocument;
 
 $.handleLinks = function(elem) {
   var click_fn = (function() {

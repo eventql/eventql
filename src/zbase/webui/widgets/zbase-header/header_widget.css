@@ -246,7 +246,6 @@
 }
 
 .zbase_header .btn_documentation,
-.zbase_header .btn_new_query,
 .zbase_header .btn_settings {
   float: right;
   border-right: 1px solid #eee;
@@ -258,7 +257,24 @@
 }
 
 .zbase_header .btn_documentation:hover,
-.zbase_header .btn_new_query:hover,
 .zbase_header .btn_settings:hover {
   color: #3498db;
+}
+
+.zbase_header z-dropdown.new_query {
+  float: right;
+  border-right: 1px solid #eee;
+  margin-top: 10px;
+  height: 32px;
+}
+
+.zbase_header z-dropdown.new_query z-dropdown-header {
+  font-size: 16px;
+  color: #444;
+  height: 32px;
+  line-height: 33px;
+}
+
+.zbase_header z-dropdown.new_query z-dropdown-flyout {
+  left: -23px;
 }
