@@ -56,6 +56,7 @@ var HeaderWidget = (function() {
     $(".change_namespace", tpl).addEventListener("click", showSelectNamespacePopup);
     $.onClick($(".dropdown", tpl), toggleDropdown);
     $("z-search", tpl).addEventListener("z-search-autocomplete", searchAutocomplete);
+    $("z-search", tpl).addEventListener("z-search-submit", searchSubmit);
 
     var elem = $("#zbase_header");
     $.replaceContent(elem, tpl);
@@ -77,22 +78,58 @@ var HeaderWidget = (function() {
     var term = e.detail.value;
     var search_widget = this;
 
-    $.httpGet("/api/v1/documents?search=" + term, function(r) {
-      if (r.status == 200) {
-        var documents = JSON.parse(r.response).documents;
-        var items = [];
+    searchDocuments(term, function(r) {
+      var documents = JSON.parse(r.response).documents;
+      var items = [];
 
-        for (var i = 0; i < documents.length; i++) {
-          if (i > 10) {
-            break;
-          }
-
-          items.push({
-            query: documents[i].name,
-            data_value: documents[i].name});
+      for (var i = 0; i < documents.length; i++) {
+        if (i > 10) {
+          break;
         }
 
-        search_widget.autocomplete(term, items);
+        items.push({
+          query: documents[i].name,
+          data_value: documents[i].name});
+      }
+
+      search_widget.autocomplete(term, items);
+    });
+  };
+
+  var searchSubmit = function(e) {
+    var term = e.detail.value;
+    var search_widget = this;
+
+    searchDocuments(term, function(r) {
+      var documents = JSON.parse(r.response).documents;
+      if (documents.length == 1) {
+        var path;
+        switch (documents[0].type) {
+          case "sql_query":
+            path = "/a/sql/" + documents[0].uuid;
+            break;
+
+          case "report":
+            path = "/a/reports/" + documents[0].uuid;
+            break;
+        }
+
+        var input = $("input", search_widget);
+        input.value = "";
+        input.blur();
+
+        $.navigateTo(path);
+        return;
+      } else {
+        //TODO navigate to search view?
+      }
+    });
+  };
+
+  var searchDocuments = function(term, callback) {
+    $.httpGet("/api/v1/documents?search=" + term, function(r) {
+      if (r.status == 200) {
+        callback(r);
       }
     });
   };
