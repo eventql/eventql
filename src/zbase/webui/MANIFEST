@@ -360,7 +360,7 @@ route {
 }
 
 route {
-  path_prefix: "/a/seller/"
+  path_prefix: "/a/apps/dawanda_seller_analytics/"
   view: "per_seller_stats"
   require_module: "util/event_source_handler"
   require_module: "util/z-date-util"
@@ -376,13 +376,14 @@ route {
   require_module: "widgets/z-progressbar"
   require_module: "widgets/z-daterangepicker"
   require_module: "widgets/z-calendar-group"
+  require_module: "widgets/z-search"
   require_module: "widgets/zbase-header"
   require_module: "widgets/zbase-query-progress"
   require_module: "views/seller"
 }
 
 route {
-  path_match: "/a/seller"
+  path_match: "/a/apps/dawanda_seller_analytics"
   view: "seller_overview"
   require_module: "util/z-url-util"
   require_module: "widgets/z-input"
