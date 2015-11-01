@@ -51,14 +51,15 @@ var HeaderWidget = (function() {
     var conf = $.getConfig();
     var tpl = $.getTemplate("widgets/zbase-header", "zbase_header_tpl");
 
-    var elem = document.querySelector("#zbase_header");
-    elem.innerHTML = "";
-    elem.appendChild(tpl);
-    $.onClick($(".dropdown", elem), toggleDropdown);
-    $(".change_namespace", elem).addEventListener("click", showSelectNamespacePopup);
+    $(".userid_info", tpl).innerHTML = conf.current_user.userid;
+    $(".namespace_info", tpl).innerHTML = conf.current_user.namespace;
+    $(".change_namespace", tpl).addEventListener("click", showSelectNamespacePopup);
+    $.onClick($(".dropdown", tpl), toggleDropdown);
+    $("z-search", tpl).addEventListener("z-search-autocomplete", searchAutocomplete);
+    $("z-search", tpl).addEventListener("z-search-submit", searchSubmit);
 
-    elem.querySelector(".userid_info").innerHTML = conf.current_user.userid;
-    elem.querySelector(".namespace_info").innerHTML = conf.current_user.namespace;
+    var elem = $("#zbase_header");
+    $.replaceContent(elem, tpl);
     elem.classList.remove("hidden");
 
     document.addEventListener("click", function(event) {
@@ -67,10 +68,70 @@ var HeaderWidget = (function() {
         return el;
       })(event.target, "dropdown")) return;
 
-      elem.querySelector(".dropdown").classList.remove("open");
+      $(".dropdown", elem).classList.remove("open");
     });
 
     $.handleLinks(elem);
+  };
+
+  var searchAutocomplete = function(e) {
+    var term = e.detail.value;
+    var search_widget = this;
+
+    searchDocuments(term, function(r) {
+      var documents = JSON.parse(r.response).documents;
+      var items = [];
+
+      for (var i = 0; i < documents.length; i++) {
+        if (i > 10) {
+          break;
+        }
+
+        items.push({
+          query: documents[i].name,
+          data_value: documents[i].name});
+      }
+
+      search_widget.autocomplete(term, items);
+    });
+  };
+
+  var searchSubmit = function(e) {
+    var term = e.detail.value;
+    var search_widget = this;
+
+    searchDocuments(term, function(r) {
+      var documents = JSON.parse(r.response).documents;
+      if (documents.length == 1) {
+        var path;
+        switch (documents[0].type) {
+          case "sql_query":
+            path = "/a/sql/" + documents[0].uuid;
+            break;
+
+          case "report":
+            path = "/a/reports/" + documents[0].uuid;
+            break;
+        }
+
+        var input = $("input", search_widget);
+        input.value = "";
+        input.blur();
+
+        $.navigateTo(path);
+        return;
+      } else {
+        //TODO navigate to search view?
+      }
+    });
+  };
+
+  var searchDocuments = function(term, callback) {
+    $.httpGet("/api/v1/documents?search=" + term, function(r) {
+      if (r.status == 200) {
+        callback(r);
+      }
+    });
   };
 
   var setActiveMenuItem = function() {
