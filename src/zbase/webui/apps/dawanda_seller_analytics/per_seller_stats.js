@@ -110,70 +110,14 @@ ZBase.registerView((function() {
 
   var aggregate = function(timeseries) {
     var aggregates = {};
-    var add = function(a, b) {
-      return parseFloat(a), parseFloat(b);
-    };
-
-    var sum = function(values) {
-      return values.reduce(add, 0);
-    };
-
-    //arithmetic mean
-    var mean = function(values) {
-      return (sum(values) / values.length);
-    }
-
-    //FIXME
-    var toPrecision = function(num, precision) {
-      return Math.round(num * Math.pow(10, precision)) / Math.pow(10, precision);
-    };
-
-    var metrics = {
-      gmv_eurcent: {unit: "eurcent", fn: sum},
-      gmv_per_transaction_eurcent: {unit: "eurcent", fn: mean},
-      num_purchases: {fn: sum, precision: 0},
-      num_refunds: {fn: sum, precision: 0},
-      refund_rate: {fn: sum, precision: 2},
-      refunded_gmv_eurcent: {unit: "eurcent", fn: sum},
-      total_listviews: {fn: sum, precision: 0},
-      listview_views_ads: {fn: sum, precision: 0},
-      listview_views_search_page: {fn: sum, precision: 0},
-      listview_views_catalog_page: {fn: sum, precision: 0},
-      listview_views_recos: {fn: sum, precision: 0},
-      listview_views_shop_page: {fn: sum, precision: 0},
-      listview_clicks_ads: {fn: sum, precision: 0},
-      listview_clicks_search_page: {fn: sum, precision: 0},
-      listview_clicks_catalog_page: {fn: sum, precision: 0},
-      listview_clicks_recos: {fn: sum, precision: 0},
-      listview_clicks_shop_page: {fn: sum, precision: 0},
-      listview_ctr_ads: {fn: mean, precision: 3},
-      listview_ctr_search_page: {fn: mean, precision: 3},
-      listview_ctr_catalog_page: {fn: mean, precision: 3},
-      listview_ctr_recos: {fn: mean, precision: 3},
-      listview_ctr_shop_page: {fn: mean, precision: 3},
-      num_active_products: {fn: sum, precision: 0},
-      num_listed_products: {fn: sum, precision: 0},
-      shop_page_views: {fn: sum, precision: 0},
-      product_page_views: {fn: sum, precision: 0}
-    }
 
     for (var metric in timeseries) {
-      if (metrics.hasOwnProperty(metric)) {
-        var aggr = metrics[metric].fn(timeseries[metric]);
-
-        if (isNaN(aggr)) {
-          aggregates[metric] = "-";
-          continue;
-        }
-
-        if (metrics[metric].unit == "eurcent") {
-          aggr = toPrecision(aggr / 100, 3) + "&euro;";
-        } else {
-          aggr = toPrecision(aggr, metrics[metric].precision);
-        }
-
-        aggregates[metric] = aggr;
+      if (metric == "time" || metric == "shop_id") {
+        continue;
       }
+
+      aggregates[metric] = ZBaseSellerMetrics[metric].print(
+          ZBaseSellerMetrics[metric].aggr(timeseries[metric]));
     }
 
     return aggregates;
