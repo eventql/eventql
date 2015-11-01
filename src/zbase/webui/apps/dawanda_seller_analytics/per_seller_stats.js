@@ -28,10 +28,38 @@ ZBase.registerView((function() {
     query_mgr = EventSourceHandler();
 
     var query_str =
-      "select * from shop_stats.last30d where shop_id = " +
-      seller_id + "order by time asc limit 100;";
+      "select" +
+          " time," +
+          " num_active_products," +
+          " num_listed_products," +
+          " num_purchases," +
+          " num_refunds," +
+          " refund_rate," +
+          " gmv_eurcent," +
+          " refunded_gmv_eurcent," +
+          " gmv_per_transaction_eurcent," +
+          " shop_page_views," +
+          " product_page_views," +
+          " listview_views_search_page + listview_views_shop_page + listview_views_catalog_page + listview_views_ads + listview_views_recos as total_listviews," +
+          " listview_views_search_page," +
+          " listview_clicks_search_page," +
+          " listview_ctr_search_page," +
+          " listview_views_catalog_page," +
+          " listview_clicks_catalog_page," +
+          " listview_ctr_catalog_page," +
+          " listview_views_shop_page," +
+          " listview_clicks_shop_page," +
+          " listview_ctr_shop_page," +
+          " listview_views_ads," +
+          " listview_clicks_ads," +
+          " listview_ctr_ads," +
+          " listview_views_recos," +
+          " listview_clicks_recos," +
+          " listview_ctr_recos" +
+      " from shop_stats.last30d where shop_id = " + seller_id // FIXME escaping
+      " order by time asc;";
 
-
+    console.log(query_str);
     setParamsFromAndUntil(
         UrlUtil.getParamValue(path, "from"),
         UrlUtil.getParamValue(path, "until"));
@@ -107,6 +135,7 @@ ZBase.registerView((function() {
       num_refunds: {fn: sum, precision: 0},
       refund_rate: {fn: sum, precision: 2},
       refunded_gmv_eurcent: {unit: "eurcent", fn: sum},
+      total_listviews: {fn: sum, precision: 0},
       listview_views_ads: {fn: sum, precision: 0},
       listview_views_search_page: {fn: sum, precision: 0},
       listview_views_catalog_page: {fn: sum, precision: 0},
