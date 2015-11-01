@@ -2,6 +2,11 @@
   display: inline-block;
 }
 
+.zbase_seller_stats .query_progress.hidden,
+.zbase_seller_stats .zbase_seller_overview.hidden {
+  display: none;
+}
+
 .zbase_seller_stats.overview .zbase_content {
   background: #fff;
 }

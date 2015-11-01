@@ -6,95 +6,100 @@
     <div class="zbase_content main_menu" style="padding: 0 20px;">
       <h2 class="pagetitle main"><em>DaWanda Seller Analytics</em></h2>
 
-      <div class="controls">
-        <div class="search left">
-          <label class="search_label">Seller</label>
-          <z-search class="seller" style="margin-left: 50px;">
-            <z-input class="icon" data-placeholder="Search For Seller by ID" style="position: relative; top: 1px; display: block;">
-              <z-input-icon><i class='fa fa-search'></i></z-input-icon>
-            </z-input>
-          </z-search>
+      <div class="query_progress"></div>
+
+      <div class="zbase_seller_overview hidden">
+
+        <div class="controls">
+          <div class="search left">
+            <label class="search_label">Seller</label>
+            <z-search class="seller" style="margin-left: 50px;">
+              <z-input class="icon" data-placeholder="Search For Seller by ID" style="position: relative; top: 1px; display: block;">
+                <z-input-icon><i class='fa fa-search'></i></z-input-icon>
+              </z-input>
+            </z-search>
+          </div>
+
+          <div class="control left">
+            <z-checkbox class="premium"></z-checkbox>
+            <label>Premium Seller <i class="fa fa-star"></i></label>
+          </div>
+
+          <div class="control right">
+            <label style="line-height: 30px;">Display:</label>
+            <z-dropdown class="input checkbox metrics" data-multiselect>
+              <z-dropdown-flyout>
+                <z-dropdown-items>
+                  <z-dropdown-item data-value="gmv_eurcent">
+                    <z-checkbox></z-checkbox> GMV
+                  </z-dropdown-item>
+                  <z-dropdown-item data-value="gmv_per_transaction_eurcent">
+                    <z-checkbox></z-checkbox> GMV Per Transaction
+                  </z-dropdown-item>
+                  <z-dropdown-item data-value="num_purchases">
+                    <z-checkbox></z-checkbox> Purchases
+                  </z-dropdown-item>
+                  <z-dropdown-item data-value="num_active_products">
+                    <z-checkbox></z-checkbox> Active Products
+                  </z-dropdown-item>
+                  <z-dropdown-item data-value="num_listed_products">
+                    <z-checkbox></z-checkbox> Listed Products
+                  </z-dropdown-item>
+                  <z-dropdown-item data-value="num_refunds">
+                    <z-checkbox></z-checkbox> Refunds
+                  </z-dropdown-item>
+                  <z-dropdown-item data-value="refund_rate">
+                    <z-checkbox></z-checkbox> Refund Rate
+                  </z-dropdown-item>
+                  <z-dropdown-item data-value="refunded_gmv_eurcent">
+                    <z-checkbox></z-checkbox> Refunded GMV
+                  </z-dropdown-item>
+                  <z-dropdown-item data-value="shop_page_views">
+                    <z-checkbox></z-checkbox> Shop Page Views
+                  </z-dropdown-item>
+                  <z-dropdown-item data-value="product_page_views">
+                    <z-checkbox></z-checkbox> Product Page Views
+                  </z-dropdown-item>
+                  <z-dropdown-item data-value="listview_ctr_search_page">
+                    <z-checkbox></z-checkbox> Search Page CTR
+                  </z-dropdown-item>
+                  <z-dropdown-item data-value="listview_clicks_search_page">
+                    <z-checkbox></z-checkbox> Search Page Clicks
+                  </z-dropdown-item>
+                  <z-dropdown-item data-value="listview_ctr_catalog_page">
+                    <z-checkbox></z-checkbox> Catalog Page CTR
+                  </z-dropdown-item>
+                  <z-dropdown-item data-value="listview_clicks_catalog_page">
+                    <z-checkbox></z-checkbox> Catalog Page Clicks
+                  </z-dropdown-item>
+                  <z-dropdown-item data-value="listview_ctr_shop_page">
+                    <z-checkbox></z-checkbox> Shop Page CTR
+                  </z-dropdown-item>
+                  <z-dropdown-item data-value="listview_clicks_shop_page">
+                    <z-checkbox></z-checkbox> Shop Page Clicks
+                  </z-dropdown-item>
+                  <z-dropdown-item data-value="listview_ctr_ads">
+                    <z-checkbox></z-checkbox> Ad CTR
+                  </z-dropdown-item>
+                  <z-dropdown-item data-value="listview_clicks_ads">
+                    <z-checkbox></z-checkbox> Ad Clicks
+                  </z-dropdown-item>
+                  <z-dropdown-item data-value="listview_ctr_recos">
+                    <z-checkbox></z-checkbox> Reco CTR
+                  </z-dropdown-item>
+                  <z-dropdown-item data-value="listview_clicks_recos">
+                    <z-checkbox></z-checkbox> Reco Clicks
+                  </z-dropdown-item>
+                </z-dropdown-items>
+              </z-dropdown-flyout>
+            </z-dropdown>
+          </div>
         </div>
 
-        <div class="control left">
-          <z-checkbox class="premium"></z-checkbox>
-          <label>Premium Seller <i class="fa fa-star"></i></label>
+        <div class="zbase_content_pane fullwidth" style="background: #fff;">
+          <table class="z-table zbase_clickable_table"></table>
         </div>
 
-        <div class="control right">
-          <label style="line-height: 30px;">Display:</label>
-          <z-dropdown class="input checkbox metrics" data-multiselect>
-            <z-dropdown-flyout>
-              <z-dropdown-items>
-                <z-dropdown-item data-value="gmv_eurcent">
-                  <z-checkbox></z-checkbox> GMV
-                </z-dropdown-item>
-                <z-dropdown-item data-value="gmv_per_transaction_eurcent">
-                  <z-checkbox></z-checkbox> GMV Per Transaction
-                </z-dropdown-item>
-                <z-dropdown-item data-value="num_purchases">
-                  <z-checkbox></z-checkbox> Purchases
-                </z-dropdown-item>
-                <z-dropdown-item data-value="num_active_products">
-                  <z-checkbox></z-checkbox> Active Products
-                </z-dropdown-item>
-                <z-dropdown-item data-value="num_listed_products">
-                  <z-checkbox></z-checkbox> Listed Products
-                </z-dropdown-item>
-                <z-dropdown-item data-value="num_refunds">
-                  <z-checkbox></z-checkbox> Refunds
-                </z-dropdown-item>
-                <z-dropdown-item data-value="refund_rate">
-                  <z-checkbox></z-checkbox> Refund Rate
-                </z-dropdown-item>
-                <z-dropdown-item data-value="refunded_gmv_eurcent">
-                  <z-checkbox></z-checkbox> Refunded GMV
-                </z-dropdown-item>
-                <z-dropdown-item data-value="shop_page_views">
-                  <z-checkbox></z-checkbox> Shop Page Views
-                </z-dropdown-item>
-                <z-dropdown-item data-value="product_page_views">
-                  <z-checkbox></z-checkbox> Product Page Views
-                </z-dropdown-item>
-                <z-dropdown-item data-value="listview_ctr_search_page">
-                  <z-checkbox></z-checkbox> Search Page CTR
-                </z-dropdown-item>
-                <z-dropdown-item data-value="listview_clicks_search_page">
-                  <z-checkbox></z-checkbox> Search Page Clicks
-                </z-dropdown-item>
-                <z-dropdown-item data-value="listview_ctr_catalog_page">
-                  <z-checkbox></z-checkbox> Catalog Page CTR
-                </z-dropdown-item>
-                <z-dropdown-item data-value="listview_clicks_catalog_page">
-                  <z-checkbox></z-checkbox> Catalog Page Clicks
-                </z-dropdown-item>
-                <z-dropdown-item data-value="listview_ctr_shop_page">
-                  <z-checkbox></z-checkbox> Shop Page CTR
-                </z-dropdown-item>
-                <z-dropdown-item data-value="listview_clicks_shop_page">
-                  <z-checkbox></z-checkbox> Shop Page Clicks
-                </z-dropdown-item>
-                <z-dropdown-item data-value="listview_ctr_ads">
-                  <z-checkbox></z-checkbox> Ad CTR
-                </z-dropdown-item>
-                <z-dropdown-item data-value="listview_clicks_ads">
-                  <z-checkbox></z-checkbox> Ad Clicks
-                </z-dropdown-item>
-                <z-dropdown-item data-value="listview_ctr_recos">
-                  <z-checkbox></z-checkbox> Reco CTR
-                </z-dropdown-item>
-                <z-dropdown-item data-value="listview_clicks_recos">
-                  <z-checkbox></z-checkbox> Reco Clicks
-                </z-dropdown-item>
-              </z-dropdown-items>
-            </z-dropdown-flyout>
-          </z-dropdown>
-        </div>
-      </div>
-
-      <div class="zbase_content_pane fullwidth" style="background: #fff;">
-        <div class="zbase_seller_overview">
-        </div>
       </div>
 
     </div>
@@ -102,66 +107,43 @@
 </template>
 
 <template id="seller_overview_table_tpl">
-  <table class="z-table zbase_clickable_table">
-    <thead>
-      <tr>
-        <th class="shop_name">Name</th>
-        <th class="shop_id">ID</th>
-        <th class="hidden gmv_eurcent">GMV</th>
-        <th class="hidden num_purchases">Purchases</th>
-        <th class="hidden listview_ctr_search_page">Search CTR</th>
-        <th class="hidden listview_ctr_catalog_page">Catalog CTR</th>
-        <th class="hidden listview_ctr_shop_page">Shop CTR</th>
-        <th class="hidden num_listed_products">Listed Products</th>
-        <th class="hidden num_active_products">Active Products</th>
-        <th class="hidden num_refunds">Refunds</th>
-        <th class="hidden refund_rate">Refund Rate</th>
-        <th class="hidden refunded_gmv_eurcent">Refunded GMV</th>
-        <th class="hidden gmv_per_transaction_eurcent">GMV Per Transaction</th>
-        <th class="hidden shop_page_views">Shop Views</th>
-        <th class="hidden product_page_views">Product Views</th>
-        <th class="hidden listview_clicks_search_page">Search Clicks</th>
-        <th class="hidden listview_clicks_catalog_page">Catalog Clicks</th>
-        <th class="hidden listview_clicks_shop_page">Shop Clicks</th>
-        <th class="hidden listview_ctr_ads">Ad CTR</th>
-        <th class="hidden listview_clicks_ads">Ad Clicks</th>
-        <th class="hidden listview_ctr_recos">Reco CTR</th>
-        <th class="hidden listview_clicks_recos">Reco Clicks</th>
-        <th style="width: 60px;"></th>
-      </tr>
-    </thead>
+  <thead>
+    <tr>
+      <th class="shop_name hidden">Name</th>
+      <th class="shop_id">ID</th>
+      <th class="hidden total_gmv">GMV</th>
+      <th class="hidden num_purchases">Purchases</th>
+      <th class="hidden listview_ctr_search_page">Search CTR</th>
+      <th class="hidden listview_ctr_catalog_page">Catalog CTR</th>
+      <th class="hidden listview_ctr_shop_page">Shop CTR</th>
+      <th class="hidden num_listed_products">Listed Products</th>
+      <th class="hidden num_active_products">Active Products</th>
+      <th class="hidden num_refunds">Refunds</th>
+      <th class="hidden refund_rate">Refund Rate</th>
+      <th class="hidden refunded_gmv_eurcent">Refunded GMV</th>
+      <th class="hidden gmv_per_transaction_eurcent">GMV Per Transaction</th>
+      <th class="hidden shop_page_views">Shop Views</th>
+      <th class="hidden product_page_views">Product Views</th>
+      <th class="hidden listview_clicks_search_page">Search Clicks</th>
+      <th class="hidden listview_clicks_catalog_page">Catalog Clicks</th>
+      <th class="hidden listview_clicks_shop_page">Shop Clicks</th>
+      <th class="hidden listview_ctr_ads">Ad CTR</th>
+      <th class="hidden listview_clicks_ads">Ad Clicks</th>
+      <th class="hidden listview_ctr_recos">Reco CTR</th>
+      <th class="hidden listview_clicks_recos">Reco Clicks</th>
+      <th style="width: 60px;"></th>
+    </tr>
+  </thead>
 
-    <tbody>
-    </tbody>
-  </table>
+  <tbody>
+  </tbody>
 </template>
 
 
 <template id="seller_overview_row_tpl">
   <tr>
-    <td>
-      <a href="/a/apps/dawanda_seller_analytics/13008">Meko</a>
-    </td>
-    <td>
-      <a href="/a/apps/dawanda_seller_analytics/13008">13008</a>
-    </td>
-    <td>
-      <a href="/a/apps/dawanda_seller_analytics/13008">294&euro;</a>
-    </td>
-    <td>
-      <a href="/a/apps/dawanda_seller_analytics/13008">123</a>
-    </td>
-    <td>
-      <a href="/a/apps/dawanda_seller_analytics/13008">0.12</a>
-    </td>
-    <td>
-      <a href="/a/apps/dawanda_seller_analytics/13008">0.14</a>
-    </td>
-    <td>
-      <a href="/a/apps/dawanda_seller_analytics/13008">0.48</a>
-    </td>
-    <td class="icon">
-      <a href="/a/apps/dawanda_seller_analytics/13008"><i class="fa fa-star"></i></a>
-    </td>
+    <td class="name hidden"><a></a></td>
+    <td class="shop_id"><a></a></td>
+    <td class="total_gmv hidden"><a></a></td>
   </tr>
 </template>

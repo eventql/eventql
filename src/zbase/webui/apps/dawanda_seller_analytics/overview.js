@@ -1,4 +1,6 @@
 ZBase.registerView((function() {
+  var query_mgr;
+
   var load = function(path) {
     var page = $.getTemplate(
         "views/seller",
@@ -19,17 +21,55 @@ ZBase.registerView((function() {
     setParamPremiumSeller(UrlUtil.getParamValue(path, "premium"));
     setParamMetrics(UrlUtil.getParamValue(path, "metrics"));
 
-    renderTable($(".zbase_seller_stats .zbase_seller_overview"), []);
+    query_mgr = EventSourceHandler();
+    var query_str =
+      "select shop_id, sum(gmv_eurcent) total_gmv from shop_stats.last30d " +
+      "where gmv_eurcent > 0 group by shop_id order by total_gmv desc limit 50;";
+
+    var query = query_mgr.get(
+      "sql_query",
+      "/api/v1/sql_stream?query=" + encodeURIComponent(query_str));
+
+    query.addEventListener("result", function(e) {
+      query_mgr.close("sql_query");
+      var data = JSON.parse(e.data).results[0];
+      hideLoader();
+      renderTable($(".zbase_seller_overview table"), data);
+    });
+
+    query.addEventListener("error", function(e) {
+      query_mgr.close("sql_query");
+      $.fatalError();
+    }, false);
+
+    query.addEventListener("status", function(e) {
+      renderQueryProgress(JSON.parse(e.data));
+    }, false);
   };
 
-  var renderTable = function(elem, data) {
+  var destroy = function() {
+    query_mgr.closeAll();
+  };
+
+  var renderQueryProgress = function(progress) {
+    QueryProgressWidget.render(
+        $(".zbase_seller_stats .query_progress"),
+        progress);
+  };
+
+  var hideLoader = function() {
+    $(".zbase_seller_stats .zbase_seller_overview").classList.remove("hidden");
+    $(".zbase_seller_stats .query_progress").classList.add("hidden");
+  };
+
+  var renderTable = function(elem, result) {
     var metrics = $(".zbase_seller_stats z-dropdown.metrics").getValue().split(",");
 
     var table_tpl = $.getTemplate(
         "views/seller_overview",
         "seller_overview_table_tpl");
 
-    metrics.forEach(function(metric) {
+    result.columns.forEach(function(metric) {
       $("th." + metric, table_tpl).classList.remove("hidden");
     });
 
@@ -38,9 +78,20 @@ ZBase.registerView((function() {
         "seller_overview_row_tpl");
 
     var tbody = $("tbody", table_tpl);
-    for (var i = 0; i < 10; i++) {
-      tbody.appendChild(tr_tpl.cloneNode(true));
-    }
+    result.rows.forEach(function(row) {
+      var tr = tr_tpl.cloneNode(true);
+      var url = "/a/apps/dawanda_seller_analytics/" + row[0]
+
+      for (var i = 0; i < row.length; i++) {
+        var td = $("td." + result.columns[i], tr);
+        var a = $("a", td);
+        a.innerHTML = row[i];
+        a.href = url;
+        td.classList.remove("hidden");
+      }
+
+      tbody.appendChild(tr);
+    });
 
     $.replaceContent(elem, table_tpl);
 
@@ -88,7 +139,7 @@ ZBase.registerView((function() {
   return {
     name: "seller_overview",
     loadView: function(params) {load(params.path);},
-    unloadView: function() {},
+    unloadView: destroy,
     handleNavigationChange: load
   };
 
