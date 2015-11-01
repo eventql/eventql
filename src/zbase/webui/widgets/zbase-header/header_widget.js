@@ -51,14 +51,13 @@ var HeaderWidget = (function() {
     var conf = $.getConfig();
     var tpl = $.getTemplate("widgets/zbase-header", "zbase_header_tpl");
 
-    var elem = document.querySelector("#zbase_header");
-    elem.innerHTML = "";
-    elem.appendChild(tpl);
-    $.onClick($(".dropdown", elem), toggleDropdown);
-    $(".change_namespace", elem).addEventListener("click", showSelectNamespacePopup);
+    $(".userid_info", tpl).innerHTML = conf.current_user.userid;
+    $(".namespace_info", tpl).innerHTML = conf.current_user.namespace;
+    $(".change_namespace", tpl).addEventListener("click", showSelectNamespacePopup);
+    $.onClick($(".dropdown", tpl), toggleDropdown);
 
-    elem.querySelector(".userid_info").innerHTML = conf.current_user.userid;
-    elem.querySelector(".namespace_info").innerHTML = conf.current_user.namespace;
+    var elem = $("#zbase_header");
+    $.replaceContent(elem, tpl);
     elem.classList.remove("hidden");
 
     document.addEventListener("click", function(event) {
@@ -67,7 +66,7 @@ var HeaderWidget = (function() {
         return el;
       })(event.target, "dropdown")) return;
 
-      elem.querySelector(".dropdown").classList.remove("open");
+      $(".dropdown", elem).classList.remove("open");
     });
 
     $.handleLinks(elem);
