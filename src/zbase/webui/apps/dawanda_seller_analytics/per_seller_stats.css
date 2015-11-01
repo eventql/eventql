@@ -117,7 +117,6 @@
 .zbase_seller_stats .per_seller .controls > button {
   background-color: #F4F4F4;
   background-image: -webkit-gradient(linear, left top, left bottom, from(#fefefe), to(#e9e9e9));
-  background-image: -webkit-linear-gradient(top, #fefefe, #e9e9e9);
   background-image: -moz-linear-gradient(top, #fefefe, #e9e9e9);
   background-image: -ms-linear-gradient(top, #fefefe, #e9e9e9);
   background-image: -o-linear-gradient(top, #fefefe, #e9e9e9);
@@ -133,6 +132,10 @@
   height: 29px;
   float: left;
   margin-top: 13px;
+}
+
+.zbase_seller_stats .per_seller .controls > button[data-state="active"] {
+  background-image: -webkit-linear-gradient(top, #e1e1e1, #e9e9e9);
 }
 
 .zbase_seller_stats .per_seller .controls label {
