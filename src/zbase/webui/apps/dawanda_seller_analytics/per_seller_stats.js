@@ -20,6 +20,7 @@ ZBase.registerView((function() {
 
     $.onClick($("button.view.sparkline", page), onViewButtonClick);
     $.onClick($("button.view.table", page), onViewButtonClick);
+    $("z-dropdown.metrics", page).addEventListener("change", onMetricsParamChanged);
 
 
     $.handleLinks(page);
@@ -59,12 +60,12 @@ ZBase.registerView((function() {
       " from shop_stats.last30d where shop_id = " + seller_id // FIXME escaping
       " order by time asc;";
 
-    console.log(query_str);
     setParamsFromAndUntil(
         UrlUtil.getParamValue(path, "from"),
         UrlUtil.getParamValue(path, "until"));
 
     setParamView(UrlUtil.getParamValue(path, "view"));
+    setParamMetrics(UrlUtil.getParamValue(path, "metrics"));
 
     var query = query_mgr.get(
         "sql_query",
@@ -74,7 +75,6 @@ ZBase.registerView((function() {
       query_mgr.close("sql_query");
       var data = JSON.parse(e.data).results[0];
 
-      console.log(data);
       var values = [];
       for (var i = 0; i < data.columns.length; i++) {
         values.push([]);
@@ -95,6 +95,7 @@ ZBase.registerView((function() {
 
       result.aggregates = aggregate(result.timeseries);
 
+      $(".zbase_seller_stats .controls").classList.remove("hidden");
       renderView(path);
     }, false);
 
@@ -110,70 +111,14 @@ ZBase.registerView((function() {
 
   var aggregate = function(timeseries) {
     var aggregates = {};
-    var add = function(a, b) {
-      return parseFloat(a), parseFloat(b);
-    };
-
-    var sum = function(values) {
-      return values.reduce(add, 0);
-    };
-
-    //arithmetic mean
-    var mean = function(values) {
-      return (sum(values) / values.length);
-    }
-
-    //FIXME
-    var toPrecision = function(num, precision) {
-      return Math.round(num * Math.pow(10, precision)) / Math.pow(10, precision);
-    };
-
-    var metrics = {
-      gmv_eurcent: {unit: "eurcent", fn: sum},
-      gmv_per_transaction_eurcent: {unit: "eurcent", fn: mean},
-      num_purchases: {fn: sum, precision: 0},
-      num_refunds: {fn: sum, precision: 0},
-      refund_rate: {fn: sum, precision: 2},
-      refunded_gmv_eurcent: {unit: "eurcent", fn: sum},
-      total_listviews: {fn: sum, precision: 0},
-      listview_views_ads: {fn: sum, precision: 0},
-      listview_views_search_page: {fn: sum, precision: 0},
-      listview_views_catalog_page: {fn: sum, precision: 0},
-      listview_views_recos: {fn: sum, precision: 0},
-      listview_views_shop_page: {fn: sum, precision: 0},
-      listview_clicks_ads: {fn: sum, precision: 0},
-      listview_clicks_search_page: {fn: sum, precision: 0},
-      listview_clicks_catalog_page: {fn: sum, precision: 0},
-      listview_clicks_recos: {fn: sum, precision: 0},
-      listview_clicks_shop_page: {fn: sum, precision: 0},
-      listview_ctr_ads: {fn: mean, precision: 3},
-      listview_ctr_search_page: {fn: mean, precision: 3},
-      listview_ctr_catalog_page: {fn: mean, precision: 3},
-      listview_ctr_recos: {fn: mean, precision: 3},
-      listview_ctr_shop_page: {fn: mean, precision: 3},
-      num_active_products: {fn: sum, precision: 0},
-      num_listed_products: {fn: sum, precision: 0},
-      shop_page_views: {fn: sum, precision: 0},
-      product_page_views: {fn: sum, precision: 0}
-    }
 
     for (var metric in timeseries) {
-      if (metrics.hasOwnProperty(metric)) {
-        var aggr = metrics[metric].fn(timeseries[metric]);
-
-        if (isNaN(aggr)) {
-          aggregates[metric] = "-";
-          continue;
-        }
-
-        if (metrics[metric].unit == "eurcent") {
-          aggr = toPrecision(aggr / 100, 3) + "&euro;";
-        } else {
-          aggr = toPrecision(aggr, metrics[metric].precision);
-        }
-
-        aggregates[metric] = aggr;
+      if (metric == "time" || metric == "shop_id") {
+        continue;
       }
+
+      aggregates[metric] = ZBaseSellerMetrics[metric].print(
+          ZBaseSellerMetrics[metric].aggr(timeseries[metric]));
     }
 
     return aggregates;
@@ -196,10 +141,17 @@ ZBase.registerView((function() {
     }
 
     var view = getParamView();
+    var metrics = getMetrics();
     if (view == "table") {
-      PerSellerTableOverview.render($(".zbase_seller_overview"), result, path);
+      PerSellerTableOverview.render(
+          $(".zbase_seller_overview"),
+          result,
+          metrics);
     } else {
-      PerSellerSparklineOverview.render($(".zbase_seller_overview"), result);
+      PerSellerSparklineOverview.render(
+          $(".zbase_seller_overview"),
+          result,
+          metrics);
     }
   };
 
@@ -230,11 +182,32 @@ ZBase.registerView((function() {
         "data-value");
   };
 
+  var setParamMetrics = function(metrics) {
+    if (metrics) {
+      $(".zbase_seller_stats z-dropdown.metrics").setValue(
+          decodeURIComponent(metrics).split(","));
+    }
+  };
+
+  var getMetrics = function() {
+    var metrics = {time: true};
+    $(".zbase_seller_stats z-dropdown.metrics")
+        .getValue()
+        .split(",")
+        .forEach(function(metric) {
+          metrics[metric] = true;
+        });
+
+    return metrics;
+  };
+
   var getUrl = function() {
     //var params = $(".zbase_seller_stats z-daterangepicker").getValue();
     var params = {};
     params.view = $(".zbase_seller_stats button.view[data-state='active']")
         .getAttribute("data-value");
+    params.metrics = encodeURIComponent(
+        $(".zbase_seller_stats z-dropdown.metrics").getValue());
     return path_prefix + seller_id + "?" + $.buildQueryString(params);
   };
 
@@ -248,6 +221,13 @@ ZBase.registerView((function() {
 
     this.setAttribute("data-state", "active");
 
+    renderView();
+
+    var path = getUrl();
+    history.pushState({path: path}, "", path);
+  };
+
+  var onMetricsParamChanged = function() {
     renderView();
 
     var path = getUrl();

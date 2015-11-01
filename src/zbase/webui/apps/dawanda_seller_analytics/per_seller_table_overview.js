@@ -1,26 +1,16 @@
 var PerSellerTableOverview = (function() {
-  var render = function(elem, result, path) {
+  var render = function(elem, result, metrics) {
     var tpl = $.getTemplate(
         "views/seller",
         "per_seller_table_overview_main_tpl");
 
     var table = $("table", tpl);
-    $("z-dropdown.metrics").addEventListener("change", function() {
-      renderTable(table, result.timeseries);
-      var new_path = UrlUtil.addOrModifyUrlParam(
-          path,
-          "metrics",
-          encodeURIComponent(this.getValue()));
-      history.pushState({path: new_path}, "", new_path);
-    }, false);
-
     $.replaceContent(elem, tpl);
 
-    setParamTableMetrics(UrlUtil.getParamValue(path, "metrics"));
-    renderTable(table, result.timeseries);
+    renderTable(table, result.timeseries, metrics);
   };
 
-  var renderTable = function(elem, timeseries) {
+  var renderTable = function(elem, timeseries, metrics) {
     var table_tpl = $.getTemplate(
         "views/seller",
         "per_seller_table_overview_table_tpl");
@@ -30,11 +20,6 @@ var PerSellerTableOverview = (function() {
         "per_seller_table_overview_row_tpl");
 
     var tbody = $("tbody", table_tpl);
-
-    var metrics = {time: true};
-    getParamTableMetrics().split(",").forEach(function(metric) {
-      metrics[metric] = true;
-    });
 
     for (var metric in metrics) {
       $("th." + metric, table_tpl).classList.remove("hidden");
@@ -46,7 +31,7 @@ var PerSellerTableOverview = (function() {
       for (var metric in timeseries) {
         var td = $("td." + metric, tr);
 
-        //REMOVEME
+        //REMOVEME 
         if (!td) {
           continue;
         }
@@ -54,7 +39,7 @@ var PerSellerTableOverview = (function() {
 
         if (metrics.hasOwnProperty(metric)) {
           td.classList.remove("hidden");
-          td.innerHTML = timeseries[metric][i];
+          td.innerHTML = ZBaseSellerMetrics[metric].print(timeseries[metric][i]);
         }
       }
 
@@ -62,16 +47,6 @@ var PerSellerTableOverview = (function() {
     }
 
     $.replaceContent(elem, table_tpl);
-  };
-
-  var setParamTableMetrics = function(metrics) {
-    if (metrics) {
-      $(".per_seller_table z-dropdown.metrics").setValue(metrics.split(","));
-    }
-  };
-
-  var getParamTableMetrics = function() {
-    return $(".zbase_seller_stats z-dropdown.metrics").getValue();
   };
 
   return {
