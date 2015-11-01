@@ -54,7 +54,7 @@ var PerSellerTableOverview = (function() {
 
         if (metrics.hasOwnProperty(metric)) {
           td.classList.remove("hidden");
-          td.innerHTML = timeseries[metric][i];
+          td.innerHTML = ZBaseSellerMetrics[metric].print(timeseries[metric][i]);
         }
       }
 
