@@ -74,7 +74,6 @@ ZBase.registerView((function() {
       query_mgr.close("sql_query");
       var data = JSON.parse(e.data).results[0];
 
-      console.log(data);
       var values = [];
       for (var i = 0; i < data.columns.length; i++) {
         values.push([]);
@@ -95,6 +94,7 @@ ZBase.registerView((function() {
 
       result.aggregates = aggregate(result.timeseries);
 
+      $(".zbase_seller_stats .controls").classList.remove("hidden");
       renderView(path);
     }, false);
 
