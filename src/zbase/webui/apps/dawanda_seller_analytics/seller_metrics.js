@@ -1,6 +1,6 @@
 var ZBaseSellerMetrics = (function() {
   var add = function(a, b) {
-    return parseFloat(a), parseFloat(b);
+    return parseFloat(a) + parseFloat(b);
   };
 
   var sum = function(values) {
