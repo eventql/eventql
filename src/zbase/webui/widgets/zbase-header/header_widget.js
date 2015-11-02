@@ -1,8 +1,74 @@
 var HeaderWidget = (function() {
 
+  var render = function() {
+    var conf = $.getConfig();
+    var tpl = $.getTemplate("widgets/zbase-header", "zbase_header_tpl");
+
+    $(".userid_info", tpl).innerHTML = conf.current_user.userid;
+    $(".namespace_info", tpl).innerHTML = conf.current_user.namespace;
+
+    $(".change_namespace", tpl).addEventListener("click", showSelectNamespacePopup);
+    $.onClick($(".dropdown", tpl), toggleDropdown);
+    $("z-search", tpl).addEventListener("z-search-autocomplete", searchAutocomplete);
+    $("z-search", tpl).addEventListener("z-search-submit", searchSubmit);
+    $("z-dropdown.new_query", tpl).addEventListener("change", createNewDocument);
+
+    var elem = $("#zbase_header");
+    $.replaceContent(elem, tpl);
+    elem.classList.remove("hidden");
+
+    document.addEventListener("click", function(event) {
+      if ((function getParentWithClass(el, className) {
+        while ((el = el.parentElement) && !el.classList.contains(className));
+        return el;
+      })(event.target, "dropdown")) return;
+
+      $(".dropdown", elem).classList.remove("open");
+    });
+
+    $.handleLinks(elem);
+  };
+
+  var update = function(path) {
+    var elem = $("#zbase_header");
+    var input = $("z-search input", elem);
+
+    if (!input) {
+      return;
+    }
+
+    if (path.indexOf("/a/search") > -1) {
+      var qparam = UrlUtil.getParamValue(path, "q");
+      if (qparam != null) {
+        input.value = qparam;
+        return;
+      }
+    }
+
+    input.value = "";
+    /*
+    var items = elem.querySelectorAll(".nav");
+    var prev_active_item = $(".nav.active", elem);
+    var active_item;
+
+    if (prev_active_item) {
+      prev_active_item.classList.remove("active");
+    }
+
+    for (var i = 0; i < items.length; i++) {
+      if (path.indexOf(items[i].getAttribute("href")) == 0) {
+        active_item = items[i];
+      }
+    }
+
+    if (active_item) {
+      active_item.classList.add("active");
+    }*/
+  };
+
   var toggleDropdown = function() {
     this.classList.toggle("open");
-  }
+  };
 
   var showSelectNamespacePopup = function() {
     ZBase.showLoader();
@@ -45,34 +111,6 @@ var HeaderWidget = (function() {
         });
       });
     });
-  }
-
-  var render = function() {
-    var conf = $.getConfig();
-    var tpl = $.getTemplate("widgets/zbase-header", "zbase_header_tpl");
-
-    $(".userid_info", tpl).innerHTML = conf.current_user.userid;
-    $(".namespace_info", tpl).innerHTML = conf.current_user.namespace;
-    $(".change_namespace", tpl).addEventListener("click", showSelectNamespacePopup);
-    $.onClick($(".dropdown", tpl), toggleDropdown);
-    $("z-search", tpl).addEventListener("z-search-autocomplete", searchAutocomplete);
-    $("z-search", tpl).addEventListener("z-search-submit", searchSubmit);
-    $("z-dropdown.new_query", tpl).addEventListener("change", createNewDocument);
-
-    var elem = $("#zbase_header");
-    $.replaceContent(elem, tpl);
-    elem.classList.remove("hidden");
-
-    document.addEventListener("click", function(event) {
-      if ((function getParentWithClass(el, className) {
-        while ((el = el.parentElement) && !el.classList.contains(className));
-        return el;
-      })(event.target, "dropdown")) return;
-
-      $(".dropdown", elem).classList.remove("open");
-    });
-
-    $.handleLinks(elem);
   };
 
   var createNewDocument = function() {
@@ -104,33 +142,8 @@ var HeaderWidget = (function() {
   };
 
   var searchSubmit = function(e) {
-    var term = e.detail.value;
-    var search_widget = this;
-
-    searchDocuments(term, function(r) {
-      var documents = JSON.parse(r.response).documents;
-      if (documents.length == 1) {
-        var path;
-        switch (documents[0].type) {
-          case "sql_query":
-            path = "/a/sql/" + documents[0].uuid;
-            break;
-
-          case "report":
-            path = "/a/reports/" + documents[0].uuid;
-            break;
-        }
-
-        var input = $("input", search_widget);
-        input.value = "";
-        input.blur();
-
-        $.navigateTo(path);
-        return;
-      } else {
-        //TODO navigate to search view?
-      }
-    });
+    $("input", this).blur();
+    $.navigateTo("/a/search?q=" + e.detail.value);
   };
 
   var searchDocuments = function(term, callback) {
@@ -141,31 +154,9 @@ var HeaderWidget = (function() {
     });
   };
 
-  var setActiveMenuItem = function() {
-    var path = window.location.pathname;
-    var elem = $("#zbase_header");
-    var items = elem.querySelectorAll(".nav");
-    var prev_active_item = $(".nav.active", elem);
-    var active_item;
-
-    if (prev_active_item) {
-      prev_active_item.classList.remove("active");
-    }
-
-    for (var i = 0; i < items.length; i++) {
-      if (path.indexOf(items[i].getAttribute("href")) == 0) {
-        active_item = items[i];
-      }
-    }
-
-    if (active_item) {
-      active_item.classList.add("active");
-    }
-  };
-
   return {
     render: render,
-    setActiveItem: setActiveMenuItem
+    update: update
   };
 
 })();
