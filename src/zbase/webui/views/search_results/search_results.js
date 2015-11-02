@@ -1,0 +1,70 @@
+ZBase.registerView((function() {
+
+  var load = function(path) {
+    var tpl = $.getTemplate(
+        "views/search_results",
+        "zbase_search_results_main_tpl");
+
+    var main_menu = ZBaseMainMenu();
+    main_menu.render($(".zbase_main_menu", tpl), path);
+
+    var search_term = UrlUtil.getParamValue(path, "q");
+
+    $.httpGet("/api/v1/documents?search=" + search_term, function(r) {
+      if (r.status == 200) {
+        var resp = JSON.parse(r.response);
+
+        if (resp.documents.length > 1) {
+          renderTable(resp.documents);
+        }
+      }
+    });
+
+    $.replaceViewport(tpl);
+  };
+
+  var renderTable = function(docs) {
+    var tbody = $(".zbase_search_results tbody");
+    var tr_tpl = $.getTemplate(
+        "views/search_results",
+        "zbase_search_results_row_tpl");
+
+    docs.forEach(function(doc) {
+      var tr = tr_tpl.cloneNode(true);
+      var url = getUrlForDocType(doc.type) + doc.uuid;
+
+      var name = $(".name", tr);
+      name.href = url;
+      name.innerHTML = $.escapeHTML(doc.name);
+
+      var type = $(".type", tr);
+      type.href = url;
+      type.innerHTML = $.escapeHTML(doc.type);
+
+      var modified = $(".modified", tr);
+      modified.href = url;
+      modified.innerHTML = DateUtil.printTimeAgo(doc.mtime);
+
+      tbody.appendChild(tr);
+    });
+  };
+
+  var getUrlForDocType = function(doc_type) {
+    switch (doc_type) {
+      case "report":
+        return "/a/reports/";
+
+      case "sql_query":
+        return "/a/sql/";
+    }
+  };
+
+
+  return {
+    name: "search_results",
+    loadView: function(params) { load(params.path); },
+    unloadView: function() {},
+    handleNavigationChange: load
+  };
+
+})());

@@ -1,0 +1,21 @@
+.zbase_search_results table.z-table {
+  table-layout: fixed;
+  font-size: 13px;
+}
+
+.zbase_search_results table.z-table thead th {
+  font-weight: 400;
+  color: #888;
+}
+
+.zbase_search_results table.z-table tbody tr td {
+  line-height: 24px;
+}
+
+.zbase_search_results table.z-table tbody tr a {
+  color: #888;
+}
+
+.zbase_search_results table.z-table tbody tr a.name {
+  color: #000;
+}
