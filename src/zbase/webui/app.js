@@ -371,7 +371,13 @@ var ZBase = (function() {
 
     // render header
     if (conf.current_user) {
-      ZBase.loadModules(["widgets/zbase-header"], function() {
+      var global_modules = [
+        "widgets/zbase-header",
+        "widgets/z-search",
+        "widgets/z-dropdown"
+      ];
+
+      ZBase.loadModules(global_modules, function() {
         HeaderWidget.render();
       });
     } else {
