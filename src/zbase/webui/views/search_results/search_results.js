@@ -68,6 +68,14 @@ ZBase.registerView((function() {
     $.replaceContent(elem, table);
   };
 
+  var renderMessage = function(elem) {
+    var tpl = $.getTemplate(
+        "views/search_results",
+        "zbase_search_results_message_tpl");
+
+    $.replaceContent(elem, tpl);
+  };
+
   var getUrlForDocType = function(doc_type) {
     switch (doc_type) {
       case "report":
