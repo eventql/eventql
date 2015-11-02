@@ -106,11 +106,12 @@ var HeaderWidget = (function() {
   var searchSubmit = function(e) {
     var term = e.detail.value;
     var search_widget = this;
+    var input = $("input", search_widget);
+    var path;
 
     searchDocuments(term, function(r) {
       var documents = JSON.parse(r.response).documents;
       if (documents.length == 1) {
-        var path;
         switch (documents[0].type) {
           case "sql_query":
             path = "/a/sql/" + documents[0].uuid;
@@ -121,15 +122,14 @@ var HeaderWidget = (function() {
             break;
         }
 
-        var input = $("input", search_widget);
         input.value = "";
-        input.blur();
-
-        $.navigateTo(path);
         return;
       } else {
-        //TODO navigate to search view?
+        path = "/a/search?q=" + term;
       }
+
+      input.blur();
+      $.navigateTo(path);
     });
   };
 
