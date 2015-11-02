@@ -22,7 +22,7 @@ ZBase.registerView((function() {
 
         if (resp.documents.length == 1 && resp.documents[0].name == search_term) {
           var doc = resp.documents[0];
-          //TODO pop search path from history
+          $.popHistoryState();
           $.navigateTo(getUrlForDocType(doc.type) + doc.uuid);
           return;
         }
