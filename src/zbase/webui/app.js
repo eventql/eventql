@@ -161,7 +161,7 @@ var ZBase = (function() {
     loadModules(route.modules, function() {
       applyNavigationChange();
       if (config.current_user) {
-        HeaderWidget.setActiveItem();
+        HeaderWidget.update(path);
       }
     });
   };
