@@ -13,6 +13,8 @@
 
 - solr item boost javascript mareduce
 - new dawanda pixel live [fat pageview event]
+  - track shop search
+  - track marketing pages 
 - dawanda category stats app
 - dawanda seo dashboard
 - dawanda internal search dashboard
