@@ -11,6 +11,16 @@
 - [x] new Tracking Pixel API
 - [ ] first free-standing complete/complex "app" [maybe docker monitoring because we know it? or the automated marketing campaign manager?]
 
+- solr item boost javascript mareduce
+- new dawanda pixel live [fat pageview event]
+- dawanda category stats app
+- dawanda seo dashboard
+- dawanda internal search dashboard
+- table viewer
+- metrics support
+- segment tool
+- chart builder tool
+-
 ### backlog
 
 - [ ] Dashboards
