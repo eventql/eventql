@@ -16,6 +16,7 @@ ZBase.registerView((function() {
 
         if (resp.documents.length == 0) {
           console.log(resp);
+          renderMessage($(".zbase_search_results .search_results"));
           return;
         }
 
@@ -26,18 +27,24 @@ ZBase.registerView((function() {
           return;
         }
 
-        renderTable(resp.documents);
+        renderTable($(".zbase_search_results .search_results"), resp.documents);
       }
     });
 
     $.replaceViewport(tpl);
   };
 
-  var renderTable = function(docs) {
-    var tbody = $(".zbase_search_results tbody");
+  var renderTable = function(elem, docs) {
+    var table = $.getTemplate(
+        "views/search_results",
+        "zbase_search_results_table_tpl");
+
     var tr_tpl = $.getTemplate(
         "views/search_results",
         "zbase_search_results_row_tpl");
+
+    var tbody = $("tbody", table);
+
 
     docs.forEach(function(doc) {
       var tr = tr_tpl.cloneNode(true);
@@ -57,6 +64,8 @@ ZBase.registerView((function() {
 
       tbody.appendChild(tr);
     });
+
+    $.replaceContent(elem, table);
   };
 
   var getUrlForDocType = function(doc_type) {
