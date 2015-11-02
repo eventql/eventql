@@ -108,7 +108,10 @@ ZBase.registerView((function() {
 
     result.columns.forEach(function(metric) {
       if (metrics[metric]) {
-        $("th." + metric, table_tpl).classList.remove("hidden");
+        var th = $("th." + metric, table_tpl);
+        th.classList.remove("hidden");
+        $.onClick($(".asc", th), orderByParamChanged);
+        $.onClick($(".desc", th), orderByParamChanged);
       }
     });
 
@@ -169,6 +172,10 @@ ZBase.registerView((function() {
 
   var paramChanged = function() {
     $.navigateTo(path_prefix + "?" + $.buildQueryString(getQueryString()));
+  };
+
+  var orderByParamChanged = function() {
+    console.log(this);
   };
 
   return {
