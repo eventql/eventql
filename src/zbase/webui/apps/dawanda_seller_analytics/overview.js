@@ -14,7 +14,7 @@ ZBase.registerView((function() {
     $.onClick($("z-checkbox.premium", page), paramChanged);
     $("z-search.seller", page).addEventListener("z-search-submit", paramChanged);
     $("z-dropdown.metrics", page).addEventListener("change", function() {
-      renderTable($(".zbase_seller_overview table"), result);
+      renderTable($(".zbase_seller_overview table"), result, path);
       $.pushHistoryState(path_prefix + "?" + $.buildQueryString(getQueryString()));
     });
 
@@ -24,6 +24,12 @@ ZBase.registerView((function() {
     setParamSeller(UrlUtil.getParamValue(path, "seller"));
     setParamPremiumSeller(UrlUtil.getParamValue(path, "premium"));
     setParamMetrics(UrlUtil.getParamValue(path, "metrics"));
+    setParamsOrder(
+        UrlUtil.getParamValue(path, "order_by"),
+        UrlUtil.getParamValue(path, "order_fn"));
+
+    var order = getParamsOrder();
+    console.log(order);
 
     query_mgr = EventSourceHandler();
     var query_str =
@@ -65,7 +71,7 @@ ZBase.registerView((function() {
       query_mgr.close("sql_query");
       result = JSON.parse(e.data).results[0];
       hideLoader();
-      renderTable($(".zbase_seller_overview table"), result);
+      renderTable($(".zbase_seller_overview table"), result, path);
     });
 
     query.addEventListener("error", function(e) {
@@ -93,7 +99,7 @@ ZBase.registerView((function() {
     $(".zbase_seller_stats .query_progress").classList.add("hidden");
   };
 
-  var renderTable = function(elem, result) {
+  var renderTable = function(elem, result, path) {
     var metrics = {shop_id: true};
     $(".zbase_seller_stats z-dropdown.metrics")
         .getValue()
@@ -110,8 +116,12 @@ ZBase.registerView((function() {
       if (metrics[metric]) {
         var th = $("th." + metric, table_tpl);
         th.classList.remove("hidden");
-        $.onClick($(".asc", th), orderByParamChanged);
-        $.onClick($(".desc", th), orderByParamChanged);
+        $.onClick($(".asc", th), function() {
+          orderByParamChanged(metric, "asc");
+        });
+        $.onClick($(".desc", th), function() {
+          orderByParamChanged(metric, "desc");
+        });
       }
     });
 
@@ -140,6 +150,10 @@ ZBase.registerView((function() {
 
     $.handleLinks(table_tpl);
     $.replaceContent(elem, table_tpl);
+
+    setParamsOrder(
+        UrlUtil.getParamValue(path, "order_by"),
+        UrlUtil.getParamValue(path, "order_fn"));
   };
 
   var setParamSeller = function(value) {
@@ -161,21 +175,45 @@ ZBase.registerView((function() {
     }
   };
 
-  var getQueryString = function() {
-    return {
-      seller: $(".zbase_seller_stats z-search.seller").getValue(),
-      metrics: $(".zbase_seller_stats z-dropdown.metrics").getValue(),
-      premium: $(".zbase_seller_stats z-checkbox.premium").hasAttribute(
-          "data-active")
+  var setParamsOrder = function(order_by, order_fn) {
+    if (order_by && order_fn) {
+      if ($(".zbase_seller_stats thead")) {
+        $(".zbase_seller_stats th.order_by").classList.remove("order_by");
+        $(".zbase_seller_stats th." + order_by).classList.add("order_by");
+      }
+
+      var table = $(".zbase_seller_stats table");
+      table.setAttribute("data-order-by", order_by);
+      table.setAttribute("data-order-fn", order_fn);
     }
+  };
+
+  var getParamsOrder = function() {
+    var table = $(".zbase_seller_stats table");
+
+    return {
+      order_by: table.getAttribute("data-order-by"),
+      order_fn: table.getAttribute("data-order-fn")
+    };
+  }
+
+  var getQueryString = function() {
+    var params = getParamsOrder();
+    params.seller = $(".zbase_seller_stats z-search.seller").getValue();
+    params.metrics = $(".zbase_seller_stats z-dropdown.metrics").getValue();
+    params.premium = $(".zbase_seller_stats z-checkbox.premium").hasAttribute(
+          "data-active");
+
+    return params;
   };
 
   var paramChanged = function() {
     $.navigateTo(path_prefix + "?" + $.buildQueryString(getQueryString()));
   };
 
-  var orderByParamChanged = function() {
-    console.log(this);
+  var orderByParamChanged = function(order_by, order_fn) {
+    setParamsOrder(order_by, order_fn);
+    paramChanged();
   };
 
   return {
