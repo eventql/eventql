@@ -12,16 +12,17 @@ ZBase.registerView((function() {
     main_menu.render($(".zbase_main_menu", page), path);
 
     $.onClick($("z-checkbox.premium", page), paramChanged);
-    $("z-search.seller", page).addEventListener("z-search-submit", paramChanged);
     $("z-dropdown.metrics", page).addEventListener("change", function() {
       renderTable($(".zbase_seller_overview table"), result, path);
       $.pushHistoryState(path_prefix + "?" + $.buildQueryString(getQueryString()));
+    });
+    $("z-search.seller", page).addEventListener("z-search-submit", function(e) {
+      $.navigateTo(path_prefix + "/" + e.detail.value);
     });
 
     $.handleLinks(page);
     $.replaceViewport(page);
 
-    setParamSeller(UrlUtil.getParamValue(path, "seller"));
     setParamPremiumSeller(UrlUtil.getParamValue(path, "premium"));
     setParamMetrics(UrlUtil.getParamValue(path, "metrics"));
     setParamsOrder(
@@ -156,10 +157,6 @@ ZBase.registerView((function() {
         UrlUtil.getParamValue(path, "order_fn"));
   };
 
-  var setParamSeller = function(value) {
-    $(".zbase_seller_stats z-search.seller input").value = value;
-  };
-
   var setParamPremiumSeller = function(value) {
     if (value) {
       $(".zbase_seller_stats z-checkbox.premium").setAttribute(
@@ -199,7 +196,6 @@ ZBase.registerView((function() {
 
   var getQueryString = function() {
     var params = getParamsOrder();
-    params.seller = $(".zbase_seller_stats z-search.seller").getValue();
     params.metrics = $(".zbase_seller_stats z-dropdown.metrics").getValue();
     params.premium = $(".zbase_seller_stats z-checkbox.premium").hasAttribute(
           "data-active");
