@@ -180,7 +180,8 @@
 }
 
 .zbase_header .userid_info {
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  color: #4E6370;
+  font-size: 12px;
 }
 
 .zbase_header.blue {
@@ -211,6 +212,18 @@
   width: 580px;
   margin-left: 10px;
   font-size: 13px;
+}
+
+@media (max-width: 1100px) {
+  .zbase_header z-search.search {
+    width: 480px;
+  }
+}
+
+@media (max-width: 1000px) {
+  .zbase_header z-search.search {
+    width: 400px;
+  }
 }
 
 .zbase_header z-search.search z-input input {
@@ -251,10 +264,42 @@
   float: right;
   border-right: 1px solid #eee;
   height: 32px;
-  line-height: 33px;
+  line-height: 32px;
   margin-top: 10px;
   padding: 0 16px;
-  color: #444;
+  color: #4E6370;
+  font-size: 12px;
+}
+
+.zbase_header .new_query {
+  /*border-left: 1px solid #eee;*/
+  padding-left: 4px;
+}
+
+.zbase_header .btn_documentation i,
+.zbase_header .btn_home i,
+.zbase_header .btn_settings i,
+.zbase_header z-dropdown.new_query z-dropdown-header i {
+  font-size: 16px;
+  position: relative;
+  top: 2px;
+}
+
+.zbase_header .btn_documentation span,
+.zbase_header .btn_home span,
+.zbase_header .btn_settings span,
+.zbase_header z-dropdown.new_query span {
+  margin-left: 6px;
+}
+
+
+@media (max-width: 1380px) {
+  .zbase_header .btn_documentation span,
+  .zbase_header .btn_home span,
+  .zbase_header .btn_settings span,
+  .zbase_header z-dropdown.new_query span {
+    display: none;
+  }
 }
 
 .zbase_header .btn_documentation:hover,
@@ -271,10 +316,11 @@
 }
 
 .zbase_header z-dropdown.new_query z-dropdown-header {
-  font-size: 16px;
-  color: #444;
   height: 32px;
   line-height: 33px;
+  font-size: 12px;
+  font-weight: 400;
+  color: #4E6370;
 }
 
 .zbase_header z-dropdown.new_query z-dropdown-flyout {
