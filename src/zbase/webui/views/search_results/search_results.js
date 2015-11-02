@@ -1,6 +1,7 @@
 ZBase.registerView((function() {
 
   var load = function(path) {
+    $.showLoader();
     var tpl = $.getTemplate(
         "views/search_results",
         "zbase_search_results_main_tpl");
@@ -15,7 +16,6 @@ ZBase.registerView((function() {
         var resp = JSON.parse(r.response);
 
         if (resp.documents.length == 0) {
-          console.log(resp);
           renderMessage($(".zbase_search_results .search_results"));
           return;
         }
@@ -66,6 +66,7 @@ ZBase.registerView((function() {
     });
 
     $.replaceContent(elem, table);
+    $.hideLoader();
   };
 
   var renderMessage = function(elem) {
@@ -74,6 +75,7 @@ ZBase.registerView((function() {
         "zbase_search_results_message_tpl");
 
     $.replaceContent(elem, tpl);
+    $.hideLoader();
   };
 
   var getUrlForDocType = function(doc_type) {
