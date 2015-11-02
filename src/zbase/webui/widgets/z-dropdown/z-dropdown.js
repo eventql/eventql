@@ -120,7 +120,7 @@ var DropDownComponent = function() {
   this.setValue = function(values) {
     var _this = this;
 
-    var selected_items = this.querySelectorAll("z-dropdown-item[data-selected");
+    var selected_items = this.querySelectorAll("z-dropdown-item[data-selected]");
     for (var i = 0; i < selected_items.length; i++) {
       this.unselectItem(selected_items[i]);
     }
