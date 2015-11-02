@@ -65,6 +65,14 @@
   margin-right: 3px;
 }
 
+.zbase_sql_editor h2.pagetitle.document_name {
+  margin-top: 0;
+}
+
+.zbase_sql_editor h2.pagetitle.document_name.editable {
+  margin-top: 17px;
+}
+
 .zbase_sql_editor .zbase_sql_editor_infobar {
   border-bottom: 1px solid #edc3c3;
   background: #fff0f0;
