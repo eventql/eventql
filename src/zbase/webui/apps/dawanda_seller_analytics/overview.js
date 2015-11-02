@@ -29,9 +29,7 @@ ZBase.registerView((function() {
         UrlUtil.getParamValue(path, "order_fn"));
 
     var order = getParamsOrder();
-    console.log(order);
 
-    query_mgr = EventSourceHandler();
     var query_str =
       "select shop_id, " +
       "sum(num_active_products) num_active_products, " +
@@ -61,8 +59,10 @@ ZBase.registerView((function() {
       "sum(listview_clicks_recos) listview_clicks_recos, " +
       "sum(listview_ctr_recos) / count(1) listview_ctr_recos " +
       "from shop_stats.last30d " +
-      "where gmv_eurcent > 0 group by shop_id order by gmv_eurcent desc limit 20;";
+      "where gmv_eurcent > 0 group by shop_id order by " + order.order_by +
+      " " + order.order_fn + " limit 20;";
 
+    query_mgr = EventSourceHandler();
     var query = query_mgr.get(
       "sql_query",
       "/api/v1/sql_stream?query=" + encodeURIComponent(query_str));
