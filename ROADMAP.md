@@ -6,7 +6,8 @@
 - [ ] sql csv download
 - [ ] dawanda category stats app
 - [ ] dawanda seo dashboard
-- [ ]dawanda internal search dashboard
+- [ ] dawanda internal search dashboard
+- [ ] report UI v2 (documents vs dashboards)
 - [ ] table viewer
 - [ ] metrics support
 - [ ] segment tool
