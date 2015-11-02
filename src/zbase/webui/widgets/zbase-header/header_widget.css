@@ -246,6 +246,7 @@
 }
 
 .zbase_header .btn_documentation,
+.zbase_header .btn_home,
 .zbase_header .btn_settings {
   float: right;
   border-right: 1px solid #eee;
@@ -257,6 +258,7 @@
 }
 
 .zbase_header .btn_documentation:hover,
+.zbase_header .btn_home:hover,
 .zbase_header .btn_settings:hover {
   color: #3498db;
 }
