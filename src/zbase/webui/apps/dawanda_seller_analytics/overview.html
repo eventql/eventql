@@ -11,7 +11,7 @@
       <div class="zbase_seller_overview hidden">
 
         <div class="controls">
-          <div class="search left" style="display: none;">
+          <div class="search left">
             <label class="search_label">Seller</label>
             <z-search class="seller" style="margin-left: 50px;">
               <z-input class="icon" data-placeholder="Search For Seller by ID" style="position: relative; top: 1px; display: block;">
@@ -112,34 +112,33 @@
 <template id="seller_overview_table_tpl">
   <thead>
     <tr>
-      <th class="shop_id">ID <span><i class="fa fa-caret-up asc"></i><i class="fa fa-caret-down desc"></i></span></th>
-      <th class="hidden gmv_eurcent order_by">GMV <span><i class="fa fa-caret-up asc"></i><i class="fa fa-caret-down desc"></i></span></th>
-      <th class="hidden gmv_per_transaction_eurcent">GMV Per Transaction <span><i class="fa fa-caret-up asc"></i><i class="fa fa-caret-down desc"></i></span></th>
-      <th class="hidden num_purchases">Purchases <span><i class="fa fa-caret-up asc"></i><i class="fa fa-caret-down desc"></i></span></th>
-      <th class="hidden num_refunds">Refunds</th>
-      <th class="hidden refund_rate">Refund Rate</th>
+      <th class="shop_id">ID <i class="fa fa-caret-up asc"></i><i class="fa fa-caret-down desc"></i></th>
+      <th class="hidden gmv_eurcent order_by">GMV <i class="fa fa-caret-up asc"></i><i class="fa fa-caret-down desc"></i></th>
+      <th class="hidden gmv_per_transaction_eurcent">GMV Per Transaction <i class="fa fa-caret-up asc"></i><i class="fa fa-caret-down desc"></i></th>
+      <th class="hidden num_purchases">Purchases <i class="fa fa-caret-up asc"></i><i class="fa fa-caret-down desc"></i></th>
+      <th class="hidden num_refunds">Refunds <i class="fa fa-caret-up asc"></i><i class="fa fa-caret-down desc"></i></th>
+      <th class="hidden refund_rate">Refund Rate <i class="fa fa-caret-up asc"></i><i class="fa fa-caret-down desc"></i></th>
       <th class="hidden refunded_gmv_eurcent">Refunded GMV</th>
-      <th class="hidden total_listviews">Total Listviews <span><i class="fa fa-caret-up asc"></i><i class="fa fa-caret-down desc"></i></span></th>
-      <th class="hidden listview_views_ads">Ad Views</th>
-      <th class="hidden listview_clicks_ads">Ad Clicks</th>
-      <th class="hidden listview_ctr_ads">Ad CTR</th>
-      <th class="hidden listview_views_recos">Reco Views</th>
-      <th class="hidden listview_ctr_recos">Reco CTR</th>
-      <th class="hidden listview_clicks_recos">Reco Clicks</th>
-      <th class="hidden listview_views_search_page">Search Views</th>
-      <th class="hidden listview_clicks_search_page">Search Clicks</th>
-      <th class="hidden listview_ctr_search_page">Search CTR</th>
-      <th class="hidden listview_views_catalog_page">Catalog Views</th>
-      <th class="hidden listview_clicks_catalog_page">Catalog Clicks</th>
-      <th class="hidden listview_ctr_catalog_page">Catalog CTR</th>
-      <th class="hidden listview_views_shop_page">Shop Views</th>
-      <th class="hidden listview_clicks_shop_page">Shop Clicks</th>
-      <th class="hidden listview_ctr_shop_page">Shop CTR</th>
-      <th class="hidden shop_page_views">Shop Page Views</th>
-      <th class="hidden product_page_views">Product Views</th>
-      <th class="hidden num_active_products">Active Products</th>
-      <th class="hidden num_listed_products">Listed Products</th>
-      <th style="width: 60px;"></th>
+      <th class="hidden total_listviews">Total Listviews <i class="fa fa-caret-up asc"></i><i class="fa fa-caret-down desc"></i></th>
+      <th class="hidden listview_views_ads">Ad Views <i class="fa fa-caret-up asc"></i><i class="fa fa-caret-down desc"></i></th>
+      <th class="hidden listview_clicks_ads">Ad Clicks <i class="fa fa-caret-up asc"></i><i class="fa fa-caret-down desc"></i></th>
+      <th class="hidden listview_ctr_ads">Ad CTR <i class="fa fa-caret-up asc"></i><i class="fa fa-caret-down desc"></i></th>
+      <th class="hidden listview_views_recos">Reco Views <i class="fa fa-caret-up asc"></i><i class="fa fa-caret-down desc"></i></th>
+      <th class="hidden listview_ctr_recos">Reco CTR <i class="fa fa-caret-up asc"></i><i class="fa fa-caret-down desc"></i></th>
+      <th class="hidden listview_clicks_recos">Reco Clicks <i class="fa fa-caret-up asc"></i><i class="fa fa-caret-down desc"></i></th>
+      <th class="hidden listview_views_search_page">Search Views <i class="fa fa-caret-up asc"></i><i class="fa fa-caret-down desc"></i></th>
+      <th class="hidden listview_clicks_search_page">Search Clicks <i class="fa fa-caret-up asc"></i><i class="fa fa-caret-down desc"></i></th>
+      <th class="hidden listview_ctr_search_page">Search CTR <i class="fa fa-caret-up asc"></i><i class="fa fa-caret-down desc"></i></th>
+      <th class="hidden listview_views_catalog_page">Catalog Views <i class="fa fa-caret-up asc"></i><i class="fa fa-caret-down desc"></i></th>
+      <th class="hidden listview_clicks_catalog_page">Catalog Clicks <i class="fa fa-caret-up asc"></i><i class="fa fa-caret-down desc"></i></th>
+      <th class="hidden listview_ctr_catalog_page">Catalog CTR <i class="fa fa-caret-up asc"></i><i class="fa fa-caret-down desc"></i></th>
+      <th class="hidden listview_views_shop_page">Shop Views <i class="fa fa-caret-up asc"></i><i class="fa fa-caret-down desc"></i></th>
+      <th class="hidden listview_clicks_shop_page">Shop Clicks <i class="fa fa-caret-up asc"></i><i class="fa fa-caret-down desc"></i></th>
+      <th class="hidden listview_ctr_shop_page">Shop CTR <i class="fa fa-caret-up asc"></i><i class="fa fa-caret-down desc"></i></th>
+      <th class="hidden shop_page_views">Shop Page Views <i class="fa fa-caret-up asc"></i><i class="fa fa-caret-down desc"></i></th>
+      <th class="hidden product_page_views">Product Views <i class="fa fa-caret-up asc"></i><i class="fa fa-caret-down desc"></i></th>
+      <th class="hidden num_active_products">Active Products <i class="fa fa-caret-up asc"></i><i class="fa fa-caret-down desc"></i></th>
+      <th class="hidden num_listed_products">Listed Products <i class="fa fa-caret-up asc"></i><i class="fa fa-caret-down desc"></i></th>
     </tr>
   </thead>
 
