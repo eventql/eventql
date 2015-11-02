@@ -23,8 +23,14 @@ ZBase.registerView((function() {
 
     query_mgr = EventSourceHandler();
     var query_str =
-      "select shop_id, sum(gmv_eurcent) total_gmv from shop_stats.last30d " +
-      "where gmv_eurcent > 0 group by shop_id order by total_gmv desc limit 50;";
+      "select shop_id, sum(gmv_eurcent) gmv_eurcent, " +
+      "sum(gmv_per_transaction_eurcent) / count(1) gmv_per_transaction_eurcent, " +
+      "sum(num_purchases) num_purchases, " +
+      "sum(shop_page_views) shop_page_views, " +
+      "sum(product_page_views) product_page_views, " +
+      "sum(listview_views_search_page) + sum(listview_views_shop_page) + sum(listview_views_catalog_page) + sum(listview_views_ads) + sum(listview_views_recos) as total_listviews " +
+      "from shop_stats.last30d " +
+      "where gmv_eurcent > 0 group by shop_id order by gmv_eurcent desc limit 50;";
 
     var query = query_mgr.get(
       "sql_query",
