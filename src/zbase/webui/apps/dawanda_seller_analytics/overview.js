@@ -91,7 +91,7 @@ ZBase.registerView((function() {
       for (var i = 0; i < row.length; i++) {
         var td = $("td." + result.columns[i], tr);
         var a = $("a", td);
-        a.innerHTML = row[i];
+        a.innerHTML = ZBaseSellerMetrics[result.columns[i]].print(row[i]);
         a.href = url;
         td.classList.remove("hidden");
       }
