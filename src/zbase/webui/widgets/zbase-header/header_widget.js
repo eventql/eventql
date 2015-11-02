@@ -33,6 +33,10 @@ var HeaderWidget = (function() {
     var elem = $("#zbase_header");
     var input = $("z-search input", elem);
 
+    if (!input) {
+      return;
+    }
+
     if (path.indexOf("/a/search") > -1) {
       var qparam = UrlUtil.getParamValue(path, "q");
       if (qparam != null) {
