@@ -23,14 +23,35 @@ ZBase.registerView((function() {
 
     query_mgr = EventSourceHandler();
     var query_str =
-      "select shop_id, sum(gmv_eurcent) gmv_eurcent, " +
-      "sum(gmv_per_transaction_eurcent) / count(1) gmv_per_transaction_eurcent, " +
+      "select shop_id, " +
+      "sum(num_active_products) num_active_products, " +
+      "sum(num_listed_products) num_listed_products, " +
       "sum(num_purchases) num_purchases, " +
+      "sum(num_refunds) num_refunds," +
+      "sum(refund_rate) refund_rate," +
+      "sum(gmv_eurcent) gmv_eurcent, " +
+      "sum(refunded_gmv_eurcent) refunded_gmv_eurcent," +
+      "sum(gmv_per_transaction_eurcent) / count(1) gmv_per_transaction_eurcent, " +
       "sum(shop_page_views) shop_page_views, " +
       "sum(product_page_views) product_page_views, " +
-      "sum(listview_views_search_page) + sum(listview_views_shop_page) + sum(listview_views_catalog_page) + sum(listview_views_ads) + sum(listview_views_recos) as total_listviews " +
+      "sum(listview_views_search_page) + sum(listview_views_shop_page) + sum(listview_views_catalog_page) + sum(listview_views_ads) + sum(listview_views_recos) as total_listviews, " +
+      "sum(listview_views_search_page) listview_views_search_page," +
+      "sum(listview_clicks_search_page) listview_clicks_search_page," +
+      "sum(listview_ctr_search_page) / count(1) listview_ctr_search_page," +
+      "sum(listview_views_catalog_page) listview_views_catalog_page," +
+      "sum(listview_clicks_catalog_page) listview_clicks_catalog_page," +
+      "sum(listview_ctr_catalog_page) / count(1) listview_ctr_catalog_page," +
+      "sum(listview_views_shop_page) listview_views_shop_page," +
+      "sum(listview_clicks_shop_page) listview_clicks_shop_page," +
+      "sum(listview_ctr_shop_page) / count(1) listview_ctr_shop_page," +
+      "sum(listview_views_ads) listview_views_ads, " +
+      "sum(listview_clicks_ads) listview_clicks_ads, " +
+      "sum(listview_ctr_ads) / count(1) listview_ctr_ads, " +
+      "sum(listview_views_recos) listview_views_recos, " +
+      "sum(listview_clicks_recos) listview_clicks_recos, " +
+      "sum(listview_ctr_recos) / count(1) listview_ctr_recos " +
       "from shop_stats.last30d " +
-      "where gmv_eurcent > 0 group by shop_id order by gmv_eurcent desc limit 50;";
+      "where gmv_eurcent > 0 group by shop_id order by gmv_eurcent desc limit 20;";
 
     var query = query_mgr.get(
       "sql_query",
@@ -76,6 +97,9 @@ ZBase.registerView((function() {
         "seller_overview_table_tpl");
 
     result.columns.forEach(function(metric) {
+      if (!$("th." + metric, table_tpl)) {
+        console.log(metric);
+      }
       $("th." + metric, table_tpl).classList.remove("hidden");
     });
 
@@ -100,7 +124,7 @@ ZBase.registerView((function() {
     });
 
     $.replaceContent(elem, table_tpl);
-
+    $.handleLinks(elem);
   };
 
   var setParamSeller = function(value) {
