@@ -104,33 +104,8 @@ var HeaderWidget = (function() {
   };
 
   var searchSubmit = function(e) {
-    var term = e.detail.value;
-    var search_widget = this;
-    var input = $("input", search_widget);
-    var path;
-
-    searchDocuments(term, function(r) {
-      var documents = JSON.parse(r.response).documents;
-      if (documents.length == 1) {
-        switch (documents[0].type) {
-          case "sql_query":
-            path = "/a/sql/" + documents[0].uuid;
-            break;
-
-          case "report":
-            path = "/a/reports/" + documents[0].uuid;
-            break;
-        }
-
-        input.value = "";
-        return;
-      } else {
-        path = "/a/search?q=" + term;
-      }
-
-      input.blur();
-      $.navigateTo(path);
-    });
+    $("input", this).blur();
+    $.navigateTo("/a/search?q=" + e.detail.value);
   };
 
   var searchDocuments = function(term, callback) {
