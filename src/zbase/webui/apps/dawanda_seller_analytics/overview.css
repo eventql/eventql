@@ -91,15 +91,19 @@
   font-size: 13px;
 }
 
+
+.zbase_seller_stats.overview table.z-table thead tr th {
+  padding: 0 0.8em;
+  font-weight: 400;
+  color: #888;
+  line-height: 33px;
+}
+
 .zbase_seller_stats.overview table.z-table thead tr th:first-child,
 .zbase_seller_stats.overview table.z-table tbody tr td:first-child a {
   padding-left: 20px;
 }
 
-.zbase_seller_stats.overview table.z-table thead tr th {
-  font-weight: 400;
-  color: #888;
-}
 
 .zbase_seller_stats.overview table.z-table thead tr th.hidden {
   display: none;
@@ -115,22 +119,16 @@
   line-height: 24px;
 }
 
-.zbase_seller_stats.overview table.z-table tbody tr td.icon {
-  text-align: center;
-}
-
-.zbase_seller_stats.overview table.z-table tbody tr td.icon i {
-  color: #999;
-}
-
 .zbase_seller_stats.overview table.z-table th i {
-  
+  padding: 6px 0;
 }
 
-.zbase_seller_stats.overview table.z-table[data-order-fn='asc'] th.order_by i.asc {
+.zbase_seller_stats.overview table.z-table th i:hover {
+  cursor: pointer;
   color: #3498db;
 }
 
+.zbase_seller_stats.overview table.z-table[data-order-fn='asc'] th.order_by i.asc,
 .zbase_seller_stats.overview table.z-table[data-order-fn='desc'] th.order_by i.desc {
   color: #3498db;
 }
