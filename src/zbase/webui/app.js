@@ -173,6 +173,10 @@ var ZBase = (function() {
     changeNavigation(path);
   };
 
+  var pushHistoryState = function(path) {
+    history.pushState({path: path}, "", path);
+  };
+
   /**
     * Replace current history state with previous one
     **/
@@ -444,6 +448,7 @@ var ZBase = (function() {
     registerView: registerView,
     navigateTo: navigateTo,
     popHistoryState: popHistoryState,
+    pushHistoryState: pushHistoryState,
     getConfig: getConfig,
     updateConfig: updateConfig,
     getTemplate: getTemplate,
@@ -470,6 +475,7 @@ $.showLoader = ZBase.showLoader;
 $.hideLoader = ZBase.hideLoader;
 $.createNewDocument = ZBase.createNewDocument;
 $.popHistoryState = ZBase.popHistoryState;
+$.pushHistoryState = ZBase.pushHistoryState;
 
 $.handleLinks = function(elem) {
   var click_fn = (function() {

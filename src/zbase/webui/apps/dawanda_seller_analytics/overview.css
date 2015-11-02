@@ -122,3 +122,15 @@
 .zbase_seller_stats.overview table.z-table tbody tr td.icon i {
   color: #999;
 }
+
+.zbase_seller_stats.overview table.z-table th i {
+  
+}
+
+.zbase_seller_stats.overview table.z-table[data-order-fn='asc'] th.order_by i.asc {
+  color: #3498db;
+}
+
+.zbase_seller_stats.overview table.z-table[data-order-fn='desc'] th.order_by i.desc {
+  color: #3498db;
+}
