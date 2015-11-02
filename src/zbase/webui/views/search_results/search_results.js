@@ -14,9 +14,19 @@ ZBase.registerView((function() {
       if (r.status == 200) {
         var resp = JSON.parse(r.response);
 
-        if (resp.documents.length > 1) {
-          renderTable(resp.documents);
+        if (resp.documents.length == 0) {
+          console.log(resp);
+          return;
         }
+
+        if (resp.documents.length == 1 && resp.documents[0].name == search_term) {
+          var doc = resp.documents[0];
+          //TODO pop search path from history
+          $.navigateTo(getUrlForDocType(doc.type) + doc.uuid);
+          return;
+        }
+
+        renderTable(resp.documents);
       }
     });
 
