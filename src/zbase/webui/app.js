@@ -3,6 +3,7 @@ var ZBase = (function() {
   var current_path;
   var current_route;
   var current_view;
+  var previous_path;
   var modules_status = {};
   var modules_waitlist = [];
   var views = {};
@@ -156,6 +157,7 @@ var ZBase = (function() {
     }
 
     current_route = route;
+    previous_path = current_path;
     current_path = path;
 
     loadModules(route.modules, function() {
@@ -169,6 +171,16 @@ var ZBase = (function() {
   var navigateTo = function(path) {
     history.pushState({path: path}, "", path);
     changeNavigation(path);
+  };
+
+  /**
+    * Replace current history state with previous one
+    **/
+  var popHistoryState = function() {
+    if (previous_path) {
+      history.pushState({path: previous_path}, "", previous_path);
+      current_path = previous_path;
+    }
   };
 
   /**
@@ -425,6 +437,7 @@ var ZBase = (function() {
     moduleReady: finishModuleDownload,
     registerView: registerView,
     navigateTo: navigateTo,
+    popHistoryState: popHistoryState,
     getConfig: getConfig,
     updateConfig: updateConfig,
     getTemplate: getTemplate,
@@ -450,6 +463,7 @@ $.fatalError = ZBase.fatalError;
 $.showLoader = ZBase.showLoader;
 $.hideLoader = ZBase.hideLoader;
 $.createNewDocument = ZBase.createNewDocument;
+$.popHistoryState = ZBase.popHistoryState;
 
 $.handleLinks = function(elem) {
   var click_fn = (function() {
