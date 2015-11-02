@@ -10,8 +10,8 @@
 
       <div class="zbase_seller_overview hidden">
 
-        <div class="controls" style="display: none;">
-          <div class="search left">
+        <div class="controls">
+          <div class="search left" style="display: none;">
             <label class="search_label">Seller</label>
             <z-search class="seller" style="margin-left: 50px;">
               <z-input class="icon" data-placeholder="Search For Seller by ID" style="position: relative; top: 1px; display: block;">
@@ -20,7 +20,7 @@
             </z-search>
           </div>
 
-          <div class="control left">
+          <div class="control left" style="display: none;">
             <z-checkbox class="premium"></z-checkbox>
             <label>Premium Seller <i class="fa fa-star"></i></label>
           </div>
@@ -30,14 +30,14 @@
             <z-dropdown class="input checkbox metrics" data-multiselect>
               <z-dropdown-flyout>
                 <z-dropdown-items>
-                  <z-dropdown-item data-value="gmv_eurcent">
-                    <z-checkbox></z-checkbox> Total GMV
+                  <z-dropdown-item data-value="gmv_eurcent" data-selected>
+                    <z-checkbox data-active></z-checkbox> Total GMV
                   </z-dropdown-item>
-                  <z-dropdown-item data-value="gmv_per_transaction_eurcent">
-                    <z-checkbox></z-checkbox> GMV Per Transaction
+                  <z-dropdown-item data-value="gmv_per_transaction_eurcent" data-selected>
+                    <z-checkbox data-active></z-checkbox> GMV Per Transaction
                   </z-dropdown-item>
-                  <z-dropdown-item data-value="num_purchases">
-                    <z-checkbox></z-checkbox> Purchases
+                  <z-dropdown-item data-value="num_purchases" data-selected>
+                    <z-checkbox data-active></z-checkbox> Purchases
                   </z-dropdown-item>
                   <z-dropdown-item data-value="num_active_products">
                     <z-checkbox></z-checkbox> Active Products
@@ -54,8 +54,8 @@
                   <z-dropdown-item data-value="refunded_gmv_eurcent">
                     <z-checkbox></z-checkbox> Refunded GMV
                   </z-dropdown-item>
-                  <z-dropdown-item data-value="total_listviews">
-                    <z-checkbox></z-checkbox> Total Listviews
+                  <z-dropdown-item data-value="total_listviews" data-selected>
+                    <z-checkbox data-active></z-checkbox> Total Listviews
                   </z-dropdown-item>
                   <z-dropdown-item data-value="shop_page_views">
                     <z-checkbox></z-checkbox> Shop Page Views

@@ -1,7 +1,9 @@
 ZBase.registerView((function() {
   var query_mgr;
+  var path_prefix = "/a/apps/dawanda_seller_analytics";
 
   var load = function(path) {
+    var result;
     var page = $.getTemplate(
         "views/seller",
         "seller_overview_main_tpl");
@@ -10,9 +12,11 @@ ZBase.registerView((function() {
     main_menu.render($(".zbase_main_menu", page), path);
 
     $.onClick($("z-checkbox.premium", page), paramChanged);
-    $("z-dropdown.metrics", page).addEventListener("change", paramChanged);
     $("z-search.seller", page).addEventListener("z-search-submit", paramChanged);
-
+    $("z-dropdown.metrics", page).addEventListener("change", function() {
+      renderTable($(".zbase_seller_overview table"), result);
+      $.pushHistoryState(path_prefix + "?" + $.buildQueryString(getQueryString()));
+    });
 
     $.handleLinks(page);
     $.replaceViewport(page);
@@ -59,9 +63,9 @@ ZBase.registerView((function() {
 
     query.addEventListener("result", function(e) {
       query_mgr.close("sql_query");
-      var data = JSON.parse(e.data).results[0];
+      result = JSON.parse(e.data).results[0];
       hideLoader();
-      renderTable($(".zbase_seller_overview table"), data);
+      renderTable($(".zbase_seller_overview table"), result);
     });
 
     query.addEventListener("error", function(e) {
@@ -90,17 +94,22 @@ ZBase.registerView((function() {
   };
 
   var renderTable = function(elem, result) {
-    var metrics = $(".zbase_seller_stats z-dropdown.metrics").getValue().split(",");
+    var metrics = {shop_id: true};
+    $(".zbase_seller_stats z-dropdown.metrics")
+        .getValue()
+        .split(",")
+        .forEach(function(metric) {
+          metrics[metric] = true;
+        });
 
     var table_tpl = $.getTemplate(
         "views/seller_overview",
         "seller_overview_table_tpl");
 
     result.columns.forEach(function(metric) {
-      if (!$("th." + metric, table_tpl)) {
-        console.log(metric);
+      if (metrics[metric]) {
+        $("th." + metric, table_tpl).classList.remove("hidden");
       }
-      $("th." + metric, table_tpl).classList.remove("hidden");
     });
 
     var tr_tpl = $.getTemplate(
@@ -113,18 +122,21 @@ ZBase.registerView((function() {
       var url = "/a/apps/dawanda_seller_analytics/" + row[0]
 
       for (var i = 0; i < row.length; i++) {
-        var td = $("td." + result.columns[i], tr);
-        var a = $("a", td);
-        a.innerHTML = ZBaseSellerMetrics[result.columns[i]].print(row[i]);
-        a.href = url;
-        td.classList.remove("hidden");
+        if (metrics[result.columns[i]]) {
+          var td = $("td." + result.columns[i], tr);
+          var a = $("a", td);
+          a.innerHTML = ZBaseSellerMetrics[result.columns[i]].print(row[i]);
+          a.href = url;
+          td.classList.remove("hidden");
+        }
       }
 
       tbody.appendChild(tr);
     });
 
+
+    $.handleLinks(table_tpl);
     $.replaceContent(elem, table_tpl);
-    $.handleLinks(elem);
   };
 
   var setParamSeller = function(value) {
@@ -142,15 +154,8 @@ ZBase.registerView((function() {
 
   var setParamMetrics = function(metrics) {
     if (metrics) {
-      metrics = metrics.split(",");
-    } else {
-      //default selection
-      metrics = [
-        "gmv_eurcent", "num_purchases", "listview_ctr_search_page",
-        "listview_ctr_catalog_page", "listview_ctr_shop_page"];
+      $(".zbase_seller_stats z-dropdown.metrics").setValue(metrics.split(","));
     }
-
-    $(".zbase_seller_stats z-dropdown.metrics").setValue(metrics);
   };
 
   var getQueryString = function() {
@@ -163,7 +168,7 @@ ZBase.registerView((function() {
   };
 
   var paramChanged = function() {
-    $.navigateTo("/a/seller?" + $.buildQueryString(getQueryString()));
+    $.navigateTo(path_prefix + "?" + $.buildQueryString(getQueryString()));
   };
 
   return {
