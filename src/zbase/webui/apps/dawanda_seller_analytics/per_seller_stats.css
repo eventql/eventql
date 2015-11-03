@@ -175,7 +175,11 @@
   background: #f9f9f9;
 }
 
-.zbase_seller_stats table.z-table td {
+.zbase_seller_stats .per_seller_table table.z-table td {
   background: #fff;
+  text-align: right;
 }
 
+.zbase_seller_stats .per_seller_table table.z-table td.align_left {
+  text-align: left;
+}
