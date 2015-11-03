@@ -7,7 +7,7 @@
           <a href="/a/apps/dawanda_seller_analytics">DaWanda Seller Analytics</a>
         </zbase-breadcrumbs-section>
         <zbase-breadcrumbs-section>
-          <a href="/a/apps/dawanda_seller_analytics">Seller XXX</a>
+          <a class="shop_id"></a>
         </zbase-breadcrumbs-section>
       </zbase-breadcrumbs>
     </section>
@@ -15,7 +15,7 @@
     <div class="zbase_content_pane fullwidth" style="padding: 0 20px;">
       <div class="zbase_stats_title">
         <h2 class="pagetitle main">
-          Seller: <em><span class="shop_name"></em></span>
+          Seller: <em><span class="shop_id"></span> <span class="shop_name"></span></em>
         </h2>
       </div>
 
@@ -106,6 +106,9 @@
                 <z-dropdown-item data-value="product_page_views" data-selected>
                   <z-checkbox></z-checkbox> Product Page Views
                 </z-dropdown-item>
+                <z-dropdown-item data-value="total_listviews" data-selected>
+                  <z-checkbox></z-checkbox> Total Listviews
+                </z-dropdown-item>
                 <z-dropdown-item data-value="num_active_products">
                   <z-checkbox></z-checkbox> Active Products
                 </z-dropdown-item>
@@ -128,22 +131,86 @@
       Average GMV per Transaction (Avg. Basket Size)
     </z-tooltip>
     <z-tooltip class="num_purchases" data-pointer="center">
-      Average GMV per Transaction (Avg. Basket Size)
+      Total Number of Purchases for this seller in this time window
     </z-tooltip>
     <z-tooltip class="num_refunds" data-pointer="center">
-      Average GMV per Transaction (Avg. Basket Size)
+      Total number of Refunded Purchases for this seller in this time window
     </z-tooltip>
     <z-tooltip class="refund_rate" data-pointer="center">
-      Average GMV per Transaction (Avg. Basket Size)
+      Refund Rate for this seller in this time window (% of purchases that got refunded)
     </z-tooltip>
     <z-tooltip class="refunded_gmv_eurcent" data-pointer="center">
-      Average GMV per Transaction (Avg. Basket Size)
+      Total Refunded GMV for this seller in this time window
     </z-tooltip>
-    <z-tooltip class="refund_rate" data-pointer="center">
-      Average GMV per Transaction (Avg. Basket Size)
+    <z-tooltip class="refunded_gmv_eurcent" data-pointer="center">
+      Total Refunded GMV for this seller in this time window
     </z-tooltip>
-
+    <z-tooltip class="listview_views_ads" data-pointer="center">
+      Agggregate number of ad (Logenplatz) impressions for all products from this seller in this time window
+    </z-tooltip>
+    <z-tooltip class="listview_views_search_page" data-pointer="center">
+      Aggregate number of listview impressions in the On-Site Search for all products from this seller in this time window
+    </z-tooltip>
+    <z-tooltip class="listview_views_catalog_page" data-pointer="center">
+      Aggregate number of listview impressions in the catalog for all products from this seller in this time window
+    </z-tooltip>
+    <z-tooltip class="listview_views_recos" data-pointer="center">
+      Aggregate number of recommendation impressions for all products from this seller in this time window
+    </z-tooltip>
+    <z-tooltip class="listview_views_shop_page" data-pointer="center">
+      Aggregate number of listview impressions on the Shop Page for all products from this seller in this time window
+    </z-tooltip>
+    <z-tooltip class="listview_clicks_ads" data-pointer="center">
+      Agggregate number of listview ad (Logenplatz) clicks for all products from this seller in this time window
+    </z-tooltip>
+    <z-tooltip class="listview_clicks_search_page" data-pointer="center">
+      Aggregate number of listview clicks in the On-Site Search for all products from this seller in this time window
+    </z-tooltip>
+    <z-tooltip class="listview_clicks_catalog_page" data-pointer="center">
+      Aggregate number of listview clicks in the catalog for all products from this seller in this time window
+    </z-tooltip>
+    <z-tooltip class="listview_clicks_recos" data-pointer="center">
+      Aggregate number of listview reco clicks for all products from this seller in this time window
+    </z-tooltip>
+    <z-tooltip class="listview_clicks_shop_page" data-pointer="center">
+      Aggregate number of listview clicks on the Shop Page for all products from this seller in this time window
+    </z-tooltip>
+    <z-tooltip class="listview_ctr_ads" data-pointer="center">
+      Agggregate listview ad (Logenplatz) CTR for all products from this seller in this time window
+    </z-tooltip>
+    <z-tooltip class="listview_ctr_search_page" data-pointer="center">
+      Aggregate listview CTR in the On-Site Search for all products from this seller in this time window
+    </z-tooltip>
+    <z-tooltip class="listview_ctr_catalog_page" data-pointer="center">
+      Aggregate listview CTR in the catalog for all products from this seller in this time window
+    </z-tooltip>
+    <z-tooltip class="listview_ctr_recos" data-pointer="center">
+      Aggregate listview recommendations CTR for all products from this seller in this time window
+    </z-tooltip>
+    <z-tooltip class="listview_ctr_shop_page" data-pointer="center">
+      Aggregate listview CTR on the Shop Page for all products from this seller in this time window
+    </z-tooltip>
+    <z-tooltip class="num_active_products" data-pointer="center">
+      Active Products for this seller in this time window
+    </z-tooltip>
+    <z-tooltip class="num_listed_products" data-pointer="center">
+      Listed Products for this seller in this time window
+    </z-tooltip>
+    <z-tooltip class="shop_page_views" data-pointer="center">
+      Aggregate number of Shop Page impressions for this seller in this time window
+    </z-tooltip>
+    <z-tooltip class="product_page_views" data-pointer="center">
+      Aggregate number of product page impressions for all products from this seller in this time window
+    </z-tooltip>
+    <z-tooltip class="total_listviews" data-pointer="center">
+      Aggregate number of search page, catalog page, shop page, ad and recommendation impressions from this seller in this time window
+    </z-tooltip>
   </div>
 </template>
 
-
+<template id="per_seller_stats_no_data_message_tpl">
+  <div class="message no_data">
+    <h2 class="pagetitle">No Data returned</h2>
+    <p>This can be caused by a non-existent seller id.</p>
+  </div>
+</template>
