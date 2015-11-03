@@ -71,6 +71,15 @@ var ZBaseSellerMetrics = (function() {
     return value;
   }
 
+  var printAsPercent = function(num) {
+    if (isNaN(num)) {
+      return "-";
+    }
+
+
+    return num;
+  };
+
   return {
     shop_id: {print: print},
     time: {print: printTimestamp},
@@ -90,11 +99,11 @@ var ZBaseSellerMetrics = (function() {
     listview_clicks_catalog_page: {aggr: sum, print: printNumber(0)},
     listview_clicks_recos: {aggr: sum, print: printNumber(0)},
     listview_clicks_shop_page: {aggr: sum, print: printNumber(0)},
-    listview_ctr_ads: {aggr: mean, print: printNumber(4)},
-    listview_ctr_search_page: {aggr: mean, print: printNumber(4)},
-    listview_ctr_catalog_page: {aggr: mean, print: printNumber(4)},
-    listview_ctr_recos: {aggr: mean, print: printNumber(4)},
-    listview_ctr_shop_page: {aggr: mean, print: printNumber(4)},
+    listview_ctr_ads: {aggr: mean, print: printAsPercent},
+    listview_ctr_search_page: {aggr: mean, print: printAsPercent},
+    listview_ctr_catalog_page: {aggr: mean, print: printasPercent},
+    listview_ctr_recos: {aggr: mean, print: printAsPercent},
+    listview_ctr_shop_page: {aggr: mean, print: printAsPercent},
     num_active_products: {aggr: sum, print: printNumber(0)},
     num_listed_products: {aggr: sum, print: printNumber(0)},
     shop_page_views: {aggr: sum, print: printNumber(0)},
