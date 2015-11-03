@@ -1,7 +1,18 @@
 <template id="per_seller_sparkline_overview_tpl">
+  <div class="metric_links">
+    <a href="#traffic">Traffic</a>
+    <a href="#sales">Sales</a>
+    <a href="#refunds">Refunds</a>
+    <a href="#inventory">Inventory</a>
+    <a href="#on_site_search">On-Site Search</a>
+    <a href="#catalog">Catalog</a>
+    <a href="#shop_page">Shop Page</a>
+    <a href="#ads">Ads</a>
+    <a href="#recommendations">Recommendations</a>
+  </div>
 
   <div style="padding: 20px; width: 100%;">
-    <div class="metric_group" >
+    <div class="metric_group" id="traffic">
       <h3>Traffic</h3>
       <div class="metric_pane first shop_page_views">
         <h2 class="pagetitle">Shop Page Impressions</h2>
@@ -37,7 +48,7 @@
       </div>
     </div>
 
-    <div class="metric_group" style="margin-top: 40px;">
+    <div class="metric_group" id="sales" style="margin-top: 40px;">
       <h3>Sales</h3>
       <div class="metric_pane first gmv_eurcent">
         <h2 class="pagetitle">GMV</h2>
@@ -73,7 +84,7 @@
       </div>
     </div>
 
-    <div class="metric_group" style="margin-top: 40px;">
+    <div class="metric_group" id="refunds" style="margin-top: 40px;">
       <h3>Refunds</h3>
 
       <div class="metric_pane first num_refunds">
@@ -110,7 +121,7 @@
       </div>
     </div>
 
-    <div class="metric_group" style="margin-top: 40px;">
+    <div class="metric_group" id="inventory" style="margin-top: 40px;">
       <h3>Inventory</h3>
       <div class="metric_pane first num_active_products">
         <h2 class="pagetitle">Active Products</h2>
@@ -145,7 +156,7 @@
 
     <table style="width: 100%; table-layout: fixed;" cellspacing="0">
 
-      <tr>
+      <tr id="on_site_search">
         <td style="width: 188px; padding-left: 20px; font-weight: 400; font-size: 15px; color: #3498db;">On-Site Search</td>
         <td>
           <div class="metric_pane first listview_views_search_page">
@@ -185,7 +196,7 @@
         </td>
       </tr>
 
-      <tr>
+      <tr id="catalog">
         <td style="width: 188px; padding-left: 20px; font-weight: 400; font-size: 15px; color: #3498db;">Catalog</td>
         <td>
           <div class="metric_pane listview_views_catalog_page">
@@ -225,7 +236,7 @@
         </td>
       </tr>
 
-      <tr>
+      <tr id="shop_page">
         <td style="width: 188px; padding-left: 20px; font-weight: 400; font-size: 15px; color: #3498db;">Shop Page</td>
         <td>
           <div class="metric_pane listview_views_shop_page">
@@ -265,7 +276,7 @@
         </td>
       </tr>
 
-      <tr>
+      <tr id="ads">
         <td style="width: 188px; padding-left: 20px; font-weight: 400; font-size: 15px; color: #3498db;">Ads (Logenplaetze)</td>
         <td>
           <div class="metric_pane first listview_views_ads">
@@ -305,7 +316,7 @@
         </td>
       </tr>
 
-      <tr>
+      <tr id="recommendations">
         <td style="width: 188px; padding-left: 20px; font-weight: 400; font-size: 15px; color: #3498db;">Recommendations</td>
         <td>
           <div class="metric_pane listview_views_recos">

@@ -21,6 +21,17 @@
   background: #f9f9f9;
 }
 
+.zbase_seller_stats .metric_links {
+  padding: 20px 38px;
+}
+
+.zbase_seller_stats .metric_links a {
+  font-size: 15px;
+  font-weight: 400;
+  width: 10.5%;
+  display: inline-block;
+}
+
 .zbase_seller_stats .metric_group {
   background: #fff;
   box-shadow: 0 1px 2px rgba(0,0,0,.2);
