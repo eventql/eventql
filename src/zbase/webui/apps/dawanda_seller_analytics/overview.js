@@ -137,7 +137,7 @@ ZBase.registerView((function() {
     var tbody = $("tbody", table_tpl);
     result.rows.forEach(function(row) {
       var tr = tr_tpl.cloneNode(true);
-      var url = "/a/apps/dawanda_seller_analytics/" + row[0]
+      var url = "/a/apps/dawanda_seller_analytics/" + row[1]
 
       for (var i = 0; i < row.length; i++) {
         if (metrics[result.columns[i]]) {
