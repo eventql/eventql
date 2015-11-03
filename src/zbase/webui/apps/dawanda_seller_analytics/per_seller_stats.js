@@ -2,21 +2,24 @@ ZBase.registerView((function() {
   var path_prefix = "/a/apps/dawanda_seller_analytics/";
   var result = null;
   var query_mgr;
-  var seller_id;
+  var shop_id;
 
   var load = function(path) {
     query_mgr = EventSourceHandler();
-    seller_id = UrlUtil.getPath(path).substr(path_prefix.length);
+    shop_id = UrlUtil.getPath(path).substr(path_prefix.length);
 
     var page = $.getTemplate(
         "views/seller",
         "per_seller_stats_main_tpl");
 
-    $(".zbase_stats_title .shop_id", page).innerHTML = seller_id;
-    $("z-daterangepicker", page).addEventListener("select", paramChanged, false);
+    var bc = $("zbase-breadcrumbs-section a.shop_id", page);
+    bc.href = path_prefix + shop_id;
+    bc.innerHTML = "Seller " + shop_id;
+    $(".pagetitle .shop_id", page).innerHTML = shop_id;
 
     $.onClick($("button.view.sparkline", page), onViewButtonClick);
     $.onClick($("button.view.table", page), onViewButtonClick);
+    $("z-daterangepicker", page).addEventListener("select", paramChanged, false);
     $("z-dropdown.metrics", page).addEventListener("change", onMetricsParamChanged);
 
     loadShopName($(".pagetitle .shop_name", page));
@@ -53,7 +56,7 @@ ZBase.registerView((function() {
           " listview_views_recos," +
           " listview_clicks_recos," +
           " listview_ctr_recos" +
-      " from shop_stats.last30d where shop_id = " + seller_id // FIXME escaping
+      " from shop_stats.last30d where shop_id = " + shop_id // FIXME escaping
       " order by time asc;";
 
     setParamsFromAndUntil(
@@ -112,7 +115,7 @@ ZBase.registerView((function() {
 
   var loadShopName = function(elem) {
     var query_str = "SELECT `title` FROM db.shops WHERE id = " +
-      $.escapeHTML(seller_id);
+      $.escapeHTML(shop_id);
 
     var query = query_mgr.get(
       "shop_name",
@@ -224,7 +227,7 @@ ZBase.registerView((function() {
         .getAttribute("data-value");
     params.metrics = encodeURIComponent(
         $(".zbase_seller_stats z-dropdown.metrics").getValue());
-    return path_prefix + seller_id + "?" + $.buildQueryString(params);
+    return path_prefix + shop_id + "?" + $.buildQueryString(params);
   };
 
   var paramChanged = function() {
