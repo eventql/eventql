@@ -81,7 +81,10 @@ ZBase.registerView((function() {
       query_mgr.close("sql_query");
       var data = JSON.parse(e.data).results[0];
 
-      //TODO handle no rows are returned --> wrong seller id
+      if (data.rows.length == 0) {
+        renderNoDataReturned();
+        return;
+      }
 
       var values = [];
       for (var i = 0; i < data.columns.length; i++) {
@@ -168,6 +171,14 @@ ZBase.registerView((function() {
           result,
           metrics);
     }
+  };
+
+  var renderNoDataReturned = function() {
+    $.replaceContent(
+      $(".zbase_seller_stats .zbase_content_pane"),
+      $.getTemplate(
+          "views/seller",
+          "per_seller_stats_no_data_message_tpl"));
   };
 
   var aggregate = function(timeseries) {
