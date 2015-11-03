@@ -5,28 +5,24 @@ ZBase.registerView((function() {
   var seller_id;
 
   var load = function(path) {
+    query_mgr = EventSourceHandler();
     seller_id = UrlUtil.getPath(path).substr(path_prefix.length);
-    //REMOVE ME
-    var seller_name = "-";
-    //REMOVEME END
 
     var page = $.getTemplate(
         "views/seller",
         "per_seller_stats_main_tpl");
 
-    $(".zbase_stats_title .shop_name", page).innerHTML =
-        seller_id + " (" + seller_name + ")";
+    $(".zbase_stats_title .shop_id", page).innerHTML = seller_id;
     $("z-daterangepicker", page).addEventListener("select", paramChanged, false);
 
     $.onClick($("button.view.sparkline", page), onViewButtonClick);
     $.onClick($("button.view.table", page), onViewButtonClick);
     $("z-dropdown.metrics", page).addEventListener("change", onMetricsParamChanged);
 
+    loadShopName($(".pagetitle .shop_name", page));
 
     $.handleLinks(page);
     $.replaceViewport(page);
-
-    query_mgr = EventSourceHandler();
 
     var query_str =
       "select" +
@@ -109,24 +105,29 @@ ZBase.registerView((function() {
     }, false);
   };
 
-  var aggregate = function(timeseries) {
-    var aggregates = {};
-
-    for (var metric in timeseries) {
-      if (metric == "time" || metric == "shop_id") {
-        continue;
-      }
-
-      aggregates[metric] = ZBaseSellerMetrics[metric].print(
-          ZBaseSellerMetrics[metric].aggr(timeseries[metric]));
-    }
-
-    return aggregates;
-  };
-
   var destroy = function() {
     window.removeEventListener("resize", resizeSparklines);
     query_mgr.closeAll();
+  };
+
+  var loadShopName = function(elem) {
+    var query_str = "SELECT `title` FROM db.shops WHERE id = " +
+      $.escapeHTML(seller_id);
+
+    var query = query_mgr.get(
+      "shop_name",
+      "/api/v1/sql_stream?query=" + encodeURIComponent(query_str));
+
+    query.addEventListener("result", function(e) {
+      query_mgr.close("shop_name");
+      var result = JSON.parse(e.data).results[0];
+      elem.innerHTML = "(" + result.rows[0] + ")";
+      elem.classList.remove("hidden");
+    });
+
+    query.addEventListener("error", function(e) {
+      query_mgr.close("shop_name");
+    });
   };
 
   var renderQueryProgress = function(progress) {
@@ -153,6 +154,21 @@ ZBase.registerView((function() {
           result,
           metrics);
     }
+  };
+
+  var aggregate = function(timeseries) {
+    var aggregates = {};
+
+    for (var metric in timeseries) {
+      if (metric == "time" || metric == "shop_id") {
+        continue;
+      }
+
+      aggregates[metric] = ZBaseSellerMetrics[metric].print(
+          ZBaseSellerMetrics[metric].aggr(timeseries[metric]));
+    }
+
+    return aggregates;
   };
 
   var setParamsFromAndUntil = function(from, until) {
