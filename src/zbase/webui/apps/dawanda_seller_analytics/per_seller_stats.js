@@ -135,7 +135,6 @@ ZBase.registerView((function() {
       query_mgr.close("shop_name");
       var result = JSON.parse(e.data).results[0];
       elem.innerHTML = "(" + result.rows[0] + ")";
-      elem.classList.remove("hidden");
     });
 
     query.addEventListener("error", function(e) {
