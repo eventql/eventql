@@ -117,6 +117,11 @@
   display: block;
   padding: .7em .8em;
   line-height: 24px;
+  text-align: right;
+}
+
+.zbase_seller_stats.overview table.z-table tbody tr td.left_align a {
+  text-align: left;
 }
 
 .zbase_seller_stats.overview table.z-table th i {
