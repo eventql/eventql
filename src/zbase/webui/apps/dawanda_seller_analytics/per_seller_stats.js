@@ -81,6 +81,8 @@ ZBase.registerView((function() {
       query_mgr.close("sql_query");
       var data = JSON.parse(e.data).results[0];
 
+      //TODO handle no rows are returned --> wrong seller id
+
       var values = [];
       for (var i = 0; i < data.columns.length; i++) {
         values.push([]);

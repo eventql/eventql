@@ -76,8 +76,7 @@ var ZBaseSellerMetrics = (function() {
       return "-";
     }
 
-
-    return num;
+    return numberFormat(num * 100, 3) + "%";
   };
 
   return {
@@ -101,7 +100,7 @@ var ZBaseSellerMetrics = (function() {
     listview_clicks_shop_page: {aggr: sum, print: printNumber(0)},
     listview_ctr_ads: {aggr: mean, print: printAsPercent},
     listview_ctr_search_page: {aggr: mean, print: printAsPercent},
-    listview_ctr_catalog_page: {aggr: mean, print: printasPercent},
+    listview_ctr_catalog_page: {aggr: mean, print: printAsPercent},
     listview_ctr_recos: {aggr: mean, print: printAsPercent},
     listview_ctr_shop_page: {aggr: mean, print: printAsPercent},
     num_active_products: {aggr: sum, print: printNumber(0)},
