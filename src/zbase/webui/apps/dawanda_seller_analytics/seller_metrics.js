@@ -11,8 +11,38 @@ var ZBaseSellerMetrics = (function() {
     return (sum(values) / values.length);
   };
 
-  var round = function(num, precision) {
-    return (Math.round(num * Math.pow(10, precision)) / Math.pow(10, precision));
+  var numberFormat = function(num, precision) {
+    var parts = num.toString().split(".");
+
+    //integer format with , every n digits
+    var int_parts = parts[0].split("").reverse();
+    var integer = [];
+    var n = 3;
+
+    for (var i = 0; i < int_parts.length; i += n) {
+      integer.push(int_parts.slice(i, i + n).reverse().join(""));
+    }
+    integer = integer.reverse().join(",");
+
+    if (precision == 0) {
+      return integer;
+    }
+
+    //decimal part with exactly n digits, where n = precision
+    if (parts.length == 1) {
+      parts.push("");
+    }
+
+    var dec = [];
+    for (var i = 0; i < precision; i++) {
+      if (i < parts[1].length) {
+        dec.push(parts[1][i]);
+      } else {
+        dec.push("0");
+      }
+    }
+
+    return integer + "." + dec.join("");
   };
 
   var printEurcent = function(amount) {
@@ -20,7 +50,7 @@ var ZBaseSellerMetrics = (function() {
       return "-";
     }
 
-    return round(amount / 100, 3) + "&euro;";
+    return numberFormat(amount / 100, 3) + "&euro;";
   };
 
   var printTimestamp = function(ts) {
@@ -28,12 +58,12 @@ var ZBaseSellerMetrics = (function() {
   };
 
   var printNumber = function(precision) {
-    return function(value) {
-      if (isNaN(value)) {
+    return function(num) {
+      if (isNaN(num)) {
         return "-";
       }
 
-      return round(value, precision);
+      return numberFormat(num, precision);
     }
   };
 
