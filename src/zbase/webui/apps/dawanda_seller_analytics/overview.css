@@ -80,6 +80,7 @@
 .zbase_seller_stats.overview .time_range {
   height: 28px;
   line-height: 28px;
+  cursor: pointer;
 }
 
 .zbase_seller_stats.overview .controls .search z-search {

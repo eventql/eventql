@@ -19,6 +19,9 @@ ZBase.registerView((function() {
     $("z-search.seller", page).addEventListener("z-search-submit", function(e) {
       $.navigateTo(path_prefix + "/" + e.detail.value);
     });
+    $(".time_range", page).addEventListener("click", function() {
+      alert("Not yet implemented");
+    }, false);
 
     $.handleLinks(page);
     $.replaceViewport(page);
