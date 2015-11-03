@@ -22,7 +22,13 @@ var PerSellerTableOverview = (function() {
     var tbody = $("tbody", table_tpl);
 
     for (var metric in metrics) {
-      $("th." + metric, table_tpl).classList.remove("hidden");
+      var th = $("th." + metric, table_tpl);
+      th.classList.remove("hidden");
+
+      var help_icon = $(".help", th);
+      if (help_icon) {
+        $(".zbase_seller_stats z-tooltip." + metric).init(help_icon);
+      }
     }
 
     var aggr_tr = tr_tpl.cloneNode(true);

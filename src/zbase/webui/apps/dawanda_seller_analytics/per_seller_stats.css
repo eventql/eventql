@@ -78,13 +78,13 @@
   line-height: 40px;
 }
 
-.zbase_seller_stats .zbase_stats .metric_pane i.help {
+.zbase_seller_stats .zbase_stats i.help {
   font-size: 13px;
   color: #888;
   margin-left: 3px
 }
 
-.zbase_seller_stats .zbase_stats .metric_pane i.help:hover {
+.zbase_seller_stats .zbase_stats i.help:hover {
   cursor: pointer;
   color: #3498db;
 }
