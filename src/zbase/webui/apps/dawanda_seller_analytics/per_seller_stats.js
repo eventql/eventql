@@ -19,8 +19,15 @@ ZBase.registerView((function() {
 
     $.onClick($("button.view.sparkline", page), onViewButtonClick);
     $.onClick($("button.view.table", page), onViewButtonClick);
-    $("z-daterangepicker", page).addEventListener("select", paramChanged, false);
     $("z-dropdown.metrics", page).addEventListener("change", onMetricsParamChanged);
+
+    //REMOVEME (replace with paramChanged)
+    var date_picker = $("z-daterangepicker", page);
+    $("z-daterangepicker-field", page).onclick = function(e) {
+      date_picker.removeAttribute("data-active");
+      alert("Not yet implemented");
+    };
+    //REMOVEME END
 
     loadShopName($(".pagetitle .shop_name", page));
 
@@ -95,6 +102,9 @@ ZBase.registerView((function() {
       result.aggregates = aggregate(result.timeseries);
 
       $(".zbase_seller_stats .controls").classList.remove("hidden");
+      setParamsFromAndUntil(
+          Math.round(data.rows[0][0] / 1000),
+          Math.round(data.rows[data.rows.length - 1][0] / 1000));
       renderView(path);
     }, false);
 
