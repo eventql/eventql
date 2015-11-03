@@ -7,10 +7,10 @@ var PerSellerTableOverview = (function() {
     var table = $("table", tpl);
     $.replaceContent(elem, tpl);
 
-    renderTable(table, result.timeseries, metrics);
+    renderTable(table, result, metrics);
   };
 
-  var renderTable = function(elem, timeseries, metrics) {
+  var renderTable = function(elem, result, metrics) {
     var table_tpl = $.getTemplate(
         "views/seller",
         "per_seller_table_overview_table_tpl");
@@ -25,10 +25,29 @@ var PerSellerTableOverview = (function() {
       $("th." + metric, table_tpl).classList.remove("hidden");
     }
 
-    for (var i = 0; i < timeseries.time.length; i++) {
+    var aggr_tr = tr_tpl.cloneNode(true);
+    for (var metric in result.aggregates) {
+      if (metrics.hasOwnProperty(metric)) {
+        var td = $("td." + metric, aggr_tr);
+
+        //REMOVEME 
+        if (!td) {
+          console.log("no td");
+          continue;
+        }
+        //REMOVEME END
+
+        td.classList.remove("hidden");
+        td.innerHTML = result.aggregates[metric];
+      }
+    }
+    $(".time", aggr_tr).innerHTML = "Total";
+    tbody.appendChild(aggr_tr);
+
+    for (var i = 0; i < result.timeseries.time.length; i++) {
       var tr = tr_tpl.cloneNode(true);
 
-      for (var metric in timeseries) {
+      for (var metric in result.timeseries) {
         var td = $("td." + metric, tr);
 
         //REMOVEME 
@@ -39,7 +58,8 @@ var PerSellerTableOverview = (function() {
 
         if (metrics.hasOwnProperty(metric)) {
           td.classList.remove("hidden");
-          td.innerHTML = ZBaseSellerMetrics[metric].print(timeseries[metric][i]);
+          td.innerHTML = ZBaseSellerMetrics[metric].print(
+              result.timeseries[metric][i]);
         }
       }
 

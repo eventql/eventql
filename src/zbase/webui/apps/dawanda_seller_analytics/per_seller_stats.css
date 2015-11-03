@@ -183,3 +183,8 @@
 .zbase_seller_stats .per_seller_table table.z-table td.align_left {
   text-align: left;
 }
+
+.zbase_seller_stats .per_seller_table table.z-table tr:first-child td {
+  background: #f9f9f9;
+  font-weight: 500;
+}
