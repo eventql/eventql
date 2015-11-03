@@ -253,15 +253,13 @@ ZBase.registerView((function() {
 
     renderView();
 
-    var path = getUrl();
-    history.pushState({path: path}, "", path);
+    $.pushHistoryState(getUrl());
   };
 
   var onMetricsParamChanged = function() {
     renderView();
 
-    var path = getUrl();
-    history.pushState({path: path}, "", path);
+    $.pushHistoryState(getUrl());
   };
 
   var resizeSparklines = function() {
