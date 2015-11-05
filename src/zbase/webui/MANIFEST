@@ -419,6 +419,7 @@ route {
   path_match: "/a/apps/dawanda_seller_analytics"
   view: "seller_overview"
   require_module: "util/z-url-util"
+  require_module: "util/z-date-util"
   require_module: "util/event_source_handler"
   require_module: "widgets/z-input"
   require_module: "widgets/z-search"

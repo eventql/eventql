@@ -50,7 +50,6 @@
   vertical-align: top;
 }
 
-.zbase_seller_stats.overview .time_range,
 .zbase_seller_stats.overview label.search_label {
   display: inline-block;
   background-color: #F4F4F4;
@@ -78,9 +77,12 @@
 }
 
 .zbase_seller_stats.overview .time_range {
-  height: 28px;
-  line-height: 28px;
-  cursor: pointer;
+  height: 30px;
+  line-height: 30px;
+  display: inline-block;
+  color: #333;
+  font-weight: 500;
+  font-size: 12px;
 }
 
 .zbase_seller_stats.overview .controls .search z-search {
