@@ -26,6 +26,11 @@
           </div>
 
           <div class="control right">
+            <label style="line-height: 30px;">Time Range:</label>
+            <div class="time_range"><span class="num_days"></span> Days <i class="fa fa-caret-down"></i></div>
+          </div>
+
+          <div class="control right">
             <label style="line-height: 30px;">Display:</label>
             <z-dropdown class="input checkbox metrics" data-multiselect>
               <z-dropdown-flyout>
@@ -100,7 +105,7 @@
         </div>
 
         <div class="zbase_content_pane fullwidth" style="background: #fff;">
-          <table class="z-table zbase_clickable_table" data-order-by="gmv_eurcent" data-order-fn="desc" style="border-top: 1px solid #ddd;"></table>
+          <table class="z-table zbase_clickable_table overview" data-order-by="gmv_eurcent" data-order-fn="desc" style="border-top: 1px solid #ddd;"></table>
         </div>
 
       </div>
@@ -149,7 +154,7 @@
 
 <template id="seller_overview_row_tpl">
   <tr>
-    <td class="shop_id"><a></a></td>
+    <td class="shop_id left_align"><a></a></td>
     <td class="hidden gmv_eurcent"><a></a></td>
     <td class="hidden gmv_per_transaction_eurcent"><a></a></td>
     <td class="hidden num_purchases"><a></a></td>

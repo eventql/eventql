@@ -1,0 +1,225 @@
+<template id="per_seller_stats_main_tpl">
+  <div class="zbase_seller_stats">
+    <section class='zbase_page_title small' style="none">
+      <a href="/a/apps/dawanda_seller_analytics" class="back_btn"></a>
+      <zbase-breadcrumbs>
+        <zbase-breadcrumbs-section>
+          <a href="/a/apps/dawanda_seller_analytics">DaWanda Seller Analytics</a>
+        </zbase-breadcrumbs-section>
+        <zbase-breadcrumbs-section>
+          <a class="shop_id"></a>
+        </zbase-breadcrumbs-section>
+      </zbase-breadcrumbs>
+    </section>
+
+    <div class="zbase_content_pane fullwidth" style="padding: 0 20px;">
+      <div class="zbase_stats_title">
+        <h2 class="pagetitle main">
+          Seller: <em><span class="shop_id"></span> <span class="shop_name"></span></em>
+        </h2>
+      </div>
+
+      <z-tabbable class="slim_tabs">
+        <z-tab data-active>Key Metrics</z-tab>
+        <z-tab style="display: none;">Per Product</z-tab>
+      </z-tabbable>
+
+      <div class="zbase_stats per_seller">
+        <div class="controls hidden">
+          <div class="control timerange" style="float: right;">
+            <z-daterangepicker class="open_left" style="float: right;"></z-daterangepicker>
+            <label style="float: right;">Time Range:</label>
+          </div>
+
+          <div class="control">
+            <label>Display:</label>
+            <button class="z-button view first table" data-value="table"><i class="fa fa-table"></i></button>
+            <button class="z-button view last sparkline" data-value="sparkline"><i class="fa fa-line-chart"></i></button>
+            <button class="z-button view last csv_download" data-value="csv_download" style="display: none;"><i class="fa fa-download"></i></button>
+          </div>
+
+          <i class="sep" style="margin-left: 20px;"></i>
+
+          <div class="control metrics">
+            <label>Metrics:</label>
+            <z-dropdown class="input checkbox metrics" data-multiselect style="position: relative; top: 9px;">
+              <z-dropdown-flyout>
+                <z-dropdown-items>
+                  <z-dropdown-item data-value="gmv_eurcent" data-selected>
+                    <z-checkbox data-active></z-checkbox> GMV
+                  </z-dropdown-item>
+                  <z-dropdown-item data-value="gmv_per_transaction_eurcent" data-selected>
+                    <z-checkbox data-active></z-checkbox> GMV Per Transaction
+                  </z-dropdown-item>
+                  <z-dropdown-item data-value="num_purchases" data-selected>
+                    <z-checkbox data-active></z-checkbox> Purchases
+                  </z-dropdown-item>
+                  <z-dropdown-item data-value="num_refunds">
+                    <z-checkbox></z-checkbox> Refunds
+                  </z-dropdown-item>
+                  <z-dropdown-item data-value="refund_rate">
+                    <z-checkbox></z-checkbox> Refund Rate
+                  </z-dropdown-item>
+                  <z-dropdown-item data-value="refunded_gmv_eurcent">
+                    <z-checkbox></z-checkbox> Refunded GMV
+                  </z-dropdown-item>
+                  <z-dropdown-item data-value="listview_views_ads">
+                    <z-checkbox></z-checkbox> Ad Views
+                  </z-dropdown-item>
+                  <z-dropdown-item data-value="listview_ctr_ads">
+                    <z-checkbox></z-checkbox> Ad CTR
+                  </z-dropdown-item>
+                  <z-dropdown-item data-value="listview_clicks_ads">
+                    <z-checkbox></z-checkbox> Ad Clicks
+                  </z-dropdown-item>
+                  <z-dropdown-item data-value="listview_views_recos">
+                    <z-checkbox></z-checkbox> Reco Views
+                  </z-dropdown-item>
+                  <z-dropdown-item data-value="listview_ctr_recos">
+                    <z-checkbox></z-checkbox> Reco CTR
+                  </z-dropdown-item>
+                  <z-dropdown-item data-value="listview_clicks_recos">
+                    <z-checkbox></z-checkbox> Reco Clicks
+                  </z-dropdown-item>
+                  <z-dropdown-item data-value="listview_views_search_page">
+                    <z-checkbox></z-checkbox> Search Views
+                  </z-dropdown-item>
+                  <z-dropdown-item data-value="listview_ctr_search_page">
+                    <z-checkbox></z-checkbox> Search CTR
+                  </z-dropdown-item>
+                  <z-dropdown-item data-value="listview_clicks_search_page">
+                    <z-checkbox></z-checkbox> Search Clicks
+                  </z-dropdown-item>
+                  <z-dropdown-item data-value="listview_views_catalog_page">
+                    <z-checkbox></z-checkbox> Catalog Views
+                  </z-dropdown-item>
+                  <z-dropdown-item data-value="listview_ctr_catalog_page">
+                    <z-checkbox></z-checkbox> Catalog CTR
+                  </z-dropdown-item>
+                  <z-dropdown-item data-value="listview_clicks_catalog_page">
+                    <z-checkbox></z-checkbox> Catalog Clicks
+                  </z-dropdown-item>
+                  <z-dropdown-item data-value="listview_views_shop_page">
+                    <z-checkbox></z-checkbox> Shop Views
+                  </z-dropdown-item>
+                  <z-dropdown-item data-value="listview_ctr_shop_page">
+                    <z-checkbox></z-checkbox> Shop CTR
+                  </z-dropdown-item>
+                  <z-dropdown-item data-value="listview_clicks_shop_page">
+                    <z-checkbox></z-checkbox> Shop Clicks
+                  </z-dropdown-item>
+                  <z-dropdown-item data-value="shop_page_views" data-selected>
+                    <z-checkbox></z-checkbox> Shop Page Views
+                  </z-dropdown-item>
+                  <z-dropdown-item data-value="product_page_views" data-selected>
+                    <z-checkbox></z-checkbox> Product Page Views
+                  </z-dropdown-item>
+                  <z-dropdown-item data-value="total_listviews" data-selected>
+                    <z-checkbox></z-checkbox> Total Listviews
+                  </z-dropdown-item>
+                  <z-dropdown-item data-value="num_active_products">
+                    <z-checkbox></z-checkbox> Active Products
+                  </z-dropdown-item>
+                  <z-dropdown-item data-value="num_listed_products">
+                    <z-checkbox></z-checkbox> Listed Products
+                  </z-dropdown-item>
+                </z-dropdown-items>
+              </z-dropdown-flyout>
+            </z-dropdown>
+          </div>
+        </div>
+
+        <div class="zbase_seller_overview"></div>
+      </div>
+    </div>
+
+    <z-tooltip class="gmv_eurcent" data-pointer="center">
+      Total GMV for this seller in this time window
+    </z-tooltip>
+    <z-tooltip class="gmv_per_transaction_eurcent" data-pointer="center">
+      Average GMV per Transaction (Avg. Basket Size)
+    </z-tooltip>
+    <z-tooltip class="num_purchases" data-pointer="center">
+      Total Number of Purchases for this seller in this time window
+    </z-tooltip>
+    <z-tooltip class="num_refunds" data-pointer="center">
+      Total number of Refunded Purchases for this seller in this time window
+    </z-tooltip>
+    <z-tooltip class="refund_rate" data-pointer="center">
+      Refund Rate for this seller in this time window (% of purchases that got refunded)
+    </z-tooltip>
+    <z-tooltip class="refunded_gmv_eurcent" data-pointer="center">
+      Total Refunded GMV for this seller in this time window
+    </z-tooltip>
+    <z-tooltip class="refunded_gmv_eurcent" data-pointer="center">
+      Total Refunded GMV for this seller in this time window
+    </z-tooltip>
+    <z-tooltip class="listview_views_ads" data-pointer="center">
+      Agggregate number of ad (Logenplatz) impressions for all products from this seller in this time window
+    </z-tooltip>
+    <z-tooltip class="listview_views_search_page" data-pointer="center">
+      Aggregate number of listview impressions in the On-Site Search for all products from this seller in this time window
+    </z-tooltip>
+    <z-tooltip class="listview_views_catalog_page" data-pointer="center">
+      Aggregate number of listview impressions in the catalog for all products from this seller in this time window
+    </z-tooltip>
+    <z-tooltip class="listview_views_recos" data-pointer="center">
+      Aggregate number of recommendation impressions for all products from this seller in this time window
+    </z-tooltip>
+    <z-tooltip class="listview_views_shop_page" data-pointer="center">
+      Aggregate number of listview impressions on the Shop Page for all products from this seller in this time window
+    </z-tooltip>
+    <z-tooltip class="listview_clicks_ads" data-pointer="center">
+      Agggregate number of listview ad (Logenplatz) clicks for all products from this seller in this time window
+    </z-tooltip>
+    <z-tooltip class="listview_clicks_search_page" data-pointer="center">
+      Aggregate number of listview clicks in the On-Site Search for all products from this seller in this time window
+    </z-tooltip>
+    <z-tooltip class="listview_clicks_catalog_page" data-pointer="center">
+      Aggregate number of listview clicks in the catalog for all products from this seller in this time window
+    </z-tooltip>
+    <z-tooltip class="listview_clicks_recos" data-pointer="center">
+      Aggregate number of listview reco clicks for all products from this seller in this time window
+    </z-tooltip>
+    <z-tooltip class="listview_clicks_shop_page" data-pointer="center">
+      Aggregate number of listview clicks on the Shop Page for all products from this seller in this time window
+    </z-tooltip>
+    <z-tooltip class="listview_ctr_ads" data-pointer="center">
+      Agggregate listview ad (Logenplatz) CTR for all products from this seller in this time window
+    </z-tooltip>
+    <z-tooltip class="listview_ctr_search_page" data-pointer="center">
+      Aggregate listview CTR in the On-Site Search for all products from this seller in this time window
+    </z-tooltip>
+    <z-tooltip class="listview_ctr_catalog_page" data-pointer="center">
+      Aggregate listview CTR in the catalog for all products from this seller in this time window
+    </z-tooltip>
+    <z-tooltip class="listview_ctr_recos" data-pointer="center">
+      Aggregate listview recommendations CTR for all products from this seller in this time window
+    </z-tooltip>
+    <z-tooltip class="listview_ctr_shop_page" data-pointer="center">
+      Aggregate listview CTR on the Shop Page for all products from this seller in this time window
+    </z-tooltip>
+    <z-tooltip class="num_active_products" data-pointer="center">
+      Active Products for this seller in this time window
+    </z-tooltip>
+    <z-tooltip class="num_listed_products" data-pointer="center">
+      Listed Products for this seller in this time window
+    </z-tooltip>
+    <z-tooltip class="shop_page_views" data-pointer="center">
+      Aggregate number of Shop Page impressions for this seller in this time window
+    </z-tooltip>
+    <z-tooltip class="product_page_views" data-pointer="center">
+      Aggregate number of product page impressions for all products from this seller in this time window
+    </z-tooltip>
+    <z-tooltip class="total_listviews" data-pointer="center">
+      Aggregate number of search page, catalog page, shop page, ad and recommendation impressions from this seller in this time window
+    </z-tooltip>
+  </div>
+</template>
+
+<template id="per_seller_stats_no_data_message_tpl">
+  <div class="message no_data">
+    <h2 class="pagetitle">No Data returned</h2>
+    <p>This can be caused by a non-existent seller id.</p>
+  </div>
+</template>

@@ -1,4 +1,4 @@
-var PerSellerSparklineOverview = (function() {
+var SellerSparklineOverview = (function() {
   var render = function(elem, result) {
     var tpl = $.getTemplate(
       "views/seller",
@@ -15,20 +15,32 @@ var PerSellerSparklineOverview = (function() {
       var pane = $(".zbase_seller_stats .metric_pane." + metric);
 
       if (pane) {
-        $("z-sparkline", pane).setAttribute(
-            "data-sparkline",
-            result.timeseries[metric].join(","));
+        var z_chart = $("z-chart", pane);
+        z_chart.render(
+            result.timeseries.time,
+            result.timeseries[metric]
+              .map(function(v) {
+                return parseFloat(v);
+              }));
+
+        z_chart.formatX = function(value) {
+          return ZBaseSellerMetrics.time.print(value);
+        };
+
+        z_chart.formatY = formatY(metric);
 
         $(".num", pane).innerHTML = result.aggregates[metric];
         $(".start", pane).innerHTML = start;
         $(".end", pane).innerHTML = end;
 
-        var tooltip = $(".zbase_seller_stats z-tooltip." + metric);
-        //REMOVE IF
-        if (tooltip) {
-          tooltip.init($(".help", pane));
-        }
+        $(".zbase_seller_stats z-tooltip." + metric).init($(".help", pane))
       }
+    }
+  };
+
+  var formatY = function(metric) {
+    return function(value) {
+      return ZBaseSellerMetrics[metric].print(value);
     }
   };
 

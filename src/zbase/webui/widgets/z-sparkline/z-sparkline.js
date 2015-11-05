@@ -78,7 +78,7 @@ var SparklineComponent = function() {
       return this.offsetWidth * (parseInt(value.substr(0, idx), 10) / 100);
     }
 
-    return value;
+    return parseFloat(value);
   };
 
   this.scaleValues = function(axes) {
