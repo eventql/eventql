@@ -2,31 +2,38 @@ ZBase.registerView((function() {
   var path_prefix = "/a/apps/dawanda_seller_analytics/";
   var result = null;
   var query_mgr;
-  var seller_id;
+  var shop_id;
 
   var load = function(path) {
-    seller_id = UrlUtil.getPath(path).substr(path_prefix.length);
-    //REMOVE ME
-    var seller_name = "-";
-    //REMOVEME END
+    query_mgr = EventSourceHandler();
+    shop_id = UrlUtil.getPath(path).substr(path_prefix.length);
 
     var page = $.getTemplate(
         "views/seller",
         "per_seller_stats_main_tpl");
 
-    $(".zbase_stats_title .shop_name", page).innerHTML =
-        seller_id + " (" + seller_name + ")";
-    $("z-daterangepicker", page).addEventListener("select", paramChanged, false);
+    var bc = $("zbase-breadcrumbs-section a.shop_id", page);
+    bc.href = path_prefix + shop_id;
+    bc.innerHTML = "Seller " + shop_id;
+    $(".pagetitle .shop_id", page).innerHTML = shop_id;
 
     $.onClick($("button.view.sparkline", page), onViewButtonClick);
     $.onClick($("button.view.table", page), onViewButtonClick);
+    $.onClick($("button.view.csv_download", page), onViewButtonClick);
     $("z-dropdown.metrics", page).addEventListener("change", onMetricsParamChanged);
 
+    //REMOVEME (replace with paramChanged)
+    var date_picker = $("z-daterangepicker", page);
+    $("z-daterangepicker-field", page).onclick = function(e) {
+      date_picker.removeAttribute("data-active");
+      alert("Not yet implemented");
+    };
+    //REMOVEME END
+
+    loadShopName($(".pagetitle .shop_name", page));
 
     $.handleLinks(page);
     $.replaceViewport(page);
-
-    query_mgr = EventSourceHandler();
 
     var query_str =
       "select" +
@@ -57,7 +64,7 @@ ZBase.registerView((function() {
           " listview_views_recos," +
           " listview_clicks_recos," +
           " listview_ctr_recos" +
-      " from shop_stats.last30d where shop_id = " + seller_id // FIXME escaping
+      " from shop_stats.last30d where shop_id = " + shop_id // FIXME escaping
       " order by time asc;";
 
     setParamsFromAndUntil(
@@ -74,6 +81,11 @@ ZBase.registerView((function() {
     query.addEventListener("result", function(e) {
       query_mgr.close("sql_query");
       var data = JSON.parse(e.data).results[0];
+
+      if (data.rows.length == 0) {
+        renderNoDataReturned();
+        return;
+      }
 
       var values = [];
       for (var i = 0; i < data.columns.length; i++) {
@@ -96,6 +108,9 @@ ZBase.registerView((function() {
       result.aggregates = aggregate(result.timeseries);
 
       $(".zbase_seller_stats .controls").classList.remove("hidden");
+      setParamsFromAndUntil(
+          Math.round(data.rows[0][0] / 1000),
+          Math.round(data.rows[data.rows.length - 1][0] / 1000));
       renderView(path);
     }, false);
 
@@ -107,6 +122,75 @@ ZBase.registerView((function() {
     query.addEventListener("status", function(e) {
       renderQueryProgress(JSON.parse(e.data));
     }, false);
+  };
+
+  var destroy = function() {
+    window.removeEventListener("resize", resizeSparklines);
+    query_mgr.closeAll();
+  };
+
+  var loadShopName = function(elem) {
+    var query_str = "SELECT `title` FROM db.shops WHERE id = " +
+      $.escapeHTML(shop_id);
+
+    var query = query_mgr.get(
+      "shop_name",
+      "/api/v1/sql_stream?query=" + encodeURIComponent(query_str));
+
+    query.addEventListener("result", function(e) {
+      query_mgr.close("shop_name");
+      var result = JSON.parse(e.data).results[0];
+      elem.innerHTML = "(" + result.rows[0] + ")";
+    });
+
+    query.addEventListener("error", function(e) {
+      query_mgr.close("shop_name");
+    });
+  };
+
+  var renderQueryProgress = function(progress) {
+    QueryProgressWidget.render(
+        $(".zbase_seller_overview"),
+        progress);
+  };
+
+  var renderView = function(path) {
+    if (result == null) {
+      $.fatalError();
+    }
+
+    var metrics = getMetrics();
+    var view = getParamView();
+
+    switch (view) {
+      case "table":
+        SellerTableOverview.render(
+          $(".zbase_seller_overview"),
+          result,
+          metrics);
+        break;
+
+      case "sparkline":
+        SellerSparklineOverview.render(
+          $(".zbase_seller_overview"),
+          result,
+          metrics);
+        break;
+
+      case "csv_download":
+        SellerCSVDownload.render($(".zbase_seller_overview"));
+        break;
+    }
+
+    updateControlsVisibility(view);
+  };
+
+  var renderNoDataReturned = function() {
+    $.replaceContent(
+      $(".zbase_seller_stats .zbase_content_pane"),
+      $.getTemplate(
+          "views/seller",
+          "per_seller_stats_no_data_message_tpl"));
   };
 
   var aggregate = function(timeseries) {
@@ -122,37 +206,6 @@ ZBase.registerView((function() {
     }
 
     return aggregates;
-  };
-
-  var destroy = function() {
-    window.removeEventListener("resize", resizeSparklines);
-    query_mgr.closeAll();
-  };
-
-  var renderQueryProgress = function(progress) {
-    QueryProgressWidget.render(
-        $(".zbase_seller_overview"),
-        progress);
-  };
-
-  var renderView = function(path) {
-    if (result == null) {
-      $.fatalError();
-    }
-
-    var view = getParamView();
-    var metrics = getMetrics();
-    if (view == "table") {
-      PerSellerTableOverview.render(
-          $(".zbase_seller_overview"),
-          result,
-          metrics);
-    } else {
-      PerSellerSparklineOverview.render(
-          $(".zbase_seller_overview"),
-          result,
-          metrics);
-    }
   };
 
   var setParamsFromAndUntil = function(from, until) {
@@ -208,7 +261,7 @@ ZBase.registerView((function() {
         .getAttribute("data-value");
     params.metrics = encodeURIComponent(
         $(".zbase_seller_stats z-dropdown.metrics").getValue());
-    return path_prefix + seller_id + "?" + $.buildQueryString(params);
+    return path_prefix + shop_id + "?" + $.buildQueryString(params);
   };
 
   var paramChanged = function() {
@@ -223,21 +276,41 @@ ZBase.registerView((function() {
 
     renderView();
 
-    var path = getUrl();
-    history.pushState({path: path}, "", path);
+    $.pushHistoryState(getUrl());
   };
 
   var onMetricsParamChanged = function() {
     renderView();
 
-    var path = getUrl();
-    history.pushState({path: path}, "", path);
+    $.pushHistoryState(getUrl());
   };
 
   var resizeSparklines = function() {
     var sparklines = document.querySelectorAll(".zbase_seller_stats z-sparkline");
     for (var i = 0; i < sparklines.length; i++) {
       sparklines[i].render();
+    }
+  };
+
+  var updateControlsVisibility = function(view) {
+    var metrics_control = $(".zbase_seller_stats .control.metrics");
+    var datepicker_control = $(".zbase_seller_stats .control.timerange");
+
+    switch (view) {
+      case "table":
+        metrics_control.classList.remove("hidden");
+        datepicker_control.classList.remove("hidden");
+        return;
+
+      case "sparkline":
+        metrics_control.classList.add("hidden");
+        datepicker_control.classList.remove("hidden");
+        return;
+
+      case "csv_download":
+        metrics_control.classList.add("hidden");
+        datepicker_control.classList.add("hidden");
+        return;
     }
   };
 

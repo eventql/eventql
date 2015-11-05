@@ -13,12 +13,15 @@ ZBase.registerView((function() {
 
     $.onClick($("z-checkbox.premium", page), paramChanged);
     $("z-dropdown.metrics", page).addEventListener("change", function() {
-      renderTable($(".zbase_seller_overview table"), result, path);
+      renderTable($(".zbase_seller_overview table.overview"), result, path);
       $.pushHistoryState(path_prefix + "?" + $.buildQueryString(getQueryString()));
     });
     $("z-search.seller", page).addEventListener("z-search-submit", function(e) {
       $.navigateTo(path_prefix + "/" + e.detail.value);
     });
+    $(".time_range", page).addEventListener("click", function() {
+      alert("Not yet implemented");
+    }, false);
 
     $.handleLinks(page);
     $.replaceViewport(page);
@@ -32,7 +35,7 @@ ZBase.registerView((function() {
     var order = getParamsOrder();
 
     var query_str =
-      "select shop_id, " +
+      "select count(1) as days, shop_id, " +
       "sum(num_active_products) num_active_products, " +
       "sum(num_listed_products) num_listed_products, " +
       "sum(num_purchases) num_purchases, " +
@@ -72,7 +75,8 @@ ZBase.registerView((function() {
       query_mgr.close("sql_query");
       result = JSON.parse(e.data).results[0];
       hideLoader();
-      renderTable($(".zbase_seller_overview table"), result, path);
+      renderTable($(".zbase_seller_overview table.overview"), result, path);
+      $(".zbase_seller_overview .time_range .num_days").innerHTML = result.rows[0][0];
     });
 
     query.addEventListener("error", function(e) {
@@ -133,7 +137,7 @@ ZBase.registerView((function() {
     var tbody = $("tbody", table_tpl);
     result.rows.forEach(function(row) {
       var tr = tr_tpl.cloneNode(true);
-      var url = "/a/apps/dawanda_seller_analytics/" + row[0]
+      var url = "/a/apps/dawanda_seller_analytics/" + row[1]
 
       for (var i = 0; i < row.length; i++) {
         if (metrics[result.columns[i]]) {
@@ -179,14 +183,14 @@ ZBase.registerView((function() {
         $(".zbase_seller_stats th." + order_by).classList.add("order_by");
       }
 
-      var table = $(".zbase_seller_stats table");
+      var table = $(".zbase_seller_stats table.overview");
       table.setAttribute("data-order-by", order_by);
       table.setAttribute("data-order-fn", order_fn);
     }
   };
 
   var getParamsOrder = function() {
-    var table = $(".zbase_seller_stats table");
+    var table = $(".zbase_seller_stats table.overview");
 
     return {
       order_by: table.getAttribute("data-order-by"),

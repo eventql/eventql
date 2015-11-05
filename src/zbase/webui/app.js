@@ -112,6 +112,10 @@ var ZBase = (function() {
           if (e.state && e.state.path) {
             changeNavigation(e.state.path);
           } else {
+            //FIXME
+            if (window.location.hash.length > 0) {
+              return;
+            }
             changeNavigation(window.location.pathname + window.location.search);
           }
         }, false);
