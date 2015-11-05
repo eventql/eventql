@@ -1,3 +1,25 @@
 z-chart {
   display: inline-block;
 }
+
+z-chart.chart-axes {
+  padding-top: 8px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.3);
+  border-left: 1px solid rgba(0, 0, 0, 0.3);
+}
+
+z-chart svg {
+  vertical-align: bottom;
+}
+
+z-chart path {
+  stroke: rgba(0, 0, 0, 0.6);
+  fill: none;
+  stroke-width: 2px;
+}
+
+z-chart circle {
+  stroke: rgba(0, 0, 0, 0.8);
+  fill: rgba(0, 0, 0, 0.8);
+  stroke-width: 1px;
+}
