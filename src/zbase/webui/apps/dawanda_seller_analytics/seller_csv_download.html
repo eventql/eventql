@@ -1,0 +1,213 @@
+<template id="seller_csv_download_main_tpl">
+  <div class="seller_csv_download">
+    <h2 class="pagetitle">Download CSV File</h2>
+
+    <div class="control">
+      <label>Time Range:</label>
+      <z-daterangepicker></z-daterangepicker>
+    </div>
+
+    <div class="control">
+      <label>Columns:</label>
+      <z-dropdown class="input checkbox columns" data-multiselect>
+        <z-dropdown-flyout>
+          <z-dropdown-items>
+            <z-dropdown-item data-value="shop_id" data-selected>
+              <z-checkbox data-active></z-checkbox> Shop ID
+            </z-dropdown-item>
+            <z-dropdown-item data-value="time" data-selected>
+              <z-checkbox data-active></z-checkbox> Time
+            </z-dropdown-item>
+            <z-dropdown-item data-value="gmv_eurcent" data-selected>
+              <z-checkbox data-active></z-checkbox> GMV
+            </z-dropdown-item>
+            <z-dropdown-item data-value="gmv_per_transaction_eurcent" data-selected>
+              <z-checkbox data-active></z-checkbox> GMV Per Transaction
+            </z-dropdown-item>
+            <z-dropdown-item data-value="num_purchases" data-selected>
+              <z-checkbox data-active></z-checkbox> Purchases
+            </z-dropdown-item>
+            <z-dropdown-item data-value="num_refunds">
+              <z-checkbox></z-checkbox> Refunds
+            </z-dropdown-item>
+            <z-dropdown-item data-value="refund_rate">
+              <z-checkbox></z-checkbox> Refund Rate
+            </z-dropdown-item>
+            <z-dropdown-item data-value="refunded_gmv_eurcent">
+              <z-checkbox></z-checkbox> Refunded GMV
+            </z-dropdown-item>
+            <z-dropdown-item data-value="listview_views_ads">
+              <z-checkbox></z-checkbox> Ad Views
+            </z-dropdown-item>
+            <z-dropdown-item data-value="listview_ctr_ads">
+              <z-checkbox></z-checkbox> Ad CTR
+            </z-dropdown-item>
+            <z-dropdown-item data-value="listview_clicks_ads">
+              <z-checkbox></z-checkbox> Ad Clicks
+            </z-dropdown-item>
+            <z-dropdown-item data-value="listview_views_recos">
+              <z-checkbox></z-checkbox> Reco Views
+            </z-dropdown-item>
+            <z-dropdown-item data-value="listview_ctr_recos">
+              <z-checkbox></z-checkbox> Reco CTR
+            </z-dropdown-item>
+            <z-dropdown-item data-value="listview_clicks_recos">
+              <z-checkbox></z-checkbox> Reco Clicks
+            </z-dropdown-item>
+            <z-dropdown-item data-value="listview_views_search_page">
+              <z-checkbox></z-checkbox> Search Views
+            </z-dropdown-item>
+            <z-dropdown-item data-value="listview_ctr_search_page">
+              <z-checkbox></z-checkbox> Search CTR
+            </z-dropdown-item>
+            <z-dropdown-item data-value="listview_clicks_search_page">
+              <z-checkbox></z-checkbox> Search Clicks
+            </z-dropdown-item>
+            <z-dropdown-item data-value="listview_views_catalog_page">
+              <z-checkbox></z-checkbox> Catalog Views
+            </z-dropdown-item>
+            <z-dropdown-item data-value="listview_ctr_catalog_page">
+              <z-checkbox></z-checkbox> Catalog CTR
+            </z-dropdown-item>
+            <z-dropdown-item data-value="listview_clicks_catalog_page">
+              <z-checkbox></z-checkbox> Catalog Clicks
+            </z-dropdown-item>
+            <z-dropdown-item data-value="listview_views_shop_page">
+              <z-checkbox></z-checkbox> Shop Views
+            </z-dropdown-item>
+            <z-dropdown-item data-value="listview_ctr_shop_page">
+              <z-checkbox></z-checkbox> Shop CTR
+            </z-dropdown-item>
+            <z-dropdown-item data-value="listview_clicks_shop_page">
+              <z-checkbox></z-checkbox> Shop Clicks
+            </z-dropdown-item>
+            <z-dropdown-item data-value="shop_page_views" data-selected>
+              <z-checkbox></z-checkbox> Shop Page Views
+            </z-dropdown-item>
+            <z-dropdown-item data-value="product_page_views" data-selected>
+              <z-checkbox></z-checkbox> Product Page Views
+            </z-dropdown-item>
+            <z-dropdown-item data-value="total_listviews" data-selected>
+              <z-checkbox></z-checkbox> Total Listviews
+            </z-dropdown-item>
+            <z-dropdown-item data-value="num_active_products">
+              <z-checkbox></z-checkbox> Active Products
+            </z-dropdown-item>
+            <z-dropdown-item data-value="num_listed_products">
+              <z-checkbox></z-checkbox> Listed Products
+            </z-dropdown-item>
+          </z-dropdown-items>
+        </z-dropdown-flyout>
+      </z-dropdown>
+
+    </div>
+
+    <div class="control">
+      <label>Order By:</label>
+      <z-dropdown class="input checkbox order_by" data-multiselect>
+        <z-dropdown-flyout>
+          <z-dropdown-items>
+            <z-dropdown-item data-value="shop_id" data-selected>
+              <z-checkbox data-active></z-checkbox> Shop ID
+            </z-dropdown-item>
+            <z-dropdown-item data-value="time" data-selected>
+              <z-checkbox data-active></z-checkbox> Time
+            </z-dropdown-item>
+            <z-dropdown-item data-value="gmv_eurcent" data-selected>
+              <z-checkbox data-active></z-checkbox> GMV
+            </z-dropdown-item>
+            <z-dropdown-item data-value="gmv_per_transaction_eurcent" data-selected>
+              <z-checkbox data-active></z-checkbox> GMV Per Transaction
+            </z-dropdown-item>
+            <z-dropdown-item data-value="num_purchases" data-selected>
+              <z-checkbox data-active></z-checkbox> Purchases
+            </z-dropdown-item>
+            <z-dropdown-item data-value="num_refunds">
+              <z-checkbox></z-checkbox> Refunds
+            </z-dropdown-item>
+            <z-dropdown-item data-value="refund_rate">
+              <z-checkbox></z-checkbox> Refund Rate
+            </z-dropdown-item>
+            <z-dropdown-item data-value="refunded_gmv_eurcent">
+              <z-checkbox></z-checkbox> Refunded GMV
+            </z-dropdown-item>
+            <z-dropdown-item data-value="listview_views_ads">
+              <z-checkbox></z-checkbox> Ad Views
+            </z-dropdown-item>
+            <z-dropdown-item data-value="listview_ctr_ads">
+              <z-checkbox></z-checkbox> Ad CTR
+            </z-dropdown-item>
+            <z-dropdown-item data-value="listview_clicks_ads">
+              <z-checkbox></z-checkbox> Ad Clicks
+            </z-dropdown-item>
+            <z-dropdown-item data-value="listview_views_recos">
+              <z-checkbox></z-checkbox> Reco Views
+            </z-dropdown-item>
+            <z-dropdown-item data-value="listview_ctr_recos">
+              <z-checkbox></z-checkbox> Reco CTR
+            </z-dropdown-item>
+            <z-dropdown-item data-value="listview_clicks_recos">
+              <z-checkbox></z-checkbox> Reco Clicks
+            </z-dropdown-item>
+            <z-dropdown-item data-value="listview_views_search_page">
+              <z-checkbox></z-checkbox> Search Views
+            </z-dropdown-item>
+            <z-dropdown-item data-value="listview_ctr_search_page">
+              <z-checkbox></z-checkbox> Search CTR
+            </z-dropdown-item>
+            <z-dropdown-item data-value="listview_clicks_search_page">
+              <z-checkbox></z-checkbox> Search Clicks
+            </z-dropdown-item>
+            <z-dropdown-item data-value="listview_views_catalog_page">
+              <z-checkbox></z-checkbox> Catalog Views
+            </z-dropdown-item>
+            <z-dropdown-item data-value="listview_ctr_catalog_page">
+              <z-checkbox></z-checkbox> Catalog CTR
+            </z-dropdown-item>
+            <z-dropdown-item data-value="listview_clicks_catalog_page">
+              <z-checkbox></z-checkbox> Catalog Clicks
+            </z-dropdown-item>
+            <z-dropdown-item data-value="listview_views_shop_page">
+              <z-checkbox></z-checkbox> Shop Views
+            </z-dropdown-item>
+            <z-dropdown-item data-value="listview_ctr_shop_page">
+              <z-checkbox></z-checkbox> Shop CTR
+            </z-dropdown-item>
+            <z-dropdown-item data-value="listview_clicks_shop_page">
+              <z-checkbox></z-checkbox> Shop Clicks
+            </z-dropdown-item>
+            <z-dropdown-item data-value="shop_page_views" data-selected>
+              <z-checkbox></z-checkbox> Shop Page Views
+            </z-dropdown-item>
+            <z-dropdown-item data-value="product_page_views" data-selected>
+              <z-checkbox></z-checkbox> Product Page Views
+            </z-dropdown-item>
+            <z-dropdown-item data-value="total_listviews" data-selected>
+              <z-checkbox></z-checkbox> Total Listviews
+            </z-dropdown-item>
+            <z-dropdown-item data-value="num_active_products">
+              <z-checkbox></z-checkbox> Active Products
+            </z-dropdown-item>
+            <z-dropdown-item data-value="num_listed_products">
+              <z-checkbox></z-checkbox> Listed Products
+            </z-dropdown-item>
+          </z-dropdown-items>
+        </z-dropdown-flyout>
+      </z-dropdown>
+    </div>
+
+    <div class="control">
+      <label>Order Function:</label>
+      <z-dropdown class="input order_fn" data-resolved>
+        <z-dropdown-flyout>
+          <z-dropdown-items>
+            <z-dropdown-item data-value="asc" data-selected>ASC</z-dropdown-item>
+            <z-dropdown-item data-value="desc">DESC</z-dropdown-item>
+          </z-dropdown-items>
+        </z-dropdown-flyout>
+      </z-dropdown>
+    </div>
+
+    <button class="z-button primary">Download</button>
+  </div>
+</template>
