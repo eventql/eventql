@@ -26,8 +26,7 @@ z-chart circle {
 
 z-chart rect {
   fill: none;
-  stroke: rgba(0, 0, 0, 0.8);
-  stroke-width: 1px;
+
   pointer-events: all;
 }
 

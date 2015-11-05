@@ -25,8 +25,8 @@ var ZChartComponent = function() {
   this.renderChart = function(y, x_values) {
     var height = this.getDimension('height');
     var width = this.getDimension("width");
-    var padding_x = 0;
-    var padding_y = 5;
+    var padding_x = 8;
+    var padding_y = 8;
 
     var points = this.scaleValues(y);
 
@@ -59,12 +59,10 @@ var ZChartComponent = function() {
     var x = (rect_width / 2) * -1;
 
     for (var i = 0; i < svg_circles.length; i++) {
-      if (rect_width > 100 || i % 2 == 1) {
-        svg.innerHTML += "<g><circle cx='" + svg_circles[i][0] + "' cy='" +
+      svg.innerHTML += "<g><circle cx='" + svg_circles[i][0] + "' cy='" +
           svg_circles[i][1] + "' r='2.5' />" +
           "<rect width='" + rect_width  + "' height='" + height +
           "' y='0' x='" + x + "' /></g>";
-      }
       x += rect_width;
     }
 
@@ -92,6 +90,9 @@ var ZChartComponent = function() {
       this.classList.remove("hidden");
     }, false);
 
+    tooltip.addEventListener("mouseout", function(e) {
+      this.classList.add("hidden");
+    }, false);
 
     rect.addEventListener("mouseout", function(e) {
       tooltip.classList.add("hidden");
