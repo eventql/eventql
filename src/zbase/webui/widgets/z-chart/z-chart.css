@@ -23,3 +23,26 @@ z-chart circle {
   fill: rgba(0, 0, 0, 0.8);
   stroke-width: 1px;
 }
+
+z-chart rect {
+  fill: none;
+  stroke: none;
+  pointer-events: all;
+}
+
+z-chart-tooltip {
+  font-size: inherit;
+  display: block;
+  position: fixed;
+  z-index: 900;
+  text-align: center;
+  padding: 5px 7px;
+  color: #fff;
+  background: #333;
+  border-radius: 3px;
+}
+
+z-chart-tooltip.hidden {
+  display: none;
+}
+

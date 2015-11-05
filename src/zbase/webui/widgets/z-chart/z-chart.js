@@ -23,10 +23,10 @@ var ZChartComponent = function() {
     y.max = (this.hasAttribute('data-max')) ?
       parseFloat(this.getattribute('data-max')) : Math.max.apply(null, y_values);
 
-    this.renderChart(y);
+    this.renderChart(y, x_values);
   };
 
-  this.renderChart = function(y) {
+  this.renderChart = function(y, x_values) {
     var height = this.getDimension('height');
     var width = this.getDimension("width");
     var padding_x = 0;
@@ -45,11 +45,9 @@ var ZChartComponent = function() {
       }
     }
 
-    console.log(svg_circles);
-
     var tpl = $.getTemplate(
-        "widgets/z-sparkline",
-        "z-sparkline-tpl");
+        "widgets/z-chart",
+        "z-chart-tpl");
 
     this.innerHTML = "";
     this.appendChild(tpl);
@@ -61,9 +59,39 @@ var ZChartComponent = function() {
     var path = this.querySelector("path");
     path.setAttribute("d", svg_line.join(" "));
 
-    svg_circles.forEach(function(c) {
-      svg.innerHTML += "<circle cx='" + c[0] + "' cy='" + c[1] + "' r='2' />";
-    });
+    var rect_width = width / (x_values.length - 1);
+    var x = (rect_width / 2) * -1;
+    for (var i = 0; i < svg_circles.length; i++) {
+      svg.innerHTML += "<g><circle cx='" + svg_circles[i][0] + "' cy='" +
+        svg_circles[i][1] + "' r='3' />" +
+        "<rect width='" + rect_width + "' height='" + height +
+        "' y='0' x='" + x + "' /></g>";
+      x += rect_width;
+    }
+
+
+    var groups = svg.querySelectorAll("g");
+    for (var i = 0; i < groups.length; i++) {
+      this.setupTooltip(groups[i], x_values[i], y.values[i]);
+    }
+  };
+
+  this.setupTooltip = function(html, x_value, y_value) {
+    var tooltip = this.querySelector("z-chart-tooltip");
+    var rect = html.querySelector("rect");
+    rect.addEventListener("mousemove", function(e) {
+      tooltip.innerHTML = x_value + " : " + y_value;
+      tooltip.classList.remove("hidden");
+
+      var pos = html.querySelector("circle").getBoundingClientRect();
+      tooltip.style.top = (pos.top - pos.height - tooltip.offsetHeight) + "px";
+      tooltip.style.left = (pos.left - tooltip.offsetWidth / 2) + "px";
+
+    }, false);
+
+    rect.addEventListener("mouseout", function(e) {
+      //tooltip.classList.add("hidden");
+    }, false);
   };
 
   this.getDimension = function(dimension) {
