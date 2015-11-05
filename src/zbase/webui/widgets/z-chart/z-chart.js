@@ -10,10 +10,6 @@
 */
 
 var ZChartComponent = function() {
-  this.createdCallback = function() {
-    console.log("z chart component");
-  };
-
   this.render = function(x_values, y_values) {
     var y = {};
     y.values = y_values;
@@ -90,7 +86,7 @@ var ZChartComponent = function() {
     }, false);
 
     rect.addEventListener("mouseout", function(e) {
-      //tooltip.classList.add("hidden");
+      tooltip.classList.add("hidden");
     }, false);
   };
 
