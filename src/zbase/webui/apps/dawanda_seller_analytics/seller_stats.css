@@ -124,6 +124,14 @@
   float: right;
 }
 
+.zbase_seller_stats .zbase_stats .metric_pane z-chart {
+  display: block;
+}
+
+.zbase_seller_stats .zbase_stats .metric_pane z-chart z-chart-tooltip {
+  font-size: 12px;
+}
+
 .zbase_seller_stats .per_seller .controls {
   overflow: visible;
   border-bottom: 1px solid #ddd;
