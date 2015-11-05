@@ -19,6 +19,7 @@ ZBase.registerView((function() {
 
     $.onClick($("button.view.sparkline", page), onViewButtonClick);
     $.onClick($("button.view.table", page), onViewButtonClick);
+    $.onClick($("button.view.csv_download", page), onViewButtonClick);
     $("z-dropdown.metrics", page).addEventListener("change", onMetricsParamChanged);
 
     //REMOVEME (replace with paramChanged)
@@ -158,18 +159,27 @@ ZBase.registerView((function() {
       $.fatalError();
     }
 
-    var view = getParamView();
     var metrics = getMetrics();
-    if (view == "table") {
-      PerSellerTableOverview.render(
+    var view = getParamView();
+
+    switch (view) {
+      case "table":
+        PerSellerTableOverview.render(
           $(".zbase_seller_overview"),
           result,
           metrics);
-    } else {
-      PerSellerSparklineOverview.render(
+        break;
+
+      case "sparkline":
+        PerSellerSparklineOverview.render(
           $(".zbase_seller_overview"),
           result,
           metrics);
+        break;
+
+      case "csv_download":
+        SellerCSVDownload.render($(".zbase_seller_overview"));
+        break;
     }
   };
 
