@@ -57,14 +57,16 @@ var ZChartComponent = function() {
 
     var rect_width = width / (x_values.length - 1);
     var x = (rect_width / 2) * -1;
+
     for (var i = 0; i < svg_circles.length; i++) {
-      svg.innerHTML += "<g><circle cx='" + svg_circles[i][0] + "' cy='" +
-        svg_circles[i][1] + "' r='3' />" +
-        "<rect width='" + rect_width + "' height='" + height +
-        "' y='0' x='" + x + "' /></g>";
+      if (rect_width > 100 || i % 2 == 1) {
+        svg.innerHTML += "<g><circle cx='" + svg_circles[i][0] + "' cy='" +
+          svg_circles[i][1] + "' r='2.5' />" +
+          "<rect width='" + rect_width  + "' height='" + height +
+          "' y='0' x='" + x + "' /></g>";
+      }
       x += rect_width;
     }
-
 
     var groups = svg.querySelectorAll("g");
     for (var i = 0; i < groups.length; i++) {
@@ -75,8 +77,9 @@ var ZChartComponent = function() {
   this.setupTooltip = function(html, x_value, y_value) {
     var tooltip = this.querySelector("z-chart-tooltip");
     var rect = html.querySelector("rect");
-    rect.addEventListener("mousemove", function(e) {
-      tooltip.innerHTML = x_value + " : " + y_value;
+    var _this = this;
+    rect.addEventListener("mouseenter", function(e) {
+      tooltip.innerHTML = _this.formatX(x_value) + ": " + _this.formatY(y_value);
       tooltip.classList.remove("hidden");
 
       var pos = html.querySelector("circle").getBoundingClientRect();
@@ -84,6 +87,11 @@ var ZChartComponent = function() {
       tooltip.style.left = (pos.left - tooltip.offsetWidth / 2) + "px";
 
     }, false);
+
+    tooltip.addEventListener("mouseenter", function(e) {
+      this.classList.remove("hidden");
+    }, false);
+
 
     rect.addEventListener("mouseout", function(e) {
       tooltip.classList.add("hidden");
