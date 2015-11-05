@@ -15,12 +15,19 @@ var SellerSparklineOverview = (function() {
       var pane = $(".zbase_seller_stats .metric_pane." + metric);
 
       if (pane) {
-        $("z-chart", pane).render(
+        var z_chart = $("z-chart", pane);
+        z_chart.render(
             result.timeseries.time,
             result.timeseries[metric]
               .map(function(v) {
                 return parseFloat(v);
               }));
+
+        z_chart.formatX = function(value) {
+          return ZBaseSellerMetrics.time.print(value);
+        };
+
+        z_chart.formatY = formatY(metric);
 
         $(".num", pane).innerHTML = result.aggregates[metric];
         $(".start", pane).innerHTML = start;
@@ -29,12 +36,12 @@ var SellerSparklineOverview = (function() {
         $(".zbase_seller_stats z-tooltip." + metric).init($(".help", pane))
       }
     }
+  };
 
-    //REMOVE ME
-    $(".zbase_seller_stats z-chart").render(
-        ["1.10", "2.10", "3.10", "4.10"],
-        [1, 2, 3, 4]);
-    //REMOVE ME END
+  var formatY = function(metric) {
+    return function(value) {
+      return ZBaseSellerMetrics[metric].print(value);
+    }
   };
 
   var add = function(a, b) {
