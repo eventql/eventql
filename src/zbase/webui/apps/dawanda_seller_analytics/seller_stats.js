@@ -181,6 +181,8 @@ ZBase.registerView((function() {
         SellerCSVDownload.render($(".zbase_seller_overview"));
         break;
     }
+
+    updateControlsVisibility(view);
   };
 
   var renderNoDataReturned = function() {
@@ -287,6 +289,28 @@ ZBase.registerView((function() {
     var sparklines = document.querySelectorAll(".zbase_seller_stats z-sparkline");
     for (var i = 0; i < sparklines.length; i++) {
       sparklines[i].render();
+    }
+  };
+
+  var updateControlsVisibility = function(view) {
+    var metrics_control = $(".zbase_seller_stats .control.metrics");
+    var datepicker_control = $(".zbase_seller_stats .control.timerange");
+
+    switch (view) {
+      case "table":
+        metrics_control.classList.remove("hidden");
+        datepicker_control.classList.remove("hidden");
+        return;
+
+      case "sparkline":
+        metrics_control.classList.add("hidden");
+        datepicker_control.classList.remove("hidden");
+        return;
+
+      case "csv_download":
+        metrics_control.classList.add("hidden");
+        datepicker_control.classList.add("hidden");
+        return;
     }
   };
 
