@@ -19,9 +19,6 @@ ZBase.registerView((function() {
     $("z-search.seller", page).addEventListener("z-search-submit", function(e) {
       $.navigateTo(path_prefix + "/" + e.detail.value);
     });
-    $(".time_range", page).addEventListener("click", function() {
-      alert("Not yet implemented");
-    }, false);
 
     $.handleLinks(page);
     $.replaceViewport(page);
@@ -76,7 +73,11 @@ ZBase.registerView((function() {
       result = JSON.parse(e.data).results[0];
       hideLoader();
       renderTable($(".zbase_seller_overview table.overview"), result, path);
-      $(".zbase_seller_overview .time_range .num_days").innerHTML = result.rows[0][0];
+
+      var until = Date.now();
+      $(".zbase_seller_overview .time_range").innerHTML =
+         DateUtil.printDate(until - DateUtil.millisPerDay) + "-" +
+         DateUtil.printDate(until);
     });
 
     query.addEventListener("error", function(e) {
