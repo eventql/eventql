@@ -1,4 +1,4 @@
-var PerSellerTableOverview = (function() {
+var SellerTableOverview = (function() {
   var render = function(elem, result, metrics) {
     var tpl = $.getTemplate(
         "views/seller",

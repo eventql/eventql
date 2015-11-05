@@ -164,14 +164,14 @@ ZBase.registerView((function() {
 
     switch (view) {
       case "table":
-        PerSellerTableOverview.render(
+        SellerTableOverview.render(
           $(".zbase_seller_overview"),
           result,
           metrics);
         break;
 
       case "sparkline":
-        PerSellerSparklineOverview.render(
+        SellerSparklineOverview.render(
           $(".zbase_seller_overview"),
           result,
           metrics);
