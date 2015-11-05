@@ -26,3 +26,7 @@
   position: relative;
   top: 14px;
 }
+
+.zbase_seller_stats .seller_csv_download button.download {
+  margin-top: 22px;
+}
