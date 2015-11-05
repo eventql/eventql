@@ -11,8 +11,38 @@ var ZBaseSellerMetrics = (function() {
     return (sum(values) / values.length);
   };
 
-  var round = function(num, precision) {
-    return (Math.round(num * Math.pow(10, precision)) / Math.pow(10, precision));
+  var numberFormat = function(num, precision) {
+    var parts = num.toString().split(".");
+
+    //integer format with , every n digits
+    var int_parts = parts[0].split("").reverse();
+    var integer = [];
+    var n = 3;
+
+    for (var i = 0; i < int_parts.length; i += n) {
+      integer.push(int_parts.slice(i, i + n).reverse().join(""));
+    }
+    integer = integer.reverse().join(",");
+
+    if (precision == 0) {
+      return integer;
+    }
+
+    //decimal part with exactly n digits, where n = precision
+    if (parts.length == 1) {
+      parts.push("");
+    }
+
+    var dec = [];
+    for (var i = 0; i < precision; i++) {
+      if (i < parts[1].length) {
+        dec.push(parts[1][i]);
+      } else {
+        dec.push("0");
+      }
+    }
+
+    return integer + "." + dec.join("");
   };
 
   var printEurcent = function(amount) {
@@ -20,7 +50,7 @@ var ZBaseSellerMetrics = (function() {
       return "-";
     }
 
-    return round(amount / 100, 3) + "&euro;";
+    return numberFormat(amount / 100, 3) + "&euro;";
   };
 
   var printTimestamp = function(ts) {
@@ -28,18 +58,26 @@ var ZBaseSellerMetrics = (function() {
   };
 
   var printNumber = function(precision) {
-    return function(value) {
-      if (isNaN(value)) {
+    return function(num) {
+      if (isNaN(num)) {
         return "-";
       }
 
-      return round(value, precision);
+      return numberFormat(num, precision);
     }
   };
 
   var print = function(value) {
     return value;
   }
+
+  var printAsPercent = function(num) {
+    if (isNaN(num)) {
+      return "-";
+    }
+
+    return numberFormat(num * 100, 3) + "%";
+  };
 
   return {
     shop_id: {print: print},
@@ -60,11 +98,11 @@ var ZBaseSellerMetrics = (function() {
     listview_clicks_catalog_page: {aggr: sum, print: printNumber(0)},
     listview_clicks_recos: {aggr: sum, print: printNumber(0)},
     listview_clicks_shop_page: {aggr: sum, print: printNumber(0)},
-    listview_ctr_ads: {aggr: mean, print: printNumber(4)},
-    listview_ctr_search_page: {aggr: mean, print: printNumber(4)},
-    listview_ctr_catalog_page: {aggr: mean, print: printNumber(4)},
-    listview_ctr_recos: {aggr: mean, print: printNumber(4)},
-    listview_ctr_shop_page: {aggr: mean, print: printNumber(4)},
+    listview_ctr_ads: {aggr: mean, print: printAsPercent},
+    listview_ctr_search_page: {aggr: mean, print: printAsPercent},
+    listview_ctr_catalog_page: {aggr: mean, print: printAsPercent},
+    listview_ctr_recos: {aggr: mean, print: printAsPercent},
+    listview_ctr_shop_page: {aggr: mean, print: printAsPercent},
     num_active_products: {aggr: sum, print: printNumber(0)},
     num_listed_products: {aggr: sum, print: printNumber(0)},
     shop_page_views: {aggr: sum, print: printNumber(0)},
