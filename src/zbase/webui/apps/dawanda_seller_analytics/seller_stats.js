@@ -83,8 +83,8 @@ ZBase.registerView((function() {
       var data = JSON.parse(e.data).results[0];
 
       if (data.rows.length == 0) {
-        //renderNoDataReturned();
-        //return;
+        renderNoDataReturned();
+        return;
       }
 
       var values = [];
@@ -108,9 +108,9 @@ ZBase.registerView((function() {
       result.aggregates = aggregate(result.timeseries);
 
       $(".zbase_seller_stats .controls").classList.remove("hidden");
-      /*setParamsFromAndUntil(
+      setParamsFromAndUntil(
           Math.round(data.rows[0][0] / 1000),
-          Math.round(data.rows[data.rows.length - 1][0] / 1000));*/
+          Math.round(data.rows[data.rows.length - 1][0] / 1000));
       renderView(path);
     }, false);
 

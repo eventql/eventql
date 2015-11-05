@@ -132,6 +132,15 @@
   font-size: 12px;
 }
 
+.zbase_seller_stats .zbase_stats .metric_pane z-chart svg {
+  margin-top: -10px;
+}
+
+.zbase_seller_stats .zbase_stats .metric_pane z-chart circle {
+  fill: none;
+  stroke: none;
+}
+
 .zbase_seller_stats .per_seller .controls {
   overflow: visible;
   border-bottom: 1px solid #ddd;
