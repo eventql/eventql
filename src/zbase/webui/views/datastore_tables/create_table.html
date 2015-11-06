@@ -56,5 +56,77 @@
     </div>
 
     <div class="link add_column main"><i class="fa fa-plus"></i> Add Column</div>
+
+    <button class="z-button primary submit">Save</button>
   </div>
+</template>
+
+<template id="zbase_datastore_tables_create_table_column_tpl">
+  <tr class="column">
+    <td colspan="3">
+      <table>
+        <tbody>
+          <tr class="selection">
+            <td style="width: 230px;"><input class="z-input name" type="text" /></td>
+            <td style="width: 230px;">
+              <z-dropdown class="input type" data-resolved>
+                <z-dropdown-flyout>
+                  <z-dropdown-items>
+                    <z-dropdown-item data-value="STRING" data-selected>STRING</z-dropdown-item>
+                    <z-dropdown-item data-value="DOUBLE">DOUBLE</z-dropdown-item>
+                    <z-dropdown-item data-value="UINT32">UINT32</z-dropdown-item>
+                    <z-dropdown-item data-value="UINT64">UINT64</z-dropdown-item>
+                    <z-dropdown-item data-value="BOOLEAN">BOOLEAN</z-dropdown-item>
+                    <z-dropdown-item data-value="DATETIME">DATETIME</z-dropdown-item>
+                    <z-dropdown-item data-value="object">OBJECT</z-dropdown-item>
+                  </z-dropdown-items>
+                </z-dropdown-flyout>
+              </z-dropdown>
+            </td>
+
+            <td style="width: 230px;">
+              <z-dropdown class="input is_nullable" data-resolved>
+                <z-dropdown-flyout>
+                  <z-dropdown-items>
+                    <z-dropdown-item data-value="true" data-selected>TRUE</z-dropdown-item>
+                    <z-dropdown-item data-value="false">FALSE</z-dropdown-item>
+                  </z-dropdown-items>
+                </z-dropdown-flyout>
+              </z-dropdown>
+            </td>
+          </tr>
+
+          <tr class="nested hidden">
+            <td colspan="3" style="padding: 5px 0px 30px 30px;">
+              <table class="z-table">
+                <tr><td class="container"><h3>Columns</h3></td></tr>
+                <tr>
+                  <td class="container">
+                    <table class="z-table">
+                      <thead>
+                        <tr>
+                          <th>Name</th>
+                          <th>Type</th>
+                          <th>Is Nullable</th>
+                        </tr>
+                      </thead>
+                      <tbody class="columns"></tbody>
+                    </table>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td>
+                    <div class="link add_column"><i class="fa fa-plus"></i> Add Column</div>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+
+        </tbody>
+      </table>
+    </td>
+  </tr>
 </template>
