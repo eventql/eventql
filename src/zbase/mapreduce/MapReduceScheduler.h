@@ -53,6 +53,7 @@ protected:
   MapReduceShardList shards_;
   Vector<MapReduceShardStatus> shard_status_;
   Vector<Option<MapReduceShardResult>> shard_results_;
+  Vector<size_t> shard_perms_;
   thread::ThreadPool* tpool_;
   AnalyticsAuth* auth_;
   String cachedir_;

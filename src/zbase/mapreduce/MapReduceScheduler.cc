@@ -35,7 +35,13 @@ MapReduceScheduler::MapReduceScheduler(
     done_(false),
     error_(false),
     num_shards_running_(0),
-    num_shards_completed_(0) {}
+    num_shards_completed_(0) {
+  for (size_t i = 0; i < shards_.size(); ++i) {
+    shard_perms_.emplace_back(i);
+  }
+
+  std::random_shuffle(shard_perms_.begin(), shard_perms_.end());
+}
 
 void MapReduceScheduler::execute() {
   std::unique_lock<std::mutex> lk(mutex_);
@@ -89,7 +95,9 @@ size_t MapReduceScheduler::startJobs() {
   }
 
   size_t num_started = 0;
-  for (size_t i = 0; i < shards_.size(); ++i) {
+  for (size_t j = 0; j < shards_.size(); ++j) {
+    auto i = shard_perms_[j];
+
     if (shard_status_[i] != MapReduceShardStatus::PENDING) {
       continue;
     }
