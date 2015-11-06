@@ -19,7 +19,14 @@ template <typename T>
 AutoRef<T>::AutoRef(std::nullptr_t) : ref_(nullptr) {}
 
 template <typename T>
-AutoRef<T>::AutoRef(T* ref) : ref_(ref) {
+template <typename T1>
+AutoRef<T>::AutoRef(T1* ref) : ref_(ref) {
+  if (ref_) ref_->incRef();
+}
+
+template <typename T>
+template <typename T1>
+AutoRef<T>::AutoRef(ScopedPtr<T1>&& ref) : ref_(ref.release()) {
   if (ref_) ref_->incRef();
 }
 
