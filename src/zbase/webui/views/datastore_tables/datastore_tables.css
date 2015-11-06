@@ -2,6 +2,12 @@
   background: #fff;
 }
 
+.zbase_datastore_tables button.create_table {
+  font-size: 13px;
+  float: right;
+  margin-top: 16px;
+}
+
 .zbase_datastore_tables table.z-table {
   font-size: 13px;
   table-layout: fixed;
@@ -109,6 +115,11 @@
 
 .zbase_datastore_tables .add_pane:hover {
   cursor: pointer;
+}
+
+.zbase_datastore_tables z-modal .z-modal-content {
+  max-height: 500px;
+  overflow-y: scroll;
 }
 
 .zbase_datastore_tables z-modal .field {

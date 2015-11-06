@@ -1,0 +1,60 @@
+<template id="zbase_datastore_tables_create_table_tpl">
+  <div class="create_table">
+    <h2 class="pagetitle main"><em>Create Table</em></h2>
+
+    <div class="error_message hidden">
+      <h4>An error occured while creating the table:</h4>
+      <span class="error_text"></span>
+    </div>
+
+    <div class="table">
+      <h3>Table</h3>
+
+      <table class="z-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Type</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr>
+            <td><input class="z-input table_name" type="text" /></td>
+            <td>
+              <z-dropdown class="input table_type" data-resolved>
+                <z-dropdown-flyout>
+                  <z-dropdown-items>
+                    <z-dropdown-item data-value="static" data-selected>static</z-dropdown-item>
+                    <z-dropdown-item data-value="log">log</z-dropdown-item>
+                  </z-dropdown-items>
+                </z-dropdown-flyout>
+              </z-dropdown>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="error_note hidden table_name">Please insert a name</div>
+    </div>
+
+
+    <div class="columns">
+      <h3>Columns</h3>
+
+      <table class="z-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Is Nullable</th>
+          </tr>
+        </thead>
+
+        <tbody class="main"></tbody>
+      </table>
+    </div>
+
+    <div class="link add_column main"><i class="fa fa-plus"></i> Add Column</div>
+  </div>
+</template>

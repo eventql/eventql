@@ -20,7 +20,14 @@ ZBase.registerView((function() {
   var render = function(tables, url) {
     var page = $.getTemplate(
         "views/datastore_tables",
+        "zbase_datastore_tables_main_tpl");
+
+    var content = $.getTemplate(
+        "views/datastore_tables",
         "zbase_datastore_tables_list_tpl");
+
+    var content_elem = $(".zbase_content", page);
+    $.replaceContent(content_elem, content);
 
     var tbody = $("tbody", page);
     tables.forEach(function(table) {
@@ -30,11 +37,8 @@ ZBase.registerView((function() {
     var main_menu = ZBaseMainMenu();
     main_menu.render($(".zbase_main_menu", page), url);
 
-    $.onClick($(".add_pane.create_table", page), displayCreateTableModal);
-    var create_modal = $("z-modal.create_table", page);
-    $.onClick($("button.submit", create_modal), createTable);
-    $.onClick($("button.close", create_modal), function() {
-      create_modal.close();
+    $.onClick($("button.create_table", page), function() {
+      createTableView.render(content_elem);
     });
 
     $.handleLinks(page);
@@ -68,7 +72,7 @@ ZBase.registerView((function() {
     renderModalColumnRow(columns);
     renderModalColumnRow(columns);
 
-    $.onClick($(".add_column", tpl), function() {
+    $.onClick($(".add_column.main", tpl), function() {
       renderModalColumnRow(columns);
     });
 
@@ -88,18 +92,15 @@ ZBase.registerView((function() {
 
     $("z-dropdown.type", tpl).addEventListener("change", function() {
       if (this.getValue() == "object") {
-        console.log("render add column");
         nested_columns_tr.classList.remove("hidden");
         nested_columns.innerHTML = "";
         renderModalColumnRow(nested_columns);
         renderModalColumnRow(nested_columns);
       } else {
         nested_columns_tr.classList.add("hidden");
-        console.log("hide add column");
       }
     }, false);
 
-    console.log(elem);
     elem.appendChild(tpl);
   };
 
@@ -123,25 +124,9 @@ ZBase.registerView((function() {
       update: false
     };
 
-    var columns = modal.querySelectorAll(".column");
-    for (var i = 0; i < columns.length; i++) {
-      var c_input = $("input", columns[i]);
-      if (c_input.value == 0) {
-        continue;
-      }
+    json.schema.columns = getColumnsSchema(
+        modal.querySelectorAll(".main > .column"));
 
-      var column = {
-        name: c_input.value,
-        type: $("z-dropdown.type", columns[i]).getValue(),
-        optional: $("z-dropdown.is_nullable", columns[i]).getValue()
-      };
-
-      if (column.type == "object") {
-        column.schema = {columns: []};
-      }
-
-      json.schema.columns.push(column);
-    }
 
     //set column ids
     for (var i = 0; i < json.schema.columns.length; i++) {
@@ -166,6 +151,31 @@ ZBase.registerView((function() {
           break;
       }
     });
+  };
+
+  var getColumnsSchema = function(columns) {
+    var schema = [];
+
+    for (var i = 0; i < columns.length; i++) {
+      var c_input = $("input", columns[i]);
+      if (c_input.value == 0) {
+        continue;
+      }
+
+      var column = {
+        name: c_input.value,
+        type: $("z-dropdown.type", columns[i]).getValue(),
+        optional: $("z-dropdown.is_nullable", columns[i]).getValue()
+      };
+
+      if (column.type == "object") {
+        column.schema = {columns: []};
+      }
+
+      schema.push(column);
+    }
+
+    return schema;
   };
 
   return {
