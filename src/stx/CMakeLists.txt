@@ -169,6 +169,7 @@ add_library(stx-base STATIC
     io/inputstream.cc
     io/outputstream.cc
     io/BufferedOutputStream.cc
+    io/VFSFileInputStream.cc
     io/mmappedfile.cc
     io/pagemanager.cc
     ISO8601.cc
