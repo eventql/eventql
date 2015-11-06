@@ -138,10 +138,18 @@ public:
   size_t size() const;
 
   /**
-   * Set the logical size of the buffer. The new size _must_ be less than the
-   * capacity of the buffer
+   * Sets the logical size for this buffer.
+   *
+   * If the new logical size is larger than the current capacity of the buffer,
+   * memory will be allocated and the capacity will be increased to the new
+   * logical size. The previous contents are unchanged but the value of any
+   * newly allocated bytes is undefined.
+   *
+   * If the new logical size is less than the currenct capacity of the buffer,
+   * the capacity and contents of the buffer will be unchanged and no memoy
+   * will be allocated or freed
    */
-  void setSize(size_t new_size) const;
+  void resize(size_t size);
 
   /**
    * Return the actual size of the backing malloc, this may be larger than the
@@ -162,15 +170,6 @@ public:
    * only increase the capacity by size bytes.
    */
   void reserve(size_t size);
-
-  /**
-   * Ensures that the capacity is at least "size" bytes.
-   *  - If the current capacity is greater or equal to "size", nothing happens.
-   *  - If the current capacity is less than "size", the capacity will be
-   *    increased (new memory will be allocated) to exactly "size" bites. The
-   *    logical size is unchanged
-   */
-  void growTo(size_t size);
 
   std::string toString() const;
 

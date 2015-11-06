@@ -51,7 +51,7 @@ public:
    * @param target the string to copy the data into
    * @param n_bytes the number of bytes to read
    */
-  virtual size_t readNextBytes(std::string* target, size_t n_bytes);
+  size_t readNextBytes(std::string* target, size_t n_bytes);
 
   /**
    * Read N bytes from the stream and copy the data into the provided buffer
@@ -60,7 +60,7 @@ public:
    * @param target the string to copy the data into
    * @param n_bytes the number of bytes to read
    */
-  virtual size_t readNextBytes(Buffer* target, size_t n_bytes);
+  size_t readNextBytes(Buffer* target, size_t n_bytes);
 
   /**
    * Read N bytes from the stream and copy the data into the provided buffer
@@ -242,6 +242,15 @@ public:
   bool readNextByte(char* target) override;
 
   /**
+   * Read N bytes from the stream and copy the data into the provided buffer
+   * Returns the number of bytes read.
+   *
+   * @param target the string to copy the data into
+   * @param n_bytes the number of bytes to read
+   */
+  size_t readNextBytes(void* target, size_t n_bytes) override;
+
+  /**
    * Skip the next N bytes in the stream. Returns the number of bytes skipped.
    *
    * @param n_bytes the number of bytes to skip
@@ -272,7 +281,7 @@ public:
   kByteOrderMark readByteOrderMark();
 
 protected:
-  void readNextChunk();
+  bool readNextChunk();
   char buf_[8192]; // FIXPAUL make configurable
   size_t buf_len_;
   size_t buf_pos_;

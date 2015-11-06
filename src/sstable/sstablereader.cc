@@ -188,7 +188,7 @@ void SSTableReader::SSTableReaderCursor::getKey(void** data, size_t* size) {
   }
 
   if (!have_key_) {
-    key_.growTo(key_size_);
+    key_.resize(key_size_);
     is_->readNextBytes(key_.data(), key_size_);
     have_key_ = true;
   }
@@ -203,13 +203,13 @@ void SSTableReader::SSTableReaderCursor::getData(void** data, size_t* size) {
   }
 
   if (!have_key_) {
-    key_.growTo(key_size_);
+    key_.resize(key_size_);
     is_->readNextBytes(key_.data(), key_size_);
     have_key_ = true;
   }
 
   if (!have_value_) {
-    value_.growTo(value_size_);
+    value_.resize(value_size_);
     is_->readNextBytes(value_.data(), value_size_);
     have_value_ = true;
   }

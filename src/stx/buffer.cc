@@ -139,6 +139,14 @@ void Buffer::truncate(size_t size) {
   size_ = size;
 }
 
+void Buffer::resize(size_t size) {
+  size_ = size;
+
+  if (size_ > alloc_) {
+    reserve(size_ - alloc_);
+  }
+}
+
 void Buffer::reserve(size_t size) {
   alloc_ += size;
 
@@ -152,13 +160,6 @@ void Buffer::reserve(size_t size) {
     RAISE(kMallocError, "malloc() failed");
   }
 }
-
-void Buffer::growTo(size_t size) {
-  if (size > alloc_) {
-    reserve(size - alloc_);
-  }
-}
-
 void Buffer::clear() {
   size_ = 0;
   mark_ = 0;

@@ -35,30 +35,17 @@ void InputStream::setFileName(const std::string& filename) {
   filename_ = filename;
 }
 
-// FIXPAUL: optimize?
 size_t InputStream::readNextBytes(std::string* target, size_t n_bytes) {
-  char byte;
-  size_t length;
-
-  for (length = 0; length < n_bytes && readNextByte(&byte); ++length) {
-    *target += byte;
-  }
-
-  return length;
+  Buffer buf(n_bytes);
+  auto s = readNextBytes(&buf, n_bytes);
+  *target = String((char*) buf.data(), buf.size());
+  return s;
 }
 
-// FIXPAUL: optimize?
 size_t InputStream::readNextBytes(Buffer* target, size_t n_bytes) {
-  char byte;
-  size_t length;
-
-  target->reserve(n_bytes);
-
-  for (length = 0; length < n_bytes && readNextByte(&byte); ++length) {
-    target->append(&byte, sizeof(byte));
-  }
-
-  return length;
+  target->resize(n_bytes);
+  auto s = readNextBytes(target->data(), n_bytes);
+  return s;
 }
 
 size_t InputStream::readNextBytes(void* target, size_t n_bytes) {
@@ -247,6 +234,29 @@ bool FileInputStream::readNextByte(char* target) {
   }
 }
 
+size_t FileInputStream::readNextBytes(void* target, size_t n_bytes) {
+  size_t length = 0;
+
+  while (length < n_bytes) {
+    if (buf_pos_ >= buf_len_) {
+      if (!readNextChunk()) {
+        return length;
+      }
+    }
+
+    size_t s = buf_pos_ - buf_len_;
+    if (n_bytes < s) {
+      s = n_bytes;
+    }
+
+    memcpy((char*) target + length, buf_ + buf_pos_, s);
+    buf_pos_ += s;
+    length += s;
+  }
+
+  return length;
+}
+
 size_t FileInputStream::skipNextBytes(size_t nbytes) {
   auto buf_remaining = buf_len_ - buf_pos_;
 
@@ -302,7 +312,7 @@ FileInputStream::kByteOrderMark FileInputStream::readByteOrderMark() {
   return BOM_UNKNOWN;
 }
 
-void FileInputStream::readNextChunk() {
+bool FileInputStream::readNextChunk() {
   int bytes_read = read(fd_, buf_, sizeof(buf_));
 
   if (bytes_read < 0) {
@@ -311,6 +321,8 @@ void FileInputStream::readNextChunk() {
 
   buf_pos_ = 0;
   buf_len_ = bytes_read;
+
+  return buf_len_ > 0;
 }
 
 void FileInputStream::seekTo(size_t offset) {
