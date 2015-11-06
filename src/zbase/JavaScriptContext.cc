@@ -265,8 +265,25 @@ void JavaScriptContext::loadProgram(const String& program) {
   }
 }
 
+void JavaScriptContext::loadClosure(const String& source) {
+  JSAutoRequest js_req(ctx_);
+  JSAutoCompartment js_comp(ctx_, global_);
+
+  JS::AutoValueArray<1> argv(ctx_);
+  auto source_str_ptr = JS_NewStringCopyN(ctx_, source.data(), source.size());
+  if (!source_str_ptr) {
+    RAISE(kRuntimeError, "map function execution error: out of memory");
+  } else {
+    argv[0].setString(source_str_ptr);
+  }
+
+  JS::RootedValue rval(ctx_);
+  if (!JS_CallFunctionName(ctx_, global_, "__load_closure", argv, &rval)) {
+    raiseError(source);
+  }
+}
+
 void JavaScriptContext::callMapFunction(
-    const String& method_name,
     const String& json_string,
     Vector<Pair<String, String>>* tuples) {
   JSAutoRequest js_req(ctx_);
@@ -293,7 +310,7 @@ void JavaScriptContext::callMapFunction(
   argv[0].set(json);
 
   JS::RootedValue rval(ctx_);
-  if (!JS_CallFunctionName(ctx_, global_, method_name.c_str(), argv, &rval)) {
+  if (!JS_CallFunctionName(ctx_, global_, "__fn", argv, &rval)) {
     raiseError(json_string);
   }
 

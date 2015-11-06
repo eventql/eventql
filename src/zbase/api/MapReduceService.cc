@@ -85,8 +85,7 @@ Option<SHA1Hash> MapReduceService::mapPartition(
     const AnalyticsSession& session,
     const String& table_name,
     const SHA1Hash& partition_key,
-    const String& program_source,
-    const String& method_name) {
+    const String& map_fn) {
   auto table = pmap_->findTable(
       session.customer(),
       table_name);
@@ -118,8 +117,7 @@ Option<SHA1Hash> MapReduceService::mapPartition(
           table_name,
           partition_key.toString(),
           reader->version().toString(),
-          SHA1::compute(program_source).toString(),
-          method_name));
+          SHA1::compute(map_fn).toString()));
 
   auto output_path = FileUtil::joinPaths(
       cachedir_,
@@ -138,23 +136,18 @@ Option<SHA1Hash> MapReduceService::mapPartition(
       output_id.toString());
 
   auto js_ctx = mkRef(new JavaScriptContext(session.customer(), tsdb_));
-  js_ctx->loadProgram(program_source);
+  js_ctx->loadClosure(map_fn);
 
   auto writer = sstable::SSTableWriter::create(output_path, nullptr, 0);
 
   reader->fetchRecords(
-      [
-        &schema,
-        &js_ctx,
-        &method_name,
-        &writer
-      ] (const msg::MessageObject& record) {
+      [&schema, &js_ctx, &writer] (const msg::MessageObject& record) {
     Buffer json;
     json::JSONOutputStream jsons(BufferOutputStream::fromBuffer(&json));
     msg::JSONEncoder::encode(record, *schema, &jsons);
 
     Vector<Pair<String, String>> tuples;
-    js_ctx->callMapFunction(method_name, json.toString(), &tuples);
+    js_ctx->callMapFunction(json.toString(), &tuples);
 
     for (const auto& t : tuples) {
       writer->appendRow(t.first, t.second);

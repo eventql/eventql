@@ -20,6 +20,7 @@ var Z1 = (function(global) {
       table_name: opts["table"],
       from: opts["from"],
       until: opts["until"],
+      map_fn: String(opts["map_fn"]),
       method_name: map_fn_id
     });
 
@@ -135,3 +136,9 @@ function __call_with_iter(method, key, iter) {
 
   return this[method].call(this, key, iter_wrap);
 }
+
+var __load_closure = (function(global_scope) {
+  return function(fn) {
+    eval("__fn = " + fn);
+  }
+})(this);

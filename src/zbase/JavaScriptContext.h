@@ -31,8 +31,9 @@ public:
 
   void loadProgram(const String& program);
 
+  void loadClosure(const String& method_source);
+
   void callMapFunction(
-      const String& method_name,
       const String& json_string,
       Vector<Pair<String, String>>* tuples);
 
