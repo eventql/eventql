@@ -49,22 +49,26 @@ TEST_CASE(RuntimeTest, TestComparisons, [] () {
   auto runtime = Runtime::getDefaultRuntime();
 
   {
-    auto v = runtime->evaluateStaticExpression("true = true");
+    auto v = runtime->evaluateStaticExpression(String(
+        "true = true"));
     EXPECT_EQ(v.toString(), "true");
   }
 
   {
-    auto v = runtime->evaluateStaticExpression("false = false");
+    auto v = runtime->evaluateStaticExpression(String(
+        "false = false"));
     EXPECT_EQ(v.toString(), "true");
   }
 
   {
-    auto v = runtime->evaluateStaticExpression("false = true");
+    auto v = runtime->evaluateStaticExpression(String(
+        "false = true"));
     EXPECT_EQ(v.toString(), "false");
   }
 
   {
-    auto v = runtime->evaluateStaticExpression("true = false");
+    auto v = runtime->evaluateStaticExpression(String(
+        "true = false"));
     EXPECT_EQ(v.toString(), "false");
   }
 
@@ -74,34 +78,34 @@ TEST_CASE(RuntimeTest, TestComparisons, [] () {
 TEST_CASE(RuntimeTest, TestExecuteIfStatement, [] () {
   auto runtime = Runtime::getDefaultRuntime();
 
-  auto out_a = runtime->evaluateStaticExpression("if(1 = 1, 42, 23)");
+  auto out_a = runtime->evaluateStaticExpression(String("if(1 = 1, 42, 23)"));
   EXPECT_EQ(out_a.getInteger(), 42);
 
-  auto out_b = runtime->evaluateStaticExpression("if(1 = 2, 42, 23)");
+  auto out_b = runtime->evaluateStaticExpression(String("if(1 = 2, 42, 23)"));
   EXPECT_EQ(out_b.getInteger(), 23);
 
   {
-    auto v = runtime->evaluateStaticExpression("if(1 = 1, 'fnord', 'blah')");
+    auto v = runtime->evaluateStaticExpression(String("if(1 = 1, 'fnord', 'blah')"));
     EXPECT_EQ(v.toString(), "fnord");
   }
 
   {
-    auto v = runtime->evaluateStaticExpression("if(1 = 2, 'fnord', 'blah')");
+    auto v = runtime->evaluateStaticExpression(String("if(1 = 2, 'fnord', 'blah')"));
     EXPECT_EQ(v.toString(), "blah");
   }
 
   {
-    auto v = runtime->evaluateStaticExpression("if('fnord' = 'blah', 1, 2)");
+    auto v = runtime->evaluateStaticExpression(String("if('fnord' = 'blah', 1, 2)"));
     EXPECT_EQ(v.toString(), "2");
   }
 
   {
-    auto v = runtime->evaluateStaticExpression("if('fnord' = 'fnord', 1, 2)");
+    auto v = runtime->evaluateStaticExpression(String("if('fnord' = 'fnord', 1, 2)"));
     EXPECT_EQ(v.toString(), "1");
   }
 
   {
-    auto v = runtime->evaluateStaticExpression("if('fnord' = '', 1, 2)");
+    auto v = runtime->evaluateStaticExpression(String("if('fnord' = '', 1, 2)"));
     EXPECT_EQ(v.toString(), "2");
   }
 });
@@ -460,7 +464,7 @@ TEST_CASE(RuntimeTest, SelectFloatIntegerDivision, [] () {
   auto runtime = Runtime::getDefaultRuntime();
 
   {
-    auto v = runtime->evaluateStaticExpression("1 / 5");
+    auto v = runtime->evaluateStaticExpression(String("1 / 5"));
     EXPECT_EQ(v.toString(), "0.200000");
   }
 });
@@ -469,17 +473,17 @@ TEST_CASE(RuntimeTest, SelectFloatIntegerMultiplication, [] () {
   auto runtime = Runtime::getDefaultRuntime();
 
   {
-    auto v = runtime->evaluateStaticExpression("10 * 5");
+    auto v = runtime->evaluateStaticExpression(String("10 * 5"));
     EXPECT_EQ(v.toString(), "50");
   }
 
   {
-    auto v = runtime->evaluateStaticExpression("10 * 5.0");
+    auto v = runtime->evaluateStaticExpression(String("10 * 5.0"));
     EXPECT_EQ(v.toString(), "50.000000");
   }
 
   {
-    auto v = runtime->evaluateStaticExpression("10.0 * 5");
+    auto v = runtime->evaluateStaticExpression(String("10.0 * 5"));
     EXPECT_EQ(v.toString(), "50.000000");
   }
 });
@@ -488,17 +492,17 @@ TEST_CASE(RuntimeTest, SelectFloatIntegerAddition, [] () {
   auto runtime = Runtime::getDefaultRuntime();
 
   {
-    auto v = runtime->evaluateStaticExpression("10 + 5");
+    auto v = runtime->evaluateStaticExpression(String("10 + 5"));
     EXPECT_EQ(v.toString(), "15");
   }
 
   {
-    auto v = runtime->evaluateStaticExpression("10 + 5.0");
+    auto v = runtime->evaluateStaticExpression(String("10 + 5.0"));
     EXPECT_EQ(v.toString(), "15.000000");
   }
 
   {
-    auto v = runtime->evaluateStaticExpression("10.0 + 5");
+    auto v = runtime->evaluateStaticExpression(String("10.0 + 5"));
     EXPECT_EQ(v.toString(), "15.000000");
   }
 });
@@ -507,17 +511,17 @@ TEST_CASE(RuntimeTest, SelectFloatIntegerSubtraction, [] () {
   auto runtime = Runtime::getDefaultRuntime();
 
   {
-    auto v = runtime->evaluateStaticExpression("10 - 5");
+    auto v = runtime->evaluateStaticExpression(String("10 - 5"));
     EXPECT_EQ(v.toString(), "5");
   }
 
   {
-    auto v = runtime->evaluateStaticExpression("10 - 5.0");
+    auto v = runtime->evaluateStaticExpression(String("10 - 5.0"));
     EXPECT_EQ(v.toString(), "5.000000");
   }
 
   {
-    auto v = runtime->evaluateStaticExpression("10.0 - 5");
+    auto v = runtime->evaluateStaticExpression(String("10.0 - 5"));
     EXPECT_EQ(v.toString(), "5.000000");
   }
 });
@@ -543,12 +547,14 @@ TEST_CASE(RuntimeTest, TestFromTimestampExpr, [] () {
   auto runtime = Runtime::getDefaultRuntime();
 
   {
-    auto v = runtime->evaluateStaticExpression("FROM_TIMESTAMP(1441408424)");
+    auto v = runtime->evaluateStaticExpression(
+        String("FROM_TIMESTAMP(1441408424)"));
     EXPECT_EQ(v.toString(), "2015-09-04 23:13:44");
   }
 
   {
-    auto v = runtime->evaluateStaticExpression("FROM_TIMESTAMP(1441408424.0)");
+    auto v = runtime->evaluateStaticExpression(
+        String("FROM_TIMESTAMP(1441408424.0)"));
     EXPECT_EQ(v.toString(), "2015-09-04 23:13:44");
   }
 });
@@ -557,12 +563,12 @@ TEST_CASE(RuntimeTest, TestTruncateExpr, [] () {
   auto runtime = Runtime::getDefaultRuntime();
 
   {
-    auto v = runtime->evaluateStaticExpression("TRUNCATE(23.3)");
+    auto v = runtime->evaluateStaticExpression(String("TRUNCATE(23.3)"));
     EXPECT_EQ(v.toString(), "23");
   }
 
   {
-    auto v = runtime->evaluateStaticExpression("TRUNCATE(23.7)");
+    auto v = runtime->evaluateStaticExpression(String("TRUNCATE(23.7)"));
     EXPECT_EQ(v.toString(), "23");
   }
 });
@@ -592,27 +598,32 @@ TEST_CASE(RuntimeTest, TestStringStartsWithExpression, [] () {
   auto runtime = Runtime::getDefaultRuntime();
 
   {
-    auto v = runtime->evaluateStaticExpression("startswith('fnordblah', 'fnord')");
+    auto v = runtime->evaluateStaticExpression(String(
+        "startswith('fnordblah', 'fnord')"));
     EXPECT_EQ(v.toString(), "true");
   }
 
   {
-    auto v = runtime->evaluateStaticExpression("startswith('fnordblah', 'f')");
+    auto v = runtime->evaluateStaticExpression(String(
+        "startswith('fnordblah', 'f')"));
     EXPECT_EQ(v.toString(), "true");
   }
 
   {
-    auto v = runtime->evaluateStaticExpression("startswith('fnordblah', 'fnordblah')");
+    auto v = runtime->evaluateStaticExpression(String(
+        "startswith('fnordblah', 'fnordblah')"));
     EXPECT_EQ(v.toString(), "true");
   }
 
   {
-    auto v = runtime->evaluateStaticExpression("startswith('fnordblah', 'fnordx')");
+    auto v = runtime->evaluateStaticExpression(String(
+        "startswith('fnordblah', 'fnordx')"));
     EXPECT_EQ(v.toString(), "false");
   }
 
   {
-    auto v = runtime->evaluateStaticExpression("startswith('fnordblah', 'bar')");
+    auto v = runtime->evaluateStaticExpression(String(
+        "startswith('fnordblah', 'bar')"));
     EXPECT_EQ(v.toString(), "false");
   }
 });
@@ -621,22 +632,26 @@ TEST_CASE(RuntimeTest, TestStringEndsWithExpression, [] () {
   auto runtime = Runtime::getDefaultRuntime();
 
   {
-    auto v = runtime->evaluateStaticExpression("endswith('fnordblah', 'blah')");
+    auto v = runtime->evaluateStaticExpression(String(
+        "endswith('fnordblah', 'blah')"));
     EXPECT_EQ(v.toString(), "true");
   }
 
   {
-    auto v = runtime->evaluateStaticExpression("endswith('fnordblah', 'h')");
+    auto v = runtime->evaluateStaticExpression(String(
+        "endswith('fnordblah', 'h')"));
     EXPECT_EQ(v.toString(), "true");
   }
 
   {
-    auto v = runtime->evaluateStaticExpression("endswith('fnordblah', 'fnordblah')");
+    auto v = runtime->evaluateStaticExpression(String(
+        "endswith('fnordblah', 'fnordblah')"));
     EXPECT_EQ(v.toString(), "true");
   }
 
   {
-    auto v = runtime->evaluateStaticExpression("endswith('fnordblah', 'bar')");
+    auto v = runtime->evaluateStaticExpression(String(
+        "endswith('fnordblah', 'bar')"));
     EXPECT_EQ(v.toString(), "false");
   }
 });
@@ -645,42 +660,46 @@ TEST_CASE(RuntimeTest, TestLogicalAnd, [] () {
   auto runtime = Runtime::getDefaultRuntime();
 
   {
-    auto v = runtime->evaluateStaticExpression("true AND true");
+    auto v = runtime->evaluateStaticExpression(String("true AND true"));
     EXPECT_EQ(v.toString(), "true");
   }
 
   {
-    auto v = runtime->evaluateStaticExpression("true AND false");
+    auto v = runtime->evaluateStaticExpression(String("true AND false"));
     EXPECT_EQ(v.toString(), "false");
   }
 
   {
-    auto v = runtime->evaluateStaticExpression("false AND true");
+    auto v = runtime->evaluateStaticExpression(String("false AND true"));
     EXPECT_EQ(v.toString(), "false");
   }
 
   {
-    auto v = runtime->evaluateStaticExpression("false AND false");
+    auto v = runtime->evaluateStaticExpression(String("false AND false"));
     EXPECT_EQ(v.toString(), "false");
   }
 
   {
-    auto v = runtime->evaluateStaticExpression("logical_and(true, true)");
+    auto v = runtime->evaluateStaticExpression(String(
+        "logical_and(true, true)"));
     EXPECT_EQ(v.toString(), "true");
   }
 
   {
-    auto v = runtime->evaluateStaticExpression("logical_and(false, true)");
+    auto v = runtime->evaluateStaticExpression(String(
+        "logical_and(false, true)"));
     EXPECT_EQ(v.toString(), "false");
   }
 
   {
-    auto v = runtime->evaluateStaticExpression("logical_and(true, false)");
+    auto v = runtime->evaluateStaticExpression(
+        String("logical_and(true, false)"));
     EXPECT_EQ(v.toString(), "false");
   }
 
   {
-    auto v = runtime->evaluateStaticExpression("logical_and(false, false)");
+    auto v = runtime->evaluateStaticExpression(
+        String("logical_and(false, false)"));
     EXPECT_EQ(v.toString(), "false");
   }
 });
@@ -689,42 +708,46 @@ TEST_CASE(RuntimeTest, TestLogicalOr, [] () {
   auto runtime = Runtime::getDefaultRuntime();
 
   {
-    auto v = runtime->evaluateStaticExpression("true OR true");
+    auto v = runtime->evaluateStaticExpression(String("true OR true"));
     EXPECT_EQ(v.toString(), "true");
   }
 
   {
-    auto v = runtime->evaluateStaticExpression("true OR false");
+    auto v = runtime->evaluateStaticExpression(String("true OR false"));
     EXPECT_EQ(v.toString(), "true");
   }
 
   {
-    auto v = runtime->evaluateStaticExpression("false OR true");
+    auto v = runtime->evaluateStaticExpression(String("false OR true"));
     EXPECT_EQ(v.toString(), "true");
   }
 
   {
-    auto v = runtime->evaluateStaticExpression("false OR false");
+    auto v = runtime->evaluateStaticExpression(String("false OR false"));
     EXPECT_EQ(v.toString(), "false");
   }
 
   {
-    auto v = runtime->evaluateStaticExpression("logical_or(true, true)");
+    auto v = runtime->evaluateStaticExpression(String(
+        "logical_or(true, true)"));
     EXPECT_EQ(v.toString(), "true");
   }
 
   {
-    auto v = runtime->evaluateStaticExpression("logical_or(false, true)");
+    auto v = runtime->evaluateStaticExpression(String(
+        "logical_or(false, true)"));
     EXPECT_EQ(v.toString(), "true");
   }
 
   {
-    auto v = runtime->evaluateStaticExpression("logical_or(true, false)");
+    auto v = runtime->evaluateStaticExpression(String(
+        "logical_or(true, false)"));
     EXPECT_EQ(v.toString(), "true");
   }
 
   {
-    auto v = runtime->evaluateStaticExpression("logical_or(false, false)");
+    auto v = runtime->evaluateStaticExpression(
+        String("logical_or(false, false)"));
     EXPECT_EQ(v.toString(), "false");
   }
 });
@@ -733,12 +756,14 @@ TEST_CASE(RuntimeTest, TestStringUppercaseExpression, [] () {
   auto runtime = Runtime::getDefaultRuntime();
 
   {
-    auto v = runtime->evaluateStaticExpression("uppercase('blah')");
+    auto v = runtime->evaluateStaticExpression(
+        String("uppercase('blah')"));
     EXPECT_EQ(v.toString(), "BLAH");
   }
 
   {
-    auto v = runtime->evaluateStaticExpression("ucase('blah')");
+    auto v = runtime->evaluateStaticExpression(
+        String("ucase('blah')"));
     EXPECT_EQ(v.toString(), "BLAH");
   }
 });
@@ -747,12 +772,13 @@ TEST_CASE(RuntimeTest, TestStringLowercaseExpression, [] () {
   auto runtime = Runtime::getDefaultRuntime();
 
   {
-    auto v = runtime->evaluateStaticExpression("lowercase('FNORD')");
+    auto v = runtime->evaluateStaticExpression(
+        String("lowercase('FNORD')"));
     EXPECT_EQ(v.toString(), "fnord");
   }
 
   {
-    auto v = runtime->evaluateStaticExpression("lcase('FnOrD')");
+    auto v = runtime->evaluateStaticExpression(String("lcase('FnOrD')"));
     EXPECT_EQ(v.toString(), "fnord");
   }
 });
@@ -762,110 +788,117 @@ TEST_CASE(RuntimeTest, TestDateTimeDateTruncExpression, [] () {
 
   {
     auto v = runtime->evaluateStaticExpression(
-        "date_trunc('milliseconds', 1444229262.983758)");
+        String("date_trunc('milliseconds', 1444229262.983758)"));
     EXPECT_EQ(double(v.getTimestamp()), 1444229262000000.000000);
   }
 
   {
     auto v = runtime->evaluateStaticExpression(
-        "date_trunc('seconds', 1444229262.983758)");
+        String("date_trunc('seconds', 1444229262.983758)"));
     EXPECT_EQ(double(v.getTimestamp()), 1444229262000000.000000);
   }
 
   {
     auto v = runtime->evaluateStaticExpression(
-        "date_trunc('minutes', 1444229262)");
+        String("date_trunc('minutes', 1444229262)"));
     EXPECT_EQ(v.toString(), "2015-10-07 14:47:00");
   }
 
   {
     auto v = runtime->evaluateStaticExpression(
-        "date_trunc('30minutes', 1444229262)");
+        String("date_trunc('30minutes', 1444229262)"));
     EXPECT_EQ(v.toString(), "2015-10-07 14:30:00");
   }
 
   {
     auto v = runtime->evaluateStaticExpression(
-        "date_trunc('hours', 1444229262)");
+        String("date_trunc('hours', 1444229262)"));
     EXPECT_EQ(v.toString(), "2015-10-07 14:00:00");
   }
 
   {
     auto v = runtime->evaluateStaticExpression(
-        "date_trunc('5hours', 1444229262.598)");
+        String("date_trunc('5hours', 1444229262.598)"));
     EXPECT_EQ(v.toString(), "2015-10-07 10:00:00");
   }
 
   {
-    auto v = runtime->evaluateStaticExpression("date_trunc('days', 1444229262)");
+    auto v = runtime->evaluateStaticExpression(
+        String("date_trunc('days', 1444229262)"));
     EXPECT_EQ(v.toString(), "2015-10-07 00:00:00");
   }
 
   {
-    auto v = runtime->evaluateStaticExpression("date_trunc('7days', 1444229262)");
+    auto v = runtime->evaluateStaticExpression(
+        String("date_trunc('7days', 1444229262)"));
     EXPECT_EQ(v.toString(), "2015-10-01 00:00:00");
   }
 
   {
-    auto v = runtime->evaluateStaticExpression("date_trunc('week', 1444229262)");
+    auto v = runtime->evaluateStaticExpression(
+        String("date_trunc('week', 1444229262)"));
     EXPECT_EQ(v.toString(), "2015-10-01 00:00:00");
   }
 
   {
-    auto v = runtime->evaluateStaticExpression("date_trunc('month', 1444229262)");
+    auto v = runtime->evaluateStaticExpression(
+        String("date_trunc('month', 1444229262)"));
     EXPECT_EQ(v.toString(), "2015-10-01 00:00:00");
   }
 
   {
     //date_trunc returns last day of previous month for months with 30 days
-    auto v = runtime->evaluateStaticExpression("date_trunc('month', 1441836754)");
+    auto v = runtime->evaluateStaticExpression(
+        String("date_trunc('month', 1441836754)"));
     EXPECT_EQ(v.toString(), "2015-08-31 00:00:00");
   }
 
   {
-    auto v = runtime->evaluateStaticExpression("date_trunc('year', 1444229262)");
+    auto v = runtime->evaluateStaticExpression(
+        String("date_trunc('year', 1444229262)"));
     //returns first of year - number of leap years until now
     EXPECT_EQ(v.toString(), "2014-12-21 00:00:00");
   }
 
   {
-    auto v = runtime->evaluateStaticExpression("date_trunc('2years', 1444229262)");
+    auto v = runtime->evaluateStaticExpression(
+        String("date_trunc('2years', 1444229262)"));
     //returns first of year - number of leap years until now
     EXPECT_EQ(v.toString(), "2013-12-21 00:00:00");
   }
 
   {
-    auto v = runtime->evaluateStaticExpression("'blah' REGEXP '^b'");
+    auto v = runtime->evaluateStaticExpression(String("'blah' REGEXP '^b'"));
     EXPECT_EQ(v.toString(), "true");
   }
 
   {
-    auto v = runtime->evaluateStaticExpression("'fubar' REGEX '^b'");
+    auto v = runtime->evaluateStaticExpression(String("'fubar' REGEX '^b'"));
     EXPECT_EQ(v.toString(), "false");
   }
 
   {
-    auto v = runtime->evaluateStaticExpression("'abc' LIKE 'abc'");
+    auto v = runtime->evaluateStaticExpression(String("'abc' LIKE 'abc'"));
     EXPECT_EQ(v.toString(), "true");
   }
 
   {
-    auto v = runtime->evaluateStaticExpression("'abc' LIKE 'a%'");
+    auto v = runtime->evaluateStaticExpression(String("'abc' LIKE 'a%'"));
     EXPECT_EQ(v.toString(), "true");
   }
 
   {
-    auto v = runtime->evaluateStaticExpression("'abc' LIKE '_b_'");
+    auto v = runtime->evaluateStaticExpression(String("'abc' LIKE '_b_'"));
     EXPECT_EQ(v.toString(), "true");
   }
 
   {
-    auto v = runtime->evaluateStaticExpression("'abc' LIKE '%bc'");
+    auto v = runtime->evaluateStaticExpression(String("'abc' LIKE '%bc'"));
     EXPECT_EQ(v.toString(), "true");
   }
 
   {
-    auto v = runtime->evaluateStaticExpression("'abc' LIKE 'c'");
+    auto v = runtime->evaluateStaticExpression(String("'abc' LIKE 'c'"));
     EXPECT_EQ(v.toString(), "false");
   }
 });
