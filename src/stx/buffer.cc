@@ -153,6 +153,12 @@ void Buffer::reserve(size_t size) {
   }
 }
 
+void Buffer::growTo(size_t size) {
+  if (size > alloc_) {
+    reserve(size - alloc_);
+  }
+}
+
 void Buffer::clear() {
   size_ = 0;
   mark_ = 0;
