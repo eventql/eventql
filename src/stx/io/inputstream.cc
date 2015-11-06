@@ -244,11 +244,7 @@ size_t FileInputStream::readNextBytes(void* target, size_t n_bytes) {
       }
     }
 
-    size_t s = buf_len_ - buf_pos_;
-    if (n_bytes < s) {
-      s = n_bytes;
-    }
-
+    size_t s = std::min(buf_len_ - buf_pos_, n_bytes - length);
     memcpy((char*) target + length, buf_ + buf_pos_, s);
     buf_pos_ += s;
     length += s;
