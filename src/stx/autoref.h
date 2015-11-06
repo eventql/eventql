@@ -26,11 +26,8 @@ public:
   AutoRef();
   AutoRef(std::nullptr_t);
 
-  template <typename T1>
-  AutoRef(T1* ref);
-
-  template <typename T1>
-  AutoRef(ScopedPtr<T1>&& ref);
+  AutoRef(T* ref);
+  AutoRef(ScopedPtr<T>&& ref);
 
   AutoRef(const AutoRef<T>& other);
   AutoRef(AutoRef<T>&& other);
