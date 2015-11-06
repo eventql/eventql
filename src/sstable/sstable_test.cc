@@ -115,7 +115,7 @@ TEST_CASE(SSTableTest, TestSSTableWriteThenRead, [] () {
   }
 
   {
-    SSTableReader tbl("/tmp/__fnord__sstabletest1.sstable");
+    SSTableReader tbl(String("/tmp/__fnord__sstabletest1.sstable"));
 
     auto cursor = tbl.getCursor();
     EXPECT_EQ(cursor->getKeyString(), "key1");
@@ -159,7 +159,7 @@ TEST_CASE(SSTableTest, TestSSTableWriteReopenThenRead, [] () {
   }
 
   {
-    SSTableReader tbl("/tmp/__fnord__sstabletest1.sstable");
+    SSTableReader tbl(String("/tmp/__fnord__sstabletest1.sstable"));
 
     auto cursor = tbl.getCursor();
     EXPECT_EQ(cursor->getKeyString(), "key1");

@@ -10,6 +10,8 @@
 #include <stx/fnv.h>
 #include <stx/exception.h>
 #include <stx/inspect.h>
+#include <stx/io/VFSFileInputStream.h>
+#include <sstable/binaryformat.h>
 #include <sstable/binaryformat.h>
 #include <sstable/sstablereader.h>
 
@@ -19,18 +21,20 @@ namespace sstable {
 
 SSTableReader::SSTableReader(
     const String& filename) :
-    SSTableReader(File::openFile(filename, File::O_READ)) {}
+    SSTableReader(FileInputStream::openFile(filename)) {}
 
 SSTableReader::SSTableReader(
     File&& file) :
-    SSTableReader(new io::MmappedFile(std::move(file))) {}
+    SSTableReader(FileInputStream::fromFile(std::move(file))) {}
 
 SSTableReader::SSTableReader(
     RefPtr<VFSFile> vfs_file) :
-    mmap_(vfs_file),
-    is_(mmap_->data(), mmap_->size()),
-    file_size_(mmap_->size()),
-    header_(FileHeaderReader::readMetaPage(&is_)) {
+    SSTableReader(new VFSFileInputStream(vfs_file)) {}
+
+SSTableReader::SSTableReader(
+    RefPtr<RewindableInputStream> is) :
+    is_(is),
+    header_(FileHeaderReader::readMetaPage(is_.get())) {
   //if (!header_.verify()) {
   //  RAISE(kIllegalStateError, "corrupt sstable header");
   //}
@@ -40,79 +44,47 @@ SSTableReader::SSTableReader(
   //}
 }
 
-void SSTableReader::readHeader(const void** userdata, size_t* userdata_size) {
-  *userdata_size = header_.userdataSize();
-  *userdata = mmap_->structAt<void>(header_.userdataOffset());
-}
-
 Buffer SSTableReader::readHeader() {
-  const void* data;
-  size_t size;
-  readHeader(&data, &size);
-
-  return Buffer(data, size);
-}
-
-void SSTableReader::readFooter(
-    uint32_t type,
-    void** data,
-    size_t* size) {
-  size_t pos = header_.headerSize() + header_.bodySize();
-
-  while (pos < file_size_) {
-    if (pos + sizeof(BinaryFormat::FooterHeader) > mmap_->size()) {
-      RAISE(kIllegalStateError, "footer exceeds file boundary");
-    }
-
-    auto footer_header = mmap_->structAt<BinaryFormat::FooterHeader>(pos);
-    pos += sizeof(BinaryFormat::FooterHeader);
-
-    if (footer_header->magic != BinaryFormat::kMagicBytes) {
-      RAISE(kIllegalStateError, "corrupt sstable footer");
-    }
-
-    if (footer_header->footer_size == 0) {
-      return;
-    }
-
-    if (footer_header->type == type || type == 0) {
-      if (pos >= mmap_->size()) {
-        RAISE(kIllegalStateError, "footer exceeds file boundary");
-      }
-
-      *data = mmap_->structAt<void>(pos);
-      *size = footer_header->footer_size;
-
-      if (pos + *size > mmap_->size()) {
-        RAISE(kIllegalStateError, "footer exceeds file boundary");
-      }
-
-      FNV<uint32_t> fnv;
-      auto checksum = fnv.hash(*data, *size);
-
-      if (checksum != footer_header->footer_checksum) {
-        RAISE(kIllegalStateError, "footer checksum mismatch. corrupt sstable?");
-      }
-
-      if (type != 0) {
-        return;
-      }
-    }
-
-    pos += footer_header->footer_size;
-  }
+  Buffer buf(header_.userdataSize());
+  is_->seekTo(header_.userdataOffset());
+  is_->readNextBytes(buf.data(), buf.size());
+  return buf;
 }
 
 Buffer SSTableReader::readFooter(uint32_t type) {
-  void* data = nullptr;
-  size_t size = 0;
-  readFooter(type, &data, &size);
-  return Buffer(data, size);
+  is_->seekTo(header_.headerSize() + header_.bodySize());
+
+  while (!is_->eof()) {
+    BinaryFormat::FooterHeader footer_header;
+    is_->readNextBytes(&footer_header, sizeof(footer_header));
+
+    if (footer_header.magic != BinaryFormat::kMagicBytes) {
+      RAISE(kIllegalStateError, "corrupt sstable footer");
+    }
+
+    if (type && footer_header.type == type) {
+      Buffer buf(footer_header.footer_size);
+      is_->readNextBytes(buf.data(), buf.size());
+
+      FNV<uint32_t> fnv;
+      auto checksum = fnv.hash(buf.data(), buf.size());
+
+      if (checksum != footer_header.footer_checksum) {
+        RAISE(kIllegalStateError, "footer checksum mismatch. corrupt sstable?");
+      }
+
+      return buf;
+    } else {
+      is_->skipNextBytes(footer_header.footer_size);
+    }
+  }
+
+  RAISE(kNotFoundError, "footer not found");
 }
 
 std::unique_ptr<SSTableReader::SSTableReaderCursor> SSTableReader::getCursor() {
   auto cursor = new SSTableReaderCursor(
-      mmap_,
+      nullptr,
       header_.headerSize(),
       header_.headerSize() + header_.bodySize());
 

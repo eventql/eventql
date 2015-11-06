@@ -50,9 +50,10 @@ public:
     size_t limit_;
   };
 
-  SSTableReader(const String& filename);
-  SSTableReader(File&& file);
-  SSTableReader(RefPtr<VFSFile> vfs_file);
+  explicit SSTableReader(const String& filename);
+  explicit SSTableReader(File&& file);
+  explicit SSTableReader(RefPtr<VFSFile> vfs_file);
+  explicit SSTableReader(RefPtr<RewindableInputStream> inputstream);
   SSTableReader(const SSTableReader& other) = delete;
   SSTableReader& operator=(const SSTableReader& other) = delete;
 
@@ -61,7 +62,6 @@ public:
    */
   std::unique_ptr<SSTableReaderCursor> getCursor();
 
-  void readHeader(const void** data, size_t* size);
   Buffer readHeader();
   void readFooter(uint32_t type, void** data, size_t* size);
   Buffer readFooter(uint32_t type);
@@ -92,9 +92,7 @@ public:
   size_t countRows();
 
 private:
-  RefPtr<VFSFile> mmap_;
-  MemoryInputStream is_;
-  uint64_t file_size_;
+  RefPtr<RewindableInputStream> is_;
   MetaPage header_;
 };
 

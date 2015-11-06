@@ -46,9 +46,7 @@ bool SSTableRepair::checkAndRepair(bool repair /* = false */) {
     return checkAndRepairUnfinishedTable(repair);
   } else {
     try {
-      void* dummy_data;
-      size_t dummy_size;
-      reader_->readFooter(0, &dummy_data, &dummy_size);
+      reader_->readFooter(0);
     } catch (stx::Exception& rte) {
       /*
       fnordmetric::env()->logger()->printf(
