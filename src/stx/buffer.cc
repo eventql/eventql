@@ -160,6 +160,7 @@ void Buffer::reserve(size_t size) {
     RAISE(kMallocError, "malloc() failed");
   }
 }
+
 void Buffer::clear() {
   size_ = 0;
   mark_ = 0;

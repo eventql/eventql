@@ -244,7 +244,7 @@ size_t FileInputStream::readNextBytes(void* target, size_t n_bytes) {
       }
     }
 
-    size_t s = buf_pos_ - buf_len_;
+    size_t s = buf_len_ - buf_pos_;
     if (n_bytes < s) {
       s = n_bytes;
     }
