@@ -12,11 +12,12 @@
 #include <memory>
 #include <string>
 #include "stx/buffer.h"
+#include <stx/autoref.h>
 #include "stx/io/file.h"
 
 namespace stx {
 
-class InputStream {
+class InputStream : public RefCounted {
 public:
 
   /**
