@@ -546,14 +546,34 @@ void MessageSchema::fromJSON(
     auto optional = json::objectGetBool(col, end, "optional");
     auto repeated = json::objectGetBool(col, end, "repeated");
 
-    addField(
-        MessageSchemaField(
-            id.get(),
-            name.get(),
-            fieldTypeFromString(type.get()),
-            type_size.isEmpty() ? 0 : type_size.get(),
-            repeated.isEmpty() ? false : repeated.get(),
-            optional.isEmpty() ? false : optional.get()));
+    auto field_type = fieldTypeFromString(type.get());
+
+    if (field_type == msg::FieldType::OBJECT) {
+      auto child_schema_json = json::objectLookup(col, end, "schema");
+      if (child_schema_json == end) {
+        RAISE(kRuntimeError, "missing field: schema");
+      }
+
+      auto child_schema = mkRef(new MessageSchema(nullptr));
+      child_schema->fromJSON(child_schema_json, end);
+
+      addField(
+          MessageSchemaField::mkObjectField(
+              id.get(),
+              name.get(),
+              repeated.isEmpty() ? false : repeated.get(),
+              optional.isEmpty() ? false : optional.get(),
+              child_schema));
+    } else {
+      addField(
+          MessageSchemaField(
+              id.get(),
+              name.get(),
+              field_type,
+              type_size.isEmpty() ? 0 : type_size.get(),
+              repeated.isEmpty() ? false : repeated.get(),
+              optional.isEmpty() ? false : optional.get()));
+    }
   }
 }
 
