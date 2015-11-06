@@ -313,13 +313,17 @@ void FileInputStream::readNextChunk() {
   buf_len_ = bytes_read;
 }
 
-void FileInputStream::rewind() {
+void FileInputStream::seekTo(size_t offset) {
   buf_pos_ = 0;
   buf_len_ = 0;
 
-  if (lseek(fd_, 0, SEEK_SET) < 0) {
+  if (lseek(fd_, offset, SEEK_SET) < 0) {
     RAISE_ERRNO(kIOError, "lseek(%s) failed", getFileName().c_str());
   }
+}
+
+void FileInputStream::rewind() {
+  seekTo(0);
 }
 
 std::unique_ptr<StringInputStream> StringInputStream::fromString(
@@ -360,6 +364,14 @@ void StringInputStream::rewind() {
   cur_ = 0;
 }
 
+void StringInputStream::seekTo(size_t offset) {
+  if (offset < str_.size()) {
+    cur_ = offset;
+  } else {
+    cur_ = str_.size();
+  }
+}
+
 std::unique_ptr<BufferInputStream> BufferInputStream::fromBuffer(
     const Buffer* buf) {
   return std::unique_ptr<BufferInputStream>(new BufferInputStream(buf));
@@ -398,6 +410,14 @@ void BufferInputStream::rewind() {
   cur_ = 0;
 }
 
+void BufferInputStream::seekTo(size_t offset) {
+  if (offset < buf_->size()) {
+    cur_ = offset;
+  } else {
+    cur_ = buf_->size();
+  }
+}
+
 MemoryInputStream::MemoryInputStream(
     const void* data,
     size_t size) :
@@ -430,6 +450,14 @@ bool MemoryInputStream::eof() {
 
 void MemoryInputStream::rewind() {
   cur_ = 0;
+}
+
+void MemoryInputStream::seekTo(size_t offset) {
+  if (offset < size_) {
+    cur_ = offset;
+  } else {
+    cur_ = size_;
+  }
 }
 
 } // namespace stx

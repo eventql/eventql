@@ -165,6 +165,12 @@ public:
    */
   virtual void rewind() = 0;
 
+  /**
+   * Seek to the provided offset in number of bytes from the beginning of the
+   * stream
+   */
+  virtual void seekTo(size_t offset) = 0;
+
 };
 
 class FileInputStream : public RewindableInputStream {
@@ -253,6 +259,13 @@ public:
   void rewind() override;
 
   /**
+   * Seek to the provided offset in number of bytes from the beginning of the
+   * file. Raises en exception if the provided offset is out of bounds of the
+  * underlying file
+   */
+  void seekTo(size_t offset) override;
+
+  /**
    * Read the byte order mark of the file
    */
   kByteOrderMark readByteOrderMark();
@@ -310,6 +323,13 @@ public:
    */
   void rewind() override;
 
+  /**
+   * Seek to the provided offset in number of bytes from the beginning of the
+   * string. Sets the position to EOF if the provided offset is larger than
+   * the underlying string's size
+   */
+  void seekTo(size_t offset) override;
+
 protected:
   std::string str_;
   size_t cur_;
@@ -358,6 +378,13 @@ public:
    */
   void rewind() override;
 
+  /**
+   * Seek to the provided offset in number of bytes from the beginning of the
+   * buffer. Sets the position to EOF if the provided offset is larger than
+   * the underlying buffer's size
+   */
+  void seekTo(size_t offset) override;
+
 protected:
   const Buffer* buf_;
   size_t cur_;
@@ -398,6 +425,13 @@ public:
    * Rewind the input stream
    */
   void rewind() override;
+
+  /**
+   * Seek to the provided offset in number of bytes from the beginning of the
+   * pointed to memory region. Sets the position to EOF if the provided offset
+   * is larger than size of the underlying memory regio
+   */
+  void seekTo(size_t offset) override;
 
 protected:
   const void* data_;
