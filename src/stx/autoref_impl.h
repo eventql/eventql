@@ -24,11 +24,6 @@ AutoRef<T>::AutoRef(T* ref) : ref_(ref) {
 }
 
 template <typename T>
-AutoRef<T>::AutoRef(ScopedPtr<T>&& ref) : ref_(ref.release()) {
-  if (ref_) ref_->incRef();
-}
-
-template <typename T>
 AutoRef<T>::AutoRef(const AutoRef<T>& other) : ref_(other.ref_) {
   if (ref_) ref_->incRef();
 }
@@ -95,6 +90,11 @@ AutoRef<T_> AutoRef<T>::asInstanceOf() const {
 template <typename T>
 AutoRef<T> mkRef(T* ptr) {
   return AutoRef<T>(ptr);
+}
+
+template <typename T>
+AutoRef<T> mkRef(ScopedPtr<T>&& ptr) {
+  return AutoRef<T>(ptr.release());
 }
 
 template <typename T>
