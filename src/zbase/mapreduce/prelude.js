@@ -7,6 +7,7 @@ var console = {
 var Z1 = (function(global) {
   var seq = 0;
   var jobs = (global["__z1_mr_jobs"] = []);
+  var bcastdata = (global["__bcastdata"] = {});
 
   var mkMapTableTask = function(opts) {
     var job_id = mkJobID();
@@ -116,7 +117,7 @@ var Z1 = (function(global) {
     return "__z1_mr_fn_" + ++seq;
   };
 
-  return {
+  var cls = {
     mapTable: mkMapTableTask,
     reduce: mkReduceTask,
     downloadResults: mkDownloadResultsTask,
@@ -124,6 +125,16 @@ var Z1 = (function(global) {
     saveToTablePartition: mkSaveToTablePartitionTask,
     processStream: processStream
   };
+
+  cls.broadcast = function(var_name) {
+    if (!global[var_name]) {
+      throw "no such variable: " + var_name;
+    }
+
+    bcastdata[var_name] = global[var_name];
+  };
+
+  return cls;
 })(this);
 
 function __call_with_iter(method, key, iter) {
