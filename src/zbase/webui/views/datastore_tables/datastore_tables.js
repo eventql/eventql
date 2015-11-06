@@ -64,22 +64,43 @@ ZBase.registerView((function() {
         "views/datastore_tables",
         "zbase_datastore_tables_add_modal_tpl");
 
-    var column_tpl = $.getTemplate(
-        "views/datastore_tables",
-        "zbase_datastore_tables_add_modal_column_tpl");
-
     var columns = $(".columns tbody", tpl);
-    columns.appendChild(column_tpl.cloneNode(true));
-    columns.appendChild(column_tpl.cloneNode(true));
+    renderModalColumnRow(columns);
+    renderModalColumnRow(columns);
 
     $.onClick($(".add_column", tpl), function() {
-      columns.appendChild(column_tpl.cloneNode(true));
+      renderModalColumnRow(columns);
     });
 
 
     $.replaceContent($(".z-modal-content", modal), tpl);
     modal.show();
     $("input", modal).focus();
+  };
+
+  var renderModalColumnRow = function(elem) {
+    var tpl = $.getTemplate(
+        "views/datastore_tables",
+        "zbase_datastore_tables_add_modal_column_tpl");
+
+    var nested_columns_tr = $("tr.nested", tpl);
+    var nested_columns = $("tr.nested .columns", tpl);
+
+    $("z-dropdown.type", tpl).addEventListener("change", function() {
+      if (this.getValue() == "object") {
+        console.log("render add column");
+        nested_columns_tr.classList.remove("hidden");
+        nested_columns.innerHTML = "";
+        renderModalColumnRow(nested_columns);
+        renderModalColumnRow(nested_columns);
+      } else {
+        nested_columns_tr.classList.add("hidden");
+        console.log("hide add column");
+      }
+    }, false);
+
+    console.log(elem);
+    elem.appendChild(tpl);
   };
 
   var createTable = function() {
@@ -109,11 +130,17 @@ ZBase.registerView((function() {
         continue;
       }
 
-      json.schema.columns.push({
+      var column = {
         name: c_input.value,
         type: $("z-dropdown.type", columns[i]).getValue(),
         optional: $("z-dropdown.is_nullable", columns[i]).getValue()
-      });
+      };
+
+      if (column.type == "object") {
+        column.schema = {columns: []};
+      }
+
+      json.schema.columns.push(column);
     }
 
     //set column ids
@@ -121,6 +148,8 @@ ZBase.registerView((function() {
       json.schema.columns[i].id = i + 1;
     }
 
+    console.log(JSON.stringify(json));
+    return;
     $.httpPost("/api/v1/tables/create_table", JSON.stringify(json), function(r) {
       switch (r.status) {
         case 201:

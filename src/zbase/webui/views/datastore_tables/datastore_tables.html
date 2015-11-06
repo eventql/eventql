@@ -141,6 +141,7 @@
   <div class="link add_column"><i class="fa fa-plus"></i> Add Column</div>
 </template>
 
+
 <template id="zbase_datastore_tables_add_modal_column_tpl">
   <tr class="column">
     <td><input class="z-input name" type="text" /></td>
@@ -154,6 +155,7 @@
             <z-dropdown-item data-value="UINT64">UINT64</z-dropdown-item>
             <z-dropdown-item data-value="BOOLEAN">BOOLEAN</z-dropdown-item>
             <z-dropdown-item data-value="DATETIME">DATETIME</z-dropdown-item>
+            <z-dropdown-item data-value="object">OBJECT</z-dropdown-item>
           </z-dropdown-items>
         </z-dropdown-flyout>
       </z-dropdown>
@@ -168,6 +170,34 @@
           </z-dropdown-items>
         </z-dropdown-flyout>
       </z-dropdown>
+    </td>
+  </tr>
+
+  <tr class="nested hidden">
+    <td colspan="3">
+      <table class="z-table">
+        <tr><td class="container"><h3>Columns</h3></td></tr>
+        <tr>
+          <td class="container">
+            <table class="z-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Type</th>
+                  <th>Is Nullable</th>
+                </tr>
+              </thead>
+              <tbody class="columns"></tbody>
+            </table>
+          </td>
+        </tr>
+
+        <tr>
+          <td>
+            <div class="link add_column"><i class="fa fa-plus"></i> Add Column</div>
+          </td>
+        </tr>
+      </table>
     </td>
   </tr>
 </template>
