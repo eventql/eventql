@@ -31,7 +31,7 @@ public:
   class SSTableReaderCursor : public sstable::Cursor {
   public:
     SSTableReaderCursor(
-        RefPtr<VFSFile> file,
+        RefPtr<RewindableInputStream> is,
         size_t begin,
         size_t limit);
 
@@ -44,10 +44,18 @@ public:
     size_t position() const override;
     size_t nextPosition() override;
   protected:
-    RefPtr<VFSFile> mmap_;
-    size_t pos_;
+    bool fetchMeta();
+    RefPtr<RewindableInputStream> is_;
     size_t begin_;
     size_t limit_;
+    size_t pos_;
+    bool valid_;
+    bool have_key_;
+    Buffer key_;
+    size_t key_size_;
+    bool have_value_;
+    Buffer value_;
+    size_t value_size_;
   };
 
   explicit SSTableReader(const String& filename);
