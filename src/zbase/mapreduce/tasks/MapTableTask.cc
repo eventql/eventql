@@ -108,6 +108,8 @@ Option<MapReduceShardResult> MapTableTask::executeRemote(
       "Authorization",
       StringUtil::format("Token $0", api_token));
 
+  iputs("execute: $0, $1, $2", url, params, api_token);
+
   http::HTTPClient http_client;
   auto req = http::HTTPRequest::mkPost(url, params, auth_headers);
   auto res = http_client.executeRequest(req);

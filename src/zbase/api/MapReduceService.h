@@ -38,6 +38,7 @@ public:
 
   Option<SHA1Hash> mapPartition(
       const AnalyticsSession& session,
+      RefPtr<MapReduceJobSpec> job,
       const String& table_name,
       const SHA1Hash& partition_key,
       const String& map_fn,

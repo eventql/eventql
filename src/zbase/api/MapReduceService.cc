@@ -74,6 +74,7 @@ void MapReduceService::executeScript(
 
 Option<SHA1Hash> MapReduceService::mapPartition(
     const AnalyticsSession& session,
+    RefPtr<MapReduceJobSpec> job,
     const String& table_name,
     const SHA1Hash& partition_key,
     const String& map_fn,
@@ -130,7 +131,7 @@ Option<SHA1Hash> MapReduceService::mapPartition(
 
   auto js_ctx = mkRef(new JavaScriptContext(
       session.customer(),
-      nullptr,
+      job,
       tsdb_,
       nullptr,
       nullptr));
