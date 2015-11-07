@@ -49,7 +49,7 @@ var Z1 = (function(global) {
       until: opts["until"],
       map_fn: String(opts["map_fn"]),
       globals: JSON.stringify(bcastdata),
-      params: JSON.stringify({ "fu": 123 })
+      params: JSON.stringify(opts["params"] || {})
     });
 
     return job_id;
@@ -65,7 +65,7 @@ var Z1 = (function(global) {
       num_shards: opts["shards"],
       reduce_fn: String(opts["reduce_fn"]),
       globals: JSON.stringify(bcastdata),
-      params: JSON.stringify({ "fu": 123 })
+      params: JSON.stringify(opts["params"] || {})
     });
 
     return job_id;
