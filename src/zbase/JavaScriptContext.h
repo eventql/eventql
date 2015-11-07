@@ -12,6 +12,7 @@
 #include "stx/option.h"
 #include "zbase/core/TSDBService.h"
 #include "zbase/mapreduce/MapReduceTaskBuilder.h"
+#include "zbase/mapreduce/MapReduceScheduler.h"
 #include <jsapi.h>
 
 using namespace stx;
@@ -27,6 +28,7 @@ public:
       const String& customer,
       TSDBService* tsdb,
       RefPtr<MapReduceTaskBuilder> task_builder,
+      RefPtr<MapReduceScheduler> scheduler,
       size_t memlimit = kDefaultMemLimit);
 
   ~JavaScriptContext();
@@ -89,6 +91,7 @@ protected:
   String customer_;
   TSDBService* tsdb_;
   RefPtr<MapReduceTaskBuilder> task_builder_;
+  RefPtr<MapReduceScheduler> scheduler_;
   JSRuntime* runtime_;
   JSContext* ctx_;
   JS::PersistentRooted<JSObject*> global_;

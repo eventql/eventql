@@ -24,13 +24,12 @@ public:
   MapReduceScheduler(
       const AnalyticsSession& session,
       RefPtr<MapReduceJobSpec> job,
-      const MapReduceShardList& shards,
       thread::ThreadPool* tpool,
       AnalyticsAuth* auth,
       const String& cachedir,
       size_t max_concurrent_tasks = kDefaultMaxConcurrentTasks);
 
-  void execute();
+  void execute(const MapReduceShardList& shards);
 
   void sendResult(const String& key, const String& value);
 

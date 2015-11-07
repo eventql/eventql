@@ -30,10 +30,12 @@ JavaScriptContext::JavaScriptContext(
     const String& customer,
     TSDBService* tsdb,
     RefPtr<MapReduceTaskBuilder> task_builder,
+    RefPtr<MapReduceScheduler> scheduler,
     size_t memlimit /* = kDefaultMemLimit */) :
     customer_(customer),
     tsdb_(tsdb),
-    task_builder_(task_builder) {
+    task_builder_(task_builder),
+    scheduler_(scheduler) {
   {
     runtime_ = JS_NewRuntime(memlimit);
     if (!runtime_) {
@@ -272,7 +274,8 @@ bool JavaScriptContext::executeMapReduce(
     return false;
   }
 
-  if (self->task_builder_.get() == nullptr) {
+  if (self->task_builder_.get() == nullptr ||
+      self->scheduler_.get() == nullptr) {
     return false;
   }
 
@@ -284,22 +287,9 @@ bool JavaScriptContext::executeMapReduce(
   String job_id(job_id_cstr);
   JS_free(ctx, job_id_cstr);
 
-  iputs("call $0 @ $1", job_id, jobs_json);
-
   auto jobs = json::parseJSON(jobs_json);
   auto task_shards = self->task_builder_->fromJSON(jobs.begin(), jobs.end());
-
-  iputs("got: $0 shards", task_shards.size());
-  //auto scheduler = mkRef(
-  //    new MapReduceScheduler(
-  //        session,
-  //        job,
-  //        task_shards,
-  //        &tpool_,
-  //        auth_,
-  //        cachedir_));
-
-  //scheduler->execute();
+  self->scheduler_->execute(task_shards);
 
   args.rval().setBoolean(true);
   return true;
