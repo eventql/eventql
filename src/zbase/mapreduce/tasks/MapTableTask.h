@@ -25,9 +25,10 @@ public:
 
   MapTableTask(
       const AnalyticsSession& session,
-      RefPtr<MapReduceJobSpec> job_spec,
       const TSDBTableRef& table,
-      const String& method_name,
+      const String& map_function,
+      const String& globals,
+      const String& params,
       MapReduceShardList* shards,
       AnalyticsAuth* auth,
       zbase::PartitionMap* pmap,
@@ -45,9 +46,10 @@ protected:
       const ReplicaRef& host);
 
   AnalyticsSession session_;
-  RefPtr<MapReduceJobSpec> job_spec_;
   TSDBTableRef table_ref_;
-  String method_name_;
+  String map_function_;
+  String globals_;
+  String params_;
   AnalyticsAuth* auth_;
   zbase::PartitionMap* pmap_;
   zbase::ReplicationScheme* repl_;

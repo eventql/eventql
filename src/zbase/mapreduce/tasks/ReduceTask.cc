@@ -16,16 +16,18 @@ namespace zbase {
 
 ReduceTask::ReduceTask(
     const AnalyticsSession& session,
-    RefPtr<MapReduceJobSpec> job_spec,
-    const String& method_name,
+    const String& reduce_fn,
+    const String& globals,
+    const String& params,
     Vector<RefPtr<MapReduceTask>> sources,
     size_t num_shards,
     MapReduceShardList* shards,
     AnalyticsAuth* auth,
     zbase::ReplicationScheme* repl) :
     session_(session),
-    job_spec_(job_spec),
-    method_name_(method_name),
+    reduce_fn_(reduce_fn),
+    globals_(globals),
+    params_(params),
     sources_(sources),
     num_shards_(num_shards),
     auth_(auth),
@@ -111,9 +113,10 @@ Option<MapReduceShardResult> ReduceTask::executeRemote(
       host.addr.ipAndPort());
 
   auto params = StringUtil::format(
-      "program_source=$0&method_name=$1",
-      URI::urlEncode(job_spec_->program_source),
-      URI::urlEncode(method_name_));
+      "reduce_fn=$0&globals=$1&params=$2",
+      URI::urlEncode(reduce_fn_),
+      URI::urlEncode(globals_),
+      URI::urlEncode(params_));
 
   for (const auto& input_table : input_tables) {
     params += "&input_table=" + URI::urlEncode(input_table);

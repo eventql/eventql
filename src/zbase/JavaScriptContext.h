@@ -11,6 +11,8 @@
 #include "stx/autoref.h"
 #include "stx/option.h"
 #include "zbase/core/TSDBService.h"
+#include "zbase/mapreduce/MapReduceTaskBuilder.h"
+#include "zbase/mapreduce/MapReduceScheduler.h"
 #include <jsapi.h>
 
 using namespace stx;
@@ -25,24 +27,27 @@ public:
   JavaScriptContext(
       const String& customer,
       TSDBService* tsdb,
+      RefPtr<MapReduceTaskBuilder> task_builder,
+      RefPtr<MapReduceScheduler> scheduler,
       size_t memlimit = kDefaultMemLimit);
 
   ~JavaScriptContext();
 
   void loadProgram(const String& program);
 
+  void loadClosure(
+      const String& source,
+      const String& globals,
+      const String& params);
+
   void callMapFunction(
-      const String& method_name,
       const String& json_string,
       Vector<Pair<String, String>>* tuples);
 
   void callReduceFunction(
-      const String& method_name,
       const String& key,
       const Vector<String>& values,
       Vector<Pair<String, String>>* tuples);
-
-  Option<String> getMapReduceJobJSON();
 
 protected:
 
@@ -74,12 +79,19 @@ protected:
       unsigned argc,
       JS::Value* vp);
 
+  static bool executeMapReduce(
+      JSContext* ctx,
+      unsigned argc,
+      JS::Value* vp);
+
   void enumerateTuples(
       JS::RootedValue* src,
       Vector<Pair<String, String>>* dst) const;
 
   String customer_;
   TSDBService* tsdb_;
+  RefPtr<MapReduceTaskBuilder> task_builder_;
+  RefPtr<MapReduceScheduler> scheduler_;
   JSRuntime* runtime_;
   JSContext* ctx_;
   JS::PersistentRooted<JSObject*> global_;

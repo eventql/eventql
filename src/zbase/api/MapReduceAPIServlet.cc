@@ -117,26 +117,26 @@ void MapReduceAPIServlet::executeMapPartitionTask(
     return;
   }
 
-  String program_source;
-  if (!URI::getParam(params, "program_source", &program_source)) {
+  String map_fn;
+  if (!URI::getParam(params, "map_function", &map_fn)) {
     res->setStatus(http::kStatusBadRequest);
-    res->addBody("missing ?program_source=... parameter");
+    res->addBody("missing ?map_function=... parameter");
     return;
   }
 
-  String method_name;
-  if (!URI::getParam(params, "method_name", &method_name)) {
-    res->setStatus(http::kStatusBadRequest);
-    res->addBody("missing ?method_name=... parameter");
-    return;
-  }
+  String js_globals = "{}";
+  URI::getParam(params, "globals", &js_globals);
+
+  String js_params = "{}";
+  URI::getParam(params, "params", &js_params);
 
   auto shard_id = service_->mapPartition(
       session,
       table_name,
       SHA1Hash::fromHexString(partition_key),
-      program_source,
-      method_name);
+      map_fn,
+      js_globals,
+      js_params);
 
   if (shard_id.isEmpty()) {
     res->setStatus(http::kStatusNoContent);
@@ -161,25 +161,25 @@ void MapReduceAPIServlet::executeReduceTask(
     }
   }
 
-  String program_source;
-  if (!URI::getParam(params, "program_source", &program_source)) {
+  String reduce_fn;
+  if (!URI::getParam(params, "reduce_fn", &reduce_fn)) {
     res->setStatus(http::kStatusBadRequest);
-    res->addBody("missing ?program_source=... parameter");
+    res->addBody("missing ?reduce_fn=... parameter");
     return;
   }
 
-  String method_name;
-  if (!URI::getParam(params, "method_name", &method_name)) {
-    res->setStatus(http::kStatusBadRequest);
-    res->addBody("missing ?method_name=... parameter");
-    return;
-  }
+  String js_globals = "{}";
+  URI::getParam(params, "globals", &js_globals);
+
+  String js_params = "{}";
+  URI::getParam(params, "params", &js_params);
 
   auto result_id = service_->reduceTables(
       session,
       input_tables,
-      program_source,
-      method_name);
+      reduce_fn,
+      js_globals,
+      js_params);
 
   if (result_id.isEmpty()) {
     res->setStatus(http::kStatusNoContent);

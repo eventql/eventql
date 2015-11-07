@@ -25,8 +25,9 @@ public:
 
   ReduceTask(
       const AnalyticsSession& session,
-      RefPtr<MapReduceJobSpec> job_spec,
-      const String& method_name,
+      const String& reduce_fn,
+      const String& globals,
+      const String& params,
       Vector<RefPtr<MapReduceTask>> sources,
       size_t num_shards,
       MapReduceShardList* shards,
@@ -46,8 +47,9 @@ protected:
       const ReplicaRef& host);
 
   AnalyticsSession session_;
-  RefPtr<MapReduceJobSpec> job_spec_;
-  String method_name_;
+  String reduce_fn_;
+  String globals_;
+  String params_;
   Vector<RefPtr<MapReduceTask>> sources_;
   size_t num_shards_;
   AnalyticsAuth* auth_;
