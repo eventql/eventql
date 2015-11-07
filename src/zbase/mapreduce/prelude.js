@@ -8,8 +8,14 @@ var Z1 = (function(global) {
     return "job-" + ++seq;
   };
 
-  cls.log = function(str) {
-    z1_log(str);
+  cls.log = function() {
+    var parts = [];
+
+    for (var i = 0; i < arguments.length; ++i) {
+      parts.push(String(arguments[i]));
+    }
+
+    z1_log(parts.join(", "));
   }
 
   cls.broadcast = function(var_name) {
