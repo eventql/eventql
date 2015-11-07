@@ -11,6 +11,7 @@
 #include "stx/autoref.h"
 #include "stx/option.h"
 #include "zbase/core/TSDBService.h"
+#include "zbase/mapreduce/MapReduceTaskBuilder.h"
 #include <jsapi.h>
 
 using namespace stx;
@@ -25,6 +26,7 @@ public:
   JavaScriptContext(
       const String& customer,
       TSDBService* tsdb,
+      RefPtr<MapReduceTaskBuilder> task_builder,
       size_t memlimit = kDefaultMemLimit);
 
   ~JavaScriptContext();
@@ -44,8 +46,6 @@ public:
       const String& key,
       const Vector<String>& values,
       Vector<Pair<String, String>>* tuples);
-
-  Option<String> getMapReduceJobJSON();
 
 protected:
 
@@ -88,6 +88,7 @@ protected:
 
   String customer_;
   TSDBService* tsdb_;
+  RefPtr<MapReduceTaskBuilder> task_builder_;
   JSRuntime* runtime_;
   JSContext* ctx_;
   JS::PersistentRooted<JSObject*> global_;

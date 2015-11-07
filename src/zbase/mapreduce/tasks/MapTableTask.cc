@@ -16,7 +16,6 @@ namespace zbase {
 
 MapTableTask::MapTableTask(
     const AnalyticsSession& session,
-    RefPtr<MapReduceJobSpec> job_spec,
     const TSDBTableRef& table_ref,
     const String& map_function,
     const String& globals,
@@ -26,7 +25,6 @@ MapTableTask::MapTableTask(
     zbase::PartitionMap* pmap,
     zbase::ReplicationScheme* repl) :
     session_(session),
-    job_spec_(job_spec),
     table_ref_(table_ref),
     map_function_(map_function),
     globals_(globals),

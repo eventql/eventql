@@ -22,14 +22,12 @@ namespace zbase {
 
 MapReduceTaskBuilder::MapReduceTaskBuilder(
     const AnalyticsSession& session,
-    RefPtr<MapReduceJobSpec> job_spec,
     AnalyticsAuth* auth,
     zbase::PartitionMap* pmap,
     zbase::ReplicationScheme* repl,
     TSDBService* tsdb,
     const String& cachedir) :
     session_(session),
-    job_spec_(job_spec),
     auth_(auth),
     pmap_(pmap),
     repl_(repl),
@@ -154,7 +152,6 @@ RefPtr<MapReduceTask> MapReduceTaskBuilder::buildMapTableTask(
 
   return new MapTableTask(
       session_,
-      job_spec_,
       table_ref,
       map_fn.get(),
       globals.get(),
@@ -208,7 +205,6 @@ RefPtr<MapReduceTask> MapReduceTaskBuilder::buildReduceTask(
 
   return new ReduceTask(
       session_,
-      job_spec_,
       reduce_fn.get(),
       globals.get(),
       params.get(),

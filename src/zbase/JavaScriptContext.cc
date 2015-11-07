@@ -29,9 +29,11 @@ static bool write_json_to_buf(const char16_t* str, uint32_t strlen, void* out) {
 JavaScriptContext::JavaScriptContext(
     const String& customer,
     TSDBService* tsdb,
+    RefPtr<MapReduceTaskBuilder> task_builder,
     size_t memlimit /* = kDefaultMemLimit */) :
     customer_(customer),
-    tsdb_(tsdb) {
+    tsdb_(tsdb),
+    task_builder_(task_builder) {
   {
     runtime_ = JS_NewRuntime(memlimit);
     if (!runtime_) {
@@ -270,6 +272,10 @@ bool JavaScriptContext::executeMapReduce(
     return false;
   }
 
+  if (self->task_builder_.get() == nullptr) {
+    return false;
+  }
+
   auto jobs_json_cstr = JS_EncodeString(ctx, args[0].toString());
   String jobs_json(jobs_json_cstr);
   JS_free(ctx, jobs_json_cstr);
@@ -279,6 +285,21 @@ bool JavaScriptContext::executeMapReduce(
   JS_free(ctx, job_id_cstr);
 
   iputs("call $0 @ $1", job_id, jobs_json);
+
+  auto jobs = json::parseJSON(jobs_json);
+  auto task_shards = self->task_builder_->fromJSON(jobs.begin(), jobs.end());
+
+  iputs("got: $0 shards", task_shards.size());
+  //auto scheduler = mkRef(
+  //    new MapReduceScheduler(
+  //        session,
+  //        job,
+  //        task_shards,
+  //        &tpool_,
+  //        auth_,
+  //        cachedir_));
+
+  //scheduler->execute();
 
   args.rval().setBoolean(true);
   return true;
@@ -484,6 +505,7 @@ void JavaScriptContext::enumerateTuples(
   }
 }
 
+/*
 Option<String> JavaScriptContext::getMapReduceJobJSON() {
   JSAutoRequest js_req(ctx_);
   JSAutoCompartment js_comp(ctx_, global_);
@@ -508,6 +530,7 @@ Option<String> JavaScriptContext::getMapReduceJobJSON() {
 
   return Some(json_str);
 }
+*/
 
 JSClass JavaScriptContext::ReduceCollectionIter::kJSClass = {
   "global",

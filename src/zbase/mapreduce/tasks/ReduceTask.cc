@@ -16,7 +16,6 @@ namespace zbase {
 
 ReduceTask::ReduceTask(
     const AnalyticsSession& session,
-    RefPtr<MapReduceJobSpec> job_spec,
     const String& reduce_fn,
     const String& globals,
     const String& params,
@@ -26,7 +25,6 @@ ReduceTask::ReduceTask(
     AnalyticsAuth* auth,
     zbase::ReplicationScheme* repl) :
     session_(session),
-    job_spec_(job_spec),
     reduce_fn_(reduce_fn),
     globals_(globals),
     params_(params),

@@ -45,40 +45,20 @@ void MapReduceService::executeScript(
       "Launching mapreduce job; customer=$0",
       session.customer());
 
-  json::JSONObject job_json;
-  {
-    auto js_ctx = mkRef(new JavaScriptContext(session.customer(), tsdb_));
-    js_ctx->loadProgram(job->program_source);
-
-    auto job_json_str = js_ctx->getMapReduceJobJSON();
-    if (job_json_str.isEmpty()) {
-      return;
-    }
-
-    job_json = json::parseJSON(job_json_str.get());
-  }
-
-  MapReduceTaskBuilder task_builder(
+  auto task_builder = mkRef(new MapReduceTaskBuilder(
       session,
-      job,
       auth_,
       pmap_,
       repl_,
       tsdb_,
-      cachedir_);
+      cachedir_));
 
-  auto task_shards = task_builder.fromJSON(job_json.begin(), job_json.end());
+  auto js_ctx = mkRef(new JavaScriptContext(
+      session.customer(),
+      tsdb_,
+      task_builder));
 
-  auto scheduler = mkRef(
-      new MapReduceScheduler(
-          session,
-          job,
-          task_shards,
-          &tpool_,
-          auth_,
-          cachedir_));
-
-  scheduler->execute();
+  js_ctx->loadProgram(job->program_source);
 }
 
 Option<SHA1Hash> MapReduceService::mapPartition(
@@ -137,7 +117,11 @@ Option<SHA1Hash> MapReduceService::mapPartition(
       partition_key.toString(),
       output_id.toString());
 
-  auto js_ctx = mkRef(new JavaScriptContext(session.customer(), tsdb_));
+  auto js_ctx = mkRef(new JavaScriptContext(
+      session.customer(),
+      tsdb_,
+      nullptr));
+
   js_ctx->loadClosure(map_fn, globals, params);
 
   auto writer = sstable::SSTableWriter::create(output_path, nullptr, 0);
@@ -231,7 +215,11 @@ Option<SHA1Hash> MapReduceService::reduceTables(
     return None<SHA1Hash>();
   }
 
-  auto js_ctx = mkRef(new JavaScriptContext(session.customer(), tsdb_));
+  auto js_ctx = mkRef(new JavaScriptContext(
+      session.customer(),
+      tsdb_,
+      nullptr));
+
   js_ctx->loadClosure(reduce_fn, globals, params);
 
   auto writer = sstable::SSTableWriter::create(output_path, nullptr, 0);

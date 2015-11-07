@@ -18,12 +18,11 @@ using namespace stx;
 
 namespace zbase {
 
-class MapReduceTaskBuilder {
+class MapReduceTaskBuilder : public RefCounted {
 public:
 
   MapReduceTaskBuilder(
       const AnalyticsSession& session,
-      RefPtr<MapReduceJobSpec> job_spec,
       AnalyticsAuth* auth,
       zbase::PartitionMap* pmap,
       zbase::ReplicationScheme* repl,
@@ -73,7 +72,6 @@ protected:
       HashMap<String, RefPtr<MapReduceTask>>* jobs);
 
   AnalyticsSession session_;
-  RefPtr<MapReduceJobSpec> job_spec_;
   AnalyticsAuth* auth_;
   zbase::PartitionMap* pmap_;
   zbase::ReplicationScheme* repl_;

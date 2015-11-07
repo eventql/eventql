@@ -25,7 +25,6 @@ public:
 
   MapTableTask(
       const AnalyticsSession& session,
-      RefPtr<MapReduceJobSpec> job_spec,
       const TSDBTableRef& table,
       const String& map_function,
       const String& globals,
@@ -47,7 +46,6 @@ protected:
       const ReplicaRef& host);
 
   AnalyticsSession session_;
-  RefPtr<MapReduceJobSpec> job_spec_;
   TSDBTableRef table_ref_;
   String map_function_;
   String globals_;

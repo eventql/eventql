@@ -25,7 +25,6 @@ public:
 
   ReduceTask(
       const AnalyticsSession& session,
-      RefPtr<MapReduceJobSpec> job_spec,
       const String& reduce_fn,
       const String& globals,
       const String& params,
@@ -48,7 +47,6 @@ protected:
       const ReplicaRef& host);
 
   AnalyticsSession session_;
-  RefPtr<MapReduceJobSpec> job_spec_;
   String reduce_fn_;
   String globals_;
   String params_;
