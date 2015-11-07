@@ -31,7 +31,10 @@ public:
 
   void loadProgram(const String& program);
 
-  void loadClosure(const String& method_source);
+  void loadClosure(
+      const String& source,
+      const String& globals,
+      const String& params);
 
   void callMapFunction(
       const String& json_string,

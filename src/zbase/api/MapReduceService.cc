@@ -85,7 +85,9 @@ Option<SHA1Hash> MapReduceService::mapPartition(
     const AnalyticsSession& session,
     const String& table_name,
     const SHA1Hash& partition_key,
-    const String& map_fn) {
+    const String& map_fn,
+    const String& globals,
+    const String& params) {
   auto table = pmap_->findTable(
       session.customer(),
       table_name);
@@ -136,7 +138,7 @@ Option<SHA1Hash> MapReduceService::mapPartition(
       output_id.toString());
 
   auto js_ctx = mkRef(new JavaScriptContext(session.customer(), tsdb_));
-  js_ctx->loadClosure(map_fn);
+  js_ctx->loadClosure(map_fn, globals, params);
 
   auto writer = sstable::SSTableWriter::create(output_path, nullptr, 0);
 

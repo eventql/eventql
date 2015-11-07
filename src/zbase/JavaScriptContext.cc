@@ -265,16 +265,34 @@ void JavaScriptContext::loadProgram(const String& program) {
   }
 }
 
-void JavaScriptContext::loadClosure(const String& source) {
+void JavaScriptContext::loadClosure(
+    const String& source,
+    const String& globals,
+    const String& params) {
+  iputs("load closure: $0 / $1 / $2", source, globals, params);
   JSAutoRequest js_req(ctx_);
   JSAutoCompartment js_comp(ctx_, global_);
 
-  JS::AutoValueArray<1> argv(ctx_);
+  JS::AutoValueArray<3> argv(ctx_);
   auto source_str_ptr = JS_NewStringCopyN(ctx_, source.data(), source.size());
   if (!source_str_ptr) {
     RAISE(kRuntimeError, "map function execution error: out of memory");
   } else {
     argv[0].setString(source_str_ptr);
+  }
+
+  auto globals_str_ptr = JS_NewStringCopyN(ctx_, globals.data(), globals.size());
+  if (!globals_str_ptr) {
+    RAISE(kRuntimeError, "map function execution error: out of memory");
+  } else {
+    argv[1].setString(globals_str_ptr);
+  }
+
+  auto params_str_ptr = JS_NewStringCopyN(ctx_, params.data(), params.size());
+  if (!params_str_ptr) {
+    RAISE(kRuntimeError, "map function execution error: out of memory");
+  } else {
+    argv[2].setString(params_str_ptr);
   }
 
   JS::RootedValue rval(ctx_);

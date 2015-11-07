@@ -124,11 +124,19 @@ void MapReduceAPIServlet::executeMapPartitionTask(
     return;
   }
 
+  String js_globals = "{}";
+  URI::getParam(params, "globals", &js_globals);
+
+  String js_params = "{}";
+  URI::getParam(params, "params", &js_params);
+
   auto shard_id = service_->mapPartition(
       session,
       table_name,
       SHA1Hash::fromHexString(partition_key),
-      map_fn);
+      map_fn,
+      js_globals,
+      js_params);
 
   if (shard_id.isEmpty()) {
     res->setStatus(http::kStatusNoContent);

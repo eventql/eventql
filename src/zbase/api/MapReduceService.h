@@ -39,7 +39,9 @@ public:
       const AnalyticsSession& session,
       const String& table_name,
       const SHA1Hash& partition_key,
-      const String& map_fn);
+      const String& map_fn,
+      const String& globals,
+      const String& params);
 
   Option<SHA1Hash> reduceTables(
       const AnalyticsSession& session,

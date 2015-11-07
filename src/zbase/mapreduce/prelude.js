@@ -149,7 +149,7 @@ function __call_with_iter(method, key, iter) {
 }
 
 var __load_closure = (function(global_scope) {
-  return function(fn) {
+  return function(fn, globals, params) {
     eval("__fn = " + fn);
   }
 })(this);
