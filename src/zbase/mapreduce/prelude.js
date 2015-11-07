@@ -18,16 +18,24 @@ var Z1 = (function(global) {
     z1_log(parts.join(", "));
   }
 
-  cls.broadcast = function(var_name) {
-    if (var_name == "params") {
-      throw "'params' is a reserved variable and cannot be broadcasted";
-    }
+  cls.broadcast = function() {
+    for (var i = 0; i < arguments.length; ++i) {
+      var var_name = arguments[i];
 
-    if (!global[var_name]) {
-      throw "no such variable: " + var_name;
-    }
+      if (typeof var_name != "string")  {
+        throw "arguments to Z1.broadcast must be strings";
+      }
 
-    bcastdata[var_name] = String(global[var_name]);
+      if (var_name == "params") {
+        throw "'params' is a reserved variable and cannot be broadcasted";
+      }
+
+      if (!global[var_name]) {
+        throw "no such variable: " + var_name;
+      }
+
+      bcastdata[var_name] = String(global[var_name]);
+    }
   };
 
   cls.mapTable = function(opts) {
