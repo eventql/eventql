@@ -12,11 +12,21 @@
 namespace stx {
 namespace http {
 
+HTTPSSEResponseHandler::HTTPSSEResponseHandler(
+    Promise<HTTPResponse> promise) :
+    HTTPResponseFuture(promise) {}
+
 HTTPSSEResponseHandler::FactoryFn HTTPSSEResponseHandler::getFactory() {
   return [] (
       const Promise<http::HTTPResponse> promise) -> HTTPResponseFuture* {
     return new HTTPSSEResponseHandler(promise);
   };
+}
+
+void HTTPSSEResponseHandler::onBodyChunk(
+    const char* data,
+    size_t size) {
+  parser_.parse(data, size);
 }
 
 }

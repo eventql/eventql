@@ -101,15 +101,14 @@ Option<MapReduceShardResult> MapTableTask::executeRemote(
       URI::urlEncode(globals_),
       URI::urlEncode(params_));
 
-
   auto api_token = auth_->encodeAuthToken(session_);
+
+  Option<MapReduceShardResult> result;
 
   http::HTTPMessage::HeaderList auth_headers;
   auth_headers.emplace_back(
       "Authorization",
       StringUtil::format("Token $0", api_token));
-
-  iputs("execute: $0, $1, $2", url, params, api_token);
 
   http::HTTPClient http_client;
 
@@ -119,17 +118,10 @@ Option<MapReduceShardResult> MapTableTask::executeRemote(
       http::HTTPSSEResponseHandler::getFactory());
 
   if (res.statusCode() != 200) {
-    RAISEF(
-        kRuntimeError,
-        "received non-201 response: $0", res.body().toString());
+    RAISEF(kRuntimeError, "received non-201 response: $0", url);
   }
 
-  MapReduceShardResult result {
-    .host = host,
-    .result_id = SHA1Hash::fromHexString(res.body().toString())
-  };
-
-  return Some(result);
+  return result;
 }
 
 } // namespace zbase

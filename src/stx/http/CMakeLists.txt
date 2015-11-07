@@ -26,6 +26,7 @@ add_library(stx-http STATIC
     httpservice.cc
     statshttpservlet.cc
     VFSFileServlet.cc
+    HTTPSSEParser.cc
     HTTPSSEStream.cc
     HTTPSSEResponseHandler.cc)
     #streaminghttpservice_example/HttpServlet.cc

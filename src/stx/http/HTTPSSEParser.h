@@ -16,27 +16,20 @@
 #include "stx/http/httpstats.h"
 #include "stx/http/httpconnectionpool.h"
 #include "stx/http/httpclient.h"
-#include "stx/http/HTTPSSEParser.h"
 
 namespace stx {
 namespace http {
 
-class HTTPSSEResponseHandler : public HTTPResponseFuture {
+class HTTPSSEParser {
 public:
-  typedef
-      Function<HTTPResponseFuture* (const Promise<http::HTTPResponse>)>
-      FactoryFn;
 
-  static FactoryFn getFactory();
+  void parse(const char* data, size_t size);
 
 protected:
 
-  HTTPSSEResponseHandler(
-      Promise<HTTPResponse> promise);
+  void parseEvent(const char* data, size_t size);
 
-  void onBodyChunk(const char* data, size_t size) override;
-
-  HTTPSSEParser parser_;
+  Buffer buf;
 };
 
 }
