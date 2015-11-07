@@ -779,7 +779,18 @@ void AnalyticsServlet::fetchTableDefinition(
 
     json.endObject();
   }
+
   json.endArray();
+
+  auto ztable_opt = pmap_->findTable(session.customer(), table.table_name);
+  if (ztable_opt.isEmpty()) {
+    res->setStatus(http::kStatusNotFound);
+    res->addBody("table not found");
+    return;
+  }
+  json.addComma();
+  json.addObjectEntry("schema");
+  ztable_opt.get()->schema()->toJSON(&json);
 
   json.endObject();
   json.endObject();
