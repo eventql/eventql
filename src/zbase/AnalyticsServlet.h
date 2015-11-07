@@ -118,6 +118,16 @@ protected:
       const http::HTTPRequest* req,
       http::HTTPResponse* res);
 
+  void addTableField(
+      const AnalyticsSession& session,
+      const http::HTTPRequest* req,
+      http::HTTPResponse* res);
+
+  void removeTableField(
+      const AnalyticsSession& session,
+      const http::HTTPRequest* req,
+      http::HTTPResponse* res);
+
   void insertIntoTable(
       const AnalyticsSession& session,
       const http::HTTPRequest* req,

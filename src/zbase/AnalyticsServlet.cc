@@ -318,6 +318,24 @@ void AnalyticsServlet::handle(
     return;
   }
 
+  if (uri.path() == "/api/v1/tables/add_field") {
+    req_stream->readBody();
+    catchAndReturnErrors(&res, [this, &session, &req, &res] {
+      addTableField(session, &req, &res);
+    });
+    res_stream->writeResponse(res);
+    return;
+  }
+
+  if (uri.path() == "/api/v1/tables/remove_field") {
+    req_stream->readBody();
+    catchAndReturnErrors(&res, [this, &session, &req, &res] {
+      removeTableField(session, &req, &res);
+    });
+    res_stream->writeResponse(res);
+    return;
+  }
+
   static const String kTablesPathPrefix = "/api/v1/tables/";
   if (StringUtil::beginsWith(uri.path(), kTablesPathPrefix)) {
     req_stream->readBody();
@@ -881,6 +899,24 @@ void AnalyticsServlet::createTable(
   }
 
   res->setStatus(http::kStatusCreated);
+}
+
+void AnalyticsServlet::addTableField(
+    const AnalyticsSession& session,
+    const http::HTTPRequest* req,
+    http::HTTPResponse* res) {
+  res->setStatus(http::kStatusCreated);
+  res->addBody("add table field");
+  return;
+}
+
+void AnalyticsServlet::removeTableField(
+    const AnalyticsSession& session,
+    const http::HTTPRequest* req,
+    http::HTTPResponse* res) {
+  res->setStatus(http::kStatusCreated);
+  res->addBody("remove table field");
+  return;
 }
 
 void AnalyticsServlet::insertIntoTable(
