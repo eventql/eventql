@@ -142,11 +142,23 @@ RefPtr<MapReduceTask> MapReduceTaskBuilder::buildMapTableTask(
     RAISE(kRuntimeError, "missing field: map_fn");
   }
 
+  auto globals = json::objectGetString(job, "globals");
+  if (globals.isEmpty()) {
+    RAISE(kRuntimeError, "missing field: globals");
+  }
+
+  auto params = json::objectGetString(job, "params");
+  if (params.isEmpty()) {
+    RAISE(kRuntimeError, "missing field: params");
+  }
+
   return new MapTableTask(
       session_,
       job_spec_,
       table_ref,
       map_fn.get(),
+      globals.get(),
+      params.get(),
       shards,
       auth_,
       pmap_,

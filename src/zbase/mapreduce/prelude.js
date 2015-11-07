@@ -7,13 +7,10 @@ var console = {
 var Z1 = (function(global) {
   var seq = 0;
   var jobs = (global["__z1_mr_jobs"] = []);
-  var bcastdata = (global["__bcastdata"] = {});
+  var bcastdata = {};
 
   var mkMapTableTask = function(opts) {
     var job_id = mkJobID();
-
-    var map_fn_id = mkFnID();
-    global[map_fn_id] = opts["map_fn"];
 
     jobs.push({
       id: job_id,
@@ -22,7 +19,8 @@ var Z1 = (function(global) {
       from: opts["from"],
       until: opts["until"],
       map_fn: String(opts["map_fn"]),
-      method_name: map_fn_id
+      globals: JSON.stringify(bcastdata),
+      params: JSON.stringify({ "fu": 123 })
     });
 
     return job_id;
@@ -149,7 +147,12 @@ function __call_with_iter(method, key, iter) {
 }
 
 var __load_closure = (function(global_scope) {
-  return function(fn, globals, params) {
+  return function(fn, globals_json, params_json) {
+    var globals = JSON.parse(globals_json);
+    for (k in globals) {
+      global_scope[k] = globals[k];
+    }
+
     eval("__fn = " + fn);
   }
 })(this);

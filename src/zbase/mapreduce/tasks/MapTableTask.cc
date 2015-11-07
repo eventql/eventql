@@ -19,6 +19,8 @@ MapTableTask::MapTableTask(
     RefPtr<MapReduceJobSpec> job_spec,
     const TSDBTableRef& table_ref,
     const String& map_function,
+    const String& globals,
+    const String& params,
     MapReduceShardList* shards,
     AnalyticsAuth* auth,
     zbase::PartitionMap* pmap,
@@ -27,6 +29,8 @@ MapTableTask::MapTableTask(
     job_spec_(job_spec),
     table_ref_(table_ref),
     map_function_(map_function),
+    globals_(globals),
+    params_(params),
     auth_(auth),
     pmap_(pmap),
     repl_(repl) {
@@ -91,10 +95,12 @@ Option<MapReduceShardResult> MapTableTask::executeRemote(
       host.addr.ipAndPort());
 
   auto params = StringUtil::format(
-      "table=$0&partition=$1&map_function=$2",
+      "table=$0&partition=$1&map_function=$2&globals=$3&params=$4",
       URI::urlEncode(shard->table_ref.table_key),
       shard->table_ref.partition_key.get().toString(),
-      URI::urlEncode(map_function_));
+      URI::urlEncode(map_function_),
+      URI::urlEncode(globals_),
+      URI::urlEncode(params_));
 
 
   auto api_token = auth_->encodeAuthToken(session_);

@@ -28,6 +28,8 @@ public:
       RefPtr<MapReduceJobSpec> job_spec,
       const TSDBTableRef& table,
       const String& map_function,
+      const String& globals,
+      const String& params,
       MapReduceShardList* shards,
       AnalyticsAuth* auth,
       zbase::PartitionMap* pmap,
@@ -48,6 +50,8 @@ protected:
   RefPtr<MapReduceJobSpec> job_spec_;
   TSDBTableRef table_ref_;
   String map_function_;
+  String globals_;
+  String params_;
   AnalyticsAuth* auth_;
   zbase::PartitionMap* pmap_;
   zbase::ReplicationScheme* repl_;
