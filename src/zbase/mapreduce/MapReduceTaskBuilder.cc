@@ -22,14 +22,12 @@ namespace zbase {
 
 MapReduceTaskBuilder::MapReduceTaskBuilder(
     const AnalyticsSession& session,
-    RefPtr<MapReduceJobSpec> job_spec,
     AnalyticsAuth* auth,
     zbase::PartitionMap* pmap,
     zbase::ReplicationScheme* repl,
     TSDBService* tsdb,
     const String& cachedir) :
     session_(session),
-    job_spec_(job_spec),
     auth_(auth),
     pmap_(pmap),
     repl_(repl),
@@ -137,16 +135,27 @@ RefPtr<MapReduceTask> MapReduceTaskBuilder::buildMapTableTask(
     table_ref.timerange_limit = UnixTime(until.get());
   }
 
-  auto method_name = json::objectGetString(job, "method_name");
-  if (method_name.isEmpty()) {
-    RAISE(kRuntimeError, "missing field: method_name");
+  auto map_fn = json::objectGetString(job, "map_fn");
+  if (map_fn.isEmpty()) {
+    RAISE(kRuntimeError, "missing field: map_fn");
+  }
+
+  auto globals = json::objectGetString(job, "globals");
+  if (globals.isEmpty()) {
+    RAISE(kRuntimeError, "missing field: globals");
+  }
+
+  auto params = json::objectGetString(job, "params");
+  if (params.isEmpty()) {
+    RAISE(kRuntimeError, "missing field: params");
   }
 
   return new MapTableTask(
       session_,
-      job_spec_,
       table_ref,
-      method_name.get(),
+      map_fn.get(),
+      globals.get(),
+      params.get(),
       shards,
       auth_,
       pmap_,
@@ -163,14 +172,24 @@ RefPtr<MapReduceTask> MapReduceTaskBuilder::buildReduceTask(
     RAISE(kRuntimeError, "missing field: sources");
   }
 
-  auto method_name = json::objectGetString(job, "method_name");
-  if (method_name.isEmpty()) {
-    RAISE(kRuntimeError, "missing field: method_name");
-  }
-
   auto num_shards = json::objectGetUInt64(job, "num_shards");
   if (num_shards.isEmpty()) {
     RAISE(kRuntimeError, "missing field: num_shards");
+  }
+
+  auto reduce_fn = json::objectGetString(job, "reduce_fn");
+  if (reduce_fn.isEmpty()) {
+    RAISE(kRuntimeError, "missing field: reduce_fn");
+  }
+
+  auto globals = json::objectGetString(job, "globals");
+  if (globals.isEmpty()) {
+    RAISE(kRuntimeError, "missing field: globals");
+  }
+
+  auto params = json::objectGetString(job, "params");
+  if (params.isEmpty()) {
+    RAISE(kRuntimeError, "missing field: params");
   }
 
   Vector<RefPtr<MapReduceTask>> sources;
@@ -186,8 +205,9 @@ RefPtr<MapReduceTask> MapReduceTaskBuilder::buildReduceTask(
 
   return new ReduceTask(
       session_,
-      job_spec_,
-      method_name.get(),
+      reduce_fn.get(),
+      globals.get(),
+      params.get(),
       sources,
       num_shards.get(),
       shards,

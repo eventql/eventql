@@ -56,5 +56,20 @@ void MapReduceJobSpec::sendResult(const String& key, const String& value) {
   }
 }
 
+void MapReduceJobSpec::onLogline(
+    Function<void (const String& logline)> fn) {
+  on_logline_ = fn;
+}
+
+void MapReduceJobSpec::sendLogline(const String& logline) {
+  try {
+    if (on_logline_) {
+      on_logline_(logline);
+    }
+  } catch (const StandardException& e) {
+    logError("z1.mapreduce", e, "MapReduceJob on_result callback crashed");
+  }
+}
+
 } // namespace zbase
 

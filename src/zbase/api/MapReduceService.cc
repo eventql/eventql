@@ -39,54 +39,47 @@ MapReduceService::MapReduceService(
 
 void MapReduceService::executeScript(
     const AnalyticsSession& session,
-    RefPtr<MapReduceJobSpec> job) {
+    RefPtr<MapReduceJobSpec> job,
+    const String& program_source) {
   logDebug(
       "z1.mapreduce",
       "Launching mapreduce job; customer=$0",
       session.customer());
 
-  json::JSONObject job_json;
-  {
-    auto js_ctx = mkRef(new JavaScriptContext(session.customer(), tsdb_));
-    js_ctx->loadProgram(job->program_source);
-
-    auto job_json_str = js_ctx->getMapReduceJobJSON();
-    if (job_json_str.isEmpty()) {
-      return;
-    }
-
-    job_json = json::parseJSON(job_json_str.get());
-  }
-
-  MapReduceTaskBuilder task_builder(
+  auto task_builder = mkRef(new MapReduceTaskBuilder(
       session,
-      job,
       auth_,
       pmap_,
       repl_,
       tsdb_,
-      cachedir_);
+      cachedir_));
 
-  auto task_shards = task_builder.fromJSON(job_json.begin(), job_json.end());
 
-  auto scheduler = mkRef(
-      new MapReduceScheduler(
-          session,
-          job,
-          task_shards,
-          &tpool_,
-          auth_,
-          cachedir_));
+  auto scheduler = mkRef(new MapReduceScheduler(
+      session,
+      job,
+      &tpool_,
+      auth_,
+      cachedir_));
 
-  scheduler->execute();
+  auto js_ctx = mkRef(new JavaScriptContext(
+      session.customer(),
+      job,
+      tsdb_,
+      task_builder,
+      scheduler));
+
+  js_ctx->loadProgram(program_source);
 }
 
 Option<SHA1Hash> MapReduceService::mapPartition(
     const AnalyticsSession& session,
+    RefPtr<MapReduceJobSpec> job,
     const String& table_name,
     const SHA1Hash& partition_key,
-    const String& program_source,
-    const String& method_name) {
+    const String& map_fn,
+    const String& globals,
+    const String& params) {
   auto table = pmap_->findTable(
       session.customer(),
       table_name);
@@ -118,8 +111,7 @@ Option<SHA1Hash> MapReduceService::mapPartition(
           table_name,
           partition_key.toString(),
           reader->version().toString(),
-          SHA1::compute(program_source).toString(),
-          method_name));
+          SHA1::compute(map_fn).toString()));
 
   auto output_path = FileUtil::joinPaths(
       cachedir_,
@@ -137,24 +129,25 @@ Option<SHA1Hash> MapReduceService::mapPartition(
       partition_key.toString(),
       output_id.toString());
 
-  auto js_ctx = mkRef(new JavaScriptContext(session.customer(), tsdb_));
-  js_ctx->loadProgram(program_source);
+  auto js_ctx = mkRef(new JavaScriptContext(
+      session.customer(),
+      job,
+      tsdb_,
+      nullptr,
+      nullptr));
+
+  js_ctx->loadClosure(map_fn, globals, params);
 
   auto writer = sstable::SSTableWriter::create(output_path, nullptr, 0);
 
   reader->fetchRecords(
-      [
-        &schema,
-        &js_ctx,
-        &method_name,
-        &writer
-      ] (const msg::MessageObject& record) {
+      [&schema, &js_ctx, &writer] (const msg::MessageObject& record) {
     Buffer json;
     json::JSONOutputStream jsons(BufferOutputStream::fromBuffer(&json));
     msg::JSONEncoder::encode(record, *schema, &jsons);
 
     Vector<Pair<String, String>> tuples;
-    js_ctx->callMapFunction(method_name, json.toString(), &tuples);
+    js_ctx->callMapFunction(json.toString(), &tuples);
 
     for (const auto& t : tuples) {
       writer->appendRow(t.first, t.second);
@@ -167,18 +160,18 @@ Option<SHA1Hash> MapReduceService::mapPartition(
 Option<SHA1Hash> MapReduceService::reduceTables(
     const AnalyticsSession& session,
     const Vector<String>& input_tables_ref,
-    const String& program_source,
-    const String& method_name) {
+    const String& reduce_fn,
+    const String& globals,
+    const String& params) {
   auto input_tables = input_tables_ref;
   std::sort(input_tables.begin(), input_tables.end());
 
   auto output_id = SHA1::compute(
       StringUtil::format(
-          "$0~$1~$2~$3",
+          "$0~$1~$2",
           session.customer(),
           StringUtil::join(input_tables, "|"),
-          SHA1::compute(program_source).toString(),
-          method_name));
+          SHA1::compute(reduce_fn).toString()));
 
   auto output_path = FileUtil::joinPaths(
       cachedir_,
@@ -236,14 +229,20 @@ Option<SHA1Hash> MapReduceService::reduceTables(
     return None<SHA1Hash>();
   }
 
-  auto js_ctx = mkRef(new JavaScriptContext(session.customer(), tsdb_));
-  js_ctx->loadProgram(program_source);
+  auto js_ctx = mkRef(new JavaScriptContext(
+      session.customer(),
+      nullptr,
+      tsdb_,
+      nullptr,
+      nullptr));
+
+  js_ctx->loadClosure(reduce_fn, globals, params);
 
   auto writer = sstable::SSTableWriter::create(output_path, nullptr, 0);
 
   for (auto cur = groups.begin(); cur != groups.end(); ) {
     Vector<Pair<String, String>> tuples;
-    js_ctx->callReduceFunction(method_name, cur->first, cur->second, &tuples);
+    js_ctx->callReduceFunction(cur->first, cur->second, &tuples);
 
     for (const auto& t : tuples) {
       writer->appendRow(t.first, t.second);

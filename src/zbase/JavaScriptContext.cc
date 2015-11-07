@@ -28,10 +28,16 @@ static bool write_json_to_buf(const char16_t* str, uint32_t strlen, void* out) {
 
 JavaScriptContext::JavaScriptContext(
     const String& customer,
+    RefPtr<MapReduceJobSpec> job,
     TSDBService* tsdb,
+    RefPtr<MapReduceTaskBuilder> task_builder,
+    RefPtr<MapReduceScheduler> scheduler,
     size_t memlimit /* = kDefaultMemLimit */) :
     customer_(customer),
-    tsdb_(tsdb) {
+    job_(job),
+    tsdb_(tsdb),
+    task_builder_(task_builder),
+    scheduler_(scheduler) {
   {
     runtime_ = JS_NewRuntime(memlimit);
     if (!runtime_) {
@@ -82,6 +88,14 @@ JavaScriptContext::JavaScriptContext(
           &JavaScriptContext::listPartitions,
           0,
           0);
+
+      JS_DefineFunction(
+          ctx_,
+          global_,
+          "z1_executemr",
+          &JavaScriptContext::executeMapReduce,
+          0,
+          0);
     }
   }
 
@@ -98,11 +112,7 @@ void JavaScriptContext::storeError(const String& error) {
 }
 
 void JavaScriptContext::raiseError(const String& input) {
-  RAISEF(
-      "JavaScriptError", "$0 for input >$1< ($2)",
-      current_error_,
-      input,
-      input.size());
+  RAISE("JavaScriptError", current_error_);
 }
 
 void JavaScriptContext::dispatchError(
@@ -121,10 +131,6 @@ void JavaScriptContext::dispatchError(
   }
 }
 
-void JavaScriptContext::storeLogline(const String& logline) {
-  iputs("jslog: $0", logline);
-}
-
 bool JavaScriptContext::dispatchLog(
     JSContext* ctx,
     unsigned argc,
@@ -141,8 +147,15 @@ bool JavaScriptContext::dispatchLog(
     String log_str(log_cstr);
     JS_free(ctx, log_cstr);
 
-    auto req = static_cast<JavaScriptContext*>(rt_userdata);
-    req->storeLogline(log_str);
+    auto self = static_cast<JavaScriptContext*>(rt_userdata);
+    if (self->job_.get()) {
+      try {
+        self->job_->sendLogline(log_str);
+      } catch (const StandardException& e) {
+        self->storeError(e.what());
+        return false;
+      }
+    }
   }
 
   args.rval().set(JSVAL_TRUE);
@@ -179,11 +192,17 @@ bool JavaScriptContext::listPartitions(
   String until(until_cstr);
   JS_free(ctx, until_cstr);
 
-  auto partitions = self->tsdb_->listPartitions(
-      self->customer_,
-      table_name,
-      std::stoull(from),
-      std::stoull(until));
+  Vector<TimeseriesPartition> partitions;
+  try {
+    partitions = self->tsdb_->listPartitions(
+        self->customer_,
+        table_name,
+        std::stoull(from),
+        std::stoull(until));
+  } catch (const StandardException& e) {
+    self->storeError(e.what());
+    return false;
+  }
 
   auto part_array_ptr = JS_NewArrayObject(ctx, partitions.size());
   if (!part_array_ptr) {
@@ -245,6 +264,49 @@ bool JavaScriptContext::listPartitions(
   return true;
 }
 
+bool JavaScriptContext::executeMapReduce(
+    JSContext* ctx,
+    unsigned argc,
+    JS::Value* vp) {
+  auto args = JS::CallArgsFromVp(argc, vp);
+  if (args.length() != 2 ||
+      !args[0].isString() ||
+      !args[1].isString()) {
+    return false;
+  }
+
+  auto rt = JS_GetRuntime(ctx);
+  auto self = (JavaScriptContext*) JS_GetRuntimePrivate(rt);
+  if (!self) {
+    return false;
+  }
+
+  if (self->task_builder_.get() == nullptr ||
+      self->scheduler_.get() == nullptr) {
+    return false;
+  }
+
+  auto jobs_json_cstr = JS_EncodeString(ctx, args[0].toString());
+  String jobs_json(jobs_json_cstr);
+  JS_free(ctx, jobs_json_cstr);
+
+  auto job_id_cstr = JS_EncodeString(ctx, args[1].toString());
+  String job_id(job_id_cstr);
+  JS_free(ctx, job_id_cstr);
+
+  try {
+    auto jobs = json::parseJSON(jobs_json);
+    auto task_shards = self->task_builder_->fromJSON(jobs.begin(), jobs.end());
+    self->scheduler_->execute(task_shards);
+  } catch (const StandardException& e) {
+    self->storeError(e.what());
+    return false;
+  }
+
+  args.rval().setBoolean(true);
+  return true;
+}
+
 void JavaScriptContext::loadProgram(const String& program) {
   JSAutoRequest js_req(ctx_);
   JSAutoCompartment ac(ctx_, global_);
@@ -265,8 +327,42 @@ void JavaScriptContext::loadProgram(const String& program) {
   }
 }
 
+void JavaScriptContext::loadClosure(
+    const String& source,
+    const String& globals,
+    const String& params) {
+  JSAutoRequest js_req(ctx_);
+  JSAutoCompartment js_comp(ctx_, global_);
+
+  JS::AutoValueArray<3> argv(ctx_);
+  auto source_str_ptr = JS_NewStringCopyN(ctx_, source.data(), source.size());
+  if (!source_str_ptr) {
+    RAISE(kRuntimeError, "map function execution error: out of memory");
+  } else {
+    argv[0].setString(source_str_ptr);
+  }
+
+  auto globals_str_ptr = JS_NewStringCopyN(ctx_, globals.data(), globals.size());
+  if (!globals_str_ptr) {
+    RAISE(kRuntimeError, "map function execution error: out of memory");
+  } else {
+    argv[1].setString(globals_str_ptr);
+  }
+
+  auto params_str_ptr = JS_NewStringCopyN(ctx_, params.data(), params.size());
+  if (!params_str_ptr) {
+    RAISE(kRuntimeError, "map function execution error: out of memory");
+  } else {
+    argv[2].setString(params_str_ptr);
+  }
+
+  JS::RootedValue rval(ctx_);
+  if (!JS_CallFunctionName(ctx_, global_, "__load_closure", argv, &rval)) {
+    raiseError(source);
+  }
+}
+
 void JavaScriptContext::callMapFunction(
-    const String& method_name,
     const String& json_string,
     Vector<Pair<String, String>>* tuples) {
   JSAutoRequest js_req(ctx_);
@@ -293,7 +389,7 @@ void JavaScriptContext::callMapFunction(
   argv[0].set(json);
 
   JS::RootedValue rval(ctx_);
-  if (!JS_CallFunctionName(ctx_, global_, method_name.c_str(), argv, &rval)) {
+  if (!JS_CallFunctionName(ctx_, global_, "__fn", argv, &rval)) {
     raiseError(json_string);
   }
 
@@ -301,29 +397,19 @@ void JavaScriptContext::callMapFunction(
 }
 
 void JavaScriptContext::callReduceFunction(
-    const String& method_name,
     const String& key,
     const Vector<String>& values,
     Vector<Pair<String, String>>* tuples) {
   JSAutoRequest js_req(ctx_);
   JSAutoCompartment js_comp(ctx_, global_);
 
-  JS::AutoValueArray<3> argv(ctx_);
-  auto method_str_ptr = JS_NewStringCopyN(
-      ctx_,
-      method_name.data(),
-      method_name.size());
-  if (!method_str_ptr) {
-    RAISE(kRuntimeError, "reduce function execution error: out of memory");
-  } else {
-    argv[0].setString(method_str_ptr);
-  }
+  JS::AutoValueArray<2> argv(ctx_);
 
   auto key_str_ptr = JS_NewStringCopyN(ctx_, key.data(), key.size());
   if (!key_str_ptr) {
     RAISE(kRuntimeError, "reduce function execution error: out of memory");
   } else {
-    argv[1].setString(key_str_ptr);
+    argv[0].setString(key_str_ptr);
   }
 
   ReduceCollectionIter val_iter;
@@ -337,7 +423,7 @@ void JavaScriptContext::callReduceFunction(
 
   JS::RootedObject val_iter_obj(ctx_, val_iter_obj_ptr);
   JS_SetPrivate(val_iter_obj, &val_iter);
-  argv[2].setObject(*val_iter_obj);
+  argv[1].setObject(*val_iter_obj);
 
   JS_DefineFunction(
       ctx_,
@@ -421,6 +507,7 @@ void JavaScriptContext::enumerateTuples(
   }
 }
 
+/*
 Option<String> JavaScriptContext::getMapReduceJobJSON() {
   JSAutoRequest js_req(ctx_);
   JSAutoCompartment js_comp(ctx_, global_);
@@ -445,6 +532,7 @@ Option<String> JavaScriptContext::getMapReduceJobJSON() {
 
   return Some(json_str);
 }
+*/
 
 JSClass JavaScriptContext::ReduceCollectionIter::kJSClass = {
   "global",

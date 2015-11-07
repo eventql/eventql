@@ -18,37 +18,40 @@ namespace zbase {
 MapReduceScheduler::MapReduceScheduler(
     const AnalyticsSession& session,
     RefPtr<MapReduceJobSpec> job,
-    const MapReduceShardList& shards,
     thread::ThreadPool* tpool,
     AnalyticsAuth* auth,
     const String& cachedir,
     size_t max_concurrent_tasks /* = kDefaultMaxConcurrentTasks */) :
     session_(session),
     job_(job),
-    shards_(shards),
-    shard_status_(shards_.size(), MapReduceShardStatus::PENDING),
-    shard_results_(shards_.size()),
     tpool_(tpool),
     auth_(auth),
     cachedir_(cachedir),
-    max_concurrent_tasks_(max_concurrent_tasks),
-    done_(false),
-    error_(false),
-    num_shards_running_(0),
-    num_shards_completed_(0) {
+    max_concurrent_tasks_(max_concurrent_tasks) {}
+
+void MapReduceScheduler::execute(const MapReduceShardList& shards) {
+  if (shards.size() == 0) {
+    return;
+  }
+
+  std::unique_lock<std::mutex> lk(mutex_);
+
+  done_ = false;
+  error_ = false;
+  num_shards_running_ = 0;
+  num_shards_completed_ = 0;
+  shards_ = shards;
+  shard_results_ = Vector<Option<MapReduceShardResult>>(shards_.size());
+  shard_status_ = Vector<MapReduceShardStatus>(
+      shards_.size(),
+      MapReduceShardStatus::PENDING);
+
+  shard_perms_.clear();
   for (size_t i = 0; i < shards_.size(); ++i) {
     shard_perms_.emplace_back(i);
   }
 
   std::random_shuffle(shard_perms_.begin(), shard_perms_.end());
-}
-
-void MapReduceScheduler::execute() {
-  std::unique_lock<std::mutex> lk(mutex_);
-
-  if (shards_.size() == 0) {
-    return;
-  }
 
   for (;;) {
     logDebug(

@@ -54,11 +54,7 @@ void MapReduceAPIServlet::handle(
   }
 
   if (uri.path() == "/api/v1/mapreduce/tasks/map_partition") {
-    req_stream->readBody();
-    catchAndReturnErrors(&res, [this, &session, &uri, &req, &res] {
-      executeMapPartitionTask(session, uri, &req, &res);
-    });
-    res_stream->writeResponse(res);
+    executeMapPartitionTask(session, uri, req_stream.get(), res_stream.get());
     return;
   }
 
@@ -98,52 +94,83 @@ void MapReduceAPIServlet::handle(
 void MapReduceAPIServlet::executeMapPartitionTask(
     const AnalyticsSession& session,
     const URI& uri,
-    const http::HTTPRequest* req,
-    http::HTTPResponse* res) {
+    http::HTTPRequestStream* req_stream,
+    http::HTTPResponseStream* res_stream) {
+  req_stream->readBody();
+
   URI::ParamList params;
-  URI::parseQueryString(req->body().toString(), &params);
+  URI::parseQueryString(req_stream->request().body().toString(), &params);
 
   String table_name;
   if (!URI::getParam(params, "table", &table_name)) {
-    res->setStatus(http::kStatusBadRequest);
-    res->addBody("missing ?table=... parameter");
+    http::HTTPResponse res;
+    res.populateFromRequest(req_stream->request());
+    res.setStatus(http::kStatusBadRequest);
+    res.addBody("missing ?table=... parameter");
+    res_stream->writeResponse(res);
     return;
   }
 
   String partition_key;
   if (!URI::getParam(params, "partition", &partition_key)) {
-    res->setStatus(http::kStatusBadRequest);
-    res->addBody("missing ?partition=... parameter");
+    http::HTTPResponse res;
+    res.populateFromRequest(req_stream->request());
+    res.setStatus(http::kStatusBadRequest);
+    res.addBody("missing ?partition=... parameter");
+    res_stream->writeResponse(res);
     return;
   }
 
-  String program_source;
-  if (!URI::getParam(params, "program_source", &program_source)) {
-    res->setStatus(http::kStatusBadRequest);
-    res->addBody("missing ?program_source=... parameter");
+  String map_fn;
+  if (!URI::getParam(params, "map_function", &map_fn)) {
+    http::HTTPResponse res;
+    res.populateFromRequest(req_stream->request());
+    res.setStatus(http::kStatusBadRequest);
+    res.addBody("missing ?map_function=... parameter");
+    res_stream->writeResponse(res);
     return;
   }
 
-  String method_name;
-  if (!URI::getParam(params, "method_name", &method_name)) {
-    res->setStatus(http::kStatusBadRequest);
-    res->addBody("missing ?method_name=... parameter");
-    return;
+  http::HTTPSSEStream sse_stream(req_stream, res_stream);
+  sse_stream.start();
+
+  auto job_spec = mkRef(new MapReduceJobSpec{});
+  job_spec->onLogline([this, &sse_stream] (const String& logline) {
+    if (sse_stream.isClosed()) {
+      return;
+    }
+
+    sse_stream.sendEvent(logline, Some(String("log")));
+  });
+
+  try {
+    String js_globals = "{}";
+    URI::getParam(params, "globals", &js_globals);
+
+    String js_params = "{}";
+    URI::getParam(params, "params", &js_params);
+
+    auto shard_id = service_->mapPartition(
+        session,
+        job_spec,
+        table_name,
+        SHA1Hash::fromHexString(partition_key),
+        map_fn,
+        js_globals,
+        js_params);
+
+    String resid;
+    if (!shard_id.isEmpty()) {
+      resid = shard_id.get().toString();
+    }
+
+    sse_stream.sendEvent(resid, Some(String("result_id")));
+  } catch (const Exception& e) {
+    sse_stream.sendEvent(e.what(), Some(String("error")));
   }
 
-  auto shard_id = service_->mapPartition(
-      session,
-      table_name,
-      SHA1Hash::fromHexString(partition_key),
-      program_source,
-      method_name);
 
-  if (shard_id.isEmpty()) {
-    res->setStatus(http::kStatusNoContent);
-  } else {
-    res->setStatus(http::kStatusCreated);
-    res->addBody(shard_id.get().toString());
-  }
+  sse_stream.finish();
 }
 
 void MapReduceAPIServlet::executeReduceTask(
@@ -161,25 +188,25 @@ void MapReduceAPIServlet::executeReduceTask(
     }
   }
 
-  String program_source;
-  if (!URI::getParam(params, "program_source", &program_source)) {
+  String reduce_fn;
+  if (!URI::getParam(params, "reduce_fn", &reduce_fn)) {
     res->setStatus(http::kStatusBadRequest);
-    res->addBody("missing ?program_source=... parameter");
+    res->addBody("missing ?reduce_fn=... parameter");
     return;
   }
 
-  String method_name;
-  if (!URI::getParam(params, "method_name", &method_name)) {
-    res->setStatus(http::kStatusBadRequest);
-    res->addBody("missing ?method_name=... parameter");
-    return;
-  }
+  String js_globals = "{}";
+  URI::getParam(params, "globals", &js_globals);
+
+  String js_params = "{}";
+  URI::getParam(params, "params", &js_params);
 
   auto result_id = service_->reduceTables(
       session,
       input_tables,
-      program_source,
-      method_name);
+      reduce_fn,
+      js_globals,
+      js_params);
 
   if (result_id.isEmpty()) {
     res->setStatus(http::kStatusNoContent);
@@ -284,12 +311,11 @@ void MapReduceAPIServlet::executeMapReduceScript(
   http::HTTPSSEStream sse_stream(req_stream, res_stream);
   sse_stream.start();
 
+  auto program_source = req_stream->request().body().toString();
   auto job_spec = mkRef(new MapReduceJobSpec{});
-  job_spec->program_source = req_stream->request().body().toString();
 
   job_spec->onProgress([this, &sse_stream] (const MapReduceJobStatus& s) {
     if (sse_stream.isClosed()) {
-      stx::logDebug("z1.mapreduce", "Aborting Job...");
       return;
     }
 
@@ -321,7 +347,6 @@ void MapReduceAPIServlet::executeMapReduceScript(
       const String& key,
       const String& value) {
     if (sse_stream.isClosed()) {
-      stx::logDebug("z1.mapreduce", "Aborting Job...");
       return;
     }
 
@@ -338,9 +363,17 @@ void MapReduceAPIServlet::executeMapReduceScript(
     sse_stream.sendEvent(buf, Some(String("result")));
   });
 
+  job_spec->onLogline([this, &sse_stream] (const String& logline) {
+    if (sse_stream.isClosed()) {
+      return;
+    }
+
+    sse_stream.sendEvent(logline, Some(String("log")));
+  });
+
   bool error = false;
   try {
-    service_->executeScript(session, job_spec);
+    service_->executeScript(session, job_spec, program_source);
   } catch (const StandardException& e) {
     Buffer buf;
     json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));

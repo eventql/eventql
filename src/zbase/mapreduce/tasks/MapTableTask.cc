@@ -7,6 +7,7 @@
  * permission is obtained.
  */
 #include "stx/SHA1.h"
+#include "stx/http/HTTPSSEResponseHandler.h"
 #include "zbase/mapreduce/tasks/MapTableTask.h"
 #include "zbase/mapreduce/MapReduceScheduler.h"
 
@@ -16,17 +17,19 @@ namespace zbase {
 
 MapTableTask::MapTableTask(
     const AnalyticsSession& session,
-    RefPtr<MapReduceJobSpec> job_spec,
     const TSDBTableRef& table_ref,
-    const String& method_name,
+    const String& map_function,
+    const String& globals,
+    const String& params,
     MapReduceShardList* shards,
     AnalyticsAuth* auth,
     zbase::PartitionMap* pmap,
     zbase::ReplicationScheme* repl) :
     session_(session),
-    job_spec_(job_spec),
     table_ref_(table_ref),
-    method_name_(method_name),
+    map_function_(map_function),
+    globals_(globals),
+    params_(params),
     auth_(auth),
     pmap_(pmap),
     repl_(repl) {
@@ -91,14 +94,16 @@ Option<MapReduceShardResult> MapTableTask::executeRemote(
       host.addr.ipAndPort());
 
   auto params = StringUtil::format(
-      "table=$0&partition=$1&program_source=$2&method_name=$3",
+      "table=$0&partition=$1&map_function=$2&globals=$3&params=$4",
       URI::urlEncode(shard->table_ref.table_key),
       shard->table_ref.partition_key.get().toString(),
-      URI::urlEncode(job_spec_->program_source),
-      URI::urlEncode(method_name_));
-
+      URI::urlEncode(map_function_),
+      URI::urlEncode(globals_),
+      URI::urlEncode(params_));
 
   auto api_token = auth_->encodeAuthToken(session_);
+
+  Option<MapReduceShardResult> result;
 
   http::HTTPMessage::HeaderList auth_headers;
   auth_headers.emplace_back(
@@ -106,25 +111,17 @@ Option<MapReduceShardResult> MapTableTask::executeRemote(
       StringUtil::format("Token $0", api_token));
 
   http::HTTPClient http_client;
+
   auto req = http::HTTPRequest::mkPost(url, params, auth_headers);
-  auto res = http_client.executeRequest(req);
+  auto res = http_client.executeRequest(
+      req,
+      http::HTTPSSEResponseHandler::getFactory());
 
-  if (res.statusCode() == 204) {
-    return None<MapReduceShardResult>();
+  if (res.statusCode() != 200) {
+    RAISEF(kRuntimeError, "received non-201 response: $0", url);
   }
 
-  if (res.statusCode() != 201) {
-    RAISEF(
-        kRuntimeError,
-        "received non-201 response: $0", res.body().toString());
-  }
-
-  MapReduceShardResult result {
-    .host = host,
-    .result_id = SHA1Hash::fromHexString(res.body().toString())
-  };
-
-  return Some(result);
+  return result;
 }
 
 } // namespace zbase

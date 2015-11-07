@@ -46,10 +46,13 @@ public:
   void onResult(Function<void (const String& key, const String& value)> fn);
   void sendResult(const String& key, const String& value);
 
-  String program_source;
+  void onLogline(Function<void (const String& line)> fn);
+  void sendLogline(const String& line);
+
 protected:
   Function<void (const MapReduceJobStatus& status)> on_progress_;
   Function<void (const String& key, const String& value)> on_result_;
+  Function<void (const String& line)> on_logline_;
 };
 
 class MapReduceScheduler;
