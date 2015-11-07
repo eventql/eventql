@@ -905,6 +905,44 @@ void AnalyticsServlet::addTableField(
     const AnalyticsSession& session,
     const http::HTTPRequest* req,
     http::HTTPResponse* res) {
+
+  URI uri(req->uri());
+  const auto& params = uri.queryParams();
+
+  String table_name;
+  if (!URI::getParam(params, "table", &table_name)) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody("missing ?table=... parameter");
+    return;
+  }
+
+  auto table_opt = pmap_->findTable(session.customer(), table_name);
+  if (table_opt.isEmpty()) {
+    res->setStatus(http::kStatusNotFound);
+    res->addBody("table not found");
+    return;
+  }
+
+  const auto& table = table_opt.get();
+
+  String field_name;
+  if (!URI::getParam(params, "field_name", &field_name)) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody("missing &field_name=... parameter");
+    return;
+  }
+
+  String field_type;
+  if (!URI::getParam(params, "field_type", &field_type)) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody("missing &field_name=... parameter");
+    return;
+  }
+
+  auto tblcfg = table->config();
+
+
+
   res->setStatus(http::kStatusCreated);
   res->addBody("add table field");
   return;
