@@ -34,6 +34,7 @@
   font-size: 13px;
   font-weight: 400;
   display: block;
+  margin-top: 10px;
 }
 
 .zbase_datastore_tables .create_table .error_message.hidden {

@@ -70,7 +70,26 @@ var createTableView = (function() {
 
     //set column ids
     indexColumns(json.schema.columns, 1);
-    console.log(json);
+    console.log(JSON.stringify(json));
+
+    $.httpPost("/api/v1/tables/create_table", JSON.stringify(json), function(r) {
+      switch (r.status) {
+        case 201:
+          $.navigateTo("/a/datastore/tables");
+          break;
+
+        case 500:
+          console.log(r.responseText);
+          $(".create_table .error_message .error_text").innerHTML = r.responseText;
+          $(".create_table .error_message").classList.remove("hidden");
+          break;
+
+        default:
+          $.fatalError();
+          break;
+      }
+    });
+
   };
 
   var indexColumns = function(columns, id) {
