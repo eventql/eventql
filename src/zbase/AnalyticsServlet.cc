@@ -939,7 +939,8 @@ void AnalyticsServlet::addTableField(
     return;
   }
 
-  auto tblcfg = table->config();
+  auto td = table->config();
+  auto schema = stx::msg::MessageSchema::decode(td.config().schema());
 
 
 
