@@ -269,7 +269,6 @@ void JavaScriptContext::loadClosure(
     const String& source,
     const String& globals,
     const String& params) {
-  iputs("load closure: $0 / $1 / $2", source, globals, params);
   JSAutoRequest js_req(ctx_);
   JSAutoCompartment js_comp(ctx_, global_);
 
@@ -336,29 +335,19 @@ void JavaScriptContext::callMapFunction(
 }
 
 void JavaScriptContext::callReduceFunction(
-    const String& method_name,
     const String& key,
     const Vector<String>& values,
     Vector<Pair<String, String>>* tuples) {
   JSAutoRequest js_req(ctx_);
   JSAutoCompartment js_comp(ctx_, global_);
 
-  JS::AutoValueArray<3> argv(ctx_);
-  auto method_str_ptr = JS_NewStringCopyN(
-      ctx_,
-      method_name.data(),
-      method_name.size());
-  if (!method_str_ptr) {
-    RAISE(kRuntimeError, "reduce function execution error: out of memory");
-  } else {
-    argv[0].setString(method_str_ptr);
-  }
+  JS::AutoValueArray<2> argv(ctx_);
 
   auto key_str_ptr = JS_NewStringCopyN(ctx_, key.data(), key.size());
   if (!key_str_ptr) {
     RAISE(kRuntimeError, "reduce function execution error: out of memory");
   } else {
-    argv[1].setString(key_str_ptr);
+    argv[0].setString(key_str_ptr);
   }
 
   ReduceCollectionIter val_iter;
@@ -372,7 +361,7 @@ void JavaScriptContext::callReduceFunction(
 
   JS::RootedObject val_iter_obj(ctx_, val_iter_obj_ptr);
   JS_SetPrivate(val_iter_obj, &val_iter);
-  argv[2].setObject(*val_iter_obj);
+  argv[1].setObject(*val_iter_obj);
 
   JS_DefineFunction(
       ctx_,

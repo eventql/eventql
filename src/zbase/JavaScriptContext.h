@@ -41,7 +41,6 @@ public:
       Vector<Pair<String, String>>* tuples);
 
   void callReduceFunction(
-      const String& method_name,
       const String& key,
       const Vector<String>& values,
       Vector<Pair<String, String>>* tuples);

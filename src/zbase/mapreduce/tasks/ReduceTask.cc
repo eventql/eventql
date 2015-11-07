@@ -115,8 +115,7 @@ Option<MapReduceShardResult> ReduceTask::executeRemote(
       host.addr.ipAndPort());
 
   auto params = StringUtil::format(
-      "program_source=$0&reduce_fn=$1&globals=$2&params=$3",
-      URI::urlEncode(job_spec_->program_source),
+      "reduce_fn=$0&globals=$1&params=$2",
       URI::urlEncode(reduce_fn_),
       URI::urlEncode(globals_),
       URI::urlEncode(params_));

@@ -162,18 +162,18 @@ Option<SHA1Hash> MapReduceService::mapPartition(
 Option<SHA1Hash> MapReduceService::reduceTables(
     const AnalyticsSession& session,
     const Vector<String>& input_tables_ref,
-    const String& program_source,
-    const String& method_name) {
+    const String& reduce_fn,
+    const String& globals,
+    const String& params) {
   auto input_tables = input_tables_ref;
   std::sort(input_tables.begin(), input_tables.end());
 
   auto output_id = SHA1::compute(
       StringUtil::format(
-          "$0~$1~$2~$3",
+          "$0~$1~$2",
           session.customer(),
           StringUtil::join(input_tables, "|"),
-          SHA1::compute(program_source).toString(),
-          method_name));
+          SHA1::compute(reduce_fn).toString()));
 
   auto output_path = FileUtil::joinPaths(
       cachedir_,
@@ -232,13 +232,13 @@ Option<SHA1Hash> MapReduceService::reduceTables(
   }
 
   auto js_ctx = mkRef(new JavaScriptContext(session.customer(), tsdb_));
-  js_ctx->loadProgram(program_source);
+  js_ctx->loadClosure(reduce_fn, globals, params);
 
   auto writer = sstable::SSTableWriter::create(output_path, nullptr, 0);
 
   for (auto cur = groups.begin(); cur != groups.end(); ) {
     Vector<Pair<String, String>> tuples;
-    js_ctx->callReduceFunction(method_name, cur->first, cur->second, &tuples);
+    js_ctx->callReduceFunction(cur->first, cur->second, &tuples);
 
     for (const auto& t : tuples) {
       writer->appendRow(t.first, t.second);

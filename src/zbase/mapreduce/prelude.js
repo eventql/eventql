@@ -144,7 +144,7 @@ var __load_closure = (function(global_scope) {
       global_scope[k] = globals[k];
     }
 
-    global_scope["params"] = JSON.parse(params);
+    global_scope["params"] = JSON.parse(params_json);
     eval("__fn = " + fn);
   }
 })(this);
