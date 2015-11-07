@@ -8,8 +8,25 @@ var Z1 = (function(global) {
   var seq = 0;
   var jobs = (global["__z1_mr_jobs"] = []);
   var bcastdata = {};
+  var cls = {};
 
-  var mkMapTableTask = function(opts) {
+  function mkJobID() {
+    return "job-" + ++seq;
+  };
+
+  cls.broadcast = function(var_name) {
+    if (var_name == "params") {
+      throw "'params' is a reserved variable and cannot be broadcasted";
+    }
+
+    if (!global[var_name]) {
+      throw "no such variable: " + var_name;
+    }
+
+    bcastdata[var_name] = global[var_name];
+  };
+
+  cls.mapTable = function(opts) {
     var job_id = mkJobID();
 
     jobs.push({
@@ -26,24 +43,23 @@ var Z1 = (function(global) {
     return job_id;
   };
 
-  var mkReduceTask = function(opts) {
+  cls.reduce = function(opts) {
     var job_id = mkJobID();
-
-    var reduce_fn_id = mkFnID();
-    global[reduce_fn_id] = opts["reduce_fn"];
 
     jobs.push({
       id: job_id,
       op: "reduce",
       sources: opts["sources"],
       num_shards: opts["shards"],
-      method_name: reduce_fn_id
+      reduce_fn: String(opts["reduce_fn"]),
+      globals: JSON.stringify(bcastdata),
+      params: JSON.stringify({ "fu": 123 })
     });
 
     return job_id;
   };
 
-  var mkDownloadResultsTask = function(sources) {
+  cls.downloadResults = function(sources) {
     var job_id = mkJobID();
 
     jobs.push({
@@ -55,7 +71,7 @@ var Z1 = (function(global) {
     return job_id;
   };
 
-  var mkSaveToTableTask = function(opts) {
+  cls.saveToTable = function(opts) {
     var job_id = mkJobID();
 
     jobs.push({
@@ -68,7 +84,7 @@ var Z1 = (function(global) {
     return job_id;
   };
 
-  var mkSaveToTablePartitionTask = function(opts) {
+  cls.saveToTablePartition = function(opts) {
     var job_id = mkJobID();
 
     jobs.push({
@@ -82,7 +98,7 @@ var Z1 = (function(global) {
     return job_id;
   };
 
-  var processStream = function(opts) {
+  cls.processStream = function(opts) {
     var calculate_fn = opts["calculate_fn"];
 
     var partitions = z1_listpartitions(
@@ -107,35 +123,10 @@ var Z1 = (function(global) {
     });
   }
 
-  var mkJobID = function() {
-    return "job-" + ++seq;
-  };
-
-  var mkFnID = function() {
-    return "__z1_mr_fn_" + ++seq;
-  };
-
-  var cls = {
-    mapTable: mkMapTableTask,
-    reduce: mkReduceTask,
-    downloadResults: mkDownloadResultsTask,
-    saveToTable: mkSaveToTableTask,
-    saveToTablePartition: mkSaveToTablePartitionTask,
-    processStream: processStream
-  };
-
-  cls.broadcast = function(var_name) {
-    if (!global[var_name]) {
-      throw "no such variable: " + var_name;
-    }
-
-    bcastdata[var_name] = global[var_name];
-  };
-
   return cls;
 })(this);
 
-function __call_with_iter(method, key, iter) {
+function __call_with_iter(key, iter) {
   var iter_wrap = (function(iter) {
     return {
       hasNext: function() { return iter.hasNext.apply(iter, arguments); },
@@ -143,7 +134,7 @@ function __call_with_iter(method, key, iter) {
     };
   })(iter);
 
-  return this[method].call(this, key, iter_wrap);
+  return __fn.call(this, key, iter_wrap);
 }
 
 var __load_closure = (function(global_scope) {
@@ -153,6 +144,7 @@ var __load_closure = (function(global_scope) {
       global_scope[k] = globals[k];
     }
 
+    global_scope["params"] = JSON.parse(params);
     eval("__fn = " + fn);
   }
 })(this);
