@@ -43,24 +43,30 @@ ZBase.registerView((function() {
       this.setValue([]);
     }, false);
 
-    renderTable(schema.columns, $("tbody", page));
+
+    renderTable(schema.schema.columns, $("tbody", page), "");
 
     $.handleLinks(page);
     $.replaceViewport(page);
   };
 
-  var renderTable = function(columns, tbody) {
+  var renderTable = function(columns, tbody, prefix) {
     var row_tpl = $.getTemplate(
         "views/table_editor",
         "zbase_table_editor_row_tpl");
 
     columns.forEach(function(column) {
       var tr = row_tpl.cloneNode(true);
-      $(".name", tr).innerHTML = column.column_name;
+      var column_name = prefix + column.name;
+      $(".name", tr).innerHTML = column_name;
       $(".type", tr).innerHTML = column.type;
-      $(".is_nullable", tr).innerHTML = column.is_nullable;
+      $(".is_nullable", tr).innerHTML = column.optional;
 
       tbody.appendChild(tr);
+
+      if (column.type == "OBJECT") {
+        renderTable(column.schema.columns, tbody, column_name + ".");
+      }
     });
   };
 
