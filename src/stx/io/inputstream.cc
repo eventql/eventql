@@ -35,30 +35,17 @@ void InputStream::setFileName(const std::string& filename) {
   filename_ = filename;
 }
 
-// FIXPAUL: optimize?
 size_t InputStream::readNextBytes(std::string* target, size_t n_bytes) {
-  char byte;
-  size_t length;
-
-  for (length = 0; length < n_bytes && readNextByte(&byte); ++length) {
-    *target += byte;
-  }
-
-  return length;
+  Buffer buf(n_bytes);
+  auto s = readNextBytes(&buf, n_bytes);
+  *target = String((char*) buf.data(), buf.size());
+  return s;
 }
 
-// FIXPAUL: optimize?
 size_t InputStream::readNextBytes(Buffer* target, size_t n_bytes) {
-  char byte;
-  size_t length;
-
-  target->reserve(n_bytes);
-
-  for (length = 0; length < n_bytes && readNextByte(&byte); ++length) {
-    target->append(&byte, sizeof(byte));
-  }
-
-  return length;
+  target->resize(n_bytes);
+  auto s = readNextBytes(target->data(), n_bytes);
+  return s;
 }
 
 size_t InputStream::readNextBytes(void* target, size_t n_bytes) {
@@ -247,6 +234,25 @@ bool FileInputStream::readNextByte(char* target) {
   }
 }
 
+size_t FileInputStream::readNextBytes(void* target, size_t n_bytes) {
+  size_t length = 0;
+
+  while (length < n_bytes) {
+    if (buf_pos_ >= buf_len_) {
+      if (!readNextChunk()) {
+        return length;
+      }
+    }
+
+    size_t s = std::min(buf_len_ - buf_pos_, n_bytes - length);
+    memcpy((char*) target + length, buf_ + buf_pos_, s);
+    buf_pos_ += s;
+    length += s;
+  }
+
+  return length;
+}
+
 size_t FileInputStream::skipNextBytes(size_t nbytes) {
   auto buf_remaining = buf_len_ - buf_pos_;
 
@@ -302,7 +308,7 @@ FileInputStream::kByteOrderMark FileInputStream::readByteOrderMark() {
   return BOM_UNKNOWN;
 }
 
-void FileInputStream::readNextChunk() {
+bool FileInputStream::readNextChunk() {
   int bytes_read = read(fd_, buf_, sizeof(buf_));
 
   if (bytes_read < 0) {
@@ -311,15 +317,21 @@ void FileInputStream::readNextChunk() {
 
   buf_pos_ = 0;
   buf_len_ = bytes_read;
+
+  return buf_len_ > 0;
 }
 
-void FileInputStream::rewind() {
+void FileInputStream::seekTo(size_t offset) {
   buf_pos_ = 0;
   buf_len_ = 0;
 
-  if (lseek(fd_, 0, SEEK_SET) < 0) {
+  if (lseek(fd_, offset, SEEK_SET) < 0) {
     RAISE_ERRNO(kIOError, "lseek(%s) failed", getFileName().c_str());
   }
+}
+
+void FileInputStream::rewind() {
+  seekTo(0);
 }
 
 std::unique_ptr<StringInputStream> StringInputStream::fromString(
@@ -360,6 +372,14 @@ void StringInputStream::rewind() {
   cur_ = 0;
 }
 
+void StringInputStream::seekTo(size_t offset) {
+  if (offset < str_.size()) {
+    cur_ = offset;
+  } else {
+    cur_ = str_.size();
+  }
+}
+
 std::unique_ptr<BufferInputStream> BufferInputStream::fromBuffer(
     const Buffer* buf) {
   return std::unique_ptr<BufferInputStream>(new BufferInputStream(buf));
@@ -398,6 +418,14 @@ void BufferInputStream::rewind() {
   cur_ = 0;
 }
 
+void BufferInputStream::seekTo(size_t offset) {
+  if (offset < buf_->size()) {
+    cur_ = offset;
+  } else {
+    cur_ = buf_->size();
+  }
+}
+
 MemoryInputStream::MemoryInputStream(
     const void* data,
     size_t size) :
@@ -430,6 +458,14 @@ bool MemoryInputStream::eof() {
 
 void MemoryInputStream::rewind() {
   cur_ = 0;
+}
+
+void MemoryInputStream::seekTo(size_t offset) {
+  if (offset < size_) {
+    cur_ = offset;
+  } else {
+    cur_ = size_;
+  }
 }
 
 } // namespace stx

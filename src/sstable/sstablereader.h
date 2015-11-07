@@ -31,7 +31,7 @@ public:
   class SSTableReaderCursor : public sstable::Cursor {
   public:
     SSTableReaderCursor(
-        RefPtr<VFSFile> file,
+        RefPtr<RewindableInputStream> is,
         size_t begin,
         size_t limit);
 
@@ -44,15 +44,24 @@ public:
     size_t position() const override;
     size_t nextPosition() override;
   protected:
-    RefPtr<VFSFile> mmap_;
-    size_t pos_;
+    bool fetchMeta();
+    RefPtr<RewindableInputStream> is_;
     size_t begin_;
     size_t limit_;
+    size_t pos_;
+    bool valid_;
+    bool have_key_;
+    Buffer key_;
+    size_t key_size_;
+    bool have_value_;
+    Buffer value_;
+    size_t value_size_;
   };
 
-  SSTableReader(const String& filename);
-  SSTableReader(File&& file);
-  SSTableReader(RefPtr<VFSFile> vfs_file);
+  explicit SSTableReader(const String& filename);
+  explicit SSTableReader(File&& file);
+  explicit SSTableReader(RefPtr<VFSFile> vfs_file);
+  explicit SSTableReader(RefPtr<RewindableInputStream> inputstream);
   SSTableReader(const SSTableReader& other) = delete;
   SSTableReader& operator=(const SSTableReader& other) = delete;
 
@@ -61,7 +70,6 @@ public:
    */
   std::unique_ptr<SSTableReaderCursor> getCursor();
 
-  void readHeader(const void** data, size_t* size);
   Buffer readHeader();
   void readFooter(uint32_t type, void** data, size_t* size);
   Buffer readFooter(uint32_t type);
@@ -92,9 +100,7 @@ public:
   size_t countRows();
 
 private:
-  RefPtr<VFSFile> mmap_;
-  MemoryInputStream is_;
-  uint64_t file_size_;
+  RefPtr<RewindableInputStream> is_;
   MetaPage header_;
 };
 

@@ -27,7 +27,7 @@ using namespace stx;
 UNIT_TEST(CSTableTest);
 
 TEST_CASE(CSTableTest, TestCSTableContainer, [] () {
-  auto filename = "/tmp/__fnord__cstabletest1.cstable";
+  String filename = "/tmp/__fnord__cstabletest1.cstable";
   auto num_records = 10;
 
   FileUtil::rm(filename);
@@ -47,7 +47,7 @@ TEST_CASE(CSTableTest, TestCSTableContainer, [] () {
 });
 
 TEST_CASE(CSTableTest, TestCSTableColumnWriterReader, [] () {
-  auto filename = "/tmp/__fnord__cstabletest2.cstable";
+  String filename = "/tmp/__fnord__cstabletest2.cstable";
   auto num_records = 4000;
   auto rep_max = 1;
   auto def_max = 1;

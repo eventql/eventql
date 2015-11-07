@@ -18,10 +18,7 @@ namespace cstable {
 /**
  * // http://tools.ietf.org/html/rfc5234
  *
- *   <sstable> :=
- *       <header>
- *       <body>
- *       *<footer>
+ * v1:
  *
  *   <cstable> :=
  *       <header>
@@ -43,6 +40,44 @@ namespace cstable {
  *       <uint32_t>              // max definition level
  *       <uint64_t>              // column data start offset
  *       <uint64_t>              // column data size
+ *
+ * v2:
+ *
+ *   <cstable> :=
+ *       <header>
+ *       <page>*
+ *
+ *   <page> := <data_page> | <index_page>
+ *
+ *   <header> :=
+ *       %x17 %x23 %x17 %x23     // magic bytes
+ *       %x00 %x02               // cstable file format version
+ *       <uint32_t>              // page_size
+ *       <uint64_t>              // file offset of the first page
+ *       <uint64_t>              // file offset of the index page
+ *       <uint64_t>              // flags
+ *       <uint32_t>              // number of columns
+ *       <column_info>*          // column info for each column
+ *       %x00*                   // zero byte padding
+ *
+ *   <column_info> :=
+ *       <lenenc_int>            // column type
+ *       <lenenc_int>            // column id
+ *       <lenenc_int>            // length of the column name
+ *       <char>*                 // column name
+ *       <lenenc_int>            // max repetition level
+ *       <lenenc_int>            // max definition level
+ *
+ *   <index_page> :=
+ *       <uint32_t>              // number of entries
+ *       <index_page_entry>*     // entries
+ *       <lenenc_int>            // number of free pages
+ *       <lenenc_int>*           // free page indexes
+ *
+ *   <index_page_entry> :=
+ *       <lenenc_int>            // column_id
+ *       <lenenc_int>            // number of pages
+ *       <lenenc_int>*           // page indexes
  *
  */
 class BinaryFormat {

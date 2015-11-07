@@ -139,6 +139,14 @@ void Buffer::truncate(size_t size) {
   size_ = size;
 }
 
+void Buffer::resize(size_t size) {
+  size_ = size;
+
+  if (size_ > alloc_) {
+    reserve(size_ - alloc_);
+  }
+}
+
 void Buffer::reserve(size_t size) {
   alloc_ += size;
 

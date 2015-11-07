@@ -138,6 +138,20 @@ public:
   size_t size() const;
 
   /**
+   * Sets the logical size for this buffer.
+   *
+   * If the new logical size is larger than the current capacity of the buffer,
+   * memory will be allocated and the capacity will be increased to the new
+   * logical size. The previous contents are unchanged but the value of any
+   * newly allocated bytes is undefined.
+   *
+   * If the new logical size is less than the currenct capacity of the buffer,
+   * the capacity and contents of the buffer will be unchanged and no memoy
+   * will be allocated or freed
+   */
+  void resize(size_t size);
+
+  /**
    * Return the actual size of the backing malloc, this may be larger than the
    * value returned by size
    */
@@ -153,7 +167,7 @@ public:
   /**
    * Reserve "size" new bytes of memory for future use. This method will not
    * change the logical size of the buffer (as returned by a call to size) but
-   * only increase the capacity.
+   * only increase the capacity by size bytes.
    */
   void reserve(size_t size);
 

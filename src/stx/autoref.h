@@ -25,7 +25,15 @@ public:
 
   AutoRef();
   AutoRef(std::nullptr_t);
+
   AutoRef(T* ref);
+
+  template <
+      class T1,
+      typename std::enable_if<std::is_base_of<T, T1>::value, T>::type* = nullptr>
+  AutoRef(ScopedPtr<T1>&& ref) : ref_(ref.release()) {
+    if (ref_) ref_->incRef();
+  }
 
   AutoRef(const AutoRef<T>& other);
   AutoRef(AutoRef<T>&& other);
@@ -67,6 +75,9 @@ using AnyRef = RefPtr<RefCounted>;
 
 template <typename T>
 AutoRef<T> mkRef(T* ptr);
+
+template <typename T>
+AutoRef<T> mkRef(ScopedPtr<T>&& ptr);
 
 template <typename T>
 ScopedPtr<T> mkScoped(T* ptr);
