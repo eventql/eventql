@@ -47,6 +47,7 @@ public:
 
   Option<SHA1Hash> reduceTables(
       const AnalyticsSession& session,
+      RefPtr<MapReduceJobSpec> job,
       const Vector<String>& input_tables,
       const String& reduce_fn,
       const String& globals,

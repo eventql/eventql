@@ -59,11 +59,7 @@ void MapReduceAPIServlet::handle(
   }
 
   if (uri.path() == "/api/v1/mapreduce/tasks/reduce") {
-    req_stream->readBody();
-    catchAndReturnErrors(&res, [this, &session, &uri, &req, &res] {
-      executeReduceTask(session, uri, &req, &res);
-    });
-    res_stream->writeResponse(res);
+    executeReduceTask(session, uri, req_stream.get(), res_stream.get());
     return;
   }
 
@@ -169,17 +165,18 @@ void MapReduceAPIServlet::executeMapPartitionTask(
     sse_stream.sendEvent(e.what(), Some(String("error")));
   }
 
-
   sse_stream.finish();
 }
 
 void MapReduceAPIServlet::executeReduceTask(
     const AnalyticsSession& session,
     const URI& uri,
-    const http::HTTPRequest* req,
-    http::HTTPResponse* res) {
+    http::HTTPRequestStream* req_stream,
+    http::HTTPResponseStream* res_stream) {
+  req_stream->readBody();
+
   URI::ParamList params;
-  URI::parseQueryString(req->body().toString(), &params);
+  URI::parseQueryString(req_stream->request().body().toString(), &params);
 
   Vector<String> input_tables;
   for (const auto& p : params) {
@@ -190,8 +187,11 @@ void MapReduceAPIServlet::executeReduceTask(
 
   String reduce_fn;
   if (!URI::getParam(params, "reduce_fn", &reduce_fn)) {
-    res->setStatus(http::kStatusBadRequest);
-    res->addBody("missing ?reduce_fn=... parameter");
+    http::HTTPResponse res;
+    res.populateFromRequest(req_stream->request());
+    res.setStatus(http::kStatusBadRequest);
+    res.addBody("missing ?reduce_fn=... parameter");
+    res_stream->writeResponse(res);
     return;
   }
 
@@ -201,19 +201,38 @@ void MapReduceAPIServlet::executeReduceTask(
   String js_params = "{}";
   URI::getParam(params, "params", &js_params);
 
-  auto result_id = service_->reduceTables(
+  http::HTTPSSEStream sse_stream(req_stream, res_stream);
+  sse_stream.start();
+
+  auto job_spec = mkRef(new MapReduceJobSpec{});
+  job_spec->onLogline([this, &sse_stream] (const String& logline) {
+    if (sse_stream.isClosed()) {
+      return;
+    }
+
+    sse_stream.sendEvent(logline, Some(String("log")));
+  });
+
+  try {
+    auto shard_id = service_->reduceTables(
       session,
+      job_spec,
       input_tables,
       reduce_fn,
       js_globals,
       js_params);
 
-  if (result_id.isEmpty()) {
-    res->setStatus(http::kStatusNoContent);
-  } else {
-    res->setStatus(http::kStatusCreated);
-    res->addBody(result_id.get().toString());
+    String resid;
+    if (!shard_id.isEmpty()) {
+      resid = shard_id.get().toString();
+    }
+
+    sse_stream.sendEvent(resid, Some(String("result_id")));
+  } catch (const Exception& e) {
+    sse_stream.sendEvent(e.what(), Some(String("error")));
   }
+
+  sse_stream.finish();
 }
 
 void MapReduceAPIServlet::executeSaveToTableTask(

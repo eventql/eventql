@@ -159,6 +159,7 @@ Option<SHA1Hash> MapReduceService::mapPartition(
 
 Option<SHA1Hash> MapReduceService::reduceTables(
     const AnalyticsSession& session,
+    RefPtr<MapReduceJobSpec> job,
     const Vector<String>& input_tables_ref,
     const String& reduce_fn,
     const String& globals,
@@ -231,7 +232,7 @@ Option<SHA1Hash> MapReduceService::reduceTables(
 
   auto js_ctx = mkRef(new JavaScriptContext(
       session.customer(),
-      nullptr,
+      job,
       tsdb_,
       nullptr,
       nullptr));

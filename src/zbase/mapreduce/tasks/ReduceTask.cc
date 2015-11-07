@@ -6,9 +6,9 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
+#include "stx/http/HTTPSSEResponseHandler.h"
 #include "zbase/mapreduce/tasks/ReduceTask.h"
 #include "zbase/mapreduce/MapReduceScheduler.h"
-#include <algorithm>
 
 using namespace stx;
 
@@ -124,6 +124,29 @@ Option<MapReduceShardResult> ReduceTask::executeRemote(
 
   auto api_token = auth_->encodeAuthToken(session_);
 
+  Option<MapReduceShardResult> result;
+  Vector<String> errors;
+  auto event_handler = [&] (const http::HTTPSSEEvent& ev) {
+    if (ev.name.isEmpty()) {
+      return;
+    }
+
+    if (ev.name.get() == "result_id") {
+      result = Some(MapReduceShardResult {
+        .host = host,
+        .result_id = SHA1Hash::fromHexString(ev.data)
+      });
+    }
+
+    else if (ev.name.get() == "log") {
+      job->sendLogline(ev.data);
+    }
+
+    else if (ev.name.get() == "error") {
+      errors.emplace_back(ev.data);
+    }
+  };
+
   http::HTTPMessage::HeaderList auth_headers;
   auth_headers.emplace_back(
       "Authorization",
@@ -131,24 +154,19 @@ Option<MapReduceShardResult> ReduceTask::executeRemote(
 
   http::HTTPClient http_client;
   auto req = http::HTTPRequest::mkPost(url, params, auth_headers);
-  auto res = http_client.executeRequest(req);
+  auto res = http_client.executeRequest(
+      req,
+      http::HTTPSSEResponseHandler::getFactory(event_handler));
 
-  if (res.statusCode() == 204) {
-    return None<MapReduceShardResult>();
+  if (!errors.empty()) {
+    RAISE(kRuntimeError, StringUtil::join(errors, "; "));
   }
 
-  if (res.statusCode() != 201) {
-    RAISEF(
-        kRuntimeError,
-        "received non-201 response: $0", res.body().toString());
+  if (res.statusCode() != 200) {
+    RAISEF(kRuntimeError, "HTTP error: $0", url);
   }
 
-  MapReduceShardResult result {
-    .host = host,
-    .result_id = SHA1Hash::fromHexString(res.body().toString())
-  };
-
-  return Some(result);
+  return result;
 }
 
 } // namespace zbase

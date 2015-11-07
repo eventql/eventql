@@ -143,7 +143,7 @@ Option<MapReduceShardResult> MapTableTask::executeRemote(
   }
 
   if (res.statusCode() != 200) {
-    RAISEF(kRuntimeError, "received non-201 response: $0", url);
+    RAISEF(kRuntimeError, "HTTP Error: $0", url);
   }
 
   return result;
