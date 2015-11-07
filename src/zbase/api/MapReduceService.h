@@ -33,7 +33,8 @@ public:
 
   void executeScript(
       const AnalyticsSession& session,
-      RefPtr<MapReduceJobSpec> job);
+      RefPtr<MapReduceJobSpec> job,
+      const String& program_source);
 
   Option<SHA1Hash> mapPartition(
       const AnalyticsSession& session,

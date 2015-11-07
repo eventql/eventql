@@ -284,8 +284,8 @@ void MapReduceAPIServlet::executeMapReduceScript(
   http::HTTPSSEStream sse_stream(req_stream, res_stream);
   sse_stream.start();
 
+  auto program_source = req_stream->request().body().toString();
   auto job_spec = mkRef(new MapReduceJobSpec{});
-  job_spec->program_source = req_stream->request().body().toString();
 
   job_spec->onProgress([this, &sse_stream] (const MapReduceJobStatus& s) {
     if (sse_stream.isClosed()) {
@@ -346,7 +346,7 @@ void MapReduceAPIServlet::executeMapReduceScript(
 
   bool error = false;
   try {
-    service_->executeScript(session, job_spec);
+    service_->executeScript(session, job_spec, program_source);
   } catch (const StandardException& e) {
     Buffer buf;
     json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));

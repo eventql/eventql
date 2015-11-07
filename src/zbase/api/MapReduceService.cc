@@ -39,7 +39,8 @@ MapReduceService::MapReduceService(
 
 void MapReduceService::executeScript(
     const AnalyticsSession& session,
-    RefPtr<MapReduceJobSpec> job) {
+    RefPtr<MapReduceJobSpec> job,
+    const String& program_source) {
   logDebug(
       "z1.mapreduce",
       "Launching mapreduce job; customer=$0",
@@ -68,7 +69,7 @@ void MapReduceService::executeScript(
       task_builder,
       scheduler));
 
-  js_ctx->loadProgram(job->program_source);
+  js_ctx->loadProgram(program_source);
 }
 
 Option<SHA1Hash> MapReduceService::mapPartition(
