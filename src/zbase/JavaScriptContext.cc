@@ -112,11 +112,7 @@ void JavaScriptContext::storeError(const String& error) {
 }
 
 void JavaScriptContext::raiseError(const String& input) {
-  RAISEF(
-      "JavaScriptError", "$0 for input >$1< ($2)",
-      current_error_,
-      input,
-      input.size());
+  RAISE("JavaScriptError", current_error_);
 }
 
 void JavaScriptContext::dispatchError(
@@ -153,7 +149,12 @@ bool JavaScriptContext::dispatchLog(
 
     auto self = static_cast<JavaScriptContext*>(rt_userdata);
     if (self->job_.get()) {
-      self->job_->sendLogline(log_str);
+      try {
+        self->job_->sendLogline(log_str);
+      } catch (const StandardException& e) {
+        self->storeError(e.what());
+        return false;
+      }
     }
   }
 
@@ -191,11 +192,17 @@ bool JavaScriptContext::listPartitions(
   String until(until_cstr);
   JS_free(ctx, until_cstr);
 
-  auto partitions = self->tsdb_->listPartitions(
-      self->customer_,
-      table_name,
-      std::stoull(from),
-      std::stoull(until));
+  Vector<TimeseriesPartition> partitions;
+  try {
+    partitions = self->tsdb_->listPartitions(
+        self->customer_,
+        table_name,
+        std::stoull(from),
+        std::stoull(until));
+  } catch (const StandardException& e) {
+    self->storeError(e.what());
+    return false;
+  }
 
   auto part_array_ptr = JS_NewArrayObject(ctx, partitions.size());
   if (!part_array_ptr) {
@@ -287,9 +294,14 @@ bool JavaScriptContext::executeMapReduce(
   String job_id(job_id_cstr);
   JS_free(ctx, job_id_cstr);
 
-  auto jobs = json::parseJSON(jobs_json);
-  auto task_shards = self->task_builder_->fromJSON(jobs.begin(), jobs.end());
-  self->scheduler_->execute(task_shards);
+  try {
+    auto jobs = json::parseJSON(jobs_json);
+    auto task_shards = self->task_builder_->fromJSON(jobs.begin(), jobs.end());
+    self->scheduler_->execute(task_shards);
+  } catch (const StandardException& e) {
+    self->storeError(e.what());
+    return false;
+  }
 
   args.rval().setBoolean(true);
   return true;
