@@ -27,12 +27,17 @@ public:
       Function<HTTPResponseFuture* (const Promise<http::HTTPResponse>)>
       FactoryFn;
 
-  static FactoryFn getFactory();
+  typedef
+      Function<void (const HTTPSSEEvent& ev)>
+      CallbackFn;
+
+  static FactoryFn getFactory(CallbackFn on_event);
 
 protected:
 
   HTTPSSEResponseHandler(
-      Promise<HTTPResponse> promise);
+      Promise<HTTPResponse> promise,
+      CallbackFn on_event);
 
   void onBodyChunk(const char* data, size_t size) override;
 

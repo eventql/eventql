@@ -13,13 +13,17 @@ namespace stx {
 namespace http {
 
 HTTPSSEResponseHandler::HTTPSSEResponseHandler(
-    Promise<HTTPResponse> promise) :
-    HTTPResponseFuture(promise) {}
+    Promise<HTTPResponse> promise,
+    CallbackFn on_event) :
+    HTTPResponseFuture(promise) {
+  parser_.onEvent(on_event);
+}
 
-HTTPSSEResponseHandler::FactoryFn HTTPSSEResponseHandler::getFactory() {
-  return [] (
+HTTPSSEResponseHandler::FactoryFn HTTPSSEResponseHandler::getFactory(
+    CallbackFn on_event) {
+  return [on_event] (
       const Promise<http::HTTPResponse> promise) -> HTTPResponseFuture* {
-    return new HTTPSSEResponseHandler(promise);
+    return new HTTPSSEResponseHandler(promise, on_event);
   };
 }
 

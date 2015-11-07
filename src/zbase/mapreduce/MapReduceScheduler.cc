@@ -173,6 +173,10 @@ void MapReduceScheduler::sendResult(const String& key, const String& value) {
   job_->sendResult(key, value);
 }
 
+void MapReduceScheduler::sendLogline(const String& logline) {
+  job_->sendLogline(logline);
+}
+
 Option<String> MapReduceScheduler::getResultURL(size_t task_index) {
   std::unique_lock<std::mutex> lk(mutex_);
   if (task_index >= shards_.size()) {

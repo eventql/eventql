@@ -32,6 +32,7 @@ public:
   void execute(const MapReduceShardList& shards);
 
   void sendResult(const String& key, const String& value);
+  void sendLogline(const String& logline);
 
   Option<String> getResultURL(size_t task_index);
   Option<SHA1Hash> getResultID(size_t task_index);

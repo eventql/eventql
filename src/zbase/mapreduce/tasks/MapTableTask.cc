@@ -104,6 +104,27 @@ Option<MapReduceShardResult> MapTableTask::executeRemote(
   auto api_token = auth_->encodeAuthToken(session_);
 
   Option<MapReduceShardResult> result;
+  Vector<String> errors;
+  auto event_handler = [&] (const http::HTTPSSEEvent& ev) {
+    if (ev.name.isEmpty()) {
+      return;
+    }
+
+    if (ev.name.get() == "result_id") {
+      result = Some(MapReduceShardResult {
+        .host = host,
+        .result_id = SHA1Hash::fromHexString(ev.data)
+      });
+    }
+
+    else if (ev.name.get() == "log") {
+      job->sendLogline(ev.data);
+    }
+
+    else if (ev.name.get() == "error") {
+      errors.emplace_back(ev.data);
+    }
+  };
 
   http::HTTPMessage::HeaderList auth_headers;
   auth_headers.emplace_back(
@@ -115,7 +136,11 @@ Option<MapReduceShardResult> MapTableTask::executeRemote(
   auto req = http::HTTPRequest::mkPost(url, params, auth_headers);
   auto res = http_client.executeRequest(
       req,
-      http::HTTPSSEResponseHandler::getFactory());
+      http::HTTPSSEResponseHandler::getFactory(event_handler));
+
+  if (!errors.empty()) {
+    RAISE(kRuntimeError, StringUtil::join(errors, "; "));
+  }
 
   if (res.statusCode() != 200) {
     RAISEF(kRuntimeError, "received non-201 response: $0", url);

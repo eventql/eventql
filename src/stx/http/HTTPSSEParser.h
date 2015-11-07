@@ -20,8 +20,15 @@
 namespace stx {
 namespace http {
 
+struct HTTPSSEEvent {
+  String data;
+  Option<String> name;
+};
+
 class HTTPSSEParser {
 public:
+
+  void onEvent(Function<void (const HTTPSSEEvent& ev)> fn);
 
   void parse(const char* data, size_t size);
 
@@ -29,7 +36,8 @@ protected:
 
   void parseEvent(const char* data, size_t size);
 
-  Buffer buf;
+  Buffer buf_;
+  Function<void (const HTTPSSEEvent& ev)> on_event_;
 };
 
 }
