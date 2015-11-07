@@ -2,6 +2,30 @@
   border-bottom: 1px solid #ddd;
 }
 
+.zbase_datastore_tables .create_table .back_btn {
+  float: left;
+  padding-right: 12px;
+  margin-top: 16px;
+}
+
+.zbase_datastore_tables .create_table .back_btn::before {
+  position: relative;
+  display: inline-block;
+  opacity: .8;
+  color: #fff;
+  top: -1px;
+  font-weight: normal;
+  font-family: FontAwesome;
+  content: "\f104";
+  font-size: 12px;
+  background: #3498db;
+  height: 20px;
+  width: 20px;
+  border-radius: 20px;
+  line-height: 20px;
+  padding-left: 7px;
+}
+
 .zbase_datastore_tables .create_table input.z-input {
   font-size: 13px;
   display: inline-block;
