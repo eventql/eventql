@@ -289,7 +289,6 @@ void MapReduceAPIServlet::executeMapReduceScript(
 
   job_spec->onProgress([this, &sse_stream] (const MapReduceJobStatus& s) {
     if (sse_stream.isClosed()) {
-      stx::logDebug("z1.mapreduce", "Aborting Job...");
       return;
     }
 
@@ -321,7 +320,6 @@ void MapReduceAPIServlet::executeMapReduceScript(
       const String& key,
       const String& value) {
     if (sse_stream.isClosed()) {
-      stx::logDebug("z1.mapreduce", "Aborting Job...");
       return;
     }
 
@@ -336,6 +334,14 @@ void MapReduceAPIServlet::executeMapReduceScript(
     json.endObject();
 
     sse_stream.sendEvent(buf, Some(String("result")));
+  });
+
+  job_spec->onLogline([this, &sse_stream] (const String& logline) {
+    if (sse_stream.isClosed()) {
+      return;
+    }
+
+    sse_stream.sendEvent(logline, Some(String("log")));
   });
 
   bool error = false;
