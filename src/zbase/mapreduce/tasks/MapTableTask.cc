@@ -7,6 +7,7 @@
  * permission is obtained.
  */
 #include "stx/SHA1.h"
+#include "stx/http/HTTPSSEResponseHandler.h"
 #include "zbase/mapreduce/tasks/MapTableTask.h"
 #include "zbase/mapreduce/MapReduceScheduler.h"
 
@@ -111,14 +112,13 @@ Option<MapReduceShardResult> MapTableTask::executeRemote(
   iputs("execute: $0, $1, $2", url, params, api_token);
 
   http::HTTPClient http_client;
+
   auto req = http::HTTPRequest::mkPost(url, params, auth_headers);
-  auto res = http_client.executeRequest(req);
+  auto res = http_client.executeRequest(
+      req,
+      http::HTTPSSEResponseHandler::getFactory());
 
-  if (res.statusCode() == 204) {
-    return None<MapReduceShardResult>();
-  }
-
-  if (res.statusCode() != 201) {
+  if (res.statusCode() != 200) {
     RAISEF(
         kRuntimeError,
         "received non-201 response: $0", res.body().toString());
