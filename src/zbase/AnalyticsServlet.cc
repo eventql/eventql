@@ -50,7 +50,8 @@ AnalyticsServlet::AnalyticsServlet(
     csql::Runtime* sql,
     zbase::TSDBService* tsdb,
     ConfigDirectory* customer_dir,
-    DocumentDB* docdb) :
+    DocumentDB* docdb,
+    PartitionMap* pmap) :
     app_(app),
     dproc_(dproc),
     ingress_(ingress),
@@ -62,7 +63,8 @@ AnalyticsServlet::AnalyticsServlet(
     logfile_api_(app->logfileService(), customer_dir, cachedir),
     events_api_(app->eventsService(), customer_dir, cachedir),
     mapreduce_api_(app->mapreduceService(), customer_dir, cachedir),
-    documents_api_(docdb) {}
+    documents_api_(docdb),
+    pmap_(pmap) {}
 
 void AnalyticsServlet::handleHTTPRequest(
     RefPtr<http::HTTPRequestStream> req_stream,

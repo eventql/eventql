@@ -290,7 +290,8 @@ int main(int argc, const char** argv) {
       sql.get(),
       &tsdb_node,
       &customer_dir,
-      &docdb);
+      &docdb,
+      &partition_map);
 
   zbase::DefaultServlet default_servlet;
 
