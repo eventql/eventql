@@ -69,6 +69,7 @@ void MapReduceService::executeScript(
       task_builder,
       scheduler));
 
+  iputs("load: $0", program_source);
   js_ctx->loadProgram(program_source);
 }
 

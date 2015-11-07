@@ -60,8 +60,10 @@ protected:
     const Vector<String>* data;
   };
 
-  void storeError(const String& error);
-  void raiseError(const String& input);
+  void storeError(
+      const String& error,
+      size_t line = 0,
+      size_t column = 0);
 
   static void dispatchError(
       JSContext* ctx,
@@ -96,6 +98,8 @@ protected:
   JSContext* ctx_;
   JS::PersistentRooted<JSObject*> global_;
   String current_error_;
+  size_t current_error_line_;
+  size_t current_error_column_;
 };
 
 } // namespace zbase

@@ -107,12 +107,13 @@ JavaScriptContext::~JavaScriptContext() {
   JS_DestroyRuntime(runtime_);
 }
 
-void JavaScriptContext::storeError(const String& error) {
+void JavaScriptContext::storeError(
+    const String& error,
+    size_t line /* = 0 */,
+    size_t column /* = 0 */) {
   current_error_ = error;
-}
-
-void JavaScriptContext::raiseError(const String& input) {
-  RAISE("JavaScriptError", current_error_);
+  current_error_line_ = line;
+  current_error_column_ = column;
 }
 
 void JavaScriptContext::dispatchError(
@@ -123,11 +124,7 @@ void JavaScriptContext::dispatchError(
   auto rt_userdata = JS_GetRuntimePrivate(rt);
   if (rt_userdata) {
     auto req = static_cast<JavaScriptContext*>(rt_userdata);
-    req->storeError(StringUtil::format(
-        "<script:$0:$1> $2",
-        report->lineno,
-        report->column,
-        String(message)));
+    req->storeError(message, report->lineno, report->column);
   }
 }
 
@@ -295,7 +292,9 @@ bool JavaScriptContext::executeMapReduce(
   JS_free(ctx, job_id_cstr);
 
   try {
+    iputs("json raw: $0", jobs_json);
     auto jobs = json::parseJSON(jobs_json);
+    iputs("json parsed: $0", jobs);
     auto task_shards = self->task_builder_->fromJSON(jobs.begin(), jobs.end());
     self->scheduler_->execute(task_shards);
   } catch (const StandardException& e) {
@@ -323,7 +322,16 @@ void JavaScriptContext::loadProgram(const String& program) {
         program.c_str(),
         program.size(),
         &rval)) {
-    raiseError("<script>");
+    if (current_error_line_ > 0) {
+      RAISEF(
+          "JavaScriptError",
+          "<$0:$1> $2",
+          current_error_line_,
+          current_error_column_,
+          current_error_);
+    } else {
+      RAISE("JavaScriptError", current_error_);
+    }
   }
 }
 
@@ -358,7 +366,7 @@ void JavaScriptContext::loadClosure(
 
   JS::RootedValue rval(ctx_);
   if (!JS_CallFunctionName(ctx_, global_, "__load_closure", argv, &rval)) {
-    raiseError(source);
+    RAISE("JavaScriptError", current_error_);
   }
 }
 
@@ -382,7 +390,7 @@ void JavaScriptContext::callMapFunction(
     JS_free(ctx_, json_wstring);
   } else {
     JS_free(ctx_, json_wstring);
-    raiseError(json_string);
+    RAISE("JavaScriptError", current_error_);
   }
 
   JS::AutoValueArray<1> argv(ctx_);
@@ -390,7 +398,7 @@ void JavaScriptContext::callMapFunction(
 
   JS::RootedValue rval(ctx_);
   if (!JS_CallFunctionName(ctx_, global_, "__fn", argv, &rval)) {
-    raiseError(json_string);
+    RAISE("JavaScriptError", current_error_);
   }
 
   enumerateTuples(&rval, tuples);
@@ -443,7 +451,7 @@ void JavaScriptContext::callReduceFunction(
 
   JS::RootedValue rval(ctx_);
   if (!JS_CallFunctionName(ctx_, global_, "__call_with_iter", argv, &rval)) {
-    raiseError(key);
+    RAISE("JavaScriptError", current_error_);
   }
 
   enumerateTuples(&rval, tuples);

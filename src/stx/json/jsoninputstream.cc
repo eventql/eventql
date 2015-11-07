@@ -148,33 +148,69 @@ void JSONInputStream::readString(std::string* dst) {
 
     switch (cur_) {
 
+      case '\\':
+        advanceCursor();
+
+        switch (cur_) {
+
+          case '"':
+            *dst += "\"";
+            break;
+
+          case '\\':
+            *dst += "\\";
+            break;
+
+          case '/':
+            *dst += "/";
+            break;
+
+          case 'b':
+            *dst += "\b";
+            break;
+
+          case 'f':
+            *dst += "\f";
+            break;
+
+          case 'n':
+            *dst += "\n";
+            break;
+
+          case 'r':
+            *dst += "\r";
+            break;
+
+          case 't':
+            *dst += "\t";
+            break;
+
+          case 'u':
+            // FIXME
+            advanceCursor();
+            advanceCursor();
+            advanceCursor();
+            advanceCursor();
+            break;
+
+          default:
+            RAISE(kRuntimeError, "invalid escape sequence");
+
+        }
+        break;
+
+      default:
+        *dst += cur_;
+        break;
+
+      case '"':
+        advanceCursor();
+        return;
+
       case 0:
         RAISE(kRuntimeError, "invalid json. unterminated string");
         return;
 
-      case '\\':
-        if (escaped) {
-          *dst += cur_;
-          escaped = false;
-        } else {
-          escaped = true;
-        }
-        break;
-
-      case '"':
-        if (escaped) {
-          escaped = false;
-          /* fallthrough */
-        } else {
-          advanceCursor();
-          return;
-        }
-        /* fallthrough */
-
-      default:
-        escaped = false;
-        *dst += cur_;
-        break;
     }
   }
 }
