@@ -77,6 +77,11 @@ protected:
       unsigned argc,
       JS::Value* vp);
 
+  static bool executeMapReduce(
+      JSContext* ctx,
+      unsigned argc,
+      JS::Value* vp);
+
   void enumerateTuples(
       JS::RootedValue* src,
       Vector<Pair<String, String>>* dst) const;

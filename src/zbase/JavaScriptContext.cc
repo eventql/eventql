@@ -82,6 +82,14 @@ JavaScriptContext::JavaScriptContext(
           &JavaScriptContext::listPartitions,
           0,
           0);
+
+      JS_DefineFunction(
+          ctx_,
+          global_,
+          "z1_executemr",
+          &JavaScriptContext::executeMapReduce,
+          0,
+          0);
     }
   }
 
@@ -242,6 +250,37 @@ bool JavaScriptContext::listPartitions(
   }
 
   args.rval().setObject(*part_array);
+  return true;
+}
+
+bool JavaScriptContext::executeMapReduce(
+    JSContext* ctx,
+    unsigned argc,
+    JS::Value* vp) {
+  auto args = JS::CallArgsFromVp(argc, vp);
+  if (args.length() != 2 ||
+      !args[0].isString() ||
+      !args[1].isString()) {
+    return false;
+  }
+
+  auto rt = JS_GetRuntime(ctx);
+  auto self = (JavaScriptContext*) JS_GetRuntimePrivate(rt);
+  if (!self) {
+    return false;
+  }
+
+  auto jobs_json_cstr = JS_EncodeString(ctx, args[0].toString());
+  String jobs_json(jobs_json_cstr);
+  JS_free(ctx, jobs_json_cstr);
+
+  auto job_id_cstr = JS_EncodeString(ctx, args[1].toString());
+  String job_id(job_id_cstr);
+  JS_free(ctx, job_id_cstr);
+
+  iputs("call $0 @ $1", job_id, jobs_json);
+
+  args.rval().setBoolean(true);
   return true;
 }
 

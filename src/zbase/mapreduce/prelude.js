@@ -6,7 +6,7 @@ var console = {
 
 var Z1 = (function(global) {
   var seq = 0;
-  var jobs = (global["__z1_mr_jobs"] = []);
+  var jobs = [];
   var bcastdata = {};
   var cls = {};
 
@@ -68,7 +68,7 @@ var Z1 = (function(global) {
       sources: sources
     });
 
-    return job_id;
+    z1_executemr(JSON.stringify(jobs), job_id);
   };
 
   cls.saveToTable = function(opts) {
