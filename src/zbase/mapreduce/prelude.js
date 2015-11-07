@@ -23,7 +23,7 @@ var Z1 = (function(global) {
       throw "no such variable: " + var_name;
     }
 
-    bcastdata[var_name] = global[var_name];
+    bcastdata[var_name] = String(global[var_name]);
   };
 
   cls.mapTable = function(opts) {
@@ -141,7 +141,7 @@ var __load_closure = (function(global_scope) {
   return function(fn, globals_json, params_json) {
     var globals = JSON.parse(globals_json);
     for (k in globals) {
-      global_scope[k] = globals[k];
+      eval(k + " = " + globals[k]);
     }
 
     global_scope["params"] = JSON.parse(params_json);
