@@ -292,9 +292,7 @@ bool JavaScriptContext::executeMapReduce(
   JS_free(ctx, job_id_cstr);
 
   try {
-    iputs("json raw: $0", jobs_json);
     auto jobs = json::parseJSON(jobs_json);
-    iputs("json parsed: $0", jobs);
     auto task_shards = self->task_builder_->fromJSON(jobs.begin(), jobs.end());
     self->scheduler_->execute(task_shards);
   } catch (const StandardException& e) {
