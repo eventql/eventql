@@ -28,11 +28,13 @@ static bool write_json_to_buf(const char16_t* str, uint32_t strlen, void* out) {
 
 JavaScriptContext::JavaScriptContext(
     const String& customer,
+    RefPtr<MapReduceJobSpec> job,
     TSDBService* tsdb,
     RefPtr<MapReduceTaskBuilder> task_builder,
     RefPtr<MapReduceScheduler> scheduler,
     size_t memlimit /* = kDefaultMemLimit */) :
     customer_(customer),
+    job_(job),
     tsdb_(tsdb),
     task_builder_(task_builder),
     scheduler_(scheduler) {
@@ -133,10 +135,6 @@ void JavaScriptContext::dispatchError(
   }
 }
 
-void JavaScriptContext::storeLogline(const String& logline) {
-  iputs("jslog: $0", logline);
-}
-
 bool JavaScriptContext::dispatchLog(
     JSContext* ctx,
     unsigned argc,
@@ -153,8 +151,10 @@ bool JavaScriptContext::dispatchLog(
     String log_str(log_cstr);
     JS_free(ctx, log_cstr);
 
-    auto req = static_cast<JavaScriptContext*>(rt_userdata);
-    req->storeLogline(log_str);
+    auto self = static_cast<JavaScriptContext*>(rt_userdata);
+    if (self->job_.get()) {
+      self->job_->sendLogline(log_str);
+    }
   }
 
   args.rval().set(JSVAL_TRUE);

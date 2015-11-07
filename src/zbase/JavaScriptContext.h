@@ -26,6 +26,7 @@ public:
 
   JavaScriptContext(
       const String& customer,
+      RefPtr<MapReduceJobSpec> job,
       TSDBService* tsdb,
       RefPtr<MapReduceTaskBuilder> task_builder,
       RefPtr<MapReduceScheduler> scheduler,
@@ -67,8 +68,6 @@ protected:
       const char* message,
       JSErrorReport* report);
 
-  void storeLogline(const String& logline);
-
   static bool dispatchLog(
       JSContext* ctx,
       unsigned argc,
@@ -89,6 +88,7 @@ protected:
       Vector<Pair<String, String>>* dst) const;
 
   String customer_;
+  RefPtr<MapReduceJobSpec> job_;
   TSDBService* tsdb_;
   RefPtr<MapReduceTaskBuilder> task_builder_;
   RefPtr<MapReduceScheduler> scheduler_;

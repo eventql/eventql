@@ -63,6 +63,7 @@ void MapReduceService::executeScript(
 
   auto js_ctx = mkRef(new JavaScriptContext(
       session.customer(),
+      job,
       tsdb_,
       task_builder,
       scheduler));
@@ -128,6 +129,7 @@ Option<SHA1Hash> MapReduceService::mapPartition(
 
   auto js_ctx = mkRef(new JavaScriptContext(
       session.customer(),
+      nullptr,
       tsdb_,
       nullptr,
       nullptr));
@@ -227,6 +229,7 @@ Option<SHA1Hash> MapReduceService::reduceTables(
 
   auto js_ctx = mkRef(new JavaScriptContext(
       session.customer(),
+      nullptr,
       tsdb_,
       nullptr,
       nullptr));

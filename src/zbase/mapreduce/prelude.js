@@ -1,9 +1,3 @@
-var console = {
-  log: function(str) {
-    z1_log(str);
-  }
-};
-
 var Z1 = (function(global) {
   var seq = 0;
   var jobs = [];
@@ -13,6 +7,10 @@ var Z1 = (function(global) {
   function mkJobID() {
     return "job-" + ++seq;
   };
+
+  cls.log = function(str) {
+    z1_log(str);
+  }
 
   cls.broadcast = function(var_name) {
     if (var_name == "params") {
@@ -125,6 +123,12 @@ var Z1 = (function(global) {
 
   return cls;
 })(this);
+
+var console = {
+  log: function() {
+    Z1.log.apply(this, arguments);
+  }
+};
 
 function __call_with_iter(key, iter) {
   var iter_wrap = (function(iter) {
