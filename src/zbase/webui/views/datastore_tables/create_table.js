@@ -68,18 +68,17 @@ var createTableView = (function() {
     json.schema.columns = getColumnsSchema(
       document.querySelectorAll(".create_table .main > .column"));
 
-    //set column ids
     indexColumns(json.schema.columns, 1);
-    console.log(JSON.stringify(json));
 
     $.httpPost("/api/v1/tables/create_table", JSON.stringify(json), function(r) {
       switch (r.status) {
         case 201:
+          var info_message = ZbaseInfoMessage($(".zbase_app"));
+          info_message.renderSuccess("Table was created successfully");
           $.navigateTo("/a/datastore/tables");
           break;
 
         case 500:
-          console.log(r.responseText);
           $(".create_table .error_message .error_text").innerHTML = r.responseText;
           $(".create_table .error_message").classList.remove("hidden");
           break;
