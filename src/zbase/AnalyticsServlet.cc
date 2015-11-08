@@ -11,6 +11,7 @@
 #include "AnalyticsServlet.h"
 #include "zbase/CTRCounter.h"
 #include "stx/Language.h"
+#include "stx/human.h"
 #include "stx/wallclock.h"
 #include "stx/io/fileutil.h"
 #include "stx/util/Base64.h"
@@ -932,15 +933,24 @@ void AnalyticsServlet::addTableField(
     return;
   }
 
-  String field_type;
-  if (!URI::getParam(params, "field_type", &field_type)) {
+  String field_type_str;
+  if (!URI::getParam(params, "field_type", &field_type_str)) {
     res->setStatus(http::kStatusBadRequest);
     res->addBody("missing &field_name=... parameter");
     return;
   }
 
+  String repeated_param;
+  URI::getParam(params, "repeated", &repeated_param);
+  auto repeated = Human::parseBoolean(repeated_param);
+
+  String optional_param;
+  URI::getParam(params, "optional", &optional_param);
+  auto optional = Human::parseBoolean(optional_param);
+
   auto td = table->config();
   auto schema = stx::msg::MessageSchema::decode(td.config().schema());
+
   uint64_t next_field_id;
   if (td.has_next_field_id()) {
     next_field_id = td.next_field_id();
@@ -948,13 +958,21 @@ void AnalyticsServlet::addTableField(
     next_field_id = stx::msg::MessageSchema::maxFieldId(*schema) + 1;
   }
 
-  auto type = stx::msg::fieldTypeFromString(field_type);
+  schema->addField(
+      stx::msg::MessageSchemaField(
+        next_field_id,
+        field_name,
+        stx::msg::fieldTypeFromString(field_type_str),
+        0,
+        repeated.isEmpty() ? false : repeated.get(),
+        optional.isEmpty() ? false : optional.get()));
+
 
   
 
 
   res->setStatus(http::kStatusCreated);
-  res->addBody("add table field");
+  res->addBody(StringUtil::toString(next_field_id));
   return;
 }
 
