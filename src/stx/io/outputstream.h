@@ -42,8 +42,8 @@ public:
    * @param size then number of bytes to be written
    */
   virtual size_t write(const char* data, size_t size) = 0;
-  size_t write(const std::string& data);
-  size_t write(const Buffer& buf);
+  virtual size_t write(const std::string& data);
+  virtual size_t write(const Buffer& buf);
   virtual size_t printf(const char* format, ...);
 
   /**

@@ -35,10 +35,11 @@ void cmd_run(const cli::FlagParser& flags) {
   }
 
   auto stdout_os = OutputStream::getStdout();
-  auto stderr_os = OutputStream::getStderr();
+  auto stderr_os = TerminalOutputStream::fromStream(OutputStream::getStderr());
+
   auto program_source = FileUtil::read(argv[0]);
 
-  stderr_os->write(">> Launching job...\n");
+  stderr_os->print(">> Launching job...\n");
 
   bool finished = false;
   bool error = false;
@@ -66,22 +67,22 @@ void cmd_run(const cli::FlagParser& flags) {
           progress.isEmpty() ? 0 : progress.get() * 100);
 
       if (is_tty) {
-        stderr_os->write("\r" + status_line);
+        stderr_os->print("\r" + status_line);
         line_dirty = true;
       } else {
-        stderr_os->write(status_line + "\n");
+        stderr_os->print(status_line + "\n");
       }
 
       return;
     }
 
     if (line_dirty) {
-      stderr_os->write("\r                                                \r");
+      stderr_os->print("\r                                                \r");
       line_dirty = false;
     }
 
     if (ev.name.get() == "job_started") {
-      stderr_os->write(">> Job started\n");
+      stderr_os->print(">> Job started\n");
       return;
     }
 
@@ -102,7 +103,7 @@ void cmd_run(const cli::FlagParser& flags) {
     }
 
     if (ev.name.get() == "log") {
-      stderr_os->write(URI::urlDecode(ev.data) + "\n");
+      stderr_os->print(URI::urlDecode(ev.data) + "\n");
       return;
     }
 
@@ -136,10 +137,14 @@ void cmd_run(const cli::FlagParser& flags) {
   }
 
   if (error) {
-    stderr_os->write(StringUtil::format("ERROR: $0\n", error_string));
+    stderr_os->print(
+        "ERROR:",
+        { TerminalStyle::RED, TerminalStyle::UNDERSCORE });
+
+    stderr_os->print(" " + error_string + "\n");
     exit(1);
   } else {
-    stderr_os->write(">> Job successfully completed\n");
+    stderr_os->print(">> Job successfully completed\n");
     exit(0);
   }
 }
