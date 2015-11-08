@@ -14,7 +14,7 @@
 namespace csql {
 
 JSONSSEStreamFormat::JSONSSEStreamFormat(
-    http::HTTPSSEStream* output) :
+    RefPtr<http::HTTPSSEStream> output) :
     output_(output) {}
 
 void JSONSSEStreamFormat::formatResults(

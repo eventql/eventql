@@ -844,8 +844,8 @@ void AnalyticsServlet::executeSQLStream(
     const http::HTTPRequest* req,
     http::HTTPResponse* res,
     RefPtr<http::HTTPResponseStream> res_stream) {
-  http::HTTPSSEStream sse_stream(res, res_stream);
-  sse_stream.start();
+  auto sse_stream = mkRef(new http::HTTPSSEStream(res, res_stream));
+  sse_stream->start();
 
   try {
     const auto& params = uri.queryParams();
@@ -858,7 +858,7 @@ void AnalyticsServlet::executeSQLStream(
     sql_->executeQuery(
         query,
         app_->getExecutionStrategy(session.customer()),
-        new csql::JSONSSEStreamFormat(&sse_stream));
+        new csql::JSONSSEStreamFormat(sse_stream));
 
   } catch (const StandardException& e) {
     Buffer buf;
@@ -868,10 +868,10 @@ void AnalyticsServlet::executeSQLStream(
     json.addString(e.what());
     json.endObject();
 
-    sse_stream.sendEvent(buf, Some(String("query_error")));
+    sse_stream->sendEvent(buf, Some(String("query_error")));
   }
 
-  sse_stream.finish();
+  sse_stream->finish();
 }
 
 void AnalyticsServlet::pipelineInfo(

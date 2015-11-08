@@ -17,14 +17,14 @@ namespace csql {
 class JSONSSEStreamFormat : public ResultFormat {
 public:
 
-  JSONSSEStreamFormat(http::HTTPSSEStream* output);
+  JSONSSEStreamFormat(RefPtr<http::HTTPSSEStream> output);
 
   void formatResults(
       RefPtr<QueryPlan> query,
       ExecutionContext* context) override;
 
 protected:
-  http::HTTPSSEStream* output_;
+  RefPtr<http::HTTPSSEStream> output_;
 };
 
 }
