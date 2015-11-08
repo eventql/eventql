@@ -973,6 +973,7 @@ void AnalyticsServlet::addTableField(
 
   app_->updateTable(td, true);
   res->setStatus(http::kStatusCreated);
+  res->addBody("ok");
   return;
 }
 
@@ -980,6 +981,8 @@ void AnalyticsServlet::removeTableField(
     const AnalyticsSession& session,
     const http::HTTPRequest* req,
     http::HTTPResponse* res) {
+
+
   res->setStatus(http::kStatusCreated);
   res->addBody("remove table field");
   return;
