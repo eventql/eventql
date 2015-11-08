@@ -14,6 +14,9 @@
 
 namespace stx {
 
+Term::Term() :
+    termos_(TerminalOutputStream::fromStream(OutputStream::getStdout())) {}
+
 char Term::readChar() {
   char chr;
   if (read(STDIN_FILENO, &chr, sizeof(chr)) != 1) {
@@ -51,6 +54,84 @@ bool Term::readConfirmation() {
       RAISEF(kIOError, "invalid response: $0", String(&resp, 1));
 
   }
+}
+
+String Term::readLine(const String& prompt) {
+  String line;
+
+  if (!prompt.empty())  {
+    printf("%s", prompt.c_str());
+    fflush(stdout);
+  }
+
+  for (;;) {
+    char chr = readChar();
+    if (chr == '\r') continue;
+    if (chr == '\n') break;
+    line += chr;
+  }
+
+  return line;
+}
+
+void Term::print(const String& str, Vector<TerminalStyle> style /* = {} */) {
+  termos_->print(str, style);
+}
+
+void Term::printRed(const String& str) {
+  termos_->printRed(str);
+}
+
+void Term::printGreen(const String& str) {
+  termos_->printGreen(str);
+}
+
+void Term::printYellow(const String& str) {
+  termos_->printYellow(str);
+}
+
+void Term::printBlue(const String& str) {
+  termos_->printBlue(str);
+}
+
+void Term::printMagenta(const String& str) {
+  termos_->printMagenta(str);
+}
+
+void Term::printCyan(const String& str) {
+  termos_->printCyan(str);
+}
+
+void Term::eraseEndOfLine() {
+  termos_->eraseEndOfLine();
+}
+
+void Term::eraseStartOfLine() {
+  termos_->eraseStartOfLine();
+}
+
+void Term::eraseLine() {
+  termos_->eraseLine();
+}
+
+void Term::eraseDown() {
+  termos_->eraseDown();
+}
+
+void Term::eraseUp() {
+  termos_->eraseUp();
+}
+
+void Term::eraseScreen() {
+  termos_->eraseScreen();
+}
+
+void Term::enableLineWrap() {
+  termos_->enableLineWrap();
+}
+
+void Term::disableLineWrap() {
+  termos_->disableLineWrap();
 }
 
 } // namespace stx

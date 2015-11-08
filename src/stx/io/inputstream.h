@@ -16,6 +16,7 @@
 #include "stx/io/file.h"
 
 namespace stx {
+class FileInputStream;
 
 class InputStream : public RefCounted {
 public:
@@ -23,7 +24,7 @@ public:
   /**
    * Get the stdin input stream
    */
-  static std::unique_ptr<InputStream> getStdin();
+  static std::unique_ptr<FileInputStream> getStdin();
 
   InputStream(const std::string& filename = "<anonymous input stream>");
   InputStream(const InputStream& other) = delete;
@@ -267,6 +268,12 @@ public:
   * underlying file
    */
   void seekTo(size_t offset) override;
+
+  /**
+   * Returns true if this input stream is connected to a TTY/terminal and false
+   * otherwise
+   */
+  bool isTTY() const;
 
   /**
    * Read the byte order mark of the file

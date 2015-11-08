@@ -24,6 +24,8 @@
 using namespace stx;
 
 void run(const cli::FlagParser& flags) {
+  stx::Term term;
+
   auto table_name = flags.getString("table_name");
   auto input_file = flags.getString("input_file");
   auto api_token = flags.getString("api_token");
@@ -214,7 +216,7 @@ void run(const cli::FlagParser& flags) {
 
   if (confirm_schema) {
     stx::logInfo("dx-csv-upload", "Is this information correct? [y/n]");
-    if (!stx::Term::readConfirmation()) {
+    if (!term.readConfirmation()) {
       stx::logInfo("dx-csv-upload", "Aborting...");
       return;
     }

@@ -23,6 +23,7 @@
 #include "stx/http/HTTPSSEResponseHandler.h"
 #include "stx/cli/CLI.h"
 #include "stx/cli/flagparser.h"
+#include "stx/cli/term.h"
 
 using namespace stx;
 
@@ -180,7 +181,12 @@ void cmd_run(
 void cmd_login(
     const cli::FlagParser& global_flags,
     const cli::FlagParser& cmd_flags) {
+  Term term;
 
+  term.print("username: ");
+  auto username = term.readLine();
+
+  iputs("username: $0", username);
 }
 
 void cmd_version(

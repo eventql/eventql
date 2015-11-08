@@ -18,9 +18,9 @@
 
 namespace stx {
 
-std::unique_ptr<InputStream> InputStream::getStdin() {
+std::unique_ptr<FileInputStream> InputStream::getStdin() {
   auto stdin_stream = new FileInputStream(0, false);
-  return std::unique_ptr<InputStream>(stdin_stream);
+  return std::unique_ptr<FileInputStream>(stdin_stream);
 }
 
 InputStream::InputStream(
