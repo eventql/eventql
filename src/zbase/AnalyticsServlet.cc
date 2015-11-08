@@ -982,9 +982,50 @@ void AnalyticsServlet::removeTableField(
     const http::HTTPRequest* req,
     http::HTTPResponse* res) {
 
+  URI uri(req->uri());
+  const auto& params = uri.queryParams();
 
+  String table_name;
+  if (!URI::getParam(params, "table", &table_name)) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody("missing ?table=... parameter");
+    return;
+  }
+
+  auto table_opt = pmap_->findTable(session.customer(), table_name);
+  if (table_opt.isEmpty()) {
+    res->setStatus(http::kStatusNotFound);
+    res->addBody("table not found");
+    return;
+  }
+  const auto& table = table_opt.get();
+
+  String field_name;
+  if (!URI::getParam(params, "field_name", &field_name)) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody("missing &field_name=... parameter");
+    return;
+  }
+
+  auto td = table->config();
+  auto schema = stx::msg::MessageSchema::decode(td.config().schema());
+
+  if (!schema->hasField(field_name)) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody("field not found");
+    return;
+  }
+
+  if (!td.has_next_field_id()) {
+    td.set_next_field_id(schema->maxFieldId() + 1);
+  }
+
+  schema->removeField(schema->fieldId(field_name));
+  td.mutable_config()->set_schema(schema->encode().toString());
+
+  app_->updateTable(td, true);
   res->setStatus(http::kStatusCreated);
-  res->addBody("remove table field");
+  res->addBody("ok");
   return;
 }
 
