@@ -92,10 +92,10 @@ void EventsAPIServlet::scanTable(
     }
   }
 
-  http::HTTPSSEStream sse_stream(req_stream, res_stream);
-  sse_stream.start();
+  auto sse_stream = mkRef(new http::HTTPSSEStream (req_stream, res_stream));
+  sse_stream->start();
 
-  auto send_result_row = [&sse_stream] (const msg::DynamicMessage& row) {
+  auto send_result_row = [sse_stream] (const msg::DynamicMessage& row) {
     Buffer buf;
     json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
     json.beginObject();
@@ -103,10 +103,10 @@ void EventsAPIServlet::scanTable(
     row.toJSON(&json);
     json.endObject();
 
-    sse_stream.sendEvent(buf, Some<String>("result"));
+    sse_stream->sendEvent(buf, Some<String>("result"));
   };
 
-  auto send_status_update = [&sse_stream, &scan_params] (bool done) {
+  auto send_status_update = [sse_stream, scan_params] (bool done) {
     Buffer buf;
     json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
     json.beginObject();
@@ -114,7 +114,7 @@ void EventsAPIServlet::scanTable(
     json.addString(done ? "finished" : "running");
     json.endObject();
 
-    sse_stream.sendEvent(buf, Some<String>("progress"));
+    sse_stream->sendEvent(buf, Some<String>("progress"));
   };
 
   service_->scanTable(
@@ -124,7 +124,7 @@ void EventsAPIServlet::scanTable(
       send_result_row,
       send_status_update);
 
-  sse_stream.finish();
+  sse_stream->finish();
 }
 
 void EventsAPIServlet::scanTablePartition(

@@ -201,16 +201,16 @@ void MapReduceAPIServlet::executeReduceTask(
   String js_params = "{}";
   URI::getParam(params, "params", &js_params);
 
-  http::HTTPSSEStream sse_stream(req_stream, res_stream);
-  sse_stream.start();
+  auto sse_stream = mkRef(new http::HTTPSSEStream(req_stream, res_stream));
+  sse_stream->start();
 
   auto job_spec = mkRef(new MapReduceJobSpec{});
-  job_spec->onLogline([this, &sse_stream] (const String& logline) {
-    if (sse_stream.isClosed()) {
+  job_spec->onLogline([this, sse_stream] (const String& logline) {
+    if (sse_stream->isClosed()) {
       return;
     }
 
-    sse_stream.sendEvent(URI::urlEncode(logline), Some(String("log")));
+    sse_stream->sendEvent(URI::urlEncode(logline), Some(String("log")));
   });
 
   try {
@@ -227,12 +227,12 @@ void MapReduceAPIServlet::executeReduceTask(
       resid = shard_id.get().toString();
     }
 
-    sse_stream.sendEvent(resid, Some(String("result_id")));
+    sse_stream->sendEvent(resid, Some(String("result_id")));
   } catch (const Exception& e) {
-    sse_stream.sendEvent(e.what(), Some(String("error")));
+    sse_stream->sendEvent(e.what(), Some(String("error")));
   }
 
-  sse_stream.finish();
+  sse_stream->finish();
 }
 
 void MapReduceAPIServlet::executeSaveToTableTask(

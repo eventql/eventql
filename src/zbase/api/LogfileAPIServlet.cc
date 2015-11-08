@@ -307,10 +307,10 @@ void LogfileAPIServlet::scanLogfile(
 
   LogfileScanResult result(limit);
 
-  http::HTTPSSEStream sse_stream(req_stream, res_stream);
-  sse_stream.start();
+  auto sse_stream = mkRef(new http::HTTPSSEStream(req_stream, res_stream));
+  sse_stream->start();
 
-  auto send_status_update = [&sse_stream, &result, &scan_params] (bool done) {
+  auto send_status_update = [sse_stream, &result, scan_params] (bool done) {
     Buffer buf;
     json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
     json.beginObject();
@@ -354,7 +354,7 @@ void LogfileAPIServlet::scanLogfile(
     json.endArray();
     json.endObject();
 
-    sse_stream.sendEvent(buf, None<String>());
+    sse_stream->sendEvent(buf, None<String>());
   };
 
   service_->scanLogfile(
@@ -364,7 +364,7 @@ void LogfileAPIServlet::scanLogfile(
       &result,
       send_status_update);
 
-  sse_stream.finish();
+  sse_stream->finish();
 }
 
 void LogfileAPIServlet::scanLogfilePartition(

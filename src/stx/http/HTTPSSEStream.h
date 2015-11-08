@@ -69,7 +69,6 @@ public:
   bool isClosed() const;
 
 private:
-
   RefPtr<http::HTTPResponseStream> res_stream_;
   HTTPResponse res_;
 };
