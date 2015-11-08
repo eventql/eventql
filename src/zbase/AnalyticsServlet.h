@@ -68,28 +68,6 @@ protected:
       const http::HTTPRequest* req,
       http::HTTPResponse* res);
 
-  void executeQuery(
-      const AnalyticsSession& session,
-      const URI& uri,
-      http::HTTPRequestStream* req_stream,
-      http::HTTPResponseStream* res_stream);
-
-  void fetchFeed(
-      const AnalyticsSession& session,
-      const URI& uri,
-      const http::HTTPRequest* req,
-      http::HTTPResponse* res);
-
-  void generateReport(
-      const URI& uri,
-      http::HTTPRequestStream* req_stream,
-      http::HTTPResponseStream* res_stream);
-
-  void downloadReport(
-      const URI& uri,
-      http::HTTPRequestStream* req_stream,
-      http::HTTPResponseStream* res_stream);
-
   void pushEvents(
       const URI& uri,
       const http::HTTPRequest* req,
