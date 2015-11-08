@@ -39,8 +39,6 @@ void cmd_run(const cli::FlagParser& flags) {
 
   auto program_source = FileUtil::read(argv[0]);
 
-  stderr_os->print(">> Launching job...\n");
-
   bool finished = false;
   bool error = false;
   String error_string;
@@ -67,6 +65,7 @@ void cmd_run(const cli::FlagParser& flags) {
           progress.isEmpty() ? 0 : progress.get() * 100);
 
       if (is_tty) {
+        stderr_os->eraseLine();
         stderr_os->print("\r" + status_line);
         line_dirty = true;
       } else {
@@ -77,12 +76,13 @@ void cmd_run(const cli::FlagParser& flags) {
     }
 
     if (line_dirty) {
-      stderr_os->print("\r                                                \r");
+      stderr_os->eraseLine();
+      stderr_os->print("\r");
       line_dirty = false;
     }
 
     if (ev.name.get() == "job_started") {
-      stderr_os->print(">> Job started\n");
+      //stderr_os->printYellow(">> Job started\n");
       return;
     }
 
@@ -120,6 +120,13 @@ void cmd_run(const cli::FlagParser& flags) {
       "Authorization",
       StringUtil::format("Token $0", auth_token));
 
+  if (is_tty) {
+    stderr_os->print("Launching job...");
+    line_dirty = true;
+  } else {
+    stderr_os->print("Launching job...\n");
+  }
+
   http::HTTPClient http_client;
   auto req = http::HTTPRequest::mkPost(url, program_source, auth_headers);
   auto res = http_client.executeRequest(
@@ -144,7 +151,7 @@ void cmd_run(const cli::FlagParser& flags) {
     stderr_os->print(" " + error_string + "\n");
     exit(1);
   } else {
-    stderr_os->print(">> Job successfully completed\n");
+    stderr_os->printGreen("Job successfully completed\n");
     exit(0);
   }
 }

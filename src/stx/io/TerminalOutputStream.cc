@@ -42,6 +42,30 @@ void TerminalOutputStream::print(
   }
 }
 
+void TerminalOutputStream::printRed(const String& str) {
+  print(str, { TerminalStyle::RED });
+}
+
+void TerminalOutputStream::printGreen(const String& str) {
+  print(str, { TerminalStyle::GREEN });
+}
+
+void TerminalOutputStream::printYellow(const String& str) {
+  print(str, { TerminalStyle::YELLOW });
+}
+
+void TerminalOutputStream::printBlue(const String& str) {
+  print(str, { TerminalStyle::BLUE });
+}
+
+void TerminalOutputStream::printMagenta(const String& str) {
+  print(str, { TerminalStyle::MAGENTA });
+}
+
+void TerminalOutputStream::printCyan(const String& str) {
+  print(str, { TerminalStyle::CYAN });
+}
+
 void TerminalOutputStream::eraseEndOfLine() {
   static const char kEscapeSequence[] = "\e[K";
   os_->write(kEscapeSequence, sizeof(kEscapeSequence) - 1);

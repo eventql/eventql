@@ -74,6 +74,48 @@ public:
   void print(const String& str, Vector<TerminalStyle> style = {});
 
   /**
+   * Write the provided string to the stream with in red color
+   *
+   * @param str a string to be written/printed
+   */
+  void printRed(const String& str);
+
+  /**
+   * Write the provided string to the stream with in green color
+   *
+   * @param str a string to be written/printed
+   */
+  void printGreen(const String& str);
+
+  /**
+   * Write the provided string to the stream with in yellow color
+   *
+   * @param str a string to be written/printed
+   */
+  void printYellow(const String& str);
+
+  /**
+   * Write the provided string to the stream with in blue color
+   *
+   * @param str a string to be written/printed
+   */
+  void printBlue(const String& str);
+
+  /**
+   * Write the provided string to the stream with in magenta color
+   *
+   * @param str a string to be written/printed
+   */
+  void printMagenta(const String& str);
+
+  /**
+   * Write the provided string to the stream with in cyan color
+   *
+   * @param str a string to be written/printed
+   */
+  void printCyan(const String& str);
+
+  /**
    * Erases from the current cursor position to the end of the current line.
    */
   void eraseEndOfLine();
