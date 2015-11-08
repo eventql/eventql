@@ -139,7 +139,7 @@ Option<MapReduceShardResult> ReduceTask::executeRemote(
     }
 
     else if (ev.name.get() == "log") {
-      job->sendLogline(ev.data);
+      job->sendLogline(URI::urlDecode(ev.data));
     }
 
     else if (ev.name.get() == "error") {

@@ -19,6 +19,7 @@
 #include "stx/json/json.h"
 #include "stx/json/jsonrpc.h"
 #include "stx/http/httpclient.h"
+#include "stx/http/HTTPSSEResponseHandler.h"
 #include "stx/cli/CLI.h"
 #include "stx/cli/flagparser.h"
 
@@ -26,13 +27,26 @@ using namespace stx;
 
 stx::thread::EventLoop ev;
 
-void cmd_mr_execute(const cli::FlagParser& flags) {
+void cmd_run(const cli::FlagParser& flags) {
   const auto& argv = flags.getArgv();
   if (argv.size() != 1) {
-    RAISE(kUsageError, "usage: $ zli mr-execute <script.js>");
+    RAISE(kUsageError, "usage: $ zli run <script.js>");
   }
 
+  auto stdout_os = OutputStream::getStdout();
+  auto stderr_os = OutputStream::getStderr();
   auto program_source = FileUtil::read(argv[0]);
+
+  auto event_handler = [&] (const http::HTTPSSEEvent& ev) {
+    if (ev.name.isEmpty()) {
+      return;
+    }
+
+    if (ev.name.get() == "log") {
+      stderr_os->write(URI::urlDecode(ev.data) + "\n");
+    }
+    //iputs("ev: $0 => $1", ev.name, ev.data);
+  };
 
   auto url = StringUtil::format(
       "http://$0/api/v1/mapreduce/execute",
@@ -47,10 +61,12 @@ void cmd_mr_execute(const cli::FlagParser& flags) {
 
   http::HTTPClient http_client;
   auto req = http::HTTPRequest::mkPost(url, program_source, auth_headers);
-  auto res = http_client.executeRequest(req);
+  auto res = http_client.executeRequest(
+      req,
+      http::HTTPSSEResponseHandler::getFactory(event_handler));
 
-  if (res.statusCode() != 201) {
-    RAISEF(kRuntimeError, "execution failed: $0", res.body().toString());
+  if (res.statusCode() != 200) {
+    RAISEF(kRuntimeError, "HTTP Error: $0", res.body().toString());
   }
 }
 
@@ -77,8 +93,8 @@ int main(int argc, const char** argv) {
   cli::CLI cli;
 
   /* command: mr_execute */
-  auto mr_execute_cmd = cli.defineCommand("mr-execute");
-  mr_execute_cmd->onCall(std::bind(&cmd_mr_execute, std::placeholders::_1));
+  auto mr_execute_cmd = cli.defineCommand("run");
+  mr_execute_cmd->onCall(std::bind(&cmd_run, std::placeholders::_1));
 
   mr_execute_cmd->flags().defineFlag(
       "api_host",

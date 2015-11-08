@@ -52,6 +52,12 @@ void HTTPSSEParser::parse(const char* data, size_t size) {
       break;
     }
   }
+
+  if (begin > 0) {
+    auto new_size = buf_.size() - begin;
+    memmove(buf_.data(), (char*) buf_.data() + begin, new_size);
+    buf_.resize(new_size);
+  }
 }
 
 void HTTPSSEParser::parseEvent(const char* data, size_t size) {
