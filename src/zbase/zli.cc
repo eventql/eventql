@@ -33,7 +33,6 @@ String loadAuth(const cli::FlagParser& global_flags) {
   auto auth_file_path = FileUtil::joinPaths(getenv("HOME"), ".z1auth");
 
   if (FileUtil::exists(auth_file_path)) {
-    iputs("exists!", 1);
     return FileUtil::read(auth_file_path).toString();
   } else {
     if (global_flags.isSet("auth_token")) {
