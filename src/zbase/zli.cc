@@ -56,13 +56,14 @@ void cmd_run(const cli::FlagParser& flags) {
       auto tasks_completed = json::objectGetUInt64(obj, "num_tasks_completed");
       auto tasks_total = json::objectGetUInt64(obj, "num_tasks_total");
       auto tasks_running = json::objectGetUInt64(obj, "num_tasks_running");
+      auto progress = json::objectGetFloat(obj, "progress");
 
-      auto status_line =
-          StringUtil::format(
-              "[$0/$1] $2 tasks running",
-              tasks_completed.isEmpty() ? 0 : tasks_completed.get(),
-              tasks_total.isEmpty() ? 0 : tasks_total.get(),
-              tasks_running.isEmpty() ? 0 : tasks_running.get());
+      auto status_line = StringUtil::format(
+          "[$0/$1] $2 tasks running ($3%)",
+          tasks_completed.isEmpty() ? 0 : tasks_completed.get(),
+          tasks_total.isEmpty() ? 0 : tasks_total.get(),
+          tasks_running.isEmpty() ? 0 : tasks_running.get(),
+          progress.isEmpty() ? 0 : progress.get() * 100);
 
       if (is_tty) {
         stderr_os->write("\r" + status_line);

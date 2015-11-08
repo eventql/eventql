@@ -42,6 +42,15 @@ Option<uint64_t> objectGetUInt64(
     JSONObject::const_iterator end,
     const std::string& key);
 
+Option<double> objectGetFloat(
+    const JSONObject& obj,
+    const std::string& key);
+
+Option<double> objectGetFloat(
+    JSONObject::const_iterator begin,
+    JSONObject::const_iterator end,
+    const std::string& key);
+
 Option<bool> objectGetBool(
     const JSONObject& obj,
     const std::string& key);
@@ -89,6 +98,11 @@ public:
       const std::string& key);
 
   static Option<uint64_t> objectGetUInt64(
+      JSONObject::const_iterator begin,
+      JSONObject::const_iterator end,
+      const std::string& key);
+
+  static Option<double> objectGetFloat(
       JSONObject::const_iterator begin,
       JSONObject::const_iterator end,
       const std::string& key);
