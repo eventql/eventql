@@ -71,7 +71,6 @@ ZBase.registerView((function() {
   };
 
   var displayAddColumnModal = function(schema) {
-
     var modal = $(".zbase_table_editor z-modal.add_column");
     var tpl = $.getTemplate(
         "views/table_editor", 
@@ -101,6 +100,7 @@ ZBase.registerView((function() {
           console.log(r);
         }
       });
+
     });
 
     $.onClick($("button.close", tpl), function() {
