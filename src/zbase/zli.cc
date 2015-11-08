@@ -37,7 +37,7 @@ String loadAuth(const cli::FlagParser& global_flags) {
     return FileUtil::read(auth_file_path).toString();
   } else {
     if (global_flags.isSet("auth_token")) {
-      global_flags.getString("auth_token");
+      return global_flags.getString("auth_token");
     } else {
       RAISE(
           kRuntimeError,
@@ -207,7 +207,6 @@ void cmd_login(
         "http://$0/api/v1/auth/login",
         global_flags.getString("api_host"));
 
-
     auto authdata = StringUtil::format(
         "userid=$0&password=$1",
         URI::urlEncode(username),
@@ -220,8 +219,24 @@ void cmd_login(
     switch (res.statusCode()) {
 
       case 200: {
-        term.printGreen("Login successful\n");
-        exit(0);
+        auto json = json::parseJSON(res.body());
+        auto auth_token = json::objectGetString(json, "auth_token");
+
+        if (!auth_token.isEmpty()) {
+          {
+            auto auth_file_path = FileUtil::joinPaths(getenv("HOME"), ".z1auth");
+            auto file = File::openFile(
+              auth_file_path,
+              File::O_WRITE | File::O_CREATEOROPEN | File::O_TRUNCATE);
+
+            file.write(auth_token.get());
+          }
+
+          term.printGreen("Login successful\n");
+          exit(0);
+        }
+
+        /* fallthrough */
       }
 
       case 401: {
