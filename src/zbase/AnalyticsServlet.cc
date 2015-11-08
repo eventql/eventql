@@ -754,14 +754,21 @@ void AnalyticsServlet::fetchTableDefinition(
     http::HTTPResponse* res) {
 
   auto table_provider = app_->getTableProvider(session.customer());
-  auto table_opt = table_provider->describe(table_name);
-  if (table_opt.isEmpty()) {
+  auto table_info_opt = table_provider->describe(table_name);
+  if (table_info_opt.isEmpty()) {
     res->setStatus(http::kStatusNotFound);
     res->addBody("table not found");
     return;
   }
 
-  const auto& table = table_opt.get();
+  const auto& table_info = table_info_opt.get();
+
+  auto table_opt = pmap_->findTable(session.customer(), table_name);
+  if (table_opt.isEmpty()) {
+    res->setStatus(http::kStatusNotFound);
+    res->addBody("table not found");
+    return;
+  }
 
   Buffer buf;
   json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
@@ -771,13 +778,13 @@ void AnalyticsServlet::fetchTableDefinition(
   json.beginObject();
 
   json.addObjectEntry("name");
-  json.addString(table.table_name);
+  json.addString(table_info.table_name);
   json.addComma();
 
   json.addObjectEntry("columns");
   json.beginArray();
-  for (size_t i = 0; i < table.columns.size(); ++i) {
-    const auto& col = table.columns[i];
+  for (size_t i = 0; i < table_info.columns.size(); ++i) {
+    const auto& col = table_info.columns[i];
 
     if (i > 0) {
       json.addComma();
@@ -801,15 +808,9 @@ void AnalyticsServlet::fetchTableDefinition(
 
   json.endArray();
 
-  auto ztable_opt = pmap_->findTable(session.customer(), table.table_name);
-  if (ztable_opt.isEmpty()) {
-    res->setStatus(http::kStatusNotFound);
-    res->addBody("table not found");
-    return;
-  }
   json.addComma();
   json.addObjectEntry("schema");
-  ztable_opt.get()->schema()->toJSON(&json);
+  table_opt.get()->schema()->toJSON(&json);
 
   json.endObject();
   json.endObject();
