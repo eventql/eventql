@@ -107,12 +107,14 @@ Option<SHA1Hash> MapReduceService::mapPartition(
 
   auto output_id = SHA1::compute(
       StringUtil::format(
-          "$0~$1~$2~$3~$4~$5",
+          "$0~$1~$2~$3~$4~$5~$6~$7",
           session.customer(),
           table_name,
           partition_key.toString(),
           reader->version().toString(),
-          SHA1::compute(map_fn).toString()));
+          SHA1::compute(map_fn).toString(),
+          SHA1::compute(globals).toString(),
+          SHA1::compute(params).toString()));
 
   auto output_path = FileUtil::joinPaths(
       cachedir_,
@@ -170,10 +172,12 @@ Option<SHA1Hash> MapReduceService::reduceTables(
 
   auto output_id = SHA1::compute(
       StringUtil::format(
-          "$0~$1~$2",
+          "$0~$1~$2~$3~$4",
           session.customer(),
           StringUtil::join(input_tables, "|"),
-          SHA1::compute(reduce_fn).toString()));
+          SHA1::compute(reduce_fn).toString(),
+          SHA1::compute(globals).toString(),
+          SHA1::compute(params).toString()));
 
   auto output_path = FileUtil::joinPaths(
       cachedir_,
