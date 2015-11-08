@@ -451,10 +451,10 @@ RefPtr<MessageSchema> MessageSchema::decode(const String& data) {
   return schema;
 }
 
-uint32_t MessageSchema::maxFieldId(MessageSchema schema) {
+uint32_t MessageSchema::maxFieldId() {
   uint32_t max_field_id = 0;
-  for (size_t i = 0; i < schema.fields_.size(); ++i) {
-    const auto& field = schema.fields_[i];
+  for (size_t i = 0; i < fields_.size(); ++i) {
+    const auto& field = fields_[i];
 
     if (field.id > max_field_id) {
       max_field_id = field.id;

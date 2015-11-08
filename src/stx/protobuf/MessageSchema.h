@@ -108,7 +108,7 @@ public:
   FieldType fieldType(uint32_t id) const;
   const String& fieldName(uint32_t id) const;
   RefPtr<MessageSchema> fieldSchema(uint32_t id) const;
-  static uint32_t maxFieldId(MessageSchema schema);
+  uint32_t maxFieldId();
 
   Vector<Pair<String, MessageSchemaField>> columns() const;
   String toString() const;
