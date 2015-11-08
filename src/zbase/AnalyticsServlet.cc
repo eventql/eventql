@@ -968,8 +968,7 @@ void AnalyticsServlet::addTableField(
     field = field.substr(prefix_len + 1);
     if (!cur_schema->hasField(prefix)) {
       res->setStatus(http::kStatusNotFound);
-      //StringUtil::format(
-      res->addBody("field not found");
+      res->addBody(StringUtil::format("field $0 not found", prefix));
       return;
     }
     cur_schema = cur_schema->fieldSchema(cur_schema->fieldId(prefix));
@@ -978,23 +977,24 @@ void AnalyticsServlet::addTableField(
   auto field_type = stx::msg::fieldTypeFromString(field_type_str);
   if (field_type == stx::msg::FieldType::OBJECT) {
     cur_schema->addField(
-      stx::msg::MessageSchemaField::mkObjectField(
-          next_field_id,
-          field,
-          repeated.isEmpty() ? false : repeated.get(),
-          optional.isEmpty() ? false : optional.get(),
-          mkRef(new stx::msg::MessageSchema(nullptr))));
+          stx::msg::MessageSchemaField::mkObjectField(
+              next_field_id,
+              field,
+              repeated.isEmpty() ? false : repeated.get(),
+              optional.isEmpty() ? false : optional.get(),
+              mkRef(new stx::msg::MessageSchema(nullptr))));
+
+
   } else {
     cur_schema->addField(
-      stx::msg::MessageSchemaField(
-        next_field_id,
-        field,
-        field_type,
-        0,
-        repeated.isEmpty() ? false : repeated.get(),
-        optional.isEmpty() ? false : optional.get()));
+          stx::msg::MessageSchemaField(
+              next_field_id,
+              field,
+              field_type,
+              0,
+              repeated.isEmpty() ? false : repeated.get(),
+              optional.isEmpty() ? false : optional.get()));
   }
-
 
 
   td.set_next_field_id(next_field_id + 1);
