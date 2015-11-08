@@ -187,7 +187,7 @@ size_t FileOutputStream::printf(const char* format, ...) {
   return pos;
 }
 
-bool FileOutputStream:isTTY() const {
+bool FileOutputStream::isTTY() const {
   return ::isatty(fd_);
 }
 
