@@ -148,7 +148,7 @@ if [[ $BUILD_ARTIFACTS == "true" ]]; then
 
   # zli
   mkdir ${TARGET_DIR}/zli-pkg
-  cp src/zbase/zli_install.sh ${TARGET_DIR}/zli-pkg/
+  cp src/zbase/zli_install.sh ${TARGET_DIR}/zli-pkg/install.sh
   cp ${TARGET_DIR}/zli ${TARGET_DIR}/zli-pkg/
   strip ${TARGET_DIR}/zli-pkg/zli
 
