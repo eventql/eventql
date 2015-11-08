@@ -140,7 +140,6 @@ void JSONInputStream::readNumber(std::string* dst) {
 }
 
 void JSONInputStream::readString(std::string* dst) {
-  bool escaped = false;
   for (;;) {
     advanceCursor();
 

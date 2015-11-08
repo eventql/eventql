@@ -45,11 +45,13 @@ public:
   void addTrue();
   void addFalse();
 
+
 protected:
   std::stack<std::pair<kTokenType, int>> stack_;
-  std::string escapeString(const std::string& string) const;
   std::shared_ptr<OutputStream> output_;
 };
+
+std::string escapeString(const std::string& string);
 
 } // namespace json
 } // namespace stx

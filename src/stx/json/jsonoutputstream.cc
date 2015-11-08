@@ -246,7 +246,7 @@ void JSONOutputStream::addValue(const std::nullptr_t& value) {
 }
 */
 
-std::string JSONOutputStream::escapeString(const std::string& string) const {
+std::string escapeString(const std::string& string) {
   std::string new_str;
 
   for (int i = 0; i < string.size(); ++i) {
