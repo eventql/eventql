@@ -950,7 +950,7 @@ void AnalyticsServlet::addTableField(
   auto td = table->config();
   auto schema = stx::msg::MessageSchema::decode(td.config().schema());
 
-  uint64_t next_field_id;
+  uint32_t next_field_id;
   if (td.has_next_field_id()) {
     next_field_id = td.next_field_id();
   } else {
@@ -970,15 +970,7 @@ void AnalyticsServlet::addTableField(
   td.set_next_field_id(next_field_id + 1);
   td.mutable_config()->set_schema(schema->encode().toString());
 
-  try {
-    app_->updateTable(td, true);
-  } catch (const StandardException& e) {
-    stx::logError("analyticsd", e, "error");
-    res->setStatus(http::kStatusInternalServerError);
-    res->addBody(StringUtil::format("error: $0", e.what()));
-    return;
-  }
-
+  app_->updateTable(td, true);
   res->setStatus(http::kStatusCreated);
   return;
 }
