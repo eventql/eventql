@@ -1,14 +1,44 @@
 var Z1 = (function(global) {
   var seq = 0;
-  var jobs = [];
+  var jobs = {};
   var bcastdata = {};
-  var cls = {};
 
   function mkJobID() {
     return "job-" + ++seq;
   };
 
-  cls.log = function() {
+  function executeJob(root_job) {
+    var dependencies = [];
+    var dependencies_set = {};
+    dependencies.push(root_job);
+
+    var find_dependecies = function(job) {
+      if (job.sources) {
+        job.sources.forEach(function(job_id) {
+          if (dependencies_set[job_id]) {
+            return;
+          }
+
+          var job = jobs[job_id];
+          if (!job) {
+            throw "invalid job id: " + job_id;
+          }
+
+          dependencies_set[job_id] = true;
+          dependencies.push(job);
+          find_dependecies(job);
+        });
+      }
+    };
+
+    find_dependecies(root_job);
+    z1_executemr(JSON.stringify(dependencies), root_job.id);
+  }
+
+  /* public api */
+  var api = {};
+
+  api.log = function() {
     var parts = [];
 
     for (var i = 0; i < arguments.length; ++i) {
@@ -18,7 +48,7 @@ var Z1 = (function(global) {
     z1_log(parts.join(", "));
   }
 
-  cls.broadcast = function() {
+  api.broadcast = function() {
     for (var i = 0; i < arguments.length; ++i) {
       var var_name = arguments[i];
 
@@ -38,10 +68,10 @@ var Z1 = (function(global) {
     }
   };
 
-  cls.mapTable = function(opts) {
+  api.mapTable = function(opts) {
     var job_id = mkJobID();
 
-    jobs.push({
+    jobs[job_id] = {
       id: job_id,
       op: "map_table",
       table_name: opts["table"],
@@ -50,15 +80,15 @@ var Z1 = (function(global) {
       map_fn: String(opts["map_fn"]),
       globals: JSON.stringify(bcastdata),
       params: JSON.stringify(opts["params"] || {})
-    });
+    };
 
     return job_id;
   };
 
-  cls.reduce = function(opts) {
+  api.reduce = function(opts) {
     var job_id = mkJobID();
 
-    jobs.push({
+    jobs[job_id] = {
       id: job_id,
       op: "reduce",
       sources: opts["sources"],
@@ -66,51 +96,39 @@ var Z1 = (function(global) {
       reduce_fn: String(opts["reduce_fn"]),
       globals: JSON.stringify(bcastdata),
       params: JSON.stringify(opts["params"] || {})
-    });
+    };
 
     return job_id;
   };
 
-  cls.downloadResults = function(sources) {
-    var job_id = mkJobID();
-
-    jobs.push({
-      id: job_id,
+  api.downloadResults = function(sources) {
+    executeJob({
+      id: mkJobID(),
       op: "return_results",
       sources: sources
     });
-
-    z1_executemr(JSON.stringify(jobs), job_id);
   };
 
-  cls.saveToTable = function(opts) {
-    var job_id = mkJobID();
-
-    jobs.push({
-      id: job_id,
+  api.saveToTable = function(opts) {
+    executeJob({
+      id: mkJobID(),
       op: "save_to_table",
       table_name: opts["table"],
       sources: opts["sources"]
     });
-
-    return job_id;
   };
 
-  cls.saveToTablePartition = function(opts) {
-    var job_id = mkJobID();
-
-    jobs.push({
-      id: job_id,
+  api.saveToTablePartition = function(opts) {
+    executeJob({
+      id: mkJobID(),
       op: "save_to_table_partition",
       table_name: opts["table"],
       partition_key: opts["partition"],
       sources: opts["sources"]
     });
-
-    return job_id;
   };
 
-  cls.processStream = function(opts) {
+  api.processStream = function(opts) {
     var calculate_fn = opts["calculate_fn"];
 
     var partitions = z1_listpartitions(
@@ -127,7 +145,7 @@ var Z1 = (function(global) {
         throw "Z1.processStream calculate_fn must return a list of jobs";
       }
 
-      mkSaveToTablePartitionTask({
+      api.saveToTablePartition({
         table: opts["table"],
         partition: partition.partition_key,
         sources: partition_sources
@@ -135,7 +153,7 @@ var Z1 = (function(global) {
     });
   }
 
-  return cls;
+  return api;
 })(this);
 
 var console = {
