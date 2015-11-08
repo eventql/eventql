@@ -39,8 +39,10 @@ String loadAuth() {
   }
 }
 
-void cmd_run(const cli::FlagParser& flags) {
-  const auto& argv = flags.getArgv();
+void cmd_run(
+    const cli::FlagParser& global_flags,
+    const cli::FlagParser& cmd_flags) {
+  const auto& argv = cmd_flags.getArgv();
   if (argv.size() != 1) {
     RAISE(kUsageError, "usage: $ zli run <script.js>");
   }
@@ -122,11 +124,11 @@ void cmd_run(const cli::FlagParser& flags) {
 
   auto url = StringUtil::format(
       "http://$0/api/v1/mapreduce/execute",
-      flags.getString("api_host"));
+      global_flags.getString("api_host"));
 
   auto auth_token = loadAuth();
   if (auth_token.empty()) {
-    auth_token = flags.getString("auth_token");
+    auth_token = global_flags.getString("auth_token");
   }
 
   http::HTTPMessage::HeaderList auth_headers;
@@ -175,11 +177,43 @@ void cmd_run(const cli::FlagParser& flags) {
   }
 }
 
+void cmd_login(
+    const cli::FlagParser& global_flags,
+    const cli::FlagParser& cmd_flags) {
+
+}
+
+void cmd_version(
+    const cli::FlagParser& global_flags,
+    const cli::FlagParser& cmd_flags) {
+  auto stdout_os = OutputStream::getStdout();
+  stdout_os->write("zli v0.0.1\n");
+}
+
 int main(int argc, const char** argv) {
   stx::Application::init();
   stx::Application::logToStderr();
 
   stx::cli::FlagParser flags;
+
+  flags.defineFlag(
+      "api_host",
+      stx::cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      "api.zscale.io",
+      "api host",
+      "<host>");
+
+  flags.defineFlag(
+      "auth_token",
+      stx::cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      NULL,
+      "auth token",
+      "<token>");
+
 
   flags.defineFlag(
       "loglevel",
@@ -197,27 +231,26 @@ int main(int argc, const char** argv) {
 
   cli::CLI cli;
 
-  /* command: mr_execute */
-  auto mr_execute_cmd = cli.defineCommand("run");
-  mr_execute_cmd->onCall(std::bind(&cmd_run, std::placeholders::_1));
+  /* command: run */
+  auto run_cmd = cli.defineCommand("run");
+  run_cmd->onCall(std::bind(&cmd_run, flags, std::placeholders::_1));
 
-  mr_execute_cmd->flags().defineFlag(
-      "api_host",
-      stx::cli::FlagParser::T_STRING,
-      false,
-      NULL,
-      "api.zscale.io",
-      "api host",
-      "<host>");
+  /* command: login */
+  auto login_cmd = cli.defineCommand("login");
+  login_cmd->onCall(std::bind(&cmd_login, flags, std::placeholders::_1));
 
-  mr_execute_cmd->flags().defineFlag(
-      "auth_token",
-      stx::cli::FlagParser::T_STRING,
-      false,
-      NULL,
-      NULL,
-      "auth token",
-      "<token>");
+  /* command: version */
+  auto version_cmd = cli.defineCommand("version");
+  version_cmd->onCall(std::bind(&cmd_version, flags, std::placeholders::_1));
+
+  //mr_execute_cmd->flags().defineFlag(
+  //    "api_host",
+  //    stx::cli::FlagParser::T_STRING,
+  //    false,
+  //    NULL,
+  //    "api.zscale.io",
+  //    "api host",
+  //    "<host>");
 
   cli.call(flags.getArgv());
   return 0;
