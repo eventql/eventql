@@ -29,14 +29,21 @@ using namespace stx;
 
 stx::thread::EventLoop ev;
 
-String loadAuth() {
+String loadAuth(const cli::FlagParser& global_flags) {
   auto auth_file_path = FileUtil::joinPaths(getenv("HOME"), ".z1auth");
 
   if (FileUtil::exists(auth_file_path)) {
     iputs("exists!", 1);
     return FileUtil::read(auth_file_path).toString();
   } else {
-    return "";
+    if (global_flags.isSet("auth_token")) {
+      global_flags.getString("auth_token");
+    } else {
+      RAISE(
+          kRuntimeError,
+          "no auth token found - you must either call 'zli login' or pass the "
+          "--auth_token flag");
+    }
   }
 }
 
@@ -51,130 +58,136 @@ void cmd_run(
   auto stdout_os = OutputStream::getStdout();
   auto stderr_os = TerminalOutputStream::fromStream(OutputStream::getStderr());
 
-  auto program_source = FileUtil::read(argv[0]);
+  try {
+    auto program_source = FileUtil::read(argv[0]);
 
-  bool finished = false;
-  bool error = false;
-  String error_string;
-  bool line_dirty = false;
-  bool is_tty = stderr_os->isTTY();
+    bool finished = false;
+    bool error = false;
+    String error_string;
+    bool line_dirty = false;
+    bool is_tty = stderr_os->isTTY();
 
-  auto event_handler = [&] (const http::HTTPSSEEvent& ev) {
-    if (ev.name.isEmpty()) {
-      return;
-    }
-
-    if (ev.name.get() == "status") {
-      auto obj = json::parseJSON(ev.data);
-      auto tasks_completed = json::objectGetUInt64(obj, "num_tasks_completed");
-      auto tasks_total = json::objectGetUInt64(obj, "num_tasks_total");
-      auto tasks_running = json::objectGetUInt64(obj, "num_tasks_running");
-      auto progress = json::objectGetFloat(obj, "progress");
-
-      auto status_line = StringUtil::format(
-          "[$0/$1] $2 tasks running ($3%)",
-          tasks_completed.isEmpty() ? 0 : tasks_completed.get(),
-          tasks_total.isEmpty() ? 0 : tasks_total.get(),
-          tasks_running.isEmpty() ? 0 : tasks_running.get(),
-          progress.isEmpty() ? 0 : progress.get() * 100);
-
-      if (is_tty) {
-        stderr_os->eraseLine();
-        stderr_os->print("\r" + status_line);
-        line_dirty = true;
-      } else {
-        stderr_os->print(status_line + "\n");
+    auto event_handler = [&] (const http::HTTPSSEEvent& ev) {
+      if (ev.name.isEmpty()) {
+        return;
       }
 
-      return;
+      if (ev.name.get() == "status") {
+        auto obj = json::parseJSON(ev.data);
+        auto tasks_completed = json::objectGetUInt64(obj, "num_tasks_completed");
+        auto tasks_total = json::objectGetUInt64(obj, "num_tasks_total");
+        auto tasks_running = json::objectGetUInt64(obj, "num_tasks_running");
+        auto progress = json::objectGetFloat(obj, "progress");
+
+        auto status_line = StringUtil::format(
+            "[$0/$1] $2 tasks running ($3%)",
+            tasks_completed.isEmpty() ? 0 : tasks_completed.get(),
+            tasks_total.isEmpty() ? 0 : tasks_total.get(),
+            tasks_running.isEmpty() ? 0 : tasks_running.get(),
+            progress.isEmpty() ? 0 : progress.get() * 100);
+
+        if (is_tty) {
+          stderr_os->eraseLine();
+          stderr_os->print("\r" + status_line);
+          line_dirty = true;
+        } else {
+          stderr_os->print(status_line + "\n");
+        }
+
+        return;
+      }
+
+      if (line_dirty) {
+        stderr_os->eraseLine();
+        stderr_os->print("\r");
+        line_dirty = false;
+      }
+
+      if (ev.name.get() == "job_started") {
+        //stderr_os->printYellow(">> Job started\n");
+        return;
+      }
+
+      if (ev.name.get() == "job_finished") {
+        finished = true;
+        return;
+      }
+
+      if (ev.name.get() == "error") {
+        error = true;
+        error_string = URI::urlDecode(ev.data);
+        return;
+      }
+
+      if (ev.name.get() == "result") {
+        stdout_os->write(URI::urlDecode(ev.data) + "\n");
+        return;
+      }
+
+      if (ev.name.get() == "log") {
+        stderr_os->print(URI::urlDecode(ev.data) + "\n");
+        return;
+      }
+
+    };
+
+    auto url = StringUtil::format(
+        "http://$0/api/v1/mapreduce/execute",
+        global_flags.getString("api_host"));
+
+    auto auth_token = loadAuth(global_flags);
+
+    http::HTTPMessage::HeaderList auth_headers;
+    auth_headers.emplace_back(
+        "Authorization",
+        StringUtil::format("Token $0", auth_token));
+
+    if (is_tty) {
+      stderr_os->print("Launching job...");
+      line_dirty = true;
+    } else {
+      stderr_os->print("Launching job...\n");
     }
+
+    http::HTTPClient http_client;
+    auto req = http::HTTPRequest::mkPost(url, program_source, auth_headers);
+    auto res = http_client.executeRequest(
+        req,
+        http::HTTPSSEResponseHandler::getFactory(event_handler));
 
     if (line_dirty) {
       stderr_os->eraseLine();
       stderr_os->print("\r");
-      line_dirty = false;
     }
 
-    if (ev.name.get() == "job_started") {
-      //stderr_os->printYellow(">> Job started\n");
-      return;
-    }
-
-    if (ev.name.get() == "job_finished") {
-      finished = true;
-      return;
-    }
-
-    if (ev.name.get() == "error") {
+    if (res.statusCode() != 200) {
       error = true;
-      error_string = URI::urlDecode(ev.data);
-      return;
+      error_string = "HTTP Error: " + res.body().toString();
     }
 
-    if (ev.name.get() == "result") {
-      stdout_os->write(URI::urlDecode(ev.data) + "\n");
-      return;
+    if (!finished && !error) {
+      error = true;
+      error_string = "connection to server lost";
     }
 
-    if (ev.name.get() == "log") {
-      stderr_os->print(URI::urlDecode(ev.data) + "\n");
-      return;
+    if (error) {
+      stderr_os->print(
+          "ERROR:",
+          { TerminalStyle::RED, TerminalStyle::UNDERSCORE });
+
+      stderr_os->print(" " + error_string + "\n");
+      exit(1);
+    } else {
+      stderr_os->printGreen("Job successfully completed\n");
+      exit(0);
     }
-
-  };
-
-  auto url = StringUtil::format(
-      "http://$0/api/v1/mapreduce/execute",
-      global_flags.getString("api_host"));
-
-  auto auth_token = loadAuth();
-  if (auth_token.empty()) {
-    auth_token = global_flags.getString("auth_token");
-  }
-
-  http::HTTPMessage::HeaderList auth_headers;
-  auth_headers.emplace_back(
-      "Authorization",
-      StringUtil::format("Token $0", auth_token));
-
-  if (is_tty) {
-    stderr_os->print("Launching job...");
-    line_dirty = true;
-  } else {
-    stderr_os->print("Launching job...\n");
-  }
-
-  http::HTTPClient http_client;
-  auto req = http::HTTPRequest::mkPost(url, program_source, auth_headers);
-  auto res = http_client.executeRequest(
-      req,
-      http::HTTPSSEResponseHandler::getFactory(event_handler));
-
-  if (line_dirty) {
-    stderr_os->eraseLine();
-    stderr_os->print("\r");
-  }
-
-  if (res.statusCode() != 200) {
-    error = true;
-    error_string = "HTTP Error: " + res.body().toString();
-  }
-
-  if (!finished && !error) {
-    error = true;
-    error_string = "connection to server lost";
-  }
-
-  if (error) {
+  } catch (const StandardException& e) {
     stderr_os->print(
         "ERROR:",
         { TerminalStyle::RED, TerminalStyle::UNDERSCORE });
 
-    stderr_os->print(" " + error_string + "\n");
+    stderr_os->print(StringUtil::format(" $0\n", e.what()));
     exit(1);
-  } else {
-    stderr_os->printGreen("Job successfully completed\n");
-    exit(0);
   }
 }
 
