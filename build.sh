@@ -146,6 +146,15 @@ if [[ $BUILD_ARTIFACTS == "true" ]]; then
   tar cz -C ${TARGET_DIR} brokerd brokerctl \
       > ${ARTIFACTS_DIR}/zbroker-${TARGET_LBL}.tgz
 
+  # zli
+  mkdir ${TARGET_DIR}/zli-pkg
+  cp src/zbase/zli_install.sh ${TARGET_DIR}/zli-pkg/
+  cp ${TARGET_DIR}/zli ${TARGET_DIR}/zli-pkg/
+  strip ${TARGET_DIR}/zli-pkg/zli
+
+  tar cz -C ${TARGET_DIR}/zli-pkg zli install.sh \
+      > ${ARTIFACTS_DIR}/zbroker-${TARGET_LBL}.tgz
+
   # zen-utils
   if [[ "${BUILD_TYPE}" == "release" ]]; then
     strip ${TARGET_DIR}/zen-csv-upload
