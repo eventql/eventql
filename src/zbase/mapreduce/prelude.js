@@ -1,3 +1,98 @@
+var __kFnMagic = "\b\bFN<1337Z12323<\b\b";
+
+function __log() {
+  var parts = [];
+
+  for (var i = 0; i < arguments.length; ++i) {
+    parts.push(String(arguments[i]));
+  }
+
+  z1_log(parts.join(", "));
+}
+
+function __encode_js(obj) {
+  var replacer = function(key, value) {
+    switch (typeof value) {
+      case "string":
+        return value;
+      case "object":
+        return value;
+      case "boolean":
+        return value;
+      case "number":
+        return value;
+      case "function":
+        return __kFnMagic + String(value);
+      default:
+        return undefined;
+    }
+  };
+
+  switch (typeof obj) {
+    case "function":
+      return __kFnMagic + String(obj);
+    default:
+      return JSON.stringify(obj, replacer);
+  }
+}
+
+function __decode_js(str) {
+  var decode_fn = function(str) {
+    eval("__load_fn = " + str);
+    var fn = __load_fn;
+    delete __load_fn;
+    return fn;
+  }
+
+  var reviver = function(key, value) {
+    switch (typeof value) {
+      case "string":
+        if (value.indexOf(__kFnMagic) == 0) {
+          return decode_fn(value.substr(__kFnMagic.length));
+        } else {
+          return value;
+        }
+      default:
+        return value;
+    }
+  };
+
+  if (str.indexOf(__kFnMagic) == 0) {
+    return decode_fn(str.substr(__kFnMagic.length));
+  } else {
+    return JSON.parse(str, reviver);
+  }
+}
+
+function __call_with_iter(key, iter) {
+  var iter_wrap = (function(iter) {
+    return {
+      hasNext: function() { return iter.hasNext.apply(iter, arguments); },
+      next: function() { return iter.next.apply(iter, arguments); },
+    };
+  })(iter);
+
+  return __fn.call(this, key, iter_wrap);
+}
+
+var __load_closure = (function(global_scope) {
+  return function(fn, globals_json, params_json) {
+    var globals = __decode_js(globals_json);
+    for (k in globals) {
+      global_scope[k] = globals[k];
+    }
+
+    global_scope["params"] = __decode_js(params_json);
+    eval("__fn = " + fn);
+  }
+})(this);
+
+var console = {
+  log: function() {
+    __log.apply(this, arguments);
+  }
+};
+
 var Z1 = (function(global) {
   var seq = 0;
   var jobs = {};
@@ -39,13 +134,7 @@ var Z1 = (function(global) {
   var api = {};
 
   api.log = function() {
-    var parts = [];
-
-    for (var i = 0; i < arguments.length; ++i) {
-      parts.push(String(arguments[i]));
-    }
-
-    z1_log(parts.join(", "));
+    __log.apply(this, arguments);
   }
 
   api.broadcast = function() {
@@ -65,7 +154,7 @@ var Z1 = (function(global) {
               "' -- all broadcast variables must be global";
       }
 
-      bcastdata[var_name] = String(global[var_name]);
+      bcastdata[var_name] = global[var_name];
     }
   };
 
@@ -79,8 +168,8 @@ var Z1 = (function(global) {
       from: opts["from"],
       until: opts["until"],
       map_fn: String(opts["map_fn"]),
-      globals: JSON.stringify(bcastdata),
-      params: JSON.stringify(opts["params"] || {})
+      globals: __encode_js(bcastdata),
+      params: __encode_js(opts["params"] || {})
     };
 
     return job_id;
@@ -95,8 +184,8 @@ var Z1 = (function(global) {
       sources: opts["sources"],
       num_shards: opts["shards"],
       reduce_fn: String(opts["reduce_fn"]),
-      globals: JSON.stringify(bcastdata),
-      params: JSON.stringify(opts["params"] || {})
+      globals: __encode_js(bcastdata),
+      params: __encode_js(opts["params"] || {})
     };
 
     return job_id;
@@ -155,33 +244,4 @@ var Z1 = (function(global) {
   }
 
   return api;
-})(this);
-
-var console = {
-  log: function() {
-    Z1.log.apply(this, arguments);
-  }
-};
-
-function __call_with_iter(key, iter) {
-  var iter_wrap = (function(iter) {
-    return {
-      hasNext: function() { return iter.hasNext.apply(iter, arguments); },
-      next: function() { return iter.next.apply(iter, arguments); },
-    };
-  })(iter);
-
-  return __fn.call(this, key, iter_wrap);
-}
-
-var __load_closure = (function(global_scope) {
-  return function(fn, globals_json, params_json) {
-    var globals = JSON.parse(globals_json);
-    for (k in globals) {
-      eval(k + " = " + globals[k]);
-    }
-
-    global_scope["params"] = JSON.parse(params_json);
-    eval("__fn = " + fn);
-  }
 })(this);

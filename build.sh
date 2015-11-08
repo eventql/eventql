@@ -147,13 +147,11 @@ if [[ $BUILD_ARTIFACTS == "true" ]]; then
       > ${ARTIFACTS_DIR}/zbroker-${TARGET_LBL}.tgz
 
   # zli
-  mkdir ${TARGET_DIR}/zli-pkg
-  cp src/zbase/zli_install.sh ${TARGET_DIR}/zli-pkg/install.sh
-  cp ${TARGET_DIR}/zli ${TARGET_DIR}/zli-pkg/
-  strip ${TARGET_DIR}/zli-pkg/zli
-
-  tar cz -C ${TARGET_DIR}/zli-pkg zli install.sh \
-      > ${ARTIFACTS_DIR}/zbroker-${TARGET_LBL}.tgz
+  mkdir -p ${TARGET_DIR}/pkg/zli
+  cp src/zbase/zli_install.sh ${TARGET_DIR}/pkg/zli/install.sh
+  cp ${TARGET_DIR}/zli ${TARGET_DIR}/pkg/zli
+  strip ${TARGET_DIR}/pkg/zli/zli
+  tar cz -C ${TARGET_DIR}/pkg zli > ${ARTIFACTS_DIR}/zli-${TARGET_LBL}.tgz
 
   # zen-utils
   if [[ "${BUILD_TYPE}" == "release" ]]; then

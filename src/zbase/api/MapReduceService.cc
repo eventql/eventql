@@ -84,6 +84,7 @@ Option<SHA1Hash> MapReduceService::mapPartition(
       session.customer(),
       table_name);
 
+  iputs("map:  $0 -- $1 -- $2", map_fn, globals, params);
   if (table.isEmpty()) {
     RAISEF(
         kNotFoundError,
@@ -123,6 +124,11 @@ Option<SHA1Hash> MapReduceService::mapPartition(
     return Some(output_id);
   }
 
+  auto output_path_tmp = StringUtil::format(
+      "$0~$1",
+      output_path,
+      Random::singleton()->hex64());
+
   logDebug(
       "z1.mapreduce",
       "Executing map shard; partition=$0/$1/$2 output=$3",
@@ -140,7 +146,7 @@ Option<SHA1Hash> MapReduceService::mapPartition(
 
   js_ctx->loadClosure(map_fn, globals, params);
 
-  auto writer = sstable::SSTableWriter::create(output_path, nullptr, 0);
+  auto writer = sstable::SSTableWriter::create(output_path_tmp, nullptr, 0);
 
   reader->fetchRecords(
       [&schema, &js_ctx, &writer] (const msg::MessageObject& record) {
@@ -156,6 +162,7 @@ Option<SHA1Hash> MapReduceService::mapPartition(
     }
   });
 
+  FileUtil::mv(output_path_tmp, output_path);
   return Some(output_id);
 }
 
@@ -185,6 +192,11 @@ Option<SHA1Hash> MapReduceService::reduceTables(
   if (FileUtil::exists(output_path)) {
     return Some(output_id);
   }
+
+  auto output_path_tmp = StringUtil::format(
+      "$0~$1",
+      output_path,
+      Random::singleton()->hex64());
 
   logDebug(
       "z1.mapreduce",
@@ -243,7 +255,7 @@ Option<SHA1Hash> MapReduceService::reduceTables(
 
   js_ctx->loadClosure(reduce_fn, globals, params);
 
-  auto writer = sstable::SSTableWriter::create(output_path, nullptr, 0);
+  auto writer = sstable::SSTableWriter::create(output_path_tmp, nullptr, 0);
 
   for (auto cur = groups.begin(); cur != groups.end(); ) {
     Vector<Pair<String, String>> tuples;
@@ -256,6 +268,7 @@ Option<SHA1Hash> MapReduceService::reduceTables(
     cur = groups.erase(cur);
   }
 
+  FileUtil::mv(output_path_tmp, output_path);
   return Some(output_id);
 }
 
