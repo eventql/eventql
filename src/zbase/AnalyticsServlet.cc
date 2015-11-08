@@ -958,14 +958,43 @@ void AnalyticsServlet::addTableField(
     next_field_id = schema->maxFieldId() + 1;
   }
 
-  schema->addField(
+  auto cur_schema = schema;
+  auto field = field_name;
+
+  while (StringUtil::includes(field, ".")) {
+    auto prefix_len = field.find(".");
+    auto prefix = field.substr(0, prefix_len);
+
+    field = field.substr(prefix_len + 1);
+    if (!cur_schema->hasField(prefix)) {
+      res->setStatus(http::kStatusNotFound);
+      //StringUtil::format(
+      res->addBody("field not found");
+      return;
+    }
+    cur_schema = cur_schema->fieldSchema(cur_schema->fieldId(prefix));
+  }
+
+  auto field_type = stx::msg::fieldTypeFromString(field_type_str);
+  if (field_type == stx::msg::FieldType::OBJECT) {
+    cur_schema->addField(
+      stx::msg::MessageSchemaField::mkObjectField(
+          next_field_id,
+          field,
+          repeated.isEmpty() ? false : repeated.get(),
+          optional.isEmpty() ? false : optional.get(),
+          mkRef(new stx::msg::MessageSchema(nullptr))));
+  } else {
+    cur_schema->addField(
       stx::msg::MessageSchemaField(
         next_field_id,
-        field_name,
-        stx::msg::fieldTypeFromString(field_type_str),
+        field,
+        field_type,
         0,
         repeated.isEmpty() ? false : repeated.get(),
         optional.isEmpty() ? false : optional.get()));
+  }
+
 
 
   td.set_next_field_id(next_field_id + 1);
@@ -1009,9 +1038,25 @@ void AnalyticsServlet::removeTableField(
 
   auto td = table->config();
   auto schema = stx::msg::MessageSchema::decode(td.config().schema());
+  auto cur_schema = schema;
+  auto field = field_name;
 
-  if (!schema->hasField(field_name)) {
-    res->setStatus(http::kStatusBadRequest);
+  while (StringUtil::includes(field, ".")) {
+    auto prefix_len = field.find(".");
+    auto prefix = field.substr(0, prefix_len);
+
+    field = field.substr(prefix_len + 1);
+
+    if (!cur_schema->hasField(prefix)) {
+      res->setStatus(http::kStatusNotFound);
+      res->addBody("field not found");
+      return;
+    }
+    cur_schema = cur_schema->fieldSchema(cur_schema->fieldId(prefix));
+  }
+
+  if (!cur_schema->hasField(field)) {
+    res->setStatus(http::kStatusNotFound);
     res->addBody("field not found");
     return;
   }
@@ -1020,7 +1065,7 @@ void AnalyticsServlet::removeTableField(
     td.set_next_field_id(schema->maxFieldId() + 1);
   }
 
-  schema->removeField(schema->fieldId(field_name));
+  cur_schema->removeField(cur_schema->fieldId(field));
   td.mutable_config()->set_schema(schema->encode().toString());
 
   app_->updateTable(td, true);
