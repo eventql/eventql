@@ -44,6 +44,7 @@ void cmd_run(const cli::FlagParser& flags) {
   bool error = false;
   String error_string;
   bool line_dirty = false;
+  bool is_tty = stderr_os->isTTY();
 
   auto event_handler = [&] (const http::HTTPSSEEvent& ev) {
     if (ev.name.isEmpty()) {
@@ -56,14 +57,20 @@ void cmd_run(const cli::FlagParser& flags) {
       auto tasks_total = json::objectGetUInt64(obj, "num_tasks_total");
       auto tasks_running = json::objectGetUInt64(obj, "num_tasks_running");
 
-      stderr_os->write(
+      auto status_line =
           StringUtil::format(
-              "\r[$0/$1] $2 tasks running",
+              "[$0/$1] $2 tasks running",
               tasks_completed.isEmpty() ? 0 : tasks_completed.get(),
               tasks_total.isEmpty() ? 0 : tasks_total.get(),
-              tasks_running.isEmpty() ? 0 : tasks_running.get()));
+              tasks_running.isEmpty() ? 0 : tasks_running.get());
 
-      line_dirty = true;
+      if (is_tty) {
+        stderr_os->write("\r" + status_line);
+        line_dirty = true;
+      } else {
+        stderr_os->write(status_line + "\n");
+      }
+
       return;
     }
 
