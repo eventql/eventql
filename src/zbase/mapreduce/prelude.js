@@ -130,6 +130,14 @@ var Z1 = (function(global) {
     z1_executemr(JSON.stringify(dependencies), root_job.id);
   }
 
+  function autoBroadcast() {
+    for (k in global) {
+      if (typeof global[k] == "function") {
+        Z1.broadcast(k);
+      }
+    }
+  }
+
   /* public api */
   var api = {};
 
@@ -159,6 +167,7 @@ var Z1 = (function(global) {
   };
 
   api.mapTable = function(opts) {
+    autoBroadcast();
     var job_id = mkJobID();
 
     jobs[job_id] = {
@@ -176,6 +185,7 @@ var Z1 = (function(global) {
   };
 
   api.reduce = function(opts) {
+    autoBroadcast();
     var job_id = mkJobID();
 
     jobs[job_id] = {
