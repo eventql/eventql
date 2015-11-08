@@ -136,7 +136,7 @@ void MapReduceAPIServlet::executeMapPartitionTask(
       return;
     }
 
-    sse_stream.sendEvent(logline, Some(String("log")));
+    sse_stream.sendEvent(URI::urlEncode(logline), Some(String("log")));
   });
 
   try {
@@ -210,7 +210,7 @@ void MapReduceAPIServlet::executeReduceTask(
       return;
     }
 
-    sse_stream.sendEvent(logline, Some(String("log")));
+    sse_stream.sendEvent(URI::urlEncode(logline), Some(String("log")));
   });
 
   try {
@@ -387,7 +387,7 @@ void MapReduceAPIServlet::executeMapReduceScript(
       return;
     }
 
-    sse_stream.sendEvent(logline, Some(String("log")));
+    sse_stream.sendEvent(URI::urlEncode(logline), Some(String("log")));
   });
 
   bool error = false;
