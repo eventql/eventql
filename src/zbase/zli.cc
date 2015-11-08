@@ -61,10 +61,13 @@ void cmd_run(const cli::FlagParser& flags) {
       error_string = URI::urlDecode(ev.data);
     }
 
-    if (ev.name.get() == "log") {
-      stderr_os->write(">> " + URI::urlDecode(ev.data) + "\n");
+    if (ev.name.get() == "result") {
+      stdout_os->write(URI::urlDecode(ev.data) + "\n");
     }
-    //iputs("ev: $0 => $1", ev.name, ev.data);
+
+    if (ev.name.get() == "log") {
+      stderr_os->write(URI::urlDecode(ev.data) + "\n");
+    }
   };
 
   auto url = StringUtil::format(
