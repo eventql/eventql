@@ -8,6 +8,9 @@
  * <http://www.gnu.org/licenses/>.
  */
 #pragma once
+#include <termios.h>
+#include <sys/types.h>
+#include <sys/ioctl.h>
 #include "stx/stdtypes.h"
 #include "stx/io/TerminalOutputStream.h"
 
@@ -17,6 +20,7 @@ class Term {
 public:
 
   Term();
+  ~Term();
 
   /**
    * Reads a "yes/no" response from STDIN. Accepted responses:
@@ -125,7 +129,13 @@ public:
   void disableLineWrap();
 
 protected:
+
+  bool enableRawMode();
+  void disableRawMode();
+
   ScopedPtr<TerminalOutputStream> termos_;
+  struct termios orig_termios_;
+  bool rawmode_;
 };
 
 } // namespace stx

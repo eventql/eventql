@@ -183,10 +183,48 @@ void cmd_login(
     const cli::FlagParser& cmd_flags) {
   Term term;
 
-  term.print("username: ");
+  term.print(">> Username: ");
   auto username = term.readLine();
+  term.print(">> Password (will not be echoed): ");
+  auto password = term.readPassword();
+  term.print("\n");
 
-  iputs("username: $0", username);
+  try {
+    auto url = StringUtil::format(
+        "http://$0/api/v1/auth/login",
+        global_flags.getString("api_host"));
+
+
+    auto authdata = StringUtil::format(
+        "userid=$0&password=$1",
+        URI::urlEncode(username),
+        URI::urlEncode(password));
+
+    http::HTTPClient http_client;
+    auto req = http::HTTPRequest::mkPost(url, authdata);
+    auto res = http_client.executeRequest(req);
+
+    switch (res.statusCode()) {
+
+      case 200: {
+        term.printGreen("Login successful\n");
+        exit(0);
+      }
+
+      case 401: {
+        term.printRed("Invalid credentials, please try again\n");
+        exit(1);
+      }
+
+      default:
+        RAISEF(kRuntimeError, "HTTP Error: $0", res.body().toString());
+
+    }
+  } catch (const StandardException& e) {
+    term.print("ERROR:", { TerminalStyle::RED, TerminalStyle::UNDERSCORE });
+    term.print(StringUtil::format(" $0\n", e.what()));
+    exit(1);
+  }
 }
 
 void cmd_version(
