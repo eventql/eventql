@@ -71,9 +71,7 @@ ZBase.registerView((function() {
   };
 
   var displayAddColumnModal = function(schema) {
-    $.httpPost("/api/v1/tables/add_field?table=test&field_name=test_field&field_type=string", "", function(r) {
-      console.log(r);
-    });
+
     var modal = $(".zbase_table_editor z-modal.add_column");
     var tpl = $.getTemplate(
         "views/table_editor", 
@@ -89,24 +87,20 @@ ZBase.registerView((function() {
         return;
       }
 
-      console.log(schema);
-      return;
-
-      var json = {
-        table_name: schema.name,
-        schema: {
-          columns: schema.columns
-        },
-        update: true
-      };
-
-      json.schema.columns.push({
-          name: input.value,
-          type: $("z-dropdown.type", modal).getValue(),
+      var url = "/api/v1/tables/add_field?" + $.buildQueryString({
+          table: schema.name,
+          field_name: input.value,
+          field_type: $("z-dropdown.type", modal).getValue(),
           optional: $("z-dropdown.is_nullable", modal).getValue()});
 
-      //TODO httpPost
 
+      $.httpPost(url, "", function(r) {
+        if (r.status == 201) {
+          $.navigateTo(kPathPrefix + schema.name);
+        } else {
+          console.log(r);
+        }
+      });
     });
 
     $.onClick($("button.close", tpl), function() {
