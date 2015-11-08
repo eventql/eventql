@@ -330,6 +330,15 @@ void MapReduceAPIServlet::executeMapReduceScript(
   auto sse_stream = mkRef(new http::HTTPSSEStream(req_stream, res_stream));
   sse_stream->start();
 
+  {
+    Buffer buf;
+    json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
+    json.beginObject();
+    json.endObject();
+
+    sse_stream->sendEvent(buf, Some(String("job_started")));
+  }
+
   auto program_source = req_stream->request().body().toString();
   auto job_spec = mkRef(new MapReduceJobSpec{});
 
@@ -405,6 +414,8 @@ void MapReduceAPIServlet::executeMapReduceScript(
     json.endObject();
 
     sse_stream->sendEvent(buf, Some(String("status")));
+    sse_stream->sendEvent(URI::urlEncode(e.what()), Some(String("error")));
+
     error = true;
   }
 
@@ -417,6 +428,15 @@ void MapReduceAPIServlet::executeMapReduceScript(
     json.endObject();
 
     sse_stream->sendEvent(buf, Some(String("status")));
+  }
+
+  {
+    Buffer buf;
+    json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
+    json.beginObject();
+    json.endObject();
+
+    sse_stream->sendEvent(buf, Some(String("job_finished")));
   }
 
   sse_stream->finish();

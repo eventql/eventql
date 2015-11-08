@@ -37,13 +37,32 @@ void cmd_run(const cli::FlagParser& flags) {
   auto stderr_os = OutputStream::getStderr();
   auto program_source = FileUtil::read(argv[0]);
 
+  stderr_os->write(">> Launching job...\n");
+
+  bool finished = false;
+  bool error = false;
+  String error_string;
+
   auto event_handler = [&] (const http::HTTPSSEEvent& ev) {
     if (ev.name.isEmpty()) {
       return;
     }
 
+    if (ev.name.get() == "job_started") {
+      stderr_os->write(">> Job started\n");
+    }
+
+    if (ev.name.get() == "job_finished") {
+      finished = true;
+    }
+
+    if (ev.name.get() == "error") {
+      error = true;
+      error_string = URI::urlDecode(ev.data);
+    }
+
     if (ev.name.get() == "log") {
-      stderr_os->write(URI::urlDecode(ev.data) + "\n");
+      stderr_os->write(">> " + URI::urlDecode(ev.data) + "\n");
     }
     //iputs("ev: $0 => $1", ev.name, ev.data);
   };
@@ -66,7 +85,21 @@ void cmd_run(const cli::FlagParser& flags) {
       http::HTTPSSEResponseHandler::getFactory(event_handler));
 
   if (res.statusCode() != 200) {
-    RAISEF(kRuntimeError, "HTTP Error: $0", res.body().toString());
+    error = true;
+    error_string = "HTTP Error: " + res.body().toString();
+  }
+
+  if (!finished && !error) {
+    error = true;
+    error_string = "connection to server lost";
+  }
+
+  if (error) {
+    stderr_os->write(StringUtil::format("ERROR: $0\n", error_string));
+    exit(1);
+  } else {
+    stderr_os->write(">> Job successfully completed\n");
+    exit(0);
   }
 }
 
