@@ -28,6 +28,17 @@ using namespace stx;
 
 stx::thread::EventLoop ev;
 
+String loadAuth() {
+  auto auth_file_path = FileUtil::joinPaths(getenv("HOME"), ".z1auth");
+
+  if (FileUtil::exists(auth_file_path)) {
+    iputs("exists!", 1);
+    return FileUtil::read(auth_file_path).toString();
+  } else {
+    return "";
+  }
+}
+
 void cmd_run(const cli::FlagParser& flags) {
   const auto& argv = flags.getArgv();
   if (argv.size() != 1) {
@@ -113,7 +124,10 @@ void cmd_run(const cli::FlagParser& flags) {
       "http://$0/api/v1/mapreduce/execute",
       flags.getString("api_host"));
 
-  auto auth_token = flags.getString("auth_token");
+  auto auth_token = loadAuth();
+  if (auth_token.empty()) {
+    auth_token = flags.getString("auth_token");
+  }
 
   http::HTTPMessage::HeaderList auth_headers;
   auth_headers.emplace_back(
@@ -132,6 +146,11 @@ void cmd_run(const cli::FlagParser& flags) {
   auto res = http_client.executeRequest(
       req,
       http::HTTPSSEResponseHandler::getFactory(event_handler));
+
+  if (line_dirty) {
+    stderr_os->eraseLine();
+    stderr_os->print("\r");
+  }
 
   if (res.statusCode() != 200) {
     error = true;
