@@ -941,7 +941,16 @@ void AnalyticsServlet::addTableField(
 
   auto td = table->config();
   auto schema = stx::msg::MessageSchema::decode(td.config().schema());
+  uint64_t next_field_id;
+  if (td.has_next_field_id()) {
+    next_field_id = td.next_field_id();
+  } else {
+    next_field_id = stx::msg::MessageSchema::maxFieldId(*schema) + 1;
+  }
 
+  auto type = stx::msg::fieldTypeFromString(field_type);
+
+  
 
 
   res->setStatus(http::kStatusCreated);
