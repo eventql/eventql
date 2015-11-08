@@ -38,13 +38,7 @@ void InputStream::setFileName(const std::string& filename) {
 size_t InputStream::readNextBytes(std::string* target, size_t n_bytes) {
   Buffer buf(n_bytes);
   auto s = readNextBytes(&buf, n_bytes);
-  *target = String((char*) buf.data(), buf.size());
-  return s;
-}
-
-size_t InputStream::readNextBytes(Buffer* target, size_t n_bytes) {
-  target->resize(n_bytes);
-  auto s = readNextBytes(target->data(), n_bytes);
+  target->append((char*) buf.data(), s);
   return s;
 }
 

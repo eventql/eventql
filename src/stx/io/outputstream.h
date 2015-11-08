@@ -42,8 +42,8 @@ public:
    * @param size then number of bytes to be written
    */
   virtual size_t write(const char* data, size_t size) = 0;
-  virtual size_t write(const std::string& data);
-  virtual size_t write(const Buffer& buf);
+  size_t write(const std::string& data);
+  size_t write(const Buffer& buf);
   virtual size_t printf(const char* format, ...);
 
   /**
@@ -86,6 +86,12 @@ public:
    */
   void appendLenencString(const std::string& string);
   void appendLenencString(const void* data, size_t size);
+
+  /**
+   * Returns true if this output stream is connected to a TTY/terminal and false
+   * otherwise
+   */
+  virtual bool isTTY() const;
 
   /**
    * Publicly accessible mutex that may be used to synchronize writes to this
@@ -162,6 +168,12 @@ public:
   size_t write(const char* data, size_t size) override;
 
   size_t printf(const char* format, ...) override;
+
+  /**
+   * Returns true if this file descriptor is connected to a TTY/terminal and
+   * false otherwise
+   */
+  bool isTTY() const override;
 
 protected:
   int fd_;

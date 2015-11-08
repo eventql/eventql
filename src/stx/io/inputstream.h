@@ -45,22 +45,15 @@ public:
   virtual bool eof() = 0;
 
   /**
-   * Read N bytes from the stream and copy the data into the provided string.
+   * Read N bytes from the stream and copy the data into the provided string,
+   * appending after any existing data if the string is not empty.
+   *
    * Returns the number of bytes read.
    *
    * @param target the string to copy the data into
    * @param n_bytes the number of bytes to read
    */
   size_t readNextBytes(std::string* target, size_t n_bytes);
-
-  /**
-   * Read N bytes from the stream and copy the data into the provided buffer
-   * Returns the number of bytes read.
-   *
-   * @param target the string to copy the data into
-   * @param n_bytes the number of bytes to read
-   */
-  size_t readNextBytes(Buffer* target, size_t n_bytes);
 
   /**
    * Read N bytes from the stream and copy the data into the provided buffer
