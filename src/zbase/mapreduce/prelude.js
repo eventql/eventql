@@ -60,8 +60,9 @@ var Z1 = (function(global) {
         throw "'params' is a reserved variable and cannot be broadcasted";
       }
 
-      if (!global[var_name]) {
-        throw "no such variable: " + var_name;
+      if (!global.hasOwnProperty(var_name)) {
+        throw "no such variable in the global namespace: '" + var_name +
+              "' -- all broadcast variables must be global";
       }
 
       bcastdata[var_name] = String(global[var_name]);

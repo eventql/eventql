@@ -127,16 +127,16 @@ void MapReduceAPIServlet::executeMapPartitionTask(
     return;
   }
 
-  http::HTTPSSEStream sse_stream(req_stream, res_stream);
-  sse_stream.start();
+  auto sse_stream = mkRef(new http::HTTPSSEStream(req_stream, res_stream));
+  sse_stream->start();
 
   auto job_spec = mkRef(new MapReduceJobSpec{});
-  job_spec->onLogline([this, &sse_stream] (const String& logline) {
-    if (sse_stream.isClosed()) {
+  job_spec->onLogline([sse_stream] (const String& logline) {
+    if (sse_stream->isClosed()) {
       return;
     }
 
-    sse_stream.sendEvent(URI::urlEncode(logline), Some(String("log")));
+    sse_stream->sendEvent(URI::urlEncode(logline), Some(String("log")));
   });
 
   try {
@@ -160,12 +160,12 @@ void MapReduceAPIServlet::executeMapPartitionTask(
       resid = shard_id.get().toString();
     }
 
-    sse_stream.sendEvent(resid, Some(String("result_id")));
+    sse_stream->sendEvent(resid, Some(String("result_id")));
   } catch (const Exception& e) {
-    sse_stream.sendEvent(e.what(), Some(String("error")));
+    sse_stream->sendEvent(e.what(), Some(String("error")));
   }
 
-  sse_stream.finish();
+  sse_stream->finish();
 }
 
 void MapReduceAPIServlet::executeReduceTask(
@@ -327,14 +327,14 @@ void MapReduceAPIServlet::executeMapReduceScript(
     http::HTTPResponseStream* res_stream) {
   req_stream->readBody();
 
-  http::HTTPSSEStream sse_stream(req_stream, res_stream);
-  sse_stream.start();
+  auto sse_stream = mkRef(new http::HTTPSSEStream(req_stream, res_stream));
+  sse_stream->start();
 
   auto program_source = req_stream->request().body().toString();
   auto job_spec = mkRef(new MapReduceJobSpec{});
 
-  job_spec->onProgress([this, &sse_stream] (const MapReduceJobStatus& s) {
-    if (sse_stream.isClosed()) {
+  job_spec->onProgress([this, sse_stream] (const MapReduceJobStatus& s) {
+    if (sse_stream->isClosed()) {
       return;
     }
 
@@ -359,13 +359,13 @@ void MapReduceAPIServlet::executeMapReduceScript(
     json.addInteger(s.num_tasks_running);
     json.endObject();
 
-    sse_stream.sendEvent(buf, Some(String("status")));
+    sse_stream->sendEvent(buf, Some(String("status")));
   });
 
-  job_spec->onResult([this, &sse_stream] (
+  job_spec->onResult([this, sse_stream] (
       const String& key,
       const String& value) {
-    if (sse_stream.isClosed()) {
+    if (sse_stream->isClosed()) {
       return;
     }
 
@@ -379,15 +379,15 @@ void MapReduceAPIServlet::executeMapReduceScript(
     json.addString(value);
     json.endObject();
 
-    sse_stream.sendEvent(buf, Some(String("result")));
+    sse_stream->sendEvent(buf, Some(String("result")));
   });
 
-  job_spec->onLogline([this, &sse_stream] (const String& logline) {
-    if (sse_stream.isClosed()) {
+  job_spec->onLogline([this, sse_stream] (const String& logline) {
+    if (sse_stream->isClosed()) {
       return;
     }
 
-    sse_stream.sendEvent(URI::urlEncode(logline), Some(String("log")));
+    sse_stream->sendEvent(URI::urlEncode(logline), Some(String("log")));
   });
 
   bool error = false;
@@ -404,7 +404,7 @@ void MapReduceAPIServlet::executeMapReduceScript(
     json.addString(e.what());
     json.endObject();
 
-    sse_stream.sendEvent(buf, Some(String("status")));
+    sse_stream->sendEvent(buf, Some(String("status")));
     error = true;
   }
 
@@ -416,10 +416,10 @@ void MapReduceAPIServlet::executeMapReduceScript(
     json.addString("success");
     json.endObject();
 
-    sse_stream.sendEvent(buf, Some(String("status")));
+    sse_stream->sendEvent(buf, Some(String("status")));
   }
 
-  sse_stream.finish();
+  sse_stream->finish();
 }
 
 void MapReduceAPIServlet::fetchResult(

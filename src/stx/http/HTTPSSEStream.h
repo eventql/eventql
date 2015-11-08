@@ -18,7 +18,7 @@
 namespace stx {
 namespace http {
 
-class HTTPSSEStream {
+class HTTPSSEStream : public RefCounted {
 public:
 
   /**
