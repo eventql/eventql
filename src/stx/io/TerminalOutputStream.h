@@ -74,6 +74,46 @@ public:
   void print(const String& str, Vector<TerminalStyle> style = {});
 
   /**
+   * Erases from the current cursor position to the end of the current line.
+   */
+  void eraseEndOfLine();
+
+  /**
+   * Erases from the current cursor position to the start of the current line.
+   */
+  void eraseStartOfLine();
+
+  /**
+   * Erases the entire current line.
+   */
+  void eraseLine();
+
+  /**
+   * Erases the screen from the current line down to the bottom of the screen.
+   */
+  void eraseDown();
+
+  /**
+   * Erases the screen from the current line up to the top of the screen.
+   */
+  void eraseUp();
+
+  /**
+   * Erases the screen with the background colour and moves the cursor to home.
+   */
+  void eraseScreen();
+
+  /**
+   * Text wraps to next line if longer than the length of the display area.
+   */
+  void enableLineWrap();
+
+  /**
+   * Disables line wrapping.
+   */
+  void disableLineWrap();
+
+  /**
    * Write the next n bytes to the stream. This may raise an exception.
    * Returns the number of bytes that have been written.
    *

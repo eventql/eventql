@@ -7,7 +7,6 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#pragma once
 #include "stx/io/TerminalOutputStream.h"
 
 namespace stx {
@@ -41,6 +40,46 @@ void TerminalOutputStream::print(
   } else {
     os_->write(str.data(), str.size());
   }
+}
+
+void TerminalOutputStream::eraseEndOfLine() {
+  static const char kEscapeSequence[] = "\e[K";
+  os_->write(kEscapeSequence, sizeof(kEscapeSequence) - 1);
+}
+
+void TerminalOutputStream::eraseStartOfLine() {
+  static const char kEscapeSequence[] = "\e[1K";
+  os_->write(kEscapeSequence, sizeof(kEscapeSequence) - 1);
+}
+
+void TerminalOutputStream::eraseLine() {
+  static const char kEscapeSequence[] = "\e[2K";
+  os_->write(kEscapeSequence, sizeof(kEscapeSequence) - 1);
+}
+
+void TerminalOutputStream::eraseDown() {
+  static const char kEscapeSequence[] = "\e[J";
+  os_->write(kEscapeSequence, sizeof(kEscapeSequence) - 1);
+}
+
+void TerminalOutputStream::eraseUp() {
+  static const char kEscapeSequence[] = "\e[1J";
+  os_->write(kEscapeSequence, sizeof(kEscapeSequence) - 1);
+}
+
+void TerminalOutputStream::eraseScreen() {
+  static const char kEscapeSequence[] = "\e[2J";
+  os_->write(kEscapeSequence, sizeof(kEscapeSequence) - 1);
+}
+
+void TerminalOutputStream::enableLineWrap() {
+  static const char kEscapeSequence[] = "\e[7h";
+  os_->write(kEscapeSequence, sizeof(kEscapeSequence) - 1);
+}
+
+void TerminalOutputStream::disableLineWrap() {
+  static const char kEscapeSequence[] = "\e[7l";
+  os_->write(kEscapeSequence, sizeof(kEscapeSequence) - 1);
 }
 
 size_t TerminalOutputStream::write(const char* data, size_t size) {
