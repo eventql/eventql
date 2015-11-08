@@ -969,10 +969,10 @@ void AnalyticsServlet::addTableField(
 
   td.set_next_field_id(next_field_id + 1);
   td.mutable_config()->set_schema(schema->encode().toString());
-  //td.set_version(td.version() + 1);
+  td.set_version(td.version() + 1);
 
   try {
-    app_->updateTable(td);
+    app_->updateTable(td, true);
   } catch (const StandardException& e) {
     stx::logError("analyticsd", e, "error");
     res->setStatus(http::kStatusInternalServerError);
