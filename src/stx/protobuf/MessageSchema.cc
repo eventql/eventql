@@ -461,11 +461,10 @@ uint32_t MessageSchema::maxFieldId() {
     }
 
     if (field.type == FieldType::OBJECT) {
-      //FIXME
-      /*uint32_t nested_max_field_id = MessageSchema::maxFieldId(*(field.schema));
+      uint32_t nested_max_field_id = field.schema->maxFieldId();
       if (nested_max_field_id > max_field_id) {
         max_field_id = nested_max_field_id;
-      }*/
+      }
     }
   }
 
