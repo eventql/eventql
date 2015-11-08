@@ -923,7 +923,6 @@ void AnalyticsServlet::addTableField(
     res->addBody("table not found");
     return;
   }
-
   const auto& table = table_opt.get();
 
   String field_name;
@@ -968,11 +967,20 @@ void AnalyticsServlet::addTableField(
         optional.isEmpty() ? false : optional.get()));
 
 
-  
+  td.set_next_field_id(next_field_id + 1);
+  td.mutable_config()->set_schema(schema->encode().toString());
+  //td.set_version(td.version() + 1);
 
+  try {
+    app_->updateTable(td);
+  } catch (const StandardException& e) {
+    stx::logError("analyticsd", e, "error");
+    res->setStatus(http::kStatusInternalServerError);
+    res->addBody(StringUtil::format("error: $0", e.what()));
+    return;
+  }
 
   res->setStatus(http::kStatusCreated);
-  res->addBody(StringUtil::toString(next_field_id));
   return;
 }
 
