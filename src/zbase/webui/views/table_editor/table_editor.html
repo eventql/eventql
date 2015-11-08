@@ -17,27 +17,25 @@
         </z-tab>
       </z-tabbable>
 
-      <div class="dropdown_container" style="display: none;">
-        <z-dropdown class="input primary edit" data-resolved>
-          <z-dropdown-header>
-            <z-dropdown-header-value data-static>
-                <span style="margin-left:4px; margin-right: 10px;">Edit</span>
-            </z-dropdown-header-value>
-          </z-dropdown-header>
-          <z-dropdown-flyout>
-            <z-dropdown-items>
-              <z-dropdown-item data-value='add_column'>
-                <z-dropdown-icon><i class="fa fa-plus"></i></z-dropdown-icon>
-                Add Column
-              </z-dropdown-item>
-              <z-dropdown-item data-value='delete_column'>
-                <z-dropdown-icon><i class="fa fa-trash-o"></i></z-dropdown-icon>
-                Remove Column
-              </z-dropdown-item>
-            </z-dropdown-items>
-          </z-dropdown-flyout>
-        </z-dropdown>
-      </div>
+      <z-dropdown class="input primary edit" data-resolved style="float: right; margin-top: 10px;">
+        <z-dropdown-header>
+          <z-dropdown-header-value data-static>
+              <span style="margin-left:4px; margin-right: 10px;">Edit</span>
+          </z-dropdown-header-value>
+        </z-dropdown-header>
+        <z-dropdown-flyout>
+          <z-dropdown-items>
+            <z-dropdown-item data-value='add_column'>
+              <z-dropdown-icon><i class="fa fa-plus"></i></z-dropdown-icon>
+              Add Column
+            </z-dropdown-item>
+            <z-dropdown-item data-value='delete_column'>
+              <z-dropdown-icon><i class="fa fa-trash-o"></i></z-dropdown-icon>
+              Remove Column
+            </z-dropdown-item>
+          </z-dropdown-items>
+        </z-dropdown-flyout>
+      </z-dropdown>
 
       <h3 style="font-weight: 400;">Table Schema</h3>
 
@@ -85,7 +83,7 @@
     <h3>Please note that this action is irreversable!</h3>
     <p>Please type in the name of the column that you want to remove.</p>
     <div class="error_note hidden">
-      The column you entered does not exist. Please type in an existing column.
+      Column could not be removed: <span class="msg"></span>
     </div>
     <input class="z-input" />
   </div>
