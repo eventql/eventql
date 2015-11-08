@@ -954,7 +954,7 @@ void AnalyticsServlet::addTableField(
   if (td.has_next_field_id()) {
     next_field_id = td.next_field_id();
   } else {
-    next_field_id = stx::msg::MessageSchema::maxFieldId(*schema) + 1;
+    next_field_id = schema->maxFieldId() + 1;
   }
 
   schema->addField(
@@ -969,7 +969,6 @@ void AnalyticsServlet::addTableField(
 
   td.set_next_field_id(next_field_id + 1);
   td.mutable_config()->set_schema(schema->encode().toString());
-  td.set_version(td.version() + 1);
 
   try {
     app_->updateTable(td, true);
