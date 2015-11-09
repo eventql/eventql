@@ -93,6 +93,11 @@ AutoRef<T> mkRef(T* ptr) {
 }
 
 template <typename T>
+AutoRef<T> mkRef(ScopedPtr<T>&& ptr) {
+  return AutoRef<T>(ptr.release());
+}
+
+template <typename T>
 ScopedPtr<T> mkScoped(T* ptr) {
   return ScopedPtr<T>(ptr);
 }
