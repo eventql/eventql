@@ -96,6 +96,9 @@ ZBase.registerView((function() {
 
       $.httpPost(url, "", function(r) {
         if (r.status == 201) {
+          var info_message = ZbaseInfoMessage($(".zbase_app"));
+          info_message.renderSuccess(
+              "The table column " + input.value + " has been successfully added.");
           $.navigateTo(kPathPrefix + schema.name);
         } else {
           $(".error_message .msg", modal).innerHTML = r.response;
@@ -129,6 +132,8 @@ ZBase.registerView((function() {
 
       $.httpPost(url, "", function(r) {
         if (r.status == 201) {
+          var info_message = ZbaseInfoMessage($(".zbase_app"));
+          info_message.renderSuccess("The table column has been removed.");
           $.navigateTo(kPathPrefix + schema.name);
         } else {
           $(".error_message", modal).classList.remove("hidden");

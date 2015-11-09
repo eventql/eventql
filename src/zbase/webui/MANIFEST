@@ -158,6 +158,7 @@ route {
   view: "table_editor"
   require_module: "widgets/zbase-header"
   require_module: "widgets/zbase-main-menu"
+  require_module: "widgets/zbase-info-message"
   require_module: "widgets/z-menu"
   require_module: "widgets/z-table"
   require_module: "widgets/z-modal"

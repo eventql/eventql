@@ -74,7 +74,7 @@ var createTableView = (function() {
       switch (r.status) {
         case 201:
           var info_message = ZbaseInfoMessage($(".zbase_app"));
-          info_message.renderSuccess("Table was created successfully");
+          info_message.renderSuccess("Table was successfully created");
           $.navigateTo("/a/datastore/tables");
           break;
 
