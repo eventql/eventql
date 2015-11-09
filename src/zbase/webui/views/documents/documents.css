@@ -2,6 +2,12 @@
   background: #fff;
 }
 
+.zbase_documents .z-button {
+  font-size: 13px;
+  font-weight: 500;
+  float: right;
+}
+
 .zbase_documents table.z-table {
   table-layout: fixed;
   font-size: 13px;

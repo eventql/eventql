@@ -53,9 +53,8 @@ ZBase.registerView((function() {
         page.querySelector(".zbase_documents tbody"),
         documents);
 
-    var new_doc_dropdown = $("z-dropdown", page);
-    new_doc_dropdown.addEventListener("change", function(e) {
-      $.createNewDocument(e.detail.value);
+    $.onClick($("button.new_report", page), function(e) {
+      $.createNewDocument("report");
     });
 
     $.handleLinks(page);
