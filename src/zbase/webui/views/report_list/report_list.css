@@ -1,0 +1,50 @@
+.zbase_report_list .zbase_content.main_menu {
+  background: #fff;
+}
+
+.zbase_report_list .z-button {
+  font-size: 13px;
+  font-weight: 500;
+  float: right;
+}
+
+.zbase_report_list table.z-table {
+  table-layout: fixed;
+  font-size: 13px;
+}
+
+.zbase_report_list table.z-table thead th {
+  font-weight: 400;
+  color: #888;
+}
+
+.zbase_report_list table.z-table tbody tr td {
+  padding: 0;
+}
+
+.zbase_report_list table.z-table tbody tr a {
+  color: #888;
+  padding: .7em .8em;
+  line-height: 24px;
+  display: block;
+}
+
+.zbase_report_list table.z-table tbody tr td:first-child a {
+  color: #000;
+}
+
+.zbase_report_list z-dropdown.input {
+  float: right;
+  margin-top: 12px;
+}
+
+.zbase_report_list z-dropdown.input z-dropdown-header {
+  font-size: 13px;
+  line-height: 34px;
+  height: 34px;
+  min-width: 133px;
+}
+
+#zbase_viewport .zbase_content_pane.zbase_report_list {
+  padding-bottom: 8px;
+}

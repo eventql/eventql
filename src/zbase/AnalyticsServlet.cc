@@ -11,6 +11,7 @@
 #include "AnalyticsServlet.h"
 #include "zbase/CTRCounter.h"
 #include "stx/Language.h"
+#include "stx/human.h"
 #include "stx/wallclock.h"
 #include "stx/io/fileutil.h"
 #include "stx/util/Base64.h"
@@ -50,7 +51,8 @@ AnalyticsServlet::AnalyticsServlet(
     csql::Runtime* sql,
     zbase::TSDBService* tsdb,
     ConfigDirectory* customer_dir,
-    DocumentDB* docdb) :
+    DocumentDB* docdb,
+    PartitionMap* pmap) :
     app_(app),
     dproc_(dproc),
     ingress_(ingress),
@@ -62,7 +64,8 @@ AnalyticsServlet::AnalyticsServlet(
     logfile_api_(app->logfileService(), customer_dir, cachedir),
     events_api_(app->eventsService(), customer_dir, cachedir),
     mapreduce_api_(app->mapreduceService(), customer_dir, cachedir),
-    documents_api_(docdb) {}
+    documents_api_(docdb),
+    pmap_(pmap) {}
 
 void AnalyticsServlet::handleHTTPRequest(
     RefPtr<http::HTTPRequestStream> req_stream,
@@ -291,6 +294,24 @@ void AnalyticsServlet::handle(
     return;
   }
 
+  if (uri.path() == "/api/v1/tables/add_field") {
+    req_stream->readBody();
+    catchAndReturnErrors(&res, [this, &session, &req, &res] {
+      addTableField(session, &req, &res);
+    });
+    res_stream->writeResponse(res);
+    return;
+  }
+
+  if (uri.path() == "/api/v1/tables/remove_field") {
+    req_stream->readBody();
+    catchAndReturnErrors(&res, [this, &session, &req, &res] {
+      removeTableField(session, &req, &res);
+    });
+    res_stream->writeResponse(res);
+    return;
+  }
+
   static const String kTablesPathPrefix = "/api/v1/tables/";
   if (StringUtil::beginsWith(uri.path(), kTablesPathPrefix)) {
     req_stream->readBody();
@@ -407,14 +428,21 @@ void AnalyticsServlet::fetchTableDefinition(
     http::HTTPResponse* res) {
 
   auto table_provider = app_->getTableProvider(session.customer());
-  auto table_opt = table_provider->describe(table_name);
-  if (table_opt.isEmpty()) {
+  auto table_info_opt = table_provider->describe(table_name);
+  if (table_info_opt.isEmpty()) {
     res->setStatus(http::kStatusNotFound);
     res->addBody("table not found");
     return;
   }
 
-  const auto& table = table_opt.get();
+  const auto& table_info = table_info_opt.get();
+
+  auto table_opt = pmap_->findTable(session.customer(), table_name);
+  if (table_opt.isEmpty()) {
+    res->setStatus(http::kStatusNotFound);
+    res->addBody("table not found");
+    return;
+  }
 
   Buffer buf;
   json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
@@ -424,13 +452,13 @@ void AnalyticsServlet::fetchTableDefinition(
   json.beginObject();
 
   json.addObjectEntry("name");
-  json.addString(table.table_name);
+  json.addString(table_info.table_name);
   json.addComma();
 
   json.addObjectEntry("columns");
   json.beginArray();
-  for (size_t i = 0; i < table.columns.size(); ++i) {
-    const auto& col = table.columns[i];
+  for (size_t i = 0; i < table_info.columns.size(); ++i) {
+    const auto& col = table_info.columns[i];
 
     if (i > 0) {
       json.addComma();
@@ -451,7 +479,12 @@ void AnalyticsServlet::fetchTableDefinition(
 
     json.endObject();
   }
+
   json.endArray();
+
+  json.addComma();
+  json.addObjectEntry("schema");
+  table_opt.get()->schema()->toJSON(&json);
 
   json.endObject();
   json.endObject();
@@ -542,6 +575,177 @@ void AnalyticsServlet::createTable(
   }
 
   res->setStatus(http::kStatusCreated);
+}
+
+void AnalyticsServlet::addTableField(
+    const AnalyticsSession& session,
+    const http::HTTPRequest* req,
+    http::HTTPResponse* res) {
+
+  URI uri(req->uri());
+  const auto& params = uri.queryParams();
+
+  String table_name;
+  if (!URI::getParam(params, "table", &table_name)) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody("missing ?table=... parameter");
+    return;
+  }
+
+  auto table_opt = pmap_->findTable(session.customer(), table_name);
+  if (table_opt.isEmpty()) {
+    res->setStatus(http::kStatusNotFound);
+    res->addBody("table not found");
+    return;
+  }
+  const auto& table = table_opt.get();
+
+  String field_name;
+  if (!URI::getParam(params, "field_name", &field_name)) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody("missing &field_name=... parameter");
+    return;
+  }
+
+  String field_type_str;
+  if (!URI::getParam(params, "field_type", &field_type_str)) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody("missing &field_name=... parameter");
+    return;
+  }
+
+  String repeated_param;
+  URI::getParam(params, "repeated", &repeated_param);
+  auto repeated = Human::parseBoolean(repeated_param);
+
+  String optional_param;
+  URI::getParam(params, "optional", &optional_param);
+  auto optional = Human::parseBoolean(optional_param);
+
+  auto td = table->config();
+  auto schema = stx::msg::MessageSchema::decode(td.config().schema());
+
+  uint32_t next_field_id;
+  if (td.has_next_field_id()) {
+    next_field_id = td.next_field_id();
+  } else {
+    next_field_id = schema->maxFieldId() + 1;
+  }
+
+  auto cur_schema = schema;
+  auto field = field_name;
+
+  while (StringUtil::includes(field, ".")) {
+    auto prefix_len = field.find(".");
+    auto prefix = field.substr(0, prefix_len);
+
+    field = field.substr(prefix_len + 1);
+    if (!cur_schema->hasField(prefix)) {
+      res->setStatus(http::kStatusNotFound);
+      res->addBody(StringUtil::format("field $0 not found", prefix));
+      return;
+    }
+    cur_schema = cur_schema->fieldSchema(cur_schema->fieldId(prefix));
+  }
+
+  auto field_type = stx::msg::fieldTypeFromString(field_type_str);
+  if (field_type == stx::msg::FieldType::OBJECT) {
+    cur_schema->addField(
+          stx::msg::MessageSchemaField::mkObjectField(
+              next_field_id,
+              field,
+              repeated.isEmpty() ? false : repeated.get(),
+              optional.isEmpty() ? false : optional.get(),
+              mkRef(new stx::msg::MessageSchema(nullptr))));
+
+
+  } else {
+    cur_schema->addField(
+          stx::msg::MessageSchemaField(
+              next_field_id,
+              field,
+              field_type,
+              0,
+              repeated.isEmpty() ? false : repeated.get(),
+              optional.isEmpty() ? false : optional.get()));
+  }
+
+
+  td.set_next_field_id(next_field_id + 1);
+  td.mutable_config()->set_schema(schema->encode().toString());
+
+  app_->updateTable(td, true);
+  res->setStatus(http::kStatusCreated);
+  res->addBody("ok");
+  return;
+}
+
+void AnalyticsServlet::removeTableField(
+    const AnalyticsSession& session,
+    const http::HTTPRequest* req,
+    http::HTTPResponse* res) {
+
+  URI uri(req->uri());
+  const auto& params = uri.queryParams();
+
+  String table_name;
+  if (!URI::getParam(params, "table", &table_name)) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody("missing ?table=... parameter");
+    return;
+  }
+
+  auto table_opt = pmap_->findTable(session.customer(), table_name);
+  if (table_opt.isEmpty()) {
+    res->setStatus(http::kStatusNotFound);
+    res->addBody("table not found");
+    return;
+  }
+  const auto& table = table_opt.get();
+
+  String field_name;
+  if (!URI::getParam(params, "field_name", &field_name)) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody("missing &field_name=... parameter");
+    return;
+  }
+
+  auto td = table->config();
+  auto schema = stx::msg::MessageSchema::decode(td.config().schema());
+  auto cur_schema = schema;
+  auto field = field_name;
+
+  while (StringUtil::includes(field, ".")) {
+    auto prefix_len = field.find(".");
+    auto prefix = field.substr(0, prefix_len);
+
+    field = field.substr(prefix_len + 1);
+
+    if (!cur_schema->hasField(prefix)) {
+      res->setStatus(http::kStatusNotFound);
+      res->addBody("field not found");
+      return;
+    }
+    cur_schema = cur_schema->fieldSchema(cur_schema->fieldId(prefix));
+  }
+
+  if (!cur_schema->hasField(field)) {
+    res->setStatus(http::kStatusNotFound);
+    res->addBody("field not found");
+    return;
+  }
+
+  if (!td.has_next_field_id()) {
+    td.set_next_field_id(schema->maxFieldId() + 1);
+  }
+
+  cur_schema->removeField(cur_schema->fieldId(field));
+  td.mutable_config()->set_schema(schema->encode().toString());
+
+  app_->updateTable(td, true);
+  res->setStatus(http::kStatusCreated);
+  res->addBody("ok");
+  return;
 }
 
 void AnalyticsServlet::insertIntoTable(

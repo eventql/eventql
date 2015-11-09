@@ -451,6 +451,26 @@ RefPtr<MessageSchema> MessageSchema::decode(const String& data) {
   return schema;
 }
 
+uint32_t MessageSchema::maxFieldId() {
+  uint32_t max_field_id = 0;
+  for (size_t i = 0; i < fields_.size(); ++i) {
+    const auto& field = fields_[i];
+
+    if (field.id > max_field_id) {
+      max_field_id = field.id;
+    }
+
+    if (field.type == FieldType::OBJECT) {
+      uint32_t nested_max_field_id = field.schema->maxFieldId();
+      if (nested_max_field_id > max_field_id) {
+        max_field_id = nested_max_field_id;
+      }
+    }
+  }
+
+  return max_field_id;
+}
+
 void MessageSchema::toJSON(json::JSONOutputStream* json) const {
   json->beginObject();
 

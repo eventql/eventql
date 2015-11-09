@@ -1,61 +1,32 @@
-<template id="zbase_datastore_tables_list_tpl">
+<template id="zbase_datastore_tables_main_tpl">
   <div class="zbase_datastore_tables">
 
     <div class="zbase_content_pane fullwidth main_menu">
       <div class="zbase_main_menu"></div>
 
       <div class="zbase_content main_menu" style="padding: 0 20px;">
-        <h2 class="pagetitle main"><em>Tables</em></h2>
-
-        <table class="z-table zbase_clickable_table" data-clickable style="border-top: 1px solid #ddd;">
-          <thead>
-            <tr>
-              <th>Table</th>
-              <th style="width: 160px;">Size</th>
-              <th style="width: 60px;">&nbsp;</th>
-            </tr>
-          </thead>
-
-          <tbody></tbody>
-        </table>
-
-        <div class="add_pane create_table">
-          <i class="fa fa-plus"></i> Create Table
-        </div>
-
       </div>
     </div>
-
-    <z-modal class="create_table">
-      <z-modal-box>
-        <z-modal-close-icon></z-modal-close-icon>
-        <div class="z-modal-header">
-          Create a new table
-        </div>
-        <div class="z-modal-content"></div>
-        <div class="z-modal-footer">
-          <button class="z-button primary submit">Save</button>
-          <button class="z-button secondary close">Cancel</button>
-        </div>
-      </z-modal-box>
-    </z-modal>
-
-    <z-modal class="delete_table">
-      <z-modal-box>
-        <z-modal-close-icon></z-modal-close-icon>
-        <div class="z-modal-header">
-          Delete Table
-        </div>
-        <div class="z-modal-content">
-          <h4>Are you sure you want to delete the table <span class="table_name"></span>?</h4>
-        </div>
-        <div class="z-modal-footer">
-          <button class="z-button primary submit">Yes</button>
-          <button class="z-button secondary close">Cancel</button>
-        </div>
-      </z-modal-box>
-    </z-modal>
   <div>
+</template>
+
+<template id="zbase_datastore_tables_list_tpl">
+  <button class="z-button primary create_table" style="margin-top: 16px;">
+    <i class="fa fa-plus"></i> &nbsp;Create Table
+  </button>
+  <h2 class="pagetitle main"><em>Tables</em></h2>
+
+  <table class="z-table zbase_clickable_table" data-clickable style="border-top: 1px solid #ddd;">
+    <thead>
+      <tr>
+        <th>Table</th>
+        <th style="width: 160px;">Size</th>
+        <th style="width: 60px;">&nbsp;</th>
+      </tr>
+    </thead>
+
+    <tbody></tbody>
+  </table>
 </template>
 
 <template id="zbase_datastore_tables_list_row_tpl">
@@ -78,93 +49,6 @@
         <z-dropdown-flyout>
           <z-dropdown-items>
             <z-dropdown-item data-value="edit" class="link"><a>Edit Table</a></z-dropdown-item>
-          </z-dropdown-items>
-        </z-dropdown-flyout>
-      </z-dropdown>
-    </td>
-  </tr>
-</template>
-
-<template id="zbase_datastore_tables_add_modal_tpl">
-  <div class="error_message hidden">
-    <h4>An error occured while creating the table:</h4>
-    <span class="error_text"></span>
-  </div>
-  <div class="table">
-    <h3>Table</h3>
-
-    <table class="z-table">
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Type</th>
-        </tr>
-      </thead>
-
-      <tbody>
-        <tr>
-          <td><input class="z-input table_name" type="text" /></td>
-          <td>
-            <z-dropdown class="input table_type" data-resolved>
-              <z-dropdown-flyout>
-                <z-dropdown-items>
-                  <z-dropdown-item data-value="static" data-selected>static</z-dropdown-item>
-                  <z-dropdown-item data-value="log">log</z-dropdown-item>
-                </z-dropdown-items>
-              </z-dropdown-flyout>
-            </z-dropdown>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-
-    <div class="error_note hidden table_name">Please insert a name</div>
-  </div>
-
-
-  <div class="columns">
-    <h3>Columns</h3>
-
-    <table class="z-table">
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Type</th>
-          <th>Is Nullable</th>
-        </tr>
-      </thead>
-
-      <tbody></tbody>
-    </table>
-  </div>
-
-  <div class="link add_column"><i class="fa fa-plus"></i> Add Column</div>
-</template>
-
-<template id="zbase_datastore_tables_add_modal_column_tpl">
-  <tr class="column">
-    <td><input class="z-input name" type="text" /></td>
-    <td>
-      <z-dropdown class="input type" data-resolved>
-        <z-dropdown-flyout>
-          <z-dropdown-items>
-            <z-dropdown-item data-value="STRING" data-selected>STRING</z-dropdown-item>
-            <z-dropdown-item data-value="DOUBLE">DOUBLE</z-dropdown-item>
-            <z-dropdown-item data-value="UINT32">UINT32</z-dropdown-item>
-            <z-dropdown-item data-value="UINT64">UINT64</z-dropdown-item>
-            <z-dropdown-item data-value="BOOLEAN">BOOLEAN</z-dropdown-item>
-            <z-dropdown-item data-value="DATETIME">DATETIME</z-dropdown-item>
-          </z-dropdown-items>
-        </z-dropdown-flyout>
-      </z-dropdown>
-    </td>
-
-    <td>
-      <z-dropdown class="input is_nullable" data-resolved>
-        <z-dropdown-flyout>
-          <z-dropdown-items>
-            <z-dropdown-item data-value="true" data-selected>TRUE</z-dropdown-item>
-            <z-dropdown-item data-value="false">FALSE</z-dropdown-item>
           </z-dropdown-items>
         </z-dropdown-flyout>
       </z-dropdown>

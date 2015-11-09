@@ -43,24 +43,30 @@ ZBase.registerView((function() {
       this.setValue([]);
     }, false);
 
-    renderTable(schema.columns, $("tbody", page));
+
+    renderTable(schema.schema.columns, $("tbody", page), "");
 
     $.handleLinks(page);
     $.replaceViewport(page);
   };
 
-  var renderTable = function(columns, tbody) {
+  var renderTable = function(columns, tbody, prefix) {
     var row_tpl = $.getTemplate(
         "views/table_editor",
         "zbase_table_editor_row_tpl");
 
     columns.forEach(function(column) {
       var tr = row_tpl.cloneNode(true);
-      $(".name", tr).innerHTML = column.column_name;
+      var column_name = prefix + column.name;
+      $(".name", tr).innerHTML = column_name;
       $(".type", tr).innerHTML = column.type;
-      $(".is_nullable", tr).innerHTML = column.is_nullable;
+      $(".is_nullable", tr).innerHTML = column.optional;
 
       tbody.appendChild(tr);
+
+      if (column.type == "OBJECT") {
+        renderTable(column.schema.columns, tbody, column_name + ".");
+      }
     });
   };
 
@@ -80,23 +86,20 @@ ZBase.registerView((function() {
         return;
       }
 
-      console.log(schema);
-      return;
-
-      var json = {
-        table_name: schema.name,
-        schema: {
-          columns: schema.columns
-        },
-        update: true
-      };
-
-      json.schema.columns.push({
-          name: input.value,
-          type: $("z-dropdown.type", modal).getValue(),
+      var url = "/api/v1/tables/add_field?" + $.buildQueryString({
+          table: schema.name,
+          field_name: input.value,
+          field_type: $("z-dropdown.type", modal).getValue(),
           optional: $("z-dropdown.is_nullable", modal).getValue()});
 
-      //TODO httpPost
+
+      $.httpPost(url, "", function(r) {
+        if (r.status == 201) {
+          $.navigateTo(kPathPrefix + schema.name);
+        } else {
+          console.log(r);
+        }
+      });
 
     });
 
@@ -118,19 +121,19 @@ ZBase.registerView((function() {
     var input = $("input", tpl);
 
     $.onClick($("button.submit", tpl), function() {
-      var column_name = input.value;
-      if (column_name.length > 0) {
-        schema.columns.forEach(function(column) {
-          if (column.column_name == column_name) {
-            console.log("delete ", column);
-          }
-        });
-      }
+      var url = "/api/v1/tables/remove_field?table=" + schema.name +
+        "&field_name=" + input.value;
 
-      $(".error_note", modal).classList.remove("hidden");
-      input.classList.add("error");
-      input.focus();
-      return;
+      $.httpPost(url, "", function(r) {
+        if (r.status == 201) {
+          $.navigateTo(kPathPrefix + schema.name);
+        } else {
+          $(".error_note", modal).classList.remove("hidden");
+          $(".error_note .msg", modal).innerHTML = r.response;
+          input.classList.add("error");
+        }
+      });
+
     });
 
     $.onClick($("button.close", tpl), function() {
@@ -142,6 +145,7 @@ ZBase.registerView((function() {
     modal.show();
     input.focus();
   };
+
 
   return {
     name: "table_editor",

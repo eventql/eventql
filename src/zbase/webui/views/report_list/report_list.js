@@ -39,23 +39,22 @@ ZBase.registerView((function() {
   }
 
   var render = function(data, qparams, path) {
-    var documents = data.documents;
+    var reports = data.documents;
     var categories = data.categories;
 
     var page = $.getTemplate(
-        "views/documents",
-        "zbase_documents_main_tpl");
+        "views/report_list",
+        "zbase_report_list_main_tpl");
 
     var main_menu = ZBaseMainMenu();
     main_menu.render($(".zbase_main_menu", page), path);
 
-    renderDocumentsList(
-        page.querySelector(".zbase_documents tbody"),
-        documents);
+    renderTable(
+        page.querySelector(".zbase_report_list tbody"),
+        reports);
 
-    var new_doc_dropdown = $("z-dropdown", page);
-    new_doc_dropdown.addEventListener("change", function(e) {
-      $.createNewDocument(e.detail.value);
+    $.onClick($("button.new_report", page), function(e) {
+      $.createNewDocument("report");
     });
 
     $.handleLinks(page);
@@ -63,9 +62,9 @@ ZBase.registerView((function() {
     $.hideLoader();
   };
 
-  var renderDocumentsList = function(tbody_elem, documents) {
-    documents.forEach(function(doc) {
-      var url = getUrlForDocument(doc);
+  var renderTable = function(tbody_elem, reports) {
+    reports.forEach(function(doc) {
+      var url = "/a/reports/" + doc.uuid;
 
       var tr = document.createElement("tr");
       tr.innerHTML = 
@@ -73,29 +72,12 @@ ZBase.registerView((function() {
           "<td><a href='" + url + "'>" + $.escapeHTML(doc.type) + "</a></td>" +
           "<td><a href='" + url + "'>" + DateUtil.printTimeAgo(doc.mtime) + "</a></td>";
 
-      $.onClick(tr, function() { $.navigateTo(url); });
       tbody_elem.appendChild(tr);
     });
   };
 
-  var getUrlForDocument = function(doc) {
-    switch (doc.type) {
-      case "sql_query":
-        return "/a/sql/" + doc.uuid;
-
-      case "report":
-        return "/a/reports/" + doc.uuid;
-
-      case "application":
-        return JSON.parse(doc.content).url;
-
-      default:
-        return "#";
-    }
-  };
-
   return {
-    name: "documents",
+    name: "report_list",
     loadView: function(params) { load(params.path); },
     unloadView: function() {},
     handleNavigationChange: load

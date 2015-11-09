@@ -1,3 +1,6 @@
 html_file: "datastore_tables.html"
+html_file: "create_table.html"
 js_file: "datastore_tables.js"
+js_file: "create_table.js"
 css_file: "datastore_tables.css"
+css_file: "create_table.css"
