@@ -106,6 +106,10 @@ void OutputStream::appendVarUInt(uint64_t value) {
   write((char*) buf, bytes);
 }
 
+bool OutputStream::isTTY() const {
+  return false;
+}
+
 std::unique_ptr<FileOutputStream> FileOutputStream::openFile(
     const std::string& file_path,
     int flags /* = O_CREAT | O_TRUNC */,
@@ -181,6 +185,10 @@ size_t FileOutputStream::printf(const char* format, ...) {
   }
 
   return pos;
+}
+
+bool FileOutputStream::isTTY() const {
+  return ::isatty(fd_);
 }
 
 std::unique_ptr<StringOutputStream> StringOutputStream::fromString(
