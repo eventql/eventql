@@ -112,6 +112,15 @@
   color: #888;
 }
 
+.zbase_sql_editor .zbase_sql_editor_overview table.z-table tbody tr td {
+  padding: 0;
+}
+
+.zbase_sql_editor .zbase_sql_editor_overview table.z-table tbody tr a {
+  padding: .7em .8em;
+  display: block;
+}
+
 .zbase_sql_editor table.z-table tbody tr td:first-child a {
   font-weight: 400;
   color: #000;
