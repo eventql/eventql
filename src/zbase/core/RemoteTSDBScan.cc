@@ -83,7 +83,8 @@ void RemoteTSDBScan::execute(
       logError(
           "zbase",
           e,
-          "RemoteTSDBScan::executeOnHost failed");
+          "RemoteTSDBScan::executeOnHost failed @ $0",
+          host.hostAndPort());
 
       errors.emplace_back(e.what());
     }
@@ -173,8 +174,8 @@ void RemoteTSDBScan::executeOnHost(
   if (res.statusCode() != 200) {
     RAISEF(
         kRuntimeError,
-        "received non-200 response: $0",
-        res.body().toString());
+        "HTTP Error: $0",
+        res.statusCode());
   }
 }
 

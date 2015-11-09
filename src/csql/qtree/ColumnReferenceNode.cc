@@ -59,7 +59,7 @@ String ColumnReferenceNode::toSQL() const {
     return StringUtil::format("subquery_column($0)", column_index_.get());
   }
 
-  return column_name_;
+  return "`" + column_name_ + "`";
 }
 
 } // namespace csql
