@@ -42,6 +42,8 @@ public:
       size_t task_index,
       Function<void (const void*, size_t, const void*, size_t)> fn);
 
+  RefPtr<MapReduceJobSpec> jobSpec();
+
 protected:
 
   enum class MapReduceShardStatus { PENDING, RUNNING, COMPLETED, ERROR };

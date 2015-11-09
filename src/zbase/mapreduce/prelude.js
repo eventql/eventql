@@ -132,6 +132,10 @@ var Z1 = (function(global) {
 
   function autoBroadcast() {
     for (k in global) {
+      if (typeof k == "string" && k.indexOf("__") == 0) {
+        continue;
+      }
+
       if (typeof global[k] == "function") {
         Z1.broadcast(k);
       }
@@ -201,11 +205,18 @@ var Z1 = (function(global) {
     return job_id;
   };
 
-  api.downloadResults = function(sources) {
+  api.downloadResults = function(sources, serialize_fn) {
+    if (!serialize_fn) {
+      serialize_fn = "";
+    }
+
     executeJob({
       id: mkJobID(),
       op: "return_results",
-      sources: sources
+      sources: sources,
+      serialize_fn: String(serialize_fn),
+      globals: __encode_js(bcastdata),
+      params: __encode_js({})
     });
   };
 

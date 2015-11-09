@@ -9,6 +9,7 @@
 #include "zbase/mapreduce/tasks/ReturnResultsTask.h"
 #include "zbase/mapreduce/MapReduceScheduler.h"
 #include "sstable/sstablereader.h"
+#include "zbase/JavaScriptContext.h"
 
 using namespace stx;
 
@@ -43,27 +44,55 @@ ReturnResultsTask::ReturnResultsTask(
 Option<MapReduceShardResult> ReturnResultsTask::execute(
     RefPtr<MapReduceTaskShard> shard,
     RefPtr<MapReduceScheduler> job) {
-  for (const auto& input : shard->dependencies) {
-    job->downloadResult(
-        input,
-        [&job] (
-            const void* key,
-            size_t key_len,
-            const void* val,
-            size_t val_len) {
+  if (serialize_fn_.empty()) {
+    for (const auto& input : shard->dependencies) {
+      job->downloadResult(
+          input,
+          [&job] (
+              const void* key,
+              size_t key_len,
+              const void* val,
+              size_t val_len) {
+        Buffer buf;
+        json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
+        json.beginObject();
+        json.addObjectEntry("key");
+        json.addString(String((const char*) key, key_len));
+        json.addComma();
+        json.addObjectEntry("value");
+        json.addString(String((const char*) val, val_len));
+        json.endObject();
 
-      Buffer buf;
-      json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
-      json.beginObject();
-      json.addObjectEntry("key");
-      json.addString(String((const char*) key, key_len));
-      json.addComma();
-      json.addObjectEntry("value");
-      json.addString(String((const char*) val, val_len));
-      json.endObject();
+        job->sendResult(buf.toString());
+      });
+    }
+  } else {
+    auto js_ctx = mkRef(new JavaScriptContext(
+        session_.customer(),
+        job->jobSpec(),
+        nullptr,
+        nullptr,
+        nullptr));
 
-      job->sendResult(buf.toString());
-    });
+    js_ctx->loadClosure(serialize_fn_, globals_, params_);
+
+    for (const auto& input : shard->dependencies) {
+      job->downloadResult(
+          input,
+          [&job, &js_ctx] (
+              const void* key,
+              size_t key_len,
+              const void* val,
+              size_t val_len) {
+        auto result = js_ctx->callSerializeFunction(
+            String((const char*) key, key_len),
+            String((const char*) val, val_len));
+
+        if (!result.empty()) {
+          job->sendResult(result);
+        }
+      });
+    }
   }
 
   return None<MapReduceShardResult>();

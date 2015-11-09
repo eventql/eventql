@@ -236,13 +236,28 @@ RefPtr<MapReduceTask> MapReduceTaskBuilder::buildReturnResultsTask(
     sources.emplace_back(getJob(src_id.get(), shards, job_definitions, jobs));
   }
 
+  auto serialize_fn = json::objectGetString(job, "serialize_fn");
+  if (serialize_fn.isEmpty()) {
+    RAISE(kRuntimeError, "missing field: serialize_fn");
+  }
+
+  auto globals = json::objectGetString(job, "globals");
+  if (globals.isEmpty()) {
+    RAISE(kRuntimeError, "missing field: globals");
+  }
+
+  auto params = json::objectGetString(job, "params");
+  if (params.isEmpty()) {
+    RAISE(kRuntimeError, "missing field: params");
+  }
+
   return new ReturnResultsTask(
       sources,
       shards,
       session_,
-      "",
-      "{}",
-      "{}");
+      serialize_fn.get(),
+      globals.get(),
+      params.get());
 }
 
 RefPtr<MapReduceTask> MapReduceTaskBuilder::buildSaveToTableTask(

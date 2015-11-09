@@ -455,6 +455,45 @@ void JavaScriptContext::callReduceFunction(
   enumerateTuples(&rval, tuples);
 }
 
+String JavaScriptContext::callSerializeFunction(
+    const String& key,
+    const String& value) {
+  JSAutoRequest js_req(ctx_);
+  JSAutoCompartment js_comp(ctx_, global_);
+
+  JS::AutoValueArray<2> argv(ctx_);
+
+  auto key_str_ptr = JS_NewStringCopyN(ctx_, key.data(), key.size());
+  if (!key_str_ptr) {
+    RAISE(kRuntimeError, "serialize function execution error: out of memory");
+  } else {
+    argv[0].setString(key_str_ptr);
+  }
+
+  auto value_str_ptr = JS_NewStringCopyN(ctx_, value.data(), value.size());
+  if (!value_str_ptr) {
+    RAISE(kRuntimeError, "serialize function execution error: out of memory");
+  } else {
+    argv[1].setString(value_str_ptr);
+  }
+
+  JS::RootedValue rval(ctx_);
+  if (!JS_CallFunctionName(ctx_, global_, "__fn", argv, &rval)) {
+    RAISE("JavaScriptError", current_error_);
+  }
+
+  auto res_jstr = JS::ToString(ctx_, rval);
+  if (!res_jstr) {
+    RAISE(kRuntimeError, "first tuple element must be a string");
+  }
+
+  auto res_cstr = JS_EncodeString(ctx_, res_jstr);
+  String res(res_cstr);
+  JS_free(ctx_, res_cstr);
+
+  return res;
+}
+
 void JavaScriptContext::enumerateTuples(
     JS::RootedValue* src,
     Vector<Pair<String, String>>* dst) const {

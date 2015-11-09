@@ -271,6 +271,9 @@ void MapReduceScheduler::downloadResult(
   MapReduceService::downloadResult(req, fn);
 }
 
+RefPtr<MapReduceJobSpec> MapReduceScheduler::jobSpec() {
+  return job_;
+}
 
 } // namespace zbase
 

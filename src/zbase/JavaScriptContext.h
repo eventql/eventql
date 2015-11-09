@@ -50,6 +50,10 @@ public:
       const Vector<String>& values,
       Vector<Pair<String, String>>* tuples);
 
+  String callSerializeFunction(
+      const String& key,
+      const String& value);
+
 protected:
 
   struct ReduceCollectionIter {

@@ -84,7 +84,6 @@ Option<SHA1Hash> MapReduceService::mapPartition(
       session.customer(),
       table_name);
 
-  iputs("map:  $0 -- $1 -- $2", map_fn, globals, params);
   if (table.isEmpty()) {
     RAISEF(
         kNotFoundError,

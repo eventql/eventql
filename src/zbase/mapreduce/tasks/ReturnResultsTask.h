@@ -33,9 +33,9 @@ public:
 protected:
   Vector<RefPtr<MapReduceTask>> sources_;
   AnalyticsSession session_;
-  const String& serialize_fn_;
-  const String& globals_;
-  const String& params_;
+  String serialize_fn_;
+  String globals_;
+  String params_;
 };
 
 } // namespace zbase
