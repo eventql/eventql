@@ -80,7 +80,7 @@ ZBase.registerView((function() {
 
     $.onClick($("button.submit", tpl), function() {
       if (input.value.length == 0) {
-        $(".error_note", modal).classList.remove("hidden");
+        $(".error_note.name", modal).classList.remove("hidden");
         input.classList.add("error");
         input.focus();
         return;
@@ -90,13 +90,16 @@ ZBase.registerView((function() {
           table: schema.name,
           field_name: input.value,
           field_type: $("z-dropdown.type", modal).getValue(),
-          optional: $("z-dropdown.is_nullable", modal).getValue()});
+          optional: "true",
+          repeated: $("z-dropdown.is_repeated", modal).getValue()});
 
 
       $.httpPost(url, "", function(r) {
         if (r.status == 201) {
           $.navigateTo(kPathPrefix + schema.name);
         } else {
+          $(".error_note .msg", modal).innerHTML = r.response;
+          $(".error_note", modal).classList.remove("hidden");
           console.log(r);
         }
       });
