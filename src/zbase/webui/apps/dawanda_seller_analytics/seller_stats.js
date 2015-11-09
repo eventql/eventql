@@ -130,7 +130,7 @@ ZBase.registerView((function() {
   };
 
   var loadShopName = function(elem) {
-    var query_str = "SELECT `title` FROM db.shops WHERE id = " +
+    var query_str = "SELECT `title` FROM db.shops WHERE user_id = " +
       $.escapeHTML(shop_id);
 
     var query = query_mgr.get(
