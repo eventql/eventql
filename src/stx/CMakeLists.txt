@@ -83,6 +83,9 @@ if(NOT HAVE_PCRE)
       set(HAVE_PCRE 1)
       message(STATUS "PCRE include dir: ${PCRE_INCLUDE_DIR}")
       include_directories(${PCRE_INCLUDE_DIR})
+      set(HAVE_PCRE 1 PARENT_SCOPE)
+      set(PCRE_INCLUDE_DIR ${PCRE_INCLUDE_DIR} PARENT_SCOPE)
+      set(PCRE_LIBRARIES ${PCRE_LIBRARIES} PARENT_SCOPE)
     endif()
   endif()
 endif()
@@ -166,6 +169,9 @@ add_library(stx-base STATIC
     io/inputstream.cc
     io/outputstream.cc
     io/BufferedOutputStream.cc
+    io/TerminalOutputStream.cc
+    io/TerminalInputStream.cc
+    io/VFSFileInputStream.cc
     io/mmappedfile.cc
     io/pagemanager.cc
     ISO8601.cc
