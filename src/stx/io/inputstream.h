@@ -12,17 +12,19 @@
 #include <memory>
 #include <string>
 #include "stx/buffer.h"
+#include <stx/autoref.h>
 #include "stx/io/file.h"
 
 namespace stx {
+class FileInputStream;
 
-class InputStream {
+class InputStream : public RefCounted {
 public:
 
   /**
    * Get the stdin input stream
    */
-  static std::unique_ptr<InputStream> getStdin();
+  static std::unique_ptr<FileInputStream> getStdin();
 
   InputStream(const std::string& filename = "<anonymous input stream>");
   InputStream(const InputStream& other) = delete;
@@ -44,22 +46,15 @@ public:
   virtual bool eof() = 0;
 
   /**
-   * Read N bytes from the stream and copy the data into the provided string.
+   * Read N bytes from the stream and copy the data into the provided string,
+   * appending after any existing data if the string is not empty.
+   *
    * Returns the number of bytes read.
    *
    * @param target the string to copy the data into
    * @param n_bytes the number of bytes to read
    */
-  virtual size_t readNextBytes(std::string* target, size_t n_bytes);
-
-  /**
-   * Read N bytes from the stream and copy the data into the provided buffer
-   * Returns the number of bytes read.
-   *
-   * @param target the string to copy the data into
-   * @param n_bytes the number of bytes to read
-   */
-  virtual size_t readNextBytes(Buffer* target, size_t n_bytes);
+  size_t readNextBytes(std::string* target, size_t n_bytes);
 
   /**
    * Read N bytes from the stream and copy the data into the provided buffer
@@ -235,6 +230,15 @@ public:
   bool readNextByte(char* target) override;
 
   /**
+   * Read N bytes from the stream and copy the data into the provided buffer
+   * Returns the number of bytes read.
+   *
+   * @param target the string to copy the data into
+   * @param n_bytes the number of bytes to read
+   */
+  size_t readNextBytes(void* target, size_t n_bytes) override;
+
+  /**
    * Skip the next N bytes in the stream. Returns the number of bytes skipped.
    *
    * @param n_bytes the number of bytes to skip
@@ -253,12 +257,25 @@ public:
   void rewind() override;
 
   /**
+   * Seek to the provided offset in number of bytes from the beginning of the
+   * file. Raises en exception if the provided offset is out of bounds of the
+  * underlying file
+   */
+  void seekTo(size_t offset) override;
+
+  /**
+   * Returns true if this input stream is connected to a TTY/terminal and false
+   * otherwise
+   */
+  bool isTTY() const;
+
+  /**
    * Read the byte order mark of the file
    */
   kByteOrderMark readByteOrderMark();
 
 protected:
-  void readNextChunk();
+  bool readNextChunk();
   char buf_[8192]; // FIXPAUL make configurable
   size_t buf_len_;
   size_t buf_pos_;
