@@ -46,7 +46,8 @@ public:
       csql::Runtime* sql,
       zbase::TSDBService* tsdb,
       ConfigDirectory* customer_dir,
-      DocumentDB* docdb);
+      DocumentDB* docdb,
+      PartitionMap* pmap);
 
   void handleHTTPRequest(
       RefPtr<stx::http::HTTPRequestStream> req_stream,
@@ -91,6 +92,16 @@ protected:
       http::HTTPResponse* res);
 
   void createTable(
+      const AnalyticsSession& session,
+      const http::HTTPRequest* req,
+      http::HTTPResponse* res);
+
+  void addTableField(
+      const AnalyticsSession& session,
+      const http::HTTPRequest* req,
+      http::HTTPResponse* res);
+
+  void removeTableField(
       const AnalyticsSession& session,
       const http::HTTPRequest* req,
       http::HTTPResponse* res);
@@ -233,6 +244,7 @@ protected:
   EventsAPIServlet events_api_;
   MapReduceAPIServlet mapreduce_api_;
   DocumentDBServlet documents_api_;
+  PartitionMap* pmap_;
 };
 
 }
