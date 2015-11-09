@@ -119,7 +119,7 @@ void cmd_run(
       }
 
       if (ev.name.get() == "result") {
-        stdout_os->write(URI::urlDecode(ev.data) + "\n");
+        stdout_os->write(URI::urlDecode(ev.data));
         return;
       }
 
