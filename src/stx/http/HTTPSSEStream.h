@@ -18,7 +18,7 @@
 namespace stx {
 namespace http {
 
-class HTTPSSEStream {
+class HTTPSSEStream : public RefCounted {
 public:
 
   /**
@@ -69,7 +69,6 @@ public:
   bool isClosed() const;
 
 private:
-
   RefPtr<http::HTTPResponseStream> res_stream_;
   HTTPResponse res_;
 };

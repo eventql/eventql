@@ -37,6 +37,7 @@ HTTPSSEStream::HTTPSSEStream(
 
 void HTTPSSEStream::start() {
   res_.setStatus(kStatusOK);
+  res_.setHeader("Connection", "close");
   res_.setHeader("Content-Type", "text/event-stream");
   res_.setHeader("Cache-Control", "no-cache");
   res_.setHeader("Access-Control-Allow-Origin", "*");
