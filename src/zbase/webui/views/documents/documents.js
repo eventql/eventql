@@ -72,7 +72,6 @@ ZBase.registerView((function() {
           "<td><a href='" + url + "'>" + $.escapeHTML(doc.type) + "</a></td>" +
           "<td><a href='" + url + "'>" + DateUtil.printTimeAgo(doc.mtime) + "</a></td>";
 
-      $.onClick(tr, function() { $.navigateTo(url); });
       tbody_elem.appendChild(tr);
     });
   };
