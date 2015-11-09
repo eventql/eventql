@@ -13,7 +13,7 @@
 namespace stx {
 
 /**
- * A buffered output stream allowsan application to write bytes to the
+ * A buffered output stream allows an application to write bytes to the
  * underlying output stream without necessarily causing a call to the
  * underlying system for each byte written.
 */
