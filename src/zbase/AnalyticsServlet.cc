@@ -651,7 +651,7 @@ void AnalyticsServlet::addTableField(
     if (parent_field_type != stx::msg::FieldType::OBJECT) {
       res->setStatus(http::kStatusBadRequest);
       res->addBody(StringUtil::format(
-        "can't add field to field of type $0",
+        "can't add field to a field of type $0",
         fieldTypeToString(parent_field_type)));
       return;
     }
