@@ -64,6 +64,32 @@ Option<uint64_t> objectGetUInt64(
   }
 }
 
+Option<double> JSONUtil::objectGetFloat(
+    JSONObject::const_iterator begin,
+    JSONObject::const_iterator end,
+    const std::string& key) {
+  return json::objectGetFloat(begin, end, key);
+}
+
+Option<double> objectGetFloat(
+    const JSONObject& obj,
+    const std::string& key) {
+  return json::objectGetFloat(obj.begin(), obj.end(), key);
+}
+
+Option<double> objectGetFloat(
+    JSONObject::const_iterator begin,
+    JSONObject::const_iterator end,
+    const std::string& key) {
+  auto iter = objectLookup(begin, end, key);
+
+  if (iter != end && (iter->type == JSON_STRING || iter->type == JSON_NUMBER)) {
+    return Some<double>(std::stod(iter->data));
+  } else {
+    return None<double>();
+  }
+}
+
 Option<bool> JSONUtil::objectGetBool(
     JSONObject::const_iterator begin,
     JSONObject::const_iterator end,
