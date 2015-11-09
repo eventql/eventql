@@ -119,7 +119,7 @@ add_subdirectory(util/mdb)
 add_custom_command(
     OUTPUT mapreduce_preludejs.cc
     COMMAND 
-        echo 'zbase/mapreduce/prelude.js:${CMAKE_CURRENT_SOURCE_DIR}/mapreduce/prelude.js' | ${CMAKE_SOURCE_DIR}/src/stx/assets.sh mapreduce_preludejs.cc
+        echo 'zbase/mapreduce/prelude.js:${CMAKE_CURRENT_SOURCE_DIR}/mapreduce/prelude.js' | ${CMAKE_SOURCE_DIR}/deps/libstx/src/stx/assets.sh mapreduce_preludejs.cc
     DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/mapreduce/prelude.js")
 
 add_executable(zbase

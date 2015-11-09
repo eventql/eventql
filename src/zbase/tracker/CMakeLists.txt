@@ -2,7 +2,7 @@ add_custom_command(
     OUTPUT ztracker_trackjs.cc
     COMMAND 
         java -jar ${CMAKE_SOURCE_DIR}/3rdparty/closure_compiler/compiler.jar  --js ${CMAKE_CURRENT_SOURCE_DIR}/track.js --js_output_file ${CMAKE_CURRENT_BINARY_DIR}/track.min.js --language_in=ECMASCRIPT5 &&
-        echo 'zbase/tracker/track.js:${CMAKE_CURRENT_BINARY_DIR}/track.min.js' | ${CMAKE_SOURCE_DIR}/src/stx/assets.sh ztracker_trackjs.cc
+        echo 'zbase/tracker/track.js:${CMAKE_CURRENT_BINARY_DIR}/track.min.js' | ${CMAKE_SOURCE_DIR}/deps/libstx/src/stx/assets.sh ztracker_trackjs.cc
     DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/track.js")
 
 add_custom_target(ztracker-assets DEPENDS

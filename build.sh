@@ -63,7 +63,7 @@ if [[ $BUILD_ASSETS == "true" ]]; then
     find src/zbase/webui/widgets -type f | while read l; do echo ${l/src\//}:$l; done
     find src/zbase/webui/util -type f | while read l; do echo ${l/src\//}:$l; done
     find src/zbase/webui/report-widgets -type f | while read l; do echo ${l/src\//}:$l; done
-  ) | ./src/stx/assets.sh ${TARGET_DIR}/zbase_assets.cc
+  ) | ./deps/libstx/src/stx/assets.sh ${TARGET_DIR}/zbase_assets.cc
 fi
 
 # build documentation
@@ -83,7 +83,7 @@ if [[ $BUILD_DOCUMENTATION == "true" ]]; then
 
   (cd $TARGET_DIR && find docs -type f) | \
       while read f; do echo zbase/docs/${f/docs\//}:${TARGET_DIR}/$f; done | \
-     ./src/stx/assets.sh ${TARGET_DIR}/zbase_documentation_assets.cc
+     ./deps/libstx/src/stx/assets.sh ${TARGET_DIR}/zbase_documentation_assets.cc
 fi
 
 # build c++ with make
