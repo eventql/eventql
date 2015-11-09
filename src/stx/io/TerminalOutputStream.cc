@@ -114,4 +114,8 @@ bool TerminalOutputStream::isTTY() const {
   return is_tty_;
 }
 
+void TerminalOutputStream::setTitle(const String& title) {
+  print(StringUtil::format("\033]0;$0\007", title));
+}
+
 }

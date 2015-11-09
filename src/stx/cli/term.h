@@ -128,6 +128,11 @@ public:
    */
   void disableLineWrap();
 
+  /**
+   * Set the title of this terminal if supported
+   */
+  void setTitle(const String& title);
+
 protected:
 
   bool enableRawMode();

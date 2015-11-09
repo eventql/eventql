@@ -206,6 +206,8 @@ void Term::disableRawMode() {
   }
 }
 
-
+void Term::setTitle(const String& title) {
+  termos_->setTitle(title);
+}
 
 } // namespace stx

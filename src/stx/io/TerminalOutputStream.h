@@ -156,6 +156,11 @@ public:
   void disableLineWrap();
 
   /**
+   * Set the title of this terminal if supported
+   */
+  void setTitle(const String& title);
+
+  /**
    * Write the next n bytes to the stream. This may raise an exception.
    * Returns the number of bytes that have been written.
    *
