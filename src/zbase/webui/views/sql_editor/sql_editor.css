@@ -138,6 +138,7 @@
 
 .zbase_sql_editor .zbase_sql_editor_result_pane table.z-table tr td {
   line-height: 14px;
+  vertical-align: top;
 }
 
 .zbase_sql_editor .error_message {
