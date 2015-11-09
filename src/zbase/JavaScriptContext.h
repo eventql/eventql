@@ -79,6 +79,11 @@ protected:
       unsigned argc,
       JS::Value* vp);
 
+  static bool returnResult(
+      JSContext* ctx,
+      unsigned argc,
+      JS::Value* vp);
+
   static bool listPartitions(
       JSContext* ctx,
       unsigned argc,

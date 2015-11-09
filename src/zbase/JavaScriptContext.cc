@@ -84,6 +84,14 @@ JavaScriptContext::JavaScriptContext(
       JS_DefineFunction(
           ctx_,
           global_,
+          "z1_returnresult",
+          &JavaScriptContext::returnResult,
+          0,
+          0);
+
+      JS_DefineFunction(
+          ctx_,
+          global_,
           "z1_listpartitions",
           &JavaScriptContext::listPartitions,
           0,
@@ -158,6 +166,38 @@ bool JavaScriptContext::dispatchLog(
   args.rval().set(JSVAL_TRUE);
   return true;
 }
+
+bool JavaScriptContext::returnResult(
+    JSContext* ctx,
+    unsigned argc,
+    JS::Value* vp) {
+  auto args = JS::CallArgsFromVp(argc, vp);
+  if (args.length() < 1 || !args[0].isString()) {
+    return false;
+  }
+
+  auto rt = JS_GetRuntime(ctx);
+  auto rt_userdata = JS_GetRuntimePrivate(rt);
+  if (rt_userdata) {
+    auto result_cstr = JS_EncodeString(ctx, args[0].toString());
+    String result_str(result_cstr);
+    JS_free(ctx, result_cstr);
+
+    auto self = static_cast<JavaScriptContext*>(rt_userdata);
+    if (self->job_.get()) {
+      try {
+        self->job_->sendResult(result_str);
+      } catch (const StandardException& e) {
+        self->storeError(e.what());
+        return false;
+      }
+    }
+  }
+
+  args.rval().set(JSVAL_TRUE);
+  return true;
+}
+
 
 bool JavaScriptContext::listPartitions(
     JSContext* ctx,

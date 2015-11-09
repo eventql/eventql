@@ -264,5 +264,13 @@ var Z1 = (function(global) {
     });
   }
 
+  api.writeToOutput = function(str) {
+    if (typeof str != "string") {
+      throw "argument to Z1.writeToOutput must be a string";
+    }
+
+    z1_returnresult(str);
+  };
+
   return api;
 })(this);
