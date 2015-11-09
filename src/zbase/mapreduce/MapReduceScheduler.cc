@@ -169,8 +169,8 @@ size_t MapReduceScheduler::startJobs() {
   return num_started;
 }
 
-void MapReduceScheduler::sendResult(const String& key, const String& value) {
-  job_->sendResult(key, value);
+void MapReduceScheduler::sendResult(const String& value) {
+  job_->sendResult(value);
 }
 
 void MapReduceScheduler::sendLogline(const String& logline) {

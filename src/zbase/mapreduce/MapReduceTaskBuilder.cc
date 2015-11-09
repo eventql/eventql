@@ -236,7 +236,13 @@ RefPtr<MapReduceTask> MapReduceTaskBuilder::buildReturnResultsTask(
     sources.emplace_back(getJob(src_id.get(), shards, job_definitions, jobs));
   }
 
-  return new ReturnResultsTask(sources, shards);
+  return new ReturnResultsTask(
+      sources,
+      shards,
+      session_,
+      "",
+      "{}",
+      "{}");
 }
 
 RefPtr<MapReduceTask> MapReduceTaskBuilder::buildSaveToTableTask(

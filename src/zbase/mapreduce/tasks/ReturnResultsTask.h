@@ -9,6 +9,7 @@
 #pragma once
 #include "stx/stdtypes.h"
 #include "zbase/mapreduce/MapReduceTask.h"
+#include "zbase/AnalyticsSession.pb.h"
 
 using namespace stx;
 
@@ -19,7 +20,11 @@ public:
 
   ReturnResultsTask(
       Vector<RefPtr<MapReduceTask>> sources,
-      MapReduceShardList* shards);
+      MapReduceShardList* shards,
+      const AnalyticsSession& session,
+      const String& serialize_fn,
+      const String& globals,
+      const String& params);
 
   Option<MapReduceShardResult> execute(
       RefPtr<MapReduceTaskShard> shard,
@@ -27,6 +32,10 @@ public:
 
 protected:
   Vector<RefPtr<MapReduceTask>> sources_;
+  AnalyticsSession session_;
+  const String& serialize_fn_;
+  const String& globals_;
+  const String& params_;
 };
 
 } // namespace zbase

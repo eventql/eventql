@@ -16,8 +16,16 @@ namespace zbase {
 
 ReturnResultsTask::ReturnResultsTask(
     Vector<RefPtr<MapReduceTask>> sources,
-    MapReduceShardList* shards) :
-    sources_(sources) {
+    MapReduceShardList* shards,
+    const AnalyticsSession& session,
+    const String& serialize_fn,
+    const String& globals,
+    const String& params) :
+    sources_(sources),
+    session_(session),
+    serialize_fn_(serialize_fn),
+    globals_(globals),
+    params_(params) {
   Vector<size_t> input;
 
   for (const auto& src : sources_) {
@@ -43,9 +51,18 @@ Option<MapReduceShardResult> ReturnResultsTask::execute(
             size_t key_len,
             const void* val,
             size_t val_len) {
-      job->sendResult(
-          String((const char*) key, key_len),
-          String((const char*) val, val_len));
+
+      Buffer buf;
+      json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
+      json.beginObject();
+      json.addObjectEntry("key");
+      json.addString(String((const char*) key, key_len));
+      json.addComma();
+      json.addObjectEntry("value");
+      json.addString(String((const char*) val, val_len));
+      json.endObject();
+
+      job->sendResult(buf.toString());
     });
   }
 

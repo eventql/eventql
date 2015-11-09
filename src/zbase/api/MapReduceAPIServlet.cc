@@ -371,24 +371,12 @@ void MapReduceAPIServlet::executeMapReduceScript(
     sse_stream->sendEvent(buf, Some(String("status")));
   });
 
-  job_spec->onResult([this, sse_stream] (
-      const String& key,
-      const String& value) {
+  job_spec->onResult([this, sse_stream] (const String& value) {
     if (sse_stream->isClosed()) {
       return;
     }
 
-    Buffer buf;
-    json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
-    json.beginObject();
-    json.addObjectEntry("key");
-    json.addString(key);
-    json.addComma();
-    json.addObjectEntry("value");
-    json.addString(value);
-    json.endObject();
-
-    sse_stream->sendEvent(buf, Some(String("result")));
+    sse_stream->sendEvent(URI::urlEncode(value), Some(String("result")));
   });
 
   job_spec->onLogline([this, sse_stream] (const String& logline) {
