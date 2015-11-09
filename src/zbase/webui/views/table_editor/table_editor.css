@@ -117,6 +117,28 @@
 .zbase_table_editor z-modal .error_note.hidden {
   display: none;
 }
+.zbase_table_editor z-modal .error_message {
+  border: 1px solid #edc3c3;
+  border-radius: 3px;
+  background: #fff0f0;
+  color: #a94442;
+  box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+  padding: 12px 20px;
+  font-size: 13px;
+  font-weight: 400;
+  display: block;
+  margin-top: 10px;
+}
+
+.zbase_table_editor z-modal .error_message.hidden {
+  display: none;
+}
+
+.zbase_table_editor z-modal .error_message h4 {
+  color: #a94442;
+  line-height: 1.2em;
+  display: inline-block;
+}
 
 .zbase_table_editor z-modal .field {
   margin-top: 18px;

@@ -98,8 +98,8 @@ ZBase.registerView((function() {
         if (r.status == 201) {
           $.navigateTo(kPathPrefix + schema.name);
         } else {
-          $(".error_note .msg", modal).innerHTML = r.response;
-          $(".error_note", modal).classList.remove("hidden");
+          $(".error_message .msg", modal).innerHTML = r.response;
+          $(".error_message", modal).classList.remove("hidden");
           console.log(r);
         }
       });
@@ -131,9 +131,8 @@ ZBase.registerView((function() {
         if (r.status == 201) {
           $.navigateTo(kPathPrefix + schema.name);
         } else {
-          $(".error_note", modal).classList.remove("hidden");
-          $(".error_note .msg", modal).innerHTML = r.response;
-          input.classList.add("error");
+          $(".error_message", modal).classList.remove("hidden");
+          $(".error_message .msg", modal).innerHTML = r.response;
         }
       });
 
