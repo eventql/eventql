@@ -187,7 +187,7 @@ route {
 
 route {
   path_match: "/a/reports"
-  view: "documents"
+  view: "report_list"
   require_module: "util/z-date-util"
   require_module: "util/z-url-util"
   require_module: "widgets/zbase-header"
@@ -196,8 +196,9 @@ route {
   require_module: "widgets/z-input"
   require_module: "widgets/z-menu"
   require_module: "widgets/z-table"
+  require_module: "widgets/z-button"
   require_module: "widgets/z-dropdown"
-  require_module: "views/documents"
+  require_module: "views/report_list"
 }
 
 route {
