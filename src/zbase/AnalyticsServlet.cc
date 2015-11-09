@@ -649,7 +649,7 @@ void AnalyticsServlet::addTableField(
     auto parent_field_id = cur_schema->fieldId(prefix);
     auto parent_field_type = cur_schema->fieldType(parent_field_id);
     if (parent_field_type != stx::msg::FieldType::OBJECT) {
-      res->setStatus(http::kStatusNotFound);
+      res->setStatus(http::kStatusBadRequest);
       res->addBody(StringUtil::format(
         "can't add field to field of type $0",
         fieldTypeToString(parent_field_type)));
