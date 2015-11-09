@@ -15,7 +15,6 @@
 #include "zbase/dproc/DispatchService.h"
 #include "zbase/AnalyticsApp.h"
 #include "zbase/ReportParams.pb.h"
-#include "zbase/EventIngress.h"
 #include "zbase/AnalyticsSession.pb.h"
 #include "csql/runtime/runtime.h"
 #include "zbase/AnalyticsAuth.h"
@@ -40,7 +39,6 @@ public:
   AnalyticsServlet(
       RefPtr<AnalyticsApp> app,
       dproc::DispatchService* dproc,
-      EventIngress* ingress,
       const String& cachedir,
       AnalyticsAuth* auth,
       csql::Runtime* sql,
@@ -233,7 +231,6 @@ protected:
 
   RefPtr<AnalyticsApp> app_;
   dproc::DispatchService* dproc_;
-  EventIngress* ingress_;
   String cachedir_;
   AnalyticsAuth* auth_;
   csql::Runtime* sql_;

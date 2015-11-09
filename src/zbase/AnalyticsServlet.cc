@@ -45,7 +45,6 @@ namespace zbase {
 AnalyticsServlet::AnalyticsServlet(
     RefPtr<AnalyticsApp> app,
     dproc::DispatchService* dproc,
-    EventIngress* ingress,
     const String& cachedir,
     AnalyticsAuth* auth,
     csql::Runtime* sql,
@@ -55,7 +54,6 @@ AnalyticsServlet::AnalyticsServlet(
     PartitionMap* pmap) :
     app_(app),
     dproc_(dproc),
-    ingress_(ingress),
     cachedir_(cachedir),
     auth_(auth),
     sql_(sql),

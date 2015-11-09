@@ -166,7 +166,6 @@ add_executable(zbase
     AnalyticsQueryReducer.cc
     AnalyticsTableScanSource.cc
     DrilldownTree.cc
-    EventIngress.cc
     ReportFactory.cc
     CSVExportRDD.cc
     JSONExportRDD.cc
@@ -181,43 +180,6 @@ add_executable(zbase
     VTable.cc
     DefaultServlet.cc
     JavaScriptContext.cc
-    ecommerce/ECommerceKPIQuery.cc
-    discovery/CTRByPageQuery.cc
-    discovery/CTRByPositionQuery.cc
-    discovery/DiscoveryDashboardQuery.cc
-    discovery/ItemBoostMapper.cc
-    discovery/ItemBoostMerge.cc
-    discovery/ItemBoostExport.cc
-    search/CTRByResultItemCategoryQuery.cc
-    search/TopSearchTermsQuery.cc
-    search/TopCategoriesByTermMapper.cc
-    search/SearchCTRStats.cc
-    search/SearchDashboardQuery.cc
-    search/ECommerceSearchQueriesFeed.cc
-    search/TopSearchTermsReport.cc
-    search/TopTermsByCategoryReport.cc
-    search/TopCategoriesByTermReport.cc
-    search/CTRBySearchTermCrossCategoryMapper.cc
-    search/RelatedTermsMapper.cc
-    search/RelatedTermsReport.cc
-    catalog/CatalogDashboardQuery.cc
-    catalog/CatalogCategoryDashboardQuery.cc
-    catalog/CatalogCategoryDashboardResult.cc
-    shop_stats/ShopStats.cc
-    shop_stats/ShopProductsTable.cc
-    shop_stats/ShopProductCTRStatsScan.cc
-    shop_stats/ShopProductECommerceStatsScan.cc
-    shop_stats/ShopKPITable.cc
-    shop_stats/ShopCTRStatsScan.cc
-    shop_stats/ShopECommerceStatsScan.cc
-    shop_stats/ShopKPIDashboardQuery.cc
-    shop_stats/ShopProductsDashboardQuery.cc
-    reco_engine/ECommerceRecoQueriesFeed.cc
-    reco_engine/ECommercePreferenceSetsFeed.cc
-    reco_engine/RecoEngineStatsQuery.cc
-    reco_engine/RecoEngineStatsBreakdownQuery.cc
-    reco_engine/RecoEngineStatsReport.cc
-    reco_engine/RecoStats.cc
     WebUIServlet.cc
     WebDocsServlet.cc
     ${CMAKE_CURRENT_BINARY_DIR}/mapreduce_preludejs.cc

@@ -44,9 +44,7 @@
 #include "zbase/WebDocsServlet.h"
 #include "zbase/ReportFactory.h"
 #include "zbase/AnalyticsApp.h"
-#include "zbase/EventIngress.h"
 #include "zbase/TableDefinition.h"
-#include "zbase/JoinedSession.pb.h"
 #include "zbase/core/TSDBService.h"
 #include "zbase/core/TSDBServlet.h"
 #include "zbase/core/ReplicationWorker.h"
@@ -284,7 +282,6 @@ int main(int argc, const char** argv) {
   zbase::AnalyticsServlet analytics_servlet(
       analytics_app,
       &dproc,
-      nullptr,
       flags.getString("cachedir"),
       &auth,
       sql.get(),
