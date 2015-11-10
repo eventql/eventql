@@ -77,7 +77,10 @@ add_subdirectory(deps/libcstable)
 include_directories(${CSTABLE_INCLUDE})
 
 add_subdirectory(src/sstable)
-add_subdirectory(src/cplot)
+
+add_subdirectory(deps/libcplot)
+include_directories(${CPLOT_INCLUDE})
+
 add_subdirectory(src/csql)
 
 add_subdirectory(3rdparty/brokerd)
