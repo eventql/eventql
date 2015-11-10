@@ -68,9 +68,9 @@ ExternalProject_Add(mozjs_build
 set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} ${CMAKE_BINARY_DIR}/3rdparty/mozjs/dist/lib)
 
 include(deps/libstx/src/stx/cmake/CFlags.cmake)
+
 add_subdirectory(deps/libstx)
-include_directories(deps/libstx/src)
-include_directories(${CMAKE_CURRENT_BINARY_DIR}/deps/libstx/src)
+include_directories(${STX_INCLUDE})
 
 add_subdirectory(src/sstable)
 add_subdirectory(src/cstable)
