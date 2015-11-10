@@ -1,0 +1,31 @@
+/**
+ * This file is part of the "libfnord" project
+ *   Copyright (c) 2015 Paul Asmuth
+ *
+ * FnordMetric is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License v3.0. You should have received a
+ * copy of the GNU General Public License along with this program. If not, see
+ * <http://www.gnu.org/licenses/>.
+ */
+package stx.feeds;
+
+message TopicCursorOffset {
+  required uint64 next_offset = 5;
+  required string host_id = 4;
+}
+
+message TopicCursor {
+
+  required string topic = 1;
+
+  /**
+   * The last read offsets for each host. This is the actual cursor information
+   * and should not be discarded. You may remove the offset for a particular
+   * host iff you are sure the host with that host id will never receive
+   * another message and the host was previously removed from the servers list.
+   * However usually that shouldn't be necessary so usually this list should
+   * not be touched.
+   */
+  repeated TopicCursorOffset offsets = 2;
+
+};
