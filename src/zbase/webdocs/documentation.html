@@ -63,7 +63,9 @@
     <script type="text/javascript">{{app_js}}</script>
     <script>
       var menu = DocumentationMenu();
-      menu.render(document.getElementsByClassName("zbase_docs_menu")[0]);
+      menu.render(
+        document.querySelector(".zbase_docs_menu"),
+        document.location.pathname);
     </script>
   </body>
 </html>
