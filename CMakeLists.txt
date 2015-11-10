@@ -71,9 +71,12 @@ include(deps/libstx/src/stx/cmake/CFlags.cmake)
 
 add_subdirectory(deps/libstx)
 include_directories(${STX_INCLUDE})
+set(HAVE_STX true)
+
+add_subdirectory(deps/libcstable)
+include_directories(${CSTABLE_INCLUDE})
 
 add_subdirectory(src/sstable)
-add_subdirectory(src/cstable)
 add_subdirectory(src/cplot)
 add_subdirectory(src/csql)
 
