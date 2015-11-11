@@ -76,7 +76,7 @@ if [[ $BUILD_DOCUMENTATION == "true" ]]; then
     mkdir -p ${TARGET_DIR}/$(dirname docs/${page_name})
 
     echo "Compiling markdown: docs/${page_name}.md"
-    node 3rdparty/markdown-js/convert.js \
+    node deps/3rdparty/markdown-js/convert.js \
         ${TARGET_DIR}/docs/${page_name}.md \
         ${TARGET_DIR}/docs/${page_name}.html
   done
