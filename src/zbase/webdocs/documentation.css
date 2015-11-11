@@ -290,6 +290,10 @@ zbase-breadcrumbs zbase-breadcrumbs-section[data-link]:hover,
   font-size: 14px;
 }
 
+.zbase_docs_sidebar z-menu-item a.active {
+  font-weight: 500;
+}
+
 .zbase_docs_sidebar z-menu-item span.index {
   font-weight: 300;
   margin-right: 5px;
