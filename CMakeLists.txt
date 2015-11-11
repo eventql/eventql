@@ -75,18 +75,23 @@ set(HAVE_STX true)
 
 add_subdirectory(deps/libcstable)
 include_directories(${CSTABLE_INCLUDE})
+set(HAVE_CSTABLE true)
 
 add_subdirectory(deps/libsstable)
 include_directories(${SSTABLE_INCLUDE})
+set(HAVE_SSTABLE true)
 
 add_subdirectory(deps/libcplot)
 include_directories(${CPLOT_INCLUDE})
+set(HAVE_CPLOT true)
 
 add_subdirectory(deps/libcsql)
 include_directories(${CSQL_INCLUDE})
+set(HAVE_CSQL true)
 
 add_subdirectory(deps/brokerd)
 include_directories(${BROKERD_INCLUDE})
+set(HAVE_BROKERD true)
 
 add_subdirectory(src/zbase)
 add_subdirectory(src/zbase/master)
