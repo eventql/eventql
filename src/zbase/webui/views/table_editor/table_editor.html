@@ -44,7 +44,7 @@
           <tr>
             <th>Column Name</th>
             <th>Type</th>
-            <th>NULL</th>
+            <th>Optional</th>
           </tr>
         </thead>
 
@@ -80,11 +80,13 @@
   <div class="z-modal-header">Remove Column</div>
 
   <div class="z-modal-content">
+    <div class="error_message hidden" style="margin-bottom: 10px;">
+      <h4>Column could not be removed:</h4>
+      <span class="msg"></span>
+    </div>
+
     <h3>Please note that this action is irreversable!</h3>
     <p>Please type in the name of the column that you want to remove.</p>
-    <div class="error_note hidden">
-      Column could not be removed: <span class="msg"></span>
-    </div>
     <input class="z-input" />
   </div>
 
@@ -97,8 +99,9 @@
 <template id="zbase_table_editor_add_modal_tpl">
   <div class="z-modal-header">Add Column</div>
   <div class="z-modal-content">
-    <div class="error_note hidden">
-      An error occured while adding the field: <span class="msg"></span>
+    <div class="error_message hidden">
+      <h4>An error occured while adding the field:</h4>
+      <span class="msg"></span>
     </div>
 
     <div class="field">
@@ -125,12 +128,12 @@
     </div>
 
     <div class="field">
-      <label>NULL:</label>
-      <z-dropdown class="input is_nullable" data-resolved>
+      <label>Repeated:</label>
+      <z-dropdown class="input is_repeated" data-resolved>
         <z-dropdown-flyout>
           <z-dropdown-items>
-            <z-dropdown-item data-value="true" data-selected>TRUE</z-dropdown-item>
-            <z-dropdown-item data-value="false">FALSE</z-dropdown-item>
+            <z-dropdown-item data-value="false" data-selected>FALSE</z-dropdown-item>
+            <z-dropdown-item data-value="true">TRUE</z-dropdown-item>
           </z-dropdown-items>
         </z-dropdown-flyout>
       </z-dropdown>

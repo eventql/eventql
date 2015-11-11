@@ -80,7 +80,7 @@ ZBase.registerView((function() {
 
     $.onClick($("button.submit", tpl), function() {
       if (input.value.length == 0) {
-        $(".error_note", modal).classList.remove("hidden");
+        $(".error_note.name", modal).classList.remove("hidden");
         input.classList.add("error");
         input.focus();
         return;
@@ -90,13 +90,19 @@ ZBase.registerView((function() {
           table: schema.name,
           field_name: input.value,
           field_type: $("z-dropdown.type", modal).getValue(),
-          optional: $("z-dropdown.is_nullable", modal).getValue()});
+          optional: "true",
+          repeated: $("z-dropdown.is_repeated", modal).getValue()});
 
 
       $.httpPost(url, "", function(r) {
         if (r.status == 201) {
+          var info_message = ZbaseInfoMessage($(".zbase_app"));
+          info_message.renderSuccess(
+              "The table column " + input.value + " has been successfully added.");
           $.navigateTo(kPathPrefix + schema.name);
         } else {
+          $(".error_message .msg", modal).innerHTML = r.response;
+          $(".error_message", modal).classList.remove("hidden");
           console.log(r);
         }
       });
@@ -126,11 +132,12 @@ ZBase.registerView((function() {
 
       $.httpPost(url, "", function(r) {
         if (r.status == 201) {
+          var info_message = ZbaseInfoMessage($(".zbase_app"));
+          info_message.renderSuccess("The table column has been removed.");
           $.navigateTo(kPathPrefix + schema.name);
         } else {
-          $(".error_note", modal).classList.remove("hidden");
-          $(".error_note .msg", modal).innerHTML = r.response;
-          input.classList.add("error");
+          $(".error_message", modal).classList.remove("hidden");
+          $(".error_message .msg", modal).innerHTML = r.response;
         }
       });
 
