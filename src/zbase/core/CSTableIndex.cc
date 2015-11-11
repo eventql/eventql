@@ -18,7 +18,7 @@
 #include <zbase/core/RecordSet.h>
 #include <zbase/core/LogPartitionReader.h>
 #include <stx/protobuf/MessageDecoder.h>
-#include <cstable/CSTableBuilder.h>
+#include <cstable/v1/CSTableBuilder.h>
 
 using namespace stx;
 
@@ -90,7 +90,7 @@ void CSTableIndex::buildCSTable(RefPtr<Partition> partition) {
   auto schema = table->schema();
 
   {
-    cstable::CSTableBuilder cstable(schema.get());
+    cstable::v1::CSTableBuilder cstable(schema.get());
 
     auto reader_ptr = partition->getReader();
     auto& reader = dynamic_cast<LogPartitionReader&>(*reader_ptr);

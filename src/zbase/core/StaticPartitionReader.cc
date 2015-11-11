@@ -29,17 +29,17 @@ void StaticPartitionReader::fetchRecords(
     Function<void (const msg::MessageObject& record)> fn) {
   auto schema = table_->schema();
 
-  auto cstable = fetchCSTable();
+  auto cstable = fetchCSTableFilename();
   if (cstable.isEmpty()) {
     return;
   }
 
-  cstable::CSTableReader reader(cstable.get());
+  auto reader = cstable::CSTableReader::openFile(cstable.get());
   cstable::RecordMaterializer materializer(
       schema.get(),
-      &reader);
+      reader.get());
 
-  auto rec_count = reader.numRecords();
+  auto rec_count = reader->numRecords();
   for (size_t i = 0; i < rec_count; ++i) {
     msg::MessageObject robj;
     materializer.nextRecord(&robj);

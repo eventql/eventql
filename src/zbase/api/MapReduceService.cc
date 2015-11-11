@@ -381,7 +381,7 @@ bool MapReduceService::saveLocalResultToTable(
       StringUtil::format("mr-shard-$0.cst", Random::singleton()->hex128()));
 
   {
-    cstable::CSTableBuilder cstable(schema.get());
+    cstable::v1::CSTableBuilder cstable(schema.get());
     sstable::SSTableReader sstable(sstable_file.get());
     auto cursor = sstable.getCursor();
     while (cursor->valid()) {
@@ -448,7 +448,7 @@ bool MapReduceService::saveRemoteResultsToTable(
       StringUtil::format("mr-shard-$0.cst", Random::singleton()->hex128()));
 
   {
-    cstable::CSTableBuilder cstable(schema.get());
+    cstable::v1::CSTableBuilder cstable(schema.get());
 
     for (const auto& input_table_url : input_tables) {
       auto api_token = auth_->encodeAuthToken(session);

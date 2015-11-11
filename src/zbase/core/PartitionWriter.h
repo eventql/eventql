@@ -12,7 +12,7 @@
 #include <stx/autoref.h>
 #include <zbase/core/PartitionSnapshot.h>
 #include <zbase/core/RecordRef.h>
-#include <cstable/CSTableBuilder.h>
+#include <cstable/v1/CSTableBuilder.h>
 
 using namespace stx;
 

@@ -16,7 +16,6 @@
 #include <stx/protobuf/MessageEncoder.h>
 #include <stx/protobuf/MessageDecoder.h>
 #include <stx/protobuf/msg.h>
-#include <cstable/CSTableBuilder.h>
 #include <sstable/sstablereader.h>
 #include <zbase/core/LogPartitionReader.h>
 #include <zbase/core/LogPartitionWriter.h>
