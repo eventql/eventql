@@ -136,6 +136,7 @@ void cmd_run(
     };
 
     std::string url;
+    //run mapreduce
     if (StringUtil::endsWith(argv[0], "js")) {
       url = StringUtil::format(
         "http://$0/api/v1/mapreduce/execute",
@@ -144,13 +145,15 @@ void cmd_run(
 
     }
 
+    //run sql query
     if (StringUtil::endsWith(argv[0], "sql")) {
       url = StringUtil::format(
         "http://$0/api/v1/sql_stream?query=$1",
         global_flags.getString("api_host"),
-        URI::urlEncode("SELECT 1;"));
-    }
+        URI::urlEncode(program_source.toString()));
 
+      program_source.clear();
+    }
 
     auto auth_token = loadAuth(global_flags);
 
