@@ -76,7 +76,8 @@ set(HAVE_STX true)
 add_subdirectory(deps/libcstable)
 include_directories(${CSTABLE_INCLUDE})
 
-add_subdirectory(src/sstable)
+add_subdirectory(deps/libsstable)
+include_directories(${SSTABLE_INCLUDE})
 
 add_subdirectory(deps/libcplot)
 include_directories(${CPLOT_INCLUDE})
