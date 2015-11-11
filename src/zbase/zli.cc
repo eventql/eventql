@@ -207,7 +207,6 @@ void cmd_run(
     stderr_os->print(StringUtil::format(" $0\n", e.what()));
     exit(1);
   }
-
 }
 
 void cmd_login(
