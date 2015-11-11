@@ -141,8 +141,6 @@ void cmd_run(
       url = StringUtil::format(
         "http://$0/api/v1/mapreduce/execute",
         global_flags.getString("api_host"));
-
-
     }
 
     //run sql query
