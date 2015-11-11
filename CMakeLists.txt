@@ -82,7 +82,8 @@ include_directories(${SSTABLE_INCLUDE})
 add_subdirectory(deps/libcplot)
 include_directories(${CPLOT_INCLUDE})
 
-add_subdirectory(src/csql)
+add_subdirectory(deps/libcsql)
+include_directories(${CSQL_INCLUDE})
 
 add_subdirectory(deps/3rdparty/brokerd)
 include_directories(${BROKERD_INCLUDE})
