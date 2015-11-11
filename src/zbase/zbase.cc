@@ -297,42 +297,6 @@ int main(int argc, const char** argv) {
   http_router.addRouteByPrefixMatch("/docs/", &webdocs_servlet);
   http_router.addRouteByPrefixMatch("/", &default_servlet);
 
-  {
-    FeedConfig fc;
-    fc.set_customer("dawanda");
-    fc.set_feed("search.ECommerceSearchQueriesFeed");
-    fc.set_partition_size(kMicrosPerHour * 4);
-    fc.set_first_partition(1430438400000000); // 2015-05-01 00:00:00Z
-    fc.set_num_shards(128);
-    fc.set_table_name("sessions");
-
-    analytics_app->configureFeed(fc);
-  }
-
-  {
-    FeedConfig fc;
-    fc.set_customer("dawanda");
-    fc.set_feed("reco_engine.ECommerceRecoQueriesFeed");
-    fc.set_partition_size(kMicrosPerHour * 4);
-    fc.set_first_partition(1432785600000000);
-    fc.set_num_shards(32);
-    fc.set_table_name("sessions");
-
-    analytics_app->configureFeed(fc);
-  }
-
-  {
-    FeedConfig fc;
-    fc.set_customer("dawanda");
-    fc.set_feed("reco_engine.ECommercePreferenceSetsFeed");
-    fc.set_partition_size(kMicrosPerHour * 4);
-    fc.set_first_partition(1430438400000000); // 2015-05-01 00:00:00Z
-    fc.set_num_shards(32);
-    fc.set_table_name("sessions");
-
-    analytics_app->configureFeed(fc);
-  }
-
   auto rusage_t = std::thread([] () {
     for (;; usleep(1000000)) {
       logDebug(

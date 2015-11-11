@@ -151,20 +151,11 @@ add_executable(zbase
     LogfileScanResult.cc
     EventScanResult.cc
     Report.cc
-    AnalyticsTableScan.cc
-    AnalyticsTableScanPlanner.cc
-    TrafficSegment.cc
     CTRStatsServlet.cc
     AnalyticsServlet.cc
     HTTPAuth.cc
     JSONSink.cc
     AnalyticsApp.cc
-    AnalyticsQuery.cc
-    AnalyticsQueryResult.cc
-    AnalyticsQueryFactory.cc
-    AnalyticsQueryMapper.cc
-    AnalyticsQueryReducer.cc
-    AnalyticsTableScanSource.cc
     DrilldownTree.cc
     ReportFactory.cc
     CSVExportRDD.cc

@@ -22,12 +22,6 @@
 #include "stx/protobuf/MessageEncoder.h"
 #include "stx/csv/CSVInputStream.h"
 #include "stx/csv/BinaryCSVInputStream.h"
-#include "zbase/TrafficSegment.h"
-#include "zbase/AnalyticsQuery.h"
-#include "zbase/AnalyticsQueryResult.h"
-#include "zbase/AnalyticsQueryReducer.h"
-#include "zbase/Report.h"
-#include "zbase/AnalyticsQueryParams.pb.h"
 #include "zbase/PipelineInfo.h"
 #include "zbase/TableDefinition.h"
 #include "csql/runtime/ASCIITableFormat.h"
@@ -35,12 +29,11 @@
 #include "zbase/core/TimeWindowPartitioner.h"
 #include "zbase/core/FixedShardPartitioner.h"
 #include "zbase/HTTPAuth.h"
-#include <cstable/CSTableBuilder.h>
+#include <cstable/v1/CSTableBuilder.h>
 
 using namespace stx;
 
 namespace zbase {
-
 
 AnalyticsServlet::AnalyticsServlet(
     RefPtr<AnalyticsApp> app,
@@ -825,7 +818,7 @@ void AnalyticsServlet::uploadTable(
       shard);
 
   try {
-    cstable::CSTableBuilder cstable(schema.get().get());
+    cstable::v1::CSTableBuilder cstable(schema.get().get());
 
     {
       auto tmpfile = File::openFile(

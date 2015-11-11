@@ -16,9 +16,6 @@
 #include "zbase/core/TSDBClient.h"
 #include "zbase/core/TSDBService.h"
 #include "zbase/core/CSTableIndex.h"
-#include "zbase/AnalyticsQuery.h"
-#include "zbase/AnalyticsQueryResult.h"
-#include "zbase/AnalyticsQueryFactory.h"
 #include "zbase/ReportFactory.h"
 #include "zbase/FeedConfig.pb.h"
 #include "zbase/ReportParams.pb.h"
@@ -49,40 +46,6 @@ public:
       const String& datadir,
       const String& cachedir);
 
-  /**
-   * Build a "feed" query
-   */
-  dproc::TaskSpec buildFeedQuery(
-      const String& customer,
-      const String& feed,
-      uint64_t sequence);
-
-  /**
-   * Build an "analytics" query
-   */
-  dproc::TaskSpec buildAnalyticsQuery(
-      const AnalyticsSession& session,
-      const AnalyticsQuerySpec& query_spec);
-
-  /**
-   * Build an "analytics" query
-   */
-  dproc::TaskSpec buildAnalyticsQuery(
-      const AnalyticsSession& session,
-      const URI::ParamList& params);
-
-  /**
-   * Build a "report" query
-   */
-  dproc::TaskSpec buildReportQuery(
-      const String& customer,
-      const String& report,
-      const UnixTime& from,
-      const UnixTime& until,
-      const URI::ParamList& params);
-
-  void configureFeed(const FeedConfig& cfg);
-
   RefPtr<csql::ExecutionStrategy> getExecutionStrategy(const String& customer);
   RefPtr<csql::TableProvider> getTableProvider(const String& customer) const;
 
@@ -109,7 +72,6 @@ protected:
   zbase::PartitionMap* partition_map_;
   zbase::ReplicationScheme* replication_scheme_;
   zbase::CSTableIndex* cstable_index_;
-  AnalyticsQueryFactory queries_;
   HashMap<String, FeedConfig> feeds_;
   ConfigDirectory* cdb_;
   AnalyticsAuth* auth_;
