@@ -85,7 +85,7 @@ include_directories(${CPLOT_INCLUDE})
 add_subdirectory(deps/libcsql)
 include_directories(${CSQL_INCLUDE})
 
-add_subdirectory(deps/3rdparty/brokerd)
+add_subdirectory(deps/brokerd)
 include_directories(${BROKERD_INCLUDE})
 
 add_subdirectory(src/zbase)
