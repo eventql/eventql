@@ -127,6 +127,12 @@ protected:
       http::HTTPResponse* res,
       RefPtr<http::HTTPResponseStream> res_stream);
 
+  void executeSQLJSONStream(
+      const String& query,
+      const AnalyticsSession& session,
+      http::HTTPResponse* res,
+      RefPtr<http::HTTPResponseStream> res_stream);
+
   void executeSQLAggregatePartition(
       const AnalyticsSession& session,
       const http::HTTPRequest* req,
