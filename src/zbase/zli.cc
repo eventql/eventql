@@ -54,6 +54,11 @@ void cmd_run(
     RAISE(kUsageError, "usage: $ zli run <script.js>");
   }
 
+  if (!(StringUtil::endsWith(argv[0], "js") ||
+      StringUtil::endsWith(argv[0], "sql"))) {
+           RAISE(kUsageError, "unsupported file format");
+  }
+
   auto stdout_os = OutputStream::getStdout();
   auto stderr_os = TerminalOutputStream::fromStream(OutputStream::getStderr());
 
@@ -130,9 +135,23 @@ void cmd_run(
 
     };
 
-    auto url = StringUtil::format(
+    std::string url;
+    //run mapreduce
+    if (StringUtil::endsWith(argv[0], "js")) {
+      url = StringUtil::format(
         "http://$0/api/v1/mapreduce/execute",
         global_flags.getString("api_host"));
+    }
+
+    //run sql query
+    if (StringUtil::endsWith(argv[0], "sql")) {
+      url = StringUtil::format(
+        "http://$0/api/v1/sql_stream?query=$1",
+        global_flags.getString("api_host"),
+        URI::urlEncode(program_source.toString()));
+
+      program_source.clear();
+    }
 
     auto auth_token = loadAuth(global_flags);
 
