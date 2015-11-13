@@ -133,6 +133,11 @@ protected:
       http::HTTPResponse* res,
       RefPtr<http::HTTPResponseStream> res_stream);
 
+  void executeSQLBinaryStream(
+      const String& query,
+      const AnalyticsSession& session,
+      RefPtr<http::HTTPResponseStream> res_stream);
+
   void executeSQLAggregatePartition(
       const AnalyticsSession& session,
       const http::HTTPRequest* req,

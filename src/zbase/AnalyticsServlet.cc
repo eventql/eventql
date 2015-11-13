@@ -1067,6 +1067,27 @@ void AnalyticsServlet::executeSQLStream(
     executeSQLJSONStream(query, session, res, res_stream);
     return;
   }
+
+  if (format == "binary") {
+    executeSQLBinaryStream(query, session, res_stream);
+    return;
+  }
+}
+
+void AnalyticsServlet::executeSQLBinaryStream(
+    const String& query,
+    const AnalyticsSession& session,
+    RefPtr<http::HTTPResponseStream> res_stream) {
+
+  /*try {
+    sql_->executeQuery(
+        query,
+        app_->getExecutionStrategy(session.customer()),
+        new csql::BinaryStreamFormat(res_stream));
+
+  } catch (const StandardException& e) {
+
+  }*/
 }
 
 void AnalyticsServlet::executeSQLJSONStream(
