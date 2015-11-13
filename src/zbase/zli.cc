@@ -46,24 +46,15 @@ String loadAuth(const cli::FlagParser& global_flags) {
   }
 }
 
-void cmd_run(
+void runJS(
     const cli::FlagParser& global_flags,
-    const cli::FlagParser& cmd_flags) {
-  const auto& argv = cmd_flags.getArgv();
-  if (argv.size() != 1) {
-    RAISE(kUsageError, "usage: $ zli run <script.js>");
-  }
-
-  if (!(StringUtil::endsWith(argv[0], "js") ||
-      StringUtil::endsWith(argv[0], "sql"))) {
-           RAISE(kUsageError, "unsupported file format");
-  }
+    const String& file) {
 
   auto stdout_os = OutputStream::getStdout();
   auto stderr_os = TerminalOutputStream::fromStream(OutputStream::getStderr());
 
   try {
-    auto program_source = FileUtil::read(argv[0]);
+    auto program_source = FileUtil::read(file);
 
     bool finished = false;
     bool error = false;
@@ -135,23 +126,9 @@ void cmd_run(
 
     };
 
-    std::string url;
-    //run mapreduce
-    if (StringUtil::endsWith(argv[0], "js")) {
-      url = StringUtil::format(
+    auto url = StringUtil::format(
         "http://$0/api/v1/mapreduce/execute",
         global_flags.getString("api_host"));
-    }
-
-    //run sql query
-    if (StringUtil::endsWith(argv[0], "sql")) {
-      url = StringUtil::format(
-        "http://$0/api/v1/sql_stream?query=$1",
-        global_flags.getString("api_host"),
-        URI::urlEncode(program_source.toString()));
-
-      program_source.clear();
-    }
 
     auto auth_token = loadAuth(global_flags);
 
@@ -207,6 +184,34 @@ void cmd_run(
     stderr_os->print(StringUtil::format(" $0\n", e.what()));
     exit(1);
   }
+}
+
+void runSQL(const String& file) {
+  auto stdout_os = OutputStream::getStdout();
+  auto stderr_os = TerminalOutputStream::fromStream(OutputStream::getStderr());
+
+  stderr_os->printGreen("run SQL");
+}
+
+void cmd_run(
+    const cli::FlagParser& global_flags,
+    const cli::FlagParser& cmd_flags) {
+  const auto& argv = cmd_flags.getArgv();
+  if (argv.size() != 1) {
+    RAISE(kUsageError, "usage: $ zli run <script.js>");
+  }
+
+  if (StringUtil::endsWith(argv[0], "js")) {
+    runJS(global_flags, argv[0]);
+    return;
+  }
+
+  if (StringUtil::endsWith(argv[0], "sql")) {
+    runSQL(argv[0]);
+    return;
+  }
+
+  RAISE(kUsageError, "unsupported file format");
 }
 
 void cmd_login(
