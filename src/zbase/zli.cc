@@ -186,9 +186,64 @@ void runJS(
   }
 }
 
-void runSQL(const String& file) {
+void runSQL(
+    const cli::FlagParser& global_flags,
+    const String& file) {
+
   auto stdout_os = OutputStream::getStdout();
   auto stderr_os = TerminalOutputStream::fromStream(OutputStream::getStderr());
+
+  try {
+    auto program_source = FileUtil::read(file).toString();
+    bool is_tty = stderr_os->isTTY();
+
+    auto response_handler = [&] (const http::HTTPSSEEvent& ev) {
+
+    };
+
+    auto url = StringUtil::format(
+          "http://$0/api/v1/sql_stream?format=binary&query=",
+          global_flags.getString("api_host"),
+          program_source);
+
+    program_source.clear();
+
+    auto auth_token = loadAuth(global_flags);
+
+    http::HTTPMessage::HeaderList auth_headers;
+    auth_headers.emplace_back(
+        "Authorization",
+        StringUtil::format("Token $0", auth_token));
+
+    if (is_tty) {
+      stderr_os->print("Launching job...");
+      //line_dirty = true;
+    } else {
+      stderr_os->print("Launching job...\n");
+    }
+
+
+    http::HTTPClient http_client;
+    const Promise<http::HTTPResponse> promise;
+    auto req = http::HTTPRequest::mkPost(url, program_source, auth_headers);
+    auto res = http_client.executeRequest(
+        req,
+        http::HTTPResponseFuture(promise));
+
+    //'Function<stx::http::HTTPResponseFuture *(Promise<stx::http::HTTPResponse>)>'
+    /*return [on_event] (
+      const Promise<http::HTTPResponse> promise) -> HTTPResponseFuture* {
+    return new HTTPSSEResponseHandler(promise, on_event);
+  }*/
+
+  } catch (const StandardException& e) {
+    stderr_os->print(
+        "ERROR:",
+        { TerminalStyle::RED, TerminalStyle::UNDERSCORE });
+
+    stderr_os->print(StringUtil::format(" $0\n", e.what()));
+    exit(1);
+  }
 
   stderr_os->printGreen("run SQL");
 }
@@ -207,7 +262,7 @@ void cmd_run(
   }
 
   if (StringUtil::endsWith(argv[0], "sql")) {
-    runSQL(argv[0]);
+    runSQL(global_flags, argv[0]);
     return;
   }
 
