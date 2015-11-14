@@ -26,6 +26,7 @@
 #include "zbase/TableDefinition.h"
 #include "csql/runtime/ASCIITableFormat.h"
 #include "csql/runtime/JSONSSEStreamFormat.h"
+#include "csql/runtime/BinaryStreamFormat.h"
 #include "zbase/core/TimeWindowPartitioner.h"
 #include "zbase/core/FixedShardPartitioner.h"
 #include "zbase/HTTPAuth.h"
@@ -1079,7 +1080,7 @@ void AnalyticsServlet::executeSQLBinaryStream(
     const AnalyticsSession& session,
     RefPtr<http::HTTPResponseStream> res_stream) {
 
-  /*try {
+  try {
     sql_->executeQuery(
         query,
         app_->getExecutionStrategy(session.customer()),
@@ -1087,7 +1088,7 @@ void AnalyticsServlet::executeSQLBinaryStream(
 
   } catch (const StandardException& e) {
 
-  }*/
+  }
 }
 
 void AnalyticsServlet::executeSQLJSONStream(
