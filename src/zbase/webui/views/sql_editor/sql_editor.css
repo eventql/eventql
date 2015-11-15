@@ -79,11 +79,16 @@
 }
 
 .zbase_sql_editor .zbase_page_title .sidebar_visibility.closed {
-  margin-right: 3px;
+  margin-right: 20px;
 }
 
 .zbase_sql_editor .zbase_page_title .sidebar_visibility i.line {
-  border-left: 2px solid #fff;
+  height: 12px;
+  width: 1px;
+  background: #fff;
+  vertical-align: middle;
+  margin-top: -4px;
+  margin-left: 1px;
 }
 
 .zbase_sql_editor .zbase_page_title .sidebar_visibility i.line.left {
@@ -92,6 +97,7 @@
 
 .zbase_sql_editor .zbase_page_title .sidebar_visibility.closed i.line.left {
   display: inline-block;
+  margin-right: -3px;
 }
 
 .zbase_sql_editor .zbase_page_title .sidebar_visibility.closed i.line.right {
@@ -99,12 +105,13 @@
 }
 
 .zbase_sql_editor .zbase_page_title .sidebar_visibility i.chevron:before {
-  content: "\f054";
+  content: "\f105";
   margin-right: -4px;
+  font-size: 15px;
 }
 
 .zbase_sql_editor .zbase_page_title .sidebar_visibility.closed i.chevron:before {
-  content: "\f053";
+  content: "\f104";
 }
 
 .zbase_sql_editor h2.pagetitle.document_name {
