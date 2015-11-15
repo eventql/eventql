@@ -85,9 +85,11 @@ ZBase.registerView((function() {
       if (docsync) docsync.saveDocument();
     });
 
-    $.onClick($("button[data-action='execute-query']", page), function() {
+    var execute_btn = $("button[data-action='execute-query']", page);
+    $.onClick(execute_btn, function() {
       editor.execute();
     });
+    $("z-tooltip.execute_hint", page).init(execute_btn);
 
     //table_list
     var table_list = TableListWidget($(".table_list", page));
