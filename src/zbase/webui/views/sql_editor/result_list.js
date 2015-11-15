@@ -21,7 +21,11 @@ var SQLEditorResultList = function(results) {
 
     innerHTML += "</tbody>";
     table.innerHTML = innerHTML;
-    elem.appendChild(table);
+
+    var container = document.createElement("div");
+    container.className = "table_container";
+    container.appendChild(table);
+    elem.appendChild(container);
   };
 
   var renderResultChart = function(elem, svg) {
