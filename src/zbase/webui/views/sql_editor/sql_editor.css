@@ -94,12 +94,13 @@
 }
 
 .zbase_sql_editor .zbase_page_title .sidebar_visibility i.chevron:before {
-  content: "\f105";
-  font-size: 15px;
+  content: "\f101";
+  font-size: 16px;
+  line-height: 38px;
 }
 
 .zbase_sql_editor .zbase_page_title .sidebar_visibility.closed i.chevron:before {
-  content: "\f104";
+  content: "\f100";
 }
 
 .zbase_sql_editor h2.pagetitle.document_name {
