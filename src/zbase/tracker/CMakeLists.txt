@@ -9,7 +9,6 @@ add_custom_target(ztracker-assets DEPENDS
     "${CMAKE_CURRENT_BINARY_DIR}/ztracker_trackjs.cc")
 
 add_executable(ztracker
-    $<TARGET_OBJECTS:stx-rpc>
     $<TARGET_OBJECTS:stx-mdb>
     $<TARGET_OBJECTS:brokerd-client>
     $<TARGET_OBJECTS:customerdirectory>

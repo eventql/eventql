@@ -32,7 +32,6 @@ add_executable(zlogjoin
     $<TARGET_OBJECTS:brokerd-client>
     $<TARGET_OBJECTS:inventoryd-client>
     $<TARGET_OBJECTS:stx-mdb>
-    $<TARGET_OBJECTS:stx-rpc>
     $<TARGET_OBJECTS:nlputil>
     $<TARGET_OBJECTS:hunspell>
     $<TARGET_OBJECTS:tsdb-client>
@@ -47,7 +46,6 @@ add_executable(test-logjoin
     $<TARGET_OBJECTS:brokerd-client>
     $<TARGET_OBJECTS:inventoryd-client>
     $<TARGET_OBJECTS:stx-mdb>
-    $<TARGET_OBJECTS:stx-rpc>
     $<TARGET_OBJECTS:nlputil>
     $<TARGET_OBJECTS:hunspell>
     $<TARGET_OBJECTS:tsdb-client>

@@ -124,7 +124,6 @@ add_custom_command(
 
 add_executable(zbase
     $<TARGET_OBJECTS:stx-mdb>
-    $<TARGET_OBJECTS:stx-rpc>
     $<TARGET_OBJECTS:brokerd-client>
     $<TARGET_OBJECTS:logjoin-common>
     $<TARGET_OBJECTS:dxa-docdb>
@@ -182,7 +181,6 @@ add_dependencies(zbase customerdirectory mozjs_build)
 
 add_executable(zbasectl
     $<TARGET_OBJECTS:stx-mdb>
-    $<TARGET_OBJECTS:stx-rpc>
     $<TARGET_OBJECTS:brokerd-client>
     $<TARGET_OBJECTS:logjoin-common>
     $<TARGET_OBJECTS:tsdb-server>
@@ -198,7 +196,6 @@ add_dependencies(zbasectl customerdirectory)
 
 add_executable(zmaster
     $<TARGET_OBJECTS:stx-mdb>
-    $<TARGET_OBJECTS:stx-rpc>
     $<TARGET_OBJECTS:customerdirectory>
     $<TARGET_OBJECTS:tsdb-server>
     $<TARGET_OBJECTS:coreprotos>
