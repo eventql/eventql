@@ -84,6 +84,7 @@ void run(const cli::FlagParser& flags) {
       "Analyzing the input file. This might take a few minutes...");
 
   Vector<String> columns;
+  Vector<String> columns_dbg;
   csv.readNextRow(&columns);
 
   HashMap<String, HumanDataType> column_types;
@@ -109,6 +110,7 @@ void run(const cli::FlagParser& flags) {
     switch (column_types[col]) {
 
         case HumanDataType::UNSIGNED_INTEGER:
+          columns_dbg.emplace_back(col + " [uint]");
           schema_fields.emplace_back(
               ++field_num,
               col,
@@ -119,6 +121,7 @@ void run(const cli::FlagParser& flags) {
           break;
 
         case HumanDataType::UNSIGNED_INTEGER_NULLABLE:
+          columns_dbg.emplace_back(col + " [uint]");
           schema_fields.emplace_back(
               ++field_num,
               col,
@@ -130,6 +133,7 @@ void run(const cli::FlagParser& flags) {
 
         case HumanDataType::SIGNED_INTEGER:
         case HumanDataType::FLOAT:
+          columns_dbg.emplace_back(col + " [float]");
           schema_fields.emplace_back(
               ++field_num,
               col,
@@ -141,6 +145,7 @@ void run(const cli::FlagParser& flags) {
 
         case HumanDataType::SIGNED_INTEGER_NULLABLE:
         case HumanDataType::FLOAT_NULLABLE:
+          columns_dbg.emplace_back(col + " [float]");
           schema_fields.emplace_back(
               ++field_num,
               col,
@@ -152,6 +157,7 @@ void run(const cli::FlagParser& flags) {
 
 
         case HumanDataType::BOOLEAN:
+          columns_dbg.emplace_back(col + " [boolean]");
           schema_fields.emplace_back(
               ++field_num,
               col,
@@ -162,6 +168,7 @@ void run(const cli::FlagParser& flags) {
           break;
 
         case HumanDataType::BOOLEAN_NULLABLE:
+          columns_dbg.emplace_back(col + " [boolean]");
           schema_fields.emplace_back(
               ++field_num,
               col,
@@ -173,6 +180,7 @@ void run(const cli::FlagParser& flags) {
 
         case HumanDataType::DATETIME:
         case HumanDataType::DATETIME_NULLABLE:
+          columns_dbg.emplace_back(col + " [datetime]");
           schema_fields.emplace_back(
               ++field_num,
               col,
@@ -188,6 +196,7 @@ void run(const cli::FlagParser& flags) {
         case HumanDataType::CURRENCY_NULLABLE:
         case HumanDataType::TEXT:
         case HumanDataType::NULL_OR_EMPTY:
+          columns_dbg.emplace_back(col + " [string]");
           schema_fields.emplace_back(
               ++field_num,
               col,
@@ -212,7 +221,7 @@ void run(const cli::FlagParser& flags) {
       "Found $0 row(s) and $1 column(s):\n    - $2",
       num_rows,
       columns.size(),
-      StringUtil::join(columns, "\n    - "));
+      StringUtil::join(columns_dbg, "\n    - "));
 
   if (confirm_schema) {
     stx::logInfo("dx-csv-upload", "Is this information correct? [y/n]");
