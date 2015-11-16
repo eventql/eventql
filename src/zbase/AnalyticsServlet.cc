@@ -29,7 +29,8 @@
 #include "zbase/core/TimeWindowPartitioner.h"
 #include "zbase/core/FixedShardPartitioner.h"
 #include "zbase/HTTPAuth.h"
-#include <cstable/v1/CSTableBuilder.h>
+#include <cstable/CSTableWriter.h>
+#include <cstable/RecordShredder.h>
 
 using namespace stx;
 
@@ -818,7 +819,12 @@ void AnalyticsServlet::uploadTable(
       shard);
 
   try {
-    cstable::v1::CSTableBuilder cstable(schema.get().get());
+    auto cstable = cstable::CSTableWriter::createFile(
+        tmpfile_path + ".cst",
+        cstable::BinaryFormatVersion::v0_1_0,
+        cstable::RecordSchema::fromProtobuf(*schema.get()));
+
+    cstable::RecordShredder shredder(cstable.get());
 
     {
       auto tmpfile = File::openFile(
@@ -842,8 +848,8 @@ void AnalyticsServlet::uploadTable(
           body_size / 1000000.0);
 
       BinaryCSVInputStream csv(FileInputStream::fromFile(std::move(tmpfile)));
-      cstable.addRecordsFromCSV(&csv);
-      cstable.write(tmpfile_path + ".cst");
+      shredder.addRecordsFromCSV(&csv);
+      cstable->commit();
     }
 
     tsdb_->updatePartitionCSTable(

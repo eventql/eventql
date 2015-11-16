@@ -18,7 +18,8 @@
 #include <zbase/core/RecordSet.h>
 #include <zbase/core/LogPartitionReader.h>
 #include <stx/protobuf/MessageDecoder.h>
-#include <cstable/v1/CSTableBuilder.h>
+#include <cstable/RecordShredder.h>
+#include <cstable/CSTableWriter.h>
 
 using namespace stx;
 
@@ -90,18 +91,23 @@ void CSTableIndex::buildCSTable(RefPtr<Partition> partition) {
   auto schema = table->schema();
 
   {
-    cstable::v1::CSTableBuilder cstable(schema.get());
+    auto cstable = cstable::CSTableWriter::createFile(
+        filepath_tmp,
+        cstable::BinaryFormatVersion::v0_1_0,
+        cstable::RecordSchema::fromProtobuf(*schema));
+
+    cstable::RecordShredder shredder(cstable.get());
 
     auto reader_ptr = partition->getReader();
     auto& reader = dynamic_cast<LogPartitionReader&>(*reader_ptr);
 
-    reader.fetchRecords([&schema, &cstable] (const Buffer& record) {
-        msg::MessageObject obj;
-        msg::MessageDecoder::decode(record.data(), record.size(), *schema, &obj);
-        cstable.addRecord(obj);
+    reader.fetchRecords([&schema, &shredder] (const Buffer& record) {
+      msg::MessageObject obj;
+      msg::MessageDecoder::decode(record.data(), record.size(), *schema, &obj);
+      shredder.addRecordFromProtobuf(obj, *schema);
     });
 
-    cstable.write(filepath_tmp);
+    cstable->commit();
   }
 
   auto metapath = FileUtil::joinPaths(snap->base_path, "_cstable_state");

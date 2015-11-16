@@ -15,6 +15,8 @@
 #include "stx/http/HTTPFileDownload.h"
 #include "sstable/SSTableWriter.h"
 #include "sstable/sstablereader.h"
+#include "cstable/CSTableWriter.h"
+#include "cstable/RecordShredder.h"
 #include <algorithm>
 
 using namespace stx;
@@ -381,7 +383,13 @@ bool MapReduceService::saveLocalResultToTable(
       StringUtil::format("mr-shard-$0.cst", Random::singleton()->hex128()));
 
   {
-    cstable::v1::CSTableBuilder cstable(schema.get());
+    auto cstable = cstable::CSTableWriter::createFile(
+        tmpfile_path,
+        cstable::BinaryFormatVersion::v0_1_0,
+        cstable::RecordSchema::fromProtobuf(*schema));
+
+    cstable::RecordShredder shredder(cstable.get());
+
     sstable::SSTableReader sstable(sstable_file.get());
     auto cursor = sstable.getCursor();
     while (cursor->valid()) {
@@ -393,14 +401,14 @@ bool MapReduceService::saveLocalResultToTable(
       msg::DynamicMessage msg(schema);
       msg.fromJSON(json.begin(), json.end());
 
-      cstable.addRecord(msg.data());
+      shredder.addRecordFromProtobuf(msg.data(), *schema);
 
       if (!cursor->next()) {
         break;
       }
     }
 
-    cstable.write(tmpfile_path);
+    cstable->commit();
   }
 
   tsdb_->updatePartitionCSTable(
@@ -448,7 +456,12 @@ bool MapReduceService::saveRemoteResultsToTable(
       StringUtil::format("mr-shard-$0.cst", Random::singleton()->hex128()));
 
   {
-    cstable::v1::CSTableBuilder cstable(schema.get());
+    auto cstable = cstable::CSTableWriter::createFile(
+        tmpfile_path,
+        cstable::BinaryFormatVersion::v0_1_0,
+        cstable::RecordSchema::fromProtobuf(*schema));
+
+    cstable::RecordShredder shredder(cstable.get());
 
     for (const auto& input_table_url : input_tables) {
       auto api_token = auth_->encodeAuthToken(session);
@@ -460,7 +473,7 @@ bool MapReduceService::saveRemoteResultsToTable(
       auto req = http::HTTPRequest::mkGet(input_table_url, auth_headers);
       MapReduceService::downloadResult(
           req,
-          [&cstable, &schema] (
+          [&shredder, &schema] (
               const void* key,
               size_t key_len,
               const void* val,
@@ -469,11 +482,11 @@ bool MapReduceService::saveRemoteResultsToTable(
         msg::DynamicMessage msg(schema);
         msg.fromJSON(json.begin(), json.end());
 
-        cstable.addRecord(msg.data());
+        shredder.addRecordFromProtobuf(msg.data(), *schema);
       });
     }
 
-    cstable.write(tmpfile_path);
+    cstable->commit();
   }
 
   tsdb_->updatePartitionCSTable(
