@@ -179,6 +179,10 @@
   font-size: 12px;
 }
 
+.zbase_sql_editor .zbase_sql_editor_result_pane .table_container {
+  overflow-x: auto;
+}
+
 .zbase_sql_editor .zbase_sql_editor_result_pane table.z-table tbody {
   -moz-user-select: text;
   -webkit-user-select: text;
@@ -302,12 +306,12 @@
 }
 
 .zbase_sql_editor_result_pane .zbase_result_pane_bar + .zbase_sql_chart,
-.zbase_sql_editor_result_pane .zbase_result_pane_bar + table.z-table {
+.zbase_sql_editor_result_pane .zbase_result_pane_bar + .table_container {
   display: none;
 }
 
-.zbase_sql_editor_result_pane .zbase_result_pane_bar[data-active] + table.z-table {
-  display: table;
+.zbase_sql_editor_result_pane .zbase_result_pane_bar[data-active] + .table_container {
+  display: block;
 }
 
 .zbase_sql_editor_result_pane .zbase_result_pane_bar[data-active] + .zbase_sql_chart {
