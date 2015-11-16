@@ -175,7 +175,7 @@ add_executable(zbase
     ${CMAKE_CURRENT_BINARY_DIR}/mapreduce_preludejs.cc
     zbase.cc)
 
-target_link_libraries(zbase chartsql cplot sstable cstable stx-http stx-json stx-protobuf stx-base js_static.a z pcre)
+target_link_libraries(zbase chartsql cplot sstable cstable stx-http stx-json stx-protobuf stx-base stx-rpc js_static.a z pcre)
 target_link_libraries(zbase -L${CMAKE_BINARY_DIR}/deps/3rdparty/mozjs/dist/lib -ljs_static)
 add_dependencies(zbase customerdirectory mozjs_build)
 
@@ -191,7 +191,7 @@ add_executable(zbasectl
     #sstable/SSTableServlet.cc
     zbasectl.cc)
 
-target_link_libraries(zbasectl chartsql cplot sstable cstable stx-http stx-json stx-protobuf stx-base pcre)
+target_link_libraries(zbasectl chartsql cplot sstable cstable stx-http stx-json stx-protobuf stx-base stx-rpc pcre)
 add_dependencies(zbasectl customerdirectory)
 
 add_executable(zmaster
