@@ -94,7 +94,7 @@ void CSTableIndex::buildCSTable(RefPtr<Partition> partition) {
     auto cstable = cstable::CSTableWriter::createFile(
         filepath_tmp,
         cstable::BinaryFormatVersion::v0_1_0,
-        cstable::RecordSchema::fromProtobuf(*schema));
+        cstable::TableSchema::fromProtobuf(*schema));
 
     cstable::RecordShredder shredder(cstable.get());
 

@@ -822,7 +822,7 @@ void AnalyticsServlet::uploadTable(
     auto cstable = cstable::CSTableWriter::createFile(
         tmpfile_path + ".cst",
         cstable::BinaryFormatVersion::v0_1_0,
-        cstable::RecordSchema::fromProtobuf(*schema.get()));
+        cstable::TableSchema::fromProtobuf(*schema.get()));
 
     cstable::RecordShredder shredder(cstable.get());
 

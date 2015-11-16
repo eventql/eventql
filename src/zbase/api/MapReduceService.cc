@@ -386,7 +386,7 @@ bool MapReduceService::saveLocalResultToTable(
     auto cstable = cstable::CSTableWriter::createFile(
         tmpfile_path,
         cstable::BinaryFormatVersion::v0_1_0,
-        cstable::RecordSchema::fromProtobuf(*schema));
+        cstable::TableSchema::fromProtobuf(*schema));
 
     cstable::RecordShredder shredder(cstable.get());
 
@@ -459,7 +459,7 @@ bool MapReduceService::saveRemoteResultsToTable(
     auto cstable = cstable::CSTableWriter::createFile(
         tmpfile_path,
         cstable::BinaryFormatVersion::v0_1_0,
-        cstable::RecordSchema::fromProtobuf(*schema));
+        cstable::TableSchema::fromProtobuf(*schema));
 
     cstable::RecordShredder shredder(cstable.get());
 
