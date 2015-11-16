@@ -32,7 +32,6 @@ add_executable(zlogjoin
     $<TARGET_OBJECTS:brokerd-client>
     $<TARGET_OBJECTS:inventoryd-client>
     $<TARGET_OBJECTS:stx-mdb>
-    $<TARGET_OBJECTS:stx-rpc>
     $<TARGET_OBJECTS:nlputil>
     $<TARGET_OBJECTS:hunspell>
     $<TARGET_OBJECTS:tsdb-client>
@@ -41,13 +40,12 @@ add_executable(zlogjoin
     $<TARGET_OBJECTS:logjoin-base>
     zlogjoin.cc)
 
-target_link_libraries(zlogjoin stx-http stx-protobuf stx-json sstable cstable chartsql cplot stx-base)
+target_link_libraries(zlogjoin stx-http stx-protobuf stx-json stx-rpc sstable cstable chartsql cplot stx-base)
 
 add_executable(test-logjoin
     $<TARGET_OBJECTS:brokerd-client>
     $<TARGET_OBJECTS:inventoryd-client>
     $<TARGET_OBJECTS:stx-mdb>
-    $<TARGET_OBJECTS:stx-rpc>
     $<TARGET_OBJECTS:nlputil>
     $<TARGET_OBJECTS:hunspell>
     $<TARGET_OBJECTS:tsdb-client>
@@ -56,4 +54,4 @@ add_executable(test-logjoin
     $<TARGET_OBJECTS:logjoin-base>
     LogJoin_test.cc)
 
-target_link_libraries(test-logjoin stx-http stx-protobuf stx-json sstable cstable chartsql cplot stx-base)
+target_link_libraries(test-logjoin stx-http stx-protobuf stx-json stx-rpc sstable cstable chartsql cplot stx-base)

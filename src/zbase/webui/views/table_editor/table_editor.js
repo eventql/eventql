@@ -30,6 +30,21 @@ ZBase.registerView((function() {
     $("z-tab.schema a", page).href = kPathPrefix + schema.name;
     $("z-tab.settings a", page).href = kPathPrefix + schema.name;
 
+    var open_table_btn;
+    //log table
+    if (schema.name.substr(0, 4) == "logs") {
+      open_table_btn = $("button.open_logviewer", page);
+      $.onClick(open_table_btn, function() {
+        $.navigateTo("/a/logs/view/" + schema.name.substr(5));
+      });
+    } else {
+      open_table_btn = $("button.open_sql_editor", page);
+      $.onClick(open_table_btn, function() {
+        openTableInSQLEditor(schema.name)
+      });
+    }
+    open_table_btn.classList.remove("hidden");
+
     $("z-dropdown.edit", page).addEventListener("change", function() {
       switch (this.getValue()) {
         case "add_column":
@@ -151,6 +166,36 @@ ZBase.registerView((function() {
 
     modal.show();
     input.focus();
+  };
+
+  var openTableInSQLEditor = function(table_name) {
+    var postdata = $.buildQueryString({
+      name: "Describe table " + table_name,
+      type: "sql_query"
+    });
+
+    var querydata = $.buildQueryString({
+      content: "DESCRIBE `" + table_name + "`;"
+    });
+
+    $.httpPost("/api/v1/documents", postdata, function(r) {
+      if (r.status == 201) {
+        var doc = JSON.parse(r.response);
+
+        $.httpPost("/api/v1/documents/" + doc.uuid, querydata, function(r) {
+          if (r.status == 201) {
+            $.navigateTo("/a/sql/" + doc.uuid);
+            return;
+          } else {
+            $.fatalError();
+          }
+        });
+
+        return;
+      } else {
+        $.fatalError();
+      }
+    });
   };
 
 

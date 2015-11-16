@@ -6,6 +6,14 @@
   color: #3498db;
 }
 
+.zbase_table_editor .zbase_content button.z-button {
+  font-size: 12px;
+}
+
+.zbase_table_editor .zbase_content button.z-button.hidden {
+  display: none;
+}
+
 .zbase_table_editor .zbase_page_title {
   height: 97px;
 }

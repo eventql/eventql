@@ -9,7 +9,6 @@ add_custom_target(ztracker-assets DEPENDS
     "${CMAKE_CURRENT_BINARY_DIR}/ztracker_trackjs.cc")
 
 add_executable(ztracker
-    $<TARGET_OBJECTS:stx-rpc>
     $<TARGET_OBJECTS:stx-mdb>
     $<TARGET_OBJECTS:brokerd-client>
     $<TARGET_OBJECTS:customerdirectory>
@@ -20,7 +19,7 @@ add_executable(ztracker
     ztrackid.cc
     ztracker.cc)
 
-target_link_libraries(ztracker chartsql cplot sstable cstable stx-http stx-protobuf stx-json stx-json stx-base pcre)
+target_link_libraries(ztracker chartsql cplot sstable cstable stx-http stx-protobuf stx-json stx-json stx-base stx-rpc pcre)
 add_dependencies(ztracker ztracker-assets)
 add_dependencies(ztracker customerdirectory)
 
