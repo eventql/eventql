@@ -113,6 +113,9 @@ ZBase.registerView((function() {
       });
     }
 
+    //sidebar visibility
+    $.onClick($(".sidebar_visibility", page), toggleSidebarVisibility);
+
     $.handleLinks(page);
     $.replaceViewport(page);
 
@@ -183,7 +186,12 @@ ZBase.registerView((function() {
       content: $(".zbase_sql_editor_pane z-codeeditor").getValue(),
       name: $(".zbase_sql_editor_pane input[name='doc_name']").value
     };
-  }
+  };
+
+  var toggleSidebarVisibility = function(e) {
+    this.classList.toggle("closed");
+    $(".zbase_sql_editor_sidebar").classList.toggle("hidden");
+  };
 
   return {
     name: "sql_editor",
