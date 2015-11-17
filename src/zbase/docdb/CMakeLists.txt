@@ -1,5 +1,5 @@
 file(GLOB PROTO_FILES *.proto */*.proto)
-PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${PROTO_FILES})
+STX_PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${PROTO_FILES})
 
 add_library(dxa-docdb OBJECT
     ${PROTO_SRCS}
@@ -10,7 +10,7 @@ add_library(dxa-docdb OBJECT
 add_dependencies(dxa-docdb customerdirectory)
 
 file(GLOB INVPROTO_FILES *.proto)
-PROTOBUF_GENERATE_CPP(INVPROTO_SRCS INVPROTO_HDRS ${INVPROTO_FILES})
+STX_PROTOBUF_GENERATE_CPP(INVPROTO_SRCS INVPROTO_HDRS ${INVPROTO_FILES})
 
 add_library(inventoryd-client OBJECT
     DocIndex.cc
