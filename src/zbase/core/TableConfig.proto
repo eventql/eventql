@@ -60,7 +60,7 @@ message TableConfig {
    * If true, allow unauthorized inserts into this table (e.g. for the tracking
    * pixel or for events sent from a mobile device
    */
-  optional bool allow_public_insert = 10;
+  optional bool allow_public_insert = 10 [default = true];
 
 };
 
