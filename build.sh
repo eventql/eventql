@@ -134,14 +134,6 @@ if [[ $BUILD_ARTIFACTS == "true" ]]; then
   tar cz -C ${TARGET_DIR} zmaster \
       > ${ARTIFACTS_DIR}/zbase-master-${TARGET_LBL}.tgz
 
-  # ztracker
-  tar cz -C ${TARGET_DIR} ztracker \
-      > ${ARTIFACTS_DIR}/ztracker-${TARGET_LBL}.tgz
-
-  # zlogjoin
-  tar cz -C ${TARGET_DIR} zlogjoin \
-      > ${ARTIFACTS_DIR}/zlogjoin-${TARGET_LBL}.tgz
-
   # zbroker
   tar cz -C ${TARGET_DIR} brokerd brokerctl \
       > ${ARTIFACTS_DIR}/zbroker-${TARGET_LBL}.tgz
