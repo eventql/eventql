@@ -105,7 +105,7 @@ protected:
       http::HTTPResponse* res);
 
   void insertIntoTable(
-      const AnalyticsSession& session,
+      const Option<AnalyticsSession>& session,
       const http::HTTPRequest* req,
       http::HTTPResponse* res);
 

@@ -125,7 +125,6 @@ add_custom_command(
 add_executable(zbase
     $<TARGET_OBJECTS:stx-mdb>
     $<TARGET_OBJECTS:brokerd-client>
-    $<TARGET_OBJECTS:logjoin-common>
     $<TARGET_OBJECTS:dxa-docdb>
     $<TARGET_OBJECTS:tsdb-server>
     $<TARGET_OBJECTS:coreprotos>
@@ -182,7 +181,6 @@ add_dependencies(zbase customerdirectory mozjs_build)
 add_executable(zbasectl
     $<TARGET_OBJECTS:stx-mdb>
     $<TARGET_OBJECTS:brokerd-client>
-    $<TARGET_OBJECTS:logjoin-common>
     $<TARGET_OBJECTS:tsdb-server>
     $<TARGET_OBJECTS:coreprotos>
     $<TARGET_OBJECTS:customerdirectory>
@@ -227,5 +225,3 @@ if(MYSQL_FOUND)
 
   target_link_libraries(zen-mysql-upload stx-http stx-protobuf stx-json stx-base ${MYSQL_CLIENT_LIBS} z pcre)
 endif()
-
-add_subdirectory(tracker)

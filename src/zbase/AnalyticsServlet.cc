@@ -112,10 +112,20 @@ void AnalyticsServlet::handle(
     return;
   }
 
-
   auto session_opt = HTTPAuth::authenticateRequest(
       req_stream->request(),
       auth_);
+
+  if (uri.path() == "/api/v1/tables/insert") {
+    req_stream->readBody();
+    catchAndReturnErrors(&res, [this, &session_opt, &req, &res] {
+      insertIntoTable(session_opt, &req, &res);
+    });
+    res_stream->writeResponse(res);
+    return;
+  }
+
+  /* authorized below here */
 
   if (session_opt.isEmpty()) {
     req_stream->readBody();
@@ -257,15 +267,6 @@ void AnalyticsServlet::handle(
   if (uri.path() == "/api/v1/tables") {
     req_stream->readBody();
     listTables(session, &req, &res);
-    res_stream->writeResponse(res);
-    return;
-  }
-
-  if (uri.path() == "/api/v1/tables/insert") {
-    req_stream->readBody();
-    catchAndReturnErrors(&res, [this, &session, &req, &res] {
-      insertIntoTable(session, &req, &res);
-    });
     res_stream->writeResponse(res);
     return;
   }
@@ -752,7 +753,7 @@ void AnalyticsServlet::removeTableField(
 }
 
 void AnalyticsServlet::insertIntoTable(
-    const AnalyticsSession& session,
+    const Option<AnalyticsSession>& session,
     const http::HTTPRequest* req,
     http::HTTPResponse* res) {
   auto jreq = json::parseJSON(req->body());
@@ -761,21 +762,48 @@ void AnalyticsServlet::insertIntoTable(
   for (size_t i = 0; i < ncols; ++i) {
     auto jrow = json::arrayLookup(jreq.begin(), jreq.end(), i); // O(N^2) but who cares...
 
-    auto data = json::objectLookup(jrow, jreq.end(), "data");
-    if (data == jreq.end()) {
-      RAISE(kRuntimeError, "missing field: data");
-    }
-
     auto table = json::objectGetString(jrow, jreq.end(), "table");
     if (table.isEmpty()) {
       RAISE(kRuntimeError, "missing field: table");
     }
 
-    tsdb_->insertRecord(
-        session.customer(),
-        table.get(),
-        data,
-        data + data->size);
+    String ns;
+    if (!session.isEmpty()) {
+      ns = session.get().customer();
+    }
+
+    if (req->hasHeader("X-Z1-Namespace")) {
+      ns = req->getHeader("X-Z1-Namespace");
+      auto tc = tsdb_->tableConfig(ns, table.get());
+      if (tc.isEmpty() || !tc.get().config().allow_public_insert()) {
+        res->setStatus(http::kStatusForbidden);
+        return;
+      }
+    }
+
+    if (ns.empty()) {
+      RAISE(kRuntimeError, "missing X-Z1-Namespace or Authorization header");
+    }
+
+    auto data = json::objectLookup(jrow, jreq.end(), "data");
+    if (data == jreq.end()) {
+      RAISE(kRuntimeError, "missing field: data");
+    }
+
+    if (data->type == json::JSON_STRING) {
+      auto data_parsed = json::parseJSON(data->data);
+      tsdb_->insertRecord(
+          ns,
+          table.get(),
+          data_parsed.begin(),
+          data_parsed.end());
+    } else {
+      tsdb_->insertRecord(
+          ns,
+          table.get(),
+          data,
+          data + data->size);
+    }
   }
 
   res->setStatus(http::kStatusCreated);
