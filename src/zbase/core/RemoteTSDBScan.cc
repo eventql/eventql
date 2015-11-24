@@ -13,6 +13,7 @@
 #include <stx/protobuf/msg.h>
 #include <zbase/core/RemoteTSDBScan.h>
 #include <zbase/AnalyticsSession.pb.h>
+#include <csql/runtime/BinaryResultParser.h>
 
 using namespace stx;
 
@@ -98,55 +99,22 @@ void RemoteTSDBScan::execute(
 
 void RemoteTSDBScan::executeOnHost(
     const RemoteTSDBScanParams& params,
-  const InetAddr& host,
-      Function<bool (int argc, const csql::SValue* argv)> fn) {
-  Buffer buffer;
-  bool eos = false;
-  bool done = false;
-  auto handler = [&buffer, &eos, &done, &fn] (const void* data, size_t size) {
-    buffer.append(data, size);
-    size_t consumed = 0;
+    const InetAddr& host,
+    Function<bool (int argc, const csql::SValue* argv)> fn) {
+  csql::BinaryResultParser res_parser;
 
-    util::BinaryMessageReader reader(buffer.data(), buffer.size());
-    while (reader.remaining() >= sizeof(uint64_t)) {
-      auto rec_len = *reader.readUInt64();
-
-      if (rec_len > reader.remaining()) {
-        break;
-      }
-
-      if (rec_len == 0) {
-        eos = true;
-      } else {
-        auto rec_data = reader.read(rec_len);
-
-        if (!done) {
-          MemoryInputStream is(rec_data, rec_len);
-          Vector<csql::SValue> row;
-          while (!is.eof()) {
-            csql::SValue val;
-            val.decode(&is);
-            row.emplace_back(val);
-          }
-
-          if (!fn(row.size(), row.data())) {
-            done = true;
-          }
-        }
-
-        consumed = reader.position();
-      }
+  bool reading = true;
+  res_parser.onRow([fn, &reading] (int argc, const csql::SValue* argv) {
+    if (reading) {
+      reading = fn(argc, argv);
     }
+  });
 
-    Buffer remaining((char*) buffer.data() + consumed, buffer.size() - consumed);
-    buffer.clear();
-    buffer.append(remaining);
-  };
-
-  auto handler_factory = [&handler] (const Promise<http::HTTPResponse> promise)
-      -> http::HTTPResponseFuture* {
-    return new http::StreamingResponseFuture(promise, handler);
-  };
+  bool error = false;
+  res_parser.onError([&error] (const String& error_str) {
+    error = true;
+    RAISE(kRuntimeError, error_str);
+  });
 
   auto url = StringUtil::format(
       "http://$0/api/v1/sql/scan_partition",
@@ -164,11 +132,17 @@ void RemoteTSDBScan::executeOnHost(
   http::HTTPClient http_client;
   auto req_body = msg::encode(params);
   auto req = http::HTTPRequest::mkPost(url, *req_body, auth_headers);
-  auto res = http_client.executeRequest(req, handler_factory);
-  handler(nullptr, 0);
+  auto res = http_client.executeRequest(
+      req,
+      http::StreamingResponseHandler::getFactory(
+          std::bind(
+              &csql::BinaryResultParser::parse,
+              &res_parser,
+              std::placeholders::_1,
+              std::placeholders::_2)));
 
-  if (!eos) {
-    RAISE(kRuntimeError, "unexpected EOF");
+  if (!res_parser.eof() || error) {
+    RAISE(kRuntimeError, "lost connection to upstream server");
   }
 
   if (res.statusCode() != 200) {

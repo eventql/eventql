@@ -195,7 +195,6 @@ void runSQL(
   auto stderr_os = TerminalOutputStream::fromStream(OutputStream::getStderr());
 
   csql::BinaryResultParser res_parser;
-  bool error = false;
 
   res_parser.onTableHeader([] (const Vector<String>& columns) {
     iputs("columns: $0", columns);
