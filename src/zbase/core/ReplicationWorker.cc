@@ -12,6 +12,7 @@
 #include <stx/wallclock.h>
 #include <zbase/core/ReplicationWorker.h>
 #include <zbase/core/Partition.h>
+#include <zbase/z1stats.h>
 
 using namespace stx;
 
@@ -56,6 +57,8 @@ void ReplicationWorker::enqueuePartitionWithLock(RefPtr<Partition> partition) {
   queue_.emplace(
       WallClock::unixMicros() + kReplicationCorkWindowMicros,
       partition);
+
+  z1stats()->replication_queue_length.incr(1);
 
   waitset_.emplace(uuid);
   cv_.notify_all();
@@ -124,6 +127,7 @@ void ReplicationWorker::work() {
     }
 
     if (success) {
+      z1stats()->replication_queue_length.decr(1);
       waitset_.erase(partition->uuid());
 
       repl = partition->getReplicationStrategy(repl_scheme, http_);

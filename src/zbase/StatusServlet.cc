@@ -79,6 +79,13 @@ void StatusServlet::handleHTTPRequest(
       zs->num_partitions_loaded.get());
   html += "</table>";
 
+  html += "<h3>Replication</h3>";
+  html += "<table cellspacing=0 border=1>";
+  html += StringUtil::format(
+      "<tr><td><em>Replication Queue Length</em></td><td align='right'>$0</td></tr>",
+      zs->replication_queue_length.get());
+  html += "</table>";
+
 
   response->setStatus(http::kStatusOK);
   response->addHeader("Content-Type", "text/html; charset=utf-8");
