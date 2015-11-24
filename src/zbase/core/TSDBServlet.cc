@@ -111,7 +111,7 @@ void TSDBServlet::insertRecords(
     http::HTTPResponse* res,
     URI* uri) {
   auto record_list = msg::decode<RecordEnvelopeList>(req->body());
-  node_->insertRecords(record_list);
+  node_->insertRecords(record_list, (uint64_t) InsertFlags::REPLICATED_WRITE);
   res->setStatus(http::kStatusCreated);
 }
 

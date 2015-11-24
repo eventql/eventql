@@ -33,7 +33,9 @@ void TSDBService::createTable(const TableDefinition& table) {
   pmap_->configureTable(table);
 }
 
-void TSDBService::insertRecords(const RecordEnvelopeList& record_list) {
+void TSDBService::insertRecords(
+    const RecordEnvelopeList& record_list,
+    uint64_t flags /* = 0 */) {
   Vector<RefPtr<Partition>> partition_refs;
   HashMap<String, Vector<RecordRef>> grouped;
 
@@ -79,11 +81,14 @@ void TSDBService::insertRecords(const RecordEnvelopeList& record_list) {
         group_key[0],
         group_key[1],
         SHA1Hash::fromHexString(group_key[2]),
-        group.second);
+        group.second,
+        flags);
   }
 }
 
-void TSDBService::insertRecords(const Vector<RecordEnvelope>& records) {
+void TSDBService::insertRecords(
+    const Vector<RecordEnvelope>& records,
+    uint64_t flags /* = 0 */) {
   Vector<RefPtr<Partition>> partition_refs;
   HashMap<String, Vector<RecordRef>> grouped;
 
@@ -129,7 +134,8 @@ void TSDBService::insertRecords(const Vector<RecordEnvelope>& records) {
         group_key[0],
         group_key[1],
         SHA1Hash::fromHexString(group_key[2]),
-        group.second);
+        group.second,
+        flags);
   }
 }
 
@@ -138,17 +144,19 @@ void TSDBService::insertRecord(
     const String& table_name,
     const SHA1Hash& partition_key,
     const SHA1Hash& record_id,
-    const Buffer& record) {
+    const Buffer& record,
+    uint64_t flags /* = 0 */) {
   Vector<RecordRef> records;
   records.emplace_back(record_id, record);
-  insertRecords(tsdb_namespace, table_name, partition_key, records);
+  insertRecords(tsdb_namespace, table_name, partition_key, records, flags);
 }
 
 void TSDBService::insertRecord(
     const String& tsdb_namespace,
     const String& table_name,
     const json::JSONObject::const_iterator& data_begin,
-    const json::JSONObject::const_iterator& data_end) {
+    const json::JSONObject::const_iterator& data_end,
+    uint64_t flags /* = 0 */) {
   auto table = pmap_->findTable(tsdb_namespace, table_name);
   if (table.isEmpty()) {
     RAISEF(kNotFoundError, "table not found: $0", table_name);
@@ -156,13 +164,14 @@ void TSDBService::insertRecord(
 
   msg::DynamicMessage record(table.get()->schema());
   record.fromJSON(data_begin, data_end);
-  insertRecord(tsdb_namespace, table_name, record);
+  insertRecord(tsdb_namespace, table_name, record, flags);
 }
 
 void TSDBService::insertRecord(
     const String& tsdb_namespace,
     const String& table_name,
-    const msg::DynamicMessage& data) {
+    const msg::DynamicMessage& data,
+    uint64_t flags /* = 0 */) {
   auto table = pmap_->findTable(tsdb_namespace, table_name);
   if (table.isEmpty()) {
     RAISEF(kNotFoundError, "table not found: $0", table_name);
@@ -187,49 +196,66 @@ void TSDBService::insertRecord(
       table_name,
       partition_key,
       record_id,
-      record);
+      record,
+      flags);
 }
 
 void TSDBService::insertRecords(
     const String& tsdb_namespace,
     const String& table_name,
     const SHA1Hash& partition_key,
-    const Vector<RecordRef>& records) {
+    const Vector<RecordRef>& records,
+    uint64_t flags /* = 0 */) {
   Vector<String> errors;
   auto hosts = repl_->replicasFor(partition_key);
-  for (const auto& host : hosts) {
 
-    try {
-      if (host.is_local) {
-        insertRecordsLocal(
-            tsdb_namespace,
-            table_name,
-            partition_key,
-            records);
-      } else {
-        insertRecordsRemote(
-            tsdb_namespace,
-            table_name,
-            partition_key,
-            records,
-            host);
-      }
-
-      return;
-    } catch (const StandardException& e) {
-      logError(
-          "zbase",
-          e,
-          "TSDBService::insertRecordsRemote failed");
-
-      errors.emplace_back(e.what());
+  if (flags & (uint64_t) InsertFlags::REPLICATED_WRITE) {
+    if (!repl_->hasLocalReplica(partition_key)) {
+      RAISE(
+          kIllegalStateError,
+          "insert has REPLICATED_WRITE flag, but the specified partition is "
+          "not owned by this host");
     }
-  }
 
-  RAISEF(
-      kRuntimeError,
-      "TSDBService::insertRecordsRemote failed: $0",
-      StringUtil::join(errors, ", "));
+    insertRecordsLocal(
+        tsdb_namespace,
+        table_name,
+        partition_key,
+        records);
+  } else {
+    for (const auto& host : hosts) {
+      try {
+        if (host.is_local) {
+          insertRecordsLocal(
+              tsdb_namespace,
+              table_name,
+              partition_key,
+              records);
+        } else {
+          insertRecordsRemote(
+              tsdb_namespace,
+              table_name,
+              partition_key,
+              records,
+              host);
+        }
+
+        return;
+      } catch (const StandardException& e) {
+        logError(
+            "zbase",
+            e,
+            "TSDBService::insertRecordsRemote failed");
+
+        errors.emplace_back(e.what());
+      }
+    }
+
+    RAISEF(
+        kRuntimeError,
+        "TSDBService::insertRecordsRemote failed: $0",
+        StringUtil::join(errors, ", "));
+  }
 }
 
 void TSDBService::insertRecordsLocal(
