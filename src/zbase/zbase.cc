@@ -291,7 +291,7 @@ int main(int argc, const char** argv) {
       &docdb,
       &partition_map);
 
-  zbase::StatusServlet status_servlet;
+  zbase::StatusServlet status_servlet(&partition_map);
   zbase::DefaultServlet default_servlet;
 
   http_router.addRouteByPrefixMatch("/a/", &webui_servlet);

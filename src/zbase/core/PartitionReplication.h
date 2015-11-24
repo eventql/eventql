@@ -60,9 +60,13 @@ public:
    */
   virtual size_t numFullRemoteCopies() const = 0;
 
-protected:
+  static ReplicationState fetchReplicationState(
+      RefPtr<PartitionSnapshot> snap);
 
   ReplicationState fetchReplicationState() const;
+
+protected:
+
   void commitReplicationState(const ReplicationState& state);
 
   RefPtr<Partition> partition_;
