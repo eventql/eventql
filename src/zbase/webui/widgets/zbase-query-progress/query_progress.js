@@ -7,8 +7,15 @@ var QueryProgressWidget = (function() {
 
     var pbar = $("z-progressbar", tpl);
     if (data && data.status == "running") {
-      pbar.setAttribute("data-progress", (data.progress * 100));
-      pbar.setAttribute("data-label", data.message);
+      if (data.progress) {
+        pbar.setAttribute("data-progress", (data.progress * 100));
+      }
+
+      if (data.message) {
+        pbar.setAttribute("data-label", data.message);
+      } else {
+        pbar.setAttribute("data-label", "Running...");
+      }
     } else {
       pbar.setAttribute("data-label", "Waiting...");
     }
