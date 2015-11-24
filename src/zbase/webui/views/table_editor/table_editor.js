@@ -30,20 +30,17 @@ ZBase.registerView((function() {
     $("z-tab.schema a", page).href = kPathPrefix + schema.name;
     $("z-tab.settings a", page).href = kPathPrefix + schema.name;
 
-    var open_table_btn;
-    //log table
-    if (schema.name.substr(0, 4) == "logs") {
-      open_table_btn = $("button.open_logviewer", page);
-      $.onClick(open_table_btn, function() {
-        $.navigateTo("/a/logs/view/" + schema.name.substr(5));
-      });
-    } else {
-      open_table_btn = $("button.open_sql_editor", page);
-      $.onClick(open_table_btn, function() {
-        openTableInSQLEditor(schema.name)
-      });
-    }
-    open_table_btn.classList.remove("hidden");
+    $("z-dropdown.open_in", page).addEventListener("change", function() {
+      switch (this.getValue()) {
+        case "sql_editor":
+          openTableInSQLEditor(schema.name);
+          break;
+
+        case "tableviewer":
+          $.navigateTo("/a/datastore/tables/view/" + schema.name);
+          break;
+      }
+    }, false);
 
     $("z-dropdown.edit", page).addEventListener("change", function() {
       switch (this.getValue()) {
