@@ -32,11 +32,13 @@ ZBase.registerView((function() {
     QueryProgressWidget.render($(".zbase_table_viewer .loader"), {status: "running"});
 
     query.addEventListener("result", function(e) {
-      query_mgr.close("table_viewer");
+      //query_mgr.close("table_viewer");
       renderJSONView(e.data);
+      console.log("result");
     }, false);
 
     query.addEventListener("progress", function(e) {
+      console.log("progress");
       var data = JSON.parse(e.data);
       QueryProgressWidget.render($(".zbase_table_viewer .loader"), data);
       if (data.status == "finished") {
@@ -66,7 +68,7 @@ ZBase.registerView((function() {
     $(".zbase_table_viewer .loader").classList.add("hidden");
     $(".zbase_table_viewer .json_viewer").classList.remove("hidden");
 
-    console.log(JSON.parse(json));
+    //console.log(JSON.parse(json));
   };
 
   return {
