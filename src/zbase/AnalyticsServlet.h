@@ -128,6 +128,13 @@ protected:
       http::HTTPResponse* res,
       RefPtr<http::HTTPResponseStream> res_stream);
 
+  void executeSQL_BINARY(
+      const URI::ParamList& params,
+      const AnalyticsSession& session,
+      const http::HTTPRequest* req,
+      http::HTTPResponse* res,
+      RefPtr<http::HTTPResponseStream> res_stream);
+
   void executeSQL_JSON(
       const URI::ParamList& params,
       const AnalyticsSession& session,

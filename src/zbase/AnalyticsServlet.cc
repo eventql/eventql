@@ -27,7 +27,7 @@
 #include "csql/runtime/ASCIITableFormat.h"
 #include "csql/runtime/JSONResultFormat.h"
 #include "csql/runtime/JSONSSEStreamFormat.h"
-//#include "csql/runtime/BinaryStreamFormat.h"
+#include "csql/runtime/BinaryResultFormat.h"
 #include "zbase/core/TimeWindowPartitioner.h"
 #include "zbase/core/FixedShardPartitioner.h"
 #include "zbase/HTTPAuth.h"
@@ -1072,6 +1072,8 @@ void AnalyticsServlet::executeSQL(
 
     if (format == "ascii") {
       executeSQL_ASCII(params, session, req, res, res_stream);
+    } else if (format == "binary") {
+      executeSQL_BINARY(params, session, req, res, res_stream);
     } else if (format == "json") {
       executeSQL_JSON(params, session, req, res, res_stream);
     } else if (format == "json_sse") {
@@ -1120,6 +1122,47 @@ void AnalyticsServlet::executeSQL_ASCII(
     res->addBody(StringUtil::format("error: $0", e.what()));
     res_stream->writeResponse(*res);
   }
+}
+
+void AnalyticsServlet::executeSQL_BINARY(
+    const URI::ParamList& params,
+    const AnalyticsSession& session,
+    const http::HTTPRequest* req,
+    http::HTTPResponse* res,
+    RefPtr<http::HTTPResponseStream> res_stream) {
+  String query;
+  if (!URI::getParam(params, "query", &query)) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody("missing ?query=... parameter");
+    res_stream->writeResponse(*res);
+    return;
+  }
+
+  res->setStatus(http::kStatusOK);
+  res->setHeader("Connection", "close");
+  res->setHeader("Content-Type", "application/octet-stream");
+  res->setHeader("Cache-Control", "no-cache");
+  res->setHeader("Access-Control-Allow-Origin", "*");
+  res_stream->startResponse(*res);
+
+  {
+    auto result_format = new csql::BinaryResultFormat(
+        [] (const void* data, size_t size) {
+      iputs("write: $0", size);
+    });
+
+    try {
+      sql_->executeQuery(
+          query,
+          app_->getExecutionStrategy(session.customer()),
+          result_format);
+
+    } catch (const StandardException& e) {
+      result_format->sendError(e.what());
+    }
+  }
+
+  res_stream->finishResponse();
 }
 
 void AnalyticsServlet::executeSQL_JSON(
