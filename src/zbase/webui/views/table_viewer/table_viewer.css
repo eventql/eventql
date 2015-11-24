@@ -1,0 +1,4 @@
+.zbase_table_viewer .loader.hidden,
+.zbase_table_viewer .json_viewer.hidden {
+  display: none;
+}
