@@ -1,8 +1,8 @@
 .inspector-json {
 	
 	padding: 25px;
-	font: 13px/18px Consolas, monospace;
-	color: rgb( 75, 75, 75 );
+	font: 13px/18px "Droid Sans Mono", "Courier", monospace;;
+	color: #444;
 	
 	}
 
@@ -47,13 +47,13 @@
 .inspector-json li > a {
 	
 	text-decoration: none;
-	color: rgb( 0, 136, 204 );
+	color: #3498db;
 	
 	}
 
 .inspector-json li > strong {
 
-	color: rgb( 0, 136, 204 );
+	color: #3498db;
 
 	}
 
