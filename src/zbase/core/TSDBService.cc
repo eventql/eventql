@@ -318,7 +318,7 @@ void TSDBService::insertRecordsRemote(
   }
 
   auto uri = URI(StringUtil::format(
-      "http://$0/tsdb/insert",
+      "http://$0/tsdb/replicate",
       host.addr.ipAndPort()));
 
   http::HTTPRequest req(http::HTTPMessage::M_POST, uri.pathAndQuery());

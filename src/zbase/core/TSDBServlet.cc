@@ -60,6 +60,13 @@ void TSDBServlet::handleHTTPRequest(
       return;
     }
 
+    if (uri.path() == "/tsdb/replicate") {
+      req_stream->readBody();
+      replicateRecords(&req, &res, &uri);
+      res_stream->writeResponse(res);
+      return;
+    }
+
     if (uri.path() == "/tsdb/stream") {
       req_stream->readBody();
       streamPartition(&req, &res, res_stream, &uri);
@@ -107,6 +114,15 @@ void TSDBServlet::handleHTTPRequest(
 }
 
 void TSDBServlet::insertRecords(
+    const http::HTTPRequest* req,
+    http::HTTPResponse* res,
+    URI* uri) {
+  auto record_list = msg::decode<RecordEnvelopeList>(req->body());
+  node_->insertRecords(record_list);
+  res->setStatus(http::kStatusCreated);
+}
+
+void TSDBServlet::replicateRecords(
     const http::HTTPRequest* req,
     http::HTTPResponse* res,
     URI* uri) {

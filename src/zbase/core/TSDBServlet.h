@@ -36,6 +36,11 @@ protected:
       http::HTTPResponse* res,
       URI* uri);
 
+  void replicateRecords(
+      const http::HTTPRequest* req,
+      http::HTTPResponse* res,
+      URI* uri);
+
   void streamPartition(
       const http::HTTPRequest* req,
       http::HTTPResponse* res,

@@ -123,7 +123,7 @@ void LogPartitionReplication::uploadBatchTo(
     const ReplicaRef& replica,
     const RecordEnvelopeList& batch) {
   auto body = msg::encode(batch);
-  URI uri(StringUtil::format("http://$0/tsdb/insert", replica.addr.hostAndPort()));
+  URI uri(StringUtil::format("http://$0/tsdb/replicate", replica.addr.hostAndPort()));
   http::HTTPRequest req(http::HTTPMessage::M_POST, uri.pathAndQuery());
   req.addHeader("Host", uri.hostAndPort());
   req.addHeader("Content-Type", "application/fnord-msg");
