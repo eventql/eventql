@@ -79,11 +79,12 @@ void LogPartitionReplication::replicateTo(
   LogPartitionReader reader(partition_->getTable(), snap_);
 
   size_t batch_size = 0;
+  size_t num_replicated = 0;
   RecordEnvelopeList batch;
   reader.fetchRecords(
       replicated_offset,
       size_t(-1),
-      [this, &batch, &replica, &replicated_offset, &batch_size] (
+      [this, &batch, &replica, &replicated_offset, &batch_size, &num_replicated] (
           const SHA1Hash& record_id,
           const void* record_data,
           size_t record_size) {
@@ -95,6 +96,7 @@ void LogPartitionReplication::replicateTo(
     rec->set_record_data(record_data, record_size);
 
     batch_size += record_size;
+    ++num_replicated;
 
     if (batch_size > kMaxBatchSizeBytes ||
         batch.records().size() > kMaxBatchSizeRows) {
@@ -106,6 +108,14 @@ void LogPartitionReplication::replicateTo(
 
   if (batch.records().size() > 0) {
     uploadBatchTo(replica, batch);
+  }
+
+  if (num_replicated != snap_->nrecs - replicated_offset) {
+    RAISEF(
+        kIllegalStateError,
+        "expected to replicate $0 records, but only saw $1",
+        snap_->nrecs - replicated_offset,
+        num_replicated);
   }
 }
 
