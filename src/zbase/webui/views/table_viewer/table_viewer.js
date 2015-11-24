@@ -74,6 +74,7 @@ ZBase.registerView((function() {
 
     $(".zbase_table_viewer .loader").classList.add("hidden");
     $(".zbase_table_viewer .json_viewer").classList.remove("hidden");
+
   };
 
   return {
