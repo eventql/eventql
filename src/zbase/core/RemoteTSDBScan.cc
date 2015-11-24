@@ -77,6 +77,7 @@ void RemoteTSDBScan::execute(
   Vector<String> errors;
   for (const auto& host : replicas) {
     try {
+      iputs("SOURCE-EXEC: $0@$1", tbl_name, host.hostAndPort());
       executeOnHost(params, host, fn);
       context->incrNumSubtasksCompleted(1);
       return;

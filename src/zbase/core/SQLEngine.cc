@@ -132,6 +132,7 @@ void SQLEngine::replaceSequentialScanWithUnion(
         host,
         URI::urlEncode(table_ref.table_key),
         partition.toString());
+    iputs("SOURCE: $0", table_name);
 
     auto copy = seqscan->deepCopyAs<csql::SequentialScanNode>();
     copy->setTableName(table_name);
