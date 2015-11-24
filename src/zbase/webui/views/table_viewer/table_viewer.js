@@ -24,34 +24,31 @@ ZBase.registerView((function() {
     $.hideLoader();
 
     //REMOVEME
-    renderJSONView();
-    return;
+    //renderJSONView();
     //REMOVEME END
 
-    var url = "/api/v1/events/scan?table=" + table + "&limit=2";
+    var url = "/api/v1/events/scan?table=" + table + "&limit=10";
     var query = query_mgr.get("table_viewer", url);
+    QueryProgressWidget.render($(".zbase_table_viewer .loader"), {status: "running"});
 
     query.addEventListener("result", function(e) {
-      console.log(e.data);
       query_mgr.close("table_viewer");
-      renderJSONView(JSON.parse(e.data));
+      renderJSONView(e.data);
     }, false);
 
     query.addEventListener("progress", function(e) {
-      console.log("running");
       var data = JSON.parse(e.data);
-      QueryProgressWidget.render($(".zbase_table_viewer .inner_view"), data);
+      QueryProgressWidget.render($(".zbase_table_viewer .loader"), data);
       if (data.status == "finished") {
         query_mgr.close("table_viewer");
       }
     }, false);
 
     query.addEventListener("error", function(e) {
-      query_mgr.close("table_viewer");
-      console.log("error", e);
+      $.fatalError();
+      console.log(e);
       renderError();
     }, false);
-
   };
 
   var destroy = function() {
@@ -61,18 +58,15 @@ ZBase.registerView((function() {
   };
 
   var renderJSONView = function(json) {
-    $(".zbase_table_viewer .inner_view").innerHTML =
-        "<div id='table_viewer_json'></div>";
-
     var inspector = new InspectorJSON({
       element: 'table_viewer_json',
-      json: '{"data": [{"sessions": "10"}, {"user_journeys": "20"}]}'
+      json: json
     });
-    console.log(inspector);
-  };
 
-  var renderError = function() {
-    
+    $(".zbase_table_viewer .loader").classList.add("hidden");
+    $(".zbase_table_viewer .json_viewer").classList.remove("hidden");
+
+    console.log(JSON.parse(json));
   };
 
   return {
