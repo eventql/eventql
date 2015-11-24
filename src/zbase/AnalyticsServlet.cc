@@ -1200,22 +1200,6 @@ void AnalyticsServlet::executeSQL_JSONSSE(
   sse_stream->finish();
 }
 
-//void AnalyticsServlet::executeSQLBinaryStream(
-//    const String& query,
-//    const AnalyticsSession& session,
-//    RefPtr<http::HTTPResponseStream> res_stream) {
-//
-//  try {
-//    sql_->executeQuery(
-//        query,
-//        app_->getExecutionStrategy(session.customer()),
-//        new csql::BinaryStreamFormat(res_stream));
-//
-//  } catch (const StandardException& e) {
-//
-//  }
-//}
-
 void AnalyticsServlet::pipelineInfo(
     const AnalyticsSession& session,
     const http::HTTPRequest* req,
