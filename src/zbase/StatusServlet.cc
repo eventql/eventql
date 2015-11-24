@@ -164,6 +164,12 @@ void StatusServlet::renderNamespacePage(
     http::HTTPRequest* request,
     http::HTTPResponse* response) {
   String html;
+  html += kStyleSheet;
+  html += kMainMenu;
+
+  html += StringUtil::format(
+      "<h2>Namespace: &nbsp; <span style='font-weight:normal'>$0</span></h2>",
+      db_namespace);
 
   response->setStatus(http::kStatusOK);
   response->addHeader("Content-Type", "text/html; charset=utf-8");
@@ -176,6 +182,28 @@ void StatusServlet::renderTablePage(
     http::HTTPRequest* request,
     http::HTTPResponse* response) {
   String html;
+  html += kStyleSheet;
+  html += kMainMenu;
+
+  html += StringUtil::format(
+      "<h2>Table: &nbsp; <span style='font-weight:normal'>"
+      "<a href='/zstatus/db/$0'>$0</a> &mdash;"
+      "$1</span></h2>",
+      db_namespace,
+      table_name);
+
+  auto table = pmap_->findTable(
+      db_namespace,
+      table_name);
+
+  if (table.isEmpty()) {
+    html += "ERROR: TABLE NOT FOUND!";
+  } else {
+    html += "<h3>TableDefinition</h3>";
+    html += StringUtil::format(
+        "<pre>$0</pre>",
+        table.get()->config().DebugString());
+  }
 
   response->setStatus(http::kStatusOK);
   response->addHeader("Content-Type", "text/html; charset=utf-8");
@@ -193,7 +221,10 @@ void StatusServlet::renderPartitionPage(
   html += kMainMenu;
 
   html += StringUtil::format(
-      "<h2>Partition: &nbsp; <span style='font-weight:normal'>$0 &mdash; $1 &mdash; $2</span></h2>",
+      "<h2>Partition: &nbsp; <span style='font-weight:normal'>"
+      "<a href='/zstatus/db/$0'>$0</a> &mdash;"
+      "<a href='/zstatus/db/$0/$1'>$1</a> &mdash;"
+      "$2</span></h2>",
       db_namespace,
       table_name,
       partition_key.toString());
