@@ -157,13 +157,14 @@ bool LogPartitionReplication::replicate() {
     const auto& replica_offset = replicatedOffsetFor(repl_state, r.unique_id);
 
     if (replica_offset < head_offset) {
-      logTrace(
-          "tsdb",
-          "Replicating partition $0/$1/$2 to $3",
+      logDebug(
+          "z1.replication",
+          "Replicating partition $0/$1/$2 to $3 ($4 records)",
           snap_->state.tsdb_namespace(),
           snap_->state.table_key(),
           snap_->key.toString(),
-          r.addr.hostAndPort());
+          r.addr.hostAndPort(),
+          head_offset - replica_offset);
 
       try {
         replicateTo(r, replica_offset);
@@ -173,7 +174,7 @@ bool LogPartitionReplication::replicate() {
         success = false;
 
         stx::logError(
-          "tsdb",
+          "z1.replication",
           e,
           "Error while replicating partition $0/$1/$2 to $3",
           snap_->state.tsdb_namespace(),
