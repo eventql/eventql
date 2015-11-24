@@ -160,11 +160,6 @@ protected:
       http::HTTPResponse* res,
       RefPtr<http::HTTPResponseStream> res_stream);
 
-  void executeSQLScanPartition(
-      const AnalyticsSession& session,
-      const RemoteTSDBScanParams& query,
-      Function<bool (int argc, const csql::SValue* argv)> fn);
-
   void pipelineInfo(
       const AnalyticsSession& session,
       const http::HTTPRequest* req,
