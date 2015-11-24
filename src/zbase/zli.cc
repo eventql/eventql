@@ -24,6 +24,7 @@
 #include "stx/cli/CLI.h"
 #include "stx/cli/flagparser.h"
 #include "stx/cli/term.h"
+#include "csql/runtime/BinaryResultParser.h"
 
 using namespace stx;
 
@@ -193,20 +194,37 @@ void runSQL(
   auto stdout_os = OutputStream::getStdout();
   auto stderr_os = TerminalOutputStream::fromStream(OutputStream::getStderr());
 
+  csql::BinaryResultParser res_parser;
+  bool error = false;
+
+  res_parser.onTableHeader([] (const Vector<String>& columns) {
+    iputs("columns: $0", columns);
+  });
+
+  res_parser.onRow([] (int argc, const csql::SValue* argv) {
+    iputs("row: $0", Vector<csql::SValue>(argv, argv + argc));
+  });
+
+  res_parser.onError([&stderr_os] (const String& error) {
+    stderr_os->print(
+        "ERROR:",
+        { TerminalStyle::RED, TerminalStyle::UNDERSCORE });
+
+    stderr_os->print(StringUtil::format(" $0\n", error));
+    exit(1);
+  });
+
   try {
     auto program_source = FileUtil::read(file).toString();
     bool is_tty = stderr_os->isTTY();
 
-    auto response_handler = [&] (const http::HTTPSSEEvent& ev) {
-
-    };
-
     auto url = StringUtil::format(
-          "http://$0/api/v1/sql_stream?format=binary&query=",
-          global_flags.getString("api_host"),
-          program_source);
+        "http://$0/api/v1/sql",
+        global_flags.getString("api_host"));
 
-    program_source.clear();
+    auto postdata = StringUtil::format(
+          "format=binary&query=$0",
+          URI::urlEncode(program_source));
 
     auto auth_token = loadAuth(global_flags);
 
@@ -215,27 +233,25 @@ void runSQL(
         "Authorization",
         StringUtil::format("Token $0", auth_token));
 
-    if (is_tty) {
-      stderr_os->print("Launching job...");
-      //line_dirty = true;
-    } else {
-      stderr_os->print("Launching job...\n");
-    }
-
-
     http::HTTPClient http_client;
-    const Promise<http::HTTPResponse> promise;
-    auto req = http::HTTPRequest::mkPost(url, program_source, auth_headers);
-    //auto res = http_client.executeRequest(
-    //    req,
-    //    http::HTTPResponseFuture(promise));
+    auto req = http::HTTPRequest::mkPost(url, postdata, auth_headers);
+    auto res = http_client.executeRequest(
+        req,
+        http::StreamingResponseHandler::getFactory(
+            std::bind(
+                &csql::BinaryResultParser::parse,
+                &res_parser,
+                std::placeholders::_1,
+                std::placeholders::_2)));
 
-    //'Function<stx::http::HTTPResponseFuture *(Promise<stx::http::HTTPResponse>)>'
-    /*return [on_event] (
-      const Promise<http::HTTPResponse> promise) -> HTTPResponseFuture* {
-    return new HTTPSSEResponseHandler(promise, on_event);
-  }*/
+    if (!res_parser.eof()) {
+      stderr_os->print(
+          "ERROR:",
+          { TerminalStyle::RED, TerminalStyle::UNDERSCORE });
 
+      stderr_os->print(" connection to server list");
+      exit(1);
+    }
   } catch (const StandardException& e) {
     stderr_os->print(
         "ERROR:",
@@ -244,8 +260,6 @@ void runSQL(
     stderr_os->print(StringUtil::format(" $0\n", e.what()));
     exit(1);
   }
-
-  stderr_os->printGreen("run SQL");
 }
 
 void cmd_run(
