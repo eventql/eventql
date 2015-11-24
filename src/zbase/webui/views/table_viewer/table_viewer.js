@@ -63,6 +63,8 @@ ZBase.registerView((function() {
       element: 'json_' + event_counter,
       json: json
     });
+
+    $("ul li", elem).classList.add("collapsed");
   };
 
   var showLoadingBar = function() {
