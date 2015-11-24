@@ -25,6 +25,7 @@ ZBase.registerView((function() {
 
     //REMOVEME
     renderJSONView();
+    return;
     //REMOVEME END
 
     var url = "/api/v1/events/scan?table=" + table + "&limit=2";
@@ -32,9 +33,12 @@ ZBase.registerView((function() {
 
     query.addEventListener("result", function(e) {
       console.log(e.data);
+      query_mgr.close("table_viewer");
+      renderJSONView(JSON.parse(e.data));
     }, false);
 
     query.addEventListener("progress", function(e) {
+      console.log("running");
       var data = JSON.parse(e.data);
       QueryProgressWidget.render($(".zbase_table_viewer .inner_view"), data);
       if (data.status == "finished") {
@@ -45,6 +49,7 @@ ZBase.registerView((function() {
     query.addEventListener("error", function(e) {
       query_mgr.close("table_viewer");
       console.log("error", e);
+      renderError();
     }, false);
 
   };
@@ -64,6 +69,10 @@ ZBase.registerView((function() {
       json: '{"hello":"world"}'
     });
     console.log(inspector);
+  };
+
+  var renderError = function() {
+    
   };
 
   return {
