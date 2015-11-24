@@ -8,8 +8,25 @@
         <em>Table: </em><a class="table_name"></a>
       </h2>
 
-      <div class="loader"></div>
-      <div class="hidden json_viewer"></div>
+      <div class="loading_bar hidden">
+        <h3>
+          <div class="loaderanim-outer">
+            <div class="loaderanim">
+              <div class="rect1"></div>
+              <div class="rect2"></div>
+              <div class="rect3"></div>
+              <div class="rect4"></div>
+              <div class="rect5"></div>
+            </div>
+          </div>
+          Scanning...
+          <div class="loading_bar_info right hidden" style="font-size: 12px;">
+            <span style="font-weight:500;"><span class="num_rows"></span></span> rows scanned
+          </div>
+        </h3>
+      </div>
+
+      <div class="json_viewer"></div>
     </div>
   </div>
 </template>

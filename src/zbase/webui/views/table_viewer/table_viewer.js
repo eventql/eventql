@@ -22,11 +22,7 @@ ZBase.registerView((function() {
     $.handleLinks(tpl);
     $.replaceViewport(tpl);
     $.hideLoader();
-
-
-    QueryProgressWidget.render(
-        $(".zbase_table_viewer .loader"),
-        {status: "running"});
+    showLoadingBar();
 
     var url = "/api/v1/events/scan?table=" + table + "&limit=10";
     var query = query_mgr.get("table_viewer", url);
@@ -35,22 +31,19 @@ ZBase.registerView((function() {
     query.addEventListener("result", function(e) {
       renderJSONView(e.data, event_counter);
       event_counter++;
-      console.log("result");
     }, false);
 
     query.addEventListener("progress", function(e) {
-      console.log("progress");
       var data = JSON.parse(e.data);
-      QueryProgressWidget.render($(".zbase_table_viewer .loader"), data);
       if (data.status == "finished") {
         query_mgr.close("table_viewer");
+        hideLoadingBar();
       }
     }, false);
 
     query.addEventListener("error", function(e) {
       $.fatalError();
       console.log(e);
-      renderError();
     }, false);
   };
 
@@ -63,7 +56,6 @@ ZBase.registerView((function() {
   var renderJSONView = function(json, event_counter) {
     var elem = document.createElement("div");
     elem.setAttribute("id", "json_" + event_counter);
-
     $(".zbase_table_viewer .json_viewer").appendChild(elem);
 
 
@@ -71,10 +63,14 @@ ZBase.registerView((function() {
       element: 'json_' + event_counter,
       json: json
     });
+  };
 
-    $(".zbase_table_viewer .loader").classList.add("hidden");
-    $(".zbase_table_viewer .json_viewer").classList.remove("hidden");
+  var showLoadingBar = function() {
+    $(".zbase_table_viewer .loading_bar").classList.remove("hidden");
+  };
 
+  var hideLoadingBar = function() {
+    $(".zbase_table_viewer .loading_bar").classList.add("hidden");
   };
 
   return {
