@@ -66,7 +66,7 @@ ZBase.registerView((function() {
 
     var inspector = new InspectorJSON({
       element: 'table_viewer_json',
-      json: '{"hello":"world"}'
+      json: '{"data": [{"sessions": "10"}, {"user_journeys": "20"}]}'
     });
     console.log(inspector);
   };
