@@ -23,6 +23,7 @@
 #include <zbase/core/StaticPartitionReader.h>
 #include <zbase/core/StaticPartitionWriter.h>
 #include <zbase/core/StaticPartitionReplication.h>
+#include <zbase/z1stats.h>
 
 using namespace stx;
 
@@ -102,7 +103,13 @@ Partition::Partition(
     RefPtr<PartitionSnapshot> head,
     RefPtr<Table> table) :
     head_(head),
-    table_(table) {}
+    table_(table) {
+  z1stats()->num_partitions_loaded.incr(1);
+}
+
+Partition::~Partition() {
+  z1stats()->num_partitions_loaded.decr(1);
+}
 
 SHA1Hash Partition::uuid() const {
   auto snap = head_.getSnapshot();

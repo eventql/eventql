@@ -14,11 +14,17 @@ using namespace stx;
 
 namespace zbase {
 
-LazyPartition::LazyPartition() {}
+LazyPartition::LazyPartition() {
+  z1stats()->num_partitions.incr(1);
+}
 
 LazyPartition::LazyPartition(
     RefPtr<Partition> partition) :
     partition_(partition) {}
+
+LazyPartition::~LazyPartition() {
+  z1stats()->num_partitions.decr(1);
+}
 
 RefPtr<Partition> LazyPartition::getPartition(
     const String& tsdb_namespace,
