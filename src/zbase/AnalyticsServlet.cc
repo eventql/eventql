@@ -26,6 +26,7 @@
 #include "zbase/TableDefinition.h"
 #include "csql/runtime/ASCIITableFormat.h"
 #include "csql/runtime/JSONSSEStreamFormat.h"
+#include "csql/runtime/BinaryStreamFormat.h"
 #include "zbase/core/TimeWindowPartitioner.h"
 #include "zbase/core/FixedShardPartitioner.h"
 #include "zbase/HTTPAuth.h"
@@ -1084,17 +1085,56 @@ void AnalyticsServlet::executeSQLStream(
     const http::HTTPRequest* req,
     http::HTTPResponse* res,
     RefPtr<http::HTTPResponseStream> res_stream) {
+
+  const auto& params = uri.queryParams();
+
+  String query;
+  if (!URI::getParam(params, "query", &query)) {
+    RAISE(kRuntimeError, "missing ?query=... parameter");
+  }
+
+  String format;
+  if (!URI::getParam(params, "format", &format)) {
+    RAISE(kRuntimeError, "missing &format=... parameter");
+  }
+
+  if (format == "json") {
+    executeSQLJSONStream(query, session, res, res_stream);
+    return;
+  }
+
+  if (format == "binary") {
+    executeSQLBinaryStream(query, session, res_stream);
+    return;
+  }
+}
+
+void AnalyticsServlet::executeSQLBinaryStream(
+    const String& query,
+    const AnalyticsSession& session,
+    RefPtr<http::HTTPResponseStream> res_stream) {
+
+  try {
+    sql_->executeQuery(
+        query,
+        app_->getExecutionStrategy(session.customer()),
+        new csql::BinaryStreamFormat(res_stream));
+
+  } catch (const StandardException& e) {
+
+  }
+}
+
+void AnalyticsServlet::executeSQLJSONStream(
+    const String& query,
+    const AnalyticsSession& session,
+    http::HTTPResponse* res,
+    RefPtr<http::HTTPResponseStream> res_stream) {
+
   auto sse_stream = mkRef(new http::HTTPSSEStream(res, res_stream));
   sse_stream->start();
 
   try {
-    const auto& params = uri.queryParams();
-
-    String query;
-    if (!URI::getParam(params, "query", &query)) {
-      RAISE(kRuntimeError, "missing ?query=... parameter");
-    }
-
     sql_->executeQuery(
         query,
         app_->getExecutionStrategy(session.customer()),

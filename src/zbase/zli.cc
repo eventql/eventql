@@ -46,19 +46,15 @@ String loadAuth(const cli::FlagParser& global_flags) {
   }
 }
 
-void cmd_run(
+void runJS(
     const cli::FlagParser& global_flags,
-    const cli::FlagParser& cmd_flags) {
-  const auto& argv = cmd_flags.getArgv();
-  if (argv.size() != 1) {
-    RAISE(kUsageError, "usage: $ zli run <script.js>");
-  }
+    const String& file) {
 
   auto stdout_os = OutputStream::getStdout();
   auto stderr_os = TerminalOutputStream::fromStream(OutputStream::getStderr());
 
   try {
-    auto program_source = FileUtil::read(argv[0]);
+    auto program_source = FileUtil::read(file);
 
     bool finished = false;
     bool error = false;
@@ -188,6 +184,89 @@ void cmd_run(
     stderr_os->print(StringUtil::format(" $0\n", e.what()));
     exit(1);
   }
+}
+
+void runSQL(
+    const cli::FlagParser& global_flags,
+    const String& file) {
+
+  auto stdout_os = OutputStream::getStdout();
+  auto stderr_os = TerminalOutputStream::fromStream(OutputStream::getStderr());
+
+  try {
+    auto program_source = FileUtil::read(file).toString();
+    bool is_tty = stderr_os->isTTY();
+
+    auto response_handler = [&] (const http::HTTPSSEEvent& ev) {
+
+    };
+
+    auto url = StringUtil::format(
+          "http://$0/api/v1/sql_stream?format=binary&query=",
+          global_flags.getString("api_host"),
+          program_source);
+
+    program_source.clear();
+
+    auto auth_token = loadAuth(global_flags);
+
+    http::HTTPMessage::HeaderList auth_headers;
+    auth_headers.emplace_back(
+        "Authorization",
+        StringUtil::format("Token $0", auth_token));
+
+    if (is_tty) {
+      stderr_os->print("Launching job...");
+      //line_dirty = true;
+    } else {
+      stderr_os->print("Launching job...\n");
+    }
+
+
+    http::HTTPClient http_client;
+    const Promise<http::HTTPResponse> promise;
+    auto req = http::HTTPRequest::mkPost(url, program_source, auth_headers);
+    auto res = http_client.executeRequest(
+        req,
+        http::HTTPResponseFuture(promise));
+
+    //'Function<stx::http::HTTPResponseFuture *(Promise<stx::http::HTTPResponse>)>'
+    /*return [on_event] (
+      const Promise<http::HTTPResponse> promise) -> HTTPResponseFuture* {
+    return new HTTPSSEResponseHandler(promise, on_event);
+  }*/
+
+  } catch (const StandardException& e) {
+    stderr_os->print(
+        "ERROR:",
+        { TerminalStyle::RED, TerminalStyle::UNDERSCORE });
+
+    stderr_os->print(StringUtil::format(" $0\n", e.what()));
+    exit(1);
+  }
+
+  stderr_os->printGreen("run SQL");
+}
+
+void cmd_run(
+    const cli::FlagParser& global_flags,
+    const cli::FlagParser& cmd_flags) {
+  const auto& argv = cmd_flags.getArgv();
+  if (argv.size() != 1) {
+    RAISE(kUsageError, "usage: $ zli run <script.js>");
+  }
+
+  if (StringUtil::endsWith(argv[0], "js")) {
+    runJS(global_flags, argv[0]);
+    return;
+  }
+
+  if (StringUtil::endsWith(argv[0], "sql")) {
+    runSQL(global_flags, argv[0]);
+    return;
+  }
+
+  RAISE(kUsageError, "unsupported file format");
 }
 
 void cmd_login(
