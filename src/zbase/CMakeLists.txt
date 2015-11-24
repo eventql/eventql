@@ -151,6 +151,7 @@ add_executable(zbase
     Report.cc
     CTRStatsServlet.cc
     AnalyticsServlet.cc
+    StatusServlet.cc
     HTTPAuth.cc
     JSONSink.cc
     AnalyticsApp.cc

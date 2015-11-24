@@ -11,13 +11,15 @@
 using namespace stx;
 namespace zbase {
 
-void handleHTTPRequest(
+void StatusServlet::handleHTTPRequest(
     http::HTTPRequest* request,
-    http::HTTPResponse* response) override;
+    http::HTTPResponse* response) {
     http::HTTPResponse res;
   String html = "blah";
 
   response->setStatus(http::kStatusOK);
   response->addHeader("Content-Type", "text/html; charset=utf-8");
   response->addBody(html);
+}
+
 }
