@@ -66,7 +66,7 @@ ZBase.registerView((function() {
     query_mgr = EventSourceHandler();
     var query = query_mgr.get(
       "sql_query",
-      "/api/v1/sql_stream?query=" + encodeURIComponent(query_str));
+      "/api/v1/sql?format=json_sse&query=" + encodeURIComponent(query_str));
 
     query.addEventListener("result", function(e) {
       query_mgr.close("sql_query");

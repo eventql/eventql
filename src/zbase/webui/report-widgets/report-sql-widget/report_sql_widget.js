@@ -61,7 +61,7 @@ var ReportSQLWidgetDisplay = function() {
 
     var query = query_mgr.get(
       "report_sql",
-      "/api/v1/sql_stream?query=" + encodeURIComponent(conf.query));
+      "/api/v1/sql?format=json_sse&query=" + encodeURIComponent(conf.query));
 
     query.addEventListener('result', function(e) {
       query_mgr.close("report_sql");

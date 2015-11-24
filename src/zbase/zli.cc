@@ -226,9 +226,9 @@ void runSQL(
     http::HTTPClient http_client;
     const Promise<http::HTTPResponse> promise;
     auto req = http::HTTPRequest::mkPost(url, program_source, auth_headers);
-    auto res = http_client.executeRequest(
-        req,
-        http::HTTPResponseFuture(promise));
+    //auto res = http_client.executeRequest(
+    //    req,
+    //    http::HTTPResponseFuture(promise));
 
     //'Function<stx::http::HTTPResponseFuture *(Promise<stx::http::HTTPResponse>)>'
     /*return [on_event] (

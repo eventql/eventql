@@ -25,8 +25,9 @@
 #include "zbase/PipelineInfo.h"
 #include "zbase/TableDefinition.h"
 #include "csql/runtime/ASCIITableFormat.h"
+#include "csql/runtime/JSONResultFormat.h"
 #include "csql/runtime/JSONSSEStreamFormat.h"
-#include "csql/runtime/BinaryStreamFormat.h"
+//#include "csql/runtime/BinaryStreamFormat.h"
 #include "zbase/core/TimeWindowPartitioner.h"
 #include "zbase/core/FixedShardPartitioner.h"
 #include "zbase/HTTPAuth.h"
@@ -318,18 +319,11 @@ void AnalyticsServlet::handle(
     return;
   }
 
-
   /* SQL */
-  if (uri.path() == "/api/v1/sql") {
+  if (uri.path() == "/api/v1/sql" ||
+      uri.path() == "/api/v1/sql_stream") {
     req_stream->readBody();
-    executeSQL(session, &req, &res);
-    res_stream->writeResponse(res);
-    return;
-  }
-
-  if (uri.path() == "/api/v1/sql_stream") {
-    req_stream->readBody();
-    executeSQLStream(uri, session, &req, &res, res_stream);
+    executeSQL(session, &req, &res, res_stream);
     return;
   }
 
@@ -950,25 +944,6 @@ void AnalyticsServlet::getPrivateAPIToken(
   res->setStatus(http::kStatusOK);
 }
 
-
-void AnalyticsServlet::executeSQL(
-    const AnalyticsSession& session,
-    const http::HTTPRequest* req,
-    http::HTTPResponse* res) {
-  auto query = req->body().toString();
-
-  Buffer result;
-  sql_->executeQuery(
-      query,
-      app_->getExecutionStrategy(session.customer()),
-      new csql::ASCIITableFormat(BufferOutputStream::fromBuffer(&result)));
-
-  res->setStatus(http::kStatusOK);
-  res->addHeader("Content-Type", "text/plain");
-  res->addHeader("Connection", "close");
-  res->addBody(result);
-}
-
 void AnalyticsServlet::executeSQLAggregatePartition(
     const AnalyticsSession& session,
     const http::HTTPRequest* req,
@@ -1079,57 +1054,128 @@ void AnalyticsServlet::executeSQLScanPartition(
   sql_->executeStatement(expr.get(), fn);
 }
 
-void AnalyticsServlet::executeSQLStream(
-    const URI& uri,
+void AnalyticsServlet::executeSQL(
     const AnalyticsSession& session,
     const http::HTTPRequest* req,
     http::HTTPResponse* res,
     RefPtr<http::HTTPResponseStream> res_stream) {
+  try {
+    URI uri(req->uri());
+    URI::ParamList params = uri.queryParams();
+    URI::parseQueryString(req->body().toString(), &params);
 
-  const auto& params = uri.queryParams();
+    String format;
+    URI::getParam(params, "format", &format);
+    if (format.empty()) {
+      format = "json";
+    }
 
-  String query;
-  if (!URI::getParam(params, "query", &query)) {
-    RAISE(kRuntimeError, "missing ?query=... parameter");
-  }
-
-  String format;
-  if (!URI::getParam(params, "format", &format)) {
-    RAISE(kRuntimeError, "missing &format=... parameter");
-  }
-
-  if (format == "json") {
-    executeSQLJSONStream(query, session, res, res_stream);
-    return;
-  }
-
-  if (format == "binary") {
-    executeSQLBinaryStream(query, session, res_stream);
-    return;
+    if (format == "ascii") {
+      executeSQL_ASCII(params, session, req, res, res_stream);
+    } else if (format == "json") {
+      executeSQL_JSON(params, session, req, res, res_stream);
+    } else if (format == "json_sse") {
+      executeSQL_JSONSSE(params, session, req, res, res_stream);
+    } else {
+      res->setStatus(http::kStatusBadRequest);
+      res->addBody("invalid format: " + format);
+      res_stream->writeResponse(*res);
+    }
+  } catch (const StandardException& e) {
+    logError("z1.sql", e, "Uncaught SQL error");
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody("invalid request");
+    res_stream->writeResponse(*res);
   }
 }
 
-void AnalyticsServlet::executeSQLBinaryStream(
-    const String& query,
+void AnalyticsServlet::executeSQL_ASCII(
+    const URI::ParamList& params,
     const AnalyticsSession& session,
+    const http::HTTPRequest* req,
+    http::HTTPResponse* res,
     RefPtr<http::HTTPResponseStream> res_stream) {
+  String query;
+  if (!URI::getParam(params, "query", &query)) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody("missing ?query=... parameter");
+    res_stream->writeResponse(*res);
+    return;
+  }
 
   try {
+    Buffer result;
     sql_->executeQuery(
         query,
         app_->getExecutionStrategy(session.customer()),
-        new csql::BinaryStreamFormat(res_stream));
+        new csql::ASCIITableFormat(BufferOutputStream::fromBuffer(&result)));
 
+    res->setStatus(http::kStatusOK);
+    res->addHeader("Content-Type", "text/plain; charset=utf-8");
+    res->addBody(result);
+    res_stream->writeResponse(*res);
   } catch (const StandardException& e) {
-
+    res->setStatus(http::kStatusInternalServerError);
+    res->addHeader("Content-Type", "text/plain; charset=utf-8");
+    res->addBody(StringUtil::format("error: $0", e.what()));
+    res_stream->writeResponse(*res);
   }
 }
 
-void AnalyticsServlet::executeSQLJSONStream(
-    const String& query,
+void AnalyticsServlet::executeSQL_JSON(
+    const URI::ParamList& params,
     const AnalyticsSession& session,
+    const http::HTTPRequest* req,
     http::HTTPResponse* res,
     RefPtr<http::HTTPResponseStream> res_stream) {
+  String query;
+  if (!URI::getParam(params, "query", &query)) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody("missing ?query=... parameter");
+    res_stream->writeResponse(*res);
+    return;
+  }
+
+  try {
+    Buffer result;
+    json::JSONOutputStream jsons(BufferOutputStream::fromBuffer(&result));
+    sql_->executeQuery(
+        query,
+        app_->getExecutionStrategy(session.customer()),
+        new csql::JSONResultFormat(&jsons));
+
+    res->setStatus(http::kStatusOK);
+    res->addHeader("Content-Type", "application/json; charset=utf-8");
+    res->addBody(result);
+    res_stream->writeResponse(*res);
+  } catch (const StandardException& e) {
+    Buffer buf;
+    json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
+    json.beginObject();
+    json.addObjectEntry("error");
+    json.addString(e.what());
+    json.endObject();
+
+    res->setStatus(http::kStatusInternalServerError);
+    res->addHeader("Content-Type", "application/json; charset=utf-8");
+    res->addBody(buf);
+    res_stream->writeResponse(*res);
+  }
+}
+
+void AnalyticsServlet::executeSQL_JSONSSE(
+    const URI::ParamList& params,
+    const AnalyticsSession& session,
+    const http::HTTPRequest* req,
+    http::HTTPResponse* res,
+    RefPtr<http::HTTPResponseStream> res_stream) {
+  String query;
+  if (!URI::getParam(params, "query", &query)) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody("missing ?query=... parameter");
+    res_stream->writeResponse(*res);
+    return;
+  }
 
   auto sse_stream = mkRef(new http::HTTPSSEStream(res, res_stream));
   sse_stream->start();
@@ -1153,6 +1199,22 @@ void AnalyticsServlet::executeSQLJSONStream(
 
   sse_stream->finish();
 }
+
+//void AnalyticsServlet::executeSQLBinaryStream(
+//    const String& query,
+//    const AnalyticsSession& session,
+//    RefPtr<http::HTTPResponseStream> res_stream) {
+//
+//  try {
+//    sql_->executeQuery(
+//        query,
+//        app_->getExecutionStrategy(session.customer()),
+//        new csql::BinaryStreamFormat(res_stream));
+//
+//  } catch (const StandardException& e) {
+//
+//  }
+//}
 
 void AnalyticsServlet::pipelineInfo(
     const AnalyticsSession& session,

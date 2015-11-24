@@ -118,24 +118,28 @@ protected:
   void executeSQL(
       const AnalyticsSession& session,
       const http::HTTPRequest* req,
-      http::HTTPResponse* res);
+      http::HTTPResponse* res,
+      RefPtr<http::HTTPResponseStream> res_stream);
 
-  void executeSQLStream(
-      const URI& uri,
+  void executeSQL_ASCII(
+      const URI::ParamList& params,
       const AnalyticsSession& session,
       const http::HTTPRequest* req,
       http::HTTPResponse* res,
       RefPtr<http::HTTPResponseStream> res_stream);
 
-  void executeSQLJSONStream(
-      const String& query,
+  void executeSQL_JSON(
+      const URI::ParamList& params,
       const AnalyticsSession& session,
+      const http::HTTPRequest* req,
       http::HTTPResponse* res,
       RefPtr<http::HTTPResponseStream> res_stream);
 
-  void executeSQLBinaryStream(
-      const String& query,
+  void executeSQL_JSONSSE(
+      const URI::ParamList& params,
       const AnalyticsSession& session,
+      const http::HTTPRequest* req,
+      http::HTTPResponse* res,
       RefPtr<http::HTTPResponseStream> res_stream);
 
   void executeSQLAggregatePartition(
