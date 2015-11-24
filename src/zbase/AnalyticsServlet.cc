@@ -1147,8 +1147,8 @@ void AnalyticsServlet::executeSQL_BINARY(
 
   {
     auto result_format = new csql::BinaryResultFormat(
-        [] (const void* data, size_t size) {
-      iputs("write: $0", size);
+        [res_stream] (const void* data, size_t size) {
+      res_stream->writeBodyChunk(data, size);
     });
 
     try {
