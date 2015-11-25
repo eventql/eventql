@@ -12,67 +12,70 @@
       </button>
 
       <h2 class="pagetitle" style="overflow:hidden;">
-        <a href="/a/datastore/tables" class="back_btn"></a>
-        <em>Table: </em><a class="table_name_breadcrumb"></a>
+        Tables &mdash; <em><a class="table_name_breadcrumb"></a></em>
       </h2>
 
-      <z-tabbable class="slim_tabs" style="margin-top: -2px;">
-        <z-tab class="link schema" data-active>
-          <a>Schema</a>
-        </z-tab>
-        <z-tab class="link settings" style="display: none;">
-          <a>Settings</a>
-        </z-tab>
-      </z-tabbable>
+      <div class="content_pane">
+        <z-tabbable class="slim_tabs" style="">
+          <z-tab class="link schema" data-active>
+            <a>Schema</a>
+          </z-tab>
+          <z-tab class="link settings" style="display: none;">
+            <a>Settings</a>
+          </z-tab>
+        </z-tabbable>
 
-      <z-dropdown class="input primary edit" data-resolved style="float: right; margin-top: 10px;">
-        <z-dropdown-header>
-          <z-dropdown-header-value data-static>
-              <span style="margin-left:4px; margin-right: 10px;">Edit</span>
-          </z-dropdown-header-value>
-        </z-dropdown-header>
-        <z-dropdown-flyout>
-          <z-dropdown-items>
-            <z-dropdown-item data-value='add_column'>
-              <z-dropdown-icon><i class="fa fa-plus"></i></z-dropdown-icon>
-              Add Column
-            </z-dropdown-item>
-            <z-dropdown-item data-value='delete_column'>
-              <z-dropdown-icon><i class="fa fa-trash-o"></i></z-dropdown-icon>
-              Remove Column
-            </z-dropdown-item>
-          </z-dropdown-items>
-        </z-dropdown-flyout>
-      </z-dropdown>
+        <z-dropdown class="input primary edit" data-resolved style="float: right; margin-top: 10px; margin-right: 20px;">
+          <z-dropdown-header>
+            <z-dropdown-header-value data-static>
+                <span style="margin-left:4px; margin-right: 10px;">Edit</span>
+            </z-dropdown-header-value>
+          </z-dropdown-header>
+          <z-dropdown-flyout>
+            <z-dropdown-items>
+              <z-dropdown-item data-value='add_column'>
+                <z-dropdown-icon><i class="fa fa-plus"></i></z-dropdown-icon>
+                Add Column
+              </z-dropdown-item>
+              <z-dropdown-item data-value='delete_column'>
+                <z-dropdown-icon><i class="fa fa-trash-o"></i></z-dropdown-icon>
+                Remove Column
+              </z-dropdown-item>
+            </z-dropdown-items>
+          </z-dropdown-flyout>
+        </z-dropdown>
 
-      <h3 style="font-weight: 400;">Table Schema</h3>
 
-      <table class="z-table" style="border-top: 1px solid #ddd; margin-top: 12px;">
-        <thead>
-          <tr>
-            <th>Column Name</th>
-            <th>Type</th>
-            <th>Optional</th>
-          </tr>
-        </thead>
 
-        <tbody></tbody>
-      </table>
+        <h3 style="font-weight: 400;">Edit Schema</h3>
+
+        <table class="z-table" style="border-top: 1px solid #ddd; margin-top: 12px;">
+          <thead>
+            <tr>
+              <th>Column Name</th>
+              <th>Type</th>
+              <th>Optional</th>
+            </tr>
+          </thead>
+
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <z-modal class="add_column">
+        <z-modal-box>
+          <z-modal-close-icon></z-modal-close-icon>
+          <div class="container"></div>
+        </z-modal-box>
+      </z-modal>
+
+      <z-modal class="delete_column">
+        <z-modal-box>
+          <z-modal-close-icon></z-modal-close-icon>
+          <div class="container"></div>
+        </z-modal-box>
+      </z-modal>
     </div>
-
-    <z-modal class="add_column">
-      <z-modal-box>
-        <z-modal-close-icon></z-modal-close-icon>
-        <div class="container"></div>
-      </z-modal-box>
-    </z-modal>
-
-    <z-modal class="delete_column">
-      <z-modal-box>
-        <z-modal-close-icon></z-modal-close-icon>
-        <div class="container"></div>
-      </z-modal-box>
-    </z-modal>
   </div>
 </template>
 

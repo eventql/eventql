@@ -176,11 +176,11 @@
 .zbase_header .main_menu > li.user_info .nav {
   padding: 0;
   margin-left: 6px;
-  margin-top: 1px;
+  margin-top: -2px;
 }
 
 .zbase_header .userid_info {
-  color: #4E6370;
+  color: rgba(255,255,255,.97);
   font-size: 12px;
 }
 
@@ -204,14 +204,15 @@
   display: block;
 }
 
-.zbase_header.blue ul.main_menu.user .dropdown_header {
-  color: #fff;
+.zbase_header ul.main_menu.user .dropdown_header {
+  color: rgba(255,255,255,.97);
 }
 
 .zbase_header z-search.search {
   width: 580px;
   margin-left: 10px;
   font-size: 13px;
+  display: none;
 }
 
 @media (max-width: 1100px) {
@@ -262,12 +263,12 @@
 .zbase_header .btn_home,
 .zbase_header .btn_settings {
   float: right;
-  border-right: 1px solid #eee;
+  border-right: 1px solid rgba(255,255,255,.2);
   height: 32px;
   line-height: 32px;
-  margin-top: 10px;
+  margin-top: 6px;
   padding: 0 16px;
-  color: #4E6370;
+  color: rgba(255,255,255,.97);
   font-size: 12px;
 }
 
@@ -310,8 +311,8 @@
 
 .zbase_header z-dropdown.new_query {
   float: right;
-  border-right: 1px solid #eee;
-  margin-top: 10px;
+  border-right: 1px solid rgba(255,255,255,.2);
+  margin-top: 6px;
   height: 32px;
 }
 
@@ -320,7 +321,7 @@
   line-height: 33px;
   font-size: 12px;
   font-weight: 400;
-  color: #4E6370;
+  color: rgba(255,255,255,.97);
 }
 
 .zbase_header z-dropdown.new_query z-dropdown-flyout {

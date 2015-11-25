@@ -76,7 +76,6 @@ z-tabbable z-tab:hover,
 z-tabbable z-tab[data-active],
 .z-tabbable .z-tab[data-active] {
   position: relative;
-  background-color: #ffffff;
   color: rgba(0, 0, 0, 0.8);
   border-color: #d4d4d5;
   font-weight: bold;

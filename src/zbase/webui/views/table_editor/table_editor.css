@@ -76,6 +76,22 @@
   color: #3498db;
 }
 
+.zbase_table_editor .content_pane {
+  width: 100%;
+  background: #fff;
+  margin: auto;
+  border: 1px solid #ddd;
+  overflow: hidden;
+  padding: 0 20px 20px 20px;
+}
+
+.zbase_table_editor z-tabbable.slim_tabs {
+  margin-left: -20px;
+  margin-right: -20px;
+  padding: 2px 20px 0 20px;
+  background: #f9f9f9;
+}
+
 .zbase_table_editor .add_pane {
   border: 1px solid #e1e1e1;
   padding: 15px;
@@ -175,3 +191,9 @@
   line-height: 34px;
 }
 
+.zbase_table_editor h3 {
+  font-size: 18px;
+  font-weight: 400;
+  margin-top: 23px;
+  margin-bottom: 19px;
+}

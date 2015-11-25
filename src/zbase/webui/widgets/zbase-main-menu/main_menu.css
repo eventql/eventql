@@ -58,6 +58,14 @@
   margin-left: -10px;
 }
 
+.zbase_main_menu z-menu i.fa {
+  font-size:80%;
+  margin-right: 8px;
+  position: relative;
+  top: -1px;
+  margin-left: -6px;
+}
+
 .zbase_main_menu z-menu z-menu-item a[data-active],
 .zbase_main_menu z-menu z-menu-item a:hover {
   color: #3498db;
