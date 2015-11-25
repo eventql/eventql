@@ -59,11 +59,12 @@
 }
 
 .zbase_main_menu z-menu i.fa {
-  font-size:80%;
-  margin-right: 8px;
+  font-size: 80%;
+  margin-right: 7px;
   position: relative;
   top: -1px;
   margin-left: -6px;
+  opacity: 0.8;
 }
 
 .zbase_main_menu z-menu z-menu-item a[data-active],
