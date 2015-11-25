@@ -8,6 +8,26 @@
         <em>Table: </em><a class="table_name"></a>
       </h2>
 
+      <div class='control_pane'>
+        <div class="control_pane_bar">
+          <z-dropdown class='input filter_type_control' style="position:absolute;">
+            <z-dropdown-flyout>
+              <z-dropdown-items>
+                <z-dropdown-item data-value="sql" data-text="SQL"><i class="fa fa-filter" style="font-weight:normal; margin-right: 5px;"></i> SQL</z-dropdown-item>
+                <z-dropdown-item data-value="regex" data-text="Regex">Regex</z-dropdown-item>
+                <z-dropdown-item data-value="fulltext" data-text="Fulltext">Fulltext</z-dropdown-item>
+              </z-dropdown-items>
+            </z-dropdown-flyout>
+          </z-dropdown>
+
+          <z-search style="display: block; margin-left:80px" class='filter_control'>
+            <z-input class="icon" data-placeholder="Filter by SQL" style="position: relative; top: 1px; display: block;">
+              <z-input-icon><i class='fa fa-search'></i></z-input-icon>
+            </z-input>
+          </z-search>
+        </div>
+      </div>
+
       <div class="loading_bar hidden">
         <h3>
           <div class="loaderanim-outer">
