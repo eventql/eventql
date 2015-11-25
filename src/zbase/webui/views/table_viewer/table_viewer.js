@@ -7,7 +7,7 @@ ZBase.registerView((function() {
     $.showLoader();
     query_mgr = EventSourceHandler();
 
-    table = path.substr(path_prefix.length);
+    table = path.split("?")[0].substr(path_prefix.length);
 
     var tpl = $.getTemplate(
         "views/table_viewer",
@@ -20,10 +20,10 @@ ZBase.registerView((function() {
     table_link.innerHTML = table;
     table_link.setAttribute("href", path_prefix + table);
 
-    $(".filter_type_control", tpl).addEventListener(
-        "change", submitControls);
-    $(".filter_control", tpl).addEventListener(
-        "z-search-submit", submitControls);
+    $(".filter_type_control", tpl).addEventListener("change", submitControls);
+    $(".filter_control", tpl).addEventListener("z-search-submit", submitControls);
+    $(".limit_control", tpl).addEventListener("keyup", onLimitInput);
+    $.onClick($(".limit_display label", tpl), displayLimitInput);
 
     $.handleLinks(tpl);
     $.replaceViewport(tpl);
@@ -60,12 +60,13 @@ ZBase.registerView((function() {
 
     query.addEventListener("error", function(e) {
       console.log(e);
+      query_mgr.close("table_viewer");
       $.fatalError();
     }, false);
   };
 
   var submitControls = function() {
-    //$.navigateTo(getViewUrl());
+    $.navigateTo(getViewUrl());
   };
 
   var getViewUrl = function() {
@@ -78,9 +79,9 @@ ZBase.registerView((function() {
 
   var getViewParams = function() {
     var params = {};
+
     //limit param
-    //FIXME
-    params.limit = 10;
+    params.limit = $(".zbase_table_viewer .limit_control").value;
 
     //filter param
     params.filter_type = $(".zbase_table_viewer .filter_type_control").getValue();
@@ -97,10 +98,14 @@ ZBase.registerView((function() {
   };
 
   var setQueryParams = function(url) {
-    // param: filter type
+    // param: filter
     var filter_type = UrlUtil.getParamValue(url, "filter_type");
     var filter = UrlUtil.getParamValue(url, "filter");
     setFilterParam(filter_type, filter);
+
+    //param limit
+    var limit = UrlUtil.getParamValue(url, "limit");
+    setLimitParam(limit);
   };
 
   var setFilterParam = function(filter_type, filter) {
@@ -110,6 +115,15 @@ ZBase.registerView((function() {
 
     $(".zbase_table_viewer .filter_type_control").setValue([filter_type]);
     $(".zbase_table_viewer .filter_control").setValue(filter);
+  };
+
+  var setLimitParam = function(limit) {
+    if (!limit) {
+      limit = 10;
+    }
+
+    $(".zbase_table_viewer .limit_display .limit_value").innerHTML = limit;
+    $(".zbase_table_viewer .limit_control").value = limit;
   };
 
   var renderJSONView = function(json, event_counter) {
@@ -134,6 +148,17 @@ ZBase.registerView((function() {
   var hideLoadingBar = function() {
     $(".zbase_table_viewer").classList.remove("loading");
     $(".zbase_table_viewer .loading_bar").classList.add("hidden");
+  };
+
+  var onLimitInput = function(e) {
+    if (e.keyCode == 13) {
+      submitControls();
+    }
+  };
+
+  var displayLimitInput = function() {
+    $(".zbase_table_viewer .limit_display").classList.add("active");
+    $(".zbase_table_viewer input.limit_control").focus();
   };
 
   return {

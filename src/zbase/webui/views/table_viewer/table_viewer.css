@@ -158,3 +158,23 @@
   line-height: 34px;
   margin-top: 1px;
 }
+
+.zbase_table_viewer .limit_display {
+  display: inline-block;
+}
+
+.zbase_table_viewer .limit_display.active label,
+.zbase_table_viewer .limit_display input.limit_control {
+  display: none;
+}
+
+.zbase_table_viewer .limit_display label,
+.zbase_table_viewer .limit_display.active input.limit_control {
+  display: block;
+}
+
+.zbase_table_viewer .limit_display label {
+  color: #3498db;
+  font-weight: 500;
+  cursor: pointer;
+}
