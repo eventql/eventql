@@ -79,11 +79,12 @@ void LogPartitionReplication::replicateTo(
   LogPartitionReader reader(partition_->getTable(), snap_);
 
   size_t batch_size = 0;
+  size_t num_replicated = 0;
   RecordEnvelopeList batch;
   reader.fetchRecords(
       replicated_offset,
       size_t(-1),
-      [this, &batch, &replica, &replicated_offset, &batch_size] (
+      [this, &batch, &replica, &replicated_offset, &batch_size, &num_replicated] (
           const SHA1Hash& record_id,
           const void* record_data,
           size_t record_size) {
@@ -95,6 +96,7 @@ void LogPartitionReplication::replicateTo(
     rec->set_record_data(record_data, record_size);
 
     batch_size += record_size;
+    ++num_replicated;
 
     if (batch_size > kMaxBatchSizeBytes ||
         batch.records().size() > kMaxBatchSizeRows) {
@@ -107,13 +109,21 @@ void LogPartitionReplication::replicateTo(
   if (batch.records().size() > 0) {
     uploadBatchTo(replica, batch);
   }
+
+  if (num_replicated != snap_->nrecs - replicated_offset) {
+    RAISEF(
+        kIllegalStateError,
+        "expected to replicate $0 records, but only saw $1",
+        snap_->nrecs - replicated_offset,
+        num_replicated);
+  }
 }
 
 void LogPartitionReplication::uploadBatchTo(
     const ReplicaRef& replica,
     const RecordEnvelopeList& batch) {
   auto body = msg::encode(batch);
-  URI uri(StringUtil::format("http://$0/tsdb/insert", replica.addr.hostAndPort()));
+  URI uri(StringUtil::format("http://$0/tsdb/replicate", replica.addr.hostAndPort()));
   http::HTTPRequest req(http::HTTPMessage::M_POST, uri.pathAndQuery());
   req.addHeader("Host", uri.hostAndPort());
   req.addHeader("Content-Type", "application/fnord-msg");
@@ -147,13 +157,14 @@ bool LogPartitionReplication::replicate() {
     const auto& replica_offset = replicatedOffsetFor(repl_state, r.unique_id);
 
     if (replica_offset < head_offset) {
-      logTrace(
-          "tsdb",
-          "Replicating partition $0/$1/$2 to $3",
+      logDebug(
+          "z1.replication",
+          "Replicating partition $0/$1/$2 to $3 ($4 records)",
           snap_->state.tsdb_namespace(),
           snap_->state.table_key(),
           snap_->key.toString(),
-          r.addr.hostAndPort());
+          r.addr.hostAndPort(),
+          head_offset - replica_offset);
 
       try {
         replicateTo(r, replica_offset);
@@ -163,7 +174,7 @@ bool LogPartitionReplication::replicate() {
         success = false;
 
         stx::logError(
-          "tsdb",
+          "z1.replication",
           e,
           "Error while replicating partition $0/$1/$2 to $3",
           snap_->state.tsdb_namespace(),

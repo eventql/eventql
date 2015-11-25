@@ -10,6 +10,7 @@
 #pragma once
 #include <stx/stdtypes.h>
 #include <zbase/core/Partition.h>
+#include <zbase/z1stats.h>
 
 using namespace stx;
 
@@ -22,6 +23,7 @@ public:
 
   LazyPartition();
   LazyPartition(RefPtr<Partition> partition);
+  ~LazyPartition();
 
   RefPtr<Partition> getPartition(
       const String& tsdb_namespace,

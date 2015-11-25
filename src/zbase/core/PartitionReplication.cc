@@ -28,9 +28,10 @@ PartitionReplication::PartitionReplication(
     repl_scheme_(repl_scheme),
     http_(http) {}
 
-ReplicationState PartitionReplication::fetchReplicationState() const {
-  auto filepath = FileUtil::joinPaths(snap_->base_path, kStateFileName);
-  String tbl_uuid((char*) snap_->uuid().data(), snap_->uuid().size());
+ReplicationState PartitionReplication::fetchReplicationState(
+    RefPtr<PartitionSnapshot> snap) {
+  auto filepath = FileUtil::joinPaths(snap->base_path, kStateFileName);
+  String tbl_uuid((char*) snap->uuid().data(), snap->uuid().size());
 
   if (FileUtil::exists(filepath)) {
     auto disk_state = msg::decode<ReplicationState>(FileUtil::read(filepath));
@@ -41,9 +42,13 @@ ReplicationState PartitionReplication::fetchReplicationState() const {
   }
 
   ReplicationState state;
-  auto uuid = snap_->uuid();
+  auto uuid = snap->uuid();
   state.set_uuid(tbl_uuid);
   return state;
+}
+
+ReplicationState PartitionReplication::fetchReplicationState() const {
+  return fetchReplicationState(snap_);
 }
 
 void PartitionReplication::commitReplicationState(

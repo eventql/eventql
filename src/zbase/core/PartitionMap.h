@@ -20,6 +20,7 @@
 #include <zbase/core/PartitionInfo.pb.h>
 #include <zbase/core/PartitionChangeNotification.h>
 #include <zbase/core/RecordEnvelope.pb.h>
+#include <zbase/z1stats.h>
 
 using namespace stx;
 

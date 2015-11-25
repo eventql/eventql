@@ -50,6 +50,7 @@ add_library(customerdirectory OBJECT
 add_dependencies(customerdirectory coreprotos)
 
 add_library(tsdb-server OBJECT
+    z1stats.cc
     core/TSDBClient.cc
     core/TimeWindowPartitioner.cc
     core/FixedShardPartitioner.cc
@@ -151,6 +152,7 @@ add_executable(zbase
     Report.cc
     CTRStatsServlet.cc
     AnalyticsServlet.cc
+    StatusServlet.cc
     HTTPAuth.cc
     JSONSink.cc
     AnalyticsApp.cc

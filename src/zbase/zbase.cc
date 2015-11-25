@@ -51,6 +51,7 @@
 #include "zbase/DefaultServlet.h"
 #include "csql/defaults.h"
 #include "zbase/ConfigDirectory.h"
+#include "zbase/StatusServlet.h"
 #include <jsapi.h>
 
 using namespace stx;
@@ -290,11 +291,13 @@ int main(int argc, const char** argv) {
       &docdb,
       &partition_map);
 
+  zbase::StatusServlet status_servlet(&partition_map);
   zbase::DefaultServlet default_servlet;
 
   http_router.addRouteByPrefixMatch("/a/", &webui_servlet);
   http_router.addRouteByPrefixMatch("/api/", &analytics_servlet, &tpool);
   http_router.addRouteByPrefixMatch("/docs/", &webdocs_servlet);
+  http_router.addRouteByPrefixMatch("/zstatus", &status_servlet);
   http_router.addRouteByPrefixMatch("/", &default_servlet);
 
   auto rusage_t = std::thread([] () {

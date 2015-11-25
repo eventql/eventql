@@ -29,6 +29,10 @@ using namespace stx;
 
 namespace zbase {
 
+enum class InsertFlags : uint64_t {
+  REPLICATED_WRITE = 1
+};
+
 class TSDBService {
 public:
 
@@ -39,33 +43,41 @@ public:
 
   void createTable(const TableDefinition& config);
 
-  void insertRecords(const RecordEnvelopeList& records);
+  void insertRecords(
+      const RecordEnvelopeList& records,
+      uint64_t flags = 0);
 
-  void insertRecords(const Vector<RecordEnvelope>& records);
+  void insertRecords(
+      const Vector<RecordEnvelope>& records,
+      uint64_t flags = 0);
 
   void insertRecords(
       const String& tsdb_namespace,
       const String& table_name,
       const SHA1Hash& partition_key,
-      const Vector<RecordRef>& recods);
+      const Vector<RecordRef>& recods,
+      uint64_t flags = 0);
 
   void insertRecord(
       const String& tsdb_namespace,
       const String& table_name,
       const SHA1Hash& partition_key,
       const SHA1Hash& record_id,
-      const Buffer& record);
+      const Buffer& record,
+      uint64_t flags = 0);
 
   void insertRecord(
       const String& tsdb_namespace,
       const String& table_name,
       const json::JSONObject::const_iterator& data_begin,
-      const json::JSONObject::const_iterator& data_end);
+      const json::JSONObject::const_iterator& data_end,
+      uint64_t flags = 0);
 
   void insertRecord(
       const String& tsdb_namespace,
       const String& table_name,
-      const msg::DynamicMessage& data);
+      const msg::DynamicMessage& data,
+      uint64_t flags = 0);
 
   void updatePartitionCSTable(
       const String& tsdb_namespace,
