@@ -34,7 +34,15 @@ ZBase.registerView((function() {
     $(".filter_control", tpl).addEventListener("z-search-submit", submitControls);
     $(".limit_control", tpl).addEventListener("z-input-submit", submitControls);
     $.onClick($(".limit_control z-input-icon", tpl), submitControls);
-    $.onClick($(".limit_display label", tpl), displayLimitInput);
+    $(".offset_control", tpl).addEventListener("z-input-submit", submitControls);
+    $.onClick($(".offset_control z-input-icon", tpl), submitControls);
+
+    $.onClick($(".limit_display label", tpl), function() {
+      displayHidableInput($(".zbase_table_viewer .limit_display"));
+    });
+    $.onClick($(".offset_display label", tpl), function() {
+      displayHidableInput($(".zbase_table_viewer .offset_display"));
+    });
 
     $.handleLinks(tpl);
     $.replaceViewport(tpl);
@@ -45,14 +53,12 @@ ZBase.registerView((function() {
   };
 
   var destroy = function() {
-    console.log("destroy");
     if (query_mgr) {
       query_mgr.closeAll();
     }
 
     if (inspectors) {
       inspectors.forEach(function(inspector) {
-        console.log(inspector);
         inspector.destroy();
       });
     }
@@ -175,23 +181,28 @@ ZBase.registerView((function() {
     }
   };
 
-  var displayLimitInput = function() {
-    $(".zbase_table_viewer .limit_display").classList.add("active");
-    $(".zbase_table_viewer .limit_control input").focus();
+  var displayHidableInput = function(container) {
+    hideInput();
+    container.classList.add("active");
+    $("input", container).focus();
 
-    $(".zbase_table_viewer").addEventListener("click", hideLimitInput);
-    $(".zbase_table_viewer .limit_control").addEventListener(
-        "click", stopHideLimitInput);
+    $(".zbase_table_viewer").addEventListener("click", hideInput);
+    $("z-input", container).addEventListener("click", stopHidingInput);
   };
 
-  var hideLimitInput = function() {
-    $(".zbase_table_viewer .limit_display").classList.remove("active");
-    $(".zbase_table_viewer").removeEventListener("click", hideLimitInput);
-    $(".zbase_table_viewer .limit_control").removeEventListener(
-        "click", stopHideLimitInput);
+  var hideInput = function() {
+    var active_elem = $(".zbase_table_viewer .hidable_input_container.active");
+
+    if (!active_elem) {
+      return;
+    }
+
+    active_elem.classList.remove("active");
+    $(".zbase_table_viewer").removeEventListener("click", hideInput);
+    $("z-input", active_elem).removeEventListener("click", stopHidingInput);
   };
 
-  var stopHideLimitInput = function(e) {
+  var stopHidingInput = function(e) {
     e.stopPropagation();
   };
 
