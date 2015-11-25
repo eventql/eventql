@@ -24,7 +24,9 @@ ZBase.registerView((function() {
     $.hideLoader();
     showLoadingBar();
 
-    var url = "/api/v1/events/scan?table=" + table + "&limit=10";
+    var params = getQueryParams();
+    params.table = table;
+    var url = "/api/v1/events/scan?" + $.buildQueryString(params);
     var query = query_mgr.get("table_viewer", url);
     var event_counter = 0;
 
@@ -51,6 +53,20 @@ ZBase.registerView((function() {
     if (query_mgr) {
       query_mgr.closeAll();
     }
+  };
+
+  var getQueryParams = function() {
+    var params = {};
+
+    //limit param
+    //FIXME
+    params.limit = 10;
+
+    //filter param
+    params.filter_type = $(".zbase_table_viewer .filter_type_control").getValue();
+    params.filter = $(".zbase_table_viewer .filter_control").getValue();
+
+    return params;
   };
 
   var renderJSONView = function(json, event_counter) {
