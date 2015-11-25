@@ -22,7 +22,8 @@ ZBase.registerView((function() {
 
     $(".filter_type_control", tpl).addEventListener("change", submitControls);
     $(".filter_control", tpl).addEventListener("z-search-submit", submitControls);
-    $(".limit_control", tpl).addEventListener("keyup", onLimitInput);
+    $(".limit_control", tpl).addEventListener("z-input-submit", submitControls);
+    $.onClick($(".limit_control z-input-icon", tpl), submitControls);
     $.onClick($(".limit_display label", tpl), displayLimitInput);
 
     $.handleLinks(tpl);
@@ -81,7 +82,7 @@ ZBase.registerView((function() {
     var params = {};
 
     //limit param
-    params.limit = $(".zbase_table_viewer .limit_control").value;
+    params.limit = $(".zbase_table_viewer .limit_control").getValue();
 
     //filter param
     params.filter_type = $(".zbase_table_viewer .filter_type_control").getValue();
@@ -123,7 +124,7 @@ ZBase.registerView((function() {
     }
 
     $(".zbase_table_viewer .limit_display .limit_value").innerHTML = limit;
-    $(".zbase_table_viewer .limit_control").value = limit;
+    $(".zbase_table_viewer .limit_control").setValue(limit);
   };
 
   var renderJSONView = function(json, event_counter) {
@@ -158,7 +159,22 @@ ZBase.registerView((function() {
 
   var displayLimitInput = function() {
     $(".zbase_table_viewer .limit_display").classList.add("active");
-    $(".zbase_table_viewer input.limit_control").focus();
+    $(".zbase_table_viewer .limit_control input").focus();
+
+    $(".zbase_table_viewer").addEventListener("click", hideLimitInput);
+    $(".zbase_table_viewer .limit_control").addEventListener(
+        "click", stopHideLimitInput);
+  };
+
+  var hideLimitInput = function() {
+    $(".zbase_table_viewer .limit_display").classList.remove("active");
+    $(".zbase_table_viewer").removeEventListener("click", hideLimitInput);
+    $(".zbase_table_viewer .limit_control").removeEventListener(
+        "click", stopHideLimitInput);
+  };
+
+  var stopHideLimitInput = function(e) {
+    e.stopPropagation();
   };
 
   return {

@@ -168,13 +168,17 @@
 }
 
 .zbase_table_viewer .limit_display.active label,
-.zbase_table_viewer .limit_display input.limit_control {
+.zbase_table_viewer .limit_display z-input.limit_control {
   display: none;
 }
 
 .zbase_table_viewer .limit_display label,
-.zbase_table_viewer .limit_display.active input.limit_control {
+.zbase_table_viewer .limit_display.active z-input.limit_control {
   display: block;
+}
+
+.zbase_table_viewer .limit_display.active z-input.limit_control z-input-icon:hover {
+  cursor: pointer;
 }
 
 .zbase_table_viewer .limit_display label {
