@@ -1,12 +1,13 @@
 ZBase.registerView((function() {
+  var path_prefix = "/a/datastore/tables/view/";
   var query_mgr = null;
+  var table;
 
   var load = function(path) {
     $.showLoader();
     query_mgr = EventSourceHandler();
 
-    var path_prefix = "/a/datastore/tables/view/";
-    var table = path.substr(path_prefix.length);
+    table = path.substr(path_prefix.length);
 
     var tpl = $.getTemplate(
         "views/table_viewer",
@@ -19,15 +20,29 @@ ZBase.registerView((function() {
     table_link.innerHTML = table;
     table_link.setAttribute("href", path_prefix + table);
 
+    $(".filter_type_control", tpl).addEventListener(
+        "change", submitControls);
+    $(".filter_control", tpl).addEventListener(
+        "z-search-submit", submitControls);
+
     $.handleLinks(tpl);
     $.replaceViewport(tpl);
     $.hideLoader();
+
+    //setQueryParams();
+    executeQuery();
+  };
+
+  var destroy = function() {
+    if (query_mgr) {
+      query_mgr.closeAll();
+    }
+  };
+
+  var executeQuery = function() {
     showLoadingBar();
 
-    var params = getQueryParams();
-    params.table = table;
-    var url = "/api/v1/events/scan?" + $.buildQueryString(params);
-    var query = query_mgr.get("table_viewer", url);
+    var query = query_mgr.get("table_viewer", getQueryUrl());
     var event_counter = 0;
 
     query.addEventListener("result", function(e) {
@@ -44,20 +59,25 @@ ZBase.registerView((function() {
     }, false);
 
     query.addEventListener("error", function(e) {
-      $.fatalError();
       console.log(e);
+      $.fatalError();
     }, false);
   };
 
-  var destroy = function() {
-    if (query_mgr) {
-      query_mgr.closeAll();
-    }
+  var submitControls = function() {
+    $.navigateTo(getViewUrl());
   };
 
-  var getQueryParams = function() {
-    var params = {};
+  var getViewUrl = function() {
+    return path_prefix + table + "?" + $.buildQueryString(getViewParams());
+  };
 
+  var getQueryUrl = function() {
+    return "/api/v1/events/scan?" + $.buildQueryString(getQueryParams())
+  };
+
+  var getViewParams = function() {
+    var params = {};
     //limit param
     //FIXME
     params.limit = 10;
@@ -65,6 +85,13 @@ ZBase.registerView((function() {
     //filter param
     params.filter_type = $(".zbase_table_viewer .filter_type_control").getValue();
     params.filter = $(".zbase_table_viewer .filter_control").getValue();
+
+    return params;
+  };
+
+  var getQueryParams = function() {
+    var params = getViewParams();
+    params.table = table;
 
     return params;
   };
