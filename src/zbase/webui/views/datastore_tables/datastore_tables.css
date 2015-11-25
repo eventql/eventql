@@ -1,5 +1,4 @@
 .zbase_datastore_tables .zbase_content {
-  background: #fff;
 }
 
 .zbase_datastore_tables button.create_table {
@@ -11,6 +10,8 @@
 .zbase_datastore_tables table.z-table {
   font-size: 13px;
   table-layout: fixed;
+  background: #fff;
+  border: 1px solid #ddd;
 }
 
 .zbase_datastore_tables .table_definition .table_config {
@@ -22,11 +23,13 @@
 .zbase_datastore_tables table.z-table thead th {
   font-weight: 400;
   color: #888;
+  padding: 8px 16px;
+  background: #f9f9f9;
 }
 
 .zbase_datastore_tables table.z-table tbody tr td {
   line-height: 24px;
-  padding: 0;
+  padding: 0 8px;
 }
 
 .zbase_datastore_tables table.z-table tbody tr a {

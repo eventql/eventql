@@ -3,6 +3,7 @@
   table-layout: fixed;
   width: 100%;
   min-height: 900px;
+  background: rgba(63,144,170,.08);
 }
 
 .zbase_content.main_menu {
@@ -14,7 +15,7 @@
   display: table-cell;
   width: 180px;
   vertical-align: top;
-  background: rgba(63,144,170,.08);
+  background: #fff;
   border-right: 1px solid #ddd;
 }
 
