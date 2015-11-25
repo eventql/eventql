@@ -104,6 +104,10 @@
   }
 }
 
+.zbase_table_viewer .control_pane {
+  padding-bottom: 8px;
+}
+
 .zbase_table_viewer .control_pane .z-input,
 .zbase_table_viewer .control_pane z-input {
   font-size: 13px;
@@ -177,4 +181,15 @@
   color: #3498db;
   font-weight: 500;
   cursor: pointer;
+  padding: 0 11px;
+}
+
+.zbase_table_viewer .limit_display label i {
+  margin-left: 6px;
+}
+
+.zbase_table_viewer .json_viewer {
+  border-top: 1px solid #d1d1d1;
+  margin: 0px -20px 0 -20px;
+  padding: 20px;
 }
