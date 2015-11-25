@@ -33,15 +33,6 @@
   display: none;
 }
 
-@media (max-width: 2048px) {
-  .zbase_table_viewer .loading_bar {
-    margin-left: -20px;
-    margin-right: -20px;
-    padding-left: 25px;
-    padding-right: 25px;
-  }
-}
-
 .zbase_table_viewer .loaderanim-outer {
   display: table-cell;
   vertical-align: middle;
@@ -108,6 +99,12 @@
   padding-bottom: 8px;
 }
 
+.zbase_table_viewer .control_pane .control_pane_item {
+  display: inline-block;
+  vertical-align: top;
+  margin-right: 10px;
+}
+
 .zbase_table_viewer .control_pane .z-input,
 .zbase_table_viewer .control_pane z-input {
   font-size: 13px;
@@ -119,11 +116,6 @@
 .zbase_table_viewer .control_pane z-input  input {
   border: 1px solid #bdbdbd;
   box-shadow: inset 1px 1px 1px rgba(0,0,0,.1);
-}
-
-
-.zbase_table_viewer.loading .json_viewer {
-  opacity: 0.5;
 }
 
 .zbase_table_viewer .control_pane .control_pane_bar {
@@ -163,37 +155,46 @@
   margin-top: 1px;
 }
 
-.zbase_table_viewer .limit_display {
+.zbase_table_viewer .hidable_input_container {
   display: inline-block;
 }
 
-.zbase_table_viewer .limit_display.active label,
-.zbase_table_viewer .limit_display z-input.limit_control {
+.zbase_table_viewer .hidable_input_container.active label,
+.zbase_table_viewer .hidable_input_container z-input {
   display: none;
 }
 
-.zbase_table_viewer .limit_display label,
-.zbase_table_viewer .limit_display.active z-input.limit_control {
+.zbase_table_viewer .hidable_input_container label,
+.zbase_table_viewer .hidable_input_container.active z-input {
   display: block;
 }
 
-.zbase_table_viewer .limit_display.active z-input.limit_control z-input-icon:hover {
+.zbase_table_viewer .hidable_input_container.active z-input z-input-icon:hover {
   cursor: pointer;
 }
 
-.zbase_table_viewer .limit_display label {
+.zbase_table_viewer .hidable_input_container label {
   color: #3498db;
   font-weight: 500;
   cursor: pointer;
   padding: 0 11px;
 }
 
-.zbase_table_viewer .limit_display label i {
+.zbase_table_viewer .hidable_input_container label i {
   margin-left: 6px;
 }
 
-.zbase_table_viewer .json_viewer {
+.zbase_table_viewer .result_pane {
   border-top: 1px solid #d1d1d1;
+  border-bottom: 1px solid #ddd;
   margin: 0px -20px 0 -20px;
-  padding: 20px;
+  background: #f9f9f9;
+}
+
+.zbase_table_viewer .result_pane .json_viewer {
+  padding: 0 20px;
+}
+
+.zbase_table_viewer.loading .json_viewer {
+  opacity: 0.5;
 }
