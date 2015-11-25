@@ -108,6 +108,9 @@ ZBase.registerView((function() {
     //limit param
     params.limit = $(".zbase_table_viewer .limit_control").getValue();
 
+    //offset param
+    params.offset = $(".zbase_table_viewer .offset_control").getValue();
+
     //filter param
     params.filter_type = $(".zbase_table_viewer .filter_type_control").getValue();
     params.filter = $(".zbase_table_viewer .filter_control").getValue();
@@ -131,6 +134,10 @@ ZBase.registerView((function() {
     //param limit
     var limit = UrlUtil.getParamValue(url, "limit");
     setLimitParam(limit);
+
+    //param offset
+    var offset = UrlUtil.getParamValue(url, "offset");
+    setOffsetParam(offset);
   };
 
   var setFilterParam = function(filter_type, filter) {
@@ -149,6 +156,16 @@ ZBase.registerView((function() {
 
     $(".zbase_table_viewer .limit_display .limit_value").innerHTML = limit;
     $(".zbase_table_viewer .limit_control").setValue(limit);
+  };
+
+  var setOffsetParam = function(offset) {
+    if (!offset) {
+      offset = 0;
+    }
+
+    $(".zbase_table_viewer .offset_display .offset_value").innerHTML = offset;
+    $(".zbase_table_viewer .offset_control").setValue(offset);
+
   };
 
   var renderJSONView = function(json, event_counter) {
