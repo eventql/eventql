@@ -2,10 +2,20 @@ ZBase.registerView((function() {
   var path_prefix = "/a/datastore/tables/view/";
   var query_mgr = null;
   var table;
+  var inspectors = [];
+
+  var init = function(path) {
+    query_mgr = EventSourceHandler();
+    load(path);
+  };
+
+  var update = function(path) {
+    destroy();
+    load(path);
+  };
 
   var load = function(path) {
     $.showLoader();
-    query_mgr = EventSourceHandler();
 
     table = path.split("?")[0].substr(path_prefix.length);
 
@@ -35,8 +45,16 @@ ZBase.registerView((function() {
   };
 
   var destroy = function() {
+    console.log("destroy");
     if (query_mgr) {
       query_mgr.closeAll();
+    }
+
+    if (inspectors) {
+      inspectors.forEach(function(inspector) {
+        console.log(inspector);
+        inspector.destroy();
+      });
     }
   };
 
@@ -133,12 +151,12 @@ ZBase.registerView((function() {
     $(".zbase_table_viewer .json_viewer").appendChild(elem);
 
 
-    var inspector = new InspectorJSON({
-      element: 'json_' + event_counter,
-      json: json
-    });
+    inspectors.push(new InspectorJSON({
+        element: 'json_' + event_counter,
+        json: json
+      }));
 
-    $("ul li", elem).classList.add("collapsed");
+    //$("ul li", elem).classList.add("collapsed");
   };
 
   var showLoadingBar = function() {
@@ -179,8 +197,8 @@ ZBase.registerView((function() {
 
   return {
     name: "table_viewer",
-    loadView: function(params) { load(params.path); },
+    loadView: function(params) { init(params.path); },
     unloadView: destroy,
-    handleNavigationChange: load
+    handleNavigationChange: update
   };
 })());
