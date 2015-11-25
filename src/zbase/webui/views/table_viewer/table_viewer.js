@@ -29,7 +29,7 @@ ZBase.registerView((function() {
     $.replaceViewport(tpl);
     $.hideLoader();
 
-    //setQueryParams();
+    setQueryParams(path);
     executeQuery();
   };
 
@@ -65,7 +65,7 @@ ZBase.registerView((function() {
   };
 
   var submitControls = function() {
-    $.navigateTo(getViewUrl());
+    //$.navigateTo(getViewUrl());
   };
 
   var getViewUrl = function() {
@@ -96,6 +96,22 @@ ZBase.registerView((function() {
     return params;
   };
 
+  var setQueryParams = function(url) {
+    // param: filter type
+    var filter_type = UrlUtil.getParamValue(url, "filter_type");
+    var filter = UrlUtil.getParamValue(url, "filter");
+    setFilterParam(filter_type, filter);
+  };
+
+  var setFilterParam = function(filter_type, filter) {
+    if (!filter_type) {
+      filter_type = "sql";
+    }
+
+    $(".zbase_table_viewer .filter_type_control").setValue([filter_type]);
+    $(".zbase_table_viewer .filter_control").setValue(filter);
+  };
+
   var renderJSONView = function(json, event_counter) {
     var elem = document.createElement("div");
     elem.setAttribute("id", "json_" + event_counter);
@@ -111,10 +127,12 @@ ZBase.registerView((function() {
   };
 
   var showLoadingBar = function() {
+    $(".zbase_table_viewer").classList.add("loading");
     $(".zbase_table_viewer .loading_bar").classList.remove("hidden");
   };
 
   var hideLoadingBar = function() {
+    $(".zbase_table_viewer").classList.remove("loading");
     $(".zbase_table_viewer .loading_bar").classList.add("hidden");
   };
 

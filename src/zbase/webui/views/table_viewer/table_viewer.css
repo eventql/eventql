@@ -118,7 +118,7 @@
 }
 
 
-.zbase_table_viewer.loading table {
+.zbase_table_viewer.loading .json_viewer {
   opacity: 0.5;
 }
 

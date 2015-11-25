@@ -157,6 +157,7 @@ route {
   path_prefix: "/a/datastore/tables/view/"
   view: "table_viewer"
   require_module: "util/event_source_handler"
+  require_module: "util/z-url-util"
   require_module: "widgets/Inspector-JSON"
   require_module: "widgets/zbase-query-progress"
   require_module: "widgets/zbase-header"
