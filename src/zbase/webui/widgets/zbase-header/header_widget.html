@@ -1,43 +1,9 @@
 <template id="zbase_header_tpl">
   <div class="navigation_inner">
-    <div style="width: 159px; float: left;">
-      <a href="/a/" class="logo_app"><img id="zbase_logo" src="/a/_/a/logo_blue.png" height="25" width="72" alt="zScale"></a>
+    <div style="width: 31px; float: left;">
       <div class="menu_icon"><i></i><i></i><i></i></div>
     </div>
     <div class="sep"></div>
-
-    <ul class="main_menu" style="display: none;">
-      <li><a href="/a/" class="nav"><i class="fa fa-bar-chart"></i> Apps</a></li>
-    </ul>
-
-    <z-search class="search">
-      <z-input class="icon" data-placeholder="Search Z1..." style="position: relative; top: 1px; display: block;">
-        <z-input-icon><i class='fa fa-search'></i></z-input-icon>
-      </z-input>
-    </z-search>
-
-
-    <ul style="float: right;" class="main_menu user">
-      <li style="display: none;"><a href="/a/documentation" class="nav"><i class="fa fa-question-circle"></i> Docs</a></li>
-
-      <li class="user_info">
-        <span class="nav dropdown" style="">
-          <span class="dropdown_header" href="">
-            <span class="userid_info"></span> (<span class="namespace_info"></span>)
-            <i class="fa fa-caret-down"></i>
-            <span style="display: block"></span>
-          </span>
-          <ul class="dropdown_panel">
-            <li class="change_namespace">
-              <span href="">Change namespace</span>
-            </li>
-            <li>
-              <a class="link" href="/a/logout">Logout</a>
-            </li>
-          </ul>
-        </span>
-      </li>
-    </ul>
 
     <a class="btn_home" href="/a/" style="display: none;">
       <i class="fa fa-home"></i> <span>Home</span>
@@ -64,6 +30,24 @@
       </z-dropdown-flyout>
     </z-dropdown>
   </div>
+</template>
+
+<template id="zbase_header_user_navi_tpl">
+  <span class="nav dropdown" style="">
+    <span class="dropdown_header" href="">
+      <span class="userid_info"></span> (<span class="namespace_info"></span>)
+      <i class="fa fa-caret-down"></i>
+      <span style="display: block"></span>
+    </span>
+    <ul class="dropdown_panel">
+      <li class="change_namespace">
+        <span href="">Change namespace</span>
+      </li>
+      <li>
+        <a class="link" href="/a/logout">Logout</a>
+      </li>
+    </ul>
+  </span>
 </template>
 
 <template id="zbase_header_namespace_prompt_tpl">

@@ -401,11 +401,12 @@ var ZBase = (function() {
         HeaderWidget.render();
       });
     } else {
-      var elem = document.querySelector("#zbase_header");
-      elem.classList.remove("hidden");
-      elem.innerHTML = "";
-      elem.appendChild($.getTemplate("", "zbase_header_default_tpl"))
-      $.handleLinks(elem);
+      //document.querySelector("#zbase_header").add("hidden");
+
+      //var elem = document.querySelector(".zscale_navi");
+      //elem.innerHTML = "";
+      //elem.appendChild($.getTemplate("", "z_default_tpl"))
+      //$.handleLinks(elem);
     }
   };
 

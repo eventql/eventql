@@ -2,20 +2,24 @@ var HeaderWidget = (function() {
 
   var render = function() {
     var conf = $.getConfig();
-    var tpl = $.getTemplate("widgets/zbase-header", "zbase_header_tpl");
 
-    $(".userid_info", tpl).innerHTML = conf.current_user.userid;
-    $(".namespace_info", tpl).innerHTML = conf.current_user.namespace;
+    /* user navi */
+    var usernav_tpl = $.getTemplate(
+        "widgets/zbase-header",
+        "zbase_header_user_navi_tpl");
 
-    $(".change_namespace", tpl).addEventListener("click", showSelectNamespacePopup);
-    $.onClick($(".dropdown", tpl), toggleDropdown);
-    $("z-search", tpl).addEventListener("z-search-autocomplete", searchAutocomplete);
-    $("z-search", tpl).addEventListener("z-search-submit", searchSubmit);
-    $("z-dropdown.new_query", tpl).addEventListener("change", createNewDocument);
+    $(".userid_info", usernav_tpl).innerHTML = conf.current_user.userid;
+    $(".namespace_info", usernav_tpl).innerHTML = conf.current_user.namespace;
+    $.onClick($(".dropdown", usernav_tpl), toggleDropdown);
+    $(".change_namespace", usernav_tpl).addEventListener(
+        "click",
+        showSelectNamespacePopup);
+    $.replaceContent($("#zscale_user_navi"), usernav_tpl);
 
-    var elem = $("#zbase_header");
-    $.replaceContent(elem, tpl);
-    elem.classList.remove("hidden");
+    /* header */
+    var hdr_tpl = $.getTemplate("widgets/zbase-header", "zbase_header_tpl");
+    $("z-dropdown.new_query", hdr_tpl).addEventListener("change", createNewDocument);
+    $.replaceContent($("#zbase_header"), hdr_tpl);
 
     document.addEventListener("click", function(event) {
       if ((function getParentWithClass(el, className) {
@@ -29,42 +33,7 @@ var HeaderWidget = (function() {
     $.handleLinks(elem);
   };
 
-  var update = function(path) {
-    var elem = $("#zbase_header");
-    var input = $("z-search input", elem);
-
-    if (!input) {
-      return;
-    }
-
-    if (path.indexOf("/a/search") > -1) {
-      var qparam = UrlUtil.getParamValue(path, "q");
-      if (qparam != null) {
-        input.value = qparam;
-        return;
-      }
-    }
-
-    input.value = "";
-    /*
-    var items = elem.querySelectorAll(".nav");
-    var prev_active_item = $(".nav.active", elem);
-    var active_item;
-
-    if (prev_active_item) {
-      prev_active_item.classList.remove("active");
-    }
-
-    for (var i = 0; i < items.length; i++) {
-      if (path.indexOf(items[i].getAttribute("href")) == 0) {
-        active_item = items[i];
-      }
-    }
-
-    if (active_item) {
-      active_item.classList.add("active");
-    }*/
-  };
+  var update = function(path) {};
 
   var toggleDropdown = function() {
     this.classList.toggle("open");
@@ -117,41 +86,6 @@ var HeaderWidget = (function() {
     var doc_type = this.getValue();
     this.setValue([]);
     $.createNewDocument(doc_type);
-  };
-
-  var searchAutocomplete = function(e) {
-    var term = e.detail.value;
-    var search_widget = this;
-
-    searchDocuments(term, function(r) {
-      var documents = JSON.parse(r.response).documents;
-      var items = [];
-
-      for (var i = 0; i < documents.length; i++) {
-        if (i > 10) {
-          break;
-        }
-
-        items.push({
-          query: documents[i].name,
-          data_value: documents[i].name});
-      }
-
-      search_widget.autocomplete(term, items);
-    });
-  };
-
-  var searchSubmit = function(e) {
-    $("input", this).blur();
-    $.navigateTo("/a/search?q=" + e.detail.value);
-  };
-
-  var searchDocuments = function(term, callback) {
-    $.httpGet("/api/v1/documents?search=" + term, function(r) {
-      if (r.status == 200) {
-        callback(r);
-      }
-    });
   };
 
   return {
