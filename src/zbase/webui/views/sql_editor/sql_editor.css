@@ -256,6 +256,10 @@
   user-select: none;
 }
 
+.zbase_sql_editor_result_pane {
+  border-top: 1px solid #c9d0d4;
+}
+
 .zbase_sql_editor_result_pane.hidden {
   display: none;
 }
@@ -270,7 +274,6 @@
   -ms-user-select: none;
   -o-user-select: none;
   user-select: none;
-  border-top: 1px solid #c9d0d4;
 }
 
 .zbase_sql_editor_result_pane .zbase_result_pane_bar label {
@@ -323,7 +326,7 @@
 }
 
 .zbase_sql_editor_result_pane table.z-table {
-  border-bottom: 1px solid #e6e8e9;
+  border-bottom: 1px solid #c9d0d4;
 }
 
 .zbase_sql_editor_result_pane table.z-table thead th:first-child,
