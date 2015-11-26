@@ -14,6 +14,7 @@ var HeaderWidget = (function() {
     $(".change_namespace", usernav_tpl).addEventListener(
         "click",
         showSelectNamespacePopup);
+    $.handleLinks(usernav_tpl);
     $.replaceContent($("#zscale_user_navi"), usernav_tpl);
 
     //document.addEventListener("click", function(event) {

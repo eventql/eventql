@@ -405,12 +405,12 @@ var ZBase = (function() {
         ZBaseMainMenu.render(current_path);
       });
     } else {
-      //document.querySelector("#zbase_header").add("hidden");
-
-      //var elem = document.querySelector(".zscale_navi");
-      //elem.innerHTML = "";
-      //elem.appendChild($.getTemplate("", "z_default_tpl"))
-      //$.handleLinks(elem);
+      document.querySelector("#zscale_navi .zscale_navi_menu").innerHTML = "";
+      document.querySelector("#zscale_user_navi").innerHTML = "";
+      document.querySelector("#zbase_header").innerHTML = "";
+      document.querySelector("#zbase_main_menu").innerHTML = "";
+      document.querySelector("#zbase_main_menu").classList.add("hidden");
+      document.querySelector("#zbase_viewport").innerHTML = "";
     }
   };
 
