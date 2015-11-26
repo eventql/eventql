@@ -327,3 +327,18 @@
 .zbase_header z-dropdown.new_query z-dropdown-flyout {
   left: -23px;
 }
+
+.zbase_header .menu_icon {
+  width: 13px;
+  float: right;
+  margin-top: 17px;
+  margin-right: 16px;
+}
+
+.zbase_header .menu_icon i {
+  background: rgba(255,255,255,.8);
+  display: block;
+  height: 2px;
+  margin-bottom: 2px;
+}
+

@@ -142,7 +142,6 @@ template {
   font-family: "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif;
   background-color: #3498db;
   box-shadow: 0 1px 1px rgba(0,0,0,0.1);
-
 }
 
 .zbase_header .navigation_inner {
@@ -154,9 +153,10 @@ template {
 }
 
 .zbase_header .sep {
-  height: 42px;
+  height: 44px;
   width: 1px;
   float: left;
+  border-left: 1px solid rgba(255,255,255,.1);
 }
 
 .zbase_header .logo_app {
