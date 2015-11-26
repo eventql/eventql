@@ -8,9 +8,6 @@ ZBase.registerView((function() {
         "views/seller",
         "seller_overview_main_tpl");
 
-    var main_menu = ZBaseMainMenu();
-    main_menu.render($(".zbase_main_menu", page), path);
-
     $.onClick($("z-checkbox.premium", page), paramChanged);
     $("z-dropdown.metrics", page).addEventListener("change", function() {
       renderTable($(".zbase_seller_overview table.overview"), result, path);
