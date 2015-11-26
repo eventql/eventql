@@ -26,9 +26,15 @@ var HeaderWidget = (function() {
     //  $(".dropdown", elem).classList.remove("open");
     //});
 
+    /* main manivi */
+    var mainnav_tpl = $.getTemplate("widgets/zbase-header", "zbase_header_main_navi_tpl");
+    $.handleLinks(mainnav_tpl);
+    $.replaceContent($("#zscale_navi .zscale_navi_menu"), mainnav_tpl);
+
     /* header */
     var hdr_tpl = $.getTemplate("widgets/zbase-header", "zbase_header_tpl");
     $("z-dropdown.new_query", hdr_tpl).addEventListener("change", createNewDocument);
+    $.handleLinks(usernav_tpl);
     $.replaceContent($("#zbase_header"), hdr_tpl);
   };
 

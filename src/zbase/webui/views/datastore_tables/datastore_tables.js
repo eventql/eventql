@@ -2,6 +2,7 @@ ZBase.registerView((function() {
 
   var load = function(url) {
     $.showLoader();
+    ZBaseMainMenu.show();
 
     $.httpGet("/api/v1/tables", function(r) {
       if (r.status == 200) {

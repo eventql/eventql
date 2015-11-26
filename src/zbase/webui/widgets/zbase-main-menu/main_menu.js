@@ -24,6 +24,11 @@ var ZBaseMainMenu = (function() {
     document.getElementById("menu_toggler").classList.add("closed");
   };
 
+  var showMenu = function() {
+    document.getElementById("zbase_main_menu").classList.remove("hidden");
+    document.getElementById("menu_toggler").classList.remove("closed");
+  };
+
   var setActiveMenuItem = function(path) {
     var menu = document.getElementById("zbase_main_menu");
     var items = menu.querySelectorAll("a");
@@ -47,6 +52,7 @@ var ZBaseMainMenu = (function() {
   return {
     render: render,
     update: setActiveMenuItem,
-    hide: hideMenu
+    hide: hideMenu,
+    show: showMenu
   }
 })();

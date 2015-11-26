@@ -27,8 +27,9 @@ ZBase.registerView((function() {
       qparams.publishing_status = pstatus_param;
     }
 
-
     $.showLoader();
+    ZBaseMainMenu.show();
+
     $.httpGet("/api/v1/documents?" + $.buildQueryString(qparams), function(r) {
       if (r.status == 200) {
         render(JSON.parse(r.response), qparams, url);

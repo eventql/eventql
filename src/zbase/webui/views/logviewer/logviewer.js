@@ -11,6 +11,8 @@ ZBase.registerView((function() {
 
   var init = function(params) {
     $.showLoader();
+    ZBaseMainMenu.hide();
+
     query_mgr = EventSourceHandler();
 
     $.httpGet("/api/v1/logfiles", function(r) {
