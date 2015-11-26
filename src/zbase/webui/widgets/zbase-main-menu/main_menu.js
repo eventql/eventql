@@ -7,6 +7,7 @@ var ZBaseMainMenu = (function() {
     var menu = document.getElementById("zbase_main_menu");
 
     $.replaceContent(menu, tpl);
+    $.handleLinks(menu);
     setActiveMenuItem(path);
 
     var toggler = document.getElementById("menu_toggler");
