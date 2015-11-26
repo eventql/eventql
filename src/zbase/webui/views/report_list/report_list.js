@@ -46,9 +46,6 @@ ZBase.registerView((function() {
         "views/report_list",
         "zbase_report_list_main_tpl");
 
-    var main_menu = ZBaseMainMenu();
-    main_menu.render($(".zbase_main_menu", page), path);
-
     renderTable(
         page.querySelector(".zbase_report_list tbody"),
         reports);
