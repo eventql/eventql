@@ -116,6 +116,7 @@ template {
 
 #zbase_viewport {
   display: table-cell;
+  width: 100%;
 
 }
 
