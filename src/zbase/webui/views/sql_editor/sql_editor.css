@@ -75,6 +75,8 @@
   color: #888;
   width: 321px;
   cursor: pointer;
+  height: 36px;
+  overflow: hidden;
 }
 
 .zbase_sql_editor .zbase_page_title .sidebar_visibility.closed {
@@ -82,7 +84,7 @@
 }
 
 .zbase_sql_editor .zbase_page_title .sidebar_visibility i.line {
-  height: 40px;
+  height: 36px;
   width: 1px;
   background: rgba(0,0,0,.1);
   vertical-align: middle;
@@ -96,7 +98,7 @@
 .zbase_sql_editor .zbase_page_title .sidebar_visibility i.chevron:before {
   content: "\f101";
   font-size: 16px;
-  line-height: 38px;
+  line-height: 36px;
 }
 
 .zbase_sql_editor .zbase_page_title .sidebar_visibility.closed i.chevron:before {
