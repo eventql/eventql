@@ -55,9 +55,6 @@ ZBase.registerView((function() {
       add_modal.close();
     });
 
-    var main_menu = ZBaseMainMenu();
-    main_menu.render($(".zbase_main_menu", page), path);
-
     $.handleLinks(page);
     $.replaceViewport(page);
   };

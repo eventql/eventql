@@ -1,43 +1,39 @@
 <template id="zbase_logviewer_logfile_list_tpl">
   <div class="zbase_logviewer">
+    <div class="zbase_content_pane logfile_list">
 
-    <div class="zbase_content_pane fullwidth main_menu">
-      <div class="zbase_main_menu"></div>
+      <h2 class="pagetitle main"><em>Log Viewer</em></h2>
 
-      <div class="zbase_content main_menu logfile_list" style="padding: 0 20px;">
-        <h2 class="pagetitle main"><em>Log Viewer</em></h2>
+      <table class="z-table zbase_clickable_table" style="border-top: 1px solid #ddd;">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Last opened by me</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+        </tbody>
+      </table>
 
-        <table class="z-table zbase_clickable_table" style="border-top: 1px solid #ddd;">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Type</th>
-              <th>Last opened by me</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-          </tbody>
-        </table>
-
-        <div class="add_pane" style="display: none;">
-          <a class="link add"><i class="fa fa-plus"></i> Add Logfile</a>
-        </div>
-
-        <z-modal class="add_logfile">
-          <z-modal-box>
-            <z-modal-close-icon></z-modal-close-icon>
-            <div class="z-modal-header">
-              Add a new logfile
-            </div>
-            <div class="z-modal-content"></div>
-            <div class="z-modal-footer">
-              <button class="z-button primary submit">Save</button>
-              <button class="z-button secondary close">Cancel</button>
-            </div>
-          </z-modal-box>
-        </z-modal>
+      <div class="add_pane" style="display: none;">
+        <a class="link add"><i class="fa fa-plus"></i> Add Logfile</a>
       </div>
+
+      <z-modal class="add_logfile">
+        <z-modal-box>
+          <z-modal-close-icon></z-modal-close-icon>
+          <div class="z-modal-header">
+            Add a new logfile
+          </div>
+          <div class="z-modal-content"></div>
+          <div class="z-modal-footer">
+            <button class="z-button primary submit">Save</button>
+            <button class="z-button secondary close">Cancel</button>
+          </div>
+        </z-modal-box>
+      </z-modal>
     </div>
   </div>
 </template>
