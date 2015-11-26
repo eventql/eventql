@@ -1,9 +1,10 @@
 .zbase_logviewer {
   background: #fff;
+  min-height: 900px;
 }
 
 .zbase_logviewer .logviewer_pane {
-  margin-top: 20px;
+  padding-top: 20px;
 }
 
 .zbase_logviewer .logviewer_pane .result_pane {

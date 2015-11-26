@@ -183,7 +183,7 @@ ZBase.registerView((function() {
   }
 
   var setLogfileName = function(logfile) {
-    $(".zbase_logviewer .logfile_name_crumb").innerHTML = logfile;
+    //$(".zbase_logviewer .logfile_name_crumb").innerHTML = logfile;
   }
 
   var setPagination = function() {
