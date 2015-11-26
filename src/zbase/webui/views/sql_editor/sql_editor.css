@@ -11,7 +11,7 @@
   min-height: 200px;
   display: table-cell;
   vertical-align: top;
-  background: rgba(63,144,170,.08);
+  background: #f9f9f9;
 }
 
 .zbase_sql_editor .zbase_sql_editor_sidebar.hidden {
@@ -180,9 +180,21 @@
   -ms-user-select: text;
 }
 
+.zbase_sql_editor .zbase_sql_editor_result_pane table.z-table tr th {
+  background: -moz-linear-gradient(top,  #ffffff 0%, #f9f9f9 100%); /* FF3.6-15 */
+  background: -webkit-linear-gradient(top,  #ffffff 0%,#f9f9f9 100%); /* Chrome10-25,Safari5.1-6 */
+  background: linear-gradient(to bottom,  #ffffff 0%,#f9f9f9 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#f9f9f9',GradientType=0 ); /* IE6-9 */
+  color: #333;
+  font-weight: 500;
+}
+
 .zbase_sql_editor .zbase_sql_editor_result_pane table.z-table tr td {
   line-height: 14px;
   vertical-align: top;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 12px;
+  color: #222;
 }
 
 .zbase_sql_editor .error_message {
@@ -225,7 +237,7 @@
   */
 .zbase_sql_editor_pane z-codeeditor {
   border-top: 1px solid #c9d0d4;
-  border-bottom: 1px solid #c9d0d4;
+  border-bottom: none;
 }
 
 .zbase_sql_editor_pane .CodeMirror-gutters {
@@ -249,24 +261,25 @@
 }
 
 .zbase_sql_editor_result_pane .zbase_result_pane_bar {
-  background-color: #f2f8fa;
-  border-bottom: 1px solid #c9d0d4;
-  box-shadow: 0 1px 1px rgba(0,0,0,0.04);
   height: 38px;
+  border-bottom: 1px solid #eee;
+  padding-left: 8px;
   overflow: hidden;
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
   -o-user-select: none;
   user-select: none;
+  border-top: 1px solid #c9d0d4;
 }
 
 .zbase_sql_editor_result_pane .zbase_result_pane_bar label {
   float:left;
   line-height: 38px;
   padding: 0 12px;
-  font-size: 13px;
-  font-weight: 500;
+  font-size: 12px;
+  font-weight: 400;
+  color: #666;
 }
 
 .zbase_sql_editor_result_pane .zbase_result_pane_bar.clickable:before {
