@@ -17,6 +17,7 @@ ZBase.registerView((function() {
       widget_list = null;
     }
 
+    ZBaseMainMenu.hide();
     $.showLoader();
     $.httpGet("/api/v1/documents/" + report_id, function(r) {
       if (r.status == 200) {
