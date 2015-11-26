@@ -1,89 +1,85 @@
 <template id="zbase_table_viewer_tpl">
-  <div class="zbase_content_pane fullwidth main_menu zbase_table_viewer">
-    <div class="zbase_main_menu"></div>
+  <div class="zbase_content_pane zbase_table_viewer">
+    <h2 class="pagetitle" style="overflow:hidden;">
+      <a href="/a/datastore/tables" class="back_btn"></a>
+      <em>Table: </em><a class="table_name"></a>
+    </h2>
 
-    <div class="zbase_content main_menu" style="padding: 0 20px;">
-      <h2 class="pagetitle" style="overflow:hidden;">
-        <a href="/a/datastore/tables" class="back_btn"></a>
-        <em>Table: </em><a class="table_name"></a>
-      </h2>
+    <div class='control_pane'>
+      <div class="control_pane_bar">
+        <z-dropdown class='input filter_type_control' style="position:absolute;">
+          <z-dropdown-flyout>
+            <z-dropdown-items>
+              <z-dropdown-item data-value="sql" data-text="SQL"><i class="fa fa-filter" style="font-weight:normal; margin-right: 5px;"></i> SQL</z-dropdown-item>
+              <z-dropdown-item data-value="regex" data-text="Regex">Regex</z-dropdown-item>
+              <z-dropdown-item data-value="fulltext" data-text="Fulltext">Fulltext</z-dropdown-item>
+            </z-dropdown-items>
+          </z-dropdown-flyout>
+        </z-dropdown>
 
-      <div class='control_pane'>
-        <div class="control_pane_bar">
-          <z-dropdown class='input filter_type_control' style="position:absolute;">
-            <z-dropdown-flyout>
-              <z-dropdown-items>
-                <z-dropdown-item data-value="sql" data-text="SQL"><i class="fa fa-filter" style="font-weight:normal; margin-right: 5px;"></i> SQL</z-dropdown-item>
-                <z-dropdown-item data-value="regex" data-text="Regex">Regex</z-dropdown-item>
-                <z-dropdown-item data-value="fulltext" data-text="Fulltext">Fulltext</z-dropdown-item>
-              </z-dropdown-items>
-            </z-dropdown-flyout>
-          </z-dropdown>
+        <z-search style="display: block; margin-left:80px" class='filter_control'>
+          <z-input class="icon" data-placeholder="Filter by SQL" style="position: relative; top: 1px; display: block;">
+            <z-input-icon><i class='fa fa-search'></i></z-input-icon>
+          </z-input>
+        </z-search>
+      </div>
 
-          <z-search style="display: block; margin-left:80px" class='filter_control'>
-            <z-input class="icon" data-placeholder="Filter by SQL" style="position: relative; top: 1px; display: block;">
-              <z-input-icon><i class='fa fa-search'></i></z-input-icon>
+      <div class="control_pane_bar">
+        <div class="control_pane_item">
+          <label>Limit:</label>
+          <div class="limit_display hidable_input_container">
+
+            <label>
+              <span class="limit_value"></span>
+              <i class="fa fa-caret-down"></i>
+            </label>
+
+            <z-input class="icon limit_control" data-placeholder="50">
+              <z-input-icon><i class="fa fa-check"></i></z-input-icon>
             </z-input>
-          </z-search>
+
+          </div>
         </div>
 
-        <div class="control_pane_bar">
-          <div class="control_pane_item">
-            <label>Limit:</label>
-            <div class="limit_display hidable_input_container">
+        <div class="control_pane_item">
+          <label>Offset:</label>
+          <div class="offset_display hidable_input_container">
 
-              <label>
-                <span class="limit_value"></span>
-                <i class="fa fa-caret-down"></i>
-              </label>
+            <label>
+              <span class="offset_value"></span>
+              <i class="fa fa-caret-down"></i>
+            </label>
 
-              <z-input class="icon limit_control" data-placeholder="50">
-                <z-input-icon><i class="fa fa-check"></i></z-input-icon>
-              </z-input>
+            <z-input class="icon offset_control" data-placeholder="0">
+              <z-input-icon><i class="fa fa-check"></i></z-input-icon>
+            </z-input>
 
-            </div>
-          </div>
-
-          <div class="control_pane_item">
-            <label>Offset:</label>
-            <div class="offset_display hidable_input_container">
-
-              <label>
-                <span class="offset_value"></span>
-                <i class="fa fa-caret-down"></i>
-              </label>
-
-              <z-input class="icon offset_control" data-placeholder="0">
-                <z-input-icon><i class="fa fa-check"></i></z-input-icon>
-              </z-input>
-
-            </div>
           </div>
         </div>
       </div>
+    </div>
 
 
-      <div class="result_pane">
-        <div class="loading_bar hidden">
-          <h3>
-            <div class="loaderanim-outer">
-              <div class="loaderanim">
-                <div class="rect1"></div>
-                <div class="rect2"></div>
-                <div class="rect3"></div>
-                <div class="rect4"></div>
-                <div class="rect5"></div>
-              </div>
+    <div class="result_pane">
+      <div class="loading_bar hidden">
+        <h3>
+          <div class="loaderanim-outer">
+            <div class="loaderanim">
+              <div class="rect1"></div>
+              <div class="rect2"></div>
+              <div class="rect3"></div>
+              <div class="rect4"></div>
+              <div class="rect5"></div>
             </div>
-            Scanning...
-            <div class="loading_bar_info right hidden" style="font-size: 12px;">
-              <span style="font-weight:500;"><span class="num_rows"></span></span> rows scanned
-            </div>
-          </h3>
-        </div>
-
-        <div class="json_viewer"></div>
+          </div>
+          Scanning...
+          <div class="loading_bar_info right hidden" style="font-size: 12px;">
+            <span style="font-weight:500;"><span class="num_rows"></span></span> rows scanned
+          </div>
+        </h3>
       </div>
+
+      <div class="json_viewer"></div>
     </div>
   </div>
 </template>

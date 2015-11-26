@@ -23,9 +23,6 @@ ZBase.registerView((function() {
         "views/table_viewer",
         "zbase_table_viewer_tpl");
 
-    var main_menu = ZBaseMainMenu();
-    main_menu.render($(".zbase_main_menu", tpl), "/a/datastore/tables");
-
     var table_link = $(".pagetitle a.table_name", tpl);
     table_link.innerHTML = table;
     table_link.setAttribute("href", path_prefix + table);
