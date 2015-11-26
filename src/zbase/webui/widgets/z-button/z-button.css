@@ -196,10 +196,16 @@ z-button[data-size='big']  {
 }
 
 .z-button.primary {
-  background: #3d8ad3;
-  color: #fff;
   font-size: 12px;
   font-weight: 500;
+  color:#fff;
+  background: -moz-linear-gradient(90deg, rgba(56,127,194,1) 0%, rgba(67,152,232,1) 100%); /* ff3.6+ */
+  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, rgba(67,152,232,1)), color-stop(100%, rgba(56,127,194,1))); /* safari4+,chrome */
+  background: -webkit-linear-gradient(90deg, rgba(56,127,194,1) 0%, rgba(67,152,232,1) 100%); /* safari5.1+,chrome10+ */
+  background: -o-linear-gradient(90deg, rgba(56,127,194,1) 0%, rgba(67,152,232,1) 100%); /* opera 11.10+ */
+  background: -ms-linear-gradient(90deg, rgba(56,127,194,1) 0%, rgba(67,152,232,1) 100%); /* ie10+ */
+  background: linear-gradient(0deg, rgba(56,127,194,1) 0%, rgba(67,152,232,1) 100%); /* w3c */
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#4398E8', endColorstr='#387FC2',GradientType=0 ); /* ie6-9 */
 }
 
 .z-button.primary:hover {
@@ -212,9 +218,14 @@ z-button[data-size='big']  {
 }
 
 .z-button.secondary {
-  color: #3d8ad3;
   font-size: 12px;
   font-weight: 500;
+  background: #ffffff; /* Old browsers */
+  background: -moz-linear-gradient(top,  #ffffff 0%, #e5e5e5 100%); /* FF3.6-15 */
+  background: -webkit-linear-gradient(top,  #ffffff 0%,#e5e5e5 100%); /* Chrome10-25,Safari5.1-6 */
+  background: linear-gradient(to bottom,  #ffffff 0%,#e5e5e5 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#e5e5e5',GradientType=0 ); /* IE6-9 */
+  color: #697886;
 }
 
 .z-button.secondary:hover {
@@ -228,10 +239,14 @@ z-button[data-size='big']  {
 }
 
 .z-button.tertiary {
-  background: #27ae60;
-  color: #fff;
   font-size: 12px;
   font-weight: 500;
+  background: #ffffff; /* Old browsers */
+  background: -moz-linear-gradient(top,  #ffffff 0%, #e5e5e5 100%); /* FF3.6-15 */
+  background: -webkit-linear-gradient(top,  #ffffff 0%,#e5e5e5 100%); /* Chrome10-25,Safari5.1-6 */
+  background: linear-gradient(to bottom,  #ffffff 0%,#e5e5e5 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#e5e5e5',GradientType=0 ); /* IE6-9 */
+  color: #697886;
 }
 
 .z-button.loading {
