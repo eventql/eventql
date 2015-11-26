@@ -108,7 +108,7 @@ void CSTableIndex::buildCSTable(RefPtr<Partition> partition) {
       shredder.addRecordFromProtobuf(obj, *schema);
 
       total_size += record.size();
-      if (total_size > 1024 * 1024 * 1024 * 4) {
+      if (total_size > 1024llu * 1024llu * 1024llu * 4llu) {
         RAISEF(
             kRuntimeError,
             "CSTable is too large $0/$1/$2: $3",
