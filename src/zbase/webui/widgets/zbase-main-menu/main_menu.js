@@ -29,6 +29,7 @@ var ZBaseMainMenu = (function() {
   };
 
   return {
-    render: render
+    render: render,
+    update: setActiveMenuItem
   }
 })();
