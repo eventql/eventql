@@ -168,6 +168,7 @@ var ZBase = (function() {
       applyNavigationChange();
       if (config.current_user) {
         HeaderWidget.update(path);
+        ZBaseMainMenu.update(path);
       }
     });
   };
@@ -401,7 +402,7 @@ var ZBase = (function() {
 
       ZBase.loadModules(global_modules, function() {
         HeaderWidget.render();
-        ZBaseMainMenu.render();
+        ZBaseMainMenu.render(current_path);
       });
     } else {
       //document.querySelector("#zbase_header").add("hidden");
