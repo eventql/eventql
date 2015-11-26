@@ -124,7 +124,7 @@ template {
   min-height: 100%;
   margin: auto;
   max-width: 2048px;
-  padding: 0 28px;
+  padding: 0 24px;
 }
 
 @media (max-width: 2048px) {
