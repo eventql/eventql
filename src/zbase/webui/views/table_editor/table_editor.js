@@ -20,9 +20,6 @@ ZBase.registerView((function() {
         "views/table_editor",
         "zbase_table_editor_tpl");
 
-    var main_menu = ZBaseMainMenu();
-    main_menu.render($(".zbase_main_menu", page), kPathPrefix);
-
     var table_breadcrumb = $(".table_name_breadcrumb", page);
     table_breadcrumb.innerHTML = schema.name;
     table_breadcrumb.href = kPathPrefix + schema.name;
