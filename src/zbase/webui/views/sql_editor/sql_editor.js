@@ -21,6 +21,7 @@ ZBase.registerView((function() {
   var loadQuery = function(path) {
     var query_id = path.substr(kPathPrefix.length);
 
+    ZBaseMainMenu.hide();
     $.showLoader();
     $.httpGet("/api/v1/documents/" + query_id, function(r) {
       if (r.status == 200) {
