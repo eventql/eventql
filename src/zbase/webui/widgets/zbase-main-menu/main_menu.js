@@ -17,6 +17,10 @@ var ZBaseMainMenu = (function() {
     }
   };
 
+  var hideMenu = function() {
+    document.getElementById("zbase_main_menu").classList.add("hidden");
+  };
+
   var setActiveMenuItem = function(path) {
     var menu = document.getElementById("zbase_main_menu");
     var items = menu.querySelectorAll("a");
@@ -39,6 +43,7 @@ var ZBaseMainMenu = (function() {
 
   return {
     render: render,
-    update: setActiveMenuItem
+    update: setActiveMenuItem,
+    hide: hideMenu
   }
 })();
