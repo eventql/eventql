@@ -14,8 +14,8 @@
 
 @media (max-width: 2048px) {
   .zbase_logviewer .logviewer_pane .result_pane {
-    margin-left: -20px;
-    margin-right: -20px;
+    margin-left: -28px;
+    margin-right: -28px;
     padding-left: 10px;
     padding-right: 10px;
   }
