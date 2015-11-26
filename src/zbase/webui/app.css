@@ -103,7 +103,7 @@ template {
 }
 
 /* .zbase_wrap, .zbase_viewport */
-#zbase_view {
+#zbase_body {
   display: table;
   table-layout: fixed;
   min-width: 960px;
@@ -124,7 +124,7 @@ template {
   min-height: 100%;
   margin: auto;
   max-width: 2048px;
-  padding: 0 20px;
+  padding: 0 28px;
 }
 
 @media (max-width: 2048px) {
