@@ -97,7 +97,7 @@ ZBase.registerView((function() {
           {
             name: getMetricTitle(),
             values: y_values,
-            color: "#3498db"
+            color: "#3d8ad3"
           }
         ]
       },

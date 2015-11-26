@@ -147,7 +147,7 @@ z-tabbable[data-content-attached] z-tab-content[data-active],
 }
 
 .zbase_app z-tabbable.open_tabs z-tab[data-active] {
-  border-top: 2px solid #3498db;
+  border-top: 2px solid #3d8ad3;
   border-left: 1px solid #ddd;
   border-right: 1px solid #ddd;
   background: #fff;
@@ -174,9 +174,9 @@ z-tabbable[data-content-attached] z-tab-content[data-active],
 }
 
 .zbase_app z-tabbable.slim_tabs z-tab[data-active] {
-  border-bottom: 2px solid #3498db;
+  border-bottom: 2px solid #3d8ad3;
 }
 
 .zbase_app z-tabbable.slim_tabs z-tab[data-active] a {
-  color: #3498db;
+  color: #3d8ad3;
 }

@@ -4,7 +4,7 @@
 }
 
 .zbase_seller_stats .zbase_stats_title zbase-breadcrumbs a.shop_name_crumb {
-  color: #3498db;
+  color: #3d8ad3;
 }
 
 .zbase_seller_stats .zbase_stats_title z-daterangepicker {
@@ -32,7 +32,7 @@
 
 .zbase_seller_stats .metric_links a {
   font-size: 12px;
-  color: #3498db;
+  color: #3d8ad3;
   margin: 0;
   padding: 0;
   text-decoration: underline;
@@ -56,7 +56,7 @@
 .zbase_seller_stats .metric_group h3 {
   font-weight: 400;
   font-size: 16px;
-  color: #3498db;
+  color: #3d8ad3;
   margin: 14px 18px 10px 18px;
 }
 
@@ -86,7 +86,7 @@
 
 .zbase_seller_stats .zbase_stats i.help:hover {
   cursor: pointer;
-  color: #3498db;
+  color: #3d8ad3;
 }
 
 .zbase_seller_stats .zbase_stats .metric_pane z-sparkline {

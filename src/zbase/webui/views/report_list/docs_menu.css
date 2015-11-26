@@ -37,7 +37,7 @@ z-menu.zbase_documents_menu > z-menu-section > z-menu-title > a {
 
 z-menu.zbase_documents_menu > z-menu-item[data-active] > a,
 z-menu.zbase_documents_menu > z-menu-section[data-active] > z-menu-title > a {
-  background: #3498db;
+  background: #3d8ad3;
   color: #fff;
 }
 
@@ -107,7 +107,7 @@ z-menu.zbase_documents_menu > z-menu-section[data-active] > z-menu-item[data-act
   margin-left: -4px;
   margin-top: 5px;
   background: #fff;
-  color: #3498db;
+  color: #3d8ad3;
 }
 
 z-menu.zbase_documents_menu > z-menu-section[data-active] > z-menu-title {

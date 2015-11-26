@@ -69,8 +69,8 @@
 
 .zbase_main_menu z-menu z-menu-item a[data-active],
 .zbase_main_menu z-menu z-menu-item a:hover {
-  color: #3498db;
-  border-left: 4px solid #3498db;
+  color: #3d8ad3;
+  border-left: 4px solid #3d8ad3;
 }
 
 .zbase_main_menu z-menu z-menu-item a[data-active] {

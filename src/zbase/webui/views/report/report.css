@@ -114,7 +114,7 @@
 }
 
 .zbase_report_pane a.link:hover {
-  background: #3498db;
+  background: #3d8ad3;
   color: #fff;
   text-decoration: none;
 }
@@ -188,7 +188,7 @@
 .zbase_report_pane z-modal.add_widget .widget_selection[data-selected] .inner:before {
   font-family: FontAwesome;
   content: "\f00c";
-  color: #3498db;
+  color: #3d8ad3;
   margin-right: 5px;
 }
 
@@ -278,7 +278,7 @@
 }
 
 .zbase_report_pane .zbase_report_widget_header z-dropdown-header:hover i.fa-circle {
-  color: #3498db;
+  color: #3d8ad3;
 }
 
 .zbase_report_pane .zbase_report_widget_header button.z-button {
@@ -301,7 +301,7 @@
 
 .zbase_report_pane .zbase_report_widget_header i.close:hover {
   cursor: pointer;
-  color: #3498db;
+  color: #3d8ad3;
 }
 
 .zbase_report_pane .zbase_report_widget_header .error_note {

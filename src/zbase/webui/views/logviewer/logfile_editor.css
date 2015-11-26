@@ -6,7 +6,7 @@
 }
 
 .zbase_logviewer .zbase_content.main_menu.logfile_editor zbase-breadcrumbs-section.logfile_name a {
-  color: #3498db;
+  color: #3d8ad3;
 }
 
 .zbase_logviewer .logfile_editor .editor_pane .editor_pane_header {
@@ -85,7 +85,7 @@
 }
 
 .zbase_logviewer .logfile_editor .editor_pane table.z-table tr td.icon i:hover {
-  color: #3498db;
+  color: #3d8ad3;
   cursor: pointer;
 }
 

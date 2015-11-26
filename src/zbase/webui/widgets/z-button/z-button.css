@@ -196,7 +196,7 @@ z-button[data-size='big']  {
 }
 
 .z-button.primary {
-  background: #3498db;
+  background: #3d8ad3;
   color: #fff;
   font-size: 12px;
   font-weight: 500;
@@ -212,7 +212,7 @@ z-button[data-size='big']  {
 }
 
 .z-button.secondary {
-  color: #3498db;
+  color: #3d8ad3;
   font-size: 12px;
   font-weight: 500;
 }
@@ -243,7 +243,7 @@ z-button[data-size='big']  {
 }
 
 .z-button.primary.loading:hover {
-  background: #3498db;
+  background: #3d8ad3;
 }
 
 .z-button.secondary.lading:hover {

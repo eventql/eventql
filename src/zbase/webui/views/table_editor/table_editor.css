@@ -4,7 +4,7 @@
 }
 
 .zbase_table_editor .zbase_content.main_menu zbase-breadcrumbs-section.table_name a {
-  color: #3498db;
+  color: #3d8ad3;
 }
 
 .zbase_table_editor .zbase_content button.z-button {
@@ -74,7 +74,7 @@
 
 .zbase_table_editor table.z-table td.icon:hover {
   cursor: pointer;
-  color: #3498db;
+  color: #3d8ad3;
 }
 
 .zbase_table_editor .content_pane {
@@ -99,7 +99,7 @@
   text-align: center;
   font-size: 14px;
   background: rgba(0, 0, 0, 0.03);
-  color: #3498db;
+  color: #3d8ad3;
   text-decoration: underline;
 }
 

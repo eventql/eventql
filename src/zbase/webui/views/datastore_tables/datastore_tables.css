@@ -48,7 +48,7 @@
 }
 
 .zbase_datastore_tables table.z-table.zbase_clickable_table tbody tr:hover td:first-child a {
-  color: #3498db;
+  color: #3d8ad3;
 }
 
 .zbase_datastore_tables table.z-table td.icon {
@@ -98,7 +98,7 @@
   text-align: center;
   font-size: 14px;
   background: rgba(0, 0, 0, 0.03);
-  color: #3498db;
+  color: #3d8ad3;
   text-decoration: underline;
 }
 
