@@ -6,12 +6,11 @@
   width: 100%;
   height: 44px;
   line-height: 44px;
-  z-index: 99999;
   font-family: "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif;
   background-color: #3498db;
   box-shadow: 0 1px 1px rgba(0,0,0,0.1);
   position: absolute;
-  z-index: 99999;
+  z-index: 99998;
   top: 34px;
 }
 
@@ -98,6 +97,26 @@
   margin-bottom: 2px;
 }
 
+.zbase_header zbase-breadcrumbs {
+  font-size: 13px;
+  font-weight: 300;
+  margin-left: 18px;
+}
+
+.zbase_header zbase-breadcrumbs,
+.zbase_header zbase-breadcrumbs a {
+  color: #fff;
+}
+
+.zbase_header zbase-breadcrumbs a:hover {
+  text-decoration: underline;
+}
+
+.zbase_header zbase-breadcrumbs zbase-breadcrumbs-section::after {
+  padding: 0 .24rem 0 .4rem;
+  color: rgba(255,255,255,.4);
+  opacity: 1;
+}
 
 #zscale_user_navi {
   font-size: 12px;

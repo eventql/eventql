@@ -6,14 +6,17 @@
       </div>
       <div class="sep"></div>
 
-      <a class="btn_home" href="/a/" style="display: none;">
-        <i class="fa fa-home"></i> <span>Home</span>
-      </a>
+      <zbase-breadcrumbs>
+        <zbase-breadcrumbs-section>
+          <a href="/a/sql">SQL Editor</a>
+        </zbase-breadcrumbs-section>
+        <zbase-breadcrumbs-section>
+          <a href="/a/sql" class="sql_document_name_crumb" style="font-weight: 300;">MOBILE requests last x days</a>
+        </zbase-breadcrumbs-section>
+      </zbase-breadcrumbs>
+
       <a class="btn_settings" href="/a/settings">
         <i class="fa fa-cog"></i> <span>Settings</span>
-      </a>
-      <a class="btn_documentation" href="/docs/" target="_blank" style="display: none;">
-        <i class="fa fa-book"></i> <span>Documentation</span>
       </a>
       <z-dropdown data-resolved data-hover class="new_query">
         <z-dropdown-header>
