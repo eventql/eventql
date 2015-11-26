@@ -90,6 +90,10 @@
   margin-right: 18px;
 }
 
+#menu_toggler:hover {
+  cursor: pointer;
+}
+
 .zbase_header .menu_icon i {
   background: rgba(255,255,255,.8);
   display: block;

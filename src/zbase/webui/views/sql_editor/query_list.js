@@ -21,9 +21,6 @@ ZBase.registerView((function() {
         page.querySelector(".zbase_sql_editor_overview tbody"),
         documents);
 
-    var main_menu = ZBaseMainMenu();
-    main_menu.render($(".zbase_main_menu", page), path);
-
     $.onClick($("button[data-action='new-query']", page), function() {
       $.createNewDocument("sql_query");
     });

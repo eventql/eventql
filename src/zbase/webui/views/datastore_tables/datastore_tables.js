@@ -26,7 +26,7 @@ ZBase.registerView((function() {
         "views/datastore_tables",
         "zbase_datastore_tables_list_tpl");
 
-    var content_elem = $(".zbase_content", page);
+    var content_elem = $(".zbase_content_pane", page);
     $.replaceContent(content_elem, content);
 
     var tbody = $("tbody", page);
@@ -34,8 +34,6 @@ ZBase.registerView((function() {
       renderRow(tbody, table);
     });
 
-    var main_menu = ZBaseMainMenu();
-    main_menu.render($(".zbase_main_menu", page), url);
 
     $.onClick($("button.create_table", page), function() {
       createTableView.render(content_elem);

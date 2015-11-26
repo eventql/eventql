@@ -28,9 +28,6 @@ ZBase.registerView((function() {
 
     info_message = ZbaseInfoMessage(page);
 
-    var main_menu = ZBaseMainMenu();
-    main_menu.render($(".zbase_main_menu", page), path_prefix);
-
     var name_breadcrumb = $("zbase-breadcrumbs .logfile_name a", page);
     name_breadcrumb.innerHTML = def.name;
 

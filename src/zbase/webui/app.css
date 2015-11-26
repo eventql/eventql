@@ -103,7 +103,9 @@ template {
 }
 
 /* .zbase_wrap, .zbase_viewport */
-#zbase_viewport {
+#zbase_body {
+  display: table;
+  table-layout: fixed;
   min-width: 960px;
   min-height: 100%;
   width: 100%;
@@ -112,12 +114,17 @@ template {
   margin-top: 34px;
 }
 
+#zbase_viewport {
+  display: table-cell;
+
+}
+
 #zbase_viewport .zbase_content_pane {
   min-width: 960px;
   min-height: 100%;
   margin: auto;
   max-width: 2048px;
-  padding: 0 20px;
+  padding: 0 28px;
 }
 
 @media (max-width: 2048px) {

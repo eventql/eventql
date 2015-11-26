@@ -78,7 +78,7 @@
 }
 
 .zbase_datastore_tables table.z-table td.icon z-dropdown-flyout {
-  left: -51px;
+  left: -45px;
 }
 
 .zbase_datastore_tables table.z-table td.icon z-dropdown-item.link {
@@ -88,6 +88,7 @@
 .zbase_datastore_tables table.z-table td.icon z-dropdown-item a {
   padding: .65em 1.1em;
   color: rgba(0, 0, 0, 0.8);
+  display: block;
 }
 
 .zbase_datastore_tables table.z-table tr.hidden {
