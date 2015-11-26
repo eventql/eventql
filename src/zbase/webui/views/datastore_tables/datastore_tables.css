@@ -11,7 +11,6 @@
   font-size: 13px;
   table-layout: fixed;
   background: #fff;
-  border: 1px solid #ddd;
 }
 
 .zbase_datastore_tables .table_definition .table_config {
@@ -40,6 +39,7 @@
 
 .zbase_datastore_tables table.z-table tbody tr td:first-child a {
   color: #000;
+  padding-left: 0;
 }
 
 .zbase_datastore_tables table.z-table.zbase_clickable_table tbody tr:hover td {

@@ -9,6 +9,7 @@
 .zbase_content.main_menu {
   display: table-cell;
   vertical-align: top;
+  padding: 0 28px;
 }
 
 .zbase_main_menu {
