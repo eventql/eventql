@@ -389,16 +389,19 @@ var ZBase = (function() {
     document.getElementById("zbase_domain").innerHTML = conf.zbase_domain;
     document.getElementById("zbase_footer").classList.remove("hidden");
 
-    // render header
+    // render header and body
     if (conf.current_user) {
       var global_modules = [
         "widgets/zbase-header",
         "widgets/z-search",
-        "widgets/z-dropdown"
+        "widgets/z-dropdown",
+        "widgets/zbase-main-menu",
+        "widgets/z-menu"
       ];
 
       ZBase.loadModules(global_modules, function() {
         HeaderWidget.render();
+        ZBaseMainMenu.render();
       });
     } else {
       //document.querySelector("#zbase_header").add("hidden");
