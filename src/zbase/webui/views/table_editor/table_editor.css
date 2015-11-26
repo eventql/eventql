@@ -1,4 +1,5 @@
-.zbase_table_editor {
+.zbase_table_editor,
+.zbase_table_editor .zbase_content.main_menu {
   background: #fff;
 }
 
