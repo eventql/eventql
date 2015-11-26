@@ -298,7 +298,7 @@ ZBase.registerView((function() {
 
   var setReportName = function(name) {
     var escaped_name = $.escapeHTML(name);
-    $("zbase-breadcrumbs-section.report_name").innerHTML = escaped_name;
+    //$("zbase-breadcrumbs-section.report_name").innerHTML = escaped_name;
     $(".zbase_report_pane .report_name").innerHTML = escaped_name;
     $(".zbase_report_pane z-modal input.report_name").value = escaped_name;
   };
