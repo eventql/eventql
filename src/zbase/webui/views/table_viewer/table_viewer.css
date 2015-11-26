@@ -20,7 +20,7 @@
 
 .zbase_table_viewer .loading_bar h3 {
   margin: 0;
-  color: #3498db;
+  color: #3d8ad3;
   line-height: 18px;
 }
 
@@ -51,7 +51,7 @@
 }
 
 .zbase_table_viewer .loaderanim > div {
-  background-color: #3498db;
+  background-color: #3d8ad3;
   height: 100%;
   width: 4px;
   display: inline-block;
@@ -128,7 +128,7 @@
 
 .zbase_table_viewer .control_pane z-dropdown.inline z-dropdown-header {
   font-size: 12px;
-  color: #3498db;
+  color: #3d8ad3;
   font-weight: 500;
   line-height: 36px;
 }
@@ -174,7 +174,7 @@
 }
 
 .zbase_table_viewer .hidable_input_container label {
-  color: #3498db;
+  color: #3d8ad3;
   font-weight: 500;
   cursor: pointer;
   padding: 0 11px;

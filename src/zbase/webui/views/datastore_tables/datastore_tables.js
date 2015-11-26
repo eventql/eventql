@@ -34,8 +34,6 @@ ZBase.registerView((function() {
       renderRow(tbody, table);
     });
 
-    var main_menu = ZBaseMainMenu();
-    main_menu.render($(".zbase_main_menu", page), url);
 
     $.onClick($("button.create_table", page), function() {
       createTableView.render(content_elem);

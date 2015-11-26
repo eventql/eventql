@@ -1,7 +1,7 @@
 .zbase_session_tracking .add_pane,
 .zbase_session_tracking .add_session_event,
 .zbase_session_tracking .add_session_attribute {
-  border: 1px solid #3498db;
+  border: 1px solid #3d8ad3;
   padding: 20px;
   text-align: center;
   font-size: 14px;
@@ -44,7 +44,7 @@
 
 .zbase_session_tracking table td.icon i:hover {
   cursor: pointer;
-  color: #3498db;
+  color: #3d8ad3;
 }
 
 .zbase_session_tracking button.add_field {

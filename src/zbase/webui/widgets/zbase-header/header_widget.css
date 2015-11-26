@@ -7,8 +7,8 @@
   height: 44px;
   line-height: 44px;
   font-family: "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif;
-  background-color: #3498db;
-  box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+  background-color: #3d8ad3;
+  box-shadow: 0 1px 1px rgba(0,0,0,0.2);
   position: absolute;
   z-index: 99998;
   top: 34px;
@@ -61,7 +61,7 @@
 }
 
 .zbase_header .btn_settings:hover {
-  color: #3498db;
+  color: #3d8ad3;
 }
 
 .zbase_header z-dropdown.new_query {
@@ -174,7 +174,7 @@
 
 #zscale_user_navi .dropdown_panel li:hover a,
 #zscale_user_navi .dropdown_panel li:hover span {
-  color: #3498db;
+  color: #3d8ad3;
 }
 
 #zscale_user_navi .dropdown_panel a,
@@ -242,6 +242,6 @@
 }
 
 .zbase_select_namespace_modal a.go_back {
-  color: #3498db;
+  color: #3d8ad3;
   font-size: 14px;
 }

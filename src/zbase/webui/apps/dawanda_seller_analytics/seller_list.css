@@ -146,10 +146,10 @@
 
 .zbase_seller_stats.overview table.z-table th i:hover {
   cursor: pointer;
-  color: #3498db;
+  color: #3d8ad3;
 }
 
 .zbase_seller_stats.overview table.z-table[data-order-fn='asc'] th.order_by i.asc,
 .zbase_seller_stats.overview table.z-table[data-order-fn='desc'] th.order_by i.desc {
-  color: #3498db;
+  color: #3d8ad3;
 }

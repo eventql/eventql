@@ -179,7 +179,6 @@ ZBase.registerView((function() {
 
   var setDocumentTitle = function(title) {
     $(".zbase_sql_editor_title h2").innerHTML = $.escapeHTML(title);
-    $(".sql_document_name_crumb").innerHTML = $.escapeHTML(title);
     $(".zbase_sql_editor_pane input[name='doc_name']").value = title;
   }
 

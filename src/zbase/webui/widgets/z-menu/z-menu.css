@@ -283,12 +283,12 @@ z-menu z-menu-section z-menu-item {
 z-menu z-menu-section .z-menu-item:hover:after,
 z-menu z-menu-section .z-menu-item:hover {
   background: transparent;
-  color: #3498db;
+  color: #3d8ad3;
 }
 
 z-menu z-menu-section .z-menu-item[data-active]:after,
 z-menu z-menu-section .z-menu-item[data-active] {
-  color: #3498db;
+  color: #3d8ad3;
 }
 
 z-menu z-menu-section .z-menu-item:after {

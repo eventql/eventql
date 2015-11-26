@@ -63,7 +63,7 @@ a{ font-weight:normal; text-decoration:none; cursor:pointer; color:#333; }
 a:hover {color:#333;}
 a.link,
 .link {
-  color: #3498db;
+  color: #3d8ad3;
   text-decoration: none
 }
 a.link:hover { text-decoration: underline; }
@@ -299,6 +299,7 @@ template {
   box-shadow: 0 1px 1px rgba(0,0,0,0.1);
   height: 54px;
   position: relative;
+  background: #f9f9f9;
 }
 
 .zbase_page_title > div {
@@ -350,8 +351,8 @@ template {
 }
 
 .zbase_page_title.small {
-  height: 41px;
-  line-height: 40px;
+  height: 36px;
+  line-height: 36px;
 }
 
 section.zbase_page_title zbase-breadcrumbs {
@@ -423,7 +424,7 @@ section.zbase_page_title.small zbase-breadcrumbs zbase-breadcrumbs-section::afte
 
 .zbase_page_title a.back_btn:hover:before {
   background: rgba(255,255,255,.8);
-  color: #3498db;
+  color: #3d8ad3;
 }
 
 
@@ -448,11 +449,11 @@ h2.pagetitle em a {
 }
 
 h2.pagetitle a:hover {
-  color: #3498db;
+  color: #3d8ad3;
 }
 
 h2.pagetitle.main {
-  color: #3498db;
+  color: #3d8ad3;
 }
 
 h2.pagetitle.editable {

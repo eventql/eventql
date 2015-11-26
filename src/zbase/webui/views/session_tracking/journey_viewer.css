@@ -35,7 +35,7 @@
 
 .zbase_user_journey_viewer ul.journeys li.journey:hover {
   background: #f9f9f9;
-  border: 1px solid #3498db;
+  border: 1px solid #3d8ad3;
 }
 
 .zbase_user_journey_viewer ul.journeys li .time {
@@ -55,7 +55,7 @@
 }
 
 .zbase_user_journey_viewer ul.journeys li:hover .time {
-  background: #3498db;
+  background: #3d8ad3;
   color: #fff;
 }
 
@@ -69,7 +69,7 @@
   height: 36px;
   line-height: 36px;
   padding: 0 12px;
-  color: #3498db;
+  color: #3d8ad3;
   background: #fff;
 }
 
@@ -116,7 +116,7 @@
 
 .zbase_user_journey_viewer .loading_bar h3 {
   margin: 0;
-  color: #3498db;
+  color: #3d8ad3;
   line-height: 20px;
   font-weight: 500;
 }
@@ -139,7 +139,7 @@
 }
 
 .zbase_user_journey_viewer .loading_bar .loaderanim > div {
-  background-color: #3498db;
+  background-color: #3d8ad3;
   height: 100%;
   width: 4px;
   display: inline-block;

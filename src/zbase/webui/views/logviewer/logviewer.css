@@ -1,9 +1,10 @@
 .zbase_logviewer {
   background: #fff;
+  min-height: 900px;
 }
 
 .zbase_logviewer .logviewer_pane {
-  margin-top: 20px;
+  padding-top: 20px;
 }
 
 .zbase_logviewer .logviewer_pane .result_pane {
@@ -52,7 +53,7 @@
 
 .zbase_logviewer .logviewer_pane .control_pane z-dropdown.inline z-dropdown-header {
   font-size: 12px;
-  color: #3498db;
+  color: #3d8ad3;
   font-weight: 500;
   line-height: 36px;
 }
@@ -88,7 +89,7 @@
   margin-left: 4px;
   border: none;
   font-size: 12px;
-  color: #3498db;
+  color: #3d8ad3;
   font-weight: 500;
   line-height: 38px;
   padding: 0;
@@ -119,7 +120,7 @@
 }
 
 .zbase_logviewer .logviewer_pane .loaderanim > div {
-  background-color: #3498db;
+  background-color: #3d8ad3;
   height: 100%;
   width: 4px;
   display: inline-block;
@@ -221,7 +222,7 @@
 
 .zbase_logviewer .loading_bar h3 {
   margin: 0;
-  color: #3498db;
+  color: #3d8ad3;
   line-height: 18px;
 }
 
@@ -307,7 +308,7 @@
 
 .zbase_logviewer .z-table.logs tr.folding td.fold_icon i:hover {
   cursor: pointer;
-  color: #3498db;
+  color: #3d8ad3;
 }
 
 .zbase_logviewer .z-table.logs tr.folding td.fold_icon i:before {
@@ -429,7 +430,7 @@
 }
 
 .zbase_logviewer .logfile_list table.z-table tbody tr td.icon z-dropdown:hover z-dropdown-header {
-  color: #3498db;
+  color: #3d8ad3;
 }
 
 .zbase_logviewer .logfile_list table.z-table tbody tr td.icon z-dropdown-flyout {

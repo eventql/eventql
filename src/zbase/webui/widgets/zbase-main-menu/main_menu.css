@@ -4,7 +4,14 @@
   width: 100%;
   min-height: 900px;
   background: rgba(63,144,170,.08);
+}
+
+.zbase_content.main_menu {
+  display: table-cell;
+  vertical-align: top;
+  padding: 0 28px;
 }*/
+
 
 #zbase_main_menu {
   display: table-cell;
@@ -64,8 +71,8 @@
 
 #zbase_main_menu z-menu z-menu-item a[data-active],
 #zbase_main_menu z-menu z-menu-item a:hover {
-  color: #3498db;
-  border-left: 4px solid #3498db;
+  color: #3d8ad3;
+  border-left: 4px solid #3d8ad3;
 }
 
 #zbase_main_menu z-menu z-menu-item a[data-active] {
