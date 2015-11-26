@@ -34,7 +34,11 @@
 }
 
 .zbase_report_list table.z-table tbody tr td:first-child a {
-  color: #000;
+  color: #3e8ad3;
+}
+
+.zbase_report_list table.z-table tbody tr td:first-child a:hover {
+  text-decoration: underline;
 }
 
 .zbase_report_list z-dropdown.input {
