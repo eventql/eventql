@@ -210,8 +210,8 @@ z-button[data-size='big']  {
 }
 
 .z-button.secondary {
-  color: #888;
-  border: 1px solid #eee;
+  color: #3498db;
+  font-weight: 500;
 }
 
 .z-button.secondary:hover {
@@ -222,6 +222,11 @@ z-button[data-size='big']  {
 .z-button.secondary:active {
   background: #cee1e8;
   color: #333;
+}
+
+.z-button.tertiary {
+  background: #27ae60;
+  color: #fff;
 }
 
 .z-button.loading {
