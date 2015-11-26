@@ -16,21 +16,19 @@ var HeaderWidget = (function() {
         showSelectNamespacePopup);
     $.replaceContent($("#zscale_user_navi"), usernav_tpl);
 
+    //document.addEventListener("click", function(event) {
+    //  if ((function getParentWithClass(el, className) {
+    //    while ((el = el.parentElement) && !el.classList.contains(className));
+    //    return el;
+    //  })(event.target, "dropdown")) return;
+
+    //  $(".dropdown", elem).classList.remove("open");
+    //});
+
     /* header */
     var hdr_tpl = $.getTemplate("widgets/zbase-header", "zbase_header_tpl");
     $("z-dropdown.new_query", hdr_tpl).addEventListener("change", createNewDocument);
     $.replaceContent($("#zbase_header"), hdr_tpl);
-
-    document.addEventListener("click", function(event) {
-      if ((function getParentWithClass(el, className) {
-        while ((el = el.parentElement) && !el.classList.contains(className));
-        return el;
-      })(event.target, "dropdown")) return;
-
-      $(".dropdown", elem).classList.remove("open");
-    });
-
-    $.handleLinks(elem);
   };
 
   var update = function(path) {};
