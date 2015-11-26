@@ -4,8 +4,17 @@ var ZBaseMainMenu = (function() {
         "widgets/zbase-main-menu",
         "zbase_main_menu_tpl");
 
-    $.replaceContent(document.getElementById("zbase_main_menu"), tpl);
+    var menu = document.getElementById("zbase_main_menu");
+
+    $.replaceContent(menu, tpl);
     setActiveMenuItem(path);
+
+    var toggler = document.getElementById("menu_toggler");
+    if (toggler) {
+      $.onClick(toggler, function() {
+        menu.classList.toggle("hidden");
+      });
+    }
   };
 
   var setActiveMenuItem = function(path) {

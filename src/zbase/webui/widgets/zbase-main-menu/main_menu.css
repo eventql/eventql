@@ -21,6 +21,10 @@
   border-right: 1px solid #ddd;
 }
 
+#zbase_main_menu.hidden {
+  display: none;
+}
+
 #zbase_main_menu z-menu {
   position: relative;
   margin-right: 10px;
