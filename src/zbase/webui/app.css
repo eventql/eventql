@@ -150,11 +150,30 @@ template {
   position: absolute;
   width: 100%;
   z-index: 99999;
+  font-size: 12px;
+}
+
+#zscale_navi .logo_app {
+  float: left;
+  margin-right: 20px;
 }
 
 #zscale_navi .logo_app img {
   margin-left: 16px;
   margin-top: 6px;
+}
+
+#zscale_navi a.nav {
+  list-style-type: none;
+  display: inline-block;
+  height: 34px;
+  float: left;
+  margin: 0 14px;
+  color: #4E6370;
+}
+
+#zscale_navi a.nav.active {
+  color: #3d8ad3;
 }
 
 /**
