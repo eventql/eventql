@@ -13,12 +13,14 @@ var ZBaseMainMenu = (function() {
     if (toggler) {
       $.onClick(toggler, function() {
         menu.classList.toggle("hidden");
+        toggler.classList.toggle("closed");
       });
     }
   };
 
   var hideMenu = function() {
     document.getElementById("zbase_main_menu").classList.add("hidden");
+    document.getElementById("menu_toggler").classList.add("closed");
   };
 
   var setActiveMenuItem = function(path) {
