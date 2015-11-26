@@ -1,15 +1,16 @@
-var ZBaseMainMenu = function() {
-  var render = function(elem, path) {
+var ZBaseMainMenu = (function() {
+  var render = function(path) {
     var tpl = $.getTemplate(
         "widgets/zbase-main-menu",
         "zbase_main_menu_tpl");
 
-    setActiveMenuItem(tpl, path);
-    $.replaceContent(elem, tpl);
+    $.replaceContent(document.getElementById("zbase_main_menu"), tpl);
+    setActiveMenuItem(path);
   };
 
-  var setActiveMenuItem = function(tpl, path) {
-    var items = tpl.querySelectorAll("a");
+  var setActiveMenuItem = function(path) {
+    var menu = document.getElementById("zbase_main_menu");
+    var items = menu.querySelectorAll("a");
     var active_path_length = 0;
     var active_item;
 
@@ -30,4 +31,4 @@ var ZBaseMainMenu = function() {
   return {
     render: render
   }
-};
+})();
