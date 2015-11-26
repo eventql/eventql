@@ -101,10 +101,22 @@ void CSTableIndex::buildCSTable(RefPtr<Partition> partition) {
     auto reader_ptr = partition->getReader();
     auto& reader = dynamic_cast<LogPartitionReader&>(*reader_ptr);
 
-    reader.fetchRecords([&schema, &shredder] (const Buffer& record) {
+    size_t total_size = 0;
+    reader.fetchRecords([&schema, &shredder, &total_size, &snap, &table] (const Buffer& record) {
       msg::MessageObject obj;
       msg::MessageDecoder::decode(record.data(), record.size(), *schema, &obj);
       shredder.addRecordFromProtobuf(obj, *schema);
+
+      total_size += record.size();
+      static const size_t kMaxTableSize = 1024 * 1024 * 1024 * 4;
+      if (total_size > kMaxTableSize) {
+        RAISEF(
+            kRuntimeError,
+            "CSTable is too large $0/$1/$2",
+            snap->state.tsdb_namespace(),
+            table->name(),
+            snap->key.toString());
+      }
     });
 
     cstable->commit();
