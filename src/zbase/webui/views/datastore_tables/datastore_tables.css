@@ -41,10 +41,9 @@
   color: #888;
 }
 
-.zbase_datastore_tables table.z-table tbody tr td:first-child i {
-  display: inline-block;
-  color: #3e8ad3;
-  margin: 0 8px 0 4px;
+.zbase_datastore_tables table.z-table thead tr th:first-child,
+.zbase_datastore_tables table.z-table tbody tr td:first-child {
+  /*padding-left: 24px;*/
 }
 
 .zbase_datastore_tables table.z-table tbody tr td:first-child a {
@@ -122,3 +121,7 @@
 }
 
 
+.zbase_datastore_tables .tbl_box {
+  /*margin-left: -24px;
+  margin-right: -24px;*/
+}
