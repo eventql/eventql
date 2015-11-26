@@ -32,10 +32,10 @@
 <template id="zbase_datastore_tables_list_row_tpl">
   <tr class="table_definition">
     <td>
-      <a href class="table_name"></a>
+      <a href class="table_name edit"></a>
     </td>
     <td>
-      <a style="color: #888;">0.0 TB</a></td>
+      <a class="edit" style="color: #888;">0.0 TB</a></td>
     <td class="icon">
       <z-dropdown class="edit" data-resolved="">
         <z-dropdown-header>
@@ -48,7 +48,12 @@
         </z-dropdown-header>
         <z-dropdown-flyout>
           <z-dropdown-items>
-            <z-dropdown-item data-value="edit" class="link"><a>Edit Table</a></z-dropdown-item>
+            <z-dropdown-item data-value="edit" class="link">
+              <a class="edit">Edit Table</a>
+            </z-dropdown-item>
+            <z-dropdown-item data-value="tableviewer" class="link">
+              <a class="tableviewer">Open in Viewer</a>
+            </z-dropdown-item>
           </z-dropdown-items>
         </z-dropdown-flyout>
       </z-dropdown>

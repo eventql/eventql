@@ -53,11 +53,16 @@ ZBase.registerView((function() {
     var table_name = $(".table_name", elem);
     table_name.innerHTML = table.name;
 
-    var url = "/a/datastore/tables/" + table.name;
-    var links = elem.querySelectorAll("a");
-    for (var i = 0; i < links.length; i++) {
-      links[i].href = url;
+    var edit_links = elem.querySelectorAll("a.edit");
+    for (var i = 0; i < edit_links.length; i++) {
+      edit_links[i].href = "/a/datastore/tables/" + table.name;
     }
+
+    var viewer_links = elem.querySelectorAll("a.tableviewer");
+    for (var i = 0; i < viewer_links.length; i++) {
+      viewer_links[i].href = "/a/datastore/tables/view/" + table.name;
+    }
+
 
     tbody.appendChild(elem);
   };
