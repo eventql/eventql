@@ -14,7 +14,7 @@ ZBase.registerView((function() {
     $.onClick($("z-checkbox.premium", page), paramChanged);
     $("z-dropdown.metrics", page).addEventListener("change", function() {
       renderTable($(".zbase_seller_overview table.overview"), result, path);
-      $.pushHistoryState(path_prefix + "?" + $.buildQueryString(getQueryString()));
+      $.pushHistoryState(path_prefix + "?" + $.buildQueryString(getQueryParams()));
     });
     $("z-search.seller", page).addEventListener("z-search-submit", function(e) {
       $.navigateTo(path_prefix + "/" + e.detail.value);
@@ -25,11 +25,47 @@ ZBase.registerView((function() {
 
     setParamPremiumSeller(UrlUtil.getParamValue(path, "premium"));
     setParamMetrics(UrlUtil.getParamValue(path, "metrics"));
+    setParamOffset(UrlUtil.getParamValue(path, "offset"));
     setParamsOrder(
         UrlUtil.getParamValue(path, "order_by"),
         UrlUtil.getParamValue(path, "order_fn"));
 
+    query_mgr = EventSourceHandler();
+    var query = query_mgr.get(
+      "sql_query",
+      "/api/v1/sql?format=json_sse&query=" + encodeURIComponent(getSQLQuery()));
+
+    query.addEventListener("result", function(e) {
+      query_mgr.close("sql_query");
+      result = JSON.parse(e.data).results[0];
+      hideLoader();
+      renderTable($(".zbase_seller_overview table.overview"), result, path);
+      setPaginationFor(result.rows.length);
+      setPaginationBack();
+
+      var until = Date.now();
+      $(".zbase_seller_overview .time_range").innerHTML =
+         DateUtil.printDate(until - DateUtil.millisPerDay) + "-" +
+         DateUtil.printDate(until);
+    });
+
+    query.addEventListener("error", function(e) {
+      query_mgr.close("sql_query");
+      $.fatalError();
+    }, false);
+
+    query.addEventListener("status", function(e) {
+      renderQueryProgress(JSON.parse(e.data));
+    }, false);
+  };
+
+  var destroy = function() {
+    query_mgr.closeAll();
+  };
+
+  var getSQLQuery = function() {
     var order = getParamsOrder();
+    var offset = getParamOffset();
 
     var query_str =
       "select count(1) as days, shop_id, " +
@@ -59,39 +95,11 @@ ZBase.registerView((function() {
       "sum(listview_views_recos) listview_views_recos, " +
       "sum(listview_clicks_recos) listview_clicks_recos, " +
       "sum(listview_ctr_recos) / count(1) listview_ctr_recos " +
-      "from shop_stats.last30d " +
-      "where gmv_eurcent > 0 group by shop_id order by " + order.order_by +
-      " " + order.order_fn + " limit 20;";
+      "from shop_stats.last30d where " +
+      order.order_by + " > 0 group by shop_id order by " + order.order_by +
+      " " + order.order_fn + " limit 20 offset " + offset + ";";
 
-    query_mgr = EventSourceHandler();
-    var query = query_mgr.get(
-      "sql_query",
-      "/api/v1/sql?format=json_sse&query=" + encodeURIComponent(query_str));
-
-    query.addEventListener("result", function(e) {
-      query_mgr.close("sql_query");
-      result = JSON.parse(e.data).results[0];
-      hideLoader();
-      renderTable($(".zbase_seller_overview table.overview"), result, path);
-
-      var until = Date.now();
-      $(".zbase_seller_overview .time_range").innerHTML =
-         DateUtil.printDate(until - DateUtil.millisPerDay) + "-" +
-         DateUtil.printDate(until);
-    });
-
-    query.addEventListener("error", function(e) {
-      query_mgr.close("sql_query");
-      $.fatalError();
-    }, false);
-
-    query.addEventListener("status", function(e) {
-      renderQueryProgress(JSON.parse(e.data));
-    }, false);
-  };
-
-  var destroy = function() {
-    query_mgr.closeAll();
+    return query_str;
   };
 
   var renderQueryProgress = function(progress) {
@@ -162,6 +170,34 @@ ZBase.registerView((function() {
         UrlUtil.getParamValue(path, "order_fn"));
   };
 
+  var setPaginationFor = function(num_results) {
+    var params = getQueryParams();
+    params.limit = parseInt(params.limit, 10);
+
+    if (num_results < params.limit) {
+      $(".zbase_seller_stats .pager .for").classList.add("disabled");
+      return;
+    }
+
+    params.offset = parseInt(params.offset, 10) + params.limit;
+    $(".zbase_seller_stats .pager .for").href =
+        path_prefix + "?" + $.buildQueryString(params);
+  };
+
+  var setPaginationBack = function() {
+    var params = getQueryParams();
+    params.offset = parseInt(params.offset, 10);
+
+    if (params.offset <= 0) {
+      $(".zbase_seller_stats .pager .back").classList.add("disabled");
+      return;
+    }
+
+    params.offset = params.offset - parseInt(params.limit, 10);
+    $(".zbase_seller_stats .pager .back").href =
+        path_prefix + "?" + $.buildQueryString(params);
+  };
+
   var setParamPremiumSeller = function(value) {
     if (value) {
       $(".zbase_seller_stats z-checkbox.premium").setAttribute(
@@ -190,6 +226,14 @@ ZBase.registerView((function() {
     }
   };
 
+  var setParamOffset = function(offset) {
+    if (!offset) {
+      offset = 0;
+    }
+
+    $(".zbase_seller_stats .pager").setAttribute("data-offset", offset);
+  };
+
   var getParamsOrder = function() {
     var table = $(".zbase_seller_stats table.overview");
 
@@ -197,23 +241,31 @@ ZBase.registerView((function() {
       order_by: table.getAttribute("data-order-by"),
       order_fn: table.getAttribute("data-order-fn")
     };
-  }
+  };
 
-  var getQueryString = function() {
+  var getParamOffset = function() {
+    return parseInt(
+        $(".zbase_seller_stats .pager").getAttribute("data-offset"), 10);
+  };
+
+  var getQueryParams = function() {
     var params = getParamsOrder();
+    params.offset = getParamOffset();
     params.metrics = $(".zbase_seller_stats z-dropdown.metrics").getValue();
     params.premium = $(".zbase_seller_stats z-checkbox.premium").hasAttribute(
           "data-active");
+    params.limit = "20";
 
     return params;
   };
 
   var paramChanged = function() {
-    $.navigateTo(path_prefix + "?" + $.buildQueryString(getQueryString()));
+    $.navigateTo(path_prefix + "?" + $.buildQueryString(getQueryParams()));
   };
 
   var orderByParamChanged = function(order_by, order_fn) {
     setParamsOrder(order_by, order_fn);
+    setParamOffset(0);
     paramChanged();
   };
 
