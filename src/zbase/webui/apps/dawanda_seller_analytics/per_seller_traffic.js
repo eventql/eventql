@@ -3,9 +3,11 @@ ZBase.registerView((function() {
   var shop_id;
 
   var load = function(path) {
+    query_mgr = EventSourceHandler();
     shop_id = UrlUtil.getPath(path).substr(path_prefix.length);
-    console.log(shop_id);
-    perSellerStats.renderLayout(shop_id);
+
+
+    perSellerStats.renderLayout(query_mgr, path_prefix, shop_id);
   };
 
   var destroy = function() {
