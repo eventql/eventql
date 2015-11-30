@@ -77,6 +77,35 @@ void MetricAPIServlet::executeQuery(
     auto query = mkRef(new MetricQuery());
     query->onProgress(send_progress);
 
+    auto jq = json::parseJSON(req_stream->request().body());
+    auto jmetrics = json::objectLookup(jq, "metrics");
+    if (jmetrics == jq.end()) {
+      RAISE(kRuntimeError, "missing field: metrics");
+    }
+
+    for (auto cur = jmetrics + 1; cur < jmetrics + jmetrics->size - 1; ) {
+      MetricDefinition metric;
+      metric.set_metric_key(cur->data);
+      ++cur;
+
+      auto metric_source = json::objectGetString(cur, jq.end(), "source");
+      if (!metric_source.isEmpty()) {
+        metric.set_source(metric_source.get());
+      }
+
+      auto metric_expr = json::objectGetString(cur, jq.end(), "expr");
+      if (!metric_expr.isEmpty()) {
+        metric.set_expr(metric_expr.get());
+      }
+
+      auto metric_filter = json::objectGetString(cur, jq.end(), "filter");
+      if (!metric_filter.isEmpty()) {
+        metric.set_filter(metric_filter.get());
+      }
+
+      cur += cur->size;
+    }
+
     send_progress(0);
     service_->executeQuery(session, query);
 

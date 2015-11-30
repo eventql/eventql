@@ -26,7 +26,7 @@ configure_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/buildconfig.h.cmake
     ${CMAKE_CURRENT_BINARY_DIR}/buildconfig.h)
 
-file(GLOB COREPROTO_FILES core/*.proto)
+file(GLOB COREPROTO_FILES core/*.proto metrics/*.proto)
 STX_PROTOBUF_GENERATE_CPP(COREPROTO_SRCS COREPROTO_HDRS ${COREPROTO_FILES})
 
 add_library(tsdb-client OBJECT

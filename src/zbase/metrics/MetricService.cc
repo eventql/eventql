@@ -27,5 +27,10 @@ MetricService::MetricService(
     repl_(repl),
     cachedir_(cachedir) {}
 
+void MetricService::executeQuery(
+    const AnalyticsSession& session,
+    RefPtr<MetricQuery> query) {
+  iputs("execute query..", 1);
+}
 
 } // namespace zbase

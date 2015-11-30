@@ -13,6 +13,10 @@ using namespace stx;
 
 namespace zbase {
 
+void MetricQuery::addMetric(const MetricDefinition& metric) {
+  metrics_.emplace_back(metric);
+}
+
 void MetricQuery::onProgress(Function<void (double progress)> fn) {
   on_progress_ = fn;
 }
