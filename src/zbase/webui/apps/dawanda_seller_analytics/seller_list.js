@@ -28,6 +28,9 @@ ZBase.registerView((function() {
     setParamsOrder(
         UrlUtil.getParamValue(path, "order_by"),
         UrlUtil.getParamValue(path, "order_fn"));
+    setParamsPager(
+        UrlUtil.getParamValue(path, "direction"),
+        UrlUtil.getParamValue(path, "threshold"));
 
     query_mgr = EventSourceHandler();
     var query = query_mgr.get(
@@ -63,6 +66,9 @@ ZBase.registerView((function() {
 
   var getSQLQuery = function() {
     var order = getParamsOrder();
+    var pager = getParamsPager();
+    console.log(pager);
+
     var query_str =
       "select count(1) as days, shop_id, " +
       "sum(num_active_products) num_active_products, " +
@@ -177,13 +183,14 @@ ZBase.registerView((function() {
     }
 
     params.theshold = result.rows[0][i];
+    params.direction = "back";
     $(".zbase_seller_stats .pager .back").href =
         path_prefix + "?" + $.buildQueryString(params);
 
+    params.direction = "for";
     params.threshold = result.rows[result.rows.length - 1][i]
     $(".zbase_seller_stats .pager .for").href =
         path_prefix + "?" + $.buildQueryString(params);
-
   };
 
   var setParamPremiumSeller = function(value) {
@@ -214,6 +221,14 @@ ZBase.registerView((function() {
     }
   };
 
+  var setParamsPager = function(direction, threshold) {
+    if (direction && threshold) {
+      var pager = $(".zbase_seller_stats .pager");
+      pager.setAttribute("data-direction", direction);
+      pager.setAttribute("data-threshold", threshold);
+    }
+  };
+
   var getParamsOrder = function() {
     var table = $(".zbase_seller_stats table.overview");
 
@@ -221,7 +236,21 @@ ZBase.registerView((function() {
       order_by: table.getAttribute("data-order-by"),
       order_fn: table.getAttribute("data-order-fn")
     };
-  }
+  };
+
+  var getParamsPager = function() {
+    var params = {};
+    var pager = $(".zbase_seller_stats .pager");
+    if (pager.hasAttribute("data-direction")) {
+      params.direction = pager.getAttribute("data-direction");
+    }
+
+    if (pager.hasAttribute("data-threshold")) {
+      params.threshold = pager.getAttribute("data-threshold");
+    }
+
+    return params;
+  };
 
   var getQueryParams = function() {
     var params = getParamsOrder();
