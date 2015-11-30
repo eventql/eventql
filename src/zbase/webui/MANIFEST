@@ -420,7 +420,7 @@ route {
 
 route {
   path_prefix: "/a/apps/dawanda_seller_analytics/"
-  view: "per_seller_overview"
+  view: "per_seller_key_metrics"
   require_module: "util/event_source_handler"
   require_module: "util/z-date-util"
   require_module: "util/z-url-util"
