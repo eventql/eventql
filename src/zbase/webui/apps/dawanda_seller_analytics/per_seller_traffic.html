@@ -1,0 +1,292 @@
+<template id="per_seller_traffic_main_tpl">
+  <div class="traffic">
+
+    <div class="metric_group">
+
+      <div class="metric_pane fullwidth first shop_page_views">
+        <div class="description">
+          <h2>Shop Page Impressions</h2>
+          <p>Aggregate number of Shop Page impressions for this seller in the specified time window</p>
+        </div>
+
+
+        <div class="values">
+          <div class="num"></div>
+          <div class="chart">
+            <z-chart width='100%' height='50'></z-chart>
+            <div class="time_line">
+              <span class="start"></span>
+              <span class="end"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="metric_pane fullwidth product_page_views">
+        <div class="description">
+          <h2>Product Page Impressions</h2>
+          <p>Aggregate number of product page impressions for all products from this seller in this time window</p>
+        </div>
+
+        <div class="values">
+          <div class="num"></div>
+          <div class="chart">
+            <z-chart width='100%' height='50'></z-chart>
+            <div class="time_line">
+              <span class="start"></span>
+              <span class="end"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="metric_pane fullwidth total_listviews">
+        <div class="description">
+          <h2>Listview Impressions</h2>
+          <p>Aggregate number of search page, catalog page, shop page, ad and recommendation impressions from this seller in this time window</p>
+        </div>
+
+        <div class="values">
+          <div class="num"></div>
+          <div class="chart">
+            <z-chart width='100%' height='50'></z-chart>
+            <div class="time_line">
+              <span class="start"></span>
+              <span class="end"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="metric_group">
+      <h2>Traffic Sources: On-Site</h2>
+      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin ex nulla, tempus efficitur pellentesque a, pulvinar a velit.</p>
+
+      <table cellspacing="0">
+        <tbody>
+          <tr>
+            <td class="metric_title">On-Site Search</td>
+            <td>
+              <div class="metric_pane first listview_views_search_page">
+                <h2 class="pagetitle">Impressions</h2>
+                <i class="fa fa-question-circle help"></i>
+                <span class="num"></span>
+
+                <div class="clearfix"></div>
+
+                <z-chart width='100%' height='50'></z-chart>
+                <div class="time_line">
+                  <span class="start"></span>
+                  <span class="end"></span>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="metric_pane listview_clicks_search_page">
+                <h2 class="pagetitle">Clicks</h2>
+                <i class="fa fa-question-circle help"></i>
+                <span class="num"></span>
+
+                <div class="clearfix"></div>
+
+                <z-chart width='100%' height='50'></z-chart>
+                <div class="time_line">
+                  <span class="start"></span>
+                  <span class="end"></span>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="metric_pane listview_ctr_search_page">
+                <h2 class="pagetitle">CTR</h2>
+                <i class="fa fa-question-circle help"></i>
+                <span class="num"></span>
+                <z-chart width='100%' height='50'></z-chart>
+                <div class="time_line">
+                  <span class="start"></span>
+                  <span class="end"></span>
+                </div>
+              </div>
+            </td>
+          </tr>
+
+          <tr>
+            <td class="metric_title">Catalog</td>
+            <td>
+              <div class="metric_pane listview_views_catalog_page">
+                <h2 class="pagetitle">Impressions</h2>
+                <i class="fa fa-question-circle help"></i>
+                <span class="num"></span>
+                <div class="clearfix"></div>
+                <z-chart width='100%' height='50'></z-chart>
+                <div class="time_line">
+                  <span class="start"></span>
+                  <span class="end"></span>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="metric_pane listview_clicks_catalog_page">
+                <h2 class="pagetitle">Clicks</h2>
+                <i class="fa fa-question-circle help"></i>
+                <span class="num"></span>
+                <div class="clearfix"></div>
+                <z-chart width='100%' height='50'></z-chart>
+                <div class="time_line">
+                  <span class="start"></span>
+                  <span class="end"></span>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="metric_pane first listview_ctr_catalog_page">
+                <h2 class="pagetitle">CTR</h2>
+                <i class="fa fa-question-circle help"></i>
+                <span class="num"></span>
+                <div class="clearfix"></div>
+                <z-chart width='100%' height='50'></z-chart>
+                <div class="time_line">
+                  <span class="start"></span>
+                  <span class="end"></span>
+                </div>
+              </div>
+            </td>
+          </tr>
+
+          <tr>
+            <td class="metric_title">Shop Page</td>
+            <td>
+              <div class="metric_pane listview_views_shop_page">
+                <h2 class="pagetitle">Impressions</h2>
+                <i class="fa fa-question-circle help"></i>
+                <span class="num"></span>
+                <div class="clearfix"></div>
+                <z-chart width='100%' height='50'></z-chart>
+                <div class="time_line">
+                  <span class="start"></span>
+                  <span class="end"></span>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="metric_pane listview_clicks_shop_page">
+                <h2 class="pagetitle">Clicks</h2>
+                <i class="fa fa-question-circle help"></i>
+                <span class="num"></span>
+                <div class="clearfix"></div>
+                <z-chart width='100%' height='50'></z-chart>
+                <div class="time_line">
+                  <span class="start"></span>
+                  <span class="end"></span>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="metric_pane first listview_ctr_shop_page">
+                <h2 class="pagetitle">CTR</h2>
+                <i class="fa fa-question-circle help"></i>
+                <span class="num"></span>
+                <div class="clearfix"></div>
+                <z-chart width='100%' height='50'></z-chart>
+                <div class="time_line">
+                  <span class="start"></span>
+                  <span class="end"></span>
+                </div>
+              </div>
+            </td>
+          </tr>
+
+          <tr>
+            <td class="metric_title">Ads (Logenplaetze)</td>
+            <td>
+              <div class="metric_pane first listview_views_ads">
+                <h2 class="pagetitle">Impressions</h2>
+                <i class="fa fa-question-circle help"></i>
+                <span class="num"></span>
+                <div class="clearfix"></div>
+                <z-chart width='100%' height='50'></z-chart>
+                <div class="time_line">
+                  <span class="start"></span>
+                  <span class="end"></span>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="metric_pane listview_clicks_ads">
+                <h2 class="pagetitle">Clicks</h2>
+                <i class="fa fa-question-circle help"></i>
+                <span class="num"></span>
+                <div class="clearfix"></div>
+                <z-chart width='100%' height='50'></z-chart>
+                <div class="time_line">
+                  <span class="start"></span>
+                  <span class="end"></span>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="metric_pane listview_ctr_ads">
+                <h2 class="pagetitle">CTR</h2>
+                <i class="fa fa-question-circle help"></i>
+                <span class="num"></span>
+                <div class="clearfix"></div>
+                <z-chart width='100%' height='50'></z-chart>
+                <div class="time_line">
+                  <span class="start"></span>
+                  <span class="end"></span>
+                </div>
+              </div>
+            </td>
+          </tr>
+
+          <tr>
+            <td class="metric_title">Recommendations</td>
+            <td>
+              <div class="metric_pane listview_views_recos">
+                <h2 class="pagetitle">Impressions</h2>
+                <i class="fa fa-question-circle help"></i>
+                <span class="num"></span>
+                <div class="clearfix"></div>
+                <z-chart width='100%' height='50'></z-chart>
+                <div class="time_line">
+                  <span class="start"></span>
+                  <span class="end"></span>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="metric_pane listview_clicks_recos">
+                <h2 class="pagetitle">Clicks</h2>
+                <i class="fa fa-question-circle help"></i>
+                <span class="num"></span>
+                <div class="clearfix"></div>
+                <z-chart width='100%' height='50'></z-chart>
+                <div class="time_line">
+                  <span class="start"></span>
+                  <span class="end"></span>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="metric_pane first listview_ctr_recos">
+                <h2 class="pagetitle">CTR</h2>
+                <i class="fa fa-question-circle help"></i>
+                <span class="num"></span>
+                <div class="clearfix"></div>
+                <z-chart width='100%' height='50'></z-chart>
+                <div class="time_line">
+                  <span class="start"></span>
+                  <span class="end"></span>
+                </div>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+    </div>
+
+  </div>
+</template>
