@@ -1,0 +1,43 @@
+<template id="per_seller_layout_main_tpl">
+  <div class="zbase_seller_stats">
+    <section class='zbase_page_title small' style="none">
+      <a href="/a/apps/dawanda_seller_analytics" class="back_btn"></a>
+      <zbase-breadcrumbs>
+        <zbase-breadcrumbs-section>
+          <a href="/a/">Analytics</a>
+        </zbase-breadcrumbs-section>
+        <zbase-breadcrumbs-section>
+          <a href="/a/apps/dawanda_seller_analytics">Seller</a>
+        </zbase-breadcrumbs-section>
+        <zbase-breadcrumbs-section>
+          <a class="shop_id"></a>
+        </zbase-breadcrumbs-section>
+      </zbase-breadcrumbs>
+    </section>
+
+    <div class="zbase_content_pane fullwidth" style="padding: 0 20px;">
+      <div class="zbase_stats_title">
+        <h2 class="pagetitle main">
+          <em><span class="shop_name"></span> [<span class="shop_id"></span>]</em>
+        </h2>
+      </div>
+
+      <z-tabbable class="slim_tabs">
+        <z-tab data-path="">
+          <a>Overview</a>
+        </z-tab>
+        <z-tab data-path="/revenue">
+          <a>Revenue</a>
+        </z-tab>
+        <z-tab data-path="/traffic">
+          <a>Traffic Sources</a>
+        </z-tab>
+        <z-tab data-path="/inventory">
+          <a>Products</a>
+        </z-tab>
+      </z-tabbable>
+
+      <div class="result_pane"></div>
+    </div>
+  </div>
+</template>

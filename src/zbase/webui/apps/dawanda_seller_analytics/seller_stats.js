@@ -317,7 +317,7 @@ ZBase.registerView((function() {
   window.addEventListener("resize", resizeSparklines);
 
   return {
-    name: "per_seller_stats",
+    name: "per_seller_overview",
     loadView: function(params) {load(params.path)},
     unloadView: destroy,
     handleNavigationChange: load
