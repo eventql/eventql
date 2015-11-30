@@ -12,6 +12,7 @@
 #include "zbase/AnalyticsAuth.h"
 #include "zbase/CustomerConfig.h"
 #include "zbase/ConfigDirectory.h"
+#include "zbase/metrics/MetricQuery.h"
 
 using namespace stx;
 
@@ -27,6 +28,10 @@ public:
       zbase::PartitionMap* pmap,
       zbase::ReplicationScheme* repl,
       const String& cachedir);
+
+  void executeQuery(
+      const AnalyticsSession& session,
+      RefPtr<MetricQuery> query);
 
 protected:
   ConfigDirectory* cdir_;

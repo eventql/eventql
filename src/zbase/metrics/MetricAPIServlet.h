@@ -32,6 +32,12 @@ public:
 
 protected:
 
+  void executeQuery(
+      const AnalyticsSession& session,
+      const URI& uri,
+      http::HTTPRequestStream* req_stream,
+      http::HTTPResponseStream* res_stream);
+
   void catchAndReturnErrors(
       http::HTTPResponse* resp,
       Function<void ()> fn) const {
