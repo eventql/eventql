@@ -39,17 +39,29 @@
 }
 
 .zbase_seller_stats.per_seller .metric_group .metric_pane.fullwidth p {
-  width: 30%;
+  width: 23.5%;
+  min-width: 200px;
 }
 
 .zbase_seller_stats.per_seller .metric_pane.fullwidth .values {
-  overflow: auto;
   margin-bottom: 29px;
+  display: table;
+  table-layout: fixed;
+  width: 100%;
+  overflow: hidden;
 }
 
 .zbase_seller_stats.per_seller .metric_pane.fullwidth .chart {
-  float: left;
-  width: 70%;
+  display: table-cell;
+  padding: 0 35px 0 4%;
+}
+
+.zbase_seller_stats.per_seller .metric_pane.fullwidth .num {
+  display: table-cell;
+  font-size: 28px;
+  width: 23.5%;
+  min-width: 200px;
+  margin-top: 30px;
 }
 
 .zbase_seller_stats.per_seller .metric_pane.fullwidth h2 {
@@ -58,13 +70,6 @@
   font-weight: 400;
   margin-top: 30px;
   color: #333;
-}
-
-.zbase_seller_stats.per_seller .metric_pane.fullwidth .num {
-  font-size: 28px;
-  float: left;
-  width: 30%;
-  margin-top: 30px;
 }
 
 /* metric pane */
