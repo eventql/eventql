@@ -1,23 +1,249 @@
 <template id="per_seller_traffic_main_tpl">
-  <div class="zbase_seller_stats traffic">
-    <section class='zbase_page_title small' style="none">
-      <a href="/a/apps/dawanda_seller_analytics" class="back_btn"></a>
-      <zbase-breadcrumbs>
-        <zbase-breadcrumbs-section>
-          <a href="/a/">Analytics</a>
-        </zbase-breadcrumbs-section>
-        <zbase-breadcrumbs-section>
-          <a href="/a/apps/dawanda_seller_analytics">Seller</a>
-        </zbase-breadcrumbs-section>
-        <zbase-breadcrumbs-section>
-          <a class="shop_id"></a>
-        </zbase-breadcrumbs-section>
-      </zbase-breadcrumbs>
-    </section>
+  <div class="traffic">
 
-    <div class="zbase_content_pane fullwidth" style="padding: 0 20px;">
-      <div class="zbase_stats_title">
-        <h2 class="pagetitle main">
-          <em><span class="shop_name"></span> [<span class="shop_id"></span>]</em>
-        </h2>
+    <div class="metric_group">
+
+      <div class="metric_pane first shop_page_views">
+        <h2 class="pagetitle">Shop Page Impressions</h2>
+        <i class="fa fa-question-circle help"></i>
+        <span class="num"></span>
+        <z-chart width='100%' height='50'></z-chart>
+        <div class="time_line">
+          <span class="start"></span>
+          <span class="end"></span>
+        </div>
       </div>
+
+      <div class="metric_pane product_page_views">
+        <h2 class="pagetitle">Product Page Impressions</h2>
+        <i class="fa fa-question-circle help"></i>
+        <span class="num"></span>
+        <z-chart width='100%' height='50'></z-chart>
+        <div class="time_line">
+          <span class="start"></span>
+          <span class="end"></span>
+        </div>
+      </div>
+
+      <div class="metric_pane total_listviews">
+        <h2 class="pagetitle">Listview Impressions</h2>
+        <i class="fa fa-question-circle help"></i>
+        <span class="num"></span>
+        <z-chart width='100%' height='50'></z-chart>
+        <div class="time_line">
+          <span class="start"></span>
+          <span class="end"></span>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="metric_group">
+      <table style="width: 100%; table-layout: fixed;" cellspacing="0">
+
+        <tr>
+          <td style="width: 188px; padding-left: 20px; font-weight: 400; font-size: 15px; color: #3498db;">On-Site Search</td>
+          <td>
+            <div class="metric_pane first listview_views_search_page">
+              <h2 class="pagetitle">Impressions</h2>
+              <i class="fa fa-question-circle help"></i>
+              <span class="num"></span>
+              <z-chart width='100%' height='50'></z-chart>
+              <div class="time_line">
+                <span class="start"></span>
+                <span class="end"></span>
+              </div>
+            </div>
+          </td>
+          <td>
+            <div class="metric_pane listview_clicks_search_page">
+              <h2 class="pagetitle">Clicks</h2>
+              <i class="fa fa-question-circle help"></i>
+              <span class="num"></span>
+              <z-chart width='100%' height='50'></z-chart>
+              <div class="time_line">
+                <span class="start"></span>
+                <span class="end"></span>
+              </div>
+            </div>
+          </td>
+          <td>
+            <div class="metric_pane listview_ctr_search_page">
+              <h2 class="pagetitle">CTR</h2>
+              <i class="fa fa-question-circle help"></i>
+              <span class="num"></span>
+              <z-chart width='100%' height='50'></z-chart>
+              <div class="time_line">
+                <span class="start"></span>
+                <span class="end"></span>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr>
+          <td style="width: 188px; padding-left: 20px; font-weight: 400; font-size: 15px; color: #3498db;">Catalog</td>
+          <td>
+            <div class="metric_pane listview_views_catalog_page">
+              <h2 class="pagetitle">Impressions</h2>
+              <i class="fa fa-question-circle help"></i>
+              <span class="num"></span>
+              <z-chart width='100%' height='50'></z-chart>
+              <div class="time_line">
+                <span class="start"></span>
+                <span class="end"></span>
+              </div>
+            </div>
+          </td>
+          <td>
+            <div class="metric_pane listview_clicks_catalog_page">
+              <h2 class="pagetitle">Clicks</h2>
+              <i class="fa fa-question-circle help"></i>
+              <span class="num"></span>
+              <z-chart width='100%' height='50'></z-chart>
+              <div class="time_line">
+                <span class="start"></span>
+                <span class="end"></span>
+              </div>
+            </div>
+          </td>
+          <td>
+            <div class="metric_pane first listview_ctr_catalog_page">
+              <h2 class="pagetitle">CTR</h2>
+              <i class="fa fa-question-circle help"></i>
+              <span class="num"></span>
+              <z-chart width='100%' height='50'></z-chart>
+              <div class="time_line">
+                <span class="start"></span>
+                <span class="end"></span>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr>
+          <td style="width: 188px; padding-left: 20px; font-weight: 400; font-size: 15px; color: #3498db;">Shop Page</td>
+          <td>
+            <div class="metric_pane listview_views_shop_page">
+              <h2 class="pagetitle">Impressions</h2>
+              <i class="fa fa-question-circle help"></i>
+              <span class="num"></span>
+              <z-chart width='100%' height='50'></z-chart>
+              <div class="time_line">
+                <span class="start"></span>
+                <span class="end"></span>
+              </div>
+            </div>
+          </td>
+          <td>
+            <div class="metric_pane listview_clicks_shop_page">
+              <h2 class="pagetitle">Clicks</h2>
+              <i class="fa fa-question-circle help"></i>
+              <span class="num"></span>
+              <z-chart width='100%' height='50'></z-chart>
+              <div class="time_line">
+                <span class="start"></span>
+                <span class="end"></span>
+              </div>
+            </div>
+          </td>
+          <td>
+            <div class="metric_pane first listview_ctr_shop_page">
+              <h2 class="pagetitle">CTR</h2>
+              <i class="fa fa-question-circle help"></i>
+              <span class="num"></span>
+              <z-chart width='100%' height='50'></z-chart>
+              <div class="time_line">
+                <span class="start"></span>
+                <span class="end"></span>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr>
+          <td style="width: 188px; padding-left: 20px; font-weight: 400; font-size: 15px; color: #3498db;">Ads (Logenplaetze)</td>
+          <td>
+            <div class="metric_pane first listview_views_ads">
+              <h2 class="pagetitle">Impressions</h2>
+              <i class="fa fa-question-circle help"></i>
+              <span class="num"></span>
+              <z-chart width='100%' height='50'></z-chart>
+              <div class="time_line">
+                <span class="start"></span>
+                <span class="end"></span>
+              </div>
+            </div>
+          </td>
+          <td>
+            <div class="metric_pane listview_clicks_ads">
+              <h2 class="pagetitle">Clicks</h2>
+              <i class="fa fa-question-circle help"></i>
+              <span class="num"></span>
+              <z-chart width='100%' height='50'></z-chart>
+              <div class="time_line">
+                <span class="start"></span>
+                <span class="end"></span>
+              </div>
+            </div>
+          </td>
+          <td>
+            <div class="metric_pane listview_ctr_ads">
+              <h2 class="pagetitle">CTR</h2>
+              <i class="fa fa-question-circle help"></i>
+              <span class="num"></span>
+              <z-chart width='100%' height='50'></z-chart>
+              <div class="time_line">
+                <span class="start"></span>
+                <span class="end"></span>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr>
+          <td style="width: 188px; padding-left: 20px; font-weight: 400; font-size: 15px; color: #3498db;">Recommendations</td>
+          <td>
+            <div class="metric_pane listview_views_recos">
+              <h2 class="pagetitle">Impressions</h2>
+              <i class="fa fa-question-circle help"></i>
+              <span class="num"></span>
+              <z-chart width='100%' height='50'></z-chart>
+              <div class="time_line">
+                <span class="start"></span>
+                <span class="end"></span>
+              </div>
+            </div>
+          </td>
+          <td>
+            <div class="metric_pane listview_clicks_recos">
+              <h2 class="pagetitle">Clicks</h2>
+              <i class="fa fa-question-circle help"></i>
+              <span class="num"></span>
+              <z-chart width='100%' height='50'></z-chart>
+              <div class="time_line">
+                <span class="start"></span>
+                <span class="end"></span>
+              </div>
+            </div>
+          </td>
+          <td>
+            <div class="metric_pane first listview_ctr_recos">
+              <h2 class="pagetitle">CTR</h2>
+              <i class="fa fa-question-circle help"></i>
+              <span class="num"></span>
+              <z-chart width='100%' height='50'></z-chart>
+              <div class="time_line">
+                <span class="start"></span>
+                <span class="end"></span>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+      </table>
+
+    </div>
+
+  </div>
+</template>

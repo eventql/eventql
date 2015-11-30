@@ -1,5 +1,5 @@
-var perSellerStats = (function() {
-  var renderLayout = function(query_mgr, path_prefix, shop_id) {
+var perSellerLayout = function(query_mgr, path_prefix, shop_id) {
+  var render = function() {
     var page = $.getTemplate(
         "views/seller",
         "per_seller_layout_main_tpl");
@@ -20,6 +20,14 @@ var perSellerStats = (function() {
     $.replaceViewport(page);
 
     loadShopName(shop_id);
+  };
+
+  var renderNoData = function() {
+
+  };
+
+  var renderQueryProgress = function(data) {
+
   };
 
   var loadShopName = function(shop_id) {
@@ -45,6 +53,8 @@ var perSellerStats = (function() {
 
 
   return {
-    renderLayout: renderLayout
+    render: render,
+    renderNoData: renderNoData,
+    renderQueryProgress: renderQueryProgress
   }
-})();
+};
