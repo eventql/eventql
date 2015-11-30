@@ -1,8 +1,8 @@
-var SellerSparklineOverview = (function() {
+var PerSellerKeyMetricsSparkline = (function() {
   var render = function(elem, result) {
     var tpl = $.getTemplate(
-      "views/seller",
-      "per_seller_sparkline_overview_tpl");
+        "apps/dawanda_seller_analytics",
+        "per_seller_key_metrics_sparkline_main_tpl");
 
     $.replaceContent(elem, tpl);
 
