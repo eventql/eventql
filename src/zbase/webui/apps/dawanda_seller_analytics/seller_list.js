@@ -40,7 +40,8 @@ ZBase.registerView((function() {
       result = JSON.parse(e.data).results[0];
       hideLoader();
       renderTable($(".zbase_seller_overview table.overview"), result, path);
-      setPagination(result);
+      setPaginationFor(result.rows.length);
+      setPaginationBack();
 
       var until = Date.now();
       $(".zbase_seller_overview .time_range").innerHTML =
@@ -94,13 +95,10 @@ ZBase.registerView((function() {
       "sum(listview_views_recos) listview_views_recos, " +
       "sum(listview_clicks_recos) listview_clicks_recos, " +
       "sum(listview_ctr_recos) / count(1) listview_ctr_recos " +
-      "from shop_stats.last30d where ";
-
-    query_str +=
+      "from shop_stats.last30d where " +
       order.order_by + " > 0 group by shop_id order by " + order.order_by +
       " " + order.order_fn + " limit 20 offset " + offset + ";";
 
-    console.log(query_str);
     return query_str;
   };
 
@@ -172,22 +170,31 @@ ZBase.registerView((function() {
         UrlUtil.getParamValue(path, "order_fn"));
   };
 
-  var setPagination = function(result) {
+  var setPaginationFor = function(num_results) {
     var params = getQueryParams();
-    params.offset = parseInt(params.offset, 10);
     params.limit = parseInt(params.limit, 10);
 
-    //backward
-    if (params.offset > 0) {
-      params.offset = params.offset - params.limit;
+    if (num_results < params.limit) {
+      $(".zbase_seller_stats .pager .for").classList.add("disabled");
+      return;
     }
-    $(".zbase_seller_stats .pager .back").href =
-        path_prefix + "?" + $.buildQueryString(params);
 
-
-    //forward
-    params.offset = params.offset + params.limit;
+    params.offset = parseInt(params.offset, 10) + params.limit;
     $(".zbase_seller_stats .pager .for").href =
+        path_prefix + "?" + $.buildQueryString(params);
+  };
+
+  var setPaginationBack = function() {
+    var params = getQueryParams();
+    params.offset = parseInt(params.offset, 10);
+
+    if (params.offset <= 0) {
+      $(".zbase_seller_stats .pager .back").classList.add("disabled");
+      return;
+    }
+
+    params.offset = params.offset - parseInt(params.limit, 10);
+    $(".zbase_seller_stats .pager .back").href =
         path_prefix + "?" + $.buildQueryString(params);
   };
 
