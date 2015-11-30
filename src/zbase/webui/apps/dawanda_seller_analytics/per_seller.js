@@ -26,8 +26,10 @@ var perSellerLayout = function(query_mgr, path_prefix, shop_id) {
 
   };
 
-  var renderQueryProgress = function(data) {
-
+  var renderQueryProgress = function(progress) {
+    QueryProgressWidget.render(
+        $(".zbase_seller_stats.per_seller .result_pane"),
+        progress);
   };
 
   var loadShopName = function(shop_id) {
