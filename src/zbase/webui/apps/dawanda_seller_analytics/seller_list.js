@@ -14,7 +14,7 @@ ZBase.registerView((function() {
     $.onClick($("z-checkbox.premium", page), paramChanged);
     $("z-dropdown.metrics", page).addEventListener("change", function() {
       renderTable($(".zbase_seller_overview table.overview"), result, path);
-      $.pushHistoryState(path_prefix + "?" + $.buildQueryString(getQueryString()));
+      $.pushHistoryState(path_prefix + "?" + $.buildQueryString(getQueryParams()));
     });
     $("z-search.seller", page).addEventListener("z-search-submit", function(e) {
       $.navigateTo(path_prefix + "/" + e.detail.value);
@@ -167,17 +167,23 @@ ZBase.registerView((function() {
   };
 
   var setPagination = function(result) {
-    var order = getParamsOrder();
+    var params = getQueryParams();
 
     var i = 0;
     for (; i < result.columns.length; i++) {
-      if (result.columns[i] == order.order_by) {
+      if (result.columns[i] == params.order_by) {
         break;
       }
     }
 
-    console.log(result.rows[0][i]);
-    console.log(result.rows[result.rows.length - 1][i]);
+    params.theshold = result.rows[0][i];
+    $(".zbase_seller_stats .pager .back").href =
+        path_prefix + "?" + $.buildQueryString(params);
+
+    params.threshold = result.rows[result.rows.length - 1][i]
+    $(".zbase_seller_stats .pager .for").href =
+        path_prefix + "?" + $.buildQueryString(params);
+
   };
 
   var setParamPremiumSeller = function(value) {
@@ -217,7 +223,7 @@ ZBase.registerView((function() {
     };
   }
 
-  var getQueryString = function() {
+  var getQueryParams = function() {
     var params = getParamsOrder();
     params.metrics = $(".zbase_seller_stats z-dropdown.metrics").getValue();
     params.premium = $(".zbase_seller_stats z-checkbox.premium").hasAttribute(
@@ -227,7 +233,7 @@ ZBase.registerView((function() {
   };
 
   var paramChanged = function() {
-    $.navigateTo(path_prefix + "?" + $.buildQueryString(getQueryString()));
+    $.navigateTo(path_prefix + "?" + $.buildQueryString(getQueryParams()));
   };
 
   var orderByParamChanged = function(order_by, order_fn) {
