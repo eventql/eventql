@@ -112,11 +112,7 @@
 
 .zbase_seller_stats.per_seller .metric_group table td {
   vertical-align: top;
-  padding: 18px 18px 30px 18px;
-  border-bottom: 1px solid #e1e1e1;
-}
-
-.zbase_seller_stats.per_seller .metric_group table tr:first-child td {
+  padding: 18px 18px 32px 18px;
   border-top: 1px solid #e1e1e1;
 }
 
