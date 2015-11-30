@@ -29,8 +29,40 @@ ZBase.registerView((function() {
         UrlUtil.getParamValue(path, "order_by"),
         UrlUtil.getParamValue(path, "order_fn"));
 
-    var order = getParamsOrder();
+    query_mgr = EventSourceHandler();
+    var query = query_mgr.get(
+      "sql_query",
+      "/api/v1/sql?format=json_sse&query=" + encodeURIComponent(getSQLQuery()));
 
+    query.addEventListener("result", function(e) {
+      query_mgr.close("sql_query");
+      result = JSON.parse(e.data).results[0];
+      hideLoader();
+      renderTable($(".zbase_seller_overview table.overview"), result, path);
+      setPagination(result);
+
+      var until = Date.now();
+      $(".zbase_seller_overview .time_range").innerHTML =
+         DateUtil.printDate(until - DateUtil.millisPerDay) + "-" +
+         DateUtil.printDate(until);
+    });
+
+    query.addEventListener("error", function(e) {
+      query_mgr.close("sql_query");
+      $.fatalError();
+    }, false);
+
+    query.addEventListener("status", function(e) {
+      renderQueryProgress(JSON.parse(e.data));
+    }, false);
+  };
+
+  var destroy = function() {
+    query_mgr.closeAll();
+  };
+
+  var getSQLQuery = function() {
+    var order = getParamsOrder();
     var query_str =
       "select count(1) as days, shop_id, " +
       "sum(num_active_products) num_active_products, " +
@@ -63,35 +95,7 @@ ZBase.registerView((function() {
       "where gmv_eurcent > 0 group by shop_id order by " + order.order_by +
       " " + order.order_fn + " limit 20;";
 
-    query_mgr = EventSourceHandler();
-    var query = query_mgr.get(
-      "sql_query",
-      "/api/v1/sql?format=json_sse&query=" + encodeURIComponent(query_str));
-
-    query.addEventListener("result", function(e) {
-      query_mgr.close("sql_query");
-      result = JSON.parse(e.data).results[0];
-      hideLoader();
-      renderTable($(".zbase_seller_overview table.overview"), result, path);
-
-      var until = Date.now();
-      $(".zbase_seller_overview .time_range").innerHTML =
-         DateUtil.printDate(until - DateUtil.millisPerDay) + "-" +
-         DateUtil.printDate(until);
-    });
-
-    query.addEventListener("error", function(e) {
-      query_mgr.close("sql_query");
-      $.fatalError();
-    }, false);
-
-    query.addEventListener("status", function(e) {
-      renderQueryProgress(JSON.parse(e.data));
-    }, false);
-  };
-
-  var destroy = function() {
-    query_mgr.closeAll();
+    return query_str;
   };
 
   var renderQueryProgress = function(progress) {
@@ -160,6 +164,20 @@ ZBase.registerView((function() {
     setParamsOrder(
         UrlUtil.getParamValue(path, "order_by"),
         UrlUtil.getParamValue(path, "order_fn"));
+  };
+
+  var setPagination = function(result) {
+    var order = getParamsOrder();
+
+    var i = 0;
+    for (; i < result.columns.length; i++) {
+      if (result.columns[i] == order.order_by) {
+        break;
+      }
+    }
+
+    console.log(result.rows[0][i]);
+    console.log(result.rows[result.rows.length - 1][i]);
   };
 
   var setParamPremiumSeller = function(value) {
