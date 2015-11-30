@@ -1,5 +1,5 @@
 .zbase_seller_stats.per_seller z-tabbable.slim_tabs {
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .zbase_seller_stats.per_seller z-tabbable.slim_tabs z-tab[data-active] a {
@@ -39,8 +39,9 @@
 }
 
 .zbase_seller_stats.per_seller .metric_group .metric_pane.fullwidth p {
-  width: 23.5%;
+  width: 26%;
   min-width: 200px;
+  margin: 0;
 }
 
 .zbase_seller_stats.per_seller .metric_pane.fullwidth .values {
@@ -58,17 +59,19 @@
 
 .zbase_seller_stats.per_seller .metric_pane.fullwidth .num {
   display: table-cell;
-  font-size: 28px;
-  width: 23.5%;
+  width: 26%;
   min-width: 200px;
-  margin-top: 30px;
+  vertical-align: bottom;
+  padding-bottom: 20px;
+  font-size: 29px;
 }
 
 .zbase_seller_stats.per_seller .metric_pane.fullwidth h2 {
   font-size: 16px;
   line-height: 20px;
   font-weight: 400;
-  margin-top: 30px;
+  margin-top: 25px;
+  margin-bottom: 4px;
   color: #333;
 }
 
@@ -139,7 +142,7 @@
 
 .zbase_seller_stats.per_seller .metric_group table td .metric_pane .num {
   font-size: 22px;
-  line-height: 40px;
+  line-height: 33px;
   float: right;
 }
 
