@@ -25,12 +25,10 @@ ZBase.registerView((function() {
 
     setParamPremiumSeller(UrlUtil.getParamValue(path, "premium"));
     setParamMetrics(UrlUtil.getParamValue(path, "metrics"));
+    setParamOffset(UrlUtil.getParamValue(path, "offset"));
     setParamsOrder(
         UrlUtil.getParamValue(path, "order_by"),
         UrlUtil.getParamValue(path, "order_fn"));
-    setParamsPager(
-        UrlUtil.getParamValue(path, "direction"),
-        UrlUtil.getParamValue(path, "threshold"));
 
     query_mgr = EventSourceHandler();
     var query = query_mgr.get(
@@ -66,8 +64,7 @@ ZBase.registerView((function() {
 
   var getSQLQuery = function() {
     var order = getParamsOrder();
-    var pager = getParamsPager();
-    console.log(pager);
+    var offset = getParamOffset();
 
     var query_str =
       "select count(1) as days, shop_id, " +
@@ -97,10 +94,13 @@ ZBase.registerView((function() {
       "sum(listview_views_recos) listview_views_recos, " +
       "sum(listview_clicks_recos) listview_clicks_recos, " +
       "sum(listview_ctr_recos) / count(1) listview_ctr_recos " +
-      "from shop_stats.last30d " +
-      "where gmv_eurcent > 0 group by shop_id order by " + order.order_by +
-      " " + order.order_fn + " limit 20;";
+      "from shop_stats.last30d where ";
 
+    query_str +=
+      order.order_by + " > 0 group by shop_id order by " + order.order_by +
+      " " + order.order_fn + " limit 20 offset " + offset + ";";
+
+    console.log(query_str);
     return query_str;
   };
 
@@ -174,21 +174,19 @@ ZBase.registerView((function() {
 
   var setPagination = function(result) {
     var params = getQueryParams();
+    params.offset = parseInt(params.offset, 10);
+    params.limit = parseInt(params.limit, 10);
 
-    var i = 0;
-    for (; i < result.columns.length; i++) {
-      if (result.columns[i] == params.order_by) {
-        break;
-      }
+    //backward
+    if (params.offset > 0) {
+      params.offset = params.offset - params.limit;
     }
-
-    params.theshold = result.rows[0][i];
-    params.direction = "back";
     $(".zbase_seller_stats .pager .back").href =
         path_prefix + "?" + $.buildQueryString(params);
 
-    params.direction = "for";
-    params.threshold = result.rows[result.rows.length - 1][i]
+
+    //forward
+    params.offset = params.offset + params.limit;
     $(".zbase_seller_stats .pager .for").href =
         path_prefix + "?" + $.buildQueryString(params);
   };
@@ -221,12 +219,12 @@ ZBase.registerView((function() {
     }
   };
 
-  var setParamsPager = function(direction, threshold) {
-    if (direction && threshold) {
-      var pager = $(".zbase_seller_stats .pager");
-      pager.setAttribute("data-direction", direction);
-      pager.setAttribute("data-threshold", threshold);
+  var setParamOffset = function(offset) {
+    if (!offset) {
+      offset = 0;
     }
+
+    $(".zbase_seller_stats .pager").setAttribute("data-offset", offset);
   };
 
   var getParamsOrder = function() {
@@ -238,25 +236,18 @@ ZBase.registerView((function() {
     };
   };
 
-  var getParamsPager = function() {
-    var params = {};
-    var pager = $(".zbase_seller_stats .pager");
-    if (pager.hasAttribute("data-direction")) {
-      params.direction = pager.getAttribute("data-direction");
-    }
-
-    if (pager.hasAttribute("data-threshold")) {
-      params.threshold = pager.getAttribute("data-threshold");
-    }
-
-    return params;
+  var getParamOffset = function() {
+    return parseInt(
+        $(".zbase_seller_stats .pager").getAttribute("data-offset"), 10);
   };
 
   var getQueryParams = function() {
     var params = getParamsOrder();
+    params.offset = getParamOffset();
     params.metrics = $(".zbase_seller_stats z-dropdown.metrics").getValue();
     params.premium = $(".zbase_seller_stats z-checkbox.premium").hasAttribute(
           "data-active");
+    params.limit = "20";
 
     return params;
   };
@@ -267,6 +258,7 @@ ZBase.registerView((function() {
 
   var orderByParamChanged = function(order_by, order_fn) {
     setParamsOrder(order_by, order_fn);
+    setParamOffset(0);
     paramChanged();
   };
 
