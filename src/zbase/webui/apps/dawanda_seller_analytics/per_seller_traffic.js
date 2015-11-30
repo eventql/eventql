@@ -93,8 +93,39 @@ ZBase.registerView((function() {
         "apps/dawanda_seller_analytics",
         "per_seller_traffic_main_tpl");
 
-
     $.replaceContent($(".zbase_seller_stats.per_seller .result_pane"), tpl);
+
+    var start = DateUtil.printDate(Math.round(
+        result.timeseries.time[0] / 1000));
+    var end = DateUtil.printDate(Math.round(
+        result.timeseries.time[result.timeseries.time.length - 1] / 1000));
+
+    for (var metric in result.timeseries) {
+      var pane = $(
+          ".zbase_seller_stats.per_seller .traffic .metric_pane." + metric);
+
+      if (pane) {
+        var z_chart = $("z-chart", pane);
+        z_chart.render(
+            result.timeseries.time,
+            result.timeseries[metric]
+              .map(function(v) {
+                return parseFloat(v);
+              }));
+
+        z_chart.formatX = function(value) {
+          return ZBaseSellerMetrics.time.print(value);
+        };
+
+        z_chart.formatY = formatY(metric);
+
+        $(".num", pane).innerHTML = result.aggregates[metric];
+        $(".start", pane).innerHTML = start;
+        $(".end", pane).innerHTML = end;
+
+        //$(".zbase_seller_stats z-tooltip." + metric).init($(".help", pane))
+      }
+    }
   };
 
   var aggregate = function(timeseries) {
@@ -111,6 +142,14 @@ ZBase.registerView((function() {
 
     return aggregates;
   };
+
+  var formatY = function(metric) {
+    return function(value) {
+      return ZBaseSellerMetrics[metric].print(value);
+    }
+  };
+
+
 
   return {
     name: "per_seller_traffic",
