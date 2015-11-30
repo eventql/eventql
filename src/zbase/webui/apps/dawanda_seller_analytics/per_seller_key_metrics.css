@@ -63,7 +63,7 @@
   border-top: none;
 }
 
-.zbase_seller_stats.per_seller .key_metrics ..metric_pane h2.pagetitle {
+.zbase_seller_stats.per_seller .key_metrics .metric_pane h2.pagetitle {
   font-size: 16px;
   float: left;
   line-height: 40px;
