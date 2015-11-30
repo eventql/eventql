@@ -69,6 +69,13 @@ AnalyticsApp::AnalyticsApp(
         partition_map,
         replication_scheme,
         js_runtime,
+        cachedir),
+    metric_service_(
+        cdb,
+        auth,
+        tsdb_node,
+        partition_map,
+        replication_scheme,
         cachedir) {
   cdb_->onCustomerConfigChange(
       std::bind(
@@ -202,6 +209,10 @@ EventsService* AnalyticsApp::eventsService() {
 
 MapReduceService* AnalyticsApp::mapreduceService() {
   return &mapreduce_service_;
+}
+
+MetricService* AnalyticsApp::metricService() {
+  return &metric_service_;
 }
 
 } // namespace zbase
