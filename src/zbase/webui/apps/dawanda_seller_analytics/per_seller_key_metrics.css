@@ -69,17 +69,6 @@
   line-height: 40px;
 }
 
-.zbase_seller_stats.per_seller .key_metrics i.help {
-  font-size: 13px;
-  color: #888;
-  margin-left: 3px
-}
-
-.zbase_seller_stats.per_seller .key_metrics i.help:hover {
-  cursor: pointer;
-  color: #3498db;
-}
-
 .zbase_seller_stats.per_seller .key_metrics .metric_pane z-sparkline {
   display: block;
 }
@@ -220,28 +209,6 @@
 .zbase_seller_stats.per_seller .key_metrics table th.hidden,
 .zbase_seller_stats.per_seller .key_metrics table td.hidden {
   display: none;
-}
-
-.zbase_seller_stats.per_seller .key_metrics table {
-  font-size: 13px;
-}
-
-.zbase_seller_stats.per_seller .key_metrics table.z-table th {
-  background: #f9f9f9;
-}
-
-.zbase_seller_stats.per_seller .key_metrics .per_seller_table table.z-table td {
-  background: #fff;
-  text-align: right;
-}
-
-.zbase_seller_stats.per_seller .key_metrics .per_seller_table table.z-table td.align_left {
-  text-align: left;
-}
-
-.zbase_seller_stats.per_seller .key_metrics .per_seller_table table.z-table tr:first-child td {
-  background: #f9f9f9;
-  font-weight: 500;
 }
 
 .zbase_seller_stats.per_seller .key_metrics .message {
