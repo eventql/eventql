@@ -187,3 +187,35 @@
   font-size: 12px;
 }
 
+.zbase_seller_stats.per_seller table.metric_table {
+  font-size: 13px;
+}
+
+.zbase_seller_stats.per_seller table.z-table.metric_table th {
+  background: #f9f9f9;
+}
+
+.zbase_seller_stats.per_seller table.z-tabl.metric_tablee td {
+  background: #fff;
+  text-align: right;
+}
+
+.zbase_seller_stats.per_seller table.z-table.metric_table td.align_left {
+  text-align: left;
+}
+
+.zbase_seller_stats.per_seller table.z-table.metric_table tr:first-child td {
+  background: #f9f9f9;
+  font-weight: 500;
+}
+
+.zbase_seller_stats.per_seller i.help {
+  font-size: 13px;
+  color: #888;
+  margin-left: 3px
+}
+
+.zbase_seller_stats.per_seller i.help:hover {
+  cursor: pointer;
+  color: #3498db;
+}
