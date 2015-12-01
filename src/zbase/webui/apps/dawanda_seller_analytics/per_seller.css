@@ -65,6 +65,17 @@
   font-size: 30px;
 }
 
+.zbase_seller_stats.per_seller .metric_group.text_chart .metric_pane.fullwidth .num h3 {
+  font-size: 12px;
+  margin-top: 30px;
+  font-weight: 500;
+  color: #333;
+}
+
+.zbase_seller_stats.per_seller .metric_group.text_chart .metric_pane.fullwidth .num h3:first-child {
+  margin-top: 0;
+}
+
 .zbase_seller_stats.per_seller .metric_group.text_chart .metric_pane.fullwidth h2 {
   font-size: 16px;
   line-height: 20px;

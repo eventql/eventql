@@ -3,6 +3,32 @@
 
     <div class="metric_group text_chart">
 
+      <div class="metric_pane fullwidth stacked gmv_eurcent refunded_gmv_eurcent">
+        <div class="description">
+          <h2>Gross Merchandise Value</h2>
+          <p>Total and refunded gross merchandise value</p>
+        </div>
+
+
+        <div class="values">
+          <div class="num">
+            <h3>Total GMV</h3>
+            <span class="gmv_eurcent"></span>
+
+            <h3>Refunded GMV</h3>
+            <span class="refunded_gmv_eurcent"></span>
+          </div>
+
+          <div class="chart">
+            <z-chart width='100%' height='50'></z-chart>
+            <div class="time_line">
+              <span class="start"></span>
+              <span class="end"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="metric_pane fullwidth gmv_per_transaction_eurcent">
         <div class="description">
           <h2>GMV per Transaction</h2>
