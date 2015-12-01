@@ -10,36 +10,30 @@
 */
 
 var ZChartComponent = function() {
+  // renders line chart
   this.render = function(x_values, y_values) {
-    var y = {};
-    y.values = y_values;
+    var data = {
+      x: x_values,
+      y: [{
+          values: y_values,
+          min: (this.hasAttribute('data-min')) ?
+            parseFloat(this.getAttribute('data-min')) : 0.0,
+          max: (this.hasAttribute('data-max')) ?
+            parseFloat(this.getAttribute('data-max')) : Math.max.apply(null, y_values)
+      }]
+    };
 
-    y.min = (this.hasAttribute('data-min')) ?
-      parseFloat(this.getAttribute('data-min')) : 0.0;
-    y.max = (this.hasAttribute('data-max')) ?
-      parseFloat(this.getattribute('data-max')) : Math.max.apply(null, y_values);
-
-    this.renderChart(y, x_values);
+    this.renderChart(data);
   };
 
-  this.renderChart = function(y, x_values) {
+  //render multiple lines
+  this.renderLines = function(values) {
+    console.log(values);
+  };
+
+  this.renderChart = function(data) {
     var height = this.getDimension('height');
     var width = this.getDimension("width");
-    var padding_x = 8;
-    var padding_y = 8;
-
-    var points = this.scaleValues(y);
-
-    var svg_line = [];
-    var svg_circles = [];
-    for (var i = 0; i < points.length; ++i) {
-      if (!isNaN(points[i].y)) {
-        var dx = padding_x + (points[i].x * (width - padding_x * 2));
-        var dy = padding_y + ((1.0 - points[i].y) * (height - padding_y * 2));
-        svg_line.push(i == 0 ? "M" : "L", dx, dy);
-        svg_circles.push([dx, dy]);
-      }
-    }
 
     var tpl = $.getTemplate(
         "widgets/z-chart",
@@ -52,10 +46,34 @@ var ZChartComponent = function() {
     svg.style.height = height + "px";
     svg.style.width = width + "px";
 
-    var path = this.querySelector("path");
+    for (var i = 0; i < data.y.length; i++) {
+      this.renderLine(height, width, data.x, data.y[i]);
+    }
+  };
+
+  this.renderLine = function(height, width, data_x, data_y) {
+    var points = this.scaleValues(data_y);
+    var svg = this.querySelector("svg");
+    var padding_x = 8;
+    var padding_y = 8;
+
+    var svg_line = [];
+    var svg_circles = [];
+    for (var i = 0; i < points.length; ++i) {
+      if (!isNaN(points[i].y)) {
+        var dx = padding_x + (points[i].x * (width - padding_x * 2));
+        var dy = padding_y + ((1.0 - points[i].y) * (height - padding_y * 2));
+        svg_line.push(i == 0 ? "M" : "L", dx, dy);
+        svg_circles.push([dx, dy]);
+      }
+    }
+
+    //var path = this.querySelector("path");
+    var path = document.createElement("path");
+    svg.appendChild(path);
     path.setAttribute("d", svg_line.join(" "));
 
-    var rect_width = width / (x_values.length - 1);
+    var rect_width = width / (data_x.length - 1);
     var x = (rect_width / 2) * -1;
 
     for (var i = 0; i < svg_circles.length; i++) {
@@ -68,9 +86,12 @@ var ZChartComponent = function() {
 
     var groups = svg.querySelectorAll("g");
     for (var i = 0; i < groups.length; i++) {
-      this.setupTooltip(groups[i], x_values[i], y.values[i]);
+      this.setupTooltip(groups[i], data_x[i], data_y.values[i]);
     }
-  };
+  }
+
+
+
 
   this.setupTooltip = function(html, x_value, y_value) {
     var tooltip = this.querySelector("z-chart-tooltip");
