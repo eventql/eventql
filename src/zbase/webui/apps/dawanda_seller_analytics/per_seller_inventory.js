@@ -13,6 +13,11 @@ ZBase.registerView((function() {
     var query_str =
       "select" +
           " time," +
+          " gmv_eurcent," +
+          " gmv_per_transaction_eurcent," +
+          " num_purchases," +
+          " product_page_views," +
+          " listview_views_search_page + listview_views_shop_page + listview_views_catalog_page + listview_views_ads + listview_views_recos as total_listviews," +
           " num_listed_products," +
           " num_purchases / product_page_views as buy_to_detail_rate" +
       " from shop_stats.last30d where shop_id = " + $.escapeHTML(shop_id)
@@ -75,8 +80,46 @@ ZBase.registerView((function() {
         "apps/dawanda_seller_analytics",
         "per_seller_inventory_main_tpl");
 
+    //render table
+    var tbody = $("tbody", tpl);
+    var tr_tpl = $.getTemplate(
+        "apps/dawanda_seller_analytics",
+        "per_seller_inventory_row_tpl");
+
+    var aggr_tr = tr_tpl.cloneNode(true);
+    for (var metric in result.aggregates) {
+      //init help bubble
+      var th = $("th." + metric, tpl);
+      if (th) {
+        $("z-tooltip." + metric, tpl).init($(".help", th));
+      }
+
+      //render aggregate field
+      var td = $("td." + metric, aggr_tr);
+      if (td) {
+        td.innerHTML = result.aggregates[metric];
+      }
+    }
+    $(".time", aggr_tr).innerHTML = "Total";
+    tbody.appendChild(aggr_tr);
+
+    for (var i = 0; i < result.timeseries.time.length; i++) {
+      var tr = tr_tpl.cloneNode(true);
+
+      for (var metric in result.timeseries) {
+        var td = $("td." + metric, tr);
+        if (td) {
+          td.innerHTML = ZBaseSellerMetrics[metric].print(
+            result.timeseries[metric][i]);
+        }
+      }
+
+      tbody.appendChild(tr);
+    }
+
     $.replaceContent($(".zbase_seller_stats.per_seller .result_pane"), tpl);
 
+    //render metric panes
     var start = DateUtil.printDate(Math.round(
         result.timeseries.time[0] / 1000));
     var end = DateUtil.printDate(Math.round(
