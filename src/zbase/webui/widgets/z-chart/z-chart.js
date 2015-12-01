@@ -74,16 +74,20 @@ var ZChartComponent = function() {
       }
     }
 
-    //var path = this.querySelector("path");
+    var color = data_y.color ? data_y.color : "rgba(0, 0, 0, 0.8)";
+
     var path = document.createElement("path");
     svg.appendChild(path);
     path.setAttribute("d", svg_line.join(" "));
+    path.style.stroke = color;
+
 
     var rect_width = width / (data_x.length - 1);
     var x = (rect_width / 2) * -1;
 
     for (var i = 0; i < svg_circles.length; i++) {
-      svg.innerHTML += "<g><circle cx='" + svg_circles[i][0] + "' cy='" +
+      svg.innerHTML += "<g><circle style='fill: " + color
+          + "; stroke:" + color + ";' cx='" + svg_circles[i][0] + "' cy='" +
           svg_circles[i][1] + "' r='2.5' />" +
           "<rect width='" + rect_width  + "' height='" + height +
           "' y='0' x='" + x + "' /></g>";
