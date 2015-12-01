@@ -3,7 +3,7 @@
 
     <div class="metric_group text_chart">
 
-      <div class="metric_pane fullwidth stacked gmv_eurcent refunded_gmv_eurcent">
+      <div class="metric_pane fullwidth stacked" data-metric="gmv_eurcent,refunded_gmv_eurcent">
         <div class="description">
           <h2>Gross Merchandise Value</h2>
           <p>Total and refunded gross merchandise value</p>
@@ -29,7 +29,33 @@
         </div>
       </div>
 
-      <div class="metric_pane fullwidth gmv_per_transaction_eurcent">
+      <div class="metric_pane fullwidth stacked" data-metric="num_purchases,num_refunds">
+        <div class="description">
+          <h2>Purchases & Refunds</h2>
+          <p>Number of purchases and number of refunds</p>
+        </div>
+
+
+        <div class="values">
+          <div class="num">
+            <h3>Number of Purchases</h3>
+            <span class="num_purchases"></span>
+
+            <h3>Number of Refunds</h3>
+            <span class="num_refunds"></span>
+          </div>
+
+          <div class="chart">
+            <z-chart width='100%' height='50'></z-chart>
+            <div class="time_line">
+              <span class="start"></span>
+              <span class="end"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="metric_pane fullwidth line" data-metric="gmv_per_transaction_eurcent">
         <div class="description">
           <h2>GMV per Transaction</h2>
           <p>Average transaction/basket size</p>
@@ -48,7 +74,7 @@
         </div>
       </div>
 
-      <div class="metric_pane fullwidth refund_rate">
+      <div class="metric_pane fullwidth line" data-metric="refund_rate">
         <div class="description">
           <h2>Refund Rate</h2>
           <p>What percentage of transactions gets refunded?</p>
