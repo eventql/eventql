@@ -16,6 +16,7 @@ var ZChartComponent = function() {
       x: x_values,
       y: [{
           values: y_values,
+          name: "data1",
           min: (this.hasAttribute('data-min')) ?
             parseFloat(this.getAttribute('data-min')) : 0.0,
           max: (this.hasAttribute('data-max')) ?
@@ -86,29 +87,34 @@ var ZChartComponent = function() {
     var x = (rect_width / 2) * -1;
 
     for (var i = 0; i < svg_circles.length; i++) {
-      svg.innerHTML += "<g><circle style='fill: " + color
+      svg.innerHTML += "<g class='" + data_y.name + "'><circle style='fill: " + color
           + "; stroke:" + color + ";' cx='" + svg_circles[i][0] + "' cy='" +
-          svg_circles[i][1] + "' r='2.5' />" +
+          svg_circles[i][1] + "' r='2.5' ></circle>" +
           "<rect width='" + rect_width  + "' height='" + height +
-          "' y='0' x='" + x + "' /></g>";
+          "' y='0' x='" + x + "' ></rect></g>";
       x += rect_width;
     }
 
-    var groups = svg.querySelectorAll("g");
+    var groups = svg.querySelectorAll("g." + data_y.name);
     for (var i = 0; i < groups.length; i++) {
-      this.setupTooltip(groups[i], data_x[i], data_y.values[i]);
+      this.setupTooltip(
+          groups[i], {
+            x: data_x[i],
+            y: {
+              value: data_y.values[i],
+              name: data_y.name
+            }
+          });
     }
   }
 
-
-
-
-  this.setupTooltip = function(html, x_value, y_value) {
+  this.setupTooltip = function(html, data) {
+    console.log(data);
     var tooltip = this.querySelector("z-chart-tooltip");
     var rect = html.querySelector("rect");
     var _this = this;
     rect.addEventListener("mouseenter", function(e) {
-      tooltip.innerHTML = _this.formatX(x_value) + ": " + _this.formatY(y_value);
+      tooltip.innerHTML = _this.formatX(data.x) + ": " + _this.formatY(data.y.value, data.y.name);
       tooltip.classList.remove("hidden");
 
       var pos = html.querySelector("circle").getBoundingClientRect();
