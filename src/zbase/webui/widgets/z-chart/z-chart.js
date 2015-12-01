@@ -109,7 +109,6 @@ var ZChartComponent = function() {
   }
 
   this.setupTooltip = function(html, data) {
-    console.log(data);
     var tooltip = this.querySelector("z-chart-tooltip");
     var rect = html.querySelector("rect");
     var _this = this;
