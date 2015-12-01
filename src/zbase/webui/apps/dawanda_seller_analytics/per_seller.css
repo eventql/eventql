@@ -54,6 +54,7 @@
 .zbase_seller_stats.per_seller .metric_group.text_chart .metric_pane.fullwidth .chart {
   display: table-cell;
   padding: 0 35px 0 4%;
+  vertical-align: bottom;
 }
 
 .zbase_seller_stats.per_seller .metric_group.text_chart .metric_pane.fullwidth .num {
