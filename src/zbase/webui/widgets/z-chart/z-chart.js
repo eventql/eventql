@@ -75,7 +75,7 @@ var ZChartComponent = function() {
       }
     }
 
-    var color = data_y.color ? data_y.color : "rgba(0, 0, 0, 0.8)";
+    var color = data_y.color ? data_y.color : "";
 
     var path = document.createElement("path");
     svg.appendChild(path);
