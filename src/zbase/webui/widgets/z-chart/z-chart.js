@@ -28,7 +28,7 @@ var ZChartComponent = function() {
 
   //render multiple lines
   this.renderLines = function(values) {
-    console.log(values);
+    this.renderChart(values);
   };
 
   this.renderChart = function(data) {
@@ -47,6 +47,12 @@ var ZChartComponent = function() {
     svg.style.width = width + "px";
 
     for (var i = 0; i < data.y.length; i++) {
+      if (!data.y[i].min) {
+        data.y[i].min = 0;
+      }
+      if (!data.y[i].max) {
+        data.y[i].max = Math.max.apply(null, data.y[i].values);
+      }
       this.renderLine(height, width, data.x, data.y[i]);
     }
   };
