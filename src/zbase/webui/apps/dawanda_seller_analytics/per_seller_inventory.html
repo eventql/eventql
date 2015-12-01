@@ -1,0 +1,46 @@
+<template id="per_seller_inventory_main_tpl">
+  <div class="inventory">
+
+    <div class="metric_group text_chart">
+
+      <div class="metric_pane fullwidth first num_listed_products">
+        <div class="description">
+          <h2>Number of Listed Products</h2>
+          <p>How many active/listed products has this shop?</p>
+        </div>
+
+
+        <div class="values">
+          <div class="num"></div>
+          <div class="chart">
+            <z-chart width='100%' height='50'></z-chart>
+            <div class="time_line">
+              <span class="start"></span>
+              <span class="end"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="metric_pane fullwidth first buy_to_detail_rate">
+        <div class="description">
+          <h2>Buy to Detail Rate</h2>
+          <p>Rate at which users buy the product after viewing the detail page</p>
+        </div>
+
+
+        <div class="values">
+          <div class="num"></div>
+          <div class="chart">
+            <z-chart width='100%' height='50'></z-chart>
+            <div class="time_line">
+              <span class="start"></span>
+              <span class="end"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</template>
