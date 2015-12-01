@@ -87,33 +87,71 @@ ZBase.registerView((function() {
     var end = DateUtil.printDate(Math.round(
         result.timeseries.time[result.timeseries.time.length - 1] / 1000));
 
-    for (var metric in result.timeseries) {
-      var pane = $(
-          ".zbase_seller_stats.per_seller .revenue .metric_pane." + metric);
+    var container = $(".zbase_seller_stats.per_seller .revenue");
 
-      if (pane) {
-        var z_chart = $("z-chart", pane);
-        z_chart.render(
-            result.timeseries.time,
-            result.timeseries[metric]
-              .map(function(v) {
-                return parseFloat(v);
-              }));
+    //render panes multiple lines
+    var stacked_panes = container.querySelectorAll(".metric_pane.stacked");
+    for (var i = 0; i < stacked_panes.length; i++) {
+      var pane = stacked_panes[i];
+      var metrics = pane.getAttribute("data-metric").split(",");
+      var colors = ["#9cc9f3", "#f4bbca"];
+      var metric_values = [];
 
-        z_chart.formatX = function(value) {
-          return ZBaseSellerMetrics.time.print(value);
-        };
-
-        z_chart.formatY = formatY(metric);
-
-        $(".num", pane).innerHTML = result.aggregates[metric];
-        $(".start", pane).innerHTML = start;
-        $(".end", pane).innerHTML = end;
-
-        //$(".zbase_seller_stats z-tooltip." + metric).init($(".help", pane))
+      for (var j = 0; j < metrics.length; j++) {
+        metric_values.push({
+            name: metrics[j],
+            values: result.timeseries[metrics[j]].map(function(v) {
+              return parseFloat(v);
+            }),
+            color: colors[j]
+          });
       }
+
+      var z_chart = $("z-chart", pane);
+      z_chart.renderLines({
+          x: result.timeseries.time,
+          y: metric_values});
+
+      z_chart.formatX = function(value) {
+        return ZBaseSellerMetrics.time.print(value);
+      };
+
+      z_chart.formatY = function(value, metric) {
+        return ZBaseSellerMetrics[metric].print(value);
+      };
+
+      for (var j = 0; j < metrics.length; j++) {
+        $(".num ." + metrics[j], pane).innerHTML = result.aggregates[metrics[j]];
+      }
+
+      $(".start", pane).innerHTML = start;
+      $(".end", pane).innerHTML = end;
     }
 
+    //render panes with line chart
+    var line_panes = container.querySelectorAll(".metric_pane.line");
+    for (var i = 0; i < line_panes.length; i++) {
+      var pane = line_panes[i];
+      var metric = pane.getAttribute("data-metric");
+
+      var z_chart = $("z-chart", pane);
+      z_chart.render(
+          result.timeseries.time,
+          result.timeseries[metric]
+            .map(function(v) {
+              return parseFloat(v);
+            }));
+
+      z_chart.formatX = function(value) {
+        return ZBaseSellerMetrics.time.print(value);
+      };
+
+      z_chart.formatY = formatY(metric);
+
+      $(".num", pane).innerHTML = result.aggregates[metric];
+      $(".start", pane).innerHTML = start;
+      $(".end", pane).innerHTML = end;
+    }
   };
 
   var aggregate = function(timeseries) {
