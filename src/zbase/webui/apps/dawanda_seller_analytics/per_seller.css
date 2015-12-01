@@ -7,4 +7,183 @@
   font-weight: 600;
 }
 
+/* metric group text_chart */
+.zbase_seller_stats.per_seller .metric_group.text_chart {
+  margin-left: 10px;
+}
+
+.zbase_seller_stats.per_seller .metric_group.text_chart > h2 {
+  font-weight: 400;
+  line-height: 40px;
+  margin: 0;
+  padding: 0;
+  color: #333;
+  font-size: 20px;
+  margin-top: 35px;
+}
+
+.zbase_seller_stats.per_seller .metric_group.text_chart > p {
+  margin-bottom: 20px;
+}
+
+.zbase_seller_stats.per_seller .metric_group.text_chart p {
+  color: #888;
+  font-size: 13px;
+}
+
+/* metric pane fullwidth */
+.zbase_seller_stats.per_seller .metric_group.text_chart .metric_pane.fullwidth {
+  border-bottom: 1px solid #e1e1e1;
+  overflow: auto;
+}
+
+.zbase_seller_stats.per_seller .metric_group.text_chart .metric_group .metric_pane.fullwidth p {
+  width: 26%;
+  min-width: 200px;
+  margin: 0;
+}
+
+.zbase_seller_stats.per_seller .metric_group.text_chart .metric_pane.fullwidth .values {
+  margin-bottom: 29px;
+  display: table;
+  table-layout: fixed;
+  width: 100%;
+  overflow: hidden;
+}
+
+.zbase_seller_stats.per_seller .metric_group.text_chart .metric_pane.fullwidth .chart {
+  display: table-cell;
+  padding: 0 35px 0 4%;
+  vertical-align: bottom;
+}
+
+.zbase_seller_stats.per_seller .metric_group.text_chart .metric_pane.fullwidth .num {
+  display: table-cell;
+  width: 26%;
+  min-width: 200px;
+  vertical-align: bottom;
+  padding-bottom: 20px;
+  font-size: 30px;
+}
+
+.zbase_seller_stats.per_seller .metric_group.text_chart .metric_pane.fullwidth .num h3 {
+  font-size: 12px;
+  margin-top: 30px;
+  font-weight: 500;
+  color: #333;
+}
+
+.zbase_seller_stats.per_seller .metric_group.text_chart .metric_pane.fullwidth .num h3:first-child {
+  margin-top: 0;
+}
+
+.zbase_seller_stats.per_seller .metric_group.text_chart .metric_pane.fullwidth h2 {
+  font-size: 16px;
+  line-height: 20px;
+  font-weight: 400;
+  margin-top: 25px;
+  margin-bottom: 4px;
+  color: #333;
+}
+
+/* text_chart metric pane */
+
+.zbase_seller_stats.per_seller .metric_group.text_chart .metric_pane .time_line {
+  border-top: 1px solid #ddd;
+}
+
+.zbase_seller_stats.per_seller .metric_group.text_chart .metric_pane .time_line .start,
+.zbase_seller_stats.per_seller .metric_group.text_chart .metric_pane .time_line .end {
+  font-size: 12px;
+  color: #888;
+  margin-top: 2px;
+}
+
+.zbase_seller_stats.per_seller .metric_group.text_chart .metric_pane .time_line .start {
+  float: left;
+}
+
+.zbase_seller_stats.per_seller .metric_group.text_chart .metric_pane .time_line .end {
+  float: right;
+}
+
+.zbase_seller_stats.per_seller .metric_group.text_chart .metric_pane z-chart {
+  display: block;
+}
+
+.zbase_seller_stats.per_seller .metric_group.text_chart .metric_pane z-chart z-chart-tooltip {
+  font-size: 12px;
+}
+
+/* metric pane fullwidth */
+.zbase_seller_stats.per_seller .metric_group.text_chart .metric_pane.fullwidth {
+  border-bottom: 1px solid #e1e1e1;
+  overflow: auto;
+}
+
+.zbase_seller_stats.per_seller .metric_group.text_chart .metric_group .metric_pane.fullwidth p {
+  width: 26%;
+  min-width: 200px;
+  margin: 0;
+}
+
+.zbase_seller_stats.per_seller .metric_group.text_chart .metric_pane.fullwidth .values {
+  margin-bottom: 29px;
+  display: table;
+  table-layout: fixed;
+  width: 100%;
+  overflow: hidden;
+}
+
+.zbase_seller_stats.per_seller .metric_group.text_chart .metric_pane.fullwidth .chart {
+  display: table-cell;
+  padding: 0 35px 0 4%;
+}
+
+.zbase_seller_stats.per_seller .metric_group.text_chart .metric_pane.fullwidth .num {
+  display: table-cell;
+  width: 26%;
+  min-width: 200px;
+  vertical-align: bottom;
+  padding-bottom: 20px;
+  font-size: 30px;
+}
+
+.zbase_seller_stats.per_seller .metric_group.text_chart .metric_pane.fullwidth h2 {
+  font-size: 16px;
+  line-height: 20px;
+  font-weight: 400;
+  margin-top: 25px;
+  margin-bottom: 4px;
+  color: #333;
+}
+
+/* metric pane */
+
+.zbase_seller_stats.per_seller .metric_group.text_chart .metric_pane .time_line {
+  border-top: 1px solid #ddd;
+}
+
+.zbase_seller_stats.per_seller .metric_group.text_chart .metric_pane .time_line .start,
+.zbase_seller_stats.per_seller .metric_group.text_chart .metric_pane .time_line .end {
+  font-size: 12px;
+  color: #888;
+  margin-top: 2px;
+}
+
+.zbase_seller_stats.per_seller .metric_group.text_chart .metric_pane .time_line .start {
+  float: left;
+}
+
+.zbase_seller_stats.per_seller .metric_group.text_chart .metric_pane .time_line .end {
+  float: right;
+}
+
+.zbase_seller_stats.per_seller .metric_group.text_chart .metric_pane z-chart {
+  display: block;
+}
+
+.zbase_seller_stats.per_seller .metric_group.text_chart .metric_pane z-chart z-chart-tooltip {
+  font-size: 12px;
+}
 
