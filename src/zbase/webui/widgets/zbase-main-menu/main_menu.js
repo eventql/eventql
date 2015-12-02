@@ -31,6 +31,11 @@ var ZBaseMainMenu = (function() {
 
   var setActiveMenuItem = function(path) {
     var menu = document.getElementById("zbase_main_menu");
+    var current_active = $("a[data-active]", menu);
+    if (current_active) {
+      current_active.removeAttribute("data-active");
+    }
+
     var items = menu.querySelectorAll("a");
     var active_path_length = 0;
     var active_item;
