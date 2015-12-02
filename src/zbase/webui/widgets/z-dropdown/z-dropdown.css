@@ -525,3 +525,21 @@ z-dropdown.input .z-dropdown-header:hover {
   background: #21aaed;
 }
 
+.zbase_app z-dropdown.input.secondary z-dropdown-header {
+  font-size: 12px;
+  font-weight: 500;
+  background: #ffffff; /* Old browsers */
+  background: -moz-linear-gradient(top,  #ffffff 0%, #e5e5e5 100%); /* FF3.6-15 */
+  background: -webkit-linear-gradient(top,  #ffffff 0%,#e5e5e5 100%); /* Chrome10-25,Safari5.1-6 */
+  background: linear-gradient(to bottom,  #ffffff 0%,#e5e5e5 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#e5e5e5',GradientType=0 ); /* IE6-9 */
+  color: #697886;
+  box-shadow: 0px 0px 0px 1px rgba(39, 41, 43, 0.15) inset;
+  border: none;
+}
+
+.zbase_app z-dropdown.input.secondary:hover z-dropdown-header {
+  background: #f2f8fa;
+  box-shadow: 0px 0px 0px 1px rgba(39, 41, 43, 0.15) inset, 0px 0px 0px 0px rgba(39, 41, 43, 0.15) inset;
+  border: none;
+}
