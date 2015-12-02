@@ -1,0 +1,10 @@
+.zbase_seller_stats.per_seller z-tabbable.slim_tabs {
+  font-size: 14px;
+}
+
+.zbase_seller_stats.per_seller z-tabbable.slim_tabs z-tab[data-active] a {
+  color: rgba(0, 0, 0, 0.8);
+  font-weight: 600;
+}
+
+
