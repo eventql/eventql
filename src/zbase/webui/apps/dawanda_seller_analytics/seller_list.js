@@ -6,7 +6,7 @@ ZBase.registerView((function() {
     ZBaseMainMenu.show();
     HeaderWidget.setBreadCrumbs([
       {href: path_prefix, title: "Analytics"},
-      {href: path_prefix, title: "Sellers"}]);
+      {href: path_prefix, title: "Seller"}]);
 
     var result;
     var page = $.getTemplate(
