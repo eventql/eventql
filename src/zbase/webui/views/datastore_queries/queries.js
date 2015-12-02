@@ -29,6 +29,9 @@ ZBase.registerView((function() {
 
     $.showLoader();
     ZBaseMainMenu.show();
+    HeaderWidget.setBreadCrumbs([
+      {href: "/a/", title: "Datastore"},
+      {href: "/a/datastore/queries", title: "Queries"}]);
 
     $.httpGet("/api/v1/documents?" + $.buildQueryString(qparams), function(r) {
       if (r.status == 200) {
