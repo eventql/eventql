@@ -21,8 +21,10 @@ ZBase.registerView((function() {
   var loadQuery = function(path) {
     var query_id = path.substr(kPathPrefix.length);
 
-    ZBaseMainMenu.hide();
     $.showLoader();
+    ZBaseMainMenu.hide();
+
+
     $.httpGet("/api/v1/documents/" + query_id, function(r) {
       if (r.status == 200) {
         var doc = JSON.parse(r.response);
@@ -76,6 +78,12 @@ ZBase.registerView((function() {
           "/api/v1/documents/" + doc.uuid,
           $(".zbase_sql_editor_infobar", page));
     }
+
+    //breadcrumbs
+    HeaderWidget.setBreadCrumbs([
+      {href: "/a/", title: "Datastore"},
+      {href: "/a/queries", title: "Queries"},
+      {href: kPathPrefix + doc.uuid, title: doc.name}]);
 
     // code editor
     var editor = $("z-codeeditor", page);
