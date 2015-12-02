@@ -45,10 +45,10 @@ ZBase.registerView((function() {
       setPaginationFor(result.rows.length);
       setPaginationBack();
 
-      var until = Date.now();
+      //REMOVE ME
       $(".zbase_seller_overview .time_range").innerHTML =
-         DateUtil.printDate(until - DateUtil.millisPerDay) + "-" +
-         DateUtil.printDate(until);
+          result.rows[0][0] + " Days";
+      //REMOVEME END
     });
 
     query.addEventListener("error", function(e) {
