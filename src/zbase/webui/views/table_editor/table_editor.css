@@ -37,8 +37,17 @@
   float: right;
 }
 
-.zbase_table_editor .dropdown_container z-dropdown.input.edit z-dropdown-header {
+
+.zbase_table_editor z-dropdown.input.edit z-dropdown-header {
   min-width: 140px;
+  height: 34px;
+  line-height: 34px;
+}
+
+.zbase_table_editor z-dropdown.input.open_in z-dropdown-header {
+  min-width: 130px;
+  height: 34px;
+  line-height: 34px;
 }
 
 .zbase_table_editor table.z-table {
