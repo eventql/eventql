@@ -1,17 +1,17 @@
-.zbase_report_list .zbase_content.main_menu {
+.zbase_datastore_queries .zbase_content.main_menu {
   background: #fff;
 }
 
-.zbase_report_list .z-button {
+.zbase_datastore_queries .z-button {
   float: right;
 }
 
-.zbase_report_list table.z-table {
+.zbase_datastore_queries table.z-table {
   table-layout: fixed;
   font-size: 13px;
 }
 
-.zbase_report_list table.z-table thead th {
+.zbase_datastore_queries table.z-table thead th {
   font-weight: 400;
   color: #888;
   background: #f9f9f9;
@@ -21,37 +21,37 @@
   filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#f9f9f9',GradientType=0 ); /* IE6-9 */
 }
 
-.zbase_report_list table.z-table tbody tr td {
+.zbase_datastore_queries table.z-table tbody tr td {
   padding: 0;
 }
 
-.zbase_report_list table.z-table tbody tr a {
+.zbase_datastore_queries table.z-table tbody tr a {
   color: #888;
   padding: .7em .8em;
   line-height: 24px;
   display: block;
 }
 
-.zbase_report_list table.z-table tbody tr td:first-child a {
+.zbase_datastore_queries table.z-table tbody tr td:first-child a {
   color: #3e8ad3;
 }
 
-.zbase_report_list table.z-table tbody tr td:first-child a:hover {
+.zbase_datastore_queries table.z-table tbody tr td:first-child a:hover {
   text-decoration: underline;
 }
 
-.zbase_report_list z-dropdown.input {
+.zbase_datastore_queries z-dropdown.input {
   float: right;
   margin-top: 12px;
 }
 
-.zbase_report_list z-dropdown.input z-dropdown-header {
+.zbase_datastore_queries z-dropdown.input z-dropdown-header {
   font-size: 13px;
   line-height: 34px;
   height: 34px;
   min-width: 133px;
 }
 
-#zbase_viewport .zbase_content_pane.zbase_report_list {
+#zbase_viewport .zbase_content_pane.zbase_datastore_queries {
   padding-bottom: 8px;
 }

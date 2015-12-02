@@ -1,8 +1,8 @@
 ZBase.registerView((function() {
 
   var render = function(path) {
-    //redirect to reports overview
-    $.navigateTo("/a/reports");
+    //redirect to queries overview
+    $.navigateTo("/a/datastore/queries");
     return;
 
     var page = $.getTemplate("views/appstore", "zbase_appstore_main_tpl");

@@ -44,11 +44,11 @@ ZBase.registerView((function() {
     var categories = data.categories;
 
     var page = $.getTemplate(
-        "views/report_list",
-        "zbase_report_list_main_tpl");
+        "views/datastore_queries",
+        "zbase_datastore_queries_main_tpl");
 
     renderTable(
-        page.querySelector(".zbase_report_list tbody"),
+        page.querySelector(".zbase_datastore_queries tbody"),
         reports);
 
     $.onClick($("button.new_report", page), function(e) {
@@ -75,7 +75,7 @@ ZBase.registerView((function() {
   };
 
   return {
-    name: "report_list",
+    name: "datastore_queries",
     loadView: function(params) { load(params.path); },
     unloadView: function() {},
     handleNavigationChange: load
