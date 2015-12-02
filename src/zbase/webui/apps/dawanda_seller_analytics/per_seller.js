@@ -4,7 +4,7 @@ var perSellerLayout = function(query_mgr, path_prefix, shop_id) {
         "views/seller",
         "per_seller_layout_main_tpl");
 
-    $("zbase-breadcrumbs-section a.shop_id", page).href = path_prefix + shop_id;
+    ZBaseMainMenu.hide();
     $("h2.pagetitle .shop_id", page).innerHTML = shop_id;
 
     var tabs = page.querySelectorAll("z-tab");
@@ -43,8 +43,12 @@ var perSellerLayout = function(query_mgr, path_prefix, shop_id) {
     query.addEventListener("result", function(e) {
       query_mgr.close("shop_name");
       var result = JSON.parse(e.data).results[0];
+
+      HeaderWidget.setBreadCrumbs([
+        {href: "/a/apps/dawanda_seller_analytics", title: "Analytics"},
+        {href: "/a/apps/dawanda_seller_analytics", title: "Seller"},
+        {href: path_prefix + shop_id, title: result.rows[0]}]);
       $(".zbase_seller_stats h2.pagetitle .shop_name").innerHTML = result.rows[0];
-      $(".zbase_seller_stats zbase-breadcrumbs-section a.shop_id").innerHTML = result.rows[0];
     });
 
     query.addEventListener("error", function(e) {
