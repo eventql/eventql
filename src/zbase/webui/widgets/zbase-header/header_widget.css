@@ -133,6 +133,10 @@
   opacity: 1;
 }
 
+.zbase_header zbase-breadcrumbs zbase-breadcrumbs-section:last-child a {
+  font-weight: 300;
+}
+
 #zscale_user_navi {
   font-size: 12px;
   margin-right: 16px;

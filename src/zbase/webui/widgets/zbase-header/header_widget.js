@@ -40,6 +40,26 @@ var HeaderWidget = (function() {
 
   var update = function(path) {};
 
+  var setBreadCrumbs = function(crumbs) {
+    var breadcrumbs = $(".header_bar zbase-breadcrumbs");
+    var inner = document.createElement("div");
+
+    crumbs.forEach(function(crumb) {
+      var section = document.createElement("zbase-breadcrumbs-section");
+
+      if (crumb.href) {
+        var link = document.createElement("a");
+        link.innerHTML = crumb.title;
+        link.href = crumb.href;
+        section.appendChild(link);
+      }
+
+      inner.appendChild(section);
+    });
+
+    $.replaceContent(breadcrumbs, inner);
+  };
+
   var toggleDropdown = function() {
     this.classList.toggle("open");
   };
@@ -95,7 +115,8 @@ var HeaderWidget = (function() {
 
   return {
     render: render,
-    update: update
+    update: update,
+    setBreadCrumbs: setBreadCrumbs
   };
 
 })();
