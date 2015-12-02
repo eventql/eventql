@@ -5,6 +5,7 @@ ZBase.registerView((function() {
     var table_id = path.substr(kPathPrefix.length);
 
     $.showLoader();
+    ZBaseMainMenu.hide();
     $.httpGet("/api/v1/tables/" + table_id, function(r) {
       if (r.status == 200) {
         render(JSON.parse(r.response).table);

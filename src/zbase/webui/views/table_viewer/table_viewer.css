@@ -187,12 +187,12 @@
 .zbase_table_viewer .result_pane {
   border-top: 1px solid #d1d1d1;
   border-bottom: 1px solid #ddd;
-  margin: 0px -28px 0 -28px;
+  margin: 0px -24px 0 -24px;
   background: #f9f9f9;
 }
 
 .zbase_table_viewer .result_pane .json_viewer {
-  padding: 0 28px;
+  padding: 0 24px;
 }
 
 .zbase_table_viewer.loading .json_viewer {
