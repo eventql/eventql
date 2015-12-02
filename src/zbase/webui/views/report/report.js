@@ -17,8 +17,9 @@ ZBase.registerView((function() {
       widget_list = null;
     }
 
-    ZBaseMainMenu.hide();
     $.showLoader();
+    ZBaseMainMenu.hide();
+
     $.httpGet("/api/v1/documents/" + report_id, function(r) {
       if (r.status == 200) {
         var doc = JSON.parse(r.response);
@@ -59,6 +60,12 @@ ZBase.registerView((function() {
     var page = $.getTemplate(
         "views/report",
         "zbase_report_main_tpl");
+
+    //breadcrumbs
+    HeaderWidget.setBreadCrumbs([
+      {href: "/a/", title: "Datastore"},
+      {href: "/a/queries", title: "Queries"},
+      {href: "/a/reports/" + doc.uuid, title: doc.name}]);
 
     //doc settings
     var settings_widget = DocumentSettingsWidget(
