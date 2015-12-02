@@ -3,7 +3,7 @@ ZBase.registerView((function() {
   var load = function(url) {
     var qparams = {
       with_categories: true,
-      type: "report",
+      type: "all",
       author: "all"
     };
 
@@ -51,8 +51,9 @@ ZBase.registerView((function() {
         page.querySelector(".zbase_datastore_queries tbody"),
         reports);
 
-    $.onClick($("button.new_report", page), function(e) {
-      $.createNewDocument("report");
+    $("z-dropdown.create_new_doc", page).addEventListener("change", function(e) {
+      $.createNewDocument(this.getValue());
+      this.setValue([]);
     });
 
     $.handleLinks(page);
