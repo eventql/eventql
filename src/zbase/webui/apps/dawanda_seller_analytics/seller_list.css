@@ -120,7 +120,7 @@
   padding-left: 20px;
 }
 
-
+.zbase_seller_stats.overview table.z-table tbody tr td.hidden,
 .zbase_seller_stats.overview table.z-table thead tr th.hidden {
   display: none;
 }
