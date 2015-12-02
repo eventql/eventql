@@ -1,5 +1,9 @@
 ZBase.registerView((function() {
   var render = function() {
+    HeaderWidget.setBreadCrumbs([
+      {href: "/a/settings", title: "Settings"},
+      {href: "/a/settings/api_tokens", title: "Auth Tokens"}]);
+
     var page = $.getTemplate(
         "views/settings_api_token",
         "zbase_settings_api_token_main_tpl");
