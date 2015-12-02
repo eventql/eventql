@@ -142,6 +142,11 @@ var ZBase = (function() {
     }
 
     hideLoader();
+    if (config.current_user) {
+      HeaderWidget.update(current_path);
+      ZBaseMainMenu.update(current_path);
+    }
+
     current_view.loadView({path: current_path, config: config});
   };
 
@@ -166,10 +171,6 @@ var ZBase = (function() {
 
     loadModules(route.modules, function() {
       applyNavigationChange();
-      if (config.current_user) {
-        HeaderWidget.update(path);
-        ZBaseMainMenu.update(path);
-      }
     });
   };
 
