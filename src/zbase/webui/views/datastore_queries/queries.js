@@ -63,7 +63,7 @@ ZBase.registerView((function() {
 
   var renderTable = function(tbody_elem, reports) {
     reports.forEach(function(doc) {
-      var url = "/a/reports/" + doc.uuid;
+      var url = getPathPrefixForDocType(doc.type) + doc.uuid;
 
       var tr = document.createElement("tr");
       tr.innerHTML = 
@@ -74,6 +74,15 @@ ZBase.registerView((function() {
       tbody_elem.appendChild(tr);
     });
   };
+
+  var getPathPrefixForDocType = function(doctype) {
+    switch (doctype) {
+      case "report":
+        return "/a/reports/";
+      case "sql_query":
+        return "/a/sql/";
+    }
+  }
 
   return {
     name: "datastore_queries",
