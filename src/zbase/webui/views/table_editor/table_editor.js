@@ -6,6 +6,11 @@ ZBase.registerView((function() {
 
     $.showLoader();
     ZBaseMainMenu.hide();
+    HeaderWidget.setBreadCrumbs([
+      {href: "/a/", title: "Datastore"},
+      {href: "/a/datastore/tables", title: "Tables"},
+      {href: kPathPrefix + table_id, title: table_id}]);
+
     $.httpGet("/api/v1/tables/" + table_id, function(r) {
       if (r.status == 200) {
         render(JSON.parse(r.response).table);
