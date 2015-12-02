@@ -22,6 +22,7 @@ ZBase.registerView((function() {
     var query_id = path.substr(kPathPrefix.length);
 
     $.showLoader();
+    ZBaseMainMenu.update("/a/datastore/queries");
     ZBaseMainMenu.hide();
 
 
