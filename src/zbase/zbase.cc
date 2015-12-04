@@ -167,8 +167,12 @@ int main(int argc, const char** argv) {
 
   flags.parseArgv(argc, argv);
 
-  if (!flags.isSet("nolog_to_stderr")) {
+  close(STDOUT_FILENO);
+
+  if (!flags.isSet("nolog_to_stderr") && !flags.isSet("daemonize")) {
     stx::Application::logToStderr();
+  } else {
+    close(STDERR_FILENO);
   }
 
   Logger::get()->setMinimumLogLevel(
@@ -177,6 +181,18 @@ int main(int argc, const char** argv) {
 #ifndef ZBASE_HAS_ASSET_BUNDLE
   Assets::setSearchPath(flags.getString("asset_path"));
 #endif
+
+  if (flags.isSet("daemonize")) {
+    Application::daemonize();
+  }
+
+  if (flags.isSet("pidfile")) {
+    auto pidfile = File::openFile(
+        flags.getString("pidfile"),
+        File::O_WRITE | File::O_CREATEOROPEN | File::O_TRUNCATE);
+
+    pidfile.write(StringUtil::toString(getpid()));
+  }
 
   /* conf */
   //auto conf_data = FileUtil::read(flags.getString("conf"));
@@ -321,18 +337,6 @@ int main(int argc, const char** argv) {
   http_router.addRouteByPrefixMatch("/zstatus", &status_servlet);
   http_router.addRouteByPrefixMatch("/", &default_servlet);
 
-  if (flags.isSet("daemonize")) {
-    Application::daemonize();
-  }
-
-  if (flags.isSet("pidfile")) {
-    auto pidfile = File::openFile(
-        flags.getString("pidfile"),
-        File::O_WRITE | File::O_CREATEOROPEN | File::O_TRUNCATE);
-
-    pidfile.write(StringUtil::toString(getpid()));
-  }
-
   auto rusage_t = std::thread([] () {
     for (;; usleep(1000000)) {
       logDebug(
@@ -344,7 +348,6 @@ int main(int argc, const char** argv) {
   });
 
   rusage_t.detach();
-
 
   try {
     partition_map.open();
