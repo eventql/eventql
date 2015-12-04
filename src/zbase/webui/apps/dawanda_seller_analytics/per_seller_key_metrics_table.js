@@ -1,8 +1,8 @@
-var SellerTableOverview = (function() {
+var PerSellerKeyMetricsTable = (function() {
   var render = function(elem, result, metrics) {
     var tpl = $.getTemplate(
-        "views/seller",
-        "per_seller_table_overview_main_tpl");
+        "apps/dawanda_seller_analytics",
+        "per_seller_key_metrics_table_main_tpl");
 
     var table = $("table", tpl);
     $.replaceContent(elem, tpl);
@@ -12,12 +12,12 @@ var SellerTableOverview = (function() {
 
   var renderTable = function(elem, result, metrics) {
     var table_tpl = $.getTemplate(
-        "views/seller",
-        "per_seller_table_overview_table_tpl");
+        "apps/dawanda_seller_analytics",
+        "per_seller_key_metrics_table_inner_tpl");
 
     var tr_tpl = $.getTemplate(
-        "views/seller",
-        "per_seller_table_overview_row_tpl");
+        "apps/dawanda_seller_analytics",
+        "per_seller_key_metrics_table_row_tpl");
 
     var tbody = $("tbody", table_tpl);
 

@@ -8,32 +8,8 @@ ZBase.registerView((function() {
     query_mgr = EventSourceHandler();
     shop_id = UrlUtil.getPath(path).substr(path_prefix.length);
 
-    var page = $.getTemplate(
-        "views/seller",
-        "per_seller_stats_main_tpl");
-
-    var bc = $("zbase-breadcrumbs-section a.shop_id", page);
-    bc.href = path_prefix + shop_id;
-    bc.innerHTML = "Seller " + shop_id;
-    $(".pagetitle .shop_id", page).innerHTML = shop_id;
-
-    $.onClick($("button.view.sparkline", page), onViewButtonClick);
-    $.onClick($("button.view.table", page), onViewButtonClick);
-    $.onClick($("button.view.csv_download", page), onViewButtonClick);
-    $("z-dropdown.metrics", page).addEventListener("change", onMetricsParamChanged);
-
-    //REMOVEME (replace with paramChanged)
-    var date_picker = $("z-daterangepicker", page);
-    $("z-daterangepicker-field", page).onclick = function(e) {
-      date_picker.removeAttribute("data-active");
-      alert("Not yet implemented");
-    };
-    //REMOVEME END
-
-    loadShopName($(".pagetitle .shop_name", page));
-
-    $.handleLinks(page);
-    $.replaceViewport(page);
+    var layout = perSellerLayout(query_mgr, path_prefix, shop_id);
+    layout.render();
 
     var query_str =
       "select" +
@@ -64,15 +40,8 @@ ZBase.registerView((function() {
           " listview_views_recos," +
           " listview_clicks_recos," +
           " listview_ctr_recos" +
-      " from shop_stats.last30d where shop_id = " + shop_id // FIXME escaping
+      " from shop_stats.last30d where shop_id = " + $.escapeHTML(shop_id)
       " order by time asc;";
-
-    setParamsFromAndUntil(
-        UrlUtil.getParamValue(path, "from"),
-        UrlUtil.getParamValue(path, "until"));
-
-    setParamView(UrlUtil.getParamValue(path, "view"));
-    setParamMetrics(UrlUtil.getParamValue(path, "metrics"));
 
     var query = query_mgr.get(
         "sql_query",
@@ -83,7 +52,7 @@ ZBase.registerView((function() {
       var data = JSON.parse(e.data).results[0];
 
       if (data.rows.length == 0) {
-        renderNoDataReturned();
+        layout.renderNoData();
         return;
       }
 
@@ -107,11 +76,10 @@ ZBase.registerView((function() {
 
       result.aggregates = aggregate(result.timeseries);
 
-      $(".zbase_seller_stats .controls").classList.remove("hidden");
-      setParamsFromAndUntil(
+      /*setParamsFromAndUntil(
           Math.round(data.rows[0][0] / 1000),
-          Math.round(data.rows[data.rows.length - 1][0] / 1000));
-      renderView(path);
+          Math.round(data.rows[data.rows.length - 1][0] / 1000));*/
+      render(path);
     }, false);
 
     query.addEventListener("error", function(e) {
@@ -120,7 +88,7 @@ ZBase.registerView((function() {
     }, false);
 
     query.addEventListener("status", function(e) {
-      renderQueryProgress(JSON.parse(e.data));
+      layout.renderQueryProgress(JSON.parse(e.data));
     }, false);
   };
 
@@ -129,30 +97,36 @@ ZBase.registerView((function() {
     query_mgr.closeAll();
   };
 
-  var loadShopName = function(elem) {
-    var query_str = "SELECT `title` FROM db.shops WHERE user_id = " +
-      $.escapeHTML(shop_id);
+  var render = function(path) {
+    var page = $.getTemplate(
+        "apps/dawanda_seller_analytics",
+        "per_seller_key_metrics_main_tpl");
 
-    var query = query_mgr.get(
-      "shop_name",
-      "/api/v1/sql?format=json_sse&query=" + encodeURIComponent(query_str));
+    $.onClick($("button.view.sparkline", page), onViewButtonClick);
+    $.onClick($("button.view.table", page), onViewButtonClick);
+    $.onClick($("button.view.csv_download", page), onViewButtonClick);
+    $("z-dropdown.metrics", page).addEventListener("change", onMetricsParamChanged);
 
-    query.addEventListener("result", function(e) {
-      query_mgr.close("shop_name");
-      var result = JSON.parse(e.data).results[0];
-      elem.innerHTML = "(" + result.rows[0] + ")";
-    });
+    //REMOVEME (replace with paramChanged)
+    var date_picker = $("z-daterangepicker", page);
+    $("z-daterangepicker-field", page).onclick = function(e) {
+      date_picker.removeAttribute("data-active");
+      alert("Not yet implemented");
+    };
+    //REMOVEME END
+    $.handleLinks(page);
+    $.replaceContent($(".zbase_seller_stats.per_seller .result_pane"), page);
 
-    query.addEventListener("error", function(e) {
-      query_mgr.close("shop_name");
-    });
+    setParamsFromAndUntil(
+        UrlUtil.getParamValue(path, "from"),
+        UrlUtil.getParamValue(path, "until"));
+
+    setParamView(UrlUtil.getParamValue(path, "view"));
+    setParamMetrics(UrlUtil.getParamValue(path, "metrics"));
+
+    renderView(path);
   };
 
-  var renderQueryProgress = function(progress) {
-    QueryProgressWidget.render(
-        $(".zbase_seller_overview"),
-        progress);
-  };
 
   var renderView = function(path) {
     if (result == null) {
@@ -162,35 +136,28 @@ ZBase.registerView((function() {
     var metrics = getMetrics();
     var view = getParamView();
 
+    updateControlsVisibility(view);
+
     switch (view) {
       case "table":
-        SellerTableOverview.render(
-          $(".zbase_seller_overview"),
+        PerSellerKeyMetricsTable.render(
+          $(".zbase_seller_stats.per_seller .key_metrics .view_pane"),
           result,
           metrics);
         break;
 
       case "sparkline":
-        SellerSparklineOverview.render(
-          $(".zbase_seller_overview"),
+        PerSellerKeyMetricsSparkline.render(
+          $(".zbase_seller_stats.per_seller .key_metrics .view_pane"),
           result,
           metrics);
         break;
 
       case "csv_download":
-        SellerCSVDownload.render($(".zbase_seller_overview"));
+        PerSellerKeyMetricsCSV.render(
+          $(".zbase_seller_stats.per_seller .key_metrics .view_pane"));
         break;
     }
-
-    updateControlsVisibility(view);
-  };
-
-  var renderNoDataReturned = function() {
-    $.replaceContent(
-      $(".zbase_seller_stats .zbase_content_pane"),
-      $.getTemplate(
-          "views/seller",
-          "per_seller_stats_no_data_message_tpl"));
   };
 
   var aggregate = function(timeseries) {
@@ -223,7 +190,7 @@ ZBase.registerView((function() {
 
   var setParamView = function(view) {
     if (view == null) {
-      view = "sparkline"
+      view = "table"
     }
 
     $(".zbase_seller_stats button.view." + view)
@@ -317,7 +284,7 @@ ZBase.registerView((function() {
   window.addEventListener("resize", resizeSparklines);
 
   return {
-    name: "per_seller_stats",
+    name: "per_seller_key_metrics",
     loadView: function(params) {load(params.path)},
     unloadView: destroy,
     handleNavigationChange: load

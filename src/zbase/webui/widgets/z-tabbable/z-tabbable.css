@@ -170,8 +170,15 @@ z-tabbable[data-content-attached] z-tab-content[data-active],
   padding: 0 10px;
 }
 
+.zbase_app z-tabbable.slim_tabs z-tab.link {
+  padding: 0;
+  color: rgba(0, 0, 0, 0.8);
+}
+
 .zbase_app z-tabbable.slim_tabs z-tab a {
   padding: 0 10px;
+  line-height: 38px;
+  display: block;
 }
 
 .zbase_app z-tabbable.slim_tabs z-tab[data-active] {

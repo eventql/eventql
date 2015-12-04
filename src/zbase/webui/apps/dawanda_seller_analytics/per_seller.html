@@ -1,0 +1,41 @@
+<template id="per_seller_layout_main_tpl">
+  <div class="zbase_seller_stats per_seller">
+    <section class='zbase_page_title small' style="none">
+      <a href="/a/apps/dawanda_seller_analytics" class="back_btn"></a>
+      <zbase-breadcrumbs>
+        <zbase-breadcrumbs-section>
+          <a href="/a/">Analytics</a>
+        </zbase-breadcrumbs-section>
+        <zbase-breadcrumbs-section>
+          <a href="/a/apps/dawanda_seller_analytics">Seller</a>
+        </zbase-breadcrumbs-section>
+        <zbase-breadcrumbs-section>
+          <a class="shop_id"></a>
+        </zbase-breadcrumbs-section>
+      </zbase-breadcrumbs>
+    </section>
+
+    <div class="zbase_content_pane fullwidth" style="padding: 0 20px;">
+      <h2 class="pagetitle" style="font-size: 24px;">
+        <em><span class="shop_name"></span> [<span class="shop_id"></span>]</em>
+      </h2>
+
+      <z-tabbable class="slim_tabs">
+        <z-tab class="link" data-path="/a/apps/dawanda_seller_analytics/">
+          <a>Key Metrics</a>
+        </z-tab>
+        <z-tab class="link" data-path="/a/apps/dawanda_seller_analytics/revenue/">
+          <a>Revenue</a>
+        </z-tab>
+        <z-tab class="link" data-path="/a/apps/dawanda_seller_analytics/traffic/">
+          <a>Traffic Sources</a>
+        </z-tab>
+        <z-tab class="link" data-path="/a/apps/dawanda_seller_analytics/inventory/">
+          <a>Products</a>
+        </z-tab>
+      </z-tabbable>
+
+      <div class="result_pane"></div>
+    </div>
+  </div>
+</template>
