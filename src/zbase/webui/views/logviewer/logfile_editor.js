@@ -28,8 +28,12 @@ ZBase.registerView((function() {
 
     info_message = ZbaseInfoMessage(page);
 
-    var name_breadcrumb = $("zbase-breadcrumbs .logfile_name a", page);
-    name_breadcrumb.innerHTML = def.name;
+    HeaderWidget.setBreadCrumbs([
+      {href: "/a/logs", title: "Monitoring"},
+      {href: "/a/logs", title: "Logfiles"},
+      {href: path_prefix + def.name, title: "Logfile Editor"},
+      {href: path_prefix + def.name, title: def.name}]);
+    ZBaseMainMenu.hide();
 
     renderRegexPane($(".editor_pane.regex", page), def.regex);
 
