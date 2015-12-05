@@ -197,8 +197,8 @@ route {
 }
 
 route {
-  path_match: "/a/reports"
-  view: "report_list"
+  path_match: "/a/datastore/queries"
+  view: "datastore_queries"
   require_module: "util/z-date-util"
   require_module: "util/z-url-util"
   require_module: "widgets/zbase-header"
@@ -207,7 +207,7 @@ route {
   require_module: "widgets/z-table"
   require_module: "widgets/z-button"
   require_module: "widgets/z-dropdown"
-  require_module: "views/report_list"
+  require_module: "views/datastore_queries"
 }
 
 route {

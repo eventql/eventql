@@ -1,0 +1,36 @@
+<template id="zbase_datastore_queries_main_tpl">
+  <div class="zbase_datastore_queries">
+    <div class="zbase_content_pane">
+
+      <z-dropdown class="input secondary create_new_doc" data-hover data-resolved style="float: right; margin-top: 16px;">
+      <z-dropdown-header>
+        <z-dropdown-header-value data-static>
+            <i class="fa fa-plus"></i> &nbsp;New Query
+        </z-dropdown-header-value>
+      </z-dropdown-header>
+
+      <z-dropdown-flyout>
+        <z-dropdown-items>
+          <z-dropdown-item data-value="sql_query">New SQL Query</z-dropdown-item>
+          <z-dropdown-item data-value="report">New Report</z-dropdown-item>
+        </z-dropdown-items>
+      </z-dropdown-flyout>
+    </z-dropdown>
+
+      <h2 class="pagetitle"><em>Queries</em></h2>
+
+      <table class="z-table zbase_clickable_table" style="border-top: 1px solid #ddd;">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th style="width: 160px;">Type</th>
+            <th style="width: 160px;">Last modified</th>
+          </tr>
+        </thead>
+        <tbody>
+        </tbody>
+      </table>
+
+    </div>
+  </div>
+</template>

@@ -53,7 +53,7 @@ void WebDocsServlet::handle(
   auto page_path = uri.path().substr(kDocumentationPathPrefix.size());
   if (page_path.empty()) {
     response->setStatus(http::kStatusFound);
-    response->addHeader("Location", "/docs/getting_started");
+    response->addHeader("Location", "/docs/z1/getting_started");
     return;
   }
 

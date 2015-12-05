@@ -104,6 +104,7 @@
   width: 230px;
   color: #454545;
   padding-bottom: 0.2em;
+  background: none;
 }
 
 .zbase_datastore_tables .create_table table.z-table thead tr th:first-child,

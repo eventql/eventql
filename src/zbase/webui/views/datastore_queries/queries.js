@@ -3,7 +3,7 @@ ZBase.registerView((function() {
   var load = function(url) {
     var qparams = {
       with_categories: true,
-      type: "report",
+      type: "all",
       author: "all"
     };
 
@@ -29,6 +29,9 @@ ZBase.registerView((function() {
 
     $.showLoader();
     ZBaseMainMenu.show();
+    HeaderWidget.setBreadCrumbs([
+      {href: "/a/", title: "Datastore"},
+      {href: "/a/datastore/queries", title: "Queries"}]);
 
     $.httpGet("/api/v1/documents?" + $.buildQueryString(qparams), function(r) {
       if (r.status == 200) {
@@ -44,15 +47,16 @@ ZBase.registerView((function() {
     var categories = data.categories;
 
     var page = $.getTemplate(
-        "views/report_list",
-        "zbase_report_list_main_tpl");
+        "views/datastore_queries",
+        "zbase_datastore_queries_main_tpl");
 
     renderTable(
-        page.querySelector(".zbase_report_list tbody"),
+        page.querySelector(".zbase_datastore_queries tbody"),
         reports);
 
-    $.onClick($("button.new_report", page), function(e) {
-      $.createNewDocument("report");
+    $("z-dropdown.create_new_doc", page).addEventListener("change", function(e) {
+      $.createNewDocument(this.getValue());
+      this.setValue([]);
     });
 
     $.handleLinks(page);
@@ -62,7 +66,7 @@ ZBase.registerView((function() {
 
   var renderTable = function(tbody_elem, reports) {
     reports.forEach(function(doc) {
-      var url = "/a/reports/" + doc.uuid;
+      var url = getPathPrefixForDocType(doc.type) + doc.uuid;
 
       var tr = document.createElement("tr");
       tr.innerHTML = 
@@ -74,8 +78,17 @@ ZBase.registerView((function() {
     });
   };
 
+  var getPathPrefixForDocType = function(doctype) {
+    switch (doctype) {
+      case "report":
+        return "/a/reports/";
+      case "sql_query":
+        return "/a/sql/";
+    }
+  }
+
   return {
-    name: "report_list",
+    name: "datastore_queries",
     loadView: function(params) { load(params.path); },
     unloadView: function() {},
     handleNavigationChange: load
