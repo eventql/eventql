@@ -70,6 +70,9 @@ add_library(tsdb-server OBJECT
     core/LogPartitionReader.cc
     core/LogPartitionWriter.cc
     core/LogPartitionReplication.cc
+    core/LSMPartitionReader.cc
+    core/LSMPartitionWriter.cc
+    core/LSMPartitionReplication.cc
     core/LazyPartition.cc
     core/Table.cc
     core/ReplicationWorker.cc
