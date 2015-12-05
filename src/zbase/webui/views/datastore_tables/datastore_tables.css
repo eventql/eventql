@@ -32,13 +32,14 @@
 }
 
 .zbase_datastore_tables table.z-table tbody tr td {
-  line-height: 25px;
   padding: 0;
-  padding: .3em .8em;
 }
 
-.zbase_datastore_tables table.z-table tbody tr a {
+.zbase_datastore_tables table.z-table tbody tr td a {
   color: #888;
+  line-height: 25px;
+  padding: .7em .8em;
+  display: block;
 }
 
 .zbase_datastore_tables table.z-table thead tr th:first-child,
@@ -47,7 +48,6 @@
 }
 
 .zbase_datastore_tables table.z-table tbody tr td:first-child a {
-  padding-left: 0;
   color: #3e8ad3;
 }
 
