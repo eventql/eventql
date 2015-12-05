@@ -180,6 +180,7 @@
   box-shadow: 0 2px 3px rgba(0,0,0,.1);
   position: absolute;
   z-index: 99999;
+  padding: 0;
 }
 
 #zscale_user_navi .dropdown_panel li {
