@@ -1,0 +1,8 @@
+- LSM partitions
+- table ids
+- cstable mmap remove
+- table partitions from WHERE clause/filter list
+- sql constant folding
+- metrics API
+- allow timewindow partitioner config updates
+- primarykeypartitioner
