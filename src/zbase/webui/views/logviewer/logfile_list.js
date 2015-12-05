@@ -28,9 +28,16 @@ ZBase.registerView((function() {
         "zbase_logviewer_logfile_list_row_tpl");
 
     var tbody = $("tbody", page);
+
     logfiles.forEach(function(def) {
       var tr = tr_tpl.cloneNode(true);
       $(".name", tr).innerHTML = def.name;
+
+      var links = tr.querySelectorAll("a");
+      for (var i = 0; i < links.length; i++) {
+        //logviewer path
+        links[i].href = "/a/logs/view/" + def.name;
+      }
 
       $("z-dropdown", tr).addEventListener("change", function() {
         switch (this.getValue()) {
@@ -42,10 +49,6 @@ ZBase.registerView((function() {
             $.navigateTo("/a/logs/" + def.name);
             return;
         }
-      });
-
-      $.onClick($("tr", tr), function() {
-        $.navigateTo("/a/logs/view/" + def.name);
       });
 
       tbody.appendChild(tr);
