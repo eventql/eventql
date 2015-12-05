@@ -22,10 +22,6 @@ public:
 
   StaticPartitionWriter(PartitionSnapshotRef* head);
 
-  bool insertRecord(
-      const SHA1Hash& record_id,
-      const Buffer& record) override;
-
   Set<SHA1Hash> insertRecords(
       const Vector<RecordRef>& records) override;
 

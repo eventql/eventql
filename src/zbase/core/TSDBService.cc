@@ -12,6 +12,7 @@
 #include <stx/protobuf/msg.h>
 #include <stx/protobuf/MessageEncoder.h>
 #include <stx/io/fileutil.h>
+#include <stx/wallclock.h>
 #include <sstable/sstablereader.h>
 #include <zbase/core/TSDBService.h>
 #include <zbase/core/LogPartitionReader.h>
@@ -59,6 +60,10 @@ void TSDBService::insertRecords(
 
     auto record_data = record.record_data().data();
     auto record_size = record.record_data().size();
+    auto record_version = record.record_version();
+    if (record_version == 0) {
+      record_version = WallClock::unixMicros();
+    }
 
     auto group_key = StringUtil::format(
         "$0~$1~$2",
@@ -68,6 +73,7 @@ void TSDBService::insertRecords(
 
     grouped[group_key].emplace_back(
         SHA1Hash::fromHexString(record.record_id()),
+        record_version,
         Buffer(record_data, record_size));
   }
 
@@ -112,6 +118,10 @@ void TSDBService::insertRecords(
 
     auto record_data = record.record_data().data();
     auto record_size = record.record_data().size();
+    auto record_version = record.record_version();
+    if (record_version == 0) {
+      record_version = WallClock::unixMicros();
+    }
 
     auto group_key = StringUtil::format(
         "$0~$1~$2",
@@ -121,6 +131,7 @@ void TSDBService::insertRecords(
 
     grouped[group_key].emplace_back(
         SHA1Hash::fromHexString(record.record_id()),
+        record_version,
         Buffer(record_data, record_size));
   }
 
@@ -144,10 +155,11 @@ void TSDBService::insertRecord(
     const String& table_name,
     const SHA1Hash& partition_key,
     const SHA1Hash& record_id,
+    uint64_t record_version,
     const Buffer& record,
     uint64_t flags /* = 0 */) {
   Vector<RecordRef> records;
-  records.emplace_back(record_id, record);
+  records.emplace_back(record_id, record_version, record);
   insertRecords(tsdb_namespace, table_name, partition_key, records, flags);
 }
 
@@ -164,12 +176,18 @@ void TSDBService::insertRecord(
 
   msg::DynamicMessage record(table.get()->schema());
   record.fromJSON(data_begin, data_end);
-  insertRecord(tsdb_namespace, table_name, record, flags);
+  insertRecord(
+      tsdb_namespace,
+      table_name,
+      WallClock::unixMicros(),
+      record,
+      flags);
 }
 
 void TSDBService::insertRecord(
     const String& tsdb_namespace,
     const String& table_name,
+    uint64_t record_version,
     const msg::DynamicMessage& data,
     uint64_t flags /* = 0 */) {
   auto table = pmap_->findTable(tsdb_namespace, table_name);
@@ -196,6 +214,7 @@ void TSDBService::insertRecord(
       table_name,
       partition_key,
       record_id,
+      record_version,
       record,
       flags);
 }
@@ -280,7 +299,7 @@ void TSDBService::insertRecordsLocal(
 
   bool dirty = false;
   for (const auto& r : records) {
-    if (writer->insertRecord(r.record_id, r.record)) {
+    if (writer->insertRecord(r.record_id, r.record_version, r.record)) {
       dirty = true;
     }
   }

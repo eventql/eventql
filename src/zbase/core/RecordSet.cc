@@ -21,8 +21,10 @@ namespace zbase {
 
 RecordRef::RecordRef(
     const SHA1Hash& _record_id,
+    uint64_t _record_version,
     const Buffer& _record) :
     record_id(_record_id),
+    record_version(_record_version),
     record(_record) {}
 
 RecordSet::RecordSet(

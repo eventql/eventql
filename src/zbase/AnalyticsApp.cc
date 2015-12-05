@@ -196,6 +196,7 @@ void AnalyticsApp::insertMetric(
           time,
           table->partitionSize()),
       Random::singleton()->sha1(),
+      WallClock::unixMicros(),
       smpl_buf);
 }
 

@@ -23,9 +23,10 @@ public:
 
   PartitionWriter(PartitionSnapshotRef* head);
 
-  virtual bool insertRecord(
+  bool insertRecord(
       const SHA1Hash& record_id,
-      const Buffer& record) = 0;
+      uint64_t record_version,
+      const Buffer& record);
 
   virtual Set<SHA1Hash> insertRecords(
       const Vector<RecordRef>& records) = 0;

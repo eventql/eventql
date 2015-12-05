@@ -23,15 +23,6 @@ LSMPartitionWriter::LSMPartitionWriter(
     idset_(FileUtil::joinPaths(head_->getSnapshot()->base_path, "_idset")),
     max_datafile_size_(kDefaultMaxDatafileSize) {}
 
-bool LSMPartitionWriter::insertRecord(
-    const SHA1Hash& record_id,
-    const Buffer& record) {
-  Vector<RecordRef> recs;
-  recs.emplace_back(record_id, record);
-  auto ids = insertRecords(recs);
-  return !ids.empty();
-}
-
 Set<SHA1Hash> LSMPartitionWriter::insertRecords(const Vector<RecordRef>& records) {
   std::unique_lock<std::mutex> lk(mutex_);
   if (frozen_) {

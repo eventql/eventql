@@ -55,7 +55,7 @@ public:
       const String& tsdb_namespace,
       const String& table_name,
       const SHA1Hash& partition_key,
-      const Vector<RecordRef>& recods,
+      const Vector<RecordRef>& records,
       uint64_t flags = 0);
 
   void insertRecord(
@@ -63,6 +63,7 @@ public:
       const String& table_name,
       const SHA1Hash& partition_key,
       const SHA1Hash& record_id,
+      uint64_t record_version,
       const Buffer& record,
       uint64_t flags = 0);
 
@@ -76,6 +77,7 @@ public:
   void insertRecord(
       const String& tsdb_namespace,
       const String& table_name,
+      uint64_t record_version,
       const msg::DynamicMessage& data,
       uint64_t flags = 0);
 
