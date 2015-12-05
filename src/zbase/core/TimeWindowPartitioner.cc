@@ -9,6 +9,7 @@
  */
 #include <stx/util/binarymessagereader.h>
 #include <stx/util/binarymessagewriter.h>
+#include <stx/logging.h>
 #include <zbase/core/TimeWindowPartitioner.h>
 
 using namespace stx;
@@ -54,7 +55,7 @@ Vector<SHA1Hash> TimeWindowPartitioner::partitionKeysFor(
     Duration window_size) {
   auto cs = window_size.microseconds();
   auto first_chunk = (from.unixMicros() / cs) * cs;
-  auto last_chunk = (until.unixMicros() / cs) * cs;
+  auto last_chunk = ((until.unixMicros() + (cs - 1)) / cs) * cs;
 
   Vector<SHA1Hash> res;
   for (auto t = first_chunk; t <= last_chunk; t += cs) {
