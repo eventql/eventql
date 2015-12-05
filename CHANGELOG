@@ -4,3 +4,12 @@ v0.1.1
 ======
   - new seller analytics UI
   - z1d daemonization
+
+
+v0.1.0
+======
+  - tsdb replication fixes
+
+v0.0.0
+======
+  - for changes before 2015-12-01 refer to the git history
