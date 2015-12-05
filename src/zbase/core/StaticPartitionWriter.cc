@@ -28,4 +28,12 @@ Set<SHA1Hash> StaticPartitionWriter::insertRecords(
       "can't insert individual records because partition is STATIC");
 }
 
+bool StaticPartitionWriter::needsCompaction() {
+  return false;
+}
+
+void StaticPartitionWriter::compact() {
+
+}
+
 } // namespace tdsb

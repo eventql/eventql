@@ -26,6 +26,10 @@ public:
   Set<SHA1Hash> insertRecords(
       const Vector<RecordRef>& records) override;
 
+  bool needsCompaction() override;
+
+  void compact() override;
+
 protected:
   PersistentHashSet idset_;
   size_t max_datafile_size_;

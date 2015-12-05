@@ -89,4 +89,12 @@ Set<SHA1Hash> LSMPartitionWriter::insertRecords(const Vector<RecordRef>& records
   return record_ids;
 }
 
+bool LSMPartitionWriter::needsCompaction() {
+  return false;
+}
+
+void LSMPartitionWriter::compact() {
+
+}
+
 } // namespace tdsb

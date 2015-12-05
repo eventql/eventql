@@ -89,4 +89,12 @@ Set<SHA1Hash> LogPartitionWriter::insertRecords(const Vector<RecordRef>& records
   return record_ids;
 }
 
+bool LogPartitionWriter::needsCompaction() {
+  return false;
+}
+
+void LogPartitionWriter::compact() {
+
+}
+
 } // namespace tdsb

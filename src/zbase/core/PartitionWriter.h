@@ -55,6 +55,10 @@ public:
    */
   void freeze();
 
+  virtual bool needsCompaction() = 0;
+
+  virtual void compact() = 0;
+
 protected:
   PartitionSnapshotRef* head_;
   std::mutex mutex_;
