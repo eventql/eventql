@@ -21,7 +21,9 @@ class LogPartitionWriter : public PartitionWriter {
 public:
   static const size_t kDefaultMaxDatafileSize = 1024 * 1024 * 128;
 
-  LogPartitionWriter(PartitionSnapshotRef* head);
+  LogPartitionWriter(
+      RefPtr<Partition> partition,
+      PartitionSnapshotRef* head);
 
   Set<SHA1Hash> insertRecords(
       const Vector<RecordRef>& records) override;
@@ -31,6 +33,7 @@ public:
   void compact() override;
 
 protected:
+  RefPtr<Partition> partition_;
   PersistentHashSet idset_;
   size_t max_datafile_size_;
 };

@@ -125,7 +125,7 @@ RefPtr<PartitionWriter> Partition::getWriter() {
     switch (table_->storage()) {
 
       case zbase::TBL_STORAGE_LOG:
-        writer_ = mkRef<PartitionWriter>(new LogPartitionWriter(&head_));
+        writer_ = mkRef<PartitionWriter>(new LogPartitionWriter(this, &head_));
         break;
 
       case zbase::TBL_STORAGE_LSM:
