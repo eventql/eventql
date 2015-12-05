@@ -427,6 +427,11 @@
   text-decoration: underline;
 }
 
+.zbase_logviewer .logfile_list table.z-table.zbase_clickable_table tbody tr:hover td {
+  border-top: 1px solid rgba(52, 152, 219, 0.3);
+  border-bottom: 1px solid rgba(52, 152, 219, 0.3);
+}
+
 .zbase_logviewer .logfile_list table.z-table tbody tr td.icon {
   width: 60px;
   text-align:center;

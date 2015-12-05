@@ -136,6 +136,11 @@
   text-align: right;
 }
 
+.zbase_seller_stats.overview table.z-table.zbase_clickable_table tbody tr:hover td {
+  border-top: 1px solid rgba(52, 152, 219, 0.3);
+  border-bottom: 1px solid rgba(52, 152, 219, 0.3);
+}
+
 .zbase_seller_stats.overview table.z-table tbody tr td.left_align a {
   text-align: left;
 }
