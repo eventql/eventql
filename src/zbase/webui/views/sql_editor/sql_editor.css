@@ -241,7 +241,7 @@
 }
 
 .zbase_sql_editor_pane .CodeMirror-gutters {
-  background: rgba(63,144,170,.08);
+  background: #f9f9f9;
   background-color: none;
 }
 
@@ -274,6 +274,7 @@
   -ms-user-select: none;
   -o-user-select: none;
   user-select: none;
+  background: #f9f9f9;
 }
 
 .zbase_sql_editor_result_pane .zbase_result_pane_bar label {
