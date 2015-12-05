@@ -152,8 +152,10 @@ ZBase.registerView((function() {
   };
 
   var renderQueryResult = function(res) {
-    var result_list = SQLEditorResultList(res);
-    result_list.render($(".zbase_sql_editor_result_pane"));
+    QueryProgressWidget.finish(function() {
+      var result_list = SQLEditorResultList(res);
+      result_list.render($(".zbase_sql_editor_result_pane"));
+    });
   }
 
   var renderQueryError = function(error) {
