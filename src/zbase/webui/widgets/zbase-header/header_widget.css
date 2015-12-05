@@ -80,7 +80,8 @@
 }
 
 .zbase_header z-dropdown.new_query z-dropdown-flyout {
-  left: -23px;
+  left: 0px;
+  border-radius: .2857rem;
 }
 
 #menu_toggler:hover {
