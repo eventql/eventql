@@ -60,8 +60,8 @@
   margin-left: 6px;
 }
 
-.zbase_header .btn_settings:hover {
-  color: #3d8ad3;
+.zbase_header .btn_settings:hover span {
+  text-decoration: underline;
 }
 
 .zbase_header z-dropdown.new_query {
