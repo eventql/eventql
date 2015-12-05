@@ -65,7 +65,15 @@ ZBase.registerView((function() {
   };
 
   var renderTable = function(tbody_elem, reports) {
+    var doc_types = {
+      report: true,
+      sql_query: true
+    };
+
     reports.forEach(function(doc) {
+      if (!doc_types[doc.type]) {
+        return;
+      }
       var url = getPathPrefixForDocType(doc.type) + doc.uuid;
 
       var tr = document.createElement("tr");
