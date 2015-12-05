@@ -61,7 +61,6 @@ stx::thread::EventLoop ev;
 
 int main(int argc, const char** argv) {
   stx::Application::init();
-  stx::Application::logToStderr();
 
   stx::cli::FlagParser flags;
 
@@ -73,15 +72,6 @@ int main(int argc, const char** argv) {
       "8080",
       "Start the public http server on this port",
       "<port>");
-
-  flags.defineFlag(
-      "frontend",
-      cli::FlagParser::T_SWITCH,
-      false,
-      NULL,
-      NULL,
-      "frontend only?",
-      "<switch>");
 
   flags.defineFlag(
       "cachedir",
@@ -148,7 +138,38 @@ int main(int argc, const char** argv) {
       "loglevel",
       "<level>");
 
+  flags.defineFlag(
+      "daemonize",
+      cli::FlagParser::T_SWITCH,
+      false,
+      NULL,
+      NULL,
+      "daemonize",
+      "<switch>");
+
+  flags.defineFlag(
+      "pidfile",
+      cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      NULL,
+      "pidfile",
+      "<path>");
+
+  flags.defineFlag(
+      "nolog_to_stderr",
+      cli::FlagParser::T_SWITCH,
+      false,
+      NULL,
+      NULL,
+      "don't log to stderr",
+      "<switch>");
+
   flags.parseArgv(argc, argv);
+
+  if (!flags.isSet("nolog_to_stderr")) {
+    stx::Application::logToStderr();
+  }
 
   Logger::get()->setMinimumLogLevel(
       strToLogLevel(flags.getString("loglevel")));
@@ -300,6 +321,18 @@ int main(int argc, const char** argv) {
   http_router.addRouteByPrefixMatch("/zstatus", &status_servlet);
   http_router.addRouteByPrefixMatch("/", &default_servlet);
 
+  if (flags.isSet("daemonize")) {
+    Application::daemonize();
+  }
+
+  if (flags.isSet("pidfile")) {
+    auto pidfile = File::openFile(
+        flags.getString("pidfile"),
+        File::O_WRITE | File::O_CREATEOROPEN | File::O_TRUNCATE);
+
+    pidfile.write(StringUtil::toString(getpid()));
+  }
+
   auto rusage_t = std::thread([] () {
     for (;; usleep(1000000)) {
       logDebug(
@@ -311,6 +344,7 @@ int main(int argc, const char** argv) {
   });
 
   rusage_t.detach();
+
 
   try {
     partition_map.open();
@@ -326,6 +360,10 @@ int main(int argc, const char** argv) {
   customer_dir.stopWatcher();
 
   JS_ShutDown();
+
+  if (flags.isSet("pidfile")) {
+    FileUtil::rm(flags.getString("pidfile"));
+  }
 
   exit(0);
 }
