@@ -24,7 +24,7 @@ RefPtr<csql::QueryTreeNode> SQLEngine::rewriteQuery(
     csql::Runtime* runtime,
     PartitionMap* partition_map,
     ReplicationScheme* replication_scheme,
-    CSTableIndex* cstable_index,
+    CompactionWorker* cstable_index,
     AnalyticsAuth* auth,
     const String& tsdb_namespace,
     RefPtr<csql::QueryTreeNode> query) {
@@ -42,7 +42,7 @@ RefPtr<csql::QueryTreeNode> SQLEngine::rewriteQuery(
 RefPtr<csql::TableProvider> SQLEngine::tableProviderForNamespace(
     PartitionMap* partition_map,
     ReplicationScheme* replication_scheme,
-    CSTableIndex* cstable_index,
+    CompactionWorker* cstable_index,
     AnalyticsAuth* auth,
     const String& tsdb_namespace) {
   return new TSDBTableProvider(
@@ -57,7 +57,7 @@ void SQLEngine::insertPartitionSubqueries(
     csql::Runtime* runtime,
     PartitionMap* partition_map,
     ReplicationScheme* replication_scheme,
-    CSTableIndex* cstable_index,
+    CompactionWorker* cstable_index,
     AnalyticsAuth* auth,
     const String& tsdb_namespace,
     RefPtr<csql::QueryTreeNode>* node) {
@@ -103,7 +103,7 @@ void SQLEngine::insertPartitionSubqueries(
 void SQLEngine::replaceSequentialScanWithUnion(
     PartitionMap* partition_map,
     ReplicationScheme* replication_scheme,
-    CSTableIndex* cstable_index,
+    CompactionWorker* cstable_index,
     const String& tsdb_namespace,
     RefPtr<csql::QueryTreeNode>* node) {
   auto seqscan = node->asInstanceOf<csql::SequentialScanNode>();
@@ -144,7 +144,7 @@ void SQLEngine::shardGroupBy(
     csql::Runtime* runtime,
     PartitionMap* partition_map,
     ReplicationScheme* replication_scheme,
-    CSTableIndex* cstable_index,
+    CompactionWorker* cstable_index,
     AnalyticsAuth* auth,
     const String& tsdb_namespace,
     RefPtr<csql::QueryTreeNode>* node) {
@@ -199,7 +199,7 @@ RefPtr<csql::ExecutionStrategy> SQLEngine::getExecutionStrategy(
     csql::Runtime* runtime,
     PartitionMap* partition_map,
     ReplicationScheme* replication_scheme,
-    CSTableIndex* cstable_index,
+    CompactionWorker* cstable_index,
     AnalyticsAuth* auth,
     const String& customer) {
   auto strategy = mkRef(new csql::DefaultExecutionStrategy());
@@ -229,7 +229,7 @@ RefPtr<csql::ExecutionStrategy> SQLEngine::getExecutionStrategy(
 ScopedPtr<InputStream> SQLEngine::executeParallelGroupBy(
     PartitionMap* partition_map,
     ReplicationScheme* replication_scheme,
-    CSTableIndex* cstable_index,
+    CompactionWorker* cstable_index,
     AnalyticsAuth* auth,
     const String& customer,
     const Vector<ReplicaRef>& hosts,
@@ -265,7 +265,7 @@ ScopedPtr<InputStream> SQLEngine::executeParallelGroupBy(
 ScopedPtr<InputStream> SQLEngine::executeRemoteGroupBy(
     PartitionMap* partition_map,
     ReplicationScheme* replication_scheme,
-    CSTableIndex* cstable_index,
+    CompactionWorker* cstable_index,
     AnalyticsAuth* auth,
     const String& customer,
     const InetAddr& host,

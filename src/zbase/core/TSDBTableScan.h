@@ -55,7 +55,7 @@ protected:
   void onRow(const Buffer& row);
 
   void scanWithoutIndex(dproc::TaskContext* context);
-  void scanWithCSTableIndex(dproc::TaskContext* context);
+  void scanWithCompactionWorker(dproc::TaskContext* context);
 
   TSDBTableScanSpec params_;
   RefPtr<ScanletType> scanlet_;

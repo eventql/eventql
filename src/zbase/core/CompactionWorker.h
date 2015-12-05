@@ -17,11 +17,11 @@ using namespace stx;
 
 namespace zbase {
 
-class CSTableIndex {
+class CompactionWorker {
 public:
 
-  CSTableIndex(PartitionMap* pmap, size_t nthreads);
-  ~CSTableIndex();
+  CompactionWorker(PartitionMap* pmap, size_t nthreads);
+  ~CompactionWorker();
 
   void enqueuePartition(RefPtr<Partition> partition);
 

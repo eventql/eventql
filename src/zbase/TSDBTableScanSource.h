@@ -45,7 +45,7 @@ public:
 protected:
 
   void scanWithoutIndex(dproc::TaskContext* context);
-  void scanWithCSTableIndex(dproc::TaskContext* context);
+  void scanWithCompactionWorker(dproc::TaskContext* context);
 
   zbase::TSDBTableScanSpec params_;
   zbase::PartitionMap* tsdb_;

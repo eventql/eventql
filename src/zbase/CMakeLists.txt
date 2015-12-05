@@ -54,7 +54,7 @@ add_library(tsdb-server OBJECT
     core/TSDBClient.cc
     core/TimeWindowPartitioner.cc
     core/FixedShardPartitioner.cc
-    core/CSTableIndex.cc
+    core/CompactionWorker.cc
     core/SQLEngine.cc
     core/TSDBService.cc
     core/TSDBServlet.cc

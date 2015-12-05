@@ -13,8 +13,8 @@
 #include <stx/io/mmappedfile.h>
 #include <stx/protobuf/msg.h>
 #include <stx/wallclock.h>
-#include <zbase/core/CSTableIndex.h>
-#include <zbase/core/CSTableIndexBuildState.pb.h>
+#include <zbase/core/CompactionWorker.h>
+#include <zbase/core/LogPartitionCompactionState.pb.h>
 #include <zbase/core/RecordSet.h>
 #include <zbase/core/LogPartitionReader.h>
 #include <stx/protobuf/MessageDecoder.h>
@@ -25,7 +25,7 @@ using namespace stx;
 
 namespace zbase {
 
-CSTableIndex::CSTableIndex(
+CompactionWorker::CompactionWorker(
     PartitionMap* pmap,
     size_t nthreads) :
     nthreads_(nthreads),
@@ -43,16 +43,16 @@ CSTableIndex::CSTableIndex(
   start();
 }
 
-CSTableIndex::~CSTableIndex() {
+CompactionWorker::~CompactionWorker() {
   stop();
 }
 
-void CSTableIndex::enqueuePartition(RefPtr<Partition> partition) {
+void CompactionWorker::enqueuePartition(RefPtr<Partition> partition) {
   std::unique_lock<std::mutex> lk(mutex_);
   enqueuePartitionWithLock(partition);
 }
 
-void CSTableIndex::enqueuePartitionWithLock(RefPtr<Partition> partition) {
+void CompactionWorker::enqueuePartitionWithLock(RefPtr<Partition> partition) {
   auto interval = partition->getTable()->cstableBuildInterval();
 
   auto uuid = partition->uuid();
@@ -68,15 +68,15 @@ void CSTableIndex::enqueuePartitionWithLock(RefPtr<Partition> partition) {
   cv_.notify_all();
 }
 
-void CSTableIndex::start() {
+void CompactionWorker::start() {
   running_ = true;
 
   for (int i = 0; i < nthreads_; ++i) {
-    threads_.emplace_back(std::bind(&CSTableIndex::work, this));
+    threads_.emplace_back(std::bind(&CompactionWorker::work, this));
   }
 }
 
-void CSTableIndex::stop() {
+void CompactionWorker::stop() {
   if (!running_) {
     return;
   }
@@ -89,7 +89,7 @@ void CSTableIndex::stop() {
   }
 }
 
-void CSTableIndex::work() {
+void CompactionWorker::work() {
   std::unique_lock<std::mutex> lk(mutex_);
 
   while (running_) {
@@ -121,7 +121,7 @@ void CSTableIndex::work() {
         auto writer = partition->getWriter();
         writer->compact();
       } catch (const StandardException& e) {
-        logError("tsdb", e, "CSTableIndex error");
+        logError("tsdb", e, "CompactionWorker error");
         success = false;
       }
 

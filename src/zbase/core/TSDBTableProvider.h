@@ -13,7 +13,7 @@
 #include <zbase/AnalyticsAuth.h>
 #include <zbase/core/TSDBTableRef.h>
 #include <zbase/core/PartitionMap.h>
-#include <zbase/core/CSTableIndex.h>
+#include <zbase/core/CompactionWorker.h>
 #include <zbase/core/TableConfig.pb.h>
 #include <zbase/core/TSDBTableInfo.h>
 
@@ -29,7 +29,7 @@ public:
       const String& tsdb_namespace,
       PartitionMap* partition_map,
       ReplicationScheme* replication_scheme,
-      CSTableIndex* cstable_index,
+      CompactionWorker* cstable_index,
       AnalyticsAuth* auth);
 
   Option<ScopedPtr<csql::TableExpression>> buildSequentialScan(
@@ -58,7 +58,7 @@ protected:
   String tsdb_namespace_;
   PartitionMap* partition_map_;
   ReplicationScheme* replication_scheme_;
-  CSTableIndex* cstable_index_;
+  CompactionWorker* cstable_index_;
   AnalyticsAuth* auth_;
 };
 

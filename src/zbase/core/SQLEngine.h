@@ -22,7 +22,7 @@ public:
   static RefPtr<csql::TableProvider> tableProviderForNamespace(
       PartitionMap* partition_map,
       ReplicationScheme* replication_scheme,
-      CSTableIndex* cstable_index,
+      CompactionWorker* cstable_index,
       AnalyticsAuth* auth,
       const String& tsdb_namespace);
 
@@ -30,7 +30,7 @@ public:
       csql::Runtime* runtime,
       PartitionMap* partition_map,
       ReplicationScheme* replication_scheme,
-      CSTableIndex* cstable_index,
+      CompactionWorker* cstable_index,
       AnalyticsAuth* auth,
       const String& tsdb_namespace,
       RefPtr<csql::QueryTreeNode> query);
@@ -39,7 +39,7 @@ public:
       csql::Runtime* runtime,
       PartitionMap* partition_map,
       ReplicationScheme* replication_scheme,
-      CSTableIndex* cstable_index,
+      CompactionWorker* cstable_index,
       AnalyticsAuth* auth,
       const String& customer);
 
@@ -49,7 +49,7 @@ protected:
       csql::Runtime* runtime,
       PartitionMap* partition_map,
       ReplicationScheme* replication_scheme,
-      CSTableIndex* cstable_index,
+      CompactionWorker* cstable_index,
       AnalyticsAuth* auth,
       const String& tsdb_namespace,
       RefPtr<csql::QueryTreeNode>* node);
@@ -57,7 +57,7 @@ protected:
   static void replaceSequentialScanWithUnion(
       PartitionMap* partition_map,
       ReplicationScheme* replication_scheme,
-      CSTableIndex* cstable_index,
+      CompactionWorker* cstable_index,
       const String& tsdb_namespace,
       RefPtr<csql::QueryTreeNode>* node);
 
@@ -65,7 +65,7 @@ protected:
       csql::Runtime* runtime,
       PartitionMap* partition_map,
       ReplicationScheme* replication_scheme,
-      CSTableIndex* cstable_index,
+      CompactionWorker* cstable_index,
       AnalyticsAuth* auth,
       const String& tsdb_namespace,
       RefPtr<csql::QueryTreeNode>* node);
@@ -73,7 +73,7 @@ protected:
   static ScopedPtr<InputStream> executeParallelGroupBy(
       PartitionMap* partition_map,
       ReplicationScheme* replication_scheme,
-      CSTableIndex* cstable_index,
+      CompactionWorker* cstable_index,
       AnalyticsAuth* auth,
       const String& customer,
       const Vector<ReplicaRef>& hosts,
@@ -82,7 +82,7 @@ protected:
   static ScopedPtr<InputStream> executeRemoteGroupBy(
       PartitionMap* partition_map,
       ReplicationScheme* replication_scheme,
-      CSTableIndex* cstable_index,
+      CompactionWorker* cstable_index,
       AnalyticsAuth* auth,
       const String& customer,
       const InetAddr& host,

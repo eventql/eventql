@@ -8,7 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include <zbase/core/CSTableIndex.h>
+#include <zbase/core/CompactionWorker.h>
 #include <cstable/CSTableReader.h>
 #include <cstable/RecordMaterializer.h>
 #include <stx/protobuf/MessageEncoder.h>
@@ -58,7 +58,7 @@ TSDBTableScan<ScanletType>::TSDBTableScan(
 template <typename ScanletType>
 void TSDBTableScan<ScanletType>::compute(dproc::TaskContext* context) {
   //if (params_.use_cstable_index()) {
-  //  scanWithCSTableIndex(context);
+  //  scanWithCompactionWorker(context);
   //} else {
     scanWithoutIndex(context);
   //}
@@ -78,9 +78,9 @@ void TSDBTableScan<ScanletType>::scanWithoutIndex(
 }
 
 template <typename ScanletType>
-void TSDBTableScan<ScanletType>::scanWithCSTableIndex(
+void TSDBTableScan<ScanletType>::scanWithCompactionWorker(
     dproc::TaskContext* context) {
-  //auto dep = context->getDependency(0)->getInstanceAs<CSTableIndex>();
+  //auto dep = context->getDependency(0)->getInstanceAs<CompactionWorker>();
   //auto data = dep->encode();
 
   //cstable::CSTableReader reader(data);
@@ -134,7 +134,7 @@ List<dproc::TaskDependency> TSDBTableScan<ScanletType>::dependencies()
     auto dparams = params_;
 
     deps.emplace_back(dproc::TaskDependency {
-      .task_name = "CSTableIndex",
+      .task_name = "CompactionWorker",
       .params = *msg::encode(dparams)
     });
   }

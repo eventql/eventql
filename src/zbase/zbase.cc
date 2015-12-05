@@ -297,7 +297,7 @@ int main(int argc, const char** argv) {
   zbase::TSDBServlet tsdb_servlet(&tsdb_node, flags.getString("cachedir"));
   http_router.addRouteByPrefixMatch("/tsdb", &tsdb_servlet, &tpool);
 
-  zbase::CSTableIndex cstable_index(
+  zbase::CompactionWorker cstable_index(
       &partition_map,
       flags.getInt("indexbuild_threads"));
 

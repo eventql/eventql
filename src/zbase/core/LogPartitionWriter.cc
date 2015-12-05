@@ -11,7 +11,7 @@
 #include <zbase/core/Partition.h>
 #include <zbase/core/LogPartitionWriter.h>
 #include <zbase/core/LogPartitionReader.h>
-#include <zbase/core/CSTableIndexBuildState.pb.h>
+#include <zbase/core/LogPartitionCompactionState.pb.h>
 #include <stx/protobuf/msg.h>
 #include <stx/logging.h>
 #include <stx/wallclock.h>
@@ -105,7 +105,7 @@ bool LogPartitionWriter::needsCompaction() {
   auto metapath = FileUtil::joinPaths(snap->base_path, "_cstable_state");
 
   if (FileUtil::exists(metapath)) {
-    auto metadata = msg::decode<CSTableIndexBuildState>(
+    auto metadata = msg::decode<LogPartitionCompactionState>(
         FileUtil::read(metapath));
 
     if (metadata.uuid() == tbl_uuid &&
@@ -175,7 +175,7 @@ void LogPartitionWriter::compact() {
         metapath_tmp,
         File::O_CREATE | File::O_WRITE);
 
-    CSTableIndexBuildState metadata;
+    LogPartitionCompactionState metadata;
     metadata.set_offset(snap->nrecs);
     metadata.set_uuid(snap->uuid().data(), snap->uuid().size());
 

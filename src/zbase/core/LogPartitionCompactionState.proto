@@ -9,7 +9,7 @@
  */
 package zbase;
 
-message CSTableIndexBuildState {
+message LogPartitionCompactionState {
 
   /**
    * SHA1 sum (20 bytes) containing the uuid of the partition for which this
