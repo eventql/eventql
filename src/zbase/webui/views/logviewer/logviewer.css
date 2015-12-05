@@ -399,19 +399,32 @@
 .zbase_logviewer .logfile_list table.z-table thead th {
   font-weight: 400;
   color: #888;
+  padding: 10px 16px;
+  background: #f9f9f9;
+  background: #ffffff; /* Old browsers */
+  background: -moz-linear-gradient(top,  #ffffff 0%, #f9f9f9 100%); /* FF3.6-15 */
+  background: -webkit-linear-gradient(top,  #ffffff 0%,#f9f9f9 100%); /* Chrome10-25,Safari5.1-6 */
+  background: linear-gradient(to bottom,  #ffffff 0%,#f9f9f9 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#f9f9f9',GradientType=0 ); /* IE6-9 */
 }
 
 .zbase_logviewer .logfile_list table.z-table tbody tr td {
-  line-height: 24px;
+  padding: 0;
 }
 
 .zbase_logviewer .logfile_list table.z-table tbody tr a {
   color: #888;
+  line-height: 24px;
+  display: block;
+  padding: .7em .8em;
 }
 
 .zbase_logviewer .logfile_list table.z-table tbody tr td:first-child a {
-  font-weight: 400;
-  color: #000;
+  color: #3e8ad3;
+}
+
+.zbase_logviewer .logfile_list table.z-table tbody tr td:first-child a:hover {
+  text-decoration: underline;
 }
 
 .zbase_logviewer .logfile_list table.z-table tbody tr td.icon {
