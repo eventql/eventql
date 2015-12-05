@@ -28,6 +28,10 @@ ZBase.registerView((function() {
 
     info_message = ZbaseInfoMessage(page);
 
+    var logfile_link = $("a.logfile_name_breadcrumb", page);
+    logfile_link.innerHTML = def.name;
+    logfile_link.href = path_prefix + def.name;
+
     HeaderWidget.setBreadCrumbs([
       {href: "/a/logs", title: "Monitoring"},
       {href: "/a/logs", title: "Logfiles"},
