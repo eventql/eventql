@@ -1,11 +1,6 @@
 <template id="zbase_sql_editor_main_tpl">
   <div class="zbase_sql_editor">
-    <section class='zbase_page_title small' style="none">
-      <span class="sidebar_visibility">
-        <i class="fa line left"></i>
-        <i class="fa chevron"></i>
-      </span>
-    </section>
+
     <div class="zbase_content_pane fullwidth">
       <div class="zbase_sql_editor_pane">
         <div class="zbase_sql_editor_content with_sidebar">
@@ -49,12 +44,13 @@
         <div class="zbase_sql_editor_sidebar">
           <div class="sidebar_header">
             <span class="sidebar_visibility">
-              <i class="fa line left"></i>
               <i class="fa chevron"></i>
             </span>
           </div>
-          <section class="sidebar_section document_settings"></section>
-          <section class="sidebar_section table_list"></section>
+          <div class="sidebar_inner">
+            <section class="sidebar_section document_settings"></section>
+            <section class="sidebar_section table_list"></section>
+          </div>
         </div>
 
       </div>
