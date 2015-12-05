@@ -47,109 +47,6 @@ CSTableIndex::~CSTableIndex() {
   stop();
 }
 
-bool CSTableIndex::needsUpdate(
-    RefPtr<PartitionSnapshot> snap) const {
-  String tbl_uuid((char*) snap->uuid().data(), snap->uuid().size());
-
-  auto metapath = FileUtil::joinPaths(snap->base_path, "_cstable_state");
-
-  if (FileUtil::exists(metapath)) {
-    auto metadata = msg::decode<CSTableIndexBuildState>(
-        FileUtil::read(metapath));
-
-    if (metadata.uuid() == tbl_uuid &&
-        metadata.offset() >= snap->nrecs) {
-      return false;
-    }
-  }
-
-  return true;
-}
-
-void CSTableIndex::buildCSTable(RefPtr<Partition> partition) {
-  auto table = partition->getTable();
-  if (table->storage() != zbase::TBL_STORAGE_LOG) {
-    return;
-  }
-
-  auto t0 = WallClock::unixMicros();
-  auto snap = partition->getSnapshot();
-
-  if (!needsUpdate(snap)) {
-    return;
-  }
-
-  logDebug(
-      "tsdb",
-      "Building CSTable index for partition $0/$1/$2",
-      snap->state.tsdb_namespace(),
-      table->name(),
-      snap->key.toString());
-
-  auto filepath = FileUtil::joinPaths(snap->base_path, "_cstable");
-  auto filepath_tmp = filepath + "." + Random::singleton()->hex128();
-  auto schema = table->schema();
-
-  {
-    auto cstable = cstable::CSTableWriter::createFile(
-        filepath_tmp,
-        cstable::BinaryFormatVersion::v0_1_0,
-        cstable::TableSchema::fromProtobuf(*schema));
-
-    cstable::RecordShredder shredder(cstable.get());
-
-    auto reader_ptr = partition->getReader();
-    auto& reader = dynamic_cast<LogPartitionReader&>(*reader_ptr);
-
-    std::atomic<size_t> total_size(0);
-    reader.fetchRecords([&schema, &shredder, &total_size, &snap, &table] (const Buffer& record) {
-      msg::MessageObject obj;
-      msg::MessageDecoder::decode(record.data(), record.size(), *schema, &obj);
-      shredder.addRecordFromProtobuf(obj, *schema);
-
-      total_size += record.size();
-      if (total_size > 1024llu * 1024llu * 1024llu * 4llu) {
-        RAISEF(
-            kRuntimeError,
-            "CSTable is too large $0/$1/$2: $3",
-            snap->state.tsdb_namespace(),
-            table->name(),
-            snap->key.toString(),
-            total_size.load());
-      }
-    });
-
-    cstable->commit();
-  }
-
-  auto metapath = FileUtil::joinPaths(snap->base_path, "_cstable_state");
-  auto metapath_tmp = metapath + "." + Random::singleton()->hex128();
-  {
-    auto metafile = File::openFile(
-        metapath_tmp,
-        File::O_CREATE | File::O_WRITE);
-
-    CSTableIndexBuildState metadata;
-    metadata.set_offset(snap->nrecs);
-    metadata.set_uuid(snap->uuid().data(), snap->uuid().size());
-
-    auto buf = msg::encode(metadata);
-    metafile.write(buf->data(), buf->size());
-  }
-
-  FileUtil::mv(filepath_tmp, filepath);
-  FileUtil::mv(metapath_tmp, metapath);
-
-  auto t1 = WallClock::unixMicros();
-  logDebug(
-      "tsdb",
-      "Commiting CSTable index for partition $0/$1/$2, building took $3s",
-      snap->state.tsdb_namespace(),
-      table->name(),
-      snap->key.toString(),
-      (double) (t1 - t0) / 1000000.0f);
-}
-
 void CSTableIndex::enqueuePartition(RefPtr<Partition> partition) {
   std::unique_lock<std::mutex> lk(mutex_);
   enqueuePartitionWithLock(partition);
@@ -221,7 +118,8 @@ void CSTableIndex::work() {
       lk.unlock();
 
       try {
-        buildCSTable(partition);
+        auto writer = partition->getWriter();
+        writer->compact();
       } catch (const StandardException& e) {
         logError("tsdb", e, "CSTableIndex error");
         success = false;
@@ -233,7 +131,7 @@ void CSTableIndex::work() {
     if (success) {
       waitset_.erase(partition->uuid());
 
-      if (needsUpdate(partition->getSnapshot())) {
+      if (partition->getWriter()->needsCompaction()) {
         enqueuePartitionWithLock(partition);
       }
     } else {
