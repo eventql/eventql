@@ -107,6 +107,7 @@ var ZBaseSellerMetrics = (function() {
     num_listed_products: {aggr: sum, print: printNumber(0)},
     shop_page_views: {aggr: sum, print: printNumber(0)},
     product_page_views: {aggr: sum, print: printNumber(0)},
-    total_listviews: {aggr: sum, print: printNumber(0)}
+    total_listviews: {aggr: sum, print: printNumber(0)},
+    buy_to_detail_rate: {aggr: mean, print: printAsPercent}
   }
 })();
