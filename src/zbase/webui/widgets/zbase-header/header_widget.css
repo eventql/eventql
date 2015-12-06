@@ -1,5 +1,5 @@
 .zbase_header {
-  margin-bottom: 43px;
+  margin-bottom: 79px;
 }
 
 .zbase_header .header_bar {
@@ -134,15 +134,25 @@
   margin-bottom: 2px;
 }
 
+.zbase_header .breadcrumbs_bar {
+  height: 36px;
+  background: #f9f9f9;
+  position: absolute;
+  top: 44px;
+  width: 100%;
+  border-bottom: 1px solid #d0d0d0;
+}
+
 .zbase_header zbase-breadcrumbs {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 300;
   margin-left: 24px;
 }
 
 .zbase_header zbase-breadcrumbs,
 .zbase_header zbase-breadcrumbs a {
-  color: #fff;
+  color: #454545;
+  line-height: 36px;
 }
 
 .zbase_header zbase-breadcrumbs a:hover {
@@ -151,7 +161,7 @@
 
 .zbase_header zbase-breadcrumbs zbase-breadcrumbs-section::after {
   padding: 0 .24rem 0 .4rem;
-  color: rgba(255,255,255,.4);
+  color: #a9a9a9;
   opacity: 1;
 }
 

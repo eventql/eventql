@@ -41,7 +41,7 @@ var HeaderWidget = (function() {
   var update = function(path) {};
 
   var setBreadCrumbs = function(crumbs) {
-    var breadcrumbs = $(".header_bar zbase-breadcrumbs");
+    var breadcrumbs = $(".zbase_header .breadcrumbs_bar zbase-breadcrumbs");
     var inner = document.createElement("div");
 
     crumbs.forEach(function(crumb) {
