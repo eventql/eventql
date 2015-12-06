@@ -12,6 +12,7 @@
 #include <stx/stdtypes.h>
 #include <stx/io/fileutil.h>
 #include <stx/io/mmappedfile.h>
+#include <stx/io/inputstream.h>
 #include <stx/io/outputstream.h>
 #include <stx/io/BufferedOutputStream.h>
 #include <stx/logging.h>
@@ -35,10 +36,23 @@ void RecordVersionMap::write(
   }
 }
 
+// FIXME !!!
 void RecordVersionMap::lookup(
     HashMap<SHA1Hash, uint64_t>* map,
     const String& filename) {
-  iputs("lookup: $0", filename);
+  auto is = FileInputStream::openFile(filename);
+  is->readUInt8();
+  auto len = is->readUInt64();
+  for (size_t i = 0; i < len; ++i) {
+    SHA1Hash id;
+    is->readNextBytes(const_cast<void*>(id.data()), SHA1Hash::kSize);
+    auto ver = is->readUInt64();
+
+    auto map_iter = map->find(id);
+    if (map_iter != map->end() && map_iter->second <= ver) {
+      map->erase(map_iter);
+    }
+  }
 }
 
 } // namespace zbase
