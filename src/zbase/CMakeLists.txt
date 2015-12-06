@@ -73,6 +73,7 @@ add_library(tsdb-server OBJECT
     core/LSMPartitionReader.cc
     core/LSMPartitionWriter.cc
     core/LSMPartitionReplication.cc
+    core/LSMPartitionSQLScan.cc
     core/LazyPartition.cc
     core/Table.cc
     core/RecordArena.cc

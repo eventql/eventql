@@ -34,9 +34,9 @@ public:
       RefPtr<csql::SequentialScanNode> stmt,
       csql::QueryBuilder* runtime);
 
-  virtual Vector<String> columnNames() const override;
+  Vector<String> columnNames() const override;
 
-  virtual size_t numColumns() const override;
+  size_t numColumns() const override;
 
   void prepare(csql::ExecutionContext* context) override;
 
@@ -48,9 +48,11 @@ public:
   void setCacheKey(const SHA1Hash& key);
 
 protected:
-
+  RefPtr<Table> table_;
+  RefPtr<PartitionSnapshot> snap_;
+  Vector<String> column_names_;
   Option<SHA1Hash> cache_key_;
 };
 
 
-} // namespace csql
+} // namespace zbase
