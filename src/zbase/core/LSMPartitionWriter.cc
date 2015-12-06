@@ -29,7 +29,10 @@ LSMPartitionWriter::LSMPartitionWriter(
     PartitionSnapshotRef* head) :
     PartitionWriter(head),
     partition_(partition),
-    compaction_strategy_(new SimpleCompactionStrategy()),
+    compaction_strategy_(
+        new SimpleCompactionStrategy(
+            partition_->getTable(),
+            head->getSnapshot()->base_path)),
     max_datafile_size_(kDefaultMaxDatafileSize) {}
 
 Set<SHA1Hash> LSMPartitionWriter::insertRecords(const Vector<RecordRef>& records) {

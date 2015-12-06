@@ -17,6 +17,7 @@
 #include <stx/io/BufferedOutputStream.h>
 #include <stx/logging.h>
 #include <zbase/core/RecordVersionMap.h>
+#include <cstable/CSTableWriter.h>
 
 using namespace stx;
 
@@ -51,6 +52,23 @@ void RecordVersionMap::lookup(
     auto map_iter = map->find(id);
     if (map_iter != map->end() && ver > map_iter->second) {
       map_iter->second = ver;
+    }
+  }
+}
+
+void RecordVersionMap::load(
+    HashMap<SHA1Hash, uint64_t>* map,
+    const String& filename) {
+  auto is = FileInputStream::openFile(filename);
+  is->readUInt8();
+  auto len = is->readUInt64();
+  for (size_t i = 0; i < len; ++i) {
+    SHA1Hash id;
+    is->readNextBytes(const_cast<void*>(id.data()), SHA1Hash::kSize);
+    auto ver = is->readUInt64();
+    auto& slot = (*map)[id];
+    if (ver > slot) {
+      slot = ver;
     }
   }
 }

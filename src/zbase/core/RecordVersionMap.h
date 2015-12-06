@@ -33,6 +33,11 @@ public:
       HashMap<SHA1Hash, uint64_t>* map,
       const String& filename);
 
+  static void load(
+      HashMap<SHA1Hash, uint64_t>* map,
+      const String& filename);
+
+
 };
 
 } // namespace zbase

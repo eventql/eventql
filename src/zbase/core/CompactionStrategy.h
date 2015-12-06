@@ -12,6 +12,7 @@
 #pragma once
 #include <stx/stdtypes.h>
 #include <stx/autoref.h>
+#include <zbase/core/Table.h>
 #include <zbase/core/PartitionSnapshot.h>
 
 using namespace stx;
@@ -33,6 +34,10 @@ public:
 class SimpleCompactionStrategy : public CompactionStrategy {
 public:
 
+  SimpleCompactionStrategy(
+      RefPtr<Table> table,
+      const String& base_path);
+
   bool compact(
       const Vector<LSMTableRef>& input,
       Vector<LSMTableRef>* output) override;
@@ -40,6 +45,9 @@ public:
   bool needsCompaction(
       const Vector<LSMTableRef>& tables) override;
 
+protected:
+  RefPtr<Table> table_;
+  String base_path_;
 };
 
 } // namespace zbase
