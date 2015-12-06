@@ -13,6 +13,7 @@
 #include <zbase/core/PartitionWriter.h>
 #include <zbase/core/RecordArena.h>
 #include <stx/util/PersistentHashSet.h>
+#include <zbase/core/CompactionStrategy.h>
 
 using namespace stx;
 
@@ -42,6 +43,7 @@ protected:
       const String& filename);
 
   RefPtr<Partition> partition_;
+  RefPtr<CompactionStrategy> compaction_strategy_;
   size_t max_datafile_size_;
   std::mutex commit_mutex_;
 };

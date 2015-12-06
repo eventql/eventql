@@ -29,6 +29,7 @@ LSMPartitionWriter::LSMPartitionWriter(
     PartitionSnapshotRef* head) :
     PartitionWriter(head),
     partition_(partition),
+    compaction_strategy_(new SimpleCompactionStrategy()),
     max_datafile_size_(kDefaultMaxDatafileSize) {}
 
 Set<SHA1Hash> LSMPartitionWriter::insertRecords(const Vector<RecordRef>& records) {
@@ -103,7 +104,11 @@ bool LSMPartitionWriter::needsCompaction() {
     return true;
   }
 
-  return false;
+  auto snap = head_->getSnapshot();
+  return compaction_strategy_->needsCompaction(
+      Vector<LSMTableRef>(
+          snap->state.lsm_tables().begin(),
+          snap->state.lsm_tables().end()));
 }
 
 void LSMPartitionWriter::commit() {
@@ -156,50 +161,56 @@ void LSMPartitionWriter::compact() {
   commit();
 
   // fetch current table list
-  Vector<LSMTableRef> old_tables;
-  {
-    auto snap = head_->getSnapshot()->clone();
-    old_tables = Vector<LSMTableRef>(
-        snap->state.lsm_tables().begin(),
-        snap->state.lsm_tables().end());
-  }
+  auto snap = head_->getSnapshot()->clone();
+
+  Vector<LSMTableRef> new_tables;
+  Vector<LSMTableRef> old_tables(
+      snap->state.lsm_tables().begin(),
+      snap->state.lsm_tables().end());
 
   // compact
-  auto new_tables = old_tables;
-  //compaction_strategy.compact(old_tables);
+  auto t0 = WallClock::unixMicros();
+  if (!compaction_strategy_->compact(old_tables, &new_tables)) {
+    return;
+  }
+  auto t1 = WallClock::unixMicros();
+
+  stx::logDebug(
+      "z1.core",
+      "Compacting partition $0/$1/$2, took $3s",
+      snap->state.tsdb_namespace(),
+      snap->state.table_key(),
+      snap->key.toString(),
+      (double) (t1 - t0) / 1000000.0f);
 
   // commit table list
-  {
-    ScopedLock<std::mutex> write_lk(mutex_);
-    auto snap = head_->getSnapshot()->clone();
+  ScopedLock<std::mutex> write_lk(mutex_);
+  snap = head_->getSnapshot()->clone();
 
-    if (snap->state.lsm_tables().size() < old_tables.size()) {
-      RAISE(kConcurrentModificationError, "can't commit compaction, aborting");
-    }
-
-    size_t i = 0;
-    for (const auto& tbl : snap->state.lsm_tables()) {
-      if (i < old_tables.size()) {
-        if (old_tables[i].filename() != tbl.filename()) {
-          RAISE(
-              kConcurrentModificationError,
-              "can't commit compaction, aborting");
-        }
-      } else {
-        new_tables.push_back(tbl);
-      }
-
-      ++i;
-    }
-
-    snap->state.mutable_lsm_tables()->Clear();
-    for (const auto& tbl :  new_tables) {
-      *snap->state.add_lsm_tables() = tbl;
-    }
-
-    snap->writeToDisk();
-    head_->setSnapshot(snap);
+  if (snap->state.lsm_tables().size() < old_tables.size()) {
+    RAISE(kConcurrentModificationError, "concurrent compaction");
   }
+
+  size_t i = 0;
+  for (const auto& tbl : snap->state.lsm_tables()) {
+    if (i < old_tables.size()) {
+      if (old_tables[i].filename() != tbl.filename()) {
+        RAISE(kConcurrentModificationError, "concurrent compaction");
+      }
+    } else {
+      new_tables.push_back(tbl);
+    }
+
+    ++i;
+  }
+
+  snap->state.mutable_lsm_tables()->Clear();
+  for (const auto& tbl :  new_tables) {
+    *snap->state.add_lsm_tables() = tbl;
+  }
+
+  snap->writeToDisk();
+  head_->setSnapshot(snap);
 }
 
 void LSMPartitionWriter::writeArenaToDisk(
