@@ -118,6 +118,16 @@ add_executable(test-replicationscheme
 
 target_link_libraries(test-replicationscheme chartsql cplot sstable cstable stx-http stx-protobuf stx-json stx-base pcre)
 
+add_executable(test-recordversionmap
+    $<TARGET_OBJECTS:stx-mdb>
+    $<TARGET_OBJECTS:tsdb-server>
+    $<TARGET_OBJECTS:coreprotos>
+    $<TARGET_OBJECTS:dproc>
+    $<TARGET_OBJECTS:customerdirectory>
+    core/RecordVersionMap_test.cc)
+
+target_link_libraries(test-recordversionmap chartsql cplot sstable cstable stx-http stx-protobuf stx-json stx-base pcre)
+
 add_subdirectory(util)
 add_subdirectory(util/mysql)
 add_subdirectory(util/mdb)
