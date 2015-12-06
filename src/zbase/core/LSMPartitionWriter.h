@@ -11,6 +11,7 @@
 #include <stx/stdtypes.h>
 #include <stx/autoref.h>
 #include <zbase/core/PartitionWriter.h>
+#include <zbase/core/RecordArena.h>
 #include <stx/util/PersistentHashSet.h>
 
 using namespace stx;
@@ -31,7 +32,7 @@ public:
   void compact() override;
 
 protected:
-  PersistentHashSet idset_;
+  RefPtr<RecordArena> arena_;
   size_t max_datafile_size_;
 };
 
