@@ -1,4 +1,8 @@
 .zbase_header {
+  margin-bottom: 44px;
+}
+
+.zbase_header.with_breadcrumbs {
   margin-bottom: 79px;
 }
 
@@ -141,6 +145,11 @@
   top: 44px;
   width: 100%;
   border-bottom: 1px solid #d0d0d0;
+  display: none;
+}
+
+.zbase_header.with_breadcrumbs .breadcrumbs_bar {
+  display: block;
 }
 
 .zbase_header zbase-breadcrumbs {

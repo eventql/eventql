@@ -40,24 +40,14 @@ var HeaderWidget = (function() {
 
   var update = function(path) {};
 
-  var setBreadCrumbs = function(crumbs) {
-    var breadcrumbs = $(".zbase_header .breadcrumbs_bar zbase-breadcrumbs");
-    var inner = document.createElement("div");
+  var setBreadCrumbs = function(inner) {
+    $.replaceContent($(".zbase_header .breadcrumbs_bar"), inner);
+    $.handleLinks(inner);
+    $(".zbase_header").classList.add("with_breadcrumbs");
+  };
 
-    crumbs.forEach(function(crumb) {
-      var section = document.createElement("zbase-breadcrumbs-section");
-
-      if (crumb.href) {
-        var link = document.createElement("a");
-        link.innerHTML = crumb.title;
-        link.href = crumb.href;
-        section.appendChild(link);
-      }
-
-      inner.appendChild(section);
-    });
-
-    $.replaceContent(breadcrumbs, inner);
+  var hideBreadCrumbs = function() {
+    $(".zbase_header").classList.remove("with_breadcrumbs");
   };
 
   var toggleDropdown = function() {
@@ -116,7 +106,8 @@ var HeaderWidget = (function() {
   return {
     render: render,
     update: update,
-    setBreadCrumbs: setBreadCrumbs
+    setBreadCrumbs: setBreadCrumbs,
+    hideBreadCrumbs: hideBreadCrumbs
   };
 
 })();
