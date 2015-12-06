@@ -15,4 +15,3 @@
 - tombstones
 - handle schema changes in compactionstrategy
 - delete compacted tables
-- cstablereader skip+copy
