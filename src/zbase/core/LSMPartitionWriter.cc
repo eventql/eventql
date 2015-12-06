@@ -134,7 +134,7 @@ void LSMPartitionWriter::commit() {
     auto filename = Random::singleton()->hex64();
     auto filepath = FileUtil::joinPaths(snap->base_path, filename);
     auto t0 = WallClock::unixMicros();
-    writeArenaToDisk(arena, filepath);
+    writeArenaToDisk(arena, snap->state.lsm_sequence() + 1, filepath);
     auto t1 = WallClock::unixMicros();
 
     stx::logDebug(
@@ -146,12 +146,14 @@ void LSMPartitionWriter::commit() {
         snap->key.toString(),
         (double) (t1 - t0) / 1000000.0f);
 
-    // swap compacting arena with disk cstable
     ScopedLock<std::mutex> write_lk(mutex_);
     snap = head_->getSnapshot()->clone();
-    snap->compacting_arena = nullptr;
     auto tblref = snap->state.add_lsm_tables();
     tblref->set_filename(filename);
+    tblref->set_first_sequence(snap->state.lsm_sequence() + 1);
+    tblref->set_last_sequence(snap->state.lsm_sequence() + arena->size());
+    snap->state.set_lsm_sequence(snap->state.lsm_sequence() + arena->size());
+    snap->compacting_arena = nullptr;
     snap->writeToDisk();
     head_->setSnapshot(snap);
   }
@@ -215,6 +217,7 @@ void LSMPartitionWriter::compact() {
 
 void LSMPartitionWriter::writeArenaToDisk(
       RefPtr<RecordArena> arena,
+      uint64_t sequence,
       const String& filename) {
   auto schema = partition_->getTable()->schema();
 
@@ -225,6 +228,7 @@ void LSMPartitionWriter::writeArenaToDisk(
     cstable_schema_ext.addBool("__lsm_is_update", false);
     cstable_schema_ext.addString("__lsm_id", false);
     cstable_schema_ext.addUnsignedInteger("__lsm_version", false);
+    cstable_schema_ext.addUnsignedInteger("__lsm_sequence", false);
 
     auto cstable = cstable::CSTableWriter::createFile(
         filename + ".cst",
@@ -235,6 +239,7 @@ void LSMPartitionWriter::writeArenaToDisk(
     auto is_update_col = cstable->getColumnWriter("__lsm_is_update");
     auto id_col = cstable->getColumnWriter("__lsm_id");
     auto version_col = cstable->getColumnWriter("__lsm_version");
+    auto sequence_col = cstable->getColumnWriter("__lsm_sequence");
 
     arena->fetchRecords([&] (const RecordRef& r) {
       msg::MessageObject obj;
@@ -243,6 +248,7 @@ void LSMPartitionWriter::writeArenaToDisk(
       is_update_col->writeBoolean(0, 0, r.is_update);
       id_col->writeString(0, 0, r.record_id.toString());
       version_col->writeUnsignedInt(0, 0, r.record_version);
+      sequence_col->writeUnsignedInt(0, 0, sequence++);
       vmap.emplace(r.record_id, r.record_version);
     });
 

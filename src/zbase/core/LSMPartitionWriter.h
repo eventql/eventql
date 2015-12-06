@@ -40,6 +40,7 @@ protected:
 
   void writeArenaToDisk(
       RefPtr<RecordArena> arena,
+      uint64_t sequence,
       const String& filename);
 
   RefPtr<Partition> partition_;

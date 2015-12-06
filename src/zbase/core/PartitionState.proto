@@ -11,6 +11,8 @@ package zbase;
 
 message LSMTableRef {
   required string filename = 1;
+  required uint64 first_sequence = 2;
+  required uint64 last_sequence = 3;
 }
 
 message PartitionState {
@@ -39,6 +41,11 @@ message PartitionState {
    * LSM table files. Last is most recent
    */
   repeated LSMTableRef lsm_tables = 7;
+
+  /**
+   * LSM sequence number
+   */
+  optional uint64 lsm_sequence = 8;
 
   /**
    * SHA1 sum (20 bytes) containing this partition's uuid. The uuid is used
