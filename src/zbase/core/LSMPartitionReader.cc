@@ -12,6 +12,7 @@
 #include <stx/protobuf/MessageDecoder.h>
 #include <sstable/sstablereader.h>
 #include <zbase/core/LSMPartitionReader.h>
+#include <zbase/core/LSMPartitionSQLScan.h>
 #include <zbase/core/Table.h>
 
 using namespace stx;
@@ -36,7 +37,19 @@ SHA1Hash LSMPartitionReader::version() const {
 ScopedPtr<csql::TableExpression> LSMPartitionReader::buildSQLScan(
     RefPtr<csql::SequentialScanNode> node,
     csql::QueryBuilder* runtime) const {
-  RAISE(kNotYetImplementedError, "not yet implemented");
+  auto scan = mkScoped(
+      new LSMPartitionSQLScan(
+          table_,
+          snap_,
+          node,
+          runtime));
+
+  //auto cstable_version = cstableVersion();
+  //if (!cstable_version.isEmpty()) {
+  //  scan->setCacheKey(cstable_version.get());
+  //}
+
+  return std::move(scan);
 }
 
 } // namespace tdsb
