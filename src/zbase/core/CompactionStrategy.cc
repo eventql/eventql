@@ -42,8 +42,6 @@ bool SimpleCompactionStrategy::compact(
         FileUtil::joinPaths(base_path_, tbl->filename() + ".idx"));
   }
 
-  iputs("got: $0 records from $1 tables", vmap.size(), input.size());
-
   auto cstable_schema = cstable::TableSchema::fromProtobuf(*table_->schema());
   auto cstable_schema_ext = cstable_schema;
   cstable_schema_ext.addBool("__lsm_is_update", false);

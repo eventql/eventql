@@ -7,10 +7,7 @@
 - allow timewindow partitioner config updates
 - primarykeypartitioner
 
-
-
 ---------
-- wait for remote commit in LSM replication
 - move replication state into partitionstate
 - in place log->lsm upgrade
 - better RecordVersionMap
