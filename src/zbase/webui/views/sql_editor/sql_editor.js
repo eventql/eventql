@@ -81,10 +81,15 @@ ZBase.registerView((function() {
     }
 
     //breadcrumbs
-    HeaderWidget.setBreadCrumbs([
-      {href: "/a/", title: "Datastore"},
-      {href: "/a/queries", title: "Queries"},
-      {href: kPathPrefix + doc.uuid, title: doc.name}]);
+    var breadcrumbs = $.getTemplate(
+        "views/sql_editor",
+        "zbase_sql_editor_breadcrumbs_tpl");
+
+    var query_breadcrumb = $(".query_name_breadcrumb", breadcrumbs);
+    query_breadcrumb.href = kPathPrefix + doc.uuid;
+    query_breadcrumb.innerHTML = doc.name;
+
+    HeaderWidget.setBreadCrumbs(breadcrumbs);
 
     // code editor
     var editor = $("z-codeeditor", page);
