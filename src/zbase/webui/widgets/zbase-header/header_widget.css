@@ -1,5 +1,5 @@
 .zbase_header {
-  margin-bottom: 77px;
+  margin-bottom: 43px;
 }
 
 .zbase_header .header_bar {
@@ -11,7 +11,7 @@
   box-shadow: 0 1px 1px rgba(0,0,0,0.2);
   position: absolute;
   z-index: 99998;
-  top: 34px;
+  top: 0px;
 }
 
 .zbase_header .navigation_inner {
@@ -27,6 +27,27 @@
   width: 1px;
   float: left;
   border-left: 1px solid rgba(255,255,255,.1);
+}
+
+.zbase_header .main_navi {
+  float: left;
+  color: #fff;
+}
+
+.zbase_header .main_navi a {
+  color: #fff;
+  font-size: 12px;
+  margin: 0 14px;
+  line-height: 44px;
+  display: inline-block;
+}
+
+.zbase_header .main_navi a:first-child {
+  margin-left: 20px;
+}
+
+.zbase_header .main_navi a:hover {
+  text-decoration: underline;
 }
 
 .zbase_header .button {
@@ -138,33 +159,33 @@
   font-weight: 300;
 }
 
-#zscale_user_navi {
+.zbase_header .user_navi {
   font-size: 12px;
-  margin-right: 16px;
   padding-left: 12px;
-  color: #4E6370;
+  color: #fff;
+  float: right;
 }
 
-#zscale_user_navi .dropdown {
+.zbase_header .user_navi .dropdown {
   cursor: pointer;
   display: block;
 }
 
-#zscale_user_navi .dropdown .dropdown_header .fa-caret-down {
+.zbase_header .user_navi .dropdown .dropdown_header .fa-caret-down {
   margin-right: 3px;
   margin-left: 5px;
 }
 
-#zscale_user_navi .dropdown .dropdown_header {
+.zbase_header .user_navi .dropdown .dropdown_header {
   display: block;
   padding: 0 10px;
 }
 
-#zscale_user_navi .dropdown .dropdown_panel {
+.zbase_header .user_navi .dropdown .dropdown_panel {
   display: none;
 }
 
-#zscale_user_navi .dropdown.open .dropdown_panel {
+.zbase_header .user_navi .dropdown.open .dropdown_panel {
   box-sizing: content-box;
   display: block;
   width: 100%;
@@ -183,22 +204,22 @@
   padding: 0;
 }
 
-#zscale_user_navi .dropdown_panel li {
+.zbase_header .user_navi .dropdown_panel li {
   display: block;
   margin-right: -11px;
 }
 
-#zscale_user_navi .dropdown_panel li:hover {
+.zbase_header .user_navi .dropdown_panel li:hover {
   background: #f2f8fa;
 }
 
-#zscale_user_navi .dropdown_panel li:hover a,
-#zscale_user_navi .dropdown_panel li:hover span {
+.zbase_header .user_navi .dropdown_panel li:hover a,
+.zbase_header .user_navi .dropdown_panel li:hover span {
   color: #3d8ad3;
 }
 
-#zscale_user_navi .dropdown_panel a,
-#zscale_user_navi .dropdown_panel span {
+.zbase_header .user_navi .dropdown_panel a,
+.zbase_header .user_navi .dropdown_panel span {
   display: block;
   width: 100%;
   color: #444;
@@ -208,8 +229,8 @@
   padding-left: 20px;
 }
 
-#zscale_user_navi .dropdown_panel a:hover,
-#zscale_user_navi .dropdown_panel span:hover {
+.zbase_header .user_navi .dropdown_panel a:hover,
+.zbase_header .user_navi .dropdown_panel span:hover {
   color: #111;
 }
 
