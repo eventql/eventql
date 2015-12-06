@@ -166,6 +166,8 @@ void TSDBService::insertRecord(
 void TSDBService::insertRecord(
     const String& tsdb_namespace,
     const String& table_name,
+    const SHA1Hash& record_id,
+    uint64_t record_version,
     const json::JSONObject::const_iterator& data_begin,
     const json::JSONObject::const_iterator& data_end,
     uint64_t flags /* = 0 */) {
@@ -179,7 +181,8 @@ void TSDBService::insertRecord(
   insertRecord(
       tsdb_namespace,
       table_name,
-      WallClock::unixMicros(),
+      record_id,
+      record_version,
       record,
       flags);
 }
@@ -187,6 +190,7 @@ void TSDBService::insertRecord(
 void TSDBService::insertRecord(
     const String& tsdb_namespace,
     const String& table_name,
+    const SHA1Hash& record_id,
     uint64_t record_version,
     const msg::DynamicMessage& data,
     uint64_t flags /* = 0 */) {
@@ -203,8 +207,6 @@ void TSDBService::insertRecord(
 
   auto partitioner = table.get()->partitioner();
   auto partition_key = partitioner->partitionKeyFor(partition_key_field.get());
-
-  auto record_id = Random::singleton()->sha1();
 
   Buffer record;
   msg::MessageEncoder::encode(data.data(), *data.schema(), &record);

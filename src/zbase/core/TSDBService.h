@@ -70,6 +70,8 @@ public:
   void insertRecord(
       const String& tsdb_namespace,
       const String& table_name,
+      const SHA1Hash& record_id,
+      uint64_t record_version,
       const json::JSONObject::const_iterator& data_begin,
       const json::JSONObject::const_iterator& data_end,
       uint64_t flags = 0);
@@ -77,6 +79,7 @@ public:
   void insertRecord(
       const String& tsdb_namespace,
       const String& table_name,
+      const SHA1Hash& record_id,
       uint64_t record_version,
       const msg::DynamicMessage& data,
       uint64_t flags = 0);
