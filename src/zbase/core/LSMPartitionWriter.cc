@@ -139,16 +139,17 @@ void LSMPartitionWriter::writeArenaToDisk(RefPtr<PartitionSnapshot> snap) {
   {
     HashMap<SHA1Hash, uint64_t> vmap;
     auto cstable_schema = cstable::TableSchema::fromProtobuf(*schema);
-    cstable_schema.addBool("__lsm_is_update", false);
-    cstable_schema.addString("__lsm_id", false);
-    cstable_schema.addUnsignedInteger("__lsm_version", false);
+    auto cstable_schema_ext = cstable_schema;
+    cstable_schema_ext.addBool("__lsm_is_update", false);
+    cstable_schema_ext.addString("__lsm_id", false);
+    cstable_schema_ext.addUnsignedInteger("__lsm_version", false);
 
     auto cstable = cstable::CSTableWriter::createFile(
         filepath + ".cst",
         cstable::BinaryFormatVersion::v0_1_0,
-        cstable_schema);
+        cstable_schema_ext);
 
-    cstable::RecordShredder shredder(cstable.get());
+    cstable::RecordShredder shredder(cstable.get(), &cstable_schema);
     auto is_update_col = cstable->getColumnWriter("__lsm_is_update");
     auto id_col = cstable->getColumnWriter("__lsm_id");
     auto version_col = cstable->getColumnWriter("__lsm_version");
