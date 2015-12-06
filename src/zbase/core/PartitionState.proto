@@ -9,6 +9,10 @@
  */
 package zbase;
 
+message LSMTableRef {
+  required string filename = 1;
+}
+
 message PartitionState {
 
   /**
@@ -30,6 +34,11 @@ message PartitionState {
    * The sstable files that contain the partition records/data
    */
   repeated string sstable_files = 4;
+
+  /**
+   * LSM table files. Last is most recent
+   */
+  repeated LSMTableRef lsm_tables = 7;
 
   /**
    * SHA1 sum (20 bytes) containing this partition's uuid. The uuid is used

@@ -26,6 +26,8 @@ public:
 
   bool insertRecord(const RecordRef& record);
 
+  void fetchRecords(Function<void (const RecordRef& record)> fn);
+
   size_t size() const;
 
 protected:

@@ -129,7 +129,7 @@ RefPtr<PartitionWriter> Partition::getWriter() {
         break;
 
       case zbase::TBL_STORAGE_LSM:
-        writer_ = mkRef<PartitionWriter>(new LSMPartitionWriter(&head_));
+        writer_ = mkRef<PartitionWriter>(new LSMPartitionWriter(this, &head_));
         break;
 
       case zbase::TBL_STORAGE_STATIC:

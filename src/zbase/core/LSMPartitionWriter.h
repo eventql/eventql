@@ -22,7 +22,9 @@ class LSMPartitionWriter : public PartitionWriter {
 public:
   static const size_t kDefaultMaxDatafileSize = 1024 * 1024 * 128;
 
-  LSMPartitionWriter(PartitionSnapshotRef* head);
+  LSMPartitionWriter(
+      RefPtr<Partition> partition,
+      PartitionSnapshotRef* head);
 
   Set<SHA1Hash> insertRecords(
       const Vector<RecordRef>& records) override;
@@ -32,6 +34,10 @@ public:
   void compact() override;
 
 protected:
+
+  void writeArenaToDisk(RefPtr<PartitionSnapshot> snap);
+
+  RefPtr<Partition> partition_;
   size_t max_datafile_size_;
   std::mutex compaction_mutex_;
 };

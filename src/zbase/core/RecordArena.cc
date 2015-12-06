@@ -32,6 +32,15 @@ bool RecordArena::insertRecord(const RecordRef& record) {
   }
 }
 
+
+void RecordArena::fetchRecords(Function<void (const RecordRef& record)> fn) {
+  ScopedLock<std::mutex> lk(mutex_); // FIXME
+
+  for (const auto& r : records_) {
+    fn(r.second);
+  }
+}
+
 size_t RecordArena::size() const {
   ScopedLock<std::mutex> lk(mutex_);
   return records_.size();
