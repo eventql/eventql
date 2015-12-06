@@ -33,6 +33,10 @@
   border-left: 1px solid rgba(255,255,255,.1);
 }
 
+.zbase_header .sep.right {
+  float: right;
+}
+
 .zbase_header .main_navi {
   float: left;
   color: #fff;
