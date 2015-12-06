@@ -36,6 +36,9 @@ public:
   void compact() override;
   bool needsCompaction() override;
 
+  ReplicationState fetchReplicationState() const;
+  void commitReplicationState(const ReplicationState& state);
+
 protected:
 
   void writeArenaToDisk(

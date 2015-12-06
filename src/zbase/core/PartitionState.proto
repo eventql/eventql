@@ -8,6 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 package zbase;
+import 'core/ReplicationState.proto';
 
 message LSMTableRef {
   required string filename = 1;
@@ -46,6 +47,8 @@ message PartitionState {
    * LSM sequence number
    */
   optional uint64 lsm_sequence = 8;
+
+  optional ReplicationState replication_state = 9;
 
   /**
    * SHA1 sum (20 bytes) containing this partition's uuid. The uuid is used

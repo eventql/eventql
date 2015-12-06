@@ -8,7 +8,6 @@
 - primarykeypartitioner
 
 ---------
-- move replication state into partitionstate
 - in place log->lsm upgrade
 - better RecordVersionMap
 - remove __lsm_id column

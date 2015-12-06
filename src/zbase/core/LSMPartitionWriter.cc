@@ -273,7 +273,19 @@ void LSMPartitionWriter::writeArenaToDisk(
     cstable->commit();
     RecordVersionMap::write(vmap, filename + ".idx");
   }
-
 }
+
+ReplicationState LSMPartitionWriter::fetchReplicationState() const {
+  return head_->getSnapshot()->state.replication_state();
+}
+
+void LSMPartitionWriter::commitReplicationState(const ReplicationState& state) {
+  ScopedLock<std::mutex> write_lk(mutex_);
+  auto snap = head_->getSnapshot()->clone();
+  *snap->state.mutable_replication_state() = state;
+  snap->writeToDisk();
+  head_->setSnapshot(snap);
+}
+
 
 } // namespace tdsb

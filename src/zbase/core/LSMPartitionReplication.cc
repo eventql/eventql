@@ -9,6 +9,7 @@
  */
 #include <zbase/core/LSMPartitionReplication.h>
 #include <zbase/core/LSMPartitionReader.h>
+#include <zbase/core/LSMPartitionWriter.h>
 #include <zbase/core/ReplicationScheme.h>
 #include <stx/logging.h>
 #include <stx/io/fileutil.h>
@@ -35,7 +36,8 @@ bool LSMPartitionReplication::needsReplication() const {
     return false;
   }
 
-  auto repl_state = fetchReplicationState();
+  auto& writer = dynamic_cast<LSMPartitionWriter&>(*partition_->getWriter());
+  auto repl_state = writer.fetchReplicationState();
   auto head_offset = snap_->state.lsm_sequence();
   for (const auto& r : replicas) {
     if (r.is_local) {
@@ -54,7 +56,8 @@ bool LSMPartitionReplication::needsReplication() const {
 size_t LSMPartitionReplication::numFullRemoteCopies() const {
   size_t ncopies = 0;
   auto replicas = repl_scheme_->replicasFor(snap_->key);
-  auto repl_state = fetchReplicationState();
+  auto& writer = dynamic_cast<LSMPartitionWriter&>(*partition_->getWriter());
+  auto repl_state = writer.fetchReplicationState();
   auto head_offset = snap_->state.lsm_sequence();
 
   for (const auto& r : replicas) {
@@ -160,7 +163,8 @@ bool LSMPartitionReplication::replicate() {
   }
 
   if (dirty) {
-    commitReplicationState(repl_state);
+    auto& writer = dynamic_cast<LSMPartitionWriter&>(*partition_->getWriter());
+    writer.commitReplicationState(repl_state);
   }
 
   return success;
