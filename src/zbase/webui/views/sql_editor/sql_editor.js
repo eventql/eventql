@@ -85,10 +85,7 @@ ZBase.registerView((function() {
         "views/sql_editor",
         "zbase_sql_editor_breadcrumbs_tpl");
 
-    var query_breadcrumb = $(".query_name_breadcrumb", breadcrumbs);
-    query_breadcrumb.href = kPathPrefix + doc.uuid;
-    query_breadcrumb.innerHTML = doc.name;
-
+    $(".query_name_breadcrumb", breadcrumbs).href = kPathPrefix + doc.uuid;
     HeaderWidget.setBreadCrumbs(breadcrumbs);
 
     // code editor
@@ -193,7 +190,9 @@ ZBase.registerView((function() {
   };
 
   var setDocumentTitle = function(title) {
-    $(".zbase_sql_editor_title h2").innerHTML = $.escapeHTML(title);
+    var escaped_name = $.escapeHTML(title);
+    $(".zbase_header .query_name_breadcrumb").innerHTML = escaped_name;
+    $(".zbase_sql_editor_title h2").innerHTML = escaped_name;
     $(".zbase_sql_editor_pane input[name='doc_name']").value = title;
   }
 
