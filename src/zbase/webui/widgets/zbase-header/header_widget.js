@@ -35,7 +35,10 @@ var HeaderWidget = (function() {
     $.replaceContent($(".user_navi", hdr_tpl), usernav_tpl);
 
     $.handleLinks(usernav_tpl);
-    $.replaceContent($("#zbase_header"), hdr_tpl);
+
+    var zbase_header = $("#zbase_header");
+    zbase_header.classList.remove("hidden");
+    $.replaceContent(zbase_header, hdr_tpl);
   };
 
   var update = function(path) {};

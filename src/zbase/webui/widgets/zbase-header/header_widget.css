@@ -2,6 +2,10 @@
   margin-bottom: 44px;
 }
 
+.zbase_header.hidden {
+  display: none;
+}
+
 .zbase_header.with_breadcrumbs {
   margin-bottom: 79px;
 }
