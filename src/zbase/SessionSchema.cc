@@ -102,6 +102,10 @@ Vector<TableDefinition> SessionSchema::tableDefinitionsForCustomer(
   //  tbls.emplace_back(td);
   //}
 
+  if (!cfg.has_logjoin_config()) {
+    return tbls;
+  }
+
   {
     TableDefinition td;
     td.set_customer(cfg.customer());
