@@ -60,8 +60,8 @@
   margin-left: 6px;
 }
 
-.zbase_header .btn_settings:hover {
-  color: #3d8ad3;
+.zbase_header .btn_settings:hover span {
+  text-decoration: underline;
 }
 
 .zbase_header z-dropdown.new_query {
@@ -80,7 +80,8 @@
 }
 
 .zbase_header z-dropdown.new_query z-dropdown-flyout {
-  left: -23px;
+  left: 0px;
+  border-radius: .2857rem;
 }
 
 #menu_toggler:hover {
@@ -179,6 +180,7 @@
   box-shadow: 0 2px 3px rgba(0,0,0,.1);
   position: absolute;
   z-index: 99999;
+  padding: 0;
 }
 
 #zscale_user_navi .dropdown_panel li {
