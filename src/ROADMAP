@@ -1,4 +1,9 @@
-- LSM partitions
+- in place log->lsm upgrade
+- better RecordVersionMap
+- remove __lsm_id column
+- tombstones
+- LSM handle schema changes in compactionstrategy
+- LSM delayed delete compacted tables
 - table ids
 - cstable mmap remove
 - table partitions from WHERE clause/filter list
@@ -6,12 +11,4 @@
 - metrics API
 - allow timewindow partitioner config updates
 - primarykeypartitioner
-
----------
-- in place log->lsm upgrade
-- better RecordVersionMap
-- remove __lsm_id column
-- tombstones
-- handle schema changes in compactionstrategy
-- delayed delete compacted tables
 - local sql scan fastpath
