@@ -42,6 +42,15 @@ protected:
       const ReplicaRef& replica,
       const RecordEnvelopeList& batch);
 
+  void fetchRecords(
+      size_t start_sequence,
+      Function<void (
+          const SHA1Hash& record_id,
+          uint64_t record_version,
+          const void* record_data,
+          size_t record_size)> fn);
+
+
 };
 
 } // namespace tdsb

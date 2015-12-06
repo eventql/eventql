@@ -31,7 +31,7 @@ void LSMPartitionReader::fetchRecords(
 }
 
 SHA1Hash LSMPartitionReader::version() const {
-  return SHA1::compute(StringUtil::toString(snap_->nrecs));
+  return SHA1::compute(StringUtil::toString(snap_->state.lsm_sequence())); // FIXME include arenas?
 }
 
 ScopedPtr<csql::TableExpression> LSMPartitionReader::buildSQLScan(
