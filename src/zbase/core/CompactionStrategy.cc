@@ -110,13 +110,14 @@ bool SimpleCompactionStrategy::compact(
 
         for (auto& col : columns) {
           while (!col.first->eofReached()) {
-            String v;
             col.first->copyValue(col.second.get());
             if (col.first->nextRepetitionLevel() == 0) {
               break;
             }
           }
         }
+
+        cstable->addRow();
       } else {
         for (auto& col : columns) {
           while (!col.first->eofReached()) {
