@@ -32,12 +32,21 @@ bool RecordArena::insertRecord(const RecordRef& record) {
   }
 }
 
-
 void RecordArena::fetchRecords(Function<void (const RecordRef& record)> fn) {
   ScopedLock<std::mutex> lk(mutex_); // FIXME
 
   for (const auto& r : records_) {
     fn(r.second);
+  }
+}
+
+uint64_t RecordArena::fetchRecordVersion(const SHA1Hash& record_id) {
+  ScopedLock<std::mutex> lk(mutex_);
+  auto rec = records_.find(record_id);
+  if (rec == records_.end()) {
+    return 0;
+  } else {
+    return rec->second.record_version;
   }
 }
 

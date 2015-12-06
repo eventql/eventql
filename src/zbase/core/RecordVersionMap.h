@@ -24,10 +24,14 @@ public:
       const HashMap<SHA1Hash, uint64_t>& map,
       const String& filename);
 
-  static uint64_t lookup(
-      const SHA1Hash& id,
+  /**
+   * Deletes all records from the provided map for which an entry with the same
+   * id with and a version equal or greater to the provided version was found
+   * in the index
+   */
+  static void lookup(
+      HashMap<SHA1Hash, uint64_t>* map,
       const String& filename);
-
 
 };
 

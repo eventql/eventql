@@ -14,6 +14,7 @@
 #include <stx/io/mmappedfile.h>
 #include <stx/io/outputstream.h>
 #include <stx/io/BufferedOutputStream.h>
+#include <stx/logging.h>
 #include <zbase/core/RecordVersionMap.h>
 
 using namespace stx;
@@ -32,6 +33,12 @@ void RecordVersionMap::write(
     os->write((const char*) p.first.data(),  p.first.size());
     os->appendUInt64(p.second);
   }
+}
+
+void RecordVersionMap::lookup(
+    HashMap<SHA1Hash, uint64_t>* map,
+    const String& filename) {
+  iputs("lookup: $0", filename);
 }
 
 } // namespace zbase

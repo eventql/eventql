@@ -47,10 +47,44 @@ Set<SHA1Hash> LSMPartitionWriter::insertRecords(const Vector<RecordRef>& records
       snap->state.table_key(),
       snap->key.toString());
 
-  Set<SHA1Hash> inserted_ids;
+  HashMap<SHA1Hash, uint64_t> rec_versions;
   for (const auto& r : records) {
-    if (snap->head_arena->insertRecord(r)) {
-      inserted_ids.emplace(r.record_id);
+    if (snap->head_arena->fetchRecordVersion(r.record_id) < r.record_version) {
+      rec_versions.emplace(r.record_id, r.record_version);
+    }
+  }
+
+  if (snap->compacting_arena.get() != nullptr) {
+    for (auto r = rec_versions.begin(); r != rec_versions.end(); ) {
+      if (snap->compacting_arena->fetchRecordVersion(r->first) >= r->second) {
+        r = rec_versions.erase(r);
+      } else {
+        ++r;
+      }
+    }
+  }
+
+  const auto& tables = snap->state.lsm_tables();
+  for (auto tbl = tables.rbegin(); tbl != tables.rend(); ++tbl) {
+    RecordVersionMap::lookup(
+        &rec_versions,
+        FileUtil::joinPaths(snap->base_path, tbl->filename() + ".idx"));
+
+    if (rec_versions.empty()) {
+      break;
+    }
+  }
+
+  Set<SHA1Hash> inserted_ids;
+  if (!rec_versions.empty()) {
+    for (const auto& r : records) {
+      if (rec_versions.count(r.record_id) != 1) {
+        continue;
+      }
+
+      if (snap->head_arena->insertRecord(r)) {
+        inserted_ids.emplace(r.record_id);
+      }
     }
   }
 

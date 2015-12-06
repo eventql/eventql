@@ -28,6 +28,8 @@ public:
 
   void fetchRecords(Function<void (const RecordRef& record)> fn);
 
+  uint64_t fetchRecordVersion(const SHA1Hash& record_id);
+
   size_t size() const;
 
 protected:
