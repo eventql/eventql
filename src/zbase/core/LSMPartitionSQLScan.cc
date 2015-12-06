@@ -38,6 +38,9 @@ size_t LSMPartitionSQLScan::numColumns() const {
 }
 
 void LSMPartitionSQLScan::prepare(csql::ExecutionContext* context) {
+  size_t ntasks = 0;
+  ntasks += snap_->state.lsm_tables().size();
+  context->incrNumSubtasksTotal(ntasks);
 }
 
 void LSMPartitionSQLScan::execute(
