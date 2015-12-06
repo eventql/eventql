@@ -67,7 +67,7 @@ message CustomerConfig {
   required string customer = 1;
   optional uint64 version = 4;
 
-  required LogJoinConfig logjoin_config = 2;
+  optional LogJoinConfig logjoin_config = 2;
 
   optional LogfileImportConfig logfile_import_config = 3;
 
