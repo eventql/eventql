@@ -15,7 +15,7 @@
   padding: 10px 20px;
   border-top: 1px solid #d1d1d1;
   border-bottom: 1px solid #d1d1d1;
-  background: rgba(63,144,170,.08);
+  background: #f9f9f9;
   height: 62px;
   overflow: visible;
 }
@@ -134,6 +134,11 @@
   padding: .7em .8em;
   line-height: 24px;
   text-align: right;
+}
+
+.zbase_seller_stats.overview table.z-table.zbase_clickable_table tbody tr:hover td {
+  border-top: 1px solid rgba(52, 152, 219, 0.3);
+  border-bottom: 1px solid rgba(52, 152, 219, 0.3);
 }
 
 .zbase_seller_stats.overview table.z-table tbody tr td.left_align a {

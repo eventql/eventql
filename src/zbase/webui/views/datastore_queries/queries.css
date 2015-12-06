@@ -40,6 +40,11 @@
   text-decoration: underline;
 }
 
+.zbase_datastore_queries table.z-table.zbase_clickable_table tbody tr:hover td {
+  border-top: 1px solid rgba(52, 152, 219, 0.3);
+  border-bottom: 1px solid rgba(52, 152, 219, 0.3);
+}
+
 .zbase_datastore_queries z-dropdown.input {
   float: right;
   margin-top: 12px;
