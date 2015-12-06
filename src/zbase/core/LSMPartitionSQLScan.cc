@@ -51,9 +51,27 @@ void LSMPartitionSQLScan::execute(
     auto cstable_file = FileUtil::joinPaths(
         snap_->base_path,
         tbl->filename() + ".cst");
+    auto cstable = cstable::CSTableReader::openFile(cstable_file);
+    auto id_col = cstable->getColumnReader("__lsm_id");
     csql::CSTableScan cstable_scan(stmt_, cstable_file, runtime_);
-    cstable_scan.execute(context, fn);
+    cstable_scan.setFilter([this, id_col] () -> bool {
+      uint64_t rlvl;
+      uint64_t dlvl;
+      String id_str;
+      id_col->readString(&rlvl, &dlvl, &id_str);
+      auto id = SHA1Hash::fromHexString(id_str);
+      if (id_set_.count(id) > 0) {
+        return false;
+      } else {
+        id_set_.emplace(id);
+        return true;
+      }
+    });
+
+    cstable_scan.execute(cstable.get(), context, fn);
   }
+
+  id_set_.clear();
 }
 
 Option<SHA1Hash> LSMPartitionSQLScan::cacheKey() const {

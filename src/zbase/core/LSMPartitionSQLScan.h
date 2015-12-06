@@ -54,6 +54,7 @@ protected:
   csql::QueryBuilder* runtime_;
   Vector<String> column_names_;
   Option<SHA1Hash> cache_key_;
+  Set<SHA1Hash> id_set_;
 };
 
 
