@@ -53,17 +53,22 @@ void LSMPartitionSQLScan::execute(
         tbl->filename() + ".cst");
     auto cstable = cstable::CSTableReader::openFile(cstable_file);
     auto id_col = cstable->getColumnReader("__lsm_id");
+    auto is_update_col = cstable->getColumnReader("__lsm_is_update");
     csql::CSTableScan cstable_scan(stmt_, cstable_file, runtime_);
-    cstable_scan.setFilter([this, id_col] () -> bool {
+    cstable_scan.setFilter([this, id_col, is_update_col] () -> bool {
       uint64_t rlvl;
       uint64_t dlvl;
       String id_str;
       id_col->readString(&rlvl, &dlvl, &id_str);
+      bool is_update = true;
+      //is_update_col->readBoolean(&rlvl, &dlvl, &is_update);
       auto id = SHA1Hash::fromHexString(id_str);
       if (id_set_.count(id) > 0) {
         return false;
       } else {
-        id_set_.emplace(id);
+        if (is_update) {
+          id_set_.emplace(id);
+        }
         return true;
       }
     });
