@@ -20,7 +20,6 @@ namespace zbase {
 LSMPartitionWriter::LSMPartitionWriter(
     PartitionSnapshotRef* head) :
     PartitionWriter(head),
-    arena_(new RecordArena()),
     max_datafile_size_(kDefaultMaxDatafileSize) {}
 
 Set<SHA1Hash> LSMPartitionWriter::insertRecords(const Vector<RecordRef>& records) {
@@ -29,7 +28,6 @@ Set<SHA1Hash> LSMPartitionWriter::insertRecords(const Vector<RecordRef>& records
     RAISE(kIllegalStateError, "partition is frozen");
   }
 
-  //auto snap = head_->getSnapshot()->clone();
   auto snap = head_->getSnapshot();
 
   stx::logTrace(
@@ -42,7 +40,7 @@ Set<SHA1Hash> LSMPartitionWriter::insertRecords(const Vector<RecordRef>& records
 
   Set<SHA1Hash> inserted_ids;
   for (const auto& r : records) {
-    if (arena_->insertRecord(r)) {
+    if (snap->head_arena->insertRecord(r)) {
       inserted_ids.emplace(r.record_id);
     }
   }
@@ -52,11 +50,37 @@ Set<SHA1Hash> LSMPartitionWriter::insertRecords(const Vector<RecordRef>& records
 }
 
 bool LSMPartitionWriter::needsCompaction() {
+  auto snap = head_->getSnapshot();
+  if (snap->compacting_arena.get() != nullptr ||
+      snap->head_arena->size() > 0) {
+    return true;
+  }
+
   return false;
 }
 
 void LSMPartitionWriter::compact() {
+  ScopedLock<std::mutex> compaction_lk(compaction_mutex_);
 
+  // flip arenas
+  auto snap = head_->getSnapshot();
+  if (snap->compacting_arena.get() == nullptr) {
+    ScopedLock<std::mutex> write_lk(mutex_);
+    snap = snap->clone();
+    snap->compacting_arena = snap->head_arena;
+    snap->head_arena = mkRef(new RecordArena());
+    head_->setSnapshot(snap);
+  }
+
+  iputs("compact... $0 records", snap->compacting_arena->size());
+
+  // commit compaction
+  {
+    ScopedLock<std::mutex> write_lk(mutex_);
+    snap = snap->clone();
+    snap->compacting_arena = nullptr;
+    head_->setSnapshot(snap);
+  }
 }
 
 } // namespace tdsb

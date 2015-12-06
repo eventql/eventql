@@ -12,6 +12,7 @@
 #include <stx/autoref.h>
 #include <stx/SHA1.h>
 #include <zbase/core/PartitionState.pb.h>
+#include <zbase/core/RecordArena.h>
 
 using namespace stx;
 
@@ -34,6 +35,8 @@ struct PartitionSnapshot : public RefCounted {
   PartitionState state;
   const String base_path;
   uint64_t nrecs;
+  RefPtr<RecordArena> head_arena;
+  RefPtr<RecordArena> compacting_arena;
 };
 
 class PartitionSnapshotRef {

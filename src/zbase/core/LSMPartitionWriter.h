@@ -32,8 +32,8 @@ public:
   void compact() override;
 
 protected:
-  RefPtr<RecordArena> arena_;
   size_t max_datafile_size_;
+  std::mutex compaction_mutex_;
 };
 
 } // namespace tdsb

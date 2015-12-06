@@ -26,17 +26,22 @@ PartitionSnapshot::PartitionSnapshot(
         _state.partition_key().size()),
     state(_state),
     base_path(_base_path),
-    nrecs(_nrecs) {}
+    nrecs(_nrecs),
+    head_arena(new RecordArena()) {}
 
 SHA1Hash PartitionSnapshot::uuid() const {
   return SHA1Hash(state.uuid().data(), state.uuid().size());
 }
 
 RefPtr<PartitionSnapshot> PartitionSnapshot::clone() const {
-  return new PartitionSnapshot(
+  auto snap = mkRef(new PartitionSnapshot(
       state,
       base_path,
-      nrecs);
+      nrecs));
+
+  snap->head_arena = head_arena;
+  snap->compacting_arena = compacting_arena;
+  return snap;
 }
 
 void PartitionSnapshot::writeToDisk() {

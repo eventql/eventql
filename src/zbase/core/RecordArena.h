@@ -12,9 +12,8 @@
 #pragma once
 #include <stx/stdtypes.h>
 #include <stx/autoref.h>
-#include <zbase/core/PartitionWriter.h>
-#include <stx/util/PersistentHashSet.h>
 #include <stx/protobuf/MessageObject.h>
+#include <zbase/core/RecordRef.h>
 
 using namespace stx;
 
@@ -27,9 +26,11 @@ public:
 
   bool insertRecord(const RecordRef& record);
 
+  size_t size() const;
+
 protected:
   HashMap<SHA1Hash, RecordRef> records_;
-  std::mutex mutex_;
+  mutable std::mutex mutex_;
 };
 
 } // namespace zbase

@@ -20,7 +20,6 @@ RecordArena::RecordArena() {}
 bool RecordArena::insertRecord(const RecordRef& record) {
   ScopedLock<std::mutex> lk(mutex_);
 
-  iputs("arena size: $0", records_.size());
   auto old = records_.find(record.record_id);
   if (old == records_.end()) {
     records_.emplace(record.record_id, record);
@@ -31,6 +30,11 @@ bool RecordArena::insertRecord(const RecordRef& record) {
   } else {
     return false;
   }
+}
+
+size_t RecordArena::size() const {
+  ScopedLock<std::mutex> lk(mutex_);
+  return records_.size();
 }
 
 } // namespace zbase
