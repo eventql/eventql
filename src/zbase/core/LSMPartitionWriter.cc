@@ -93,50 +93,73 @@ Set<SHA1Hash> LSMPartitionWriter::insertRecords(const Vector<RecordRef>& records
   return inserted_ids;
 }
 
+bool LSMPartitionWriter::needsCommit() {
+  ScopedLock<std::mutex> write_lk(mutex_);
+  return head_->getSnapshot()->head_arena->size() > 0;
+}
+
 bool LSMPartitionWriter::needsCompaction() {
-  auto snap = head_->getSnapshot();
-  if (snap->compacting_arena.get() != nullptr ||
-      snap->head_arena->size() > 0) {
+  if (needsCommit()) {
     return true;
   }
 
   return false;
 }
 
-void LSMPartitionWriter::compact() {
-  ScopedLock<std::mutex> compaction_lk(compaction_mutex_);
+void LSMPartitionWriter::commit() {
+  ScopedLock<std::mutex> commit_lk(commit_mutex_);
+  RefPtr<RecordArena> arena;
 
   // flip arenas if records pending
-  auto snap = head_->getSnapshot()->clone();
-  if (snap->compacting_arena.get() == nullptr) {
+  {
     ScopedLock<std::mutex> write_lk(mutex_);
-    if (snap->head_arena->size() > 0) {
+    auto snap = head_->getSnapshot()->clone();
+    if (snap->compacting_arena.get() == nullptr &&
+        snap->head_arena->size() > 0) {
       snap->compacting_arena = snap->head_arena;
       snap->head_arena = mkRef(new RecordArena());
       head_->setSnapshot(snap);
-      snap = snap->clone();
     }
+    arena = snap->compacting_arena;
   }
 
   // flush arena to disk if pending
-  if (snap->compacting_arena.get() != nullptr) {
-    writeArenaToDisk(snap);
-  }
+  if (arena.get() && arena->size() > 0) {
+    auto snap = head_->getSnapshot();
+    auto filename = Random::singleton()->hex64();
+    auto filepath = FileUtil::joinPaths(snap->base_path, filename);
+    auto t0 = WallClock::unixMicros();
+    writeArenaToDisk(arena, filepath);
+    auto t1 = WallClock::unixMicros();
 
-  // commit compaction
-  {
+    stx::logDebug(
+        "z1.core",
+        "Comitting partition $1/$2/$3 ($0 records), took $4s",
+        arena->size(),
+        snap->state.tsdb_namespace(),
+        snap->state.table_key(),
+        snap->key.toString(),
+        (double) (t1 - t0) / 1000000.0f);
+
+    // swap compacting arena with disk cstable
     ScopedLock<std::mutex> write_lk(mutex_);
+    snap = head_->getSnapshot()->clone();
+    snap->compacting_arena = nullptr;
+    auto tblref = snap->state.add_lsm_tables();
+    tblref->set_filename(filename);
     snap->writeToDisk();
     head_->setSnapshot(snap);
   }
 }
 
-void LSMPartitionWriter::writeArenaToDisk(RefPtr<PartitionSnapshot> snap) {
-  auto t0 = WallClock::unixMicros();
+void LSMPartitionWriter::compact() {
+  commit();
+}
+
+void LSMPartitionWriter::writeArenaToDisk(
+      RefPtr<RecordArena> arena,
+      const String& filename) {
   auto schema = partition_->getTable()->schema();
-  auto arena = snap->compacting_arena;
-  auto filename = Random::singleton()->hex64();
-  auto filepath = FileUtil::joinPaths(snap->base_path, filename);
 
   {
     HashMap<SHA1Hash, uint64_t> vmap;
@@ -147,7 +170,7 @@ void LSMPartitionWriter::writeArenaToDisk(RefPtr<PartitionSnapshot> snap) {
     cstable_schema_ext.addUnsignedInteger("__lsm_version", false);
 
     auto cstable = cstable::CSTableWriter::createFile(
-        filepath + ".cst",
+        filename + ".cst",
         cstable::BinaryFormatVersion::v0_1_0,
         cstable_schema_ext);
 
@@ -167,23 +190,9 @@ void LSMPartitionWriter::writeArenaToDisk(RefPtr<PartitionSnapshot> snap) {
     });
 
     cstable->commit();
-    RecordVersionMap::write(vmap, filepath + ".idx");
+    RecordVersionMap::write(vmap, filename + ".idx");
   }
 
-  snap->compacting_arena = nullptr;
-  auto tblref = snap->state.add_lsm_tables();
-  tblref->set_filename(filename);
-
-  auto t1 = WallClock::unixMicros();
-
-  stx::logDebug(
-      "z1.core",
-      "Writing arena with $0 records to disk for partition $1/$2/$3, took $4s",
-      arena->size(),
-      snap->state.tsdb_namespace(),
-      snap->state.table_key(),
-      snap->key.toString(),
-      (double) (t1 - t0) / 1000000.0f);
 }
 
 } // namespace tdsb

@@ -29,17 +29,21 @@ public:
   Set<SHA1Hash> insertRecords(
       const Vector<RecordRef>& records) override;
 
+  bool needsCommit();
   bool needsCompaction() override;
 
+  void commit();
   void compact() override;
 
 protected:
 
-  void writeArenaToDisk(RefPtr<PartitionSnapshot> snap);
+  void writeArenaToDisk(
+      RefPtr<RecordArena> arena,
+      const String& filename);
 
   RefPtr<Partition> partition_;
   size_t max_datafile_size_;
-  std::mutex compaction_mutex_;
+  std::mutex commit_mutex_;
 };
 
 } // namespace tdsb

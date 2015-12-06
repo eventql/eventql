@@ -12,3 +12,4 @@
 ---------
 - better RecordVersionMap
 - remove __lsm_id column
+- tombstones
