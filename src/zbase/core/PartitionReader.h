@@ -13,6 +13,7 @@
 #include <stx/option.h>
 #include <stx/protobuf/MessageObject.h>
 #include <zbase/core/PartitionSnapshot.h>
+#include <csql/CSTableScan.h>
 
 using namespace stx;
 
@@ -31,6 +32,10 @@ public:
 
   virtual void fetchRecords(
       Function<void (const msg::MessageObject& record)> fn) = 0;
+
+  virtual ScopedPtr<csql::TableExpression> buildSQLScan(
+        RefPtr<csql::SequentialScanNode> node,
+        csql::QueryBuilder* runtime) const = 0;
 
   virtual SHA1Hash version() const = 0;
 

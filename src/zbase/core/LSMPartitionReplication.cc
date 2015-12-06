@@ -75,67 +75,6 @@ void LSMPartitionReplication::replicateTo(
   if (replica.is_local) {
     RAISE(kIllegalStateError, "can't replicate to myself");
   }
-
-  LSMPartitionReader reader(partition_->getTable(), snap_);
-
-  size_t batch_size = 0;
-  size_t num_replicated = 0;
-  RecordEnvelopeList batch;
-  reader.fetchRecords(
-      replicated_offset,
-      size_t(-1),
-      [this, &batch, &replica, &replicated_offset, &batch_size, &num_replicated] (
-          const SHA1Hash& record_id,
-          const void* record_data,
-          size_t record_size) {
-    auto rec = batch.add_records();
-    rec->set_tsdb_namespace(snap_->state.tsdb_namespace());
-    rec->set_table_name(snap_->state.table_key());
-    rec->set_partition_sha1(snap_->key.toString());
-    rec->set_record_id(record_id.toString());
-    rec->set_record_data(record_data, record_size);
-
-    batch_size += record_size;
-    ++num_replicated;
-
-    if (batch_size > kMaxBatchSizeBytes ||
-        batch.records().size() > kMaxBatchSizeRows) {
-      uploadBatchTo(replica, batch);
-      batch.mutable_records()->Clear();
-      batch_size = 0;
-    }
-  });
-
-  if (batch.records().size() > 0) {
-    uploadBatchTo(replica, batch);
-  }
-
-  if (num_replicated != snap_->nrecs - replicated_offset) {
-    RAISEF(
-        kIllegalStateError,
-        "expected to replicate $0 records, but only saw $1",
-        snap_->nrecs - replicated_offset,
-        num_replicated);
-  }
-}
-
-void LSMPartitionReplication::uploadBatchTo(
-    const ReplicaRef& replica,
-    const RecordEnvelopeList& batch) {
-  auto body = msg::encode(batch);
-  URI uri(StringUtil::format("http://$0/tsdb/replicate", replica.addr.hostAndPort()));
-  http::HTTPRequest req(http::HTTPMessage::M_POST, uri.pathAndQuery());
-  req.addHeader("Host", uri.hostAndPort());
-  req.addHeader("Content-Type", "application/fnord-msg");
-  req.addBody(body->data(), body->size());
-
-  auto res = http_->executeRequest(req);
-  res.wait();
-
-  const auto& r = res.get();
-  if (r.statusCode() != 201) {
-    RAISEF(kRuntimeError, "received non-201 response: $0", r.body().toString());
-  }
 }
 
 bool LSMPartitionReplication::replicate() {

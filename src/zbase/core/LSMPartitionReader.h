@@ -29,20 +29,9 @@ public:
   void fetchRecords(
       Function<void (const msg::MessageObject& record)> fn) override;
 
-  void fetchRecords(
-      size_t offset,
-      size_t limit,
-      Function<void (
-          const SHA1Hash& record_id,
-          const void* record_data,
-          size_t record_size)> fn);
-
-  void fetchRecords(Function<void (const Buffer& record)> fn);
-
-  void fetchRecordsWithSampling(
-      size_t sample_modulo,
-      size_t sample_index,
-      Function<void (const Buffer& record)> fn);
+  ScopedPtr<csql::TableExpression> buildSQLScan(
+      RefPtr<csql::SequentialScanNode> node,
+      csql::QueryBuilder* runtime) const override;
 
   SHA1Hash version() const override;
 

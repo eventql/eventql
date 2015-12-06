@@ -65,28 +65,11 @@ Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildLocalSequential
   if (partition.isEmpty()) {
     return Option<ScopedPtr<csql::TableExpression>>(
         mkScoped(new csql::EmptyTable(node->columnNames())));
+  } else {
+    auto reader = partition.get()->getReader();
+    auto scan = reader->buildSQLScan(node, runtime);
+    return Option<ScopedPtr<csql::TableExpression>>(std::move(scan));
   }
-
-  auto snap = partition.get()->getSnapshot();
-  auto reader = partition.get()->getReader();
-  auto cstable = reader->fetchCSTableFilename();
-  if (cstable.isEmpty()) {
-    return Option<ScopedPtr<csql::TableExpression>>(
-        mkScoped(new csql::EmptyTable(node->columnNames())));
-  }
-
-  auto scan = mkScoped(
-      new csql::CSTableScan(
-          node,
-          cstable.get(),
-          runtime));
-
-  auto cstable_version = reader->cstableVersion();
-  if (!cstable_version.isEmpty()) {
-    scan->setCacheKey(cstable_version.get());
-  }
-
-  return Option<ScopedPtr<csql::TableExpression>>(std::move(scan));
 }
 
 Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildRemoteSequentialScan(

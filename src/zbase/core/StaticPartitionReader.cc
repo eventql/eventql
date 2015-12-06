@@ -14,6 +14,7 @@
 #include <zbase/core/Table.h>
 #include <cstable/CSTableReader.h>
 #include <cstable/RecordMaterializer.h>
+#include <csql/runtime/EmptyTable.h>
 
 using namespace stx;
 
@@ -54,6 +55,28 @@ SHA1Hash StaticPartitionReader::version() const {
   } else {
     return cstable_version.get();
   }
+}
+
+ScopedPtr<csql::TableExpression> StaticPartitionReader::buildSQLScan(
+    RefPtr<csql::SequentialScanNode> node,
+    csql::QueryBuilder* runtime) const {
+  auto cstable = fetchCSTableFilename();
+  if (cstable.isEmpty()) {
+    return mkScoped(new csql::EmptyTable(node->columnNames()));
+  }
+
+  auto scan = mkScoped(
+      new csql::CSTableScan(
+          node,
+          cstable.get(),
+          runtime));
+
+  auto cstable_version = cstableVersion();
+  if (!cstable_version.isEmpty()) {
+    scan->setCacheKey(cstable_version.get());
+  }
+
+  return std::move(scan);
 }
 
 } // namespace tdsb
