@@ -110,8 +110,6 @@ void LSMPartitionReplication::replicateTo(
   if (batch.records().size() > 0) {
     uploadBatchTo(replica, batch);
   }
-
-  // FIXME remote commit!
 }
 
 bool LSMPartitionReplication::replicate() {

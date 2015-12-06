@@ -30,11 +30,11 @@ public:
   Set<SHA1Hash> insertRecords(
       const Vector<RecordRef>& records) override;
 
+  void commit() override;
   bool needsCommit();
-  bool needsCompaction() override;
 
-  void commit();
   void compact() override;
+  bool needsCompaction() override;
 
 protected:
 

@@ -117,6 +117,10 @@ bool LogPartitionWriter::needsCompaction() {
   return true;
 }
 
+void LogPartitionWriter::commit() {
+ // noop
+}
+
 void LogPartitionWriter::compact() {
   if (!needsCompaction()) {
     return;

@@ -30,7 +30,8 @@ using namespace stx;
 namespace zbase {
 
 enum class InsertFlags : uint64_t {
-  REPLICATED_WRITE = 1
+  REPLICATED_WRITE = 1,
+  SYNC_COMMIT = 2
 };
 
 class TSDBService {
@@ -134,15 +135,16 @@ protected:
       const String& tsdb_namespace,
       const String& table_name,
       const SHA1Hash& partition_key,
-      const Vector<RecordRef>& records);
+      const Vector<RecordRef>& records,
+      uint64_t flags);
 
   void insertRecordsRemote(
       const String& tsdb_namespace,
       const String& table_name,
       const SHA1Hash& partition_key,
       const Vector<RecordRef>& records,
+      uint64_t flags,
       const ReplicaRef& host);
-
 
   PartitionMap* pmap_;
   ReplicationScheme* repl_;

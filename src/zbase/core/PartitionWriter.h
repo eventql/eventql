@@ -57,6 +57,7 @@ public:
 
   virtual bool needsCompaction() = 0;
 
+  virtual void commit() = 0;
   virtual void compact() = 0;
 
 protected:

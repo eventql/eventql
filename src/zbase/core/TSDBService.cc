@@ -242,7 +242,8 @@ void TSDBService::insertRecords(
         tsdb_namespace,
         table_name,
         partition_key,
-        records);
+        records,
+        flags);
   } else {
     for (const auto& host : hosts) {
       try {
@@ -251,13 +252,15 @@ void TSDBService::insertRecords(
               tsdb_namespace,
               table_name,
               partition_key,
-              records);
+              records,
+              flags);
         } else {
           insertRecordsRemote(
               tsdb_namespace,
               table_name,
               partition_key,
               records,
+              flags,
               host);
         }
 
@@ -283,7 +286,8 @@ void TSDBService::insertRecordsLocal(
     const String& tsdb_namespace,
     const String& table_name,
     const SHA1Hash& partition_key,
-    const Vector<RecordRef>& records) {
+    const Vector<RecordRef>& records,
+    uint64_t flags) {
   logDebug(
       "z1.core",
       "Inserting $0 records into tsdb://localhost/$1/$2/$3",
@@ -307,6 +311,10 @@ void TSDBService::insertRecordsLocal(
   }
 
   if (dirty) {
+    if (flags & (uint64_t) InsertFlags::SYNC_COMMIT) {
+      writer->commit();
+    }
+
     auto change = mkRef(new PartitionChangeNotification());
     change->partition = partition;
     pmap_->publishPartitionChange(change);
@@ -318,6 +326,7 @@ void TSDBService::insertRecordsRemote(
     const String& table_name,
     const SHA1Hash& partition_key,
     const Vector<RecordRef>& records,
+    uint64_t flags,
     const ReplicaRef& host) {
   logDebug(
       "z1.core",

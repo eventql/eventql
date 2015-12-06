@@ -28,9 +28,10 @@ public:
   Set<SHA1Hash> insertRecords(
       const Vector<RecordRef>& records) override;
 
-  bool needsCompaction() override;
+  void commit() override;
 
   void compact() override;
+  bool needsCompaction() override;
 
 protected:
   RefPtr<Partition> partition_;

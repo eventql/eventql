@@ -27,6 +27,7 @@ public:
 
   bool needsCompaction() override;
 
+  void commit() override;
   void compact() override;
 
 };
