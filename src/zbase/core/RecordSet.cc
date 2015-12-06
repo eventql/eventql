@@ -25,7 +25,8 @@ RecordRef::RecordRef(
     const Buffer& _record) :
     record_id(_record_id),
     record_version(_record_version),
-    record(_record) {}
+    record(_record),
+    is_update(false) {}
 
 RecordSet::RecordSet(
     const String& datadir,

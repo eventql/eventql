@@ -25,6 +25,7 @@ struct RecordRef {
   SHA1Hash record_id;
   uint64_t record_version;
   Buffer record;
+  bool is_update;
 };
 
 } // namespace tdsb

@@ -50,16 +50,15 @@ Set<SHA1Hash> LSMPartitionWriter::insertRecords(const Vector<RecordRef>& records
   HashMap<SHA1Hash, uint64_t> rec_versions;
   for (const auto& r : records) {
     if (snap->head_arena->fetchRecordVersion(r.record_id) < r.record_version) {
-      rec_versions.emplace(r.record_id, r.record_version);
+      rec_versions.emplace(r.record_id, 0);
     }
   }
 
   if (snap->compacting_arena.get() != nullptr) {
-    for (auto r = rec_versions.begin(); r != rec_versions.end(); ) {
-      if (snap->compacting_arena->fetchRecordVersion(r->first) >= r->second) {
-        r = rec_versions.erase(r);
-      } else {
-        ++r;
+    for (auto& r : rec_versions) {
+      auto v = snap->compacting_arena->fetchRecordVersion(r.first);
+      if (v > r.second) {
+        r.second = v;
       }
     }
   }
@@ -70,15 +69,18 @@ Set<SHA1Hash> LSMPartitionWriter::insertRecords(const Vector<RecordRef>& records
         &rec_versions,
         FileUtil::joinPaths(snap->base_path, tbl->filename() + ".idx"));
 
-    if (rec_versions.empty()) {
-      break;
-    }
+    // FIMXE early exit...
   }
 
   Set<SHA1Hash> inserted_ids;
   if (!rec_versions.empty()) {
-    for (const auto& r : records) {
-      if (rec_versions.count(r.record_id) != 1) {
+    for (auto r : records) {
+      auto headv = rec_versions[r.record_id];
+      if (headv > 0) {
+        r.is_update = true;
+      }
+
+      if (r.record_version <= headv) {
         continue;
       }
 
@@ -158,7 +160,7 @@ void LSMPartitionWriter::writeArenaToDisk(RefPtr<PartitionSnapshot> snap) {
       msg::MessageObject obj;
       msg::MessageDecoder::decode(r.record, *schema, &obj);
       shredder.addRecordFromProtobuf(obj, *schema);
-      version_col->writeBoolean(0, 0, false);
+      is_update_col->writeBoolean(0, 0, r.is_update);
       id_col->writeString(0, 0, r.record_id.toString());
       version_col->writeUnsignedInt(0, 0, r.record_version);
       vmap.emplace(r.record_id, r.record_version);

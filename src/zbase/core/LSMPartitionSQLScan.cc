@@ -60,8 +60,8 @@ void LSMPartitionSQLScan::execute(
       uint64_t dlvl;
       String id_str;
       id_col->readString(&rlvl, &dlvl, &id_str);
-      bool is_update = true;
-      //is_update_col->readBoolean(&rlvl, &dlvl, &is_update);
+      bool is_update;
+      is_update_col->readBoolean(&rlvl, &dlvl, &is_update);
       auto id = SHA1Hash::fromHexString(id_str);
       if (id_set_.count(id) > 0) {
         return false;

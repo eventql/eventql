@@ -49,8 +49,8 @@ void RecordVersionMap::lookup(
     auto ver = is->readUInt64();
 
     auto map_iter = map->find(id);
-    if (map_iter != map->end() && map_iter->second <= ver) {
-      map->erase(map_iter);
+    if (map_iter != map->end() && ver > map_iter->second) {
+      map_iter->second = ver;
     }
   }
 }
