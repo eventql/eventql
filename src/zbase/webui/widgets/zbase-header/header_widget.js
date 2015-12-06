@@ -2,6 +2,23 @@ var HeaderWidget = (function() {
 
   var render = function() {
     var conf = $.getConfig();
+    //document.addEventListener("click", function(event) {
+    //  if ((function getParentWithClass(el, className) {
+    //    while ((el = el.parentElement) && !el.classList.contains(className));
+    //    return el;
+    //  })(event.target, "dropdown")) return;
+
+    //  $(".dropdown", elem).classList.remove("open");
+    //});
+
+    /* header */
+    var hdr_tpl = $.getTemplate("widgets/zbase-header", "zbase_header_tpl");
+    //$("z-dropdown.new_query", hdr_tpl).addEventListener("change", createNewDocument);
+
+    /* main manivi */
+    var mainnav_tpl = $.getTemplate("widgets/zbase-header", "zbase_header_main_navi_tpl");
+    $.handleLinks(mainnav_tpl);
+    $.replaceContent($(".main_navi", hdr_tpl), mainnav_tpl);
 
     /* user navi */
     var usernav_tpl = $.getTemplate(
@@ -15,49 +32,22 @@ var HeaderWidget = (function() {
         "click",
         showSelectNamespacePopup);
     $.handleLinks(usernav_tpl);
-    $.replaceContent($("#zscale_user_navi"), usernav_tpl);
+    $.replaceContent($(".user_navi", hdr_tpl), usernav_tpl);
 
-    //document.addEventListener("click", function(event) {
-    //  if ((function getParentWithClass(el, className) {
-    //    while ((el = el.parentElement) && !el.classList.contains(className));
-    //    return el;
-    //  })(event.target, "dropdown")) return;
-
-    //  $(".dropdown", elem).classList.remove("open");
-    //});
-
-    /* main manivi */
-    var mainnav_tpl = $.getTemplate("widgets/zbase-header", "zbase_header_main_navi_tpl");
-    $.handleLinks(mainnav_tpl);
-    $.replaceContent($("#zscale_navi .zscale_navi_menu"), mainnav_tpl);
-
-    /* header */
-    var hdr_tpl = $.getTemplate("widgets/zbase-header", "zbase_header_tpl");
-    $("z-dropdown.new_query", hdr_tpl).addEventListener("change", createNewDocument);
     $.handleLinks(usernav_tpl);
     $.replaceContent($("#zbase_header"), hdr_tpl);
   };
 
   var update = function(path) {};
 
-  var setBreadCrumbs = function(crumbs) {
-    var breadcrumbs = $(".header_bar zbase-breadcrumbs");
-    var inner = document.createElement("div");
+  var setBreadCrumbs = function(inner) {
+    $.replaceContent($(".zbase_header .breadcrumbs_bar"), inner);
+    $.handleLinks(inner);
+    $(".zbase_header").classList.add("with_breadcrumbs");
+  };
 
-    crumbs.forEach(function(crumb) {
-      var section = document.createElement("zbase-breadcrumbs-section");
-
-      if (crumb.href) {
-        var link = document.createElement("a");
-        link.innerHTML = crumb.title;
-        link.href = crumb.href;
-        section.appendChild(link);
-      }
-
-      inner.appendChild(section);
-    });
-
-    $.replaceContent(breadcrumbs, inner);
+  var hideBreadCrumbs = function() {
+    $(".zbase_header").classList.remove("with_breadcrumbs");
   };
 
   var toggleDropdown = function() {
@@ -116,7 +106,8 @@ var HeaderWidget = (function() {
   return {
     render: render,
     update: update,
-    setBreadCrumbs: setBreadCrumbs
+    setBreadCrumbs: setBreadCrumbs,
+    hideBreadCrumbs: hideBreadCrumbs
   };
 
 })();

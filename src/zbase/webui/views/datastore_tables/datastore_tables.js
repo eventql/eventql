@@ -3,9 +3,7 @@ ZBase.registerView((function() {
   var load = function(url) {
     $.showLoader();
     ZBaseMainMenu.show();
-    HeaderWidget.setBreadCrumbs([
-      {href: "/a/", title: "Datastore"},
-      {href: "/a/datastore/tables", title: "Tables"}]);
+    HeaderWidget.hideBreadCrumbs();
 
     $.httpGet("/api/v1/tables", function(r) {
       if (r.status == 200) {

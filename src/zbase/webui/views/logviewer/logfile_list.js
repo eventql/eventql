@@ -3,9 +3,7 @@ ZBase.registerView((function() {
   var load = function(path) {
     $.showLoader();
     ZBaseMainMenu.show();
-    HeaderWidget.setBreadCrumbs([
-      {href: "/a/logs", title: "Monitoring"},
-      {href: "/a/logs", title: "Log Viewer"}]);
+    HeaderWidget.hideBreadCrumbs();
 
     $.httpGet("/api/v1/logfiles", function(r) {
       if (r.status == 200) {

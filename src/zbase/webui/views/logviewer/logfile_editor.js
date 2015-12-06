@@ -32,11 +32,7 @@ ZBase.registerView((function() {
     logfile_link.innerHTML = def.name;
     logfile_link.href = path_prefix + def.name;
 
-    HeaderWidget.setBreadCrumbs([
-      {href: "/a/logs", title: "Monitoring"},
-      {href: "/a/logs", title: "Logfiles"},
-      {href: path_prefix + def.name, title: "Logfile Editor"},
-      {href: path_prefix + def.name, title: def.name}]);
+    HeaderWidget.hideBreadCrumbs();
     ZBaseMainMenu.hide();
 
     renderRegexPane($(".editor_pane.regex", page), def.regex);

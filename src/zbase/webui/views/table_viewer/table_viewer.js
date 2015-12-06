@@ -19,11 +19,7 @@ ZBase.registerView((function() {
     table = path.split("?")[0].substr(path_prefix.length);
 
     ZBaseMainMenu.hide();
-    HeaderWidget.setBreadCrumbs([
-      {href: "/a/", title: "Datastore"},
-      {href: "/a/datastore/tables", title: "Tables"},
-      {href: path_prefix + table, title: table}]);
-
+    HeaderWidget.hideBreadCrumbs();
 
     var tpl = $.getTemplate(
         "views/table_viewer",
