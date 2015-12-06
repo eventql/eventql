@@ -6,3 +6,9 @@
 - metrics API
 - allow timewindow partitioner config updates
 - primarykeypartitioner
+
+
+
+---------
+- better RecordVersionMap
+- remove __lsm_id column

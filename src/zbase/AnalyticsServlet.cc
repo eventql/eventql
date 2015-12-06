@@ -804,7 +804,6 @@ void AnalyticsServlet::insertIntoTable(
             WallClock::unixMicros() :
             version_opt.get();
 
-
     if (data->type == json::JSON_STRING) {
       auto data_parsed = json::parseJSON(data->data);
       tsdb_->insertRecord(

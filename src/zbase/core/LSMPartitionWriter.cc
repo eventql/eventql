@@ -138,17 +138,28 @@ void LSMPartitionWriter::writeArenaToDisk(RefPtr<PartitionSnapshot> snap) {
 
   {
     HashMap<SHA1Hash, uint64_t> vmap;
+    auto cstable_schema = cstable::TableSchema::fromProtobuf(*schema);
+    cstable_schema.addBool("__lsm_is_update", false);
+    cstable_schema.addString("__lsm_id", false);
+    cstable_schema.addUnsignedInteger("__lsm_version", false);
+
     auto cstable = cstable::CSTableWriter::createFile(
         filepath + ".cst",
         cstable::BinaryFormatVersion::v0_1_0,
-        cstable::TableSchema::fromProtobuf(*schema));
+        cstable_schema);
 
     cstable::RecordShredder shredder(cstable.get());
+    auto is_update_col = cstable->getColumnWriter("__lsm_is_update");
+    auto id_col = cstable->getColumnWriter("__lsm_id");
+    auto version_col = cstable->getColumnWriter("__lsm_version");
 
-    arena->fetchRecords([&shredder, &schema, &vmap] (const RecordRef& r) {
+    arena->fetchRecords([&] (const RecordRef& r) {
       msg::MessageObject obj;
       msg::MessageDecoder::decode(r.record, *schema, &obj);
       shredder.addRecordFromProtobuf(obj, *schema);
+      version_col->writeBoolean(0, 0, false);
+      id_col->writeString(0, 0, r.record_id.toString());
+      version_col->writeUnsignedInt(0, 0, r.record_version);
       vmap.emplace(r.record_id, r.record_version);
     });
 
