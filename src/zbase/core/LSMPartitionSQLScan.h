@@ -50,6 +50,8 @@ public:
 protected:
   RefPtr<Table> table_;
   RefPtr<PartitionSnapshot> snap_;
+  RefPtr<csql::SequentialScanNode> stmt_;
+  csql::QueryBuilder* runtime_;
   Vector<String> column_names_;
   Option<SHA1Hash> cache_key_;
 };
