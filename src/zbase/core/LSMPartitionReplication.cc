@@ -13,6 +13,8 @@
 #include <stx/logging.h>
 #include <stx/io/fileutil.h>
 #include <stx/protobuf/msg.h>
+#include <stx/protobuf/MessageEncoder.h>
+#include <cstable/RecordMaterializer.h>
 
 using namespace stx;
 
@@ -108,10 +110,11 @@ void LSMPartitionReplication::replicateTo(
   if (batch.records().size() > 0) {
     uploadBatchTo(replica, batch);
   }
+
+  // FIXME remote commit!
 }
 
 bool LSMPartitionReplication::replicate() {
-  iputs("replicate!!", 1);
   auto replicas = repl_scheme_->replicasFor(snap_->key);
   if (replicas.size() == 0) {
     return true;
@@ -182,8 +185,61 @@ void LSMPartitionReplication::uploadBatchTo(
   if (r.statusCode() != 201) {
     RAISEF(kRuntimeError, "received non-201 response: $0", r.body().toString());
   }
+}
 
-  // FIXME remote commit!
+void LSMPartitionReplication::fetchRecords(
+    size_t start_sequence,
+    Function<void (
+        const SHA1Hash& record_id,
+        uint64_t record_version,
+        const void* record_data,
+        size_t record_size)> fn) {
+  auto schema = partition_->getTable()->schema();
+  const auto& tables = snap_->state.lsm_tables();
+  for (const auto& tbl : tables) {
+    if (tbl.last_sequence() < start_sequence) {
+      continue;
+    }
+
+    auto cstable_file = FileUtil::joinPaths(
+        snap_->base_path,
+        tbl.filename() + ".cst");
+    auto cstable = cstable::CSTableReader::openFile(cstable_file);
+    cstable::RecordMaterializer materializer(schema.get(), cstable.get());
+    auto id_col = cstable->getColumnReader("__lsm_id");
+    auto version_col = cstable->getColumnReader("__lsm_version");
+    auto sequence_col = cstable->getColumnReader("__lsm_sequence");
+
+    auto nrecs = cstable->numRecords();
+    for (size_t i = 0; i < nrecs; ++i) {
+      uint64_t rlvl;
+      uint64_t dlvl;
+
+      uint64_t sequence;
+      sequence_col->readUnsignedInt(&rlvl, &dlvl, &sequence);
+
+      if (sequence < start_sequence) {
+        materializer.skipRecord();
+        continue;
+      }
+
+      String id_str;
+      id_col->readString(&rlvl, &dlvl, &id_str);
+      auto id = SHA1Hash::fromHexString(id_str);
+
+      uint64_t version;
+      version_col->readUnsignedInt(&rlvl, &dlvl, &version);
+
+      msg::MessageObject record;
+      materializer.nextRecord(&record);
+
+      Buffer record_buf;
+      msg::MessageEncoder::encode(record, *schema, &record_buf);
+
+      fn(id, version, record_buf.data(), record_buf.size());
+    }
+  }
+
 }
 
 } // namespace tdsb

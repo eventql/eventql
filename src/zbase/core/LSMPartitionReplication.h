@@ -49,9 +49,7 @@ protected:
           uint64_t record_version,
           const void* record_data,
           size_t record_size)> fn);
-
-
 };
 
-} // namespace tdsb
+} // namespace zbase
 

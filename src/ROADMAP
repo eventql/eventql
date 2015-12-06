@@ -10,6 +10,9 @@
 
 
 ---------
+- wait for remote commit in LSM replication
+- move replication state into partitionstate
+- in place log->lsm upgrade
 - better RecordVersionMap
 - remove __lsm_id column
 - tombstones
