@@ -10,6 +10,7 @@
 #include <stx/io/fileutil.h>
 #include <zbase/core/Partition.h>
 #include <zbase/core/LSMPartitionWriter.h>
+#include <zbase/core/RecordVersionMap.h>
 #include <stx/protobuf/msg.h>
 #include <stx/logging.h>
 #include <stx/wallclock.h>
@@ -18,7 +19,6 @@
 #include <stx/protobuf/MessageDecoder.h>
 #include <cstable/RecordShredder.h>
 #include <cstable/CSTableWriter.h>
-
 
 using namespace stx;
 
@@ -99,24 +99,27 @@ void LSMPartitionWriter::writeArenaToDisk(RefPtr<PartitionSnapshot> snap) {
   auto t0 = WallClock::unixMicros();
   auto schema = partition_->getTable()->schema();
   auto arena = snap->compacting_arena;
-  auto filename = Random::singleton()->hex64() + ".cst";
+  auto filename = Random::singleton()->hex64();
   auto filepath = FileUtil::joinPaths(snap->base_path, filename);
 
   {
+    HashMap<SHA1Hash, uint64_t> vmap;
     auto cstable = cstable::CSTableWriter::createFile(
-        filepath,
+        filepath + ".cst",
         cstable::BinaryFormatVersion::v0_1_0,
         cstable::TableSchema::fromProtobuf(*schema));
 
     cstable::RecordShredder shredder(cstable.get());
 
-    arena->fetchRecords([&shredder, &schema] (const RecordRef& r) {
+    arena->fetchRecords([&shredder, &schema, &vmap] (const RecordRef& r) {
       msg::MessageObject obj;
       msg::MessageDecoder::decode(r.record, *schema, &obj);
       shredder.addRecordFromProtobuf(obj, *schema);
+      vmap.emplace(r.record_id, r.record_version);
     });
 
     cstable->commit();
+    RecordVersionMap::write(vmap, filepath + ".idx");
   }
 
   snap->compacting_arena = nullptr;
