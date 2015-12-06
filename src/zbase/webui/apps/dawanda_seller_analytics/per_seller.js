@@ -44,10 +44,17 @@ var perSellerLayout = function(query_mgr, path_prefix, shop_id) {
       query_mgr.close("shop_name");
       var result = JSON.parse(e.data).results[0];
 
-      HeaderWidget.setBreadCrumbs([
-        {href: "/a/apps/dawanda_seller_analytics", title: "Analytics"},
-        {href: "/a/apps/dawanda_seller_analytics", title: "Seller"},
-        {href: path_prefix + shop_id, title: result.rows[0]}]);
+      //breadcrumbs
+      var breadcrumbs = $.getTemplate(
+          "apps/dawanda_seller_analytics",
+          "zbase_per_seller_layout_breadcrumbs_tpl");
+
+      var shop_name_bc = $(".shop_name_breadcrumb", breadcrumbs);
+      shop_name_bc.href = path_prefix + shop_id;
+      shop_name_bc.innerHTML = result.rows[0];
+
+      HeaderWidget.setBreadCrumbs(breadcrumbs);
+
       $(".zbase_seller_stats h2.pagetitle .shop_name").innerHTML = result.rows[0];
     });
 

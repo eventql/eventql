@@ -1,11 +1,11 @@
 ZBase.registerView((function() {
+  var kPathPrefix = "/a/reports/";
   var widget_list = null;
   var edit_view = null;
   var docsync = null;
 
   // REMOVEME
   var goToURL = function(path) {
-    var kPathPrefix = "/a/reports/";
     var report_id = path.substr(kPathPrefix.length);
     loadReport(report_id);
   }
@@ -63,10 +63,12 @@ ZBase.registerView((function() {
         "zbase_report_main_tpl");
 
     //breadcrumbs
-    HeaderWidget.setBreadCrumbs([
-      {href: "/a/", title: "Datastore"},
-      {href: "/a/queries", title: "Queries"},
-      {href: "/a/reports/" + doc.uuid, title: doc.name}]);
+    var breadcrumbs = $.getTemplate(
+        "views/report",
+        "zbase_report_breadcrumbs_tpl");
+
+    $(".report_breadcrumb", breadcrumbs).href = kPathPrefix + doc.uuid;
+    HeaderWidget.setBreadCrumbs(breadcrumbs);
 
     //doc settings
     var settings_widget = DocumentSettingsWidget(
@@ -308,6 +310,7 @@ ZBase.registerView((function() {
   var setReportName = function(name) {
     var escaped_name = $.escapeHTML(name);
     //$("zbase-breadcrumbs-section.report_name").innerHTML = escaped_name;
+    $(".zbase_header .report_breadcrumb").innerHTML = escaped_name;
     $(".zbase_report_pane .report_name").innerHTML = escaped_name;
     $(".zbase_report_pane z-modal input.report_name").value = escaped_name;
   };

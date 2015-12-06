@@ -1,5 +1,5 @@
 ZBase.registerView((function() {
-  var path_prefix = "/a/apps/dawanda_seller_analytics/revenue/";
+  var path_prefix = "/a/apps/dawanda_seller_analytics/";
   var shop_id;
   var query_mgr;
 

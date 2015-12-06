@@ -28,11 +28,11 @@ ZBase.registerView((function() {
 
     info_message = ZbaseInfoMessage(page);
 
-    HeaderWidget.setBreadCrumbs([
-      {href: "/a/logs", title: "Monitoring"},
-      {href: "/a/logs", title: "Logfiles"},
-      {href: path_prefix + def.name, title: "Logfile Editor"},
-      {href: path_prefix + def.name, title: def.name}]);
+    var logfile_link = $("a.logfile_name_breadcrumb", page);
+    logfile_link.innerHTML = def.name;
+    logfile_link.href = path_prefix + def.name;
+
+    HeaderWidget.hideBreadCrumbs();
     ZBaseMainMenu.hide();
 
     renderRegexPane($(".editor_pane.regex", page), def.regex);

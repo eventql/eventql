@@ -12,9 +12,7 @@ ZBase.registerView((function() {
   var init = function(params) {
     $.showLoader();
     ZBaseMainMenu.hide();
-    HeaderWidget.setBreadCrumbs([
-      {href: "/a/logs", title: "Monitoring"},
-      {href: "/a/logs", title: "Log Viewer"}]);
+    HeaderWidget.hideBreadCrumbs();
 
     query_mgr = EventSourceHandler();
 
@@ -189,10 +187,7 @@ ZBase.registerView((function() {
   }
 
   var setLogfileName = function(logfile) {
-    HeaderWidget.setBreadCrumbs([
-      {href: "/a/logs", title: "Monitoring"},
-      {href: "/a/logs", title: "Log Viewer"},
-      {href: kBasePath + logfile, title: logfile}])
+
     //$(".zbase_logviewer .logfile_name_crumb").innerHTML = logfile;
   }
 
