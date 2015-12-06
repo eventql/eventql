@@ -216,6 +216,21 @@ void LSMPartitionWriter::compact() {
 
   snap->writeToDisk();
   head_->setSnapshot(snap);
+  write_lk.unlock();
+
+  Set<String> delete_filenames;
+  for (const auto& tbl : old_tables) {
+    delete_filenames.emplace(tbl.filename());
+  }
+  for (const auto& tbl : new_tables) {
+    delete_filenames.erase(tbl.filename());
+  }
+
+  for (const auto& f : delete_filenames) {
+    // FIXME: delayed delete
+    FileUtil::rm(FileUtil::joinPaths(snap->base_path, f + ".cst"));
+    FileUtil::rm(FileUtil::joinPaths(snap->base_path, f + ".idx"));
+  }
 }
 
 void LSMPartitionWriter::writeArenaToDisk(

@@ -14,4 +14,5 @@
 - remove __lsm_id column
 - tombstones
 - handle schema changes in compactionstrategy
-- delete compacted tables
+- delayed delete compacted tables
+- local sql scan fastpath
