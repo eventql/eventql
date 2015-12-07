@@ -37,45 +37,40 @@ TEST_CASE(RecordVersionMapTest, TestSimpleSet, [] () {
     map[SHA1::compute("0x42424242")] = 0;
     map[SHA1::compute("0x23232323")] = 0;
     map[SHA1::compute("0x52525252")] = 0;
+    map[SHA1::compute("0x17171717")] = 0;
     RecordVersionMap::lookup(&map, filename);
-    EXPECT_EQ(map.size(), 0);
+    EXPECT_EQ(map.size(), 4);
+    EXPECT_EQ(map[SHA1::compute("0x42424242")], 3);
+    EXPECT_EQ(map[SHA1::compute("0x23232323")], 1);
+    EXPECT_EQ(map[SHA1::compute("0x52525252")], 2);
+    EXPECT_EQ(map[SHA1::compute("0x17171717")], 0);
   }
 
   {
     VersionMap map;
-    map[SHA1::compute("0x42424242")] = 0;
-    map[SHA1::compute("0x23232323")] = 0;
-    map[SHA1::compute("0x17171717")] = 1;
     map[SHA1::compute("0x52525252")] = 0;
     RecordVersionMap::lookup(&map, filename);
     EXPECT_EQ(map.size(), 1);
-    EXPECT_EQ(map[SHA1::compute("0x17171717")], 1);
+    EXPECT_EQ(map[SHA1::compute("0x52525252")], 2);
   }
 
   {
     VersionMap map;
-    map[SHA1::compute("0x42424242")] = 4;
-    map[SHA1::compute("0x23232323")] = 0;
-    map[SHA1::compute("0x17171717")] = 1;
-    map[SHA1::compute("0x52525252")] = 0;
+    map[SHA1::compute("0x52525252")] = 3;
     RecordVersionMap::lookup(&map, filename);
-    EXPECT_EQ(map.size(), 2);
-    EXPECT_EQ(map[SHA1::compute("0x17171717")], 1);
-    EXPECT_EQ(map[SHA1::compute("0x42424242")], 4);
+    EXPECT_EQ(map.size(), 1);
+    EXPECT_EQ(map[SHA1::compute("0x52525252")], 3);
   }
 
   {
     VersionMap map;
-    map[SHA1::compute("0x42424242")] = 4;
-    map[SHA1::compute("0x23232323")] = 2;
-    map[SHA1::compute("0x17171717")] = 1;
-    map[SHA1::compute("0x52525252")] = 2;
-    RecordVersionMap::lookup(&map, filename);
+    RecordVersionMap::load(&map, filename);
     EXPECT_EQ(map.size(), 3);
-    EXPECT_EQ(map[SHA1::compute("0x17171717")], 1);
-    EXPECT_EQ(map[SHA1::compute("0x42424242")], 4);
-    EXPECT_EQ(map[SHA1::compute("0x23232323")], 2);
+    EXPECT_EQ(map[SHA1::compute("0x42424242")], 3);
+    EXPECT_EQ(map[SHA1::compute("0x23232323")], 1);
+    EXPECT_EQ(map[SHA1::compute("0x52525252")], 2);
   }
+
 });
 
 
