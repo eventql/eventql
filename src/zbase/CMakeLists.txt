@@ -90,16 +90,6 @@ add_library(tsdb-server OBJECT
 add_dependencies(tsdb-server customerdirectory)
 add_dependencies(tsdb-server coreprotos)
 
-add_executable(test-recordset
-    $<TARGET_OBJECTS:stx-mdb>
-    $<TARGET_OBJECTS:tsdb-server>
-    $<TARGET_OBJECTS:coreprotos>
-    $<TARGET_OBJECTS:dproc>
-    $<TARGET_OBJECTS:customerdirectory>
-    core/RecordSet_test.cc)
-
-target_link_libraries(test-recordset chartsql cplot sstable cstable stx-http stx-protobuf stx-json stx-base pcre)
-
 add_executable(test-tsdb-timewindowpartitioner
     $<TARGET_OBJECTS:stx-mdb>
     $<TARGET_OBJECTS:tsdb-server>
