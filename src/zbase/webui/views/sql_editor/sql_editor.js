@@ -47,6 +47,7 @@ ZBase.registerView((function() {
     query.addEventListener('result', function(e) {
       query_mgr.close("sql_query");
 
+      console.log("DONE!");
       var data = JSON.parse(e.data);
       renderQueryResult(data.results);
     });
@@ -154,10 +155,9 @@ ZBase.registerView((function() {
   };
 
   var renderQueryResult = function(res) {
-    QueryProgressWidget.finish(function() {
-      var result_list = SQLEditorResultList(res);
-      result_list.render($(".zbase_sql_editor_result_pane"));
-    });
+    QueryProgressWidget.finish();
+    var result_list = SQLEditorResultList(res);
+    result_list.render($(".zbase_sql_editor_result_pane"));
   }
 
   var renderQueryError = function(error) {
