@@ -8,7 +8,7 @@
  */
 #include "zbase/TSDBTableScanSource.h"
 #include <stx/fnv.h>
-#include <zbase/core/CSTableIndex.h>
+#include <zbase/core/CompactionWorker.h>
 #include <cstable/CSTableReader.h>
 #include <cstable/RecordMaterializer.h>
 #include <stx/protobuf/MessageEncoder.h>
@@ -27,7 +27,7 @@ TSDBTableScanSource<ProtoType>::TSDBTableScanSource(
 template <typename ProtoType>
 void TSDBTableScanSource<ProtoType>::read(dproc::TaskContext* context) {
   if (params_.use_cstable_index() && !required_fields_.empty()) {
-    scanWithCSTableIndex(context);
+    scanWithCompactionWorker(context);
   } else {
     scanWithoutIndex(context);
   }
@@ -73,7 +73,7 @@ void TSDBTableScanSource<ProtoType>::scanWithoutIndex(
 }
 
 template <typename ProtoType>
-void TSDBTableScanSource<ProtoType>::scanWithCSTableIndex(
+void TSDBTableScanSource<ProtoType>::scanWithCompactionWorker(
     dproc::TaskContext* context) {
   auto table = tsdb_->findTable(
         params_.tsdb_namespace(),

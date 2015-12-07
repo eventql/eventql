@@ -21,19 +21,23 @@ StaticPartitionWriter::StaticPartitionWriter(
     PartitionSnapshotRef* head) :
     PartitionWriter(head) {}
 
-bool StaticPartitionWriter::insertRecord(
-    const SHA1Hash& record_id,
-    const Buffer& record) {
-  RAISE(
-      kRuntimeError,
-      "can't insert individual records because partition is STATIC");
-}
-
 Set<SHA1Hash> StaticPartitionWriter::insertRecords(
     const Vector<RecordRef>& records) {
   RAISE(
       kRuntimeError,
       "can't insert individual records because partition is STATIC");
+}
+
+bool StaticPartitionWriter::needsCompaction() {
+  return false;
+}
+
+bool StaticPartitionWriter::commit() {
+ return true; // noop
+}
+
+bool StaticPartitionWriter::compact() {
+ return true; // noop
 }
 
 } // namespace tdsb

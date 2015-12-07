@@ -1,8 +1,21 @@
-- LSM partitions
-- table ids
-- cstable mmap remove
-- table partitions from WHERE clause/filter list
-- sql constant folding
-- metrics API
-- allow timewindow partitioner config updates
-- primarykeypartitioner
+next release:
+  - better RecordVersionMap
+  - better __lsm_id column encoding
+
+features:
+  - tombstones
+  - table ids
+  - table partitions from WHERE clause/filter list
+  - sql constant folding
+  - metrics API
+  - allow timewindow partitioner config updates
+  - primarykeypartitioner
+
+improvements:
+  - LSM delayed delete compacted tables
+  - cstable mmap remove
+  - local sql scan fastpath
+  - scan in memory arenas in lsm reader
+  - include in memory arenas in lsm reader cache key/checksum
+  - in memory versionmap cache
+  - compact cstable/idx storage (unified file)

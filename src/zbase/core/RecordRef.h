@@ -17,10 +17,15 @@ using namespace stx;
 namespace zbase {
 
 struct RecordRef {
-  RecordRef(const SHA1Hash& _record_id, const Buffer& _record);
+  RecordRef(
+      const SHA1Hash& _record_id,
+      uint64_t _record_version,
+      const Buffer& _record);
 
   SHA1Hash record_id;
+  uint64_t record_version;
   Buffer record;
+  bool is_update;
 };
 
 } // namespace tdsb

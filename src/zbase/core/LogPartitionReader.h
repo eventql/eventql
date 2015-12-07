@@ -29,6 +29,10 @@ public:
   void fetchRecords(
       Function<void (const msg::MessageObject& record)> fn) override;
 
+  ScopedPtr<csql::TableExpression> buildSQLScan(
+      RefPtr<csql::SequentialScanNode> node,
+      csql::QueryBuilder* runtime) const override;
+
   void fetchRecords(
       size_t offset,
       size_t limit,

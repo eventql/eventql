@@ -15,7 +15,7 @@
 #include "stx/protobuf/MessageSchema.h"
 #include "zbase/core/TSDBClient.h"
 #include "zbase/core/TSDBService.h"
-#include "zbase/core/CSTableIndex.h"
+#include "zbase/core/CompactionWorker.h"
 #include "zbase/ReportFactory.h"
 #include "zbase/FeedConfig.pb.h"
 #include "zbase/ReportParams.pb.h"
@@ -39,7 +39,7 @@ public:
       zbase::TSDBService* tsdb_node,
       zbase::PartitionMap* partition_map,
       zbase::ReplicationScheme* replication_scheme,
-      zbase::CSTableIndex* cstable_index,
+      zbase::CompactionWorker* cstable_index,
       ConfigDirectory* cdb,
       AnalyticsAuth* auth,
       csql::Runtime* sql,
@@ -73,7 +73,7 @@ protected:
   zbase::TSDBService* tsdb_node_;
   zbase::PartitionMap* partition_map_;
   zbase::ReplicationScheme* replication_scheme_;
-  zbase::CSTableIndex* cstable_index_;
+  zbase::CompactionWorker* cstable_index_;
   HashMap<String, FeedConfig> feeds_;
   ConfigDirectory* cdb_;
   AnalyticsAuth* auth_;

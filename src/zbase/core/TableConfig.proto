@@ -17,7 +17,6 @@ enum TablePartitionerType {
 enum TableStorage {
   TBL_STORAGE_LOG = 0;
   TBL_STORAGE_STATIC = 2;
-  //TBL_STORAGE_BTREE = 3;
 };
 
 message TableConfig {
@@ -50,7 +49,7 @@ message TableConfig {
   /**
    * How often should we re-build the cstable indexes if the partition has
    * changed in microseconds (this is basically a rate-limit for the
-   * CSTableIndex subprocess)
+   * CompactionWorker subprocess)
    */
   optional uint64 cstable_build_interval = 9 [default = 10000000];
 

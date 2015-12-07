@@ -69,6 +69,9 @@ public:
       http::HTTPConnectionPool* http);
 
 protected:
+
+  bool upgradeToLSMv2() const;
+
   PartitionSnapshotRef head_;
   RefPtr<Table> table_;
   RefPtr<PartitionWriter> writer_;

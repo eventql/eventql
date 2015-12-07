@@ -19,10 +19,10 @@ using namespace stx;
 namespace zbase {
 class Partition;
 
-class StaticPartitionReader : public PartitionReader {
+class LSMPartitionReader : public PartitionReader {
 public:
 
-  StaticPartitionReader(
+  LSMPartitionReader(
       RefPtr<Table> table,
       RefPtr<PartitionSnapshot> head);
 

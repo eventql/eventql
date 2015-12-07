@@ -54,7 +54,8 @@ add_library(tsdb-server OBJECT
     core/TSDBClient.cc
     core/TimeWindowPartitioner.cc
     core/FixedShardPartitioner.cc
-    core/CSTableIndex.cc
+    core/CompactionStrategy.cc
+    core/CompactionWorker.cc
     core/SQLEngine.cc
     core/TSDBService.cc
     core/TSDBServlet.cc
@@ -70,8 +71,14 @@ add_library(tsdb-server OBJECT
     core/LogPartitionReader.cc
     core/LogPartitionWriter.cc
     core/LogPartitionReplication.cc
+    core/LSMPartitionReader.cc
+    core/LSMPartitionWriter.cc
+    core/LSMPartitionReplication.cc
+    core/LSMPartitionSQLScan.cc
     core/LazyPartition.cc
     core/Table.cc
+    core/RecordArena.cc
+    core/RecordVersionMap.cc
     core/ReplicationWorker.cc
     core/ReplicationScheme.cc
     core/ReplicationState.cc
@@ -82,16 +89,6 @@ add_library(tsdb-server OBJECT
 
 add_dependencies(tsdb-server customerdirectory)
 add_dependencies(tsdb-server coreprotos)
-
-add_executable(test-recordset
-    $<TARGET_OBJECTS:stx-mdb>
-    $<TARGET_OBJECTS:tsdb-server>
-    $<TARGET_OBJECTS:coreprotos>
-    $<TARGET_OBJECTS:dproc>
-    $<TARGET_OBJECTS:customerdirectory>
-    core/RecordSet_test.cc)
-
-target_link_libraries(test-recordset chartsql cplot sstable cstable stx-http stx-protobuf stx-json stx-base pcre)
 
 add_executable(test-tsdb-timewindowpartitioner
     $<TARGET_OBJECTS:stx-mdb>
@@ -112,6 +109,16 @@ add_executable(test-replicationscheme
     core/ReplicationScheme_test.cc)
 
 target_link_libraries(test-replicationscheme chartsql cplot sstable cstable stx-http stx-protobuf stx-json stx-base pcre)
+
+add_executable(test-recordversionmap
+    $<TARGET_OBJECTS:stx-mdb>
+    $<TARGET_OBJECTS:tsdb-server>
+    $<TARGET_OBJECTS:coreprotos>
+    $<TARGET_OBJECTS:dproc>
+    $<TARGET_OBJECTS:customerdirectory>
+    core/RecordVersionMap_test.cc)
+
+target_link_libraries(test-recordversionmap chartsql cplot sstable cstable stx-http stx-protobuf stx-json stx-base pcre)
 
 add_subdirectory(util)
 add_subdirectory(util/mysql)

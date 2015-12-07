@@ -23,9 +23,10 @@ public:
 
   PartitionWriter(PartitionSnapshotRef* head);
 
-  virtual bool insertRecord(
+  bool insertRecord(
       const SHA1Hash& record_id,
-      const Buffer& record) = 0;
+      uint64_t record_version,
+      const Buffer& record);
 
   virtual Set<SHA1Hash> insertRecords(
       const Vector<RecordRef>& records) = 0;
@@ -53,6 +54,11 @@ public:
    * might have kepy around will fail)
    */
   void freeze();
+
+  virtual bool needsCompaction() = 0;
+
+  virtual bool commit() = 0;
+  virtual bool compact() = 0;
 
 protected:
   PartitionSnapshotRef* head_;

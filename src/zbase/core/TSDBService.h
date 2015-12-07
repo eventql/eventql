@@ -30,7 +30,8 @@ using namespace stx;
 namespace zbase {
 
 enum class InsertFlags : uint64_t {
-  REPLICATED_WRITE = 1
+  REPLICATED_WRITE = 1,
+  SYNC_COMMIT = 2
 };
 
 class TSDBService {
@@ -55,7 +56,7 @@ public:
       const String& tsdb_namespace,
       const String& table_name,
       const SHA1Hash& partition_key,
-      const Vector<RecordRef>& recods,
+      const Vector<RecordRef>& records,
       uint64_t flags = 0);
 
   void insertRecord(
@@ -63,12 +64,15 @@ public:
       const String& table_name,
       const SHA1Hash& partition_key,
       const SHA1Hash& record_id,
+      uint64_t record_version,
       const Buffer& record,
       uint64_t flags = 0);
 
   void insertRecord(
       const String& tsdb_namespace,
       const String& table_name,
+      const SHA1Hash& record_id,
+      uint64_t record_version,
       const json::JSONObject::const_iterator& data_begin,
       const json::JSONObject::const_iterator& data_end,
       uint64_t flags = 0);
@@ -76,6 +80,8 @@ public:
   void insertRecord(
       const String& tsdb_namespace,
       const String& table_name,
+      const SHA1Hash& record_id,
+      uint64_t record_version,
       const msg::DynamicMessage& data,
       uint64_t flags = 0);
 
@@ -123,21 +129,27 @@ public:
       const String& tsdb_namespace,
       const String& table_key);
 
+  void compactPartition(
+      const String& tsdb_namespace,
+      const String& table_name,
+      const SHA1Hash& partition_key);
+
 protected:
 
   void insertRecordsLocal(
       const String& tsdb_namespace,
       const String& table_name,
       const SHA1Hash& partition_key,
-      const Vector<RecordRef>& records);
+      const Vector<RecordRef>& records,
+      uint64_t flags);
 
   void insertRecordsRemote(
       const String& tsdb_namespace,
       const String& table_name,
       const SHA1Hash& partition_key,
       const Vector<RecordRef>& records,
+      uint64_t flags,
       const ReplicaRef& host);
-
 
   PartitionMap* pmap_;
   ReplicationScheme* repl_;

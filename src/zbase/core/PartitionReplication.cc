@@ -42,7 +42,6 @@ ReplicationState PartitionReplication::fetchReplicationState(
   }
 
   ReplicationState state;
-  auto uuid = snap->uuid();
   state.set_uuid(tbl_uuid);
   return state;
 }

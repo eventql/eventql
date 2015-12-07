@@ -11,17 +11,19 @@
 #include <stx/stdtypes.h>
 #include <stx/autoref.h>
 #include <zbase/core/PartitionWriter.h>
+#include <zbase/core/RecordArena.h>
 #include <stx/util/PersistentHashSet.h>
+#include <zbase/core/CompactionStrategy.h>
 
 using namespace stx;
 
 namespace zbase {
 
-class LogPartitionWriter : public PartitionWriter {
+class LSMPartitionWriter : public PartitionWriter {
 public:
   static const size_t kDefaultMaxDatafileSize = 1024 * 1024 * 128;
 
-  LogPartitionWriter(
+  LSMPartitionWriter(
       RefPtr<Partition> partition,
       PartitionSnapshotRef* head);
 
@@ -29,14 +31,29 @@ public:
       const Vector<RecordRef>& records) override;
 
   bool commit() override;
+  bool needsCommit();
 
   bool compact() override;
   bool needsCompaction() override;
 
+  ReplicationState fetchReplicationState() const;
+  void commitReplicationState(const ReplicationState& state);
+
 protected:
+
+  void writeArenaToDisk(
+      RefPtr<RecordArena> arena,
+      uint64_t sequence,
+      const String& filename);
+
+  void upgradeFromV1();
+  bool needsUpgradeFromV1();
+  std::mutex upgrade_mutex_;
+
   RefPtr<Partition> partition_;
-  PersistentHashSet idset_;
+  RefPtr<CompactionStrategy> compaction_strategy_;
   size_t max_datafile_size_;
+  std::mutex commit_mutex_;
 };
 
 } // namespace tdsb

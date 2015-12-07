@@ -23,6 +23,8 @@ message RecordEnvelope {
 
   required bytes record_data = 4;
 
+  optional uint64 record_version = 7;
+
 };
 
 message RecordEnvelopeList {

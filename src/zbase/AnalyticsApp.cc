@@ -18,7 +18,7 @@
 #include "zbase/AnalyticsSession.pb.h"
 #include <zbase/core/TSDBTableScanSpec.pb.h>
 #include "zbase/core/TimeWindowPartitioner.h"
-#include <zbase/core/CSTableIndex.h>
+#include <zbase/core/CompactionWorker.h>
 #include "zbase/core/SQLEngine.h"
 #include "zbase/SessionSchema.h"
 #include "stx/protobuf/DynamicMessage.h"
@@ -32,7 +32,7 @@ AnalyticsApp::AnalyticsApp(
     zbase::TSDBService* tsdb_node,
     zbase::PartitionMap* partition_map,
     zbase::ReplicationScheme* replication_scheme,
-    zbase::CSTableIndex* cstable_index,
+    zbase::CompactionWorker* cstable_index,
     ConfigDirectory* cdb,
     AnalyticsAuth* auth,
     csql::Runtime* sql,
@@ -196,6 +196,7 @@ void AnalyticsApp::insertMetric(
           time,
           table->partitionSize()),
       Random::singleton()->sha1(),
+      WallClock::unixMicros(),
       smpl_buf);
 }
 
