@@ -320,6 +320,11 @@ void LSMPartitionWriter::upgradeFromV1() {
     FileUtil::rm(cst_filepath);
   }
 
+  auto cstm_filepath = FileUtil::joinPaths(snap->base_path, "_cstable_state");
+  if (FileUtil::exists(cstm_filepath)) {
+    FileUtil::rm(cstm_filepath);
+  }
+
   auto files = snap->state.sstable_files();
   size_t nrecs = 0;
   for (const auto& f : files) {
@@ -371,6 +376,16 @@ void LSMPartitionWriter::upgradeFromV1() {
   for (const auto& f : files) {
     auto fpath = FileUtil::joinPaths(snap->base_path, f);
     FileUtil::mv(fpath, fpath + ".DELETED_BY_UPGRADE");
+  }
+
+  auto idset_filepath = FileUtil::joinPaths(snap->base_path, "_idset");
+  if (FileUtil::exists(idset_filepath)) {
+    FileUtil::mv(idset_filepath, idset_filepath + ".DELETED_BY_UPGRADE");
+  }
+
+  auto repl_filepath = FileUtil::joinPaths(snap->base_path, "_repl");
+  if (FileUtil::exists(repl_filepath)) {
+    FileUtil::rm(repl_filepath);
   }
 
   logNotice(
