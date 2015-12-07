@@ -281,7 +281,17 @@ void LSMPartitionWriter::writeArenaToDisk(
 }
 
 ReplicationState LSMPartitionWriter::fetchReplicationState() const {
-  return head_->getSnapshot()->state.replication_state();
+  auto snap = head_->getSnapshot();
+  auto repl_state = snap->state.replication_state();
+  String tbl_uuid((char*) snap->uuid().data(), snap->uuid().size());
+
+  if (repl_state.uuid() == tbl_uuid) {
+    return repl_state;
+  } else {
+    ReplicationState state;
+    state.set_uuid(tbl_uuid);
+    return state;
+  }
 }
 
 void LSMPartitionWriter::commitReplicationState(const ReplicationState& state) {
