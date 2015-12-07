@@ -176,12 +176,8 @@ int main(int argc, const char** argv) {
 
   flags.parseArgv(argc, argv);
 
-  //close(STDOUT_FILENO);
-
   if (flags.isSet("log_to_stderr") && !flags.isSet("daemonize")) {
     stx::Application::logToStderr();
-  } else {
-    //close(STDERR_FILENO);
   }
 
   if (flags.isSet("log_to_syslog")) {
@@ -196,6 +192,8 @@ int main(int argc, const char** argv) {
 #endif
 
   if (flags.isSet("daemonize")) {
+    close(STDOUT_FILENO);
+    close(STDERR_FILENO);
     Application::daemonize();
   }
 
