@@ -125,8 +125,11 @@ RefPtr<PartitionWriter> Partition::getWriter() {
     switch (table_->storage()) {
 
       case zbase::TBL_STORAGE_LOG:
-        writer_ = mkRef<PartitionWriter>(new LogPartitionWriter(this, &head_));
-        //writer_ = mkRef<PartitionWriter>(new LSMPartitionWriter(this, &head_));
+        if (upgradeToLSMv2()) {
+          writer_ = mkRef<PartitionWriter>(new LSMPartitionWriter(this, &head_));
+        } else {
+          writer_ = mkRef<PartitionWriter>(new LogPartitionWriter(this, &head_));
+        }
         break;
 
       case zbase::TBL_STORAGE_STATIC:
@@ -147,8 +150,11 @@ RefPtr<PartitionReader> Partition::getReader() {
   switch (table_->storage()) {
 
     case zbase::TBL_STORAGE_LOG:
-      return new LogPartitionReader(table_, head_.getSnapshot());
-      //return new LSMPartitionReader(table_, head_.getSnapshot());
+      if (upgradeToLSMv2()) {
+        return new LSMPartitionReader(table_, head_.getSnapshot());
+      } else {
+        return new LogPartitionReader(table_, head_.getSnapshot());
+      }
 
     case zbase::TBL_STORAGE_STATIC:
       return new StaticPartitionReader(table_, head_.getSnapshot());
@@ -188,14 +194,17 @@ RefPtr<PartitionReplication> Partition::getReplicationStrategy(
   switch (table_->storage()) {
 
     case zbase::TBL_STORAGE_LOG:
-      return new LogPartitionReplication(
-          this,
-          repl_scheme,
-          http);
-      //return new LSMPartitionReplication(
-      //    this,
-      //    repl_scheme,
-      //    http);
+      if (upgradeToLSMv2()) {
+        return new LSMPartitionReplication(
+            this,
+            repl_scheme,
+            http);
+      } else {
+        return new LogPartitionReplication(
+            this,
+            repl_scheme,
+            http);
+      }
 
     case zbase::TBL_STORAGE_STATIC:
       return new StaticPartitionReplication(
@@ -207,6 +216,10 @@ RefPtr<PartitionReplication> Partition::getReplicationStrategy(
       RAISE(kRuntimeError, "invalid storage class");
 
   }
+}
+
+bool Partition::upgradeToLSMv2() const {
+  return true;
 }
 
 }

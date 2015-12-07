@@ -309,6 +309,7 @@ void LSMPartitionWriter::upgradeFromV1() {
   auto snap = head_->getSnapshot();
 
   logNotice(
+      "z1.core",
       "Upgrading partition $0/$1/$2 to LSM storage v0.2.0",
       snap->state.tsdb_namespace(),
       snap->state.table_key(),
