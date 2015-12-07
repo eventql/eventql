@@ -77,9 +77,21 @@ bool SimpleCompactionStrategy::compact(
 
     auto flat_columns = cstable_schema.flatColumns();
     for (const auto& col : flat_columns) {
-      columns.emplace_back(
-          input_cstable->getColumnReader(col.column_name),
-          cstable->getColumnWriter(col.column_name));
+      if (input_cstable->hasColumn(col.column_name)) {
+        columns.emplace_back(
+            input_cstable->getColumnReader(col.column_name),
+            cstable->getColumnWriter(col.column_name));
+      } else {
+        if (col.dlevel_max == 0) {
+          RAISE(
+              kIllegalStateError,
+              "can't merge CSTables after a new required column was added");
+        }
+
+        columns.emplace_back(
+            nullptr,
+            cstable->getColumnWriter(col.column_name));
+      }
     }
 
     auto nrecords = input_cstable->numRecords();
@@ -109,21 +121,27 @@ bool SimpleCompactionStrategy::compact(
         sequence_col->writeUnsignedInt(0, 0, sequence);
 
         for (auto& col : columns) {
-          while (!col.first->eofReached()) {
-            col.first->copyValue(col.second.get());
-            if (col.first->nextRepetitionLevel() == 0) {
-              break;
+          if (col.first.get()) {
+            while (!col.first->eofReached()) {
+              col.first->copyValue(col.second.get());
+              if (col.first->nextRepetitionLevel() == 0) {
+                break;
+              }
             }
+          } else {
+            col.second->writeNull(0, 0);
           }
         }
 
         cstable->addRow();
       } else {
         for (auto& col : columns) {
-          while (!col.first->eofReached()) {
-            col.first->skipValue();
-            if (col.first->nextRepetitionLevel() == 0) {
-              break;
+          if (col.first.get()) {
+            while (!col.first->eofReached()) {
+              col.first->skipValue();
+              if (col.first->nextRepetitionLevel() == 0) {
+                break;
+              }
             }
           }
         }
