@@ -1,3 +1,7 @@
+zbase-breadcrumbs.zbase_sql_editor_breadcrumbs {
+  padding-left: 57px;
+}
+
 .zbase_sql_editor .zbase_sql_editor_pane {
   display: table;
   table-layout: fixed;
