@@ -127,11 +127,12 @@ void TSDBServlet::replicateRecords(
     http::HTTPResponse* res,
     URI* uri) {
   auto record_list = msg::decode<RecordEnvelopeList>(req->body());
-  node_->insertRecords(
-      record_list,
-      (uint64_t) InsertFlags::REPLICATED_WRITE |
-      (uint64_t) InsertFlags::SYNC_COMMIT);
+  auto insert_flags = (uint64_t) InsertFlags::REPLICATED_WRITE;
+  if (record_list.sync_commit()) {
+    insert_flags |= (uint64_t) InsertFlags::SYNC_COMMIT;
+  }
 
+  node_->insertRecords(record_list, insert_flags);
   res->setStatus(http::kStatusCreated);
 }
 

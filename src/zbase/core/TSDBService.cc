@@ -351,6 +351,10 @@ void TSDBService::insertRecordsRemote(
       "http://$0/tsdb/replicate",
       host.addr.ipAndPort()));
 
+  if (flags & (uint64_t) InsertFlags::SYNC_COMMIT) {
+    envelope.set_sync_commit(true);
+  }
+
   http::HTTPRequest req(http::HTTPMessage::M_POST, uri.pathAndQuery());
   req.addHeader("Host", uri.hostAndPort());
   req.addBody(*msg::encode(envelope));

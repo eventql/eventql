@@ -84,6 +84,7 @@ void LSMPartitionReplication::replicateTo(
   size_t batch_size = 0;
   size_t num_replicated = 0;
   RecordEnvelopeList batch;
+  batch.set_sync_commit(true);
   fetchRecords(
       replicated_offset,
       [this, &batch, &replica, &replicated_offset, &batch_size, &num_replicated] (

@@ -1,8 +1,3 @@
-next release:
-  - remove commit flag from forwarded writes
-  - better RecordVersionMap
-  - better __lsm_id column encoding
-
 features:
   - tombstones
   - table ids
@@ -13,6 +8,7 @@ features:
   - primarykeypartitioner
 
 improvements:
+  - better __lsm_id column encoding
   - LSM delayed delete compacted tables
   - cstable mmap remove
   - local sql scan fastpath

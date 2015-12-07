@@ -28,6 +28,10 @@ message RecordEnvelope {
 };
 
 message RecordEnvelopeList {
+
   repeated RecordEnvelope records = 1;
+
+  optional bool sync_commit = 2;
+
 }
 
