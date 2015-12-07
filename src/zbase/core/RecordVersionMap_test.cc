@@ -103,3 +103,34 @@ TEST_CASE(RecordVersionMapTest, TestEmptyMap, [] () {
   }
 });
 
+TEST_CASE(RecordVersionMapTest, TestMapWithOneSlit, [] () {
+  auto filename = "/tmp/_zbase_recversionmap_test.idx";
+  FileUtil::rm(filename);
+
+  {
+    OrderedVersionMap map;
+    map[SHA1::compute("0x23232323")] = 1;
+    RecordVersionMap::write(map, filename);
+  }
+
+  {
+    VersionMap map;
+    map[SHA1::compute("0x42424242")] = 0;
+    map[SHA1::compute("0x23232323")] = 0;
+    map[SHA1::compute("0x52525252")] = 0;
+    map[SHA1::compute("0x17171717")] = 0;
+    RecordVersionMap::lookup(&map, filename);
+    EXPECT_EQ(map.size(), 4);
+    EXPECT_EQ(map[SHA1::compute("0x42424242")], 0);
+    EXPECT_EQ(map[SHA1::compute("0x23232323")], 1);
+    EXPECT_EQ(map[SHA1::compute("0x52525252")], 0);
+    EXPECT_EQ(map[SHA1::compute("0x17171717")], 0);
+  }
+
+  {
+    VersionMap map;
+    RecordVersionMap::load(&map, filename);
+    EXPECT_EQ(map.size(), 1);
+  }
+});
+

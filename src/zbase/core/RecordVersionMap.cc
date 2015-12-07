@@ -74,6 +74,10 @@ void RecordVersionMap::lookup(
         break;
       }
 
+      if (len == 1) {
+        break;
+      }
+
       if (cur_id < p.first) {
         begin = cur + 1;
       } else {
