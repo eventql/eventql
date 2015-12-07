@@ -1,4 +1,3 @@
-- in place log->lsm upgrade
 - better RecordVersionMap
 - LSM handle schema changes in compactionstrategy
 ------
