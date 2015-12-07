@@ -30,6 +30,7 @@ void LSMPartitionReader::fetchRecords(
     Function<void (const msg::MessageObject& record)> fn) {
   auto schema = table_->schema();
   const auto& tables = snap_->state.lsm_tables();
+  Set<SHA1Hash> id_set;
   for (auto tbl = tables.rbegin(); tbl != tables.rend(); ++tbl) {
     auto cstable_file = FileUtil::joinPaths(
         snap_->base_path,
@@ -39,7 +40,6 @@ void LSMPartitionReader::fetchRecords(
     auto id_col = cstable->getColumnReader("__lsm_id");
     auto is_update_col = cstable->getColumnReader("__lsm_is_update");
 
-    Set<SHA1Hash> id_set;
     auto nrecs = cstable->numRecords();
     for (size_t i = 0; i < nrecs; ++i) {
       uint64_t rlvl;
