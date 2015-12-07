@@ -143,7 +143,7 @@ bool LSMPartitionWriter::commit() {
 
     stx::logDebug(
         "z1.core",
-        "Comitting partition $1/$2/$3 ($0 records), took $4s",
+        "Committing partition $1/$2/$3 ($0 records), took $4s",
         arena->size(),
         snap->state.tsdb_namespace(),
         snap->state.table_key(),
