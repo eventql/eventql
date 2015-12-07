@@ -56,7 +56,7 @@ void EventsService::scanTable(
   }
 
   auto schema = table.get()->schema();
-  const auto& table_cfg = table.get()->config().config();
+  auto table_cfg = table.get()->config().config();
 
   if (!schema->hasField("time")) {
     RAISEF(kNotFoundError, "table '$0' has no 'time' column", table_name);
