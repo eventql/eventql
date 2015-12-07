@@ -527,7 +527,7 @@ Vector<TableDefinition> LogfileService::getTableDefinitions(
     auto tblcfg = td.mutable_config();
     tblcfg->set_schema(getSchema(logfile)->encode().toString());
     tblcfg->set_partitioner(zbase::TBL_PARTITION_TIMEWINDOW);
-    tblcfg->set_storage(zbase::TBL_STORAGE_LOG);
+    tblcfg->set_storage(zbase::TBL_STORAGE_COLSM);
 
     auto partcfg = tblcfg->mutable_time_window_partitioner_config();
     partcfg->set_partition_size(10 * kMicrosPerMinute);

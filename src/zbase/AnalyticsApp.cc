@@ -174,7 +174,7 @@ void AnalyticsApp::insertMetric(
     auto tblcfg = td.mutable_config();
     tblcfg->set_schema(schema.encode().toString());
     tblcfg->set_partitioner(zbase::TBL_PARTITION_TIMEWINDOW);
-    tblcfg->set_storage(zbase::TBL_STORAGE_LOG);
+    tblcfg->set_storage(zbase::TBL_STORAGE_COLSM);
     createTable(td);
     table = partition_map_->findTable(customer, metric).get();
   } else {

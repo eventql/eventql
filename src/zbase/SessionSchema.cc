@@ -98,7 +98,7 @@ Vector<TableDefinition> SessionSchema::tableDefinitionsForCustomer(
   //  auto tblcfg = td.mutable_config();
   //  tblcfg->set_schema(evschema.schema());
   //  tblcfg->set_partitioner(zbase::TBL_PARTITION_TIMEWINDOW);
-  //  tblcfg->set_storage(zbase::TBL_STORAGE_LOG);
+  //  tblcfg->set_storage(zbase::TBL_STORAGE_COLSM);
   //  tbls.emplace_back(td);
   //}
 
@@ -113,7 +113,7 @@ Vector<TableDefinition> SessionSchema::tableDefinitionsForCustomer(
     auto tblcfg = td.mutable_config();
     tblcfg->set_schema(SessionSchema::forCustomer(cfg)->encode().toString());
     tblcfg->set_partitioner(zbase::TBL_PARTITION_TIMEWINDOW);
-    tblcfg->set_storage(zbase::TBL_STORAGE_LOG);
+    tblcfg->set_storage(zbase::TBL_STORAGE_COLSM);
     tbls.emplace_back(td);
   }
 

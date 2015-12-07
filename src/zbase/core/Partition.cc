@@ -124,7 +124,7 @@ RefPtr<PartitionWriter> Partition::getWriter() {
   if (writer_.get() == nullptr) {
     switch (table_->storage()) {
 
-      case zbase::TBL_STORAGE_LOG:
+      case zbase::TBL_STORAGE_COLSM:
         if (upgradeToLSMv2()) {
           writer_ = mkRef<PartitionWriter>(new LSMPartitionWriter(this, &head_));
         } else {
@@ -149,7 +149,7 @@ RefPtr<PartitionWriter> Partition::getWriter() {
 RefPtr<PartitionReader> Partition::getReader() {
   switch (table_->storage()) {
 
-    case zbase::TBL_STORAGE_LOG:
+    case zbase::TBL_STORAGE_COLSM:
       if (upgradeToLSMv2()) {
         return new LSMPartitionReader(table_, head_.getSnapshot());
       } else {
@@ -193,7 +193,7 @@ RefPtr<PartitionReplication> Partition::getReplicationStrategy(
     http::HTTPConnectionPool* http) {
   switch (table_->storage()) {
 
-    case zbase::TBL_STORAGE_LOG:
+    case zbase::TBL_STORAGE_COLSM:
       if (upgradeToLSMv2()) {
         return new LSMPartitionReplication(
             this,

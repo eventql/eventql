@@ -533,7 +533,7 @@ void AnalyticsServlet::createTable(
 
     if (table_type == "timeseries" || table_type == "log_timeseries") {
       tblcfg->set_partitioner(zbase::TBL_PARTITION_TIMEWINDOW);
-      tblcfg->set_storage(zbase::TBL_STORAGE_LOG);
+      tblcfg->set_storage(zbase::TBL_STORAGE_COLSM);
 
       auto partition_size = json::objectGetUInt64(jreq, "partition_size");
       auto partcfg = tblcfg->mutable_time_window_partitioner_config();

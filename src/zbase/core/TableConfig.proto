@@ -15,7 +15,7 @@ enum TablePartitionerType {
 };
 
 enum TableStorage {
-  TBL_STORAGE_LOG = 0;
+  TBL_STORAGE_COLSM = 0;
   TBL_STORAGE_STATIC = 2;
 };
 
