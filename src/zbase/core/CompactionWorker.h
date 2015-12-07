@@ -33,6 +33,7 @@ protected:
   void stop();
   void work();
 
+  PartitionMap* pmap_;
   size_t nthreads_;
   Set<SHA1Hash> waitset_;
   std::multiset<

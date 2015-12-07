@@ -114,7 +114,7 @@ bool LSMPartitionWriter::needsCompaction() {
           snap->state.lsm_tables().end()));
 }
 
-void LSMPartitionWriter::commit() {
+bool LSMPartitionWriter::commit() {
   ScopedLock<std::mutex> commit_lk(commit_mutex_);
   RefPtr<RecordArena> arena;
 
@@ -159,11 +159,14 @@ void LSMPartitionWriter::commit() {
     snap->compacting_arena = nullptr;
     snap->writeToDisk();
     head_->setSnapshot(snap);
+    return true;
+  } else {
+    return false;
   }
 }
 
-void LSMPartitionWriter::compact() {
-  commit();
+bool LSMPartitionWriter::compact() {
+  auto dirty = commit();
 
   // fetch current table list
   auto snap = head_->getSnapshot()->clone();
@@ -176,7 +179,7 @@ void LSMPartitionWriter::compact() {
   // compact
   auto t0 = WallClock::unixMicros();
   if (!compaction_strategy_->compact(old_tables, &new_tables)) {
-    return;
+    return dirty;
   }
   auto t1 = WallClock::unixMicros();
 
@@ -231,6 +234,8 @@ void LSMPartitionWriter::compact() {
     FileUtil::rm(FileUtil::joinPaths(snap->base_path, f + ".cst"));
     FileUtil::rm(FileUtil::joinPaths(snap->base_path, f + ".idx"));
   }
+
+  return true;
 }
 
 void LSMPartitionWriter::writeArenaToDisk(

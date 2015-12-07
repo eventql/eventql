@@ -30,10 +30,10 @@ public:
   Set<SHA1Hash> insertRecords(
       const Vector<RecordRef>& records) override;
 
-  void commit() override;
+  bool commit() override;
   bool needsCommit();
 
-  void compact() override;
+  bool compact() override;
   bool needsCompaction() override;
 
   ReplicationState fetchReplicationState() const;

@@ -32,12 +32,12 @@ bool StaticPartitionWriter::needsCompaction() {
   return false;
 }
 
-void StaticPartitionWriter::commit() {
- // noop
+bool StaticPartitionWriter::commit() {
+ return true; // noop
 }
 
-void StaticPartitionWriter::compact() {
- // noop
+bool StaticPartitionWriter::compact() {
+ return true; // noop
 }
 
 } // namespace tdsb

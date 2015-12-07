@@ -117,13 +117,13 @@ bool LogPartitionWriter::needsCompaction() {
   return true;
 }
 
-void LogPartitionWriter::commit() {
- // noop
+bool LogPartitionWriter::commit() {
+ return true; // noop
 }
 
-void LogPartitionWriter::compact() {
+bool LogPartitionWriter::compact() {
   if (!needsCompaction()) {
-    return;
+    return false;
   }
 
   auto t0 = WallClock::unixMicros();
@@ -198,6 +198,8 @@ void LogPartitionWriter::compact() {
       snap->state.table_key(),
       snap->key.toString(),
       (double) (t1 - t0) / 1000000.0f);
+
+  return true;
 }
 
 } // namespace tdsb

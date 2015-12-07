@@ -28,9 +28,9 @@ public:
   Set<SHA1Hash> insertRecords(
       const Vector<RecordRef>& records) override;
 
-  void commit() override;
+  bool commit() override;
 
-  void compact() override;
+  bool compact() override;
   bool needsCompaction() override;
 
 protected:

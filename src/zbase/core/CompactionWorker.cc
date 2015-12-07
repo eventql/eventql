@@ -28,6 +28,7 @@ namespace zbase {
 CompactionWorker::CompactionWorker(
     PartitionMap* pmap,
     size_t nthreads) :
+    pmap_(pmap),
     nthreads_(nthreads),
     queue_([] (
         const Pair<uint64_t, RefPtr<Partition>>& a,
@@ -119,7 +120,11 @@ void CompactionWorker::work() {
 
       try {
         auto writer = partition->getWriter();
-        writer->compact();
+        if (writer->compact()) {
+          auto change = mkRef(new PartitionChangeNotification());
+          change->partition = partition;
+          pmap_->publishPartitionChange(change);
+        }
       } catch (const StandardException& e) {
         logError("tsdb", e, "CompactionWorker error");
         success = false;
