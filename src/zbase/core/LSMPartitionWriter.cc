@@ -250,7 +250,7 @@ void LSMPartitionWriter::writeArenaToDisk(
   auto schema = partition_->getTable()->schema();
 
   {
-    HashMap<SHA1Hash, uint64_t> vmap;
+    OrderedMap<SHA1Hash, uint64_t> vmap;
     auto cstable_schema = cstable::TableSchema::fromProtobuf(*schema);
     auto cstable_schema_ext = cstable_schema;
     cstable_schema_ext.addBool("__lsm_is_update", false);

@@ -150,7 +150,12 @@ bool SimpleCompactionStrategy::compact(
   }
 
   cstable->commit();
-  RecordVersionMap::write(vmap, cstable_filepath + ".idx");
+
+  OrderedMap<SHA1Hash, uint64_t> vmap_ordered;
+  for (const auto& p : vmap) {
+    vmap_ordered.emplace(p);
+  }
+  RecordVersionMap::write(vmap_ordered, cstable_filepath + ".idx");
 
   LSMTableRef tbl_ref;
   tbl_ref.set_filename(cstable_filename);

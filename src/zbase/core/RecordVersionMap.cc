@@ -14,6 +14,7 @@
 #include <stx/io/mmappedfile.h>
 #include <stx/io/inputstream.h>
 #include <stx/io/outputstream.h>
+#include <stx/io/mmappedfile.h>
 #include <stx/io/BufferedOutputStream.h>
 #include <stx/logging.h>
 #include <zbase/core/RecordVersionMap.h>
@@ -24,7 +25,7 @@ using namespace stx;
 namespace zbase {
 
 void RecordVersionMap::write(
-    const HashMap<SHA1Hash, uint64_t>& map,
+    const OrderedMap<SHA1Hash, uint64_t>& map,
     const String& filename) {
   auto os = BufferedOutputStream::fromStream(
       FileOutputStream::openFile(filename));
@@ -41,17 +42,40 @@ void RecordVersionMap::write(
 void RecordVersionMap::lookup(
     HashMap<SHA1Hash, uint64_t>* map,
     const String& filename) {
-  auto is = FileInputStream::openFile(filename);
-  is->readUInt8();
-  auto len = is->readUInt64();
-  for (size_t i = 0; i < len; ++i) {
-    SHA1Hash id;
-    is->readNextBytes(const_cast<void*>(id.data()), SHA1Hash::kSize);
-    auto ver = is->readUInt64();
+  io::MmappedFile mmap(File::openFile(filename, File::O_READ));
 
-    auto map_iter = map->find(id);
-    if (map_iter != map->end() && ver > map_iter->second) {
-      map_iter->second = ver;
+  auto len = *mmap.structAt<uint64_t>(1);
+
+  static size_t kHeaderOffset = 9;
+  static size_t kSlotSize = 28;
+
+  for (auto& p : *map) {
+    uint64_t begin = 0;
+    uint64_t end = len - 1;
+
+    // continue searching while [begin,end] is not empty
+    while (begin <= end) {
+      uint64_t cur = begin + ((end - begin) / uint64_t(2));
+      SHA1Hash cur_id(
+          mmap.structAt<void>(kHeaderOffset + cur * kSlotSize),
+          SHA1Hash::kSize);
+
+      if (cur_id == p.first) {
+        auto cur_version = *mmap.structAt<uint64_t>(
+            kHeaderOffset + cur * kSlotSize + SHA1Hash::kSize);
+
+        if (cur_version > p.second) {
+          p.second = cur_version;
+        }
+
+        break;
+      }
+
+      if (cur_id < p.first) {
+        begin = cur + 1;
+      } else {
+        end = cur - 1;
+      }
     }
   }
 }

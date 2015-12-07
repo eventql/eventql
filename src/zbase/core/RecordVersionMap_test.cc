@@ -19,13 +19,14 @@ using namespace zbase;
 UNIT_TEST(RecordVersionMapTest);
 
 using VersionMap = HashMap<SHA1Hash, uint64_t>;
+using OrderedVersionMap = OrderedMap<SHA1Hash, uint64_t>;
 
 TEST_CASE(RecordVersionMapTest, TestSimpleSet, [] () {
   auto filename = "/tmp/_zbase_recversionmap_test.idx";
   FileUtil::rm(filename);
 
   {
-    VersionMap map;
+    OrderedVersionMap map;
     map[SHA1::compute("0x42424242")] = 3;
     map[SHA1::compute("0x23232323")] = 1;
     map[SHA1::compute("0x52525252")] = 2;

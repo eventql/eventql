@@ -21,7 +21,7 @@ class RecordVersionMap {
 public:
 
   static void write(
-      const HashMap<SHA1Hash, uint64_t>& map,
+      const OrderedMap<SHA1Hash, uint64_t>& map,
       const String& filename);
 
   /**
@@ -36,7 +36,6 @@ public:
   static void load(
       HashMap<SHA1Hash, uint64_t>* map,
       const String& filename);
-
 
 };
 
