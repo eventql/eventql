@@ -219,7 +219,8 @@ RefPtr<PartitionReplication> Partition::getReplicationStrategy(
 }
 
 bool Partition::upgradeToLSMv2() const {
-  return false;
+  auto table_name = table_->name();
+  return table_name == "myts";
 }
 
 }
