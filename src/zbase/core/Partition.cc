@@ -219,7 +219,7 @@ RefPtr<PartitionReplication> Partition::getReplicationStrategy(
 }
 
 bool Partition::upgradeToLSMv2() const {
-  return true;
+  return false;
 }
 
 }
