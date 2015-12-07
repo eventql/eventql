@@ -63,12 +63,7 @@ ZBase.registerView((function() {
         "zbase_report_main_tpl");
 
     //breadcrumbs
-    var breadcrumbs = $.getTemplate(
-        "views/report",
-        "zbase_report_breadcrumbs_tpl");
-
-    $(".report_breadcrumb", breadcrumbs).href = kPathPrefix + doc.uuid;
-    HeaderWidget.setBreadCrumbs(breadcrumbs);
+    $(".report_breadcrumb", page).href = kPathPrefix + doc.uuid;
 
     //doc settings
     var settings_widget = DocumentSettingsWidget(
@@ -309,8 +304,7 @@ ZBase.registerView((function() {
 
   var setReportName = function(name) {
     var escaped_name = $.escapeHTML(name);
-    //$("zbase-breadcrumbs-section.report_name").innerHTML = escaped_name;
-    $(".zbase_header .report_breadcrumb").innerHTML = escaped_name;
+    $(".zbase_report_breadcrumbs .report_breadcrumb").innerHTML = escaped_name;
     $(".zbase_report_pane .report_name").innerHTML = escaped_name;
     $(".zbase_report_pane z-modal input.report_name").value = escaped_name;
   };
