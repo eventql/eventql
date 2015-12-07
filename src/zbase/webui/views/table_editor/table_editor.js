@@ -6,7 +6,6 @@ ZBase.registerView((function() {
 
     $.showLoader();
     ZBaseMainMenu.hide();
-    HeaderWidget.hideBreadCrumbs();
 
     $.httpGet("/api/v1/tables/" + table_id, function(r) {
       if (r.status == 200) {

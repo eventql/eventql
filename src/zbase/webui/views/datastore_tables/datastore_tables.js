@@ -3,7 +3,6 @@ ZBase.registerView((function() {
   var load = function(url) {
     $.showLoader();
     ZBaseMainMenu.show();
-    HeaderWidget.hideBreadCrumbs();
 
     $.httpGet("/api/v1/tables", function(r) {
       if (r.status == 200) {
