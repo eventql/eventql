@@ -45,15 +45,9 @@ var perSellerLayout = function(query_mgr, path_prefix, shop_id) {
       var result = JSON.parse(e.data).results[0];
 
       //breadcrumbs
-      var breadcrumbs = $.getTemplate(
-          "apps/dawanda_seller_analytics",
-          "zbase_per_seller_layout_breadcrumbs_tpl");
-
-      var shop_name_bc = $(".shop_name_breadcrumb", breadcrumbs);
+      var shop_name_bc = $(".zbase_seller_stats.per_seller .shop_name_breadcrumb");
       shop_name_bc.href = path_prefix + shop_id;
       shop_name_bc.innerHTML = result.rows[0];
-
-      HeaderWidget.setBreadCrumbs(breadcrumbs);
 
       $(".zbase_seller_stats h2.pagetitle .shop_name").innerHTML = result.rows[0];
     });

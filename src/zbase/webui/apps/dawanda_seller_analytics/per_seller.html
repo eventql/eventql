@@ -1,6 +1,20 @@
 <template id="per_seller_layout_main_tpl">
   <div class="zbase_seller_stats per_seller">
-    <div class="zbase_content_pane fullwidth" style="padding: 0 20px;">
+    <div class="zbase_content_pane fullwidth" style="padding: 0 20px 0 23px;">
+      <div class="zbase_seller_breadcrumbs">
+        <zbase-breadcrumbs>
+          <zbase-breadcrumbs-section>
+            <a href="/a/apps/dawanda_seller_analytics">Analytics</a>
+          </zbase-breadcrumbs-section>
+          <zbase-breadcrumbs-section>
+            <a href="/a/apps/dawanda_seller_analytics">DaWanda Seller</a>
+          </zbase-breadcrumbs-section>
+          <zbase-breadcrumbs-section>
+            <a class="shop_name_breadcrumb"></a>
+          </zbase-breadcrumbs-section>
+        </zbase-breadcrumbs>
+      </div>
+
       <h2 class="pagetitle" style="font-size: 24px;">
         <em><span class="shop_name"></span> [<span class="shop_id"></span>]</em>
       </h2>
@@ -23,18 +37,4 @@
       <div class="result_pane"></div>
     </div>
   </div>
-</template>
-
-<template id="zbase_per_seller_layout_breadcrumbs_tpl">
-  <zbase-breadcrumbs>
-    <zbase-breadcrumbs-section>
-      <a href="/a/apps/dawanda_seller_analytics">Analytics</a>
-    </zbase-breadcrumbs-section>
-    <zbase-breadcrumbs-section>
-      <a href="/a/apps/dawanda_seller_analytics">DaWanda Seller</a>
-    </zbase-breadcrumbs-section>
-    <zbase-breadcrumbs-section>
-      <a class="shop_name_breadcrumb"></a>
-    </zbase-breadcrumbs-section>
-  </zbase-breadcrumbs>
 </template>

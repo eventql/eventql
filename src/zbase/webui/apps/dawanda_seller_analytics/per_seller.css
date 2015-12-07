@@ -1,3 +1,31 @@
+/* breadcrumbs */
+.zbase_seller_stats.per_seller .zbase_seller_breadcrumbs {
+  height: 36px;
+  background: #f9f9f9;
+  border-bottom: 1px solid #d0d0d0;
+  margin: 0 -20px 0 -23px;
+}
+
+.zbase_seller_stats.per_seller .zbase_seller_breadcrumbs zbase-breadcrumbs {
+  font-size: 12px;
+  font-weight: 300;
+  margin-left: 23px;
+}
+
+.zbase_seller_stats.per_seller .zbase_seller_breadcrumbs zbase-breadcrumbs,
+.zbase_seller_stats.per_seller .zbase_seller_breadcrumbs zbase-breadcrumbs a {
+  color: #454545;
+  line-height: 36px;
+}
+
+.zbase_seller_stats.per_seller .zbase_seller_breadcrumbs zbase-breadcrumbs-section:last-child a {
+  font-weight: 300;
+}
+
+.zbase_seller_stats.per_seller .zbase_seller_breadcrumbs zbase-breadcrumbs-section a:hover {
+  text-decoration: underline;
+}
+
 .zbase_seller_stats.per_seller z-tabbable.slim_tabs {
   font-size: 14px;
 }
