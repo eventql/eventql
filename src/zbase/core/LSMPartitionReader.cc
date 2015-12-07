@@ -10,7 +10,8 @@
 #include <stx/fnv.h>
 #include <stx/io/fileutil.h>
 #include <stx/protobuf/MessageDecoder.h>
-#include <sstable/sstablereader.h>
+#include <cstable/CSTableReader.h>
+#include <cstable/RecordMaterializer.h>
 #include <zbase/core/LSMPartitionReader.h>
 #include <zbase/core/LSMPartitionSQLScan.h>
 #include <zbase/core/Table.h>
@@ -27,7 +28,43 @@ LSMPartitionReader::LSMPartitionReader(
 
 void LSMPartitionReader::fetchRecords(
     Function<void (const msg::MessageObject& record)> fn) {
-  RAISE(kNotYetImplementedError, "not yet implemented");
+  auto schema = table_->schema();
+  const auto& tables = snap_->state.lsm_tables();
+  for (auto tbl = tables.rbegin(); tbl != tables.rend(); ++tbl) {
+    auto cstable_file = FileUtil::joinPaths(
+        snap_->base_path,
+        tbl->filename() + ".cst");
+    auto cstable = cstable::CSTableReader::openFile(cstable_file);
+    cstable::RecordMaterializer materializer(schema.get(), cstable.get());
+    auto id_col = cstable->getColumnReader("__lsm_id");
+    auto is_update_col = cstable->getColumnReader("__lsm_is_update");
+
+    Set<SHA1Hash> id_set;
+    auto nrecs = cstable->numRecords();
+    for (size_t i = 0; i < nrecs; ++i) {
+      uint64_t rlvl;
+      uint64_t dlvl;
+
+      bool is_update;
+      is_update_col->readBoolean(&rlvl, &dlvl, &is_update);
+
+      String id_str;
+      id_col->readString(&rlvl, &dlvl, &id_str);
+      auto id = SHA1Hash::fromHexString(id_str);
+
+      if (id_set.count(id) == 0) {
+        if (is_update) {
+          id_set.emplace(id);
+        }
+
+        msg::MessageObject record;
+        materializer.nextRecord(&record);
+        fn(record);
+      } else {
+        materializer.skipRecord();
+      }
+    }
+  }
 }
 
 SHA1Hash LSMPartitionReader::version() const {
