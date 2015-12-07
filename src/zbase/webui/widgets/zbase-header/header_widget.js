@@ -43,16 +43,6 @@ var HeaderWidget = (function() {
 
   var update = function(path) {};
 
-  var setBreadCrumbs = function(inner) {
-    $.replaceContent($(".zbase_header .breadcrumbs_bar"), inner);
-    $.handleLinks(inner);
-    $(".zbase_header").classList.add("with_breadcrumbs");
-  };
-
-  var hideBreadCrumbs = function() {
-    $(".zbase_header").classList.remove("with_breadcrumbs");
-  };
-
   var toggleDropdown = function() {
     this.classList.toggle("open");
   };
@@ -109,8 +99,6 @@ var HeaderWidget = (function() {
   return {
     render: render,
     update: update,
-    setBreadCrumbs: setBreadCrumbs,
-    hideBreadCrumbs: hideBreadCrumbs
   };
 
 })();
