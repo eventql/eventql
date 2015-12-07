@@ -21,7 +21,7 @@ UNIT_TEST(RecordVersionMapTest);
 using VersionMap = HashMap<SHA1Hash, uint64_t>;
 using OrderedVersionMap = OrderedMap<SHA1Hash, uint64_t>;
 
-TEST_CASE(RecordVersionMapTest, TestSimpleSet, [] () {
+TEST_CASE(RecordVersionMapTest, TestLookup, [] () {
   auto filename = "/tmp/_zbase_recversionmap_test.idx";
   FileUtil::rm(filename);
 
@@ -71,7 +71,35 @@ TEST_CASE(RecordVersionMapTest, TestSimpleSet, [] () {
     EXPECT_EQ(map[SHA1::compute("0x23232323")], 1);
     EXPECT_EQ(map[SHA1::compute("0x52525252")], 2);
   }
-
 });
 
+TEST_CASE(RecordVersionMapTest, TestEmptyMap, [] () {
+  auto filename = "/tmp/_zbase_recversionmap_test.idx";
+  FileUtil::rm(filename);
+
+  {
+    OrderedVersionMap map;
+    RecordVersionMap::write(map, filename);
+  }
+
+  {
+    VersionMap map;
+    map[SHA1::compute("0x42424242")] = 0;
+    map[SHA1::compute("0x23232323")] = 0;
+    map[SHA1::compute("0x52525252")] = 0;
+    map[SHA1::compute("0x17171717")] = 0;
+    RecordVersionMap::lookup(&map, filename);
+    EXPECT_EQ(map.size(), 4);
+    EXPECT_EQ(map[SHA1::compute("0x42424242")], 0);
+    EXPECT_EQ(map[SHA1::compute("0x23232323")], 0);
+    EXPECT_EQ(map[SHA1::compute("0x52525252")], 0);
+    EXPECT_EQ(map[SHA1::compute("0x17171717")], 0);
+  }
+
+  {
+    VersionMap map;
+    RecordVersionMap::load(&map, filename);
+    EXPECT_EQ(map.size(), 0);
+  }
+});
 

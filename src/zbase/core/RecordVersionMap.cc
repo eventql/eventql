@@ -45,6 +45,9 @@ void RecordVersionMap::lookup(
   io::MmappedFile mmap(File::openFile(filename, File::O_READ));
 
   auto len = *mmap.structAt<uint64_t>(1);
+  if (len == 0) {
+    return;
+  }
 
   static size_t kHeaderOffset = 9;
   static size_t kSlotSize = 28;
