@@ -12,3 +12,5 @@
 - allow timewindow partitioner config updates
 - primarykeypartitioner
 - local sql scan fastpath
+- scan in memory arenas in lsm reader
+- include in memory arenas in lsm reader cache key/checksum
