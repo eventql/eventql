@@ -9,6 +9,7 @@ features:
 
 improvements:
   - better __lsm_id column encoding
+  - autocommit if arena too large
   - LSM delayed delete compacted tables
   - cstable mmap remove
   - local sql scan fastpath
