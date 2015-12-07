@@ -12,7 +12,7 @@
 #include <zbase/core/CompactionStrategy.h>
 #include <zbase/core/RecordVersionMap.h>
 #include <cstable/CSTableWriter.h>
-#include <stx/io/FileUtil.h>
+#include <stx/io/fileutil.h>
 
 using namespace stx;
 
