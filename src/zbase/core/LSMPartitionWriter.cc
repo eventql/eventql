@@ -353,7 +353,7 @@ void LSMPartitionWriter::upgradeFromV1() {
       auto record_id = SHA1Hash(key, key_size);
       records.emplace_back(record_id, 1, Buffer(data, data_size));
 
-      if (records.size() == 8192) {
+      if (records.size() == 8192 * 8) {
         insertRecords(records);
         records.clear();
         commit();
