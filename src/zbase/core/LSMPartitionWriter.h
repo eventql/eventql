@@ -48,6 +48,7 @@ protected:
 
   void upgradeFromV1();
   bool needsUpgradeFromV1();
+  std::mutex upgrade_mutex_;
 
   RefPtr<Partition> partition_;
   RefPtr<CompactionStrategy> compaction_strategy_;

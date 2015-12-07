@@ -305,7 +305,7 @@ void LSMPartitionWriter::commitReplicationState(const ReplicationState& state) {
 }
 
 void LSMPartitionWriter::upgradeFromV1() {
-  ScopedLock<std::mutex> commit_lk(mutex_);
+  ScopedLock<std::mutex> upgrade_lk(upgrade_mutex_);
   auto snap = head_->getSnapshot();
 
   logNotice(
