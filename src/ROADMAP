@@ -1,7 +1,7 @@
 - better RecordVersionMap
+- better __lsm_id column encoding
 - LSM handle schema changes in compactionstrategy
 ------
-- remove __lsm_id column
 - tombstones
 - LSM delayed delete compacted tables
 - table ids
