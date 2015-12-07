@@ -1,4 +1,5 @@
 next release:
+  - remove commit flag from forwarded writes
   - better RecordVersionMap
   - better __lsm_id column encoding
 
