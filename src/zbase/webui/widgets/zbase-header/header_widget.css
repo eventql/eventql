@@ -123,13 +123,9 @@
 }
 
 #menu_toggler {
-  width: 179px;
+  width: 60px;
   float: left;
   height: 44px;
-}
-
-#menu_toggler.closed {
-  width: 60px;
 }
 
 .zbase_header .menu_icon {
