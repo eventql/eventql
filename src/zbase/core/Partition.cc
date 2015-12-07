@@ -126,10 +126,7 @@ RefPtr<PartitionWriter> Partition::getWriter() {
 
       case zbase::TBL_STORAGE_LOG:
         writer_ = mkRef<PartitionWriter>(new LogPartitionWriter(this, &head_));
-        break;
-
-      case zbase::TBL_STORAGE_LSM:
-        writer_ = mkRef<PartitionWriter>(new LSMPartitionWriter(this, &head_));
+        //writer_ = mkRef<PartitionWriter>(new LSMPartitionWriter(this, &head_));
         break;
 
       case zbase::TBL_STORAGE_STATIC:
@@ -151,9 +148,7 @@ RefPtr<PartitionReader> Partition::getReader() {
 
     case zbase::TBL_STORAGE_LOG:
       return new LogPartitionReader(table_, head_.getSnapshot());
-
-    case zbase::TBL_STORAGE_LSM:
-      return new LSMPartitionReader(table_, head_.getSnapshot());
+      //return new LSMPartitionReader(table_, head_.getSnapshot());
 
     case zbase::TBL_STORAGE_STATIC:
       return new StaticPartitionReader(table_, head_.getSnapshot());
@@ -197,12 +192,10 @@ RefPtr<PartitionReplication> Partition::getReplicationStrategy(
           this,
           repl_scheme,
           http);
-
-    case zbase::TBL_STORAGE_LSM:
-      return new LSMPartitionReplication(
-          this,
-          repl_scheme,
-          http);
+      //return new LSMPartitionReplication(
+      //    this,
+      //    repl_scheme,
+      //    http);
 
     case zbase::TBL_STORAGE_STATIC:
       return new StaticPartitionReplication(
