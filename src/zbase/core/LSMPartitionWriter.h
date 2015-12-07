@@ -46,6 +46,9 @@ protected:
       uint64_t sequence,
       const String& filename);
 
+  void upgradeFromV1();
+  bool needsUpgradeFromV1();
+
   RefPtr<Partition> partition_;
   RefPtr<CompactionStrategy> compaction_strategy_;
   size_t max_datafile_size_;

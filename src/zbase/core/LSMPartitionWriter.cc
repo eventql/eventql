@@ -19,6 +19,7 @@
 #include <stx/protobuf/MessageDecoder.h>
 #include <cstable/RecordShredder.h>
 #include <cstable/CSTableWriter.h>
+#include <sstable/sstablereader.h>
 
 using namespace stx;
 
@@ -103,7 +104,7 @@ bool LSMPartitionWriter::needsCommit() {
 }
 
 bool LSMPartitionWriter::needsCompaction() {
-  if (needsCommit()) {
+  if (needsCommit() || needsUpgradeFromV1()) {
     return true;
   }
 
@@ -166,6 +167,7 @@ bool LSMPartitionWriter::commit() {
 }
 
 bool LSMPartitionWriter::compact() {
+  upgradeFromV1();
   auto dirty = commit();
 
   // fetch current table list
@@ -302,5 +304,81 @@ void LSMPartitionWriter::commitReplicationState(const ReplicationState& state) {
   head_->setSnapshot(snap);
 }
 
+void LSMPartitionWriter::upgradeFromV1() {
+  ScopedLock<std::mutex> commit_lk(mutex_);
+  auto snap = head_->getSnapshot();
+
+  logNotice(
+      "Upgrading partition $0/$1/$2 to LSM storage v0.2.0",
+      snap->state.tsdb_namespace(),
+      snap->state.table_key(),
+      snap->key.toString());
+
+  auto cst_filepath = FileUtil::joinPaths(snap->base_path, "_cstable");
+  if (FileUtil::exists(cst_filepath)) {
+    FileUtil::rm(cst_filepath);
+  }
+
+  auto files = snap->state.sstable_files();
+  size_t nrecs = 0;
+  for (const auto& f : files) {
+    auto fpath = FileUtil::joinPaths(snap->base_path, f);
+    sstable::SSTableReader reader(fpath);
+
+    Vector<RecordRef> records;
+    auto cursor = reader.getCursor();
+    while (cursor->valid()) {
+      void* key;
+      size_t key_size;
+      cursor->getKey(&key, &key_size);
+      if (key_size != SHA1Hash::kSize) {
+        RAISE(kRuntimeError, "invalid row");
+      }
+
+      void* data;
+      size_t data_size;
+      cursor->getData(&data, &data_size);
+
+      ++nrecs;
+      auto record_id = SHA1Hash(key, key_size);
+      records.emplace_back(record_id, 1, Buffer(data, data_size));
+
+      if (!cursor->next()) {
+        break;
+      }
+    }
+
+    insertRecords(records);
+  }
+
+  commit();
+
+  {
+    ScopedLock<std::mutex> write_lk(mutex_);
+    auto snap = head_->getSnapshot()->clone();
+    snap->state.mutable_sstable_files()->Clear();
+    snap->writeToDisk();
+    head_->setSnapshot(snap);
+  }
+
+  for (const auto& f : files) {
+    auto fpath = FileUtil::joinPaths(snap->base_path, f);
+    FileUtil::mv(fpath, fpath + ".DELETED_BY_UPGRADE");
+  }
+
+  logNotice(
+      "z1.core",
+      "Upgrade for partition $1/$2/$3 ($0 records) to LSM storage v0.2.0 done",
+      nrecs,
+      snap->state.tsdb_namespace(),
+      snap->state.table_key(),
+      snap->key.toString());
+}
+
+bool LSMPartitionWriter::needsUpgradeFromV1() {
+  auto snap = head_->getSnapshot();
+  auto filepath = FileUtil::joinPaths(snap->base_path, "_cstable");
+  return snap->state.sstable_files().size() > 0 || FileUtil::exists(filepath);
+}
 
 } // namespace tdsb
