@@ -121,7 +121,8 @@ bool LSMPartitionReplication::replicate() {
     return true;
   }
 
-  auto repl_state = fetchReplicationState();
+  auto& writer = dynamic_cast<LSMPartitionWriter&>(*partition_->getWriter());
+  auto repl_state = writer.fetchReplicationState();
   auto head_offset = snap_->state.lsm_sequence();
   bool dirty = false;
   bool success = true;
@@ -136,11 +137,13 @@ bool LSMPartitionReplication::replicate() {
     if (replica_offset < head_offset) {
       logDebug(
           "z1.replication",
-          "Replicating partition $0/$1/$2 to $3 ($4 records)",
+          "Replicating partition $0/$1/$2 to $3 (replicated_seq: $4, head_seq: $5, $6 records)",
           snap_->state.tsdb_namespace(),
           snap_->state.table_key(),
           snap_->key.toString(),
           r.addr.hostAndPort(),
+          replica_offset,
+          head_offset,
           head_offset - replica_offset);
 
       try {
