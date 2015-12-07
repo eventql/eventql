@@ -50,7 +50,7 @@ void LSMPartitionReader::fetchRecords(
 
       String id_str;
       id_col->readString(&rlvl, &dlvl, &id_str);
-      auto id = SHA1Hash::fromHexString(id_str);
+      SHA1Hash id(id_str.data(), id_str.size());
 
       if (id_set.count(id) == 0) {
         if (is_update) {

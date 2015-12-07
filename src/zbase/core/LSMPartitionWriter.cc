@@ -274,7 +274,8 @@ void LSMPartitionWriter::writeArenaToDisk(
       msg::MessageDecoder::decode(r.record, *schema, &obj);
       shredder.addRecordFromProtobuf(obj, *schema);
       is_update_col->writeBoolean(0, 0, r.is_update);
-      id_col->writeString(0, 0, r.record_id.toString());
+      String id_str((const char*) r.record_id.data(), r.record_id.size());
+      id_col->writeString(0, 0, id_str);
       version_col->writeUnsignedInt(0, 0, r.record_version);
       sequence_col->writeUnsignedInt(0, 0, sequence++);
       vmap.emplace(r.record_id, r.record_version);

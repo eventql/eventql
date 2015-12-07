@@ -230,7 +230,7 @@ void LSMPartitionReplication::fetchRecords(
 
       String id_str;
       id_col->readString(&rlvl, &dlvl, &id_str);
-      auto id = SHA1Hash::fromHexString(id_str);
+      SHA1Hash id(id_str.data(), id_str.size());
 
       uint64_t version;
       version_col->readUnsignedInt(&rlvl, &dlvl, &version);
