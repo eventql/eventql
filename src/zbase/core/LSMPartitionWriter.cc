@@ -167,7 +167,10 @@ bool LSMPartitionWriter::commit() {
 }
 
 bool LSMPartitionWriter::compact() {
-  upgradeFromV1();
+  if (needsUpgradeFromV1()) {
+    upgradeFromV1();
+  }
+
   auto dirty = commit();
 
   // fetch current table list
@@ -399,8 +402,12 @@ void LSMPartitionWriter::upgradeFromV1() {
 
 bool LSMPartitionWriter::needsUpgradeFromV1() {
   auto snap = head_->getSnapshot();
-  auto filepath = FileUtil::joinPaths(snap->base_path, "_cstable");
-  return snap->state.sstable_files().size() > 0 || FileUtil::exists(filepath);
+  return
+      snap->state.sstable_files().size() > 0 ||
+      FileUtil::exists(FileUtil::joinPaths(snap->base_path, "_idset")) ||
+      FileUtil::exists(FileUtil::joinPaths(snap->base_path, "_repl")) ||
+      FileUtil::exists(FileUtil::joinPaths(snap->base_path, "_cstable_state")) ||
+      FileUtil::exists(FileUtil::joinPaths(snap->base_path, "_cstable"));
 }
 
 } // namespace tdsb
