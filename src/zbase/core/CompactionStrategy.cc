@@ -74,10 +74,12 @@ bool SimpleCompactionStrategy::compact(
     Vector<Pair<
         RefPtr<cstable::ColumnReader>,
         RefPtr<cstable::ColumnWriter>>> columns;
-    for (const auto& col : cstable_schema.columns()) {
+
+    auto flat_columns = cstable_schema.flatColumns();
+    for (const auto& col : flat_columns) {
       columns.emplace_back(
-          input_cstable->getColumnReader(col->name),
-          cstable->getColumnWriter(col->name));
+          input_cstable->getColumnReader(col.column_name),
+          cstable->getColumnWriter(col.column_name));
     }
 
     auto nrecords = input_cstable->numRecords();
