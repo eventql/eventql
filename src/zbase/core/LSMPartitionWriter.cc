@@ -399,6 +399,8 @@ void LSMPartitionWriter::upgradeFromV1() {
       snap->state.tsdb_namespace(),
       snap->state.table_key(),
       snap->key.toString());
+
+  compact();
 }
 
 bool LSMPartitionWriter::needsUpgradeFromV1() {
