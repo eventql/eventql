@@ -402,6 +402,26 @@ var ZBase = (function() {
       ];
 
       ZBase.loadModules(global_modules, function() {
+        //render header bar
+        var header_bar = document.getElementById("zbase_header_bar");
+        header_bar.style.display = "block";
+        var links = {
+          "/a/datastore": "Datastore",
+          "/a/analytics": "Analytics",
+          "/a/documentation": "Documentation"
+        }
+        for (var link in links) {
+          var html = "<a href='" + link +
+            "' style='font-size: 12px; margin-left: 23px; line-height: 29px; color: ";
+          if (current_path.indexOf(link) > -1) {
+            html += "#fff;'>"
+          } else {
+            html += "#b5cce3;'>"
+          }
+          html += links[link] + "</a>"
+          header_bar.innerHTML += html;
+        }
+
         HeaderWidget.render();
         ZBaseMainMenu.render(current_path);
       });

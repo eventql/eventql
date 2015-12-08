@@ -1,7 +1,3 @@
-.zbase_header {
-  margin-bottom: 44px;
-}
-
 .zbase_header.hidden {
   display: none;
 }
@@ -17,9 +13,9 @@
   font-family: "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif;
   background-color: #3d8ad3;
   box-shadow: 0 1px 1px rgba(0,0,0,0.2);
-  position: absolute;
   z-index: 99998;
-  top: 0px;
+  /*position: absolute;
+  top: 0px;*/
 }
 
 .zbase_header .navigation_inner {
@@ -48,7 +44,7 @@
 
 .zbase_header .main_navi a {
   color: #fff;
-  font-size: 12px;
+  font-size: 13px;
   margin: 0 14px;
   line-height: 44px;
   display: inline-block;
