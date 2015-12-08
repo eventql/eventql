@@ -12,7 +12,6 @@ ZBase.registerView((function() {
   var init = function(params) {
     $.showLoader();
     ZBaseMainMenu.hide();
-    HeaderWidget.hideBreadCrumbs();
 
     query_mgr = EventSourceHandler();
 

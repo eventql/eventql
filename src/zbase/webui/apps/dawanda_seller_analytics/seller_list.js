@@ -4,7 +4,6 @@ ZBase.registerView((function() {
 
   var load = function(path) {
     ZBaseMainMenu.show();
-    HeaderWidget.hideBreadCrumbs();
 
     var result;
     var page = $.getTemplate(

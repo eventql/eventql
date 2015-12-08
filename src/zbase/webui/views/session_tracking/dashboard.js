@@ -4,9 +4,9 @@ ZBase.registerView((function() {
   var chart;
 
   var load = function(path) {
-    HeaderWidget.setBreadCrumbs([
+    /*HeaderWidget.setBreadCrumbs([
       {href: "/a/settings", title: "Settings"},
-      {href: "/a/session_tracking", title: "User Tracking"}]);
+      {href: "/a/session_tracking", title: "User Tracking"}]);*/
 
     query_mgr = EventSourceHandler();
 

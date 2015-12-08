@@ -1,3 +1,31 @@
+/* Breadcrumbs */
+.zbase_report_breadcrumbs {
+  height: 36px;
+  background: #f9f9f9;
+  width: 100%;
+  border-bottom: 1px solid #d0d0d0;
+}
+
+.zbase_report_breadcrumbs zbase-breadcrumbs {
+  font-size: 12px;
+  font-weight: 300;
+  margin-left: 23px;
+}
+
+.zbase_report_breadcrumbs zbase-breadcrumbs,
+.zbase_report_breadcrumbs zbase-breadcrumbs a {
+  color: #454545;
+  line-height: 36px;
+}
+
+.zbase_report_breadcrumbs zbase-breadcrumbs-section:last-child a {
+  font-weight: 300;
+}
+
+.zbase_report_breadcrumbs zbase-breadcrumbs-section a:hover {
+  text-decoration: underline;
+}
+
 .zbase_report_pane {
   display: table;
   table-layout: fixed;
@@ -11,9 +39,9 @@
   display: table-cell;
   vertical-align: top;
   width: 320px;
-  padding: 20px 20px 0;
+  padding: 20px 20px 0 23px;
   background: #fff;
-  box-shadow: 0 0 2px rgba(0,0,0,0.4);
+  box-shadow: 1px 1px 1px rgba(0,0,0,0.4);
 }
 
 .zbase_report_pane .zbase_report_sidebar h4 {
@@ -99,8 +127,8 @@
 
 .zbase_report_pane .zbase_report_sidebar .secondary_section {
   background: #f9f9f9;
-  margin-left: -20px;
-  padding-left: 20px;
+  margin-left: -23px;
+  padding-left: 23px;
   margin-right: -20px;
   border-bottom: 1px solid #eee;
 }
