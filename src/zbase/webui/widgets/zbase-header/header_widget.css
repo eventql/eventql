@@ -45,17 +45,23 @@
 .zbase_header .main_navi a {
   color: #fff;
   font-size: 13px;
-  margin: 0 14px;
-  line-height: 44px;
-  display: inline-block;
+  padding: 0 14px;
+  line-height: 43px;
+  display: block;
+  float: left;
+  margin: 0;
 }
 
-.zbase_header .main_navi a:first-child {
-  margin-left: 20px;
-}
+/*.zbase_header .main_navi a:first-child {
+  margin-left: 6px;
+}*/
 
 .zbase_header .main_navi a:hover {
-  text-decoration: underline;
+  background: #367ebf;
+}
+
+.zbase_header .main_navi a.active {
+  background: #367ebf;
 }
 
 .zbase_header .button {
