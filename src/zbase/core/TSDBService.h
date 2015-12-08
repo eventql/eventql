@@ -85,6 +85,11 @@ public:
       const msg::DynamicMessage& data,
       uint64_t flags = 0);
 
+  void compactPartition(
+      const String& tsdb_namespace,
+      const String& table_name,
+      const SHA1Hash& partition_key);
+
   void updatePartitionCSTable(
       const String& tsdb_namespace,
       const String& table_name,
@@ -128,11 +133,6 @@ public:
   Option<RefPtr<TablePartitioner>> tablePartitioner(
       const String& tsdb_namespace,
       const String& table_key);
-
-  void compactPartition(
-      const String& tsdb_namespace,
-      const String& table_name,
-      const SHA1Hash& partition_key);
 
 protected:
 

@@ -368,6 +368,23 @@ void TSDBService::insertRecordsRemote(
   }
 }
 
+void TSDBService::compactPartition(
+    const String& tsdb_namespace,
+    const String& table_name,
+    const SHA1Hash& partition_key) {
+  auto partition = pmap_->findOrCreatePartition(
+      tsdb_namespace,
+      table_name,
+      partition_key);
+
+  auto writer = partition->getWriter();
+  if (writer->compact()) {
+    auto change = mkRef(new PartitionChangeNotification());
+    change->partition = partition;
+    pmap_->publishPartitionChange(change);
+  }
+}
+
 void TSDBService::updatePartitionCSTable(
     const String& tsdb_namespace,
     const String& table_name,

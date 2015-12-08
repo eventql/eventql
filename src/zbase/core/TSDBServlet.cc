@@ -67,6 +67,13 @@ void TSDBServlet::handleHTTPRequest(
       return;
     }
 
+    if (uri.path() == "/tsdb/compact") {
+      req_stream->readBody();
+      compactPartition(&req, &res, &uri);
+      res_stream->writeResponse(res);
+      return;
+    }
+
     if (uri.path() == "/tsdb/stream") {
       req_stream->readBody();
       streamPartition(&req, &res, res_stream, &uri);
@@ -119,6 +126,41 @@ void TSDBServlet::insertRecords(
     URI* uri) {
   auto record_list = msg::decode<RecordEnvelopeList>(req->body());
   node_->insertRecords(record_list);
+  res->setStatus(http::kStatusCreated);
+}
+
+void TSDBServlet::compactPartition(
+    const http::HTTPRequest* req,
+    http::HTTPResponse* res,
+    URI* uri) {
+  const auto& params = uri->queryParams();
+
+  String tsdb_namespace;
+  if (!URI::getParam(params, "namespace", &tsdb_namespace)) {
+    res->setStatus(stx::http::kStatusBadRequest);
+    res->addBody("missing ?namespace=... parameter");
+    return;
+  }
+
+  String table_name;
+  if (!URI::getParam(params, "table", &table_name)) {
+    res->setStatus(stx::http::kStatusBadRequest);
+    res->addBody("missing ?table=... parameter");
+    return;
+  }
+
+  String partition_key;
+  if (!URI::getParam(params, "partition", &partition_key)) {
+    res->setStatus(stx::http::kStatusBadRequest);
+    res->addBody("missing ?partition=... parameter");
+    return;
+  }
+
+  node_->compactPartition(
+      tsdb_namespace,
+      table_name,
+      SHA1Hash::fromHexString(partition_key));
+
   res->setStatus(http::kStatusCreated);
 }
 

@@ -41,6 +41,11 @@ protected:
       http::HTTPResponse* res,
       URI* uri);
 
+  void compactPartition(
+      const http::HTTPRequest* req,
+      http::HTTPResponse* res,
+      URI* uri);
+
   void streamPartition(
       const http::HTTPRequest* req,
       http::HTTPResponse* res,
