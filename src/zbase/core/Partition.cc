@@ -219,12 +219,7 @@ RefPtr<PartitionReplication> Partition::getReplicationStrategy(
 }
 
 bool Partition::upgradeToLSMv2() const {
-  auto table_name = table_->name();
-  return table_name ==
-      "myts" ||
-      StringUtil::beginsWith(table_name, "logs.") ||
-      StringUtil::beginsWith(table_name, "web.") ||
-      StringUtil::beginsWith(table_name, "stats.");
+  return true;
 }
 
 }
