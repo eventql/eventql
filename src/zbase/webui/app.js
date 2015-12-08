@@ -408,17 +408,20 @@ var ZBase = (function() {
         var links = {
           "/a/datastore": "Datastore",
           "/a/analytics": "Analytics",
-          "/a/documentation": "Documentation"
+          "/docs/": "Documentation"
         }
         for (var link in links) {
           var html = "<a href='" + link +
             "' style='font-size: 12px; margin-left: 23px; line-height: 29px; color: ";
           if (current_path.indexOf(link) > -1) {
-            html += "#fff;'>"
+            html += "#fff;'"
           } else {
-            html += "#b5cce3;'>"
+            html += "#b5cce3;'"
           }
-          html += links[link] + "</a>"
+          if (link == "/docs/") {
+            html += "target='_blank'";
+          }
+          html += ">" + links[link] + "</a>"
           header_bar.innerHTML += html;
         }
 
