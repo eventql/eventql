@@ -32,7 +32,6 @@ ZBase.registerView((function() {
     logfile_link.innerHTML = def.name;
     logfile_link.href = path_prefix + def.name;
 
-    HeaderWidget.hideBreadCrumbs();
     ZBaseMainMenu.hide();
 
     renderRegexPane($(".editor_pane.regex", page), def.regex);

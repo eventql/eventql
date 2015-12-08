@@ -29,7 +29,6 @@ ZBase.registerView((function() {
 
     $.showLoader();
     ZBaseMainMenu.show();
-    HeaderWidget.hideBreadCrumbs();
 
     $.httpGet("/api/v1/documents?" + $.buildQueryString(qparams), function(r) {
       if (r.status == 200) {

@@ -1,9 +1,9 @@
 ZBase.registerView((function() {
 
   var load = function(path) {
-    HeaderWidget.setBreadCrumbs([
+    /*HeaderWidget.setBreadCrumbs([
       {href: "/a/settings", title: "Settings"},
-      {href: "/a/session_tracking", title: "User Tracking"}]);
+      {href: "/a/session_tracking", title: "User Tracking"}]);*/
 
     var page = $.getTemplate(
         "views/session_tracking",

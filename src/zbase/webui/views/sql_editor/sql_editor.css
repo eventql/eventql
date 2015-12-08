@@ -1,3 +1,30 @@
+.zbase_sql_editor .zbase_sql_editor_breadcrumbs {
+  height: 36px;
+  background: #f9f9f9;
+  width: 100%;
+  border-bottom: 1px solid #d0d0d0;
+}
+
+.zbase_sql_editor .zbase_sql_editor_breadcrumbs zbase-breadcrumbs {
+  font-size: 12px;
+  font-weight: 300;
+  margin-left: 23px;
+}
+
+.zbase_sql_editor .zbase_sql_editor_breadcrumbs zbase-breadcrumbs,
+.zbase_sql_editor .zbase_sql_editor_breadcrumbs zbase-breadcrumbs a {
+  color: #454545;
+  line-height: 36px;
+}
+
+.zbase_sql_editor .zbase_sql_editor_breadcrumbs zbase-breadcrumbs-section:last-child a {
+  font-weight: 300;
+}
+
+.zbase_sql_editor .zbase_sql_editor_breadcrumbs zbase-breadcrumbs-section a:hover {
+  text-decoration: underline;
+}
+
 .zbase_sql_editor .zbase_sql_editor_pane {
   display: table;
   table-layout: fixed;
@@ -356,11 +383,6 @@
 
 .zbase_loader.zbase_sql_result_loader.hidden {
   display: none;
-}
-
-.zbase_sql_editor zbase-breadcrumbs {
-  font-size: 12px;
-  padding: 15px 20px 0 20px;
 }
 
 .zbase_sql_editor .zbase_sql_editor_title {
