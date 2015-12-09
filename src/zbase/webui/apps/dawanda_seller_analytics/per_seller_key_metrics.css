@@ -23,7 +23,7 @@
 
 .zbase_seller_stats.per_seller .key_metrics .metric_links a {
   font-size: 12px;
-  color: #3498db;
+  color: #3d8bd4;
   margin: 0;
   padding: 0;
   text-decoration: underline;
@@ -47,7 +47,7 @@
 .zbase_seller_stats.per_seller .key_metrics .metric_group h3 {
   font-weight: 400;
   font-size: 16px;
-  color: #3498db;
+  color: #3d8bd4;
   margin: 14px 18px 10px 18px;
 }
 
