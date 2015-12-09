@@ -409,7 +409,6 @@ var ZBase = (function() {
 
         var links = {
           "/a/datastore": "Datastore",
-          "/a/apps/dawanda_seller_analytics": "Analytics",
           "/docs/": "Documentation"
         }
         for (var link in links) {
