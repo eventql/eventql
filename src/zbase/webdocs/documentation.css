@@ -126,7 +126,7 @@ template {
   border-bottom: 1px solid #c9d0d4;
   box-shadow: 0 1px 1px rgba(0,0,0,0.1);
   position: relative;
-  height: 61px;
+  height: 56px;
 }
 
 .zbase_docs_page_title > div {
@@ -136,7 +136,8 @@ template {
 
 .zbase_docs_page_title h2.pagetitle {
   color: #fff;
-  margin-top: -1px;
+  margin-top: 0;
+  line-height: 53px;
 }
 
 
