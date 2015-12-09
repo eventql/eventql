@@ -33,11 +33,7 @@
     <meta name="google" content="notranslate" />
   </head>
   <body class="zbase_documentation">
-    <nav class="zbase_docs_header">
-      <div class="navigation_inner">
-        <a href="/a/" class="logo_app"><img id="zbase_logo" src="/a/_/a/favicon-32x32.png" height="22" alt="zScale"></a>
-      </div>
-    </nav>
+    <div id="zbase_header_bar" style="height: 29px; background-color: #3880c5; display: none; border-bottom: 1px solid #5298d9;"></div>
     <section class="zbase_docs_page_title">
       <div>
         <h2 class="pagetitle">Documentation &nbsp;&mdash;&nbsp; Z1</h2>
@@ -66,6 +62,29 @@
       menu.render(
         document.querySelector(".zbase_docs_menu"),
         document.location.pathname);
+
+      //render header bar
+      var header_bar = document.getElementById("zbase_header_bar");
+      header_bar.innerHTML = "";
+      header_bar.style.display = "block";
+
+      var links = {
+        "/a/datastore": "Datastore",
+        "/analytics": "Analytics",
+        "/docs/": "Documentation"
+      }
+      for (var link in links) {
+        var html = "<a href='" + link +
+          "' style='font-size: 12px; margin-left: 23px; line-height: 29px; color: ";
+
+        if (link == "/docs/") {
+          html += "#fff;'"
+        } else {
+          html += "#b5cce3;'"
+        }
+        html += ">" + links[link] + "</a>"
+        header_bar.innerHTML += html;
+      }
     </script>
   </body>
 </html>
