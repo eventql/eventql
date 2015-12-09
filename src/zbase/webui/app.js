@@ -414,7 +414,7 @@ var ZBase = (function() {
         }
         for (var link in links) {
           var html = "<a href='" + link +
-            "' style='font-size: 12px; margin-left: 23px; line-height: 29px; color: ";
+            "' style='font-size: 72%; margin-left: 23px; line-height: 29px; color: ";
 
           if (link == "/a/datastore") {
             html += "#fff;'";

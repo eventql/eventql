@@ -17,8 +17,9 @@
   display: table-cell;
   width: 180px;
   vertical-align: top;
-  background: #fff;
+  background: #f9f9f9;
   border-right: 1px solid #ddd;
+  box-shadow: 0 0 1px rgba(0,0,0,.2);
 }
 
 #zbase_main_menu.hidden {
