@@ -404,7 +404,9 @@ var ZBase = (function() {
       ZBase.loadModules(global_modules, function() {
         //render header bar
         var header_bar = document.getElementById("zbase_header_bar");
+        header_bar.innerHTML = "";
         header_bar.style.display = "block";
+
         var links = {
           "/a/datastore": "Datastore",
           "/analytics": "Analytics",
@@ -413,13 +415,13 @@ var ZBase = (function() {
         for (var link in links) {
           var html = "<a href='" + link +
             "' style='font-size: 12px; margin-left: 23px; line-height: 29px; color: ";
-          if (current_path.indexOf(link) > -1 || link.indexOf(current_path) > -1) {
-            html += "#fff;'"
+
+          if (link == "/a/datastore") {
+            html += "#fff;'";
+          } else if (link == "/docs/") {
+            html += "#b5cce3;' target='_blank'"
           } else {
             html += "#b5cce3;'"
-          }
-          if (link == "/docs/") {
-            html += "target='_blank'";
           }
           html += ">" + links[link] + "</a>"
           header_bar.innerHTML += html;
@@ -429,6 +431,7 @@ var ZBase = (function() {
         ZBaseMainMenu.render(current_path);
       });
     } else {
+      document.querySelector("#zbase_header_bar").style.display = "none";
       document.querySelector("#zbase_header").classList.add("hidden");
       document.querySelector("#zbase_main_menu").classList.add("hidden");
     }
