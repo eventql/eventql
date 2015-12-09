@@ -8,9 +8,6 @@
 
       <div class="main_navi"></div>
       <!--
-      <a class="btn_settings" href="/a/settings">
-        <i class="fa fa-cog"></i>
-      </a>
       <z-dropdown data-resolved data-hover class="new_query">
         <z-dropdown-header>
           <z-dropdown-header-value data-static class="fullwidth">
@@ -29,6 +26,9 @@
       -->
       <div class="user_navi"></div>
       <div class="sep right"></div>
+      <a class="btn_settings" href="/a/settings">
+        <i class="fa fa-cog"></i>
+      </a>
     </div>
   </div>
 </template>
@@ -53,8 +53,8 @@
 </template>
 
 <template id="zbase_header_main_navi_tpl">
-  <a href="/a/" class="nav active">Datastore</a></li>
-  <a href="/docs/" class="nav" target="_blank">Documentation</a></li>
+  <a href="/a/datastore/queries" class="nav">Query</a></li>
+  <a href="/a/datastore/tables" class="nav">Table</a></li>
 </template>
 
 <template id="zbase_header_namespace_prompt_tpl">

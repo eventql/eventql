@@ -402,10 +402,36 @@ var ZBase = (function() {
       ];
 
       ZBase.loadModules(global_modules, function() {
+        //render header bar
+        var header_bar = document.getElementById("zbase_header_bar");
+        header_bar.innerHTML = "";
+        header_bar.style.display = "block";
+
+        var links = {
+          "/a/datastore": "Datastore",
+          "/a/apps/dawanda_seller_analytics": "Analytics",
+          "/docs/": "Documentation"
+        }
+        for (var link in links) {
+          var html = "<a href='" + link +
+            "' style='font-size: 12px; margin-left: 23px; line-height: 29px; color: ";
+
+          if (link == "/a/datastore") {
+            html += "#fff;'";
+          } else if (link == "/docs/") {
+            html += "#b5cce3;' target='_blank'"
+          } else {
+            html += "#b5cce3;'"
+          }
+          html += ">" + links[link] + "</a>"
+          header_bar.innerHTML += html;
+        }
+
         HeaderWidget.render();
         ZBaseMainMenu.render(current_path);
       });
     } else {
+      document.querySelector("#zbase_header_bar").style.display = "none";
       document.querySelector("#zbase_header").classList.add("hidden");
       document.querySelector("#zbase_main_menu").classList.add("hidden");
     }
