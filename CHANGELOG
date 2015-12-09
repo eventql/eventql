@@ -1,12 +1,17 @@
 
+v0.2.1
+======
+  - removed COLSM v0.2.0 upgrade code
+
 v0.2.0
 ======
-  - upgrade to COLSM v0.2.0 storage engine
+  - merged upgrade to COLSM v0.2.0 storage engine
+  - UI fixes
 
 v0.1.2
 ======
-  - UI refresh
   - TimeWindowPartitioner::partitionKeysFor one-off fix
+  - UI refresh
 
 v0.1.1
 ======
