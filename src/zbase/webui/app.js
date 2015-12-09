@@ -407,13 +407,13 @@ var ZBase = (function() {
         header_bar.style.display = "block";
         var links = {
           "/a/datastore": "Datastore",
-          "/a/analytics": "Analytics",
+          "/analytics": "Analytics",
           "/docs/": "Documentation"
         }
         for (var link in links) {
           var html = "<a href='" + link +
             "' style='font-size: 12px; margin-left: 23px; line-height: 29px; color: ";
-          if (current_path.indexOf(link) > -1) {
+          if (current_path.indexOf(link) > -1 || link.indexOf(current_path) > -1) {
             html += "#fff;'"
           } else {
             html += "#b5cce3;'"
