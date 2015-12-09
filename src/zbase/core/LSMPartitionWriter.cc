@@ -311,6 +311,7 @@ void LSMPartitionWriter::commitReplicationState(const ReplicationState& state) {
 void LSMPartitionWriter::upgradeFromV1() {
   ScopedLock<std::mutex> upgrade_lk(upgrade_mutex_);
   auto snap = head_->getSnapshot();
+  auto schema = partition_->getTable()->schema();
 
   logNotice(
       "z1.core",
@@ -349,9 +350,16 @@ void LSMPartitionWriter::upgradeFromV1() {
       size_t data_size;
       cursor->getData(&data, &data_size);
 
-      ++nrecs;
-      auto record_id = SHA1Hash(key, key_size);
-      records.emplace_back(record_id, 1, Buffer(data, data_size));
+      try {
+        msg::MessageObject obj;
+        msg::MessageDecoder::decode(data, data_size, *schema, &obj);
+
+        ++nrecs;
+        auto record_id = SHA1Hash(key, key_size);
+        records.emplace_back(record_id, 1, Buffer(data, data_size));
+      } catch (const StandardException& e) {
+        logError("z1.core", e, "error while upgrading partition");
+      }
 
       if (records.size() == 8192) {
         insertRecords(records);
