@@ -44,6 +44,10 @@ var HeaderWidget = (function() {
   var update = function(path) {
     //update main navi
     var main_navi = $(".zbase_header .main_navi");
+
+    if (!main_navi) {
+      return;
+    }
     var current_active = $("a.active", main_navi);
     if (current_active) {
       current_active.classList.remove("active");
