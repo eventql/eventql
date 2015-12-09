@@ -216,8 +216,8 @@
   display: block;
   width: 100%;
   font-size: 13px;
-  margin-top: -1px;
-  margin-left: -11px;
+  margin-top: 0px;
+  margin-left: -13px;
   padding-right: 11px;
   background-color: #fff;
   border-bottom-right-radius: 3px;
