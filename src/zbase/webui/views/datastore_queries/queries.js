@@ -28,7 +28,7 @@ ZBase.registerView((function() {
     }
 
     $.showLoader();
-    ZBaseMainMenu.show();
+    
 
     $.httpGet("/api/v1/documents?" + $.buildQueryString(qparams), function(r) {
       if (r.status == 200) {

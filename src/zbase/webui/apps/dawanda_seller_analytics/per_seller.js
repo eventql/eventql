@@ -4,7 +4,7 @@ var perSellerLayout = function(query_mgr, path_prefix, shop_id) {
         "views/seller",
         "per_seller_layout_main_tpl");
 
-    ZBaseMainMenu.hide();
+    
     $("h2.pagetitle .shop_id", page).innerHTML = shop_id;
 
     var tabs = page.querySelectorAll("z-tab");

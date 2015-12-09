@@ -18,7 +18,7 @@ ZBase.registerView((function() {
     $.showLoader();
     table = path.split("?")[0].substr(path_prefix.length);
 
-    ZBaseMainMenu.hide();
+    
 
     var tpl = $.getTemplate(
         "views/table_viewer",

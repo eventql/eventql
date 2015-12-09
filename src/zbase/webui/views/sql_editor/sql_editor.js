@@ -23,7 +23,7 @@ ZBase.registerView((function() {
 
     $.showLoader();
     ZBaseMainMenu.update("/a/datastore/queries");
-    ZBaseMainMenu.hide();
+    
 
 
     $.httpGet("/api/v1/documents/" + query_id, function(r) {

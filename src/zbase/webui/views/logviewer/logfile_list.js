@@ -2,7 +2,7 @@ ZBase.registerView((function() {
 
   var load = function(path) {
     $.showLoader();
-    ZBaseMainMenu.show();
+    
 
     $.httpGet("/api/v1/logfiles", function(r) {
       if (r.status == 200) {

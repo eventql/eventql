@@ -3,7 +3,7 @@ ZBase.registerView((function() {
   var path_prefix = "/a/apps/dawanda_seller_analytics";
 
   var load = function(path) {
-    ZBaseMainMenu.show();
+    
 
     var result;
     var page = $.getTemplate(

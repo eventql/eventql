@@ -11,7 +11,7 @@ ZBase.registerView((function() {
 
   var init = function(params) {
     $.showLoader();
-    ZBaseMainMenu.hide();
+    
 
     query_mgr = EventSourceHandler();
 

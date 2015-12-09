@@ -142,6 +142,7 @@ var ZBase = (function() {
     }
 
     hideLoader();
+    ZBaseMainMenu.hide();
     if (config.current_user) {
       HeaderWidget.update(current_path);
       ZBaseMainMenu.update(current_path);
