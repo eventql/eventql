@@ -15,11 +15,9 @@
 #include <stx/logging.h>
 #include <stx/wallclock.h>
 #include <stx/logging.h>
-#include <sstable/SSTableWriter.h>
 #include <stx/protobuf/MessageDecoder.h>
 #include <cstable/RecordShredder.h>
 #include <cstable/CSTableWriter.h>
-#include <sstable/sstablereader.h>
 
 using namespace stx;
 
@@ -104,7 +102,7 @@ bool LSMPartitionWriter::needsCommit() {
 }
 
 bool LSMPartitionWriter::needsCompaction() {
-  if (needsCommit() || needsUpgradeFromV1()) {
+  if (needsCommit()) {
     return true;
   }
 
@@ -167,10 +165,6 @@ bool LSMPartitionWriter::commit() {
 }
 
 bool LSMPartitionWriter::compact() {
-  if (needsUpgradeFromV1()) {
-    upgradeFromV1();
-  }
-
   auto dirty = commit();
 
   // fetch current table list
@@ -306,119 +300,6 @@ void LSMPartitionWriter::commitReplicationState(const ReplicationState& state) {
   *snap->state.mutable_replication_state() = state;
   snap->writeToDisk();
   head_->setSnapshot(snap);
-}
-
-void LSMPartitionWriter::upgradeFromV1() {
-  ScopedLock<std::mutex> upgrade_lk(upgrade_mutex_);
-  auto snap = head_->getSnapshot();
-  auto schema = partition_->getTable()->schema();
-
-  logNotice(
-      "z1.core",
-      "Upgrading partition $0/$1/$2 to LSM storage v0.2.0",
-      snap->state.tsdb_namespace(),
-      snap->state.table_key(),
-      snap->key.toString());
-
-  auto cst_filepath = FileUtil::joinPaths(snap->base_path, "_cstable");
-  if (FileUtil::exists(cst_filepath)) {
-    FileUtil::rm(cst_filepath);
-  }
-
-  auto cstm_filepath = FileUtil::joinPaths(snap->base_path, "_cstable_state");
-  if (FileUtil::exists(cstm_filepath)) {
-    FileUtil::rm(cstm_filepath);
-  }
-
-  auto files = snap->state.sstable_files();
-  size_t nrecs = 0;
-  for (const auto& f : files) {
-    auto fpath = FileUtil::joinPaths(snap->base_path, f);
-    sstable::SSTableReader reader(fpath);
-
-    Vector<RecordRef> records;
-    auto cursor = reader.getCursor();
-    while (cursor->valid()) {
-      void* key;
-      size_t key_size;
-      cursor->getKey(&key, &key_size);
-      if (key_size != SHA1Hash::kSize) {
-        RAISE(kRuntimeError, "invalid row");
-      }
-
-      void* data;
-      size_t data_size;
-      cursor->getData(&data, &data_size);
-
-      try {
-        msg::MessageObject obj;
-        msg::MessageDecoder::decode(data, data_size, *schema, &obj);
-
-        ++nrecs;
-        auto record_id = SHA1Hash(key, key_size);
-        records.emplace_back(record_id, 1, Buffer(data, data_size));
-      } catch (const StandardException& e) {
-        logError("z1.core", e, "error while upgrading partition");
-      }
-
-      if (records.size() == 8192) {
-        insertRecords(records);
-        records.clear();
-        commit();
-      }
-
-      if (!cursor->next()) {
-        break;
-      }
-    }
-
-    insertRecords(records);
-  }
-
-  commit();
-
-  {
-    ScopedLock<std::mutex> write_lk(mutex_);
-    auto snap = head_->getSnapshot()->clone();
-    snap->state.mutable_sstable_files()->Clear();
-    snap->writeToDisk();
-    head_->setSnapshot(snap);
-  }
-
-  for (const auto& f : files) {
-    auto fpath = FileUtil::joinPaths(snap->base_path, f);
-    FileUtil::mv(fpath, fpath + ".DELETED_BY_UPGRADE");
-  }
-
-  auto idset_filepath = FileUtil::joinPaths(snap->base_path, "_idset");
-  if (FileUtil::exists(idset_filepath)) {
-    FileUtil::mv(idset_filepath, idset_filepath + ".DELETED_BY_UPGRADE");
-  }
-
-  auto repl_filepath = FileUtil::joinPaths(snap->base_path, "_repl");
-  if (FileUtil::exists(repl_filepath)) {
-    FileUtil::rm(repl_filepath);
-  }
-
-  logNotice(
-      "z1.core",
-      "Upgrade for partition $1/$2/$3 ($0 records) to LSM storage v0.2.0 done",
-      nrecs,
-      snap->state.tsdb_namespace(),
-      snap->state.table_key(),
-      snap->key.toString());
-
-  compact();
-}
-
-bool LSMPartitionWriter::needsUpgradeFromV1() {
-  auto snap = head_->getSnapshot();
-  return
-      snap->state.sstable_files().size() > 0 ||
-      FileUtil::exists(FileUtil::joinPaths(snap->base_path, "_idset")) ||
-      FileUtil::exists(FileUtil::joinPaths(snap->base_path, "_repl")) ||
-      FileUtil::exists(FileUtil::joinPaths(snap->base_path, "_cstable_state")) ||
-      FileUtil::exists(FileUtil::joinPaths(snap->base_path, "_cstable"));
 }
 
 } // namespace tdsb
