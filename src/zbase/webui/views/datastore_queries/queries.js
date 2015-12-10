@@ -1,10 +1,9 @@
 ZBase.registerView((function() {
-
   var load = function(url) {
     var qparams = {
       with_categories: true,
       type: "all",
-      author: "all"
+      author: "all",
     };
 
     var owner_param = UrlUtil.getParamValue(url, "owner");
@@ -27,16 +26,25 @@ ZBase.registerView((function() {
       qparams.publishing_status = pstatus_param;
     }
 
+    var search_param = UrlUtil.getParamValue(url, "q");
+    if (search_param) {
+      qparams.search = search_param;
+    }
+
     $.showLoader();
 
-    $.httpGet("/api/v1/documents?" + $.buildQueryString(qparams), function(r) {
+    searchDocuments(qparams, function(r) {
       if (r.status == 200) {
         render(JSON.parse(r.response), qparams, url);
       } else {
         $.fatalError();
       }
     });
-  }
+  };
+
+  var searchDocuments = function(qparams, callback) {
+    $.httpGet("/api/v1/documents?" + $.buildQueryString(qparams), callback);
+  };
 
   var render = function(data, qparams, path) {
     var reports = data.documents;
@@ -58,6 +66,13 @@ ZBase.registerView((function() {
     var search = $("z-search.search_queries", page);
     search.addEventListener("z-search-autocomplete", searchAutocomplete);
     search.addEventListener("z-search-submit", searchSubmit);
+
+    if (qparams.search) {
+      $("z-input", search).setAttribute("data-value", qparams.search);
+      var query_bc = $("zbase-breadcrumbs .query_breadcrumb", page);
+      query_bc.href = getSearchUrl(qparams.search);
+      query_bc.innerHTML = "Search results for '" + qparams.search + "'";
+    }
 
     $.handleLinks(page);
     $.replaceViewport(page)
@@ -84,6 +99,8 @@ ZBase.registerView((function() {
 
       tbody_elem.appendChild(tr);
     });
+
+    $.handleLinks(tbody_elem);
   };
 
   var getPathPrefixForDocType = function(doctype) {
@@ -99,63 +116,65 @@ ZBase.registerView((function() {
     var term = e.detail.value;
     var search_widget = this;
 
-    searchDocuments(term, function(r) {
-      var documents = JSON.parse(r.response).documents;
-      var items = [];
+    searchDocuments({search: term}, function(r) {
+      if (r.status == 200) {
+        var documents = JSON.parse(r.response).documents;
+        var items = [];
 
-      for (var i = 0; i < documents.length; i++) {
-        if (i > 10) {
-          break;
+        for (var i = 0; i < documents.length; i++) {
+          if (i > 10) {
+            break;
+          }
+
+          items.push({
+            query: documents[i].name,
+            data_value: documents[i].name});
         }
 
-        items.push({
-          query: documents[i].name,
-          data_value: documents[i].name});
+        search_widget.autocomplete(term, items);
       }
-
-      search_widget.autocomplete(term, items);
     });
   };
 
   var searchSubmit = function(e) {
-    console.log("search submit");
     var term = e.detail.value;
     var search_widget = this;
 
-    searchDocuments(term, function(r) {
-      console.log(r);
-      var documents = JSON.parse(r.response).documents;
-      console.log(documents);
-      if (documents.length == 1) {
-        var path;
-        switch (documents[0].type) {
-          case "sql_query":
-            path = "/a/sql/" + documents[0].uuid;
-            break;
+    searchDocuments({search: term}, function(r) {
+      if (r.status == 200) {
+        var documents = JSON.parse(r.response).documents;
+        if (documents.length == 1) {
+          var path;
+          switch (documents[0].type) {
+            case "sql_query":
+              path = "/a/sql/" + documents[0].uuid;
+              break;
 
-          case "report":
-            path = "/a/reports/" + documents[0].uuid;
-            break;
+            case "report":
+              path = "/a/reports/" + documents[0].uuid;
+              break;
+          }
+
+          var input = $("input", search_widget);
+          input.value = "";
+          input.blur();
+
+          $.navigateTo(path);
+          return;
+        } else {
+          $.navigateTo(getSearchUrl(term));
         }
-
-        var input = $("input", search_widget);
-        input.value = "";
-        input.blur();
-
-        $.navigateTo(path);
-        return;
-      } else {
-        //TODO navigate to search view?
       }
     });
   };
 
-  var searchDocuments = function(term, callback) {
-    $.httpGet("/api/v1/documents?search=" + term, function(r) {
-      if (r.status == 200) {
-        callback(r);
-      }
-    });
+  var getSearchUrl = function(search_term) {
+    var path = "/a/datastore/queries"
+    if (search_term.length > 0) {
+      path += "?q=" + search_term;
+    }
+
+    return path;
   };
 
   return {
