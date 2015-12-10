@@ -1284,7 +1284,8 @@ void AnalyticsServlet::executeDrilldownQuery(
     query->addMetric(DrilldownQuery::MetricDefinition {
       .name = "value_total",
       .expression =  "sum(value)",
-      .source_table = Some(String("myts.last3d"))
+      .source_table = Some(String("myts.last3d")),
+      .filter = Some(String("things.one = 1337"))
     });
 
     query->addDimension(DrilldownQuery::DimensionDefinition {
@@ -1292,6 +1293,7 @@ void AnalyticsServlet::executeDrilldownQuery(
       .expression =  "time"
     });
 
+    query->setFilter("1 = 1");
     query->execute();
 
     res->setStatus(http::kStatusOK);

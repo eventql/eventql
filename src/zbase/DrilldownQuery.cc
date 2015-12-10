@@ -108,6 +108,35 @@ RefPtr<csql::QueryTreeNode> DrilldownQuery::buildQueryTree(
 
   // build filter
   Option<RefPtr<csql::ValueExpressionNode>> where_expr;
+  {
+    String filter_str;
+    if (!filter_.isEmpty()) {
+      filter_str = "( " + filter_.get() + " )";
+    }
+
+    if (!metric.filter.isEmpty()) {
+      if (!filter_str.empty()) {
+        filter_str += " AND ";
+      }
+
+      filter_str += "( " + metric.filter.get() + " )";
+    }
+
+
+    if (!filter_str.empty()) {
+      csql::Parser parser;
+      parser.parseValueExpression(
+          filter_str.data(),
+          filter_str.size());
+
+      auto stmts = parser.getStatements();
+      if (stmts.size() != 1) {
+        RAISE(kIllegalArgumentError);
+      }
+
+      where_expr = Some(mkRef(qtree_builder->buildValueExpression(stmts[0])));
+    }
+  }
 
   // build qtree node
   Vector<RefPtr<csql::SelectListNode>> inner_select_list;
