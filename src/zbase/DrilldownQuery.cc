@@ -81,14 +81,14 @@ RefPtr<csql::QueryTreeNode> DrilldownQuery::buildQueryTree(
       aggr_strategy = csql::AggregationStrategy::AGGREGATE_WITHIN_RECORD_DEEP;
     }
 
-    outer_select_list.emplace_back(
-        new csql::SelectListNode(
-            qtree_builder->buildValueExpression(stmts[0])));
-
     auto inner_sl = mkScoped(new csql::ASTNode(csql::ASTNode::T_SELECT_LIST));
     qtree_builder->buildInternalSelectList(
         stmts[0],
         inner_sl.get());
+
+    outer_select_list.emplace_back(
+        new csql::SelectListNode(
+            qtree_builder->buildValueExpression(stmts[0])));
 
     for (const auto& e : inner_sl->getChildren()) {
       inner_select_list.emplace_back(qtree_builder->buildSelectList(e));

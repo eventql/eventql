@@ -1284,7 +1284,7 @@ void AnalyticsServlet::executeDrilldownQuery(
     query->addMetric(DrilldownQuery::MetricDefinition {
       .name = "value_total",
       .expression =  "sum(value)",
-      .source_table = Some(String("myts.last14d"))
+      .source_table = Some(String("myts.last3d"))
     });
 
     query->execute();
