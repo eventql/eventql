@@ -33,6 +33,34 @@
   float: right;
 }
 
+/* controls */
+.zbase_datastore_queries .controls {
+  height: 70px;
+  padding: 18px 23px;
+  overflow-y: visible;
+}
+
+.zbase_datastore_queries .controls z-search {
+  float: left;
+  display: block;
+  width: 400px;
+}
+
+.zbase_datastore_queries .controls z-search z-input {
+  font-size: 13px;
+}
+
+.zbase_datastore_queries .controls z-dropdown {
+  float: right;
+}
+
+.zbase_datastore_queries .controls z-dropdown.input z-dropdown-header {
+  font-size: 13px;
+  line-height: 34px;
+  height: 34px;
+  min-width: 133px;
+}
+
 .zbase_datastore_queries table.z-table {
   table-layout: fixed;
   font-size: 13px;
@@ -70,18 +98,6 @@
 .zbase_datastore_queries table.z-table.zbase_clickable_table tbody tr:hover td {
   border-top: 1px solid rgba(52, 152, 219, 0.3);
   border-bottom: 1px solid rgba(52, 152, 219, 0.3);
-}
-
-.zbase_datastore_queries z-dropdown.input {
-  float: right;
-  margin-top: 12px;
-}
-
-.zbase_datastore_queries z-dropdown.input z-dropdown-header {
-  font-size: 13px;
-  line-height: 34px;
-  height: 34px;
-  min-width: 133px;
 }
 
 #zbase_viewport .zbase_content_pane.zbase_datastore_queries {

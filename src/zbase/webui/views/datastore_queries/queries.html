@@ -16,22 +16,29 @@
         </zbase-breadcrumbs>
       </div>
 
-      <z-dropdown class="input secondary create_new_doc" data-hover data-resolved style="float: right; margin-top: 11px;">
-      <z-dropdown-header>
-        <z-dropdown-header-value data-static>
-            <i class="fa fa-plus"></i> &nbsp;New Query
-        </z-dropdown-header-value>
-      </z-dropdown-header>
+      <div class="controls">
+        <z-search class="search_queries">
+          <z-input class="icon" data-placeholder="Search Queries..." style="position: relative; top: 1px; display: block;">
+            <z-input-icon><i class='fa fa-search'></i></z-input-icon>
+          </z-input>
+        </z-search>
 
-      <z-dropdown-flyout>
-        <z-dropdown-items>
-          <z-dropdown-item data-value="sql_query">New SQL Query</z-dropdown-item>
-          <z-dropdown-item data-value="report">New Report</z-dropdown-item>
-        </z-dropdown-items>
-      </z-dropdown-flyout>
-    </z-dropdown>
+        <z-dropdown class="input primary create_new_doc" data-hover data-resolved>
+          <z-dropdown-header>
+            <z-dropdown-header-value data-static>
+                <i class="fa fa-plus"></i> &nbsp;New Query
+            </z-dropdown-header-value>
+          </z-dropdown-header>
 
-      <h2 class="pagetitle"><em>Queries</em></h2>
+          <z-dropdown-flyout>
+            <z-dropdown-items>
+              <z-dropdown-item data-value="sql_query">New SQL Query</z-dropdown-item>
+              <z-dropdown-item data-value="report">New Report</z-dropdown-item>
+            </z-dropdown-items>
+          </z-dropdown-flyout>
+        </z-dropdown>
+
+      </div>
 
       <table class="z-table zbase_clickable_table" style="border-top: 1px solid #ddd;">
         <thead>
