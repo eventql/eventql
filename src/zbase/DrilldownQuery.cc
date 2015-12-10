@@ -38,11 +38,16 @@ void DrilldownQuery::setFilter(String filter) {
 }
 
 void DrilldownQuery::execute() {
+  auto result_handler = mkRef(new csql::CallbackResultHandler());
+  result_handler->onRow([this] (
+      size_t stmt_idx,
+      int argc,
+      const csql::SValue* argv) {
+    iputs("got row: $0/$1", stmt_idx, argc);
+  });
+
   auto query_plan = buildQueryPlan();
-  iputs("running...", 1);
-  runtime_->executeQuery(
-      query_plan,
-      new csql::ASCIITableFormat(OutputStream::getStdout()));
+  runtime_->executeQuery(query_plan, result_handler.get());
 }
 
 RefPtr<csql::QueryPlan> DrilldownQuery::buildQueryPlan() {
