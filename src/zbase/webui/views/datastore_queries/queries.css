@@ -47,8 +47,10 @@
   font-size: 13px;
 }
 
-.zbase_datastore_queries .controls z-search z-input {
+.zbase_datastore_queries .controls z-search z-input input {
   font-size: 13px;
+  border: 1px solid #bdbdbd;
+  box-shadow: inset 1px 1px 1px rgba(0,0,0,.1);
 }
 
 .zbase_datastore_queries .controls z-dropdown {
