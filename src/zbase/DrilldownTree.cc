@@ -14,9 +14,12 @@ namespace zbase {
 
 DrilldownTree::DrilldownTree(
     size_t depth,
-    size_t num_slots) :
+    size_t num_slots,
+    size_t max_leaves) :
     depth_(depth),
-    num_slots_(num_slots) {
+    num_slots_(num_slots),
+    max_leaves_(max_leaves),
+    num_leaves_(0) {
   if (depth_ > 0) {
     root_ = mkScoped(new DrilldownTreeInternalNode());
   } else {
@@ -35,6 +38,11 @@ DrilldownTreeLeafNode* DrilldownTree::lookupOrInsert(
       if (i + 1 < depth_) {
         cur = new DrilldownTreeInternalNode();
       } else {
+        if (num_leaves_ == max_leaves_) {
+          RAISE(kRuntimeError, "DrilldownTree cardinality is too large");
+        }
+
+        ++num_leaves_;
         cur = new DrilldownTreeLeafNode(num_slots_);
       }
 

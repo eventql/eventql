@@ -32,7 +32,10 @@ struct DrilldownTreeInternalNode : public DrilldownTreeNode {
 class DrilldownTree : public RefCounted {
 public:
 
-  DrilldownTree(size_t depth, size_t num_slots);
+  DrilldownTree(
+      size_t depth,
+      size_t num_slots,
+      size_t max_leaves);
 
   DrilldownTreeLeafNode* lookupOrInsert(const csql::SValue* key);
   DrilldownTreeLeafNode* lookup(const csql::SValue* key);
@@ -41,6 +44,8 @@ protected:
   size_t depth_;
   size_t num_slots_;
   ScopedPtr<DrilldownTreeNode> root_;
+  size_t max_leaves_;
+  size_t num_leaves_;
 };
 
 }

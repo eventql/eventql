@@ -39,7 +39,11 @@ void DrilldownQuery::setFilter(String filter) {
 
 void DrilldownQuery::execute() {
   size_t ndims = dimensions_.size();
-  auto dtree = mkRef(new DrilldownTree(ndims, metrics_.size()));
+  auto dtree = mkRef(
+      new DrilldownTree(
+          ndims,
+          metrics_.size(),
+          1024 * 1024));
 
   auto result_handler = mkRef(new csql::CallbackResultHandler());
   result_handler->onRow([this, ndims, dtree] (
