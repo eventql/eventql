@@ -69,6 +69,11 @@ DrilldownTreeLeafNode* DrilldownTree::lookup(
   return static_cast<DrilldownTreeLeafNode*>(cur);
 }
 
+void DrilldownTree::toJSON(json::JSONOutputStream* json) {
+  json->beginObject();
+  json->endObject();
+}
+
 DrilldownTreeLeafNode::DrilldownTreeLeafNode(
     size_t num_slots) :
     slots(num_slots) {}

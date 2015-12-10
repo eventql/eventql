@@ -1294,10 +1294,14 @@ void AnalyticsServlet::executeDrilldownQuery(
     });
 
     query->setFilter("1 = 1");
-    query->execute();
+    auto dtree = query->execute();
+
+    Buffer buf;
+    json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
+    dtree->toJSON(&json);
 
     res->setStatus(http::kStatusOK);
-    res->addBody("fnord");
+    res->addBody(buf);
     res_stream->writeResponse(*res);
   } catch (const StandardException& e) {
     logError("z1.sql", e, "Uncaught query error");

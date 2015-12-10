@@ -45,7 +45,7 @@ public:
 
   void setFilter(String filter);
 
-  void execute();
+  RefPtr<DrilldownTree> execute();
 
 protected:
 

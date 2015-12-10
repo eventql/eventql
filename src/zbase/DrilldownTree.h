@@ -9,8 +9,8 @@
 #pragma once
 #include <stx/stdtypes.h>
 #include <stx/autoref.h>
+#include <stx/json/JSONOutputStream.h>
 #include <csql/svalue.h>
-#include <csql/SFunction.h>
 
 using namespace stx;
 
@@ -39,6 +39,8 @@ public:
 
   DrilldownTreeLeafNode* lookupOrInsert(const csql::SValue* key);
   DrilldownTreeLeafNode* lookup(const csql::SValue* key);
+
+  void toJSON(json::JSONOutputStream* json);
 
 protected:
   size_t depth_;

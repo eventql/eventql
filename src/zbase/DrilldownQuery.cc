@@ -37,7 +37,7 @@ void DrilldownQuery::setFilter(String filter) {
   filter_ = Some(filter);
 }
 
-void DrilldownQuery::execute() {
+RefPtr<DrilldownTree> DrilldownQuery::execute() {
   size_t ndims = dimensions_.size();
   auto dtree = mkRef(
       new DrilldownTree(
@@ -54,13 +54,14 @@ void DrilldownQuery::execute() {
       RAISE(kRuntimeError, "invalid result row");
     }
 
-    iputs("got row: $0/$1", stmt_idx, argc);
     auto node = dtree->lookupOrInsert(argv + 1);
     node->slots[stmt_idx] = *argv;
   });
 
   auto query_plan = buildQueryPlan();
   runtime_->executeQuery(query_plan, result_handler.get());
+
+  return dtree;
 }
 
 RefPtr<csql::QueryPlan> DrilldownQuery::buildQueryPlan() {
