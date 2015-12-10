@@ -28,6 +28,7 @@
 #include "csql/runtime/JSONResultFormat.h"
 #include "csql/runtime/JSONSSEStreamFormat.h"
 #include "csql/runtime/BinaryResultFormat.h"
+#include "csql/runtime/ExecutionStrategy.h"
 #include "zbase/core/TimeWindowPartitioner.h"
 #include "zbase/core/FixedShardPartitioner.h"
 #include "zbase/DrilldownQuery.h"
@@ -1275,7 +1276,12 @@ void AnalyticsServlet::executeDrilldownQuery(
     URI uri(req->uri());
     auto jreq = json::parseJSON(req->body());
 
-    auto query = mkRef(new DrilldownQuery());
+    auto execution_strategy = app_->getExecutionStrategy(session.customer());
+    auto query = mkRef(
+        new DrilldownQuery(
+            execution_strategy->tableProvider(),
+            sql_));
+
     query->addMetric(DrilldownQuery::MetricDefinition {
       .name = "gmv_total",
       .expression =  "sum(price_cents)",

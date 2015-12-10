@@ -13,6 +13,7 @@
 #include <stx/stdtypes.h>
 #include <stx/autoref.h>
 #include <zbase/DrilldownTree.h>
+#include "csql/runtime/ExecutionStrategy.h"
 
 using namespace stx;
 
@@ -34,13 +35,25 @@ public:
     Option<String> order;
   };
 
+  DrilldownQuery(
+      RefPtr<csql::TableProvider> table_provider,
+      csql::Runtime* runtime);
+
   void addMetric(MetricDefinition metric);
 
   void addDimension(DimensionDefinition dimension);
 
   void setFilter(String filter);
 
+  void execute();
+
 protected:
+
+  RefPtr<csql::QueryTreeNode> buildQueryTree(
+      const MetricDefinition& metric);
+
+  RefPtr<csql::TableProvider> table_provider_;
+  csql::Runtime* runtime_;
   Vector<MetricDefinition> metrics_;
   Vector<DimensionDefinition> dimensions_;
   Option<String> filter_;
