@@ -161,6 +161,12 @@ protected:
       http::HTTPResponse* res,
       RefPtr<http::HTTPResponseStream> res_stream);
 
+  void executeDrilldownQuery(
+      const AnalyticsSession& session,
+      const http::HTTPRequest* req,
+      http::HTTPResponse* res,
+      RefPtr<http::HTTPResponseStream> res_stream);
+
   void pipelineInfo(
       const AnalyticsSession& session,
       const http::HTTPRequest* req,

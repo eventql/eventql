@@ -30,6 +30,7 @@
 #include "csql/runtime/BinaryResultFormat.h"
 #include "zbase/core/TimeWindowPartitioner.h"
 #include "zbase/core/FixedShardPartitioner.h"
+#include "zbase/DrilldownQuery.h"
 #include "zbase/HTTPAuth.h"
 #include <cstable/CSTableWriter.h>
 #include <cstable/RecordShredder.h>
@@ -322,6 +323,13 @@ void AnalyticsServlet::handle(
         &req,
         &res);
     res_stream->writeResponse(res);
+    return;
+  }
+
+  /* query */
+  if (uri.path() == "/api/v1/query/drilldown") {
+    req_stream->readBody();
+    executeDrilldownQuery(session, &req, &res, res_stream);
     return;
   }
 
@@ -1256,6 +1264,33 @@ void AnalyticsServlet::executeSQL_JSONSSE(
   }
 
   sse_stream->finish();
+}
+
+void AnalyticsServlet::executeDrilldownQuery(
+    const AnalyticsSession& session,
+    const http::HTTPRequest* req,
+    http::HTTPResponse* res,
+    RefPtr<http::HTTPResponseStream> res_stream) {
+  try {
+    URI uri(req->uri());
+    auto jreq = json::parseJSON(req->body());
+
+    auto query = mkRef(new DrilldownQuery());
+    query->addMetric(DrilldownQuery::MetricDefinition {
+      .name = "gmv_total",
+      .expression =  "sum(price_cents)",
+      .source_table = Some(String("db.order_items"))
+    });
+
+    res->setStatus(http::kStatusOK);
+    res->addBody("fnord");
+    res_stream->writeResponse(*res);
+  } catch (const StandardException& e) {
+    logError("z1.sql", e, "Uncaught query error");
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody("invalid request");
+    res_stream->writeResponse(*res);
+  }
 }
 
 void AnalyticsServlet::pipelineInfo(
