@@ -23,15 +23,15 @@ class DrilldownQuery : public RefCounted {
 public:
 
   struct MetricDefinition {
-    String name;
     String expression;
+    Option<String> name;
     Option<String> source_table;
     Option<String> filter;
   };
 
   struct DimensionDefinition {
-    String name;
-    String expression;
+    Option<String> name;
+    Option<String> expression;
     Option<String> order;
   };
 

@@ -1281,23 +1281,44 @@ void AnalyticsServlet::executeDrilldownQuery(
             app_->getExecutionStrategy(session.customer()),
             sql_));
 
-    query->addMetric(DrilldownQuery::MetricDefinition {
-      .name = "value_total",
-      .expression =  "sum(value)",
-      .source_table = Some(String("myts.last3d"))
-    });
+    auto metrics = json::objectLookup(jreq.begin(), jreq.end(), "metrics");
+    if (metrics == jreq.end()) {
+      RAISE(kRuntimeError, "missing field: metrics");
+    }
 
-    query->addDimension(DrilldownQuery::DimensionDefinition {
-      .name = "time",
-      .expression =  "time"
-    });
+    auto nmetrics = json::arrayLength(metrics, jreq.end());
+    for (size_t i = 0; i < nmetrics; ++i) {
+      auto jmetric = json::arrayLookup(metrics, jreq.end(), i); // O(N^2) but who cares...
+      DrilldownQuery::MetricDefinition metric;
+      auto expr = json::objectGetString(jmetric, jreq.end(), "expr");
+      if (expr.isEmpty()) {
+        RAISE(kRuntimeError, "missing field: expr");
+      }
 
-    query->addDimension(DrilldownQuery::DimensionDefinition {
-      .name = "things_one",
-      .expression =  "things.one"
-    });
+      metric.expression = expr.get();
+      metric.name = json::objectGetString(jmetric, jreq.end(), "name");
+      metric.filter = json::objectGetString(jmetric, jreq.end(), "filter");
+      metric.source_table = json::objectGetString(jmetric, jreq.end(), "source");
+      query->addMetric(metric);
+    }
 
-    query->setFilter("1 = 1");
+    auto dimensions = json::objectLookup(jreq.begin(), jreq.end(), "dimensions");
+    if (dimensions != jreq.end()) {
+      auto ndimensions = json::arrayLength(dimensions, jreq.end());
+      for (size_t i = 0; i < ndimensions; ++i) {
+        auto jdimension = json::arrayLookup(dimensions, jreq.end(), i); // O(N^2) but who cares...
+        DrilldownQuery::DimensionDefinition dimension;
+        dimension.name = json::objectGetString(jdimension, jreq.end(), "name");
+        dimension.expression = json::objectGetString(jdimension, jreq.end(), "expr");
+        query->addDimension(dimension);
+      }
+    }
+
+    auto filter = json::objectGetString(jreq.begin(), jreq.end(), "filter");
+    if (!filter.isEmpty()) {
+      query->setFilter(filter.get());
+    }
+
     auto dtree = query->execute();
 
     Buffer buf;
@@ -1313,7 +1334,7 @@ void AnalyticsServlet::executeDrilldownQuery(
   } catch (const StandardException& e) {
     logError("z1.sql", e, "Uncaught query error");
     res->setStatus(http::kStatusBadRequest);
-    res->addBody("invalid request");
+    res->addBody("invalid request: " + String(e.what()));
     res_stream->writeResponse(*res);
   }
 }

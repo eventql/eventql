@@ -26,10 +26,18 @@ DrilldownQuery::DrilldownQuery(
     runtime_(runtime) {}
 
 void DrilldownQuery::addMetric(MetricDefinition metric) {
+  if (metric.name.isEmpty()) {
+    metric.name = Some(StringUtil::toString(metrics_.size()));
+  }
+
   metrics_.emplace_back(metric);
 }
 
 void DrilldownQuery::addDimension(DimensionDefinition dimension) {
+  if (dimension.name.isEmpty()) {
+    dimension.name = Some(StringUtil::toString(dimensions_.size()));
+  }
+
   dimensions_.emplace_back(dimension);
 }
 
@@ -105,10 +113,21 @@ RefPtr<csql::QueryTreeNode> DrilldownQuery::buildQueryTree(
   // build dimensione expressions
   Vector<RefPtr<csql::ValueExpressionNode>> group_exprs;
   for (const auto& dimension : dimensions_) {
+    String dimexpr_str;
+    if (!dimension.expression.isEmpty()) {
+      dimexpr_str = dimension.expression.get();
+    }
+
+    if (dimexpr_str.empty()) {
+      RAISEF(
+          kRuntimeError,
+          "missing expression for metric=$0 dimension=$1",
+          metric.name.get(),
+          dimension.name.get());
+    }
+
     csql::Parser parser;
-    parser.parseValueExpression(
-        dimension.expression.data(),
-        dimension.expression.size());
+    parser.parseValueExpression(dimexpr_str.data(), dimexpr_str.size());
 
     auto stmts = parser.getStatements();
     if (stmts.size() != 1) {
