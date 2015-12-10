@@ -51,7 +51,7 @@ void DrilldownQuery::execute() {
     }
 
     iputs("got row: $0/$1", stmt_idx, argc);
-    auto node = dtree->lookup(argv + 1, true);
+    auto node = dtree->lookupOrInsert(argv + 1);
     node->slots[stmt_idx] = *argv;
   });
 
