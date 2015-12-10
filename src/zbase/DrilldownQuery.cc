@@ -57,13 +57,10 @@ RefPtr<csql::QueryPlan> DrilldownQuery::buildQueryPlan() {
 
 RefPtr<csql::QueryTreeNode> DrilldownQuery::buildQueryTree(
     const MetricDefinition& metric) {
-  Vector<RefPtr<csql::SelectListNode>> outer_select_list;
-  Vector<RefPtr<csql::SelectListNode>> inner_select_list;
-  Vector<RefPtr<csql::ValueExpressionNode>> group_exprs;
-  Option<RefPtr<csql::ValueExpressionNode>> where_expr;
-  auto aggr_strategy = csql::AggregationStrategy::NO_AGGREGATION;
-
   auto qtree_builder = runtime_->queryPlanBuilder();
+  Vector<RefPtr<csql::SelectListNode>> outer_select_list;
+  auto inner_sl = mkScoped(new csql::ASTNode(csql::ASTNode::T_SELECT_LIST));
+  auto aggr_strategy = csql::AggregationStrategy::NO_AGGREGATION;
 
   // build result expression
   {
@@ -77,11 +74,6 @@ RefPtr<csql::QueryTreeNode> DrilldownQuery::buildQueryTree(
       RAISE(kIllegalArgumentError);
     }
 
-    if (qtree_builder->hasAggregationWithinRecord(stmts[0])) {
-      aggr_strategy = csql::AggregationStrategy::AGGREGATE_WITHIN_RECORD_DEEP;
-    }
-
-    auto inner_sl = mkScoped(new csql::ASTNode(csql::ASTNode::T_SELECT_LIST));
     qtree_builder->buildInternalSelectList(
         stmts[0],
         inner_sl.get());
@@ -89,10 +81,42 @@ RefPtr<csql::QueryTreeNode> DrilldownQuery::buildQueryTree(
     outer_select_list.emplace_back(
         new csql::SelectListNode(
             qtree_builder->buildValueExpression(stmts[0])));
+  }
 
-    for (const auto& e : inner_sl->getChildren()) {
-      inner_select_list.emplace_back(qtree_builder->buildSelectList(e));
+  // build dimensione expressions
+  Vector<RefPtr<csql::ValueExpressionNode>> group_exprs;
+  for (const auto& dimension : dimensions_) {
+    csql::Parser parser;
+    parser.parseValueExpression(
+        dimension.expression.data(),
+        dimension.expression.size());
+
+    auto stmts = parser.getStatements();
+    if (stmts.size() != 1) {
+      RAISE(kIllegalArgumentError);
     }
+
+
+    qtree_builder->buildInternalSelectList(
+        stmts[0],
+        inner_sl.get());
+
+    auto dimexpr = mkRef(qtree_builder->buildValueExpression(stmts[0]));
+    outer_select_list.emplace_back(new csql::SelectListNode(dimexpr));
+    group_exprs.emplace_back(dimexpr);
+  }
+
+  // build filter
+  Option<RefPtr<csql::ValueExpressionNode>> where_expr;
+
+  // build qtree node
+  Vector<RefPtr<csql::SelectListNode>> inner_select_list;
+  for (const auto& e : inner_sl->getChildren()) {
+    inner_select_list.emplace_back(qtree_builder->buildSelectList(e));
+  }
+
+  if (qtree_builder->hasAggregationWithinRecord(inner_sl.get())) {
+    aggr_strategy = csql::AggregationStrategy::AGGREGATE_WITHIN_RECORD_DEEP;
   }
 
   return new csql::GroupByNode(

@@ -1287,6 +1287,11 @@ void AnalyticsServlet::executeDrilldownQuery(
       .source_table = Some(String("myts.last3d"))
     });
 
+    query->addDimension(DrilldownQuery::DimensionDefinition {
+      .name = "time",
+      .expression =  "time"
+    });
+
     query->execute();
 
     res->setStatus(http::kStatusOK);
