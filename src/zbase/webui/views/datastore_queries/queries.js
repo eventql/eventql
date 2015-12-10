@@ -1,10 +1,9 @@
 ZBase.registerView((function() {
-
   var load = function(url) {
     var qparams = {
       with_categories: true,
       type: "all",
-      author: "all"
+      author: "all",
     };
 
     var owner_param = UrlUtil.getParamValue(url, "owner");
@@ -27,17 +26,25 @@ ZBase.registerView((function() {
       qparams.publishing_status = pstatus_param;
     }
 
-    $.showLoader();
-    
+    var search_param = UrlUtil.getParamValue(url, "q");
+    if (search_param) {
+      qparams.search = search_param;
+    }
 
-    $.httpGet("/api/v1/documents?" + $.buildQueryString(qparams), function(r) {
+    $.showLoader();
+
+    searchDocuments(qparams, function(r) {
       if (r.status == 200) {
         render(JSON.parse(r.response), qparams, url);
       } else {
         $.fatalError();
       }
     });
-  }
+  };
+
+  var searchDocuments = function(qparams, callback) {
+    $.httpGet("/api/v1/documents?" + $.buildQueryString(qparams), callback);
+  };
 
   var render = function(data, qparams, path) {
     var reports = data.documents;
@@ -55,6 +62,17 @@ ZBase.registerView((function() {
       $.createNewDocument(this.getValue());
       this.setValue([]);
     });
+
+    var search = $("z-search.search_queries", page);
+    search.addEventListener("z-search-autocomplete", searchAutocomplete);
+    search.addEventListener("z-search-submit", searchSubmit);
+
+    if (qparams.search) {
+      $("z-input", search).setAttribute("data-value", qparams.search);
+      var query_bc = $("zbase-breadcrumbs .query_breadcrumb", page);
+      query_bc.href = getSearchUrl(qparams.search);
+      query_bc.innerHTML = "Search results for '" + qparams.search + "'";
+    }
 
     $.handleLinks(page);
     $.replaceViewport(page)
@@ -81,6 +99,8 @@ ZBase.registerView((function() {
 
       tbody_elem.appendChild(tr);
     });
+
+    $.handleLinks(tbody_elem);
   };
 
   var getPathPrefixForDocType = function(doctype) {
@@ -90,7 +110,72 @@ ZBase.registerView((function() {
       case "sql_query":
         return "/a/sql/";
     }
-  }
+  };
+
+  var searchAutocomplete = function(e) {
+    var term = e.detail.value;
+    var search_widget = this;
+
+    searchDocuments({search: term}, function(r) {
+      if (r.status == 200) {
+        var documents = JSON.parse(r.response).documents;
+        var items = [];
+
+        for (var i = 0; i < documents.length; i++) {
+          if (i > 10) {
+            break;
+          }
+
+          items.push({
+            query: documents[i].name,
+            data_value: documents[i].name});
+        }
+
+        search_widget.autocomplete(term, items);
+      }
+    });
+  };
+
+  var searchSubmit = function(e) {
+    var term = e.detail.value;
+    var search_widget = this;
+
+    searchDocuments({search: term}, function(r) {
+      if (r.status == 200) {
+        var documents = JSON.parse(r.response).documents;
+        if (documents.length == 1) {
+          var path;
+          switch (documents[0].type) {
+            case "sql_query":
+              path = "/a/sql/" + documents[0].uuid;
+              break;
+
+            case "report":
+              path = "/a/reports/" + documents[0].uuid;
+              break;
+          }
+
+          var input = $("input", search_widget);
+          input.value = "";
+          input.blur();
+
+          $.navigateTo(path);
+          return;
+        } else {
+          $.navigateTo(getSearchUrl(term));
+        }
+      }
+    });
+  };
+
+  var getSearchUrl = function(search_term) {
+    var path = "/a/datastore/queries"
+    if (search_term.length > 0) {
+      path += "?q=" + search_term;
+    }
+
+    return path;
+  };
 
   return {
     name: "datastore_queries",

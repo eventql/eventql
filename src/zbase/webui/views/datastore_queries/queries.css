@@ -1,3 +1,30 @@
+.zbase_datastore_queries .zbase_queries_breadcrumbs {
+  height: 36px;
+  background: #f9f9f9;
+  width: 100%;
+  border-bottom: 1px solid #d0d0d0;
+}
+
+.zbase_datastore_queries .zbase_queries_breadcrumbs zbase-breadcrumbs {
+  font-size: 12px;
+  font-weight: 300;
+  margin-left: 23px;
+}
+
+.zbase_datastore_queries .zbase_queries_breadcrumbs zbase-breadcrumbs,
+.zbase_datastore_queries .zbase_queries_breadcrumbs zbase-breadcrumbs a {
+  color: #454545;
+  line-height: 36px;
+}
+
+.zbase_datastore_queries .zbase_queries_breadcrumbs zbase-breadcrumbs-section:last-child a {
+  font-weight: 300;
+}
+
+.zbase_datastore_queries .zbase_queries_breadcrumbs zbase-breadcrumbs-section a:hover {
+  text-decoration: underline;
+}
+
 .zbase_datastore_queries .zbase_content.main_menu {
   background: #fff;
 }
@@ -6,6 +33,36 @@
   float: right;
 }
 
+/* controls */
+.zbase_datastore_queries .controls {
+  height: 70px;
+  padding: 18px 23px;
+  overflow-y: visible;
+}
+
+.zbase_datastore_queries .controls z-search {
+  float: left;
+  display: block;
+  width: 400px;
+  font-size: 13px;
+}
+
+.zbase_datastore_queries .controls z-search z-input {
+  font-size: 13px;
+}
+
+.zbase_datastore_queries .controls z-dropdown {
+  float: right;
+}
+
+.zbase_datastore_queries .controls z-dropdown.input z-dropdown-header {
+  font-size: 13px;
+  line-height: 34px;
+  height: 34px;
+  min-width: 133px;
+}
+
+/* table */
 .zbase_datastore_queries table.z-table {
   table-layout: fixed;
   font-size: 13px;
@@ -21,6 +78,14 @@
   filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#f9f9f9',GradientType=0 ); /* IE6-9 */
 }
 
+.zbase_datastore_queries table.z-table thead th:first-child {
+  padding-left: 23px;
+}
+
+.zbase_datastore_queries table.z-table thead th:last-child {
+  padding-right: 23px;
+}
+
 .zbase_datastore_queries table.z-table tbody tr td {
   padding: 0;
 }
@@ -34,6 +99,11 @@
 
 .zbase_datastore_queries table.z-table tbody tr td:first-child a {
   color: #3e8ad3;
+  padding-left: 23px;
+}
+
+.zbase_datastore_queries table.z-table tbody tr td:last-child a {
+  padding-right: 23px;
 }
 
 .zbase_datastore_queries table.z-table tbody tr td:first-child a:hover {
@@ -43,18 +113,6 @@
 .zbase_datastore_queries table.z-table.zbase_clickable_table tbody tr:hover td {
   border-top: 1px solid rgba(52, 152, 219, 0.3);
   border-bottom: 1px solid rgba(52, 152, 219, 0.3);
-}
-
-.zbase_datastore_queries z-dropdown.input {
-  float: right;
-  margin-top: 12px;
-}
-
-.zbase_datastore_queries z-dropdown.input z-dropdown-header {
-  font-size: 13px;
-  line-height: 34px;
-  height: 34px;
-  min-width: 133px;
 }
 
 #zbase_viewport .zbase_content_pane.zbase_datastore_queries {
