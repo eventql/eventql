@@ -20,10 +20,10 @@ using namespace stx;
 namespace zbase {
 
 DrilldownQuery::DrilldownQuery(
-      RefPtr<csql::ExecutionStrategy> execution_strategy,
-      csql::Runtime* runtime) :
-      execution_strategy_(execution_strategy),
-      runtime_(runtime) {}
+    RefPtr<csql::ExecutionStrategy> execution_strategy,
+    csql::Runtime* runtime) :
+    execution_strategy_(execution_strategy),
+    runtime_(runtime) {}
 
 void DrilldownQuery::addMetric(MetricDefinition metric) {
   metrics_.emplace_back(metric);
@@ -38,12 +38,21 @@ void DrilldownQuery::setFilter(String filter) {
 }
 
 void DrilldownQuery::execute() {
+  size_t ndims = dimensions_.size();
+  auto dtree = mkRef(new DrilldownTree(ndims, metrics_.size()));
+
   auto result_handler = mkRef(new csql::CallbackResultHandler());
-  result_handler->onRow([this] (
+  result_handler->onRow([this, ndims, dtree] (
       size_t stmt_idx,
       int argc,
       const csql::SValue* argv) {
+    if (argc != ndims + 1) {
+      RAISE(kRuntimeError, "invalid result row");
+    }
+
     iputs("got row: $0/$1", stmt_idx, argc);
+    auto node = dtree->lookup(argv + 1, true);
+    node->slots[stmt_idx] = *argv;
   });
 
   auto query_plan = buildQueryPlan();

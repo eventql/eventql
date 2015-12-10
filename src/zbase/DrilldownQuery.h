@@ -59,7 +59,6 @@ protected:
   Vector<MetricDefinition> metrics_;
   Vector<DimensionDefinition> dimensions_;
   Option<String> filter_;
-  DrilldownTree dtree_;
 };
 
 } // namespace zbase

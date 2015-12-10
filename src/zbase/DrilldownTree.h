@@ -16,12 +16,31 @@ using namespace stx;
 
 namespace zbase {
 
-struct DrilldownTreeNode : public RefCounted {
-  HashMap<csql::SValue, RefPtr<DrilldownTreeNode>> groups;
+struct DrilldownTreeNode {
+  virtual ~DrilldownTreeNode() {}
 };
 
-struct DrilldownTree : public RefCounted {
-  RefPtr<DrilldownTreeNode> root;
+struct DrilldownTreeLeafNode : public DrilldownTreeNode {
+  Vector<csql::SValue> slots;
+};
+
+struct DrilldownTreeInternalNode : public DrilldownTreeNode {
+  HashMap<csql::SValue, ScopedPtr<DrilldownTreeNode>> groups;
+};
+
+class DrilldownTree : public RefCounted {
+public:
+
+  DrilldownTree(size_t depth, size_t num_slots);
+
+  DrilldownTreeLeafNode* lookup(
+      const csql::SValue* key,
+      bool insert = false);
+
+protected:
+  ScopedPtr<DrilldownTreeNode> root;
+  size_t depth;
+  size_t num_slots;
 };
 
 }
