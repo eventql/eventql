@@ -9,7 +9,7 @@
 #pragma once
 #include <stx/stdtypes.h>
 #include <stx/autoref.h>
-#include <stx/json/JSONOutputStream.h>
+#include <stx/json/jsonoutputstream.h>
 #include <csql/svalue.h>
 
 using namespace stx;
