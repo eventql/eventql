@@ -44,6 +44,7 @@
   float: left;
   display: block;
   width: 400px;
+  font-size: 13px;
 }
 
 .zbase_datastore_queries .controls z-search z-input {

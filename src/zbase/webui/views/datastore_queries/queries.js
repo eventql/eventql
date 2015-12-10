@@ -28,7 +28,6 @@ ZBase.registerView((function() {
     }
 
     $.showLoader();
-    
 
     $.httpGet("/api/v1/documents?" + $.buildQueryString(qparams), function(r) {
       if (r.status == 200) {
@@ -55,6 +54,10 @@ ZBase.registerView((function() {
       $.createNewDocument(this.getValue());
       this.setValue([]);
     });
+
+    var search = $("z-search.search_queries", page);
+    search.addEventListener("z-search-autocomplete", searchAutocomplete);
+    search.addEventListener("z-search-submit", searchSubmit);
 
     $.handleLinks(page);
     $.replaceViewport(page)
@@ -90,7 +93,70 @@ ZBase.registerView((function() {
       case "sql_query":
         return "/a/sql/";
     }
-  }
+  };
+
+  var searchAutocomplete = function(e) {
+    var term = e.detail.value;
+    var search_widget = this;
+
+    searchDocuments(term, function(r) {
+      var documents = JSON.parse(r.response).documents;
+      var items = [];
+
+      for (var i = 0; i < documents.length; i++) {
+        if (i > 10) {
+          break;
+        }
+
+        items.push({
+          query: documents[i].name,
+          data_value: documents[i].name});
+      }
+
+      search_widget.autocomplete(term, items);
+    });
+  };
+
+  var searchSubmit = function(e) {
+    console.log("search submit");
+    var term = e.detail.value;
+    var search_widget = this;
+
+    searchDocuments(term, function(r) {
+      console.log(r);
+      var documents = JSON.parse(r.response).documents;
+      console.log(documents);
+      if (documents.length == 1) {
+        var path;
+        switch (documents[0].type) {
+          case "sql_query":
+            path = "/a/sql/" + documents[0].uuid;
+            break;
+
+          case "report":
+            path = "/a/reports/" + documents[0].uuid;
+            break;
+        }
+
+        var input = $("input", search_widget);
+        input.value = "";
+        input.blur();
+
+        $.navigateTo(path);
+        return;
+      } else {
+        //TODO navigate to search view?
+      }
+    });
+  };
+
+  var searchDocuments = function(term, callback) {
+    $.httpGet("/api/v1/documents?search=" + term, function(r) {
+      if (r.status == 200) {
+        callback(r);
+      }
+    });
+  };
 
   return {
     name: "datastore_queries",
