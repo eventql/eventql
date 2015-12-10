@@ -71,7 +71,50 @@ DrilldownTreeLeafNode* DrilldownTree::lookup(
 
 void DrilldownTree::toJSON(json::JSONOutputStream* json) {
   json->beginObject();
+  toJSON(root_.get(), 0, json);
   json->endObject();
+}
+
+void DrilldownTree::toJSON(
+    DrilldownTreeNode* node,
+    size_t depth,
+    json::JSONOutputStream* json) {
+  if (depth == depth_) {
+    auto leaf = static_cast<DrilldownTreeLeafNode*>(node);
+    json->addObjectEntry("values");
+    json->beginArray();
+
+    for (size_t i = 0; i < num_slots_; ++i) {
+      if (i > 0) {
+        json->addComma();
+      }
+
+      json->addString(leaf->slots[i].toString());
+    }
+
+    json->endArray();
+  } else {
+    auto internal = static_cast<DrilldownTreeInternalNode*>(node);
+    json->addObjectEntry("values");
+    json->beginArray();
+
+    auto begin = internal->slots.begin();
+    auto end = internal->slots.end();
+    for (auto cur = begin; cur != end; ++cur) {
+      if (cur != begin) {
+        json->addComma();
+      }
+
+      json->beginObject();
+      json->addObjectEntry("key");
+      json->addString(cur->first.toString());
+      json->addComma();
+      toJSON(cur->second.get(), depth + 1, json);
+      json->endObject();
+    }
+
+    json->endArray();
+  }
 }
 
 DrilldownTreeLeafNode::DrilldownTreeLeafNode(

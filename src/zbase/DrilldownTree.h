@@ -43,6 +43,12 @@ public:
   void toJSON(json::JSONOutputStream* json);
 
 protected:
+
+  void toJSON(
+      DrilldownTreeNode* node,
+      size_t depth,
+      json::JSONOutputStream* json);
+
   size_t depth_;
   size_t num_slots_;
   ScopedPtr<DrilldownTreeNode> root_;

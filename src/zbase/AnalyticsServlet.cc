@@ -1284,8 +1284,7 @@ void AnalyticsServlet::executeDrilldownQuery(
     query->addMetric(DrilldownQuery::MetricDefinition {
       .name = "value_total",
       .expression =  "sum(value)",
-      .source_table = Some(String("myts.last3d")),
-      .filter = Some(String("things.one = 1337"))
+      .source_table = Some(String("myts.last3d"))
     });
 
     query->addDimension(DrilldownQuery::DimensionDefinition {
@@ -1293,12 +1292,20 @@ void AnalyticsServlet::executeDrilldownQuery(
       .expression =  "time"
     });
 
+    query->addDimension(DrilldownQuery::DimensionDefinition {
+      .name = "things_one",
+      .expression =  "things.one"
+    });
+
     query->setFilter("1 = 1");
     auto dtree = query->execute();
 
     Buffer buf;
     json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
+    json.beginObject();
+    json.addObjectEntry("result");
     dtree->toJSON(&json);
+    json.endObject();
 
     res->setStatus(http::kStatusOK);
     res->addBody(buf);
