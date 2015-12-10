@@ -13,15 +13,16 @@
 #include <csql/parser/parser.h>
 #include <csql/parser/astnode.h>
 #include <csql/runtime/runtime.h>
+#include "csql/runtime/ASCIITableFormat.h"
 
 using namespace stx;
 
 namespace zbase {
 
 DrilldownQuery::DrilldownQuery(
-      RefPtr<csql::TableProvider> table_provider,
+      RefPtr<csql::ExecutionStrategy> execution_strategy,
       csql::Runtime* runtime) :
-      table_provider_(table_provider),
+      execution_strategy_(execution_strategy),
       runtime_(runtime) {}
 
 void DrilldownQuery::addMetric(MetricDefinition metric) {
@@ -37,7 +38,21 @@ void DrilldownQuery::setFilter(String filter) {
 }
 
 void DrilldownQuery::execute() {
+  auto query_plan = buildQueryPlan();
+  iputs("running...", 1);
+  runtime_->executeQuery(
+      query_plan,
+      new csql::ASCIITableFormat(OutputStream::getStdout()));
+}
 
+RefPtr<csql::QueryPlan> DrilldownQuery::buildQueryPlan() {
+  Vector<RefPtr<csql::QueryTreeNode>> statements;
+
+  for (const auto& metric : metrics_) {
+    statements.emplace_back(buildQueryTree(metric));
+  }
+
+  return runtime_->buildQueryPlan(statements, execution_strategy_);
 }
 
 RefPtr<csql::QueryTreeNode> DrilldownQuery::buildQueryTree(

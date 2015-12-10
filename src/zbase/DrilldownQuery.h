@@ -36,7 +36,7 @@ public:
   };
 
   DrilldownQuery(
-      RefPtr<csql::TableProvider> table_provider,
+      RefPtr<csql::ExecutionStrategy> execution_strategy,
       csql::Runtime* runtime);
 
   void addMetric(MetricDefinition metric);
@@ -49,10 +49,12 @@ public:
 
 protected:
 
+  RefPtr<csql::QueryPlan> buildQueryPlan();
+
   RefPtr<csql::QueryTreeNode> buildQueryTree(
       const MetricDefinition& metric);
 
-  RefPtr<csql::TableProvider> table_provider_;
+  RefPtr<csql::ExecutionStrategy> execution_strategy_;
   csql::Runtime* runtime_;
   Vector<MetricDefinition> metrics_;
   Vector<DimensionDefinition> dimensions_;

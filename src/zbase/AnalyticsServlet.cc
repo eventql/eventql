@@ -1069,7 +1069,7 @@ void AnalyticsServlet::executeSQLScanPartition(
               sql_->queryBuilder().get(),
               sql_));
 
-      sql_->executeQuery(qplan, execution_strategy, result_format);
+      sql_->executeQuery(qplan, result_format);
     } catch (const StandardException& e) {
       result_format->sendError(e.what());
     }
@@ -1276,17 +1276,18 @@ void AnalyticsServlet::executeDrilldownQuery(
     URI uri(req->uri());
     auto jreq = json::parseJSON(req->body());
 
-    auto execution_strategy = app_->getExecutionStrategy(session.customer());
     auto query = mkRef(
         new DrilldownQuery(
-            execution_strategy->tableProvider(),
+            app_->getExecutionStrategy(session.customer()),
             sql_));
 
     query->addMetric(DrilldownQuery::MetricDefinition {
-      .name = "gmv_total",
-      .expression =  "sum(price_cents)",
-      .source_table = Some(String("db.order_items"))
+      .name = "value_total",
+      .expression =  "sum(value)",
+      .source_table = Some(String("myts.last14d"))
     });
+
+    query->execute();
 
     res->setStatus(http::kStatusOK);
     res->addBody("fnord");
