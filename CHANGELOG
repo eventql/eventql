@@ -2,6 +2,9 @@
 v0.2.1
 ======
   - removed COLSM v0.2.0 upgrade code
+  - drilldown query API
+  - drilldown query UI
+  - metrics support
 
 v0.2.0
 ======
