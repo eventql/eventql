@@ -76,7 +76,9 @@ RefPtr<csql::QueryPlan> DrilldownQuery::buildQueryPlan() {
   Vector<RefPtr<csql::QueryTreeNode>> statements;
 
   for (const auto& metric : metrics_) {
-    statements.emplace_back(buildQueryTree(metric));
+    if (!metric.source_table.isEmpty()) {
+      statements.emplace_back(buildQueryTree(metric));
+    }
   }
 
   return runtime_->buildQueryPlan(statements, execution_strategy_);
@@ -110,7 +112,7 @@ RefPtr<csql::QueryTreeNode> DrilldownQuery::buildQueryTree(
             qtree_builder->buildValueExpression(stmts[0])));
   }
 
-  // build dimensione expressions
+  // build dimension expressions
   Vector<RefPtr<csql::ValueExpressionNode>> group_exprs;
   for (const auto& dimension : dimensions_) {
     String dimexpr_str;
@@ -133,7 +135,6 @@ RefPtr<csql::QueryTreeNode> DrilldownQuery::buildQueryTree(
     if (stmts.size() != 1) {
       RAISE(kIllegalArgumentError);
     }
-
 
     qtree_builder->buildInternalSelectList(
         stmts[0],
