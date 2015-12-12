@@ -224,8 +224,10 @@ void DrilldownQuery::calculateDerivedMetrics(RefPtr<DrilldownTree> dtree) {
     exprs.emplace_back(i, query_builder->buildValueExpression(expr));
   }
 
-  dtree->walkLeafs([&exprs] (DrilldownTreeLeafNode* node) {
-    iputs("leaf... $0", (void*) node);
+  dtree->walkLeafs([this, &exprs] (DrilldownTreeLeafNode* node) {
+    for (const auto& e : exprs) {
+      node->slots[e.first] = runtime_->evaluateStaticExpression(e.second);
+    }
   });
 }
 
