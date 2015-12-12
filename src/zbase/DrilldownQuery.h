@@ -60,6 +60,7 @@ protected:
   csql::Runtime* runtime_;
   Vector<MetricDefinition> metrics_;
   Vector<DimensionDefinition> dimensions_;
+  HashMap<String, size_t> metric_name_map_;
   Option<String> filter_;
 };
 

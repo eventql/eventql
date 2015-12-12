@@ -12,8 +12,8 @@
 #include <zbase/DrilldownQuery.h>
 #include <csql/parser/parser.h>
 #include <csql/parser/astnode.h>
+#include <csql/qtree/QueryTreeUtil.h>
 #include <csql/runtime/runtime.h>
-#include "csql/runtime/ASCIITableFormat.h"
 
 using namespace stx;
 
@@ -28,6 +28,10 @@ DrilldownQuery::DrilldownQuery(
 void DrilldownQuery::addMetric(MetricDefinition metric) {
   if (metric.name.isEmpty()) {
     metric.name = Some(StringUtil::toString(metrics_.size()));
+  }
+
+  if (!metric.name.isEmpty()) {
+    metric_name_map_.emplace(metric.name.get(), metrics_.size());
   }
 
   metrics_.emplace_back(metric);
@@ -220,7 +224,18 @@ void DrilldownQuery::calculateDerivedMetrics(RefPtr<DrilldownTree> dtree) {
       RAISE(kIllegalArgumentError);
     }
 
-    auto expr = qtree_builder->buildValueExpression(stmts[0]);
+    auto expr = mkRef(qtree_builder->buildValueExpression(stmts[0]));
+    auto resolver = [this] (const String& column_name) -> size_t {
+      const auto& idx = metric_name_map_.find(column_name);
+
+      if (idx == metric_name_map_.end()) {
+        RAISEF(kNotFoundError, "metric not found: $0", column_name);
+      }
+
+      return idx->second;
+    };
+
+    csql::QueryTreeUtil::resolveColumns(expr, resolver);
     exprs.emplace_back(i, query_builder->buildValueExpression(expr));
   }
 
