@@ -69,6 +69,8 @@ RefPtr<DrilldownTree> DrilldownQuery::execute() {
   auto query_plan = buildQueryPlan();
   runtime_->executeQuery(query_plan, result_handler.get());
 
+  calculateDerivedMetrics(dtree);
+
   return dtree;
 }
 
@@ -195,6 +197,32 @@ RefPtr<csql::QueryTreeNode> DrilldownQuery::buildQueryTree(
             inner_select_list,
             where_expr,
             aggr_strategy));
+}
+
+void DrilldownQuery::calculateDerivedMetrics(RefPtr<DrilldownTree> dtree) {
+  auto qtree_builder = runtime_->queryPlanBuilder();
+  auto query_builder = runtime_->queryBuilder();
+
+  Vector<Pair<size_t, csql::ValueExpression>> exprs;
+  for (size_t i = 0; i < metrics_.size(); ++i) {
+    const auto& metric = metrics_[i];
+    if (!metric.source_table.isEmpty()) {
+      continue;
+    }
+
+    csql::Parser parser;
+    parser.parseValueExpression(
+        metric.expression.data(),
+        metric.expression.size());
+
+    auto stmts = parser.getStatements();
+    if (stmts.size() != 1) {
+      RAISE(kIllegalArgumentError);
+    }
+
+    auto expr = qtree_builder->buildValueExpression(stmts[0]);
+    exprs.emplace_back(i, query_builder->buildValueExpression(expr));
+  }
 }
 
 } // namespace zbase

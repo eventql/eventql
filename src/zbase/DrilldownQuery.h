@@ -54,6 +54,8 @@ protected:
   RefPtr<csql::QueryTreeNode> buildQueryTree(
       const MetricDefinition& metric);
 
+  void calculateDerivedMetrics(RefPtr<DrilldownTree> dtree);
+
   RefPtr<csql::ExecutionStrategy> execution_strategy_;
   csql::Runtime* runtime_;
   Vector<MetricDefinition> metrics_;
