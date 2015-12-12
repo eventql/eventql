@@ -40,6 +40,8 @@ public:
   DrilldownTreeLeafNode* lookupOrInsert(const csql::SValue* key);
   DrilldownTreeLeafNode* lookup(const csql::SValue* key);
 
+  void walkLeafs(Function<void (DrilldownTreeLeafNode* leaf)> fn);
+
   void toJSON(json::JSONOutputStream* json);
 
 protected:
@@ -48,6 +50,11 @@ protected:
       DrilldownTreeNode* node,
       size_t depth,
       json::JSONOutputStream* json);
+
+  void walkLeafs(
+      DrilldownTreeNode* node,
+      size_t depth,
+      Function<void (DrilldownTreeLeafNode* leaf)> fn);
 
   size_t depth_;
   size_t num_slots_;

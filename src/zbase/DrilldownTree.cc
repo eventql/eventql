@@ -117,6 +117,25 @@ void DrilldownTree::toJSON(
   }
 }
 
+void DrilldownTree::walkLeafs(Function<void (DrilldownTreeLeafNode* leaf)> fn) {
+  walkLeafs(root_.get(), 0, fn);
+}
+
+void DrilldownTree::walkLeafs(
+    DrilldownTreeNode* node,
+    size_t depth,
+    Function<void (DrilldownTreeLeafNode* leaf)> fn) {
+  if (depth == depth_) {
+    auto leaf = static_cast<DrilldownTreeLeafNode*>(node);
+    fn(leaf);
+  } else {
+    auto internal = static_cast<DrilldownTreeInternalNode*>(node);
+    for (const auto& slot : internal->slots) {
+      walkLeafs(slot.second.get(), depth + 1, fn);
+    }
+  }
+}
+
 DrilldownTreeLeafNode::DrilldownTreeLeafNode(
     size_t num_slots) :
     slots(num_slots) {}

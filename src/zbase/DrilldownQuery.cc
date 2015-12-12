@@ -223,6 +223,10 @@ void DrilldownQuery::calculateDerivedMetrics(RefPtr<DrilldownTree> dtree) {
     auto expr = qtree_builder->buildValueExpression(stmts[0]);
     exprs.emplace_back(i, query_builder->buildValueExpression(expr));
   }
+
+  dtree->walkLeafs([&exprs] (DrilldownTreeLeafNode* node) {
+    iputs("leaf... $0", (void*) node);
+  });
 }
 
 } // namespace zbase
