@@ -93,12 +93,26 @@ Set<SHA1Hash> LSMPartitionWriter::insertRecords(const Vector<RecordRef>& records
     }
   }
 
+  lk.unlock();
+
+  if (needsUrgentCommit()) {
+    commit();
+  }
+
+  if (needsUrgentCompaction()) {
+    compact();
+  }
+
   return inserted_ids;
 }
 
 bool LSMPartitionWriter::needsCommit() {
   ScopedLock<std::mutex> write_lk(mutex_);
   return head_->getSnapshot()->head_arena->size() > 0;
+}
+
+bool LSMPartitionWriter::needsUrgentCommit() {
+  return head_->getSnapshot()->head_arena->size() > kMaxArenaRecords;
 }
 
 bool LSMPartitionWriter::needsCompaction() {
@@ -108,6 +122,14 @@ bool LSMPartitionWriter::needsCompaction() {
 
   auto snap = head_->getSnapshot();
   return compaction_strategy_->needsCompaction(
+      Vector<LSMTableRef>(
+          snap->state.lsm_tables().begin(),
+          snap->state.lsm_tables().end()));
+}
+
+bool LSMPartitionWriter::needsUrgentCompaction() {
+  auto snap = head_->getSnapshot();
+  return compaction_strategy_->needsUrgentCompaction(
       Vector<LSMTableRef>(
           snap->state.lsm_tables().begin(),
           snap->state.lsm_tables().end()));
@@ -165,6 +187,7 @@ bool LSMPartitionWriter::commit() {
 }
 
 bool LSMPartitionWriter::compact() {
+  ScopedLock<std::mutex> compact_lk(commit_mutex_);
   auto dirty = commit();
 
   // fetch current table list

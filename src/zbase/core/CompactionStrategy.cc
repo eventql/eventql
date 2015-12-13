@@ -20,9 +20,13 @@ namespace zbase {
 
 SimpleCompactionStrategy::SimpleCompactionStrategy(
     RefPtr<Table> table,
-    const String& base_path) :
+    const String& base_path,
+    size_t num_tables_soft_limit,
+    size_t num_tables_hard_limit) :
     table_(table),
-    base_path_(base_path) {}
+    base_path_(base_path),
+    num_tables_soft_limit_(num_tables_soft_limit),
+    num_tables_hard_limit_(num_tables_hard_limit) {}
 
 bool SimpleCompactionStrategy::compact(
     const Vector<LSMTableRef>& input,
@@ -168,7 +172,12 @@ bool SimpleCompactionStrategy::compact(
 
 bool SimpleCompactionStrategy::needsCompaction(
     const Vector<LSMTableRef>& tables) {
-  return tables.size() > 3;
+  return tables.size() > num_tables_soft_limit_;
+}
+
+bool SimpleCompactionStrategy::needsUrgentCompaction(
+    const Vector<LSMTableRef>& tables) {
+  return tables.size() > num_tables_hard_limit_;
 }
 
 } // namespace zbase

@@ -22,6 +22,7 @@ namespace zbase {
 class LSMPartitionWriter : public PartitionWriter {
 public:
   static const size_t kDefaultMaxDatafileSize = 1024 * 1024 * 128;
+  static const size_t kMaxArenaRecords = 10000;
 
   LSMPartitionWriter(
       RefPtr<Partition> partition,
@@ -32,9 +33,11 @@ public:
 
   bool commit() override;
   bool needsCommit();
+  bool needsUrgentCommit();
 
   bool compact() override;
   bool needsCompaction() override;
+  bool needsUrgentCompaction();
 
   ReplicationState fetchReplicationState() const;
   void commitReplicationState(const ReplicationState& state);
@@ -50,6 +53,7 @@ protected:
   RefPtr<CompactionStrategy> compaction_strategy_;
   size_t max_datafile_size_;
   std::mutex commit_mutex_;
+  std::mutex compaction_mutex_;
 };
 
 } // namespace tdsb
