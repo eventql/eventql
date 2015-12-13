@@ -13,6 +13,7 @@
 #include <stx/stdtypes.h>
 #include <stx/autoref.h>
 #include <zbase/core/ReplicationScheme.h>
+#include <zbase/core/LSMTableIndexCache.h>
 
 using namespace stx;
 
@@ -21,6 +22,7 @@ namespace zbase {
 struct ServerConfig {
   String db_path;
   RefPtr<ReplicationScheme> repl_scheme;
+  LSMTableIndexCache* idx_cache;
 };
 
 } // namespace zbase

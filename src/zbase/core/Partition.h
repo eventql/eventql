@@ -52,6 +52,7 @@ public:
       ServerConfig* cfg);
 
   Partition(
+      ServerConfig* cfg,
       RefPtr<PartitionSnapshot> snap,
       RefPtr<Table> table);
 
@@ -73,6 +74,7 @@ protected:
 
   bool upgradeToLSMv2() const;
 
+  ServerConfig* cfg_;
   PartitionSnapshotRef head_;
   RefPtr<Table> table_;
   RefPtr<PartitionWriter> writer_;

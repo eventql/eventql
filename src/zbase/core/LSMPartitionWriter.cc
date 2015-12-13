@@ -24,6 +24,7 @@ using namespace stx;
 namespace zbase {
 
 LSMPartitionWriter::LSMPartitionWriter(
+    ServerConfig* cfg,
     RefPtr<Partition> partition,
     PartitionSnapshotRef* head) :
     PartitionWriter(head),
@@ -32,6 +33,7 @@ LSMPartitionWriter::LSMPartitionWriter(
         new SimpleCompactionStrategy(
             partition_->getTable(),
             head->getSnapshot()->base_path)),
+    idx_cache_(cfg->idx_cache),
     max_datafile_size_(kDefaultMaxDatafileSize) {}
 
 Set<SHA1Hash> LSMPartitionWriter::insertRecords(const Vector<RecordRef>& records) {

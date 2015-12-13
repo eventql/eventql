@@ -63,7 +63,7 @@ RefPtr<Partition> Partition::create(
 
   auto snap = mkRef(new PartitionSnapshot(state, pdir, 0));
   snap->writeToDisk();
-  return new Partition(snap, table);
+  return new Partition(cfg, snap, table);
 }
 
 RefPtr<Partition> Partition::reopen(
@@ -99,12 +99,14 @@ RefPtr<Partition> Partition::reopen(
       nrecs);
 
   auto snap = mkRef(new PartitionSnapshot(state, pdir, nrecs));
-  return new Partition(snap, table);
+  return new Partition(cfg, snap, table);
 }
 
 Partition::Partition(
+    ServerConfig* cfg,
     RefPtr<PartitionSnapshot> head,
     RefPtr<Table> table) :
+    cfg_(cfg),
     head_(head),
     table_(table) {
   z1stats()->num_partitions_loaded.incr(1);
@@ -126,7 +128,8 @@ RefPtr<PartitionWriter> Partition::getWriter() {
 
       case zbase::TBL_STORAGE_COLSM:
         if (upgradeToLSMv2()) {
-          writer_ = mkRef<PartitionWriter>(new LSMPartitionWriter(this, &head_));
+          writer_ = mkRef<PartitionWriter>(
+              new LSMPartitionWriter(cfg_, this, &head_));
         } else {
           writer_ = mkRef<PartitionWriter>(new LogPartitionWriter(this, &head_));
         }
