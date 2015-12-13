@@ -126,17 +126,13 @@ fi
 
 # pack artifacts
 if [[ $BUILD_ARTIFACTS == "true" ]]; then
-  # zbase-core
+  # z1d
   tar cz -C ${TARGET_DIR} zbase zbasectl \
       > ${ARTIFACTS_DIR}/zbase-core-${TARGET_LBL}.tgz
 
-  # zbase-master
+  # z1master
   tar cz -C ${TARGET_DIR} zmaster \
       > ${ARTIFACTS_DIR}/zbase-master-${TARGET_LBL}.tgz
-
-  # zbroker
-  tar cz -C ${TARGET_DIR} brokerd brokerctl \
-      > ${ARTIFACTS_DIR}/zbroker-${TARGET_LBL}.tgz
 
   # zli
   mkdir -p ${TARGET_DIR}/pkg/zli
@@ -145,35 +141,39 @@ if [[ $BUILD_ARTIFACTS == "true" ]]; then
   strip ${TARGET_DIR}/pkg/zli/zli
   tar cz -C ${TARGET_DIR}/pkg zli > ${ARTIFACTS_DIR}/zli-${TARGET_LBL}.tgz
 
+  # zbroker
+  #tar cz -C ${TARGET_DIR} brokerd brokerctl \
+  #    > ${ARTIFACTS_DIR}/zbroker-${TARGET_LBL}.tgz
+
   # zen-utils
-  if [[ "${BUILD_TYPE}" == "release" ]]; then
-    strip ${TARGET_DIR}/zen-csv-upload
-  fi
+  #if [[ "${BUILD_TYPE}" == "release" ]]; then
+  #  strip ${TARGET_DIR}/zen-csv-upload
+  #fi
 
-  tar cz -C ${TARGET_DIR} zen-csv-upload \
-      > ${ARTIFACTS_DIR}/zen-csv-upload-${TARGET_LBL}.tgz
+  #tar cz -C ${TARGET_DIR} zen-csv-upload \
+  #    > ${ARTIFACTS_DIR}/zen-csv-upload-${TARGET_LBL}.tgz
 
-  if [[ "${BUILD_TYPE}" == "release" ]]; then
-    strip ${TARGET_DIR}/zen-mysql-upload
-  fi
+  #if [[ "${BUILD_TYPE}" == "release" ]]; then
+  #  strip ${TARGET_DIR}/zen-mysql-upload
+  #fi
 
-  tar cz -C ${TARGET_DIR} zen-mysql-upload \
-      > ${ARTIFACTS_DIR}/zen-mysql-upload-${TARGET_LBL}.tgz
+  #tar cz -C ${TARGET_DIR} zen-mysql-upload \
+  #    > ${ARTIFACTS_DIR}/zen-mysql-upload-${TARGET_LBL}.tgz
 
-  if [[ "${BUILD_TYPE}" == "release" ]]; then
-    strip ${TARGET_DIR}/zen-statsd-upload
-  fi
+  #if [[ "${BUILD_TYPE}" == "release" ]]; then
+  #  strip ${TARGET_DIR}/zen-statsd-upload
+  #fi
 
-  tar cz -C ${TARGET_DIR} zen-statsd-upload \
-      > ${ARTIFACTS_DIR}/zen-statsd-upload-${TARGET_LBL}.tgz
+  #tar cz -C ${TARGET_DIR} zen-statsd-upload \
+  #    > ${ARTIFACTS_DIR}/zen-statsd-upload-${TARGET_LBL}.tgz
 
-  if [[ "${BUILD_TYPE}" == "release" ]]; then
-    strip ${TARGET_DIR}/zen-logfile-upload
-  fi
+  #if [[ "${BUILD_TYPE}" == "release" ]]; then
+  #  strip ${TARGET_DIR}/zen-logfile-upload
+  #fi
 
-  tar cz -C ${TARGET_DIR} zen-logfile-upload \
-      > ${ARTIFACTS_DIR}/zen-logfile-upload-${TARGET_LBL}.tgz
+  #tar cz -C ${TARGET_DIR} zen-logfile-upload \
+  #    > ${ARTIFACTS_DIR}/zen-logfile-upload-${TARGET_LBL}.tgz
 
-  tar cz -C ${TARGET_DIR} zen-csv-upload zen-mysql-upload zen-statsd-upload \
-      > ${ARTIFACTS_DIR}/zen-utils-${TARGET_LBL}.tgz
+  #tar cz -C ${TARGET_DIR} zen-csv-upload zen-mysql-upload zen-statsd-upload \
+  #    > ${ARTIFACTS_DIR}/zen-utils-${TARGET_LBL}.tgz
 fi
