@@ -30,7 +30,7 @@ RefPtr<Partition> LazyPartition::getPartition(
     const String& tsdb_namespace,
     RefPtr<Table> table,
     const SHA1Hash& partition_key,
-    const String& db_path,
+    ServerConfig* cfg,
     PartitionMap* pmap) {
   std::unique_lock<std::mutex> lk(mutex_);
   if (partition_.get() != nullptr) {
@@ -42,7 +42,7 @@ RefPtr<Partition> LazyPartition::getPartition(
       tsdb_namespace,
       table,
       partition_key,
-      db_path);
+      cfg);
 
   auto partition = partition_;
   lk.unlock();

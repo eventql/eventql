@@ -14,6 +14,7 @@
 #include <stx/UnixTime.h>
 #include <stx/protobuf/MessageSchema.h>
 #include <stx/http/httpconnectionpool.h>
+#include <zbase/core/ServerConfig.h>
 #include <zbase/core/Table.h>
 #include <zbase/core/RecordRef.h>
 #include <zbase/core/PartitionInfo.pb.h>
@@ -42,13 +43,13 @@ public:
       const String& tsdb_namespace,
       RefPtr<Table> table,
       const SHA1Hash& partition_key,
-      const String& db_path);
+      ServerConfig* cfg);
 
   static RefPtr<Partition> reopen(
       const String& tsdb_namespace,
       RefPtr<Table> table,
       const SHA1Hash& partition_key,
-      const String& db_path);
+      ServerConfig* cfg);
 
   Partition(
       RefPtr<PartitionSnapshot> snap,

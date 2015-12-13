@@ -21,9 +21,9 @@ namespace zbase {
 class LSMTableIndexCache {
 public:
 
-  RefPtr<VFSFile> getIndexFile(const String& filename);
+  RefPtr<LSMTableIndex> lookup(const String& filename);
 
-  void flushOndexFile(const String& filename);
+  void flush(const String& filename);
 
 protected:
   const String base_path_;

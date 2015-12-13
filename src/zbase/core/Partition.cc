@@ -36,7 +36,7 @@ RefPtr<Partition> Partition::create(
     const String& tsdb_namespace,
     RefPtr<Table> table,
     const SHA1Hash& partition_key,
-    const String& db_path) {
+    ServerConfig* cfg) {
   stx::logDebug(
       "tsdb",
       "Creating new partition; stream='$0' partition='$1'",
@@ -44,7 +44,7 @@ RefPtr<Partition> Partition::create(
       partition_key.toString());
 
   auto pdir = FileUtil::joinPaths(
-      db_path,
+      cfg->db_path,
       StringUtil::format(
           "$0/$1/$2",
           tsdb_namespace,
@@ -70,9 +70,9 @@ RefPtr<Partition> Partition::reopen(
     const String& tsdb_namespace,
     RefPtr<Table> table,
     const SHA1Hash& partition_key,
-    const String& db_path) {
+    ServerConfig* cfg) {
   auto pdir = FileUtil::joinPaths(
-      db_path,
+      cfg->db_path,
       StringUtil::format(
           "$0/$1/$2",
           tsdb_namespace,

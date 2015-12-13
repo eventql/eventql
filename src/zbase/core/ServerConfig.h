@@ -12,27 +12,15 @@
 #pragma once
 #include <stx/stdtypes.h>
 #include <stx/autoref.h>
-#include <stx/SHA1.h>
+#include <zbase/core/ReplicationScheme.h>
 
 using namespace stx;
 
 namespace zbase {
 
-class LSMTableIndex : public RefCounted {
-public:
-
-  static void write(
-      const OrderedMap<SHA1Hash, uint64_t>& map,
-      const String& filename);
-
-  static void load(
-      HashMap<SHA1Hash, uint64_t>* map,
-      const String& filename);
-
-  static void lookup(
-      HashMap<SHA1Hash, uint64_t>* map,
-      const String& filename);
-
+struct ServerConfig {
+  String db_path;
+  RefPtr<ReplicationScheme> repl_scheme;
 };
 
 } // namespace zbase
