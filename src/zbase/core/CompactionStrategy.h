@@ -49,8 +49,8 @@ public:
   static const size_t kDefaultNumTablesHardLimit = 8;
 
   SimpleCompactionStrategy(
-      RefPtr<Table> table,
-      const String& base_path,
+      RefPtr<Partition> partition,
+      LSMTableIndexCache* idx_cache,
       size_t num_tables_soft_limit = kDefaultNumTablesSoftLimit,
       size_t num_tables_hard_limit = kDefaultNumTablesHardLimit);
 
@@ -65,8 +65,8 @@ public:
       const Vector<LSMTableRef>& tables) override;
 
 protected:
-  RefPtr<Table> table_;
-  String base_path_;
+  RefPtr<Partition> partition_;
+  LSMTableIndexCache* idx_cache_;
   size_t num_tables_soft_limit_;
   size_t num_tables_hard_limit_;
 };

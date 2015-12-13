@@ -43,13 +43,13 @@ RefPtr<Partition> Partition::create(
       table->name(),
       partition_key.toString());
 
-  auto pdir = FileUtil::joinPaths(
-      cfg->db_path,
-      StringUtil::format(
-          "$0/$1/$2",
-          tsdb_namespace,
-          SHA1::compute(table->name()).toString(),
-          partition_key.toString()));
+  auto pdir_rel = StringUtil::format(
+      "$0/$1/$2",
+      tsdb_namespace,
+      SHA1::compute(table->name()).toString(),
+      partition_key.toString());
+
+  auto pdir = FileUtil::joinPaths(cfg->db_path, pdir_rel);
 
   FileUtil::mkdir_p(pdir);
 
@@ -61,7 +61,7 @@ RefPtr<Partition> Partition::create(
   state.set_table_key(table->name());
   state.set_uuid(uuid.data(), uuid.size());
 
-  auto snap = mkRef(new PartitionSnapshot(state, pdir, 0));
+  auto snap = mkRef(new PartitionSnapshot(state, pdir, pdir_rel, 0));
   snap->writeToDisk();
   return new Partition(cfg, snap, table);
 }
@@ -71,13 +71,13 @@ RefPtr<Partition> Partition::reopen(
     RefPtr<Table> table,
     const SHA1Hash& partition_key,
     ServerConfig* cfg) {
-  auto pdir = FileUtil::joinPaths(
-      cfg->db_path,
-      StringUtil::format(
-          "$0/$1/$2",
-          tsdb_namespace,
-          SHA1::compute(table->name()).toString(),
-          partition_key.toString()));
+  auto pdir_rel = StringUtil::format(
+      "$0/$1/$2",
+      tsdb_namespace,
+      SHA1::compute(table->name()).toString(),
+      partition_key.toString());
+
+  auto pdir = FileUtil::joinPaths(cfg->db_path, pdir_rel);
 
   auto state = msg::decode<PartitionState>(
       FileUtil::read(FileUtil::joinPaths(pdir, "_snapshot")));
@@ -98,7 +98,7 @@ RefPtr<Partition> Partition::reopen(
       partition_key.toString(),
       nrecs);
 
-  auto snap = mkRef(new PartitionSnapshot(state, pdir, nrecs));
+  auto snap = mkRef(new PartitionSnapshot(state, pdir, pdir_rel, nrecs));
   return new Partition(cfg, snap, table);
 }
 
@@ -223,6 +223,14 @@ RefPtr<PartitionReplication> Partition::getReplicationStrategy(
 
 bool Partition::upgradeToLSMv2() const {
   return true;
+}
+
+String Partition::getRelativePath() const {
+  return head_.getSnapshot()->rel_path;
+}
+
+String Partition::getAbsolutePath() const {
+  return head_.getSnapshot()->base_path;
 }
 
 }

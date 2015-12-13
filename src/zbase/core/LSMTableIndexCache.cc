@@ -12,24 +12,23 @@
 #pragma once
 #include <stx/stdtypes.h>
 #include <stx/autoref.h>
-#include <zbase/core/LSMTableIndex.h>
+#include <stx/io/fileutil.h>
+#include <zbase/core/LSMTableIndexCache.h>
 
 using namespace stx;
 
 namespace zbase {
 
-class LSMTableIndexCache : public RefCounted {
-public:
+LSMTableIndexCache::LSMTableIndexCache(
+    const String& base_path) :
+    base_path_(base_path) {}
 
-  LSMTableIndexCache(const String& base_path);
+RefPtr<LSMTableIndex> LSMTableIndexCache::lookup(const String& filename) {
+  auto idx = mkRef(new LSMTableIndex());
+  idx->load(FileUtil::joinPaths(base_path_, filename + ".idx"));
+  return idx;
+}
 
-  RefPtr<LSMTableIndex> lookup(const String& filename);
-
-  void flush(const String& filename);
-
-protected:
-  const String base_path_;
-};
 
 } // namespace zbase
 

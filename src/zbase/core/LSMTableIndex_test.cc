@@ -39,7 +39,8 @@ TEST_CASE(LSMTableIndexTest, TestLookup, [] () {
     map[SHA1::compute("0x23232323")] = 0;
     map[SHA1::compute("0x52525252")] = 0;
     map[SHA1::compute("0x17171717")] = 0;
-    LSMTableIndex::lookup(&map, filename);
+    LSMTableIndex idx(filename);
+    idx.lookup(&map);
     EXPECT_EQ(map.size(), 4);
     EXPECT_EQ(map[SHA1::compute("0x42424242")], 3);
     EXPECT_EQ(map[SHA1::compute("0x23232323")], 1);
@@ -50,7 +51,8 @@ TEST_CASE(LSMTableIndexTest, TestLookup, [] () {
   {
     VersionMap map;
     map[SHA1::compute("0x52525252")] = 0;
-    LSMTableIndex::lookup(&map, filename);
+    LSMTableIndex idx(filename);
+    idx.lookup(&map);
     EXPECT_EQ(map.size(), 1);
     EXPECT_EQ(map[SHA1::compute("0x52525252")], 2);
   }
@@ -58,14 +60,16 @@ TEST_CASE(LSMTableIndexTest, TestLookup, [] () {
   {
     VersionMap map;
     map[SHA1::compute("0x52525252")] = 3;
-    LSMTableIndex::lookup(&map, filename);
+    LSMTableIndex idx(filename);
+    idx.lookup(&map);
     EXPECT_EQ(map.size(), 1);
     EXPECT_EQ(map[SHA1::compute("0x52525252")], 3);
   }
 
   {
     VersionMap map;
-    LSMTableIndex::load(&map, filename);
+    LSMTableIndex idx(filename);
+    idx.list(&map);
     EXPECT_EQ(map.size(), 3);
     EXPECT_EQ(map[SHA1::compute("0x42424242")], 3);
     EXPECT_EQ(map[SHA1::compute("0x23232323")], 1);
@@ -88,7 +92,8 @@ TEST_CASE(LSMTableIndexTest, TestEmptyMap, [] () {
     map[SHA1::compute("0x23232323")] = 0;
     map[SHA1::compute("0x52525252")] = 0;
     map[SHA1::compute("0x17171717")] = 0;
-    LSMTableIndex::lookup(&map, filename);
+    LSMTableIndex idx(filename);
+    idx.lookup(&map);
     EXPECT_EQ(map.size(), 4);
     EXPECT_EQ(map[SHA1::compute("0x42424242")], 0);
     EXPECT_EQ(map[SHA1::compute("0x23232323")], 0);
@@ -98,12 +103,13 @@ TEST_CASE(LSMTableIndexTest, TestEmptyMap, [] () {
 
   {
     VersionMap map;
-    LSMTableIndex::load(&map, filename);
+    LSMTableIndex idx(filename);
+    idx.list(&map);
     EXPECT_EQ(map.size(), 0);
   }
 });
 
-TEST_CASE(LSMTableIndexTest, TestMapWithOneSlit, [] () {
+TEST_CASE(LSMTableIndexTest, TestMapWithOneSlot, [] () {
   auto filename = "/tmp/_zbase_recversionmap_test.idx";
   FileUtil::rm(filename);
 
@@ -119,7 +125,8 @@ TEST_CASE(LSMTableIndexTest, TestMapWithOneSlit, [] () {
     map[SHA1::compute("0x23232323")] = 0;
     map[SHA1::compute("0x52525252")] = 0;
     map[SHA1::compute("0x17171717")] = 0;
-    LSMTableIndex::lookup(&map, filename);
+    LSMTableIndex idx(filename);
+    idx.lookup(&map);
     EXPECT_EQ(map.size(), 4);
     EXPECT_EQ(map[SHA1::compute("0x42424242")], 0);
     EXPECT_EQ(map[SHA1::compute("0x23232323")], 1);
@@ -129,7 +136,8 @@ TEST_CASE(LSMTableIndexTest, TestMapWithOneSlit, [] () {
 
   {
     VersionMap map;
-    LSMTableIndex::load(&map, filename);
+    LSMTableIndex idx(filename);
+    idx.list(&map);
     EXPECT_EQ(map.size(), 1);
   }
 });

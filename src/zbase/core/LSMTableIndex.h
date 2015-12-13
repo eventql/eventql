@@ -25,14 +25,33 @@ public:
       const OrderedMap<SHA1Hash, uint64_t>& map,
       const String& filename);
 
-  static void load(
-      HashMap<SHA1Hash, uint64_t>* map,
-      const String& filename);
+  LSMTableIndex();
+  LSMTableIndex(const String& filename);
+  ~LSMTableIndex();
 
-  static void lookup(
-      HashMap<SHA1Hash, uint64_t>* map,
-      const String& filename);
+  void load(const String& filename);
 
+  void list(
+      HashMap<SHA1Hash, uint64_t>* map);
+
+  void lookup(
+      HashMap<SHA1Hash, uint64_t>* map);
+
+protected:
+
+  static const size_t kSlotSize = 28;
+
+  inline void* getID(size_t slot) const {
+    return ((char *) data_) + slot * kSlotSize;
+  }
+
+  inline uint64_t* getVersion(size_t slot) const {
+    return (uint64_t*) (((char *) data_) + slot * kSlotSize + SHA1Hash::kSize);
+  }
+
+  std::mutex load_mutex_;
+  size_t size_;
+  void* data_;
 };
 
 } // namespace zbase

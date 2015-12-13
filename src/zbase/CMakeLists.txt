@@ -79,6 +79,7 @@ add_library(tsdb-server OBJECT
     core/Table.cc
     core/RecordArena.cc
     core/LSMTableIndex.cc
+    core/LSMTableIndexCache.cc
     core/ReplicationWorker.cc
     core/ReplicationScheme.cc
     core/ReplicationState.cc

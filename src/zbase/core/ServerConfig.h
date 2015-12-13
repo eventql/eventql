@@ -22,7 +22,7 @@ namespace zbase {
 struct ServerConfig {
   String db_path;
   RefPtr<ReplicationScheme> repl_scheme;
-  LSMTableIndexCache* idx_cache;
+  RefPtr<LSMTableIndexCache> idx_cache;
 };
 
 } // namespace zbase

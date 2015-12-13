@@ -48,6 +48,7 @@
 #include "zbase/core/TSDBService.h"
 #include "zbase/core/TSDBServlet.h"
 #include "zbase/core/ReplicationWorker.h"
+#include "zbase/core/LSMTableIndexCache.h"
 #include "zbase/DefaultServlet.h"
 #include "csql/defaults.h"
 #include "zbase/ConfigDirectory.h"
@@ -288,6 +289,7 @@ int main(int argc, const char** argv) {
   zbase::ServerConfig cfg;
   cfg.db_path = tsdb_dir;
   cfg.repl_scheme = repl_scheme;
+  cfg.idx_cache = mkRef(new LSMTableIndexCache(tsdb_dir));
 
   zbase::PartitionMap partition_map(&cfg);
   zbase::TSDBService tsdb_node(&partition_map, repl_scheme.get(), &ev);

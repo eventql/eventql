@@ -70,6 +70,9 @@ public:
       RefPtr<ReplicationScheme> repl_scheme,
       http::HTTPConnectionPool* http);
 
+  String getRelativePath() const;
+  String getAbsolutePath() const;
+
 protected:
 
   bool upgradeToLSMv2() const;

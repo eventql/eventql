@@ -31,9 +31,9 @@ LSMPartitionWriter::LSMPartitionWriter(
     partition_(partition),
     compaction_strategy_(
         new SimpleCompactionStrategy(
-            partition_->getTable(),
-            head->getSnapshot()->base_path)),
-    idx_cache_(cfg->idx_cache),
+            partition_,
+            cfg->idx_cache.get())),
+    idx_cache_(cfg->idx_cache.get()),
     max_datafile_size_(kDefaultMaxDatafileSize) {}
 
 Set<SHA1Hash> LSMPartitionWriter::insertRecords(const Vector<RecordRef>& records) {
@@ -70,9 +70,9 @@ Set<SHA1Hash> LSMPartitionWriter::insertRecords(const Vector<RecordRef>& records
 
   const auto& tables = snap->state.lsm_tables();
   for (auto tbl = tables.rbegin(); tbl != tables.rend(); ++tbl) {
-    LSMTableIndex::lookup(
-        &rec_versions,
-        FileUtil::joinPaths(snap->base_path, tbl->filename() + ".idx"));
+    auto idx = idx_cache_->lookup(
+        FileUtil::joinPaths(snap->rel_path, tbl->filename()));
+    idx->lookup(&rec_versions);
 
     // FIMXE early exit...
   }

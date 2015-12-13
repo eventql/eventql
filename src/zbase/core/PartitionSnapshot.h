@@ -23,7 +23,8 @@ struct PartitionSnapshot : public RefCounted {
 
   PartitionSnapshot(
       const PartitionState& state,
-      const String& _base_path,
+      const String& _abs_path,
+      const String& _rel_path,
       size_t _nrecs);
 
   RefPtr<PartitionSnapshot> clone() const;
@@ -34,6 +35,7 @@ struct PartitionSnapshot : public RefCounted {
   SHA1Hash key;
   PartitionState state;
   const String base_path;
+  const String rel_path;
   uint64_t nrecs;
   RefPtr<RecordArena> head_arena;
   RefPtr<RecordArena> compacting_arena;
