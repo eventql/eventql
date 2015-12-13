@@ -150,6 +150,9 @@ void StatusServlet::renderDashboard(
       "<tr><td><em>Number of Partitions - Loaded</em></td><td align='right'>$0</td></tr>",
       zs->num_partitions_loaded.get());
   html += StringUtil::format(
+      "<tr><td><em>Number of Dirty Partitions</em></td><td align='right'>$0</td></tr>",
+      zs->compaction_queue_length.get());
+  html += StringUtil::format(
       "<tr><td><em>LSMTableIndexCache size</em></td><td align='right'>$0 MB</td></tr>",
       config_->idx_cache->size() / (1024.0 * 1024.0));
   html += "</table>";

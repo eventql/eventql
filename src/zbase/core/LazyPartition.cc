@@ -20,7 +20,9 @@ LazyPartition::LazyPartition() {
 
 LazyPartition::LazyPartition(
     RefPtr<Partition> partition) :
-    partition_(partition) {}
+    partition_(partition) {
+  z1stats()->num_partitions.incr(1);
+}
 
 LazyPartition::~LazyPartition() {
   z1stats()->num_partitions.decr(1);

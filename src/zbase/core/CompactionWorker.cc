@@ -67,6 +67,7 @@ void CompactionWorker::enqueuePartitionWithLock(RefPtr<Partition> partition) {
 
   waitset_.emplace(uuid);
   cv_.notify_all();
+  z1stats()->compaction_queue_length.set(queue_.size());
 }
 
 void CompactionWorker::start() {
@@ -143,6 +144,8 @@ void CompactionWorker::work() {
       auto delay = 30 * kMicrosPerSecond; // FIXPAUL increasing delay..
       queue_.emplace(now + delay, partition);
     }
+
+    z1stats()->compaction_queue_length.set(queue_.size());
   }
 }
 

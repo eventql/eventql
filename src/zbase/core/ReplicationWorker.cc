@@ -58,7 +58,7 @@ void ReplicationWorker::enqueuePartitionWithLock(RefPtr<Partition> partition) {
       WallClock::unixMicros() + kReplicationCorkWindowMicros,
       partition);
 
-  z1stats()->replication_queue_length.incr(1);
+  z1stats()->replication_queue_length.set(queue_.size());
 
   waitset_.emplace(uuid);
   cv_.notify_all();
@@ -127,7 +127,6 @@ void ReplicationWorker::work() {
     }
 
     if (success) {
-      z1stats()->replication_queue_length.decr(1);
       waitset_.erase(partition->uuid());
 
       repl = partition->getReplicationStrategy(repl_scheme, http_);
@@ -153,6 +152,8 @@ void ReplicationWorker::work() {
       auto delay = 30 * kMicrosPerSecond; // FIXPAUL increasing delay..
       queue_.emplace(now + delay, partition);
     }
+
+    z1stats()->replication_queue_length.set(queue_.size());
   }
 }
 
