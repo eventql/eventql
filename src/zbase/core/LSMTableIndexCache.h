@@ -29,6 +29,8 @@ public:
 
 protected:
   const String base_path_;
+  std::mutex mutex_;
+  HashMap<String, RefPtr<LSMTableIndex>> map_;
 };
 
 } // namespace zbase

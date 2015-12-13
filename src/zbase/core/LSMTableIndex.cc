@@ -62,6 +62,7 @@ void LSMTableIndex::load(const String& filename) {
     return;
   }
 
+  iputs("!!!LOADING INDEX: $0", filename);
   auto is = FileInputStream::openFile(filename);
   is->readUInt8();
   size_ = is->readUInt64();

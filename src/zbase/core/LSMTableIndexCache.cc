@@ -13,6 +13,7 @@
 #include <stx/stdtypes.h>
 #include <stx/autoref.h>
 #include <stx/io/fileutil.h>
+#include <stx/logging.h>
 #include <zbase/core/LSMTableIndexCache.h>
 
 using namespace stx;
@@ -24,7 +25,15 @@ LSMTableIndexCache::LSMTableIndexCache(
     base_path_(base_path) {}
 
 RefPtr<LSMTableIndex> LSMTableIndexCache::lookup(const String& filename) {
-  auto idx = mkRef(new LSMTableIndex());
+  ScopedLock<std::mutex> lk(mutex_);
+  auto& slot = map_[filename];
+  if (!slot.get()) {
+    slot = new LSMTableIndex();
+  }
+
+  auto idx = slot;
+  lk.unlock();
+
   idx->load(FileUtil::joinPaths(base_path_, filename + ".idx"));
   return idx;
 }
