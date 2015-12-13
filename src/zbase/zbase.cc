@@ -360,6 +360,8 @@ int main(int argc, const char** argv) {
 
   rusage_t.detach();
 
+  Application::setCurrentThreadName("z1d-mainevloop");
+
   try {
     partition_map.open();
     customer_dir.startWatcher();
