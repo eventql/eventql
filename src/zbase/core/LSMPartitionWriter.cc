@@ -260,6 +260,7 @@ bool LSMPartitionWriter::compact() {
     // FIXME: delayed delete
     FileUtil::rm(FileUtil::joinPaths(snap->base_path, f + ".cst"));
     FileUtil::rm(FileUtil::joinPaths(snap->base_path, f + ".idx"));
+    idx_cache_->flush(FileUtil::joinPaths(snap->rel_path, f));
   }
 
   return true;

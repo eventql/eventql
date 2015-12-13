@@ -9,7 +9,6 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#pragma once
 #include <stx/stdtypes.h>
 #include <stx/autoref.h>
 #include <stx/io/fileutil.h>
@@ -74,6 +73,33 @@ RefPtr<LSMTableIndex> LSMTableIndexCache::lookup(const String& filename) {
   }
 
   return idx;
+}
+
+void LSMTableIndexCache::flush(const String& filename) {
+  ScopedLock<std::mutex> lk(mutex_);
+
+  auto iter = map_.find(filename);
+  if (iter == map_.end()) {
+    return;
+  }
+
+  auto slot = iter->second;
+  map_.erase(iter);
+
+  if (slot->next) {
+    slot->next->prev = slot->prev;
+  } else {
+    tail_ = slot->prev;
+  }
+
+  if (slot->prev) {
+    slot->prev->next = slot->next;
+  } else {
+    head_ = slot->next;
+  }
+
+  size_ -= (slot->idx->size() + slot->filename.size() * 2 + kConstantOverhead);
+  delete slot;
 }
 
 // PRECONDITION: must hold mutex
