@@ -10,7 +10,7 @@
  * permission is obtained.
  */
 #include <zbase/core/CompactionStrategy.h>
-#include <zbase/core/RecordVersionMap.h>
+#include <zbase/core/LSMTableIndex.h>
 #include <cstable/CSTableWriter.h>
 #include <stx/io/fileutil.h>
 
@@ -41,7 +41,7 @@ bool SimpleCompactionStrategy::compact(
 
   HashMap<SHA1Hash, uint64_t> vmap;
   for (auto tbl = input.rbegin(); tbl != input.rend(); ++tbl) {
-    RecordVersionMap::load(
+    LSMTableIndex::load(
         &vmap,
         FileUtil::joinPaths(base_path_, tbl->filename() + ".idx"));
   }
@@ -159,7 +159,7 @@ bool SimpleCompactionStrategy::compact(
   for (const auto& p : vmap) {
     vmap_ordered.emplace(p);
   }
-  RecordVersionMap::write(vmap_ordered, cstable_filepath + ".idx");
+  LSMTableIndex::write(vmap_ordered, cstable_filepath + ".idx");
 
   LSMTableRef tbl_ref;
   tbl_ref.set_filename(cstable_filename);

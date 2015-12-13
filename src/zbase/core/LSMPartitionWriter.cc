@@ -10,7 +10,7 @@
 #include <stx/io/fileutil.h>
 #include <zbase/core/Partition.h>
 #include <zbase/core/LSMPartitionWriter.h>
-#include <zbase/core/RecordVersionMap.h>
+#include <zbase/core/LSMTableIndex.h>
 #include <stx/protobuf/msg.h>
 #include <stx/logging.h>
 #include <stx/wallclock.h>
@@ -68,7 +68,7 @@ Set<SHA1Hash> LSMPartitionWriter::insertRecords(const Vector<RecordRef>& records
 
   const auto& tables = snap->state.lsm_tables();
   for (auto tbl = tables.rbegin(); tbl != tables.rend(); ++tbl) {
-    RecordVersionMap::lookup(
+    LSMTableIndex::lookup(
         &rec_versions,
         FileUtil::joinPaths(snap->base_path, tbl->filename() + ".idx"));
 
@@ -302,7 +302,7 @@ void LSMPartitionWriter::writeArenaToDisk(
     });
 
     cstable->commit();
-    RecordVersionMap::write(vmap, filename + ".idx");
+    LSMTableIndex::write(vmap, filename + ".idx");
   }
 }
 

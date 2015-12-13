@@ -17,7 +17,7 @@ using namespace stx;
 
 namespace zbase {
 
-class RecordVersionMap {
+class LSMTableIndex {
 public:
 
   static void write(

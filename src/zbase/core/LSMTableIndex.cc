@@ -17,14 +17,14 @@
 #include <stx/io/mmappedfile.h>
 #include <stx/io/BufferedOutputStream.h>
 #include <stx/logging.h>
-#include <zbase/core/RecordVersionMap.h>
+#include <zbase/core/LSMTableIndex.h>
 #include <cstable/CSTableWriter.h>
 
 using namespace stx;
 
 namespace zbase {
 
-void RecordVersionMap::write(
+void LSMTableIndex::write(
     const OrderedMap<SHA1Hash, uint64_t>& map,
     const String& filename) {
   auto os = BufferedOutputStream::fromStream(
@@ -39,7 +39,7 @@ void RecordVersionMap::write(
 }
 
 // FIXME !!!
-void RecordVersionMap::lookup(
+void LSMTableIndex::lookup(
     HashMap<SHA1Hash, uint64_t>* map,
     const String& filename) {
   io::MmappedFile mmap(File::openFile(filename, File::O_READ));
@@ -91,7 +91,7 @@ void RecordVersionMap::lookup(
   }
 }
 
-void RecordVersionMap::load(
+void LSMTableIndex::load(
     HashMap<SHA1Hash, uint64_t>* map,
     const String& filename) {
   auto is = FileInputStream::openFile(filename);

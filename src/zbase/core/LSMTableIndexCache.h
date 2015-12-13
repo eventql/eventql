@@ -12,14 +12,13 @@
 #pragma once
 #include <stx/stdtypes.h>
 #include <stx/autoref.h>
-#include <zbase/core/Table.h>
-#include <zbase/core/PartitionSnapshot.h>
+#include <zbase/core/LSMTableIndex.h>
 
 using namespace stx;
 
 namespace zbase {
 
-class IndexCache {
+class LSMTableIndexCache {
 public:
 
   RefPtr<VFSFile> getIndexFile(const String& filename);
