@@ -70,7 +70,11 @@ static const String kMainMenu = R"(
   </div>
 )";
 
-StatusServlet::StatusServlet(PartitionMap* pmap) : pmap_(pmap) {}
+StatusServlet::StatusServlet(
+    ServerConfig* config,
+    PartitionMap* pmap) :
+    config_(config),
+    pmap_(pmap) {}
 
 void StatusServlet::handleHTTPRequest(
     http::HTTPRequest* request,
@@ -137,7 +141,7 @@ void StatusServlet::renderDashboard(
       kBuildID);
   html += "</table>";
 
-  html += "<h3>Partition Map</h3>";
+  html += "<h3>Partitions</h3>";
   html += "<table cellspacing=0 border=1>";
   html += StringUtil::format(
       "<tr><td><em>Number of Partitions</em></td><td align='right'>$0</td></tr>",
@@ -145,6 +149,9 @@ void StatusServlet::renderDashboard(
   html += StringUtil::format(
       "<tr><td><em>Number of Partitions - Loaded</em></td><td align='right'>$0</td></tr>",
       zs->num_partitions_loaded.get());
+  html += StringUtil::format(
+      "<tr><td><em>LSMTableIndexCache size</em></td><td align='right'>$0 MB</td></tr>",
+      config_->idx_cache->size() / (1024.0 * 1024.0));
   html += "</table>";
 
   html += "<h3>Replication</h3>";

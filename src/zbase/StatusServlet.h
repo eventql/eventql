@@ -18,7 +18,9 @@ namespace zbase {
 class StatusServlet : public stx::http::HTTPService {
 public:
 
-  StatusServlet(PartitionMap* pmap);
+  StatusServlet(
+      ServerConfig* config,
+      PartitionMap* pmap);
 
   void handleHTTPRequest(
       http::HTTPRequest* request,
@@ -52,6 +54,7 @@ protected:
       http::HTTPRequest* request,
       http::HTTPResponse* response);
 
+  ServerConfig* config_;
   PartitionMap* pmap_;
 };
 

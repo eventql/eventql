@@ -52,17 +52,16 @@ LSMTableIndex::~LSMTableIndex() {
   }
 }
 
-void LSMTableIndex::load(const String& filename) {
+bool LSMTableIndex::load(const String& filename) {
   if (data_) {
-    return;
+    return false;
   }
 
   std::unique_lock<std::mutex> lk(load_mutex_);
   if (data_) {
-    return;
+    return false;
   }
 
-  iputs("!!!LOADING INDEX: $0", filename);
   auto is = FileInputStream::openFile(filename);
   is->readUInt8();
   size_ = is->readUInt64();
@@ -74,6 +73,11 @@ void LSMTableIndex::load(const String& filename) {
   }
 
   is->readNextBytes(data_, data_size);
+  return true;
+}
+
+size_t LSMTableIndex::size() const {
+  return size_ * kSlotSize;
 }
 
 void LSMTableIndex::list(HashMap<SHA1Hash, uint64_t>* map) {

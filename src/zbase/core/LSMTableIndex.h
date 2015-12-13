@@ -29,13 +29,15 @@ public:
   LSMTableIndex(const String& filename);
   ~LSMTableIndex();
 
-  void load(const String& filename);
+  bool load(const String& filename);
 
   void list(
       HashMap<SHA1Hash, uint64_t>* map);
 
   void lookup(
       HashMap<SHA1Hash, uint64_t>* map);
+
+  size_t size() const;
 
 protected:
 

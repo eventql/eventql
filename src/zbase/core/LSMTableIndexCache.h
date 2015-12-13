@@ -20,17 +20,38 @@ namespace zbase {
 
 class LSMTableIndexCache : public RefCounted {
 public:
+  static const size_t kDefaultMaxSize = 1024 * 1024 * 256; // 256 MB;
 
-  LSMTableIndexCache(const String& base_path);
+  LSMTableIndexCache(
+      const String& base_path,
+      size_t max_size = kDefaultMaxSize);
 
   RefPtr<LSMTableIndex> lookup(const String& filename);
 
   void flush(const String& filename);
 
+  size_t size() const;
+
 protected:
+
+  static const size_t kConstantOverhead = 32;
+
+  struct Entry {
+    RefPtr<LSMTableIndex> idx;
+    String filename;
+    Entry* prev;
+    Entry* next;
+  };
+
+  void flushTail();
+
   const String base_path_;
   std::mutex mutex_;
-  HashMap<String, RefPtr<LSMTableIndex>> map_;
+  HashMap<String, Entry*> map_;
+  Entry* head_;
+  Entry* tail_;
+  std::atomic<size_t> size_;
+  size_t max_size_;
 };
 
 } // namespace zbase
