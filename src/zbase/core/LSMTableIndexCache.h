@@ -26,6 +26,8 @@ public:
       const String& base_path,
       size_t max_size = kDefaultMaxSize);
 
+  ~LSMTableIndexCache();
+
   RefPtr<LSMTableIndex> lookup(const String& filename);
 
   void flush(const String& filename);

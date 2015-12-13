@@ -28,6 +28,12 @@ LSMTableIndexCache::LSMTableIndexCache(
     size_(0),
     max_size_(max_size) {}
 
+LSMTableIndexCache::~LSMTableIndexCache() {
+  for (const auto& slot : map_) {
+    delete slot.second;
+  }
+}
+
 RefPtr<LSMTableIndex> LSMTableIndexCache::lookup(const String& filename) {
   ScopedLock<std::mutex> lk(mutex_);
   auto& slot = map_[filename];
