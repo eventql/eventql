@@ -107,7 +107,6 @@ Set<SHA1Hash> LSMPartitionWriter::insertRecords(const Vector<RecordRef>& records
 }
 
 bool LSMPartitionWriter::needsCommit() {
-  ScopedLock<std::mutex> write_lk(mutex_);
   return head_->getSnapshot()->head_arena->size() > 0;
 }
 
@@ -187,7 +186,11 @@ bool LSMPartitionWriter::commit() {
 }
 
 bool LSMPartitionWriter::compact() {
-  ScopedLock<std::mutex> compact_lk(commit_mutex_);
+  ScopedLock<std::mutex> compact_lk(compaction_mutex_, std::defer_lock);
+  if (!compact_lk.try_lock()) {
+    return false;
+  }
+
   auto dirty = commit();
 
   // fetch current table list
