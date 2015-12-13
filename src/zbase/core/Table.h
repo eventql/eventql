@@ -34,7 +34,7 @@ public:
 
   size_t numShards() const;
 
-  Duration cstableBuildInterval() const;
+  Duration commitInterval() const;
 
   RefPtr<msg::MessageSchema> schema() const;
 

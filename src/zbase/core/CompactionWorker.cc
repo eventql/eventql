@@ -54,7 +54,7 @@ void CompactionWorker::enqueuePartition(RefPtr<Partition> partition) {
 }
 
 void CompactionWorker::enqueuePartitionWithLock(RefPtr<Partition> partition) {
-  auto interval = partition->getTable()->cstableBuildInterval();
+  auto interval = partition->getTable()->commitInterval();
 
   auto uuid = partition->uuid();
   if (waitset_.count(uuid) > 0) {

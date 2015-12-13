@@ -47,11 +47,11 @@ message TableConfig {
   optional uint64 num_shards = 7;
 
   /**
-   * How often should we re-build the cstable indexes if the partition has
-   * changed in microseconds (this is basically a rate-limit for the
-   * CompactionWorker subprocess)
+   * How often should we commit the partition to disk in microseconds (N.B.
+   * that even with a high value, we can't loose data as inserts are replicated
+   * before the interval is up)
    */
-  optional uint64 cstable_build_interval = 9 [default = 10000000];
+  optional uint64 commit_interval = 9 [default = 60000000];
 
   optional TimeWindowPartitionerConfig time_window_partitioner_config = 8;
 
