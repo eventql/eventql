@@ -10,6 +10,7 @@
 #include "stx/http/HTTPSSEResponseHandler.h"
 #include "zbase/mapreduce/tasks/MapTableTask.h"
 #include "zbase/mapreduce/MapReduceScheduler.h"
+#include <zbase/z1stats.h>
 
 using namespace stx;
 
@@ -131,8 +132,7 @@ Option<MapReduceShardResult> MapTableTask::executeRemote(
       "Authorization",
       StringUtil::format("Token $0", api_token));
 
-  http::HTTPClient http_client;
-
+  http::HTTPClient http_client(&z1stats()->http_client_stats);
   auto req = http::HTTPRequest::mkPost(url, params, auth_headers);
   auto res = http_client.executeRequest(
       req,

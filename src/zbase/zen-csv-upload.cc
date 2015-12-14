@@ -234,7 +234,7 @@ void run(const cli::FlagParser& flags) {
   auto num_shards = (num_rows + shard_size - 1) / shard_size;
   stx::logDebug("dx-csv-upload", "Splitting into $0 shards", num_shards);
 
-  http::HTTPClient http_client;
+  http::HTTPClient http_client(nullptr);
   http::HTTPMessage::HeaderList auth_headers;
   auth_headers.emplace_back(
       "Authorization",

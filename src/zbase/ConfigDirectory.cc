@@ -12,6 +12,7 @@
 #include <stx/protobuf/msg.h>
 #include <stx/csv/CSVInputStream.h>
 #include <zbase/ConfigDirectory.h>
+#include <zbase/z1stats.h>
 
 using namespace stx;
 
@@ -27,7 +28,7 @@ ClusterConfig ConfigDirectoryClient::fetchClusterConfig() {
           "http://$0/analytics/master/fetch_cluster_config",
           master_addr_.hostAndPort()));
 
-  http::HTTPClient http;
+  http::HTTPClient http(&z1stats()->http_client_stats);
   auto res = http.executeRequest(http::HTTPRequest::mkGet(uri));
   if (res.statusCode() != 200) {
     RAISEF(kRuntimeError, "error: $0", res.body().toString());
@@ -43,7 +44,7 @@ ClusterConfig ConfigDirectoryClient::updateClusterConfig(
         "http://$0/analytics/master/update_cluster_config",
         master_addr_.hostAndPort());
 
-  http::HTTPClient http;
+  http::HTTPClient http(&z1stats()->http_client_stats);
   auto res = http.executeRequest(http::HTTPRequest::mkPost(uri, *body));
   if (res.statusCode() != 201) {
     RAISEF(kRuntimeError, "error: $0", res.body().toString());
@@ -182,7 +183,7 @@ void ConfigDirectory::updateCustomerConfig(CustomerConfig cfg) {
         "http://$0/analytics/master/update_customer_config",
         master_addr_.hostAndPort());
 
-  http::HTTPClient http;
+  http::HTTPClient http(&z1stats()->http_client_stats);
   auto res = http.executeRequest(http::HTTPRequest::mkPost(uri, *body));
   if (res.statusCode() != 201) {
     RAISEF(kRuntimeError, "error: $0", res.body().toString());
@@ -214,7 +215,7 @@ void ConfigDirectory::updateTableDefinition(
     uri += "?force=true";
   }
 
-  http::HTTPClient http;
+  http::HTTPClient http(&z1stats()->http_client_stats);
   auto res = http.executeRequest(http::HTTPRequest::mkPost(uri, *body));
   if (res.statusCode() != 201) {
     RAISEF(kRuntimeError, "error: $0", res.body().toString());
@@ -371,7 +372,7 @@ void ConfigDirectory::syncCustomerConfig(const String& customer) {
           master_addr_.hostAndPort(),
           URI::urlEncode(customer)));
 
-  http::HTTPClient http;
+  http::HTTPClient http(&z1stats()->http_client_stats);
   auto res = http.executeRequest(http::HTTPRequest::mkGet(uri));
   if (res.statusCode() != 200) {
     RAISEF(kRuntimeError, "error: $0", res.body().toString());
@@ -408,7 +409,7 @@ void ConfigDirectory::syncTableDefinitions(const String& customer) {
           master_addr_.hostAndPort(),
           URI::urlEncode(customer)));
 
-  http::HTTPClient http;
+  http::HTTPClient http(&z1stats()->http_client_stats);
   auto res = http.executeRequest(http::HTTPRequest::mkGet(uri));
   if (res.statusCode() != 200) {
     RAISEF(kRuntimeError, "error: $0", res.body().toString());
@@ -465,7 +466,7 @@ void ConfigDirectory::syncUserDB() {
           "http://$0/analytics/master/fetch_userdb",
           master_addr_.hostAndPort()));
 
-  http::HTTPClient http;
+  http::HTTPClient http(&z1stats()->http_client_stats);
   auto res = http.executeRequest(http::HTTPRequest::mkGet(uri));
   if (res.statusCode() != 200) {
     RAISEF(kRuntimeError, "error: $0", res.body().toString());
@@ -518,7 +519,7 @@ HashMap<String, uint64_t> ConfigDirectory::fetchMasterHeads() const {
           "http://$0/analytics/master/heads",
           master_addr_.hostAndPort()));
 
-  http::HTTPClient http;
+  http::HTTPClient http(&z1stats()->http_client_stats);
   auto res = http.executeRequest(http::HTTPRequest::mkGet(uri));
   if (res.statusCode() != 200) {
     RAISEF(kRuntimeError, "error: $0", res.body().toString());

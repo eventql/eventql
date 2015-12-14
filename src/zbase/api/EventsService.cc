@@ -260,7 +260,7 @@ bool EventsService::scanRemoteTablePartition(
       "Authorization",
       StringUtil::format("Token $0", api_token));
 
-  http::HTTPClient http_client;
+  http::HTTPClient http_client(&z1stats()->http_client_stats);
   auto req_body = msg::encode(params);
   auto req = http::HTTPRequest::mkPost(url, *req_body, auth_headers);
   auto res = http_client.executeRequest(req);

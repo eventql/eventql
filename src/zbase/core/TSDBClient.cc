@@ -14,6 +14,7 @@
 #include <stx/protobuf/msg.h>
 #include <stx/http/httpclient.h>
 #include <stx/logging.h>
+#include <zbase/z1stats.h>
 
 using namespace stx;
 
@@ -138,7 +139,7 @@ void TSDBClient::fetchPartitionWithSampling(
     size_t sample_modulo,
     size_t sample_index,
     Function<void (const Buffer& record)> fn) {
-  http::HTTPClient http;
+  http::HTTPClient http(&z1stats()->http_client_stats);
 
   auto uri = StringUtil::format(
       "$0/stream?namespace=$1&stream=$2&partition=$3",

@@ -10,6 +10,7 @@
 #include "zbase/mapreduce/MapReduceScheduler.h"
 #include "zbase/core/FixedShardPartitioner.h"
 #include "sstable/sstablereader.h"
+#include <zbase/z1stats.h>
 
 using namespace stx;
 
@@ -110,7 +111,7 @@ Option<MapReduceShardResult> SaveToTablePartitionTask::executeRemote(
       "Authorization",
       StringUtil::format("Token $0", api_token));
 
-  http::HTTPClient http_client;
+  http::HTTPClient http_client(&z1stats()->http_client_stats);
   auto req = http::HTTPRequest::mkPost(url, params, auth_headers);
   auto res = http_client.executeRequest(req);
 

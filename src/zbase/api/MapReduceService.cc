@@ -330,7 +330,7 @@ void MapReduceService::downloadResult(
     return new http::StreamingResponseFuture(promise, handler);
   };
 
-  http::HTTPClient http_client;
+  http::HTTPClient http_client(&z1stats()->http_client_stats);
   auto res = http_client.executeRequest(req, handler_factory);
   handler(nullptr, 0);
 

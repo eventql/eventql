@@ -214,11 +214,10 @@ int main(int argc, const char** argv) {
   wpool.start();
 
   /* http */
-  stx::http::HTTPClientStats http_client_stats;
   stx::http::HTTPRouter http_router;
   stx::http::HTTPServer http_server(&http_router, &ev);
   http_server.listen(flags.getInt("http_port"));
-  http::HTTPConnectionPool http(&ev, &http_client_stats);
+  http::HTTPConnectionPool http(&ev, &z1stats()->http_client_stats);
 
   /* customer directory */
   if (!FileUtil::exists(flags.getString("datadir"))) {
@@ -295,7 +294,7 @@ int main(int argc, const char** argv) {
       &partition_map,
       repl_scheme.get(),
       &ev,
-      &http_client_stats);
+      &z1stats()->http_client_stats);
 
   zbase::ReplicationWorker tsdb_replication(
       repl_scheme.get(),
@@ -353,7 +352,7 @@ int main(int argc, const char** argv) {
       &cfg,
       &partition_map,
       http_server.stats(),
-      &http_client_stats);
+      &z1stats()->http_client_stats);
 
   zbase::DefaultServlet default_servlet;
 

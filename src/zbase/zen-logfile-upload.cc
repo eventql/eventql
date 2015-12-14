@@ -62,7 +62,7 @@ void run(const cli::FlagParser& flags) {
   }
 
   /* http client */
-  http::HTTPClient http_client;
+  http::HTTPClient http_client(nullptr);
   http::HTTPMessage::HeaderList auth_headers;
   auth_headers.emplace_back(
       "Authorization",

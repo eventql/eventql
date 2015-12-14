@@ -145,7 +145,7 @@ void runJS(
       stderr_os->print("Launching job...\n");
     }
 
-    http::HTTPClient http_client;
+    http::HTTPClient http_client(nullptr);
     auto req = http::HTTPRequest::mkPost(url, program_source, auth_headers);
     auto res = http_client.executeRequest(
         req,
@@ -232,7 +232,7 @@ void runSQL(
         "Authorization",
         StringUtil::format("Token $0", auth_token));
 
-    http::HTTPClient http_client;
+    http::HTTPClient http_client(nullptr);
     auto req = http::HTTPRequest::mkPost(url, postdata, auth_headers);
     auto res = http_client.executeRequest(
         req,
@@ -303,7 +303,7 @@ void cmd_login(
         URI::urlEncode(username),
         URI::urlEncode(password));
 
-    http::HTTPClient http_client;
+    http::HTTPClient http_client(nullptr);
     auto req = http::HTTPRequest::mkPost(url, authdata);
     auto res = http_client.executeRequest(req);
 
