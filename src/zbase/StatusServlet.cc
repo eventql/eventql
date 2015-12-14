@@ -27,7 +27,7 @@ static const String kStyleSheet = R"(
     }
 
     body {
-      padding: 0 30px;
+      padding: 0 30px 30px 30px;
     }
 
     em {
@@ -207,6 +207,20 @@ void StatusServlet::renderDashboard(
       "<tr><td><em>Client Bytes Sent</em></td><td align='right'>$0 MB</td></tr>",
       http_client_stats_->sent_bytes.get() / (1024.0 * 1024.0));
   html += "</table>";
+
+  html += "<h3>MapReduce</h3>";
+  html += "<table cellspacing=0 border=1>";
+  html += StringUtil::format(
+      "<tr><td><em>Number of Map Tasks - Running</em></td><td align='right'>$0</td></tr>",
+      zs->mapreduce_num_map_tasks.get());
+  html += StringUtil::format(
+      "<tr><td><em>Number of Reduce Tasks - Running</em></td><td align='right'>$0</td></tr>",
+      zs->mapreduce_num_reduce_tasks.get());
+  html += StringUtil::format(
+      "<tr><td><em>Reduce Memory Used</em></td><td align='right'>$0 MB</td></tr>",
+      zs->mapreduce_reduce_memory.get() / (1024.0 * 1024.0));
+  html += "</table>";
+
 
   response->setStatus(http::kStatusOK);
   response->addHeader("Content-Type", "text/html; charset=utf-8");

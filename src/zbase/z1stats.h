@@ -18,6 +18,9 @@ struct Z1Stats {
   stx::stats::Counter<uint64_t> num_partitions_loaded;
   stx::stats::Counter<uint64_t> replication_queue_length;
   stx::stats::Counter<uint64_t> compaction_queue_length;
+  stx::stats::Counter<uint64_t> mapreduce_reduce_memory;
+  stx::stats::Counter<uint64_t> mapreduce_num_map_tasks;
+  stx::stats::Counter<uint64_t> mapreduce_num_reduce_tasks;
   stx::http::HTTPClientStats http_client_stats;
 };
 

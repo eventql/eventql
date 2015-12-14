@@ -138,30 +138,40 @@ Option<SHA1Hash> MapReduceService::mapPartition(
       partition_key.toString(),
       output_id.toString());
 
-  auto js_ctx = mkRef(new JavaScriptContext(
-      session.customer(),
-      job,
-      tsdb_,
-      nullptr,
-      nullptr));
+  try {
+    z1stats()->mapreduce_num_map_tasks.incr(1);
 
-  js_ctx->loadClosure(map_fn, globals, params);
+    auto js_ctx = mkRef(new JavaScriptContext(
+        session.customer(),
+        job,
+        tsdb_,
+        nullptr,
+        nullptr));
 
-  auto writer = sstable::SSTableWriter::create(output_path_tmp, nullptr, 0);
+    js_ctx->loadClosure(map_fn, globals, params);
 
-  reader->fetchRecords(
-      [&schema, &js_ctx, &writer] (const msg::MessageObject& record) {
-    Buffer json;
-    json::JSONOutputStream jsons(BufferOutputStream::fromBuffer(&json));
-    msg::JSONEncoder::encode(record, *schema, &jsons);
+    auto writer = sstable::SSTableWriter::create(output_path_tmp, nullptr, 0);
 
-    Vector<Pair<String, String>> tuples;
-    js_ctx->callMapFunction(json.toString(), &tuples);
+    reader->fetchRecords(
+        [&schema, &js_ctx, &writer] (const msg::MessageObject& record) {
+      Buffer json;
+      json::JSONOutputStream jsons(BufferOutputStream::fromBuffer(&json));
+      msg::JSONEncoder::encode(record, *schema, &jsons);
 
-    for (const auto& t : tuples) {
-      writer->appendRow(t.first, t.second);
-    }
-  });
+      Vector<Pair<String, String>> tuples;
+      js_ctx->callMapFunction(json.toString(), &tuples);
+
+      for (const auto& t : tuples) {
+        writer->appendRow(t.first, t.second);
+      }
+    });
+
+  } catch (const StandardException& e) {
+    z1stats()->mapreduce_num_map_tasks.decr(1);
+    throw e;
+  }
+
+  z1stats()->mapreduce_num_map_tasks.decr(1);
 
   FileUtil::mv(output_path_tmp, output_path);
   return Some(output_id);
@@ -209,66 +219,77 @@ Option<SHA1Hash> MapReduceService::reduceTables(
   std::random_shuffle(input_tables.begin(), input_tables.end());
 
   // FIXME MOST NAIVE IN MEMORY MERGE AHEAD !!
-  HashMap<String, Vector<String>> groups;
   size_t num_input_tables_read = 0;
   size_t num_bytes_read = 0;
-  for (const auto& input_table_url : input_tables) {
-    auto api_token = auth_->encodeAuthToken(session);
-    http::HTTPMessage::HeaderList auth_headers;
-    auth_headers.emplace_back(
-        "Authorization",
-        StringUtil::format("Token $0", api_token));
+  try {
+    z1stats()->mapreduce_num_reduce_tasks.incr(1);
 
-    auto req = http::HTTPRequest::mkGet(input_table_url, auth_headers);
-    MapReduceService::downloadResult(
-        req,
-        [&groups, &num_bytes_read] (
-            const void* key,
-            size_t key_len,
-            const void* val,
-            size_t val_len) {
-      auto key_str = String((const char*) key, key_len);
-      auto& lst = groups[key_str];
-      lst.emplace_back(key_str);
-      num_bytes_read += key_len + val_len;
-    });
+    HashMap<String, Vector<String>> groups;
+    for (const auto& input_table_url : input_tables) {
+      auto api_token = auth_->encodeAuthToken(session);
+      http::HTTPMessage::HeaderList auth_headers;
+      auth_headers.emplace_back(
+          "Authorization",
+          StringUtil::format("Token $0", api_token));
 
-    ++num_input_tables_read;
-    logDebug(
-      "z1.mapreduce",
-      "Executing reduce shard; customer=$0 input_tables=$1/$2 output=$3 mem_used=$4MB",
-      session.customer(),
-      input_tables.size(),
-      num_input_tables_read,
-      output_id.toString(),
-      num_bytes_read / 1024.0 / 1024.0);
-  }
+      auto req = http::HTTPRequest::mkGet(input_table_url, auth_headers);
+      MapReduceService::downloadResult(
+          req,
+          [&groups, &num_bytes_read] (
+              const void* key,
+              size_t key_len,
+              const void* val,
+              size_t val_len) {
+        auto key_str = String((const char*) key, key_len);
+        auto& lst = groups[key_str];
+        lst.emplace_back(key_str);
+        auto rec_size = key_len + val_len;
+        num_bytes_read += rec_size;
+        z1stats()->mapreduce_reduce_memory.incr(rec_size);
+      });
 
-  if (groups.size() == 0) {
-    return None<SHA1Hash>();
-  }
-
-  auto js_ctx = mkRef(new JavaScriptContext(
-      session.customer(),
-      job,
-      tsdb_,
-      nullptr,
-      nullptr));
-
-  js_ctx->loadClosure(reduce_fn, globals, params);
-
-  auto writer = sstable::SSTableWriter::create(output_path_tmp, nullptr, 0);
-
-  for (auto cur = groups.begin(); cur != groups.end(); ) {
-    Vector<Pair<String, String>> tuples;
-    js_ctx->callReduceFunction(cur->first, cur->second, &tuples);
-
-    for (const auto& t : tuples) {
-      writer->appendRow(t.first, t.second);
+      ++num_input_tables_read;
+      logDebug(
+        "z1.mapreduce",
+        "Executing reduce shard; customer=$0 input_tables=$1/$2 output=$3 mem_used=$4MB",
+        session.customer(),
+        input_tables.size(),
+        num_input_tables_read,
+        output_id.toString(),
+        num_bytes_read / 1024.0 / 1024.0);
     }
 
-    cur = groups.erase(cur);
+    if (groups.size() == 0) {
+      return None<SHA1Hash>();
+    }
+
+    auto js_ctx = mkRef(new JavaScriptContext(
+        session.customer(),
+        job,
+        tsdb_,
+        nullptr,
+        nullptr));
+
+    js_ctx->loadClosure(reduce_fn, globals, params);
+
+    auto writer = sstable::SSTableWriter::create(output_path_tmp, nullptr, 0);
+
+    for (const auto& cur : groups) {
+      Vector<Pair<String, String>> tuples;
+      js_ctx->callReduceFunction(cur.first, cur.second, &tuples);
+
+      for (const auto& t : tuples) {
+        writer->appendRow(t.first, t.second);
+      }
+    }
+  } catch (const StandardException& e) {
+    z1stats()->mapreduce_reduce_memory.decr(num_bytes_read);
+    z1stats()->mapreduce_num_reduce_tasks.decr(1);
+    throw e;
   }
+
+  z1stats()->mapreduce_reduce_memory.decr(num_bytes_read);
+  z1stats()->mapreduce_num_reduce_tasks.decr(1);
 
   FileUtil::mv(output_path_tmp, output_path);
   return Some(output_id);
