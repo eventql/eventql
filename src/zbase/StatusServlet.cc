@@ -72,9 +72,11 @@ static const String kMainMenu = R"(
 
 StatusServlet::StatusServlet(
     ServerConfig* config,
-    PartitionMap* pmap) :
+    PartitionMap* pmap,
+    http::HTTPServerStats* http_stats) :
     config_(config),
-    pmap_(pmap) {}
+    pmap_(pmap),
+    http_stats_(http_stats) {}
 
 void StatusServlet::handleHTTPRequest(
     http::HTTPRequest* request,
@@ -162,6 +164,28 @@ void StatusServlet::renderDashboard(
   html += StringUtil::format(
       "<tr><td><em>Replication Queue Length</em></td><td align='right'>$0</td></tr>",
       zs->replication_queue_length.get());
+  html += "</table>";
+
+  html += "<h3>HTTP</h3>";
+  html += "<table cellspacing=0 border=1>";
+  html += StringUtil::format(
+      "<tr><td><em>Server Connections - Current</em></td><td align='right'>$0</td></tr>",
+      http_stats_->current_connections.get());
+  html += StringUtil::format(
+      "<tr><td><em>Server Connections - Total</em></td><td align='right'>$0</td></tr>",
+      http_stats_->total_connections.get());
+  html += StringUtil::format(
+      "<tr><td><em>Server Requests - Current</em></td><td align='right'>$0</td></tr>",
+      http_stats_->current_requests.get());
+  html += StringUtil::format(
+      "<tr><td><em>Server Requests - Total</em></td><td align='right'>$0</td></tr>",
+      http_stats_->total_requests.get());
+  html += StringUtil::format(
+      "<tr><td><em>Server Bytes Received</em></td><td align='right'>$0 MB</td></tr>",
+      http_stats_->received_bytes.get() / (1024.0 * 1024.0));
+  html += StringUtil::format(
+      "<tr><td><em>Server Bytes Sent</em></td><td align='right'>$0 MB</td></tr>",
+      http_stats_->sent_bytes.get() / (1024.0 * 1024.0));
   html += "</table>";
 
   response->setStatus(http::kStatusOK);

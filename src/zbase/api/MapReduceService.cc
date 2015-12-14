@@ -227,8 +227,9 @@ Option<SHA1Hash> MapReduceService::reduceTables(
             size_t key_len,
             const void* val,
             size_t val_len) {
-      auto& lst = groups[String((const char*) key, key_len)];
-      lst.emplace_back(String((const char*) val, val_len));
+      auto key_str = String((const char*) key, key_len);
+      auto& lst = groups[key_str];
+      lst.emplace_back(key_str);
       num_bytes_read += key_len + val_len;
     });
 

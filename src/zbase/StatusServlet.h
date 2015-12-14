@@ -9,6 +9,7 @@
 #pragma once
 #include <stx/stdtypes.h>
 #include <stx/http/httpservice.h>
+#include <stx/http/httpstats.h>
 #include <stx/SHA1.h>
 #include <zbase/core/PartitionMap.h>
 
@@ -20,7 +21,8 @@ public:
 
   StatusServlet(
       ServerConfig* config,
-      PartitionMap* pmap);
+      PartitionMap* pmap,
+      http::HTTPServerStats* http_stats);
 
   void handleHTTPRequest(
       http::HTTPRequest* request,
@@ -56,6 +58,7 @@ protected:
 
   ServerConfig* config_;
   PartitionMap* pmap_;
+  http::HTTPServerStats* http_stats_;
 };
 
 }
