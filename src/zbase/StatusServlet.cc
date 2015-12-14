@@ -10,6 +10,7 @@
 #include <zbase/core/PartitionReplication.h>
 #include <zbase/z1stats.h>
 #include <zbase/z1.h>
+#include "stx/application.h"
 
 using namespace stx;
 namespace zbase {
@@ -143,6 +144,12 @@ void StatusServlet::renderDashboard(
   html += StringUtil::format(
       "<tr><td><em>Build-ID</em></td><td align='left'>$0</td></tr>",
       kBuildID);
+  html += StringUtil::format(
+      "<tr><td><em>Memory Usage - Current</em></td><td align='right'>$0 MB</td></tr>",
+      Application::getCurrentMemoryUsage() / (1024.0 * 1024.0));
+  html += StringUtil::format(
+      "<tr><td><em>Memory Usage - Peak</em></td><td align='right'>$0 MB</td></tr>",
+      Application::getPeakMemoryUsage() / (1024.0 * 1024.0));
   html += "</table>";
 
   html += "<h3>Partitions</h3>";
