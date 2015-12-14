@@ -82,6 +82,7 @@ void MapReduceAPIServlet::handle(
   }
 
   res.setStatus(http::kStatusNotFound);
+  res.addHeader("Connection", "close");
   res.addHeader("Content-Type", "text/html; charset=utf-8");
   res.addBody(Assets::getAsset("zbase/webui/404.html"));
   res_stream->writeResponse(res);
@@ -447,6 +448,7 @@ void MapReduceAPIServlet::fetchResult(
 
   if (filename.isEmpty()) {
     res.setStatus(http::kStatusNotFound);
+    res.addHeader("Connection", "close");
     res_stream->writeResponse(res);
     return;
   }
