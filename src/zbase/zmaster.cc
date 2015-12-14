@@ -62,7 +62,7 @@ int main(int argc, const char** argv) {
       strToLogLevel(flags.getString("loglevel")));
 
   /* thread pools */
-  stx::thread::ThreadPool tpool;
+  stx::thread::ThreadPool tpool(thread::ThreadPoolOptions{});
 
   /* http */
   stx::http::HTTPRouter http_router;

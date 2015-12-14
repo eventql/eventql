@@ -213,9 +213,9 @@ int main(int argc, const char** argv) {
   //auto conf = msg::parseText<zbase::TSDBNodeConfig>(conf_data);
 
   /* thread pools */
-  stx::thread::ThreadPool tpool;
-  stx::thread::FixedSizeThreadPool wpool(8);
-  wpool.start();
+  stx::thread::ThreadPool tpool(thread::ThreadPoolOptions {
+    .thread_name = Some(String("z1d-httpserver"))
+  });
 
   /* http */
   stx::http::HTTPRouter http_router;
@@ -313,8 +313,22 @@ int main(int argc, const char** argv) {
       flags.getInt("indexbuild_threads"));
 
   /* sql */
-  auto sql = csql::Runtime::getDefaultRuntime();
-  sql->setCacheDir(flags.getString("cachedir"));
+  RefPtr<csql::Runtime> sql;
+  {
+    auto symbols = mkRef(new csql::SymbolTable());
+    csql::installDefaultSymbols(symbols.get());
+    sql = mkRef(new csql::Runtime(
+        stx::thread::ThreadPoolOptions {
+          .thread_name = Some(String("z1d-sqlruntime"))
+        },
+        symbols,
+        new csql::QueryBuilder(
+            new csql::ValueExpressionBuilder(symbols.get()),
+            new csql::TableExpressionBuilder()),
+        new csql::QueryPlanBuilder(symbols.get())));
+
+    sql->setCacheDir(flags.getString("cachedir"));
+  }
 
   /* spidermonkey javascript runtime */
   JS_Init();

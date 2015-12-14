@@ -26,7 +26,8 @@ LocalScheduler::LocalScheduler(
     const String& tempdir /* = "/tmp" */,
     size_t max_requests /* = 32 */) :
     tempdir_(tempdir),
-    req_tpool_(max_requests) {}
+    work_tpool_(thread::ThreadPoolOptions{}),
+    req_tpool_(thread::ThreadPoolOptions{}, max_requests) {}
 
 void LocalScheduler::start() {
   req_tpool_.start();

@@ -37,7 +37,10 @@ MapReduceService::MapReduceService(
     pmap_(pmap),
     repl_(repl),
     js_runtime_(js_runtime),
-    cachedir_(cachedir) {}
+    cachedir_(cachedir),
+    tpool_(thread::ThreadPoolOptions {
+      .thread_name = Some(String("z1d-mapreduce"))
+    }) {}
 
 void MapReduceService::executeScript(
     const AnalyticsSession& session,

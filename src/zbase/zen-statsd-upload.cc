@@ -34,7 +34,7 @@ void run(const cli::FlagParser& flags) {
   auto prefix = flags.getString("key_prefix");
 
   thread::EventLoop ev;
-  thread::FixedSizeThreadPool tpool(4);
+  thread::FixedSizeThreadPool tpool(thread::ThreadPoolOptions{}, 4);
   tpool.start();
 
   http::HTTPConnectionPool http(&ev, nullptr);
