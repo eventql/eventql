@@ -89,10 +89,6 @@ add_subdirectory(deps/libcsql)
 include_directories(${CSQL_INCLUDE})
 set(HAVE_CSQL true)
 
-add_subdirectory(deps/brokerd)
-include_directories(${BROKERD_INCLUDE})
-set(HAVE_BROKERD true)
-
 add_subdirectory(src/zbase)
 add_subdirectory(src/zbase/master)
 add_subdirectory(src/zbase/docdb)

@@ -30,9 +30,7 @@
 #include "stx/http/httprouter.h"
 #include "stx/http/httpserver.h"
 #include "stx/http/VFSFileServlet.h"
-#include "brokerd/FeedService.h"
-#include "brokerd/RemoteFeedFactory.h"
-#include "brokerd/RemoteFeedReader.h"
+#include "stx/io/FileLock.h"
 #include "zbase/dproc/LocalScheduler.h"
 #include "zbase/dproc/DispatchService.h"
 #include "stx/stats/statsdagent.h"
@@ -216,10 +214,11 @@ int main(int argc, const char** argv) {
   wpool.start();
 
   /* http */
+  stx::http::HTTPClientStats http_client_stats;
   stx::http::HTTPRouter http_router;
   stx::http::HTTPServer http_server(&http_router, &ev);
   http_server.listen(flags.getInt("http_port"));
-  http::HTTPConnectionPool http(&ev);
+  http::HTTPConnectionPool http(&ev, &http_client_stats);
 
   /* customer directory */
   if (!FileUtil::exists(flags.getString("datadir"))) {
@@ -292,7 +291,12 @@ int main(int argc, const char** argv) {
   cfg.idx_cache = mkRef(new LSMTableIndexCache(tsdb_dir));
 
   zbase::PartitionMap partition_map(&cfg);
-  zbase::TSDBService tsdb_node(&partition_map, repl_scheme.get(), &ev);
+  zbase::TSDBService tsdb_node(
+      &partition_map,
+      repl_scheme.get(),
+      &ev,
+      &http_client_stats);
+
   zbase::ReplicationWorker tsdb_replication(
       repl_scheme.get(),
       &partition_map,
@@ -348,7 +352,8 @@ int main(int argc, const char** argv) {
   zbase::StatusServlet status_servlet(
       &cfg,
       &partition_map,
-      http_server.stats());
+      http_server.stats(),
+      &http_client_stats);
 
   zbase::DefaultServlet default_servlet;
 

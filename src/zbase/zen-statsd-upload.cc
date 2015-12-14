@@ -37,7 +37,7 @@ void run(const cli::FlagParser& flags) {
   thread::FixedSizeThreadPool tpool(4);
   tpool.start();
 
-  http::HTTPConnectionPool http(&ev);
+  http::HTTPConnectionPool http(&ev, nullptr);
 
   http::HTTPMessage::HeaderList auth_headers;
   auth_headers.emplace_back(

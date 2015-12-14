@@ -154,7 +154,6 @@ target_link_libraries(test-javascriptcontext -L${CMAKE_BINARY_DIR}/deps/3rdparty
 
 add_executable(zbase
     $<TARGET_OBJECTS:stx-mdb>
-    $<TARGET_OBJECTS:brokerd-client>
     $<TARGET_OBJECTS:dxa-docdb>
     $<TARGET_OBJECTS:tsdb-server>
     $<TARGET_OBJECTS:coreprotos>
@@ -215,7 +214,6 @@ add_dependencies(zbase customerdirectory mozjs_build)
 
 add_executable(zbasectl
     $<TARGET_OBJECTS:stx-mdb>
-    $<TARGET_OBJECTS:brokerd-client>
     $<TARGET_OBJECTS:tsdb-server>
     $<TARGET_OBJECTS:coreprotos>
     $<TARGET_OBJECTS:customerdirectory>

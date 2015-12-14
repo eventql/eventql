@@ -40,7 +40,8 @@ public:
   TSDBService(
       PartitionMap* pmap,
       ReplicationScheme* repl,
-      thread::EventLoop* ev);
+      thread::EventLoop* ev,
+      http::HTTPClientStats* http_stats);
 
   void createTable(const TableDefinition& config);
 

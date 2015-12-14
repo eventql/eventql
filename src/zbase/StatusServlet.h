@@ -22,7 +22,8 @@ public:
   StatusServlet(
       ServerConfig* config,
       PartitionMap* pmap,
-      http::HTTPServerStats* http_stats);
+      http::HTTPServerStats* http_server_stats,
+      http::HTTPClientStats* http_client_stats);
 
   void handleHTTPRequest(
       http::HTTPRequest* request,
@@ -58,7 +59,8 @@ protected:
 
   ServerConfig* config_;
   PartitionMap* pmap_;
-  http::HTTPServerStats* http_stats_;
+  http::HTTPServerStats* http_server_stats_;
+  http::HTTPClientStats* http_client_stats_;
 };
 
 }

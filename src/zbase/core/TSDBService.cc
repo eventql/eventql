@@ -25,10 +25,11 @@ namespace zbase {
 TSDBService::TSDBService(
     PartitionMap* pmap,
     ReplicationScheme* repl,
-    thread::EventLoop* ev) :
+    thread::EventLoop* ev,
+    http::HTTPClientStats* http_stats) :
     pmap_(pmap),
     repl_(repl),
-    http_(ev) {}
+    http_(ev, http_stats) {}
 
 void TSDBService::createTable(const TableDefinition& table) {
   pmap_->configureTable(table);

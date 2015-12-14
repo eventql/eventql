@@ -73,10 +73,12 @@ static const String kMainMenu = R"(
 StatusServlet::StatusServlet(
     ServerConfig* config,
     PartitionMap* pmap,
-    http::HTTPServerStats* http_stats) :
+    http::HTTPServerStats* http_server_stats,
+    http::HTTPClientStats* http_client_stats) :
     config_(config),
     pmap_(pmap),
-    http_stats_(http_stats) {}
+    http_server_stats_(http_server_stats),
+    http_client_stats_(http_client_stats) {}
 
 void StatusServlet::handleHTTPRequest(
     http::HTTPRequest* request,
@@ -170,22 +172,40 @@ void StatusServlet::renderDashboard(
   html += "<table cellspacing=0 border=1>";
   html += StringUtil::format(
       "<tr><td><em>Server Connections - Current</em></td><td align='right'>$0</td></tr>",
-      http_stats_->current_connections.get());
+      http_server_stats_->current_connections.get());
   html += StringUtil::format(
       "<tr><td><em>Server Connections - Total</em></td><td align='right'>$0</td></tr>",
-      http_stats_->total_connections.get());
+      http_server_stats_->total_connections.get());
   html += StringUtil::format(
       "<tr><td><em>Server Requests - Current</em></td><td align='right'>$0</td></tr>",
-      http_stats_->current_requests.get());
+      http_server_stats_->current_requests.get());
   html += StringUtil::format(
       "<tr><td><em>Server Requests - Total</em></td><td align='right'>$0</td></tr>",
-      http_stats_->total_requests.get());
+      http_server_stats_->total_requests.get());
   html += StringUtil::format(
       "<tr><td><em>Server Bytes Received</em></td><td align='right'>$0 MB</td></tr>",
-      http_stats_->received_bytes.get() / (1024.0 * 1024.0));
+      http_server_stats_->received_bytes.get() / (1024.0 * 1024.0));
   html += StringUtil::format(
       "<tr><td><em>Server Bytes Sent</em></td><td align='right'>$0 MB</td></tr>",
-      http_stats_->sent_bytes.get() / (1024.0 * 1024.0));
+      http_server_stats_->sent_bytes.get() / (1024.0 * 1024.0));
+  html += StringUtil::format(
+      "<tr><td><em>Client Connections - Current</em></td><td align='right'>$0</td></tr>",
+      http_client_stats_->current_connections.get());
+  html += StringUtil::format(
+      "<tr><td><em>Client Connections - Total</em></td><td align='right'>$0</td></tr>",
+      http_client_stats_->total_connections.get());
+  html += StringUtil::format(
+      "<tr><td><em>Client Requests - Current</em></td><td align='right'>$0</td></tr>",
+      http_client_stats_->current_requests.get());
+  html += StringUtil::format(
+      "<tr><td><em>Client Requests - Total</em></td><td align='right'>$0</td></tr>",
+      http_client_stats_->total_requests.get());
+  html += StringUtil::format(
+      "<tr><td><em>Client Bytes Received</em></td><td align='right'>$0 MB</td></tr>",
+      http_client_stats_->received_bytes.get() / (1024.0 * 1024.0));
+  html += StringUtil::format(
+      "<tr><td><em>Client Bytes Sent</em></td><td align='right'>$0 MB</td></tr>",
+      http_client_stats_->sent_bytes.get() / (1024.0 * 1024.0));
   html += "</table>";
 
   response->setStatus(http::kStatusOK);
