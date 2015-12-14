@@ -19,13 +19,15 @@ namespace zbase {
 
 PartitionSnapshot::PartitionSnapshot(
     const PartitionState& _state,
-    const String& _base_path,
+    const String& _abs_path,
+    const String& _rel_path,
     size_t _nrecs) :
     key(
         _state.partition_key().data(),
         _state.partition_key().size()),
     state(_state),
-    base_path(_base_path),
+    base_path(_abs_path),
+    rel_path(_rel_path),
     nrecs(_nrecs),
     head_arena(new RecordArena()) {}
 
@@ -37,6 +39,7 @@ RefPtr<PartitionSnapshot> PartitionSnapshot::clone() const {
   auto snap = mkRef(new PartitionSnapshot(
       state,
       base_path,
+      rel_path,
       nrecs));
 
   snap->head_arena = head_arena;

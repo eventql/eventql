@@ -10,7 +10,7 @@
  * permission is obtained.
  */
 #include <zbase/core/CompactionStrategy.h>
-#include <zbase/core/RecordVersionMap.h>
+#include <zbase/core/LSMTableIndex.h>
 #include <cstable/CSTableWriter.h>
 #include <stx/io/fileutil.h>
 
@@ -19,12 +19,12 @@ using namespace stx;
 namespace zbase {
 
 SimpleCompactionStrategy::SimpleCompactionStrategy(
-    RefPtr<Table> table,
-    const String& base_path,
+    RefPtr<Partition> partition,
+    LSMTableIndexCache* idx_cache,
     size_t num_tables_soft_limit,
     size_t num_tables_hard_limit) :
-    table_(table),
-    base_path_(base_path),
+    partition_(partition),
+    idx_cache_(idx_cache),
     num_tables_soft_limit_(num_tables_soft_limit),
     num_tables_hard_limit_(num_tables_hard_limit) {}
 
@@ -41,12 +41,14 @@ bool SimpleCompactionStrategy::compact(
 
   HashMap<SHA1Hash, uint64_t> vmap;
   for (auto tbl = input.rbegin(); tbl != input.rend(); ++tbl) {
-    RecordVersionMap::load(
-        &vmap,
-        FileUtil::joinPaths(base_path_, tbl->filename() + ".idx"));
+    auto idx = idx_cache_->lookup(
+        FileUtil::joinPaths(partition_->getRelativePath(), tbl->filename()));
+    idx->list(&vmap);
   }
 
-  auto cstable_schema = cstable::TableSchema::fromProtobuf(*table_->schema());
+  auto table = partition_->getTable();
+  auto base_path = partition_->getAbsolutePath();
+  auto cstable_schema = cstable::TableSchema::fromProtobuf(*table->schema());
   auto cstable_schema_ext = cstable_schema;
   cstable_schema_ext.addBool("__lsm_is_update", false);
   cstable_schema_ext.addString("__lsm_id", false);
@@ -54,7 +56,8 @@ bool SimpleCompactionStrategy::compact(
   cstable_schema_ext.addUnsignedInteger("__lsm_sequence", false);
 
   auto cstable_filename = Random::singleton()->hex64();
-  auto cstable_filepath = FileUtil::joinPaths(base_path_, cstable_filename);
+  auto cstable_filepath = FileUtil::joinPaths(base_path, cstable_filename);
+
   auto cstable = cstable::CSTableWriter::createFile(
       cstable_filepath + ".cst",
       cstable::BinaryFormatVersion::v0_1_0,
@@ -67,7 +70,7 @@ bool SimpleCompactionStrategy::compact(
 
   for (const auto& tbl : input) {
     auto input_cstable_file = FileUtil::joinPaths(
-        base_path_,
+        base_path,
         tbl.filename() + ".cst");
 
     auto input_cstable = cstable::CSTableReader::openFile(input_cstable_file);
@@ -159,7 +162,7 @@ bool SimpleCompactionStrategy::compact(
   for (const auto& p : vmap) {
     vmap_ordered.emplace(p);
   }
-  RecordVersionMap::write(vmap_ordered, cstable_filepath + ".idx");
+  LSMTableIndex::write(vmap_ordered, cstable_filepath + ".idx");
 
   LSMTableRef tbl_ref;
   tbl_ref.set_filename(cstable_filename);

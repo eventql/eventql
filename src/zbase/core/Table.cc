@@ -46,9 +46,9 @@ size_t Table::numShards() const {
   return config_.config().num_shards();
 }
 
-Duration Table::cstableBuildInterval() const {
+Duration Table::commitInterval() const {
   std::unique_lock<std::mutex> lk(mutex_);
-  return config_.config().cstable_build_interval();
+  return config_.config().commit_interval();
 }
 
 RefPtr<msg::MessageSchema> Table::schema() const {

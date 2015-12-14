@@ -29,11 +29,9 @@ static mdb::MDBOptions tsdb_mdb_opts() {
 };
 
 PartitionMap::PartitionMap(
-    const String& db_path,
-    RefPtr<ReplicationScheme> repl_scheme) :
-    db_path_(db_path),
-    db_(mdb::MDB::open(db_path, tsdb_mdb_opts())),
-    repl_scheme_(repl_scheme) {}
+    ServerConfig* cfg) :
+    cfg_(cfg),
+    db_(mdb::MDB::open(cfg_->db_path, tsdb_mdb_opts())) {}
 
 Option<RefPtr<Table>> PartitionMap::findTable(
     const String& stream_ns,
@@ -175,7 +173,7 @@ RefPtr<Partition> PartitionMap::findOrCreatePartition(
         tsdb_namespace,
         table.get(),
         partition_key,
-        db_path_,
+        cfg_,
         this);
   }
 
@@ -183,7 +181,7 @@ RefPtr<Partition> PartitionMap::findOrCreatePartition(
       tsdb_namespace,
       table.get(),
       partition_key,
-      db_path_);
+      cfg_);
 
   partitions_.emplace(db_key, mkScoped(new LazyPartition(partition)));
 
@@ -233,7 +231,7 @@ Option<RefPtr<Partition>> PartitionMap::findPartition(
             tsdb_namespace,
             table.get(),
             partition_key,
-            db_path_,
+            cfg_,
             this));
   }
 }
@@ -272,12 +270,14 @@ bool PartitionMap::dropLocalPartition(
   /* check preconditions */
   size_t full_copies = 0;
   try {
+    auto repl_scheme = cfg_->repl_scheme;
+
     full_copies = partition
-        ->getReplicationStrategy(repl_scheme_, nullptr)
+        ->getReplicationStrategy(repl_scheme, nullptr)
         ->numFullRemoteCopies();
 
-    if (repl_scheme_->hasLocalReplica(partition_key) ||
-        full_copies < repl_scheme_->minNumCopies()) {
+    if (repl_scheme->hasLocalReplica(partition_key) ||
+        full_copies < repl_scheme->minNumCopies()) {
       RAISE(kIllegalStateError, "can't delete partition");
     }
   } catch (const StandardException& e) {
@@ -323,7 +323,7 @@ bool PartitionMap::dropLocalPartition(
   /* delete partition data from disk (move to trash) */
   {
     auto src_path = FileUtil::joinPaths(
-        db_path_,
+        cfg_->db_path,
         StringUtil::format(
             "$0/$1/$2",
             tsdb_namespace,
@@ -331,7 +331,7 @@ bool PartitionMap::dropLocalPartition(
             partition_key.toString()));
 
     auto dst_path = FileUtil::joinPaths(
-        db_path_,
+        cfg_->db_path,
         StringUtil::format(
             "../../trash/$0~$1~$2~$3",
             tsdb_namespace,

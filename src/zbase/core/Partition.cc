@@ -36,20 +36,20 @@ RefPtr<Partition> Partition::create(
     const String& tsdb_namespace,
     RefPtr<Table> table,
     const SHA1Hash& partition_key,
-    const String& db_path) {
+    ServerConfig* cfg) {
   stx::logDebug(
       "tsdb",
       "Creating new partition; stream='$0' partition='$1'",
       table->name(),
       partition_key.toString());
 
-  auto pdir = FileUtil::joinPaths(
-      db_path,
-      StringUtil::format(
-          "$0/$1/$2",
-          tsdb_namespace,
-          SHA1::compute(table->name()).toString(),
-          partition_key.toString()));
+  auto pdir_rel = StringUtil::format(
+      "$0/$1/$2",
+      tsdb_namespace,
+      SHA1::compute(table->name()).toString(),
+      partition_key.toString());
+
+  auto pdir = FileUtil::joinPaths(cfg->db_path, pdir_rel);
 
   FileUtil::mkdir_p(pdir);
 
@@ -61,23 +61,23 @@ RefPtr<Partition> Partition::create(
   state.set_table_key(table->name());
   state.set_uuid(uuid.data(), uuid.size());
 
-  auto snap = mkRef(new PartitionSnapshot(state, pdir, 0));
+  auto snap = mkRef(new PartitionSnapshot(state, pdir, pdir_rel, 0));
   snap->writeToDisk();
-  return new Partition(snap, table);
+  return new Partition(cfg, snap, table);
 }
 
 RefPtr<Partition> Partition::reopen(
     const String& tsdb_namespace,
     RefPtr<Table> table,
     const SHA1Hash& partition_key,
-    const String& db_path) {
-  auto pdir = FileUtil::joinPaths(
-      db_path,
-      StringUtil::format(
-          "$0/$1/$2",
-          tsdb_namespace,
-          SHA1::compute(table->name()).toString(),
-          partition_key.toString()));
+    ServerConfig* cfg) {
+  auto pdir_rel = StringUtil::format(
+      "$0/$1/$2",
+      tsdb_namespace,
+      SHA1::compute(table->name()).toString(),
+      partition_key.toString());
+
+  auto pdir = FileUtil::joinPaths(cfg->db_path, pdir_rel);
 
   auto state = msg::decode<PartitionState>(
       FileUtil::read(FileUtil::joinPaths(pdir, "_snapshot")));
@@ -98,13 +98,15 @@ RefPtr<Partition> Partition::reopen(
       partition_key.toString(),
       nrecs);
 
-  auto snap = mkRef(new PartitionSnapshot(state, pdir, nrecs));
-  return new Partition(snap, table);
+  auto snap = mkRef(new PartitionSnapshot(state, pdir, pdir_rel, nrecs));
+  return new Partition(cfg, snap, table);
 }
 
 Partition::Partition(
+    ServerConfig* cfg,
     RefPtr<PartitionSnapshot> head,
     RefPtr<Table> table) :
+    cfg_(cfg),
     head_(head),
     table_(table) {
   z1stats()->num_partitions_loaded.incr(1);
@@ -126,7 +128,8 @@ RefPtr<PartitionWriter> Partition::getWriter() {
 
       case zbase::TBL_STORAGE_COLSM:
         if (upgradeToLSMv2()) {
-          writer_ = mkRef<PartitionWriter>(new LSMPartitionWriter(this, &head_));
+          writer_ = mkRef<PartitionWriter>(
+              new LSMPartitionWriter(cfg_, this, &head_));
         } else {
           writer_ = mkRef<PartitionWriter>(new LogPartitionWriter(this, &head_));
         }
@@ -220,6 +223,14 @@ RefPtr<PartitionReplication> Partition::getReplicationStrategy(
 
 bool Partition::upgradeToLSMv2() const {
   return true;
+}
+
+String Partition::getRelativePath() const {
+  return head_.getSnapshot()->rel_path;
+}
+
+String Partition::getAbsolutePath() const {
+  return head_.getSnapshot()->base_path;
 }
 
 }

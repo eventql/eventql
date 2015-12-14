@@ -17,14 +17,14 @@
 #include <stx/io/mmappedfile.h>
 #include <stx/io/BufferedOutputStream.h>
 #include <stx/logging.h>
-#include <zbase/core/RecordVersionMap.h>
+#include <zbase/core/LSMTableIndex.h>
 #include <cstable/CSTableWriter.h>
 
 using namespace stx;
 
 namespace zbase {
 
-void RecordVersionMap::write(
+void LSMTableIndex::write(
     const OrderedMap<SHA1Hash, uint64_t>& map,
     const String& filename) {
   auto os = BufferedOutputStream::fromStream(
@@ -38,34 +38,75 @@ void RecordVersionMap::write(
   }
 }
 
-// FIXME !!!
-void RecordVersionMap::lookup(
-    HashMap<SHA1Hash, uint64_t>* map,
-    const String& filename) {
-  io::MmappedFile mmap(File::openFile(filename, File::O_READ));
+LSMTableIndex::LSMTableIndex() :
+    size_(0),
+    data_(nullptr) {}
 
-  auto len = *mmap.structAt<uint64_t>(1);
-  if (len == 0) {
+LSMTableIndex::LSMTableIndex(const String& filename) : LSMTableIndex() {
+  load(filename);
+}
+
+LSMTableIndex::~LSMTableIndex() {
+  if (data_) {
+    free(data_);
+  }
+}
+
+bool LSMTableIndex::load(const String& filename) {
+  if (data_) {
+    return false;
+  }
+
+  std::unique_lock<std::mutex> lk(load_mutex_);
+  if (data_) {
+    return false;
+  }
+
+  auto is = FileInputStream::openFile(filename);
+  is->readUInt8();
+  size_ = is->readUInt64();
+
+  auto data_size = size_ * kSlotSize;
+  data_ = malloc(data_size);
+  if (!data_) {
+    RAISEF(kMallocError, "can't load LSMTableIndex $0 into memory", filename);
+  }
+
+  is->readNextBytes(data_, data_size);
+  return true;
+}
+
+size_t LSMTableIndex::size() const {
+  return size_ * kSlotSize;
+}
+
+void LSMTableIndex::list(HashMap<SHA1Hash, uint64_t>* map) {
+  for (size_t i = 0; i < size_; ++i) {
+    SHA1Hash id(getID(i), SHA1Hash::kSize);
+    auto ver = *getVersion(i);
+    auto& slot = (*map)[id];
+    if (ver > slot) {
+      slot = ver;
+    }
+  }
+}
+
+void LSMTableIndex::lookup(HashMap<SHA1Hash, uint64_t>* map) {
+  if (size_ == 0) {
     return;
   }
 
-  static size_t kHeaderOffset = 9;
-  static size_t kSlotSize = 28;
-
   for (auto& p : *map) {
     uint64_t begin = 0;
-    uint64_t end = len - 1;
+    uint64_t end = size_ - 1;
 
-    // continue searching while [begin,end] is not empty
     while (begin <= end) {
       uint64_t cur = begin + ((end - begin) / uint64_t(2));
-      SHA1Hash cur_id(
-          mmap.structAt<void>(kHeaderOffset + cur * kSlotSize),
-          SHA1Hash::kSize);
+      auto cur_id = getID(cur);
+      auto cmp = SHA1::compare(cur_id, p.first.data());
 
-      if (cur_id == p.first) {
-        auto cur_version = *mmap.structAt<uint64_t>(
-            kHeaderOffset + cur * kSlotSize + SHA1Hash::kSize);
+      if (cmp == 0) {
+        auto cur_version = *getVersion(cur);
 
         if (cur_version > p.second) {
           p.second = cur_version;
@@ -74,7 +115,7 @@ void RecordVersionMap::lookup(
         break;
       }
 
-      if (cur_id < p.first) {
+      if (cmp < 0) {
         if (cur == end) {
           break;
         }
@@ -91,21 +132,5 @@ void RecordVersionMap::lookup(
   }
 }
 
-void RecordVersionMap::load(
-    HashMap<SHA1Hash, uint64_t>* map,
-    const String& filename) {
-  auto is = FileInputStream::openFile(filename);
-  is->readUInt8();
-  auto len = is->readUInt64();
-  for (size_t i = 0; i < len; ++i) {
-    SHA1Hash id;
-    is->readNextBytes(const_cast<void*>(id.data()), SHA1Hash::kSize);
-    auto ver = is->readUInt64();
-    auto& slot = (*map)[id];
-    if (ver > slot) {
-      slot = ver;
-    }
-  }
-}
 
 } // namespace zbase

@@ -16,6 +16,7 @@ struct Z1Stats {
   stx::stats::Counter<uint64_t> num_partitions;
   stx::stats::Counter<uint64_t> num_partitions_loaded;
   stx::stats::Counter<uint64_t> replication_queue_length;
+  stx::stats::Counter<uint64_t> compaction_queue_length;
 };
 
 Z1Stats* z1stats();

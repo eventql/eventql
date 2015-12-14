@@ -10,7 +10,7 @@
 #include <stx/io/fileutil.h>
 #include <zbase/core/Partition.h>
 #include <zbase/core/LSMPartitionWriter.h>
-#include <zbase/core/RecordVersionMap.h>
+#include <zbase/core/LSMTableIndex.h>
 #include <stx/protobuf/msg.h>
 #include <stx/logging.h>
 #include <stx/wallclock.h>
@@ -24,14 +24,16 @@ using namespace stx;
 namespace zbase {
 
 LSMPartitionWriter::LSMPartitionWriter(
+    ServerConfig* cfg,
     RefPtr<Partition> partition,
     PartitionSnapshotRef* head) :
     PartitionWriter(head),
     partition_(partition),
     compaction_strategy_(
         new SimpleCompactionStrategy(
-            partition_->getTable(),
-            head->getSnapshot()->base_path)),
+            partition_,
+            cfg->idx_cache.get())),
+    idx_cache_(cfg->idx_cache.get()),
     max_datafile_size_(kDefaultMaxDatafileSize) {}
 
 Set<SHA1Hash> LSMPartitionWriter::insertRecords(const Vector<RecordRef>& records) {
@@ -68,9 +70,9 @@ Set<SHA1Hash> LSMPartitionWriter::insertRecords(const Vector<RecordRef>& records
 
   const auto& tables = snap->state.lsm_tables();
   for (auto tbl = tables.rbegin(); tbl != tables.rend(); ++tbl) {
-    RecordVersionMap::lookup(
-        &rec_versions,
-        FileUtil::joinPaths(snap->base_path, tbl->filename() + ".idx"));
+    auto idx = idx_cache_->lookup(
+        FileUtil::joinPaths(snap->rel_path, tbl->filename()));
+    idx->lookup(&rec_versions);
 
     // FIMXE early exit...
   }
@@ -258,6 +260,7 @@ bool LSMPartitionWriter::compact() {
     // FIXME: delayed delete
     FileUtil::rm(FileUtil::joinPaths(snap->base_path, f + ".cst"));
     FileUtil::rm(FileUtil::joinPaths(snap->base_path, f + ".idx"));
+    idx_cache_->flush(FileUtil::joinPaths(snap->rel_path, f));
   }
 
   return true;
@@ -302,7 +305,7 @@ void LSMPartitionWriter::writeArenaToDisk(
     });
 
     cstable->commit();
-    RecordVersionMap::write(vmap, filename + ".idx");
+    LSMTableIndex::write(vmap, filename + ".idx");
   }
 }
 

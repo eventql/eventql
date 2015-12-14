@@ -20,6 +20,7 @@
 #include <zbase/core/PartitionInfo.pb.h>
 #include <zbase/core/PartitionChangeNotification.h>
 #include <zbase/core/RecordEnvelope.pb.h>
+#include <zbase/core/ServerConfig.h>
 #include <zbase/z1stats.h>
 
 using namespace stx;
@@ -28,9 +29,8 @@ namespace zbase {
 
 class PartitionMap {
 public:
-  PartitionMap(
-      const String& db_path,
-      RefPtr<ReplicationScheme> repl_scheme);
+
+  PartitionMap(ServerConfig* cfg);
 
   void configureTable(const TableDefinition& config);
   void open();
@@ -101,9 +101,8 @@ protected:
 
   void loadPartitions(const Vector<PartitionKey>& partitions);
 
-  String db_path_;
+  ServerConfig* cfg_;
   RefPtr<mdb::MDB> db_;
-  RefPtr<ReplicationScheme> repl_scheme_;
 
   mutable std::mutex mutex_;
   HashMap<String, RefPtr<Table>> tables_;

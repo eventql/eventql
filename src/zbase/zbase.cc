@@ -48,6 +48,7 @@
 #include "zbase/core/TSDBService.h"
 #include "zbase/core/TSDBServlet.h"
 #include "zbase/core/ReplicationWorker.h"
+#include "zbase/core/LSMTableIndexCache.h"
 #include "zbase/DefaultServlet.h"
 #include "csql/defaults.h"
 #include "zbase/ConfigDirectory.h"
@@ -285,7 +286,12 @@ int main(int argc, const char** argv) {
   FileLock server_lock(FileUtil::joinPaths(tsdb_dir, "__lock"));
   server_lock.lock();
 
-  zbase::PartitionMap partition_map(tsdb_dir, repl_scheme);
+  zbase::ServerConfig cfg;
+  cfg.db_path = tsdb_dir;
+  cfg.repl_scheme = repl_scheme;
+  cfg.idx_cache = mkRef(new LSMTableIndexCache(tsdb_dir));
+
+  zbase::PartitionMap partition_map(&cfg);
   zbase::TSDBService tsdb_node(&partition_map, repl_scheme.get(), &ev);
   zbase::ReplicationWorker tsdb_replication(
       repl_scheme.get(),
@@ -339,7 +345,7 @@ int main(int argc, const char** argv) {
       &docdb,
       &partition_map);
 
-  zbase::StatusServlet status_servlet(&partition_map);
+  zbase::StatusServlet status_servlet(&cfg, &partition_map);
   zbase::DefaultServlet default_servlet;
 
   http_router.addRouteByPrefixMatch("/a/", &webui_servlet);
