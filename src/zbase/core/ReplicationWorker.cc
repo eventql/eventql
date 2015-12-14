@@ -10,6 +10,7 @@
 #include "unistd.h"
 #include <stx/logging.h>
 #include <stx/wallclock.h>
+#include <stx/application.h>
 #include <zbase/core/ReplicationWorker.h>
 #include <zbase/core/Partition.h>
 #include <zbase/z1stats.h>
@@ -86,6 +87,8 @@ void ReplicationWorker::stop() {
 }
 
 void ReplicationWorker::work() {
+  Application::setCurrentThreadName("z1d-replication");
+
   std::unique_lock<std::mutex> lk(mutex_);
 
   while (running_) {

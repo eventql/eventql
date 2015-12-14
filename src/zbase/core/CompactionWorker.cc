@@ -13,6 +13,7 @@
 #include <stx/io/mmappedfile.h>
 #include <stx/protobuf/msg.h>
 #include <stx/wallclock.h>
+#include <stx/application.h>
 #include <zbase/core/CompactionWorker.h>
 #include <zbase/core/LogPartitionCompactionState.pb.h>
 #include <zbase/core/RecordSet.h>
@@ -92,6 +93,8 @@ void CompactionWorker::stop() {
 }
 
 void CompactionWorker::work() {
+  Application::setCurrentThreadName("z1d-compaction");
+
   std::unique_lock<std::mutex> lk(mutex_);
 
   while (running_) {

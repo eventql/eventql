@@ -213,9 +213,11 @@ int main(int argc, const char** argv) {
   //auto conf = msg::parseText<zbase::TSDBNodeConfig>(conf_data);
 
   /* thread pools */
-  stx::thread::ThreadPool tpool(thread::ThreadPoolOptions {
-    .thread_name = Some(String("z1d-httpserver"))
-  });
+  stx::thread::CachedThreadPool tpool(
+      thread::ThreadPoolOptions {
+        .thread_name = Some(String("z1d-httpserver"))
+      },
+      8);
 
   /* http */
   stx::http::HTTPRouter http_router;
