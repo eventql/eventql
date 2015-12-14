@@ -58,6 +58,10 @@ using namespace zbase;
 
 stx::thread::EventLoop ev;
 
+namespace js {
+void DisableExtraThreads();
+}
+
 int main(int argc, const char** argv) {
   stx::Application::init();
 
@@ -314,6 +318,7 @@ int main(int argc, const char** argv) {
 
   /* spidermonkey javascript runtime */
   JS_Init();
+  js::DisableExtraThreads();
 
   /* analytics core */
   AnalyticsAuth auth(&customer_dir);
@@ -374,7 +379,7 @@ int main(int argc, const char** argv) {
 
   rusage_t.detach();
 
-  Application::setCurrentThreadName("z1d-mainevloop");
+  Application::setCurrentThreadName("z1d");
 
   try {
     partition_map.open();
