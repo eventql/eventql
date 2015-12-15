@@ -489,7 +489,11 @@ void JavaScriptContext::callReduceFunction(
 
   JS::RootedValue rval(ctx_);
   if (!JS_CallFunctionName(ctx_, global_, "__call_with_iter", argv, &rval)) {
-    RAISE("JavaScriptError", current_error_);
+    RAISEF(
+        "JavaScriptError $0 for input $1/$2",
+        current_error_,
+        key,
+        inspect(values));
   }
 
   enumerateTuples(&rval, tuples);
