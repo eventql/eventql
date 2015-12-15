@@ -265,6 +265,8 @@ Option<SHA1Hash> MapReduceService::reduceTables(
     }
 
     if (groups.size() == 0) {
+      z1stats()->mapreduce_reduce_memory.decr(num_bytes_read);
+      z1stats()->mapreduce_num_reduce_tasks.decr(1);
       return None<SHA1Hash>();
     }
 
