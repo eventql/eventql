@@ -20,13 +20,27 @@ var ZBaseMainMenu = (function() {
   };
 
   var hideMenu = function() {
-    document.getElementById("zbase_main_menu").classList.add("hidden");
-    document.getElementById("menu_toggler").classList.add("closed");
+    var menu = document.getElementById("zbase_main_menu");
+    if (menu) {
+      menu.classList.add("hidden");
+    }
+
+    var toggler = document.getElementById("menu_toggler");
+    if (toggler) {
+      toggler.classList.add("closed");
+    }
   };
 
   var showMenu = function() {
-    document.getElementById("zbase_main_menu").classList.remove("hidden");
-    document.getElementById("menu_toggler").classList.remove("closed");
+    var menu = document.getElementById("zbase_main_menu");
+    if (menu) {
+      menu.classList.remove("hidden");
+    }
+
+    var toggler = document.getElementById("menu_toggler");
+    if (toggler) {
+      toggler.classList.remove("closed");
+    }
   };
 
   var setActiveMenuItem = function(path) {

@@ -142,7 +142,10 @@ var ZBase = (function() {
     }
 
     hideLoader();
-    ZBaseMainMenu.hide();
+
+    if (typeof ZBaseMainMenu != "undefined") {
+      ZBaseMainMenu.hide();
+    }
     if (config.current_user) {
       HeaderWidget.update(current_path);
       ZBaseMainMenu.update(current_path);
