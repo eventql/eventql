@@ -171,7 +171,7 @@ Option<SHA1Hash> MapReduceService::mapPartition(
       }
     });
 
-  } catch (const StandardException& e) {
+  } catch (const Exception& e) {
     z1stats()->mapreduce_num_map_tasks.decr(1);
     throw e;
   }
@@ -289,7 +289,7 @@ Option<SHA1Hash> MapReduceService::reduceTables(
         writer->appendRow(t.first, t.second);
       }
     }
-  } catch (const StandardException& e) {
+  } catch (const Exception& e) {
     z1stats()->mapreduce_reduce_memory.decr(num_bytes_read);
     z1stats()->mapreduce_num_reduce_tasks.decr(1);
     throw e;
