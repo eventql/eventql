@@ -3,8 +3,6 @@ ZBase.registerView((function() {
   var path_prefix = "/a/apps/dawanda_seller_analytics";
 
   var load = function(path) {
-    
-
     var result;
     var page = $.getTemplate(
         "views/seller",
@@ -67,7 +65,7 @@ ZBase.registerView((function() {
     var offset = getParamOffset();
 
     var query_str =
-      "select count(1) as days, shop_id, " +
+      "select count(1) as days, shop_id, shop_name, " +
       "sum(num_active_products) num_active_products, " +
       "sum(num_listed_products) num_listed_products, " +
       "sum(num_purchases) num_purchases, " +
