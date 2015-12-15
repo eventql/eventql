@@ -52,8 +52,12 @@ var ZChartComponent = function() {
         data.y[i].min = 0;
       }
       if (!data.y[i].max) {
-        data.y[i].max = Math.max.apply(null, data.y[i].values);
+        var nums = data.y[i].values.filter(function(v) {
+          return !isNaN(parseInt(v));
+        });
+        data.y[i].max = Math.max.apply(0, nums);
       }
+
       this.renderLine(height, width, data.x, data.y[i]);
     }
   };
@@ -152,6 +156,12 @@ var ZChartComponent = function() {
     for (var i = 0; i < y.values.length; ++i) {
       var v = y.values[i];
       var x  = i / (y.values.length - 1);
+
+      if (isNaN(v)) {
+        //FIXME better NULL value handling
+        scaled.push({x:x, y: 0});
+        continue;
+      }
 
       if (v < y.min) {
         scaled.push({x : x, y: 0});
