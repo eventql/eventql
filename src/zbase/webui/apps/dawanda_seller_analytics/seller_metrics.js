@@ -82,7 +82,15 @@ var ZBaseSellerMetrics = (function() {
 
   var print = function(value) {
     return value;
-  }
+  };
+
+  var printName = function(name) {
+    if (name == "NULL") {
+      return "-";
+    }
+
+    return $.escapeHTML(name);
+  };
 
   var printAsPercent = function(num) {
     if (isNaN(num)) {
@@ -94,6 +102,7 @@ var ZBaseSellerMetrics = (function() {
 
   return {
     shop_id: {print: print},
+    shop_name: {print: printName},
     time: {print: printTimestamp},
     gmv_eurcent: {aggr: sum, print: printEurcent},
     gmv_per_transaction_eurcent: {aggr: mean, print: printEurcent},
