@@ -19,7 +19,7 @@ ZBase.registerView((function() {
           " product_page_views," +
           " listview_views_search_page + listview_views_shop_page + listview_views_catalog_page + listview_views_ads + listview_views_recos as total_listviews," +
           " num_listed_products," +
-          " num_purchases / product_page_views as buy_to_detail_rate" +
+          " buy_to_detail_rate" +
       " from shop_stats.last30d where shop_id = " + $.escapeHTML(shop_id)
       " order by time asc;";
 
