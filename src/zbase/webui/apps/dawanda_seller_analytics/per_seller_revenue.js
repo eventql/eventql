@@ -19,7 +19,7 @@ ZBase.registerView((function() {
           " refunded_gmv_eurcent," +
           " gmv_per_transaction_eurcent," +
           " refund_rate" +
-          " from shop_stats.last30d where shop_id = " + $.escapeHTML(shop_id)
+          " from shop_stats.last30d where shop_id = " + $.escapeHTML(shop_id) +
           " order by time asc;";
 
     var query = query_mgr.get(
