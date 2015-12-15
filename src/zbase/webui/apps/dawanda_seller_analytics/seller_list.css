@@ -105,8 +105,8 @@
 
 .zbase_seller_stats.overview table.z-table {
   font-size: 13px;
+  table-layout: fixed;
 }
-
 
 .zbase_seller_stats.overview table.z-table thead tr th {
   padding: 0 0.8em;
@@ -143,6 +143,12 @@
 
 .zbase_seller_stats.overview table.z-table tbody tr td.left_align a {
   text-align: left;
+}
+
+.zbase_seller_stats.overview table.z-table tbody tr td.shop_name a {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .zbase_seller_stats.overview table.z-table th i {
