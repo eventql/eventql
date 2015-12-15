@@ -195,8 +195,6 @@ int main(int argc, const char** argv) {
 #endif
 
   if (flags.isSet("daemonize")) {
-    close(STDOUT_FILENO);
-    close(STDERR_FILENO);
     Application::daemonize();
   }
 
