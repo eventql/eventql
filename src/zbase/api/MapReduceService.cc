@@ -247,7 +247,7 @@ Option<SHA1Hash> MapReduceService::reduceTables(
               size_t val_len) {
         auto key_str = String((const char*) key, key_len);
         auto& lst = groups[key_str];
-        lst.emplace_back(key_str);
+        lst.emplace_back(String((const char*) val, val_len));
         auto rec_size = key_len + val_len;
         num_bytes_read += rec_size;
         z1stats()->mapreduce_reduce_memory.incr(rec_size);
