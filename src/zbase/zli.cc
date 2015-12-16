@@ -116,7 +116,7 @@ void runJS(
       }
 
       if (ev.name.get() == "result") {
-        stdout_os->write(URI::urlDecode(ev.data));
+        stdout_os->write(URI::urlDecode(ev.data) + "\n");
         return;
       }
 
