@@ -24,6 +24,10 @@ var ZBaseSellerMetrics = (function() {
     return (nums.reduce(add, 0) / nums.length);
   };
 
+  var latest = function(values) {
+    return values[values.length - 1];
+  };
+
   var numberFormat = function(num, precision) {
     var parts = num.toString().split(".");
 
@@ -125,8 +129,8 @@ var ZBaseSellerMetrics = (function() {
     listview_ctr_catalog_page: {aggr: mean, print: printAsPercent},
     listview_ctr_recos: {aggr: mean, print: printAsPercent},
     listview_ctr_shop_page: {aggr: mean, print: printAsPercent},
-    num_active_products: {aggr: sum, print: printNumber(0)},
-    num_listed_products: {aggr: sum, print: printNumber(0)},
+    num_active_products: {aggr: latest, print: printNumber(0)},
+    num_listed_products: {aggr: latest, print: printNumber(0)},
     shop_page_views: {aggr: sum, print: printNumber(0)},
     product_page_views: {aggr: sum, print: printNumber(0)},
     total_listviews: {aggr: sum, print: printNumber(0)},
