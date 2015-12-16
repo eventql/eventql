@@ -3,8 +3,10 @@ v0.2.1
 ======
   - removed COLSM v0.2.0 upgrade code
   - drilldown query API
-  - drilldown query UI
   - metrics support
+  - stats on /zstatus/
+  - http/mapreduce error handling improvements
+  - javascript utf8 fixes
 
 v0.2.0
 ======
