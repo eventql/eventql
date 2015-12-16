@@ -35,6 +35,9 @@
             <z-dropdown class="input checkbox metrics" data-multiselect>
               <z-dropdown-flyout>
                 <z-dropdown-items>
+                  <z-dropdown-item data-value="shop_name" data-selected>
+                    <z-checkbox data-active></z-checkbox> Shop Name
+                  </z-dropdown-item>
                   <z-dropdown-item data-value="gmv_eurcent" data-selected>
                     <z-checkbox data-active></z-checkbox> Total GMV
                   </z-dropdown-item>
@@ -128,6 +131,7 @@
   <thead>
     <tr>
       <th class="shop_id">ID <i class="fa fa-caret-up asc"></i><i class="fa fa-caret-down desc"></i></th>
+      <th class="hidden shop_name">Name <i class="fa fa-caret-up asc"></i><i class="fa fa-caret-down desc"></i></th>
       <th class="hidden gmv_eurcent order_by">GMV <i class="fa fa-caret-up asc"></i><i class="fa fa-caret-down desc"></i></th>
       <th class="hidden gmv_per_transaction_eurcent">GMV Per Transaction <i class="fa fa-caret-up asc"></i><i class="fa fa-caret-down desc"></i></th>
       <th class="hidden num_purchases">Purchases <i class="fa fa-caret-up asc"></i><i class="fa fa-caret-down desc"></i></th>
@@ -165,6 +169,7 @@
 <template id="seller_overview_row_tpl">
   <tr>
     <td class="shop_id left_align"><a></a></td>
+    <td class="hidden shop_name left_align"><a></a></td>
     <td class="hidden gmv_eurcent"><a></a></td>
     <td class="hidden gmv_per_transaction_eurcent"><a></a></td>
     <td class="hidden num_purchases"><a></a></td>

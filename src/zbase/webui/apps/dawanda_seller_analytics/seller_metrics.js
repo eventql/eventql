@@ -1,14 +1,27 @@
 var ZBaseSellerMetrics = (function() {
+  var filterNumeric = function(values) {
+    var nums = values.filter(function(v) {
+      return !isNaN(parseFloat(v));
+    });
+
+    return nums;
+  };
+
   var add = function(a, b) {
     return parseFloat(a) + parseFloat(b);
   };
 
   var sum = function(values) {
-    return values.reduce(add, 0);
+    var nums = filterNumeric(values);
+    if (nums.length == 0) {
+      return "NULL";
+    }
+    return nums.reduce(add, 0);
   };
 
   var mean = function(values) {
-    return (sum(values) / values.length);
+    var nums = filterNumeric(values);
+    return (nums.reduce(add, 0) / nums.length);
   };
 
   var numberFormat = function(num, precision) {
@@ -69,7 +82,15 @@ var ZBaseSellerMetrics = (function() {
 
   var print = function(value) {
     return value;
-  }
+  };
+
+  var printName = function(name) {
+    if (name == "NULL") {
+      return "-";
+    }
+
+    return $.escapeHTML(name);
+  };
 
   var printAsPercent = function(num) {
     if (isNaN(num)) {
@@ -81,6 +102,7 @@ var ZBaseSellerMetrics = (function() {
 
   return {
     shop_id: {print: print},
+    shop_name: {print: printName},
     time: {print: printTimestamp},
     gmv_eurcent: {aggr: sum, print: printEurcent},
     gmv_per_transaction_eurcent: {aggr: mean, print: printEurcent},

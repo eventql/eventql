@@ -31,7 +31,7 @@ ZBase.registerView((function() {
           " listview_views_recos," +
           " listview_clicks_recos," +
           " listview_ctr_recos" +
-      " from shop_stats.last30d where shop_id = " + $.escapeHTML(shop_id)
+      " from shop_stats.last30d where shop_id = " + $.escapeHTML(shop_id) +
       " order by time asc;";
 
     var query = query_mgr.get(
