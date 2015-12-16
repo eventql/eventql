@@ -20,8 +20,12 @@ namespace zbase {
 JSClass JavaScriptContext::kGlobalJSClass = { "global", JSCLASS_GLOBAL_FLAGS };
 
 static bool write_json_to_buf(const char16_t* str, uint32_t strlen, void* out) {
-  *static_cast<String*>(out) += StringUtil::convertUTF16To8(
-      std::basic_string<char16_t>(str, strlen));
+  auto outstr = static_cast<String*>(out);
+  outstr->reserve(outstr->size() + strlen);
+
+  for (size_t i = 0; i < strlen; ++i) {
+    outstr->push_back(*((const char*) (str + i)));
+  }
 
   return true;
 }
