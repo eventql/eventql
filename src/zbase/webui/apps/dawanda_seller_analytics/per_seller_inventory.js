@@ -4,6 +4,8 @@ ZBase.registerView((function() {
   var query_mgr;
 
   var load = function(path) {
+    destroy();
+
     query_mgr = EventSourceHandler();
     shop_id = UrlUtil.getPath(path).substr(path_prefix.length);
 
