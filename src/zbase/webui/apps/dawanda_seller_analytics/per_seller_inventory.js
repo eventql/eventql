@@ -13,14 +13,14 @@ ZBase.registerView((function() {
     var query_str =
       "select" +
           " time," +
-          " gmv_eurcent," +
+         /* " gmv_eurcent," +
           " gmv_per_transaction_eurcent," +
           " num_purchases," +
           " product_page_views," +
-          " listview_views_search_page + listview_views_shop_page + listview_views_catalog_page + listview_views_ads + listview_views_recos as total_listviews," +
+          " listview_views_search_page + listview_views_shop_page + listview_views_catalog_page + listview_views_ads + listview_views_recos as total_listviews," + */
           " num_listed_products," +
-          " num_purchases / product_page_views as buy_to_detail_rate" +
-      " from shop_stats.last30d where shop_id = " + $.escapeHTML(shop_id)
+          " buy_to_detail_rate" +
+      " from shop_stats.last30d where shop_id = " + $.escapeHTML(shop_id) +
       " order by time asc;";
 
     var query = query_mgr.get(
@@ -81,7 +81,7 @@ ZBase.registerView((function() {
         "per_seller_inventory_main_tpl");
 
     //render table
-    var tbody = $("tbody", tpl);
+    /*var tbody = $("tbody", tpl);
     var tr_tpl = $.getTemplate(
         "apps/dawanda_seller_analytics",
         "per_seller_inventory_row_tpl");
@@ -115,7 +115,7 @@ ZBase.registerView((function() {
       }
 
       tbody.appendChild(tr);
-    }
+    }*/
 
     $.replaceContent($(".zbase_seller_stats.per_seller .result_pane"), tpl);
 
