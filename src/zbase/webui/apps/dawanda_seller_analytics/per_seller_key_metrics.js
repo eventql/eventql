@@ -5,6 +5,8 @@ ZBase.registerView((function() {
   var shop_id;
 
   var load = function(path) {
+    destroy();
+
     query_mgr = EventSourceHandler();
     shop_id = UrlUtil.getPath(path).substr(path_prefix.length);
 
@@ -94,7 +96,10 @@ ZBase.registerView((function() {
 
   var destroy = function() {
     window.removeEventListener("resize", resizeSparklines);
-    query_mgr.closeAll();
+
+    if (query_mgr) {
+      query_mgr.closeAll();
+    }
   };
 
   var render = function(path) {
