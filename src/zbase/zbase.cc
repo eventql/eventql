@@ -198,7 +198,11 @@ int main(int argc, const char** argv) {
     Application::daemonize();
   }
 
+  ScopedPtr<FileLock> pidfile_lock;
   if (flags.isSet("pidfile")) {
+    pidfile_lock = mkScoped(new FileLock(flags.getString("pidfile")));
+    pidfile_lock->lock(false);
+
     auto pidfile = File::openFile(
         flags.getString("pidfile"),
         File::O_WRITE | File::O_CREATEOROPEN | File::O_TRUNCATE);
@@ -411,6 +415,7 @@ int main(int argc, const char** argv) {
   JS_ShutDown();
 
   if (flags.isSet("pidfile")) {
+    pidfile_lock.reset(nullptr);
     FileUtil::rm(flags.getString("pidfile"));
   }
 
