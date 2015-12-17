@@ -17,6 +17,22 @@
   position: relative;
 }
 
+.zbase_header .platform {
+  font-size: 14px;
+  padding: 0 24px 0 19px;
+  float: left;
+  color: #e4edf8;
+  font-family: "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-weight: 200;
+  line-height: 44px;
+  letter-spacing: 0.5px;
+}
+
+.zbase_header .platform .icon {
+  vertical-align: middle;
+  margin-right: 3px;
+}
+
 .zbase_header .navigation_inner {
   margin: auto;
   max-width: 2048px;
