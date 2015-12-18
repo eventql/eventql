@@ -3,16 +3,15 @@ ZBase.registerView((function() {
   var widget_list = null;
   var edit_view = null;
   var docsync = null;
-  var report_id = null;
 
   // REMOVEME
   var goToURL = function(path) {
-    report_id = path.substr(kPathPrefix.length);
-    loadReport();
+    var report_id = path.substr(kPathPrefix.length);
+    loadReport(report_id);
   }
   // REMOVEME END
 
-  var loadReport = function() {
+  var loadReport = function(report_id) {
     if (widget_list) {
       widget_list.destroy();
       widget_list = null;
@@ -37,7 +36,7 @@ ZBase.registerView((function() {
           $.hideLoader();
         });
       } else {
-        renderError(r.statusText);
+        renderError(r.statusText, kPathPrefix + report_id);
         $.hideLoader();
       }
     });
@@ -143,7 +142,7 @@ ZBase.registerView((function() {
     showReportView();
   };
 
-  var renderError = function(msg) {
+  var renderError = function(msg, path) {
     var error_elem = document.createElement("div");
     error_elem.classList.add("zbase_error");
     error_elem.innerHTML = 
@@ -153,7 +152,7 @@ ZBase.registerView((function() {
         "<p>Please try it again or contact support if the problem persists.</p>" +
         "<a href='/a/datastore/queries' class='z-button secondary'>" +
         "<i class='fa fa-arrow-left'></i>&nbsp;Back</a>" +
-        "<a href='" + kPathPrefix + report_id + "' class='z-button secondary'>" + 
+        "<a href='" + path + "' class='z-button secondary'>" + 
         "<i class='fa fa-refresh'></i>&nbsp;Reload</a>" +
         "</span>";
 
