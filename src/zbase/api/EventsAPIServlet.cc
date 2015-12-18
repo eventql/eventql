@@ -59,39 +59,6 @@ void EventsAPIServlet::scanTable(
 
   const auto& params = uri.queryParams();
 
-  String table_name;
-  if (!URI::getParam(params, "table", &table_name)) {
-    http::HTTPResponse res;
-    res.populateFromRequest(req_stream->request());
-    res.setStatus(http::kStatusBadRequest);
-    res.addBody("error: missing ?table=... parameter");
-    res_stream->writeResponse(res);
-    return;
-  }
-
-  EventScanParams scan_params;
-
-  scan_params.set_end_time(WallClock::unixMicros());
-
-  String time_str;
-  if (URI::getParam(params, "time", &time_str)) {
-    scan_params.set_end_time(std::stoull(time_str));
-  }
-
-  size_t limit = 1000;
-  String limit_str;
-  if (URI::getParam(params, "limit", &limit_str)) {
-    limit = std::stoull(limit_str);
-  }
-  scan_params.set_limit(limit);
-
-  String columns_str;
-  if (URI::getParam(params, "columns", &columns_str)) {
-    for (const auto& c : StringUtil::split(columns_str, ",")) {
-      *scan_params.add_columns() = c;
-    }
-  }
-
   auto sse_stream = mkRef(new http::HTTPSSEStream (req_stream, res_stream));
   sse_stream->start();
 
@@ -106,7 +73,7 @@ void EventsAPIServlet::scanTable(
     sse_stream->sendEvent(buf, Some<String>("result"));
   };
 
-  auto send_status_update = [sse_stream, scan_params] (bool done) {
+  auto send_status_update = [sse_stream] (bool done) {
     Buffer buf;
     json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
     json.beginObject();
@@ -117,12 +84,62 @@ void EventsAPIServlet::scanTable(
     sse_stream->sendEvent(buf, Some<String>("progress"));
   };
 
-  service_->scanTable(
-      session,
-      table_name,
-      scan_params,
-      send_result_row,
-      send_status_update);
+  try {
+    String table_name;
+    if (!URI::getParam(params, "table", &table_name)) {
+      RAISE(kRuntimeError, "error: missing ?table=... parameter");
+    }
+
+    EventScanParams scan_params;
+    scan_params.set_end_time(WallClock::unixMicros());
+
+    String time_str;
+    if (URI::getParam(params, "time", &time_str)) {
+      scan_params.set_end_time(std::stoull(time_str));
+    }
+
+    size_t limit = 1000;
+    String limit_str;
+    if (URI::getParam(params, "limit", &limit_str)) {
+      limit = std::stoull(limit_str);
+    }
+    scan_params.set_limit(limit);
+
+    String columns_str;
+    if (URI::getParam(params, "columns", &columns_str)) {
+      for (const auto& c : StringUtil::split(columns_str, ",")) {
+        *scan_params.add_columns() = c;
+      }
+    }
+
+    service_->scanTable(
+        session,
+        table_name,
+        scan_params,
+        send_result_row,
+        send_status_update);
+
+  } catch (const StandardException& e) {
+    Buffer buf;
+    json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
+    json.beginObject();
+    json.addObjectEntry("error");
+    json.addString(e.what());
+    json.endObject();
+
+    sse_stream->sendEvent(buf, Some<String>("query_error"));
+    sse_stream->finish();
+    return;
+  }
+
+  {
+    Buffer buf;
+    json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
+    json.beginObject();
+    json.endObject();
+
+    sse_stream->sendEvent(buf, Some<String>("query_completed"));
+  }
 
   sse_stream->finish();
 }

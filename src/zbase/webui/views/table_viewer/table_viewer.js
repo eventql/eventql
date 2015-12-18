@@ -18,8 +18,6 @@ ZBase.registerView((function() {
     $.showLoader();
     table = path.split("?")[0].substr(path_prefix.length);
 
-    
-
     var tpl = $.getTemplate(
         "views/table_viewer",
         "zbase_table_viewer_tpl");
@@ -69,6 +67,7 @@ ZBase.registerView((function() {
     var event_counter = 0;
 
     query.addEventListener("result", function(e) {
+      query_mgr.close("table_viewer");
       renderJSONView(e.data, event_counter);
       event_counter++;
     }, false);
@@ -81,10 +80,14 @@ ZBase.registerView((function() {
       }
     }, false);
 
-    query.addEventListener("error", function(e) {
-      console.log(e);
+    query.addEventListener("query_error", function(e) {
+      var error = "";
+      if (e.data) {
+        error = "Error: " + JSON.parse(e.data).error;
+      }
+
+      renderError(error)
       query_mgr.close("table_viewer");
-      $.fatalError();
     }, false);
   };
 
@@ -163,7 +166,6 @@ ZBase.registerView((function() {
 
     $(".zbase_table_viewer .offset_display .offset_value").innerHTML = offset;
     $(".zbase_table_viewer .offset_control").setValue(offset);
-
   };
 
   var renderJSONView = function(json, event_counter) {
@@ -178,6 +180,23 @@ ZBase.registerView((function() {
       }));
 
     //$("ul li", elem).classList.add("collapsed");
+  };
+
+  var renderError = function(msg) {
+    var error_elem = document.createElement("div");
+    error_elem.classList.add("zbase_error");
+    error_elem.innerHTML = 
+        "<span>" +
+        "<h2>We're sorry</h2>" +
+        "<h1>An error occured.</h1><p>" + msg + "</p> " +
+        "<p>Please try it again or contact support if the problem persists.</p>" +
+        "<a href='/a/datastore/tables' class='z-button secondary'>" +
+        "<i class='fa fa-arrow-left'></i>&nbsp;Back</a>" +
+        "<a href='" + path_prefix + table + "' class='z-button secondary'>" + 
+        "<i class='fa fa-refresh'></i>&nbsp;Reload</a>" +
+        "</span>";
+
+    $.replaceViewport(error_elem);
   };
 
   var showLoadingBar = function() {

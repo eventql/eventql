@@ -229,6 +229,51 @@ template {
 }
 
 /**
+  * zbase error
+  */
+.zbase_error {
+  margin: auto;
+  vertical-align: middle;
+  width: 600px;
+  margin-top: 5%;
+  border-radius: 4px;
+  border: 1px solid #e1e1e1;
+  box-shadow: 0 1px 2px rgba(0,0,0,.09);
+  padding: 50px 150px;
+  text-align: center;
+}
+
+.zbase_error h2 {
+  font-weight: 200;
+  font-size: 18px;
+  color: #3e8ad3;
+  text-transform: uppercase;
+}
+
+.zbase_error h1 {
+  font-size: 25px;
+  font-weight: 400;
+  color: #3e8ad3;
+  margin: 0 0 35px 0;
+}
+
+.zbase_error p {
+  margin: auto;
+  color: #697886;
+}
+
+.zbase_error p + p {
+  margin-top: 10px;
+}
+
+.zbase_error a.z-button {
+  font-size: 14px;
+  height: 40px;
+  line-height: 40px;
+  margin-top: 30px;
+}
+
+/**
  * zbase_loader
  */
 .zbase_loader {
