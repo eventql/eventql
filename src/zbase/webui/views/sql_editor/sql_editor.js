@@ -176,7 +176,7 @@ ZBase.registerView((function() {
         "<h2>We're sorry</h2>" +
         "<h1>An error occured.</h1><p>" + msg + "</p> " +
         "<p>Please try it again or contact support if the problem persists.</p>" +
-        "<a href='/a/datastore/tables' class='z-button secondary'>" +
+        "<a href='/a/datastore/queries' class='z-button secondary'>" +
         "<i class='fa fa-arrow-left'></i>&nbsp;Back</a>" +
         "<a href='" + path + "' class='z-button secondary'>" + 
         "<i class='fa fa-refresh'></i>&nbsp;Reload</a>" +
