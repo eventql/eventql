@@ -23,17 +23,15 @@ ZBase.registerView((function() {
 
     $.showLoader();
     ZBaseMainMenu.update("/a/datastore/queries");
-    
-
 
     $.httpGet("/api/v1/documents/" + query_id, function(r) {
       if (r.status == 200) {
         var doc = JSON.parse(r.response);
         renderQueryEditor(doc);
-        $.hideLoader();
       } else {
-        $.fatalError();
+        renderError(r.statusText, kPathPrefix + query_id);
       }
+      $.hideLoader();
     });
   };
 
@@ -169,6 +167,23 @@ ZBase.registerView((function() {
         $(".zbase_sql_editor_result_pane"),
         progress);
   }
+
+  var renderError = function(msg, path) {
+    var error_elem = document.createElement("div");
+    error_elem.classList.add("zbase_error");
+    error_elem.innerHTML = 
+        "<span>" +
+        "<h2>We're sorry</h2>" +
+        "<h1>An error occured.</h1><p>" + msg + "</p> " +
+        "<p>Please try it again or contact support if the problem persists.</p>" +
+        "<a href='/a/datastore/tables' class='z-button secondary'>" +
+        "<i class='fa fa-arrow-left'></i>&nbsp;Back</a>" +
+        "<a href='" + path + "' class='z-button secondary'>" + 
+        "<i class='fa fa-refresh'></i>&nbsp;Reload</a>" +
+        "</span>";
+
+    $.replaceViewport(error_elem);
+  };
 
   var initDocumentNameEditModal = function() {
     var modal = $(".zbase_sql_editor_pane z-modal.rename_query");
