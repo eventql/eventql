@@ -39,3 +39,39 @@
   color: rgba(0, 0, 0, 0.8);
   font-weight: 600;
 }
+
+/* chart container */
+.zbase_table_overview .chart_container {
+  margin-top: 35px;
+  border: 1px solid #dadada;
+  box-shadow: 0 0 4px #f6f6f6;
+  border-radius: 4px;
+}
+
+.zbase_table_overview .chart_container .panel_bar {
+  height: 45px;
+  line-height: 45px;
+  padding: 0 20px;
+  border-bottom: 1px solid #ddd;
+}
+
+.zbase_table_overview .chart_container .panel_bar label,
+.zbase_table_overview .chart_container .panel_bar z-dropdown {
+  display: block;
+  float: left;
+}
+
+.zbase_table_overview .chart_container .panel_bar label {
+  font-size: 12px;
+  color: #999;
+}
+
+.zbase_table_overview .chart_container .panel_bar z-dropdown-header {
+  height: 45px;
+  line-height: 45px;
+  color: #3d8ad3;
+}
+
+.zbase_table_overview .chart_container .inner_chart {
+  padding: 10px;
+}
