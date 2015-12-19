@@ -72,10 +72,12 @@ SHA1Hash LSMPartitionReader::version() const {
 }
 
 ScopedPtr<csql::TableExpression> LSMPartitionReader::buildSQLScan(
+    csql::SContext* ctx,
     RefPtr<csql::SequentialScanNode> node,
     csql::QueryBuilder* runtime) const {
   auto scan = mkScoped(
       new LSMPartitionSQLScan(
+          ctx,
           table_,
           snap_,
           node,

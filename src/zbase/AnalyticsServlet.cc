@@ -982,9 +982,12 @@ void AnalyticsServlet::executeSQLAggregatePartition(
     http::HTTPResponse* res) {
   auto query = req->body().toString();
 
+  auto txn = sql_->newContext();
+
   Buffer result;
   auto os = BufferOutputStream::fromBuffer(&result);
   sql_->executeAggregate(
+      txn.get(),
       msg::decode<csql::RemoteAggregateParams>(query),
       app_->getExecutionStrategy(session.customer()),
       os.get());
@@ -1062,14 +1065,13 @@ void AnalyticsServlet::executeSQLScanPartition(
 
       auto execution_strategy = app_->getExecutionStrategy(session.customer());
 
-      auto qplan = mkRef(
-          new csql::QueryPlan(
-              Vector<RefPtr<csql::QueryTreeNode>>{ qtree.get() },
-              execution_strategy->tableProvider(),
-              sql_->queryBuilder().get(),
-              sql_));
+      auto txn = sql_->newContext();
+      auto qplan = sql_->buildQueryPlan(
+          txn.get(),
+          Vector<RefPtr<csql::QueryTreeNode>>{ qtree.get() },
+          execution_strategy);
 
-      sql_->executeQuery(qplan, result_format);
+      sql_->executeQuery(txn.get(), qplan, result_format);
     } catch (const StandardException& e) {
       result_format->sendError(e.what());
     }
@@ -1130,8 +1132,11 @@ void AnalyticsServlet::executeSQL_ASCII(
   }
 
   try {
+    auto ctx = sql_->newContext();
+
     Buffer result;
     sql_->executeQuery(
+        ctx.get(),
         query,
         app_->getExecutionStrategy(session.customer()),
         new csql::ASCIITableFormat(BufferOutputStream::fromBuffer(&result)));
@@ -1176,7 +1181,10 @@ void AnalyticsServlet::executeSQL_BINARY(
     });
 
     try {
+      auto txn = sql_->newContext();
+
       sql_->executeQuery(
+          txn.get(),
           query,
           app_->getExecutionStrategy(session.customer()),
           result_format);
@@ -1204,9 +1212,12 @@ void AnalyticsServlet::executeSQL_JSON(
   }
 
   try {
+    auto txn = sql_->newContext();
+
     Buffer result;
     json::JSONOutputStream jsons(BufferOutputStream::fromBuffer(&result));
     sql_->executeQuery(
+        txn.get(),
         query,
         app_->getExecutionStrategy(session.customer()),
         new csql::JSONResultFormat(&jsons));
@@ -1248,7 +1259,10 @@ void AnalyticsServlet::executeSQL_JSONSSE(
   sse_stream->start();
 
   try {
+    auto txn = sql_->newContext();
+
     sql_->executeQuery(
+        txn.get(),
         query,
         app_->getExecutionStrategy(session.customer()),
         new csql::JSONSSEStreamFormat(sse_stream));

@@ -31,6 +31,7 @@ TSDBTableProvider::TSDBTableProvider(
     auth_(auth) {}
 
 Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
+    csql::SContext* ctx,
     RefPtr<csql::SequentialScanNode> node,
     csql::QueryBuilder* runtime) const {
   auto table_ref = TSDBTableRef::parse(node->tableName());
@@ -46,13 +47,14 @@ Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
   }
 
   if (table_ref.host.isEmpty() || table_ref.host.get() != "localhost") {
-    return buildRemoteSequentialScan(node, table_ref, runtime);
+    return buildRemoteSequentialScan(ctx, node, table_ref, runtime);
   } else {
-    return buildLocalSequentialScan(node, table_ref, runtime);
+    return buildLocalSequentialScan(ctx, node, table_ref, runtime);
   }
 }
 
 Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildLocalSequentialScan(
+    csql::SContext* ctx,
     RefPtr<csql::SequentialScanNode> node,
     const TSDBTableRef& table_ref,
     csql::QueryBuilder* runtime) const {
@@ -67,12 +69,13 @@ Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildLocalSequential
         mkScoped(new csql::EmptyTable(node->columnNames())));
   } else {
     auto reader = partition.get()->getReader();
-    auto scan = reader->buildSQLScan(node, runtime);
+    auto scan = reader->buildSQLScan(ctx, node, runtime);
     return Option<ScopedPtr<csql::TableExpression>>(std::move(scan));
   }
 }
 
 Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildRemoteSequentialScan(
+    csql::SContext* ctx,
     RefPtr<csql::SequentialScanNode> node,
     const TSDBTableRef& table_ref,
     csql::QueryBuilder* runtime) const {
