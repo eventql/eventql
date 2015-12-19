@@ -14,7 +14,7 @@
 #include <stx/autoref.h>
 #include <zbase/DrilldownTree.h>
 #include "csql/runtime/ExecutionStrategy.h"
-#include "csql/SContext.h"
+#include "csql/Transaction.h"
 
 using namespace stx;
 
@@ -59,7 +59,7 @@ protected:
 
   RefPtr<csql::ExecutionStrategy> execution_strategy_;
   csql::Runtime* runtime_;
-  ScopedPtr<csql::SContext> txn_;
+  ScopedPtr<csql::Transaction> txn_;
   Vector<MetricDefinition> metrics_;
   Vector<DimensionDefinition> dimensions_;
   HashMap<String, size_t> metric_name_map_;

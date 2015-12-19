@@ -169,7 +169,7 @@ void LogfileService::scanLocalLogfilePartition(
     return;
   }
 
-  csql::SContext ctx;
+  csql::Transaction ctx;
   csql::CSTableScan cstable_scan(
       &ctx,
       seqscan,

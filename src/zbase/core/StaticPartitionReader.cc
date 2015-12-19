@@ -58,7 +58,7 @@ SHA1Hash StaticPartitionReader::version() const {
 }
 
 ScopedPtr<csql::TableExpression> StaticPartitionReader::buildSQLScan(
-    csql::SContext* ctx,
+    csql::Transaction* ctx,
     RefPtr<csql::SequentialScanNode> node,
     csql::QueryBuilder* runtime) const {
   auto cstable = fetchCSTableFilename();

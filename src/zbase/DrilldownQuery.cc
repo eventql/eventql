@@ -24,7 +24,7 @@ DrilldownQuery::DrilldownQuery(
     csql::Runtime* runtime) :
     execution_strategy_(execution_strategy),
     runtime_(runtime),
-    txn_(runtime_->newContext()) {}
+    txn_(runtime_->newTransaction()) {}
 
 void DrilldownQuery::addMetric(MetricDefinition metric) {
   if (metric.name.isEmpty()) {

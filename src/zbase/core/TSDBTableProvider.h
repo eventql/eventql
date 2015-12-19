@@ -33,7 +33,7 @@ public:
       AnalyticsAuth* auth);
 
   Option<ScopedPtr<csql::TableExpression>> buildSequentialScan(
-      csql::SContext* ctx,
+      csql::Transaction* ctx,
       RefPtr<csql::SequentialScanNode> node,
       csql::QueryBuilder* runtime) const override;
 
@@ -45,13 +45,13 @@ public:
 protected:
 
   Option<ScopedPtr<csql::TableExpression>> buildLocalSequentialScan(
-      csql::SContext* ctx,
+      csql::Transaction* ctx,
       RefPtr<csql::SequentialScanNode> node,
       const TSDBTableRef& table_ref,
       csql::QueryBuilder* runtime) const;
 
   Option<ScopedPtr<csql::TableExpression>> buildRemoteSequentialScan(
-      csql::SContext* ctx,
+      csql::Transaction* ctx,
       RefPtr<csql::SequentialScanNode> node,
       const TSDBTableRef& table_ref,
       csql::QueryBuilder* runtime) const;

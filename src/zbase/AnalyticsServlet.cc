@@ -982,7 +982,7 @@ void AnalyticsServlet::executeSQLAggregatePartition(
     http::HTTPResponse* res) {
   auto query = req->body().toString();
 
-  auto txn = sql_->newContext();
+  auto txn = sql_->newTransaction();
 
   Buffer result;
   auto os = BufferOutputStream::fromBuffer(&result);
@@ -1065,7 +1065,7 @@ void AnalyticsServlet::executeSQLScanPartition(
 
       auto execution_strategy = app_->getExecutionStrategy(session.customer());
 
-      auto txn = sql_->newContext();
+      auto txn = sql_->newTransaction();
       auto qplan = sql_->buildQueryPlan(
           txn.get(),
           Vector<RefPtr<csql::QueryTreeNode>>{ qtree.get() },
@@ -1132,7 +1132,7 @@ void AnalyticsServlet::executeSQL_ASCII(
   }
 
   try {
-    auto ctx = sql_->newContext();
+    auto ctx = sql_->newTransaction();
 
     Buffer result;
     sql_->executeQuery(
@@ -1181,7 +1181,7 @@ void AnalyticsServlet::executeSQL_BINARY(
     });
 
     try {
-      auto txn = sql_->newContext();
+      auto txn = sql_->newTransaction();
 
       sql_->executeQuery(
           txn.get(),
@@ -1212,7 +1212,7 @@ void AnalyticsServlet::executeSQL_JSON(
   }
 
   try {
-    auto txn = sql_->newContext();
+    auto txn = sql_->newTransaction();
 
     Buffer result;
     json::JSONOutputStream jsons(BufferOutputStream::fromBuffer(&result));
@@ -1259,7 +1259,7 @@ void AnalyticsServlet::executeSQL_JSONSSE(
   sse_stream->start();
 
   try {
-    auto txn = sql_->newContext();
+    auto txn = sql_->newTransaction();
 
     sql_->executeQuery(
         txn.get(),

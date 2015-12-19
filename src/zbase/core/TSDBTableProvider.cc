@@ -31,7 +31,7 @@ TSDBTableProvider::TSDBTableProvider(
     auth_(auth) {}
 
 Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
-    csql::SContext* ctx,
+    csql::Transaction* ctx,
     RefPtr<csql::SequentialScanNode> node,
     csql::QueryBuilder* runtime) const {
   auto table_ref = TSDBTableRef::parse(node->tableName());
@@ -54,7 +54,7 @@ Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
 }
 
 Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildLocalSequentialScan(
-    csql::SContext* ctx,
+    csql::Transaction* ctx,
     RefPtr<csql::SequentialScanNode> node,
     const TSDBTableRef& table_ref,
     csql::QueryBuilder* runtime) const {
@@ -75,7 +75,7 @@ Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildLocalSequential
 }
 
 Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildRemoteSequentialScan(
-    csql::SContext* ctx,
+    csql::Transaction* ctx,
     RefPtr<csql::SequentialScanNode> node,
     const TSDBTableRef& table_ref,
     csql::QueryBuilder* runtime) const {

@@ -16,7 +16,7 @@ using namespace stx;
 namespace zbase {
 
 LSMPartitionSQLScan::LSMPartitionSQLScan(
-    csql::SContext* ctx,
+    csql::Transaction* ctx,
     RefPtr<Table> table,
     RefPtr<PartitionSnapshot> snap,
     RefPtr<csql::SequentialScanNode> stmt,
