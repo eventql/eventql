@@ -22,12 +22,38 @@ ZBase.registerView((function() {
         "views/table_overview",
         "zbase_table_overview_main_tpl");
 
+    //set table name
     var table_breadcrumb = $(".table_name_breadcrumb", page);
     table_breadcrumb.innerHTML = schema.name;
     table_breadcrumb.href = kPathPrefix + schema.name;
+    $(".pagetitle .table_name", page).innerHTML = schema.name;
+
+    //set tab links
+    var tabs = page.querySelectorAll("z-tab a");
+    for (var i = 0; i < tabs.length; i++) {
+      tabs[i].href += schema.name;
+      console.log(tabs[i].href);
+    }
+
+    renderSchemaTable($(".table_schema tbody", page), schema.schema.columns, "");
 
     $.handleLinks(page);
     $.replaceViewport(page);
+  };
+
+  var renderSchemaTable = function(tbody, columns, prefix) {
+    columns.forEach(function(column) {
+      var tr = document.createElement("tr");
+      var column_name = prefix + column.name;
+      tr.innerHTML = [
+        "<td>", column_name, "</td><td>", column.type,
+        "</td><td>", column.optional, "</td>"].join("");
+
+      tbody.appendChild(tr);
+      if (column.type == "OBJECT") {
+        renderSchemaTable(tbody, column.schema.columns, column_name + ".");
+      }
+    });
   };
 
   var renderError = function(msg, path) {
