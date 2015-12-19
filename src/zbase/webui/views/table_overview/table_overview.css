@@ -76,15 +76,48 @@
   padding: 10px;
 }
 
+/* table info */
+.zbase_table_overview .table_info {
+  overflow: auto;
+  padding: 18px 13px 16px 13px;
+  border-bottom: 1px solid #dadada;
+  box-shadow: inset 0 -4px 3px -3px #f9f9f9;
+}
+
+.zbase_table_overview .table_info .column {
+  float: left;
+  margin-right: 75px;
+}
+
+.zbase_table_overview .table_info .column label {
+  color: #9b9b9b;
+  font-size: 13px;
+}
+
+.zbase_table_overview .table_info .column .value {
+  color: #4f4f4f;
+  font-size: 24px;
+  line-height: 33px;
+  letter-spacing: 0.8px;
+  font-weight: 300;
+}
+
 /* schema */
+.zbase_table_overview .table_schema {
+  margin-top: 33px;
+}
+
 .zbase_table_overview .table_schema h3 {
   color: #000;
+  font-size: 16px;
+  font-weight: 500;
 }
 
 .zbase_table_overview .table_schema table.z-table {
+  table-layout: fixed;
+  margin-top: 14px;
   font-size: 13px;
   border-top: 1px solid #ddd;
-  table-layout: fixed;
 }
 
 .zbase_table_overview .table_schema table.z-table thead th {
