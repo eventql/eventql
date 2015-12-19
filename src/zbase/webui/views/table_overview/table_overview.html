@@ -1,0 +1,29 @@
+<template id="zbase_table_overview_main_tpl">
+  <div class="zbase_content_pane zbase_table_overview">
+    <div class="zbase_table_overview_breadcrumbs">
+      <zbase-breadcrumbs>
+        <zbase-breadcrumbs-section>
+          <a href="/a/">Datastore</a>
+        </zbase-breadcrumbs-section>
+        <zbase-breadcrumbs-section>
+          <a href="/a/datastore/tables">Tables</a>
+        </zbase-breadcrumbs-section>
+        <zbase-breadcrumbs-section>
+          <a class="table_name_breadcrumb"></a>
+        </zbase-breadcrumbs-section>
+      </zbase-breadcrumbs>
+    </div>
+
+    <h2 class="pagetitle" style="overflow:hidden;">
+      <i class="fa fa-database"></i>Table: <em><a class="table_name"></a></em>
+    </h2>
+
+    <z-tabbable class="slim_tabs">
+      <z-tab class="link" data-active><a href="/a/datastore/tables/">Overview</a></z-tab>
+      <z-tab class="link"><a href="/a/datastore/tables/edit/">Schema</a></z-tab>
+      <z-tab class="link"><a href="/a/datastore/tables/view/">Table Viewer</a></z-tab>
+      <z-tab class="link"><a href="/a/datastore/tables/">Settings</a></z-tab>
+    </z-tabbable>
+
+  </div>
+</template>

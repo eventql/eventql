@@ -1,0 +1,41 @@
+/* breadcrumbs */
+.zbase_table_overview .zbase_table_overview_breadcrumbs {
+  height: 36px;
+  width: 100%;
+  border-bottom: 1px solid #eee;
+}
+
+.zbase_table_overview .zbase_table_overview_breadcrumbs zbase-breadcrumbs {
+  font-size: 12px;
+  font-weight: 300;
+}
+
+.zbase_table_overview .zbase_table_overview_breadcrumbs zbase-breadcrumbs,
+.zbase_table_overview .zbase_table_overview_breadcrumbs zbase-breadcrumbs a {
+  color: #454545;
+  line-height: 36px;
+}
+
+.zbase_table_overview .zbase_table_overview_breadcrumbs zbase-breadcrumbs-section:last-child a {
+  font-weight: 300;
+}
+
+.zbase_table_overview .zbase_table_overview_breadcrumbs zbase-breadcrumbs-section a:hover {
+  text-decoration: underline;
+}
+
+/* pagetitle */
+.zbase_table_overview h2.pagetitle {
+  color: #000;
+}
+
+.zbase_table_overview h2.pagetitle i {
+  color: #666;
+  margin-right: 13px;
+}
+
+/* tabs */
+.zbase_table_overview z-tabbable.slim_tabs z-tab[data-active] a {
+  color: rgba(0, 0, 0, 0.8);
+  font-weight: 600;
+}
