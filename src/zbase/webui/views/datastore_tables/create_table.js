@@ -84,11 +84,26 @@ var createTableView = (function() {
           break;
 
         default:
-          $.fatalError();
+          renderError();
           break;
       }
     });
 
+  };
+
+  var renderError = function() {
+    var error_elem = document.createElement("div");
+    error_elem.classList.add("zbase_error");
+    error_elem.innerHTML = 
+        "<span>" +
+        "<h2>We're sorry</h2>" +
+        "<h1>An error occured.</h1><p>Your table was not created successfully.</p> " +
+        "<p>Please try it again or contact support if the problem persists.</p>" +
+        "<a href='/a/datastore/tables' class='z-button secondary'>" +
+        "<i class='fa fa-arrow-left'></i>&nbsp;Back</a>" +
+        "</span>";
+
+    $.replaceViewport(error_elem);
   };
 
   var indexColumns = function(columns, id) {

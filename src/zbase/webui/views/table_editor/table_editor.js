@@ -5,13 +5,12 @@ ZBase.registerView((function() {
     var table_id = path.substr(kPathPrefix.length);
 
     $.showLoader();
-    
 
     $.httpGet("/api/v1/tables/" + table_id, function(r) {
       if (r.status == 200) {
         render(JSON.parse(r.response).table);
       } else {
-        $.fatalError();
+        renderError(r.statusText, kPathPrefix + table_id);
       }
       $.hideLoader();
     });
@@ -59,6 +58,23 @@ ZBase.registerView((function() {
 
     $.handleLinks(page);
     $.replaceViewport(page);
+  };
+
+  var renderError = function(msg, path) {
+    var error_elem = document.createElement("div");
+    error_elem.classList.add("zbase_error");
+    error_elem.innerHTML = 
+        "<span>" +
+        "<h2>We're sorry</h2>" +
+        "<h1>An error occured.</h1><p>" + msg + "</p> " +
+        "<p>Please try it again or contact support if the problem persists.</p>" +
+        "<a href='/a/datastore/tables' class='z-button secondary'>" +
+        "<i class='fa fa-arrow-left'></i>&nbsp;Back</a>" +
+        "<a href='" + path + "' class='z-button secondary'>" + 
+        "<i class='fa fa-refresh'></i>&nbsp;Reload</a>" +
+        "</span>";
+
+    $.replaceViewport(error_elem);
   };
 
   var renderTable = function(columns, tbody, prefix) {
@@ -181,15 +197,14 @@ ZBase.registerView((function() {
         $.httpPost("/api/v1/documents/" + doc.uuid, querydata, function(r) {
           if (r.status == 201) {
             $.navigateTo("/a/sql/" + doc.uuid);
-            return;
           } else {
-            $.fatalError();
+            renderError("Table could not be opened in SQL Editor");
           }
         });
 
         return;
       } else {
-        $.fatalError();
+        renderError("Table could not be opened in SQL Editor");
       }
     });
   };
