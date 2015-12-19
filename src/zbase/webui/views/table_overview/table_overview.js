@@ -1,11 +1,20 @@
 ZBase.registerView((function() {
   var kPathPrefix = "/a/datastore/tables/";
+  var query_mgr;
+
+  var init = function(path) {
+    query_mgr = EventSourceHandler();
+    load(path);
+  };
 
   var load = function(path) {
-    var table_id = path.substr(kPathPrefix.length);
-
+    destroy();
     $.showLoader();
 
+    var table_id = path.substr(kPathPrefix.length);
+    loadChart(table_id);
+
+    //load schema
     $.httpGet("/api/v1/tables/" + table_id, function(r) {
       if (r.status == 200) {
         render(JSON.parse(r.response).table);
@@ -16,8 +25,46 @@ ZBase.registerView((function() {
     });
   };
 
+  var destroy = function() {
+    if (query_mgr) {
+      query_mgr.closeAll();
+    }
+  };
+
+  var loadChart = function(table_id) {
+    var query_str =
+      "select TRUNCATE(time / 1000000) as time, count(*) as num_inserts from '" +
+      table_id + ".last1d' group by TRUNCATE(time / 1000000) order by time asc;";
+
+    var query = query_mgr.get(
+      "sql_query",
+      "/api/v1/sql?format=json_sse&query=" + encodeURIComponent(query_str));
+
+    query.addEventListener('result', function(e) {
+      query_mgr.close("sql_query");
+
+      console.log("DONE!");
+      var data = JSON.parse(e.data);
+      renderChart(data.results);
+    });
+
+    query.addEventListener('query_error', function(e) {
+      query_mgr.close("sql_query");
+      renderError(JSON.parse(e.data).error);
+    });
+
+    query.addEventListener('error', function(e) {
+      query_mgr.close("sql_query");
+      renderError("Server Error");
+    });
+
+    query.addEventListener('status', function(e) {
+      //renderQueryProgress(JSON.parse(e.data));
+    });
+
+  };
+
   var render = function(schema) {
-    console.log(schema);
     var page = $.getTemplate(
         "views/table_overview",
         "zbase_table_overview_main_tpl");
@@ -32,7 +79,6 @@ ZBase.registerView((function() {
     var tabs = page.querySelectorAll("z-tab a");
     for (var i = 0; i < tabs.length; i++) {
       tabs[i].href += schema.name;
-      console.log(tabs[i].href);
     }
 
     renderSchemaTable($(".table_schema tbody", page), schema.schema.columns, "");
@@ -54,6 +100,10 @@ ZBase.registerView((function() {
         renderSchemaTable(tbody, column.schema.columns, column_name + ".");
       }
     });
+  };
+
+  var renderChart = function(data) {
+    console.log(data);
   };
 
   var renderError = function(msg, path) {
@@ -78,8 +128,8 @@ ZBase.registerView((function() {
 
   return {
     name: "table_overview",
-    loadView: function(params) { load(params.path); },
-    unloadView: function() {},
+    loadView: function(params) { init(params.path); },
+    unloadView: destroy,
     handleNavigationChange: load
   };
 })());
