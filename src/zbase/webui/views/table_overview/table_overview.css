@@ -75,3 +75,18 @@
 .zbase_table_overview .chart_container .inner_chart {
   padding: 10px;
 }
+
+/* schema */
+.zbase_table_overview .table_schema h3 {
+  color: #000;
+}
+
+.zbase_table_overview .table_schema table.z-table {
+  font-size: 13px;
+  border-top: 1px solid #ddd;
+}
+
+.zbase_table_overview .table_schema table.z-table thead th {
+  color: #888;
+  font-weight: 400;
+}
