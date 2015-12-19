@@ -84,9 +84,16 @@
 .zbase_table_overview .table_schema table.z-table {
   font-size: 13px;
   border-top: 1px solid #ddd;
+  table-layout: fixed;
 }
 
 .zbase_table_overview .table_schema table.z-table thead th {
   color: #888;
   font-weight: 400;
+  width: 33.33%;
+}
+
+.zbase_table_overview .table_schema table.z-table tbody td {
+  padding: 0 .8em;
+  line-height: 42px;
 }
