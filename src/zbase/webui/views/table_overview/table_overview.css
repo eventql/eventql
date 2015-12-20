@@ -1,3 +1,7 @@
+#zbase_viewport .page_wrap.zbase_table_overview {
+  padding-left: 5px;
+}
+
 /* breadcrumbs */
 .zbase_table_overview .zbase_table_overview_breadcrumbs {
   height: 36px;
@@ -27,6 +31,8 @@
 /* pagetitle */
 .zbase_table_overview h2.pagetitle {
   color: #000;
+  height: 53px;
+  line-height: 53px;
 }
 
 .zbase_table_overview h2.pagetitle i {
@@ -42,7 +48,7 @@
 
 /* chart container */
 .zbase_table_overview .chart_container {
-  margin-top: 35px;
+  margin: 35px 0 0 4px;
   border: 1px solid #dadada;
   box-shadow: 0 0 4px #f6f6f6;
   border-radius: 4px;
@@ -93,7 +99,7 @@
 /* table info */
 .zbase_table_overview .table_info {
   overflow: auto;
-  padding: 18px 13px 16px 13px;
+  padding: 18px 13px 16px 16px;
   border-bottom: 1px solid #dadada;
   box-shadow: inset 0 -4px 3px -3px #f9f9f9;
 }
@@ -119,12 +125,14 @@
 /* schema */
 .zbase_table_overview .table_schema {
   margin-top: 33px;
+  padding-left: 3px;
 }
 
 .zbase_table_overview .table_schema h3 {
   color: #000;
   font-size: 16px;
   font-weight: 500;
+  padding-left: 4px;
 }
 
 .zbase_table_overview .table_schema table.z-table {
