@@ -32,9 +32,10 @@ ZBase.registerView((function() {
   };
 
   var loadChart = function(table_id) {
+    //FIXME remove limit
     var query_str =
-      "select TRUNCATE(time / 1000000) as time, count(*) as num_inserts from '" +
-      table_id + ".last1d' group by TRUNCATE(time / 1000000) order by time asc;";
+      "select (TRUNCATE(time / 3600000000) * 3600000) as time, count(*) / 3600 as num_inserts from '" +
+      table_id + ".last7d' group by TRUNCATE(time / 3600000000) order by time asc limit 3600;";
 
     var query = query_mgr.get(
       "sql_query",
@@ -57,11 +58,6 @@ ZBase.registerView((function() {
       query_mgr.close("sql_query");
       renderError("Server Error");
     });
-
-    query.addEventListener('status', function(e) {
-      //renderQueryProgress(JSON.parse(e.data));
-    });
-
   };
 
   var render = function(schema) {
@@ -103,7 +99,73 @@ ZBase.registerView((function() {
   };
 
   var renderChart = function(data) {
-    console.log(data);
+    var x_values = ["x"];
+    var y_values = ["inserts"];
+
+
+    data[0].rows.forEach(function(row) {
+      x_values.push(parseInt(row[0], 10));
+      y_values.push(row[1]);
+    });
+
+    hideChartLoader();
+    var chart = c3.generate({
+      bindto: "#table_overview_chart",
+      size: {
+        width: $(".zbase_table_overview .inner_chart").offsetWidth
+      },
+      padding: {
+        bottom: 10
+      },
+      interaction: true,
+      data: {
+        x: 'x',
+        type: "area",
+        columns: [
+          x_values, y_values
+        ],
+        colors: {
+          "inserts": '#eaf2fa'
+        },
+        selection: {
+          enabled: true
+        },
+      },
+      line: {
+        connectNull: false
+      },
+      axis: {
+        x: {
+          show: false,
+          type: "timeseries",
+          tick: {
+            format: "%Y-%m-%d %H:%M:%S"
+          }
+        },
+        y: {
+          show: false,
+          min: 0,
+          tick: {
+            count: 3
+          }
+        }
+      },
+      legend: {
+        show: false
+      },
+      grid: {
+        y: {
+          show: true
+        }
+      },
+      point: {
+        show: false
+      }
+    });
+  };
+
+  var hideChartLoader = function() {
+    $(".zbase_table_overview .chart_container .zbase_loader").classList.add("hidden");
   };
 
   var renderError = function(msg, path) {

@@ -73,7 +73,11 @@
 }
 
 .zbase_table_overview .chart_container .inner_chart {
-  padding: 10px;
+  background-color: #f9f9f9;
+}
+
+.zbase_table_overview .chart_container .c3-line {
+  stroke-width: 2px;
 }
 
 /* table info */
