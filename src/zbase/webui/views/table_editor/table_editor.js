@@ -1,5 +1,5 @@
 ZBase.registerView((function() {
-  var kPathPrefix = "/a/datastore/tables/";
+  var kPathPrefix = "/a/datastore/tables/edit/";
 
   var load = function(path) {
     var table_id = path.substr(kPathPrefix.length);
