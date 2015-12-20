@@ -127,6 +127,11 @@ template {
   padding: 0 24px;
 }
 
+#zbase_viewport .page_wrap {
+  max-width: 1400px;
+  margin: auto;
+}
+
 @media (max-width: 2048px) {
   #zbase_viewport .zbase_content_pane.fullwidth {
     padding: 0;
