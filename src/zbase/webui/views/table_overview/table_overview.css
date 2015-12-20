@@ -48,6 +48,10 @@
   border-radius: 4px;
 }
 
+.zbase_table_overview .chart_container.hidden {
+  display: none;
+}
+
 .zbase_table_overview .chart_container .panel_bar {
   height: 45px;
   line-height: 45px;
@@ -78,6 +82,12 @@
 
 .zbase_table_overview .chart_container .c3-line {
   stroke-width: 2px;
+}
+
+.zbase_table_overview .chart_container .inner_chart .error_msg {
+  line-height: 130px;
+  text-align: center;
+  color: #999;
 }
 
 /* table info */

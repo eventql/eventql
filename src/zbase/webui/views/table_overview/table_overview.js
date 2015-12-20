@@ -34,9 +34,11 @@ ZBase.registerView((function() {
   var loadChart = function(table_id) {
     //FIXME remove limit
     var query_str =
-      "select (TRUNCATE(time / 3600000000) * 3600000) as time, count(*) / 3600 as num_inserts from '" +
-      table_id + ".last7d' group by TRUNCATE(time / 3600000000) order by time asc limit 3600;";
+      "select (TRUNCATE(time / 3600000000) * 3600000) as time, count(*) / 3600 " +
+      "as num_inserts from '" + table_id + ".last7d' group by " +
+      "TRUNCATE(time / 3600000000) order by time asc limit 3600;";
 
+    console.log(query_str);
     var query = query_mgr.get(
       "sql_query",
       "/api/v1/sql?format=json_sse&query=" + encodeURIComponent(query_str));
@@ -44,19 +46,21 @@ ZBase.registerView((function() {
     query.addEventListener('result', function(e) {
       query_mgr.close("sql_query");
 
-      console.log("DONE!");
       var data = JSON.parse(e.data);
+      console.log(data);
       renderChart(data.results);
     });
 
     query.addEventListener('query_error', function(e) {
       query_mgr.close("sql_query");
-      renderError(JSON.parse(e.data).error);
+      console.log("query execution failed");
+      renderChartError();
     });
 
     query.addEventListener('error', function(e) {
       query_mgr.close("sql_query");
-      renderError("Server Error");
+      console.log("server error while executing query");
+      renderChartError();
     });
   };
 
@@ -166,6 +170,16 @@ ZBase.registerView((function() {
 
   var hideChartLoader = function() {
     $(".zbase_table_overview .chart_container .zbase_loader").classList.add("hidden");
+  };
+
+  var renderChartError = function() {
+    var error_msg = document.createElement("div");
+    error_msg.classList.add("error_msg");
+    error_msg.innerHTML = "No data received.";
+
+    $.replaceContent(
+      $(".zbase_table_overview .chart_container .inner_chart"),
+      error_msg);
   };
 
   var renderError = function(msg, path) {
