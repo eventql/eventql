@@ -2985,8 +2985,7 @@
             (withTransition ? this.mainArea.transition() : this.mainArea)
                 .attr("d", drawArea)
                 .style("fill", this.color)
-                //custom zscale config
-                .style("opacity", 1)
+                .style("opacity", this.orgAreaOpacity)
         ];
     };
     c3_chart_internal_fn.generateDrawArea = function (areaIndices, isSub) {
