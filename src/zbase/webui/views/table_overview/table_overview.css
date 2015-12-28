@@ -12,6 +12,7 @@
 .zbase_table_overview .zbase_table_overview_breadcrumbs zbase-breadcrumbs {
   font-size: 12px;
   font-weight: 300;
+  display: block;
 }
 
 .zbase_table_overview .zbase_table_overview_breadcrumbs zbase-breadcrumbs,
@@ -31,8 +32,6 @@
 /* pagetitle */
 .zbase_table_overview h2.pagetitle {
   color: #000;
-  height: 53px;
-  line-height: 53px;
 }
 
 .zbase_table_overview h2.pagetitle i {

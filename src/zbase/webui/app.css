@@ -130,6 +130,7 @@ template {
 #zbase_viewport .page_wrap {
   max-width: 1400px;
   margin: auto;
+  padding: 0;
 }
 
 @media (max-width: 2048px) {
