@@ -38,7 +38,6 @@ ZBase.registerView((function() {
       "as num_inserts from '" + table_id + ".last7d' group by " +
       "TRUNCATE(time / 3600000000) order by time asc limit 3600;";
 
-    console.log(query_str);
     var query = query_mgr.get(
       "sql_query",
       "/api/v1/sql?format=json_sse&query=" + encodeURIComponent(query_str));
@@ -47,7 +46,6 @@ ZBase.registerView((function() {
       query_mgr.close("sql_query");
 
       var data = JSON.parse(e.data);
-      console.log(data);
       renderChart(data.results);
     });
 
@@ -105,11 +103,17 @@ ZBase.registerView((function() {
   var renderChart = function(data) {
     var x_values = ["x"];
     var y_values = ["inserts"];
+    var y_max = 0;
 
 
     data[0].rows.forEach(function(row) {
       x_values.push(parseInt(row[0], 10));
-      y_values.push(row[1]);
+
+      var y_value = parseFloat(row[1]);
+      y_values.push(y_value);
+      if (y_value > y_max) {
+        y_max = y_value;
+      }
     });
 
     hideChartLoader();
@@ -142,15 +146,21 @@ ZBase.registerView((function() {
         x: {
           show: false,
           type: "timeseries",
+          padding: {
+            left: 0,
+            right: 0
+          },
           tick: {
-            format: "%Y-%m-%d %H:%M:%S"
+            format: "%Y-%m-%d %H:%M:%S",
+            count: 10
           }
         },
         y: {
           show: false,
           min: 0,
           tick: {
-            count: 3
+            count: 3,
+            values: [-0.1, (y_max + 10) / 2, y_max + 10]
           }
         }
       },
