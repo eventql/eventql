@@ -47,15 +47,15 @@ RefPtr<VFSFile> JSONExportRDD::computeBlob(dproc::TaskContext* context) {
       json.addObjectEntry(cols[i]);
 
       switch (row[i].getType()) {
-        case csql::SValue::T_FLOAT:
+        case SQL_FLOAT:
           json.addFloat(row[i].getFloat());
           break;
 
-        case csql::SValue::T_INTEGER:
+        case SQL_INTEGER:
           json.addInteger(row[i].getInteger());
           break;
 
-        case csql::SValue::T_BOOL:
+        case SQL_BOOL:
           row[i].getBool() ? json.addTrue() : json.addFalse();
           break;
 

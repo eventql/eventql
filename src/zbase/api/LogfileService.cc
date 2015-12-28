@@ -169,7 +169,9 @@ void LogfileService::scanLocalLogfilePartition(
     return;
   }
 
+  csql::Transaction ctx;
   csql::CSTableScan cstable_scan(
+      &ctx,
       seqscan,
       cstable_filename.get(),
       sql_->queryBuilder().get());

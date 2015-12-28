@@ -16,10 +16,12 @@ using namespace stx;
 namespace zbase {
 
 LSMPartitionSQLScan::LSMPartitionSQLScan(
+    csql::Transaction* ctx,
     RefPtr<Table> table,
     RefPtr<PartitionSnapshot> snap,
     RefPtr<csql::SequentialScanNode> stmt,
     csql::QueryBuilder* runtime) :
+    ctx_(ctx),
     table_(table),
     snap_(snap),
     stmt_(stmt),
@@ -54,7 +56,7 @@ void LSMPartitionSQLScan::execute(
     auto cstable = cstable::CSTableReader::openFile(cstable_file);
     auto id_col = cstable->getColumnReader("__lsm_id");
     auto is_update_col = cstable->getColumnReader("__lsm_is_update");
-    csql::CSTableScan cstable_scan(stmt_, cstable_file, runtime_);
+    csql::CSTableScan cstable_scan(ctx_, stmt_, cstable_file, runtime_);
     cstable_scan.setFilter([this, id_col, is_update_col] () -> bool {
       uint64_t rlvl;
       uint64_t dlvl;

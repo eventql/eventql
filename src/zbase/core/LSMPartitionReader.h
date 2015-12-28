@@ -30,6 +30,7 @@ public:
       Function<void (const msg::MessageObject& record)> fn) override;
 
   ScopedPtr<csql::TableExpression> buildSQLScan(
+      csql::Transaction* ctx,
       RefPtr<csql::SequentialScanNode> node,
       csql::QueryBuilder* runtime) const override;
 

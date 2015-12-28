@@ -23,7 +23,8 @@ DrilldownQuery::DrilldownQuery(
     RefPtr<csql::ExecutionStrategy> execution_strategy,
     csql::Runtime* runtime) :
     execution_strategy_(execution_strategy),
-    runtime_(runtime) {}
+    runtime_(runtime),
+    txn_(runtime_->newTransaction()) {}
 
 void DrilldownQuery::addMetric(MetricDefinition metric) {
   if (metric.name.isEmpty()) {
@@ -71,7 +72,7 @@ RefPtr<DrilldownTree> DrilldownQuery::execute() {
   });
 
   auto query_plan = buildQueryPlan();
-  runtime_->executeQuery(query_plan, result_handler.get());
+  runtime_->executeQuery(txn_.get(), query_plan, result_handler.get());
 
   calculateDerivedMetrics(dtree);
 
@@ -87,7 +88,7 @@ RefPtr<csql::QueryPlan> DrilldownQuery::buildQueryPlan() {
     }
   }
 
-  return runtime_->buildQueryPlan(statements, execution_strategy_);
+  return runtime_->buildQueryPlan(txn_.get(), statements, execution_strategy_);
 }
 
 RefPtr<csql::QueryTreeNode> DrilldownQuery::buildQueryTree(
@@ -236,12 +237,13 @@ void DrilldownQuery::calculateDerivedMetrics(RefPtr<DrilldownTree> dtree) {
     };
 
     csql::QueryTreeUtil::resolveColumns(expr, resolver);
-    exprs.emplace_back(i, query_builder->buildValueExpression(expr));
+    exprs.emplace_back(i, query_builder->buildValueExpression(txn_.get(), expr));
   }
 
   dtree->walkLeafs([this, &exprs] (DrilldownTreeLeafNode* node) {
     for (const auto& e : exprs) {
       node->slots[e.first] = runtime_->evaluateScalarExpression(
+          txn_.get(),
           e.second,
           node->slots.size(),
           node->slots.data());

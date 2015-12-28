@@ -29,6 +29,7 @@ class LSMPartitionSQLScan : public csql::TableExpression {
 public:
 
   LSMPartitionSQLScan(
+      csql::Transaction* ctx,
       RefPtr<Table> table,
       RefPtr<PartitionSnapshot> snap,
       RefPtr<csql::SequentialScanNode> stmt,
@@ -48,6 +49,7 @@ public:
   void setCacheKey(const SHA1Hash& key);
 
 protected:
+  csql::Transaction* ctx_;
   RefPtr<Table> table_;
   RefPtr<PartitionSnapshot> snap_;
   RefPtr<csql::SequentialScanNode> stmt_;

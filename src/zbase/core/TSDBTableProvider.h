@@ -33,8 +33,9 @@ public:
       AnalyticsAuth* auth);
 
   Option<ScopedPtr<csql::TableExpression>> buildSequentialScan(
-        RefPtr<csql::SequentialScanNode> node,
-        csql::QueryBuilder* runtime) const override;
+      csql::Transaction* ctx,
+      RefPtr<csql::SequentialScanNode> node,
+      csql::QueryBuilder* runtime) const override;
 
   void listTables(
       Function<void (const csql::TableInfo& table)> fn) const override;
@@ -44,14 +45,16 @@ public:
 protected:
 
   Option<ScopedPtr<csql::TableExpression>> buildLocalSequentialScan(
-        RefPtr<csql::SequentialScanNode> node,
-        const TSDBTableRef& table_ref,
-        csql::QueryBuilder* runtime) const;
+      csql::Transaction* ctx,
+      RefPtr<csql::SequentialScanNode> node,
+      const TSDBTableRef& table_ref,
+      csql::QueryBuilder* runtime) const;
 
   Option<ScopedPtr<csql::TableExpression>> buildRemoteSequentialScan(
-        RefPtr<csql::SequentialScanNode> node,
-        const TSDBTableRef& table_ref,
-        csql::QueryBuilder* runtime) const;
+      csql::Transaction* ctx,
+      RefPtr<csql::SequentialScanNode> node,
+      const TSDBTableRef& table_ref,
+      csql::QueryBuilder* runtime) const;
 
   csql::TableInfo tableInfoForTable(const TSDBTableInfo& table) const;
 

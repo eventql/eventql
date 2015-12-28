@@ -157,6 +157,7 @@ SHA1Hash LogPartitionReader::version() const {
 }
 
 ScopedPtr<csql::TableExpression> LogPartitionReader::buildSQLScan(
+    csql::Transaction* ctx,
     RefPtr<csql::SequentialScanNode> node,
     csql::QueryBuilder* runtime) const {
   auto cstable = fetchCSTableFilename();
@@ -166,6 +167,7 @@ ScopedPtr<csql::TableExpression> LogPartitionReader::buildSQLScan(
 
   auto scan = mkScoped(
       new csql::CSTableScan(
+          ctx,
           node,
           cstable.get(),
           runtime));
