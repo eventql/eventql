@@ -22,10 +22,20 @@ ZBase.registerView((function() {
         "views/table_viewer",
         "zbase_table_viewer_tpl");
 
+    //set table name
     var table_link = $(".pagetitle a.table_name", tpl);
     table_link.innerHTML = table;
     table_link.setAttribute("href", path_prefix + table);
+    $(".table_name_breadcrumb", tpl).innerHTML = table;
 
+    //set tab links
+    var tabs = tpl.querySelectorAll("z-tab a");
+    for (var i = 0; i < tabs.length; i++) {
+      var link = tabs[i].getAttribute("href");
+      tabs[i].setAttribute("href", link + table);
+    }
+
+    //init controls
     $(".filter_type_control", tpl).addEventListener("change", submitControls);
     $(".filter_control", tpl).addEventListener("z-search-submit", submitControls);
     $(".limit_control", tpl).addEventListener("z-input-submit", submitControls);
