@@ -28,6 +28,10 @@
   letter-spacing: 0.5px;
 }
 
+.zbase_header .page_wrap .platform {
+  padding: 0 24px 0 0;
+}
+
 .zbase_header .platform .icon {
   vertical-align: middle;
   margin-right: 3px;
@@ -35,9 +39,12 @@
 
 .zbase_header .navigation_inner {
   margin: auto;
-  max-width: 2048px;
   min-width: 960px;
   box-sizing: border-box;
+}
+
+.zbase_header .navigation_inner:not(.page_wrap) {
+  max-width: 2048px;
   padding: 0 20px 0 0;
 }
 

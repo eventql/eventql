@@ -1,17 +1,20 @@
 <template id="zbase_datastore_tables_main_tpl">
   <div class="zbase_datastore_tables">
 
-    <div class="zbase_content_pane"></div>
+    <div class="zbase_content_pane fullwidth">
+    </div>
   <div>
 </template>
 
 <template id="zbase_datastore_tables_list_tpl">
-  <button class="z-button secondary create_table" style="margin-top: 11px;">
-    <i class="fa fa-plus"></i> &nbsp;Create Table
-  </button>
-  <h2 class="pagetitle"><em>Tables</em></h2>
+  <div class="page_wrap frame">
+    <button class="z-button secondary create_table" style="margin-top: 11px;">
+      <i class="fa fa-plus"></i> &nbsp;Create Table
+    </button>
+    <h2 class="pagetitle"><em>Tables</em></h2>
+  </div>
 
-  <div class="tbl_box">
+  <div class="tbl_box page_wrap">
     <table class="z-table zbase_clickable_table" data-clickable style="border-top: 1px solid #ddd;">
       <thead>
         <tr>
