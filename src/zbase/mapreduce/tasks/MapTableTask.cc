@@ -40,7 +40,7 @@ MapTableTask::MapTableTask(
   }
 
   auto partitioner = table.get()->partitioner();
-  auto partitions = partitioner->partitionKeysFor(table_ref_);
+  auto partitions = partitioner->listPartitions();
 
   for (const auto& partition : partitions) {
     auto shard = mkRef(new MapTableTaskShard());

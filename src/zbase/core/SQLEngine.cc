@@ -120,7 +120,7 @@ void SQLEngine::replaceSequentialScanWithUnion(
   }
 
   auto partitioner = table.get()->partitioner();
-  auto partitions = partitioner->partitionKeysFor(table_ref);
+  auto partitions = partitioner->listPartitions(seqscan->constraints());
 
   Vector<RefPtr<csql::QueryTreeNode>> union_tables;
   for (const auto& partition : partitions) {
@@ -162,7 +162,7 @@ void SQLEngine::shardGroupBy(
   }
 
   auto partitioner = table.get()->partitioner();
-  auto partitions = partitioner->partitionKeysFor(table_ref);
+  auto partitions = partitioner->listPartitions(seqscan->constraints());
 
   Vector<RefPtr<csql::QueryTreeNode>> shards;
   for (const auto& partition : partitions) {

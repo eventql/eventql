@@ -28,14 +28,14 @@ public:
       const String& table_name,
       size_t shard);
 
-  static Vector<SHA1Hash> partitionKeysFor(
+  static Vector<SHA1Hash> listPartitions(
       const String& table_name,
       size_t nshards);
 
   SHA1Hash partitionKeyFor(const String& partition_key) const override;
 
-  Vector<SHA1Hash> partitionKeysFor(
-      const TSDBTableRef& table_ref) const override;
+  Vector<SHA1Hash> listPartitions(
+      const Vector<csql::ScanConstraint>& constraints) const override;
 
 protected:
   String table_name_;

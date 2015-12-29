@@ -40,7 +40,7 @@ public:
       UnixTime time,
       Duration window_size);
 
-  static Vector<SHA1Hash> partitionKeysFor(
+  static Vector<SHA1Hash> listPartitions(
       const String& table_name,
       UnixTime from,
       UnixTime until,
@@ -52,7 +52,7 @@ public:
       UnixTime until,
       Duration window_size);
 
-  Vector<SHA1Hash> partitionKeysFor(
+  Vector<SHA1Hash> listPartitions(
       UnixTime from,
       UnixTime until);
 
@@ -62,8 +62,8 @@ public:
 
   SHA1Hash partitionKeyFor(const String& partition_key) const override;
 
-  Vector<SHA1Hash> partitionKeysFor(
-      const TSDBTableRef& table_ref) const override;
+  Vector<SHA1Hash> listPartitions(
+      const Vector<csql::ScanConstraint>& constraints) const override;
 
 protected:
   String table_name_;

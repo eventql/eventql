@@ -32,7 +32,7 @@ SHA1Hash FixedShardPartitioner::partitionKeyFor(
   return SHA1::compute(buf.data(), buf.size());
 }
 
-Vector<SHA1Hash> FixedShardPartitioner::partitionKeysFor(
+Vector<SHA1Hash> FixedShardPartitioner::listPartitions(
     const String& table_name,
     size_t nshards) {
   Vector<SHA1Hash> partitions;
@@ -49,9 +49,9 @@ SHA1Hash FixedShardPartitioner::partitionKeyFor(
   return partitionKeyFor(table_name_, std::stoull(partition_key));
 }
 
-Vector<SHA1Hash> FixedShardPartitioner::partitionKeysFor(
-    const TSDBTableRef& table_ref) const {
-  return partitionKeysFor(table_ref.table_key, num_shards_);
+Vector<SHA1Hash> FixedShardPartitioner::listPartitions(
+      const Vector<csql::ScanConstraint>& constraints) const {
+  return listPartitions(table_name_, num_shards_);
 }
 
 }

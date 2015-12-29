@@ -48,7 +48,7 @@ SHA1Hash TimeWindowPartitioner::partitionKeyFor(
   return SHA1::compute(buf.data(), buf.size());
 }
 
-Vector<SHA1Hash> TimeWindowPartitioner::partitionKeysFor(
+Vector<SHA1Hash> TimeWindowPartitioner::listPartitions(
     const String& table_name,
     UnixTime from,
     UnixTime until,
@@ -86,10 +86,10 @@ Vector<TimeseriesPartition> TimeWindowPartitioner::partitionsFor(
   return res;
 }
 
-Vector<SHA1Hash> TimeWindowPartitioner::partitionKeysFor(
+Vector<SHA1Hash> TimeWindowPartitioner::listPartitions(
     UnixTime from,
     UnixTime until) {
-  return partitionKeysFor(
+  return listPartitions(
       table_name_,
       from,
       until,
@@ -114,12 +114,65 @@ SHA1Hash TimeWindowPartitioner::partitionKeyFor(
       config_.partition_size());
 }
 
-Vector<SHA1Hash> TimeWindowPartitioner::partitionKeysFor(
-    const TSDBTableRef& table_ref) const {
-  return partitionKeysFor(
-        table_ref.table_key,
-        table_ref.timerange_begin.get(),
-        table_ref.timerange_limit.get(),
+Vector<SHA1Hash> TimeWindowPartitioner::listPartitions(
+    const Vector<csql::ScanConstraint>& constraints) const {
+  uint64_t lower_limit;
+  bool has_lower_limit = false;
+  uint64_t upper_limit;
+  bool has_upper_limit = false;
+
+  for (const auto& c : constraints) {
+    if (c.column_name != "time") { // FIXME
+      continue;
+    }
+
+    uint64_t val;
+    try {
+      val = c.value.getInteger();
+    } catch (const StandardException& e) {
+      continue;
+    }
+
+    switch (c.type) {
+      case csql::ScanConstraintType::EQUAL_TO:
+        lower_limit = val;
+        upper_limit = val;
+        has_lower_limit = true;
+        has_upper_limit = true;
+        break;
+      case csql::ScanConstraintType::NOT_EQUAL_TO:
+        break;
+      case csql::ScanConstraintType::LESS_THAN:
+        upper_limit = val - 1;
+        has_upper_limit = true;
+        break;
+      case csql::ScanConstraintType::LESS_THAN_OR_EQUAL_TO:
+        upper_limit = val;
+        has_upper_limit = true;
+        break;
+      case csql::ScanConstraintType::GREATER_THAN:
+        lower_limit = val + 1;
+        has_lower_limit = true;
+        break;
+      case csql::ScanConstraintType::GREATER_THAN_OR_EQUAL_TO:
+        lower_limit = val;
+        has_lower_limit = true;
+        break;
+    }
+  }
+
+  if (!has_lower_limit || !has_upper_limit) {
+    RAISE(
+        kRuntimeError,
+        "All queries on timeseries tables must have an upper and lower bound "
+        "on the scanned time window. Try appending this to your query: "
+        "'WHERE time > time_at(\"-30min\") AND time < time_at(\"now\")'");
+  }
+
+  return listPartitions(
+        table_name_,
+        lower_limit,
+        upper_limit,
         config_.partition_size());
 }
 

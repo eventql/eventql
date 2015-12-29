@@ -14,6 +14,7 @@
 #include <stx/duration.h>
 #include <stx/SHA1.h>
 #include <zbase/core/TSDBTableRef.h>
+#include <csql/qtree/SequentialScanNode.h>
 
 using namespace stx;
 
@@ -24,8 +25,12 @@ public:
 
   virtual SHA1Hash partitionKeyFor(const String& partition_key) const = 0;
 
-  virtual Vector<SHA1Hash> partitionKeysFor(
-      const TSDBTableRef& table_ref) const = 0;
+  Vector<SHA1Hash> listPartitions() const {
+    return listPartitions(Vector<csql::ScanConstraint>{});
+  }
+
+  virtual Vector<SHA1Hash> listPartitions(
+      const Vector<csql::ScanConstraint>& constraints) const = 0;
 
 };
 
