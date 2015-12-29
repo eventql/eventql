@@ -1020,6 +1020,8 @@ void AnalyticsServlet::executeSQLScanPartition(
     });
 
     try {
+      auto txn = sql_->newTransaction();
+
       Vector<RefPtr<csql::SelectListNode>> select_list;
       for (const auto& e : query.select_list()) {
         csql::Parser parser;
@@ -1034,7 +1036,9 @@ void AnalyticsServlet::executeSQLScanPartition(
 
         auto slnode = mkRef(
             new csql::SelectListNode(
-                sql_->queryPlanBuilder()->buildValueExpression(stmts[0])));
+                sql_->queryPlanBuilder()->buildValueExpression(
+                    txn.get(),
+                    stmts[0])));
 
         if (e.has_alias()) {
           slnode->setAlias(e.alias());
@@ -1055,8 +1059,10 @@ void AnalyticsServlet::executeSQLScanPartition(
           RAISE(kIllegalArgumentError);
         }
 
-        where_expr = Some(mkRef(
-            sql_->queryPlanBuilder()->buildValueExpression(stmts[0])));
+        where_expr = Some(
+            sql_->queryPlanBuilder()->buildValueExpression(
+                txn.get(),
+                stmts[0]));
       }
 
       auto qtree = mkRef(
@@ -1068,7 +1074,6 @@ void AnalyticsServlet::executeSQLScanPartition(
 
       auto execution_strategy = app_->getExecutionStrategy(session.customer());
 
-      auto txn = sql_->newTransaction();
       auto qplan = sql_->buildQueryPlan(
           txn.get(),
           Vector<RefPtr<csql::QueryTreeNode>>{ qtree.get() },

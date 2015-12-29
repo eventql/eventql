@@ -116,6 +116,8 @@ void LogfileService::scanLocalLogfilePartition(
       table_name,
       partition_key.toString());
 
+  auto txn = sql_->newTransaction();
+
   Vector<RefPtr<csql::SelectListNode>> select_list;
   select_list.emplace_back(
       new csql::SelectListNode(
@@ -150,7 +152,7 @@ void LogfileService::scanLocalLogfilePartition(
       }
 
       where_cond = Some(
-          mkRef(sql_->queryPlanBuilder()->buildValueExpression(stmts[0])));
+          sql_->queryPlanBuilder()->buildValueExpression(txn.get(), stmts[0]));
 
       break;
     }
@@ -169,9 +171,8 @@ void LogfileService::scanLocalLogfilePartition(
     return;
   }
 
-  csql::Transaction ctx;
   csql::CSTableScan cstable_scan(
-      &ctx,
+      txn.get(),
       seqscan,
       cstable_filename.get(),
       sql_->queryBuilder().get());

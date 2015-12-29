@@ -329,7 +329,9 @@ int main(int argc, const char** argv) {
         new csql::QueryBuilder(
             new csql::ValueExpressionBuilder(symbols.get()),
             new csql::TableExpressionBuilder()),
-        new csql::QueryPlanBuilder(symbols.get())));
+        new csql::QueryPlanBuilder(
+            csql::QueryPlanBuilderOptions{},
+            symbols.get())));
 
     sql->setCacheDir(flags.getString("cachedir"));
   }
