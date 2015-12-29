@@ -1,36 +1,50 @@
 <template id="zbase_table_editor_tpl">
-  <div class="zbase_content_pane zbase_table_editor">
+  <div class="zbase_content_pane zbase_table_editor fullwidth">
 
-    <z-dropdown class="input secondary open_in" data-resolved style="float: right; margin-top: 11px;">
-      <z-dropdown-header>
-        <z-dropdown-header-value data-static>
-            <i class="fa fa-search"></i> &nbsp;Open In
-        </z-dropdown-header-value>
-      </z-dropdown-header>
+    <div class="zbase_table_editor_breadcrumbs">
+      <zbase-breadcrumbs class="page_wrap frame">
+        <zbase-breadcrumbs-section>
+          <a href="/a/">Datastore</a>
+        </zbase-breadcrumbs-section>
+        <zbase-breadcrumbs-section>
+          <a href="/a/datastore/tables">Tables</a>
+        </zbase-breadcrumbs-section>
+        <zbase-breadcrumbs-section>
+          <a class="table_name_breadcrumb"></a>
+        </zbase-breadcrumbs-section>
+      </zbase-breadcrumbs>
+    </div>
 
-      <z-dropdown-flyout>
-        <z-dropdown-items>
-          <z-dropdown-item data-value="sql_editor">SQL Editor</z-dropdown-item>
-          <z-dropdown-item data-value="tableviewer">Table Viewer</z-dropdown-item>
-        </z-dropdown-items>
-      </z-dropdown-flyout>
-    </z-dropdown>
-
-    <h2 class="pagetitle" style="overflow:hidden;">
-      Tables &mdash; <em><a class="table_name_breadcrumb"></a></em>
+    <h2 class="pagetitle page_wrap frame" style="overflow:hidden;">
+      <i class="fa fa-database"></i>Table: <em><a class="table_name"></a></em>
     </h2>
 
-    <div class="content_pane">
-      <z-tabbable class="slim_tabs" style="">
-        <z-tab class="link schema" data-active>
-          <a>Schema</a>
-        </z-tab>
-        <z-tab class="link settings" style="display: none;">
-          <a>Settings</a>
-        </z-tab>
-      </z-tabbable>
+    <z-tabbable class="slim_tabs">
+      <div class="page_wrap frame">
+        <z-tab class="link"><a href="/a/datastore/tables/">Overview</a></z-tab>
+        <z-tab class="link" data-active><a href="/a/datastore/tables/edit/">Schema</a></z-tab>
+        <z-tab class="link"><a href="/a/datastore/tables/view/">Table Viewer</a></z-tab>
+        <z-tab class="link" style="display: none;"><a href="/a/datastore/tables/">Settings</a></z-tab>
+      </div>
+    </z-tabbable>
 
-      <z-dropdown class="input secondary edit" data-resolved style="float: right; margin-top: 15px; margin-right: 20px;">
+    <div class="page_wrap frame" style="height: 57px;">
+
+      <z-dropdown class="input secondary open_in" data-resolved style="float: right; margin: 11px 0;">
+        <z-dropdown-header>
+          <z-dropdown-header-value data-static>
+              <i class="fa fa-search"></i> &nbsp;Open In
+          </z-dropdown-header-value>
+        </z-dropdown-header>
+
+        <z-dropdown-flyout>
+          <z-dropdown-items>
+            <z-dropdown-item data-value="sql_editor">SQL Editor</z-dropdown-item>
+          </z-dropdown-items>
+        </z-dropdown-flyout>
+      </z-dropdown>
+
+      <z-dropdown class="input secondary edit" data-resolved style="float: right; margin: 11px 20px;">
         <z-dropdown-header>
           <z-dropdown-header-value data-static>
               <i class="fa fa-pencil"></i> &nbsp;Edit
@@ -49,23 +63,19 @@
           </z-dropdown-items>
         </z-dropdown-flyout>
       </z-dropdown>
-
-
-
-      <h3 style="font-weight: 400;">Edit Schema</h3>
-
-      <table class="z-table" style="border-top: 1px solid #ddd; margin-top: 12px;">
-        <thead>
-          <tr>
-            <th>Column Name</th>
-            <th>Type</th>
-            <th>Optional</th>
-          </tr>
-        </thead>
-
-        <tbody></tbody>
-      </table>
     </div>
+
+    <table class="z-table page_wrap" style="border-top: 1px solid #ddd;">
+      <thead>
+        <tr>
+          <th>Column Name</th>
+          <th>Type</th>
+          <th>Optional</th>
+        </tr>
+      </thead>
+
+      <tbody></tbody>
+    </table>
 
     <z-modal class="add_column">
       <z-modal-box>
