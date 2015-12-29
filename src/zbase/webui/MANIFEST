@@ -156,6 +156,7 @@ route {
   require_module: "util/z-url-util"
   require_module: "widgets/Inspector-JSON"
   require_module: "widgets/zbase-query-progress"
+  require_module: "widgets/z-tabbable"
   require_module: "widgets/zbase-header"
   require_module: "widgets/z-table"
   require_module: "widgets/z-progressbar"
@@ -163,7 +164,6 @@ route {
   require_module: "widgets/z-input"
   require_module: "widgets/z-search"
   require_module: "widgets/z-dropdown"
-  require_module: "widgets/z-tabbable"
   require_module: "views/table/table_viewer"
 }
 
