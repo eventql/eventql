@@ -42,9 +42,11 @@
   display: block;
 }
 
-.zbase_datastore_tables table.z-table thead tr th:first-child,
-.zbase_datastore_tables table.z-table tbody tr td:first-child {
-  /*padding-left: 24px;*/
+@media (max-width: 1400px) {
+  .zbase_datastore_tables table.z-table thead tr th:first-child,
+  .zbase_datastore_tables table.z-table tbody tr td:first-child a {
+    padding-left: 23px;
+  }
 }
 
 .zbase_datastore_tables table.z-table tbody tr td:first-child a {
@@ -77,7 +79,7 @@
 }
 
 .zbase_datastore_tables table.z-table td.icon z-dropdown-flyout {
-  left: -45px;
+  left: -65px;
 }
 
 .zbase_datastore_tables table.z-table td.icon z-dropdown-item.link {
