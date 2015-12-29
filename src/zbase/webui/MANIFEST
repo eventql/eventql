@@ -163,11 +163,11 @@ route {
   require_module: "widgets/z-input"
   require_module: "widgets/z-search"
   require_module: "widgets/z-dropdown"
-  require_module: "views/table_viewer"
+  require_module: "views/table/table_viewer"
 }
 
 route {
-  path_prefix: "/a/datastore/tables/"
+  path_prefix: "/a/datastore/tables/edit/"
   view: "table_editor"
   require_module: "widgets/zbase-header"
   require_module: "widgets/zbase-info-message"
@@ -179,6 +179,18 @@ route {
   require_module: "widgets/z-dropdown"
   require_module: "widgets/z-tabbable"
   require_module: "views/table_editor"
+}
+
+route {
+  path_prefix: "/a/datastore/tables/"
+  view: "table_overview"
+  require_module: "util/event_source_handler"
+  require_module: "widgets/zbase-header"
+  require_module: "widgets/zbase-info-message"
+  require_module: "widgets/z-table"
+  require_module: "widgets/z-tabbable"
+  require_module: "widgets/zbase-c3-chart"
+  require_module: "views/table/table_overview"
 }
 
 route {

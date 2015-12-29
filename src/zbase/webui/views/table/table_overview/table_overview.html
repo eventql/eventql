@@ -1,0 +1,102 @@
+<template id="zbase_table_overview_main_tpl">
+  <div class="zbase_content_pane zbase_table_overview fullwidth">
+    <div class="zbase_table_overview_breadcrumbs">
+      <zbase-breadcrumbs class="page_wrap frame">
+        <zbase-breadcrumbs-section>
+          <a href="/a/">Datastore</a>
+        </zbase-breadcrumbs-section>
+        <zbase-breadcrumbs-section>
+          <a href="/a/datastore/tables">Tables</a>
+        </zbase-breadcrumbs-section>
+        <zbase-breadcrumbs-section>
+          <a class="table_name_breadcrumb"></a>
+        </zbase-breadcrumbs-section>
+      </zbase-breadcrumbs>
+    </div>
+
+    <h2 class="pagetitle page_wrap frame" style="overflow:hidden;">
+      <i class="fa fa-database"></i>Table: <em><a class="table_name"></a></em>
+    </h2>
+
+    <z-tabbable class="slim_tabs">
+      <div class="page_wrap frame">
+        <z-tab class="link" data-active><a href="/a/datastore/tables/">Overview</a></z-tab>
+        <z-tab class="link"><a href="/a/datastore/tables/edit/">Schema</a></z-tab>
+        <z-tab class="link"><a href="/a/datastore/tables/view/">Table Viewer</a></z-tab>
+        <z-tab class="link"><a href="/a/datastore/tables/">Settings</a></z-tab>
+      </div>
+    </z-tabbable>
+
+    <div class="inner_content page_wrap frame">
+
+      <div class="chart_container">
+
+        <div class="panel_bar">
+          <label>Display:</label>
+          <z-dropdown class="inline" data-resolved>
+            <z-dropdown-flyout>
+              <z-dropdown-items>
+                <z-dropdown-item data-selected>Inserts / sec</z-dropdown-item>
+              </z-dropdown-items>
+            </z-dropdown-flyout>
+          </z-dropdown>
+        </div>
+
+        <div class="inner_chart" style="height: 130px;">
+
+          <div class="zbase_loader">
+            <div class="spinner_outer">
+              <div class="spinner">
+                <div class="rect1"></div>
+                <div class="rect2"></div>
+                <div class="rect3"></div>
+                <div class="rect4"></div>
+                <div class="rect5"></div>
+              </div>
+            </div>
+          </div>
+
+          <div id="table_overview_chart" style="height: 130px;"></div>
+        </div>
+      </div>
+
+      <div class="table_info">
+        <div class="column">
+          <label>Total Size</label>
+          <div class="value total_size">33.6 TB</div>
+        </div>
+
+        <div class="column">
+          <label>Number of Rows</label>
+          <div class="value num_rows">8.34 bln</div>
+        </div>
+
+        <div class="column">
+          <label>Current Request Rate</label>
+          <div class="value request_rate">3634 req/s</div>
+        </div>
+
+        <div class="column">
+          <label>Current Insert Rate</label>
+          <div class="value insert_rate">452.4 MB/s</div>
+        </div>
+      </div>
+
+      <div class="table_schema">
+        <h3>Schema</h3>
+
+        <table class="z-table">
+          <thead>
+            <tr>
+              <th>Column Name</th>
+              <th>Type</th>
+              <th>Optional</th>
+            </tr>
+          </thead>
+
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</template>

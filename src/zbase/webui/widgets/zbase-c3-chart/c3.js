@@ -2806,7 +2806,8 @@
         return [
             (withTransition ? this.mainLine.transition() : this.mainLine)
                 .attr("d", drawLine)
-                .style("stroke", this.color)
+                //custom zscale config
+                .style("stroke", "#3d8ad3")
                 .style("opacity", 1)
         ];
     };

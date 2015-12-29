@@ -127,9 +127,22 @@ template {
   padding: 0 24px;
 }
 
+.zbase_app .page_wrap {
+  max-width: 1400px;
+  margin: auto;
+  padding: 0;
+}
+
 @media (max-width: 2048px) {
   #zbase_viewport .zbase_content_pane.fullwidth {
     padding: 0;
+  }
+}
+
+@media (max-width: 1500px) {
+  .zbase_app .page_wrap.frame {
+    padding-left: 23px;
+    padding-right: 23px;
   }
 }
 
