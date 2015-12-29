@@ -139,6 +139,13 @@ template {
   }
 }
 
+@media (max-width: 1500px) {
+  .zbase_app .page_wrap.frame {
+    padding-left: 23px;
+    padding-right: 23px;
+  }
+}
+
 .zbase_card {
   background: #fff;
   box-shadow: 0 1px 2px rgba(0,0,0,.2);
