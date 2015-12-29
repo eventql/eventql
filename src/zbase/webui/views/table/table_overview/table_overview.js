@@ -145,14 +145,14 @@ ZBase.registerView((function() {
       },
       axis: {
         x: {
-          show: false,
+          show: true,
           type: "timeseries",
           padding: {
             left: 0,
             right: 0
           },
           tick: {
-            format: "%Y-%m-%d %H:%M:%S",
+            format: "%Y-%m-%d",
             count: 10
           }
         },
@@ -162,6 +162,13 @@ ZBase.registerView((function() {
           tick: {
             count: 3,
             values: [-0.1, (y_max + 10) / 2, y_max + 10]
+          }
+        }
+      },
+      tooltip: {
+        format: {
+          title: function(d) {
+            return d3.time.format("%Y-%m-%d %H:%M")(d);
           }
         }
       },
