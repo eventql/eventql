@@ -42,7 +42,7 @@
   display: block;
 }
 
-@media (max-width: 1400px) {
+@media (max-width: 1500px) {
   .zbase_datastore_tables table.z-table thead tr th:first-child,
   .zbase_datastore_tables table.z-table tbody tr td:first-child a {
     padding-left: 23px;
