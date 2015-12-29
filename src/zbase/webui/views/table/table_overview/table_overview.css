@@ -2,7 +2,7 @@
   padding: 0 5px;
 }
 
-.zbase_table_overview .inner_content.page_wrap {
+.zbase_table_overview .inner_content {
   padding: 0 8px;
 }
 
@@ -87,6 +87,10 @@
   height: 45px;
   line-height: 45px;
   color: #3d8ad3;
+}
+
+.zbase_table_overview .chart_container .panel_bar z-dropdown-flyout {
+  margin-top: -12px;
 }
 
 .zbase_table_overview .chart_container .inner_chart {

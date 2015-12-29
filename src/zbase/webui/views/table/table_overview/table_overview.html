@@ -1,7 +1,7 @@
 <template id="zbase_table_overview_main_tpl">
   <div class="zbase_content_pane zbase_table_overview fullwidth">
     <div class="zbase_table_overview_breadcrumbs">
-      <zbase-breadcrumbs class="page_wrap">
+      <zbase-breadcrumbs class="page_wrap frame">
         <zbase-breadcrumbs-section>
           <a href="/a/">Datastore</a>
         </zbase-breadcrumbs-section>
@@ -14,12 +14,12 @@
       </zbase-breadcrumbs>
     </div>
 
-    <h2 class="pagetitle page_wrap" style="overflow:hidden;">
+    <h2 class="pagetitle page_wrap frame" style="overflow:hidden;">
       <i class="fa fa-database"></i>Table: <em><a class="table_name"></a></em>
     </h2>
 
     <z-tabbable class="slim_tabs">
-      <div class="page_wrap">
+      <div class="page_wrap frame">
         <z-tab class="link" data-active><a href="/a/datastore/tables/">Overview</a></z-tab>
         <z-tab class="link"><a href="/a/datastore/tables/edit/">Schema</a></z-tab>
         <z-tab class="link"><a href="/a/datastore/tables/view/">Table Viewer</a></z-tab>
@@ -27,16 +27,16 @@
       </div>
     </z-tabbable>
 
-    <div class="inner_content page_wrap">
+    <div class="inner_content page_wrap frame">
 
       <div class="chart_container">
 
         <div class="panel_bar">
-          <label>Display</label>
+          <label>Display:</label>
           <z-dropdown class="inline" data-resolved>
             <z-dropdown-flyout>
               <z-dropdown-items>
-                <z-dropdown-item>Inserts / sec</z-dropdown-item>
+                <z-dropdown-item data-selected>Inserts / sec</z-dropdown-item>
               </z-dropdown-items>
             </z-dropdown-flyout>
           </z-dropdown>
