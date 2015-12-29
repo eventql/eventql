@@ -139,7 +139,7 @@ template {
   }
 }
 
-@media (max-width: 1500px) {
+@media (max-width: 1400px) {
   .zbase_app .page_wrap.frame {
     padding-left: 23px;
     padding-right: 23px;
