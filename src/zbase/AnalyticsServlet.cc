@@ -92,6 +92,9 @@ void AnalyticsServlet::handle(
 
   http::HTTPResponse res;
   res.populateFromRequest(req);
+  res.addHeader("Access-Control-Allow-Origin", "*");
+  res.addHeader("Access-Control-Allow-Methods", "GET, POST");
+  res.addHeader("Access-Control-Allow-Headers", "Authorization");
 
   if (req.method() == http::HTTPMessage::M_OPTIONS) {
     req_stream->readBody();
