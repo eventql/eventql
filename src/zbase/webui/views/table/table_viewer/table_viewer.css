@@ -1,3 +1,51 @@
+/* breadcrumbs */
+.zbase_table_viewer .zbase_table_viewer_breadcrumbs {
+  height: 36px;
+  width: 100%;
+  border-bottom: 1px solid #eee;
+}
+
+.zbase_table_viewer .zbase_table_viewer_breadcrumbs zbase-breadcrumbs {
+  font-size: 12px;
+  font-weight: 300;
+  display: block;
+}
+
+.zbase_table_viewer .zbase_table_viewer_breadcrumbs zbase-breadcrumbs,
+.zbase_table_viewer .zbase_table_viewer_breadcrumbs zbase-breadcrumbs a {
+  color: #454545;
+  line-height: 36px;
+}
+
+.zbase_table_viewer .zbase_table_viewer_breadcrumbs zbase-breadcrumbs-section:last-child a {
+  font-weight: 300;
+}
+
+.zbase_table_viewer .zbase_table_viewer_breadcrumbs zbase-breadcrumbs-section a:hover {
+  text-decoration: underline;
+}
+
+/* pagetitle */
+.zbase_table_viewer h2.pagetitle {
+  color: #000;
+  padding-left: 8px;
+  padding-top: 5px;
+  line-height: 58px;
+  height: 58px;
+}
+
+.zbase_table_viewer h2.pagetitle i {
+  color: #666;
+  margin-right: 13px;
+}
+
+/* tabs */
+.zbase_table_viewer z-tabbable.slim_tabs z-tab[data-active] a {
+  color: rgba(0, 0, 0, 0.8);
+  font-weight: 600;
+}
+
+/* loading_bar */
 .zbase_table_viewer .loading_bar {
   background-color: #f2f8fa;
   border-bottom: 1px solid #c9d0d4;
@@ -19,7 +67,6 @@
 }
 
 .zbase_table_viewer .loading_bar h3 {
-  margin: 0;
   color: #3d8ad3;
   line-height: 18px;
 }
@@ -95,6 +142,7 @@
   }
 }
 
+/* control_pane */
 .zbase_table_viewer .control_pane {
   padding-bottom: 8px;
 }
@@ -184,6 +232,8 @@
   margin-left: 6px;
 }
 
+
+/* result */
 .zbase_table_viewer .result_pane {
   border-top: 1px solid #d1d1d1;
   border-bottom: 1px solid #ddd;

@@ -171,7 +171,7 @@ ZBase.registerView((function() {
   var renderJSONView = function(json, event_counter) {
     var elem = document.createElement("div");
     elem.setAttribute("id", "json_" + event_counter);
-    $(".zbase_table_viewer .json_viewer").appendChild(elem);
+    $(".zbase_table_viewer .json_viewer .content").appendChild(elem);
 
 
     inspectors.push(new InspectorJSON({
