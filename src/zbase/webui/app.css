@@ -127,7 +127,7 @@ template {
   padding: 0 24px;
 }
 
-#zbase_viewport .page_wrap {
+.zbase_app .page_wrap {
   max-width: 1400px;
   margin: auto;
   padding: 0;
