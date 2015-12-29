@@ -21,12 +21,19 @@ ZBase.registerView((function() {
         "views/table_editor",
         "zbase_table_editor_tpl");
 
+    //set table name
     var table_breadcrumb = $(".table_name_breadcrumb", page);
     table_breadcrumb.innerHTML = schema.name;
     table_breadcrumb.href = kPathPrefix + schema.name;
+    $(".pagetitle .table_name", page).innerHTML = schema.name;
 
-    $("z-tab.schema a", page).href = kPathPrefix + schema.name;
-    $("z-tab.settings a", page).href = kPathPrefix + schema.name;
+    //set tab links
+    var tabs = page.querySelectorAll("z-tab a");
+    for (var i = 0; i < tabs.length; i++) {
+      var link = tabs[i].getAttribute("href");
+      tabs[i].setAttribute("href", link + schema.name);
+    }
+
 
     $("z-dropdown.open_in", page).addEventListener("change", function() {
       switch (this.getValue()) {

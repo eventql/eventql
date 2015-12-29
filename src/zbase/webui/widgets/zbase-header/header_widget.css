@@ -35,6 +35,7 @@
 .zbase_header .platform .icon {
   vertical-align: middle;
   margin-right: 3px;
+  margin-left: -2px;
 }
 
 .zbase_header .navigation_inner {

@@ -1,12 +1,3 @@
-.zbase_table_editor,
-.zbase_table_editor .zbase_content.main_menu {
-  background: #fff;
-}
-
-.zbase_table_editor .zbase_content.main_menu zbase-breadcrumbs-section.table_name a {
-  color: #3d8ad3;
-}
-
 .zbase_table_editor .zbase_content button.z-button {
   font-size: 12px;
 }
@@ -15,17 +6,54 @@
   display: none;
 }
 
-.zbase_table_editor .zbase_page_title {
-  height: 97px;
+/* breadcrumbs */
+.zbase_table_editor .zbase_table_editor_breadcrumbs {
+  height: 36px;
+  width: 100%;
+  border-bottom: 1px solid #eee;
 }
 
-.zbase_table_editor z-tabbable {
-  font-size: 14px;
-  padding-left: 20px;
-  background: transparent;
-  border-bottom: none;
+.zbase_table_editor .zbase_table_editor_breadcrumbs zbase-breadcrumbs {
+  font-size: 12px;
+  font-weight: 300;
+  display: block;
 }
 
+.zbase_table_editor .zbase_table_editor_breadcrumbs zbase-breadcrumbs,
+.zbase_table_editor .zbase_table_editor_breadcrumbs zbase-breadcrumbs a {
+  color: #454545;
+  line-height: 36px;
+}
+
+.zbase_table_editor .zbase_table_editor_breadcrumbs zbase-breadcrumbs-section:last-child a {
+  font-weight: 300;
+}
+
+.zbase_table_editor .zbase_table_editor_breadcrumbs zbase-breadcrumbs-section a:hover {
+  text-decoration: underline;
+}
+
+/* pagetitle */
+.zbase_table_editor h2.pagetitle {
+  color: #000;
+  padding-left: 8px;
+  padding-top: 5px;
+  line-height: 58px;
+  height: 58px;
+}
+
+.zbase_table_editor h2.pagetitle i {
+  color: #666;
+  margin-right: 13px;
+}
+
+/* tabs */
+.zbase_table_editor z-tabbable.slim_tabs z-tab[data-active] a {
+  color: rgba(0, 0, 0, 0.8);
+  font-weight: 600;
+}
+
+/* dropdown */
 .zbase_table_editor .dropdown_container {
   padding: 20px;
   height: 80px;
@@ -50,6 +78,8 @@
   line-height: 34px;
 }
 
+
+/* table */
 .zbase_table_editor table.z-table {
   font-size: 13px;
   table-layout: fixed;
@@ -95,12 +125,6 @@
   padding: 0 20px 20px 20px;
 }
 
-.zbase_table_editor z-tabbable.slim_tabs {
-  margin-left: -20px;
-  margin-right: -20px;
-  padding: 2px 20px 0 20px;
-  background: #f9f9f9;
-}
 
 .zbase_table_editor .add_pane {
   border: 1px solid #e1e1e1;
