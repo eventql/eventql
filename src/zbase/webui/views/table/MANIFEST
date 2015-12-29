@@ -1,3 +1,6 @@
+js_file: "table_viewer.js"
 js_file: "table_overview.js"
+html_file: "table_viewer.html"
 html_file: "table_overview.html"
+css_file: "table_viewer.css"
 css_file: "table_overview.css"
