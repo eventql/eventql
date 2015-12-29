@@ -76,7 +76,8 @@ ZBase.registerView((function() {
     //set tab links
     var tabs = page.querySelectorAll("z-tab a");
     for (var i = 0; i < tabs.length; i++) {
-      tabs[i].href += schema.name;
+      var link = tabs[i].getAttribute("href");
+      tabs[i].setAttribute("href", link + schema.name);
     }
 
     renderSchemaTable($(".table_schema tbody", page), schema.schema.columns, "");
