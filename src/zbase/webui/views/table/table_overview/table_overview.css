@@ -1,0 +1,161 @@
+.zbase_table_overview .page_wrap {
+  padding: 0 5px;
+}
+
+.zbase_table_overview .inner_content.page_wrap {
+  padding: 0 8px;
+}
+
+/* breadcrumbs */
+.zbase_table_overview .zbase_table_overview_breadcrumbs {
+  height: 36px;
+  width: 100%;
+  border-bottom: 1px solid #eee;
+}
+
+.zbase_table_overview .zbase_table_overview_breadcrumbs zbase-breadcrumbs {
+  font-size: 12px;
+  font-weight: 300;
+  display: block;
+}
+
+.zbase_table_overview .zbase_table_overview_breadcrumbs zbase-breadcrumbs,
+.zbase_table_overview .zbase_table_overview_breadcrumbs zbase-breadcrumbs a {
+  color: #454545;
+  line-height: 36px;
+}
+
+.zbase_table_overview .zbase_table_overview_breadcrumbs zbase-breadcrumbs-section:last-child a {
+  font-weight: 300;
+}
+
+.zbase_table_overview .zbase_table_overview_breadcrumbs zbase-breadcrumbs-section a:hover {
+  text-decoration: underline;
+}
+
+/* pagetitle */
+.zbase_table_overview h2.pagetitle {
+  color: #000;
+  padding-left: 8px;
+  padding-top: 5px;
+  line-height: 58px;
+  height: 58px;
+}
+
+.zbase_table_overview h2.pagetitle i {
+  color: #666;
+  margin-right: 13px;
+}
+
+/* tabs */
+.zbase_table_overview z-tabbable.slim_tabs z-tab[data-active] a {
+  color: rgba(0, 0, 0, 0.8);
+  font-weight: 600;
+}
+
+/* chart container */
+.zbase_table_overview .chart_container {
+  margin: 37px 0 0 4px;
+  border: 1px solid #dadada;
+  box-shadow: 0 0 4px #f6f6f6;
+  border-radius: 4px;
+}
+
+.zbase_table_overview .chart_container.hidden {
+  display: none;
+}
+
+.zbase_table_overview .chart_container .panel_bar {
+  height: 45px;
+  line-height: 45px;
+  padding: 0 20px;
+  border-bottom: 1px solid #ddd;
+}
+
+.zbase_table_overview .chart_container .panel_bar label,
+.zbase_table_overview .chart_container .panel_bar z-dropdown {
+  display: block;
+  float: left;
+}
+
+.zbase_table_overview .chart_container .panel_bar label {
+  font-size: 12px;
+  color: #999;
+}
+
+.zbase_table_overview .chart_container .panel_bar z-dropdown-header {
+  height: 45px;
+  line-height: 45px;
+  color: #3d8ad3;
+}
+
+.zbase_table_overview .chart_container .inner_chart {
+  background-color: #f9f9f9;
+}
+
+.zbase_table_overview .chart_container .c3-line {
+  stroke-width: 2px;
+}
+
+.zbase_table_overview .chart_container .inner_chart .error_msg {
+  line-height: 130px;
+  text-align: center;
+  color: #999;
+}
+
+/* table info */
+.zbase_table_overview .table_info {
+  overflow: auto;
+  padding: 18px 13px 16px 16px;
+  border-bottom: 1px solid #dadada;
+  box-shadow: inset 0 -4px 3px -3px #f9f9f9;
+}
+
+.zbase_table_overview .table_info .column {
+  float: left;
+  margin-right: 75px;
+}
+
+.zbase_table_overview .table_info .column label {
+  color: #9b9b9b;
+  font-size: 13px;
+}
+
+.zbase_table_overview .table_info .column .value {
+  color: #4f4f4f;
+  font-size: 24px;
+  line-height: 33px;
+  letter-spacing: 0.8px;
+  font-weight: 300;
+}
+
+/* schema */
+.zbase_table_overview .table_schema {
+  margin-top: 33px;
+  padding-left: 3px;
+}
+
+.zbase_table_overview .table_schema h3 {
+  color: #000;
+  font-size: 16px;
+  font-weight: 500;
+  padding-left: 4px;
+}
+
+.zbase_table_overview .table_schema table.z-table {
+  table-layout: fixed;
+  margin-top: 14px;
+  font-size: 13px;
+  border-top: 1px solid #ddd;
+}
+
+.zbase_table_overview .table_schema table.z-table thead th {
+  color: #888;
+  font-weight: 400;
+  width: 33.33%;
+}
+
+.zbase_table_overview .table_schema table.z-table tbody td {
+  padding: 0 .8em;
+  line-height: 42px;
+}
