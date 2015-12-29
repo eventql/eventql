@@ -163,7 +163,7 @@ route {
   require_module: "widgets/z-input"
   require_module: "widgets/z-search"
   require_module: "widgets/z-dropdown"
-  require_module: "views/table_viewer"
+  require_module: "views/table/table_viewer"
 }
 
 route {
@@ -190,7 +190,7 @@ route {
   require_module: "widgets/z-table"
   require_module: "widgets/z-tabbable"
   require_module: "widgets/zbase-c3-chart"
-  require_module: "views/table_overview"
+  require_module: "views/table/table_overview"
 }
 
 route {
