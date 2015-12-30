@@ -66,7 +66,7 @@ Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildLocalSequential
 
   if (partition.isEmpty()) {
     return Option<ScopedPtr<csql::TableExpression>>(
-        mkScoped(new csql::EmptyTable(node->columnNames())));
+        mkScoped(new csql::EmptyTable(node->outputColumns())));
   } else {
     auto reader = partition.get()->getReader();
     auto scan = reader->buildSQLScan(ctx, node, runtime);

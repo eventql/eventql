@@ -162,7 +162,7 @@ ScopedPtr<csql::TableExpression> LogPartitionReader::buildSQLScan(
     csql::QueryBuilder* runtime) const {
   auto cstable = fetchCSTableFilename();
   if (cstable.isEmpty()) {
-    return mkScoped(new csql::EmptyTable(node->columnNames()));
+    return mkScoped(new csql::EmptyTable(node->outputColumns()));
   }
 
   auto scan = mkScoped(
