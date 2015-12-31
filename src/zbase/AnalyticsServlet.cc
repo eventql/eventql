@@ -989,15 +989,22 @@ void AnalyticsServlet::executeSQLAggregatePartition(
 
   Buffer result;
   auto os = BufferOutputStream::fromBuffer(&result);
-  sql_->executeAggregate(
-      txn.get(),
-      msg::decode<csql::RemoteAggregateParams>(query),
-      app_->getExecutionStrategy(session.customer()),
-      os.get());
 
-  res->setStatus(http::kStatusOK);
-  res->addHeader("Content-Type", "application/octet-stream");
-  res->addBody(result);
+  try {
+    sql_->executeAggregate(
+        txn.get(),
+        msg::decode<csql::RemoteAggregateParams>(query),
+        app_->getExecutionStrategy(session.customer()),
+        os.get());
+
+    res->setStatus(http::kStatusOK);
+    res->addHeader("Content-Type", "application/octet-stream");
+    res->addBody(result);
+  } catch (const StandardException& e) {
+    res->setStatus(http::kStatusInternalServerError);
+    res->addHeader("Content-Type", "application/octet-stream");
+    res->addBody(e.what());
+  }
 }
 
 void AnalyticsServlet::executeSQLScanPartition(

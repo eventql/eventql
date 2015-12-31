@@ -257,9 +257,8 @@ ScopedPtr<InputStream> SQLEngine::executeParallelGroupBy(
     }
   }
 
-  RAISEF(
+  RAISE(
       kRuntimeError,
-      "SQLEngine::executeRemoteGroupBy failed: $0",
       StringUtil::join(errors, ", "));
 }
 
@@ -296,9 +295,7 @@ ScopedPtr<InputStream> SQLEngine::executeRemoteGroupBy(
   auto res = http_client.executeRequest(req);
 
   if (res.statusCode() != 200) {
-    RAISEF(
-        kRuntimeError,
-        "received non-200 response: $0", res.body().toString());
+    RAISE(kRuntimeError, res.body().toString());
   }
 
   return mkScoped(new StringInputStream(res.body().toString()));
