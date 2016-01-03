@@ -19,6 +19,7 @@
 #include "csql/qtree/ColumnReferenceNode.h"
 #include "csql/CSTableScan.h"
 #include "zbase/core/TimeWindowPartitioner.h"
+#include "zbase/core/SQLEngine.h"
 
 using namespace stx;
 
@@ -117,6 +118,17 @@ void LogfileService::scanLocalLogfilePartition(
       partition_key.toString());
 
   auto txn = sql_->newTransaction();
+  auto tables = zbase::SQLEngine::tableProviderForNamespace(
+        pmap_,
+        repl_,
+        nullptr,
+        auth_,
+        session.customer());
+
+  auto table_info = tables->describe(table_name);
+  if (table_info.isEmpty()) {
+    RAISEF(kNotFoundError, "table not found: '$0'", table_name);
+  }
 
   Vector<RefPtr<csql::SelectListNode>> select_list;
   select_list.emplace_back(
@@ -161,7 +173,7 @@ void LogfileService::scanLocalLogfilePartition(
 
   auto seqscan = mkRef(
       new csql::SequentialScanNode(
-          table_name,
+          table_info.get(),
           select_list,
           where_cond));
 

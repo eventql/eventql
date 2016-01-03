@@ -6,6 +6,7 @@ v0.2.2
   - new table management UI
   - implemented SQL table subqueries
   - improved column name resolution and group by select list rewriting
+  - implemented SQL JOIN
 
 v0.2.1
 ======

@@ -1072,14 +1072,21 @@ void AnalyticsServlet::executeSQLScanPartition(
                 stmts[0]));
       }
 
+      auto execution_strategy = app_->getExecutionStrategy(session.customer());
+      auto table_info = execution_strategy
+          ->tableProvider()
+          ->describe(query.table_name());
+
+      if (table_info.isEmpty()) {
+        RAISEF(kNotFoundError, "table not found: '$0'", query.table_name());
+      }
+
       auto qtree = mkRef(
           new csql::SequentialScanNode(
-                query.table_name(),
-                select_list,
-                where_expr,
-                (csql::AggregationStrategy) query.aggregation_strategy()));
-
-      auto execution_strategy = app_->getExecutionStrategy(session.customer());
+              table_info.get(),
+              select_list,
+              where_expr,
+              (csql::AggregationStrategy) query.aggregation_strategy()));
 
       auto qplan = sql_->buildQueryPlan(
           txn.get(),
