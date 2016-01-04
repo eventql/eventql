@@ -1,4 +1,8 @@
-v0.2.2 (pending)
+v0.2.2 (next)
+=============
+  - SQL: nested loop JOIN optimization
+
+v0.2.2 (current)
 ================
   - CORE: select TSDB partitions from tablescan constraints (deprecates .lastNdays)
   - SQL: implemented JOIN
@@ -7,6 +11,7 @@ v0.2.2 (pending)
   - SQL: implemented scan constraint extraction
   - SQL: improved column name resolution and group by select list rewriting
   - SQL: implemented WHERE pushdown (predicate pruning/rewriting)
+  - SQL: time_at function
   - WEBUI: new table management UI
 
 v0.2.1 (2015-12-16)
