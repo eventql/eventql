@@ -6,6 +6,7 @@ v0.2.2 (pending)
   - SQL: implemented constant folding
   - SQL: implemented scan constraint extraction
   - SQL: improved column name resolution and group by select list rewriting
+  - SQL: implemented WHERE pushdown (predicate pruning/rewriting)
   - WEBUI: new table management UI
 
 v0.2.1 (2015-12-16)
