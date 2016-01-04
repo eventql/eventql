@@ -1,12 +1,18 @@
-v0.2.2 (pending)
+v0.2.2 (next)
+=============
+  - SQL: nested loop JOIN optimization
+
+v0.2.2 (current)
 ================
-  - CORE: select TSDB partitions from sql tablescan constraints (deprecates .lastNdays)
+  - CORE: select TSDB partitions from tablescan constraints (deprecates .lastNdays)
   - SQL: implemented JOIN
   - SQL: implemented table subqueries
   - SQL: implemented constant folding
   - SQL: implemented scan constraint extraction
   - SQL: improved column name resolution and group by select list rewriting
-  - SQL: implement to_{string,int,float,bool} conversion functions
+  - SQL: implemented WHERE pushdown (predicate pruning/rewriting)
+  - SQL: implemented to_{string,int,float,bool} conversion functions
+  - SQL: implemented time_at function
   - WEBUI: new table management UI
 
 v0.2.1 (2015-12-16)
@@ -20,7 +26,7 @@ v0.2.1 (2015-12-16)
 
 v0.2.0 (2015-12-09)
 ===================
-  - CORE: merged upgrade to COLSM v0.2.0 storage engine
+  - CORE: upgrade to COLSM v0.2.0 storage engine (enables true LSM with UPDATEs)
   - WEBUI: UI fixes
 
 v0.1.2 (2015-12-06)
@@ -34,13 +40,9 @@ v0.1.1 (2015-12-04)
 
 v0.1.0 (2015-11-26)
 ===================
-  - CORE: tsdb replication fixes
-
-v0.0.0
-======
   - CORE: timeseries and static partitioned tables
   - CORE: DHT based replication and sharding
-  - CORE: COLSM v0.1.0 storage
+  - CORE: COLSM v0.1.0 storage (append only)
   - CORE: basic zmaster
   - SQL: basic SQL engine
   - API: basic javascript (spidermonkey) integration, MR framework
