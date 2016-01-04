@@ -1,42 +1,47 @@
+v0.2.2 (pending)
+================
+  - CORE: select TSDB partitions from sql tablescan constraints (deprecates .lastNdays)
+  - SQL: implemented JOIN
+  - SQL: implemented table subqueries
+  - SQL: implemented constant folding
+  - SQL: implemented scan constraint extraction
+  - SQL: improved column name resolution and group by select list rewriting
+  - WEBUI: new table management UI
 
-v0.2.2
+v0.2.1 (2015-12-16)
+===================
+  - CORE: removed COLSM v0.2.0 upgrade code
+  - API: drilldown query API
+  - API: metrics support
+  - API: http/mapreduce error handling improvements
+  - API: javascript utf8 fixes
+  - WEBUI: stats on /zstatus/
+
+v0.2.0 (2015-12-09)
+===================
+  - CORE: merged upgrade to COLSM v0.2.0 storage engine
+  - WEBUI: UI fixes
+
+v0.1.2 (2015-12-06)
 ======
-  - sql constant folding
-  - extract scan/time constraints from where clause (deprecates .lastNdays)
-  - new table management UI
-  - implemented SQL table subqueries
-  - improved column name resolution and group by select list rewriting
-  - implemented SQL JOIN
+  - CORE: TimeWindowPartitioner::partitionKeysFor one-off fix
+  - WEBUI: UI refresh
 
-v0.2.1
+v0.1.1 (2015-12-04)
 ======
-  - removed COLSM v0.2.0 upgrade code
-  - drilldown query API
-  - metrics support
-  - stats on /zstatus/
-  - http/mapreduce error handling improvements
-  - javascript utf8 fixes
+  - CORE: z1d daemonization
 
-v0.2.0
+v0.1.0 (2015-11-26)
 ======
-  - merged upgrade to COLSM v0.2.0 storage engine
-  - UI fixes
-
-v0.1.2
-======
-  - TimeWindowPartitioner::partitionKeysFor one-off fix
-  - UI refresh
-
-v0.1.1
-======
-  - new seller analytics UI
-  - z1d daemonization
-
-
-v0.1.0
-======
-  - tsdb replication fixes
+  - CORE: tsdb replication fixes
 
 v0.0.0
 ======
-  - for changes before 2015-12-01 refer to the git history
+  - CORE: timeseries and static partitioned tables
+  - CORE: DHT based replication and sharding
+  - CORE: COLSM v0.1.0 storage
+  - CORE: basic zmaster
+  - SQL: basic SQL engine
+  - API: basic javascript (spidermonkey) integration, MR framework
+  - API: basic HTTP API
+  - WEBUI: sql editor, table management UI
