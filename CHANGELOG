@@ -33,10 +33,6 @@ v0.1.1 (2015-12-04)
 
 v0.1.0 (2015-11-26)
 ===================
-  - CORE: tsdb replication fixes
-
-v0.0.0
-======
   - CORE: timeseries and static partitioned tables
   - CORE: DHT based replication and sharding
   - CORE: COLSM v0.1.0 storage (append only)
