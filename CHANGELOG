@@ -19,7 +19,7 @@ v0.2.1 (2015-12-16)
 
 v0.2.0 (2015-12-09)
 ===================
-  - CORE: merged upgrade to COLSM v0.2.0 storage engine
+  - CORE: merged upgrade to COLSM v0.2.0 storage engine (enables true LSM with UPDATEs)
   - WEBUI: UI fixes
 
 v0.1.2 (2015-12-06)
@@ -39,7 +39,7 @@ v0.0.0
 ======
   - CORE: timeseries and static partitioned tables
   - CORE: DHT based replication and sharding
-  - CORE: COLSM v0.1.0 storage
+  - CORE: COLSM v0.1.0 storage (append only)
   - CORE: basic zmaster
   - SQL: basic SQL engine
   - API: basic javascript (spidermonkey) integration, MR framework
