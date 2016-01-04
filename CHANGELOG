@@ -1,6 +1,6 @@
 v0.2.2 (pending)
 ================
-  - CORE: select TSDB partitions from sql tablescan constraints (deprecates .lastNdays)
+  - CORE: select TSDB partitions from tablescan constraints (deprecates .lastNdays)
   - SQL: implemented JOIN
   - SQL: implemented table subqueries
   - SQL: implemented constant folding
