@@ -23,16 +23,16 @@ v0.2.0 (2015-12-09)
   - WEBUI: UI fixes
 
 v0.1.2 (2015-12-06)
-======
+===================
   - CORE: TimeWindowPartitioner::partitionKeysFor one-off fix
   - WEBUI: UI refresh
 
 v0.1.1 (2015-12-04)
-======
+===================
   - CORE: z1d daemonization
 
 v0.1.0 (2015-11-26)
-======
+===================
   - CORE: tsdb replication fixes
 
 v0.0.0
