@@ -104,7 +104,9 @@ Option<csql::TableInfo> TSDBTableProvider::describe(
   if (table.isEmpty()) {
     return None<csql::TableInfo>();
   } else {
-    return Some(tableInfoForTable(table.get()));
+    auto tblinfo = tableInfoForTable(table.get());
+    tblinfo.table_name = table_name;
+    return Some(tblinfo);
   }
 }
 

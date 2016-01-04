@@ -270,7 +270,6 @@ int main(int argc, const char** argv) {
   auto repl_scheme = RefPtr<zbase::ReplicationScheme>(
         new zbase::DHTReplicationScheme(cluster_config, local_replica));
 
-
   String node_name = "__anonymous";
   if (flags.isSet("join")) {
     node_name = flags.getString("join");
