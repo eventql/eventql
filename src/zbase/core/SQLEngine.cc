@@ -17,6 +17,8 @@
 #include <csql/qtree/GroupByMergeNode.h>
 #include <csql/qtree/RemoteAggregateNode.h>
 #include <csql/qtree/RemoteAggregateParams.pb.h>
+#include <csql/qtree/CallExpressionNode.h>
+#include <csql/qtree/ColumnReferenceNode.h>
 #include <zbase/z1stats.h>
 
 namespace zbase {
@@ -29,6 +31,8 @@ RefPtr<csql::QueryTreeNode> SQLEngine::rewriteQuery(
     AnalyticsAuth* auth,
     const String& tsdb_namespace,
     RefPtr<csql::QueryTreeNode> query) {
+  rewriteTableTimeSuffix(query);
+
   insertPartitionSubqueries(
       runtime,
       partition_map,
@@ -52,6 +56,60 @@ RefPtr<csql::TableProvider> SQLEngine::tableProviderForNamespace(
       replication_scheme,
       cstable_index,
       auth);
+}
+
+void SQLEngine::rewriteTableTimeSuffix(
+      RefPtr<csql::QueryTreeNode> node) {
+  auto seqscan = dynamic_cast<csql::SequentialScanNode*>(node.get());
+  if (seqscan) {
+    auto table_ref = TSDBTableRef::parse(seqscan->tableName());
+    if (!table_ref.timerange_begin.isEmpty() &&
+        !table_ref.timerange_limit.isEmpty()) {
+      seqscan->setTableName(table_ref.table_key);
+
+      auto pred = mkRef(
+          new csql::CallExpressionNode(
+              "logical_and",
+              Vector<RefPtr<csql::ValueExpressionNode>>{
+                new csql::CallExpressionNode(
+                    "gte",
+                    Vector<RefPtr<csql::ValueExpressionNode>>{
+                      new csql::ColumnReferenceNode("time"),
+                      new csql::LiteralExpressionNode(
+                          csql::SValue(csql::SValue::IntegerType(
+                              table_ref.timerange_begin.get().unixMicros())))
+                    }),
+                new csql::CallExpressionNode(
+                    "lte",
+                    Vector<RefPtr<csql::ValueExpressionNode>>{
+                      new csql::ColumnReferenceNode("time"),
+                      new csql::LiteralExpressionNode(
+                          csql::SValue(csql::SValue::IntegerType(
+                              table_ref.timerange_limit.get().unixMicros())))
+                    })
+              }));
+
+      auto where_expr = seqscan->whereExpression();
+      if (!where_expr.isEmpty()) {
+        pred = mkRef(
+            new csql::CallExpressionNode(
+                "logical_and",
+                Vector<RefPtr<csql::ValueExpressionNode>>{
+                  where_expr.get(),
+                  pred.asInstanceOf<csql::ValueExpressionNode>()
+                }));
+      }
+
+      iputs("rewirte: $0", pred->toString());
+      seqscan->setWhereExpression(
+          pred.asInstanceOf<csql::ValueExpressionNode>());
+    }
+  }
+
+  auto ntables = node->numChildren();
+  for (int i = 0; i < ntables; ++i) {
+    rewriteTableTimeSuffix(node->child(i));
+  }
 }
 
 void SQLEngine::insertPartitionSubqueries(

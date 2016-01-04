@@ -45,6 +45,10 @@ public:
 
 protected:
 
+  // rewrite tbl.lastXXX to tbl WHERE time > x and time < x
+  static void rewriteTableTimeSuffix(
+      RefPtr<csql::QueryTreeNode> node);
+
   static void insertPartitionSubqueries(
       csql::Runtime* runtime,
       PartitionMap* partition_map,
