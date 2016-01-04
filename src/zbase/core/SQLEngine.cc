@@ -100,7 +100,6 @@ void SQLEngine::rewriteTableTimeSuffix(
                 }));
       }
 
-      iputs("rewirte: $0", pred->toString());
       seqscan->setWhereExpression(
           pred.asInstanceOf<csql::ValueExpressionNode>());
     }
