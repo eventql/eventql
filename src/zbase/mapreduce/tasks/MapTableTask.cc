@@ -52,7 +52,7 @@ MapTableTask::MapTableTask(
   if (!table_ref.timerange_limit.isEmpty()) {
     csql::ScanConstraint constraint;
     constraint.column_name = "time";
-    constraint.type = csql::ScanConstraintType::GREATER_THAN_OR_EQUAL_TO;
+    constraint.type = csql::ScanConstraintType::LESS_THAN_OR_EQUAL_TO;
     constraint.value = csql::SValue(csql::SValue::IntegerType(
         table_ref.timerange_limit.get().unixMicros()));
     constraints.emplace_back(constraint);
