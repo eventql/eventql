@@ -39,8 +39,27 @@ MapTableTask::MapTableTask(
     RAISEF(kNotFoundError, "table not found: $0", table_ref_.table_key);
   }
 
+  Vector<csql::ScanConstraint> constraints;
+  if (!table_ref.timerange_begin.isEmpty()) {
+    csql::ScanConstraint constraint;
+    constraint.column_name = "time";
+    constraint.type = csql::ScanConstraintType::GREATER_THAN_OR_EQUAL_TO;
+    constraint.value = csql::SValue(csql::SValue::IntegerType(
+        table_ref.timerange_begin.get().unixMicros()));
+    constraints.emplace_back(constraint);
+  }
+
+  if (!table_ref.timerange_limit.isEmpty()) {
+    csql::ScanConstraint constraint;
+    constraint.column_name = "time";
+    constraint.type = csql::ScanConstraintType::GREATER_THAN_OR_EQUAL_TO;
+    constraint.value = csql::SValue(csql::SValue::IntegerType(
+        table_ref.timerange_limit.get().unixMicros()));
+    constraints.emplace_back(constraint);
+  }
+
   auto partitioner = table.get()->partitioner();
-  auto partitions = partitioner->listPartitions();
+  auto partitions = partitioner->listPartitions(constraints);
 
   for (const auto& partition : partitions) {
     auto shard = mkRef(new MapTableTaskShard());
