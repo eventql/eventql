@@ -83,11 +83,7 @@ ScopedPtr<csql::TableExpression> LSMPartitionReader::buildSQLScan(
           node,
           runtime));
 
-  //auto cstable_version = cstableVersion();
-  //if (!cstable_version.isEmpty()) {
-  //  scan->setCacheKey(cstable_version.get());
-  //}
-
+  scan->setCacheKey(version());
   return std::move(scan);
 }
 
