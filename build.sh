@@ -98,7 +98,7 @@ if [[ $MAKETOOL == "make" ]]; then
         -H${SOURCE_DIR_REAL}
   fi
 
-  (cd ${TARGET_DIR} && make -j${BUILD_NCPUS}) || exit 1
+  (cd ${TARGET_DIR} && make -j${BUILD_NCPUS} VERBOSE=1) || exit 1
 
 # build c++ with ninja
 elif [[ $MAKETOOL == "ninja" ]]; then
