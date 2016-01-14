@@ -17,6 +17,9 @@ option(ENABLE_TESTS "Build unit tests [default: ON]" ON)
 #set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
 #set(CMAKE_STATIC_LINKER_FLAGS "${CMAKE_STATIC_LINKER_FLAGS} -static")
 
+set(CMAKE_C_FLAGS_RELEASE "-O3 ${CMAKE_CXX_FLAGS_RELEASE}")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3 ${CMAKE_CXX_FLAGS_RELEASE}")
+
 set(PROTOC_ARGS --proto_path ${CMAKE_SOURCE_DIR}/src/zbase/core)
 
 add_library(hunspell OBJECT
