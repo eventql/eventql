@@ -335,6 +335,9 @@ void DocumentDBServlet::listDocuments(
   String search_filter;
   URI::getParam(params, "search", &search_filter);
 
+  String skip_acls_string;
+  bool skip_acls = URI::getParam(params, "skip_acls", &skip_acls_string);
+
   /* scan documents */
   Buffer buf;
   json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
@@ -354,7 +357,7 @@ void DocumentDBServlet::listDocuments(
       return true;
     }
 
-    if (isDocumentReadableForUser(doc, session.userid())) {
+    if (skip_acls || isDocumentReadableForUser(doc, session.userid())) {
       ++num_docs_total;
     }
 
