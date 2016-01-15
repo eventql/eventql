@@ -19,6 +19,8 @@ Option<DocumentACL> findDocumentACLForUser(
     const Document& doc,
     const String& userid);
 
+String getDocumentOwner(const Document& doc);
+
 bool isDocumentReadableForUser(const Document& doc, const String& userid);
 
 bool isDocumentWritableForUser(const Document& doc, const String& userid);

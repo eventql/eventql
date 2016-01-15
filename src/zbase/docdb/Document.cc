@@ -37,6 +37,16 @@ bool isDocumentReadableForUser(const Document& doc, const String& userid) {
   return !acls.isEmpty() && acls.get().allow_read();
 }
 
+String getDocumentOwner(const Document& doc) {
+  for (const auto& acl : doc.acls()) {
+    if (acl.is_owner()) {
+      return acl.userid();
+    }
+  }
+
+  return "";
+}
+
 bool isDocumentWritableForUser(const Document& doc, const String& userid) {
   auto acls = findDocumentACLForUser(doc, userid);
   return !acls.isEmpty() && acls.get().allow_write();

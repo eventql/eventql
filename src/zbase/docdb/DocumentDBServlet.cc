@@ -461,6 +461,10 @@ void DocumentDBServlet::renderDocument(
   json->addString(doc.category());
   json->addComma();
 
+  json->addObjectEntry("author");
+  json->addString(getDocumentOwner(doc));
+  json->addComma();
+
   json->addObjectEntry("acl_policy");
   json->addString(DocumentACLPolicy_Name(doc.acl_policy()));
   json->addComma();
