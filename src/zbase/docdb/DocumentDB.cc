@@ -25,7 +25,6 @@ DocumentDB::DocumentDB(const String& path) {
 
 void DocumentDB::listDocuments(
     const String& db_namespace,
-    const String& userid,
     Function<bool (const Document& doc)> fn) const {
   auto namespace_prefix = db_namespace + "~d~";
 
@@ -47,10 +46,6 @@ void DocumentDB::listDocuments(
     }
 
     auto doc = msg::decode<Document>(value);
-    if (!isDocumentReadableForUser(doc, userid)) {
-      continue;
-    }
-
     if (!fn(doc)) {
       break;
     }

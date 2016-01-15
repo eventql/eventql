@@ -23,7 +23,6 @@ public:
 
   void listDocuments(
       const String& db_namespace,
-      const String& userid,
       Function<bool (const Document& doc)> fn) const;
 
   void createDocument(

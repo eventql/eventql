@@ -351,15 +351,16 @@ void DocumentDBServlet::listDocuments(
   size_t num_docs_user = 0;
   docdb_->listDocuments(
       session.customer(),
-      session.userid(),
       [&] (const Document& doc) -> bool {
     if (!type_filter.empty() && doc.type() != type_filter) {
       return true;
     }
 
-    if (skip_acls || isDocumentReadableForUser(doc, session.userid())) {
-      ++num_docs_total;
+    if (!isDocumentReadableForUser(doc, session.userid()) && !skip_acls) {
+      return true;
     }
+
+    ++num_docs_total;
 
     if (isDocumentAuthoredByUser(doc, session.userid())) {
       ++num_docs_user;
