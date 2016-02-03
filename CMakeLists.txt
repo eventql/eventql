@@ -1,7 +1,9 @@
 project(ZenBase)
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.0)
 
 include(CheckIncludeFile)
+include(CheckCXXSourceCompiles)
+
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/modules/") 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
@@ -83,8 +85,8 @@ if(APPLE)
 
 # LINUX FLAGS
 else()
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++ ")
-  set(CMAKE_CXX_LINK_EXECUTABLE " -stdlib=libc++ ${CMAKE_CXX_LINK_EXECUTABLE} -ldl -static-libstdc++ -static-libgcc")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+  set(CMAKE_CXX_LINK_EXECUTABLE "${CMAKE_CXX_LINK_EXECUTABLE} -ldl -static-libstdc++ -static-libgcc")
   set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
   set(BUILD_SHARED_LIBRARIES OFF)
   set(CMAKE_EXE_LINK_DYNAMIC_C_FLAGS)       # remove -Wl,-Bdynamic
@@ -93,6 +95,19 @@ else()
   set(CMAKE_SHARED_LIBRARY_CXX_FLAGS)
   set(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS)    # remove -rdynamic
   set(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS)
+endif()
+
+# check for codecvt
+CHECK_CXX_SOURCE_COMPILES("
+  #include <codecvt>
+  int main() {
+    std::codecvt_utf8_utf16<wchar_t> x;
+    return 0;
+  }
+" HAVE_STD_CODECVT)
+
+if (NOT HAVE_STD_CODECVT)
+  message(FATAL_ERROR "ERROR: c++ stdlib does not support <codecvt>")
 endif()
 
 add_subdirectory(deps/libstx)
