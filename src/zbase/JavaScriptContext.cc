@@ -355,6 +355,7 @@ void JavaScriptContext::loadProgram(const String& program) {
   JS::RootedValue rval(ctx_);
 
   JS::CompileOptions opts(ctx_);
+  opts.setUTF8(true);
   opts.setFileAndLine("<mapreduce>", 1);
 
   if (!JS::Evaluate(
