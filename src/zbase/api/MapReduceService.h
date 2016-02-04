@@ -43,7 +43,8 @@ public:
       const SHA1Hash& partition_key,
       const String& map_fn,
       const String& globals,
-      const String& params);
+      const String& params,
+      const Set<String>& required_columns);
 
   Option<SHA1Hash> reduceTables(
       const AnalyticsSession& session,

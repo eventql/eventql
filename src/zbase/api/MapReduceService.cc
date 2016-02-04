@@ -86,7 +86,8 @@ Option<SHA1Hash> MapReduceService::mapPartition(
     const SHA1Hash& partition_key,
     const String& map_fn,
     const String& globals,
-    const String& params) {
+    const String& params,
+    const Set<String>& required_columns) {
   auto table = pmap_->findTable(
       session.customer(),
       table_name);

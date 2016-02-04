@@ -114,12 +114,13 @@ Option<MapReduceShardResult> MapTableTask::executeRemote(
       host.addr.ipAndPort());
 
   auto params = StringUtil::format(
-      "table=$0&partition=$1&map_function=$2&globals=$3&params=$4",
+      "table=$0&partition=$1&map_function=$2&globals=$3&params=$4&required_columns=$5",
       URI::urlEncode(shard->table_ref.table_key),
       shard->table_ref.partition_key.get().toString(),
       URI::urlEncode(map_function_),
       URI::urlEncode(globals_),
-      URI::urlEncode(params_));
+      URI::urlEncode(params_),
+      URI::urlEncode(StringUtil::join(required_columns_, ",")));
 
   auto api_token = auth_->encodeAuthToken(session_);
 

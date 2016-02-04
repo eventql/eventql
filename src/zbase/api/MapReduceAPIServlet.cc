@@ -147,6 +147,14 @@ void MapReduceAPIServlet::executeMapPartitionTask(
     String js_params = "{}";
     URI::getParam(params, "params", &js_params);
 
+    String required_columns_str;
+    URI::getParam(params, "required_columns", &required_columns_str);
+
+    Set<String> required_columns;
+    for (const auto& col : StringUtil::split(required_columns_str, ",")) {
+      required_columns.insert(col);
+    }
+
     auto shard_id = service_->mapPartition(
         session,
         job_spec,
@@ -154,7 +162,8 @@ void MapReduceAPIServlet::executeMapPartitionTask(
         SHA1Hash::fromHexString(partition_key),
         map_fn,
         js_globals,
-        js_params);
+        js_params,
+        required_columns);
 
     String resid;
     if (!shard_id.isEmpty()) {
