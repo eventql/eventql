@@ -152,6 +152,10 @@ void MapReduceAPIServlet::executeMapPartitionTask(
 
     Set<String> required_columns;
     for (const auto& col : StringUtil::split(required_columns_str, ",")) {
+      if (col.length() == 0) {
+        continue;
+      }
+
       required_columns.insert(col);
     }
 
