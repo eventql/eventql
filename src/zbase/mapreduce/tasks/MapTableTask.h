@@ -38,6 +38,8 @@ public:
       RefPtr<MapReduceTaskShard> shard,
       RefPtr<MapReduceScheduler> job) override;
 
+  void setRequiredColumns(const Set<String>& columns);
+
 protected:
 
   Option<MapReduceShardResult> executeRemote(
@@ -53,6 +55,7 @@ protected:
   AnalyticsAuth* auth_;
   zbase::PartitionMap* pmap_;
   zbase::ReplicationScheme* repl_;
+  Set<String> required_columns_;
 };
 
 } // namespace zbase

@@ -182,7 +182,8 @@ var Z1 = (function(global) {
       until: opts["until"],
       map_fn: String(opts["map_fn"]),
       globals: __encode_js(bcastdata),
-      params: __encode_js(opts["params"] || {})
+      params: __encode_js(opts["params"] || {}),
+      required_columns: opts["required_columns"]
     };
 
     return job_id;

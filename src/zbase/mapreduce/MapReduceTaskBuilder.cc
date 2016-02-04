@@ -150,7 +150,7 @@ RefPtr<MapReduceTask> MapReduceTaskBuilder::buildMapTableTask(
     RAISE(kRuntimeError, "missing field: params");
   }
 
-  return new MapTableTask(
+  auto task = new MapTableTask(
       session_,
       table_ref,
       map_fn.get(),
@@ -160,6 +160,28 @@ RefPtr<MapReduceTask> MapReduceTaskBuilder::buildMapTableTask(
       auth_,
       pmap_,
       repl_);
+
+  auto required_columns = json::objectLookup(job, "required_columns");
+  if (required_columns != job.end()) {
+    Set<String> required_columns_set;
+
+    auto ncols = json::arrayLength(required_columns, job.end());
+    for (size_t i = 0; i < ncols; ++i) {
+      auto jcol = json::arrayLookup(required_columns, job.end(), i); // O(N^2) but who cares...
+
+      if (jcol->type != json::JSON_STRING) {
+        RAISE(
+            kRuntimeError,
+            "required_columns parameter must be a list/array of strings");
+      }
+
+      required_columns_set.insert(jcol->data);
+    }
+
+    task->setRequiredColumns(required_columns_set);
+  }
+
+  return task;
 }
 
 RefPtr<MapReduceTask> MapReduceTaskBuilder::buildReduceTask(

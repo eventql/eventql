@@ -168,5 +168,9 @@ Option<MapReduceShardResult> MapTableTask::executeRemote(
   return result;
 }
 
+void MapTableTask::setRequiredColumns(const Set<String>& columns) {
+  required_columns_ = columns;
+}
+
 } // namespace zbase
 
