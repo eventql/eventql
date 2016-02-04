@@ -172,6 +172,7 @@ void EventsService::scanLocalTablePartition(
 
   size_t nrows = 0;
   reader->fetchRecords(
+      Set<String>{},
       [
         &result,
         &nrows,

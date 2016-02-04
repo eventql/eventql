@@ -27,6 +27,7 @@ public:
       RefPtr<PartitionSnapshot> head);
 
   void fetchRecords(
+      const Set<String>& required_columns,
       Function<void (const msg::MessageObject& record)> fn) override;
 
   ScopedPtr<csql::TableExpression> buildSQLScan(

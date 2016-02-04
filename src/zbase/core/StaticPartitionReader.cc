@@ -27,6 +27,7 @@ StaticPartitionReader::StaticPartitionReader(
     table_(table) {}
 
 void StaticPartitionReader::fetchRecords(
+    const Set<String>& required_columns,
     Function<void (const msg::MessageObject& record)> fn) {
   auto schema = table_->schema();
 

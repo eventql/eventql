@@ -31,6 +31,7 @@ public:
   Option<String> cstableFilename() const;
 
   virtual void fetchRecords(
+      const Set<String>& required_columns,
       Function<void (const msg::MessageObject& record)> fn) = 0;
 
   virtual ScopedPtr<csql::TableExpression> buildSQLScan(

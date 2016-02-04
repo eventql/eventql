@@ -26,6 +26,7 @@ LogPartitionReader::LogPartitionReader(
     table_(table) {}
 
 void LogPartitionReader::fetchRecords(
+    const Set<String>& required_columns,
     Function<void (const msg::MessageObject& record)> fn) {
   auto schema = table_->schema();
 

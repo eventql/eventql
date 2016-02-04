@@ -159,6 +159,7 @@ Option<SHA1Hash> MapReduceService::mapPartition(
     auto writer = sstable::SSTableWriter::create(output_path_tmp, nullptr, 0);
 
     reader->fetchRecords(
+        required_columns,
         [&schema, &js_ctx, &writer] (const msg::MessageObject& record) {
       Buffer json;
       json::JSONOutputStream jsons(BufferOutputStream::fromBuffer(&json));

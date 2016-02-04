@@ -27,6 +27,7 @@ LSMPartitionReader::LSMPartitionReader(
     table_(table) {}
 
 void LSMPartitionReader::fetchRecords(
+    const Set<String>& required_columns,
     Function<void (const msg::MessageObject& record)> fn) {
   auto schema = table_->schema();
   const auto& tables = snap_->state.lsm_tables();
@@ -36,7 +37,10 @@ void LSMPartitionReader::fetchRecords(
         snap_->base_path,
         tbl->filename() + ".cst");
     auto cstable = cstable::CSTableReader::openFile(cstable_file);
-    cstable::RecordMaterializer materializer(schema.get(), cstable.get());
+    cstable::RecordMaterializer materializer(
+        schema.get(),
+        cstable.get(),
+        required_columns);
     auto id_col = cstable->getColumnReader("__lsm_id");
     auto is_update_col = cstable->getColumnReader("__lsm_is_update");
 
