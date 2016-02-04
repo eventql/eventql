@@ -12,6 +12,10 @@
 #include "js/Conversions.h"
 #include "jsapi.h"
 #include "jsstr.h"
+#include <iostream>
+#include <locale>
+#include <string>
+#include <codecvt>
 
 using namespace stx;
 
@@ -23,9 +27,8 @@ static bool write_json_to_buf(const char16_t* str, uint32_t strlen, void* out) {
   auto outstr = static_cast<String*>(out);
   outstr->reserve(outstr->size() + strlen);
 
-  for (size_t i = 0; i < strlen; ++i) {
-    outstr->push_back(*((const char*) (str + i)));
-  }
+  std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> utf8to16;
+  *outstr += utf8to16.to_bytes(str, str + strlen);
 
   return true;
 }
@@ -152,7 +155,8 @@ bool JavaScriptContext::dispatchLog(
   auto rt = JS_GetRuntime(ctx);
   auto rt_userdata = JS_GetRuntimePrivate(rt);
   if (rt_userdata) {
-    auto log_cstr = JS_EncodeString(ctx, args[0].toString());
+    JS::RootedString log_rstr(ctx, args[0].toString());
+    auto log_cstr = JS_EncodeStringToUTF8(ctx, log_rstr);
     String log_str(log_cstr);
     JS_free(ctx, log_cstr);
 
@@ -183,7 +187,8 @@ bool JavaScriptContext::returnResult(
   auto rt = JS_GetRuntime(ctx);
   auto rt_userdata = JS_GetRuntimePrivate(rt);
   if (rt_userdata) {
-    auto result_cstr = JS_EncodeString(ctx, args[0].toString());
+    JS::RootedString result_rstr(ctx, args[0].toString());
+    auto result_cstr = JS_EncodeStringToUTF8(ctx, result_rstr);
     String result_str(result_cstr);
     JS_free(ctx, result_cstr);
 
@@ -358,12 +363,17 @@ void JavaScriptContext::loadProgram(const String& program) {
   opts.setUTF8(true);
   opts.setFileAndLine("<mapreduce>", 1);
 
+  std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> utf8to16;
+  auto program_utf16 = utf8to16.from_bytes(
+      program.data(),
+      program.data() + program.length());
+
   if (!JS::Evaluate(
         ctx_,
         global_,
         opts,
-        program.c_str(),
-        program.size(),
+        program_utf16.data(),
+        program_utf16.length(),
         &rval)) {
     if (current_error_line_ > 0) {
       RAISEF(
@@ -385,22 +395,42 @@ void JavaScriptContext::loadClosure(
   JSAutoRequest js_req(ctx_);
   JSAutoCompartment js_comp(ctx_, global_);
 
+  std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> utf8to16;
+
   JS::AutoValueArray<3> argv(ctx_);
-  auto source_str_ptr = JS_NewStringCopyN(ctx_, source.data(), source.size());
+  auto source_utf16 = utf8to16.from_bytes(
+      source.data(),
+      source.data() + source.length());
+  auto source_str_ptr = JS_NewUCStringCopyN(
+      ctx_,
+      source_utf16.data(),
+      source_utf16.size());
   if (!source_str_ptr) {
     RAISE(kRuntimeError, "map function execution error: out of memory");
   } else {
     argv[0].setString(source_str_ptr);
   }
 
-  auto globals_str_ptr = JS_NewStringCopyN(ctx_, globals.data(), globals.size());
+  auto globals_utf16 = utf8to16.from_bytes(
+      globals.data(),
+      globals.data() + globals.length());
+  auto globals_str_ptr = JS_NewUCStringCopyN(
+      ctx_,
+      globals_utf16.data(),
+      globals_utf16.size());
   if (!globals_str_ptr) {
     RAISE(kRuntimeError, "map function execution error: out of memory");
   } else {
     argv[1].setString(globals_str_ptr);
   }
 
-  auto params_str_ptr = JS_NewStringCopyN(ctx_, params.data(), params.size());
+  auto params_utf16 = utf8to16.from_bytes(
+      params.data(),
+      params.data() + params.length());
+  auto params_str_ptr = JS_NewUCStringCopyN(
+      ctx_,
+      params_utf16.data(),
+      params_utf16.size());
   if (!params_str_ptr) {
     RAISE(kRuntimeError, "map function execution error: out of memory");
   } else {
@@ -419,20 +449,14 @@ void JavaScriptContext::callMapFunction(
   JSAutoRequest js_req(ctx_);
   JSAutoCompartment js_comp(ctx_, global_);
 
-  size_t json_wstring_len = json_string.size();
-  auto json_wstring = js::InflateString(
-      (js::ExclusiveContext*) ctx_,
+  std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> utf8to16;
+  auto json_string_utf16 = utf8to16.from_bytes(
       json_string.data(),
-      &json_wstring_len);
-  if (!json_wstring) {
-    RAISE(kRuntimeError, "maap function execution error: out of memory");
-  }
+      json_string.data() + json_string.length());
 
   JS::RootedValue json(ctx_);
-  if (JS_ParseJSON(ctx_, json_wstring, json_wstring_len, &json)) {
-    JS_free(ctx_, json_wstring);
+  if (JS_ParseJSON(ctx_, json_string_utf16.data(), json_string_utf16.length(), &json)) {
   } else {
-    JS_free(ctx_, json_wstring);
     RAISE("JavaScriptError", current_error_);
   }
 
@@ -456,7 +480,9 @@ void JavaScriptContext::callReduceFunction(
 
   JS::AutoValueArray<2> argv(ctx_);
 
-  auto key_str_ptr = JS_NewStringCopyN(ctx_, key.data(), key.size());
+  std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> utf8to16;
+  auto key_utf16 = utf8to16.from_bytes(key.data(), key.data() + key.length());
+  auto key_str_ptr = JS_NewUCStringCopyN(ctx_, key_utf16.data(), key_utf16.size());
   if (!key_str_ptr) {
     RAISE(kRuntimeError, "reduce function execution error: out of memory");
   } else {
@@ -512,14 +538,27 @@ String JavaScriptContext::callSerializeFunction(
 
   JS::AutoValueArray<2> argv(ctx_);
 
-  auto key_str_ptr = JS_NewStringCopyN(ctx_, key.data(), key.size());
+  std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> utf8to16;
+  auto key_utf16 = utf8to16.from_bytes(key.data(), key.data() + key.length());
+  auto key_str_ptr = JS_NewUCStringCopyN(
+      ctx_,
+      key_utf16.data(),
+      key_utf16.size());
+
   if (!key_str_ptr) {
     RAISE(kRuntimeError, "serialize function execution error: out of memory");
   } else {
     argv[0].setString(key_str_ptr);
   }
 
-  auto value_str_ptr = JS_NewStringCopyN(ctx_, value.data(), value.size());
+  auto value_utf16 = utf8to16.from_bytes(
+      value.data(),
+      value.data() + value.length());
+  auto value_str_ptr = JS_NewUCStringCopyN(
+      ctx_,
+      value_utf16.data(),
+      value_utf16.size());
+
   if (!value_str_ptr) {
     RAISE(kRuntimeError, "serialize function execution error: out of memory");
   } else {
@@ -531,12 +570,8 @@ String JavaScriptContext::callSerializeFunction(
     RAISE("JavaScriptError", current_error_);
   }
 
-  auto res_jstr = JS::ToString(ctx_, rval);
-  if (!res_jstr) {
-    RAISE(kRuntimeError, "first tuple element must be a string");
-  }
-
-  auto res_cstr = JS_EncodeString(ctx_, res_jstr);
+  JS::RootedString res_rstr(ctx_, rval.toString());
+  auto res_cstr = JS_EncodeStringToUTF8(ctx_, res_rstr);
   String res(res_cstr);
   JS_free(ctx_, res_cstr);
 
@@ -580,7 +615,7 @@ void JavaScriptContext::enumerateTuples(
       RAISE(kRuntimeError, "first tuple element must be a string");
     }
 
-    auto tkey_cstr = JS_EncodeString(ctx_, tkey_jstr);
+    auto tkey_cstr = JS_EncodeStringToUTF8(ctx_, JS::RootedString(ctx_, tkey_jstr));
     String tkey(tkey_cstr);
     JS_free(ctx_, tkey_cstr);
 
@@ -689,9 +724,17 @@ bool JavaScriptContext::ReduceCollectionIter::getNext(
   const auto& value = (*iter->data)[iter->cur];
   ++iter->cur;
 
-  auto val_str_ptr = JS_NewStringCopyN(ctx, value.data(), value.size());
-  if (val_str_ptr) {
-    args.rval().setString(val_str_ptr);
+  std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> utf8to16;
+  auto value_utf16 = utf8to16.from_bytes(
+      value.data(),
+      value.data() + value.length());
+  auto value_str_ptr = JS_NewUCStringCopyN(
+      ctx,
+      value_utf16.data(),
+      value_utf16.size());
+
+  if (value_str_ptr) {
+    args.rval().setString(value_str_ptr);
     return true;
   } else {
     return false;
