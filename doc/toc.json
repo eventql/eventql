@@ -1,0 +1,156 @@
+{
+  "toc": [
+    {
+      "title": "Z1 Database",
+      "path": "getting_started",
+      "children": [
+        {
+          "title": "Getting Started",
+          "path": "z1/getting_started"
+        },
+        {
+          "title": "Concepts",
+          "path": "z1/concepts"
+        },
+        {
+          "title": "Table Types",
+          "path": "z1/table_types"
+        }
+      ]
+    },
+    {
+      "title": "SQL Query Language",
+      "path": "sql/introduction",
+      "children": [
+        {
+          "title": "Introduction",
+          "path": "sql/introduction"
+        },
+        {
+          "title": "Data Types",
+          "path": "sql/data_types"
+        },
+        {
+          "title": "Statements",
+          "path": "sql/statements"
+        },
+        {
+          "title": "Functions &amp; Operators",
+          "path": "sql/functions_and_operators"
+        },
+        {
+          "title": "Literal Values",
+          "path": "sql/literals"
+        },
+        {
+          "title": "Nested Records",
+          "path": "sql/nested_records"
+        },
+        {
+          "title": "ChartSQL Extensions",
+          "path": "sql/chartsql"
+        },
+        {
+          "title": "Examples",
+          "path": "sql/examples"
+        }
+      ]
+    },
+    {
+      "title": "Pipelines",
+      "path": "pipelines/introduction",
+      "children": [
+        {
+          "title": "Introduction",
+          "path": "pipelines/introduction"
+        },
+        {
+          "title": "Map Reduce",
+          "path": "pipelines/map_reduce"
+        },
+        {
+          "title": "Stream Processing",
+          "path": "pipelines/stream_processing"
+        },
+        {
+          "title": "JavaScript API",
+          "path": "pipelines/javascript_api"
+        }
+      ]
+    },
+    {
+      "title": "Collecting Data",
+      "path": "connectors/overview",
+      "children": [
+        {
+          "title": "Web Tracking",
+          "path": "connectors/web_tracking"
+        },
+        {
+          "title": "iOS SDK",
+          "path": "connectors/ios_sdk"
+        },
+        {
+          "title": "Android SDK",
+          "path": "connectors/android_sdk"
+        },
+        {
+          "title": "MySQL/Postgres",
+          "path": "connectors/sql_import"
+        },
+        {
+          "title": "Logfile Import",
+          "path": "connectors/logfile_import"
+        },
+        {
+          "title": "CSV Import",
+          "path": "connectors/csv_import"
+        },
+        {
+          "title": "StatsD",
+          "path": "connectors/statd_import"
+        },
+        {
+          "title": "JSON Events",
+          "path": "connectors/json_event_import"
+        }
+      ]
+    },
+    {
+      "title": "zli Command Line",
+      "path": "zli/introduction",
+      "children": [
+        {
+          "title": "Introduction",
+          "path": "zli/introduction"
+        },
+        {
+          "title": "Installation",
+          "path": "zli/installation"
+        },
+        {
+          "title": "Usage",
+          "path": "zli/usage"
+        }
+      ]
+    },
+    {
+      "title": "HTTP API",
+      "path": "http_api/introduction",
+      "children": [
+        {
+          "title": "Introduction",
+          "path": "http_api/introduction"
+        },
+        {
+          "title": "Authorization",
+          "path": "http_api/authorization"
+        },
+        {
+          "title": "API Reference",
+          "path": "http_api/http_api_reference"
+        }
+      ]
+    }
+  ]
+}
