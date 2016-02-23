@@ -89,7 +89,7 @@ void DrilldownTree::toJSON(
         json->addComma();
       }
 
-      json->addString(leaf->slots[i].toString());
+      json->addString(leaf->slots[i].getString());
     }
 
     json->endArray();
@@ -107,7 +107,7 @@ void DrilldownTree::toJSON(
 
       json->beginObject();
       json->addObjectEntry("key");
-      json->addString(cur->first.toString());
+      json->addString(cur->first.getString());
       json->addComma();
       toJSON(cur->second.get(), depth + 1, json);
       json->endObject();

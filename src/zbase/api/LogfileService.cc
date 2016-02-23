@@ -207,11 +207,11 @@ void LogfileService::scanLocalLogfilePartition(
     }
 
     if (params.return_raw()) {
-      line->raw = argv[colidx++].toString();
+      line->raw = argv[colidx++].getString();
     }
 
     for (; colidx < argc; ++colidx) {
-      line->columns.emplace_back(argv[colidx].toString());
+      line->columns.emplace_back(argv[colidx].getString());
     }
 
     return true;

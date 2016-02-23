@@ -60,7 +60,7 @@ RefPtr<VFSFile> JSONExportRDD::computeBlob(dproc::TaskContext* context) {
           break;
 
         default:
-          json.addString(row[i].toString());
+          json.addString(row[i].getString());
           break;
       }
     }

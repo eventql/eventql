@@ -25,7 +25,7 @@ RefPtr<VFSFile> CSVExportRDD::computeBlob(dproc::TaskContext* context) {
   source_->forEach([&csv] (const Vector<csql::SValue> row) -> bool {
     Vector<String> str_row;
     for (const auto& sv : row) {
-      str_row.emplace_back(sv.toString());
+      str_row.emplace_back(sv.getString());
     }
 
     csv.appendRow(str_row);

@@ -75,7 +75,7 @@ void rowToJSON(
     }
 
     json->addObjectEntry(cols[i]);
-    json->addString(row[i].toString());
+    json->addString(row[i].getString());
   }
 
   json->endObject();
