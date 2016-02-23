@@ -56,7 +56,9 @@ void LSMPartitionSQLScan::execute(
     auto cstable = cstable::CSTableReader::openFile(cstable_file);
     auto id_col = cstable->getColumnReader("__lsm_id");
     auto is_update_col = cstable->getColumnReader("__lsm_is_update");
-    csql::CSTableScan cstable_scan(ctx_, stmt_, cstable_file, runtime_);
+    csql::CSTableScan cstable_scan(ctx_, stmt_, cstable, runtime_);
+    cstable_scan.open();
+
     cstable_scan.setFilter([this, id_col, is_update_col] () -> bool {
       uint64_t rlvl;
       uint64_t dlvl;
@@ -75,7 +77,30 @@ void LSMPartitionSQLScan::execute(
       }
     });
 
-    cstable_scan.execute(cstable.get(), context, fn);
+    for (const auto& col : table_->schema()->columns()) {
+      switch (col.second.type) {
+        case msg::FieldType::BOOLEAN:
+          cstable_scan.setColumnType(col.first, SQL_BOOL);
+          break;
+        case msg::FieldType::UINT32:
+          cstable_scan.setColumnType(col.first, SQL_INTEGER);
+          break;
+        case msg::FieldType::UINT64:
+          cstable_scan.setColumnType(col.first, SQL_INTEGER);
+          break;
+        case msg::FieldType::STRING:
+          cstable_scan.setColumnType(col.first, SQL_STRING);
+          break;
+        case msg::FieldType::DOUBLE:
+          cstable_scan.setColumnType(col.first, SQL_FLOAT);
+          break;
+        case msg::FieldType::DATETIME:
+          cstable_scan.setColumnType(col.first, SQL_TIMESTAMP);
+          break;
+      }
+    }
+
+    cstable_scan.execute(context, fn);
   }
 
   id_set_.clear();
