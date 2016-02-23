@@ -8,18 +8,12 @@ if(EXISTS ${ZBASE_ASSETS_PACK})
   set(ZBASE_ASSETS_SRCS ${ZBASE_ASSETS_SRCS} ${ZBASE_ASSETS_PACK})
   set(ZBASE_HAS_ASSET_BUNDLE TRUE)
 else()
-  if (NOT ZBASE_BUILD_ID MATCHES "devel")
-    message(FATAL_ERROR "ZBase release build with dynamic assets is not allowed")
-  endif()
 endif()
 
 set(ZBASE_DOCASSETS_PACK "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/zbase_documentation_assets.cc")
 if(EXISTS ${ZBASE_DOCASSETS_PACK})
   set(ZBASE_ASSETS_SRCS ${ZBASE_ASSETS_SRCS} ${ZBASE_DOCASSETS_PACK})
 else()
-  if (NOT ZBASE_BUILD_ID MATCHES "devel")
-    message(FATAL_ERROR "ZBase release build without documentation assets is not allowed")
-  endif()
 endif()
 
 configure_file(
