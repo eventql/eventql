@@ -1,3 +1,7 @@
+v0.2.4
+======
+  - improved SValue interface and numeric/time handling
+
 v0.2.3 (2016-02-04)
 ===================
   - MR: support column projection in mapreduces
