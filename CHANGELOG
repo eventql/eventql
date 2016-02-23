@@ -1,9 +1,10 @@
-v0.2.2 (next)
-=============
-  - SQL: nested loop JOIN optimization
+v0.2.3
+======
+  - MR: support column projection in mapreduces
+  - BUG: fix minor bugs in constant folding and constraint resolution
 
-v0.2.2 (current)
-================
+v0.2.2
+======
   - CORE: select TSDB partitions from tablescan constraints (deprecates .lastNdays)
   - SQL: implemented JOIN
   - SQL: implemented table subqueries
