@@ -1,6 +1,7 @@
 v0.2.4
 ======
   - improved SValue interface and numeric/time handling
+  - new functions: now(), z1_version()
 
 v0.2.3 (2016-02-04)
 ===================

@@ -47,6 +47,7 @@
 #include "zbase/core/TSDBServlet.h"
 #include "zbase/core/ReplicationWorker.h"
 #include "zbase/core/LSMTableIndexCache.h"
+#include "zbase/core/SQLEngine.h"
 #include "zbase/DefaultServlet.h"
 #include "csql/defaults.h"
 #include "zbase/ConfigDirectory.h"
@@ -333,6 +334,7 @@ int main(int argc, const char** argv) {
             symbols.get())));
 
     sql->setCacheDir(flags.getString("cachedir"));
+    sql->symbols()->registerFunction("z1_version", &z1VersionExpr);
   }
 
   /* spidermonkey javascript runtime */

@@ -9,6 +9,7 @@
  */
 #include <stx/http/httpclient.h>
 #include <stx/protobuf/msg.h>
+#include <zbase/z1.h>
 #include <zbase/core/SQLEngine.h>
 #include <zbase/core/TSDBService.h>
 #include <zbase/core/TimeWindowPartitioner.h>
@@ -356,6 +357,11 @@ ScopedPtr<InputStream> SQLEngine::executeRemoteGroupBy(
   }
 
   return mkScoped(new StringInputStream(res.body().toString()));
+}
+
+
+void z1VersionExpr(sql_txn* ctx, int argc, csql::SValue* argv, csql::SValue* out) {
+  *out = csql::SValue::newString(zbase::kVersionString);
 }
 
 }

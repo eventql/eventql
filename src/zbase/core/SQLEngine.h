@@ -94,4 +94,6 @@ protected:
 
 };
 
+void z1VersionExpr(sql_txn* ctx, int argc, csql::SValue* argv, csql::SValue* out);
+
 }
