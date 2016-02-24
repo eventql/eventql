@@ -13,8 +13,8 @@ namespace zbase {
 
 static const uint32_t kVersionMajor = 0;
 static const uint32_t kVersionMinor = 2;
-static const uint32_t kVersionPatch = 3;
-static const std::string kVersionString = "v0.2.3";
+static const uint32_t kVersionPatch = 4;
+static const std::string kVersionString = "v0.2.4";
 
 #ifdef ZBASE_BUILD_ID
 static const std::string kBuildID = ZBASE_BUILD_ID;
