@@ -37,8 +37,8 @@ public:
 
   void onInputsReady() override;
 
-  Option<SHA1Hash> cacheKey() const override;
-  void setCacheKey(const SHA1Hash& key);
+  //Option<SHA1Hash> cacheKey() const override;
+  //void setCacheKey(const SHA1Hash& key);
 
 protected:
   csql::Transaction* ctx_;

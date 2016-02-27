@@ -29,63 +29,71 @@ TSDBTableProvider::TSDBTableProvider(
     cstable_index_(cstable_index),
     auth_(auth) {}
 
-//Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
-//    csql::Transaction* ctx,
-//    RefPtr<csql::SequentialScanNode> node,
-//    csql::QueryBuilder* runtime) const {
-//  auto table_ref = TSDBTableRef::parse(node->tableName());
-//  if (partition_map_->findTable(tsdb_namespace_, table_ref.table_key).isEmpty()) {
-//    return None<ScopedPtr<csql::TableExpression>>();
-//  }
-//
-//  if (table_ref.partition_key.isEmpty()) {
-//    RAISEF(
-//        kRuntimeError,
-//        "error while opening table '$0': missing partition key",
-//        node->tableName());
-//  }
-//
-//  if (table_ref.host.isEmpty() || table_ref.host.get() != "localhost") {
-//    return buildRemoteSequentialScan(ctx, node, table_ref, runtime);
-//  } else {
-//    return buildLocalSequentialScan(ctx, node, table_ref, runtime);
-//  }
-//}
+csql::TaskIDList TSDBTableProvider::buildSequentialScan(
+    csql::Transaction* txn,
+    RefPtr<csql::SequentialScanNode> node,
+    csql::TaskDAG* tasks) const {
+  auto table_ref = TSDBTableRef::parse(node->tableName());
+  if (partition_map_->findTable(tsdb_namespace_, table_ref.table_key).isEmpty()) {
+    return csql::TaskIDList{};
+  }
 
-//Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildLocalSequentialScan(
-//    csql::Transaction* ctx,
-//    RefPtr<csql::SequentialScanNode> node,
-//    const TSDBTableRef& table_ref,
-//    csql::QueryBuilder* runtime) const {
-//
-//  auto partition = partition_map_->findPartition(
-//      tsdb_namespace_,
-//      table_ref.table_key,
-//      table_ref.partition_key.get());
-//
-//  if (partition.isEmpty()) {
-//    return Option<ScopedPtr<csql::TableExpression>>(
-//        mkScoped(new csql::EmptyTable(node->outputColumns())));
-//  } else {
-//    auto reader = partition.get()->getReader();
-//    auto scan = reader->buildSQLScan(ctx, node, runtime);
-//    return Option<ScopedPtr<csql::TableExpression>>(std::move(scan));
-//  }
-//}
-//
-//Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildRemoteSequentialScan(
-//    csql::Transaction* ctx,
-//    RefPtr<csql::SequentialScanNode> node,
-//    const TSDBTableRef& table_ref,
-//    csql::QueryBuilder* runtime) const {
-//  return Option<ScopedPtr<csql::TableExpression>>(mkScoped(
-//      new RemoteTSDBScan(
-//          node,
-//          tsdb_namespace_,
-//          table_ref,
-//          replication_scheme_,
-//          auth_)));
-//}
+  if (table_ref.partition_key.isEmpty()) {
+    RAISEF(
+        kRuntimeError,
+        "error while opening table '$0': missing partition key",
+        node->tableName());
+  }
+
+  if (table_ref.host.isEmpty() || table_ref.host.get() != "localhost") {
+    return buildRemoteSequentialScan(txn, node, table_ref, tasks);
+  } else {
+    return buildLocalSequentialScan(txn, node, table_ref, tasks);
+  }
+}
+
+csql::TaskIDList TSDBTableProvider::buildLocalSequentialScan(
+    csql::Transaction* txn,
+    RefPtr<csql::SequentialScanNode> node,
+    const TSDBTableRef& table_ref,
+    csql::TaskDAG* tasks) const {
+
+  auto partition = partition_map_->findPartition(
+      tsdb_namespace_,
+      table_ref.table_key,
+      table_ref.partition_key.get());
+
+  if (partition.isEmpty()) {
+    return csql::TaskIDList{};
+  } else {
+    auto reader = partition.get()->getReader();
+    return reader->buildSQLScan(txn, node, tasks);
+  }
+}
+
+csql::TaskIDList TSDBTableProvider::buildRemoteSequentialScan(
+    csql::Transaction* txn,
+    RefPtr<csql::SequentialScanNode> node,
+    const TSDBTableRef& table_ref,
+    csql::TaskDAG* tasks) const {
+  auto task_factory = [this, node, table_ref] (
+      csql::Transaction* txn,
+      csql::RowSinkFn output) -> RefPtr<csql::Task> {
+      return new RemoteTSDBScan(
+          node,
+          tsdb_namespace_,
+          table_ref,
+          replication_scheme_,
+          auth_);
+  };
+
+  auto task = new csql::TaskDAGNode(
+      new csql::SimpleTableExpressionFactory(task_factory));
+
+  csql::TaskIDList output;
+  output.emplace_back(tasks->addTask(task));
+  return output;
+}
 
 void TSDBTableProvider::listTables(
     Function<void (const csql::TableInfo& table)> fn) const {

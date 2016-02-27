@@ -27,6 +27,7 @@ LSMPartitionSQLScan::LSMPartitionSQLScan(
     stmt_(stmt),
     runtime_(runtime) {}
 
+void LSMPartitionSQLScan::onInputsReady() {
 //void LSMPartitionSQLScan::execute(
 //    csql::ExecutionContext* context,
 //    Function<bool (int argc, const csql::SValue* argv)> fn) {
@@ -86,6 +87,6 @@ LSMPartitionSQLScan::LSMPartitionSQLScan(
 //  }
 //
 //  id_set_.clear();
-//}
+}
 
 } // namespace zbase

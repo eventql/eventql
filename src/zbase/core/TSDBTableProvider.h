@@ -44,17 +44,17 @@ public:
 
 protected:
 
-  Option<ScopedPtr<csql::TableExpression>> buildLocalSequentialScan(
+  csql::TaskIDList buildLocalSequentialScan(
       csql::Transaction* ctx,
       RefPtr<csql::SequentialScanNode> node,
       const TSDBTableRef& table_ref,
-      csql::QueryBuilder* runtime) const;
+      csql::TaskDAG* tasks) const;
 
-  Option<ScopedPtr<csql::TableExpression>> buildRemoteSequentialScan(
+  csql::TaskIDList buildRemoteSequentialScan(
       csql::Transaction* ctx,
       RefPtr<csql::SequentialScanNode> node,
       const TSDBTableRef& table_ref,
-      csql::QueryBuilder* runtime) const;
+      csql::TaskDAG* tasks) const;
 
   csql::TableInfo tableInfoForTable(const TSDBTableInfo& table) const;
 

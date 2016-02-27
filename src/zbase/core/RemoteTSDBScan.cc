@@ -33,7 +33,7 @@ RemoteTSDBScan::RemoteTSDBScan(
     auth_(auth),
     rows_scanned_(0) {}
 
-//void RemoteTSDBScan::execute(
+void RemoteTSDBScan::onInputsReady() {
 //    csql::ExecutionContext* context,
 //    Function<bool (int argc, const csql::SValue* argv)> fn) {
 //
@@ -80,7 +80,7 @@ RemoteTSDBScan::RemoteTSDBScan(
 //      kRuntimeError,
 //      "RemoteTSDBScan::execute failed: $0",
 //      StringUtil::join(errors, ", "));
-//}
+}
 
 void RemoteTSDBScan::executeOnHost(
     const RemoteTSDBScanParams& params,
