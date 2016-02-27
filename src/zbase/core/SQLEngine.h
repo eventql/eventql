@@ -48,50 +48,6 @@ protected:
   // rewrite tbl.lastXXX to tbl WHERE time > x and time < x
   static void rewriteTableTimeSuffix(
       RefPtr<csql::QueryTreeNode> node);
-
-  static void insertPartitionSubqueries(
-      csql::Runtime* runtime,
-      PartitionMap* partition_map,
-      ReplicationScheme* replication_scheme,
-      CompactionWorker* cstable_index,
-      AnalyticsAuth* auth,
-      const String& tsdb_namespace,
-      RefPtr<csql::QueryTreeNode>* node);
-
-  static void replaceSequentialScanWithUnion(
-      PartitionMap* partition_map,
-      ReplicationScheme* replication_scheme,
-      CompactionWorker* cstable_index,
-      const String& tsdb_namespace,
-      RefPtr<csql::QueryTreeNode>* node);
-
-  static void shardGroupBy(
-      csql::Runtime* runtime,
-      PartitionMap* partition_map,
-      ReplicationScheme* replication_scheme,
-      CompactionWorker* cstable_index,
-      AnalyticsAuth* auth,
-      const String& tsdb_namespace,
-      RefPtr<csql::QueryTreeNode>* node);
-
-  static ScopedPtr<InputStream> executeParallelGroupBy(
-      PartitionMap* partition_map,
-      ReplicationScheme* replication_scheme,
-      CompactionWorker* cstable_index,
-      AnalyticsAuth* auth,
-      const String& customer,
-      const Vector<ReplicaRef>& hosts,
-      const csql::RemoteAggregateParams& params);
-
-  static ScopedPtr<InputStream> executeRemoteGroupBy(
-      PartitionMap* partition_map,
-      ReplicationScheme* replication_scheme,
-      CompactionWorker* cstable_index,
-      AnalyticsAuth* auth,
-      const String& customer,
-      const InetAddr& host,
-      const csql::RemoteAggregateParams& params);
-
 };
 
 void z1VersionExpr(sql_txn* ctx, int argc, csql::SValue* argv, csql::SValue* out);

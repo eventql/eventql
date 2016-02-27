@@ -14,7 +14,6 @@
 #include <zbase/core/Table.h>
 #include <cstable/CSTableReader.h>
 #include <cstable/RecordMaterializer.h>
-#include <csql/runtime/EmptyTable.h>
 
 using namespace stx;
 
@@ -58,29 +57,29 @@ SHA1Hash StaticPartitionReader::version() const {
   }
 }
 
-ScopedPtr<csql::TableExpression> StaticPartitionReader::buildSQLScan(
-    csql::Transaction* ctx,
-    RefPtr<csql::SequentialScanNode> node,
-    csql::QueryBuilder* runtime) const {
-  auto cstable = fetchCSTableFilename();
-  if (cstable.isEmpty()) {
-    return mkScoped(new csql::EmptyTable(node->outputColumns()));
-  }
-
-  auto scan = mkScoped(
-      new csql::CSTableScan(
-          ctx,
-          node,
-          cstable.get(),
-          runtime));
-
-  auto cstable_version = cstableVersion();
-  if (!cstable_version.isEmpty()) {
-    scan->setCacheKey(cstable_version.get());
-  }
-
-  return std::move(scan);
-}
+//ScopedPtr<csql::TableExpression> StaticPartitionReader::buildSQLScan(
+//    csql::Transaction* ctx,
+//    RefPtr<csql::SequentialScanNode> node,
+//    csql::QueryBuilder* runtime) const {
+//  auto cstable = fetchCSTableFilename();
+//  if (cstable.isEmpty()) {
+//    return mkScoped(new csql::EmptyTable(node->outputColumns()));
+//  }
+//
+//  auto scan = mkScoped(
+//      new csql::CSTableScan(
+//          ctx,
+//          node,
+//          cstable.get(),
+//          runtime));
+//
+//  auto cstable_version = cstableVersion();
+//  if (!cstable_version.isEmpty()) {
+//    scan->setCacheKey(cstable_version.get());
+//  }
+//
+//  return std::move(scan);
+//}
 
 } // namespace tdsb
 

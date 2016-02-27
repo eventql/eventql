@@ -32,10 +32,10 @@ public:
       CompactionWorker* cstable_index,
       AnalyticsAuth* auth);
 
-  Option<ScopedPtr<csql::TableExpression>> buildSequentialScan(
-      csql::Transaction* ctx,
-      RefPtr<csql::SequentialScanNode> node,
-      csql::QueryBuilder* runtime) const override;
+  csql::TaskIDList buildSequentialScan(
+      csql::Transaction* txn,
+      RefPtr<csql::SequentialScanNode> seqscan,
+      csql::TaskDAG* tasks) const override;
 
   void listTables(
       Function<void (const csql::TableInfo& table)> fn) const override;

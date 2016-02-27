@@ -25,7 +25,7 @@ using namespace stx;
 
 namespace zbase {
 
-class LSMPartitionSQLScan : public csql::TableExpression {
+class LSMPartitionSQLScan : public csql::Task {
 public:
 
   LSMPartitionSQLScan(
@@ -35,15 +35,7 @@ public:
       RefPtr<csql::SequentialScanNode> stmt,
       csql::QueryBuilder* runtime);
 
-  Vector<String> columnNames() const override;
-
-  size_t numColumns() const override;
-
-  void prepare(csql::ExecutionContext* context) override;
-
-  void execute(
-      csql::ExecutionContext* context,
-      Function<bool (int argc, const csql::SValue* argv)> fn) override;
+  void onInputsReady() override;
 
   Option<SHA1Hash> cacheKey() const override;
   void setCacheKey(const SHA1Hash& key);
@@ -54,7 +46,6 @@ protected:
   RefPtr<PartitionSnapshot> snap_;
   RefPtr<csql::SequentialScanNode> stmt_;
   csql::QueryBuilder* runtime_;
-  Vector<String> column_names_;
   Option<SHA1Hash> cache_key_;
   Set<SHA1Hash> id_set_;
 };

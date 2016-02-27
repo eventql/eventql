@@ -31,72 +31,56 @@ RemoteTSDBScan::RemoteTSDBScan(
     table_ref_(table_ref),
     replication_scheme_(replication_scheme),
     auth_(auth),
-    rows_scanned_(0) {
-  for (const auto& sl : stmt->selectList()) {
-    columns_.emplace_back(sl->columnName());
-  }
-}
+    rows_scanned_(0) {}
 
-Vector<String> RemoteTSDBScan::columnNames() const {
-  return columns_;
-}
-
-size_t RemoteTSDBScan::numColumns() const {
-  return columns_.size();
-}
-
-void RemoteTSDBScan::prepare(csql::ExecutionContext* context) {
-  context->incrNumSubtasksTotal(1);
-}
-
-void RemoteTSDBScan::execute(
-    csql::ExecutionContext* context,
-    Function<bool (int argc, const csql::SValue* argv)> fn) {
-
-  RemoteTSDBScanParams params;
-
-  auto tbl_name = stmt_->tableName();
-  StringUtil::replaceAll(&tbl_name, "tsdb://remote/", "tsdb://localhost/");
-
-  params.set_table_name(tbl_name);
-  params.set_aggregation_strategy((uint64_t) stmt_->aggregationStrategy());
-
-  for (const auto& e : stmt_->selectList()) {
-    auto sl = params.add_select_list();
-    sl->set_expression(e->expression()->toSQL());
-    sl->set_alias(e->columnName());
-  }
-
-  auto where = stmt_->whereExpression();
-  if (!where.isEmpty()) {
-    params.set_where_expression(where.get()->toSQL());
-  }
-
-  auto replicas = replication_scheme_->replicaAddrsFor(
-      table_ref_.partition_key.get());
-
-  Vector<String> errors;
-  for (const auto& host : replicas) {
-    try {
-      executeOnHost(params, host, fn);
-      context->incrNumSubtasksCompleted(1);
-      return;
-    } catch (const StandardException& e) {
-      logError(
-          "zbase",
-          e,
-          "RemoteTSDBScan::executeOnHost failed @ $0",
-          host.hostAndPort());
-
-      errors.emplace_back(e.what());
-    }
-  }
-
-  RAISEF(
-      kRuntimeError,
-      "RemoteTSDBScan::execute failed: $0",
-      StringUtil::join(errors, ", "));
-}
+//void RemoteTSDBScan::execute(
+//    csql::ExecutionContext* context,
+//    Function<bool (int argc, const csql::SValue* argv)> fn) {
+//
+//  RemoteTSDBScanParams params;
+//
+//  auto tbl_name = stmt_->tableName();
+//  StringUtil::replaceAll(&tbl_name, "tsdb://remote/", "tsdb://localhost/");
+//
+//  params.set_table_name(tbl_name);
+//  params.set_aggregation_strategy((uint64_t) stmt_->aggregationStrategy());
+//
+//  for (const auto& e : stmt_->selectList()) {
+//    auto sl = params.add_select_list();
+//    sl->set_expression(e->expression()->toSQL());
+//    sl->set_alias(e->columnName());
+//  }
+//
+//  auto where = stmt_->whereExpression();
+//  if (!where.isEmpty()) {
+//    params.set_where_expression(where.get()->toSQL());
+//  }
+//
+//  auto replicas = replication_scheme_->replicaAddrsFor(
+//      table_ref_.partition_key.get());
+//
+//  Vector<String> errors;
+//  for (const auto& host : replicas) {
+//    try {
+//      executeOnHost(params, host, fn);
+//      context->incrNumSubtasksCompleted(1);
+//      return;
+//    } catch (const StandardException& e) {
+//      logError(
+//          "zbase",
+//          e,
+//          "RemoteTSDBScan::executeOnHost failed @ $0",
+//          host.hostAndPort());
+//
+//      errors.emplace_back(e.what());
+//    }
+//  }
+//
+//  RAISEF(
+//      kRuntimeError,
+//      "RemoteTSDBScan::execute failed: $0",
+//      StringUtil::join(errors, ", "));
+//}
 
 void RemoteTSDBScan::executeOnHost(
     const RemoteTSDBScanParams& params,
