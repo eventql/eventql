@@ -1107,14 +1107,14 @@ void AnalyticsServlet::executeSQL_ASCII(
   }
 
   try {
-    auto ctx = sql_->newTransaction();
+    auto txn = sql_->newTransaction();
+    auto estrat = app_->getExecutionStrategy(session.customer());
+    txn->setTableProvider(estrat->tableProvider());
+    auto qplan = sql_->buildQueryPlan(txn.get(), query, estrat);
 
     Buffer result;
-    //sql_->executeQuery(
-    //    ctx.get(),
-    //    query,
-    //    app_->getExecutionStrategy(session.customer()),
-    //    new csql::ASCIITableFormat(BufferOutputStream::fromBuffer(&result)));
+    ASCIICodec ascii_codec(qplan.get(), BufferOutputStream::fromBuffer(&result));
+    qplan->execute();
 
     res->setStatus(http::kStatusOK);
     res->addHeader("Content-Type", "text/plain; charset=utf-8");

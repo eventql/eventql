@@ -7,42 +7,25 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <csql/runtime/ASCIITableFormat.h>
+#include <zbase/sql/codec/ascii_codec.h>
+#include <csql/runtime/resultlist.h>
 
-namespace csql {
+namespace zbase {
 
-ASCIITableFormat::ASCIITableFormat(
+ASCIICodec::ASCIICodec(
+    csql::QueryPlan* query,
     ScopedPtr<OutputStream> output) :
-    output_(std::move(output)) {}
-
-void ASCIITableFormat::formatResults(
-    ScopedPtr<QueryPlan> query,
-    ExecutionContext* context) {
-
-  for (int i = 0; i < query->numStatements(); ++i) {
-    output_->write("==== query ====\n");
-
-    auto stmt = query->getStatement(i);
-    auto select = dynamic_cast<TableExpression*>(stmt);
-    if (!select) {
-      RAISE(
-          kRuntimeError,
-          "can't execute non select statement in ASCIITableFormat");
-    }
-
-    select->execute(
-        context,
-        [this] (int argc, const csql::SValue* argv) -> bool {
-      Vector<String> row;
-      for (int n = 0; n < argc; ++n) {
-        row.emplace_back(argv[n].getString());
-      }
-
-      output_->write(stx::inspect(row));
-      output_->write("\n");
-      return true;
-    });
+    output_(std::move(output)) {
+  for (size_t i = 0; i < query->numStatements(); ++i) {
+    auto result = mkScoped(new csql::ResultList());
+    query->storeResults(i, result.get());
+    results_.emplace_back(std::move(result));
+    query->onOutputComplete(i, std::bind(&ASCIICodec::flushResult, this, i));
   }
+}
+
+void ASCIICodec::flushResult(size_t idx) {
+  results_[idx]->debugPrint(output_.get());
 }
 
 }
