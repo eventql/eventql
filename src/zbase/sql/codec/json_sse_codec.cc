@@ -28,7 +28,12 @@ JSONSSECodec::JSONSSECodec(
 void JSONSSECodec::sendResult(size_t idx) {
   Buffer result;
   json::JSONOutputStream json(BufferOutputStream::fromBuffer(&result));
+  json.beginObject();
+  json.addObjectEntry("results");
+  json.beginArray();
   JSONCodec::formatResultList(results_[idx].get(), &json);
+  json.endArray();
+  json.endObject();
   output_->sendEvent(result, Some(String("result")));
 }
 
