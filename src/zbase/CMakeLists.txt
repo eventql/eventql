@@ -173,6 +173,7 @@ add_executable(zbase
     metrics/MetricQuery.cc
     metrics/MetricService.cc
     sql/codec/ascii_codec.cc
+    sql/codec/json_codec.cc
     sql/codec/binary_codec.cc
     LogfileScanResult.cc
     EventScanResult.cc

@@ -12,20 +12,18 @@
 
 namespace zbase {
 
-ASCIICodec::ASCIICodec(
-    csql::QueryPlan* query,
-    ScopedPtr<OutputStream> output) :
-    output_(std::move(output)) {
+ASCIICodec::ASCIICodec(csql::QueryPlan* query)  {
   for (size_t i = 0; i < query->numStatements(); ++i) {
     auto result = mkScoped(new csql::ResultList());
     query->storeResults(i, result.get());
     results_.emplace_back(std::move(result));
-    query->onOutputComplete(i, std::bind(&ASCIICodec::flushResult, this, i));
   }
 }
 
-void ASCIICodec::flushResult(size_t idx) {
-  results_[idx]->debugPrint(output_.get());
+void ASCIICodec::printResults(ScopedPtr<OutputStream> output) {
+  for (size_t i = 0; i < results_.size(); ++i) {
+    results_[i]->debugPrint(output.get());
+  }
 }
 
 }

@@ -17,7 +17,7 @@ namespace csql {
 class JSONSSEStreamFormat : public ResultFormat {
 public:
 
-  JSONSSEStreamFormat(RefPtr<http::HTTPSSEStream> output);
+  JSONSSEStreamFormat();
 
   void formatResults(
       ScopedPtr<QueryPlan> query,
@@ -25,6 +25,21 @@ public:
 
 protected:
   RefPtr<http::HTTPSSEStream> output_;
+};
+
+class ASCIICodec {
+public:
+
+  ASCIICodec(
+      csql::QueryPlan* query,
+      RefPtr<http::HTTPSSEStream> output);
+
+protected:
+
+  void flushResult(size_t idx);
+
+  RefPtr<http::HTTPSSEStream> output_;
+  Vector<ScopedPtr<csql::ResultList>> results_;
 };
 
 }

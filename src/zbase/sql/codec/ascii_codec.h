@@ -16,15 +16,11 @@ namespace zbase {
 class ASCIICodec {
 public:
 
-  ASCIICodec(
-      csql::QueryPlan* query,
-      ScopedPtr<OutputStream> output);
+  ASCIICodec(csql::QueryPlan* query);
+
+  void printResults(ScopedPtr<OutputStream> output);
 
 protected:
-
-  void flushResult(size_t idx);
-
-  ScopedPtr<OutputStream> output_;
   Vector<ScopedPtr<csql::ResultList>> results_;
 };
 

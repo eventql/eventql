@@ -14,34 +14,17 @@
 #include <csql/runtime/charts/ChartStatement.h>
 #include <csql/runtime/ResultFormat.h>
 
-namespace csql {
+namespace zbase {
 
-class JSONResultFormat : public ResultFormat {
+class JSONCodec {
 public:
 
-  JSONResultFormat(json::JSONOutputStream* json);
+  JSONCodec(csql::QueryPlan* query);
 
-  void formatResults(
-      ScopedPtr<QueryPlan> query,
-      ExecutionContext* context);
+  void printResults(ScopedPtr<OutputStream> output);
 
 protected:
-
-  void renderStatement(
-      RefPtr<QueryTreeNode> qtree,
-      Statement* stmt,
-      ExecutionContext* context);
-
-  void renderTable(
-      RefPtr<QueryTreeNode> qtree,
-      TableExpression* stmt,
-      ExecutionContext* context);
-
-  void renderChart(
-      ChartStatement* stmt,
-      ExecutionContext* context);
-
-  json::JSONOutputStream* json_;
+  Vector<ScopedPtr<csql::ResultList>> results_;
 };
 
 }

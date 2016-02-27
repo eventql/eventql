@@ -7,132 +7,90 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <csql/runtime/JSONResultFormat.h>
-#include <cplot/svgtarget.h>
+#include <zbase/sql/codec/json_codec.h>
+#include <csql/runtime/resultlist.h>
 
-namespace csql {
+namespace zbase {
 
-JSONResultFormat::JSONResultFormat(
-    json::JSONOutputStream* output) :
-    json_(output) {}
+JSONCodec::JSONCodec(csql::QueryPlan* query) {
+  for (size_t i = 0; i < query->numStatements(); ++i) {
+    auto result = mkScoped(new csql::ResultList());
+    query->storeResults(i, result.get());
+    results_.emplace_back(std::move(result));
+  }
+}
 
-void JSONResultFormat::formatResults(
-    ScopedPtr<QueryPlan> query,
-    ExecutionContext* context) {
-  json_->beginObject();
+void JSONCodec::printResults(ScopedPtr<OutputStream> os) {
+  json::JSONOutputStream json(std::move(os));
 
-  json_->addObjectEntry("results");
-  json_->beginArray();
+  json.beginObject();
 
-  for (int i = 0; i < query->numStatements(); ++i) {
-    auto qtree = query->getStatementQTree(i);
-    auto stmt = query->getStatement(i);
+  json.addObjectEntry("results");
+  json.beginArray();
+
+  for (int i = 0; i < results_.size(); ++i) {
+    json.beginObject();
+    json.addObjectEntry("type");
+    json.addString("table");
+    json.addComma();
+
+    json.addObjectEntry("columns");
+    json.beginArray();
+
+    auto columns = results_[i]->getColumns();
+    for (int n = 0; n < columns.size(); ++n) {
+      if (n > 0) {
+        json.addComma();
+      }
+      json.addString(columns[n]);
+    }
+    json.endArray();
+    json.addComma();
+
+    json.addObjectEntry("rows");
+    json.beginArray();
+
+    size_t j = 0;
+    size_t m = columns.size();
+    for (; j < results_[i]->getNumRows(); ++j) {
+      const auto& row = results_[i]->getRow(j);
+
+      if (++j > 1) {
+        json.addComma();
+      }
+
+      json.beginArray();
+
+      size_t n = 0;
+      for (; n < m && n < row.size(); ++n) {
+        if (n > 0) {
+          json.addComma();
+        }
+
+        json.addString(row[n]);
+      }
+
+      for (; n < m; ++n) {
+        if (n > 0) {
+          json.addComma();
+        }
+
+        json.addNull();
+      }
+
+      json.endArray();
+    }
+
+    json.endArray();
+    json.endObject();
 
     if (i > 0) {
-      json_->addComma();
+      json.addComma();
     }
-
-    renderStatement(qtree, stmt, context);
   }
 
-  json_->endArray();
-  json_->endObject();
+  json.endArray();
+  json.endObject();
 }
 
-void JSONResultFormat::renderStatement(
-    RefPtr<QueryTreeNode> qtree,
-    Statement* stmt,
-    ExecutionContext* context) {
-  auto table_expr = dynamic_cast<TableExpression*>(stmt);
-  if (table_expr) {
-    renderTable(qtree, table_expr, context);
-    return;
-  }
-
-  auto chart_expr = dynamic_cast<ChartStatement*>(stmt);
-  if (chart_expr) {
-    renderChart(chart_expr, context);
-    return;
-  }
-
-  RAISE(kRuntimeError, "can't render statement in JSONResultFormat");
-}
-
-void JSONResultFormat::renderTable(
-    RefPtr<QueryTreeNode> qtree,
-    TableExpression* stmt,
-    ExecutionContext* context) {
-  json_->beginObject();
-  json_->addObjectEntry("type");
-  json_->addString("table");
-  json_->addComma();
-
-  json_->addObjectEntry("columns");
-  json_->beginArray();
-
-  auto columns = qtree.asInstanceOf<TableExpressionNode>()->outputColumns();
-  for (int n = 0; n < columns.size(); ++n) {
-    if (n > 0) {
-      json_->addComma();
-    }
-    json_->addString(columns[n]);
-  }
-  json_->endArray();
-  json_->addComma();
-
-  json_->addObjectEntry("rows");
-  json_->beginArray();
-
-  size_t j = 0;
-  size_t m = columns.size();
-  stmt->execute(
-      context,
-      [this, &j, m] (int argc, const csql::SValue* argv) -> bool {
-    if (++j > 1) {
-      json_->addComma();
-    }
-
-    json_->beginArray();
-
-    size_t n = 0;
-    for (; n < m && n < argc; ++n) {
-      if (n > 0) {
-        json_->addComma();
-      }
-
-      json_->addString(argv[n].getString());
-    }
-
-    for (; n < m; ++n) {
-      if (n > 0) {
-        json_->addComma();
-      }
-
-      json_->addNull();
-    }
-
-    json_->endArray();
-    return true;
-  });
-
-  json_->endArray();
-  json_->endObject();
-}
-
-void JSONResultFormat::renderChart(
-    ChartStatement* stmt,
-    ExecutionContext* context) {
-  String svg_str;
-  auto svg_stream = StringOutputStream::fromString(&svg_str);
-  stx::chart::SVGTarget svg(svg_stream.get());
-  stmt->execute(context, &svg);
-
-  json_->beginObject();
-  json_->addObjectEntry("type");
-  json_->addString("chart");
-  json_->addComma();
-  json_->addObjectEntry("svg");
-  json_->addString(svg_str);
-  json_->endObject();
-}
 }
