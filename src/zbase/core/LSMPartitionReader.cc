@@ -75,21 +75,40 @@ SHA1Hash LSMPartitionReader::version() const {
   return SHA1::compute(StringUtil::toString(snap_->state.lsm_sequence())); // FIXME include arenas?
 }
 
-//ScopedPtr<csql::TableExpression> LSMPartitionReader::buildSQLScan(
-//    csql::Transaction* ctx,
-//    RefPtr<csql::SequentialScanNode> node,
-//    csql::QueryBuilder* runtime) const {
-//  auto scan = mkScoped(
-//      new LSMPartitionSQLScan(
-//          ctx,
-//          table_,
-//          snap_,
-//          node,
-//          runtime));
-//
-//  scan->setCacheKey(version());
-//  return std::move(scan);
-//}
+csql::TaskIDList LSMPartitionReader::buildSQLScan(
+    csql::Transaction* txn,
+    RefPtr<csql::SequentialScanNode> seqscan,
+    csql::TaskDAG* tasks) const {
+  auto cstable = fetchCSTableFilename();
+  if (cstable.isEmpty()) {
+    return csql::TaskIDList{};
+  }
+
+  // auto cstable_version = cstableVersion();
+  // if (!cstable_version.isEmpty()) {
+  //   scan->setCacheKey(cstable_version.get());
+  // }
+
+  auto table = table_;
+  auto snap = snap_;
+  auto task_factory = [seqscan, cstable, table, snap] (
+      csql::Transaction* txn,
+      csql::RowSinkFn output) -> RefPtr<csql::Task> {
+    return new LSMPartitionSQLScan(
+          txn,
+          table,
+          snap,
+          seqscan,
+          txn->getRuntime()->queryBuilder().get());
+  };
+
+  auto task = new csql::TaskDAGNode(
+      new csql::SimpleTableExpressionFactory(task_factory));
+
+  csql::TaskIDList output;
+  output.emplace_back(tasks->addTask(task));
+  return output;
+}
 
 } // namespace tdsb
 

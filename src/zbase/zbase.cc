@@ -327,8 +327,7 @@ int main(int argc, const char** argv) {
         },
         symbols,
         new csql::QueryBuilder(
-            new csql::ValueExpressionBuilder(symbols.get()),
-            new csql::TableExpressionBuilder()),
+            new csql::ValueExpressionBuilder(symbols.get())),
         new csql::QueryPlanBuilder(
             csql::QueryPlanBuilderOptions{},
             symbols.get())));

@@ -57,29 +57,38 @@ SHA1Hash StaticPartitionReader::version() const {
   }
 }
 
-//ScopedPtr<csql::TableExpression> StaticPartitionReader::buildSQLScan(
-//    csql::Transaction* ctx,
-//    RefPtr<csql::SequentialScanNode> node,
-//    csql::QueryBuilder* runtime) const {
-//  auto cstable = fetchCSTableFilename();
-//  if (cstable.isEmpty()) {
-//    return mkScoped(new csql::EmptyTable(node->outputColumns()));
-//  }
-//
-//  auto scan = mkScoped(
-//      new csql::CSTableScan(
-//          ctx,
-//          node,
-//          cstable.get(),
-//          runtime));
-//
-//  auto cstable_version = cstableVersion();
-//  if (!cstable_version.isEmpty()) {
-//    scan->setCacheKey(cstable_version.get());
-//  }
-//
-//  return std::move(scan);
-//}
+csql::TaskIDList StaticPartitionReader::buildSQLScan(
+    csql::Transaction* txn,
+    RefPtr<csql::SequentialScanNode> seqscan,
+    csql::TaskDAG* tasks) const {
+  auto cstable = fetchCSTableFilename();
+  if (cstable.isEmpty()) {
+    return csql::TaskIDList{};
+  }
+
+  // auto cstable_version = cstableVersion();
+  // if (!cstable_version.isEmpty()) {
+  //   scan->setCacheKey(cstable_version.get());
+  // }
+
+  auto task_factory = [seqscan, cstable] (
+      csql::Transaction* txn,
+      csql::RowSinkFn output) -> RefPtr<csql::Task> {
+    return new csql::CSTableScan(
+        txn,
+        seqscan,
+        cstable.get(),
+        txn->getRuntime()->queryBuilder().get(),
+        output);
+  };
+
+  auto task = new csql::TaskDAGNode(
+      new csql::SimpleTableExpressionFactory(task_factory));
+
+  csql::TaskIDList output;
+  output.emplace_back(tasks->addTask(task));
+  return output;
+}
 
 } // namespace tdsb
 

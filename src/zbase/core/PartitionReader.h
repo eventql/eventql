@@ -34,10 +34,10 @@ public:
       const Set<String>& required_columns,
       Function<void (const msg::MessageObject& record)> fn) = 0;
 
-  virtual ScopedPtr<csql::TableExpression> buildSQLScan(
-        csql::Transaction* ctx,
-        RefPtr<csql::SequentialScanNode> node,
-        csql::QueryBuilder* runtime) const = 0;
+  virtual csql::TaskIDList buildSQLScan(
+      csql::Transaction* txn,
+      RefPtr<csql::SequentialScanNode> seqscan,
+      csql::TaskDAG* tasks) const = 0;
 
   virtual SHA1Hash version() const = 0;
 
