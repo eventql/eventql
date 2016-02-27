@@ -26,6 +26,7 @@
 #include "zbase/TableDefinition.h"
 #include "zbase/sql/codec/ascii_codec.h"
 #include "zbase/sql/codec/json_codec.h"
+#include "zbase/sql/codec/json_sse_codec.h"
 #include "csql/runtime/ExecutionStrategy.h"
 #include "zbase/core/TimeWindowPartitioner.h"
 #include "zbase/core/FixedShardPartitioner.h"
@@ -1242,7 +1243,7 @@ void AnalyticsServlet::executeSQL_JSONSSE(
     auto estrat = app_->getExecutionStrategy(session.customer());
     txn->setTableProvider(estrat->tableProvider());
     auto qplan = sql_->buildQueryPlan(txn.get(), query, estrat);
-    //JSONSSECodec json_sse_codec(qplan.get(), sse_stream);
+    JSONSSECodec json_sse_codec(qplan.get(), sse_stream);
     qplan->execute();
   } catch (const StandardException& e) {
     Buffer buf;

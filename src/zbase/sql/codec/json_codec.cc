@@ -12,6 +12,65 @@
 
 namespace zbase {
 
+void JSONCodec::formatResultList(
+    const csql::ResultList* result,
+    json::JSONOutputStream* json) {
+  json->beginObject();
+  json->addObjectEntry("type");
+  json->addString("table");
+  json->addComma();
+
+  json->addObjectEntry("columns");
+  json->beginArray();
+
+  auto columns = result->getColumns();
+  for (int n = 0; n < columns.size(); ++n) {
+    if (n > 0) {
+      json->addComma();
+    }
+    json->addString(columns[n]);
+  }
+  json->endArray();
+  json->addComma();
+
+  json->addObjectEntry("rows");
+  json->beginArray();
+
+  size_t j = 0;
+  size_t m = columns.size();
+  for (; j < result->getNumRows(); ++j) {
+    const auto& row = result->getRow(j);
+
+    if (++j > 1) {
+      json->addComma();
+    }
+
+    json->beginArray();
+
+    size_t n = 0;
+    for (; n < m && n < row.size(); ++n) {
+      if (n > 0) {
+        json->addComma();
+      }
+
+      json->addString(row[n]);
+    }
+
+    for (; n < m; ++n) {
+      if (n > 0) {
+        json->addComma();
+      }
+
+      json->addNull();
+    }
+
+    json->endArray();
+  }
+
+  json->endArray();
+  json->endObject();
+}
+
 JSONCodec::JSONCodec(csql::QueryPlan* query) {
   for (size_t i = 0; i < query->numStatements(); ++i) {
     auto result = mkScoped(new csql::ResultList());
@@ -29,60 +88,7 @@ void JSONCodec::printResults(ScopedPtr<OutputStream> os) {
   json.beginArray();
 
   for (int i = 0; i < results_.size(); ++i) {
-    json.beginObject();
-    json.addObjectEntry("type");
-    json.addString("table");
-    json.addComma();
-
-    json.addObjectEntry("columns");
-    json.beginArray();
-
-    auto columns = results_[i]->getColumns();
-    for (int n = 0; n < columns.size(); ++n) {
-      if (n > 0) {
-        json.addComma();
-      }
-      json.addString(columns[n]);
-    }
-    json.endArray();
-    json.addComma();
-
-    json.addObjectEntry("rows");
-    json.beginArray();
-
-    size_t j = 0;
-    size_t m = columns.size();
-    for (; j < results_[i]->getNumRows(); ++j) {
-      const auto& row = results_[i]->getRow(j);
-
-      if (++j > 1) {
-        json.addComma();
-      }
-
-      json.beginArray();
-
-      size_t n = 0;
-      for (; n < m && n < row.size(); ++n) {
-        if (n > 0) {
-          json.addComma();
-        }
-
-        json.addString(row[n]);
-      }
-
-      for (; n < m; ++n) {
-        if (n > 0) {
-          json.addComma();
-        }
-
-        json.addNull();
-      }
-
-      json.endArray();
-    }
-
-    json.endArray();
-    json.endObject();
+    formatResultList(results_[i].get(), &json);
 
     if (i > 0) {
       json.addComma();

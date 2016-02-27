@@ -19,6 +19,10 @@ namespace zbase {
 class JSONCodec {
 public:
 
+  static void formatResultList(
+      const csql::ResultList* results,
+      json::JSONOutputStream* json);
+
   JSONCodec(csql::QueryPlan* query);
 
   void printResults(ScopedPtr<OutputStream> output);

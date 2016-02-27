@@ -9,34 +9,20 @@
  */
 #pragma once
 #include <stx/stdtypes.h>
-#include <csql/runtime/ResultFormat.h>
 #include <stx/http/HTTPSSEStream.h>
 
-namespace csql {
+namespace zbase {
 
-class JSONSSEStreamFormat : public ResultFormat {
+class JSONSSECodec{
 public:
 
-  JSONSSEStreamFormat();
-
-  void formatResults(
-      ScopedPtr<QueryPlan> query,
-      ExecutionContext* context) override;
-
-protected:
-  RefPtr<http::HTTPSSEStream> output_;
-};
-
-class ASCIICodec {
-public:
-
-  ASCIICodec(
+  JSONSSECodec(
       csql::QueryPlan* query,
-      RefPtr<http::HTTPSSEStream> output);
+      RefPtr<http::HTTPSSEStream> sse_stream);
 
 protected:
 
-  void flushResult(size_t idx);
+  void sendResult(size_t idx);
 
   RefPtr<http::HTTPSSEStream> output_;
   Vector<ScopedPtr<csql::ResultList>> results_;

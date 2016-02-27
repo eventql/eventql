@@ -7,68 +7,29 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <csql/runtime/JSONSSEStreamFormat.h>
-#include <csql/runtime/JSONResultFormat.h>
-#include <stx/logging.h>
+#include <zbase/sql/codec/json_codec.h>
+#include <zbase/sql/codec/json_sse_codec.h>
+#include <csql/runtime/resultlist.h>
 
-namespace csql {
+namespace zbase {
 
-JSONSSEStreamFormat::JSONSSEStreamFormat(
+JSONSSECodec::JSONSSECodec(
+    csql::QueryPlan* query,
     RefPtr<http::HTTPSSEStream> output) :
-    output_(output) {}
-
-void JSONSSEStreamFormat::formatResults(
-    ScopedPtr<QueryPlan> query,
-    ExecutionContext* context) {
-  try {
-    context->onStatusChange([this, context] (const csql::ExecutionStatus& status) {
-      auto progress = status.progress();
-
-      if (output_->isClosed()) {
-        stx::logDebug("sql", "Aborting Query...");
-        context->cancel();
-        return;
-      }
-
-      Buffer buf;
-      json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
-      json.beginObject();
-      json.addObjectEntry("status");
-      json.addString("running");
-      json.addComma();
-      json.addObjectEntry("progress");
-      json.addFloat(progress);
-      json.addComma();
-      json.addObjectEntry("message");
-      if (progress == 0.0f) {
-        json.addString("Waiting...");
-      } else if (progress == 1.0f) {
-        json.addString("Downloading...");
-      } else {
-        json.addString("Running...");
-      }
-      json.endObject();
-
-      output_->sendEvent(buf, Some(String("status")));
-    });
-
-    Buffer result;
-    json::JSONOutputStream json(BufferOutputStream::fromBuffer(&result));
-    JSONResultFormat format(&json);
-    format.formatResults(query, context);
-    output_->sendEvent(result, Some(String("result")));
-  } catch (const StandardException& e) {
-    stx::logError("sql", e, "SQL execution failed");
-
-    Buffer buf;
-    json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
-    json.beginObject();
-    json.addObjectEntry("error");
-    json.addString(e.what());
-    json.endObject();
-
-    output_->sendEvent(buf, Some(String("query_error")));
+    output_(output) {
+  for (size_t i = 0; i < query->numStatements(); ++i) {
+    auto result = mkScoped(new csql::ResultList());
+    query->storeResults(i, result.get());
+    results_.emplace_back(std::move(result));
+    query->onOutputComplete(i, std::bind(&JSONSSECodec::sendResult, this, i));
   }
+}
+
+void JSONSSECodec::sendResult(size_t idx) {
+  Buffer result;
+  json::JSONOutputStream json(BufferOutputStream::fromBuffer(&result));
+  JSONCodec::formatResultList(results_[idx].get(), &json);
+  output_->sendEvent(result, Some(String("result")));
 }
 
 }
