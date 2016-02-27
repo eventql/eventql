@@ -182,7 +182,6 @@ add_executable(zbase
     JSONSink.cc
     AnalyticsApp.cc
     DrilldownTree.cc
-    DrilldownQuery.cc
     ReportFactory.cc
     CSVExportRDD.cc
     JSONExportRDD.cc

@@ -242,4 +242,81 @@ void LogfileAPIServlet::renderLogfileDefinition(
   json->endObject();
 }
 
+void LogfileAPIServlet::uploadLogfile(
+    const AnalyticsSession& session,
+    const URI& uri,
+    http::HTTPRequestStream* req_stream,
+    http::HTTPResponse* res) {
+  const auto& params = uri.queryParams();
+
+  if (req_stream->request().method() != http::HTTPMessage::M_POST) {
+    req_stream->discardBody();
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody("error: expected HTTP POST request");
+    return;
+  }
+
+  String logfile_name;
+  if (!URI::getParam(params, "logfile", &logfile_name)) {
+    req_stream->discardBody();
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody("error: missing ?logfile=... parameter");
+    return;
+  }
+
+  auto logfile_def = service_->findLogfileDefinition(
+      session.customer(),
+      logfile_name);
+
+  if (logfile_def.isEmpty()) {
+    req_stream->discardBody();
+    res->setStatus(http::kStatusNotFound);
+    res->addBody("error: logfile not found");
+    return;
+  }
+
+  Vector<Pair<String, String>> source_fields;
+  for (const auto& source_field : logfile_def.get().source_fields()) {
+    String field_val;
+
+    if (!URI::getParam(params, source_field.name(), &field_val)) {
+      req_stream->discardBody();
+      res->setStatus(http::kStatusBadRequest);
+      res->addBody(
+          StringUtil::format(
+              "error: missing ?$0=... parameter",
+              source_field.name()));
+      return;
+    }
+
+    source_fields.emplace_back(source_field.name(), field_val);
+  }
+
+  auto tmpfile_path = FileUtil::joinPaths(
+      cachedir_,
+      StringUtil::format("upload_$0.tmp", Random::singleton()->hex128()));
+
+  auto tmpfile = File::openFile(
+      tmpfile_path,
+      File::O_CREATE | File::O_READ | File::O_WRITE | File::O_AUTODELETE);
+
+  size_t body_size = 0;
+  req_stream->readBody([&tmpfile, &body_size] (const void* data, size_t size) {
+    tmpfile.write(data, size);
+    body_size += size;
+  });
+
+  tmpfile.seekTo(0);
+
+  auto is = FileInputStream::fromFile(std::move(tmpfile));
+
+  service_->insertLoglines(
+      session.customer(),
+      logfile_def.get(),
+      source_fields,
+      is.get());
+
+  res->setStatus(http::kStatusCreated);
+}
+
 }
