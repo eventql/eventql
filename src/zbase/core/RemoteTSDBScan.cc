@@ -13,7 +13,6 @@
 #include <stx/protobuf/msg.h>
 #include <zbase/core/RemoteTSDBScan.h>
 #include <zbase/AnalyticsSession.pb.h>
-#include <csql/runtime/BinaryResultParser.h>
 #include <zbase/z1stats.h>
 
 using namespace stx;
@@ -86,56 +85,56 @@ void RemoteTSDBScan::executeOnHost(
     const RemoteTSDBScanParams& params,
     const InetAddr& host,
     Function<bool (int argc, const csql::SValue* argv)> fn) {
-  csql::BinaryResultParser res_parser;
+ // csql::BinaryResultParser res_parser;
 
-  bool reading = true;
-  res_parser.onRow([fn, &reading] (int argc, const csql::SValue* argv) {
-    if (reading) {
-      reading = fn(argc, argv);
-    }
-  });
+ // bool reading = true;
+ // res_parser.onRow([fn, &reading] (int argc, const csql::SValue* argv) {
+ //   if (reading) {
+ //     reading = fn(argc, argv);
+ //   }
+ // });
 
-  bool error = false;
-  res_parser.onError([&error] (const String& error_str) {
-    error = true;
-    RAISE(kRuntimeError, error_str);
-  });
+ // bool error = false;
+ // res_parser.onError([&error] (const String& error_str) {
+ //   error = true;
+ //   RAISE(kRuntimeError, error_str);
+ // });
 
-  auto url = StringUtil::format(
-      "http://$0/api/v1/sql/scan_partition",
-      host.ipAndPort());
+ // auto url = StringUtil::format(
+ //     "http://$0/api/v1/sql/scan_partition",
+ //     host.ipAndPort());
 
-  AnalyticsPrivileges privileges;
-  privileges.set_allow_private_api_read_access(true);
-  auto api_token = auth_->getPrivateAPIToken(customer_, privileges);
+ // AnalyticsPrivileges privileges;
+ // privileges.set_allow_private_api_read_access(true);
+ // auto api_token = auth_->getPrivateAPIToken(customer_, privileges);
 
-  http::HTTPMessage::HeaderList auth_headers;
-  auth_headers.emplace_back(
-      "Authorization",
-      StringUtil::format("Token $0", api_token));
+ // http::HTTPMessage::HeaderList auth_headers;
+ // auth_headers.emplace_back(
+ //     "Authorization",
+ //     StringUtil::format("Token $0", api_token));
 
-  http::HTTPClient http_client(&z1stats()->http_client_stats);
-  auto req_body = msg::encode(params);
-  auto req = http::HTTPRequest::mkPost(url, *req_body, auth_headers);
-  auto res = http_client.executeRequest(
-      req,
-      http::StreamingResponseHandler::getFactory(
-          std::bind(
-              &csql::BinaryResultParser::parse,
-              &res_parser,
-              std::placeholders::_1,
-              std::placeholders::_2)));
+ // http::HTTPClient http_client(&z1stats()->http_client_stats);
+ // auto req_body = msg::encode(params);
+ // auto req = http::HTTPRequest::mkPost(url, *req_body, auth_headers);
+ // auto res = http_client.executeRequest(
+ //     req,
+ //     http::StreamingResponseHandler::getFactory(
+ //         std::bind(
+ //             &csql::BinaryResultParser::parse,
+ //             &res_parser,
+ //             std::placeholders::_1,
+ //             std::placeholders::_2)));
 
-  if (!res_parser.eof() || error) {
-    RAISE(kRuntimeError, "lost connection to upstream server");
-  }
+ // if (!res_parser.eof() || error) {
+ //   RAISE(kRuntimeError, "lost connection to upstream server");
+ // }
 
-  if (res.statusCode() != 200) {
-    RAISEF(
-        kRuntimeError,
-        "HTTP Error: $0",
-        res.statusCode());
-  }
+ // if (res.statusCode() != 200) {
+ //   RAISEF(
+ //       kRuntimeError,
+ //       "HTTP Error: $0",
+ //       res.statusCode());
+ // }
 }
 
 size_t RemoteTSDBScan::rowsScanned() const {

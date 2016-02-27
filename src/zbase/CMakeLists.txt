@@ -172,6 +172,7 @@ add_executable(zbase
     metrics/MetricAPIServlet.cc
     metrics/MetricQuery.cc
     metrics/MetricService.cc
+    sql/codec/binary_codec.cc
     LogfileScanResult.cc
     EventScanResult.cc
     Report.cc
@@ -230,7 +231,10 @@ add_executable(zmaster
 target_link_libraries(zmaster chartsql cplot sstable cstable stx-http stx-protobuf stx-json stx-json stx-base pcre)
 add_dependencies(zmaster customerdirectory)
 
-add_executable(zli zli.cc)
+add_executable(zli
+    sql/codec/binary_codec.cc
+    zli.cc)
+
 target_link_libraries(zli chartsql cplot cstable stx-http stx-protobuf stx-json stx-base pcre)
 
 add_executable(zen-csv-upload ${COREPROTO_SRCS} zen-csv-upload.cc)
