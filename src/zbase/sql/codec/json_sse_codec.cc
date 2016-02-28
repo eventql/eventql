@@ -37,4 +37,31 @@ void JSONSSECodec::sendResult(size_t idx) {
   output_->sendEvent(result, Some(String("result")));
 }
 
+void JSONSSECodec::sendProgress(double progress) {
+  if (output_->isClosed()) {
+    return;
+  }
+
+  Buffer buf;
+  json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
+  json.beginObject();
+  json.addObjectEntry("status");
+  json.addString("running");
+  json.addComma();
+  json.addObjectEntry("progress");
+  json.addFloat(progress);
+  json.addComma();
+  json.addObjectEntry("message");
+  if (progress == 0.0f) {
+    json.addString("Waiting...");
+  } else if (progress == 1.0f) {
+    json.addString("Downloading...");
+  } else {
+    json.addString("Running...");
+  }
+  json.endObject();
+
+  output_->sendEvent(buf, Some(String("status")));
+}
+
 }

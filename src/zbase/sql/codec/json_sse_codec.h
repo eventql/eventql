@@ -23,6 +23,7 @@ public:
 protected:
 
   void sendResult(size_t idx);
+  void sendProgress(double progress);
 
   RefPtr<http::HTTPSSEStream> output_;
   Vector<ScopedPtr<csql::ResultList>> results_;
