@@ -10,7 +10,7 @@
 #include <stx/http/httpclient.h>
 #include <stx/protobuf/msg.h>
 #include <zbase/z1.h>
-#include <zbase/core/SQLEngine.h>
+#include <zbase/sql/sql_engine.h>
 #include <zbase/core/TSDBService.h>
 #include <zbase/core/TimeWindowPartitioner.h>
 #include <zbase/core/FixedShardPartitioner.h>
@@ -25,7 +25,6 @@ RefPtr<csql::QueryTreeNode> SQLEngine::rewriteQuery(
     csql::Runtime* runtime,
     PartitionMap* partition_map,
     ReplicationScheme* replication_scheme,
-    CompactionWorker* cstable_index,
     AnalyticsAuth* auth,
     const String& tsdb_namespace,
     RefPtr<csql::QueryTreeNode> query) {
@@ -36,14 +35,12 @@ RefPtr<csql::QueryTreeNode> SQLEngine::rewriteQuery(
 RefPtr<csql::TableProvider> SQLEngine::tableProviderForNamespace(
     PartitionMap* partition_map,
     ReplicationScheme* replication_scheme,
-    CompactionWorker* cstable_index,
     AnalyticsAuth* auth,
     const String& tsdb_namespace) {
   return new TSDBTableProvider(
       tsdb_namespace,
       partition_map,
       replication_scheme,
-      cstable_index,
       auth);
 }
 
@@ -104,7 +101,6 @@ RefPtr<csql::ExecutionStrategy> SQLEngine::getExecutionStrategy(
     csql::Runtime* runtime,
     PartitionMap* partition_map,
     ReplicationScheme* replication_scheme,
-    CompactionWorker* cstable_index,
     AnalyticsAuth* auth,
     const String& customer) {
   auto strategy = mkRef(new csql::DefaultExecutionStrategy());
@@ -113,7 +109,6 @@ RefPtr<csql::ExecutionStrategy> SQLEngine::getExecutionStrategy(
       tableProviderForNamespace(
           partition_map,
           replication_scheme,
-          cstable_index,
           auth,
           customer));
 
@@ -123,7 +118,6 @@ RefPtr<csql::ExecutionStrategy> SQLEngine::getExecutionStrategy(
           runtime,
           partition_map,
           replication_scheme,
-          cstable_index,
           auth,
           customer,
           std::placeholders::_1));

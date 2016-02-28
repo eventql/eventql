@@ -9,8 +9,9 @@
  */
 #pragma once
 #include <csql/runtime/runtime.h>
-#include <csql/runtime/ResultFormat.h>
-#include <zbase/core/TSDBTableProvider.h>
+#include <zbase/core/TSDBService.h>
+#include <zbase/sql/sql_engine.h>
+#include <zbase/sql/table_provider.h>
 #include <zbase/AnalyticsAuth.h>
 
 namespace zbase {
@@ -22,7 +23,6 @@ public:
   static RefPtr<csql::TableProvider> tableProviderForNamespace(
       PartitionMap* partition_map,
       ReplicationScheme* replication_scheme,
-      CompactionWorker* cstable_index,
       AnalyticsAuth* auth,
       const String& tsdb_namespace);
 
@@ -30,7 +30,6 @@ public:
       csql::Runtime* runtime,
       PartitionMap* partition_map,
       ReplicationScheme* replication_scheme,
-      CompactionWorker* cstable_index,
       AnalyticsAuth* auth,
       const String& tsdb_namespace,
       RefPtr<csql::QueryTreeNode> query);
@@ -39,7 +38,6 @@ public:
       csql::Runtime* runtime,
       PartitionMap* partition_map,
       ReplicationScheme* replication_scheme,
-      CompactionWorker* cstable_index,
       AnalyticsAuth* auth,
       const String& customer);
 

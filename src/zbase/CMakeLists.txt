@@ -50,10 +50,10 @@ add_library(tsdb-server OBJECT
     core/FixedShardPartitioner.cc
     core/CompactionStrategy.cc
     core/CompactionWorker.cc
-    core/SQLEngine.cc
+    sql/sql_engine.cc
+    sql/table_provider.cc
     core/TSDBService.cc
     core/TSDBServlet.cc
-    core/TSDBTableProvider.cc
     core/TSDBTableRef.cc
     core/RecordSet.cc
     core/Partition.cc

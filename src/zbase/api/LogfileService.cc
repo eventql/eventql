@@ -19,7 +19,6 @@
 #include "csql/qtree/ColumnReferenceNode.h"
 #include "csql/CSTableScan.h"
 #include "zbase/core/TimeWindowPartitioner.h"
-#include "zbase/core/SQLEngine.h"
 
 using namespace stx;
 

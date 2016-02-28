@@ -47,7 +47,7 @@
 #include "zbase/core/TSDBServlet.h"
 #include "zbase/core/ReplicationWorker.h"
 #include "zbase/core/LSMTableIndexCache.h"
-#include "zbase/core/SQLEngine.h"
+#include "zbase/sql/sql_engine.h"
 #include "zbase/DefaultServlet.h"
 #include "csql/defaults.h"
 #include "zbase/ConfigDirectory.h"
