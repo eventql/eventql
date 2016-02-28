@@ -10,6 +10,7 @@
 #pragma once
 #include <stx/stdtypes.h>
 #include <stx/http/HTTPSSEStream.h>
+#include <zbase/sql/codec/json_codec.h>
 
 namespace zbase {
 
@@ -22,11 +23,11 @@ public:
 
 protected:
 
-  void sendResult(size_t idx);
+  void sendResults();
   void sendProgress(double progress);
 
+  JSONCodec json_codec_;
   RefPtr<http::HTTPSSEStream> output_;
-  Vector<ScopedPtr<csql::ResultList>> results_;
 };
 
 }
