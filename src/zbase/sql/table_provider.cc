@@ -32,22 +32,33 @@ csql::TaskIDList TSDBTableProvider::buildSequentialScan(
     RefPtr<csql::SequentialScanNode> node,
     csql::TaskDAG* tasks) const {
   auto table_ref = TSDBTableRef::parse(node->tableName());
-  if (partition_map_->findTable(tsdb_namespace_, table_ref.table_key).isEmpty()) {
-    return csql::TaskIDList{};
+  auto table = partition_map_->findTable(tsdb_namespace_, table_ref.table_key);
+  if (table.isEmpty()) {
+    RAISEF(kRuntimeError, "table not found: '$0'", node->tableName());
   }
 
-  if (table_ref.partition_key.isEmpty()) {
-    RAISEF(
-        kRuntimeError,
-        "error while opening table '$0': missing partition key",
-        node->tableName());
+  auto partitioner = table.get()->partitioner();
+  auto partitions = partitioner->listPartitions(node->constraints());
+
+  csql::TaskIDList task_ids;
+  for (const auto& partition : partitions) {
+    if (replication_scheme_->hasLocalReplica(partition)) {
+      auto task_factory = [node, table, partition] (
+          csql::Transaction* txn,
+          csql::RowSinkFn output) -> RefPtr<csql::Task> {
+
+      };
+
+      auto task = new csql::TaskDAGNode(
+          new csql::SimpleTableExpressionFactory(task_factory));
+
+      task_ids.emplace_back(tasks->addTask(task));
+    } else {
+      RAISE(kRuntimeError, "remote scan not supported");
+    }
   }
 
-  if (table_ref.host.isEmpty() || table_ref.host.get() != "localhost") {
-    return buildRemoteSequentialScan(txn, node, table_ref, tasks);
-  } else {
-    return buildLocalSequentialScan(txn, node, table_ref, tasks);
-  }
+  return task_ids;
 }
 
 csql::TaskIDList TSDBTableProvider::buildLocalSequentialScan(
