@@ -1,0 +1,86 @@
+<template id="zbase_sql_editor_main_tpl">
+  <div class="zbase_sql_editor">
+
+    <div class="zbase_content_pane fullwidth">
+      <div class="zbase_sql_editor_breadcrumbs">
+        <zbase-breadcrumbs>
+          <zbase-breadcrumbs-section>
+            <a href="/a/">Datastore</a>
+          </zbase-breadcrumbs-section>
+          <zbase-breadcrumbs-section>
+            <a href="/a/datastore/queries">Queries</a>
+          </zbase-breadcrumbs-section>
+          <zbase-breadcrumbs-section>
+            <a class="query_name_breadcrumb"></a>
+          </zbase-breadcrumbs-section>
+        </zbase-breadcrumbs>
+      </div>
+      <div class="zbase_sql_editor_pane">
+
+
+        <div class="zbase_sql_editor_content with_sidebar">
+          <div class="zbase_sql_editor_infobar hidden"></div>
+          <section class="zbase_sql_editor_title">
+            <button class="z-button primary" data-action="execute-query">
+              <i class="fa fa-bolt"></i>
+              &nbsp;Execute
+            </button>
+            <button class="z-button secondary share_button" data-action="share-query">
+              <i class="fa fa-share-alt"></i>
+              &nbsp;Share
+            </button>
+            <span class="readonly_hint hidden"><i class="fa fa-lock"></i> Read-Only</span>
+            <h2 class="pagetitle document_name" data-action='edit-query-name'></h2>
+          </section>
+
+          <z-codeeditor data-language="text/x-chartsql" data-content='query_content' data-resizable='vertical' style="height: 250px;"></z-codeeditor>
+
+          <div class="zbase_sql_editor_result_pane">
+          </div>
+
+          <z-modal class="zbase_sql_editor_modal rename_query">
+            <z-modal-box>
+              <z-modal-close-icon></z-modal-close-icon>
+              <div class="z-modal-header">Rename Query</div>
+              <div class="z-modal-content">
+                <h4>Enter a new query name</h4>
+                <input class="z-input" name="doc_name" />
+              </div>
+              <div class="z-modal-footer">
+                <button class="z-button primary" data-action="submit">
+                  Save
+                </button>
+              </div>
+            </z-modal-box>
+          </z-modal>
+
+        </div>
+
+        <div class="zbase_sql_editor_sidebar hidden">
+          <div class="sidebar_header">
+            <span class="sidebar_visibility closed">
+              <i class="fa chevron"></i>
+            </span>
+          </div>
+          <div class="sidebar_inner">
+            <section class="sidebar_section document_settings"></section>
+            <section class="sidebar_section table_list"></section>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <z-tooltip class="execute_hint" data-pointer='center' data-position='bottom'>
+      You can also press Ctrl+Enter
+    </z-tooltip>
+  </div>
+</template>
+
+<template id="zbase_sql_editor_error_msg_tpl">
+  <div class="error_message">
+    <h3>Error</h3>
+    <div class="error_text"></div>
+  </div>
+</template>
+

@@ -1,0 +1,51 @@
+/**
+ * This file is part of the "tsdb" project
+ *   Copyright (c) 2015 Paul Asmuth, FnordCorp B.V.
+ *
+ * FnordMetric is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License v3.0. You should have received a
+ * copy of the GNU General Public License along with this program. If not, see
+ * <http://www.gnu.org/licenses/>.
+ */
+package zbase;
+
+message ReplicaState {
+
+  /**
+   * SHA1 sum (20 bytes) containing the unique identifier of this replica
+   */
+  required bytes replica_id = 1;
+
+  /**
+   * Up to which offset have we uploaded the partition to this replica (used
+   * for log partition replication)
+   */
+  optional uint64 replicated_offset = 2;
+
+  /**
+   * Which is the newest version have we uploaded the partition to this replica
+   * (used for static partition replication)
+   */
+  optional uint64 version = 6;
+
+};
+
+message ReplicationState {
+
+  /**
+   * SHA1 sum (20 bytes) containing the uuid of the partition for which this
+   * replication state was written. The uuid is used to prevent A/B/A scenarios
+   * when a partition is created, deleted and recreated.  
+   */
+  required bytes uuid = 1;
+
+  /**
+   * One entry for each replica to which we pushed some data. It is safe to
+   * delete entries from this list / truncate this list; if the replication
+   * offset for a specific host is lost all that will happen is that some
+   * data will be uploaded to the host that has already been sent there. However
+   * since the upload is idempotent this will not have any visible effects.
+   */
+  repeated ReplicaState replicas = 2;
+
+};

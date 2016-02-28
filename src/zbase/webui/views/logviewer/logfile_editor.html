@@ -1,0 +1,150 @@
+<template id="zbase_logviewer_logfile_editor_tpl">
+  <div class="zbase_content_pane zbase_logviewer logfile_editor">
+
+    <h2 class="pagetitle">
+      Logfiles &mdash; <em><a class="logfile_name_breadcrumb"></a></em>
+    </h2>
+
+    <div class="editor_pane source_fields">
+      <div class="editor_pane_header">
+        <h2 class="pagetitle">Source Fields</h2>
+      </div>
+
+      <div class="editor_pane_inner">
+        <table class="z-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Type</th>
+              <th>Format</th>
+              <th></th>
+            </tr>
+          </thead>
+
+          <tbody></tbody>
+        </table>
+
+        <div class="add_field">
+          <a class="link add"><i class="fa fa-plus"></i> Add Field</a>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="editor_pane regex">
+      <div class="editor_pane_header">
+        <h2 class="pagetitle">Row Regex</h2>
+      </div>
+
+      <div class="editor_pane_inner">
+        <textarea class="z-textarea regex" rows="3" ></textarea>
+        <button class="z-button primary submit">Save</button>
+        <button class="z-button primary loading saving hidden" style="width: 60px;">
+          <i class="fa fa-spinner fa-spin"></i>
+        </button>
+      </div>
+    </div>
+
+
+    <div class="editor_pane row_fields">
+      <div class="editor_pane_header">
+        <h2 class="pagetitle">Row Fields</h2>
+      </div>
+
+      <div class="editor_pane_inner">
+        <table class="z-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Type</th>
+              <th>Format</th>
+              <th></th>
+            </tr>
+          </thead>
+
+          <tbody></tbody>
+        </table>
+
+        <div class="add_field">
+          <a class="link add"><i class="fa fa-plus"></i> Add Field</a>
+        </div>
+      </div>
+
+    </div>
+
+    <z-modal class="edit_field">
+      <z-modal-box>
+        <z-modal-close-icon></z-modal-close-icon>
+        <div class="container"></div>
+      </z-modal-box>
+    </z-modal>
+
+    <z-modal class="delete_field">
+      <z-modal-box>
+        <z-modal-close-icon></z-modal-close-icon>
+        <div class="container"></div>
+      </z-modal-box>
+    </z-modal>
+  </div>
+</template>
+
+<template id="zbase_logviewer_logfile_editor_row_tpl">
+  <tr>
+    <td class="name"></td>
+    <td class="type"></td>
+    <td class="format"></td>
+    <td class="icon">
+      <i class="fa fa-trash-o delete"></i>
+    </td>
+  </tr>
+</template>
+
+<template id="zbase_logviewer_logfile_editor_modal_tpl">
+  <div class="z-modal-header"></div>
+  <div class="z-modal-content">
+    <div class="field">
+      <label>Name:</label>
+      <input class="z-input name" type="text" />
+      <div class="error_note name hidden">Please insert a name</div>
+    </div>
+
+    <div class="field">
+      <label>Type:</label>
+      <z-dropdown class="input" data-resolved>
+        <z-dropdown-flyout>
+          <z-dropdown-items>
+            <z-dropdown-item data-value="STRING" data-selected>STRING</z-dropdown-item>
+            <z-dropdown-item data-value="DOUBLE">DOUBLE</z-dropdown-item>
+            <z-dropdown-item data-value="UINT32">UINT32</z-dropdown-item>
+            <z-dropdown-item data-value="UINT64">UINT64</z-dropdown-item>
+            <z-dropdown-item data-value="BOOLEAN">BOOLEAN</z-dropdown-item>
+            <z-dropdown-item data-value="DATETIME">DATETIME</z-dropdown-item>
+          </z-dropdown-items>
+        </z-dropdown-flyout>
+      </z-dropdown>
+    </div>
+
+    <div class="field">
+      <label>Format:</label>
+      <input class="z-input format" type="text" />
+      <div class="error_note date_time_format hidden">Please insert a format, e.g. '%H:%M:%S'</div>
+    </div>
+  </div>
+  <div class="z-modal-footer">
+    <button class="z-button primary submit">Save</button>
+    <button class="z-button secondary close">Cancel</button>
+  </div>
+</template>
+
+<template id="zbase_logviewer_logfile_editor_delete_modal_tpl">
+  <div class="z-modal-header"></div>
+  <div class="z-modal-content">
+    <h4>
+      Are you sure you want to delete the field <span class="field_name"></span>
+    </h4>
+  </div>
+  <div class="z-modal-footer">
+    <button class="z-button primary submit">Yes</button>
+    <button class="z-button secondary close">Cancel</button>
+  </div>
+</template>

@@ -1,0 +1,116 @@
+.zbase_doc_settings {
+  font-size: 12px;
+}
+
+.zbase_doc_settings h3 {
+  font-weight: 500;
+  color: #333;
+  margin: 0 0 7px 0;
+  font-size: 12px;
+}
+
+.zbase_doc_settings .doc_setting {
+  border-top: 1px dotted #eee;
+  line-height: 28px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.zbase_doc_settings .doc_setting.visible_overflow {
+  overflow: visible;
+}
+
+.zbase_doc_settings .doc_setting .doc_setting_title {
+  display: inline-block;
+  width: 64px;
+  color: #777;
+}
+
+.zbase_doc_settings .doc_setting .doc_setting_value {
+  display: inline-block;
+  font-weight: 500;
+  color: #333;
+  padding: 0 10px;
+  cursor: pointer;
+}
+
+.zbase_doc_settings .doc_setting .doc_setting_value:hover {
+  background: #3d8ad3;
+  color: #fff;
+}
+
+.zbase_doc_settings .doc_setting .doc_setting_value:hover z-dropdown-header {
+  color: #fff;
+}
+
+.zbase_doc_settings .doc_setting .doc_setting_value z-dropdown {
+  margin-left: -11px;
+}
+
+.zbase_doc_settings .doc_setting .doc_setting_value z-dropdown {
+  line-height: 28px;
+  vertical-align: middle;
+}
+
+.zbase_doc_settings .doc_setting .doc_setting_value z-dropdown z-dropdown-item {
+  line-height: 16px;
+}
+
+.zbase_doc_settings .doc_setting .doc_setting_value.with_dropdown_icon:after,
+.zbase_doc_settings .doc_setting .doc_setting_value.with_edit_icon:after {
+  font: normal normal normal 12px/1 FontAwesome;
+  font-weight: 400;
+  margin-left: 0.5em;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  text-rendering: auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.zbase_doc_settings .doc_setting .doc_setting_value.with_dropdown_icon:after {
+  content: "\f0d7";
+}
+
+.zbase_doc_settings .doc_setting .doc_setting_value.with_edit_icon:hover:after {
+  content: "\f040";
+}
+
+.zbase_doc_settings .doc_setting .link {
+  display: inline-block;
+  font-weight: 400;
+  margin-left: -10px;
+  padding-left: 10px;
+  padding-right: 20px;
+}
+
+.zbase_doc_settings .doc_setting .link:hover {
+  background: #3d8ad3;
+  color: #fff;
+}
+
+.zbase_doc_settings .zbase_doc_settings_modal {
+  font-size: 14px;
+}
+
+.zbase_doc_settings .zbase_doc_settings_modal h4 {
+  font-size: 14px;
+  line-height: 34px;
+  font-weight: 400;
+  margin: 0;
+}
+
+.zbase_doc_settings .doc_settings_infobar {
+  border-bottom: 1px solid #edc3c3;
+  background: #fff0f0;
+  box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+  padding: 10px 20px;
+  font-size: 13px;
+  font-weight: 400;
+  color: rgba(10,10,10,0.65);
+  display: block;
+}
+
+.zbase_doc_settings .doc_settings_infobar.hidden {
+  display: none;
+}

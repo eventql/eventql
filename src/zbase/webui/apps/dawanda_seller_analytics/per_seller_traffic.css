@@ -1,0 +1,46 @@
+.zbase_seller_stats.per_seller .traffic .metric_group table {
+  width: 100%;
+  table-layout: fixed;
+  font-size: 13px;
+}
+
+.zbase_seller_stats.per_seller .traffic .metric_group table td {
+  vertical-align: top;
+  padding: 18px 18px 32px 18px;
+  border-top: 1px solid #e1e1e1;
+}
+
+.zbase_seller_stats.per_seller .traffic .metric_group table td.metric_title {
+  width: 188px;
+  padding-left: 6px;
+  font-weight: 400;
+  font-size: 15px;
+  line-height: 40px;
+  color: #333;
+}
+
+.zbase_seller_stats.per_seller .traffic .metric_group table td .metric_pane h2.pagetitle {
+  font-size: 16px;
+  float: left;
+  line-height: 40px;
+  margin-top: 0px;
+}
+
+.zbase_seller_stats.per_seller .traffic .metric_group table td .metric_pane i.help {
+  display: none;
+}
+
+.zbase_seller_stats.per_seller .traffic .metric_group table td .metric_pane .num {
+  font-size: 22px;
+  line-height: 33px;
+  float: right;
+}
+
+.zbase_seller_stats.per_seller .traffic .metric_group table td .metric_pane z-chart {
+  margin-top: 6px;
+}
+
+.zbase_seller_stats.per_seller .traffic .metric_group table td .metric_pane z-chart circle {
+  fill: none;
+  stroke: none;
+}

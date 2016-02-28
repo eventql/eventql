@@ -1,0 +1,184 @@
+.zbase_user_journey_viewer > .hidden {
+  display: none;
+}
+
+.zbase_user_journey_viewer ul.journeys {
+  list-style-type: none;
+  padding: 20px;
+  margin: 0;
+}
+
+.zbase_user_journey_viewer ul.journeys li {
+  border-bottom: 2px solid #ddd;
+  padding: 16px 20px 8px 20px;
+  font-size: 13px;
+  min-height: 76px;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.zbase_user_journey_viewer ul.journeys li .time:after {
+  content: "\f105";
+  display: block;
+  float: right;
+  font: normal normal normal 14px/1 FontAwesome;
+  text-rendering: auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-size: 16px;
+  line-height: 38px;
+}
+
+.zbase_user_journey_viewer ul.journeys li.journey:hover {
+  background: #f9f9f9;
+  border: 1px solid #3d8ad3;
+}
+
+.zbase_user_journey_viewer ul.journeys li .time {
+  display: block;
+  color: #666;
+  margin-left: -20px;
+  margin-right: -20px;
+  margin-top: -16px;
+  padding: 0 20px;
+  margin-bottom: 21px;
+  border-bottom: 1px solid #eee;
+  height: 40px;
+  line-height: 40px;
+  font-weight: 400;
+  font-size: 12px;
+  background: #fff;
+}
+
+.zbase_user_journey_viewer ul.journeys li:hover .time {
+  background: #3d8ad3;
+  color: #fff;
+}
+
+.zbase_user_journey_viewer ul.journeys li .event {
+  display: block;
+  border: 1px solid rgba(52, 152, 219, 0.3);
+  border-radius: 4px;
+  margin-right: 14px;
+  margin-bottom: 14px;
+  float: left;
+  height: 36px;
+  line-height: 36px;
+  padding: 0 12px;
+  color: #3d8ad3;
+  background: #fff;
+}
+
+.zbase_user_journey_viewer ul.journeys li .event em {
+  font-weight: 400;
+  font-style: normal;
+  color: #666;
+}
+
+.zbase_user_journey_viewer ul.journeys li .event i {
+  margin-right: 3px;
+}
+
+.zbase_user_journey_viewer ul.journeys li:before,
+.zbase_user_journey_viewer ul.journeys li:after {
+    content: " "; /* 1 */
+    display: table; /* 2 */
+}
+
+.zbase_user_journey_viewer ul.journeys li:after {
+  clear: both;
+}
+
+.zbase_user_journey_viewer ul.journeys li.loading_bar {
+  background-color: #fff;
+  border-bottom: 1px solid #c9d0d4;
+  box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+  padding: 10px 20px;
+  font-size: 13px;
+  font-weight: 400;
+  color: rgba(10,10,10,0.65);
+  min-height: 0;
+}
+
+.zbase_user_journey_viewer .loading_bar.hidden {
+  display: none;
+}
+
+.zbase_user_journey_viewer .loading_bar em {
+  font-weight: 500;
+  font-style: normal;
+  color: rgba(10,10,10,0.7);
+}
+
+.zbase_user_journey_viewer .loading_bar h3 {
+  margin: 0;
+  color: #3d8ad3;
+  line-height: 20px;
+  font-weight: 500;
+}
+
+.zbase_user_journey_viewer .loading_bar .loaderanim-outer {
+  display: table-cell;
+  vertical-align: middle;
+  float: left;
+  margin-left: -10px;
+  margin-right: 10px;
+}
+
+.zbase_user_journey_viewer .loading_bar .loaderanim {
+  width: 50px;
+  height: 20px;
+  display: block;
+  text-align: center;
+  font-size: 10px;
+  overflow: hidden;
+}
+
+.zbase_user_journey_viewer .loading_bar .loaderanim > div {
+  background-color: #3d8ad3;
+  height: 100%;
+  width: 4px;
+  display: inline-block;
+  -webkit-animation: zbase_user_journey_loading_anim 1.2s infinite ease-in-out;
+  animation: zbase_user_journey_loading_anim 1.2s infinite ease-in-out;
+}
+
+.zbase_user_journey_viewer .loading_bar .loaderanim .rect2 {
+  -webkit-animation-delay: -1.1s;
+  animation-delay: -1.1s;
+}
+
+.zbase_user_journey_viewer .loading_bar .loaderanim .rect3 {
+  -webkit-animation-delay: -1.0s;
+  animation-delay: -1.0s;
+}
+
+.zbase_user_journey_viewer .loading_bar .loaderanim .rect4 {
+  -webkit-animation-delay: -0.9s;
+  animation-delay: -0.9s;
+}
+
+.zbase_user_journey_viewer .loading_bar .loaderanim .rect5 {
+  -webkit-animation-delay: -0.8s;
+  animation-delay: -0.8s;
+}
+
+@-webkit-keyframes zbase_user_journey_loading_anim {
+  0%, 40%, 100% { -webkit-transform: scaleY(0.4) }  
+  20% { -webkit-transform: scaleY(1.0) }
+}
+
+@keyframes zbase_user_journey_loading_anim {
+  0%, 40%, 100% { 
+    transform: scaleY(0.4);
+    -webkit-transform: scaleY(0.4);
+  }  20% { 
+    transform: scaleY(1.0);
+    -webkit-transform: scaleY(1.0);
+  }
+}
+

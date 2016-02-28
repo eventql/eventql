@@ -1,0 +1,62 @@
+<template id="zbase_datastore_tables_main_tpl">
+  <div class="zbase_datastore_tables">
+
+    <div class="zbase_content_pane fullwidth">
+    </div>
+  <div>
+</template>
+
+<template id="zbase_datastore_tables_list_tpl">
+  <div class="page_wrap frame">
+    <button class="z-button secondary create_table" style="margin-top: 11px;">
+      <i class="fa fa-plus"></i> &nbsp;Create Table
+    </button>
+    <h2 class="pagetitle"><em>Tables</em></h2>
+  </div>
+
+  <div class="tbl_box page_wrap">
+    <table class="z-table zbase_clickable_table" data-clickable style="border-top: 1px solid #ddd;">
+      <thead>
+        <tr>
+          <th>Table</th>
+          <th style="width: 160px;">Size</th>
+          <th style="width: 60px;">&nbsp;</th>
+        </tr>
+      </thead>
+
+      <tbody></tbody>
+    </table>
+  </div>
+</template>
+
+<template id="zbase_datastore_tables_list_row_tpl">
+  <tr class="table_definition">
+    <td>
+      <a href class="table_name edit"></a>
+    </td>
+    <td>
+      <a class="edit" style="color: #888;">0.0 TB</a></td>
+    <td class="icon">
+      <z-dropdown class="edit" data-resolved="">
+        <z-dropdown-header>
+          <z-dropdown-header-value data-static="">
+            <i class="dot"></i>
+            <i class="dot"></i>
+            <i class="dot"></i>
+          </z-dropdown-header-value>
+          <z-dropdown-header-icon></z-dropdown-header-icon>
+        </z-dropdown-header>
+        <z-dropdown-flyout>
+          <z-dropdown-items>
+            <z-dropdown-item data-value="edit" class="link">
+              <a class="edit">Edit Table</a>
+            </z-dropdown-item>
+            <z-dropdown-item data-value="tableviewer" class="link">
+              <a class="tableviewer">Open in Viewer</a>
+            </z-dropdown-item>
+          </z-dropdown-items>
+        </z-dropdown-flyout>
+      </z-dropdown>
+    </td>
+  </tr>
+</template>

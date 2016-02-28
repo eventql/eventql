@@ -1,0 +1,115 @@
+<template id="zbase_report_main_tpl">
+  <div class="zbase_content_pane fullwidth">
+    <div class="zbase_report_breadcrumbs">
+      <zbase-breadcrumbs>
+        <zbase-breadcrumbs-section>
+          <a href="/a/">Datastore</a>
+        </zbase-breadcrumbs-section>
+        <zbase-breadcrumbs-section>
+          <a href="/a/datastore/queries">Queries</a>
+        </zbase-breadcrumbs-section>
+        <zbase-breadcrumbs-section>
+          <a class="report_breadcrumb"></a>
+        </zbase-breadcrumbs-section>
+      </zbase-breadcrumbs>
+    </div>
+
+    <div class="zbase_report_infobar hidden"></div>
+    <div class="zbase_report_pane editable">
+
+      <div class="zbase_report_sidebar">
+        <h3 class="sidebar_title">
+          <span class="report_name editable"></span>
+        </h3>
+
+        <div class="sidebar_subtitle">
+          <a class="link share hide_when_readonly">Share</a>
+          <span class="readonly_hint hidden"><i class="fa fa-lock"></i> Read-Only</span>
+          <z-dropdown data-resolved class="mode hide_when_readonly">
+            <z-dropdown-flyout>
+              <z-dropdown-items>
+                <z-dropdown-item data-value='editing' data-selected>
+                  <i class='fa fa-pencil'></i>Editing
+                </z-dropdown-item>
+                <z-dropdown-item data-value='viewing'>
+                  <i class='fa fa-eye'></i>Viewing
+                </z-dropdown-item>
+              </z-dropdown-items>
+            </z-dropdown-flyout>
+          </z-dropdown>
+
+          <div>
+            Last refreshed: <span class="report_activity_info">Just now</span>
+          </div>
+        </div>
+
+        <div class="sidebar_content">
+          <h4 class="sidebar_content_title">Description</h4>
+          <a class="link hidden add_description">Add Description</a>
+          <div class="report_description editable"></div>
+        </div>
+
+        <div class="sidebar_content secondary_section">
+          <div class="document_settings"></div>
+          <div style="border-top: 1px dotted #eee; line-height: 28px;">
+            <a class="link edit_source"><i class="fa fa-code" style="margin-right: 3px;"></i> Edit Source</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="zbase_report_content">
+        <div class="zbase_report_viewport"></div>
+
+        <div class="link add_widget">
+          <i class="fa fa-plus"></i>&nbsp;Add Report Element
+        </div>
+      </div>
+
+      <z-modal class="zbase_sql_editor_modal rename_report edit">
+        <z-modal-box>
+          <z-modal-close-icon></z-modal-close-icon>
+          <div class="z-modal-header">Rename Report</div>
+          <div class="z-modal-content">
+            <h3>Enter a new report name</h3>
+            <input class="z-input report_name" />
+          </div>
+          <div class="z-modal-footer">
+            <button class="z-button primary submit">
+              Save
+            </button>
+          </div>
+        </z-modal-box>
+      </z-modal>
+
+      <z-modal class="zbase_sql_editor_modal edit edit_description">
+        <z-modal-box>
+          <z-modal-close-icon></z-modal-close-icon>
+          <div class="z-modal-header">Edit Report Description</div>
+          <div class="z-modal-content">
+            <h3>Enter a new report description</h3>
+            <textarea class="z-textarea report_description" rows="20"></textarea>
+          </div>
+          <div class="z-modal-footer">
+            <button class="z-button primary submit">
+              Save
+            </button>
+          </div>
+        </z-modal-box>
+      </z-modal>
+    </div>
+  </div>
+</template>
+
+<template id="zbase_report_breadcrumbs_tpl">
+  <zbase-breadcrumbs>
+    <zbase-breadcrumbs-section>
+      <a href="/a/">Datastore</a>
+    </zbase-breadcrumbs-section>
+    <zbase-breadcrumbs-section>
+      <a href="/a/datastore/queries">Queries</a>
+    </zbase-breadcrumbs-section>
+    <zbase-breadcrumbs-section>
+      <a class="report_breadcrumb"></a>
+    </zbase-breadcrumbs-section>
+  </zbase-breadcrumbs>
+</template>

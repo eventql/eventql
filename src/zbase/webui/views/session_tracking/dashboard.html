@@ -1,0 +1,60 @@
+<template id="zbase_session_tracking_dashboard_tpl">
+  <div class="zbase_session_tracking zbase_session_tracking_dashboard">
+
+    <div class="zbase_content_pane fullwidth">
+      <div style="padding: 0 20px;">
+        <h2 class="pagetitle main"><em>User Tracking</em></h2>
+        <z-tabbable class="slim_tabs" style="margin-top: -2px;">
+          <z-tab class="link" data-active>
+            <a href="/a/session_tracking">Status</a>
+          </z-tab>
+          <z-tab class="link">
+            <a href="/a/session_tracking/settings/tracking_pixel">Tracking Pixel</a>
+          </z-tab>
+        </z-tabbable>
+
+        <div class="dashboard">
+          <div class="chart_panel">
+            <label>Display:</label>
+            <z-dropdown data-resolved class="input metric" name="metric">
+              <z-dropdown-flyout>
+                <z-dropdown-items>
+                  <z-dropdown-item data-value="num_sessions" data-title="Number of Sessions" data-selected>Number of Sessions</z-dropdown-item>
+                </z-dropdown-items>
+              </z-dropdown-flyout>
+            </z-dropdown>
+
+            <z-dropdown data-resolved class="time_window" name="time_window">
+              <z-dropdown-flyout>
+                <z-dropdown-items>
+                  <z-dropdown-item data-value="3600" data-selected>Hourly</z-dropdown-item>
+                  <z-dropdown-item data-value="86400">Daily</z-dropdown-item>
+                  <z-dropdown-item data-value="604800">Weekly</z-dropdown-item>
+                </z-dropdown-items>
+              </z-dropdown-flyout>
+            </z-dropdown>
+
+            <z-daterangepicker data-resolved class="open_left"></z-daterangepicker>
+          </div>
+
+          <div class="chart_container">
+            <div class="chart_legend"></div>
+            <div class="clearfix"></div>
+            <div class="zbase_loader">
+              <div class="spinner_outer">
+                <div class="spinner">
+                  <div class="rect1"></div>
+                  <div class="rect2"></div>
+                  <div class="rect3"></div>
+                  <div class="rect4"></div>
+                  <div class="rect5"></div>
+                </div>
+              </div>
+            </div>
+            <div class="inner_chart" id="dashboard_chart"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>

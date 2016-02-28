@@ -1,0 +1,80 @@
+<template id="zbase_header_tpl">
+  <div class="header_bar">
+    <div class="navigation_inner page_wrap frame">
+
+      <div class="platform">
+        <img src="/a/_/a/favicon_w-26x26.png" class="icon" />
+        <span>Datastore</span>
+      </div>
+
+      <div id="menu_toggler" class="closed" style="display: none;">
+        <div class="menu_icon" ><i></i><i></i><i></i></div>
+      </div>
+      <div class="sep"></div>
+
+      <div class="main_navi"></div>
+      <!--
+      <z-dropdown data-resolved data-hover class="new_query">
+        <z-dropdown-header>
+          <z-dropdown-header-value data-static class="fullwidth">
+            <i class="fa fa-plus"></i>
+            <span>New Query</span>
+          </z-dropdown-header-value>
+          <z-dropdown-header-icon></z-dropdown-header-icon>
+        </z-dropdown-header>
+        <z-dropdown-flyout>
+          <z-dropdown-items>
+            <z-dropdown-item data-value='sql_query'>New SQL Query</z-dropdown-item>
+            <z-dropdown-item data-value='report'>New Report</z-dropdown-item>
+          </z-dropdown-items>
+        </z-dropdown-flyout>
+      </z-dropdown>
+      -->
+      <div class="user_navi"></div>
+      <div class="sep right"></div>
+      <a class="btn_settings" href="/a/settings">
+        <i class="fa fa-cog"></i>
+      </a>
+    </div>
+  </div>
+</template>
+
+
+<template id="zbase_header_user_navi_tpl">
+  <span class="nav dropdown" style="">
+    <span class="dropdown_header" href="">
+      <span class="userid_info"></span> (<span class="namespace_info"></span>)
+      <i class="fa fa-caret-down"></i>
+      <span style="display: block"></span>
+    </span>
+    <ul class="dropdown_panel">
+      <li class="change_namespace" style="display: none;">
+        <span href="">Change namespace</span>
+      </li>
+      <li>
+        <a class="link" href="/a/logout">Logout</a>
+      </li>
+    </ul>
+  </span>
+</template>
+
+<template id="zbase_header_main_navi_tpl">
+  <a href="/a/datastore/queries" class="nav">Query</a></li>
+  <a href="/a/datastore/tables" class="nav">Tables</a></li>
+</template>
+
+<template id="zbase_header_namespace_prompt_tpl">
+  <z-modal class='zbase_select_namespace_modal'>
+    <z-modal-box>
+      <z-modal-close-icon></z-modal-close-icon>
+      <div class='z-modal-header'>
+        Select a Namespace
+      </div>
+
+      <div class="error_message hidden"></div>
+
+      <ul class="namespace_list">
+      </ul>
+    </z-modal-box>
+  </z-modal>
+</template>

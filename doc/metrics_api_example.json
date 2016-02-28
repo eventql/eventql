@@ -1,0 +1,65 @@
+
+{
+  "metrics": {
+    "gmv_total": {
+      "source": "db.order_items",
+      "expr": "sum(price_cents)"
+    },
+    "num_purchases": {
+      "source": "db.order_items",
+      "expr": "count(1)"
+    },
+    "gmv_per_transaction": {
+      "expr": "gmv_total / num_purchases"
+    },
+    "buy_to_detail_rate": {
+      "expr": "num_purchases / product_detail_page_views"
+    },
+    "product_detail_page_views": {
+      "source": "web.page_views",
+      "filter": "page_type = 'product_page'",
+      "expr": "count(1)"
+    }
+  },
+  "drilldown": [
+    {
+      "key": "category_e1",
+      "expr": "category_e1",
+      "order": "DESC"
+    },
+    {
+      "key": "time",
+      "expr": "time",
+      "order": "time ASC"
+    }
+  ],
+  "filter": "shop_id = 13008 and time < NOW() and time > NOW() - 30days"
+}
+
+
+{
+  "metrics": {
+    "listview_impressions": {
+      "source": "web.page_views",
+      "expr": "sum(count(product_list.position) WITHIN RECORD)"
+    },
+    "listview_clicks": {
+      "source": "web.page_views",
+      "expr": "sum(sum(if(product_list.clicked, 1, 0)) WITHIN RECORD)"
+    },
+    "listview_ctr": {
+      "expr": "(listview_clicks / listview_impressions) * 100"
+    },
+  },
+  "breakdown": [
+    {
+      "expr": "if (ab_test_group >= 0 and ab_test_group < 25,  'vanilla', if (ab_test_group >= 25 and ab_test_group < 50,  'ctr_base', if (ab_test_group >= 50 and ab_test_group < 75, 'ctr_stddev', if (ab_test_group >= 75 and ab_test_group < 100, 'ctr_stddev_light', 'unknown'))",
+      "order": "listview_ctr ASC"
+    }
+  ],
+  "filter": "shop_id = 13008 and time < NOW() and time > NOW() - 30days"
+}
+
+
+
+

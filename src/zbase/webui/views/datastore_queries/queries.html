@@ -1,0 +1,57 @@
+<template id="zbase_datastore_queries_main_tpl">
+  <div class="zbase_datastore_queries">
+    <div class="zbase_content_pane fullwidth">
+
+      <div class="zbase_queries_breadcrumbs">
+        <zbase-breadcrumbs class="page_wrap frame">
+          <zbase-breadcrumbs-section>
+            <a href="/a/">Datastore</a>
+          </zbase-breadcrumbs-section>
+          <zbase-breadcrumbs-section>
+            <a href="/a/datastore/queries">Queries</a>
+          </zbase-breadcrumbs-section>
+          <zbase-breadcrumbs-section>
+            <a href="/a/datastore/queries" class="query_breadcrumb">All Queries</a>
+          </zbase-breadcrumbs-section>
+        </zbase-breadcrumbs>
+      </div>
+
+      <div class="controls page_wrap frame">
+        <z-search class="search_queries">
+          <z-input class="icon" data-placeholder="Search Queries..." style="position: relative; top: 1px; display: block;">
+            <z-input-icon><i class='fa fa-search'></i></z-input-icon>
+          </z-input>
+        </z-search>
+
+        <z-dropdown class="input primary create_new_doc" data-hover data-resolved>
+          <z-dropdown-header>
+            <z-dropdown-header-value data-static>
+                <i class="fa fa-plus"></i> &nbsp;New Query
+            </z-dropdown-header-value>
+          </z-dropdown-header>
+
+          <z-dropdown-flyout>
+            <z-dropdown-items>
+              <z-dropdown-item data-value="sql_query">New SQL Query</z-dropdown-item>
+              <z-dropdown-item data-value="report">New Report</z-dropdown-item>
+            </z-dropdown-items>
+          </z-dropdown-flyout>
+        </z-dropdown>
+
+      </div>
+
+      <table class="z-table zbase_clickable_table page_wrap" style="border-top: 1px solid #ddd;">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th style="width: 160px;">Type</th>
+            <th style="width: 184px;">Last modified</th>
+          </tr>
+        </thead>
+        <tbody>
+        </tbody>
+      </table>
+
+    </div>
+  </div>
+</template>

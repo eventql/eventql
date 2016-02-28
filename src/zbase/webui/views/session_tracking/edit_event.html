@@ -1,0 +1,143 @@
+<template id="zbase_session_tracking_edit_event_tpl">
+  <div class='zbase_content_pane fullwidth main_menu zbase_session_tracking'>
+
+    <div class="zbase_main_menu"></div>
+
+    <div class="zbase_content main_menu">
+
+      <section class="zbase_page_title large">
+        <div>
+          <h2 class="pagetitle">Tracking</h2>
+          <z-tabbable>
+            <z-tab class="link">
+              <a href="/a/session_tracking">Dashboard</a>
+            </z-tab>
+            <z-tab class="link">
+              <a href="/a/session_tracking/journey_viewer">Journey Viewer</a>
+            </z-tab>
+            <z-tab class="link" data-active>
+              <a href="/a/session_tracking/settings/schema">Schema</a>
+            </z-tab>
+            <z-tab class="link">
+              <a href="/a/session_tracking/settings/tracking_pixel">Tracking Pixel</a>
+            </z-tab>
+          </z-tabbable>
+        </div>
+      </section>
+
+      <div class="edit_session_event">
+        <button class="z-button secondary back"><i class="fa fa-arrow-left"></i> Back</button>
+
+        <h2 class='pagetitle edit_event'>
+          <i class="fa fa-cube"></i> Schema <em class="event_name"></em>
+        </h2>
+
+        <div class="table_container">
+          <table class="z-table edit_event">
+
+            <tbody></tbody>
+          </table>
+
+          <div class="add_pane">
+            <a class="link add_field"><i class="fa fa-plus"></i> Add Field</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <z-modal class="add_field">
+      <z-modal-box>
+        <z-modal-close-icon></z-modal-close-icon>
+        <div class="container"></div>
+      </z-modal-box>
+    </z-modal>
+
+    <z-modal class="delete_field">
+      <z-modal-box>
+        <z-modal-close-icon></z-modal-close-icon>
+        <div class="z-modal-header">Delete Field</div>
+        <div class="z-modal-content">
+          <h4>
+            Are you sure you wan to delete the field <span class="field_name"></span>
+          </h4>
+        </div>
+        <div class="z-modal-footer">
+          <button class="z-button primary submit">Yes</button>
+          <button class="z-button secondary close">Cancel</button>
+        </div>
+      </z-modal-box>
+    </z-modal>
+  </div>
+</template>
+
+<template id="zbase_session_tracking_edit_event_table_tpl">
+  <tr class="table_attached">
+    <td colspan="2" >
+      <table class="z-table">
+        <tbody></tbody>
+      </table>
+
+      <div class="add_pane">
+        <a class="link add_field"><i class="fa fa-plus"></i> Add Field</a>
+      </div>
+    </td>
+  </tr>
+</template>
+
+<template id="zbase_session_tracking_edit_event_row_tpl">
+  <tr>
+    <td class="info">
+      <span class="name"></span>
+      <span class="type"></span>
+      <span class="repeated"></span>
+    </td>
+    <td class="icon">
+      <i class="fa fa-trash-o delete"></i>
+    </td>
+  </tr>
+</template>
+
+<template id="zbase_session_tracking_add_event_modal_tpl">
+  <z-modal-box>
+      <z-modal-close-icon></z-modal-close-icon>
+      <div class="z-modal-header">Add Field</div>
+
+      <div class="z-modal-content">
+        <div class="error_field hidden">
+          Error: <span class="error_message"></span>
+        </div>
+
+        <div class="field">
+          <label>Field:</label>
+          <input class="z-input" type="text" />
+          <div class="error_note hidden">Please add a field name</div>
+        </div>
+
+        <div class="field">
+          <label>Type:</label>
+          <z-dropdown data-resolved class="input">
+            <z-dropdown-flyout>
+              <z-dropdown-items>
+                <z-dropdown-item data-value="OBJECT">OBJECT</z-dropdown-item>
+                <z-dropdown-item data-value="BOOLEAN">BOOLEAN</z-dropdown-item>
+                <z-dropdown-item data-value="UINT32">UINT32</z-dropdown-item>
+                <z-dropdown-item data-value="STRING" data-selected>STRING</z-dropdown-item>
+                <z-dropdown-item data-value="UINT64">UINT64</z-dropdown-item>
+                <z-dropdown-item data-value="DOUBLE">DOUBLE</z-dropdown-item>
+                <z-dropdown-item data-value="DATETIME">DATETIME</z-dropdown-item>
+              </z-dropdown-items>
+            </z-dropdown-flyout>
+          </z-dropdown>
+        </div>
+
+        <div class="field">
+          <z-checkbox></z-checkbox> <label>Repeated</label>
+        </div>
+      </div>
+
+      <div class="z-modal-footer">
+        <button class="z-button primary submit">Submit</button>
+        <button class="z-button secondary close">Cancel</button>
+      </div>
+  </z-modal-box>
+</template>

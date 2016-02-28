@@ -1,0 +1,36 @@
+/**
+ * Copyright (c) 2015 - The CM Authors <legal@clickmatcher.com>
+ *   All Rights Reserved.
+ *
+ * This file is CONFIDENTIAL -- Distribution or duplication of this material or
+ * the information contained herein is strictly forbidden unless prior written
+ * permission is obtained.
+ */
+package zbase;
+
+message AnalyticsPrivileges {
+  optional bool allow_web_access = 1;
+  optional bool allow_private_api_write_access = 2;
+  optional bool allow_private_api_read_access = 3;
+};
+
+message AnalyticsSession {
+  required string customer = 1;
+
+  /**
+   * Special usernames: __private_api_key, __public_api_key
+   */
+  required string userid = 2;
+
+  /**
+   * Used to expire tokens server-side
+   */
+  optional uint64 token_seq = 3;
+
+  /**
+   * Privileges for this session
+   */
+  required AnalyticsPrivileges privileges = 4;
+
+}
+

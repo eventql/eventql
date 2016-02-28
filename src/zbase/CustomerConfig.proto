@@ -1,0 +1,74 @@
+/**
+ * Copyright (c) 2015 - The CM Authors <legal@clickmatcher.com>
+ *   All Rights Reserved.
+ *
+ * This file is CONFIDENTIAL -- Distribution or duplication of this material or
+ * the information contained herein is strictly forbidden unless prior written
+ * permission is obtained.
+ */
+package zbase;
+
+enum UserAuthTwoFactorMethod {
+  USERAUTH_2FA_NONE = 0;
+  USERAUTH_2FA_U2F = 1;
+};
+
+message UserConfig {
+  required string userid = 1;
+  required string customer = 2;
+  optional uint64 version = 3;
+  required string password_hash = 4;
+  required string password_salt = 5;
+  optional UserAuthTwoFactorMethod two_factor_method = 6;
+};
+
+message UserDB {
+  repeated UserConfig users = 1;
+  optional uint64 version = 2;
+};
+
+message EventDefinition {
+  required string evtype = 1;
+  required bytes schema = 2;
+  required uint32 evid = 3;
+};
+
+message LogJoinWebhook {
+  required string id = 1;
+  required string target_url = 2;
+};
+
+message LogJoinConfig {
+  repeated LogJoinWebhook webhooks = 1;
+  repeated EventDefinition session_event_schemas = 2;
+  required bytes session_attributes_schema = 3;
+  required uint32 session_schema_next_field_id = 4;
+};
+
+message LogfileField {
+  required string name = 1;
+  required uint64 id = 2;
+  required string type = 3;
+  optional string format = 4;
+}
+
+message LogfileDefinition {
+  required string name = 1;
+  required string regex = 2;
+  repeated LogfileField source_fields = 3;
+  repeated LogfileField row_fields = 4;
+};
+
+message LogfileImportConfig {
+  repeated LogfileDefinition logfiles = 1;
+}
+
+message CustomerConfig {
+  required string customer = 1;
+  optional uint64 version = 4;
+
+  optional LogJoinConfig logjoin_config = 2;
+
+  optional LogfileImportConfig logfile_import_config = 3;
+
+};

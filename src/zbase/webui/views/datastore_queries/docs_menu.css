@@ -1,0 +1,172 @@
+z-menu.zbase_documents_menu {
+  margin-right: 10px;
+  width: auto;
+}
+
+z-menu.zbase_documents_menu z-menu-item,
+z-menu.zbase_documents_menu z-menu-title,
+z-menu.zbase_documents_menu z-menu-title a {
+  font-size: 12px;
+  margin-bottom: 0;
+}
+
+z-menu.zbase_documents_menu z-menu-section {
+  padding: 0;
+}
+
+z-menu.zbase_documents_menu z-menu-item a,
+z-menu.zbase_documents_menu z-menu-section z-menu-item a {
+  font-size: inherit;
+  padding: 0;
+}
+
+z-menu.zbase_documents_menu > z-menu-item,
+z-menu.zbase_documents_menu > z-menu-section > z-menu-title {
+  padding: 0;
+}
+
+z-menu.zbase_documents_menu > z-menu-item > a,
+z-menu.zbase_documents_menu > z-menu-section > z-menu-title > a {
+  line-height: 32px;
+  height: 32px;
+  display: block;
+  padding: 0 20px 0 14px;
+  font-weight: 400;
+  color: #737373;
+}
+
+z-menu.zbase_documents_menu > z-menu-item[data-active] > a,
+z-menu.zbase_documents_menu > z-menu-section[data-active] > z-menu-title > a {
+  background: #3d8ad3;
+  color: #fff;
+}
+
+z-menu.zbase_documents_menu > z-menu-section > z-menu-title > a:after {
+  font: normal normal normal 12px/1 FontAwesome;
+  font-weight: 400;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  text-rendering: auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  content: "\f105";
+  font-weight: bold;
+  font-size: 15px;
+  display: block;
+  width: 16px;
+  height: 16px;
+  text-align: center;
+  position: relative;
+  float: right;
+  color: #ccc;
+  top: 7px;
+  right: 6px;
+}
+
+z-menu.zbase_documents_menu > z-menu-section[data-active] > z-menu-title > a:after {
+  color: #fff;
+  content: "\f107";
+  top: 8px;
+}
+
+z-menu.zbase_documents_menu > z-menu-section > z-menu-item {
+  display: none;
+}
+
+z-menu.zbase_documents_menu > z-menu-section z-menu-section {
+  display: none;
+}
+
+z-menu.zbase_documents_menu > z-menu-section[data-active] > z-menu-item {
+  display: block;
+  border-left: 2px solid #ddd;
+  margin-left: 30px;
+  padding-left: 16px;
+  padding-top: 6px;
+  padding-bottom: 6px;
+  border-radius: 0;
+}
+
+z-menu.zbase_documents_menu > z-menu-section[data-active] > z-menu-item[data-active]:before {
+  font: normal normal normal 12px/1 FontAwesome;
+  font-weight: 400;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  text-rendering: auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  content: "\f105";
+  font-weight: bold;
+  font-size: 15px;
+  display: block;
+  width: 8px;
+  padding-left: 2px;
+  padding-right: 2px;
+  height: 16px;
+  position: absolute;
+  margin-left: -4px;
+  margin-top: 5px;
+  background: #fff;
+  color: #3d8ad3;
+}
+
+z-menu.zbase_documents_menu > z-menu-section[data-active] > z-menu-title {
+  margin-bottom: 8px;
+}
+
+z-menu.zbase_documents_menu > z-menu-section[data-active] {
+  margin-bottom: 10px;
+}
+
+z-menu.zbase_documents_menu > z-menu-section[data-active] z-menu-section {
+  display: block;
+}
+
+z-menu.zbase_documents_menu > z-menu-section[data-active] > z-menu-section {
+  margin-left: 10px;
+}
+
+z-menu.zbase_documents_menu > z-menu-section[data-active] > z-menu-item {
+}
+
+z-menu.zbase_documents_menu > z-menu-section[data-active] z-menu-item z-menu-item {
+  margin: 2px 0 2px 16px;
+  padding: 2px 0;
+}
+
+z-menu.zbase_documents_menu > z-menu-section[data-active] z-menu-item a {
+  font-weight: normal;
+  color: #737373;
+}
+
+z-menu.zbase_documents_menu > z-menu-section[data-active] z-menu-item[data-active] > a {
+  font-weight: 500;
+  color: #000;
+}
+
+z-menu.zbase_documents_menu > z-menu-section[data-active] z-menu-section z-menu-title {
+  display: none;
+}
+
+z-menu.zbase_documents_menu > z-menu-item a {
+  color: #000;
+  font-weight: 500;
+}
+
+z-menu.zbase_documents_menu > z-menu-item span {
+  float: right;
+  font-weight: 400;
+  color: #aaa;
+}
+
+z-menu.zbase_documents_menu > z-menu-item[data-active] span {
+  color: rgba(255,255,255,.7);
+}
+
+z-menu.zbase_documents_menu .menu_sep {
+  border-top: 1px solid #d2d2d2;
+  width: 20px;
+  margin: 10px 24px;
+}
+
+

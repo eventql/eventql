@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>{{doc_title}} - Documentation - zScale</title>
+    <meta content="text/html; charset=utf-8" http-equiv="Content-type">
+
+    <link rel="apple-touch-icon" sizes="57x57"   href="/a/_/a/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60"   href="/a/_/a/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72"   href="/a/_/a/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76"   href="/a/_/a/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/a/_/a/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/a/_/a/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/a/_/a/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/a/_/a/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/a/_/aassets/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192"  href="/a/_/a/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/a/_/a/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="/a/_/a/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/a/_/a/favicon-16x16.png">
+    <meta name="msapplication-TileImage" content="/a/_/a/assets/ms-icon-144x144.png">
+
+    <style type="text/css">
+     @font-face {
+        font-family: 'FontAwesome';
+        src: url('/a/_/a/fontawesome-webfont.eot?v=4.3.0');
+        src: url('/a/_/a/fontawesome-webfont.eot?#iefix&v=4.3.0') format('embedded-opentype'), url('/a/_/a/fontawesome-webfont.woff2?v=4.3.0') format('woff2'), url('/a/_/a/fontawesome-webfont.woff?v=4.3.0') format('woff'), url('/a/_/a/fontawesome-webfont.ttf?v=4.3.0') format('truetype'), url('/a/_/a/fontawesome-webfont.svg?v=4.3.0#fontawesomeregular') format('svg');
+        font-weight: normal;
+        font-style: normal;
+      }
+    </style>
+
+    <style type="text/css">{{app_css}}</style>
+    <meta name="google" content="notranslate" />
+  </head>
+  <body class="zbase_documentation">
+    <div id="zbase_header_bar" style="height: 30px; background-color: #3880c5; display: none; border-bottom: 1px solid #5298d9;"></div>
+    <section class="zbase_docs_page_title">
+      <div>
+        <h2 class="pagetitle">Documentation &nbsp;&mdash;&nbsp; Z1</h2>
+      </div>
+    </section>
+
+
+    <div class="zbase_docs_viewport">
+      <div class="zbase_docs_sidebar">
+        <z-menu class="zbase_docs_menu">
+        </z-menu>
+      </div>
+
+      <div class="zbase_docs_content_outer">
+        <div class="zbase_docs_content">
+          {{doc_content}}
+        </div>
+      </div>
+    </div>
+    <div class="zbase_docs_footer">
+    </div>
+
+    <script type="text/javascript">{{app_js}}</script>
+    <script>
+      var menu = DocumentationMenu();
+      menu.render(
+        document.querySelector(".zbase_docs_menu"),
+        document.location.pathname);
+
+      //render header bar
+      var header_bar = document.getElementById("zbase_header_bar");
+      header_bar.innerHTML = "";
+      header_bar.style.display = "block";
+
+      var links = {
+        "/a/datastore": "Datastore",
+        "/docs/": "Documentation"
+      }
+      for (var link in links) {
+        var html = "<a href='" + link +
+          "' style='font-size: 72%; margin-left: 23px; line-height: 30px; color: ";
+
+        if (link == "/docs/") {
+          html += "#fff;'"
+        } else {
+          html += "#b5cce3;'"
+        }
+        html += ">" + links[link] + "</a>"
+        header_bar.innerHTML += html;
+      }
+    </script>
+  </body>
+</html>
+

@@ -1,0 +1,403 @@
+/* Breadcrumbs */
+.zbase_report_breadcrumbs {
+  height: 36px;
+  background: #f9f9f9;
+  width: 100%;
+  border-bottom: 1px solid #d0d0d0;
+}
+
+.zbase_report_breadcrumbs zbase-breadcrumbs {
+  font-size: 12px;
+  font-weight: 300;
+  margin-left: 23px;
+}
+
+.zbase_report_breadcrumbs zbase-breadcrumbs,
+.zbase_report_breadcrumbs zbase-breadcrumbs a {
+  color: #454545;
+  line-height: 36px;
+}
+
+.zbase_report_breadcrumbs zbase-breadcrumbs-section:last-child a {
+  font-weight: 300;
+}
+
+.zbase_report_breadcrumbs zbase-breadcrumbs-section a:hover {
+  text-decoration: underline;
+}
+
+.zbase_report_pane {
+  display: table;
+  table-layout: fixed;
+  width: 100%;
+  min-height: 900px; /* FIXME  firefox ignores min-height*/
+  background: #f9f9f9;
+}
+
+/** Sidebar **/
+.zbase_report_pane .zbase_report_sidebar {
+  display: table-cell;
+  vertical-align: top;
+  width: 320px;
+  padding: 20px 20px 0 23px;
+  background: #fff;
+  box-shadow: 1px 1px 1px rgba(0,0,0,0.4);
+}
+
+.zbase_report_pane .zbase_report_sidebar h4 {
+  font-weight: 500;
+  color: #333;
+}
+
+.zbase_report_pane .zbase_report_sidebar h3.sidebar_title {
+  margin: 0;
+}
+
+.zbase_report_pane .zbase_report_sidebar h3.sidebar_title .editable {
+  margin-left: -3px;
+  font-weight: 500;
+  font-size: 15px;
+  line-height: 160%;
+  margin-bottom: 4px;
+  display: block;
+  margin-top: -5px;
+  margin-left: -3px;
+  padding: 5px 3px;
+}
+
+.zbase_report_pane .zbase_report_sidebar .readonly_hint {
+  font-size: 12px;
+  overflow: hidden;
+  opacity: 0.8;
+}
+
+.zbase_report_pane .zbase_report_sidebar .readonly_hint i {
+  opacity: 0.8;
+}
+
+.zbase_report_pane .zbase_report_sidebar .readonly_hint:hover {
+  opacity: 1.0;
+  cursor: default;
+}
+
+
+
+
+.zbase_report_pane .zbase_report_sidebar .sidebar_subtitle {
+  margin: 2px 0 15px 0;
+  font-size: 12px;
+  color: #999;
+}
+
+.zbase_report_pane .zbase_report_sidebar .link {
+  font-weight: 500;
+  margin-right: 5px;
+}
+
+.zbase_report_pane .zbase_report_sidebar z-dropdown.mode {
+  float: right;
+  font-weight: 400;
+  margin-top: -3px;
+}
+
+
+
+.zbase_report_pane .zbase_report_sidebar z-dropdown i {
+  margin-right: 3px;
+}
+
+.zbase_report_pane .zbase_report_sidebar .sidebar_content {
+  border-top: 1px solid #eee;
+  padding: 15px 0px 18px 0;
+  font-size: 12px;
+}
+
+.zbase_report_pane .zbase_report_sidebar .report_description {
+  margin-top: 2px;
+  padding-bottom: 30px;
+}
+
+.zbase_report_pane .zbase_report_sidebar .report_description p {
+  line-height: 190%;
+}
+
+.zbase_report_pane .zbase_report_sidebar .zbase_doc_settings h3 i {
+  display: none;
+}
+
+.zbase_report_pane .zbase_report_sidebar .secondary_section {
+  background: #f9f9f9;
+  margin-left: -23px;
+  padding-left: 23px;
+  margin-right: -20px;
+  border-bottom: 1px solid #eee;
+}
+
+.zbase_report_pane a.link {
+  display: inline-block;
+  font-weight: 400;
+  margin-left: -10px;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.zbase_report_pane a.link:hover {
+  background: #3d8ad3;
+  color: #fff;
+  text-decoration: none;
+}
+
+/** Content **/
+.zbase_report_pane .zbase_report_content {
+  display: table-cell;
+  vertical-align: top;
+  width: auto;
+  border-left: 1px solid #ddd;
+  border-right: 1px solid #ddd;
+}
+
+.zbase_report_pane .zbase_report_content .link.add_widget {
+  text-align: center;
+  margin-top: 60px;
+}
+
+.zbase_report_pane .zbase_report_content .link.add_widget:hover {
+  text-decoration: underline;
+}
+
+.zbase_report_pane z-modal.edit h3 {
+  margin: 5px 0 10px 0;
+}
+
+.zbase_report_pane z-modal.edit input.z-input {
+  font-size: 13px;
+}
+
+.zbase_report_pane z-modal button.z-button {
+  float: right;
+  font-size: 13px;
+}
+
+.zbase_report_pane z-modal.edit textarea.z-textarea {
+  width: 100%;
+  font-size: 13px;
+}
+
+.zbase_report_pane z-modal.add_widget h4 {
+  font-weight: 400;
+  line-height: 34px;
+  font-size: 14px;
+}
+
+.zbase_report_pane z-modal.add_widget .widget_selections {
+  margin: 10px 0 0 0;
+}
+
+.zbase_report_pane z-modal.add_widget .widget_selection {
+  width: 100%;
+  padding: 12px 10px;
+  border-left: 1px solid rgba(0, 0, 0, 0.15);
+  border-right: 1px solid rgba(0, 0, 0, 0.15);
+  border-top: 1px solid rgba(0, 0, 0, 0.15);
+  color: #000;
+  font-size: 14px;
+}
+
+.zbase_report_pane z-modal.add_widget .widget_selection:last-child {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+}
+
+.zbase_report_pane z-modal.add_widget .widget_selection[data-selected],
+.zbase_report_pane z-modal.add_widget .widget_selection:hover {
+  cursor: pointer;
+  background: #f2f8fa
+}
+
+.zbase_report_pane z-modal.add_widget .widget_selection[data-selected] .inner:before {
+  font-family: FontAwesome;
+  content: "\f00c";
+  color: #3d8ad3;
+  margin-right: 5px;
+}
+
+.zbase_report_infobar {
+  border-bottom: 1px solid #edc3c3;
+  background: #fff0f0;
+  color: #a94442;
+  box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+  padding: 10px 20px;
+  font-size: 13px;
+  font-weight: 400;
+  color: rgba(10,10,10,0.65);
+  display: block;
+}
+
+.zbase_report_infobar em {
+  font-weight: 500;
+  font-style: normal;
+  color: rgba(10,10,10,0.7);
+}
+
+.zbase_report_infobar.hidden {
+  display: none;
+}
+
+/** Display Mode **/
+.zbase_report_pane .zbase_report_sidebar .readonly_hint,
+.zbase_report_pane .link.add_widget,
+.zbase_report_pane .link.add_description {
+  display: none;
+}
+
+.zbase_report_pane.editable:not(.readonly) .link.add_widget,
+.zbase_report_pane.editable:not(.readonly) .link.add_description:not(.hidden) {
+  display: block;
+}
+
+.zbase_report_pane.editable:not(.readonly) .zbase_report_sidebar .editable:hover {
+  cursor: pointer;
+  background: #f2f8fa;
+}
+
+.zbase_report_pane.readonly .zbase_report_sidebar .readonly_hint {
+  display: inline-block;
+}
+
+.zbase_report_pane.readonly .hide_when_readonly {
+  display: none;
+}
+
+.zbase_report_pane .zbase_report_viewport.editor + .link.add_widget {
+  display: none;
+}
+
+/**
+  * Widget
+  */
+.zbase_report_pane .zbase_report_widget {
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0,0,0,.2);
+  border: 1px solid #ddd;
+  margin: 20px;
+}
+
+/**
+  * Widget Header
+  */
+.zbase_report_pane .zbase_report_widget_header {
+  padding: 0 20px;
+  height: 60px;
+  overflow: visible;
+}
+
+.zbase_report_pane .zbase_report_widget_header h2.pagetitle {
+  float: left;
+}
+
+.zbase_report_pane .zbase_report_widget_header z-dropdown {
+  float: right;
+  margin-top: 15px;
+  height: 24px;
+}
+
+.zbase_report_pane .zbase_report_widget_header z-dropdown i.fa-circle {
+  font-size: 7px;
+  color: #888;
+}
+
+.zbase_report_pane .zbase_report_widget_header z-dropdown-header:hover i.fa-circle {
+  color: #3d8ad3;
+}
+
+.zbase_report_pane .zbase_report_widget_header button.z-button {
+  margin: 14px 5px 0 0;
+  float: right;
+  font-size: 13px;
+}
+
+.zbase_report_pane .zbase_report_widget_header button.cancel {
+  float: left;
+  margin-right: 18px;
+}
+
+.zbase_report_pane .zbase_report_widget_header i.close {
+  float: right;
+  padding: 5px;
+  margin-right: 3px;
+  color: #999;
+}
+
+.zbase_report_pane .zbase_report_widget_header i.close:hover {
+  cursor: pointer;
+  color: #3d8ad3;
+}
+
+.zbase_report_pane .zbase_report_widget_header .error_note {
+  float: left;
+  margin: 13px 0 0 15px;
+}
+
+.zbase_report_pane .zbase_report_widgets .zbase_report_widget_edit_actions {
+  float: right;
+  display: none;
+}
+
+.zbase_report_pane .zbase_report_widget z-modal h4 {
+  font-size: 14px;
+  line-height: 34px;
+  font-weight: 500;
+  color: #333;
+  margin: 0;
+}
+
+
+/**
+  * Error Note
+  */
+.zbase_report_pane .error_note {
+  color: #a94442;
+  font-size: 13px;
+  font-weight: 400;
+  background: #fff0f0;
+  box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+  padding: 5px 20px;
+}
+
+.zbase_report_pane .error_note.hidden {
+  display: none;
+}
+
+
+/**
+  * Editor
+  */
+.zbase_report_pane .edit_content_pane z-codeeditor {
+  border-top: 1px solid #c9d0d4;
+  border-bottom: 1px solid #c9d0d4;
+}
+
+.zbase_report_pane .edit_content_pane  .CodeMirror-gutters {
+  background: rgba(63,144,170,.08);
+  background-color: none;
+}
+
+.zbase_report_pane .edit_content_pane  .CodeMirror {
+  border-left: none;
+  border-right: none;
+  border-bottom: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -o-user-select: none;
+  user-select: none;
+}
+
+h2.report_widget_title {
+  font-size: 18px;
+  line-height: 60px;
+  font-size: 20px;
+  font-weight: 300;
+  color: #454545;
+  margin: 0;
+  padding: 0;
+}

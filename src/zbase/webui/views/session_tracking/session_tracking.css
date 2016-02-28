@@ -1,0 +1,132 @@
+.zbase_session_tracking .add_pane,
+.zbase_session_tracking .add_session_event,
+.zbase_session_tracking .add_session_attribute {
+  border: 1px solid #3d8ad3;
+  padding: 20px;
+  text-align: center;
+  font-size: 14px;
+  background: rgba(0, 0, 0, 0.03)
+}
+
+.zbase_session_tracking .add_session_attribute.hidden {
+  display: none;
+}
+
+.zbase_session_tracking table {
+  margin-top: 22px;
+  border-top: 1px solid #eee;
+  font-size: 13px;
+}
+
+.zbase_session_tracking table tr {
+  background: #fff;
+}
+
+.zbase_session_tracking table thead tr th {
+  color: #888;
+  font-weight: 400;
+}
+
+.zbase_session_tracking table thead tr th:first-child {
+  width: 50%;
+}
+
+.zbase_session_tracking table td.icon {
+  width: 64px;
+  text-align: center;
+}
+
+.zbase_session_tracking table td.icon i {
+  font-size: 14px;
+  color: #999;
+  padding: 10px;
+}
+
+.zbase_session_tracking table td.icon i:hover {
+  cursor: pointer;
+  color: #3d8ad3;
+}
+
+.zbase_session_tracking button.add_field {
+  float: right;
+  margin-top: 20px;
+  margin-right: 20px;
+}
+
+.zbase_session_tracking button.add {
+  float: right;
+  margin-right: 20px;
+}
+
+.zbase_session_tracking .table_container {
+  margin: 0px;
+}
+
+.zbase_session_tracking button.z-button {
+  font-size: 13px;
+}
+
+.zbase_session_tracking z-modal h4 {
+  font-size: 14px;
+  line-height: 34px;
+  margin: 0;
+  color: #333;
+  font-weight: 500;
+}
+
+.zbase_session_tracking z-modal .field {
+  margin-top: 18px;
+}
+
+.zbase_session_tracking z-modal .field label {
+  display: inline-block;
+  vertical-align: top;
+  color: #333;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 34px;
+  width: 45px;
+}
+
+.zbase_session_tracking z-modal .field input.z-input {
+  font-size: 13px;
+  display: inline-block;
+  width: auto;
+}
+
+.zbase_session_tracking z-modal .field z-checkbox + label {
+  line-height: 18px;
+}
+
+.zbase_session_tracking z-modal .z-modal-footer button {
+  float: right;
+}
+
+.zbase_session_tracking z-modal .field .error_note {
+  display: inline-block;
+  font-size: 13px;
+  line-height: 34px;
+  color: #a94442; 
+}
+
+.zbase_session_tracking z-modal .field .error_note.hidden {
+  display: none;
+}
+
+.zbase_session_tracking z-modal .field.not_visible {
+  visibility: hidden;
+}
+
+.zbase_session_tracking .error_field {
+  border: 1px solid #edc3c3;
+  background: #fff0f0;
+  color: #a94442;
+  box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+  padding: 10px 20px;
+  font-size: 13px;
+  font-weight: 400
+}
+
+.zbase_session_tracking .error_field.hidden {
+  display: none;
+}

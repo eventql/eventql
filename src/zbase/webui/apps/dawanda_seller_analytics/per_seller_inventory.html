@@ -1,0 +1,103 @@
+<template id="per_seller_inventory_main_tpl">
+  <div class="inventory">
+
+    <div class="metric_group text_chart">
+
+      <div class="metric_pane fullwidth first num_listed_products">
+        <div class="description">
+          <h2>Number of Listed Products</h2>
+          <p>How many active/listed products has this shop?</p>
+        </div>
+
+
+        <div class="values">
+          <div class="num"></div>
+          <div class="chart">
+            <z-chart width='100%' height='50'></z-chart>
+            <div class="time_line">
+              <span class="start"></span>
+              <span class="end"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="metric_pane fullwidth first buy_to_detail_rate">
+        <div class="description">
+          <h2>Buy to Detail Rate</h2>
+          <p>Rate at which users buy the product after viewing the detail page</p>
+        </div>
+
+
+        <div class="values">
+          <div class="num"></div>
+          <div class="chart">
+            <z-chart width='100%' height='50'></z-chart>
+            <div class="time_line">
+              <span class="start"></span>
+              <span class="end"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!--
+    <div class="metric_group text_chart">
+      <h2>Inventory Drilldown</h2>
+
+      <div class="dimension_control">
+        <label>Primary Dimension:</label>
+        <a class="link dimension time">Time</a>
+      </div>
+
+      <table class="z-table metric_table">
+        <thead>
+          <tr>
+            <th class="time">Time</th>
+            <th class="gmv_eurcent">GMV<i class="fa fa-question-circle help"></i></th>
+            <th class="gmv_per_transaction_eurcent">GMV Per Transaction<i class="fa fa-question-circle help"></i></th>
+            <th class="num_purchases">Purchases<i class="fa fa-question-circle help"></i></th>
+            <th class="buy_to_detail_rate">Buy to Detail Rate<i class="fa fa-question-circle help"></i></th>
+            <th class="product_page_views">Product Views<i class="fa fa-question-circle help"></i></th>
+            <th class="total_listviews">Total Listviews<i class="fa fa-question-circle help"></i></th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <z-tooltip class="gmv_eurcent" data-pointer="center">
+      Total GMV for this seller in this time window
+    </z-tooltip>
+    <z-tooltip class="gmv_per_transaction_eurcent" data-pointer="center">
+      Average GMV per Transaction (Avg. Basket Size)
+    </z-tooltip>
+    <z-tooltip class="num_purchases" data-pointer="center">
+      Total Number of Purchases for this seller in this time window
+    </z-tooltip>
+    <z-tooltip class="product_page_views" data-pointer="center">
+      Aggregate number of product page impressions for all products from this seller in this time window
+    </z-tooltip>
+    <z-tooltip class="total_listviews" data-pointer="center">
+      Aggregate number of search page, catalog page, shop page, ad and recommendation impressions from this seller in this time window
+    </z-tooltip>
+    <z-tooltip class="buy_to_detail_rate" data-pointer="center">
+      Rate at which users buy the product after viewing the detail page for this seller in this time window
+    </z-tooltip>
+    -->
+  </div>
+</template>
+
+<template id="per_seller_inventory_row_tpl">
+  <tr>
+    <td class="time"></td>
+    <td class="gmv_eurcent"></td>
+    <td class="gmv_per_transaction_eurcent"></td>
+    <td class="num_purchases"></td>
+    <td class="buy_to_detail_rate"></td>
+    <td class="product_page_views"></td>
+    <td class="total_listviews"></td>
+  </tr>
+</template>

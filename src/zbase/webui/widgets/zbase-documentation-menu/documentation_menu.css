@@ -1,0 +1,53 @@
+.zbase_documentation_menu_clear {
+  clear: both;
+  visibility: hidden;
+}
+
+.zbase_documentation_menu_sidebar z-menu {
+  position: initial;
+  float: left;
+  width: 300px;
+  margin-left: 0px;
+  margin-top: 0px;
+  box-sizing: content-box;
+  border-right: 1px solid #e8e8e8;
+}
+
+.zbase_documentation_menu_content {
+  margin-left: 300px;
+  border-left: 1px solid #ddd;
+  min-height: 900px;
+  padding-left: 0px;
+}
+
+.zbase_documentation_menu_sidebar z-menu-item.doc_section {
+  margin-left: 20px !important;
+  padding-right: 0 !important;
+  border-left: 0 !important;
+  cursor: default;
+}
+
+.zbase_documentation_menu_sidebar z-menu-section > z-menu-item.doc_section {
+  margin-left: 0 !important;
+  padding-right: 0 !important;
+  font-size: 14px;
+}
+
+.zbase_documentation_menu_sidebar z-menu-item.doc_section a {
+  display: block;
+  padding: 8px 15px;
+  line-height: 20px;
+  color: #364149 !important;
+  font-size: 14px;
+}
+
+.zbase_documentation_menu_sidebar z-menu-item.doc_section a:hover,
+.zbase_documentation_menu_sidebar z-menu-item.doc_section a.current
+ {
+  color: #008cff !important;
+}
+
+.zbase_documentation_menu_sidebar z-menu-item.doc_section span.index {
+  font-weight: 700;
+  margin-right: 5px;
+}

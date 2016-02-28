@@ -1,0 +1,56 @@
+v0.2.4
+======
+  - improved SValue interface and numeric/time handling
+  - new functions: now(), z1_version()
+
+v0.2.3 (2016-02-04)
+===================
+  - MR: support column projection in mapreduces
+  - BUG: fix minor bugs in constant folding and constraint resolution
+
+v0.2.2 (2015-12-30)
+===================
+  - CORE: select TSDB partitions from tablescan constraints (deprecates .lastNdays)
+  - SQL: implemented JOIN
+  - SQL: implemented table subqueries
+  - SQL: implemented constant folding
+  - SQL: implemented scan constraint extraction
+  - SQL: improved column name resolution and group by select list rewriting
+  - SQL: implemented WHERE pushdown (predicate pruning/rewriting)
+  - SQL: implemented to_{string,int,float,bool} conversion functions
+  - SQL: implemented time_at function
+  - WEBUI: new table management UI
+
+v0.2.1 (2015-12-16)
+===================
+  - CORE: removed COLSM v0.2.0 upgrade code
+  - API: drilldown query API
+  - API: metrics support
+  - API: http/mapreduce error handling improvements
+  - API: javascript utf8 fixes
+  - WEBUI: stats on /zstatus/
+
+v0.2.0 (2015-12-09)
+===================
+  - CORE: upgrade to COLSM v0.2.0 storage engine (enables true LSM with UPDATEs)
+  - WEBUI: UI fixes
+
+v0.1.2 (2015-12-06)
+===================
+  - CORE: TimeWindowPartitioner::partitionKeysFor one-off fix
+  - WEBUI: UI refresh
+
+v0.1.1 (2015-12-04)
+===================
+  - CORE: z1d daemonization
+
+v0.1.0 (2015-11-26)
+===================
+  - CORE: timeseries and static partitioned tables
+  - CORE: DHT based replication and sharding
+  - CORE: COLSM v0.1.0 storage (append only)
+  - CORE: basic zmaster
+  - SQL: basic SQL engine
+  - API: basic javascript (spidermonkey) integration, MR framework
+  - API: basic HTTP API
+  - WEBUI: sql editor, table management UI

@@ -1,0 +1,200 @@
+<template id="seller_overview_main_tpl">
+  <div class="zbase_content_pane fullwidth main_menu zbase_seller_stats overview">
+
+    <div class="zbase_main_menu"></div>
+
+    <div class="zbase_content main_menu" style="padding: 0 20px;">
+      <h2 class="pagetitle"><em>DaWanda Seller Analytics</em></h2>
+
+      <div class="query_progress"></div>
+
+      <div class="zbase_seller_overview hidden">
+
+        <div class="controls">
+          <div class="search left">
+            <label class="search_label">Seller</label>
+            <z-search class="seller" style="margin-left: 50px;">
+              <z-input class="icon" data-placeholder="Search For Seller by ID" style="position: relative; top: 1px; display: block;">
+                <z-input-icon><i class='fa fa-search'></i></z-input-icon>
+              </z-input>
+            </z-search>
+          </div>
+
+          <div class="control left" style="display: none;">
+            <z-checkbox class="premium"></z-checkbox>
+            <label>Premium Seller <i class="fa fa-star"></i></label>
+          </div>
+
+          <div class="control right">
+            <label style="line-height: 30px;">Time Range:</label>
+            <div class="time_range"></div>
+          </div>
+
+          <div class="control right">
+            <label style="line-height: 30px;">Display:</label>
+            <z-dropdown class="input checkbox metrics" data-multiselect>
+              <z-dropdown-flyout>
+                <z-dropdown-items>
+                  <z-dropdown-item data-value="shop_name" data-selected>
+                    <z-checkbox data-active></z-checkbox> Shop Name
+                  </z-dropdown-item>
+                  <z-dropdown-item data-value="gmv_eurcent" data-selected>
+                    <z-checkbox data-active></z-checkbox> Total GMV
+                  </z-dropdown-item>
+                  <z-dropdown-item data-value="gmv_per_transaction_eurcent" data-selected>
+                    <z-checkbox data-active></z-checkbox> GMV Per Transaction
+                  </z-dropdown-item>
+                  <z-dropdown-item data-value="num_purchases" data-selected>
+                    <z-checkbox data-active></z-checkbox> Purchases
+                  </z-dropdown-item>
+                  <z-dropdown-item data-value="num_active_products">
+                    <z-checkbox></z-checkbox> Active Products
+                  </z-dropdown-item>
+                  <z-dropdown-item data-value="num_listed_products">
+                    <z-checkbox></z-checkbox> Listed Products
+                  </z-dropdown-item>
+                  <z-dropdown-item data-value="num_refunds">
+                    <z-checkbox></z-checkbox> Refunds
+                  </z-dropdown-item>
+                  <z-dropdown-item data-value="refund_rate">
+                    <z-checkbox></z-checkbox> Refund Rate
+                  </z-dropdown-item>
+                  <z-dropdown-item data-value="refunded_gmv_eurcent">
+                    <z-checkbox></z-checkbox> Refunded GMV
+                  </z-dropdown-item>
+                  <z-dropdown-item data-value="total_listviews" data-selected>
+                    <z-checkbox data-active></z-checkbox> Total Listviews
+                  </z-dropdown-item>
+                  <z-dropdown-item data-value="shop_page_views">
+                    <z-checkbox></z-checkbox> Shop Page Views
+                  </z-dropdown-item>
+                  <z-dropdown-item data-value="product_page_views">
+                    <z-checkbox></z-checkbox> Product Page Views
+                  </z-dropdown-item>
+                  <z-dropdown-item data-value="listview_ctr_search_page">
+                    <z-checkbox></z-checkbox> Search Page CTR
+                  </z-dropdown-item>
+                  <z-dropdown-item data-value="listview_clicks_search_page">
+                    <z-checkbox></z-checkbox> Search Page Clicks
+                  </z-dropdown-item>
+                  <z-dropdown-item data-value="listview_ctr_catalog_page">
+                    <z-checkbox></z-checkbox> Catalog Page CTR
+                  </z-dropdown-item>
+                  <z-dropdown-item data-value="listview_clicks_catalog_page">
+                    <z-checkbox></z-checkbox> Catalog Page Clicks
+                  </z-dropdown-item>
+                  <z-dropdown-item data-value="listview_ctr_shop_page">
+                    <z-checkbox></z-checkbox> Shop Page CTR
+                  </z-dropdown-item>
+                  <z-dropdown-item data-value="listview_clicks_shop_page">
+                    <z-checkbox></z-checkbox> Shop Page Clicks
+                  </z-dropdown-item>
+                  <z-dropdown-item data-value="listview_ctr_ads">
+                    <z-checkbox></z-checkbox> Ad CTR
+                  </z-dropdown-item>
+                  <z-dropdown-item data-value="listview_clicks_ads">
+                    <z-checkbox></z-checkbox> Ad Clicks
+                  </z-dropdown-item>
+                  <z-dropdown-item data-value="listview_ctr_recos">
+                    <z-checkbox></z-checkbox> Reco CTR
+                  </z-dropdown-item>
+                  <z-dropdown-item data-value="listview_clicks_recos">
+                    <z-checkbox></z-checkbox> Reco Clicks
+                  </z-dropdown-item>
+                </z-dropdown-items>
+              </z-dropdown-flyout>
+            </z-dropdown>
+          </div>
+        </div>
+
+        <div class="zbase_content_pane fullwidth" style="background: #fff;">
+          <table class="z-table zbase_clickable_table overview" data-order-by="gmv_eurcent" data-order-fn="desc" style="border-top: 1px solid #ddd;"></table>
+
+          <div class="pager">
+            <a class="tooltip back">
+              <i class="fa fa-angle-double-left"></i>
+            </a>
+            <a class="tooltip for">
+              <i class="fa fa-angle-double-right"></i>
+            </a>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</template>
+
+<template id="seller_overview_table_tpl">
+  <thead>
+    <tr>
+      <th class="shop_id">ID <i class="fa fa-caret-up asc"></i><i class="fa fa-caret-down desc"></i></th>
+      <th class="hidden shop_name">Name <i class="fa fa-caret-up asc"></i><i class="fa fa-caret-down desc"></i></th>
+      <th class="hidden gmv_eurcent order_by">GMV <i class="fa fa-caret-up asc"></i><i class="fa fa-caret-down desc"></i></th>
+      <th class="hidden gmv_per_transaction_eurcent">GMV Per Transaction <i class="fa fa-caret-up asc"></i><i class="fa fa-caret-down desc"></i></th>
+      <th class="hidden num_purchases">Purchases <i class="fa fa-caret-up asc"></i><i class="fa fa-caret-down desc"></i></th>
+      <th class="hidden num_refunds">Refunds <i class="fa fa-caret-up asc"></i><i class="fa fa-caret-down desc"></i></th>
+      <th class="hidden refund_rate">Refund Rate <i class="fa fa-caret-up asc"></i><i class="fa fa-caret-down desc"></i></th>
+      <th class="hidden refunded_gmv_eurcent">Refunded GMV <i class="fa fa-caret-up asc"></i><i class="fa fa-caret-down desc"></i></th>
+      <th class="hidden total_listviews">Total Listviews <i class="fa fa-caret-up asc"></i><i class="fa fa-caret-down desc"></i></th>
+      <th class="hidden listview_views_ads">Ad Views <i class="fa fa-caret-up asc"></i><i class="fa fa-caret-down desc"></i></th>
+      <th class="hidden listview_clicks_ads">Ad Clicks <i class="fa fa-caret-up asc"></i><i class="fa fa-caret-down desc"></i></th>
+      <th class="hidden listview_ctr_ads">Ad CTR <i class="fa fa-caret-up asc"></i><i class="fa fa-caret-down desc"></i></th>
+      <th class="hidden listview_views_recos">Reco Views <i class="fa fa-caret-up asc"></i><i class="fa fa-caret-down desc"></i></th>
+      <th class="hidden listview_ctr_recos">Reco CTR <i class="fa fa-caret-up asc"></i><i class="fa fa-caret-down desc"></i></th>
+      <th class="hidden listview_clicks_recos">Reco Clicks <i class="fa fa-caret-up asc"></i><i class="fa fa-caret-down desc"></i></th>
+      <th class="hidden listview_views_search_page">Search Views <i class="fa fa-caret-up asc"></i><i class="fa fa-caret-down desc"></i></th>
+      <th class="hidden listview_clicks_search_page">Search Clicks <i class="fa fa-caret-up asc"></i><i class="fa fa-caret-down desc"></i></th>
+      <th class="hidden listview_ctr_search_page">Search CTR <i class="fa fa-caret-up asc"></i><i class="fa fa-caret-down desc"></i></th>
+      <th class="hidden listview_views_catalog_page">Catalog Views <i class="fa fa-caret-up asc"></i><i class="fa fa-caret-down desc"></i></th>
+      <th class="hidden listview_clicks_catalog_page">Catalog Clicks <i class="fa fa-caret-up asc"></i><i class="fa fa-caret-down desc"></i></th>
+      <th class="hidden listview_ctr_catalog_page">Catalog CTR <i class="fa fa-caret-up asc"></i><i class="fa fa-caret-down desc"></i></th>
+      <th class="hidden listview_views_shop_page">Shop Views <i class="fa fa-caret-up asc"></i><i class="fa fa-caret-down desc"></i></th>
+      <th class="hidden listview_clicks_shop_page">Shop Clicks <i class="fa fa-caret-up asc"></i><i class="fa fa-caret-down desc"></i></th>
+      <th class="hidden listview_ctr_shop_page">Shop CTR <i class="fa fa-caret-up asc"></i><i class="fa fa-caret-down desc"></i></th>
+      <th class="hidden shop_page_views">Shop Page Views <i class="fa fa-caret-up asc"></i><i class="fa fa-caret-down desc"></i></th>
+      <th class="hidden product_page_views">Product Views <i class="fa fa-caret-up asc"></i><i class="fa fa-caret-down desc"></i></th>
+      <th class="hidden num_active_products">Active Products <i class="fa fa-caret-up asc"></i><i class="fa fa-caret-down desc"></i></th>
+      <th class="hidden num_listed_products">Listed Products <i class="fa fa-caret-up asc"></i><i class="fa fa-caret-down desc"></i></th>
+    </tr>
+  </thead>
+
+  <tbody>
+  </tbody>
+</template>
+
+
+<template id="seller_overview_row_tpl">
+  <tr>
+    <td class="shop_id left_align"><a></a></td>
+    <td class="hidden shop_name left_align"><a></a></td>
+    <td class="hidden gmv_eurcent"><a></a></td>
+    <td class="hidden gmv_per_transaction_eurcent"><a></a></td>
+    <td class="hidden num_purchases"><a></a></td>
+    <td class="hidden num_refunds"><a></a></td>
+    <td class="hidden refund_rate"><a></a></td>
+    <td class="hidden refunded_gmv_eurcent"><a></a></td>
+    <td class="hidden total_listviews"><a></a></td>
+    <td class="hidden listview_views_ads"><a></a></td>
+    <td class="hidden listview_clicks_ads"><a></a></td>
+    <td class="hidden listview_ctr_ads"><a></a></td>
+    <td class="hidden listview_views_recos"><a></a></td>
+    <td class="hidden listview_ctr_recos"><a></a></td>
+    <td class="hidden listview_clicks_recos"><a></a></td>
+    <td class="hidden listview_views_search_page"><a></a></td>
+    <td class="hidden listview_clicks_search_page"><a></a></td>
+    <td class="hidden listview_ctr_search_page"><a></a></td>
+    <td class="hidden listview_views_catalog_page"><a></a></td>
+    <td class="hidden listview_clicks_catalog_page"><a></a></td>
+    <td class="hidden listview_ctr_catalog_page"><a></a></td>
+    <td class="hidden listview_views_shop_page"><a></a></td>
+    <td class="hidden listview_clicks_shop_page"><a></a></td>
+    <td class="hidden listview_ctr_shop_page"><a></a></td>
+    <td class="hidden shop_page_views"><a></a></td>
+    <td class="hidden product_page_views"><a></a></td>
+    <td class="hidden num_active_products"><a></a></td>
+    <td class="hidden num_listed_products"><a></a></td> 
+  </tr>
+</template>

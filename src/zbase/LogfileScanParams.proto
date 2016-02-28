@@ -1,0 +1,29 @@
+/**
+ * Copyright (c) 2015 - The CM Authors <legal@clickmatcher.com>
+ *   All Rights Reserved.
+ *
+ * This file is CONFIDENTIAL -- Distribution or duplication of this material or
+ * the information contained herein is strictly forbidden unless prior written
+ * permission is obtained.
+ */
+package zbase;
+
+enum LogfileScanType {
+  LOGSCAN_ALL = 0;
+  LOGSCAN_REGEX = 1;
+  LOGSCAN_FULLTEXT = 2;
+  LOGSCAN_SQL = 3;
+};
+
+message LogfileScanParams {
+
+  required uint64 end_time = 1;
+  required LogfileScanType scan_type = 2;
+
+  optional string condition = 3;
+
+  repeated string columns = 4;
+  optional bool return_raw = 5;
+  optional bool all_columns = 6;
+
+};
