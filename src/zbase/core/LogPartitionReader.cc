@@ -156,38 +156,5 @@ SHA1Hash LogPartitionReader::version() const {
   return SHA1::compute(StringUtil::toString(snap_->nrecs));
 }
 
-csql::TaskIDList LogPartitionReader::buildSQLScan(
-    csql::Transaction* txn,
-    RefPtr<csql::SequentialScanNode> seqscan,
-    csql::TaskDAG* tasks) const {
-  auto cstable = fetchCSTableFilename();
-  if (cstable.isEmpty()) {
-    return csql::TaskIDList{};
-  }
-
-  // auto cstable_version = cstableVersion();
-  // if (!cstable_version.isEmpty()) {
-  //   scan->setCacheKey(cstable_version.get());
-  // }
-
-  auto task_factory = [seqscan, cstable] (
-      csql::Transaction* txn,
-      csql::RowSinkFn output) -> RefPtr<csql::Task> {
-    return new csql::CSTableScan(
-        txn,
-        seqscan,
-        cstable.get(),
-        txn->getRuntime()->queryBuilder().get(),
-        output);
-  };
-
-  auto task = new csql::TaskDAGNode(
-      new csql::SimpleTableExpressionFactory(task_factory));
-
-  csql::TaskIDList output;
-  output.emplace_back(tasks->addTask(task));
-  return output;
-}
-
 } // namespace tdsb
 

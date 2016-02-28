@@ -57,49 +57,6 @@ csql::TaskIDList TSDBTableProvider::buildSequentialScan(
   return task_ids;
 }
 
-csql::TaskIDList TSDBTableProvider::buildLocalSequentialScan(
-    csql::Transaction* txn,
-    RefPtr<csql::SequentialScanNode> node,
-    const TSDBTableRef& table_ref,
-    csql::TaskDAG* tasks) const {
-
-  auto partition = partition_map_->findPartition(
-      tsdb_namespace_,
-      table_ref.table_key,
-      table_ref.partition_key.get());
-
-  if (partition.isEmpty()) {
-    return csql::TaskIDList{};
-  } else {
-    auto reader = partition.get()->getReader();
-    return reader->buildSQLScan(txn, node, tasks);
-  }
-}
-
-csql::TaskIDList TSDBTableProvider::buildRemoteSequentialScan(
-    csql::Transaction* txn,
-    RefPtr<csql::SequentialScanNode> node,
-    const TSDBTableRef& table_ref,
-    csql::TaskDAG* tasks) const {
-  auto task_factory = [this, node, table_ref] (
-      csql::Transaction* txn,
-      csql::RowSinkFn output) -> RefPtr<csql::Task> {
-      return new RemoteTSDBScan(
-          node,
-          tsdb_namespace_,
-          table_ref,
-          replication_scheme_,
-          auth_);
-  };
-
-  auto task = new csql::TaskDAGNode(
-      new csql::SimpleTableExpressionFactory(task_factory));
-
-  csql::TaskIDList output;
-  output.emplace_back(tasks->addTask(task));
-  return output;
-}
-
 void TSDBTableProvider::listTables(
     Function<void (const csql::TableInfo& table)> fn) const {
   partition_map_->listTables(

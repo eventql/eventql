@@ -43,18 +43,6 @@ public:
 
 protected:
 
-  csql::TaskIDList buildLocalSequentialScan(
-      csql::Transaction* ctx,
-      RefPtr<csql::SequentialScanNode> node,
-      const TSDBTableRef& table_ref,
-      csql::TaskDAG* tasks) const;
-
-  csql::TaskIDList buildRemoteSequentialScan(
-      csql::Transaction* ctx,
-      RefPtr<csql::SequentialScanNode> node,
-      const TSDBTableRef& table_ref,
-      csql::TaskDAG* tasks) const;
-
   csql::TableInfo tableInfoForTable(const TSDBTableInfo& table) const;
 
   String tsdb_namespace_;

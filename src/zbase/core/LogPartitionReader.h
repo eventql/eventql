@@ -30,11 +30,6 @@ public:
       const Set<String>& required_columns,
       Function<void (const msg::MessageObject& record)> fn) override;
 
-  csql::TaskIDList buildSQLScan(
-      csql::Transaction* txn,
-      RefPtr<csql::SequentialScanNode> seqscan,
-      csql::TaskDAG* tasks) const override;
-
   void fetchRecords(
       size_t offset,
       size_t limit,

@@ -74,12 +74,5 @@ SHA1Hash LSMPartitionReader::version() const {
   return SHA1::compute(StringUtil::toString(snap_->state.lsm_sequence())); // FIXME include arenas?
 }
 
-csql::TaskIDList LSMPartitionReader::buildSQLScan(
-    csql::Transaction* txn,
-    RefPtr<csql::SequentialScanNode> seqscan,
-    csql::TaskDAG* tasks) const {
-  RAISE(kNotImplementedError);
-}
-
 } // namespace tdsb
 
