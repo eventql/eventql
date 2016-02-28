@@ -29,7 +29,6 @@ public:
       const String& tsdb_namespace,
       PartitionMap* partition_map,
       ReplicationScheme* replication_scheme,
-      CompactionWorker* cstable_index,
       AnalyticsAuth* auth);
 
   csql::TaskIDList buildSequentialScan(
@@ -61,7 +60,6 @@ protected:
   String tsdb_namespace_;
   PartitionMap* partition_map_;
   ReplicationScheme* replication_scheme_;
-  CompactionWorker* cstable_index_;
   AnalyticsAuth* auth_;
 };
 

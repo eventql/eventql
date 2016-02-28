@@ -8,7 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <stx/SHA1.h>
-#include <zbase/core/TSDBTableProvider.h>
+#include <zbase/sql/table_provider.h>
 #include <zbase/core/TSDBService.h>
 #include <zbase/core/RemoteTSDBScan.h>
 #include <csql/CSTableScan.h>
@@ -21,12 +21,10 @@ TSDBTableProvider::TSDBTableProvider(
     const String& tsdb_namespace,
     PartitionMap* partition_map,
     ReplicationScheme* replication_scheme,
-    CompactionWorker* cstable_index,
     AnalyticsAuth* auth) :
     tsdb_namespace_(tsdb_namespace),
     partition_map_(partition_map),
     replication_scheme_(replication_scheme),
-    cstable_index_(cstable_index),
     auth_(auth) {}
 
 csql::TaskIDList TSDBTableProvider::buildSequentialScan(
