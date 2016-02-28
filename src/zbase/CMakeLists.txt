@@ -52,6 +52,7 @@ add_library(tsdb-server OBJECT
     core/CompactionWorker.cc
     sql/sql_engine.cc
     sql/table_provider.cc
+    sql/table_scan.cc
     core/TSDBService.cc
     core/TSDBServlet.cc
     core/TSDBTableRef.cc
@@ -68,7 +69,6 @@ add_library(tsdb-server OBJECT
     core/LSMPartitionReader.cc
     core/LSMPartitionWriter.cc
     core/LSMPartitionReplication.cc
-    core/LSMPartitionSQLScan.cc
     core/LazyPartition.cc
     core/Table.cc
     core/RecordArena.cc

@@ -9,6 +9,7 @@
  */
 #include <stx/SHA1.h>
 #include <zbase/sql/table_provider.h>
+#include <zbase/sql/table_scan.h>
 #include <zbase/core/TSDBService.h>
 #include <zbase/core/RemoteTSDBScan.h>
 #include <csql/CSTableScan.h>
@@ -42,20 +43,15 @@ csql::TaskIDList TSDBTableProvider::buildSequentialScan(
 
   csql::TaskIDList task_ids;
   for (const auto& partition : partitions) {
-    if (replication_scheme_->hasLocalReplica(partition)) {
-      auto task_factory = [node, table, partition] (
-          csql::Transaction* txn,
-          csql::RowSinkFn output) -> RefPtr<csql::Task> {
+    auto task = new csql::TaskDAGNode(
+        new TableScanFactory(
+            partition_map_,
+            tsdb_namespace_,
+            table_ref.table_key,
+            partition,
+            node));
 
-      };
-
-      auto task = new csql::TaskDAGNode(
-          new csql::SimpleTableExpressionFactory(task_factory));
-
-      task_ids.emplace_back(tasks->addTask(task));
-    } else {
-      RAISE(kRuntimeError, "remote scan not supported");
-    }
+    task_ids.emplace_back(tasks->addTask(task));
   }
 
   return task_ids;

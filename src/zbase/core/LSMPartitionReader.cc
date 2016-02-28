@@ -13,7 +13,6 @@
 #include <cstable/CSTableReader.h>
 #include <cstable/RecordMaterializer.h>
 #include <zbase/core/LSMPartitionReader.h>
-#include <zbase/core/LSMPartitionSQLScan.h>
 #include <zbase/core/Table.h>
 
 using namespace stx;
@@ -79,35 +78,7 @@ csql::TaskIDList LSMPartitionReader::buildSQLScan(
     csql::Transaction* txn,
     RefPtr<csql::SequentialScanNode> seqscan,
     csql::TaskDAG* tasks) const {
-  auto cstable = fetchCSTableFilename();
-  if (cstable.isEmpty()) {
-    return csql::TaskIDList{};
-  }
-
-  // auto cstable_version = cstableVersion();
-  // if (!cstable_version.isEmpty()) {
-  //   scan->setCacheKey(cstable_version.get());
-  // }
-
-  auto table = table_;
-  auto snap = snap_;
-  auto task_factory = [seqscan, cstable, table, snap] (
-      csql::Transaction* txn,
-      csql::RowSinkFn output) -> RefPtr<csql::Task> {
-    return new LSMPartitionSQLScan(
-          txn,
-          table,
-          snap,
-          seqscan,
-          txn->getRuntime()->queryBuilder().get());
-  };
-
-  auto task = new csql::TaskDAGNode(
-      new csql::SimpleTableExpressionFactory(task_factory));
-
-  csql::TaskIDList output;
-  output.emplace_back(tasks->addTask(task));
-  return output;
+  RAISE(kNotImplementedError);
 }
 
 } // namespace tdsb
