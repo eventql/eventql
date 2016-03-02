@@ -415,6 +415,20 @@ void AnalyticsServlet::listTables(
 
     json.addObjectEntry("name");
     json.addString(table.table_name);
+    json.addComma();
+
+    json.addObjectEntry("tags");
+    json.beginArray();
+    for (auto tag = table.tags.begin(); tag != table.tags.end(); ++tag) {
+
+      if (tag != table.tags.begin()) {
+        json.addComma();
+      }
+
+      json.addString(*tag);
+    }
+
+    json.endArray();
 
     json.endObject();
   });
