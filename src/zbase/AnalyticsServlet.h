@@ -105,6 +105,11 @@ protected:
       const http::HTTPRequest* req,
       http::HTTPResponse* res);
 
+  void addTableTag(
+      const AnalyticsSession& session,
+      const http::HTTPRequest* req,
+      http::HTTPResponse* res);
+
   void insertIntoTable(
       const Option<AnalyticsSession>& session,
       const http::HTTPRequest* req,
