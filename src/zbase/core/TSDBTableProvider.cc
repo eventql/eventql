@@ -115,6 +115,10 @@ csql::TableInfo TSDBTableProvider::tableInfoForTable(
   csql::TableInfo ti;
   ti.table_name = table.table_name;
 
+  for (const auto& tag : table.config.tag()) {
+    ti.tags.insert(tag);
+  }
+
   for (const auto& col : table.schema->columns()) {
     csql::ColumnInfo ci;
     ci.column_name = col.first;
