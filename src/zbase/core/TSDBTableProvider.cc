@@ -115,7 +115,7 @@ csql::TableInfo TSDBTableProvider::tableInfoForTable(
   csql::TableInfo ti;
   ti.table_name = table.table_name;
 
-  for (const auto& tag : table.config.tag()) {
+  for (const auto& tag : table.config.tags()) {
     ti.tags.insert(tag);
   }
 

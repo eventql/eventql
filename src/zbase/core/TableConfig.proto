@@ -84,7 +84,7 @@ message TableDefinition {
 
   optional uint64 next_field_id = 5;
 
-  repeated string tag = 6;
+  repeated string tags = 6;
 };
 
 message TableDefinitionList {
