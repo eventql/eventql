@@ -606,46 +606,6 @@ void AnalyticsServlet::createTable(
   res->setStatus(http::kStatusCreated);
 }
 
-void AnalyticsServlet::addTableTag(
-    const AnalyticsSession& session,
-    const http::HTTPRequest* req,
-    http::HTTPResponse* res) {
-
-  URI uri(req->uri());
-  const auto& params = uri.queryParams();
-
-  String table_name;
-  if (!URI::getParam(params, "table", &table_name)) {
-    res->setStatus(http::kStatusBadRequest);
-    res->addBody("missing ?table=... parameter");
-    return;
-  }
-
-  auto table_opt = pmap_->findTable(session.customer(), table_name);
-  if (table_opt.isEmpty()) {
-    res->setStatus(http::kStatusNotFound);
-    res->addBody("table not found");
-    return;
-  }
-  const auto& table = table_opt.get();
-
-  String tag;
-  if (!URI::getParam(params, "tag", &tag)) {
-    res->setStatus(http::kStatusBadRequest);
-    res->addBody("missing &tag=... parameter");
-    return;
-  }
-
-  auto td = table->config();
-  td.add_tags(tag);
-
-  app_->updateTable(td, true);
-  res->setStatus(http::kStatusCreated);
-  res->addBody("ok");
-  return;
-}
-
-
 void AnalyticsServlet::addTableField(
     const AnalyticsSession& session,
     const http::HTTPRequest* req,
@@ -827,6 +787,46 @@ void AnalyticsServlet::removeTableField(
   res->addBody("ok");
   return;
 }
+
+void AnalyticsServlet::addTableTag(
+    const AnalyticsSession& session,
+    const http::HTTPRequest* req,
+    http::HTTPResponse* res) {
+
+  URI uri(req->uri());
+  const auto& params = uri.queryParams();
+
+  String table_name;
+  if (!URI::getParam(params, "table", &table_name)) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody("missing ?table=... parameter");
+    return;
+  }
+
+  auto table_opt = pmap_->findTable(session.customer(), table_name);
+  if (table_opt.isEmpty()) {
+    res->setStatus(http::kStatusNotFound);
+    res->addBody("table not found");
+    return;
+  }
+  const auto& table = table_opt.get();
+
+  String tag;
+  if (!URI::getParam(params, "tag", &tag)) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody("missing &tag=... parameter");
+    return;
+  }
+
+  auto td = table->config();
+  td.add_tags(tag);
+
+  app_->updateTable(td, true);
+  res->setStatus(http::kStatusCreated);
+  res->addBody("ok");
+  return;
+}
+
 
 void AnalyticsServlet::insertIntoTable(
     const Option<AnalyticsSession>& session,
