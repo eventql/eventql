@@ -327,6 +327,15 @@ void AnalyticsServlet::handle(
     return;
   }
 
+  if (uri.path() == "/api/v1/tables/remove_tag") {
+    req_stream->readBody();
+    catchAndReturnErrors(&res, [this, &session, &req, &res] {
+      removeTableTag(session, &req, &res);
+    });
+    res_stream->writeResponse(res);
+    return;
+  }
+
   static const String kTablesPathPrefix = "/api/v1/tables/";
   if (StringUtil::beginsWith(uri.path(), kTablesPathPrefix)) {
     req_stream->readBody();
@@ -856,6 +865,55 @@ void AnalyticsServlet::addTableTag(
   app_->updateTable(td, true);
   res->setStatus(http::kStatusCreated);
   res->addBody("ok");
+  return;
+}
+
+void AnalyticsServlet::removeTableTag(
+    const AnalyticsSession& session,
+    const http::HTTPRequest* req,
+    http::HTTPResponse* res) {
+
+  URI uri(req->uri());
+  const auto& params = uri.queryParams();
+
+  String table_name;
+  if (!URI::getParam(params, "table", &table_name)) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody("missing ?table=... parameter");
+    return;
+  }
+
+  String tag;
+  if (!URI::getParam(params, "tag", &tag)) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody("missing ?tag=... parameter");
+    return;
+  }
+
+  auto table_opt = pmap_->findTable(session.customer(), table_name);
+  if (table_opt.isEmpty()) {
+    res->setStatus(http::kStatusNotFound);
+    res->addBody("table not found");
+    return;
+  }
+
+  const auto& table = table_opt.get();
+  auto td = table->config();
+  const auto& tags = td.mutable_tags();
+
+  for (size_t i = 0; i < tags->size(); ++i) {
+    if (tags->Get(i) == tag) {
+      tags->DeleteSubrange(i, 1);
+      app_->updateTable(td, true);
+      res->setStatus(http::kStatusCreated);
+      res->addBody("ok");
+      return;
+    }
+  }
+
+
+  res->setStatus(http::kStatusNotFound);
+  res->addBody("tag not found");
   return;
 }
 
