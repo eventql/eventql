@@ -502,6 +502,20 @@ void AnalyticsServlet::fetchTableDefinition(
   json.addString(table_info.table_name);
   json.addComma();
 
+  json.addObjectEntry("tags");
+  json.beginArray();
+  auto first_tag = table_info.tags.begin();
+  for (auto tag = first_tag; tag != table_info.tags.end(); ++tag) {
+
+    if (tag != first_tag) {
+      json.addComma();
+    }
+
+    json.addString(*tag);
+  }
+  json.endArray();
+  json.addComma();
+
   json.addObjectEntry("columns");
   json.beginArray();
   for (size_t i = 0; i < table_info.columns.size(); ++i) {
