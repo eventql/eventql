@@ -406,6 +406,18 @@ void AnalyticsServlet::listTables(
     const AnalyticsSession& session,
     const http::HTTPRequest* req,
     http::HTTPResponse* res) {
+  URI uri(req->uri());
+  const auto& params = uri.queryParams();
+
+  /* param tag */
+  String tag_filter;
+  URI::getParam(params, "tag", &tag_filter);
+
+  if (tag_filter == "all") {
+    tag_filter.clear();
+  }
+
+
   Buffer buf;
   json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
 
@@ -415,7 +427,13 @@ void AnalyticsServlet::listTables(
 
   auto table_provider = app_->getTableProvider(session.customer());
   size_t ntable = 0;
-  table_provider->listTables([&json, &ntable] (const csql::TableInfo table) {
+  table_provider->listTables([&json, &ntable, &tag_filter] (const csql::TableInfo table) {
+    if (!tag_filter.empty()) {
+      if (table.tags.find(tag_filter) == table.tags.end()) {
+        return;
+      }
+    }
+
     if (++ntable > 1) {
       json.addComma();
     }
