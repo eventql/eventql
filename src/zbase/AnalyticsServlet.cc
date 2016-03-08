@@ -900,20 +900,24 @@ void AnalyticsServlet::removeTableTag(
   const auto& table = table_opt.get();
   auto td = table->config();
   const auto& tags = td.mutable_tags();
+  bool tag_found = false;
 
-  for (size_t i = 0; i < tags->size(); ++i) {
+  for (size_t i = tags->size() - 1; i >= 0; --i) {
     if (tags->Get(i) == tag) {
       tags->DeleteSubrange(i, 1);
-      app_->updateTable(td);
-      res->setStatus(http::kStatusCreated);
-      res->addBody("ok");
-      return;
+      tag_found = true;
     }
   }
 
+  if (!tag_found) {
+    res->setStatus(http::kStatusNotFound);
+    res->addBody("tag not found");
+    return;
+  }
 
-  res->setStatus(http::kStatusNotFound);
-  res->addBody("tag not found");
+  app_->updateTable(td);
+  res->setStatus(http::kStatusCreated);
+  res->addBody("ok");
   return;
 }
 
