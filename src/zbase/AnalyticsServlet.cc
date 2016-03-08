@@ -877,22 +877,20 @@ void AnalyticsServlet::removeTableTag(
     return;
   }
 
-  const auto& table = table_opt.get();
+  auto table = table_opt.get();
   auto td = table->config();
-  const auto& tags = td.mutable_tags();
-  bool tag_found = false;
+  auto tags = td.mutable_tags();
 
-  for (size_t i = tags->size() - 1; i >= 0; --i) {
+
+  for (size_t i = tags->size() - 1; ; --i) {
     if (tags->Get(i) == tag) {
       tags->DeleteSubrange(i, 1);
-      tag_found = true;
     }
-  }
 
-  if (!tag_found) {
-    res->setStatus(http::kStatusNotFound);
-    res->addBody("tag not found");
-    return;
+    if (i == 0) {
+      break;
+    }
+
   }
 
   app_->updateTable(td);
