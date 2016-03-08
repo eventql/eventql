@@ -83,6 +83,8 @@ message TableDefinition {
   required TableConfig config = 4;
 
   optional uint64 next_field_id = 5;
+
+  repeated string tags = 6;
 };
 
 message TableDefinitionList {

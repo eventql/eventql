@@ -316,6 +316,24 @@ void AnalyticsServlet::handle(
     return;
   }
 
+  if (uri.path() == "/api/v1/tables/add_tag") {
+    req_stream->readBody();
+    catchAndReturnErrors(&res, [this, &session, &req, &res] {
+      addTableTag(session, &req, &res);
+    });
+    res_stream->writeResponse(res);
+    return;
+  }
+
+  if (uri.path() == "/api/v1/tables/remove_tag") {
+    req_stream->readBody();
+    catchAndReturnErrors(&res, [this, &session, &req, &res] {
+      removeTableTag(session, &req, &res);
+    });
+    res_stream->writeResponse(res);
+    return;
+  }
+
   static const String kTablesPathPrefix = "/api/v1/tables/";
   if (StringUtil::beginsWith(uri.path(), kTablesPathPrefix)) {
     req_stream->readBody();
@@ -380,6 +398,18 @@ void AnalyticsServlet::listTables(
     const AnalyticsSession& session,
     const http::HTTPRequest* req,
     http::HTTPResponse* res) {
+  URI uri(req->uri());
+  const auto& params = uri.queryParams();
+
+  /* param tag */
+  String tag_filter;
+  URI::getParam(params, "tag", &tag_filter);
+
+  if (tag_filter == "all") {
+    tag_filter.clear();
+  }
+
+
   Buffer buf;
   json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
 
@@ -389,7 +419,13 @@ void AnalyticsServlet::listTables(
 
   auto table_provider = app_->getTableProvider(session.customer());
   size_t ntable = 0;
-  table_provider->listTables([&json, &ntable] (const csql::TableInfo table) {
+  table_provider->listTables([&json, &ntable, &tag_filter] (const csql::TableInfo table) {
+    if (!tag_filter.empty()) {
+      if (table.tags.count(tag_filter) == 0) {
+        return;
+      }
+    }
+
     if (++ntable > 1) {
       json.addComma();
     }
@@ -398,6 +434,10 @@ void AnalyticsServlet::listTables(
 
     json.addObjectEntry("name");
     json.addString(table.table_name);
+    json.addComma();
+
+    json.addObjectEntry("tags");
+    json::toJSON(table.tags, &json);
 
     json.endObject();
   });
@@ -442,6 +482,10 @@ void AnalyticsServlet::fetchTableDefinition(
 
   json.addObjectEntry("name");
   json.addString(table_info.table_name);
+  json.addComma();
+
+  json.addObjectEntry("tags");
+  json::toJSON(table_info.tags, &json);
   json.addComma();
 
   json.addObjectEntry("columns");
@@ -674,7 +718,7 @@ void AnalyticsServlet::addTableField(
   td.set_next_field_id(next_field_id + 1);
   td.mutable_config()->set_schema(schema->encode().toString());
 
-  app_->updateTable(td, true);
+  app_->updateTable(td);
   res->setStatus(http::kStatusCreated);
   res->addBody("ok");
   return;
@@ -742,11 +786,102 @@ void AnalyticsServlet::removeTableField(
   cur_schema->removeField(cur_schema->fieldId(field));
   td.mutable_config()->set_schema(schema->encode().toString());
 
-  app_->updateTable(td, true);
+  app_->updateTable(td);
   res->setStatus(http::kStatusCreated);
   res->addBody("ok");
   return;
 }
+
+void AnalyticsServlet::addTableTag(
+    const AnalyticsSession& session,
+    const http::HTTPRequest* req,
+    http::HTTPResponse* res) {
+
+  URI uri(req->uri());
+  const auto& params = uri.queryParams();
+
+  String table_name;
+  if (!URI::getParam(params, "table", &table_name)) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody("missing ?table=... parameter");
+    return;
+  }
+
+  auto table_opt = pmap_->findTable(session.customer(), table_name);
+  if (table_opt.isEmpty()) {
+    res->setStatus(http::kStatusNotFound);
+    res->addBody("table not found");
+    return;
+  }
+  const auto& table = table_opt.get();
+
+  String tag;
+  if (!URI::getParam(params, "tag", &tag)) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody("missing &tag=... parameter");
+    return;
+  }
+
+  auto td = table->config();
+  td.add_tags(tag);
+
+  app_->updateTable(td);
+  res->setStatus(http::kStatusCreated);
+  res->addBody("ok");
+  return;
+}
+
+void AnalyticsServlet::removeTableTag(
+    const AnalyticsSession& session,
+    const http::HTTPRequest* req,
+    http::HTTPResponse* res) {
+
+  URI uri(req->uri());
+  const auto& params = uri.queryParams();
+
+  String table_name;
+  if (!URI::getParam(params, "table", &table_name)) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody("missing ?table=... parameter");
+    return;
+  }
+
+  String tag;
+  if (!URI::getParam(params, "tag", &tag)) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody("missing ?tag=... parameter");
+    return;
+  }
+
+  auto table_opt = pmap_->findTable(session.customer(), table_name);
+  if (table_opt.isEmpty()) {
+    res->setStatus(http::kStatusNotFound);
+    res->addBody("table not found");
+    return;
+  }
+
+  auto table = table_opt.get();
+  auto td = table->config();
+  auto tags = td.mutable_tags();
+
+
+  for (size_t i = tags->size() - 1; ; --i) {
+    if (tags->Get(i) == tag) {
+      tags->DeleteSubrange(i, 1);
+    }
+
+    if (i == 0) {
+      break;
+    }
+
+  }
+
+  app_->updateTable(td);
+  res->setStatus(http::kStatusCreated);
+  res->addBody("ok");
+  return;
+}
+
 
 void AnalyticsServlet::insertIntoTable(
     const Option<AnalyticsSession>& session,
