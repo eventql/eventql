@@ -862,7 +862,7 @@ void AnalyticsServlet::addTableTag(
   auto td = table->config();
   td.add_tags(tag);
 
-  app_->updateTable(td, true);
+  app_->updateTable(td);
   res->setStatus(http::kStatusCreated);
   res->addBody("ok");
   return;
@@ -904,7 +904,7 @@ void AnalyticsServlet::removeTableTag(
   for (size_t i = 0; i < tags->size(); ++i) {
     if (tags->Get(i) == tag) {
       tags->DeleteSubrange(i, 1);
-      app_->updateTable(td, true);
+      app_->updateTable(td);
       res->setStatus(http::kStatusCreated);
       res->addBody("ok");
       return;
