@@ -454,17 +454,7 @@ void AnalyticsServlet::listTables(
     json.addComma();
 
     json.addObjectEntry("tags");
-    json.beginArray();
-    for (auto tag = table.tags.begin(); tag != table.tags.end(); ++tag) {
-
-      if (tag != table.tags.begin()) {
-        json.addComma();
-      }
-
-      json.addString(*tag);
-    }
-
-    json.endArray();
+    json::toJSON(table.tags, &json);
 
     json.endObject();
   });
@@ -512,17 +502,7 @@ void AnalyticsServlet::fetchTableDefinition(
   json.addComma();
 
   json.addObjectEntry("tags");
-  json.beginArray();
-  auto first_tag = table_info.tags.begin();
-  for (auto tag = first_tag; tag != table_info.tags.end(); ++tag) {
-
-    if (tag != first_tag) {
-      json.addComma();
-    }
-
-    json.addString(*tag);
-  }
-  json.endArray();
+  json::toJSON(table_info.tags, &json);
   json.addComma();
 
   json.addObjectEntry("columns");
