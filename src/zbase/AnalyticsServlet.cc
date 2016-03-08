@@ -735,7 +735,7 @@ void AnalyticsServlet::addTableField(
   td.set_next_field_id(next_field_id + 1);
   td.mutable_config()->set_schema(schema->encode().toString());
 
-  app_->updateTable(td, true);
+  app_->updateTable(td);
   res->setStatus(http::kStatusCreated);
   res->addBody("ok");
   return;
@@ -803,7 +803,7 @@ void AnalyticsServlet::removeTableField(
   cur_schema->removeField(cur_schema->fieldId(field));
   td.mutable_config()->set_schema(schema->encode().toString());
 
-  app_->updateTable(td, true);
+  app_->updateTable(td);
   res->setStatus(http::kStatusCreated);
   res->addBody("ok");
   return;
