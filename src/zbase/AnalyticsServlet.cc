@@ -438,7 +438,7 @@ void AnalyticsServlet::listTables(
   size_t ntable = 0;
   table_provider->listTables([&json, &ntable, &tag_filter] (const csql::TableInfo table) {
     if (!tag_filter.empty()) {
-      if (table.tags.find(tag_filter) == table.tags.end()) {
+      if (table.tags.count(tag_filter) == 0) {
         return;
       }
     }
