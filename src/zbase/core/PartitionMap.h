@@ -105,7 +105,7 @@ protected:
   RefPtr<mdb::MDB> db_;
 
   mutable std::mutex mutex_;
-  HashMap<String, RefPtr<Table>> tables_;
+  OrderedMap<String, RefPtr<Table>> tables_;
   HashMap<String, ScopedPtr<LazyPartition>> partitions_;
   Vector<PartitionChangeCallbackFn> callbacks_;
 };
