@@ -35,6 +35,48 @@ void TSDBService::createTable(const TableDefinition& table) {
   pmap_->configureTable(table);
 }
 
+void TSDBService::listTables(
+    const String& tsdb_namespace,
+    Function<void (const csql::TableInfo& table)> fn) const {
+  pmap_->listTables(
+      tsdb_namespace,
+      [this, fn] (const TSDBTableInfo& table) {
+    fn(tableInfoForTable(table));
+  });
+}
+
+void TSDBService::listTablesReverse(
+    const String& tsdb_namespace,
+    Function<void (const csql::TableInfo& table)> fn) const {
+  pmap_->listTablesReverse(
+      tsdb_namespace,
+      [this, fn] (const TSDBTableInfo& table) {
+    fn(tableInfoForTable(table));
+  });
+}
+
+csql::TableInfo TSDBService::tableInfoForTable(
+    const TSDBTableInfo& table) const {
+  csql::TableInfo ti;
+  ti.table_name = table.table_name;
+
+  for (const auto& tag : table.config.tags()) {
+    ti.tags.insert(tag);
+  }
+
+  for (const auto& col : table.schema->columns()) {
+    csql::ColumnInfo ci;
+    ci.column_name = col.first;
+    ci.type = col.second.typeName();
+    ci.type_size = col.second.typeSize();
+    ci.is_nullable = col.second.optional;
+
+    ti.columns.emplace_back(ci);
+  }
+
+  return ti;
+}
+
 void TSDBService::insertRecords(
     const RecordEnvelopeList& record_list,
     uint64_t flags /* = 0 */) {
