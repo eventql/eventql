@@ -442,9 +442,10 @@ void AnalyticsServlet::listTables(
   json.addObjectEntry("tables");
   json.beginArray();
 
-  auto table_provider = app_->getTableProvider(session.customer());
+  auto table_service = app_->getTSDBNode();
   size_t ntable = 0;
-  table_provider->listTables([&json, &ntable, &tag_filter] (const csql::TableInfo table) {
+
+  auto writeTableJSON = [&json, &ntable, &tag_filter] (const csql::TableInfo table) {
     if (!tag_filter.empty()) {
       if (table.tags.count(tag_filter) == 0) {
         return;
@@ -465,7 +466,14 @@ void AnalyticsServlet::listTables(
     json::toJSON(table.tags, &json);
 
     json.endObject();
-  });
+
+  };
+
+  if (order_filter == "desc") {
+    table_service->listTablesReverse(session.customer(), writeTableJSON);
+  } else {
+    table_service->listTables(session.customer(), writeTableJSON);
+  }
 
   json.endArray();
   json.endObject();
