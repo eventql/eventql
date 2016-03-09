@@ -430,11 +430,6 @@ void AnalyticsServlet::listTables(
   String order_filter;
   URI::getParam(params, "order", &order_filter);
 
-  if (order_filter == "desc") {
-    //listTablesReverse
-  }
-
-
   Buffer buf;
   json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
 
