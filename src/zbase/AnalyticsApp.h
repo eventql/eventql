@@ -49,6 +49,7 @@ public:
 
   RefPtr<csql::ExecutionStrategy> getExecutionStrategy(const String& customer);
   RefPtr<csql::TableProvider> getTableProvider(const String& customer) const;
+  zbase::TSDBService* getTSDBNode() const;
 
   void insertMetric(
       const String& customer,
