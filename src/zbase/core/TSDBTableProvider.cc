@@ -97,6 +97,15 @@ void TSDBTableProvider::listTables(
   });
 }
 
+void TSDBTableProvider::listTablesReverse(
+    Function<void (const csql::TableInfo& table)> fn) const {
+  partition_map_->listTablesReverse(
+      tsdb_namespace_,
+      [this, fn] (const TSDBTableInfo& table) {
+    fn(tableInfoForTable(table));
+  });
+}
+
 Option<csql::TableInfo> TSDBTableProvider::describe(
     const String& table_name) const {
   auto table_ref = TSDBTableRef::parse(table_name);
