@@ -426,6 +426,14 @@ void AnalyticsServlet::listTables(
     tag_filter.clear();
   }
 
+  /* param sort_fn */
+  String order_filter;
+  URI::getParam(params, "order", &order_filter);
+
+  if (order_filter == "desc") {
+    //listTablesReverse
+  }
+
 
   Buffer buf;
   json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
