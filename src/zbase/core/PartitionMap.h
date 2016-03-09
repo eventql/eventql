@@ -43,6 +43,10 @@ public:
       const String& tsdb_namespace,
       Function<void (const TSDBTableInfo& table)> fn) const;
 
+  void listTablesReverse(
+      const String& tsdb_namespace,
+      Function<void (const TSDBTableInfo& table)> fn) const;
+
   Option<TSDBTableInfo> tableInfo(
       const String& tsdb_namespace,
       const String& table_key) const;
