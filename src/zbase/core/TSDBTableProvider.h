@@ -40,9 +40,6 @@ public:
   void listTables(
       Function<void (const csql::TableInfo& table)> fn) const override;
 
-  void listTablesReverse(
-      Function<void (const csql::TableInfo& table)> fn) const;
-
   Option<csql::TableInfo> describe(const String& table_name) const override;
 
 protected:
