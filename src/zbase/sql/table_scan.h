@@ -39,6 +39,7 @@ public:
 
   void onInputsReady() override;
 
+  int nextRow(csql::SValue* out, int out_len) override;
   //Option<SHA1Hash> cacheKey() const override;
   //void setCacheKey(const SHA1Hash& key);
 
@@ -59,6 +60,7 @@ protected:
 
 class EmptyTableScan : public csql::Task {
 public:
+  int nextRow(csql::SValue* out, int out_len) override;
 };
 
 class TableScanFactory : public csql::TaskFactory {

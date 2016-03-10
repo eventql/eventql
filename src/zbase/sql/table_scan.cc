@@ -134,6 +134,14 @@ void TableScan::scanStaticTable() {
   }
 }
 
+int TableScan::nextRow(csql::SValue* out, int out_len) {
+  return -1;
+}
+
+int EmptyTableScan::nextRow(csql::SValue* out, int out_len) {
+  return -1;
+}
+
 TableScanFactory::TableScanFactory(
     PartitionMap* pmap,
     String keyspace,
