@@ -440,9 +440,15 @@ void AnalyticsServlet::listTables(
   auto table_service = app_->getTSDBNode();
   size_t ntable = 0;
 
-  auto writeTableJSON = [&json, &ntable, &tag_filter] (const csql::TableInfo table) {
+  auto writeTableJSON = [&json, &ntable, &tag_filter] (const TSDBTableInfo& table) {
+
+    Set<String> tags;
+    for (const auto& tag : table.config.tags()) {
+      tags.insert(tag);
+    }
+
     if (!tag_filter.empty()) {
-      if (table.tags.count(tag_filter) == 0) {
+      if (tags.count(tag_filter) == 0) {
         return;
       }
     }
@@ -458,7 +464,7 @@ void AnalyticsServlet::listTables(
     json.addComma();
 
     json.addObjectEntry("tags");
-    json::toJSON(table.tags, &json);
+    json::toJSON(tags, &json);
 
     json.endObject();
 
