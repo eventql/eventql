@@ -47,15 +47,11 @@ public:
 
   void listTables(
       const String& tsdb_namespace,
-      Function<void (const csql::TableInfo& table)> fn) const;
+      Function<void (const TSDBTableInfo& table)> fn) const;
 
   void listTablesReverse(
       const String& tsdb_namespace,
-      Function<void (const csql::TableInfo& table)> fn) const;
-
-  csql::TableInfo tableInfoForTable(
-      const TSDBTableInfo& table) const;
-
+      Function<void (const TSDBTableInfo& table)> fn) const;
 
   void insertRecords(
       const RecordEnvelopeList& records,
