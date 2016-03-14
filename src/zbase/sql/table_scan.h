@@ -37,7 +37,7 @@ public:
       csql::QueryBuilder* runtime,
       csql::RowSinkFn output);
 
-  void onInputsReady() override;
+  //void onInputsReady() override;
 
   int nextRow(csql::SValue* out, int out_len) override;
   //Option<SHA1Hash> cacheKey() const override;

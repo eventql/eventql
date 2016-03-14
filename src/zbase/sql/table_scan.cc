@@ -29,16 +29,16 @@ TableScan::TableScan(
     runtime_(runtime),
     output_(output) {}
 
-void TableScan::onInputsReady() {
-  switch (table_->storage()) {
-    case TBL_STORAGE_COLSM:
-      scanLSMTable();
-      return;
-    case TBL_STORAGE_STATIC:
-      scanStaticTable();
-      return;
-  }
-}
+//void TableScan::onInputsReady() {
+//  switch (table_->storage()) {
+//    case TBL_STORAGE_COLSM:
+//      scanLSMTable();
+//      return;
+//    case TBL_STORAGE_STATIC:
+//      scanStaticTable();
+//      return;
+//  }
+//}
 
 void TableScan::scanLSMTable() {
   const auto& tables = snap_->state.lsm_tables();
@@ -93,7 +93,7 @@ void TableScan::scanLSMTable() {
       }
     }
 
-    cstable_scan.onInputsReady();
+    //cstable_scan.onInputsReady();
   }
 
   id_set_.clear();
@@ -130,7 +130,7 @@ void TableScan::scanStaticTable() {
       }
     }
 
-    cstable_scan.onInputsReady();
+    //cstable_scan.onInputsReady();
   }
 }
 

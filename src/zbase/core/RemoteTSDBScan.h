@@ -31,7 +31,8 @@ public:
       ReplicationScheme* replication_scheme,
       AnalyticsAuth* auth);
 
-  void onInputsReady() override;
+  //void onInputsReady() override;
+  int nextRow(csql::SValue* out, int out_len) override;
 
   size_t rowsScanned() const;
 
