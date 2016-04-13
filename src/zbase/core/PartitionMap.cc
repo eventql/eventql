@@ -252,6 +252,22 @@ void PartitionMap::listTables(
   }
 }
 
+void PartitionMap::listTablesReverse(
+    const String& tsdb_namespace,
+    Function<void (const TSDBTableInfo& table)> fn) const {
+  for (auto cur = tables_.rbegin(); cur != tables_.rend(); ++cur) {
+    if (cur->second->tsdbNamespace() != tsdb_namespace) {
+      continue;
+    }
+
+    TSDBTableInfo ti;
+    ti.table_name = cur->second->name();
+    ti.config = cur->second->config();
+    ti.schema = cur->second->schema();
+    fn(ti);
+  }
+}
+
 bool PartitionMap::dropLocalPartition(
     const String& tsdb_namespace,
     const String& table_name,

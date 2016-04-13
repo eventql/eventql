@@ -117,6 +117,10 @@ RefPtr<csql::TableProvider> AnalyticsApp::getTableProvider(
         customer);
 }
 
+zbase::TSDBService* AnalyticsApp::getTSDBNode() const {
+  return tsdb_node_;
+}
+
 void AnalyticsApp::createTable(const TableDefinition& tbl) {
   cdb_->updateTableDefinition(tbl);
 }

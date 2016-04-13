@@ -43,6 +43,10 @@ public:
       const String& tsdb_namespace,
       Function<void (const TSDBTableInfo& table)> fn) const;
 
+  void listTablesReverse(
+      const String& tsdb_namespace,
+      Function<void (const TSDBTableInfo& table)> fn) const;
+
   Option<TSDBTableInfo> tableInfo(
       const String& tsdb_namespace,
       const String& table_key) const;
@@ -105,7 +109,7 @@ protected:
   RefPtr<mdb::MDB> db_;
 
   mutable std::mutex mutex_;
-  HashMap<String, RefPtr<Table>> tables_;
+  OrderedMap<String, RefPtr<Table>> tables_;
   HashMap<String, ScopedPtr<LazyPartition>> partitions_;
   Vector<PartitionChangeCallbackFn> callbacks_;
 };

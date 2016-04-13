@@ -45,6 +45,14 @@ public:
 
   void createTable(const TableDefinition& config);
 
+  void listTables(
+      const String& tsdb_namespace,
+      Function<void (const TSDBTableInfo& table)> fn) const;
+
+  void listTablesReverse(
+      const String& tsdb_namespace,
+      Function<void (const TSDBTableInfo& table)> fn) const;
+
   void insertRecords(
       const RecordEnvelopeList& records,
       uint64_t flags = 0);

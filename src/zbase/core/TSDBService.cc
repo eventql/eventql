@@ -35,6 +35,26 @@ void TSDBService::createTable(const TableDefinition& table) {
   pmap_->configureTable(table);
 }
 
+void TSDBService::listTables(
+    const String& tsdb_namespace,
+    Function<void (const TSDBTableInfo& table)> fn) const {
+  pmap_->listTables(
+      tsdb_namespace,
+      [this, fn] (const TSDBTableInfo& table) {
+    fn(table);
+  });
+}
+
+void TSDBService::listTablesReverse(
+    const String& tsdb_namespace,
+    Function<void (const TSDBTableInfo& table)> fn) const {
+  pmap_->listTablesReverse(
+      tsdb_namespace,
+      [this, fn] (const TSDBTableInfo& table) {
+    fn(table);
+  });
+}
+
 void TSDBService::insertRecords(
     const RecordEnvelopeList& record_list,
     uint64_t flags /* = 0 */) {
