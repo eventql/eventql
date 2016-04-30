@@ -1,7 +1,8 @@
-Getting Started with Z1
-=======================
+1.1 Introduction
+================
 
-##### Getting Started in 5 minutes
+
+##### Getting Started with EventQL
 
 We have 5 minute getting started guides for impatient people who don't like
 reading documentation. For more in-depth information you are
@@ -12,7 +13,7 @@ kindly referred to the remaining chapters.
 
 ##### Importing data
 
-If you are just interested in sending data to Z1, read on:
+If you are just interested in sending data to EventQL, read on:
 
   + [Web Tracking](/docs/connectors/web_tracking)
   + [iOS Tracking](/docs/connectors/ios_sdk)
@@ -22,15 +23,13 @@ If you are just interested in sending data to Z1, read on:
 
 ---
 
-What is Z1?
+What is EventQL?
 -----------
 
-Z1 is a distributed, analytical database. It allows you to store massive amounts
-of structured data and explore it using SQL and powerful built-in query tools.
-Additionally, you can run stream and batch data processing pipelines using a
-simple JavaScript SDK to create advanced analytics or data-driven automations.
+EventQL is a distributed, analytical database. It allows you to store massive amounts
+of structured data and explore it using SQL and other programmatic query facilities.
 
-If you want to take the deep dive, start by reading [the "Concepts" page](/docs/concepts).
+If you want to take the deep dive, start by reading [the "Concepts" page](../concepts/).
 
 ##### Distributed Queries &amp; Storage
 
@@ -41,20 +40,20 @@ parallelized and distributed across servers.
 
 ##### Column-oriented
 
-Z1 is a column-oriented database. This means that when executing a query, it
+EventQL is a column-oriented database. This means that when executing a query, it
 doesn't have to read the full row from disk (like row-oriented databases) but
 only those columns which are actually required by the query. This feature results
 in a dramatic speed-up for most queries but is otherwise transparent to the user.
 
 ##### Nested Records
 
-The core unit of data storage in Z1 are tables and rows. Tables have a strict
-schema and are strictly typed. Tables in Z1 may have "nested" schema that allow
+The core unit of data storage in EventQL are tables and rows. Tables have a strict
+schema and are strictly typed. Tables in EventQL may have "nested" schema that allow
 you to store complex data structures (like a JSON object) in a single field.
 
 ##### SQL and JavaScript Queries
 
-In addition to the full SQL query language, Z1 can execute JavaScript queries
+In addition to the full SQL query language, EventQL can execute JavaScript queries
 and data processing pipelines allowing you to build the most complex data driven
 applications.
 
@@ -62,7 +61,7 @@ applications.
 
 ##### Query Tools & Report Editor
 
-Z1 features a web UI that allows you to create and share complex reports
+EventQL features a web UI that allows you to create and share complex reports
 and dashboards using SQL, JavaScript and built-in graphical analytics and
 query tools.
 
