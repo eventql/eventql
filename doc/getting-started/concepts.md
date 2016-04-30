@@ -1,15 +1,15 @@
 1.2 Concepts
 ============
 
-From a user perspective, interacting with a Z1 instance feels similar to
+From a user perspective, interacting with an EventQL instance feels similar to
 interacting with most traditional SQL databases. Data is stored as rows in
 schemaful tables. You can insert and retrieve rows, execute complex queries and
 create, edit and drop tables.
 
-However, Z1 is not a general purpose database. It was designed for large scala
+However, EventQL is not a general purpose database. It was designed for large scala
 data analysis and processing and has a fully distributed architecture. This
 design allows you to ingest, process and query massive amounts of data at low
-latency, but also makes Z1 less suited for classical transaction processing tasks.
+latency, but also makes EventQL less suited for classical transaction processing tasks.
 
 This page explains the major concepts:
 
@@ -20,13 +20,13 @@ This page explains the major concepts:
 
 ### Tables
 
-The core unit of data storage in Z1 are tables and rows. Tables have a strict
+The core unit of data storage in EventQL are tables and rows. Tables have a strict
 schema that you must define and table columns are strictly typed.
 
 The most simple form of a table schema is one that has a flat list of columns
 with a simple data type like `string`, `uint64` or `datetime`. These table
 schemas look exactly like the ones you are probably used to from other databases.
-In fact, Z1 can import tables from all major database products with a few clicks.
+In fact, EventQL can import tables from all major database products with a few clicks.
 
   Schema changes are instant since they only require a small metadata change on disk.
 
@@ -73,7 +73,7 @@ you then insert into multiple tables. Only to later re-assemble it at query time
 using JOINs. This often adds unnessecary complexity. Moreover JOINs have inherent
 performance and scalability issues.
 
-While Z1 still alows you to import, create and use tables using the relational
+While EventQL still alows you to import, create and use tables using the relational
 paradigm it additionally supports nested and repeated columns. This may sound
 complex but is actually quite simple and allows you to implement complex data
 models traditionally not suited for SQL databases.
@@ -120,7 +120,7 @@ use it. Check out the ["Nested Records" page](/docs/sql/nested_records) for more
 ###### Automatic Sharding &amp; Replication
 
 Table storage is distributed across a cluster of physical servers and scales
-linearly in the number of servers. Given enough servers, or in a Z1 Cloud
+linearly in the number of servers. Given enough servers, or in an EventQL Cloud
 instance, you can store extremely large tables (>1000TB).
 
 Queries are also automatically parallelized and executed on multiple physical
@@ -145,21 +145,21 @@ are 3 copies of every piece of data for redundancy and performance.
 <br />
 ###### Columnar Storage
 
-Z1 stores all data on disk in a columnar format: when executing a query, it
+EventQL stores all data on disk in a columnar format: when executing a query, it
 doesn't have to read the full row from disk (like row-oriented databases) but
 only those columns which are actually required by the query. This feature is
 fully transparent to the user: The only thing you will notice is dramatically
 increased IO performance and therefore query execution speed.
 
 Since queries don't have to read the full row from disk every time, you don't
-have to limit yourself in terms of table size. Z1 can handle tables containing
+have to limit yourself in terms of table size. EventQL can handle tables containing
 many thousand individual columns per row just fine.
 
 
 <br />
 ### SQL and JavaScript Queries
 
-In addition to the full SQL query language, Z1 can execute JavaScript queries
+In addition to the full SQL query language, EventQL can execute JavaScript queries
 and data processing pipelines allowing you to build the most complex data driven
 applications.
 
