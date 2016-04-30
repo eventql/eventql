@@ -1,31 +1,6 @@
 1.1 Introduction
 ================
 
-
-##### Getting Started with EventQL
-
-We have 5 minute getting started guides for impatient people who don't like
-reading documentation. For more in-depth information you are
-kindly referred to the remaining chapters.
-
-  + [SQL &mdash; 5 minute introduction](/docs/sql/introduction)
-  + [MapReduce &mdash; 5 minute introduction](/docs/mapreduce/introduction)
-
-##### Importing data
-
-If you are just interested in sending data to EventQL, read on:
-
-  + [Web Tracking](/docs/connectors/web_tracking)
-  + [iOS Tracking](/docs/connectors/ios_sdk)
-  + [Android Tracking](/docs/connectors/android_sdk)
-  + [Logfile Import](/docs/connectors/logfile_import)
-  + [StatsD Import](/docs/connectors/statsd_import)
-
----
-
-What is EventQL?
------------
-
 EventQL is a distributed, analytical database. It allows you to store massive amounts
 of structured data and explore it using SQL and other programmatic query facilities.
 
