@@ -1,12 +1,13 @@
 2.1 Tables & Schemas
 ====================
 
-The core unit of data storage in EventQL are tables and rows. Tables have a strict
-schema that you must define and that all rows must adhere to.
+The core unit of data storage in EventQL are tables and rows (also referred to
+as records or events). Tables have a strict schema that you must define and that
+all rows must adhere to.
 
 Schema changes are instant since they only require a small metadata change on disk.
 
-### Flat Rows
+### Flat Records
 
 The most simple form of a table schema is one that has a flat list of columns
 with a simple data type like `string`, `uint64` or `datetime`. These table
@@ -45,7 +46,7 @@ but in the JSON representation:
     { "collected_at": "2015-02-05 13:34:56", "sensor_id": "t2", "temperature": 21.7 }
 
 
-### Nested Rows
+### Nested Records
 
 Alas, some data doesn't fit into this simple, flat model. Imagine for example that
 you want to store a table of xxx where each xxx has multiple yyy. You can't fit
