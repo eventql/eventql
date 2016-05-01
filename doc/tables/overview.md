@@ -7,7 +7,7 @@ all rows must adhere to.
 
 Schema changes are instant since they only require a small metadata change on disk.
 
-### Flat Records
+## Flat Records
 
 The most simple form of a table schema is one that has a flat list of columns
 with a simple data type like `string`, `uint64` or `datetime`. These table
@@ -46,7 +46,7 @@ but in the JSON representation:
     { "collected_at": "2015-02-05 13:34:56", "sensor_id": "t2", "temperature": 21.7 }
 
 
-### Nested Records
+## Nested Records
 
 Alas, some data doesn't fit into this simple, flat model. Imagine for example that
 you want to store a table of xxx where each xxx has multiple yyy. You can't fit
@@ -64,14 +64,12 @@ aaa and bbb.
       double   temperature;
     }
 
-This is the time to shine for our JSON representation. Here are some example
-rows that we can store in the table.
+Now is the time to shine for our JSON representation. Here are some example
+rows that we can store in the table:
 
-      Example Rows (JSON representation)
-
-        { "collected_at": "2015-02-05 13:34:51", "sensor_id": "t3", "temperature": 20.3 }
-        { "collected_at": "2015-02-05 13:34:53", "sensor_id": "t1", "temperature": 21.2 }
-        { "collected_at": "2015-02-05 13:34:56", "sensor_id": "t2", "temperature": 21.7 }
+    { "collected_at": "2015-02-05 13:34:51", "sensor_id": "t3", "temperature": 20.3 }
+    { "collected_at": "2015-02-05 13:34:53", "sensor_id": "t1", "temperature": 21.2 }
+    { "collected_at": "2015-02-05 13:34:56", "sensor_id": "t2", "temperature": 21.7 }
 
 In general, nested rows allow you to store arbitrarily complex data structures
 in a table row and still maintain a strict schema. You can insert nested rows as

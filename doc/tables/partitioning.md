@@ -22,7 +22,19 @@ Two consecutive writes with the same primary key value are treated as an insert
 followed by an update 0 that is, every insert with a primary key value equal to
 that of another record that already exists will replace that original record.
 
+### Partitioning Key
+
+The partitioning key is used to distribute rows across machines. The brief description
+of how this works is that rows with the same partioning key will end up on the
+same machine and rows with similar partioning keys will also be grouped together.
+
 #### Partitioning Key
+
+The partitioning key is used to distribute rows across machines. The brief description
+of how this works is that rows with the same partioning key will end up on the
+same machine and rows with similar partioning keys will also be grouped together.
+
+##### Partitioning Key
 
 The partitioning key is used to distribute rows across machines. The brief description
 of how this works is that rows with the same partioning key will end up on the
