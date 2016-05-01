@@ -1,0 +1,5 @@
+### ucase
+
+Alias for `uppercase`
+
+
