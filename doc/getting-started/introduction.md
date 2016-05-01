@@ -16,10 +16,12 @@ latency, but also makes EventQL less suited for classical transaction processing
 
 If you want to take the deep dive, these pages explain the major concepts:
 
-  - [Tables](#tables)
-  - [SQL and JavaScript Queries](#sql-and-javascript-queries)
-  - [Metrics](#metrics)
-  - [Plugins](#plugins)
+  - [Tables & Schemas](../../tables/)
+  - [Partitioning](../../tables/partitioning/)
+  - [Replication](../../tables/replication/)
+  - [The SQL Query Language](../../sql/)
+  - [JavaScript Queries](../../queries/)
+  - [Drivers & APIs](../../api/)
 
 
 
