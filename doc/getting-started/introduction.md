@@ -16,6 +16,7 @@ latency, but also makes EventQL less suited for classical transaction processing
 
 If you want to take the deep dive, these pages explain the major concepts:
 
+  - [Concepts](../concepts/)
   - [Tables & Schemas](../../tables/)
   - [Partitioning](../../tables/partitioning/)
   - [Replication](../../tables/replication/)
