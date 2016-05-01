@@ -2,13 +2,13 @@
 ==================
 
 Tables in EventQL are internally split into many partitions that can be distributed
-over many machines and queried in parallel, allowing horizontally scale tables far
-beyond what a single machine could handle. This concept is sometimes referred
+over many machines and queried in parallel, allowing you to horizontally scale
+tables far beyond what a single machine could handle. This concept is sometimes referred
 to as "massively parallel database architecture".
 
-The partioning is more or less transparent to you. If you want to learn about the
+The partioning is more or less transparent to users. If you want to learn about the
 intricate details of the algorithm, have a look at the internals section.
-Still there are few things that you have to consider when designing your data
+Still there are few things that you have to consider while designing your data
 model for EventQL:
 
 ## Mandatory Primary Key
