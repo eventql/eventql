@@ -11,7 +11,7 @@ intricate details of the algorithm, have a look at the internals section.
 Still there are few things that you have to consider while designing your data
 model for EventQL:
 
-## Primary Key
+## The Primary Key
 
 The primary key consists of one or more columns from the table schema. The primary
 key is automatically unique. There can't be two rows with the exactly same
@@ -22,19 +22,11 @@ Two consecutive writes with the same primary key value are treated as an insert
 followed by an update 0 that is, every insert with a primary key value equal to
 that of another record that already exists will replace that original record.
 
-### Partitioning Key
-
-The partitioning key is used to distribute rows across machines. The brief description
-of how this works is that rows with the same partioning key will end up on the
-same machine and rows with similar partioning keys will also be grouped together.
-
 #### Partitioning Key
 
-The partitioning key is used to distribute rows across machines. The brief description
-of how this works is that rows with the same partioning key will end up on the
-same machine and rows with similar partioning keys will also be grouped together.
-
-##### Partitioning Key
+The partitioning key is defined as exactly one column from the table schema that must
+also be included in the primary key. Another way to see it is that the partinioning
+key is a subset of the primary key.
 
 The partitioning key is used to distribute rows across machines. The brief description
 of how this works is that rows with the same partioning key will end up on the
@@ -43,16 +35,12 @@ same machine and rows with similar partioning keys will also be grouped together
 This scheme allows EventQL to make an extremely quick decision which servers
 need to be asked for data in a full table scan.
 
-The partitioning key is defined as exactly one column from the table schema that must
-also be included in the primary key. Another way to see it is that the partinioning
-key is a subset of the primary key.
-
 When storing timeseries or event streams the partitioning key will almost always
 be `time` as this allows to efficiently restrict scans on a specific time window.
 
 #### Example
 
-Here is a simple exampl schema for a table that stores temperature measurements
+Here is a simple example schema for a table that stores temperature measurements
 and its primary and partitioning key:
 
     schema ev.temperature_measurements {
