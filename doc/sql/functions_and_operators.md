@@ -6,61 +6,221 @@ Users can also define their own functions and operators.
 
 ---
 
+
+
 ###### Control Flow Functions
-[if](#if_expression_)
+
+<table class="small functions_and_operators">
+  <tr>
+    <td><a class="link" href="/documentation/sql/functions-and-operators/if-expression">if</a></td>
+    <td>an if statement with lazy evalutation</td>
+    <td><code>if(1 == 2, "foo", "bar")</code></td>
+  </tr>
+</table>
 
 ###### String Functions
-[REGEXP](#regexp-operator-),
-[startswith](#startswith),
-[endswith](#endswith),
-[uppercase](#uppercase),
-[ucase](#ucase),
-[lowercase](#lowercase),
-[lcase](#lcase)
+<table class="small functions_and_operators">
+  <tr>
+    <td><a class="link" href="/documentation/sql/functions-and-operators/regexp-operator">REGEXP</a></td>
+    <td>REGEXP operator</td>
+    <td><code>'foobar' REGEXP '^foo'</code></td>
+  </tr>
+  <tr>
+    <td><a class="link" href="/documentation/sql/functions-and-operators/endswith">endswith</a></td>
+    <td>check string end</td>
+    <td><code>endswith("eventql", "ql")</code></td>
+  </tr>
+  <tr>
+    <td><a class="link" href="/documentation/sql/functions-and-operators/startswith">startswith</a></td>
+    <td>check string start</td>
+    <td><code>startswith("eventql", "event")</code></td>
+  </tr>
+  <tr>
+    <td><a class="link" href="/documentation/sql/functions-and-operators/uppercase">uppercase</a></td>
+    <td>convert to uppercase</td>
+    <td><code>uppercase("hello world")</code></td>
+  </tr>
+  <tr>
+    <td><a class="link" href="/documentation/sql/functions-and-operators/ucase">ucase</a></td>
+    <td>alias for uppercase</td>
+    <td><code>ucase("hello world")</code></td>
+  </tr>
+  <tr>
+    <td><a class="link" href="/documentation/sql/functions-and-operators/lowercase">lowercase</a></td>
+    <td>convert to lowercase</td>
+    <td><code>lowercase("hello world")</code></td>
+  </tr>
+  <tr>
+    <td><a class="link" href="/documentation/sql/functions-and-operators/lcase">lcase</a></td>
+    <td>alias for lowercase</td>
+    <td><code>lcase("hello world")</code></td>
+  </tr>
+</table>
 
 ###### Numeric Functions
-[+](#add-operator),
-[-](#sub-operator),
-[*](#mul-operator),
-[/](#div-operator),
-[%](#mod-operator),
-[pow](#pow),
-[mod](#mod),
-[round](#round),
-[truncate](#truncate)
+<table class="small functions_and_operators">
+  <tr>
+    <td><a class="link" href="/documentation/sql/functions-and-operators/add-operator">+</a></<td>
+    <td>Sum of two values</td>
+    <td><code>2 + 2</code></td>
+  </tr>
+  <tr>
+    <td><a class="link" href="/documentation/sql/functions-and-operators/mul-operator">*</a></<td>
+    <td>Multiply two numbers</td>
+    <td><code>4 * 2</code></td>
+  </tr>
+  <tr>
+    <td><a class="link" href="/documentation/sql/functions-and-operators/mul-operator">/</a></<td>
+    <td>Division operator</td>
+    <td><code>4 / 2</code></td>
+  </tr>
+  <tr>
+    <td><a class="link" href="/documentation/sql/functions-and-operators/pow">pow</a></<td>
+    <td>Power operator</td>
+    <td><code>pow(2, 32)</code></td>
+  </tr>
+  <tr>
+    <td><a class="link" href="/documentation/sql/functions-and-operators/round">round</a></<td>
+    <td>Round a number</td>
+    <td><code>round(0.234, 2)</code></td>
+  </tr>
+  <tr>
+    <td><a class="link" href="/documentation/sql/functions-and-operators/truncate">truncate</a></<td>
+    <td>Truncate a number</td>
+    <td><code>truncate(0.234, 2)</code></td>
+  </tr>
+</table>
 
 ###### Boolean Functions
-[!](#neg-operator),
-[==](#eq-operator),
-[!=](#neq-operator),
-[<](#lt-operator),
-[<=](#lte-operator),
-[>](#gt-operator),
-[>=](#gte-operator),
-[&&](#and),
-[||](#or),
-[AND](#and),
-[OR](#or)
-[ISNULL](#isnull)
+<table class="small functions_and_operators">
+  <tr>
+    <td><a class="link" href="/documentation/sql/functions-and-operators/neg-operator">!</a></<td>
+    <td>Logical Negation operator</td>
+    <td><code>!true</code></td>
+  </tr>
+  <tr>
+    <td><a class="link" href="/documentation/sql/functions-and-operators/eq-operator">==</a></<td>
+    <td>'Equal' operator</td>
+    <td><code>2 == 2</code></td>
+  </tr>
+  <tr>
+    <td><a class="link" href="/documentation/sql/functions-and-operators/neq-operator">!=</a></<td>
+    <td>'Not equal' operator</td>
+    <td><code>2 != 3</code></td>
+  </tr>
+  <tr>
+    <td><a class="link" href="/documentation/sql/functions-and-operators/lt-operator">&lt;</a></<td>
+    <td>'Less than' operator</td>
+    <td><code>2 < 4</code></td>
+  </tr>
+  <tr>
+    <td><a class="link" href="/documentation/sql/functions-and-operators/lte-operator">&lt;=</a></<td>
+    <td>'Less or equal than' operator</td>
+    <td><code>2 <= 4</code></td>
+  </tr>
+  <tr>
+    <td><a class="link" href="/documentation/sql/functions-and-operators/gt-operator">&gt;</a></<td>
+    <td>'Greather than' operator</td>
+    <td><code>4 > 2</code></td>
+  </tr>
+  <tr>
+    <td><a class="link" href="/documentation/sql/functions-and-operators/gte-operator">&gt;=</a></<td>
+    <td>'Greather or equal than' operator</td>
+    <td><code>4 >= 2</code></td>
+  </tr>
+  <tr>
+    <td><a class="link" href="/documentation/sql/functions-and-operators/and">AND</a></<td>
+    <td>Logical and</td>
+    <td><code>1 < 2 AND 2 < 3</code></td>
+  </tr>
+  <tr>
+    <td><a class="link" href="/documentation/sql/functions-and-operators/or">OR</a></<td>
+    <td>Logical or</td>
+    <td><code>1 < 2 OR 2 < 3</code></td>
+  </tr>
+  <tr>
+    <td><a class="link" href="/documentation/sql/functions-and-operators/isnull">isnull</a></<td>
+    <td>Check if value is null</td>
+    <td><code>isnull(null)</code></td>
+  </tr>
+</table>
 
 ###### DateTime Functions
-[from_timestamp](#from_timestamp),
-[date_trunc](#date_trunc)
-[date_add](#date_add)
-[time_at](#time_at)
+<table class="small functions_and_operators">
+  <tr>
+    <td><a class="link" href="/documentation/sql/functions-and-operators/from_timestamp">from_timestamp</a></<td>
+    <td>Convert a timestamp to a DateTime value</td>
+    <td><code>from_timestamp(1462125626)</code></td>
+  </tr>
+  <tr>
+    <td><a class="link" href="/documentation/sql/functions-and-operators/date_trunc">date_trunc</a></<td>
+    <td>Truncate to specified precision</td>
+    <td><code>date_trunc("d", 1462125626)</code></td>
+  </tr>
+  <tr>
+    <td><a class="link" href="/documentation/sql/functions-and-operators/date_add">date_add</a></<td>
+    <td>Add interval</td>
+    <td><code>date_add(1462125626, '1', 'DAY')</code></td>
+  </tr>
+  <tr>
+    <td><a class="link" href="/documentation/sql/functions-and-operators/time_at">time_at</a></<td>
+    <td>Get DateTime value for interval from now</td>
+    <td><code>time_at('-12hours')</code></td>
+  </tr>
+</table>
 
 ###### Aggregate Functions
-[sum](#sum),
-[count](#count),
-[min](#min),
-[max](#max),
-[mean](#mean)
+<table class="small functions_and_operators">
+  <tr>
+    <td><a class="link" href="/documentation/sql/functions-and-operators/sum">sum</a></<td>
+    <td>Sum of all values in the result set</td>
+    <td><code>sum(price)</code></td>
+  </tr>
+  <tr>
+    <td><a class="link" href="/documentation/sql/functions-and-operators/count">count</a></<td>
+    <td>Number of values in the result set</td>
+    <td><code>count(1)</code></td>
+  </tr>
+  <tr>
+    <td><a class="link" href="/documentation/sql/functions-and-operators/min">min</a></<td>
+    <td>Minimum of values in the result set</td>
+    <td><code>min(price)</code></td>
+  </tr>
+  <tr>
+    <td><a class="link" href="/documentation/sql/functions-and-operators/max">max</a></<td>
+    <td>Maximum of values in the result set</td>
+    <td><code>max(price)</code></td>
+  </tr>
+  <tr>
+    <td><a class="link" href="/documentation/sql/functions-and-operators/mean">mean</a></<td>
+    <td>mean of values in the result set</td>
+    <td><code>mean(price)</code></td>
+  </tr>
+</table>
 
 ###### Conversion Functions
-[to_str](#to_str),
-[to_int](#to_int),
-[to_float](#to_float),
-[to_bool](#to_bool)
+<table class="small functions_and_operators">
+  <tr>
+    <td><a class="link" href="/documentation/sql/functions-and-operators/to_str">to_str</a></<td>
+    <td>Convert to string</td>
+    <td><code>to_str(1)</code></td>
+  </tr>
+  <tr>
+    <td><a class="link" href="/documentation/sql/functions-and-operators/to_int">to_int</a></<td>
+    <td>Convert to integer</td>
+    <td><code>to_int(142.23)</code></td>
+  </tr>
+  <tr>
+    <td><a class="link" href="/documentation/sql/functions-and-operators/to_float">to_float</a></<td>
+    <td>Convert to float</td>
+    <td><code>to_float(12)</code></td>
+  </tr>
+  <tr>
+    <td><a class="link" href="/documentation/sql/functions-and-operators/to_bool">to_bool</a></<td>
+    <td>Convert to string</td>
+    <td><code>to_bool(1)</code></td>
+  </tr>
+</table>
 
 ---
 ##### Operator Precedence
@@ -82,410 +242,4 @@ the lowest. Operators that are shown together on a line have the same precedence
     &&, AND
     XOR
     ||, OR
-
-
-
-<br /><br />
-Control Flow Functions
-----------------------
-
----
-### if (expression)
-Executes one of two subexpressions based on the return value of a conditional
-expression.
-
-    if(cond_expr, true_branch, false_branch)
-
-If `cond_expr` is, the `true_branch` expression will be executed and the result
-returned. Otherwise the `false_branch` expression will be executed and the result
-returned.
-
-Examples:
-
-    SELECT if(1 == 1, 23, 42);
-    Result: 23
-
-    SELECT if(1 == 2, 2 * 2, 4 * 4);
-    Result: 16
-
-
-<br /><br />
-String Functions
-----------------
-
----
-### REGEXP (operator)
-Matches the provided `value` against the provided `pattern`. Returns true if the
-`pattern` matches the `value` and false otherwise.
-
-    value REGEXP pattern
-
-The pattern must be a POSIX compatible regular expression.
-
-
----
-### startswith
-Returns true if the `value` strings begins with the `prefix` string or both
-strings areq equal and false otherwise.
-
-    startswith(value, prefix)
-
-
----
-### endswith
-Returns true if the `value` strings ends with the `suffx` string or both strings
-are equal and false otherwise.
-
-    endswith(value, prefix)
-
-
----
-### uppercase
-
-Returns a copy of the provided `value` string with all characters converted to
-upper case.
-
-    uppercase(value)
-
-
----
-### ucase
-
-Alias for `uppercase`
-
-
----
-### lowercase
-
-Returns a copy of the provided `value` string with all characters converted to
-lower case.
-
-    lowercase(value)
-
-
----
-### lcase
-
-Alias for `lowercase`
-
-
-<br /><br />
-Numeric Functions and Operators
--------------------------------
-
----
-### + (operator)
-Returns the sum of the values `a` and `b`.
-
-    a + b
-
----
-### - (operator)
-
-Returns the difference of the values `a` and `b`.
-
-    a - b
-
----
-### * (operator)
-Returns the product of the values `a` and `b`.
-
-    a * b
-
----
-### / (operator)
-Returns the quotient of the values `a` and `b`.
-
-    a / b
-
----
-### % (operator)
-Returns the modulo of the values `a` and `b`.
-
-    a % b
-
----
-### pow
-
-Returns `a` to the power of `b`.
-
-    pow(a, b)
-
-
----
-### mod
-
-Returns the modulo of the values `a` and `b`.
-
-    mod(a, b)
-
-
----
-### round
-
-Returns the number `x` rounded to `d` decimal places. `d` defaults to 0 if
-not specified.
-
-    round(x)
-    round(x, d)
-
-
----
-### truncate
-
-Returns the number `x` truncated to `d` decimal places. `d` defaults to 0 if
-not specified.
-
-    truncate(x)
-    truncate(x, d)
-
-
-
-<br /><br />
-Numeric Functions and Operators
--------------------------------
-
----
-### ! (operator)
-Returns false if the `expr` is true and false if the `expr` is true.
-
-    !expr
-
-
----
-### == (operator)
-Returns true if the values `a` and `b` are equal.
-
-    a == b
-
-
----
-### != (operator)
-Returns true if the values `a` and `b` are not equal.
-
-    a != b
-
-
----
-### < (operator)
-Returns true if the values `a` is strictly less than `b`
-
-    a < b
-
----
-### <= (operator)
-Returns true if the values `a` is strictly less than or equal to `b`
-
-    a <= b
-
----
-### > (operator)
-Returns true if the values `a` is strictly greater than `b`
-
-    a > b
-
-
----
-### >= (operator)
-Returns true if the values `a` is strictly greater than or equal to `b`
-
-    a >= b
-
----
-### && (operator)
-
-Returns true if the values `a` and `b` are both true.
-
-    a AND b
-
-
----
-### || (operator)
-
-Returns true if one or both of the values `a` and `b` are true.
-
-    a || b
-
-
----
-### AND
-
-Returns true if the values `a` and `b` are both true.
-
-    a AND b
-
-
----
-### OR
-
-Returns true if one or both of the values `a` and `b` are true.
-
-    a OR b
-
-
----
-### isnull
-
-Returns true iff the value `a` is NULL and false otherwise. I.e. this method will return true only in one single case and that is  when the provided value has the valuetype NULL. This method will return false for other null-like values that are not the exact NULL valuetype, like the numeric zero or the empty string.
-
-    isnull(value)
-
-
-
-
-<br /><br />
-DateTime Functions
-------------------
-
----
-### from_timestamp
-Convert a numeric unix timestamp into a DateTime value.
-
-    from_timestamp(timestamp)
-
-
----
-### date_trunc
-
-Truncates a DateTime value to the specified window/precision. Given an input
-timestamp this function returns the start time of the time window that contains
-the input timestamp.
-
-    date_trunc(window, timestamp)
-
-The window parameter must be a string and must be equal to or end with one of the
-time units below. Optionally, you can prefix the time unit with an integral number
-to make the window a multiple of the unit.
-
-The valid time units are:
-
-    s/sec/secs/second/seconds
-    m/min/mins/minute/minutes
-    h/hour/hours
-    d/day/days
-    w/week/weeks
-    m/month/months
-    y/year/years
-
-Examples:
-
-    SELECT date_trunc('hour', TIMESTAMP '2001-02-16 20:38:40');
-    Result: 2001-02-16 20:00:00
-
-    SELECT date_trunc('30mins', TIMESTAMP '2001-02-16 20:38:40');
-    Result: 2001-02-16 20:30:00
-
-    SELECT date_trunc('year', TIMESTAMP '2001-02-16 20:38:40');
-    Result: 2001-01-01 00:00:00
-
-
----
-### date_add
-Adds an interval to a DateTime value.
-
-    date_add(date, expr, unit)
-
-The date argument indicates the starting DateTime or Timestamp value.
-Expr is a string specifying the interval value to be added, it may start with a '-' for negative values.
-Unit is a string specifying the expression's unit.
-
-| Unit           | Expr Format                 |
-| -------------- | --------------------------- |
-| SECOND         | SECONDS                     |
-| MINUTE         | MINUTES                     |
-| HOUR           | HOURS                       |
-| DAY            | DAYS                        |
-| WEEK           | WEEKS                       |
-| MONTH          | MONTHS                      |
-| YEAR           | YEARS                       |
-| MINUTE_SECOND  | MINUTES:SECONDS             |
-| HOUR_SECOND    | HOURS:MINUTES:SECONDS       |
-| HOUR_MINUTE    | HOURS:MINUTES               |
-| DAY_SECOND     | DAYS HOURS:MINUTES:SECONDS  |
-| DAY_MINUTE     | DAYS HOURS:MINUTES          |
-| DAY_HOUR       | DAYS HOURS                  |
-| YEAR_MONTH     | YEARS-MONTHS                |
-
-```
-SELECT DATE_ADD('1447671624', '1', 'SECOND')
--> '2015-11-16 11:00:25'
-```
-
----
-### time_at
-Returns a DateTime value for a time value or a time interval from now.
-
-Time values can be a unix timestamp, the literal 'now' or a time string in the
-format %Y-%m-%d %H:%M:%S
-
-```
-SELECT TIME_AT('1451910364')
---> '2016-01-04 12:26:04'
-```
-
-
-Interval values can be written using the following syntax:
-
-```
-  [sign]<quantity><unit> [direction]
-```
-
-where *sign* can be '-' or empty, *direction* can be 'ago' or empty but either sign or
-direction have to be given, *quantity* is an integer and *unit* is one of the following
-possible time units:
-
-    s/sec/secs/second/seconds
-    min/mins/minute/minutes
-    h/hour/hours
-    d/day/days
-    w/week/weeks
-    month/months
-    y/year/years
-
-
-```
-SELECT TIME_AT('-7days')
-SELECT TIME_AT('7days ago')
-```
-This would return the DateTime value for the current timestamp - 7 days.
-
-
-
-<br /><br />
-Aggregate Functions
--------------------
-
----
-### sum
-Returns the sum of all values in the result set.
-
-  sum(expr)
-
-
----
-### count
-Returns the number of values in the result set
-
-  count(expr)
-
-
----
-### mean
-Returns the mean/average of values in the result set
-
-    mean(expr)
-
-
----
-### min
-Returns the min of values in the result set
-
-    min(expr)
-
-
----
-### max
-Returns the max of values in the result set
-
-    max(expr)
 

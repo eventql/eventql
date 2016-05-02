@@ -1,0 +1,3 @@
+### lcase
+
+Alias for `lowercase`
