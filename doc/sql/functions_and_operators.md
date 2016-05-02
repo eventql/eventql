@@ -22,8 +22,8 @@ Users can also define their own functions and operators.
 <table class="small functions_and_operators">
   <tr>
     <td><a class="link" href="/documentation/sql/functions-and-operators/regexp-operator">REGEXP</a></td>
-    <td></td>
-    <td></td>
+    <td>REGEXP operator</td>
+    <td><code>'foobar' REGEXP '^foo'</code></td>
   </tr>
   <tr>
     <td><a class="link" href="/documentation/sql/functions-and-operators/endswith">endswith</a></td>
@@ -61,32 +61,32 @@ Users can also define their own functions and operators.
 <table class="small functions_and_operators">
   <tr>
     <td><a class="link" href="/documentation/sql/functions-and-operators/add-operator">+</a></<td>
-    <td>sum of two values</td>
+    <td>Sum of two values</td>
     <td><code>2 + 2</code></td>
   </tr>
   <tr>
     <td><a class="link" href="/documentation/sql/functions-and-operators/mul-operator">*</a></<td>
-    <td></td>
+    <td>Multiply two numbers</td>
     <td><code>4 * 2</code></td>
   </tr>
   <tr>
-    <td><a class="link" href="/documentation/sql/functions-and-operators/mul-operator">+</a></<td>
-    <td></td>
+    <td><a class="link" href="/documentation/sql/functions-and-operators/mul-operator">/</a></<td>
+    <td>Division operator</td>
     <td><code>4 / 2</code></td>
   </tr>
   <tr>
     <td><a class="link" href="/documentation/sql/functions-and-operators/pow">pow</a></<td>
-    <td></td>
+    <td>Power operator</td>
     <td><code>pow(2, 32)</code></td>
   </tr>
   <tr>
     <td><a class="link" href="/documentation/sql/functions-and-operators/round">round</a></<td>
-    <td>round number</td>
+    <td>Round a number</td>
     <td><code>round(0.234, 2)</code></td>
   </tr>
   <tr>
     <td><a class="link" href="/documentation/sql/functions-and-operators/truncate">truncate</a></<td>
-    <td>truncate number</td>
+    <td>Truncate a number</td>
     <td><code>truncate(0.234, 2)</code></td>
   </tr>
 </table>
@@ -95,53 +95,53 @@ Users can also define their own functions and operators.
 <table class="small functions_and_operators">
   <tr>
     <td><a class="link" href="/documentation/sql/functions-and-operators/neg-operator">!</a></<td>
-    <td></td>
+    <td>Logical Negation operator</td>
     <td><code>!true</code></td>
   </tr>
   <tr>
     <td><a class="link" href="/documentation/sql/functions-and-operators/eq-operator">==</a></<td>
-    <td></td>
+    <td>'Equal' operator</td>
     <td><code>2 == 2</code></td>
   </tr>
   <tr>
     <td><a class="link" href="/documentation/sql/functions-and-operators/neq-operator">!=</a></<td>
-    <td></td>
+    <td>'Not equal' operator</td>
     <td><code>2 != 3</code></td>
   </tr>
   <tr>
     <td><a class="link" href="/documentation/sql/functions-and-operators/lt-operator">&lt;</a></<td>
-    <td></td>
+    <td>'Less than' operator</td>
     <td><code>2 < 4</code></td>
   </tr>
   <tr>
     <td><a class="link" href="/documentation/sql/functions-and-operators/lte-operator">&lt;=</a></<td>
-    <td></td>
+    <td>'Less or equal than' operator</td>
     <td><code>2 <= 4</code></td>
   </tr>
   <tr>
     <td><a class="link" href="/documentation/sql/functions-and-operators/gt-operator">&gt;</a></<td>
-    <td></td>
+    <td>'Greather than' operator</td>
     <td><code>4 > 2</code></td>
   </tr>
   <tr>
     <td><a class="link" href="/documentation/sql/functions-and-operators/gte-operator">&gt;=</a></<td>
-    <td></td>
+    <td>'Greather or equal than' operator</td>
     <td><code>4 >= 2</code></td>
   </tr>
   <tr>
     <td><a class="link" href="/documentation/sql/functions-and-operators/and">AND</a></<td>
-    <td></td>
-    <td><code></code></td>
+    <td>Logical and</td>
+    <td><code>1 < 2 AND 2 < 3</code></td>
   </tr>
   <tr>
     <td><a class="link" href="/documentation/sql/functions-and-operators/or">OR</a></<td>
-    <td></td>
-    <td><code></code></td>
+    <td>Logical or</td>
+    <td><code>1 < 2 OR 2 < 3</code></td>
   </tr>
   <tr>
     <td><a class="link" href="/documentation/sql/functions-and-operators/isnull">isnull</a></<td>
-    <td></td>
-    <td><code></code></td>
+    <td>Check if value is null</td>
+    <td><code>isnull(null)</code></td>
   </tr>
 </table>
 
@@ -149,7 +149,7 @@ Users can also define their own functions and operators.
 <table class="small functions_and_operators">
   <tr>
     <td><a class="link" href="/documentation/sql/functions-and-operators/from_timestamp">from_timestamp</a></<td>
-    <td>Convert unix timestamp into a DateTime value</td>
+    <td>Convert a timestamp to a DateTime value</td>
     <td><code>from_timestamp(1462125626)</code></td>
   </tr>
   <tr>
@@ -173,22 +173,22 @@ Users can also define their own functions and operators.
 <table class="small functions_and_operators">
   <tr>
     <td><a class="link" href="/documentation/sql/functions-and-operators/sum">sum</a></<td>
-    <td></td>
+    <td>Sum of all values in the result set</td>
     <td><code>sum(price)</code></td>
   </tr>
   <tr>
     <td><a class="link" href="/documentation/sql/functions-and-operators/count">count</a></<td>
-    <td></td>
+    <td>Number of values in the result set</td>
     <td><code>count(1)</code></td>
   </tr>
   <tr>
     <td><a class="link" href="/documentation/sql/functions-and-operators/min">min</a></<td>
-    <td>min of values in the result set</td>
+    <td>Minimum of values in the result set</td>
     <td><code>min(price)</code></td>
   </tr>
   <tr>
     <td><a class="link" href="/documentation/sql/functions-and-operators/max">max</a></<td>
-    <td>max of values in the result set</td>
+    <td>Maximum of values in the result set</td>
     <td><code>max(price)</code></td>
   </tr>
   <tr>
