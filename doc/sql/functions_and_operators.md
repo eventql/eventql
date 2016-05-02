@@ -10,7 +10,7 @@ Users can also define their own functions and operators.
 
 ###### Control Flow Functions
 
-<table class="small">
+<table class="small functions_and_operators">
   <tr>
     <td><a class="link" href="/documentation/sql/functions-and-operators/if-expression">if</a></td>
     <td>an if statement with lazy evalutation</td>
@@ -19,7 +19,7 @@ Users can also define their own functions and operators.
 </table>
 
 ###### String Functions
-<table class="small">
+<table class="small functions_and_operators">
   <tr>
     <td><a class="link" href="/documentation/sql/functions-and-operators/regexp-operator">REGEXP</a></td>
     <td></td>
@@ -58,7 +58,7 @@ Users can also define their own functions and operators.
 </table>
 
 ###### Numeric Functions
-<table class="small">
+<table class="small functions_and_operators">
   <tr>
     <td><a class="link" href="/documentation/sql/functions-and-operators/add-operator">+</a></<td>
     <td>sum of two values</td>
@@ -92,7 +92,7 @@ Users can also define their own functions and operators.
 </table>
 
 ###### Boolean Functions
-<table class="small">
+<table class="small functions_and_operators">
   <tr>
     <td><a class="link" href="/documentation/sql/functions-and-operators/neg-operator">!</a></<td>
     <td></td>
@@ -146,7 +146,7 @@ Users can also define their own functions and operators.
 </table>
 
 ###### DateTime Functions
-<table class="small">
+<table class="small functions_and_operators">
   <tr>
     <td><a class="link" href="/documentation/sql/functions-and-operators/from_timestamp">from_timestamp</a></<td>
     <td>Convert unix timestamp into a DateTime value</td>
@@ -170,7 +170,7 @@ Users can also define their own functions and operators.
 </table>
 
 ###### Aggregate Functions
-<table class="small">
+<table class="small functions_and_operators">
   <tr>
     <td><a class="link" href="/documentation/sql/functions-and-operators/sum">sum</a></<td>
     <td></td>
@@ -199,7 +199,7 @@ Users can also define their own functions and operators.
 </table>
 
 ###### Conversion Functions
-<table class="small">
+<table class="small functions_and_operators">
   <tr>
     <td><a class="link" href="/documentation/sql/functions-and-operators/to_str">to_str</a></<td>
     <td>Convert to string</td>
