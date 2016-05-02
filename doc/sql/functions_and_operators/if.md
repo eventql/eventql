@@ -5,7 +5,7 @@ expression.
 
     if(cond_expr, true_branch, false_branch)
 
-If `cond_expr` is, the `true_branch` expression will be executed and the result
+If `cond_expr` is true, the `true_branch` expression will be executed and the result
 returned. Otherwise the `false_branch` expression will be executed and the result
 returned.
 

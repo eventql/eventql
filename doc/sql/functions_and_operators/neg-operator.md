@@ -1,4 +1,4 @@
-### != (operator)
-Returns true if the values `a` and `b` are not equal.
+### ! (operator)
+Returns false if the `expr` is true and false if the `expr` is true.
 
-    a != b
+    !expr
