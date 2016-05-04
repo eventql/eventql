@@ -15,7 +15,7 @@ Create a new EventQL table or overwrite an existing table.
   </tr>
 </table>
 
-###Parameters:
+###Parameters
 <table class='http_api create_table'>
   <tr>
     <td>table&#95;name</td>

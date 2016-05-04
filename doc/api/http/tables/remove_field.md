@@ -9,9 +9,13 @@ Remove an existing field from an existing table.
     <td>Authentication required?</td>
     <td>Yes</td>
   </tr>
+  <tr>
+    <td>Content-Type</td>
+    <td>text/plain</td>
+  </tr>
 </table>
 
-###Parameters:
+###Parameters
 <table class='http_api'>
   <tr>
     <td>table</td>
@@ -27,7 +31,7 @@ Remove an existing field from an existing table.
 
         >> POST /api/v1/tables/remove_field?table=my_sensor_table&field_name=sensor_location HTTP/1.1
         >> Authorization: Token <authtoken>
-        >> Content-Type: text/plain;charset=UTF-8
+        >> Content-Type: text/plain
         >> Content-Length: ...
 
 

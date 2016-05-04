@@ -17,7 +17,7 @@ inserted. You may therefore insert one or more rows per request.
   </tr>
 </table>
 
-###Parameters:
+###Parameters
 <table class='http_api create_table'>
   <tr>
     <td>table</td>

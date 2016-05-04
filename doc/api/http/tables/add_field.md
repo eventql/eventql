@@ -47,7 +47,7 @@ For more information on the data types supported by EventQL, please refer to
         >> POST /api/v1/tables/add_field?table=my_sensor_table&field_name=sensor_location&
            field_type=STRING&repeated=false&optional=true HTTP/1.1
         >> Authorization: Token <authtoken>
-        >> Content-Type: text/plain;charset=UTF-8
+        >> Content-Type: text/plain
         >> Content-Length: ...
 
 
