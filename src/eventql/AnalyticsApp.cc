@@ -9,12 +9,6 @@
 #include "eventql/util/wallclock.h"
 #include "eventql/util/util/Base64.h"
 #include "eventql/AnalyticsApp.h"
-#include "eventql/CSVExportRDD.h"
-#include "eventql/JSONExportRDD.h"
-#include "eventql/CSVSink.h"
-#include "eventql/CTRCounterMergeReducer.h"
-#include "eventql/ProtoSSTableMergeReducer.h"
-#include "eventql/ProtoSSTableSink.h"
 #include "eventql/AnalyticsSession.pb.h"
 #include <eventql/core/TSDBTableScanSpec.pb.h>
 #include "eventql/core/TimeWindowPartitioner.h"
@@ -39,7 +33,6 @@ AnalyticsApp::AnalyticsApp(
     JSRuntime* js_runtime,
     const String& datadir,
     const String& cachedir) :
-    dproc::DefaultApplication("cm.analytics"),
     tsdb_node_(tsdb_node),
     partition_map_(partition_map),
     replication_scheme_(replication_scheme),

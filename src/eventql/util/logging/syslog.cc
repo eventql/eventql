@@ -8,7 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include "eventql/util/logging/syslog.h"
-#include "eventql/util/sysconfig.h"
+#include "eventql/sysconfig.h"
 #ifdef HAVE_SYSLOG_H
 #include <syslog.h>
 #endif

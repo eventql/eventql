@@ -8,7 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 package zbase;
-import "core/TableConfig.proto";
+import "eventql/core/TableConfig.proto";
 
 message TSDBNodeConfig {
 

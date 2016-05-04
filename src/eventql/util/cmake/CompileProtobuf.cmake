@@ -28,7 +28,7 @@ function(STX_PROTOBUF_GENERATE_CPP SRCS HDRS)
     get_filename_component(ABS_FIL ${FIL} ABSOLUTE)
     get_filename_component(FIL_WE ${FIL} NAME_WE)
 
-    get_filename_component(ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR} ABSOLUTE)
+    get_filename_component(ROOT_DIR ${CMAKE_SOURCE_DIR}/src ABSOLUTE)
     string(LENGTH ${ROOT_DIR} ROOT_DIR_LEN)
 
     get_filename_component(FIL_DIR ${ABS_FIL} PATH)
@@ -38,16 +38,15 @@ function(STX_PROTOBUF_GENERATE_CPP SRCS HDRS)
     string(SUBSTRING ${FIL_DIR} ${ROOT_DIR_LEN} ${FIL_DIR_REM} FIL_DIR_PREFIX)
     set(FIL_WEPREFIX "${FIL_DIR_PREFIX}/${FIL_WE}")
 
-    list(APPEND ${SRCS} "${CMAKE_CURRENT_BINARY_DIR}/${FIL_WEPREFIX}.pb.cc")
-    list(APPEND ${HDRS} "${CMAKE_CURRENT_BINARY_DIR}/${FIL_WEPREFIX}.pb.h")
+    list(APPEND ${SRCS} "${CMAKE_BINARY_DIR}/${FIL_WEPREFIX}.pb.cc")
+    list(APPEND ${HDRS} "${CMAKE_BINARY_DIR}/${FIL_WEPREFIX}.pb.h")
 
     add_custom_command(
-      OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${FIL_WEPREFIX}.pb.cc"
-             "${CMAKE_CURRENT_BINARY_DIR}/${FIL_WEPREFIX}.pb.h"
+      OUTPUT "${CMAKE_BINARY_DIR}/${FIL_WEPREFIX}.pb.cc"
+             "${CMAKE_BINARY_DIR}/${FIL_WEPREFIX}.pb.h"
       COMMAND  ${PROTOBUF_PROTOC_EXECUTABLE}
-      ARGS --cpp_out ${CMAKE_CURRENT_BINARY_DIR} --proto_path ${CMAKE_SOURCE_DIR}/src/eventql/util/3rdparty --proto_path ${CMAKE_SOURCE_DIR}/src/eventql/util --proto_path ${CMAKE_CURRENT_SOURCE_DIR} ${STX_PROTOC_ARGS} ${ABS_FIL}
+      ARGS --cpp_out ${CMAKE_BINARY_DIR} --proto_path ${CMAKE_SOURCE_DIR}/src/eventql/util/3rdparty --proto_path ${CMAKE_SOURCE_DIR}/src ${ABS_FIL}
       DEPENDS ${ABS_FIL}
-      COMMENT "Running C++ protocol buffer compiler on ${FIL}"
       VERBATIM )
   endforeach()
 

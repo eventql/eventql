@@ -8,7 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 package zbase;
-import 'core/ReplicationState.proto';
+import 'eventql/core/ReplicationState.proto';
 
 message LSMTableRef {
   required string filename = 1;

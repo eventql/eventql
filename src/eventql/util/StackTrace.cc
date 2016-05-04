@@ -19,7 +19,7 @@
 #include <sys/types.h>
 #include <cxxabi.h>
 #include "StackTrace.h"
-#include <eventql/util/sysconfig.h>
+/*#include <eventql/util/sysconfig.h>*/
 
 #if defined(HAVE_EXECINFO_H)
 #include <execinfo.h>
@@ -147,7 +147,7 @@ std::vector<std::string> StackTrace::symbols() const {
 
     return output;
   }
-#else
+#elif defined(HAVE_BACKTRACE)
   if (frames_ && frameCount_) {
     char** strings = backtrace_symbols(frames_, frameCount_);
 

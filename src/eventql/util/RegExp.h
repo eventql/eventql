@@ -9,7 +9,7 @@
 #pragma once
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/buffer.h>
-#include <eventql/util/sysconfig.h>
+#include <eventql/sysconfig.h>
 #include <string>
 #include <vector>
 

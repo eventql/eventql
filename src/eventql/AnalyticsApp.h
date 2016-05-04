@@ -8,17 +8,10 @@
  */
 #ifndef _CM_ANALYTICSAPP_H
 #define _CM_ANALYTICSAPP_H
-#include "eventql/dproc/Application.h"
-#include "eventql/dproc/Task.h"
-#include "eventql/dproc/TaskResultFuture.h"
-#include "eventql/dproc/DispatchService.h"
 #include "eventql/util/protobuf/MessageSchema.h"
 #include "eventql/core/TSDBClient.h"
 #include "eventql/core/TSDBService.h"
 #include "eventql/core/CompactionWorker.h"
-#include "eventql/ReportFactory.h"
-#include "eventql/FeedConfig.pb.h"
-#include "eventql/ReportParams.pb.h"
 #include "eventql/api/LogfileService.h"
 #include "eventql/api/EventsService.h"
 #include "eventql/api/MapReduceService.h"
@@ -32,7 +25,7 @@ using namespace stx;
 
 namespace zbase {
 
-class AnalyticsApp : public dproc::DefaultApplication {
+class AnalyticsApp : public RefCounted {
 public:
 
   AnalyticsApp(
@@ -75,7 +68,6 @@ protected:
   zbase::PartitionMap* partition_map_;
   zbase::ReplicationScheme* replication_scheme_;
   zbase::CompactionWorker* cstable_index_;
-  HashMap<String, FeedConfig> feeds_;
   ConfigDirectory* cdb_;
   AnalyticsAuth* auth_;
   csql::Runtime* sql_;

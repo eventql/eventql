@@ -36,7 +36,7 @@
 #include <errno.h>
 #include <vector>
 
-#include <eventql/util/sysconfig.h>
+#include <eventql/sysconfig.h>
 
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN  // We only need minimal includes

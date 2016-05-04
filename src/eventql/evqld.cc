@@ -31,14 +31,11 @@
 #include "eventql/util/http/httpserver.h"
 #include "eventql/util/http/VFSFileServlet.h"
 #include "eventql/util/io/FileLock.h"
-#include "eventql/dproc/LocalScheduler.h"
-#include "eventql/dproc/DispatchService.h"
 #include "eventql/util/stats/statsdagent.h"
 #include "eventql/infra/sstable/SSTableServlet.h"
 #include "eventql/util/mdb/MDB.h"
 #include "eventql/util/mdb/MDBUtil.h"
 #include "eventql/AnalyticsServlet.h"
-#include "eventql/ReportFactory.h"
 #include "eventql/AnalyticsApp.h"
 #include "eventql/TableDefinition.h"
 #include "eventql/core/TSDBService.h"
@@ -238,14 +235,6 @@ int main(int argc, const char** argv) {
       ConfigTopic::CUSTOMERS | ConfigTopic::TABLES | ConfigTopic::USERDB |
       ConfigTopic::CLUSTERCONFIG);
 
-  /* dproc */
-  auto local_scheduler = mkRef(
-      new dproc::LocalScheduler(
-          flags.getString("cachedir"),
-          12));
-
-  local_scheduler->start();
-
   /* DocumentDB */
   DocumentDB docdb(flags.getString("datadir"));
 
@@ -351,12 +340,8 @@ int main(int argc, const char** argv) {
           flags.getString("datadir"),
           flags.getString("cachedir")));
 
-  dproc::DispatchService dproc;
-  dproc.registerApp(analytics_app.get(), local_scheduler.get());
-
   zbase::AnalyticsServlet analytics_servlet(
       analytics_app,
-      &dproc,
       flags.getString("cachedir"),
       &auth,
       sql.get(),
@@ -401,7 +386,6 @@ int main(int argc, const char** argv) {
 
   stx::logInfo("zbase", "Exiting...");
 
-  local_scheduler->stop();
   customer_dir.stopWatcher();
 
   JS_ShutDown();

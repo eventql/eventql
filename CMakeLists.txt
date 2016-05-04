@@ -51,6 +51,7 @@ endif()
 
 include_directories(deps/3rdparty/)
 include_directories(src/)
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/src)
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/deps/3rdparty/)
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/deps/3rdparty/pcre)

@@ -28,8 +28,6 @@
 #include "eventql/util/http/VFSFileServlet.h"
 #include "eventql/util/cli/CLI.h"
 #include "eventql/util/cli/flagparser.h"
-#include "eventql/dproc/LocalScheduler.h"
-#include "eventql/dproc/DispatchService.h"
 #include "eventql/ConfigDirectory.h"
 #include "eventql/infra/sstable/sstablereader.h"
 #include "eventql/core/TimeWindowPartitioner.h"
