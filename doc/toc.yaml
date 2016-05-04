@@ -499,6 +499,25 @@
           visible_in_menu: true
           visible_in_toc: true
           source: "/api/http/index.html"
+          children:
+            -
+              url: "/drivers-and-api/http/tables/create_table"
+              type: page
+              visible_in_menu: false
+              visible_in_toc: false
+              source: "/api/http/tables/create_table.md"
+            -
+              url: "/drivers-and-api/http/tables/add_field"
+              type: page
+              visible_in_menu: false
+              visible_in_toc: false
+              source: "/api/http/tables/add_field.md"
+            -
+              url: "/drivers-and-api/http/tables/remove_field"
+              type: page
+              visible_in_menu: false
+              visible_in_toc: false
+              source: "/api/http/tables/remove_field.md"
         -
           url: "/drivers-and-api/javascript"
           title: "JavaScript Query API"
