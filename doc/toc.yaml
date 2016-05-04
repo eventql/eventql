@@ -518,6 +518,12 @@
               visible_in_menu: false
               visible_in_toc: false
               source: "/api/http/tables/remove_field.md"
+            -
+              url: "/drivers-and-api/http/tables/insert"
+              type: page
+              visible_in_menu: false
+              visible_in_toc: false
+              source: "/api/http/tables/insert.md"
         -
           url: "/drivers-and-api/javascript"
           title: "JavaScript Query API"
