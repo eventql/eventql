@@ -524,6 +524,18 @@
               visible_in_menu: false
               visible_in_toc: false
               source: "/api/http/tables/insert.md"
+            -
+              url: "/drivers-and-api/http/tables/table"
+              type: page
+              visible_in_menu: false
+              visible_in_toc: false
+              source: "/api/http/tables/table.md"
+            -
+              url: "/drivers-and-api/http/tables/"
+              type: page
+              visible_in_menu: false
+              visible_in_toc: false
+              source: "/api/http/tables/tables.md"
         -
           url: "/drivers-and-api/javascript"
           title: "JavaScript Query API"
