@@ -1,7 +1,7 @@
 POST /api/v1/tables/add_field
 ================
 
-Adds a new field with specified data type to an existing table. </br>
+Add a new field with specified data type to an existing table. </br>
 For more information on the data types supported by EventQL, please refer to
 <a href="/documentation/tables/datatypes">Chapter 2.1.1 </a>
 
@@ -10,6 +10,10 @@ For more information on the data types supported by EventQL, please refer to
   <tr>
     <td>Authentication required?</td>
     <td>Yes</td>
+  </tr>
+  <tr>
+    <td>Content-Type</td>
+    <td>text/plain</td>
   </tr>
 </table>
 

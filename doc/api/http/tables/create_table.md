@@ -10,8 +10,8 @@ Create a new EventQL table or overwrite an existing table.
     <td>Yes</td>
   </tr>
   <tr>
-    <td>Request parameter format</td>
-    <td>JSON</td>
+    <td>Content-Type</td>
+    <td>application/json</td>
   </tr>
 </table>
 
