@@ -4,7 +4,7 @@ POST /api/v1/tables/create_table
 Create a new EventQL table or overwrite an existing table.
 
 ###Resource Information
-<table>
+<table class='http_api create_table'>
   <tr>
     <td>Authentication required?</td>
     <td>Yes</td>
@@ -16,7 +16,7 @@ Create a new EventQL table or overwrite an existing table.
 </table>
 
 ###Parameters:
-<table>
+<table class='http_api create_table'>
   <tr>
     <td>table&#95;name</td>
     <td>name of the table to be created/overwritten</td>
