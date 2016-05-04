@@ -16,7 +16,7 @@
 #include "eventql/AnalyticsApp.h"
 #include "eventql/ReportParams.pb.h"
 #include "eventql/AnalyticsSession.pb.h"
-#include "csql/runtime/runtime.h"
+#include "eventql/sql/runtime/runtime.h"
 #include "eventql/AnalyticsAuth.h"
 #include "eventql/ConfigDirectory.h"
 #include "eventql/core/TSDBService.h"

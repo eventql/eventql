@@ -10,8 +10,8 @@
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/duration.h>
 #include <eventql/util/autoref.h>
-#include <csql/svalue.h>
-#include <csql/SFunction.h>
+#include <eventql/sql/svalue.h>
+#include <eventql/sql/SFunction.h>
 
 using namespace stx;
 

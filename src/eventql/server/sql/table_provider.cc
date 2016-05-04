@@ -12,7 +12,7 @@
 #include <zbase/sql/table_scan.h>
 #include <zbase/core/TSDBService.h>
 #include <zbase/core/RemoteTSDBScan.h>
-#include <csql/CSTableScan.h>
+#include <eventql/sql/CSTableScan.h>
 
 using namespace stx;
 

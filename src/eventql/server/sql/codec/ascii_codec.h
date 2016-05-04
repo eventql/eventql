@@ -9,7 +9,7 @@
  */
 #pragma once
 #include <eventql/util/stdtypes.h>
-#include <csql/runtime/queryplan.h>
+#include <eventql/sql/runtime/queryplan.h>
 
 namespace zbase {
 

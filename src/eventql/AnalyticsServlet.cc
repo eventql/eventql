@@ -27,7 +27,7 @@
 #include "eventql/sql/codec/ascii_codec.h"
 #include "eventql/sql/codec/json_codec.h"
 #include "eventql/sql/codec/json_sse_codec.h"
-#include "csql/runtime/ExecutionStrategy.h"
+#include "eventql/sql/runtime/ExecutionStrategy.h"
 #include "eventql/core/TimeWindowPartitioner.h"
 #include "eventql/core/FixedShardPartitioner.h"
 #include "eventql/HTTPAuth.h"

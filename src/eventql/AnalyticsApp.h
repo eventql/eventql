@@ -24,7 +24,7 @@
 #include "eventql/api/MapReduceService.h"
 #include "eventql/metrics/MetricService.h"
 #include "eventql/AnalyticsSession.pb.h"
-#include "csql/runtime/ExecutionStrategy.h"
+#include "eventql/sql/runtime/ExecutionStrategy.h"
 #include "eventql/ConfigDirectory.h"
 #include <jsapi.h>
 

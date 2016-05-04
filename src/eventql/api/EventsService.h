@@ -17,7 +17,7 @@
 #include "eventql/EventScanResult.h"
 #include "eventql/AnalyticsSession.pb.h"
 #include "eventql/EventScanParams.pb.h"
-#include "csql/runtime/runtime.h"
+#include "eventql/sql/runtime/runtime.h"
 
 using namespace stx;
 

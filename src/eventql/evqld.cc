@@ -49,7 +49,7 @@
 #include "eventql/core/LSMTableIndexCache.h"
 #include "eventql/sql/sql_engine.h"
 #include "eventql/DefaultServlet.h"
-#include "csql/defaults.h"
+#include "eventql/sql/defaults.h"
 #include "eventql/ConfigDirectory.h"
 #include "eventql/StatusServlet.h"
 #include <jsapi.h>

@@ -14,7 +14,7 @@
 #include <eventql/util/duration.h>
 #include <eventql/util/SHA1.h>
 #include <eventql/core/TSDBTableRef.h>
-#include <csql/qtree/SequentialScanNode.h>
+#include <eventql/sql/qtree/SequentialScanNode.h>
 
 using namespace stx;
 

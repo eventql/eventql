@@ -9,7 +9,7 @@
  */
 #pragma once
 #include <eventql/util/stdtypes.h>
-#include <csql/runtime/tablerepository.h>
+#include <eventql/sql/runtime/tablerepository.h>
 #include <zbase/AnalyticsAuth.h>
 #include <zbase/core/TSDBTableRef.h>
 #include <zbase/core/PartitionMap.h>

@@ -8,7 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include <csql/runtime/runtime.h>
+#include <eventql/sql/runtime/runtime.h>
 #include <zbase/core/TSDBService.h>
 #include <zbase/sql/sql_engine.h>
 #include <zbase/sql/table_provider.h>

@@ -10,9 +10,9 @@
 #pragma once
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/json/json.h>
-#include <csql/runtime/queryplan.h>
-#include <csql/runtime/charts/ChartStatement.h>
-#include <csql/runtime/ResultFormat.h>
+#include <eventql/sql/runtime/queryplan.h>
+#include <eventql/sql/runtime/charts/ChartStatement.h>
+#include <eventql/sql/runtime/ResultFormat.h>
 
 namespace zbase {
 

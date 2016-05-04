@@ -14,9 +14,9 @@
 #include <zbase/core/TSDBService.h>
 #include <zbase/core/TimeWindowPartitioner.h>
 #include <zbase/core/FixedShardPartitioner.h>
-#include <csql/defaults.h>
-#include <csql/qtree/CallExpressionNode.h>
-#include <csql/qtree/ColumnReferenceNode.h>
+#include <eventql/sql/defaults.h>
+#include <eventql/sql/qtree/CallExpressionNode.h>
+#include <eventql/sql/qtree/ColumnReferenceNode.h>
 #include <zbase/z1stats.h>
 
 namespace zbase {

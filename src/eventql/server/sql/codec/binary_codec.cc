@@ -8,7 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include "zbase/sql/codec/binary_codec.h"
-#include "csql/svalue.h"
+#include "eventql/sql/svalue.h"
 #include "eventql/util/util/binarymessagereader.h"
 
 using namespace stx;
