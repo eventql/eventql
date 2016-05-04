@@ -1,9 +1,0 @@
-.zbase_table_schema_modal .z-modal-content {
-  height: 350px;
-  overflow: auto;
-  padding: 0;
-}
-
-.zbase_table_schema_modal .z-modal-content table.z-table {
-  font-size: 13px;
-}
