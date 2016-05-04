@@ -3,19 +3,6 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR}/)
 file(GLOB PROTO_FILES *.proto)
 STX_PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${PROTO_FILES})
 
-set(ZBASE_ASSETS_PACK "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/zbase_assets.cc")
-if(EXISTS ${ZBASE_ASSETS_PACK})
-  set(ZBASE_ASSETS_SRCS ${ZBASE_ASSETS_SRCS} ${ZBASE_ASSETS_PACK})
-  set(ZBASE_HAS_ASSET_BUNDLE TRUE)
-else()
-endif()
-
-set(ZBASE_DOCASSETS_PACK "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/zbase_documentation_assets.cc")
-if(EXISTS ${ZBASE_DOCASSETS_PACK})
-  set(ZBASE_ASSETS_SRCS ${ZBASE_ASSETS_SRCS} ${ZBASE_DOCASSETS_PACK})
-else()
-endif()
-
 configure_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/buildconfig.h.cmake
     ${CMAKE_CURRENT_BINARY_DIR}/buildconfig.h)
@@ -38,8 +25,7 @@ add_library(customerdirectory OBJECT
     SessionSchema.cc
     TableDefinition.cc
     AnalyticsAuth.cc
-    ${PROTO_SRCS}
-    ${ZBASE_ASSETS_SRCS})
+    ${PROTO_SRCS})
 
 add_dependencies(customerdirectory coreprotos)
 
@@ -197,8 +183,6 @@ add_executable(zbase
     VTable.cc
     DefaultServlet.cc
     JavaScriptContext.cc
-    WebUIServlet.cc
-    WebDocsServlet.cc
     ${CMAKE_CURRENT_BINARY_DIR}/mapreduce_preludejs.cc
     zbase.cc)
 
@@ -233,22 +217,3 @@ add_dependencies(zmaster customerdirectory)
 
 add_executable(zli zli.cc)
 target_link_libraries(zli chartsql cplot cstable stx-http stx-protobuf stx-json stx-base pcre)
-
-add_executable(zen-csv-upload ${COREPROTO_SRCS} zen-csv-upload.cc)
-target_link_libraries(zen-csv-upload stx-http stx-protobuf stx-json stx-base pcre)
-
-add_executable(zen-logfile-upload ${COREPROTO_SRCS} zen-logfile-upload.cc)
-target_link_libraries(zen-logfile-upload stx-http stx-protobuf stx-json stx-base pcre)
-
-add_executable(zen-statsd-upload ${COREPROTO_SRCS} zen-statsd-upload.cc)
-target_link_libraries(zen-statsd-upload stx-http stx-protobuf stx-json stx-base pcre)
-
-#if(MYSQL_FOUND)
-#  add_executable(zen-mysql-upload
-#      $<TARGET_OBJECTS:stx-mysql>
-#      $<TARGET_OBJECTS:tsdb-client>
-#      ${PROTO_SRCS}
-#      zen-mysql-upload.cc)
-#
-#  target_link_libraries(zen-mysql-upload stx-http stx-protobuf stx-json stx-base ${MYSQL_CLIENT_LIBS} z pcre)
-#endif()

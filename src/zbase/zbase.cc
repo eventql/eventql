@@ -38,8 +38,6 @@
 #include "zbase/util/mdb/MDB.h"
 #include "zbase/util/mdb/MDBUtil.h"
 #include "zbase/AnalyticsServlet.h"
-#include "zbase/WebUIServlet.h"
-#include "zbase/WebDocsServlet.h"
 #include "zbase/ReportFactory.h"
 #include "zbase/AnalyticsApp.h"
 #include "zbase/TableDefinition.h"
@@ -190,10 +188,6 @@ int main(int argc, const char** argv) {
 
   Logger::get()->setMinimumLogLevel(
       strToLogLevel(flags.getString("loglevel")));
-
-#ifndef ZBASE_HAS_ASSET_BUNDLE
-  Assets::setSearchPath(flags.getString("asset_path"));
-#endif
 
   if (flags.isSet("daemonize")) {
     Application::daemonize();
@@ -360,9 +354,6 @@ int main(int argc, const char** argv) {
   dproc::DispatchService dproc;
   dproc.registerApp(analytics_app.get(), local_scheduler.get());
 
-  zbase::WebUIServlet webui_servlet(&auth);
-  zbase::WebDocsServlet webdocs_servlet;
-
   zbase::AnalyticsServlet analytics_servlet(
       analytics_app,
       &dproc,
@@ -382,9 +373,7 @@ int main(int argc, const char** argv) {
 
   zbase::DefaultServlet default_servlet;
 
-  http_router.addRouteByPrefixMatch("/a/", &webui_servlet);
   http_router.addRouteByPrefixMatch("/api/", &analytics_servlet, &tpool);
-  http_router.addRouteByPrefixMatch("/docs/", &webdocs_servlet);
   http_router.addRouteByPrefixMatch("/zstatus", &status_servlet);
   http_router.addRouteByPrefixMatch("/", &default_servlet);
 
