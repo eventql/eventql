@@ -20,69 +20,44 @@
 #include <cstable/CSTableReader.h>
 #include <zbase/core/Table.h>
 #include <zbase/core/PartitionReader.h>
-#include <zbase/core/PartitionMap.h>
 
 using namespace stx;
 
 namespace zbase {
 
-class TableScan : public csql::Task {
+class LSMPartitionSQLScan : public csql::TableExpression {
 public:
 
-  TableScan(
-      csql::Transaction* txn,
+  LSMPartitionSQLScan(
+      csql::Transaction* ctx,
       RefPtr<Table> table,
       RefPtr<PartitionSnapshot> snap,
       RefPtr<csql::SequentialScanNode> stmt,
-      csql::QueryBuilder* runtime,
-      csql::RowSinkFn output);
+      csql::QueryBuilder* runtime);
 
-  //void onInputsReady() override;
+  Vector<String> columnNames() const override;
 
-  int nextRow(csql::SValue* out, int out_len) override;
-  //Option<SHA1Hash> cacheKey() const override;
-  //void setCacheKey(const SHA1Hash& key);
+  size_t numColumns() const override;
+
+  void prepare(csql::ExecutionContext* context) override;
+
+  void execute(
+      csql::ExecutionContext* context,
+      Function<bool (int argc, const csql::SValue* argv)> fn) override;
+
+  Option<SHA1Hash> cacheKey() const override;
+  void setCacheKey(const SHA1Hash& key);
 
 protected:
-
-  void scanLSMTable();
-  void scanStaticTable();
-
-  csql::Transaction* txn_;
+  csql::Transaction* ctx_;
   RefPtr<Table> table_;
   RefPtr<PartitionSnapshot> snap_;
   RefPtr<csql::SequentialScanNode> stmt_;
   csql::QueryBuilder* runtime_;
-  csql::RowSinkFn output_;
+  Vector<String> column_names_;
   Option<SHA1Hash> cache_key_;
   Set<SHA1Hash> id_set_;
 };
 
-class EmptyTableScan : public csql::Task {
-public:
-  int nextRow(csql::SValue* out, int out_len) override;
-};
-
-class TableScanFactory : public csql::TaskFactory {
-public:
-
-  TableScanFactory(
-      PartitionMap* pmap,
-      String keyspace,
-      String table,
-      SHA1Hash partition,
-      RefPtr<csql::SequentialScanNode> stmt);
-
-  RefPtr<csql::Task> build(
-      csql::Transaction* txn,
-      csql::RowSinkFn output) const override;
-
-protected:
-  PartitionMap* pmap_;
-  String keyspace_;
-  String table_;
-  SHA1Hash partition_;
-  RefPtr<csql::SequentialScanNode> stmt_;
-};
 
 } // namespace zbase

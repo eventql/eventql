@@ -29,12 +29,13 @@ public:
       const String& tsdb_namespace,
       PartitionMap* partition_map,
       ReplicationScheme* replication_scheme,
+      CompactionWorker* cstable_index,
       AnalyticsAuth* auth);
 
-  csql::TaskIDList buildSequentialScan(
-      csql::Transaction* txn,
-      RefPtr<csql::SequentialScanNode> seqscan,
-      csql::TaskDAG* tasks) const override;
+  Option<ScopedPtr<csql::TableExpression>> buildSequentialScan(
+      csql::Transaction* ctx,
+      RefPtr<csql::SequentialScanNode> node,
+      csql::QueryBuilder* runtime) const override;
 
   void listTables(
       Function<void (const csql::TableInfo& table)> fn) const override;
@@ -43,11 +44,24 @@ public:
 
 protected:
 
+  Option<ScopedPtr<csql::TableExpression>> buildLocalSequentialScan(
+      csql::Transaction* ctx,
+      RefPtr<csql::SequentialScanNode> node,
+      const TSDBTableRef& table_ref,
+      csql::QueryBuilder* runtime) const;
+
+  Option<ScopedPtr<csql::TableExpression>> buildRemoteSequentialScan(
+      csql::Transaction* ctx,
+      RefPtr<csql::SequentialScanNode> node,
+      const TSDBTableRef& table_ref,
+      csql::QueryBuilder* runtime) const;
+
   csql::TableInfo tableInfoForTable(const TSDBTableInfo& table) const;
 
   String tsdb_namespace_;
   PartitionMap* partition_map_;
   ReplicationScheme* replication_scheme_;
+  CompactionWorker* cstable_index_;
   AnalyticsAuth* auth_;
 };
 

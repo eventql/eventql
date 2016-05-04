@@ -19,7 +19,7 @@
 #include <zbase/core/TSDBTableScanSpec.pb.h>
 #include "zbase/core/TimeWindowPartitioner.h"
 #include <zbase/core/CompactionWorker.h>
-#include "zbase/sql/sql_engine.h"
+#include "zbase/core/SQLEngine.h"
 #include "zbase/SessionSchema.h"
 #include "stx/protobuf/DynamicMessage.h"
 #include "stx/protobuf/MessageEncoder.h"
@@ -104,6 +104,7 @@ RefPtr<csql::ExecutionStrategy> AnalyticsApp::getExecutionStrategy(
       sql_,
       partition_map_,
       replication_scheme_,
+      cstable_index_,
       auth_,
       customer);
 }
@@ -113,6 +114,7 @@ RefPtr<csql::TableProvider> AnalyticsApp::getTableProvider(
   return zbase::SQLEngine::tableProviderForNamespace(
         partition_map_,
         replication_scheme_,
+        cstable_index_,
         auth_,
         customer);
 }

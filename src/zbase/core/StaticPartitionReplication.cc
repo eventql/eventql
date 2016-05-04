@@ -86,8 +86,9 @@ void StaticPartitionReplication::replicateTo(
   }
 
   auto reader = partition_->getReader();
-  auto cstable_file = FileUtil::joinPaths(snap_->base_path, "_cstable");
-  if (!FileUtil::exists(cstable_file)) {
+  auto cstable_file = reader->cstableFilename();
+
+  if (cstable_file.isEmpty()) {
     return;
   }
 
@@ -102,7 +103,7 @@ void StaticPartitionReplication::replicateTo(
 
   http::HTTPRequest req(http::HTTPMessage::M_POST, uri.pathAndQuery());
   req.addHeader("Host", uri.hostAndPort());
-  req.addBody(FileUtil::read(cstable_file)); // FIXME use FileUpload
+  req.addBody(FileUtil::read(cstable_file.get())); // FIXME use FileUpload
 
   auto res = http_->executeRequest(req);
   res.wait();
