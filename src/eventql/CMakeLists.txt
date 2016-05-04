@@ -132,7 +132,7 @@ add_custom_command(
 #target_link_libraries(test-javascriptcontext chartsql cplot sstable cstable stx-http stx-protobuf stx-json stx-base pcre z)
 #target_link_libraries(test-javascriptcontext -L${CMAKE_BINARY_DIR}/deps/3rdparty/mozjs/dist/lib -ljs_static)
 
-add_executable(zbase
+add_executable(evqld
     $<TARGET_OBJECTS:stx-mdb>
     $<TARGET_OBJECTS:dxa-docdb>
     $<TARGET_OBJECTS:tsdb-server>
@@ -184,13 +184,13 @@ add_executable(zbase
     DefaultServlet.cc
     JavaScriptContext.cc
     ${CMAKE_CURRENT_BINARY_DIR}/mapreduce_preludejs.cc
-    zbase.cc)
+    evqld.cc)
 
-target_link_libraries(zbase chartsql cplot sstable cstable stx-http stx-protobuf stx-json stx-base stx-rpc js_static.a z pcre)
-target_link_libraries(zbase -L${CMAKE_BINARY_DIR}/deps/3rdparty/mozjs/dist/lib -ljs_static)
-add_dependencies(zbase customerdirectory mozjs_build)
+target_link_libraries(evqld chartsql cplot sstable cstable stx-http stx-protobuf stx-json stx-base stx-rpc js_static.a z pcre)
+target_link_libraries(evqld -L${CMAKE_BINARY_DIR}/deps/3rdparty/mozjs/dist/lib -ljs_static)
+add_dependencies(evqld customerdirectory mozjs_build)
 
-add_executable(zbasectl
+add_executable(evqlctl
     $<TARGET_OBJECTS:stx-mdb>
     $<TARGET_OBJECTS:tsdb-server>
     $<TARGET_OBJECTS:coreprotos>
@@ -198,10 +198,10 @@ add_executable(zbasectl
     #$<TARGET_OBJECTS:fnord-afx>
     $<TARGET_OBJECTS:dproc>
     #sstable/SSTableServlet.cc
-    zbasectl.cc)
+    evqlctl.cc)
 
-target_link_libraries(zbasectl chartsql cplot sstable cstable stx-http stx-protobuf stx-json stx-base stx-rpc pcre)
-add_dependencies(zbasectl customerdirectory)
+target_link_libraries(evqlctl chartsql cplot sstable cstable stx-http stx-protobuf stx-json stx-base stx-rpc pcre)
+add_dependencies(evqlctl customerdirectory)
 
 add_executable(zmaster
     $<TARGET_OBJECTS:stx-mdb>
@@ -212,8 +212,8 @@ add_executable(zmaster
     master/MasterServlet.cc
     zmaster.cc)
 
+add_executable(evql evql.cc)
+target_link_libraries(evql chartsql cplot cstable stx-http stx-protobuf stx-json stx-base pcre)
+
 target_link_libraries(zmaster chartsql cplot sstable cstable stx-http stx-protobuf stx-json stx-json stx-base pcre)
 add_dependencies(zmaster customerdirectory)
-
-add_executable(zli zli.cc)
-target_link_libraries(zli chartsql cplot cstable stx-http stx-protobuf stx-json stx-base pcre)
