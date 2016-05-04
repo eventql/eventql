@@ -4,77 +4,62 @@
 <h3>Tables</h3>
 <table class="api_reference http" cellspacing=0 border=0>
   <tr>
-    <td><span class="tag">GET</span></td>
+    <td><span class="tag">POST</span></td>
+    <td>/api/v1/tables/upload_table</td>
+    <td>Upload a table</td>
+  </tr>
+  <tr>
+    <td><span class="tag">POST</span></td>
+    <td><a href="tables/create_table">/api/v1/tables/create_table</a></td>
+    <td>Create a new table (or overwrite an existing table).</td>
+  </tr>
+  <tr>
+    <td><span class="tag">POST</span></td>
+    <td><a href="tables/add_field">/api/v1/tables/add_field</a></td>
+    <td>Add a field to an existing table.</td>
+  </tr>
+  <tr>
+    <td><span class="tag">POST</span></td>
+    <td><a href="tables/remove_field">/api/v1/tables/remove_field</a></td>
+    <td>Remove a field from an existing table.</td>
+  </tr>
+  <tr>
+    <td><span class="tag">POST</span></td>
     <td>/api/v1/tables/insert</td>
     <td>Insert or update record(s)</td>
   </tr>
   <tr>
     <td><span class="tag">GET</span></td>
-    <td>/api/v1/tables/insert</td>
-    <td>Insert or update record(s)</td>
+    <td>/api/v1/tables</td>
+    <td>List existing tables.</td>
   </tr>
   <tr>
     <td><span class="tag">GET</span></td>
-    <td>/api/v1/tables/insert</td>
-    <td>Insert or update record(s)</td>
-  </tr>
-  <tr>
-    <td><span class="tag">GET</span></td>
-    <td>/api/v1/tables/insert</td>
-    <td>Insert or update record(s)</td>
-  </tr>
-  <tr>
-    <td><span class="tag">GET</span></td>
-    <td>/api/v1/tables/insert</td>
-    <td>Insert or update record(s)</td>
-  </tr>
-  <tr>
-    <td><span class="tag">GET</span></td>
-    <td>/api/v1/tables/insert</td>
-    <td>Insert or update record(s)</td>
-  </tr>
-  <tr>
-    <td><span class="tag">GET</span></td>
-    <td>/api/v1/tables/insert</td>
-    <td>Insert or update record(s)</td>
+    <td>/api/v1/tables/[table]</td>
+    <td>Obtain information about the table and its columns</td>
   </tr>
 </table>
 
-<h3>Tables</h3>
+<h3>SQL</h3>
 <table class="api_reference http" cellspacing=0 border=0>
   <tr>
     <td><span class="tag">GET</span></td>
-    <td>/api/v1/tables/insert</td>
+    <td>/api/v1/sql</td>
+    <td>Execute SQL</td>
+  </tr>
+  <tr>
+    <td><span class="tag">GET</span></td>
+    <td>/api/v1/sql_stream</td>
+    <td>Execute SQL using Server-Sent Events</td>
+  </tr>
+  <tr>
+    <td><span class="tag">POST</span></td>
+    <td>/api/v1/sql/aggregate_partition</td>
     <td>Insert or update record(s)</td>
   </tr>
   <tr>
     <td><span class="tag">GET</span></td>
-    <td>/api/v1/tables/insert</td>
-    <td>Insert or update record(s)</td>
-  </tr>
-  <tr>
-    <td><span class="tag">GET</span></td>
-    <td>/api/v1/tables/insert</td>
-    <td>Insert or update record(s)</td>
-  </tr>
-  <tr>
-    <td><span class="tag">GET</span></td>
-    <td>/api/v1/tables/insert</td>
-    <td>Insert or update record(s)</td>
-  </tr>
-  <tr>
-    <td><span class="tag">GET</span></td>
-    <td>/api/v1/tables/insert</td>
-    <td>Insert or update record(s)</td>
-  </tr>
-  <tr>
-    <td><span class="tag">GET</span></td>
-    <td>/api/v1/tables/insert</td>
-    <td>Insert or update record(s)</td>
-  </tr>
-  <tr>
-    <td><span class="tag">GET</span></td>
-    <td>/api/v1/tables/insert</td>
+    <td>/api/v1/sql/scan_partition</td>
     <td>Insert or update record(s)</td>
   </tr>
 </table>
