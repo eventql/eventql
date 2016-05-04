@@ -98,7 +98,6 @@ add_executable(test-lsmtableindex
 
 target_link_libraries(test-lsmtableindex chartsql cplot sstable cstable stx-http stx-protobuf stx-json stx-base pcre)
 
-add_subdirectory(util)
 add_subdirectory(util/mysql)
 add_subdirectory(util/mdb)
 
