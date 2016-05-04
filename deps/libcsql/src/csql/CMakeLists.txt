@@ -5,6 +5,9 @@
 # the terms of the GNU General Public License v3.0. You should have received a
 # copy of the GNU General Public License along with this program. If not, see
 # <http://www.gnu.org/licenses/>.
+file(GLOB PROTO_FILES **/*.proto)
+STX_PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${PROTO_FILES})
+
 add_library(chartsql STATIC
     svalue.cc
     SFunction.cc
@@ -44,6 +47,7 @@ add_library(chartsql STATIC
     qtree/TableExpressionNode.cc
     qtree/SelectListNode.cc
     qtree/GroupByNode.cc
+    qtree/GroupByMergeNode.cc
     qtree/UnionNode.cc
     qtree/LimitNode.cc
     qtree/OrderByNode.cc
@@ -53,6 +57,7 @@ add_library(chartsql STATIC
     qtree/DescribeTableNode.cc
     qtree/DrawStatementNode.cc
     qtree/ChartStatementNode.cc
+    qtree/RemoteAggregateNode.cc
     runtime/ResultFormat.cc
     runtime/ValueExpression.cc
     runtime/ScratchMemory.cc
@@ -60,10 +65,13 @@ add_library(chartsql STATIC
     runtime/symboltable.cc
     runtime/queryplannode.cc
     runtime/ValueExpressionBuilder.cc
+    runtime/TableExpressionBuilder.cc
     runtime/defaultruntime.cc
+    runtime/importstatement.cc
     runtime/tablerepository.cc
     runtime/queryplanbuilder.cc
     runtime/queryplan.cc
+    runtime/tablescan.cc
     runtime/vm.cc
     runtime/compiler.cc
     runtime/ExecutionContext.cc
@@ -78,20 +86,14 @@ add_library(chartsql STATIC
     runtime/charts/linechartbuilder.cc
     runtime/charts/pointchartbuilder.cc
     runtime/charts/seriesadapter.cc
-    result_cursor.cc
-    schedulers/local_scheduler.cc
+    runtime/schedulers/LocalScheduler.cc
     tasks/Task.cc
     tasks/TaskFactory.cc
     tasks/TaskDAG.cc
     tasks/orderby.cc
     tasks/groupby.cc
     tasks/subquery.cc
-    tasks/select.cc
-    tasks/limit.cc
-    tasks/nested_loop_join.cc
-    tasks/show_tables.cc
-    tasks/describe_table.cc
-    tasks/tablescan.cc
+    ${PROTO_SRCS}
     defaults.cc)
 
 add_dependencies(chartsql stx-protobuf)

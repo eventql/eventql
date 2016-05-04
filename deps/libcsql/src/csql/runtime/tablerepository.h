@@ -16,6 +16,7 @@
 #include <csql/TableInfo.h>
 
 namespace csql {
+class ImportStatement;
 class QueryBuilder;
 class Transaction;
 
@@ -45,6 +46,10 @@ public:
   void import(
       const std::vector<std::string>& tables,
       const std::string& source_uri,
+      const std::vector<std::unique_ptr<Backend>>& backends);
+
+  void import(
+      const ImportStatement& import_stmt,
       const std::vector<std::unique_ptr<Backend>>& backends);
 
   TaskIDList buildSequentialScan(

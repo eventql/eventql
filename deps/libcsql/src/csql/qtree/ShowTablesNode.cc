@@ -8,7 +8,6 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <csql/qtree/ShowTablesNode.h>
-#include <csql/tasks/show_tables.h>
 
 using namespace stx;
 
@@ -43,10 +42,7 @@ Vector<QualifiedColumn> ShowTablesNode::allColumns() const {
 }
 
 Vector<TaskID> ShowTablesNode::build(Transaction* txn, TaskDAG* tree) const {
-  TaskIDList output;
-  auto out_task = mkRef(new TaskDAGNode(new ShowTablesFactory()));
-  output.emplace_back(tree->addTask(out_task));
-  return output;
+  RAISE(kNotYetImplementedError, "not yet implemented");
 }
 
 size_t ShowTablesNode::getColumnIndex(

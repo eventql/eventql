@@ -28,16 +28,21 @@ public:
       Transaction* ctx,
       Vector<SortExpr> sort_specs,
       size_t num_columns,
-      HashMap<TaskID, ScopedPtr<ResultCursor>> input);
+      RowSinkFn output);
 
-  bool nextRow(SValue* out, int out_len) override;
+  bool onInputRow(
+      const TaskID& input_id,
+      const SValue* row,
+      int row_len) override;
+
+  void onInputsReady() override;
 
 protected:
   Transaction* ctx_;
   Vector<SortExpr> sort_specs_;
   size_t num_columns_;
   Vector<Vector<SValue>> rows_;
-  ScopedPtr<ResultCursorList> input_;
+  RowSinkFn output_;
 };
 
 class OrderByFactory : public TaskFactory {
@@ -54,7 +59,7 @@ public:
 
   RefPtr<Task> build(
       Transaction* txn,
-      HashMap<TaskID, ScopedPtr<ResultCursor>> input) const override;
+      RowSinkFn output) const override;
 
 protected:
   Vector<SortExpr> sort_specs_;

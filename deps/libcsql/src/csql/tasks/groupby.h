@@ -22,16 +22,14 @@ public:
       Transaction* txn,
       Vector<ValueExpression> select_expressions,
       Vector<ValueExpression> group_expressions,
-      HashMap<TaskID, ScopedPtr<ResultCursor>> input);
+      RowSinkFn output);
 
-  bool nextRow(SValue* out, int out_len) override;
+  bool onInputRow(
+      const TaskID& input_id,
+      const SValue* row,
+      int row_len) override;
 
-  //bool onInputRow(
-  //    const TaskID& input_id,
-  //    const SValue* row,
-  //    int row_len) override;
-
-  //void onInputsReady() override;
+  void onInputsReady() override;
 
 protected:
 
@@ -40,7 +38,7 @@ protected:
   Transaction* txn_;
   Vector<ValueExpression> select_exprs_;
   Vector<ValueExpression> group_exprs_;
-  ScopedPtr<ResultCursorList> input_;
+  RowSinkFn output_;
   HashMap<String, Vector<VM::Instance>> groups_;
   ScratchMemory scratch_;
 };
@@ -54,7 +52,7 @@ public:
 
   RefPtr<Task> build(
       Transaction* txn,
-      HashMap<TaskID, ScopedPtr<ResultCursor>> input) const override;
+      RowSinkFn output) const override;
 
 protected:
   Vector<RefPtr<SelectListNode>> select_exprs_;

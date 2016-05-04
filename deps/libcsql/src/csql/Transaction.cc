@@ -37,10 +37,6 @@ void Transaction::setTableProvider(RefPtr<TableProvider> provider) {
 }
 
 RefPtr<TableProvider> Transaction::getTableProvider() const {
-  if (table_provider_.get() == nullptr) {
-    RAISE(kRuntimeError, "no table provider configured");
-  }
-
   return table_provider_;
 }
 

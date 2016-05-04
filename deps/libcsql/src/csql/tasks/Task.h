@@ -30,15 +30,12 @@ public:
     return None<SHA1Hash>();
   }
 
-  virtual void run() {}
-  virtual bool nextRow(SValue* out, int out_len) = 0;
+  virtual void onInputsReady() {}
 
-  //virtual void onInputsReady() {}
-
-  //virtual bool onInputRow(
-  //    const TaskID& input_id,
-  //    const SValue* row,
-  //    int row_len) { return true; };
+  virtual bool onInputRow(
+      const TaskID& input_id,
+      const SValue* row,
+      int row_len) { return true; };
 
 };
 

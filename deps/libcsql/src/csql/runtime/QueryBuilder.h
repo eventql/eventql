@@ -11,6 +11,7 @@
 #include <stx/stdtypes.h>
 #include <csql/qtree/ChartStatementNode.h>
 #include <csql/runtime/ValueExpressionBuilder.h>
+#include <csql/runtime/TableExpressionBuilder.h>
 #include <csql/runtime/charts/ChartStatement.h>
 #include <csql/runtime/ValueExpression.h>
 
@@ -22,11 +23,18 @@ class QueryBuilder : public RefCounted {
 public:
 
   QueryBuilder(
-      RefPtr<ValueExpressionBuilder> scalar_exp_builder);
+      RefPtr<ValueExpressionBuilder> scalar_exp_builder,
+      RefPtr<TableExpressionBuilder> table_exp_builder);
 
   ValueExpression buildValueExpression(
       Transaction* ctx,
       RefPtr<ValueExpressionNode> expression);
+
+  ScopedPtr<Task> buildTableExpression(
+      Transaction* ctx,
+      RefPtr<TableExpressionNode> expression,
+      RefPtr<TableProvider> tables,
+      Runtime* runtime);
 
   ScopedPtr<ChartStatement> buildChartStatement(
       Transaction* ctx,
@@ -36,6 +44,7 @@ public:
 
 protected:
   RefPtr<ValueExpressionBuilder> scalar_exp_builder_;
+  RefPtr<TableExpressionBuilder> table_exp_builder_;
 };
 
 } // namespace csql

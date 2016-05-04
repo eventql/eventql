@@ -13,8 +13,6 @@
 #include <stx/SHA1.h>
 #include <csql/tasks/Task.h>
 #include <csql/runtime/RowSink.h>
-#include <csql/result_cursor.h>
-
 using namespace stx;
 
 namespace csql {
@@ -25,7 +23,7 @@ public:
 
   virtual RefPtr<Task> build(
       Transaction* txn,
-      HashMap<TaskID, ScopedPtr<ResultCursor>> input) const = 0;
+      RowSinkFn output) const = 0;
 
 };
 
@@ -36,13 +34,13 @@ public:
   typedef
       Function<RefPtr<Task> (
           Transaction* txn,
-          HashMap<TaskID, ScopedPtr<ResultCursor>> input)> FactoryFn;
+          RowSinkFn output)> FactoryFn;
 
   SimpleTableExpressionFactory(FactoryFn factory_fn);
 
   RefPtr<Task> build(
       Transaction* txn,
-      HashMap<TaskID, ScopedPtr<ResultCursor>> input) const override;
+      RowSinkFn output) const override;
 
 protected:
   FactoryFn factory_fn_;

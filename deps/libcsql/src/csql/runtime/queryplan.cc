@@ -26,40 +26,27 @@ QueryPlan::QueryPlan(
   }
 }
 
-ScopedPtr<ResultCursor> QueryPlan::execute(size_t stmt_idx) {
+void QueryPlan::execute() {
   if (!scheduler_) {
     RAISE(kRuntimeError, "QueryPlan has no scheduler");
   }
 
-  if (stmt_idx >= qtrees_.size()) {
-    RAISE(kIndexError, "invalid statement index");
-  }
-
   auto sched = scheduler_(txn_, &tasks_, &callbacks_);
-  Set<TaskID> task_ids;
-  for (const auto& task_id : statement_tasks_[stmt_idx]) {
-    task_ids.emplace(task_id);
-  }
-  return sched->execute(task_ids);
-}
-
-void QueryPlan::execute(size_t stmt_idx, ResultList* result_list) {
-  if (stmt_idx >= qtrees_.size()) {
-    RAISE(kIndexError, "invalid statement index");
-  }
-
-  auto result_columns = getStatementOutputColumns(stmt_idx);
-  auto result_cursor = execute(stmt_idx);
-
-  result_list->addHeader(result_columns);
-  Vector<SValue> tmp(result_columns.size());
-  while (result_cursor->next(tmp.data(), tmp.size())) {
-    result_list->addRow(tmp.data(), tmp.size());
-  }
+  sched->execute();
 }
 
 void QueryPlan::setScheduler(SchedulerFactory scheduler) {
   scheduler_ = scheduler;
+}
+
+void QueryPlan::onOutputRow(size_t stmt_idx, RowSinkFn fn) {
+  if (stmt_idx >= qtrees_.size()) {
+    RAISE(kIndexError, "invalid statement index");
+  }
+
+  for (const auto& task_id : statement_tasks_[stmt_idx]) {
+    callbacks_.on_row[task_id].emplace_back(fn);
+  }
 }
 
 const Vector<String>& QueryPlan::getStatementOutputColumns(size_t stmt_idx) {
@@ -86,15 +73,16 @@ RefPtr<QueryTreeNode> QueryPlan::getStatementQTree(size_t stmt_idx) const {
   return qtrees_[stmt_idx];
 }
 
-//void QueryPlan::storeResults(size_t stmt_idx, ResultList* result_list) {
-//
-//  onOutputRow(
-//      stmt_idx,
-//      std::bind(
-//          &ResultList::addRow,
-//          result_list,
-//          std::placeholders::_1,
-//          std::placeholders::_2));
-//}
+void QueryPlan::storeResults(size_t stmt_idx, ResultList* result_list) {
+  result_list->addHeader(getStatementOutputColumns(stmt_idx));
+
+  onOutputRow(
+      stmt_idx,
+      std::bind(
+          &ResultList::addRow,
+          result_list,
+          std::placeholders::_1,
+          std::placeholders::_2));
+}
 
 }

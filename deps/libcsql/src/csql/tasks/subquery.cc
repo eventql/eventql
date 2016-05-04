@@ -16,35 +16,31 @@ Subquery::Subquery(
     Transaction* txn,
     Vector<ValueExpression> select_expressions,
     Option<ValueExpression> where_expr,
-    HashMap<TaskID, ScopedPtr<ResultCursor>> input) :
+    RowSinkFn output) :
     txn_(txn),
     select_exprs_(std::move(select_expressions)),
     where_expr_(std::move(where_expr)),
-    input_(new ResultCursorList(std::move(input))) {}
+    output_(output) {}
 
-bool Subquery::nextRow(SValue* out, int out_len) {
-  return false;
+bool Subquery::onInputRow(
+    const TaskID& input_id,
+    const SValue* row,
+    int row_len) {
+  if (!where_expr_.isEmpty()) {
+    SValue pred;
+    VM::evaluate(txn_, where_expr_.get().program(), row_len, row, &pred);
+    if (!pred.getBool()) {
+      return true;
+    }
+  }
+
+  Vector<SValue> out_row(select_exprs_.size(), SValue{});
+  for (int i = 0; i < select_exprs_.size(); ++i) {
+    VM::evaluate(txn_, select_exprs_[i].program(), row_len, row, &out_row[i]);
+  }
+
+  return output_(out_row.data(), out_row.size());
 }
-
-//bool Subquery::onInputRow(
-//    const TaskID& input_id,
-//    const SValue* row,
-//    int row_len) {
-//  if (!where_expr_.isEmpty()) {
-//    SValue pred;
-//    VM::evaluate(txn_, where_expr_.get().program(), row_len, row, &pred);
-//    if (!pred.getBool()) {
-//      return true;
-//    }
-//  }
-//
-//  Vector<SValue> out_row(select_exprs_.size(), SValue{});
-//  for (int i = 0; i < select_exprs_.size(); ++i) {
-//    VM::evaluate(txn_, select_exprs_[i].program(), row_len, row, &out_row[i]);
-//  }
-//
-//  return input_(out_row.data(), out_row.size());
-//}
 
 SubqueryFactory::SubqueryFactory(
     Vector<RefPtr<SelectListNode>> select_exprs,
@@ -54,7 +50,7 @@ SubqueryFactory::SubqueryFactory(
 
 RefPtr<Task> SubqueryFactory::build(
     Transaction* txn,
-    HashMap<TaskID, ScopedPtr<ResultCursor>> input) const {
+    RowSinkFn output) const {
   Vector<ValueExpression> select_expressions;
   Option<ValueExpression> where_expr;
 
@@ -74,7 +70,7 @@ RefPtr<Task> SubqueryFactory::build(
       txn,
       std::move(select_expressions),
       std::move(where_expr),
-      std::move(input));
+      output);
 }
 
 }

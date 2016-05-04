@@ -32,18 +32,19 @@ TaskIDList CSTableScanProvider::buildSequentialScan(
   auto self = mkRef(const_cast<CSTableScanProvider*>(this));
   auto task_factory = [self, node] (
       Transaction* txn,
-      HashMap<TaskID, ScopedPtr<ResultCursor>> input) -> RefPtr<Task> {
+      RowSinkFn output) -> RefPtr<Task> {
     return new CSTableScan(
         txn,
         node,
         self->cstable_file_,
-        txn->getRuntime()->queryBuilder().get());
+        txn->getRuntime()->queryBuilder().get(),
+        output);
   };
 
   auto task = new TaskDAGNode(new SimpleTableExpressionFactory(task_factory));
-  TaskIDList input;
-  input.emplace_back(tasks->addTask(task));
-  return input;
+  TaskIDList output;
+  output.emplace_back(tasks->addTask(task));
+  return output;
 }
 
 //Option<ScopedPtr<Task>>
