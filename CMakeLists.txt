@@ -130,5 +130,3 @@ set(HAVE_CSQL true)
 
 add_subdirectory(src/eventql)
 add_subdirectory(src/eventql/master)
-add_subdirectory(src/eventql/docdb)
-add_subdirectory(src/eventql/dproc)

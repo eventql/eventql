@@ -15,7 +15,6 @@
 #include "eventql/api/LogfileService.h"
 #include "eventql/api/EventsService.h"
 #include "eventql/api/MapReduceService.h"
-#include "eventql/metrics/MetricService.h"
 #include "eventql/AnalyticsSession.pb.h"
 #include "eventql/sql/runtime/ExecutionStrategy.h"
 #include "eventql/ConfigDirectory.h"
@@ -57,7 +56,6 @@ public:
   LogfileService* logfileService();
   EventsService* eventsService();
   MapReduceService* mapreduceService();
-  MetricService* metricService();
 
 protected:
 
@@ -76,7 +74,6 @@ protected:
   LogfileService logfile_service_;
   EventsService events_service_;
   MapReduceService mapreduce_service_;
-  MetricService metric_service_;
 };
 
 zbase::TableDefinition tableDefinitionToTableConfig(const TableDefinition& tbl);

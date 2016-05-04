@@ -62,13 +62,6 @@ AnalyticsApp::AnalyticsApp(
         partition_map,
         replication_scheme,
         js_runtime,
-        cachedir),
-    metric_service_(
-        cdb,
-        auth,
-        tsdb_node,
-        partition_map,
-        replication_scheme,
         cachedir) {
   cdb_->onCustomerConfigChange(
       std::bind(
@@ -142,60 +135,7 @@ void AnalyticsApp::insertMetric(
     const String& customer,
     const String& metric,
     const UnixTime& time,
-    const String& value) {
-  RefPtr<zbase::Table> table;
-  auto table_opt = partition_map_->findTable(customer, metric);
-  if (table_opt.isEmpty()) {
-    auto schema = msg::MessageSchema(
-        "generic_metric",
-        Vector<msg::MessageSchemaField> {
-            msg::MessageSchemaField(
-                1,
-                "time",
-                msg::FieldType::DATETIME,
-                0,
-                false,
-                true),
-            msg::MessageSchemaField(
-                2,
-                "value",
-                msg::FieldType::DOUBLE,
-                0,
-                false,
-                true),
-        });
-
-    TableDefinition td;
-    td.set_customer(customer);
-    td.set_table_name(metric);
-    auto tblcfg = td.mutable_config();
-    tblcfg->set_schema(schema.encode().toString());
-    tblcfg->set_partitioner(zbase::TBL_PARTITION_TIMEWINDOW);
-    tblcfg->set_storage(zbase::TBL_STORAGE_COLSM);
-    createTable(td);
-    table = partition_map_->findTable(customer, metric).get();
-  } else {
-    table = table_opt.get();
-  }
-
-  msg::DynamicMessage smpl(table->schema());
-  smpl.addField("time", StringUtil::toString(time));
-  smpl.addField("value", value);
-
-  Buffer smpl_buf;
-  msg::MessageEncoder::encode(smpl.data(), *smpl.schema(), &smpl_buf);
-
-  tsdb_node_->insertRecord(
-      customer,
-      metric,
-      zbase::TimeWindowPartitioner::partitionKeyFor(
-          metric,
-          time,
-          table->partitionSize()),
-      Random::singleton()->sha1(),
-      WallClock::unixMicros(),
-      smpl_buf);
-}
+    const String& value) {}
 
 LogfileService* AnalyticsApp::logfileService() {
   return &logfile_service_;
@@ -207,10 +147,6 @@ EventsService* AnalyticsApp::eventsService() {
 
 MapReduceService* AnalyticsApp::mapreduceService() {
   return &mapreduce_service_;
-}
-
-MetricService* AnalyticsApp::metricService() {
-  return &metric_service_;
 }
 
 } // namespace zbase
