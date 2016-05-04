@@ -74,6 +74,17 @@ size_t UnionNode::getColumnIndex(
   return idx;
 }
 
+Vector<TaskID> UnionNode::build(Transaction* txn, TaskDAG* tree) const {
+  TaskIDList output;
+  for (const auto& tbl : tables_) {
+    auto tbl_tasks = tbl.asInstanceOf<TableExpressionNode>()->build(txn, tree);
+    for (const auto& task : tbl_tasks) {
+      output.emplace_back(task);
+    }
+  }
+  return output;
+}
+
 RefPtr<QueryTreeNode> UnionNode::deepCopy() const {
   return new UnionNode(*this);
 }

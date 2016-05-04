@@ -32,7 +32,6 @@ public:
   int getColumnIndex(const std::string& column_name) const;
 
   void setTarget(RowSink* target);
-  void finish() override;
 
 protected:
   bool emitRow(SValue* row, int row_len);

@@ -30,20 +30,24 @@ bool ScanConstraint::operator!=(const ScanConstraint& other) const {
 
 SequentialScanNode::SequentialScanNode(
     const TableInfo& table_info,
+    RefPtr<TableProvider> table_provider,
     Vector<RefPtr<SelectListNode>> select_list,
     Option<RefPtr<ValueExpressionNode>> where_expr) :
     SequentialScanNode(
         table_info,
+        table_provider,
         select_list,
         where_expr,
         AggregationStrategy::NO_AGGREGATION) {}
 
 SequentialScanNode::SequentialScanNode(
     const TableInfo& table_info,
+    RefPtr<TableProvider> table_provider,
     Vector<RefPtr<SelectListNode>> select_list,
     Option<RefPtr<ValueExpressionNode>> where_expr,
     AggregationStrategy aggr_strategy) :
     table_name_(table_info.table_name),
+    table_provider_(table_provider),
     select_list_(select_list),
     where_expr_(where_expr),
     aggr_strategy_(aggr_strategy) {
@@ -218,6 +222,15 @@ AggregationStrategy SequentialScanNode::aggregationStrategy() const {
 
 void SequentialScanNode::setAggregationStrategy(AggregationStrategy strategy) {
   aggr_strategy_ = strategy;
+}
+
+Vector<TaskID> SequentialScanNode::build(
+    Transaction* txn,
+    TaskDAG* tree) const {
+  return table_provider_->buildSequentialScan(
+      txn,
+      mkRef(const_cast<SequentialScanNode*>(this)),
+      tree);
 }
 
 RefPtr<QueryTreeNode> SequentialScanNode::deepCopy() const {

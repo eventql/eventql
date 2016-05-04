@@ -12,7 +12,7 @@
 #include <stx/exception.h>
 #include <csql/parser/astnode.h>
 #include <csql/backends/csv/csvtableref.h>
-#include <csql/runtime/tablescan.h>
+#include <csql/tasks/tablescan.h>
 #include <csql/svalue.h>
 
 namespace csql {

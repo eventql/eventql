@@ -13,21 +13,69 @@
 namespace csql {
 
 QueryPlan::QueryPlan(
-    Vector<RefPtr<QueryTreeNode>> qtrees,
-    Vector<ScopedPtr<Statement>> statements) :
-    qtrees_(qtrees),
-    statements_(std::move(statements)) {}
+    Transaction* txn,
+    Vector<RefPtr<QueryTreeNode>> qtrees) :
+    txn_(txn),
+    qtrees_(qtrees) {
+  for (const auto& qtree : qtrees_) {
+    statement_tasks_.emplace_back(
+        qtree.asInstanceOf<TableExpressionNode>()->build(txn, &tasks_));
+
+    statement_columns_.emplace_back(
+        qtree.asInstanceOf<TableExpressionNode>()->outputColumns());
+  }
+}
+
+ScopedPtr<ResultCursor> QueryPlan::execute(size_t stmt_idx) {
+  if (!scheduler_) {
+    RAISE(kRuntimeError, "QueryPlan has no scheduler");
+  }
+
+  if (stmt_idx >= qtrees_.size()) {
+    RAISE(kIndexError, "invalid statement index");
+  }
+
+  auto sched = scheduler_(txn_, &tasks_, &callbacks_);
+  Set<TaskID> task_ids;
+  for (const auto& task_id : statement_tasks_[stmt_idx]) {
+    task_ids.emplace(task_id);
+  }
+  return sched->execute(task_ids);
+}
+
+void QueryPlan::execute(size_t stmt_idx, ResultList* result_list) {
+  if (stmt_idx >= qtrees_.size()) {
+    RAISE(kIndexError, "invalid statement index");
+  }
+
+  auto result_columns = getStatementOutputColumns(stmt_idx);
+  auto result_cursor = execute(stmt_idx);
+
+  result_list->addHeader(result_columns);
+  Vector<SValue> tmp(result_columns.size());
+  while (result_cursor->next(tmp.data(), tmp.size())) {
+    result_list->addRow(tmp.data(), tmp.size());
+  }
+}
+
+void QueryPlan::setScheduler(SchedulerFactory scheduler) {
+  scheduler_ = scheduler;
+}
+
+const Vector<String>& QueryPlan::getStatementOutputColumns(size_t stmt_idx) {
+  if (stmt_idx >= qtrees_.size()) {
+    RAISE(kIndexError, "invalid statement index");
+  }
+
+  return statement_columns_[stmt_idx];
+}
 
 size_t QueryPlan::numStatements() const {
   return qtrees_.size();
 }
 
 Statement* QueryPlan::getStatement(size_t stmt_idx) const {
-  if (stmt_idx >= statements_.size()) {
-    RAISE(kIndexError, "invalid statement index");
-  }
-
-  return statements_[stmt_idx].get();
+  RAISE(kNotImplementedError);
 }
 
 RefPtr<QueryTreeNode> QueryPlan::getStatementQTree(size_t stmt_idx) const {
@@ -37,5 +85,16 @@ RefPtr<QueryTreeNode> QueryPlan::getStatementQTree(size_t stmt_idx) const {
 
   return qtrees_[stmt_idx];
 }
+
+//void QueryPlan::storeResults(size_t stmt_idx, ResultList* result_list) {
+//
+//  onOutputRow(
+//      stmt_idx,
+//      std::bind(
+//          &ResultList::addRow,
+//          result_list,
+//          std::placeholders::_1,
+//          std::placeholders::_2));
+//}
 
 }

@@ -20,9 +20,6 @@ namespace csql {
 class Statement : public RefCounted {
 public:
 
-  virtual void prepare(
-      ExecutionContext* context) = 0;
-
 };
 
 }

@@ -8,7 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <csql/backends/metricservice/metrictableref.h>
-#include <csql/runtime/tablescan.h>
+#include <csql/tasks/tablescan.h>
 #include <csql/svalue.h>
 
 namespace csql {

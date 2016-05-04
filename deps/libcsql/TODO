@@ -1,3 +1,20 @@
+
+- partial group by / group by merge
+- task bundle packing / pipeline scheduling
+- factory serialization
+- lazy dependencies
+- limit optimzation/bool return in onInputRow?
+- bring back charting stuff
+
+- runtime iface: remove querybuilder etc stuff (move into txn), rename evaluateScalarExpr -> evaluateExpr
+- delete valueexpressionbuilder, querybuilder
+- sql_alloc / sql_free
+
+- remove cstable depdenency
+- inline stx util files
+
+- split qtree node in tablexpressionnode + valueexpressionnode
+- delete {table/valueexpressionbuilder}
 - rename SequentialScan -> TableScan
 - test multi-way joins
 - push down all JOIN conjunctions from higher-level join condtitions and WHERE clause

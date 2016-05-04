@@ -50,7 +50,7 @@ SValue SValue::newFloat(const String& value) {
 }
 
 SValue SValue::newBool(BoolType value) {
-  return SValue(value);
+  return SValue(SValue::BoolType(value));
 }
 
 SValue SValue::newBool(const String& value) {
@@ -657,6 +657,19 @@ bool SValue::isConvertibleToNumeric() const {
     return true;
   } else {
     return false;
+  }
+}
+
+bool SValue::isConvertibleToBool() const {
+  switch (data_.type) {
+    case SQL_STRING:
+    case SQL_FLOAT:
+    case SQL_INTEGER:
+    case SQL_BOOL:
+    case SQL_NULL:
+      return true;
+    case SQL_TIMESTAMP:
+      return false;
   }
 }
 

@@ -19,8 +19,6 @@
 #include <stx/util/Base64.h>
 #include <stx/fnv.h>
 #include <sstable/sstablereader.h>
-#include <csql/runtime/ASCIITableFormat.h>
-#include <csql/runtime/JSONSSEStreamFormat.h>
 
 using namespace stx;
 

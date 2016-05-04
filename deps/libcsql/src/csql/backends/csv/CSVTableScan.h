@@ -9,7 +9,7 @@
  */
 #pragma once
 #include <stx/stdtypes.h>
-#include <csql/runtime/tablescan.h>
+#include <csql/tasks/tablescan.h>
 #include <csql/backends/csv/CSVInputStream.h>
 
 using namespace stx;

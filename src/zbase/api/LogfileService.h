@@ -34,51 +34,6 @@ public:
       zbase::ReplicationScheme* repl,
       csql::Runtime* sql);
 
-  /**
-   * Scan a logfile, returns the "limit" newest rows that match the condition
-   * and are older than end_time
-   */
-  void scanLogfile(
-      const AnalyticsSession& session,
-      const String& logfile_name,
-      const LogfileScanParams& params,
-      LogfileScanResult* result,
-      Function<void (bool done)> on_progress);
-
-  /**
-   * Scan a single logfile partition. This method must be executed on a host
-   * that actually stores this partition
-   */
-  void scanLocalLogfilePartition(
-      const AnalyticsSession& session,
-      const String& table_name,
-      const SHA1Hash& partition,
-      const LogfileScanParams& params,
-      LogfileScanResult* result);
-
-  /**
-   * Scan a single remote logfile partition, try all hosts in order from first
-   * to last
-   */
-  void scanRemoteLogfilePartition(
-      const AnalyticsSession& session,
-      const String& table_name,
-      const SHA1Hash& partition,
-      const LogfileScanParams& params,
-      const Vector<InetAddr>& hosts,
-      LogfileScanResult* result);
-
-  /**
-   * Scan a single remote logfile partition on a specific host
-   */
-  bool scanRemoteLogfilePartition(
-      const AnalyticsSession& session,
-      const String& table_name,
-      const SHA1Hash& partition,
-      const LogfileScanParams& params,
-      const InetAddr& hosts,
-      LogfileScanResult* result);
-
   void insertLoglines(
       const String& customer,
       const String& logfile_name,

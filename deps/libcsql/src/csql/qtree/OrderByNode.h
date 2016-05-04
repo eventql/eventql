@@ -44,6 +44,8 @@ public:
       const String& column_name,
       bool allow_add = false) override;
 
+  Vector<TaskID> build(Transaction* txn, TaskDAG* tree) const override;
+
 protected:
   Vector<SortSpec> sort_specs_;
   size_t max_output_column_index_;

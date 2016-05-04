@@ -11,10 +11,12 @@
 #include <stx/stdtypes.h>
 #include <stx/option.h>
 #include <csql/qtree/QueryTreeNode.h>
+#include <csql/tasks/TaskDAG.h>
 
 using namespace stx;
 
 namespace csql {
+class Transaction;
 
 struct QualifiedColumn {
   String qualified_name;
@@ -33,6 +35,8 @@ public:
       bool allow_add = false) = 0;
 
   size_t numColumns() const;
+
+  virtual Vector<TaskID> build(Transaction* txn, TaskDAG* tree) const = 0;
 
 };
 

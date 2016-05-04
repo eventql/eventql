@@ -22,7 +22,7 @@
 #include <csql/runtime/rowsink.h>
 #include <csql/runtime/resultlist.h>
 #include <csql/runtime/queryplannode.h>
-#include <csql/runtime/TableExpression.h>
+#include <csql/tasks/Task.h>
 #include <csql/runtime/charts/seriesadapter.h>
 
 namespace csql {
@@ -38,95 +38,95 @@ public:
       draw_stmt_(draw_stmt) {}
 
   void executeStatement(
-      TableExpression* stmt,
+      Task* stmt,
       ExecutionContext* context) {
-    name_ind_ = stmt->getColumnIndex("series");
+    //name_ind_ = stmt->getColumnIndex("series");
 
-    x_ind_ = stmt->getColumnIndex("x");
-    if (x_ind_ < 0) {
-      x_ind_ = stmt->getColumnIndex("X");
-    }
+    //x_ind_ = stmt->getColumnIndex("x");
+    //if (x_ind_ < 0) {
+    //  x_ind_ = stmt->getColumnIndex("X");
+    //}
 
-    y_ind_ = stmt->getColumnIndex("y");
-    if (y_ind_ < 0) {
-      y_ind_ = stmt->getColumnIndex("Y");
-    }
+    //y_ind_ = stmt->getColumnIndex("y");
+    //if (y_ind_ < 0) {
+    //  y_ind_ = stmt->getColumnIndex("Y");
+    //}
 
-    z_ind_ = stmt->getColumnIndex("z");
-    if (z_ind_ < 0) {
-      z_ind_ = stmt->getColumnIndex("Z");
-    }
+    //z_ind_ = stmt->getColumnIndex("z");
+    //if (z_ind_ < 0) {
+    //  z_ind_ = stmt->getColumnIndex("Z");
+    //}
 
-    prop_indexes_.clear();
+    //prop_indexes_.clear();
 
-    int color_ind = stmt->getColumnIndex("color");
-    if (color_ind >= 0) {
-      prop_indexes_.emplace_back(stx::chart::Series::P_COLOR, color_ind);
-    }
+    //int color_ind = stmt->getColumnIndex("color");
+    //if (color_ind >= 0) {
+    //  prop_indexes_.emplace_back(stx::chart::Series::P_COLOR, color_ind);
+    //}
 
-    int label_ind = stmt->getColumnIndex("label");
-    if (label_ind >= 0) {
-      prop_indexes_.emplace_back(stx::chart::Series::P_LABEL, label_ind);
-    }
+    //int label_ind = stmt->getColumnIndex("label");
+    //if (label_ind >= 0) {
+    //  prop_indexes_.emplace_back(stx::chart::Series::P_LABEL, label_ind);
+    //}
 
-    int line_style_ind = stmt->getColumnIndex("linestyle");
-    if (line_style_ind >= 0) {
-      prop_indexes_.emplace_back(
-          stx::chart::Series::P_LINE_STYLE,
-          line_style_ind);
-    }
+    //int line_style_ind = stmt->getColumnIndex("linestyle");
+    //if (line_style_ind >= 0) {
+    //  prop_indexes_.emplace_back(
+    //      stx::chart::Series::P_LINE_STYLE,
+    //      line_style_ind);
+    //}
 
-    int line_width_ind = stmt->getColumnIndex("linewidth");
-    if (line_width_ind >= 0) {
-      prop_indexes_.emplace_back(
-          stx::chart::Series::P_LINE_WIDTH,
-          line_width_ind);
-    }
+    //int line_width_ind = stmt->getColumnIndex("linewidth");
+    //if (line_width_ind >= 0) {
+    //  prop_indexes_.emplace_back(
+    //      stx::chart::Series::P_LINE_WIDTH,
+    //      line_width_ind);
+    //}
 
-    int point_style_ind = stmt->getColumnIndex("pointstyle");
-    if (point_style_ind >= 0) {
-      prop_indexes_.emplace_back(
-          stx::chart::Series::P_POINT_STYLE,
-          point_style_ind);
-    }
+    //int point_style_ind = stmt->getColumnIndex("pointstyle");
+    //if (point_style_ind >= 0) {
+    //  prop_indexes_.emplace_back(
+    //      stx::chart::Series::P_POINT_STYLE,
+    //      point_style_ind);
+    //}
 
-    int point_size_ind = stmt->getColumnIndex("pointsize");
-    if (point_size_ind >= 0) {
-      prop_indexes_.emplace_back(
-          stx::chart::Series::P_POINT_SIZE,
-          point_size_ind);
-    }
+    //int point_size_ind = stmt->getColumnIndex("pointsize");
+    //if (point_size_ind >= 0) {
+    //  prop_indexes_.emplace_back(
+    //      stx::chart::Series::P_POINT_SIZE,
+    //      point_size_ind);
+    //}
 
-    bool first = true;
-    stmt->execute(
-        context,
-        [this, &first] (int row_len, const SValue* row_const) -> bool {
-      auto row = const_cast<SValue*>(row_const);
+    //bool first = true;
+    ////stmt->execute(
+    ////    context,
+    ////    [this, &first] (int row_len, const SValue* row_const) -> bool {
+    ////  auto row = const_cast<SValue*>(row_const);
 
-      if (first) {
-        first = false;
+    ////  if (first) {
+    ////    first = false;
 
-        if (x_ind_ < 0) {
-          RAISE(
-              kRuntimeError,
-              "can't draw SELECT because it has no 'x' column");
-        }
+    ////    if (x_ind_ < 0) {
+    ////      RAISE(
+    ////          kRuntimeError,
+    ////          "can't draw SELECT because it has no 'x' column");
+    ////    }
 
-        if (adapter_.get() == nullptr) {
-          adapter_.reset(mkSeriesAdapter(row));
-        } else {
-          adapter_->name_ind_ = name_ind_;
-          adapter_->x_ind_ = x_ind_;
-          adapter_->y_ind_ = y_ind_;
-          adapter_->z_ind_ = z_ind_;
-        }
+    ////    if (adapter_.get() == nullptr) {
+    ////      adapter_.reset(mkSeriesAdapter(row));
+    ////    } else {
+    ////      adapter_->name_ind_ = name_ind_;
+    ////      adapter_->x_ind_ = x_ind_;
+    ////      adapter_->y_ind_ = y_ind_;
+    ////      adapter_->z_ind_ = z_ind_;
+    ////    }
 
-        adapter_->prop_indexes_ = prop_indexes_;
-      }
+    ////    adapter_->prop_indexes_ = prop_indexes_;
+    ////  }
 
-      adapter_->nextRow(row, row_len);
-      return true;
-    });
+    ////  adapter_->nextRow(row, row_len);
+    ////  return true;
+    ////});
   }
 
   virtual stx::chart::Drawable* getChart() const = 0;

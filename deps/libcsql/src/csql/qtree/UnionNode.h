@@ -35,6 +35,8 @@ public:
       const String& column_name,
       bool allow_add = false) override;
 
+  Vector<TaskID> build(Transaction* txn, TaskDAG* tree) const override;
+
 protected:
   Vector<RefPtr<QueryTreeNode>> tables_;
 };

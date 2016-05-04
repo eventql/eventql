@@ -17,7 +17,7 @@ class ResultFormat : public RefCounted {
 public:
 
   virtual void formatResults(
-      RefPtr<QueryPlan> query,
+      ScopedPtr<QueryPlan> query,
       ExecutionContext* context) = 0;
 
 };
@@ -33,7 +33,7 @@ public:
   void onStatementEnd(Function<void (size_t stmt_id)> fn);
 
   void formatResults(
-      RefPtr<QueryPlan> query,
+      ScopedPtr<QueryPlan> query,
       ExecutionContext* context) override;
 
 protected:

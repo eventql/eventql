@@ -8,6 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <csql/qtree/OrderByNode.h>
+#include <csql/tasks/orderby.h>
 
 using namespace stx;
 
@@ -39,6 +40,30 @@ size_t OrderByNode::getColumnIndex(
   return table_.asInstanceOf<TableExpressionNode>()->getColumnIndex(
       column_name,
       allow_add);
+}
+
+TaskIDList OrderByNode::build(Transaction* txn, TaskDAG* tree) const {
+  auto input = table_.asInstanceOf<TableExpressionNode>()->build(txn, tree);
+  auto ncols = table_.asInstanceOf<TableExpressionNode>()->outputColumns().size(); // FIXME!!!
+
+  Vector<OrderByFactory::SortExpr> sort_exprs;
+  for (const auto& ss : sort_specs_) {
+    OrderByFactory::SortExpr se;
+    se.descending = ss.descending;
+    se.expr = ss.expr;
+    sort_exprs.emplace_back(std::move(se));
+  }
+
+  TaskIDList output;
+  auto out_task = mkRef(new TaskDAGNode(new OrderByFactory(sort_exprs, ncols)));
+  for (const auto& in_task_id : input) {
+    TaskDAGNode::Dependency dep;
+    dep.task_id = in_task_id;
+    out_task->addDependency(dep);
+  }
+  output.emplace_back(tree->addTask(out_task));
+
+  return output;
 }
 
 const Vector<OrderByNode::SortSpec>& OrderByNode::sortSpecs() const {

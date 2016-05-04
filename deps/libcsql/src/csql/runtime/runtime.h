@@ -40,41 +40,15 @@ public:
 
   ScopedPtr<Transaction> newTransaction();
 
-  RefPtr<QueryPlan> buildQueryPlan(
+  ScopedPtr<QueryPlan> buildQueryPlan(
       Transaction* ctx,
       const String& query,
       RefPtr<ExecutionStrategy> execution_strategy);
 
-  RefPtr<QueryPlan> buildQueryPlan(
+  ScopedPtr<QueryPlan> buildQueryPlan(
       Transaction* ctx,
       Vector<RefPtr<csql::QueryTreeNode>> statements,
       RefPtr<ExecutionStrategy> execution_strategy);
-
-  void executeQuery(
-      Transaction* ctx,
-      const String& query,
-      RefPtr<ExecutionStrategy> execution_strategy,
-      RefPtr<ResultFormat> result_format);
-
-  void executeQuery(
-      Transaction* ctx,
-      RefPtr<QueryPlan> query_plan,
-      RefPtr<ResultFormat> result_format);
-
-  void executeStatement(
-      Transaction* ctx,
-      RefPtr<TableExpressionNode> qtree,
-      ResultList* result);
-
-  void executeStatement(
-      Transaction* ctx,
-      Statement* statement,
-      ResultList* result);
-
-  void executeStatement(
-      Transaction* ctx,
-      TableExpression* statement,
-      Function<bool (int argc, const SValue* argv)> fn);
 
   SValue evaluateScalarExpression(
       Transaction* ctx,
@@ -104,12 +78,6 @@ public:
   SValue evaluateConstExpression(Transaction* ctx, ASTNode* expr);
   SValue evaluateConstExpression(Transaction* ctx, RefPtr<ValueExpressionNode> expr);
   SValue evaluateConstExpression(Transaction* ctx, const ValueExpression& expr);
-
-  void executeAggregate(
-      Transaction* ctx,
-      const RemoteAggregateParams& query,
-      RefPtr<ExecutionStrategy> execution_strategy,
-      OutputStream* os);
 
   Option<String> cacheDir() const;
   void setCacheDir(const String& cachedir);

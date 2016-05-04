@@ -19,7 +19,7 @@
 #include <csql/runtime/defaultruntime.h>
 #include <csql/runtime/queryplannode.h>
 #include <csql/runtime/resultlist.h>
-#include <csql/runtime/tablescan.h>
+#include <csql/tasks/tablescan.h>
 #include <csql/runtime/tablerepository.h>
 #include <ui/canvas.h>
 #include <ui/svgtarget.h>

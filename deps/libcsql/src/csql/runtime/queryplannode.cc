@@ -42,10 +42,4 @@ int QueryPlanNode::getColumnIndex(const std::string& column_name) const {
   return -1;
 }
 
-void QueryPlanNode::finish() {
-  if (target_ != nullptr) {
-    target_->finish();
-  }
-}
-
 }

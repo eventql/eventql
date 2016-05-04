@@ -8,6 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <csql/qtree/DescribeTableNode.h>
+#include <csql/tasks/describe_table.h>
 
 using namespace stx;
 
@@ -55,6 +56,15 @@ size_t DescribeTableNode::getColumnIndex(
     const String& column_name,
     bool allow_add /* = false */) {
   return -1;
+}
+
+Vector<TaskID> DescribeTableNode::build(Transaction* txn, TaskDAG* tree) const {
+  TaskIDList output;
+  auto out_task = mkRef(
+      new TaskDAGNode(
+          new DescribeTableFactory(table_name_)));
+  output.emplace_back(tree->addTask(out_task));
+  return output;
 }
 
 String DescribeTableNode::toString() const {

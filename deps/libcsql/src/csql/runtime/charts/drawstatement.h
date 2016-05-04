@@ -9,7 +9,7 @@
  */
 #pragma once
 #include <stx/stdtypes.h>
-#include <csql/runtime/TableExpression.h>
+#include <csql/tasks/Task.h>
 #include <csql/qtree/DrawStatementNode.h>
 #include <csql/parser/token.h>
 #include <csql/Transaction.h>
@@ -27,14 +27,8 @@ public:
   DrawStatement(
       Transaction* ctx,
       RefPtr<DrawStatementNode> node,
-      Vector<ScopedPtr<TableExpression>> sources,
+      Vector<ScopedPtr<Task>> sources,
       Runtime* runtime);
-
-  void prepare(ExecutionContext* context) override;
-
-  void execute(
-      ExecutionContext* context,
-      stx::chart::Canvas* canvas);
 
 protected:
 
@@ -60,7 +54,7 @@ protected:
 
   Transaction* ctx_;
   RefPtr<DrawStatementNode> node_;
-  Vector<ScopedPtr<TableExpression>> sources_;
+  Vector<ScopedPtr<Task>> sources_;
   Runtime* runtime_;
 };
 

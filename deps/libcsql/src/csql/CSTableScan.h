@@ -21,32 +21,29 @@ using namespace stx;
 
 namespace csql {
 
-class CSTableScan : public TableExpression {
+class CSTableScan : public Task {
 public:
 
   CSTableScan(
-      Transaction* ctx,
+      Transaction* txn,
       RefPtr<SequentialScanNode> stmt,
       const String& cstable_filename,
       QueryBuilder* runtime);
 
   CSTableScan(
-      Transaction* ctx,
+      Transaction* txn,
       RefPtr<SequentialScanNode> stmt,
       RefPtr<cstable::CSTableReader> cstable,
       QueryBuilder* runtime);
 
-  virtual Vector<String> columnNames() const override;
+  bool nextRow(SValue* out, int out_len) override;
 
-  virtual size_t numColumns() const override;
+  virtual Vector<String> columnNames() const;
+  virtual size_t numColumns() const;
 
-  void prepare(ExecutionContext* context) override;
+  //void onInputsReady() override;
 
   void open();
-
-  void execute(
-      ExecutionContext* context,
-      Function<bool (int argc, const SValue* argv)> fn) override;
 
   Option<SHA1Hash> cacheKey() const override;
   void setCacheKey(const SHA1Hash& key);
@@ -67,7 +64,7 @@ protected:
 
   struct ExpressionRef {
     ExpressionRef(
-        Transaction* _ctx,
+        Transaction* _txn,
         size_t _rep_level,
         ValueExpression _compiled,
         ScratchMemory* scratch);
@@ -75,14 +72,14 @@ protected:
     ExpressionRef(ExpressionRef&& other);
     ~ExpressionRef();
 
-    Transaction* ctx;
+    Transaction* txn;
     size_t rep_level;
     ValueExpression compiled;
     VM::Instance instance;
   };
 
-  void scan(Function<bool (int argc, const SValue* argv)> fn);
-  void scanWithoutColumns(Function<bool (int argc, const SValue* argv)> fn);
+  void scan();
+  void scanWithoutColumns();
 
   void findColumns(
       RefPtr<ValueExpressionNode> expr,
@@ -94,7 +91,7 @@ protected:
 
   void fetch();
 
-  Transaction* ctx_;
+  Transaction* txn_;
   Vector<String> column_names_;
   ScratchMemory scratch_;
   RefPtr<SequentialScanNode> stmt_;

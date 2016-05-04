@@ -47,7 +47,7 @@
 #include "zbase/core/TSDBServlet.h"
 #include "zbase/core/ReplicationWorker.h"
 #include "zbase/core/LSMTableIndexCache.h"
-#include "zbase/core/SQLEngine.h"
+#include "zbase/sql/sql_engine.h"
 #include "zbase/DefaultServlet.h"
 #include "csql/defaults.h"
 #include "zbase/ConfigDirectory.h"
@@ -327,8 +327,7 @@ int main(int argc, const char** argv) {
         },
         symbols,
         new csql::QueryBuilder(
-            new csql::ValueExpressionBuilder(symbols.get()),
-            new csql::TableExpressionBuilder()),
+            new csql::ValueExpressionBuilder(symbols.get())),
         new csql::QueryPlanBuilder(
             csql::QueryPlanBuilderOptions{},
             symbols.get())));

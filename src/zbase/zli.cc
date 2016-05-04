@@ -24,7 +24,7 @@
 #include "stx/cli/CLI.h"
 #include "stx/cli/flagparser.h"
 #include "stx/cli/term.h"
-#include "csql/runtime/BinaryResultParser.h"
+#include "zbase/sql/codec/binary_codec.h"
 
 using namespace stx;
 

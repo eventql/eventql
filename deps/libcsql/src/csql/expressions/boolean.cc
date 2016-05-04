@@ -27,64 +27,23 @@ void eqExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
   SValue* lhs = argv;
   SValue* rhs = argv + 1;
 
-  switch(lhs->getType()) {
-    case SQL_INTEGER:
-    case SQL_TIMESTAMP:
-      switch(rhs->getType()) {
-        case SQL_INTEGER:
-        case SQL_TIMESTAMP:
-          *out = SValue(lhs->getInteger() == rhs->getInteger());
-          return;
-        case SQL_FLOAT:
-          *out = SValue(lhs->getFloat() == rhs->getFloat());
-          return;
-        case SQL_NULL:
-          *out = SValue(SValue::BoolType(false));
-          return;
-        default:
-          break;
-      }
-      break;
-    case SQL_FLOAT:
-      switch(rhs->getType()) {
-        case SQL_INTEGER:
-        case SQL_FLOAT:
-        case SQL_TIMESTAMP:
-          *out = SValue(lhs->getFloat() == rhs->getFloat());
-          return;
-        case SQL_NULL:
-          *out = SValue(SValue::BoolType(false));
-          return;
-        default:
-          break;
-      }
-      break;
-    case SQL_NULL:
-      switch(rhs->getType()) {
-        case SQL_NULL:
-          *out = SValue(SValue::BoolType(true));
-          return;
-        default:
-          *out = SValue(SValue::BoolType(false));
-          return;
-      }
-      return;
-    case SQL_BOOL:
-      switch(rhs->getType()) {
-        case SQL_BOOL:
-          *out = SValue(SValue::BoolType(lhs->getBool() == rhs->getBool()));
-          return;
-        default:
-          break;
-      }
-      return;
-    default:
-      break;
+  if (lhs->getType() == SQL_NULL ^ rhs->getType() == SQL_NULL) {
+    *out = SValue::newBool(false);
+    return;
   }
 
-  if (lhs->getType() == SQL_STRING ||
-      rhs->getType() == SQL_STRING) {
-    *out = SValue(lhs->getString() == rhs->getString());
+  if (lhs->isNumeric() && rhs->isNumeric()) {
+    *out = SValue::newBool(lhs->getFloat() == rhs->getFloat());
+    return;
+  }
+
+  if (lhs->getType() == SQL_STRING || rhs->getType() == SQL_STRING) {
+    *out = SValue::newBool(lhs->getString() == rhs->getString());
+    return;
+  }
+
+  if (lhs->isConvertibleToBool() || rhs->isConvertibleToBool()) {
+    *out = SValue::newBool(lhs->getBool() == rhs->getBool());
     return;
   }
 

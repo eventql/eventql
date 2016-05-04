@@ -1350,6 +1350,7 @@ QueryTreeNode* QueryPlanBuilder::buildSeqscanTableReference(
   /* aggregation type */
   auto seqscan = new SequentialScanNode(
       table.get(),
+      tables,
       select_list_expressions,
       where_expr);
 

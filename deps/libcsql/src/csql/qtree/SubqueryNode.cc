@@ -9,6 +9,7 @@
  */
 #include <csql/qtree/SubqueryNode.h>
 #include <csql/qtree/ColumnReferenceNode.h>
+#include <csql/tasks/subquery.h>
 
 using namespace stx;
 
@@ -114,6 +115,22 @@ size_t SubqueryNode::getColumnIndex(
 
 Option<RefPtr<ValueExpressionNode>> SubqueryNode::whereExpression() const {
   return where_expr_;
+}
+
+Vector<TaskID> SubqueryNode::build(Transaction* txn, TaskDAG* tree) const {
+  auto input = subquery_.asInstanceOf<TableExpressionNode>()->build(txn, tree);
+
+  TaskIDList output;
+  for (const auto& in_task_id : input) {
+    auto out_task = mkRef(new TaskDAGNode(
+        new SubqueryFactory(selectList(), whereExpression())));
+    TaskDAGNode::Dependency dep;
+    dep.task_id = in_task_id;
+    out_task->addDependency(dep);
+    output.emplace_back(tree->addTask(out_task));
+  }
+
+  return output;
 }
 
 RefPtr<QueryTreeNode> SubqueryNode::deepCopy() const {

@@ -8,6 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <csql/qtree/SelectExpressionNode.h>
+#include <csql/tasks/select.h>
 
 using namespace stx;
 
@@ -54,6 +55,13 @@ size_t SelectExpressionNode::getColumnIndex(
   }
 
   return -1;
+}
+
+Vector<TaskID> SelectExpressionNode::build(Transaction* txn, TaskDAG* tree) const {
+  TaskIDList output;
+  auto out_task = mkRef(new TaskDAGNode(new SelectFactory(selectList())));
+  output.emplace_back(tree->addTask(out_task));
+  return output;
 }
 
 RefPtr<QueryTreeNode> SelectExpressionNode::deepCopy() const {

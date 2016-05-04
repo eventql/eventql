@@ -36,7 +36,6 @@ int main() {
 }
 ```
 
-
 LICENSE
 -------
 

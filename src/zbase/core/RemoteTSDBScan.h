@@ -21,7 +21,7 @@ using namespace stx;
 
 namespace zbase {
 
-class RemoteTSDBScan : public csql::TableExpression {
+class RemoteTSDBScan : public csql::Task {
 public:
 
   RemoteTSDBScan(
@@ -31,15 +31,8 @@ public:
       ReplicationScheme* replication_scheme,
       AnalyticsAuth* auth);
 
-  Vector<String> columnNames() const override;
-
-  size_t numColumns() const override;
-
-  void prepare(csql::ExecutionContext* context) override;
-
-  void execute(
-      csql::ExecutionContext* context,
-      Function<bool (int argc, const csql::SValue* argv)> fn) override;
+  //void onInputsReady() override;
+  int nextRow(csql::SValue* out, int out_len) override;
 
   size_t rowsScanned() const;
 
@@ -55,7 +48,6 @@ protected:
   TSDBTableRef table_ref_;
   ReplicationScheme* replication_scheme_;
   AnalyticsAuth* auth_;
-  Vector<String> columns_;
   size_t rows_scanned_;
 };
 

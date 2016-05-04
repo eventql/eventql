@@ -25,19 +25,9 @@ public:
 
   PartitionReader(RefPtr<PartitionSnapshot> head);
 
-  Option<RefPtr<VFSFile>> fetchCSTable() const;
-  Option<String> fetchCSTableFilename() const;
-  Option<SHA1Hash> cstableVersion() const;
-  Option<String> cstableFilename() const;
-
   virtual void fetchRecords(
       const Set<String>& required_columns,
       Function<void (const msg::MessageObject& record)> fn) = 0;
-
-  virtual ScopedPtr<csql::TableExpression> buildSQLScan(
-        csql::Transaction* ctx,
-        RefPtr<csql::SequentialScanNode> node,
-        csql::QueryBuilder* runtime) const = 0;
 
   virtual SHA1Hash version() const = 0;
 

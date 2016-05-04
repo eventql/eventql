@@ -8,6 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <csql/qtree/LimitNode.h>
+#include <csql/tasks/limit.h>
 
 using namespace stx;
 
@@ -41,6 +42,21 @@ size_t LimitNode::getColumnIndex(
   return table_.asInstanceOf<TableExpressionNode>()->getColumnIndex(
       column_name,
       allow_add);
+}
+
+Vector<TaskID> LimitNode::build(Transaction* txn, TaskDAG* tree) const {
+  auto input = table_.asInstanceOf<TableExpressionNode>()->build(txn, tree);
+
+  TaskIDList output;
+  auto out_task = mkRef(new TaskDAGNode(new LimitFactory(limit_, offset_)));
+  for (const auto& in_task_id : input) {
+    TaskDAGNode::Dependency dep;
+    dep.task_id = in_task_id;
+    out_task->addDependency(dep);
+  }
+  output.emplace_back(tree->addTask(out_task));
+
+  return output;
 }
 
 RefPtr<QueryTreeNode> LimitNode::deepCopy() const {

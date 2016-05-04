@@ -11,22 +11,21 @@
 #include <stx/option.h>
 #include <csql/backends/backend.h>
 #include <csql/backends/tableref.h>
-#include <csql/runtime/TableExpression.h>
+#include <csql/tasks/Task.h>
 #include <csql/qtree/SequentialScanNode.h>
 #include <csql/TableInfo.h>
 
 namespace csql {
-class ImportStatement;
 class QueryBuilder;
 class Transaction;
 
 class TableProvider : public RefCounted {
 public:
 
-  virtual Option<ScopedPtr<TableExpression>> buildSequentialScan(
-      Transaction* ctx,
+  virtual TaskIDList buildSequentialScan(
+      Transaction* txn,
       RefPtr<SequentialScanNode> seqscan,
-      QueryBuilder* runtime) const = 0;
+      TaskDAG* tasks) const = 0;
 
   virtual void listTables(Function<void (const TableInfo& table)> fn) const = 0;
 
@@ -36,9 +35,6 @@ public:
 
 class TableRepository : public TableProvider {
 public:
-  typedef
-      Function<RefPtr<ScopedPtr<TableExpression>> (RefPtr<SequentialScanNode>)>
-      TableFactoryFn;
 
   virtual TableRef* getTableRef(const std::string& table_name) const;
 
@@ -51,14 +47,10 @@ public:
       const std::string& source_uri,
       const std::vector<std::unique_ptr<Backend>>& backends);
 
-  void import(
-      const ImportStatement& import_stmt,
-      const std::vector<std::unique_ptr<Backend>>& backends);
-
-  Option<ScopedPtr<TableExpression>> buildSequentialScan(
-      Transaction* ctx,
+  TaskIDList buildSequentialScan(
+      Transaction* txn,
       RefPtr<SequentialScanNode> seqscan,
-      QueryBuilder* runtime) const override;
+      TaskDAG* tasks) const override;
 
   void addProvider(RefPtr<TableProvider> provider);
 

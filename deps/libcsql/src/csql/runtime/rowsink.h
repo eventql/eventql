@@ -7,9 +7,7 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-
-#ifndef _FNORDMETRIC_SQL_ROWSINK_H
-#define _FNORDMETRIC_SQL_ROWSINK_H
+#pragma once
 #include <stdlib.h>
 #include <string>
 #include <vector>
@@ -20,12 +18,9 @@
 
 namespace csql {
 
-class RowSink {
+class RowSink : public RefCounted {
 public:
-  virtual ~RowSink() {}
-  virtual bool nextRow(SValue* row, int row_len) = 0;
-  virtual void finish() {}
+  virtual bool nextRow(SValue* row, int row_len) { return true; };
 };
 
 }
-#endif

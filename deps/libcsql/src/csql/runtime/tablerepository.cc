@@ -8,7 +8,6 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <csql/runtime/tablerepository.h>
-#include <csql/runtime/importstatement.h>
 #include <stx/exception.h>
 #include <stx/uri.h>
 
@@ -61,24 +60,19 @@ void TableRepository::import(
       source_uri.toString().c_str());
 }
 
-void TableRepository::import(
-    const ImportStatement& import_stmt,
-    const std::vector<std::unique_ptr<Backend>>& backends) {
-  import(import_stmt.tables(), import_stmt.source_uri(), backends);
-}
-
-Option<ScopedPtr<TableExpression>> TableRepository::buildSequentialScan(
-    Transaction* ctx,
+TaskIDList TableRepository::buildSequentialScan(
+    Transaction* txn,
     RefPtr<SequentialScanNode> seqscan,
-    QueryBuilder* runtime) const {
+    TaskDAG* tasks) const {
   for (const auto& p : providers_) {
-    auto tbl = p->buildSequentialScan(ctx, seqscan, runtime);
-    if (!tbl.isEmpty()) {
-      return std::move(tbl.get());
+    if (p->describe(seqscan->tableName()).isEmpty()) {
+      continue;
     }
+
+    return p->buildSequentialScan(txn, seqscan, tasks);
   }
 
-  return None<ScopedPtr<TableExpression>>();
+  RAISEF(kNotFoundError, "table not found: '$0'", seqscan->tableName());
 }
 
 void TableRepository::addProvider(RefPtr<TableProvider> provider) {

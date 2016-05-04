@@ -70,6 +70,8 @@ public:
 
   String toString() const override;
 
+  Vector<TaskID> build(Transaction* txn, TaskDAG* tree) const override;
+
 protected:
 
 
