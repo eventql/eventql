@@ -8,6 +8,6 @@
  */
 #include "DocIndex.h"
 #include "IndexChangeRequest.h"
-#include <stx/inspect.h>
+#include <eventql/util/inspect.h>
 
 

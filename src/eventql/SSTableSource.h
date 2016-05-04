@@ -8,7 +8,7 @@
  */
 #ifndef _CM_SSTABLETABLESOURCE_H
 #define _CM_SSTABLETABLESOURCE_H
-#include "stx/logging.h"
+#include "eventql/util/logging.h"
 #include "eventql/Report.h"
 #include "eventql/infra/sstable/sstablereader.h"
 #include "eventql/infra/sstable/SSTableEditor.h"

@@ -8,8 +8,8 @@
  * <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include <stx/stdtypes.h>
-#include <stx/http/httpconnectionpool.h>
+#include <eventql/util/stdtypes.h>
+#include <eventql/util/http/httpconnectionpool.h>
 #include <eventql/core/Partition.h>
 #include <eventql/core/ReplicationScheme.h>
 #include <eventql/core/ReplicationState.h>

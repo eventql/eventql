@@ -13,7 +13,7 @@
 #include <memory>
 #include <unordered_map>
 #include <string>
-#include <stx/csv/CSVInputStream.h>
+#include <eventql/util/csv/CSVInputStream.h>
 #include <csql/backends/tableref.h>
 
 using namespace stx;

@@ -9,11 +9,11 @@
  */
 #ifndef _FNORD_TSDB_STREAMCHUNK_H
 #define _FNORD_TSDB_STREAMCHUNK_H
-#include <stx/stdtypes.h>
-#include <stx/option.h>
-#include <stx/UnixTime.h>
-#include <stx/protobuf/MessageSchema.h>
-#include <stx/http/httpconnectionpool.h>
+#include <eventql/util/stdtypes.h>
+#include <eventql/util/option.h>
+#include <eventql/util/UnixTime.h>
+#include <eventql/util/protobuf/MessageSchema.h>
+#include <eventql/util/http/httpconnectionpool.h>
 #include <eventql/core/ServerConfig.h>
 #include <eventql/core/Table.h>
 #include <eventql/core/RecordRef.h>

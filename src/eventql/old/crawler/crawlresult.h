@@ -10,8 +10,8 @@
 #define _CM_CRAWLRESEULT_H
 #include <stdlib.h>
 #include <string>
-#include <stx/UnixTime.h>
-#include <stx/reflect/reflect.h>
+#include <eventql/util/UnixTime.h>
+#include <eventql/util/reflect/reflect.h>
 
 namespace zbase {
 

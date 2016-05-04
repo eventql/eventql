@@ -7,11 +7,11 @@
  * permission is obtained.
  */
 #include "eventql/master/MasterServlet.h"
-#include "stx/io/outputstream.h"
-#include "stx/io/BufferedOutputStream.h"
-#include "stx/logging.h"
-#include "stx/protobuf/msg.h"
-#include "stx/random.h"
+#include "eventql/util/io/outputstream.h"
+#include "eventql/util/io/BufferedOutputStream.h"
+#include "eventql/util/logging.h"
+#include "eventql/util/protobuf/msg.h"
+#include "eventql/util/random.h"
 
 using namespace stx;
 

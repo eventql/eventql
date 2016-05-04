@@ -7,7 +7,7 @@
  * permission is obtained.
  */
 #pragma once
-#include <stx/logging.h>
+#include <eventql/util/logging.h>
 
 namespace zbase {
 

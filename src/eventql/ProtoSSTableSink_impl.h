@@ -7,8 +7,8 @@
  * permission is obtained.
  */
 #pragma once
-#include <stx/random.h>
-#include <stx/io/fileutil.h>
+#include <eventql/util/random.h>
+#include <eventql/util/io/fileutil.h>
 
 namespace zbase {
 

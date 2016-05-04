@@ -6,9 +6,9 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#include <stx/logging.h>
-#include <stx/http/httprequest.h>
-#include <stx/json/json.h>
+#include <eventql/util/logging.h>
+#include <eventql/util/http/httprequest.h>
+#include <eventql/util/json/json.h>
 #include "crawler/crawler.h"
 #include "crawler/crawlresult.h"
 

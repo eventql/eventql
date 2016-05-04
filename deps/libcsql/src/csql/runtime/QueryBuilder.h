@@ -8,7 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include <stx/stdtypes.h>
+#include <eventql/util/stdtypes.h>
 #include <csql/qtree/ChartStatementNode.h>
 #include <csql/runtime/ValueExpressionBuilder.h>
 #include <csql/runtime/TableExpressionBuilder.h>

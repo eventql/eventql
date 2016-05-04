@@ -16,9 +16,9 @@
 #include <cstable/columns/v1/LEB128ColumnWriter.h>
 #include <cstable/columns/v1/DoubleColumnWriter.h>
 #include <cstable/columns/v1/StringColumnWriter.h>
-#include <stx/SHA1.h>
-#include <stx/io/fileutil.h>
-#include <stx/option.h>
+#include <eventql/util/SHA1.h>
+#include <eventql/util/io/fileutil.h>
+#include <eventql/util/option.h>
 
 using namespace stx;
 

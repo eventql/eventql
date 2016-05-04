@@ -8,7 +8,7 @@
  */
 #ifndef _CM_AUTOCOMPLETEMODEL_H
 #define _CM_AUTOCOMPLETEMODEL_H
-#include "stx/json/json.h"
+#include "eventql/util/json/json.h"
 #include "ModelCache.h"
 #include "eventql/TermInfo.h"
 #include <eventql/util/fts.h>

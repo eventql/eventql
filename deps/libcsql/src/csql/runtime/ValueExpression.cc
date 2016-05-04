@@ -8,7 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <csql/runtime/ValueExpression.h>
-#include <stx/inspect.h>
+#include <eventql/util/inspect.h>
 
 using namespace stx;
 

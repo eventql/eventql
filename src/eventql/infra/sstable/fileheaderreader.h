@@ -9,8 +9,8 @@
  */
 #ifndef _FNORDMETRIC_METRICDB_FILEHEADERREADER_H
 #define _FNORDMETRIC_METRICDB_FILEHEADERREADER_H
-#include <stx/util/binarymessagereader.h>
-#include <stx/io/inputstream.h>
+#include <eventql/util/util/binarymessagereader.h>
+#include <eventql/util/io/inputstream.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <string>

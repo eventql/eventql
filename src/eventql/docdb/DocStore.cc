@@ -6,9 +6,9 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#include <stx/fnv.h>
-#include <stx/io/file.h>
-#include <stx/json/json.h>
+#include <eventql/util/fnv.h>
+#include <eventql/util/io/file.h>
+#include <eventql/util/json/json.h>
 #include "DocStore.h"
 
 using namespace stx;

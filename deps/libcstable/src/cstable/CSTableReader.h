@@ -8,8 +8,8 @@
  * <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include <stx/stdtypes.h>
-#include <stx/io/file.h>
+#include <eventql/util/stdtypes.h>
+#include <eventql/util/io/file.h>
 #include <cstable/ColumnReader.h>
 #include <cstable/cstable.h>
 #include <cstable/io/PageManager.h>

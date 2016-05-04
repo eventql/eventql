@@ -10,8 +10,8 @@
  * permission is obtained.
  */
 #pragma once
-#include <stx/stdtypes.h>
-#include <stx/autoref.h>
+#include <eventql/util/stdtypes.h>
+#include <eventql/util/autoref.h>
 #include <eventql/core/Table.h>
 #include <eventql/core/PartitionSnapshot.h>
 

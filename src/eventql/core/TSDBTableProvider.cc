@@ -7,7 +7,7 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <stx/SHA1.h>
+#include <eventql/util/SHA1.h>
 #include <eventql/core/TSDBTableProvider.h>
 #include <eventql/core/TSDBService.h>
 #include <eventql/core/RemoteTSDBScan.h>

@@ -7,7 +7,7 @@
  * permission is obtained.
  */
 #pragma once
-#include "stx/protobuf/MessageSchema.h"
+#include "eventql/util/protobuf/MessageSchema.h"
 #include "eventql/CustomerConfig.h"
 #include "eventql/TableDefinition.h"
 

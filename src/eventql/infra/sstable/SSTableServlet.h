@@ -9,9 +9,9 @@
  */
 #ifndef _FNORD_SSTABLE_SSTABLESERVLET_H
 #define _FNORD_SSTABLE_SSTABLESERVLET_H
-#include "stx/VFS.h"
-#include "stx/http/httpservice.h"
-#include "stx/json/json.h"
+#include "eventql/util/VFS.h"
+#include "eventql/util/http/httpservice.h"
+#include "eventql/util/json/json.h"
 
 namespace stx {
 namespace sstable {

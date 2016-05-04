@@ -8,9 +8,9 @@
  * <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include <stx/stdtypes.h>
-#include <stx/random.h>
-#include <stx/option.h>
+#include <eventql/util/stdtypes.h>
+#include <eventql/util/random.h>
+#include <eventql/util/option.h>
 #include <eventql/util/mdb/MDB.h>
 #include <eventql/core/TableConfig.pb.h>
 #include <eventql/core/Partition.h>

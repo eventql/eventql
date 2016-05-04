@@ -8,7 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include <stx/stdtypes.h>
+#include <eventql/util/stdtypes.h>
 #include <csql/runtime/TableExpression.h>
 #include <csql/runtime/defaultruntime.h>
 #include <csql/qtree/JoinNode.h>

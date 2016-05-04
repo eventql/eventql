@@ -6,8 +6,8 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#include "stx/logging.h"
-#include "stx/http/HTTPFileDownload.h"
+#include "eventql/util/logging.h"
+#include "eventql/util/http/HTTPFileDownload.h"
 #include "eventql/mapreduce/MapReduceScheduler.h"
 #include "eventql/api/MapReduceService.h"
 

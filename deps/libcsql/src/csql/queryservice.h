@@ -10,9 +10,9 @@
 #ifndef _FNORDMETRIC_QUERYSERVICE_H
 #define _FNORDMETRIC_QUERYSERVICE_H
 #include <cplot/rendertarget.h>
-#include <stx/io/inputstream.h>
+#include <eventql/util/io/inputstream.h>
 }
-#include <stx/json/jsonoutputstream.h>
+#include <eventql/util/json/jsonoutputstream.h>
 #include "fnordmetric/chartsql/query.h"
 #include "fnordmetric/sql/runtime/defaultruntime.h"
 

@@ -10,12 +10,12 @@
 #ifndef _FNORDMETRIC_METRICDB_HTTPINTERFACE_H
 #define _FNORDMETRIC_METRICDB_HTTPINTERFACE_H
 #include <memory>
-#include <stx/uri.h>
+#include <eventql/util/uri.h>
 #include <stx-http/httpservice.h>
 #include <stx-http/httprequest.h>
 #include <stx-http/httpresponse.h>
 }
-#include <stx/json/jsonoutputstream.h>
+#include <eventql/util/json/jsonoutputstream.h>
 
 using namespace stx;
 namespace csql {

@@ -7,7 +7,7 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <stx/exception.h>
+#include <eventql/util/exception.h>
 #include <csql/runtime/LikePattern.h>
 
 using namespace stx;

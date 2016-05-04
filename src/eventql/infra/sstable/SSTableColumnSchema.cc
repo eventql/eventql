@@ -10,8 +10,8 @@
 #include <eventql/infra/sstable/SSTableColumnSchema.h>
 #include <eventql/infra/sstable/sstablereader.h>
 #include <eventql/infra/sstable/SSTableEditor.h>
-#include <stx/util/binarymessagereader.h>
-#include <stx/util/binarymessagewriter.h>
+#include <eventql/util/util/binarymessagereader.h>
+#include <eventql/util/util/binarymessagewriter.h>
 
 namespace stx {
 namespace sstable {

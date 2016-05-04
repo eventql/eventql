@@ -8,8 +8,8 @@
  */
 #ifndef _CM_PROTOCRDT_H
 #define _CM_PROTOCRDT_H
-#include <stx/util/binarymessagereader.h>
-#include <stx/util/binarymessagewriter.h>
+#include <eventql/util/util/binarymessagereader.h>
+#include <eventql/util/util/binarymessagewriter.h>
 
 using namespace stx;
 

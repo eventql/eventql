@@ -8,10 +8,10 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <thread>
-#include <stx/util/Base64.h>
-#include <stx/fnv.h>
-#include <stx/protobuf/msg.h>
-#include <stx/io/fileutil.h>
+#include <eventql/util/util/Base64.h>
+#include <eventql/util/fnv.h>
+#include <eventql/util/protobuf/msg.h>
+#include <eventql/util/io/fileutil.h>
 #include <eventql/infra/sstable/sstablereader.h>
 #include <eventql/core/PartitionMap.h>
 #include <eventql/core/PartitionState.pb.h>

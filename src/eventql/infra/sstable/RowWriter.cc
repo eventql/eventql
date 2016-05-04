@@ -7,7 +7,7 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <stx/fnv.h>
+#include <eventql/util/fnv.h>
 #include <eventql/infra/sstable/RowWriter.h>
 
 namespace stx {

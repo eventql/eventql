@@ -7,11 +7,11 @@
  * permission is obtained.
  */
 #pragma once
-#include "stx/stdtypes.h"
-#include "stx/io/inputstream.h"
-#include "stx/io/outputstream.h"
-#include "stx/protobuf/DynamicMessage.h"
-#include "stx/UnixTime.h"
+#include "eventql/util/stdtypes.h"
+#include "eventql/util/io/inputstream.h"
+#include "eventql/util/io/outputstream.h"
+#include "eventql/util/protobuf/DynamicMessage.h"
+#include "eventql/util/UnixTime.h"
 
 using namespace stx;
 

@@ -7,11 +7,11 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include "stx/util/binarymessagewriter.h"
+#include "eventql/util/util/binarymessagewriter.h"
 #include "fnord-logtable/LogTableServlet.h"
-#include "stx/json/json.h"
-#include "stx/protobuf/MessageEncoder.h"
-#include "stx/protobuf/MessagePrinter.h"
+#include "eventql/util/json/json.h"
+#include "eventql/util/protobuf/MessageEncoder.h"
+#include "eventql/util/protobuf/MessagePrinter.h"
 
 namespace stx {
 namespace logtable {

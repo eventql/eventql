@@ -9,10 +9,10 @@
  */
 #ifndef _FNORD_TSDB_TSDBSERVLET_H
 #define _FNORD_TSDB_TSDBSERVLET_H
-#include "stx/http/httpservice.h"
-#include <stx/random.h>
+#include "eventql/util/http/httpservice.h"
+#include <eventql/util/random.h>
 #include <eventql/core/TSDBService.h>
-#include <stx/http/HTTPSSEStream.h>
+#include <eventql/util/http/HTTPSSEStream.h>
 
 using namespace stx;
 

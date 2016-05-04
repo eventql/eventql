@@ -12,7 +12,7 @@
 #include <eventql/core/CompactionStrategy.h>
 #include <eventql/core/LSMTableIndex.h>
 #include <cstable/CSTableWriter.h>
-#include <stx/io/fileutil.h>
+#include <eventql/util/io/fileutil.h>
 
 using namespace stx;
 

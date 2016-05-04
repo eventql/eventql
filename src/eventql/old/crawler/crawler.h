@@ -13,11 +13,11 @@
 #include <set>
 #include <string>
 #include <unordered_map>
-#include <stx/random.h>
-#include <stx/uri.h>
-#include <stx/thread/taskscheduler.h>
+#include <eventql/util/random.h>
+#include <eventql/util/uri.h>
+#include <eventql/util/thread/taskscheduler.h>
 #include <brokerd/RemoteFeed.h>
-#include <stx/http/httpconnectionpool.h>
+#include <eventql/util/http/httpconnectionpool.h>
 #include "crawler/crawlrequest.h"
 
 namespace zbase {

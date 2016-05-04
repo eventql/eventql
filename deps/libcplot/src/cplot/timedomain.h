@@ -9,7 +9,7 @@
  */
 #ifndef _libstx_TIMEDOMAIN_H
 #define _libstx_TIMEDOMAIN_H
-#include "stx/UnixTime.h"
+#include "eventql/util/UnixTime.h"
 #include "cplot/continuousdomain.h"
 
 namespace stx {

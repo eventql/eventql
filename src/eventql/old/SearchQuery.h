@@ -8,7 +8,7 @@
  */
 #ifndef _CM_SEARCHQUERY_H
 #define _CM_SEARCHQUERY_H
-#include "stx/json/json.h"
+#include "eventql/util/json/json.h"
 #include "eventql/util/fts.h"
 #include "eventql/util/fts_common.h"
 #include "eventql/util/Analyzer.h"

@@ -12,8 +12,8 @@
 #include <memory>
 #include <vector>
 #include <liblmdb/lmdb.h>
-#include "stx/logging.h"
-#include "stx/autoref.h"
+#include "eventql/util/logging.h"
+#include "eventql/util/autoref.h"
 #include "eventql/util/mdb/MDBTransaction.h"
 
 namespace stx {

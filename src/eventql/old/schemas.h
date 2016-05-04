@@ -9,7 +9,7 @@
 #ifndef _CM_SCHEMAS_H
 #define _CM_SCHEMAS_H
 #include "common.h"
-#include "stx/protobuf/MessageSchema.h"
+#include "eventql/util/protobuf/MessageSchema.h"
 
 using namespace zbase;
 using namespace stx;

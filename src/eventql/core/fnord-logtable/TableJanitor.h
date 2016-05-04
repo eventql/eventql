@@ -10,7 +10,7 @@
 #ifndef _FNORD_LOGTABLE_TABLEREJANITOR_H
 #define _FNORD_LOGTABLE_TABLEREJANITOR_H
 #include <thread>
-#include <stx/stdtypes.h>
+#include <eventql/util/stdtypes.h>
 #include <fnord-logtable/TableRepository.h>
 
 namespace stx {

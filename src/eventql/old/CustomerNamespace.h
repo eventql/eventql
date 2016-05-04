@@ -13,8 +13,8 @@
 #include <set>
 #include <string>
 #include <unordered_map>
-#include <stx/random.h>
-#include <stx/http/httphandler.h>
+#include <eventql/util/random.h>
+#include <eventql/util/http/httphandler.h>
 
 namespace zbase {
 

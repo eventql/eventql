@@ -10,11 +10,11 @@
 #include <vector>
 #include <string>
 #include <memory>
-#include <stx/exception.h>
-#include <stx/exceptionhandler.h>
-#include <stx/io/inputstream.h>
-#include <stx/io/outputstream.h>
-#include <stx/cli/flagparser.h>
+#include <eventql/util/exception.h>
+#include <eventql/util/exceptionhandler.h>
+#include <eventql/util/io/inputstream.h>
+#include <eventql/util/io/outputstream.h>
+#include <eventql/util/cli/flagparser.h>
 #include "environment.h"
 #include "cli/cli.h"
 #include <csql/backends/csv/csvbackend.h>

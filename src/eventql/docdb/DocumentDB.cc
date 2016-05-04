@@ -6,8 +6,8 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#include "stx/protobuf/msg.h"
-#include "stx/wallclock.h"
+#include "eventql/util/protobuf/msg.h"
+#include "eventql/util/wallclock.h"
 #include "eventql/docdb/DocumentDB.h"
 
 using namespace stx;

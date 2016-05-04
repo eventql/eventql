@@ -9,10 +9,10 @@
  */
 #ifndef _FNORD_LOGTABLE_TABLEARENA_H
 #define _FNORD_LOGTABLE_TABLEARENA_H
-#include <stx/stdtypes.h>
-#include <stx/autoref.h>
-#include <stx/protobuf/MessageSchema.h>
-#include <stx/protobuf/MessageObject.h>
+#include <eventql/util/stdtypes.h>
+#include <eventql/util/autoref.h>
+#include <eventql/util/protobuf/MessageSchema.h>
+#include <eventql/util/protobuf/MessageObject.h>
 
 namespace stx {
 namespace logtable {

@@ -7,12 +7,12 @@
  * permission is obtained.
  */
 #include <eventql/master/ConfigDirectoryMaster.h>
-#include <stx/io/file.h>
-#include <stx/io/fileutil.h>
-#include <stx/random.h>
-#include <stx/protobuf/msg.h>
-#include <stx/logging.h>
-#include <stx/inspect.h>
+#include <eventql/util/io/file.h>
+#include <eventql/util/io/fileutil.h>
+#include <eventql/util/random.h>
+#include <eventql/util/protobuf/msg.h>
+#include <eventql/util/logging.h>
+#include <eventql/util/inspect.h>
 
 using namespace stx;
 

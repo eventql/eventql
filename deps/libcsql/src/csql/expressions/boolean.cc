@@ -12,7 +12,7 @@
 #include <math.h>
 #include <string.h>
 #include <csql/expressions/boolean.h>
-#include <stx/exception.h>
+#include <eventql/util/exception.h>
 
 namespace csql {
 namespace expressions {

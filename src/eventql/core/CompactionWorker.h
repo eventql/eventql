@@ -9,9 +9,9 @@
  */
 #pragma once
 #include <thread>
-#include <stx/stdtypes.h>
+#include <eventql/util/stdtypes.h>
 #include <eventql/core/TSDBService.h>
-#include <stx/random.h>
+#include <eventql/util/random.h>
 
 using namespace stx;
 

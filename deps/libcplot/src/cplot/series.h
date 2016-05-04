@@ -14,8 +14,8 @@
 #include <vector>
 #include <unordered_map>
 #include <tuple>
-#include <stx/exception.h>
-#include <stx/stringutil.h>
+#include <eventql/util/exception.h>
+#include <eventql/util/stringutil.h>
 
 namespace stx {
 namespace chart {

@@ -9,7 +9,7 @@
  */
 #include <cstable/io/PageIndex.h>
 #include <cstable/io/PageWriter.h>
-#include <stx/util/binarymessagewriter.h>
+#include <eventql/util/util/binarymessagewriter.h>
 
 
 namespace cstable {

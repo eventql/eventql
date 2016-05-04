@@ -9,11 +9,11 @@
  */
 #ifndef _FNORD_LOGTABLE_TABLEREPOSITORY_H
 #define _FNORD_LOGTABLE_TABLEREPOSITORY_H
-#include <stx/stdtypes.h>
+#include <eventql/util/stdtypes.h>
 #include <fnord-logtable/TableReader.h>
 #include <fnord-logtable/TableWriter.h>
 #include <fnord-afx/ArtifactIndex.h>
-#include <stx/protobuf/MessageSchema.h>
+#include <eventql/util/protobuf/MessageSchema.h>
 
 namespace stx {
 namespace logtable {

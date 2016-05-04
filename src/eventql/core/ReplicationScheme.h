@@ -8,12 +8,12 @@
  * <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include <stx/stdtypes.h>
-#include <stx/SHA1.h>
-#include <stx/autoref.h>
-#include <stx/random.h>
-#include <stx/option.h>
-#include <stx/net/inetaddr.h>
+#include <eventql/util/stdtypes.h>
+#include <eventql/util/SHA1.h>
+#include <eventql/util/autoref.h>
+#include <eventql/util/random.h>
+#include <eventql/util/option.h>
+#include <eventql/util/net/inetaddr.h>
 #include <eventql/core/ClusterConfig.pb.h>
 
 using namespace stx;

@@ -9,15 +9,15 @@
  */
 #ifndef _FNORD_DPROC_TASK_H
 #define _FNORD_DPROC_TASK_H
-#include <stx/stdtypes.h>
-#include <stx/autoref.h>
-#include <stx/buffer.h>
-#include <stx/option.h>
-#include <stx/exception.h>
-#include <stx/SHA1.h>
-#include <stx/VFSFile.h>
-#include <stx/thread/future.h>
-#include <stx/protobuf/msg.h>
+#include <eventql/util/stdtypes.h>
+#include <eventql/util/autoref.h>
+#include <eventql/util/buffer.h>
+#include <eventql/util/option.h>
+#include <eventql/util/exception.h>
+#include <eventql/util/SHA1.h>
+#include <eventql/util/VFSFile.h>
+#include <eventql/util/thread/future.h>
+#include <eventql/util/protobuf/msg.h>
 
 using namespace stx;
 

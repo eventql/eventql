@@ -9,12 +9,12 @@
  */
 #ifndef _FNORD_CSTABLE_COLUMNWRITER_H
 #define _FNORD_CSTABLE_COLUMNWRITER_H
-#include <stx/stdtypes.h>
-#include <stx/exception.h>
-#include <stx/autoref.h>
-#include <stx/util/binarymessagewriter.h>
-#include <stx/util/BitPackEncoder.h>
-#include <stx/protobuf/MessageObject.h>
+#include <eventql/util/stdtypes.h>
+#include <eventql/util/exception.h>
+#include <eventql/util/autoref.h>
+#include <eventql/util/util/binarymessagewriter.h>
+#include <eventql/util/util/BitPackEncoder.h>
+#include <eventql/util/protobuf/MessageObject.h>
 #include <cstable/cstable.h>
 #include <cstable/ColumnWriter.h>
 

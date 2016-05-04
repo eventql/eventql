@@ -8,9 +8,9 @@
  * <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include <stx/stdtypes.h>
-#include <stx/util/binarymessagereader.h>
-#include <stx/util/BitPackDecoder.h>
+#include <eventql/util/stdtypes.h>
+#include <eventql/util/util/binarymessagereader.h>
+#include <eventql/util/util/BitPackDecoder.h>
 #include <cstable/columns/v1/ColumnReader.h>
 
 

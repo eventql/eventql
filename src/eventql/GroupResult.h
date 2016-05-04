@@ -8,8 +8,8 @@
  */
 #ifndef _CM_GROURESULT_H
 #define _CM_GROURESULT_H
-#include <stx/stdtypes.h>
-#include <stx/json/json.h>
+#include <eventql/util/stdtypes.h>
+#include <eventql/util/json/json.h>
 #include "cstable/CSTableReader.h"
 #include "eventql/CTRCounter.h"
 #include "eventql/AnalyticsTableScan.h"

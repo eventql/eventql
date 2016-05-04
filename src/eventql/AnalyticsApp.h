@@ -12,7 +12,7 @@
 #include "eventql/dproc/Task.h"
 #include "eventql/dproc/TaskResultFuture.h"
 #include "eventql/dproc/DispatchService.h"
-#include "stx/protobuf/MessageSchema.h"
+#include "eventql/util/protobuf/MessageSchema.h"
 #include "eventql/core/TSDBClient.h"
 #include "eventql/core/TSDBService.h"
 #include "eventql/core/CompactionWorker.h"

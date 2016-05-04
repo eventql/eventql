@@ -10,7 +10,7 @@
 #include "eventql/infra/sstable/SSTableServlet.h"
 #include "eventql/infra/sstable/sstablereader.h"
 #include "eventql/infra/sstable/SSTableScan.h"
-#include "stx/io/fileutil.h"
+#include "eventql/util/io/fileutil.h"
 
 namespace stx {
 namespace sstable {

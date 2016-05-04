@@ -7,9 +7,9 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#include "stx/wallclock.h"
-#include "stx/json/json.h"
-#include "stx/protobuf/msg.h"
+#include "eventql/util/wallclock.h"
+#include "eventql/util/json/json.h"
+#include "eventql/util/protobuf/msg.h"
 #include "eventql/JSONExportRDD.h"
 
 using namespace stx;

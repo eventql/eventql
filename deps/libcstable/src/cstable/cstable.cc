@@ -9,9 +9,9 @@
  */
 #include <cstable/cstable.h>
 #include <cstable/io/PageManager.h>
-#include <stx/util/binarymessagewriter.h>
-#include <stx/util/binarymessagereader.h>
-#include <stx/SHA1.h>
+#include <eventql/util/util/binarymessagewriter.h>
+#include <eventql/util/util/binarymessagereader.h>
+#include <eventql/util/SHA1.h>
 
 using namespace stx;
 

@@ -9,11 +9,11 @@
  */
 #ifndef _FNORD_DPROC_LOCALSCHEDULER_H
 #define _FNORD_DPROC_LOCALSCHEDULER_H
-#include "stx/stdtypes.h"
-#include "stx/random.h"
-#include "stx/thread/taskscheduler.h"
-#include "stx/thread/threadpool.h"
-#include "stx/thread/FixedSizeThreadPool.h"
+#include "eventql/util/stdtypes.h"
+#include "eventql/util/random.h"
+#include "eventql/util/thread/taskscheduler.h"
+#include "eventql/util/thread/threadpool.h"
+#include "eventql/util/thread/FixedSizeThreadPool.h"
 #include <eventql/dproc/Application.h>
 #include <eventql/dproc/Scheduler.h>
 #include <eventql/dproc/TaskSpec.pb.h>

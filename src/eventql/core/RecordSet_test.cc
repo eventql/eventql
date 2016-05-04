@@ -10,9 +10,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "stx/test/unittest.h"
-#include "stx/protobuf/MessageDecoder.h"
-#include "stx/protobuf/MessageEncoder.h"
+#include "eventql/util/test/unittest.h"
+#include "eventql/util/protobuf/MessageDecoder.h"
+#include "eventql/util/protobuf/MessageEncoder.h"
 #include "eventql/core/RecordSet.h"
 
 using namespace stx;

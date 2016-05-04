@@ -8,9 +8,9 @@
  */
 #include "CTRStatsServlet.h"
 #include "eventql/CTRCounter.h"
-#include "stx/Language.h"
-#include "stx/wallclock.h"
-#include "stx/io/fileutil.h"
+#include "eventql/util/Language.h"
+#include "eventql/util/wallclock.h"
+#include "eventql/util/io/fileutil.h"
 #include "eventql/infra/sstable/sstablereader.h"
 #include "eventql/infra/sstable/SSTableScan.h"
 

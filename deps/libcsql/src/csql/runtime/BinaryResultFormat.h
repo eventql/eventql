@@ -9,10 +9,10 @@
  * <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include <stx/stdtypes.h>
+#include <eventql/util/stdtypes.h>
 #include <csql/runtime/ResultFormat.h>
-#include <stx/http/HTTPResponseStream.h>
-#include <stx/util/binarymessagewriter.h>
+#include <eventql/util/http/HTTPResponseStream.h>
+#include <eventql/util/util/binarymessagewriter.h>
 
 /**
  * Binary SQL Query Result/Response Format

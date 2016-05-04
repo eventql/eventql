@@ -7,7 +7,7 @@
  * permission is obtained.
  */
 #pragma once
-#include "stx/thread/threadpool.h"
+#include "eventql/util/thread/threadpool.h"
 #include "eventql/core/TSDBService.h"
 #include "eventql/AnalyticsAuth.h"
 #include "eventql/CustomerConfig.h"

@@ -7,9 +7,9 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include "stx/io/fileutil.h"
-#include "stx/ieee754.h"
-#include "stx/human.h"
+#include "eventql/util/io/fileutil.h"
+#include "eventql/util/ieee754.h"
+#include "eventql/util/human.h"
 #include <cstable/RecordShredder.h>
 
 using namespace stx;

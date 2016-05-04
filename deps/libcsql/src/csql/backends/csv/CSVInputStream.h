@@ -8,8 +8,8 @@
  * <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include "stx/stdtypes.h"
-#include "stx/io/inputstream.h"
+#include "eventql/util/stdtypes.h"
+#include "eventql/util/io/inputstream.h"
 
 using namespace stx;
 

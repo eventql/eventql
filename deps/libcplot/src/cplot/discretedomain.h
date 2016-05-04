@@ -9,7 +9,7 @@
  */
 #ifndef _libstx_DISCRETEDOMAIN_H
 #define _libstx_DISCRETEDOMAIN_H
-#include "stx/stringutil.h"
+#include "eventql/util/stringutil.h"
 #include "cplot/domain.h"
 
 namespace stx {

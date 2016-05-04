@@ -12,11 +12,11 @@
 #include <string>
 #include <string.h>
 #include <vector>
-#include <stx/io/inputstream.h>
-#include <stx/io/outputstream.h>
-#include <stx/stdtypes.h>
-#include <stx/UnixTime.h>
-#include <stx/exception.h>
+#include <eventql/util/io/inputstream.h>
+#include <eventql/util/io/outputstream.h>
+#include <eventql/util/stdtypes.h>
+#include <eventql/util/UnixTime.h>
+#include <eventql/util/exception.h>
 #include <csql/csql.h>
 
 using namespace stx;

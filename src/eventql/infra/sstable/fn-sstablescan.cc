@@ -9,10 +9,10 @@
  */
 #include <stdlib.h>
 #include <unistd.h>
-#include "stx/application.h"
-#include "stx/cli/flagparser.h"
-#include "stx/logging.h"
-#include "stx/inspect.h"
+#include "eventql/util/application.h"
+#include "eventql/util/cli/flagparser.h"
+#include "eventql/util/logging.h"
+#include "eventql/util/inspect.h"
 #include "eventql/infra/sstable/sstablereader.h"
 #include "eventql/infra/sstable/SSTableScan.h"
 

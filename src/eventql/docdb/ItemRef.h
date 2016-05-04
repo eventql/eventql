@@ -13,7 +13,7 @@
 #include <set>
 #include <string>
 #include <unordered_map>
-#include "stx/reflect/reflect.h"
+#include "eventql/util/reflect/reflect.h"
 #include "DocID.h"
 
 using namespace stx;

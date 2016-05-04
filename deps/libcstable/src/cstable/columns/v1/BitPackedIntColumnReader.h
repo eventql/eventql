@@ -9,9 +9,9 @@
  */
 #ifndef _FNORD_CSTABLE_UINT16COLUMNREADER_H
 #define _FNORD_CSTABLE_UINT16COLUMNREADER_H
-#include <stx/stdtypes.h>
-#include <stx/util/binarymessagereader.h>
-#include <stx/util/BitPackDecoder.h>
+#include <eventql/util/stdtypes.h>
+#include <eventql/util/util/binarymessagereader.h>
+#include <eventql/util/util/BitPackDecoder.h>
 #include <cstable/columns/v1/ColumnReader.h>
 
 namespace cstable {

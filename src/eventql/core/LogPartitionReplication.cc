@@ -10,9 +10,9 @@
 #include <eventql/core/LogPartitionReplication.h>
 #include <eventql/core/LogPartitionReader.h>
 #include <eventql/core/ReplicationScheme.h>
-#include <stx/logging.h>
-#include <stx/io/fileutil.h>
-#include <stx/protobuf/msg.h>
+#include <eventql/util/logging.h>
+#include <eventql/util/io/fileutil.h>
+#include <eventql/util/protobuf/msg.h>
 
 using namespace stx;
 

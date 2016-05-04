@@ -7,9 +7,9 @@
  * permission is obtained.
  */
 #pragma once
-#include "stx/stdtypes.h"
-#include "stx/http/httpservice.h"
-#include "stx/http/HTTPSSEStream.h"
+#include "eventql/util/stdtypes.h"
+#include "eventql/util/http/httpservice.h"
+#include "eventql/util/http/HTTPSSEStream.h"
 #include "eventql/AnalyticsSession.pb.h"
 #include "eventql/api/EventsService.h"
 

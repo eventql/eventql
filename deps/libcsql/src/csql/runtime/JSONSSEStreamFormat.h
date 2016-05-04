@@ -8,9 +8,9 @@
  * <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include <stx/stdtypes.h>
+#include <eventql/util/stdtypes.h>
 #include <csql/runtime/ResultFormat.h>
-#include <stx/http/HTTPSSEStream.h>
+#include <eventql/util/http/HTTPSSEStream.h>
 
 namespace csql {
 

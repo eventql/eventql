@@ -8,9 +8,9 @@
  * <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include <stx/stdtypes.h>
-#include <stx/autoref.h>
-#include <stx/thread/taskscheduler.h>
+#include <eventql/util/stdtypes.h>
+#include <eventql/util/autoref.h>
+#include <eventql/util/thread/taskscheduler.h>
 #include <csql/svalue.h>
 
 using namespace stx;

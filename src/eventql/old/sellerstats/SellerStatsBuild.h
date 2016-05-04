@@ -8,13 +8,13 @@
  */
 #ifndef _CM_SELLERSTATSBUILD_H
 #define _CM_SELLERSTATSBUILD_H
-#include "stx/stdtypes.h"
-#include "stx/rpc/RPC.h"
-#include "stx/rpc/RPCClient.h"
-#include "stx/thread/taskscheduler.h"
+#include "eventql/util/stdtypes.h"
+#include "eventql/util/rpc/RPC.h"
+#include "eventql/util/rpc/RPCClient.h"
+#include "eventql/util/thread/taskscheduler.h"
 #include "eventql/util/mdb/MDB.h"
-#include "stx/stats/stats.h"
-#include "stx/json/json.h"
+#include "eventql/util/stats/stats.h"
+#include "eventql/util/json/json.h"
 #include <eventql/docdb/ItemRef.h>
 #include "JoinedItemVisit.h"
 #include "FeatureIndex.h"

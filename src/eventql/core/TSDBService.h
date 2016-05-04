@@ -9,12 +9,12 @@
  */
 #ifndef _FNORD_TSDB_TSDBNODE_H
 #define _FNORD_TSDB_TSDBNODE_H
-#include <stx/stdtypes.h>
-#include <stx/random.h>
-#include <stx/option.h>
-#include <stx/protobuf/DynamicMessage.h>
-#include <stx/thread/queue.h>
-#include <stx/thread/eventloop.h>
+#include <eventql/util/stdtypes.h>
+#include <eventql/util/random.h>
+#include <eventql/util/option.h>
+#include <eventql/util/protobuf/DynamicMessage.h>
+#include <eventql/util/thread/queue.h>
+#include <eventql/util/thread/eventloop.h>
 #include <eventql/util/mdb/MDB.h>
 #include <eventql/core/TableConfig.pb.h>
 #include <eventql/core/Partition.h>

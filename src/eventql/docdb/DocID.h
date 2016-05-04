@@ -10,7 +10,7 @@
 #define _CM_DOCID_H
 #include <stdlib.h>
 #include <string>
-#include <stx/stdtypes.h>
+#include <eventql/util/stdtypes.h>
 
 using namespace stx;
 

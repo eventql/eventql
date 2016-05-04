@@ -12,7 +12,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <unordered_map>
-#include <stx/exception.h>
+#include <eventql/util/exception.h>
 #include <cplot/canvas.h>
 #include <cplot/barchart.h>
 #include <cplot/series.h>

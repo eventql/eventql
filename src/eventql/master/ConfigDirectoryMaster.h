@@ -7,8 +7,8 @@
  * permission is obtained.
  */
 #pragma once
-#include <stx/stdtypes.h>
-#include <stx/SHA1.h>
+#include <eventql/util/stdtypes.h>
+#include <eventql/util/SHA1.h>
 #include <eventql/CustomerConfig.h>
 #include <eventql/core/ClusterConfig.pb.h>
 #include <eventql/TableDefinition.h>

@@ -8,8 +8,8 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <memory>
-#include <stx/exception.h>
-#include <stx/io/inputstream.h>
+#include <eventql/util/exception.h>
+#include <eventql/util/io/inputstream.h>
 #include <csql/backends/csv/csvbackend.h>
 #include <csql/backends/csv/csvtableref.h>
 #include <csql/parser/astnode.h>

@@ -10,9 +10,9 @@
 #include <assert.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include "stx/csv/CSVInputStream.h"
-#include "stx/exception.h"
-#include "stx/io/inputstream.h"
+#include "eventql/util/csv/CSVInputStream.h"
+#include "eventql/util/exception.h"
+#include "eventql/util/io/inputstream.h"
 #include "csql/backends/csv/CSVInputStream.h"
 
 namespace csql {

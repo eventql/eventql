@@ -9,13 +9,13 @@
  */
 #ifndef _FNORD_TSDB_MESSAGESET_H
 #define _FNORD_TSDB_MESSAGESET_H
-#include <stx/stdtypes.h>
-#include <stx/io/file.h>
-#include <stx/option.h>
-#include <stx/SHA1.h>
-#include <stx/util/binarymessagereader.h>
-#include <stx/util/binarymessagewriter.h>
-#include <stx/random.h>
+#include <eventql/util/stdtypes.h>
+#include <eventql/util/io/file.h>
+#include <eventql/util/option.h>
+#include <eventql/util/SHA1.h>
+#include <eventql/util/util/binarymessagereader.h>
+#include <eventql/util/util/binarymessagewriter.h>
+#include <eventql/util/random.h>
 #include <eventql/core/RecordRef.h>
 
 using namespace stx;

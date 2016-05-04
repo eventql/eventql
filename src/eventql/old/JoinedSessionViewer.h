@@ -1,8 +1,8 @@
 #ifndef _CM_JOINEDSESSIONVIEWER_H
 #define _CM_JOINEDSESSIONVIEWER_H
-#include <stx/stdtypes.h>
-#include <stx/util/Base64.h>
-#include "stx/http/httpservice.h"
+#include <eventql/util/stdtypes.h>
+#include <eventql/util/util/Base64.h>
+#include "eventql/util/http/httpservice.h"
 #include "common.h"
 
 

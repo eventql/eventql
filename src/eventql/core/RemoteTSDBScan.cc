@@ -7,10 +7,10 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <stx/logging.h>
-#include <stx/thread/future.h>
-#include <stx/http/httpclient.h>
-#include <stx/protobuf/msg.h>
+#include <eventql/util/logging.h>
+#include <eventql/util/thread/future.h>
+#include <eventql/util/http/httpclient.h>
+#include <eventql/util/protobuf/msg.h>
 #include <eventql/core/RemoteTSDBScan.h>
 #include <eventql/AnalyticsSession.pb.h>
 #include <csql/runtime/BinaryResultParser.h>

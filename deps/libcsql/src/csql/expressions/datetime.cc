@@ -12,9 +12,9 @@
 #include <assert.h>
 #include <math.h>
 #include <string.h>
-#include <stx/inspect.h>
-#include <stx/human.h>
-#include <stx/wallclock.h>
+#include <eventql/util/inspect.h>
+#include <eventql/util/human.h>
+#include <eventql/util/wallclock.h>
 #include <csql/expressions/datetime.h>
 #include <csql/svalue.h>
 

@@ -18,7 +18,7 @@
 #include <csql/runtime/tablerepository.h>
 #include <csql/runtime/compiler.h>
 #include <csql/runtime/vm.h>
-#include <stx/exception.h>
+#include <eventql/util/exception.h>
 
 namespace csql {
 

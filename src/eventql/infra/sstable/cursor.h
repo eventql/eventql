@@ -13,7 +13,7 @@
 #include <string>
 #include <vector>
 #include <memory>
-#include "stx/buffer.h"
+#include "eventql/util/buffer.h"
 
 namespace stx {
 namespace sstable {

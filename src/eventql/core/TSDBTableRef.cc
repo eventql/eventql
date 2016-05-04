@@ -8,9 +8,9 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <eventql/core/TSDBTableRef.h>
-#include <stx/uri.h>
-#include <stx/wallclock.h>
-#include <stx/human.h>
+#include <eventql/util/uri.h>
+#include <eventql/util/wallclock.h>
+#include <eventql/util/human.h>
 
 using namespace stx;
 

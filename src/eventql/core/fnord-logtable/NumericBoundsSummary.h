@@ -9,9 +9,9 @@
  */
 #ifndef _FNORD_LOGTABLE_NUMERICBOUNDSSUMMARYBUILDER_H
 #define _FNORD_LOGTABLE_NUMERICBOUNDSSUMMARYBUILDER_H
-#include <stx/stdtypes.h>
-#include <stx/util/binarymessagewriter.h>
-#include <stx/util/binarymessagereader.h>
+#include <eventql/util/stdtypes.h>
+#include <eventql/util/util/binarymessagewriter.h>
+#include <eventql/util/util/binarymessagereader.h>
 #include <fnord-logtable/TableChunkSummaryBuilder.h>
 
 namespace stx {

@@ -7,19 +7,19 @@
  * permission is obtained.
  */
 #include <unistd.h>
-#include "stx/stdtypes.h"
-#include "stx/application.h"
-#include "stx/cli/flagparser.h"
-#include "stx/cli/CLI.h"
-#include "stx/csv/CSVInputStream.h"
-#include "stx/csv/BinaryCSVOutputStream.h"
-#include "stx/io/file.h"
-#include "stx/io/BufferedOutputStream.h"
-#include "stx/inspect.h"
-#include "stx/human.h"
-#include "stx/http/httpclient.h"
-#include "stx/util/SimpleRateLimit.h"
-#include "stx/protobuf/MessageSchema.h"
+#include "eventql/util/stdtypes.h"
+#include "eventql/util/application.h"
+#include "eventql/util/cli/flagparser.h"
+#include "eventql/util/cli/CLI.h"
+#include "eventql/util/csv/CSVInputStream.h"
+#include "eventql/util/csv/BinaryCSVOutputStream.h"
+#include "eventql/util/io/file.h"
+#include "eventql/util/io/BufferedOutputStream.h"
+#include "eventql/util/inspect.h"
+#include "eventql/util/human.h"
+#include "eventql/util/http/httpclient.h"
+#include "eventql/util/util/SimpleRateLimit.h"
+#include "eventql/util/protobuf/MessageSchema.h"
 
 using namespace stx;
 

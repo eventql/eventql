@@ -6,7 +6,7 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#include "stx/logging.h"
+#include "eventql/util/logging.h"
 #include "eventql/metrics/MetricQuery.h"
 
 using namespace stx;

@@ -9,8 +9,8 @@
  */
 #ifndef _FNORD_LOGTABLE_LOGTABLESERVLET_H
 #define _FNORD_LOGTABLE_LOGTABLESERVLET_H
-#include "stx/http/httpservice.h"
-#include "stx/json/json.h"
+#include "eventql/util/http/httpservice.h"
+#include "eventql/util/json/json.h"
 #include <fnord-logtable/TableRepository.h>
 
 namespace stx {

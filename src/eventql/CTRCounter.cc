@@ -6,8 +6,8 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#include <stx/util/binarymessagereader.h>
-#include <stx/util/binarymessagewriter.h>
+#include <eventql/util/util/binarymessagereader.h>
+#include <eventql/util/util/binarymessagewriter.h>
 #include "eventql/CTRCounter.h"
 
 using namespace stx;

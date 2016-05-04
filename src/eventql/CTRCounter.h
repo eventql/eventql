@@ -8,9 +8,9 @@
  */
 #ifndef _CM_CTRCOUNTER_H
 #define _CM_CTRCOUNTER_H
-#include "stx/stdtypes.h"
-#include "stx/option.h"
-#include "stx/json/json.h"
+#include "eventql/util/stdtypes.h"
+#include "eventql/util/option.h"
+#include "eventql/util/json/json.h"
 #include "eventql/infra/sstable/sstablereader.h"
 #include "eventql/infra/sstable/SSTableEditor.h"
 #include "eventql/infra/sstable/SSTableColumnSchema.h"

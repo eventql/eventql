@@ -9,8 +9,8 @@
  */
 #ifndef _libstx_CONTINUOUSDOMAIN_H
 #define _libstx_CONTINUOUSDOMAIN_H
-#include "stx/exception.h"
-#include "stx/stringutil.h"
+#include "eventql/util/exception.h"
+#include "eventql/util/stringutil.h"
 #include "cplot/domain.h"
 
 namespace stx {

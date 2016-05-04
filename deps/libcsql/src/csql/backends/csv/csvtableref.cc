@@ -7,9 +7,9 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <stx/stdtypes.h>
-#include <stx/csv/CSVInputStream.h>
-#include <stx/exception.h>
+#include <eventql/util/stdtypes.h>
+#include <eventql/util/csv/CSVInputStream.h>
+#include <eventql/util/exception.h>
 #include <csql/parser/astnode.h>
 #include <csql/backends/csv/csvtableref.h>
 #include <csql/runtime/tablescan.h>

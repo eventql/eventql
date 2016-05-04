@@ -8,9 +8,9 @@
  * <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include <stx/stdtypes.h>
-#include <stx/buffer.h>
-#include <stx/SHA1.h>
+#include <eventql/util/stdtypes.h>
+#include <eventql/util/buffer.h>
+#include <eventql/util/SHA1.h>
 
 using namespace stx;
 

@@ -7,7 +7,7 @@
  * permission is obtained.
  */
 #include "eventql/mapreduce/MapReduceTask.h"
-#include "stx/logging.h"
+#include "eventql/util/logging.h"
 
 using namespace stx;
 

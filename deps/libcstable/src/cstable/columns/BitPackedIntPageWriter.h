@@ -8,9 +8,9 @@
  * <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include <stx/stdtypes.h>
-#include <stx/util/binarymessagewriter.h>
-#include <stx/util/BitPackEncoder.h>
+#include <eventql/util/stdtypes.h>
+#include <eventql/util/util/binarymessagewriter.h>
+#include <eventql/util/util/BitPackEncoder.h>
 #include <cstable/cstable.h>
 #include <cstable/io/PageManager.h>
 #include <cstable/io/PageWriter.h>

@@ -111,8 +111,7 @@ if (NOT HAVE_STD_CODECVT)
   message(FATAL_ERROR "ERROR: c++ stdlib does not support <codecvt>")
 endif()
 
-add_subdirectory(deps/libstx)
-include_directories(${STX_INCLUDE})
+add_subdirectory(src/eventql/util)
 set(HAVE_STX true)
 
 add_subdirectory(deps/libcstable)

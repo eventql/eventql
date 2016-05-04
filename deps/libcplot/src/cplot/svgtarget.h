@@ -15,7 +15,7 @@
 #include <string>
 #include "cplot/rendertarget.h"
 #include "cplot/styles/style_default.h"
-#include "stx/io/outputstream.h"
+#include "eventql/util/io/outputstream.h"
 
 namespace stx {
 namespace chart {

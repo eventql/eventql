@@ -8,10 +8,10 @@
  * <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include <stx/stdtypes.h>
-#include <stx/autoref.h>
-#include <stx/option.h>
-#include <stx/protobuf/MessageObject.h>
+#include <eventql/util/stdtypes.h>
+#include <eventql/util/autoref.h>
+#include <eventql/util/option.h>
+#include <eventql/util/protobuf/MessageObject.h>
 #include <eventql/core/PartitionSnapshot.h>
 #include <csql/CSTableScan.h>
 

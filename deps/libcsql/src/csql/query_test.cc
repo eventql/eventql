@@ -27,8 +27,8 @@
 #include <util/inputstream.h>
 #include <util/outputstream.h>
 #include <util/unittest.h>
-#include <stx/uri.h>
-#include <stx/exception.h>
+#include <eventql/util/uri.h>
+#include <eventql/util/exception.h>
 
 using namespace stxmetric::query;
 

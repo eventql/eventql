@@ -8,11 +8,11 @@
  * <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include <stx/stdtypes.h>
-#include <stx/autoref.h>
+#include <eventql/util/stdtypes.h>
+#include <eventql/util/autoref.h>
 #include <eventql/core/PartitionWriter.h>
 #include <eventql/core/RecordArena.h>
-#include <stx/util/PersistentHashSet.h>
+#include <eventql/util/util/PersistentHashSet.h>
 #include <eventql/core/CompactionStrategy.h>
 
 using namespace stx;

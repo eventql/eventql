@@ -8,16 +8,16 @@
  * <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include <stx/stdtypes.h>
-#include <stx/io/file.h>
-#include <stx/util/binarymessagewriter.h>
-#include <stx/autoref.h>
-#include <stx/csv/CSVInputStream.h>
+#include <eventql/util/stdtypes.h>
+#include <eventql/util/io/file.h>
+#include <eventql/util/util/binarymessagewriter.h>
+#include <eventql/util/autoref.h>
+#include <eventql/util/csv/CSVInputStream.h>
 #include <cstable/ColumnWriter.h>
 #include <cstable/CSTableWriter.h>
 #include <cstable/TableSchema.h>
-#include <stx/protobuf/MessageSchema.h>
-#include <stx/protobuf/DynamicMessage.h>
+#include <eventql/util/protobuf/MessageSchema.h>
+#include <eventql/util/protobuf/DynamicMessage.h>
 
 
 namespace cstable {

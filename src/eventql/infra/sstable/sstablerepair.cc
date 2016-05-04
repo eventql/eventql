@@ -7,8 +7,8 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <stx/exception.h>
-#include <stx/fnv.h>
+#include <eventql/util/exception.h>
+#include <eventql/util/fnv.h>
 #include <eventql/infra/sstable/sstablereader.h>
 #include <eventql/infra/sstable/sstablerepair.h>
 

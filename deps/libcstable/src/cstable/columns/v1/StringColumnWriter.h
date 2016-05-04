@@ -9,9 +9,9 @@
  */
 #ifndef _FNORD_CSTABLE_STRINGCOLUMNWRITER_H
 #define _FNORD_CSTABLE_STRINGCOLUMNWRITER_H
-#include <stx/stdtypes.h>
-#include <stx/util/binarymessagewriter.h>
-#include <stx/util/BitPackEncoder.h>
+#include <eventql/util/stdtypes.h>
+#include <eventql/util/util/binarymessagewriter.h>
+#include <eventql/util/util/BitPackEncoder.h>
 #include <cstable/cstable.h>
 #include <cstable/columns/v1/ColumnWriter.h>
 

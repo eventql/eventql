@@ -6,9 +6,9 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#include "stx/wallclock.h"
-#include "stx/protobuf/MessageEncoder.h"
-#include "stx/protobuf/MessageDecoder.h"
+#include "eventql/util/wallclock.h"
+#include "eventql/util/protobuf/MessageEncoder.h"
+#include "eventql/util/protobuf/MessageDecoder.h"
 #include "eventql/EventScanResult.h"
 
 using namespace stx;

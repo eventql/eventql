@@ -8,10 +8,10 @@
  */
 #include "AutoCompleteServlet.h"
 #include "eventql/CTRCounter.h"
-#include "stx/Language.h"
-#include "stx/logging.h"
-#include "stx/wallclock.h"
-#include "stx/io/fileutil.h"
+#include "eventql/util/Language.h"
+#include "eventql/util/logging.h"
+#include "eventql/util/wallclock.h"
+#include "eventql/util/io/fileutil.h"
 
 using namespace stx;
 

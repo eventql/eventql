@@ -13,7 +13,7 @@
 #include <string>
 #include <vector>
 #include <memory>
-#include <stx/exception.h>
+#include <eventql/util/exception.h>
 #include <csql/parser/token.h>
 #include <csql/parser/astnode.h>
 

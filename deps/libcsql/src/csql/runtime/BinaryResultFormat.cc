@@ -9,7 +9,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <csql/runtime/BinaryResultFormat.h>
-#include <stx/logging.h>
+#include <eventql/util/logging.h>
 
 namespace csql {
 

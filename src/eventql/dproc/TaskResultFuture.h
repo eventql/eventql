@@ -9,7 +9,7 @@
  */
 #ifndef _FNORD_DPROC_TASKRESULT_H
 #define _FNORD_DPROC_TASKRESULT_H
-#include <stx/stdtypes.h>
+#include <eventql/util/stdtypes.h>
 #include <eventql/dproc/Task.h>
 #include <eventql/dproc/TaskRef.h>
 

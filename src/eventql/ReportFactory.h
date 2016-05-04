@@ -7,10 +7,10 @@
  * permission is obtained.
  */
 #pragma once
-#include "stx/stdtypes.h"
-#include "stx/exception.h"
-#include "stx/uri.h"
-#include "stx/autoref.h"
+#include "eventql/util/stdtypes.h"
+#include "eventql/util/exception.h"
+#include "eventql/util/uri.h"
+#include "eventql/util/autoref.h"
 #include "eventql/dproc/TaskSpec.pb.h"
 
 using namespace stx;

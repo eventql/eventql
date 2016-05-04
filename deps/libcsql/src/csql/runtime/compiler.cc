@@ -8,7 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <stdlib.h>
-#include <stx/RegExp.h>
+#include <eventql/util/RegExp.h>
 #include <csql/parser/astnode.h>
 #include <csql/parser/token.h>
 #include <csql/runtime/compiler.h>

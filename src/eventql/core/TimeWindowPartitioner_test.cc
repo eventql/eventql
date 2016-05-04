@@ -10,7 +10,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "stx/test/unittest.h"
+#include "eventql/util/test/unittest.h"
 #include "eventql/core/Partition.h"
 #include "eventql/core/TimeWindowPartitioner.h"
 

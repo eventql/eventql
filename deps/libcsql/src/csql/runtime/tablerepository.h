@@ -8,7 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include <stx/option.h>
+#include <eventql/util/option.h>
 #include <csql/backends/backend.h>
 #include <csql/backends/tableref.h>
 #include <csql/runtime/TableExpression.h>

@@ -8,8 +8,8 @@
  */
 #ifndef _CM_FEATURESELECTOR_H
 #define _CM_FEATURESELECTOR_H
-#include "stx/stdtypes.h"
-#include "stx/option.h"
+#include "eventql/util/stdtypes.h"
+#include "eventql/util/option.h"
 #include "FeatureID.h"
 #
 #include <eventql/util/fts.h>

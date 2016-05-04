@@ -7,10 +7,10 @@
  * permission is obtained.
  */
 #pragma once
-#include <stx/stdtypes.h>
-#include <stx/http/httpservice.h>
-#include <stx/http/httpstats.h>
-#include <stx/SHA1.h>
+#include <eventql/util/stdtypes.h>
+#include <eventql/util/http/httpservice.h>
+#include <eventql/util/http/httpstats.h>
+#include <eventql/util/SHA1.h>
 #include <eventql/core/PartitionMap.h>
 
 using namespace stx;

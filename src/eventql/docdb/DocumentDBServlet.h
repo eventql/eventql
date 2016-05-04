@@ -7,9 +7,9 @@
  * permission is obtained.
  */
 #pragma once
-#include "stx/http/httpservice.h"
-#include "stx/json/json.h"
-#include "stx/random.h"
+#include "eventql/util/http/httpservice.h"
+#include "eventql/util/json/json.h"
+#include "eventql/util/random.h"
 #include "eventql/AnalyticsAuth.h"
 #include "eventql/ConfigDirectory.h"
 #include "eventql/docdb/DocumentDB.h"

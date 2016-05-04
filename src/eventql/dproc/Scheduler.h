@@ -9,7 +9,7 @@
  */
 #ifndef _FNORD_SCHEDULER_H
 #define _FNORD_SCHEDULER_H
-#include "stx/stdtypes.h"
+#include "eventql/util/stdtypes.h"
 #include <eventql/dproc/Application.h>
 #include <eventql/dproc/TaskSpec.pb.h>
 #include <eventql/dproc/TaskResultFuture.h>

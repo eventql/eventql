@@ -9,11 +9,11 @@
  */
 #ifndef _FNORD_TSDB_TSDBCLIENT_H
 #define _FNORD_TSDB_TSDBCLIENT_H
-#include <stx/stdtypes.h>
-#include <stx/random.h>
-#include <stx/option.h>
-#include <stx/SHA1.h>
-#include <stx/http/httpconnectionpool.h>
+#include <eventql/util/stdtypes.h>
+#include <eventql/util/random.h>
+#include <eventql/util/option.h>
+#include <eventql/util/SHA1.h>
+#include <eventql/util/http/httpconnectionpool.h>
 #include <eventql/core/PartitionInfo.pb.h>
 #include <eventql/core/RecordEnvelope.pb.h>
 

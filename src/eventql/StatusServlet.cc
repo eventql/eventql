@@ -10,7 +10,7 @@
 #include <eventql/core/PartitionReplication.h>
 #include <eventql/z1stats.h>
 #include <eventql/z1.h>
-#include "stx/application.h"
+#include "eventql/util/application.h"
 
 using namespace stx;
 namespace zbase {

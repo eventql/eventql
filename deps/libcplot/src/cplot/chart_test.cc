@@ -19,8 +19,8 @@
 #include "cplot/pointchart.h"
 #include "cplot/series.h"
 #include "cplot/svgtarget.h"
-#include "stx/io/fileutil.h"
-#include "stx/test/unittest.h"
+#include "eventql/util/io/fileutil.h"
+#include "eventql/util/test/unittest.h"
 
 UNIT_TEST(ChartTest);
 

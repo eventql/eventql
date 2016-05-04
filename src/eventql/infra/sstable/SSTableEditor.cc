@@ -8,8 +8,8 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <string.h>
-#include <stx/exception.h>
-#include <stx/fnv.h>
+#include <eventql/util/exception.h>
+#include <eventql/util/fnv.h>
 #include <eventql/infra/sstable/binaryformat.h>
 #include <eventql/infra/sstable/fileheaderwriter.h>
 #include <eventql/infra/sstable/fileheaderreader.h>

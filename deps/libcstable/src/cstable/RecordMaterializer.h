@@ -9,13 +9,13 @@
  */
 #ifndef _FNORD_CSTABLE_RECORDMATERIALIZER_H
 #define _FNORD_CSTABLE_RECORDMATERIALIZER_H
-#include <stx/stdtypes.h>
-#include <stx/io/file.h>
-#include <stx/io/mmappedfile.h>
+#include <eventql/util/stdtypes.h>
+#include <eventql/util/io/file.h>
+#include <eventql/util/io/mmappedfile.h>
 #include <cstable/cstable.h>
 #include <cstable/CSTableReader.h>
 #include <cstable/ColumnReader.h>
-#include <stx/protobuf/MessageSchema.h>
+#include <eventql/util/protobuf/MessageSchema.h>
 
 namespace cstable {
 

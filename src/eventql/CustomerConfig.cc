@@ -6,7 +6,7 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#include "stx/protobuf/MessageSchema.h"
+#include "eventql/util/protobuf/MessageSchema.h"
 #include "eventql/CustomerConfig.h"
 
 using namespace stx;

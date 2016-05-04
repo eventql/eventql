@@ -7,7 +7,7 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include "stx/UnixTime.h"
+#include "eventql/util/UnixTime.h"
 #include "cplot/timedomain.h"
 
 namespace stx {

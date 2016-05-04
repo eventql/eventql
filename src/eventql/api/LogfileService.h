@@ -7,8 +7,8 @@
  * permission is obtained.
  */
 #pragma once
-#include "stx/protobuf/MessageSchema.h"
-#include "stx/io/inputstream.h"
+#include "eventql/util/protobuf/MessageSchema.h"
+#include "eventql/util/io/inputstream.h"
 #include "eventql/core/TSDBService.h"
 #include "eventql/AnalyticsAuth.h"
 #include "eventql/CustomerConfig.h"

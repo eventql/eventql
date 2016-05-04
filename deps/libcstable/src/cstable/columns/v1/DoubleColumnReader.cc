@@ -106,7 +106,7 @@ void DoubleColumnReader::skipValue() {
   readFloat(&rlvl, &dlvl, &val);
 }
 
-#include <stx/inspect.h>
+#include <eventql/util/inspect.h>
 void DoubleColumnReader::copyValue(ColumnWriter* writer) {
   uint64_t rlvl;
   uint64_t dlvl;

@@ -10,8 +10,8 @@
 #ifndef _FNORD_CSTABLE_COLUMNREADER_H
 #define _FNORD_CSTABLE_COLUMNREADER_H
 #include <cstable/ColumnReader.h>
-#include <stx/util/binarymessagereader.h>
-#include <stx/util/BitPackDecoder.h>
+#include <eventql/util/util/binarymessagereader.h>
+#include <eventql/util/util/BitPackDecoder.h>
 
 
 namespace cstable {

@@ -7,11 +7,11 @@
  * permission is obtained.
  */
 #pragma once
-#include "stx/VFS.h"
-#include "stx/http/httpservice.h"
-#include "stx/http/HTTPSSEStream.h"
-#include "stx/json/json.h"
-#include "stx/web/SecureCookie.h"
+#include "eventql/util/VFS.h"
+#include "eventql/util/http/httpservice.h"
+#include "eventql/util/http/HTTPSSEStream.h"
+#include "eventql/util/json/json.h"
+#include "eventql/util/web/SecureCookie.h"
 #include "eventql/dproc/DispatchService.h"
 #include "eventql/AnalyticsApp.h"
 #include "eventql/ReportParams.pb.h"
