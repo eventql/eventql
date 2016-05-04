@@ -15,7 +15,7 @@
 #include <csql/runtime/defaultruntime.h>
 #include <csql/runtime/TableExpression.h>
 #include <csql/runtime/ValueExpression.h>
-#include <cstable/CSTableReader.h>
+#include <eventql/infra/cstable/CSTableReader.h>
 
 using namespace stx;
 

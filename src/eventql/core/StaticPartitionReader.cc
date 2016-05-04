@@ -12,8 +12,8 @@
 #include <eventql/util/protobuf/MessageDecoder.h>
 #include <eventql/core/StaticPartitionReader.h>
 #include <eventql/core/Table.h>
-#include <cstable/CSTableReader.h>
-#include <cstable/RecordMaterializer.h>
+#include <eventql/infra/cstable/CSTableReader.h>
+#include <eventql/infra/cstable/RecordMaterializer.h>
 
 using namespace stx;
 

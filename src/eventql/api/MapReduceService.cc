@@ -15,8 +15,8 @@
 #include "eventql/util/http/HTTPFileDownload.h"
 #include "eventql/infra/sstable/SSTableWriter.h"
 #include "eventql/infra/sstable/sstablereader.h"
-#include "cstable/CSTableWriter.h"
-#include "cstable/RecordShredder.h"
+#include "eventql/infra/cstable/CSTableWriter.h"
+#include "eventql/infra/cstable/RecordShredder.h"
 #include <algorithm>
 
 using namespace stx;

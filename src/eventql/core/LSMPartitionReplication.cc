@@ -15,7 +15,7 @@
 #include <eventql/util/io/fileutil.h>
 #include <eventql/util/protobuf/msg.h>
 #include <eventql/util/protobuf/MessageEncoder.h>
-#include <cstable/RecordMaterializer.h>
+#include <eventql/infra/cstable/RecordMaterializer.h>
 
 using namespace stx;
 

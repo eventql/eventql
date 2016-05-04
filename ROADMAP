@@ -33,7 +33,7 @@ improvements:
   - scan in memory arenas in lsm reader
   - include in memory arenas in lsm reader cache key/checksum
   - LSM delayed delete compacted tables
-  - compact cstable/idx storage (unified file)
+  - compact eventql/infra/cstable/idx storage (unified file)
   - push down table subqueries to remote node if no aggregation or only WITHIN record aggregation
   - SQL distributed hash join
   - write cstable record id -> col posi idx for fast lookup by ID

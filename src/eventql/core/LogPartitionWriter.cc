@@ -17,8 +17,8 @@
 #include <eventql/util/wallclock.h>
 #include <eventql/infra/sstable/SSTableWriter.h>
 #include <eventql/util/protobuf/MessageDecoder.h>
-#include <cstable/RecordShredder.h>
-#include <cstable/CSTableWriter.h>
+#include <eventql/infra/cstable/RecordShredder.h>
+#include <eventql/infra/cstable/CSTableWriter.h>
 
 using namespace stx;
 

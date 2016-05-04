@@ -13,7 +13,7 @@
 #include <eventql/util/autoref.h>
 #include <fnord-logtable/AbstractTableReader.h>
 #include "eventql/infra/sstable/sstablereader.h"
-#include "cstable/CSTableReader.h"
+#include "eventql/infra/cstable/CSTableReader.h"
 
 namespace stx {
 namespace logtable {

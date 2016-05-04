@@ -10,7 +10,7 @@
 #pragma once
 #include <eventql/util/stdtypes.h>
 #include <csql/runtime/tablerepository.h>
-#include <cstable/CSTableReader.h>
+#include <eventql/infra/cstable/CSTableReader.h>
 
 using namespace stx;
 

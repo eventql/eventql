@@ -22,7 +22,7 @@
 #include <eventql/core/PartitionWriter.h>
 #include <eventql/core/PartitionReader.h>
 #include <eventql/core/ReplicationScheme.h>
-#include <cstable/CSTableReader.h>
+#include <eventql/infra/cstable/CSTableReader.h>
 
 using namespace stx;
 

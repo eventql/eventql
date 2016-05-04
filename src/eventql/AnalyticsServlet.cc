@@ -31,8 +31,8 @@
 #include "eventql/core/TimeWindowPartitioner.h"
 #include "eventql/core/FixedShardPartitioner.h"
 #include "eventql/HTTPAuth.h"
-#include <cstable/CSTableWriter.h>
-#include <cstable/RecordShredder.h>
+#include <eventql/infra/cstable/CSTableWriter.h>
+#include <eventql/infra/cstable/RecordShredder.h>
 
 using namespace stx;
 
