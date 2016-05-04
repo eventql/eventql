@@ -10,8 +10,8 @@
 #include <eventql/util/fnv.h>
 #include <eventql/util/io/fileutil.h>
 #include <eventql/util/protobuf/MessageDecoder.h>
-#include <cstable/CSTableReader.h>
-#include <cstable/RecordMaterializer.h>
+#include <eventql/infra/cstable/CSTableReader.h>
+#include <eventql/infra/cstable/RecordMaterializer.h>
 #include <eventql/core/LSMPartitionReader.h>
 #include <eventql/core/LSMPartitionSQLScan.h>
 #include <eventql/core/Table.h>

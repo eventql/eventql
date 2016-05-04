@@ -26,9 +26,9 @@
 #include "eventql/infra/sstable/SSTableColumnSchema.h"
 #include "eventql/infra/sstable/SSTableColumnReader.h"
 #include "eventql/infra/sstable/SSTableColumnWriter.h"
-#include "cstable/CSTableWriter.h"
-#include "cstable/CSTableReader.h"
-#include "cstable/CSTableBuilder.h"
+#include "eventql/infra/cstable/CSTableWriter.h"
+#include "eventql/infra/cstable/CSTableReader.h"
+#include "eventql/infra/cstable/CSTableBuilder.h"
 
 namespace stx {
 namespace logtable {

@@ -114,8 +114,7 @@ endif()
 add_subdirectory(src/eventql/util)
 set(HAVE_STX true)
 
-add_subdirectory(deps/libcstable)
-include_directories(${CSTABLE_INCLUDE})
+add_subdirectory(src/eventql/infra/cstable)
 set(HAVE_CSTABLE true)
 
 add_subdirectory(src/eventql/infra/sstable)

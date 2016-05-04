@@ -10,7 +10,7 @@
 #define _CM_TIMESERIESRESULT_H
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/json/json.h>
-#include "cstable/CSTableReader.h"
+#include "eventql/infra/cstable/CSTableReader.h"
 #include "eventql/CTRCounter.h"
 #include "eventql/AnalyticsTableScan.h"
 #include "eventql/TrafficSegment.h"
