@@ -9,7 +9,7 @@
 #include "eventql/mapreduce/tasks/SaveToTableTask.h"
 #include "eventql/mapreduce/MapReduceScheduler.h"
 #include "eventql/core/FixedShardPartitioner.h"
-#include "sstable/sstablereader.h"
+#include "eventql/infra/sstable/sstablereader.h"
 
 using namespace stx;
 

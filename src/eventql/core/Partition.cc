@@ -16,7 +16,7 @@
 #include <stx/protobuf/MessageEncoder.h>
 #include <stx/protobuf/MessageDecoder.h>
 #include <stx/protobuf/msg.h>
-#include <sstable/sstablereader.h>
+#include <eventql/infra/sstable/sstablereader.h>
 #include <eventql/core/LogPartitionReader.h>
 #include <eventql/core/LogPartitionWriter.h>
 #include <eventql/core/LogPartitionReplication.h>

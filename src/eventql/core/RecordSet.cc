@@ -11,8 +11,8 @@
 #include <stx/io/mmappedfile.h>
 #include <stx/util/binarymessagereader.h>
 #include <stx/util/binarymessagewriter.h>
-#include <sstable/SSTableEditor.h>
-#include <sstable/sstablereader.h>
+#include <eventql/infra/sstable/SSTableEditor.h>
+#include <eventql/infra/sstable/sstablereader.h>
 #include <eventql/core/RecordSet.h>
 
 using namespace stx;

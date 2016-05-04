@@ -30,7 +30,7 @@
 #include "brokerd/RemoteFeedFactory.h"
 #include "brokerd/RemoteFeedReader.h"
 #include "stx/stats/statsdagent.h"
-#include "sstable/sstablereader.h"
+#include "eventql/infra/sstable/sstablereader.h"
 #include "fnord-logtable/RemoteTableReader.h"
 #include "fnord-logtable/LogTableTail.h"
 #include "eventql/util/mdb/MDB.h"

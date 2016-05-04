@@ -11,8 +11,8 @@
 #include "stx/Language.h"
 #include "stx/wallclock.h"
 #include "stx/io/fileutil.h"
-#include "sstable/sstablereader.h"
-#include "sstable/SSTableScan.h"
+#include "eventql/infra/sstable/sstablereader.h"
+#include "eventql/infra/sstable/SSTableScan.h"
 
 using namespace stx;
 

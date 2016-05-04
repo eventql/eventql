@@ -8,8 +8,8 @@
  */
 #pragma once
 #include "eventql/Report.h"
-#include "sstable/sstablereader.h"
-#include "sstable/SSTableEditor.h"
+#include "eventql/infra/sstable/sstablereader.h"
+#include "eventql/infra/sstable/SSTableEditor.h"
 
 using namespace stx;
 

@@ -119,8 +119,7 @@ add_subdirectory(deps/libcstable)
 include_directories(${CSTABLE_INCLUDE})
 set(HAVE_CSTABLE true)
 
-add_subdirectory(deps/libsstable)
-include_directories(${SSTABLE_INCLUDE})
+add_subdirectory(src/eventql/infra/sstable)
 set(HAVE_SSTABLE true)
 
 add_subdirectory(deps/libcplot)

@@ -21,11 +21,11 @@
 #include <fnord-logtable/TableArena.h>
 #include <fnord-logtable/TableSnapshot.h>
 #include <fnord-logtable/TableChunkSummaryBuilder.h>
-#include "sstable/sstablereader.h"
-#include "sstable/SSTableEditor.h"
-#include "sstable/SSTableColumnSchema.h"
-#include "sstable/SSTableColumnReader.h"
-#include "sstable/SSTableColumnWriter.h"
+#include "eventql/infra/sstable/sstablereader.h"
+#include "eventql/infra/sstable/SSTableEditor.h"
+#include "eventql/infra/sstable/SSTableColumnSchema.h"
+#include "eventql/infra/sstable/SSTableColumnReader.h"
+#include "eventql/infra/sstable/SSTableColumnWriter.h"
 #include "cstable/CSTableWriter.h"
 #include "cstable/CSTableReader.h"
 #include "cstable/CSTableBuilder.h"

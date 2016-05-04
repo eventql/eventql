@@ -439,7 +439,7 @@ add_executable(cm-chunkserver
     $<TARGET_OBJECTS:dproc>
     $<TARGET_OBJECTS:dproc>
     $<TARGET_OBJECTS:fnord-afx>
-    ../3rdparty/libfnord/sstable/SSTableServlet.cc
+    ../3rdparty/libfnord/eventql/infra/sstable/SSTableServlet.cc
     ../3rdparty/libfnord/fnord-logtable/LogTableServlet.cc
     ../3rdparty/libfnord/fnord-logtable/TableReader.cc
     ../3rdparty/libfnord/fnord-logtable/TableWriter.cc
@@ -472,7 +472,7 @@ add_executable(zbase
     $<TARGET_OBJECTS:tsdb-client>
     $<TARGET_OBJECTS:fnord-afx>
     $<TARGET_OBJECTS:dproc>
-    ../3rdparty/libfnord/sstable/SSTableServlet.cc
+    ../3rdparty/libfnord/eventql/infra/sstable/SSTableServlet.cc
     ../3rdparty/libfnord/fnord-logtable/LogTableServlet.cc
     ../3rdparty/libfnord/fnord-logtable/TableReader.cc
     ../3rdparty/libfnord/fnord-logtable/TableWriter.cc

@@ -22,11 +22,11 @@
 #include "stx/json/json.h"
 #include "eventql/util/mdb/MDB.h"
 #include "eventql/util/mdb/MDBUtil.h"
-#include "sstable/sstablereader.h"
-#include "sstable/SSTableEditor.h"
-#include "sstable/SSTableColumnSchema.h"
-#include "sstable/SSTableColumnReader.h"
-#include "sstable/SSTableColumnWriter.h"
+#include "eventql/infra/sstable/sstablereader.h"
+#include "eventql/infra/sstable/SSTableEditor.h"
+#include "eventql/infra/sstable/SSTableColumnSchema.h"
+#include "eventql/infra/sstable/SSTableColumnReader.h"
+#include "eventql/infra/sstable/SSTableColumnWriter.h"
 #include "fnord-afx/ArtifactIndex.h"
 #include <eventql/util/fts.h>
 #include <eventql/util/fts_common.h>

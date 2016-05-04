@@ -11,7 +11,7 @@
 #include <eventql/core/Partition.h>
 #include <eventql/core/PartitionWriter.h>
 #include <stx/logging.h>
-#include <sstable/SSTableWriter.h>
+#include <eventql/infra/sstable/SSTableWriter.h>
 
 using namespace stx;
 

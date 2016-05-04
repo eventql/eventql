@@ -8,7 +8,7 @@
  */
 #include "eventql/mapreduce/tasks/ReturnResultsTask.h"
 #include "eventql/mapreduce/MapReduceScheduler.h"
-#include "sstable/sstablereader.h"
+#include "eventql/infra/sstable/sstablereader.h"
 #include "eventql/JavaScriptContext.h"
 
 using namespace stx;

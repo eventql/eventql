@@ -18,7 +18,7 @@
 #include "stx/protobuf/msg.h"
 #include <stx/util/Base64.h>
 #include <stx/fnv.h>
-#include <sstable/sstablereader.h>
+#include <eventql/infra/sstable/sstablereader.h>
 
 using namespace stx;
 

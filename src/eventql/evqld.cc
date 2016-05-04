@@ -34,7 +34,7 @@
 #include "eventql/dproc/LocalScheduler.h"
 #include "eventql/dproc/DispatchService.h"
 #include "stx/stats/statsdagent.h"
-#include "sstable/SSTableServlet.h"
+#include "eventql/infra/sstable/SSTableServlet.h"
 #include "eventql/util/mdb/MDB.h"
 #include "eventql/util/mdb/MDBUtil.h"
 #include "eventql/AnalyticsServlet.h"

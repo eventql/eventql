@@ -12,11 +12,11 @@
 #include "eventql/CTRCounter.h"
 #include <eventql/docdb/ItemRef.h>
 
-#include "sstable/sstablereader.h"
-#include "sstable/SSTableEditor.h"
-#include "sstable/SSTableColumnSchema.h"
-#include "sstable/SSTableColumnReader.h"
-#include "sstable/SSTableColumnWriter.h"
+#include "eventql/infra/sstable/sstablereader.h"
+#include "eventql/infra/sstable/SSTableEditor.h"
+#include "eventql/infra/sstable/SSTableColumnSchema.h"
+#include "eventql/infra/sstable/SSTableColumnReader.h"
+#include "eventql/infra/sstable/SSTableColumnWriter.h"
 
 using namespace stx;
 

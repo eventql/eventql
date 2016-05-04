@@ -7,7 +7,7 @@
  * permission is obtained.
  */
 #include "eventql/CTRCounterTableSource.h"
-#include <sstable/SSTableColumnReader.h>
+#include <eventql/infra/sstable/SSTableColumnReader.h>
 #include "stx/json/json.h"
 
 using namespace stx;

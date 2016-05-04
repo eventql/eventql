@@ -13,7 +13,7 @@
 #include <stx/protobuf/MessageEncoder.h>
 #include <stx/io/fileutil.h>
 #include <stx/wallclock.h>
-#include <sstable/sstablereader.h>
+#include <eventql/infra/sstable/sstablereader.h>
 #include <eventql/core/TSDBService.h>
 #include <eventql/core/LogPartitionReader.h>
 #include <eventql/core/PartitionState.pb.h>
