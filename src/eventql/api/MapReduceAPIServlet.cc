@@ -13,7 +13,7 @@
 #include "stx/io/BufferedOutputStream.h"
 #include "eventql/api/MapReduceAPIServlet.h"
 #include "eventql/mapreduce/MapReduceTask.h"
-#include "sstable/sstablereader.h"
+#include "eventql/infra/sstable/sstablereader.h"
 
 using namespace stx;
 

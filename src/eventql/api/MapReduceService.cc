@@ -13,8 +13,8 @@
 #include "stx/protobuf/MessageDecoder.h"
 #include "stx/protobuf/JSONEncoder.h"
 #include "stx/http/HTTPFileDownload.h"
-#include "sstable/SSTableWriter.h"
-#include "sstable/sstablereader.h"
+#include "eventql/infra/sstable/SSTableWriter.h"
+#include "eventql/infra/sstable/sstablereader.h"
 #include "cstable/CSTableWriter.h"
 #include "cstable/RecordShredder.h"
 #include <algorithm>

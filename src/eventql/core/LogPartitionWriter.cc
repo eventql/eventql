@@ -15,7 +15,7 @@
 #include <stx/protobuf/msg.h>
 #include <stx/logging.h>
 #include <stx/wallclock.h>
-#include <sstable/SSTableWriter.h>
+#include <eventql/infra/sstable/SSTableWriter.h>
 #include <stx/protobuf/MessageDecoder.h>
 #include <cstable/RecordShredder.h>
 #include <cstable/CSTableWriter.h>

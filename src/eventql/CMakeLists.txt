@@ -140,7 +140,7 @@ add_executable(evqld
     $<TARGET_OBJECTS:customerdirectory>
     #$<TARGET_OBJECTS:fnord-afx>
     $<TARGET_OBJECTS:dproc>
-    #sstable/SSTableServlet.cc
+    #eventql/infra/sstable/SSTableServlet.cc
     api/LogfileService.cc
     api/LogfileAPIServlet.cc
     api/EventsService.cc
@@ -197,7 +197,7 @@ add_executable(evqlctl
     $<TARGET_OBJECTS:customerdirectory>
     #$<TARGET_OBJECTS:fnord-afx>
     $<TARGET_OBJECTS:dproc>
-    #sstable/SSTableServlet.cc
+    #eventql/infra/sstable/SSTableServlet.cc
     evqlctl.cc)
 
 target_link_libraries(evqlctl chartsql cplot sstable cstable stx-http stx-protobuf stx-json stx-base stx-rpc pcre)

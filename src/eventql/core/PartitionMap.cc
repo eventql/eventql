@@ -12,7 +12,7 @@
 #include <stx/fnv.h>
 #include <stx/protobuf/msg.h>
 #include <stx/io/fileutil.h>
-#include <sstable/sstablereader.h>
+#include <eventql/infra/sstable/sstablereader.h>
 #include <eventql/core/PartitionMap.h>
 #include <eventql/core/PartitionState.pb.h>
 #include <eventql/core/PartitionReplication.h>

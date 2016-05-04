@@ -9,7 +9,7 @@
  */
 #include <stx/fnv.h>
 #include <stx/io/fileutil.h>
-#include <sstable/sstablereader.h>
+#include <eventql/infra/sstable/sstablereader.h>
 #include <eventql/core/PartitionReader.h>
 
 using namespace stx;

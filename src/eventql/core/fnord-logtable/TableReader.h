@@ -12,7 +12,7 @@
 #include <stx/stdtypes.h>
 #include <stx/autoref.h>
 #include <fnord-logtable/AbstractTableReader.h>
-#include "sstable/sstablereader.h"
+#include "eventql/infra/sstable/sstablereader.h"
 #include "cstable/CSTableReader.h"
 
 namespace stx {

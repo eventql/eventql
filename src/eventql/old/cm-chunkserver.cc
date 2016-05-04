@@ -32,7 +32,7 @@
 #include "brokerd/RemoteFeedFactory.h"
 #include "brokerd/RemoteFeedReader.h"
 #include "stx/stats/statsdagent.h"
-#include "sstable/SSTableServlet.h"
+#include "eventql/infra/sstable/SSTableServlet.h"
 #include "fnord-logtable/LogTableServlet.h"
 #include "fnord-logtable/TableRepository.h"
 #include "fnord-logtable/TableJanitor.h"

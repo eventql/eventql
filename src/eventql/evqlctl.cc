@@ -31,7 +31,7 @@
 #include "eventql/dproc/LocalScheduler.h"
 #include "eventql/dproc/DispatchService.h"
 #include "eventql/ConfigDirectory.h"
-#include "sstable/sstablereader.h"
+#include "eventql/infra/sstable/sstablereader.h"
 #include "eventql/core/TimeWindowPartitioner.h"
 #include "eventql/core/TSDBClient.h"
 #include "csql/qtree/SequentialScanNode.h"

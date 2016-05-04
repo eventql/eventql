@@ -10,7 +10,7 @@
 #include <stx/fnv.h>
 #include <stx/io/fileutil.h>
 #include <stx/protobuf/MessageDecoder.h>
-#include <sstable/sstablereader.h>
+#include <eventql/infra/sstable/sstablereader.h>
 #include <eventql/core/LogPartitionReader.h>
 #include <eventql/core/Table.h>
 #include <csql/runtime/EmptyTable.h>

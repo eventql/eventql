@@ -9,11 +9,11 @@
 #ifndef _CM_CTRCONTERSSTABLESOURCE_H
 #define _CM_CTRCONTERSSTABLESOURCE_H
 #include "eventql/Report.h"
-#include "sstable/sstablereader.h"
-#include "sstable/SSTableEditor.h"
-#include "sstable/SSTableColumnSchema.h"
-#include "sstable/SSTableColumnReader.h"
-#include "sstable/SSTableColumnWriter.h"
+#include "eventql/infra/sstable/sstablereader.h"
+#include "eventql/infra/sstable/SSTableEditor.h"
+#include "eventql/infra/sstable/SSTableColumnSchema.h"
+#include "eventql/infra/sstable/SSTableColumnReader.h"
+#include "eventql/infra/sstable/SSTableColumnWriter.h"
 #include "eventql/CTRCounter.h"
 
 using namespace stx;
