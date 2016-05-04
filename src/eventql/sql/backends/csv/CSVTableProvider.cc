@@ -8,7 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <eventql/sql/backends/csv/CSVTableProvider.h>
-#include <eventql/sql/runtime/tablescan.h>
+#include <eventql/sql/tasks/tablescan.h>
 
 using namespace stx;
 
@@ -53,22 +53,21 @@ TaskIDList CSVTableProvider::buildSequentialScan(
   }
 
   auto self = mkRef(const_cast<CSVTableProvider*>(this));
-  auto task_factory = [self, node] (Transaction* txn, RowSinkFn output) -> RefPtr<Task> {
+  auto task_factory = [self, node] (Transaction* txn, HashMap<TaskID, ScopedPtr<ResultCursor>> input) -> RefPtr<Task> {
     auto stream = self->stream_factory_();
     stream->skipNextRow();
 
     return new TableScan(
           txn,
           node,
-          mkScoped(new CSVTableScan(self->headers_, std::move(stream))),
-          output);
+          mkScoped(new CSVTableScan(self->headers_, std::move(stream))));
   };
 
   auto task = new TaskDAGNode(new SimpleTableExpressionFactory(task_factory));
 
-  TaskIDList output;
-  output.emplace_back(tasks->addTask(task));
-  return output;
+  TaskIDList input;
+  input.emplace_back(tasks->addTask(task));
+  return input;
 }
 
 void CSVTableProvider::listTables(

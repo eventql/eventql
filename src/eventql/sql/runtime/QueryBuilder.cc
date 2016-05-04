@@ -15,23 +15,13 @@ using namespace stx;
 namespace csql {
 
 QueryBuilder::QueryBuilder(
-    RefPtr<ValueExpressionBuilder> scalar_exp_builder,
-    RefPtr<TableExpressionBuilder> table_exp_builder) :
-    scalar_exp_builder_(scalar_exp_builder),
-    table_exp_builder_(table_exp_builder) {}
+    RefPtr<ValueExpressionBuilder> scalar_exp_builder) :
+    scalar_exp_builder_(scalar_exp_builder) {}
 
 ValueExpression QueryBuilder::buildValueExpression(
     Transaction* ctx,
     RefPtr<ValueExpressionNode> node) {
   return scalar_exp_builder_->compile(ctx, node);
-}
-
-ScopedPtr<Task> QueryBuilder::buildTableExpression(
-    Transaction* ctx,
-    RefPtr<TableExpressionNode> node,
-    RefPtr<TableProvider> tables,
-    Runtime* runtime) {
-  return table_exp_builder_->build(ctx, node.get(), this, tables.get());
 }
 
 ScopedPtr<ChartStatement> QueryBuilder::buildChartStatement(
@@ -46,8 +36,8 @@ ScopedPtr<ChartStatement> QueryBuilder::buildChartStatement(
 
     auto draw_stmt_node = node->child(i).asInstanceOf<DrawStatementNode>();
     for (const auto& table : draw_stmt_node->inputTables()) {
-      union_tables.emplace_back(
-          table_exp_builder_->build(ctx, table, this, tables.get()));
+      //union_tables.emplace_back(
+      //    table_exp_builder_->build(ctx, table, this, tables.get()));
     }
 
     draw_statements.emplace_back(

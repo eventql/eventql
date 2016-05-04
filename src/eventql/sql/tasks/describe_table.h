@@ -9,48 +9,39 @@
  */
 #pragma once
 #include <eventql/util/stdtypes.h>
+#include <eventql/sql/qtree/ShowTablesNode.h>
 #include <eventql/sql/tasks/Task.h>
-#include <eventql/sql/runtime/defaultruntime.h>
+#include <eventql/sql/runtime/tablerepository.h>
 
 namespace csql {
 
-class Subquery : public Task {
+class DescribeTable : public Task {
 public:
 
-  Subquery(
+  DescribeTable(
       Transaction* txn,
-      Vector<ValueExpression> select_expressions,
-      Option<ValueExpression> where_expr,
-      HashMap<TaskID, ScopedPtr<ResultCursor>> input);
+      const String& table_name);
+
+  //void onInputsReady() override;
 
   bool nextRow(SValue* out, int out_len) override;
 
-//  bool onInputRow(
-//      const TaskID& input_id,
-//      const SValue* row,
-//      int row_len) override;
-//
 protected:
   Transaction* txn_;
-  Vector<ValueExpression> select_exprs_;
-  Option<ValueExpression> where_expr_;
-  ScopedPtr<ResultCursorList> input_;
+  String table_name_;
 };
 
-class SubqueryFactory : public TaskFactory {
+class DescribeTableFactory : public TaskFactory {
 public:
 
-  SubqueryFactory(
-      Vector<RefPtr<SelectListNode>> select_exprs,
-      Option<RefPtr<ValueExpressionNode>> where_expr);
+  DescribeTableFactory(const String& table_name);
 
   RefPtr<Task> build(
       Transaction* txn,
       HashMap<TaskID, ScopedPtr<ResultCursor>> input) const override;
 
 protected:
-  Vector<RefPtr<SelectListNode>> select_exprs_;
-  Option<RefPtr<ValueExpressionNode>> where_expr_;
+  String table_name_;
 };
 
 }

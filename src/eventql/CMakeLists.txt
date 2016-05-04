@@ -130,14 +130,13 @@ add_library(coreprotos OBJECT
 add_library(customerdirectory OBJECT
     CustomerConfig.cc
     ConfigDirectory.cc
-    SessionSchema.cc
     TableDefinition.cc
     AnalyticsAuth.cc
     ${PROTO_SRCS})
 
 add_dependencies(customerdirectory coreprotos)
 
-add_library(tsdb-server OBJECT
+add_library(evql-core OBJECT
     z1stats.cc
     core/TSDBClient.cc
     core/TimeWindowPartitioner.cc
@@ -173,12 +172,12 @@ add_library(tsdb-server OBJECT
     core/StaticPartitionWriter.cc
     core/StaticPartitionReplication.cc)
 
-add_dependencies(tsdb-server customerdirectory)
-add_dependencies(tsdb-server coreprotos)
+add_dependencies(evql-core customerdirectory)
+add_dependencies(evql-core coreprotos)
 
 add_executable(test-tsdb-timewindowpartitioner
     $<TARGET_OBJECTS:stx-mdb>
-    $<TARGET_OBJECTS:tsdb-server>
+    $<TARGET_OBJECTS:evql-core>
     $<TARGET_OBJECTS:coreprotos>
     $<TARGET_OBJECTS:customerdirectory>
     core/TimeWindowPartitioner_test.cc)
@@ -187,7 +186,7 @@ target_link_libraries(test-tsdb-timewindowpartitioner chartsql cplot sstable cst
 
 add_executable(test-replicationscheme
     $<TARGET_OBJECTS:stx-mdb>
-    $<TARGET_OBJECTS:tsdb-server>
+    $<TARGET_OBJECTS:evql-core>
     $<TARGET_OBJECTS:coreprotos>
     $<TARGET_OBJECTS:customerdirectory>
     core/ReplicationScheme_test.cc)
@@ -196,7 +195,7 @@ target_link_libraries(test-replicationscheme chartsql cplot sstable cstable stx-
 
 add_executable(test-lsmtableindex
     $<TARGET_OBJECTS:stx-mdb>
-    $<TARGET_OBJECTS:tsdb-server>
+    $<TARGET_OBJECTS:evql-core>
     $<TARGET_OBJECTS:coreprotos>
     $<TARGET_OBJECTS:customerdirectory>
     core/LSMTableIndex_test.cc)
@@ -214,7 +213,7 @@ add_custom_command(
 
 #add_executable(test-javascriptcontext
 #    $<TARGET_OBJECTS:stx-mdb>
-#    $<TARGET_OBJECTS:tsdb-server>
+#    $<TARGET_OBJECTS:evql-core>
 #    $<TARGET_OBJECTS:coreprotos>
 #    $<TARGET_OBJECTS:customerdirectory>
 #    mapreduce/MapReduceTask.cc
@@ -234,7 +233,7 @@ add_custom_command(
 
 add_executable(evqld
     $<TARGET_OBJECTS:stx-mdb>
-    $<TARGET_OBJECTS:tsdb-server>
+    $<TARGET_OBJECTS:evql-core>
     $<TARGET_OBJECTS:coreprotos>
     $<TARGET_OBJECTS:customerdirectory>
     #$<TARGET_OBJECTS:fnord-afx>
@@ -260,7 +259,6 @@ add_executable(evqld
     HTTPAuth.cc
     AnalyticsApp.cc
     DrilldownTree.cc
-    PipelineInfo.cc
     DefaultServlet.cc
     JavaScriptContext.cc
     ${CMAKE_CURRENT_BINARY_DIR}/mapreduce_preludejs.cc
@@ -272,7 +270,7 @@ add_dependencies(evqld customerdirectory mozjs_build)
 
 add_executable(evqlctl
     $<TARGET_OBJECTS:stx-mdb>
-    $<TARGET_OBJECTS:tsdb-server>
+    $<TARGET_OBJECTS:evql-core>
     $<TARGET_OBJECTS:coreprotos>
     $<TARGET_OBJECTS:customerdirectory>
     #$<TARGET_OBJECTS:fnord-afx>
@@ -285,7 +283,7 @@ add_dependencies(evqlctl customerdirectory)
 add_executable(zmaster
     $<TARGET_OBJECTS:stx-mdb>
     $<TARGET_OBJECTS:customerdirectory>
-    $<TARGET_OBJECTS:tsdb-server>
+    $<TARGET_OBJECTS:evql-core>
     $<TARGET_OBJECTS:coreprotos>
     master/ConfigDirectoryMaster.cc
     master/MasterServlet.cc

@@ -79,12 +79,6 @@ public:
   SValue evaluateConstExpression(Transaction* ctx, RefPtr<ValueExpressionNode> expr);
   SValue evaluateConstExpression(Transaction* ctx, const ValueExpression& expr);
 
-  void executeAggregate(
-      Transaction* ctx,
-      const RemoteAggregateParams& query,
-      RefPtr<ExecutionStrategy> execution_strategy,
-      OutputStream* os);
-
   Option<String> cacheDir() const;
   void setCacheDir(const String& cachedir);
 

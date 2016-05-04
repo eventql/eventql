@@ -13,6 +13,8 @@
 #include <eventql/util/SHA1.h>
 #include <eventql/sql/tasks/Task.h>
 #include <eventql/sql/runtime/RowSink.h>
+#include <eventql/sql/result_cursor.h>
+
 using namespace stx;
 
 namespace csql {
@@ -23,7 +25,7 @@ public:
 
   virtual RefPtr<Task> build(
       Transaction* txn,
-      RowSinkFn output) const = 0;
+      HashMap<TaskID, ScopedPtr<ResultCursor>> input) const = 0;
 
 };
 
@@ -34,13 +36,13 @@ public:
   typedef
       Function<RefPtr<Task> (
           Transaction* txn,
-          RowSinkFn output)> FactoryFn;
+          HashMap<TaskID, ScopedPtr<ResultCursor>> input)> FactoryFn;
 
   SimpleTableExpressionFactory(FactoryFn factory_fn);
 
   RefPtr<Task> build(
       Transaction* txn,
-      RowSinkFn output) const override;
+      HashMap<TaskID, ScopedPtr<ResultCursor>> input) const override;
 
 protected:
   FactoryFn factory_fn_;

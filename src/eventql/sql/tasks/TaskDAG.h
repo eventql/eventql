@@ -66,6 +66,7 @@ protected:
   HashMap<TaskID, RefPtr<TaskDAGNode>> tasks_;
   HashMap<TaskID, TaskStatus> task_status_;
   HashMap<TaskID, Set<TaskID>> task_deps_;
+  HashMap<TaskID, Set<TaskID>> task_deps_reverse_;
 };
 
 } // namespace csql

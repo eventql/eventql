@@ -158,7 +158,7 @@ protected:
     }
 
     AnySeriesAdapter* a = nullptr;
-    if (!a) a = mkSeriesAdapter2D<TX, SValue::TimeType>(row);
+    if (!a) a = mkSeriesAdapter2DStrict<TX, SValue::TimeType>(row);
     if (!a) a = mkSeriesAdapter2D<TX, SValue::FloatType>(row);
     if (!a) a = mkSeriesAdapter2D<TX, SValue::StringType>(row);
     return a;
@@ -178,7 +178,7 @@ protected:
     }
 
     AnySeriesAdapter* a = nullptr;
-    if (!a) a = mkSeriesAdapter3D<TX, TY, SValue::TimeType>(row);
+    if (!a) a = mkSeriesAdapter3DStrict<TX, TY, SValue::TimeType>(row);
     if (!a) a = mkSeriesAdapter3D<TX, TY, SValue::FloatType>(row);
     if (!a) a = mkSeriesAdapter3D<TX, TY, SValue::StringType>(row);
     return a;
@@ -187,6 +187,39 @@ protected:
   template <typename TX, typename TY, typename TZ>
   AnySeriesAdapter* mkSeriesAdapter3D(SValue* row) {
     if (!row[z_ind_].isConvertibleTo<TZ>()) {
+      return nullptr;
+    }
+
+    return new SeriesAdapter3D<TX, TY, TZ>(
+        name_ind_,
+        x_ind_,
+        y_ind_,
+        z_ind_);
+  }
+
+  template <typename TX, typename TY>
+  AnySeriesAdapter* mkSeriesAdapter2DStrict(SValue* row) {
+    if (!row[y_ind_].isOfType<TY>()) {
+      return nullptr;
+    }
+
+    if (z_ind_ < 0) {
+      return new SeriesAdapter2D<TX, TY>(
+          name_ind_,
+          x_ind_,
+          y_ind_);
+    }
+
+    AnySeriesAdapter* a = nullptr;
+    if (!a) a = mkSeriesAdapter3D<TX, TY, SValue::TimeType>(row);
+    if (!a) a = mkSeriesAdapter3D<TX, TY, SValue::FloatType>(row);
+    if (!a) a = mkSeriesAdapter3D<TX, TY, SValue::StringType>(row);
+    return a;
+  }
+
+  template <typename TX, typename TY, typename TZ>
+  AnySeriesAdapter* mkSeriesAdapter3DStrict(SValue* row) {
+    if (!row[z_ind_].isOfType<TZ>()) {
       return nullptr;
     }
 

@@ -620,6 +620,22 @@ SValue SValue::toNumeric() const {
       getString().c_str());
 }
 
+bool SValue::isString() const {
+  return data_.type == SQL_STRING;
+}
+
+bool SValue::isFloat() const {
+  return data_.type == SQL_FLOAT;
+}
+
+bool SValue::isInteger() const {
+  return data_.type == SQL_INTEGER;
+}
+
+bool SValue::isBool() const {
+  return data_.type == SQL_BOOL;
+}
+
 bool SValue::isTimestamp() const {
   return data_.type == SQL_TIMESTAMP;
 }
@@ -714,6 +730,26 @@ String sql_escape(const String& orig_str) {
   StringUtil::replaceAll(&str, "'", "\\'");
   StringUtil::replaceAll(&str, "\"", "\\\"");
   return str;
+}
+
+template <> bool SValue::isOfType<SValue::StringType>() const {
+  return isString();
+}
+
+template <> bool SValue::isOfType<SValue::FloatType>() const {
+  return isFloat();
+}
+
+template <> bool SValue::isOfType<SValue::IntegerType>() const {
+  return isInteger();
+}
+
+template <> bool SValue::isOfType<SValue::BoolType>() const {
+  return isBool();
+}
+
+template <> bool SValue::isOfType<SValue::TimeType>() const {
+  return isTimestamp();
 }
 
 }

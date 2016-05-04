@@ -22,7 +22,6 @@
 #include "eventql/util/protobuf/MessageEncoder.h"
 #include "eventql/util/csv/CSVInputStream.h"
 #include "eventql/util/csv/BinaryCSVInputStream.h"
-#include "eventql/PipelineInfo.h"
 #include "eventql/TableDefinition.h"
 #include "eventql/sql/codec/ascii_codec.h"
 #include "eventql/sql/codec/json_codec.h"
@@ -165,79 +164,6 @@ void AnalyticsServlet::handle(
   if (uri.path() == "/api/v1/auth/private_api_token") {
     req_stream->readBody();
     getPrivateAPIToken(session, &req, &res);
-    res_stream->writeResponse(res);
-    return;
-  }
-
-
-  if (uri.path() == "/api/v1/pipeline_info") {
-    req_stream->readBody();
-    pipelineInfo(session, &req, &res);
-    res_stream->writeResponse(res);
-    return;
-  }
-
-
-  /* SESSION TRACKING */
-  if (uri.path() == "/api/v1/session_tracking/events") {
-    req_stream->readBody();
-    catchAndReturnErrors(&res, [this, &session, &req, &res] {
-      sessionTrackingListEvents(session, &req, &res);
-    });
-    res_stream->writeResponse(res);
-    return;
-  }
-
-  if (uri.path() == "/api/v1/session_tracking/events/add_event") {
-    expectHTTPPost(req);
-    req_stream->readBody();
-    sessionTrackingEventAdd(session, &req, &res);
-    res_stream->writeResponse(res);
-    return;
-  }
-
-  if (uri.path() == "/api/v1/session_tracking/events/remove_event") {
-    expectHTTPPost(req);
-    req_stream->readBody();
-    sessionTrackingEventRemove(session, &req, &res);
-    res_stream->writeResponse(res);
-    return;
-  }
-
-  if (uri.path() == "/api/v1/session_tracking/events/add_field") {
-    expectHTTPPost(req);
-    req_stream->readBody();
-    catchAndReturnErrors(&res, [this, &session, &req, &res] {
-      sessionTrackingEventAddField(session, &req, &res);
-    });
-    res_stream->writeResponse(res);
-    return;
-  }
-
-  if (uri.path() == "/api/v1/session_tracking/events/remove_field") {
-    expectHTTPPost(req);
-    req_stream->readBody();
-    catchAndReturnErrors(&res, [this, &session, &req, &res] {
-      sessionTrackingEventRemoveField(session, &req, &res);
-    });
-    res_stream->writeResponse(res);
-    return;
-  }
-
-  if (uri.path() == "/api/v1/session_tracking/event_info") {
-    req_stream->readBody();
-    catchAndReturnErrors(&res, [this, &session, &req, &res] {
-      sessionTrackingEventInfo(session, &req, &res);
-    });
-    res_stream->writeResponse(res);
-    return;
-  }
-
-  if (uri.path() == "/api/v1/session_tracking/attributes") {
-    req_stream->readBody();
-    catchAndReturnErrors(&res, [this, &session, &req, &res] {
-      sessionTrackingListAttributes(session, &req, &res);
-    });
     res_stream->writeResponse(res);
     return;
   }
@@ -1352,6 +1278,7 @@ void AnalyticsServlet::executeSQL_JSONSSE(
   sse_stream->finish();
 }
 
+<<<<<<< HEAD
 void AnalyticsServlet::pipelineInfo(
     const AnalyticsSession& session,
     const http::HTTPRequest* req,
@@ -1704,6 +1631,80 @@ void AnalyticsServlet::sessionTrackingEventRemoveField(
   res->setStatus(http::kStatusNotFound);
   res->addBody("event not found");
 }
+=======
+void AnalyticsServlet::executeDrilldownQuery(
+    const AnalyticsSession& session,
+    const http::HTTPRequest* req,
+    http::HTTPResponse* res,
+    RefPtr<http::HTTPResponseStream> res_stream) {
+  try {
+    URI uri(req->uri());
+    auto jreq = json::parseJSON(req->body());
+
+    auto query = mkRef(
+        new DrilldownQuery(
+            app_->getExecutionStrategy(session.customer()),
+            sql_));
+
+    auto metrics = json::objectLookup(jreq.begin(), jreq.end(), "metrics");
+    if (metrics == jreq.end()) {
+      RAISE(kRuntimeError, "missing field: metrics");
+    }
+
+    auto nmetrics = json::arrayLength(metrics, jreq.end());
+    for (size_t i = 0; i < nmetrics; ++i) {
+      auto jmetric = json::arrayLookup(metrics, jreq.end(), i); // O(N^2) but who cares...
+      DrilldownQuery::MetricDefinition metric;
+      auto expr = json::objectGetString(jmetric, jreq.end(), "expr");
+      if (expr.isEmpty()) {
+        RAISE(kRuntimeError, "missing field: expr");
+      }
+
+      metric.expression = expr.get();
+      metric.name = json::objectGetString(jmetric, jreq.end(), "name");
+      metric.filter = json::objectGetString(jmetric, jreq.end(), "filter");
+      metric.source_table = json::objectGetString(jmetric, jreq.end(), "source");
+      query->addMetric(metric);
+    }
+
+    auto dimensions = json::objectLookup(jreq.begin(), jreq.end(), "dimensions");
+    if (dimensions != jreq.end()) {
+      auto ndimensions = json::arrayLength(dimensions, jreq.end());
+      for (size_t i = 0; i < ndimensions; ++i) {
+        auto jdimension = json::arrayLookup(dimensions, jreq.end(), i); // O(N^2) but who cares...
+        DrilldownQuery::DimensionDefinition dimension;
+        dimension.name = json::objectGetString(jdimension, jreq.end(), "name");
+        dimension.expression = json::objectGetString(jdimension, jreq.end(), "expr");
+        query->addDimension(dimension);
+      }
+    }
+
+    auto filter = json::objectGetString(jreq.begin(), jreq.end(), "filter");
+    if (!filter.isEmpty()) {
+      query->setFilter(filter.get());
+    }
+
+    auto dtree = query->execute();
+
+    Buffer buf;
+    json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
+    json.beginObject();
+    json.addObjectEntry("result");
+    dtree->toJSON(&json);
+    json.endObject();
+
+    res->setStatus(http::kStatusOK);
+    res->addBody(buf);
+    res_stream->writeResponse(*res);
+  } catch (const StandardException& e) {
+    logError("z1.sql", e, "Uncaught query error");
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody("invalid request: " + String(e.what()));
+    res_stream->writeResponse(*res);
+  }
+}
+
+>>>>>>> 7ec7dd94098a33a75d25fc6b7cadd3a0e5d8f04b
 
 void AnalyticsServlet::performLogin(
     const URI& uri,

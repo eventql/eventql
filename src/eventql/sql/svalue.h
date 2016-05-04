@@ -75,6 +75,7 @@ public:
   BoolType getBool() const;
   TimeType getTimestamp() const;
 
+  template <typename T> bool isOfType() const;
   template <typename T> bool isConvertibleTo() const;
   bool isConvertibleToString() const;
   bool isConvertibleToNumeric() const;

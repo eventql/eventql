@@ -8,6 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <eventql/sql/qtree/SelectExpressionNode.h>
+#include <eventql/sql/tasks/select.h>
 
 using namespace stx;
 
@@ -57,7 +58,10 @@ size_t SelectExpressionNode::getColumnIndex(
 }
 
 Vector<TaskID> SelectExpressionNode::build(Transaction* txn, TaskDAG* tree) const {
-  RAISE(kNotYetImplementedError, "not yet implemented");
+  TaskIDList output;
+  auto out_task = mkRef(new TaskDAGNode(new SelectFactory(selectList())));
+  output.emplace_back(tree->addTask(out_task));
+  return output;
 }
 
 RefPtr<QueryTreeNode> SelectExpressionNode::deepCopy() const {

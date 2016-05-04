@@ -9,48 +9,33 @@
  */
 #pragma once
 #include <eventql/util/stdtypes.h>
-#include <eventql/util/SHA1.h>
 #include <eventql/sql/tasks/Task.h>
 #include <eventql/sql/runtime/defaultruntime.h>
 
 namespace csql {
 
-class GroupBy : public Task {
+class Select : public Task {
 public:
 
-  GroupBy(
+  Select(
       Transaction* txn,
-      Vector<ValueExpression> select_expressions,
-      Vector<ValueExpression> group_expressions,
-      HashMap<TaskID, ScopedPtr<ResultCursor>> input);
+      Vector<ValueExpression> select_expressions);
 
   bool nextRow(SValue* out, int out_len) override;
-
-  //bool onInputRow(
-  //    const TaskID& input_id,
-  //    const SValue* row,
-  //    int row_len) override;
 
   //void onInputsReady() override;
 
 protected:
-
-  void freeResult();
-
   Transaction* txn_;
   Vector<ValueExpression> select_exprs_;
-  Vector<ValueExpression> group_exprs_;
-  ScopedPtr<ResultCursorList> input_;
-  HashMap<String, Vector<VM::Instance>> groups_;
-  ScratchMemory scratch_;
+  size_t pos_;
 };
 
-class GroupByFactory : public TaskFactory {
+class SelectFactory : public TaskFactory {
 public:
 
-  GroupByFactory(
-      Vector<RefPtr<SelectListNode>> select_exprs,
-      Vector<RefPtr<ValueExpressionNode>> group_exprs);
+  SelectFactory(
+      Vector<RefPtr<SelectListNode>> select_exprs);
 
   RefPtr<Task> build(
       Transaction* txn,
@@ -58,7 +43,6 @@ public:
 
 protected:
   Vector<RefPtr<SelectListNode>> select_exprs_;
-  Vector<RefPtr<ValueExpressionNode>> group_exprs_;
 };
 
 }

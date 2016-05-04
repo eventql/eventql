@@ -75,7 +75,14 @@ size_t UnionNode::getColumnIndex(
 }
 
 Vector<TaskID> UnionNode::build(Transaction* txn, TaskDAG* tree) const {
-  RAISE(kNotYetImplementedError, "not yet implemented");
+  TaskIDList output;
+  for (const auto& tbl : tables_) {
+    auto tbl_tasks = tbl.asInstanceOf<TableExpressionNode>()->build(txn, tree);
+    for (const auto& task : tbl_tasks) {
+      output.emplace_back(task);
+    }
+  }
+  return output;
 }
 
 RefPtr<QueryTreeNode> UnionNode::deepCopy() const {

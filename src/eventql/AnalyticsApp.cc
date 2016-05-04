@@ -13,8 +13,7 @@
 #include <eventql/core/TSDBTableScanSpec.pb.h>
 #include "eventql/core/TimeWindowPartitioner.h"
 #include <eventql/core/CompactionWorker.h>
-#include "eventql/sql/sql_engine.h"
-#include "eventql/SessionSchema.h"
+#include "eventql/server/sql/sql_engine.h"
 #include "eventql/util/protobuf/DynamicMessage.h"
 #include "eventql/util/protobuf/MessageEncoder.h"
 
@@ -120,10 +119,6 @@ void AnalyticsApp::configureTable(const TableDefinition& tbl) {
 }
 
 void AnalyticsApp::configureCustomer(const CustomerConfig& config) {
-  for (const auto& td : SessionSchema::tableDefinitionsForCustomer(config)) {
-    configureTable(td);
-  }
-
   for (const auto& td : logfile_service_.getTableDefinitions(config)) {
     configureTable(td);
   }

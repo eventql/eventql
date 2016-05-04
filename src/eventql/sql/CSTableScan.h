@@ -28,20 +28,20 @@ public:
       Transaction* txn,
       RefPtr<SequentialScanNode> stmt,
       const String& cstable_filename,
-      QueryBuilder* runtime,
-      RowSinkFn output);
+      QueryBuilder* runtime);
 
   CSTableScan(
       Transaction* txn,
       RefPtr<SequentialScanNode> stmt,
       RefPtr<cstable::CSTableReader> cstable,
-      QueryBuilder* runtime,
-      RowSinkFn output);
+      QueryBuilder* runtime);
+
+  bool nextRow(SValue* out, int out_len) override;
 
   virtual Vector<String> columnNames() const;
   virtual size_t numColumns() const;
 
-  void onInputsReady() override;
+  //void onInputsReady() override;
 
   void open();
 
@@ -98,7 +98,6 @@ protected:
   String cstable_filename_;
   RefPtr<cstable::CSTableReader> cstable_;
   QueryBuilder* runtime_;
-  RowSinkFn output_;
   HashMap<String, ColumnRef> columns_;
   Vector<ExpressionRef> select_list_;
   ValueExpression where_expr_;

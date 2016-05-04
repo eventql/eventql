@@ -8,7 +8,6 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <eventql/sql/runtime/tablerepository.h>
-#include <eventql/sql/runtime/importstatement.h>
 #include <eventql/util/exception.h>
 #include <eventql/util/uri.h>
 
@@ -59,12 +58,6 @@ void TableRepository::import(
       kRuntimeError,
       "no backend found for '%s'\n",
       source_uri.toString().c_str());
-}
-
-void TableRepository::import(
-    const ImportStatement& import_stmt,
-    const std::vector<std::unique_ptr<Backend>>& backends) {
-  import(import_stmt.tables(), import_stmt.source_uri(), backends);
 }
 
 TaskIDList TableRepository::buildSequentialScan(

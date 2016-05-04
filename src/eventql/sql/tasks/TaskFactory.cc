@@ -18,8 +18,8 @@ SimpleTableExpressionFactory::SimpleTableExpressionFactory(
 
 RefPtr<Task> SimpleTableExpressionFactory::build(
     Transaction* txn,
-    RowSinkFn output) const {
-  return factory_fn_(txn, output);
+    HashMap<TaskID, ScopedPtr<ResultCursor>> input) const {
+  return factory_fn_(txn, std::move(input));
 }
 
 } // namespace csql

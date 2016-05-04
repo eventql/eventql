@@ -17,55 +17,58 @@ GroupBy::GroupBy(
     Transaction* txn,
     Vector<ValueExpression> select_expressions,
     Vector<ValueExpression> group_expressions,
-    RowSinkFn output) :
+    HashMap<TaskID, ScopedPtr<ResultCursor>> input) :
     txn_(txn),
     select_exprs_(std::move(select_expressions)),
     group_exprs_(std::move(group_expressions)),
-    output_(output) {}
+    input_(new ResultCursorList(std::move(input))) {}
 
-bool GroupBy::onInputRow(
-      const TaskID& input_id,
-      const SValue* row,
-      int row_len) {
-  Vector<SValue> gkey(group_exprs_.size(), SValue{});
-  for (size_t i = 0; i < group_exprs_.size(); ++i) {
-    VM::evaluate(txn_, group_exprs_[i].program(), row_len, row, &gkey[i]);
-  }
-
-  auto group_key = SValue::makeUniqueKey(gkey.data(), gkey.size());
-  auto& group = groups_[group_key];
-  if (group.size() == 0) {
-    for (const auto& e : select_exprs_) {
-      group.emplace_back(VM::allocInstance(txn_, e.program(), &scratch_));
-    }
-  }
-
-  for (size_t i = 0; i < select_exprs_.size(); ++i) {
-    VM::accumulate(txn_, select_exprs_[i].program(), &group[i], row_len, row);
-  }
-
-  return true;
+bool GroupBy::nextRow(SValue* out, int out_len) {
+  return false;
 }
-
-void GroupBy::onInputsReady() {
-  try {
-    Vector<SValue> out_row(select_exprs_.size(), SValue{});
-    for (auto& group : groups_) {
-      for (size_t i = 0; i < select_exprs_.size(); ++i) {
-        VM::result(txn_, select_exprs_[i].program(), &group.second[i], &out_row[i]);
-      }
-
-      if (!output_(out_row.data(), out_row.size())) {
-        break;
-      }
-    }
-  } catch (...) {
-    freeResult();
-    throw;
-  }
-
-  freeResult();
-}
+//bool GroupBy::onInputRow(
+//      const TaskID& input_id,
+//      const SValue* row,
+//      int row_len) {
+//  Vector<SValue> gkey(group_exprs_.size(), SValue{});
+//  for (size_t i = 0; i < group_exprs_.size(); ++i) {
+//    VM::evaluate(txn_, group_exprs_[i].program(), row_len, row, &gkey[i]);
+//  }
+//
+//  auto group_key = SValue::makeUniqueKey(gkey.data(), gkey.size());
+//  auto& group = groups_[group_key];
+//  if (group.size() == 0) {
+//    for (const auto& e : select_exprs_) {
+//      group.emplace_back(VM::allocInstance(txn_, e.program(), &scratch_));
+//    }
+//  }
+//
+//  for (size_t i = 0; i < select_exprs_.size(); ++i) {
+//    VM::accumulate(txn_, select_exprs_[i].program(), &group[i], row_len, row);
+//  }
+//
+//  return true;
+//}
+//
+//void GroupBy::onInputsReady() {
+//  try {
+//    Vector<SValue> out_row(select_exprs_.size(), SValue{});
+//    for (auto& group : groups_) {
+//      for (size_t i = 0; i < select_exprs_.size(); ++i) {
+//        VM::result(txn_, select_exprs_[i].program(), &group.second[i], &out_row[i]);
+//      }
+//
+//      if (!input_(out_row.data(), out_row.size())) {
+//        break;
+//      }
+//    }
+//  } catch (...) {
+//    freeResult();
+//    throw;
+//  }
+//
+//  freeResult();
+//}
 
 void GroupBy::freeResult() {
   for (auto& group : groups_) {
@@ -99,7 +102,7 @@ GroupByFactory::GroupByFactory(
 
 RefPtr<Task> GroupByFactory::build(
     Transaction* txn,
-    RowSinkFn output) const {
+    HashMap<TaskID, ScopedPtr<ResultCursor>> input) const {
   Vector<ValueExpression> select_expressions;
   Vector<ValueExpression> group_expressions;
 
@@ -119,7 +122,7 @@ RefPtr<Task> GroupByFactory::build(
       txn,
       std::move(select_expressions),
       std::move(group_expressions),
-      output);
+      std::move(input));
 }
 
 } // namespace csql

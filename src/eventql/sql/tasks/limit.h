@@ -1,6 +1,6 @@
 /**
  * This file is part of the "FnordMetric" project
- *   Copyright (c) 2014 Paul Asmuth, Google Inc.
+ *   Copyright (c) 2011-2014 Paul Asmuth, Google Inc.
  *
  * FnordMetric is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License v3.0. You should have received a
@@ -9,19 +9,17 @@
  */
 #pragma once
 #include <eventql/util/stdtypes.h>
-#include <eventql/util/SHA1.h>
 #include <eventql/sql/tasks/Task.h>
 #include <eventql/sql/runtime/defaultruntime.h>
 
 namespace csql {
 
-class GroupBy : public Task {
+class Limit : public Task {
 public:
 
-  GroupBy(
-      Transaction* txn,
-      Vector<ValueExpression> select_expressions,
-      Vector<ValueExpression> group_expressions,
+  Limit(
+      size_t limit,
+      size_t offset,
       HashMap<TaskID, ScopedPtr<ResultCursor>> input);
 
   bool nextRow(SValue* out, int out_len) override;
@@ -31,34 +29,25 @@ public:
   //    const SValue* row,
   //    int row_len) override;
 
-  //void onInputsReady() override;
-
 protected:
-
-  void freeResult();
-
-  Transaction* txn_;
-  Vector<ValueExpression> select_exprs_;
-  Vector<ValueExpression> group_exprs_;
+  size_t limit_;
+  size_t offset_;
   ScopedPtr<ResultCursorList> input_;
-  HashMap<String, Vector<VM::Instance>> groups_;
-  ScratchMemory scratch_;
+  size_t counter_;
 };
 
-class GroupByFactory : public TaskFactory {
+class LimitFactory : public TaskFactory {
 public:
 
-  GroupByFactory(
-      Vector<RefPtr<SelectListNode>> select_exprs,
-      Vector<RefPtr<ValueExpressionNode>> group_exprs);
+  LimitFactory(size_t limit, size_t offset);
 
   RefPtr<Task> build(
       Transaction* txn,
       HashMap<TaskID, ScopedPtr<ResultCursor>> input) const override;
 
 protected:
-  Vector<RefPtr<SelectListNode>> select_exprs_;
-  Vector<RefPtr<ValueExpressionNode>> group_exprs_;
+  size_t limit_;
+  size_t offset_;
 };
 
 }

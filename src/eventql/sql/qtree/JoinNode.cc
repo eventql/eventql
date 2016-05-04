@@ -10,6 +10,7 @@
 #include <eventql/sql/qtree/JoinNode.h>
 #include <eventql/sql/qtree/ColumnReferenceNode.h>
 #include <eventql/sql/qtree/QueryTreeUtil.h>
+#include <eventql/sql/tasks/nested_loop_join.h>
 
 using namespace stx;
 
@@ -169,7 +170,42 @@ Option<RefPtr<ValueExpressionNode>> JoinNode::joinCondition() const {
 }
 
 Vector<TaskID> JoinNode::build(Transaction* txn, TaskDAG* tree) const {
-  RAISE(kNotYetImplementedError, "not yet implemented");
+  auto base_table_tasks =
+      base_table_.asInstanceOf<TableExpressionNode>()->build(txn, tree);
+  auto joined_table_tasks =
+      joined_table_.asInstanceOf<TableExpressionNode>()->build(txn, tree);
+
+  Set<TaskID> input_tasks_idset;
+  Set<TaskID> base_table_tasks_idset;
+  Set<TaskID> joined_table_tasks_idset;
+  for (const auto& task_id : base_table_tasks) {
+    input_tasks_idset.emplace(task_id);
+    base_table_tasks_idset.emplace(task_id);
+  }
+  for (const auto& task_id : joined_table_tasks) {
+    input_tasks_idset.emplace(task_id);
+    joined_table_tasks_idset.emplace(task_id);
+  }
+
+  auto out_task = mkRef(new TaskDAGNode(
+      new NestedLoopJoinFactory(
+          join_type_,
+          base_table_tasks_idset,
+          joined_table_tasks_idset,
+          input_map_,
+          selectList(),
+          joinCondition(),
+          whereExpression())));
+
+  for (const auto& in_task_id : input_tasks_idset) {
+    TaskDAGNode::Dependency dep;
+    dep.task_id = in_task_id;
+    out_task->addDependency(dep);
+  }
+
+  TaskIDList output;
+  output.emplace_back(tree->addTask(out_task));
+  return output;
 }
 
 RefPtr<QueryTreeNode> JoinNode::deepCopy() const {

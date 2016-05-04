@@ -24,6 +24,7 @@ struct TableInfo {
   String table_name;
   Option<String> description;
   Vector<ColumnInfo> columns;
+  Set<String> tags;
 };
 
 } // namespace csql

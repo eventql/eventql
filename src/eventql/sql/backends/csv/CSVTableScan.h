@@ -9,7 +9,7 @@
  */
 #pragma once
 #include <eventql/util/stdtypes.h>
-#include <eventql/sql/runtime/tablescan.h>
+#include <eventql/sql/tasks/tablescan.h>
 #include <eventql/sql/backends/csv/CSVInputStream.h>
 
 using namespace stx;
