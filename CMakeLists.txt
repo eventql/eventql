@@ -23,7 +23,7 @@ option(ENABLE_TESTS "Build unit tests [default: ON]" ON)
 set(CMAKE_C_FLAGS_RELEASE "-O3 ${CMAKE_CXX_FLAGS_RELEASE}")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3 ${CMAKE_CXX_FLAGS_RELEASE}")
 
-set(PROTOC_ARGS --proto_path ${CMAKE_SOURCE_DIR}/src/zbase/core)
+set(PROTOC_ARGS --proto_path ${CMAKE_SOURCE_DIR}/src/eventql/core)
 
 add_library(hunspell OBJECT
     deps/3rdparty/hunspell/affentry.cxx
@@ -42,7 +42,7 @@ add_library(hunspell OBJECT
     deps/3rdparty/hunspell/hnjalloc.c
     deps/3rdparty/hunspell/hyphen.c)
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/src/zbase/util/mysql")
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/src/eventql/util/mysql")
 find_package(MySQL)
 
 if(MYSQL_FOUND)
@@ -131,7 +131,7 @@ add_subdirectory(deps/libcsql)
 include_directories(${CSQL_INCLUDE})
 set(HAVE_CSQL true)
 
-add_subdirectory(src/zbase)
-add_subdirectory(src/zbase/master)
-add_subdirectory(src/zbase/docdb)
-add_subdirectory(src/zbase/dproc)
+add_subdirectory(src/eventql)
+add_subdirectory(src/eventql/master)
+add_subdirectory(src/eventql/docdb)
+add_subdirectory(src/eventql/dproc)
