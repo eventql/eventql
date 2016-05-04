@@ -13,56 +13,21 @@
 namespace csql {
 
 QueryPlan::QueryPlan(
-    Transaction* txn,
-    Vector<RefPtr<QueryTreeNode>> qtrees) :
-    txn_(txn),
-    qtrees_(qtrees) {
-  for (const auto& qtree : qtrees_) {
-    statement_tasks_.emplace_back(
-        qtree.asInstanceOf<TableExpressionNode>()->build(txn, &tasks_));
-
-    statement_columns_.emplace_back(
-        qtree.asInstanceOf<TableExpressionNode>()->outputColumns());
-  }
-}
-
-void QueryPlan::execute() {
-  if (!scheduler_) {
-    RAISE(kRuntimeError, "QueryPlan has no scheduler");
-  }
-
-  auto sched = scheduler_(txn_, &tasks_, &callbacks_);
-  sched->execute();
-}
-
-void QueryPlan::setScheduler(SchedulerFactory scheduler) {
-  scheduler_ = scheduler;
-}
-
-void QueryPlan::onOutputRow(size_t stmt_idx, RowSinkFn fn) {
-  if (stmt_idx >= qtrees_.size()) {
-    RAISE(kIndexError, "invalid statement index");
-  }
-
-  for (const auto& task_id : statement_tasks_[stmt_idx]) {
-    callbacks_.on_row[task_id].emplace_back(fn);
-  }
-}
-
-const Vector<String>& QueryPlan::getStatementOutputColumns(size_t stmt_idx) {
-  if (stmt_idx >= qtrees_.size()) {
-    RAISE(kIndexError, "invalid statement index");
-  }
-
-  return statement_columns_[stmt_idx];
-}
+    Vector<RefPtr<QueryTreeNode>> qtrees,
+    Vector<ScopedPtr<Statement>> statements) :
+    qtrees_(qtrees),
+    statements_(std::move(statements)) {}
 
 size_t QueryPlan::numStatements() const {
   return qtrees_.size();
 }
 
 Statement* QueryPlan::getStatement(size_t stmt_idx) const {
-  RAISE(kNotImplementedError);
+  if (stmt_idx >= statements_.size()) {
+    RAISE(kIndexError, "invalid statement index");
+  }
+
+  return statements_[stmt_idx].get();
 }
 
 RefPtr<QueryTreeNode> QueryPlan::getStatementQTree(size_t stmt_idx) const {
@@ -71,18 +36,6 @@ RefPtr<QueryTreeNode> QueryPlan::getStatementQTree(size_t stmt_idx) const {
   }
 
   return qtrees_[stmt_idx];
-}
-
-void QueryPlan::storeResults(size_t stmt_idx, ResultList* result_list) {
-  result_list->addHeader(getStatementOutputColumns(stmt_idx));
-
-  onOutputRow(
-      stmt_idx,
-      std::bind(
-          &ResultList::addRow,
-          result_list,
-          std::placeholders::_1,
-          std::placeholders::_2));
 }
 
 }

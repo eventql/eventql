@@ -124,8 +124,7 @@ add_subdirectory(deps/libcplot)
 include_directories(${CPLOT_INCLUDE})
 set(HAVE_CPLOT true)
 
-add_subdirectory(deps/libcsql)
-include_directories(${CSQL_INCLUDE})
+add_subdirectory(src/eventql/sql)
 set(HAVE_CSQL true)
 
 add_subdirectory(src/eventql)
