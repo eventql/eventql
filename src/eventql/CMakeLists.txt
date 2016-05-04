@@ -262,7 +262,6 @@ add_executable(evqld
     metrics/MetricService.cc
     LogfileScanResult.cc
     EventScanResult.cc
-    CTRStatsServlet.cc
     AnalyticsServlet.cc
     StatusServlet.cc
     HTTPAuth.cc

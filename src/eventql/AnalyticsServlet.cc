@@ -9,7 +9,6 @@
 #include <thread>
 
 #include "AnalyticsServlet.h"
-#include "eventql/CTRCounter.h"
 #include "eventql/util/Language.h"
 #include "eventql/util/human.h"
 #include "eventql/util/wallclock.h"
