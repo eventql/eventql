@@ -17,8 +17,6 @@ set(CSTABLE_INCLUDE ${MODULE_INCLUDE} PARENT_SCOPE)
 # DEPENDENCIES
 find_package(Threads)
 
-include(../libeventql/util/src/eventql/util/cmake/CFlags.cmake)
-
 if(NOT HAVE_STX)
   set(STX_PATH "deps/libstx" CACHE STRING "libstx directory")
   message(STATUS "using libstx at: ${STX_PATH}")
