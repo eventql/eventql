@@ -1,7 +1,7 @@
 POST /api/v1/tables/add_field
 ================
 
-Add a new field with specified data type to an existing table. </br>
+Adds a new field with specified data type to an existing table. </br>
 For more information on the data types supported by EventQL, please refer to
 <a href="/documentation/tables/datatypes">Chapter 2.1.1 </a>
 
@@ -42,7 +42,7 @@ For more information on the data types supported by EventQL, please refer to
 
         >> POST /api/v1/tables/add_field?table=my_sensor_table&field_name=sensor_location&
            field_type=STRING&repeated=false&optional=true HTTP/1.1
-        >> Authorization: Token <auth&#95;token>
+        >> Authorization: Token <authtoken>
         >> Content-Type: text/plain;charset=UTF-8
         >> Content-Length: ...
 
