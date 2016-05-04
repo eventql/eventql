@@ -13,8 +13,8 @@
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/autoref.h>
 #include <eventql/DrilldownTree.h>
-#include "csql/runtime/ExecutionStrategy.h"
-#include "csql/Transaction.h"
+#include "eventql/sql/runtime/ExecutionStrategy.h"
+#include "eventql/sql/Transaction.h"
 
 using namespace stx;
 

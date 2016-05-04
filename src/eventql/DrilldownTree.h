@@ -10,7 +10,7 @@
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/autoref.h>
 #include <eventql/util/json/jsonoutputstream.h>
-#include <csql/svalue.h>
+#include <eventql/sql/svalue.h>
 
 using namespace stx;
 

@@ -14,7 +14,7 @@
 #include <eventql/core/Table.h>
 #include <eventql/infra/cstable/CSTableReader.h>
 #include <eventql/infra/cstable/RecordMaterializer.h>
-#include <csql/runtime/EmptyTable.h>
+#include <eventql/sql/runtime/EmptyTable.h>
 
 using namespace stx;
 

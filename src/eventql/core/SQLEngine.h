@@ -8,8 +8,8 @@
  * <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include <csql/runtime/runtime.h>
-#include <csql/runtime/ResultFormat.h>
+#include <eventql/sql/runtime/runtime.h>
+#include <eventql/sql/runtime/ResultFormat.h>
 #include <eventql/core/TSDBTableProvider.h>
 #include <eventql/AnalyticsAuth.h>
 

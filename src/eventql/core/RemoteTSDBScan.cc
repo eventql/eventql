@@ -13,7 +13,7 @@
 #include <eventql/util/protobuf/msg.h>
 #include <eventql/core/RemoteTSDBScan.h>
 #include <eventql/AnalyticsSession.pb.h>
-#include <csql/runtime/BinaryResultParser.h>
+#include <eventql/sql/runtime/BinaryResultParser.h>
 #include <eventql/z1stats.h>
 
 using namespace stx;

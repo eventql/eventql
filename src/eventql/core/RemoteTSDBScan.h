@@ -9,9 +9,9 @@
  */
 #pragma once
 #include <eventql/util/stdtypes.h>
-#include <csql/qtree/SequentialScanNode.h>
-#include <csql/runtime/TableExpression.h>
-#include <csql/runtime/ValueExpression.h>
+#include <eventql/sql/qtree/SequentialScanNode.h>
+#include <eventql/sql/runtime/TableExpression.h>
+#include <eventql/sql/runtime/ValueExpression.h>
 #include <eventql/RemoteTSDBScanParams.pb.h>
 #include <eventql/core/TSDBTableRef.h>
 #include <eventql/core/ReplicationScheme.h>

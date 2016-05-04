@@ -10,7 +10,7 @@
 #include <eventql/util/stdtypes.h>
 #include <eventql/Report.h>
 #include <eventql/dproc/Task.h>
-#include <csql/svalue.h>
+#include <eventql/sql/svalue.h>
 
 using namespace stx;
 

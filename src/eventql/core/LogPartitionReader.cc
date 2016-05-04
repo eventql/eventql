@@ -13,7 +13,7 @@
 #include <eventql/infra/sstable/sstablereader.h>
 #include <eventql/core/LogPartitionReader.h>
 #include <eventql/core/Table.h>
-#include <csql/runtime/EmptyTable.h>
+#include <eventql/sql/runtime/EmptyTable.h>
 
 using namespace stx;
 

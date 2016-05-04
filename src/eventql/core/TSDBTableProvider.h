@@ -9,7 +9,7 @@
  */
 #pragma once
 #include <eventql/util/stdtypes.h>
-#include <csql/runtime/tablerepository.h>
+#include <eventql/sql/runtime/tablerepository.h>
 #include <eventql/AnalyticsAuth.h>
 #include <eventql/core/TSDBTableRef.h>
 #include <eventql/core/PartitionMap.h>

@@ -25,7 +25,7 @@
 #include "eventql/dproc/Task.h"
 #include "eventql/dproc/BlobRDD.h"
 #include <eventql/docdb/ItemRef.h>
-#include <csql/svalue.h>
+#include <eventql/sql/svalue.h>
 #include "eventql/ReportParams.pb.h"
 
 using namespace stx;

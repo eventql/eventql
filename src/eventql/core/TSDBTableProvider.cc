@@ -11,8 +11,8 @@
 #include <eventql/core/TSDBTableProvider.h>
 #include <eventql/core/TSDBService.h>
 #include <eventql/core/RemoteTSDBScan.h>
-#include <csql/CSTableScan.h>
-#include <csql/runtime/EmptyTable.h>
+#include <eventql/sql/CSTableScan.h>
+#include <eventql/sql/runtime/EmptyTable.h>
 
 using namespace stx;
 

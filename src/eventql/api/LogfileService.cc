@@ -15,9 +15,9 @@
 #include "eventql/util/protobuf/MessagePrinter.h"
 #include "eventql/util/protobuf/MessageEncoder.h"
 #include "eventql/util/protobuf/DynamicMessage.h"
-#include "csql/qtree/SelectListNode.h"
-#include "csql/qtree/ColumnReferenceNode.h"
-#include "csql/CSTableScan.h"
+#include "eventql/sql/qtree/SelectListNode.h"
+#include "eventql/sql/qtree/ColumnReferenceNode.h"
+#include "eventql/sql/CSTableScan.h"
 #include "eventql/core/TimeWindowPartitioner.h"
 #include "eventql/core/SQLEngine.h"
 

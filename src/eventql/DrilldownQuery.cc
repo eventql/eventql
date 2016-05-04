@@ -10,10 +10,10 @@
  * permission is obtained.
  */
 #include <eventql/DrilldownQuery.h>
-#include <csql/parser/parser.h>
-#include <csql/parser/astnode.h>
-#include <csql/qtree/QueryTreeUtil.h>
-#include <csql/runtime/runtime.h>
+#include <eventql/sql/parser/parser.h>
+#include <eventql/sql/parser/astnode.h>
+#include <eventql/sql/qtree/QueryTreeUtil.h>
+#include <eventql/sql/runtime/runtime.h>
 
 using namespace stx;
 

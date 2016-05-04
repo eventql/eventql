@@ -12,11 +12,11 @@
 #pragma once
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/protobuf/MessageSchema.h>
-#include <csql/qtree/SequentialScanNode.h>
-#include <csql/runtime/compiler.h>
-#include <csql/runtime/defaultruntime.h>
-#include <csql/runtime/TableExpression.h>
-#include <csql/runtime/ValueExpression.h>
+#include <eventql/sql/qtree/SequentialScanNode.h>
+#include <eventql/sql/runtime/compiler.h>
+#include <eventql/sql/runtime/defaultruntime.h>
+#include <eventql/sql/runtime/TableExpression.h>
+#include <eventql/sql/runtime/ValueExpression.h>
 #include <eventql/infra/cstable/CSTableReader.h>
 #include <eventql/core/Table.h>
 #include <eventql/core/PartitionReader.h>

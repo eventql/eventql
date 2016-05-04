@@ -24,7 +24,7 @@
 #include "eventql/util/cli/CLI.h"
 #include "eventql/util/cli/flagparser.h"
 #include "eventql/util/cli/term.h"
-#include "csql/runtime/BinaryResultParser.h"
+#include "eventql/sql/runtime/BinaryResultParser.h"
 
 using namespace stx;
 

@@ -19,8 +19,8 @@
 #include <eventql/util/util/Base64.h>
 #include <eventql/util/fnv.h>
 #include <eventql/infra/sstable/sstablereader.h>
-#include <csql/runtime/ASCIITableFormat.h>
-#include <csql/runtime/JSONSSEStreamFormat.h>
+#include <eventql/sql/runtime/ASCIITableFormat.h>
+#include <eventql/sql/runtime/JSONSSEStreamFormat.h>
 
 using namespace stx;
 

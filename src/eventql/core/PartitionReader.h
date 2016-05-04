@@ -13,7 +13,7 @@
 #include <eventql/util/option.h>
 #include <eventql/util/protobuf/MessageObject.h>
 #include <eventql/core/PartitionSnapshot.h>
-#include <csql/CSTableScan.h>
+#include <eventql/sql/CSTableScan.h>
 
 using namespace stx;
 

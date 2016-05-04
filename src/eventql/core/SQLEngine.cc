@@ -14,12 +14,12 @@
 #include <eventql/core/TSDBService.h>
 #include <eventql/core/TimeWindowPartitioner.h>
 #include <eventql/core/FixedShardPartitioner.h>
-#include <csql/defaults.h>
-#include <csql/qtree/GroupByMergeNode.h>
-#include <csql/qtree/RemoteAggregateNode.h>
-#include <csql/qtree/RemoteAggregateParams.pb.h>
-#include <csql/qtree/CallExpressionNode.h>
-#include <csql/qtree/ColumnReferenceNode.h>
+#include <eventql/sql/defaults.h>
+#include <eventql/sql/qtree/GroupByMergeNode.h>
+#include <eventql/sql/qtree/RemoteAggregateNode.h>
+#include <eventql/sql/qtree/RemoteAggregateParams.pb.h>
+#include <eventql/sql/qtree/CallExpressionNode.h>
+#include <eventql/sql/qtree/ColumnReferenceNode.h>
 #include <eventql/z1stats.h>
 
 namespace zbase {
