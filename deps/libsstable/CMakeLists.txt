@@ -17,8 +17,6 @@ set(SSTABLE_INCLUDE ${MODULE_INCLUDE} PARENT_SCOPE)
 # DEPENDENCIES
 find_package(Threads)
 
-include(deps/libstx/src/stx/cmake/CFlags.cmake)
-
 if(NOT HAVE_STX)
   add_subdirectory(deps/libstx)
   include_directories(${STX_INCLUDE})
