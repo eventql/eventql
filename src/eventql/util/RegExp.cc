@@ -7,7 +7,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 #include <eventql/util/RegExp.h>
-#include <eventql/util/sysconfig.h>
+#include <eventql/sysconfig.h>
 #include <cstring>
 
 #ifdef HAVE_PCRE

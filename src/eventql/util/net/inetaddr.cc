@@ -14,7 +14,7 @@
 #include "eventql/util/exception.h"
 #include "eventql/util/stringutil.h"
 #include "eventql/util/net/inetaddr.h"
-#include "eventql/util/sysconfig.h"
+#include "eventql/sysconfig.h"
 
 namespace stx {
 

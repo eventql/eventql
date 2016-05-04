@@ -37,7 +37,7 @@
 
 #include <string.h>
 #include <eventql/util/3rdparty/google/protobuf/stubs/common.h>
-#include <eventql/util/sysconfig.h>
+/*#include <eventql/util/sysconfig.h>*/
 
 #if defined(HAVE_HASH_MAP) && defined(HAVE_HASH_SET)
 #include HASH_MAP_H

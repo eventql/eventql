@@ -12,7 +12,6 @@
 #include "eventql/util/http/HTTPSSEStream.h"
 #include "eventql/util/json/json.h"
 #include "eventql/util/web/SecureCookie.h"
-#include "eventql/dproc/DispatchService.h"
 #include "eventql/AnalyticsApp.h"
 #include "eventql/ReportParams.pb.h"
 #include "eventql/AnalyticsSession.pb.h"
@@ -39,7 +38,6 @@ public:
 
   AnalyticsServlet(
       RefPtr<AnalyticsApp> app,
-      dproc::DispatchService* dproc,
       const String& cachedir,
       AnalyticsAuth* auth,
       csql::Runtime* sql,
@@ -264,7 +262,6 @@ protected:
   }
 
   RefPtr<AnalyticsApp> app_;
-  dproc::DispatchService* dproc_;
   String cachedir_;
   AnalyticsAuth* auth_;
   csql::Runtime* sql_;

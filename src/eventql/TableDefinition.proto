@@ -7,5 +7,5 @@
  * permission is obtained.
  */
 package zbase;
-import 'core/TableConfig.proto';
+import 'eventql/core/TableConfig.proto';
 

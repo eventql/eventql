@@ -9,7 +9,6 @@
 #include <thread>
 
 #include "AnalyticsServlet.h"
-#include "eventql/CTRCounter.h"
 #include "eventql/util/Language.h"
 #include "eventql/util/human.h"
 #include "eventql/util/wallclock.h"
@@ -17,6 +16,7 @@
 #include "eventql/util/util/Base64.h"
 #include "eventql/util/logging.h"
 #include "eventql/util/assets.h"
+#include "eventql/util/protobuf/msg.h"
 #include "eventql/util/http/cookies.h"
 #include "eventql/util/protobuf/DynamicMessage.h"
 #include "eventql/util/protobuf/MessageEncoder.h"
@@ -40,7 +40,6 @@ namespace zbase {
 
 AnalyticsServlet::AnalyticsServlet(
     RefPtr<AnalyticsApp> app,
-    dproc::DispatchService* dproc,
     const String& cachedir,
     AnalyticsAuth* auth,
     csql::Runtime* sql,
@@ -49,7 +48,6 @@ AnalyticsServlet::AnalyticsServlet(
     DocumentDB* docdb,
     PartitionMap* pmap) :
     app_(app),
-    dproc_(dproc),
     cachedir_(cachedir),
     auth_(auth),
     sql_(sql),

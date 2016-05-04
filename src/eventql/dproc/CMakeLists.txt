@@ -5,21 +5,3 @@
 # the terms of the GNU General Public License v3.0. You should have received a
 # copy of the GNU General Public License along with this program. If not, see
 # <http://www.gnu.org/licenses/>.
-project(FNORD_DPROC)
-
-include_directories(../)
-include_directories(../3rdparty)
-include_directories(${CMAKE_CURRENT_BINARY_DIR}/../)
-
-file(GLOB PROTO_FILES *.proto)
-STX_PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${PROTO_FILES})
-
-add_library(dproc OBJECT
-    Application.cc
-    DispatchService.cc
-    TaskSpec.pb.cc
-    TaskRef.cc
-    LocalScheduler.cc
-    TaskResultFuture.cc
-    BlobRDD.cc
-    ${PROTO_SRCS})
