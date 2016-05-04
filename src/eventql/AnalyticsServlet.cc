@@ -45,7 +45,6 @@ AnalyticsServlet::AnalyticsServlet(
     csql::Runtime* sql,
     zbase::TSDBService* tsdb,
     ConfigDirectory* customer_dir,
-    DocumentDB* docdb,
     PartitionMap* pmap) :
     app_(app),
     cachedir_(cachedir),
@@ -56,8 +55,6 @@ AnalyticsServlet::AnalyticsServlet(
     logfile_api_(app->logfileService(), customer_dir, cachedir),
     events_api_(app->eventsService(), customer_dir, cachedir),
     mapreduce_api_(app->mapreduceService(), customer_dir, cachedir),
-    metrics_api_(app->metricService(), customer_dir, cachedir),
-    documents_api_(docdb),
     pmap_(pmap) {}
 
 void AnalyticsServlet::handleHTTPRequest(
@@ -158,18 +155,6 @@ void AnalyticsServlet::handle(
     return;
   }
 
-  if (StringUtil::beginsWith(uri.path(), "/api/v1/metrics")) {
-    metrics_api_.handle(session, req_stream, res_stream);
-    return;
-  }
-
-  if (StringUtil::beginsWith(uri.path(), "/api/v1/documents")) {
-    req_stream->readBody();
-    documents_api_.handle(session, &req, &res);
-    res_stream->writeResponse(res);
-    return;
-  }
-
   if (uri.path() == "/api/v1/auth/info") {
     req_stream->readBody();
     getAuthInfo(session, &req, &res);
@@ -255,20 +240,6 @@ void AnalyticsServlet::handle(
     });
     res_stream->writeResponse(res);
     return;
-  }
-
-
-  /* METRICS */
-  if (uri.path() == "/api/v1/metrics") {
-    req_stream->readBody();
-    switch (req.method()) {
-      case http::HTTPMessage::M_POST:
-        insertIntoMetric(uri, session, &req, &res);
-        res_stream->writeResponse(res);
-        return;
-      default:
-        break;
-    }
   }
 
 
@@ -362,34 +333,6 @@ void AnalyticsServlet::handle(
   res.addHeader("Content-Type", "text/html; charset=utf-8");
   res.addBody(Assets::getAsset("eventql/webui/404.html"));
   res_stream->writeResponse(res);
-}
-
-void AnalyticsServlet::insertIntoMetric(
-    const URI& uri,
-    const AnalyticsSession& session,
-    const http::HTTPRequest* req,
-    http::HTTPResponse* res) {
-  auto params = uri.queryParams();
-
-  String metric;
-  if (!URI::getParam(params, "metric", &metric)) {
-    res->setStatus(http::kStatusBadRequest);
-    res->addBody("error: missing ?metric=... parameter");
-    return;
-  }
-
-  String value;
-  if (!URI::getParam(params, "value", &value)) {
-    res->setStatus(http::kStatusBadRequest);
-    res->addBody("error: missing ?value=... parameter");
-    return;
-  }
-
-  auto time = WallClock::unixMicros();
-
-  stx::logTrace("analyticsd", "Insert into metric '$0' -> $1", metric, value);
-  app_->insertMetric(session.customer(), metric, time, value);
-  res->setStatus(http::kStatusCreated);
 }
 
 void AnalyticsServlet::listTables(

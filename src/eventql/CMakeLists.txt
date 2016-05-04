@@ -234,7 +234,6 @@ add_custom_command(
 
 add_executable(evqld
     $<TARGET_OBJECTS:stx-mdb>
-    $<TARGET_OBJECTS:dxa-docdb>
     $<TARGET_OBJECTS:tsdb-server>
     $<TARGET_OBJECTS:coreprotos>
     $<TARGET_OBJECTS:customerdirectory>
@@ -254,9 +253,6 @@ add_executable(evqld
     mapreduce/tasks/ReturnResultsTask.cc
     mapreduce/tasks/SaveToTableTask.cc
     mapreduce/tasks/SaveToTablePartitionTask.cc
-    metrics/MetricAPIServlet.cc
-    metrics/MetricQuery.cc
-    metrics/MetricService.cc
     LogfileScanResult.cc
     EventScanResult.cc
     AnalyticsServlet.cc

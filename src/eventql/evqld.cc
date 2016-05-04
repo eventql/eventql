@@ -235,9 +235,6 @@ int main(int argc, const char** argv) {
       ConfigTopic::CUSTOMERS | ConfigTopic::TABLES | ConfigTopic::USERDB |
       ConfigTopic::CLUSTERCONFIG);
 
-  /* DocumentDB */
-  DocumentDB docdb(flags.getString("datadir"));
-
   /* clusterconfig */
   auto cluster_config = customer_dir.clusterConfig();
   logInfo(
@@ -346,7 +343,6 @@ int main(int argc, const char** argv) {
       sql.get(),
       &tsdb_node,
       &customer_dir,
-      &docdb,
       &partition_map);
 
   zbase::StatusServlet status_servlet(

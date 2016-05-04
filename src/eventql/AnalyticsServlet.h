@@ -22,9 +22,6 @@
 #include "eventql/api/LogfileAPIServlet.h"
 #include "eventql/api/EventsAPIServlet.h"
 #include "eventql/api/MapReduceAPIServlet.h"
-#include "eventql/metrics/MetricAPIServlet.h"
-#include "eventql/docdb/DocumentDB.h"
-#include "eventql/docdb/DocumentDBServlet.h"
 #include "eventql/RemoteTSDBScanParams.pb.h"
 
 using namespace stx;
@@ -43,7 +40,6 @@ public:
       csql::Runtime* sql,
       zbase::TSDBService* tsdb,
       ConfigDirectory* customer_dir,
-      DocumentDB* docdb,
       PartitionMap* pmap);
 
   void handleHTTPRequest(
@@ -271,8 +267,6 @@ protected:
   LogfileAPIServlet logfile_api_;
   EventsAPIServlet events_api_;
   MapReduceAPIServlet mapreduce_api_;
-  MetricAPIServlet metrics_api_;
-  DocumentDBServlet documents_api_;
   PartitionMap* pmap_;
 };
 
