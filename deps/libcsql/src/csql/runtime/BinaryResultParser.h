@@ -8,15 +8,15 @@
  * <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include <stx/uri.h>
-#include <stx/io/file.h>
-#include <stx/autoref.h>
-#include <stx/http/httpmessage.h>
-#include "stx/http/httprequest.h"
-#include "stx/http/httpresponse.h"
-#include "stx/http/httpstats.h"
-#include "stx/http/httpconnectionpool.h"
-#include "stx/http/httpclient.h"
+#include <eventql/util/uri.h>
+#include <eventql/util/io/file.h>
+#include <eventql/util/autoref.h>
+#include <eventql/util/http/httpmessage.h>
+#include "eventql/util/http/httprequest.h"
+#include "eventql/util/http/httpresponse.h"
+#include "eventql/util/http/httpstats.h"
+#include "eventql/util/http/httpconnectionpool.h"
+#include "eventql/util/http/httpclient.h"
 #include "csql/svalue.h"
 #include "csql/runtime/ExecutionContext.h"
 

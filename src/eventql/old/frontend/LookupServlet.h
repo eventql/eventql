@@ -8,8 +8,8 @@
  */
 #ifndef _CM_LOOKUPSERVLET_H
 #define _CM_LOOKUPSERVLET_H
-#include "stx/http/httpservice.h"
-#include "stx/json/json.h"
+#include "eventql/util/http/httpservice.h"
+#include "eventql/util/json/json.h"
 #include "eventql/util/mdb/MDB.h"
 
 using namespace stx;

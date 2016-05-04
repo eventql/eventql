@@ -6,7 +6,7 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#include <stx/inspect.h>
+#include <eventql/util/inspect.h>
 #include <eventql/docdb/ItemRef.h>
 
 namespace zbase {

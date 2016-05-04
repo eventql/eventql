@@ -8,7 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include <stx/stdtypes.h>
+#include <eventql/util/stdtypes.h>
 #include <csql/runtime/runtime.h>
 #include <csql/expressions/aggregate.h>
 #include <csql/expressions/boolean.h>

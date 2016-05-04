@@ -9,8 +9,8 @@
  */
 #ifndef _FNORD_LOGTABLE_TABLEREADER_H
 #define _FNORD_LOGTABLE_TABLEREADER_H
-#include <stx/stdtypes.h>
-#include <stx/autoref.h>
+#include <eventql/util/stdtypes.h>
+#include <eventql/util/autoref.h>
 #include <fnord-logtable/AbstractTableReader.h>
 #include "eventql/infra/sstable/sstablereader.h"
 #include "cstable/CSTableReader.h"

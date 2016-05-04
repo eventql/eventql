@@ -6,7 +6,7 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#include "stx/http/HTTPSSEResponseHandler.h"
+#include "eventql/util/http/HTTPSSEResponseHandler.h"
 #include "eventql/mapreduce/tasks/ReduceTask.h"
 #include "eventql/mapreduce/MapReduceScheduler.h"
 #include <eventql/z1stats.h>

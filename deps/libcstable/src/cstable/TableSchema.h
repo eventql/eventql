@@ -8,11 +8,11 @@
  * <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include <stx/stdtypes.h>
-#include <stx/exception.h>
-#include <stx/autoref.h>
-#include <stx/json/json.h>
-#include <stx/protobuf/MessageSchema.h>
+#include <eventql/util/stdtypes.h>
+#include <eventql/util/exception.h>
+#include <eventql/util/autoref.h>
+#include <eventql/util/json/json.h>
+#include <eventql/util/protobuf/MessageSchema.h>
 
 namespace cstable {
 

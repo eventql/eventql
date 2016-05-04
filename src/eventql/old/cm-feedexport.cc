@@ -6,15 +6,15 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#include <stx/stdtypes.h>
-#include <stx/cli/flagparser.h>
-#include <stx/application.h>
-#include <stx/logging.h>
-#include <stx/random.h>
-#include <stx/wallclock.h>
-#include <stx/thread/eventloop.h>
-#include <stx/thread/threadpool.h>
-#include <stx/http/httpconnectionpool.h>
+#include <eventql/util/stdtypes.h>
+#include <eventql/util/cli/flagparser.h>
+#include <eventql/util/application.h>
+#include <eventql/util/logging.h>
+#include <eventql/util/random.h>
+#include <eventql/util/wallclock.h>
+#include <eventql/util/thread/eventloop.h>
+#include <eventql/util/thread/threadpool.h>
+#include <eventql/util/http/httpconnectionpool.h>
 #include <eventql/dproc/Application.h>
 #include <eventql/dproc/LocalScheduler.h>
 #include <eventql/core/TSDBClient.h>

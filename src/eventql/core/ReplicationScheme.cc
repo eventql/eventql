@@ -8,7 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <eventql/core/ReplicationScheme.h>
-#include <stx/fnv.h>
+#include <eventql/util/fnv.h>
 
 using namespace stx;
 

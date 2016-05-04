@@ -9,8 +9,8 @@
  */
 #include <csql/runtime/tablerepository.h>
 #include <csql/runtime/importstatement.h>
-#include <stx/exception.h>
-#include <stx/uri.h>
+#include <eventql/util/exception.h>
+#include <eventql/util/uri.h>
 
 namespace csql {
 

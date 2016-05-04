@@ -8,8 +8,8 @@
  * <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include <stx/stdtypes.h>
-#include <stx/autoref.h>
+#include <eventql/util/stdtypes.h>
+#include <eventql/util/autoref.h>
 #include <csql/qtree/QueryTreeNode.h>
 #include <csql/tasks/TaskDAG.h>
 #include <csql/runtime/Scheduler.h>

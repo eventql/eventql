@@ -8,7 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 //#include <fnordmetric/environment.h>
-#include <stx/logging.h>
+#include <eventql/util/logging.h>
 #include <csql/backends/mysql/mysqlconnection.h>
 
 namespace csql {

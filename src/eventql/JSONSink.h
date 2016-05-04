@@ -9,10 +9,10 @@
 #ifndef _CM_JSONSINK_H
 #define _CM_JSONSINK_H
 #include "eventql/Report.h"
-#include "stx/stdtypes.h"
-#include "stx/io/file.h"
-#include "stx/io/mmappedfile.h"
-#include "stx/json/json.h"
+#include "eventql/util/stdtypes.h"
+#include "eventql/util/io/file.h"
+#include "eventql/util/io/mmappedfile.h"
+#include "eventql/util/json/json.h"
 
 using namespace stx;
 

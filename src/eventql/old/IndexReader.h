@@ -15,12 +15,12 @@
 #include <unordered_map>
 #include <vector>
 #include <queue>
-#include "stx/stdtypes.h"
-#include "stx/thread/taskscheduler.h"
+#include "eventql/util/stdtypes.h"
+#include "eventql/util/thread/taskscheduler.h"
 #include <eventql/util/fts.h>
 #include <eventql/util/fts_common.h>
 #include "eventql/util/mdb/MDB.h"
-#include "stx/stats/stats.h"
+#include "eventql/util/stats/stats.h"
 #include "FeatureIndex.h"
 #include "DocStore.h"
 #include "IndexChangeRequest.h"

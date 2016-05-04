@@ -10,11 +10,11 @@
 #ifndef _FNORD_LOGTABLE_TABLEREPLICATION_H
 #define _FNORD_LOGTABLE_TABLEREPLICATION_H
 #include <thread>
-#include <stx/stdtypes.h>
-#include <stx/uri.h>
+#include <eventql/util/stdtypes.h>
+#include <eventql/util/uri.h>
 #include <fnord-logtable/TableRepository.h>
-#include "stx/http/httprequest.h"
-#include "stx/http/httpconnectionpool.h"
+#include "eventql/util/http/httprequest.h"
+#include "eventql/util/http/httpconnectionpool.h"
 
 namespace stx {
 namespace logtable {

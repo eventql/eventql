@@ -12,7 +12,7 @@
 #include <csql/runtime/vm.h>
 #include <csql/runtime/importstatement.h>
 #include <csql/svalue.h>
-#include <stx/exception.h>
+#include <eventql/util/exception.h>
 
 namespace csql {
 

@@ -9,7 +9,7 @@
  */
 #ifndef _FNORD_DPROC_DISPATCHSERVICE_H
 #define _FNORD_DPROC_DISPATCHSERVICE_H
-#include <stx/stdtypes.h>
+#include <eventql/util/stdtypes.h>
 #include <eventql/dproc/Application.h>
 #include <eventql/dproc/Scheduler.h>
 #include <eventql/dproc/TaskSpec.pb.h>

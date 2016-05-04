@@ -10,9 +10,9 @@
 #ifndef _STX_SQL_MYSQLCONNECTION_H
 #define _STX_SQL_MYSQLCONNECTION_H
 #include <memory>
-#include <stx/uri.h>
-#include <stx/exception.h>
-#include <stx/protobuf/MessageSchema.h>
+#include <eventql/util/uri.h>
+#include <eventql/util/exception.h>
+#include <eventql/util/protobuf/MessageSchema.h>
 #include <functional>
 #include <eventql/buildconfig.h>
 #ifdef STX_ENABLE_MYSQL

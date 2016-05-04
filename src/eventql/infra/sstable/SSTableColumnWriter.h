@@ -13,11 +13,11 @@
 #include <string>
 #include <vector>
 #include <memory>
-#include <stx/buffer.h>
-#include <stx/exception.h>
-#include <stx/io/file.h>
-#include <stx/io/mmappedfile.h>
-#include <stx/util/binarymessagewriter.h>
+#include <eventql/util/buffer.h>
+#include <eventql/util/exception.h>
+#include <eventql/util/io/file.h>
+#include <eventql/util/io/mmappedfile.h>
+#include <eventql/util/util/binarymessagewriter.h>
 #include <eventql/infra/sstable/binaryformat.h>
 #include <eventql/infra/sstable/fileheaderreader.h>
 #include <eventql/infra/sstable/cursor.h>

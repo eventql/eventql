@@ -8,7 +8,7 @@
  */
 #include "eventql/CTRCounterTableSource.h"
 #include <eventql/infra/sstable/SSTableColumnReader.h>
-#include "stx/json/json.h"
+#include "eventql/util/json/json.h"
 
 using namespace stx;
 

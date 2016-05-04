@@ -9,7 +9,7 @@
  */
 #include <csql/runtime/JSONSSEStreamFormat.h>
 #include <csql/runtime/JSONResultFormat.h>
-#include <stx/logging.h>
+#include <eventql/util/logging.h>
 
 namespace csql {
 

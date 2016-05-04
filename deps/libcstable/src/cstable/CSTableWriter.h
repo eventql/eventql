@@ -8,9 +8,9 @@
  * <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include <stx/stdtypes.h>
-#include <stx/exception.h>
-#include <stx/io/file.h>
+#include <eventql/util/stdtypes.h>
+#include <eventql/util/exception.h>
+#include <eventql/util/io/file.h>
 #include <cstable/ColumnWriter.h>
 #include <cstable/LockManager.h>
 #include <cstable/io/PageManager.h>

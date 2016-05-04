@@ -8,9 +8,9 @@
  */
 #ifndef _CM_CTRSTATSSERVLET_H
 #define _CM_CTRSTATSSERVLET_H
-#include "stx/VFS.h"
-#include "stx/http/httpservice.h"
-#include "stx/json/json.h"
+#include "eventql/util/VFS.h"
+#include "eventql/util/http/httpservice.h"
+#include "eventql/util/json/json.h"
 
 using namespace stx;
 

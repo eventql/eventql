@@ -8,9 +8,9 @@
  * <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include <stx/stdtypes.h>
-#include <stx/autoref.h>
-#include <stx/option.h>
+#include <eventql/util/stdtypes.h>
+#include <eventql/util/autoref.h>
+#include <eventql/util/option.h>
 #include <csql/qtree/QueryTreeNode.h>
 #include <csql/qtree/GroupByNode.h>
 #include <csql/qtree/GroupByMergeNode.h>

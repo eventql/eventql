@@ -7,9 +7,9 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <stx/io/file.h>
-#include <stx/io/fileutil.h>
-#include <stx/protobuf/msg.h>
+#include <eventql/util/io/file.h>
+#include <eventql/util/io/fileutil.h>
+#include <eventql/util/protobuf/msg.h>
 #include <eventql/core/PartitionSnapshot.h>
 #include <eventql/core/Table.h>
 

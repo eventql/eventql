@@ -11,10 +11,10 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <signal.h>
-#include "stx/io/fileutil.h"
-#include "stx/application.h"
-#include "stx/logging.h"
-#include "stx/cli/flagparser.h"
+#include "eventql/util/io/fileutil.h"
+#include "eventql/util/application.h"
+#include "eventql/util/logging.h"
+#include "eventql/util/cli/flagparser.h"
 #include "common.h"
 #include <eventql/util/fts.h>
 #include <eventql/util/fts_common.h>

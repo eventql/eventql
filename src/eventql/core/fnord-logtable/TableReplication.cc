@@ -8,8 +8,8 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include "unistd.h"
-#include <stx/logging.h>
-#include <stx/wallclock.h>
+#include <eventql/util/logging.h>
+#include <eventql/util/wallclock.h>
 #include <fnord-logtable/TableReplication.h>
 
 namespace stx {

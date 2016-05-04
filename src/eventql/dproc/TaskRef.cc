@@ -8,8 +8,8 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <eventql/dproc/TaskRef.h>
-#include <stx/io/mmappedfile.h>
-#include <stx/io/fileutil.h>
+#include <eventql/util/io/mmappedfile.h>
+#include <eventql/util/io/fileutil.h>
 
 using namespace stx;
 

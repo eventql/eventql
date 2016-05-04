@@ -20,7 +20,7 @@
 #include "cplot/drawable.h"
 #include "cplot/rendertarget.h"
 #include "cplot/seriesjoin.h"
-#include <stx/exception.h>
+#include <eventql/util/exception.h>
 
 namespace stx {
 namespace chart {

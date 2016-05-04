@@ -8,8 +8,8 @@
  * <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include <stx/stdtypes.h>
-#include <stx/protobuf/MessageSchema.h>
+#include <eventql/util/stdtypes.h>
+#include <eventql/util/protobuf/MessageSchema.h>
 #include <csql/qtree/SequentialScanNode.h>
 #include <csql/runtime/compiler.h>
 #include <csql/runtime/defaultruntime.h>

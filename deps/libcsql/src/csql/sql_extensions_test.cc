@@ -16,7 +16,7 @@
 #include <csql/runtime/runtime.h>
 #include <csql/svalue.h>
 #include <util/unittest.h>
-#include <stx/exception.h>
+#include <eventql/util/exception.h>
 
 using namespace stxmetric::query;
 

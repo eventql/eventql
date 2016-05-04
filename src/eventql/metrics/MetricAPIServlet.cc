@@ -6,10 +6,10 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#include "stx/wallclock.h"
-#include "stx/assets.h"
-#include <stx/fnv.h>
-#include "stx/protobuf/msg.h"
+#include "eventql/util/wallclock.h"
+#include "eventql/util/assets.h"
+#include <eventql/util/fnv.h>
+#include "eventql/util/protobuf/msg.h"
 #include "eventql/metrics/MetricAPIServlet.h"
 #include "eventql/metrics/MetricQuery.h"
 

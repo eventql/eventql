@@ -8,8 +8,8 @@
  * <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include <stx/stdtypes.h>
-#include <stx/http/HTTPSSEStream.h>
+#include <eventql/util/stdtypes.h>
+#include <eventql/util/http/HTTPSSEStream.h>
 #include <zbase/sql/codec/json_codec.h>
 
 namespace zbase {

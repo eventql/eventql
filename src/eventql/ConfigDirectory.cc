@@ -7,10 +7,10 @@
  * permission is obtained.
  */
 #include <unistd.h>
-#include <stx/exception.h>
-#include <stx/uri.h>
-#include <stx/protobuf/msg.h>
-#include <stx/csv/CSVInputStream.h>
+#include <eventql/util/exception.h>
+#include <eventql/util/uri.h>
+#include <eventql/util/protobuf/msg.h>
+#include <eventql/util/csv/CSVInputStream.h>
 #include <eventql/ConfigDirectory.h>
 #include <eventql/z1stats.h>
 

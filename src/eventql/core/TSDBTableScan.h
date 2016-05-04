@@ -8,8 +8,8 @@
  * <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include <stx/stdtypes.h>
-#include <stx/protobuf/MessageSchema.h>
+#include <eventql/util/stdtypes.h>
+#include <eventql/util/protobuf/MessageSchema.h>
 #include <eventql/dproc/Task.h>
 #include <eventql/core/TSDBTableScanSpec.pb.h>
 #include <eventql/core/TSDBTableScanlet.h>

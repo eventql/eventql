@@ -7,8 +7,8 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <stx/io/BufferedOutputStream.h>
-#include <stx/io/fileutil.h>
+#include <eventql/util/io/BufferedOutputStream.h>
+#include <eventql/util/io/fileutil.h>
 #include <csql/tasks/groupby.h>
 
 namespace csql {

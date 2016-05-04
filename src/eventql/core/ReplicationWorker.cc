@@ -8,9 +8,9 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include "unistd.h"
-#include <stx/logging.h>
-#include <stx/wallclock.h>
-#include <stx/application.h>
+#include <eventql/util/logging.h>
+#include <eventql/util/wallclock.h>
+#include <eventql/util/application.h>
 #include <eventql/core/ReplicationWorker.h>
 #include <eventql/core/Partition.h>
 #include <eventql/z1stats.h>

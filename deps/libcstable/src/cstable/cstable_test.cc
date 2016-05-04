@@ -8,9 +8,9 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <stx/stdtypes.h>
-#include <stx/io/file.h>
-#include <stx/test/unittest.h>
+#include <eventql/util/stdtypes.h>
+#include <eventql/util/io/file.h>
+#include <eventql/util/test/unittest.h>
 #include <cstable/columns/v1/BitPackedIntColumnWriter.h>
 #include <cstable/columns/v1/BooleanColumnWriter.h>
 #include <cstable/columns/v1/DoubleColumnWriter.h>

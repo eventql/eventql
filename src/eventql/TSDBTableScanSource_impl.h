@@ -7,11 +7,11 @@
  * permission is obtained.
  */
 #include "eventql/TSDBTableScanSource.h"
-#include <stx/fnv.h>
+#include <eventql/util/fnv.h>
 #include <eventql/core/CompactionWorker.h>
 #include <cstable/CSTableReader.h>
 #include <cstable/RecordMaterializer.h>
-#include <stx/protobuf/MessageEncoder.h>
+#include <eventql/util/protobuf/MessageEncoder.h>
 
 using namespace stx;
 

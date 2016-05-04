@@ -9,12 +9,12 @@
  */
 #ifndef _FNORD_LOGTABLE_LOGTABLETAIL_H
 #define _FNORD_LOGTABLE_LOGTABLETAIL_H
-#include <stx/stdtypes.h>
-#include <stx/autoref.h>
-#include <stx/util/binarymessagereader.h>
-#include <stx/util/binarymessagewriter.h>
-#include <stx/protobuf/MessageSchema.h>
-#include <stx/protobuf/MessageObject.h>
+#include <eventql/util/stdtypes.h>
+#include <eventql/util/autoref.h>
+#include <eventql/util/util/binarymessagereader.h>
+#include <eventql/util/util/binarymessagewriter.h>
+#include <eventql/util/protobuf/MessageSchema.h>
+#include <eventql/util/protobuf/MessageObject.h>
 #include <fnord-logtable/TableReader.h>
 
 namespace stx {

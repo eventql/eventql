@@ -9,11 +9,11 @@
  */
 #ifndef _FNORD_LOGTABLE_TABLESNAPSHOT_H
 #define _FNORD_LOGTABLE_TABLESNAPSHOT_H
-#include <stx/stdtypes.h>
-#include <stx/autoref.h>
-#include <stx/random.h>
-#include <stx/protobuf/MessageSchema.h>
-#include <stx/protobuf/MessageObject.h>
+#include <eventql/util/stdtypes.h>
+#include <eventql/util/autoref.h>
+#include <eventql/util/random.h>
+#include <eventql/util/protobuf/MessageSchema.h>
+#include <eventql/util/protobuf/MessageObject.h>
 #include <fnord-logtable/TableArena.h>
 
 namespace stx {

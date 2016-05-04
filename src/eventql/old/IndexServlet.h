@@ -8,8 +8,8 @@
  */
 #ifndef _CM_INDEXSERVLET_H
 #define _CM_INDEXSERVLET_H
-#include "stx/autoref.h"
-#include "stx/http/httpservice.h"
+#include "eventql/util/autoref.h"
+#include "eventql/util/http/httpservice.h"
 #include "eventql/util/Analyzer.h"
 #include "IndexReader.h"
 

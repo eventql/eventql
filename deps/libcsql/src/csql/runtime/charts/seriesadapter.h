@@ -15,7 +15,7 @@
 #include <cplot/canvas.h>
 #include <cplot/barchart.h>
 #include <cplot/series.h>
-#include <stx/exception.h>
+#include <eventql/util/exception.h>
 #include <csql/runtime/compiler.h>
 #include <csql/runtime/vm.h>
 #include <csql/runtime/rowsink.h>

@@ -9,8 +9,8 @@
  */
 #include <cstable/io/PageManager.h>
 #include <cstable/cstable.h>
-#include <stx/exception.h>
-#include <stx/freeondestroy.h>
+#include <eventql/util/exception.h>
+#include <eventql/util/freeondestroy.h>
 
 
 namespace cstable {

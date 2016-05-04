@@ -9,14 +9,14 @@
  */
 #ifndef _FNORD_LOGTABLE_TABLE_H
 #define _FNORD_LOGTABLE_TABLE_H
-#include <stx/stdtypes.h>
-#include <stx/autoref.h>
-#include <stx/random.h>
-#include <stx/io/FileLock.h>
-#include <stx/thread/taskscheduler.h>
-#include <stx/inspect.h>
-#include <stx/protobuf/MessageSchema.h>
-#include <stx/protobuf/MessageObject.h>
+#include <eventql/util/stdtypes.h>
+#include <eventql/util/autoref.h>
+#include <eventql/util/random.h>
+#include <eventql/util/io/FileLock.h>
+#include <eventql/util/thread/taskscheduler.h>
+#include <eventql/util/inspect.h>
+#include <eventql/util/protobuf/MessageSchema.h>
+#include <eventql/util/protobuf/MessageObject.h>
 #include <fnord-afx/ArtifactIndex.h>
 #include <fnord-logtable/TableArena.h>
 #include <fnord-logtable/TableSnapshot.h>

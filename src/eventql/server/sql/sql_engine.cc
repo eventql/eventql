@@ -7,8 +7,8 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <stx/http/httpclient.h>
-#include <stx/protobuf/msg.h>
+#include <eventql/util/http/httpclient.h>
+#include <eventql/util/protobuf/msg.h>
 #include <zbase/z1.h>
 #include <zbase/sql/sql_engine.h>
 #include <zbase/core/TSDBService.h>

@@ -8,8 +8,8 @@
  * <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include <stx/stdtypes.h>
-#include <stx/autoref.h>
+#include <eventql/util/stdtypes.h>
+#include <eventql/util/autoref.h>
 #include <csql/qtree/ValueExpressionNode.h>
 #include <csql/qtree/ColumnReferenceNode.h>
 #include <csql/qtree/SequentialScanNode.h>

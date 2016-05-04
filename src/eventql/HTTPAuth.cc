@@ -7,7 +7,7 @@
  * permission is obtained.
  */
 #include <eventql/HTTPAuth.h>
-#include "stx/http/cookies.h"
+#include "eventql/util/http/cookies.h"
 
 namespace zbase {
 

@@ -8,7 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include <stx/stdtypes.h>
+#include <eventql/util/stdtypes.h>
 #include <cstable/cstable.h>
 #include <cstable/io/PageManager.h>
 #include <cstable/io/PageIndex.h>

@@ -11,7 +11,7 @@
 #include <csql/parser/astutil.h>
 #include <csql/parser/token.h>
 #include <csql/runtime/tablerepository.h>
-#include <stx/exception.h>
+#include <eventql/util/exception.h>
 
 namespace csql {
 

@@ -9,10 +9,10 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#include <stx/stdtypes.h>
-#include <stx/autoref.h>
-#include <stx/io/fileutil.h>
-#include <stx/logging.h>
+#include <eventql/util/stdtypes.h>
+#include <eventql/util/autoref.h>
+#include <eventql/util/io/fileutil.h>
+#include <eventql/util/logging.h>
 #include <eventql/core/LSMTableIndexCache.h>
 
 using namespace stx;

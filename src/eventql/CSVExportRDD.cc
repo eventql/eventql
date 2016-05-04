@@ -6,9 +6,9 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#include "stx/wallclock.h"
-#include "stx/csv/CSVOutputStream.h"
-#include "stx/protobuf/msg.h"
+#include "eventql/util/wallclock.h"
+#include "eventql/util/csv/CSVOutputStream.h"
+#include "eventql/util/protobuf/msg.h"
 #include "eventql/CSVExportRDD.h"
 
 using namespace stx;

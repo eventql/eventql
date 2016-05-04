@@ -11,7 +11,7 @@
 #include <csql/backends/mysql/mysqlbackend.h>
 #include <csql/backends/mysql/mysqlconnection.h>
 #include <csql/backends/mysql/mysqltableref.h>
-#include <stx/exception.h>
+#include <eventql/util/exception.h>
 #include <memory>
 #include <mutex>
 

@@ -9,7 +9,7 @@
  */
 #include <stdlib.h>
 #include "pointchart.h"
-#include <stx/exception.h>
+#include <eventql/util/exception.h>
 
 namespace stx {
 namespace chart {

@@ -8,7 +8,7 @@
  */
 #ifndef _CM_GROUPBYCTRRESULT_H
 #define _CM_GROUPBYCTRRESULT_H
-#include <stx/stdtypes.h>
+#include <eventql/util/stdtypes.h>
 #include "eventql/GroupResult.h"
 
 using namespace stx;

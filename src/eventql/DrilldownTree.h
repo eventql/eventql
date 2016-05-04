@@ -7,9 +7,9 @@
  * permission is obtained.
  */
 #pragma once
-#include <stx/stdtypes.h>
-#include <stx/autoref.h>
-#include <stx/json/jsonoutputstream.h>
+#include <eventql/util/stdtypes.h>
+#include <eventql/util/autoref.h>
+#include <eventql/util/json/jsonoutputstream.h>
 #include <csql/svalue.h>
 
 using namespace stx;

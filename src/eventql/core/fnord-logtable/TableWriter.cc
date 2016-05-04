@@ -11,15 +11,15 @@
 #include <thread>
 #include <fnord-logtable/TableWriter.h>
 #include <fnord-logtable/TableChunkSummaryWriter.h>
-#include <stx/logging.h>
-#include <stx/io/fileutil.h>
-#include <stx/io/FileLock.h>
-#include <stx/wallclock.h>
-#include <stx/util/binarymessagewriter.h>
-#include <stx/util/binarymessagereader.h>
-#include <stx/protobuf/MessageDecoder.h>
-#include <stx/protobuf/MessageEncoder.h>
-#include <stx/protobuf/MessagePrinter.h>
+#include <eventql/util/logging.h>
+#include <eventql/util/io/fileutil.h>
+#include <eventql/util/io/FileLock.h>
+#include <eventql/util/wallclock.h>
+#include <eventql/util/util/binarymessagewriter.h>
+#include <eventql/util/util/binarymessagereader.h>
+#include <eventql/util/protobuf/MessageDecoder.h>
+#include <eventql/util/protobuf/MessageEncoder.h>
+#include <eventql/util/protobuf/MessagePrinter.h>
 
 namespace stx {
 namespace logtable {

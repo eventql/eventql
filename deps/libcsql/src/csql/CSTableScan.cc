@@ -11,8 +11,8 @@
 #include <csql/qtree/ColumnReferenceNode.h>
 #include <csql/runtime/defaultruntime.h>
 #include <csql/runtime/compiler.h>
-#include <stx/ieee754.h>
-#include <stx/logging.h>
+#include <eventql/util/ieee754.h>
+#include <eventql/util/logging.h>
 
 using namespace stx;
 

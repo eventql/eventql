@@ -8,7 +8,7 @@
  */
 #include "IndexServlet.h"
 #include "SearchQuery.h"
-#include "stx/json/json.h"
+#include "eventql/util/json/json.h"
 
 using namespace stx;
 

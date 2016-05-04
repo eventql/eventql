@@ -7,7 +7,7 @@
  * permission is obtained.
  */
 #pragma once
-#include "stx/http/httpservice.h"
+#include "eventql/util/http/httpservice.h"
 #include "eventql/master/ConfigDirectoryMaster.h"
 
 using namespace stx;

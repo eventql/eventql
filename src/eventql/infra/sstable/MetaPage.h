@@ -8,10 +8,10 @@
  * <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include <stx/stdtypes.h>
-#include <stx/buffer.h>
-#include <stx/io/inputstream.h>
-#include <stx/io/outputstream.h>
+#include <eventql/util/stdtypes.h>
+#include <eventql/util/buffer.h>
+#include <eventql/util/io/inputstream.h>
+#include <eventql/util/io/outputstream.h>
 
 namespace stx {
 namespace sstable {

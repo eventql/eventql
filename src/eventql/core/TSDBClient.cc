@@ -9,11 +9,11 @@
  */
 #include <eventql/core/TSDBClient.h>
 #include <eventql/core/RecordEnvelope.pb.h>
-#include <stx/util/binarymessagereader.h>
-#include <stx/util/binarymessagewriter.h>
-#include <stx/protobuf/msg.h>
-#include <stx/http/httpclient.h>
-#include <stx/logging.h>
+#include <eventql/util/util/binarymessagereader.h>
+#include <eventql/util/util/binarymessagewriter.h>
+#include <eventql/util/protobuf/msg.h>
+#include <eventql/util/http/httpclient.h>
+#include <eventql/util/logging.h>
 #include <eventql/z1stats.h>
 
 using namespace stx;

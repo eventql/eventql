@@ -8,7 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <fnord-logtable/TableChunkSummaryReader.h>
-#include <stx/util/binarymessagereader.h>
+#include <eventql/util/util/binarymessagereader.h>
 
 namespace stx {
 namespace logtable {

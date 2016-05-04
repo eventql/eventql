@@ -8,13 +8,13 @@
  * <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include <stx/stdtypes.h>
+#include <eventql/util/stdtypes.h>
 #include <csql/tasks/Task.h>
 #include <csql/qtree/DrawStatementNode.h>
 #include <csql/parser/token.h>
 #include <csql/Transaction.h>
-#include <stx/exception.h>
-#include <stx/autoref.h>
+#include <eventql/util/exception.h>
+#include <eventql/util/autoref.h>
 #include <cplot/canvas.h>
 #include <cplot/drawable.h>
 

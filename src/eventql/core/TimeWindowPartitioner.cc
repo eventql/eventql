@@ -7,9 +7,9 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <stx/util/binarymessagereader.h>
-#include <stx/util/binarymessagewriter.h>
-#include <stx/logging.h>
+#include <eventql/util/util/binarymessagereader.h>
+#include <eventql/util/util/binarymessagewriter.h>
+#include <eventql/util/logging.h>
 #include <eventql/core/TimeWindowPartitioner.h>
 
 using namespace stx;

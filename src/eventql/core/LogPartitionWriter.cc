@@ -7,16 +7,16 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <stx/io/fileutil.h>
+#include <eventql/util/io/fileutil.h>
 #include <eventql/core/Partition.h>
 #include <eventql/core/LogPartitionWriter.h>
 #include <eventql/core/LogPartitionReader.h>
 #include <eventql/core/LogPartitionCompactionState.pb.h>
-#include <stx/protobuf/msg.h>
-#include <stx/logging.h>
-#include <stx/wallclock.h>
+#include <eventql/util/protobuf/msg.h>
+#include <eventql/util/logging.h>
+#include <eventql/util/wallclock.h>
 #include <eventql/infra/sstable/SSTableWriter.h>
-#include <stx/protobuf/MessageDecoder.h>
+#include <eventql/util/protobuf/MessageDecoder.h>
 #include <cstable/RecordShredder.h>
 #include <cstable/CSTableWriter.h>
 

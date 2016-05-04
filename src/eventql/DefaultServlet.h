@@ -7,8 +7,8 @@
  * permission is obtained.
  */
 #pragma once
-#include <stx/stdtypes.h>
-#include <stx/http/httpservice.h>
+#include <eventql/util/stdtypes.h>
+#include <eventql/util/http/httpservice.h>
 
 using namespace stx;
 namespace zbase {

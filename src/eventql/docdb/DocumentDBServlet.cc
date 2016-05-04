@@ -7,7 +7,7 @@
  * permission is obtained.
  */
 #include "DocumentDBServlet.h"
-#include "stx/human.h"
+#include "eventql/util/human.h"
 
 using namespace stx;
 

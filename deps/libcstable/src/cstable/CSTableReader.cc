@@ -19,8 +19,8 @@
 #include <cstable/columns/v1/StringColumnReader.h>
 #include <cstable/columns/UnsignedIntColumnReader.h>
 #include <cstable/columns/UInt64PageReader.h>
-#include <stx/io/file.h>
-#include <stx/io/mmappedfile.h>
+#include <eventql/util/io/file.h>
+#include <eventql/util/io/mmappedfile.h>
 
 using namespace stx;
 

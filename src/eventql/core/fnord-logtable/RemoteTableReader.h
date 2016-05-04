@@ -9,9 +9,9 @@
  */
 #ifndef _FNORD_LOGTABLE_REMOTETABLEREADER_H
 #define _FNORD_LOGTABLE_REMOTETABLEREADER_H
-#include <stx/stdtypes.h>
-#include <stx/autoref.h>
-#include <stx/http/httpconnectionpool.h>
+#include <eventql/util/stdtypes.h>
+#include <eventql/util/autoref.h>
+#include <eventql/util/http/httpconnectionpool.h>
 #include <fnord-logtable/AbstractTableReader.h>
 
 namespace stx {

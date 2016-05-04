@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <stx/exception.h>
+#include <eventql/util/exception.h>
 #include <util/unittest.h>
 #include <csql/backends/csv/csvinputstream.h>
 #include <csql/backends/csv/csvtableref.h>

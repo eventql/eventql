@@ -8,7 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <csql/expressions/string.h>
-#include <stx/stringutil.h>
+#include <eventql/util/stringutil.h>
 
 namespace csql {
 namespace expressions {

@@ -7,10 +7,10 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <stx/fnv.h>
-#include <stx/exception.h>
-#include <stx/inspect.h>
-#include <stx/io/VFSFileInputStream.h>
+#include <eventql/util/fnv.h>
+#include <eventql/util/exception.h>
+#include <eventql/util/inspect.h>
+#include <eventql/util/io/VFSFileInputStream.h>
 #include <eventql/infra/sstable/binaryformat.h>
 #include <eventql/infra/sstable/binaryformat.h>
 #include <eventql/infra/sstable/sstablereader.h>

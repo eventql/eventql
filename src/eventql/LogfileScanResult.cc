@@ -6,7 +6,7 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#include "stx/wallclock.h"
+#include "eventql/util/wallclock.h"
 #include "eventql/LogfileScanResult.h"
 
 using namespace stx;

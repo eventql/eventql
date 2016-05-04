@@ -8,7 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include <stx/stdtypes.h>
+#include <eventql/util/stdtypes.h>
 #include <csql/qtree/ValueExpressionNode.h>
 #include <csql/runtime/symboltable.h>
 #include <csql/runtime/ValueExpression.h>

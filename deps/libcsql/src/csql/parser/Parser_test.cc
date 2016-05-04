@@ -7,10 +7,10 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <stx/stdtypes.h>
-#include <stx/exception.h>
-#include <stx/wallclock.h>
-#include <stx/test/unittest.h>
+#include <eventql/util/stdtypes.h>
+#include <eventql/util/exception.h>
+#include <eventql/util/wallclock.h>
+#include <eventql/util/test/unittest.h>
 #include <csql/parser/parser.h>
 #include <csql/parser/token.h>
 #include <csql/parser/tokenize.h>

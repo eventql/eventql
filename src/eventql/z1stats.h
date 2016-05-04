@@ -7,9 +7,9 @@
  * permission is obtained.
  */
 #pragma once
-#include <stx/stdtypes.h>
-#include <stx/stats/counter.h>
-#include <stx/http/httpstats.h>
+#include <eventql/util/stdtypes.h>
+#include <eventql/util/stats/counter.h>
+#include <eventql/util/http/httpstats.h>
 
 namespace zbase {
 

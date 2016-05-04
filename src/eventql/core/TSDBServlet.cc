@@ -7,17 +7,17 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include "stx/util/binarymessagewriter.h"
+#include "eventql/util/util/binarymessagewriter.h"
 #include "eventql/core/TSDBServlet.h"
 #include "eventql/core/RecordEnvelope.pb.h"
-#include "stx/json/json.h"
-#include <stx/wallclock.h>
-#include <stx/thread/wakeup.h>
-#include "stx/protobuf/MessageEncoder.h"
-#include "stx/protobuf/MessagePrinter.h"
-#include "stx/protobuf/msg.h"
-#include <stx/util/Base64.h>
-#include <stx/fnv.h>
+#include "eventql/util/json/json.h"
+#include <eventql/util/wallclock.h>
+#include <eventql/util/thread/wakeup.h>
+#include "eventql/util/protobuf/MessageEncoder.h"
+#include "eventql/util/protobuf/MessagePrinter.h"
+#include "eventql/util/protobuf/msg.h"
+#include <eventql/util/util/Base64.h>
+#include <eventql/util/fnv.h>
 #include <eventql/infra/sstable/sstablereader.h>
 
 using namespace stx;

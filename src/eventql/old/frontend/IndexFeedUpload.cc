@@ -7,14 +7,14 @@
  * permission is obtained.
  */
 #include "frontend/IndexFeedUpload.h"
-#include "stx/uri.h"
-#include "stx/logging.h"
-#include "stx/util/binarymessagewriter.h"
-#include "stx/http/httprequest.h"
-#include "stx/protobuf/MessageSchema.h"
-#include "stx/protobuf/MessagePrinter.h"
-#include "stx/protobuf/MessageEncoder.h"
-#include "stx/protobuf/msg.h"
+#include "eventql/util/uri.h"
+#include "eventql/util/logging.h"
+#include "eventql/util/util/binarymessagewriter.h"
+#include "eventql/util/http/httprequest.h"
+#include "eventql/util/protobuf/MessageSchema.h"
+#include "eventql/util/protobuf/MessagePrinter.h"
+#include "eventql/util/protobuf/MessageEncoder.h"
+#include "eventql/util/protobuf/msg.h"
 #include "schemas.h"
 #include "unistd.h"
 

@@ -14,8 +14,8 @@
 #include <string>
 #include <thread>
 #include <unordered_map>
-#include <stx/autoref.h>
-#include <stx/uri.h>
+#include <eventql/util/autoref.h>
+#include <eventql/util/uri.h>
 #include <fnord-afx/ArtifactIndex.h>
 
 using namespace stx;

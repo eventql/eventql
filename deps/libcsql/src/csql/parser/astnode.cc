@@ -11,7 +11,7 @@
 #include <assert.h>
 #include "astnode.h"
 #include "token.h"
-#include <stx/inspect.h>
+#include <eventql/util/inspect.h>
 
 namespace csql {
 

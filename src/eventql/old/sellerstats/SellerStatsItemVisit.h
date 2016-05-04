@@ -14,9 +14,9 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include <stx/UnixTime.h>
-#include <stx/uri.h>
-#include <stx/reflect/reflect.h>
+#include <eventql/util/UnixTime.h>
+#include <eventql/util/uri.h>
+#include <eventql/util/reflect/reflect.h>
 #include <eventql/docdb/ItemRef.h>
 
 using namespace stx;

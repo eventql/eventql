@@ -12,9 +12,9 @@
 #include <memory>
 #include <vector>
 #include <liblmdb/lmdb.h>
-#include "stx/autoref.h"
-#include "stx/logging.h"
-#include "stx/option.h"
+#include "eventql/util/autoref.h"
+#include "eventql/util/logging.h"
+#include "eventql/util/option.h"
 #include "eventql/util/mdb/MDBCursor.h"
 
 namespace stx {

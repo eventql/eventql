@@ -7,14 +7,14 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include "stx/stdtypes.h"
-#include "stx/application.h"
-#include "stx/cli/flagparser.h"
-#include "stx/cli/CLI.h"
-#include "stx/csv/CSVInputStream.h"
-#include "stx/io/file.h"
-#include "stx/inspect.h"
-#include "stx/human.h"
+#include "eventql/util/stdtypes.h"
+#include "eventql/util/application.h"
+#include "eventql/util/cli/flagparser.h"
+#include "eventql/util/cli/CLI.h"
+#include "eventql/util/csv/CSVInputStream.h"
+#include "eventql/util/io/file.h"
+#include "eventql/util/inspect.h"
+#include "eventql/util/human.h"
 #include "cstable/columns/v1/LEB128ColumnWriter.h"
 #include "cstable/columns/v1/StringColumnWriter.h"
 #include "cstable/columns/v1/DoubleColumnWriter.h"

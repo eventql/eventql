@@ -7,7 +7,7 @@
  * permission is obtained.
  */
 #pragma once
-#include <stx/stdtypes.h>
+#include <eventql/util/stdtypes.h>
 #include <eventql/Report.h>
 #include <eventql/dproc/Task.h>
 #include <csql/svalue.h>

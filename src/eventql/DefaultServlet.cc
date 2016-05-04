@@ -6,8 +6,8 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#include <stx/http/cookies.h>
-#include <stx/assets.h>
+#include <eventql/util/http/cookies.h>
+#include <eventql/util/assets.h>
 #include <eventql/DefaultServlet.h>
 #include <eventql/HTTPAuth.h>
 

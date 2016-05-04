@@ -8,8 +8,8 @@
  * <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include <stx/stdtypes.h>
-#include <stx/json/json.h>
+#include <eventql/util/stdtypes.h>
+#include <eventql/util/json/json.h>
 #include <csql/runtime/queryplan.h>
 #include <csql/runtime/charts/ChartStatement.h>
 #include <csql/runtime/ResultFormat.h>

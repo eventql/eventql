@@ -9,9 +9,9 @@
  */
 #ifndef _FNORDMETRIC_METRICDB_FILEHEADERWRITER_H
 #define _FNORDMETRIC_METRICDB_FILEHEADERWRITER_H
-#include <stx/util/binarymessagewriter.h>
-#include <stx/buffer.h>
-#include <stx/io/outputstream.h>
+#include <eventql/util/util/binarymessagewriter.h>
+#include <eventql/util/buffer.h>
+#include <eventql/util/io/outputstream.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <string>

@@ -9,7 +9,7 @@
  */
 #ifndef _FNORD_LOGTABLE_CHUNKINDEXWRITER_H
 #define _FNORD_LOGTABLE_CHUNKINDEXWRITER_H
-#include <stx/stdtypes.h>
+#include <eventql/util/stdtypes.h>
 
 namespace stx {
 namespace cstable {

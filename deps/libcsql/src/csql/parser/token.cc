@@ -8,8 +8,8 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <csql/parser/token.h>
-#include <stx/exception.h>
-#include <stx/inspect.h>
+#include <eventql/util/exception.h>
+#include <eventql/util/inspect.h>
 #include <string.h>
 
 namespace csql {

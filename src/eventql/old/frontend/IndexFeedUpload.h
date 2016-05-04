@@ -8,10 +8,10 @@
  */
 #ifndef _CM_INDEXFEEDUPLOAD_H
 #define _CM_INDEXFEEDUPLOAD_H
-#include "stx/stdtypes.h"
-#include "stx/thread/queue.h"
-#include "stx/http/httpconnectionpool.h"
-#include "stx/protobuf/MessageSchema.h"
+#include "eventql/util/stdtypes.h"
+#include "eventql/util/thread/queue.h"
+#include "eventql/util/http/httpconnectionpool.h"
+#include "eventql/util/protobuf/MessageSchema.h"
 #include "IndexChangeRequest.h"
 #include <thread>
 

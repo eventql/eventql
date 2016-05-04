@@ -10,7 +10,7 @@
 #include <csql/runtime/runtime.h>
 #include <csql/qtree/QueryTreeUtil.h>
 #include <csql/qtree/ColumnReferenceNode.h>
-#include <stx/logging.h>
+#include <eventql/util/logging.h>
 
 using namespace stx;
 

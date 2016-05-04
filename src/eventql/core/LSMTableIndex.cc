@@ -9,14 +9,14 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#include <stx/stdtypes.h>
-#include <stx/io/fileutil.h>
-#include <stx/io/mmappedfile.h>
-#include <stx/io/inputstream.h>
-#include <stx/io/outputstream.h>
-#include <stx/io/mmappedfile.h>
-#include <stx/io/BufferedOutputStream.h>
-#include <stx/logging.h>
+#include <eventql/util/stdtypes.h>
+#include <eventql/util/io/fileutil.h>
+#include <eventql/util/io/mmappedfile.h>
+#include <eventql/util/io/inputstream.h>
+#include <eventql/util/io/outputstream.h>
+#include <eventql/util/io/mmappedfile.h>
+#include <eventql/util/io/BufferedOutputStream.h>
+#include <eventql/util/logging.h>
 #include <eventql/core/LSMTableIndex.h>
 #include <cstable/CSTableWriter.h>
 

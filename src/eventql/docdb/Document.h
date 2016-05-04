@@ -7,8 +7,8 @@
  * permission is obtained.
  */
 #pragma once
-#include <stx/stdtypes.h>
-#include <stx/option.h>
+#include <eventql/util/stdtypes.h>
+#include <eventql/util/option.h>
 #include <eventql/docdb/Document.pb.h>
 
 using namespace stx;

@@ -8,7 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <cstable/columns/UInt64PageWriter.h>
-#include <stx/inspect.h>
+#include <eventql/util/inspect.h>
 
 
 namespace cstable {

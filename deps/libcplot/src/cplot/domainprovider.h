@@ -13,7 +13,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include "cplot/domain.h"
-#include "stx/exception.h"
+#include "eventql/util/exception.h"
 
 namespace stx {
 namespace chart {

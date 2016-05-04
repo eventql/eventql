@@ -10,7 +10,7 @@
 #pragma once
 #include <thread>
 #include <condition_variable>
-#include <stx/stdtypes.h>
+#include <eventql/util/stdtypes.h>
 #include <eventql/core/PartitionMap.h>
 #include <eventql/core/PartitionReplication.h>
 #include <eventql/core/ReplicationScheme.h>

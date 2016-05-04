@@ -9,11 +9,11 @@
  */
 #ifndef _FNORD_TSDB_DERIVEDDATASET_H
 #define _FNORD_TSDB_DERIVEDDATASET_H
-#include <stx/stdtypes.h>
-#include <stx/option.h>
-#include <stx/autoref.h>
-#include <stx/util/binarymessagereader.h>
-#include <stx/util/binarymessagewriter.h>
+#include <eventql/util/stdtypes.h>
+#include <eventql/util/option.h>
+#include <eventql/util/autoref.h>
+#include <eventql/util/util/binarymessagereader.h>
+#include <eventql/util/util/binarymessagewriter.h>
 
 using namespace stx;
 

@@ -7,7 +7,7 @@
  * permission is obtained.
  */
 #pragma once
-#include "stx/stdtypes.h"
+#include "eventql/util/stdtypes.h"
 #include "eventql/mapreduce/MapReduceTask.h"
 #include "eventql/AnalyticsSession.pb.h"
 

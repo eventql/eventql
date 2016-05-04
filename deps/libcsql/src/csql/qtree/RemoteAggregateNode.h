@@ -8,8 +8,8 @@
  * <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include <stx/stdtypes.h>
-#include <stx/io/inputstream.h>
+#include <eventql/util/stdtypes.h>
+#include <eventql/util/io/inputstream.h>
 #include <csql/qtree/TableExpressionNode.h>
 #include <csql/qtree/GroupByNode.h>
 #include <csql/qtree/RemoteAggregateParams.pb.h>

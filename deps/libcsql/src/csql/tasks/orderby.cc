@@ -11,7 +11,7 @@
 #include <csql/tasks/orderby.h>
 #include <csql/expressions/boolean.h>
 #include <csql/runtime/runtime.h>
-#include <stx/inspect.h>
+#include <eventql/util/inspect.h>
 
 namespace csql {
 

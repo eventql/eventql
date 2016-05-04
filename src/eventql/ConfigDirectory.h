@@ -7,11 +7,11 @@
  * permission is obtained.
  */
 #pragma once
-#include <stx/stdtypes.h>
-#include <stx/SHA1.h>
+#include <eventql/util/stdtypes.h>
+#include <eventql/util/SHA1.h>
 #include <eventql/util/mdb/MDB.h>
-#include <stx/net/inetaddr.h>
-#include <stx/http/httpclient.h>
+#include <eventql/util/net/inetaddr.h>
+#include <eventql/util/http/httpclient.h>
 #include <eventql/CustomerConfig.h>
 #include <eventql/core/ClusterConfig.pb.h>
 #include <eventql/TableDefinition.h>

@@ -6,9 +6,9 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#include <stx/assets.h>
-#include <stx/stringutil.h>
-#include <stx/io/fileutil.h>
+#include <eventql/util/assets.h>
+#include <eventql/util/stringutil.h>
+#include <eventql/util/io/fileutil.h>
 #include "CustomerNamespace.h"
 
 namespace zbase {

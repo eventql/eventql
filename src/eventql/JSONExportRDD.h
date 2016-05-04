@@ -7,8 +7,8 @@
  * permission is obtained.
  */
 #pragma once
-#include <stx/stdtypes.h>
-#include <stx/wallclock.h>
+#include <eventql/util/stdtypes.h>
+#include <eventql/util/wallclock.h>
 #include <eventql/dproc/Task.h>
 #include <eventql/dproc/BlobRDD.h>
 #include "eventql/VTable.h"

@@ -8,13 +8,13 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <unistd.h>
-#include <stx/io/file.h>
-#include <stx/io/fileutil.h>
-#include <stx/io/mmappedfile.h>
-#include <stx/logging.h>
-#include <stx/io/fileutil.h>
-#include <stx/util/binarymessagereader.h>
-#include <stx/util/binarymessagewriter.h>
+#include <eventql/util/io/file.h>
+#include <eventql/util/io/fileutil.h>
+#include <eventql/util/io/mmappedfile.h>
+#include <eventql/util/logging.h>
+#include <eventql/util/io/fileutil.h>
+#include <eventql/util/util/binarymessagereader.h>
+#include <eventql/util/util/binarymessagewriter.h>
 #include <eventql/dproc/LocalScheduler.h>
 #include <eventql/dproc/TaskRef.h>
 

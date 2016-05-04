@@ -11,7 +11,7 @@
 #define _FNORDMETRIC_SQL_BACKEND_H
 #include <memory>
 #include <vector>
-#include <stx/uri.h>
+#include <eventql/util/uri.h>
 #include <csql/backends/tableref.h>
 
 namespace csql {

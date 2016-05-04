@@ -10,7 +10,7 @@
 #include <stdlib.h>
 #include "canvas.h"
 #include "linechart.h"
-#include <stx/exception.h>
+#include <eventql/util/exception.h>
 
 namespace stx {
 namespace chart {

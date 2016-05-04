@@ -9,11 +9,11 @@
  */
 #ifndef _FNORD_DPROC_APPLICATION_H
 #define _FNORD_DPROC_APPLICATION_H
-#include <stx/stdtypes.h>
-#include <stx/autoref.h>
+#include <eventql/util/stdtypes.h>
+#include <eventql/util/autoref.h>
 #include <eventql/dproc/Task.h>
 #include <eventql/dproc/TaskSpec.pb.h>
-#include <stx/protobuf/msg.h>
+#include <eventql/util/protobuf/msg.h>
 
 using namespace stx;
 

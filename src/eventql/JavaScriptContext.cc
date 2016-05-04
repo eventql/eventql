@@ -6,8 +6,8 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#include "stx/inspect.h"
-#include "stx/assets.h"
+#include "eventql/util/inspect.h"
+#include "eventql/util/assets.h"
 #include "eventql/JavaScriptContext.h"
 #include "js/Conversions.h"
 #include "jsapi.h"

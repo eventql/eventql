@@ -8,11 +8,11 @@
  * <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include <stx/stdtypes.h>
-#include <stx/duration.h>
+#include <eventql/util/stdtypes.h>
+#include <eventql/util/duration.h>
 #include <eventql/core/Partition.h>
 #include <eventql/core/TablePartitioner.h>
-#include <stx/protobuf/MessageSchema.h>
+#include <eventql/util/protobuf/MessageSchema.h>
 #include <eventql/core/TableConfig.pb.h>
 
 using namespace stx;

@@ -13,8 +13,8 @@
 #include <string>
 #include <ctime>
 #include <stdint.h>
-#include <stx/inspect.h>
-#include <stx/human.h>
+#include <eventql/util/inspect.h>
+#include <eventql/util/human.h>
 #include <csql/svalue.h>
 #include <csql/format.h>
 #include <csql/parser/token.h>

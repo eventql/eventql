@@ -9,8 +9,8 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#include <stx/stdtypes.h>
-#include <stx/test/unittest.h>
+#include <eventql/util/stdtypes.h>
+#include <eventql/util/test/unittest.h>
 #include <eventql/core/LSMTableIndex.h>
 
 using namespace stx;

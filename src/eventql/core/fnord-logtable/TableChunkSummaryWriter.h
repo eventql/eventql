@@ -9,13 +9,13 @@
  */
 #ifndef _FNORD_LOGTABLE_TABLECHUNKSUMMARYWRITER_H
 #define _FNORD_LOGTABLE_TABLECHUNKSUMMARYWRITER_H
-#include <stx/stdtypes.h>
-#include <stx/autoref.h>
-#include <stx/random.h>
-#include <stx/io/FileLock.h>
-#include <stx/util/binarymessagewriter.h>
-#include <stx/protobuf/MessageSchema.h>
-#include <stx/protobuf/MessageObject.h>
+#include <eventql/util/stdtypes.h>
+#include <eventql/util/autoref.h>
+#include <eventql/util/random.h>
+#include <eventql/util/io/FileLock.h>
+#include <eventql/util/util/binarymessagewriter.h>
+#include <eventql/util/protobuf/MessageSchema.h>
+#include <eventql/util/protobuf/MessageObject.h>
 
 namespace stx {
 namespace logtable {

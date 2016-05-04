@@ -6,8 +6,8 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#include "stx/wallclock.h"
-#include "stx/util/Base64.h"
+#include "eventql/util/wallclock.h"
+#include "eventql/util/util/Base64.h"
 #include "eventql/AnalyticsApp.h"
 #include "eventql/CSVExportRDD.h"
 #include "eventql/JSONExportRDD.h"
@@ -21,8 +21,8 @@
 #include <eventql/core/CompactionWorker.h>
 #include "eventql/sql/sql_engine.h"
 #include "eventql/SessionSchema.h"
-#include "stx/protobuf/DynamicMessage.h"
-#include "stx/protobuf/MessageEncoder.h"
+#include "eventql/util/protobuf/DynamicMessage.h"
+#include "eventql/util/protobuf/MessageEncoder.h"
 
 using namespace stx;
 

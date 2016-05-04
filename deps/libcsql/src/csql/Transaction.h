@@ -8,8 +8,8 @@
  * <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include <stx/stdtypes.h>
-#include <stx/UnixTime.h>
+#include <eventql/util/stdtypes.h>
+#include <eventql/util/UnixTime.h>
 #include <csql/csql.h>
 #include <csql/runtime/tablerepository.h>
 

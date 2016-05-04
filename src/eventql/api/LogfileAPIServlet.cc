@@ -6,10 +6,10 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#include "stx/wallclock.h"
-#include "stx/assets.h"
-#include "stx/protobuf/msg.h"
-#include "stx/io/BufferedOutputStream.h"
+#include "eventql/util/wallclock.h"
+#include "eventql/util/assets.h"
+#include "eventql/util/protobuf/msg.h"
+#include "eventql/util/io/BufferedOutputStream.h"
 #include "eventql/api/LogfileAPIServlet.h"
 
 using namespace stx;

@@ -8,8 +8,8 @@
  * <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include <stx/stdtypes.h>
-#include <stx/option.h>
+#include <eventql/util/stdtypes.h>
+#include <eventql/util/option.h>
 #include <csql/svalue.h>
 #include <csql/qtree/TableExpressionNode.h>
 #include <csql/qtree/ValueExpressionNode.h>

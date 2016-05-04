@@ -8,11 +8,11 @@
  * <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include <stx/stdtypes.h>
-#include <stx/io/file.h>
-#include <stx/io/pagemanager.h>
+#include <eventql/util/stdtypes.h>
+#include <eventql/util/io/file.h>
+#include <eventql/util/io/pagemanager.h>
 #include <eventql/infra/sstable/MetaPage.h>
-#include <stx/exception.h>
+#include <eventql/util/exception.h>
 
 namespace stx {
 namespace sstable {

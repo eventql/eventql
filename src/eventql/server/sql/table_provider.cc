@@ -7,7 +7,7 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <stx/SHA1.h>
+#include <eventql/util/SHA1.h>
 #include <zbase/sql/table_provider.h>
 #include <zbase/sql/table_scan.h>
 #include <zbase/core/TSDBService.h>

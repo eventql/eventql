@@ -10,9 +10,9 @@
 #pragma once
 #include <stdlib.h>
 #include <stdint.h>
-#include <stx/io/inputstream.h>
-#include <stx/io/outputstream.h>
-#include <stx/protobuf/MessageObject.h>
+#include <eventql/util/io/inputstream.h>
+#include <eventql/util/io/outputstream.h>
+#include <eventql/util/protobuf/MessageObject.h>
 
 namespace cstable {
 

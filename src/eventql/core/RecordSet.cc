@@ -7,10 +7,10 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <stx/io/fileutil.h>
-#include <stx/io/mmappedfile.h>
-#include <stx/util/binarymessagereader.h>
-#include <stx/util/binarymessagewriter.h>
+#include <eventql/util/io/fileutil.h>
+#include <eventql/util/io/mmappedfile.h>
+#include <eventql/util/util/binarymessagereader.h>
+#include <eventql/util/util/binarymessagewriter.h>
 #include <eventql/infra/sstable/SSTableEditor.h>
 #include <eventql/infra/sstable/sstablereader.h>
 #include <eventql/core/RecordSet.h>

@@ -6,9 +6,9 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#include "stx/logging.h"
-#include "stx/exception.h"
-#include "stx/io/fileutil.h"
+#include "eventql/util/logging.h"
+#include "eventql/util/exception.h"
+#include "eventql/util/io/fileutil.h"
 #include "ModelCache.h"
 
 using namespace stx;

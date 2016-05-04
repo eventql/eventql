@@ -12,8 +12,8 @@
 #include <string.h>
 #include <string>
 #include <vector>
-#include <stx/exceptionhandler.h>
-#include <stx/random.h>
+#include <eventql/util/exceptionhandler.h>
+#include <eventql/util/random.h>
 #include <fnordmetric/environment.h>
 #include <cli/cli.h>
 

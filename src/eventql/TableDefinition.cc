@@ -6,7 +6,7 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#include <stx/duration.h>
+#include <eventql/util/duration.h>
 #include <eventql/TableDefinition.h>
 
 using namespace stx;

@@ -7,7 +7,7 @@
  * permission is obtained.
  */
 #pragma once
-#include <stx/stdtypes.h>
+#include <eventql/util/stdtypes.h>
 #include <eventql/TableDefinition.pb.h>
 #include <eventql/core/TableConfig.pb.h>
 

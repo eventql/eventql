@@ -6,8 +6,8 @@
  */
 #include <stdlib.h>
 #include <stdio.h>
-#include "stx/exception.h"
-#include "stx/test/unittest.h"
+#include "eventql/util/exception.h"
+#include "eventql/util/test/unittest.h"
 #include "JoinedSessionViewer.h"
 #include "eventql/JoinedSession.pb.h"
 

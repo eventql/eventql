@@ -8,10 +8,10 @@
  * <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include <stx/stdtypes.h>
-#include <stx/UnixTime.h>
-#include <stx/option.h>
-#include <stx/SHA1.h>
+#include <eventql/util/stdtypes.h>
+#include <eventql/util/UnixTime.h>
+#include <eventql/util/option.h>
+#include <eventql/util/SHA1.h>
 
 using namespace stx;
 

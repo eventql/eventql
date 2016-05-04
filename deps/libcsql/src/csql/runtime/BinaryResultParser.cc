@@ -9,7 +9,7 @@
  */
 #include "csql/runtime/BinaryResultParser.h"
 #include "csql/svalue.h"
-#include "stx/util/binarymessagereader.h"
+#include "eventql/util/util/binarymessagereader.h"
 
 using namespace stx;
 

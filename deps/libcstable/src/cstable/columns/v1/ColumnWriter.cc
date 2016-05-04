@@ -8,7 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <cstable/columns/v1/ColumnWriter.h>
-#include <stx/ieee754.h>
+#include <eventql/util/ieee754.h>
 
 using namespace stx;
 

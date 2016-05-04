@@ -8,14 +8,14 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <eventql/core/Partition.h>
-#include <stx/io/fileutil.h>
-#include <stx/uri.h>
-#include <stx/logging.h>
-#include <stx/util/binarymessagewriter.h>
-#include <stx/wallclock.h>
-#include <stx/protobuf/MessageEncoder.h>
-#include <stx/protobuf/MessageDecoder.h>
-#include <stx/protobuf/msg.h>
+#include <eventql/util/io/fileutil.h>
+#include <eventql/util/uri.h>
+#include <eventql/util/logging.h>
+#include <eventql/util/util/binarymessagewriter.h>
+#include <eventql/util/wallclock.h>
+#include <eventql/util/protobuf/MessageEncoder.h>
+#include <eventql/util/protobuf/MessageDecoder.h>
+#include <eventql/util/protobuf/msg.h>
 #include <eventql/infra/sstable/sstablereader.h>
 #include <eventql/core/LogPartitionReader.h>
 #include <eventql/core/LogPartitionWriter.h>

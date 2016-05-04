@@ -8,10 +8,10 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <cplot/svgtarget.h>
-#include <stx/io/inputstream.h>
-#include <stx/logging.h>
+#include <eventql/util/io/inputstream.h>
+#include <eventql/util/logging.h>
 }
-#include <stx/json/jsonoutputstream.h>
+#include <eventql/util/json/jsonoutputstream.h>
 #include <fnordmetric/environment.h>
 #include <csql/query.h>
 #include <csql/queryservice.h>

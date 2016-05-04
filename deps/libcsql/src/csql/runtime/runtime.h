@@ -13,7 +13,7 @@
 #include <string>
 #include <vector>
 #include <memory>
-#include <stx/thread/threadpool.h>
+#include <eventql/util/thread/threadpool.h>
 #include <csql/parser/parser.h>
 #include <csql/qtree/RemoteAggregateParams.pb.h>
 #include <csql/runtime/queryplan.h>

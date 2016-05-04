@@ -6,9 +6,9 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#include <stx/json/json.h>
-#include <stx/random.h>
-#include <stx/io/fileutil.h>
+#include <eventql/util/json/json.h>
+#include <eventql/util/random.h>
+#include <eventql/util/io/fileutil.h>
 #include "eventql/CTRCounterTableSink.h"
 
 using namespace stx;

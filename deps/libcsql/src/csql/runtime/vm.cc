@@ -14,8 +14,8 @@
 #include <csql/runtime/LikePattern.h>
 #include <csql/svalue.h>
 #include <csql/runtime/vm.h>
-#include <stx/exception.h>
-#include <stx/RegExp.h>
+#include <eventql/util/exception.h>
+#include <eventql/util/RegExp.h>
 
 #ifndef HAVE_PCRE
 #error "PCRE is required"

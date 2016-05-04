@@ -8,7 +8,7 @@
  */
 #ifndef _CM_SSTABLESINK_H
 #define _CM_SSTABLESINK_H
-#include "stx/io/fileutil.h"
+#include "eventql/util/io/fileutil.h"
 #include "eventql/Report.h"
 
 #include <eventql/docdb/ItemRef.h>

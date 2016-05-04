@@ -6,8 +6,8 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#include <stx/json/json.h>
-#include <stx/random.h>
+#include <eventql/util/json/json.h>
+#include <eventql/util/random.h>
 #include "eventql/JSONSink.h"
 
 using namespace stx;

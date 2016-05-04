@@ -7,8 +7,8 @@
  * permission is obtained.
  */
 #include "unistd.h"
-#include <stx/wallclock.h>
-#include <stx/logging.h>
+#include <eventql/util/wallclock.h>
+#include <eventql/util/logging.h>
 #include "ModelReplication.h"
 
 using namespace stx;
