@@ -1,0 +1,17 @@
+/**
+ * This file is part of the "libstx" project
+ *   Copyright (c) 2015 Paul Asmuth
+ *
+ * libstx is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License v3.0. You should have received a
+ * copy of the GNU General Public License along with this program. If not, see
+ * <http://www.gnu.org/licenses/>.
+ */
+package stx;
+
+enum Currency {
+  CURRENCY_UNKNOWN = 0;
+  CURRENCY_EUR = 1;
+  CURRENCY_PLN = 2;
+  CURRENCY_USD = 3;
+}

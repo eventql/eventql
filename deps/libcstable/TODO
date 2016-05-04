@@ -1,0 +1,5 @@
+- store schema in v2
+- assign column ids in v2
+- delete defaultcolumnwriter
+- convenience addRecord methods in cstable
+- store max values for e.g. bitpackcolumn

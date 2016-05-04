@@ -1,0 +1,5 @@
+language: cpp
+script: make test
+compiler: clang
+sudo: required
+dist: trusty

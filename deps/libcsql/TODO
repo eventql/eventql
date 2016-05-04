@@ -1,0 +1,18 @@
+- rename SequentialScan -> TableScan
+- test multi-way joins
+- push down all JOIN conjunctions from higher-level join condtitions and WHERE clause
+- fold nested loop joins
+- join where push down for SUBQUERY
+- join relation extraction
+- fold hashjoins
+- fold 1:1 mapping subqueries into lower tablescan
+- join column list
+- table-name qualified wildcards
+- select expression with where
+- show tables/describe tables with where
+- fold limit (without order) into lower tablescan??
+- CAST
+- CONVERT
+- CASE
+- topN optimzation / distributed top
+- doc like http://docs.oracle.com/javadb/10.8.3.0/ref/rrefsqljnaturaljoin.html
