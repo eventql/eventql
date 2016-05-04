@@ -79,7 +79,7 @@
               visible_in_toc: true
               source: "tables/datatypes.md"
             -
-              url: "/tables/partitioning"
+              url: "/collecting-and-storing/tables/partitioning"
               title: "Partitioning"
               type: page
               visible_in_menu: true
@@ -156,7 +156,7 @@
           type: redirect
           visible_in_menu: true
           visible_in_toc: true
-          location: "/sql/introduction"
+          location: "/queries/sql/introduction"
           children:
             -
               url: "/queries/sql/introduction"
