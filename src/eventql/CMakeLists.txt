@@ -261,6 +261,7 @@ add_executable(evqld
     DrilldownTree.cc
     DefaultServlet.cc
     JavaScriptContext.cc
+    server/sql/codec/binary_codec.cc
     ${CMAKE_CURRENT_BINARY_DIR}/mapreduce_preludejs.cc
     evqld.cc)
 
@@ -289,7 +290,10 @@ add_executable(zmaster
     master/MasterServlet.cc
     zmaster.cc)
 
-add_executable(evql evql.cc)
+add_executable(evql
+    server/sql/codec/binary_codec.cc
+    evql.cc)
+
 target_link_libraries(evql chartsql cplot cstable stx-http stx-protobuf stx-json stx-base pcre)
 
 target_link_libraries(zmaster chartsql cplot sstable cstable stx-http stx-protobuf stx-json stx-json stx-base pcre)

@@ -83,15 +83,6 @@ add_library(chartsql STATIC
     tasks/Task.cc
     tasks/TaskFactory.cc
     tasks/TaskDAG.cc
-    tasks/orderby.cc
-    tasks/groupby.cc
-    tasks/subquery.cc
-    tasks/select.cc
-    tasks/limit.cc
-    tasks/nested_loop_join.cc
-    tasks/show_tables.cc
-    tasks/describe_table.cc
-    tasks/tablescan.cc
     defaults.cc)
 
 add_dependencies(chartsql stx-protobuf)

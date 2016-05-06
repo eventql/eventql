@@ -8,7 +8,6 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <eventql/sql/runtime/runtime.h>
-#include <eventql/sql/tasks/groupby.h>
 #include <eventql/sql/qtree/QueryTreeUtil.h>
 #include <eventql/sql/schedulers/local_scheduler.h>
 #include <eventql/sql/defaults.h>

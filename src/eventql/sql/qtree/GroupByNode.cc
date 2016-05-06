@@ -9,7 +9,6 @@
  */
 #include <eventql/sql/qtree/GroupByNode.h>
 #include <eventql/sql/qtree/ColumnReferenceNode.h>
-#include <eventql/sql/tasks/GroupBy.h>
 
 using namespace stx;
 
@@ -81,22 +80,6 @@ size_t GroupByNode::getColumnIndex(
   }
 
   return -1;
-}
-
-Vector<TaskID> GroupByNode::build(Transaction* txn, TaskDAG* tree) const {
-  auto input = table_.asInstanceOf<TableExpressionNode>()->build(txn, tree);
-
-  TaskIDList output;
-  auto out_task = mkRef(new TaskDAGNode(
-      new GroupByFactory(selectList(), groupExpressions())));
-  for (const auto& in_task_id : input) {
-    TaskDAGNode::Dependency dep;
-    dep.task_id = in_task_id;
-    out_task->addDependency(dep);
-  }
-  output.emplace_back(tree->addTask(out_task));
-
-  return output;
 }
 
 Vector<RefPtr<ValueExpressionNode>> GroupByNode::groupExpressions() const {

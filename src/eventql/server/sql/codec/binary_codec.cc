@@ -7,7 +7,7 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include "zbase/sql/codec/binary_codec.h"
+#include "eventql/server/sql/codec/binary_codec.h"
 #include "eventql/sql/svalue.h"
 #include "eventql/util/util/binarymessagereader.h"
 
