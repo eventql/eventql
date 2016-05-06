@@ -4,17 +4,8 @@ GET /api/v1/sql
 Perform a query against the EventQL database. The query string to execute can contain multiple
 queries that should each end with a semicolon.
 
-
-
-
-EventQL provides different formats in which the result can be returned.
-if you want to stream constant  updates about the status of the query please use "json_sse"
-
-  json_sse provides constant updates ...
-
-When using "json_sse",
-
-Updates about the status of the query execution will be send
+EventQL provides different formats in which the result can be returned. If you whish
+to stream constant updates about the status of the query, please use "json_sse" as format.
 
 ###Resource Information
 <table class='http_api'>
