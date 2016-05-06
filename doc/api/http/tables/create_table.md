@@ -9,6 +9,12 @@ of type datetype or uint64.
 You need to make sure that each field has a unique numeric ID (it's basically
 a protobuf schema).
 
+How to choose a good partition size? Currently it's best to aim for roughly
+250MB-1Gper partition. If unsure, leave it with the default. In the future the
+parition size will be automatically adjusted on the fly so you don't have to
+choose one. Tables with a fixed partition size will automatically transition
+to this new scheme.
+
 ###Resource Information
 <table class='http_api create_table'>
   <tr>
@@ -37,7 +43,7 @@ a protobuf schema).
   </tr>
   <tr>
     <td>update (optional)</td>
-    <td>if true, overwrite an existing table if a table with the same name exists</td>
+    <td>if true, overwrite an existing table if a table with the same name exists. Note that this should not be used for regular schema maintenance as it's fairly unsafe (it will hard-overwrite the tables schema). Use the add_field/remove_field calls instead to manage an existing table schema.</td>
   </tr>
   <tr>
     <td>partition_size (optional)</td>
