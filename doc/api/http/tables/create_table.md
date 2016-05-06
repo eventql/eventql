@@ -3,6 +3,12 @@ POST /api/v1/tables/create_table
 
 Create a new EventQL table or overwrite an existing table.
 
+Currently, every table must have one column that is named time and is either
+of type datetype or uint64.
+
+You need to make sure that each field has a unique numeric ID (it's basically
+a protobuf schema).
+
 ###Resource Information
 <table class='http_api create_table'>
   <tr>
@@ -23,7 +29,7 @@ Create a new EventQL table or overwrite an existing table.
   </tr>
   <tr>
     <td>table&#95;type</td>
-    <td>the type of the table to be created. must be "static" or "timeseries"</td>
+    <td>the type of the table to be created. must be "timeseries"</td>
   </tr>
   <tr>
     <td>schema</td>
@@ -32,6 +38,10 @@ Create a new EventQL table or overwrite an existing table.
   <tr>
     <td>update (optional)</td>
     <td>if true, overwrite an existing table if a table with the same name exists</td>
+  </tr>
+  <tr>
+    <td>partition_size (optional)</td>
+    <td>the partition size in microseconds, defaults to 4h</td>
   </tr>
 </table>
 

@@ -485,7 +485,7 @@
           visible_in_toc: true
           source: "/queries.md"
     -
-      url: "/drivers-and-api"
+      url: "/api"
       title: "Drivers &amp; API"
       type: page
       visible_in_menu: true
@@ -493,7 +493,7 @@
       source: "/api/overview.md"
       children:
         -
-          url: "/drivers-and-api/http"
+          url: "/api/http"
           title: "HTTP API"
           type: page
           visible_in_menu: true
@@ -501,120 +501,120 @@
           source: "/api/http/index.html"
           children:
             -
-              url: "/drivers-and-api/http/tables/create_table"
+              url: "/api/http/tables/create_table"
               type: page
               visible_in_menu: false
               visible_in_toc: false
               source: "/api/http/tables/create_table.md"
             -
-              url: "/drivers-and-api/http/tables/add_field"
+              url: "/api/http/tables/add_field"
               type: page
               visible_in_menu: false
               visible_in_toc: false
               source: "/api/http/tables/add_field.md"
             -
-              url: "/drivers-and-api/http/tables/remove_field"
+              url: "/api/http/tables/remove_field"
               type: page
               visible_in_menu: false
               visible_in_toc: false
               source: "/api/http/tables/remove_field.md"
             -
-              url: "/drivers-and-api/http/tables/insert"
+              url: "/api/http/tables/insert"
               type: page
               visible_in_menu: false
               visible_in_toc: false
               source: "/api/http/tables/insert.md"
             -
-              url: "/drivers-and-api/http/tables/table"
+              url: "/api/http/tables/table"
               type: page
               visible_in_menu: false
               visible_in_toc: false
               source: "/api/http/tables/table.md"
             -
-              url: "/drivers-and-api/http/tables/"
+              url: "/api/http/tables/"
               type: page
               visible_in_menu: false
               visible_in_toc: false
               source: "/api/http/tables/tables.md"
         -
-          url: "/drivers-and-api/javascript"
+          url: "/api/javascript"
           title: "JavaScript Query API"
           type: page
           visible_in_menu: true
           visible_in_toc: true
           source: "/api/http/index.html"
         -
-          url: "/drivers-and-api/evqlctl"
+          url: "/api/evqlctl"
           title: "evql Command Line"
           type: page
           visible_in_menu: true
           visible_in_toc: true
           source: "/api/http/index.html"
         -
-          url: "/drivers-and-api/evqlld"
+          url: "/api/evqlld"
           title: "evqld / evqlctl"
           type: page
           visible_in_menu: true
           visible_in_toc: true
           source: "/api/http/index.html"
         -
-          url: "/drivers-and-api/node"
+          url: "/api/node"
           title: "Node.js Driver"
           type: page
           visible_in_menu: true
           visible_in_toc: true
           source: "/api/http/index.html"
         -
-          url: "/drivers-and-api/java"
+          url: "/api/java"
           title: "Java Driver"
           type: page
           visible_in_menu: true
           visible_in_toc: true
           source: "/api/http/index.html"
         -
-          url: "/drivers-and-api/ruby"
+          url: "/api/ruby"
           title: "Ruby Driver"
           type: page
           visible_in_menu: true
           visible_in_toc: true
           source: "/api/http/index.html"
         -
-          url: "/drivers-and-api/python"
+          url: "/api/python"
           title: "Python Driver"
           type: page
           visible_in_menu: true
           visible_in_toc: true
           source: "/api/http/index.html"
         -
-          url: "/drivers-and-api/c_cplusplus"
+          url: "/api/c_cplusplus"
           title: "C/C++ Driver"
           type: page
           visible_in_menu: true
           visible_in_toc: true
           source: "/api/http/index.html"
         -
-          url: "/drivers-and-api/csv-file-connector"
+          url: "/api/csv-file-connector"
           title: "CSV File Connector"
           type: page
           visible_in_menu: true
           visible_in_toc: true
           source: "/api/http/index.html"
         -
-          url: "/drivers-and-api/logfile-connector"
+          url: "/api/logfile-connector"
           title: "Logfile Connector"
           type: page
           visible_in_menu: true
           visible_in_toc: true
           source: "/api/http/index.html"
         -
-          url: "/drivers-and-api/statsd-connector"
+          url: "/api/statsd-connector"
           title: "StatsD Connector"
           type: page
           visible_in_menu: true
           visible_in_toc: true
           source: "/api/http/index.html"
         -
-          url: "/drivers-and-api/mysql-postgres-connector"
+          url: "/api/mysql-postgres-connector"
           title: "MySQL/Postgres Connector"
           type: page
           visible_in_menu: true
