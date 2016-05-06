@@ -62,19 +62,22 @@ a protobuf schema).
         >>             "id": 1,
         >>             "name": "time",
         >>             "type": "DATETIME",
-        >>             "optional": "false"
+        >>             "optional": false,
+        >>             "repeated": false
         >>          },
         >>          {
         >>             "id": 2,
         >>             "name": "sensor_name",
         >>             "type": "STRING",
-        >>             "optional": "false"
+        >>             "optional": false,
+        >>             "repeated": false
         >>          },
         >>          {
         >>             "id": 3,
         >>             "name": "sensor_value",
-        >>             "type": "DOUBLE"
-        >>             "optional": "true"
+        >>             "type": "DOUBLE",
+        >>             "optional": true,
+        >>             "repeated": false
         >>          }
         >>      ]
         >>   }
