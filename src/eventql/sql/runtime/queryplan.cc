@@ -17,13 +17,13 @@ QueryPlan::QueryPlan(
     Vector<RefPtr<QueryTreeNode>> qtrees) :
     txn_(txn),
     qtrees_(qtrees) {
-  for (const auto& qtree : qtrees_) {
-    statement_tasks_.emplace_back(
-        qtree.asInstanceOf<TableExpressionNode>()->build(txn, &tasks_));
+  //for (const auto& qtree : qtrees_) {
+  //  statement_tasks_.emplace_back(
+  //      qtree.asInstanceOf<TableExpressionNode>()->build(txn, &tasks_));
 
-    statement_columns_.emplace_back(
-        qtree.asInstanceOf<TableExpressionNode>()->outputColumns());
-  }
+  //  statement_columns_.emplace_back(
+  //      qtree.asInstanceOf<TableExpressionNode>()->outputColumns());
+  //}
 }
 
 ScopedPtr<ResultCursor> QueryPlan::execute(size_t stmt_idx) {

@@ -224,15 +224,6 @@ void SequentialScanNode::setAggregationStrategy(AggregationStrategy strategy) {
   aggr_strategy_ = strategy;
 }
 
-Vector<TaskID> SequentialScanNode::build(
-    Transaction* txn,
-    TaskDAG* tree) const {
-  return table_provider_->buildSequentialScan(
-      txn,
-      mkRef(const_cast<SequentialScanNode*>(this)),
-      tree);
-}
-
 RefPtr<QueryTreeNode> SequentialScanNode::deepCopy() const {
   return new SequentialScanNode(*this);
 }

@@ -23,11 +23,6 @@ public:
       const String& table_name,
       const String& cstable_file);
 
-  TaskIDList buildSequentialScan(
-      Transaction* txn,
-      RefPtr<SequentialScanNode> seqscan,
-      TaskDAG* tasks) const override;
-
   void listTables(
       Function<void (const csql::TableInfo& table)> fn) const override;
 

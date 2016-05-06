@@ -21,7 +21,7 @@ using namespace stx;
 
 namespace zbase {
 
-class RemoteTSDBScan : public csql::Task {
+class RemoteTSDBScan : public RefCounted {
 public:
 
   RemoteTSDBScan(
@@ -32,7 +32,7 @@ public:
       AnalyticsAuth* auth);
 
   //void onInputsReady() override;
-  int nextRow(csql::SValue* out, int out_len) override;
+  //int nextRow(csql::SValue* out, int out_len) override;
 
   size_t rowsScanned() const;
 

@@ -18,16 +18,10 @@
 #include <eventql/sql/runtime/tablerepository.h>
 #include <eventql/sql/runtime/compiler.h>
 #include <eventql/sql/runtime/vm.h>
+#include <eventql/sql/table_iterator.h>
 #include <eventql/util/exception.h>
 
 namespace csql {
-
-class TableIterator {
-public:
-  virtual bool nextRow(SValue* row) = 0;
-  virtual size_t findColumn(const String& name) = 0;
-  virtual size_t numColumns() const = 0;
-};
 
 class TableScan : public Task {
 public:

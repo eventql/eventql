@@ -56,6 +56,16 @@ size_t SelectExpressionNode::getColumnIndex(
   return -1;
 }
 
+RefPtr<QueryTreeNode> SelectExpressionNode::deepCopy() const {
+  Vector<RefPtr<SelectListNode>> args;
+  for (const auto& arg : select_list_) {
+    args.emplace_back(arg->deepCopyAs<SelectListNode>());
+  }
+
+  return new SelectExpressionNode(args);
+}
+
+
 String SelectExpressionNode::toString() const {
   String str = "(select-expr";
 

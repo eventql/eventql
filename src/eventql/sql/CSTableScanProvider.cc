@@ -21,30 +21,30 @@ CSTableScanProvider::CSTableScanProvider(
     table_name_(table_name),
     cstable_file_(cstable_file) {}
 
-TaskIDList CSTableScanProvider::buildSequentialScan(
-    Transaction* txn,
-    RefPtr<SequentialScanNode> node,
-    TaskDAG* tasks) const {
-  if (node->tableName() != table_name_) {
-    RAISEF(kNotFoundError, "table not found: '$0'", node->tableName());
-  }
-
-  auto self = mkRef(const_cast<CSTableScanProvider*>(this));
-  auto task_factory = [self, node] (
-      Transaction* txn,
-      HashMap<TaskID, ScopedPtr<ResultCursor>> input) -> RefPtr<Task> {
-    return new CSTableScan(
-        txn,
-        node,
-        self->cstable_file_,
-        txn->getRuntime()->queryBuilder().get());
-  };
-
-  auto task = new TaskDAGNode(new SimpleTableExpressionFactory(task_factory));
-  TaskIDList input;
-  input.emplace_back(tasks->addTask(task));
-  return input;
-}
+//TaskIDList CSTableScanProvider::buildSequentialScan(
+//    Transaction* txn,
+//    RefPtr<SequentialScanNode> node,
+//    TaskDAG* tasks) const {
+//  if (node->tableName() != table_name_) {
+//    RAISEF(kNotFoundError, "table not found: '$0'", node->tableName());
+//  }
+//
+//  auto self = mkRef(const_cast<CSTableScanProvider*>(this));
+//  auto task_factory = [self, node] (
+//      Transaction* txn,
+//      HashMap<TaskID, ScopedPtr<ResultCursor>> input) -> RefPtr<Task> {
+//    return new CSTableScan(
+//        txn,
+//        node,
+//        self->cstable_file_,
+//        txn->getRuntime()->queryBuilder().get());
+//  };
+//
+//  auto task = new TaskDAGNode(new SimpleTableExpressionFactory(task_factory));
+//  TaskIDList input;
+//  input.emplace_back(tasks->addTask(task));
+//  return input;
+//}
 
 //Option<ScopedPtr<Task>>
 //    CSTableScanProvider::buildSequentialScan(

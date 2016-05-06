@@ -23,9 +23,9 @@
 #include "eventql/util/csv/CSVInputStream.h"
 #include "eventql/util/csv/BinaryCSVInputStream.h"
 #include "eventql/TableDefinition.h"
-#include "eventql/sql/codec/ascii_codec.h"
-#include "eventql/sql/codec/json_codec.h"
-#include "eventql/sql/codec/json_sse_codec.h"
+#include "eventql/server/sql/codec/ascii_codec.h"
+#include "eventql/server/sql/codec/json_codec.h"
+#include "eventql/server/sql/codec/json_sse_codec.h"
 #include "eventql/sql/runtime/ExecutionStrategy.h"
 #include "eventql/core/TimeWindowPartitioner.h"
 #include "eventql/core/FixedShardPartitioner.h"
@@ -1119,36 +1119,36 @@ void AnalyticsServlet::executeSQL_ASCII(
     const http::HTTPRequest* req,
     http::HTTPResponse* res,
     RefPtr<http::HTTPResponseStream> res_stream) {
-  String query;
-  if (!URI::getParam(params, "query", &query)) {
-    res->setStatus(http::kStatusBadRequest);
-    res->addBody("missing ?query=... parameter");
-    res_stream->writeResponse(*res);
-    return;
-  }
-
-  try {
-    auto txn = sql_->newTransaction();
-    auto estrat = app_->getExecutionStrategy(session.customer());
-    txn->setTableProvider(estrat->tableProvider());
-    auto qplan = sql_->buildQueryPlan(txn.get(), query, estrat);
-
-    ASCIICodec ascii_codec(qplan.get());
-    qplan->execute();
-
-    Buffer result;
-    ascii_codec.printResults(BufferOutputStream::fromBuffer(&result));
-
-    res->setStatus(http::kStatusOK);
-    res->addHeader("Content-Type", "text/plain; charset=utf-8");
-    res->addBody(result);
-    res_stream->writeResponse(*res);
-  } catch (const StandardException& e) {
-    res->setStatus(http::kStatusInternalServerError);
-    res->addHeader("Content-Type", "text/plain; charset=utf-8");
-    res->addBody(StringUtil::format("error: $0", e.what()));
-    res_stream->writeResponse(*res);
-  }
+//  String query;
+//  if (!URI::getParam(params, "query", &query)) {
+//    res->setStatus(http::kStatusBadRequest);
+//    res->addBody("missing ?query=... parameter");
+//    res_stream->writeResponse(*res);
+//    return;
+//  }
+//
+//  try {
+//    auto txn = sql_->newTransaction();
+//    auto estrat = app_->getExecutionStrategy(session.customer());
+//    txn->setTableProvider(estrat->tableProvider());
+//    auto qplan = sql_->buildQueryPlan(txn.get(), query, estrat);
+//
+//    ASCIICodec ascii_codec(qplan.get());
+//    qplan->execute();
+//
+//    Buffer result;
+//    ascii_codec.printResults(BufferOutputStream::fromBuffer(&result));
+//
+//    res->setStatus(http::kStatusOK);
+//    res->addHeader("Content-Type", "text/plain; charset=utf-8");
+//    res->addBody(result);
+//    res_stream->writeResponse(*res);
+//  } catch (const StandardException& e) {
+//    res->setStatus(http::kStatusInternalServerError);
+//    res->addHeader("Content-Type", "text/plain; charset=utf-8");
+//    res->addBody(StringUtil::format("error: $0", e.what()));
+//    res_stream->writeResponse(*res);
+//  }
 }
 
 //void AnalyticsServlet::executeSQL_BINARY(
@@ -1201,43 +1201,43 @@ void AnalyticsServlet::executeSQL_JSON(
     const http::HTTPRequest* req,
     http::HTTPResponse* res,
     RefPtr<http::HTTPResponseStream> res_stream) {
-  String query;
-  if (!URI::getParam(params, "query", &query)) {
-    res->setStatus(http::kStatusBadRequest);
-    res->addBody("missing ?query=... parameter");
-    res_stream->writeResponse(*res);
-    return;
-  }
+  //String query;
+  //if (!URI::getParam(params, "query", &query)) {
+  //  res->setStatus(http::kStatusBadRequest);
+  //  res->addBody("missing ?query=... parameter");
+  //  res_stream->writeResponse(*res);
+  //  return;
+  //}
 
-  try {
-    auto txn = sql_->newTransaction();
-    auto estrat = app_->getExecutionStrategy(session.customer());
-    txn->setTableProvider(estrat->tableProvider());
-    auto qplan = sql_->buildQueryPlan(txn.get(), query, estrat);
+  //try {
+  //  auto txn = sql_->newTransaction();
+  //  auto estrat = app_->getExecutionStrategy(session.customer());
+  //  txn->setTableProvider(estrat->tableProvider());
+  //  auto qplan = sql_->buildQueryPlan(txn.get(), query, estrat);
 
-    JSONCodec json_codec(qplan.get());
-    qplan->execute();
+  //  JSONCodec json_codec(qplan.get());
+  //  qplan->execute();
 
-    Buffer result;
-    json_codec.printResults(BufferOutputStream::fromBuffer(&result));
+  //  Buffer result;
+  //  json_codec.printResults(BufferOutputStream::fromBuffer(&result));
 
-    res->setStatus(http::kStatusOK);
-    res->addHeader("Content-Type", "application/json; charset=utf-8");
-    res->addBody(result);
-    res_stream->writeResponse(*res);
-  } catch (const StandardException& e) {
-    Buffer buf;
-    json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
-    json.beginObject();
-    json.addObjectEntry("error");
-    json.addString(e.what());
-    json.endObject();
+  //  res->setStatus(http::kStatusOK);
+  //  res->addHeader("Content-Type", "application/json; charset=utf-8");
+  //  res->addBody(result);
+  //  res_stream->writeResponse(*res);
+  //} catch (const StandardException& e) {
+  //  Buffer buf;
+  //  json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
+  //  json.beginObject();
+  //  json.addObjectEntry("error");
+  //  json.addString(e.what());
+  //  json.endObject();
 
-    res->setStatus(http::kStatusInternalServerError);
-    res->addHeader("Content-Type", "application/json; charset=utf-8");
-    res->addBody(buf);
-    res_stream->writeResponse(*res);
-  }
+  //  res->setStatus(http::kStatusInternalServerError);
+  //  res->addHeader("Content-Type", "application/json; charset=utf-8");
+  //  res->addBody(buf);
+  //  res_stream->writeResponse(*res);
+  //}
 }
 
 void AnalyticsServlet::executeSQL_JSONSSE(
@@ -1246,465 +1246,37 @@ void AnalyticsServlet::executeSQL_JSONSSE(
     const http::HTTPRequest* req,
     http::HTTPResponse* res,
     RefPtr<http::HTTPResponseStream> res_stream) {
-  String query;
-  if (!URI::getParam(params, "query", &query)) {
-    res->setStatus(http::kStatusBadRequest);
-    res->addBody("missing ?query=... parameter");
-    res_stream->writeResponse(*res);
-    return;
-  }
+  //String query;
+  //if (!URI::getParam(params, "query", &query)) {
+  //  res->setStatus(http::kStatusBadRequest);
+  //  res->addBody("missing ?query=... parameter");
+  //  res_stream->writeResponse(*res);
+  //  return;
+  //}
 
-  auto sse_stream = mkRef(new http::HTTPSSEStream(res, res_stream));
-  sse_stream->start();
+  //auto sse_stream = mkRef(new http::HTTPSSEStream(res, res_stream));
+  //sse_stream->start();
 
-  try {
-    auto txn = sql_->newTransaction();
-    auto estrat = app_->getExecutionStrategy(session.customer());
-    txn->setTableProvider(estrat->tableProvider());
-    auto qplan = sql_->buildQueryPlan(txn.get(), query, estrat);
-    JSONSSECodec json_sse_codec(qplan.get(), sse_stream);
-    qplan->execute();
-  } catch (const StandardException& e) {
-    Buffer buf;
-    json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
-    json.beginObject();
-    json.addObjectEntry("error");
-    json.addString(e.what());
-    json.endObject();
+  //try {
+  //  auto txn = sql_->newTransaction();
+  //  auto estrat = app_->getExecutionStrategy(session.customer());
+  //  txn->setTableProvider(estrat->tableProvider());
+  //  auto qplan = sql_->buildQueryPlan(txn.get(), query, estrat);
+  //  JSONSSECodec json_sse_codec(qplan.get(), sse_stream);
+  //  qplan->execute();
+  //} catch (const StandardException& e) {
+  //  Buffer buf;
+  //  json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
+  //  json.beginObject();
+  //  json.addObjectEntry("error");
+  //  json.addString(e.what());
+  //  json.endObject();
 
-    sse_stream->sendEvent(buf, Some(String("query_error")));
-  }
+  //  sse_stream->sendEvent(buf, Some(String("query_error")));
+  //}
 
-  sse_stream->finish();
+  //sse_stream->finish();
 }
-
-<<<<<<< HEAD
-void AnalyticsServlet::pipelineInfo(
-    const AnalyticsSession& session,
-    const http::HTTPRequest* req,
-    http::HTTPResponse* res) {
-
-  auto customer_conf = customer_dir_->configFor(session.customer());
-  const auto& pipelines = PipelineInfo::forCustomer(customer_conf->config);
-
-  Buffer buf;
-  json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
-  json.beginObject();
-  json.addObjectEntry("pipelines");
-  json.beginArray();
-
-  for (size_t i = 0; i < pipelines.size(); ++i) {
-    const auto& pipeline = pipelines[i];
-
-    if (i > 0) {
-      json.addComma();
-    }
-
-    json.beginObject();
-
-    json.addObjectEntry("type");
-    json.addString(pipeline.type);
-    json.addComma();
-
-    json.addObjectEntry("path");
-    json.addString(pipeline.path);
-    json.addComma();
-
-    json.addObjectEntry("name");
-    json.addString(pipeline.name);
-    json.addComma();
-
-    json.addObjectEntry("info");
-    json.addString(pipeline.info);
-    json.addComma();
-
-    json.addObjectEntry("status");
-    json.addString(pipeline.status);
-
-    json.endObject();
-  }
-
-  json.endArray();
-  json.endObject();
-
-  res->setStatus(http::kStatusOK);
-  res->setHeader("Content-Type", "application/json; charset=utf-8");
-  res->addBody(buf);
-}
-
-void AnalyticsServlet::sessionTrackingListEvents(
-    const AnalyticsSession& session,
-    const http::HTTPRequest* req,
-    http::HTTPResponse* res) {
-  auto customer_conf = customer_dir_->configFor(session.customer());
-  const auto& logjoin_conf = customer_conf->config.logjoin_config();
-
-  Buffer buf;
-  json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
-  json.beginObject();
-  json.addObjectEntry("session_events");
-  json.beginArray();
-
-  size_t i = 0;
-  for (const auto& ev_def : logjoin_conf.session_event_schemas()) {
-    auto schema = msg::MessageSchema::decode(ev_def.schema());
-
-    if (++i > 1) {
-      json.addComma();
-    }
-
-    json.beginObject();
-
-    json.addObjectEntry("event");
-    json.addString(ev_def.evtype());
-    json.addComma();
-
-    json.addObjectEntry("schema_debug");
-    json.addString(schema->toString());
-
-    json.endObject();
-  }
-
-  json.endArray();
-  json.endObject();
-
-  res->setStatus(http::kStatusOK);
-  res->setHeader("Content-Type", "application/json; charset=utf-8");
-  res->addBody(buf);
-}
-
-void AnalyticsServlet::sessionTrackingListAttributes(
-    const AnalyticsSession& session,
-    const http::HTTPRequest* req,
-    http::HTTPResponse* res) {
-  auto customer_conf = customer_dir_->configFor(session.customer());
-  const auto& logjoin_conf = customer_conf->config.logjoin_config();
-
-  auto schema = msg::MessageSchema::decode(
-      logjoin_conf.session_attributes_schema());
-
-  Buffer buf;
-  json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
-  json.beginObject();
-  json.addObjectEntry("session_attributes");
-  schema->toJSON(&json);
-  json.endObject();
-
-  res->setStatus(http::kStatusOK);
-  res->setHeader("Content-Type", "application/json; charset=utf-8");
-  res->addBody(buf);
-}
-
-void AnalyticsServlet::sessionTrackingEventInfo(
-    const AnalyticsSession& session,
-    const http::HTTPRequest* req,
-    http::HTTPResponse* res) {
-  URI uri(req->uri());
-  const auto& params = uri.queryParams();
-
-  String event_name;
-  if (!URI::getParam(params, "event", &event_name)) {
-    res->setStatus(http::kStatusBadRequest);
-    res->addBody("missing ?event=... parameter");
-    return;
-  }
-
-  auto customer_conf = customer_dir_->configFor(session.customer());
-  const auto& logjoin_conf = customer_conf->config.logjoin_config();
-
-  for (const auto& ev_def : logjoin_conf.session_event_schemas()) {
-    if (ev_def.evtype() == event_name) {
-      auto schema = msg::MessageSchema::decode(ev_def.schema());
-
-      Buffer buf;
-      json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
-      json.beginObject();
-      json.addObjectEntry("event");
-      json.beginObject();
-
-      json.addObjectEntry("name");
-      json.addString(ev_def.evtype());
-      json.addComma();
-
-      json.addObjectEntry("schema");
-      schema->toJSON(&json);
-      json.addComma();
-
-      json.addObjectEntry("schema_debug");
-      json.addString(schema->toString());
-
-      json.endObject();
-      json.endObject();
-
-      res->setStatus(http::kStatusOK);
-      res->setHeader("Content-Type", "application/json; charset=utf-8");
-      res->addBody(buf);
-      return;
-    }
-  }
-
-  res->setStatus(http::kStatusNotFound);
-  res->addBody("not found");
-}
-
-void AnalyticsServlet::sessionTrackingEventAdd(
-    const AnalyticsSession& session,
-    const http::HTTPRequest* req,
-    http::HTTPResponse* res) {
-  URI uri(req->uri());
-  const auto& params = uri.queryParams();
-
-  String event_name;
-  if (!URI::getParam(params, "event", &event_name)) {
-    res->setStatus(http::kStatusBadRequest);
-    res->addBody("missing ?event=... parameter");
-    return;
-  }
-
-  auto customer_conf = customer_dir_->configFor(session.customer())->config;
-  auto logjoin_conf = customer_conf.mutable_logjoin_config();
-
-  for (auto& ev_def : logjoin_conf->session_event_schemas()) {
-    if (ev_def.evtype() == event_name) {
-      RAISE(kRuntimeError, "an event with this name already exists");
-    }
-  }
-
-  auto field_id = logjoin_conf->session_schema_next_field_id();
-  auto ev_def = logjoin_conf->add_session_event_schemas();
-  ev_def->set_evtype(event_name);
-  ev_def->set_evid(field_id);
-
-  msg::MessageSchema schema(nullptr);
-  schema.setName(event_name);
-  ev_def->set_schema(schema.encode().toString());
-
-  logjoin_conf->set_session_schema_next_field_id(field_id + 1);
-  customer_dir_->updateCustomerConfig(customer_conf);
-
-  res->setStatus(http::kStatusCreated);
-  res->addBody("ok");
-  return;
-}
-
-void AnalyticsServlet::sessionTrackingEventRemove(
-    const AnalyticsSession& session,
-    const http::HTTPRequest* req,
-    http::HTTPResponse* res) {
-  URI uri(req->uri());
-  const auto& params = uri.queryParams();
-
-  String event_name;
-  if (!URI::getParam(params, "event", &event_name)) {
-    res->setStatus(http::kStatusBadRequest);
-    res->addBody("missing ?event=... parameter");
-    return;
-  }
-
-  auto customer_conf = customer_dir_->configFor(session.customer())->config;
-  auto logjoin_conf = customer_conf.mutable_logjoin_config();
-
-  auto events = logjoin_conf->mutable_session_event_schemas();
-  for (auto i = 0; i < events->size(); ++i) {
-    if (events->Get(i).evtype() == event_name) {
-      events->DeleteSubrange(i, 1);
-      customer_dir_->updateCustomerConfig(customer_conf);
-      res->setStatus(http::kStatusCreated);
-      res->addBody("ok");
-      return;
-    }
-  }
-
-  res->setStatus(http::kStatusNotFound);
-  res->addBody("event not found");
-}
-
-void AnalyticsServlet::sessionTrackingEventAddField(
-    const AnalyticsSession& session,
-    const http::HTTPRequest* req,
-    http::HTTPResponse* res) {
-  URI uri(req->uri());
-  const auto& params = uri.queryParams();
-
-  String event_name;
-  if (!URI::getParam(params, "event", &event_name)) {
-    res->setStatus(http::kStatusBadRequest);
-    res->addBody("missing ?event=... parameter");
-    return;
-  }
-
-  String field_name;
-  if (!URI::getParam(params, "field", &field_name)) {
-    res->setStatus(http::kStatusBadRequest);
-    res->addBody("missing ?field=... parameter");
-    return;
-  }
-
-  String field_type_str;
-  if (!URI::getParam(params, "type", &field_type_str)) {
-    res->setStatus(http::kStatusBadRequest);
-    res->addBody("missing ?type=... parameter");
-    return;
-  }
-
-  auto customer_conf = customer_dir_->configFor(session.customer())->config;
-  auto logjoin_conf = customer_conf.mutable_logjoin_config();
-
-  auto field_type = msg::fieldTypeFromString(field_type_str);
-  bool field_optional = false;
-  bool field_repeated = false;
-  auto field_id = logjoin_conf->session_schema_next_field_id();
-
-  String repeated_str;
-  if (URI::getParam(params, "repeated", &repeated_str) &&
-      repeated_str == "true") {
-    field_repeated = true;
-  }
-
-  String optional_str;
-  if (URI::getParam(params, "optional", &optional_str) &&
-      optional_str == "true") {
-    field_optional = true;
-  }
-
-  for (auto& ev_def : *logjoin_conf->mutable_session_event_schemas()) {
-    if (ev_def.evtype() != event_name) {
-      continue;
-    }
-
-    eventDefinitonAddField(
-        &ev_def,
-        field_name,
-        field_id,
-        field_type,
-        field_repeated,
-        field_optional);
-
-    logjoin_conf->set_session_schema_next_field_id(field_id + 1);
-    customer_dir_->updateCustomerConfig(customer_conf);
-    res->setStatus(http::kStatusCreated);
-    res->addBody("ok");
-    return;
-  }
-
-  res->setStatus(http::kStatusNotFound);
-  res->addBody("event not found");
-}
-
-void AnalyticsServlet::sessionTrackingEventRemoveField(
-    const AnalyticsSession& session,
-    const http::HTTPRequest* req,
-    http::HTTPResponse* res) {
-  URI uri(req->uri());
-  const auto& params = uri.queryParams();
-
-  String event_name;
-  if (!URI::getParam(params, "event", &event_name)) {
-    res->setStatus(http::kStatusBadRequest);
-    res->addBody("missing ?event=... parameter");
-    return;
-  }
-
-  String field_name;
-  if (!URI::getParam(params, "field", &field_name)) {
-    res->setStatus(http::kStatusBadRequest);
-    res->addBody("missing ?field=... parameter");
-    return;
-  }
-
-  auto customer_conf = customer_dir_->configFor(session.customer())->config;
-  auto logjoin_conf = customer_conf.mutable_logjoin_config();
-
-  for (auto& ev_def : *logjoin_conf->mutable_session_event_schemas()) {
-    if (ev_def.evtype() != event_name) {
-      continue;
-    }
-
-    eventDefinitonRemoveField(&ev_def, field_name);
-
-    customer_dir_->updateCustomerConfig(customer_conf);
-    res->setStatus(http::kStatusCreated);
-    res->addBody("ok");
-    return;
-  }
-
-  res->setStatus(http::kStatusNotFound);
-  res->addBody("event not found");
-}
-=======
-void AnalyticsServlet::executeDrilldownQuery(
-    const AnalyticsSession& session,
-    const http::HTTPRequest* req,
-    http::HTTPResponse* res,
-    RefPtr<http::HTTPResponseStream> res_stream) {
-  try {
-    URI uri(req->uri());
-    auto jreq = json::parseJSON(req->body());
-
-    auto query = mkRef(
-        new DrilldownQuery(
-            app_->getExecutionStrategy(session.customer()),
-            sql_));
-
-    auto metrics = json::objectLookup(jreq.begin(), jreq.end(), "metrics");
-    if (metrics == jreq.end()) {
-      RAISE(kRuntimeError, "missing field: metrics");
-    }
-
-    auto nmetrics = json::arrayLength(metrics, jreq.end());
-    for (size_t i = 0; i < nmetrics; ++i) {
-      auto jmetric = json::arrayLookup(metrics, jreq.end(), i); // O(N^2) but who cares...
-      DrilldownQuery::MetricDefinition metric;
-      auto expr = json::objectGetString(jmetric, jreq.end(), "expr");
-      if (expr.isEmpty()) {
-        RAISE(kRuntimeError, "missing field: expr");
-      }
-
-      metric.expression = expr.get();
-      metric.name = json::objectGetString(jmetric, jreq.end(), "name");
-      metric.filter = json::objectGetString(jmetric, jreq.end(), "filter");
-      metric.source_table = json::objectGetString(jmetric, jreq.end(), "source");
-      query->addMetric(metric);
-    }
-
-    auto dimensions = json::objectLookup(jreq.begin(), jreq.end(), "dimensions");
-    if (dimensions != jreq.end()) {
-      auto ndimensions = json::arrayLength(dimensions, jreq.end());
-      for (size_t i = 0; i < ndimensions; ++i) {
-        auto jdimension = json::arrayLookup(dimensions, jreq.end(), i); // O(N^2) but who cares...
-        DrilldownQuery::DimensionDefinition dimension;
-        dimension.name = json::objectGetString(jdimension, jreq.end(), "name");
-        dimension.expression = json::objectGetString(jdimension, jreq.end(), "expr");
-        query->addDimension(dimension);
-      }
-    }
-
-    auto filter = json::objectGetString(jreq.begin(), jreq.end(), "filter");
-    if (!filter.isEmpty()) {
-      query->setFilter(filter.get());
-    }
-
-    auto dtree = query->execute();
-
-    Buffer buf;
-    json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
-    json.beginObject();
-    json.addObjectEntry("result");
-    dtree->toJSON(&json);
-    json.endObject();
-
-    res->setStatus(http::kStatusOK);
-    res->addBody(buf);
-    res_stream->writeResponse(*res);
-  } catch (const StandardException& e) {
-    logError("z1.sql", e, "Uncaught query error");
-    res->setStatus(http::kStatusBadRequest);
-    res->addBody("invalid request: " + String(e.what()));
-    res_stream->writeResponse(*res);
-  }
-}
-
->>>>>>> 7ec7dd94098a33a75d25fc6b7cadd3a0e5d8f04b
 
 void AnalyticsServlet::performLogin(
     const URI& uri,

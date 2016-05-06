@@ -49,8 +49,6 @@ public:
   const String& tableAlias() const;
   void setTableAlias(const String& alias);
 
-  Vector<TaskID> build(Transaction* txn, TaskDAG* tree) const override;
-
 protected:
   RefPtr<QueryTreeNode> subquery_;
   Vector<String> column_names_;

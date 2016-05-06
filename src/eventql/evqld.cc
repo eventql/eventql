@@ -42,7 +42,7 @@
 #include "eventql/core/TSDBServlet.h"
 #include "eventql/core/ReplicationWorker.h"
 #include "eventql/core/LSMTableIndexCache.h"
-#include "eventql/sql/sql_engine.h"
+#include "eventql/server/sql/sql_engine.h"
 #include "eventql/DefaultServlet.h"
 #include "eventql/sql/defaults.h"
 #include "eventql/ConfigDirectory.h"

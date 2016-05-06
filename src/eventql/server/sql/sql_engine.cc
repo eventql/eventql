@@ -9,15 +9,15 @@
  */
 #include <eventql/util/http/httpclient.h>
 #include <eventql/util/protobuf/msg.h>
-#include <zbase/z1.h>
-#include <zbase/sql/sql_engine.h>
-#include <zbase/core/TSDBService.h>
-#include <zbase/core/TimeWindowPartitioner.h>
-#include <zbase/core/FixedShardPartitioner.h>
+#include <eventql/z1.h>
+#include <eventql/server/sql/sql_engine.h>
+#include <eventql/core/TSDBService.h>
+#include <eventql/core/TimeWindowPartitioner.h>
+#include <eventql/core/FixedShardPartitioner.h>
 #include <eventql/sql/defaults.h>
 #include <eventql/sql/qtree/CallExpressionNode.h>
 #include <eventql/sql/qtree/ColumnReferenceNode.h>
-#include <zbase/z1stats.h>
+#include <eventql/z1stats.h>
 
 namespace zbase {
 
@@ -37,11 +37,12 @@ RefPtr<csql::TableProvider> SQLEngine::tableProviderForNamespace(
     ReplicationScheme* replication_scheme,
     AnalyticsAuth* auth,
     const String& tsdb_namespace) {
-  return new TSDBTableProvider(
-      tsdb_namespace,
-      partition_map,
-      replication_scheme,
-      auth);
+  RAISE(kNotYetImplementedError, "not yet implemented");
+  //return new TSDBTableProvider(
+  //    tsdb_namespace,
+  //    partition_map,
+  //    replication_scheme,
+  //    auth);
 }
 
 void SQLEngine::rewriteTableTimeSuffix(

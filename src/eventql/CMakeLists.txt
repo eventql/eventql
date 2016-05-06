@@ -252,6 +252,7 @@ add_executable(evqld
     mapreduce/tasks/ReturnResultsTask.cc
     mapreduce/tasks/SaveToTableTask.cc
     mapreduce/tasks/SaveToTablePartitionTask.cc
+    server/sql/sql_engine.cc
     LogfileScanResult.cc
     EventScanResult.cc
     AnalyticsServlet.cc

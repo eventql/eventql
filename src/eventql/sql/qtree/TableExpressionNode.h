@@ -11,7 +11,6 @@
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/option.h>
 #include <eventql/sql/qtree/QueryTreeNode.h>
-#include <eventql/sql/tasks/TaskDAG.h>
 
 using namespace stx;
 
@@ -35,8 +34,6 @@ public:
       bool allow_add = false) = 0;
 
   size_t numColumns() const;
-
-  virtual Vector<TaskID> build(Transaction* txn, TaskDAG* tree) const = 0;
 
 };
 

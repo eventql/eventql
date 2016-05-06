@@ -11,7 +11,6 @@
 #include <eventql/util/option.h>
 #include <eventql/sql/backends/backend.h>
 #include <eventql/sql/backends/tableref.h>
-#include <eventql/sql/tasks/Task.h>
 #include <eventql/sql/qtree/SequentialScanNode.h>
 #include <eventql/sql/TableInfo.h>
 
@@ -21,11 +20,6 @@ class Transaction;
 
 class TableProvider : public RefCounted {
 public:
-
-  virtual TaskIDList buildSequentialScan(
-      Transaction* txn,
-      RefPtr<SequentialScanNode> seqscan,
-      TaskDAG* tasks) const = 0;
 
   virtual void listTables(Function<void (const TableInfo& table)> fn) const = 0;
 
@@ -46,11 +40,6 @@ public:
       const std::vector<std::string>& tables,
       const std::string& source_uri,
       const std::vector<std::unique_ptr<Backend>>& backends);
-
-  TaskIDList buildSequentialScan(
-      Transaction* txn,
-      RefPtr<SequentialScanNode> seqscan,
-      TaskDAG* tasks) const override;
 
   void addProvider(RefPtr<TableProvider> provider);
 

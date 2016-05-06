@@ -32,9 +32,9 @@ RemoteTSDBScan::RemoteTSDBScan(
     auth_(auth),
     rows_scanned_(0) {}
 
-int RemoteTSDBScan::nextRow(csql::SValue* out, int out_len) {
-  return -1;
-}
+//int RemoteTSDBScan::nextRow(csql::SValue* out, int out_len) {
+//  return -1;
+//}
 //void RemoteTSDBScan::onInputsReady() {
 //    csql::ExecutionContext* context,
 //    Function<bool (int argc, const csql::SValue* argv)> fn) {

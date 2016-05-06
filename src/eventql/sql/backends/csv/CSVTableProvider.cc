@@ -8,7 +8,6 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <eventql/sql/backends/csv/CSVTableProvider.h>
-#include <eventql/sql/tasks/tablescan.h>
 
 using namespace stx;
 
@@ -44,31 +43,31 @@ CSVTableProvider::CSVTableProvider(
                 quote_char);
           }) {}
 
-TaskIDList CSVTableProvider::buildSequentialScan(
-    Transaction* txn,
-    RefPtr<SequentialScanNode> node,
-    TaskDAG* tasks) const {
-  if (node->tableName() != table_name_) {
-    RAISEF(kNotFoundError, "table not found: '$0'", node->tableName());
-  }
-
-  auto self = mkRef(const_cast<CSVTableProvider*>(this));
-  auto task_factory = [self, node] (Transaction* txn, HashMap<TaskID, ScopedPtr<ResultCursor>> input) -> RefPtr<Task> {
-    auto stream = self->stream_factory_();
-    stream->skipNextRow();
-
-    return new TableScan(
-          txn,
-          node,
-          mkScoped(new CSVTableScan(self->headers_, std::move(stream))));
-  };
-
-  auto task = new TaskDAGNode(new SimpleTableExpressionFactory(task_factory));
-
-  TaskIDList input;
-  input.emplace_back(tasks->addTask(task));
-  return input;
-}
+//TaskIDList CSVTableProvider::buildSequentialScan(
+//    Transaction* txn,
+//    RefPtr<SequentialScanNode> node,
+//    TaskDAG* tasks) const {
+//  if (node->tableName() != table_name_) {
+//    RAISEF(kNotFoundError, "table not found: '$0'", node->tableName());
+//  }
+//
+//  auto self = mkRef(const_cast<CSVTableProvider*>(this));
+//  auto task_factory = [self, node] (Transaction* txn, HashMap<TaskID, ScopedPtr<ResultCursor>> input) -> RefPtr<Task> {
+//    auto stream = self->stream_factory_();
+//    stream->skipNextRow();
+//
+//    return new TableScan(
+//          txn,
+//          node,
+//          mkScoped(new CSVTableScan(self->headers_, std::move(stream))));
+//  };
+//
+//  auto task = new TaskDAGNode(new SimpleTableExpressionFactory(task_factory));
+//
+//  TaskIDList input;
+//  input.emplace_back(tasks->addTask(task));
+//  return input;
+//}
 
 void CSVTableProvider::listTables(
     Function<void (const TableInfo& table)> fn) const {

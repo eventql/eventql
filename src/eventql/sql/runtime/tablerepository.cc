@@ -60,21 +60,6 @@ void TableRepository::import(
       source_uri.toString().c_str());
 }
 
-TaskIDList TableRepository::buildSequentialScan(
-    Transaction* txn,
-    RefPtr<SequentialScanNode> seqscan,
-    TaskDAG* tasks) const {
-  for (const auto& p : providers_) {
-    if (p->describe(seqscan->tableName()).isEmpty()) {
-      continue;
-    }
-
-    return p->buildSequentialScan(txn, seqscan, tasks);
-  }
-
-  RAISEF(kNotFoundError, "table not found: '$0'", seqscan->tableName());
-}
-
 void TableRepository::addProvider(RefPtr<TableProvider> provider) {
   providers_.emplace_back(provider);
 }

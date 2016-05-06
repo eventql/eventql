@@ -10,7 +10,7 @@
 #pragma once
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/http/HTTPSSEStream.h>
-#include <zbase/sql/codec/json_codec.h>
+#include <eventql/server/sql/codec/json_codec.h>
 
 namespace zbase {
 
