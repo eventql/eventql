@@ -536,6 +536,24 @@
               visible_in_menu: false
               visible_in_toc: false
               source: "/api/http/tables/tables.md"
+            -
+              url: "/drivers-and-api/http/sql"
+              type: page
+              visible_in_menu: false
+              visible_in_toc: false
+              source: "/api/http/sql/sql.md"
+            -
+              url: "/drivers-and-api/http/sql/scan_partition"
+              type: page
+              visible_in_menu: false
+              visible_in_toc: false
+              source: "/api/http/sql/scan_partition.md"
+            -
+              url: "/drivers-and-api/http/auth/login"
+              type: page
+              visible_in_menu: false
+              visible_in_toc: false
+              source: "/api/http/auth/login.md"
         -
           url: "/drivers-and-api/javascript"
           title: "JavaScript Query API"
