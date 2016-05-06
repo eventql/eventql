@@ -44,13 +44,8 @@
 <table class="api_reference http" cellspacing=0 border=0>
   <tr>
     <td><span class="tag">GET</span></td>
-    <td>/api/v1/sql</td>
+    <td><a href="sql">/api/v1/sql</a></td>
     <td>Execute SQL</td>
-  </tr>
-  <tr>
-    <td><span class="tag">GET</span></td>
-    <td>/api/v1/sql_stream</td>
-    <td>Execute SQL using Server-Sent Events</td>
   </tr>
   <tr>
     <td><span class="tag">POST</span></td>
@@ -59,7 +54,21 @@
   </tr>
   <tr>
     <td><span class="tag">GET</span></td>
-    <td>/api/v1/sql/scan_partition</td>
+    <td><a href="sql/scan_partition">/api/v1/sql/scan_partition</a></td>
     <td>Insert or update record(s)</td>
+  </tr>
+</table>
+
+<h3>Auth</h3>
+<table class="api_reference http" cellspacing=0 border=0>
+  <tr>
+    <td><span class="tag">POST</span></td>
+    <td><a href="auth/login">/api/v1/auth/login</a></td>
+    <td>Login</td>
+  </tr>
+  <tr>
+    <td><span class="tag">POST</span></td>
+    <td><a href="sql">/api/v1/auth/logout</a></td>
+    <td>Logout</td>
   </tr>
 </table>

@@ -1,13 +1,20 @@
 GET /api/v1/sql
-==========================
+=======================
 
-Execute a SQL query. EventQL provides different formats in which the result can be returned.
+Perform a query against the EventQL database. The query string to execute can contain multiple
+queries that should each end with a semicolon.
 
+
+
+
+EventQL provides different formats in which the result can be returned.
+if you want to stream constant  updates about the status of the query please use "json_sse"
+
+  json_sse provides constant updates ...
 
 When using "json_sse",
 
 Updates about the status of the query execution will be send
-
 
 ###Resource Information
 <table class='http_api'>
@@ -25,7 +32,7 @@ Updates about the status of the query execution will be send
   </tr>
   <tr>
     <td>query</td>
-    <td>The query string to execute.</td>
+    <td>The sql statement. It should end with a semicolon.</td>
   </tr>
 </table>
 
@@ -41,11 +48,11 @@ Status Event (type = "status") is sent ....
 <table>
   <tr>
     <td>status</td>
-    <td>one of waiting, running or</td>
+    <td></td>
   </tr>
   <tr>
     <td>message</td>
-    <td></td>
+    <td>Human one of running, waiting, downloading</td>
   </tr>
   <tr>
     <td>progress</td>
