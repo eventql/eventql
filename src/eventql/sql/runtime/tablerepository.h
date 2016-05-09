@@ -13,19 +13,11 @@
 #include <eventql/sql/backends/tableref.h>
 #include <eventql/sql/qtree/SequentialScanNode.h>
 #include <eventql/sql/TableInfo.h>
+#include <eventql/sql/table_provider.h>
 
 namespace csql {
 class QueryBuilder;
 class Transaction;
-
-class TableProvider : public RefCounted {
-public:
-
-  virtual void listTables(Function<void (const TableInfo& table)> fn) const = 0;
-
-  virtual Option<TableInfo> describe(const String& table_name) const = 0;
-
-};
 
 class TableRepository : public TableProvider {
 public:
