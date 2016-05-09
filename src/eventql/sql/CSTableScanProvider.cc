@@ -8,7 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <eventql/sql/CSTableScanProvider.h>
-#include <eventql/sql/CSTableScan.h>
+//#include <eventql/sql/CSTableScan.h>
 #include <eventql/sql/qtree/SequentialScanNode.h>
 
 using namespace stx;
@@ -70,49 +70,50 @@ Option<csql::TableInfo> CSTableScanProvider::describe(
 }
 
 csql::TableInfo CSTableScanProvider::tableInfo() const {
-  auto cstable = cstable::CSTableReader::openFile(cstable_file_);
+  RAISE(kNotYetImplementedError, "nyi");
+  //auto cstable = cstable::CSTableReader::openFile(cstable_file_);
 
-  csql::TableInfo ti;
-  ti.table_name = table_name_;
+  //csql::TableInfo ti;
+  //ti.table_name = table_name_;
 
-  for (const auto& col : cstable->columns()) {
-    csql::ColumnInfo ci;
-    ci.column_name = col.column_name;
-    ci.type_size = 0;
-    ci.is_nullable = true;
+  //for (const auto& col : cstable->columns()) {
+  //  csql::ColumnInfo ci;
+  //  ci.column_name = col.column_name;
+  //  ci.type_size = 0;
+  //  ci.is_nullable = true;
 
-    switch (col.logical_type) {
+  //  switch (col.logical_type) {
 
-      case cstable::ColumnType::BOOLEAN:
-        ci.type = "bool";
-        break;
+  //    case cstable::ColumnType::BOOLEAN:
+  //      ci.type = "bool";
+  //      break;
 
-      case cstable::ColumnType::UNSIGNED_INT:
-        ci.type = "uint64";
-        break;
+  //    case cstable::ColumnType::UNSIGNED_INT:
+  //      ci.type = "uint64";
+  //      break;
 
-      case cstable::ColumnType::SIGNED_INT:
-        ci.type = "int64";
-        break;
+  //    case cstable::ColumnType::SIGNED_INT:
+  //      ci.type = "int64";
+  //      break;
 
-      case cstable::ColumnType::FLOAT:
-        ci.type = "double";
-        break;
+  //    case cstable::ColumnType::FLOAT:
+  //      ci.type = "double";
+  //      break;
 
-      case cstable::ColumnType::STRING:
-        ci.type = "string";
-        break;
+  //    case cstable::ColumnType::STRING:
+  //      ci.type = "string";
+  //      break;
 
-      case cstable::ColumnType::DATETIME:
-        ci.type = "datetime";
-        break;
+  //    case cstable::ColumnType::DATETIME:
+  //      ci.type = "datetime";
+  //      break;
 
-    }
+  //  }
 
-    ti.columns.emplace_back(ci);
-  }
+  //  ti.columns.emplace_back(ci);
+  //}
 
-  return ti;
+  //return ti;
 }
 
 } // namespace csql

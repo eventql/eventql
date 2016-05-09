@@ -24,8 +24,12 @@ ScopedPtr<ResultCursor> LocalScheduler::execute(
   return table_expr->execute();
 };
 
-//ScopedPtr<TableExpression> LocalScheduler::buildExpression(
-//    Transaction* ctx,
-//    RefPtr<QueryTreeNode> node);
-//
+ScopedPtr<TableExpression> LocalScheduler::buildExpression(
+    Transaction* ctx,
+    RefPtr<QueryTreeNode> node) {
+  RAISE(
+      kRuntimeError,
+      "cannot figure out how to execute that query, sorry.");
+}
+
 } // namespace csql
