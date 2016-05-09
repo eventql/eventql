@@ -34,23 +34,6 @@ public:
    */
   virtual bool next(SValue* row, int row_len) = 0;
 
-  /**
-   * Returns true if a call to next would not block and false if such a call
-   * would block
-   */
-  virtual bool poll() {
-    return true;
-  }
-
-  /**
-   * Wait for the next row. Calls the provided callback exactly one time once the
-   * new row becomes available. The callback may be executed in the current
-   * or any other thread.
-   */
-  virtual void wait(Function<void ()> callback) {
-    callback();
-  }
-
   virtual size_t getNumColumns() = 0;
 
 };
@@ -62,9 +45,9 @@ public:
       size_t num_columns,
       Function<bool(SValue*, int)> next_fn);
 
-  size_t getNumColumns() override;
-
   bool next(SValue* row, int row_len) override;
+
+  size_t getNumColumns() override;
 
 protected:
   size_t num_columns_;
