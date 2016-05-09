@@ -8,7 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <eventql/sql/CSTableScanProvider.h>
-//#include <eventql/sql/CSTableScan.h>
+#include <eventql/sql/CSTableScan.h>
 #include <eventql/sql/qtree/SequentialScanNode.h>
 
 using namespace stx;
@@ -21,39 +21,21 @@ CSTableScanProvider::CSTableScanProvider(
     table_name_(table_name),
     cstable_file_(cstable_file) {}
 
-//TaskIDList CSTableScanProvider::buildSequentialScan(
-//    Transaction* txn,
-//    RefPtr<SequentialScanNode> node,
-//    TaskDAG* tasks) const {
-//  if (node->tableName() != table_name_) {
-//    RAISEF(kNotFoundError, "table not found: '$0'", node->tableName());
-//  }
-//
-//  auto self = mkRef(const_cast<CSTableScanProvider*>(this));
-//  auto task_factory = [self, node] (
-//      Transaction* txn,
-//      HashMap<TaskID, ScopedPtr<ResultCursor>> input) -> RefPtr<Task> {
-//    return new CSTableScan(
-//        txn,
-//        node,
-//        self->cstable_file_,
-//        txn->getRuntime()->queryBuilder().get());
-//  };
-//
-//  auto task = new TaskDAGNode(new SimpleTableExpressionFactory(task_factory));
-//  TaskIDList input;
-//  input.emplace_back(tasks->addTask(task));
-//  return input;
-//}
+Option<ScopedPtr<TableExpression>> CSTableScanProvider::buildSequentialScan(
+    Transaction* txn,
+    RefPtr<SequentialScanNode> node) const {
+  if (node->tableName() != table_name_) {
+    return None<ScopedPtr<TableExpression>>();
+  }
 
-//Option<ScopedPtr<Task>>
-//    CSTableScanProvider::buildSequentialScan(
-//        Transaction* ctx,
-//        RefPtr<SequentialScanNode> node,
-//        QueryBuilder* runtime) const {
-//  return Option<ScopedPtr<Task>>(
-//      mkScoped(
-//}
+  return Option<ScopedPtr<TableExpression>>(
+      ScopedPtr<TableExpression>(
+          new CSTableScan(
+              txn,
+              node,
+              cstable_file_,
+              txn->getCompiler())));
+}
 
 void CSTableScanProvider::listTables(
     Function<void (const csql::TableInfo& table)> fn) const {
@@ -70,56 +52,49 @@ Option<csql::TableInfo> CSTableScanProvider::describe(
 }
 
 csql::TableInfo CSTableScanProvider::tableInfo() const {
-  RAISE(kNotYetImplementedError, "nyi");
-  //auto cstable = cstable::CSTableReader::openFile(cstable_file_);
+  auto cstable = cstable::CSTableReader::openFile(cstable_file_);
 
-  //csql::TableInfo ti;
-  //ti.table_name = table_name_;
+  csql::TableInfo ti;
+  ti.table_name = table_name_;
 
-  //for (const auto& col : cstable->columns()) {
-  //  csql::ColumnInfo ci;
-  //  ci.column_name = col.column_name;
-  //  ci.type_size = 0;
-  //  ci.is_nullable = true;
+  for (const auto& col : cstable->columns()) {
+    csql::ColumnInfo ci;
+    ci.column_name = col.column_name;
+    ci.type_size = 0;
+    ci.is_nullable = true;
 
-  //  switch (col.logical_type) {
+    switch (col.logical_type) {
 
-  //    case cstable::ColumnType::BOOLEAN:
-  //      ci.type = "bool";
-  //      break;
+      case cstable::ColumnType::BOOLEAN:
+        ci.type = "bool";
+        break;
 
-  //    case cstable::ColumnType::UNSIGNED_INT:
-  //      ci.type = "uint64";
-  //      break;
+      case cstable::ColumnType::UNSIGNED_INT:
+        ci.type = "uint64";
+        break;
 
-  //    case cstable::ColumnType::SIGNED_INT:
-  //      ci.type = "int64";
-  //      break;
+      case cstable::ColumnType::SIGNED_INT:
+        ci.type = "int64";
+        break;
 
-  //    case cstable::ColumnType::FLOAT:
-  //      ci.type = "double";
-  //      break;
+      case cstable::ColumnType::FLOAT:
+        ci.type = "double";
+        break;
 
-  //    case cstable::ColumnType::STRING:
-  //      ci.type = "string";
-  //      break;
+      case cstable::ColumnType::STRING:
+        ci.type = "string";
+        break;
 
-  //    case cstable::ColumnType::DATETIME:
-  //      ci.type = "datetime";
-  //      break;
+      case cstable::ColumnType::DATETIME:
+        ci.type = "datetime";
+        break;
 
-  //  }
+    }
 
-  //  ti.columns.emplace_back(ci);
-  //}
+    ti.columns.emplace_back(ci);
+  }
 
-  //return ti;
-}
-
-Option<ScopedPtr<TableExpression>> CSTableScanProvider::buildSequentialScan(
-    Transaction* ctx,
-    RefPtr<SequentialScanNode> seqscan) const {
-  RAISE(kNotYetImplementedError, "nyi");
+  return ti;
 }
 
 } // namespace csql

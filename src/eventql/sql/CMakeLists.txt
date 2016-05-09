@@ -13,7 +13,7 @@ add_library(chartsql STATIC
     #queryendpoint.cc
     #query.cc
     #queryservice.cc
-    #CSTableScan.cc
+    CSTableScan.cc
     CSTableScanProvider.cc
     backends/csv/CSVInputStream.cc
     backends/csv/CSVTableProvider.cc

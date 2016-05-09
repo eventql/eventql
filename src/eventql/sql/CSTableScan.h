@@ -13,7 +13,7 @@
 #include <eventql/sql/qtree/SequentialScanNode.h>
 #include <eventql/sql/runtime/compiler.h>
 #include <eventql/sql/runtime/defaultruntime.h>
-#include <eventql/sql/runtime/TableExpression.h>
+#include <eventql/sql/expressions/table_expression.h>
 #include <eventql/sql/runtime/ValueExpression.h>
 #include <eventql/infra/cstable/CSTableReader.h>
 
@@ -21,7 +21,7 @@ using namespace stx;
 
 namespace csql {
 
-class CSTableScan : public Task {
+class CSTableScan : public TableExpression {
 public:
 
   CSTableScan(
@@ -36,17 +36,10 @@ public:
       RefPtr<cstable::CSTableReader> cstable,
       QueryBuilder* runtime);
 
-  bool nextRow(SValue* out, int out_len) override;
+  ScopedPtr<ResultCursor> execute() override;
 
   virtual Vector<String> columnNames() const;
   virtual size_t numColumns() const;
-
-  //void onInputsReady() override;
-
-  void open();
-
-  Option<SHA1Hash> cacheKey() const override;
-  void setCacheKey(const SHA1Hash& key);
 
   size_t rowsScanned() const;
 
@@ -54,6 +47,9 @@ public:
   void setColumnType(String column, sql_type type);
 
 protected:
+
+  void open();
+  bool next(SValue* out, int out_len);
 
   struct ColumnRef {
     ColumnRef(RefPtr<cstable::ColumnReader> r, size_t i, sql_type t);
@@ -78,8 +74,8 @@ protected:
     VM::Instance instance;
   };
 
-  void scan();
-  void scanWithoutColumns();
+  bool fetchNext(SValue* out, int out_len);
+  bool fetchNextWithoutColumns(SValue* out, int out_len);
 
   void findColumns(
       RefPtr<ValueExpressionNode> expr,
@@ -105,8 +101,14 @@ protected:
   AggregationStrategy aggr_strategy_;
   Option<SHA1Hash> cache_key_;
   size_t rows_scanned_;
+  size_t num_records_;
   Function<bool ()> filter_fn_;
   bool opened_;
+  uint64_t cur_select_level_;
+  uint64_t cur_fetch_level_;
+  bool cur_filter_pred_;
+  Vector<SValue> cur_buf_;
+  size_t cur_pos_;
 };
 
 
