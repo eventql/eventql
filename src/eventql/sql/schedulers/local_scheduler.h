@@ -13,8 +13,10 @@
 #include <eventql/sql/qtree/QueryTreeNode.h>
 #include <eventql/sql/expressions/table/select.h>
 #include <eventql/sql/expressions/table/subquery.h>
+#include <eventql/sql/expressions/table/orderby.h>
 #include <eventql/sql/qtree/SelectExpressionNode.h>
 #include <eventql/sql/qtree/SubqueryNode.h>
+#include <eventql/sql/qtree/OrderByNode.h>
 
 
 using namespace stx;
@@ -44,6 +46,11 @@ protected:
   ScopedPtr<TableExpression> buildSequentialScan(
     Transaction* txn,
     RefPtr<SequentialScanNode> node);
+
+  ScopedPtr<TableExpression> buildOrderByExpression(
+    Transaction* txn,
+    RefPtr<OrderByNode> node);
+
 };
 
 class LocalResultCursor : public ResultCursor {

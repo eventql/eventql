@@ -40,6 +40,10 @@ ScopedPtr<TableExpression> LocalScheduler::buildExpression(
         node.asInstanceOf<SubqueryNode>());
   }
 
+  if (dynamic_cast<OrderByNode*>(node.get())) {
+    return buildOrderByExpression(ctx, node.asInstanceOf<OrderByNode>());
+  }
+
   if (dynamic_cast<SequentialScanNode*>(node.get())) {
     return buildSequentialScan(
         ctx,
@@ -67,26 +71,44 @@ ScopedPtr<TableExpression> LocalScheduler::buildSelectExpression(
 };
 
 ScopedPtr<TableExpression> LocalScheduler::buildSubquery(
-    Transaction* ctx,
+    Transaction* txn,
     RefPtr<SubqueryNode> node) {
   Vector<ValueExpression> select_expressions;
   Option<ValueExpression> where_expr;
 
   if (!node->whereExpression().isEmpty()) {
     where_expr = std::move(Option<ValueExpression>(
-        ctx->getCompiler()->buildValueExpression(ctx, node->whereExpression().get())));
+        txn->getCompiler()->buildValueExpression(txn, node->whereExpression().get())));
   }
 
   for (const auto& slnode : node->selectList()) {
     select_expressions.emplace_back(
-        ctx->getCompiler()->buildValueExpression(ctx, slnode->expression()));
+        txn->getCompiler()->buildValueExpression(txn, slnode->expression()));
   }
 
   return mkScoped(new SubqueryExpression(
-      ctx,
+      txn,
       std::move(select_expressions),
       std::move(where_expr),
-      buildExpression(ctx, node->subquery())));
+      buildExpression(txn, node->subquery())));
+}
+
+ScopedPtr<TableExpression> LocalScheduler::buildOrderByExpression(
+    Transaction* txn,
+    RefPtr<OrderByNode> node) {
+  Vector<OrderByExpression::SortExpr> sort_exprs;
+  for (const auto& ss : node->sortSpecs()) {
+    OrderByExpression::SortExpr se;
+    se.descending = ss.descending;
+    se.expr = txn->getCompiler()->buildValueExpression(txn, ss.expr);
+    sort_exprs.emplace_back(std::move(se));
+  }
+
+  return mkScoped(
+      new OrderByExpression(
+          txn,
+          std::move(sort_exprs),
+          buildExpression(txn, node->inputTable())));
 }
 
 ScopedPtr<TableExpression> LocalScheduler::buildSequentialScan(

@@ -10,13 +10,13 @@
 #pragma once
 #include <eventql/util/stdtypes.h>
 #include <eventql/sql/Transaction.h>
-#include <eventql/sql/tasks/Task.h>
 #include <eventql/sql/runtime/ValueExpression.h>
 #include <eventql/sql/qtree/OrderByNode.h>
+#include <eventql/sql/expressions/table_expression.h>
 
 namespace csql {
 
-class OrderBy : public Task {
+class OrderByExpression : public TableExpression {
 public:
 
   struct SortExpr {
@@ -24,41 +24,22 @@ public:
     bool descending; // false == ASCENDING, true == DESCENDING
   };
 
-  OrderBy(
+  OrderByExpression(
       Transaction* ctx,
       Vector<SortExpr> sort_specs,
-      size_t num_columns,
-      HashMap<TaskID, ScopedPtr<ResultCursor>> input);
+      ScopedPtr<TableExpression> input);
 
-  bool nextRow(SValue* out, int out_len) override;
+  ScopedPtr<ResultCursor> execute() override;
 
 protected:
+
+  bool next(SValue* row, int row_len);
+
   Transaction* ctx_;
   Vector<SortExpr> sort_specs_;
-  size_t num_columns_;
+  ScopedPtr<TableExpression> input_;
+  ScopedPtr<ResultCursor> input_cursor_;
   Vector<Vector<SValue>> rows_;
-  ScopedPtr<ResultCursorList> input_;
-};
-
-class OrderByFactory : public TaskFactory {
-public:
-
-  struct SortExpr {
-    RefPtr<ValueExpressionNode> expr;
-    bool descending; // false == ASCENDING, true == DESCENDING
-  };
-
-  OrderByFactory(
-      Vector<SortExpr> sort_specs,
-      size_t num_columns);
-
-  RefPtr<Task> build(
-      Transaction* txn,
-      HashMap<TaskID, ScopedPtr<ResultCursor>> input) const override;
-
-protected:
-  Vector<SortExpr> sort_specs_;
-  size_t num_columns_;
 };
 
 }

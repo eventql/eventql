@@ -8,7 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <algorithm>
-#include <eventql/sql/tasks/orderby.h>
+#include <eventql/sql/expressions/table/orderby.h>
 #include <eventql/sql/expressions/boolean.h>
 #include <eventql/sql/runtime/runtime.h>
 #include <eventql/util/inspect.h>
@@ -18,18 +18,29 @@ namespace csql {
 OrderBy::OrderBy(
     Transaction* ctx,
     Vector<SortExpr> sort_specs,
-    size_t num_columns,
-    HashMap<TaskID, ScopedPtr<ResultCursor>> input) :
+    ScopedPtr<TableExpression> input) :
     ctx_(ctx),
     sort_specs_(std::move(sort_specs)),
-    num_columns_(num_columns),
-    input_(new ResultCursorList(std::move(input))) {
+    input_(std::move(input)) {
   if (sort_specs_.size() == 0) {
     RAISE(kIllegalArgumentError, "can't execute ORDER BY: no sort specs");
   }
 }
 
-bool OrderBy::nextRow(SValue* out, int out_len) {
+ScopedPtr<ResultCursor> OrderByExpression::execute() {
+  input_cursor_ = input_->execute();
+
+  return mkScoped(
+      new DefaultResultCursor(
+          select_exprs_.size(),
+          std::bind(
+              &ORderByExpression::next,
+              this,
+              std::placeholders::_1,
+              std::placeholders::_2)));
+}
+
+bool OrderBy::next(SValue* out, int out_len) {
   return false;
 }
 // FIXPAUL this should mergesort while inserting...
@@ -92,27 +103,5 @@ bool OrderBy::nextRow(SValue* out, int out_len) {
 //
 //  rows_.clear();
 //}
-
-OrderByFactory::OrderByFactory(
-    Vector<SortExpr> sort_specs,
-    size_t num_columns) :
-    sort_specs_(sort_specs),
-    num_columns_(num_columns) {}
-
-RefPtr<Task> OrderByFactory::build(
-    Transaction* txn,
-    HashMap<TaskID, ScopedPtr<ResultCursor>> input) const {
-  auto qbuilder = txn->getRuntime()->queryBuilder();
-
-  Vector<OrderBy::SortExpr> sort_exprs;
-  for (const auto& ss : sort_specs_) {
-    OrderBy::SortExpr se;
-    se.descending = ss.descending;
-    se.expr = qbuilder->buildValueExpression(txn, ss.expr);
-    sort_exprs.emplace_back(std::move(se));
-  }
-
-  return new OrderBy(txn, std::move(sort_exprs), num_columns_, std::move(input));
-}
 
 } // namespace csql
