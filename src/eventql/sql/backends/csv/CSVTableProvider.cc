@@ -8,6 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <eventql/sql/backends/csv/CSVTableProvider.h>
+#include <eventql/sql/expressions/table/tablescan.h>
 
 using namespace stx;
 
@@ -43,32 +44,6 @@ CSVTableProvider::CSVTableProvider(
                 quote_char);
           }) {}
 
-//TaskIDList CSVTableProvider::buildSequentialScan(
-//    Transaction* txn,
-//    RefPtr<SequentialScanNode> node,
-//    TaskDAG* tasks) const {
-//  if (node->tableName() != table_name_) {
-//    RAISEF(kNotFoundError, "table not found: '$0'", node->tableName());
-//  }
-//
-//  auto self = mkRef(const_cast<CSVTableProvider*>(this));
-//  auto task_factory = [self, node] (Transaction* txn, HashMap<TaskID, ScopedPtr<ResultCursor>> input) -> RefPtr<Task> {
-//    auto stream = self->stream_factory_();
-//    stream->skipNextRow();
-//
-//    return new TableScan(
-//          txn,
-//          node,
-//          mkScoped(new CSVTableScan(self->headers_, std::move(stream))));
-//  };
-//
-//  auto task = new TaskDAGNode(new SimpleTableExpressionFactory(task_factory));
-//
-//  TaskIDList input;
-//  input.emplace_back(tasks->addTask(task));
-//  return input;
-//}
-
 void CSVTableProvider::listTables(
     Function<void (const TableInfo& table)> fn) const {
   fn(tableInfo());
@@ -100,9 +75,22 @@ TableInfo CSVTableProvider::tableInfo() const {
 }
 
 Option<ScopedPtr<TableExpression>> CSVTableProvider::buildSequentialScan(
-    Transaction* ctx,
+    Transaction* txn,
     RefPtr<SequentialScanNode> seqscan) const {
-  RAISE(kNotYetImplementedError, "nyi");
+  if (seqscan->tableName() != table_name_) {
+    return None<ScopedPtr<TableExpression>>();
+  }
+
+  auto stream = stream_factory_();
+  stream->skipNextRow();
+
+  return Option<ScopedPtr<TableExpression>>(
+      ScopedPtr<TableExpression>(
+          new TableScan(
+              txn,
+              seqscan,
+              mkScoped(new CSVTableScan(headers_, std::move(stream))))));
+
 }
 
 

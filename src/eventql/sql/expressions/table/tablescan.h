@@ -23,7 +23,7 @@
 
 namespace csql {
 
-class TableScan : public Task {
+class TableScan : public TableExpression {
 public:
 
   TableScan(
@@ -31,11 +31,11 @@ public:
       RefPtr<SequentialScanNode> stmt,
       ScopedPtr<TableIterator> iter);
 
-  //void onInputsReady() override;
-
-  bool nextRow(SValue* out, int out_len) override;
+  ScopedPtr<ResultCursor> execute() override;
 
 protected:
+
+  bool next(SValue* out, int out_len);
 
   Transaction* txn_;
   ScopedPtr<TableIterator> iter_;

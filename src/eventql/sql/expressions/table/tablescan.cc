@@ -11,7 +11,7 @@
 #include <eventql/sql/qtree/QueryTreeUtil.h>
 #include <eventql/sql/runtime/QueryBuilder.h>
 #include <eventql/sql/runtime/runtime.h>
-#include <eventql/sql/tasks/tablescan.h>
+#include <eventql/sql/expressions/table/tablescan.h>
 
 namespace csql {
 
@@ -21,7 +21,7 @@ TableScan::TableScan(
     ScopedPtr<TableIterator> iter) :
     txn_(txn),
     iter_(std::move(iter)) {
-  auto qbuilder = txn->getRuntime()->queryBuilder();
+  auto qbuilder = txn->getCompiler();
 
   for (const auto& slnode : stmt->selectList()) {
     QueryTreeUtil::resolveColumns(
@@ -48,41 +48,48 @@ TableScan::TableScan(
   }
 }
 
-bool TableScan::nextRow(SValue* out, int out_len) {
-  return false;
+ScopedPtr<ResultCursor> TableScan::execute() {
+  return mkScoped(
+      new DefaultResultCursor(
+          select_exprs_.size(),
+          std::bind(
+              &TableScan::next,
+              this,
+              std::placeholders::_1,
+              std::placeholders::_2)));
 }
 
-//void TableScan::onInputsReady() {
-//  Vector<SValue> inbuf(iter_->numColumns());
-//  Vector<SValue> outbuf(select_exprs_.size());
-//  while (iter_->nextRow(inbuf.data())) {
-//    if (!where_expr_.isEmpty()) {
-//      SValue pred;
-//      VM::evaluate(
-//          txn_,
-//          where_expr_.get().program(),
-//          inbuf.size(),
-//          inbuf.data(),
-//          &pred);
-//
-//      if (!pred.getBool()) {
-//        continue;
-//      }
-//    }
-//
-//    for (int i = 0; i < select_exprs_.size(); ++i) {
-//      VM::evaluate(
-//          txn_,
-//          select_exprs_[i].program(),
-//          inbuf.size(),
-//          inbuf.data(),
-//          &outbuf[i]);
-//    }
-//
-//    if (!output_(outbuf.data(), outbuf.size())) {
-//      return;
-//    }
-//  }
-//}
+bool TableScan::next(SValue* out, int out_len) {
+  Vector<SValue> buf(iter_->numColumns());
+
+  while (iter_->nextRow(buf.data())) {
+    if (!where_expr_.isEmpty()) {
+      SValue pred;
+      VM::evaluate(
+          txn_,
+          where_expr_.get().program(),
+          buf.size(),
+          buf.data(),
+          &pred);
+
+      if (!pred.getBool()) {
+        continue;
+      }
+    }
+
+    for (int i = 0; i < select_exprs_.size() && i < out_len; ++i) {
+      VM::evaluate(
+          txn_,
+          select_exprs_[i].program(),
+          buf.size(),
+          buf.data(),
+          &out[i]);
+    }
+
+    return true;
+  }
+
+  return false;
+}
 
 }
