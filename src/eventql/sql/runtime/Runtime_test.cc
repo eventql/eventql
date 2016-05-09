@@ -1460,6 +1460,22 @@ TEST_CASE(RuntimeTest, SelectFloatIntegerSubtraction, [] () {
 //});
 //
 //
+TEST_CASE(RuntimeTest, TestSimpleTablelessSelect, [] () {
+  auto runtime = Runtime::getDefaultRuntime();
+  auto ctx = runtime->newTransaction();
+
+  auto estrat = mkRef(new DefaultExecutionStrategy());
+
+  ResultList result;
+  auto query = R"(select 123 as a, 435 as b;";
+  auto qplan = runtime->buildQueryPlan(ctx.get(), query, estrat.get());
+  qplan->execute(0, &result);
+  EXPECT_EQ(result.getNumColumns(), 2);
+  EXPECT_EQ(result.getNumRows(), 1);
+  EXPECT_EQ(result.getRow(0)[0], "123");
+  EXPECT_EQ(result.getRow(0)[1], "435");
+});
+
 TEST_CASE(RuntimeTest, TestSimpleSubSelect, [] () {
   auto runtime = Runtime::getDefaultRuntime();
   auto ctx = runtime->newTransaction();
