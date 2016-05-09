@@ -77,6 +77,11 @@ T* AutoRef<T>::release() {
 }
 
 template <typename T>
+bool AutoRef<T>::isNull() const {
+  return ref_ == nullptr;
+}
+
+template <typename T>
 template <typename T_>
 AutoRef<T_> AutoRef<T>::asInstanceOf() const {
   auto cast = dynamic_cast<T_*>(ref_);

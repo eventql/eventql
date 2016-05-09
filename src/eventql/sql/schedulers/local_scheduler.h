@@ -7,35 +7,19 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-//#pragma once
-//#include <eventql/sql/runtime/Scheduler.h>
-//
-//using namespace stx;
-//
-//namespace csql {
-//class Transaction;
-//
-//class LocalScheduler : public Scheduler {
-//public:
-//
-//  static SchedulerFactory getFactory();
-//
-//  LocalScheduler(
-//      Transaction* txn,
-//      TaskDAG* tasks,
-//      SchedulerCallbacks* callbacks);
-//
-//  //void execute() override;
-//  ScopedPtr<ResultCursor> execute(Set<TaskID> tasks) override;
-//
-//protected:
-//
-//  ScopedPtr<ResultCursor> buildInstance(const TaskID& task_id);
-//
-//  Transaction* txn_;
-//  TaskDAG* tasks_;
-//  SchedulerCallbacks* callbacks_;
-//  HashMap<TaskID, RefPtr<Task>> instances_;
-//};
-//
-//} // namespace csql
+#pragma once
+#include <eventql/sql/scheduler.h>
+
+using namespace stx;
+
+namespace csql {
+class Transaction;
+
+class LocalScheduler : public Scheduler {
+public:
+
+  ScopedPtr<ResultCursor> execute(QueryPlan* query_plan, size_t stmt_idx) override;
+
+};
+
+} // namespace csql

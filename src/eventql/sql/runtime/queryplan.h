@@ -12,7 +12,7 @@
 #include <eventql/util/autoref.h>
 #include <eventql/sql/qtree/QueryTreeNode.h>
 #include <eventql/sql/tasks/TaskDAG.h>
-#include <eventql/sql/runtime/Scheduler.h>
+#include <eventql/sql/scheduler.h>
 
 namespace csql {
 class Runtime;
@@ -59,7 +59,7 @@ public:
    */
   const Vector<String>& getStatementOutputColumns(size_t stmt_idx);
 
-  void setScheduler(Scheduler* scheduler);
+  void setScheduler(RefPtr<Scheduler> scheduler);
   RefPtr<QueryTreeNode> getStatement(size_t stmt_idx) const;
 
   //void onOutputComplete(size_t stmt_idx, Function<void ()> fn);
@@ -72,7 +72,7 @@ protected:
   Transaction* txn_;
   Vector<RefPtr<QueryTreeNode>> qtrees_;
   Vector<Vector<String>> statement_columns_;
-  Scheduler* scheduler_;
+  RefPtr<Scheduler> scheduler_;
 };
 
 }

@@ -46,6 +46,7 @@ public:
 
   T* get() const;
   T* release();
+  bool isNull() const;
 
   template <typename T_>
   AutoRef<T_> asInstanceOf() const;

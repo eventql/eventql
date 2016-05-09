@@ -28,7 +28,7 @@ QueryPlan::QueryPlan(
 }
 
 ScopedPtr<ResultCursor> QueryPlan::execute(size_t stmt_idx) {
-  if (!scheduler_) {
+  if (scheduler_.isNull()) {
     RAISE(kRuntimeError, "QueryPlan has no scheduler");
   }
 
@@ -53,7 +53,7 @@ void QueryPlan::execute(size_t stmt_idx, ResultList* result_list) {
   }
 }
 
-void QueryPlan::setScheduler(Scheduler* scheduler) {
+void QueryPlan::setScheduler(RefPtr<Scheduler> scheduler) {
   scheduler_ = scheduler;
 }
 

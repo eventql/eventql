@@ -24,10 +24,10 @@ struct SchedulerCallbacks {
   Vector<Function<void ()>> on_query_finished;
 };
 
-class Scheduler {
+class Scheduler : public RefCounted {
 public:
   virtual ~Scheduler() {};
-  virtual ScopedPtr<ResultCursor> execute(RefPtr<QueryPlan> query_plan, size_t stmt_idx) = 0;
+  virtual ScopedPtr<ResultCursor> execute(QueryPlan* query_plan, size_t stmt_idx) = 0;
 };
 
 } // namespace csql
