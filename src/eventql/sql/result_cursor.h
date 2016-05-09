@@ -59,5 +59,19 @@ public:
 
 };
 
+class DefaultResultCursor : public ResultCursor {
+
+  DefaultResultCursor(
+      size_t num_columns,
+      Function<bool(SValue*, int)> next_fn);
+
+  size_t getNumColumns() override;
+
+  bool next(SValue* row, int row_len) override;
+
+protected:
+  size_t num_columns_;
+  Function<bool(SValue*, int)> next_fn_;
+};
 
 }

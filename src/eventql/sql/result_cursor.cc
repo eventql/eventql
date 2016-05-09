@@ -13,4 +13,18 @@ using namespace stx;
 
 namespace csql {
 
+DefaultResultCursor::DefaultResultCursor(
+    size_t num_columns,
+    Function<bool(SValue*, int)> next_fn) :
+    num_columns_(num_columns),
+    next_fn_(next_fn) {};
+
+size_t DefaultResultCursor::getNumColumns() {
+  return num_columns_;
+}
+
+bool DefaultResultCursor::next(SValue* row, int row_len) {
+  return next_fn_(row, row_len);
+}
+
 }
