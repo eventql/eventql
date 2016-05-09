@@ -40,9 +40,16 @@ ScopedPtr<TableExpression> LocalScheduler::buildExpression(
         node.asInstanceOf<SubqueryNode>());
   }
 
-  RAISE(
+  if (dynamic_cast<SequentialScanNode*>(node.get())) {
+    return buildSequentialScan(
+        ctx,
+        node.asInstanceOf<SequentialScanNode>());
+  }
+
+  RAISEF(
       kRuntimeError,
-      "cannot figure out how to execute that query, sorry.");
+      "cannot figure out how to execute that query, sorry. -- $0",
+      node->toString());
 };
 
 ScopedPtr<TableExpression> LocalScheduler::buildSelectExpression(
@@ -80,6 +87,20 @@ ScopedPtr<TableExpression> LocalScheduler::buildSubquery(
       std::move(select_expressions),
       std::move(where_expr),
       buildExpression(ctx, node->subquery())));
+}
+
+ScopedPtr<TableExpression> LocalScheduler::buildSequentialScan(
+    Transaction* txn,
+    RefPtr<SequentialScanNode> node) {
+  const auto& table_name = node->tableName();
+  auto table_provider = txn->getTableProvider();
+
+  auto seqscan = table_provider->buildSequentialScan(txn, node);
+  if (seqscan.isEmpty()) {
+    RAISEF(kRuntimeError, "table not found: $0", table_name);
+  }
+
+  return std::move(seqscan.get());
 }
 
 LocalResultCursor::LocalResultCursor(

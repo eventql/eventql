@@ -40,7 +40,10 @@ protected:
   ScopedPtr<TableExpression> buildSubquery(
       Transaction* ctx,
       RefPtr<SubqueryNode> node);
-  
+
+  ScopedPtr<TableExpression> buildSequentialScan(
+    Transaction* txn,
+    RefPtr<SequentialScanNode> node);
 };
 
 class LocalResultCursor : public ResultCursor {
