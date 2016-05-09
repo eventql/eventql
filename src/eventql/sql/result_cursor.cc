@@ -13,25 +13,4 @@ using namespace stx;
 
 namespace csql {
 
-ResultCursorList::ResultCursorList(
-    Vector<ScopedPtr<ResultCursor>> cursors) :
-    cursors_(std::move(cursors)) {}
-
-ResultCursorList::ResultCursorList(
-    HashMap<TaskID, ScopedPtr<ResultCursor>> cursors) {
-  for (auto& cur : cursors) {
-    cursors_.emplace_back(std::move(cur.second));
-  }
-}
-
-bool ResultCursorList::next(SValue* row, int row_len) {
-  return false;
-}
-
-TaskResultCursor::TaskResultCursor(RefPtr<Task> task) : task_(task) {}
-
-bool TaskResultCursor::next(SValue* row, int row_len) {
-  return task_->nextRow(row, row_len);
-}
-
 }
