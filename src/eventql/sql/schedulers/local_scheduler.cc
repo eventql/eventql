@@ -34,6 +34,12 @@ ScopedPtr<TableExpression> LocalScheduler::buildExpression(
         node.asInstanceOf<SelectExpressionNode>());
   }
 
+  if (dynamic_cast<SubqueryNode*>(node.get())) {
+    return buildSubquery(
+        ctx,
+        node.asInstanceOf<SubqueryNode>());
+  }
+
   RAISE(
       kRuntimeError,
       "cannot figure out how to execute that query, sorry.");
@@ -52,6 +58,29 @@ ScopedPtr<TableExpression> LocalScheduler::buildSelectExpression(
       ctx,
       std::move(select_expressions)));
 };
+
+ScopedPtr<TableExpression> LocalScheduler::buildSubquery(
+    Transaction* ctx,
+    RefPtr<SubqueryNode> node) {
+  Vector<ValueExpression> select_expressions;
+  Option<ValueExpression> where_expr;
+
+  if (!node->whereExpression().isEmpty()) {
+    where_expr = std::move(Option<ValueExpression>(
+        ctx->getCompiler()->buildValueExpression(ctx, node->whereExpression().get())));
+  }
+
+  for (const auto& slnode : node->selectList()) {
+    select_expressions.emplace_back(
+        ctx->getCompiler()->buildValueExpression(ctx, slnode->expression()));
+  }
+
+  return mkScoped(new SubqueryExpression(
+      ctx,
+      std::move(select_expressions),
+      std::move(where_expr),
+      buildExpression(ctx, node->subquery())));
+}
 
 LocalResultCursor::LocalResultCursor(
     ScopedPtr<TableExpression> table_expression) :

@@ -9,48 +9,32 @@
  */
 #pragma once
 #include <eventql/util/stdtypes.h>
-#include <eventql/sql/tasks/Task.h>
 #include <eventql/sql/runtime/defaultruntime.h>
+#include <eventql/sql/expressions/table_expression.h>
 
 namespace csql {
 
-class Subquery : public Task {
+class SubqueryExpression : public TableExpression {
 public:
 
-  Subquery(
+  SubqueryExpression(
       Transaction* txn,
       Vector<ValueExpression> select_expressions,
       Option<ValueExpression> where_expr,
-      HashMap<TaskID, ScopedPtr<ResultCursor>> input);
+      ScopedPtr<TableExpression> input);
 
-  bool nextRow(SValue* out, int out_len) override;
+  ScopedPtr<ResultCursor> execute() override;
 
-//  bool onInputRow(
-//      const TaskID& input_id,
-//      const SValue* row,
-//      int row_len) override;
-//
 protected:
+
+  bool next(SValue* row, int row_len);
+
   Transaction* txn_;
   Vector<ValueExpression> select_exprs_;
   Option<ValueExpression> where_expr_;
-  ScopedPtr<ResultCursorList> input_;
-};
-
-class SubqueryFactory : public TaskFactory {
-public:
-
-  SubqueryFactory(
-      Vector<RefPtr<SelectListNode>> select_exprs,
-      Option<RefPtr<ValueExpressionNode>> where_expr);
-
-  RefPtr<Task> build(
-      Transaction* txn,
-      HashMap<TaskID, ScopedPtr<ResultCursor>> input) const override;
-
-protected:
-  Vector<RefPtr<SelectListNode>> select_exprs_;
-  Option<RefPtr<ValueExpressionNode>> where_expr_;
+  ScopedPtr<TableExpression> input_;
+  ScopedPtr<ResultCursor> input_cursor_;
+  Vector<SValue> buf_;
 };
 
 }

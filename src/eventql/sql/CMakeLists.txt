@@ -26,6 +26,7 @@ add_library(chartsql STATIC
     expressions/math.cc
     expressions/string.cc
     expressions/table/select.cc
+    expressions/table/subquery.cc
     parser/astnode.cc
     parser/astutil.cc
     parser/parser.cc

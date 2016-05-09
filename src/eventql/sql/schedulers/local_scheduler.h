@@ -12,7 +12,10 @@
 #include <eventql/sql/expressions/table_expression.h>
 #include <eventql/sql/qtree/QueryTreeNode.h>
 #include <eventql/sql/expressions/table/select.h>
+#include <eventql/sql/expressions/table/subquery.h>
 #include <eventql/sql/qtree/SelectExpressionNode.h>
+#include <eventql/sql/qtree/SubqueryNode.h>
+
 
 using namespace stx;
 
@@ -33,6 +36,10 @@ protected:
   ScopedPtr<TableExpression> buildSelectExpression(
       Transaction* ctx,
       RefPtr<SelectExpressionNode> node);
+
+  ScopedPtr<TableExpression> buildSubquery(
+      Transaction* ctx,
+      RefPtr<SubqueryNode> node);
   
 };
 
