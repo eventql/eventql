@@ -25,7 +25,7 @@ public:
   };
 
   OrderByExpression(
-      Transaction* ctx,
+      Transaction* txn,
       Vector<SortExpr> sort_specs,
       ScopedPtr<TableExpression> input);
 
@@ -35,10 +35,11 @@ protected:
 
   bool next(SValue* row, int row_len);
 
-  Transaction* ctx_;
+  Transaction* txn_;
   Vector<SortExpr> sort_specs_;
   ScopedPtr<TableExpression> input_;
   ScopedPtr<ResultCursor> input_cursor_;
+  size_t pos_;
   Vector<Vector<SValue>> rows_;
 };
 

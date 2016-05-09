@@ -15,13 +15,14 @@
 
 namespace csql {
 
-OrderBy::OrderBy(
-    Transaction* ctx,
+OrderByExpression::OrderByExpression(
+    Transaction* txn,
     Vector<SortExpr> sort_specs,
     ScopedPtr<TableExpression> input) :
-    ctx_(ctx),
+    txn_(txn),
     sort_specs_(std::move(sort_specs)),
-    input_(std::move(input)) {
+    input_(std::move(input)),
+    pos_(0) {
   if (sort_specs_.size() == 0) {
     RAISE(kIllegalArgumentError, "can't execute ORDER BY: no sort specs");
   }
@@ -30,78 +31,72 @@ OrderBy::OrderBy(
 ScopedPtr<ResultCursor> OrderByExpression::execute() {
   input_cursor_ = input_->execute();
 
+  Vector<SValue> row(input_cursor_->getNumColumns());
+  while (input_cursor_->next(row.data(), row.size())) {
+    rows_.emplace_back(row);
+  }
+
+  std::sort(
+      rows_.begin(),
+      rows_.end(),
+      [this] (const Vector<SValue>& left, const Vector<SValue>& right) -> bool {
+    for (const auto& sort : sort_specs_) {
+      SValue args[2];
+
+      VM::evaluate(
+          txn_,
+          sort.expr.program(),
+          left.size(),
+          left.data(),
+          &args[0]);
+
+      VM::evaluate(
+          txn_,
+          sort.expr.program(),
+          right.size(),
+          right.data(),
+          &args[1]);
+
+      SValue res(false);
+      expressions::eqExpr(Transaction::get(txn_), 2, args, &res);
+      if (res.getBool()) {
+        continue;
+      }
+
+      if (sort.descending) {
+        expressions::gtExpr(Transaction::get(txn_), 2, args, &res);
+      } else {
+        expressions::ltExpr(Transaction::get(txn_), 2, args, &res);
+      }
+
+      return res.getBool();
+    }
+
+    /* all dimensions equal */
+    return false;
+  });
+
   return mkScoped(
       new DefaultResultCursor(
-          select_exprs_.size(),
+          input_cursor_->getNumColumns(),
           std::bind(
-              &ORderByExpression::next,
+              &OrderByExpression::next,
               this,
               std::placeholders::_1,
               std::placeholders::_2)));
 }
 
-bool OrderBy::next(SValue* out, int out_len) {
-  return false;
+bool OrderByExpression::next(SValue* out, int out_len) {
+  if (pos_ >= rows_.size()) {
+    return false;
+  } else {
+    for (size_t i = 0; i < input_cursor_->getNumColumns() && i < out_len; ++i) {
+      out[i] = rows_[pos_][i];
+    }
+
+    ++pos_;
+    return true;
+  }
 }
-// FIXPAUL this should mergesort while inserting...
-//bool OrderBy::onInputRow(
-//    const TaskID& input_id,
-//    const SValue* argv,
-//    int argc) {
-//  Vector<SValue> row;
-//  for (int i = 0; i < argc; i++) {
-//    row.emplace_back(argv[i]);
-//  }
-//
-//  rows_.emplace_back(row);
-//  return true;
-//}
-//
-//void OrderBy::onInputsReady() {
-//  auto rt = ctx_->getRuntime();
-//  std::sort(
-//      rows_.begin(),
-//      rows_.end(),
-//      [this, rt] (const Vector<SValue>& left, const Vector<SValue>& right) -> bool {
-//    for (const auto& sort : sort_specs_) {
-//      SValue args[2];
-//      SValue res(false);
-//      args[0] = rt->evaluateScalarExpression(
-//          ctx_,
-//          sort.expr,
-//          left.size(),
-//          left.data());
-//      args[1] = rt->evaluateScalarExpression(
-//          ctx_,
-//          sort.expr,
-//          right.size(),
-//          right.data());
-//
-//      expressions::eqExpr(Transaction::get(ctx_), 2, args, &res);
-//      if (res.getBool()) {
-//        continue;
-//      }
-//
-//      if (sort.descending) {
-//        expressions::gtExpr(Transaction::get(ctx_), 2, args, &res);
-//      } else {
-//        expressions::ltExpr(Transaction::get(ctx_), 2, args, &res);
-//      }
-//
-//      return res.getBool();
-//    }
-//
-//    /* all dimensions equal */
-//    return false;
-//  });
-//
-//  for (auto& row : rows_) {
-//    if (!input_(row.data(), row.size())) {
-//      break;
-//    }
-//  }
-//
-//  rows_.clear();
-//}
 
 } // namespace csql
