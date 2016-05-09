@@ -22,17 +22,7 @@ namespace csql {
 class TableExpression : public Statement {
 public:
 
-  virtual Vector<String> columnNames() const = 0;
-
-  virtual size_t numColumns() const = 0;
-
-  virtual size_t getColumnIndex(const String& column_name) const;
-
   virtual ScopedPtr<ResultCursor> execute() = 0;
-
-  virtual Option<SHA1Hash> cacheKey() const {
-    return None<SHA1Hash>();
-  }
 
 };
 

@@ -11,6 +11,8 @@
 #include <eventql/sql/scheduler.h>
 #include <eventql/sql/expressions/table_expression.h>
 #include <eventql/sql/qtree/QueryTreeNode.h>
+#include <eventql/sql/expressions/table/select.h>
+#include <eventql/sql/qtree/SelectExpressionNode.h>
 
 using namespace stx;
 
@@ -27,6 +29,11 @@ protected:
   ScopedPtr<TableExpression> buildExpression(
       Transaction* ctx,
       RefPtr<QueryTreeNode> node);
+
+  ScopedPtr<TableExpression> buildSelectExpression(
+      Transaction* ctx,
+      RefPtr<SelectExpressionNode> node);
+  
 };
 
 } // namespace csql

@@ -27,9 +27,22 @@ ScopedPtr<ResultCursor> LocalScheduler::execute(
 ScopedPtr<TableExpression> LocalScheduler::buildExpression(
     Transaction* ctx,
     RefPtr<QueryTreeNode> node) {
+
+  if (dynamic_cast<SelectExpressionNode*>(node.get())) {
+    return buildSelectExpression(
+        ctx,
+        node.asInstanceOf<SelectExpressionNode>());
+  }
+
   RAISE(
       kRuntimeError,
       "cannot figure out how to execute that query, sorry.");
-}
+};
+
+ScopedPtr<TableExpression> LocalScheduler::buildSelectExpression(
+    Transaction* ctx,
+    RefPtr<SelectExpressionNode> node) {
+
+};
 
 } // namespace csql

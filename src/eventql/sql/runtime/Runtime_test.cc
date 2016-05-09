@@ -1467,7 +1467,7 @@ TEST_CASE(RuntimeTest, TestSimpleTablelessSelect, [] () {
   auto estrat = mkRef(new DefaultExecutionStrategy());
 
   ResultList result;
-  auto query = R"(select 123 as a, 435 as b;";
+  auto query = R"(select 123 as a, 435 as b;)";
   auto qplan = runtime->buildQueryPlan(ctx.get(), query, estrat.get());
   qplan->execute(0, &result);
   EXPECT_EQ(result.getNumColumns(), 2);

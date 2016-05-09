@@ -14,14 +14,14 @@
 
 namespace csql {
 
-class Select : public Task {
+class Select : public TableExpression {
 public:
 
   Select(
       Transaction* txn,
       Vector<ValueExpression> select_expressions);
 
-  bool nextRow(SValue* out, int out_len) override;
+  ScopedPtr<ResultCursor> execute() override;
 
   //void onInputsReady() override;
 
@@ -29,20 +29,6 @@ protected:
   Transaction* txn_;
   Vector<ValueExpression> select_exprs_;
   size_t pos_;
-};
-
-class SelectFactory : public TaskFactory {
-public:
-
-  SelectFactory(
-      Vector<RefPtr<SelectListNode>> select_exprs);
-
-  RefPtr<Task> build(
-      Transaction* txn,
-      HashMap<TaskID, ScopedPtr<ResultCursor>> input) const override;
-
-protected:
-  Vector<RefPtr<SelectListNode>> select_exprs_;
 };
 
 }

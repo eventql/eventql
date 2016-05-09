@@ -18,34 +18,34 @@ Select::Select(
     select_exprs_(std::move(select_expressions)),
     pos_(0) {}
 
-bool Select::nextRow(SValue* out, int out_len) {
-  if (pos_ == 0) {
-    for (int i = 0; i < select_exprs_.size() && i < out_len; ++i) {
-      VM::evaluate(txn_, select_exprs_[i].program(), 0, nullptr,  &out[i]);
-    }
+//bool Select::nextRow(SValue* out, int out_len) {
+//  if (pos_ == 0) {
+//    for (int i = 0; i < select_exprs_.size() && i < out_len; ++i) {
+//      VM::evaluate(txn_, select_exprs_[i].program(), 0, nullptr,  &out[i]);
+//    }
+//
+//    ++pos_;
+//    return true;
+//  } else {
+//    return false;
+//  }
+//}
 
-    ++pos_;
-    return true;
-  } else {
-    return false;
-  }
-}
-
-SelectFactory::SelectFactory(
-    Vector<RefPtr<SelectListNode>> select_exprs) :
-    select_exprs_(select_exprs) {}
-
-RefPtr<Task> SelectFactory::build(
-    Transaction* txn,
-    HashMap<TaskID, ScopedPtr<ResultCursor>> input) const {
-  Vector<ValueExpression> select_expressions;
-  auto qbuilder = txn->getRuntime()->queryBuilder();
-  for (const auto& slnode : select_exprs_) {
-    select_expressions.emplace_back(
-        qbuilder->buildValueExpression(txn, slnode->expression()));
-  }
-
-  return new Select(txn, std::move(select_expressions));
-}
-
+//SelectFactory::SelectFactory(
+//    Vector<RefPtr<SelectListNode>> select_exprs) :
+//    select_exprs_(select_exprs) {}
+//
+//RefPtr<Task> SelectFactory::build(
+//    Transaction* txn,
+//    HashMap<TaskID, ScopedPtr<ResultCursor>> input) const {
+//  Vector<ValueExpression> select_expressions;
+//  auto qbuilder = txn->getRuntime()->queryBuilder();
+//  for (const auto& slnode : select_exprs_) {
+//    select_expressions.emplace_back(
+//        qbuilder->buildValueExpression(txn, slnode->expression()));
+//  }
+//
+//  return new Select(txn, std::move(select_expressions));
+//}
+//
 }
