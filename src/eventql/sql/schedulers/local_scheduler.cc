@@ -21,7 +21,8 @@ ScopedPtr<ResultCursor> LocalScheduler::execute(
       query_plan->getTransaction(),
       query_plan->getStatement(stmt_idx));
 
-  return table_expr->execute();
+  auto te = table_expr.release();
+  return te->execute();
 };
 
 ScopedPtr<TableExpression> LocalScheduler::buildExpression(

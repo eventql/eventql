@@ -26,6 +26,9 @@ public:
   //void onInputsReady() override;
 
 protected:
+
+  bool next(SValue* row, int row_len);
+
   Transaction* txn_;
   Vector<ValueExpression> select_exprs_;
   size_t pos_;

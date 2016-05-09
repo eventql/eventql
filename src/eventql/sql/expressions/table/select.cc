@@ -18,6 +18,28 @@ SelectExpression::SelectExpression(
     select_exprs_(std::move(select_expressions)),
     pos_(0) {}
 
+ScopedPtr<ResultCursor> SelectExpression::execute() {
+  return mkScoped(
+      new DefaultResultCursor(
+          select_exprs_.size(),
+          std::bind(
+              &SelectExpression::next,
+              this,
+              std::placeholders::_1,
+              std::placeholders::_2)));
+}
+
+bool SelectExpression::next(SValue* row, int row_len) {
+  if (pos_++ == 0) {
+    for (int i = 0; i < select_exprs_.size() && i < row_len; ++i) {
+      VM::evaluate(txn_, select_exprs_[i].program(), 0, nullptr,  &row[i]);
+    }
+
+    return true;
+  } else {
+    return false;
+  }
+}
 //bool Select::nextRow(SValue* out, int out_len) {
 //  if (pos_ == 0) {
 //    for (int i = 0; i < select_exprs_.size() && i < out_len; ++i) {

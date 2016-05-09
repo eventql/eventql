@@ -60,6 +60,7 @@ public:
 };
 
 class DefaultResultCursor : public ResultCursor {
+public:
 
   DefaultResultCursor(
       size_t num_columns,
