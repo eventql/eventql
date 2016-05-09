@@ -9,6 +9,8 @@
  */
 #pragma once
 #include <eventql/sql/scheduler.h>
+#include <eventql/sql/expressions/table_expression.h>
+#include <eventql/sql/qtree/QueryTreeNode.h>
 
 using namespace stx;
 
@@ -20,6 +22,11 @@ public:
 
   ScopedPtr<ResultCursor> execute(QueryPlan* query_plan, size_t stmt_idx) override;
 
+protected:
+
+  ScopedPtr<TableExpression> buildExpression(
+      Transaction* ctx,
+      RefPtr<QueryTreeNode> node);
 };
 
 } // namespace csql

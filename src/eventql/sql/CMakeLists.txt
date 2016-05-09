@@ -13,8 +13,8 @@ add_library(chartsql STATIC
     #queryendpoint.cc
     #query.cc
     #queryservice.cc
-    CSTableScan.cc
-    CSTableScanProvider.cc
+    #CSTableScan.cc
+    #CSTableScanProvider.cc
     backends/csv/CSVInputStream.cc
     backends/csv/CSVTableProvider.cc
     backends/csv/CSVTableScan.cc
@@ -80,9 +80,6 @@ add_library(chartsql STATIC
     runtime/charts/seriesadapter.cc
     result_cursor.cc
     schedulers/local_scheduler.cc
-    tasks/Task.cc
-    tasks/TaskFactory.cc
-    tasks/TaskDAG.cc
     defaults.cc)
 
 add_dependencies(chartsql stx-protobuf)

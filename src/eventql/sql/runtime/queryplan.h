@@ -62,6 +62,8 @@ public:
   void setScheduler(RefPtr<Scheduler> scheduler);
   RefPtr<QueryTreeNode> getStatement(size_t stmt_idx) const;
 
+  Transaction* getTransaction() const;
+
   //void onOutputComplete(size_t stmt_idx, Function<void ()> fn);
   //void onOutputRow(size_t stmt_idx, RowSinkFn fn);
   //void onQueryFinished(Function<void ()> fn);

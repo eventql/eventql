@@ -77,6 +77,10 @@ RefPtr<QueryTreeNode> QueryPlan::getStatement(size_t stmt_idx) const {
   return qtrees_[stmt_idx];
 }
 
+Transaction* QueryPlan::getTransaction() const {
+  return txn_;
+}
+
 //void QueryPlan::storeResults(size_t stmt_idx, ResultList* result_list) {
 //
 //  onOutputRow(

@@ -28,9 +28,7 @@ public:
 
   virtual size_t getColumnIndex(const String& column_name) const;
 
-  virtual void execute(
-      ExecutionContext* context,
-      Function<bool (int argc, const SValue* argv)> fn) = 0;
+  virtual ScopedPtr<ResultCursor> execute() = 0;
 
   virtual Option<SHA1Hash> cacheKey() const {
     return None<SHA1Hash>();
