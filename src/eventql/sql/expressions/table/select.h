@@ -9,15 +9,15 @@
  */
 #pragma once
 #include <eventql/util/stdtypes.h>
-#include <eventql/sql/tasks/Task.h>
 #include <eventql/sql/runtime/defaultruntime.h>
+#include <eventql/sql/expressions/table_expression.h>
 
 namespace csql {
 
-class Select : public TableExpression {
+class SelectExpression : public TableExpression {
 public:
 
-  Select(
+  SelectExpression(
       Transaction* txn,
       Vector<ValueExpression> select_expressions);
 

@@ -18,6 +18,7 @@ using namespace stx;
 namespace csql {
 class Runtime;
 class SymbolTable;
+class QueryBuilder;
 
 class Transaction {
 public:
@@ -31,7 +32,7 @@ public:
   UnixTime now() const;
 
   Runtime* getRuntime() const;
-
+  QueryBuilder* getCompiler() const;
   SymbolTable* getSymbolTable() const;
 
   void setTableProvider(RefPtr<TableProvider> provider);

@@ -7,11 +7,11 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <eventql/sql/tasks/select.h>
+#include <eventql/sql/expressions/table/select.h>
 
 namespace csql {
 
-Select::Select(
+SelectExpression::SelectExpression(
     Transaction* txn,
     Vector<ValueExpression> select_expressions) :
     txn_(txn),

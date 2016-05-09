@@ -24,6 +24,10 @@ Runtime* Transaction::getRuntime() const {
   return runtime_;
 }
 
+QueryBuilder* Transaction::getCompiler() const {
+  return runtime_->queryBuilder().get();
+}
+
 SymbolTable* Transaction::getSymbolTable() const {
   return runtime_->symbols();
 }

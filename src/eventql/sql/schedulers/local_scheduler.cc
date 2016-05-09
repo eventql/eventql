@@ -42,7 +42,15 @@ ScopedPtr<TableExpression> LocalScheduler::buildExpression(
 ScopedPtr<TableExpression> LocalScheduler::buildSelectExpression(
     Transaction* ctx,
     RefPtr<SelectExpressionNode> node) {
+  Vector<ValueExpression> select_expressions;
+  for (const auto& slnode : node->selectList()) {
+    select_expressions.emplace_back(
+        ctx->getCompiler()->buildValueExpression(ctx, slnode->expression()));
+  }
 
+  return mkScoped(new SelectExpression(
+      ctx,
+      std::move(select_expressions)));
 };
 
 } // namespace csql
