@@ -116,4 +116,10 @@ csql::TableInfo CSTableScanProvider::tableInfo() const {
   //return ti;
 }
 
+Option<ScopedPtr<TableExpression>> CSTableScanProvider::buildSequentialScan(
+    Transaction* ctx,
+    RefPtr<SequentialScanNode> seqscan) const {
+  RAISE(kNotYetImplementedError, "nyi");
+}
+
 } // namespace csql

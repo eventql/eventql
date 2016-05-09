@@ -99,6 +99,13 @@ TableInfo CSVTableProvider::tableInfo() const {
   return ti;
 }
 
+Option<ScopedPtr<TableExpression>> CSVTableProvider::buildSequentialScan(
+    Transaction* ctx,
+    RefPtr<SequentialScanNode> seqscan) const {
+  RAISE(kNotYetImplementedError, "nyi");
+}
+
+
 } // namespace csv
 } // namespace backends
 } // namespace csql

@@ -12,8 +12,8 @@
 #include <eventql/util/autoref.h>
 #include <eventql/util/SHA1.h>
 #include <eventql/sql/svalue.h>
-#include <eventql/sql/runtime/ExecutionContext.h>
 #include <eventql/sql/runtime/Statement.h>
+#include <eventql/sql/result_cursor.h>
 
 using namespace stx;
 

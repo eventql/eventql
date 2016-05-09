@@ -12,11 +12,7 @@
 #include <eventql/util/autoref.h>
 #include <eventql/util/SHA1.h>
 #include <eventql/sql/svalue.h>
-#include <eventql/sql/runtime/ExecutionContext.h>
 #include <eventql/sql/runtime/Statement.h>
-#include <eventql/sql/runtime/rowsink.h>
-#include <eventql/sql/tasks/TaskID.h>
-#include <eventql/sql/tasks/Task.h>
 
 using namespace stx;
 

@@ -45,6 +45,10 @@ public:
 
   Option<csql::TableInfo> describe(const String& table_name) const override;
 
+  Option<ScopedPtr<TableExpression>> buildSequentialScan(
+      Transaction* ctx,
+      RefPtr<SequentialScanNode> seqscan) const override;
+
 protected:
 
   csql::TableInfo tableInfo() const;

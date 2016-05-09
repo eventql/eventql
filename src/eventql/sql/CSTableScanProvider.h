@@ -30,6 +30,10 @@ public:
 
   csql::TableInfo tableInfo() const;
 
+  Option<ScopedPtr<TableExpression>> buildSequentialScan(
+      Transaction* ctx,
+      RefPtr<SequentialScanNode> seqscan) const override;
+
 protected:
   const String table_name_;
   const String cstable_file_;

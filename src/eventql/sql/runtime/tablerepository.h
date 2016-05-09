@@ -39,6 +39,10 @@ public:
 
   Option<TableInfo> describe(const String& table_name) const override;
 
+  Option<ScopedPtr<TableExpression>> buildSequentialScan(
+      Transaction* ctx,
+      RefPtr<SequentialScanNode> seqscan) const override;
+
 protected:
   std::unordered_map<std::string, std::unique_ptr<TableRef>> table_refs_;
 

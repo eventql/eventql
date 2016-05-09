@@ -11,11 +11,16 @@
 #include <eventql/util/option.h>
 #include <eventql/sql/qtree/SequentialScanNode.h>
 #include <eventql/sql/TableInfo.h>
+#include <eventql/sql/expressions/table_expression.h>
 
 namespace csql {
 
 class TableProvider : public RefCounted {
 public:
+
+  virtual Option<ScopedPtr<TableExpression>> buildSequentialScan(
+      Transaction* ctx,
+      RefPtr<SequentialScanNode> seqscan) const = 0;
 
   virtual void listTables(Function<void (const TableInfo& table)> fn) const = 0;
 

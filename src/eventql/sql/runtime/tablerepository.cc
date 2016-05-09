@@ -82,4 +82,10 @@ Option<TableInfo> TableRepository::describe(const String& table_name) const {
   return None<TableInfo>();
 }
 
+Option<ScopedPtr<TableExpression>> TableRepository::buildSequentialScan(
+      Transaction* ctx,
+      RefPtr<SequentialScanNode> seqscan) const {
+  RAISE(kNotYetImplementedError, "nyi");
+}
+
 }
