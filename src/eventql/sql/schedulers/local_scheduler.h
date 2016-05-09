@@ -36,4 +36,18 @@ protected:
   
 };
 
+class LocalResultCursor : public ResultCursor {
+public:
+
+  LocalResultCursor(ScopedPtr<TableExpression> table_expression);
+
+  bool next(SValue* row, int row_len) override;
+
+  size_t getNumColumns() override;
+
+protected:
+  ScopedPtr<TableExpression> table_expression_;
+  ScopedPtr<ResultCursor> cursor_;
+};
+
 } // namespace csql

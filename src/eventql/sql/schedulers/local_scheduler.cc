@@ -21,8 +21,7 @@ ScopedPtr<ResultCursor> LocalScheduler::execute(
       query_plan->getTransaction(),
       query_plan->getStatement(stmt_idx));
 
-  auto te = table_expr.release();
-  return te->execute();
+  return mkScoped(new LocalResultCursor(std::move(table_expr)));
 };
 
 ScopedPtr<TableExpression> LocalScheduler::buildExpression(
@@ -53,5 +52,18 @@ ScopedPtr<TableExpression> LocalScheduler::buildSelectExpression(
       ctx,
       std::move(select_expressions)));
 };
+
+LocalResultCursor::LocalResultCursor(
+    ScopedPtr<TableExpression> table_expression) :
+    table_expression_(std::move(table_expression)),
+    cursor_(table_expression_->execute()) {}
+
+bool LocalResultCursor::next(SValue* row, int row_len) {
+  return cursor_->next(row, row_len);
+}
+
+size_t LocalResultCursor::getNumColumns() {
+  return cursor_->getNumColumns();
+}
 
 } // namespace csql
