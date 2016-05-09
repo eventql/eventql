@@ -16,7 +16,8 @@ QueryPlan::QueryPlan(
     Transaction* txn,
     Vector<RefPtr<QueryTreeNode>> qtrees) :
     txn_(txn),
-    qtrees_(qtrees) {
+    qtrees_(qtrees),
+    scheduler_(nullptr) {
   //for (const auto& qtree : qtrees_) {
   //  statement_tasks_.emplace_back(
   //      qtree.asInstanceOf<TableExpressionNode>()->build(txn, &tasks_));
@@ -35,12 +36,7 @@ ScopedPtr<ResultCursor> QueryPlan::execute(size_t stmt_idx) {
     RAISE(kIndexError, "invalid statement index");
   }
 
-  auto sched = scheduler_(txn_, &tasks_, &callbacks_);
-  Set<TaskID> task_ids;
-  for (const auto& task_id : statement_tasks_[stmt_idx]) {
-    task_ids.emplace(task_id);
-  }
-  return sched->execute(task_ids);
+  return scheduler_->execute(this, stmt_idx);
 }
 
 void QueryPlan::execute(size_t stmt_idx, ResultList* result_list) {
@@ -48,17 +44,16 @@ void QueryPlan::execute(size_t stmt_idx, ResultList* result_list) {
     RAISE(kIndexError, "invalid statement index");
   }
 
-  auto result_columns = getStatementOutputColumns(stmt_idx);
-  auto result_cursor = execute(stmt_idx);
+ // result_list->addHeader(getStatementOutputColumns(stmt_idx));
 
-  result_list->addHeader(result_columns);
-  Vector<SValue> tmp(result_columns.size());
-  while (result_cursor->next(tmp.data(), tmp.size())) {
+  auto cursor = execute(stmt_idx);
+  Vector<SValue> tmp(cursor->getNumColumns());
+  while (cursor->next(tmp.data(), tmp.size())) {
     result_list->addRow(tmp.data(), tmp.size());
   }
 }
 
-void QueryPlan::setScheduler(SchedulerFactory scheduler) {
+void QueryPlan::setScheduler(Scheduler* scheduler) {
   scheduler_ = scheduler;
 }
 
@@ -74,11 +69,7 @@ size_t QueryPlan::numStatements() const {
   return qtrees_.size();
 }
 
-Statement* QueryPlan::getStatement(size_t stmt_idx) const {
-  RAISE(kNotImplementedError);
-}
-
-RefPtr<QueryTreeNode> QueryPlan::getStatementQTree(size_t stmt_idx) const {
+RefPtr<QueryTreeNode> QueryPlan::getStatement(size_t stmt_idx) const {
   if (stmt_idx >= qtrees_.size()) {
     RAISE(kIndexError, "invalid statement index");
   }

@@ -16,6 +16,7 @@
 using namespace stx;
 
 namespace csql {
+class QueryPlan;
 
 struct SchedulerCallbacks {
   HashMap<TaskID, Vector<RowSinkFn>> on_row;
@@ -26,13 +27,7 @@ struct SchedulerCallbacks {
 class Scheduler {
 public:
   virtual ~Scheduler() {};
-  virtual ScopedPtr<ResultCursor> execute(Set<TaskID> tasks) = 0;
+  virtual ScopedPtr<ResultCursor> execute(RefPtr<QueryPlan> query_plan, size_t stmt_idx) = 0;
 };
-
-using SchedulerFactory = Function<
-    ScopedPtr<Scheduler> (
-        Transaction* txn,
-        TaskDAG* tasks,
-        SchedulerCallbacks* callbacks)>;
 
 } // namespace csql

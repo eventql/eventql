@@ -55,6 +55,8 @@ public:
     callback();
   }
 
+  virtual size_t getNumColumns() = 0;
+
 };
 
 class ResultCursorList : public ResultCursor {

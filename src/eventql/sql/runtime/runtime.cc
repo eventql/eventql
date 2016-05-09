@@ -71,7 +71,7 @@ ScopedPtr<QueryPlan> Runtime::buildQueryPlan(
   }
 
   auto qplan = mkScoped(new QueryPlan(txn, statements));
-  qplan->setScheduler(LocalScheduler::getFactory());
+  //qplan->setScheduler(LocalScheduler::getFactory());
   return std::move(qplan);
 }
 

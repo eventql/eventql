@@ -18,7 +18,7 @@ namespace csql {
 class Runtime;
 class ResultList;
 
-class QueryPlan {
+class QueryPlan : public RefCounted {
 public:
 
   /**
@@ -59,9 +59,8 @@ public:
    */
   const Vector<String>& getStatementOutputColumns(size_t stmt_idx);
 
-  void setScheduler(SchedulerFactory scheduler);
-  Statement* getStatement(size_t stmt_idx) const;
-  RefPtr<QueryTreeNode> getStatementQTree(size_t stmt_idx) const;
+  void setScheduler(Scheduler* scheduler);
+  RefPtr<QueryTreeNode> getStatement(size_t stmt_idx) const;
 
   //void onOutputComplete(size_t stmt_idx, Function<void ()> fn);
   //void onOutputRow(size_t stmt_idx, RowSinkFn fn);
@@ -72,11 +71,8 @@ public:
 protected:
   Transaction* txn_;
   Vector<RefPtr<QueryTreeNode>> qtrees_;
-  Vector<TaskIDList> statement_tasks_;
   Vector<Vector<String>> statement_columns_;
-  TaskDAG tasks_;
-  SchedulerFactory scheduler_;
-  SchedulerCallbacks callbacks_;
+  Scheduler* scheduler_;
 };
 
 }
