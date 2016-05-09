@@ -20,7 +20,6 @@
 #include <eventql/sql/runtime/QueryBuilder.h>
 #include <eventql/sql/runtime/symboltable.h>
 #include <eventql/sql/runtime/ResultFormat.h>
-#include <eventql/sql/runtime/ExecutionStrategy.h>
 #include <eventql/sql/runtime/resultlist.h>
 
 namespace csql {
@@ -41,13 +40,11 @@ public:
 
   ScopedPtr<QueryPlan> buildQueryPlan(
       Transaction* ctx,
-      const String& query,
-      RefPtr<ExecutionStrategy> execution_strategy);
+      const String& query);
 
   ScopedPtr<QueryPlan> buildQueryPlan(
       Transaction* ctx,
-      Vector<RefPtr<csql::QueryTreeNode>> statements,
-      RefPtr<ExecutionStrategy> execution_strategy);
+      Vector<RefPtr<csql::QueryTreeNode>> statements);
 
   SValue evaluateScalarExpression(
       Transaction* ctx,

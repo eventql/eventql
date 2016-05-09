@@ -27,7 +27,7 @@ UNIT_TEST(RuntimeTest);
 
 TEST_CASE(RuntimeTest, TestStaticExpression, [] () {
   auto runtime = Runtime::getDefaultRuntime();
-  auto ctx = runtime->newTransaction();
+  auto txn = runtime->newTransaction();
 
   auto expr = mkRef(
       new csql::CallExpressionNode(
@@ -40,7 +40,7 @@ TEST_CASE(RuntimeTest, TestStaticExpression, [] () {
   auto t0 = WallClock::unixMicros();
   SValue out;
   for (int i = 0; i < 1000; ++i) {
-    out = runtime->evaluateConstExpression(ctx.get(), expr.get());
+    out = runtime->evaluateConstExpression(txn.get(), expr.get());
   }
   auto t1 = WallClock::unixMicros();
 
@@ -49,32 +49,32 @@ TEST_CASE(RuntimeTest, TestStaticExpression, [] () {
 
 TEST_CASE(RuntimeTest, TestComparisons, [] () {
   auto runtime = Runtime::getDefaultRuntime();
-  auto ctx = runtime->newTransaction();
+  auto txn = runtime->newTransaction();
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String("true = true"));
     EXPECT_EQ(v.getString(), "true");
   }
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String("false = false"));
     EXPECT_EQ(v.getString(), "true");
   }
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String("false = true"));
     EXPECT_EQ(v.getString(), "false");
   }
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String("true = false"));
     EXPECT_EQ(v.getString(), "false");
   }
@@ -82,49 +82,49 @@ TEST_CASE(RuntimeTest, TestComparisons, [] () {
 
 TEST_CASE(RuntimeTest, TestExecuteIfStatement, [] () {
   auto runtime = Runtime::getDefaultRuntime();
-  auto ctx = runtime->newTransaction();
+  auto txn = runtime->newTransaction();
 
   auto out_a = runtime->evaluateConstExpression(
-      ctx.get(),
+      txn.get(),
       String("if(1 = 1, 42, 23)"));
   EXPECT_EQ(out_a.getInteger(), 42);
 
   auto out_b = runtime->evaluateConstExpression(
-      ctx.get(),
+      txn.get(),
       String("if(1 = 2, 42, 23)"));
   EXPECT_EQ(out_b.getInteger(), 23);
 
   {
     auto v = runtime->evaluateConstExpression(
-      ctx.get(),
+      txn.get(),
       String("if(1 = 1, 'fnord', 'blah')"));
     EXPECT_EQ(v.getString(), "fnord");
   }
 
   {
     auto v = runtime->evaluateConstExpression(
-      ctx.get(),
+      txn.get(),
       String("if(1 = 2, 'fnord', 'blah')"));
     EXPECT_EQ(v.getString(), "blah");
   }
 
   {
     auto v = runtime->evaluateConstExpression(
-      ctx.get(),
+      txn.get(),
       String("if('fnord' = 'blah', 1, 2)"));
     EXPECT_EQ(v.getString(), "2");
   }
 
   {
     auto v = runtime->evaluateConstExpression(
-      ctx.get(),
+      txn.get(),
       String("if('fnord' = 'fnord', 1, 2)"));
     EXPECT_EQ(v.getString(), "1");
   }
 
   {
     auto v = runtime->evaluateConstExpression(
-      ctx.get(),
+      txn.get(),
       String("if('fnord' = '', 1, 2)"));
     EXPECT_EQ(v.getString(), "2");
   }
@@ -132,10 +132,9 @@ TEST_CASE(RuntimeTest, TestExecuteIfStatement, [] () {
 
 TEST_CASE(RuntimeTest, TestColumnReferenceWithTableNamePrefix, [] () {
   auto runtime = Runtime::getDefaultRuntime();
-  auto ctx = runtime->newTransaction();
+  auto txn = runtime->newTransaction();
 
-  auto estrat = mkRef(new DefaultExecutionStrategy());
-  estrat->addTableProvider(
+  txn->addTableProvider(
       new CSTableScanProvider(
           "testtable",
           "src/eventql/sql/testdata/testtbl.cst"));
@@ -143,7 +142,7 @@ TEST_CASE(RuntimeTest, TestColumnReferenceWithTableNamePrefix, [] () {
   {
     ResultList result;
     auto query = R"(select testtable.time from testtable;)";
-    auto qplan = runtime->buildQueryPlan(ctx.get(), query, estrat.get());
+    auto qplan = runtime->buildQueryPlan(txn.get(), query);
     qplan->execute(0, &result);
     EXPECT_EQ(result.getNumColumns(), 1);
     EXPECT_EQ(result.getNumRows(), 213);
@@ -152,7 +151,7 @@ TEST_CASE(RuntimeTest, TestColumnReferenceWithTableNamePrefix, [] () {
   {
     ResultList result;
     auto query = R"(select t1.time from testtable t1;)";
-    auto qplan = runtime->buildQueryPlan(ctx.get(), query, estrat.get());
+    auto qplan = runtime->buildQueryPlan(txn.get(), query);
     qplan->execute(0, &result);
     EXPECT_EQ(result.getNumColumns(), 1);
     EXPECT_EQ(result.getNumRows(), 213);
@@ -162,17 +161,16 @@ TEST_CASE(RuntimeTest, TestColumnReferenceWithTableNamePrefix, [] () {
 
 TEST_CASE(RuntimeTest, TestSimpleCSTableAggregate, [] () {
   auto runtime = Runtime::getDefaultRuntime();
-  auto ctx = runtime->newTransaction();
+  auto txn = runtime->newTransaction();
 
-  auto estrat = mkRef(new DefaultExecutionStrategy());
-  estrat->addTableProvider(
+  txn->addTableProvider(
       new CSTableScanProvider(
           "testtable",
           "src/eventql/sql/testdata/testtbl.cst"));
 
   ResultList result;
   auto query = R"(select count(1) from testtable;)";
-  auto qplan = runtime->buildQueryPlan(ctx.get(), query, estrat.get());
+  auto qplan = runtime->buildQueryPlan(txn.get(), query);
   qplan->execute(0, &result);
   EXPECT_EQ(result.getNumColumns(), 1);
   EXPECT_EQ(result.getNumRows(), 1);
@@ -181,17 +179,16 @@ TEST_CASE(RuntimeTest, TestSimpleCSTableAggregate, [] () {
 
 TEST_CASE(RuntimeTest, TestNestedCSTableAggregate, [] () {
   auto runtime = Runtime::getDefaultRuntime();
-  auto ctx = runtime->newTransaction();
+  auto txn = runtime->newTransaction();
 
-  auto estrat = mkRef(new DefaultExecutionStrategy());
-  estrat->addTableProvider(
+  txn->addTableProvider(
       new CSTableScanProvider(
           "testtable",
           "src/eventql/sql/testdata/testtbl.cst"));
 
   ResultList result;
   auto query = R"(select count(event.search_query.time) from testtable;)";
-  auto qplan = runtime->buildQueryPlan(ctx.get(), query, estrat.get());
+  auto qplan = runtime->buildQueryPlan(txn.get(), query);
   qplan->execute(0, &result);
   EXPECT_EQ(result.getNumColumns(), 1);
   EXPECT_EQ(result.getNumRows(), 1);
@@ -200,10 +197,9 @@ TEST_CASE(RuntimeTest, TestNestedCSTableAggregate, [] () {
 
 TEST_CASE(RuntimeTest, TestWithinRecordCSTableAggregate, [] () {
   auto runtime = Runtime::getDefaultRuntime();
-  auto ctx = runtime->newTransaction();
+  auto txn = runtime->newTransaction();
 
-  auto estrat = mkRef(new DefaultExecutionStrategy());
-  estrat->addTableProvider(
+  txn->addTableProvider(
       new CSTableScanProvider(
           "testtable",
           "src/eventql/sql/testdata/testtbl.cst"));
@@ -211,7 +207,7 @@ TEST_CASE(RuntimeTest, TestWithinRecordCSTableAggregate, [] () {
   {
     ResultList result;
     auto query = R"(select sum(event.search_query.num_result_items) from testtable;)";
-    auto qplan = runtime->buildQueryPlan(ctx.get(), query, estrat.get());
+    auto qplan = runtime->buildQueryPlan(txn.get(), query);
     qplan->execute(0, &result);
     EXPECT_EQ(result.getNumColumns(), 1);
     EXPECT_EQ(result.getNumRows(), 1);
@@ -221,7 +217,7 @@ TEST_CASE(RuntimeTest, TestWithinRecordCSTableAggregate, [] () {
   {
     ResultList result;
     auto query = R"(select sum(count(event.search_query.result_items.position) WITHIN RECORD) from testtable;)";
-    auto qplan = runtime->buildQueryPlan(ctx.get(), query, estrat.get());
+    auto qplan = runtime->buildQueryPlan(txn.get(), query);
     qplan->execute(0, &result);
     EXPECT_EQ(result.getNumColumns(), 1);
     EXPECT_EQ(result.getNumRows(), 1);
@@ -234,7 +230,7 @@ TEST_CASE(RuntimeTest, TestWithinRecordCSTableAggregate, [] () {
         sum(event.search_query.num_result_items) WITHIN RECORD,
         count(event.search_query.result_items.position) WITHIN RECORD
       from testtable;)";
-  auto qplan = runtime->buildQueryPlan(ctx.get(), query, estrat.get());
+  auto qplan = runtime->buildQueryPlan(txn.get(), query);
   qplan->execute(0, &result);
   EXPECT_EQ(result.getNumColumns(), 2);
   EXPECT_EQ(result.getNumRows(), 213);
@@ -260,10 +256,9 @@ TEST_CASE(RuntimeTest, TestWithinRecordCSTableAggregate, [] () {
 
 TEST_CASE(RuntimeTest, TestMultiLevelNestedCSTableAggregate, [] () {
   auto runtime = Runtime::getDefaultRuntime();
-  auto ctx = runtime->newTransaction();
+  auto txn = runtime->newTransaction();
 
-  auto estrat = mkRef(new DefaultExecutionStrategy());
-  estrat->addTableProvider(
+  txn->addTableProvider(
       new CSTableScanProvider(
           "testtable",
           "src/eventql/sql/testdata/testtbl.cst"));
@@ -277,7 +272,7 @@ TEST_CASE(RuntimeTest, TestMultiLevelNestedCSTableAggregate, [] () {
           event.search_query.num_result_items,
           event.search_query.result_items.position
         from testtable;)";
-    auto qplan = runtime->buildQueryPlan(ctx.get(), query, estrat.get());
+    auto qplan = runtime->buildQueryPlan(txn.get(), query);
     qplan->execute(0, &result);
     EXPECT_EQ(result.getNumRows(), 24866);
   }
@@ -291,7 +286,7 @@ TEST_CASE(RuntimeTest, TestMultiLevelNestedCSTableAggregate, [] () {
           sum(sum(event.search_query.num_result_items) WITHIN RECORD),
           sum(count(event.search_query.result_items.position) WITHIN RECORD)
         from testtable;)";
-    auto qplan = runtime->buildQueryPlan(ctx.get(), query, estrat.get());
+    auto qplan = runtime->buildQueryPlan(txn.get(), query);
     qplan->execute(0, &result);
 
     EXPECT_EQ(result.getNumColumns(), 4);
@@ -326,7 +321,7 @@ TEST_CASE(RuntimeTest, TestMultiLevelNestedCSTableAggregate, [] () {
           )
         from testtable
         group by 1;)";
-    auto qplan = runtime->buildQueryPlan(ctx.get(), query, estrat.get());
+    auto qplan = runtime->buildQueryPlan(txn.get(), query);
     qplan->execute(0, &result);
     EXPECT_EQ(result.getNumColumns(), 5);
     EXPECT_EQ(result.getNumRows(), 1);
@@ -340,10 +335,9 @@ TEST_CASE(RuntimeTest, TestMultiLevelNestedCSTableAggregate, [] () {
 
 TEST_CASE(RuntimeTest, TestMultiLevelNestedCSTableAggrgateWithGroup, [] () {
   auto runtime = Runtime::getDefaultRuntime();
-  auto ctx = runtime->newTransaction();
+  auto txn = runtime->newTransaction();
 
-  auto estrat = mkRef(new DefaultExecutionStrategy());
-  estrat->addTableProvider(
+  txn->addTableProvider(
       new CSTableScanProvider(
           "testtable",
           "src/eventql/sql/testdata/testtbl.cst"));
@@ -361,7 +355,7 @@ TEST_CASE(RuntimeTest, TestMultiLevelNestedCSTableAggrgateWithGroup, [] () {
             from testtable) as s
             where s.p = 6;
         )";
-    auto qplan = runtime->buildQueryPlan(ctx.get(), query, estrat.get());
+    auto qplan = runtime->buildQueryPlan(txn.get(), query);
     qplan->execute(0, &result);
     EXPECT_EQ(result.getNumColumns(), 2);
     EXPECT_EQ(result.getNumRows(), 1);
@@ -377,8 +371,8 @@ TEST_CASE(RuntimeTest, TestMultiLevelNestedCSTableAggrgateWithGroup, [] () {
   //        sum(sum(if(event.search_query.result_items.clicked, 1, 0)) WITHIN RECORD)
   //      from testtable
   //      where event.search_query.result_items.position = 9;)";
-  //  auto qplan = runtime->buildQueryPlan(ctx.get(), query, estrat.get());
-  //  runtime->executeStatement(ctx.get(), qplan->getStatement(0), &result);
+  //  auto qplan = runtime->buildQueryPlan(txn.get(), query);
+  //  runtime->executeStatement(txn.get(), qplan->getStatement(0), &result);
   //  EXPECT_EQ(result.getNumColumns(), 2);
   //  EXPECT_EQ(result.getNumRows(), 1);
   //  EXPECT_EQ(result.getRow(0)[0], "679");
@@ -396,8 +390,8 @@ TEST_CASE(RuntimeTest, TestMultiLevelNestedCSTableAggrgateWithGroup, [] () {
   //      group by event.search_query.result_items.position
   //      order by event.search_query.result_items.position ASC
   //      LIMIT 10;)";
-  //  auto qplan = runtime->buildQueryPlan(ctx.get(), query, estrat.get());
-  //  runtime->executeStatement(ctx.get(), qplan->getStatement(0), &result);
+  //  auto qplan = runtime->buildQueryPlan(txn.get(), query);
+  //  runtime->executeStatement(txn.get(), qplan->getStatement(0), &result);
 
   //  EXPECT_EQ(result.getNumColumns(), 3);
   //  auto cols = result.getColumns();
@@ -414,10 +408,9 @@ TEST_CASE(RuntimeTest, TestMultiLevelNestedCSTableAggrgateWithGroup, [] () {
 
 TEST_CASE(RuntimeTest, TestMultiLevelNestedCSTableAggrgateWithMultiLevelGroup, [] () {
   auto runtime = Runtime::getDefaultRuntime();
-  auto ctx = runtime->newTransaction();
+  auto txn = runtime->newTransaction();
 
-  auto estrat = mkRef(new DefaultExecutionStrategy());
-  estrat->addTableProvider(
+  txn->addTableProvider(
       new CSTableScanProvider(
           "testtable",
           "src/eventql/sql/testdata/testtbl.cst"));
@@ -433,7 +426,7 @@ TEST_CASE(RuntimeTest, TestMultiLevelNestedCSTableAggrgateWithMultiLevelGroup, [
           group by TRUNCATE(time / 86400000000)
           order by time desc;)";
 
-    auto qplan = runtime->buildQueryPlan(ctx.get(), query, estrat.get());
+    auto qplan = runtime->buildQueryPlan(txn.get(), query);
     qplan->execute(0, &result);
     EXPECT_EQ(result.getNumColumns(), 3);
     EXPECT_EQ(result.getNumRows(), 1);
@@ -444,10 +437,9 @@ TEST_CASE(RuntimeTest, TestMultiLevelNestedCSTableAggrgateWithMultiLevelGroup, [
 
 TEST_CASE(RuntimeTest, TestMultiLevelNestedCSTableAggrgateWithWhere, [] () {
   auto runtime = Runtime::getDefaultRuntime();
-  auto ctx = runtime->newTransaction();
+  auto txn = runtime->newTransaction();
 
-  auto estrat = mkRef(new DefaultExecutionStrategy());
-  estrat->addTableProvider(
+  txn->addTableProvider(
       new CSTableScanProvider(
           "testtable",
           "src/eventql/sql/testdata/testtbl.cst"));
@@ -455,10 +447,9 @@ TEST_CASE(RuntimeTest, TestMultiLevelNestedCSTableAggrgateWithWhere, [] () {
 
 TEST_CASE(RuntimeTest, TestTableNamesWithDots, [] () {
   auto runtime = Runtime::getDefaultRuntime();
-  auto ctx = runtime->newTransaction();
+  auto txn = runtime->newTransaction();
 
-  auto estrat = mkRef(new DefaultExecutionStrategy());
-  estrat->addTableProvider(
+  txn->addTableProvider(
       new CSTableScanProvider(
           "test.tbl",
           "src/eventql/sql/testdata/testtbl.cst"));
@@ -466,7 +457,7 @@ TEST_CASE(RuntimeTest, TestTableNamesWithDots, [] () {
   {
     ResultList result;
     auto query = R"(select count(1) from 'test.tbl';)";
-    auto qplan = runtime->buildQueryPlan(ctx.get(), query, estrat.get());
+    auto qplan = runtime->buildQueryPlan(txn.get(), query);
     qplan->execute(0, &result);
     EXPECT_EQ(result.getNumColumns(), 1);
     EXPECT_EQ(result.getNumRows(), 1);
@@ -476,7 +467,7 @@ TEST_CASE(RuntimeTest, TestTableNamesWithDots, [] () {
   {
     ResultList result;
     auto query = R"(select count(1) from `test.tbl`;)";
-    auto qplan = runtime->buildQueryPlan(ctx.get(), query, estrat.get());
+    auto qplan = runtime->buildQueryPlan(txn.get(), query);
     qplan->execute(0, &result);
     EXPECT_EQ(result.getNumColumns(), 1);
     EXPECT_EQ(result.getNumRows(), 1);
@@ -486,7 +477,7 @@ TEST_CASE(RuntimeTest, TestTableNamesWithDots, [] () {
   {
     ResultList result;
     auto query = R"(select count(1) from test.tbl;)";
-    auto qplan = runtime->buildQueryPlan(ctx.get(), query, estrat.get());
+    auto qplan = runtime->buildQueryPlan(txn.get(), query);
     qplan->execute(0, &result);
     EXPECT_EQ(result.getNumColumns(), 1);
     EXPECT_EQ(result.getNumRows(), 1);
@@ -496,70 +487,70 @@ TEST_CASE(RuntimeTest, TestTableNamesWithDots, [] () {
 
 TEST_CASE(RuntimeTest, SelectFloatIntegerDivision, [] () {
   auto runtime = Runtime::getDefaultRuntime();
-  auto ctx = runtime->newTransaction();
+  auto txn = runtime->newTransaction();
 
   {
-    auto v = runtime->evaluateConstExpression(ctx.get(), String("1 / 5"));
+    auto v = runtime->evaluateConstExpression(txn.get(), String("1 / 5"));
     EXPECT_EQ(v.getString(), "0.200000");
   }
 });
 
 TEST_CASE(RuntimeTest, SelectFloatIntegerMultiplication, [] () {
   auto runtime = Runtime::getDefaultRuntime();
-  auto ctx = runtime->newTransaction();
+  auto txn = runtime->newTransaction();
 
   {
-    auto v = runtime->evaluateConstExpression(ctx.get(), String("10 * 5"));
+    auto v = runtime->evaluateConstExpression(txn.get(), String("10 * 5"));
     EXPECT_EQ(v.getString(), "50");
   }
 
   {
-    auto v = runtime->evaluateConstExpression(ctx.get(), String("10 * 5.0"));
+    auto v = runtime->evaluateConstExpression(txn.get(), String("10 * 5.0"));
     EXPECT_EQ(v.getString(), "50.000000");
   }
 
   {
-    auto v = runtime->evaluateConstExpression(ctx.get(), String("10.0 * 5"));
+    auto v = runtime->evaluateConstExpression(txn.get(), String("10.0 * 5"));
     EXPECT_EQ(v.getString(), "50.000000");
   }
 });
 
 TEST_CASE(RuntimeTest, SelectFloatIntegerAddition, [] () {
   auto runtime = Runtime::getDefaultRuntime();
-  auto ctx = runtime->newTransaction();
+  auto txn = runtime->newTransaction();
 
   {
-    auto v = runtime->evaluateConstExpression(ctx.get(), String("10 + 5"));
+    auto v = runtime->evaluateConstExpression(txn.get(), String("10 + 5"));
     EXPECT_EQ(v.getString(), "15");
   }
 
   {
-    auto v = runtime->evaluateConstExpression(ctx.get(), String("10 + 5.0"));
+    auto v = runtime->evaluateConstExpression(txn.get(), String("10 + 5.0"));
     EXPECT_EQ(v.getString(), "15.000000");
   }
 
   {
-    auto v = runtime->evaluateConstExpression(ctx.get(), String("10.0 + 5"));
+    auto v = runtime->evaluateConstExpression(txn.get(), String("10.0 + 5"));
     EXPECT_EQ(v.getString(), "15.000000");
   }
 });
 //
 TEST_CASE(RuntimeTest, SelectFloatIntegerSubtraction, [] () {
   auto runtime = Runtime::getDefaultRuntime();
-  auto ctx = runtime->newTransaction();
+  auto txn = runtime->newTransaction();
 
   {
-    auto v = runtime->evaluateConstExpression(ctx.get(), String("10 - 5"));
+    auto v = runtime->evaluateConstExpression(txn.get(), String("10 - 5"));
     EXPECT_EQ(v.getString(), "5");
   }
 
   {
-    auto v = runtime->evaluateConstExpression(ctx.get(), String("10 - 5.0"));
+    auto v = runtime->evaluateConstExpression(txn.get(), String("10 - 5.0"));
     EXPECT_EQ(v.getString(), "5.000000");
   }
 
   {
-    auto v = runtime->evaluateConstExpression(ctx.get(), String("10.0 - 5"));
+    auto v = runtime->evaluateConstExpression(txn.get(), String("10.0 - 5"));
     EXPECT_EQ(v.getString(), "5.000000");
   }
 });
@@ -567,35 +558,34 @@ TEST_CASE(RuntimeTest, SelectFloatIntegerSubtraction, [] () {
 TEST_CASE(RuntimeTest, TestSelectInvalidColumn, [] () {
   EXPECT_EXCEPTION("column(s) not found: fnord", [] () {
     auto runtime = Runtime::getDefaultRuntime();
-  auto ctx = runtime->newTransaction();
+  auto txn = runtime->newTransaction();
 
-    auto estrat = mkRef(new DefaultExecutionStrategy());
-    estrat->addTableProvider(
+    txn->addTableProvider(
         new CSTableScanProvider(
             "test.tbl",
             "src/eventql/sql/testdata/testtbl.cst"));
 
     ResultList result;
     auto query = R"(select fnord from 'test.tbl';)";
-    auto qplan = runtime->buildQueryPlan(ctx.get(), query, estrat.get());
+    auto qplan = runtime->buildQueryPlan(txn.get(), query);
     qplan->execute(0, &result);
   });
 });
 
 TEST_CASE(RuntimeTest, TestFromTimestampExpr, [] () {
   auto runtime = Runtime::getDefaultRuntime();
-  auto ctx = runtime->newTransaction();
+  auto txn = runtime->newTransaction();
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String("FROM_TIMESTAMP(1441408424)"));
     EXPECT_EQ(v.getString(), "2015-09-04 23:13:44");
   }
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String("FROM_TIMESTAMP(1441408424.0)"));
     EXPECT_EQ(v.getString(), "2015-09-04 23:13:44");
   }
@@ -603,18 +593,18 @@ TEST_CASE(RuntimeTest, TestFromTimestampExpr, [] () {
 
 TEST_CASE(RuntimeTest, TestTimestampArithmetic, [] () {
   auto runtime = Runtime::getDefaultRuntime();
-  auto ctx = runtime->newTransaction();
+  auto txn = runtime->newTransaction();
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String("FROM_TIMESTAMP(1441408424) + 1"));
     EXPECT_EQ(v.getString(), "1441408424000001");
   }
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String("FROM_TIMESTAMP(1441408424) / 1000000"));
     EXPECT_EQ(v.getString(), "1441408424.000000");
   }
@@ -622,18 +612,18 @@ TEST_CASE(RuntimeTest, TestTimestampArithmetic, [] () {
 
 TEST_CASE(RuntimeTest, TestTruncateExpr, [] () {
   auto runtime = Runtime::getDefaultRuntime();
-  auto ctx = runtime->newTransaction();
+  auto txn = runtime->newTransaction();
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String("TRUNCATE(23.3)"));
     EXPECT_EQ(v.getString(), "23");
   }
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String("TRUNCATE(23.7)"));
     EXPECT_EQ(v.getString(), "23");
   }
@@ -641,10 +631,9 @@ TEST_CASE(RuntimeTest, TestTruncateExpr, [] () {
 
 TEST_CASE(RuntimeTest, TestWildcardSelect, [] () {
   auto runtime = Runtime::getDefaultRuntime();
-  auto ctx = runtime->newTransaction();
+  auto txn = runtime->newTransaction();
 
-  auto estrat = mkRef(new DefaultExecutionStrategy());
-  estrat->addTableProvider(
+  txn->addTableProvider(
       new CSTableScanProvider(
           "testtable",
           "src/eventql/sql/testdata/testtbl.cst"));
@@ -652,7 +641,7 @@ TEST_CASE(RuntimeTest, TestWildcardSelect, [] () {
   {
     ResultList result;
     auto query = R"(select * from testtable;)";
-    auto qplan = runtime->buildQueryPlan(ctx.get(), query, estrat.get());
+    auto qplan = runtime->buildQueryPlan(txn.get(), query);
     qplan->execute(0, &result);
     EXPECT_EQ(result.getNumColumns(), 63);
     EXPECT_EQ(result.getColumns()[0], "attr.ab_test_group");
@@ -663,10 +652,9 @@ TEST_CASE(RuntimeTest, TestWildcardSelect, [] () {
 
 TEST_CASE(RuntimeTest, TestWildcardSelectWithOrderLimit, [] () {
   auto runtime = Runtime::getDefaultRuntime();
-  auto ctx = runtime->newTransaction();
+  auto txn = runtime->newTransaction();
 
-  auto estrat = mkRef(new DefaultExecutionStrategy());
-  estrat->addTableProvider(
+  txn->addTableProvider(
       new CSTableScanProvider(
           "testtable",
           "src/eventql/sql/testdata/testtbl.cst"));
@@ -674,7 +662,7 @@ TEST_CASE(RuntimeTest, TestWildcardSelectWithOrderLimit, [] () {
   {
     ResultList result;
     auto query = R"(select * from testtable order by time desc limit 10;)";
-    auto qplan = runtime->buildQueryPlan(ctx.get(), query, estrat.get());
+    auto qplan = runtime->buildQueryPlan(txn.get(), query);
     qplan->execute(0, &result);
     EXPECT_EQ(result.getNumColumns(), 63);
     EXPECT_EQ(result.getColumns()[0], "attr.ab_test_group");
@@ -685,10 +673,9 @@ TEST_CASE(RuntimeTest, TestWildcardSelectWithOrderLimit, [] () {
 
 TEST_CASE(RuntimeTest, TestWildcardSelectWithSubqueries, [] () {
   auto runtime = Runtime::getDefaultRuntime();
-  auto ctx = runtime->newTransaction();
+  auto txn = runtime->newTransaction();
 
-  auto estrat = mkRef(new DefaultExecutionStrategy());
-  estrat->addTableProvider(
+  txn->addTableProvider(
       new backends::csv::CSVTableProvider(
           "testtable",
           "src/eventql/sql/testdata/testtbl1.csv",
@@ -699,7 +686,7 @@ TEST_CASE(RuntimeTest, TestWildcardSelectWithSubqueries, [] () {
     auto query = R"(
       select value, time from testtable;
     )";
-    auto qplan = runtime->buildQueryPlan(ctx.get(), query, estrat.get());
+    auto qplan = runtime->buildQueryPlan(txn.get(), query);
     qplan->execute(0, &result);
     EXPECT_EQ(result.getNumColumns(), 2);
     EXPECT_EQ(result.getColumns()[0], "value");
@@ -712,7 +699,7 @@ TEST_CASE(RuntimeTest, TestWildcardSelectWithSubqueries, [] () {
     auto query = R"(
       select * from (select value, time from testtable);
     )";
-    auto qplan = runtime->buildQueryPlan(ctx.get(), query, estrat.get());
+    auto qplan = runtime->buildQueryPlan(txn.get(), query);
     qplan->execute(0, &result);
     EXPECT_EQ(result.getNumColumns(), 2);
     EXPECT_EQ(result.getColumns()[0], "value");
@@ -725,7 +712,7 @@ TEST_CASE(RuntimeTest, TestWildcardSelectWithSubqueries, [] () {
     auto query = R"(
       select * from (select * from (select value, time from testtable));
     )";
-    auto qplan = runtime->buildQueryPlan(ctx.get(), query, estrat.get());
+    auto qplan = runtime->buildQueryPlan(txn.get(), query);
     qplan->execute(0, &result);
     EXPECT_EQ(result.getNumColumns(), 2);
     EXPECT_EQ(result.getColumns()[0], "value");
@@ -738,7 +725,7 @@ TEST_CASE(RuntimeTest, TestWildcardSelectWithSubqueries, [] () {
     auto query = R"(
       select * from (select * from (select * from testtable));
     )";
-    auto qplan = runtime->buildQueryPlan(ctx.get(), query, estrat.get());
+    auto qplan = runtime->buildQueryPlan(txn.get(), query);
     qplan->execute(0, &result);
     EXPECT_EQ(result.getNumColumns(), 4);
     EXPECT_EQ(result.getColumns()[0], "time");
@@ -751,10 +738,9 @@ TEST_CASE(RuntimeTest, TestWildcardSelectWithSubqueries, [] () {
 
 TEST_CASE(RuntimeTest, TestSelectWithInternalAggrGroupColumns, [] () {
   auto runtime = Runtime::getDefaultRuntime();
-  auto ctx = runtime->newTransaction();
+  auto txn = runtime->newTransaction();
 
-  auto estrat = mkRef(new DefaultExecutionStrategy());
-  estrat->addTableProvider(
+  txn->addTableProvider(
       new CSTableScanProvider(
           "testtable",
           "src/eventql/sql/testdata/testtbl.cst"));
@@ -762,7 +748,7 @@ TEST_CASE(RuntimeTest, TestSelectWithInternalAggrGroupColumns, [] () {
   {
     ResultList result;
     auto query = R"(select count(1) cnt, time from testtable group by TRUNCATE(time / 60000000) order by cnt desc;)";
-    auto qplan = runtime->buildQueryPlan(ctx.get(), query, estrat.get());
+    auto qplan = runtime->buildQueryPlan(txn.get(), query);
     qplan->execute(0, &result);
     EXPECT_EQ(result.getNumColumns(), 2);
     EXPECT_EQ(result.getNumRows(), 129);
@@ -773,10 +759,9 @@ TEST_CASE(RuntimeTest, TestSelectWithInternalAggrGroupColumns, [] () {
 
 TEST_CASE(RuntimeTest, TestSelectWithInternalGroupColumns, [] () {
   auto runtime = Runtime::getDefaultRuntime();
-  auto ctx = runtime->newTransaction();
+  auto txn = runtime->newTransaction();
 
-  auto estrat = mkRef(new DefaultExecutionStrategy());
-  estrat->addTableProvider(
+  txn->addTableProvider(
       new CSTableScanProvider(
           "testtable",
           "src/eventql/sql/testdata/testtbl.cst"));
@@ -784,7 +769,7 @@ TEST_CASE(RuntimeTest, TestSelectWithInternalGroupColumns, [] () {
   {
     ResultList result;
     auto query = R"(select time from testtable group by TRUNCATE(time / 60000000);)";
-    auto qplan = runtime->buildQueryPlan(ctx.get(), query, estrat.get());
+    auto qplan = runtime->buildQueryPlan(txn.get(), query);
     qplan->execute(0, &result);
     EXPECT_EQ(result.getNumColumns(), 1);
     EXPECT_EQ(result.getNumRows(), 129);
@@ -793,10 +778,9 @@ TEST_CASE(RuntimeTest, TestSelectWithInternalGroupColumns, [] () {
 
 TEST_CASE(RuntimeTest, TestSelectWithInternalOrderColumns, [] () {
   auto runtime = Runtime::getDefaultRuntime();
-  auto ctx = runtime->newTransaction();
+  auto txn = runtime->newTransaction();
 
-  auto estrat = mkRef(new DefaultExecutionStrategy());
-  estrat->addTableProvider(
+  txn->addTableProvider(
       new CSTableScanProvider(
           "testtable",
           "src/eventql/sql/testdata/testtbl.cst"));
@@ -804,7 +788,7 @@ TEST_CASE(RuntimeTest, TestSelectWithInternalOrderColumns, [] () {
   {
     ResultList result;
     auto query = R"(select user_id from testtable order by time desc limit 10;)";
-    auto qplan = runtime->buildQueryPlan(ctx.get(), query, estrat.get());
+    auto qplan = runtime->buildQueryPlan(txn.get(), query);
     qplan->execute(0, &result);
     EXPECT_EQ(result.getNumColumns(), 1);
     EXPECT_EQ(result.getNumRows(), 10);
@@ -813,39 +797,39 @@ TEST_CASE(RuntimeTest, TestSelectWithInternalOrderColumns, [] () {
 
 TEST_CASE(RuntimeTest, TestStringStartsWithExpression, [] () {
   auto runtime = Runtime::getDefaultRuntime();
-  auto ctx = runtime->newTransaction();
+  auto txn = runtime->newTransaction();
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String("startswith('fnordblah', 'fnord')"));
     EXPECT_EQ(v.getString(), "true");
   }
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String("startswith('fnordblah', 'f')"));
     EXPECT_EQ(v.getString(), "true");
   }
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String("startswith('fnordblah', 'fnordblah')"));
     EXPECT_EQ(v.getString(), "true");
   }
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String("startswith('fnordblah', 'fnordx')"));
     EXPECT_EQ(v.getString(), "false");
   }
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String("startswith('fnordblah', 'bar')"));
     EXPECT_EQ(v.getString(), "false");
   }
@@ -853,32 +837,32 @@ TEST_CASE(RuntimeTest, TestStringStartsWithExpression, [] () {
 
 TEST_CASE(RuntimeTest, TestStringEndsWithExpression, [] () {
   auto runtime = Runtime::getDefaultRuntime();
-  auto ctx = runtime->newTransaction();
+  auto txn = runtime->newTransaction();
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String("endswith('fnordblah', 'blah')"));
     EXPECT_EQ(v.getString(), "true");
   }
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String("endswith('fnordblah', 'h')"));
     EXPECT_EQ(v.getString(), "true");
   }
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String("endswith('fnordblah', 'fnordblah')"));
     EXPECT_EQ(v.getString(), "true");
   }
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String("endswith('fnordblah', 'bar')"));
     EXPECT_EQ(v.getString(), "false");
   }
@@ -886,60 +870,60 @@ TEST_CASE(RuntimeTest, TestStringEndsWithExpression, [] () {
 
 TEST_CASE(RuntimeTest, TestLogicalAnd, [] () {
   auto runtime = Runtime::getDefaultRuntime();
-  auto ctx = runtime->newTransaction();
+  auto txn = runtime->newTransaction();
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String("true AND true"));
     EXPECT_EQ(v.getString(), "true");
   }
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String("true AND false"));
     EXPECT_EQ(v.getString(), "false");
   }
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String("false AND true"));
     EXPECT_EQ(v.getString(), "false");
   }
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String("false AND false"));
     EXPECT_EQ(v.getString(), "false");
   }
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String("logical_and(true, true)"));
     EXPECT_EQ(v.getString(), "true");
   }
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String("logical_and(false, true)"));
     EXPECT_EQ(v.getString(), "false");
   }
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String("logical_and(true, false)"));
     EXPECT_EQ(v.getString(), "false");
   }
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String("logical_and(false, false)"));
     EXPECT_EQ(v.getString(), "false");
   }
@@ -947,60 +931,60 @@ TEST_CASE(RuntimeTest, TestLogicalAnd, [] () {
 
 TEST_CASE(RuntimeTest, TestLogicalOr, [] () {
   auto runtime = Runtime::getDefaultRuntime();
-  auto ctx = runtime->newTransaction();
+  auto txn = runtime->newTransaction();
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String("true OR true"));
     EXPECT_EQ(v.getString(), "true");
   }
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String("true OR false"));
     EXPECT_EQ(v.getString(), "true");
   }
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String("false OR true"));
     EXPECT_EQ(v.getString(), "true");
   }
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String("false OR false"));
     EXPECT_EQ(v.getString(), "false");
   }
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String("logical_or(true, true)"));
     EXPECT_EQ(v.getString(), "true");
   }
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String("logical_or(false, true)"));
     EXPECT_EQ(v.getString(), "true");
   }
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String("logical_or(true, false)"));
     EXPECT_EQ(v.getString(), "true");
   }
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String("logical_or(false, false)"));
     EXPECT_EQ(v.getString(), "false");
   }
@@ -1008,25 +992,25 @@ TEST_CASE(RuntimeTest, TestLogicalOr, [] () {
 
 TEST_CASE(RuntimeTest, TestIsNull, [] () {
   auto runtime = Runtime::getDefaultRuntime();
-  auto ctx = runtime->newTransaction();
+  auto txn = runtime->newTransaction();
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         "isnull('NULL')");
     EXPECT_EQ(v.getString(), "false");
   }
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         "isnull(0)");
     EXPECT_EQ(v.getString(), "false");
   }
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         "isnull(NULL)");
     EXPECT_EQ(v.getString(), "true");
   }
@@ -1034,18 +1018,18 @@ TEST_CASE(RuntimeTest, TestIsNull, [] () {
 
 TEST_CASE(RuntimeTest, TestStringUppercaseExpression, [] () {
   auto runtime = Runtime::getDefaultRuntime();
-  auto ctx = runtime->newTransaction();
+  auto txn = runtime->newTransaction();
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String("uppercase('blah')"));
     EXPECT_EQ(v.getString(), "BLAH");
   }
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String("ucase('blah')"));
     EXPECT_EQ(v.getString(), "BLAH");
   }
@@ -1053,18 +1037,18 @@ TEST_CASE(RuntimeTest, TestStringUppercaseExpression, [] () {
 
 TEST_CASE(RuntimeTest, TestStringLowercaseExpression, [] () {
   auto runtime = Runtime::getDefaultRuntime();
-  auto ctx = runtime->newTransaction();
+  auto txn = runtime->newTransaction();
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String("lowercase('FNORD')"));
     EXPECT_EQ(v.getString(), "fnord");
   }
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String("lcase('FnOrD')"));
     EXPECT_EQ(v.getString(), "fnord");
   }
@@ -1072,74 +1056,74 @@ TEST_CASE(RuntimeTest, TestStringLowercaseExpression, [] () {
 
 TEST_CASE(RuntimeTest, TestDateTimeDateTruncExpression, [] () {
   auto runtime = Runtime::getDefaultRuntime();
-  auto ctx = runtime->newTransaction();
+  auto txn = runtime->newTransaction();
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String("date_trunc('milliseconds', FROM_TIMESTAMP(1444229262.983758))"));
     EXPECT_EQ(v.getTimestamp().unixMicros(), 1444229262983000);
   }
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String("date_trunc('seconds', FROM_TIMESTAMP(1444229262.983758))"));
     EXPECT_EQ(v.getTimestamp().unixMicros(), 1444229262000000);
   }
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String("date_trunc('minutes', FROM_TIMESTAMP(1444229262))"));
     EXPECT_EQ(v.getString(), "2015-10-07 14:47:00");
   }
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String("date_trunc('30minutes', FROM_TIMESTAMP(1444229262))"));
     EXPECT_EQ(v.getString(), "2015-10-07 14:30:00");
   }
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String("date_trunc('hours', FROM_TIMESTAMP(1444229262))"));
     EXPECT_EQ(v.getString(), "2015-10-07 14:00:00");
   }
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String("date_trunc('5hours', FROM_TIMESTAMP(1444229262.598))"));
     EXPECT_EQ(v.getString(), "2015-10-07 10:00:00");
   }
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String("date_trunc('days', FROM_TIMESTAMP(1444229262))"));
     EXPECT_EQ(v.getString(), "2015-10-07 00:00:00");
   }
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String("date_trunc('7days', FROM_TIMESTAMP(1444229262))"));
     EXPECT_EQ(v.getString(), "2015-10-01 00:00:00");
   }
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String("date_trunc('week', FROM_TIMESTAMP(1444229262))"));
     EXPECT_EQ(v.getString(), "2015-10-01 00:00:00");
   }
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String("date_trunc('month', FROM_TIMESTAMP(1444229262))"));
     EXPECT_EQ(v.getString(), "2015-10-01 00:00:00");
   }
@@ -1147,14 +1131,14 @@ TEST_CASE(RuntimeTest, TestDateTimeDateTruncExpression, [] () {
   {
     //date_trunc returns last day of previous month for months with 30 days
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String("date_trunc('month', FROM_TIMESTAMP(1441836754))"));
     EXPECT_EQ(v.getString(), "2015-08-31 00:00:00");
   }
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String("date_trunc('year', FROM_TIMESTAMP(1444229262))"));
     //returns first of year - number of leap years until now
     EXPECT_EQ(v.getString(), "2014-12-21 00:00:00");
@@ -1162,7 +1146,7 @@ TEST_CASE(RuntimeTest, TestDateTimeDateTruncExpression, [] () {
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String("date_trunc('2years', FROM_TIMESTAMP(1444229262))"));
     //returns first of year - number of leap years until now
     EXPECT_EQ(v.getString(), "2013-12-21 00:00:00");
@@ -1171,109 +1155,109 @@ TEST_CASE(RuntimeTest, TestDateTimeDateTruncExpression, [] () {
 
 TEST_CASE(RuntimeTest, TestDateTimeDateAddExpression, [] () {
   auto runtime = Runtime::getDefaultRuntime();
-  auto ctx = runtime->newTransaction();
+  auto txn = runtime->newTransaction();
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String("date_add(FROM_TIMESTAMP('1447671624'), '1.0', 'SECOND')"));
     EXPECT_EQ(v.getString(), "2015-11-16 11:00:25");
   }
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String("date_add(FROM_TIMESTAMP('1447671624'), '-1', 'SECOND')"));
     EXPECT_EQ(v.getString(), "2015-11-16 11:00:23");
   }
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String("date_add(time_at('2015-11-16 11:00:24'), '1', 'SECOND')"));
     EXPECT_EQ(v.getString(), "2015-11-16 11:00:25");
   }
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String("date_add(FROM_TIMESTAMP('1447671624'), '2', 'MINUTE')"));
     EXPECT_EQ(v.getString(), "2015-11-16 11:02:24");
   }
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String("date_add(FROM_TIMESTAMP('1447671624'), '4', 'HOUR')"));
     EXPECT_EQ(v.getString(), "2015-11-16 15:00:24");
   }
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String("date_add(FROM_TIMESTAMP('1447671624'), '30', 'DAY')"));
     EXPECT_EQ(v.getString(), "2015-12-16 11:00:24");
   }
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String("date_add(FROM_TIMESTAMP('1447671624'), '1', 'MONTH')"));
     EXPECT_EQ(v.getString(), "2015-12-17 11:00:24");
   }
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String("date_add(FROM_TIMESTAMP('1447671624'), '2', 'YEAR')"));
     EXPECT_EQ(v.getString(), "2017-11-15 11:00:24");
   }
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String("date_add(FROM_TIMESTAMP('1447671624'), '2:15', 'MINUTE_SECOND')"));
     EXPECT_EQ(v.getString(), "2015-11-16 11:02:39");
   }
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String("date_add(FROM_TIMESTAMP('1447671624'), '2:15:00', 'HOUR_SECOND')"));
     EXPECT_EQ(v.getString(), "2015-11-16 13:15:24");
   }
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String("date_add(FROM_TIMESTAMP('1447671624'), '2:60', 'HOUR_MINUTE')"));
     EXPECT_EQ(v.getString(), "2015-11-16 14:00:24");
   }
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String("date_add(time_at('2015-01-01 00:00:00'), '1 1:30:30', 'DAY_SECOND')"));
     EXPECT_EQ(v.getString(), "2015-01-02 01:30:30");
   }
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String("date_add(time_at('2015-12-31 00:00:00'), '1 1:30', 'DAY_MINUTE')"));
     EXPECT_EQ(v.getString(), "2016-01-01 01:30:00");
   }
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String("date_add(time_at('2015-12-31 23:00:00'), '2 2', 'DAY_HOUR')"));
     EXPECT_EQ(v.getString(), "2016-01-03 01:00:00");
   }
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String("date_add(time_at('2015-12-31 23:00:00'), '2-2', 'YEAR_MONTH')"));
     EXPECT_EQ(v.getString(), "2018-03-02 23:00:00");
   }
@@ -1281,11 +1265,11 @@ TEST_CASE(RuntimeTest, TestDateTimeDateAddExpression, [] () {
 
 TEST_CASE(RuntimeTest, TestDateTimeTimeAtExpression, [] () {
   auto runtime = Runtime::getDefaultRuntime();
-  auto ctx = runtime->newTransaction();
+  auto txn = runtime->newTransaction();
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String("time_at('NOW')"));
     EXPECT_EQ(
         v.getString(),
@@ -1294,21 +1278,21 @@ TEST_CASE(RuntimeTest, TestDateTimeTimeAtExpression, [] () {
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String("time_at('1451910364')"));
     EXPECT_EQ(v.getString(), "2016-01-04 12:26:04");
   }
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String("time_at('2016-01-04 12:26:04')"));
     EXPECT_EQ(v.getString(), "2016-01-04 12:26:04");
   }
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String("time_at('-7DAYS')"));
     auto now = uint64_t(WallClock::now());
     EXPECT_EQ(
@@ -1318,7 +1302,7 @@ TEST_CASE(RuntimeTest, TestDateTimeTimeAtExpression, [] () {
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String("time_at('2days ago')"));
     auto now = uint64_t(WallClock::now());
     EXPECT_EQ(
@@ -1329,18 +1313,18 @@ TEST_CASE(RuntimeTest, TestDateTimeTimeAtExpression, [] () {
 
 TEST_CASE(RuntimeTest, TestRegexExpression, [] () {
   auto runtime = Runtime::getDefaultRuntime();
-  auto ctx = runtime->newTransaction();
+  auto txn = runtime->newTransaction();
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String("'blah' REGEXP '^b'"));
     EXPECT_EQ(v.getString(), "true");
   }
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String("'fubar' REGEX '^b'"));
     EXPECT_EQ(v.getString(), "false");
   }
@@ -1348,7 +1332,7 @@ TEST_CASE(RuntimeTest, TestRegexExpression, [] () {
 
 TEST_CASE(RuntimeTest, TestLikeExpression, [] () {
   auto runtime = Runtime::getDefaultRuntime();
-  auto ctx = runtime->newTransaction();
+  auto txn = runtime->newTransaction();
 
   //{
   //  auto v = runtime->evaluateConstExpression(String("'abc' LIKE 'abc'"));
@@ -1380,11 +1364,11 @@ TEST_CASE(RuntimeTest, TestLikeExpression, [] () {
 
 TEST_CASE(RuntimeTest, TestEscaping, [] () {
   auto runtime = Runtime::getDefaultRuntime();
-  auto ctx = runtime->newTransaction();
+  auto txn = runtime->newTransaction();
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String(R"( "fnord'fnord" )"));
 
     EXPECT_EQ(v.getString(), "fnord'fnord");
@@ -1392,7 +1376,7 @@ TEST_CASE(RuntimeTest, TestEscaping, [] () {
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String(R"( "fnord\'fnord" )"));
 
     EXPECT_EQ(v.getString(), "fnord'fnord");
@@ -1400,7 +1384,7 @@ TEST_CASE(RuntimeTest, TestEscaping, [] () {
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String(R"( "fnord\\'fnord" )"));
 
     EXPECT_EQ(v.getString(), "fnord\\'fnord");
@@ -1408,7 +1392,7 @@ TEST_CASE(RuntimeTest, TestEscaping, [] () {
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String(R"( "fnord\\'fn\ord" )"));
 
     EXPECT_EQ(v.getString(), "fnord\\'fnord");
@@ -1416,7 +1400,7 @@ TEST_CASE(RuntimeTest, TestEscaping, [] () {
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String(R"( "fnord\\\'fn\ord" )"));
 
     EXPECT_EQ(v.getString(), "fnord\\'fnord");
@@ -1424,7 +1408,7 @@ TEST_CASE(RuntimeTest, TestEscaping, [] () {
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String(R"( "fnord\\\\'fn\ord" )"));
 
     EXPECT_EQ(v.getString(), "fnord\\\\'fnord");
@@ -1433,10 +1417,9 @@ TEST_CASE(RuntimeTest, TestEscaping, [] () {
 
 TEST_CASE(RuntimeTest, TestSimpleSelect, [] () {
   auto runtime = Runtime::getDefaultRuntime();
-  auto ctx = runtime->newTransaction();
+  auto txn = runtime->newTransaction();
 
-  auto estrat = mkRef(new DefaultExecutionStrategy());
-  estrat->addTableProvider(
+  txn->addTableProvider(
       new backends::csv::CSVTableProvider(
           "customers",
           "src/eventql/sql/testdata/testtbl2.csv",
@@ -1450,7 +1433,7 @@ TEST_CASE(RuntimeTest, TestSimpleSelect, [] () {
       ORDER BY customername;
     )";
 
-    auto qplan = runtime->buildQueryPlan(ctx.get(), query, estrat.get());
+    auto qplan = runtime->buildQueryPlan(txn.get(), query);
     qplan->execute(0, &result);
     EXPECT_EQ(result.getNumColumns(), 1);
     EXPECT_EQ(result.getNumRows(), 91);
@@ -1462,13 +1445,12 @@ TEST_CASE(RuntimeTest, TestSimpleSelect, [] () {
 
 TEST_CASE(RuntimeTest, TestSimpleTablelessSelect, [] () {
   auto runtime = Runtime::getDefaultRuntime();
-  auto ctx = runtime->newTransaction();
+  auto txn = runtime->newTransaction();
 
-  auto estrat = mkRef(new DefaultExecutionStrategy());
 
   ResultList result;
   auto query = R"(select 123 as a, 435 as b;)";
-  auto qplan = runtime->buildQueryPlan(ctx.get(), query, estrat.get());
+  auto qplan = runtime->buildQueryPlan(txn.get(), query);
   qplan->execute(0, &result);
   EXPECT_EQ(result.getNumColumns(), 2);
   EXPECT_EQ(result.getNumRows(), 1);
@@ -1478,13 +1460,12 @@ TEST_CASE(RuntimeTest, TestSimpleTablelessSelect, [] () {
 
 TEST_CASE(RuntimeTest, TestSimpleSubSelect, [] () {
   auto runtime = Runtime::getDefaultRuntime();
-  auto ctx = runtime->newTransaction();
+  auto txn = runtime->newTransaction();
 
-  auto estrat = mkRef(new DefaultExecutionStrategy());
 
   ResultList result;
   auto query = R"(select t1.b, a from (select 123 as a, 435 as b) as t1)";
-  auto qplan = runtime->buildQueryPlan(ctx.get(), query, estrat.get());
+  auto qplan = runtime->buildQueryPlan(txn.get(), query);
   qplan->execute(0, &result);
   EXPECT_EQ(result.getNumColumns(), 2);
   EXPECT_EQ(result.getNumRows(), 1);
@@ -1494,13 +1475,12 @@ TEST_CASE(RuntimeTest, TestSimpleSubSelect, [] () {
 
 TEST_CASE(RuntimeTest, TestWildcardOnSubselect, [] () {
   auto runtime = Runtime::getDefaultRuntime();
-  auto ctx = runtime->newTransaction();
+  auto txn = runtime->newTransaction();
 
-  auto estrat = mkRef(new DefaultExecutionStrategy());
 
   ResultList result;
   auto query = R"(select * from (select 123 as a, 435 as b) as t1)";
-  auto qplan = runtime->buildQueryPlan(ctx.get(), query, estrat.get());
+  auto qplan = runtime->buildQueryPlan(txn.get(), query);
   qplan->execute(0, &result);
   EXPECT_EQ(result.getNumColumns(), 2);
   EXPECT_EQ(result.getNumRows(), 1);
@@ -1510,17 +1490,16 @@ TEST_CASE(RuntimeTest, TestWildcardOnSubselect, [] () {
 
 TEST_CASE(RuntimeTest, TestSubqueryInGroupBy, [] () {
   auto runtime = Runtime::getDefaultRuntime();
-  auto ctx = runtime->newTransaction();
+  auto txn = runtime->newTransaction();
 
-  auto estrat = mkRef(new DefaultExecutionStrategy());
-  estrat->addTableProvider(
+  txn->addTableProvider(
       new CSTableScanProvider(
           "testtable",
           "src/eventql/sql/testdata/testtbl.cst"));
 
   ResultList result;
   auto query = R"(select count(1), t1.fubar + t1.x from (select count(1) as x, 123 as fubar from testtable group by TRUNCATE(time / 2000000)) t1 GROUP BY t1.x;)";
-  auto qplan = runtime->buildQueryPlan(ctx.get(), query, estrat.get());
+  auto qplan = runtime->buildQueryPlan(txn.get(), query);
   qplan->execute(0, &result);
   EXPECT_EQ(result.getNumColumns(), 2);
   EXPECT_EQ(result.getNumRows(), 2);
@@ -1532,17 +1511,16 @@ TEST_CASE(RuntimeTest, TestSubqueryInGroupBy, [] () {
 
 TEST_CASE(RuntimeTest, TestInternalOrderByWithSubquery, [] () {
   auto runtime = Runtime::getDefaultRuntime();
-  auto ctx = runtime->newTransaction();
+  auto txn = runtime->newTransaction();
 
-  auto estrat = mkRef(new DefaultExecutionStrategy());
-  estrat->addTableProvider(
+  txn->addTableProvider(
       new CSTableScanProvider(
           "testtable",
           "src/eventql/sql/testdata/testtbl.cst"));
 
   ResultList result;
   auto query = R"(select t1.x from (select count(1) as x from testtable group by TRUNCATE(time / 2000000)) t1  order by t1.x DESC LIMIT 2;)";
-  auto qplan = runtime->buildQueryPlan(ctx.get(), query, estrat.get());
+  auto qplan = runtime->buildQueryPlan(txn.get(), query);
   qplan->execute(0, &result);
   EXPECT_EQ(result.getNumColumns(), 1);
   EXPECT_EQ(result.getNumRows(), 2);
@@ -1550,10 +1528,9 @@ TEST_CASE(RuntimeTest, TestInternalOrderByWithSubquery, [] () {
 
 TEST_CASE(RuntimeTest, TestWildcardWithGroupBy, [] () {
   auto runtime = Runtime::getDefaultRuntime();
-  auto ctx = runtime->newTransaction();
+  auto txn = runtime->newTransaction();
 
-  auto estrat = mkRef(new DefaultExecutionStrategy());
-  estrat->addTableProvider(
+  txn->addTableProvider(
       new backends::csv::CSVTableProvider(
           "testtable",
           "src/eventql/sql/testdata/testtbl1.csv",
@@ -1561,7 +1538,7 @@ TEST_CASE(RuntimeTest, TestWildcardWithGroupBy, [] () {
 
   ResultList result;
   auto query = R"(select * from testtable group by time;)";
-  auto qplan = runtime->buildQueryPlan(ctx.get(), query, estrat.get());
+  auto qplan = runtime->buildQueryPlan(txn.get(), query);
   qplan->execute(0, &result);
   EXPECT_EQ(result.getNumColumns(), 4);
   EXPECT_EQ(result.getColumns()[0], "time");
@@ -1573,10 +1550,9 @@ TEST_CASE(RuntimeTest, TestWildcardWithGroupBy, [] () {
 
 TEST_CASE(RuntimeTest, TestInnerJoin, [] () {
   auto runtime = Runtime::getDefaultRuntime();
-  auto ctx = runtime->newTransaction();
+  auto txn = runtime->newTransaction();
 
-  auto estrat = mkRef(new DefaultExecutionStrategy());
-  estrat->addTableProvider(
+  txn->addTableProvider(
       new CSTableScanProvider(
           "testtable",
           "src/eventql/sql/testdata/testtbl.cst"));
@@ -1594,7 +1570,7 @@ TEST_CASE(RuntimeTest, TestInnerJoin, [] () {
           t1.time desc;
     )";
 
-    auto qplan = runtime->buildQueryPlan(ctx.get(), query, estrat.get());
+    auto qplan = runtime->buildQueryPlan(txn.get(), query);
     qplan->execute(0, &result);
     EXPECT_EQ(result.getNumColumns(), 10);
     EXPECT_EQ(result.getNumRows(), 12 * 12 * 12);
@@ -1617,7 +1593,7 @@ TEST_CASE(RuntimeTest, TestInnerJoin, [] () {
           t1.time desc;
     )";
 
-    auto qplan = runtime->buildQueryPlan(ctx.get(), query, estrat.get());
+    auto qplan = runtime->buildQueryPlan(txn.get(), query);
     qplan->execute(0, &result);
     EXPECT_EQ(result.getNumColumns(), 10);
     EXPECT_EQ(result.getNumRows(), 12);
@@ -1660,7 +1636,7 @@ TEST_CASE(RuntimeTest, TestInnerJoin, [] () {
           t1.time desc;
     )";
 
-    auto qplan = runtime->buildQueryPlan(ctx.get(), query, estrat.get());
+    auto qplan = runtime->buildQueryPlan(txn.get(), query);
     qplan->execute(0, &result);
     EXPECT_EQ(result.getNumColumns(), 10);
     EXPECT_EQ(result.getNumRows(), 12);
@@ -1689,15 +1665,14 @@ TEST_CASE(RuntimeTest, TestInnerJoin, [] () {
 
 TEST_CASE(RuntimeTest, TestLeftJoin, [] () {
   auto runtime = Runtime::getDefaultRuntime();
-  auto ctx = runtime->newTransaction();
+  auto txn = runtime->newTransaction();
 
-  auto estrat = mkRef(new DefaultExecutionStrategy());
-  estrat->addTableProvider(
+  txn->addTableProvider(
       new backends::csv::CSVTableProvider(
           "customers",
           "src/eventql/sql/testdata/testtbl2.csv",
           '\t'));
-  estrat->addTableProvider(
+  txn->addTableProvider(
       new backends::csv::CSVTableProvider(
           "orders",
           "src/eventql/sql/testdata/testtbl3.csv",
@@ -1713,7 +1688,7 @@ TEST_CASE(RuntimeTest, TestLeftJoin, [] () {
       ORDER BY customers.customername;
     )";
 
-    auto qplan = runtime->buildQueryPlan(ctx.get(), query, estrat.get());
+    auto qplan = runtime->buildQueryPlan(txn.get(), query);
     qplan->execute(0, &result);
     EXPECT_EQ(result.getNumColumns(), 2);
     EXPECT_EQ(result.getNumRows(), 213);
@@ -1736,7 +1711,7 @@ TEST_CASE(RuntimeTest, TestLeftJoin, [] () {
       ORDER BY customers.customername;
     )";
 
-    auto qplan = runtime->buildQueryPlan(ctx.get(), query, estrat.get());
+    auto qplan = runtime->buildQueryPlan(txn.get(), query);
     qplan->execute(0, &result);
     EXPECT_EQ(result.getNumColumns(), 2);
     EXPECT_EQ(result.getNumRows(), 13);
@@ -1751,15 +1726,14 @@ TEST_CASE(RuntimeTest, TestLeftJoin, [] () {
 
 TEST_CASE(RuntimeTest, TestRightJoin, [] () {
   auto runtime = Runtime::getDefaultRuntime();
-  auto ctx = runtime->newTransaction();
+  auto txn = runtime->newTransaction();
 
-  auto estrat = mkRef(new DefaultExecutionStrategy());
-  estrat->addTableProvider(
+  txn->addTableProvider(
       new backends::csv::CSVTableProvider(
           "employees",
           "src/eventql/sql/testdata/testtbl4.csv",
           '\t'));
-  estrat->addTableProvider(
+  txn->addTableProvider(
       new backends::csv::CSVTableProvider(
           "orders",
           "src/eventql/sql/testdata/testtbl3.csv",
@@ -1775,7 +1749,7 @@ TEST_CASE(RuntimeTest, TestRightJoin, [] () {
       ORDER BY orders.orderid;
     )";
 
-    auto qplan = runtime->buildQueryPlan(ctx.get(), query, estrat.get());
+    auto qplan = runtime->buildQueryPlan(txn.get(), query);
     qplan->execute(0, &result);
     EXPECT_EQ(result.getNumColumns(), 2);
     EXPECT_EQ(result.getNumRows(), 197);
@@ -1800,7 +1774,7 @@ TEST_CASE(RuntimeTest, TestRightJoin, [] () {
       ORDER BY orders.orderid;
     )";
 
-    auto qplan = runtime->buildQueryPlan(ctx.get(), query, estrat.get());
+    auto qplan = runtime->buildQueryPlan(txn.get(), query);
     qplan->execute(0, &result);
     EXPECT_EQ(result.getNumColumns(), 2);
     EXPECT_EQ(result.getNumRows(), 11);
@@ -1815,11 +1789,11 @@ TEST_CASE(RuntimeTest, TestRightJoin, [] () {
 
 TEST_CASE(RuntimeTest, TestConversionFunctions, [] () {
   auto runtime = Runtime::getDefaultRuntime();
-  auto ctx = runtime->newTransaction();
+  auto txn = runtime->newTransaction();
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String("to_string(123)"));
     EXPECT_EQ(v.getType(), SQL_STRING);
     EXPECT_EQ(v.getString(), "123");
@@ -1827,7 +1801,7 @@ TEST_CASE(RuntimeTest, TestConversionFunctions, [] () {
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String("to_int('123')"));
     EXPECT_EQ(v.getType(), SQL_INTEGER);
     EXPECT_EQ(v.getInteger(), 123);
@@ -1835,7 +1809,7 @@ TEST_CASE(RuntimeTest, TestConversionFunctions, [] () {
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String("to_int('123.5')"));
     EXPECT_EQ(v.getType(), SQL_INTEGER);
     EXPECT_EQ(v.getInteger(), 123);
@@ -1843,7 +1817,7 @@ TEST_CASE(RuntimeTest, TestConversionFunctions, [] () {
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String("to_float('123')"));
     EXPECT_EQ(v.getType(), SQL_FLOAT);
     EXPECT_EQ(v.getFloat(), 123.0);
@@ -1851,7 +1825,7 @@ TEST_CASE(RuntimeTest, TestConversionFunctions, [] () {
 
   {
     auto v = runtime->evaluateConstExpression(
-        ctx.get(),
+        txn.get(),
         String("to_float('123.5')"));
     EXPECT_EQ(v.getType(), SQL_FLOAT);
     EXPECT_EQ(v.getFloat(), 123.5);
@@ -1860,20 +1834,19 @@ TEST_CASE(RuntimeTest, TestConversionFunctions, [] () {
 
 TEST_CASE(RuntimeTest, TestWildcardJoins, [] () {
   auto runtime = Runtime::getDefaultRuntime();
-  auto ctx = runtime->newTransaction();
+  auto txn = runtime->newTransaction();
 
-  auto estrat = mkRef(new DefaultExecutionStrategy());
-  estrat->addTableProvider(
+  txn->addTableProvider(
       new backends::csv::CSVTableProvider(
           "departments",
           "src/eventql/sql/testdata/testtbl5.csv",
           '\t'));
-  estrat->addTableProvider(
+  txn->addTableProvider(
       new backends::csv::CSVTableProvider(
           "users",
           "src/eventql/sql/testdata/testtbl6.csv",
           '\t'));
-  estrat->addTableProvider(
+  txn->addTableProvider(
       new backends::csv::CSVTableProvider(
           "openinghours",
           "src/eventql/sql/testdata/testtbl7.csv",
@@ -1889,7 +1862,7 @@ TEST_CASE(RuntimeTest, TestWildcardJoins, [] () {
       ORDER BY name;
     )";
 
-    auto qplan = runtime->buildQueryPlan(ctx.get(), query, estrat.get());
+    auto qplan = runtime->buildQueryPlan(txn.get(), query);
     qplan->execute(0, &result);
     EXPECT_EQ(result.getNumColumns(), 4);
     EXPECT_EQ(result.getColumns()[0], "name");
@@ -1920,7 +1893,7 @@ TEST_CASE(RuntimeTest, TestWildcardJoins, [] () {
       ORDER BY name;
     )";
 
-    auto qplan = runtime->buildQueryPlan(ctx.get(), query, estrat.get());
+    auto qplan = runtime->buildQueryPlan(txn.get(), query);
     qplan->execute(0, &result);
     EXPECT_EQ(result.getNumColumns(), 7);
     EXPECT_EQ(result.getColumns()[0], "name");
@@ -1964,7 +1937,7 @@ TEST_CASE(RuntimeTest, TestWildcardJoins, [] () {
       ) ORDER BY name;
     )";
 
-    auto qplan = runtime->buildQueryPlan(ctx.get(), query, estrat.get());
+    auto qplan = runtime->buildQueryPlan(txn.get(), query);
     qplan->execute(0, &result);
     EXPECT_EQ(result.getNumColumns(), 7);
     EXPECT_EQ(result.getColumns()[0], "name");
@@ -2001,20 +1974,19 @@ TEST_CASE(RuntimeTest, TestWildcardJoins, [] () {
 
 TEST_CASE(RuntimeTest, TestNaturalJoin, [] () {
   auto runtime = Runtime::getDefaultRuntime();
-  auto ctx = runtime->newTransaction();
+  auto txn = runtime->newTransaction();
 
-  auto estrat = mkRef(new DefaultExecutionStrategy());
-  estrat->addTableProvider(
+  txn->addTableProvider(
       new backends::csv::CSVTableProvider(
           "departments",
           "src/eventql/sql/testdata/testtbl5.csv",
           '\t'));
-  estrat->addTableProvider(
+  txn->addTableProvider(
       new backends::csv::CSVTableProvider(
           "users",
           "src/eventql/sql/testdata/testtbl6.csv",
           '\t'));
-  estrat->addTableProvider(
+  txn->addTableProvider(
       new backends::csv::CSVTableProvider(
           "openinghours",
           "src/eventql/sql/testdata/testtbl7.csv",
@@ -2029,7 +2001,7 @@ TEST_CASE(RuntimeTest, TestNaturalJoin, [] () {
       ORDER BY name;
     )";
 
-    auto qplan = runtime->buildQueryPlan(ctx.get(), query, estrat.get());
+    auto qplan = runtime->buildQueryPlan(txn.get(), query);
     qplan->execute(0, &result);
     EXPECT_EQ(result.getNumColumns(), 3);
     EXPECT_EQ(result.getColumns()[0], "deptid");
@@ -2057,7 +2029,7 @@ TEST_CASE(RuntimeTest, TestNaturalJoin, [] () {
       ORDER BY name;
     )";
 
-    auto qplan = runtime->buildQueryPlan(ctx.get(), query, estrat.get());
+    auto qplan = runtime->buildQueryPlan(txn.get(), query);
     qplan->execute(0, &result);
     EXPECT_EQ(result.getNumColumns(), 5);
     EXPECT_EQ(result.getColumns()[0], "deptid");
@@ -2093,7 +2065,7 @@ TEST_CASE(RuntimeTest, TestNaturalJoin, [] () {
       ORDER BY name;
     )";
 
-    auto qplan = runtime->buildQueryPlan(ctx.get(), query, estrat.get());
+    auto qplan = runtime->buildQueryPlan(txn.get(), query);
     qplan->execute(0, &result);
     EXPECT_EQ(result.getNumColumns(), 5);
     EXPECT_EQ(result.getColumns()[0], "deptid");
@@ -2124,24 +2096,21 @@ TEST_CASE(RuntimeTest, TestShowTables, [] () {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
-  auto estrat = mkRef(new DefaultExecutionStrategy());
-  estrat->addTableProvider(
+  txn->addTableProvider(
       new backends::csv::CSVTableProvider(
           "departments",
           "src/eventql/sql/testdata/testtbl5.csv",
           '\t'));
-  estrat->addTableProvider(
+  txn->addTableProvider(
       new backends::csv::CSVTableProvider(
           "users",
           "src/eventql/sql/testdata/testtbl6.csv",
           '\t'));
 
-  txn->setTableProvider(estrat->tableProvider());
-
   {
     ResultList result;
     auto query = R"(show tables;)";
-    auto qplan = runtime->buildQueryPlan(txn.get(), query, estrat.get());
+    auto qplan = runtime->buildQueryPlan(txn.get(), query);
     qplan->execute(0, &result);
 
     EXPECT_EQ(result.getNumColumns(), 2);
@@ -2157,19 +2126,16 @@ TEST_CASE(RuntimeTest, TestDescribeTable, [] () {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
-  auto estrat = mkRef(new DefaultExecutionStrategy());
-  estrat->addTableProvider(
+  txn->addTableProvider(
       new backends::csv::CSVTableProvider(
           "departments",
           "src/eventql/sql/testdata/testtbl5.csv",
           '\t'));
 
-  txn->setTableProvider(estrat->tableProvider());
-
   {
     ResultList result;
     auto query = R"(describe departments;)";
-    auto qplan = runtime->buildQueryPlan(txn.get(), query, estrat.get());
+    auto qplan = runtime->buildQueryPlan(txn.get(), query);
     qplan->execute(0, &result);
 
     EXPECT_EQ(result.getNumColumns(), 4);
@@ -2190,12 +2156,11 @@ TEST_CASE(RuntimeTest, TestDescribeTable, [] () {
 TEST_CASE(RuntimeTest, TestNowExpr, [] () {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
-  auto estrat = mkRef(new DefaultExecutionStrategy());
 
   {
     ResultList result;
     auto query = R"(select now();)";
-    auto qplan = runtime->buildQueryPlan(txn.get(), query, estrat.get());
+    auto qplan = runtime->buildQueryPlan(txn.get(), query);
     qplan->execute(0, &result);
 
     EXPECT_EQ(result.getNumColumns(), 1);

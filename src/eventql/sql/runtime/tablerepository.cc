@@ -85,7 +85,14 @@ Option<TableInfo> TableRepository::describe(const String& table_name) const {
 Option<ScopedPtr<TableExpression>> TableRepository::buildSequentialScan(
       Transaction* ctx,
       RefPtr<SequentialScanNode> seqscan) const {
-  RAISE(kNotYetImplementedError, "nyi");
+  for (const auto& provider : providers_) {
+    auto expr = provider->buildSequentialScan(ctx, seqscan);
+    if (!expr.isEmpty()) {
+      return expr;
+    }
+  }
+
+  RAISEF(kNotFoundError, "table not found: '$0'", seqscan->tableName());
 }
 
 }

@@ -70,7 +70,6 @@ add_library(chartsql STATIC
     runtime/vm.cc
     runtime/compiler.cc
     runtime/ExecutionContext.cc
-    runtime/ExecutionStrategy.cc
     runtime/QueryBuilder.cc
     runtime/LikePattern.cc
     runtime/charts/areachartbuilder.cc

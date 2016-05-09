@@ -45,8 +45,7 @@ Runtime::Runtime(
 
 ScopedPtr<QueryPlan> Runtime::buildQueryPlan(
     Transaction* txn,
-    const String& query,
-    RefPtr<ExecutionStrategy> execution_strategy) {
+    const String& query) {
   /* parse query */
   csql::Parser parser;
   parser.parse(query.data(), query.size());
@@ -55,22 +54,14 @@ ScopedPtr<QueryPlan> Runtime::buildQueryPlan(
   auto statements = query_plan_builder_->build(
       txn,
       parser.getStatements(),
-      execution_strategy->tableProvider());
+      txn->getTableProvider());
 
-  return buildQueryPlan(
-      txn,
-      statements,
-      execution_strategy);
+  return buildQueryPlan(txn, statements);
 }
 
 ScopedPtr<QueryPlan> Runtime::buildQueryPlan(
     Transaction* txn,
-    Vector<RefPtr<QueryTreeNode>> statements,
-    RefPtr<ExecutionStrategy> execution_strategy) {
-  for (auto& stmt : statements) {
-    stmt = execution_strategy->rewriteQueryTree(stmt);
-  }
-
+    Vector<RefPtr<QueryTreeNode>> statements) {
   auto qplan = mkScoped(new QueryPlan(txn, statements));
   qplan->setScheduler(new LocalScheduler());
   return std::move(qplan);
