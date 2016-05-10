@@ -12,11 +12,11 @@
 
 namespace csql {
 
-ShowTables::ShowTables(
+ShowTablesExpression::ShowTablesExpression(
     Transaction* txn) :
     txn_(txn) {}
 
-ScopedPtr<ResultCursor> ShowTables::execute() {
+ScopedPtr<ResultCursor> ShowTablesExpression::execute() {
   txn_->getTableProvider()->listTables([this] (const TableInfo& table) {
     Vector<SValue> row;
     row.emplace_back(table.table_name);
@@ -34,13 +34,13 @@ ScopedPtr<ResultCursor> ShowTables::execute() {
       new DefaultResultCursor(
           columnNames().size(),
           std::bind(
-              &ShowTables::next,
+              &ShowTablesExpression::next,
               this,
               std::placeholders::_1,
               std::placeholders::_2)));
 }
 
-Vector<String> ShowTables::columnNames() const {
+Vector<String> ShowTablesExpression::columnNames() const {
   return Vector<String> {
     "table_name",
     "description"
@@ -48,7 +48,7 @@ Vector<String> ShowTables::columnNames() const {
 }
 
 
-bool ShowTables::next(SValue* row, size_t row_len) {
+bool ShowTablesExpression::next(SValue* row, size_t row_len) {
   if (pos_ < buf_.size()) {
     for (size_t i = 0; i < row_len; ++i) {
       row[i] = buf_[pos_][i];
@@ -60,7 +60,7 @@ bool ShowTables::next(SValue* row, size_t row_len) {
   }
 }
 
-//void ShowTables::onInputsReady() {
+//void ShowTablesExpression::onInputsReady() {
 //  auto table_provider = txn_->getTableProvider();
 //
 //  table_provider->listTables([this] (const TableInfo& table) {

@@ -51,7 +51,7 @@ ScopedPtr<TableExpression> LocalScheduler::buildExpression(
   }
 
   if (dynamic_cast<ShowTablesNode*>(node.get())) {
-    return mkScoped(new ShowTables(ctx));
+    return mkScoped(new ShowTablesExpression(ctx));
   }
 
   RAISEF(

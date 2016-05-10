@@ -14,10 +14,10 @@
 
 namespace csql {
 
-class ShowTables : public TableExpression {
+class ShowTablesExpression : public TableExpression {
 public:
 
-  ShowTables(Transaction* txn);
+  ShowTablesExpression(Transaction* txn);
 
   ScopedPtr<ResultCursor> execute() override;
 
