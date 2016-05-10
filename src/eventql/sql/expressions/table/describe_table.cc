@@ -37,14 +37,21 @@ ScopedPtr<ResultCursor> DescribeTableStatement::execute() {
 }
 
 bool DescribeTableStatement::next(SValue* row, size_t row_len) {
-  if (counter_ < rows_.size() && row_len >= kNumColumns) {
-    auto col = rows_[counter_];
-    row[0] = SValue::newString(col.column_name); //Field
-    row[1] = SValue::newString(col.type); //Type
-    // row[1] = (col.type_size == 0) ? 
-    //     SValue::newNull() : SValue::newInteger(col.type_size) //Type Size
-    row[2] = col.is_nullable ? SValue::newString("YES") : SValue::newString("NO"); //Null
-    row[3] = SValue::newNull(); //Description
+  if (counter_ < rows_.size()) {
+    const auto& col = rows_[counter_];
+    switch (row_len) {
+      default:
+      case 4:
+        row[3] = SValue::newNull(); //Description
+      case 3:
+        row[2] = col.is_nullable ? SValue::newString("YES") : SValue::newString("NO"); //Null
+      case 2:
+        row[1] = SValue::newString(col.type); //Type
+      case 1:
+        row[0] = SValue::newString(col.column_name); //Field
+      case 0:
+        break;
+    }
 
     ++counter_;
     return true;
