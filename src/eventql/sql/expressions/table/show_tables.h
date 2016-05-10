@@ -10,31 +10,22 @@
 #pragma once
 #include <eventql/util/stdtypes.h>
 #include <eventql/sql/qtree/ShowTablesNode.h>
-#include <eventql/sql/tasks/Task.h>
 #include <eventql/sql/runtime/tablerepository.h>
 
 namespace csql {
 
-class ShowTables : public Task {
+class ShowTables : public TableExpression {
 public:
 
   ShowTables(Transaction* txn);
 
-  //void onInputsReady() override;
-
-  bool nextRow(SValue* out, int out_len) override;
+  ScopedPtr<ResultCursor> execute() override;
 
 protected:
+
+  bool next(SValue* row, size_t row_len);
+
   Transaction* txn_;
-};
-
-class ShowTablesFactory : public TaskFactory {
-public:
-
-  RefPtr<Task> build(
-      Transaction* txn,
-      HashMap<TaskID, ScopedPtr<ResultCursor>> input) const override;
-
 };
 
 }

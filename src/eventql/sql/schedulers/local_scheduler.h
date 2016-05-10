@@ -14,9 +14,11 @@
 #include <eventql/sql/expressions/table/select.h>
 #include <eventql/sql/expressions/table/subquery.h>
 #include <eventql/sql/expressions/table/orderby.h>
+#include <eventql/sql/expressions/table/show_tables.h>
 #include <eventql/sql/qtree/SelectExpressionNode.h>
 #include <eventql/sql/qtree/SubqueryNode.h>
 #include <eventql/sql/qtree/OrderByNode.h>
+#include <eventql/sql/qtree/ShowTablesNode.h>
 
 
 using namespace stx;

@@ -7,7 +7,7 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <eventql/sql/tasks/show_tables.h>
+#include <eventql/sql/expressions/table/show_tables.h>
 #include <eventql/sql/Transaction.h>
 
 namespace csql {
@@ -16,7 +16,12 @@ ShowTables::ShowTables(
     Transaction* txn) :
     txn_(txn) {}
 
-bool ShowTables::nextRow(SValue* out, int out_len) {
+ScopedPtr<ResultCursor> ShowTables::execute() {
+  RAISE(kNotYetImplementedError, "nyi");
+}
+
+
+bool ShowTables::next(SValue* row, size_t row_len) {
   return false;
 }
 
@@ -37,10 +42,5 @@ bool ShowTables::nextRow(SValue* out, int out_len) {
 //  });
 //}
 
-RefPtr<Task> ShowTablesFactory::build(
-    Transaction* txn,
-    HashMap<TaskID, ScopedPtr<ResultCursor>> input) const {
-  return new ShowTables(txn);
-}
 
 }
