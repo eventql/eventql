@@ -22,6 +22,7 @@ Limit::Limit(
 
 ScopedPtr<ResultCursor> Limit::execute() {
   input_cursor_ = input_->execute();
+  buf_.resize(input_cursor_->getNumColumns());
 
   return mkScoped(
       new DefaultResultCursor(
@@ -33,31 +34,23 @@ ScopedPtr<ResultCursor> Limit::execute() {
               std::placeholders::_2)));
 }
 
-
-//bool Limit::onInputRow(
-//    const TaskID& input_id,
-//    const SValue* row,
-//    int row_len) {
-//  if (counter_++ < offset_) {
-//    return true;
-//  }
-//
-//  if (counter_ > (offset_ + limit_)) {
-//    return false;
-//  }
-//
-//  return input_(row, row_len);
-//}
 bool Limit::next(SValue* row, size_t row_len) {
-  if (counter_++ < offset_) {
-    return true;
-  }
-
-  if (counter_ > (offset_ + limit_)) {
+  if (counter_ >= (offset_ + limit_)) {
     return false;
   }
 
-  return false;
+  Vector<SValue> buf_(input_cursor_->getNumColumns());
+
+  while (input_cursor_->next(buf_.data(), buf_.size())) {
+    if (counter_++ < offset_) {
+      continue;
+    } else {
+      for (size_t i = 0; i < row_len && i < buf_.size(); ++i) {
+        row[i] = buf_[i];
+      }
+      return true;
+    }
+  }
 }
 
 }

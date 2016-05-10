@@ -31,6 +31,7 @@ protected:
   ScopedPtr<TableExpression> input_;
   size_t counter_;
   ScopedPtr<ResultCursor> input_cursor_;
+  Vector<SValue> buf_;
 };
 
 }
