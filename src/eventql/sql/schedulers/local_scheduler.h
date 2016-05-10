@@ -14,9 +14,11 @@
 #include <eventql/sql/expressions/table/select.h>
 #include <eventql/sql/expressions/table/subquery.h>
 #include <eventql/sql/expressions/table/orderby.h>
+#include <eventql/sql/expressions/table/limit.h>
 #include <eventql/sql/qtree/SelectExpressionNode.h>
 #include <eventql/sql/qtree/SubqueryNode.h>
 #include <eventql/sql/qtree/OrderByNode.h>
+#include <eventql/sql/qtree/LimitNode.h>
 
 
 using namespace stx;
@@ -34,6 +36,10 @@ protected:
   ScopedPtr<TableExpression> buildExpression(
       Transaction* ctx,
       RefPtr<QueryTreeNode> node);
+
+  ScopedPtr<TableExpression> buildLimit(
+    Transaction* ctx,
+    RefPtr<LimitNode> node);
 
   ScopedPtr<TableExpression> buildSelectExpression(
       Transaction* ctx,

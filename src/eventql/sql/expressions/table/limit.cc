@@ -7,18 +7,32 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <eventql/sql/tasks/limit.h>
+#include <eventql/sql/expressions/table/limit.h>
 
 namespace csql {
 
 Limit::Limit(
     size_t limit,
     size_t offset,
-    HashMap<TaskID, ScopedPtr<ResultCursor>> input) :
+    ScopedPtr<TableExpression> input) :
     limit_(limit),
     offset_(offset),
-    input_(new ResultCursorList(std::move(input))),
+    input_(std::move(input)),
     counter_(0) {}
+
+ScopedPtr<ResultCursor> Limit::execute() {
+  input_cursor_ = input_->execute();
+
+  return mkScoped(
+      new DefaultResultCursor(
+          input_cursor_->getNumColumns(),
+          std::bind(
+              &Limit::next,
+              this,
+              std::placeholders::_1,
+              std::placeholders::_2)));
+}
+
 
 //bool Limit::onInputRow(
 //    const TaskID& input_id,
@@ -34,20 +48,16 @@ Limit::Limit(
 //
 //  return input_(row, row_len);
 //}
-bool Limit::nextRow(SValue* out, int out_len) {
+bool Limit::next(SValue* row, size_t row_len) {
+  if (counter_++ < offset_) {
+    return true;
+  }
+
+  if (counter_ > (offset_ + limit_)) {
+    return false;
+  }
+
   return false;
-}
-
-LimitFactory::LimitFactory(
-    size_t limit,
-    size_t offset) :
-    limit_(limit),
-    offset_(offset) {}
-
-RefPtr<Task> LimitFactory::build(
-    Transaction* txn,
-    HashMap<TaskID, ScopedPtr<ResultCursor>> input) const {
-  return new Limit(limit_, offset_, std::move(input));
 }
 
 }
