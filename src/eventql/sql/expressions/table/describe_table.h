@@ -29,8 +29,13 @@ public:
 protected:
 
   bool next(SValue* row, size_t row_len);
+
+  const size_t k_num_columns_ = 4;
+  size_t pos_ = 0;
+
   Transaction* txn_;
   String table_name_;
+  Vector<ColumnInfo> columns_;
 };
 
 }

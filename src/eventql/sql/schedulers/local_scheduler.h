@@ -54,10 +54,6 @@ protected:
     Transaction* txn,
     RefPtr<OrderByNode> node);
 
-  ScopedPtr<TableExpression> buildDescribeTableStatement(
-    Transaction* txn,
-    RefPtr<DescribeTableNode> node);
-  
 };
 
 class LocalResultCursor : public ResultCursor {

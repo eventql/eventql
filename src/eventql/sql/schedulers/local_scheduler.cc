@@ -51,9 +51,9 @@ ScopedPtr<TableExpression> LocalScheduler::buildExpression(
   }
 
   if (dynamic_cast<DescribeTableNode*>(node.get())) {
-    return buildDescribeTableStatement(
+    return mkScoped(new DescribeTableStatement(
         ctx,
-        node.asInstanceOf<DescribeTableNode>());
+        node.asInstanceOf<DescribeTableNode>()->tableName()));
   }
 
   RAISEF(
@@ -129,17 +129,6 @@ ScopedPtr<TableExpression> LocalScheduler::buildSequentialScan(
   }
 
   return std::move(seqscan.get());
-}
-
-ScopedPtr<TableExpression> LocalScheduler::buildDescribeTableStatement(
-    Transaction* txn,
-    RefPtr<DescribeTableNode> node) {
-  auto table_info = txn->getTableProvider()->describe(node->tableName());
-  if (table_info.isEmpty()) {
-    RAISEF(kNotFoundError, "table not found: $0", node->tableName());
-  }
-
-  return mkScoped(new DescribeTableStatement(txn, node->tableName()));
 }
 
 LocalResultCursor::LocalResultCursor(

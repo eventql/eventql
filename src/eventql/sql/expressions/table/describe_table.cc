@@ -19,27 +19,37 @@ DescribeTableStatement::DescribeTableStatement(
     table_name_(table_name) {}
 
 ScopedPtr<ResultCursor> DescribeTableStatement::execute() {
-  RAISE(kNotYetImplementedError, "describe table not yet implemented");
+  auto table_info = txn_->getTableProvider()->describe(table_name_);
+  if (table_info.isEmpty()) {
+    RAISEF(kNotFoundError, "table not found: $0", table_name_);
+  }
+
+  columns_ = table_info.get().columns;
+  return mkScoped(
+      new DefaultResultCursor(
+          k_num_columns_,
+          std::bind(
+              &DescribeTableStatement::next,
+              this,
+              std::placeholders::_1,
+              std::placeholders::_2)));
 }
 
 bool DescribeTableStatement::next(SValue* row, size_t row_len) {
-  return false;
-}
+  if (pos_ < columns_.size() && row_len >= k_num_columns_) {
+    auto col = columns_[pos_];
+    row[0] = SValue::newString(col.column_name); //Field
+    row[1] = SValue::newString(col.type); //Type
+    // row[1] = (col.type_size == 0) ? 
+    //     SValue::newNull() : SValue::newInteger(col.type_size) //Type
+    row[2] = col.is_nullable ? SValue::newString("YES") : SValue::newString("NO");
+    row[3] = SValue::newNull(); //Description
 
-//void DescribeTableStatement::onInputsReady() {
-//  const auto& table_info = txn_->getTableProvider()->describe(table_name_);
-//  if (table_info.isEmpty()) {
-//    RAISEF(kRuntimeError, "table not found: '$0'", table_name_);
-//  }
-//
-//  for (const auto& col : table_info.get().columns) {
-//    Vector<SValue> row;
-//    row.emplace_back(col.column_name);
-//    row.emplace_back(col.type);
-//    row.emplace_back(col.is_nullable ? "YES" : "NO");
-//    row.emplace_back();
-//    input_(row.data(), row.size());
-//  }
-//}
+    ++pos_;
+    return true;
+  } else {
+    return false;
+  }
+}
 
 }
