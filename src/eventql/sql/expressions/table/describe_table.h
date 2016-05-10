@@ -21,21 +21,18 @@ public:
       Transaction* txn,
       const String& table_name);
 
-  //void onInputsReady() override;
-
   ScopedPtr<ResultCursor> execute() override;
-
 
 protected:
 
   bool next(SValue* row, size_t row_len);
 
-  const size_t k_num_columns_ = 4;
-  size_t pos_ = 0;
+  const size_t kNumColumns = 4;
 
   Transaction* txn_;
   String table_name_;
-  Vector<ColumnInfo> columns_;
+  Vector<ColumnInfo> buf_;
+  size_t counter_;
 };
 
 }

@@ -16,7 +16,8 @@ DescribeTableStatement::DescribeTableStatement(
     Transaction* txn,
     const String& table_name) :
     txn_(txn),
-    table_name_(table_name) {}
+    table_name_(table_name),
+    counter_(0) {}
 
 ScopedPtr<ResultCursor> DescribeTableStatement::execute() {
   auto table_info = txn_->getTableProvider()->describe(table_name_);
@@ -24,10 +25,10 @@ ScopedPtr<ResultCursor> DescribeTableStatement::execute() {
     RAISEF(kNotFoundError, "table not found: $0", table_name_);
   }
 
-  columns_ = table_info.get().columns;
+  buf_ = table_info.get().columns;
   return mkScoped(
       new DefaultResultCursor(
-          k_num_columns_,
+          kNumColumns,
           std::bind(
               &DescribeTableStatement::next,
               this,
@@ -36,16 +37,16 @@ ScopedPtr<ResultCursor> DescribeTableStatement::execute() {
 }
 
 bool DescribeTableStatement::next(SValue* row, size_t row_len) {
-  if (pos_ < columns_.size() && row_len >= k_num_columns_) {
-    auto col = columns_[pos_];
+  if (counter_ < buf_.size() && row_len >= kNumColumns) {
+    auto col = buf_[counter_];
     row[0] = SValue::newString(col.column_name); //Field
     row[1] = SValue::newString(col.type); //Type
     // row[1] = (col.type_size == 0) ? 
-    //     SValue::newNull() : SValue::newInteger(col.type_size) //Type
-    row[2] = col.is_nullable ? SValue::newString("YES") : SValue::newString("NO");
+    //     SValue::newNull() : SValue::newInteger(col.type_size) //Type Size
+    row[2] = col.is_nullable ? SValue::newString("YES") : SValue::newString("NO"); //Null
     row[3] = SValue::newNull(); //Description
 
-    ++pos_;
+    ++counter_;
     return true;
   } else {
     return false;
