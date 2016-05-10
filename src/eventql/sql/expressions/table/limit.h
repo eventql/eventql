@@ -13,10 +13,10 @@
 
 namespace csql {
 
-class Limit : public TableExpression {
+class LimitExpression : public TableExpression {
 public:
 
-  Limit(
+  LimitExpression(
       size_t limit,
       size_t offset,
       ScopedPtr<TableExpression> input);

@@ -11,7 +11,7 @@
 
 namespace csql {
 
-Limit::Limit(
+LimitExpression::LimitExpression(
     size_t limit,
     size_t offset,
     ScopedPtr<TableExpression> input) :
@@ -20,7 +20,7 @@ Limit::Limit(
     input_(std::move(input)),
     counter_(0) {}
 
-ScopedPtr<ResultCursor> Limit::execute() {
+ScopedPtr<ResultCursor> LimitExpression::execute() {
   input_cursor_ = input_->execute();
   buf_.resize(input_cursor_->getNumColumns());
 
@@ -28,13 +28,13 @@ ScopedPtr<ResultCursor> Limit::execute() {
       new DefaultResultCursor(
           input_cursor_->getNumColumns(),
           std::bind(
-              &Limit::next,
+              &LimitExpression::next,
               this,
               std::placeholders::_1,
               std::placeholders::_2)));
 }
 
-bool Limit::next(SValue* row, size_t row_len) {
+bool LimitExpression::next(SValue* row, size_t row_len) {
   if (limit_ == 0 || counter_ >= offset_ + limit_) {
     return false;
   }

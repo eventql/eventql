@@ -74,7 +74,7 @@ ScopedPtr<TableExpression> LocalScheduler::buildLimit(
     Transaction* ctx,
     RefPtr<LimitNode> node) {
   return mkScoped(
-      new Limit(
+      new LimitExpression(
           node->limit(),
           node->offset(),
           buildExpression(ctx, node->inputTable())));
