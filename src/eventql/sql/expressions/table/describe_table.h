@@ -31,7 +31,7 @@ protected:
 
   Transaction* txn_;
   String table_name_;
-  Vector<ColumnInfo> buf_;
+  Vector<ColumnInfo> rows_;
   size_t counter_;
 };
 

@@ -25,7 +25,7 @@ ScopedPtr<ResultCursor> DescribeTableStatement::execute() {
     RAISEF(kNotFoundError, "table not found: $0", table_name_);
   }
 
-  buf_ = table_info.get().columns;
+  rows_ = table_info.get().columns;
   return mkScoped(
       new DefaultResultCursor(
           kNumColumns,
@@ -37,8 +37,8 @@ ScopedPtr<ResultCursor> DescribeTableStatement::execute() {
 }
 
 bool DescribeTableStatement::next(SValue* row, size_t row_len) {
-  if (counter_ < buf_.size() && row_len >= kNumColumns) {
-    auto col = buf_[counter_];
+  if (counter_ < rows_.size() && row_len >= kNumColumns) {
+    auto col = rows_[counter_];
     row[0] = SValue::newString(col.column_name); //Field
     row[1] = SValue::newString(col.type); //Type
     // row[1] = (col.type_size == 0) ? 
