@@ -49,6 +49,8 @@ bool Limit::next(SValue* row, size_t row_len) {
       return true;
     }
   }
+  
+  return false;
 }
 
 }
