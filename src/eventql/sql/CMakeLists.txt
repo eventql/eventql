@@ -30,6 +30,7 @@ add_library(chartsql STATIC
     expressions/table/orderby.cc
     expressions/table/tablescan.cc
     expressions/table/describe_table.cc
+    expressions/table/limit.cc
     parser/astnode.cc
     parser/astutil.cc
     parser/parser.cc
