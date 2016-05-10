@@ -17,6 +17,8 @@ namespace csql {
 class ShowTablesExpression : public TableExpression {
 public:
 
+  static const size_t kNumColumns = 2;
+
   ShowTablesExpression(Transaction* txn);
 
   ScopedPtr<ResultCursor> execute() override;
@@ -25,7 +27,6 @@ protected:
 
   bool next(SValue* row, size_t row_len);
 
-  const size_t kNumColumns = 2;
   Transaction* txn_;
   size_t counter_;
   Vector<Vector<SValue>> buf_;
