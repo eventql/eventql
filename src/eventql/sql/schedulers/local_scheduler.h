@@ -14,9 +14,12 @@
 #include <eventql/sql/expressions/table/select.h>
 #include <eventql/sql/expressions/table/subquery.h>
 #include <eventql/sql/expressions/table/orderby.h>
+#include <eventql/sql/expressions/table/describe_table.h>
 #include <eventql/sql/qtree/SelectExpressionNode.h>
 #include <eventql/sql/qtree/SubqueryNode.h>
 #include <eventql/sql/qtree/OrderByNode.h>
+#include <eventql/sql/qtree/DescribeTableNode.h>
+
 
 
 using namespace stx;
@@ -51,6 +54,10 @@ protected:
     Transaction* txn,
     RefPtr<OrderByNode> node);
 
+  ScopedPtr<TableExpression> buildDescribeTableStatement(
+    Transaction* txn,
+    RefPtr<DescribeTableNode> node);
+  
 };
 
 class LocalResultCursor : public ResultCursor {

@@ -50,6 +50,12 @@ ScopedPtr<TableExpression> LocalScheduler::buildExpression(
         node.asInstanceOf<SequentialScanNode>());
   }
 
+  if (dynamic_cast<DescribeTableNode*>(node.get())) {
+    return buildDescribeTableStatement(
+        ctx,
+        node.asInstanceOf<DescribeTableNode>());
+  }
+
   RAISEF(
       kRuntimeError,
       "cannot figure out how to execute that query, sorry. -- $0",
@@ -123,6 +129,17 @@ ScopedPtr<TableExpression> LocalScheduler::buildSequentialScan(
   }
 
   return std::move(seqscan.get());
+}
+
+ScopedPtr<TableExpression> LocalScheduler::buildDescribeTableStatement(
+    Transaction* txn,
+    RefPtr<DescribeTableNode> node) {
+  auto table_info = txn->getTableProvider()->describe(node->tableName());
+  if (table_info.isEmpty()) {
+    RAISEF(kNotFoundError, "table not found: $0", node->tableName());
+  }
+
+  return mkScoped(new DescribeTableStatement(txn, node->tableName()));
 }
 
 LocalResultCursor::LocalResultCursor(
