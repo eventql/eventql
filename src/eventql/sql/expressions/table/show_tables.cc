@@ -14,7 +14,8 @@ namespace csql {
 
 ShowTablesExpression::ShowTablesExpression(
     Transaction* txn) :
-    txn_(txn) {}
+    txn_(txn),
+    counter_(0) {}
 
 ScopedPtr<ResultCursor> ShowTablesExpression::execute() {
   txn_->getTableProvider()->listTables([this] (const TableInfo& table) {
@@ -32,7 +33,7 @@ ScopedPtr<ResultCursor> ShowTablesExpression::execute() {
 
   return mkScoped(
       new DefaultResultCursor(
-          k_num_columns_,
+          kNumColumns,
           std::bind(
               &ShowTablesExpression::next,
               this,
@@ -42,11 +43,11 @@ ScopedPtr<ResultCursor> ShowTablesExpression::execute() {
 
 
 bool ShowTablesExpression::next(SValue* row, size_t row_len) {
-  if (pos_ < buf_.size() && row_len >= k_num_columns_) {
-    for (size_t i = 0; i < k_num_columns_; ++i) {
-      row[i] = buf_[pos_][i];
+  if (counter_ < buf_.size() && row_len >= kNumColumns) {
+    for (size_t i = 0; i < kNumColumns; ++i) {
+      row[i] = buf_[counter_][i];
     }
-    ++pos_;
+    ++counter_;
     return true;
   } else {
     return false;

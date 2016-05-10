@@ -25,9 +25,9 @@ protected:
 
   bool next(SValue* row, size_t row_len);
 
-  const size_t k_num_columns_ = 2;
-  size_t pos_ = 0;
+  const size_t kNumColumns = 2;
   Transaction* txn_;
+  size_t counter_;
   Vector<Vector<SValue>> buf_;
 };
 
