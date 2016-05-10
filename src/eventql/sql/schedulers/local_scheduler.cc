@@ -54,6 +54,12 @@ ScopedPtr<TableExpression> LocalScheduler::buildExpression(
         node.asInstanceOf<SequentialScanNode>());
   }
 
+  if (dynamic_cast<DescribeTableNode*>(node.get())) {
+    return mkScoped(new DescribeTableStatement(
+        ctx,
+        node.asInstanceOf<DescribeTableNode>()->tableName()));
+  }
+
   RAISEF(
       kRuntimeError,
       "cannot figure out how to execute that query, sorry. -- $0",

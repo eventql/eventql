@@ -35,7 +35,7 @@ ScopedPtr<ResultCursor> Limit::execute() {
 }
 
 bool Limit::next(SValue* row, size_t row_len) {
-  if (limit == 0 || counter_ >= offset_ + limit_) {
+  if (limit_ == 0 || counter_ >= offset_ + limit_) {
     return false;
   }
 
