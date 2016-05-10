@@ -9,45 +9,29 @@
  */
 #pragma once
 #include <eventql/util/stdtypes.h>
-#include <eventql/sql/tasks/Task.h>
 #include <eventql/sql/runtime/defaultruntime.h>
 
 namespace csql {
 
-class Limit : public Task {
+class Limit : public TableExpression {
 public:
 
   Limit(
       size_t limit,
       size_t offset,
-      HashMap<TaskID, ScopedPtr<ResultCursor>> input);
+      ScopedPtr<TableExpression> input);
 
-  bool nextRow(SValue* out, int out_len) override;
-
-  //bool onInputRow(
-  //    const TaskID& input_id,
-  //    const SValue* row,
-  //    int row_len) override;
+  ScopedPtr<ResultCursor> execute() override;
 
 protected:
+  bool next(SValue* row, size_t row_len);
+
   size_t limit_;
   size_t offset_;
-  ScopedPtr<ResultCursorList> input_;
+  ScopedPtr<TableExpression> input_;
   size_t counter_;
-};
-
-class LimitFactory : public TaskFactory {
-public:
-
-  LimitFactory(size_t limit, size_t offset);
-
-  RefPtr<Task> build(
-      Transaction* txn,
-      HashMap<TaskID, ScopedPtr<ResultCursor>> input) const override;
-
-protected:
-  size_t limit_;
-  size_t offset_;
+  ScopedPtr<ResultCursor> input_cursor_;
+  Vector<SValue> buf_;
 };
 
 }
