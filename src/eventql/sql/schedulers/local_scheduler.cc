@@ -28,6 +28,10 @@ ScopedPtr<TableExpression> LocalScheduler::buildExpression(
     Transaction* ctx,
     RefPtr<QueryTreeNode> node) {
 
+  if (dynamic_cast<LimitNode*>(node.get())) {
+    return buildLimit(ctx, node.asInstanceOf<LimitNode>());
+  }
+
   if (dynamic_cast<SelectExpressionNode*>(node.get())) {
     return buildSelectExpression(
         ctx,
@@ -54,11 +58,27 @@ ScopedPtr<TableExpression> LocalScheduler::buildExpression(
     return mkScoped(new ShowTablesExpression(ctx));
   }
 
+  if (dynamic_cast<DescribeTableNode*>(node.get())) {
+    return mkScoped(new DescribeTableStatement(
+        ctx,
+        node.asInstanceOf<DescribeTableNode>()->tableName()));
+  }
+
   RAISEF(
       kRuntimeError,
       "cannot figure out how to execute that query, sorry. -- $0",
       node->toString());
 };
+
+ScopedPtr<TableExpression> LocalScheduler::buildLimit(
+    Transaction* ctx,
+    RefPtr<LimitNode> node) {
+  return mkScoped(
+      new Limit(
+          node->limit(),
+          node->offset(),
+          buildExpression(ctx, node->inputTable())));
+}
 
 ScopedPtr<TableExpression> LocalScheduler::buildSelectExpression(
     Transaction* ctx,
