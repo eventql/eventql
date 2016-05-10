@@ -32,7 +32,7 @@ ScopedPtr<ResultCursor> ShowTablesExpression::execute() {
 
   return mkScoped(
       new DefaultResultCursor(
-          columnNames().size(),
+          k_num_columns_,
           std::bind(
               &ShowTablesExpression::next,
               this,
@@ -40,17 +40,10 @@ ScopedPtr<ResultCursor> ShowTablesExpression::execute() {
               std::placeholders::_2)));
 }
 
-Vector<String> ShowTablesExpression::columnNames() const {
-  return Vector<String> {
-    "table_name",
-    "description"
-  };
-}
-
 
 bool ShowTablesExpression::next(SValue* row, size_t row_len) {
-  if (pos_ < buf_.size()) {
-    for (size_t i = 0; i < row_len; ++i) {
+  if (pos_ < buf_.size() && row_len >= k_num_columns_) {
+    for (size_t i = 0; i < k_num_columns_; ++i) {
       row[i] = buf_[pos_][i];
     }
     ++pos_;
