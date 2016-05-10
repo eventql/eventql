@@ -43,8 +43,8 @@ ScopedPtr<ResultCursor> ShowTablesExpression::execute() {
 
 
 bool ShowTablesExpression::next(SValue* row, size_t row_len) {
-  if (counter_ < buf_.size() && row_len >= kNumColumns) {
-    for (size_t i = 0; i < kNumColumns; ++i) {
+  if (counter_ < buf_.size()) {
+    for (size_t i = 0; i < kNumColumns && i < row_len; ++i) {
       row[i] = buf_[counter_][i];
     }
     ++counter_;
