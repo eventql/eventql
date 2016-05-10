@@ -35,11 +35,9 @@ ScopedPtr<ResultCursor> Limit::execute() {
 }
 
 bool Limit::next(SValue* row, size_t row_len) {
-  if (counter_ >= (offset_ + limit_)) {
+  if (counter_ >= offset_ + limit_) {
     return false;
   }
-
-  Vector<SValue> buf_(input_cursor_->getNumColumns());
 
   while (input_cursor_->next(buf_.data(), buf_.size())) {
     if (counter_++ < offset_) {
