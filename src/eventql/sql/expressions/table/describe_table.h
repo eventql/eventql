@@ -17,6 +17,8 @@ namespace csql {
 class DescribeTableStatement : public TableExpression {
 public:
 
+  static const size_t kNumColumns = 4;
+
   DescribeTableStatement(
       Transaction* txn,
       const String& table_name);
@@ -26,8 +28,6 @@ public:
 protected:
 
   bool next(SValue* row, size_t row_len);
-
-  const size_t kNumColumns = 4;
 
   Transaction* txn_;
   String table_name_;
