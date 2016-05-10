@@ -17,12 +17,47 @@ ShowTables::ShowTables(
     txn_(txn) {}
 
 ScopedPtr<ResultCursor> ShowTables::execute() {
-  RAISE(kNotYetImplementedError, "nyi");
+  txn_->getTableProvider()->listTables([this] (const TableInfo& table) {
+    Vector<SValue> row;
+    row.emplace_back(table.table_name);
+
+    if (table.description.isEmpty()) {
+      row.emplace_back();
+    } else {
+      row.emplace_back(table.description.get());
+    }
+
+    buf_.emplace_back(row);
+  });
+
+  return mkScoped(
+      new DefaultResultCursor(
+          columnNames().size(),
+          std::bind(
+              &ShowTables::next,
+              this,
+              std::placeholders::_1,
+              std::placeholders::_2)));
+}
+
+Vector<String> ShowTables::columnNames() const {
+  return Vector<String> {
+    "table_name",
+    "description"
+  };
 }
 
 
 bool ShowTables::next(SValue* row, size_t row_len) {
-  return false;
+  if (pos_ < buf_.size()) {
+    for (size_t i = 0; i < row_len; ++i) {
+      row[i] = buf_[pos_][i];
+    }
+    ++pos_;
+    return true;
+  } else {
+    return false;
+  }
 }
 
 //void ShowTables::onInputsReady() {

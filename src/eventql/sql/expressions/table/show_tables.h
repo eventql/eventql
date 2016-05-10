@@ -23,9 +23,13 @@ public:
 
 protected:
 
+  Vector<String> columnNames() const;
+
   bool next(SValue* row, size_t row_len);
 
   Transaction* txn_;
+  Vector<Vector<SValue>> buf_;
+  size_t pos_ = 0;
 };
 
 }
