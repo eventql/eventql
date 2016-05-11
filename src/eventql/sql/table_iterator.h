@@ -8,17 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include <stdlib.h>
-#include <string>
-#include <vector>
-#include <assert.h>
-#include <eventql/sql/parser/token.h>
-#include <eventql/sql/parser/astnode.h>
-#include <eventql/sql/runtime/queryplannode.h>
-#include <eventql/sql/runtime/tablerepository.h>
-#include <eventql/sql/runtime/compiler.h>
-#include <eventql/sql/runtime/vm.h>
-#include <eventql/util/exception.h>
+#include <eventql/sql/svalue.h>
 
 namespace csql {
 

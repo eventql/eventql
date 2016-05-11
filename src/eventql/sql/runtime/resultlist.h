@@ -13,13 +13,11 @@
 #include <string>
 #include <vector>
 #include <memory>
-#include <eventql/sql/runtime/rowsink.h>
-#include <eventql/sql/runtime/queryplan.h>
 #include <eventql/sql/svalue.h>
 
 namespace csql {
 
-class ResultList : public RowSink {
+class ResultList{
 public:
 
   ResultList() {}

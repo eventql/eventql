@@ -2168,3 +2168,39 @@ TEST_CASE(RuntimeTest, TestNowExpr, [] () {
     //EXPECT_EQ(result.getRow(0)[0], "...");
   }
 });
+
+TEST_CASE(RuntimeTest, TestResultCursor, [] () {
+  auto runtime = Runtime::getDefaultRuntime();
+  auto txn = runtime->newTransaction();
+
+  txn->addTableProvider(
+      new backends::csv::CSVTableProvider(
+          "departments",
+          "src/eventql/sql/testdata/testtbl5.csv",
+          '\t'));
+  txn->addTableProvider(
+      new backends::csv::CSVTableProvider(
+          "users",
+          "src/eventql/sql/testdata/testtbl6.csv",
+          '\t'));
+
+  auto query = R"(
+    SELECT *
+    FROM departments
+    JOIN users
+    ORDER BY name
+    LIMIT 5;
+  )";
+
+  auto qplan = runtime->buildQueryPlan(txn.get(), query);
+  auto result_cursor = qplan->execute(0);
+
+  size_t num_rows = 0;
+  while (result_cursor->next(nullptr, 0)) {
+    ++num_rows;
+  }
+
+  EXPECT_EQ(num_rows, 5);
+});
+
+

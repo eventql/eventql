@@ -33,6 +33,7 @@ add_library(chartsql STATIC
     expressions/table/describe_table.cc
     expressions/table/limit.cc
     expressions/table/groupby.cc
+    expressions/table/nested_loop_join.cc
     parser/astnode.cc
     parser/astutil.cc
     parser/parser.cc
@@ -55,6 +56,7 @@ add_library(chartsql STATIC
     qtree/UnionNode.cc
     qtree/LimitNode.cc
     qtree/OrderByNode.cc
+    qtree/JoinNode.cc
     qtree/QueryTreeNode.cc
     qtree/QueryTreeUtil.cc
     qtree/ShowTablesNode.cc
@@ -66,7 +68,6 @@ add_library(chartsql STATIC
     runtime/ScratchMemory.cc
     runtime/runtime.cc
     runtime/symboltable.cc
-    runtime/queryplannode.cc
     runtime/ValueExpressionBuilder.cc
     runtime/defaultruntime.cc
     runtime/tablerepository.cc
@@ -77,16 +78,16 @@ add_library(chartsql STATIC
     runtime/ExecutionContext.cc
     runtime/QueryBuilder.cc
     runtime/LikePattern.cc
-    runtime/charts/areachartbuilder.cc
-    runtime/charts/barchartbuilder.cc
-    runtime/charts/domainconfig.cc
-    runtime/charts/drawstatement.cc
-    runtime/charts/ChartStatement.cc
-    runtime/charts/linechartbuilder.cc
-    runtime/charts/pointchartbuilder.cc
-    runtime/charts/seriesadapter.cc
+    #runtime/charts/areachartbuilder.cc
+    #runtime/charts/barchartbuilder.cc
+    #runtime/charts/domainconfig.cc
+    #runtime/charts/drawstatement.cc
+    #runtime/charts/ChartStatement.cc
+    #runtime/charts/linechartbuilder.cc
+    #runtime/charts/pointchartbuilder.cc
+    #runtime/charts/seriesadapter.cc
     result_cursor.cc
-    schedulers/local_scheduler.cc
+    scheduler.cc
     defaults.cc)
 
 add_dependencies(chartsql stx-protobuf)

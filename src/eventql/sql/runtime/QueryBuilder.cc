@@ -24,27 +24,27 @@ ValueExpression QueryBuilder::buildValueExpression(
   return scalar_exp_builder_->compile(ctx, node);
 }
 
-ScopedPtr<ChartStatement> QueryBuilder::buildChartStatement(
-    Transaction* ctx,
-    RefPtr<ChartStatementNode> node,
-    RefPtr<TableProvider> tables,
-    Runtime* runtime) {
-  Vector<ScopedPtr<DrawStatement>> draw_statements;
-
-  for (size_t i = 0; i < node->numChildren(); ++i) {
-    Vector<ScopedPtr<Task>> union_tables;
-
-    auto draw_stmt_node = node->child(i).asInstanceOf<DrawStatementNode>();
-    for (const auto& table : draw_stmt_node->inputTables()) {
-      //union_tables.emplace_back(
-      //    table_exp_builder_->build(ctx, table, this, tables.get()));
-    }
-
-    draw_statements.emplace_back(
-        new DrawStatement(ctx, draw_stmt_node, std::move(union_tables), runtime));
-  }
-
-  return mkScoped(new ChartStatement(std::move(draw_statements)));
-}
+//ScopedPtr<ChartStatement> QueryBuilder::buildChartStatement(
+//    Transaction* ctx,
+//    RefPtr<ChartStatementNode> node,
+//    RefPtr<TableProvider> tables,
+//    Runtime* runtime) {
+//  Vector<ScopedPtr<DrawStatement>> draw_statements;
+//
+//  for (size_t i = 0; i < node->numChildren(); ++i) {
+//    Vector<ScopedPtr<Task>> union_tables;
+//
+//    auto draw_stmt_node = node->child(i).asInstanceOf<DrawStatementNode>();
+//    for (const auto& table : draw_stmt_node->inputTables()) {
+//      //union_tables.emplace_back(
+//      //    table_exp_builder_->build(ctx, table, this, tables.get()));
+//    }
+//
+//    draw_statements.emplace_back(
+//        new DrawStatement(ctx, draw_stmt_node, std::move(union_tables), runtime));
+//  }
+//
+//  return mkScoped(new ChartStatement(std::move(draw_statements)));
+//}
 
 } // namespace csql

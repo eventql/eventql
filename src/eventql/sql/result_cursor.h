@@ -17,8 +17,7 @@
 using namespace stx;
 
 namespace csql {
-
-typedef Function<bool (const SValue* argv, int argc)> RowSinkFn;
+class TableExpression;
 
 class ResultCursor {
 public:
@@ -26,11 +25,10 @@ public:
   /**
    * Fetch the next row from the cursor. Returns true if a row was returned
    * into the provided storage and false if the last row of the query has been
-   * read (EOF). If this method returns false the provided storage will not
-   * be changed.
+   * read (EOF). If this method returns false the provided storage will remain
+   * unchanged.
    *
-   * This method will block until the next row is available. Use the polling/
-   * callback interface below if you need async execution.
+   * This method will block until the next row is available.
    */
   virtual bool next(SValue* row, int row_len) = 0;
 
@@ -52,6 +50,20 @@ public:
 protected:
   size_t num_columns_;
   Function<bool(SValue*, int)> next_fn_;
+};
+
+class TableExpressionResultCursor : public ResultCursor {
+public:
+
+  TableExpressionResultCursor(ScopedPtr<TableExpression> table_expression);
+
+  bool next(SValue* row, int row_len) override;
+
+  size_t getNumColumns() override;
+
+protected:
+  ScopedPtr<TableExpression> table_expression_;
+  ScopedPtr<ResultCursor> cursor_;
 };
 
 }

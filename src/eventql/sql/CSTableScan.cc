@@ -146,8 +146,7 @@ void CSTableScan::open() {
 
 bool CSTableScan::next(SValue* out, int out_len) {
   if (columns_.empty()) {
-    RAISE(kNotYetImplementedError, "niy");
-    //return fetchNextWithoutColumns(out, out_len);
+    return fetchNextWithoutColumns(out, out_len);
   } else {
     return fetchNext(out, out_len);
   }
@@ -500,71 +499,36 @@ bool CSTableScan::fetchNext(SValue* out, int out_len) {
   }
 }
 
-//void CSTableScan::fetchNextWithoutColumns() {
-//  Vector<SValue> out_row(select_list_.size(), SValue{});
-//
-//  size_t total_records = cstable_->numRecords();
-//  for (size_t i = 0; i < total_records; ++i) {
-//    bool where_pred = true;
-//    if (where_expr_.program() != nullptr) {
-//      SValue where_tmp;
-//      VM::evaluate(txn_, where_expr_.program(), 0, nullptr, &where_tmp);
-//      where_pred = where_tmp.getBool();
-//    }
-//
-//    if (where_pred) {
-//      switch (aggr_strategy_) {
-//
-//        case AggregationStrategy::AGGREGATE_ALL:
-//          for (int i = 0; i < select_list_.size(); ++i) {
-//            VM::accumulate(
-//                txn_,
-//                select_list_[i].compiled.program(),
-//                &select_list_[i].instance,
-//                0,
-//                nullptr);
-//          }
-//          break;
-//
-//        case AggregationStrategy::AGGREGATE_WITHIN_RECORD_DEEP:
-//        case AggregationStrategy::AGGREGATE_WITHIN_RECORD_FLAT:
-//        case AggregationStrategy::NO_AGGREGATION:
-//          for (int i = 0; i < select_list_.size(); ++i) {
-//            VM::evaluate(
-//                txn_,
-//                select_list_[i].compiled.program(),
-//                0,
-//                nullptr,
-//                &out_row[i]);
-//          }
-//
-//          if (!output_(out_row.data(), out_row.size())) {
-//            return;
-//          }
-//          break;
-//      }
-//    }
-//  }
-//
-//  switch (aggr_strategy_) {
-//    case AggregationStrategy::AGGREGATE_ALL:
-//      for (int i = 0; i < select_list_.size(); ++i) {
-//        VM::result(
-//            txn_,
-//            select_list_[i].compiled.program(),
-//            &select_list_[i].instance,
-//            &out_row[i]);
-//      }
-//
-//      output_(out_row.data(), out_row.size());
-//      break;
-//
-//    default:
-//      break;
-//
-//  }
-//}
-//
+bool CSTableScan::fetchNextWithoutColumns(SValue* row, int row_len) {
+  Vector<SValue> out_row(select_list_.size(), SValue{});
+
+  while (cur_pos_ < num_records_) {
+    ++cur_pos_;
+
+    if (where_expr_.program() != nullptr) {
+      SValue where_tmp;
+      VM::evaluate(txn_, where_expr_.program(), 0, nullptr, &where_tmp);
+      if (!where_tmp.getBool()) {
+        continue;
+      }
+    }
+
+    for (int i = 0; i < select_list_.size() && i < row_len; ++i) {
+      VM::evaluate(
+          txn_,
+          select_list_[i].compiled.program(),
+          0,
+          nullptr,
+          &row[i]);
+    }
+
+    return true;
+  }
+
+  return false;
+}
+
+
 void CSTableScan::findColumns(
     RefPtr<ValueExpressionNode> expr,
     Set<String>* column_names) const {
