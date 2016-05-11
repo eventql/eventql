@@ -30,4 +30,9 @@ public:
   virtual ScopedPtr<ResultCursor> execute(QueryPlan* query_plan, size_t stmt_idx) = 0;
 };
 
+class DefaultScheduler : public Scheduler {
+public:
+  ScopedPtr<ResultCursor> execute(QueryPlan* query_plan, size_t stmt_idx) override;
+};
+
 } // namespace csql

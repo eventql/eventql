@@ -10,7 +10,6 @@
 #include <eventql/sql/runtime/runtime.h>
 #include <eventql/sql/qtree/QueryTreeUtil.h>
 #include <eventql/sql/scheduler.h>
-#include <eventql/sql/schedulers/local_scheduler.h>
 #include <eventql/sql/defaults.h>
 
 namespace csql {
@@ -63,7 +62,7 @@ ScopedPtr<QueryPlan> Runtime::buildQueryPlan(
     Transaction* txn,
     Vector<RefPtr<QueryTreeNode>> statements) {
   auto qplan = mkScoped(new QueryPlan(txn, statements));
-  qplan->setScheduler(new LocalScheduler());
+  qplan->setScheduler(new DefaultScheduler());
   return std::move(qplan);
 }
 

@@ -17,6 +17,7 @@
 using namespace stx;
 
 namespace csql {
+class TableExpression;
 
 typedef Function<bool (const SValue* argv, int argc)> RowSinkFn;
 
@@ -51,6 +52,20 @@ public:
 protected:
   size_t num_columns_;
   Function<bool(SValue*, int)> next_fn_;
+};
+
+class TableExpressionResultCursor : public ResultCursor {
+public:
+
+  TableExpressionResultCursor(ScopedPtr<TableExpression> table_expression);
+
+  bool next(SValue* row, int row_len) override;
+
+  size_t getNumColumns() override;
+
+protected:
+  ScopedPtr<TableExpression> table_expression_;
+  ScopedPtr<ResultCursor> cursor_;
 };
 
 }

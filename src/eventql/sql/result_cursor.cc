@@ -8,6 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <eventql/sql/result_cursor.h>
+#include <eventql/sql/expressions/table_expression.h>
 
 using namespace stx;
 
@@ -25,6 +26,19 @@ size_t DefaultResultCursor::getNumColumns() {
 
 bool DefaultResultCursor::next(SValue* row, int row_len) {
   return next_fn_(row, row_len);
+}
+
+TableExpressionResultCursor::TableExpressionResultCursor(
+    ScopedPtr<TableExpression> table_expression) :
+    table_expression_(std::move(table_expression)),
+    cursor_(table_expression_->execute()) {}
+
+bool TableExpressionResultCursor::next(SValue* row, int row_len) {
+  return cursor_->next(row, row_len);
+}
+
+size_t TableExpressionResultCursor::getNumColumns() {
+  return cursor_->getNumColumns();
 }
 
 }

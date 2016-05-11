@@ -7,24 +7,175 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <eventql/sql/schedulers/local_scheduler.h>
+#include <eventql/sql/scheduler.h>
+#include <eventql/sql/expressions/table_expression.h>
+#include <eventql/sql/qtree/QueryTreeNode.h>
+#include <eventql/sql/expressions/table/select.h>
+#include <eventql/sql/expressions/table/subquery.h>
+#include <eventql/sql/expressions/table/orderby.h>
+#include <eventql/sql/expressions/table/show_tables.h>
+#include <eventql/sql/expressions/table/limit.h>
+#include <eventql/sql/expressions/table/describe_table.h>
+#include <eventql/sql/expressions/table/groupby.h>
+#include <eventql/sql/expressions/table/nested_loop_join.h>
+#include <eventql/sql/qtree/SelectExpressionNode.h>
+#include <eventql/sql/qtree/SubqueryNode.h>
+#include <eventql/sql/qtree/OrderByNode.h>
+#include <eventql/sql/qtree/DescribeTableNode.h>
+#include <eventql/sql/qtree/LimitNode.h>
+#include <eventql/sql/qtree/GroupByNode.h>
+#include <eventql/sql/qtree/JoinNode.h>
 #include <eventql/sql/runtime/queryplan.h>
 
 using namespace stx;
 
 namespace csql {
 
-ScopedPtr<ResultCursor> LocalScheduler::execute(
-    QueryPlan* query_plan,
-    size_t stmt_idx) {
-  auto table_expr = buildExpression(
-      query_plan->getTransaction(),
-      query_plan->getStatement(stmt_idx));
+static ScopedPtr<TableExpression> buildExpression(
+    Transaction* ctx,
+    RefPtr<QueryTreeNode> node);
 
-  return mkScoped(new LocalResultCursor(std::move(table_expr)));
+static ScopedPtr<TableExpression> buildLimit(
+    Transaction* ctx,
+    RefPtr<LimitNode> node) {
+  return mkScoped(
+      new LimitExpression(
+          node->limit(),
+          node->offset(),
+          buildExpression(ctx, node->inputTable())));
+}
+
+static ScopedPtr<TableExpression> buildSelectExpression(
+    Transaction* ctx,
+    RefPtr<SelectExpressionNode> node) {
+  Vector<ValueExpression> select_expressions;
+  for (const auto& slnode : node->selectList()) {
+    select_expressions.emplace_back(
+        ctx->getCompiler()->buildValueExpression(ctx, slnode->expression()));
+  }
+
+  return mkScoped(new SelectExpression(
+      ctx,
+      std::move(select_expressions)));
 };
 
-ScopedPtr<TableExpression> LocalScheduler::buildExpression(
+static ScopedPtr<TableExpression> buildSubquery(
+    Transaction* txn,
+    RefPtr<SubqueryNode> node) {
+  Vector<ValueExpression> select_expressions;
+  Option<ValueExpression> where_expr;
+
+  if (!node->whereExpression().isEmpty()) {
+    where_expr = std::move(Option<ValueExpression>(
+        txn->getCompiler()->buildValueExpression(txn, node->whereExpression().get())));
+  }
+
+  for (const auto& slnode : node->selectList()) {
+    select_expressions.emplace_back(
+        txn->getCompiler()->buildValueExpression(txn, slnode->expression()));
+  }
+
+  return mkScoped(new SubqueryExpression(
+      txn,
+      std::move(select_expressions),
+      std::move(where_expr),
+      buildExpression(txn, node->subquery())));
+}
+
+static ScopedPtr<TableExpression> buildOrderByExpression(
+    Transaction* txn,
+    RefPtr<OrderByNode> node) {
+  Vector<OrderByExpression::SortExpr> sort_exprs;
+  for (const auto& ss : node->sortSpecs()) {
+    OrderByExpression::SortExpr se;
+    se.descending = ss.descending;
+    se.expr = txn->getCompiler()->buildValueExpression(txn, ss.expr);
+    sort_exprs.emplace_back(std::move(se));
+  }
+
+  return mkScoped(
+      new OrderByExpression(
+          txn,
+          std::move(sort_exprs),
+          buildExpression(txn, node->inputTable())));
+}
+
+static ScopedPtr<TableExpression> buildSequentialScan(
+    Transaction* txn,
+    RefPtr<SequentialScanNode> node) {
+  const auto& table_name = node->tableName();
+  auto table_provider = txn->getTableProvider();
+
+  auto seqscan = table_provider->buildSequentialScan(txn, node);
+  if (seqscan.isEmpty()) {
+    RAISEF(kRuntimeError, "table not found: $0", table_name);
+  }
+
+  return std::move(seqscan.get());
+}
+
+static ScopedPtr<TableExpression> buildGroupByExpression(
+    Transaction* txn,
+    RefPtr<GroupByNode> node) {
+  Vector<ValueExpression> select_expressions;
+  Vector<ValueExpression> group_expressions;
+
+  for (const auto& slnode : node->selectList()) {
+    select_expressions.emplace_back(
+        txn->getCompiler()->buildValueExpression(
+            txn,
+            slnode->expression()));
+  }
+
+  for (const auto& e : node->groupExpressions()) {
+    group_expressions.emplace_back(
+        txn->getCompiler()->buildValueExpression(txn, e));
+  }
+
+  return mkScoped(
+      new GroupByExpression(
+          txn,
+          std::move(select_expressions),
+          std::move(group_expressions),
+          buildExpression(txn, node->inputTable())));
+}
+
+static ScopedPtr<TableExpression> buildJoinExpression(
+    Transaction* ctx,
+    RefPtr<JoinNode> node) {
+  Vector<String> column_names;
+  Vector<ValueExpression> select_expressions;
+
+  for (const auto& slnode : node->selectList()) {
+    select_expressions.emplace_back(
+        ctx->getCompiler()->buildValueExpression(ctx, slnode->expression()));
+  }
+
+  Option<ValueExpression> where_expr;
+  if (!node->whereExpression().isEmpty()) {
+    where_expr = std::move(Option<ValueExpression>(
+        ctx->getCompiler()->buildValueExpression(ctx, node->whereExpression().get())));
+  }
+
+  Option<ValueExpression> join_cond_expr;
+  if (!node->joinCondition().isEmpty()) {
+    join_cond_expr = std::move(Option<ValueExpression>(
+        ctx->getCompiler()->buildValueExpression(ctx, node->joinCondition().get())));
+  }
+
+  return mkScoped(
+      new NestedLoopJoin(
+          ctx,
+          node->joinType(),
+          node->inputColumnMap(),
+          std::move(select_expressions),
+          std::move(join_cond_expr),
+          std::move(where_expr),
+          buildExpression(ctx, node->baseTable()),
+          buildExpression(ctx, node->joinedTable())));
+}
+
+static ScopedPtr<TableExpression> buildExpression(
     Transaction* ctx,
     RefPtr<QueryTreeNode> node) {
 
@@ -82,157 +233,15 @@ ScopedPtr<TableExpression> LocalScheduler::buildExpression(
       node->toString());
 };
 
-ScopedPtr<TableExpression> LocalScheduler::buildLimit(
-    Transaction* ctx,
-    RefPtr<LimitNode> node) {
+ScopedPtr<ResultCursor> DefaultScheduler::execute(
+    QueryPlan* query_plan,
+    size_t stmt_idx) {
   return mkScoped(
-      new LimitExpression(
-          node->limit(),
-          node->offset(),
-          buildExpression(ctx, node->inputTable())));
-}
-
-ScopedPtr<TableExpression> LocalScheduler::buildSelectExpression(
-    Transaction* ctx,
-    RefPtr<SelectExpressionNode> node) {
-  Vector<ValueExpression> select_expressions;
-  for (const auto& slnode : node->selectList()) {
-    select_expressions.emplace_back(
-        ctx->getCompiler()->buildValueExpression(ctx, slnode->expression()));
-  }
-
-  return mkScoped(new SelectExpression(
-      ctx,
-      std::move(select_expressions)));
+      new TableExpressionResultCursor(
+          buildExpression(
+              query_plan->getTransaction(),
+              query_plan->getStatement(stmt_idx))));
 };
 
-ScopedPtr<TableExpression> LocalScheduler::buildSubquery(
-    Transaction* txn,
-    RefPtr<SubqueryNode> node) {
-  Vector<ValueExpression> select_expressions;
-  Option<ValueExpression> where_expr;
-
-  if (!node->whereExpression().isEmpty()) {
-    where_expr = std::move(Option<ValueExpression>(
-        txn->getCompiler()->buildValueExpression(txn, node->whereExpression().get())));
-  }
-
-  for (const auto& slnode : node->selectList()) {
-    select_expressions.emplace_back(
-        txn->getCompiler()->buildValueExpression(txn, slnode->expression()));
-  }
-
-  return mkScoped(new SubqueryExpression(
-      txn,
-      std::move(select_expressions),
-      std::move(where_expr),
-      buildExpression(txn, node->subquery())));
-}
-
-ScopedPtr<TableExpression> LocalScheduler::buildOrderByExpression(
-    Transaction* txn,
-    RefPtr<OrderByNode> node) {
-  Vector<OrderByExpression::SortExpr> sort_exprs;
-  for (const auto& ss : node->sortSpecs()) {
-    OrderByExpression::SortExpr se;
-    se.descending = ss.descending;
-    se.expr = txn->getCompiler()->buildValueExpression(txn, ss.expr);
-    sort_exprs.emplace_back(std::move(se));
-  }
-
-  return mkScoped(
-      new OrderByExpression(
-          txn,
-          std::move(sort_exprs),
-          buildExpression(txn, node->inputTable())));
-}
-
-ScopedPtr<TableExpression> LocalScheduler::buildSequentialScan(
-    Transaction* txn,
-    RefPtr<SequentialScanNode> node) {
-  const auto& table_name = node->tableName();
-  auto table_provider = txn->getTableProvider();
-
-  auto seqscan = table_provider->buildSequentialScan(txn, node);
-  if (seqscan.isEmpty()) {
-    RAISEF(kRuntimeError, "table not found: $0", table_name);
-  }
-
-  return std::move(seqscan.get());
-}
-
-ScopedPtr<TableExpression> LocalScheduler::buildGroupByExpression(
-    Transaction* txn,
-    RefPtr<GroupByNode> node) {
-  Vector<ValueExpression> select_expressions;
-  Vector<ValueExpression> group_expressions;
-
-  for (const auto& slnode : node->selectList()) {
-    select_expressions.emplace_back(
-        txn->getCompiler()->buildValueExpression(
-            txn,
-            slnode->expression()));
-  }
-
-  for (const auto& e : node->groupExpressions()) {
-    group_expressions.emplace_back(
-        txn->getCompiler()->buildValueExpression(txn, e));
-  }
-
-  return mkScoped(
-      new GroupByExpression(
-          txn,
-          std::move(select_expressions),
-          std::move(group_expressions),
-          buildExpression(txn, node->inputTable())));
-}
-
-ScopedPtr<TableExpression> LocalScheduler::buildJoinExpression(
-    Transaction* ctx,
-    RefPtr<JoinNode> node) {
-  Vector<String> column_names;
-  Vector<ValueExpression> select_expressions;
-
-  for (const auto& slnode : node->selectList()) {
-    select_expressions.emplace_back(
-        ctx->getCompiler()->buildValueExpression(ctx, slnode->expression()));
-  }
-
-  Option<ValueExpression> where_expr;
-  if (!node->whereExpression().isEmpty()) {
-    where_expr = std::move(Option<ValueExpression>(
-        ctx->getCompiler()->buildValueExpression(ctx, node->whereExpression().get())));
-  }
-
-  Option<ValueExpression> join_cond_expr;
-  if (!node->joinCondition().isEmpty()) {
-    join_cond_expr = std::move(Option<ValueExpression>(
-        ctx->getCompiler()->buildValueExpression(ctx, node->joinCondition().get())));
-  }
-
-  return mkScoped(
-      new NestedLoopJoin(
-          ctx,
-          node->joinType(),
-          node->inputColumnMap(),
-          std::move(select_expressions),
-          std::move(join_cond_expr),
-          std::move(where_expr),
-          buildExpression(ctx, node->baseTable()),
-          buildExpression(ctx, node->joinedTable())));
-}
-
-LocalResultCursor::LocalResultCursor(
-    ScopedPtr<TableExpression> table_expression) :
-    table_expression_(std::move(table_expression)),
-    cursor_(table_expression_->execute()) {}
-
-bool LocalResultCursor::next(SValue* row, int row_len) {
-  return cursor_->next(row, row_len);
-}
-
-size_t LocalResultCursor::getNumColumns() {
-  return cursor_->getNumColumns();
-}
 
 } // namespace csql
