@@ -38,6 +38,13 @@ ScopedPtr<ResultCursor> NestedLoopJoin::execute() {
   Vector<SValue> row(joined_cursor->getNumColumns());
   while (joined_cursor->next(row.data(), row.size())) {
     joined_tbl_data_.emplace_back(row);
+
+    if (joined_tbl_data_.size() >= kMaxInMemoryRows) {
+      RAISE(
+          kRuntimeError,
+          "Nested Loop JOIN intermediate result set is too large, try using an"
+          " equi-join instead.");
+    }
   }
 
   base_tbl_cursor_ = base_tbl_->execute();
@@ -58,42 +65,6 @@ ScopedPtr<ResultCursor> NestedLoopJoin::execute() {
       RAISE(kIllegalStateError);
   }
 }
-
-
-//bool NestedLoopJoin::onInputRow(
-//    const TaskID& input_id,
-//    const SValue* row,
-//    int row_len) {
-//  if (base_tbl_ids_.count(input_id) > 0) {
-//    base_tbl_.emplace_back(row, row + row_len);
-//    if (base_tbl_.size() >= kMaxInMemoryRows) {
-//      RAISE(
-//          kRuntimeError,
-//          "Nested Loop JOIN intermediate result set is too large, try using an"
-//          " equi-join instead.");
-//    }
-//    return true;
-//  }
-//
-//  if (joined_tbl_ids_.count(input_id) > 0) {
-//    joined_tbl_.emplace_back(row, row + row_len);
-//    if (joined_tbl_.size() >= kMaxInMemoryRows) {
-//      RAISE(
-//          kRuntimeError,
-//          "Nested Loop JOIN intermediate result set is too large, try using an"
-//          " equi-join instead.");
-//    }
-//    return true;
-//  }
-//
-//  RAISE(kIllegalStateError);
-//}
-//
-//void NestedLoopJoin::onInputsReady() {
-//
-//  base_tbl_.clear();
-//  joined_tbl_.clear();
-//}
 
 ScopedPtr<ResultCursor> NestedLoopJoin::executeCartesianJoin() {
   auto cursor = [this] (SValue* row, int row_len) -> bool {
@@ -234,161 +205,101 @@ ScopedPtr<ResultCursor> NestedLoopJoin::executeInnerJoin() {
 }
 
 ScopedPtr<ResultCursor> NestedLoopJoin::executeOuterJoin() {
-  //Vector<SValue> outbuf(select_exprs_.size(), SValue{});
-  //Vector<SValue> input_buf_(input_map_.size(), SValue{});
+  auto cursor = [this] (SValue* row, int row_len) -> bool {
+    for (;;) {
+      if (joined_tbl_pos_ == 0 ||
+          joined_tbl_pos_ == joined_tbl_data_.size()) {
+        joined_tbl_pos_ = 0;
+        joined_tbl_row_found_ = false;
 
-  //for (const auto& r1 : base_tbl_) {
-  //  bool match = false;
+        if (!base_tbl_cursor_->next(
+              base_tbl_row_.data(),
+              base_tbl_row_.size())) {
+          return false;
+        }
+      }
 
-  //  for (const auto& r2 : joined_tbl_) {
-  //    for (size_t i = 0; i < input_map_.size(); ++i) {
-  //      const auto& m = input_map_[i];
+      bool match = false;
+      while (joined_tbl_pos_ < joined_tbl_data_.size()) {
+        const auto& joined_table_row = joined_tbl_data_[joined_tbl_pos_++];
 
-  //      switch (m.table_idx) {
-  //        case 0:
-  //          input_buf_[i] = r1[m.column_idx];
-  //          break;
-  //        case 1:
-  //          input_buf_[i] = r2[m.column_idx];
-  //          break;
-  //        default:
-  //          RAISE(kRuntimeError, "invalid table index");
-  //      }
-  //    }
+        for (size_t i = 0; i < input_map_.size(); ++i) {
+          const auto& m = input_map_[i];
 
-  //    {
-  //      SValue pred;
-  //      VM::evaluate(
-  //          txn_,
-  //          join_cond_expr_.get().program(),
-  //          input_buf_.size(),
-  //          input_buf_.data(),
-  //          &pred);
+          switch (m.table_idx) {
+            case 0:
+              input_buf_[i] = base_tbl_row_[m.column_idx];
+              break;
+            case 1:
+              input_buf_[i] = joined_table_row[m.column_idx];
+              break;
+            default:
+              RAISE(kRuntimeError, "invalid table index");
+          }
+        }
 
-  //      if (!pred.getBool()) {
-  //        continue;
-  //      }
-  //    }
+        SValue pred;
+        VM::evaluate(
+            txn_,
+            join_cond_expr_.get().program(),
+            input_buf_.size(),
+            input_buf_.data(),
+            &pred);
 
-  //    if (!where_expr_.isEmpty()) {
-  //      SValue pred;
-  //      VM::evaluate(
-  //          txn_,
-  //          where_expr_.get().program(),
-  //          input_buf_.size(),
-  //          input_buf_.data(),
-  //          &pred);
+        if (!pred.getBool()) {
+          continue;
+        }
 
-  //      if (!pred.getBool()) {
-  //        continue;
-  //      }
-  //    }
+        joined_tbl_row_found_ = true;
+        match = true;
+        break;
+      }
 
-  //    match = true;
+      if (match || !joined_tbl_row_found_) {
+        if (!joined_tbl_row_found_) {
+          for (size_t i = 0; i < input_map_.size(); ++i) {
+            switch (input_map_[i].table_idx) {
+              case 0:
+                break;
+              case 1:
+                input_buf_[i] = SValue{};
+                break;
+              default:
+                RAISE(kRuntimeError, "invalid table index");
+            }
+          }
+        }
 
-  //    for (int i = 0; i < select_exprs_.size(); ++i) {
-  //      VM::evaluate(
-  //          txn_,
-  //          select_exprs_[i].program(),
-  //          input_buf_.size(),
-  //          input_buf_.data(),
-  //          &outbuf[i]);
-  //    }
+        if (!where_expr_.isEmpty()) {
+          SValue pred;
+          VM::evaluate(
+              txn_,
+              where_expr_.get().program(),
+              input_buf_.size(),
+              input_buf_.data(),
+              &pred);
 
-  //    //if (!input_(outbuf.data(), outbuf.size()))  {
-  //    //  return;
-  //    //}
-  //  }
+          if (!pred.getBool()) {
+            continue;
+          }
+        }
 
-  //  if (!match) {
-  //    for (size_t i = 0; i < input_map_.size(); ++i) {
-  //      const auto& m = input_map_[i];
+        for (int i = 0; i < select_exprs_.size() && i < row_len; ++i) {
+          VM::evaluate(
+              txn_,
+              select_exprs_[i].program(),
+              input_buf_.size(),
+              input_buf_.data(),
+              &row[i]);
+        }
 
-  //      if (m.table_idx != 0) {
-  //        input_buf_[i] = SValue();
-  //      }
-  //    }
+        return true;
+      }
+    }
+  };
 
-  //    if (!where_expr_.isEmpty()) {
-  //      SValue pred;
-  //      VM::evaluate(
-  //          txn_,
-  //          where_expr_.get().program(),
-  //          input_buf_.size(),
-  //          input_buf_.data(),
-  //          &pred);
-
-  //      if (!pred.getBool()) {
-  //        continue;
-  //      }
-  //    }
-
-  //    for (int i = 0; i < select_exprs_.size(); ++i) {
-  //      VM::evaluate(
-  //          txn_,
-  //          select_exprs_[i].program(),
-  //          input_buf_.size(),
-  //          input_buf_.data(),
-  //          &outbuf[i]);
-  //    }
-
-  //    //if (!input_(outbuf.data(), outbuf.size()))  {
-  //    //  return;
-  //    //}
-  //  }
-  //}
-  RAISE(kNotYetImplementedError, "nyi");
+  return mkScoped(new DefaultResultCursor( select_exprs_.size(), cursor));
 }
 
-//NestedLoopJoinFactory::NestedLoopJoinFactory(
-//    JoinType join_type,
-//    const Set<TaskID>& base_tbl_ids,
-//    const Set<TaskID>& joined_tbl_ids,
-//    const Vector<JoinNode::InputColumnRef>& input_map,
-//    Vector<RefPtr<SelectListNode>> select_exprs,
-//    Option<RefPtr<ValueExpressionNode>> join_cond_expr,
-//    Option<RefPtr<ValueExpressionNode>> where_expr) :
-//    join_type_(join_type),
-//    base_tbl_ids_(base_tbl_ids),
-//    joined_tbl_ids_(joined_tbl_ids),
-//    input_map_(input_map),
-//    select_exprs_(select_exprs),
-//    join_cond_expr_(join_cond_expr),
-//    where_expr_(where_expr) {}
-//
-//RefPtr<Task> NestedLoopJoinFactory::build(
-//    Transaction* txn,
-//    HashMap<TaskID, ScopedPtr<ResultCursor>> input) const {
-//  auto qbuilder = txn->getRuntime()->queryBuilder();
-//
-//  Vector<ValueExpression> select_expressions;
-//  for (const auto& slnode : select_exprs_) {
-//    select_expressions.emplace_back(
-//        qbuilder->buildValueExpression(txn, slnode->expression()));
-//  }
-//
-//  Option<ValueExpression> join_cond_expr;
-//  if (!join_cond_expr_.isEmpty()) {
-//    join_cond_expr = std::move(Option<ValueExpression>(
-//        qbuilder->buildValueExpression(txn, join_cond_expr_.get())));
-//  }
-//
-//  Option<ValueExpression> where_expr;
-//  if (!where_expr_.isEmpty()) {
-//    where_expr = std::move(Option<ValueExpression>(
-//        qbuilder->buildValueExpression(txn, where_expr_.get())));
-//  }
-//
-//  return new NestedLoopJoin(
-//      txn,
-//      join_type_,
-//      base_tbl_ids_,
-//      joined_tbl_ids_,
-//      input_map_,
-//      std::move(select_expressions),
-//      std::move(join_cond_expr),
-//      std::move(where_expr),
-//      std::move(input));
-//}
 
 }

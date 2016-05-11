@@ -56,6 +56,7 @@ protected:
   ScopedPtr<TableExpression> joined_tbl_;
   Vector<Vector<SValue>> joined_tbl_data_;
   size_t joined_tbl_pos_;
+  bool joined_tbl_row_found_;
 };
 
 //class NestedLoopJoinFactory  : public TaskFactory {
