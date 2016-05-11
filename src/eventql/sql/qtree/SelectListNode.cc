@@ -45,7 +45,7 @@ void SelectListNode::setAlias(const String& alias) {
 }
 
 String SelectListNode::toString() const {
-  String str = "(column-ref ";
+  String str = "(select-list ";
   str += expr_->toString();
 
   if (!alias_.isEmpty()) {
@@ -55,5 +55,33 @@ String SelectListNode::toString() const {
   str += ")";
   return str;
 }
+
+void SelectListNode::encode(
+    QueryTreeCoder* coder,
+    const SelectListNode& node,
+    stx::OutputStream* os) {
+  coder->encode(node.expr_.get(), os);
+
+  if (!node.alias_.isEmpty()) {
+    os->appendUInt8(1);
+    os->appendLenencString(node.alias_.get());
+  } else {
+    os->appendUInt8(0);
+  }
+}
+
+RefPtr<QueryTreeNode> SelectListNode::decode(
+    QueryTreeCoder* coder,
+    stx::InputStream* is) {
+  auto node = new SelectListNode(
+      coder->decode(is).asInstanceOf<ValueExpressionNode>());
+
+  if (is->readUInt8()) {
+    node->setAlias(is->readLenencString());
+  }
+
+  return node;
+}
+
 
 } // namespace csql
