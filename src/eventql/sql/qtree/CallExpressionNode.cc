@@ -48,5 +48,29 @@ String CallExpressionNode::toSQL() const {
       StringUtil::join(args_sql, ","));
 }
 
+void CallExpressionNode::encode(
+    QueryTreeCoder* coder,
+    const CallExpressionNode& node,
+    stx::OutputStream* os) {
+  os->appendLenencString(node.symbol());
+  os->appendUInt64(node.arguments_.size());
+  for (auto arg : node.arguments_) {
+    coder->encode(arg.get(), os);
+  }
+}
+
+RefPtr<QueryTreeNode> CallExpressionNode::decode (
+    QueryTreeCoder* coder,
+    stx::InputStream* is) {
+  auto symbol = is->readLenencString();
+
+  Vector<RefPtr<ValueExpressionNode>> arguments;
+  for (size_t i = 0; i < is->readUInt64(); ++i) {
+    arguments.emplace_back(coder->decode(is).asInstanceOf<ValueExpressionNode>());
+  }
+
+  return new CallExpressionNode(symbol, arguments);
+}
+
 } // namespace csql
 
