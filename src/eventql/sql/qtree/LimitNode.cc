@@ -73,8 +73,14 @@ void LimitNode::encode(const LimitNode& node, stx::OutputStream* os) {
   QueryTreeCoder::encode(node.table_, os);
 }
 
-RefPtr<QueryTreeNode> LimitNode::decode(stx::InputStream* is) {
-  RAISE(kNotYetImplementedError, "nyi");
+RefPtr<QueryTreeNode> LimitNode::decode(
+    Transaction* txn,
+    stx::InputStream* is) {
+  auto limit = is->readVarUInt();
+  auto offset = is->readVarUInt();
+  auto table = QueryTreeCoder::decode(txn, is);
+
+  return new LimitNode(limit, offset, table);
 }
 
 static QueryTreeCoderType<LimitNode> kCoderType{};

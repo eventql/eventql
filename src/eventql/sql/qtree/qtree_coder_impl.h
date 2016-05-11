@@ -19,8 +19,8 @@ QueryTreeCoderType<T>::QueryTreeCoderType() {
       [] (RefPtr<QueryTreeNode> self, stx::OutputStream* os) {
         T::encode(*dynamic_cast<T*>(self.get()), os);
       },
-      [] (stx::InputStream* is) -> RefPtr<QueryTreeNode> {
-        return T::decode(is);
+      [] (Transaction* txn, stx::InputStream* is) -> RefPtr<QueryTreeNode> {
+        return T::decode(txn, is);
       });
 }
 

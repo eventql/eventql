@@ -32,7 +32,7 @@ void QueryTreeCoder::encode(RefPtr<QueryTreeNode> tree, stx::OutputStream* os) {
   coder->second.encode_fn(tree, os);
 }
 
-RefPtr<QueryTreeNode> QueryTreeCoder::decode(stx::InputStream* is) {
+RefPtr<QueryTreeNode> QueryTreeCoder::decode(Transaction* txn, stx::InputStream* is) {
   auto wire_type = is->readVarUInt();
 
   auto coder = coders_by_wire_type_id.find(wire_type);
@@ -40,7 +40,7 @@ RefPtr<QueryTreeNode> QueryTreeCoder::decode(stx::InputStream* is) {
     RAISE(kIOError, "don't know how to decode this QueryTreeNode");
   }
 
-  return coder->second.decode_fn(is);
+  return coder->second.decode_fn(txn, is);
 }
 
 void QueryTreeCoder::registerType(

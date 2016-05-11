@@ -23,10 +23,10 @@ public:
   friend class QueryTreeCoderType;
 
   typedef Function<void (RefPtr<QueryTreeNode>, stx::OutputStream*)> EncodeFn;
-  typedef Function<RefPtr<QueryTreeNode> (stx::InputStream*)> DecodeFn;
+  typedef Function<RefPtr<QueryTreeNode> (Transaction* txn, stx::InputStream*)> DecodeFn;
 
   static void encode(RefPtr<QueryTreeNode> tree, stx::OutputStream* os);
-  static RefPtr<QueryTreeNode> decode(stx::InputStream* is);
+  static RefPtr<QueryTreeNode> decode(Transaction* txn, stx::InputStream* is);
 
 protected:
 

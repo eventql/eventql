@@ -46,7 +46,7 @@ public:
   String toString() const override;
 
   static void encode(const LimitNode& node, stx::OutputStream* os);
-  static RefPtr<QueryTreeNode> decode(stx::InputStream* os);
+  static RefPtr<QueryTreeNode> decode(Transaction* txn, stx::InputStream* os);
 
 protected:
   size_t limit_;
