@@ -190,7 +190,36 @@ ScopedPtr<TableExpression> LocalScheduler::buildGroupByExpression(
 ScopedPtr<TableExpression> LocalScheduler::buildJoinExpression(
     Transaction* ctx,
     RefPtr<JoinNode> node) {
-  RAISE(kNotYetImplementedError, "nyi");
+  Vector<String> column_names;
+  Vector<ValueExpression> select_expressions;
+
+  for (const auto& slnode : node->selectList()) {
+    select_expressions.emplace_back(
+        ctx->getCompiler()->buildValueExpression(ctx, slnode->expression()));
+  }
+
+  Option<ValueExpression> where_expr;
+  if (!node->whereExpression().isEmpty()) {
+    where_expr = std::move(Option<ValueExpression>(
+        ctx->getCompiler()->buildValueExpression(ctx, node->whereExpression().get())));
+  }
+
+  Option<ValueExpression> join_cond_expr;
+  if (!node->joinCondition().isEmpty()) {
+    join_cond_expr = std::move(Option<ValueExpression>(
+        ctx->getCompiler()->buildValueExpression(ctx, node->joinCondition().get())));
+  }
+
+  return mkScoped(
+      new NestedLoopJoin(
+          ctx,
+          node->joinType(),
+          node->inputColumnMap(),
+          std::move(select_expressions),
+          std::move(join_cond_expr),
+          std::move(where_expr),
+          buildExpression(ctx, node->baseTable()),
+          buildExpression(ctx, node->joinedTable())));
 }
 
 LocalResultCursor::LocalResultCursor(

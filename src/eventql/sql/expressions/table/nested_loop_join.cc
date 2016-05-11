@@ -32,6 +32,12 @@ NestedLoopJoin::NestedLoopJoin(
 static const size_t kMaxInMemoryRows = 1000000;
 
 ScopedPtr<ResultCursor> NestedLoopJoin::execute() {
+  auto joined_cursor = joined_tbl_->execute();
+  Vector<SValue> row(joined_cursor->getNumColumns());
+  while (joined_cursor->next(row.data(), row.size())) {
+    joined_table_data_.emplace_back(row);
+  }
+
   switch (join_type_) {
     case JoinType::OUTER:
       return executeOuterJoin();
@@ -138,6 +144,7 @@ ScopedPtr<ResultCursor> NestedLoopJoin::executeCartesianJoin() {
 }
 
 ScopedPtr<ResultCursor> NestedLoopJoin::executeInnerJoin() {
+
   //Vector<SValue> outbuf(select_exprs_.size(), SValue{});
   //Vector<SValue> inbuf(input_map_.size(), SValue{});
 

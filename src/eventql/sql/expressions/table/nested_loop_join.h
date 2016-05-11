@@ -51,6 +51,7 @@ protected:
   Option<ValueExpression> where_expr_;
   ScopedPtr<TableExpression> base_tbl_;
   ScopedPtr<TableExpression> joined_tbl_;
+  Vector<Vector<SValue>> joined_table_data_;
 };
 
 //class NestedLoopJoinFactory  : public TaskFactory {
