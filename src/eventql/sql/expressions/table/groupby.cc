@@ -76,7 +76,7 @@ ScopedPtr<ResultCursor> GroupByExpression::execute() {
 bool GroupByExpression::next(SValue* row, size_t row_len) {
   if (groups_iter_ != groups_.end()) {
     for (size_t i = 0; i < select_exprs_.size(); ++i) {
-      VM::result(txn_, select_exprs_[i].program(), &groups_iter_->second[i], row);
+      VM::result(txn_, select_exprs_[i].program(), &groups_iter_->second[i], &row[i]);
     }
 
     if (++groups_iter_ == groups_.end()) {
