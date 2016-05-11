@@ -15,13 +15,13 @@ using namespace stx;
 namespace csql {
 
 QueryTreeCoder::QueryTreeCoder(Transaction* txn) : txn_(txn) {
-  registerType<LimitNode>();
+  registerType<LimitNode>(1);
 }
 
 void QueryTreeCoder::encode(RefPtr<QueryTreeNode> tree, stx::OutputStream* os) {
   auto coder = coders_by_type_id_.find(&typeid(*tree));
   if (coder == coders_by_type_id_.end()) {
-    RAISE(kIOError, "don't know how to encode this QueryTreeNode");
+    RAISEF(kIOError, "don't know how to encode this QueryTreeNode: $0", tree->toString());
   }
 
   os->appendVarUInt(coder->second.wire_type_id);
@@ -33,7 +33,7 @@ RefPtr<QueryTreeNode> QueryTreeCoder::decode(stx::InputStream* is) {
 
   auto coder = coders_by_wire_type_id_.find(wire_type);
   if (coder == coders_by_wire_type_id_.end()) {
-    RAISE(kIOError, "don't know how to decode this QueryTreeNode");
+    RAISEF(kIOError, "don't know how to decode this QueryTreeNode: $0", wire_type);
   }
 
   return coder->second.decode_fn(this, is);

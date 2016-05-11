@@ -21,8 +21,6 @@ namespace csql {
 class LimitNode : public TableExpressionNode {
 public:
 
-  static const uint64_t kSerializableID = 1;
-
   LimitNode(
       size_t limit,
       size_t offset,

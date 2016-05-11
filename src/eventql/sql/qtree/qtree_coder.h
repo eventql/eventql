@@ -22,7 +22,7 @@ public:
   QueryTreeCoder(Transaction* txn);
 
   template <class T>
-  void registerType();
+  void registerType(uint64_t wire_type_id);
 
   void encode(RefPtr<QueryTreeNode> tree, stx::OutputStream* os);
   RefPtr<QueryTreeNode> decode(stx::InputStream* is);

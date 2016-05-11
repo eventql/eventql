@@ -12,10 +12,10 @@
 namespace csql {
 
 template <class T>
-void QueryTreeCoder::registerType() {
+void QueryTreeCoder::registerType(uint64_t wire_type_id) {
   QueryTreeCoderType type;
   type.type_id = &typeid(T);
-  type.wire_type_id = T::kSerializableID;
+  type.wire_type_id = wire_type_id;
 
   type.encode_fn = [] (QueryTreeCoder* coder, RefPtr<QueryTreeNode> self, stx::OutputStream* os) {
     T::encode(coder, *dynamic_cast<T*>(self.get()), os);
