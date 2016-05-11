@@ -1,4 +1,4 @@
-/**
+/*
  * This file is part of the "libfnord" project
  *   Copyright (c) 2015 Paul Asmuth
  *
@@ -276,13 +276,51 @@ void SequentialScanNode::encode(
     QueryTreeCoder* coder,
     const SequentialScanNode& node,
     stx::OutputStream* os) {
-  RAISE(kNotYetImplementedError, "nyi");
+
+  os->appendLenencString(node.table_name_);
+  os->appendVarUInt(node.select_list_.size());
+  for (size_t i = 0; i < node.select_list_.size(); ++i) {
+   coder->encode(node.select_list_[i].get(), os);
+  }
+
+  os->appendUInt8((uint8_t) node.aggr_strategy_);
+
+  if (!node.where_expr_.isEmpty()) {
+    os->appendUInt8(1);
+    coder->encode(node.where_expr_.get().get(), os);
+  } else {
+    os->appendUInt8(0);
+  }
 }
 
 RefPtr<QueryTreeNode> SequentialScanNode::decode(
     QueryTreeCoder* coder,
-    stx::InputStream* os) {
-  RAISE(kNotYetImplementedError, "nyi");
+    stx::InputStream* is) {
+  auto table_provider = coder->getTransaction()->getTableProvider();
+  Option<TableInfo> table_info = table_provider->describe(is->readLenencString());
+  if (table_info.isEmpty()) {
+    RAISE(kIllegalArgumentError, "table not found");
+  }
+
+  auto select_list_size = is->readVarUInt();
+  Vector<RefPtr<SelectListNode>> select_list;
+  for (auto i = 0; i < select_list_size; ++i) {
+    select_list.emplace_back(coder->decode(is).asInstanceOf<SelectListNode>());
+  }
+
+  auto aggr_strategy = (AggregationStrategy) is->readUInt8();
+
+  Option<RefPtr<ValueExpressionNode>> where_expr;
+  if (is->readUInt8()) {
+    where_expr = coder->decode(is).asInstanceOf<ValueExpressionNode>();
+  }
+
+  return new SequentialScanNode(
+      table_info.get(),
+      table_provider,
+      select_list,
+      where_expr,
+      aggr_strategy);
 }
 
 } // namespace csql
