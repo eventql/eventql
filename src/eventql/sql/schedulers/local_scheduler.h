@@ -17,11 +17,13 @@
 #include <eventql/sql/expressions/table/show_tables.h>
 #include <eventql/sql/expressions/table/limit.h>
 #include <eventql/sql/expressions/table/describe_table.h>
+#include <eventql/sql/expressions/table/groupby.h>
 #include <eventql/sql/qtree/SelectExpressionNode.h>
 #include <eventql/sql/qtree/SubqueryNode.h>
 #include <eventql/sql/qtree/OrderByNode.h>
 #include <eventql/sql/qtree/DescribeTableNode.h>
 #include <eventql/sql/qtree/LimitNode.h>
+#include <eventql/sql/qtree/GroupByNode.h>
 
 
 using namespace stx;
@@ -59,6 +61,10 @@ protected:
   ScopedPtr<TableExpression> buildOrderByExpression(
     Transaction* txn,
     RefPtr<OrderByNode> node);
+
+  ScopedPtr<TableExpression> buildGroupByExpression(
+    Transaction* txn,
+    RefPtr<GroupByNode> node);
 
 };
 

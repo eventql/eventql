@@ -54,6 +54,12 @@ ScopedPtr<TableExpression> LocalScheduler::buildExpression(
         node.asInstanceOf<SequentialScanNode>());
   }
 
+  if (dynamic_cast<GroupByNode*>(node.get())) {
+    return buildGroupByExpression(
+        ctx,
+        node.asInstanceOf<GroupByNode>());
+  }
+
   if (dynamic_cast<ShowTablesNode*>(node.get())) {
     return mkScoped(new ShowTablesExpression(ctx));
   }
@@ -147,6 +153,32 @@ ScopedPtr<TableExpression> LocalScheduler::buildSequentialScan(
   }
 
   return std::move(seqscan.get());
+}
+
+ScopedPtr<TableExpression> LocalScheduler::buildGroupByExpression(
+    Transaction* txn,
+    RefPtr<GroupByNode> node) {
+  Vector<ValueExpression> select_expressions;
+  Vector<ValueExpression> group_expressions;
+
+  for (const auto& slnode : node->selectList()) {
+    select_expressions.emplace_back(
+        txn->getCompiler()->buildValueExpression(
+            txn,
+            slnode->expression()));
+  }
+
+  for (const auto& e : node->groupExpressions()) {
+    group_expressions.emplace_back(
+        txn->getCompiler()->buildValueExpression(txn, e));
+  }
+
+  return mkScoped(
+      new GroupByExpression(
+          txn,
+          std::move(select_expressions),
+          std::move(group_expressions),
+          buildExpression(txn, node->inputTable())));
 }
 
 LocalResultCursor::LocalResultCursor(
