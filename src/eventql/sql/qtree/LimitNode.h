@@ -9,6 +9,8 @@
  */
 #pragma once
 #include <eventql/util/stdtypes.h>
+#include <eventql/util/io/outputstream.h>
+#include <eventql/util/io/inputstream.h>
 #include <eventql/sql/qtree/TableExpressionNode.h>
 
 using namespace stx;
@@ -17,6 +19,8 @@ namespace csql {
 
 class LimitNode : public TableExpressionNode {
 public:
+
+  static const uint64_t kSerializableID = 1;
 
   LimitNode(
       size_t limit,
@@ -40,6 +44,9 @@ public:
   RefPtr<QueryTreeNode> deepCopy() const override;
 
   String toString() const override;
+
+  static void encode(const LimitNode& node, stx::OutputStream* os);
+  static RefPtr<QueryTreeNode> decode(stx::InputStream* os);
 
 protected:
   size_t limit_;

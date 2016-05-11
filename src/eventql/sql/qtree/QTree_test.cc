@@ -18,6 +18,7 @@
 #include "eventql/sql/qtree/CallExpressionNode.h"
 #include "eventql/sql/qtree/LiteralExpressionNode.h"
 #include "eventql/sql/qtree/QueryTreeUtil.h"
+#include "eventql/sql/qtree/qtree_coder.h"
 #include "eventql/sql/CSTableScanProvider.h"
 
 using namespace stx;
@@ -405,4 +406,32 @@ TEST_CASE(QTreeTest, TestPruneConstraints, [] () {
   }
 });
 
+TEST_CASE(QTreeTest, TestSerialization, [] () {
+  auto runtime = Runtime::getDefaultRuntime();
+  auto txn = runtime->newTransaction();
+
+  txn->addTableProvider(
+      new CSTableScanProvider(
+          "testtable",
+          "src/eventql/sql/testdata/testtbl.cst"));
+
+  String query = "select 1 + 2 + 3 from testtable where time > ucase('fu') + lcase('Bar') limit 10;";
+
+  csql::Parser parser;
+  parser.parse(query.data(), query.size());
+
+  auto qtree_builder = runtime->queryPlanBuilder();
+  auto qtrees = qtree_builder->build(
+      txn.get(),
+      parser.getStatements(),
+      txn->getTableProvider());
+
+  EXPECT_EQ(qtrees.size(), 1);
+  auto qtree = qtrees[0];
+
+  Buffer buf;
+  auto buf_os = BufferOutputStream::fromBuffer(&buf);
+  QueryTreeCoder::encode(qtree, buf_os.get());
+
+});
 

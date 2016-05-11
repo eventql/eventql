@@ -39,6 +39,7 @@ add_library(chartsql STATIC
     parser/parser.cc
     parser/token.cc
     parser/tokenize.cc
+    qtree/qtree_coder.cc
     qtree/CallExpressionNode.cc
     qtree/ColumnReferenceNode.cc
     qtree/JoinCondition.cc
