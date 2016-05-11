@@ -39,8 +39,9 @@ protected:
   Vector<SortExpr> sort_specs_;
   ScopedPtr<TableExpression> input_;
   ScopedPtr<ResultCursor> input_cursor_;
-  size_t pos_;
   Vector<Vector<SValue>> rows_;
+  size_t num_rows_;
+  size_t pos_;
 };
 
 }

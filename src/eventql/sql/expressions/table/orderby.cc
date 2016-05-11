@@ -22,6 +22,7 @@ OrderByExpression::OrderByExpression(
     txn_(txn),
     sort_specs_(std::move(sort_specs)),
     input_(std::move(input)),
+    num_rows_(0),
     pos_(0) {
   if (sort_specs_.size() == 0) {
     RAISE(kIllegalArgumentError, "can't execute ORDER BY: no sort specs");
@@ -35,6 +36,8 @@ ScopedPtr<ResultCursor> OrderByExpression::execute() {
   while (input_cursor_->next(row.data(), row.size())) {
     rows_.emplace_back(row);
   }
+
+  num_rows_ = rows_.size();
 
   std::sort(
       rows_.begin(),
@@ -87,14 +90,17 @@ ScopedPtr<ResultCursor> OrderByExpression::execute() {
 }
 
 bool OrderByExpression::next(SValue* out, int out_len) {
-  if (pos_ >= rows_.size()) {
+  if (pos_ >= num_rows_) {
     return false;
   } else {
     for (size_t i = 0; i < input_cursor_->getNumColumns() && i < out_len; ++i) {
       out[i] = rows_[pos_][i];
     }
 
-    ++pos_;
+    if (++pos_ >= num_rows_) {
+      rows_.clear();
+    }
+
     return true;
   }
 }
