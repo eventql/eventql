@@ -8,52 +8,40 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <eventql/sql/qtree/qtree_coder.h>
+#include <eventql/sql/qtree/LimitNode.h>
 
 using namespace stx;
 
 namespace csql {
 
-struct QueryTreeCoderTypeFactory {
-  uint64_t wire_type;
-  QueryTreeCoder::EncodeFn encode_fn;
-  QueryTreeCoder::DecodeFn decode_fn;
-};
-
-static HashMap<const std::type_info*, QueryTreeCoderTypeFactory> coders_by_type_id{};
-static HashMap<uint64_t, QueryTreeCoderTypeFactory> coders_by_wire_type_id{};
+QueryTreeCoder::QueryTreeCoder(Transaction* txn) : txn_(txn) {
+  registerType<LimitNode>();
+}
 
 void QueryTreeCoder::encode(RefPtr<QueryTreeNode> tree, stx::OutputStream* os) {
-  auto coder = coders_by_type_id.find(&typeid(*tree));
-  if (coder == coders_by_type_id.end()) {
+  auto coder = coders_by_type_id_.find(&typeid(*tree));
+  if (coder == coders_by_type_id_.end()) {
     RAISE(kIOError, "don't know how to encode this QueryTreeNode");
   }
 
-  os->appendVarUInt(coder->second.wire_type);
-  coder->second.encode_fn(tree, os);
+  os->appendVarUInt(coder->second.wire_type_id);
+  coder->second.encode_fn(this, tree, os);
 }
 
-RefPtr<QueryTreeNode> QueryTreeCoder::decode(Transaction* txn, stx::InputStream* is) {
+RefPtr<QueryTreeNode> QueryTreeCoder::decode(stx::InputStream* is) {
   auto wire_type = is->readVarUInt();
 
-  auto coder = coders_by_wire_type_id.find(wire_type);
-  if (coder == coders_by_wire_type_id.end()) {
+  auto coder = coders_by_wire_type_id_.find(wire_type);
+  if (coder == coders_by_wire_type_id_.end()) {
     RAISE(kIOError, "don't know how to decode this QueryTreeNode");
   }
 
-  return coder->second.decode_fn(txn, is);
+  return coder->second.decode_fn(this, is);
 }
 
-void QueryTreeCoder::registerType(
-    const std::type_info* type_id,
-    uint64_t wire_type_id,
-    EncodeFn encode_fn,
-    DecodeFn decode_fn) {
-  QueryTreeCoderTypeFactory f;
-  f.encode_fn = encode_fn;
-  f.decode_fn = decode_fn;
-  f.wire_type = wire_type_id;
-  coders_by_type_id[type_id] = f;
-  coders_by_wire_type_id[wire_type_id] = f;
+void QueryTreeCoder::registerType(QueryTreeCoderType t) {
+  coders_by_type_id_[t.type_id] = t;
+  coders_by_wire_type_id_[t.wire_type_id] = t;
 }
 
 } // namespace csql

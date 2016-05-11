@@ -12,16 +12,20 @@
 namespace csql {
 
 template <class T>
-QueryTreeCoderType<T>::QueryTreeCoderType() {
-  QueryTreeCoder::registerType(
-      &typeid(T),
-      T::kSerializableID,
-      [] (RefPtr<QueryTreeNode> self, stx::OutputStream* os) {
-        T::encode(*dynamic_cast<T*>(self.get()), os);
-      },
-      [] (Transaction* txn, stx::InputStream* is) -> RefPtr<QueryTreeNode> {
-        return T::decode(txn, is);
-      });
+void QueryTreeCoder::registerType() {
+  QueryTreeCoderType type;
+  type.type_id = &typeid(T);
+  type.wire_type_id = T::kSerializableID;
+
+  type.encode_fn = [] (QueryTreeCoder* coder, RefPtr<QueryTreeNode> self, stx::OutputStream* os) {
+    T::encode(coder, *dynamic_cast<T*>(self.get()), os);
+  };
+
+  type.decode_fn = [] (QueryTreeCoder* coder, stx::InputStream* is) -> RefPtr<QueryTreeNode> {
+    return T::decode(coder, is);
+  };
+
+  registerType(type);
 }
 
 } // namespace csql

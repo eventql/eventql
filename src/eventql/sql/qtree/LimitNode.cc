@@ -67,22 +67,23 @@ String LimitNode::toString() const {
       table_->toString());
 }
 
-void LimitNode::encode(const LimitNode& node, stx::OutputStream* os) {
+void LimitNode::encode(
+    QueryTreeCoder* coder,
+    const LimitNode& node,
+    stx::OutputStream* os) {
   os->appendVarUInt(node.limit_);
   os->appendVarUInt(node.offset_);
-  QueryTreeCoder::encode(node.table_, os);
+  coder->encode(node.table_, os);
 }
 
 RefPtr<QueryTreeNode> LimitNode::decode(
-    Transaction* txn,
+    QueryTreeCoder* coder,
     stx::InputStream* is) {
   auto limit = is->readVarUInt();
   auto offset = is->readVarUInt();
-  auto table = QueryTreeCoder::decode(txn, is);
+  auto table = coder->decode(is);
 
   return new LimitNode(limit, offset, table);
 }
-
-static QueryTreeCoderType<LimitNode> kCoderType{};
 
 } // namespace csql

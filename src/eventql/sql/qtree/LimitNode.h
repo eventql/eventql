@@ -12,6 +12,7 @@
 #include <eventql/util/io/outputstream.h>
 #include <eventql/util/io/inputstream.h>
 #include <eventql/sql/qtree/TableExpressionNode.h>
+#include <eventql/sql/qtree/qtree_coder.h>
 
 using namespace stx;
 
@@ -45,8 +46,14 @@ public:
 
   String toString() const override;
 
-  static void encode(const LimitNode& node, stx::OutputStream* os);
-  static RefPtr<QueryTreeNode> decode(Transaction* txn, stx::InputStream* os);
+  static void encode(
+      QueryTreeCoder* coder,
+      const LimitNode& node,
+      stx::OutputStream* os);
+
+  static RefPtr<QueryTreeNode> decode(
+      QueryTreeCoder* coder,
+      stx::InputStream* os);
 
 protected:
   size_t limit_;

@@ -19,29 +19,31 @@ namespace csql {
 class QueryTreeCoder {
 public:
 
+  QueryTreeCoder(Transaction* txn);
+
   template <class T>
-  friend class QueryTreeCoderType;
+  void registerType();
 
-  typedef Function<void (RefPtr<QueryTreeNode>, stx::OutputStream*)> EncodeFn;
-  typedef Function<RefPtr<QueryTreeNode> (Transaction* txn, stx::InputStream*)> DecodeFn;
-
-  static void encode(RefPtr<QueryTreeNode> tree, stx::OutputStream* os);
-  static RefPtr<QueryTreeNode> decode(Transaction* txn, stx::InputStream* is);
+  void encode(RefPtr<QueryTreeNode> tree, stx::OutputStream* os);
+  RefPtr<QueryTreeNode> decode(stx::InputStream* is);
 
 protected:
 
-  static void registerType(
-      const std::type_info* type_id,
-      uint64_t wire_type_id,
-      EncodeFn encode_fn,
-      DecodeFn decode_fn);
+  typedef Function<void (QueryTreeCoder*, RefPtr<QueryTreeNode>, stx::OutputStream*)> EncodeFn;
+  typedef Function<RefPtr<QueryTreeNode> (QueryTreeCoder*, stx::InputStream*)> DecodeFn;
 
-};
+  struct QueryTreeCoderType {
+    const std::type_info* type_id;
+    uint64_t wire_type_id;
+    QueryTreeCoder::EncodeFn encode_fn;
+    QueryTreeCoder::DecodeFn decode_fn;
+  };
 
-template <class T>
-class QueryTreeCoderType {
-public:
-  QueryTreeCoderType();
+  void registerType(QueryTreeCoderType f);
+
+  Transaction* txn_;
+  HashMap<const std::type_info*, QueryTreeCoderType> coders_by_type_id_;
+  HashMap<uint64_t, QueryTreeCoderType> coders_by_wire_type_id_;
 };
 
 } // namespace csql
