@@ -9,6 +9,7 @@
  */
 #include <eventql/sql/qtree/qtree_coder.h>
 #include <eventql/sql/qtree/LimitNode.h>
+#include <eventql/sql/qtree/SequentialScanNode.h>
 
 using namespace stx;
 
@@ -16,6 +17,7 @@ namespace csql {
 
 QueryTreeCoder::QueryTreeCoder(Transaction* txn) : txn_(txn) {
   registerType<LimitNode>(1);
+  registerType<SequentialScanNode>(2);
 }
 
 void QueryTreeCoder::encode(RefPtr<QueryTreeNode> tree, stx::OutputStream* os) {
@@ -43,6 +45,11 @@ void QueryTreeCoder::registerType(QueryTreeCoderType t) {
   coders_by_type_id_[t.type_id] = t;
   coders_by_wire_type_id_[t.wire_type_id] = t;
 }
+
+Transaction* QueryTreeCoder::getTransaction() const {
+  return txn_;
+}
+
 
 } // namespace csql
 
