@@ -66,5 +66,5 @@ query out to other nodes and parallelizes some operations.
 
 The heavy lifting, however, is usually not done within the scheduler itself.
 The scheduler merely coordinates what code should run where and the calls into
-the standard runtime and table expression implementations that do the heavy
-lifting and actually perform the individual operations.
+the standard runtime and table expression implementations that perform the actual
+operations.
