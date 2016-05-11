@@ -33,6 +33,7 @@ add_library(chartsql STATIC
     expressions/table/describe_table.cc
     expressions/table/limit.cc
     expressions/table/groupby.cc
+    expressions/table/nested_loop_join.cc
     parser/astnode.cc
     parser/astutil.cc
     parser/parser.cc
@@ -55,6 +56,7 @@ add_library(chartsql STATIC
     qtree/UnionNode.cc
     qtree/LimitNode.cc
     qtree/OrderByNode.cc
+    qtree/JoinNode.cc
     qtree/QueryTreeNode.cc
     qtree/QueryTreeUtil.cc
     qtree/ShowTablesNode.cc

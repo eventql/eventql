@@ -18,12 +18,14 @@
 #include <eventql/sql/expressions/table/limit.h>
 #include <eventql/sql/expressions/table/describe_table.h>
 #include <eventql/sql/expressions/table/groupby.h>
+#include <eventql/sql/expressions/table/nested_loop_join.h>
 #include <eventql/sql/qtree/SelectExpressionNode.h>
 #include <eventql/sql/qtree/SubqueryNode.h>
 #include <eventql/sql/qtree/OrderByNode.h>
 #include <eventql/sql/qtree/DescribeTableNode.h>
 #include <eventql/sql/qtree/LimitNode.h>
 #include <eventql/sql/qtree/GroupByNode.h>
+#include <eventql/sql/qtree/JoinNode.h>
 
 
 using namespace stx;
@@ -65,6 +67,10 @@ protected:
   ScopedPtr<TableExpression> buildGroupByExpression(
     Transaction* txn,
     RefPtr<GroupByNode> node);
+
+  ScopedPtr<TableExpression> buildJoinExpression(
+    Transaction* ctx,
+    RefPtr<JoinNode> node);
 
 };
 

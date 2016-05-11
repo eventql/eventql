@@ -70,6 +70,12 @@ ScopedPtr<TableExpression> LocalScheduler::buildExpression(
         node.asInstanceOf<DescribeTableNode>()->tableName()));
   }
 
+  if (dynamic_cast<JoinNode*>(node.get())) {
+    return buildJoinExpression(
+        ctx,
+        node.asInstanceOf<JoinNode>());
+  }
+
   RAISEF(
       kRuntimeError,
       "cannot figure out how to execute that query, sorry. -- $0",
@@ -179,6 +185,12 @@ ScopedPtr<TableExpression> LocalScheduler::buildGroupByExpression(
           std::move(select_expressions),
           std::move(group_expressions),
           buildExpression(txn, node->inputTable())));
+}
+
+ScopedPtr<TableExpression> LocalScheduler::buildJoinExpression(
+    Transaction* ctx,
+    RefPtr<JoinNode> node) {
+  RAISE(kNotYetImplementedError, "nyi");
 }
 
 LocalResultCursor::LocalResultCursor(
