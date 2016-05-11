@@ -28,12 +28,6 @@ public:
       Transaction* ctx,
       RefPtr<ValueExpressionNode> expression);
 
-  ScopedPtr<ChartStatement> buildChartStatement(
-      Transaction* ctx,
-      RefPtr<ChartStatementNode> node,
-      RefPtr<TableProvider> tables,
-      Runtime* runtime);
-
 protected:
   RefPtr<ValueExpressionBuilder> scalar_exp_builder_;
 };

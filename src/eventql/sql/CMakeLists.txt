@@ -68,7 +68,6 @@ add_library(chartsql STATIC
     runtime/ScratchMemory.cc
     runtime/runtime.cc
     runtime/symboltable.cc
-    runtime/queryplannode.cc
     runtime/ValueExpressionBuilder.cc
     runtime/defaultruntime.cc
     runtime/tablerepository.cc
@@ -79,14 +78,14 @@ add_library(chartsql STATIC
     runtime/ExecutionContext.cc
     runtime/QueryBuilder.cc
     runtime/LikePattern.cc
-    runtime/charts/areachartbuilder.cc
-    runtime/charts/barchartbuilder.cc
-    runtime/charts/domainconfig.cc
-    runtime/charts/drawstatement.cc
-    runtime/charts/ChartStatement.cc
-    runtime/charts/linechartbuilder.cc
-    runtime/charts/pointchartbuilder.cc
-    runtime/charts/seriesadapter.cc
+    #runtime/charts/areachartbuilder.cc
+    #runtime/charts/barchartbuilder.cc
+    #runtime/charts/domainconfig.cc
+    #runtime/charts/drawstatement.cc
+    #runtime/charts/ChartStatement.cc
+    #runtime/charts/linechartbuilder.cc
+    #runtime/charts/pointchartbuilder.cc
+    #runtime/charts/seriesadapter.cc
     result_cursor.cc
     scheduler.cc
     defaults.cc)

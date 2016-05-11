@@ -10,19 +10,12 @@
 #pragma once
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/autoref.h>
-#include <eventql/sql/tasks/TaskDAG.h>
 #include <eventql/sql/result_cursor.h>
 
 using namespace stx;
 
 namespace csql {
 class QueryPlan;
-
-struct SchedulerCallbacks {
-  HashMap<TaskID, Vector<RowSinkFn>> on_row;
-  HashMap<TaskID, Vector<Function<void (TaskID)>>> on_complete;
-  Vector<Function<void ()>> on_query_finished;
-};
 
 class Scheduler : public RefCounted {
 public:

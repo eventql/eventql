@@ -11,8 +11,8 @@
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/autoref.h>
 #include <eventql/sql/qtree/QueryTreeNode.h>
-#include <eventql/sql/tasks/TaskDAG.h>
 #include <eventql/sql/scheduler.h>
+#include <eventql/sql/transaction.h>
 
 namespace csql {
 class Runtime;

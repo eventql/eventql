@@ -19,8 +19,6 @@ using namespace stx;
 namespace csql {
 class TableExpression;
 
-typedef Function<bool (const SValue* argv, int argc)> RowSinkFn;
-
 class ResultCursor {
 public:
 

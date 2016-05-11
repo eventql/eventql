@@ -15,13 +15,13 @@
 namespace csql {
 class Runtime;
 
-class ChartStatement : public Statement {
-public:
-
-  ChartStatement(Vector<ScopedPtr<DrawStatement>> draw_statements);
-
-protected:
-  Vector<ScopedPtr<DrawStatement>> draw_statements_;
-};
+//class ChartStatement : public Statement {
+//public:
+//
+//  ChartStatement(Vector<ScopedPtr<DrawStatement>> draw_statements);
+//
+//protected:
+//  Vector<ScopedPtr<DrawStatement>> draw_statements_;
+//};
 
 }
