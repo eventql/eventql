@@ -99,19 +99,4 @@ void GroupByExpression::freeResult() {
   freed_ = true;
 }
 
-//Option<SHA1Hash> GroupByExpression::cacheKey() const {
-//  auto source_key = source_->cacheKey();
-//  if (source_key.isEmpty()) {
-//    return None<SHA1Hash>();
-//  }
-//
-//  return Some(
-//      SHA1::compute(
-//          StringUtil::format(
-//              "$0~$1",
-//              source_key.get().toString(),
-//              qtree_fingerprint_.toString())));
-//}
-
-
 } // namespace csql

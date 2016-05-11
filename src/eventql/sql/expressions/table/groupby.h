@@ -25,17 +25,10 @@ public:
 
   ~GroupByExpression();
 
-
   ScopedPtr<ResultCursor> execute() override;
 
-  //bool onInputRow(
-  //    const TaskID& input_id,
-  //    const SValue* row,
-  //    int row_len) override;
-
-  //void onInputsReady() override;
-
 protected:
+
   bool next(SValue* row, size_t row_len);
 
   void freeResult();
