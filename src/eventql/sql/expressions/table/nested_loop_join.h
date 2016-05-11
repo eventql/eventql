@@ -45,6 +45,7 @@ protected:
   Transaction* txn_;
   JoinType join_type_;
   Vector<JoinNode::InputColumnRef> input_map_;
+  Vector<SValue> input_buf_;
   Vector<String> column_names_;
   Vector<ValueExpression> select_exprs_;
   Option<ValueExpression> join_cond_expr_;

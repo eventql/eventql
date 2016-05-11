@@ -23,6 +23,7 @@ NestedLoopJoin::NestedLoopJoin(
     txn_(txn),
     join_type_(join_type),
     input_map_(input_map),
+    input_buf_(input_map.size()),
     select_exprs_(std::move(select_expressions)),
     join_cond_expr_(std::move(join_cond_expr)),
     where_expr_(std::move(where_expr)),
@@ -95,63 +96,8 @@ ScopedPtr<ResultCursor> NestedLoopJoin::execute() {
 //}
 
 ScopedPtr<ResultCursor> NestedLoopJoin::executeCartesianJoin() {
-  //Vector<SValue> outbuf(select_exprs_.size(), SValue{});
-  //Vector<SValue> inbuf(input_map_.size(), SValue{});
-
-  //for (const auto& r1 : base_tbl_) {
-  //  for (const auto& r2 : joined_tbl_) {
-
-  //    for (size_t i = 0; i < input_map_.size(); ++i) {
-  //      const auto& m = input_map_[i];
-
-  //      switch (m.table_idx) {
-  //        case 0:
-  //          inbuf[i] = r1[m.column_idx];
-  //          break;
-  //        case 1:
-  //          inbuf[i] = r2[m.column_idx];
-  //          break;
-  //        default:
-  //          RAISE(kRuntimeError, "invalid table index");
-  //      }
-  //    }
-
-  //    if (!where_expr_.isEmpty()) {
-  //      SValue pred;
-  //      VM::evaluate(
-  //          txn_,
-  //          where_expr_.get().program(),
-  //          inbuf.size(),
-  //          inbuf.data(),
-  //          &pred);
-
-  //      if (!pred.getBool()) {
-  //        continue;
-  //      }
-  //    }
-
-  //    for (int i = 0; i < select_exprs_.size(); ++i) {
-  //      VM::evaluate(
-  //          txn_,
-  //          select_exprs_[i].program(),
-  //          inbuf.size(),
-  //          inbuf.data(),
-  //          &outbuf[i]);
-  //    }
-
-  //    //if (!input_(outbuf.data(), outbuf.size()))  {
-  //    //  return;
-  //    //}
-  //  }
-  //}
-  RAISE(kNotYetImplementedError, "nyi");
-}
-
-ScopedPtr<ResultCursor> NestedLoopJoin::executeInnerJoin() {
   auto cursor = [this] (SValue* row, int row_len) -> bool {
     for (;;) {
-      Vector<SValue> inbuf(input_map_.size(), SValue{});
-
       if (joined_tbl_pos_ == 0 || joined_tbl_pos_ == joined_tbl_data_.size()) {
         joined_tbl_pos_ = 0;
 
@@ -170,10 +116,72 @@ ScopedPtr<ResultCursor> NestedLoopJoin::executeInnerJoin() {
 
           switch (m.table_idx) {
             case 0:
-              inbuf[i] = base_tbl_row_[m.column_idx];
+              input_buf_[i] = base_tbl_row_[m.column_idx];
               break;
             case 1:
-              inbuf[i] = joined_table_row[m.column_idx];
+              input_buf_[i] = joined_table_row[m.column_idx];
+              break;
+            default:
+              RAISE(kRuntimeError, "invalid table index");
+          }
+        }
+
+        if (!where_expr_.isEmpty()) {
+          SValue pred;
+          VM::evaluate(
+              txn_,
+              where_expr_.get().program(),
+              input_buf_.size(),
+              input_buf_.data(),
+              &pred);
+
+          if (!pred.getBool()) {
+            continue;
+          }
+        }
+
+        for (int i = 0; i < select_exprs_.size() && i < row_len; ++i) {
+          VM::evaluate(
+              txn_,
+              select_exprs_[i].program(),
+              input_buf_.size(),
+              input_buf_.data(),
+              &row[i]);
+        }
+
+        return true;
+      }
+    }
+  };
+
+  return mkScoped(new DefaultResultCursor( select_exprs_.size(), cursor));
+}
+
+ScopedPtr<ResultCursor> NestedLoopJoin::executeInnerJoin() {
+  auto cursor = [this] (SValue* row, int row_len) -> bool {
+    for (;;) {
+      if (joined_tbl_pos_ == 0 || joined_tbl_pos_ == joined_tbl_data_.size()) {
+        joined_tbl_pos_ = 0;
+
+        if (!base_tbl_cursor_->next(
+              base_tbl_row_.data(),
+              base_tbl_row_.size())) {
+          return false;
+        }
+      }
+
+      while (joined_tbl_pos_ < joined_tbl_data_.size()) {
+        const auto& joined_table_row = joined_tbl_data_[joined_tbl_pos_++];
+
+        for (size_t i = 0; i < input_map_.size(); ++i) {
+          const auto& m = input_map_[i];
+
+          switch (m.table_idx) {
+            case 0:
+              input_buf_[i] = base_tbl_row_[m.column_idx];
+              break;
+            case 1:
+              input_buf_[i] = joined_table_row[m.column_idx];
               break;
             default:
               RAISE(kRuntimeError, "invalid table index");
@@ -185,8 +193,8 @@ ScopedPtr<ResultCursor> NestedLoopJoin::executeInnerJoin() {
           VM::evaluate(
               txn_,
               join_cond_expr_.get().program(),
-              inbuf.size(),
-              inbuf.data(),
+              input_buf_.size(),
+              input_buf_.data(),
               &pred);
 
           if (!pred.getBool()) {
@@ -199,8 +207,8 @@ ScopedPtr<ResultCursor> NestedLoopJoin::executeInnerJoin() {
           VM::evaluate(
               txn_,
               where_expr_.get().program(),
-              inbuf.size(),
-              inbuf.data(),
+              input_buf_.size(),
+              input_buf_.data(),
               &pred);
 
           if (!pred.getBool()) {
@@ -212,8 +220,8 @@ ScopedPtr<ResultCursor> NestedLoopJoin::executeInnerJoin() {
           VM::evaluate(
               txn_,
               select_exprs_[i].program(),
-              inbuf.size(),
-              inbuf.data(),
+              input_buf_.size(),
+              input_buf_.data(),
               &row[i]);
         }
 
@@ -227,7 +235,7 @@ ScopedPtr<ResultCursor> NestedLoopJoin::executeInnerJoin() {
 
 ScopedPtr<ResultCursor> NestedLoopJoin::executeOuterJoin() {
   //Vector<SValue> outbuf(select_exprs_.size(), SValue{});
-  //Vector<SValue> inbuf(input_map_.size(), SValue{});
+  //Vector<SValue> input_buf_(input_map_.size(), SValue{});
 
   //for (const auto& r1 : base_tbl_) {
   //  bool match = false;
@@ -238,10 +246,10 @@ ScopedPtr<ResultCursor> NestedLoopJoin::executeOuterJoin() {
 
   //      switch (m.table_idx) {
   //        case 0:
-  //          inbuf[i] = r1[m.column_idx];
+  //          input_buf_[i] = r1[m.column_idx];
   //          break;
   //        case 1:
-  //          inbuf[i] = r2[m.column_idx];
+  //          input_buf_[i] = r2[m.column_idx];
   //          break;
   //        default:
   //          RAISE(kRuntimeError, "invalid table index");
@@ -253,8 +261,8 @@ ScopedPtr<ResultCursor> NestedLoopJoin::executeOuterJoin() {
   //      VM::evaluate(
   //          txn_,
   //          join_cond_expr_.get().program(),
-  //          inbuf.size(),
-  //          inbuf.data(),
+  //          input_buf_.size(),
+  //          input_buf_.data(),
   //          &pred);
 
   //      if (!pred.getBool()) {
@@ -267,8 +275,8 @@ ScopedPtr<ResultCursor> NestedLoopJoin::executeOuterJoin() {
   //      VM::evaluate(
   //          txn_,
   //          where_expr_.get().program(),
-  //          inbuf.size(),
-  //          inbuf.data(),
+  //          input_buf_.size(),
+  //          input_buf_.data(),
   //          &pred);
 
   //      if (!pred.getBool()) {
@@ -282,8 +290,8 @@ ScopedPtr<ResultCursor> NestedLoopJoin::executeOuterJoin() {
   //      VM::evaluate(
   //          txn_,
   //          select_exprs_[i].program(),
-  //          inbuf.size(),
-  //          inbuf.data(),
+  //          input_buf_.size(),
+  //          input_buf_.data(),
   //          &outbuf[i]);
   //    }
 
@@ -297,7 +305,7 @@ ScopedPtr<ResultCursor> NestedLoopJoin::executeOuterJoin() {
   //      const auto& m = input_map_[i];
 
   //      if (m.table_idx != 0) {
-  //        inbuf[i] = SValue();
+  //        input_buf_[i] = SValue();
   //      }
   //    }
 
@@ -306,8 +314,8 @@ ScopedPtr<ResultCursor> NestedLoopJoin::executeOuterJoin() {
   //      VM::evaluate(
   //          txn_,
   //          where_expr_.get().program(),
-  //          inbuf.size(),
-  //          inbuf.data(),
+  //          input_buf_.size(),
+  //          input_buf_.data(),
   //          &pred);
 
   //      if (!pred.getBool()) {
@@ -319,8 +327,8 @@ ScopedPtr<ResultCursor> NestedLoopJoin::executeOuterJoin() {
   //      VM::evaluate(
   //          txn_,
   //          select_exprs_[i].program(),
-  //          inbuf.size(),
-  //          inbuf.data(),
+  //          input_buf_.size(),
+  //          input_buf_.data(),
   //          &outbuf[i]);
   //    }
 
