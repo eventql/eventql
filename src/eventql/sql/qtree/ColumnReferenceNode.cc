@@ -78,4 +78,18 @@ String ColumnReferenceNode::toSQL() const {
   return "`" + column_name_ + "`";
 }
 
+void ColumnReferenceNode::encode(
+    QueryTreeCoder* coder,
+    const ColumnReferenceNode& node,
+    stx::OutputStream* os) {
+  os->appendLenencString(node.column_name_);
+}
+
+RefPtr<QueryTreeNode> ColumnReferenceNode::decode (
+    QueryTreeCoder* coder,
+    stx::InputStream* is) {
+  auto column_name = is->readLenencString();
+  return new ColumnReferenceNode(column_name);
+}
+
 } // namespace csql
