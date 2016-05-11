@@ -10,11 +10,14 @@
 #pragma once
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/autoref.h>
-#include <eventql/sql/Transaction.h>
+#include <eventql/util/io/inputstream.h>
+#include <eventql/util/io/outputstream.h>
 
 using namespace stx;
 
 namespace csql {
+class Transaction;
+class QueryTreeNode;
 
 class QueryTreeCoder {
 public:

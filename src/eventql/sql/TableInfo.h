@@ -13,6 +13,8 @@
 
 namespace csql {
 
+using namespace stx;
+
 struct ColumnInfo {
   String column_name;
   String type;

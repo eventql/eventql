@@ -272,4 +272,17 @@ const Vector<ScanConstraint>& SequentialScanNode::constraints() const {
   return constraints_;
 }
 
+void SequentialScanNode::encode(
+    QueryTreeCoder* coder,
+    const SequentialScanNode& node,
+    stx::OutputStream* os) {
+  RAISE(kNotYetImplementedError, "nyi");
+}
+
+RefPtr<QueryTreeNode> SequentialScanNode::decode(
+    QueryTreeCoder* coder,
+    stx::InputStream* os) {
+  RAISE(kNotYetImplementedError, "nyi");
+}
+
 } // namespace csql

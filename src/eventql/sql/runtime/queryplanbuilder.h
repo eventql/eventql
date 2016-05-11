@@ -19,6 +19,7 @@ namespace csql {
 class QueryPlanNode;
 class TableRepository;
 class Runtime;
+class SelectListNode;
 
 struct QueryPlanBuilderOptions {
   QueryPlanBuilderOptions() :

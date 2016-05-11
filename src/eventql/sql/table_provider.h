@@ -9,11 +9,13 @@
  */
 #pragma once
 #include <eventql/util/option.h>
-#include <eventql/sql/qtree/SequentialScanNode.h>
 #include <eventql/sql/TableInfo.h>
 #include <eventql/sql/expressions/table_expression.h>
+#include <eventql/sql/qtree/SequentialScanNode.h>
 
 namespace csql {
+
+class Transaction;
 
 class TableProvider : public RefCounted {
 public:
