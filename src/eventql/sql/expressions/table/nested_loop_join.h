@@ -50,8 +50,11 @@ protected:
   Option<ValueExpression> join_cond_expr_;
   Option<ValueExpression> where_expr_;
   ScopedPtr<TableExpression> base_tbl_;
+  ScopedPtr<ResultCursor> base_tbl_cursor_;
+  Vector<SValue> base_tbl_row_;
   ScopedPtr<TableExpression> joined_tbl_;
-  Vector<Vector<SValue>> joined_table_data_;
+  Vector<Vector<SValue>> joined_tbl_data_;
+  size_t joined_tbl_pos_;
 };
 
 //class NestedLoopJoinFactory  : public TaskFactory {

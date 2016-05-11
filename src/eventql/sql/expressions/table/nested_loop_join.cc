@@ -27,7 +27,8 @@ NestedLoopJoin::NestedLoopJoin(
     join_cond_expr_(std::move(join_cond_expr)),
     where_expr_(std::move(where_expr)),
     base_tbl_(std::move(base_tbl)),
-    joined_tbl_(std::move(joined_tbl)) {}
+    joined_tbl_(std::move(joined_tbl)),
+    joined_tbl_pos_(0) {}
 
 static const size_t kMaxInMemoryRows = 1000000;
 
@@ -35,8 +36,11 @@ ScopedPtr<ResultCursor> NestedLoopJoin::execute() {
   auto joined_cursor = joined_tbl_->execute();
   Vector<SValue> row(joined_cursor->getNumColumns());
   while (joined_cursor->next(row.data(), row.size())) {
-    joined_table_data_.emplace_back(row);
+    joined_tbl_data_.emplace_back(row);
   }
+
+  base_tbl_cursor_ = base_tbl_->execute();
+  base_tbl_row_.resize(base_tbl_cursor_->getNumColumns());
 
   switch (join_type_) {
     case JoinType::OUTER:
@@ -144,71 +148,81 @@ ScopedPtr<ResultCursor> NestedLoopJoin::executeCartesianJoin() {
 }
 
 ScopedPtr<ResultCursor> NestedLoopJoin::executeInnerJoin() {
+  auto cursor = [this] (SValue* row, int row_len) -> bool {
+    for (;;) {
+      Vector<SValue> inbuf(input_map_.size(), SValue{});
 
-  //Vector<SValue> outbuf(select_exprs_.size(), SValue{});
-  //Vector<SValue> inbuf(input_map_.size(), SValue{});
+      if (joined_tbl_pos_ == 0 || joined_tbl_pos_ == joined_tbl_data_.size()) {
+        joined_tbl_pos_ = 0;
 
-  //for (const auto& r1 : base_tbl_) {
-  //  for (const auto& r2 : joined_tbl_) {
+        if (!base_tbl_cursor_->next(
+              base_tbl_row_.data(),
+              base_tbl_row_.size())) {
+          return false;
+        }
+      }
 
-  //    for (size_t i = 0; i < input_map_.size(); ++i) {
-  //      const auto& m = input_map_[i];
+      while (joined_tbl_pos_ < joined_tbl_data_.size()) {
+        const auto& joined_table_row = joined_tbl_data_[joined_tbl_pos_++];
 
-  //      switch (m.table_idx) {
-  //        case 0:
-  //          inbuf[i] = r1[m.column_idx];
-  //          break;
-  //        case 1:
-  //          inbuf[i] = r2[m.column_idx];
-  //          break;
-  //        default:
-  //          RAISE(kRuntimeError, "invalid table index");
-  //      }
-  //    }
+        for (size_t i = 0; i < input_map_.size(); ++i) {
+          const auto& m = input_map_[i];
 
-  //    {
-  //      SValue pred;
-  //      VM::evaluate(
-  //          txn_,
-  //          join_cond_expr_.get().program(),
-  //          inbuf.size(),
-  //          inbuf.data(),
-  //          &pred);
+          switch (m.table_idx) {
+            case 0:
+              inbuf[i] = base_tbl_row_[m.column_idx];
+              break;
+            case 1:
+              inbuf[i] = joined_table_row[m.column_idx];
+              break;
+            default:
+              RAISE(kRuntimeError, "invalid table index");
+          }
+        }
 
-  //      if (!pred.getBool()) {
-  //        continue;
-  //      }
-  //    }
+        {
+          SValue pred;
+          VM::evaluate(
+              txn_,
+              join_cond_expr_.get().program(),
+              inbuf.size(),
+              inbuf.data(),
+              &pred);
 
-  //    if (!where_expr_.isEmpty()) {
-  //      SValue pred;
-  //      VM::evaluate(
-  //          txn_,
-  //          where_expr_.get().program(),
-  //          inbuf.size(),
-  //          inbuf.data(),
-  //          &pred);
+          if (!pred.getBool()) {
+            continue;
+          }
+        }
 
-  //      if (!pred.getBool()) {
-  //        continue;
-  //      }
-  //    }
+        if (!where_expr_.isEmpty()) {
+          SValue pred;
+          VM::evaluate(
+              txn_,
+              where_expr_.get().program(),
+              inbuf.size(),
+              inbuf.data(),
+              &pred);
 
-  //    for (int i = 0; i < select_exprs_.size(); ++i) {
-  //      VM::evaluate(
-  //          txn_,
-  //          select_exprs_[i].program(),
-  //          inbuf.size(),
-  //          inbuf.data(),
-  //          &outbuf[i]);
-  //    }
+          if (!pred.getBool()) {
+            continue;
+          }
+        }
 
-  //    //if (!input_(outbuf.data(), outbuf.size()))  {
-  //    //  return;
-  //    //}
-  //  }
-  //}
-  RAISE(kNotYetImplementedError, "nyi");
+        for (int i = 0; i < select_exprs_.size() && i < row_len; ++i) {
+          VM::evaluate(
+              txn_,
+              select_exprs_[i].program(),
+              inbuf.size(),
+              inbuf.data(),
+              &row[i]);
+        }
+
+        return true;
+      }
+    }
+  };
+
+  return mkScoped(new DefaultResultCursor( select_exprs_.size(), cursor));
 }
 
 ScopedPtr<ResultCursor> NestedLoopJoin::executeOuterJoin() {
