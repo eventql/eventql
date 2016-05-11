@@ -11,6 +11,7 @@
 #include <eventql/sql/qtree/LimitNode.h>
 #include <eventql/sql/qtree/SequentialScanNode.h>
 #include <eventql/sql/qtree/SelectListNode.h>
+#include <eventql/sql/qtree/LiteralExpressionNode.h>
 
 using namespace stx;
 
@@ -20,6 +21,7 @@ QueryTreeCoder::QueryTreeCoder(Transaction* txn) : txn_(txn) {
   registerType<LimitNode>(1);
   registerType<SequentialScanNode>(2);
   registerType<SelectListNode>(3);
+  registerType<LiteralExpressionNode>(4);
 }
 
 void QueryTreeCoder::encode(RefPtr<QueryTreeNode> tree, stx::OutputStream* os) {
