@@ -65,7 +65,8 @@ RefPtr<QueryTreeNode> CallExpressionNode::decode (
   auto symbol = is->readLenencString();
 
   Vector<RefPtr<ValueExpressionNode>> arguments;
-  for (size_t i = 0; i < is->readUInt64(); ++i) {
+  auto num_arguments = is->readUInt64();
+  for (size_t i = 0; i < num_arguments; ++i) {
     arguments.emplace_back(coder->decode(is).asInstanceOf<ValueExpressionNode>());
   }
 
