@@ -20,6 +20,7 @@
 #include <eventql/sql/qtree/GroupByNode.h>
 #include <eventql/sql/qtree/IfExpressionNode.h>
 #include <eventql/sql/qtree/RegexExpressionNode.h>
+#include <eventql/sql/qtree/SelectExpressionNode.h>
 
 using namespace stx;
 
@@ -38,6 +39,7 @@ QueryTreeCoder::QueryTreeCoder(Transaction* txn) : txn_(txn) {
   registerType<GroupByNode>(9);
   registerType<IfExpressionNode>(10);
   registerType<RegexExpressionNode>(11);
+  registerType<SelectExpressionNode>(11);
 }
 
 void QueryTreeCoder::encode(RefPtr<QueryTreeNode> tree, stx::OutputStream* os) {

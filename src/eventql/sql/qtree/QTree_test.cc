@@ -450,7 +450,7 @@ TEST_CASE(QTreeTest, TestSerialization2, [] () {
           "testtable",
           "src/eventql/sql/testdata/testtbl.cst"));
 
-  String query = "select if(time, 0, 1) from testtable;";
+  String query = "select 'foo' regexp 'fo';";
 
   csql::Parser parser;
   parser.parse(query.data(), query.size());
