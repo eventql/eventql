@@ -69,7 +69,7 @@ void OrderByNode::encode(
     QueryTreeCoder* coder,
     const OrderByNode& node,
     stx::OutputStream* os) {
-  os->appendUInt64(node.sort_specs_.size());
+  os->appendVarUInt(node.sort_specs_.size());
   for (const auto& spec : node.sort_specs_) {
     coder->encode(spec.expr.get(), os);
     os->appendUInt8(spec.descending);
@@ -82,7 +82,7 @@ RefPtr<QueryTreeNode> OrderByNode::decode (
     QueryTreeCoder* coder,
     stx::InputStream* is) {
   Vector<SortSpec> sort_specs;
-  auto num_sort_specs = is->readUInt64();
+  auto num_sort_specs = is->readVarUInt();
 
   for (auto i = 0; i < num_sort_specs; ++i) {
     SortSpec spec;
