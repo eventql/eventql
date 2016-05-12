@@ -205,9 +205,6 @@ void JoinNode::encode(
     stx::OutputStream* os) {
   os->appendUInt8((uint8_t) node.join_type_);
 
-  coder->encode(node.base_table_.get(), os);
-  coder->encode(node.joined_table_.get(), os);
-
   os->appendVarUInt(node.select_list_.size());
   for (const auto& e : node.select_list_) {
     coder->encode(e.get(), os);
@@ -226,14 +223,15 @@ void JoinNode::encode(
   } else {
     os->appendUInt8(0);
   }
+
+  coder->encode(node.base_table_.get(), os);
+  coder->encode(node.joined_table_.get(), os);
 }
 
 RefPtr<QueryTreeNode> JoinNode::decode (
     QueryTreeCoder* coder,
     stx::InputStream* is) {
   auto join_type = (JoinType) is->readUInt8();
-  auto base_tbl = coder->decode(is);
-  auto joined_tbl = coder->decode(is);
 
   Vector<RefPtr<SelectListNode>> select_list;
   auto select_list_size = is->readVarUInt();
@@ -250,6 +248,9 @@ RefPtr<QueryTreeNode> JoinNode::decode (
   if (is->readUInt8()) {
     join_cond = coder->decode(is).asInstanceOf<ValueExpressionNode>();
   }
+
+  auto base_tbl = coder->decode(is);
+  auto joined_tbl = coder->decode(is);
 
   return new JoinNode(
       join_type,
