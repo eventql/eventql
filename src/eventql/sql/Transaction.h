@@ -19,6 +19,8 @@ namespace csql {
 class Runtime;
 class SymbolTable;
 class QueryBuilder;
+class TableProvider;
+class TableRepository;
 
 class Transaction {
 public:

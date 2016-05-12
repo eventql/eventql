@@ -11,13 +11,15 @@
 #include <eventql/util/option.h>
 #include <eventql/sql/backends/backend.h>
 #include <eventql/sql/backends/tableref.h>
-#include <eventql/sql/qtree/SequentialScanNode.h>
 #include <eventql/sql/TableInfo.h>
 #include <eventql/sql/table_provider.h>
 
 namespace csql {
 class QueryBuilder;
 class Transaction;
+class SequentialScanNode;
+
+using namespace stx;
 
 class TableRepository : public TableProvider {
 public:

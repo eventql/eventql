@@ -8,6 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <eventql/sql/qtree/LimitNode.h>
+#include <eventql/sql/qtree/qtree_coder.h>
 
 using namespace stx;
 
@@ -66,5 +67,23 @@ String LimitNode::toString() const {
       table_->toString());
 }
 
+void LimitNode::encode(
+    QueryTreeCoder* coder,
+    const LimitNode& node,
+    stx::OutputStream* os) {
+  os->appendVarUInt(node.limit_);
+  os->appendVarUInt(node.offset_);
+  coder->encode(node.table_, os);
+}
+
+RefPtr<QueryTreeNode> LimitNode::decode(
+    QueryTreeCoder* coder,
+    stx::InputStream* is) {
+  auto limit = is->readVarUInt();
+  auto offset = is->readVarUInt();
+  auto table = coder->decode(is);
+
+  return new LimitNode(limit, offset, table);
+}
 
 } // namespace csql
