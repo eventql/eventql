@@ -45,5 +45,23 @@ String RegexExpressionNode::toSQL() const {
       sql_escape(pattern_));
 }
 
+void RegexExpressionNode::encode(
+    QueryTreeCoder* coder,
+    const RegexExpressionNode& node,
+    stx::OutputStream* os) {
+  coder->encode(node.subject_.get(), os);
+  os->appendLenencString(node.pattern_);
+}
+
+RefPtr<QueryTreeNode> RegexExpressionNode::decode (
+    QueryTreeCoder* coder,
+    stx::InputStream* is) {
+  auto subject = coder->decode(is).asInstanceOf<ValueExpressionNode>();
+  auto pattern = is->readLenencString();
+
+  return new RegexExpressionNode(subject, pattern);
+}
+
+
 } // namespace csql
 
