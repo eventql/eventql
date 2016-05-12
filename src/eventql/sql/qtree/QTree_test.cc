@@ -20,6 +20,7 @@
 #include "eventql/sql/qtree/QueryTreeUtil.h"
 #include "eventql/sql/qtree/qtree_coder.h"
 #include "eventql/sql/CSTableScanProvider.h"
+#include "eventql/sql/backends/csv/CSVTableProvider.h"
 
 using namespace stx;
 using namespace csql;
@@ -445,20 +446,25 @@ TEST_CASE(QTreeTest, TestSerializationJoinAndSubquery, [] () {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
+    txn->addTableProvider(
+      new backends::csv::CSVTableProvider(
+          "customers",
+          "src/eventql/sql/testdata/testtbl2.csv",
+          '\t'));
   txn->addTableProvider(
-      new CSTableScanProvider(
-          "testtable",
-          "src/eventql/sql/testdata/testtbl.cst"));
+      new backends::csv::CSVTableProvider(
+          "orders",
+          "src/eventql/sql/testdata/testtbl3.csv",
+          '\t'));
 
   String query =
-        "SELECT  \
-          t1.time, t2.time, t3.time, t1.x, t2.x, t1.x + t2.x, t1.x * 3 = t3.x, x1, x2, x3 \
-        FROM  \
-          (select TRUNCATE(time / 1000000) as time, count(1) as x, 123 as x1 from testtable group by TRUNCATE(time / 1200000000)) t1, \
-          (select TRUNCATE(time / 1000000) as time, sum(2) as x, 456 as x2 from testtable group by TRUNCATE(time / 1200000000)) AS t2,  \
-          (select TRUNCATE(time / 1000000) as time, sum(3) as x, 789 as x3 from testtable group by TRUNCATE(time / 1200000000)) AS t3   \
-        ORDER BY \
-          t1.time desc;";
+      "SELECT customers.customername, orders.orderid \
+      FROM customers \
+      LEFT JOIN orders \
+      ON customers.customerid=orders.customerid \
+      WHERE true \
+      ORDER BY customers.customername;";
+
 
   csql::Parser parser;
   parser.parse(query.data(), query.size());

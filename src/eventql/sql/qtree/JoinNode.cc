@@ -210,18 +210,22 @@ void JoinNode::encode(
     coder->encode(e.get(), os);
   }
 
+  uint8_t flags = kNoneFlag;
   if (!node.where_expr_.isEmpty()) {
-    os->appendUInt8(1);
+    flags |= kWhereFlag;
+  }
+  if (!node.join_cond_.isEmpty()) {
+    flags |= kJoinFlag;
+  }
+
+  os->appendUInt8(flags);
+
+  if (!node.where_expr_.isEmpty()) {
     coder->encode(node.where_expr_.get().get(), os);
-  } else {
-    os->appendUInt8(0);
   }
 
   if (!node.join_cond_.isEmpty()) {
-    os->appendUInt8(1);
     coder->encode(node.join_cond_.get().get(), os);
-  } else {
-    os->appendUInt8(0);
   }
 
   coder->encode(node.base_table_.get(), os);
@@ -240,12 +244,14 @@ RefPtr<QueryTreeNode> JoinNode::decode (
   }
 
   Option<RefPtr<ValueExpressionNode>> where_expr;
-  if (is->readUInt8()) {
+  Option<RefPtr<ValueExpressionNode>> join_cond;
+  auto flags = is->readUInt8();
+
+  if (flags == kAllFlags || flags == kWhereFlag) {
     where_expr = coder->decode(is).asInstanceOf<ValueExpressionNode>();
   }
 
-  Option<RefPtr<ValueExpressionNode>> join_cond;
-  if (is->readUInt8()) {
+  if (flags == kAllFlags || flags == kJoinFlag) {
     join_cond = coder->decode(is).asInstanceOf<ValueExpressionNode>();
   }
 

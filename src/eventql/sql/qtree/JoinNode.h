@@ -32,6 +32,11 @@ public:
     size_t column_idx;
   };
 
+  static const uint8_t kNoneFlag = 0;
+  static const uint8_t kWhereFlag = 1;
+  static const uint8_t kJoinFlag = 2;
+  static const uint8_t kAllFlags = 3;
+
   JoinNode(
       JoinType join_type,
       RefPtr<QueryTreeNode> base_table,
