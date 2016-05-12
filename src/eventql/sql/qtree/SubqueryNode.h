@@ -49,6 +49,15 @@ public:
   const String& tableAlias() const;
   void setTableAlias(const String& alias);
 
+  static void encode(
+      QueryTreeCoder* coder,
+      const SubqueryNode& node,
+      stx::OutputStream* os);
+
+  static RefPtr<QueryTreeNode> decode(
+      QueryTreeCoder* coder,
+      stx::InputStream* is);
+
 protected:
   RefPtr<QueryTreeNode> subquery_;
   Vector<String> column_names_;
