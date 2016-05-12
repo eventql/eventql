@@ -450,7 +450,7 @@ TEST_CASE(QTreeTest, TestSerialization2, [] () {
           "testtable",
           "src/eventql/sql/testdata/testtbl.cst"));
 
-  String query = "select count(1), date_trunc('d', time) from testtable group by date_trunc('d', time);";
+  String query = "select if(time, 0, 1) from testtable;";
 
   csql::Parser parser;
   parser.parse(query.data(), query.size());

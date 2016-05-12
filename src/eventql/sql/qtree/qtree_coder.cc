@@ -18,6 +18,7 @@
 #include <eventql/sql/qtree/OrderByNode.h>
 #include <eventql/sql/qtree/ShowTablesNode.h>
 #include <eventql/sql/qtree/GroupByNode.h>
+#include <eventql/sql/qtree/IfExpressionNode.h>
 
 using namespace stx;
 
@@ -34,6 +35,7 @@ QueryTreeCoder::QueryTreeCoder(Transaction* txn) : txn_(txn) {
   registerType<OrderByNode>(8);
   registerType<ShowTablesNode>(9);
   registerType<GroupByNode>(9);
+  registerType<IfExpressionNode>(10);
 }
 
 void QueryTreeCoder::encode(RefPtr<QueryTreeNode> tree, stx::OutputStream* os) {
