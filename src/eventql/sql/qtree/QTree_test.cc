@@ -441,7 +441,7 @@ TEST_CASE(QTreeTest, TestSerialization, [] () {
   EXPECT_EQ(qtree->toString(), qtree2->toString());
 });
 
-TEST_CASE(QTreeTest, TestSerialization2, [] () {
+TEST_CASE(QTreeTest, TestSerializationJoinAndSubquery, [] () {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 

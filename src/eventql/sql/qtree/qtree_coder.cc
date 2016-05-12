@@ -29,21 +29,21 @@ using namespace stx;
 namespace csql {
 
 QueryTreeCoder::QueryTreeCoder(Transaction* txn) : txn_(txn) {
-  registerType<LimitNode>(1);
-  registerType<SequentialScanNode>(2);
-  registerType<SelectListNode>(3);
-  registerType<LiteralExpressionNode>(4);
-  registerType<CallExpressionNode>(5);
-  registerType<ColumnReferenceNode>(6);
-  registerType<DescribeTableNode>(7);
-  registerType<OrderByNode>(8);
-  registerType<ShowTablesNode>(9);
-  registerType<GroupByNode>(9);
-  registerType<IfExpressionNode>(10);
-  registerType<RegexExpressionNode>(11);
-  registerType<SelectExpressionNode>(12);
-  registerType<JoinNode>(13);
-  registerType<SubqueryNode>(14);
+  registerType<CallExpressionNode>(1);
+  registerType<ColumnReferenceNode>(2);
+  registerType<DescribeTableNode>(3);
+  registerType<GroupByNode>(4);
+  registerType<IfExpressionNode>(5);
+  registerType<JoinNode>(6);
+  registerType<LimitNode>(7);
+  registerType<LiteralExpressionNode>(8);
+  registerType<OrderByNode>(9);
+  registerType<RegexExpressionNode>(10);
+  registerType<SelectExpressionNode>(11);
+  registerType<SelectListNode>(12);
+  registerType<SequentialScanNode>(13);
+  registerType<ShowTablesNode>(14);
+  registerType<SubqueryNode>(15);
 }
 
 void QueryTreeCoder::encode(RefPtr<QueryTreeNode> tree, stx::OutputStream* os) {
