@@ -53,7 +53,7 @@ void CallExpressionNode::encode(
     const CallExpressionNode& node,
     stx::OutputStream* os) {
   os->appendLenencString(node.symbol());
-  os->appendUInt64(node.arguments_.size());
+  os->appendVarUInt(node.arguments_.size());
   for (auto arg : node.arguments_) {
     coder->encode(arg.get(), os);
   }
@@ -65,7 +65,7 @@ RefPtr<QueryTreeNode> CallExpressionNode::decode (
   auto symbol = is->readLenencString();
 
   Vector<RefPtr<ValueExpressionNode>> arguments;
-  auto num_arguments = is->readUInt64();
+  auto num_arguments = is->readVarUInt();
   for (size_t i = 0; i < num_arguments; ++i) {
     arguments.emplace_back(coder->decode(is).asInstanceOf<ValueExpressionNode>());
   }
