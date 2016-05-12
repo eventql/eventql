@@ -210,12 +210,12 @@ void JoinNode::encode(
     coder->encode(e.get(), os);
   }
 
-  uint8_t flags = kNoneFlag;
+  uint8_t flags = 0;
   if (!node.where_expr_.isEmpty()) {
-    flags |= kWhereFlag;
+    flags |= kHasWhereExprFlag;
   }
   if (!node.join_cond_.isEmpty()) {
-    flags |= kJoinFlag;
+    flags |= kHasJoinExprFlag;
   }
 
   os->appendUInt8(flags);
@@ -247,11 +247,11 @@ RefPtr<QueryTreeNode> JoinNode::decode (
   Option<RefPtr<ValueExpressionNode>> join_cond;
   auto flags = is->readUInt8();
 
-  if (flags == kAllFlags || flags == kWhereFlag) {
+  if ((flags & kHasWhereExprFlag) > 0) {
     where_expr = coder->decode(is).asInstanceOf<ValueExpressionNode>();
   }
 
-  if (flags == kAllFlags || flags == kJoinFlag) {
+  if ((flags & kHasJoinExprFlag) > 0) {
     join_cond = coder->decode(is).asInstanceOf<ValueExpressionNode>();
   }
 

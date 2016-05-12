@@ -32,10 +32,8 @@ public:
     size_t column_idx;
   };
 
-  static const uint8_t kNoneFlag = 0;
-  static const uint8_t kWhereFlag = 1;
-  static const uint8_t kJoinFlag = 2;
-  static const uint8_t kAllFlags = 3;
+  static const uint8_t kHasWhereExprFlag = 1;
+  static const uint8_t kHasJoinExprFlag = 2;
 
   JoinNode(
       JoinType join_type,
