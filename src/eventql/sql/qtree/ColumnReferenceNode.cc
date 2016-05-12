@@ -82,14 +82,25 @@ void ColumnReferenceNode::encode(
     QueryTreeCoder* coder,
     const ColumnReferenceNode& node,
     stx::OutputStream* os) {
-  os->appendLenencString(node.column_name_);
+  if (!node.column_index_.isEmpty() && node.column_index_.get() != size_t(-1)) {
+    os->appendUInt8(1);
+    os->appendUInt64(node.column_index_.get());
+  } else {
+    os->appendUInt8(0);
+    os->appendLenencString(node.column_name_);
+  }
 }
 
 RefPtr<QueryTreeNode> ColumnReferenceNode::decode (
     QueryTreeCoder* coder,
     stx::InputStream* is) {
-  auto column_name = is->readLenencString();
-  return new ColumnReferenceNode(column_name);
+  if (is->readUInt8()) {
+    auto column_index = is->readUInt64();
+    return new ColumnReferenceNode(column_index);
+  } else {
+    auto column_name = is->readLenencString();
+    return new ColumnReferenceNode(column_name);
+  }
 }
 
 } // namespace csql
