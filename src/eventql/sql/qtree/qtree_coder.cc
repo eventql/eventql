@@ -14,6 +14,7 @@
 #include <eventql/sql/qtree/LiteralExpressionNode.h>
 #include <eventql/sql/qtree/CallExpressionNode.h>
 #include <eventql/sql/qtree/ColumnReferenceNode.h>
+#include <eventql/sql/qtree/DescribeTableNode.h>
 
 using namespace stx;
 
@@ -26,6 +27,7 @@ QueryTreeCoder::QueryTreeCoder(Transaction* txn) : txn_(txn) {
   registerType<LiteralExpressionNode>(4);
   registerType<CallExpressionNode>(5);
   registerType<ColumnReferenceNode>(6);
+  registerType<DescribeTableNode>(7);
 }
 
 void QueryTreeCoder::encode(RefPtr<QueryTreeNode> tree, stx::OutputStream* os) {

@@ -61,4 +61,18 @@ String DescribeTableNode::toString() const {
   return StringUtil::format("(describe-table $0)", table_name_);;
 }
 
+void DescribeTableNode::encode(
+    QueryTreeCoder* coder,
+    const DescribeTableNode& node,
+    stx::OutputStream* os) {
+  os->appendLenencString(node.table_name_);
+}
+
+RefPtr<QueryTreeNode> DescribeTableNode::decode (
+    QueryTreeCoder* coder,
+    stx::InputStream* is) {
+  return new DescribeTableNode(is->readLenencString());
+}
+
+
 } // namespace csql
