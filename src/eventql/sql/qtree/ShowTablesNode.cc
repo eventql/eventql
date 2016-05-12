@@ -51,4 +51,16 @@ String ShowTablesNode::toString() const {
   return "(show-tables)";
 }
 
+void ShowTablesNode::encode(
+    QueryTreeCoder* coder,
+    const ShowTablesNode& node,
+    stx::OutputStream* os) {}
+
+RefPtr<QueryTreeNode> ShowTablesNode::decode (
+    QueryTreeCoder* coder,
+    stx::InputStream* is) {
+  return new ShowTablesNode();
+}
+
+
 } // namespace csql

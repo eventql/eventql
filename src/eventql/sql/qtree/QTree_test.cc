@@ -450,7 +450,7 @@ TEST_CASE(QTreeTest, TestSerialization2, [] () {
           "testtable",
           "src/eventql/sql/testdata/testtbl.cst"));
 
-  String query = "select time from testtable order by time limit 10;";
+  String query = "show tables;";
 
   csql::Parser parser;
   parser.parse(query.data(), query.size());
