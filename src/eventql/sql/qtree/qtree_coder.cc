@@ -21,6 +21,8 @@
 #include <eventql/sql/qtree/IfExpressionNode.h>
 #include <eventql/sql/qtree/RegexExpressionNode.h>
 #include <eventql/sql/qtree/SelectExpressionNode.h>
+#include <eventql/sql/qtree/JoinNode.h>
+#include <eventql/sql/qtree/SubqueryNode.h>
 
 using namespace stx;
 
@@ -39,7 +41,9 @@ QueryTreeCoder::QueryTreeCoder(Transaction* txn) : txn_(txn) {
   registerType<GroupByNode>(9);
   registerType<IfExpressionNode>(10);
   registerType<RegexExpressionNode>(11);
-  registerType<SelectExpressionNode>(11);
+  registerType<SelectExpressionNode>(12);
+  registerType<JoinNode>(13);
+  registerType<SubqueryNode>(14);
 }
 
 void QueryTreeCoder::encode(RefPtr<QueryTreeNode> tree, stx::OutputStream* os) {

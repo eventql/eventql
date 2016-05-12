@@ -70,6 +70,15 @@ public:
 
   String toString() const override;
 
+  static void encode(
+      QueryTreeCoder* coder,
+      const JoinNode& node,
+      stx::OutputStream* os);
+
+  static RefPtr<QueryTreeNode> decode(
+      QueryTreeCoder* coder,
+      stx::InputStream* is);
+
 protected:
 
 
