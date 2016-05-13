@@ -136,4 +136,43 @@ String SubqueryNode::toString() const {
   return str;
 };
 
+void SubqueryNode::encode(
+    QueryTreeCoder* coder,
+    const SubqueryNode& node,
+    stx::OutputStream* os) {
+  coder->encode(node.subquery_, os);
+
+  os->appendVarUInt(node.select_list_.size());
+  for (const auto& e : node.select_list_) {
+    coder->encode(e.get(), os);
+  }
+
+  if (!node.where_expr_.isEmpty()) {
+    os->appendUInt8(1);
+    coder->encode(node.where_expr_.get().get(), os);
+  } else {
+    os->appendUInt8(0);
+  }
+}
+
+RefPtr<QueryTreeNode> SubqueryNode::decode (
+    QueryTreeCoder* coder,
+    stx::InputStream* is) {
+  auto subquery = coder->decode(is);
+
+  Vector<RefPtr<SelectListNode>> select_list;
+  auto select_list_size = is->readVarUInt();
+  for (auto i = 0; i < select_list_size; ++i) {
+    select_list.emplace_back(coder->decode(is).asInstanceOf<SelectListNode>());
+  }
+
+  Option<RefPtr<ValueExpressionNode>> where_expr;
+  if (is->readUInt8()) {
+    where_expr = coder->decode(is).asInstanceOf<ValueExpressionNode>();
+  }
+
+  return new SubqueryNode(subquery, select_list, where_expr);
+}
+
+
 } // namespace csql

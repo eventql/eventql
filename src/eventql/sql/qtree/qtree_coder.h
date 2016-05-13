@@ -30,6 +30,8 @@ public:
   void encode(RefPtr<QueryTreeNode> tree, stx::OutputStream* os);
   RefPtr<QueryTreeNode> decode(stx::InputStream* is);
 
+  Transaction* getTransaction() const;
+
 protected:
 
   typedef Function<void (QueryTreeCoder*, RefPtr<QueryTreeNode>, stx::OutputStream*)> EncodeFn;

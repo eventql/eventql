@@ -199,5 +199,73 @@ String JoinNode::toString() const {
   return str;
 };
 
+void JoinNode::encode(
+    QueryTreeCoder* coder,
+    const JoinNode& node,
+    stx::OutputStream* os) {
+  os->appendUInt8((uint8_t) node.join_type_);
+
+  os->appendVarUInt(node.select_list_.size());
+  for (const auto& e : node.select_list_) {
+    coder->encode(e.get(), os);
+  }
+
+  uint8_t flags = 0;
+  if (!node.where_expr_.isEmpty()) {
+    flags |= kHasWhereExprFlag;
+  }
+  if (!node.join_cond_.isEmpty()) {
+    flags |= kHasJoinExprFlag;
+  }
+
+  os->appendUInt8(flags);
+
+  if (!node.where_expr_.isEmpty()) {
+    coder->encode(node.where_expr_.get().get(), os);
+  }
+
+  if (!node.join_cond_.isEmpty()) {
+    coder->encode(node.join_cond_.get().get(), os);
+  }
+
+  coder->encode(node.base_table_.get(), os);
+  coder->encode(node.joined_table_.get(), os);
+}
+
+RefPtr<QueryTreeNode> JoinNode::decode (
+    QueryTreeCoder* coder,
+    stx::InputStream* is) {
+  auto join_type = (JoinType) is->readUInt8();
+
+  Vector<RefPtr<SelectListNode>> select_list;
+  auto select_list_size = is->readVarUInt();
+  for (auto i = 0; i < select_list_size; ++i) {
+    select_list.emplace_back(coder->decode(is).asInstanceOf<SelectListNode>());
+  }
+
+  Option<RefPtr<ValueExpressionNode>> where_expr;
+  Option<RefPtr<ValueExpressionNode>> join_cond;
+  auto flags = is->readUInt8();
+
+  if ((flags & kHasWhereExprFlag) > 0) {
+    where_expr = coder->decode(is).asInstanceOf<ValueExpressionNode>();
+  }
+
+  if ((flags & kHasJoinExprFlag) > 0) {
+    join_cond = coder->decode(is).asInstanceOf<ValueExpressionNode>();
+  }
+
+  auto base_tbl = coder->decode(is);
+  auto joined_tbl = coder->decode(is);
+
+  return new JoinNode(
+      join_type,
+      base_tbl,
+      joined_tbl,
+      select_list,
+      where_expr,
+      join_cond);
+}
+
 } // namespace csql
 

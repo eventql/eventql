@@ -37,6 +37,15 @@ public:
       const String& column_name,
       bool allow_add = false) override;
 
+  static void encode(
+      QueryTreeCoder* coder,
+      const SelectExpressionNode& node,
+      stx::OutputStream* os);
+
+  static RefPtr<QueryTreeNode> decode(
+      QueryTreeCoder* coder,
+      stx::InputStream* is);
+
 protected:
   Vector<RefPtr<SelectListNode>> select_list_;
   Vector<String> column_names_;

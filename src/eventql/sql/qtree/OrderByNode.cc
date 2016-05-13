@@ -65,4 +65,36 @@ String OrderByNode::toString() const {
   return str;
 }
 
+void OrderByNode::encode(
+    QueryTreeCoder* coder,
+    const OrderByNode& node,
+    stx::OutputStream* os) {
+  os->appendVarUInt(node.sort_specs_.size());
+  for (const auto& spec : node.sort_specs_) {
+    coder->encode(spec.expr.get(), os);
+    os->appendUInt8(spec.descending);
+  }
+
+  coder->encode(node.table_, os);
+}
+
+RefPtr<QueryTreeNode> OrderByNode::decode (
+    QueryTreeCoder* coder,
+    stx::InputStream* is) {
+  Vector<SortSpec> sort_specs;
+  auto num_sort_specs = is->readVarUInt();
+
+  for (auto i = 0; i < num_sort_specs; ++i) {
+    SortSpec spec;
+    spec.expr = coder->decode(is).asInstanceOf<ValueExpressionNode>();
+    spec.descending = (bool) is->readUInt8();
+    sort_specs.emplace_back(spec);
+  }
+
+  auto table = coder->decode(is);
+
+  return new OrderByNode(sort_specs, table);
+}
+
+
 } // namespace csql

@@ -20,6 +20,7 @@
 #include "eventql/sql/qtree/QueryTreeUtil.h"
 #include "eventql/sql/qtree/qtree_coder.h"
 #include "eventql/sql/CSTableScanProvider.h"
+#include "eventql/sql/backends/csv/CSVTableProvider.h"
 
 using namespace stx;
 using namespace csql;
@@ -441,3 +442,50 @@ TEST_CASE(QTreeTest, TestSerialization, [] () {
   EXPECT_EQ(qtree->toString(), qtree2->toString());
 });
 
+TEST_CASE(QTreeTest, TestSerializationJoinAndSubquery, [] () {
+  auto runtime = Runtime::getDefaultRuntime();
+  auto txn = runtime->newTransaction();
+
+    txn->addTableProvider(
+      new backends::csv::CSVTableProvider(
+          "customers",
+          "src/eventql/sql/testdata/testtbl2.csv",
+          '\t'));
+  txn->addTableProvider(
+      new backends::csv::CSVTableProvider(
+          "orders",
+          "src/eventql/sql/testdata/testtbl3.csv",
+          '\t'));
+
+  String query =
+      "SELECT customers.customername, orders.orderid \
+      FROM customers \
+      LEFT JOIN orders \
+      ON customers.customerid=orders.customerid \
+      WHERE true \
+      ORDER BY customers.customername;";
+
+
+  csql::Parser parser;
+  parser.parse(query.data(), query.size());
+
+  auto qtree_builder = runtime->queryPlanBuilder();
+  auto qtrees = qtree_builder->build(
+      txn.get(),
+      parser.getStatements(),
+      txn->getTableProvider());
+
+  EXPECT_EQ(qtrees.size(), 1);
+  auto qtree = qtrees[0];
+
+  QueryTreeCoder coder(txn.get());
+
+  Buffer buf;
+  auto buf_os = BufferOutputStream::fromBuffer(&buf);
+  coder.encode(qtree, buf_os.get());
+
+  auto buf_is = BufferInputStream::fromBuffer(&buf);
+  auto qtree2 = coder.decode(buf_is.get());
+
+  EXPECT_EQ(qtree->toString(), qtree2->toString());
+});

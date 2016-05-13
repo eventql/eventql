@@ -31,4 +31,19 @@ String LiteralExpressionNode::toSQL() const {
   return value_.toSQL();
 }
 
+void LiteralExpressionNode::encode(
+    QueryTreeCoder* coder,
+    const LiteralExpressionNode& node,
+    stx::OutputStream* os) {
+  node.value().encode(os);
+}
+
+RefPtr<QueryTreeNode> LiteralExpressionNode::decode (
+    QueryTreeCoder* coder,
+    stx::InputStream* is) {
+  SValue value;
+  value.decode(is);
+  return new LiteralExpressionNode(value);
+}
+
 } // namespace csql

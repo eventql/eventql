@@ -12,6 +12,7 @@
 #include <eventql/util/option.h>
 #include <eventql/sql/qtree/QueryTreeNode.h>
 #include <eventql/sql/qtree/ValueExpressionNode.h>
+#include <eventql/sql/qtree/qtree_coder.h>
 
 using namespace stx;
 
@@ -31,6 +32,15 @@ public:
   void setAlias(const String& alias);
 
   String toString() const override;
+
+  static void encode(
+      QueryTreeCoder* coder,
+      const SelectListNode& node,
+      stx::OutputStream* os);
+
+  static RefPtr<QueryTreeNode> decode(
+      QueryTreeCoder* coder,
+      stx::InputStream* is);
 
 protected:
   Option<String> alias_;

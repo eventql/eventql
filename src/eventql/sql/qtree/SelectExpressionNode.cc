@@ -77,4 +77,26 @@ String SelectExpressionNode::toString() const {
   return str;
 }
 
+void SelectExpressionNode::encode(
+    QueryTreeCoder* coder,
+    const SelectExpressionNode& node,
+    stx::OutputStream* os) {
+  os->appendVarUInt(node.select_list_.size());
+  for (const auto& e : node.select_list_) {
+    coder->encode(e.get(), os);
+  }
+}
+
+RefPtr<QueryTreeNode> SelectExpressionNode::decode(
+    QueryTreeCoder* coder,
+    stx::InputStream* is) {
+  Vector<RefPtr<SelectListNode>> select_list;
+  auto select_list_size = is->readVarUInt();
+  for (auto i = 0; i < select_list_size; ++i) {
+    select_list.emplace_back(coder->decode(is).asInstanceOf<SelectListNode>());
+  }
+
+  return new SelectExpressionNode(select_list);
+}
+
 } // namespace csql

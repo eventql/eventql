@@ -10,6 +10,7 @@
 #pragma once
 #include <eventql/util/stdtypes.h>
 #include <eventql/sql/qtree/TableExpressionNode.h>
+#include <eventql/sql/qtree/qtree_coder.h>
 
 using namespace stx;
 
@@ -35,6 +36,15 @@ public:
   size_t getColumnIndex(
       const String& column_name,
       bool allow_add = false) override;
+
+  static void encode(
+      QueryTreeCoder* coder,
+      const DescribeTableNode& node,
+      stx::OutputStream* os);
+
+  static RefPtr<QueryTreeNode> decode (
+      QueryTreeCoder* coder,
+      stx::InputStream* is);
 
 protected:
   String table_name_;

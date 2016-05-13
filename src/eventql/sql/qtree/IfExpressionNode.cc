@@ -56,5 +56,27 @@ String IfExpressionNode::toSQL() const {
       false_branch_expr_->toSQL());
 }
 
+void IfExpressionNode::encode(
+    QueryTreeCoder* coder,
+    const IfExpressionNode& node,
+    stx::OutputStream* os) {
+  coder->encode(node.conditional_expr_.get(), os);
+  coder->encode(node.true_branch_expr_.get(), os);
+  coder->encode(node.false_branch_expr_.get(), os);
+}
+
+RefPtr<QueryTreeNode> IfExpressionNode::decode (
+    QueryTreeCoder* coder,
+    stx::InputStream* is) {
+  auto conditional_expr = coder->decode(is).asInstanceOf<ValueExpressionNode>();
+  auto true_branch_expr = coder->decode(is).asInstanceOf<ValueExpressionNode>();
+  auto false_branch_expr = coder->decode(is).asInstanceOf<ValueExpressionNode>();
+
+  return new IfExpressionNode(
+      conditional_expr,
+      true_branch_expr,
+      false_branch_expr);
+}
+
 } // namespace csql
 
