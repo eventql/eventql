@@ -26,22 +26,26 @@ public:
       Vector<ReplicaRef> hosts,
       AnalyticsAuth* auth);
 
+  ~RemoteExpression();
+
   ScopedPtr<csql::ResultCursor> execute() override;
 
 protected:
 
-  bool next(csql::SValue* row, size_t row_len);
+  void executeAsync();
+  bool next(csql::SValue* out_row, size_t out_row_len);
 
   csql::Transaction* txn_;
   RefPtr<csql::TableExpressionNode> qtree_;
   Vector<ReplicaRef> hosts_;
   AnalyticsAuth* auth_;
-  bool complete_;
+  bool eof_;
   bool error_;
-  bool canceled_;
+  std::atomic<bool> canceled_;
   std::mutex mutex_;
   std::condition_variable cv_;
   List<Vector<csql::SValue>> buf_;
+  std::thread thread_;
 };
 
 }

@@ -23,11 +23,18 @@ RemoteExpression::RemoteExpression(
     qtree_(qtree),
     hosts_(hosts),
     auth_(auth),
-    complete_(false),
+    eof_(false),
     error_(false),
     canceled_(false){};
 
+RemoteExpression::~RemoteExpression() {
+  canceled_ = false;
+  thread_.join();
+}
+
 ScopedPtr<csql::ResultCursor> RemoteExpression::execute() {
+  thread_ = std::thread(std::bind(&RemoteExpression::executeAsync, this));
+
   return mkScoped(
     new csql::DefaultResultCursor(
         qtree_->numColumns(),
@@ -38,8 +45,31 @@ ScopedPtr<csql::ResultCursor> RemoteExpression::execute() {
             std::placeholders::_2)));
 }
 
-bool RemoteExpression::next(csql::SValue* row, size_t row_len) {
-  return false;
+void RemoteExpression::executeAsync() {
+}
+
+bool RemoteExpression::next(csql::SValue* out_row, size_t out_row_len) {
+  std::unique_lock<std::mutex> lk(mutex_);
+
+  while (buf_.size() == 0 && !eof_ && !error_) {
+    cv_.wait(lk);
+  }
+
+  if (error_) {
+    RAISE(kIOError, "IO error");
+  }
+
+  if (eof_ && buf_.size() == 0) {
+    return false;
+  }
+
+  const auto& row = buf_.front();
+  for (size_t i = 0; i < row.size() && i < out_row_len; ++i) {
+    out_row[i] = row[i];
+  }
+
+  buf_.pop_front();
+  return true;
 }
 
 
