@@ -118,62 +118,6 @@ STX_PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${PROTO_FILES})
 file(GLOB COREPROTO_FILES core/*.proto metrics/*.proto)
 STX_PROTOBUF_GENERATE_CPP(COREPROTO_SRCS COREPROTO_HDRS ${COREPROTO_FILES})
 
-add_library(tsdb-client OBJECT
-    core/TSDBClient.cc
-    core/TimeWindowPartitioner.cc
-    core/FixedShardPartitioner.cc
-    ${COREPROTO_SRCS})
-
-add_library(coreprotos OBJECT
-    ${COREPROTO_SRCS})
-
-add_library(customerdirectory OBJECT
-    CustomerConfig.cc
-    ConfigDirectory.cc
-    TableDefinition.cc
-    AnalyticsAuth.cc
-    ${PROTO_SRCS})
-
-add_dependencies(customerdirectory coreprotos)
-
-#add_library(evql-core OBJECT
-#    z1stats.cc
-#    core/TSDBClient.cc
-#    core/TimeWindowPartitioner.cc
-#    core/FixedShardPartitioner.cc
-#    core/CompactionStrategy.cc
-#    core/CompactionWorker.cc
-#    core/TSDBService.cc
-#    core/TSDBServlet.cc
-#    core/TSDBTableRef.cc
-#    core/RecordSet.cc
-#    core/Partition.cc
-#    core/PartitionMap.cc
-#    core/PartitionReader.cc
-#    core/PartitionWriter.cc
-#    core/PartitionSnapshot.cc
-#    core/PartitionReplication.cc
-#    core/LogPartitionReader.cc
-#    core/LogPartitionWriter.cc
-#    core/LogPartitionReplication.cc
-#    core/LSMPartitionReader.cc
-#    core/LSMPartitionWriter.cc
-#    core/LSMPartitionReplication.cc
-#    core/LazyPartition.cc
-#    core/Table.cc
-#    core/RecordArena.cc
-#    core/LSMTableIndex.cc
-#    core/LSMTableIndexCache.cc
-#    core/ReplicationWorker.cc
-#    core/ReplicationScheme.cc
-#    core/ReplicationState.cc
-#    core/RemoteTSDBScan.cc
-#    core/StaticPartitionReader.cc
-#    core/StaticPartitionWriter.cc
-#    core/StaticPartitionReplication.cc)
-#
-#add_dependencies(evql-core customerdirectory)
-#add_dependencies(evql-core coreprotos)
 #
 #add_executable(test-tsdb-timewindowpartitioner
 #    $<TARGET_OBJECTS:stx-mdb>
@@ -234,41 +178,73 @@ add_dependencies(customerdirectory coreprotos)
 
 
 
-#add_executable(evqld
-#    $<TARGET_OBJECTS:stx-mdb>
-#    $<TARGET_OBJECTS:evql-core>
-#    $<TARGET_OBJECTS:coreprotos>
-#    $<TARGET_OBJECTS:customerdirectory>
-#    #$<TARGET_OBJECTS:fnord-afx>
-#    #eventql/infra/sstable/SSTableServlet.cc
-#    api/LogfileService.cc
-#    api/LogfileAPIServlet.cc
-#    api/EventsService.cc
-#    api/EventsAPIServlet.cc
-#    api/MapReduceService.cc
-#    api/MapReduceAPIServlet.cc
-#    mapreduce/MapReduceTask.cc
-#    mapreduce/MapReduceTaskBuilder.cc
-#    mapreduce/MapReduceScheduler.cc
-#    mapreduce/tasks/MapTableTask.cc
-#    mapreduce/tasks/ReduceTask.cc
-#    mapreduce/tasks/ReturnResultsTask.cc
-#    mapreduce/tasks/SaveToTableTask.cc
-#    mapreduce/tasks/SaveToTablePartitionTask.cc
-#    server/sql/sql_engine.cc
-#    LogfileScanResult.cc
-#    EventScanResult.cc
-#    AnalyticsServlet.cc
-#    StatusServlet.cc
-#    HTTPAuth.cc
-#    AnalyticsApp.cc
-#    DrilldownTree.cc
-#    DefaultServlet.cc
-#    JavaScriptContext.cc
-#    server/sql/codec/binary_codec.cc
-#    ${CMAKE_CURRENT_BINARY_DIR}/mapreduce_preludejs.cc
-#    evqld.cc)
-#
+add_executable(evqld
+    #eventql/infra/sstable/SSTableServlet.cc
+    ${CMAKE_CURRENT_BINARY_DIR}/mapreduce_preludejs.cc
+    ${COREPROTO_FILES}
+    AnalyticsApp.cc
+    AnalyticsAuth.cc
+    AnalyticsServlet.cc
+    ConfigDirectory.cc
+    CustomerConfig.cc
+    DefaultServlet.cc
+    DrilldownTree.cc
+    EventScanResult.cc
+    HTTPAuth.cc
+    JavaScriptContext.cc
+    LogfileScanResult.cc
+    StatusServlet.cc
+    TableDefinition.cc
+    api/EventsAPIServlet.cc
+    api/EventsService.cc
+    api/LogfileAPIServlet.cc
+    api/LogfileService.cc
+    api/MapReduceAPIServlet.cc
+    api/MapReduceService.cc
+    core/CompactionStrategy.cc
+    core/CompactionWorker.cc
+    core/FixedShardPartitioner.cc
+    core/LSMPartitionReader.cc
+    core/LSMPartitionReplication.cc
+    core/LSMPartitionWriter.cc
+    core/LSMTableIndex.cc
+    core/LSMTableIndexCache.cc
+    core/LazyPartition.cc
+    core/LogPartitionReader.cc
+    core/LogPartitionReplication.cc
+    core/LogPartitionWriter.cc
+    core/Partition.cc
+    core/PartitionMap.cc
+    core/PartitionReader.cc
+    core/PartitionReplication.cc
+    core/PartitionSnapshot.cc
+    core/PartitionWriter.cc
+    core/RecordArena.cc
+    core/RecordSet.cc
+    core/ReplicationScheme.cc
+    core/ReplicationState.cc
+    core/ReplicationWorker.cc
+    core/StaticPartitionReader.cc
+    core/StaticPartitionReplication.cc
+    core/StaticPartitionWriter.cc
+    core/TSDBClient.cc
+    core/TSDBService.cc
+    core/TSDBServlet.cc
+    core/TSDBTableRef.cc
+    core/Table.cc
+    core/TimeWindowPartitioner.cc
+    mapreduce/MapReduceScheduler.cc
+    mapreduce/MapReduceTask.cc
+    mapreduce/MapReduceTaskBuilder.cc
+    mapreduce/tasks/MapTableTask.cc
+    mapreduce/tasks/ReduceTask.cc
+    mapreduce/tasks/ReturnResultsTask.cc
+    mapreduce/tasks/SaveToTablePartitionTask.cc
+    mapreduce/tasks/SaveToTableTask.cc
+    server/sql/codec/binary_codec.cc
+    z1stats.cc
+    evqld.cc)
+
 #target_link_libraries(evqld chartsql cplot sstable cstable stx-http stx-protobuf stx-json stx-base stx-rpc js_static.a z pcre)
 #target_link_libraries(evqld -L${CMAKE_BINARY_DIR}/deps/3rdparty/mozjs/dist/lib -ljs_static)
 #add_dependencies(evqld customerdirectory mozjs_build)

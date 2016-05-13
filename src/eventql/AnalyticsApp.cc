@@ -83,16 +83,6 @@ AnalyticsApp::AnalyticsApp(
   });
 }
 
-RefPtr<csql::ExecutionStrategy> AnalyticsApp::getExecutionStrategy(
-    const String& customer) {
-  return SQLEngine::getExecutionStrategy(
-      sql_,
-      partition_map_,
-      replication_scheme_,
-      auth_,
-      customer);
-}
-
 RefPtr<csql::TableProvider> AnalyticsApp::getTableProvider(
     const String& customer) const {
   return zbase::SQLEngine::tableProviderForNamespace(
