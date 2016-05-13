@@ -10,7 +10,7 @@
 #include "eventql/util/stdtypes.h"
 #include "eventql/util/autoref.h"
 #include "eventql/util/protobuf/MessageObject.h"
-#include "eventql/CustomerConfig.pb.h"
+#include "eventql/CustomerConfigProtos.pb.h"
 
 using namespace stx;
 

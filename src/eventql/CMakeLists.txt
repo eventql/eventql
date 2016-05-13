@@ -150,11 +150,11 @@ STX_PROTOBUF_GENERATE_CPP(COREPROTO_SRCS COREPROTO_HDRS ${COREPROTO_FILES})
 #add_subdirectory(util/mysql)
 #add_subdirectory(util/mdb)
 #
-#add_custom_command(
-#    OUTPUT mapreduce_preludejs.cc
-#    COMMAND 
-#        echo 'eventql/mapreduce/prelude.js:${CMAKE_CURRENT_SOURCE_DIR}/mapreduce/prelude.js' | ${CMAKE_SOURCE_DIR}/src/eventql/util/assets.sh mapreduce_preludejs.cc
-#    DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/mapreduce/prelude.js")
+add_custom_command(
+    OUTPUT mapreduce_preludejs.cc
+    COMMAND 
+        echo 'eventql/mapreduce/prelude.js:${CMAKE_CURRENT_SOURCE_DIR}/mapreduce/prelude.js' | ${CMAKE_SOURCE_DIR}/src/eventql/util/assets.sh mapreduce_preludejs.cc
+    DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/mapreduce/prelude.js")
 #
 ##add_executable(test-javascriptcontext
 ##    $<TARGET_OBJECTS:stx-mdb>
@@ -175,7 +175,6 @@ STX_PROTOBUF_GENERATE_CPP(COREPROTO_SRCS COREPROTO_HDRS ${COREPROTO_FILES})
 ##
 ##target_link_libraries(test-javascriptcontext chartsql cplot sstable cstable stx-http stx-protobuf stx-json stx-base pcre z)
 ##target_link_libraries(test-javascriptcontext -L${CMAKE_BINARY_DIR}/deps/3rdparty/mozjs/dist/lib -ljs_static)
-
 
 
 
