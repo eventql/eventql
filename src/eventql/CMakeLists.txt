@@ -112,6 +112,8 @@ configure_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/sysconfig.h.cmake
     ${CMAKE_CURRENT_BINARY_DIR}/sysconfig.h)
 
+add_subdirectory(util/mdb)
+
 file(GLOB PROTO_FILES *.proto)
 STX_PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${PROTO_FILES})
 
@@ -245,7 +247,7 @@ add_executable(evqld
     z1stats.cc
     evqld.cc)
 
-target_link_libraries(evqld chartsql cplot sstable cstable stx-http stx-protobuf stx-json stx-base stx-rpc js_static.a z pcre)
+target_link_libraries(evqld chartsql cplot sstable cstable stx-http stx-protobuf stx-json stx-base stx-rpc stx-mdb js_static.a z pcre)
 target_link_libraries(evqld -L${CMAKE_BINARY_DIR}/deps/3rdparty/mozjs/dist/lib -ljs_static)
 add_dependencies(evqld customerdirectory mozjs_build)
 #
