@@ -11,6 +11,7 @@
 #include <eventql/util/stdtypes.h>
 #include <eventql/sql/qtree/ValueExpressionNode.h>
 #include <eventql/sql/svalue.h>
+#include <eventql/sql/qtree/qtree_coder.h>
 
 using namespace stx;
 
@@ -28,6 +29,15 @@ public:
   RefPtr<QueryTreeNode> deepCopy() const override;
 
   String toSQL() const override;
+
+  static void encode(
+      QueryTreeCoder* coder,
+      const LiteralExpressionNode& node,
+      stx::OutputStream* os);
+
+  static RefPtr<QueryTreeNode> decode (
+      QueryTreeCoder* coder,
+      stx::InputStream* is);
 
 protected:
   SValue value_;

@@ -78,4 +78,32 @@ String ColumnReferenceNode::toSQL() const {
   return "`" + column_name_ + "`";
 }
 
+void ColumnReferenceNode::encode(
+    QueryTreeCoder* coder,
+    const ColumnReferenceNode& node,
+    stx::OutputStream* os) {
+  os->appendLenencString(node.column_name_);
+
+  if (!node.column_index_.isEmpty() && node.column_index_.get() != size_t(-1)) {
+    os->appendUInt8(1);
+    os->appendVarUInt(node.column_index_.get());
+  } else {
+    os->appendUInt8(0);
+  }
+}
+
+RefPtr<QueryTreeNode> ColumnReferenceNode::decode (
+    QueryTreeCoder* coder,
+    stx::InputStream* is) {
+
+  auto column_name = is->readLenencString();
+  auto node = new ColumnReferenceNode(column_name);
+
+  if (is->readUInt8()) {
+    node->setColumnIndex(is->readVarUInt());
+  }
+
+  return node;
+}
+
 } // namespace csql

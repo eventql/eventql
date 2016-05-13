@@ -32,6 +32,9 @@ public:
     size_t column_idx;
   };
 
+  static const uint8_t kHasWhereExprFlag = 1;
+  static const uint8_t kHasJoinExprFlag = 2;
+
   JoinNode(
       JoinType join_type,
       RefPtr<QueryTreeNode> base_table,
@@ -69,6 +72,15 @@ public:
   RefPtr<QueryTreeNode> deepCopy() const override;
 
   String toString() const override;
+
+  static void encode(
+      QueryTreeCoder* coder,
+      const JoinNode& node,
+      stx::OutputStream* os);
+
+  static RefPtr<QueryTreeNode> decode(
+      QueryTreeCoder* coder,
+      stx::InputStream* is);
 
 protected:
 

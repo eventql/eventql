@@ -111,4 +111,43 @@ String GroupByNode::toString() const {
   return str;
 }
 
+void GroupByNode::encode(
+    QueryTreeCoder* coder,
+    const GroupByNode& node,
+    stx::OutputStream* os) {
+  os->appendVarUInt(node.select_list_.size());
+  for (const auto& e : node.select_list_) {
+    coder->encode(e.get(), os);
+  }
+
+  os->appendVarUInt(node.group_exprs_.size());
+  for (const auto& e : node.group_exprs_) {
+    coder->encode(e.get(), os);
+  }
+
+  coder->encode(node.table_, os);
+}
+
+RefPtr<QueryTreeNode> GroupByNode::decode (
+    QueryTreeCoder* coder,
+    stx::InputStream* is) {
+  Vector<RefPtr<SelectListNode>> select_list;
+  auto select_list_size = is->readVarUInt();
+  for (auto i = 0; i < select_list_size; ++i) {
+    select_list.emplace_back(coder->decode(is).asInstanceOf<SelectListNode>());
+  }
+
+  Vector<RefPtr<ValueExpressionNode>> group_exprs;
+  auto group_exprs_size = is->readVarUInt();
+  for (auto i = 0; i < group_exprs_size; ++i) {
+    group_exprs.emplace_back(
+        coder->decode(is).asInstanceOf<ValueExpressionNode>());
+  }
+
+  auto table = coder->decode(is);
+
+  return new GroupByNode(select_list, group_exprs, table);
+}
+
+
 } // namespace csql
