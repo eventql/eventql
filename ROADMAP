@@ -12,7 +12,7 @@ ROADMAP
 - [ ] distributed join
 - [ ] unified scheduler
 - [ ] partitioning/sharding v2
-
+- [ ] improved table iterator iface (update, ordered, restricted, etc)
 
 kleinkram:
 - [ ] accept SQL query as post data in /api/v1/sql
