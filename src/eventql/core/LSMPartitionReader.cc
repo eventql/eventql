@@ -13,7 +13,6 @@
 #include <eventql/infra/cstable/CSTableReader.h>
 #include <eventql/infra/cstable/RecordMaterializer.h>
 #include <eventql/core/LSMPartitionReader.h>
-#include <eventql/core/LSMPartitionSQLScan.h>
 #include <eventql/core/Table.h>
 
 using namespace stx;
@@ -73,22 +72,6 @@ void LSMPartitionReader::fetchRecords(
 
 SHA1Hash LSMPartitionReader::version() const {
   return SHA1::compute(StringUtil::toString(snap_->state.lsm_sequence())); // FIXME include arenas?
-}
-
-ScopedPtr<csql::TableExpression> LSMPartitionReader::buildSQLScan(
-    csql::Transaction* ctx,
-    RefPtr<csql::SequentialScanNode> node,
-    csql::QueryBuilder* runtime) const {
-  auto scan = mkScoped(
-      new LSMPartitionSQLScan(
-          ctx,
-          table_,
-          snap_,
-          node,
-          runtime));
-
-  scan->setCacheKey(version());
-  return std::move(scan);
 }
 
 } // namespace tdsb

@@ -30,20 +30,24 @@ bool ScanConstraint::operator!=(const ScanConstraint& other) const {
 
 SequentialScanNode::SequentialScanNode(
     const TableInfo& table_info,
+    RefPtr<TableProvider> table_provider,
     Vector<RefPtr<SelectListNode>> select_list,
     Option<RefPtr<ValueExpressionNode>> where_expr) :
     SequentialScanNode(
         table_info,
+        table_provider,
         select_list,
         where_expr,
         AggregationStrategy::NO_AGGREGATION) {}
 
 SequentialScanNode::SequentialScanNode(
     const TableInfo& table_info,
+    RefPtr<TableProvider> table_provider,
     Vector<RefPtr<SelectListNode>> select_list,
     Option<RefPtr<ValueExpressionNode>> where_expr,
     AggregationStrategy aggr_strategy) :
     table_name_(table_info.table_name),
+    table_provider_(table_provider),
     select_list_(select_list),
     where_expr_(where_expr),
     aggr_strategy_(aggr_strategy) {
@@ -266,6 +270,19 @@ String SequentialScanNode::toString() const {
 
 const Vector<ScanConstraint>& SequentialScanNode::constraints() const {
   return constraints_;
+}
+
+void SequentialScanNode::encode(
+    QueryTreeCoder* coder,
+    const SequentialScanNode& node,
+    stx::OutputStream* os) {
+  RAISE(kNotYetImplementedError, "nyi");
+}
+
+RefPtr<QueryTreeNode> SequentialScanNode::decode(
+    QueryTreeCoder* coder,
+    stx::InputStream* os) {
+  RAISE(kNotYetImplementedError, "nyi");
 }
 
 } // namespace csql

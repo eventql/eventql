@@ -15,10 +15,12 @@
 #include <eventql/sql/qtree/ValueExpressionNode.h>
 #include <eventql/sql/qtree/SelectListNode.h>
 #include <eventql/sql/TableInfo.h>
+#include <eventql/sql/qtree/qtree_coder.h>
 
 using namespace stx;
 
 namespace csql {
+class TableProvider;
 
 /**
  * This flag controls the table scan aggregation behaviour and how many rows are
@@ -82,11 +84,13 @@ public:
 
   SequentialScanNode(
       const TableInfo& table_info,
+      RefPtr<TableProvider> table_provider,
       Vector<RefPtr<SelectListNode>> select_list,
       Option<RefPtr<ValueExpressionNode>> where_expr);
 
   SequentialScanNode(
       const TableInfo& table_info,
+      RefPtr<TableProvider> table_provider,
       Vector<RefPtr<SelectListNode>> select_list,
       Option<RefPtr<ValueExpressionNode>> where_expr,
       AggregationStrategy aggr_strategy);
@@ -128,6 +132,15 @@ public:
 
   String toString() const override;
 
+  static void encode(
+      QueryTreeCoder* coder,
+      const SequentialScanNode& node,
+      stx::OutputStream* os);
+
+  static RefPtr<QueryTreeNode> decode(
+      QueryTreeCoder* coder,
+      stx::InputStream* os);
+
 protected:
 
   void findSelectedColumnNames(
@@ -137,6 +150,7 @@ protected:
   String table_name_;
   String table_alias_;
   Vector<String> table_columns_;
+  RefPtr<TableProvider> table_provider_;
   Vector<RefPtr<SelectListNode>> select_list_;
   Vector<String> output_columns_;
   Option<RefPtr<ValueExpressionNode>> where_expr_;

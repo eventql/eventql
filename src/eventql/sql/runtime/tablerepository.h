@@ -11,34 +11,18 @@
 #include <eventql/util/option.h>
 #include <eventql/sql/backends/backend.h>
 #include <eventql/sql/backends/tableref.h>
-#include <eventql/sql/runtime/TableExpression.h>
-#include <eventql/sql/qtree/SequentialScanNode.h>
 #include <eventql/sql/TableInfo.h>
+#include <eventql/sql/table_provider.h>
 
 namespace csql {
-class ImportStatement;
 class QueryBuilder;
 class Transaction;
+class SequentialScanNode;
 
-class TableProvider : public RefCounted {
-public:
-
-  virtual Option<ScopedPtr<TableExpression>> buildSequentialScan(
-      Transaction* ctx,
-      RefPtr<SequentialScanNode> seqscan,
-      QueryBuilder* runtime) const = 0;
-
-  virtual void listTables(Function<void (const TableInfo& table)> fn) const = 0;
-
-  virtual Option<TableInfo> describe(const String& table_name) const = 0;
-
-};
+using namespace stx;
 
 class TableRepository : public TableProvider {
 public:
-  typedef
-      Function<RefPtr<ScopedPtr<TableExpression>> (RefPtr<SequentialScanNode>)>
-      TableFactoryFn;
 
   virtual TableRef* getTableRef(const std::string& table_name) const;
 
@@ -51,20 +35,15 @@ public:
       const std::string& source_uri,
       const std::vector<std::unique_ptr<Backend>>& backends);
 
-  void import(
-      const ImportStatement& import_stmt,
-      const std::vector<std::unique_ptr<Backend>>& backends);
-
-  Option<ScopedPtr<TableExpression>> buildSequentialScan(
-      Transaction* ctx,
-      RefPtr<SequentialScanNode> seqscan,
-      QueryBuilder* runtime) const override;
-
   void addProvider(RefPtr<TableProvider> provider);
 
   void listTables(Function<void (const TableInfo& table)> fn) const override;
 
   Option<TableInfo> describe(const String& table_name) const override;
+
+  Option<ScopedPtr<TableExpression>> buildSequentialScan(
+      Transaction* ctx,
+      RefPtr<SequentialScanNode> seqscan) const override;
 
 protected:
   std::unordered_map<std::string, std::unique_ptr<TableRef>> table_refs_;

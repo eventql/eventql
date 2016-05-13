@@ -21,18 +21,20 @@ CSTableScanProvider::CSTableScanProvider(
     table_name_(table_name),
     cstable_file_(cstable_file) {}
 
-Option<ScopedPtr<TableExpression>>
-    CSTableScanProvider::buildSequentialScan(
-        Transaction* ctx,
-        RefPtr<SequentialScanNode> node,
-        QueryBuilder* runtime) const {
+Option<ScopedPtr<TableExpression>> CSTableScanProvider::buildSequentialScan(
+    Transaction* txn,
+    RefPtr<SequentialScanNode> node) const {
+  if (node->tableName() != table_name_) {
+    return None<ScopedPtr<TableExpression>>();
+  }
+
   return Option<ScopedPtr<TableExpression>>(
-      mkScoped(
+      ScopedPtr<TableExpression>(
           new CSTableScan(
-              ctx,
+              txn,
               node,
               cstable_file_,
-              runtime)));
+              txn->getCompiler())));
 }
 
 void CSTableScanProvider::listTables(

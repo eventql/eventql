@@ -8,7 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <eventql/sql/backends/mysql/mysqltableref.h>
-#include <eventql/sql/runtime/tablescan.h>
+#include <eventql/sql/tasks/tablescan.h>
 
 namespace csql {
 namespace mysql_backend {

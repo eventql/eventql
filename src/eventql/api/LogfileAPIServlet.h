@@ -50,18 +50,6 @@ protected:
       const http::HTTPRequest* req,
       http::HTTPResponse* res);
 
-  void scanLogfile(
-      const AnalyticsSession& session,
-      const URI& uri,
-      http::HTTPRequestStream* req_stream,
-      http::HTTPResponseStream* res_stream);
-
-  void scanLogfilePartition(
-      const AnalyticsSession& session,
-      const URI& uri,
-      http::HTTPRequestStream* req_stream,
-      http::HTTPResponseStream* res_stream);
-
   void uploadLogfile(
       const AnalyticsSession& session,
       const URI& uri,

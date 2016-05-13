@@ -15,13 +15,11 @@
 #include <memory>
 #include <eventql/util/thread/threadpool.h>
 #include <eventql/sql/parser/parser.h>
-#include <eventql/sql/qtree/RemoteAggregateParams.pb.h>
 #include <eventql/sql/runtime/queryplan.h>
 #include <eventql/sql/runtime/queryplanbuilder.h>
 #include <eventql/sql/runtime/QueryBuilder.h>
 #include <eventql/sql/runtime/symboltable.h>
 #include <eventql/sql/runtime/ResultFormat.h>
-#include <eventql/sql/runtime/ExecutionStrategy.h>
 #include <eventql/sql/runtime/resultlist.h>
 
 namespace csql {
@@ -40,41 +38,13 @@ public:
 
   ScopedPtr<Transaction> newTransaction();
 
-  RefPtr<QueryPlan> buildQueryPlan(
+  ScopedPtr<QueryPlan> buildQueryPlan(
       Transaction* ctx,
-      const String& query,
-      RefPtr<ExecutionStrategy> execution_strategy);
+      const String& query);
 
-  RefPtr<QueryPlan> buildQueryPlan(
+  ScopedPtr<QueryPlan> buildQueryPlan(
       Transaction* ctx,
-      Vector<RefPtr<csql::QueryTreeNode>> statements,
-      RefPtr<ExecutionStrategy> execution_strategy);
-
-  void executeQuery(
-      Transaction* ctx,
-      const String& query,
-      RefPtr<ExecutionStrategy> execution_strategy,
-      RefPtr<ResultFormat> result_format);
-
-  void executeQuery(
-      Transaction* ctx,
-      RefPtr<QueryPlan> query_plan,
-      RefPtr<ResultFormat> result_format);
-
-  void executeStatement(
-      Transaction* ctx,
-      RefPtr<TableExpressionNode> qtree,
-      ResultList* result);
-
-  void executeStatement(
-      Transaction* ctx,
-      Statement* statement,
-      ResultList* result);
-
-  void executeStatement(
-      Transaction* ctx,
-      TableExpression* statement,
-      Function<bool (int argc, const SValue* argv)> fn);
+      Vector<RefPtr<csql::QueryTreeNode>> statements);
 
   SValue evaluateScalarExpression(
       Transaction* ctx,
@@ -104,12 +74,6 @@ public:
   SValue evaluateConstExpression(Transaction* ctx, ASTNode* expr);
   SValue evaluateConstExpression(Transaction* ctx, RefPtr<ValueExpressionNode> expr);
   SValue evaluateConstExpression(Transaction* ctx, const ValueExpression& expr);
-
-  void executeAggregate(
-      Transaction* ctx,
-      const RemoteAggregateParams& query,
-      RefPtr<ExecutionStrategy> execution_strategy,
-      OutputStream* os);
 
   Option<String> cacheDir() const;
   void setCacheDir(const String& cachedir);

@@ -9,7 +9,6 @@
  */
 #pragma once
 #include <eventql/util/stdtypes.h>
-#include <eventql/sql/runtime/TableExpression.h>
 #include <eventql/sql/qtree/DrawStatementNode.h>
 #include <eventql/sql/parser/token.h>
 #include <eventql/sql/Transaction.h>
@@ -21,47 +20,41 @@
 namespace csql {
 class Runtime;
 
-class DrawStatement : public Statement {
-public:
-
-  DrawStatement(
-      Transaction* ctx,
-      RefPtr<DrawStatementNode> node,
-      Vector<ScopedPtr<TableExpression>> sources,
-      Runtime* runtime);
-
-  void prepare(ExecutionContext* context) override;
-
-  void execute(
-      ExecutionContext* context,
-      stx::chart::Canvas* canvas);
-
-protected:
-
-  template <typename ChartBuilderType>
-  stx::chart::Drawable* executeWithChart(
-      ExecutionContext* context,
-      stx::chart::Canvas* canvas) {
-    ChartBuilderType chart_builder(canvas, node_);
-
-    for (auto& source : sources_) {
-      chart_builder.executeStatement(source.get(), context);
-    }
-
-    return chart_builder.getChart();
-  }
-
-  void applyAxisDefinitions(stx::chart::Drawable* chart) const;
-  void applyAxisLabels(ASTNode* ast, stx::chart::AxisDefinition* axis) const;
-  void applyDomainDefinitions(stx::chart::Drawable* chart) const;
-  void applyGrid(stx::chart::Drawable* chart) const;
-  void applyLegend(stx::chart::Drawable* chart) const;
-  void applyTitle(stx::chart::Drawable* chart) const;
-
-  Transaction* ctx_;
-  RefPtr<DrawStatementNode> node_;
-  Vector<ScopedPtr<TableExpression>> sources_;
-  Runtime* runtime_;
-};
+//class DrawStatement : public Statement {
+//public:
+//
+//  DrawStatement(
+//      Transaction* ctx,
+//      RefPtr<DrawStatementNode> node,
+//      Vector<ScopedPtr<Task>> sources,
+//      Runtime* runtime);
+//
+//protected:
+//
+//  template <typename ChartBuilderType>
+//  stx::chart::Drawable* executeWithChart(
+//      ExecutionContext* context,
+//      stx::chart::Canvas* canvas) {
+//    ChartBuilderType chart_builder(canvas, node_);
+//
+//    for (auto& source : sources_) {
+//      chart_builder.executeStatement(source.get(), context);
+//    }
+//
+//    return chart_builder.getChart();
+//  }
+//
+//  void applyAxisDefinitions(stx::chart::Drawable* chart) const;
+//  void applyAxisLabels(ASTNode* ast, stx::chart::AxisDefinition* axis) const;
+//  void applyDomainDefinitions(stx::chart::Drawable* chart) const;
+//  void applyGrid(stx::chart::Drawable* chart) const;
+//  void applyLegend(stx::chart::Drawable* chart) const;
+//  void applyTitle(stx::chart::Drawable* chart) const;
+//
+//  Transaction* ctx_;
+//  RefPtr<DrawStatementNode> node_;
+//  Vector<ScopedPtr<Task>> sources_;
+//  Runtime* runtime_;
+//};
 
 }

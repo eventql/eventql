@@ -16,7 +16,6 @@
 #include "eventql/api/EventsService.h"
 #include "eventql/api/MapReduceService.h"
 #include "eventql/AnalyticsSession.pb.h"
-#include "eventql/sql/runtime/ExecutionStrategy.h"
 #include "eventql/ConfigDirectory.h"
 #include <jsapi.h>
 
@@ -39,7 +38,6 @@ public:
       const String& datadir,
       const String& cachedir);
 
-  RefPtr<csql::ExecutionStrategy> getExecutionStrategy(const String& customer);
   RefPtr<csql::TableProvider> getTableProvider(const String& customer) const;
   zbase::TSDBService* getTSDBNode() const;
 

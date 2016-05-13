@@ -13,7 +13,7 @@
 #include <eventql/core/TSDBTableScanSpec.pb.h>
 #include "eventql/core/TimeWindowPartitioner.h"
 #include <eventql/core/CompactionWorker.h>
-#include "eventql/core/SQLEngine.h"
+#include "eventql/server/sql/sql_engine.h"
 #include "eventql/util/protobuf/DynamicMessage.h"
 #include "eventql/util/protobuf/MessageEncoder.h"
 
@@ -83,23 +83,11 @@ AnalyticsApp::AnalyticsApp(
   });
 }
 
-RefPtr<csql::ExecutionStrategy> AnalyticsApp::getExecutionStrategy(
-    const String& customer) {
-  return SQLEngine::getExecutionStrategy(
-      sql_,
-      partition_map_,
-      replication_scheme_,
-      cstable_index_,
-      auth_,
-      customer);
-}
-
 RefPtr<csql::TableProvider> AnalyticsApp::getTableProvider(
     const String& customer) const {
   return zbase::SQLEngine::tableProviderForNamespace(
         partition_map_,
         replication_scheme_,
-        cstable_index_,
         auth_,
         customer);
 }

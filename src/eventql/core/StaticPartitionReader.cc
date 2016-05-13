@@ -14,7 +14,6 @@
 #include <eventql/core/Table.h>
 #include <eventql/infra/cstable/CSTableReader.h>
 #include <eventql/infra/cstable/RecordMaterializer.h>
-#include <eventql/sql/runtime/EmptyTable.h>
 
 using namespace stx;
 
@@ -31,12 +30,12 @@ void StaticPartitionReader::fetchRecords(
     Function<void (const msg::MessageObject& record)> fn) {
   auto schema = table_->schema();
 
-  auto cstable = fetchCSTableFilename();
-  if (cstable.isEmpty()) {
+  auto cstable = FileUtil::joinPaths(snap_->base_path, "_cstable");
+  if (!FileUtil::exists(cstable)) {
     return;
   }
 
-  auto reader = cstable::CSTableReader::openFile(cstable.get());
+  auto reader = cstable::CSTableReader::openFile(cstable);
   cstable::RecordMaterializer materializer(
       schema.get(),
       reader.get());
@@ -50,36 +49,17 @@ void StaticPartitionReader::fetchRecords(
 }
 
 SHA1Hash StaticPartitionReader::version() const {
-  auto cstable_version = cstableVersion();
-  if (cstable_version.isEmpty()) {
-    return SHA1Hash{};
-  } else {
-    return cstable_version.get();
-  }
-}
+  auto metapath = FileUtil::joinPaths(snap_->base_path, "_cstable_state");
 
-ScopedPtr<csql::TableExpression> StaticPartitionReader::buildSQLScan(
-    csql::Transaction* ctx,
-    RefPtr<csql::SequentialScanNode> node,
-    csql::QueryBuilder* runtime) const {
-  auto cstable = fetchCSTableFilename();
-  if (cstable.isEmpty()) {
-    return mkScoped(new csql::EmptyTable(node->outputColumns()));
+  if (FileUtil::exists(metapath)) {
+    return SHA1::compute(FileUtil::read(metapath));
   }
 
-  auto scan = mkScoped(
-      new csql::CSTableScan(
-          ctx,
-          node,
-          cstable.get(),
-          runtime));
-
-  auto cstable_version = cstableVersion();
-  if (!cstable_version.isEmpty()) {
-    scan->setCacheKey(cstable_version.get());
+  if (snap_->state.has_cstable_version()) {
+    return SHA1::compute(StringUtil::toString(snap_->state.cstable_version()));
   }
 
-  return std::move(scan);
+  return SHA1Hash{};
 }
 
 } // namespace tdsb

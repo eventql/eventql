@@ -62,7 +62,7 @@ public:
     void* scratch;
   };
 
-  static inline void evaluate(
+  static void evaluate(
       Transaction* ctx,
       const Program* program,
       int argc,
@@ -185,15 +185,6 @@ protected:
       InputStream* is);
 
 };
-
-inline void VM::evaluate(
-    Transaction* ctx,
-    const Program* program,
-    int argc,
-    const SValue* argv,
-    SValue* out) {
-  return evaluate(ctx, program, nullptr, program->entry_, argc, argv, out);
-}
 
 } // namespace csql
 

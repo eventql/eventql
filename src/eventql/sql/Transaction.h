@@ -18,6 +18,9 @@ using namespace stx;
 namespace csql {
 class Runtime;
 class SymbolTable;
+class QueryBuilder;
+class TableProvider;
+class TableRepository;
 
 class Transaction {
 public:
@@ -31,16 +34,16 @@ public:
   UnixTime now() const;
 
   Runtime* getRuntime() const;
-
+  QueryBuilder* getCompiler() const;
   SymbolTable* getSymbolTable() const;
 
-  void setTableProvider(RefPtr<TableProvider> provider);
+  void addTableProvider(RefPtr<TableProvider> provider);
   RefPtr<TableProvider> getTableProvider() const;
 
 protected:
   Runtime* runtime_;
   UnixTime now_;
-  RefPtr<TableProvider> table_provider_;
+  RefPtr<TableRepository> table_providers_;
 };
 
 

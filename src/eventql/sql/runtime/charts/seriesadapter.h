@@ -18,7 +18,6 @@
 #include <eventql/util/exception.h>
 #include <eventql/sql/runtime/compiler.h>
 #include <eventql/sql/runtime/vm.h>
-#include <eventql/sql/runtime/rowsink.h>
 #include <eventql/sql/runtime/queryplannode.h>
 
 namespace csql {

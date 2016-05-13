@@ -8,7 +8,6 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <eventql/sql/runtime/tablerepository.h>
-#include <eventql/sql/runtime/importstatement.h>
 #include <eventql/util/exception.h>
 #include <eventql/util/uri.h>
 
@@ -61,26 +60,6 @@ void TableRepository::import(
       source_uri.toString().c_str());
 }
 
-void TableRepository::import(
-    const ImportStatement& import_stmt,
-    const std::vector<std::unique_ptr<Backend>>& backends) {
-  import(import_stmt.tables(), import_stmt.source_uri(), backends);
-}
-
-Option<ScopedPtr<TableExpression>> TableRepository::buildSequentialScan(
-    Transaction* ctx,
-    RefPtr<SequentialScanNode> seqscan,
-    QueryBuilder* runtime) const {
-  for (const auto& p : providers_) {
-    auto tbl = p->buildSequentialScan(ctx, seqscan, runtime);
-    if (!tbl.isEmpty()) {
-      return std::move(tbl.get());
-    }
-  }
-
-  return None<ScopedPtr<TableExpression>>();
-}
-
 void TableRepository::addProvider(RefPtr<TableProvider> provider) {
   providers_.emplace_back(provider);
 }
@@ -101,6 +80,19 @@ Option<TableInfo> TableRepository::describe(const String& table_name) const {
   }
 
   return None<TableInfo>();
+}
+
+Option<ScopedPtr<TableExpression>> TableRepository::buildSequentialScan(
+      Transaction* ctx,
+      RefPtr<SequentialScanNode> seqscan) const {
+  for (const auto& provider : providers_) {
+    auto expr = provider->buildSequentialScan(ctx, seqscan);
+    if (!expr.isEmpty()) {
+      return expr;
+    }
+  }
+
+  RAISEF(kNotFoundError, "table not found: '$0'", seqscan->tableName());
 }
 
 }

@@ -19,7 +19,7 @@
 #include <eventql/sql/runtime/defaultruntime.h>
 #include <eventql/sql/runtime/queryplannode.h>
 #include <eventql/sql/runtime/resultlist.h>
-#include <eventql/sql/runtime/tablescan.h>
+#include <eventql/sql/tasks/tablescan.h>
 #include <eventql/sql/runtime/tablerepository.h>
 #include <ui/canvas.h>
 #include <ui/svgtarget.h>

@@ -15,6 +15,7 @@
 using namespace stx;
 
 namespace csql {
+class Transaction;
 
 struct QualifiedColumn {
   String qualified_name;

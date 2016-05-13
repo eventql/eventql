@@ -23,14 +23,11 @@
 #include "eventql/util/csv/CSVInputStream.h"
 #include "eventql/util/csv/BinaryCSVInputStream.h"
 #include "eventql/TableDefinition.h"
-#include "eventql/sql/runtime/ASCIITableFormat.h"
-#include "eventql/sql/runtime/JSONResultFormat.h"
-#include "eventql/sql/runtime/JSONSSEStreamFormat.h"
-#include "eventql/sql/runtime/BinaryResultFormat.h"
-#include "eventql/sql/runtime/ExecutionStrategy.h"
+#include "eventql/server/sql/codec/ascii_codec.h"
+#include "eventql/server/sql/codec/json_codec.h"
+#include "eventql/server/sql/codec/json_sse_codec.h"
 #include "eventql/core/TimeWindowPartitioner.h"
 #include "eventql/core/FixedShardPartitioner.h"
-#include "eventql/DrilldownQuery.h"
 #include "eventql/HTTPAuth.h"
 #include <eventql/infra/cstable/CSTableWriter.h>
 #include <eventql/infra/cstable/RecordShredder.h>
@@ -243,13 +240,6 @@ void AnalyticsServlet::handle(
     return;
   }
 
-  /* query */
-  if (uri.path() == "/api/v1/query/drilldown") {
-    req_stream->readBody();
-    executeDrilldownQuery(session, &req, &res, res_stream);
-    return;
-  }
-
   /* SQL */
   if (uri.path() == "/api/v1/sql" ||
       uri.path() == "/api/v1/sql_stream") {
@@ -258,19 +248,11 @@ void AnalyticsServlet::handle(
     return;
   }
 
-  if (uri.path() == "/api/v1/sql/aggregate_partition") {
-    req_stream->readBody();
-    executeSQLAggregatePartition(session, &req, &res);
-    res_stream->writeResponse(res);
-    return;
-  }
-
   if (uri.path() == "/api/v1/sql/scan_partition") {
     req_stream->readBody();
-    executeSQLScanPartition(session, &req, &res, res_stream);
+    //executeSQLScanPartition(session, &req, &res, res_stream);
     return;
   }
-
 
   res.setStatus(http::kStatusNotFound);
   res.addHeader("Content-Type", "text/html; charset=utf-8");
@@ -998,128 +980,100 @@ void AnalyticsServlet::getPrivateAPIToken(
   res->setStatus(http::kStatusOK);
 }
 
-void AnalyticsServlet::executeSQLAggregatePartition(
-    const AnalyticsSession& session,
-    const http::HTTPRequest* req,
-    http::HTTPResponse* res) {
-  auto query = req->body().toString();
-
-  auto txn = sql_->newTransaction();
-
-  Buffer result;
-  auto os = BufferOutputStream::fromBuffer(&result);
-
-  try {
-    sql_->executeAggregate(
-        txn.get(),
-        msg::decode<csql::RemoteAggregateParams>(query),
-        app_->getExecutionStrategy(session.customer()),
-        os.get());
-
-    res->setStatus(http::kStatusOK);
-    res->addHeader("Content-Type", "application/octet-stream");
-    res->addBody(result);
-  } catch (const StandardException& e) {
-    res->setStatus(http::kStatusInternalServerError);
-    res->addHeader("Content-Type", "application/octet-stream");
-    res->addBody(e.what());
-  }
-}
-
-void AnalyticsServlet::executeSQLScanPartition(
-    const AnalyticsSession& session,
-    const http::HTTPRequest* req,
-    http::HTTPResponse* res,
-    RefPtr<http::HTTPResponseStream> res_stream) {
-  // FIXME error handling
-  auto query = msg::decode<RemoteTSDBScanParams>(req->body().toString());
-
-  res->setStatus(http::kStatusOK);
-  res->addHeader("Content-Type", "application/octet-stream");
-  res->addHeader("Connection", "close");
-  res_stream->startResponse(*res);
-
-  {
-    auto result_format = new csql::BinaryResultFormat(
-        [res_stream] (const void* data, size_t size) {
-      res_stream->writeBodyChunk(data, size);
-    });
-
-    try {
-      auto txn = sql_->newTransaction();
-
-      Vector<RefPtr<csql::SelectListNode>> select_list;
-      for (const auto& e : query.select_list()) {
-        csql::Parser parser;
-        parser.parseValueExpression(
-            e.expression().data(),
-            e.expression().size());
-
-        auto stmts = parser.getStatements();
-        if (stmts.size() != 1) {
-          RAISE(kIllegalArgumentError);
-        }
-
-        auto slnode = mkRef(
-            new csql::SelectListNode(
-                sql_->queryPlanBuilder()->buildValueExpression(
-                    txn.get(),
-                    stmts[0])));
-
-        if (e.has_alias()) {
-          slnode->setAlias(e.alias());
-        }
-
-        select_list.emplace_back(slnode);
-      }
-
-      Option<RefPtr<csql::ValueExpressionNode>> where_expr;
-      if (query.has_where_expression()) {
-        csql::Parser parser;
-        parser.parseValueExpression(
-            query.where_expression().data(),
-            query.where_expression().size());
-
-        auto stmts = parser.getStatements();
-        if (stmts.size() != 1) {
-          RAISE(kIllegalArgumentError);
-        }
-
-        where_expr = Some(
-            sql_->queryPlanBuilder()->buildValueExpression(
-                txn.get(),
-                stmts[0]));
-      }
-
-      auto execution_strategy = app_->getExecutionStrategy(session.customer());
-      auto table_info = execution_strategy
-          ->tableProvider()
-          ->describe(query.table_name());
-
-      if (table_info.isEmpty()) {
-        RAISEF(kNotFoundError, "table not found: '$0'", query.table_name());
-      }
-
-      auto qtree = mkRef(
-          new csql::SequentialScanNode(
-              table_info.get(),
-              select_list,
-              where_expr,
-              (csql::AggregationStrategy) query.aggregation_strategy()));
-
-      auto qplan = sql_->buildQueryPlan(
-          txn.get(),
-          Vector<RefPtr<csql::QueryTreeNode>>{ qtree.get() },
-          execution_strategy);
-
-      sql_->executeQuery(txn.get(), qplan, result_format);
-    } catch (const StandardException& e) {
-      result_format->sendError(e.what());
-    }
-  }
-
-  res_stream->finishResponse();
-}
+//void AnalyticsServlet::executeSQLScanPartition(
+//    const AnalyticsSession& session,
+//    const http::HTTPRequest* req,
+//    http::HTTPResponse* res,
+//    RefPtr<http::HTTPResponseStream> res_stream) {
+//  // FIXME error handling
+//  auto query = msg::decode<RemoteTSDBScanParams>(req->body().toString());
+//
+//  res->setStatus(http::kStatusOK);
+//  res->addHeader("Content-Type", "application/octet-stream");
+//  res->addHeader("Connection", "close");
+//  res_stream->startResponse(*res);
+//
+//  {
+//    auto result_format = new csql::BinaryResultFormat(
+//        [res_stream] (const void* data, size_t size) {
+//      res_stream->writeBodyChunk(data, size);
+//    });
+//
+//    try {
+//      auto txn = sql_->newTransaction();
+//
+//      Vector<RefPtr<csql::SelectListNode>> select_list;
+//      for (const auto& e : query.select_list()) {
+//        csql::Parser parser;
+//        parser.parseValueExpression(
+//            e.expression().data(),
+//            e.expression().size());
+//
+//        auto stmts = parser.getStatements();
+//        if (stmts.size() != 1) {
+//          RAISE(kIllegalArgumentError);
+//        }
+//
+//        auto slnode = mkRef(
+//            new csql::SelectListNode(
+//                sql_->queryPlanBuilder()->buildValueExpression(
+//                    txn.get(),
+//                    stmts[0])));
+//
+//        if (e.has_alias()) {
+//          slnode->setAlias(e.alias());
+//        }
+//
+//        select_list.emplace_back(slnode);
+//      }
+//
+//      Option<RefPtr<csql::ValueExpressionNode>> where_expr;
+//      if (query.has_where_expression()) {
+//        csql::Parser parser;
+//        parser.parseValueExpression(
+//            query.where_expression().data(),
+//            query.where_expression().size());
+//
+//        auto stmts = parser.getStatements();
+//        if (stmts.size() != 1) {
+//          RAISE(kIllegalArgumentError);
+//        }
+//
+//        where_expr = Some(
+//            sql_->queryPlanBuilder()->buildValueExpression(
+//                txn.get(),
+//                stmts[0]));
+//      }
+//
+//      auto execution_strategy = app_->getExecutionStrategy(session.customer());
+//      auto table_info = execution_strategy
+//          ->tableProvider()
+//          ->describe(query.table_name());
+//
+//      if (table_info.isEmpty()) {
+//        RAISEF(kNotFoundError, "table not found: '$0'", query.table_name());
+//      }
+//
+//      //auto qtree = mkRef(
+//      //    new csql::SequentialScanNode(
+//      //        table_info.get(),
+//      //        select_list,
+//      //        where_expr,
+//      //        (csql::AggregationStrategy) query.aggregation_strategy()));
+//
+//      //auto qplan = sql_->buildQueryPlan(
+//      //    txn.get(),
+//      //    Vector<RefPtr<csql::QueryTreeNode>>{ qtree.get() },
+//      //    execution_strategy);
+//
+//      //sql_->executeQuery(txn.get(), qplan, result_format);
+//    } catch (const StandardException& e) {
+//      result_format->sendError(e.what());
+//    }
+//  }
+//
+//  res_stream->finishResponse();
+//}
 
 void AnalyticsServlet::executeSQL(
     const AnalyticsSession& session,
@@ -1139,8 +1093,8 @@ void AnalyticsServlet::executeSQL(
 
     if (format == "ascii") {
       executeSQL_ASCII(params, session, req, res, res_stream);
-    } else if (format == "binary") {
-      executeSQL_BINARY(params, session, req, res, res_stream);
+    //} else if (format == "binary") {
+    //  executeSQL_BINARY(params, session, req, res, res_stream);
     } else if (format == "json") {
       executeSQL_JSON(params, session, req, res, res_stream);
     } else if (format == "json_sse") {
@@ -1164,122 +1118,125 @@ void AnalyticsServlet::executeSQL_ASCII(
     const http::HTTPRequest* req,
     http::HTTPResponse* res,
     RefPtr<http::HTTPResponseStream> res_stream) {
-  String query;
-  if (!URI::getParam(params, "query", &query)) {
-    res->setStatus(http::kStatusBadRequest);
-    res->addBody("missing ?query=... parameter");
-    res_stream->writeResponse(*res);
-    return;
-  }
-
-  try {
-    auto ctx = sql_->newTransaction();
-
-    Buffer result;
-    sql_->executeQuery(
-        ctx.get(),
-        query,
-        app_->getExecutionStrategy(session.customer()),
-        new csql::ASCIITableFormat(BufferOutputStream::fromBuffer(&result)));
-
-    res->setStatus(http::kStatusOK);
-    res->addHeader("Content-Type", "text/plain; charset=utf-8");
-    res->addBody(result);
-    res_stream->writeResponse(*res);
-  } catch (const StandardException& e) {
-    res->setStatus(http::kStatusInternalServerError);
-    res->addHeader("Content-Type", "text/plain; charset=utf-8");
-    res->addBody(StringUtil::format("error: $0", e.what()));
-    res_stream->writeResponse(*res);
-  }
+//  String query;
+//  if (!URI::getParam(params, "query", &query)) {
+//    res->setStatus(http::kStatusBadRequest);
+//    res->addBody("missing ?query=... parameter");
+//    res_stream->writeResponse(*res);
+//    return;
+//  }
+//
+//  try {
+//    auto txn = sql_->newTransaction();
+//    auto estrat = app_->getExecutionStrategy(session.customer());
+//    txn->setTableProvider(estrat->tableProvider());
+//    auto qplan = sql_->buildQueryPlan(txn.get(), query, estrat);
+//
+//    ASCIICodec ascii_codec(qplan.get());
+//    qplan->execute();
+//
+//    Buffer result;
+//    ascii_codec.printResults(BufferOutputStream::fromBuffer(&result));
+//
+//    res->setStatus(http::kStatusOK);
+//    res->addHeader("Content-Type", "text/plain; charset=utf-8");
+//    res->addBody(result);
+//    res_stream->writeResponse(*res);
+//  } catch (const StandardException& e) {
+//    res->setStatus(http::kStatusInternalServerError);
+//    res->addHeader("Content-Type", "text/plain; charset=utf-8");
+//    res->addBody(StringUtil::format("error: $0", e.what()));
+//    res_stream->writeResponse(*res);
+//  }
 }
 
-void AnalyticsServlet::executeSQL_BINARY(
-    const URI::ParamList& params,
-    const AnalyticsSession& session,
-    const http::HTTPRequest* req,
-    http::HTTPResponse* res,
-    RefPtr<http::HTTPResponseStream> res_stream) {
-  String query;
-  if (!URI::getParam(params, "query", &query)) {
-    res->setStatus(http::kStatusBadRequest);
-    res->addBody("missing ?query=... parameter");
-    res_stream->writeResponse(*res);
-    return;
-  }
-
-  res->setStatus(http::kStatusOK);
-  res->setHeader("Connection", "close");
-  res->setHeader("Content-Type", "application/octet-stream");
-  res->setHeader("Cache-Control", "no-cache");
-  res->setHeader("Access-Control-Allow-Origin", "*");
-  res_stream->startResponse(*res);
-
-  {
-    auto result_format = new csql::BinaryResultFormat(
-        [res_stream] (const void* data, size_t size) {
-      res_stream->writeBodyChunk(data, size);
-    });
-
-    try {
-      auto txn = sql_->newTransaction();
-
-      sql_->executeQuery(
-          txn.get(),
-          query,
-          app_->getExecutionStrategy(session.customer()),
-          result_format);
-
-    } catch (const StandardException& e) {
-      result_format->sendError(e.what());
-    }
-  }
-
-  res_stream->finishResponse();
-}
-
+//void AnalyticsServlet::executeSQL_BINARY(
+//    const URI::ParamList& params,
+//    const AnalyticsSession& session,
+//    const http::HTTPRequest* req,
+//    http::HTTPResponse* res,
+//    RefPtr<http::HTTPResponseStream> res_stream) {
+//  String query;
+//  if (!URI::getParam(params, "query", &query)) {
+//    res->setStatus(http::kStatusBadRequest);
+//    res->addBody("missing ?query=... parameter");
+//    res_stream->writeResponse(*res);
+//    return;
+//  }
+//
+//  res->setStatus(http::kStatusOK);
+//  res->setHeader("Connection", "close");
+//  res->setHeader("Content-Type", "application/octet-stream");
+//  res->setHeader("Cache-Control", "no-cache");
+//  res->setHeader("Access-Control-Allow-Origin", "*");
+//  res_stream->startResponse(*res);
+//
+//  {
+//    auto result_format = new csql::BinaryResultFormat(
+//        [res_stream] (const void* data, size_t size) {
+//      res_stream->writeBodyChunk(data, size);
+//    });
+//
+//    try {
+//      auto txn = sql_->newTransaction();
+//
+//      //sql_->executeQuery(
+//      //    txn.get(),
+//      //    query,
+//      //    app_->getExecutionStrategy(session.customer()),
+//      //    result_format);
+//
+//    } catch (const StandardException& e) {
+//      result_format->sendError(e.what());
+//    }
+//  }
+//
+//  res_stream->finishResponse();
+//}
+//
 void AnalyticsServlet::executeSQL_JSON(
     const URI::ParamList& params,
     const AnalyticsSession& session,
     const http::HTTPRequest* req,
     http::HTTPResponse* res,
     RefPtr<http::HTTPResponseStream> res_stream) {
-  String query;
-  if (!URI::getParam(params, "query", &query)) {
-    res->setStatus(http::kStatusBadRequest);
-    res->addBody("missing ?query=... parameter");
-    res_stream->writeResponse(*res);
-    return;
-  }
+  //String query;
+  //if (!URI::getParam(params, "query", &query)) {
+  //  res->setStatus(http::kStatusBadRequest);
+  //  res->addBody("missing ?query=... parameter");
+  //  res_stream->writeResponse(*res);
+  //  return;
+  //}
 
-  try {
-    auto txn = sql_->newTransaction();
+  //try {
+  //  auto txn = sql_->newTransaction();
+  //  auto estrat = app_->getExecutionStrategy(session.customer());
+  //  txn->setTableProvider(estrat->tableProvider());
+  //  auto qplan = sql_->buildQueryPlan(txn.get(), query, estrat);
 
-    Buffer result;
-    json::JSONOutputStream jsons(BufferOutputStream::fromBuffer(&result));
-    sql_->executeQuery(
-        txn.get(),
-        query,
-        app_->getExecutionStrategy(session.customer()),
-        new csql::JSONResultFormat(&jsons));
+  //  JSONCodec json_codec(qplan.get());
+  //  qplan->execute();
 
-    res->setStatus(http::kStatusOK);
-    res->addHeader("Content-Type", "application/json; charset=utf-8");
-    res->addBody(result);
-    res_stream->writeResponse(*res);
-  } catch (const StandardException& e) {
-    Buffer buf;
-    json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
-    json.beginObject();
-    json.addObjectEntry("error");
-    json.addString(e.what());
-    json.endObject();
+  //  Buffer result;
+  //  json_codec.printResults(BufferOutputStream::fromBuffer(&result));
 
-    res->setStatus(http::kStatusInternalServerError);
-    res->addHeader("Content-Type", "application/json; charset=utf-8");
-    res->addBody(buf);
-    res_stream->writeResponse(*res);
-  }
+  //  res->setStatus(http::kStatusOK);
+  //  res->addHeader("Content-Type", "application/json; charset=utf-8");
+  //  res->addBody(result);
+  //  res_stream->writeResponse(*res);
+  //} catch (const StandardException& e) {
+  //  Buffer buf;
+  //  json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
+  //  json.beginObject();
+  //  json.addObjectEntry("error");
+  //  json.addString(e.what());
+  //  json.endObject();
+
+  //  res->setStatus(http::kStatusInternalServerError);
+  //  res->addHeader("Content-Type", "application/json; charset=utf-8");
+  //  res->addBody(buf);
+  //  res_stream->writeResponse(*res);
+  //}
 }
 
 void AnalyticsServlet::executeSQL_JSONSSE(
@@ -1288,112 +1245,37 @@ void AnalyticsServlet::executeSQL_JSONSSE(
     const http::HTTPRequest* req,
     http::HTTPResponse* res,
     RefPtr<http::HTTPResponseStream> res_stream) {
-  String query;
-  if (!URI::getParam(params, "query", &query)) {
-    res->setStatus(http::kStatusBadRequest);
-    res->addBody("missing ?query=... parameter");
-    res_stream->writeResponse(*res);
-    return;
-  }
+  //String query;
+  //if (!URI::getParam(params, "query", &query)) {
+  //  res->setStatus(http::kStatusBadRequest);
+  //  res->addBody("missing ?query=... parameter");
+  //  res_stream->writeResponse(*res);
+  //  return;
+  //}
 
-  auto sse_stream = mkRef(new http::HTTPSSEStream(res, res_stream));
-  sse_stream->start();
+  //auto sse_stream = mkRef(new http::HTTPSSEStream(res, res_stream));
+  //sse_stream->start();
 
-  try {
-    auto txn = sql_->newTransaction();
+  //try {
+  //  auto txn = sql_->newTransaction();
+  //  auto estrat = app_->getExecutionStrategy(session.customer());
+  //  txn->setTableProvider(estrat->tableProvider());
+  //  auto qplan = sql_->buildQueryPlan(txn.get(), query, estrat);
+  //  JSONSSECodec json_sse_codec(qplan.get(), sse_stream);
+  //  qplan->execute();
+  //} catch (const StandardException& e) {
+  //  Buffer buf;
+  //  json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
+  //  json.beginObject();
+  //  json.addObjectEntry("error");
+  //  json.addString(e.what());
+  //  json.endObject();
 
-    sql_->executeQuery(
-        txn.get(),
-        query,
-        app_->getExecutionStrategy(session.customer()),
-        new csql::JSONSSEStreamFormat(sse_stream));
+  //  sse_stream->sendEvent(buf, Some(String("query_error")));
+  //}
 
-  } catch (const StandardException& e) {
-    Buffer buf;
-    json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
-    json.beginObject();
-    json.addObjectEntry("error");
-    json.addString(e.what());
-    json.endObject();
-
-    sse_stream->sendEvent(buf, Some(String("query_error")));
-  }
-
-  sse_stream->finish();
+  //sse_stream->finish();
 }
-
-void AnalyticsServlet::executeDrilldownQuery(
-    const AnalyticsSession& session,
-    const http::HTTPRequest* req,
-    http::HTTPResponse* res,
-    RefPtr<http::HTTPResponseStream> res_stream) {
-  try {
-    URI uri(req->uri());
-    auto jreq = json::parseJSON(req->body());
-
-    auto query = mkRef(
-        new DrilldownQuery(
-            app_->getExecutionStrategy(session.customer()),
-            sql_));
-
-    auto metrics = json::objectLookup(jreq.begin(), jreq.end(), "metrics");
-    if (metrics == jreq.end()) {
-      RAISE(kRuntimeError, "missing field: metrics");
-    }
-
-    auto nmetrics = json::arrayLength(metrics, jreq.end());
-    for (size_t i = 0; i < nmetrics; ++i) {
-      auto jmetric = json::arrayLookup(metrics, jreq.end(), i); // O(N^2) but who cares...
-      DrilldownQuery::MetricDefinition metric;
-      auto expr = json::objectGetString(jmetric, jreq.end(), "expr");
-      if (expr.isEmpty()) {
-        RAISE(kRuntimeError, "missing field: expr");
-      }
-
-      metric.expression = expr.get();
-      metric.name = json::objectGetString(jmetric, jreq.end(), "name");
-      metric.filter = json::objectGetString(jmetric, jreq.end(), "filter");
-      metric.source_table = json::objectGetString(jmetric, jreq.end(), "source");
-      query->addMetric(metric);
-    }
-
-    auto dimensions = json::objectLookup(jreq.begin(), jreq.end(), "dimensions");
-    if (dimensions != jreq.end()) {
-      auto ndimensions = json::arrayLength(dimensions, jreq.end());
-      for (size_t i = 0; i < ndimensions; ++i) {
-        auto jdimension = json::arrayLookup(dimensions, jreq.end(), i); // O(N^2) but who cares...
-        DrilldownQuery::DimensionDefinition dimension;
-        dimension.name = json::objectGetString(jdimension, jreq.end(), "name");
-        dimension.expression = json::objectGetString(jdimension, jreq.end(), "expr");
-        query->addDimension(dimension);
-      }
-    }
-
-    auto filter = json::objectGetString(jreq.begin(), jreq.end(), "filter");
-    if (!filter.isEmpty()) {
-      query->setFilter(filter.get());
-    }
-
-    auto dtree = query->execute();
-
-    Buffer buf;
-    json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
-    json.beginObject();
-    json.addObjectEntry("result");
-    dtree->toJSON(&json);
-    json.endObject();
-
-    res->setStatus(http::kStatusOK);
-    res->addBody(buf);
-    res_stream->writeResponse(*res);
-  } catch (const StandardException& e) {
-    logError("z1.sql", e, "Uncaught query error");
-    res->setStatus(http::kStatusBadRequest);
-    res->addBody("invalid request: " + String(e.what()));
-    res_stream->writeResponse(*res);
-  }
-}
-
 
 void AnalyticsServlet::performLogin(
     const URI& uri,

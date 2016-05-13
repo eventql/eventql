@@ -13,7 +13,6 @@
 #include <eventql/infra/sstable/sstablereader.h>
 #include <eventql/core/LogPartitionReader.h>
 #include <eventql/core/Table.h>
-#include <eventql/sql/runtime/EmptyTable.h>
 
 using namespace stx;
 
@@ -155,30 +154,6 @@ void LogPartitionReader::fetchRecordsWithSampling(
 
 SHA1Hash LogPartitionReader::version() const {
   return SHA1::compute(StringUtil::toString(snap_->nrecs));
-}
-
-ScopedPtr<csql::TableExpression> LogPartitionReader::buildSQLScan(
-    csql::Transaction* ctx,
-    RefPtr<csql::SequentialScanNode> node,
-    csql::QueryBuilder* runtime) const {
-  auto cstable = fetchCSTableFilename();
-  if (cstable.isEmpty()) {
-    return mkScoped(new csql::EmptyTable(node->outputColumns()));
-  }
-
-  auto scan = mkScoped(
-      new csql::CSTableScan(
-          ctx,
-          node,
-          cstable.get(),
-          runtime));
-
-  auto cstable_version = cstableVersion();
-  if (!cstable_version.isEmpty()) {
-    scan->setCacheKey(cstable_version.get());
-  }
-
-  return std::move(scan);
 }
 
 } // namespace tdsb

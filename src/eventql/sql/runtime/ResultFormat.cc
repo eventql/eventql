@@ -17,24 +17,25 @@ void CallbackResultHandler::onRow(
 }
 
 void CallbackResultHandler::formatResults(
-    RefPtr<QueryPlan> query,
+    ScopedPtr<QueryPlan> query,
     ExecutionContext* context) {
-  for (int i = 0; i < query->numStatements(); ++i) {
-    auto stmt = query->getStatement(i);
-    auto select = dynamic_cast<TableExpression*>(stmt);
-    if (!select) {
-      RAISE(
-          kRuntimeError,
-          "can't execute non select statement in CallbackResultHandler");
-    }
+  RAISE(kNotImplementedError);
+  //for (int i = 0; i < query->numStatements(); ++i) {
+  //  auto stmt = query->getStatement(i);
+  //  auto select = dynamic_cast<TableExpression*>(stmt);
+  //  if (!select) {
+  //    RAISE(
+  //        kRuntimeError,
+  //        "can't execute non select statement in CallbackResultHandler");
+  //  }
 
-    select->execute(
-        context,
-        [this, i] (int argc, const csql::SValue* argv) -> bool {
-      on_row_(i, argc, argv);
-      return true;
-    });
-  }
+  //  select->execute(
+  //      context,
+  //      [this, i] (int argc, const csql::SValue* argv) -> bool {
+  //    on_row_(i, argc, argv);
+  //    return true;
+  //  });
+  //}
 }
 
 }

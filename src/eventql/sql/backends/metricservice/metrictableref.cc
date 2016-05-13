@@ -8,7 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <eventql/sql/backends/metricservice/metrictableref.h>
-#include <eventql/sql/runtime/tablescan.h>
+#include <eventql/sql/tasks/tablescan.h>
 #include <eventql/sql/svalue.h>
 
 namespace csql {

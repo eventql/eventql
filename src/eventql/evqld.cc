@@ -42,7 +42,7 @@
 #include "eventql/core/TSDBServlet.h"
 #include "eventql/core/ReplicationWorker.h"
 #include "eventql/core/LSMTableIndexCache.h"
-#include "eventql/core/SQLEngine.h"
+#include "eventql/server/sql/sql_engine.h"
 #include "eventql/DefaultServlet.h"
 #include "eventql/sql/defaults.h"
 #include "eventql/ConfigDirectory.h"
@@ -307,8 +307,7 @@ int main(int argc, const char** argv) {
         },
         symbols,
         new csql::QueryBuilder(
-            new csql::ValueExpressionBuilder(symbols.get()),
-            new csql::TableExpressionBuilder()),
+            new csql::ValueExpressionBuilder(symbols.get())),
         new csql::QueryPlanBuilder(
             csql::QueryPlanBuilderOptions{},
             symbols.get())));

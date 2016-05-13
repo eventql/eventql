@@ -8,7 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <eventql/sql/backends/csv/CSVTableProvider.h>
-#include <eventql/sql/runtime/tablescan.h>
+#include <eventql/sql/expressions/table/tablescan.h>
 
 using namespace stx;
 
@@ -44,27 +44,6 @@ CSVTableProvider::CSVTableProvider(
                 quote_char);
           }) {}
 
-Option<ScopedPtr<TableExpression>> CSVTableProvider::buildSequentialScan(
-    Transaction* ctx,
-    RefPtr<SequentialScanNode> node,
-    QueryBuilder* runtime) const {
-
-  if (node->tableName() != table_name_) {
-    return None<ScopedPtr<TableExpression>>();
-  }
-
-  auto stream = stream_factory_();
-  stream->skipNextRow();
-
-  return Option<ScopedPtr<TableExpression>>(
-      std::move(mkScoped<TableExpression>(
-          new TableScan(
-              ctx,
-              runtime,
-              node,
-              mkScoped(new CSVTableScan(headers_, std::move(stream)))))));
-}
-
 void CSVTableProvider::listTables(
     Function<void (const TableInfo& table)> fn) const {
   fn(tableInfo());
@@ -94,6 +73,26 @@ TableInfo CSVTableProvider::tableInfo() const {
 
   return ti;
 }
+
+Option<ScopedPtr<TableExpression>> CSVTableProvider::buildSequentialScan(
+    Transaction* txn,
+    RefPtr<SequentialScanNode> seqscan) const {
+  if (seqscan->tableName() != table_name_) {
+    return None<ScopedPtr<TableExpression>>();
+  }
+
+  auto stream = stream_factory_();
+  stream->skipNextRow();
+
+  return Option<ScopedPtr<TableExpression>>(
+      ScopedPtr<TableExpression>(
+          new TableScan(
+              txn,
+              seqscan,
+              mkScoped(new CSVTableScan(headers_, std::move(stream))))));
+
+}
+
 
 } // namespace csv
 } // namespace backends

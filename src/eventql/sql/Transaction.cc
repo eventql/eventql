@@ -18,10 +18,15 @@ namespace csql {
 Transaction::Transaction(
     Runtime* runtime) :
     runtime_(runtime),
-    now_(WallClock::now()) {}
+    now_(WallClock::now()),
+    table_providers_(new TableRepository()) {}
 
 Runtime* Transaction::getRuntime() const {
   return runtime_;
+}
+
+QueryBuilder* Transaction::getCompiler() const {
+  return runtime_->queryBuilder().get();
 }
 
 SymbolTable* Transaction::getSymbolTable() const {
@@ -32,12 +37,12 @@ UnixTime Transaction::now() const {
   return now_;
 }
 
-void Transaction::setTableProvider(RefPtr<TableProvider> provider) {
-  table_provider_ = provider;
+void Transaction::addTableProvider(RefPtr<TableProvider> provider) {
+  table_providers_->addProvider(provider);
 }
 
 RefPtr<TableProvider> Transaction::getTableProvider() const {
-  return table_provider_;
+  return table_providers_.get();
 }
 
 } // namespace csql

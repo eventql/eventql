@@ -10,7 +10,7 @@
 #pragma once
 #include <eventql/util/stdtypes.h>
 #include <eventql/sql/runtime/tablerepository.h>
-#include <eventql/infra/cstable/CSTableReader.h>
+//#include <eventql/infra/cstable/CSTableReader.h>
 
 using namespace stx;
 
@@ -23,17 +23,16 @@ public:
       const String& table_name,
       const String& cstable_file);
 
-  Option<ScopedPtr<TableExpression>> buildSequentialScan(
-        Transaction* ctx,
-        RefPtr<SequentialScanNode> node,
-        QueryBuilder* runtime) const override;
-
   void listTables(
       Function<void (const csql::TableInfo& table)> fn) const override;
 
   Option<csql::TableInfo> describe(const String& table_name) const override;
 
   csql::TableInfo tableInfo() const;
+
+  Option<ScopedPtr<TableExpression>> buildSequentialScan(
+      Transaction* ctx,
+      RefPtr<SequentialScanNode> seqscan) const override;
 
 protected:
   const String table_name_;

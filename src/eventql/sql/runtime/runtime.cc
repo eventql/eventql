@@ -8,8 +8,8 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <eventql/sql/runtime/runtime.h>
-#include <eventql/sql/runtime/groupby.h>
 #include <eventql/sql/qtree/QueryTreeUtil.h>
+#include <eventql/sql/scheduler.h>
 #include <eventql/sql/defaults.h>
 
 namespace csql {
@@ -26,8 +26,7 @@ RefPtr<Runtime> Runtime::getDefaultRuntime() {
       stx::thread::ThreadPoolOptions{},
       symbols,
       new QueryBuilder(
-          new ValueExpressionBuilder(symbols.get()),
-          new TableExpressionBuilder()),
+          new ValueExpressionBuilder(symbols.get())),
       new QueryPlanBuilder(
           QueryPlanBuilderOptions{},
           symbols.get()));
@@ -43,10 +42,9 @@ Runtime::Runtime(
     query_builder_(query_builder),
     query_plan_builder_(query_plan_builder) {}
 
-RefPtr<QueryPlan> Runtime::buildQueryPlan(
+ScopedPtr<QueryPlan> Runtime::buildQueryPlan(
     Transaction* txn,
-    const String& query,
-    RefPtr<ExecutionStrategy> execution_strategy) {
+    const String& query) {
   /* parse query */
   csql::Parser parser;
   parser.parse(query.data(), query.size());
@@ -55,256 +53,17 @@ RefPtr<QueryPlan> Runtime::buildQueryPlan(
   auto statements = query_plan_builder_->build(
       txn,
       parser.getStatements(),
-      execution_strategy->tableProvider());
+      txn->getTableProvider());
 
-  return buildQueryPlan(
-      txn,
-      statements,
-      execution_strategy);
+  return buildQueryPlan(txn, statements);
 }
 
-RefPtr<QueryPlan> Runtime::buildQueryPlan(
+ScopedPtr<QueryPlan> Runtime::buildQueryPlan(
     Transaction* txn,
-    Vector<RefPtr<QueryTreeNode>> statements,
-    RefPtr<ExecutionStrategy> execution_strategy) {
-  for (auto& stmt : statements) {
-    stmt = execution_strategy->rewriteQueryTree(stmt);
-  }
-
-  Vector<ScopedPtr<Statement>> stmt_exprs;
-  for (const auto& stmt : statements) {
-    if (dynamic_cast<TableExpressionNode*>(stmt.get())) {
-      stmt_exprs.emplace_back(query_builder_->buildTableExpression(
-          txn,
-          stmt.asInstanceOf<TableExpressionNode>(),
-          execution_strategy->tableProvider(),
-          this));
-
-      continue;
-    }
-
-    if (dynamic_cast<ChartStatementNode*>(stmt.get())) {
-      stmt_exprs.emplace_back(query_builder_->buildChartStatement(
-          txn,
-          stmt.asInstanceOf<ChartStatementNode>(),
-          execution_strategy->tableProvider(),
-          this));
-
-      continue;
-    }
-
-    RAISE(
-        kRuntimeError,
-        "cannot figure out how to execute this query plan");
-
-  }
-
-  return mkRef(new QueryPlan(statements, std::move(stmt_exprs)));
-}
-
-void Runtime::executeQuery(
-    Transaction* txn,
-    const String& query,
-    RefPtr<ExecutionStrategy> execution_strategy,
-    RefPtr<ResultFormat> result_format) {
-  executeQuery(
-      txn,
-      buildQueryPlan(txn, query, execution_strategy),
-      result_format);
-}
-
-void Runtime::executeQuery(
-    Transaction* txn,
-    RefPtr<QueryPlan> query_plan,
-    RefPtr<ResultFormat> result_format) {
-  /* execute query and format results */
-  csql::ExecutionContext context(&tpool_);
-  if (!cachedir_.isEmpty()) {
-    context.setCacheDir(cachedir_.get());
-  }
-
-  for (int i = 0; i < query_plan->numStatements(); ++i) {
-    query_plan->getStatement(i)->prepare(&context);
-  }
-
-  result_format->formatResults(query_plan, &context);
-}
-
-void Runtime::executeStatement(
-    Transaction* txn,
-    RefPtr<TableExpressionNode> qtree,
-    ResultList* result) {
-
-  auto expr = query_builder_->buildTableExpression(
-      txn,
-      qtree.get(),
-      txn->getTableProvider(),
-      this);
-
-  result->addHeader(qtree->outputColumns());
-
-  csql::ExecutionContext context(&tpool_);
-  if (!cachedir_.isEmpty()) {
-    context.setCacheDir(cachedir_.get());
-  }
-
-  expr->prepare(&context);
-  expr->execute(
-      &context,
-      [result] (int argc, const csql::SValue* argv) -> bool {
-    result->addRow(argv, argc);
-    return true;
-  });
-}
-
-void Runtime::executeStatement(
-    Transaction* txn,
-    Statement* statement,
-    ResultList* result) {
-  auto table_expr = dynamic_cast<TableExpression*>(statement);
-  if (!table_expr) {
-    RAISE(kRuntimeError, "statement must be a table expression");
-  }
-
-  result->addHeader(table_expr->columnNames());
-  executeStatement(
-      txn,
-      table_expr,
-      [result] (int argc, const csql::SValue* argv) -> bool {
-    result->addRow(argv, argc);
-    return true;
-  });
-}
-
-void Runtime::executeStatement(
-    Transaction* txn,
-    TableExpression* statement,
-    Function<bool (int argc, const SValue* argv)> fn) {
-  csql::ExecutionContext context(&tpool_);
-  if (!cachedir_.isEmpty()) {
-    context.setCacheDir(cachedir_.get());
-  }
-
-  statement->prepare(&context);
-  statement->execute(&context, fn);
-}
-
-void Runtime::executeAggregate(
-    Transaction* txn,
-    const RemoteAggregateParams& query,
-    RefPtr<ExecutionStrategy> execution_strategy,
-    OutputStream* os) {
-  Option<RefPtr<ValueExpressionNode>> where_expr;
-  if (query.has_where_expression()) {
-    csql::Parser parser;
-    parser.parseValueExpression(
-        query.where_expression().data(),
-        query.where_expression().size());
-
-    auto stmts = parser.getStatements();
-    if (stmts.size() != 1) {
-      RAISE(kIllegalArgumentError);
-    }
-
-    where_expr = Some(query_plan_builder_->buildValueExpression(txn, stmts[0]));
-  }
-
-  Vector<RefPtr<SelectListNode>> inner_select_list;
-  for (const auto& e : query.select_expression_list()) {
-    csql::Parser parser;
-    parser.parseValueExpression(
-        e.expression().data(),
-        e.expression().size());
-
-    auto stmts = parser.getStatements();
-    if (stmts.size() != 1) {
-      RAISE(kIllegalArgumentError);
-    }
-
-    auto slnode = mkRef(
-        new SelectListNode(
-            query_plan_builder_->buildValueExpression(txn, stmts[0])));
-
-    if (e.has_alias()) {
-      slnode->setAlias(e.alias());
-    }
-
-    inner_select_list.emplace_back(slnode);
-  }
-
-  auto table_info =
-      execution_strategy->tableProvider()->describe(query.table_name());
-  if (table_info.isEmpty()) {
-    RAISEF(kNotFoundError, "table not found: '$0'", query.table_name());
-  }
-
-  auto seqscan =
-        new SequentialScanNode(
-              table_info.get(),
-              inner_select_list,
-              where_expr,
-              (AggregationStrategy) query.aggregation_strategy());
-
-  Vector<RefPtr<SelectListNode>> outer_select_list;
-  for (const auto& e : query.aggregate_expression_list()) {
-    csql::Parser parser;
-    parser.parseValueExpression(
-        e.expression().data(),
-        e.expression().size());
-
-    auto stmts = parser.getStatements();
-    if (stmts.size() != 1) {
-      RAISE(kIllegalArgumentError);
-    }
-
-    auto slnode = mkRef(
-        new SelectListNode(
-            query_plan_builder_->buildValueExpression(txn, stmts[0])));
-
-    if (e.has_alias()) {
-      slnode->setAlias(e.alias());
-    }
-
-    outer_select_list.emplace_back(slnode);
-  }
-
-  Vector<RefPtr<ValueExpressionNode>> group_exprs;
-  for (const auto& e : query.group_expression_list()) {
-    csql::Parser parser;
-    parser.parseValueExpression(e.data(), e.size());
-
-    auto stmts = parser.getStatements();
-    if (stmts.size() != 1) {
-      RAISE(kIllegalArgumentError);
-    }
-
-    auto ve = query_plan_builder_->buildValueExpression(txn, stmts[0]);
-    group_exprs.emplace_back(ve);
-  }
-
-  auto qtree = mkRef(
-      new GroupByNode(
-          outer_select_list,
-          group_exprs,
-          seqscan));
-
-  auto expr = query_builder_->buildTableExpression(
-      txn,
-      qtree.get(),
-      execution_strategy->tableProvider(),
-      this);
-
-  auto group_expr = dynamic_cast<GroupByExpression*>(expr.get());
-  if (!group_expr) {
-    RAISE(kIllegalStateError);
-  }
-
-  csql::ExecutionContext context(&tpool_);
-  if (!cachedir_.isEmpty()) {
-    context.setCacheDir(cachedir_.get());
-  }
-
-  group_expr->executeRemote(&context, os);
+    Vector<RefPtr<QueryTreeNode>> statements) {
+  auto qplan = mkScoped(new QueryPlan(txn, statements));
+  qplan->setScheduler(new DefaultScheduler());
+  return std::move(qplan);
 }
 
 SValue Runtime::evaluateScalarExpression(

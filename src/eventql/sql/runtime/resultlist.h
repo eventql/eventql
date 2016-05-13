@@ -13,12 +13,11 @@
 #include <string>
 #include <vector>
 #include <memory>
-#include <eventql/sql/runtime/rowsink.h>
 #include <eventql/sql/svalue.h>
 
 namespace csql {
 
-class ResultList {
+class ResultList{
 public:
 
   ResultList() {}
@@ -63,7 +62,7 @@ public:
     columns_ = columns;
   }
 
-  void addRow(const csql::SValue* row, int row_len) {
+  bool addRow(const csql::SValue* row, int row_len) {
     if (row_len > columns_.size()) {
       row_len = columns_.size();
     }
@@ -74,9 +73,15 @@ public:
     }
 
     rows_.emplace_back(str_row);
+    return true;
   }
 
   void debugPrint() const {
+    auto os = OutputStream::getStderr();
+    debugPrint(os.get());
+  }
+
+  void debugPrint(OutputStream* os) const {
     std::vector<int> col_widths;
     int total_width = 0;
 
@@ -85,25 +90,25 @@ public:
       total_width += 20;
     }
 
-    auto print_hsep = [&col_widths] () {
+    auto print_hsep = [os, &col_widths] () {
       for (auto w : col_widths) {
         for (int i = 0; i < w; ++i) {
           char c = (i == 0 || i == w - 1) ? '+' : '-';
-          printf("%c", c);
+          os->printf("%c", c);
         }
       }
-      printf("\n");
+      os->printf("\n");
     };
 
-    auto print_row = [this, &col_widths] (const std::vector<std::string>& row) {
+    auto print_row = [this, os, &col_widths] (const std::vector<std::string>& row) {
       for (int n = 0; n < row.size(); ++n) {
         const auto& val = row[n];
-        printf("| %s", val.c_str());
+        os->printf("| %s", val.c_str());
         for (int i = col_widths[n] - val.size() - 3; i > 0; --i) {
-          printf(" ");
+          os->printf(" ");
         }
       }
-      printf("|\n");
+      os->printf("|\n");
     };
 
     print_hsep();

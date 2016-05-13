@@ -11,7 +11,6 @@
 #include <eventql/util/stdtypes.h>
 #include <eventql/sql/qtree/ChartStatementNode.h>
 #include <eventql/sql/runtime/ValueExpressionBuilder.h>
-#include <eventql/sql/runtime/TableExpressionBuilder.h>
 #include <eventql/sql/runtime/charts/ChartStatement.h>
 #include <eventql/sql/runtime/ValueExpression.h>
 
@@ -23,28 +22,14 @@ class QueryBuilder : public RefCounted {
 public:
 
   QueryBuilder(
-      RefPtr<ValueExpressionBuilder> scalar_exp_builder,
-      RefPtr<TableExpressionBuilder> table_exp_builder);
+      RefPtr<ValueExpressionBuilder> scalar_exp_builder);
 
   ValueExpression buildValueExpression(
       Transaction* ctx,
       RefPtr<ValueExpressionNode> expression);
 
-  ScopedPtr<TableExpression> buildTableExpression(
-      Transaction* ctx,
-      RefPtr<TableExpressionNode> expression,
-      RefPtr<TableProvider> tables,
-      Runtime* runtime);
-
-  ScopedPtr<ChartStatement> buildChartStatement(
-      Transaction* ctx,
-      RefPtr<ChartStatementNode> node,
-      RefPtr<TableProvider> tables,
-      Runtime* runtime);
-
 protected:
   RefPtr<ValueExpressionBuilder> scalar_exp_builder_;
-  RefPtr<TableExpressionBuilder> table_exp_builder_;
 };
 
 } // namespace csql

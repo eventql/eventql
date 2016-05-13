@@ -13,7 +13,7 @@
 #include <eventql/sql/qtree/SequentialScanNode.h>
 #include <eventql/sql/runtime/compiler.h>
 #include <eventql/sql/runtime/defaultruntime.h>
-#include <eventql/sql/runtime/TableExpression.h>
+#include <eventql/sql/expressions/table_expression.h>
 #include <eventql/sql/runtime/ValueExpression.h>
 #include <eventql/infra/cstable/CSTableReader.h>
 
@@ -25,31 +25,21 @@ class CSTableScan : public TableExpression {
 public:
 
   CSTableScan(
-      Transaction* ctx,
+      Transaction* txn,
       RefPtr<SequentialScanNode> stmt,
       const String& cstable_filename,
       QueryBuilder* runtime);
 
   CSTableScan(
-      Transaction* ctx,
+      Transaction* txn,
       RefPtr<SequentialScanNode> stmt,
       RefPtr<cstable::CSTableReader> cstable,
       QueryBuilder* runtime);
 
-  virtual Vector<String> columnNames() const override;
+  ScopedPtr<ResultCursor> execute() override;
 
-  virtual size_t numColumns() const override;
-
-  void prepare(ExecutionContext* context) override;
-
-  void open();
-
-  void execute(
-      ExecutionContext* context,
-      Function<bool (int argc, const SValue* argv)> fn) override;
-
-  Option<SHA1Hash> cacheKey() const override;
-  void setCacheKey(const SHA1Hash& key);
+  virtual Vector<String> columnNames() const;
+  virtual size_t numColumns() const;
 
   size_t rowsScanned() const;
 
@@ -57,6 +47,9 @@ public:
   void setColumnType(String column, sql_type type);
 
 protected:
+
+  void open();
+  bool next(SValue* out, int out_len);
 
   struct ColumnRef {
     ColumnRef(RefPtr<cstable::ColumnReader> r, size_t i, sql_type t);
@@ -67,7 +60,7 @@ protected:
 
   struct ExpressionRef {
     ExpressionRef(
-        Transaction* _ctx,
+        Transaction* _txn,
         size_t _rep_level,
         ValueExpression _compiled,
         ScratchMemory* scratch);
@@ -75,14 +68,14 @@ protected:
     ExpressionRef(ExpressionRef&& other);
     ~ExpressionRef();
 
-    Transaction* ctx;
+    Transaction* txn;
     size_t rep_level;
     ValueExpression compiled;
     VM::Instance instance;
   };
 
-  void scan(Function<bool (int argc, const SValue* argv)> fn);
-  void scanWithoutColumns(Function<bool (int argc, const SValue* argv)> fn);
+  bool fetchNext(SValue* out, int out_len);
+  bool fetchNextWithoutColumns(SValue* out, int out_len);
 
   void findColumns(
       RefPtr<ValueExpressionNode> expr,
@@ -94,7 +87,7 @@ protected:
 
   void fetch();
 
-  Transaction* ctx_;
+  Transaction* txn_;
   Vector<String> column_names_;
   ScratchMemory scratch_;
   RefPtr<SequentialScanNode> stmt_;
@@ -108,8 +101,14 @@ protected:
   AggregationStrategy aggr_strategy_;
   Option<SHA1Hash> cache_key_;
   size_t rows_scanned_;
+  size_t num_records_;
   Function<bool ()> filter_fn_;
   bool opened_;
+  uint64_t cur_select_level_;
+  uint64_t cur_fetch_level_;
+  bool cur_filter_pred_;
+  Vector<SValue> cur_buf_;
+  size_t cur_pos_;
 };
 
 

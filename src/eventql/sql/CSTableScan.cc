@@ -19,40 +19,65 @@ using namespace stx;
 namespace csql {
 
 CSTableScan::CSTableScan(
-    Transaction* ctx,
+    Transaction* txn,
     RefPtr<SequentialScanNode> stmt,
     const String& cstable_filename,
     QueryBuilder* runtime) :
-    ctx_(ctx),
+    txn_(txn),
     stmt_(stmt->deepCopyAs<SequentialScanNode>()),
     cstable_filename_(cstable_filename),
     runtime_(runtime),
     colindex_(0),
     aggr_strategy_(stmt_->aggregationStrategy()),
     rows_scanned_(0),
-    opened_(false) {
+    num_records_(0),
+    opened_(false),
+    cur_select_level_(0),
+    cur_fetch_level_(0),
+    cur_filter_pred_(true),
+    cur_pos_(0) {
   column_names_ = stmt_->outputColumns();
 }
 
 CSTableScan::CSTableScan(
-    Transaction* ctx,
+    Transaction* txn,
     RefPtr<SequentialScanNode> stmt,
     RefPtr<cstable::CSTableReader> cstable,
     QueryBuilder* runtime) :
-    ctx_(ctx),
+    txn_(txn),
     stmt_(stmt->deepCopyAs<SequentialScanNode>()),
     cstable_(cstable),
     runtime_(runtime),
     colindex_(0),
     aggr_strategy_(stmt_->aggregationStrategy()),
     rows_scanned_(0),
-    opened_(false) {
+    num_records_(0),
+    opened_(false),
+    cur_select_level_(0),
+    cur_fetch_level_(0),
+    cur_filter_pred_(true),
+    cur_pos_(0) {
   column_names_ = stmt_->outputColumns();
 }
 
-void CSTableScan::prepare(ExecutionContext* context) {
-  context->incrNumSubtasksTotal(1);
+ScopedPtr<ResultCursor> CSTableScan::execute() {
+  if (!opened_) {
+    open();
+  }
+
+  cur_buf_.resize(colindex_);
+  num_records_ = cstable_->numRecords();
+
+  return mkScoped(
+      new DefaultResultCursor(
+          select_list_.size(),
+          std::bind(
+              &CSTableScan::next,
+              this,
+              std::placeholders::_1,
+              std::placeholders::_2)));
 }
+
 
 void CSTableScan::open() {
   opened_ = true;
@@ -107,61 +132,56 @@ void CSTableScan::open() {
     resolveColumns(slnode->expression());
 
     select_list_.emplace_back(
-        ctx_,
+        txn_,
         findMaxRepetitionLevel(slnode->expression()),
-        runtime_->buildValueExpression(ctx_, slnode->expression()),
+        runtime_->buildValueExpression(txn_, slnode->expression()),
         &scratch_);
   }
 
   if (!where_expr.isEmpty()) {
     resolveColumns(where_expr.get());
-    where_expr_ = runtime_->buildValueExpression(ctx_, where_expr.get());
+    where_expr_ = runtime_->buildValueExpression(txn_, where_expr.get());
   }
 }
 
-void CSTableScan::execute(
-    ExecutionContext* context,
-    Function<bool (int argc, const SValue* argv)> fn) {
-  logTrace("sql", "Scanning cstable: $0", cstable_filename_);
-
-  if (!opened_) {
-    open();
-  }
-
+bool CSTableScan::next(SValue* out, int out_len) {
   if (columns_.empty()) {
-    scanWithoutColumns(fn);
+    return fetchNextWithoutColumns(out, out_len);
   } else {
-    scan(fn);
+    return fetchNext(out, out_len);
   }
-
-  context->incrNumSubtasksCompleted(1);
 }
 
-void CSTableScan::scan(
-    Function<bool (int argc, const SValue* argv)> fn) {
-  uint64_t select_level = 0;
-  uint64_t fetch_level = 0;
-  bool filter_pred = true;
+//void CSTableScan::onInputsReady() {
+//  logTrace("sql", "Scanning cstable: $0", cstable_filename_);
+//
+//  if (!opened_) {
+//    open();
+//  }
+//
+//
+//  //txn_->incrNumSubtasksCompleted(1);
+//}
 
-  Vector<SValue> in_row(colindex_, SValue{});
-  Vector<SValue> out_row(select_list_.size(), SValue{});
+bool CSTableScan::fetchNext(SValue* out, int out_len) {
+  if (cur_pos_ >= num_records_) {
+    return false;
+  }
 
-  size_t num_records = 0;
-  size_t total_records = cstable_->numRecords();
-  while (num_records < total_records) {
+  while (cur_pos_ < num_records_) {
     ++rows_scanned_;
     uint64_t next_level = 0;
 
-    if (fetch_level == 0) {
-      if (num_records < total_records && filter_fn_) {
-        filter_pred = filter_fn_();
+    if (cur_fetch_level_ == 0) {
+      if (cur_pos_ < num_records_ && filter_fn_) {
+        cur_filter_pred_ = filter_fn_();
       }
     }
 
     for (auto& col : columns_) {
       auto nextr = col.second.reader->nextRepetitionLevel();
 
-      if (nextr >= fetch_level) {
+      if (nextr >= cur_fetch_level_) {
         auto& reader = col.second.reader;
 
         uint64_t r;
@@ -174,26 +194,26 @@ void CSTableScan::scan(
             reader->readString(&r, &d, &v);
 
             if (d < reader->maxDefinitionLevel()) {
-              in_row[col.second.index] = SValue();
+              cur_buf_[col.second.index] = SValue();
             } else {
               switch (col.second.type) {
                 case SQL_NULL:
-                  in_row[col.second.index] = SValue::newNull();
+                  cur_buf_[col.second.index] = SValue::newNull();
                   break;
                 case SQL_STRING:
-                  in_row[col.second.index] = SValue::newString(v);
+                  cur_buf_[col.second.index] = SValue::newString(v);
                   break;
                 case SQL_FLOAT:
-                  in_row[col.second.index] = SValue::newFloat(v);
+                  cur_buf_[col.second.index] = SValue::newFloat(v);
                   break;
                 case SQL_INTEGER:
-                  in_row[col.second.index] = SValue::newInteger(v);
+                  cur_buf_[col.second.index] = SValue::newInteger(v);
                   break;
                 case SQL_BOOL:
-                  in_row[col.second.index] = SValue::newBool(v);
+                  cur_buf_[col.second.index] = SValue::newBool(v);
                   break;
                 case SQL_TIMESTAMP:
-                  in_row[col.second.index] = SValue::newTimestamp(v);
+                  cur_buf_[col.second.index] = SValue::newTimestamp(v);
                   break;
               }
             }
@@ -206,26 +226,26 @@ void CSTableScan::scan(
             reader->readUnsignedInt(&r, &d, &v);
 
             if (d < reader->maxDefinitionLevel()) {
-              in_row[col.second.index] = SValue();
+              cur_buf_[col.second.index] = SValue();
             } else {
               switch (col.second.type) {
                 case SQL_NULL:
-                  in_row[col.second.index] = SValue::newNull();
+                  cur_buf_[col.second.index] = SValue::newNull();
                   break;
                 case SQL_STRING:
-                  in_row[col.second.index] = SValue::newInteger(v).toString();
+                  cur_buf_[col.second.index] = SValue::newInteger(v).toString();
                   break;
                 case SQL_FLOAT:
-                  in_row[col.second.index] = SValue::newFloat(v);
+                  cur_buf_[col.second.index] = SValue::newFloat(v);
                   break;
                 case SQL_INTEGER:
-                  in_row[col.second.index] = SValue::newInteger(v);
+                  cur_buf_[col.second.index] = SValue::newInteger(v);
                   break;
                 case SQL_BOOL:
-                  in_row[col.second.index] = SValue::newBool(v);
+                  cur_buf_[col.second.index] = SValue::newBool(v);
                   break;
                 case SQL_TIMESTAMP:
-                  in_row[col.second.index] = SValue::newTimestamp(v);
+                  cur_buf_[col.second.index] = SValue::newTimestamp(v);
                   break;
               }
             }
@@ -238,26 +258,26 @@ void CSTableScan::scan(
             reader->readSignedInt(&r, &d, &v);
 
             if (d < reader->maxDefinitionLevel()) {
-              in_row[col.second.index] = SValue();
+              cur_buf_[col.second.index] = SValue();
             } else {
               switch (col.second.type) {
                 case SQL_NULL:
-                  in_row[col.second.index] = SValue::newNull();
+                  cur_buf_[col.second.index] = SValue::newNull();
                   break;
                 case SQL_STRING:
-                  in_row[col.second.index] = SValue::newInteger(v).toString();
+                  cur_buf_[col.second.index] = SValue::newInteger(v).toString();
                   break;
                 case SQL_FLOAT:
-                  in_row[col.second.index] = SValue::newFloat(v);
+                  cur_buf_[col.second.index] = SValue::newFloat(v);
                   break;
                 case SQL_INTEGER:
-                  in_row[col.second.index] = SValue::newInteger(v);
+                  cur_buf_[col.second.index] = SValue::newInteger(v);
                   break;
                 case SQL_BOOL:
-                  in_row[col.second.index] = SValue::newBool(v);
+                  cur_buf_[col.second.index] = SValue::newBool(v);
                   break;
                 case SQL_TIMESTAMP:
-                  in_row[col.second.index] = SValue::newTimestamp(v);
+                  cur_buf_[col.second.index] = SValue::newTimestamp(v);
                   break;
               }
             }
@@ -270,26 +290,26 @@ void CSTableScan::scan(
             reader->readBoolean(&r, &d, &v);
 
             if (d < reader->maxDefinitionLevel()) {
-              in_row[col.second.index] = SValue(SValue::BoolType(false));
+              cur_buf_[col.second.index] = SValue(SValue::BoolType(false));
             } else {
               switch (col.second.type) {
                 case SQL_NULL:
-                  in_row[col.second.index] = SValue::newNull();
+                  cur_buf_[col.second.index] = SValue::newNull();
                   break;
                 case SQL_STRING:
-                  in_row[col.second.index] = SValue::newBool(v).toString();
+                  cur_buf_[col.second.index] = SValue::newBool(v).toString();
                   break;
                 case SQL_FLOAT:
-                  in_row[col.second.index] = SValue::newFloat(v);
+                  cur_buf_[col.second.index] = SValue::newFloat(v);
                   break;
                 case SQL_INTEGER:
-                  in_row[col.second.index] = SValue::newInteger(v);
+                  cur_buf_[col.second.index] = SValue::newInteger(v);
                   break;
                 case SQL_BOOL:
-                  in_row[col.second.index] = SValue::newBool(v);
+                  cur_buf_[col.second.index] = SValue::newBool(v);
                   break;
                 case SQL_TIMESTAMP:
-                  in_row[col.second.index] = SValue::newTimestamp(v);
+                  cur_buf_[col.second.index] = SValue::newTimestamp(v);
                   break;
               }
             }
@@ -302,26 +322,26 @@ void CSTableScan::scan(
             reader->readFloat(&r, &d, &v);
 
             if (d < reader->maxDefinitionLevel()) {
-              in_row[col.second.index] = SValue();
+              cur_buf_[col.second.index] = SValue();
             } else {
               switch (col.second.type) {
                 case SQL_NULL:
-                  in_row[col.second.index] = SValue::newNull();
+                  cur_buf_[col.second.index] = SValue::newNull();
                   break;
                 case SQL_STRING:
-                  in_row[col.second.index] = SValue::newFloat(v).toString();
+                  cur_buf_[col.second.index] = SValue::newFloat(v).toString();
                   break;
                 case SQL_FLOAT:
-                  in_row[col.second.index] = SValue::newFloat(v);
+                  cur_buf_[col.second.index] = SValue::newFloat(v);
                   break;
                 case SQL_INTEGER:
-                  in_row[col.second.index] = SValue::newInteger(v);
+                  cur_buf_[col.second.index] = SValue::newInteger(v);
                   break;
                 case SQL_BOOL:
-                  in_row[col.second.index] = SValue::newBool(v);
+                  cur_buf_[col.second.index] = SValue::newBool(v);
                   break;
                 case SQL_TIMESTAMP:
-                  in_row[col.second.index] = SValue::newTimestamp(v);
+                  cur_buf_[col.second.index] = SValue::newTimestamp(v);
                   break;
               }
             }
@@ -334,23 +354,23 @@ void CSTableScan::scan(
             reader->readDateTime(&r, &d, &v);
 
             if (d < reader->maxDefinitionLevel()) {
-              in_row[col.second.index] = SValue();
+              cur_buf_[col.second.index] = SValue();
             } else {
               switch (col.second.type) {
                 case SQL_NULL:
-                  in_row[col.second.index] = SValue::newNull();
+                  cur_buf_[col.second.index] = SValue::newNull();
                   break;
                 case SQL_STRING:
-                  in_row[col.second.index] = SValue::newTimestamp(v).toString();
+                  cur_buf_[col.second.index] = SValue::newTimestamp(v).toString();
                   break;
                 case SQL_FLOAT:
-                  in_row[col.second.index] = SValue::newTimestamp(v).toFloat();
+                  cur_buf_[col.second.index] = SValue::newTimestamp(v).toFloat();
                   break;
                 case SQL_INTEGER:
-                  in_row[col.second.index] = SValue::newTimestamp(v).toInteger();
+                  cur_buf_[col.second.index] = SValue::newTimestamp(v).toInteger();
                   break;
                 case SQL_TIMESTAMP:
-                  in_row[col.second.index] = SValue::newTimestamp(v);
+                  cur_buf_[col.second.index] = SValue::newTimestamp(v);
                   break;
                 default:
                   RAISE(kIllegalStateError);
@@ -371,19 +391,20 @@ void CSTableScan::scan(
           col.second.reader->nextRepetitionLevel());
     }
 
-    fetch_level = next_level;
-    if (fetch_level == 0) {
-      ++num_records;
+    cur_fetch_level_ = next_level;
+    if (cur_fetch_level_ == 0) {
+      ++cur_pos_;
     }
 
-    bool where_pred = filter_pred;
+    bool row_ready = false;
+    bool where_pred = cur_filter_pred_;
     if (where_pred && where_expr_.program() != nullptr) {
       SValue where_tmp;
       VM::evaluate(
-          ctx_,
+          txn_,
           where_expr_.program(),
-          in_row.size(),
-          in_row.data(),
+          cur_buf_.size(),
+          cur_buf_.data(),
           &where_tmp);
 
       where_pred = where_tmp.getBool();
@@ -391,15 +412,16 @@ void CSTableScan::scan(
 
     if (where_pred) {
       for (int i = 0; i < select_list_.size(); ++i) {
-        if (select_list_[i].rep_level >= select_level) {
+        if (select_list_[i].rep_level >= cur_select_level_) {
           VM::accumulate(
-              ctx_,
+              txn_,
               select_list_[i].compiled.program(),
               &select_list_[i].instance,
-              in_row.size(),
-              in_row.data());
+              cur_buf_.size(),
+              cur_buf_.data());
         }
       }
+
 
       switch (aggr_strategy_) {
 
@@ -412,139 +434,100 @@ void CSTableScan::scan(
           }
 
         case AggregationStrategy::AGGREGATE_WITHIN_RECORD_DEEP:
-          for (int i = 0; i < select_list_.size(); ++i) {
+          for (int i = 0; i < select_list_.size() && i < out_len; ++i) {
             VM::result(
-                ctx_,
+                txn_,
                 select_list_[i].compiled.program(),
                 &select_list_[i].instance,
-                &out_row[i]);
+                &out[i]);
 
             VM::reset(
-                ctx_,
+                txn_,
                 select_list_[i].compiled.program(),
                 &select_list_[i].instance);
           }
 
-          if (!fn(out_row.size(), out_row.data())) {
-            return;
-          }
-
+          row_ready = true;
           break;
 
         case AggregationStrategy::NO_AGGREGATION:
-          for (int i = 0; i < select_list_.size(); ++i) {
+          for (int i = 0; i < select_list_.size() && i < out_len; ++i) {
             VM::evaluate(
-                ctx_,
+                txn_,
                 select_list_[i].compiled.program(),
-                in_row.size(),
-                in_row.data(),
-                &out_row[i]);
+                cur_buf_.size(),
+                cur_buf_.data(),
+                &out[i]);
           }
 
-          if (!fn(out_row.size(), out_row.data())) {
-            return;
-          }
-
+          row_ready = true;
           break;
 
       }
 
-      select_level = fetch_level;
+      cur_select_level_ = cur_fetch_level_;
     } else {
-      select_level = std::min(select_level, fetch_level);
+      cur_select_level_ = std::min(cur_select_level_, cur_fetch_level_);
     }
 
     for (const auto& col : columns_) {
-      if (col.second.reader->maxRepetitionLevel() >= select_level) {
-        in_row[col.second.index] = SValue();
+      if (col.second.reader->maxRepetitionLevel() >= cur_select_level_) {
+        cur_buf_[col.second.index] = SValue();
       }
+    }
+
+    if (row_ready) {
+      return true;
     }
   }
 
   switch (aggr_strategy_) {
     case AggregationStrategy::AGGREGATE_ALL:
-      for (int i = 0; i < select_list_.size(); ++i) {
+      for (int i = 0; i < select_list_.size() && i < out_len; ++i) {
         VM::result(
-            ctx_,
+            txn_,
             select_list_[i].compiled.program(),
             &select_list_[i].instance,
-            &out_row[i]);
+            &out[i]);
       }
 
-      fn(out_row.size(), out_row.data());
-      break;
+      return true;
 
     default:
-      break;
+      RAISE(kIllegalStateError, "invalid aggregation strategy");
 
   }
 }
 
-void CSTableScan::scanWithoutColumns(
-    Function<bool (int argc, const SValue* argv)> fn) {
+bool CSTableScan::fetchNextWithoutColumns(SValue* row, int row_len) {
   Vector<SValue> out_row(select_list_.size(), SValue{});
 
-  size_t total_records = cstable_->numRecords();
-  for (size_t i = 0; i < total_records; ++i) {
-    bool where_pred = true;
+  while (cur_pos_ < num_records_) {
+    ++cur_pos_;
+
     if (where_expr_.program() != nullptr) {
       SValue where_tmp;
-      VM::evaluate(ctx_, where_expr_.program(), 0, nullptr, &where_tmp);
-      where_pred = where_tmp.getBool();
-    }
-
-    if (where_pred) {
-      switch (aggr_strategy_) {
-
-        case AggregationStrategy::AGGREGATE_ALL:
-          for (int i = 0; i < select_list_.size(); ++i) {
-            VM::accumulate(
-                ctx_,
-                select_list_[i].compiled.program(),
-                &select_list_[i].instance,
-                0,
-                nullptr);
-          }
-          break;
-
-        case AggregationStrategy::AGGREGATE_WITHIN_RECORD_DEEP:
-        case AggregationStrategy::AGGREGATE_WITHIN_RECORD_FLAT:
-        case AggregationStrategy::NO_AGGREGATION:
-          for (int i = 0; i < select_list_.size(); ++i) {
-            VM::evaluate(
-                ctx_,
-                select_list_[i].compiled.program(),
-                0,
-                nullptr,
-                &out_row[i]);
-          }
-
-          if (!fn(out_row.size(), out_row.data())) {
-            return;
-          }
-          break;
+      VM::evaluate(txn_, where_expr_.program(), 0, nullptr, &where_tmp);
+      if (!where_tmp.getBool()) {
+        continue;
       }
     }
+
+    for (int i = 0; i < select_list_.size() && i < row_len; ++i) {
+      VM::evaluate(
+          txn_,
+          select_list_[i].compiled.program(),
+          0,
+          nullptr,
+          &row[i]);
+    }
+
+    return true;
   }
 
-  switch (aggr_strategy_) {
-    case AggregationStrategy::AGGREGATE_ALL:
-      for (int i = 0; i < select_list_.size(); ++i) {
-        VM::result(
-            ctx_,
-            select_list_[i].compiled.program(),
-            &select_list_[i].instance,
-            &out_row[i]);
-      }
-
-      fn(out_row.size(), out_row.data());
-      break;
-
-    default:
-      break;
-
-  }
+  return false;
 }
+
 
 void CSTableScan::findColumns(
     RefPtr<ValueExpressionNode> expr,
@@ -565,7 +548,7 @@ void CSTableScan::resolveColumns(RefPtr<ValueExpressionNode> expr) const {
     auto colname = fieldref->fieldName();
     auto col = columns_.find(colname);
     if (col == columns_.end()) {
-      RAISEF(kNotFoundError, "column not found: $0", colname);
+      RAISEF(kNotFoundError, "column(s) not found: $0", colname);
     } else {
       fieldref->setColumnIndex(col->second.index);
     }
@@ -609,14 +592,6 @@ size_t CSTableScan::numColumns() const {
   return column_names_.size();
 }
 
-Option<SHA1Hash> CSTableScan::cacheKey() const {
-  return cache_key_;
-}
-
-void CSTableScan::setCacheKey(const SHA1Hash& key) {
-  cache_key_ = Some(key);
-}
-
 size_t CSTableScan::rowsScanned() const {
   return rows_scanned_;
 }
@@ -643,14 +618,14 @@ CSTableScan::ColumnRef::ColumnRef(
     type(t) {}
 
 CSTableScan::ExpressionRef::ExpressionRef(
-    Transaction* _ctx,
+    Transaction* _txn,
     size_t _rep_level,
     ValueExpression _compiled,
     ScratchMemory* smem) :
-    ctx(_ctx),
+    txn(_txn),
     rep_level(_rep_level),
     compiled(std::move(_compiled)),
-    instance(VM::allocInstance(ctx, compiled.program(), smem)) {}
+    instance(VM::allocInstance(txn, compiled.program(), smem)) {}
 
 CSTableScan::ExpressionRef::ExpressionRef(
     ExpressionRef&& other) :
@@ -662,8 +637,9 @@ CSTableScan::ExpressionRef::ExpressionRef(
 
 CSTableScan::ExpressionRef::~ExpressionRef() {
   if (instance.scratch) {
-    VM::freeInstance(ctx, compiled.program(), &instance);
+    VM::freeInstance(txn, compiled.program(), &instance);
   }
 }
+
 
 } // namespace csql
