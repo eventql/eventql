@@ -183,6 +183,7 @@ STX_PROTOBUF_GENERATE_CPP(COREPROTO_SRCS COREPROTO_HDRS ${COREPROTO_FILES})
 add_executable(evqld
     #eventql/infra/sstable/SSTableServlet.cc
     ${CMAKE_CURRENT_BINARY_DIR}/mapreduce_preludejs.cc
+    ${PROTO_FILES}
     ${COREPROTO_FILES}
     AnalyticsApp.cc
     AnalyticsAuth.cc
