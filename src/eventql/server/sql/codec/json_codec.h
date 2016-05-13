@@ -13,22 +13,21 @@
 #include <eventql/sql/runtime/queryplan.h>
 #include <eventql/sql/runtime/charts/ChartStatement.h>
 #include <eventql/sql/runtime/ResultFormat.h>
+#include <eventql/sql/result_cursor.h>
 
 namespace zbase {
 
 class JSONCodec {
 public:
 
-  static void formatResultList(
-      const csql::ResultList* results,
-      json::JSONOutputStream* json);
+  JSONCodec(json::JSONOutputStream* json);
 
-  JSONCodec(csql::QueryPlan* query);
-
-  void printResults(ScopedPtr<OutputStream> output);
+  void printResultTable(
+      const Vector<String>& header,
+      csql::ResultCursor* cursor);
 
 protected:
-  Vector<ScopedPtr<csql::ResultList>> results_;
+  json::JSONOutputStream* json_;
 };
 
 }

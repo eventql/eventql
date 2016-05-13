@@ -1211,18 +1211,28 @@ void AnalyticsServlet::executeSQL_JSON(
   try {
     auto txn = sql_->newTransaction();
     txn->addTableProvider(app_->getTableProvider(session.customer()));
-
     auto qplan = sql_->buildQueryPlan(txn.get(), query);
-    auto result_cursor = qplan->execute(0);
-
-    Vector<csql::SValue> row(result_cursor->getNumColumns());
-    while (result_cursor->next(row.data(), row.size())) {
-      iputs("got row: $0", row);
-    }
 
     Buffer result;
-  //  JSONCodec json_codec(qplan.get());
-  //  json_codec.printResults(BufferOutputStream::fromBuffer(&result));
+    json::JSONOutputStream json(BufferOutputStream::fromBuffer(&result));
+    JSONCodec json_codec(&json);
+    json.beginObject();
+    json.addObjectEntry("results");
+    json.beginArray();
+
+    size_t num_statements = 1;
+    for (size_t i = 0; i < num_statements; ++i) {
+      if (i > 0) {
+        json.addComma();
+      }
+
+      auto result_columns = qplan->getStatementOutputColumns(i);
+      auto result_cursor = qplan->execute(i);
+      json_codec.printResultTable(result_columns, result_cursor.get());
+    }
+
+    json.endArray();
+    json.endObject();
 
     res->setStatus(http::kStatusOK);
     res->addHeader("Content-Type", "application/json; charset=utf-8");
