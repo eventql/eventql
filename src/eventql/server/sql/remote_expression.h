@@ -22,7 +22,7 @@ public:
 
   RemoteExpression(
       csql::Transaction* txn,
-      RefPtr<csql::QueryTreeNode> qtree,
+      RefPtr<csql::TableExpressionNode> qtree,
       Vector<ReplicaRef> hosts,
       AnalyticsAuth* auth);
 
@@ -30,10 +30,18 @@ public:
 
 protected:
 
+  bool next(csql::SValue* row, size_t row_len);
+
   csql::Transaction* txn_;
-  RefPtr<csql::QueryTreeNode> qtree_;
+  RefPtr<csql::TableExpressionNode> qtree_;
   Vector<ReplicaRef> hosts_;
   AnalyticsAuth* auth_;
+  bool complete_;
+  bool error_;
+  bool canceled_;
+  std::mutex mutex_;
+  std::condition_variable cv_;
+  List<Vector<csql::SValue>> buf_;
 };
 
 }
