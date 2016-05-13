@@ -19,6 +19,12 @@ BUGS
 -> remote partition csan sollte nur eine partition scannen
 -> acme corp hardgecodet
 
+...
+
+-> remoteexpression -> pipelinedremoteexpressions
+-> partial group by + group by merge
+-> qtree rewrite: .lastXX sufix
+-> evql scheduler w/ group by rewrite
 
 ???
 - tablecursor::next -> num_rows/batch ??
