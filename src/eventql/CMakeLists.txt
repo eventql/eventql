@@ -119,7 +119,6 @@ STX_PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${PROTO_FILES})
 
 file(GLOB COREPROTO_FILES core/*.proto metrics/*.proto)
 STX_PROTOBUF_GENERATE_CPP(COREPROTO_SRCS COREPROTO_HDRS ${COREPROTO_FILES})
-
 #
 #add_executable(test-tsdb-timewindowpartitioner
 #    $<TARGET_OBJECTS:stx-mdb>
@@ -151,11 +150,11 @@ STX_PROTOBUF_GENERATE_CPP(COREPROTO_SRCS COREPROTO_HDRS ${COREPROTO_FILES})
 #add_subdirectory(util/mysql)
 #add_subdirectory(util/mdb)
 #
-#add_custom_command(
-#    OUTPUT mapreduce_preludejs.cc
-#    COMMAND 
-#        echo 'eventql/mapreduce/prelude.js:${CMAKE_CURRENT_SOURCE_DIR}/mapreduce/prelude.js' | ${CMAKE_SOURCE_DIR}/src/eventql/util/assets.sh mapreduce_preludejs.cc
-#    DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/mapreduce/prelude.js")
+add_custom_command(
+    OUTPUT mapreduce_preludejs.cc
+    COMMAND 
+        echo 'eventql/mapreduce/prelude.js:${CMAKE_CURRENT_SOURCE_DIR}/mapreduce/prelude.js' | ${CMAKE_SOURCE_DIR}/src/eventql/util/assets.sh mapreduce_preludejs.cc
+    DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/mapreduce/prelude.js")
 #
 ##add_executable(test-javascriptcontext
 ##    $<TARGET_OBJECTS:stx-mdb>
@@ -179,12 +178,11 @@ STX_PROTOBUF_GENERATE_CPP(COREPROTO_SRCS COREPROTO_HDRS ${COREPROTO_FILES})
 
 
 
-
 add_executable(evqld
     #eventql/infra/sstable/SSTableServlet.cc
     ${CMAKE_CURRENT_BINARY_DIR}/mapreduce_preludejs.cc
-    ${PROTO_FILES}
-    ${COREPROTO_FILES}
+    ${COREPROTO_SRCS}
+    ${PROTO_SRCS}
     AnalyticsApp.cc
     AnalyticsAuth.cc
     AnalyticsServlet.cc
@@ -245,12 +243,13 @@ add_executable(evqld
     mapreduce/tasks/SaveToTablePartitionTask.cc
     mapreduce/tasks/SaveToTableTask.cc
     server/sql/codec/binary_codec.cc
+    server/sql/sql_engine.cc
     z1stats.cc
     evqld.cc)
 
 target_link_libraries(evqld chartsql cplot sstable cstable stx-http stx-protobuf stx-json stx-base stx-rpc stx-mdb js_static.a z pcre)
 target_link_libraries(evqld -L${CMAKE_BINARY_DIR}/deps/3rdparty/mozjs/dist/lib -ljs_static)
-add_dependencies(evqld customerdirectory mozjs_build)
+add_dependencies(evqld mozjs_build)
 #
 #add_executable(evqlctl
 #    $<TARGET_OBJECTS:stx-mdb>
