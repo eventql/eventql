@@ -1,16 +1,25 @@
+ROADMAP
+- [x] result cursors
+- [ ] zookeeper master
+- [ ] standalone mode
+- [ ] in memory visibility
+- [ ] pluggable auth
+- [ ] evql
+- [ ] table id + table deletion
+- [ ] easy create table
+- [ ] record deletion
+- [ ] binary protocol
+- [ ] distributed join
+- [ ] unified scheduler
+- [ ] partitioning/sharding v2
+
+
 bugfixes:
-  - bring back .lastN.. suffix
   - bug: select time from testtbl order by value desc limit 10;
   - time at functions
 
 features:
-  - better sql time handling
   - SVALUE object/array type
-  - tombstones
-  - table ids
-  - allow timewindow partitioner config updates
-  - primarykeypartitioner
-  - standalone mode
   - implement set subqueries (IN/etc)
   - implement scalar subqueries
 

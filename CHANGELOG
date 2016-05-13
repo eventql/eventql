@@ -1,11 +1,13 @@
 v0.3.0
 ======
+  - renamed to eventqlr
+  - deleted old webui code, non-core services
+  - rewritten sql query execution to internally use and return result cursors
   - implemented unified DAG scheduler for sql+mapreduce
   - implemented binary network protocol
-  - deleted old webui code, non-core services
 
-v0.2.4
-======
+v0.2.4 (2016-02-24)
+===================
   - improved SValue interface and numeric/time handling
   - new functions: now(), z1_version()
 
