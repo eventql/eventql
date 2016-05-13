@@ -11,7 +11,7 @@
  */
 #include "eventql/server/sql/table_scan.h"
 #include "eventql/server/sql/partition_cursor.h"
-
+#include "eventql/server/sql/remote_expression.h"
 
 namespace zbase {
 
@@ -98,7 +98,14 @@ ScopedPtr<csql::ResultCursor> TableScan::openLocalPartition(
 
 ScopedPtr<csql::ResultCursor> TableScan::openRemotePartition(
     const SHA1Hash& partition_key) {
-  RAISE(kNotYetImplementedError, "nyi");
+  return mkScoped(
+      new csql::TableExpressionResultCursor(
+          mkScoped(
+              new RemoteExpression(
+                  txn_,
+                  seqscan_.get(),
+                  replication_scheme_->replicasFor(partition_key),
+                  auth_))));
 }
 
 }
