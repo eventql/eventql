@@ -21,6 +21,7 @@ class TableScan : public csql::TableExpression {
 public:
 
   TableScan(
+    csql::Transaction* txn,
     const String& tsdb_namespace,
     const String& table_name,
     const Vector<SHA1Hash>& partitions,
@@ -37,6 +38,7 @@ protected:
 
   ScopedPtr<csql::ResultCursor> openPartition(const SHA1Hash& partition_id);
 
+  csql::Transaction* txn_;
   String tsdb_namespace_;
   String table_name_;
   Vector<SHA1Hash> partitions_;

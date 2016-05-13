@@ -46,6 +46,7 @@ Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
   return Option<ScopedPtr<csql::TableExpression>>(
       mkScoped(
           new TableScan(
+              ctx,
               tsdb_namespace_,
               table_ref.table_key,
               partitions,

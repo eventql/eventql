@@ -247,6 +247,7 @@ add_executable(evqld
     server/sql/sql_engine.cc
     server/sql/table_scan.cc
     server/sql/table_provider.cc
+    server/sql/partition_cursor.cc
     z1stats.cc
     evqld.cc)
 

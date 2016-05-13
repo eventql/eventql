@@ -10,10 +10,13 @@
  * permission is obtained.
  */
 #include "eventql/server/sql/table_scan.h"
+#include "eventql/server/sql/partition_cursor.h"
+
 
 namespace zbase {
 
 TableScan::TableScan(
+    csql::Transaction* txn,
     const String& tsdb_namespace,
     const String& table_name,
     const Vector<SHA1Hash>& partitions,
@@ -21,6 +24,7 @@ TableScan::TableScan(
     PartitionMap* partition_map,
     ReplicationScheme* replication_scheme,
     AnalyticsAuth* auth) :
+    txn_(txn),
     tsdb_namespace_(tsdb_namespace),
     table_name_(table_name),
     partitions_(partitions),
@@ -48,7 +52,7 @@ bool TableScan::next(csql::SValue* row, size_t row_len) {
       cur_cursor_ = openPartition(partitions_[cur_partition_]);
     }
 
-    if (cur_cursor_->next(row, row_len)) {
+    if (cur_cursor_.get() && cur_cursor_->next(row, row_len)) {
       return true;
     } else {
       cur_cursor_.reset(nullptr);
@@ -60,8 +64,27 @@ bool TableScan::next(csql::SValue* row, size_t row_len) {
 }
 
 ScopedPtr<csql::ResultCursor> TableScan::openPartition(
-    const SHA1Hash& partition_id) {
-  RAISE(kNotYetImplementedError, "nyi");
+    const SHA1Hash& partition_key) {
+  auto partition =  partition_map_->findPartition(
+      tsdb_namespace_,
+      table_name_,
+      partition_key);
+
+  auto table = partition_map_->findTable(tsdb_namespace_, table_name_);
+  if (table.isEmpty()) {
+    RAISE(kNotFoundError, "table not found");
+  }
+
+  if (partition.isEmpty()) {
+    return ScopedPtr<csql::ResultCursor>();
+  }
+
+  return mkScoped(
+      new PartitionCursor(
+          txn_,
+          table.get(),
+          partition.get()->getSnapshot(),
+          seqscan_));
 }
 
 }
