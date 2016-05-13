@@ -21,12 +21,10 @@ namespace csql {
 CSTableScan::CSTableScan(
     Transaction* txn,
     RefPtr<SequentialScanNode> stmt,
-    const String& cstable_filename,
-    QueryBuilder* runtime) :
+    const String& cstable_filename) :
     txn_(txn),
     stmt_(stmt->deepCopyAs<SequentialScanNode>()),
     cstable_filename_(cstable_filename),
-    runtime_(runtime),
     colindex_(0),
     aggr_strategy_(stmt_->aggregationStrategy()),
     rows_scanned_(0),
@@ -42,12 +40,10 @@ CSTableScan::CSTableScan(
 CSTableScan::CSTableScan(
     Transaction* txn,
     RefPtr<SequentialScanNode> stmt,
-    RefPtr<cstable::CSTableReader> cstable,
-    QueryBuilder* runtime) :
+    RefPtr<cstable::CSTableReader> cstable) :
     txn_(txn),
     stmt_(stmt->deepCopyAs<SequentialScanNode>()),
     cstable_(cstable),
-    runtime_(runtime),
     colindex_(0),
     aggr_strategy_(stmt_->aggregationStrategy()),
     rows_scanned_(0),
@@ -80,6 +76,7 @@ ScopedPtr<ResultCursor> CSTableScan::execute() {
 
 
 void CSTableScan::open() {
+  auto runtime = txn_->getCompiler();
   opened_ = true;
 
   if (cstable_.get() == nullptr) {
@@ -134,13 +131,13 @@ void CSTableScan::open() {
     select_list_.emplace_back(
         txn_,
         findMaxRepetitionLevel(slnode->expression()),
-        runtime_->buildValueExpression(txn_, slnode->expression()),
+        runtime->buildValueExpression(txn_, slnode->expression()),
         &scratch_);
   }
 
   if (!where_expr.isEmpty()) {
     resolveColumns(where_expr.get());
-    where_expr_ = runtime_->buildValueExpression(txn_, where_expr.get());
+    where_expr_ = runtime->buildValueExpression(txn_, where_expr.get());
   }
 }
 

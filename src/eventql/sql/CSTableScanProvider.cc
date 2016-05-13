@@ -33,8 +33,7 @@ Option<ScopedPtr<TableExpression>> CSTableScanProvider::buildSequentialScan(
           new CSTableScan(
               txn,
               node,
-              cstable_file_,
-              txn->getCompiler())));
+              cstable_file_)));
 }
 
 void CSTableScanProvider::listTables(

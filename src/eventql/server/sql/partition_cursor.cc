@@ -34,7 +34,7 @@ bool PartitionCursor::next(csql::SValue* row, int row_len) {
       auto cstable = cstable::CSTableReader::openFile(cstable_file);
       auto id_col = cstable->getColumnReader("__lsm_id");
       auto is_update_col = cstable->getColumnReader("__lsm_is_update");
-      cur_scan_.reset(new csql::CSTableScan(txn_, stmt_, cstable, txn_->getCompiler()));
+      cur_scan_.reset(new csql::CSTableScan(txn_, stmt_, cstable));
 
       cur_scan_->setFilter([this, id_col, is_update_col] () -> bool {
         uint64_t rlvl;

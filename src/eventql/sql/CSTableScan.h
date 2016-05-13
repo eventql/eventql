@@ -11,8 +11,6 @@
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/protobuf/MessageSchema.h>
 #include <eventql/sql/qtree/SequentialScanNode.h>
-#include <eventql/sql/runtime/compiler.h>
-#include <eventql/sql/runtime/defaultruntime.h>
 #include <eventql/sql/expressions/table_expression.h>
 #include <eventql/sql/runtime/ValueExpression.h>
 #include <eventql/infra/cstable/CSTableReader.h>
@@ -27,14 +25,12 @@ public:
   CSTableScan(
       Transaction* txn,
       RefPtr<SequentialScanNode> stmt,
-      const String& cstable_filename,
-      QueryBuilder* runtime);
+      const String& cstable_filename);
 
   CSTableScan(
       Transaction* txn,
       RefPtr<SequentialScanNode> stmt,
-      RefPtr<cstable::CSTableReader> cstable,
-      QueryBuilder* runtime);
+      RefPtr<cstable::CSTableReader> cstable);
 
   ScopedPtr<ResultCursor> execute() override;
 
@@ -93,7 +89,6 @@ protected:
   RefPtr<SequentialScanNode> stmt_;
   String cstable_filename_;
   RefPtr<cstable::CSTableReader> cstable_;
-  QueryBuilder* runtime_;
   HashMap<String, ColumnRef> columns_;
   Vector<ExpressionRef> select_list_;
   ValueExpression where_expr_;
