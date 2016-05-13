@@ -20,10 +20,10 @@ class PartitionCursor : public csql::ResultCursor {
 public:
 
   PartitionCursor(
-    csql::Transaction* txn,
-    RefPtr<Table> table,
-    RefPtr<PartitionSnapshot> snap,
-    RefPtr<csql::SequentialScanNode> stmt);
+      csql::Transaction* txn,
+      RefPtr<Table> table,
+      RefPtr<PartitionSnapshot> snap,
+      RefPtr<csql::SequentialScanNode> stmt);
 
   bool next(csql::SValue* row, int row_len) override;
 
@@ -31,10 +31,14 @@ public:
 
 protected:
 
-    csql::Transaction* txn_;
-    RefPtr<Table> table_;
-    RefPtr<PartitionSnapshot> snap_;
-    RefPtr<csql::SequentialScanNode> stmt_;
+  csql::Transaction* txn_;
+  RefPtr<Table> table_;
+  RefPtr<PartitionSnapshot> snap_;
+  RefPtr<csql::SequentialScanNode> stmt_;
+  Set<SHA1Hash> id_set_;
+  size_t cur_table_;
+  ScopedPtr<csql::ResultCursor> cur_cursor_;
+  ScopedPtr<csql::CSTableScan> cur_scan_;
 };
 
 }
