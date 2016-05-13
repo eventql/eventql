@@ -19,6 +19,7 @@ namespace zbase {
 
 class RemoteExpression : public csql::TableExpression {
 public:
+  static const constexpr size_t kMaxBufferSize = 100;
 
   RemoteExpression(
       csql::Transaction* txn,
@@ -33,6 +34,8 @@ public:
 protected:
 
   void executeAsync();
+  void executeOnHost(const InetAddr& host);
+
   bool next(csql::SValue* out_row, size_t out_row_len);
 
   csql::Transaction* txn_;
@@ -41,10 +44,12 @@ protected:
   AnalyticsAuth* auth_;
   bool eof_;
   bool error_;
-  std::atomic<bool> canceled_;
+  String error_str_;
+  std::atomic<bool> cancelled_;
   std::mutex mutex_;
   std::condition_variable cv_;
   List<Vector<csql::SValue>> buf_;
+  size_t buf_ctr_;
   std::thread thread_;
 };
 
