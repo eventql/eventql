@@ -8,10 +8,9 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <eventql/util/SHA1.h>
-#include <zbase/sql/table_provider.h>
-#include <zbase/sql/table_scan.h>
-#include <zbase/core/TSDBService.h>
-#include <zbase/core/RemoteTSDBScan.h>
+#include <eventql/server/sql/table_provider.h>
+//#include <eventql/server/sql/table_scan.h>
+#include <eventql/core/TSDBService.h>
 #include <eventql/sql/CSTableScan.h>
 
 using namespace stx;
@@ -28,33 +27,10 @@ TSDBTableProvider::TSDBTableProvider(
     replication_scheme_(replication_scheme),
     auth_(auth) {}
 
-csql::TaskIDList TSDBTableProvider::buildSequentialScan(
-    csql::Transaction* txn,
-    RefPtr<csql::SequentialScanNode> node,
-    csql::TaskDAG* tasks) const {
-  auto table_ref = TSDBTableRef::parse(node->tableName());
-  auto table = partition_map_->findTable(tsdb_namespace_, table_ref.table_key);
-  if (table.isEmpty()) {
-    RAISEF(kRuntimeError, "table not found: '$0'", node->tableName());
-  }
-
-  auto partitioner = table.get()->partitioner();
-  auto partitions = partitioner->listPartitions(node->constraints());
-
-  csql::TaskIDList task_ids;
-  for (const auto& partition : partitions) {
-    auto task = new csql::TaskDAGNode(
-        new TableScanFactory(
-            partition_map_,
-            tsdb_namespace_,
-            table_ref.table_key,
-            partition,
-            node));
-
-    task_ids.emplace_back(tasks->addTask(task));
-  }
-
-  return task_ids;
+Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
+    csql::Transaction* ctx,
+    RefPtr<csql::SequentialScanNode> seqscan) const {
+  RAISE(kNotYetImplementedError, "nyi");
 }
 
 void TSDBTableProvider::listTables(

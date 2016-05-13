@@ -10,12 +10,12 @@
 #pragma once
 #include <eventql/util/stdtypes.h>
 #include <eventql/sql/runtime/tablerepository.h>
-#include <zbase/AnalyticsAuth.h>
-#include <zbase/core/TSDBTableRef.h>
-#include <zbase/core/PartitionMap.h>
-#include <zbase/core/CompactionWorker.h>
-#include <zbase/core/TableConfig.pb.h>
-#include <zbase/core/TSDBTableInfo.h>
+#include <eventql/AnalyticsAuth.h>
+#include <eventql/core/TSDBTableRef.h>
+#include <eventql/core/PartitionMap.h>
+#include <eventql/core/CompactionWorker.h>
+#include <eventql/core/TableConfig.pb.h>
+#include <eventql/core/TSDBTableInfo.h>
 
 using namespace stx;
 
@@ -31,10 +31,9 @@ public:
       ReplicationScheme* replication_scheme,
       AnalyticsAuth* auth);
 
-  csql::TaskIDList buildSequentialScan(
-      csql::Transaction* txn,
-      RefPtr<csql::SequentialScanNode> seqscan,
-      csql::TaskDAG* tasks) const override;
+  Option<ScopedPtr<csql::TableExpression>> buildSequentialScan(
+      csql::Transaction* ctx,
+      RefPtr<csql::SequentialScanNode> seqscan) const override;
 
   void listTables(
       Function<void (const csql::TableInfo& table)> fn) const override;

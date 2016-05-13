@@ -11,6 +11,7 @@
 #include <eventql/util/protobuf/msg.h>
 #include <eventql/z1.h>
 #include <eventql/server/sql/sql_engine.h>
+#include <eventql/server/sql/table_provider.h>
 #include <eventql/core/TSDBService.h>
 #include <eventql/core/TimeWindowPartitioner.h>
 #include <eventql/core/FixedShardPartitioner.h>
@@ -37,12 +38,11 @@ RefPtr<csql::TableProvider> SQLEngine::tableProviderForNamespace(
     ReplicationScheme* replication_scheme,
     AnalyticsAuth* auth,
     const String& tsdb_namespace) {
-  RAISE(kNotYetImplementedError, "not yet implemented");
-  //return new TSDBTableProvider(
-  //    tsdb_namespace,
-  //    partition_map,
-  //    replication_scheme,
-  //    auth);
+  return new TSDBTableProvider(
+      tsdb_namespace,
+      partition_map,
+      replication_scheme,
+      auth);
 }
 
 //void SQLEngine::rewriteTableTimeSuffix(

@@ -244,6 +244,7 @@ add_executable(evqld
     mapreduce/tasks/SaveToTableTask.cc
     server/sql/codec/binary_codec.cc
     server/sql/sql_engine.cc
+    server/sql/table_provider.cc
     z1stats.cc
     evqld.cc)
 

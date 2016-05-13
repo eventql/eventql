@@ -14,6 +14,10 @@ ROADMAP
 - [ ] partitioning/sharding v2
 
 
+kleinkram:
+- [ ] accept SQL query as post data in /api/v1/sql
+
+
 bugfixes:
   - bug: select time from testtbl order by value desc limit 10;
   - time at functions
