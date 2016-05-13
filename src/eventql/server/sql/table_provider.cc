@@ -68,6 +68,7 @@ void TSDBTableProvider::listTables(
 Option<csql::TableInfo> TSDBTableProvider::describe(
     const String& table_name) const {
   auto table_ref = TSDBTableRef::parse(table_name);
+
   auto table = partition_map_->tableInfo(tsdb_namespace_, table_ref.table_key);
   if (table.isEmpty()) {
     return None<csql::TableInfo>();
@@ -98,6 +99,10 @@ csql::TableInfo TSDBTableProvider::tableInfoForTable(
   }
 
   return ti;
+}
+
+const String& TSDBTableProvider::getNamespace() const {
+  return tsdb_namespace_;
 }
 
 } // namespace csql

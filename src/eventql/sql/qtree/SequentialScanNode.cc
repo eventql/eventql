@@ -291,15 +291,28 @@ void SequentialScanNode::encode(
   } else {
     os->appendUInt8(0);
   }
+
+  os->appendVarUInt(node.output_columns_.size());
+  for (const auto& oc : node.output_columns_) {
+    os->appendLenencString(oc);
+  }
+
+  os->appendVarUInt(node.constraints_.size());
+  for (const auto& sc : node.constraints_) {
+    os->appendLenencString(sc.column_name);
+    os->appendUInt8((uint8_t) sc.type);
+    sc.value.encode(os);
+  }
 }
 
 RefPtr<QueryTreeNode> SequentialScanNode::decode(
     QueryTreeCoder* coder,
     stx::InputStream* is) {
   auto table_provider = coder->getTransaction()->getTableProvider();
-  Option<TableInfo> table_info = table_provider->describe(is->readLenencString());
+  auto table_name = is->readLenencString();
+  Option<TableInfo> table_info = table_provider->describe(table_name);
   if (table_info.isEmpty()) {
-    RAISE(kIllegalArgumentError, "table not found");
+    RAISEF(kRuntimeError, "table not found: $0", table_name);
   }
 
   auto select_list_size = is->readVarUInt();
@@ -315,12 +328,34 @@ RefPtr<QueryTreeNode> SequentialScanNode::decode(
     where_expr = coder->decode(is).asInstanceOf<ValueExpressionNode>();
   }
 
-  return new SequentialScanNode(
-      table_info.get(),
-      table_provider,
-      select_list,
-      where_expr,
-      aggr_strategy);
+  auto node = mkRef(
+      new SequentialScanNode(
+          table_info.get(),
+          table_provider,
+          select_list,
+          where_expr,
+          aggr_strategy));
+
+  auto num_output_columns = is->readVarUInt();
+  for (auto i = 0; i < num_output_columns; ++i) {
+    node->output_columns_.emplace_back(is->readLenencString());
+  }
+
+  auto num_constraints = is->readVarUInt();
+  for (auto i = 0; i < num_constraints; ++i) {
+    auto constraint_name = is->readLenencString();
+    auto constraint_type = (ScanConstraintType) is->readUInt8();
+    SValue constraint_value;
+    constraint_value.decode(is);
+
+    node->constraints_.emplace_back(ScanConstraint{
+      .column_name = constraint_name,
+      .type = constraint_type,
+      .value = constraint_value
+    });
+  }
+
+  return node.get();
 }
 
 } // namespace csql

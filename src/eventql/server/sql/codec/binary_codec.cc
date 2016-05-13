@@ -10,6 +10,7 @@
 #include "eventql/server/sql/codec/binary_codec.h"
 #include "eventql/sql/svalue.h"
 #include "eventql/util/util/binarymessagereader.h"
+#include "eventql/util/util/binarymessagewriter.h"
 
 using namespace stx;
 
@@ -269,5 +270,92 @@ size_t BinaryResultParser::parseError(const void* data, size_t size) {
 bool BinaryResultParser::eof() const {
   return got_footer_;
 }
+
+
+BinaryResultFormat::BinaryResultFormat(
+    WriteCallback write_cb) :
+    write_cb_(write_cb) {
+  sendHeader();
+}
+
+BinaryResultFormat::~BinaryResultFormat() {
+  sendFooter();
+}
+
+void BinaryResultFormat::sendProgress(double progress) {
+  stx::util::BinaryMessageWriter writer;
+  writer.appendUInt8(0xf3);
+  writer.appendDouble(progress);
+  write_cb_(writer.data(), writer.size());
+}
+
+void BinaryResultFormat::sendError(const String& error) {
+  stx::util::BinaryMessageWriter writer;
+  writer.appendUInt8(0xf4);
+  writer.appendLenencString(error);
+  write_cb_(writer.data(), writer.size());
+}
+
+void BinaryResultFormat::sendHeader() {
+  stx::util::BinaryMessageWriter writer;
+  writer.appendUInt8(0x01);
+  write_cb_(writer.data(), writer.size());
+}
+
+void BinaryResultFormat::sendFooter() {
+  stx::util::BinaryMessageWriter writer;
+  writer.appendUInt8(0xff);
+  write_cb_(writer.data(), writer.size());
+}
+
+void BinaryResultFormat::sendResults(QueryPlan* query) {
+  //context->onStatusChange([this] (const csql::ExecutionStatus& status) {
+  //  sendProgress(status.progress());
+  //});
+
+  try {
+    for (int i = 0; i < query->numStatements(); ++i) {
+      sendTable(query, i);
+    }
+  } catch (const StandardException& e) {
+    sendError(e.what());
+    throw e;
+  }
+}
+
+void BinaryResultFormat::sendTable(
+    QueryPlan* qplan,
+    size_t stmt_idx) {
+  auto result_columns = qplan->getStatementOutputColumns(stmt_idx);
+  auto result_cursor = qplan->execute(stmt_idx);
+
+  // table header
+  {
+    stx::util::BinaryMessageWriter writer;
+    writer.appendUInt8(0xf1);
+
+    writer.appendVarUInt(result_columns.size());
+    for (const auto& col : result_columns) {
+      writer.appendLenencString(col);
+    }
+
+    write_cb_(writer.data(), writer.size());
+  }
+
+  Vector<SValue> row(result_cursor->getNumColumns());
+  while (result_cursor->next(row.data(), row.size())) {
+    Buffer buf;
+    BufferOutputStream writer(&buf);
+    writer.appendUInt8(0xf2);
+    writer.appendVarUInt(row.size());
+    for (const auto& val: row) {
+      val.encode(&writer);
+    }
+
+    write_cb_(buf.data(), buf.size());
+  }
+}
+
+
 
 }

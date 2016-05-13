@@ -81,7 +81,7 @@ ScopedPtr<csql::ResultCursor> TableScan::openLocalPartition(
 
   auto table = partition_map_->findTable(tsdb_namespace_, table_name_);
   if (table.isEmpty()) {
-    RAISE(kNotFoundError, "table not found");
+    RAISEF(kNotFoundError, "table not found: $0/$1", tsdb_namespace_, table_name_);
   }
 
   if (partition.isEmpty()) {

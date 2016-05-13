@@ -41,6 +41,8 @@ public:
 
   Option<csql::TableInfo> describe(const String& table_name) const override;
 
+  const String& getNamespace() const;
+
 protected:
 
   csql::TableInfo tableInfoForTable(const TSDBTableInfo& table) const;

@@ -26,6 +26,7 @@
 #include "eventql/server/sql/codec/ascii_codec.h"
 #include "eventql/server/sql/codec/json_codec.h"
 #include "eventql/server/sql/codec/json_sse_codec.h"
+#include "eventql/server/sql/codec/binary_codec.h"
 #include "eventql/core/TimeWindowPartitioner.h"
 #include "eventql/core/FixedShardPartitioner.h"
 #include "eventql/HTTPAuth.h"
@@ -245,6 +246,12 @@ void AnalyticsServlet::handle(
       uri.path() == "/api/v1/sql_stream") {
     req_stream->readBody();
     executeSQL(session, &req, &res, res_stream);
+    return;
+  }
+
+  if (uri.path() == "/api/v1/sql/execute_qtree") {
+    req_stream->readBody();
+    executeQTree(session, &req, &res, res_stream);
     return;
   }
 
@@ -1220,8 +1227,7 @@ void AnalyticsServlet::executeSQL_JSON(
     json.addObjectEntry("results");
     json.beginArray();
 
-    size_t num_statements = 1;
-    for (size_t i = 0; i < num_statements; ++i) {
+    for (size_t i = 0; i < qplan->numStatements(); ++i) {
       if (i > 0) {
         json.addComma();
       }
@@ -1289,6 +1295,43 @@ void AnalyticsServlet::executeSQL_JSONSSE(
   //}
 
   //sse_stream->finish();
+}
+
+void AnalyticsServlet::executeQTree(
+    const AnalyticsSession& session,
+    const http::HTTPRequest* req,
+    http::HTTPResponse* res,
+    RefPtr<http::HTTPResponseStream> res_stream) {
+  res->setStatus(http::kStatusOK);
+  res->setHeader("Connection", "close");
+  res->setHeader("Content-Type", "application/octet-stream");
+  res->setHeader("Cache-Control", "no-cache");
+  res->setHeader("Access-Control-Allow-Origin", "*");
+  res_stream->startResponse(*res);
+
+  {
+    csql::BinaryResultFormat result_format(
+        [res_stream] (const void* data, size_t size) {
+      res_stream->writeBodyChunk(data, size);
+    });
+
+    try {
+      auto txn = sql_->newTransaction();
+      txn->addTableProvider(app_->getTableProvider(session.customer()));
+
+      csql::QueryTreeCoder coder(txn.get());
+      auto req_body_is = BufferInputStream::fromBuffer(&req->body());
+      auto qtree = coder.decode(req_body_is.get());
+      auto qplan = sql_->buildQueryPlan(txn.get(), { qtree });
+
+      result_format.sendResults(qplan.get());
+    } catch (const StandardException& e) {
+      logError("evql", "SQL Error: $0", e.what());
+      result_format.sendError(e.what());
+    }
+  }
+
+  res_stream->finishResponse();
 }
 
 void AnalyticsServlet::performLogin(

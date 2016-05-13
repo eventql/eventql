@@ -18,11 +18,50 @@
 #include "eventql/util/http/httpconnectionpool.h"
 #include "eventql/util/http/httpclient.h"
 #include "eventql/sql/svalue.h"
+#include "eventql/sql/runtime/QueryPlan.h"
 #include "eventql/sql/runtime/ExecutionContext.h"
 
 using namespace stx;
 
 namespace csql {
+
+
+/**
+ * Binary SQL Query Result/Response Format
+ *
+ *   <response> :=
+ *       <header>
+ *       <event>*
+ *       <footer>
+ *
+ *   <header> :=
+ *       %0x01                      // version
+ *
+ *   <event> :=
+ *        <table_header_event> / <row_event> / <progress_even>
+ *
+ *   <table_header_event>
+ *       %0xf1
+ *       <lenenc_int>               // number_of_columns
+ *       <lenenc_string>*           // column names
+ *
+ *   <row_event> :=
+ *       %0xf2
+ *       <lenenc_int>               // number of fields
+ *       <svalue>*                  // svalues
+ *
+ *   <progress_event> :=
+ *       %0xf3
+ *       <ieee754>                  // progress percent
+ *
+ *   <error_event> :=
+ *       %0xf4
+ *       <lenenc_str>               // error message
+ *
+ *   <footer>
+ *       %0xff
+ *
+ */
 
 class BinaryResultParser : public stx::RefCounted {
 public:
@@ -54,5 +93,31 @@ protected:
   bool got_header_;
   bool got_footer_;
 };
+
+class BinaryResultFormat  {
+public:
+  typedef Function<void (void* data, size_t size)> WriteCallback;
+
+  BinaryResultFormat(WriteCallback write_cb);
+  ~BinaryResultFormat();
+
+  //void formatResults(
+  //    QueryPlan* query,
+  //    ExecutionContext* context) override;
+
+  void sendResults(QueryPlan* query);
+  void sendError(const String& error_msg);
+
+protected:
+
+  void sendTable(QueryPlan* query, size_t stmt_idx);
+  void sendProgress(double progress);
+
+  void sendHeader();
+  void sendFooter();
+
+  WriteCallback write_cb_;
+};
+
 
 }
