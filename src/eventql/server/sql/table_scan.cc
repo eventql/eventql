@@ -27,7 +27,8 @@ TableScan::TableScan(
     seqscan_(seqscan),
     partition_map_(partition_map),
     replication_scheme_(replication_scheme),
-    auth_(auth) {}
+    auth_(auth),
+    cur_partition_(0) {}
 
 
 ScopedPtr<csql::ResultCursor> TableScan::execute() {
@@ -42,8 +43,25 @@ ScopedPtr<csql::ResultCursor> TableScan::execute() {
 };
 
 bool TableScan::next(csql::SValue* row, size_t row_len) {
+  while (cur_partition_ < partitions_.size()) {
+    if (cur_cursor_.get() == nullptr) {
+      cur_cursor_ = openPartition(partitions_[cur_partition_]);
+    }
+
+    if (cur_cursor_->next(row, row_len)) {
+      return true;
+    } else {
+      cur_cursor_.reset(nullptr);
+      ++cur_partition_;
+    }
+  }
+
   return false;
 }
 
+ScopedPtr<csql::ResultCursor> TableScan::openPartition(
+    const SHA1Hash& partition_id) {
+  RAISE(kNotYetImplementedError, "nyi");
+}
 
 }

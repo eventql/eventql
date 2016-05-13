@@ -35,6 +35,8 @@ protected:
 
   bool next(csql::SValue* row, size_t row_len);
 
+  ScopedPtr<csql::ResultCursor> openPartition(const SHA1Hash& partition_id);
+
   String tsdb_namespace_;
   String table_name_;
   Vector<SHA1Hash> partitions_;
@@ -42,6 +44,8 @@ protected:
   PartitionMap* partition_map_;
   ReplicationScheme* replication_scheme_;
   AnalyticsAuth* auth_;
+  ScopedPtr<csql::ResultCursor> cur_cursor_;
+  size_t cur_partition_;
 };
 
 }
