@@ -245,9 +245,9 @@ add_executable(evqld
     z1stats.cc
     evqld.cc)
 
-#target_link_libraries(evqld chartsql cplot sstable cstable stx-http stx-protobuf stx-json stx-base stx-rpc js_static.a z pcre)
-#target_link_libraries(evqld -L${CMAKE_BINARY_DIR}/deps/3rdparty/mozjs/dist/lib -ljs_static)
-#add_dependencies(evqld customerdirectory mozjs_build)
+target_link_libraries(evqld chartsql cplot sstable cstable stx-http stx-protobuf stx-json stx-base stx-rpc js_static.a z pcre)
+target_link_libraries(evqld -L${CMAKE_BINARY_DIR}/deps/3rdparty/mozjs/dist/lib -ljs_static)
+add_dependencies(evqld customerdirectory mozjs_build)
 #
 #add_executable(evqlctl
 #    $<TARGET_OBJECTS:stx-mdb>
