@@ -38,6 +38,10 @@ protected:
 
   ScopedPtr<csql::ResultCursor> openPartition(const SHA1Hash& partition_id);
 
+  ScopedPtr<csql::ResultCursor> openLocalPartition(const SHA1Hash& partition_id);
+
+  ScopedPtr<csql::ResultCursor> openRemotePartition(const SHA1Hash& partition_id);
+
   csql::Transaction* txn_;
   String tsdb_namespace_;
   String table_name_;

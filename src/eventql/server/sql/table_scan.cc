@@ -65,6 +65,15 @@ bool TableScan::next(csql::SValue* row, size_t row_len) {
 
 ScopedPtr<csql::ResultCursor> TableScan::openPartition(
     const SHA1Hash& partition_key) {
+  if (replication_scheme_->hasLocalReplica(partition_key)) {
+    return openLocalPartition(partition_key);
+  } else {
+    return openRemotePartition(partition_key);
+  }
+}
+
+ScopedPtr<csql::ResultCursor> TableScan::openLocalPartition(
+    const SHA1Hash& partition_key) {
   auto partition =  partition_map_->findPartition(
       tsdb_namespace_,
       table_name_,
@@ -85,6 +94,11 @@ ScopedPtr<csql::ResultCursor> TableScan::openPartition(
           table.get(),
           partition.get()->getSnapshot(),
           seqscan_));
+}
+
+ScopedPtr<csql::ResultCursor> TableScan::openRemotePartition(
+    const SHA1Hash& partition_key) {
+  RAISE(kNotYetImplementedError, "nyi");
 }
 
 }
