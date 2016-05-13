@@ -30,7 +30,29 @@ TSDBTableProvider::TSDBTableProvider(
 Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
     csql::Transaction* ctx,
     RefPtr<csql::SequentialScanNode> seqscan) const {
-  RAISE(kNotYetImplementedError, "nyi");
+  auto table_ref = TSDBTableRef::parse(seqscan->tableName());
+  if (partition_map_->findTable(tsdb_namespace_, table_ref.table_key).isEmpty()) {
+    return None<ScopedPtr<csql::TableExpression>>();
+  }
+
+  auto table = partition_map_->findTable(tsdb_namespace_, table_ref.table_key);
+  if (table.isEmpty()) {
+    return None<ScopedPtr<csql::TableExpression>>();
+  }
+
+  auto partitioner = table.get()->partitioner();
+  auto partitions = partitioner->listPartitions(seqscan->constraints());
+
+  return Option<ScopedPtr<csql::TableExpression>>(
+      mkScoped(
+          new TableScan(
+              tsdb_namespace_,
+              table_ref.table_key,
+              partitions,
+              seqscan,
+              partition_map_,
+              replication_scheme_,
+              auth_)));
 }
 
 void TSDBTableProvider::listTables(

@@ -16,6 +16,7 @@
 #include <eventql/core/CompactionWorker.h>
 #include <eventql/core/TableConfig.pb.h>
 #include <eventql/core/TSDBTableInfo.h>
+#include "eventql/server/sql/table_scan.h"
 
 using namespace stx;
 
