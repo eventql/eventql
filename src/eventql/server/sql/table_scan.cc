@@ -98,12 +98,20 @@ ScopedPtr<csql::ResultCursor> TableScan::openLocalPartition(
 
 ScopedPtr<csql::ResultCursor> TableScan::openRemotePartition(
     const SHA1Hash& partition_key) {
+  auto table_name = StringUtil::format(
+      "tsdb://remote/$0/$1",
+      URI::urlEncode(table_name_),
+      partition_key.toString());
+
+  auto seqscan_copy = seqscan_->template deepCopyAs<csql::SequentialScanNode>();
+  seqscan_copy->setTableName(table_name);
+
   return mkScoped(
       new csql::TableExpressionResultCursor(
           mkScoped(
               new RemoteExpression(
                   txn_,
-                  seqscan_.get(),
+                  seqscan_copy.get(),
                   replication_scheme_->replicasFor(partition_key),
                   auth_))));
 }

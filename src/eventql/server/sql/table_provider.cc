@@ -41,7 +41,12 @@ Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
   }
 
   auto partitioner = table.get()->partitioner();
-  auto partitions = partitioner->listPartitions(seqscan->constraints());
+  Vector<SHA1Hash> partitions;
+  if (table_ref.partition_key.isEmpty()) {
+    partitions = partitioner->listPartitions(seqscan->constraints());
+  } else {
+    partitions.emplace_back(table_ref.partition_key.get());
+  }
 
   return Option<ScopedPtr<csql::TableExpression>>(
       mkScoped(
