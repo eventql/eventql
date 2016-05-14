@@ -15,10 +15,6 @@ ROADMAP
 - [ ] improved table iterator iface (update, ordered, restricted, etc)
 
 
-BUGS
--> remote partition csan sollte nur eine partition scannen
--> acme corp hardgecodet
-
 ...
 
 -> remoteexpression -> pipelinedremoteexpressions

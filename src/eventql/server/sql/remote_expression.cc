@@ -17,10 +17,12 @@ namespace zbase {
 
 RemoteExpression::RemoteExpression(
     csql::Transaction* txn,
+    const String& db_namespace,
     RefPtr<csql::TableExpressionNode> qtree,
     Vector<ReplicaRef> hosts,
     AnalyticsAuth* auth) :
     txn_(txn),
+    db_namespace_(db_namespace),
     qtree_(qtree),
     hosts_(hosts),
     auth_(auth),
@@ -112,7 +114,7 @@ void RemoteExpression::executeOnHost(const InetAddr& host) {
 
   AnalyticsPrivileges privileges;
   privileges.set_allow_private_api_read_access(true);
-  auto api_token = auth_->getPrivateAPIToken("acme_corp", privileges); // FIXME
+  auto api_token = auth_->getPrivateAPIToken(db_namespace_, privileges);
 
   http::HTTPMessage::HeaderList auth_headers;
   auth_headers.emplace_back(

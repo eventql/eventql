@@ -23,6 +23,7 @@ public:
 
   RemoteExpression(
       csql::Transaction* txn,
+      const String& db_namespace,
       RefPtr<csql::TableExpressionNode> qtree,
       Vector<ReplicaRef> hosts,
       AnalyticsAuth* auth);
@@ -39,6 +40,7 @@ protected:
   bool next(csql::SValue* out_row, size_t out_row_len);
 
   csql::Transaction* txn_;
+  String db_namespace_;
   RefPtr<csql::TableExpressionNode> qtree_;
   Vector<ReplicaRef> hosts_;
   AnalyticsAuth* auth_;

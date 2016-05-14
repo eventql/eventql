@@ -111,6 +111,7 @@ ScopedPtr<csql::ResultCursor> TableScan::openRemotePartition(
           mkScoped(
               new RemoteExpression(
                   txn_,
+                  tsdb_namespace_,
                   seqscan_copy.get(),
                   replication_scheme_->replicasFor(partition_key),
                   auth_))));
