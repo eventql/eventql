@@ -27,7 +27,6 @@
 #include <eventql/util/buffer.h>
 #include <eventql/util/thread/taskscheduler.h>
 
-namespace util {
 namespace net {
 
 class UDPServer {
@@ -51,6 +50,5 @@ protected:
 };
 
 
-}
 }
 #endif

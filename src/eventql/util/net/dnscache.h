@@ -28,7 +28,6 @@
 #include <unordered_map>
 #include "eventql/util/net/inetaddr.h"
 
-namespace util {
 namespace net {
 
 class DNSCache {
@@ -41,7 +40,6 @@ protected:
   std::mutex mutex_;
 };
 
-}
 }
 
 #endif

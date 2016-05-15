@@ -24,8 +24,6 @@
 
 #include "ini_parser.h"
 
-namespace util {
-
 void IniParser::start(const String& str) {
   iputs("start parsing $0", str);
 
@@ -35,5 +33,3 @@ bool IniParser::test() {
   return true;
 }
 
-
-}

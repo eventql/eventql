@@ -29,8 +29,6 @@
 #include <eventql/util/duration.h>
 #include <cstdio>
 
-namespace util {
-
 /**
  * @brief High resolution time span.
  *
@@ -57,8 +55,6 @@ private:
   const UnixTime start_;
   const Duration duration_;
 };
-
-}  // namespace util
 
 #include <eventql/util/TimeRange_impl.h>
 #endif

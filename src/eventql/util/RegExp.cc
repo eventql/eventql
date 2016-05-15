@@ -30,8 +30,6 @@
 #include <pcre.h>
 #endif
 
-namespace util {
-
 RegExp::RegExp() {
 #ifdef HAVE_PCRE
   pcre_handle_ = nullptr;
@@ -167,5 +165,3 @@ size_t RegExp::getNamedCaptureIndex(const String& name) {
 const char* RegExp::c_str() const {
   return pattern_.c_str();
 }
-
-}  // namespace util

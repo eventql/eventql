@@ -25,8 +25,6 @@
 #include "eventql/util/Currency.h"
 #include "eventql/util/stringutil.h"
 
-namespace util {
-
 Money::Money(
     uint64_t _cents,
     Currency _currency) :
@@ -78,5 +76,3 @@ String currencyToString(Currency lang) {
     case CURRENCY_USD: return "USD";
   }
 }
-
-} // namespace util

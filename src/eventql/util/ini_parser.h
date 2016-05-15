@@ -29,8 +29,6 @@
 #include <string>
 #include "eventql/util/inspect.h"
 
-namespace util {
-
 class IniParser {
 public:
 
@@ -39,7 +37,6 @@ public:
   static bool test();
 
 };
-}
 
 #endif
 

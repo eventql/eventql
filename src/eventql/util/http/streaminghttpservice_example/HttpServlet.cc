@@ -24,7 +24,6 @@
  */
 #include "HttpServlet.h"
 
-namespace util {
 namespace http {
 
 void HTTPServlet::handleHTTPRequest(
@@ -42,5 +41,4 @@ void HTTPServlet::handleHTTPRequest(
   res->writeResponse(resp);
 }
 
-}
 }
