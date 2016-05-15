@@ -33,8 +33,6 @@
 #include <vector>
 #include "eventql/util/logging.h"
 
-namespace util {
-
 // FIXME rename to procutil
 class Application {
 public:
@@ -87,5 +85,4 @@ public:
 
 };
 
-}
 #endif

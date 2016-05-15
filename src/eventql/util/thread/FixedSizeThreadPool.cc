@@ -40,7 +40,7 @@ FixedSizeThreadPool::FixedSizeThreadPool(
         opts,
         nthreads,
         std::unique_ptr<ExceptionHandler>(
-            new util::CatchAndAbortExceptionHandler())) {}
+            new CatchAndAbortExceptionHandler())) {}
 
 FixedSizeThreadPool::FixedSizeThreadPool(
     ThreadPoolOptions opts,

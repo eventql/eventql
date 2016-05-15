@@ -43,7 +43,7 @@
 
 #include "eventql/eventql.h"
 
-util::thread::EventLoop ev;
+thread::EventLoop ev;
 
 String loadAuth(const cli::FlagParser& global_flags) {
   auto auth_file_path = FileUtil::joinPaths(getenv("HOME"), ".z1auth");
@@ -369,8 +369,8 @@ void cmd_version(
 }
 
 int main(int argc, const char** argv) {
-  util::Application::init();
-  util::Application::logToStderr();
+  Application::init();
+  Application::logToStderr();
 
   cli::FlagParser flags;
 

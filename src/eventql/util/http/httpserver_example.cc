@@ -129,14 +129,14 @@ int main() {
   util::system::SignalHandler::ignoreSIGHUP();
   util::system::SignalHandler::ignoreSIGPIPE();
 
-  util::CatchAndAbortExceptionHandler ehandler;
+  CatchAndAbortExceptionHandler ehandler;
   ehandler.installGlobalHandlers();
 
   log::LogOutputStream logger(OutputStream::getStderr());
   log::Logger::get()->setMinimumLogLevel(log::kTrace);
   log::Logger::get()->listen(&logger);
 
-  util::thread::ThreadPool thread_pool;
+  thread::ThreadPool thread_pool;
   http::HTTPRouter router;
   http::HTTPServer http_server(&router, &thread_pool);
 

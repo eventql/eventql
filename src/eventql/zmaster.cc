@@ -36,11 +36,11 @@
 #include "eventql/eventql.h"
 using namespace eventql;
 
-util::thread::EventLoop ev;
+thread::EventLoop ev;
 
 int main(int argc, const char** argv) {
-  util::Application::init();
-  util::Application::logToStderr();
+  Application::init();
+  Application::logToStderr();
 
   cli::FlagParser flags;
 
@@ -77,7 +77,7 @@ int main(int argc, const char** argv) {
       strToLogLevel(flags.getString("loglevel")));
 
   /* thread pools */
-  util::thread::ThreadPool tpool(thread::ThreadPoolOptions{});
+  thread::ThreadPool tpool(thread::ThreadPoolOptions{});
 
   /* http */
   http::HTTPRouter http_router;

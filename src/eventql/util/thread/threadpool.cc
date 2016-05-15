@@ -41,7 +41,7 @@ ThreadPool::ThreadPool(
     ThreadPool(
         opts,
         std::unique_ptr<ExceptionHandler>(
-            new util::CatchAndAbortExceptionHandler()),
+            new CatchAndAbortExceptionHandler()),
     max_cached_threads) {}
 
 ThreadPool::ThreadPool(

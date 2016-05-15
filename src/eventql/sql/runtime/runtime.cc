@@ -37,7 +37,7 @@ RefPtr<Runtime> Runtime::getDefaultRuntime() {
   installDefaultSymbols(symbols.get());
 
   return new Runtime(
-      util::thread::ThreadPoolOptions{},
+      thread::ThreadPoolOptions{},
       symbols,
       new QueryBuilder(
           new ValueExpressionBuilder(symbols.get())),
@@ -47,7 +47,7 @@ RefPtr<Runtime> Runtime::getDefaultRuntime() {
 }
 
 Runtime::Runtime(
-    util::thread::ThreadPoolOptions tpool_opts,
+    thread::ThreadPoolOptions tpool_opts,
     RefPtr<SymbolTable> symbol_table,
     RefPtr<QueryBuilder> query_builder,
     RefPtr<QueryPlanBuilder> query_plan_builder) :

@@ -67,14 +67,14 @@
 #include "eventql/eventql.h"
 using namespace eventql;
 
-util::thread::EventLoop ev;
+thread::EventLoop ev;
 
 namespace js {
 void DisableExtraThreads();
 }
 
 int main(int argc, const char** argv) {
-  util::Application::init();
+  Application::init();
 
   cli::FlagParser flags;
 
@@ -191,11 +191,11 @@ int main(int argc, const char** argv) {
   flags.parseArgv(argc, argv);
 
   if (flags.isSet("log_to_stderr") && !flags.isSet("daemonize")) {
-    util::Application::logToStderr();
+    Application::logToStderr();
   }
 
   if (flags.isSet("log_to_syslog")) {
-    util::Application::logToSyslog("z1d");
+    Application::logToSyslog("z1d");
   }
 
   Logger::get()->setMinimumLogLevel(
@@ -222,7 +222,7 @@ int main(int argc, const char** argv) {
   //auto conf = msg::parseText<eventql::TSDBNodeConfig>(conf_data);
 
   /* thread pools */
-  util::thread::CachedThreadPool tpool(
+  thread::CachedThreadPool tpool(
       thread::ThreadPoolOptions {
         .thread_name = Some(String("z1d-httpserver"))
       },
@@ -317,7 +317,7 @@ int main(int argc, const char** argv) {
     auto symbols = mkRef(new csql::SymbolTable());
     csql::installDefaultSymbols(symbols.get());
     sql = mkRef(new csql::Runtime(
-        util::thread::ThreadPoolOptions {
+        thread::ThreadPoolOptions {
           .thread_name = Some(String("z1d-sqlruntime"))
         },
         symbols,

@@ -55,11 +55,11 @@
 #include "eventql/eventql.h"
 
 std::atomic<bool> shutdown_sig;
-util::thread::EventLoop ev;
+thread::EventLoop ev;
 
 int main(int argc, const char** argv) {
-  util::Application::init();
-  util::Application::logToStderr();
+  Application::init();
+  Application::logToStderr();
 
   cli::FlagParser flags;
 
@@ -122,7 +122,7 @@ int main(int argc, const char** argv) {
   auto conf = msg::parseText<eventql::TSDBNodeConfig>(conf_data);
 
   /* start http server and worker pools */
-  util::thread::ThreadPool tpool;
+  thread::ThreadPool tpool;
   http::HTTPConnectionPool http(&ev);
   http::HTTPRouter http_router;
   http::HTTPServer http_server(&http_router, &ev);

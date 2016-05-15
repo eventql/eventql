@@ -45,7 +45,7 @@ public:
 
   // FIXPAUL: make parser configurable via parserfactory
   Runtime(
-      util::thread::ThreadPoolOptions tpool_opts,
+      thread::ThreadPoolOptions tpool_opts,
       RefPtr<SymbolTable> symbol_table,
       RefPtr<QueryBuilder> query_builder,
       RefPtr<QueryPlanBuilder> query_plan_builder);
@@ -99,7 +99,7 @@ public:
   SymbolTable* symbols();
 
 protected:
-  util::thread::ThreadPool tpool_;
+  thread::ThreadPool tpool_;
   RefPtr<SymbolTable> symbol_table_;
   RefPtr<QueryBuilder> query_builder_;
   RefPtr<QueryPlanBuilder> query_plan_builder_;

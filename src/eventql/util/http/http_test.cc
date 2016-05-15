@@ -256,7 +256,7 @@ TEST_CASE(HTTPTest, TestInvalidCookies, [] () {
 });
 
 //TEST_CASE(HTTPTest, TestHTTPConnectionPoolEnd2End, [] () {
-//  util::thread::ThreadPool tp;
+//  thread::ThreadPool tp;
 //  HTTPConnectionPool http_pool(&tp);
 //
 //  auto res = http_pool.executeRequest(

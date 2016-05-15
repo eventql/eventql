@@ -61,7 +61,7 @@
 #include "eventql/eventql.h"
 using namespace eventql;
 
-util::thread::EventLoop ev;
+thread::EventLoop ev;
 
 void cmd_cluster_status(const cli::FlagParser& flags) {
   ConfigDirectoryClient cclient(
@@ -91,8 +91,8 @@ void cmd_cluster_add_node(const cli::FlagParser& flags) {
 }
 
 int main(int argc, const char** argv) {
-  util::Application::init();
-  util::Application::logToStderr();
+  Application::init();
+  Application::logToStderr();
 
   cli::FlagParser flags;
 

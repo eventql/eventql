@@ -210,8 +210,8 @@
 //}
 
 int main(int argc, const char** argv) {
-  util::Application::init();
-  util::Application::logToStderr();
+  Application::init();
+  Application::logToStderr();
 
   cli::FlagParser flags;
 
