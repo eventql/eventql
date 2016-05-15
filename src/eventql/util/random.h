@@ -29,8 +29,6 @@
 #include <random>
 #include "SHA1.h"
 
-namespace util {
-
 class Random {
 public:
 
@@ -76,6 +74,4 @@ public:
 protected:
   std::mt19937_64 prng_;
 };
-
-}
 #endif

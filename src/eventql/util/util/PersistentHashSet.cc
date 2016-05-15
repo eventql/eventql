@@ -28,8 +28,6 @@
 #include <eventql/util/io/mmappedfile.h>
 #include <eventql/util/fnv.h>
 
-namespace util {
-
 const size_t PersistentHashSet::kVersion = 1;
 const double PersistentHashSet::kMaxFillFactor = 0.5f;
 const double PersistentHashSet::kGrowthFactor = 2.0f;
@@ -265,6 +263,4 @@ void PersistentHashSet::grow(File* file) {
   FileUtil::mv(fpath_ + "~", fpath_);
   nslots_ = new_nslots;
 }
-
-} // namespace util
 
