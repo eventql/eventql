@@ -28,7 +28,6 @@
 #include <eventql/util/exception.h>
 #include <eventql/util/io/outputstream.h>
 
-namespace util {
 namespace cli {
 
 class FlagParser {
@@ -121,6 +120,5 @@ protected:
   bool ignore_unknown_;
 };
 
-}
 }
 #endif

@@ -28,8 +28,6 @@
 #include "eventql/util/stdtypes.h"
 #include "eventql/util/io/TerminalOutputStream.h"
 
-namespace util {
-
 class Term {
 public:
 
@@ -156,5 +154,3 @@ protected:
   struct termios orig_termios_;
   bool rawmode_;
 };
-
-} // namespace util

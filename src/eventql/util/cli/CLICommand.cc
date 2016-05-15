@@ -23,7 +23,6 @@
  */
 #include <eventql/util/cli/CLICommand.h>
 
-namespace util {
 namespace cli {
 
 CLICommand::CLICommand(const String& command) {}
@@ -41,5 +40,4 @@ FlagParser& CLICommand::flags() {
   return flags_;
 }
 
-}
 }

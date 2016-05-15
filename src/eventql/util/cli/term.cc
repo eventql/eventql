@@ -27,8 +27,6 @@
 #include <termios.h>
 #include <unistd.h>
 
-namespace util {
-
 Term::Term() :
     termos_(TerminalOutputStream::fromStream(OutputStream::getStdout())) {}
 
@@ -224,4 +222,3 @@ void Term::setTitle(const String& title) {
   termos_->setTitle(title);
 }
 
-} // namespace util

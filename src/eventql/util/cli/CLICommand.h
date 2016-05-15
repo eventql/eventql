@@ -29,7 +29,6 @@
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/cli/flagparser.h>
 
-namespace util {
 namespace cli {
 
 class CLICommand : public RefCounted {
@@ -47,6 +46,5 @@ protected:
   CallFnType on_call_;
 };
 
-}
 }
 #endif
