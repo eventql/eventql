@@ -27,8 +27,6 @@
 #include <stdint.h>
 #include <stdio.h>
 
-namespace util {
-
 BinaryCSVOutputStream::BinaryCSVOutputStream(
     std::unique_ptr<OutputStream> output_stream) :
     output_(std::move(output_stream)) {}
@@ -40,6 +38,3 @@ void BinaryCSVOutputStream::appendRow(const Vector<String>& row) {
     output_->appendLenencString(row[i]);
   }
 }
-
-} // namespace util
-
