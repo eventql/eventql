@@ -26,7 +26,7 @@
 #include <eventql/infra/sstable/sstablereader.h>
 #include <eventql/infra/sstable/sstablerepair.h>
 
-namespace util {
+
 namespace sstable {
 
 SSTableRepair::SSTableRepair(
@@ -139,6 +139,5 @@ bool SSTableRepair::checkAndRepairUnfinishedTable(bool repair) {
   return true;
 }
 
-}
 }
 

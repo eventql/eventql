@@ -50,7 +50,7 @@ public:
 protected:
 
   typedef Function<void (QueryTreeCoder*, RefPtr<QueryTreeNode>, OutputStream*)> EncodeFn;
-  typedef Function<RefPtr<QueryTreeNode> (QueryTreeCoder*, OutputStream*)> DecodeFn;
+  typedef Function<RefPtr<QueryTreeNode> (QueryTreeCoder*, InputStream*)> DecodeFn;
 
   struct QueryTreeCoderType {
     const std::type_info* type_id;

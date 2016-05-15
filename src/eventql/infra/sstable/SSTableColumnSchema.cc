@@ -27,7 +27,7 @@
 #include <eventql/util/util/binarymessagereader.h>
 #include <eventql/util/util/binarymessagewriter.h>
 
-namespace util {
+
 namespace sstable {
 
 SSTableColumnSchema::SSTableColumnSchema() {}
@@ -111,7 +111,6 @@ void SSTableColumnSchema::loadIndex(const Buffer& buf) {
 
     addColumn(col_name, col_id, (util::sstable::SSTableColumnType) col_type);
   }
-}
 
 void SSTableColumnSchema::loadIndex(
     SSTableReader* sstable_reader) {
@@ -120,4 +119,4 @@ void SSTableColumnSchema::loadIndex(
 }
 
 } // namespace sstable
-} // namespace util
+

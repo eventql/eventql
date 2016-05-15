@@ -30,7 +30,6 @@
 #include <string>
 #include <eventql/infra/sstable/MetaPage.h>
 
-namespace util {
 namespace sstable {
 
 class FileHeaderReader : public util::BinaryMessageReader {
@@ -97,7 +96,6 @@ protected:
   size_t file_size_;
 };
 
-}
 }
 
 #endif

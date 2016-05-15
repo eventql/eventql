@@ -143,8 +143,7 @@ TEST_CASE(SSTableTest, TestSSTableWriteThenRead, [] () {
     EXPECT_EQ(cursor->getKeyString(), "key3");
     EXPECT_EQ(cursor->getDataString(), "value3");
     EXPECT_EQ(cursor->next(), false);
-  }
-});
+  });
 
 
 TEST_CASE(SSTableTest, TestSSTableWriteReopenThenRead, [] () {
@@ -195,7 +194,6 @@ TEST_CASE(SSTableTest, TestSSTableWriteReopenThenRead, [] () {
     EXPECT_EQ(cursor->getKeyString(), "key6");
     EXPECT_EQ(cursor->getDataString(), "value6");
     EXPECT_EQ(cursor->next(), false);
-  }
-});
+  });
 
 

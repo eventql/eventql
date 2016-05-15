@@ -34,7 +34,7 @@
 #include <eventql/infra/sstable/indexprovider.h>
 #include <eventql/util/exception.h>
 
-namespace util {
+
 namespace sstable {
 
 class SSTableColumnWriter;
@@ -150,7 +150,6 @@ private:
 };
 
 
-}
 }
 
 #include "SSTableEditor_impl.h"

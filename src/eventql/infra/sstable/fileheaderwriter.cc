@@ -25,7 +25,7 @@
 #include <eventql/infra/sstable/binaryformat.h>
 #include <eventql/infra/sstable/fileheaderwriter.h>
 
-namespace util {
+
 namespace sstable {
 
 size_t FileHeaderWriter::calculateSize(size_t userdata_size) {
@@ -86,7 +86,6 @@ FileHeaderWriter::FileHeaderWriter(
     appendUInt32(0);
     appendUInt32(0);
   }
-}
 
 // DEPRECATED
 FileHeaderWriter::FileHeaderWriter(
@@ -106,6 +105,5 @@ void FileHeaderWriter::setFlag(FileHeaderFlags flag) {
   updateUInt64(6, flags);
 }
 
-}
 }
 

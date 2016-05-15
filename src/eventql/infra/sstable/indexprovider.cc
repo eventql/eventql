@@ -23,7 +23,7 @@
  */
 #include <eventql/infra/sstable/indexprovider.h>
 
-namespace util {
+
 namespace sstable {
 
 IndexProvider::IndexProvider() {}
@@ -36,6 +36,5 @@ std::vector<Index::IndexRef>&& IndexProvider::popIndexes() {
   return std::move(indexes_);
 }
 
-}
 }
 

@@ -28,7 +28,7 @@
 #include <eventql/util/io/outputstream.h>
 #include <eventql/infra/sstable/MetaPage.h>
 
-namespace util {
+
 namespace sstable {
 
 struct RowWriter {
@@ -47,5 +47,4 @@ struct RowWriter {
 
 };
 
-}
 }

@@ -26,7 +26,7 @@
 #include "eventql/infra/sstable/SSTableScan.h"
 #include "eventql/util/io/fileutil.h"
 
-namespace util {
+
 namespace sstable {
 
 SSTableServlet::SSTableServlet(
@@ -190,5 +190,4 @@ SSTableServlet::ResponseFormat SSTableServlet::formatFromString(
   RAISEF(kIllegalArgumentError, "invalid format: $0", format);
 }
 
-}
 }

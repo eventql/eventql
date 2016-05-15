@@ -29,7 +29,7 @@
 #include <vector>
 #include <memory>
 
-namespace util {
+
 namespace sstable {
 
 class RowOffsetIndex : public Index {
@@ -50,7 +50,6 @@ public:
 };
 
 
-}
 }
 
 #endif

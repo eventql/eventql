@@ -23,7 +23,7 @@
  */
 #include <eventql/infra/sstable/cursor.h>
 
-namespace util {
+
 namespace sstable {
 
 Cursor::Cursor() {}
@@ -58,6 +58,5 @@ Buffer Cursor::getDataBuffer() {
   return Buffer(data, size);
 }
 
-}
 }
 

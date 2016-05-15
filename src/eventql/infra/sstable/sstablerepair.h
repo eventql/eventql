@@ -25,7 +25,7 @@
 #define _FNORD_SSTABLE_SSTABLEREPAIR_H
 #include <string>
 
-namespace util {
+
 namespace sstable {
 
 class SSTableRepair {
@@ -40,7 +40,6 @@ protected:
   const std::string filename_;
 };
 
-}
 }
 
 #endif

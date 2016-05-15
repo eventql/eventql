@@ -29,7 +29,7 @@
 #include <memory>
 #include "eventql/util/buffer.h"
 
-namespace util {
+
 namespace sstable {
 
 class Cursor {
@@ -57,7 +57,6 @@ public:
 };
 
 
-}
 }
 
 #endif

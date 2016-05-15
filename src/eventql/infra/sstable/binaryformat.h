@@ -26,7 +26,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 
-namespace util {
+
 namespace sstable {
 
 /**
@@ -105,7 +105,6 @@ public:
 
 };
 
-}
 }
 
 #endif

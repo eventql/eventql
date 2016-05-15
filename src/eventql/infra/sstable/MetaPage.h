@@ -27,7 +27,6 @@
 #include <eventql/util/io/inputstream.h>
 #include <eventql/util/io/outputstream.h>
 
-namespace util {
 namespace sstable {
 
 class MetaPage {
@@ -112,5 +111,4 @@ protected:
   uint32_t userdata_size_;
 };
 
-}
 }

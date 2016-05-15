@@ -29,7 +29,7 @@
 #include <vector>
 #include <memory>
 
-namespace util {
+
 namespace sstable {
 
 class IndexProvider {
@@ -55,7 +55,6 @@ void IndexProvider::addIndex() {
   indexes_.emplace_back(IndexType::makeIndex());
 }
 
-}
 }
 
 #endif
