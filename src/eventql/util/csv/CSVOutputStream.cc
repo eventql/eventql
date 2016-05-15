@@ -27,8 +27,6 @@
 #include <stdint.h>
 #include <stdio.h>
 
-namespace util {
-
 CSVOutputStream::CSVOutputStream(
     std::unique_ptr<OutputStream> output_stream,
     String col_sep /* = ';' */,
@@ -51,6 +49,3 @@ void CSVOutputStream::appendRow(const Vector<String>& row) {
   buf.append(row_sep_);
   output_->write(buf);
 }
-
-} // namespace util
-
