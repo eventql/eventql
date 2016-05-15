@@ -30,7 +30,7 @@
 #include "eventql/util/inspect.h"
 #include "eventql/util/exception.h"
 
-namespace stx {
+namespace util {
 
 template <typename T>
 class Option {
@@ -60,7 +60,7 @@ Option<T> Some(const T& value);
 template <typename T>
 Option<T> None();
 
-} // namespace stx
+} // namespace util
 
 #include "option_impl.h"
 #endif

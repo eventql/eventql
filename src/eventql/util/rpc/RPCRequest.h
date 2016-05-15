@@ -29,7 +29,7 @@
 #include "eventql/util/Serializable.h"
 #include "eventql/util/io/inputstream.h"
 
-namespace stx {
+namespace util {
 namespace rpc {
 class RPCContext;
 
@@ -73,5 +73,5 @@ protected:
 
 
 } // namespace rpc
-} // namespace stx
+} // namespace util
 

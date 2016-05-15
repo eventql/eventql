@@ -18,7 +18,7 @@
 #include "cplot/colorpalette.h"
 #include "cplot/rendertarget.h"
 
-namespace stx {
+namespace util {
 namespace chart {
 
 class AreaChart : public Drawable {

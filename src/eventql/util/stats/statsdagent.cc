@@ -26,7 +26,7 @@
 #include "eventql/util/stats/statsdagent.h"
 #include "eventql/util/wallclock.h"
 
-namespace stx {
+namespace util {
 namespace stats {
 
 StatsdAgent::StatsdAgent(
@@ -66,7 +66,7 @@ void StatsdAgent::start() {
       try {
         report();
       } catch (const StandardException& e) {
-        stx::logError("fnord.statsd_agent", e, "StatsD push failed");
+        util::logError("fnord.statsd_agent", e, "StatsD push failed");
       }
     }
   });

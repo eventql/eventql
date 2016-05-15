@@ -29,7 +29,7 @@
 #include <eventql/sql/qtree/SequentialScanNode.h>
 #include <eventql/sql/Transaction.h>
 
-using namespace stx;
+using namespace util;
 
 namespace csql {
 

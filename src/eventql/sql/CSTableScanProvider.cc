@@ -25,7 +25,7 @@
 #include <eventql/sql/CSTableScan.h>
 #include <eventql/sql/qtree/SequentialScanNode.h>
 
-using namespace stx;
+using namespace util;
 
 namespace csql {
 

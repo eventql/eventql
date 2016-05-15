@@ -26,7 +26,7 @@
 #include <eventql/util/exception.h>
 #include <eventql/util/http/HTTPResponseStream.h>
 
-namespace stx {
+namespace util {
 namespace http {
 
 HTTPResponseStream::HTTPResponseStream(

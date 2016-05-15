@@ -26,9 +26,9 @@
 #include <eventql/infra/sstable/sstablereader.h>
 #include <eventql/infra/sstable/sstablerepair.h>
 
-using stx::Exception;
+using util::Exception;
 
-namespace stx {
+namespace util {
 namespace sstable {
 
 SSTableRepair::SSTableRepair(
@@ -37,11 +37,11 @@ SSTableRepair::SSTableRepair(
 
 bool SSTableRepair::checkAndRepair(bool repair /* = false */) {
   auto file = File::openFile(filename_, File::O_READ);
-  std::unique_ptr<stx::sstable::SSTableReader> reader_;
+  std::unique_ptr<util::sstable::SSTableReader> reader_;
 
   try {
     reader_.reset(new sstable::SSTableReader(std::move(file)));
-  } catch (stx::Exception& rte) {
+  } catch (util::Exception& rte) {
     /*
     fnordmetric::env()->logger()->printf(
         "INFO",
@@ -61,7 +61,7 @@ bool SSTableRepair::checkAndRepair(bool repair /* = false */) {
   } else {
     try {
       reader_->readFooter(0);
-    } catch (stx::Exception& rte) {
+    } catch (util::Exception& rte) {
       /*
       fnordmetric::env()->logger()->printf(
           "INFO",

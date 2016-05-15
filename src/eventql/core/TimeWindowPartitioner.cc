@@ -26,7 +26,7 @@
 #include <eventql/util/logging.h>
 #include <eventql/core/TimeWindowPartitioner.h>
 
-using namespace stx;
+using namespace util;
 
 namespace eventql {
 

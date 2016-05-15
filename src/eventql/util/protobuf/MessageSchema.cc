@@ -33,7 +33,7 @@
 #include <eventql/util/3rdparty/google/protobuf/compiler/parser.h>
 #include <eventql/util/3rdparty/simdcomp/simdcomp.h>
 
-namespace stx {
+namespace util {
 namespace msg {
 
 String MessageSchemaField::typeName() const {
@@ -674,4 +674,4 @@ void MessageSchemaRepository::loadProtobufFile(
 }
 
 } // namespace msg
-} // namespace stx
+} // namespace util

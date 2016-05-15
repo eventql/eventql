@@ -27,18 +27,18 @@
 #include "eventql/util/http/httpservice.h"
 #include "eventql/util/stats/statsrepository.h"
 
-namespace stx {
+namespace util {
 namespace stats {
 
-class StatsHTTPServlet : public stx::http::HTTPService {
+class StatsHTTPServlet : public util::http::HTTPService {
 public:
 
   StatsHTTPServlet();
   StatsHTTPServlet(StatsRepository* stats_repo);
 
   void handleHTTPRequest(
-      stx::http::HTTPRequest* req,
-      stx::http::HTTPResponse* res);
+      util::http::HTTPRequest* req,
+      util::http::HTTPResponse* res);
 
 protected:
   StatsRepository* stats_repo_;

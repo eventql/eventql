@@ -24,7 +24,7 @@
  */
 #include <eventql/sql/qtree/JoinCondition.h>
 
-using namespace stx;
+using namespace util;
 
 namespace csql {
 

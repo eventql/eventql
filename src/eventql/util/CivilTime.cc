@@ -25,7 +25,7 @@
 #include <string>
 #include <ctime>
 
-namespace stx {
+namespace util {
 
 Option<CivilTime> CivilTime::parseString(
     const String& str,

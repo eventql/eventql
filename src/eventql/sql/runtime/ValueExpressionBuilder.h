@@ -27,7 +27,7 @@
 #include <eventql/sql/runtime/symboltable.h>
 #include <eventql/sql/runtime/ValueExpression.h>
 
-using namespace stx;
+using namespace util;
 
 namespace csql {
 class ASTNode;

@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <eventql/util/duration.h>
 
-namespace stx {
+namespace util {
 
 class MonotonicTime {
 public:
@@ -34,6 +34,6 @@ private:
 
 std::string inspect(const MonotonicTime& value);
 
-} // namespace stx
+} // namespace util
 
 #include <eventql/util/MonotonicTime_impl.h>

@@ -23,7 +23,7 @@
  */
 #include <eventql/util/io/VFSFileInputStream.h>
 
-namespace stx {
+namespace util {
 
 VFSFileInputStream::VFSFileInputStream(
     RefPtr<VFSFile> data) :
@@ -65,4 +65,4 @@ void VFSFileInputStream::seekTo(size_t offset) {
   }
 }
 
-} // namespace stx
+} // namespace util

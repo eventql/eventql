@@ -11,7 +11,7 @@
 #include "cplot/canvas.h"
 #include "cplot/drawable.h"
 
-namespace stx {
+namespace util {
 namespace chart {
 
 Drawable::Drawable(Canvas* canvas) : canvas_(canvas) {}

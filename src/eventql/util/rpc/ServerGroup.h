@@ -32,7 +32,7 @@
 #include <vector>
 #include "eventql/util/net/inetaddr.h"
 
-namespace stx {
+namespace util {
 
 class ServerGroup {
 public:

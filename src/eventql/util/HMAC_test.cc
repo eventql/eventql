@@ -24,7 +24,7 @@
 #include "eventql/util/HMAC.h"
 #include "eventql/util/test/unittest.h"
 
-using namespace stx;
+using namespace util;
 
 UNIT_TEST(HMACTest);
 

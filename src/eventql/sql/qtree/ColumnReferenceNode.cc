@@ -24,7 +24,7 @@
  */
 #include <eventql/sql/qtree/ColumnReferenceNode.h>
 
-using namespace stx;
+using namespace util;
 
 namespace csql {
 
@@ -96,7 +96,7 @@ String ColumnReferenceNode::toSQL() const {
 void ColumnReferenceNode::encode(
     QueryTreeCoder* coder,
     const ColumnReferenceNode& node,
-    stx::OutputStream* os) {
+    util::OutputStream* os) {
   os->appendLenencString(node.column_name_);
 
   if (!node.column_index_.isEmpty() && node.column_index_.get() != size_t(-1)) {
@@ -109,7 +109,7 @@ void ColumnReferenceNode::encode(
 
 RefPtr<QueryTreeNode> ColumnReferenceNode::decode (
     QueryTreeCoder* coder,
-    stx::InputStream* is) {
+    util::InputStream* is) {
 
   auto column_name = is->readLenencString();
   auto node = new ColumnReferenceNode(column_name);

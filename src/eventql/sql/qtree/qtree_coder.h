@@ -28,7 +28,7 @@
 #include <eventql/util/io/inputstream.h>
 #include <eventql/util/io/outputstream.h>
 
-using namespace stx;
+using namespace util;
 
 namespace csql {
 class Transaction;
@@ -42,15 +42,15 @@ public:
   template <class T>
   void registerType(uint64_t wire_type_id);
 
-  void encode(RefPtr<QueryTreeNode> tree, stx::OutputStream* os);
-  RefPtr<QueryTreeNode> decode(stx::InputStream* is);
+  void encode(RefPtr<QueryTreeNode> tree, util::OutputStream* os);
+  RefPtr<QueryTreeNode> decode(util::InputStream* is);
 
   Transaction* getTransaction() const;
 
 protected:
 
-  typedef Function<void (QueryTreeCoder*, RefPtr<QueryTreeNode>, stx::OutputStream*)> EncodeFn;
-  typedef Function<RefPtr<QueryTreeNode> (QueryTreeCoder*, stx::InputStream*)> DecodeFn;
+  typedef Function<void (QueryTreeCoder*, RefPtr<QueryTreeNode>, util::OutputStream*)> EncodeFn;
+  typedef Function<RefPtr<QueryTreeNode> (QueryTreeCoder*, util::InputStream*)> DecodeFn;
 
   struct QueryTreeCoderType {
     const std::type_info* type_id;

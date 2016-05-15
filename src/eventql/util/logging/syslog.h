@@ -25,7 +25,7 @@
 #include <eventql/util/stdtypes.h>
 #include "eventql/util/logging/logtarget.h"
 
-namespace stx {
+namespace util {
 
 class SyslogTarget : public LogTarget {
 public:
@@ -43,4 +43,4 @@ protected:
 };
 
 
-} // namespace stx
+} // namespace util

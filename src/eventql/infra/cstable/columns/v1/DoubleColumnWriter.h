@@ -57,9 +57,9 @@ public:
 
 protected:
   size_t size() const override;
-  void write(stx::util::BinaryMessageWriter* writer) override;
+  void write(util::BinaryMessageWriter* writer) override;
 
-  stx::util::BinaryMessageWriter data_writer_;
+  util::BinaryMessageWriter data_writer_;
 };
 
 } // namespace v1

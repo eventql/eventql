@@ -24,7 +24,7 @@
 #include <fnord-logtable/TableChunkSummaryReader.h>
 #include <eventql/util/util/binarymessagereader.h>
 
-namespace stx {
+namespace util {
 namespace logtable {
 
 TableChunkSummaryReader::TableChunkSummaryReader(

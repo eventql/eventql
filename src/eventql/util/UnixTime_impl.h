@@ -1,4 +1,4 @@
-namespace stx {
+namespace util {
 
 constexpr UnixTime::UnixTime(uint64_t utc_time) :
     utc_micros_(utc_time) {}
@@ -57,4 +57,4 @@ constexpr UnixTime UnixTime::operator-(const Duration& duration) const {
   return UnixTime(utc_micros_ - duration.microseconds());
 }
 
-} // namespace stx
+} // namespace util

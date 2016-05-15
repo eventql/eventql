@@ -36,7 +36,7 @@
 #include <eventql/sql/runtime/ScratchMemory.h>
 #include <eventql/sql/svalue.h>
 
-using namespace stx;
+using namespace util;
 
 namespace csql {
 class ASTNode;

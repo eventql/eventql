@@ -25,7 +25,7 @@
 #include "eventql/util/json/jsonrpcrequest.h"
 #include "eventql/util/json/jsonrpcresponse.h"
 
-namespace stx {
+namespace util {
 namespace json {
 
 template <class ServiceType>

@@ -27,7 +27,7 @@
 #include "eventql/util/inspect.h"
 #include "eventql/util/http/httpparser.h"
 
-namespace stx {
+namespace util {
 namespace http {
 
 const char HTTPParser::kContentLengthHeader[] = "Content-Length";

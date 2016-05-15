@@ -78,7 +78,7 @@ public:
 
 protected:
   uint32_t max_value_;
-  stx::util::BitPackDecoder data_reader_;
+  util::BitPackDecoder data_reader_;
   uint32_t cur_val_;
 };
 

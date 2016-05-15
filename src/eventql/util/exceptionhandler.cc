@@ -31,9 +31,9 @@
 #include <eventql/util/logging.h>
 #include <eventql/util/StackTrace.h>
 
-namespace stx {
+namespace util {
 
-using stx::Exception;
+using util::Exception;
 
 CatchAndLogExceptionHandler::CatchAndLogExceptionHandler(
     const String& component) :
@@ -53,7 +53,7 @@ void CatchAndAbortExceptionHandler::onException(
   fprintf(stderr, "%s\n\n", message_.c_str()); // FIXPAUL
 
   try {
-    auto rte = dynamic_cast<const stx::Exception&>(error);
+    auto rte = dynamic_cast<const util::Exception&>(error);
     rte.debugPrint();
   } catch (const std::exception& cast_error) {
     fprintf(stderr, "foreign exception: %s\n", error.what());
@@ -86,7 +86,7 @@ static void globalEHandler() {
 
   try {
     std::rethrow_exception(ex);
-  } catch (const stx::Exception& e) {
+  } catch (const util::Exception& e) {
     e.debugPrint();
   } catch (const std::exception& e) {
     fprintf(stderr, "foreign exception: %s\n", e.what());
@@ -130,5 +130,5 @@ void CatchAndAbortExceptionHandler::installGlobalHandlers() {
   //}
 }
 
-} // namespace stx
+} // namespace util
 

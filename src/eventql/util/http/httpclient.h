@@ -28,7 +28,7 @@
 #include "eventql/util/http/httpconnectionpool.h"
 #include "eventql/util/thread/eventloop.h"
 
-namespace stx {
+namespace util {
 namespace http {
 
 class HTTPClient {
@@ -40,7 +40,7 @@ public:
 
   HTTPResponse executeRequest(
       const HTTPRequest& req,
-      const stx::InetAddr& addr);
+      const util::InetAddr& addr);
 
   HTTPResponse executeRequest(
       const HTTPRequest& req,
@@ -48,14 +48,14 @@ public:
 
   HTTPResponse executeRequest(
       const HTTPRequest& req,
-      const stx::InetAddr& addr,
+      const util::InetAddr& addr,
       Function<HTTPResponseFuture* (Promise<HTTPResponse> promise)> factory);
 
 protected:
   HTTPClientStats* stats_;
   thread::EventLoop ev_;
   std::mutex mutex_;
-  stx::net::DNSCache dns_cache_;
+  util::net::DNSCache dns_cache_;
 };
 
 }

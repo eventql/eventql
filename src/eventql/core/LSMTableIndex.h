@@ -14,7 +14,7 @@
 #include <eventql/util/autoref.h>
 #include <eventql/util/SHA1.h>
 
-using namespace stx;
+using namespace util;
 
 namespace eventql {
 

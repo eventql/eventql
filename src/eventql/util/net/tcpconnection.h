@@ -27,7 +27,7 @@
 #include "eventql/util/net/inetaddr.h"
 #include "eventql/util/thread/taskscheduler.h"
 
-namespace stx {
+namespace util {
 namespace net {
 
 class TCPConnection {

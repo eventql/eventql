@@ -33,7 +33,7 @@
 #include <sys/time.h>                   // struct timeval; struct timespec;
 #include <eventql/util/time_constants.h>
 
-namespace stx {
+namespace util {
 
 class Duration {
 private:

@@ -64,23 +64,23 @@ public:
     return vals_read_ >= vals_total_;
   }
 
-  void storeMmap(RefPtr<stx::VFSFile> mmap) {
+  void storeMmap(RefPtr<util::VFSFile> mmap) {
     mmap_ = mmap;
   }
 
 protected:
   uint64_t r_max_;
   uint64_t d_max_;
-  stx::util::BinaryMessageReader reader_;
+  util::BinaryMessageReader reader_;
   size_t vals_total_;
   size_t vals_read_;
   uint64_t rlvl_size_;
   uint64_t dlvl_size_;
   uint64_t data_size_;
-  stx::util::BitPackDecoder rlvl_reader_;
-  stx::util::BitPackDecoder dlvl_reader_;
+  util::BitPackDecoder rlvl_reader_;
+  util::BitPackDecoder dlvl_reader_;
   void* data_;
-  RefPtr<stx::VFSFile> mmap_;
+  RefPtr<util::VFSFile> mmap_;
 };
 
 } // namespace v1

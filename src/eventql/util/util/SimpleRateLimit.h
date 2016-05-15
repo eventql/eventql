@@ -30,7 +30,6 @@
 #include "eventql/util/wallclock.h"
 #include "eventql/util/duration.h"
 
-namespace stx {
 namespace util {
 
 class SimpleRateLimit {
@@ -54,7 +53,6 @@ protected:
 
 
 
-}
 }
 
 #endif

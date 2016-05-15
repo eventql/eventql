@@ -25,7 +25,6 @@
 #define _STX_UTIL_CUMULATIVEHISTOGRAM_H
 #include "eventql/util/stdtypes.h"
 
-namespace stx {
 namespace util {
 
 class CumulativeHistogram {
@@ -51,7 +50,6 @@ protected:
   Vector<double> bins_;
 };
 
-}
 }
 
 #endif

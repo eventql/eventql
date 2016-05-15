@@ -39,8 +39,8 @@ AnySeriesAdapter::AnySeriesAdapter(
 void AnySeriesAdapter::applyProperties(
     SValue* row,
     int row_len,
-    stx::chart::Series* series,
-    stx::chart::Series::AnyPoint* point) {
+    util::chart::Series* series,
+    util::chart::Series::AnyPoint* point) {
   for (const auto& prop : prop_indexes_) {
     if (prop.second >= row_len) {
       RAISE(kRuntimeError, "invalid index for property");

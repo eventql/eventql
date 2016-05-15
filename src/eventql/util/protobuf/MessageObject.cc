@@ -24,7 +24,7 @@
 #include <eventql/util/protobuf/MessageObject.h>
 #include <eventql/util/exception.h>
 
-namespace stx {
+namespace util {
 namespace msg {
 
 String fieldTypeToString(FieldType type) {
@@ -409,4 +409,4 @@ bool MessageObject::getBool(uint32_t id) const {
 }
 
 } // namespace msg
-} // namespace stx
+} // namespace util

@@ -34,7 +34,7 @@
 #include <eventql/infra/cstable/RecordShredder.h>
 #include <eventql/infra/cstable/CSTableWriter.h>
 
-using namespace stx;
+using namespace util;
 
 namespace eventql {
 
@@ -54,7 +54,7 @@ Set<SHA1Hash> LogPartitionWriter::insertRecords(const Vector<RecordRef>& records
 
   auto snap = head_->getSnapshot()->clone();
 
-  stx::logTrace(
+  util::logTrace(
       "tsdb",
       "Insert $0 record into partition $1/$2/$3",
       records.size(),

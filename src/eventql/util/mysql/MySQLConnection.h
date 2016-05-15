@@ -33,7 +33,7 @@
 #include <mysql.h>
 #endif
 
-namespace stx {
+namespace util {
 namespace mysql {
 
 class MySQLConnection {
@@ -50,7 +50,7 @@ public:
    * @param URI the mysql:// URI
    * @returns a new MySQLConnection
    */
-  static std::unique_ptr<MySQLConnection> openConnection(const stx::URI& uri);
+  static std::unique_ptr<MySQLConnection> openConnection(const util::URI& uri);
 
   /**
    * Creates a new mysql connection and tries to connect
@@ -85,7 +85,7 @@ public:
    * @param URI the mysql:// URI
    * @returns a new MySQLConnection
    */
-  void connect(const stx::URI& uri);
+  void connect(const util::URI& uri);
 
   /**
    * Connect to a mysql server. May throw an exception

@@ -27,7 +27,7 @@
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/io/file.h>
 
-namespace stx {
+namespace util {
 
 /**
  * A RAII File Lock class. Destructor automatically yields the lock if is was

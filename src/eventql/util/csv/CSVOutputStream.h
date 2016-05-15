@@ -26,7 +26,7 @@
 #include <eventql/util/exception.h>
 #include <eventql/util/io/outputstream.h>
 
-namespace stx {
+namespace util {
 
 class CSVOutputStream {
 public:
@@ -44,5 +44,5 @@ protected:
   String row_sep_;
 };
 
-} // namespace stx
+} // namespace util
 

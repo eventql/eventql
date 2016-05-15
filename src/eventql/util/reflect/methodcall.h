@@ -29,7 +29,7 @@
 #include <vector>
 #include "eventql/util/reflect/indexsequence.h"
 
-namespace stx {
+namespace util {
 namespace reflect {
 
 template <typename _ClassType, typename _ReturnType, typename... ArgTypes>

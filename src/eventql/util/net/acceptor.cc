@@ -35,7 +35,7 @@
 #include "eventloop.h"
 #include <eventql/util/exception.h>
 
-namespace stxmetric {
+namespace utilmetric {
 namespace ev {
 
 Acceptor::Acceptor(EventLoop* ev_loop) : ev_loop_(ev_loop) {}

@@ -29,7 +29,7 @@
 #include <eventql/core/TSDBTableScanlet.h>
 #include <eventql/core/TSDBClient.h>
 
-using namespace stx;
+using namespace util;
 
 namespace eventql {
 

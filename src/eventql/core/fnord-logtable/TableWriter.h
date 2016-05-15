@@ -44,7 +44,7 @@
 #include "eventql/infra/cstable/CSTableReader.h"
 #include "eventql/infra/cstable/CSTableBuilder.h"
 
-namespace stx {
+namespace util {
 namespace logtable {
 
 class TableChunkWriter : public RefCounted {
@@ -191,6 +191,6 @@ protected:
 };
 
 } // namespace logtable
-} // namespace stx
+} // namespace util
 
 #endif

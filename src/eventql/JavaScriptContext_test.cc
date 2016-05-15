@@ -13,7 +13,7 @@
 #include <eventql/util/test/unittest.h>
 #include <eventql/JavaScriptContext.h>
 
-using namespace stx;
+using namespace util;
 using namespace eventql;
 
 UNIT_TEST(JavaScriptContextTest);

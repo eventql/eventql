@@ -29,7 +29,7 @@
 #include <fnord-afx/ArtifactIndex.h>
 #include <eventql/util/protobuf/MessageSchema.h>
 
-namespace stx {
+namespace util {
 namespace logtable {
 
 class TableRepository {
@@ -62,6 +62,6 @@ protected:
 };
 
 } // namespace logtable
-} // namespace stx
+} // namespace util
 
 #endif

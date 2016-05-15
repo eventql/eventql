@@ -26,7 +26,7 @@
 #include <eventql/util/wallclock.h>
 #include <fnord-logtable/TableReplication.h>
 
-namespace stx {
+namespace util {
 namespace logtable {
 
 TableReplication::TableReplication(
@@ -58,7 +58,7 @@ void TableReplication::stop() {
 void TableReplication::pull(
       RefPtr<TableWriter> table,
       const URI& uri) {
-  stx::logDebug(
+  util::logDebug(
       "fn.evdb",
       "Replicating table '$0' from '$1'...",
       table->name(),
@@ -99,7 +99,7 @@ void TableReplication::run() {
       try {
         pull(t.first, t.second);
       } catch (const Exception& e) {
-        stx::logError("fnord.evdb", e, "TableReplication error");
+        util::logError("fnord.evdb", e, "TableReplication error");
       }
     }
 
@@ -111,5 +111,5 @@ void TableReplication::run() {
 }
 
 } // namespace logtable
-} // namespace stx
+} // namespace util
 

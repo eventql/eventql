@@ -30,7 +30,7 @@
 #include <pcre.h>
 #endif
 
-namespace stx {
+namespace util {
 
 RegExp::RegExp() {
 #ifdef HAVE_PCRE
@@ -168,4 +168,4 @@ const char* RegExp::c_str() const {
   return pattern_.c_str();
 }
 
-}  // namespace stx
+}  // namespace util

@@ -32,7 +32,7 @@
 #include "eventql/util/http/httpclient.h"
 #include "eventql/util/http/HTTPSSEParser.h"
 
-namespace stx {
+namespace util {
 namespace http {
 
 class HTTPSSEResponseHandler : public HTTPResponseFuture {

@@ -28,7 +28,7 @@
 #include <vector>
 #include "eventql/util/random.h"
 
-namespace stx {
+namespace util {
 
 class FileRepository {
 public:

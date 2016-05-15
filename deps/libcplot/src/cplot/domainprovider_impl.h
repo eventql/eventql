@@ -10,7 +10,7 @@
 #ifndef _libstx_DOMAINPROVIDER_IMPL_H
 #define _libstx_DOMAINPROVIDER_IMPL_H
 
-namespace stx {
+namespace util {
 namespace chart {
 
 template <typename T>

@@ -32,7 +32,7 @@
 #include <string>
 #include <codecvt>
 
-using namespace stx;
+using namespace util;
 
 namespace eventql {
 

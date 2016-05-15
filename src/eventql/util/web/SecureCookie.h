@@ -30,7 +30,7 @@
 #include <eventql/util/option.h>
 #include <eventql/util/wallclock.h>
 
-namespace stx {
+namespace util {
 namespace web {
 
 /**

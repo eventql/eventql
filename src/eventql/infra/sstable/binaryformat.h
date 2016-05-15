@@ -26,7 +26,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 
-namespace stx {
+namespace util {
 namespace sstable {
 
 /**

@@ -29,8 +29,8 @@
 #include <eventql/infra/sstable/sstablereader.h>
 #include <eventql/infra/sstable/rowoffsetindex.h>
 
-using namespace stx::sstable;
-using namespace stx;
+using namespace util::sstable;
+using namespace util;
 UNIT_TEST(SSTableTest);
 
 TEST_CASE(SSTableTest, TestSSTableEditor, [] () {

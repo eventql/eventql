@@ -29,7 +29,7 @@
 #include <eventql/util/http/status.h>
 #include <string>
 
-namespace stx {
+namespace util {
 namespace http {
 
 class HTTPResponse : public HTTPMessage {

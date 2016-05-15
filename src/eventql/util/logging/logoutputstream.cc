@@ -26,9 +26,9 @@
 #include "eventql/util/stringutil.h"
 #include "eventql/util/wallclock.h"
 
-using stx::OutputStream;
+using util::OutputStream;
 
-namespace stx {
+namespace util {
 
 LogOutputStream::LogOutputStream(
     std::unique_ptr<OutputStream> target) :

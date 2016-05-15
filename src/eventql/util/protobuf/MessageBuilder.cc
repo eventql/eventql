@@ -25,7 +25,7 @@
 #include <eventql/util/inspect.h>
 #include <eventql/util/exception.h>
 
-namespace stx {
+namespace util {
 namespace msg {
 
 void MessageBuilder::setUInt32(const String path, uint32_t value) {
@@ -156,5 +156,5 @@ bool MessageBuilder::isSet(const String& path) const {
 }
 
 } // namespace msg
-} // namespace stx
+} // namespace util
 

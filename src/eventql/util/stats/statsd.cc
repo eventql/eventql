@@ -26,15 +26,15 @@
 #include <eventql/util/logging.h>
 #include <eventql/util/stats/statsd.h>
 
-namespace stx {
+namespace util {
 namespace statsd {
 
 StatsdServer::StatsdServer(
-    stx::TaskScheduler* server_scheduler,
-    stx::TaskScheduler* work_scheduler) :
+    util::TaskScheduler* server_scheduler,
+    util::TaskScheduler* work_scheduler) :
     udp_server_(server_scheduler, work_scheduler) {
 
-  udp_server_.onMessage([this] (const stx::Buffer& msg) {
+  udp_server_.onMessage([this] (const util::Buffer& msg) {
     this->messageReceived(msg);
   });
 }
@@ -57,7 +57,7 @@ enum StatsdParseState {
   S_VALUE
 };
 
-void StatsdServer::messageReceived(const stx::Buffer& msg) {
+void StatsdServer::messageReceived(const util::Buffer& msg) {
   std::string key;
   std::string value;
   std::vector<std::pair<std::string, std::string>> labels;

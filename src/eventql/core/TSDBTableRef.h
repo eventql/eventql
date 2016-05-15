@@ -27,7 +27,7 @@
 #include <eventql/util/option.h>
 #include <eventql/util/SHA1.h>
 
-using namespace stx;
+using namespace util;
 
 namespace eventql {
 

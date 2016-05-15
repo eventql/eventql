@@ -23,7 +23,7 @@
  */
 #include <eventql/DrilldownTree.h>
 
-using namespace stx;
+using namespace util;
 
 namespace eventql {
 

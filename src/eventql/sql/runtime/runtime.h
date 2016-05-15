@@ -45,7 +45,7 @@ public:
 
   // FIXPAUL: make parser configurable via parserfactory
   Runtime(
-      stx::thread::ThreadPoolOptions tpool_opts,
+      util::thread::ThreadPoolOptions tpool_opts,
       RefPtr<SymbolTable> symbol_table,
       RefPtr<QueryBuilder> query_builder,
       RefPtr<QueryPlanBuilder> query_plan_builder);

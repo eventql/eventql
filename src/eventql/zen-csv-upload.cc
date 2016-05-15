@@ -36,10 +36,10 @@
 #include "eventql/util/util/SimpleRateLimit.h"
 #include "eventql/util/protobuf/MessageSchema.h"
 
-using namespace stx;
+using namespace util;
 
 void run(const cli::FlagParser& flags) {
-  stx::Term term;
+  util::Term term;
 
   auto table_name = flags.getString("table_name");
   auto input_file = flags.getString("input_file");
@@ -79,7 +79,7 @@ void run(const cli::FlagParser& flags) {
     quote_char = s[0];
   }
 
-  stx::logInfo("dx-csv-upload", "Opening CSV file '$0'", input_file);
+  util::logInfo("dx-csv-upload", "Opening CSV file '$0'", input_file);
 
   auto is = FileInputStream::openFile(input_file);
   auto bom = is->readByteOrderMark();
@@ -94,7 +94,7 @@ void run(const cli::FlagParser& flags) {
 
   DefaultCSVInputStream csv(std::move(is), col_sep, row_sep, quote_char);
 
-  stx::logInfo(
+  util::logInfo(
       "dx-csv-upload",
       "Analyzing the input file. This might take a few minutes...");
 
@@ -231,7 +231,7 @@ void run(const cli::FlagParser& flags) {
   csv.rewind();
 
   auto schema = mkRef(new msg::MessageSchema("<anonymous>", schema_fields));
-  stx::logInfo(
+  util::logInfo(
       "dx-csv-upload",
       "Found $0 row(s) and $1 column(s):\n    - $2",
       num_rows,
@@ -239,15 +239,15 @@ void run(const cli::FlagParser& flags) {
       StringUtil::join(columns_dbg, "\n    - "));
 
   if (confirm_schema) {
-    stx::logInfo("dx-csv-upload", "Is this information correct? [y/n]");
+    util::logInfo("dx-csv-upload", "Is this information correct? [y/n]");
     if (!term.readConfirmation()) {
-      stx::logInfo("dx-csv-upload", "Aborting...");
+      util::logInfo("dx-csv-upload", "Aborting...");
       return;
     }
   }
 
   auto num_shards = (num_rows + shard_size - 1) / shard_size;
-  stx::logDebug("dx-csv-upload", "Splitting into $0 shards", num_shards);
+  util::logDebug("dx-csv-upload", "Splitting into $0 shards", num_shards);
 
   http::HTTPClient http_client(nullptr);
   http::HTTPMessage::HeaderList auth_headers;
@@ -288,7 +288,7 @@ void run(const cli::FlagParser& flags) {
   util::SimpleRateLimitedFn status_line(
       kMicrosPerSecond,
       [&num_rows_uploaded, num_rows] () {
-    stx::logInfo(
+    util::logInfo(
         "dx-csv-upload",
         "[$0%] Uploading... $1/$2 rows",
         (size_t) ((num_rows_uploaded / (double) num_rows) * 100),
@@ -338,18 +338,18 @@ void run(const cli::FlagParser& flags) {
   }
 
   status_line.runForce();
-  stx::logInfo("dx-csv-upload", "Upload finished successfully :)");
+  util::logInfo("dx-csv-upload", "Upload finished successfully :)");
 }
 
 int main(int argc, const char** argv) {
-  stx::Application::init();
-  stx::Application::logToStderr();
+  util::Application::init();
+  util::Application::logToStderr();
 
-  stx::cli::FlagParser flags;
+  util::cli::FlagParser flags;
 
   flags.defineFlag(
       "loglevel",
-      stx::cli::FlagParser::T_STRING,
+      util::cli::FlagParser::T_STRING,
       false,
       NULL,
       "INFO",
@@ -358,7 +358,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "input_file",
-      stx::cli::FlagParser::T_STRING,
+      util::cli::FlagParser::T_STRING,
       true,
       "i",
       NULL,
@@ -367,7 +367,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "table_name",
-      stx::cli::FlagParser::T_STRING,
+      util::cli::FlagParser::T_STRING,
       true,
       "t",
       NULL,
@@ -376,7 +376,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "column_separator",
-      stx::cli::FlagParser::T_STRING,
+      util::cli::FlagParser::T_STRING,
       false,
       NULL,
       "\t",
@@ -385,7 +385,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "row_separator",
-      stx::cli::FlagParser::T_STRING,
+      util::cli::FlagParser::T_STRING,
       false,
       NULL,
       "\n",
@@ -394,7 +394,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "quote_char",
-      stx::cli::FlagParser::T_STRING,
+      util::cli::FlagParser::T_STRING,
       false,
       NULL,
       "\"",
@@ -403,7 +403,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "api_token",
-      stx::cli::FlagParser::T_STRING,
+      util::cli::FlagParser::T_STRING,
       true,
       "x",
       NULL,
@@ -412,7 +412,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "api_host",
-      stx::cli::FlagParser::T_STRING,
+      util::cli::FlagParser::T_STRING,
       false,
       NULL,
       "api.eventql.io",
@@ -421,7 +421,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "shard_size",
-      stx::cli::FlagParser::T_INTEGER,
+      util::cli::FlagParser::T_INTEGER,
       false,
       NULL,
       "262144",
@@ -430,7 +430,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "skip_confirmation",
-      stx::cli::FlagParser::T_SWITCH,
+      util::cli::FlagParser::T_SWITCH,
       false,
       "y",
       NULL,
@@ -445,7 +445,7 @@ int main(int argc, const char** argv) {
   try {
     run(flags);
   } catch (const StandardException& e) {
-    stx::logError("dx-csv-upload", "[FATAL ERROR] $0", e.what());
+    util::logError("dx-csv-upload", "[FATAL ERROR] $0", e.what());
   }
 
   return 0;

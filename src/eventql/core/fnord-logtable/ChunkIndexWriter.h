@@ -25,7 +25,7 @@
 #define _FNORD_LOGTABLE_CHUNKINDEXWRITER_H
 #include <eventql/util/stdtypes.h>
 
-namespace stx {
+namespace util {
 namespace cstable {
 
 class ChunkIndexWriter {
@@ -36,6 +36,6 @@ public:
 };
 
 } // namespace logtable
-} // namespace stx
+} // namespace util
 
 #endif

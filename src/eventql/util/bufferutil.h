@@ -28,7 +28,7 @@
 #include <stdint.h>
 #include "eventql/util/buffer.h"
 
-namespace stx {
+namespace util {
 
 class BufferUtil {
 public:
@@ -68,6 +68,6 @@ public:
 
 };
 
-} // namespace stx
+} // namespace util
 
 #endif

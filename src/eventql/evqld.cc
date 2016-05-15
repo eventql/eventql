@@ -64,23 +64,23 @@
 #include "eventql/StatusServlet.h"
 #include <jsapi.h>
 
-using namespace stx;
+using namespace util;
 using namespace eventql;
 
-stx::thread::EventLoop ev;
+util::thread::EventLoop ev;
 
 namespace js {
 void DisableExtraThreads();
 }
 
 int main(int argc, const char** argv) {
-  stx::Application::init();
+  util::Application::init();
 
-  stx::cli::FlagParser flags;
+  util::cli::FlagParser flags;
 
   flags.defineFlag(
       "http_port",
-      stx::cli::FlagParser::T_INTEGER,
+      util::cli::FlagParser::T_INTEGER,
       false,
       NULL,
       "8080",
@@ -145,7 +145,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "loglevel",
-      stx::cli::FlagParser::T_STRING,
+      util::cli::FlagParser::T_STRING,
       false,
       NULL,
       "INFO",
@@ -191,11 +191,11 @@ int main(int argc, const char** argv) {
   flags.parseArgv(argc, argv);
 
   if (flags.isSet("log_to_stderr") && !flags.isSet("daemonize")) {
-    stx::Application::logToStderr();
+    util::Application::logToStderr();
   }
 
   if (flags.isSet("log_to_syslog")) {
-    stx::Application::logToSyslog("z1d");
+    util::Application::logToSyslog("z1d");
   }
 
   Logger::get()->setMinimumLogLevel(
@@ -222,15 +222,15 @@ int main(int argc, const char** argv) {
   //auto conf = msg::parseText<eventql::TSDBNodeConfig>(conf_data);
 
   /* thread pools */
-  stx::thread::CachedThreadPool tpool(
+  util::thread::CachedThreadPool tpool(
       thread::ThreadPoolOptions {
         .thread_name = Some(String("z1d-httpserver"))
       },
       8);
 
   /* http */
-  stx::http::HTTPRouter http_router;
-  stx::http::HTTPServer http_server(&http_router, &ev);
+  util::http::HTTPRouter http_router;
+  util::http::HTTPServer http_server(&http_router, &ev);
   http_server.listen(flags.getInt("http_port"));
   http::HTTPConnectionPool http(&ev, &z1stats()->http_client_stats);
 
@@ -317,7 +317,7 @@ int main(int argc, const char** argv) {
     auto symbols = mkRef(new csql::SymbolTable());
     csql::installDefaultSymbols(symbols.get());
     sql = mkRef(new csql::Runtime(
-        stx::thread::ThreadPoolOptions {
+        util::thread::ThreadPoolOptions {
           .thread_name = Some(String("z1d-sqlruntime"))
         },
         symbols,
@@ -394,7 +394,7 @@ int main(int argc, const char** argv) {
     logAlert("eventql", e, "FATAL ERROR");
   }
 
-  stx::logInfo("eventql", "Exiting...");
+  util::logInfo("eventql", "Exiting...");
 
   customer_dir.stopWatcher();
 

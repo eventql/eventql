@@ -30,7 +30,7 @@
 #include "eventql/util/logging.h"
 #include "eventql/util/option.h"
 
-namespace stx {
+namespace util {
 namespace mdb {
 
 class MDBCursor : public RefCounted {

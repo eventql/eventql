@@ -12,7 +12,7 @@
 #include "linechart.h"
 #include <eventql/util/exception.h>
 
-namespace stx {
+namespace util {
 namespace chart {
 
 char LineChart::kDefaultLineStyle[] = "solid";

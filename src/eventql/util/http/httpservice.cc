@@ -27,7 +27,7 @@
 #include <eventql/util/http/httpservice.h>
 #include <eventql/util/http/HTTPResponseStream.h>
 
-namespace stx {
+namespace util {
 namespace http {
 
 void HTTPService::handleHTTPRequest(

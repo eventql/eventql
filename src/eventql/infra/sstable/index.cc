@@ -23,7 +23,7 @@
  */
 #include <eventql/infra/sstable/index.h>
 
-namespace stx {
+namespace util {
 namespace sstable {
 
 Index::Index(uint32_t type) : type_(type) {}

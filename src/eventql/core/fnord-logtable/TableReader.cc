@@ -29,7 +29,7 @@
 #include <eventql/util/protobuf/MessageDecoder.h>
 #include <eventql/util/protobuf/MessageEncoder.h>
 
-namespace stx {
+namespace util {
 namespace logtable {
 
 static uint64_t findHeadGen(
@@ -148,7 +148,7 @@ RefPtr<TableSnapshot> TableReader::getSnapshot() {
 
   return new TableSnapshot(
       head,
-      List<RefPtr<stx::logtable::TableArena>>{});
+      List<RefPtr<util::logtable::TableArena>>{});
 }
 
 size_t TableReader::fetchRecords(
@@ -194,7 +194,7 @@ size_t TableReader::fetchRecords(
       chunk.chunk_id);
 
 #ifndef FNORD_NOTRACE
-  stx::logTrace(
+  util::logTrace(
       "fnord.evdb",
       "Reading rows local=$0..$1 global=$2..$3 from table=$4 chunk=$5",
       offset,
@@ -213,7 +213,7 @@ size_t TableReader::fetchRecords(
 
   auto body_size = reader.bodySize();
   if (body_size == 0) {
-    stx::logWarning("fnord.evdb", "empty table chunk: $0", filename);
+    util::logWarning("fnord.evdb", "empty table chunk: $0", filename);
     return 0;
   }
 
@@ -242,5 +242,5 @@ size_t TableReader::fetchRecords(
 }
 
 } // namespace logtable
-} // namespace stx
+} // namespace util
 

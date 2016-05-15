@@ -25,7 +25,7 @@
 #include <eventql/sql/qtree/TableExpressionNode.h>
 #include <eventql/util/inspect.h>
 
-using namespace stx;
+using namespace util;
 
 namespace csql {
 

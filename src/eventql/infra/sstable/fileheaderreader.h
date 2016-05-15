@@ -30,10 +30,10 @@
 #include <string>
 #include <eventql/infra/sstable/MetaPage.h>
 
-namespace stx {
+namespace util {
 namespace sstable {
 
-class FileHeaderReader : public stx::util::BinaryMessageReader {
+class FileHeaderReader : public util::BinaryMessageReader {
 public:
 
   /**

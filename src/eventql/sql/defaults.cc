@@ -24,7 +24,7 @@
  */
 #include <eventql/sql/defaults.h>
 
-using namespace stx;
+using namespace util;
 
 namespace csql {
 

@@ -25,7 +25,7 @@
 
 #include "HTTPSSEStream.h"
 
-namespace stx {
+namespace util {
 namespace http {
 
 HTTPSSEStream::HTTPSSEStream(

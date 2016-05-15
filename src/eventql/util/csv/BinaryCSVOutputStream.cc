@@ -27,7 +27,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
-namespace stx {
+namespace util {
 
 BinaryCSVOutputStream::BinaryCSVOutputStream(
     std::unique_ptr<OutputStream> output_stream) :
@@ -41,5 +41,5 @@ void BinaryCSVOutputStream::appendRow(const Vector<String>& row) {
   }
 }
 
-} // namespace stx
+} // namespace util
 

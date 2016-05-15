@@ -33,7 +33,7 @@
 #include <eventql/util/exception.h>
 #include <eventql/sql/csql.h>
 
-using namespace stx;
+using namespace util;
 
 namespace csql {
 
@@ -43,7 +43,7 @@ public:
   typedef double FloatType;
   typedef int64_t IntegerType;
   typedef bool BoolType;
-  typedef stx::UnixTime TimeType;
+  typedef util::UnixTime TimeType;
 
   static SValue newNull();
   static SValue newString(const String& value);

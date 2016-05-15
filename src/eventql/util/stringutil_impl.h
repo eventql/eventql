@@ -26,7 +26,7 @@
 #include <stdint.h>
 #include <string>
 
-namespace stx {
+namespace util {
 
 template <typename H, typename... T>
 void StringUtil::toStringVImpl(
@@ -137,4 +137,4 @@ std::string StringUtil::formatNumberMetric(T orig_value) {
   return std::string(buf, len);
 }
 
-} // namespace stx
+} // namespace util

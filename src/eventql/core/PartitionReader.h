@@ -29,7 +29,7 @@
 #include <eventql/core/PartitionSnapshot.h>
 #include <eventql/sql/CSTableScan.h>
 
-using namespace stx;
+using namespace util;
 
 namespace eventql {
 class Partition;

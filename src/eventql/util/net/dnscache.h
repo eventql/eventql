@@ -28,7 +28,7 @@
 #include <unordered_map>
 #include "eventql/util/net/inetaddr.h"
 
-namespace stx {
+namespace util {
 namespace net {
 
 class DNSCache {

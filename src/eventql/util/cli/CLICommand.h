@@ -29,7 +29,7 @@
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/cli/flagparser.h>
 
-namespace stx {
+namespace util {
 namespace cli {
 
 class CLICommand : public RefCounted {

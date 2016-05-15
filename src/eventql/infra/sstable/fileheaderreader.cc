@@ -26,7 +26,7 @@
 #include <eventql/util/exception.h>
 #include <eventql/util/fnv.h>
 
-namespace stx {
+namespace util {
 namespace sstable {
 
 MetaPage FileHeaderReader::readMetaPage(InputStream* is) {

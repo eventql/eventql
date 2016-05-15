@@ -26,7 +26,7 @@
 #include "eventql/util/thread/task.h"
 #include "eventql/util/thread/wakeup.h"
 
-namespace stx {
+namespace util {
 
 class TaskScheduler {
 public:

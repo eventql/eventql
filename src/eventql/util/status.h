@@ -29,7 +29,7 @@
 #include <stdlib.h>
 #include <string>
 
-namespace stx {
+namespace util {
 
 enum kStatusType {
   eSuccess,

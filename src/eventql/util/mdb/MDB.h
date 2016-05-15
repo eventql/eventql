@@ -30,7 +30,7 @@
 #include "eventql/util/autoref.h"
 #include "eventql/util/mdb/MDBTransaction.h"
 
-namespace stx {
+namespace util {
 namespace mdb {
 
 struct MDBOptions {

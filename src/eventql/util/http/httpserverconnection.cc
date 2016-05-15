@@ -27,7 +27,7 @@
 #include "eventql/util/http/httpserverconnection.h"
 #include "eventql/util/http/httpgenerator.h"
 
-namespace stx {
+namespace util {
 
 template <>
 std::string inspect(const http::HTTPServerConnection& conn) {
@@ -362,5 +362,5 @@ bool HTTPServerConnection::isClosed() const {
 }
 
 } // namespace http
-} // namespace stx
+} // namespace util
 

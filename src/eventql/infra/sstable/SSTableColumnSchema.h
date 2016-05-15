@@ -37,7 +37,7 @@
 #include <eventql/infra/sstable/index.h>
 #include <eventql/infra/sstable/indexprovider.h>
 
-namespace stx {
+namespace util {
 namespace sstable {
 class SSTableEditor;
 class SSTableReader;
@@ -84,6 +84,6 @@ protected:
 };
 
 } // namespace sstable
-} // namespace stx
+} // namespace util
 
 #endif

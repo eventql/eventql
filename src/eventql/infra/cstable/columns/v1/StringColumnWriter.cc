@@ -52,7 +52,7 @@ void StringColumnWriter::addDatum(
   ++num_vals_;
 }
 
-void StringColumnWriter::write(stx::util::BinaryMessageWriter* writer) {
+void StringColumnWriter::write(util::BinaryMessageWriter* writer) {
   writer->append(data_writer_.data(), data_writer_.size());
 }
 

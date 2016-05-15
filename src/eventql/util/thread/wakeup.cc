@@ -24,7 +24,7 @@
 #include "eventql/util/inspect.h"
 #include "eventql/util/thread/wakeup.h"
 
-namespace stx {
+namespace util {
 
 Wakeup::Wakeup() : gen_(0) {
 }

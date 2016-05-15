@@ -23,7 +23,7 @@
  */
 #include "eventql/util/mdb/MDB.h"
 
-namespace stx {
+namespace util {
 namespace mdb {
 
 RefPtr<MDB> MDB::open(

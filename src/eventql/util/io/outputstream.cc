@@ -32,7 +32,7 @@
 #include "eventql/util/io/outputstream.h"
 #include "eventql/util/ieee754.h"
 
-namespace stx {
+namespace util {
 
 std::unique_ptr<OutputStream> OutputStream::getStdout() {
   auto stdout_stream = new FileOutputStream(1, false);

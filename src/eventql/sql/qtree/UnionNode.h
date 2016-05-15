@@ -26,7 +26,7 @@
 #include <eventql/util/stdtypes.h>
 #include <eventql/sql/qtree/TableExpressionNode.h>
 
-using namespace stx;
+using namespace util;
 
 namespace csql {
 

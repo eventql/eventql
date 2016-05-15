@@ -29,7 +29,7 @@
 #include <eventql/util/duration.h>
 #include <cstdio>
 
-namespace stx {
+namespace util {
 
 /**
  * @brief High resolution time span.
@@ -58,7 +58,7 @@ private:
   const Duration duration_;
 };
 
-}  // namespace stx
+}  // namespace util
 
 #include <eventql/util/TimeRange_impl.h>
 #endif

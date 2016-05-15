@@ -29,7 +29,7 @@
 #include "eventql/util/http/httpservice.h"
 
 
-namespace stx {
+namespace util {
 namespace http {
 
 class ReadStreamServlet : public http::StreamingHTTPService {

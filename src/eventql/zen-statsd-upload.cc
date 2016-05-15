@@ -36,7 +36,7 @@
 #include "eventql/util/util/SimpleRateLimit.h"
 #include "eventql/util/protobuf/MessageSchema.h"
 
-using namespace stx;
+using namespace util;
 
 void run(const cli::FlagParser& flags) {
   String api_url = "http://api.eventql.io/api/v1";
@@ -98,14 +98,14 @@ void run(const cli::FlagParser& flags) {
 }
 
 int main(int argc, const char** argv) {
-  stx::Application::init();
-  stx::Application::logToStderr();
+  util::Application::init();
+  util::Application::logToStderr();
 
-  stx::cli::FlagParser flags;
+  util::cli::FlagParser flags;
 
   flags.defineFlag(
       "api_token",
-      stx::cli::FlagParser::T_STRING,
+      util::cli::FlagParser::T_STRING,
       true,
       "x",
       NULL,
@@ -114,7 +114,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "statsd_port",
-      stx::cli::FlagParser::T_INTEGER,
+      util::cli::FlagParser::T_INTEGER,
       false,
       "p",
       "8125",
@@ -123,7 +123,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "key_prefix",
-      stx::cli::FlagParser::T_STRING,
+      util::cli::FlagParser::T_STRING,
       false,
       NULL,
       "stats.",
@@ -132,7 +132,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "loglevel",
-      stx::cli::FlagParser::T_STRING,
+      util::cli::FlagParser::T_STRING,
       false,
       NULL,
       "INFO",
@@ -147,7 +147,7 @@ int main(int argc, const char** argv) {
   try {
     run(flags);
   } catch (const StandardException& e) {
-    stx::logError("dx-statsd-sink", "[FATAL ERROR] $0", e.what());
+    util::logError("dx-statsd-sink", "[FATAL ERROR] $0", e.what());
   }
 
   return 0;

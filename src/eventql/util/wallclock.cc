@@ -24,7 +24,7 @@
 #include <sys/time.h>
 #include "eventql/util/wallclock.h"
 
-namespace stx {
+namespace util {
 
 UnixTime WallClock::now() {
   return UnixTime(WallClock::getUnixMicros());

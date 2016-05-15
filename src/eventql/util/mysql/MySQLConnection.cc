@@ -25,11 +25,11 @@
 #include <eventql/buildconfig.h>
 #include <eventql/util/mysql//MySQLConnection.h>
 
-namespace stx {
+namespace util {
 namespace mysql {
 
 std::unique_ptr<MySQLConnection> MySQLConnection::openConnection(
-    const stx::URI& uri) {
+    const util::URI& uri) {
   std::unique_ptr<MySQLConnection> conn(new MySQLConnection());
   conn->connect(uri);
   return conn;
@@ -68,7 +68,7 @@ MySQLConnection::~MySQLConnection() {
 #endif
 }
 
-void MySQLConnection::connect(const stx::URI& uri) {
+void MySQLConnection::connect(const util::URI& uri) {
   unsigned int port = 3306;
   std::string host = uri.host();
   std::string username;
@@ -264,7 +264,7 @@ void MySQLConnection::executeQuery(
 #ifdef STX_ENABLE_MYSQL
 
 #ifndef STX_NOTRACE
-    stx::logTrace("fnord.mysql", "Executing MySQL query: $0", query);
+    util::logTrace("fnord.mysql", "Executing MySQL query: $0", query);
 #endif
 
   MYSQL_RES* result = nullptr;
@@ -301,7 +301,7 @@ void MySQLConnection::executeQuery(
     } catch (const std::exception& e) {
       mysql_free_result(result);
       try {
-        auto rte = dynamic_cast<const stx::Exception&>(e);
+        auto rte = dynamic_cast<const util::Exception&>(e);
         throw rte;
       } catch (std::bad_cast bce) {
         throw e;
@@ -321,7 +321,7 @@ std::list<std::vector<std::string>> MySQLConnection::executeQuery(
 #ifdef STX_ENABLE_MYSQL
 
 #ifndef STX_NOTRACE
-    stx::logTrace("fnord.mysql", "Executing MySQL query: $0", query);
+    util::logTrace("fnord.mysql", "Executing MySQL query: $0", query);
 #endif
 
   MYSQL_RES* result = nullptr;

@@ -23,7 +23,7 @@
  */
 #include "eventql/util/rpc/RPC.h"
 
-namespace stx {
+namespace util {
 
 AnyRPC::AnyRPC(
     const std::string& method) :

@@ -13,7 +13,7 @@
 #include <vector>
 #include <string>
 
-namespace stx {
+namespace util {
 namespace chart {
 
 class RenderTarget {

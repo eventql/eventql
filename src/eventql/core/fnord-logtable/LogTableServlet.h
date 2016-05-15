@@ -27,10 +27,10 @@
 #include "eventql/util/json/json.h"
 #include <fnord-logtable/TableRepository.h>
 
-namespace stx {
+namespace util {
 namespace logtable {
 
-class LogTableServlet : public stx::http::HTTPService {
+class LogTableServlet : public util::http::HTTPService {
 public:
   enum class ResponseFormat {
     JSON,

@@ -26,7 +26,7 @@
 #include "eventql/util/util/binarymessagereader.h"
 #include "eventql/util/util/binarymessagewriter.h"
 
-using namespace stx;
+using namespace util;
 
 namespace csql {
 
@@ -35,21 +35,21 @@ BinaryResultParser::BinaryResultParser() :
     got_footer_(false) {}
 
 void BinaryResultParser::onTableHeader(
-    stx::Function<void (const Vector<String>& columns)> fn) {
+    util::Function<void (const Vector<String>& columns)> fn) {
   on_table_header_ = fn;
 }
 
 void BinaryResultParser::onRow(
-    stx::Function<void (int argc, const SValue* argv)> fn) {
+    util::Function<void (int argc, const SValue* argv)> fn) {
   on_row_ = fn;
 }
 
 void BinaryResultParser::onProgress(
-    stx::Function<void (const ExecutionStatus& status)> fn) {
+    util::Function<void (const ExecutionStatus& status)> fn) {
   on_progress_ = fn;
 }
 
-void BinaryResultParser::onError(stx::Function<void (const String& error)> fn) {
+void BinaryResultParser::onError(util::Function<void (const String& error)> fn) {
   on_error_ = fn;
 }
 
@@ -297,27 +297,27 @@ BinaryResultFormat::~BinaryResultFormat() {
 }
 
 void BinaryResultFormat::sendProgress(double progress) {
-  stx::util::BinaryMessageWriter writer;
+  util::BinaryMessageWriter writer;
   writer.appendUInt8(0xf3);
   writer.appendDouble(progress);
   write_cb_(writer.data(), writer.size());
 }
 
 void BinaryResultFormat::sendError(const String& error) {
-  stx::util::BinaryMessageWriter writer;
+  util::BinaryMessageWriter writer;
   writer.appendUInt8(0xf4);
   writer.appendLenencString(error);
   write_cb_(writer.data(), writer.size());
 }
 
 void BinaryResultFormat::sendHeader() {
-  stx::util::BinaryMessageWriter writer;
+  util::BinaryMessageWriter writer;
   writer.appendUInt8(0x01);
   write_cb_(writer.data(), writer.size());
 }
 
 void BinaryResultFormat::sendFooter() {
-  stx::util::BinaryMessageWriter writer;
+  util::BinaryMessageWriter writer;
   writer.appendUInt8(0xff);
   write_cb_(writer.data(), writer.size());
 }
@@ -345,7 +345,7 @@ void BinaryResultFormat::sendTable(
 
   // table header
   {
-    stx::util::BinaryMessageWriter writer;
+    util::BinaryMessageWriter writer;
     writer.appendUInt8(0xf1);
 
     writer.appendVarUInt(result_columns.size());

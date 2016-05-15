@@ -29,7 +29,7 @@
 #include <eventql/util/protobuf/MessageSchema.h>
 #include <eventql/util/protobuf/MessageObject.h>
 
-namespace stx {
+namespace util {
 namespace msg {
 
 class MessageDecoder {
@@ -51,6 +51,6 @@ public:
 };
 
 } // namespace msg
-} // namespace stx
+} // namespace util
 
 #endif

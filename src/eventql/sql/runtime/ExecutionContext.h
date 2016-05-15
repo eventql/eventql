@@ -27,7 +27,7 @@
 #include <eventql/util/thread/taskscheduler.h>
 #include <eventql/sql/svalue.h>
 
-using namespace stx;
+using namespace util;
 
 namespace csql {
 

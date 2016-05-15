@@ -31,7 +31,7 @@
 #include "eventql/util/thread/wakeup.h"
 #include <memory>
 
-namespace stx {
+namespace util {
 namespace http {
 
 class HTTPResponseFuture : public HTTPResponseHandler {

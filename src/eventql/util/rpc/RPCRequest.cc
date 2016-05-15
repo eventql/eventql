@@ -25,7 +25,7 @@
 #include "eventql/util/rpc/RPCRequest.h"
 #include "eventql/util/rpc/RPCContext.h"
 
-namespace stx {
+namespace util {
 namespace rpc {
 
 RPCRequest::RPCRequest(
@@ -85,7 +85,7 @@ void RPCRequest::returnSuccess() {
 
 void RPCRequest::returnError(const StandardException& e) {
   try {
-    auto rte = dynamic_cast<const stx::Exception&>(e);
+    auto rte = dynamic_cast<const util::Exception&>(e);
     returnError(rte.getType(), rte.getMessage());
   } catch (const std::exception& cast_error) {
     returnError(kRuntimeError, e.what());
@@ -160,5 +160,5 @@ bool RPCRequest::waitFor(const Duration& timeout) const {
 }
 
 } // namespace rpc
-} // namespace stx
+} // namespace util
 

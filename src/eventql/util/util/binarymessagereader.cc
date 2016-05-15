@@ -23,7 +23,6 @@
  */
 #include <eventql/util/util/binarymessagereader.h>
 
-namespace stx {
 namespace util {
 
 BinaryMessageReader::BinaryMessageReader(
@@ -33,6 +32,5 @@ BinaryMessageReader::BinaryMessageReader(
     size_(buf_len),
     pos_(0) {}
 
-}
 }
 

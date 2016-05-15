@@ -25,7 +25,7 @@
 #define _STX_INETADDR_H
 #include <string>
 
-namespace stx {
+namespace util {
 
 class InetAddr {
 public:

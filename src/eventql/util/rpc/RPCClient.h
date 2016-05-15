@@ -34,7 +34,7 @@
 #include "eventql/util/rpc/RPC.h"
 #include "eventql/util/http/httpconnectionpool.h"
 
-namespace stx {
+namespace util {
 
 class RPCClient {
 public:
@@ -49,8 +49,8 @@ public:
   HTTPRPCClient(TaskScheduler* sched);
   void call(const URI& uri, RefPtr<AnyRPC> rpc) override;
 protected:
-  stx::http::HTTPConnectionPool http_pool_;
+  util::http::HTTPConnectionPool http_pool_;
 };
 
-} // namespace stx
+} // namespace util
 #endif

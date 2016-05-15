@@ -28,7 +28,7 @@
 #include <mysql.h>
 #endif
 
-namespace stx {
+namespace util {
 namespace mysql {
 
 void mysqlInit();

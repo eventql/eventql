@@ -24,7 +24,7 @@
 #ifndef _STX_STATS_MULTICOUNTER_IMPL_H
 #define _STX_STATS_MULTICOUNTER_IMPL_H
 
-namespace stx {
+namespace util {
 namespace stats {
 
 template <typename ValueType, typename... LabelTypes>

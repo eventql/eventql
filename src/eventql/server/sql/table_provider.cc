@@ -27,7 +27,7 @@
 #include <eventql/core/TSDBService.h>
 #include <eventql/sql/CSTableScan.h>
 
-using namespace stx;
+using namespace util;
 
 namespace eventql {
 

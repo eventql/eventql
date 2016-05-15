@@ -26,7 +26,7 @@
 #include <stdlib.h>
 #include <string>
 
-namespace stx {
+namespace util {
 namespace json {
 
 class JSONPointer {
@@ -55,5 +55,5 @@ protected:
 };
 
 } // namespace json
-} // namespace stx
+} // namespace util
 #endif

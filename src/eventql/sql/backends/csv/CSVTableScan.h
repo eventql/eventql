@@ -26,7 +26,7 @@
 #include <eventql/sql/table_iterator.h>
 #include <eventql/sql/backends/csv/CSVInputStream.h>
 
-using namespace stx;
+using namespace util;
 
 namespace csql {
 namespace backends {

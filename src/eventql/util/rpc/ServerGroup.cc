@@ -24,7 +24,7 @@
 #include "eventql/util/exception.h"
 #include "eventql/util/rpc/ServerGroup.h"
 
-namespace stx {
+namespace util {
 
 ServerGroup::ServerGroup() {}
 

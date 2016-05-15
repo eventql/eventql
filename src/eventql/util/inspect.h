@@ -28,7 +28,7 @@
 #include <vector>
 #include "eventql/util/io/outputstream.h"
 
-namespace stx {
+namespace util {
 
 template <typename T>
 std::string inspect(const T& value);

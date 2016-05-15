@@ -52,20 +52,20 @@
 #include "eventql/core/TSDBServlet.h"
 #include "eventql/core/TSDBNodeConfig.pb.h"
 
-using namespace stx;
+using namespace util;
 
 std::atomic<bool> shutdown_sig;
-stx::thread::EventLoop ev;
+util::thread::EventLoop ev;
 
 int main(int argc, const char** argv) {
-  stx::Application::init();
-  stx::Application::logToStderr();
+  util::Application::init();
+  util::Application::logToStderr();
 
-  stx::cli::FlagParser flags;
+  util::cli::FlagParser flags;
 
   flags.defineFlag(
       "http_port",
-      stx::cli::FlagParser::T_INTEGER,
+      util::cli::FlagParser::T_INTEGER,
       false,
       NULL,
       "8000",
@@ -101,7 +101,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "loglevel",
-      stx::cli::FlagParser::T_STRING,
+      util::cli::FlagParser::T_STRING,
       false,
       NULL,
       "INFO",
@@ -122,10 +122,10 @@ int main(int argc, const char** argv) {
   auto conf = msg::parseText<eventql::TSDBNodeConfig>(conf_data);
 
   /* start http server and worker pools */
-  stx::thread::ThreadPool tpool;
+  util::thread::ThreadPool tpool;
   http::HTTPConnectionPool http(&ev);
-  stx::http::HTTPRouter http_router;
-  stx::http::HTTPServer http_server(&http_router, &ev);
+  util::http::HTTPRouter http_router;
+  util::http::HTTPServer http_server(&http_router, &ev);
   http_server.listen(flags.getInt("http_port"));
 
   eventql::PartitionMap pmap(dir);
@@ -137,7 +137,7 @@ int main(int argc, const char** argv) {
   http_router.addRouteByPrefixMatch("/tsdb", &tsdb_servlet, &tpool);
 
   ev.run();
-  stx::logInfo("tsdb", "Exiting...");
+  util::logInfo("tsdb", "Exiting...");
 
   exit(0);
 }

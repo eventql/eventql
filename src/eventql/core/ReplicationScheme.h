@@ -30,7 +30,7 @@
 #include <eventql/util/net/inetaddr.h>
 #include <eventql/core/ClusterConfig.pb.h>
 
-using namespace stx;
+using namespace util;
 
 namespace eventql {
 

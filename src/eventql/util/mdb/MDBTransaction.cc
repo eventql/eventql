@@ -25,7 +25,7 @@
 #include "eventql/util/mdb/MDB.h"
 #include "eventql/util/mdb/MDBTransaction.h"
 
-namespace stx {
+namespace util {
 namespace mdb {
 
 MDBTransaction::MDBTransaction(

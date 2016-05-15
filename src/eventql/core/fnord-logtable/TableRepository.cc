@@ -23,7 +23,7 @@
  */
 #include <fnord-logtable/TableRepository.h>
 
-namespace stx {
+namespace util {
 namespace logtable {
 
 TableRepository::TableRepository(
@@ -124,4 +124,4 @@ const String& TableRepository::replicaID() const {
 }
 
 } // namespace logtable
-} // namespace stx
+} // namespace util

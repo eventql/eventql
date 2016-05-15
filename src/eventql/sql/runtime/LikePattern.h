@@ -24,7 +24,7 @@
 #pragma once
 #include <eventql/util/stdtypes.h>
 
-using namespace stx;
+using namespace util;
 
 namespace csql {
 

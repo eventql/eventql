@@ -26,7 +26,7 @@
 #include "eventql/util/human.h"
 #include <eventql/infra/cstable/RecordShredder.h>
 
-using namespace stx;
+using namespace util;
 
 namespace cstable {
 

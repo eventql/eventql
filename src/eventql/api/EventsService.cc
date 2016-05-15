@@ -36,7 +36,7 @@
 #include "eventql/sql/CSTableScan.h"
 #include "eventql/core/TimeWindowPartitioner.h"
 
-using namespace stx;
+using namespace util;
 
 namespace eventql {
 

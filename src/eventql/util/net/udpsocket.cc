@@ -31,7 +31,7 @@
 #include "eventql/util/exception.h"
 #include "eventql/util/net/udpsocket.h"
 
-namespace stx {
+namespace util {
 namespace net {
 
 UDPSocket::UDPSocket() {

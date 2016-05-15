@@ -34,7 +34,7 @@
 #include <eventql/util/net/tcpconnection.h>
 #include <eventql/util/thread/taskscheduler.h>
 
-namespace stx {
+namespace util {
 namespace http {
 class HTTPResponseHandler;
 

@@ -24,7 +24,7 @@
 #include "eventql/util/stringutil.h"
 #include "eventql/util/stats/statssink.h"
 
-namespace stx {
+namespace util {
 namespace stats {
 
 TextStatsSink::TextStatsSink(

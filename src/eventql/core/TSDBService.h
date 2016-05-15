@@ -39,7 +39,7 @@
 #include <eventql/core/PartitionMap.h>
 #include <eventql/core/TimeWindowPartitioner.h>
 
-using namespace stx;
+using namespace util;
 
 namespace eventql {
 

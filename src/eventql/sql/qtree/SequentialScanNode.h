@@ -32,7 +32,7 @@
 #include <eventql/sql/TableInfo.h>
 #include <eventql/sql/qtree/qtree_coder.h>
 
-using namespace stx;
+using namespace util;
 
 namespace csql {
 class TableProvider;
@@ -150,11 +150,11 @@ public:
   static void encode(
       QueryTreeCoder* coder,
       const SequentialScanNode& node,
-      stx::OutputStream* os);
+      util::OutputStream* os);
 
   static RefPtr<QueryTreeNode> decode(
       QueryTreeCoder* coder,
-      stx::InputStream* os);
+      util::InputStream* os);
 
 protected:
 

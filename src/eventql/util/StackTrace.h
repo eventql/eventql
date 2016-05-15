@@ -26,7 +26,7 @@
 #include <vector>
 #include <string>
 
-namespace stx {
+namespace util {
 
 class StackTrace {
  public:
@@ -47,4 +47,4 @@ class StackTrace {
   int frameCount_;
 };
 
-} // namespace stx
+} // namespace util

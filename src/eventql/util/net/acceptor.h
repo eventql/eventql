@@ -28,7 +28,7 @@
 #include <vector>
 #include "eventloop.h"
 
-namespace stxmetric {
+namespace utilmetric {
 namespace ev {
 
 class Acceptor {

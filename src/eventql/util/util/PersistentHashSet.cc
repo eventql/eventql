@@ -28,7 +28,7 @@
 #include <eventql/util/io/mmappedfile.h>
 #include <eventql/util/fnv.h>
 
-namespace stx {
+namespace util {
 
 const size_t PersistentHashSet::kVersion = 1;
 const double PersistentHashSet::kMaxFillFactor = 0.5f;
@@ -266,5 +266,5 @@ void PersistentHashSet::grow(File* file) {
   nslots_ = new_nslots;
 }
 
-} // namespace stx
+} // namespace util
 

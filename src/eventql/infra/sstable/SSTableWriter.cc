@@ -32,7 +32,7 @@
 #include <eventql/infra/sstable/SSTableColumnWriter.h>
 #include <eventql/infra/sstable/RowWriter.h>
 
-namespace stx {
+namespace util {
 namespace sstable {
 
 std::unique_ptr<SSTableWriter> SSTableWriter::create(

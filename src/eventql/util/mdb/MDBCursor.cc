@@ -24,7 +24,7 @@
 #include <assert.h>
 #include "eventql/util/mdb/MDBCursor.h"
 
-namespace stx {
+namespace util {
 namespace mdb {
 
 MDBCursor::MDBCursor(

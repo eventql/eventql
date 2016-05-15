@@ -29,7 +29,7 @@
 #include <eventql/sql/runtime/Statement.h>
 #include <eventql/sql/result_cursor.h>
 
-using namespace stx;
+using namespace util;
 
 namespace csql {
 

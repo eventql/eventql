@@ -29,7 +29,7 @@
 #include <vector>
 #include "eventql/util/thread/taskscheduler.h"
 
-namespace stx {
+namespace util {
 namespace thread {
 
 class EventLoop : public TaskScheduler {

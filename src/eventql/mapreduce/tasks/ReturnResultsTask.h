@@ -26,7 +26,7 @@
 #include "eventql/mapreduce/MapReduceTask.h"
 #include "eventql/AnalyticsSession.pb.h"
 
-using namespace stx;
+using namespace util;
 
 namespace eventql {
 

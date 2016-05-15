@@ -28,7 +28,7 @@
 #include "eventql/util/protobuf/DynamicMessage.h"
 #include "eventql/util/UnixTime.h"
 
-using namespace stx;
+using namespace util;
 
 namespace eventql {
 

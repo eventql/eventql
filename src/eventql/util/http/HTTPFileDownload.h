@@ -33,7 +33,7 @@
 #include "eventql/util/http/httpclient.h"
 #include <string>
 
-namespace stx {
+namespace util {
 namespace http {
 
 class HTTPFileDownload {

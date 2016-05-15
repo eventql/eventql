@@ -29,7 +29,7 @@
 #include <vector>
 #include <memory>
 
-namespace stx {
+namespace util {
 namespace sstable {
 
 class RowOffsetIndex : public Index {

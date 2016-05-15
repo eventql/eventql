@@ -17,7 +17,7 @@
 #include <eventql/util/exception.h>
 #include <eventql/util/stringutil.h>
 
-namespace stx {
+namespace util {
 namespace chart {
 
 class Series {

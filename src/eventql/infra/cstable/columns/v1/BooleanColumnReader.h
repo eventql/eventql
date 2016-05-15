@@ -78,7 +78,7 @@ public:
   }
 
 protected:
-  stx::util::BitPackDecoder data_reader_;
+  util::BitPackDecoder data_reader_;
   uint8_t cur_val_;
 };
 

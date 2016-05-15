@@ -26,7 +26,7 @@
 #include "eventql/util/buffer.h"
 #include "eventql/util/stdtypes.h"
 
-namespace stx {
+namespace util {
 
 class FileUtil {
 public:

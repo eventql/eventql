@@ -17,7 +17,7 @@
 #include "cplot/styles/style_default.h"
 #include "eventql/util/io/outputstream.h"
 
-namespace stx {
+namespace util {
 namespace chart {
 
 class SVGTarget : public RenderTarget {

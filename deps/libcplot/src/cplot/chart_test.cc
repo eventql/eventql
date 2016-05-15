@@ -24,27 +24,27 @@
 
 UNIT_TEST(ChartTest);
 
-using stx::chart::AnyDomain;
-using stx::chart::AxisDefinition;
-using stx::chart::AreaChart;
-using stx::chart::AreaChart2D;
-using stx::chart::AreaChart3D;
-using stx::chart::BarChart;
-using stx::chart::BarChart2D;
-using stx::chart::BarChart3D;
-using stx::chart::LineChart2D;
-using stx::chart::PointChart2D;
-using stx::chart::PointChart3D;
-using stx::chart::Canvas;
-using stx::chart::ContinuousDomain;
-using stx::chart::DomainProvider;
-using stx::chart::Series;
-using stx::chart::Series2D;
-using stx::chart::Series3D;
-using stx::chart::SVGTarget;
-using stx::FileOutputStream;
-using stx::FileUtil;
-using stx::test::UnitTest;
+using util::chart::AnyDomain;
+using util::chart::AxisDefinition;
+using util::chart::AreaChart;
+using util::chart::AreaChart2D;
+using util::chart::AreaChart3D;
+using util::chart::BarChart;
+using util::chart::BarChart2D;
+using util::chart::BarChart3D;
+using util::chart::LineChart2D;
+using util::chart::PointChart2D;
+using util::chart::PointChart3D;
+using util::chart::Canvas;
+using util::chart::ContinuousDomain;
+using util::chart::DomainProvider;
+using util::chart::Series;
+using util::chart::Series2D;
+using util::chart::Series3D;
+using util::chart::SVGTarget;
+using util::FileOutputStream;
+using util::FileUtil;
+using util::test::UnitTest;
 
 static void compareChart(
     Canvas* chart,
@@ -389,7 +389,7 @@ TEST_CASE(ChartTest, TestCanvasWithAxisFromNumericalDomain, [] () {
 });
 
 
-static stx::test::UnitTest::TestCase __test_simple_bar_chart_(
+static util::test::UnitTest::TestCase __test_simple_bar_chart_(
     &ChartTest, "TestSimpleBarChart", [] () {
   auto series = new Series2D<std::string, double>("myseries");
 
@@ -415,7 +415,7 @@ static stx::test::UnitTest::TestCase __test_simple_bar_chart_(
       "ChartTest_TestSimpleBarChart_out.svg.html");
 });
 
-static stx::test::UnitTest::TestCase __test_mulitseries_bar_chart_(
+static util::test::UnitTest::TestCase __test_mulitseries_bar_chart_(
     &ChartTest, "TestMultiSeriesBarChart", [] () {
   auto series1 = new Series2D<std::string, double>("myseries1");
   series1->addDatum("A", 40);
@@ -449,7 +449,7 @@ static stx::test::UnitTest::TestCase __test_mulitseries_bar_chart_(
       "ChartTest_TestMultiSeriesBarChart_out.svg.html");
 });
 
-static stx::test::UnitTest::TestCase __test_stacked_bar_chart_(
+static util::test::UnitTest::TestCase __test_stacked_bar_chart_(
     &ChartTest, "TestStackedBarChart", [] () {
   auto series1 = new Series2D<std::string, double>("myseries1");
   series1->addDatum("A", 40);
@@ -483,7 +483,7 @@ static stx::test::UnitTest::TestCase __test_stacked_bar_chart_(
       "ChartTest_TestStackedBarChart_out.svg.html");
 });
 
-static stx::test::UnitTest::TestCase __test_horizontal_bar_chart_(
+static util::test::UnitTest::TestCase __test_horizontal_bar_chart_(
     &ChartTest, "TestHorizontalBarChart", [] () {
   auto series1 = new Series2D<std::string, double>("myseries1");
   series1->addDatum("A", 40);
@@ -508,7 +508,7 @@ static stx::test::UnitTest::TestCase __test_horizontal_bar_chart_(
       "ChartTest_TestHorizontalBarChart_out.svg.html");
 });
 
-static stx::test::UnitTest::TestCase __test_horizontal_mulit_bar_chart_(
+static util::test::UnitTest::TestCase __test_horizontal_mulit_bar_chart_(
     &ChartTest, "TestHorizontalMulitSeriesBarChart", [] () {
   auto series1 = new Series2D<std::string, double>("myseries1");
   series1->addDatum("A", 40);
@@ -542,7 +542,7 @@ static stx::test::UnitTest::TestCase __test_horizontal_mulit_bar_chart_(
       "ChartTest_TestHorizontalMulitSeriesBarChart_out.svg.html");
 });
 
-static stx::test::UnitTest::TestCase __test_horiz_stacked_bar_chart_(
+static util::test::UnitTest::TestCase __test_horiz_stacked_bar_chart_(
     &ChartTest, "TestHorizontalStackedBarChart", [] () {
   auto series1 = new Series2D<std::string, double>("myseries1");
   series1->addDatum("A", 40);
@@ -575,7 +575,7 @@ static stx::test::UnitTest::TestCase __test_horiz_stacked_bar_chart_(
       "ChartTest_TestHorizontalStackedBarChart_out.svg.html");
 });
 
-static stx::test::UnitTest::TestCase __test_range_bar_chart_(
+static util::test::UnitTest::TestCase __test_range_bar_chart_(
     &ChartTest, "TestRangeBarChart", [] () {
   auto series1 = new Series3D<std::string, double, double>("myseries1");
   series1->addDatum("A", -40, +40);
@@ -608,7 +608,7 @@ static stx::test::UnitTest::TestCase __test_range_bar_chart_(
       "ChartTest_TestRangeBarChart_out.svg.html");
 });
 
-static stx::test::UnitTest::TestCase __test_horiz_range_bar_chart_(
+static util::test::UnitTest::TestCase __test_horiz_range_bar_chart_(
     &ChartTest, "TestHorizontalRangeBarChart", [] () {
   auto series1 = new Series3D<std::string, double, double>("myseries1");
   series1->addDatum("A", -40, +40);
@@ -641,7 +641,7 @@ static stx::test::UnitTest::TestCase __test_horiz_range_bar_chart_(
       "ChartTest_TestHorizontalRangeBarChart_out.svg.html");
 });
 
-static stx::test::UnitTest::TestCase __test_simple_point_chart_(
+static util::test::UnitTest::TestCase __test_simple_point_chart_(
     &ChartTest, "TestSimplePointChart", [] () {
   auto series1 = new Series2D<double, double>("myseries1");
   series1->addDatum(10, 34);
@@ -673,7 +673,7 @@ static stx::test::UnitTest::TestCase __test_simple_point_chart_(
       "ChartTest_TestSimplePointChart_out.svg.html");
 });
 
-static stx::test::UnitTest::TestCase __test_variablesize_point_chart_(
+static util::test::UnitTest::TestCase __test_variablesize_point_chart_(
     &ChartTest, "TestVariableSizePointChart", [] () {
   auto series1 = new Series3D<double, double, double>("myseries1");
   series1->addDatum(10, 34, 5);
@@ -705,7 +705,7 @@ static stx::test::UnitTest::TestCase __test_variablesize_point_chart_(
       "ChartTest_TestVariableSizePointChart_out.svg.html");
 });
 
-static stx::test::UnitTest::TestCase __test_simple_line_chart_(
+static util::test::UnitTest::TestCase __test_simple_line_chart_(
     &ChartTest, "TestSimpleLineChart", [] () {
   auto series1 = new Series2D<double, double>("myseries1");
   series1->addDatum(10, 34);
@@ -741,7 +741,7 @@ static stx::test::UnitTest::TestCase __test_simple_line_chart_(
       "ChartTest_TestSimpleLineChart_out.svg.html");
 });
 
-static stx::test::UnitTest::TestCase __test_point_line_chart_(
+static util::test::UnitTest::TestCase __test_point_line_chart_(
     &ChartTest, "TestPointLineChart", [] () {
   auto series1 = new Series2D<double, double>("myseries1");
   series1->addDatum(10, 34);
@@ -778,7 +778,7 @@ static stx::test::UnitTest::TestCase __test_point_line_chart_(
       "ChartTest_TestPointLineChart_out.svg.html");
 });
 
-static stx::test::UnitTest::TestCase __test_multi_chart_(
+static util::test::UnitTest::TestCase __test_multi_chart_(
     &ChartTest, "TestMultiChart", [] () {
   auto series1 = new Series2D<double, double>("myseries1");
   series1->addDatum(10, 34);
@@ -850,7 +850,7 @@ static stx::test::UnitTest::TestCase __test_multi_chart_(
       "ChartTest_TestMultiChart_out.svg.html");
 });
 
-static stx::test::UnitTest::TestCase __test_simple_area_chart_(
+static util::test::UnitTest::TestCase __test_simple_area_chart_(
     &ChartTest, "TestSimpleAreaChart", [] () {
   auto series1 = new Series2D<double, double>("myseries1");
   series1->addDatum(10, 34);
@@ -879,7 +879,7 @@ static stx::test::UnitTest::TestCase __test_simple_area_chart_(
       "ChartTest_TestSimpleAreaChart_out.svg.html");
 });
 
-static stx::test::UnitTest::TestCase __test_range_area_chart_(
+static util::test::UnitTest::TestCase __test_range_area_chart_(
     &ChartTest, "TestRangeAreaChart", [] () {
   auto series1 = new Series3D<double, double, double>("myseries1");
   series1->addDatum(10, -34, 34);
@@ -908,7 +908,7 @@ static stx::test::UnitTest::TestCase __test_range_area_chart_(
       "ChartTest_TestRangeAreaChart_out.svg.html");
 });
 
-static stx::test::UnitTest::TestCase __test_multi_range_area_chart_(
+static util::test::UnitTest::TestCase __test_multi_range_area_chart_(
     &ChartTest, "TestMultiRangeAreaChart", [] () {
   auto series1 = new Series3D<double, double, double>("myseries1");
   series1->addDatum(10, -34, 34);
@@ -944,7 +944,7 @@ static stx::test::UnitTest::TestCase __test_multi_range_area_chart_(
       "ChartTest_TestMultiRangeAreaChart_out.svg.html");
 });
 
-static stx::test::UnitTest::TestCase __test_multi_range_area_line_(
+static util::test::UnitTest::TestCase __test_multi_range_area_line_(
     &ChartTest, "TestMultiRangeAreaLineChart", [] () {
   auto series1 = new Series3D<double, double, double>("myseries1");
   series1->addDatum(10, -34, 34);

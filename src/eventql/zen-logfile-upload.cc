@@ -36,7 +36,7 @@
 #include "eventql/util/util/SimpleRateLimit.h"
 #include "eventql/util/protobuf/MessageSchema.h"
 
-using namespace stx;
+using namespace util;
 
 void run(const cli::FlagParser& flags) {
   auto logfile_name = flags.getString("logfile_name");
@@ -45,7 +45,7 @@ void run(const cli::FlagParser& flags) {
   auto tail = flags.isSet("tail");
   String api_url = "http://api.eventql.io/api/v1";
 
-  stx::logInfo("dx-logfile-upload", "Tailing logfile '$0'", input_file);
+  util::logInfo("dx-logfile-upload", "Tailing logfile '$0'", input_file);
 
   String source_attrs;
   for (const auto& a : flags.getStrings("attr")) {
@@ -87,7 +87,7 @@ void run(const cli::FlagParser& flags) {
   util::SimpleRateLimitedFn status_line(
       kMicrosPerSecond,
       [&num_rows_uploaded, &position, &inode] () {
-    stx::logDebug(
+    util::logDebug(
         "dx-logfile-upload",
         "Uploading... rows_uploaded=$0 position=$1 inode=$2",
         num_rows_uploaded,
@@ -171,14 +171,14 @@ void run(const cli::FlagParser& flags) {
 }
 
 int main(int argc, const char** argv) {
-  stx::Application::init();
-  stx::Application::logToStderr();
+  util::Application::init();
+  util::Application::logToStderr();
 
-  stx::cli::FlagParser flags;
+  util::cli::FlagParser flags;
 
   flags.defineFlag(
       "loglevel",
-      stx::cli::FlagParser::T_STRING,
+      util::cli::FlagParser::T_STRING,
       false,
       NULL,
       "INFO",
@@ -187,7 +187,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "input_file",
-      stx::cli::FlagParser::T_STRING,
+      util::cli::FlagParser::T_STRING,
       true,
       "i",
       NULL,
@@ -196,7 +196,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "logfile_name",
-      stx::cli::FlagParser::T_STRING,
+      util::cli::FlagParser::T_STRING,
       true,
       NULL,
       NULL,
@@ -205,7 +205,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "tail",
-      stx::cli::FlagParser::T_SWITCH,
+      util::cli::FlagParser::T_SWITCH,
       false,
       NULL,
       NULL,
@@ -214,7 +214,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "attr",
-      stx::cli::FlagParser::T_STRING,
+      util::cli::FlagParser::T_STRING,
       false,
       NULL,
       NULL,
@@ -223,7 +223,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "api_token",
-      stx::cli::FlagParser::T_STRING,
+      util::cli::FlagParser::T_STRING,
       true,
       "x",
       NULL,
@@ -237,7 +237,7 @@ int main(int argc, const char** argv) {
 
     run(flags);
   } catch (const StandardException& e) {
-    stx::logError("dx-logfile-upload", "[FATAL ERROR] $0", e.what());
+    util::logError("dx-logfile-upload", "[FATAL ERROR] $0", e.what());
   }
 
   return 0;

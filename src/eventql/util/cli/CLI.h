@@ -29,7 +29,7 @@
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/cli/CLICommand.h>
 
-namespace stx {
+namespace util {
 namespace cli {
 
 class CLI {

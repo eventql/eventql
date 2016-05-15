@@ -12,8 +12,8 @@
 #include "cplot/discretedomain.h"
 #include "cplot/timedomain.h"
 
-using namespace stx;
-namespace stx {
+using namespace util;
+namespace util {
 namespace chart {
 
 const char AnyDomain::kDimensionLetters[] = "xyz";
@@ -30,8 +30,8 @@ template <> Domain<double>*
   return new ContinuousDomain<double>();
 }
 
-template <> Domain<stx::UnixTime>*
-    Domain<stx::UnixTime>::mkDomain() {
+template <> Domain<util::UnixTime>*
+    Domain<util::UnixTime>::mkDomain() {
   return new TimeDomain();
 }
 

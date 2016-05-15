@@ -27,7 +27,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
-namespace stx {
+namespace util {
 
 CSVOutputStream::CSVOutputStream(
     std::unique_ptr<OutputStream> output_stream,
@@ -52,5 +52,5 @@ void CSVOutputStream::appendRow(const Vector<String>& row) {
   output_->write(buf);
 }
 
-} // namespace stx
+} // namespace util
 

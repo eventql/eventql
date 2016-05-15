@@ -11,7 +11,7 @@
 #define _libstx_UI_COLORPALETTE_H
 #include <stdlib.h>
 
-namespace stx {
+namespace util {
 namespace chart {
 
 class ColorPalette {

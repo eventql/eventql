@@ -24,7 +24,7 @@
 #ifndef _libstx_HTTP_STATUSES_H
 #define _libstx_HTTP_STATUSES_H
 
-namespace stx {
+namespace util {
 namespace http {
 
 struct HTTPStatus {

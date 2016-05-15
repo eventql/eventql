@@ -30,7 +30,7 @@
 #include <atomic>
 #include <eventql/util/stdtypes.h>
 
-namespace stx {
+namespace util {
 
 template <typename T>
 class AutoRef {
@@ -97,7 +97,7 @@ AutoRef<T> mkRef(ScopedPtr<T>&& ptr);
 template <typename T>
 ScopedPtr<T> mkScoped(T* ptr);
 
-} // namespace stx
+} // namespace util
 
 #include "autoref_impl.h"
 #endif

@@ -25,7 +25,7 @@
 #include <eventql/infra/sstable/binaryformat.h>
 #include <eventql/infra/sstable/fileheaderwriter.h>
 
-namespace stx {
+namespace util {
 namespace sstable {
 
 size_t FileHeaderWriter::calculateSize(size_t userdata_size) {
@@ -68,7 +68,7 @@ FileHeaderWriter::FileHeaderWriter(
     size_t body_size,
     const void* userdata,
     size_t userdata_size) :
-    stx::util::BinaryMessageWriter(buf, buf_size) {
+    util::BinaryMessageWriter(buf, buf_size) {
   uint64_t flags = 0;
 
   appendUInt32(BinaryFormat::kMagicBytes);
@@ -92,7 +92,7 @@ FileHeaderWriter::FileHeaderWriter(
 FileHeaderWriter::FileHeaderWriter(
     void* buf,
     size_t buf_size) :
-    stx::util::BinaryMessageWriter(buf, buf_size) {}
+    util::BinaryMessageWriter(buf, buf_size) {}
 
 // DEPRECATED
 void FileHeaderWriter::updateBodySize(size_t body_size) {

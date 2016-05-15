@@ -12,21 +12,21 @@
 #include "eventql/util/UnixTime.h"
 #include "cplot/continuousdomain.h"
 
-namespace stx {
+namespace util {
 namespace chart {
 
-class TimeDomain : public ContinuousDomain<stx::UnixTime> {
+class TimeDomain : public ContinuousDomain<util::UnixTime> {
 public:
 
   TimeDomain(
-    stx::UnixTime min_value =
-        std::numeric_limits<stx::UnixTime>::max(),
-    stx::UnixTime max_value =
-        std::numeric_limits<stx::UnixTime>::min(),
+    util::UnixTime min_value =
+        std::numeric_limits<util::UnixTime>::max(),
+    util::UnixTime max_value =
+        std::numeric_limits<util::UnixTime>::min(),
     bool is_logarithmic = false,
     bool is_inverted = false);
 
-  std::string label(stx::UnixTime value) const;
+  std::string label(util::UnixTime value) const;
 
 };
 

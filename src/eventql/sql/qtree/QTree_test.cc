@@ -37,7 +37,7 @@
 #include "eventql/sql/CSTableScanProvider.h"
 #include "eventql/sql/backends/csv/CSVTableProvider.h"
 
-using namespace stx;
+using namespace util;
 using namespace csql;
 
 UNIT_TEST(QTreeTest);

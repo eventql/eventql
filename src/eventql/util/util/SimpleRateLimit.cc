@@ -23,7 +23,6 @@
  */
 #include "eventql/util/util/SimpleRateLimit.h"
 
-namespace stx {
 namespace util {
 
 SimpleRateLimit::SimpleRateLimit(
@@ -58,6 +57,5 @@ void SimpleRateLimitedFn::runForce() {
   fn_();
 }
 
-}
 }
 

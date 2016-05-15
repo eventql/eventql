@@ -27,7 +27,7 @@
 #include <eventql/util/buffer.h>
 #include <eventql/util/thread/taskscheduler.h>
 
-namespace stx {
+namespace util {
 namespace net {
 
 class UDPServer {
@@ -47,7 +47,7 @@ protected:
   TaskScheduler* server_scheduler_;
   TaskScheduler* callback_scheduler_;
   int ssock_;
-  std::function<void (const stx::Buffer&)> callback_;
+  std::function<void (const util::Buffer&)> callback_;
 };
 
 

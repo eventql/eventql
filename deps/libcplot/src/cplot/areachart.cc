@@ -13,7 +13,7 @@
 #include "areachart.h"
 #include "rendertarget.h"
 
-namespace stx {
+namespace util {
 namespace chart {
 
 char AreaChart::kDefaultLineStyle[] = "none";

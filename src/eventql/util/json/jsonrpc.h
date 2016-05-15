@@ -31,7 +31,7 @@
 #include "eventql/util/json/jsonrpchttpadapter.h"
 #include "eventql/util/reflect/reflect.h"
 
-namespace stx {
+namespace util {
 namespace json {
 class JSONRPCRequest;
 class JSONRPCResponse;
@@ -80,7 +80,7 @@ protected:
 };
 
 } // namespace json
-} // namespace stx
+} // namespace util
 
 #include "jsonrpc_impl.h"
 #endif

@@ -27,7 +27,7 @@
 #include "eventql/util/http/httprouter.h"
 #include "eventql/util/http/httpservice.h"
 
-namespace stx {
+namespace util {
 namespace http {
 
 void HTTPRouter::addRoute(

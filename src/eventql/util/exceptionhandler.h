@@ -26,7 +26,7 @@
 #include <mutex>
 #include "eventql/util/stdtypes.h"
 
-namespace stx {
+namespace util {
 
 class ExceptionHandler {
 public:

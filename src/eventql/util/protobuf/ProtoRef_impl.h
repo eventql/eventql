@@ -23,7 +23,7 @@
  */
 #pragma once
 
-namespace stx {
+namespace util {
 
 template <class ProtoType>
 ProtoRef<ProtoType>::ProtoRef() {}
@@ -37,5 +37,5 @@ ProtoRef<ProtoType>::ProtoRef(
     const ProtoRef<ProtoType>& other) :
     proto(other.proto) {}
 
-} // namespace stx
+} // namespace util
 

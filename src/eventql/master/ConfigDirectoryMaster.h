@@ -28,7 +28,7 @@
 #include <eventql/core/ClusterConfig.pb.h>
 #include <eventql/TableDefinition.h>
 
-using namespace stx;
+using namespace util;
 
 namespace eventql {
 

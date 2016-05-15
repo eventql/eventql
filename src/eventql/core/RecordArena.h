@@ -15,7 +15,7 @@
 #include <eventql/util/protobuf/MessageObject.h>
 #include <eventql/core/RecordRef.h>
 
-using namespace stx;
+using namespace util;
 
 namespace eventql {
 

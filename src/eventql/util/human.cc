@@ -28,7 +28,7 @@
 #include <eventql/util/human.h>
 #include <eventql/util/ISO8601.h>
 
-namespace stx {
+namespace util {
 
 Option<UnixTime> Human::parseTime(
     const String& str,
@@ -401,5 +401,5 @@ bool Human::isNullOrEmpty(const String& value) {
       value == "NULL";
 }
 
-} // namespace stx
+} // namespace util
 

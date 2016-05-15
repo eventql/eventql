@@ -28,7 +28,7 @@
 #include "eventql/util/exception.h"
 #include "eventql/util/io/inputstream.h"
 
-namespace stx {
+namespace util {
 
 std::unique_ptr<CSVInputStream> CSVInputStream::openFile(
     const std::string& file_path,

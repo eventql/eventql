@@ -23,7 +23,7 @@
  */
 #include "eventql/util/csv/BinaryCSVInputStream.h"
 
-namespace stx {
+namespace util {
 
 BinaryCSVInputStream::BinaryCSVInputStream(
     std::unique_ptr<RewindableInputStream>&& input_stream) :

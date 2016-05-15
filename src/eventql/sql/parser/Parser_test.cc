@@ -29,7 +29,7 @@
 #include <eventql/sql/parser/token.h>
 #include <eventql/sql/parser/tokenize.h>
 
-using namespace stx;
+using namespace util;
 using namespace csql;
 
 UNIT_TEST(ParserTest);
@@ -591,7 +591,7 @@ TEST_INITIALIZER(ParserTest, InitializeComplexQueries, [] () {
         "    o_orderdate;");
 
   for (auto query : queries) {
-    new stx::test::UnitTest::TestCase(
+    new util::test::UnitTest::TestCase(
         &ParserTest,
         "TestComplexQueries",
         [query] () {

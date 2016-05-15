@@ -20,7 +20,7 @@
 #include <eventql/core/LSMTableIndex.h>
 #include <eventql/infra/cstable/CSTableWriter.h>
 
-using namespace stx;
+using namespace util;
 
 namespace eventql {
 

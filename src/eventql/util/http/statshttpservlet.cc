@@ -24,7 +24,7 @@
 #include "eventql/util/http/statshttpservlet.h"
 #include "eventql/util/stats/statssink.h"
 
-namespace stx {
+namespace util {
 namespace stats {
 
 StatsHTTPServlet::StatsHTTPServlet() : stats_repo_(StatsRepository::get()) {}
@@ -33,8 +33,8 @@ StatsHTTPServlet::StatsHTTPServlet(StatsRepository* stats_repo) :
     stats_repo_(stats_repo) {}
 
 void StatsHTTPServlet::handleHTTPRequest(
-    stx::http::HTTPRequest* req,
-    stx::http::HTTPResponse* res) {
+    util::http::HTTPRequest* req,
+    util::http::HTTPResponse* res) {
   Buffer buf;
 
   TextStatsSink sink([&buf] (const String& line) {
@@ -46,7 +46,7 @@ void StatsHTTPServlet::handleHTTPRequest(
     exp.stat->exportAll(exp.path, &sink);
   });
 
-  res->setStatus(stx::http::kStatusOK);
+  res->setStatus(util::http::kStatusOK);
   res->addBody(buf);
 }
 

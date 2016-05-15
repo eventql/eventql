@@ -24,7 +24,7 @@
 #pragma once
 #include <eventql/util/stdtypes.h>
 
-namespace stx {
+namespace util {
 
 class Assets {
 public:
@@ -60,5 +60,5 @@ protected:
   static AssetMap* globalMap();
 };
 
-} // namespace stx
+} // namespace util
 

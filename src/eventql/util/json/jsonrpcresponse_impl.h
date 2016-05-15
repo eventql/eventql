@@ -23,7 +23,7 @@
  */
 #include "eventql/util/json/json.h"
 
-namespace stx {
+namespace util {
 namespace json {
 
 template <typename T>

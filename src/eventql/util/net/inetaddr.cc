@@ -30,7 +30,7 @@
 #include "eventql/util/net/inetaddr.h"
 #include "eventql/sysconfig.h"
 
-namespace stx {
+namespace util {
 
 InetAddr InetAddr::resolve(const std::string& addr_str) {
   auto parts = StringUtil::split(addr_str, ":");

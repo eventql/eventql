@@ -13,7 +13,7 @@
 #include "cplot/domain.h"
 #include "cplot/svgtarget.h"
 
-namespace stx {
+namespace util {
 namespace chart {
 
 Canvas::Canvas() :

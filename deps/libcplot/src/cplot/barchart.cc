@@ -9,7 +9,7 @@
  */
 #include "cplot/barchart.h"
 
-namespace stx {
+namespace util {
 namespace chart {
 
 BarChart::BarChart(

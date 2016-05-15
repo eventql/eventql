@@ -30,7 +30,7 @@
 #include <eventql/util/exception.h>
 #include <eventql/util/net/udpserver.h>
 
-namespace stx {
+namespace util {
 namespace net {
 
 UDPServer::UDPServer(

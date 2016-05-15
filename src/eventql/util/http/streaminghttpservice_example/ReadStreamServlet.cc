@@ -25,7 +25,7 @@
 #include "ReadStreamServlet.h"
 
 
-namespace stx {
+namespace util {
 namespace http {
 
 void ReadStreamServlet::handleHTTPRequest(
@@ -38,11 +38,11 @@ void ReadStreamServlet::handleHTTPRequest(
     Buffer chunk;
     chunk.append(data, size);
     body.append(data, size);
-    stx::iputs("Request Body Chunk read: $0", chunk.toString());
+    util::iputs("Request Body Chunk read: $0", chunk.toString());
   };
 
   req_stream->readBody(bodyChunkRead);
-  stx::iputs("Request Body: $0", body.toString());
+  util::iputs("Request Body: $0", body.toString());
 
 }
 

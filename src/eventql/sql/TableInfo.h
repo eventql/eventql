@@ -27,7 +27,7 @@
 
 namespace csql {
 
-using namespace stx;
+using namespace util;
 
 struct ColumnInfo {
   String column_name;

@@ -28,7 +28,7 @@
 #include <eventql/core/PartitionState.pb.h>
 #include <eventql/core/RecordArena.h>
 
-using namespace stx;
+using namespace util;
 
 namespace eventql {
 class Table;

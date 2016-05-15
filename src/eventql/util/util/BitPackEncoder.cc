@@ -25,9 +25,7 @@
 #include <eventql/util/inspect.h>
 #include <eventql/util/util/BitPackEncoder.h>
 
-namespace stx {
 namespace util {
-
 
 BitPackEncoder::BitPackEncoder(
     uint32_t max_val) :
@@ -68,6 +66,5 @@ size_t BitPackEncoder::size() const {
   return buf_.size();
 }
 
-}
 }
 

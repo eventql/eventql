@@ -30,7 +30,7 @@
 #include <eventql/util/exception.h>
 #include <eventql/util/io/outputstream.h>
 
-namespace stx {
+namespace util {
 namespace json {
 
 class JSONOutputStream {
@@ -68,7 +68,7 @@ protected:
 std::string escapeString(const std::string& string);
 
 } // namespace json
-} // namespace stx
+} // namespace util
 
 //#include "jsonoutputstream_impl.h"
 #endif

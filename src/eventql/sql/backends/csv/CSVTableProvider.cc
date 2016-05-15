@@ -24,7 +24,7 @@
 #include <eventql/sql/backends/csv/CSVTableProvider.h>
 #include <eventql/sql/expressions/table/tablescan.h>
 
-using namespace stx;
+using namespace util;
 
 namespace csql {
 namespace backends {

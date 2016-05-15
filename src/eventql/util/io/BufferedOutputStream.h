@@ -24,7 +24,7 @@
 #pragma once
 #include "eventql/util/io/outputstream.h"
 
-namespace stx {
+namespace util {
 
 /**
  * A buffered output stream allows an application to write bytes to the

@@ -31,7 +31,7 @@
 #include <locale>
 #include "eventql/util/stdtypes.h"
 
-namespace stx {
+namespace util {
 
 class StringUtil {
 public:
@@ -386,7 +386,7 @@ protected:
 
 };
 
-} // namespace stx
+} // namespace util
 
 #include "stringutil_impl.h"
 #endif

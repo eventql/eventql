@@ -26,7 +26,7 @@
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/UnixTime.h>
 
-namespace stx {
+namespace util {
 namespace msg {
 
 struct MessageObject;
@@ -110,6 +110,6 @@ struct MessageObject {
 
 
 } // namespace msg
-} // namespace stx
+} // namespace util
 
 #endif

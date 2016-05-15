@@ -15,7 +15,7 @@
 #include <vector>
 
 // FIXPAUL too many copies T val...
-namespace stx {
+namespace util {
 namespace chart {
 
 /**

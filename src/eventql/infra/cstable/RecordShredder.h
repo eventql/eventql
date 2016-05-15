@@ -48,16 +48,16 @@ public:
 
   void addRecordFromJSON(const String& json);
   void addRecordFromJSON(
-      const stx::json::JSONObject::const_iterator& begin,
-      const stx::json::JSONObject::const_iterator& end);
+      const util::json::JSONObject::const_iterator& begin,
+      const util::json::JSONObject::const_iterator& end);
 
-  void addRecordFromProtobuf(const stx::msg::DynamicMessage& msg);
+  void addRecordFromProtobuf(const util::msg::DynamicMessage& msg);
   void addRecordFromProtobuf(
-      const stx::msg::MessageObject& msg,
-      const stx::msg::MessageSchema& schema);
+      const util::msg::MessageObject& msg,
+      const util::msg::MessageSchema& schema);
 
 
-  void addRecordsFromCSV(stx::CSVInputStream* csv);
+  void addRecordsFromCSV(util::CSVInputStream* csv);
 
 protected:
   CSTableWriter* writer_;

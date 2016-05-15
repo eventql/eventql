@@ -24,7 +24,7 @@
  */
 #include <eventql/util/http/HTTPRequestStream.h>
 
-namespace stx {
+namespace util {
 namespace http {
 
 HTTPRequestStream::HTTPRequestStream(

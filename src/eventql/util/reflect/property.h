@@ -28,7 +28,7 @@
 #include <functional>
 #include "eventql/util/reflect/indexsequence.h"
 
-namespace stx {
+namespace util {
 namespace reflect {
 
 template <typename ClassType, typename TargetType>

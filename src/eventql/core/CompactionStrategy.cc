@@ -14,7 +14,7 @@
 #include <eventql/infra/cstable/CSTableWriter.h>
 #include <eventql/util/io/fileutil.h>
 
-using namespace stx;
+using namespace util;
 
 namespace eventql {
 

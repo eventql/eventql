@@ -26,7 +26,7 @@
 #include "eventql/mapreduce/MapReduceScheduler.h"
 #include "eventql/api/MapReduceService.h"
 
-using namespace stx;
+using namespace util;
 
 namespace eventql {
 

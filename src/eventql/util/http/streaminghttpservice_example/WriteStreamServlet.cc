@@ -24,7 +24,7 @@
  */
 #include "WriteStreamServlet.h"
 
-namespace stx {
+namespace util {
 namespace http {
 
 void WriteStreamServlet::handleHTTPRequest(

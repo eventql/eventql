@@ -39,7 +39,7 @@
 #include <eventql/infra/sstable/indexprovider.h>
 #include <eventql/infra/sstable/SSTableColumnSchema.h>
 
-namespace stx {
+namespace util {
 namespace sstable {
 
 class SSTableColumnWriter {
@@ -61,6 +61,6 @@ protected:
 };
 
 } // namespace sstable
-} // namespace stx
+} // namespace util
 
 #endif

@@ -40,11 +40,11 @@ namespace csql {
 class Parser {
   friend class QueryTest;
 public:
-  struct ParseError : public stx::Exception {
+  struct ParseError : public util::Exception {
     template <typename... T>
     ParseError(
         const char* message, T... args) :
-        stx::Exception(message, args...) {}
+        util::Exception(message, args...) {}
   };
 
   /* precedence table

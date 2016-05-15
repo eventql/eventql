@@ -24,7 +24,7 @@
 #include <fnord-logtable/RemoteTableReader.h>
 #include <eventql/util/protobuf/MessageDecoder.h>
 
-namespace stx {
+namespace util {
 namespace logtable {
 
 RemoteTableReader::RemoteTableReader(
@@ -110,6 +110,6 @@ size_t RemoteTableReader::fetchRecords(
 }
 
 } // namespace logtable
-} // namespace stx
+} // namespace util
 
 

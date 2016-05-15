@@ -30,14 +30,14 @@ class DrawStatement;
 
 class BarChartBuilder : public ChartBuilder {
 public:
-  BarChartBuilder(stx::chart::Canvas* canvas, RefPtr<DrawStatementNode> draw_stmt);
-  stx::chart::Drawable* getChart() const override;
+  BarChartBuilder(util::chart::Canvas* canvas, RefPtr<DrawStatementNode> draw_stmt);
+  util::chart::Drawable* getChart() const override;
   std::string chartName() const override;
 protected:
-  stx::chart::Drawable* findChartType() const;
-  void setOrientation(stx::chart::BarChart* chart) const;
-  void setStacked(stx::chart::BarChart* chart) const;
-  void setLabels(stx::chart::BarChart* chart) const;
+  util::chart::Drawable* findChartType() const;
+  void setOrientation(util::chart::BarChart* chart) const;
+  void setStacked(util::chart::BarChart* chart) const;
+  void setLabels(util::chart::BarChart* chart) const;
 };
 
 }

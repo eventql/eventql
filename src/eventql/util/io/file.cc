@@ -29,7 +29,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-namespace stx {
+namespace util {
 
 File File::openFile(
     const std::string& filename,

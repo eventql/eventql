@@ -31,7 +31,7 @@
 namespace cstable {
 class ColumnWriter;
 
-class ColumnReader : public stx::RefCounted {
+class ColumnReader : public util::RefCounted {
 public:
 
   virtual bool readBoolean(

@@ -30,7 +30,7 @@
 #include "eventql/JavaScriptContext.h"
 #include "eventql/mapreduce/MapReduceTask.h"
 
-using namespace stx;
+using namespace util;
 
 namespace eventql {
 

@@ -31,7 +31,7 @@
 #include "eventql/CustomerConfig.h"
 #include "eventql/ConfigDirectory.h"
 
-using namespace stx;
+using namespace util;
 
 namespace eventql {
 

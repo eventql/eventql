@@ -37,7 +37,7 @@
 #include "eventql/util/mysql//MySQL.h"
 #include "eventql/util/mysql//MySQLConnection.h"
 
-using namespace stx;
+using namespace util;
 
 #ifndef STX_ENABLE_MYSQL
 #error zen-mysql-upload needs libmysqlclient
@@ -51,17 +51,17 @@ void run(const cli::FlagParser& flags) {
   auto shard_size = flags.getInt("shard_size");
   auto mysql_addr = flags.getString("mysql");
 
-  stx::logInfo("dx-mysql-upload", "Connecting to MySQL Server...");
+  util::logInfo("dx-mysql-upload", "Connecting to MySQL Server...");
 
   mysql::mysqlInit();
   auto mysql_conn = mysql::MySQLConnection::openConnection(URI(mysql_addr));
 
-  stx::logInfo(
+  util::logInfo(
       "dx-mysql-upload",
       "Analyzing the input table. This might take a few minutes...");
 
   auto schema = mysql_conn->getTableSchema(source_table);
-  stx::logDebug("dx-mysql-upload", "Table Schema:\n$0", schema->toString());
+  util::logDebug("dx-mysql-upload", "Table Schema:\n$0", schema->toString());
 
   auto count_rows_qry = StringUtil::format(
       "SELECT count(*) FROM `$0`;",
@@ -77,7 +77,7 @@ void run(const cli::FlagParser& flags) {
   });
 
   if (num_rows == 0) {
-    stx::logError(
+    util::logError(
         "dx-mysql-upload",
         "Table '$0' appears to be empty",
         source_table);
@@ -86,7 +86,7 @@ void run(const cli::FlagParser& flags) {
   }
 
   auto num_shards = (num_rows + shard_size - 1) / shard_size;
-  stx::logDebug("dx-mysql-upload", "Splitting into $0 shards", num_shards);
+  util::logDebug("dx-mysql-upload", "Splitting into $0 shards", num_shards);
 
   http::HTTPMessage::HeaderList auth_headers;
   auth_headers.emplace_back(
@@ -129,7 +129,7 @@ void run(const cli::FlagParser& flags) {
   util::SimpleRateLimitedFn status_line(
       kMicrosPerSecond,
       [&num_rows_uploaded, num_rows] () {
-    stx::logInfo(
+    util::logInfo(
         "dx-mysql-upload",
         "[$0%] Uploading... $1/$2 rows",
         (size_t) ((num_rows_uploaded / (double) num_rows) * 100),
@@ -151,7 +151,7 @@ void run(const cli::FlagParser& flags) {
 
   size_t nshard = 0;
   auto upload_shard = [&] {
-    stx::logDebug(
+    util::logDebug(
         "dx-mysql-upload",
         "Shard $0 ready for upload; size=$1MB",
         nshard,
@@ -164,7 +164,7 @@ void run(const cli::FlagParser& flags) {
         nshard++);
 
     tpool.run([upload_uri, shard_data, auth_headers] () {
-      stx::logDebug("dx-mysql-upload", "Uploading: $0", upload_uri);
+      util::logDebug("dx-mysql-upload", "Uploading: $0", upload_uri);
 
       http::HTTPClient http_client;
       auto upload_res = http_client.executeRequest(
@@ -173,7 +173,7 @@ void run(const cli::FlagParser& flags) {
               shard_data,
               auth_headers));
 
-      stx::logDebug("dx-mysql-upload", "Upload finished: $0", upload_uri);
+      util::logDebug("dx-mysql-upload", "Upload finished: $0", upload_uri);
       if (upload_res.statusCode() != 201) {
         RAISE(kRuntimeError, upload_res.body().toString());
       }
@@ -210,19 +210,19 @@ void run(const cli::FlagParser& flags) {
   status_line.runForce();
   tpool.stop();
 
-  stx::logInfo("dx-mysql-upload", "Upload finished successfully :)");
+  util::logInfo("dx-mysql-upload", "Upload finished successfully :)");
   exit(0);
 }
 
 int main(int argc, const char** argv) {
-  stx::Application::init();
-  stx::Application::logToStderr();
+  util::Application::init();
+  util::Application::logToStderr();
 
-  stx::cli::FlagParser flags;
+  util::cli::FlagParser flags;
 
   flags.defineFlag(
       "loglevel",
-      stx::cli::FlagParser::T_STRING,
+      util::cli::FlagParser::T_STRING,
       false,
       NULL,
       "INFO",
@@ -231,7 +231,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "source_table",
-      stx::cli::FlagParser::T_STRING,
+      util::cli::FlagParser::T_STRING,
       true,
       "t",
       NULL,
@@ -240,7 +240,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "destination_table",
-      stx::cli::FlagParser::T_STRING,
+      util::cli::FlagParser::T_STRING,
       true,
       "t",
       NULL,
@@ -249,7 +249,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "api_token",
-      stx::cli::FlagParser::T_STRING,
+      util::cli::FlagParser::T_STRING,
       true,
       "x",
       NULL,
@@ -258,7 +258,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "mysql",
-      stx::cli::FlagParser::T_STRING,
+      util::cli::FlagParser::T_STRING,
       true,
       "x",
       "mysql://localhost:3306/mydb?user=root",
@@ -267,7 +267,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "shard_size",
-      stx::cli::FlagParser::T_INTEGER,
+      util::cli::FlagParser::T_INTEGER,
       false,
       NULL,
       "262144",
@@ -282,7 +282,7 @@ int main(int argc, const char** argv) {
   try {
     run(flags);
   } catch (const StandardException& e) {
-    stx::logError("dx-mysql-upload", "[FATAL ERROR] $0", e.what());
+    util::logError("dx-mysql-upload", "[FATAL ERROR] $0", e.what());
   }
 
   return 0;

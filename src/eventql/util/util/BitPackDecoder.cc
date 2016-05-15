@@ -25,7 +25,6 @@
 #include <eventql/util/exception.h>
 #include <3rdparty/simdcomp/simdcomp.h>
 
-namespace stx {
 namespace util {
 
 BitPackDecoder::BitPackDecoder(
@@ -45,7 +44,6 @@ void BitPackDecoder::fetch() {
   outbuf_pos_ = 0;
 }
 
-}
 }
 
 

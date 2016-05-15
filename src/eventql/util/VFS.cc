@@ -24,7 +24,7 @@
 #include <eventql/util/VFS.h>
 #include <eventql/util/io/mmappedfile.h>
 
-namespace stx {
+namespace util {
 
 RefPtr<VFSFile> WhitelistVFS::openFile(const String& filename) {
   auto iter = whitelist_.find(filename);

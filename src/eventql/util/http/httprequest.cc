@@ -26,7 +26,7 @@
 #include <eventql/util/http/httpparser.h>
 #include <eventql/util/http/httprequest.h>
 
-namespace stx {
+namespace util {
 namespace http {
 
 HTTPRequest HTTPRequest::mkGet(const std::string& uri) {

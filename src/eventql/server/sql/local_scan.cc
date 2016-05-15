@@ -11,7 +11,7 @@
  */
 #include <eventql/sql/table_scan.h>
 
-using namespace stx;
+using namespace util;
 
 namespace eventql {
 

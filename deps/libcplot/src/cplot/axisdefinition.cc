@@ -10,7 +10,7 @@
 #include "axisdefinition.h"
 #include "domain.h"
 
-namespace stx {
+namespace util {
 namespace chart {
 
 AxisDefinition::AxisDefinition(

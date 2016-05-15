@@ -27,7 +27,7 @@
 #include <syslog.h>
 #endif
 
-namespace stx {
+namespace util {
 
 SyslogTarget::SyslogTarget(const String& name)  {
 #ifdef HAVE_SYSLOG_H
@@ -96,4 +96,4 @@ void SyslogTarget::log(
 }
 
 
-} // namespace stx
+} // namespace util

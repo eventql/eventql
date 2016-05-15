@@ -34,7 +34,7 @@
 #include <eventql/util/io/fileutil.h>
 #include <eventql/util/option.h>
 
-using namespace stx;
+using namespace util;
 
 namespace cstable {
 
@@ -193,7 +193,7 @@ void CSTableWriter::commitV1() {
     columns_[i].body_size = writer->bodySize();
   }
 
-  stx::util::BinaryMessageWriter header;
+  util::BinaryMessageWriter header;
   header.appendUInt32(cstable::v0_1_0::kMagicBytesUInt32);
   header.appendUInt16(cstable::v0_1_0::kVersion);
   header.appendUInt64(0); // flags

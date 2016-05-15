@@ -1,4 +1,4 @@
-namespace stx {
+namespace util {
 
 inline constexpr CivilTime::CivilTime() :
     year_(0),
@@ -46,4 +46,4 @@ inline constexpr int32_t CivilTime::offset() const {
   return offset_;
 }
 
-} // namespace stx
+} // namespace util

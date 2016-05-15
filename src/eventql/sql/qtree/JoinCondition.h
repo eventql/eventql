@@ -30,7 +30,7 @@
 #include <eventql/sql/qtree/ValueExpressionNode.h>
 #include <eventql/sql/qtree/SelectListNode.h>
 
-using namespace stx;
+using namespace util;
 
 namespace csql {
 

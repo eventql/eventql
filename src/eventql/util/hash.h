@@ -25,7 +25,7 @@
 #define _libstx_HASH_H
 #include <tuple>
 
-namespace stx {
+namespace util {
 
 template <typename T>
 struct hash {

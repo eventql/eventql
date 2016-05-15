@@ -29,7 +29,7 @@
 #include <string>
 #include <eventql/util/stdtypes.h>
 
-namespace stx {
+namespace util {
 class Buffer;
 
 #undef O_APPEND

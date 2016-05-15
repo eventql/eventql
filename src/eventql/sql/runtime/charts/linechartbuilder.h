@@ -31,12 +31,12 @@ class DrawStatement;
 
 class LineChartBuilder : public ChartBuilder {
 public:
-  LineChartBuilder(stx::chart::Canvas* canvas, RefPtr<DrawStatementNode> draw_stmt);
-  stx::chart::Drawable* getChart() const override;
+  LineChartBuilder(util::chart::Canvas* canvas, RefPtr<DrawStatementNode> draw_stmt);
+  util::chart::Drawable* getChart() const override;
   std::string chartName() const override;
 protected:
-  stx::chart::Drawable* findChartType() const;
-  void setLabels(stx::chart::LineChart* chart) const;
+  util::chart::Drawable* findChartType() const;
+  void setLabels(util::chart::LineChart* chart) const;
 };
 
 }

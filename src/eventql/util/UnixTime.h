@@ -32,7 +32,7 @@
 #include "eventql/util/duration.h"
 #include "eventql/util/option.h"
 
-namespace stx {
+namespace util {
 
 class UnixTime {
 public:
@@ -149,10 +149,10 @@ protected:
 }
 
 namespace std {
-template <> class numeric_limits<stx::UnixTime> {
+template <> class numeric_limits<util::UnixTime> {
 public:
-  static stx::UnixTime max();
-  static stx::UnixTime min();
+  static util::UnixTime max();
+  static util::UnixTime min();
 };
 }
 

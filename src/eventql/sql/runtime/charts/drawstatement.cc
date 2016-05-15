@@ -53,8 +53,8 @@ namespace csql {
 //
 ////void DrawStatement::execute(
 ////    ExecutionContext* context,
-////    stx::chart::Canvas* canvas) {
-////  stx::chart::Drawable* chart = nullptr;
+////    util::chart::Canvas* canvas) {
+////  util::chart::Drawable* chart = nullptr;
 ////
 ////  switch (node_->chartType()) {
 ////    case DrawStatementNode::ChartType::AREACHART:
@@ -78,7 +78,7 @@ namespace csql {
 ////  applyLegend(chart);
 ////}
 //
-//void DrawStatement::applyAxisDefinitions(stx::chart::Drawable* chart) const {
+//void DrawStatement::applyAxisDefinitions(util::chart::Drawable* chart) const {
 //  for (const auto& child : node_->ast()->getChildren()) {
 //    if (child->getType() != ASTNode::T_AXIS ||
 //        child->getChildren().size() < 1 ||
@@ -86,7 +86,7 @@ namespace csql {
 //      continue;
 //    }
 //
-//    stx::chart::AxisDefinition* axis = nullptr;
+//    util::chart::AxisDefinition* axis = nullptr;
 //
 //    if (child->getChildren().size() < 1) {
 //      RAISE(kRuntimeError, "corrupt AST: AXIS has < 1 child");
@@ -94,19 +94,19 @@ namespace csql {
 //
 //    switch (child->getChildren()[0]->getToken()->getType()) {
 //      case Token::T_TOP:
-//        axis = chart->addAxis(stx::chart::AxisDefinition::TOP);
+//        axis = chart->addAxis(util::chart::AxisDefinition::TOP);
 //        break;
 //
 //      case Token::T_RIGHT:
-//        axis = chart->addAxis(stx::chart::AxisDefinition::RIGHT);
+//        axis = chart->addAxis(util::chart::AxisDefinition::RIGHT);
 //        break;
 //
 //      case Token::T_BOTTOM:
-//        axis = chart->addAxis(stx::chart::AxisDefinition::BOTTOM);
+//        axis = chart->addAxis(util::chart::AxisDefinition::BOTTOM);
 //        break;
 //
 //      case Token::T_LEFT:
-//        axis = chart->addAxis(stx::chart::AxisDefinition::LEFT);
+//        axis = chart->addAxis(util::chart::AxisDefinition::LEFT);
 //        break;
 //
 //      default:
@@ -136,7 +136,7 @@ namespace csql {
 //
 //void DrawStatement::applyAxisLabels(
 //    ASTNode* ast,
-//    stx::chart::AxisDefinition* axis) const {
+//    util::chart::AxisDefinition* axis) const {
 //  for (const auto& prop : ast->getChildren()) {
 //    if (prop->getType() != ASTNode::T_PROPERTY ||
 //        prop->getToken() == nullptr) {
@@ -145,13 +145,13 @@ namespace csql {
 //
 //    switch (prop->getToken()->getType()) {
 //      case Token::T_INSIDE:
-//        axis->setLabelPosition(stx::chart::AxisDefinition::LABELS_INSIDE);
+//        axis->setLabelPosition(util::chart::AxisDefinition::LABELS_INSIDE);
 //        break;
 //      case Token::T_OUTSIDE:
-//        axis->setLabelPosition(stx::chart::AxisDefinition::LABELS_OUTSIDE);
+//        axis->setLabelPosition(util::chart::AxisDefinition::LABELS_OUTSIDE);
 //        break;
 //      case Token::T_OFF:
-//        axis->setLabelPosition(stx::chart::AxisDefinition::LABELS_OFF);
+//        axis->setLabelPosition(util::chart::AxisDefinition::LABELS_OFF);
 //        break;
 //      case Token::T_ROTATE: {
 //        if (prop->getChildren().size() != 1) {
@@ -171,7 +171,7 @@ namespace csql {
 //}
 //
 //void DrawStatement::applyDomainDefinitions(
-//    stx::chart::Drawable* chart) const {
+//    util::chart::Drawable* chart) const {
 //  for (const auto& child : node_->ast()->getChildren()) {
 //    bool invert = false;
 //    bool logarithmic = false;
@@ -186,16 +186,16 @@ namespace csql {
 //      RAISE(kRuntimeError, "corrupt AST: DOMAIN has no token");
 //    }
 //
-//    stx::chart::AnyDomain::kDimension dim;
+//    util::chart::AnyDomain::kDimension dim;
 //    switch (child->getToken()->getType()) {
 //      case Token::T_XDOMAIN:
-//        dim = stx::chart::AnyDomain::DIM_X;
+//        dim = util::chart::AnyDomain::DIM_X;
 //        break;
 //      case Token::T_YDOMAIN:
-//        dim = stx::chart::AnyDomain::DIM_Y;
+//        dim = util::chart::AnyDomain::DIM_Y;
 //        break;
 //      case Token::T_ZDOMAIN:
-//        dim = stx::chart::AnyDomain::DIM_Z;
+//        dim = util::chart::AnyDomain::DIM_Z;
 //        break;
 //      default:
 //        RAISE(kRuntimeError, "corrupt AST: DOMAIN has invalid token");
@@ -247,7 +247,7 @@ namespace csql {
 //  }
 //}
 //
-//void DrawStatement::applyTitle(stx::chart::Drawable* chart) const {
+//void DrawStatement::applyTitle(util::chart::Drawable* chart) const {
 //  for (const auto& child : node_->ast()->getChildren()) {
 //    if (child->getType() != ASTNode::T_PROPERTY ||
 //        child->getToken() == nullptr || !(
@@ -278,7 +278,7 @@ namespace csql {
 //  }
 //}
 //
-//void DrawStatement::applyGrid(stx::chart::Drawable* chart) const {
+//void DrawStatement::applyGrid(util::chart::Drawable* chart) const {
 //  ASTNode* grid = nullptr;
 //
 //  for (const auto& child : node_->ast()->getChildren()) {
@@ -311,15 +311,15 @@ namespace csql {
 //  }
 //
 //  if (horizontal) {
-//    chart->addGrid(stx::chart::GridDefinition::GRID_HORIZONTAL);
+//    chart->addGrid(util::chart::GridDefinition::GRID_HORIZONTAL);
 //  }
 //
 //  if (vertical) {
-//    chart->addGrid(stx::chart::GridDefinition::GRID_VERTICAL);
+//    chart->addGrid(util::chart::GridDefinition::GRID_VERTICAL);
 //  }
 //}
 //
-//void DrawStatement::applyLegend(stx::chart::Drawable* chart) const {
+//void DrawStatement::applyLegend(util::chart::Drawable* chart) const {
 //  ASTNode* legend = nullptr;
 //
 //  for (const auto& child : node_->ast()->getChildren()) {
@@ -334,34 +334,34 @@ namespace csql {
 //  }
 //
 //
-//  stx::chart::LegendDefinition::kVerticalPosition vert_pos =
-//      stx::chart::LegendDefinition::LEGEND_BOTTOM;
-//  stx::chart::LegendDefinition::kHorizontalPosition horiz_pos =
-//      stx::chart::LegendDefinition::LEGEND_LEFT;
-//  stx::chart::LegendDefinition::kPlacement placement =
-//      stx::chart::LegendDefinition::LEGEND_OUTSIDE;
+//  util::chart::LegendDefinition::kVerticalPosition vert_pos =
+//      util::chart::LegendDefinition::LEGEND_BOTTOM;
+//  util::chart::LegendDefinition::kHorizontalPosition horiz_pos =
+//      util::chart::LegendDefinition::LEGEND_LEFT;
+//  util::chart::LegendDefinition::kPlacement placement =
+//      util::chart::LegendDefinition::LEGEND_OUTSIDE;
 //  std::string title;
 //
 //  for (const auto& prop : legend->getChildren()) {
 //    if (prop->getType() == ASTNode::T_PROPERTY && prop->getToken() != nullptr) {
 //      switch (prop->getToken()->getType()) {
 //        case Token::T_TOP:
-//          vert_pos = stx::chart::LegendDefinition::LEGEND_TOP;
+//          vert_pos = util::chart::LegendDefinition::LEGEND_TOP;
 //          break;
 //        case Token::T_RIGHT:
-//          horiz_pos = stx::chart::LegendDefinition::LEGEND_RIGHT;
+//          horiz_pos = util::chart::LegendDefinition::LEGEND_RIGHT;
 //          break;
 //        case Token::T_BOTTOM:
-//          vert_pos = stx::chart::LegendDefinition::LEGEND_BOTTOM;
+//          vert_pos = util::chart::LegendDefinition::LEGEND_BOTTOM;
 //          break;
 //        case Token::T_LEFT:
-//          horiz_pos = stx::chart::LegendDefinition::LEGEND_LEFT;
+//          horiz_pos = util::chart::LegendDefinition::LEGEND_LEFT;
 //          break;
 //        case Token::T_INSIDE:
-//          placement = stx::chart::LegendDefinition::LEGEND_INSIDE;
+//          placement = util::chart::LegendDefinition::LEGEND_INSIDE;
 //          break;
 //        case Token::T_OUTSIDE:
-//          placement = stx::chart::LegendDefinition::LEGEND_OUTSIDE;
+//          placement = util::chart::LegendDefinition::LEGEND_OUTSIDE;
 //          break;
 //        case Token::T_TITLE: {
 //          if (prop->getChildren().size() != 1) {

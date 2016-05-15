@@ -31,9 +31,9 @@ namespace csql {
 //
 ////void ChartStatement::execute(
 ////    ExecutionContext* context,
-////    stx::chart::RenderTarget* target) {
+////    util::chart::RenderTarget* target) {
 ////
-////  stx::chart::Canvas canvas;
+////  util::chart::Canvas canvas;
 ////  for (auto& draw_stmt : draw_statements_) {
 ////    draw_stmt->execute(context, &canvas);
 ////  }

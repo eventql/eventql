@@ -24,7 +24,7 @@
 #pragma once
 #include "eventql/util/io/inputstream.h"
 
-namespace stx {
+namespace util {
 
 class TerminalInputStream : public InputStream {
 public:

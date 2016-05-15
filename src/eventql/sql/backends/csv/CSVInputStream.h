@@ -25,7 +25,7 @@
 #include "eventql/util/stdtypes.h"
 #include "eventql/util/io/inputstream.h"
 
-using namespace stx;
+using namespace util;
 
 namespace csql {
 namespace backends {

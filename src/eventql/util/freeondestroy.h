@@ -21,11 +21,9 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#ifndef _STX_UTIL_FREEONDESTROY_H
-#define _STX_UTIL_FREEONDESTROY_H
+#pragma once
 #include <stdlib.h>
 
-namespace stx {
 namespace util {
 
 class FreeOnDestroy {
@@ -58,6 +56,4 @@ protected:
 };
 
 }
-}
 
-#endif

@@ -24,7 +24,7 @@
 #include <eventql/util/protobuf/MessageDecoder.h>
 #include <eventql/util/inspect.h>
 
-namespace stx {
+namespace util {
 namespace msg {
 
 void MessageDecoder::decode(
@@ -135,5 +135,5 @@ void MessageDecoder::decode(
 
 
 } // namespace msg
-} // namespace stx
+} // namespace util
 

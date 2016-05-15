@@ -28,7 +28,7 @@
 #include <eventql/util/http/httpconnectionpool.h>
 #include <fnord-logtable/AbstractTableReader.h>
 
-namespace stx {
+namespace util {
 namespace logtable {
 
 class RemoteTableReader : public AbstractTableReader{
@@ -59,7 +59,7 @@ protected:
 };
 
 } // namespace logtable
-} // namespace stx
+} // namespace util
 
 #endif
 

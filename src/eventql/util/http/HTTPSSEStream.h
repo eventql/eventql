@@ -29,7 +29,7 @@
 #include "eventql/util/json/json.h"
 #include <eventql/util/inspect.h>
 
-namespace stx {
+namespace util {
 namespace http {
 
 class HTTPSSEStream : public RefCounted {

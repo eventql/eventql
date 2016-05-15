@@ -78,7 +78,7 @@ public:
   }
 
 protected:
-  stx::util::BinaryMessageReader data_reader_;
+  util::BinaryMessageReader data_reader_;
   uint64_t cur_val_;
 };
 

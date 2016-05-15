@@ -24,7 +24,7 @@
 #include <eventql/sql/runtime/ValueExpression.h>
 #include <eventql/util/inspect.h>
 
-using namespace stx;
+using namespace util;
 
 namespace csql {
 

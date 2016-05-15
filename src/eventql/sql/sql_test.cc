@@ -43,7 +43,7 @@
 #include <util/unittest.h>
 #include <eventql/util/exception.h>
 
-using namespace stxmetric::query;
+using namespace utilmetric::query;
 
 UNIT_TEST(SQLTest);
 
@@ -122,7 +122,7 @@ class TestTimeTableRef : public TableRef {
         start_time += 120000000;
       }
 
-      row.emplace_back(stx::util::UnixTime(start_time + 1000000 * i));
+      row.emplace_back(util::UnixTime(start_time + 1000000 * i));
       row.emplace_back(SValue((SValue::IntegerType) i));
       if (!scan->nextRow(row.data(), row.size())) {
         return;

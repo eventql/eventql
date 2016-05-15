@@ -29,7 +29,7 @@
 #include "eventql/util/buffer.h"
 #include "eventql/util/io/file.h"
 
-namespace stx {
+namespace util {
 
 class OutputStream {
 public:

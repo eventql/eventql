@@ -29,7 +29,7 @@
 #include <eventql/util/3rdparty/google/protobuf/io/zero_copy_stream_impl_lite.h>
 #include <eventql/util/3rdparty/google/protobuf/text_format.h>
 
-namespace stx {
+namespace util {
 namespace msg {
 
 template <typename ProtoType>
@@ -196,5 +196,5 @@ void parseText(const void* data, size_t size, ProtoType* target) {
 }
 
 } // namespace msg
-} // namespace stx
+} // namespace util
 #endif

@@ -27,7 +27,7 @@
 #include "eventql/util/logging/loglevel.h"
 #include "eventql/util/logging/logger.h"
 
-namespace stx {
+namespace util {
 
 /**
  * EMERGENCY: Something very bad happened

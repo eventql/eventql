@@ -24,7 +24,7 @@
 #include <eventql/util/fnv.h>
 #include <eventql/infra/sstable/RowWriter.h>
 
-namespace stx {
+namespace util {
 namespace sstable {
 
 size_t RowWriter::appendRow(

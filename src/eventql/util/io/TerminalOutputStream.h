@@ -24,7 +24,7 @@
 #pragma once
 #include "eventql/util/io/outputstream.h"
 
-namespace stx {
+namespace util {
 
 enum class TerminalStyle : uint8_t {
   BRIGHT      = 1,

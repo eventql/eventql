@@ -9,7 +9,7 @@
  */
 #include "cplot/griddefinition.h"
 
-namespace stx {
+namespace util {
 namespace chart {
 
 GridDefinition::GridDefinition(

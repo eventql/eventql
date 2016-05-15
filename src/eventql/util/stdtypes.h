@@ -38,7 +38,7 @@
 #include <unordered_map>
 #include <vector>
 
-namespace stx {
+namespace util {
 
 using String = std::string;
 using WString = std::wstring;
@@ -82,5 +82,5 @@ using Stack = std::stack<T>;
 
 using StandardException = std::exception;
 
-} // namespace stx
+} // namespace util
 #endif

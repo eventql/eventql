@@ -27,7 +27,7 @@
 #include <eventql/util/option.h>
 #include <eventql/sql/qtree/QueryTreeNode.h>
 
-using namespace stx;
+using namespace util;
 
 namespace csql {
 class Transaction;

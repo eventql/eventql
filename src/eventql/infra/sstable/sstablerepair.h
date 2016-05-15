@@ -25,7 +25,7 @@
 #define _FNORD_SSTABLE_SSTABLEREPAIR_H
 #include <string>
 
-namespace stx {
+namespace util {
 namespace sstable {
 
 class SSTableRepair {

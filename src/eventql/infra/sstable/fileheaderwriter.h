@@ -31,10 +31,10 @@
 #include <string>
 #include <eventql/infra/sstable/MetaPage.h>
 
-namespace stx {
+namespace util {
 namespace sstable {
 
-class FileHeaderWriter : public stx::util::BinaryMessageWriter {
+class FileHeaderWriter : public util::BinaryMessageWriter {
 public:
 
   /**

@@ -29,7 +29,7 @@
 #include <eventql/infra/sstable/binaryformat.h>
 #include <eventql/infra/sstable/sstablereader.h>
 
-namespace stx {
+namespace util {
 namespace sstable {
 
 

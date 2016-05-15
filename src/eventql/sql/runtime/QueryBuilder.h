@@ -28,7 +28,7 @@
 #include <eventql/sql/runtime/charts/ChartStatement.h>
 #include <eventql/sql/runtime/ValueExpression.h>
 
-using namespace stx;
+using namespace util;
 
 namespace csql {
 

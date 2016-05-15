@@ -28,11 +28,11 @@
 #include <eventql/core/TSDBService.h>
 #include <eventql/util/http/HTTPSSEStream.h>
 
-using namespace stx;
+using namespace util;
 
 namespace eventql {
 
-class TSDBServlet : public stx::http::StreamingHTTPService {
+class TSDBServlet : public util::http::StreamingHTTPService {
 public:
 
   TSDBServlet(

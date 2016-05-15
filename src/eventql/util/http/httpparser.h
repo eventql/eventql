@@ -29,7 +29,7 @@
 #include "eventql/util/buffer.h"
 #include "eventql/util/http/httpmessage.h"
 
-namespace stx {
+namespace util {
 namespace http {
 
 class HTTPParser {

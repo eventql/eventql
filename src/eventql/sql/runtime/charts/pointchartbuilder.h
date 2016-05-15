@@ -32,14 +32,14 @@ class DrawStatement;
 class PointChartBuilder : public ChartBuilder {
 public:
   PointChartBuilder(
-      stx::chart::Canvas* canvas,
+      util::chart::Canvas* canvas,
       RefPtr<DrawStatementNode> draw_stmt);
 
-  stx::chart::Drawable* getChart() const override;
+  util::chart::Drawable* getChart() const override;
   std::string chartName() const override;
 protected:
-  stx::chart::Drawable* findChartType() const;
-  void setLabels(stx::chart::PointChart* chart) const;
+  util::chart::Drawable* findChartType() const;
+  void setLabels(util::chart::PointChart* chart) const;
 };
 
 }

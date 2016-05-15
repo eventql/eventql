@@ -29,7 +29,7 @@
 #include <eventql/util/util/PersistentHashSet.h>
 #include <eventql/core/CompactionStrategy.h>
 
-using namespace stx;
+using namespace util;
 
 namespace eventql {
 

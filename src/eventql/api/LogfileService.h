@@ -34,7 +34,7 @@
 #include "eventql/LogfileScanParams.pb.h"
 #include "eventql/sql/runtime/runtime.h"
 
-using namespace stx;
+using namespace util;
 
 namespace eventql {
 

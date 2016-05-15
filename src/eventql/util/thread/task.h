@@ -26,7 +26,7 @@
 #include <functional>
 #include <memory>
 
-namespace stx {
+namespace util {
 namespace thread {
 
 class Task {

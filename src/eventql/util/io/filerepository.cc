@@ -25,7 +25,7 @@
 #include <eventql/util/io/filerepository.h>
 #include <eventql/util/io/fileutil.h>
 
-namespace stx {
+namespace util {
 
 FileRepository::FileRepository(
     const std::string& basedir) :

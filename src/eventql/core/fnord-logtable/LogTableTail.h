@@ -31,7 +31,7 @@
 #include <eventql/util/protobuf/MessageObject.h>
 #include <fnord-logtable/TableReader.h>
 
-namespace stx {
+namespace util {
 namespace logtable {
 
 struct LogTableTailOffset {
@@ -68,6 +68,6 @@ protected:
 };
 
 } // namespace logtable
-} // namespace stx
+} // namespace util
 
 #endif

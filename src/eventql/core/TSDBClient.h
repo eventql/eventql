@@ -31,7 +31,7 @@
 #include <eventql/core/PartitionInfo.pb.h>
 #include <eventql/core/RecordEnvelope.pb.h>
 
-using namespace stx;
+using namespace util;
 
 namespace eventql {
 

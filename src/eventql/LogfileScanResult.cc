@@ -24,7 +24,7 @@
 #include "eventql/util/wallclock.h"
 #include "eventql/LogfileScanResult.h"
 
-using namespace stx;
+using namespace util;
 
 namespace eventql {
 

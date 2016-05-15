@@ -27,7 +27,7 @@
 #include "eventql/util/io/inputstream.h"
 #include "eventql/util/test/unittest.h"
 
-using namespace stx;
+using namespace util;
 
 UNIT_TEST(FileInputStreamTest);
 

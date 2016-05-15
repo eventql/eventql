@@ -25,7 +25,7 @@
 #define _STX_RADIXTREE_H
 #include "3rdparty/libart/art.h"
 
-namespace stx {
+namespace util {
 
 template <typename T>
 class RadixTree {

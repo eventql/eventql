@@ -30,7 +30,7 @@
 #include <eventql/infra/sstable/SSTableEditor.h>
 #include <eventql/infra/sstable/SSTableColumnWriter.h>
 
-namespace stx {
+namespace util {
 namespace sstable {
 
 std::unique_ptr<SSTableEditor> SSTableEditor::create(

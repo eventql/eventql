@@ -883,7 +883,7 @@ void timeAtExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
         }
       }
 
-      auto time_opt = stx::Human::parseTime(time_str);
+      auto time_opt = util::Human::parseTime(time_str);
       if (time_opt.isEmpty()) {
         RAISEF(
            kTypeError,

@@ -28,7 +28,7 @@
 #include <eventql/sql/qtree/ValueExpressionNode.h>
 #include <eventql/sql/qtree/SelectListNode.h>
 
-using namespace stx;
+using namespace util;
 
 namespace csql {
 
@@ -63,11 +63,11 @@ public:
   static void encode(
       QueryTreeCoder* coder,
       const GroupByNode& node,
-      stx::OutputStream* os);
+      util::OutputStream* os);
 
   static RefPtr<QueryTreeNode> decode (
       QueryTreeCoder* coder,
-      stx::InputStream* is);
+      util::InputStream* is);
 
 protected:
   Vector<RefPtr<SelectListNode>> select_list_;

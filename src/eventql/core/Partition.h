@@ -38,7 +38,7 @@
 #include <eventql/core/ReplicationScheme.h>
 #include <eventql/infra/cstable/CSTableReader.h>
 
-using namespace stx;
+using namespace util;
 
 namespace eventql {
 class Table;

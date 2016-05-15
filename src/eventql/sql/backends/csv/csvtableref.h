@@ -30,7 +30,7 @@
 #include <eventql/util/csv/CSVInputStream.h>
 #include <eventql/sql/backends/tableref.h>
 
-using namespace stx;
+using namespace util;
 
 namespace csql {
 class SValue;

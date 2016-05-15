@@ -24,7 +24,7 @@
 #include <metricdb/statsd.h>
 #include <util/unittest.h>
 
-using namespace stxmetric::metricdb;
+using namespace utilmetric::metricdb;
 
 UNIT_TEST(StatsdTest);
 

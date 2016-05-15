@@ -29,7 +29,7 @@
 #include <stdint.h>
 #include <string>
 
-namespace stx {
+namespace util {
 
 /**
  * This implements the FNV1a (Fowler–Noll–Vo) hash function

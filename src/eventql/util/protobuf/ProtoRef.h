@@ -24,7 +24,7 @@
 #pragma once
 #include "eventql/util/stdtypes.h"
 
-namespace stx {
+namespace util {
 
 template <class ProtoType>
 struct ProtoRef : public Serializable, public RefCounted {
@@ -34,6 +34,6 @@ struct ProtoRef : public Serializable, public RefCounted {
   ProtoType proto;
 };
 
-} // namespace stx
+} // namespace util
 
 #include "ProtoRef_impl.h"

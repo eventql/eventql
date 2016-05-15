@@ -25,7 +25,7 @@
 #include "eventql/util/exception.h"
 #include "eventql/util/http/httpresponsefuture.h"
 
-namespace stx {
+namespace util {
 namespace http {
 
 HTTPResponseFuture::HTTPResponseFuture(

@@ -41,7 +41,7 @@
 #include <eventql/sql/qtree/JoinNode.h>
 #include <eventql/sql/runtime/queryplan.h>
 
-using namespace stx;
+using namespace util;
 
 namespace csql {
 

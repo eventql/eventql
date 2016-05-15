@@ -29,7 +29,7 @@
 #include <eventql/util/autoref.h>
 #include "eventql/util/io/file.h"
 
-namespace stx {
+namespace util {
 class FileInputStream;
 
 class InputStream : public RefCounted {

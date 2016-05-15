@@ -27,7 +27,7 @@
 #include <eventql/util/stdtypes.h>
 #include <fnord-logtable/TableRepository.h>
 
-namespace stx {
+namespace util {
 namespace logtable {
 
 class TableJanitor {
@@ -48,6 +48,6 @@ protected:
 };
 
 } // namespace logtable
-} // namespace stx
+} // namespace util
 
 #endif

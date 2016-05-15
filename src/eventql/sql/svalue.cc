@@ -768,7 +768,7 @@ template <> bool SValue::isOfType<SValue::TimeType>() const {
 
 }
 
-namespace stx {
+namespace util {
 
 template <>
 std::string inspect<sql_type>(

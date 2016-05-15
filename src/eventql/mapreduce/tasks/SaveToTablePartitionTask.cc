@@ -27,7 +27,7 @@
 #include "eventql/infra/sstable/sstablereader.h"
 #include <eventql/z1stats.h>
 
-using namespace stx;
+using namespace util;
 
 namespace eventql {
 

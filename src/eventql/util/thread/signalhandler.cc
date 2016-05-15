@@ -24,7 +24,7 @@
 #include <signal.h>
 #include "eventql/util/thread/signalhandler.h"
 
-namespace stx {
+namespace util {
 namespace thread {
 
 void SignalHandler::ignoreSIGHUP() {

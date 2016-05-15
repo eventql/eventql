@@ -31,7 +31,7 @@
 #include "eventql/TrafficSegment.h"
 #include "eventql/AnalyticsQueryResult.h"
 
-using namespace stx;
+using namespace util;
 
 namespace eventql {
 

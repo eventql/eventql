@@ -25,7 +25,7 @@
 #include "eventql/util/stdtypes.h"
 #include "eventql/util/option.h"
 
-namespace stx {
+namespace util {
 
 /**
  * Class representing an instance of time in the gregorian calendar

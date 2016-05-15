@@ -53,7 +53,7 @@ MySQLBackend::MySQLBackend() {
 
 bool MySQLBackend::openTables(
     const std::vector<std::string>& table_names,
-    const stx::URI& source_uri,
+    const util::URI& source_uri,
     std::vector<std::unique_ptr<TableRef>>* target) {
   if (source_uri.scheme() != "mysql") {
     return false;

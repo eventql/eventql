@@ -24,7 +24,7 @@
 #include "eventql/util/bufferutil.h"
 #include "eventql/util/inspect.h"
 
-namespace stx {
+namespace util {
 
 void BufferUtil::stripTrailingBytes(Buffer* buf, unsigned char byte) {
   auto begin = (const unsigned char*) buf->data();
@@ -68,5 +68,5 @@ std::string BufferUtil::hexPrint(
 
   return str;
 }
-} // namespace stx
+} // namespace util
 

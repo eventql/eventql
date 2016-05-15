@@ -10,22 +10,22 @@
 #include "eventql/util/UnixTime.h"
 #include "cplot/timedomain.h"
 
-namespace stx {
+namespace util {
 namespace chart {
 
 TimeDomain::TimeDomain(
-    stx::UnixTime min_value,
-    stx::UnixTime max_value,
+    util::UnixTime min_value,
+    util::UnixTime max_value,
     bool is_logarithmic,
     bool is_inverted) :
-    ContinuousDomain<stx::UnixTime>(
+    ContinuousDomain<util::UnixTime>(
         min_value,
         max_value,
         is_logarithmic,
         is_inverted) {}
 
-std::string TimeDomain::label(stx::UnixTime value) const {
-  auto range = ContinuousDomain<stx::UnixTime>::getRange();
+std::string TimeDomain::label(util::UnixTime value) const {
+  auto range = ContinuousDomain<util::UnixTime>::getRange();
 
   if (range < 60 * 60) {
     return value.toString("%H:%M:%S");

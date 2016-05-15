@@ -26,7 +26,7 @@
 #include <eventql/sql/qtree/ColumnReferenceNode.h>
 #include <eventql/sql/qtree/QueryTreeUtil.h>
 
-using namespace stx;
+using namespace util;
 
 namespace csql {
 
@@ -217,7 +217,7 @@ String JoinNode::toString() const {
 void JoinNode::encode(
     QueryTreeCoder* coder,
     const JoinNode& node,
-    stx::OutputStream* os) {
+    util::OutputStream* os) {
   os->appendUInt8((uint8_t) node.join_type_);
 
   os->appendVarUInt(node.select_list_.size());
@@ -249,7 +249,7 @@ void JoinNode::encode(
 
 RefPtr<QueryTreeNode> JoinNode::decode (
     QueryTreeCoder* coder,
-    stx::InputStream* is) {
+    util::InputStream* is) {
   auto join_type = (JoinType) is->readUInt8();
 
   Vector<RefPtr<SelectListNode>> select_list;

@@ -42,7 +42,7 @@
 #include <eventql/core/StaticPartitionReplication.h>
 #include <eventql/z1stats.h>
 
-using namespace stx;
+using namespace util;
 
 namespace eventql {
 
@@ -51,7 +51,7 @@ RefPtr<Partition> Partition::create(
     RefPtr<Table> table,
     const SHA1Hash& partition_key,
     ServerConfig* cfg) {
-  stx::logDebug(
+  util::logDebug(
       "tsdb",
       "Creating new partition; stream='$0' partition='$1'",
       table->name(),
@@ -104,7 +104,7 @@ RefPtr<Partition> Partition::reopen(
     nrecs += header.rowCount();
   }
 
-  stx::logTrace(
+  util::logTrace(
       "tsdb",
       "Loading partition $0/$1/$2 ($3 records)",
       tsdb_namespace,

@@ -25,7 +25,7 @@
 #include <eventql/sql/qtree/GroupByNode.h>
 #include <eventql/sql/qtree/ColumnReferenceNode.h>
 
-using namespace stx;
+using namespace util;
 
 namespace csql {
 
@@ -129,7 +129,7 @@ String GroupByNode::toString() const {
 void GroupByNode::encode(
     QueryTreeCoder* coder,
     const GroupByNode& node,
-    stx::OutputStream* os) {
+    util::OutputStream* os) {
   os->appendVarUInt(node.select_list_.size());
   for (const auto& e : node.select_list_) {
     coder->encode(e.get(), os);
@@ -145,7 +145,7 @@ void GroupByNode::encode(
 
 RefPtr<QueryTreeNode> GroupByNode::decode (
     QueryTreeCoder* coder,
-    stx::InputStream* is) {
+    util::InputStream* is) {
   Vector<RefPtr<SelectListNode>> select_list;
   auto select_list_size = is->readVarUInt();
   for (auto i = 0; i < select_list_size; ++i) {

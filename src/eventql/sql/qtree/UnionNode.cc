@@ -24,7 +24,7 @@
  */
 #include <eventql/sql/qtree/UnionNode.h>
 
-using namespace stx;
+using namespace util;
 
 namespace csql {
 

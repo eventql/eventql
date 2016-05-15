@@ -28,7 +28,7 @@
 #include <eventql/infra/sstable/MetaPage.h>
 #include <eventql/util/exception.h>
 
-namespace stx {
+namespace util {
 namespace sstable {
 
 class SSTableColumnWriter;

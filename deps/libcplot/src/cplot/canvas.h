@@ -17,7 +17,7 @@
 #include "cplot/drawable.h"
 #include "cplot/legenddefinition.h"
 
-namespace stx {
+namespace util {
 namespace chart {
 class RenderTarget;
 

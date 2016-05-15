@@ -30,7 +30,7 @@
 #include "eventql/util/option.h"
 #include "eventql/util/UnixTime.h"
 
-namespace stx {
+namespace util {
 namespace thread {
 
 /**

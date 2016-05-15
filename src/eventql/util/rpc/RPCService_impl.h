@@ -23,7 +23,7 @@
  */
 #pragma once
 
-namespace stx {
+namespace util {
 namespace rpc {
 
 template <class ParamType>
@@ -44,5 +44,5 @@ void RPCService::registerMethod(
 }
 
 } // namespace rpc
-} // namespace stx
+} // namespace util
 

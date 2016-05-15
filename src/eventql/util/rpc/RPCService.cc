@@ -24,7 +24,7 @@
  */
 #include "eventql/util/rpc/RPCService.h"
 
-namespace stx {
+namespace util {
 namespace rpc {
 
 RefPtr<RPCRequest> RPCService::getRPC(
@@ -41,5 +41,5 @@ RefPtr<RPCRequest> RPCService::getRPC(
 }
 
 } // namespace rpc
-} // namespace stx
+} // namespace util
 

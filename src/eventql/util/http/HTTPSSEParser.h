@@ -31,7 +31,7 @@
 #include "eventql/util/http/httpconnectionpool.h"
 #include "eventql/util/http/httpclient.h"
 
-namespace stx {
+namespace util {
 namespace http {
 
 struct HTTPSSEEvent {

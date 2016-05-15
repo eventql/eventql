@@ -24,7 +24,7 @@
 #pragma once
 #include "eventql/util/stdtypes.h"
 
-namespace stx {
+namespace util {
 
 class Serializable {
 public:
@@ -33,5 +33,5 @@ public:
 
 };
 
-} // namespace stx
+} // namespace util
 

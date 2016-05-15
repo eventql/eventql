@@ -25,7 +25,7 @@
 #include "eventql/util/json/jsonrpcrequest.h"
 #include "eventql/util/json/jsonrpcresponse.h"
 
-namespace stx {
+namespace util {
 namespace json {
 
 JSONRPC::JSONRPC() {}
@@ -48,5 +48,5 @@ void JSONRPC::registerMethod(
 }
 
 } // namespace json
-} // namespace stx
+} // namespace util
 

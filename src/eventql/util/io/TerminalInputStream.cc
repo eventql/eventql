@@ -23,7 +23,7 @@
  */
 #include "eventql/util/io/TerminalInputStream.h"
 
-namespace stx {
+namespace util {
 
 ScopedPtr<TerminalInputStream> TerminalInputStream::fromStream(
     ScopedPtr<FileInputStream> stream) {

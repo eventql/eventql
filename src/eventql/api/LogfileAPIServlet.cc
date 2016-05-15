@@ -27,7 +27,7 @@
 #include "eventql/util/io/BufferedOutputStream.h"
 #include "eventql/api/LogfileAPIServlet.h"
 
-using namespace stx;
+using namespace util;
 
 namespace eventql {
 
@@ -41,8 +41,8 @@ LogfileAPIServlet::LogfileAPIServlet(
 
 void LogfileAPIServlet::handle(
     const AnalyticsSession& session,
-    RefPtr<stx::http::HTTPRequestStream> req_stream,
-    RefPtr<stx::http::HTTPResponseStream> res_stream) {
+    RefPtr<util::http::HTTPRequestStream> req_stream,
+    RefPtr<util::http::HTTPResponseStream> res_stream) {
   const auto& req = req_stream->request();
   URI uri(req.uri());
 

@@ -26,7 +26,7 @@
 #include <stdlib.h>
 #include "eventql/util/stdtypes.h"
 
-namespace stx {
+namespace util {
 namespace stats {
 
 class StatsSink {

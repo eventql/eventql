@@ -23,7 +23,7 @@
  */
 #include <eventql/util/wallclock.h>
 
-namespace stx {
+namespace util {
 namespace thread {
 
 template <typename T>

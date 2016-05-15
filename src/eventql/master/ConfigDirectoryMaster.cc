@@ -29,7 +29,7 @@
 #include <eventql/util/logging.h>
 #include <eventql/util/inspect.h>
 
-using namespace stx;
+using namespace util;
 
 namespace eventql {
 

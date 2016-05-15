@@ -26,7 +26,7 @@
 #include <eventql/util/inspect.h>
 #include <eventql/util/stringutil.h>
 
-namespace stx {
+namespace util {
 
 SHA1Hash SHA1Hash::fromHexString(const String& str) {
   SHA1Hash hash(DeferInitialization{});

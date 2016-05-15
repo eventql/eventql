@@ -35,7 +35,7 @@
 #include "eventql/util/thread/future.h"
 #include "eventql/util/thread/wakeup.h"
 
-namespace stx {
+namespace util {
 class RPCChannel;
 
 class AnyRPC : public RefCounted {
@@ -121,7 +121,7 @@ AutoRef<RPC<ReturnType, std::tuple<ArgTypes...>>> mkRPC(
   ReturnType (ClassType::* method)(ArgTypes...),
   ArgTypes... args);
 
-} // namespace stx
+} // namespace util
 
 #include "RPC_impl.h"
 #endif

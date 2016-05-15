@@ -28,7 +28,6 @@
 #include <string>
 #include <eventql/util/buffer.h>
 
-namespace stx {
 namespace util {
 
 class Base64 {
@@ -43,7 +42,6 @@ public:
 
 };
 
-}
 }
 
 #endif

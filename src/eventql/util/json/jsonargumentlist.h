@@ -30,7 +30,7 @@
 #include <time.h>
 #include "eventql/util/json/json.h"
 
-namespace stx {
+namespace util {
 namespace json {
 
 class JSONArgumentList {
@@ -43,5 +43,5 @@ protected:
 };
 
 } // namespace json
-} // namespace stx
+} // namespace util
 #endif

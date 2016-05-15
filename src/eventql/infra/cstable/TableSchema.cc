@@ -24,7 +24,7 @@
 #include <eventql/infra/cstable/cstable.h>
 #include <eventql/infra/cstable/TableSchema.h>
 
-using namespace stx;
+using namespace util;
 
 namespace cstable {
 

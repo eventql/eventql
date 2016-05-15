@@ -27,7 +27,7 @@
 #include <eventql/util/http/httpmessage.h>
 #include <string>
 
-namespace stx {
+namespace util {
 namespace http {
 class HTTPInputStream;
 

@@ -26,7 +26,7 @@
 #include <eventql/util/io/inputstream.h>
 #include <eventql/util/VFSFile.h>
 
-namespace stx {
+namespace util {
 
 class VFSFileInputStream : public RewindableInputStream {
 public:

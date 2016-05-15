@@ -4,7 +4,7 @@
 #include <eventql/util/cli/flagparser.h>
 #include <eventql/util/io/outputstream.h>
 
-namespace stx {
+namespace util {
 namespace cli {
 
 FlagParser::FlagParser() : ignore_unknown_(false) {}
@@ -203,7 +203,7 @@ const std::vector<std::string>& FlagParser::getArgv() const {
   return argv_;
 }
 
-void FlagParser::printUsage(stx::OutputStream* target) const {
+void FlagParser::printUsage(util::OutputStream* target) const {
   for (const auto& flag : flags_) {
     if (flag.shortopt == nullptr) {
       target->printf("    --%-26.26s", flag.longopt);

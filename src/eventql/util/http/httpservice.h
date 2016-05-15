@@ -30,7 +30,7 @@
 #include <eventql/util/http/HTTPResponseStream.h>
 #include "eventql/util/thread/taskscheduler.h"
 
-namespace stx {
+namespace util {
 namespace http {
 
 class StreamingHTTPService {

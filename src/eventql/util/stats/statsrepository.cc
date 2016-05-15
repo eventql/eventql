@@ -23,7 +23,7 @@
  */
 #include "eventql/util/stats/statsrepository.h"
 
-namespace stx {
+namespace util {
 namespace stats {
 
 StatsRepository* StatsRepository::get() {

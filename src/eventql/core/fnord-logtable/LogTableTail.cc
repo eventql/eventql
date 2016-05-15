@@ -24,7 +24,7 @@
 #include <eventql/util/logging.h>
 #include <fnord-logtable/LogTableTail.h>
 
-namespace stx {
+namespace util {
 namespace logtable {
 
 void LogTableTailCursor::encode(util::BinaryMessageWriter* writer) const {
@@ -137,5 +137,5 @@ String LogTableTailCursor::debugPrint() const {
 }
 
 } // namespace logtable
-} // namespace stx
+} // namespace util
 

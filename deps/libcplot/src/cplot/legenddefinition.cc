@@ -9,7 +9,7 @@
  */
 #include "cplot/legenddefinition.h"
 
-namespace stx {
+namespace util {
 namespace chart {
 
 LegendDefinition::LegendDefinition(

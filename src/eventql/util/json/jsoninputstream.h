@@ -31,7 +31,7 @@
 #include "eventql/util/json/json.h"
 #include "eventql/util/json/jsonpointer.h"
 
-namespace stx {
+namespace util {
 namespace json {
 
 class JSONInputStream {

@@ -27,7 +27,7 @@
 #include <vector>
 #include <utility>
 
-namespace stx {
+namespace util {
 
 class URI {
 public:
@@ -82,6 +82,6 @@ protected:
   std::string fragment_;
 };
 
-} // namespace stx
+} // namespace util
 
 #endif

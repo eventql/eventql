@@ -32,7 +32,7 @@
 #include <eventql/core/LogPartitionReader.h>
 #include <eventql/core/PartitionState.pb.h>
 
-using namespace stx;
+using namespace util;
 
 namespace eventql {
 

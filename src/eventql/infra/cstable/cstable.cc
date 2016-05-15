@@ -27,7 +27,7 @@
 #include <eventql/util/util/binarymessagereader.h>
 #include <eventql/util/SHA1.h>
 
-using namespace stx;
+using namespace util;
 
 namespace cstable {
 
@@ -125,7 +125,7 @@ void readHeader(FileHeader* hdr, InputStream* is) {
 namespace v0_2_0 {
 
 size_t writeMetaBlock(const MetaBlock& mb, OutputStream* os) {
-  stx::util::BinaryMessageWriter buf;
+  util::BinaryMessageWriter buf;
   buf.appendUInt64(mb.transaction_id); // transaction id
   buf.appendUInt64(mb.num_rows); // number of rows
   buf.appendUInt64(mb.head_index_page_offset); // head index page offset
@@ -149,7 +149,7 @@ bool readMetaBlock(MetaBlock* mb, InputStream* is) {
       SHA1Hash::kSize);
 
   if (hash_a == hash_b) {
-    stx::util::BinaryMessageReader reader(buf.data(), buf.size());
+    util::BinaryMessageReader reader(buf.data(), buf.size());
     mb->transaction_id = *reader.readUInt64();
     mb->num_rows = *reader.readUInt64();
     mb->head_index_page_offset = *reader.readUInt64();
@@ -162,7 +162,7 @@ bool readMetaBlock(MetaBlock* mb, InputStream* is) {
 }
 
 size_t writeHeader(const FileHeader& hdr, OutputStream* os) {
-  stx::util::BinaryMessageWriter buf;
+  util::BinaryMessageWriter buf;
   buf.append(kMagicBytes, sizeof(kMagicBytes));
   buf.appendUInt16(2); // version
   buf.appendUInt64(0); // flags

@@ -24,7 +24,7 @@
  */
 #include "HttpServlet.h"
 
-namespace stx {
+namespace util {
 namespace http {
 
 void HTTPServlet::handleHTTPRequest(

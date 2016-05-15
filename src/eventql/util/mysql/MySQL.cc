@@ -24,7 +24,7 @@
 #include <eventql/util/mysql//MySQL.h>
 #include <mutex>
 
-namespace stx {
+namespace util {
 namespace mysql {
 
 void mysqlInit() {

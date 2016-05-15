@@ -28,7 +28,7 @@
 #include <eventql/util/io/fileutil.h>
 #include <eventql/util/protobuf/msg.h>
 
-using namespace stx;
+using namespace util;
 
 namespace eventql {
 
@@ -169,7 +169,7 @@ bool StaticPartitionReplication::replicate() {
       } catch (const std::exception& e) {
         success = false;
 
-        stx::logError(
+        util::logError(
           "tsdb",
           e,
           "Error while replicating partition $0/$1/$2 to $3",

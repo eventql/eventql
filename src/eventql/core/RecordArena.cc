@@ -11,7 +11,7 @@
  */
 #include <eventql/core/RecordArena.h>
 
-using namespace stx;
+using namespace util;
 
 namespace eventql {
 

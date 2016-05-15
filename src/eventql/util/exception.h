@@ -69,20 +69,20 @@ const char kFutureError[] = "FutureError";
 
 #define RAISE(E, ...) \
     RAISE_EXCEPTION( \
-        stx::Exception( __VA_ARGS__).setTypeName(E)); \
+        util::Exception( __VA_ARGS__).setTypeName(E)); \
         while(0) {}
 
 #define RAISEF(E, ...) \
     RAISE_EXCEPTION( \
-        stx::Exception( \
-            stx::StringUtil::format(__VA_ARGS__)).setTypeName(E)); \
+        util::Exception( \
+            util::StringUtil::format(__VA_ARGS__)).setTypeName(E)); \
         while(0) {}
 
 #define RAISE_ERRNO(E, ...) \
     { \
       int e = errno; \
       RAISE_EXCEPTION( \
-          stx::Exception( \
+          util::Exception( \
               __VA_ARGS__).setTypeName(E).setErrno(e)); \
     }
 
@@ -91,7 +91,7 @@ const char kFutureError[] = "FutureError";
     while(0) {}
 
 #define RCHECKF(P, ...) \
-    if (!(P)) { RAISE(kAssertionError, stx::StringUtil::format(__VA_ARGS__)) } \
+    if (!(P)) { RAISE(kAssertionError, util::StringUtil::format(__VA_ARGS__)) } \
     while(0) {}
 
 #ifdef NDEBUG
@@ -104,7 +104,7 @@ const char kFutureError[] = "FutureError";
 
 #define __brk raise(SIGTRAP); while (0) {}
 
-namespace stx {
+namespace util {
 
 class OutputStream;
 
@@ -144,6 +144,6 @@ private:
   char message_[1024];
 };
 
-} // namespace stx
+} // namespace util
 
 #endif

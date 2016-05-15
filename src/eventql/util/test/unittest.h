@@ -40,17 +40,17 @@
 const char kExpectationFailed[] = "ExpectationFailed";
 
 #define UNIT_TEST(T) \
-    static stx::test::UnitTest T(#T); \
+    static util::test::UnitTest T(#T); \
     int main() { \
       auto& t = T; \
       return t.run(); \
     }
 
 #define TEST_CASE(T, N, L) \
-    static stx::test::UnitTest::TestCase __##T##__case__##N(&T, #N, (L));
+    static util::test::UnitTest::TestCase __##T##__case__##N(&T, #N, (L));
 
 #define TEST_INITIALIZER(T, N, L) \
-    static stx::test::UnitTest::TestInitializer __##T##__case__##N( \
+    static util::test::UnitTest::TestInitializer __##T##__case__##N( \
         &T, (L));
 
 #define EXPECT(X) \
@@ -83,9 +83,9 @@ void EXPECT_NEAR(T1 expected, T2 actual, T3 diff) {
     RAISE(
         kExpectationFailed,
         "expectation failed: actual %s near expected %s, diff %s",
-        stx::inspect<T2>(actual).c_str(),
-        stx::inspect<T1>(expected).c_str(),
-        stx::inspect<T3>(diff).c_str());
+        util::inspect<T2>(actual).c_str(),
+        util::inspect<T1>(expected).c_str(),
+        util::inspect<T3>(diff).c_str());
   }
 }
 
@@ -95,8 +95,8 @@ void EXPECT_EQ(T1 left, T2 right) {
     RAISE(
         kExpectationFailed,
         "expectation failed: %s == %s",
-        stx::inspect<T1>(left).c_str(),
-        stx::inspect<T2>(right).c_str());
+        util::inspect<T1>(left).c_str(),
+        util::inspect<T2>(right).c_str());
   }
 }
 
@@ -105,7 +105,7 @@ void EXPECT_EQ(T1 left, T2 right) {
       bool raised = false; \
       try { \
         L(); \
-      } catch (stx::Exception e) { \
+      } catch (util::Exception e) { \
         raised = true; \
         auto msg = e.getMessage().c_str(); \
         if (strcmp(msg, E) != 0) { \
@@ -123,8 +123,8 @@ void EXPECT_EQ(T1 left, T2 right) {
 
 #define EXPECT_FILES_EQ(F1, F2) \
   { \
-    auto one = stx::FileInputStream::openFile(F1); \
-    auto two = stx::FileInputStream::openFile(F2); \
+    auto one = util::FileInputStream::openFile(F1); \
+    auto two = util::FileInputStream::openFile(F2); \
     std::string one_str; \
     std::string two_str; \
     one->readUntilEOF(&one_str); \
@@ -140,7 +140,7 @@ void EXPECT_EQ(T1 left, T2 right) {
   }
 
 
-namespace stx {
+namespace util {
 namespace test {
 
 class UnitTest {
@@ -195,7 +195,7 @@ public:
     fprintf(stderr, "%s\n", name_);
 
     int num_tests_passed = 0;
-    std::unordered_map<const TestCase*, stx::Exception> errors;
+    std::unordered_map<const TestCase*, util::Exception> errors;
 
     for (auto test_case : cases_) {
       fprintf(stderr, "    %s::%s", name_, test_case->name_);
@@ -203,7 +203,7 @@ public:
 
       try {
         test_case->lambda_();
-      } catch (stx::Exception e) {
+      } catch (util::Exception e) {
         fprintf(stderr, " \033[1;31m[FAIL]\e[0m\n");
         errors.emplace(test_case, e);
         continue;

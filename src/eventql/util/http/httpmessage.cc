@@ -25,12 +25,12 @@
 #include <eventql/util/inspect.h>
 #include <eventql/util/http/httprequest.h>
 
-using stx::InputStream;
-using stx::OutputStream;
-using stx::StringInputStream;
-using stx::StringOutputStream;
+using util::InputStream;
+using util::OutputStream;
+using util::StringInputStream;
+using util::StringOutputStream;
 
-namespace stx {
+namespace util {
 namespace http {
 
 std::string HTTPMessage::kEmptyHeader = "";

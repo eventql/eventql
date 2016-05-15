@@ -2,7 +2,7 @@
 
 #include <eventql/util/MonotonicTime.h>
 
-namespace stx {
+namespace util {
 
 /**
  * Monotonic Clock Provider API.
@@ -18,4 +18,4 @@ public:
   static MonotonicTime now();
 };
 
-} // namespace stx
+} // namespace util

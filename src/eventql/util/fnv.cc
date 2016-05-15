@@ -26,7 +26,7 @@
 #include <stdint.h>
 #include "fnv.h"
 
-namespace stx {
+namespace util {
 
 /**
  * Parameters for the 32bit version of the FNV hash function

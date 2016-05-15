@@ -30,7 +30,7 @@
 #include "eventql/util/io/inputstream.h"
 #include "eventql/util/rpc/RPCRequest.h"
 
-namespace stx {
+namespace util {
 namespace rpc {
 
 class RPCContext {
@@ -49,5 +49,5 @@ protected:
 };
 
 } // namespace rpc
-} // namespace stx
+} // namespace util
 

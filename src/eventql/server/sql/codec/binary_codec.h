@@ -35,7 +35,7 @@
 #include "eventql/sql/runtime/QueryPlan.h"
 #include "eventql/sql/runtime/ExecutionContext.h"
 
-using namespace stx;
+using namespace util;
 
 namespace csql {
 
@@ -77,15 +77,15 @@ namespace csql {
  *
  */
 
-class BinaryResultParser : public stx::RefCounted {
+class BinaryResultParser : public util::RefCounted {
 public:
 
   BinaryResultParser();
 
-  void onTableHeader(stx::Function<void (const Vector<String>& columns)> fn);
-  void onRow(stx::Function<void (int argc, const SValue* argv)> fn);
-  void onProgress(stx::Function<void (const ExecutionStatus& status)> fn);
-  void onError(stx::Function<void (const String& error)> fn);
+  void onTableHeader(util::Function<void (const Vector<String>& columns)> fn);
+  void onRow(util::Function<void (int argc, const SValue* argv)> fn);
+  void onProgress(util::Function<void (const ExecutionStatus& status)> fn);
+  void onError(util::Function<void (const String& error)> fn);
 
   void parse(const char* data, size_t size);
 
@@ -98,11 +98,11 @@ protected:
   size_t parseProgress(const void* data, size_t size);
   size_t parseError(const void* data, size_t size);
 
-  stx::Buffer buf_;
-  stx::Function<void (const Vector<String>& columns)> on_table_header_;
-  stx::Function<void (int argc, const SValue* argv)> on_row_;
-  stx::Function<void (const ExecutionStatus& status)> on_progress_;
-  stx::Function<void (const String& error)> on_error_;
+  util::Buffer buf_;
+  util::Function<void (const Vector<String>& columns)> on_table_header_;
+  util::Function<void (int argc, const SValue* argv)> on_row_;
+  util::Function<void (const ExecutionStatus& status)> on_progress_;
+  util::Function<void (const String& error)> on_error_;
 
   bool got_header_;
   bool got_footer_;

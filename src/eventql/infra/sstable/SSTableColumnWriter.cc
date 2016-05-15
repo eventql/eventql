@@ -24,7 +24,7 @@
 #include <eventql/util/ieee754.h>
 #include <eventql/infra/sstable/SSTableColumnWriter.h>
 
-namespace stx {
+namespace util {
 namespace sstable {
 
 SSTableColumnWriter::SSTableColumnWriter(
@@ -88,4 +88,4 @@ size_t SSTableColumnWriter::size() const {
 }
 
 } // namespace sstable
-} // namespace stx
+} // namespace util

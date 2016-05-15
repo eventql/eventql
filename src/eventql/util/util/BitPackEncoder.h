@@ -28,7 +28,6 @@
 #include <string>
 #include <eventql/util/buffer.h>
 
-namespace stx {
 namespace util {
 
 class BitPackEncoder {
@@ -49,7 +48,6 @@ protected:
   Buffer buf_;
 };
 
-}
 }
 
 #endif

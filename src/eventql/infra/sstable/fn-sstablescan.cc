@@ -30,17 +30,17 @@
 #include "eventql/infra/sstable/sstablereader.h"
 #include "eventql/infra/sstable/SSTableScan.h"
 
-using namespace stx;
+using namespace util;
 
 int main(int argc, const char** argv) {
-  stx::Application::init();
-  stx::Application::logToStderr();
+  util::Application::init();
+  util::Application::logToStderr();
 
-  stx::cli::FlagParser flags;
+  util::cli::FlagParser flags;
 
   flags.defineFlag(
       "file",
-      stx::cli::FlagParser::T_STRING,
+      util::cli::FlagParser::T_STRING,
       true,
       "f",
       NULL,
@@ -49,7 +49,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "limit",
-      stx::cli::FlagParser::T_INTEGER,
+      util::cli::FlagParser::T_INTEGER,
       false,
       NULL,
       NULL,
@@ -58,7 +58,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "offset",
-      stx::cli::FlagParser::T_INTEGER,
+      util::cli::FlagParser::T_INTEGER,
       false,
       NULL,
       NULL,
@@ -67,7 +67,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "order_by",
-      stx::cli::FlagParser::T_STRING,
+      util::cli::FlagParser::T_STRING,
       false,
       NULL,
       NULL,
@@ -76,7 +76,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "order_fn",
-      stx::cli::FlagParser::T_STRING,
+      util::cli::FlagParser::T_STRING,
       false,
       NULL,
       "STRASC",
@@ -85,7 +85,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "loglevel",
-      stx::cli::FlagParser::T_STRING,
+      util::cli::FlagParser::T_STRING,
       false,
       NULL,
       "INFO",
@@ -101,7 +101,7 @@ int main(int argc, const char** argv) {
   auto input_file = flags.getString("file");
   sstable::SSTableReader reader(File::openFile(input_file, File::O_READ));
   if (reader.bodySize() == 0) {
-    stx::logWarning("fnord.sstablescan", "sstable is unfinished");
+    util::logWarning("fnord.sstablescan", "sstable is unfinished");
   }
 
   sstable::SSTableColumnSchema schema;
@@ -123,11 +123,11 @@ int main(int argc, const char** argv) {
 
   /* execute scan */
   auto headers = scan.columnNames();
-  stx::iputs("$0", StringUtil::join(headers, ";"));
+  util::iputs("$0", StringUtil::join(headers, ";"));
 
   auto cursor = reader.getCursor();
   scan.execute(cursor.get(), [] (const Vector<String> row) {
-    stx::iputs("$0", StringUtil::join(row, ";"));
+    util::iputs("$0", StringUtil::join(row, ";"));
   });
 
   return 0;

@@ -24,7 +24,7 @@
 #include <eventql/util/exception.h>
 #include <eventql/sql/runtime/LikePattern.h>
 
-using namespace stx;
+using namespace util;
 
 namespace csql {
 

@@ -23,7 +23,7 @@
  */
 #include "eventql/util/json/jsonutil.h"
 
-namespace stx {
+namespace util {
 namespace json {
 
 template <typename T>
@@ -59,4 +59,4 @@ T JSONRPCRequest::getArg(size_t index, const std::string& name) const {
 }
 
 } // namespace json
-} // namespace stx
+} // namespace util

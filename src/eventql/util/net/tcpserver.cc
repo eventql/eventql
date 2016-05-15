@@ -31,7 +31,7 @@
 #include "eventql/util/inspect.h"
 #include "eventql/util/net/tcpserver.h"
 
-namespace stx {
+namespace util {
 namespace net {
 
 TCPServer::TCPServer(

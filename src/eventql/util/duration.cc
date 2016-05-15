@@ -26,7 +26,7 @@
 #include <eventql/util/stringutil.h>
 #include <sstream>
 
-namespace stx {
+namespace util {
 
 std::string inspect(const Duration& value) {
   unsigned years = value.days() / kDaysPerYear;

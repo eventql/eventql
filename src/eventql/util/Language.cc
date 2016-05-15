@@ -25,7 +25,7 @@
 #include "eventql/util/Language.h"
 #include "eventql/util/stringutil.h"
 
-namespace stx {
+namespace util {
 
 Language languageFromString(const String& string) {
   String s(string);
@@ -55,4 +55,4 @@ String languageToString(Language lang) {
   }
 }
 
-} // namespace stx
+} // namespace util

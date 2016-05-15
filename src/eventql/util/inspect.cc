@@ -23,7 +23,7 @@
  */
 #include <eventql/util/inspect.h>
 
-namespace stx {
+namespace util {
 
 template <>
 std::string inspect<bool>(const bool& value) {
@@ -115,5 +115,5 @@ std::string inspect<std::exception>(const std::exception& e) {
   return e.what();
 }
 
-} // namespace stx
+} // namespace util
 

@@ -33,7 +33,7 @@
 
 namespace cstable {
 
-class ColumnWriter : public stx::RefCounted {
+class ColumnWriter : public util::RefCounted {
 public:
 
   ColumnWriter(size_t r_max, size_t d_max);

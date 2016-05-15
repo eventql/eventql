@@ -27,7 +27,7 @@
 #include "eventql/util/io/outputstream.h"
 #include "eventql/util/UnixTime.h"
 
-using namespace stx;
+using namespace util;
 
 namespace eventql {
 

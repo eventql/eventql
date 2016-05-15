@@ -34,13 +34,13 @@
 #include "eventql/util/exceptionhandler.h"
 #include "eventql/util/thread/signalhandler.h"
 
-namespace stx {
+namespace util {
 
 void Application::init() {
-  stx::thread::SignalHandler::ignoreSIGHUP();
-  stx::thread::SignalHandler::ignoreSIGPIPE();
+  util::thread::SignalHandler::ignoreSIGHUP();
+  util::thread::SignalHandler::ignoreSIGPIPE();
 
-  auto ehandler = new stx::CatchAndAbortExceptionHandler();
+  auto ehandler = new util::CatchAndAbortExceptionHandler();
   ehandler->installGlobalHandlers();
 }
 

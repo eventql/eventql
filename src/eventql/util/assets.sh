@@ -23,6 +23,6 @@ while read line; do
     echo "static const unsigned char __${uniq}_data[] = {"
     (cat $real_path | xxd -i)
     echo "};"
-    echo "static stx::Assets::AssetFile __${uniq}(\"$logical_path\", __${uniq}_data, sizeof(__${uniq}_data));"
+    echo "static util::Assets::AssetFile __${uniq}(\"$logical_path\", __${uniq}_data, sizeof(__${uniq}_data));"
   ) >> $ASSETS_FILE
 done

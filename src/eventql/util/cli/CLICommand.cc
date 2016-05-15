@@ -23,7 +23,7 @@
  */
 #include <eventql/util/cli/CLICommand.h>
 
-namespace stx {
+namespace util {
 namespace cli {
 
 CLICommand::CLICommand(const String& command) {}

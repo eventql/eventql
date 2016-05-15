@@ -29,7 +29,7 @@
 #include <eventql/infra/cstable/CSTableReader.h>
 #include <eventql/infra/cstable/RecordMaterializer.h>
 
-using namespace stx;
+using namespace util;
 
 namespace eventql {
 

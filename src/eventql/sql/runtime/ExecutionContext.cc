@@ -23,7 +23,7 @@
  */
 #include <eventql/sql/runtime/ExecutionContext.h>
 
-using namespace stx;
+using namespace util;
 
 namespace csql {
 

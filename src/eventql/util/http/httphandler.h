@@ -25,7 +25,7 @@
 #define _libstx_HTTPHANDLER_H
 #include <memory>
 
-namespace stx {
+namespace util {
 namespace http {
 class HTTPServerConnection;
 class HTTPRequest;

@@ -27,7 +27,7 @@
 #include <eventql/core/PartitionWriter.h>
 #include <eventql/util/util/PersistentHashSet.h>
 
-using namespace stx;
+using namespace util;
 
 namespace eventql {
 

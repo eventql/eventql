@@ -27,10 +27,10 @@
 #include "eventql/util/http/httpservice.h"
 #include "eventql/util/json/json.h"
 
-namespace stx {
+namespace util {
 namespace sstable {
 
-class SSTableServlet : public stx::http::HTTPService {
+class SSTableServlet : public util::http::HTTPService {
 public:
   enum class ResponseFormat {
     JSON,
@@ -40,14 +40,14 @@ public:
   SSTableServlet(const String& base_path, VFS* vfs);
 
   void handleHTTPRequest(
-      stx::http::HTTPRequest* req,
-      stx::http::HTTPResponse* res);
+      util::http::HTTPRequest* req,
+      util::http::HTTPResponse* res);
 
 protected:
 
   void scan(
-      stx::http::HTTPRequest* req,
-      stx::http::HTTPResponse* res,
+      util::http::HTTPRequest* req,
+      util::http::HTTPResponse* res,
       const URI& uri);
 
   ResponseFormat formatFromString(const String& format);

@@ -30,7 +30,7 @@
 #include <eventql/util/io/inputstream.h>
 #include <eventql/util/io/outputstream.h>
 
-namespace stx {
+namespace util {
 namespace http {
 
 class HTTPMessage {

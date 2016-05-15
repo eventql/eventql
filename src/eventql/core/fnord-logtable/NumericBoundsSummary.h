@@ -28,7 +28,7 @@
 #include <eventql/util/util/binarymessagereader.h>
 #include <fnord-logtable/TableChunkSummaryBuilder.h>
 
-namespace stx {
+namespace util {
 namespace logtable {
 class TableChunkSummaryWriter;
 

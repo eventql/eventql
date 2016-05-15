@@ -24,7 +24,7 @@
 #include "eventql/util/UTF8.h"
 #include "eventql/util/exception.h"
 
-namespace stx {
+namespace util {
 
 char32_t UTF8::nextCodepoint(const char** cur, const char* end_) {
   auto begin = reinterpret_cast<const uint8_t*>(*cur);

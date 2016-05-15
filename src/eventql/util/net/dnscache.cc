@@ -23,7 +23,7 @@
  */
 #include "eventql/util/net/dnscache.h"
 
-namespace stx {
+namespace util {
 namespace net {
 
 InetAddr DNSCache::resolve(const std::string& addr_str) {

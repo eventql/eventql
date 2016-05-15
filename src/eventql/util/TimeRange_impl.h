@@ -1,4 +1,4 @@
-namespace stx {
+namespace util {
 
 inline constexpr TimeRange::TimeRange(UnixTime start, Duration duration)
     : start_(start), duration_(duration) {
@@ -44,4 +44,4 @@ inline constexpr bool TimeRange::operator!=(const TimeRange& other) const {
   return start_ != other.start_ || duration_ != other.duration_;
 }
 
-} // namespace stx
+} // namespace util

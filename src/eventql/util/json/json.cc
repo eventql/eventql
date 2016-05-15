@@ -29,7 +29,7 @@
 #include "eventql/util/json/json.h"
 #include "eventql/util/json/jsoninputstream.h"
 
-namespace stx {
+namespace util {
 namespace json {
 
 JSONToken::JSONToken(
@@ -49,7 +49,7 @@ JSONObject parseJSON(const std::string& json_str) {
   return parseJSON(&json);
 }
 
-JSONObject parseJSON(const stx::Buffer& json_buf) {
+JSONObject parseJSON(const util::Buffer& json_buf) {
   JSONInputStream json(BufferInputStream::fromBuffer(&json_buf));
   return parseJSON(&json);
 }
@@ -355,8 +355,8 @@ template <>
 std::string inspect(const json::JSONToken& token) {
   return StringUtil::format(
       "$0:$1",
-      stx::StringUtil::toString(token.type),
+      util::StringUtil::toString(token.type),
       token.data);
 }
 
-} // namespace stx
+} // namespace util

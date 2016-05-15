@@ -9,7 +9,7 @@
  */
 #include "cplot/domainprovider.h"
 
-namespace stx {
+namespace util {
 namespace chart {
 
 DomainProvider::DomainProvider(

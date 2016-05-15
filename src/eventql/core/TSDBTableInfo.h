@@ -26,7 +26,7 @@
 #include <eventql/util/protobuf/MessageSchema.h>
 #include <eventql/core/TableConfig.pb.h>
 
-using namespace stx;
+using namespace util;
 
 namespace eventql {
 

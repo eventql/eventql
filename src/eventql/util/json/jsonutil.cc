@@ -23,7 +23,7 @@
  */
 #include "eventql/util/json/jsonutil.h"
 
-namespace stx {
+namespace util {
 namespace json {
 
 Option<String> JSONUtil::objectGetString(

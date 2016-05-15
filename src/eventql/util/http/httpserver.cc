@@ -38,7 +38,7 @@ TODO:
   - https
 */
 
-namespace stx {
+namespace util {
 namespace http {
 
 HTTPServer::HTTPServer(

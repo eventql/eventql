@@ -29,7 +29,7 @@
 #include "eventql/util/thread/FixedSizeThreadPool.h"
 #include "eventql/util/application.h"
 
-namespace stx {
+namespace util {
 namespace thread {
 
 FixedSizeThreadPool::FixedSizeThreadPool(
@@ -40,8 +40,8 @@ FixedSizeThreadPool::FixedSizeThreadPool(
     FixedSizeThreadPool(
         opts,
         nthreads,
-        std::unique_ptr<stx::ExceptionHandler>(
-            new stx::CatchAndAbortExceptionHandler())) {}
+        std::unique_ptr<util::ExceptionHandler>(
+            new util::CatchAndAbortExceptionHandler())) {}
 
 FixedSizeThreadPool::FixedSizeThreadPool(
     ThreadPoolOptions opts,

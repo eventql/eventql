@@ -30,7 +30,7 @@
 #include "eventql/util/json/jsoninputstream.h"
 #include "eventql/util/json/jsonpointer.h"
 
-namespace stx {
+namespace util {
 namespace json {
 
 class JSONDocument {
@@ -66,7 +66,7 @@ protected:
 };
 
 } // namespace json
-} // namespace stx
+} // namespace util
 
 #include "jsondocument_impl.h"
 #endif

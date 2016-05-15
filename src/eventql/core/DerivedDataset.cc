@@ -23,7 +23,7 @@
  */
 #include <eventql/core/DerivedDataset.h>
 
-using namespace stx;
+using namespace util;
 
 namespace eventql {
 

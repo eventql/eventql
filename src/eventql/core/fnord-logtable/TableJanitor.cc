@@ -26,7 +26,7 @@
 #include <eventql/util/wallclock.h>
 #include <fnord-logtable/TableJanitor.h>
 
-namespace stx {
+namespace util {
 namespace logtable {
 
 TableJanitor::TableJanitor(
@@ -50,7 +50,7 @@ void TableJanitor::stop() {
 }
 
 void TableJanitor::check() {
-  stx::logDebug("fnord.evdb", "Running TableJanitor...");
+  util::logDebug("fnord.evdb", "Running TableJanitor...");
 
   auto tables = repo_->tables();
 
@@ -70,7 +70,7 @@ void TableJanitor::run() {
     try {
       check();
     } catch (const Exception& e) {
-      stx::logError("fnord.evdb", e, "TableJanitor error");
+      util::logError("fnord.evdb", e, "TableJanitor error");
     }
 
     auto elapsed = WallClock::unixMicros() - begin;
@@ -81,5 +81,5 @@ void TableJanitor::run() {
 }
 
 } // namespace logtable
-} // namespace stx
+} // namespace util
 

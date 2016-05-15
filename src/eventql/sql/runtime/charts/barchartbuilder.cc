@@ -28,27 +28,27 @@
 namespace csql {
 
 BarChartBuilder::BarChartBuilder(
-    stx::chart::Canvas* canvas,
+    util::chart::Canvas* canvas,
     RefPtr<DrawStatementNode> draw_stmt) :
     ChartBuilder(canvas, draw_stmt) {}
 
-stx::chart::Drawable* BarChartBuilder::getChart() const {
-  auto chart = dynamic_cast<stx::chart::BarChart*>(findChartType());
+util::chart::Drawable* BarChartBuilder::getChart() const {
+  auto chart = dynamic_cast<util::chart::BarChart*>(findChartType());
   setOrientation(chart);
   setStacked(chart);
   setLabels(chart);
   return chart;
 }
 
-stx::chart::Drawable* BarChartBuilder::findChartType() const {
+util::chart::Drawable* BarChartBuilder::findChartType() const {
   preconditionCheck();
 
-  if (auto c = tryType2D<stx::chart::BarChart2D<
+  if (auto c = tryType2D<util::chart::BarChart2D<
         SValue::StringType,
         SValue::FloatType>>())
     return c;
 
-  if (auto c = tryType3D<stx::chart::BarChart3D<
+  if (auto c = tryType3D<util::chart::BarChart3D<
         SValue::StringType,
         SValue::FloatType,
         SValue::FloatType>>())
@@ -58,7 +58,7 @@ stx::chart::Drawable* BarChartBuilder::findChartType() const {
   return nullptr;
 }
 
-void BarChartBuilder::setOrientation(stx::chart::BarChart* chart) const {
+void BarChartBuilder::setOrientation(util::chart::BarChart* chart) const {
   auto prop = draw_stmt_->getProperty(Token::T_ORIENTATION);
 
   if (prop == nullptr) {
@@ -67,11 +67,11 @@ void BarChartBuilder::setOrientation(stx::chart::BarChart* chart) const {
 
   switch (prop->getToken()->getType()) {
     case Token::T_VERTICAL:
-      chart->setOrientation(stx::chart::BarChart::O_VERTICAL);
+      chart->setOrientation(util::chart::BarChart::O_VERTICAL);
       break;
 
     case Token::T_HORIZONTAL:
-      chart->setOrientation(stx::chart::BarChart::O_HORIZONTAL);
+      chart->setOrientation(util::chart::BarChart::O_HORIZONTAL);
       break;
 
     default:
@@ -79,7 +79,7 @@ void BarChartBuilder::setOrientation(stx::chart::BarChart* chart) const {
   }
 }
 
-void BarChartBuilder::setStacked(stx::chart::BarChart* chart) const {
+void BarChartBuilder::setStacked(util::chart::BarChart* chart) const {
   auto prop = draw_stmt_->getProperty(Token::T_STACKED);
   chart->setStacked(prop != nullptr);
 }
@@ -88,7 +88,7 @@ std::string BarChartBuilder::chartName() const {
   return "BarChart";
 }
 
-void BarChartBuilder::setLabels(stx::chart::BarChart* chart) const {
+void BarChartBuilder::setLabels(util::chart::BarChart* chart) const {
   auto prop = draw_stmt_->getProperty(Token::T_LABELS);
   chart->setLabels(prop != nullptr);
 }

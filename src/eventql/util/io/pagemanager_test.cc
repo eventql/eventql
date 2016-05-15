@@ -30,7 +30,7 @@
 #include <sys/fcntl.h>
 #include <unistd.h>
 
-using namespace stx;
+using namespace util;
 
 UNIT_TEST(PageManagerTest);
 

@@ -23,7 +23,7 @@
  */
 #include <eventql/core/ReplicationState.h>
 
-using namespace stx;
+using namespace util;
 
 namespace eventql {
 

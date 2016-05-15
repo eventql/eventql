@@ -32,7 +32,7 @@
 #include <util/unittest.h>
 #include <eventql/util/exception.h>
 
-using namespace stxmetric::query;
+using namespace utilmetric::query;
 
 UNIT_TEST(SQLExtensionsTest);
 

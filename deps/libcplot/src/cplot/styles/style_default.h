@@ -13,7 +13,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-namespace stx {
+namespace util {
 
 static const std::string kStyleSheetDefault = R"(
   .fm-chart text, .fm-tooltip {

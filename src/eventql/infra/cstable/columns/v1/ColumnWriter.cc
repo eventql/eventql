@@ -24,7 +24,7 @@
 #include <eventql/infra/cstable/columns/v1/ColumnWriter.h>
 #include <eventql/util/ieee754.h>
 
-using namespace stx;
+using namespace util;
 
 namespace cstable {
 namespace v1 {
@@ -43,7 +43,7 @@ void ColumnWriter::commit() {
 }
 
 void ColumnWriter::write(void* buf, size_t buf_len) {
-  stx::util::BinaryMessageWriter writer(buf, buf_len);
+  util::BinaryMessageWriter writer(buf, buf_len);
   writer.appendUInt64(num_vals_);
   writer.appendUInt64(rlvl_writer_.size());
   writer.appendUInt64(dlvl_writer_.size());

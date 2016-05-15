@@ -25,7 +25,7 @@
 #include <eventql/infra/sstable/SSTableScan.h>
 #include <eventql/infra/sstable/SSTableColumnReader.h>
 
-namespace stx {
+namespace util {
 namespace sstable {
 
 SSTableScan::SSTableScan(
@@ -225,4 +225,4 @@ void SSTableScan::execute(
 }
 
 } // namespace sstable
-} // namespace stx
+} // namespace util

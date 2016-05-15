@@ -35,7 +35,7 @@
 #include <eventql/util/exception.h>
 #include <eventql/util/autoref.h>
 
-namespace stx {
+namespace util {
 namespace io {
 
 /**

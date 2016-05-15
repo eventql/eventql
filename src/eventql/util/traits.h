@@ -24,11 +24,11 @@
 #ifndef _STX_TRAITS_H
 #define _STX_TRAITS_H
 
-namespace stx {
+namespace util {
 
 /* TypeIsReflected<T> */
 template <typename T>
-using TypeIsReflected = stx::reflect::is_reflected<T>;
+using TypeIsReflected = util::reflect::is_reflected<T>;
 
 /* TypeIsVector<T> */
 template <typename T, typename = void>
@@ -48,5 +48,5 @@ struct TypeIsVector<
   static const bool value = true;
 };
 
-} // namespace stx
+} // namespace util
 #endif

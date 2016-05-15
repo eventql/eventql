@@ -28,7 +28,7 @@
 #include "eventql/util/protobuf/msg.h"
 #include "eventql/util/random.h"
 
-using namespace stx;
+using namespace util;
 
 namespace eventql {
 
@@ -87,12 +87,12 @@ void MasterServlet::handleHTTPRequest(
     }
   } catch (const StandardException& e) {
     logError("dxa-master", e, "error while handling HTTP request");
-    res->setStatus(stx::http::kStatusInternalServerError);
+    res->setStatus(util::http::kStatusInternalServerError);
     res->addBody(StringUtil::format("error: $0", e.what()));
     return;
   }
 
-  res->setStatus(stx::http::kStatusNotFound);
+  res->setStatus(util::http::kStatusNotFound);
   res->addBody("not found");
 }
 
@@ -111,7 +111,7 @@ void MasterServlet::listHeads(
 
   os.flush();
 
-  res->setStatus(stx::http::kStatusOK);
+  res->setStatus(util::http::kStatusOK);
   res->addBody(body);
 }
 
@@ -122,7 +122,7 @@ void MasterServlet::fetchCustomerConfig(
   const auto& params = uri.queryParams();
 
   String customer;
-  if (!stx::URI::getParam(params, "customer", &customer)) {
+  if (!util::URI::getParam(params, "customer", &customer)) {
     res->addBody("error: missing ?customer=... parameter");
     res->setStatus(http::kStatusBadRequest);
     return;
@@ -131,7 +131,7 @@ void MasterServlet::fetchCustomerConfig(
   auto config = cdb_->fetchCustomerConfig(customer);
   auto body = msg::encode(config);
 
-  res->setStatus(stx::http::kStatusOK);
+  res->setStatus(util::http::kStatusOK);
   res->addBody(*body);
 }
 
@@ -145,7 +145,7 @@ void MasterServlet::updateCustomerConfig(
 
   auto config = msg::decode<CustomerConfig>(req->body());
   auto updated_config = cdb_->updateCustomerConfig(config);
-  res->setStatus(stx::http::kStatusCreated);
+  res->setStatus(util::http::kStatusCreated);
   res->addBody(*msg::encode(updated_config));
 }
 
@@ -156,7 +156,7 @@ void MasterServlet::fetchClusterConfig(
   auto config = cdb_->fetchClusterConfig();
   auto body = msg::encode(config);
 
-  res->setStatus(stx::http::kStatusOK);
+  res->setStatus(util::http::kStatusOK);
   res->addBody(*body);
 }
 
@@ -170,7 +170,7 @@ void MasterServlet::updateClusterConfig(
 
   auto config = msg::decode<ClusterConfig>(req->body());
   auto updated_config = cdb_->updateClusterConfig(config);
-  res->setStatus(stx::http::kStatusCreated);
+  res->setStatus(util::http::kStatusCreated);
   res->addBody(*msg::encode(updated_config));
 }
 
@@ -183,7 +183,7 @@ void MasterServlet::fetchUserDB(
   auto users = cdb_->fetchUserDB();
   auto body = msg::encode(users);
 
-  res->setStatus(stx::http::kStatusOK);
+  res->setStatus(util::http::kStatusOK);
   res->addBody(*body);
 }
 
@@ -198,21 +198,21 @@ void MasterServlet::createUser(
   const auto& params = uri.queryParams();
 
   String customer;
-  if (!stx::URI::getParam(params, "customer", &customer)) {
+  if (!util::URI::getParam(params, "customer", &customer)) {
     res->addBody("error: missing ?customer=... parameter");
     res->setStatus(http::kStatusBadRequest);
     return;
   }
 
   String userid;
-  if (!stx::URI::getParam(params, "userid", &userid)) {
+  if (!util::URI::getParam(params, "userid", &userid)) {
     res->addBody("error: missing ?userid=... parameter");
     res->setStatus(http::kStatusBadRequest);
     return;
   }
 
   String password;
-  if (!stx::URI::getParam(params, "password", &password)) {
+  if (!util::URI::getParam(params, "password", &password)) {
     res->addBody("error: missing ?password=... parameter");
     res->setStatus(http::kStatusBadRequest);
     return;
@@ -229,13 +229,13 @@ void MasterServlet::createUser(
   user.set_two_factor_method(USERAUTH_2FA_NONE);
 
   String force;
-  if (stx::URI::getParam(params, "force_reset", &force) && force == "true") {
+  if (util::URI::getParam(params, "force_reset", &force) && force == "true") {
     auto head_cfg = cdb_->fetchUserConfig(userid);
     user.set_version(head_cfg.version());
   }
 
   cdb_->updateUserConfig(user);
-  res->setStatus(stx::http::kStatusCreated);
+  res->setStatus(util::http::kStatusCreated);
 }
 
 
@@ -250,7 +250,7 @@ void MasterServlet::createCustomer(
   const auto& params = uri.queryParams();
 
   String customer;
-  if (!stx::URI::getParam(params, "customer", &customer)) {
+  if (!util::URI::getParam(params, "customer", &customer)) {
     res->addBody("error: missing ?customer=... parameter");
     res->setStatus(http::kStatusBadRequest);
     return;
@@ -259,13 +259,13 @@ void MasterServlet::createCustomer(
   auto cfg = createCustomerConfig(customer);
 
   String force;
-  if (stx::URI::getParam(params, "force_reset", &force) && force == "true") {
+  if (util::URI::getParam(params, "force_reset", &force) && force == "true") {
     auto head_cfg = cdb_->fetchCustomerConfig(customer);
     cfg.set_version(head_cfg.version());
   }
 
   cdb_->updateCustomerConfig(cfg);
-  res->setStatus(stx::http::kStatusCreated);
+  res->setStatus(util::http::kStatusCreated);
 }
 
 void MasterServlet::fetchTableDefinition(
@@ -275,14 +275,14 @@ void MasterServlet::fetchTableDefinition(
   const auto& params = uri.queryParams();
 
   String customer;
-  if (!stx::URI::getParam(params, "customer", &customer)) {
+  if (!util::URI::getParam(params, "customer", &customer)) {
     res->addBody("error: missing ?customer=... parameter");
     res->setStatus(http::kStatusBadRequest);
     return;
   }
 
   String table_name;
-  if (!stx::URI::getParam(params, "table_name", &table_name)) {
+  if (!util::URI::getParam(params, "table_name", &table_name)) {
     res->addBody("error: missing ?table_name=... parameter");
     res->setStatus(http::kStatusBadRequest);
     return;
@@ -291,7 +291,7 @@ void MasterServlet::fetchTableDefinition(
   auto td = cdb_->fetchTableDefinition(customer, table_name);
   auto body = msg::encode(td);
 
-  res->setStatus(stx::http::kStatusOK);
+  res->setStatus(util::http::kStatusOK);
   res->addBody(*body);
 }
 
@@ -302,7 +302,7 @@ void MasterServlet::fetchTableDefinitions(
   const auto& params = uri.queryParams();
 
   String customer;
-  if (!stx::URI::getParam(params, "customer", &customer)) {
+  if (!util::URI::getParam(params, "customer", &customer)) {
     res->addBody("error: missing ?customer=... parameter");
     res->setStatus(http::kStatusBadRequest);
     return;
@@ -311,7 +311,7 @@ void MasterServlet::fetchTableDefinitions(
   auto tables = cdb_->fetchTableDefinitions(customer);
   auto body = msg::encode(tables);
 
-  res->setStatus(stx::http::kStatusOK);
+  res->setStatus(util::http::kStatusOK);
   res->addBody(*body);
 }
 
@@ -327,13 +327,13 @@ void MasterServlet::updateTableDefinition(
 
   bool force = false;
   String force_str;
-  if (stx::URI::getParam(params, "force", &force_str) && force_str == "true") {
+  if (util::URI::getParam(params, "force", &force_str) && force_str == "true") {
     force = true;
   }
 
   auto tbl = msg::decode<TableDefinition>(req->body());
   auto updated_tbl = cdb_->updateTableDefinition(tbl, force);
-  res->setStatus(stx::http::kStatusCreated);
+  res->setStatus(util::http::kStatusCreated);
   res->addBody(*msg::encode(updated_tbl));
 }
 

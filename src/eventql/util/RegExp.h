@@ -35,7 +35,7 @@
 #include <regex>
 #endif
 
-namespace stx {
+namespace util {
 
 class RegExp {
 public:
@@ -101,10 +101,10 @@ private:
 #endif
 };
 
-}  // namespace stx
+}  // namespace util
 
 namespace std {
-inline std::ostream& operator<<(std::ostream& os, const stx::RegExp& re) {
+inline std::ostream& operator<<(std::ostream& os, const util::RegExp& re) {
   os << re.pattern();
   return os;
 }

@@ -29,7 +29,7 @@
 #include <list>
 #include <eventql/util/autoref.h>
 
-namespace stx {
+namespace util {
 
 class Wakeup : public RefCounted {
 public:

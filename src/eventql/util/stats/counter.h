@@ -29,7 +29,7 @@
 #include "eventql/util/hash.h"
 #include "eventql/util/stats/stat.h"
 
-namespace stx {
+namespace util {
 namespace stats {
 
 template <typename ValueType>

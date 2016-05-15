@@ -33,7 +33,7 @@ class QueryBuilder;
 class Transaction;
 class SequentialScanNode;
 
-using namespace stx;
+using namespace util;
 
 class TableRepository : public TableProvider {
 public:

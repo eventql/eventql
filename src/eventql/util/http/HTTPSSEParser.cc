@@ -23,7 +23,7 @@
  */
 #include "eventql/util/http/HTTPSSEParser.h"
 
-namespace stx {
+namespace util {
 namespace http {
 
 void HTTPSSEParser::onEvent(Function<void (const HTTPSSEEvent& ev)> fn) {

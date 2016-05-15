@@ -29,7 +29,7 @@
 #include "eventql/util/stringutil.h"
 #include "eventql/util/ISO8601.h"
 
-namespace stx {
+namespace util {
 
 UnixTime::UnixTime() :
     utc_micros_(WallClock::unixMicros()) {}
@@ -109,12 +109,12 @@ std::string inspect(const UnixTime& value) {
 
 }
 
-stx::UnixTime
-    std::numeric_limits<stx::UnixTime>::min() {
-  return stx::UnixTime::epoch();
+util::UnixTime
+    std::numeric_limits<util::UnixTime>::min() {
+  return util::UnixTime::epoch();
 }
 
-stx::UnixTime
-    std::numeric_limits<stx::UnixTime>::max() {
-  return stx::UnixTime(std::numeric_limits<uint64_t>::max());
+util::UnixTime
+    std::numeric_limits<util::UnixTime>::max() {
+  return util::UnixTime(std::numeric_limits<uint64_t>::max());
 }

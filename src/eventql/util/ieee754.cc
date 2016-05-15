@@ -27,7 +27,7 @@
 #include <eventql/util/exception.h>
 #include <eventql/util/ieee754.h>
 
-namespace stx {
+namespace util {
 
 uint64_t IEEE754::toBytes(double value) {
   uint64_t bytes;

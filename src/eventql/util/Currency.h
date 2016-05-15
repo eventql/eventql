@@ -26,7 +26,7 @@
 #include "eventql/util/stdtypes.h"
 #include "eventql/util/Currency.pb.h"
 
-namespace stx {
+namespace util {
 
 Currency currencyFromString(const String& string);
 String currencyToString(Currency lang);
@@ -52,6 +52,6 @@ protected:
 };
 
 
-} // namespace stx
+} // namespace util
 
 #endif

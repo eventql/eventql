@@ -28,7 +28,7 @@
 #include "eventql/util/stdtypes.h"
 #include "eventql/util/io/TerminalOutputStream.h"
 
-namespace stx {
+namespace util {
 
 class Term {
 public:
@@ -157,4 +157,4 @@ protected:
   bool rawmode_;
 };
 
-} // namespace stx
+} // namespace util

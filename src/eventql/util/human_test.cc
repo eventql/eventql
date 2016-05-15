@@ -26,7 +26,7 @@
 #include "eventql/util/ISO8601.h"
 #include "eventql/util/test/unittest.h"
 
-using namespace stx;
+using namespace util;
 
 UNIT_TEST(HumanTest);
 

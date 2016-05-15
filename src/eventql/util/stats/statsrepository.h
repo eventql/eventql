@@ -26,7 +26,7 @@
 #include "eventql/util/stdtypes.h"
 #include "eventql/util/stats/stat.h"
 
-namespace stx {
+namespace util {
 namespace stats {
 
 enum class ExportMode {

@@ -25,7 +25,7 @@
 #include <eventql/infra/sstable/MetaPage.h>
 #include <eventql/infra/sstable/binaryformat.h>
 
-namespace stx {
+namespace util {
 namespace sstable {
 
 MetaPage::MetaPage(

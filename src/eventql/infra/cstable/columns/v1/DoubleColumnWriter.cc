@@ -54,7 +54,7 @@ void DoubleColumnWriter::addDatum(
   ++num_vals_;
 }
 
-void DoubleColumnWriter::write(stx::util::BinaryMessageWriter* writer) {
+void DoubleColumnWriter::write(util::BinaryMessageWriter* writer) {
   writer->append(data_writer_.data(), data_writer_.size());
 }
 

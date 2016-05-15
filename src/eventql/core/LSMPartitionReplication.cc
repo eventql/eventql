@@ -31,7 +31,7 @@
 #include <eventql/util/protobuf/MessageEncoder.h>
 #include <eventql/infra/cstable/RecordMaterializer.h>
 
-using namespace stx;
+using namespace util;
 
 namespace eventql {
 
@@ -168,7 +168,7 @@ bool LSMPartitionReplication::replicate() {
       } catch (const std::exception& e) {
         success = false;
 
-        stx::logError(
+        util::logError(
           "z1.replication",
           e,
           "Error while replicating partition $0/$1/$2 to $3",

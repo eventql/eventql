@@ -28,7 +28,7 @@
 #include <stdint.h>
 #include <string>
 
-namespace stx {
+namespace util {
 
 class IEEE754 {
 public:

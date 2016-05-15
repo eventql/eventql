@@ -30,7 +30,7 @@
 #include <eventql/util/protobuf/MessageSchema.h>
 #include <eventql/util/protobuf/MessageObject.h>
 
-namespace stx {
+namespace util {
 namespace logtable {
 class TableChunkSummaryWriter;
 

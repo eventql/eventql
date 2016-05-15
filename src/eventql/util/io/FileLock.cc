@@ -25,7 +25,7 @@
 #include <eventql/util/exception.h>
 #include <eventql/util/io/FileLock.h>
 
-namespace stx {
+namespace util {
 
 FileLock::FileLock(
     const String& filename) :

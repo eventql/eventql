@@ -30,7 +30,7 @@
 #include "eventql/util/autoref.h"
 #include "eventql/util/VFSFile.h"
 
-namespace stx {
+namespace util {
 
 /**
  * A growing/growable buffer class.

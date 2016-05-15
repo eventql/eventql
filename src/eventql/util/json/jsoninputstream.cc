@@ -26,7 +26,7 @@
 #include "eventql/util/stringutil.h"
 #include "eventql/util/json/jsoninputstream.h"
 
-namespace stx {
+namespace util {
 namespace json {
 
 JSONInputStream::JSONInputStream(
@@ -261,5 +261,5 @@ std::string inspect(const json::kTokenType& token) {
   }
 }
 
-} // namespace stx
+} // namespace util
 

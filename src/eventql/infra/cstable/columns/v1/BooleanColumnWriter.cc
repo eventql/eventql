@@ -71,7 +71,7 @@ void BooleanColumnWriter::commit() {
   data_writer_.flush();
 }
 
-void BooleanColumnWriter::write(stx::util::BinaryMessageWriter* writer) {
+void BooleanColumnWriter::write(util::BinaryMessageWriter* writer) {
   writer->append(data_writer_.data(), data_writer_.size());
 }
 

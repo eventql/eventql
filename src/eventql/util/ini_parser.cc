@@ -24,10 +24,10 @@
 
 #include "ini_parser.h"
 
-namespace stx {
+namespace util {
 
 void IniParser::start(const String& str) {
-  stx::iputs("start parsing $0", str);
+  util::iputs("start parsing $0", str);
 
 }
 

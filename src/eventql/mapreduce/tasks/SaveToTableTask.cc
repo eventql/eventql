@@ -26,7 +26,7 @@
 #include "eventql/core/FixedShardPartitioner.h"
 #include "eventql/infra/sstable/sstablereader.h"
 
-using namespace stx;
+using namespace util;
 
 namespace eventql {
 

@@ -28,7 +28,7 @@
 #include "eventql/util/json/json.h"
 #include "eventql/core/ReplicationScheme.h"
 
-using namespace stx;
+using namespace util;
 
 namespace eventql {
 

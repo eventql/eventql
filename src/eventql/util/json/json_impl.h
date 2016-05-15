@@ -32,7 +32,7 @@
 #include "eventql/util/reflect/indexsequence.h"
 #include "eventql/util/reflect/reflect.h"
 
-namespace stx {
+namespace util {
 namespace json {
 
 template <typename T>
@@ -94,7 +94,7 @@ T fromJSON(const std::string& json_str) {
 }
 
 template <typename T>
-T fromJSON(const stx::Buffer& json_buf) {
+T fromJSON(const util::Buffer& json_buf) {
   return fromJSON<T>(parseJSON(json_buf));
 }
 
@@ -107,7 +107,7 @@ template <
     typename T,
     typename O,
     typename = typename std::enable_if<
-        stx::reflect::is_reflected<T>::value>::type>
+        util::reflect::is_reflected<T>::value>::type>
 void toJSON(const T& value, O* target) {
   JSONOutputProxy<O> proxy(value, target);
 }
@@ -116,7 +116,7 @@ template <
     typename T,
     typename O,
     typename = typename std::enable_if<
-        !stx::reflect::is_reflected<T>::value>::type,
+        !util::reflect::is_reflected<T>::value>::type,
     typename = void>
 void toJSON(const T& value, O* target) {
   toJSONImpl(value, target);
@@ -146,7 +146,7 @@ JSONInputProxy<T>::JSONInputProxy(
     JSONObject::const_iterator end) :
     obj_begin(begin),
     obj_end(end),
-    value(stx::reflect::MetaClass<T>::unserialize(this)) {}
+    value(util::reflect::MetaClass<T>::unserialize(this)) {}
 
 template <typename T>
 template <typename PropertyType>
@@ -183,7 +183,7 @@ JSONOutputProxy<OutputType>::JSONOutputProxy(
     OutputType* target) :
     target_(target) {
   target_->emplace_back(json::JSON_OBJECT_BEGIN);
-  stx::reflect::MetaClass<T>::serialize(instance, this);
+  util::reflect::MetaClass<T>::serialize(instance, this);
   target_->emplace_back(json::JSON_OBJECT_END);
 }
 
@@ -234,7 +234,7 @@ template <typename... T, int... I, typename O>
 void toJSONTupleImpl(
     const std::tuple<T...>& value,
     O* target,
-    stx::reflect::IndexSequence<I...>) {
+    util::reflect::IndexSequence<I...>) {
   toJSONVariadicImpl(target, std::get<I>(value)...);
 }
 
@@ -244,7 +244,7 @@ void toJSONImpl(const std::tuple<T...>& value, O* target) {
   toJSONTupleImpl(
       value,
       target,
-      typename stx::reflect::MkIndexSequenceFor<T...>::type());
+      typename util::reflect::MkIndexSequenceFor<T...>::type());
   target->emplace_back(json::JSON_ARRAY_END);
 }
 
@@ -284,7 +284,7 @@ void toJSONImpl(double const& val, O* target) {
 }
 
 template <typename O>
-void toJSONImpl(const stx::UnixTime& val, O* target) {
+void toJSONImpl(const util::UnixTime& val, O* target) {
   toJSONImpl(static_cast<uint64_t>(val), target);
 }
 

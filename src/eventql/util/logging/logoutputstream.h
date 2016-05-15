@@ -29,7 +29,7 @@
 #include "eventql/util/logging/logtarget.h"
 #include "eventql/util/stdtypes.h"
 
-namespace stx {
+namespace util {
 
 class LogOutputStream : public LogTarget {
 public:

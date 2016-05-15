@@ -46,9 +46,9 @@ class Runtime;
 //protected:
 //
 //  template <typename ChartBuilderType>
-//  stx::chart::Drawable* executeWithChart(
+//  util::chart::Drawable* executeWithChart(
 //      ExecutionContext* context,
-//      stx::chart::Canvas* canvas) {
+//      util::chart::Canvas* canvas) {
 //    ChartBuilderType chart_builder(canvas, node_);
 //
 //    for (auto& source : sources_) {
@@ -58,12 +58,12 @@ class Runtime;
 //    return chart_builder.getChart();
 //  }
 //
-//  void applyAxisDefinitions(stx::chart::Drawable* chart) const;
-//  void applyAxisLabels(ASTNode* ast, stx::chart::AxisDefinition* axis) const;
-//  void applyDomainDefinitions(stx::chart::Drawable* chart) const;
-//  void applyGrid(stx::chart::Drawable* chart) const;
-//  void applyLegend(stx::chart::Drawable* chart) const;
-//  void applyTitle(stx::chart::Drawable* chart) const;
+//  void applyAxisDefinitions(util::chart::Drawable* chart) const;
+//  void applyAxisLabels(ASTNode* ast, util::chart::AxisDefinition* axis) const;
+//  void applyDomainDefinitions(util::chart::Drawable* chart) const;
+//  void applyGrid(util::chart::Drawable* chart) const;
+//  void applyLegend(util::chart::Drawable* chart) const;
+//  void applyTitle(util::chart::Drawable* chart) const;
 //
 //  Transaction* ctx_;
 //  RefPtr<DrawStatementNode> node_;

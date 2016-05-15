@@ -27,7 +27,6 @@
 #include <stdint.h>
 #include <string>
 
-namespace stx {
 namespace util {
 
 class BinaryMessageWriter {
@@ -70,7 +69,6 @@ protected:
   bool owned_;
 };
 
-}
 }
 
 #endif

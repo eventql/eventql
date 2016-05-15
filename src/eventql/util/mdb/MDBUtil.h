@@ -25,7 +25,7 @@
 #define _STX_MDBUTIL_H
 #include "eventql/util/mdb/MDBTransaction.h"
 
-namespace stx {
+namespace util {
 namespace mdb {
 
 class MDBUtil {

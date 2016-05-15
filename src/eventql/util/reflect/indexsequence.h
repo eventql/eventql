@@ -24,7 +24,7 @@
 #ifndef _STX_REFLECT_INDEXSEQUENCE_H
 #define _STX_REFLECT_INDEXSEQUENCE_H
 
-namespace stx {
+namespace util {
 namespace reflect {
 
 template <int...>

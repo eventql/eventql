@@ -27,7 +27,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-namespace stx {
 namespace util {
 
 BinaryMessageWriter::BinaryMessageWriter(
@@ -177,6 +176,5 @@ void BinaryMessageWriter::appendValue<String>(const String& val) {
   append(val.data(), val.size());
 }
 
-}
 }
 

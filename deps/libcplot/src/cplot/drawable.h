@@ -17,7 +17,7 @@
 #include "cplot/series.h"
 #include "cplot/viewport.h"
 
-namespace stx {
+namespace util {
 namespace chart {
 class RenderTarget;
 class Canvas;

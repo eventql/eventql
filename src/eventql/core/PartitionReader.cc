@@ -26,7 +26,7 @@
 #include <eventql/infra/sstable/sstablereader.h>
 #include <eventql/core/PartitionReader.h>
 
-using namespace stx;
+using namespace util;
 
 namespace eventql {
 

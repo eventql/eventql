@@ -61,7 +61,7 @@ void LEB128ColumnWriter::addDatum(
   ++num_vals_;
 }
 
-void LEB128ColumnWriter::write(stx::util::BinaryMessageWriter* writer) {
+void LEB128ColumnWriter::write(util::BinaryMessageWriter* writer) {
   writer->append(data_writer_.data(), data_writer_.size());
 }
 

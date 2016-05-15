@@ -22,7 +22,7 @@
 #include "cplot/seriesjoin.h"
 #include <eventql/util/exception.h>
 
-namespace stx {
+namespace util {
 namespace chart {
 
 /**

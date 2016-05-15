@@ -29,7 +29,7 @@
 #include <eventql/util/io/file.h>
 #include <eventql/util/io/fileutil.h>
 
-namespace stx {
+namespace util {
 namespace io {
 
 PageManager::PageManager(
@@ -181,7 +181,7 @@ RefPtr<MmapPageManager::MmappedFile> MmapPageManager::getMmappedFile(
   if (current_mapping_.get() == nullptr ||
       last_byte > current_mapping_->size) {
     /* align mmap size to the next larger block boundary */
-    auto file = stx::File::openFile(
+    auto file = util::File::openFile(
         filename_,
         File::O_READ | File::O_WRITE);
 

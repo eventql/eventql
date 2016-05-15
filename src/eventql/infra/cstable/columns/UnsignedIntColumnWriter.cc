@@ -23,7 +23,7 @@
  */
 #include <eventql/infra/cstable/columns/UnsignedIntColumnWriter.h>
 
-using namespace stx;
+using namespace util;
 
 namespace cstable {
 

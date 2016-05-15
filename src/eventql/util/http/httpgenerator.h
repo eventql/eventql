@@ -30,9 +30,9 @@
 #include <eventql/util/http/httpresponse.h>
 #include <eventql/util/http/httprequest.h>
 
-using stx::OutputStream;
+using util::OutputStream;
 
-namespace stx {
+namespace util {
 namespace http {
 
 class HTTPGenerator {

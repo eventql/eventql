@@ -27,7 +27,7 @@
 #include <unistd.h>
 #include "eventql/util/http/httpservice.h"
 
-namespace stx {
+namespace util {
 namespace http {
 
 class WriteStreamServlet : public http::StreamingHTTPService {

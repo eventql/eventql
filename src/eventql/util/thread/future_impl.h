@@ -25,7 +25,7 @@
 #define _STX_THREAD_FUTURE_IMPL_H
 #include <assert.h>
 
-namespace stx {
+namespace util {
 
 template <typename T>
 PromiseState<T>::PromiseState() :
@@ -230,6 +230,6 @@ bool Promise<T>::isFulfilled() const {
   return state_->ready;
 }
 
-} // namespace stx
+} // namespace util
 
 #endif

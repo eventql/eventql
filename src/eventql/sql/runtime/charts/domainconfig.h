@@ -39,8 +39,8 @@ public:
    * @param dimension 0 for x, 1 for y, etc
    */
   DomainConfig(
-      stx::chart::Drawable* drawable,
-      stx::chart::AnyDomain::kDimension dimension);
+      util::chart::Drawable* drawable,
+      util::chart::AnyDomain::kDimension dimension);
 
   void setMin(const SValue& value);
   void setMax(const SValue& value);
@@ -48,7 +48,7 @@ public:
   void setLogarithmic(bool logarithmic);
 
 protected:
-  stx::chart::AnyDomain* domain_;
+  util::chart::AnyDomain* domain_;
   char dimension_letter_;
 };
 

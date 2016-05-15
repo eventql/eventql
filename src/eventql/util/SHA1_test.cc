@@ -24,7 +24,7 @@
 #include "eventql/util/SHA1.h"
 #include "eventql/util/test/unittest.h"
 
-using namespace stx;
+using namespace util;
 
 UNIT_TEST(SHA1Test);
 

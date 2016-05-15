@@ -36,7 +36,7 @@ struct PageRef {
   uint32_t size;
 };
 
-class PageManager : public stx::RefCounted {
+class PageManager : public util::RefCounted {
 public:
 
   PageManager(

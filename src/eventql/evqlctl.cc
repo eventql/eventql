@@ -58,10 +58,10 @@
 #include "eventql/sql/runtime/defaultruntime.h"
 #include "eventql/sql/runtime/tablerepository.h"
 
-using namespace stx;
+using namespace util;
 using namespace eventql;
 
-stx::thread::EventLoop ev;
+util::thread::EventLoop ev;
 
 void cmd_cluster_status(const cli::FlagParser& flags) {
   ConfigDirectoryClient cclient(
@@ -91,14 +91,14 @@ void cmd_cluster_add_node(const cli::FlagParser& flags) {
 }
 
 int main(int argc, const char** argv) {
-  stx::Application::init();
-  stx::Application::logToStderr();
+  util::Application::init();
+  util::Application::logToStderr();
 
-  stx::cli::FlagParser flags;
+  util::cli::FlagParser flags;
 
   flags.defineFlag(
       "loglevel",
-      stx::cli::FlagParser::T_STRING,
+      util::cli::FlagParser::T_STRING,
       false,
       NULL,
       "INFO",
@@ -142,7 +142,7 @@ int main(int argc, const char** argv) {
 
   cluster_add_node_cmd->flags().defineFlag(
       "name",
-      stx::cli::FlagParser::T_STRING,
+      util::cli::FlagParser::T_STRING,
       true,
       NULL,
       NULL,
@@ -151,7 +151,7 @@ int main(int argc, const char** argv) {
 
   cluster_add_node_cmd->flags().defineFlag(
       "addr",
-      stx::cli::FlagParser::T_STRING,
+      util::cli::FlagParser::T_STRING,
       true,
       NULL,
       NULL,
@@ -160,7 +160,7 @@ int main(int argc, const char** argv) {
 
   cluster_add_node_cmd->flags().defineFlag(
       "vnodes",
-      stx::cli::FlagParser::T_INTEGER,
+      util::cli::FlagParser::T_INTEGER,
       true,
       NULL,
       NULL,

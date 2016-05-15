@@ -24,7 +24,7 @@
 #include <eventql/util/ieee754.h>
 #include <eventql/infra/sstable/SSTableColumnReader.h>
 
-namespace stx {
+namespace util {
 namespace sstable {
 
 SSTableColumnReader::SSTableColumnReader(
@@ -146,5 +146,5 @@ Vector<String> SSTableColumnReader::getStringColumns(SSTableColumnID id) {
 }
 
 } // namespace sstable
-} // namespace stx
+} // namespace util
 

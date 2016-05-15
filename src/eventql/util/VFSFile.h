@@ -26,7 +26,7 @@
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/autoref.h>
 
-namespace stx {
+namespace util {
 
 class VFSFile : public RefCounted {
 public:

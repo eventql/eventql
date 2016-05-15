@@ -27,7 +27,7 @@
 #include <stdint.h>
 #include "eventql/util/UnixTime.h"
 
-namespace stx {
+namespace util {
 namespace stats {
 
 template <typename T>

@@ -25,7 +25,7 @@
 #include "eventql/util/Currency.h"
 #include "eventql/util/stringutil.h"
 
-namespace stx {
+namespace util {
 
 Money::Money(
     uint64_t _cents,
@@ -79,4 +79,4 @@ String currencyToString(Currency lang) {
   }
 }
 
-} // namespace stx
+} // namespace util

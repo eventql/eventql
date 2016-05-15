@@ -28,28 +28,28 @@
 namespace csql {
 
 DomainConfig::DomainConfig(
-    stx::chart::Drawable* drawable,
-    stx::chart::AnyDomain::kDimension dimension) :
+    util::chart::Drawable* drawable,
+    util::chart::AnyDomain::kDimension dimension) :
     domain_(drawable->getDomain(dimension)),
-    dimension_letter_(stx::chart::AnyDomain::kDimensionLetters[dimension]) {}
+    dimension_letter_(util::chart::AnyDomain::kDimensionLetters[dimension]) {}
 
 void DomainConfig::setMin(const SValue& value) {
   auto int_domain = dynamic_cast<
-      stx::chart::ContinuousDomain<SValue::IntegerType>*>(domain_);
+      util::chart::ContinuousDomain<SValue::IntegerType>*>(domain_);
   if (int_domain != nullptr) {
     int_domain->setMin(value.getValue<SValue::IntegerType>());
     return;
   }
 
   auto float_domain = dynamic_cast<
-      stx::chart::ContinuousDomain<SValue::FloatType>*>(domain_);
+      util::chart::ContinuousDomain<SValue::FloatType>*>(domain_);
   if (float_domain != nullptr) {
     float_domain->setMin(value.getValue<SValue::FloatType>());
     return;
   }
 
   auto time_domain =
-      dynamic_cast<stx::chart::TimeDomain*>(domain_);
+      dynamic_cast<util::chart::TimeDomain*>(domain_);
   if (time_domain != nullptr) {
     time_domain->setMin(value.getValue<SValue::TimeType>());
     return;
@@ -63,21 +63,21 @@ void DomainConfig::setMin(const SValue& value) {
 
 void DomainConfig::setMax(const SValue& value) {
   auto int_domain = dynamic_cast<
-      stx::chart::ContinuousDomain<SValue::IntegerType>*>(domain_);
+      util::chart::ContinuousDomain<SValue::IntegerType>*>(domain_);
   if (int_domain != nullptr) {
     int_domain->setMax(value.getValue<SValue::IntegerType>());
     return;
   }
 
   auto float_domain = dynamic_cast<
-      stx::chart::ContinuousDomain<SValue::FloatType>*>(domain_);
+      util::chart::ContinuousDomain<SValue::FloatType>*>(domain_);
   if (float_domain != nullptr) {
     float_domain->setMax(value.getValue<SValue::FloatType>());
     return;
   }
 
   auto time_domain =
-      dynamic_cast<stx::chart::TimeDomain*>(domain_);
+      dynamic_cast<util::chart::TimeDomain*>(domain_);
   if (time_domain != nullptr) {
     time_domain->setMax(value.getValue<SValue::TimeType>());
     return;
@@ -103,7 +103,7 @@ void DomainConfig::setLogarithmic(bool logarithmic) {
   }
 
   auto continuous_domain =
-      dynamic_cast<stx::chart::AnyContinuousDomain*>(domain_);
+      dynamic_cast<util::chart::AnyContinuousDomain*>(domain_);
   if (continuous_domain == nullptr) {
     RAISE(
         kRuntimeError,

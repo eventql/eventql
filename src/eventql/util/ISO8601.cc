@@ -25,7 +25,7 @@
 #include "eventql/util/ISO8601.h"
 #include "eventql/util/time_constants.h"
 
-using namespace stx;
+using namespace util;
 
 namespace {
 
@@ -278,7 +278,7 @@ static bool parseYear(const char* begin, const char* end, CivilTime* date) {
 
 }
 
-namespace stx {
+namespace util {
 
 Option<CivilTime> ISO8601::parse(const String& str) {
   CivilTime date(nullptr);

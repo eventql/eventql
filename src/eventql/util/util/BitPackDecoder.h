@@ -28,7 +28,6 @@
 #include <string>
 #include <eventql/util/buffer.h>
 
-namespace stx {
 namespace util {
 
 class BitPackDecoder {
@@ -75,7 +74,6 @@ inline uint32_t BitPackDecoder::peek() {
   return outbuf_[outbuf_pos_];
 }
 
-}
 }
 
 #endif

@@ -26,7 +26,7 @@
 #include "eventql/util/autoref.h"
 #include "eventql/util/stats/statssink.h"
 
-namespace stx {
+namespace util {
 namespace stats {
 
 class Stat : public RefCounted {

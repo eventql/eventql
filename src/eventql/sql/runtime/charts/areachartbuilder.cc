@@ -28,41 +28,41 @@
 namespace csql {
 
 AreaChartBuilder::AreaChartBuilder(
-    stx::chart::Canvas* canvas,
+    util::chart::Canvas* canvas,
     RefPtr<DrawStatementNode> draw_stmt) :
     ChartBuilder(canvas, draw_stmt) {}
 
-stx::chart::Drawable* AreaChartBuilder::getChart() const {
+util::chart::Drawable* AreaChartBuilder::getChart() const {
   preconditionCheck();
 
-  if (auto c = tryType2D<stx::chart::AreaChart2D<
+  if (auto c = tryType2D<util::chart::AreaChart2D<
         SValue::TimeType,
         SValue::FloatType>>())
     return c;
 
-  if (auto c = tryType2D<stx::chart::AreaChart2D<
+  if (auto c = tryType2D<util::chart::AreaChart2D<
         SValue::FloatType,
         SValue::FloatType>>())
     return c;
 
-  if (auto c = tryType2D<stx::chart::AreaChart2D<
+  if (auto c = tryType2D<util::chart::AreaChart2D<
         SValue::StringType,
         SValue::FloatType>>())
     return c;
 
-  if (auto c = tryType3D<stx::chart::AreaChart3D<
+  if (auto c = tryType3D<util::chart::AreaChart3D<
         SValue::TimeType,
         SValue::FloatType,
         SValue::FloatType>>())
     return c;
 
-  if (auto c = tryType3D<stx::chart::AreaChart3D<
+  if (auto c = tryType3D<util::chart::AreaChart3D<
         SValue::FloatType,
         SValue::FloatType,
         SValue::FloatType>>())
     return c;
 
-  if (auto c = tryType3D<stx::chart::AreaChart3D<
+  if (auto c = tryType3D<util::chart::AreaChart3D<
         SValue::StringType,
         SValue::FloatType,
         SValue::FloatType>>())

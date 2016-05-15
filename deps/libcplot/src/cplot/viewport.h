@@ -10,7 +10,7 @@
 #ifndef _libstx_UI_VIEWPORT_H
 #define _libstx_UI_VIEWPORT_H
 
-namespace stx {
+namespace util {
 namespace chart {
 
 class Viewport {

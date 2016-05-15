@@ -23,7 +23,7 @@
  */
 #include "eventql/util/io/BufferedOutputStream.h"
 
-namespace stx {
+namespace util {
 
 ScopedPtr<BufferedOutputStream> BufferedOutputStream::fromStream(
     ScopedPtr<OutputStream> stream,

@@ -27,7 +27,7 @@
 #include "eventql/util/thread/taskscheduler.h"
 #include "eventql/util/net/tcpconnection.h"
 
-namespace stx {
+namespace util {
 namespace net {
 
 class TCPServer {

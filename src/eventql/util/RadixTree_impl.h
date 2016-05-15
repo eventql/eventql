@@ -21,7 +21,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-namespace stx {
+namespace util {
 
 template <typename T>
 RadixTree<T>::RadixTree() {

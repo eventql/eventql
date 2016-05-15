@@ -43,7 +43,7 @@
 #include <dlfcn.h>
 #endif
 
-namespace stx {
+namespace util {
 
 #define MAX_FRAMES 64
 #define SKIP_FRAMES 2
@@ -187,4 +187,4 @@ void StackTrace::debugPrint(int fd) {
   }
 }
 
-}  // namespace stx
+}  // namespace util

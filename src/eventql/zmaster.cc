@@ -33,20 +33,20 @@
 #include "eventql/master/ConfigDirectoryMaster.h"
 #include "eventql/master/MasterServlet.h"
 
-using namespace stx;
+using namespace util;
 using namespace eventql;
 
-stx::thread::EventLoop ev;
+util::thread::EventLoop ev;
 
 int main(int argc, const char** argv) {
-  stx::Application::init();
-  stx::Application::logToStderr();
+  util::Application::init();
+  util::Application::logToStderr();
 
-  stx::cli::FlagParser flags;
+  util::cli::FlagParser flags;
 
   flags.defineFlag(
       "http_port",
-      stx::cli::FlagParser::T_INTEGER,
+      util::cli::FlagParser::T_INTEGER,
       false,
       NULL,
       "9175",
@@ -64,7 +64,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "loglevel",
-      stx::cli::FlagParser::T_STRING,
+      util::cli::FlagParser::T_STRING,
       false,
       NULL,
       "INFO",
@@ -77,11 +77,11 @@ int main(int argc, const char** argv) {
       strToLogLevel(flags.getString("loglevel")));
 
   /* thread pools */
-  stx::thread::ThreadPool tpool(thread::ThreadPoolOptions{});
+  util::thread::ThreadPool tpool(thread::ThreadPoolOptions{});
 
   /* http */
-  stx::http::HTTPRouter http_router;
-  stx::http::HTTPServer http_server(&http_router, &ev);
+  util::http::HTTPRouter http_router;
+  util::http::HTTPServer http_server(&http_router, &ev);
   http_server.listen(flags.getInt("http_port"));
 
   /* customer directory */
@@ -102,7 +102,7 @@ int main(int argc, const char** argv) {
       &tpool);
 
   ev.run();
-  stx::logInfo("dxa-master", "Exiting...");
+  util::logInfo("dxa-master", "Exiting...");
 
   exit(0);
 }

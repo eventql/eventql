@@ -23,7 +23,6 @@
  */
 #include <eventql/util/util/Base64.h>
 
-namespace stx {
 namespace util {
 
 /**
@@ -127,5 +126,4 @@ void Base64::encode(const void* data, size_t size, String* out) {
 }
 
 
-}
 }

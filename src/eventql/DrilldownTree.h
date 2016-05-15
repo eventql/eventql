@@ -27,7 +27,7 @@
 #include <eventql/util/json/jsonoutputstream.h>
 #include <eventql/sql/svalue.h>
 
-using namespace stx;
+using namespace util;
 
 namespace eventql {
 

@@ -32,7 +32,7 @@
 #include "eventql/util/inspect.h"
 #include "eventql/util/thread/eventloop.h"
 
-namespace stx {
+namespace util {
 namespace thread {
 
 EventLoop::EventLoop() :

@@ -24,7 +24,7 @@
 #include <eventql/util/exception.h>
 #include <eventql/util/uri.h>
 
-namespace stx {
+namespace util {
 
 
 std::string URI::urlEncode(const std::string& str) {
@@ -428,5 +428,5 @@ std::string URI::buildQueryString(const URI::ParamList& params) {
   return out;
 }
 
-} // namespace stx
+} // namespace util
 

@@ -30,7 +30,7 @@
 #include <fnord-logtable/TableArena.h>
 #include <fnord-logtable/TableSnapshot.h>
 
-namespace stx {
+namespace util {
 namespace logtable {
 
 class AbstractTableReader : public RefCounted {
@@ -52,6 +52,6 @@ public:
 };
 
 } // namespace logtable
-} // namespace stx
+} // namespace util
 
 #endif

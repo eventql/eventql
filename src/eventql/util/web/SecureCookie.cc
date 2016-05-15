@@ -24,7 +24,7 @@
 #include <eventql/util/util/Base64.h>
 #include <eventql/util/web/SecureCookie.h>
 
-namespace stx {
+namespace util {
 namespace web {
 
 SecureCookie::SecureCookie(

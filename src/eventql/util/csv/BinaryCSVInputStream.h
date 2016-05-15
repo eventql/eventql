@@ -26,7 +26,7 @@
 #include "eventql/util/io/inputstream.h"
 #include "eventql/util/csv/CSVInputStream.h"
 
-namespace stx {
+namespace util {
 
 class BinaryCSVInputStream : public CSVInputStream {
 public:

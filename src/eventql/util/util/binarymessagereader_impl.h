@@ -23,7 +23,6 @@
  */
 #pragma once
 
-namespace stx {
 namespace util {
 
 inline uint8_t const* BinaryMessageReader::readUInt8() {
@@ -206,5 +205,4 @@ inline String const* BinaryMessageReader::readValue<String>() {
   return &cur_str_;
 }
 
-}
 }

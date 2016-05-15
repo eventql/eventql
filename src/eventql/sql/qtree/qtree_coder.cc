@@ -39,7 +39,7 @@
 #include <eventql/sql/qtree/JoinNode.h>
 #include <eventql/sql/qtree/SubqueryNode.h>
 
-using namespace stx;
+using namespace util;
 
 namespace csql {
 
@@ -61,7 +61,7 @@ QueryTreeCoder::QueryTreeCoder(Transaction* txn) : txn_(txn) {
   registerType<SubqueryNode>(15);
 }
 
-void QueryTreeCoder::encode(RefPtr<QueryTreeNode> tree, stx::OutputStream* os) {
+void QueryTreeCoder::encode(RefPtr<QueryTreeNode> tree, util::OutputStream* os) {
   auto coder = coders_by_type_id_.find(&typeid(*tree));
   if (coder == coders_by_type_id_.end()) {
     RAISEF(kIOError, "don't know how to encode this QueryTreeNode: $0", tree->toString());
@@ -71,7 +71,7 @@ void QueryTreeCoder::encode(RefPtr<QueryTreeNode> tree, stx::OutputStream* os) {
   coder->second.encode_fn(this, tree, os);
 }
 
-RefPtr<QueryTreeNode> QueryTreeCoder::decode(stx::InputStream* is) {
+RefPtr<QueryTreeNode> QueryTreeCoder::decode(util::InputStream* is) {
   auto wire_type = is->readVarUInt();
 
   auto coder = coders_by_wire_type_id_.find(wire_type);

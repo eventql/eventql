@@ -23,10 +23,10 @@
  */
 #include "eventql/util/rpc/RPCStub.h"
 
-namespace stx {
+namespace util {
 namespace rpc {
 
 
 } // namespace rpc
-} // namespace stx
+} // namespace util
 

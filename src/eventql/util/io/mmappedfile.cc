@@ -25,7 +25,7 @@
 #include <unistd.h>
 #include <eventql/util/io/mmappedfile.h>
 
-namespace stx {
+namespace util {
 namespace io {
 
 MmappedFile::MmappedFile(File&& file) : MmappedFile(std::move(file), 0, -1) {}

@@ -29,7 +29,7 @@
 #include "eventql/infra/sstable/sstablereader.h"
 #include "eventql/infra/cstable/CSTableReader.h"
 
-namespace stx {
+namespace util {
 namespace logtable {
 
 class TableReader : public AbstractTableReader {
@@ -77,6 +77,6 @@ protected:
 };
 
 } // namespace logtable
-} // namespace stx
+} // namespace util
 
 #endif

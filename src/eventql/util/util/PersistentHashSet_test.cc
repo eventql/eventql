@@ -27,7 +27,7 @@
 #include "eventql/util/test/unittest.h"
 #include "eventql/util/util/PersistentHashSet.h"
 
-using namespace stx;
+using namespace util;
 
 UNIT_TEST(RecordIDSetTest);
 

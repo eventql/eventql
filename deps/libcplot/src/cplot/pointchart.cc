@@ -11,7 +11,7 @@
 #include "pointchart.h"
 #include <eventql/util/exception.h>
 
-namespace stx {
+namespace util {
 namespace chart {
 
 char PointChart::kDefaultPointStyle[] = "circle";

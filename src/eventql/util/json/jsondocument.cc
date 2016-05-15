@@ -30,7 +30,7 @@
 #include "eventql/util/json/jsondocument.h"
 #include "eventql/util/json/jsonpointer.h"
 
-namespace stx {
+namespace util {
 namespace json {
 
 JSONDocument::JSONDocument(
@@ -194,5 +194,5 @@ void JSONDocument::forEach(
 }
 
 } // namespace json
-} // namespace stx
+} // namespace util
 

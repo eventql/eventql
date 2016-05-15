@@ -1,7 +1,7 @@
 #include <eventql/util/MonotonicTime.h>
 #include <eventql/util/stringutil.h>
 
-namespace stx {
+namespace util {
 
 std::string inspect(const MonotonicTime& value) {
   return StringUtil::format("$0", value.milliseconds());
@@ -17,4 +17,4 @@ std::string StringUtil::toString<const MonotonicTime&>(const MonotonicTime& valu
   return inspect(value);
 }
 
-} // namespace stx
+} // namespace util

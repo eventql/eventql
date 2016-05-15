@@ -23,7 +23,7 @@
  */
 #include "eventql/util/http/HTTPFileDownload.h"
 
-namespace stx {
+namespace util {
 namespace http {
 
 HTTPFileDownload::HTTPFileDownload(

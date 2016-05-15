@@ -24,7 +24,6 @@
 #include "eventql/util/util/CumulativeHistogram.h"
 #include "eventql/util/stringutil.h"
 
-namespace stx {
 namespace util {
 
 CumulativeHistogram CumulativeHistogram::withLinearBins(double bin_size) {
@@ -67,6 +66,5 @@ Vector<Pair<String, double>>
   return res;
 }
 
-}
 }
 

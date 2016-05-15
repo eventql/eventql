@@ -31,7 +31,7 @@
 #include <locale>
 #include "eventql/util/stdtypes.h"
 
-namespace stx {
+namespace util {
 
 class UTF8 {
 public:

@@ -24,7 +24,7 @@
 #include <fnord-logtable/NumericBoundsSummary.h>
 #include <fnord-logtable/TableChunkSummaryWriter.h>
 
-namespace stx {
+namespace util {
 namespace logtable {
 
 void NumericBoundsSummary::encode(util::BinaryMessageWriter* writer) const {

@@ -30,7 +30,7 @@
 #include <eventql/util/protobuf/MessageObject.h>
 #include <fnord-logtable/TableArena.h>
 
-namespace stx {
+namespace util {
 namespace logtable {
 
 struct TableChunkRef {
@@ -67,6 +67,6 @@ struct TableSnapshot : public RefCounted {
 };
 
 } // namespace logtable
-} // namespace stx
+} // namespace util
 
 #endif

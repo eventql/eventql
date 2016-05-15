@@ -23,7 +23,7 @@
  */
 #include "eventql/util/io/TerminalOutputStream.h"
 
-namespace stx {
+namespace util {
 
 ScopedPtr<TerminalOutputStream> TerminalOutputStream::fromStream(
     ScopedPtr<OutputStream> stream) {

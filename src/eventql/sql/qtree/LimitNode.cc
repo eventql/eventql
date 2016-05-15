@@ -25,7 +25,7 @@
 #include <eventql/sql/qtree/LimitNode.h>
 #include <eventql/sql/qtree/qtree_coder.h>
 
-using namespace stx;
+using namespace util;
 
 namespace csql {
 
@@ -85,7 +85,7 @@ String LimitNode::toString() const {
 void LimitNode::encode(
     QueryTreeCoder* coder,
     const LimitNode& node,
-    stx::OutputStream* os) {
+    util::OutputStream* os) {
   os->appendVarUInt(node.limit_);
   os->appendVarUInt(node.offset_);
   coder->encode(node.table_, os);
@@ -93,7 +93,7 @@ void LimitNode::encode(
 
 RefPtr<QueryTreeNode> LimitNode::decode(
     QueryTreeCoder* coder,
-    stx::InputStream* is) {
+    util::InputStream* is) {
   auto limit = is->readVarUInt();
   auto offset = is->readVarUInt();
   auto table = coder->decode(is);

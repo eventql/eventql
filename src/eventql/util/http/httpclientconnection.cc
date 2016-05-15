@@ -27,7 +27,7 @@
 #include <eventql/util/http/httpclientconnection.h>
 #include <eventql/util/http/httpresponsehandler.h>
 
-namespace stx {
+namespace util {
 namespace http {
 
 HTTPClientConnection::HTTPClientConnection(

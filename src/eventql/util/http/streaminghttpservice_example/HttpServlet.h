@@ -26,7 +26,7 @@
 #define _CM_HTTPSERVLET_H
 #include "eventql/util/http/httpservice.h"
 
-namespace stx {
+namespace util {
 namespace http {
 
 class HTTPServlet : public http::StreamingHTTPService {

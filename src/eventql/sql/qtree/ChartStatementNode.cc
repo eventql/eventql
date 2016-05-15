@@ -24,7 +24,7 @@
  */
 #include <eventql/sql/qtree/ChartStatementNode.h>
 
-using namespace stx;
+using namespace util;
 
 namespace csql {
 

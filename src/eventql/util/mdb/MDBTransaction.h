@@ -31,7 +31,7 @@
 #include "eventql/util/option.h"
 #include "eventql/util/mdb/MDBCursor.h"
 
-namespace stx {
+namespace util {
 namespace mdb {
 struct MDBOptions;
 

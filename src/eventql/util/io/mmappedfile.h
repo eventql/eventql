@@ -31,7 +31,7 @@
 #include <stdint.h>
 #include <string>
 
-namespace stx {
+namespace util {
 namespace io {
 
 class MmappedFile : public VFSFile {

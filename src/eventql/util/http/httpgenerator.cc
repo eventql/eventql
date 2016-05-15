@@ -25,9 +25,9 @@
 #include <eventql/util/stringutil.h>
 #include <eventql/util/http/httpgenerator.h>
 
-using stx::OutputStream;
+using util::OutputStream;
 
-namespace stx {
+namespace util {
 namespace http {
 
 void HTTPGenerator::generate(const HTTPRequest& req, OutputStream* os) {

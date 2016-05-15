@@ -27,7 +27,7 @@
 #include <eventql/util/protobuf/MessageObject.h>
 #include <eventql/util/json/json.h>
 
-namespace stx {
+namespace util {
 namespace msg {
 
 class JSONEncoder {
@@ -48,5 +48,5 @@ protected:
 };
 
 } // namespace msg
-} // namespace stx
+} // namespace util
 

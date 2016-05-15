@@ -23,7 +23,7 @@
  */
 #include <eventql/util/protobuf/JSONEncoder.h>
 
-namespace stx {
+namespace util {
 namespace msg {
 
 void JSONEncoder::encode(
@@ -116,5 +116,5 @@ void JSONEncoder::encodeField(
 }
 
 } // namespace msg
-} // namespace stx
+} // namespace util
 

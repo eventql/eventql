@@ -24,7 +24,7 @@
 #include <eventql/util/util/binarymessagewriter.h>
 #include <eventql/core/FixedShardPartitioner.h>
 
-using namespace stx;
+using namespace util;
 
 namespace eventql {
 

@@ -35,7 +35,7 @@
 #include "eventql/util/io/file.h"
 #include "eventql/util/io/mmappedfile.h"
 
-namespace stx {
+namespace util {
 
 void FileUtil::mkdir(const std::string& dirname) {
   if (::mkdir(dirname.c_str(), S_IRWXU) != 0) {
@@ -148,9 +148,9 @@ void FileUtil::mkdir_p(const std::string& dirname) {
 
 std::string FileUtil::joinPaths(const std::string& p1, const std::string p2) {
   String p1_stripped = p1;
-  stx::StringUtil::stripTrailingSlashes(&p1_stripped);
+  util::StringUtil::stripTrailingSlashes(&p1_stripped);
   String p2_stripped = p2;
-  stx::StringUtil::stripTrailingSlashes(&p2_stripped);
+  util::StringUtil::stripTrailingSlashes(&p2_stripped);
   return p1_stripped + "/" + p2_stripped;
 }
 

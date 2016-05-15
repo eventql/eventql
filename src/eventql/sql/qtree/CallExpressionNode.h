@@ -27,7 +27,7 @@
 #include <eventql/sql/qtree/ValueExpressionNode.h>
 #include <eventql/sql/qtree/qtree_coder.h>
 
-using namespace stx;
+using namespace util;
 
 namespace csql {
 
@@ -49,11 +49,11 @@ public:
   static void encode(
       QueryTreeCoder* coder,
       const CallExpressionNode& node,
-      stx::OutputStream* os);
+      util::OutputStream* os);
 
   static RefPtr<QueryTreeNode> decode (
       QueryTreeCoder* coder,
-      stx::InputStream* is);
+      util::InputStream* is);
 
 protected:
   String symbol_;

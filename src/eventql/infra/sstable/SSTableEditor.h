@@ -34,7 +34,7 @@
 #include <eventql/infra/sstable/indexprovider.h>
 #include <eventql/util/exception.h>
 
-namespace stx {
+namespace util {
 namespace sstable {
 
 class SSTableColumnWriter;

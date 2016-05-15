@@ -30,7 +30,7 @@
 #include "eventql/util/json/jsonrpcresponse.h"
 #include "eventql/util/json/jsonrpcrequest.h"
 
-namespace stx {
+namespace util {
 namespace json {
 
 std::unique_ptr<http::HTTPService> JSONRPCHTTPAdapter::make(JSONRPC* rpc) {
@@ -68,7 +68,7 @@ void JSONRPCHTTPAdapter::handleHTTPRequest(
     JSONRPCRequest req(parseJSON(request->body()));
     res.setID(req.id());
     json_rpc_->dispatch(&req, &res);
-  } catch (const stx::Exception& e) {
+  } catch (const util::Exception& e) {
     res.error(
         JSONRPCResponse::kJSONRPCPInternalError,
         e.getMessage());
@@ -77,5 +77,5 @@ void JSONRPCHTTPAdapter::handleHTTPRequest(
 
 
 } // namespace json
-} // namespace stx
+} // namespace util
 

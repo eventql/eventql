@@ -24,7 +24,7 @@
 #include "eventql/util/stdtypes.h"
 #include "eventql/util/rpc/RPCContext.h"
 
-namespace stx {
+namespace util {
 namespace rpc {
 
 RPCContext::RPCContext(RPCRequest* rpc) : rpc_(rpc) {}
@@ -47,5 +47,5 @@ void RPCContext::onCancel(Function<void ()> fn) {
 
 
 } // namespace rpc
-} // namespace stx
+} // namespace util
 

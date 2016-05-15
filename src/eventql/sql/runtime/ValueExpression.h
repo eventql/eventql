@@ -30,7 +30,7 @@
 #include <eventql/sql/runtime/ScratchMemory.h>
 #include <eventql/sql/runtime/vm.h>
 
-using namespace stx;
+using namespace util;
 
 namespace csql {
 

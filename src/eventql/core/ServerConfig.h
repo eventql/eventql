@@ -15,7 +15,7 @@
 #include <eventql/core/ReplicationScheme.h>
 #include <eventql/core/LSMTableIndexCache.h>
 
-using namespace stx;
+using namespace util;
 
 namespace eventql {
 

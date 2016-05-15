@@ -26,7 +26,7 @@
 #include <eventql/util/exception.h>
 #include <eventql/util/io/outputstream.h>
 
-namespace stx {
+namespace util {
 
 class BinaryCSVOutputStream {
 public:
@@ -39,5 +39,5 @@ protected:
   std::shared_ptr<OutputStream> output_;
 };
 
-} // namespace stx
+} // namespace util
 

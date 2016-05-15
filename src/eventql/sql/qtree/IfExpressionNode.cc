@@ -24,7 +24,7 @@
  */
 #include <eventql/sql/qtree/IfExpressionNode.h>
 
-using namespace stx;
+using namespace util;
 
 namespace csql {
 
@@ -74,7 +74,7 @@ String IfExpressionNode::toSQL() const {
 void IfExpressionNode::encode(
     QueryTreeCoder* coder,
     const IfExpressionNode& node,
-    stx::OutputStream* os) {
+    util::OutputStream* os) {
   coder->encode(node.conditional_expr_.get(), os);
   coder->encode(node.true_branch_expr_.get(), os);
   coder->encode(node.false_branch_expr_.get(), os);
@@ -82,7 +82,7 @@ void IfExpressionNode::encode(
 
 RefPtr<QueryTreeNode> IfExpressionNode::decode (
     QueryTreeCoder* coder,
-    stx::InputStream* is) {
+    util::InputStream* is) {
   auto conditional_expr = coder->decode(is).asInstanceOf<ValueExpressionNode>();
   auto true_branch_expr = coder->decode(is).asInstanceOf<ValueExpressionNode>();
   auto false_branch_expr = coder->decode(is).asInstanceOf<ValueExpressionNode>();

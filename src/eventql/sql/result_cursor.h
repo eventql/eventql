@@ -28,7 +28,7 @@
 #include <eventql/sql/svalue.h>
 #include <eventql/sql/runtime/Statement.h>
 
-using namespace stx;
+using namespace util;
 
 namespace csql {
 class TableExpression;

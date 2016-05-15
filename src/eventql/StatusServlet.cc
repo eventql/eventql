@@ -27,7 +27,7 @@
 #include <eventql/z1.h>
 #include "eventql/util/application.h"
 
-using namespace stx;
+using namespace util;
 namespace eventql {
 
 static const String kStyleSheet = R"(

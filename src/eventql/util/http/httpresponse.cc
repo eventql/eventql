@@ -29,7 +29,7 @@
 #include <eventql/util/http/httpresponse.h>
 #include <eventql/util/http/httpparser.h>
 
-namespace stx {
+namespace util {
 namespace http {
 
 HTTPResponse HTTPResponse::parse(const std::string& str) {

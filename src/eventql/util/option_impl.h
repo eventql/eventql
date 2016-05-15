@@ -24,7 +24,7 @@
 #ifndef _STX_BASE_OPTION_IMPL_H
 #define _STX_BASE_OPTION_IMPL_H
 
-namespace stx {
+namespace util {
 
 template <typename T>
 Option<T>::Option() : value_(nullptr) {}

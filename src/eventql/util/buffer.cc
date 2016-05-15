@@ -25,7 +25,7 @@
 #include <eventql/util/exception.h>
 #include <string.h>
 
-namespace stx {
+namespace util {
 
 Buffer::Buffer() : data_(nullptr), size_(0), alloc_(0), mark_(0) {}
 

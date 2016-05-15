@@ -13,7 +13,7 @@
 #include "eventql/util/stringutil.h"
 #include "cplot/domain.h"
 
-namespace stx {
+namespace util {
 namespace chart {
 
 class AnyContinuousDomain {

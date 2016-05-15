@@ -26,7 +26,7 @@
 #include "eventql/util/http/httpclientconnection.h"
 #include "eventql/util/net/tcpconnection.h"
 
-namespace stx {
+namespace util {
 namespace http {
 
 HTTPClient::HTTPClient(HTTPClientStats* stats) : stats_(stats) {}
@@ -42,7 +42,7 @@ HTTPResponse HTTPClient::executeRequest(
 
 HTTPResponse HTTPClient::executeRequest(
     const HTTPRequest& req,
-    const stx::InetAddr& addr) {
+    const util::InetAddr& addr) {
   return executeRequest(
       req,
       addr,
@@ -68,7 +68,7 @@ HTTPResponse HTTPClient::executeRequest(
 
 HTTPResponse HTTPClient::executeRequest(
     const HTTPRequest& req,
-    const stx::InetAddr& addr,
+    const util::InetAddr& addr,
     Function<HTTPResponseFuture* (Promise<HTTPResponse> promise)> factory) {
   std::unique_lock<std::mutex> lk(mutex_);
 

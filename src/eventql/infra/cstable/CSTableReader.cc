@@ -36,7 +36,7 @@
 #include <eventql/util/io/file.h>
 #include <eventql/util/io/mmappedfile.h>
 
-using namespace stx;
+using namespace util;
 
 namespace cstable {
 

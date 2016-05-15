@@ -23,7 +23,7 @@
  */
 #include <eventql/infra/sstable/cursor.h>
 
-namespace stx {
+namespace util {
 namespace sstable {
 
 Cursor::Cursor() {}

@@ -28,7 +28,7 @@
 #include <eventql/util/ieee754.h>
 #include <eventql/util/logging.h>
 
-using namespace stx;
+using namespace util;
 
 namespace csql {
 

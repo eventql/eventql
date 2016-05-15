@@ -32,11 +32,11 @@ void QueryTreeCoder::registerType(uint64_t wire_type_id) {
   type.type_id = &typeid(T);
   type.wire_type_id = wire_type_id;
 
-  type.encode_fn = [] (QueryTreeCoder* coder, RefPtr<QueryTreeNode> self, stx::OutputStream* os) {
+  type.encode_fn = [] (QueryTreeCoder* coder, RefPtr<QueryTreeNode> self, util::OutputStream* os) {
     T::encode(coder, *dynamic_cast<T*>(self.get()), os);
   };
 
-  type.decode_fn = [] (QueryTreeCoder* coder, stx::InputStream* is) -> RefPtr<QueryTreeNode> {
+  type.decode_fn = [] (QueryTreeCoder* coder, util::InputStream* is) -> RefPtr<QueryTreeNode> {
     return T::decode(coder, is);
   };
 

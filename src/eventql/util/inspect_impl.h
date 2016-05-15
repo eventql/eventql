@@ -24,7 +24,7 @@
 #include "eventql/util/stringutil.h"
 #include "eventql/util/io/outputstream.h"
 
-namespace stx {
+namespace util {
 
 template <typename T1, typename T2>
 std::string inspect(const std::pair<T1, T2>& value) {

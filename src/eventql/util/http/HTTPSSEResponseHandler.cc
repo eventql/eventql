@@ -23,7 +23,7 @@
  */
 #include "eventql/util/http/HTTPSSEResponseHandler.h"
 
-namespace stx {
+namespace util {
 namespace http {
 
 HTTPSSEResponseHandler::HTTPSSEResponseHandler(

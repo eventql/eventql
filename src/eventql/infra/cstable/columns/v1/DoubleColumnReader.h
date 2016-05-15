@@ -77,7 +77,7 @@ public:
   }
 
 protected:
-  stx::util::BinaryMessageReader data_reader_;
+  util::BinaryMessageReader data_reader_;
   double cur_val_;
 };
 

@@ -12,7 +12,7 @@
 #include "cplot/domain.h"
 #include "cplot/domainprovider.h"
 
-namespace stx {
+namespace util {
 namespace chart {
 
 class GridDefinition {

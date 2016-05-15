@@ -34,7 +34,7 @@
 #include "eventql/infra/cstable/columns/v1/DoubleColumnWriter.h"
 #include "eventql/infra/cstable/columns/v1/BooleanColumnWriter.h"
 
-using namespace stx;
+using namespace util;
 
 //void cmd_from_csv(const cli::FlagParser& flags) {
 //  auto csv = CSVInputStream::openFile(
@@ -210,14 +210,14 @@ using namespace stx;
 //}
 
 int main(int argc, const char** argv) {
-  stx::Application::init();
-  stx::Application::logToStderr();
+  util::Application::init();
+  util::Application::logToStderr();
 
-  stx::cli::FlagParser flags;
+  util::cli::FlagParser flags;
 
   flags.defineFlag(
       "loglevel",
-      stx::cli::FlagParser::T_STRING,
+      util::cli::FlagParser::T_STRING,
       false,
       NULL,
       "INFO",
@@ -237,7 +237,7 @@ int main(int argc, const char** argv) {
 
   //from_csv_cmd->flags().defineFlag(
   //    "input_file",
-  //    stx::cli::FlagParser::T_STRING,
+  //    util::cli::FlagParser::T_STRING,
   //    true,
   //    "i",
   //    NULL,
@@ -246,7 +246,7 @@ int main(int argc, const char** argv) {
 
   //from_csv_cmd->flags().defineFlag(
   //    "output_file",
-  //    stx::cli::FlagParser::T_STRING,
+  //    util::cli::FlagParser::T_STRING,
   //    true,
   //    "o",
   //    NULL,

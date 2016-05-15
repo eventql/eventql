@@ -34,7 +34,7 @@
 #include "eventql/ConfigDirectory.h"
 #include <jsapi.h>
 
-using namespace stx;
+using namespace util;
 
 namespace eventql {
 

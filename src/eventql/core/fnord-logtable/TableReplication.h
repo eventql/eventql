@@ -30,7 +30,7 @@
 #include "eventql/util/http/httprequest.h"
 #include "eventql/util/http/httpconnectionpool.h"
 
-namespace stx {
+namespace util {
 namespace logtable {
 
 class TableReplication {
@@ -62,6 +62,6 @@ protected:
 };
 
 } // namespace logtable
-} // namespace stx
+} // namespace util
 
 #endif

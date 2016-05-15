@@ -25,7 +25,7 @@
 #define _libstx_UTIL_LOGTARGET_H
 #include "eventql/util/logging/loglevel.h"
 
-namespace stx {
+namespace util {
 
 class LogTarget {
 public:

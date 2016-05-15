@@ -23,7 +23,7 @@
  */
 #include "eventql/util/stringutil.h"
 
-namespace stx {
+namespace util {
 namespace http {
 
 template <typename... HandlerArgs>

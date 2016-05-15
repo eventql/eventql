@@ -64,7 +64,7 @@ void UInt32ColumnWriter::addDatum(
   ++num_vals_;
 }
 
-void UInt32ColumnWriter::write(stx::util::BinaryMessageWriter* writer) {
+void UInt32ColumnWriter::write(util::BinaryMessageWriter* writer) {
   writer->append(data_writer_.data(), data_writer_.size());
 }
 

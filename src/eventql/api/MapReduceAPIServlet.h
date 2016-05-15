@@ -28,7 +28,7 @@
 #include "eventql/AnalyticsSession.pb.h"
 #include "eventql/api/MapReduceService.h"
 
-using namespace stx;
+using namespace util;
 
 namespace eventql {
 
@@ -42,8 +42,8 @@ public:
 
   void handle(
       const AnalyticsSession& session,
-      RefPtr<stx::http::HTTPRequestStream> req_stream,
-      RefPtr<stx::http::HTTPResponseStream> res_stream);
+      RefPtr<util::http::HTTPRequestStream> req_stream,
+      RefPtr<util::http::HTTPResponseStream> res_stream);
 
 protected:
 

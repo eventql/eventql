@@ -30,7 +30,7 @@
 #include <eventql/util/logging.h>
 #include <eventql/z1stats.h>
 
-using namespace stx;
+using namespace util;
 
 namespace eventql {
 
@@ -199,7 +199,7 @@ void TSDBClient::fetchPartitionWithSampling(
     return new http::StreamingResponseFuture(promise, handler);
   };
 
-  stx::logTrace("tsdb.client", "Executing request: $0", uri);
+  util::logTrace("tsdb.client", "Executing request: $0", uri);
 
   auto req = http::HTTPRequest::mkGet(uri);
   auto res = http.executeRequest(req, handler_factory);

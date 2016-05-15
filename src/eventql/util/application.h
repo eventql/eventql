@@ -33,7 +33,7 @@
 #include <vector>
 #include "eventql/util/logging.h"
 
-namespace stx {
+namespace util {
 
 // FIXME rename to procutil
 class Application {

@@ -28,7 +28,7 @@
 #include <eventql/util/exception.h>
 #include <eventql/util/io/outputstream.h>
 
-namespace stx {
+namespace util {
 namespace cli {
 
 class FlagParser {
@@ -100,7 +100,7 @@ public:
    */
   const std::vector<std::string>& getArgv() const;
 
-  void printUsage(stx::OutputStream* target) const;
+  void printUsage(util::OutputStream* target) const;
 
   void ignoreUnknownFlags();
 

@@ -26,7 +26,7 @@
 #include <eventql/util/random.h>
 #include <eventql/util/stringutil.h>
 
-namespace stx {
+namespace util {
 
 Random::Random() {
   std::random_device r;

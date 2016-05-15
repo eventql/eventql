@@ -12,7 +12,7 @@
 #include <eventql/sql/result_cursor.h>
 #include <eventql/core/PartitionMap.h>
 
-using namespace stx;
+using namespace util;
 
 namespace eventql {
 

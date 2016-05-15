@@ -26,7 +26,7 @@
 #include <eventql/util/stdtypes.h>
 #include <eventql/sql/qtree/QueryTreeNode.h>
 
-using namespace stx;
+using namespace util;
 
 namespace csql {
 

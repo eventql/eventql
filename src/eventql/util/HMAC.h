@@ -28,7 +28,7 @@
 #include <eventql/util/buffer.h>
 #include <eventql/util/SHA1.h>
 
-namespace stx {
+namespace util {
 
 class HMAC {
 public:

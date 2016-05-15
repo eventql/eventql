@@ -90,12 +90,12 @@ public:
 
 protected:
   virtual size_t size() const = 0;
-  virtual void write(stx::util::BinaryMessageWriter* writer) = 0;
+  virtual void write(util::BinaryMessageWriter* writer) = 0;
 
   size_t r_max_;
   size_t d_max_;
-  stx::util::BitPackEncoder rlvl_writer_;
-  stx::util::BitPackEncoder dlvl_writer_;
+  util::BitPackEncoder rlvl_writer_;
+  util::BitPackEncoder dlvl_writer_;
   size_t num_vals_;
 };
 

@@ -29,7 +29,6 @@
 #include <eventql/util/ieee754.h>
 #include <string>
 
-namespace stx {
 namespace util {
 
 class BinaryMessageReader {
@@ -71,7 +70,6 @@ protected:
   std::string cur_str_;
 };
 
-}
 }
 
 #include "binarymessagereader_impl.h"

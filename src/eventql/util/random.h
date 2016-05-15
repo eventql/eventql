@@ -29,7 +29,7 @@
 #include <random>
 #include "SHA1.h"
 
-namespace stx {
+namespace util {
 
 class Random {
 public:

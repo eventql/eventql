@@ -29,7 +29,7 @@
 #include <string>
 #include "eventql/util/inspect.h"
 
-namespace stx {
+namespace util {
 
 class IniParser {
 public:

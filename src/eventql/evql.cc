@@ -41,9 +41,9 @@
 #include "eventql/util/cli/term.h"
 #include "eventql/server/sql/codec/binary_codec.h"
 
-using namespace stx;
+using namespace util;
 
-stx::thread::EventLoop ev;
+util::thread::EventLoop ev;
 
 String loadAuth(const cli::FlagParser& global_flags) {
   auto auth_file_path = FileUtil::joinPaths(getenv("HOME"), ".z1auth");
@@ -369,14 +369,14 @@ void cmd_version(
 }
 
 int main(int argc, const char** argv) {
-  stx::Application::init();
-  stx::Application::logToStderr();
+  util::Application::init();
+  util::Application::logToStderr();
 
-  stx::cli::FlagParser flags;
+  util::cli::FlagParser flags;
 
   flags.defineFlag(
       "api_host",
-      stx::cli::FlagParser::T_STRING,
+      util::cli::FlagParser::T_STRING,
       false,
       NULL,
       "api.zscale.io",
@@ -385,7 +385,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "auth_token",
-      stx::cli::FlagParser::T_STRING,
+      util::cli::FlagParser::T_STRING,
       false,
       NULL,
       NULL,
@@ -395,7 +395,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "loglevel",
-      stx::cli::FlagParser::T_STRING,
+      util::cli::FlagParser::T_STRING,
       false,
       NULL,
       "INFO",
@@ -423,7 +423,7 @@ int main(int argc, const char** argv) {
 
   //mr_execute_cmd->flags().defineFlag(
   //    "api_host",
-  //    stx::cli::FlagParser::T_STRING,
+  //    util::cli::FlagParser::T_STRING,
   //    false,
   //    NULL,
   //    "api.zscale.io",

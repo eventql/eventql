@@ -23,7 +23,7 @@
  */
 #include "eventql/util/autoref.h"
 
-namespace stx {
+namespace util {
 
 RefCounted::RefCounted() : refcount_(0) {}
 
@@ -44,4 +44,4 @@ bool RefCounted::decRef() {
   return false;
 }
 
-} // namespace stx
+} // namespace util
