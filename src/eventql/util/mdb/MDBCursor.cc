@@ -24,7 +24,6 @@
 #include <assert.h>
 #include "eventql/util/mdb/MDBCursor.h"
 
-namespace util {
 namespace mdb {
 
 MDBCursor::MDBCursor(
@@ -291,5 +290,4 @@ void MDBCursor::del() {
   mdb_cursor_del(mdb_cur_, 0);
 }
 
-}
 }

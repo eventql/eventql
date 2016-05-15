@@ -25,7 +25,6 @@
 #include "eventql/util/mdb/MDB.h"
 #include "eventql/util/mdb/MDBTransaction.h"
 
-namespace util {
 namespace mdb {
 
 MDBTransaction::MDBTransaction(
@@ -254,5 +253,4 @@ void MDBTransaction::del(const void* key, size_t key_size) {
 }
 
 
-}
 }

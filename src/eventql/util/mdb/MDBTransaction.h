@@ -31,7 +31,6 @@
 #include "eventql/util/option.h"
 #include "eventql/util/mdb/MDBCursor.h"
 
-namespace util {
 namespace mdb {
 struct MDBOptions;
 
@@ -95,6 +94,5 @@ protected:
   bool abort_on_free_;
 };
 
-}
 }
 #endif

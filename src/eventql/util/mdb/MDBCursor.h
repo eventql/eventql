@@ -30,7 +30,6 @@
 #include "eventql/util/logging.h"
 #include "eventql/util/option.h"
 
-namespace util {
 namespace mdb {
 
 class MDBCursor : public RefCounted {
@@ -102,6 +101,5 @@ protected:
   bool is_closed_;
 };
 
-}
 }
 #endif

@@ -23,7 +23,6 @@
  */
 #include "eventql/util/mdb/MDB.h"
 
-namespace util {
 namespace mdb {
 
 RefPtr<MDB> MDB::open(
@@ -149,5 +148,4 @@ void MDB::removeStaleReaders() {
   }
 }
 
-}
 }

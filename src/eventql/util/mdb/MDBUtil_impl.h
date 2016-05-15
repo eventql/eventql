@@ -24,7 +24,6 @@
 #ifndef _STX_MDBUTIL_IMPL_H
 #define _STX_MDBUTIL_IMPL_H
 
-namespace util {
 namespace mdb {
 
 template <typename T>
@@ -67,6 +66,5 @@ Option<T> MDBUtil::getAs(
 
 
 
-}
 }
 #endif

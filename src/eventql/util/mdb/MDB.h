@@ -30,7 +30,6 @@
 #include "eventql/util/autoref.h"
 #include "eventql/util/mdb/MDBTransaction.h"
 
-namespace util {
 namespace mdb {
 
 struct MDBOptions {
@@ -93,6 +92,5 @@ protected:
   const String lock_filename_;
 };
 
-}
 }
 #endif
