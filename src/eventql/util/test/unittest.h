@@ -40,17 +40,17 @@
 const char kExpectationFailed[] = "ExpectationFailed";
 
 #define UNIT_TEST(T) \
-    static util::test::UnitTest T(#T); \
+    static test::UnitTest T(#T); \
     int main() { \
       auto& t = T; \
       return t.run(); \
     }
 
 #define TEST_CASE(T, N, L) \
-    static util::test::UnitTest::TestCase __##T##__case__##N(&T, #N, (L));
+    static test::UnitTest::TestCase __##T##__case__##N(&T, #N, (L));
 
 #define TEST_INITIALIZER(T, N, L) \
-    static util::test::UnitTest::TestInitializer __##T##__case__##N( \
+    static test::UnitTest::TestInitializer __##T##__case__##N( \
         &T, (L));
 
 #define EXPECT(X) \
@@ -83,9 +83,9 @@ void EXPECT_NEAR(T1 expected, T2 actual, T3 diff) {
     RAISE(
         kExpectationFailed,
         "expectation failed: actual %s near expected %s, diff %s",
-        util::inspect<T2>(actual).c_str(),
-        util::inspect<T1>(expected).c_str(),
-        util::inspect<T3>(diff).c_str());
+        inspect<T2>(actual).c_str(),
+        inspect<T1>(expected).c_str(),
+        inspect<T3>(diff).c_str());
   }
 }
 
@@ -95,8 +95,8 @@ void EXPECT_EQ(T1 left, T2 right) {
     RAISE(
         kExpectationFailed,
         "expectation failed: %s == %s",
-        util::inspect<T1>(left).c_str(),
-        util::inspect<T2>(right).c_str());
+        inspect<T1>(left).c_str(),
+        inspect<T2>(right).c_str());
   }
 }
 
@@ -123,8 +123,8 @@ void EXPECT_EQ(T1 left, T2 right) {
 
 #define EXPECT_FILES_EQ(F1, F2) \
   { \
-    auto one = util::FileInputStream::openFile(F1); \
-    auto two = util::FileInputStream::openFile(F2); \
+    auto one = FileInputStream::openFile(F1); \
+    auto two = FileInputStream::openFile(F2); \
     std::string one_str; \
     std::string two_str; \
     one->readUntilEOF(&one_str); \
@@ -140,7 +140,6 @@ void EXPECT_EQ(T1 left, T2 right) {
   }
 
 
-namespace util {
 namespace test {
 
 class UnitTest {
@@ -243,6 +242,5 @@ protected:
   std::vector<const TestInitializer*> initializers_;
 };
 
-}
 }
 #endif

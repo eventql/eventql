@@ -26,8 +26,6 @@
 #include <eventql/util/random.h>
 #include <eventql/util/stringutil.h>
 
-namespace util {
-
 Random::Random() {
   std::random_device r;
   prng_.seed(r() ^ time(NULL));
@@ -97,6 +95,4 @@ std::string Random::alphanumericString(int nchars) {
 Random* Random::singleton() {
   static Random rnd;
   return &rnd;
-}
-
 }

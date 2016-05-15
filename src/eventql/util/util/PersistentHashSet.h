@@ -30,8 +30,6 @@
 #include <eventql/util/util/binarymessagewriter.h>
 #include <eventql/util/random.h>
 
-namespace util {
-
 class PersistentHashSet {
 public:
 
@@ -81,6 +79,3 @@ protected:
   mutable std::mutex write_mutex_;
   mutable std::mutex read_mutex_;
 };
-
-} // namespace util
-
