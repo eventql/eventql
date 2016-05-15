@@ -137,7 +137,7 @@ int main(int argc, const char** argv) {
   http_router.addRouteByPrefixMatch("/tsdb", &tsdb_servlet, &tpool);
 
   ev.run();
-  util::logInfo("tsdb", "Exiting...");
+  logInfo("tsdb", "Exiting...");
 
   exit(0);
 }

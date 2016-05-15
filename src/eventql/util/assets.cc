@@ -25,8 +25,6 @@
 #include "eventql/util/exception.h"
 #include "eventql/util/io/fileutil.h"
 
-namespace util {
-
 #ifndef _NDEBUG
 static String __asset_search_path;
 #endif
@@ -79,6 +77,4 @@ std::string Assets::getAsset(const std::string& filename) {
 
   RAISE(kRuntimeError, "asset not found: %s", filename.c_str());
 }
-
-} // namespace util
 

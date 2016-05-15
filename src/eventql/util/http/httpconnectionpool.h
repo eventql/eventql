@@ -75,7 +75,7 @@ protected:
       HTTPClientConnection*> connection_cache_;
   std::mutex connection_cache_mutex_;
 
-  util::net::DNSCache dns_cache_;
+  net::DNSCache dns_cache_;
   HTTPClientStats* stats_;
 };
 

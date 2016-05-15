@@ -122,7 +122,7 @@ void TSDBServlet::handleHTTPRequest(
     res.addBody("not found");
     res_stream->writeResponse(res);
   } catch (const Exception& e) {
-    util::logError("tsdb", e, "error while processing HTTP request");
+    logError("tsdb", e, "error while processing HTTP request");
 
     res.setStatus(http::kStatusInternalServerError);
     res.addBody(StringUtil::format("error: $0: $1", e.getTypeName(), e.getMessage()));
@@ -354,7 +354,7 @@ void TSDBServlet::executeSQLStream(
     //    new csql::JSONSSEStreamFormat(&sse_stream));
 
   } catch (const StandardException& e) {
-    util::logError("sql", e, "SQL execution failed");
+    logError("sql", e, "SQL execution failed");
 
     Buffer buf;
     json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));

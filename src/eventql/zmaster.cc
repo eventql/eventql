@@ -102,7 +102,7 @@ int main(int argc, const char** argv) {
       &tpool);
 
   ev.run();
-  util::logInfo("dxa-master", "Exiting...");
+  logInfo("dxa-master", "Exiting...");
 
   exit(0);
 }

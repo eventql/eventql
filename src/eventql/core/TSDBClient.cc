@@ -199,7 +199,7 @@ void TSDBClient::fetchPartitionWithSampling(
     return new http::StreamingResponseFuture(promise, handler);
   };
 
-  util::logTrace("tsdb.client", "Executing request: $0", uri);
+  logTrace("tsdb.client", "Executing request: $0", uri);
 
   auto req = http::HTTPRequest::mkGet(uri);
   auto res = http.executeRequest(req, handler_factory);

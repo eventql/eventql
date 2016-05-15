@@ -58,7 +58,7 @@ Set<SHA1Hash> LSMPartitionWriter::insertRecords(const Vector<RecordRef>& records
 
   auto snap = head_->getSnapshot();
 
-  util::logTrace(
+  logTrace(
       "tsdb",
       "Insert $0 record into partition $1/$2/$3",
       records.size(),
@@ -176,7 +176,7 @@ bool LSMPartitionWriter::commit() {
     writeArenaToDisk(arena, snap->state.lsm_sequence() + 1, filepath);
     auto t1 = WallClock::unixMicros();
 
-    util::logDebug(
+    logDebug(
         "z1.core",
         "Committing partition $1/$2/$3 ($0 records), took $4s",
         arena->size(),
@@ -224,7 +224,7 @@ bool LSMPartitionWriter::compact() {
   }
   auto t1 = WallClock::unixMicros();
 
-  util::logDebug(
+  logDebug(
       "z1.core",
       "Compacting partition $0/$1/$2, took $3s",
       snap->state.tsdb_namespace(),

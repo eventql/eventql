@@ -56,8 +56,6 @@ using util::chart::Series;
 using util::chart::Series2D;
 using util::chart::Series3D;
 using util::chart::SVGTarget;
-using FileOutputStream;
-using FileUtil;
 using test::UnitTest;
 
 static void compareChart(

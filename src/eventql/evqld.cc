@@ -394,7 +394,7 @@ int main(int argc, const char** argv) {
     logAlert("eventql", e, "FATAL ERROR");
   }
 
-  util::logInfo("eventql", "Exiting...");
+  logInfo("eventql", "Exiting...");
 
   customer_dir.stopWatcher();
 

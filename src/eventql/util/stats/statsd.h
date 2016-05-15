@@ -52,7 +52,7 @@ protected:
 
   void messageReceived(const Buffer& msg);
 
-  util::net::UDPServer udp_server_;
+  net::UDPServer udp_server_;
 
   std::function<void (
       const std::string&,

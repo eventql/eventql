@@ -101,7 +101,7 @@ int main(int argc, const char** argv) {
   auto input_file = flags.getString("file");
   sstable::SSTableReader reader(File::openFile(input_file, File::O_READ));
   if (reader.bodySize() == 0) {
-    util::logWarning("fnord.sstablescan", "sstable is unfinished");
+    logWarning("fnord.sstablescan", "sstable is unfinished");
   }
 
   sstable::SSTableColumnSchema schema;

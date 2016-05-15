@@ -54,7 +54,7 @@ protected:
   HTTPClientStats* stats_;
   thread::EventLoop ev_;
   std::mutex mutex_;
-  util::net::DNSCache dns_cache_;
+  net::DNSCache dns_cache_;
 };
 
 }

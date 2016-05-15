@@ -57,6 +57,7 @@ SSTableColumnReader::SSTableColumnReader(
 
     }
   }
+}
 
 uint32_t SSTableColumnReader::getUInt32Column(SSTableColumnID id) {
 #ifndef FNORD_NODEBUG

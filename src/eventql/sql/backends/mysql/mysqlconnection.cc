@@ -164,7 +164,7 @@ void MySQLConnection::executeQuery(
     std::function<bool (const std::vector<std::string>&)> row_callback) {
 #ifdef FNORD_ENABLE_MYSQL
   if (env()->verbose()) {
-    util::logDebug("fnordmetric", "Executing MySQL query: $0", query);
+    logDebug("fnordmetric", "Executing MySQL query: $0", query);
   }
 
   MYSQL_RES* result = nullptr;
