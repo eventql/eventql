@@ -28,7 +28,6 @@
 #include "eventql/util/http/httpservice.h"
 #include "eventql/util/http/HTTPSSEStream.h"
 
-namespace util {
 namespace http {
 
 class SSEStreamServlet : public http::StreamingHTTPService {
@@ -40,6 +39,5 @@ public:
 
 };
 
-}
 }
 #endif
