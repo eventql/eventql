@@ -24,8 +24,6 @@
 #pragma once
 #include "eventql/util/io/outputstream.h"
 
-namespace util {
-
 enum class TerminalStyle : uint8_t {
   BRIGHT      = 1,
   DIM         = 2,
@@ -193,5 +191,3 @@ protected:
   ScopedPtr<OutputStream> os_;
   bool is_tty_;
 };
-
-}

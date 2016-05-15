@@ -28,8 +28,6 @@
 #include <vector>
 #include "eventql/util/random.h"
 
-namespace util {
-
 class FileRepository {
 public:
   struct FileRef {
@@ -54,5 +52,4 @@ protected:
   std::string basedir_;
 };
 
-}
 #endif

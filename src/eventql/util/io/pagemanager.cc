@@ -29,7 +29,6 @@
 #include <eventql/util/io/file.h>
 #include <eventql/util/io/fileutil.h>
 
-namespace util {
 namespace io {
 
 PageManager::PageManager(
@@ -246,5 +245,4 @@ void MmapPageManager::MmappedPageRef::sync(bool async /* = false */) const {
 
 MmapPageManager::MmappedPageRef::~MmappedPageRef() {}
 
-}
 }

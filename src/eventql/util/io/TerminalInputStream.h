@@ -24,8 +24,6 @@
 #pragma once
 #include "eventql/util/io/inputstream.h"
 
-namespace util {
-
 class TerminalInputStream : public InputStream {
 public:
 
@@ -78,5 +76,3 @@ public:
 protected:
   ScopedPtr<InputStream> is_;
 };
-
-}

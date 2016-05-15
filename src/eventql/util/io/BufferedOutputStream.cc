@@ -23,8 +23,6 @@
  */
 #include "eventql/util/io/BufferedOutputStream.h"
 
-namespace util {
-
 ScopedPtr<BufferedOutputStream> BufferedOutputStream::fromStream(
     ScopedPtr<OutputStream> stream,
     size_t buffer_size /* = kDefaultBufferSize */) {
@@ -75,7 +73,4 @@ void BufferedOutputStream::flush() {
 
   os_->write((char*) buf_.data(), buf_.size());
   buf_.clear();
-}
-
-
 }

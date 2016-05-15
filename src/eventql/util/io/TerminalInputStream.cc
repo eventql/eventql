@@ -23,8 +23,6 @@
  */
 #include "eventql/util/io/TerminalInputStream.h"
 
-namespace util {
-
 ScopedPtr<TerminalInputStream> TerminalInputStream::fromStream(
     ScopedPtr<FileInputStream> stream) {
   return mkScoped(new TerminalInputStream(std::move(stream)));
@@ -48,6 +46,4 @@ size_t TerminalInputStream::skipNextBytes(size_t n_bytes) {
 
 bool TerminalInputStream::eof() {
   return is_->eof();
-}
-
 }

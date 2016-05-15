@@ -23,8 +23,6 @@
  */
 #include "eventql/util/io/TerminalOutputStream.h"
 
-namespace util {
-
 ScopedPtr<TerminalOutputStream> TerminalOutputStream::fromStream(
     ScopedPtr<OutputStream> stream) {
   return mkScoped(new TerminalOutputStream(std::move(stream)));
@@ -130,6 +128,4 @@ bool TerminalOutputStream::isTTY() const {
 
 void TerminalOutputStream::setTitle(const String& title) {
   print(StringUtil::format("\033]0;$0\007", title));
-}
-
 }

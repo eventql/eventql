@@ -24,8 +24,6 @@
 #pragma once
 #include "eventql/util/io/outputstream.h"
 
-namespace util {
-
 /**
  * A buffered output stream allows an application to write bytes to the
  * underlying output stream without necessarily causing a call to the
@@ -81,5 +79,3 @@ protected:
   ScopedPtr<OutputStream> os_;
   Buffer buf_;
 };
-
-}

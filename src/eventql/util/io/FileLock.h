@@ -27,8 +27,6 @@
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/io/file.h>
 
-namespace util {
-
 /**
  * A RAII File Lock class. Destructor automatically yields the lock if is was
  * aquired.
@@ -73,5 +71,4 @@ protected:
   bool locked_;
 };
 
-}
 #endif

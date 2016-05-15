@@ -26,8 +26,6 @@
 #include <eventql/util/io/inputstream.h>
 #include <eventql/util/VFSFile.h>
 
-namespace util {
-
 class VFSFileInputStream : public RewindableInputStream {
 public:
 
@@ -75,5 +73,3 @@ protected:
   RefPtr<VFSFile> data_;
   size_t cur_;
 };
-
-}

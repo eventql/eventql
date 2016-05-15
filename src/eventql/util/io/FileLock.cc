@@ -25,8 +25,6 @@
 #include <eventql/util/exception.h>
 #include <eventql/util/io/FileLock.h>
 
-namespace util {
-
 FileLock::FileLock(
     const String& filename) :
     filename_(filename),
@@ -66,6 +64,4 @@ void FileLock::unlock() {
   }
 
   locked_ = false;
-}
-
 }

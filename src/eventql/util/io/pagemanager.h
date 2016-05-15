@@ -35,7 +35,7 @@
 #include <eventql/util/exception.h>
 #include <eventql/util/autoref.h>
 
-namespace util {
+
 namespace io {
 
 /**
@@ -228,6 +228,5 @@ T* PageManager::PageRef::structAt(size_t position) const {
   return (T*) (((char *) getPtr()) + page_.offset + position);
 }
 
-}
 }
 #endif
