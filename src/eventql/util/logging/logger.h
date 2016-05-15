@@ -33,7 +33,6 @@
 #define STX_LOGGER_MAX_LISTENERS 64
 #endif
 
-namespace util {
 
 class Logger {
 public:
@@ -74,8 +73,6 @@ protected:
   std::atomic<size_t> max_listener_index_;
   std::atomic<LogTarget*> listeners_[STX_LOGGER_MAX_LISTENERS];
 };
-
-} // namespace util
 
 #include "eventql/util/logging/logger_impl.h"
 #endif

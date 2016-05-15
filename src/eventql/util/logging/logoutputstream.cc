@@ -26,8 +26,6 @@
 #include "eventql/util/stringutil.h"
 #include "eventql/util/wallclock.h"
 
-namespace util {
-
 LogOutputStream::LogOutputStream(
     std::unique_ptr<OutputStream> target) :
     target_(std::move(target)) {}
@@ -48,6 +46,4 @@ void LogOutputStream::log(
 
   ScopedLock<std::mutex> lk(target_->mutex);
   target_->write(lines);
-}
-
 }

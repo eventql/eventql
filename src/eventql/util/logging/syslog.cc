@@ -27,8 +27,6 @@
 #include <syslog.h>
 #endif
 
-namespace util {
-
 SyslogTarget::SyslogTarget(const String& name)  {
 #ifdef HAVE_SYSLOG_H
   setlogmask(LOG_UPTO (LOG_DEBUG));
@@ -94,6 +92,3 @@ void SyslogTarget::log(
   }
 #endif
 }
-
-
-} // namespace util

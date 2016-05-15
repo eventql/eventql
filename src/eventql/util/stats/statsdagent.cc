@@ -65,7 +65,7 @@ void StatsdAgent::start() {
       try {
         report();
       } catch (const StandardException& e) {
-        util::logError("fnord.statsd_agent", e, "StatsD push failed");
+        logError("fnord.statsd_agent", e, "StatsD push failed");
       }
     }
   });

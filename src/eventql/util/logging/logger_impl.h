@@ -25,7 +25,6 @@
 #define _libstx_UTIL_LOGGER_IMPL_H
 #include "eventql/util/stringutil.h"
 
-namespace util {
 
 template <typename... T>
 void Logger::log(
@@ -53,7 +52,5 @@ void Logger::logException(
         StringUtil::format(message, args...));
   }
 }
-
-} // namespace util
 
 #endif

@@ -25,8 +25,6 @@
 #include <eventql/util/stdtypes.h>
 #include "eventql/util/logging/logtarget.h"
 
-namespace util {
-
 class SyslogTarget : public LogTarget {
 public:
 
@@ -41,6 +39,3 @@ public:
 protected:
   ScopedPtr<char> ident_;
 };
-
-
-} // namespace util

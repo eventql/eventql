@@ -28,8 +28,6 @@
 #include <eventql/util/buffer.h>
 #include <eventql/util/SHA1.h>
 
-namespace util {
-
 class HMAC {
 public:
 
@@ -43,7 +41,5 @@ public:
       const Buffer& message);
 
 };
-
-}
 
 #endif

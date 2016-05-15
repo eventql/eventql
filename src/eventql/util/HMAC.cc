@@ -23,8 +23,6 @@
  */
 #include <eventql/util/HMAC.h>
 
-namespace util {
-
 const size_t HMAC::kBlockSize = 64;
 const char HMAC::kOPad = 0x5c;
 const char HMAC::kIPad = 0x36;
@@ -61,6 +59,3 @@ SHA1Hash HMAC::hmac_sha1(const Buffer& key, const Buffer& message) {
 
   return SHA1::compute(h2);
 }
-
-}
-

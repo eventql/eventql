@@ -24,7 +24,6 @@
 #include <eventql/util/util/Base64.h>
 #include <eventql/util/web/SecureCookie.h>
 
-namespace util {
 namespace web {
 
 SecureCookie::SecureCookie(
@@ -122,5 +121,3 @@ String SecureCookieCoder::encodeWithoutEncryption(const SecureCookie& cookie) {
 }
 
 }
-}
-

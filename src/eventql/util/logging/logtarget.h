@@ -25,8 +25,6 @@
 #define _libstx_UTIL_LOGTARGET_H
 #include "eventql/util/logging/loglevel.h"
 
-namespace util {
-
 class LogTarget {
 public:
   virtual ~LogTarget() {}
@@ -37,7 +35,5 @@ public:
       const String& message) = 0;
 
 };
-
-}
 
 #endif

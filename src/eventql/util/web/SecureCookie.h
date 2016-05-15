@@ -30,7 +30,6 @@
 #include <eventql/util/option.h>
 #include <eventql/util/wallclock.h>
 
-namespace util {
 namespace web {
 
 /**
@@ -112,5 +111,3 @@ protected:
 };
 
 }
-}
-

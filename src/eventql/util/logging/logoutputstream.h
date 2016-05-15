@@ -29,8 +29,6 @@
 #include "eventql/util/logging/logtarget.h"
 #include "eventql/util/stdtypes.h"
 
-namespace util {
-
 class LogOutputStream : public LogTarget {
 public:
   LogOutputStream(std::unique_ptr<OutputStream> target);
@@ -43,6 +41,4 @@ public:
 protected:
   ScopedPtr<OutputStream> target_;
 };
-
-}
 #endif

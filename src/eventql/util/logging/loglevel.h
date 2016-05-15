@@ -26,8 +26,6 @@
 #include "eventql/util/UnixTime.h"
 #include "eventql/util/stdtypes.h"
 
-namespace util {
-
 enum class LogLevel {
   kEmergency = 9000,
   kAlert = 8000,
@@ -40,5 +38,4 @@ enum class LogLevel {
   kTrace = 1000
 };
 
-}
 #endif

@@ -28,8 +28,6 @@
 #include <eventql/util/wallclock.h>
 #include <eventql/util/logging.h>
 
-namespace util {
-
 const char* logLevelToStr(LogLevel log_level) {
   switch (log_level) {
     case LogLevel::kEmergency: return "EMERGENCY";
@@ -127,7 +125,4 @@ void Logger::addTarget(LogTarget* target) {
 
 void Logger::setMinimumLogLevel(LogLevel min_level) {
   min_level_ = min_level;
-}
-
-
 }
