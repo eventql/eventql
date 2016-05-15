@@ -213,11 +213,11 @@ int main(int argc, const char** argv) {
   util::Application::init();
   util::Application::logToStderr();
 
-  util::cli::FlagParser flags;
+  cli::FlagParser flags;
 
   flags.defineFlag(
       "loglevel",
-      util::cli::FlagParser::T_STRING,
+      cli::FlagParser::T_STRING,
       false,
       NULL,
       "INFO",
@@ -237,7 +237,7 @@ int main(int argc, const char** argv) {
 
   //from_csv_cmd->flags().defineFlag(
   //    "input_file",
-  //    util::cli::FlagParser::T_STRING,
+  //    cli::FlagParser::T_STRING,
   //    true,
   //    "i",
   //    NULL,
@@ -246,7 +246,7 @@ int main(int argc, const char** argv) {
 
   //from_csv_cmd->flags().defineFlag(
   //    "output_file",
-  //    util::cli::FlagParser::T_STRING,
+  //    cli::FlagParser::T_STRING,
   //    true,
   //    "o",
   //    NULL,

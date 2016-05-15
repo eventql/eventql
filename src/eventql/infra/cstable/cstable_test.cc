@@ -39,7 +39,7 @@
 
 using namespace cstable;
 
-using FileUtil = util::FileUtil;
+using FileUtil = FileUtil;
 using MessageSchema = msg::MessageSchema;
 using DynamicMessage = msg::DynamicMessage;
 

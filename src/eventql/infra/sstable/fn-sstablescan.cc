@@ -36,11 +36,11 @@ int main(int argc, const char** argv) {
   util::Application::init();
   util::Application::logToStderr();
 
-  util::cli::FlagParser flags;
+  cli::FlagParser flags;
 
   flags.defineFlag(
       "file",
-      util::cli::FlagParser::T_STRING,
+      cli::FlagParser::T_STRING,
       true,
       "f",
       NULL,
@@ -49,7 +49,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "limit",
-      util::cli::FlagParser::T_INTEGER,
+      cli::FlagParser::T_INTEGER,
       false,
       NULL,
       NULL,
@@ -58,7 +58,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "offset",
-      util::cli::FlagParser::T_INTEGER,
+      cli::FlagParser::T_INTEGER,
       false,
       NULL,
       NULL,
@@ -67,7 +67,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "order_by",
-      util::cli::FlagParser::T_STRING,
+      cli::FlagParser::T_STRING,
       false,
       NULL,
       NULL,
@@ -76,7 +76,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "order_fn",
-      util::cli::FlagParser::T_STRING,
+      cli::FlagParser::T_STRING,
       false,
       NULL,
       "STRASC",
@@ -85,7 +85,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "loglevel",
-      util::cli::FlagParser::T_STRING,
+      cli::FlagParser::T_STRING,
       false,
       NULL,
       "INFO",

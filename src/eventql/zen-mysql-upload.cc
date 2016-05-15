@@ -218,11 +218,11 @@ int main(int argc, const char** argv) {
   util::Application::init();
   util::Application::logToStderr();
 
-  util::cli::FlagParser flags;
+  cli::FlagParser flags;
 
   flags.defineFlag(
       "loglevel",
-      util::cli::FlagParser::T_STRING,
+      cli::FlagParser::T_STRING,
       false,
       NULL,
       "INFO",
@@ -231,7 +231,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "source_table",
-      util::cli::FlagParser::T_STRING,
+      cli::FlagParser::T_STRING,
       true,
       "t",
       NULL,
@@ -240,7 +240,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "destination_table",
-      util::cli::FlagParser::T_STRING,
+      cli::FlagParser::T_STRING,
       true,
       "t",
       NULL,
@@ -249,7 +249,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "api_token",
-      util::cli::FlagParser::T_STRING,
+      cli::FlagParser::T_STRING,
       true,
       "x",
       NULL,
@@ -258,7 +258,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "mysql",
-      util::cli::FlagParser::T_STRING,
+      cli::FlagParser::T_STRING,
       true,
       "x",
       "mysql://localhost:3306/mydb?user=root",
@@ -267,7 +267,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "shard_size",
-      util::cli::FlagParser::T_INTEGER,
+      cli::FlagParser::T_INTEGER,
       false,
       NULL,
       "262144",

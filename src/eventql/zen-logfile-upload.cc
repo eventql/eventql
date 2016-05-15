@@ -174,11 +174,11 @@ int main(int argc, const char** argv) {
   util::Application::init();
   util::Application::logToStderr();
 
-  util::cli::FlagParser flags;
+  cli::FlagParser flags;
 
   flags.defineFlag(
       "loglevel",
-      util::cli::FlagParser::T_STRING,
+      cli::FlagParser::T_STRING,
       false,
       NULL,
       "INFO",
@@ -187,7 +187,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "input_file",
-      util::cli::FlagParser::T_STRING,
+      cli::FlagParser::T_STRING,
       true,
       "i",
       NULL,
@@ -196,7 +196,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "logfile_name",
-      util::cli::FlagParser::T_STRING,
+      cli::FlagParser::T_STRING,
       true,
       NULL,
       NULL,
@@ -205,7 +205,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "tail",
-      util::cli::FlagParser::T_SWITCH,
+      cli::FlagParser::T_SWITCH,
       false,
       NULL,
       NULL,
@@ -214,7 +214,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "attr",
-      util::cli::FlagParser::T_STRING,
+      cli::FlagParser::T_STRING,
       false,
       NULL,
       NULL,
@@ -223,7 +223,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "api_token",
-      util::cli::FlagParser::T_STRING,
+      cli::FlagParser::T_STRING,
       true,
       "x",
       NULL,
