@@ -172,7 +172,7 @@ void SubqueryNode::encode(
 
 RefPtr<QueryTreeNode> SubqueryNode::decode (
     QueryTreeCoder* coder,
-    OutputStream* is) {
+    InputStream* is) {
   auto subquery = coder->decode(is);
 
   Vector<RefPtr<SelectListNode>> select_list;

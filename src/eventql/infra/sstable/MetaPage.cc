@@ -25,7 +25,6 @@
 #include <eventql/infra/sstable/MetaPage.h>
 #include <eventql/infra/sstable/binaryformat.h>
 
-namespace util {
 namespace sstable {
 
 MetaPage::MetaPage(
@@ -114,5 +113,4 @@ uint64_t MetaPage::flags() const {
   return flags_;
 }
 
-}
 }

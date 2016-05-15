@@ -31,7 +31,7 @@
 #include <string>
 #include <eventql/infra/sstable/MetaPage.h>
 
-namespace util {
+
 namespace sstable {
 
 class FileHeaderWriter : public util::BinaryMessageWriter {
@@ -89,7 +89,6 @@ public:
 
 };
 
-}
 }
 
 #endif

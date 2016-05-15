@@ -28,7 +28,7 @@
 #include <vector>
 #include <memory>
 
-namespace util {
+
 namespace sstable {
 
 class Index {
@@ -54,7 +54,6 @@ protected:
 };
 
 
-}
 }
 
 #endif

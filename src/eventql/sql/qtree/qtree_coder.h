@@ -43,14 +43,14 @@ public:
   void registerType(uint64_t wire_type_id);
 
   void encode(RefPtr<QueryTreeNode> tree, OutputStream* os);
-  RefPtr<QueryTreeNode> decode(OutputStream* is);
+  RefPtr<QueryTreeNode> decode(InputStream* is);
 
   Transaction* getTransaction() const;
 
 protected:
 
   typedef Function<void (QueryTreeCoder*, RefPtr<QueryTreeNode>, OutputStream*)> EncodeFn;
-  typedef Function<RefPtr<QueryTreeNode> (QueryTreeCoder*, OutputStream*)> DecodeFn;
+  typedef Function<RefPtr<QueryTreeNode> (QueryTreeCoder*, InputStream*)> DecodeFn;
 
   struct QueryTreeCoderType {
     const std::type_info* type_id;

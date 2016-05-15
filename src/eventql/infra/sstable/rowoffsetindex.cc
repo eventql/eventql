@@ -23,7 +23,7 @@
  */
 #include <eventql/infra/sstable/rowoffsetindex.h>
 
-namespace util {
+
 namespace sstable {
 
 RowOffsetIndex* RowOffsetIndex::makeIndex() {
@@ -40,5 +40,4 @@ void RowOffsetIndex::addRow(
     size_t data_size) const {
 }
 
-}
 }

@@ -93,7 +93,7 @@ void LimitNode::encode(
 
 RefPtr<QueryTreeNode> LimitNode::decode(
     QueryTreeCoder* coder,
-    OutputStream* is) {
+    InputStream* is) {
   auto limit = is->readVarUInt();
   auto offset = is->readVarUInt();
   auto table = coder->decode(is);

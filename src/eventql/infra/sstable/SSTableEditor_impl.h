@@ -21,7 +21,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-namespace util {
+
 namespace sstable {
 
 template <typename IndexType>
@@ -41,5 +41,4 @@ IndexType* SSTableEditor::getIndex() const {
   RAISE(kIndexError, "sstable has no such index");
 }
 
-}
 }

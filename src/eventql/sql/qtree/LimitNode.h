@@ -66,7 +66,7 @@ public:
 
   static RefPtr<QueryTreeNode> decode(
       QueryTreeCoder* coder,
-      OutputStream* os);
+      InputStream* is);
 
 protected:
   size_t limit_;

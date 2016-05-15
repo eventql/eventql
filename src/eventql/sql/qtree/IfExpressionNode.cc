@@ -82,7 +82,7 @@ void IfExpressionNode::encode(
 
 RefPtr<QueryTreeNode> IfExpressionNode::decode (
     QueryTreeCoder* coder,
-    OutputStream* is) {
+    InputStream* is) {
   auto conditional_expr = coder->decode(is).asInstanceOf<ValueExpressionNode>();
   auto true_branch_expr = coder->decode(is).asInstanceOf<ValueExpressionNode>();
   auto false_branch_expr = coder->decode(is).asInstanceOf<ValueExpressionNode>();

@@ -249,7 +249,7 @@ void JoinNode::encode(
 
 RefPtr<QueryTreeNode> JoinNode::decode (
     QueryTreeCoder* coder,
-    OutputStream* is) {
+    InputStream* is) {
   auto join_type = (JoinType) is->readUInt8();
 
   Vector<RefPtr<SelectListNode>> select_list;

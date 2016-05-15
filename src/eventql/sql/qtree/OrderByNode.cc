@@ -95,7 +95,7 @@ void OrderByNode::encode(
 
 RefPtr<QueryTreeNode> OrderByNode::decode (
     QueryTreeCoder* coder,
-    OutputStream* is) {
+    InputStream* is) {
   Vector<SortSpec> sort_specs;
   auto num_sort_specs = is->readVarUInt();
 

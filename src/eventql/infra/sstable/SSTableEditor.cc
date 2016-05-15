@@ -30,7 +30,7 @@
 #include <eventql/infra/sstable/SSTableEditor.h>
 #include <eventql/infra/sstable/SSTableColumnWriter.h>
 
-namespace util {
+
 namespace sstable {
 
 std::unique_ptr<SSTableEditor> SSTableEditor::create(
@@ -348,5 +348,4 @@ SSTableEditor::SSTableEditorCursor::getPage() {
       table_->bodySize() - pos_));
 }
 
-}
 }

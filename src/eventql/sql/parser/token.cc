@@ -192,8 +192,6 @@ const std::string Token::getString() const {
 
 } // namespace csql
 
-namespace util {
-
 template <>
 std::string inspect<
     csql::Token::kTokenType>(
@@ -207,5 +205,3 @@ std::string inspect<
     const csql::Token& value) {
   return csql::Token::getTypeName(value.getType());
 }
-
-} // namespace util

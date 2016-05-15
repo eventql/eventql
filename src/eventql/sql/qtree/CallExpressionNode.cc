@@ -76,7 +76,7 @@ void CallExpressionNode::encode(
 
 RefPtr<QueryTreeNode> CallExpressionNode::decode (
     QueryTreeCoder* coder,
-    OutputStream* is) {
+    InputStream* is) {
   auto symbol = is->readLenencString();
 
   Vector<RefPtr<ValueExpressionNode>> arguments;

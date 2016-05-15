@@ -26,7 +26,7 @@
 #include <eventql/infra/sstable/sstablereader.h>
 #include <eventql/infra/sstable/sstablerepair.h>
 
-namespace util {
+
 namespace sstable {
 
 SSTableRepair::SSTableRepair(
@@ -35,7 +35,7 @@ SSTableRepair::SSTableRepair(
 
 bool SSTableRepair::checkAndRepair(bool repair /* = false */) {
   auto file = File::openFile(filename_, File::O_READ);
-  std::unique_ptr<util::sstable::SSTableReader> reader_;
+  std::unique_ptr<sstable::SSTableReader> reader_;
 
   try {
     reader_.reset(new sstable::SSTableReader(std::move(file)));
@@ -139,6 +139,5 @@ bool SSTableRepair::checkAndRepairUnfinishedTable(bool repair) {
   return true;
 }
 
-}
 }
 

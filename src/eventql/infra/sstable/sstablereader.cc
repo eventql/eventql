@@ -29,7 +29,7 @@
 #include <eventql/infra/sstable/binaryformat.h>
 #include <eventql/infra/sstable/sstablereader.h>
 
-namespace util {
+
 namespace sstable {
 
 
@@ -247,6 +247,5 @@ size_t SSTableReader::countRows() {
   return n;
 }
 
-}
 }
 

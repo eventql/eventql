@@ -26,7 +26,6 @@
 #include <eventql/util/exception.h>
 #include <eventql/util/fnv.h>
 
-namespace util {
 namespace sstable {
 
 MetaPage FileHeaderReader::readMetaPage(InputStream* is) {
@@ -129,6 +128,5 @@ void FileHeaderReader::readUserdata(
   *userdata = read(*userdata_size);
 }
 
-}
 }
 

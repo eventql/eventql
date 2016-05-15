@@ -24,7 +24,7 @@
 #include <eventql/util/fnv.h>
 #include <eventql/infra/sstable/RowWriter.h>
 
-namespace util {
+
 namespace sstable {
 
 size_t RowWriter::appendRow(
@@ -51,5 +51,4 @@ size_t RowWriter::appendRow(
   return 12 + key_size + data_size;
 }
 
-}
 }

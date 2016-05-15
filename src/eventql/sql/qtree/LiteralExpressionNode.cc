@@ -55,7 +55,7 @@ void LiteralExpressionNode::encode(
 
 RefPtr<QueryTreeNode> LiteralExpressionNode::decode (
     QueryTreeCoder* coder,
-    OutputStream* is) {
+    InputStream* is) {
   SValue value;
   value.decode(is);
   return new LiteralExpressionNode(value);

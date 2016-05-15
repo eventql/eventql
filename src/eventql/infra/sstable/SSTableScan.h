@@ -41,7 +41,7 @@
 #include <eventql/infra/sstable/indexprovider.h>
 #include <eventql/infra/sstable/SSTableColumnSchema.h>
 
-namespace util {
+
 namespace sstable {
 
 class SSTableScan {
@@ -76,6 +76,6 @@ protected:
 };
 
 } // namespace sstable
-} // namespace util
+
 
 #endif

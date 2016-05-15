@@ -27,7 +27,7 @@
 #include "eventql/util/http/httpservice.h"
 #include "eventql/util/json/json.h"
 
-namespace util {
+
 namespace sstable {
 
 class SSTableServlet : public http::HTTPService {
@@ -56,6 +56,5 @@ protected:
   VFS* vfs_;
 };
 
-}
 }
 #endif

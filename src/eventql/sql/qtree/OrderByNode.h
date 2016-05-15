@@ -67,7 +67,7 @@ public:
 
   static RefPtr<QueryTreeNode> decode (
       QueryTreeCoder* coder,
-      OutputStream* is);
+      InputStream* is);
 
 protected:
   Vector<SortSpec> sort_specs_;

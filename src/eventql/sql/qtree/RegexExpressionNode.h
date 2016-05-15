@@ -55,7 +55,7 @@ public:
 
   static RefPtr<QueryTreeNode> decode (
       QueryTreeCoder* coder,
-      OutputStream* is);
+      InputStream* is);
 
 protected:
   RefPtr<ValueExpressionNode> subject_;

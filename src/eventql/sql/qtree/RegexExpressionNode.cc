@@ -70,7 +70,7 @@ void RegexExpressionNode::encode(
 
 RefPtr<QueryTreeNode> RegexExpressionNode::decode (
     QueryTreeCoder* coder,
-    OutputStream* is) {
+    InputStream* is) {
   auto subject = coder->decode(is).asInstanceOf<ValueExpressionNode>();
   auto pattern = is->readLenencString();
 

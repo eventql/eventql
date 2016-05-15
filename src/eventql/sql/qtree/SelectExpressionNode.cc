@@ -104,7 +104,7 @@ void SelectExpressionNode::encode(
 
 RefPtr<QueryTreeNode> SelectExpressionNode::decode(
     QueryTreeCoder* coder,
-    OutputStream* is) {
+    InputStream* is) {
   Vector<RefPtr<SelectListNode>> select_list;
   auto select_list_size = is->readVarUInt();
   for (auto i = 0; i < select_list_size; ++i) {

@@ -23,7 +23,7 @@
  */
 #include <eventql/infra/sstable/index.h>
 
-namespace util {
+
 namespace sstable {
 
 Index::Index(uint32_t type) : type_(type) {}
@@ -32,6 +32,5 @@ uint32_t Index::type() const {
   return type_;
 }
 
-}
 }
 
