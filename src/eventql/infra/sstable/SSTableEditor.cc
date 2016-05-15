@@ -265,6 +265,7 @@ bool SSTableEditor::SSTableEditorCursor::trySeekTo(size_t body_offset) {
     pos_ = body_offset;
     return true;
   }
+}
 
 void SSTableEditor::SSTableEditorCursor::seekTo(size_t body_offset) {
   if (body_offset >= table_->bodySize()) {
@@ -288,6 +289,7 @@ bool SSTableEditor::SSTableEditorCursor::next() {
     pos_ += row_size;
     return true;
   }
+}
 
 bool SSTableEditor::SSTableEditorCursor::valid() {
   return pos_ < table_->bodySize();

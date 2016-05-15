@@ -109,8 +109,9 @@ void SSTableColumnSchema::loadIndex(const Buffer& buf) {
     uint32_t col_name_len = *reader.readUInt32();
     String col_name((char*) reader.read(col_name_len), col_name_len);
 
-    addColumn(col_name, col_id, (util::sstable::SSTableColumnType) col_type);
+    addColumn(col_name, col_id, (sstable::SSTableColumnType) col_type);
   }
+}
 
 void SSTableColumnSchema::loadIndex(
     SSTableReader* sstable_reader) {

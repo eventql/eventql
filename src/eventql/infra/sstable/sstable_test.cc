@@ -29,7 +29,7 @@
 #include <eventql/infra/sstable/sstablereader.h>
 #include <eventql/infra/sstable/rowoffsetindex.h>
 
-using namespace util::sstable;
+using namespace sstable;
 #include "eventql/eventql.h"
 UNIT_TEST(SSTableTest);
 

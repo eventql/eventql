@@ -86,6 +86,7 @@ FileHeaderWriter::FileHeaderWriter(
     appendUInt32(0);
     appendUInt32(0);
   }
+}
 
 // DEPRECATED
 FileHeaderWriter::FileHeaderWriter(

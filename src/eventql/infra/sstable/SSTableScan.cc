@@ -41,6 +41,7 @@ SSTableScan::SSTableScan(
       select_list_.emplace_back(c);
     }
   }
+}
 
 void SSTableScan::setKeyPrefix(const String& prefix) {
   setKeyFilterRegex(prefix + ".*"); // FIXPAUL HACK !!! ;) :) ;)
@@ -221,6 +222,7 @@ void SSTableScan::execute(
       fn(rows[i]);
     }
   }
+}
 
 } // namespace sstable
 

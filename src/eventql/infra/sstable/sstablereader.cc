@@ -56,6 +56,7 @@ SSTableReader::SSTableReader(
   //if (header_.headerSize() + header_.bodySize() > file_size_) {
   //  RAISE(kIllegalStateError, "file metadata offsets exceed file bounds");
   //}
+}
 
 Buffer SSTableReader::readHeader() {
   Buffer buf(header_.userdataSize());
@@ -164,6 +165,7 @@ bool SSTableReader::SSTableReaderCursor::trySeekTo(size_t body_offset) {
   } else {
     return false;
   }
+}
 
 size_t SSTableReader::SSTableReaderCursor::position() const {
   return pos_;

@@ -56,7 +56,7 @@ using util::chart::Series;
 using util::chart::Series2D;
 using util::chart::Series3D;
 using util::chart::SVGTarget;
-using util::FileOutputStream;
+using FileOutputStream;
 using FileUtil;
 using test::UnitTest;
 

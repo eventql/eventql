@@ -35,7 +35,7 @@ SSTableRepair::SSTableRepair(
 
 bool SSTableRepair::checkAndRepair(bool repair /* = false */) {
   auto file = File::openFile(filename_, File::O_READ);
-  std::unique_ptr<util::sstable::SSTableReader> reader_;
+  std::unique_ptr<sstable::SSTableReader> reader_;
 
   try {
     reader_.reset(new sstable::SSTableReader(std::move(file)));
