@@ -24,7 +24,6 @@
  */
 #include "SSEStreamServlet.h"
 
-namespace util {
 namespace http {
 
 void SSEStreamServlet::handleHTTPRequest(
@@ -40,6 +39,5 @@ void SSEStreamServlet::handleHTTPRequest(
   }
 
   sse.finish();
-}
 }
 }

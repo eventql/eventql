@@ -27,7 +27,6 @@
 #include <unistd.h>
 #include "eventql/util/http/httpservice.h"
 
-namespace util {
 namespace http {
 
 class WriteStreamServlet : public http::StreamingHTTPService {
@@ -39,6 +38,5 @@ public:
 
 };
 
-}
 }
 #endif

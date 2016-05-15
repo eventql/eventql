@@ -24,7 +24,6 @@
  */
 #include "WriteStreamServlet.h"
 
-namespace util {
 namespace http {
 
 void WriteStreamServlet::handleHTTPRequest(
@@ -49,6 +48,5 @@ void WriteStreamServlet::handleHTTPRequest(
   res_stream->finishResponse();
 }
 
-}
 }
 

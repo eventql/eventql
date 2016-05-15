@@ -31,8 +31,6 @@
 #include <eventql/util/logging.h>
 #include <eventql/util/StackTrace.h>
 
-namespace util {
-
 CatchAndLogExceptionHandler::CatchAndLogExceptionHandler(
     const String& component) :
     component_(component) {}
@@ -127,6 +125,4 @@ void CatchAndAbortExceptionHandler::installGlobalHandlers() {
   //  RAISE_ERRNO(kIOError, "sigaction() failed");
   //}
 }
-
-} // namespace util
 

@@ -26,8 +26,6 @@
 #include <mutex>
 #include "eventql/util/stdtypes.h"
 
-namespace util {
-
 class ExceptionHandler {
 public:
   virtual ~ExceptionHandler() {}
@@ -55,5 +53,4 @@ protected:
   std::string message_;
 };
 
-}
 #endif
