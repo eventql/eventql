@@ -35,7 +35,6 @@
 #include "eventql/util/thread/threadpool.h"
 #include "eventql/util/exceptionhandler.h"
 
-namespace util {
 namespace thread {
 
 /**
@@ -99,6 +98,5 @@ protected:
   Vector<std::thread> threads_;
 };
 
-}
 }
 #endif

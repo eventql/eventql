@@ -24,7 +24,6 @@
 #include <signal.h>
 #include "eventql/util/thread/signalhandler.h"
 
-namespace util {
 namespace thread {
 
 void SignalHandler::ignoreSIGHUP() {
@@ -35,5 +34,4 @@ void SignalHandler::ignoreSIGPIPE() {
   signal(SIGPIPE, SIG_IGN);
 }
 
-}
 }

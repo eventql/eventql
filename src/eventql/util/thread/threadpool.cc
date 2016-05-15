@@ -33,7 +33,6 @@
 #include "eventql/util/logging.h"
 #include "eventql/util/thread/threadpool.h"
 
-namespace util {
 namespace thread {
 
 ThreadPool::ThreadPool(
@@ -165,5 +164,4 @@ void ThreadPool::startThread() {
 }
 
 
-}
 }

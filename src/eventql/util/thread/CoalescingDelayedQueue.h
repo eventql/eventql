@@ -30,7 +30,6 @@
 #include <list>
 #include "eventql/util/option.h"
 
-namespace util {
 namespace thread {
 
 /**
@@ -64,7 +63,6 @@ protected:
   std::condition_variable wakeup_;
 };
 
-}
 }
 
 #include "CoalescingDelayedQueue_impl.h"

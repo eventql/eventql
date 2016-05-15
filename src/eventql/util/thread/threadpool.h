@@ -33,7 +33,6 @@
 #include "eventql/util/exceptionhandler.h"
 #include "eventql/util/option.h"
 
-namespace util {
 namespace thread {
 
 struct ThreadPoolOptions {
@@ -79,6 +78,5 @@ protected:
 
 using CachedThreadPool = ThreadPool;
 
-}
 }
 #endif

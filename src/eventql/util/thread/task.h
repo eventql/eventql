@@ -26,7 +26,6 @@
 #include <functional>
 #include <memory>
 
-namespace util {
 namespace thread {
 
 class Task {
@@ -63,6 +62,5 @@ void TaskImpl<RunnableType>::run() {
   runnable_();
 }
 
-}
 }
 #endif

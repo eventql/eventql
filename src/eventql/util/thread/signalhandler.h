@@ -24,7 +24,6 @@
 #ifndef _STX_SYSTEM_SIGNALHANDLER_H
 #define _STX_SYSTEM_SIGNALHANDLER_H
 
-namespace util {
 namespace thread {
 
 class SignalHandler {
@@ -35,6 +34,5 @@ public:
 
 };
 
-}
 }
 #endif

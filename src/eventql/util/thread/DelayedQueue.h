@@ -30,7 +30,6 @@
 #include "eventql/util/option.h"
 #include "eventql/util/UnixTime.h"
 
-namespace util {
 namespace thread {
 
 /**
@@ -62,7 +61,6 @@ protected:
   std::condition_variable wakeup_;
 };
 
-}
 }
 
 #include "DelayedQueue_impl.h"

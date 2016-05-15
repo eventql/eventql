@@ -29,7 +29,6 @@
 #include <list>
 #include "eventql/util/option.h"
 
-namespace util {
 namespace thread {
 
 /**
@@ -59,7 +58,6 @@ protected:
   size_t length_;
 };
 
-}
 }
 
 #include "queue_impl.h"

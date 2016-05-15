@@ -23,7 +23,6 @@
  */
 #include <eventql/util/wallclock.h>
 
-namespace util {
 namespace thread {
 
 template <typename T>
@@ -99,5 +98,4 @@ void DelayedQueue<T>::wakeup() {
   wakeup_.notify_all();
 }
 
-}
 }

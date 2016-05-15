@@ -29,7 +29,6 @@
 #include "eventql/util/thread/FixedSizeThreadPool.h"
 #include "eventql/util/application.h"
 
-namespace util {
 namespace thread {
 
 FixedSizeThreadPool::FixedSizeThreadPool(
@@ -114,5 +113,4 @@ void FixedSizeThreadPool::runOnWakeup(
       "not suppported: FixedSizeThreadPool::runOnWakeup");
 }
 
-}
 }

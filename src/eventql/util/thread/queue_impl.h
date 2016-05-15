@@ -21,7 +21,6 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-namespace util {
 namespace thread {
 
 template <typename T>
@@ -122,5 +121,4 @@ void Queue<T>::waitUntilEmpty() const {
   }
 }
 
-}
 }
