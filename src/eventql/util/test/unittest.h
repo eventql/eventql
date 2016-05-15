@@ -83,9 +83,9 @@ void EXPECT_NEAR(T1 expected, T2 actual, T3 diff) {
     RAISE(
         kExpectationFailed,
         "expectation failed: actual %s near expected %s, diff %s",
-        util::inspect<T2>(actual).c_str(),
-        util::inspect<T1>(expected).c_str(),
-        util::inspect<T3>(diff).c_str());
+        inspect<T2>(actual).c_str(),
+        inspect<T1>(expected).c_str(),
+        inspect<T3>(diff).c_str());
   }
 }
 
@@ -95,8 +95,8 @@ void EXPECT_EQ(T1 left, T2 right) {
     RAISE(
         kExpectationFailed,
         "expectation failed: %s == %s",
-        util::inspect<T1>(left).c_str(),
-        util::inspect<T2>(right).c_str());
+        inspect<T1>(left).c_str(),
+        inspect<T2>(right).c_str());
   }
 }
 

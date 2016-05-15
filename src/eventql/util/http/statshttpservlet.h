@@ -27,7 +27,6 @@
 #include "eventql/util/http/httpservice.h"
 #include "eventql/util/stats/statsrepository.h"
 
-namespace util {
 namespace stats {
 
 class StatsHTTPServlet : public http::HTTPService {
@@ -44,6 +43,5 @@ protected:
   StatsRepository* stats_repo_;
 };
 
-}
 }
 #endif
