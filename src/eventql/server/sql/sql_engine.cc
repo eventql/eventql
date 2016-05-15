@@ -23,7 +23,7 @@
  */
 #include <eventql/util/http/httpclient.h>
 #include <eventql/util/protobuf/msg.h>
-#include <eventql/z1.h>
+#include <eventql/eventql.h>
 #include <eventql/server/sql/sql_engine.h>
 #include <eventql/server/sql/table_provider.h>
 #include <eventql/core/TSDBService.h>
