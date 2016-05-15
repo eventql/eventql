@@ -25,12 +25,6 @@
 #include <eventql/util/inspect.h>
 #include <eventql/util/http/httprequest.h>
 
-using util::InputStream;
-using util::OutputStream;
-using util::StringInputStream;
-using util::StringOutputStream;
-
-namespace util {
 namespace http {
 
 std::string HTTPMessage::kEmptyHeader = "";
@@ -150,6 +144,4 @@ std::string StringUtil::toString(http::HTTPMessage::kHTTPMethod method) {
 template <>
 std::string inspect(const http::HTTPMessage::kHTTPMethod& method) {
   return StringUtil::toString(method);
-}
-
 }

@@ -29,7 +29,7 @@
 #include <eventql/util/util/binarymessagereader.h>
 #include <eventql/util/util/binarymessagewriter.h>
 
-using namespace util;
+#include "eventql/eventql.h"
 
 namespace eventql {
 class RecordSet;

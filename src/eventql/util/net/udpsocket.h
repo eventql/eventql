@@ -28,7 +28,6 @@
 #include "eventql/util/net/inetaddr.h"
 #include "eventql/util/thread/taskscheduler.h"
 
-namespace util {
 namespace net {
 
 class UDPSocket {
@@ -43,6 +42,5 @@ protected:
   int fd_;
 };
 
-}
 }
 #endif

@@ -34,7 +34,6 @@
 #include "eventql/util/status.h"
 #include "eventql/util/thread/wakeup.h"
 
-namespace util {
 class TaskScheduler;
 
 template <typename T>
@@ -104,8 +103,6 @@ public:
 protected:
   AutoRef<PromiseState<T>> state_;
 };
-
-} // namespace util
 
 #include "future_impl.h"
 #endif

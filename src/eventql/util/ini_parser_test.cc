@@ -26,7 +26,7 @@
 #include "eventql/util/ini_parser.h"
 #include "eventql/util/test/unittest.h"
 
-using namespace util;
+#include "eventql/eventql.h"
 
 UNIT_TEST(IniParserTest);
 

@@ -25,8 +25,6 @@
 #include "eventql/util/stdtypes.h"
 #include "eventql/util/io/inputstream.h"
 
-namespace util {
-
 class CSVInputStream {
 public:
 
@@ -114,4 +112,3 @@ protected:
   const char quote_char_;
 };
 
-}

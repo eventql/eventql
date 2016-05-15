@@ -23,7 +23,6 @@
  */
 #include "eventql/util/http/HTTPFileDownload.h"
 
-namespace util {
 namespace http {
 
 HTTPFileDownload::HTTPFileDownload(
@@ -61,5 +60,4 @@ void HTTPFileDownload::ResponseFuture::onBodyChunk(
   file_.write(data, size);
 }
 
-}
 }

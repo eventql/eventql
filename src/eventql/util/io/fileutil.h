@@ -26,8 +26,6 @@
 #include "eventql/util/buffer.h"
 #include "eventql/util/stdtypes.h"
 
-namespace util {
-
 class FileUtil {
 public:
 
@@ -138,5 +136,4 @@ public:
 
 };
 
-}
 #endif

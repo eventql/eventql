@@ -33,7 +33,6 @@
 #include "eventql/util/http/httpclient.h"
 #include <string>
 
-namespace util {
 namespace http {
 
 class HTTPFileDownload {
@@ -59,6 +58,5 @@ protected:
   File file_;
 };
 
-}
 }
 #endif

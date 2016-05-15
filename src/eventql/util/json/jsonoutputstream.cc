@@ -29,7 +29,6 @@
 #include <stdio.h>
 #include <cmath>
 
-namespace util {
 namespace json {
 
 JSONOutputStream::JSONOutputStream(
@@ -377,5 +376,4 @@ std::string escapeString(const std::string& string) {
 
 
 } // namespace json
-} // namespace util
 

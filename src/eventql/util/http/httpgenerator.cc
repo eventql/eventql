@@ -25,9 +25,6 @@
 #include <eventql/util/stringutil.h>
 #include <eventql/util/http/httpgenerator.h>
 
-using util::OutputStream;
-
-namespace util {
 namespace http {
 
 void HTTPGenerator::generate(const HTTPRequest& req, OutputStream* os) {
@@ -78,5 +75,4 @@ void HTTPGenerator::generate(const HTTPResponse& res, OutputStream* os) {
   }
 }
 
-}
 }

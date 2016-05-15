@@ -30,7 +30,7 @@
 #include "eventql/infra/sstable/sstablereader.h"
 #include "eventql/infra/sstable/SSTableScan.h"
 
-using namespace util;
+#include "eventql/eventql.h"
 
 int main(int argc, const char** argv) {
   util::Application::init();

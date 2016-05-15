@@ -29,8 +29,6 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-namespace util {
-
 File File::openFile(
     const std::string& filename,
     int flags,
@@ -220,4 +218,3 @@ void File::fsync(bool sync_metadata /* = false */) {
   }
 }
 
-}

@@ -72,8 +72,8 @@ std::vector<std::string> MetricTableRef::columns() {
 }
 
 void MetricTableRef::executeScan(csql::TableScan* scan) {
-  auto begin = util::UnixTime::epoch();
-  auto limit = util::UnixTime::now();
+  auto begin = UnixTime::epoch();
+  auto limit = UnixTime::now();
 
   metric_->scanSamples(
       begin,

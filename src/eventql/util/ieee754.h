@@ -28,8 +28,6 @@
 #include <stdint.h>
 #include <string>
 
-namespace util {
-
 class IEEE754 {
 public:
 
@@ -38,5 +36,4 @@ public:
 
 };
 
-}
 #endif

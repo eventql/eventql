@@ -141,44 +141,6 @@ static const char kMagicBytes[4] = {0x23, 0x17, 0x23, 0x17};
 
 static const size_t kSectorSize = 512;
 
-using String = std::string;
-using StringUtil = util::StringUtil;
-
-template <typename T>
-using ScopedPtr = std::unique_ptr<T>;
-
-template <typename T>
-using Vector = std::vector<T>;
-
-template <typename T>
-using Set = std::set<T>;
-
-template <typename T>
-using Function = std::function<T>;
-
-template <typename T1, typename T2>
-using Pair = std::pair<T1, T2>;
-
-template <typename T1, typename T2>
-using HashMap = std::unordered_map<T1, T2>;
-
-template <typename T>
-using RefPtr = util::RefPtr<T>;
-using RefCounted = util::RefCounted;
-
-template <typename T>
-using ScopedPtr = util::ScopedPtr<T>;
-
-template <typename T>
-using Option = util::Option<T>;
-
-using InputStream = util::InputStream;
-using OutputStream = util::OutputStream;
-using FileOutputStream = util::FileOutputStream;
-using File = util::File;
-using Buffer = util::Buffer;
-using UnixTime = util::UnixTime;
-
 inline uint64_t padToNextSector(uint64_t val) {
   return (((val) + (kSectorSize - 1)) / kSectorSize) * kSectorSize;
 }

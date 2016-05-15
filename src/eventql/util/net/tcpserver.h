@@ -27,7 +27,6 @@
 #include "eventql/util/thread/taskscheduler.h"
 #include "eventql/util/net/tcpconnection.h"
 
-namespace util {
 namespace net {
 
 class TCPServer {
@@ -49,6 +48,5 @@ protected:
   std::function<void (std::unique_ptr<TCPConnection>)> on_connection_cb_;
 };
 
-}
 }
 #endif

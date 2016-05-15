@@ -24,7 +24,6 @@
  */
 #include <eventql/util/http/HTTPRequestStream.h>
 
-namespace util {
 namespace http {
 
 HTTPRequestStream::HTTPRequestStream(
@@ -73,5 +72,4 @@ void HTTPRequestStream::discardBody() {
   readBody([this] (const void* data, size_t size) {});
 }
 
-}
 }

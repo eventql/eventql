@@ -30,7 +30,7 @@
 namespace util {
 namespace sstable {
 
-class SSTableServlet : public util::http::HTTPService {
+class SSTableServlet : public http::HTTPService {
 public:
   enum class ResponseFormat {
     JSON,
@@ -40,14 +40,14 @@ public:
   SSTableServlet(const String& base_path, VFS* vfs);
 
   void handleHTTPRequest(
-      util::http::HTTPRequest* req,
-      util::http::HTTPResponse* res);
+      http::HTTPRequest* req,
+      http::HTTPResponse* res);
 
 protected:
 
   void scan(
-      util::http::HTTPRequest* req,
-      util::http::HTTPResponse* res,
+      http::HTTPRequest* req,
+      http::HTTPResponse* res,
       const URI& uri);
 
   ResponseFormat formatFromString(const String& format);

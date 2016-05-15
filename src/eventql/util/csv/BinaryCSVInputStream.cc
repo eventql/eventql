@@ -23,8 +23,6 @@
  */
 #include "eventql/util/csv/BinaryCSVInputStream.h"
 
-namespace util {
-
 BinaryCSVInputStream::BinaryCSVInputStream(
     std::unique_ptr<RewindableInputStream>&& input_stream) :
     input_(std::move(input_stream)) {}
@@ -58,4 +56,3 @@ const RewindableInputStream& BinaryCSVInputStream::getInputStream() const {
   return *input_;
 }
 
-}

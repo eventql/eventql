@@ -29,18 +29,18 @@
 namespace util {
 namespace chart {
 
-class TimeDomain : public ContinuousDomain<util::UnixTime> {
+class TimeDomain : public ContinuousDomain<UnixTime> {
 public:
 
   TimeDomain(
-    util::UnixTime min_value =
-        std::numeric_limits<util::UnixTime>::max(),
-    util::UnixTime max_value =
-        std::numeric_limits<util::UnixTime>::min(),
+    UnixTime min_value =
+        std::numeric_limits<UnixTime>::max(),
+    UnixTime max_value =
+        std::numeric_limits<UnixTime>::min(),
     bool is_logarithmic = false,
     bool is_inverted = false);
 
-  std::string label(util::UnixTime value) const;
+  std::string label(UnixTime value) const;
 
 };
 

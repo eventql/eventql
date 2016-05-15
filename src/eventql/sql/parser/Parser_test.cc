@@ -29,7 +29,7 @@
 #include <eventql/sql/parser/token.h>
 #include <eventql/sql/parser/tokenize.h>
 
-using namespace util;
+#include "eventql/eventql.h"
 using namespace csql;
 
 UNIT_TEST(ParserTest);

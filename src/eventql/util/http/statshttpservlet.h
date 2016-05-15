@@ -30,15 +30,15 @@
 namespace util {
 namespace stats {
 
-class StatsHTTPServlet : public util::http::HTTPService {
+class StatsHTTPServlet : public http::HTTPService {
 public:
 
   StatsHTTPServlet();
   StatsHTTPServlet(StatsRepository* stats_repo);
 
   void handleHTTPRequest(
-      util::http::HTTPRequest* req,
-      util::http::HTTPResponse* res);
+      http::HTTPRequest* req,
+      http::HTTPResponse* res);
 
 protected:
   StatsRepository* stats_repo_;

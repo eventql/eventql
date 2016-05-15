@@ -30,7 +30,6 @@
 #include "eventql/util/stats/multicounter.h"
 #include "eventql/util/stats/statsrepository.h"
 
-namespace util {
 namespace http {
 
 struct HTTPClientStats {
@@ -149,6 +148,5 @@ struct HTTPServerStats {
   }
 };
 
-}
 }
 #endif

@@ -27,7 +27,7 @@
 #include <eventql/sql/csql.h>
 #include <eventql/sql/runtime/tablerepository.h>
 
-using namespace util;
+#include "eventql/eventql.h"
 
 namespace csql {
 class Runtime;

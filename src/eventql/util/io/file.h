@@ -29,7 +29,6 @@
 #include <string>
 #include <eventql/util/stdtypes.h>
 
-namespace util {
 class Buffer;
 
 #undef O_APPEND
@@ -123,5 +122,4 @@ protected:
   int flags_;
 };
 
-}
 #endif

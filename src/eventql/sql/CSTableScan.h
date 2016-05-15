@@ -29,7 +29,7 @@
 #include <eventql/sql/runtime/ValueExpression.h>
 #include <eventql/infra/cstable/CSTableReader.h>
 
-using namespace util;
+#include "eventql/eventql.h"
 
 namespace csql {
 

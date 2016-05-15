@@ -28,8 +28,6 @@
 #include <eventql/util/human.h>
 #include <eventql/util/ISO8601.h>
 
-namespace util {
-
 Option<UnixTime> Human::parseTime(
     const String& str,
     UnixTime now /* = WallClock::now() */) {
@@ -401,5 +399,4 @@ bool Human::isNullOrEmpty(const String& value) {
       value == "NULL";
 }
 
-} // namespace util
 

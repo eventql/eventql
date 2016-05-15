@@ -27,7 +27,6 @@
 #include <eventql/util/protobuf/JSONEncoder.h>
 #include <eventql/util/protobuf/MessagePrinter.h>
 
-namespace util {
 namespace msg {
 
 DynamicMessage::DynamicMessage(
@@ -349,5 +348,3 @@ String DynamicMessage::debugPrint() const {
 }
 
 } // namespace msg
-} // namespace util
-

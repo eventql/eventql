@@ -24,7 +24,7 @@
 #pragma once
 #include <eventql/util/stdtypes.h>
 
-using namespace util;
+#include "eventql/eventql.h"
 
 namespace csql {
 class ASTNode;

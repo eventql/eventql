@@ -47,7 +47,7 @@ void TableRepository::import(
     const std::vector<std::string>& tables,
     const std::string& source_uri_raw,
     const std::vector<std::unique_ptr<Backend>>& backends) {
-  util::URI source_uri(source_uri_raw);
+  URI source_uri(source_uri_raw);
 
   for (const auto& backend : backends) {
     std::vector<std::unique_ptr<TableRef>> tbl_refs;

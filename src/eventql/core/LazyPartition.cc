@@ -24,7 +24,7 @@
 #include <eventql/core/LazyPartition.h>
 #include <eventql/core/PartitionMap.h>
 
-using namespace util;
+#include "eventql/eventql.h"
 
 namespace eventql {
 

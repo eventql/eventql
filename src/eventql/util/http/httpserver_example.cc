@@ -37,16 +37,16 @@
 /**
  * Example 1: A simple HTTP Service
  */
-class TestService : public util::http::HTTPService {
+class TestService : public http::HTTPService {
 
   void handleHTTPRequest(
-      util::http::HTTPRequest* req,
-      util::http::HTTPResponse* res) {
-    auto res_body = util::StringUtil::format(
+      http::HTTPRequest* req,
+      http::HTTPResponse* res) {
+    auto res_body = StringUtil::format(
         "pong: $0",
         req->body().toString());
 
-    res->setStatus(util::http::kStatusOK);
+    res->setStatus(http::kStatusOK);
     res->addBody(res_body);
   }
 
@@ -55,11 +55,11 @@ class TestService : public util::http::HTTPService {
 /**
  * Example 2: A streaming HTTP Handler
  */
-class StreamingTestHandler : public util::http::HTTPHandler {
+class StreamingTestHandler : public http::HTTPHandler {
 public:
   StreamingTestHandler(
-      util::http::HTTPServerConnection* conn,
-      util::http::HTTPRequest* req) :
+      http::HTTPServerConnection* conn,
+      http::HTTPRequest* req) :
       conn_(conn),
       req_(req),
       body_len_(0),
@@ -81,9 +81,9 @@ public:
   }
 
   void writeResponseHeaders() {
-    res_.setStatus(util::http::kStatusOK);
-    res_.addHeader("Content-Length", util::StringUtil::toString(5 * 10));
-    res_.addHeader("X-Orig-Bodylen", util::StringUtil::toString(body_len_));
+    res_.setStatus(http::kStatusOK);
+    res_.addHeader("Content-Length", StringUtil::toString(5 * 10));
+    res_.addHeader("X-Orig-Bodylen", StringUtil::toString(body_len_));
 
     conn_->writeResponse(
         res_,
@@ -98,7 +98,7 @@ public:
       conn_->writeResponseBody(
           buf.c_str(),
           buf.length(),
-          std::bind(&util::http::HTTPServerConnection::finishResponse, conn_));
+          std::bind(&http::HTTPServerConnection::finishResponse, conn_));
     } else {
       conn_->writeResponseBody(
           buf.c_str(),
@@ -110,17 +110,17 @@ public:
 protected:
   size_t body_len_;
   int chunks_written_;
-  util::http::HTTPServerConnection* conn_;
-  util::http::HTTPRequest* req_;
-  util::http::HTTPResponse res_;
+  http::HTTPServerConnection* conn_;
+  http::HTTPRequest* req_;
+  http::HTTPResponse res_;
 };
 
-class StreamingTestHandlerFactory : public util::http::HTTPHandlerFactory {
+class StreamingTestHandlerFactory : public http::HTTPHandlerFactory {
 public:
-  std::unique_ptr<util::http::HTTPHandler> getHandler(
-      util::http::HTTPServerConnection* conn,
-      util::http::HTTPRequest* req) override {
-    return std::unique_ptr<util::http::HTTPHandler>(
+  std::unique_ptr<http::HTTPHandler> getHandler(
+      http::HTTPServerConnection* conn,
+      http::HTTPRequest* req) override {
+    return std::unique_ptr<http::HTTPHandler>(
         new StreamingTestHandler(conn, req));
   }
 };
@@ -132,13 +132,13 @@ int main() {
   util::CatchAndAbortExceptionHandler ehandler;
   ehandler.installGlobalHandlers();
 
-  util::log::LogOutputStream logger(util::OutputStream::getStderr());
+  util::log::LogOutputStream logger(OutputStream::getStderr());
   util::log::Logger::get()->setMinimumLogLevel(util::log::kTrace);
   util::log::Logger::get()->listen(&logger);
 
   util::thread::ThreadPool thread_pool;
-  util::http::HTTPRouter router;
-  util::http::HTTPServer http_server(&router, &thread_pool);
+  http::HTTPRouter router;
+  http::HTTPServer http_server(&router, &thread_pool);
 
   TestService ping_example;
   router.addRouteByPrefixMatch("/ping", &ping_example, &thread_pool);

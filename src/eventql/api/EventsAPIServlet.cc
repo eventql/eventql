@@ -27,7 +27,7 @@
 #include "eventql/util/io/BufferedOutputStream.h"
 #include "eventql/api/EventsAPIServlet.h"
 
-using namespace util;
+#include "eventql/eventql.h"
 
 namespace eventql {
 
@@ -41,8 +41,8 @@ EventsAPIServlet::EventsAPIServlet(
 
 void EventsAPIServlet::handle(
     const AnalyticsSession& session,
-    RefPtr<util::http::HTTPRequestStream> req_stream,
-    RefPtr<util::http::HTTPResponseStream> res_stream) {
+    RefPtr<http::HTTPRequestStream> req_stream,
+    RefPtr<http::HTTPResponseStream> res_stream) {
   const auto& req = req_stream->request();
   URI uri(req.uri());
 

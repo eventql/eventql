@@ -31,11 +31,10 @@
 #include "eventql/util/http/httpresponse.h"
 #include "eventql/util/http/httpservice.h"
 
-namespace util {
 namespace json {
 class JSONRPC;
 
-class JSONRPCHTTPAdapter : public util::http::HTTPService {
+class JSONRPCHTTPAdapter : public http::HTTPService {
 public:
 
   static std::unique_ptr<http::HTTPService> make(JSONRPC* rpc);
@@ -54,5 +53,4 @@ protected:
 };
 
 } // namespace json
-} // namespace util
 #endif

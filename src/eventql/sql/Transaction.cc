@@ -25,7 +25,7 @@
 #include <eventql/sql/Transaction.h>
 #include <eventql/sql/runtime/runtime.h>
 
-using namespace util;
+#include "eventql/eventql.h"
 
 namespace csql {
 

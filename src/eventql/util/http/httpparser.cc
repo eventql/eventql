@@ -27,7 +27,6 @@
 #include "eventql/util/inspect.h"
 #include "eventql/util/http/httpparser.h"
 
-namespace util {
 namespace http {
 
 const char HTTPParser::kContentLengthHeader[] = "Content-Length";
@@ -453,5 +452,4 @@ void HTTPParser::ignoreBody() {
   expect_body_ = false;
 }
 
-}
 }

@@ -23,7 +23,7 @@
  */
 #include <eventql/sql/SFunction.h>
 
-using namespace util;
+#include "eventql/eventql.h"
 
 namespace csql {
 

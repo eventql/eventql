@@ -25,8 +25,6 @@
 #include "eventql/util/stdtypes.h"
 #include "eventql/util/option.h"
 
-namespace util {
-
 /**
  * Class representing an instance of time in the gregorian calendar
  */
@@ -124,7 +122,5 @@ protected:
   uint16_t millisecond_;
   int32_t offset_;
 };
-
-}
 
 #include <eventql/util/CivilTime_impl.h>

@@ -25,7 +25,6 @@
 #include "eventql/util/exception.h"
 #include "eventql/util/http/httpresponsefuture.h"
 
-namespace util {
 namespace http {
 
 HTTPResponseFuture::HTTPResponseFuture(
@@ -95,5 +94,4 @@ void StreamingResponseHandler::onBodyChunk(
   callback_(data, size);
 }
 
-}
 }

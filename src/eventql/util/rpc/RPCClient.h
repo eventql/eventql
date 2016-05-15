@@ -49,7 +49,7 @@ public:
   HTTPRPCClient(TaskScheduler* sched);
   void call(const URI& uri, RefPtr<AnyRPC> rpc) override;
 protected:
-  util::http::HTTPConnectionPool http_pool_;
+  http::HTTPConnectionPool http_pool_;
 };
 
 } // namespace util

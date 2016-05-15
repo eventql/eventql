@@ -38,13 +38,13 @@
 #include "eventql/api/MapReduceAPIServlet.h"
 #include "eventql/RemoteTSDBScanParams.pb.h"
 
-using namespace util;
+#include "eventql/eventql.h"
 
 namespace eventql {
 
 struct AnalyticsQuery;
 
-class AnalyticsServlet : public util::http::StreamingHTTPService {
+class AnalyticsServlet : public http::StreamingHTTPService {
 public:
 
   AnalyticsServlet(
@@ -57,14 +57,14 @@ public:
       PartitionMap* pmap);
 
   void handleHTTPRequest(
-      RefPtr<util::http::HTTPRequestStream> req_stream,
-      RefPtr<util::http::HTTPResponseStream> res_stream);
+      RefPtr<http::HTTPRequestStream> req_stream,
+      RefPtr<http::HTTPResponseStream> res_stream);
 
 protected:
 
   void handle(
-      RefPtr<util::http::HTTPRequestStream> req_stream,
-      RefPtr<util::http::HTTPResponseStream> res_stream);
+      RefPtr<http::HTTPRequestStream> req_stream,
+      RefPtr<http::HTTPResponseStream> res_stream);
 
   void getAuthInfo(
       const AnalyticsSession& session,

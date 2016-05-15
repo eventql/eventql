@@ -26,8 +26,6 @@
 #include "eventql/util/stringutil.h"
 #include "eventql/util/wallclock.h"
 
-using util::OutputStream;
-
 namespace util {
 
 LogOutputStream::LogOutputStream(

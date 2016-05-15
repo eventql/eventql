@@ -23,7 +23,6 @@
  */
 #include "eventql/util/json/json.h"
 
-namespace util {
 namespace json {
 
 template <typename T>
@@ -33,5 +32,4 @@ void JSONRPCResponse::successAndReturn(const T& ret_val) {
   });
 }
 
-}
 }

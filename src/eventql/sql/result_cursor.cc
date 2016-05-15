@@ -25,7 +25,7 @@
 #include <eventql/sql/result_cursor.h>
 #include <eventql/sql/expressions/table_expression.h>
 
-using namespace util;
+#include "eventql/eventql.h"
 
 namespace csql {
 

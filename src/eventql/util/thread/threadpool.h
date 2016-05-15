@@ -53,7 +53,7 @@ public:
 
   ThreadPool(
       ThreadPoolOptions opts,
-      std::unique_ptr<util::ExceptionHandler> error_handler,
+      std::unique_ptr<ExceptionHandler> error_handler,
       size_t max_cached_threads = kDefaultMaxCachedThreads);
 
   void run(std::function<void()> task) override;
@@ -67,7 +67,7 @@ public:
 protected:
   void startThread();
 
-  std::unique_ptr<util::ExceptionHandler> error_handler_;
+  std::unique_ptr<ExceptionHandler> error_handler_;
   ThreadPoolOptions opts_;
   size_t max_cached_threads_;
   size_t num_threads_;

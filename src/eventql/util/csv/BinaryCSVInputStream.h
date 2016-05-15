@@ -26,8 +26,6 @@
 #include "eventql/util/io/inputstream.h"
 #include "eventql/util/csv/CSVInputStream.h"
 
-namespace util {
-
 class BinaryCSVInputStream : public CSVInputStream {
 public:
 
@@ -63,4 +61,3 @@ protected:
   std::unique_ptr<RewindableInputStream> input_;
 };
 
-}

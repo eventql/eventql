@@ -27,8 +27,6 @@
 #include <stdint.h>
 #include "eventql/util/UnixTime.h"
 
-namespace util {
-
 class WallClock {
 public:
   static UnixTime now();
@@ -39,5 +37,4 @@ public:
   static uint64_t unixMicros();
 };
 
-}
 #endif

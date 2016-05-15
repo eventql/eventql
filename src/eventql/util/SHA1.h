@@ -29,8 +29,6 @@
 #include <eventql/util/exception.h>
 #include <eventql/util/buffer.h>
 
-namespace util {
-
 class SHA1Hash {
   friend class SHA1;
 public:
@@ -96,14 +94,12 @@ public:
 
 };
 
-}
-
 namespace std {
 template<>
-struct hash<util::SHA1Hash> {
-  size_t operator()(util::SHA1Hash const& val) const {
+struct hash<SHA1Hash> {
+  size_t operator()(SHA1Hash const& val) const {
     static_assert(
-        sizeof(size_t) < util::SHA1Hash::kSize,
+        sizeof(size_t) < SHA1Hash::kSize,
         "sizeof(size_t must be <20 bytes");
 
     return *((const size_t*) val.data());

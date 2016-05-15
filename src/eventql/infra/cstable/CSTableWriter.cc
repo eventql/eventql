@@ -34,7 +34,7 @@
 #include <eventql/util/io/fileutil.h>
 #include <eventql/util/option.h>
 
-using namespace util;
+#include "eventql/eventql.h"
 
 namespace cstable {
 

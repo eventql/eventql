@@ -25,8 +25,6 @@
 #define _STX_THREAD_FUTURE_IMPL_H
 #include <assert.h>
 
-namespace util {
-
 template <typename T>
 PromiseState<T>::PromiseState() :
     status(eSuccess),
@@ -229,7 +227,5 @@ bool Promise<T>::isFulfilled() const {
   std::unique_lock<std::mutex> lk(state_->mutex);
   return state_->ready;
 }
-
-} // namespace util
 
 #endif

@@ -28,8 +28,6 @@
 #include <vector>
 #include "eventql/util/io/outputstream.h"
 
-namespace util {
-
 template <typename T>
 std::string inspect(const T& value);
 
@@ -53,8 +51,6 @@ std::vector<std::string> inspectAll(H head);
 
 template <typename... T>
 void iputs(const char* fmt, T... values);
-
-}
 
 #include "inspect_impl.h"
 #endif

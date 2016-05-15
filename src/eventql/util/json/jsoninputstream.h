@@ -31,7 +31,6 @@
 #include "eventql/util/json/json.h"
 #include "eventql/util/json/jsonpointer.h"
 
-namespace util {
 namespace json {
 
 class JSONInputStream {
@@ -57,6 +56,5 @@ protected:
   char cur_;
 };
 
-}
 }
 #endif

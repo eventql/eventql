@@ -33,7 +33,7 @@ RefPtr<VFSFile> WhitelistVFS::openFile(const String& filename) {
   }
 
   return RefPtr<VFSFile>(
-      new io::MmappedFile(File::openFile(iter->second, File::O_READ)));
+      new MmappedFile(File::openFile(iter->second, File::O_READ)));
 }
 
 bool WhitelistVFS::exists(const String& filename) {

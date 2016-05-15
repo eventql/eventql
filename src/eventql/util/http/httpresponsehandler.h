@@ -26,7 +26,6 @@
 #include "eventql/util/thread/wakeup.h"
 #include <memory>
 
-namespace util {
 namespace http {
 
 class HTTPResponseHandler {
@@ -45,6 +44,5 @@ public:
 
 };
 
-}
 }
 #endif

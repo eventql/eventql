@@ -26,8 +26,6 @@
 #include <stdint.h>
 #include <string>
 
-namespace util {
-
 template <typename H, typename... T>
 void StringUtil::toStringVImpl(
     std::vector<std::string>* target,
@@ -137,4 +135,3 @@ std::string StringUtil::formatNumberMetric(T orig_value) {
   return std::string(buf, len);
 }
 
-} // namespace util

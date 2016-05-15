@@ -25,7 +25,6 @@
 #include "eventql/util/json/jsonrpcrequest.h"
 #include "eventql/util/json/jsonrpcresponse.h"
 
-namespace util {
 namespace json {
 
 template <class ServiceType>
@@ -90,5 +89,4 @@ void JSONRPC::ReflectionTarget<ClassType>::rpc(RPCCallType rpc_call) {
   });
 }
 
-}
 }

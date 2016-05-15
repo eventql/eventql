@@ -23,7 +23,6 @@
  */
 #include "eventql/util/stats/statsrepository.h"
 
-namespace util {
 namespace stats {
 
 StatsRepository* StatsRepository::get() {
@@ -54,5 +53,4 @@ void exportStat(String path, StatRef* stat, ExportMode export_mode) {
   StatsRepository::get()->exportStat(path, stat, export_mode);
 }
 
-}
 }

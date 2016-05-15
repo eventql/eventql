@@ -33,8 +33,6 @@
 #include "eventql/util/logging.h"
 #include "eventql/util/thread/threadpool.h"
 
-using util::ExceptionHandler;
-
 namespace util {
 namespace thread {
 
@@ -43,7 +41,7 @@ ThreadPool::ThreadPool(
     size_t max_cached_threads /* = kDefaultNumCachedThreads */) :
     ThreadPool(
         opts,
-        std::unique_ptr<util::ExceptionHandler>(
+        std::unique_ptr<ExceptionHandler>(
             new util::CatchAndAbortExceptionHandler()),
     max_cached_threads) {}
 

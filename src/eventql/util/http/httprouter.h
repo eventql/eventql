@@ -29,7 +29,6 @@
 #include "eventql/util/http/httpresponse.h"
 #include "eventql/util/thread/taskscheduler.h"
 
-namespace util {
 namespace http {
 class StreamingHTTPService;
 
@@ -80,7 +79,6 @@ protected:
   std::vector<std::pair<PredicateFnType, FactoryFnType>> routes_;
 };
 
-}
 }
 #include "httprouter_impl.h"
 #endif

@@ -32,7 +32,7 @@
 #include <eventql/core/TSDBTableInfo.h>
 #include "eventql/server/sql/table_scan.h"
 
-using namespace util;
+#include "eventql/eventql.h"
 
 namespace eventql {
 class TSDBService;

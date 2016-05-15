@@ -58,7 +58,7 @@
 #include "eventql/sql/runtime/defaultruntime.h"
 #include "eventql/sql/runtime/tablerepository.h"
 
-using namespace util;
+#include "eventql/eventql.h"
 using namespace eventql;
 
 util::thread::EventLoop ev;

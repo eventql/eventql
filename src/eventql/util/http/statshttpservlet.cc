@@ -33,8 +33,8 @@ StatsHTTPServlet::StatsHTTPServlet(StatsRepository* stats_repo) :
     stats_repo_(stats_repo) {}
 
 void StatsHTTPServlet::handleHTTPRequest(
-    util::http::HTTPRequest* req,
-    util::http::HTTPResponse* res) {
+    http::HTTPRequest* req,
+    http::HTTPResponse* res) {
   Buffer buf;
 
   TextStatsSink sink([&buf] (const String& line) {
@@ -46,7 +46,7 @@ void StatsHTTPServlet::handleHTTPRequest(
     exp.stat->exportAll(exp.path, &sink);
   });
 
-  res->setStatus(util::http::kStatusOK);
+  res->setStatus(http::kStatusOK);
   res->addBody(buf);
 }
 

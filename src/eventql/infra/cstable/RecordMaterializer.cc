@@ -24,7 +24,7 @@
 #include <eventql/util/ieee754.h>
 #include <eventql/infra/cstable/RecordMaterializer.h>
 
-using namespace util;
+#include "eventql/eventql.h"
 
 namespace cstable {
 

@@ -25,10 +25,10 @@
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/http/httpservice.h>
 
-using namespace util;
+#include "eventql/eventql.h"
 namespace eventql {
 
-class DefaultServlet : public util::http::HTTPService {
+class DefaultServlet : public http::HTTPService {
 public:
 
   void handleHTTPRequest(

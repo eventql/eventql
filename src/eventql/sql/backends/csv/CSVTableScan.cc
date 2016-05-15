@@ -23,7 +23,7 @@
  */
 #include <eventql/sql/backends/csv/CSVTableScan.h>
 
-using namespace util;
+#include "eventql/eventql.h"
 
 namespace csql {
 namespace backends {

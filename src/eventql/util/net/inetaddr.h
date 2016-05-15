@@ -25,8 +25,6 @@
 #define _STX_INETADDR_H
 #include <string>
 
-namespace util {
-
 class InetAddr {
 public:
 
@@ -55,7 +53,5 @@ protected:
   std::string ip_;
   unsigned port_;
 };
-
-}
 
 #endif

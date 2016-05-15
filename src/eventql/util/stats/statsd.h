@@ -25,15 +25,14 @@
 #include <eventql/util/net/udpserver.h>
 #include <eventql/util/thread/taskscheduler.h>
 
-namespace util {
 namespace statsd {
 
 class StatsdServer {
 public:
 
   StatsdServer(
-      util::TaskScheduler* server_scheduler,
-      util::TaskScheduler* work_scheduler);
+      TaskScheduler* server_scheduler,
+      TaskScheduler* work_scheduler);
 
   void listen(int port);
 
@@ -51,7 +50,7 @@ public:
 
 protected:
 
-  void messageReceived(const util::Buffer& msg);
+  void messageReceived(const Buffer& msg);
 
   util::net::UDPServer udp_server_;
 
@@ -62,5 +61,4 @@ protected:
 };
 
 
-}
 }

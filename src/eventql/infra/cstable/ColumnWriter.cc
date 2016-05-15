@@ -23,7 +23,7 @@
  */
 #include <eventql/infra/cstable/ColumnWriter.h>
 
-using namespace util;
+#include "eventql/eventql.h"
 
 namespace cstable {
 

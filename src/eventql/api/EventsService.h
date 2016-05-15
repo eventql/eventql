@@ -34,7 +34,7 @@
 #include "eventql/EventScanParams.pb.h"
 #include "eventql/sql/runtime/runtime.h"
 
-using namespace util;
+#include "eventql/eventql.h"
 
 namespace eventql {
 

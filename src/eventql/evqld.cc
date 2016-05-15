@@ -64,7 +64,7 @@
 #include "eventql/StatusServlet.h"
 #include <jsapi.h>
 
-using namespace util;
+#include "eventql/eventql.h"
 using namespace eventql;
 
 util::thread::EventLoop ev;
@@ -229,8 +229,8 @@ int main(int argc, const char** argv) {
       8);
 
   /* http */
-  util::http::HTTPRouter http_router;
-  util::http::HTTPServer http_server(&http_router, &ev);
+  http::HTTPRouter http_router;
+  http::HTTPServer http_server(&http_router, &ev);
   http_server.listen(flags.getInt("http_port"));
   http::HTTPConnectionPool http(&ev, &z1stats()->http_client_stats);
 

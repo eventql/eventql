@@ -28,7 +28,6 @@
 #include "eventql/util/http/httpconnectionpool.h"
 #include "eventql/util/thread/eventloop.h"
 
-namespace util {
 namespace http {
 
 class HTTPClient {
@@ -40,7 +39,7 @@ public:
 
   HTTPResponse executeRequest(
       const HTTPRequest& req,
-      const util::InetAddr& addr);
+      const InetAddr& addr);
 
   HTTPResponse executeRequest(
       const HTTPRequest& req,
@@ -48,7 +47,7 @@ public:
 
   HTTPResponse executeRequest(
       const HTTPRequest& req,
-      const util::InetAddr& addr,
+      const InetAddr& addr,
       Function<HTTPResponseFuture* (Promise<HTTPResponse> promise)> factory);
 
 protected:
@@ -58,6 +57,5 @@ protected:
   util::net::DNSCache dns_cache_;
 };
 
-}
 }
 #endif

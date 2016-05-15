@@ -26,7 +26,7 @@
 #include "cplot/discretedomain.h"
 #include "cplot/timedomain.h"
 
-using namespace util;
+#include "eventql/eventql.h"
 namespace util {
 namespace chart {
 
@@ -44,8 +44,8 @@ template <> Domain<double>*
   return new ContinuousDomain<double>();
 }
 
-template <> Domain<util::UnixTime>*
-    Domain<util::UnixTime>::mkDomain() {
+template <> Domain<UnixTime>*
+    Domain<UnixTime>::mkDomain() {
   return new TimeDomain();
 }
 

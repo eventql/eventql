@@ -24,11 +24,10 @@
 #include "eventql/util/exception.h"
 #include "eventql/util/http/httpconnectionpool.h"
 
-namespace util {
 namespace http {
 
 HTTPConnectionPool::HTTPConnectionPool(
-    util::TaskScheduler* scheduler,
+    TaskScheduler* scheduler,
     HTTPClientStats* stats) :
     scheduler_(scheduler),
     stats_(stats) {}
@@ -44,7 +43,7 @@ Future<HTTPResponse> HTTPConnectionPool::executeRequest(
 
 Future<HTTPResponse> HTTPConnectionPool::executeRequest(
     const HTTPRequest& req,
-    const util::InetAddr& addr) {
+    const InetAddr& addr) {
   return executeRequest(
       req,
       addr,
@@ -70,7 +69,7 @@ Future<HTTPResponse> HTTPConnectionPool::executeRequest(
 
 Future<HTTPResponse> HTTPConnectionPool::executeRequest(
     const HTTPRequest& req,
-    const util::InetAddr& addr,
+    const InetAddr& addr,
     Function<HTTPResponseFuture* (Promise<HTTPResponse> promise)> factory) {
   Promise<HTTPResponse> promise;
 
@@ -102,7 +101,7 @@ void HTTPConnectionPool::parkConnection(
 }
 
 void HTTPConnectionPool::leaseConnection(
-    const util::InetAddr& addr,
+    const InetAddr& addr,
     Promise<HTTPResponse> promise,
     Function<void (HTTPClientConnection* conn)> callback) {
   std::unique_lock<std::mutex> lk(connection_cache_mutex_);
@@ -159,5 +158,4 @@ HTTPClientStats* HTTPConnectionPool::stats() {
   return stats_;
 }
 
-}
 }

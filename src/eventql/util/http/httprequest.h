@@ -27,7 +27,6 @@
 #include <eventql/util/http/httpmessage.h>
 #include <string>
 
-namespace util {
 namespace http {
 class HTTPInputStream;
 
@@ -77,6 +76,5 @@ protected:
   std::string url_;
 };
 
-}
 }
 #endif

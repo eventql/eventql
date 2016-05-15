@@ -32,7 +32,6 @@
 #include "eventql/util/inspect.h"
 #include "eventql/util/net/tcpconnection.h"
 
-namespace util {
 namespace net {
 
 TCPConnection::TCPConnection(int fd) : fd_(fd), closed_(false) {}
@@ -142,6 +141,5 @@ void TCPConnection::checkErrors() const {
 
 }
 
-}
 }
 

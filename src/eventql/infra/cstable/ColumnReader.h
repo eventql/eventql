@@ -31,7 +31,7 @@
 namespace cstable {
 class ColumnWriter;
 
-class ColumnReader : public util::RefCounted {
+class ColumnReader : public RefCounted {
 public:
 
   virtual bool readBoolean(

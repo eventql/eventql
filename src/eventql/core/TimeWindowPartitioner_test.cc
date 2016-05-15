@@ -28,7 +28,7 @@
 #include "eventql/core/Partition.h"
 #include "eventql/core/TimeWindowPartitioner.h"
 
-using namespace util;
+#include "eventql/eventql.h"
 using namespace eventql;
 
 // FIXPAUL rename to TimeWindowPartitionerTest

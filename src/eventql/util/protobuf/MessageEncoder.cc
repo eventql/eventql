@@ -23,7 +23,6 @@
  */
 #include <eventql/util/protobuf/MessageEncoder.h>
 
-namespace util {
 namespace msg {
 
 void MessageEncoder::encode(
@@ -100,5 +99,4 @@ void MessageEncoder::encodeObject(
 
 
 } // namespace msg
-} // namespace util
 

@@ -21,8 +21,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#ifndef _libstx_UTIL_DATETIME_H
-#define _libstx_UTIL_DATETIME_H
+#pragma once
 #include <ctime>
 #include <inttypes.h>
 #include <limits>
@@ -31,8 +30,6 @@
 #include "eventql/util/CivilTime.h"
 #include "eventql/util/duration.h"
 #include "eventql/util/option.h"
-
-namespace util {
 
 class UnixTime {
 public:
@@ -146,15 +143,12 @@ protected:
   uint64_t utc_micros_;
 };
 
-}
-
 namespace std {
-template <> class numeric_limits<util::UnixTime> {
+template <> class numeric_limits<UnixTime> {
 public:
-  static util::UnixTime max();
-  static util::UnixTime min();
+  static UnixTime max();
+  static UnixTime min();
 };
 }
 
 #include <eventql/util/UnixTime_impl.h>
-#endif

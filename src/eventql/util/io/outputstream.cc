@@ -32,8 +32,6 @@
 #include "eventql/util/io/outputstream.h"
 #include "eventql/util/ieee754.h"
 
-namespace util {
-
 std::unique_ptr<OutputStream> OutputStream::getStdout() {
   auto stdout_stream = new FileOutputStream(1, false);
   return std::unique_ptr<OutputStream>(stdout_stream);
@@ -228,6 +226,4 @@ size_t BufferOutputStream::write(const char* data, size_t size) {
   buf_->append(data, size);
   return size;
 }
-
-} // fnord
 

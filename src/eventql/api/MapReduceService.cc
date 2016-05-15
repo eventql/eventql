@@ -34,7 +34,7 @@
 #include "eventql/infra/cstable/RecordShredder.h"
 #include <algorithm>
 
-using namespace util;
+#include "eventql/eventql.h"
 
 namespace eventql {
 

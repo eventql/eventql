@@ -27,7 +27,7 @@
 #include "eventql/util/uri.h"
 #include "eventql/util/test/unittest.h"
 
-using namespace util;
+#include "eventql/eventql.h"
 
 UNIT_TEST(URITest);
 

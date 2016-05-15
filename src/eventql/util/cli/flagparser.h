@@ -100,7 +100,7 @@ public:
    */
   const std::vector<std::string>& getArgv() const;
 
-  void printUsage(util::OutputStream* target) const;
+  void printUsage(OutputStream* target) const;
 
   void ignoreUnknownFlags();
 

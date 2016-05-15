@@ -25,8 +25,6 @@
 #include <eventql/util/exception.h>
 #include <string.h>
 
-namespace util {
-
 Buffer::Buffer() : data_(nullptr), size_(0), alloc_(0), mark_(0) {}
 
 Buffer::Buffer(
@@ -230,5 +228,4 @@ size_t Buffer::mark() const {
   return mark_;
 }
 
-}
 

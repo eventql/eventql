@@ -64,7 +64,7 @@ public:
     return vals_read_ >= vals_total_;
   }
 
-  void storeMmap(RefPtr<util::VFSFile> mmap) {
+  void storeMmap(RefPtr<VFSFile> mmap) {
     mmap_ = mmap;
   }
 
@@ -80,7 +80,7 @@ protected:
   util::BitPackDecoder rlvl_reader_;
   util::BitPackDecoder dlvl_reader_;
   void* data_;
-  RefPtr<util::VFSFile> mmap_;
+  RefPtr<VFSFile> mmap_;
 };
 
 } // namespace v1

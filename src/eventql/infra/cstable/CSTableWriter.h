@@ -89,7 +89,7 @@ public:
   static RefPtr<CSTableWriter> createFile(
       const String& filename,
       const TableSchema& schema,
-      Option<RefPtr<LockRef>> lockref = util::None<RefPtr<LockRef>>());
+      Option<RefPtr<LockRef>> lockref = None<RefPtr<LockRef>>());
 
   /**
    * Create a new cstable with a specific binary format version. This method
@@ -103,7 +103,7 @@ public:
       const String& filename,
       BinaryFormatVersion version,
       const TableSchema& schema,
-      Option<RefPtr<LockRef>> lockref = util::None<RefPtr<LockRef>>());
+      Option<RefPtr<LockRef>> lockref = None<RefPtr<LockRef>>());
 
   /**
    * Reopen an existing cstable. This method implicitly requires a write lock
@@ -116,7 +116,7 @@ public:
    */
   static RefPtr<CSTableWriter> reopenFile(
       const String& filename,
-      Option<RefPtr<LockRef>> lockref = util::None<RefPtr<LockRef>>());
+      Option<RefPtr<LockRef>> lockref = None<RefPtr<LockRef>>());
 
   /**
    * Commit the current implicit transaction. Note that after commiting you

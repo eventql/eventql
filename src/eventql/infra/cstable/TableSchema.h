@@ -30,7 +30,7 @@
 
 namespace cstable {
 
-class TableSchema : public util::RefCounted {
+class TableSchema : public RefCounted {
 public:
 
   struct Column {
@@ -127,7 +127,7 @@ public:
   //    json::JSONObject::const_iterator begin,
   //    json::JSONObject::const_iterator end);
 
-  static TableSchema fromProtobuf(const util::msg::MessageSchema& schema);
+  static TableSchema fromProtobuf(const msg::MessageSchema& schema);
 
   Vector<ColumnConfig> flatColumns() const;
 

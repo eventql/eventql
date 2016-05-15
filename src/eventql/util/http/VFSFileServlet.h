@@ -26,17 +26,16 @@
 #include "eventql/util/VFS.h"
 #include "eventql/util/http/httpservice.h"
 
-namespace util {
 namespace http {
 
-class VFSFileServlet : public util::http::HTTPService {
+class VFSFileServlet : public http::HTTPService {
 public:
 
   VFSFileServlet(const String& base_path, VFS* vfs);
 
   void handleHTTPRequest(
-      util::http::HTTPRequest* req,
-      util::http::HTTPResponse* res);
+      http::HTTPRequest* req,
+      http::HTTPResponse* res);
 
 protected:
   String contentTypeFromFilename(const String& filename) const;
@@ -45,6 +44,5 @@ protected:
   VFS* vfs_;
 };
 
-}
 }
 #endif

@@ -32,7 +32,7 @@
 #include <eventql/util/random.h>
 #include <eventql/core/RecordRef.h>
 
-using namespace util;
+#include "eventql/eventql.h"
 
 namespace eventql {
 

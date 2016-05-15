@@ -27,7 +27,7 @@
 #include <eventql/AnalyticsSession.pb.h>
 #include <eventql/AnalyticsAuth.h>
 
-using namespace util;
+#include "eventql/eventql.h"
 namespace eventql {
 
 class HTTPAuth {

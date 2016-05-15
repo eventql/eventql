@@ -29,7 +29,6 @@
 #include "eventql/util/hash.h"
 #include "eventql/util/stats/stat.h"
 
-namespace util {
 namespace stats {
 
 template <typename ValueType>
@@ -64,7 +63,6 @@ protected:
   RefPtr<CounterStat<ValueType>> stat_;
 };
 
-}
 }
 
 #include "counter_impl.h"

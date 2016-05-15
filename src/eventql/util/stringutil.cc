@@ -26,7 +26,6 @@
 #include <eventql/util/stringutil.h>
 #include <eventql/util/UTF8.h>
 
-namespace util {
 
 void StringUtil::toStringVImpl(std::vector<std::string>* target) {}
 
@@ -469,4 +468,3 @@ String StringUtil::stripShell(const std::string& str) {
   return out;
 }
 
-} // namespace util

@@ -26,7 +26,6 @@
 #include "eventql/util/protobuf/MessageObject.h"
 #include "eventql/util/protobuf/MessageSchema.h"
 
-namespace util {
 namespace msg {
 
 class DynamicMessage {
@@ -70,5 +69,3 @@ protected:
 };
 
 } // namespace msg
-} // namespace util
-

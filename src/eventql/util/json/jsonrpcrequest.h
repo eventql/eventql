@@ -29,7 +29,6 @@
 #include "eventql/util/inspect.h"
 #include "eventql/util/json/json.h"
 
-namespace util {
 namespace json {
 
 class JSONRPCRequest {
@@ -53,7 +52,6 @@ protected:
 };
 
 } // namespace json
-} // namespace util
 
 #include "jsonrpcrequest_impl.h"
 #endif

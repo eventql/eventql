@@ -24,7 +24,7 @@
 #include "eventql/util/protobuf/MessageSchema.h"
 #include "eventql/CustomerConfig.h"
 
-using namespace util;
+#include "eventql/eventql.h"
 
 namespace eventql {
 

@@ -54,7 +54,7 @@ public:
 
 protected:
   HashMap<String, Pair<uint64_t, uint64_t>> offsets_;
-  io::MmappedFile mmap_;
+  MmappedFile mmap_;
   size_t body_offset_;
 };
 

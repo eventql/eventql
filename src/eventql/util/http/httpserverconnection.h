@@ -35,7 +35,6 @@
 #include <eventql/util/net/tcpconnection.h>
 #include <eventql/util/thread/taskscheduler.h>
 
-namespace util {
 namespace http {
 
 class HTTPServerConnection : public RefCounted {
@@ -147,6 +146,5 @@ protected:
   HTTPServerStats* stats_;
 };
 
-}
 }
 #endif

@@ -29,7 +29,6 @@
 #include <eventql/util/autoref.h>
 #include "eventql/util/io/file.h"
 
-namespace util {
 class FileInputStream;
 
 class InputStream : public RefCounted {
@@ -463,5 +462,4 @@ protected:
   size_t cur_;
 };
 
-}
 #endif

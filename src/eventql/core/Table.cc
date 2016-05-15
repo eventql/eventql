@@ -25,7 +25,7 @@
 #include <eventql/core/TimeWindowPartitioner.h>
 #include <eventql/core/FixedShardPartitioner.h>
 
-using namespace util;
+#include "eventql/eventql.h"
 
 namespace eventql {
 

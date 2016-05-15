@@ -31,7 +31,6 @@
 #include "eventql/util/http/httpconnectionpool.h"
 #include "eventql/util/http/httpclient.h"
 
-namespace util {
 namespace http {
 
 struct HTTPSSEEvent {
@@ -54,5 +53,4 @@ protected:
   Function<void (const HTTPSSEEvent& ev)> on_event_;
 };
 
-}
 }

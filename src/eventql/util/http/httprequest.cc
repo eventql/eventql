@@ -26,7 +26,6 @@
 #include <eventql/util/http/httpparser.h>
 #include <eventql/util/http/httprequest.h>
 
-namespace util {
 namespace http {
 
 HTTPRequest HTTPRequest::mkGet(const std::string& uri) {
@@ -161,5 +160,4 @@ std::vector<std::pair<std::string, std::string>> HTTPRequest::cookies() const {
   return Cookies::parseCookieHeader(getHeader("Cookie"));
 }
 
-}
 }

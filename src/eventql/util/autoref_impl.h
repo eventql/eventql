@@ -24,8 +24,6 @@
 #pragma once
 #include <eventql/util/exception.h>
 
-namespace util {
-
 template <typename T>
 AutoRef<T>::AutoRef() : ref_(nullptr) {}
 
@@ -121,4 +119,3 @@ ScopedPtr<T> mkScoped(T* ptr) {
   return ScopedPtr<T>(ptr);
 }
 
-} // namespace util

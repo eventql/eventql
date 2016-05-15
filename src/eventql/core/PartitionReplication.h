@@ -29,7 +29,7 @@
 #include <eventql/core/ReplicationState.h>
 #include <eventql/core/RecordEnvelope.pb.h>
 
-using namespace util;
+#include "eventql/eventql.h"
 
 namespace eventql {
 

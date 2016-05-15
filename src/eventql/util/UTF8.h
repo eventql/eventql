@@ -21,17 +21,13 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#ifndef _STX_BASE_UTF8_H_
-#define _STX_BASE_UTF8_H_
-
+#pragma once
 #include <stdlib.h>
 #include <stdint.h>
 #include <string>
 #include <vector>
 #include <locale>
 #include "eventql/util/stdtypes.h"
-
-namespace util {
 
 class UTF8 {
 public:
@@ -45,5 +41,3 @@ public:
 
 };
 
-}
-#endif

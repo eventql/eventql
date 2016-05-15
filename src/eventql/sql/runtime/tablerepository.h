@@ -33,7 +33,7 @@ class QueryBuilder;
 class Transaction;
 class SequentialScanNode;
 
-using namespace util;
+#include "eventql/eventql.h"
 
 class TableRepository : public TableProvider {
 public:

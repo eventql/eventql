@@ -24,7 +24,7 @@
 #include <eventql/infra/cstable/columns/v1/BitPackedIntColumnReader.h>
 #include <eventql/infra/cstable/ColumnWriter.h>
 
-using namespace util;
+#include "eventql/eventql.h"
 
 namespace cstable {
 namespace v1 {

@@ -32,7 +32,7 @@
 #include <eventql/sql/expressions/math.h>
 #include <eventql/sql/expressions/string.h>
 
-using namespace util;
+#include "eventql/eventql.h"
 
 namespace csql {
 

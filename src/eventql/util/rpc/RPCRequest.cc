@@ -85,7 +85,7 @@ void RPCRequest::returnSuccess() {
 
 void RPCRequest::returnError(const StandardException& e) {
   try {
-    auto rte = dynamic_cast<const util::Exception&>(e);
+    auto rte = dynamic_cast<const Exception&>(e);
     returnError(rte.getType(), rte.getMessage());
   } catch (const std::exception& cast_error) {
     returnError(kRuntimeError, e.what());

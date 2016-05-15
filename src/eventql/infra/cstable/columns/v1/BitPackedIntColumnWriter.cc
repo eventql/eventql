@@ -23,7 +23,7 @@
  */
 #include <eventql/infra/cstable/columns/v1/BitPackedIntColumnWriter.h>
 
-using namespace util;
+#include "eventql/eventql.h"
 
 namespace cstable {
 namespace v1 {

@@ -26,8 +26,6 @@
 #include <stdint.h>
 #include "fnv.h"
 
-namespace util {
-
 /**
  * Parameters for the 32bit version of the FNV hash function
  *
@@ -49,4 +47,3 @@ template<> FNV<uint32_t>::FNV() :
 template<> FNV<uint64_t>::FNV() :
     FNV(14695981039346656037llu, 1099511628211llu) {}
 
-}

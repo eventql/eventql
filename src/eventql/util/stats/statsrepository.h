@@ -26,7 +26,6 @@
 #include "eventql/util/stdtypes.h"
 #include "eventql/util/stats/stat.h"
 
-namespace util {
 namespace stats {
 
 enum class ExportMode {
@@ -67,6 +66,5 @@ protected:
 
 void exportStat(String path, StatRef* stat, ExportMode export_mode);
 
-}
 }
 #endif

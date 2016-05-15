@@ -29,7 +29,6 @@
 #include <eventql/util/http/status.h>
 #include <string>
 
-namespace util {
 namespace http {
 
 class HTTPResponse : public HTTPMessage {
@@ -65,6 +64,5 @@ protected:
   std::string status_;
 };
 
-}
 }
 #endif

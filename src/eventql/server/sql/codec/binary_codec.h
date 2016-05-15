@@ -35,7 +35,7 @@
 #include "eventql/sql/runtime/QueryPlan.h"
 #include "eventql/sql/runtime/ExecutionContext.h"
 
-using namespace util;
+#include "eventql/eventql.h"
 
 namespace csql {
 
@@ -77,7 +77,7 @@ namespace csql {
  *
  */
 
-class BinaryResultParser : public util::RefCounted {
+class BinaryResultParser : public RefCounted {
 public:
 
   BinaryResultParser();
@@ -98,7 +98,7 @@ protected:
   size_t parseProgress(const void* data, size_t size);
   size_t parseError(const void* data, size_t size);
 
-  util::Buffer buf_;
+  Buffer buf_;
   util::Function<void (const Vector<String>& columns)> on_table_header_;
   util::Function<void (int argc, const SValue* argv)> on_row_;
   util::Function<void (const ExecutionStatus& status)> on_progress_;

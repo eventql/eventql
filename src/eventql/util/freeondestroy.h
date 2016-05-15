@@ -24,8 +24,6 @@
 #pragma once
 #include <stdlib.h>
 
-namespace util {
-
 class FreeOnDestroy {
 public:
 
@@ -54,6 +52,4 @@ public:
 protected:
   void* ptr_;
 };
-
-}
 

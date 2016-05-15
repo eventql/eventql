@@ -29,7 +29,6 @@
 #include <vector>
 #include "eventql/util/thread/taskscheduler.h"
 
-namespace util {
 namespace thread {
 
 class EventLoop : public TaskScheduler {
@@ -72,6 +71,5 @@ protected:
   size_t num_fds_;
 };
 
-}
 }
 #endif

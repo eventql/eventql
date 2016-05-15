@@ -26,8 +26,6 @@
 #include <eventql/util/inspect.h>
 #include <eventql/util/stringutil.h>
 
-namespace util {
-
 SHA1Hash SHA1Hash::fromHexString(const String& str) {
   SHA1Hash hash(DeferInitialization{});
 
@@ -286,4 +284,3 @@ void SHA1::compute(const void* data, size_t size, SHA1Hash* out) {
   }
 }
 
-}

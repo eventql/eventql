@@ -29,7 +29,7 @@
 #include <eventql/infra/sstable/sstablereader.h>
 #include <eventql/core/RecordSet.h>
 
-using namespace util;
+#include "eventql/eventql.h"
 
 namespace eventql {
 
@@ -327,7 +327,7 @@ void RecordSet::loadCommitlog(
     const String& filename,
     Function<void (const SHA1Hash&, const void*, size_t)> fn) {
   auto filepath = FileUtil::joinPaths(datadir_, filename);
-  io::MmappedFile mmap(File::openFile(filepath, File::O_READ));
+  MmappedFile mmap(File::openFile(filepath, File::O_READ));
   util::BinaryMessageReader reader(mmap.data(), mmap.size());
   auto limit = *reader.readUInt64() + sizeof(uint64_t);
 

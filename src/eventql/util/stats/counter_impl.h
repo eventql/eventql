@@ -24,7 +24,6 @@
 #ifndef _STX_STATS_COUNTER_IMPL_H
 #define _STX_STATS_COUNTER_IMPL_H
 
-namespace util {
 namespace stats {
 
 template <typename ValueType>
@@ -86,6 +85,5 @@ ValueType Counter<ValueType>::get() const {
   return stat_->get();
 }
 
-}
 }
 #endif

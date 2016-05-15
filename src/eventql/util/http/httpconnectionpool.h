@@ -34,20 +34,19 @@
 #include "eventql/util/http/httpstats.h"
 #include "eventql/util/stats/statsrepository.h"
 
-namespace util {
 namespace http {
 
 class HTTPConnectionPool {
 public:
   HTTPConnectionPool(
-      util::TaskScheduler* scheduler,
+      TaskScheduler* scheduler,
       HTTPClientStats* stats);
 
   Future<HTTPResponse> executeRequest(const HTTPRequest& req);
 
   Future<HTTPResponse> executeRequest(
       const HTTPRequest& req,
-      const util::InetAddr& addr);
+      const InetAddr& addr);
 
   Future<HTTPResponse> executeRequest(
       const HTTPRequest& req,
@@ -55,7 +54,7 @@ public:
 
   Future<HTTPResponse> executeRequest(
       const HTTPRequest& req,
-      const util::InetAddr& addr,
+      const InetAddr& addr,
       Function<HTTPResponseFuture* (Promise<HTTPResponse> promise)> factory);
 
   HTTPClientStats* stats();
@@ -65,11 +64,11 @@ protected:
   void parkConnection(HTTPClientConnection* conn, InetAddr addr);
 
   void leaseConnection(
-      const util::InetAddr& addr,
+      const InetAddr& addr,
       Promise<HTTPResponse> promise,
       Function<void (HTTPClientConnection* conn)> callback);
 
-  util::TaskScheduler* scheduler_;
+  TaskScheduler* scheduler_;
 
   std::multimap<
       std::string,
@@ -80,6 +79,5 @@ protected:
   HTTPClientStats* stats_;
 };
 
-}
 }
 #endif

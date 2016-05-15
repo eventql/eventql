@@ -27,8 +27,6 @@
 #include "eventql/util/logging/loglevel.h"
 #include "eventql/util/logging/logger.h"
 
-namespace util {
-
 /**
  * EMERGENCY: Something very bad happened
  */
@@ -192,7 +190,5 @@ const char* logLevelToStr(LogLevel log_level);
  * will raise an exception if no such log level is known
  */
 LogLevel strToLogLevel(const String& log_level);
-
-}
 
 #endif

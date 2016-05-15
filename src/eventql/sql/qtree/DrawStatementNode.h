@@ -28,7 +28,7 @@
 #include <eventql/sql/parser/token.h>
 #include <eventql/sql/qtree/TableExpressionNode.h>
 
-using namespace util;
+#include "eventql/eventql.h"
 
 namespace csql {
 

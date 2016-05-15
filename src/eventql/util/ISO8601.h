@@ -27,8 +27,6 @@
 #include "eventql/util/option.h"
 #include "eventql/util/CivilTime.h"
 
-namespace util {
-
 class ISO8601 {
 public:
 
@@ -40,4 +38,3 @@ public:
 
 };
 
-}

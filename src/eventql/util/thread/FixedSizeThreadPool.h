@@ -74,7 +74,7 @@ public:
   FixedSizeThreadPool(
       ThreadPoolOptions opts,
       size_t nthreads,
-      std::unique_ptr<util::ExceptionHandler> error_handler,
+      std::unique_ptr<ExceptionHandler> error_handler,
       size_t maxqueuelen = -1,
       bool block = true);
 
@@ -92,7 +92,7 @@ public:
 protected:
   ThreadPoolOptions opts_;
   size_t nthreads_;
-  std::unique_ptr<util::ExceptionHandler> error_handler_;
+  std::unique_ptr<ExceptionHandler> error_handler_;
   Queue<std::function<void()>> queue_;
   bool block_;
   std::atomic<bool> running_;

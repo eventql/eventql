@@ -28,8 +28,6 @@
 #include <limits>
 #include <string>
 
-namespace util {
-
 constexpr const uint64_t kMicrosPerMilli = 1000;
 constexpr const uint64_t kMicrosPerSecond = 1000000;
 constexpr const uint64_t kMillisPerSecond = 1000;
@@ -53,5 +51,4 @@ constexpr const uint64_t kSecondsPerYear = kDaysPerYear * kSecondsPerDay;
 constexpr const uint64_t kMillisPerYear = kDaysPerYear * kMillisPerDay;
 constexpr const uint64_t kMicrosPerYear = kDaysPerYear * kMicrosPerDay;
 
-} // namespace util
 #endif

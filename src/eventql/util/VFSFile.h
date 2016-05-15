@@ -26,8 +26,6 @@
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/autoref.h>
 
-namespace util {
-
 class VFSFile : public RefCounted {
 public:
   virtual ~VFSFile() {}
@@ -42,5 +40,4 @@ public:
 
 };
 
-}
 #endif

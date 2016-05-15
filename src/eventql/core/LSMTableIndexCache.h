@@ -14,7 +14,7 @@
 #include <eventql/util/autoref.h>
 #include <eventql/core/LSMTableIndex.h>
 
-using namespace util;
+#include "eventql/eventql.h"
 
 namespace eventql {
 

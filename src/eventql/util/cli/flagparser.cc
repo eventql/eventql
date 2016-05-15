@@ -203,7 +203,7 @@ const std::vector<std::string>& FlagParser::getArgv() const {
   return argv_;
 }
 
-void FlagParser::printUsage(util::OutputStream* target) const {
+void FlagParser::printUsage(OutputStream* target) const {
   for (const auto& flag : flags_) {
     if (flag.shortopt == nullptr) {
       target->printf("    --%-26.26s", flag.longopt);

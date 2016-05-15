@@ -28,8 +28,6 @@
 #include <eventql/util/wallclock.h>
 #include <eventql/util/logging.h>
 
-using util::Exception;
-
 namespace util {
 
 const char* logLevelToStr(LogLevel log_level) {
@@ -83,7 +81,7 @@ void Logger::logException(
   }
 
   try {
-    auto rte = dynamic_cast<const util::Exception&>(exception);
+    auto rte = dynamic_cast<const Exception&>(exception);
     log(
         log_level,
         component,

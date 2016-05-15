@@ -26,7 +26,6 @@
 #include "eventql/util/option.h"
 #include "eventql/util/json/jsontypes.h"
 
-namespace util {
 namespace json {
 
 JSONObject::const_iterator objectLookup(
@@ -142,7 +141,6 @@ public:
 
 };
 
-}
 }
 
 #endif

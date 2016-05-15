@@ -40,7 +40,7 @@ struct PageIndexKey {
   PageIndexEntryType entry_type;
 };
 
-class PageIndex : public util::RefCounted {
+class PageIndex : public RefCounted {
 public:
 
   PageIndex(

@@ -33,8 +33,6 @@
 #include <sys/time.h>                   // struct timeval; struct timespec;
 #include <eventql/util/time_constants.h>
 
-namespace util {
-
 class Duration {
 private:
   enum class ZeroType { Zero };
@@ -123,8 +121,6 @@ protected:
 };
 
 std::string inspect(const Duration& value);
-
-}
 
 #include <eventql/util/duration_impl.h>
 #endif

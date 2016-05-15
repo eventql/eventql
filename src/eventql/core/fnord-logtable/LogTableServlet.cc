@@ -33,8 +33,8 @@ namespace logtable {
 LogTableServlet::LogTableServlet(TableRepository* tables) : tables_(tables) {}
 
 void LogTableServlet::handleHTTPRequest(
-    util::http::HTTPRequest* req,
-    util::http::HTTPResponse* res) {
+    http::HTTPRequest* req,
+    http::HTTPResponse* res) {
   URI uri(req->uri());
 
   res->addHeader("Access-Control-Allow-Origin", "*");
@@ -76,7 +76,7 @@ void LogTableServlet::handleHTTPRequest(
       return tableSnapshot(req, res, &uri);
     }
 
-    res->setStatus(util::http::kStatusNotFound);
+    res->setStatus(http::kStatusNotFound);
     res->addBody("not found");
   } catch (const Exception& e) {
     res->setStatus(http::kStatusInternalServerError);
@@ -92,7 +92,7 @@ void LogTableServlet::insertRecord(
 
   String table;
   if (!URI::getParam(params, "table", &table)) {
-    res->setStatus(util::http::kStatusBadRequest);
+    res->setStatus(http::kStatusBadRequest);
     res->addBody("missing ?table=... parameter");
     return;
   }
@@ -117,7 +117,7 @@ void LogTableServlet::insertRecordsBatch(
 
   String table;
   if (!URI::getParam(params, "table", &table)) {
-    res->setStatus(util::http::kStatusBadRequest);
+    res->setStatus(http::kStatusBadRequest);
     res->addBody("missing ?table=... parameter");
     return;
   }
@@ -149,7 +149,7 @@ void LogTableServlet::commitTable(
 
   String table;
   if (!URI::getParam(params, "table", &table)) {
-    res->setStatus(util::http::kStatusBadRequest);
+    res->setStatus(http::kStatusBadRequest);
     res->addBody("missing ?table=... parameter");
     return;
   }
@@ -169,7 +169,7 @@ void LogTableServlet::mergeTable(
 
   String table;
   if (!URI::getParam(params, "table", &table)) {
-    res->setStatus(util::http::kStatusBadRequest);
+    res->setStatus(http::kStatusBadRequest);
     res->addBody("missing ?table=... parameter");
     return;
   }
@@ -188,7 +188,7 @@ void LogTableServlet::gcTable(
 
   String table;
   if (!URI::getParam(params, "table", &table)) {
-    res->setStatus(util::http::kStatusBadRequest);
+    res->setStatus(http::kStatusBadRequest);
     res->addBody("missing ?table=... parameter");
     return;
   }
@@ -207,7 +207,7 @@ void LogTableServlet::tableInfo(
 
   String table;
   if (!URI::getParam(params, "table", &table)) {
-    res->setStatus(util::http::kStatusBadRequest);
+    res->setStatus(http::kStatusBadRequest);
     res->addBody("missing ?table=... parameter");
     return;
   }
@@ -351,7 +351,7 @@ void LogTableServlet::tableSnapshot(
 
   String table;
   if (!URI::getParam(params, "table", &table)) {
-    res->setStatus(util::http::kStatusBadRequest);
+    res->setStatus(http::kStatusBadRequest);
     res->addBody("missing ?table=... parameter");
     return;
   }
@@ -374,14 +374,14 @@ void LogTableServlet::fetchRecord(
 
   String table;
   if (!URI::getParam(params, "table", &table)) {
-    res->setStatus(util::http::kStatusBadRequest);
+    res->setStatus(http::kStatusBadRequest);
     res->addBody("missing ?table=... parameter");
     return;
   }
 
   String replica;
   if (!URI::getParam(params, "replica", &replica)) {
-    res->setStatus(util::http::kStatusBadRequest);
+    res->setStatus(http::kStatusBadRequest);
     res->addBody("missing ?replica=... parameter");
     return;
   }
@@ -391,7 +391,7 @@ void LogTableServlet::fetchRecord(
   if (URI::getParam(params, "seq", &seq_str)) {
     seq = std::stoull(seq_str);
   } else {
-    res->setStatus(util::http::kStatusBadRequest);
+    res->setStatus(http::kStatusBadRequest);
     res->addBody("missing ?seq=... parameter");
     return;
   }
@@ -440,14 +440,14 @@ void LogTableServlet::fetchRecordsBatch(
 
   String table;
   if (!URI::getParam(params, "table", &table)) {
-    res->setStatus(util::http::kStatusBadRequest);
+    res->setStatus(http::kStatusBadRequest);
     res->addBody("missing ?table=... parameter");
     return;
   }
 
   String replica;
   if (!URI::getParam(params, "replica", &replica)) {
-    res->setStatus(util::http::kStatusBadRequest);
+    res->setStatus(http::kStatusBadRequest);
     res->addBody("missing ?replica=... parameter");
     return;
   }
@@ -457,7 +457,7 @@ void LogTableServlet::fetchRecordsBatch(
   if (URI::getParam(params, "seq", &seq_str)) {
     seq = std::stoull(seq_str);
   } else {
-    res->setStatus(util::http::kStatusBadRequest);
+    res->setStatus(http::kStatusBadRequest);
     res->addBody("missing ?seq=... parameter");
     return;
   }
@@ -467,7 +467,7 @@ void LogTableServlet::fetchRecordsBatch(
   if (URI::getParam(params, "limit", &limit_str)) {
     limit = std::stoull(limit_str);
   } else {
-    res->setStatus(util::http::kStatusBadRequest);
+    res->setStatus(http::kStatusBadRequest);
     res->addBody("missing ?limit=... parameter");
     return;
   }

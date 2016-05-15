@@ -29,7 +29,6 @@
 #include "eventql/util/json/json.h"
 #include <eventql/util/inspect.h>
 
-namespace util {
 namespace http {
 
 class HTTPSSEStream : public RefCounted {
@@ -87,6 +86,5 @@ private:
   HTTPResponse res_;
 };
 
-}
 }
 #endif

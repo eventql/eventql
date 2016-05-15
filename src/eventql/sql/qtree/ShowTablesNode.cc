@@ -24,7 +24,7 @@
  */
 #include <eventql/sql/qtree/ShowTablesNode.h>
 
-using namespace util;
+#include "eventql/eventql.h"
 
 namespace csql {
 
@@ -69,11 +69,11 @@ String ShowTablesNode::toString() const {
 void ShowTablesNode::encode(
     QueryTreeCoder* coder,
     const ShowTablesNode& node,
-    util::OutputStream* os) {}
+    OutputStream* os) {}
 
 RefPtr<QueryTreeNode> ShowTablesNode::decode (
     QueryTreeCoder* coder,
-    util::InputStream* is) {
+    OutputStream* is) {
   return new ShowTablesNode();
 }
 

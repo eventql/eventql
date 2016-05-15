@@ -25,7 +25,6 @@
 
 #include "HTTPSSEStream.h"
 
-namespace util {
 namespace http {
 
 HTTPSSEStream::HTTPSSEStream(
@@ -102,5 +101,4 @@ bool HTTPSSEStream::isClosed() const {
   return res_stream_->isClosed();
 }
 
-}
 }

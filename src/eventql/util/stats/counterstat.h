@@ -24,7 +24,6 @@
 #ifndef _STX_STATS_COUNTERSTAT_H
 #define _STX_STATS_COUNTERSTAT_H
 
-namespace util {
 namespace stats {
 
 /**
@@ -49,7 +48,6 @@ public:
 
 };
 
-}
 }
 
 #endif

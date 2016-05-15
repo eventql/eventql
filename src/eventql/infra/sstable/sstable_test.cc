@@ -30,7 +30,7 @@
 #include <eventql/infra/sstable/rowoffsetindex.h>
 
 using namespace util::sstable;
-using namespace util;
+#include "eventql/eventql.h"
 UNIT_TEST(SSTableTest);
 
 TEST_CASE(SSTableTest, TestSSTableEditor, [] () {

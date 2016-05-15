@@ -30,7 +30,7 @@
 #include "eventql/JavaScriptContext.h"
 #include "eventql/mapreduce/MapReduceTask.h"
 
-using namespace util;
+#include "eventql/eventql.h"
 
 namespace eventql {
 

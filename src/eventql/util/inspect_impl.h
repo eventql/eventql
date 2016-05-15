@@ -24,8 +24,6 @@
 #include "eventql/util/stringutil.h"
 #include "eventql/util/io/outputstream.h"
 
-namespace util {
-
 template <typename T1, typename T2>
 std::string inspect(const std::pair<T1, T2>& value) {
   std::string str = "<";
@@ -90,5 +88,4 @@ void iputs(const char* fmt, T... values) {
   OutputStream::getStdout()->write(str);
 }
 
-}
 

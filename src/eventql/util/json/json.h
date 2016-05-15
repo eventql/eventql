@@ -32,7 +32,6 @@
 #include "eventql/util/json/jsontypes.h"
 #include "eventql/util/reflect/reflect.h"
 
-namespace util {
 namespace json {
 class JSONOutputStream;
 class JSONInputStream;
@@ -89,16 +88,15 @@ template <typename T>
 T fromJSON(const std::string& json_str);
 
 template <typename T>
-T fromJSON(const util::Buffer& json_buf);
+T fromJSON(const Buffer& json_buf);
 
 template <typename T>
 T fromJSON(const JSONObject& jsonobj);
 
 JSONObject parseJSON(const std::string& json_str);
-JSONObject parseJSON(const util::Buffer& json_buf);
+JSONObject parseJSON(const Buffer& json_buf);
 JSONObject parseJSON(JSONInputStream* json);
 
-}
 }
 
 #endif

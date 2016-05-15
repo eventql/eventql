@@ -26,7 +26,6 @@
 #include <stdlib.h>
 #include "eventql/util/stdtypes.h"
 
-namespace util {
 namespace stats {
 
 class StatsSink {
@@ -82,6 +81,5 @@ protected:
   Vector<Pair<String, double>> values_;
 };
 
-}
 }
 #endif

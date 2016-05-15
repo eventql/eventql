@@ -26,7 +26,6 @@
 #include "eventql/util/autoref.h"
 #include "eventql/util/stats/statssink.h"
 
-namespace util {
 namespace stats {
 
 class Stat : public RefCounted {
@@ -41,7 +40,6 @@ public:
   virtual RefPtr<Stat> getStat() const = 0;
 };
 
-}
 }
 
 #endif

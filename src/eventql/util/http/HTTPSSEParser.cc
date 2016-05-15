@@ -23,7 +23,6 @@
  */
 #include "eventql/util/http/HTTPSSEParser.h"
 
-namespace util {
 namespace http {
 
 void HTTPSSEParser::onEvent(Function<void (const HTTPSSEEvent& ev)> fn) {
@@ -113,5 +112,4 @@ void HTTPSSEParser::parseEvent(const char* data, size_t size) {
   }
 }
 
-}
 }

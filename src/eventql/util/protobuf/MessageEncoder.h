@@ -29,7 +29,6 @@
 #include <eventql/util/protobuf/MessageSchema.h>
 #include <eventql/util/protobuf/MessageObject.h>
 
-namespace util {
 namespace msg {
 
 class MessageEncoder {
@@ -50,6 +49,5 @@ protected:
 };
 
 } // namespace msg
-} // namespace util
 
 #endif

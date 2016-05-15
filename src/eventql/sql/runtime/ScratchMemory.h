@@ -25,7 +25,7 @@
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/buffer.h>
 
-using namespace util;
+#include "eventql/eventql.h"
 
 namespace csql {
 

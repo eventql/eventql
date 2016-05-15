@@ -31,9 +31,6 @@
 #include <stdint.h>
 #include <string>
 
-namespace util {
-namespace io {
-
 class MmappedFile : public VFSFile {
 public:
   MmappedFile() = delete;
@@ -73,6 +70,4 @@ protected:
   size_t mmap_size_;
 };
 
-}
-}
 #endif

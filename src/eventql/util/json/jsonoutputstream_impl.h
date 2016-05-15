@@ -21,7 +21,6 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-namespace util {
 namespace json {
 
 template <typename T>
@@ -56,5 +55,4 @@ void JSONOutputStream::addValue(const std::vector<T>& value) {
   endArray();
 }
 
-}
 }

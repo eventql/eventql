@@ -49,7 +49,7 @@ protected:
   bool has_page_;
   cstable::PageRef page_;
   Buffer page_buf_;
-  util::BufferOutputStream page_os_;
+  BufferOutputStream page_os_;
   Vector<Pair<cstable::PageRef, uint64_t>> pages_;
 };
 

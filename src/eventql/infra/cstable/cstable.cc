@@ -27,7 +27,7 @@
 #include <eventql/util/util/binarymessagereader.h>
 #include <eventql/util/SHA1.h>
 
-using namespace util;
+#include "eventql/eventql.h"
 
 namespace cstable {
 

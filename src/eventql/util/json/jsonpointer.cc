@@ -27,7 +27,6 @@
 #include "eventql/util/stringutil.h"
 #include "eventql/util/json/jsonpointer.h"
 
-namespace util {
 namespace json {
 
 JSONPointer::JSONPointer() : path_("") {}
@@ -66,6 +65,4 @@ template <>
 std::string inspect(const json::JSONPointer& ptr) {
   return ptr.toString();
 }
-
-} // namespace util
 

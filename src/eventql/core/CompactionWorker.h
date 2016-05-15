@@ -27,7 +27,7 @@
 #include <eventql/core/TSDBService.h>
 #include <eventql/util/random.h>
 
-using namespace util;
+#include "eventql/eventql.h"
 
 namespace eventql {
 

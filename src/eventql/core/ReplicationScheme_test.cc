@@ -10,7 +10,7 @@
 #include "eventql/util/test/unittest.h"
 #include "eventql/core/ReplicationScheme.h"
 
-using namespace util;
+#include "eventql/eventql.h"
 using namespace eventql;
 
 UNIT_TEST(ReplicationSchemeTest);

@@ -32,7 +32,6 @@
 #include "eventql/util/reflect/indexsequence.h"
 #include "eventql/util/reflect/reflect.h"
 
-namespace util {
 namespace json {
 
 template <typename T>
@@ -94,7 +93,7 @@ T fromJSON(const std::string& json_str) {
 }
 
 template <typename T>
-T fromJSON(const util::Buffer& json_buf) {
+T fromJSON(const Buffer& json_buf) {
   return fromJSON<T>(parseJSON(json_buf));
 }
 
@@ -284,7 +283,7 @@ void toJSONImpl(double const& val, O* target) {
 }
 
 template <typename O>
-void toJSONImpl(const util::UnixTime& val, O* target) {
+void toJSONImpl(const UnixTime& val, O* target) {
   toJSONImpl(static_cast<uint64_t>(val), target);
 }
 
@@ -326,6 +325,5 @@ void toJSONImpl(const Pair<T1, T2>& val, O* target) {
 
 
 
-}
 }
 #endif

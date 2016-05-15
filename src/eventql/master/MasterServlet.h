@@ -25,18 +25,18 @@
 #include "eventql/util/http/httpservice.h"
 #include "eventql/master/ConfigDirectoryMaster.h"
 
-using namespace util;
+#include "eventql/eventql.h"
 
 namespace eventql {
 
-class MasterServlet : public util::http::HTTPService {
+class MasterServlet : public http::HTTPService {
 public:
 
   MasterServlet(ConfigDirectoryMaster* cdb);
 
   void handleHTTPRequest(
-      util::http::HTTPRequest* req,
-      util::http::HTTPResponse* res) override;
+      http::HTTPRequest* req,
+      http::HTTPResponse* res) override;
 
 protected:
 

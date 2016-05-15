@@ -31,7 +31,7 @@
 #include <eventql/core/ReplicationScheme.h>
 #include <eventql/AnalyticsAuth.h>
 
-using namespace util;
+#include "eventql/eventql.h"
 
 namespace eventql {
 

@@ -35,8 +35,6 @@
 #include "eventql/util/io/file.h"
 #include "eventql/util/io/mmappedfile.h"
 
-namespace util {
-
 void FileUtil::mkdir(const std::string& dirname) {
   if (::mkdir(dirname.c_str(), S_IRWXU) != 0) {
     RAISE_ERRNO(kIOError, "mkdir('%s') failed", dirname.c_str());
@@ -148,9 +146,9 @@ void FileUtil::mkdir_p(const std::string& dirname) {
 
 std::string FileUtil::joinPaths(const std::string& p1, const std::string p2) {
   String p1_stripped = p1;
-  util::StringUtil::stripTrailingSlashes(&p1_stripped);
+  StringUtil::stripTrailingSlashes(&p1_stripped);
   String p2_stripped = p2;
-  util::StringUtil::stripTrailingSlashes(&p2_stripped);
+  StringUtil::stripTrailingSlashes(&p2_stripped);
   return p1_stripped + "/" + p2_stripped;
 }
 
@@ -247,7 +245,7 @@ Buffer FileUtil::read(
 }
 
 uint64_t FileUtil::checksum(const std::string& filename) {
-  io::MmappedFile mmap(File::openFile(filename, File::O_READ));
+  MmappedFile mmap(File::openFile(filename, File::O_READ));
   FNV<uint64_t> fnv;
   return fnv.hash(mmap.data(), mmap.size());
 }
@@ -301,4 +299,3 @@ size_t FileUtil::du_c(const std::string& path) {
 }
 
 
-}

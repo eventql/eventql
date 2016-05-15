@@ -31,7 +31,6 @@
 #include "eventql/util/thread/wakeup.h"
 #include <memory>
 
-namespace util {
 namespace http {
 
 class HTTPResponseFuture : public HTTPResponseHandler {
@@ -81,6 +80,5 @@ protected:
 
 using StreamingResponseFuture = StreamingResponseHandler;
 
-}
 }
 #endif

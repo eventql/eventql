@@ -24,7 +24,7 @@
  */
 #include <eventql/sql/qtree/DescribeTableNode.h>
 
-using namespace util;
+#include "eventql/eventql.h"
 
 namespace csql {
 
@@ -79,13 +79,13 @@ String DescribeTableNode::toString() const {
 void DescribeTableNode::encode(
     QueryTreeCoder* coder,
     const DescribeTableNode& node,
-    util::OutputStream* os) {
+    OutputStream* os) {
   os->appendLenencString(node.table_name_);
 }
 
 RefPtr<QueryTreeNode> DescribeTableNode::decode (
     QueryTreeCoder* coder,
-    util::InputStream* is) {
+    OutputStream* is) {
   return new DescribeTableNode(is->readLenencString());
 }
 

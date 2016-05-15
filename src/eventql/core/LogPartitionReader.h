@@ -28,7 +28,7 @@
 #include <eventql/core/PartitionSnapshot.h>
 #include <eventql/core/PartitionReader.h>
 
-using namespace util;
+#include "eventql/eventql.h"
 
 namespace eventql {
 class Partition;

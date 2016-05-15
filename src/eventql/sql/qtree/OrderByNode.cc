@@ -24,7 +24,7 @@
  */
 #include <eventql/sql/qtree/OrderByNode.h>
 
-using namespace util;
+#include "eventql/eventql.h"
 
 namespace csql {
 
@@ -83,7 +83,7 @@ String OrderByNode::toString() const {
 void OrderByNode::encode(
     QueryTreeCoder* coder,
     const OrderByNode& node,
-    util::OutputStream* os) {
+    OutputStream* os) {
   os->appendVarUInt(node.sort_specs_.size());
   for (const auto& spec : node.sort_specs_) {
     coder->encode(spec.expr.get(), os);
@@ -95,7 +95,7 @@ void OrderByNode::encode(
 
 RefPtr<QueryTreeNode> OrderByNode::decode (
     QueryTreeCoder* coder,
-    util::InputStream* is) {
+    OutputStream* is) {
   Vector<SortSpec> sort_specs;
   auto num_sort_specs = is->readVarUInt();
 

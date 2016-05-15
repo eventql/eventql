@@ -23,7 +23,6 @@
  */
 #include "eventql/util/http/HTTPSSEResponseHandler.h"
 
-namespace util {
 namespace http {
 
 HTTPSSEResponseHandler::HTTPSSEResponseHandler(
@@ -47,5 +46,4 @@ void HTTPSSEResponseHandler::onBodyChunk(
   parser_.parse(data, size);
 }
 
-}
 }

@@ -26,7 +26,6 @@
 #include <eventql/util/exception.h>
 #include <eventql/util/http/HTTPResponseStream.h>
 
-namespace util {
 namespace http {
 
 HTTPResponseStream::HTTPResponseStream(
@@ -69,7 +68,7 @@ void HTTPResponseStream::startResponse(const HTTPResponse& resp) {
       std::bind(&HTTPResponseStream::onCallbackError, this));
 }
 
-void HTTPResponseStream::writeBodyChunk(const VFSFile& buf) {
+void HTTPResponseStream::writeBodyChunk(const Buffer& buf) {
   writeBodyChunk(buf.data(), buf.size());
 }
 
@@ -197,6 +196,5 @@ void HTTPResponseStream::onStateChanged(std::unique_lock<std::mutex>* lk) {
   }
 }
 
-}
 }
 

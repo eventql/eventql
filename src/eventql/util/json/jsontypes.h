@@ -30,7 +30,6 @@
 #include "eventql/util/reflect/reflect.h"
 #include "eventql/util/traits.h"
 
-namespace util {
 namespace json {
 
 enum kTokenType {
@@ -61,7 +60,5 @@ template <>
 struct TypeIsVector<json::JSONObject> {
   static const bool value = false;
 };
-
-} // namespace util
 
 #endif

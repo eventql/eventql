@@ -24,7 +24,6 @@
 #include <eventql/util/protobuf/MessagePrinter.h>
 #include <eventql/util/stringutil.h>
 
-namespace util {
 namespace msg {
 
 String MessagePrinter::print(
@@ -107,5 +106,4 @@ String MessagePrinter::printField(
 }
 
 } // namespace msg
-} // namespace util
 

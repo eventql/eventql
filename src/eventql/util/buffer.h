@@ -30,8 +30,6 @@
 #include "eventql/util/autoref.h"
 #include "eventql/util/VFSFile.h"
 
-namespace util {
-
 /**
  * A growing/growable buffer class.
  *
@@ -60,7 +58,7 @@ namespace util {
  * This means writing directly to a buffer in small increments without calling
  * reserve first can be slow as it will incur a lot of memory allocations.
  */
-class Buffer : public VFSFile {
+class Buffer : public RefCounted {
 public:
   static const size_t npos = -1;
 
@@ -190,6 +188,11 @@ public:
   void setMark(size_t mark);
   size_t mark() const;
 
+  template <typename T>
+  inline T* structAt(size_t pos) const {
+    return (T*) (((char *) data()) + pos);
+  }
+
 protected:
   void* data_;
   size_t size_;
@@ -199,5 +202,4 @@ protected:
 
 typedef RefPtr<Buffer> BufferRef;
 
-}
 #endif

@@ -28,8 +28,6 @@
 #include <stdint.h>
 #include "eventql/util/buffer.h"
 
-namespace util {
-
 class BufferUtil {
 public:
 
@@ -67,7 +65,5 @@ public:
       bool reverse_byte_order = false);
 
 };
-
-} // namespace util
 
 #endif

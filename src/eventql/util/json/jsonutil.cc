@@ -23,7 +23,6 @@
  */
 #include "eventql/util/json/jsonutil.h"
 
-namespace util {
 namespace json {
 
 Option<String> JSONUtil::objectGetString(
@@ -297,6 +296,5 @@ Option<String> arrayGetString(
   }
 }
 
-}
 }
 

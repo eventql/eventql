@@ -31,7 +31,6 @@
 #include "eventql/util/inspect.h"
 #include "eventql/util/net/tcpserver.h"
 
-namespace util {
 namespace net {
 
 TCPServer::TCPServer(
@@ -103,5 +102,4 @@ void TCPServer::listen(int port) {
 }
 
 
-}
 }

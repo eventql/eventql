@@ -29,7 +29,7 @@
 #include <eventql/sql/svalue.h>
 #include <eventql/sql/Transaction.h>
 
-using namespace util;
+#include "eventql/eventql.h"
 
 namespace csql {
 

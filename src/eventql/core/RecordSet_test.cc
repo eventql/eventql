@@ -29,7 +29,7 @@
 #include "eventql/util/protobuf/MessageEncoder.h"
 #include "eventql/core/RecordSet.h"
 
-using namespace util;
+#include "eventql/eventql.h"
 using namespace eventql;
 
 UNIT_TEST(RecordSetTest);

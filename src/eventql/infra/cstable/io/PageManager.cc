@@ -66,7 +66,7 @@ void PageManager::writePage(
     size_t data_size) {
   auto page_data = data;
 
-  util::FreeOnDestroy tmp;
+  FreeOnDestroy tmp;
   if (data_size < page_size) {
     page_data = malloc(page_size);
     if (!page_data) {
@@ -92,7 +92,7 @@ void PageManager::writeTransaction(const MetaBlock& mb) {
   // build new meta block
   Buffer buf;
   buf.reserve(meta_block_size_);
-  auto os = util::BufferOutputStream::fromBuffer(&buf);
+  auto os = BufferOutputStream::fromBuffer(&buf);
 
   switch (version_) {
     case BinaryFormatVersion::v0_1_0:

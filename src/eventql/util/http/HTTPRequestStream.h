@@ -29,7 +29,6 @@
 #include <eventql/util/http/httpresponse.h>
 #include <eventql/util/http/httpserverconnection.h>
 
-namespace util {
 namespace http {
 
 class HTTPRequestStream : public RefCounted {
@@ -65,6 +64,5 @@ protected:
   RefPtr<HTTPServerConnection> conn_;
 };
 
-}
 }
 #endif

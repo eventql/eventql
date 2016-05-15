@@ -28,10 +28,10 @@
 #include <eventql/util/SHA1.h>
 #include <eventql/core/PartitionMap.h>
 
-using namespace util;
+#include "eventql/eventql.h"
 namespace eventql {
 
-class StatusServlet : public util::http::HTTPService {
+class StatusServlet : public http::HTTPService {
 public:
 
   StatusServlet(

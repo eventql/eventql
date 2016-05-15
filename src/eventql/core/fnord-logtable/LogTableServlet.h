@@ -30,7 +30,7 @@
 namespace util {
 namespace logtable {
 
-class LogTableServlet : public util::http::HTTPService {
+class LogTableServlet : public http::HTTPService {
 public:
   enum class ResponseFormat {
     JSON,

@@ -26,7 +26,7 @@
 #include <eventql/util/autoref.h>
 #include <eventql/sql/result_cursor.h>
 
-using namespace util;
+#include "eventql/eventql.h"
 
 namespace csql {
 class QueryPlan;

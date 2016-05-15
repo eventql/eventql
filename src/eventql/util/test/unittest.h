@@ -105,7 +105,7 @@ void EXPECT_EQ(T1 left, T2 right) {
       bool raised = false; \
       try { \
         L(); \
-      } catch (util::Exception e) { \
+      } catch (Exception e) { \
         raised = true; \
         auto msg = e.getMessage().c_str(); \
         if (strcmp(msg, E) != 0) { \
@@ -195,7 +195,7 @@ public:
     fprintf(stderr, "%s\n", name_);
 
     int num_tests_passed = 0;
-    std::unordered_map<const TestCase*, util::Exception> errors;
+    std::unordered_map<const TestCase*, Exception> errors;
 
     for (auto test_case : cases_) {
       fprintf(stderr, "    %s::%s", name_, test_case->name_);
@@ -203,7 +203,7 @@ public:
 
       try {
         test_case->lambda_();
-      } catch (util::Exception e) {
+      } catch (Exception e) {
         fprintf(stderr, " \033[1;31m[FAIL]\e[0m\n");
         errors.emplace(test_case, e);
         continue;

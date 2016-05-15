@@ -24,8 +24,6 @@
 #ifndef _STX_BASE_OPTION_IMPL_H
 #define _STX_BASE_OPTION_IMPL_H
 
-namespace util {
-
 template <typename T>
 Option<T>::Option() : value_(nullptr) {}
 
@@ -134,5 +132,4 @@ std::string inspect(const Option<T> value) {
   }
 }
 
-}
 #endif

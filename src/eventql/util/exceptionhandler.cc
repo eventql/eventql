@@ -33,8 +33,6 @@
 
 namespace util {
 
-using util::Exception;
-
 CatchAndLogExceptionHandler::CatchAndLogExceptionHandler(
     const String& component) :
     component_(component) {}
@@ -53,7 +51,7 @@ void CatchAndAbortExceptionHandler::onException(
   fprintf(stderr, "%s\n\n", message_.c_str()); // FIXPAUL
 
   try {
-    auto rte = dynamic_cast<const util::Exception&>(error);
+    auto rte = dynamic_cast<const Exception&>(error);
     rte.debugPrint();
   } catch (const std::exception& cast_error) {
     fprintf(stderr, "foreign exception: %s\n", error.what());
@@ -86,7 +84,7 @@ static void globalEHandler() {
 
   try {
     std::rethrow_exception(ex);
-  } catch (const util::Exception& e) {
+  } catch (const Exception& e) {
     e.debugPrint();
   } catch (const std::exception& e) {
     fprintf(stderr, "foreign exception: %s\n", e.what());

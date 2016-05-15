@@ -24,7 +24,6 @@
 #include "eventql/util/exception.h"
 #include "eventql/util/stringutil.h"
 
-namespace util {
 namespace json {
 
 template <typename T>
@@ -50,4 +49,3 @@ T JSONDocument::getAs(const JSONPointer& path, const T& fallback) const {
 }
 
 } // namespace json
-} // namespace util

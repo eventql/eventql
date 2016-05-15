@@ -24,7 +24,7 @@
 #include <eventql/infra/cstable/columns/v1/ColumnWriter.h>
 #include <eventql/util/ieee754.h>
 
-using namespace util;
+#include "eventql/eventql.h"
 
 namespace cstable {
 namespace v1 {

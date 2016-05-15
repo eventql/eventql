@@ -21,6 +21,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#pragma once
 #include <stdlib.h>
 #include <eventql/buildconfig.h>
 

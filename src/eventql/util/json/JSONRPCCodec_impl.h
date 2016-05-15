@@ -21,7 +21,6 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-namespace util {
 namespace json {
 
 template <typename RPCType>
@@ -37,7 +36,7 @@ void JSONRPCCodec::encodeRPCRequest(RPCType* rpc, Buffer* buffer) {
   json.emplace_back(JSON_STRING, "id");
   json.emplace_back(JSON_STRING, "0"); // FIXPAUL
   json.emplace_back(JSON_STRING, "params");
-  util::json::toJSON(rpc->args(), &json);
+  json::toJSON(rpc->args(), &json);
   json.emplace_back(JSON_OBJECT_END);
 
 }
@@ -67,4 +66,3 @@ void JSONRPCCodec::decodeRPCResponse(RPCType* rpc, const Buffer& buffer) {
 
 
 } // namespace json
-} // namespace util

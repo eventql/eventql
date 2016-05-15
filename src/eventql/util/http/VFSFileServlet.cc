@@ -24,7 +24,6 @@
 #include "eventql/util/http/VFSFileServlet.h"
 #include "eventql/util/io/fileutil.h"
 
-namespace util {
 namespace http {
 
 VFSFileServlet::VFSFileServlet(
@@ -34,15 +33,15 @@ VFSFileServlet::VFSFileServlet(
     vfs_(vfs) {}
 
 void VFSFileServlet::handleHTTPRequest(
-    util::http::HTTPRequest* req,
-    util::http::HTTPResponse* res) {
+    http::HTTPRequest* req,
+    http::HTTPResponse* res) {
   URI uri(req->uri());
-  util::URI::ParamList params = uri.queryParams();
+  URI::ParamList params = uri.queryParams();
 
   res->addHeader("Access-Control-Allow-Origin", "*");
 
   std::string file_path;
-  if (!util::URI::getParam(params, "file", &file_path)) {
+  if (!URI::getParam(params, "file", &file_path)) {
     res->addBody("error: missing ?file=... parameter");
     res->setStatus(http::kStatusBadRequest);
     return;
@@ -50,7 +49,7 @@ void VFSFileServlet::handleHTTPRequest(
 
   if (uri.path() == base_path_ + "/get") {
     auto file = vfs_->openFile(file_path);
-    res->setStatus(util::http::kStatusOK);
+    res->setStatus(http::kStatusOK);
     res->addHeader("Content-Type", contentTypeFromFilename(file_path));
     res->addBody(file->data(), file->size());
     return;
@@ -58,12 +57,12 @@ void VFSFileServlet::handleHTTPRequest(
 
   if (uri.path() == base_path_ + "/size") {
     auto file = vfs_->openFile(file_path);
-    res->setStatus(util::http::kStatusOK);
+    res->setStatus(http::kStatusOK);
     res->addBody(StringUtil::toString(file->size()));
     return;
   }
 
-  res->setStatus(util::http::kStatusNotFound);
+  res->setStatus(http::kStatusNotFound);
   res->addBody("not found");
 }
 
@@ -87,5 +86,4 @@ String VFSFileServlet::contentTypeFromFilename(const String& filename) const {
   return "application/octet-stream";
 }
 
-}
 }

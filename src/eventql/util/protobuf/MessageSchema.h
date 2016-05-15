@@ -48,7 +48,6 @@
  *       <varint>               // field data end offset
  *
  */
-namespace util {
 namespace msg {
 
 enum class EncodingHint : uint8_t {
@@ -171,6 +170,5 @@ protected:
 };
 
 } // namespace msg
-} // namespace util
 
 #endif

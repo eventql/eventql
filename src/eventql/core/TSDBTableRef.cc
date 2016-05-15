@@ -26,7 +26,7 @@
 #include <eventql/util/wallclock.h>
 #include <eventql/util/human.h>
 
-using namespace util;
+#include "eventql/eventql.h"
 
 namespace eventql {
 

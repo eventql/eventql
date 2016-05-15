@@ -31,7 +31,6 @@
 #include "eventql/util/exception.h"
 #include "eventql/util/net/udpsocket.h"
 
-namespace util {
 namespace net {
 
 UDPSocket::UDPSocket() {
@@ -66,5 +65,4 @@ void UDPSocket::sendTo(const Buffer& pkt, const InetAddr& addr) {
   }
 }
 
-}
 }

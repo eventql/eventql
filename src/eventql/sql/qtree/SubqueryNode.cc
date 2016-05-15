@@ -25,7 +25,7 @@
 #include <eventql/sql/qtree/SubqueryNode.h>
 #include <eventql/sql/qtree/ColumnReferenceNode.h>
 
-using namespace util;
+#include "eventql/eventql.h"
 
 namespace csql {
 
@@ -154,7 +154,7 @@ String SubqueryNode::toString() const {
 void SubqueryNode::encode(
     QueryTreeCoder* coder,
     const SubqueryNode& node,
-    util::OutputStream* os) {
+    OutputStream* os) {
   coder->encode(node.subquery_, os);
 
   os->appendVarUInt(node.select_list_.size());
@@ -172,7 +172,7 @@ void SubqueryNode::encode(
 
 RefPtr<QueryTreeNode> SubqueryNode::decode (
     QueryTreeCoder* coder,
-    util::InputStream* is) {
+    OutputStream* is) {
   auto subquery = coder->decode(is);
 
   Vector<RefPtr<SelectListNode>> select_list;

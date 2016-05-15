@@ -28,18 +28,18 @@ namespace util {
 namespace chart {
 
 TimeDomain::TimeDomain(
-    util::UnixTime min_value,
-    util::UnixTime max_value,
+    UnixTime min_value,
+    UnixTime max_value,
     bool is_logarithmic,
     bool is_inverted) :
-    ContinuousDomain<util::UnixTime>(
+    ContinuousDomain<UnixTime>(
         min_value,
         max_value,
         is_logarithmic,
         is_inverted) {}
 
-std::string TimeDomain::label(util::UnixTime value) const {
-  auto range = ContinuousDomain<util::UnixTime>::getRange();
+std::string TimeDomain::label(UnixTime value) const {
+  auto range = ContinuousDomain<UnixTime>::getRange();
 
   if (range < 60 * 60) {
     return value.toString("%H:%M:%S");

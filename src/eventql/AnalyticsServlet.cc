@@ -48,7 +48,7 @@
 #include <eventql/infra/cstable/CSTableWriter.h>
 #include <eventql/infra/cstable/RecordShredder.h>
 
-using namespace util;
+#include "eventql/eventql.h"
 
 namespace eventql {
 
@@ -561,7 +561,7 @@ void AnalyticsServlet::addTableField(
   auto optional = Human::parseBoolean(optional_param);
 
   auto td = table->config();
-  auto schema = util::msg::MessageSchema::decode(td.config().schema());
+  auto schema = msg::MessageSchema::decode(td.config().schema());
 
   uint32_t next_field_id;
   if (td.has_next_field_id()) {
@@ -586,7 +586,7 @@ void AnalyticsServlet::addTableField(
 
     auto parent_field_id = cur_schema->fieldId(prefix);
     auto parent_field_type = cur_schema->fieldType(parent_field_id);
-    if (parent_field_type != util::msg::FieldType::OBJECT) {
+    if (parent_field_type != msg::FieldType::OBJECT) {
       res->setStatus(http::kStatusBadRequest);
       res->addBody(StringUtil::format(
         "can't add field to a field of type $0",
@@ -597,20 +597,20 @@ void AnalyticsServlet::addTableField(
     cur_schema = cur_schema->fieldSchema(parent_field_id);
   }
 
-  auto field_type = util::msg::fieldTypeFromString(field_type_str);
-  if (field_type == util::msg::FieldType::OBJECT) {
+  auto field_type = msg::fieldTypeFromString(field_type_str);
+  if (field_type == msg::FieldType::OBJECT) {
     cur_schema->addField(
-          util::msg::MessageSchemaField::mkObjectField(
+          msg::MessageSchemaField::mkObjectField(
               next_field_id,
               field,
               repeated.isEmpty() ? false : repeated.get(),
               optional.isEmpty() ? false : optional.get(),
-              mkRef(new util::msg::MessageSchema(nullptr))));
+              mkRef(new msg::MessageSchema(nullptr))));
 
 
   } else {
     cur_schema->addField(
-          util::msg::MessageSchemaField(
+          msg::MessageSchemaField(
               next_field_id,
               field,
               field_type,
@@ -660,7 +660,7 @@ void AnalyticsServlet::removeTableField(
   }
 
   auto td = table->config();
-  auto schema = util::msg::MessageSchema::decode(td.config().schema());
+  auto schema = msg::MessageSchema::decode(td.config().schema());
   auto cur_schema = schema;
   auto field = field_name;
 

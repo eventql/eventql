@@ -1,5 +1,3 @@
-namespace util {
-
 inline constexpr CivilTime::CivilTime() :
     year_(0),
     month_(0),
@@ -45,5 +43,3 @@ inline constexpr uint16_t CivilTime::millisecond() const {
 inline constexpr int32_t CivilTime::offset() const {
   return offset_;
 }
-
-} // namespace util

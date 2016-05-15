@@ -29,7 +29,7 @@ namespace util {
 namespace mysql {
 
 std::unique_ptr<MySQLConnection> MySQLConnection::openConnection(
-    const util::URI& uri) {
+    const URI& uri) {
   std::unique_ptr<MySQLConnection> conn(new MySQLConnection());
   conn->connect(uri);
   return conn;
@@ -68,7 +68,7 @@ MySQLConnection::~MySQLConnection() {
 #endif
 }
 
-void MySQLConnection::connect(const util::URI& uri) {
+void MySQLConnection::connect(const URI& uri) {
   unsigned int port = 3306;
   std::string host = uri.host();
   std::string username;
@@ -301,7 +301,7 @@ void MySQLConnection::executeQuery(
     } catch (const std::exception& e) {
       mysql_free_result(result);
       try {
-        auto rte = dynamic_cast<const util::Exception&>(e);
+        auto rte = dynamic_cast<const Exception&>(e);
         throw rte;
       } catch (std::bad_cast bce) {
         throw e;

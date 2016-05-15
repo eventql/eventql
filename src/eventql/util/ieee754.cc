@@ -27,8 +27,6 @@
 #include <eventql/util/exception.h>
 #include <eventql/util/ieee754.h>
 
-namespace util {
-
 uint64_t IEEE754::toBytes(double value) {
   uint64_t bytes;
 
@@ -67,7 +65,5 @@ double IEEE754::fromBytes(uint64_t bytes) {
   }
 
   return value;
-}
-
 }
 

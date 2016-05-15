@@ -25,7 +25,7 @@
 #include "eventql/util/test/unittest.h"
 #include "eventql/util/protobuf/DynamicMessage.h"
 
-using namespace util;
+#include "eventql/eventql.h"
 
 UNIT_TEST(ProtobufTest);
 

@@ -29,7 +29,7 @@
 #include <eventql/util/SHA1.h>
 #include <eventql/core/TablePartitioner.h>
 
-using namespace util;
+#include "eventql/eventql.h"
 
 namespace eventql {
 

@@ -25,9 +25,6 @@
 #include <unistd.h>
 #include <eventql/util/io/mmappedfile.h>
 
-namespace util {
-namespace io {
-
 MmappedFile::MmappedFile(File&& file) : MmappedFile(std::move(file), 0, -1) {}
 
 MmappedFile::MmappedFile(File&& file, size_t offset, size_t size) {
@@ -63,5 +60,3 @@ bool MmappedFile::isWritable() const {
   return is_writable_;
 }
 
-}
-}

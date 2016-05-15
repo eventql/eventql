@@ -26,7 +26,7 @@
 #include <eventql/sql/qtree/ColumnReferenceNode.h>
 #include <eventql/util/logging.h>
 
-using namespace util;
+#include "eventql/eventql.h"
 
 namespace csql {
 

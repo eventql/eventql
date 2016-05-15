@@ -26,8 +26,6 @@
 #include "eventql/util/thread/task.h"
 #include "eventql/util/thread/wakeup.h"
 
-namespace util {
-
 class TaskScheduler {
 public:
   virtual ~TaskScheduler() {}
@@ -102,5 +100,4 @@ public:
 
 };
 
-}
 #endif

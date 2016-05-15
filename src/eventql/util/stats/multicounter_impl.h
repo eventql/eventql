@@ -24,7 +24,6 @@
 #ifndef _STX_STATS_MULTICOUNTER_IMPL_H
 #define _STX_STATS_MULTICOUNTER_IMPL_H
 
-namespace util {
 namespace stats {
 
 template <typename ValueType, typename... LabelTypes>
@@ -56,7 +55,7 @@ MultiCounter<ValueType, LabelTypes...>::MultiCounter(
 
 template <typename ValueType, typename... LabelTypes>
 RefPtr<Stat> MultiCounter<ValueType, LabelTypes...>::getStat() const {
-  return RefPtr<Stat>(stat_.get());
+  return RefPtr<Stat>((Stat*) stat_.get());
 }
 
 /*
@@ -64,6 +63,5 @@ RefPtr<Stat> MultiCounter<ValueType, LabelTypes...>::getStat() const {
   void set(ValueType value);
 */
 
-}
 }
 #endif

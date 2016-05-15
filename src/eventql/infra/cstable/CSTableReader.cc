@@ -36,13 +36,13 @@
 #include <eventql/util/io/file.h>
 #include <eventql/util/io/mmappedfile.h>
 
-using namespace util;
+#include "eventql/eventql.h"
 
 namespace cstable {
 
 static RefPtr<v1::ColumnReader> openColumnV1(
     const ColumnConfig& c,
-    RefPtr<VFSFile> mmap) {
+    RefPtr<MmappedFile> mmap) {
   auto csize = c.body_size;
   auto cdata = mmap->structAt<void>(c.body_offset);
   auto rmax = c.rlevel_max;
@@ -121,7 +121,7 @@ RefPtr<CSTableReader> CSTableReader::openFile(const String& filename) {
 
   switch (version) {
     case BinaryFormatVersion::v0_1_0: {
-      auto mmap = mkRef(new io::MmappedFile(std::move(file)));
+      auto mmap = mkRef(new MmappedFile(std::move(file)));
 
       Vector<RefPtr<ColumnReader>> column_readers;
       for (const auto& col : header.columns) {

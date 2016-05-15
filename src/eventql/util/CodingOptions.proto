@@ -21,7 +21,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-package util;
+package msg;
 
 message CodingOptions {
   optional uint64 maxval = 1;

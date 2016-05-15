@@ -25,8 +25,6 @@
 #include "eventql/util/exception.h"
 #include "eventql/util/status.h"
 
-namespace util {
-
 Status Status::success() {
   return Status(eSuccess);
 }
@@ -35,7 +33,7 @@ Status::Status(kStatusType type) : type_(type) {}
 
 Status::Status(const std::exception& e) {
   try {
-    auto rte = dynamic_cast<const util::Exception&>(e);
+    auto rte = dynamic_cast<const Exception&>(e);
     type_ = eRuntimeError; // FIXPAUL
     message_ = StringUtil::format(
         "$0: $1",
@@ -118,6 +116,4 @@ void Status::raiseIfError() const {
   if (isError()) {
     RAISE(kRuntimeError, message_);
   }
-}
-
 }

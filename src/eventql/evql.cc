@@ -41,7 +41,7 @@
 #include "eventql/util/cli/term.h"
 #include "eventql/server/sql/codec/binary_codec.h"
 
-using namespace util;
+#include "eventql/eventql.h"
 
 util::thread::EventLoop ev;
 

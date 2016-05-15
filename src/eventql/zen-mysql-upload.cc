@@ -37,7 +37,7 @@
 #include "eventql/util/mysql//MySQL.h"
 #include "eventql/util/mysql//MySQLConnection.h"
 
-using namespace util;
+#include "eventql/eventql.h"
 
 #ifndef STX_ENABLE_MYSQL
 #error zen-mysql-upload needs libmysqlclient

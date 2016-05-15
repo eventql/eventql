@@ -29,7 +29,7 @@
 #include <eventql/ConfigDirectory.h>
 #include <eventql/z1stats.h>
 
-using namespace util;
+#include "eventql/eventql.h"
 
 namespace eventql {
 

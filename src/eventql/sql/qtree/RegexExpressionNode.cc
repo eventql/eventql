@@ -25,7 +25,7 @@
 #include <eventql/sql/qtree/RegexExpressionNode.h>
 #include <eventql/sql/svalue.h>
 
-using namespace util;
+#include "eventql/eventql.h"
 
 namespace csql {
 
@@ -63,14 +63,14 @@ String RegexExpressionNode::toSQL() const {
 void RegexExpressionNode::encode(
     QueryTreeCoder* coder,
     const RegexExpressionNode& node,
-    util::OutputStream* os) {
+    OutputStream* os) {
   coder->encode(node.subject_.get(), os);
   os->appendLenencString(node.pattern_);
 }
 
 RefPtr<QueryTreeNode> RegexExpressionNode::decode (
     QueryTreeCoder* coder,
-    util::InputStream* is) {
+    OutputStream* is) {
   auto subject = coder->decode(is).asInstanceOf<ValueExpressionNode>();
   auto pattern = is->readLenencString();
 

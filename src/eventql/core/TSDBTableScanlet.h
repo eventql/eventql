@@ -25,7 +25,7 @@
 #include "eventql/util/stdtypes.h"
 #include "eventql/util/autoref.h"
 
-using namespace util;
+#include "eventql/eventql.h"
 
 namespace eventql {
 

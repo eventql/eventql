@@ -27,7 +27,7 @@
 #include <eventql/sql/qtree/TableExpressionNode.h>
 #include <eventql/sql/qtree/qtree_coder.h>
 
-using namespace util;
+#include "eventql/eventql.h"
 
 namespace csql {
 
@@ -51,11 +51,11 @@ public:
   static void encode(
       QueryTreeCoder* coder,
       const ShowTablesNode& node,
-      util::OutputStream* os);
+      OutputStream* os);
 
   static RefPtr<QueryTreeNode> decode (
       QueryTreeCoder* coder,
-      util::InputStream* is);
+      OutputStream* is);
 };
 
 } // namespace csql

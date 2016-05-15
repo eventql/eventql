@@ -30,9 +30,6 @@
 #include <eventql/util/http/httpresponse.h>
 #include <eventql/util/http/httprequest.h>
 
-using util::OutputStream;
-
-namespace util {
 namespace http {
 
 class HTTPGenerator {
@@ -41,6 +38,5 @@ public:
   static void generate(const HTTPResponse& res, OutputStream* os);
 };
 
-}
 }
 #endif

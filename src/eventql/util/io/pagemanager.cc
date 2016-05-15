@@ -181,7 +181,7 @@ RefPtr<MmapPageManager::MmappedFile> MmapPageManager::getMmappedFile(
   if (current_mapping_.get() == nullptr ||
       last_byte > current_mapping_->size) {
     /* align mmap size to the next larger block boundary */
-    auto file = util::File::openFile(
+    auto file = File::openFile(
         filename_,
         File::O_READ | File::O_WRITE);
 

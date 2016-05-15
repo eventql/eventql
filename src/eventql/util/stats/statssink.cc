@@ -24,7 +24,6 @@
 #include "eventql/util/stringutil.h"
 #include "eventql/util/stats/statssink.h"
 
-namespace util {
 namespace stats {
 
 TextStatsSink::TextStatsSink(
@@ -59,5 +58,4 @@ const Vector<Pair<String, double>>& BufferStatsSinkStatsSink::values() const {
   return values_;
 }
 
-}
 }

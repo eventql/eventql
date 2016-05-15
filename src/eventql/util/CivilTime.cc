@@ -25,8 +25,6 @@
 #include <string>
 #include <ctime>
 
-namespace util {
-
 Option<CivilTime> CivilTime::parseString(
     const String& str,
     const char* fmt /* = "%Y-%m-%d %H:%M:%S" */) {
@@ -84,6 +82,4 @@ void CivilTime::setMillisecond(uint16_t value) {
 
 void CivilTime::setOffset(int32_t value) {
   offset_ = value;
-}
-
 }

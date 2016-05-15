@@ -26,7 +26,6 @@
 #include <eventql/util/http/httprequest.h>
 #include <eventql/util/http/httpresponse.h>
 
-namespace util {
 namespace http {
 
 class HTTPServerConnectionHandler {
@@ -40,6 +39,5 @@ public:
 
 };
 
-}
 }
 #endif

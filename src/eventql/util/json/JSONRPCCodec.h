@@ -31,7 +31,6 @@
 #include "eventql/util/buffer.h"
 #include "eventql/util/json/json.h"
 
-namespace util {
 namespace json {
 
 class JSONRPCCodec {
@@ -46,7 +45,6 @@ public:
 };
 
 } // namespace json
-} // namespace util
 
 #include "JSONRPCCodec_impl.h"
 #endif

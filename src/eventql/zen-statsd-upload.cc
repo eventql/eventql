@@ -36,7 +36,7 @@
 #include "eventql/util/util/SimpleRateLimit.h"
 #include "eventql/util/protobuf/MessageSchema.h"
 
-using namespace util;
+#include "eventql/eventql.h"
 
 void run(const cli::FlagParser& flags) {
   String api_url = "http://api.eventql.io/api/v1";

@@ -52,7 +52,7 @@
 #include "eventql/core/TSDBServlet.h"
 #include "eventql/core/TSDBNodeConfig.pb.h"
 
-using namespace util;
+#include "eventql/eventql.h"
 
 std::atomic<bool> shutdown_sig;
 util::thread::EventLoop ev;
@@ -124,8 +124,8 @@ int main(int argc, const char** argv) {
   /* start http server and worker pools */
   util::thread::ThreadPool tpool;
   http::HTTPConnectionPool http(&ev);
-  util::http::HTTPRouter http_router;
-  util::http::HTTPServer http_server(&http_router, &ev);
+  http::HTTPRouter http_router;
+  http::HTTPServer http_server(&http_router, &ev);
   http_server.listen(flags.getInt("http_port"));
 
   eventql::PartitionMap pmap(dir);

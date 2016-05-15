@@ -34,7 +34,7 @@
 #include "eventql/infra/cstable/columns/v1/DoubleColumnWriter.h"
 #include "eventql/infra/cstable/columns/v1/BooleanColumnWriter.h"
 
-using namespace util;
+#include "eventql/eventql.h"
 
 //void cmd_from_csv(const cli::FlagParser& flags) {
 //  auto csv = CSVInputStream::openFile(

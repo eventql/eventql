@@ -31,7 +31,7 @@
 #include <eventql/core/PartitionState.pb.h>
 #include <eventql/core/PartitionReplication.h>
 
-using namespace util;
+#include "eventql/eventql.h"
 
 namespace eventql {
 

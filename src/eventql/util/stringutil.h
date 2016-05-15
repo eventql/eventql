@@ -31,8 +31,6 @@
 #include <locale>
 #include "eventql/util/stdtypes.h"
 
-namespace util {
-
 class StringUtil {
 public:
 
@@ -385,8 +383,6 @@ protected:
       ValueType value);
 
 };
-
-} // namespace util
 
 #include "stringutil_impl.h"
 #endif

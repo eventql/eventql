@@ -29,8 +29,6 @@
 #include "eventql/util/wallclock.h"
 #include "eventql/util/option.h"
 
-namespace util {
-
 enum class HumanDataType {
   UNKNOWN,
   DATETIME,
@@ -73,4 +71,3 @@ public:
 
 };
 
-}

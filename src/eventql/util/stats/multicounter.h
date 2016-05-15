@@ -29,11 +29,10 @@
 #include "eventql/util/hash.h"
 #include "eventql/util/stats/stat.h"
 
-namespace util {
 namespace stats {
 
 template <typename ValueType, typename... LabelTypes>
-class MultiCounterStat : public Stat {
+class MultiCounterStat : public stats::Stat {
 public:
   typedef std::tuple<LabelTypes...> LabelValuesType;
 
@@ -46,7 +45,7 @@ public:
   void exportAll(const String& path, StatsSink* sink) const override;
 
 protected:
-  std::unordered_map<LabelValuesType, ValueType, hash<LabelValuesType>> values_;
+  std::unordered_map<LabelValuesType, ValueType, std::hash<LabelValuesType>> values_;
   mutable std::mutex mutex_;
 };
 
@@ -66,7 +65,6 @@ protected:
   RefPtr<MultiCounterStat<ValueType, LabelTypes...>> stat_;
 };
 
-}
 }
 
 #include "multicounter_impl.h"

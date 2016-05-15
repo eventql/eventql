@@ -24,7 +24,7 @@
  */
 #include <eventql/sql/qtree/CallExpressionNode.h>
 
-using namespace util;
+#include "eventql/eventql.h"
 
 namespace csql {
 
@@ -66,7 +66,7 @@ String CallExpressionNode::toSQL() const {
 void CallExpressionNode::encode(
     QueryTreeCoder* coder,
     const CallExpressionNode& node,
-    util::OutputStream* os) {
+    OutputStream* os) {
   os->appendLenencString(node.symbol());
   os->appendVarUInt(node.arguments_.size());
   for (auto arg : node.arguments_) {
@@ -76,7 +76,7 @@ void CallExpressionNode::encode(
 
 RefPtr<QueryTreeNode> CallExpressionNode::decode (
     QueryTreeCoder* coder,
-    util::InputStream* is) {
+    OutputStream* is) {
   auto symbol = is->readLenencString();
 
   Vector<RefPtr<ValueExpressionNode>> arguments;

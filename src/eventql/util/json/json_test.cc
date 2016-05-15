@@ -35,77 +35,77 @@
 UNIT_TEST(JSONTest);
 
 using util::StringInputStream;
-using util::json::FlatJSONReader;
-using util::json::JSONDocument;
-using util::json::JSONInputStream;
-using util::json::JSONPointer;
-using util::json::JSONUtil;
+using json::FlatJSONReader;
+using json::JSONDocument;
+using json::JSONInputStream;
+using json::JSONPointer;
+using json::JSONUtil;
 
 TEST_CASE(JSONTest, TestJSONInputStream, [] () {
   auto json1 = "{ 123: \"fnord\", \"blah\": [ true, false, null, 3.7e-5 ] }";
   JSONInputStream json1_stream(StringInputStream::fromString(json1));
 
-  util::json::kTokenType token_type;
+  json::kTokenType token_type;
   std::string token_str;
 
   EXPECT_TRUE(json1_stream.readNextToken(&token_type, &token_str));
-  EXPECT_EQ(token_type, util::json::JSON_OBJECT_BEGIN);
+  EXPECT_EQ(token_type, json::JSON_OBJECT_BEGIN);
 
   EXPECT_TRUE(json1_stream.readNextToken(&token_type, &token_str));
-  EXPECT_EQ(token_type, util::json::JSON_NUMBER);
+  EXPECT_EQ(token_type, json::JSON_NUMBER);
   EXPECT_EQ(token_str, "123");
 
   EXPECT_TRUE(json1_stream.readNextToken(&token_type, &token_str));
-  EXPECT_EQ(token_type, util::json::JSON_STRING);
+  EXPECT_EQ(token_type, json::JSON_STRING);
   EXPECT_EQ(token_str, "fnord");
 
   EXPECT_TRUE(json1_stream.readNextToken(&token_type, &token_str));
-  EXPECT_EQ(token_type, util::json::JSON_STRING);
+  EXPECT_EQ(token_type, json::JSON_STRING);
   EXPECT_EQ(token_str, "blah");
 
   EXPECT_TRUE(json1_stream.readNextToken(&token_type, &token_str));
-  EXPECT_EQ(token_type, util::json::JSON_ARRAY_BEGIN);
+  EXPECT_EQ(token_type, json::JSON_ARRAY_BEGIN);
 
   EXPECT_TRUE(json1_stream.readNextToken(&token_type, &token_str));
-  EXPECT_EQ(token_type, util::json::JSON_TRUE);
+  EXPECT_EQ(token_type, json::JSON_TRUE);
 
   EXPECT_TRUE(json1_stream.readNextToken(&token_type, &token_str));
-  EXPECT_EQ(token_type, util::json::JSON_FALSE);
+  EXPECT_EQ(token_type, json::JSON_FALSE);
 
   EXPECT_TRUE(json1_stream.readNextToken(&token_type, &token_str));
-  EXPECT_EQ(token_type, util::json::JSON_NULL);
+  EXPECT_EQ(token_type, json::JSON_NULL);
 
   EXPECT_TRUE(json1_stream.readNextToken(&token_type, &token_str));
-  EXPECT_EQ(token_type, util::json::JSON_NUMBER);
+  EXPECT_EQ(token_type, json::JSON_NUMBER);
   EXPECT_EQ(token_str, "3.7e-5");
 
   EXPECT_TRUE(json1_stream.readNextToken(&token_type, &token_str));
-  EXPECT_EQ(token_type, util::json::JSON_ARRAY_END);
+  EXPECT_EQ(token_type, json::JSON_ARRAY_END);
 
   EXPECT_TRUE(json1_stream.readNextToken(&token_type, &token_str));
-  EXPECT_EQ(token_type, util::json::JSON_OBJECT_END);
+  EXPECT_EQ(token_type, json::JSON_OBJECT_END);
 });
 
 TEST_CASE(JSONTest, TestJSONInputStreamEscaping, [] () {
   auto json1 = "{ 123: \"fno\\\"rd\" }";
   JSONInputStream json1_stream(StringInputStream::fromString(json1));
 
-  util::json::kTokenType token_type;
+  json::kTokenType token_type;
   std::string token_str;
 
   EXPECT_TRUE(json1_stream.readNextToken(&token_type, &token_str));
-  EXPECT_EQ(token_type, util::json::JSON_OBJECT_BEGIN);
+  EXPECT_EQ(token_type, json::JSON_OBJECT_BEGIN);
 
   EXPECT_TRUE(json1_stream.readNextToken(&token_type, &token_str));
-  EXPECT_EQ(token_type, util::json::JSON_NUMBER);
+  EXPECT_EQ(token_type, json::JSON_NUMBER);
   EXPECT_EQ(token_str, "123");
 
   EXPECT_TRUE(json1_stream.readNextToken(&token_type, &token_str));
-  EXPECT_EQ(token_type, util::json::JSON_STRING);
+  EXPECT_EQ(token_type, json::JSON_STRING);
   EXPECT_EQ(token_str, "fno\"rd");
 
   EXPECT_TRUE(json1_stream.readNextToken(&token_type, &token_str));
-  EXPECT_EQ(token_type, util::json::JSON_OBJECT_END);
+  EXPECT_EQ(token_type, json::JSON_OBJECT_END);
 });
 
 TEST_CASE(JSONTest, TestJSONDocumentGet, [] () {
@@ -191,37 +191,37 @@ TEST_CASE(JSONTest, TestFlatJSONReader, [] () {
 });
 
 TEST_CASE(JSONTest, TestFromJSON, [] () {
-  EXPECT_EQ(util::json::fromJSON<std::string>("\"fnord\""), "fnord");
+  EXPECT_EQ(json::fromJSON<std::string>("\"fnord\""), "fnord");
 
-  auto json1 = util::json::parseJSON(
+  auto json1 = json::parseJSON(
       "{ 123: \"fnord\", \"blubb\": \"xxx\", \"blah\": [ true, false, null, " \
       "3.7e-5 ] }");
 
   auto iter = JSONUtil::objectLookup(json1.begin(), json1.end(), "blubb");
   EXPECT_TRUE(iter != json1.end());
-  EXPECT_EQ(util::json::fromJSON<std::string>(iter, json1.end()), "xxx");
+  EXPECT_EQ(json::fromJSON<std::string>(iter, json1.end()), "xxx");
 
   iter = JSONUtil::objectLookup(json1.begin(), json1.end(), "blah");
   EXPECT_TRUE(iter != json1.end());
-  EXPECT_EQ(iter->type, util::json::JSON_ARRAY_BEGIN);
+  EXPECT_EQ(iter->type, json::JSON_ARRAY_BEGIN);
   EXPECT_EQ(JSONUtil::arrayLength(iter, json1.end()), 4);
 
   auto aiter = JSONUtil::arrayLookup(iter, json1.end(), 0);
-  EXPECT_EQ(util::json::fromJSON<std::string>(aiter, json1.end()), "true");
+  EXPECT_EQ(json::fromJSON<std::string>(aiter, json1.end()), "true");
   aiter = JSONUtil::arrayLookup(iter, json1.end(), 1);
-  EXPECT_EQ(util::json::fromJSON<std::string>(aiter, json1.end()), "false");
+  EXPECT_EQ(json::fromJSON<std::string>(aiter, json1.end()), "false");
   aiter = JSONUtil::arrayLookup(iter, json1.end(), 2);
-  EXPECT_EQ(util::json::fromJSON<std::string>(aiter, json1.end()), "null");
+  EXPECT_EQ(json::fromJSON<std::string>(aiter, json1.end()), "null");
   aiter = JSONUtil::arrayLookup(iter, json1.end(), 3);
-  EXPECT_EQ(util::json::fromJSON<std::string>(aiter, json1.end()), "3.7e-5");
+  EXPECT_EQ(json::fromJSON<std::string>(aiter, json1.end()), "3.7e-5");
 });
 
 TEST_CASE(JSONTest, TestToJSON, [] () {
-  util::json::JSONObject j1;
-  util::json::toJSON(std::string("blah"), &j1);
+  json::JSONObject j1;
+  json::toJSON(std::string("blah"), &j1);
 
   EXPECT_EQ(j1.size(), 1);
-  EXPECT_EQ(j1[0].type, util::json::JSON_STRING);
+  EXPECT_EQ(j1[0].type, json::JSON_STRING);
   EXPECT_EQ(j1[0].data, "blah");
 });
 
@@ -241,8 +241,8 @@ TEST_CASE(JSONTest, TestToFromJSON, [] () {
   m1.a = "stringdata";
   m1.b = 23;
 
-  auto j1 = util::json::parseJSON(util::json::toJSONString(m1));
-  auto m2 = util::json::fromJSON<TestMessage>(j1);
+  auto j1 = json::parseJSON(json::toJSONString(m1));
+  auto m2 = json::fromJSON<TestMessage>(j1);
 
   EXPECT_EQ(m1.a, m2.a);
   EXPECT_EQ(m1.b, m2.b);
@@ -250,7 +250,7 @@ TEST_CASE(JSONTest, TestToFromJSON, [] () {
 
 struct TestStruct {
   util::String str;
-  util::json::JSONObject obj;
+  json::JSONObject obj;
 
   template <typename T>
   static void reflect(T* meta) {
@@ -262,14 +262,14 @@ struct TestStruct {
 TEST_CASE(JSONTest, TestJSONShouldNotSegfaultOnInvalidInput, [] () {
   EXPECT_EXCEPTION("unbalanced braces", [] {
     auto orig_str = "{ \"str\": \"fnord\", \"obj\": { \"a\": 1, \"b\": 2 ] } }";
-    auto obj = util::json::fromJSON<TestStruct>(orig_str);
+    auto obj = json::fromJSON<TestStruct>(orig_str);
   });
 });
 
 TEST_CASE(JSONTest, TestJSONReEncodingViaReflectionWithObject, [] () {
   auto orig_str = "{\"str\":\"fnord\",\"obj\":{\"a\":\"1\",\"b\":\"2\"}}";
-  auto obj = util::json::fromJSON<TestStruct>(orig_str);
-  auto reenc_str = util::json::toJSONString(obj);
+  auto obj = json::fromJSON<TestStruct>(orig_str);
+  auto reenc_str = json::toJSONString(obj);
   EXPECT_EQ(orig_str, reenc_str);
 });
 
@@ -285,25 +285,25 @@ struct TestJSONObject {
 
 TEST_CASE(JSONTest, ParseMultiLevelEscaping, [] () {
   auto orig_str = R"({"str":"fub \\\"blah\\\" bar"})";
-  auto doc = util::json::parseJSON(orig_str);
+  auto doc = json::parseJSON(orig_str);
   EXPECT_EQ(doc.size(), 4);
-  EXPECT_EQ(doc[2].type, util::json::JSON_STRING);
+  EXPECT_EQ(doc[2].type, json::JSON_STRING);
   EXPECT_EQ(doc[2].data, "fub \\\"blah\\\" bar");
 });
 
 TEST_CASE(JSONTest, TestJSONReencoding1, [] () {
   auto orig_str = R"({"customer":"xxx","docid":{"set_id":"p","item_id":"123"},"attributes":{"title~en":"12- blubb silver version","description~en":"925 blah blahb blah -- \"12\" represents 12 different chinese zodiac sign animals 鼠 Rat is symbol of Charm  those who born in 1948、1960、1972、1984 、1996 and 2008 are belonged to Rat  product description: it is a pendant with 2 faces 1 face is shinny well-polished silver surface the other face is matt look finishing with a raw feeling therefore, this big pendant can be wear in both sides to match your apparel!  the pendant is linked by a 100cm/ 40 inch long silver plated chain.  pendant size: 8.5cm x 7cm, about 15 gr.  the necklace would be received with our gift packing especially for rat @\"12\" series!!  ******************************************************  you are welcome to visit my web-site","category2":"999"}})";
-  auto doc = util::json::parseJSON(orig_str);
+  auto doc = json::parseJSON(orig_str);
   TestJSONObject obj;
-  obj.data = util::json::toJSONString(doc);
-  auto obj_json = util::json::toJSONString(obj);
-  auto obj2 = util::json::fromJSON<TestJSONObject>(obj_json);
+  obj.data = json::toJSONString(doc);
+  auto obj_json = json::toJSONString(obj);
+  auto obj2 = json::fromJSON<TestJSONObject>(obj_json);
   EXPECT_EQ(obj2.data, orig_str);
 });
 
 TEST_CASE(JSONTest, TestJSONOutputStreamStringEncoding, [] () {
-  util::Buffer json;
-  util::json::JSONOutputStream jsons(util::BufferOutputStream::fromBuffer(&json));
+  Buffer json;
+  json::JSONOutputStream jsons(BufferOutputStream::fromBuffer(&json));
 
   const char teststr[] ="b\"la\x00ht\x0cx\x1bxe\nxs\rx\tx\\xt";
   jsons.addString(std::string(teststr, sizeof(teststr) - 1));

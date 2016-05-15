@@ -29,7 +29,6 @@
 #include "eventql/util/io/outputstream.h"
 #include "eventql/util/json/jsonoutputstream.h"
 
-namespace util {
 namespace json {
 
 class JSONRPCResponse {
@@ -57,7 +56,6 @@ protected:
 };
 
 } // namespace json
-} // namespace util
 
 #include "jsonrpcresponse_impl.h"
 #endif

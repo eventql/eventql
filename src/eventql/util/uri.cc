@@ -24,9 +24,6 @@
 #include <eventql/util/exception.h>
 #include <eventql/util/uri.h>
 
-namespace util {
-
-
 std::string URI::urlEncode(const std::string& str) {
   static char hextbl[] = "0123456789ABCDEF";
   std::string encoded;
@@ -427,6 +424,4 @@ std::string URI::buildQueryString(const URI::ParamList& params) {
 
   return out;
 }
-
-} // namespace util
 

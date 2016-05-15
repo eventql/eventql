@@ -38,8 +38,8 @@
 #include <eventql/util/thread/eventloop.h>
 #include <eventql/util/thread/threadpool.h>
 
-using namespace util;
-using namespace util::http;
+#include "eventql/eventql.h"
+using namespace http;
 using util::StringInputStream;
 using util::StringOutputStream;
 
@@ -165,7 +165,7 @@ TEST_CASE(HTTPTest, TestAddCookie, [] () {
 
   {
     HTTPResponse response;
-    response.addCookie("fnord", "bar", util::UnixTime(1418571527495314));
+    response.addCookie("fnord", "bar", UnixTime(1418571527495314));
     EXPECT_EQ(
         response.getHeader("Set-Cookie"),
         "fnord=bar; Expires=Sun, 14-Dec-2014 15:38:47 UTC");
@@ -176,7 +176,7 @@ TEST_CASE(HTTPTest, TestAddCookie, [] () {
     response.addCookie(
         "fnord",
         "bar",
-        util::UnixTime::epoch(),
+        UnixTime::epoch(),
         "/blah");
     EXPECT_EQ(
         response.getHeader("Set-Cookie"), "fnord=bar; Path=/blah");
@@ -187,7 +187,7 @@ TEST_CASE(HTTPTest, TestAddCookie, [] () {
     response.addCookie(
         "fnord",
         "bar",
-        util::UnixTime::epoch(),
+        UnixTime::epoch(),
         "",
         ".fnrd.net");
     EXPECT_EQ(
@@ -199,7 +199,7 @@ TEST_CASE(HTTPTest, TestAddCookie, [] () {
     response.addCookie(
         "fnord",
         "bar",
-        util::UnixTime::epoch(),
+        UnixTime::epoch(),
         "",
         "",
         false,
@@ -213,7 +213,7 @@ TEST_CASE(HTTPTest, TestAddCookie, [] () {
     response.addCookie(
         "fnord",
         "bar",
-        util::UnixTime::epoch(),
+        UnixTime::epoch(),
         "",
         "",
         true,
@@ -262,7 +262,7 @@ TEST_CASE(HTTPTest, TestInvalidCookies, [] () {
 //  HTTPConnectionPool http_pool(&tp);
 //
 //  auto res = http_pool.executeRequest(
-//      util::http::HTTPRequest::mkGet("http://www.google.com/"));
+//      http::HTTPRequest::mkGet("http://www.google.com/"));
 //  res.wait();
 //
 //  const auto& r = res.get();

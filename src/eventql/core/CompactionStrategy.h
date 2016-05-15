@@ -15,7 +15,7 @@
 #include <eventql/core/Table.h>
 #include <eventql/core/PartitionSnapshot.h>
 
-using namespace util;
+#include "eventql/eventql.h"
 
 namespace eventql {
 

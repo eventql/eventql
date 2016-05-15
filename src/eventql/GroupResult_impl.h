@@ -24,7 +24,7 @@
 #ifndef _CM_GROUPRESULT_IMPL_H
 #define _CM_GROUPRESULT_IMPL_H
 
-using namespace util;
+#include "eventql/eventql.h"
 
 namespace eventql {
 

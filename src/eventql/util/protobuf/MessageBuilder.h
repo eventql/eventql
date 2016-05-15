@@ -27,7 +27,6 @@
 #include <eventql/util/buffer.h>
 #include <eventql/util/util/binarymessagewriter.h>
 
-namespace util {
 namespace msg {
 
 class MessageBuilder {
@@ -64,6 +63,5 @@ protected:
 };
 
 } // namespace msg
-} // namespace util
 
 #endif

@@ -25,7 +25,6 @@
 #define _libstx_HTTPHANDLER_H
 #include <memory>
 
-namespace util {
 namespace http {
 class HTTPServerConnection;
 class HTTPRequest;
@@ -44,6 +43,5 @@ public:
       HTTPRequest* req) = 0;
 };
 
-}
 }
 #endif

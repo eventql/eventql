@@ -27,7 +27,7 @@
 #include <eventql/util/io/fileutil.h>
 #include <eventql/util/protobuf/msg.h>
 
-using namespace util;
+#include "eventql/eventql.h"
 
 namespace eventql {
 

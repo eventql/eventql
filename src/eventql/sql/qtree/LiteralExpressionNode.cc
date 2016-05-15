@@ -24,7 +24,7 @@
  */
 #include <eventql/sql/qtree/LiteralExpressionNode.h>
 
-using namespace util;
+#include "eventql/eventql.h"
 
 namespace csql {
 
@@ -49,13 +49,13 @@ String LiteralExpressionNode::toSQL() const {
 void LiteralExpressionNode::encode(
     QueryTreeCoder* coder,
     const LiteralExpressionNode& node,
-    util::OutputStream* os) {
+    OutputStream* os) {
   node.value().encode(os);
 }
 
 RefPtr<QueryTreeNode> LiteralExpressionNode::decode (
     QueryTreeCoder* coder,
-    util::InputStream* is) {
+    OutputStream* is) {
   SValue value;
   value.decode(is);
   return new LiteralExpressionNode(value);

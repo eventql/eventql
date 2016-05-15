@@ -24,7 +24,6 @@
 #include "eventql/util/http/cookies.h"
 #include "eventql/util/inspect.h"
 
-namespace util {
 namespace http {
 
 bool Cookies::getCookie(
@@ -100,4 +99,3 @@ std::string Cookies::mkCookie(
 }
 
 } // namespace http
-} // namespace util

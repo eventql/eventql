@@ -30,7 +30,7 @@
 #include <eventql/core/TSDBTableRef.h>
 #include <eventql/sql/qtree/SequentialScanNode.h>
 
-using namespace util;
+#include "eventql/eventql.h"
 
 namespace eventql {
 

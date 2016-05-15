@@ -28,7 +28,7 @@
 #include "eventql/AnalyticsSession.pb.h"
 #include "eventql/api/EventsService.h"
 
-using namespace util;
+#include "eventql/eventql.h"
 
 namespace eventql {
 
@@ -42,8 +42,8 @@ public:
 
   void handle(
       const AnalyticsSession& session,
-      RefPtr<util::http::HTTPRequestStream> req_stream,
-      RefPtr<util::http::HTTPResponseStream> res_stream);
+      RefPtr<http::HTTPRequestStream> req_stream,
+      RefPtr<http::HTTPResponseStream> res_stream);
 
 protected:
 

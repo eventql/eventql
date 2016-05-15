@@ -32,7 +32,6 @@
 #include "eventql/util/stats/stat.h"
 #include "eventql/util/stats/statsrepository.h"
 
-namespace util {
 namespace stats {
 
 class StatsdAgent {
@@ -72,6 +71,5 @@ protected:
 };
 
 
-}
 }
 #endif

@@ -28,7 +28,6 @@
 #include "eventql/util/UnixTime.h"
 #include <eventql/util/uri.h>
 
-namespace util {
 namespace http {
 
 class Cookies {
@@ -52,6 +51,5 @@ public:
       bool httponly = false);
 };
 
-}
 }
 #endif

@@ -24,8 +24,6 @@
 #include <sys/time.h>
 #include "eventql/util/wallclock.h"
 
-namespace util {
-
 UnixTime WallClock::now() {
   return UnixTime(WallClock::getUnixMicros());
 }
@@ -59,4 +57,3 @@ uint64_t WallClock::unixMicros() {
   return tv.tv_sec * 1000000llu + tv.tv_usec;
 }
 
-}

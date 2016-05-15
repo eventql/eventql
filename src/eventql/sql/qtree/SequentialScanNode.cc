@@ -27,7 +27,7 @@
 #include <eventql/sql/qtree/LiteralExpressionNode.h>
 #include <eventql/sql/qtree/QueryTreeUtil.h>
 
-using namespace util;
+#include "eventql/eventql.h"
 
 namespace csql {
 
@@ -289,7 +289,7 @@ const Vector<ScanConstraint>& SequentialScanNode::constraints() const {
 void SequentialScanNode::encode(
     QueryTreeCoder* coder,
     const SequentialScanNode& node,
-    util::OutputStream* os) {
+    OutputStream* os) {
 
   os->appendLenencString(node.table_name_);
   os->appendVarUInt(node.select_list_.size());
@@ -321,7 +321,7 @@ void SequentialScanNode::encode(
 
 RefPtr<QueryTreeNode> SequentialScanNode::decode(
     QueryTreeCoder* coder,
-    util::InputStream* is) {
+    OutputStream* is) {
   auto table_provider = coder->getTransaction()->getTableProvider();
   auto table_name = is->readLenencString();
   Option<TableInfo> table_info = table_provider->describe(table_name);

@@ -27,7 +27,7 @@
 #include <eventql/util/logging.h>
 #include <eventql/infra/sstable/SSTableWriter.h>
 
-using namespace util;
+#include "eventql/eventql.h"
 
 namespace eventql {
 

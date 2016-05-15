@@ -29,8 +29,6 @@
 #include <list>
 #include <eventql/util/autoref.h>
 
-namespace util {
-
 class Wakeup : public RefCounted {
 public:
   Wakeup();
@@ -54,5 +52,4 @@ protected:
   std::list<std::function<void()>> callbacks_;
 };
 
-}
 #endif

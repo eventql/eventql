@@ -24,8 +24,6 @@
 #include "eventql/util/inspect.h"
 #include "eventql/util/thread/wakeup.h"
 
-namespace util {
-
 Wakeup::Wakeup() : gen_(0) {
 }
 
@@ -76,4 +74,3 @@ void Wakeup::wakeup() {
   }
 }
 
-}

@@ -30,8 +30,6 @@
 #include <eventql/util/io/inputstream.h>
 #include <eventql/util/ieee754.h>
 
-namespace util {
-
 std::unique_ptr<FileInputStream> InputStream::getStdin() {
   auto stdin_stream = new FileInputStream(0, false);
   return std::unique_ptr<FileInputStream>(stdin_stream);
@@ -476,5 +474,4 @@ void MemoryInputStream::seekTo(size_t offset) {
   }
 }
 
-} // namespace util
 

@@ -27,7 +27,6 @@
 #include "eventql/util/inspect.h"
 #include "eventql/util/json/flatjsonreader.h"
 
-namespace util {
 namespace json {
 
 FlatJSONReader::FlatJSONReader(
@@ -185,5 +184,4 @@ void FlatJSONReader::readArray(
 }
 
 } // namespace json
-} // namespace util
 

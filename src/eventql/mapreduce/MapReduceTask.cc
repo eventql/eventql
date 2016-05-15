@@ -24,7 +24,7 @@
 #include "eventql/mapreduce/MapReduceTask.h"
 #include "eventql/util/logging.h"
 
-using namespace util;
+#include "eventql/eventql.h"
 
 namespace eventql {
 

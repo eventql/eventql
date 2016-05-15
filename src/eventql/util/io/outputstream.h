@@ -29,8 +29,6 @@
 #include "eventql/util/buffer.h"
 #include "eventql/util/io/file.h"
 
-namespace util {
-
 class OutputStream {
 public:
   OutputStream() {}
@@ -254,5 +252,4 @@ protected:
   Buffer* buf_;
 };
 
-}
 #endif

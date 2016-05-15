@@ -34,7 +34,7 @@
 #include <eventql/util/fnv.h>
 #include <eventql/infra/sstable/sstablereader.h>
 
-using namespace util;
+#include "eventql/eventql.h"
 
 namespace eventql {
 
@@ -118,7 +118,7 @@ void TSDBServlet::handleHTTPRequest(
       return;
     }
 
-    res.setStatus(util::http::kStatusNotFound);
+    res.setStatus(http::kStatusNotFound);
     res.addBody("not found");
     res_stream->writeResponse(res);
   } catch (const Exception& e) {
@@ -149,21 +149,21 @@ void TSDBServlet::compactPartition(
 
   String tsdb_namespace;
   if (!URI::getParam(params, "namespace", &tsdb_namespace)) {
-    res->setStatus(util::http::kStatusBadRequest);
+    res->setStatus(http::kStatusBadRequest);
     res->addBody("missing ?namespace=... parameter");
     return;
   }
 
   String table_name;
   if (!URI::getParam(params, "table", &table_name)) {
-    res->setStatus(util::http::kStatusBadRequest);
+    res->setStatus(http::kStatusBadRequest);
     res->addBody("missing ?table=... parameter");
     return;
   }
 
   String partition_key;
   if (!URI::getParam(params, "partition", &partition_key)) {
-    res->setStatus(util::http::kStatusBadRequest);
+    res->setStatus(http::kStatusBadRequest);
     res->addBody("missing ?partition=... parameter");
     return;
   }
@@ -199,7 +199,7 @@ void TSDBServlet::streamPartition(
 
   String tsdb_namespace;
   if (!URI::getParam(params, "namespace", &tsdb_namespace)) {
-    res->setStatus(util::http::kStatusBadRequest);
+    res->setStatus(http::kStatusBadRequest);
     res->addBody("missing ?namespace=... parameter");
     res_stream->writeResponse(*res);
     return;
@@ -207,7 +207,7 @@ void TSDBServlet::streamPartition(
 
   String table_name;
   if (!URI::getParam(params, "stream", &table_name)) {
-    res->setStatus(util::http::kStatusBadRequest);
+    res->setStatus(http::kStatusBadRequest);
     res->addBody("missing ?stream=... parameter");
     res_stream->writeResponse(*res);
     return;
@@ -215,7 +215,7 @@ void TSDBServlet::streamPartition(
 
   String partition_key;
   if (!URI::getParam(params, "partition", &partition_key)) {
-    res->setStatus(util::http::kStatusBadRequest);
+    res->setStatus(http::kStatusBadRequest);
     res->addBody("missing ?partition=... parameter");
     res_stream->writeResponse(*res);
     return;
@@ -228,7 +228,7 @@ void TSDBServlet::streamPartition(
     auto parts = StringUtil::split(sample_str, ":");
 
     if (parts.size() != 2) {
-      res->setStatus(util::http::kStatusBadRequest);
+      res->setStatus(http::kStatusBadRequest);
       res->addBody("invalid ?sample=... parameter, format is <mod>:<idx>");
       res_stream->writeResponse(*res);
     }
@@ -275,21 +275,21 @@ void TSDBServlet::fetchPartitionInfo(
 
   String tsdb_namespace;
   if (!URI::getParam(params, "namespace", &tsdb_namespace)) {
-    res->setStatus(util::http::kStatusBadRequest);
+    res->setStatus(http::kStatusBadRequest);
     res->addBody("missing ?namespace=... parameter");
     return;
   }
 
   String table_name;
   if (!URI::getParam(params, "stream", &table_name)) {
-    res->setStatus(util::http::kStatusBadRequest);
+    res->setStatus(http::kStatusBadRequest);
     res->addBody("missing ?stream=... parameter");
     return;
   }
 
   String partition_key;
   if (!URI::getParam(params, "partition", &partition_key)) {
-    res->setStatus(util::http::kStatusBadRequest);
+    res->setStatus(http::kStatusBadRequest);
     res->addBody("missing ?partition=... parameter");
     return;
   }
@@ -389,7 +389,7 @@ void TSDBServlet::updateCSTable(
 
   String partition_key;
   if (!URI::getParam(params, "partition", &partition_key)) {
-    res->setStatus(util::http::kStatusBadRequest);
+    res->setStatus(http::kStatusBadRequest);
     res->addBody("missing ?partition=... parameter");
     return;
   }

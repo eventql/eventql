@@ -38,7 +38,6 @@ TODO:
   - https
 */
 
-namespace util {
 namespace http {
 
 HTTPServer::HTTPServer(
@@ -65,5 +64,4 @@ HTTPServerStats* HTTPServer::stats() {
   return &stats_;
 }
 
-}
 }

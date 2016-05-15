@@ -23,7 +23,6 @@
  */
 #include "eventql/util/json/jsonrpcresponse.h"
 
-namespace util {
 namespace json {
 
 JSONRPCResponse::JSONRPCResponse(
@@ -84,5 +83,4 @@ void JSONRPCResponse::setID(const std::string& id) {
 }
 
 } // namespace json
-} // namespace util
 

@@ -30,7 +30,7 @@
 #include <eventql/core/TablePartitioner.h>
 #include <eventql/core/TableConfig.pb.h>
 
-using namespace util;
+#include "eventql/eventql.h"
 
 namespace eventql {
 

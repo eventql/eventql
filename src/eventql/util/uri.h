@@ -27,8 +27,6 @@
 #include <vector>
 #include <utility>
 
-namespace util {
-
 class URI {
 public:
   typedef std::vector<std::pair<std::string, std::string>> ParamList;
@@ -81,7 +79,5 @@ protected:
   std::string query_;
   std::string fragment_;
 };
-
-} // namespace util
 
 #endif

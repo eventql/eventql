@@ -29,8 +29,6 @@
 #include <stdlib.h>
 #include <string>
 
-namespace util {
-
 enum kStatusType {
   eSuccess,
   eBufferOverflowError,
@@ -83,5 +81,4 @@ protected:
   std::string message_;
 };
 
-}
 #endif

@@ -31,7 +31,7 @@
 #include <eventql/util/protobuf/MessageEncoder.h>
 #include <eventql/infra/cstable/RecordMaterializer.h>
 
-using namespace util;
+#include "eventql/eventql.h"
 
 namespace eventql {
 

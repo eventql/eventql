@@ -33,7 +33,7 @@
 #include <eventql/infra/cstable/RecordShredder.h>
 #include <eventql/infra/cstable/CSTableWriter.h>
 
-using namespace util;
+#include "eventql/eventql.h"
 
 namespace eventql {
 

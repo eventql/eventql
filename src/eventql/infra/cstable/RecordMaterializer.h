@@ -37,11 +37,11 @@ class RecordMaterializer {
 public:
 
   RecordMaterializer(
-      util::msg::MessageSchema* schema,
+      msg::MessageSchema* schema,
       CSTableReader* reader,
       Set<String> columns = Set<String> {});
 
-  void nextRecord(util::msg::MessageObject* record);
+  void nextRecord(msg::MessageObject* record);
   void skipRecord();
 
 protected:
@@ -59,9 +59,9 @@ protected:
     uint64_t d;
     bool pending;
     bool defined;
-    Vector<util::Tuple<uint64_t, bool, uint32_t>> parents;
+    Vector<Tuple<uint64_t, bool, uint32_t>> parents;
     uint32_t field_id;
-    util::msg::FieldType field_type;
+    msg::FieldType field_type;
     ColumnType col_type;
 
     String val_str;
@@ -81,25 +81,25 @@ protected:
   void loadColumn(
       const String& column_name,
       ColumnState* column,
-      util::msg::MessageObject* record);
+      msg::MessageObject* record);
 
   void insertValue(
       ColumnState* column,
-      Vector<util::Tuple<uint64_t, bool, uint32_t>> parents,
+      Vector<Tuple<uint64_t, bool, uint32_t>> parents,
       Vector<size_t> indexes,
-      util::msg::MessageObject* record);
+      msg::MessageObject* record);
 
   void insertNull(
       ColumnState* column,
-      Vector<util::Tuple<uint64_t, bool, uint32_t>> parents,
+      Vector<Tuple<uint64_t, bool, uint32_t>> parents,
       const Vector<size_t> indexes,
-      util::msg::MessageObject* record);
+      msg::MessageObject* record);
 
   void createColumns(
       const String& prefix,
       uint32_t dmax,
-      Vector<util::Tuple<uint64_t, bool, uint32_t>> parents,
-      const util::msg::MessageSchemaField& field,
+      Vector<Tuple<uint64_t, bool, uint32_t>> parents,
+      const msg::MessageSchemaField& field,
       CSTableReader* reader,
       const Set<String>& columns);
 

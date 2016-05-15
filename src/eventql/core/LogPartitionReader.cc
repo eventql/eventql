@@ -28,7 +28,7 @@
 #include <eventql/core/LogPartitionReader.h>
 #include <eventql/core/Table.h>
 
-using namespace util;
+#include "eventql/eventql.h"
 
 namespace eventql {
 

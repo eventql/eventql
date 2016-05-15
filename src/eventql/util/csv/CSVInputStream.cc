@@ -28,8 +28,6 @@
 #include "eventql/util/exception.h"
 #include "eventql/util/io/inputstream.h"
 
-namespace util {
-
 std::unique_ptr<CSVInputStream> CSVInputStream::openFile(
     const std::string& file_path,
     char column_separator /* = ';' */,
@@ -113,5 +111,3 @@ const RewindableInputStream& DefaultCSVInputStream::getInputStream() const {
   return *input_;
 }
 
-
-}

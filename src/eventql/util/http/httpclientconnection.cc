@@ -27,7 +27,6 @@
 #include <eventql/util/http/httpclientconnection.h>
 #include <eventql/util/http/httpresponsehandler.h>
 
-namespace util {
 namespace http {
 
 HTTPClientConnection::HTTPClientConnection(
@@ -261,5 +260,4 @@ void HTTPClientConnection::error(const std::exception& e) {
   cur_handler_->onError(e);
 }
 
-}
 }

@@ -99,7 +99,7 @@ public:
   SymbolTable* symbols();
 
 protected:
-  thread::ThreadPool tpool_;
+  util::thread::ThreadPool tpool_;
   RefPtr<SymbolTable> symbol_table_;
   RefPtr<QueryBuilder> query_builder_;
   RefPtr<QueryPlanBuilder> query_plan_builder_;

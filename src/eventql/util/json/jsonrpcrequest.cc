@@ -25,7 +25,6 @@
 #include "eventql/util/json/jsonrpcrequest.h"
 #include "eventql/util/json/jsonutil.h"
 
-namespace util {
 namespace json {
 
 JSONRPCRequest::JSONRPCRequest(
@@ -76,5 +75,4 @@ const std::string& JSONRPCRequest::method() const {
 }
 
 } // namespace json
-} // namespace util
 

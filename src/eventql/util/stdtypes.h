@@ -38,8 +38,6 @@
 #include <unordered_map>
 #include <vector>
 
-namespace util {
-
 using String = std::string;
 using WString = std::wstring;
 using UTF32String = std::string;
@@ -82,5 +80,4 @@ using Stack = std::stack<T>;
 
 using StandardException = std::exception;
 
-} // namespace util
 #endif

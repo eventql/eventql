@@ -30,7 +30,7 @@
 
 namespace cstable {
 
-class CSTableReader : public util::RefCounted {
+class CSTableReader : public RefCounted {
 public:
 
   static RefPtr<CSTableReader> openFile(const String& filename);

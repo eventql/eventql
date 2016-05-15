@@ -36,7 +36,7 @@ public:
 
   virtual bool openTables(
       const std::vector<std::string>& table_names,
-      const util::URI& source_uri,
+      const URI& source_uri,
       std::vector<std::unique_ptr<TableRef>>* target) = 0;
 
 };

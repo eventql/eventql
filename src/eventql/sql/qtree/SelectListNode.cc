@@ -24,7 +24,7 @@
  */
 #include <eventql/sql/qtree/SelectListNode.h>
 
-using namespace util;
+#include "eventql/eventql.h"
 
 namespace csql {
 
@@ -74,7 +74,7 @@ String SelectListNode::toString() const {
 void SelectListNode::encode(
     QueryTreeCoder* coder,
     const SelectListNode& node,
-    util::OutputStream* os) {
+    OutputStream* os) {
   coder->encode(node.expr_.get(), os);
 
   if (!node.alias_.isEmpty()) {
@@ -87,7 +87,7 @@ void SelectListNode::encode(
 
 RefPtr<QueryTreeNode> SelectListNode::decode(
     QueryTreeCoder* coder,
-    util::InputStream* is) {
+    OutputStream* is) {
   auto node = new SelectListNode(
       coder->decode(is).asInstanceOf<ValueExpressionNode>());
 

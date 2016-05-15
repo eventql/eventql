@@ -26,7 +26,7 @@
 #include "eventql/util/protobuf/MessageDecoder.h"
 #include "eventql/EventScanResult.h"
 
-using namespace util;
+#include "eventql/eventql.h"
 
 namespace eventql {
 

@@ -27,8 +27,6 @@
 #include <eventql/util/exception.h>
 #include <eventql/util/io/outputstream.h>
 
-namespace util {
-
 Exception::Exception() :
     type_name_(nullptr),
     file_(nullptr),
@@ -162,6 +160,4 @@ std::string Exception::file() const {
 int Exception::line() const {
   return line_;
 }
-
-} // namespace util
 

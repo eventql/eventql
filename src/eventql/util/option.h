@@ -30,8 +30,6 @@
 #include "eventql/util/inspect.h"
 #include "eventql/util/exception.h"
 
-namespace util {
-
 template <typename T>
 class Option {
 public:
@@ -59,8 +57,6 @@ Option<T> Some(const T& value);
 
 template <typename T>
 Option<T> None();
-
-} // namespace util
 
 #include "option_impl.h"
 #endif

@@ -24,7 +24,7 @@
 #include <eventql/core/ReplicationScheme.h>
 #include <eventql/util/fnv.h>
 
-using namespace util;
+#include "eventql/eventql.h"
 
 namespace eventql {
 

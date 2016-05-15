@@ -28,7 +28,6 @@
 #include "eventql/util/json/json.h"
 #include "eventql/util/json/jsoninputstream.h"
 
-namespace util {
 namespace json {
 
 class FlatJSONReader {
@@ -52,5 +51,4 @@ protected:
 };
 
 } // namespace json
-} // namespace util
 #endif

@@ -24,8 +24,6 @@
  */
 #include <eventql/util/defines.h>
 
-namespace util {
-
 inline constexpr Duration::Duration(ZeroType)
     : micros_(0) {}
 
@@ -143,5 +141,3 @@ Duration Duration::fromMicroseconds(uint64_t v) {
 Duration Duration::fromNanoseconds(uint64_t v) {
   return Duration(v / 1000);
 }
-
-} // namespace util

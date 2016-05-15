@@ -27,7 +27,7 @@
 
 namespace csql {
 
-using namespace util;
+#include "eventql/eventql.h"
 
 struct ColumnInfo {
   String column_name;

@@ -32,7 +32,6 @@
 #include "eventql/util/inspect.h"
 #include "eventql/util/thread/eventloop.h"
 
-namespace util {
 namespace thread {
 
 EventLoop::EventLoop() :
@@ -278,5 +277,4 @@ void EventLoop::shutdown() {
   wakeup();
 }
 
-}
 }

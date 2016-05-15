@@ -29,7 +29,6 @@
 #include "eventql/util/buffer.h"
 #include "eventql/util/http/httpmessage.h"
 
-namespace util {
 namespace http {
 
 class HTTPParser {
@@ -118,6 +117,5 @@ protected:
   bool expect_body_;
 };
 
-}
 }
 #endif

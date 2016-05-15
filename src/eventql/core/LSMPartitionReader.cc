@@ -29,7 +29,7 @@
 #include <eventql/core/LSMPartitionReader.h>
 #include <eventql/core/Table.h>
 
-using namespace util;
+#include "eventql/eventql.h"
 
 namespace eventql {
 

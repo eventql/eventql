@@ -29,8 +29,6 @@
 #include <stdint.h>
 #include <string>
 
-namespace util {
-
 /**
  * This implements the FNV1a (Fowler–Noll–Vo) hash function
  *   see http://en.wikipedia.org/wiki/Fowler-Noll-Vo_hash_function
@@ -68,7 +66,5 @@ protected:
   T prime_;
   T memory_;
 };
-
-}
 
 #endif

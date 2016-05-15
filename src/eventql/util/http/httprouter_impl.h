@@ -23,7 +23,6 @@
  */
 #include "eventql/util/stringutil.h"
 
-namespace util {
 namespace http {
 
 template <typename... HandlerArgs>
@@ -37,5 +36,4 @@ void HTTPRouter::addRouteByPrefixMatch(
   addRoute(pred, handler_args...);
 }
 
-}
 }

@@ -30,7 +30,7 @@
 #include "eventql/mapreduce/MapReduceTask.h"
 #include "eventql/infra/sstable/sstablereader.h"
 
-using namespace util;
+#include "eventql/eventql.h"
 
 namespace eventql {
 
@@ -46,8 +46,8 @@ static const String kResultPathPrefix = "/api/v1/mapreduce/result/";
 
 void MapReduceAPIServlet::handle(
     const AnalyticsSession& session,
-    RefPtr<util::http::HTTPRequestStream> req_stream,
-    RefPtr<util::http::HTTPResponseStream> res_stream) {
+    RefPtr<http::HTTPRequestStream> req_stream,
+    RefPtr<http::HTTPResponseStream> res_stream) {
   const auto& req = req_stream->request();
   URI uri(req.uri());
 
@@ -488,7 +488,7 @@ void MapReduceAPIServlet::fetchResult(
     auto parts = StringUtil::split(sample_str, ":");
 
     if (parts.size() != 2) {
-      res.setStatus(util::http::kStatusBadRequest);
+      res.setStatus(http::kStatusBadRequest);
       res.addBody("invalid ?sample=... parameter, format is <mod>:<idx>");
       res_stream->writeResponse(res);
       return;

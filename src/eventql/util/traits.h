@@ -24,8 +24,6 @@
 #ifndef _STX_TRAITS_H
 #define _STX_TRAITS_H
 
-namespace util {
-
 /* TypeIsReflected<T> */
 template <typename T>
 using TypeIsReflected = util::reflect::is_reflected<T>;
@@ -48,5 +46,4 @@ struct TypeIsVector<
   static const bool value = true;
 };
 
-} // namespace util
 #endif

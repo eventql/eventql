@@ -32,7 +32,7 @@
 #include "eventql/util/protobuf/DynamicMessage.h"
 #include "eventql/util/protobuf/MessageEncoder.h"
 
-using namespace util;
+#include "eventql/eventql.h"
 
 namespace eventql {
 

@@ -30,7 +30,7 @@
 #include <sys/fcntl.h>
 #include <unistd.h>
 
-using namespace util;
+#include "eventql/eventql.h"
 
 UNIT_TEST(PageManagerTest);
 

@@ -32,10 +32,9 @@
 #include <eventql/util/net/tcpserver.h>
 #include <eventql/util/thread/taskscheduler.h>
 
-namespace util {
 namespace http {
 
-using util::TaskScheduler;
+using TaskScheduler;
 
 class HTTPServer {
 public:
@@ -54,6 +53,5 @@ protected:
   net::TCPServer ssock_;
 };
 
-}
 }
 #endif

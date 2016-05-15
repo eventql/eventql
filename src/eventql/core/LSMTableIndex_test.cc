@@ -13,7 +13,7 @@
 #include <eventql/util/test/unittest.h>
 #include <eventql/core/LSMTableIndex.h>
 
-using namespace util;
+#include "eventql/eventql.h"
 using namespace eventql;
 
 UNIT_TEST(LSMTableIndexTest);

@@ -25,7 +25,7 @@
 #include <eventql/util/stdtypes.h>
 #include <eventql/core/PartitionReplication.h>
 
-using namespace util;
+#include "eventql/eventql.h"
 
 namespace eventql {
 

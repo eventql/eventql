@@ -25,7 +25,7 @@
 #include "eventql/util/ISO8601.h"
 #include "eventql/util/time_constants.h"
 
-using namespace util;
+#include "eventql/eventql.h"
 
 namespace {
 
@@ -278,8 +278,6 @@ static bool parseYear(const char* begin, const char* end, CivilTime* date) {
 
 }
 
-namespace util {
-
 Option<CivilTime> ISO8601::parse(const String& str) {
   CivilTime date(nullptr);
 
@@ -306,4 +304,3 @@ uint8_t ISO8601::daysInMonth(uint16_t year, uint8_t month) {
   return (31 - (month - 1) % 7 % 2);
 }
 
-}

@@ -768,8 +768,6 @@ template <> bool SValue::isOfType<SValue::TimeType>() const {
 
 }
 
-namespace util {
-
 template <>
 std::string inspect<sql_type>(
     const sql_type& type) {
@@ -780,8 +778,6 @@ template <>
 std::string inspect<csql::SValue>(
     const csql::SValue& sval) {
   return sval.getString();
-}
-
 }
 
 namespace std {

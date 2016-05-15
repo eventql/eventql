@@ -26,8 +26,6 @@
 #include <eventql/util/stringutil.h>
 #include <sstream>
 
-namespace util {
-
 std::string inspect(const Duration& value) {
   unsigned years = value.days() / kDaysPerYear;
   unsigned days = value.days() % kDaysPerYear;;
@@ -78,6 +76,4 @@ std::string StringUtil::toString<Duration>(Duration duration) {
 template<>
 std::string StringUtil::toString<const Duration&>(const Duration& duration) {
   return inspect(duration);
-}
-
 }

@@ -26,7 +26,7 @@
 #include "eventql/infra/sstable/sstablereader.h"
 #include "eventql/JavaScriptContext.h"
 
-using namespace util;
+#include "eventql/eventql.h"
 
 namespace eventql {
 

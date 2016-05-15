@@ -27,7 +27,6 @@
 #include "eventql/util/http/httprouter.h"
 #include "eventql/util/http/httpservice.h"
 
-namespace util {
 namespace http {
 
 void HTTPRouter::addRoute(
@@ -101,6 +100,5 @@ void HTTPRouter::NoSuchRouteHandler::handleHTTPRequest() {
   [] {});
 }
 
-}
 }
 

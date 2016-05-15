@@ -25,7 +25,7 @@
 #include <eventql/infra/cstable/columns/UInt64PageReader.h>
 #include <eventql/infra/cstable/ColumnWriter.h>
 
-using namespace util;
+#include "eventql/eventql.h"
 
 namespace cstable {
 

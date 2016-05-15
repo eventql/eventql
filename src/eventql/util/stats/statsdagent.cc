@@ -26,7 +26,6 @@
 #include "eventql/util/stats/statsdagent.h"
 #include "eventql/util/wallclock.h"
 
-namespace util {
 namespace stats {
 
 StatsdAgent::StatsdAgent(
@@ -148,5 +147,4 @@ void StatsdAgent::sendToStatsd(const Buffer& packet) {
   sock_.sendTo(packet, addr_);
 }
 
-}
 }
