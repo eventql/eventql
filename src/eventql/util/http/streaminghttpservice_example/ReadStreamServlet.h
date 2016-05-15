@@ -29,7 +29,6 @@
 #include "eventql/util/http/httpservice.h"
 
 
-namespace util {
 namespace http {
 
 class ReadStreamServlet : public http::StreamingHTTPService {
@@ -42,7 +41,6 @@ public:
 
 };
 
-}
 }
 #endif
 
