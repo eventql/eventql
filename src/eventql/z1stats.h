@@ -26,7 +26,7 @@
 #include <eventql/util/stats/counter.h>
 #include <eventql/util/http/httpstats.h>
 
-namespace zbase {
+namespace eventql {
 
 struct Z1Stats {
   stx::stats::Counter<uint64_t> num_partitions;

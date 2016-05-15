@@ -33,7 +33,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 const size_t LSMPartitionReplication::kMaxBatchSizeRows = 8192;
 const size_t LSMPartitionReplication::kMaxBatchSizeBytes = 1024 * 1024 * 50; // 50 MB

@@ -15,7 +15,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 class TableScan : public csql::TableExpression {
 public:

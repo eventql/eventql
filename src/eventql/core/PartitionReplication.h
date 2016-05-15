@@ -31,7 +31,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 class PartitionReplication : public RefCounted {
 public:

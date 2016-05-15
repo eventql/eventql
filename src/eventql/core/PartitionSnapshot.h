@@ -30,7 +30,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 class Table;
 
 struct PartitionSnapshot : public RefCounted {

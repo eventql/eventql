@@ -33,7 +33,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 static mdb::MDBOptions tsdb_mdb_opts() {
   mdb::MDBOptions opts;

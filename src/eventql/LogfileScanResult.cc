@@ -26,7 +26,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 LogfileScanResult::LogfileScanResult(
     size_t max_lines /* = 1000 */) :
@@ -140,4 +140,4 @@ void LogfileScanResult::decode(InputStream* is) {
   }
 }
 
-} // namespace zbase
+} // namespace eventql

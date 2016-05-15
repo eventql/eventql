@@ -17,7 +17,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 class RecordArena : public RefCounted {
 public:
@@ -37,5 +37,5 @@ protected:
   mutable std::mutex mutex_;
 };
 
-} // namespace zbase
+} // namespace eventql
 

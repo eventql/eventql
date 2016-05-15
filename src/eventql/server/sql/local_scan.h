@@ -18,13 +18,13 @@
 #include <eventql/sql/runtime/TableExpression.h>
 #include <eventql/sql/runtime/ValueExpression.h>
 #include <eventql/infra/cstable/CSTableReader.h>
-#include <zbase/core/Table.h>
-#include <zbase/core/PartitionReader.h>
-#include <zbase/core/PartitionMap.h>
+#include <eventql/core/Table.h>
+#include <eventql/core/PartitionReader.h>
+#include <eventql/core/PartitionMap.h>
 
 //using namespace stx;
 //
-//namespace zbase {
+//namespace eventql {
 //
 //class TableScan : public csql::Task {
 //public:
@@ -85,4 +85,4 @@
 //  RefPtr<csql::SequentialScanNode> stmt_;
 //};
 //
-//} // namespace zbase
+//} // namespace eventql

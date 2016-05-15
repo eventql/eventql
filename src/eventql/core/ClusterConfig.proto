@@ -1,4 +1,4 @@
-package zbase;
+package eventql;
 
 enum DHTNodeStatus {
   DHTNODE_JOINING = 0;

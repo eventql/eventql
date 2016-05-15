@@ -27,7 +27,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 template <typename _RowType, typename _ParamType, typename _ResultType>
 class TSDBTableScanlet : public RefCounted {
@@ -57,4 +57,4 @@ protected:
   ResultType result_;
 };
 
-} // namespace zbase
+} // namespace eventql

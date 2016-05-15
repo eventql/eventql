@@ -27,7 +27,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 class StaticPartitionReplication : public PartitionReplication {
 public:

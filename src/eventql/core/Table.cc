@@ -27,7 +27,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 Table::Table(
     const TableDefinition& config) :

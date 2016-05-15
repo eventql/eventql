@@ -35,7 +35,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 LSMPartitionWriter::LSMPartitionWriter(
     ServerConfig* cfg,

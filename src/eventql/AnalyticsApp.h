@@ -36,16 +36,16 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 class AnalyticsApp : public RefCounted {
 public:
 
   AnalyticsApp(
-      zbase::TSDBService* tsdb_node,
-      zbase::PartitionMap* partition_map,
-      zbase::ReplicationScheme* replication_scheme,
-      zbase::CompactionWorker* cstable_index,
+      eventql::TSDBService* tsdb_node,
+      eventql::PartitionMap* partition_map,
+      eventql::ReplicationScheme* replication_scheme,
+      eventql::CompactionWorker* cstable_index,
       ConfigDirectory* cdb,
       AnalyticsAuth* auth,
       csql::Runtime* sql,
@@ -54,7 +54,7 @@ public:
       const String& cachedir);
 
   RefPtr<csql::TableProvider> getTableProvider(const String& customer) const;
-  zbase::TSDBService* getTSDBNode() const;
+  eventql::TSDBService* getTSDBNode() const;
 
   void insertMetric(
       const String& customer,
@@ -75,10 +75,10 @@ protected:
   void configureCustomer(const CustomerConfig& customer);
   void configureTable(const TableDefinition& tbl);
 
-  zbase::TSDBService* tsdb_node_;
-  zbase::PartitionMap* partition_map_;
-  zbase::ReplicationScheme* replication_scheme_;
-  zbase::CompactionWorker* cstable_index_;
+  eventql::TSDBService* tsdb_node_;
+  eventql::PartitionMap* partition_map_;
+  eventql::ReplicationScheme* replication_scheme_;
+  eventql::CompactionWorker* cstable_index_;
   ConfigDirectory* cdb_;
   AnalyticsAuth* auth_;
   csql::Runtime* sql_;
@@ -89,8 +89,8 @@ protected:
   MapReduceService mapreduce_service_;
 };
 
-zbase::TableDefinition tableDefinitionToTableConfig(const TableDefinition& tbl);
+eventql::TableDefinition tableDefinitionToTableConfig(const TableDefinition& tbl);
 
-} // namespace zbase
+} // namespace eventql
 
 #endif

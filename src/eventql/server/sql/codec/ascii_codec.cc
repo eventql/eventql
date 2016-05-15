@@ -21,10 +21,10 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include <zbase/sql/codec/ascii_codec.h>
+#include <eventql/sql/codec/ascii_codec.h>
 #include <eventql/sql/runtime/resultlist.h>
 
-namespace zbase {
+namespace eventql {
 
 ASCIICodec::ASCIICodec(csql::QueryPlan* query)  {
   for (size_t i = 0; i < query->numStatements(); ++i) {

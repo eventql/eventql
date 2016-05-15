@@ -47,7 +47,7 @@ void run(const cli::FlagParser& flags) {
   auto source_table = flags.getString("source_table");
   auto destination_table = flags.getString("destination_table");
   auto api_token = flags.getString("api_token");
-  String api_url = "http://api.zbase.io/api/v1";
+  String api_url = "http://api.eventql.io/api/v1";
   auto shard_size = flags.getInt("shard_size");
   auto mysql_addr = flags.getString("mysql");
 

@@ -26,7 +26,7 @@
 #include <eventql/util/http/httpservice.h>
 
 using namespace stx;
-namespace zbase {
+namespace eventql {
 
 class DefaultServlet : public stx::http::HTTPService {
 public:

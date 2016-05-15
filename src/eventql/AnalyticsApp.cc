@@ -34,13 +34,13 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 AnalyticsApp::AnalyticsApp(
-    zbase::TSDBService* tsdb_node,
-    zbase::PartitionMap* partition_map,
-    zbase::ReplicationScheme* replication_scheme,
-    zbase::CompactionWorker* cstable_index,
+    eventql::TSDBService* tsdb_node,
+    eventql::PartitionMap* partition_map,
+    eventql::ReplicationScheme* replication_scheme,
+    eventql::CompactionWorker* cstable_index,
     ConfigDirectory* cdb,
     AnalyticsAuth* auth,
     csql::Runtime* sql,
@@ -100,14 +100,14 @@ AnalyticsApp::AnalyticsApp(
 
 RefPtr<csql::TableProvider> AnalyticsApp::getTableProvider(
     const String& customer) const {
-  return zbase::SQLEngine::tableProviderForNamespace(
+  return eventql::SQLEngine::tableProviderForNamespace(
         partition_map_,
         replication_scheme_,
         auth_,
         customer);
 }
 
-zbase::TSDBService* AnalyticsApp::getTSDBNode() const {
+eventql::TSDBService* AnalyticsApp::getTSDBNode() const {
   return tsdb_node_;
 }
 
@@ -147,4 +147,4 @@ MapReduceService* AnalyticsApp::mapreduceService() {
   return &mapreduce_service_;
 }
 
-} // namespace zbase
+} // namespace eventql

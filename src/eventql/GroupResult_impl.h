@@ -26,7 +26,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 template <typename GroupKeyType, typename GroupValueType>
 void GroupResult<GroupKeyType, GroupValueType>::merge(
@@ -118,6 +118,6 @@ void GroupResult<GroupKeyType, GroupValueType>::decode(util::BinaryMessageReader
 }
 
 
-} // namespace zbase
+} // namespace eventql
 
 #endif

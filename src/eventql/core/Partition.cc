@@ -44,7 +44,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 RefPtr<Partition> Partition::create(
     const String& tsdb_namespace,
@@ -140,7 +140,7 @@ RefPtr<PartitionWriter> Partition::getWriter() {
   if (writer_.get() == nullptr) {
     switch (table_->storage()) {
 
-      case zbase::TBL_STORAGE_COLSM:
+      case eventql::TBL_STORAGE_COLSM:
         if (upgradeToLSMv2()) {
           writer_ = mkRef<PartitionWriter>(
               new LSMPartitionWriter(cfg_, this, &head_));
@@ -149,7 +149,7 @@ RefPtr<PartitionWriter> Partition::getWriter() {
         }
         break;
 
-      case zbase::TBL_STORAGE_STATIC:
+      case eventql::TBL_STORAGE_STATIC:
         writer_ = mkRef<PartitionWriter>(new StaticPartitionWriter(&head_));
         break;
 
@@ -166,14 +166,14 @@ RefPtr<PartitionWriter> Partition::getWriter() {
 RefPtr<PartitionReader> Partition::getReader() {
   switch (table_->storage()) {
 
-    case zbase::TBL_STORAGE_COLSM:
+    case eventql::TBL_STORAGE_COLSM:
       if (upgradeToLSMv2()) {
         return new LSMPartitionReader(table_, head_.getSnapshot());
       } else {
         return new LogPartitionReader(table_, head_.getSnapshot());
       }
 
-    case zbase::TBL_STORAGE_STATIC:
+    case eventql::TBL_STORAGE_STATIC:
       return new StaticPartitionReader(table_, head_.getSnapshot());
 
     default:
@@ -210,7 +210,7 @@ RefPtr<PartitionReplication> Partition::getReplicationStrategy(
     http::HTTPConnectionPool* http) {
   switch (table_->storage()) {
 
-    case zbase::TBL_STORAGE_COLSM:
+    case eventql::TBL_STORAGE_COLSM:
       if (upgradeToLSMv2()) {
         return new LSMPartitionReplication(
             this,
@@ -223,7 +223,7 @@ RefPtr<PartitionReplication> Partition::getReplicationStrategy(
             http);
       }
 
-    case zbase::TBL_STORAGE_STATIC:
+    case eventql::TBL_STORAGE_STATIC:
       return new StaticPartitionReplication(
           this,
           repl_scheme,

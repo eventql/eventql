@@ -28,7 +28,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 class ReturnResultsTask : public MapReduceTask {
 public:
@@ -53,6 +53,6 @@ protected:
   String params_;
 };
 
-} // namespace zbase
+} // namespace eventql
 
 

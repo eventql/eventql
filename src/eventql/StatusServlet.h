@@ -29,7 +29,7 @@
 #include <eventql/core/PartitionMap.h>
 
 using namespace stx;
-namespace zbase {
+namespace eventql {
 
 class StatusServlet : public stx::http::HTTPService {
 public:

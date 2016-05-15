@@ -59,7 +59,7 @@
 #include "eventql/sql/runtime/tablerepository.h"
 
 using namespace stx;
-using namespace zbase;
+using namespace eventql;
 
 stx::thread::EventLoop ev;
 

@@ -11,7 +11,7 @@
  */
 #include "eventql/server/sql/partition_cursor.h"
 
-namespace zbase {
+namespace eventql {
 
 PartitionCursor::PartitionCursor(
     csql::Transaction* txn,

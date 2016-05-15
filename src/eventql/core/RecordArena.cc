@@ -13,7 +13,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 RecordArena::RecordArena() {}
 
@@ -55,5 +55,5 @@ size_t RecordArena::size() const {
   return records_.size();
 }
 
-} // namespace zbase
+} // namespace eventql
 

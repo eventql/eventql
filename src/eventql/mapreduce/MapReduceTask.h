@@ -30,7 +30,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 class MapReduceTask;
 
@@ -91,5 +91,5 @@ protected:
 };
 
 
-} // namespace zbase
+} // namespace eventql
 

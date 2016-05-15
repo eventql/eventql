@@ -31,7 +31,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 class ReplicationWorker {
 public:
@@ -73,5 +73,5 @@ protected:
   std::condition_variable cv_;
 };
 
-} // namespace zbase
+} // namespace eventql
 

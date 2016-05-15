@@ -34,7 +34,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 JSClass JavaScriptContext::kGlobalJSClass = { "global", JSCLASS_GLOBAL_FLAGS };
 
@@ -756,5 +756,5 @@ bool JavaScriptContext::ReduceCollectionIter::getNext(
   }
 }
 
-} // namespace zbase
+} // namespace eventql
 

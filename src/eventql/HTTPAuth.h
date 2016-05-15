@@ -28,7 +28,7 @@
 #include <eventql/AnalyticsAuth.h>
 
 using namespace stx;
-namespace zbase {
+namespace eventql {
 
 class HTTPAuth {
 public:

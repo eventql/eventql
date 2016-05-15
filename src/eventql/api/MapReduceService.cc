@@ -36,14 +36,14 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 MapReduceService::MapReduceService(
     ConfigDirectory* cdir,
     AnalyticsAuth* auth,
-    zbase::TSDBService* tsdb,
-    zbase::PartitionMap* pmap,
-    zbase::ReplicationScheme* repl,
+    eventql::TSDBService* tsdb,
+    eventql::PartitionMap* pmap,
+    eventql::ReplicationScheme* repl,
     JSRuntime* js_runtime,
     const String& cachedir) :
     cdir_(cdir),
@@ -546,4 +546,4 @@ bool MapReduceService::saveRemoteResultsToTable(
   return true;
 }
 
-} // namespace zbase
+} // namespace eventql

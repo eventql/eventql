@@ -29,7 +29,7 @@
 #include <eventql/sql/runtime/ResultFormat.h>
 #include <eventql/sql/result_cursor.h>
 
-namespace zbase {
+namespace eventql {
 
 class JSONCodec {
 public:

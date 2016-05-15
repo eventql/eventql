@@ -30,7 +30,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 LogPartitionReader::LogPartitionReader(
     RefPtr<Table> table,

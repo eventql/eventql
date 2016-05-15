@@ -28,7 +28,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 struct RecordRef {
   RecordRef(

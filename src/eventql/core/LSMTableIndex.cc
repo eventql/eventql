@@ -22,7 +22,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 void LSMTableIndex::write(
     const OrderedMap<SHA1Hash, uint64_t>& map,
@@ -133,4 +133,4 @@ void LSMTableIndex::lookup(HashMap<SHA1Hash, uint64_t>* map) {
 }
 
 
-} // namespace zbase
+} // namespace eventql

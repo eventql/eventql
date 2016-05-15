@@ -30,7 +30,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 StaticPartitionReplication::StaticPartitionReplication(
     RefPtr<Partition> partition,
@@ -88,7 +88,7 @@ void StaticPartitionReplication::replicateTo(
   }
 
   auto tsdb_url = StringUtil::format("http://$0/tsdb", replica.addr.hostAndPort());
-  zbase::TSDBClient tsdb_client(tsdb_url, http_);
+  eventql::TSDBClient tsdb_client(tsdb_url, http_);
 
   auto pinfo = tsdb_client.partitionInfo(
       snap_->state.tsdb_namespace(),

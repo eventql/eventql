@@ -28,7 +28,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 EventScanRow::EventScanRow(RefPtr<msg::MessageSchema> schema) : obj(schema) {}
 
@@ -139,4 +139,4 @@ void EventScanResult::decode(InputStream* is) {
   }
 }
 
-} // namespace zbase
+} // namespace eventql

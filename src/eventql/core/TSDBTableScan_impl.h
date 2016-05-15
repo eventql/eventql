@@ -29,7 +29,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 template <typename ScanletType>
 typename ScanletType::ResultType TSDBTableScan<ScanletType>::mergeResults(
@@ -215,4 +215,4 @@ typename TSDBTableScan<ScanletType>::ResultType*
 //  }
 //}
 
-} // namespace zbase
+} // namespace eventql

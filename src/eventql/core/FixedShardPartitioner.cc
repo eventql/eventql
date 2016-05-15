@@ -26,7 +26,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 FixedShardPartitioner::FixedShardPartitioner(
     const String& table_name,

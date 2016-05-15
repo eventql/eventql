@@ -9,11 +9,11 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#include <zbase/sql/table_scan.h>
+#include <eventql/sql/table_scan.h>
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 TableScan::TableScan(
     csql::Transaction* txn,
@@ -176,4 +176,4 @@ RefPtr<csql::Task> TableScanFactory::build(
       output);
 }
 
-} // namespace zbase
+} // namespace eventql

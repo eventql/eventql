@@ -34,7 +34,7 @@
 #include <eventql/sql/qtree/ColumnReferenceNode.h>
 #include <eventql/z1stats.h>
 
-namespace zbase {
+namespace eventql {
 
 //RefPtr<csql::QueryTreeNode> SQLEngine::rewriteQuery(
 //    csql::Runtime* runtime,
@@ -129,7 +129,7 @@ RefPtr<csql::TableProvider> SQLEngine::tableProviderForNamespace(
 //
 //  strategy->addQueryTreeRewriteRule(
 //      std::bind(
-//          &zbase::SQLEngine::rewriteQuery,
+//          &eventql::SQLEngine::rewriteQuery,
 //          runtime,
 //          partition_map,
 //          replication_scheme,
@@ -142,7 +142,7 @@ RefPtr<csql::TableProvider> SQLEngine::tableProviderForNamespace(
 //
 
 void z1VersionExpr(sql_txn* ctx, int argc, csql::SValue* argv, csql::SValue* out) {
-  *out = csql::SValue::newString(zbase::kVersionString);
+  *out = csql::SValue::newString(eventql::kVersionString);
 }
 
 }

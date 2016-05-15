@@ -28,7 +28,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 ReduceTask::ReduceTask(
     const AnalyticsSession& session,
@@ -39,7 +39,7 @@ ReduceTask::ReduceTask(
     size_t num_shards,
     MapReduceShardList* shards,
     AnalyticsAuth* auth,
-    zbase::ReplicationScheme* repl) :
+    eventql::ReplicationScheme* repl) :
     session_(session),
     reduce_fn_(reduce_fn),
     globals_(globals),
@@ -185,5 +185,5 @@ Option<MapReduceShardResult> ReduceTask::executeRemote(
   return result;
 }
 
-} // namespace zbase
+} // namespace eventql
 

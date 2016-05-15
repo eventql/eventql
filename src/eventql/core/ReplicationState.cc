@@ -25,7 +25,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 uint64_t replicatedOffsetFor(
     const ReplicationState& repl_state,

@@ -33,7 +33,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 enum ConfigTopic : uint64_t {
   CUSTOMERS = 1,
@@ -120,4 +120,4 @@ protected:
   std::thread watcher_thread_;
 };
 
-} // namespace zbase
+} // namespace eventql

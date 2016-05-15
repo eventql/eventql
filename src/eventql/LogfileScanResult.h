@@ -29,7 +29,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 struct LogfileScanLine {
   UnixTime time;
@@ -85,4 +85,4 @@ protected:
   Vector<String> columns_;
 };
 
-} // namespace zbase
+} // namespace eventql

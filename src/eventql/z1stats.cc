@@ -23,7 +23,7 @@
  */
 #include <eventql/z1stats.h>
 
-namespace zbase {
+namespace eventql {
 
 Z1Stats* z1stats() {
   static Z1Stats singleton;

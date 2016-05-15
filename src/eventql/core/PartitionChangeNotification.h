@@ -29,7 +29,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 struct PartitionChangeNotification : public RefCounted {
   RefPtr<Partition> partition;

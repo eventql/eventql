@@ -28,7 +28,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 MapReduceScheduler::MapReduceScheduler(
     const AnalyticsSession& session,
@@ -290,5 +290,5 @@ RefPtr<MapReduceJobSpec> MapReduceScheduler::jobSpec() {
   return job_;
 }
 
-} // namespace zbase
+} // namespace eventql
 

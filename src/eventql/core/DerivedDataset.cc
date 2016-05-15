@@ -25,7 +25,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 DerivedDatasetState::DerivedDatasetState() : last_offset(0) {}
 

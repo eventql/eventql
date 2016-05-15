@@ -16,7 +16,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 SimpleCompactionStrategy::SimpleCompactionStrategy(
     RefPtr<Partition> partition,
@@ -183,5 +183,5 @@ bool SimpleCompactionStrategy::needsUrgentCompaction(
   return tables.size() > num_tables_hard_limit_;
 }
 
-} // namespace zbase
+} // namespace eventql
 

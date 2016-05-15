@@ -415,7 +415,7 @@ int main(int argc, const char** argv) {
       stx::cli::FlagParser::T_STRING,
       false,
       NULL,
-      "api.zbase.io",
+      "api.eventql.io",
       "DeepAnalytics API Host",
       "<host>");
 

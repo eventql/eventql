@@ -17,7 +17,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 struct ServerConfig {
   String db_path;
@@ -25,5 +25,5 @@ struct ServerConfig {
   RefPtr<LSMTableIndexCache> idx_cache;
 };
 
-} // namespace zbase
+} // namespace eventql
 

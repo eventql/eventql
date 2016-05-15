@@ -27,7 +27,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 class LSMPartitionReplication : public PartitionReplication {
 public:
@@ -65,5 +65,5 @@ protected:
           size_t record_size)> fn);
 };
 
-} // namespace zbase
+} // namespace eventql
 

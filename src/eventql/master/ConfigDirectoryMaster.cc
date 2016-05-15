@@ -31,7 +31,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 ConfigDirectoryMaster::ConfigDirectoryMaster(
     const String& path) :
@@ -453,4 +453,4 @@ void ConfigDirectoryMaster::loadHeads() {
 
 }
 
-} // namespace zbase
+} // namespace eventql

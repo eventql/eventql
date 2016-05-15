@@ -31,7 +31,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 RemoteTSDBScan::RemoteTSDBScan(
     RefPtr<csql::SequentialScanNode> stmt,
@@ -83,7 +83,7 @@ RemoteTSDBScan::RemoteTSDBScan(
 //      return;
 //    } catch (const StandardException& e) {
 //      logError(
-//          "zbase",
+//          "eventql",
 //          e,
 //          "RemoteTSDBScan::executeOnHost failed @ $0",
 //          host.hostAndPort());

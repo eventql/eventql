@@ -1,5 +1,5 @@
 #pragma once
 
-#cmakedefine ZBASE_HAS_ASSET_BUNDLE
-#cmakedefine ZBASE_BUILD_ID "@ZBASE_BUILD_ID@"
+#cmakedefine eventql_HAS_ASSET_BUNDLE
+#cmakedefine eventql_BUILD_ID "@eventql_BUILD_ID@"
 #cmakedefine STX_ENABLE_MYSQL

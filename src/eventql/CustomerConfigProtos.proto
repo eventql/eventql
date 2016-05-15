@@ -21,7 +21,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-package zbase;
+package eventql;
 
 enum UserAuthTwoFactorMethod {
   USERAUTH_2FA_NONE = 0;

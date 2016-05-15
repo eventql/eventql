@@ -31,7 +31,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 template <typename ScanletType>
 class TSDBTableScan : public dproc::RDD {
@@ -78,6 +78,6 @@ protected:
 };
 
 
-} // namespace zbase
+} // namespace eventql
 
 #include "TSDBTableScan_impl.h"

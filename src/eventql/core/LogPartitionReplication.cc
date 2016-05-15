@@ -30,7 +30,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 const size_t LogPartitionReplication::kMaxBatchSizeRows = 8192;
 const size_t LogPartitionReplication::kMaxBatchSizeBytes = 1024 * 1024 * 50; // 50 MB

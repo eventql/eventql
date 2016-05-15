@@ -16,7 +16,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 class LSMTableIndexCache : public RefCounted {
 public:
@@ -56,5 +56,5 @@ protected:
   size_t max_size_;
 };
 
-} // namespace zbase
+} // namespace eventql
 

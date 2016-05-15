@@ -31,7 +31,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 ReplicationWorker::ReplicationWorker(
     RefPtr<ReplicationScheme> repl_scheme,
@@ -47,7 +47,7 @@ ReplicationWorker::ReplicationWorker(
     }),
     running_(false) {
   pmap->subscribeToPartitionChanges([this] (
-      RefPtr<zbase::PartitionChangeNotification> change) {
+      RefPtr<eventql::PartitionChangeNotification> change) {
     enqueuePartition(change->partition);
   });
 
@@ -174,4 +174,4 @@ void ReplicationWorker::work() {
   }
 }
 
-} // namespace zbase
+} // namespace eventql

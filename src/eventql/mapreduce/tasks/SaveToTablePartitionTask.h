@@ -29,7 +29,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 class SaveToTablePartitionTask : public MapReduceTask {
 public:
@@ -41,7 +41,7 @@ public:
       Vector<RefPtr<MapReduceTask>> sources,
       MapReduceShardList* shards,
       AnalyticsAuth* auth,
-      zbase::ReplicationScheme* repl);
+      eventql::ReplicationScheme* repl);
 
   Option<MapReduceShardResult> execute(
       RefPtr<MapReduceTaskShard> shard,
@@ -60,9 +60,9 @@ protected:
   SHA1Hash partition_key_;
   Vector<RefPtr<MapReduceTask>> sources_;
   AnalyticsAuth* auth_;
-  zbase::ReplicationScheme* repl_;
+  eventql::ReplicationScheme* repl_;
 };
 
-} // namespace zbase
+} // namespace eventql
 
 

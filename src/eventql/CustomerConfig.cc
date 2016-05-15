@@ -26,7 +26,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 CustomerConfig createCustomerConfig(const String& customer) {
   CustomerConfig conf;
@@ -97,5 +97,5 @@ void eventDefinitonAddField(
   def->set_schema(schema->encode().toString());
 }
 
-} // namespace zbase
+} // namespace eventql
 

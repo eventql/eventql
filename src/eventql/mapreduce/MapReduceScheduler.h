@@ -30,7 +30,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 class MapReduceScheduler : public RefCounted {
 public:
@@ -86,5 +86,5 @@ protected:
   std::condition_variable cv_;
 };
 
-} // namespace zbase
+} // namespace eventql
 

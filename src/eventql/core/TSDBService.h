@@ -41,7 +41,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 enum class InsertFlags : uint64_t {
   REPLICATED_WRITE = 1,

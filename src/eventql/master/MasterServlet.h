@@ -27,7 +27,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 class MasterServlet : public stx::http::HTTPService {
 public:

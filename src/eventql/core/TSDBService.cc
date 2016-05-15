@@ -34,7 +34,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 TSDBService::TSDBService(
     PartitionMap* pmap,
@@ -302,7 +302,7 @@ void TSDBService::insertRecords(
         return;
       } catch (const StandardException& e) {
         logError(
-            "zbase",
+            "eventql",
             e,
             "TSDBService::insertRecordsRemote failed");
 

@@ -33,13 +33,13 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 MapReduceTaskBuilder::MapReduceTaskBuilder(
     const AnalyticsSession& session,
     AnalyticsAuth* auth,
-    zbase::PartitionMap* pmap,
-    zbase::ReplicationScheme* repl,
+    eventql::PartitionMap* pmap,
+    eventql::ReplicationScheme* repl,
     TSDBService* tsdb,
     const String& cachedir) :
     session_(session),
@@ -373,5 +373,5 @@ RefPtr<MapReduceTask> MapReduceTaskBuilder::buildSaveToTablePartitionTask(
       repl_);
 }
 
-} // namespace zbase
+} // namespace eventql
 

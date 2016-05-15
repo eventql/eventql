@@ -17,7 +17,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 LSMTableIndexCache::LSMTableIndexCache(
     const String& base_path,
@@ -131,5 +131,5 @@ size_t LSMTableIndexCache::size() const {
   return size_;
 }
 
-} // namespace zbase
+} // namespace eventql
 

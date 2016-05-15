@@ -29,7 +29,7 @@
 #include "eventql/core/TimeWindowPartitioner.h"
 
 using namespace stx;
-using namespace zbase;
+using namespace eventql;
 
 // FIXPAUL rename to TimeWindowPartitionerTest
 UNIT_TEST(TimeWindowPartitionerTest);

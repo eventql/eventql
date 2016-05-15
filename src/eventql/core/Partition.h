@@ -40,7 +40,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 class Table;
 class PartitionReplication;
 

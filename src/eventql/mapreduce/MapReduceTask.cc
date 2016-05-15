@@ -26,7 +26,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 Vector<size_t> MapReduceTask::shards() const {
   return shards_;
@@ -86,5 +86,5 @@ void MapReduceJobSpec::sendLogline(const String& logline) {
   }
 }
 
-} // namespace zbase
+} // namespace eventql
 

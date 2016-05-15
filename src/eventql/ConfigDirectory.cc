@@ -31,7 +31,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 ConfigDirectoryClient::ConfigDirectoryClient(
     InetAddr master_addr) :
@@ -323,7 +323,7 @@ void ConfigDirectory::sync() {
 }
 
 void ConfigDirectory::syncObject(const String& obj) {
-  logDebug("zbase", "Syncing config object '$0' from master", obj);
+  logDebug("eventql", "Syncing config object '$0' from master", obj);
 
   if (topics_ & ConfigTopic::CUSTOMERS) {
     static const String kCustomerPrefix = "customers/";
@@ -563,7 +563,7 @@ void ConfigDirectory::startWatcher() {
       try {
         sync();
       } catch (const StandardException& e) {
-        logCritical("zbase", e, "error during master sync");
+        logCritical("eventql", e, "error during master sync");
       }
 
       usleep(500000);
@@ -580,4 +580,4 @@ void ConfigDirectory::stopWatcher() {
   watcher_thread_.join();
 }
 
-} // namespace zbase
+} // namespace eventql

@@ -30,7 +30,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 class ConfigDirectoryMaster {
 public:
@@ -71,4 +71,4 @@ protected:
   HashMap<String, uint64_t> heads_;
 };
 
-} // namespace zbase
+} // namespace eventql

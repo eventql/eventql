@@ -29,7 +29,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 struct SaveToTableTaskShard : public MapReduceTaskShard {
   SHA1Hash partition;
@@ -57,6 +57,6 @@ protected:
   AnalyticsAuth* auth_;
 };
 
-} // namespace zbase
+} // namespace eventql
 
 

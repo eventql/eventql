@@ -24,7 +24,7 @@
 #include <eventql/HTTPAuth.h>
 #include "eventql/util/http/cookies.h"
 
-namespace zbase {
+namespace eventql {
 
 const char HTTPAuth::kSessionCookieKey[] = "__dxa_session";
 const uint64_t HTTPAuth::kSessionLifetimeMicros = 365 * kMicrosPerDay;

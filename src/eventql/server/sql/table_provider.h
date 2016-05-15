@@ -34,7 +34,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 class TSDBService;
 
 struct TSDBTableProvider : public csql::TableProvider {

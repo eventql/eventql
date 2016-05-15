@@ -17,7 +17,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 class CompactionStrategy : public RefCounted {
 public:
@@ -71,5 +71,5 @@ protected:
   size_t num_tables_hard_limit_;
 };
 
-} // namespace zbase
+} // namespace eventql
 

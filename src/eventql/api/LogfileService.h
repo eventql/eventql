@@ -36,7 +36,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 class LogfileService {
 public:
@@ -44,9 +44,9 @@ public:
   LogfileService(
       ConfigDirectory* cdir,
       AnalyticsAuth* auth,
-      zbase::TSDBService* tsdb,
-      zbase::PartitionMap* pmap,
-      zbase::ReplicationScheme* repl,
+      eventql::TSDBService* tsdb,
+      eventql::PartitionMap* pmap,
+      eventql::ReplicationScheme* repl,
       csql::Runtime* sql);
 
   void insertLoglines(
@@ -79,10 +79,10 @@ public:
 protected:
   ConfigDirectory* cdir_;
   AnalyticsAuth* auth_;
-  zbase::TSDBService* tsdb_;
-  zbase::PartitionMap* pmap_;
-  zbase::ReplicationScheme* repl_;
+  eventql::TSDBService* tsdb_;
+  eventql::PartitionMap* pmap_;
+  eventql::ReplicationScheme* repl_;
   csql::Runtime* sql_;
 };
 
-} // namespace zbase
+} // namespace eventql

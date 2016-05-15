@@ -26,7 +26,7 @@
 #include <eventql/DefaultServlet.h>
 #include <eventql/HTTPAuth.h>
 
-namespace zbase {
+namespace eventql {
 
 void DefaultServlet::handleHTTPRequest(
     http::HTTPRequest* request,
@@ -43,7 +43,7 @@ void DefaultServlet::handleHTTPRequest(
 
     if (auth_cookie.empty()) {
       response->setStatus(http::kStatusFound);
-      response->addHeader("Location", "http://app.zbase.io/");
+      response->addHeader("Location", "http://app.eventql.io/");
       return;
     }
   }

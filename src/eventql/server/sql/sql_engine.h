@@ -26,7 +26,7 @@
 #include <eventql/core/TSDBService.h>
 #include <eventql/AnalyticsAuth.h>
 
-namespace zbase {
+namespace eventql {
 class TSDBService;
 
 class SQLEngine {

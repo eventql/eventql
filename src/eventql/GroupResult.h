@@ -33,7 +33,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 template <typename GroupKeyType, typename GroupValueType>
 struct GroupResult : public AnalyticsQueryResult::SubQueryResult {
@@ -46,7 +46,7 @@ struct GroupResult : public AnalyticsQueryResult::SubQueryResult {
   Vector<String> segment_keys;
 };
 
-} // namespace zbase
+} // namespace eventql
 
 #include "GroupResult_impl.h"
 #endif

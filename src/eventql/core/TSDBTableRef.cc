@@ -28,7 +28,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 TSDBTableRef TSDBTableRef::parse(const String& table_ref) {
   TSDBTableRef ref;

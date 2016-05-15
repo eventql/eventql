@@ -32,7 +32,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 class JavaScriptContext : public RefCounted {
 public:
@@ -126,5 +126,5 @@ protected:
   size_t current_error_column_;
 };
 
-} // namespace zbase
+} // namespace eventql
 

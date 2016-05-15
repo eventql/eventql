@@ -33,7 +33,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 class RemoteTSDBScan : public RefCounted {
 public:

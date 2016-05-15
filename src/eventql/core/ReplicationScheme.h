@@ -32,7 +32,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 struct ReplicaRef {
   ReplicaRef(
@@ -115,5 +115,5 @@ protected:
 };
 
 
-} // namespace zbase
+} // namespace eventql
 

@@ -38,14 +38,14 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 EventsService::EventsService(
     ConfigDirectory* cdir,
     AnalyticsAuth* auth,
-    zbase::TSDBService* tsdb,
-    zbase::PartitionMap* pmap,
-    zbase::ReplicationScheme* repl,
+    eventql::TSDBService* tsdb,
+    eventql::PartitionMap* pmap,
+    eventql::ReplicationScheme* repl,
     csql::Runtime* sql) :
     cdir_(cdir),
     auth_(auth),
@@ -92,7 +92,7 @@ void EventsService::scanTable(
 
     EventScanResult result(schema, remaining);
 
-    auto partition = zbase::TimeWindowPartitioner::partitionKeyFor(
+    auto partition = eventql::TimeWindowPartitioner::partitionKeyFor(
         table_name,
         time,
         partition_size);
@@ -175,7 +175,7 @@ void EventsService::scanLocalTablePartition(
   }
 
   logDebug(
-      "zbase",
+      "eventql",
       "Scanning local table partition $0/$1/$2",
       session.customer(),
       table_name,
@@ -231,7 +231,7 @@ void EventsService::scanRemoteTablePartition(
       }
     } catch (const StandardException& e) {
       logError(
-          "zbase",
+          "eventql",
           e,
           "EventsService::scanRemoteTablePartition failed");
 
@@ -255,7 +255,7 @@ bool EventsService::scanRemoteTablePartition(
     const InetAddr& host,
     EventScanResult* result) {
   logDebug(
-      "zbase",
+      "eventql",
       "Scanning remote table partition $0/$1/$2 on $3",
       session.customer(),
       table_name,
@@ -297,4 +297,4 @@ bool EventsService::scanRemoteTablePartition(
   return true;
 }
 
-} // namespace zbase
+} // namespace eventql

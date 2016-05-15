@@ -21,6 +21,6 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-package zbase;
+package eventql;
 import 'eventql/core/TableConfig.proto';
 

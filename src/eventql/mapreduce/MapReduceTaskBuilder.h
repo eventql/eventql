@@ -31,7 +31,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 class MapReduceTaskBuilder : public RefCounted {
 public:
@@ -39,8 +39,8 @@ public:
   MapReduceTaskBuilder(
       const AnalyticsSession& session,
       AnalyticsAuth* auth,
-      zbase::PartitionMap* pmap,
-      zbase::ReplicationScheme* repl,
+      eventql::PartitionMap* pmap,
+      eventql::ReplicationScheme* repl,
       TSDBService* tsdb,
       const String& cachedir);
 
@@ -88,11 +88,11 @@ protected:
 
   AnalyticsSession session_;
   AnalyticsAuth* auth_;
-  zbase::PartitionMap* pmap_;
-  zbase::ReplicationScheme* repl_;
+  eventql::PartitionMap* pmap_;
+  eventql::ReplicationScheme* repl_;
   TSDBService* tsdb_;
   String cachedir_;
 };
 
-} // namespace zbase
+} // namespace eventql
 

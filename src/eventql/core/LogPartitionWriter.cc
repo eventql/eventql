@@ -36,7 +36,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 LogPartitionWriter::LogPartitionWriter(
     RefPtr<Partition> partition,

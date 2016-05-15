@@ -25,7 +25,7 @@
 #include <eventql/util/stdtypes.h>
 #include <eventql/sql/runtime/queryplan.h>
 
-namespace zbase {
+namespace eventql {
 
 class ASCIICodec {
 public:

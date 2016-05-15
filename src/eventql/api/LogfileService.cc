@@ -37,14 +37,14 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 LogfileService::LogfileService(
     ConfigDirectory* cdir,
     AnalyticsAuth* auth,
-    zbase::TSDBService* tsdb,
-    zbase::PartitionMap* pmap,
-    zbase::ReplicationScheme* repl,
+    eventql::TSDBService* tsdb,
+    eventql::PartitionMap* pmap,
+    eventql::ReplicationScheme* repl,
     csql::Runtime* sql) :
     cdir_(cdir),
     auth_(auth),
@@ -286,8 +286,8 @@ Vector<TableDefinition> LogfileService::getTableDefinitions(
     td.set_table_name("logs." + logfile.name());
     auto tblcfg = td.mutable_config();
     tblcfg->set_schema(getSchema(logfile)->encode().toString());
-    tblcfg->set_partitioner(zbase::TBL_PARTITION_TIMEWINDOW);
-    tblcfg->set_storage(zbase::TBL_STORAGE_COLSM);
+    tblcfg->set_partitioner(eventql::TBL_PARTITION_TIMEWINDOW);
+    tblcfg->set_storage(eventql::TBL_STORAGE_COLSM);
 
     auto partcfg = tblcfg->mutable_time_window_partitioner_config();
     partcfg->set_partition_size(10 * kMicrosPerMinute);
@@ -298,4 +298,4 @@ Vector<TableDefinition> LogfileService::getTableDefinitions(
   return tbls;
 }
 
-} // namespace zbase
+} // namespace eventql

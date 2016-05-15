@@ -50,14 +50,14 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 AnalyticsServlet::AnalyticsServlet(
     RefPtr<AnalyticsApp> app,
     const String& cachedir,
     AnalyticsAuth* auth,
     csql::Runtime* sql,
-    zbase::TSDBService* tsdb,
+    eventql::TSDBService* tsdb,
     ConfigDirectory* customer_dir,
     PartitionMap* pmap) :
     app_(app),
@@ -77,7 +77,7 @@ void AnalyticsServlet::handleHTTPRequest(
   try {
     handle(req_stream, res_stream);
   } catch (const StandardException& e) {
-    logError("zbase", e, "error while handling HTTP request");
+    logError("eventql", e, "error while handling HTTP request");
     req_stream->discardBody();
 
     http::HTTPResponse res;
@@ -95,7 +95,7 @@ void AnalyticsServlet::handle(
   const auto& req = req_stream->request();
   URI uri(req.uri());
 
-  logDebug("zbase", "HTTP Request: $0 $1", req.method(), req.uri());
+  logDebug("eventql", "HTTP Request: $0 $1", req.method(), req.uri());
 
   http::HTTPResponse res;
   res.populateFromRequest(req);
@@ -476,8 +476,8 @@ void AnalyticsServlet::createTable(
     tblcfg->set_num_shards(num_shards.isEmpty() ? 1 : num_shards.get());
 
     if (table_type == "timeseries" || table_type == "log_timeseries") {
-      tblcfg->set_partitioner(zbase::TBL_PARTITION_TIMEWINDOW);
-      tblcfg->set_storage(zbase::TBL_STORAGE_COLSM);
+      tblcfg->set_partitioner(eventql::TBL_PARTITION_TIMEWINDOW);
+      tblcfg->set_storage(eventql::TBL_STORAGE_COLSM);
 
       auto partition_size = json::objectGetUInt64(jreq, "partition_size");
       auto partcfg = tblcfg->mutable_time_window_partitioner_config();
@@ -486,13 +486,13 @@ void AnalyticsServlet::createTable(
     }
 
     else if (table_type == "static" || table_type == "static_fixed") {
-      tblcfg->set_partitioner(zbase::TBL_PARTITION_FIXED);
-      tblcfg->set_storage(zbase::TBL_STORAGE_STATIC);
+      tblcfg->set_partitioner(eventql::TBL_PARTITION_FIXED);
+      tblcfg->set_storage(eventql::TBL_STORAGE_STATIC);
     }
 
     else if (table_type == "static_timeseries") {
-      tblcfg->set_partitioner(zbase::TBL_PARTITION_TIMEWINDOW);
-      tblcfg->set_storage(zbase::TBL_STORAGE_STATIC);
+      tblcfg->set_partitioner(eventql::TBL_PARTITION_TIMEWINDOW);
+      tblcfg->set_storage(eventql::TBL_STORAGE_STATIC);
 
       auto partition_size = json::objectGetUInt64(jreq, "partition_size");
       auto partcfg = tblcfg->mutable_time_window_partitioner_config();
@@ -895,7 +895,7 @@ void AnalyticsServlet::uploadTable(
       cachedir_,
       StringUtil::format("upload_$0.tmp", Random::singleton()->hex128()));
 
-  auto partition_key = zbase::FixedShardPartitioner::partitionKeyFor(
+  auto partition_key = eventql::FixedShardPartitioner::partitionKeyFor(
       table_name,
       shard);
 
@@ -1425,4 +1425,4 @@ void AnalyticsServlet::performLogout(
 
 
 
-} // namespace zbase
+} // namespace eventql

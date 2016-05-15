@@ -40,7 +40,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 struct AnalyticsQuery;
 
@@ -52,7 +52,7 @@ public:
       const String& cachedir,
       AnalyticsAuth* auth,
       csql::Runtime* sql,
-      zbase::TSDBService* tsdb,
+      eventql::TSDBService* tsdb,
       ConfigDirectory* customer_dir,
       PartitionMap* pmap);
 
@@ -281,7 +281,7 @@ protected:
   String cachedir_;
   AnalyticsAuth* auth_;
   csql::Runtime* sql_;
-  zbase::TSDBService* tsdb_;
+  eventql::TSDBService* tsdb_;
   ConfigDirectory* customer_dir_;
 
   LogfileAPIServlet logfile_api_;

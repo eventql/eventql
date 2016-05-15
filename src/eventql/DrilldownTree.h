@@ -29,7 +29,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 struct DrilldownTreeNode {
   virtual ~DrilldownTreeNode() {}

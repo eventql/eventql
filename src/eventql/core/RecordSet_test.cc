@@ -30,7 +30,7 @@
 #include "eventql/core/RecordSet.h"
 
 using namespace stx;
-using namespace zbase;
+using namespace eventql;
 
 UNIT_TEST(RecordSetTest);
 

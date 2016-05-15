@@ -14,7 +14,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 class PartitionCursor : public csql::ResultCursor {
 public:

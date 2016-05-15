@@ -15,7 +15,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 class RemoteExpression : public csql::TableExpression {
 public:

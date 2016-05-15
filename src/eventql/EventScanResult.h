@@ -30,7 +30,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 struct EventScanRow {
   EventScanRow(RefPtr<msg::MessageSchema> schema);
@@ -87,4 +87,4 @@ protected:
   size_t rows_scanned_;
 };
 
-} // namespace zbase
+} // namespace eventql

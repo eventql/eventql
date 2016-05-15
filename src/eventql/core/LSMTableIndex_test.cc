@@ -14,7 +14,7 @@
 #include <eventql/core/LSMTableIndex.h>
 
 using namespace stx;
-using namespace zbase;
+using namespace eventql;
 
 UNIT_TEST(LSMTableIndexTest);
 
@@ -22,7 +22,7 @@ using VersionMap = HashMap<SHA1Hash, uint64_t>;
 using OrderedVersionMap = OrderedMap<SHA1Hash, uint64_t>;
 
 TEST_CASE(LSMTableIndexTest, TestLookup, [] () {
-  auto filename = "/tmp/_zbase_recversionmap_test.idx";
+  auto filename = "/tmp/_eventql_recversionmap_test.idx";
   FileUtil::rm(filename);
 
   {
@@ -78,7 +78,7 @@ TEST_CASE(LSMTableIndexTest, TestLookup, [] () {
 });
 
 TEST_CASE(LSMTableIndexTest, TestEmptyMap, [] () {
-  auto filename = "/tmp/_zbase_recversionmap_test.idx";
+  auto filename = "/tmp/_eventql_recversionmap_test.idx";
   FileUtil::rm(filename);
 
   {
@@ -110,7 +110,7 @@ TEST_CASE(LSMTableIndexTest, TestEmptyMap, [] () {
 });
 
 TEST_CASE(LSMTableIndexTest, TestMapWithOneSlot, [] () {
-  auto filename = "/tmp/_zbase_recversionmap_test.idx";
+  auto filename = "/tmp/_eventql_recversionmap_test.idx";
   FileUtil::rm(filename);
 
   {

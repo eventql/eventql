@@ -24,7 +24,7 @@
 #include <eventql/server/sql/codec/json_codec.h>
 #include <eventql/sql/runtime/resultlist.h>
 
-namespace zbase {
+namespace eventql {
 
 JSONCodec::JSONCodec(json::JSONOutputStream* json) : json_(json) {}
 

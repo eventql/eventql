@@ -28,7 +28,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 ReturnResultsTask::ReturnResultsTask(
     Vector<RefPtr<MapReduceTask>> sources,
@@ -113,5 +113,5 @@ Option<MapReduceShardResult> ReturnResultsTask::execute(
   return None<MapReduceShardResult>();
 }
 
-} // namespace zbase
+} // namespace eventql
 

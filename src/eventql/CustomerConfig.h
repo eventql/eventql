@@ -29,7 +29,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 struct CustomerConfigRef : public RefCounted {
   CustomerConfigRef(CustomerConfig _config) : config(_config) {}
@@ -48,5 +48,5 @@ void eventDefinitonAddField(
     bool repeated,
     bool optional);
 
-} // namespace zbase
+} // namespace eventql
 

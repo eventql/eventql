@@ -65,7 +65,7 @@
 #include <jsapi.h>
 
 using namespace stx;
-using namespace zbase;
+using namespace eventql;
 
 stx::thread::EventLoop ev;
 
@@ -105,7 +105,7 @@ int main(int argc, const char** argv) {
       "datadir path",
       "<path>");
 
-#ifndef ZBASE_HAS_ASSET_BUNDLE
+#ifndef eventql_HAS_ASSET_BUNDLE
   flags.defineFlag(
       "asset_path",
       cli::FlagParser::T_STRING,
@@ -219,7 +219,7 @@ int main(int argc, const char** argv) {
 
   /* conf */
   //auto conf_data = FileUtil::read(flags.getString("conf"));
-  //auto conf = msg::parseText<zbase::TSDBNodeConfig>(conf_data);
+  //auto conf = msg::parseText<eventql::TSDBNodeConfig>(conf_data);
 
   /* thread pools */
   stx::thread::CachedThreadPool tpool(
@@ -253,7 +253,7 @@ int main(int argc, const char** argv) {
   /* clusterconfig */
   auto cluster_config = customer_dir.clusterConfig();
   logInfo(
-      "zbase",
+      "eventql",
       "Starting with cluster config: $0",
       cluster_config.DebugString());
 
@@ -263,8 +263,8 @@ int main(int argc, const char** argv) {
     local_replica = Some(flags.getString("join"));
   }
 
-  auto repl_scheme = RefPtr<zbase::ReplicationScheme>(
-        new zbase::DHTReplicationScheme(cluster_config, local_replica));
+  auto repl_scheme = RefPtr<eventql::ReplicationScheme>(
+        new eventql::DHTReplicationScheme(cluster_config, local_replica));
 
   String node_name = "__anonymous";
   if (flags.isSet("join")) {
@@ -287,27 +287,27 @@ int main(int argc, const char** argv) {
   FileLock server_lock(FileUtil::joinPaths(tsdb_dir, "__lock"));
   server_lock.lock();
 
-  zbase::ServerConfig cfg;
+  eventql::ServerConfig cfg;
   cfg.db_path = tsdb_dir;
   cfg.repl_scheme = repl_scheme;
   cfg.idx_cache = mkRef(new LSMTableIndexCache(tsdb_dir));
 
-  zbase::PartitionMap partition_map(&cfg);
-  zbase::TSDBService tsdb_node(
+  eventql::PartitionMap partition_map(&cfg);
+  eventql::TSDBService tsdb_node(
       &partition_map,
       repl_scheme.get(),
       &ev,
       &z1stats()->http_client_stats);
 
-  zbase::ReplicationWorker tsdb_replication(
+  eventql::ReplicationWorker tsdb_replication(
       repl_scheme.get(),
       &partition_map,
       &http);
 
-  zbase::TSDBServlet tsdb_servlet(&tsdb_node, flags.getString("cachedir"));
+  eventql::TSDBServlet tsdb_servlet(&tsdb_node, flags.getString("cachedir"));
   http_router.addRouteByPrefixMatch("/tsdb", &tsdb_servlet, &tpool);
 
-  zbase::CompactionWorker cstable_index(
+  eventql::CompactionWorker cstable_index(
       &partition_map,
       flags.getInt("indexbuild_threads"));
 
@@ -351,7 +351,7 @@ int main(int argc, const char** argv) {
           flags.getString("datadir"),
           flags.getString("cachedir")));
 
-  zbase::AnalyticsServlet analytics_servlet(
+  eventql::AnalyticsServlet analytics_servlet(
       analytics_app,
       flags.getString("cachedir"),
       &auth,
@@ -360,13 +360,13 @@ int main(int argc, const char** argv) {
       &customer_dir,
       &partition_map);
 
-  zbase::StatusServlet status_servlet(
+  eventql::StatusServlet status_servlet(
       &cfg,
       &partition_map,
       http_server.stats(),
       &z1stats()->http_client_stats);
 
-  zbase::DefaultServlet default_servlet;
+  eventql::DefaultServlet default_servlet;
 
   http_router.addRouteByPrefixMatch("/api/", &analytics_servlet, &tpool);
   http_router.addRouteByPrefixMatch("/zstatus", &status_servlet);
@@ -375,7 +375,7 @@ int main(int argc, const char** argv) {
   auto rusage_t = std::thread([] () {
     for (;; usleep(1000000)) {
       logDebug(
-          "zbase",
+          "eventql",
           "Using $0MB of memory (peak $1)",
           Application::getCurrentMemoryUsage() / 1000000.0,
           Application::getPeakMemoryUsage() / 1000000.0);
@@ -391,10 +391,10 @@ int main(int argc, const char** argv) {
     customer_dir.startWatcher();
     ev.run();
   } catch (const StandardException& e) {
-    logAlert("zbase", e, "FATAL ERROR");
+    logAlert("eventql", e, "FATAL ERROR");
   }
 
-  stx::logInfo("zbase", "Exiting...");
+  stx::logInfo("eventql", "Exiting...");
 
   customer_dir.stopWatcher();
 

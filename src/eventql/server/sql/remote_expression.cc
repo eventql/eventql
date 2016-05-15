@@ -13,7 +13,7 @@
 #include "eventql/server/sql/codec/binary_codec.h"
 
 
-namespace zbase {
+namespace eventql {
 
 RemoteExpression::RemoteExpression(
     csql::Transaction* txn,
@@ -57,7 +57,7 @@ void RemoteExpression::executeAsync() {
       break;
     } catch (const StandardException& e) {
       logError(
-          "zbase",
+          "eventql",
           e,
           "RemoteExpression::executeOnHost failed @ $0",
           host.addr.hostAndPort());
@@ -175,4 +175,4 @@ bool RemoteExpression::next(csql::SValue* out_row, size_t out_row_len) {
 
 
 
-} // namespace zbase
+} // namespace eventql

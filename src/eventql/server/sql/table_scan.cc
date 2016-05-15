@@ -13,7 +13,7 @@
 #include "eventql/server/sql/partition_cursor.h"
 #include "eventql/server/sql/remote_expression.h"
 
-namespace zbase {
+namespace eventql {
 
 TableScan::TableScan(
     csql::Transaction* txn,

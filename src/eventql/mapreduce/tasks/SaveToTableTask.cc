@@ -28,7 +28,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 SaveToTableTask::SaveToTableTask(
     const AnalyticsSession& session,
@@ -117,5 +117,5 @@ Option<MapReduceShardResult> SaveToTableTask::execute(
   return None<MapReduceShardResult>();
 }
 
-} // namespace zbase
+} // namespace eventql
 

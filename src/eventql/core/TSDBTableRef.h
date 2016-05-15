@@ -29,7 +29,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 struct TSDBTableRef {
   static TSDBTableRef parse(const String& table_ref);

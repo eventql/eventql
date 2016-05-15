@@ -26,7 +26,7 @@
 #include <eventql/util/http/HTTPSSEStream.h>
 #include <eventql/server/sql/codec/json_codec.h>
 
-namespace zbase {
+namespace eventql {
 
 class JSONSSECodec{
 public:

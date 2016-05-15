@@ -16,7 +16,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 class LSMTableIndex : public RefCounted {
 public:
@@ -56,5 +56,5 @@ protected:
   void* data_;
 };
 
-} // namespace zbase
+} // namespace eventql
 

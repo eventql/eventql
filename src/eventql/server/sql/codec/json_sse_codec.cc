@@ -21,10 +21,10 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include <zbase/sql/codec/json_sse_codec.h>
+#include <eventql/sql/codec/json_sse_codec.h>
 #include <eventql/sql/runtime/resultlist.h>
 
-namespace zbase {
+namespace eventql {
 
 JSONSSECodec::JSONSSECodec(
     csql::QueryPlan* query,

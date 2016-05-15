@@ -29,7 +29,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 struct ReduceTaskShard : public MapReduceTaskShard {
   size_t shard;
@@ -47,7 +47,7 @@ public:
       size_t num_shards,
       MapReduceShardList* shards,
       AnalyticsAuth* auth,
-      zbase::ReplicationScheme* repl);
+      eventql::ReplicationScheme* repl);
 
   Option<MapReduceShardResult> execute(
       RefPtr<MapReduceTaskShard> shard,
@@ -68,9 +68,9 @@ protected:
   Vector<RefPtr<MapReduceTask>> sources_;
   size_t num_shards_;
   AnalyticsAuth* auth_;
-  zbase::ReplicationScheme* repl_;
+  eventql::ReplicationScheme* repl_;
 };
 
-} // namespace zbase
+} // namespace eventql
 
 

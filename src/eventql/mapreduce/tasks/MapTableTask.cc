@@ -29,7 +29,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 MapTableTask::MapTableTask(
     const AnalyticsSession& session,
@@ -39,8 +39,8 @@ MapTableTask::MapTableTask(
     const String& params,
     MapReduceShardList* shards,
     AnalyticsAuth* auth,
-    zbase::PartitionMap* pmap,
-    zbase::ReplicationScheme* repl) :
+    eventql::PartitionMap* pmap,
+    eventql::ReplicationScheme* repl) :
     session_(session),
     table_ref_(table_ref),
     map_function_(map_function),
@@ -188,5 +188,5 @@ void MapTableTask::setRequiredColumns(const Set<String>& columns) {
   required_columns_ = columns;
 }
 
-} // namespace zbase
+} // namespace eventql
 

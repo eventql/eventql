@@ -22,7 +22,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-package zbase;
+package eventql;
 
 enum TablePartitionerType {
   TBL_PARTITION_TIMEWINDOW = 0;

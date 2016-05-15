@@ -29,7 +29,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 PartitionWriter::PartitionWriter(
     PartitionSnapshotRef* head) :

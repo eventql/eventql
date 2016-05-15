@@ -32,7 +32,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 class TablePartitioner : public RefCounted {
 public:

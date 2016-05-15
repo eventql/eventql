@@ -29,7 +29,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 const char PartitionReplication::kStateFileName[] = "_repl";
 

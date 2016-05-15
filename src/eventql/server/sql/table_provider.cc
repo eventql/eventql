@@ -29,7 +29,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 TSDBTableProvider::TSDBTableProvider(
     const String& tsdb_namespace,

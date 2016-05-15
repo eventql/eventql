@@ -26,7 +26,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 LazyPartition::LazyPartition() {
   z1stats()->num_partitions.incr(1);

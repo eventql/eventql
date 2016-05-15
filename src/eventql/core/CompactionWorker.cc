@@ -38,7 +38,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 CompactionWorker::CompactionWorker(
     PartitionMap* pmap,
@@ -52,7 +52,7 @@ CompactionWorker::CompactionWorker(
     }),
     running_(false) {
   pmap->subscribeToPartitionChanges([this] (
-      RefPtr<zbase::PartitionChangeNotification> change) {
+      RefPtr<eventql::PartitionChangeNotification> change) {
     enqueuePartition(change->partition);
   });
 
@@ -166,4 +166,4 @@ void CompactionWorker::work() {
   }
 }
 
-} // namespace zbase
+} // namespace eventql

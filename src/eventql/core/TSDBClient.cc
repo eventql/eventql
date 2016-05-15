@@ -32,7 +32,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 TSDBClient::TSDBClient(
     const String& uri,

@@ -119,7 +119,7 @@ int main(int argc, const char** argv) {
 
   /* conf */
   auto conf_data = FileUtil::read(flags.getString("conf"));
-  auto conf = msg::parseText<zbase::TSDBNodeConfig>(conf_data);
+  auto conf = msg::parseText<eventql::TSDBNodeConfig>(conf_data);
 
   /* start http server and worker pools */
   stx::thread::ThreadPool tpool;
@@ -128,12 +128,12 @@ int main(int argc, const char** argv) {
   stx::http::HTTPServer http_server(&http_router, &ev);
   http_server.listen(flags.getInt("http_port"));
 
-  zbase::PartitionMap pmap(dir);
+  eventql::PartitionMap pmap(dir);
   pmap.open();
 
-  zbase::TSDBService tsdb_node(&pmap);
+  eventql::TSDBService tsdb_node(&pmap);
 
-  zbase::TSDBServlet tsdb_servlet(&tsdb_node, "/tmp");
+  eventql::TSDBServlet tsdb_servlet(&tsdb_node, "/tmp");
   http_router.addRouteByPrefixMatch("/tsdb", &tsdb_servlet, &tpool);
 
   ev.run();

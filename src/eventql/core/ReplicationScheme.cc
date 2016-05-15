@@ -26,7 +26,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 ReplicaRef::ReplicaRef(
     SHA1Hash _unique_id,
@@ -146,4 +146,4 @@ size_t DHTReplicationScheme::minNumCopies() const {
   return cluster_config_.dht_num_copies();
 }
 
-} // namespace zbase
+} // namespace eventql

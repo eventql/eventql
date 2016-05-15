@@ -32,7 +32,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 class MapReduceService {
 public:
@@ -40,9 +40,9 @@ public:
   MapReduceService(
       ConfigDirectory* cdir,
       AnalyticsAuth* auth,
-      zbase::TSDBService* tsdb,
-      zbase::PartitionMap* pmap,
-      zbase::ReplicationScheme* repl,
+      eventql::TSDBService* tsdb,
+      eventql::PartitionMap* pmap,
+      eventql::ReplicationScheme* repl,
       JSRuntime* js_runtime,
       const String& cachedir);
 
@@ -91,12 +91,12 @@ public:
 protected:
   ConfigDirectory* cdir_;
   AnalyticsAuth* auth_;
-  zbase::TSDBService* tsdb_;
-  zbase::PartitionMap* pmap_;
-  zbase::ReplicationScheme* repl_;
+  eventql::TSDBService* tsdb_;
+  eventql::PartitionMap* pmap_;
+  eventql::ReplicationScheme* repl_;
   JSRuntime* js_runtime_;
   String cachedir_;
   thread::ThreadPool tpool_;
 };
 
-} // namespace zbase
+} // namespace eventql

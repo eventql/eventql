@@ -34,7 +34,7 @@
 #include "eventql/master/MasterServlet.h"
 
 using namespace stx;
-using namespace zbase;
+using namespace eventql;
 
 stx::thread::EventLoop ev;
 

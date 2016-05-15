@@ -29,7 +29,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 SaveToTablePartitionTask::SaveToTablePartitionTask(
     const AnalyticsSession& session,
@@ -38,7 +38,7 @@ SaveToTablePartitionTask::SaveToTablePartitionTask(
     Vector<RefPtr<MapReduceTask>> sources,
     MapReduceShardList* shards,
     AnalyticsAuth* auth,
-    zbase::ReplicationScheme* repl) :
+    eventql::ReplicationScheme* repl) :
     session_(session),
     table_name_(table_name),
     partition_key_(partition_key),
@@ -150,5 +150,5 @@ Option<MapReduceShardResult> SaveToTablePartitionTask::executeRemote(
   return None<MapReduceShardResult>();
 }
 
-} // namespace zbase
+} // namespace eventql
 

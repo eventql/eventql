@@ -29,7 +29,7 @@
 
 using namespace stx;
 
-namespace zbase {
+namespace eventql {
 
 struct MapTableTaskShard : public MapReduceTaskShard {
   TSDBTableRef table_ref;
@@ -46,8 +46,8 @@ public:
       const String& params,
       MapReduceShardList* shards,
       AnalyticsAuth* auth,
-      zbase::PartitionMap* pmap,
-      zbase::ReplicationScheme* repl);
+      eventql::PartitionMap* pmap,
+      eventql::ReplicationScheme* repl);
 
   Option<MapReduceShardResult> execute(
       RefPtr<MapReduceTaskShard> shard,
@@ -68,10 +68,10 @@ protected:
   String globals_;
   String params_;
   AnalyticsAuth* auth_;
-  zbase::PartitionMap* pmap_;
-  zbase::ReplicationScheme* repl_;
+  eventql::PartitionMap* pmap_;
+  eventql::ReplicationScheme* repl_;
   Set<String> required_columns_;
 };
 
-} // namespace zbase
+} // namespace eventql
 
