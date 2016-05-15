@@ -26,8 +26,6 @@
 #include <mutex>
 #include "eventql/util/stdtypes.h"
 
-namespace util {
-
 class InternMap {
 public:
   static const constexpr uint32_t kMagic = 0x17234205;
@@ -45,5 +43,4 @@ protected:
   HashMap<String, void*> intern_map_;
 };
 
-} // namespace util
 #endif
