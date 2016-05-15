@@ -372,11 +372,11 @@ int main(int argc, const char** argv) {
   util::Application::init();
   util::Application::logToStderr();
 
-  util::cli::FlagParser flags;
+  cli::FlagParser flags;
 
   flags.defineFlag(
       "api_host",
-      util::cli::FlagParser::T_STRING,
+      cli::FlagParser::T_STRING,
       false,
       NULL,
       "api.zscale.io",
@@ -385,7 +385,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "auth_token",
-      util::cli::FlagParser::T_STRING,
+      cli::FlagParser::T_STRING,
       false,
       NULL,
       NULL,
@@ -395,7 +395,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "loglevel",
-      util::cli::FlagParser::T_STRING,
+      cli::FlagParser::T_STRING,
       false,
       NULL,
       "INFO",
@@ -423,7 +423,7 @@ int main(int argc, const char** argv) {
 
   //mr_execute_cmd->flags().defineFlag(
   //    "api_host",
-  //    util::cli::FlagParser::T_STRING,
+  //    cli::FlagParser::T_STRING,
   //    false,
   //    NULL,
   //    "api.zscale.io",

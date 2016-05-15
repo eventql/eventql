@@ -94,11 +94,11 @@ int main(int argc, const char** argv) {
   util::Application::init();
   util::Application::logToStderr();
 
-  util::cli::FlagParser flags;
+  cli::FlagParser flags;
 
   flags.defineFlag(
       "loglevel",
-      util::cli::FlagParser::T_STRING,
+      cli::FlagParser::T_STRING,
       false,
       NULL,
       "INFO",
@@ -142,7 +142,7 @@ int main(int argc, const char** argv) {
 
   cluster_add_node_cmd->flags().defineFlag(
       "name",
-      util::cli::FlagParser::T_STRING,
+      cli::FlagParser::T_STRING,
       true,
       NULL,
       NULL,
@@ -151,7 +151,7 @@ int main(int argc, const char** argv) {
 
   cluster_add_node_cmd->flags().defineFlag(
       "addr",
-      util::cli::FlagParser::T_STRING,
+      cli::FlagParser::T_STRING,
       true,
       NULL,
       NULL,
@@ -160,7 +160,7 @@ int main(int argc, const char** argv) {
 
   cluster_add_node_cmd->flags().defineFlag(
       "vnodes",
-      util::cli::FlagParser::T_INTEGER,
+      cli::FlagParser::T_INTEGER,
       true,
       NULL,
       NULL,

@@ -25,8 +25,6 @@
 #include <eventql/util/io/filerepository.h>
 #include <eventql/util/io/fileutil.h>
 
-namespace util {
-
 FileRepository::FileRepository(
     const std::string& basedir) :
     basedir_(basedir) {}
@@ -54,7 +52,5 @@ void FileRepository::deleteAllFiles() {
     FileUtil::rm(filename);
     return true;
   });
-}
-
 }
 

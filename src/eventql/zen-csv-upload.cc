@@ -345,11 +345,11 @@ int main(int argc, const char** argv) {
   util::Application::init();
   util::Application::logToStderr();
 
-  util::cli::FlagParser flags;
+  cli::FlagParser flags;
 
   flags.defineFlag(
       "loglevel",
-      util::cli::FlagParser::T_STRING,
+      cli::FlagParser::T_STRING,
       false,
       NULL,
       "INFO",
@@ -358,7 +358,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "input_file",
-      util::cli::FlagParser::T_STRING,
+      cli::FlagParser::T_STRING,
       true,
       "i",
       NULL,
@@ -367,7 +367,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "table_name",
-      util::cli::FlagParser::T_STRING,
+      cli::FlagParser::T_STRING,
       true,
       "t",
       NULL,
@@ -376,7 +376,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "column_separator",
-      util::cli::FlagParser::T_STRING,
+      cli::FlagParser::T_STRING,
       false,
       NULL,
       "\t",
@@ -385,7 +385,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "row_separator",
-      util::cli::FlagParser::T_STRING,
+      cli::FlagParser::T_STRING,
       false,
       NULL,
       "\n",
@@ -394,7 +394,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "quote_char",
-      util::cli::FlagParser::T_STRING,
+      cli::FlagParser::T_STRING,
       false,
       NULL,
       "\"",
@@ -403,7 +403,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "api_token",
-      util::cli::FlagParser::T_STRING,
+      cli::FlagParser::T_STRING,
       true,
       "x",
       NULL,
@@ -412,7 +412,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "api_host",
-      util::cli::FlagParser::T_STRING,
+      cli::FlagParser::T_STRING,
       false,
       NULL,
       "api.eventql.io",
@@ -421,7 +421,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "shard_size",
-      util::cli::FlagParser::T_INTEGER,
+      cli::FlagParser::T_INTEGER,
       false,
       NULL,
       "262144",
@@ -430,7 +430,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "skip_confirmation",
-      util::cli::FlagParser::T_SWITCH,
+      cli::FlagParser::T_SWITCH,
       false,
       "y",
       NULL,

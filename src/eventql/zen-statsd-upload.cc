@@ -101,11 +101,11 @@ int main(int argc, const char** argv) {
   util::Application::init();
   util::Application::logToStderr();
 
-  util::cli::FlagParser flags;
+  cli::FlagParser flags;
 
   flags.defineFlag(
       "api_token",
-      util::cli::FlagParser::T_STRING,
+      cli::FlagParser::T_STRING,
       true,
       "x",
       NULL,
@@ -114,7 +114,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "statsd_port",
-      util::cli::FlagParser::T_INTEGER,
+      cli::FlagParser::T_INTEGER,
       false,
       "p",
       "8125",
@@ -123,7 +123,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "key_prefix",
-      util::cli::FlagParser::T_STRING,
+      cli::FlagParser::T_STRING,
       false,
       NULL,
       "stats.",
@@ -132,7 +132,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "loglevel",
-      util::cli::FlagParser::T_STRING,
+      cli::FlagParser::T_STRING,
       false,
       NULL,
       "INFO",
