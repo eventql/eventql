@@ -24,7 +24,6 @@
 #include "eventql/util/http/statshttpservlet.h"
 #include "eventql/util/stats/statssink.h"
 
-namespace util {
 namespace stats {
 
 StatsHTTPServlet::StatsHTTPServlet() : stats_repo_(StatsRepository::get()) {}
@@ -50,5 +49,4 @@ void StatsHTTPServlet::handleHTTPRequest(
   res->addBody(buf);
 }
 
-}
 }

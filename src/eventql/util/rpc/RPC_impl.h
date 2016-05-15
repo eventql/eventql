@@ -23,8 +23,6 @@
  */
 #include "eventql/util/reflect/reflect.h"
 
-namespace util {
-
 template <typename ResultType, typename ArgPackType>
 RPC<ResultType, ArgPackType>::RPC(
   const std::string& method,
@@ -114,9 +112,7 @@ AutoRef<RPC<ReturnType, std::tuple<ArgTypes...>>> mkRPC(
   ReturnType (ClassType::* method)(ArgTypes...),
   ArgTypes... args) {
   return mkRPC<Codec>(
-      util::reflect::reflectMethod(method),
+      reflect::reflectMethod(method),
       std::tuple<typename std::decay<ArgTypes>::type...>(args...));
 }
-
-} // namespace util
 

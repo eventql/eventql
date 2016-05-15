@@ -23,8 +23,6 @@
  */
 #include "eventql/util/rpc/RPC.h"
 
-namespace util {
-
 AnyRPC::AnyRPC(
     const std::string& method) :
     method_(method),
@@ -97,6 +95,4 @@ bool AnyRPC::isFailure() const {
 
 const Status& AnyRPC::status() const {
   return status_;
-}
-
 }

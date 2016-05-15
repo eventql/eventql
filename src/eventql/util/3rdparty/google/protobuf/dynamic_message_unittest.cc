@@ -114,7 +114,7 @@ TEST_F(DynamicMessageTest, OnePrototype) {
 
 TEST_F(DynamicMessageTest, Defaults) {
   // Check that all default values are set correctly in the initial message.
-  TestUtil::ReflectionTester reflection_tester(descriptor_);
+  TestreflectionTester reflection_tester(descriptor_);
   reflection_tester.ExpectClearViaReflection(*prototype_);
 }
 
@@ -123,7 +123,7 @@ TEST_F(DynamicMessageTest, IndependentOffsets) {
   // one to a unique value then checking that they all still have those
   // unique values (i.e. they don't stomp each other).
   scoped_ptr<Message> message(prototype_->New());
-  TestUtil::ReflectionTester reflection_tester(descriptor_);
+  TestreflectionTester reflection_tester(descriptor_);
 
   reflection_tester.SetAllFieldsViaReflection(message.get());
   reflection_tester.ExpectAllFieldsSetViaReflection(*message);
@@ -132,7 +132,7 @@ TEST_F(DynamicMessageTest, IndependentOffsets) {
 TEST_F(DynamicMessageTest, Extensions) {
   // Check that extensions work.
   scoped_ptr<Message> message(extensions_prototype_->New());
-  TestUtil::ReflectionTester reflection_tester(extensions_descriptor_);
+  TestreflectionTester reflection_tester(extensions_descriptor_);
 
   reflection_tester.SetAllFieldsViaReflection(message.get());
   reflection_tester.ExpectAllFieldsSetViaReflection(*message);
@@ -141,7 +141,7 @@ TEST_F(DynamicMessageTest, Extensions) {
 TEST_F(DynamicMessageTest, PackedFields) {
   // Check that packed fields work properly.
   scoped_ptr<Message> message(packed_prototype_->New());
-  TestUtil::ReflectionTester reflection_tester(packed_descriptor_);
+  TestreflectionTester reflection_tester(packed_descriptor_);
 
   reflection_tester.SetPackedFieldsViaReflection(message.get());
   reflection_tester.ExpectPackedFieldsSetViaReflection(*message);
@@ -154,7 +154,7 @@ TEST_F(DynamicMessageTest, SpaceUsed) {
   // to test very much here.  Just make sure it appears to be working.
 
   scoped_ptr<Message> message(prototype_->New());
-  TestUtil::ReflectionTester reflection_tester(descriptor_);
+  TestreflectionTester reflection_tester(descriptor_);
 
   int initial_space_used = message->SpaceUsed();
 

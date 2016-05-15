@@ -4,7 +4,6 @@
 #include <eventql/util/cli/flagparser.h>
 #include <eventql/util/io/outputstream.h>
 
-namespace util {
 namespace cli {
 
 FlagParser::FlagParser() : ignore_unknown_(false) {}
@@ -244,5 +243,4 @@ void FlagParser::ignoreUnknownFlags() {
   ignore_unknown_ = true;
 }
 
-}
 }

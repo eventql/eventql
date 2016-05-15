@@ -24,8 +24,6 @@
 #include "eventql/util/exception.h"
 #include "eventql/util/rpc/ServerGroup.h"
 
-namespace util {
-
 ServerGroup::ServerGroup() {}
 
 std::string ServerGroup::getServerForNextRequest() {
@@ -74,6 +72,4 @@ int RoundRobinServerGroup::pickServerForNextRequest(
   }
 
   return -1;
-}
-
 }

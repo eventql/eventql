@@ -27,7 +27,7 @@
 namespace util {
 
 void IniParser::start(const String& str) {
-  util::iputs("start parsing $0", str);
+  iputs("start parsing $0", str);
 
 }
 

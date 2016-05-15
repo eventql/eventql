@@ -67,7 +67,7 @@ const FieldDescriptor* F(const string& name) {
 TEST(GeneratedMessageReflectionTest, Defaults) {
   // Check that all default values are set correctly in the initial message.
   unittest::TestAllTypes message;
-  TestUtil::ReflectionTester reflection_tester(
+  TestreflectionTester reflection_tester(
     unittest::TestAllTypes::descriptor());
 
   reflection_tester.ExpectClearViaReflection(message);
@@ -91,7 +91,7 @@ TEST(GeneratedMessageReflectionTest, Accessors) {
   // Set every field to a unique value then go back and check all those
   // values.
   unittest::TestAllTypes message;
-  TestUtil::ReflectionTester reflection_tester(
+  TestreflectionTester reflection_tester(
     unittest::TestAllTypes::descriptor());
 
   reflection_tester.SetAllFieldsViaReflection(&message);
@@ -128,7 +128,7 @@ TEST(GeneratedMessageReflectionTest, DefaultsAfterClear) {
   // Check that after setting all fields and then clearing, getting an
   // embedded message does NOT return the default instance.
   unittest::TestAllTypes message;
-  TestUtil::ReflectionTester reflection_tester(
+  TestreflectionTester reflection_tester(
     unittest::TestAllTypes::descriptor());
 
   TestUtil::SetAllFields(&message);
@@ -209,7 +209,7 @@ TEST(GeneratedMessageReflectionTest, SwapUnknown) {
 
 TEST(GeneratedMessageReflectionTest, RemoveLast) {
   unittest::TestAllTypes message;
-  TestUtil::ReflectionTester reflection_tester(
+  TestreflectionTester reflection_tester(
     unittest::TestAllTypes::descriptor());
 
   TestUtil::SetAllFields(&message);
@@ -221,7 +221,7 @@ TEST(GeneratedMessageReflectionTest, RemoveLast) {
 
 TEST(GeneratedMessageReflectionTest, RemoveLastExtensions) {
   unittest::TestAllExtensions message;
-  TestUtil::ReflectionTester reflection_tester(
+  TestreflectionTester reflection_tester(
     unittest::TestAllExtensions::descriptor());
 
   TestUtil::SetAllExtensions(&message);
@@ -234,7 +234,7 @@ TEST(GeneratedMessageReflectionTest, RemoveLastExtensions) {
 TEST(GeneratedMessageReflectionTest, ReleaseLast) {
   unittest::TestAllTypes message;
   const Descriptor* descriptor = message.GetDescriptor();
-  TestUtil::ReflectionTester reflection_tester(descriptor);
+  TestreflectionTester reflection_tester(descriptor);
 
   TestUtil::SetAllFields(&message);
 
@@ -256,7 +256,7 @@ TEST(GeneratedMessageReflectionTest, ReleaseLast) {
 TEST(GeneratedMessageReflectionTest, ReleaseLastExtensions) {
   unittest::TestAllExtensions message;
   const Descriptor* descriptor = message.GetDescriptor();
-  TestUtil::ReflectionTester reflection_tester(descriptor);
+  TestreflectionTester reflection_tester(descriptor);
 
   TestUtil::SetAllExtensions(&message);
 
@@ -280,7 +280,7 @@ TEST(GeneratedMessageReflectionTest, ReleaseLastExtensions) {
 
 TEST(GeneratedMessageReflectionTest, SwapRepeatedElements) {
   unittest::TestAllTypes message;
-  TestUtil::ReflectionTester reflection_tester(
+  TestreflectionTester reflection_tester(
     unittest::TestAllTypes::descriptor());
 
   TestUtil::SetAllFields(&message);
@@ -296,7 +296,7 @@ TEST(GeneratedMessageReflectionTest, SwapRepeatedElements) {
 
 TEST(GeneratedMessageReflectionTest, SwapRepeatedElementsExtension) {
   unittest::TestAllExtensions message;
-  TestUtil::ReflectionTester reflection_tester(
+  TestreflectionTester reflection_tester(
     unittest::TestAllExtensions::descriptor());
 
   TestUtil::SetAllExtensions(&message);
@@ -314,7 +314,7 @@ TEST(GeneratedMessageReflectionTest, Extensions) {
   // Set every extension to a unique value then go back and check all those
   // values.
   unittest::TestAllExtensions message;
-  TestUtil::ReflectionTester reflection_tester(
+  TestreflectionTester reflection_tester(
     unittest::TestAllExtensions::descriptor());
 
   reflection_tester.SetAllFieldsViaReflection(&message);
@@ -377,24 +377,24 @@ TEST(GeneratedMessageReflectionTest, FindKnownExtensionByName) {
 
 TEST(GeneratedMessageReflectionTest, ReleaseMessageTest) {
   unittest::TestAllTypes message;
-  TestUtil::ReflectionTester reflection_tester(
+  TestreflectionTester reflection_tester(
     unittest::TestAllTypes::descriptor());
 
   // When nothing is set, we expect all released messages to be NULL.
   reflection_tester.ExpectMessagesReleasedViaReflection(
-      &message, TestUtil::ReflectionTester::IS_NULL);
+      &message, TestreflectionTester::IS_NULL);
 
   // After fields are set we should get non-NULL releases.
   reflection_tester.SetAllFieldsViaReflection(&message);
   reflection_tester.ExpectMessagesReleasedViaReflection(
-      &message, TestUtil::ReflectionTester::NOT_NULL);
+      &message, TestreflectionTester::NOT_NULL);
 
   // After Clear() we may or may not get a message from ReleaseMessage().
   // This is implementation specific.
   reflection_tester.SetAllFieldsViaReflection(&message);
   message.Clear();
   reflection_tester.ExpectMessagesReleasedViaReflection(
-      &message, TestUtil::ReflectionTester::CAN_BE_NULL);
+      &message, TestreflectionTester::CAN_BE_NULL);
 
   // Test a different code path for setting after releasing.
   TestUtil::SetAllFields(&message);
@@ -403,24 +403,24 @@ TEST(GeneratedMessageReflectionTest, ReleaseMessageTest) {
 
 TEST(GeneratedMessageReflectionTest, ReleaseExtensionMessageTest) {
   unittest::TestAllExtensions message;
-  TestUtil::ReflectionTester reflection_tester(
+  TestreflectionTester reflection_tester(
     unittest::TestAllExtensions::descriptor());
 
   // When nothing is set, we expect all released messages to be NULL.
   reflection_tester.ExpectMessagesReleasedViaReflection(
-      &message, TestUtil::ReflectionTester::IS_NULL);
+      &message, TestreflectionTester::IS_NULL);
 
   // After fields are set we should get non-NULL releases.
   reflection_tester.SetAllFieldsViaReflection(&message);
   reflection_tester.ExpectMessagesReleasedViaReflection(
-      &message, TestUtil::ReflectionTester::NOT_NULL);
+      &message, TestreflectionTester::NOT_NULL);
 
   // After Clear() we may or may not get a message from ReleaseMessage().
   // This is implementation specific.
   reflection_tester.SetAllFieldsViaReflection(&message);
   message.Clear();
   reflection_tester.ExpectMessagesReleasedViaReflection(
-      &message, TestUtil::ReflectionTester::CAN_BE_NULL);
+      &message, TestreflectionTester::CAN_BE_NULL);
 
   // Test a different code path for setting after releasing.
   TestUtil::SetAllExtensions(&message);

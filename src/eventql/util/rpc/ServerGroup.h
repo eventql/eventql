@@ -32,8 +32,6 @@
 #include <vector>
 #include "eventql/util/net/inetaddr.h"
 
-namespace util {
-
 class ServerGroup {
 public:
   ServerGroup();
@@ -75,5 +73,4 @@ protected:
   unsigned last_index_;
 };
 
-}
 #endif

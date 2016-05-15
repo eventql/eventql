@@ -106,7 +106,7 @@ template <
     typename T,
     typename O,
     typename = typename std::enable_if<
-        util::reflect::is_reflected<T>::value>::type>
+        reflect::is_reflected<T>::value>::type>
 void toJSON(const T& value, O* target) {
   JSONOutputProxy<O> proxy(value, target);
 }
@@ -115,7 +115,7 @@ template <
     typename T,
     typename O,
     typename = typename std::enable_if<
-        !util::reflect::is_reflected<T>::value>::type,
+        !reflect::is_reflected<T>::value>::type,
     typename = void>
 void toJSON(const T& value, O* target) {
   toJSONImpl(value, target);
@@ -145,7 +145,7 @@ JSONInputProxy<T>::JSONInputProxy(
     JSONObject::const_iterator end) :
     obj_begin(begin),
     obj_end(end),
-    value(util::reflect::MetaClass<T>::unserialize(this)) {}
+    value(reflect::MetaClass<T>::unserialize(this)) {}
 
 template <typename T>
 template <typename PropertyType>
@@ -182,7 +182,7 @@ JSONOutputProxy<OutputType>::JSONOutputProxy(
     OutputType* target) :
     target_(target) {
   target_->emplace_back(json::JSON_OBJECT_BEGIN);
-  util::reflect::MetaClass<T>::serialize(instance, this);
+  reflect::MetaClass<T>::serialize(instance, this);
   target_->emplace_back(json::JSON_OBJECT_END);
 }
 
@@ -233,7 +233,7 @@ template <typename... T, int... I, typename O>
 void toJSONTupleImpl(
     const std::tuple<T...>& value,
     O* target,
-    util::reflect::IndexSequence<I...>) {
+    reflect::IndexSequence<I...>) {
   toJSONVariadicImpl(target, std::get<I>(value)...);
 }
 
@@ -243,7 +243,7 @@ void toJSONImpl(const std::tuple<T...>& value, O* target) {
   toJSONTupleImpl(
       value,
       target,
-      typename util::reflect::MkIndexSequenceFor<T...>::type());
+      typename reflect::MkIndexSequenceFor<T...>::type());
   target->emplace_back(json::JSON_ARRAY_END);
 }
 

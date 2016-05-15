@@ -24,14 +24,10 @@
 #pragma once
 #include "eventql/util/stdtypes.h"
 
-namespace util {
-
 class Serializable {
 public:
 
   virtual ~Serializable() {}
 
 };
-
-} // namespace util
 

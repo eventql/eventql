@@ -24,8 +24,6 @@
 #include <eventql/util/VFS.h>
 #include <eventql/util/io/mmappedfile.h>
 
-namespace util {
-
 RefPtr<VFSFile> WhitelistVFS::openFile(const String& filename) {
   auto iter = whitelist_.find(filename);
   if (iter == whitelist_.end()) {
@@ -44,6 +42,4 @@ void WhitelistVFS::registerFile(
     const String vfs_path,
     const String& real_path) {
   whitelist_[vfs_path] = real_path;
-}
-
 }

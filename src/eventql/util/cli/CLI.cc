@@ -23,7 +23,6 @@
  */
 #include <eventql/util/cli/CLI.h>
 
-namespace util {
 namespace cli {
 
 RefPtr<CLICommand> CLI::defineCommand(const String& command) {
@@ -51,5 +50,4 @@ void CLI::call(const std::vector<std::string>& argv) {
 }
 
 
-}
 }

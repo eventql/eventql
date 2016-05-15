@@ -38,11 +38,11 @@ void ReadStreamServlet::handleHTTPRequest(
     Buffer chunk;
     chunk.append(data, size);
     body.append(data, size);
-    util::iputs("Request Body Chunk read: $0", chunk.toString());
+    iputs("Request Body Chunk read: $0", chunk.toString());
   };
 
   req_stream->readBody(bodyChunkRead);
-  util::iputs("Request Body: $0", body.toString());
+  iputs("Request Body: $0", body.toString());
 
 }
 

@@ -24,8 +24,6 @@
 #include "eventql/util/logging.h"
 #include "eventql/util/rpc/RPCClient.h"
 
-namespace util {
-
 HTTPRPCClient::HTTPRPCClient(
     TaskScheduler* sched) :
     http_pool_(sched, nullptr) {}
@@ -39,7 +37,7 @@ void HTTPRPCClient::call(const URI& uri, RefPtr<AnyRPC> rpc) {
   auto http_future = http_pool_.executeRequest(http_req);
 
 #ifndef STX_NOTRACE
-  util::logTrace(
+  logTrace(
       "http.rpcclient",
       "executing RPC via HTTP request\n    id=$2\n    method=$1\n    uri=$0",
       uri.toString(),
@@ -54,7 +52,7 @@ void HTTPRPCClient::call(const URI& uri, RefPtr<AnyRPC> rpc) {
           resp.body().toString());
 
 #ifndef STX_NOTRACE
-    util::logTrace(
+    logTrace(
         "http.rpcclient",
         "RPC via HTTP request id=$0: Failed: $1",
         (void*) rpc.get(),
@@ -66,7 +64,7 @@ void HTTPRPCClient::call(const URI& uri, RefPtr<AnyRPC> rpc) {
     }
 
 #ifndef STX_NOTRACE
-    util::logTrace(
+    logTrace(
         "http.rpcclient",
         "RPC via HTTP request id=$0: Success, got $1 bytes response",
         (void*) rpc.get(),
@@ -77,7 +75,7 @@ void HTTPRPCClient::call(const URI& uri, RefPtr<AnyRPC> rpc) {
 
   http_future.onFailure([uri, rpc] (const Status& status) mutable{
 #ifndef STX_NOTRACE
-    util::logTrace(
+    logTrace(
         "http.rpcclient",
         "RPC via HTTP request id=$0: Failed: $1",
         (void*) rpc.get(),
@@ -87,6 +85,4 @@ void HTTPRPCClient::call(const URI& uri, RefPtr<AnyRPC> rpc) {
     rpc->error(status);
   });
 }
-
-} // namespace util
 

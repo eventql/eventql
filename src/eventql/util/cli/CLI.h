@@ -29,7 +29,6 @@
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/cli/CLICommand.h>
 
-namespace util {
 namespace cli {
 
 class CLI {
@@ -46,6 +45,5 @@ protected:
   HashMap<String, RefPtr<CLICommand>> commands_;
 };
 
-}
 }
 #endif

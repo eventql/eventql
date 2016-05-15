@@ -25,7 +25,6 @@
 #include "eventql/util/rpc/RPCRequest.h"
 #include "eventql/util/rpc/RPCContext.h"
 
-namespace util {
 namespace rpc {
 
 RPCRequest::RPCRequest(
@@ -160,5 +159,4 @@ bool RPCRequest::waitFor(const Duration& timeout) const {
 }
 
 } // namespace rpc
-} // namespace util
 

@@ -34,8 +34,6 @@
 #include "eventql/util/rpc/RPC.h"
 #include "eventql/util/http/httpconnectionpool.h"
 
-namespace util {
-
 class RPCClient {
 public:
   virtual ~RPCClient() {}
@@ -52,5 +50,4 @@ protected:
   http::HTTPConnectionPool http_pool_;
 };
 
-} // namespace util
 #endif

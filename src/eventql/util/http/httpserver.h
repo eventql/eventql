@@ -34,8 +34,6 @@
 
 namespace http {
 
-using TaskScheduler;
-
 class HTTPServer {
 public:
   HTTPServer(

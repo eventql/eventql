@@ -520,7 +520,7 @@ TEST(GeneratedMessageTest, DynamicMessageCopyFrom) {
   message1.reset(factory.GetPrototype(
                      unittest::TestAllTypes::descriptor())->New());
 
-  TestUtil::ReflectionTester reflection_tester(
+  TestreflectionTester reflection_tester(
     unittest::TestAllTypes::descriptor());
   reflection_tester.SetAllFieldsViaReflection(message1.get());
 

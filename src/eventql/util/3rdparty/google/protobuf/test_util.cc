@@ -2121,7 +2121,7 @@ void TestUtil::ExpectRepeatedExtensionsSwapped(
 
 // ===================================================================
 
-TestUtil::ReflectionTester::ReflectionTester(
+TestreflectionTester::ReflectionTester(
     const Descriptor* base_descriptor)
   : base_descriptor_(base_descriptor) {
 
@@ -2184,7 +2184,7 @@ TestUtil::ReflectionTester::ReflectionTester(
 }
 
 // Shorthand to get a FieldDescriptor for a field of unittest::TestAllTypes.
-const FieldDescriptor* TestUtil::ReflectionTester::F(const string& name) {
+const FieldDescriptor* TestreflectionTester::F(const string& name) {
   const FieldDescriptor* result = NULL;
   if (base_descriptor_->name() == "TestAllExtensions" ||
       base_descriptor_->name() == "TestPackedExtensions") {
@@ -2198,7 +2198,7 @@ const FieldDescriptor* TestUtil::ReflectionTester::F(const string& name) {
 
 // -------------------------------------------------------------------
 
-void TestUtil::ReflectionTester::SetAllFieldsViaReflection(Message* message) {
+void TestreflectionTester::SetAllFieldsViaReflection(Message* message) {
   const Reflection* reflection = message->GetReflection();
   Message* sub_message;
 
@@ -2337,7 +2337,7 @@ void TestUtil::ReflectionTester::SetAllFieldsViaReflection(Message* message) {
   reflection->SetString(message, F("default_cord"), "425");
 }
 
-void TestUtil::ReflectionTester::SetPackedFieldsViaReflection(
+void TestreflectionTester::SetPackedFieldsViaReflection(
     Message* message) {
   const Reflection* reflection = message->GetReflection();
   reflection->AddInt32 (message, F("packed_int32"   ), 601);
@@ -2373,7 +2373,7 @@ void TestUtil::ReflectionTester::SetPackedFieldsViaReflection(
 
 // -------------------------------------------------------------------
 
-void TestUtil::ReflectionTester::ExpectAllFieldsSetViaReflection(
+void TestreflectionTester::ExpectAllFieldsSetViaReflection(
     const Message& message) {
   // We have to split this into three function otherwise it creates a stack
   // frame so large that it triggers a warning.
@@ -2382,7 +2382,7 @@ void TestUtil::ReflectionTester::ExpectAllFieldsSetViaReflection(
   ExpectAllFieldsSetViaReflection3(message);
 }
 
-void TestUtil::ReflectionTester::ExpectAllFieldsSetViaReflection1(
+void TestreflectionTester::ExpectAllFieldsSetViaReflection1(
     const Message& message) {
   const Reflection* reflection = message.GetReflection();
   string scratch;
@@ -2475,7 +2475,7 @@ void TestUtil::ReflectionTester::ExpectAllFieldsSetViaReflection1(
 
 }
 
-void TestUtil::ReflectionTester::ExpectAllFieldsSetViaReflection2(
+void TestreflectionTester::ExpectAllFieldsSetViaReflection2(
     const Message& message) {
   const Reflection* reflection = message.GetReflection();
   string scratch;
@@ -2598,7 +2598,7 @@ void TestUtil::ReflectionTester::ExpectAllFieldsSetViaReflection2(
                         message, F("repeated_cord"), 1, &scratch));
 }
 
-void TestUtil::ReflectionTester::ExpectAllFieldsSetViaReflection3(
+void TestreflectionTester::ExpectAllFieldsSetViaReflection3(
     const Message& message) {
   const Reflection* reflection = message.GetReflection();
   string scratch;
@@ -2659,7 +2659,7 @@ void TestUtil::ReflectionTester::ExpectAllFieldsSetViaReflection3(
   EXPECT_EQ("425", reflection->GetStringReference(message, F("default_cord"), &scratch));
 }
 
-void TestUtil::ReflectionTester::ExpectPackedFieldsSetViaReflection(
+void TestreflectionTester::ExpectPackedFieldsSetViaReflection(
     const Message& message) {
   const Reflection* reflection = message.GetReflection();
 
@@ -2713,7 +2713,7 @@ void TestUtil::ReflectionTester::ExpectPackedFieldsSetViaReflection(
 
 // -------------------------------------------------------------------
 
-void TestUtil::ReflectionTester::ExpectClearViaReflection(
+void TestreflectionTester::ExpectClearViaReflection(
     const Message& message) {
   const Reflection* reflection = message.GetReflection();
   string scratch;
@@ -2885,7 +2885,7 @@ void TestUtil::ReflectionTester::ExpectClearViaReflection(
   EXPECT_EQ("123", reflection->GetStringReference(message, F("default_cord"), &scratch));
 }
 
-void TestUtil::ReflectionTester::ExpectPackedClearViaReflection(
+void TestreflectionTester::ExpectPackedClearViaReflection(
     const Message& message) {
   const Reflection* reflection = message.GetReflection();
 
@@ -2907,7 +2907,7 @@ void TestUtil::ReflectionTester::ExpectPackedClearViaReflection(
 
 // -------------------------------------------------------------------
 
-void TestUtil::ReflectionTester::ModifyRepeatedFieldsViaReflection(
+void TestreflectionTester::ModifyRepeatedFieldsViaReflection(
     Message* message) {
   const Reflection* reflection = message->GetReflection();
   Message* sub_message;
@@ -2947,7 +2947,7 @@ void TestUtil::ReflectionTester::ModifyRepeatedFieldsViaReflection(
   reflection->SetRepeatedString(message, F("repeated_cord"), 1, "525");
 }
 
-void TestUtil::ReflectionTester::ModifyPackedFieldsViaReflection(
+void TestreflectionTester::ModifyPackedFieldsViaReflection(
     Message* message) {
   const Reflection* reflection = message->GetReflection();
   reflection->SetRepeatedInt32 (message, F("packed_int32"   ), 1, 801);
@@ -2966,7 +2966,7 @@ void TestUtil::ReflectionTester::ModifyPackedFieldsViaReflection(
   reflection->SetRepeatedEnum  (message, F("packed_enum"    ), 1, foreign_foo_);
 }
 
-void TestUtil::ReflectionTester::RemoveLastRepeatedsViaReflection(
+void TestreflectionTester::RemoveLastRepeatedsViaReflection(
     Message* message) {
   const Reflection* reflection = message->GetReflection();
 
@@ -2980,7 +2980,7 @@ void TestUtil::ReflectionTester::RemoveLastRepeatedsViaReflection(
   }
 }
 
-void TestUtil::ReflectionTester::ReleaseLastRepeatedsViaReflection(
+void TestreflectionTester::ReleaseLastRepeatedsViaReflection(
     Message* message, bool expect_extensions_notnull) {
   const Reflection* reflection = message->GetReflection();
 
@@ -3000,7 +3000,7 @@ void TestUtil::ReflectionTester::ReleaseLastRepeatedsViaReflection(
   }
 }
 
-void TestUtil::ReflectionTester::SwapRepeatedsViaReflection(Message* message) {
+void TestreflectionTester::SwapRepeatedsViaReflection(Message* message) {
   const Reflection* reflection = message->GetReflection();
 
   vector<const FieldDescriptor*> output;
@@ -3013,9 +3013,9 @@ void TestUtil::ReflectionTester::SwapRepeatedsViaReflection(Message* message) {
   }
 }
 
-void TestUtil::ReflectionTester::ExpectMessagesReleasedViaReflection(
+void TestreflectionTester::ExpectMessagesReleasedViaReflection(
     Message* message,
-    TestUtil::ReflectionTester::MessageReleaseState expected_release_state) {
+    TestreflectionTester::MessageReleaseState expected_release_state) {
   const Reflection* reflection = message->GetReflection();
 
   static const char* fields[] = {

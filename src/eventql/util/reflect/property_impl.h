@@ -21,7 +21,6 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-namespace util {
 namespace reflect {
 
 template <typename ClassType, typename TargetType>
@@ -94,5 +93,4 @@ ClassType MetaClass<ClassType>::unserialize(
 }
 
 
-}
 }

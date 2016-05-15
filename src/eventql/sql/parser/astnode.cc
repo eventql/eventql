@@ -319,8 +319,6 @@ void ASTNode::debugPrint(int indent /* = 0 */) const {
 
 } // namespace csql
 
-namespace util {
-
 template <>
 std::string inspect<
     csql::ASTNode::kASTNodeType>(
@@ -335,4 +333,3 @@ std::string inspect<
   return "<ASTNode>";
 }
 
-} // namespace util
