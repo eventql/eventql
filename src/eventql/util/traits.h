@@ -26,7 +26,7 @@
 
 /* TypeIsReflected<T> */
 template <typename T>
-using TypeIsReflected = util::reflect::is_reflected<T>;
+using TypeIsReflected = reflect::is_reflected<T>;
 
 /* TypeIsVector<T> */
 template <typename T, typename = void>

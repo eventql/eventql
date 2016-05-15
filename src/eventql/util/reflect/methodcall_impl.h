@@ -28,7 +28,6 @@
 #include "eventql/util/stringutil.h"
 #include "eventql/util/reflect/metaclass.h"
 
-namespace util {
 namespace reflect {
 
 template <typename ClassType, typename ReturnType, typename... ArgTypes>
@@ -102,7 +101,7 @@ template <typename ClassType, typename ReturnType, typename... ArgTypes>
 MethodCall<ClassType, ReturnType, ArgTypes...> reflectMethodImpl(
     ReturnType (ClassType::* method)(ArgTypes...)) {
   MethodCallLookup<ClassType, ReturnType, ArgTypes...> lookup(method);
-  util::reflect::MetaClass<ClassType>::reflect(&lookup);
+  reflect::MetaClass<ClassType>::reflect(&lookup);
   return lookup.get();
 }
 
@@ -272,5 +271,4 @@ typename RPCCall<MethodCallType>::RPCArgPackType
                   arg_names_[I])...);
 }
 
-}
 }

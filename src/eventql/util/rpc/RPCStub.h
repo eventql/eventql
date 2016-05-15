@@ -30,7 +30,6 @@
 #include "eventql/util/io/inputstream.h"
 #include "eventql/util/rpc/RPCRequest.h"
 
-namespace util {
 namespace rpc {
 
 class RPCStub {
@@ -61,5 +60,4 @@ protected:
 };
 
 } // namespace rpc
-} // namespace util
 

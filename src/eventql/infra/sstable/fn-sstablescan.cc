@@ -123,11 +123,11 @@ int main(int argc, const char** argv) {
 
   /* execute scan */
   auto headers = scan.columnNames();
-  util::iputs("$0", StringUtil::join(headers, ";"));
+  iputs("$0", StringUtil::join(headers, ";"));
 
   auto cursor = reader.getCursor();
   scan.execute(cursor.get(), [] (const Vector<String> row) {
-    util::iputs("$0", StringUtil::join(row, ";"));
+    iputs("$0", StringUtil::join(row, ";"));
   });
 
   return 0;

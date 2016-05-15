@@ -28,7 +28,6 @@
 #include <functional>
 #include "eventql/util/reflect/indexsequence.h"
 
-namespace util {
 namespace reflect {
 
 template <typename ClassType, typename TargetType>
@@ -83,7 +82,6 @@ protected:
   TargetType* target_;
 };
 
-}
 }
 
 #include "property_impl.h"

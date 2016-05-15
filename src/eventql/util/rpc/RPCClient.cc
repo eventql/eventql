@@ -24,8 +24,6 @@
 #include "eventql/util/logging.h"
 #include "eventql/util/rpc/RPCClient.h"
 
-namespace util {
-
 HTTPRPCClient::HTTPRPCClient(
     TaskScheduler* sched) :
     http_pool_(sched, nullptr) {}
@@ -87,6 +85,4 @@ void HTTPRPCClient::call(const URI& uri, RefPtr<AnyRPC> rpc) {
     rpc->error(status);
   });
 }
-
-} // namespace util
 

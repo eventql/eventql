@@ -29,7 +29,6 @@
 #include <vector>
 #include "eventql/util/reflect/indexsequence.h"
 
-namespace util {
 namespace reflect {
 
 template <typename _ClassType, typename _ReturnType, typename... ArgTypes>
@@ -174,7 +173,6 @@ protected:
   std::vector<std::string> arg_names_;
 };
 
-}
 }
 
 #include "methodcall_impl.h"

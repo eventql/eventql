@@ -24,7 +24,6 @@
 #ifndef _STX_REFLECT_INDEXSEQUENCE_H
 #define _STX_REFLECT_INDEXSEQUENCE_H
 
-namespace util {
 namespace reflect {
 
 template <int...>
@@ -44,7 +43,6 @@ struct MkIndexSequenceFor {
   typedef typename IndexSequenceFor<sizeof...(T)>::IndexSequenceType type;
 };
 
-}
 }
 
 #endif

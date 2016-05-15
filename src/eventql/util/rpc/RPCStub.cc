@@ -22,11 +22,3 @@
  * code of your own applications
  */
 #include "eventql/util/rpc/RPCStub.h"
-
-namespace util {
-namespace rpc {
-
-
-} // namespace rpc
-} // namespace util
-
