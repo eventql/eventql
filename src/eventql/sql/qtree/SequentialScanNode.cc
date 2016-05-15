@@ -321,7 +321,7 @@ void SequentialScanNode::encode(
 
 RefPtr<QueryTreeNode> SequentialScanNode::decode(
     QueryTreeCoder* coder,
-    OutputStream* is) {
+    InputStream* is) {
   auto table_provider = coder->getTransaction()->getTableProvider();
   auto table_name = is->readLenencString();
   Option<TableInfo> table_info = table_provider->describe(table_name);

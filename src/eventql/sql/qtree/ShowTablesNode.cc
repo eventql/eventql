@@ -73,7 +73,7 @@ void ShowTablesNode::encode(
 
 RefPtr<QueryTreeNode> ShowTablesNode::decode (
     QueryTreeCoder* coder,
-    OutputStream* is) {
+    InputStream* is) {
   return new ShowTablesNode();
 }
 

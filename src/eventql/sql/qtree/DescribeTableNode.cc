@@ -85,7 +85,7 @@ void DescribeTableNode::encode(
 
 RefPtr<QueryTreeNode> DescribeTableNode::decode (
     QueryTreeCoder* coder,
-    OutputStream* is) {
+    InputStream* is) {
   return new DescribeTableNode(is->readLenencString());
 }
 

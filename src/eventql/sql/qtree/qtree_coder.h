@@ -43,7 +43,7 @@ public:
   void registerType(uint64_t wire_type_id);
 
   void encode(RefPtr<QueryTreeNode> tree, OutputStream* os);
-  RefPtr<QueryTreeNode> decode(OutputStream* is);
+  RefPtr<QueryTreeNode> decode(InputStream* is);
 
   Transaction* getTransaction() const;
 

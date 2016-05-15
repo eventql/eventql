@@ -71,7 +71,7 @@ void QueryTreeCoder::encode(RefPtr<QueryTreeNode> tree, OutputStream* os) {
   coder->second.encode_fn(this, tree, os);
 }
 
-RefPtr<QueryTreeNode> QueryTreeCoder::decode(OutputStream* is) {
+RefPtr<QueryTreeNode> QueryTreeCoder::decode(InputStream* is) {
   auto wire_type = is->readVarUInt();
 
   auto coder = coders_by_wire_type_id_.find(wire_type);

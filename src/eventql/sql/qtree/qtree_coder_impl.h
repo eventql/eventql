@@ -36,7 +36,7 @@ void QueryTreeCoder::registerType(uint64_t wire_type_id) {
     T::encode(coder, *dynamic_cast<T*>(self.get()), os);
   };
 
-  type.decode_fn = [] (QueryTreeCoder* coder, OutputStream* is) -> RefPtr<QueryTreeNode> {
+  type.decode_fn = [] (QueryTreeCoder* coder, InputStream* is) -> RefPtr<QueryTreeNode> {
     return T::decode(coder, is);
   };
 

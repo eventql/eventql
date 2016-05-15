@@ -71,7 +71,7 @@ public:
 
   static RefPtr<QueryTreeNode> decode(
       QueryTreeCoder* coder,
-      OutputStream* is);
+      InputStream* is);
 
 protected:
   RefPtr<QueryTreeNode> subquery_;

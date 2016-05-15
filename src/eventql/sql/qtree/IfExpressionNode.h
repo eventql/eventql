@@ -56,7 +56,7 @@ public:
 
   static RefPtr<QueryTreeNode> decode (
       QueryTreeCoder* coder,
-      OutputStream* is);
+      InputStream* is);
 
 protected:
   RefPtr<ValueExpressionNode> conditional_expr_;

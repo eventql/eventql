@@ -87,7 +87,7 @@ void SelectListNode::encode(
 
 RefPtr<QueryTreeNode> SelectListNode::decode(
     QueryTreeCoder* coder,
-    OutputStream* is) {
+    InputStream* is) {
   auto node = new SelectListNode(
       coder->decode(is).asInstanceOf<ValueExpressionNode>());
 

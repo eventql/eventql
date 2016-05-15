@@ -109,7 +109,7 @@ void ColumnReferenceNode::encode(
 
 RefPtr<QueryTreeNode> ColumnReferenceNode::decode (
     QueryTreeCoder* coder,
-    OutputStream* is) {
+    InputStream* is) {
 
   auto column_name = is->readLenencString();
   auto node = new ColumnReferenceNode(column_name);

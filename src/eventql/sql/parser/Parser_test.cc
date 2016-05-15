@@ -591,7 +591,7 @@ TEST_INITIALIZER(ParserTest, InitializeComplexQueries, [] () {
         "    o_orderdate;");
 
   for (auto query : queries) {
-    new util::test::UnitTest::TestCase(
+    new test::UnitTest::TestCase(
         &ParserTest,
         "TestComplexQueries",
         [query] () {
