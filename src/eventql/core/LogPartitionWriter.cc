@@ -29,10 +29,10 @@
 #include <eventql/util/protobuf/msg.h>
 #include <eventql/util/logging.h>
 #include <eventql/util/wallclock.h>
-#include <eventql/infra/sstable/SSTableWriter.h>
+#include <eventql/io/sstable/SSTableWriter.h>
 #include <eventql/util/protobuf/MessageDecoder.h>
-#include <eventql/infra/cstable/RecordShredder.h>
-#include <eventql/infra/cstable/CSTableWriter.h>
+#include <eventql/io/cstable/RecordShredder.h>
+#include <eventql/io/cstable/CSTableWriter.h>
 
 #include "eventql/eventql.h"
 

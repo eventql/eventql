@@ -30,7 +30,7 @@
 #include <eventql/util/protobuf/MessageEncoder.h>
 #include <eventql/util/protobuf/MessageDecoder.h>
 #include <eventql/util/protobuf/msg.h>
-#include <eventql/infra/sstable/sstablereader.h>
+#include <eventql/io/sstable/sstablereader.h>
 #include <eventql/core/LogPartitionReader.h>
 #include <eventql/core/LogPartitionWriter.h>
 #include <eventql/core/LogPartitionReplication.h>

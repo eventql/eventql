@@ -27,7 +27,7 @@
 #include <eventql/util/protobuf/MessageEncoder.h>
 #include <eventql/util/io/fileutil.h>
 #include <eventql/util/wallclock.h>
-#include <eventql/infra/sstable/sstablereader.h>
+#include <eventql/io/sstable/sstablereader.h>
 #include <eventql/core/TSDBService.h>
 #include <eventql/core/LogPartitionReader.h>
 #include <eventql/core/PartitionState.pb.h>

@@ -25,7 +25,7 @@
 #include <eventql/core/Partition.h>
 #include <eventql/core/StaticPartitionWriter.h>
 #include <eventql/util/logging.h>
-#include <eventql/infra/sstable/SSTableWriter.h>
+#include <eventql/io/sstable/SSTableWriter.h>
 
 #include "eventql/eventql.h"
 

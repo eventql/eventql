@@ -24,7 +24,7 @@
 #include "eventql/mapreduce/tasks/SaveToTablePartitionTask.h"
 #include "eventql/mapreduce/MapReduceScheduler.h"
 #include "eventql/core/FixedShardPartitioner.h"
-#include "eventql/infra/sstable/sstablereader.h"
+#include "eventql/io/sstable/sstablereader.h"
 #include <eventql/z1stats.h>
 
 #include "eventql/eventql.h"

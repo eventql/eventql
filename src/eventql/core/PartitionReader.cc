@@ -23,7 +23,7 @@
  */
 #include <eventql/util/fnv.h>
 #include <eventql/util/io/fileutil.h>
-#include <eventql/infra/sstable/sstablereader.h>
+#include <eventql/io/sstable/sstablereader.h>
 #include <eventql/core/PartitionReader.h>
 
 #include "eventql/eventql.h"

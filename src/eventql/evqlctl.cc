@@ -44,7 +44,7 @@
 #include "eventql/util/cli/CLI.h"
 #include "eventql/util/cli/flagparser.h"
 #include "eventql/ConfigDirectory.h"
-#include "eventql/infra/sstable/sstablereader.h"
+#include "eventql/io/sstable/sstablereader.h"
 #include "eventql/core/TimeWindowPartitioner.h"
 #include "eventql/core/TSDBClient.h"
 #include "eventql/sql/qtree/SequentialScanNode.h"

@@ -26,8 +26,8 @@
 #include <eventql/util/protobuf/MessageDecoder.h>
 #include <eventql/core/StaticPartitionReader.h>
 #include <eventql/core/Table.h>
-#include <eventql/infra/cstable/CSTableReader.h>
-#include <eventql/infra/cstable/RecordMaterializer.h>
+#include <eventql/io/cstable/CSTableReader.h>
+#include <eventql/io/cstable/RecordMaterializer.h>
 
 #include "eventql/eventql.h"
 

@@ -179,7 +179,7 @@ add_custom_command(
 
 
 add_executable(evqld
-    #eventql/infra/sstable/SSTableServlet.cc
+    #eventql/io/sstable/SSTableServlet.cc
     ${CMAKE_CURRENT_BINARY_DIR}/mapreduce_preludejs.cc
     ${COREPROTO_SRCS}
     ${PROTO_SRCS}
@@ -262,7 +262,7 @@ add_dependencies(evqld mozjs_build)
 #    $<TARGET_OBJECTS:coreprotos>
 #    $<TARGET_OBJECTS:customerdirectory>
 #    #$<TARGET_OBJECTS:fnord-afx>
-#    #eventql/infra/sstable/SSTableServlet.cc
+#    #eventql/io/sstable/SSTableServlet.cc
 #    evqlctl.cc)
 #
 #target_link_libraries(evqlctl chartsql cplot sstable cstable stx-http stx-protobuf stx-json stx-base stx-rpc pcre)

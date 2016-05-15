@@ -45,8 +45,8 @@
 #include "eventql/core/TimeWindowPartitioner.h"
 #include "eventql/core/FixedShardPartitioner.h"
 #include "eventql/HTTPAuth.h"
-#include <eventql/infra/cstable/CSTableWriter.h>
-#include <eventql/infra/cstable/RecordShredder.h>
+#include <eventql/io/cstable/CSTableWriter.h>
+#include <eventql/io/cstable/RecordShredder.h>
 
 #include "eventql/eventql.h"
 

@@ -47,7 +47,7 @@
 #include "eventql/util/http/VFSFileServlet.h"
 #include "eventql/util/io/FileLock.h"
 #include "eventql/util/stats/statsdagent.h"
-#include "eventql/infra/sstable/SSTableServlet.h"
+#include "eventql/io/sstable/SSTableServlet.h"
 #include "eventql/util/mdb/MDB.h"
 #include "eventql/util/mdb/MDBUtil.h"
 #include "eventql/AnalyticsServlet.h"

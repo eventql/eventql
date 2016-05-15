@@ -28,10 +28,10 @@
 #include "eventql/util/protobuf/MessageDecoder.h"
 #include "eventql/util/protobuf/JSONEncoder.h"
 #include "eventql/util/http/HTTPFileDownload.h"
-#include "eventql/infra/sstable/SSTableWriter.h"
-#include "eventql/infra/sstable/sstablereader.h"
-#include "eventql/infra/cstable/CSTableWriter.h"
-#include "eventql/infra/cstable/RecordShredder.h"
+#include "eventql/io/sstable/SSTableWriter.h"
+#include "eventql/io/sstable/sstablereader.h"
+#include "eventql/io/cstable/CSTableWriter.h"
+#include "eventql/io/cstable/RecordShredder.h"
 #include <algorithm>
 
 #include "eventql/eventql.h"

@@ -24,7 +24,7 @@
 #include <eventql/util/fnv.h>
 #include <eventql/util/io/fileutil.h>
 #include <eventql/util/protobuf/MessageDecoder.h>
-#include <eventql/infra/sstable/sstablereader.h>
+#include <eventql/io/sstable/sstablereader.h>
 #include <eventql/core/LogPartitionReader.h>
 #include <eventql/core/Table.h>
 

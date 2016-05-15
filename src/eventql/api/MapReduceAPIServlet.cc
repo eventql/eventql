@@ -28,7 +28,7 @@
 #include "eventql/util/io/BufferedOutputStream.h"
 #include "eventql/api/MapReduceAPIServlet.h"
 #include "eventql/mapreduce/MapReduceTask.h"
-#include "eventql/infra/sstable/sstablereader.h"
+#include "eventql/io/sstable/sstablereader.h"
 
 #include "eventql/eventql.h"
 

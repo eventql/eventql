@@ -36,7 +36,7 @@
 #include <eventql/core/PartitionWriter.h>
 #include <eventql/core/PartitionReader.h>
 #include <eventql/core/ReplicationScheme.h>
-#include <eventql/infra/cstable/CSTableReader.h>
+#include <eventql/io/cstable/CSTableReader.h>
 
 #include "eventql/eventql.h"
 

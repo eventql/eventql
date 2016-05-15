@@ -35,14 +35,14 @@
 #include <fnord-logtable/TableArena.h>
 #include <fnord-logtable/TableSnapshot.h>
 #include <fnord-logtable/TableChunkSummaryBuilder.h>
-#include "eventql/infra/sstable/sstablereader.h"
-#include "eventql/infra/sstable/SSTableEditor.h"
-#include "eventql/infra/sstable/SSTableColumnSchema.h"
-#include "eventql/infra/sstable/SSTableColumnReader.h"
-#include "eventql/infra/sstable/SSTableColumnWriter.h"
-#include "eventql/infra/cstable/CSTableWriter.h"
-#include "eventql/infra/cstable/CSTableReader.h"
-#include "eventql/infra/cstable/CSTableBuilder.h"
+#include "eventql/io/sstable/sstablereader.h"
+#include "eventql/io/sstable/SSTableEditor.h"
+#include "eventql/io/sstable/SSTableColumnSchema.h"
+#include "eventql/io/sstable/SSTableColumnReader.h"
+#include "eventql/io/sstable/SSTableColumnWriter.h"
+#include "eventql/io/cstable/CSTableWriter.h"
+#include "eventql/io/cstable/CSTableReader.h"
+#include "eventql/io/cstable/CSTableBuilder.h"
 
 namespace util {
 namespace logtable {

@@ -25,8 +25,8 @@
 #include <eventql/util/io/mmappedfile.h>
 #include <eventql/util/util/binarymessagereader.h>
 #include <eventql/util/util/binarymessagewriter.h>
-#include <eventql/infra/sstable/SSTableEditor.h>
-#include <eventql/infra/sstable/sstablereader.h>
+#include <eventql/io/sstable/SSTableEditor.h>
+#include <eventql/io/sstable/sstablereader.h>
 #include <eventql/core/RecordSet.h>
 
 #include "eventql/eventql.h"

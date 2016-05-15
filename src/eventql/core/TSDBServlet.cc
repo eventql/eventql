@@ -32,7 +32,7 @@
 #include "eventql/util/protobuf/msg.h"
 #include <eventql/util/util/Base64.h>
 #include <eventql/util/fnv.h>
-#include <eventql/infra/sstable/sstablereader.h>
+#include <eventql/io/sstable/sstablereader.h>
 
 #include "eventql/eventql.h"
 

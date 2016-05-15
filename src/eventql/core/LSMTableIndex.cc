@@ -18,7 +18,7 @@
 #include <eventql/util/io/BufferedOutputStream.h>
 #include <eventql/util/logging.h>
 #include <eventql/core/LSMTableIndex.h>
-#include <eventql/infra/cstable/CSTableWriter.h>
+#include <eventql/io/cstable/CSTableWriter.h>
 
 #include "eventql/eventql.h"
 

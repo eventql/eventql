@@ -25,7 +25,7 @@
 #define _CM_GROURESULT_H
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/json/json.h>
-#include "eventql/infra/cstable/CSTableReader.h"
+#include "eventql/io/cstable/CSTableReader.h"
 #include "eventql/CTRCounter.h"
 #include "eventql/AnalyticsTableScan.h"
 #include "eventql/TrafficSegment.h"

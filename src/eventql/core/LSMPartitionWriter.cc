@@ -30,8 +30,8 @@
 #include <eventql/util/wallclock.h>
 #include <eventql/util/logging.h>
 #include <eventql/util/protobuf/MessageDecoder.h>
-#include <eventql/infra/cstable/RecordShredder.h>
-#include <eventql/infra/cstable/CSTableWriter.h>
+#include <eventql/io/cstable/RecordShredder.h>
+#include <eventql/io/cstable/CSTableWriter.h>
 
 #include "eventql/eventql.h"
 

@@ -29,7 +29,7 @@
 #include <eventql/util/io/fileutil.h>
 #include <eventql/util/protobuf/msg.h>
 #include <eventql/util/protobuf/MessageEncoder.h>
-#include <eventql/infra/cstable/RecordMaterializer.h>
+#include <eventql/io/cstable/RecordMaterializer.h>
 
 #include "eventql/eventql.h"
 

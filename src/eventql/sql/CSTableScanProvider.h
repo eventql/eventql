@@ -24,7 +24,7 @@
 #pragma once
 #include <eventql/util/stdtypes.h>
 #include <eventql/sql/runtime/tablerepository.h>
-//#include <eventql/infra/cstable/CSTableReader.h>
+//#include <eventql/io/cstable/CSTableReader.h>
 
 #include "eventql/eventql.h"
 

@@ -11,7 +11,7 @@
  */
 #include <eventql/core/CompactionStrategy.h>
 #include <eventql/core/LSMTableIndex.h>
-#include <eventql/infra/cstable/CSTableWriter.h>
+#include <eventql/io/cstable/CSTableWriter.h>
 #include <eventql/util/io/fileutil.h>
 
 #include "eventql/eventql.h"

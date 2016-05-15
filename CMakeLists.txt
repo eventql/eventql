@@ -115,10 +115,10 @@ endif()
 add_subdirectory(src/eventql/util)
 set(HAVE_STX true)
 
-add_subdirectory(src/eventql/infra/cstable)
+add_subdirectory(src/eventql/io/cstable)
 set(HAVE_CSTABLE true)
 
-add_subdirectory(src/eventql/infra/sstable)
+add_subdirectory(src/eventql/io/sstable)
 set(HAVE_SSTABLE true)
 
 add_subdirectory(deps/libcplot)
