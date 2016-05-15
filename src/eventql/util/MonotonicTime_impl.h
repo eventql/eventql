@@ -1,6 +1,4 @@
 
-namespace util {
-
 inline constexpr MonotonicTime::MonotonicTime()
     : nanosecs_(0) {
 }
@@ -64,5 +62,3 @@ inline constexpr bool MonotonicTime::operator>(const MonotonicTime& other) const
 inline constexpr bool MonotonicTime::operator!() const {
   return nanosecs_ == 0;
 }
-
-} // namespace util
