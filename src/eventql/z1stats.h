@@ -29,13 +29,13 @@
 namespace eventql {
 
 struct Z1Stats {
-  util::stats::Counter<uint64_t> num_partitions;
-  util::stats::Counter<uint64_t> num_partitions_loaded;
-  util::stats::Counter<uint64_t> replication_queue_length;
-  util::stats::Counter<uint64_t> compaction_queue_length;
-  util::stats::Counter<uint64_t> mapreduce_reduce_memory;
-  util::stats::Counter<uint64_t> mapreduce_num_map_tasks;
-  util::stats::Counter<uint64_t> mapreduce_num_reduce_tasks;
+  stats::Counter<uint64_t> num_partitions;
+  stats::Counter<uint64_t> num_partitions_loaded;
+  stats::Counter<uint64_t> replication_queue_length;
+  stats::Counter<uint64_t> compaction_queue_length;
+  stats::Counter<uint64_t> mapreduce_reduce_memory;
+  stats::Counter<uint64_t> mapreduce_num_map_tasks;
+  stats::Counter<uint64_t> mapreduce_num_reduce_tasks;
   http::HTTPClientStats http_client_stats;
 };
 

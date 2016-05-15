@@ -132,9 +132,9 @@ int main() {
   util::CatchAndAbortExceptionHandler ehandler;
   ehandler.installGlobalHandlers();
 
-  util::log::LogOutputStream logger(OutputStream::getStderr());
-  util::log::Logger::get()->setMinimumLogLevel(util::log::kTrace);
-  util::log::Logger::get()->listen(&logger);
+  log::LogOutputStream logger(OutputStream::getStderr());
+  log::Logger::get()->setMinimumLogLevel(log::kTrace);
+  log::Logger::get()->listen(&logger);
 
   util::thread::ThreadPool thread_pool;
   http::HTTPRouter router;

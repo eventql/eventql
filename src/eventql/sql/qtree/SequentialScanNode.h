@@ -154,7 +154,7 @@ public:
 
   static RefPtr<QueryTreeNode> decode(
       QueryTreeCoder* coder,
-      OutputStream* os);
+      InputStream* os);
 
 protected:
 

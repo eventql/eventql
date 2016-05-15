@@ -50,7 +50,7 @@ void TableJanitor::stop() {
 }
 
 void TableJanitor::check() {
-  util::logDebug("fnord.evdb", "Running TableJanitor...");
+  logDebug("fnord.evdb", "Running TableJanitor...");
 
   auto tables = repo_->tables();
 
@@ -70,7 +70,7 @@ void TableJanitor::run() {
     try {
       check();
     } catch (const Exception& e) {
-      util::logError("fnord.evdb", e, "TableJanitor error");
+      logError("fnord.evdb", e, "TableJanitor error");
     }
 
     auto elapsed = WallClock::unixMicros() - begin;

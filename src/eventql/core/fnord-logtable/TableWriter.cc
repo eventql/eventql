@@ -151,7 +151,7 @@ size_t TableWriter::commitWithLock() {
     return 0;
   }
 
-  util::logInfo("fnord.evdb", "Commiting table: $0", name_);
+  logInfo("fnord.evdb", "Commiting table: $0", name_);
 
   arenas_.emplace_front(new TableArena(seq_, rnd_.hex128()));
 
@@ -183,7 +183,7 @@ void TableWriter::merge() {
     input_chunk_ids.emplace(c.chunk_id);
   }
 
-  util::logInfo(
+  logInfo(
       "fnord.evdb",
       "Merging table '$0'\n    input_chunks=$1\n    ouput_chunk=$2",
       name_,
@@ -225,7 +225,7 @@ void TableWriter::merge() {
   }
 
   if (input_chunk_ids.size() > 0) {
-    util::logInfo("fnord.evdb", "Aborting merging for table '$0'", name_);
+    logInfo("fnord.evdb", "Aborting merging for table '$0'", name_);
     // FIXPAUL delete orphaned files...
     return;
   }
@@ -266,7 +266,7 @@ void TableWriter::gc(size_t keep_generations, size_t max_generations) {
     auto atime = FileUtil::atime(genfile);
     if (atime > cutoff / kMicrosPerSecond) {
 #ifndef FNORD_NODEBUG
-      util::logDebug(
+      logDebug(
           "fnord.evdb",
           "Skipping garbage collection for table '$0' generation $1 because " \
           "was accessed in the last $2 seconds",
@@ -322,7 +322,7 @@ void TableWriter::gc(size_t keep_generations, size_t max_generations) {
     }
   }
 
-  util::logDebug(
+  logDebug(
       "fnord.evdb",
       "Garbage collecting table '$0'; deleting generations $1..$2, " \
       "chunks ($3): $4",
@@ -339,7 +339,7 @@ void TableWriter::gc(size_t keep_generations, size_t max_generations) {
     try {
       artifacts_.deleteArtifact(chunkname);
     } catch (const Exception& e) {
-      util::logError("fnord.evdb", e, "error while deleting artifact");
+      logError("fnord.evdb", e, "error while deleting artifact");
     }
 
     delete_files.emplace(chunkfile + ".sst");
@@ -348,7 +348,7 @@ void TableWriter::gc(size_t keep_generations, size_t max_generations) {
   }
 
   for (const auto& f : delete_files) {
-    util::logInfo("fnord.evdb", "Deleting file: $0", f);
+    logInfo("fnord.evdb", "Deleting file: $0", f);
     FileUtil::rm(f);
   }
 }
@@ -434,7 +434,7 @@ void TableWriter::writeSnapshot() {
     replica_id_,
     head_->generation);
 
-  util::logInfo("fnord.evdb", "Writing snapshot: $0", snapname);
+  logInfo("fnord.evdb", "Writing snapshot: $0", snapname);
   auto filename = FileUtil::joinPaths(db_path_, snapname + ".idx");
 
   auto file = File::openFile(filename + "~", File::O_CREATE | File::O_WRITE);
@@ -582,7 +582,7 @@ void TableChunkWriter::addRecord(const msg::MessageObject& record) {
 }
 
 void TableChunkWriter::commit() {
-  util::logInfo("fnord.evdb", "Writing chunk: $0", chunk_name_);
+  logInfo("fnord.evdb", "Writing chunk: $0", chunk_name_);
 
   cstable_->write(chunk_filename_ + ".cst~");
   sstable_->finalize();
@@ -648,7 +648,7 @@ void TableChunkMerge::readTable(const String& filename) {
 
   auto body_size = reader.bodySize();
   if (body_size == 0) {
-    util::logWarning("fnord.evdb", "empty table chunk: $0", filename);
+    logWarning("fnord.evdb", "empty table chunk: $0", filename);
     return;
   }
 
@@ -711,7 +711,7 @@ void TableWriter::replicateFrom(const TableGeneration& other_table) {
       continue;
     }
 
-    util::logInfo(
+    logInfo(
         "fnord.evdb",
         "Adding foreign chunk '$0' to table '$1'",
         chunkname,
@@ -735,7 +735,7 @@ void TableWriter::replicateFrom(const TableGeneration& other_table) {
     }
 
     if (dropped_chunks.size() > 0) {
-        util::logInfo(
+        logInfo(
             "fnord.evdb",
             "Dropping foreign chunks $0 from table '$1' because they are " \
             "a strict subset of chunk '$2'",
@@ -823,7 +823,7 @@ bool TableMergePolicy::tryFoldIntoMerge(
         c.chunk_id);
 
     if (i > begin && c.start_sequence != next_seq) {
-      util::logWarning(
+      logWarning(
           "fnord.evdb",
           "found record sequence discontinuity at $0 <> $1. missing chunks?",
           c.start_sequence,
@@ -897,7 +897,7 @@ void TableWriter::runConsistencyCheck(
       continue;
     }
 
-    util::logError(
+    logError(
         "fnord.evdb",
         "consistency error: chunk '$0' is missing from artifact index ",
         chunkname);

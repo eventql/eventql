@@ -35,21 +35,21 @@ BinaryResultParser::BinaryResultParser() :
     got_footer_(false) {}
 
 void BinaryResultParser::onTableHeader(
-    util::Function<void (const Vector<String>& columns)> fn) {
+    Function<void (const Vector<String>& columns)> fn) {
   on_table_header_ = fn;
 }
 
 void BinaryResultParser::onRow(
-    util::Function<void (int argc, const SValue* argv)> fn) {
+    Function<void (int argc, const SValue* argv)> fn) {
   on_row_ = fn;
 }
 
 void BinaryResultParser::onProgress(
-    util::Function<void (const ExecutionStatus& status)> fn) {
+    Function<void (const ExecutionStatus& status)> fn) {
   on_progress_ = fn;
 }
 
-void BinaryResultParser::onError(util::Function<void (const String& error)> fn) {
+void BinaryResultParser::onError(Function<void (const String& error)> fn) {
   on_error_ = fn;
 }
 

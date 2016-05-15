@@ -506,7 +506,7 @@ void AnalyticsServlet::createTable(
 
     app_->updateTable(td, force);
   } catch (const StandardException& e) {
-    util::logError("analyticsd", e, "error");
+    logError("analyticsd", e, "error");
     res->setStatus(http::kStatusInternalServerError);
     res->addBody(StringUtil::format("error: $0", e.what()));
     return;
@@ -920,7 +920,7 @@ void AnalyticsServlet::uploadTable(
 
       tmpfile.seekTo(0);
 
-      util::logDebug(
+      logDebug(
           "analyticsd",
           "Uploading static table; customer=$0, table=$1, shard=$2, size=$3MB",
           session.customer(),
@@ -940,7 +940,7 @@ void AnalyticsServlet::uploadTable(
         tmpfile_path + ".cst",
         WallClock::unixMicros());
   } catch (const StandardException& e) {
-    util::logError("analyticsd", e, "error");
+    logError("analyticsd", e, "error");
     res->setStatus(http::kStatusInternalServerError);
     res->addBody(StringUtil::format("error: $0", e.what()));
     return;

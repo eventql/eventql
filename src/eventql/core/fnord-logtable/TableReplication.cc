@@ -58,7 +58,7 @@ void TableReplication::stop() {
 void TableReplication::pull(
       RefPtr<TableWriter> table,
       const URI& uri) {
-  util::logDebug(
+  logDebug(
       "fn.evdb",
       "Replicating table '$0' from '$1'...",
       table->name(),
@@ -99,7 +99,7 @@ void TableReplication::run() {
       try {
         pull(t.first, t.second);
       } catch (const Exception& e) {
-        util::logError("fnord.evdb", e, "TableReplication error");
+        logError("fnord.evdb", e, "TableReplication error");
       }
     }
 

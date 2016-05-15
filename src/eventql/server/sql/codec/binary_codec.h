@@ -82,10 +82,10 @@ public:
 
   BinaryResultParser();
 
-  void onTableHeader(util::Function<void (const Vector<String>& columns)> fn);
-  void onRow(util::Function<void (int argc, const SValue* argv)> fn);
-  void onProgress(util::Function<void (const ExecutionStatus& status)> fn);
-  void onError(util::Function<void (const String& error)> fn);
+  void onTableHeader(Function<void (const Vector<String>& columns)> fn);
+  void onRow(Function<void (int argc, const SValue* argv)> fn);
+  void onProgress(Function<void (const ExecutionStatus& status)> fn);
+  void onError(Function<void (const String& error)> fn);
 
   void parse(const char* data, size_t size);
 
@@ -99,10 +99,10 @@ protected:
   size_t parseError(const void* data, size_t size);
 
   Buffer buf_;
-  util::Function<void (const Vector<String>& columns)> on_table_header_;
-  util::Function<void (int argc, const SValue* argv)> on_row_;
-  util::Function<void (const ExecutionStatus& status)> on_progress_;
-  util::Function<void (const String& error)> on_error_;
+  Function<void (const Vector<String>& columns)> on_table_header_;
+  Function<void (int argc, const SValue* argv)> on_row_;
+  Function<void (const ExecutionStatus& status)> on_progress_;
+  Function<void (const String& error)> on_error_;
 
   bool got_header_;
   bool got_footer_;

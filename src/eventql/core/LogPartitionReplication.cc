@@ -187,7 +187,7 @@ bool LogPartitionReplication::replicate() {
       } catch (const std::exception& e) {
         success = false;
 
-        util::logError(
+        logError(
           "z1.replication",
           e,
           "Error while replicating partition $0/$1/$2 to $3",

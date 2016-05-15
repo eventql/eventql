@@ -264,7 +264,7 @@ void MySQLConnection::executeQuery(
 #ifdef STX_ENABLE_MYSQL
 
 #ifndef STX_NOTRACE
-    util::logTrace("fnord.mysql", "Executing MySQL query: $0", query);
+    logTrace("fnord.mysql", "Executing MySQL query: $0", query);
 #endif
 
   MYSQL_RES* result = nullptr;
@@ -321,7 +321,7 @@ std::list<std::vector<std::string>> MySQLConnection::executeQuery(
 #ifdef STX_ENABLE_MYSQL
 
 #ifndef STX_NOTRACE
-    util::logTrace("fnord.mysql", "Executing MySQL query: $0", query);
+    logTrace("fnord.mysql", "Executing MySQL query: $0", query);
 #endif
 
   MYSQL_RES* result = nullptr;

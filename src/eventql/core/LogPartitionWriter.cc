@@ -54,7 +54,7 @@ Set<SHA1Hash> LogPartitionWriter::insertRecords(const Vector<RecordRef>& records
 
   auto snap = head_->getSnapshot()->clone();
 
-  util::logTrace(
+  logTrace(
       "tsdb",
       "Insert $0 record into partition $1/$2/$3",
       records.size(),

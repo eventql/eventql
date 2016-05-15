@@ -45,7 +45,7 @@ void run(const cli::FlagParser& flags) {
   auto tail = flags.isSet("tail");
   String api_url = "http://api.eventql.io/api/v1";
 
-  util::logInfo("dx-logfile-upload", "Tailing logfile '$0'", input_file);
+  logInfo("dx-logfile-upload", "Tailing logfile '$0'", input_file);
 
   String source_attrs;
   for (const auto& a : flags.getStrings("attr")) {
@@ -87,7 +87,7 @@ void run(const cli::FlagParser& flags) {
   util::SimpleRateLimitedFn status_line(
       kMicrosPerSecond,
       [&num_rows_uploaded, &position, &inode] () {
-    util::logDebug(
+    logDebug(
         "dx-logfile-upload",
         "Uploading... rows_uploaded=$0 position=$1 inode=$2",
         num_rows_uploaded,
@@ -237,7 +237,7 @@ int main(int argc, const char** argv) {
 
     run(flags);
   } catch (const StandardException& e) {
-    util::logError("dx-logfile-upload", "[FATAL ERROR] $0", e.what());
+    logError("dx-logfile-upload", "[FATAL ERROR] $0", e.what());
   }
 
   return 0;

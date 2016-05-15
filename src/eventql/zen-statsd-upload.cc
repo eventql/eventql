@@ -147,7 +147,7 @@ int main(int argc, const char** argv) {
   try {
     run(flags);
   } catch (const StandardException& e) {
-    util::logError("dx-statsd-sink", "[FATAL ERROR] $0", e.what());
+    logError("dx-statsd-sink", "[FATAL ERROR] $0", e.what());
   }
 
   return 0;

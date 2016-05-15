@@ -79,7 +79,7 @@ void run(const cli::FlagParser& flags) {
     quote_char = s[0];
   }
 
-  util::logInfo("dx-csv-upload", "Opening CSV file '$0'", input_file);
+  logInfo("dx-csv-upload", "Opening CSV file '$0'", input_file);
 
   auto is = FileInputStream::openFile(input_file);
   auto bom = is->readByteOrderMark();
@@ -94,7 +94,7 @@ void run(const cli::FlagParser& flags) {
 
   DefaultCSVInputStream csv(std::move(is), col_sep, row_sep, quote_char);
 
-  util::logInfo(
+  logInfo(
       "dx-csv-upload",
       "Analyzing the input file. This might take a few minutes...");
 
@@ -231,7 +231,7 @@ void run(const cli::FlagParser& flags) {
   csv.rewind();
 
   auto schema = mkRef(new msg::MessageSchema("<anonymous>", schema_fields));
-  util::logInfo(
+  logInfo(
       "dx-csv-upload",
       "Found $0 row(s) and $1 column(s):\n    - $2",
       num_rows,
@@ -239,15 +239,15 @@ void run(const cli::FlagParser& flags) {
       StringUtil::join(columns_dbg, "\n    - "));
 
   if (confirm_schema) {
-    util::logInfo("dx-csv-upload", "Is this information correct? [y/n]");
+    logInfo("dx-csv-upload", "Is this information correct? [y/n]");
     if (!term.readConfirmation()) {
-      util::logInfo("dx-csv-upload", "Aborting...");
+      logInfo("dx-csv-upload", "Aborting...");
       return;
     }
   }
 
   auto num_shards = (num_rows + shard_size - 1) / shard_size;
-  util::logDebug("dx-csv-upload", "Splitting into $0 shards", num_shards);
+  logDebug("dx-csv-upload", "Splitting into $0 shards", num_shards);
 
   http::HTTPClient http_client(nullptr);
   http::HTTPMessage::HeaderList auth_headers;
@@ -288,7 +288,7 @@ void run(const cli::FlagParser& flags) {
   util::SimpleRateLimitedFn status_line(
       kMicrosPerSecond,
       [&num_rows_uploaded, num_rows] () {
-    util::logInfo(
+    logInfo(
         "dx-csv-upload",
         "[$0%] Uploading... $1/$2 rows",
         (size_t) ((num_rows_uploaded / (double) num_rows) * 100),
@@ -338,7 +338,7 @@ void run(const cli::FlagParser& flags) {
   }
 
   status_line.runForce();
-  util::logInfo("dx-csv-upload", "Upload finished successfully :)");
+  logInfo("dx-csv-upload", "Upload finished successfully :)");
 }
 
 int main(int argc, const char** argv) {
@@ -445,7 +445,7 @@ int main(int argc, const char** argv) {
   try {
     run(flags);
   } catch (const StandardException& e) {
-    util::logError("dx-csv-upload", "[FATAL ERROR] $0", e.what());
+    logError("dx-csv-upload", "[FATAL ERROR] $0", e.what());
   }
 
   return 0;
