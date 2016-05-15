@@ -26,8 +26,6 @@
 #include "eventql/util/stdtypes.h"
 #include "eventql/util/Currency.pb.h"
 
-namespace util {
-
 Currency currencyFromString(const String& string);
 String currencyToString(Currency lang);
 
@@ -51,7 +49,5 @@ protected:
   const ConversionTable conv_table_;
 };
 
-
-} // namespace util
 
 #endif

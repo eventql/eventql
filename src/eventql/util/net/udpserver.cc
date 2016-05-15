@@ -30,7 +30,6 @@
 #include <eventql/util/exception.h>
 #include <eventql/util/net/udpserver.h>
 
-namespace util {
 namespace net {
 
 UDPServer::UDPServer(
@@ -109,6 +108,5 @@ void UDPServer::messageReceived() {
   }
 }
 
-}
 }
 

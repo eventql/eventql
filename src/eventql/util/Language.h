@@ -25,8 +25,6 @@
 #define _STX_LANGUAGE_H
 #include "eventql/util/stdtypes.h"
 
-namespace util {
-
 /* ISO 639-1 */
 enum class Language : uint16_t {
   UNKNOWN = 0,
@@ -43,7 +41,5 @@ const uint16_t kMaxLanguage = 7;
 
 Language languageFromString(const String& string);
 String languageToString(Language lang);
-
-} // namespace util
 
 #endif

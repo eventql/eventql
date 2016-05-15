@@ -23,7 +23,6 @@
  */
 #include "eventql/util/net/dnscache.h"
 
-namespace util {
 namespace net {
 
 InetAddr DNSCache::resolve(const std::string& addr_str) {
@@ -41,5 +40,4 @@ InetAddr DNSCache::resolve(const std::string& addr_str) {
   }
 }
 
-}
 }

@@ -40,8 +40,6 @@
 
 #include "eventql/eventql.h"
 using namespace http;
-using util::StringInputStream;
-using util::StringOutputStream;
 
 UNIT_TEST(HTTPTest);
 

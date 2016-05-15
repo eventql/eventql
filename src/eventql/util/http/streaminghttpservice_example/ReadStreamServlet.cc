@@ -25,7 +25,6 @@
 #include "ReadStreamServlet.h"
 
 
-namespace util {
 namespace http {
 
 void ReadStreamServlet::handleHTTPRequest(
@@ -46,7 +45,6 @@ void ReadStreamServlet::handleHTTPRequest(
 
 }
 
-}
 }
 
 

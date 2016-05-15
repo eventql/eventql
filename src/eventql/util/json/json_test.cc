@@ -34,7 +34,6 @@
 
 UNIT_TEST(JSONTest);
 
-using util::StringInputStream;
 using json::FlatJSONReader;
 using json::JSONDocument;
 using json::JSONInputStream;
@@ -249,7 +248,7 @@ TEST_CASE(JSONTest, TestToFromJSON, [] () {
 });
 
 struct TestStruct {
-  util::String str;
+  String str;
   json::JSONObject obj;
 
   template <typename T>

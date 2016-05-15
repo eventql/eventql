@@ -2,8 +2,6 @@
 
 #include <eventql/util/MonotonicTime.h>
 
-namespace util {
-
 /**
  * Monotonic Clock Provider API.
  *
@@ -17,5 +15,3 @@ public:
    */
   static MonotonicTime now();
 };
-
-} // namespace util

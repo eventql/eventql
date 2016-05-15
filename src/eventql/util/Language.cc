@@ -25,8 +25,6 @@
 #include "eventql/util/Language.h"
 #include "eventql/util/stringutil.h"
 
-namespace util {
-
 Language languageFromString(const String& string) {
   String s(string);
   StringUtil::toLower(&s);
@@ -54,5 +52,3 @@ String languageToString(Language lang) {
     case Language::PL: return "pl";
   }
 }
-
-} // namespace util

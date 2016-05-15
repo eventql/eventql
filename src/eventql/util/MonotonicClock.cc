@@ -9,8 +9,6 @@
 #include <mach/mach_time.h>
 #endif
 
-namespace util {
-
 #if defined(STX_OS_DARWIN)
 mach_timebase_info_data_t timebaseInfo;
 
@@ -42,5 +40,3 @@ MonotonicTime MonotonicClock::now() {
   #error "MonotonicClock: Your platform is not implemented."
 #endif
 }
-
-} // namespace util

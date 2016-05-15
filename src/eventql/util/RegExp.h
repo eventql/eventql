@@ -35,8 +35,6 @@
 #include <regex>
 #endif
 
-namespace util {
-
 class RegExp {
 public:
   typedef std::vector<std::pair<const char*, size_t>> Result;
@@ -101,10 +99,9 @@ private:
 #endif
 };
 
-}  // namespace util
 
 namespace std {
-inline std::ostream& operator<<(std::ostream& os, const util::RegExp& re) {
+inline std::ostream& operator<<(std::ostream& os, const RegExp& re) {
   os << re.pattern();
   return os;
 }
