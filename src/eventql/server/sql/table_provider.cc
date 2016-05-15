@@ -24,7 +24,7 @@
 #include <eventql/util/SHA1.h>
 #include <eventql/server/sql/table_provider.h>
 //#include <eventql/server/sql/table_scan.h>
-#include <eventql/core/TSDBService.h>
+#include <eventql/db/TSDBService.h>
 #include <eventql/sql/CSTableScan.h>
 
 #include "eventql/eventql.h"

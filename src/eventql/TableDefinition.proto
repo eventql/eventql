@@ -22,5 +22,5 @@
  * code of your own applications
  */
 package eventql;
-import 'eventql/core/TableConfig.proto';
+import 'eventql/db/TableConfig.proto';
 

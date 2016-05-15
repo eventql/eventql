@@ -24,7 +24,7 @@
 #pragma once
 #include "eventql/util/stdtypes.h"
 #include "eventql/mapreduce/MapReduceTask.h"
-#include "eventql/core/TSDBService.h"
+#include "eventql/db/TSDBService.h"
 #include "eventql/AnalyticsAuth.h"
 #include "eventql/CustomerConfig.h"
 #include "eventql/ConfigDirectory.h"

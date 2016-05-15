@@ -33,7 +33,7 @@
 #include "eventql/sql/qtree/SelectListNode.h"
 #include "eventql/sql/qtree/ColumnReferenceNode.h"
 #include "eventql/sql/CSTableScan.h"
-#include "eventql/core/TimeWindowPartitioner.h"
+#include "eventql/db/TimeWindowPartitioner.h"
 
 #include "eventql/eventql.h"
 

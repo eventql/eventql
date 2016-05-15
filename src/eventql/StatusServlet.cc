@@ -22,7 +22,7 @@
  * code of your own applications
  */
 #include <eventql/StatusServlet.h>
-#include <eventql/core/PartitionReplication.h>
+#include <eventql/db/PartitionReplication.h>
 #include <eventql/z1stats.h>
 #include <eventql/eventql.h>
 #include "eventql/util/application.h"

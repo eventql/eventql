@@ -24,7 +24,7 @@
 #pragma once
 #include "eventql/util/protobuf/MessageSchema.h"
 #include "eventql/util/io/inputstream.h"
-#include "eventql/core/TSDBService.h"
+#include "eventql/db/TSDBService.h"
 #include "eventql/AnalyticsAuth.h"
 #include "eventql/CustomerConfig.h"
 #include "eventql/ConfigDirectory.h"

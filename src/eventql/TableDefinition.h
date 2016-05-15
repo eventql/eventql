@@ -24,7 +24,7 @@
 #pragma once
 #include <eventql/util/stdtypes.h>
 #include <eventql/TableDefinition.pb.h>
-#include <eventql/core/TableConfig.pb.h>
+#include <eventql/db/TableConfig.pb.h>
 
 #include "eventql/eventql.h"
 

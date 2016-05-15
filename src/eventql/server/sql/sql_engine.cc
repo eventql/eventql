@@ -26,9 +26,9 @@
 #include <eventql/eventql.h>
 #include <eventql/server/sql/sql_engine.h>
 #include <eventql/server/sql/table_provider.h>
-#include <eventql/core/TSDBService.h>
-#include <eventql/core/TimeWindowPartitioner.h>
-#include <eventql/core/FixedShardPartitioner.h>
+#include <eventql/db/TSDBService.h>
+#include <eventql/db/TimeWindowPartitioner.h>
+#include <eventql/db/FixedShardPartitioner.h>
 #include <eventql/sql/defaults.h>
 #include <eventql/sql/qtree/CallExpressionNode.h>
 #include <eventql/sql/qtree/ColumnReferenceNode.h>

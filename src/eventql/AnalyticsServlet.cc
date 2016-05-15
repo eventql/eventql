@@ -42,8 +42,8 @@
 #include "eventql/server/sql/codec/json_codec.h"
 #include "eventql/server/sql/codec/json_sse_codec.h"
 #include "eventql/server/sql/codec/binary_codec.h"
-#include "eventql/core/TimeWindowPartitioner.h"
-#include "eventql/core/FixedShardPartitioner.h"
+#include "eventql/db/TimeWindowPartitioner.h"
+#include "eventql/db/FixedShardPartitioner.h"
 #include "eventql/HTTPAuth.h"
 #include <eventql/io/cstable/CSTableWriter.h>
 #include <eventql/io/cstable/RecordShredder.h>

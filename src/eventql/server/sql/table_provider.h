@@ -25,11 +25,11 @@
 #include <eventql/util/stdtypes.h>
 #include <eventql/sql/runtime/tablerepository.h>
 #include <eventql/AnalyticsAuth.h>
-#include <eventql/core/TSDBTableRef.h>
-#include <eventql/core/PartitionMap.h>
-#include <eventql/core/CompactionWorker.h>
-#include <eventql/core/TableConfig.pb.h>
-#include <eventql/core/TSDBTableInfo.h>
+#include <eventql/db/TSDBTableRef.h>
+#include <eventql/db/PartitionMap.h>
+#include <eventql/db/CompactionWorker.h>
+#include <eventql/db/TableConfig.pb.h>
+#include <eventql/db/TSDBTableInfo.h>
 #include "eventql/server/sql/table_scan.h"
 
 #include "eventql/eventql.h"

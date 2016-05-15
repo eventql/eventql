@@ -25,7 +25,7 @@
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/SHA1.h>
 #include <eventql/CustomerConfig.h>
-#include <eventql/core/ClusterConfig.pb.h>
+#include <eventql/db/ClusterConfig.pb.h>
 #include <eventql/TableDefinition.h>
 
 #include "eventql/eventql.h"

@@ -26,7 +26,7 @@
 #include <eventql/util/http/httpservice.h>
 #include <eventql/util/http/httpstats.h>
 #include <eventql/util/SHA1.h>
-#include <eventql/core/PartitionMap.h>
+#include <eventql/db/PartitionMap.h>
 
 #include "eventql/eventql.h"
 namespace eventql {

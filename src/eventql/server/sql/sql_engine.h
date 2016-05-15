@@ -23,7 +23,7 @@
  */
 #pragma once
 #include <eventql/sql/runtime/runtime.h>
-#include <eventql/core/TSDBService.h>
+#include <eventql/db/TSDBService.h>
 #include <eventql/AnalyticsAuth.h>
 
 namespace eventql {

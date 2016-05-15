@@ -32,7 +32,7 @@
 #include "eventql/sql/runtime/runtime.h"
 #include "eventql/AnalyticsAuth.h"
 #include "eventql/ConfigDirectory.h"
-#include "eventql/core/TSDBService.h"
+#include "eventql/db/TSDBService.h"
 #include "eventql/api/LogfileAPIServlet.h"
 #include "eventql/api/EventsAPIServlet.h"
 #include "eventql/api/MapReduceAPIServlet.h"

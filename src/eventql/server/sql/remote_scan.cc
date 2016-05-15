@@ -25,7 +25,7 @@
 #include <eventql/util/thread/future.h>
 #include <eventql/util/http/httpclient.h>
 #include <eventql/util/protobuf/msg.h>
-#include <eventql/core/RemoteTSDBScan.h>
+#include <eventql/db/RemoteTSDBScan.h>
 #include <eventql/AnalyticsSession.pb.h>
 #include <eventql/z1stats.h>
 

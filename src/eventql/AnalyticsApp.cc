@@ -25,9 +25,9 @@
 #include "eventql/util/util/Base64.h"
 #include "eventql/AnalyticsApp.h"
 #include "eventql/AnalyticsSession.pb.h"
-#include <eventql/core/TSDBTableScanSpec.pb.h>
-#include "eventql/core/TimeWindowPartitioner.h"
-#include <eventql/core/CompactionWorker.h>
+#include <eventql/db/TSDBTableScanSpec.pb.h>
+#include "eventql/db/TimeWindowPartitioner.h"
+#include <eventql/db/CompactionWorker.h>
 #include "eventql/server/sql/sql_engine.h"
 #include "eventql/util/protobuf/DynamicMessage.h"
 #include "eventql/util/protobuf/MessageEncoder.h"

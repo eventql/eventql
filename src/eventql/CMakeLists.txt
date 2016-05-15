@@ -114,11 +114,8 @@ configure_file(
 
 add_subdirectory(util/mdb)
 
-file(GLOB PROTO_FILES *.proto)
+file(GLOB PROTO_FILES *.proto db/*.proto metrics/*.proto)
 STX_PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${PROTO_FILES})
-
-file(GLOB COREPROTO_FILES core/*.proto metrics/*.proto)
-STX_PROTOBUF_GENERATE_CPP(COREPROTO_SRCS COREPROTO_HDRS ${COREPROTO_FILES})
 #
 #add_executable(test-tsdb-timewindowpartitioner
 #    $<TARGET_OBJECTS:stx-mdb>
@@ -181,7 +178,6 @@ add_custom_command(
 add_executable(evqld
     #eventql/io/sstable/SSTableServlet.cc
     ${CMAKE_CURRENT_BINARY_DIR}/mapreduce_preludejs.cc
-    ${COREPROTO_SRCS}
     ${PROTO_SRCS}
     AnalyticsApp.cc
     AnalyticsAuth.cc
@@ -202,38 +198,38 @@ add_executable(evqld
     api/LogfileService.cc
     api/MapReduceAPIServlet.cc
     api/MapReduceService.cc
-    core/CompactionStrategy.cc
-    core/CompactionWorker.cc
-    core/FixedShardPartitioner.cc
-    core/LSMPartitionReader.cc
-    core/LSMPartitionReplication.cc
-    core/LSMPartitionWriter.cc
-    core/LSMTableIndex.cc
-    core/LSMTableIndexCache.cc
-    core/LazyPartition.cc
-    core/LogPartitionReader.cc
-    core/LogPartitionReplication.cc
-    core/LogPartitionWriter.cc
-    core/Partition.cc
-    core/PartitionMap.cc
-    core/PartitionReader.cc
-    core/PartitionReplication.cc
-    core/PartitionSnapshot.cc
-    core/PartitionWriter.cc
-    core/RecordArena.cc
-    core/RecordSet.cc
-    core/ReplicationScheme.cc
-    core/ReplicationState.cc
-    core/ReplicationWorker.cc
-    core/StaticPartitionReader.cc
-    core/StaticPartitionReplication.cc
-    core/StaticPartitionWriter.cc
-    core/TSDBClient.cc
-    core/TSDBService.cc
-    core/TSDBServlet.cc
-    core/TSDBTableRef.cc
-    core/Table.cc
-    core/TimeWindowPartitioner.cc
+    db/CompactionStrategy.cc
+    db/CompactionWorker.cc
+    db/FixedShardPartitioner.cc
+    db/LSMPartitionReader.cc
+    db/LSMPartitionReplication.cc
+    db/LSMPartitionWriter.cc
+    db/LSMTableIndex.cc
+    db/LSMTableIndexCache.cc
+    db/LazyPartition.cc
+    db/LogPartitionReader.cc
+    db/LogPartitionReplication.cc
+    db/LogPartitionWriter.cc
+    db/Partition.cc
+    db/PartitionMap.cc
+    db/PartitionReader.cc
+    db/PartitionReplication.cc
+    db/PartitionSnapshot.cc
+    db/PartitionWriter.cc
+    db/RecordArena.cc
+    db/RecordSet.cc
+    db/ReplicationScheme.cc
+    db/ReplicationState.cc
+    db/ReplicationWorker.cc
+    db/StaticPartitionReader.cc
+    db/StaticPartitionReplication.cc
+    db/StaticPartitionWriter.cc
+    db/TSDBClient.cc
+    db/TSDBService.cc
+    db/TSDBServlet.cc
+    db/TSDBTableRef.cc
+    db/Table.cc
+    db/TimeWindowPartitioner.cc
     mapreduce/MapReduceScheduler.cc
     mapreduce/MapReduceTask.cc
     mapreduce/MapReduceTaskBuilder.cc

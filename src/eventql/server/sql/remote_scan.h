@@ -27,8 +27,8 @@
 #include <eventql/sql/runtime/TableExpression.h>
 #include <eventql/sql/runtime/ValueExpression.h>
 #include <eventql/RemoteTSDBScanParams.pb.h>
-#include <eventql/core/TSDBTableRef.h>
-#include <eventql/core/ReplicationScheme.h>
+#include <eventql/db/TSDBTableRef.h>
+#include <eventql/db/ReplicationScheme.h>
 #include <eventql/AnalyticsAuth.h>
 
 #include "eventql/eventql.h"

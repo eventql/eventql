@@ -18,9 +18,9 @@
 #include <eventql/sql/runtime/TableExpression.h>
 #include <eventql/sql/runtime/ValueExpression.h>
 #include <eventql/io/cstable/CSTableReader.h>
-#include <eventql/core/Table.h>
-#include <eventql/core/PartitionReader.h>
-#include <eventql/core/PartitionMap.h>
+#include <eventql/db/Table.h>
+#include <eventql/db/PartitionReader.h>
+#include <eventql/db/PartitionMap.h>
 
 //#include "eventql/eventql.h"
 //
