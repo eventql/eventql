@@ -28,8 +28,6 @@
 #include <eventql/util/exception.h>
 #include <eventql/util/autoref.h>
 
-namespace util {
-
 class VFS {
 public:
   virtual ~VFS() {}
@@ -46,5 +44,4 @@ protected:
   HashMap<String, String> whitelist_;
 };
 
-}
 #endif
