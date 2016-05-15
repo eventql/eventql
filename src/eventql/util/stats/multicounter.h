@@ -45,7 +45,7 @@ public:
   void exportAll(const String& path, StatsSink* sink) const override;
 
 protected:
-  std::unordered_map<LabelValuesType, ValueType, std::hash<LabelValuesType>> values_;
+  std::unordered_map<LabelValuesType, ValueType, util::hash<LabelValuesType>> values_;
   mutable std::mutex mutex_;
 };
 
