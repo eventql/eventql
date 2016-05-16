@@ -43,6 +43,7 @@
 #include "eventql/server/sql/codec/json_codec.h"
 #include "eventql/server/sql/codec/json_sse_codec.h"
 #include "eventql/server/sql/codec/binary_codec.h"
+#include "eventql/server/sql/transaction_info.h"
 #include "eventql/db/TimeWindowPartitioner.h"
 #include "eventql/db/FixedShardPartitioner.h"
 #include "eventql/transport/http/http_auth.h"
@@ -1232,6 +1233,9 @@ void AnalyticsServlet::executeSQL_JSON(
   try {
     auto txn = sql_->newTransaction();
     txn->addTableProvider(app_->getTableProvider(session.customer()));
+    txn->setUserData(
+        new TransactionInfo(session.customer()),
+        [] (void* tx_info) { delete (TransactionInfo*) tx_info; });
     auto qplan = sql_->buildQueryPlan(txn.get(), query);
 
     Buffer result;

@@ -181,7 +181,10 @@ Vector<RefPtr<csql::QueryTreeNode>> Scheduler::pipelineExpression(
         partition.toString());
 
     auto qtree_copy = qtree->deepCopy();
-    iputs("table name: $0", table_name);
+    auto shard = csql::QueryTreeUtil::findNode<csql::SequentialScanNode>(
+        qtree_copy.get());
+    shard->setTableName(table_name);
+    shards.emplace_back(shard);
   }
 
   return shards;
@@ -256,11 +259,11 @@ ScopedPtr<csql::TableExpression> Scheduler::buildExpression(
   if (dynamic_cast<csql::GroupByNode*>(node.get())) {
     auto group_node = node.asInstanceOf<csql::GroupByNode>();
     if (isPipelineable(*group_node->inputTable())) {
-      return buildGroupByExpression(
+      return buildPipelineGroupByExpression(
           ctx,
           group_node);
     } else {
-      return buildPipelineGroupByExpression(
+      return buildGroupByExpression(
           ctx,
           group_node);
     }
