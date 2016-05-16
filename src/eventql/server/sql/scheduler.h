@@ -107,6 +107,7 @@ protected:
       RefPtr<csql::JoinNode> node);
 
   struct PipelinedExpression {
+    bool is_local;
     RefPtr<csql::QueryTreeNode> qtree;
     Vector<ReplicaRef> hosts;
   };

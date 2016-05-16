@@ -59,6 +59,10 @@ ScopedPtr<csql::ResultCursor> TableScan::execute() {
               std::placeholders::_2)));
 };
 
+size_t TableScan::getNumColumns() const {
+  return seqscan_->numColumns();
+}
+
 bool TableScan::next(csql::SValue* row, size_t row_len) {
   while (cur_partition_ < partitions_.size()) {
     if (cur_cursor_.get() == nullptr) {
@@ -125,7 +129,7 @@ ScopedPtr<csql::ResultCursor> TableScan::openRemotePartition(
           tsdb_namespace_,
           auth_));
 
-  remote_expr->addQueryTree(
+  remote_expr->addRemoteQuery(
       seqscan_copy.get(),
       replication_scheme_->replicasFor(partition_key));
 

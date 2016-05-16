@@ -41,11 +41,15 @@ public:
 
   ~RemoteExpression();
 
-  void addQueryTree(
+  void addLocalQuery(ScopedPtr<csql::TableExpression> expr);
+
+  void addRemoteQuery(
       RefPtr<csql::TableExpressionNode> qtree,
       Vector<ReplicaRef> hosts);
 
   ScopedPtr<csql::ResultCursor> execute() override;
+
+  size_t getNumColumns() const override;
 
 protected:
 
@@ -54,14 +58,16 @@ protected:
 
   bool next(csql::SValue* out_row, size_t out_row_len);
 
-  struct RemoteQuerySpec {
+  struct QuerySpec {
+    bool is_local;
+    ScopedPtr<csql::TableExpression> expr;
     RefPtr<csql::TableExpressionNode> qtree;
     Vector<ReplicaRef> hosts;
   };
 
   csql::Transaction* txn_;
   String db_namespace_;
-  Vector<RemoteQuerySpec> queries_;
+  Vector<QuerySpec> queries_;
   AnalyticsAuth* auth_;
   size_t num_columns_;
   bool eof_;

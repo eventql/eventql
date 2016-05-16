@@ -46,10 +46,21 @@ RemoteExpression::~RemoteExpression() {
   thread_.join();
 }
 
-void RemoteExpression::addQueryTree(
+void RemoteExpression::addLocalQuery(ScopedPtr<csql::TableExpression> expr) {
+  num_columns_ = std::max(num_columns_, expr->getNumColumns());
+
+  queries_.emplace_back(QuerySpec {
+    .is_local = true,
+    .expr = std::move(expr)
+  });
+}
+
+
+void RemoteExpression::addRemoteQuery(
     RefPtr<csql::TableExpressionNode> qtree,
     Vector<ReplicaRef> hosts) {
-  queries_.emplace_back(RemoteQuerySpec {
+  queries_.emplace_back(QuerySpec {
+    .is_local = false,
     .qtree = qtree,
     .hosts = hosts
   });
@@ -68,6 +79,10 @@ ScopedPtr<csql::ResultCursor> RemoteExpression::execute() {
             this,
             std::placeholders::_1,
             std::placeholders::_2)));
+}
+
+size_t RemoteExpression::getNumColumns() const {
+  return num_columns_;
 }
 
 void RemoteExpression::executeAsync() {

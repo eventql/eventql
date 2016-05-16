@@ -188,7 +188,13 @@ ScopedPtr<csql::TableExpression> Scheduler::buildPipelineGroupByExpression(
             shards[i].qtree));
 
     group_by_copy->setIsPartialAggreagtion(true);
-    remote_aggregate->addQueryTree(group_by_copy.get(), shards[i].hosts);
+    if (shards[i].is_local) {
+      auto partial = 
+          buildPartialGroupByExpression(txn, group_by_copy);
+      remote_aggregate->addLocalQuery(std::move(partial));
+    } else {
+      remote_aggregate->addRemoteQuery(group_by_copy.get(), shards[i].hosts);
+    }
   }
 
   Vector<csql::ValueExpression> select_expressions;
@@ -250,6 +256,7 @@ Vector<Scheduler::PipelinedExpression> Scheduler::pipelineExpression(
     auto shard_hosts = repl_scheme_->replicasFor(partition);
 
     shards.emplace_back(PipelinedExpression {
+      .is_local = repl_scheme_->hasLocalReplica(partition),
       .qtree = shard,
       .hosts = shard_hosts
     });

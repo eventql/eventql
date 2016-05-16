@@ -45,6 +45,8 @@ public:
 
   ScopedPtr<csql::ResultCursor> execute() override;
 
+  size_t getNumColumns() const override;
+
 protected:
 
   bool next(csql::SValue* row, size_t row_len);
