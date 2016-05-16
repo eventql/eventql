@@ -24,6 +24,7 @@ ROADMAP
 
 ???
 - tablecursor::next -> num_rows/batch ??
+- tablecursor::nextEncoded optional fastpath (for remote aggregate)
 
 kleinkram:
 - [ ] accept SQL query as post data in /api/v1/sql
