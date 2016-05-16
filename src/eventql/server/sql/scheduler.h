@@ -106,13 +106,13 @@ protected:
       csql::Transaction* txn,
       RefPtr<csql::JoinNode> node);
 
-  struct PipelinedExpression {
+  struct PipelinedQueryTree {
     bool is_local;
     RefPtr<csql::QueryTreeNode> qtree;
     Vector<ReplicaRef> hosts;
   };
 
-  Vector<PipelinedExpression> pipelineExpression(
+  Vector<PipelinedQueryTree> pipelineExpression(
       csql::Transaction* txn,
       RefPtr<csql::QueryTreeNode> qtree);
 

@@ -243,7 +243,7 @@ add_executable(evqld
     server/sql/table_scan.cc
     server/sql/table_provider.cc
     server/sql/partition_cursor.cc
-    server/sql/remote_expression.cc
+    server/sql/pipelined_expression.cc
     server/sql/scheduler.cc
     server/sql/transaction_info.cc
     z1stats.cc

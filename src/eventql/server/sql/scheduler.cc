@@ -24,7 +24,7 @@
  */
 #include <eventql/server/sql/scheduler.h>
 #include <eventql/server/sql/transaction_info.h>
-#include <eventql/server/sql/remote_expression.h>
+#include <eventql/server/sql/pipelined_expression.h>
 #include <eventql/sql/qtree/QueryTreeUtil.h>
 
 #include "eventql/eventql.h"
@@ -174,7 +174,7 @@ ScopedPtr<csql::TableExpression> Scheduler::buildPipelineGroupByExpression(
       csql::Transaction* txn,
       RefPtr<csql::GroupByNode> node) {
   auto remote_aggregate = mkScoped(
-      new RemoteExpression(
+      new PipelinedExpression(
           txn,
           TransactionInfo::get(txn)->getNamespace(),
           auth_));
@@ -212,7 +212,7 @@ ScopedPtr<csql::TableExpression> Scheduler::buildPipelineGroupByExpression(
           std::move(remote_aggregate)));
 }
 
-Vector<Scheduler::PipelinedExpression> Scheduler::pipelineExpression(
+Vector<Scheduler::PipelinedQueryTree> Scheduler::pipelineExpression(
       csql::Transaction* txn,
       RefPtr<csql::QueryTreeNode> qtree) {
   auto seqscan = csql::QueryTreeUtil::findNode<csql::SequentialScanNode>(
@@ -241,7 +241,7 @@ Vector<Scheduler::PipelinedExpression> Scheduler::pipelineExpression(
   auto partitioner = table.get()->partitioner();
   auto partitions = partitioner->listPartitions(seqscan->constraints());
 
-  Vector<PipelinedExpression> shards;
+  Vector<PipelinedQueryTree> shards;
   for (const auto& partition : partitions) {
     auto table_name = StringUtil::format(
         "tsdb://localhost/$0/$1",
@@ -255,7 +255,7 @@ Vector<Scheduler::PipelinedExpression> Scheduler::pipelineExpression(
 
     auto shard_hosts = repl_scheme_->replicasFor(partition);
 
-    shards.emplace_back(PipelinedExpression {
+    shards.emplace_back(PipelinedQueryTree {
       .is_local = repl_scheme_->hasLocalReplica(partition),
       .qtree = shard,
       .hosts = shard_hosts

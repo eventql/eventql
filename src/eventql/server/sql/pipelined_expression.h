@@ -30,16 +30,16 @@
 
 namespace eventql {
 
-class RemoteExpression : public csql::TableExpression {
+class PipelinedExpression : public csql::TableExpression {
 public:
   static const constexpr size_t kMaxBufferSize = 100;
 
-  RemoteExpression(
+  PipelinedExpression(
       csql::Transaction* txn,
       const String& db_namespace,
       AnalyticsAuth* auth);
 
-  ~RemoteExpression();
+  ~PipelinedExpression();
 
   void addLocalQuery(ScopedPtr<csql::TableExpression> expr);
 

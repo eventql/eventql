@@ -24,7 +24,7 @@
  */
 #include "eventql/server/sql/table_scan.h"
 #include "eventql/server/sql/partition_cursor.h"
-#include "eventql/server/sql/remote_expression.h"
+#include "eventql/server/sql/pipelined_expression.h"
 
 namespace eventql {
 
@@ -124,7 +124,7 @@ ScopedPtr<csql::ResultCursor> TableScan::openRemotePartition(
   seqscan_copy->setTableName(table_name);
 
   auto remote_expr = mkScoped(
-      new RemoteExpression(
+      new PipelinedExpression(
           txn_,
           tsdb_namespace_,
           auth_));

@@ -22,13 +22,13 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include "eventql/server/sql/remote_expression.h"
+#include "eventql/server/sql/pipelined_expression.h"
 #include "eventql/server/sql/codec/binary_codec.h"
 
 
 namespace eventql {
 
-RemoteExpression::RemoteExpression(
+PipelinedExpression::PipelinedExpression(
     csql::Transaction* txn,
     const String& db_namespace,
     AnalyticsAuth* auth) :
@@ -40,13 +40,13 @@ RemoteExpression::RemoteExpression(
     error_(false),
     cancelled_(false) {};
 
-RemoteExpression::~RemoteExpression() {
+PipelinedExpression::~PipelinedExpression() {
   cancelled_ = true;
   cv_.notify_all();
   thread_.join();
 }
 
-void RemoteExpression::addLocalQuery(ScopedPtr<csql::TableExpression> expr) {
+void PipelinedExpression::addLocalQuery(ScopedPtr<csql::TableExpression> expr) {
   num_columns_ = std::max(num_columns_, expr->getNumColumns());
 
   queries_.emplace_back(QuerySpec {
@@ -56,7 +56,7 @@ void RemoteExpression::addLocalQuery(ScopedPtr<csql::TableExpression> expr) {
 }
 
 
-void RemoteExpression::addRemoteQuery(
+void PipelinedExpression::addRemoteQuery(
     RefPtr<csql::TableExpressionNode> qtree,
     Vector<ReplicaRef> hosts) {
   queries_.emplace_back(QuerySpec {
@@ -68,24 +68,24 @@ void RemoteExpression::addRemoteQuery(
   num_columns_ = std::max(num_columns_, qtree->numColumns());
 }
 
-ScopedPtr<csql::ResultCursor> RemoteExpression::execute() {
-  thread_ = std::thread(std::bind(&RemoteExpression::executeAsync, this));
+ScopedPtr<csql::ResultCursor> PipelinedExpression::execute() {
+  thread_ = std::thread(std::bind(&PipelinedExpression::executeAsync, this));
 
   return mkScoped(
     new csql::DefaultResultCursor(
         num_columns_,
         std::bind(
-            &RemoteExpression::next,
+            &PipelinedExpression::next,
             this,
             std::placeholders::_1,
             std::placeholders::_2)));
 }
 
-size_t RemoteExpression::getNumColumns() const {
+size_t PipelinedExpression::getNumColumns() const {
   return num_columns_;
 }
 
-void RemoteExpression::executeAsync() {
+void PipelinedExpression::executeAsync() {
   Vector<String> errors;
   for (const auto& query : queries_) {
     for (const auto& host : query.hosts) {
@@ -96,7 +96,7 @@ void RemoteExpression::executeAsync() {
         logError(
             "eventql",
             e,
-            "RemoteExpression::executeOnHost failed @ $0",
+            "PipelinedExpression::executeOnHost failed @ $0",
             host.addr.hostAndPort());
 
         std::unique_lock<std::mutex> lk(mutex_);
@@ -119,7 +119,7 @@ void RemoteExpression::executeAsync() {
   cv_.notify_all();
 }
 
-void RemoteExpression::executeOnHost(
+void PipelinedExpression::executeOnHost(
     RefPtr<csql::TableExpressionNode> qtree,
     const InetAddr& host) {
   Buffer req_body;
@@ -188,7 +188,7 @@ void RemoteExpression::executeOnHost(
 }
 
 
-bool RemoteExpression::next(csql::SValue* out_row, size_t out_row_len) {
+bool PipelinedExpression::next(csql::SValue* out_row, size_t out_row_len) {
   std::unique_lock<std::mutex> lk(mutex_);
 
   while (buf_.size() == 0 && !eof_ && !error_ && !cancelled_) {
