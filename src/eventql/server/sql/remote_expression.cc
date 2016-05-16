@@ -109,7 +109,7 @@ void RemoteExpression::executeOnHost(const InetAddr& host) {
   });
 
   auto url = StringUtil::format(
-      "http://$0/api/v1/sql/execute_qtree",
+      "http://$0/transport/http/v1/sql/execute_qtree",
       host.ipAndPort());
 
   AnalyticsPrivileges privileges;

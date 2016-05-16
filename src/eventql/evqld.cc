@@ -368,7 +368,7 @@ int main(int argc, const char** argv) {
 
   eventql::DefaultServlet default_servlet;
 
-  http_router.addRouteByPrefixMatch("/api/", &analytics_servlet, &tpool);
+  http_router.addRouteByPrefixMatch("/transport/http/", &analytics_servlet, &tpool);
   http_router.addRouteByPrefixMatch("/zstatus", &status_servlet);
   http_router.addRouteByPrefixMatch("/", &default_servlet);
 

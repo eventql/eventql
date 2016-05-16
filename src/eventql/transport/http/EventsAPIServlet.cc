@@ -25,7 +25,7 @@
 #include "eventql/util/assets.h"
 #include "eventql/util/protobuf/msg.h"
 #include "eventql/util/io/BufferedOutputStream.h"
-#include "eventql/api/EventsAPIServlet.h"
+#include "eventql/transport/http/EventsAPIServlet.h"
 
 #include "eventql/eventql.h"
 
@@ -49,12 +49,12 @@ void EventsAPIServlet::handle(
   http::HTTPResponse res;
   res.populateFromRequest(req);
 
-  if (uri.path() == "/api/v1/events/scan") {
+  if (uri.path() == "/transport/http/v1/events/scan") {
     scanTable(session, uri, req_stream.get(), res_stream.get());
     return;
   }
 
-  if (uri.path() == "/api/v1/events/scan_partition") {
+  if (uri.path() == "/transport/http/v1/events/scan_partition") {
     scanTablePartition(session, uri, req_stream.get(), res_stream.get());
     return;
   }

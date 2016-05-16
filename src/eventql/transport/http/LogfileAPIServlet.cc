@@ -25,7 +25,7 @@
 #include "eventql/util/assets.h"
 #include "eventql/util/protobuf/msg.h"
 #include "eventql/util/io/BufferedOutputStream.h"
-#include "eventql/api/LogfileAPIServlet.h"
+#include "eventql/transport/http/LogfileAPIServlet.h"
 
 #include "eventql/eventql.h"
 
@@ -49,28 +49,28 @@ void LogfileAPIServlet::handle(
   http::HTTPResponse res;
   res.populateFromRequest(req);
 
-  if (uri.path() == "/api/v1/logfiles") {
+  if (uri.path() == "/transport/http/v1/logfiles") {
     req_stream->readBody();
     listLogfiles(session, uri, &req, &res);
     res_stream->writeResponse(res);
     return;
   }
 
-  if (uri.path() == "/api/v1/logfiles/get_definition") {
+  if (uri.path() == "/transport/http/v1/logfiles/get_definition") {
     req_stream->readBody();
     fetchLogfileDefinition(session, uri, &req, &res);
     res_stream->writeResponse(res);
     return;
   }
 
-  if (uri.path() == "/api/v1/logfiles/set_regex") {
+  if (uri.path() == "/transport/http/v1/logfiles/set_regex") {
     req_stream->readBody();
     setLogfileRegex(session, uri, &req, &res);
     res_stream->writeResponse(res);
     return;
   }
 
-  if (uri.path() == "/api/v1/logfiles/upload") {
+  if (uri.path() == "/transport/http/v1/logfiles/upload") {
     uploadLogfile(session, uri, req_stream.get(), &res);
     res_stream->writeResponse(res);
     return;

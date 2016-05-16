@@ -26,17 +26,17 @@
 #include "eventql/util/http/httpservice.h"
 #include "eventql/util/http/HTTPSSEStream.h"
 #include "eventql/AnalyticsSession.pb.h"
-#include "eventql/api/EventsService.h"
+#include "eventql/transport/http/LogfileService.h"
 
 #include "eventql/eventql.h"
 
 namespace eventql {
 
-class EventsAPIServlet {
+class LogfileAPIServlet {
 public:
 
-  EventsAPIServlet(
-      EventsService* service,
+  LogfileAPIServlet(
+      LogfileService* service,
       ConfigDirectory* cdir,
       const String& cachedir);
 
@@ -47,25 +47,35 @@ public:
 
 protected:
 
-  void scanTable(
-      const AnalyticsSession& session,
-      const URI& uri,
-      http::HTTPRequestStream* req_stream,
-      http::HTTPResponseStream* res_stream);
-
-  void scanTablePartition(
-      const AnalyticsSession& session,
-      const URI& uri,
-      http::HTTPRequestStream* req_stream,
-      http::HTTPResponseStream* res_stream);
-
-  void insertEvents(
+  void listLogfiles(
       const AnalyticsSession& session,
       const URI& uri,
       const http::HTTPRequest* req,
       http::HTTPResponse* res);
 
-  EventsService* service_;
+  void fetchLogfileDefinition(
+      const AnalyticsSession& session,
+      const URI& uri,
+      const http::HTTPRequest* req,
+      http::HTTPResponse* res);
+
+  void setLogfileRegex(
+      const AnalyticsSession& session,
+      const URI& uri,
+      const http::HTTPRequest* req,
+      http::HTTPResponse* res);
+
+  void uploadLogfile(
+      const AnalyticsSession& session,
+      const URI& uri,
+      http::HTTPRequestStream* req_stream,
+      http::HTTPResponse* res);
+
+  void renderLogfileDefinition(
+      const LogfileDefinition* logfile_def,
+      json::JSONOutputStream* json);
+
+  LogfileService* service_;
   ConfigDirectory* cdir_;
   String cachedir_;
 };

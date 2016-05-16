@@ -21,7 +21,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include "eventql/api/MapReduceService.h"
+#include "eventql/transport/http/MapReduceService.h"
 #include "eventql/mapreduce/MapReduceTask.h"
 #include "eventql/mapreduce/MapReduceTaskBuilder.h"
 #include "eventql/mapreduce/MapReduceScheduler.h"

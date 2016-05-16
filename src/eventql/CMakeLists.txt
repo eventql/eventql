@@ -166,7 +166,7 @@ add_custom_command(
 ##    mapreduce/tasks/ReturnResultsTask.cc
 ##    mapreduce/tasks/SaveToTableTask.cc
 ##    mapreduce/tasks/SaveToTablePartitionTask.cc
-##    api/MapReduceService.cc
+##    transport/http/MapReduceService.cc
 ##    JavaScriptContext.cc
 ##    JavaScriptContext_test.cc)
 ##
@@ -192,12 +192,12 @@ add_executable(evqld
     LogfileScanResult.cc
     transport/http/status_servlet.cc
     TableDefinition.cc
-    api/EventsAPIServlet.cc
-    api/EventsService.cc
-    api/LogfileAPIServlet.cc
-    api/LogfileService.cc
-    api/MapReduceAPIServlet.cc
-    api/MapReduceService.cc
+    transport/http/EventsAPIServlet.cc
+    transport/http/EventsService.cc
+    transport/http/LogfileAPIServlet.cc
+    transport/http/LogfileService.cc
+    transport/http/MapReduceAPIServlet.cc
+    transport/http/MapReduceService.cc
     db/CompactionStrategy.cc
     db/CompactionWorker.cc
     db/FixedShardPartitioner.cc

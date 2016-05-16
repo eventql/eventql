@@ -276,7 +276,7 @@ void run(const cli::FlagParser& flags) {
 
   auto create_res = http_client.executeRequest(
       http::HTTPRequest::mkPost(
-          "http://" + api_host + "/api/v1/tables/create_table",
+          "http://" + api_host + "/transport/http/v1/tables/create_table",
           create_req,
           auth_headers));
 
@@ -321,7 +321,7 @@ void run(const cli::FlagParser& flags) {
     }
 
     auto upload_uri = StringUtil::format(
-        "http://$0/api/v1/tables/upload_table?table=$1&shard=$2",
+        "http://$0/transport/http/v1/tables/upload_table?table=$1&shard=$2",
         api_host,
         URI::urlEncode(table_name),
         nshard);

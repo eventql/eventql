@@ -143,7 +143,7 @@ void runJS(
     };
 
     auto url = StringUtil::format(
-        "http://$0/api/v1/mapreduce/execute",
+        "http://$0/transport/http/v1/mapreduce/execute",
         global_flags.getString("api_host"));
 
     auto auth_token = loadAuth(global_flags);
@@ -233,7 +233,7 @@ void runSQL(
     bool is_tty = stderr_os->isTTY();
 
     auto url = StringUtil::format(
-        "http://$0/api/v1/sql",
+        "http://$0/transport/http/v1/sql",
         global_flags.getString("api_host"));
 
     auto postdata = StringUtil::format(
@@ -310,7 +310,7 @@ void cmd_login(
 
   try {
     auto url = StringUtil::format(
-        "http://$0/api/v1/auth/login",
+        "http://$0/transport/http/v1/auth/login",
         global_flags.getString("api_host"));
 
     auto authdata = StringUtil::format(

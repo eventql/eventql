@@ -27,9 +27,9 @@
 #include "eventql/db/TSDBClient.h"
 #include "eventql/db/TSDBService.h"
 #include "eventql/db/CompactionWorker.h"
-#include "eventql/api/LogfileService.h"
-#include "eventql/api/EventsService.h"
-#include "eventql/api/MapReduceService.h"
+#include "eventql/transport/http/LogfileService.h"
+#include "eventql/transport/http/EventsService.h"
+#include "eventql/transport/http/MapReduceService.h"
 #include "eventql/AnalyticsSession.pb.h"
 #include "eventql/ConfigDirectory.h"
 #include <jsapi.h>

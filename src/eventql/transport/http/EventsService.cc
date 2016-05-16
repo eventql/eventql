@@ -22,7 +22,7 @@
  * code of your own applications
  */
 #include <unistd.h>
-#include "eventql/api/EventsService.h"
+#include "eventql/transport/http/EventsService.h"
 #include "eventql/util/RegExp.h"
 #include "eventql/util/human.h"
 #include "eventql/util/protobuf/msg.h"
@@ -263,7 +263,7 @@ bool EventsService::scanRemoteTablePartition(
       host.hostAndPort());
 
   auto url = StringUtil::format(
-      "http://$0/api/v1/events/scan_partition?table=$1&partition=$2&limit=$3",
+      "http://$0/transport/http/v1/events/scan_partition?table=$1&partition=$2&limit=$3",
       host.hostAndPort(),
       URI::urlEncode(table_name),
       partition_key.toString(),

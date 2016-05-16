@@ -22,7 +22,7 @@
  * code of your own applications
  */
 #include <unistd.h>
-#include "eventql/api/LogfileService.h"
+#include "eventql/transport/http/LogfileService.h"
 #include "eventql/util/RegExp.h"
 #include "eventql/util/human.h"
 #include "eventql/util/protobuf/msg.h"

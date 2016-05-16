@@ -26,7 +26,7 @@
 #include <eventql/util/fnv.h>
 #include "eventql/util/protobuf/msg.h"
 #include "eventql/util/io/BufferedOutputStream.h"
-#include "eventql/api/MapReduceAPIServlet.h"
+#include "eventql/transport/http/MapReduceAPIServlet.h"
 #include "eventql/mapreduce/MapReduceTask.h"
 #include "eventql/io/sstable/sstablereader.h"
 
@@ -42,7 +42,7 @@ MapReduceAPIServlet::MapReduceAPIServlet(
     cdir_(cdir),
     cachedir_(cachedir) {}
 
-static const String kResultPathPrefix = "/api/v1/mapreduce/result/";
+static const String kResultPathPrefix = "/transport/http/v1/mapreduce/result/";
 
 void MapReduceAPIServlet::handle(
     const AnalyticsSession& session,
@@ -54,7 +54,7 @@ void MapReduceAPIServlet::handle(
   http::HTTPResponse res;
   res.populateFromRequest(req);
 
-  if (uri.path() == "/api/v1/mapreduce/execute") {
+  if (uri.path() == "/transport/http/v1/mapreduce/execute") {
     executeMapReduceScript(session, uri, req_stream.get(), res_stream.get());
     return;
   }
@@ -68,17 +68,17 @@ void MapReduceAPIServlet::handle(
     return;
   }
 
-  if (uri.path() == "/api/v1/mapreduce/tasks/map_partition") {
+  if (uri.path() == "/transport/http/v1/mapreduce/tasks/map_partition") {
     executeMapPartitionTask(session, uri, req_stream.get(), res_stream.get());
     return;
   }
 
-  if (uri.path() == "/api/v1/mapreduce/tasks/reduce") {
+  if (uri.path() == "/transport/http/v1/mapreduce/tasks/reduce") {
     executeReduceTask(session, uri, req_stream.get(), res_stream.get());
     return;
   }
 
-  if (uri.path() == "/api/v1/mapreduce/tasks/save_to_table") {
+  if (uri.path() == "/transport/http/v1/mapreduce/tasks/save_to_table") {
     req_stream->readBody();
     catchAndReturnErrors(&res, [this, &session, &uri, &req, &res] {
       executeSaveToTableTask(session, uri, &req, &res);
@@ -87,7 +87,7 @@ void MapReduceAPIServlet::handle(
     return;
   }
 
-  if (uri.path() == "/api/v1/mapreduce/tasks/save_to_table_partition") {
+  if (uri.path() == "/transport/http/v1/mapreduce/tasks/save_to_table_partition") {
     req_stream->readBody();
     catchAndReturnErrors(&res, [this, &session, &uri, &req, &res] {
       executeSaveToTablePartitionTask(session, uri, &req, &res);

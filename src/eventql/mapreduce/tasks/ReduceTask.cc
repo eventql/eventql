@@ -125,7 +125,7 @@ Option<MapReduceShardResult> ReduceTask::executeRemote(
       host.addr.hostAndPort());
 
   auto url = StringUtil::format(
-      "http://$0/api/v1/mapreduce/tasks/reduce",
+      "http://$0/transport/http/v1/mapreduce/tasks/reduce",
       host.addr.ipAndPort());
 
   auto params = StringUtil::format(

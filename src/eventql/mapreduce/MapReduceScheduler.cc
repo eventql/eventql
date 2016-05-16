@@ -24,7 +24,7 @@
 #include "eventql/util/logging.h"
 #include "eventql/util/http/HTTPFileDownload.h"
 #include "eventql/mapreduce/MapReduceScheduler.h"
-#include "eventql/api/MapReduceService.h"
+#include "eventql/transport/http/MapReduceService.h"
 
 #include "eventql/eventql.h"
 
@@ -212,7 +212,7 @@ Option<String> MapReduceScheduler::getResultURL(size_t task_index) {
       StringUtil::format("mr-result-$0", result.get().result_id.toString()));
 
   return Some(StringUtil::format(
-      "http://$0/api/v1/mapreduce/result/$1",
+      "http://$0/transport/http/v1/mapreduce/result/$1",
       result.get().host.addr.ipAndPort(),
       result.get().result_id.toString()));
 }
@@ -271,7 +271,7 @@ void MapReduceScheduler::downloadResult(
   }
 
   auto url = StringUtil::format(
-      "http://$0/api/v1/mapreduce/result/$1",
+      "http://$0/transport/http/v1/mapreduce/result/$1",
       result.get().host.addr.ipAndPort(),
       result.get().result_id.toString());
 

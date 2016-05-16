@@ -33,9 +33,9 @@
 #include "eventql/AnalyticsAuth.h"
 #include "eventql/ConfigDirectory.h"
 #include "eventql/db/TSDBService.h"
-#include "eventql/api/LogfileAPIServlet.h"
-#include "eventql/api/EventsAPIServlet.h"
-#include "eventql/api/MapReduceAPIServlet.h"
+#include "eventql/transport/http/LogfileAPIServlet.h"
+#include "eventql/transport/http/EventsAPIServlet.h"
+#include "eventql/transport/http/MapReduceAPIServlet.h"
 #include "eventql/RemoteTSDBScanParams.pb.h"
 
 #include "eventql/eventql.h"
