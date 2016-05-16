@@ -137,20 +137,12 @@ The `$DESTDIR` environment variable is honored at install.  See
 Origin & References
 --------------------
 
-This [line editing][] library was created by Simmule Turner and
-[Rich Salz][upstream] in in 1992.  It is distributed under a “C
-News-like” license, similar to the [BSD license][].  Rich's latest
-version is however under the Apache license.  For details on the
-licensing terms of this version of the software, see [LICENSE][].
+This [line editing][] library was created by Simmule Turner and Rich Salz
+in in 1992.  It is distributed under a “C News-like” license, similar to
+the [BSD license][].  For details, see the file [LICENSE][].
 
-This version of the editline library was forked from the [Minix 3][]
-source tree and is *not* related to the similarily named NetBSD version
-that [Jess Thrysøe][jess] disitributes to the world outside BSD.  The
-libraries have much in common, but the latter is heavily refactored and
-also relies on ncurses, whereas this library only uses termios from the
-standard C library.
-
-Patches and bug fixes from the following forks, all based on the
+This version of the editline library is forked from the [Minix 3][] source
+tree.  Patches and bug fixes from the following forks, all based on the
 original comp.sources.unix posting, have been merged:
 
 * Debian [libeditline][]
@@ -174,9 +166,7 @@ Outstanding issues are listed in the [TODO.md][] file.
 [TODO.md]:         https://github.com/troglobit/editline/blob/master/TODO.md
 [ChangeLog.md]:    https://github.com/troglobit/editline/blob/master/ChangeLog.md
 [FSF readline]:    http://www.gnu.org/software/readline/
-[upstream]:        https://github.com/richsalz/editline/
-[Minix 3]:         http://www.cise.ufl.edu/~cop4600/cgi-bin/lxr/http/source.cgi/lib/editline/
-[jess]:            http://thrysoee.dk/editline/
+[Minix 3]:         http://www.minix3.org/
 [BSD license]:     http://en.wikipedia.org/wiki/BSD_licenses
 [libeditline]:     http://packages.qa.debian.org/e/editline.html
 [Heimdal]:         http://www.h5l.org

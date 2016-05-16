@@ -13,8 +13,8 @@
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 AC_PREREQ(2.61)
-AC_INIT(editline, 1.15.2-beta1, https://github.com/troglobit/editline/issues)
-AM_INIT_AUTOMAKE([1.11 no-dist-gzip dist-xz])
+AC_INIT(editline, 1.15.0, https://github.com/troglobit/editline/issues)
+AM_INIT_AUTOMAKE([no-dist-gzip dist-xz])
 AM_SILENT_RULES([yes])
 
 AC_CONFIG_MACRO_DIR([m4])
@@ -83,7 +83,6 @@ AC_ARG_ENABLE(termcap,
    [AS_HELP_STRING([--enable-termcap], [Use termcap library to query terminal size.])],
    AC_DEFINE([CONFIG_USE_TERMCAP], 1, [Define to use the termcap library for terminal size.]))
 
-AM_CONDITIONAL([USE_LIBTERMCAP], [test "$enable_termcap" != no])
 AM_CFLAGS="-std=gnu99 $inline_cflags -W -Wall -Wundef -Wunused -Wstrict-prototypes -Werror-implicit-function-declaration $nopointersign_cflags -Wshadow -Wcast-qual"
 AC_SUBST(AM_CFLAGS)
 

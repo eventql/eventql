@@ -1170,7 +1170,6 @@ void rl_clear_message(void)
 void rl_forced_update_display()
 {
     redisplay();
-    tty_flush();
 }
 
 char *readline(const char *prompt)
@@ -1735,6 +1734,7 @@ el_status_t el_bind_key_in_metamap(int key, el_keymap_func_t function)
 
 /**
  * Local Variables:
+ *  version-control: t
  *  indent-tabs-mode: t
  *  c-file-style: "ellemtel"
  *  c-basic-offset: 4

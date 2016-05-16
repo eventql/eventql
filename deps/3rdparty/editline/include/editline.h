@@ -29,10 +29,6 @@
 #define ISMETA(x)       ((x) & 0x80)
 #define UNMETA(x)       ((x) & 0x7F)
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /* Command status codes. */
 typedef enum {
     CSdone = 0,                 /* OK */
@@ -103,9 +99,5 @@ void rl_prep_terminal(int meta_flag);
 void rl_deprep_terminal(void);
 
 int rl_getc(void);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif  /* __EDITLINE_H__ */
