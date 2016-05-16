@@ -53,3 +53,15 @@ protected:
   void* ptr_;
 };
 
+class RunOnDestroy {
+public:
+
+  RunOnDestroy(std::function<void()> fn) : fn_(fn) {}
+  RunOnDestroy(const FreeOnDestroy& other) = delete;
+  RunOnDestroy& operator=(const FreeOnDestroy& other) = delete;
+  ~RunOnDestroy() { fn_(); }
+
+protected:
+  std::function<void()> fn_;
+};
+

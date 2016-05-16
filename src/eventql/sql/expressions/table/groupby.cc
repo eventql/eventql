@@ -25,6 +25,7 @@
 #include <eventql/util/io/BufferedOutputStream.h>
 #include <eventql/util/io/fileutil.h>
 #include <eventql/sql/expressions/table/groupby.h>
+#include <eventql/util/freeondestroy.h>
 
 namespace csql {
 
@@ -235,8 +236,35 @@ GroupByMergeExpression::~GroupByMergeExpression() {
 ScopedPtr<ResultCursor> GroupByMergeExpression::execute() {
   auto input_cursor = input_->execute();
   Vector<SValue> row(2);
+
+  ScratchMemory scratch;
+  Vector<VM::Instance> remote_group;
+  for (size_t i = 0; i < select_exprs_.size(); ++i) {
+    const auto& e = select_exprs_[i];
+    remote_group.emplace_back(VM::allocInstance(txn_, e.program(), &scratch));
+  }
+
+  RunOnDestroy remote_group_finalizer([this, &remote_group] {
+    for (size_t i = 0; i < select_exprs_.size(); ++i) {
+      VM::freeInstance(txn_, select_exprs_[i].program(), &remote_group[i]);
+    }
+  });
+
   while (input_cursor->next(row.data(), row.size())) {
-    iputs("got row: $0", row);
+    const auto& group_key = row[0].getString();
+    auto& group = groups_[group_key];
+    if (group.size() == 0) {
+      for (const auto& e : select_exprs_) {
+        group.emplace_back(VM::allocInstance(txn_, e.program(), &scratch_));
+      }
+    }
+
+    auto is = StringInputStream::fromString(row[1].getString());
+    for (size_t i = 0; i < select_exprs_.size(); ++i) {
+      const auto& e = select_exprs_[i];
+      VM::loadState(txn_, e.program(), &remote_group[i], is.get());
+      VM::merge(txn_, e.program(), &group[i], &remote_group[i]);
+    }
   }
 
   groups_iter_ = groups_.begin();
