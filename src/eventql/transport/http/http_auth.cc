@@ -21,7 +21,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include <eventql/HTTPAuth.h>
+#include <eventql/transport/http/http_auth.h>
 #include "eventql/util/http/cookies.h"
 
 namespace eventql {

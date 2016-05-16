@@ -23,7 +23,8 @@
  */
 #include <thread>
 
-#include "AnalyticsServlet.h"
+#include "eventql/eventql.h"
+#include "eventql/transport/http/api_servlet.h"
 #include "eventql/util/Language.h"
 #include "eventql/util/human.h"
 #include "eventql/util/wallclock.h"
@@ -44,11 +45,9 @@
 #include "eventql/server/sql/codec/binary_codec.h"
 #include "eventql/db/TimeWindowPartitioner.h"
 #include "eventql/db/FixedShardPartitioner.h"
-#include "eventql/HTTPAuth.h"
+#include "eventql/transport/http/http_auth.h"
 #include <eventql/io/cstable/CSTableWriter.h>
 #include <eventql/io/cstable/RecordShredder.h>
-
-#include "eventql/eventql.h"
 
 namespace eventql {
 

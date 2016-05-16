@@ -181,16 +181,16 @@ add_executable(evqld
     ${PROTO_SRCS}
     AnalyticsApp.cc
     AnalyticsAuth.cc
-    AnalyticsServlet.cc
+    transport/http/api_servlet.cc
     ConfigDirectory.cc
     CustomerConfig.cc
     DefaultServlet.cc
     DrilldownTree.cc
     EventScanResult.cc
-    HTTPAuth.cc
+    transport/http/http_auth.cc
     JavaScriptContext.cc
     LogfileScanResult.cc
-    StatusServlet.cc
+    transport/http/status_servlet.cc
     TableDefinition.cc
     api/EventsAPIServlet.cc
     api/EventsService.cc

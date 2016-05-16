@@ -50,7 +50,7 @@
 #include "eventql/io/sstable/SSTableServlet.h"
 #include "eventql/util/mdb/MDB.h"
 #include "eventql/util/mdb/MDBUtil.h"
-#include "eventql/AnalyticsServlet.h"
+#include "eventql/transport/http/api_servlet.h"
 #include "eventql/AnalyticsApp.h"
 #include "eventql/TableDefinition.h"
 #include "eventql/db/TSDBService.h"
@@ -61,7 +61,7 @@
 #include "eventql/DefaultServlet.h"
 #include "eventql/sql/defaults.h"
 #include "eventql/ConfigDirectory.h"
-#include "eventql/StatusServlet.h"
+#include "eventql/transport/http/status_servlet.h"
 #include <jsapi.h>
 
 #include "eventql/eventql.h"

@@ -21,7 +21,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include <eventql/StatusServlet.h>
+#include <eventql/transport/http/status_servlet.h>
 #include <eventql/db/PartitionReplication.h>
 #include <eventql/z1stats.h>
 #include <eventql/eventql.h>
