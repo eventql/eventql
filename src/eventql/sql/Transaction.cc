@@ -33,7 +33,14 @@ Transaction::Transaction(
     Runtime* runtime) :
     runtime_(runtime),
     now_(WallClock::now()),
-    table_providers_(new TableRepository()) {}
+    table_providers_(new TableRepository()),
+    user_data_(nullptr) {}
+
+Transaction::~Transaction() {
+  if (free_user_data_fn_) {
+    free_user_data_fn_(user_data_);
+  }
+}
 
 Runtime* Transaction::getRuntime() const {
   return runtime_;
@@ -58,5 +65,17 @@ void Transaction::addTableProvider(RefPtr<TableProvider> provider) {
 RefPtr<TableProvider> Transaction::getTableProvider() const {
   return table_providers_.get();
 }
+
+void Transaction::setUserData(
+    void* user_data,
+    Function<void (void*)> free_fn /* [] (void*) {} */) {
+  user_data_ = user_data;
+  free_user_data_fn_ = free_fn;
+}
+
+void* Transaction::getUserData() {
+  return user_data_;
+}
+
 
 } // namespace csql
