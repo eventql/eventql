@@ -20,7 +20,7 @@
 #include <eventql/io/cstable/CSTableReader.h>
 #include <eventql/db/Table.h>
 #include <eventql/db/PartitionReader.h>
-#include <eventql/db/PartitionMap.h>
+#include <eventql/db/partition_map.h>
 
 //#include "eventql/eventql.h"
 //

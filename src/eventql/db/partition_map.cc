@@ -27,7 +27,7 @@
 #include <eventql/util/protobuf/msg.h>
 #include <eventql/util/io/fileutil.h>
 #include <eventql/io/sstable/sstablereader.h>
-#include <eventql/db/PartitionMap.h>
+#include <eventql/db/partition_map.h>
 #include <eventql/db/PartitionState.pb.h>
 #include <eventql/db/PartitionReplication.h>
 

@@ -22,7 +22,7 @@
  * code of your own applications
  */
 #include <eventql/db/LazyPartition.h>
-#include <eventql/db/PartitionMap.h>
+#include <eventql/db/partition_map.h>
 
 #include "eventql/eventql.h"
 

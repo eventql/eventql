@@ -25,7 +25,7 @@
 #include <thread>
 #include <condition_variable>
 #include <eventql/util/stdtypes.h>
-#include <eventql/db/PartitionMap.h>
+#include <eventql/db/partition_map.h>
 #include <eventql/db/PartitionReplication.h>
 #include <eventql/db/ReplicationScheme.h>
 

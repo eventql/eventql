@@ -211,7 +211,7 @@ add_executable(evqld
     db/LogPartitionReplication.cc
     db/LogPartitionWriter.cc
     db/Partition.cc
-    db/PartitionMap.cc
+    db/partition_map.cc
     db/PartitionReader.cc
     db/PartitionReplication.cc
     db/PartitionSnapshot.cc

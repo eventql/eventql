@@ -26,7 +26,7 @@
 #include <eventql/sql/runtime/tablerepository.h>
 #include <eventql/AnalyticsAuth.h>
 #include <eventql/db/TSDBTableRef.h>
-#include <eventql/db/PartitionMap.h>
+#include <eventql/db/partition_map.h>
 #include <eventql/db/CompactionWorker.h>
 #include <eventql/db/TableConfig.pb.h>
 #include <eventql/db/TSDBTableInfo.h>

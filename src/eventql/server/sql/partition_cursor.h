@@ -10,7 +10,7 @@
  * permission is obtained.
  */
 #include <eventql/sql/result_cursor.h>
-#include <eventql/db/PartitionMap.h>
+#include <eventql/db/partition_map.h>
 
 #include "eventql/eventql.h"
 

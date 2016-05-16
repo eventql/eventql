@@ -11,7 +11,7 @@
  */
 #include <eventql/sql/expressions/table_expression.h>
 #include <eventql/AnalyticsAuth.h>
-#include <eventql/db/PartitionMap.h>
+#include <eventql/db/partition_map.h>
 
 #include "eventql/eventql.h"
 
