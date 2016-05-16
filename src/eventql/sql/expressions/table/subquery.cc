@@ -51,6 +51,9 @@ ScopedPtr<ResultCursor> SubqueryExpression::execute() {
               std::placeholders::_2)));
 }
 
+size_t SubqueryExpression::getNumColumns() const {
+  return select_exprs_.size();
+}
 
 bool SubqueryExpression::next(SValue* row, int row_len) {
   Vector<SValue> buf_(input_cursor_->getNumColumns());

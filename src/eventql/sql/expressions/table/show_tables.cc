@@ -56,6 +56,9 @@ ScopedPtr<ResultCursor> ShowTablesExpression::execute() {
               std::placeholders::_2)));
 }
 
+size_t ShowTablesExpression::getNumColumns() const {
+  return kNumColumns;
+}
 
 bool ShowTablesExpression::next(SValue* row, size_t row_len) {
   if (counter_ < buf_.size()) {

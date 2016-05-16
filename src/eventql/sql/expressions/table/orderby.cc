@@ -104,6 +104,10 @@ ScopedPtr<ResultCursor> OrderByExpression::execute() {
               std::placeholders::_2)));
 }
 
+size_t OrderByExpression::getNumColumns() const {
+  return input_cursor_->getNumColumns();
+}
+
 bool OrderByExpression::next(SValue* out, int out_len) {
   if (pos_ >= num_rows_) {
     return false;

@@ -81,6 +81,10 @@ ScopedPtr<ResultCursor> NestedLoopJoin::execute() {
   }
 }
 
+size_t NestedLoopJoin::getNumColumns() const {
+  return select_exprs_.size();
+}
+
 ScopedPtr<ResultCursor> NestedLoopJoin::executeCartesianJoin() {
   auto cursor = [this] (SValue* row, int row_len) -> bool {
     for (;;) {

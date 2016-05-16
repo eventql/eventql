@@ -38,6 +38,8 @@ public:
 
   ScopedPtr<ResultCursor> execute() override;
 
+  size_t getNumColumns() const override;
+
   //void onInputsReady() override;
 
 protected:

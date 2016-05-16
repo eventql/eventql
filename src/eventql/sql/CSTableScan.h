@@ -49,7 +49,7 @@ public:
   ScopedPtr<ResultCursor> execute() override;
 
   virtual Vector<String> columnNames() const;
-  virtual size_t numColumns() const;
+  size_t getNumColumns() const override;
 
   size_t rowsScanned() const;
 

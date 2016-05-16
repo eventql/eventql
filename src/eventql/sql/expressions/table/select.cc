@@ -44,6 +44,10 @@ ScopedPtr<ResultCursor> SelectExpression::execute() {
               std::placeholders::_2)));
 }
 
+size_t SelectExpression::getNumColumns() const {
+  return select_exprs_.size();
+}
+
 bool SelectExpression::next(SValue* row, int row_len) {
   if (pos_++ == 0) {
     for (int i = 0; i < select_exprs_.size() && i < row_len; ++i) {

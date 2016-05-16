@@ -49,6 +49,10 @@ ScopedPtr<ResultCursor> LimitExpression::execute() {
               std::placeholders::_2)));
 }
 
+size_t LimitExpression::getNumColumns() const {
+  return input_cursor_->getNumColumns();
+}
+
 bool LimitExpression::next(SValue* row, size_t row_len) {
   if (limit_ == 0 || counter_ >= offset_ + limit_) {
     return false;

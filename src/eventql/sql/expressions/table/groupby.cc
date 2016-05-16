@@ -89,6 +89,10 @@ ScopedPtr<ResultCursor> GroupByExpression::execute() {
               std::placeholders::_2)));
 }
 
+size_t GroupByExpression::getNumColumns() const {
+  return select_exprs_.size();
+}
+
 bool GroupByExpression::next(SValue* row, size_t row_len) {
   if (groups_iter_ != groups_.end()) {
     for (size_t i = 0; i < select_exprs_.size(); ++i) {
@@ -174,6 +178,10 @@ ScopedPtr<ResultCursor> PartialGroupByExpression::execute() {
               this,
               std::placeholders::_1,
               std::placeholders::_2)));
+}
+
+size_t PartialGroupByExpression::getNumColumns() const {
+  return 2;
 }
 
 bool PartialGroupByExpression::next(SValue* row, size_t row_len) {
@@ -276,6 +284,10 @@ ScopedPtr<ResultCursor> GroupByMergeExpression::execute() {
               this,
               std::placeholders::_1,
               std::placeholders::_2)));
+}
+
+size_t GroupByMergeExpression::getNumColumns() const {
+  return select_exprs_.size();
 }
 
 bool GroupByMergeExpression::next(SValue* row, size_t row_len) {

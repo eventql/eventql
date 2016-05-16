@@ -51,6 +51,10 @@ ScopedPtr<ResultCursor> DescribeTableStatement::execute() {
               std::placeholders::_2)));
 }
 
+size_t DescribeTableStatement::getNumColumns() const {
+  return kNumColumns;
+}
+
 bool DescribeTableStatement::next(SValue* row, size_t row_len) {
   if (counter_ < rows_.size()) {
     const auto& col = rows_[counter_];

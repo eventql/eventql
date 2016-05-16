@@ -74,6 +74,10 @@ ScopedPtr<ResultCursor> TableScan::execute() {
               std::placeholders::_2)));
 }
 
+size_t TableScan::getNumColumns() const {
+  return iter_->numColumns();
+}
+
 bool TableScan::next(SValue* out, int out_len) {
   Vector<SValue> buf(iter_->numColumns());
 

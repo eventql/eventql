@@ -38,6 +38,8 @@ public:
 
   virtual ScopedPtr<ResultCursor> execute() = 0;
 
+  virtual size_t getNumColumns() const = 0;
+
 };
 
 }

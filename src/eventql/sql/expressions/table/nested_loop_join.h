@@ -50,6 +50,7 @@ public:
   //void onInputsReady() override;
   ScopedPtr<ResultCursor> execute() override;
 
+  size_t getNumColumns() const override;
 
 protected:
 

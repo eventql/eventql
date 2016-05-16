@@ -45,6 +45,8 @@ public:
 
   ScopedPtr<ResultCursor> execute() override;
 
+  size_t getNumColumns() const override;
+
 protected:
 
   bool next(SValue* out, int out_len);

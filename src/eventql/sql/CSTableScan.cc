@@ -599,7 +599,7 @@ Vector<String> CSTableScan::columnNames() const {
   return column_names_;
 }
 
-size_t CSTableScan::numColumns() const {
+size_t CSTableScan::getNumColumns() const {
   return column_names_.size();
 }
 
