@@ -48,7 +48,8 @@ public:
       thread::ThreadPoolOptions tpool_opts,
       RefPtr<SymbolTable> symbol_table,
       RefPtr<QueryBuilder> query_builder,
-      RefPtr<QueryPlanBuilder> query_plan_builder);
+      RefPtr<QueryPlanBuilder> query_plan_builder,
+      ScopedPtr<Scheduler> scheduler);
 
   ScopedPtr<Transaction> newTransaction();
 
@@ -95,8 +96,10 @@ public:
   RefPtr<QueryBuilder> queryBuilder() const;
   RefPtr<QueryPlanBuilder> queryPlanBuilder() const;
 
-  TaskScheduler* scheduler();
   SymbolTable* symbols();
+
+  void setScheduler(ScopedPtr<Scheduler> scheduler);
+  Scheduler* getScheduler();
 
 protected:
   thread::ThreadPool tpool_;
@@ -104,6 +107,7 @@ protected:
   RefPtr<QueryBuilder> query_builder_;
   RefPtr<QueryPlanBuilder> query_plan_builder_;
   Option<String> cachedir_;
+  ScopedPtr<Scheduler> scheduler_;
 };
 
 }

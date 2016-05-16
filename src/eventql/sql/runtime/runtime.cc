@@ -43,18 +43,21 @@ RefPtr<Runtime> Runtime::getDefaultRuntime() {
           new ValueExpressionBuilder(symbols.get())),
       new QueryPlanBuilder(
           QueryPlanBuilderOptions{},
-          symbols.get()));
+          symbols.get()),
+      mkScoped(new DefaultScheduler()));
 }
 
 Runtime::Runtime(
     thread::ThreadPoolOptions tpool_opts,
     RefPtr<SymbolTable> symbol_table,
     RefPtr<QueryBuilder> query_builder,
-    RefPtr<QueryPlanBuilder> query_plan_builder) :
+    RefPtr<QueryPlanBuilder> query_plan_builder,
+    ScopedPtr<Scheduler> scheduler) :
     tpool_(tpool_opts),
     symbol_table_(symbol_table),
     query_builder_(query_builder),
-    query_plan_builder_(query_plan_builder) {}
+    query_plan_builder_(query_plan_builder),
+    scheduler_(std::move(scheduler)) {}
 
 ScopedPtr<QueryPlan> Runtime::buildQueryPlan(
     Transaction* txn,
@@ -76,7 +79,6 @@ ScopedPtr<QueryPlan> Runtime::buildQueryPlan(
     Transaction* txn,
     Vector<RefPtr<QueryTreeNode>> statements) {
   auto qplan = mkScoped(new QueryPlan(txn, statements));
-  qplan->setScheduler(new DefaultScheduler());
   return std::move(qplan);
 }
 
@@ -200,12 +202,16 @@ RefPtr<QueryPlanBuilder> Runtime::queryPlanBuilder() const {
   return query_plan_builder_;
 }
 
-TaskScheduler* Runtime::scheduler() {
-  return &tpool_;
-}
-
 SymbolTable* Runtime::symbols() {
   return symbol_table_.get();
+}
+
+void Runtime::setScheduler(ScopedPtr<Scheduler> scheduler) {
+  scheduler_ = std::move(scheduler);
+}
+
+Scheduler* Runtime::getScheduler() {
+  return scheduler_.get();
 }
 
 

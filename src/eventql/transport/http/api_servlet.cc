@@ -110,7 +110,7 @@ void AnalyticsServlet::handle(
   }
 
   /* AUTH METHODS */
-  if (uri.path() == "/transport/http/v1/auth/login") {
+  if (uri.path() == "/api/v1/auth/login") {
     expectHTTPPost(req);
     req_stream->readBody();
     performLogin(uri, &req, &res);
@@ -118,7 +118,7 @@ void AnalyticsServlet::handle(
     return;
   }
 
-  if (uri.path() == "/transport/http/v1/auth/logout") {
+  if (uri.path() == "/api/v1/auth/logout") {
     expectHTTPPost(req);
     req_stream->readBody();
     performLogout(uri, &req, &res);
@@ -130,7 +130,7 @@ void AnalyticsServlet::handle(
       req_stream->request(),
       auth_);
 
-  if (uri.path() == "/transport/http/v1/tables/insert") {
+  if (uri.path() == "/api/v1/tables/insert") {
     req_stream->readBody();
     catchAndReturnErrors(&res, [this, &session_opt, &req, &res] {
       insertIntoTable(session_opt, &req, &res);
@@ -153,29 +153,29 @@ void AnalyticsServlet::handle(
 
   const auto& session = session_opt.get();
 
-  if (StringUtil::beginsWith(uri.path(), "/transport/http/v1/logfiles")) {
+  if (StringUtil::beginsWith(uri.path(), "/api/v1/logfiles")) {
     logfile_api_.handle(session, req_stream, res_stream);
     return;
   }
 
-  if (StringUtil::beginsWith(uri.path(), "/transport/http/v1/events")) {
+  if (StringUtil::beginsWith(uri.path(), "/api/v1/events")) {
     events_api_.handle(session, req_stream, res_stream);
     return;
   }
 
-  if (StringUtil::beginsWith(uri.path(), "/transport/http/v1/mapreduce")) {
+  if (StringUtil::beginsWith(uri.path(), "/api/v1/mapreduce")) {
     mapreduce_api_.handle(session, req_stream, res_stream);
     return;
   }
 
-  if (uri.path() == "/transport/http/v1/auth/info") {
+  if (uri.path() == "/api/v1/auth/info") {
     req_stream->readBody();
     getAuthInfo(session, &req, &res);
     res_stream->writeResponse(res);
     return;
   }
 
-  if (uri.path() == "/transport/http/v1/auth/private_api_token") {
+  if (uri.path() == "/api/v1/auth/private_api_token") {
     req_stream->readBody();
     getPrivateAPIToken(session, &req, &res);
     res_stream->writeResponse(res);
@@ -184,14 +184,14 @@ void AnalyticsServlet::handle(
 
 
   /* TABLES */
-  if (uri.path() == "/transport/http/v1/tables") {
+  if (uri.path() == "/api/v1/tables") {
     req_stream->readBody();
     listTables(session, &req, &res);
     res_stream->writeResponse(res);
     return;
   }
 
-  if (uri.path() == "/transport/http/v1/tables/create_table") {
+  if (uri.path() == "/api/v1/tables/create_table") {
     req_stream->readBody();
     catchAndReturnErrors(&res, [this, &session, &req, &res] {
       createTable(session, &req, &res);
@@ -200,14 +200,14 @@ void AnalyticsServlet::handle(
     return;
   }
 
-  if (uri.path() == "/transport/http/v1/tables/upload_table") {
+  if (uri.path() == "/api/v1/tables/upload_table") {
     expectHTTPPost(req);
     uploadTable(uri, session, req_stream.get(), &res);
     res_stream->writeResponse(res);
     return;
   }
 
-  if (uri.path() == "/transport/http/v1/tables/add_field") {
+  if (uri.path() == "/api/v1/tables/add_field") {
     req_stream->readBody();
     catchAndReturnErrors(&res, [this, &session, &req, &res] {
       addTableField(session, &req, &res);
@@ -216,7 +216,7 @@ void AnalyticsServlet::handle(
     return;
   }
 
-  if (uri.path() == "/transport/http/v1/tables/remove_field") {
+  if (uri.path() == "/api/v1/tables/remove_field") {
     req_stream->readBody();
     catchAndReturnErrors(&res, [this, &session, &req, &res] {
       removeTableField(session, &req, &res);
@@ -225,7 +225,7 @@ void AnalyticsServlet::handle(
     return;
   }
 
-  if (uri.path() == "/transport/http/v1/tables/add_tag") {
+  if (uri.path() == "/api/v1/tables/add_tag") {
     req_stream->readBody();
     catchAndReturnErrors(&res, [this, &session, &req, &res] {
       addTableTag(session, &req, &res);
@@ -234,7 +234,7 @@ void AnalyticsServlet::handle(
     return;
   }
 
-  if (uri.path() == "/transport/http/v1/tables/remove_tag") {
+  if (uri.path() == "/api/v1/tables/remove_tag") {
     req_stream->readBody();
     catchAndReturnErrors(&res, [this, &session, &req, &res] {
       removeTableTag(session, &req, &res);
@@ -243,7 +243,7 @@ void AnalyticsServlet::handle(
     return;
   }
 
-  static const String kTablesPathPrefix = "/transport/http/v1/tables/";
+  static const String kTablesPathPrefix = "/api/v1/tables/";
   if (StringUtil::beginsWith(uri.path(), kTablesPathPrefix)) {
     req_stream->readBody();
     fetchTableDefinition(
@@ -256,20 +256,20 @@ void AnalyticsServlet::handle(
   }
 
   /* SQL */
-  if (uri.path() == "/transport/http/v1/sql" ||
-      uri.path() == "/transport/http/v1/sql_stream") {
+  if (uri.path() == "/api/v1/sql" ||
+      uri.path() == "/api/v1/sql_stream") {
     req_stream->readBody();
     executeSQL(session, &req, &res, res_stream);
     return;
   }
 
-  if (uri.path() == "/transport/http/v1/sql/execute_qtree") {
+  if (uri.path() == "/api/v1/sql/execute_qtree") {
     req_stream->readBody();
     executeQTree(session, &req, &res, res_stream);
     return;
   }
 
-  if (uri.path() == "/transport/http/v1/sql/scan_partition") {
+  if (uri.path() == "/api/v1/sql/scan_partition") {
     req_stream->readBody();
     //executeSQLScanPartition(session, &req, &res, res_stream);
     return;

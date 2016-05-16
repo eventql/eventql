@@ -125,7 +125,7 @@ Option<MapReduceShardResult> MapTableTask::executeRemote(
       host.addr.hostAndPort());
 
   auto url = StringUtil::format(
-      "http://$0/transport/http/v1/mapreduce/tasks/map_partition",
+      "http://$0/api/v1/mapreduce/tasks/map_partition",
       host.addr.ipAndPort());
 
   auto params = StringUtil::format(

@@ -118,7 +118,7 @@ void RemoteTSDBScan::executeOnHost(
  // });
 
  // auto url = StringUtil::format(
- //     "http://$0/transport/http/v1/sql/scan_partition",
+ //     "http://$0/api/v1/sql/scan_partition",
  //     host.ipAndPort());
 
  // AnalyticsPrivileges privileges;
