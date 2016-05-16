@@ -61,8 +61,8 @@ void DefaultServlet::handleHTTPRequest(
   }
 
   response->setStatus(http::kStatusNotFound);
-  response->addHeader("Content-Type", "text/html; charset=utf-8");
-  response->addBody(Assets::getAsset("eventql/webui/404.html"));
+  response->addHeader("Content-Type", "text/plain; charset=utf-8");
+  response->addBody("not found");
 }
 
 }
