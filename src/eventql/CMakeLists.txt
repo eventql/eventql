@@ -182,7 +182,7 @@ add_executable(evqld
     AnalyticsApp.cc
     AnalyticsAuth.cc
     transport/http/api_servlet.cc
-    ConfigDirectory.cc
+    config/config_directory.cc
     CustomerConfig.cc
     transport/http/default_servlet.cc
     EventScanResult.cc

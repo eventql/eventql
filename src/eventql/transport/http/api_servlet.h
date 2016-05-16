@@ -31,7 +31,7 @@
 #include "eventql/AnalyticsSession.pb.h"
 #include "eventql/sql/runtime/runtime.h"
 #include "eventql/AnalyticsAuth.h"
-#include "eventql/ConfigDirectory.h"
+#include "eventql/config/config_directory.h"
 #include "eventql/db/TSDBService.h"
 #include "eventql/transport/http/LogfileAPIServlet.h"
 #include "eventql/transport/http/EventsAPIServlet.h"

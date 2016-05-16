@@ -43,7 +43,7 @@
 #include "eventql/util/http/VFSFileServlet.h"
 #include "eventql/util/cli/CLI.h"
 #include "eventql/util/cli/flagparser.h"
-#include "eventql/ConfigDirectory.h"
+#include "eventql/config/config_directory.h"
 #include "eventql/io/sstable/sstablereader.h"
 #include "eventql/db/TimeWindowPartitioner.h"
 #include "eventql/db/TSDBClient.h"

@@ -26,7 +26,7 @@
 #include <eventql/util/uri.h>
 #include <eventql/util/protobuf/msg.h>
 #include <eventql/util/csv/CSVInputStream.h>
-#include <eventql/ConfigDirectory.h>
+#include <eventql/config/config_directory.h>
 #include <eventql/z1stats.h>
 
 #include "eventql/eventql.h"

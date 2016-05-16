@@ -31,7 +31,7 @@
 #include "eventql/transport/http/EventsService.h"
 #include "eventql/transport/http/MapReduceService.h"
 #include "eventql/AnalyticsSession.pb.h"
-#include "eventql/ConfigDirectory.h"
+#include "eventql/config/config_directory.h"
 #include <jsapi.h>
 
 #include "eventql/eventql.h"
