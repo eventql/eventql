@@ -27,7 +27,7 @@
 #include <eventql/util/mdb/MDB.h>
 #include <eventql/util/net/inetaddr.h>
 #include <eventql/util/http/httpclient.h>
-#include <eventql/CustomerConfig.h>
+#include <eventql/config/namespace_config.h>
 #include <eventql/db/ClusterConfig.pb.h>
 #include <eventql/TableDefinition.h>
 
@@ -66,11 +66,11 @@ public:
   void updateClusterConfig(ClusterConfig config);
   void onClusterConfigChange(Function<void (const ClusterConfig& cfg)> fn);
 
-  RefPtr<CustomerConfigRef> configFor(const String& customer_key) const;
-  void updateCustomerConfig(CustomerConfig config);
+  RefPtr<NamespaceConfigRef> configFor(const String& customer_key) const;
+  void updateNamespaceConfig(NamespaceConfig config);
   void listCustomers(
-      Function<void (const CustomerConfig& cfg)> fn) const;
-  void onCustomerConfigChange(Function<void (const CustomerConfig& cfg)> fn);
+      Function<void (const NamespaceConfig& cfg)> fn) const;
+  void onNamespaceConfigChange(Function<void (const NamespaceConfig& cfg)> fn);
 
   void updateTableDefinition(const TableDefinition& table, bool force = false);
   void listTableDefinitions(
@@ -86,7 +86,7 @@ public:
 
 protected:
 
-  void loadCustomerConfigs();
+  void loadNamespaceConfigs();
   HashMap<String, uint64_t> fetchMasterHeads() const;
 
   void syncObject(const String& obj);
@@ -94,8 +94,8 @@ protected:
   void syncClusterConfig();
   void commitClusterConfig(const ClusterConfig& config);
 
-  void syncCustomerConfig(const String& customer);
-  void commitCustomerConfig(const CustomerConfig& config);
+  void syncNamespaceConfig(const String& customer);
+  void commitNamespaceConfig(const NamespaceConfig& config);
 
   void syncTableDefinitions(const String& customer);
   void commitTableDefinition(const TableDefinition& tbl);
@@ -109,10 +109,10 @@ protected:
   RefPtr<mdb::MDB> db_;
   mutable std::mutex mutex_;
   ClusterConfig cluster_config_;
-  HashMap<String, RefPtr<CustomerConfigRef>> customers_;
+  HashMap<String, RefPtr<NamespaceConfigRef>> customers_;
 
   Vector<Function<void (const ClusterConfig& cfg)>> on_cluster_change_;
-  Vector<Function<void (const CustomerConfig& cfg)>> on_customer_change_;
+  Vector<Function<void (const NamespaceConfig& cfg)>> on_customer_change_;
   Vector<Function<void (const TableDefinition& cfg)>> on_table_change_;
   Vector<Function<void (const UserConfig& cfg)>> on_user_change_;
 

@@ -77,13 +77,13 @@ AnalyticsApp::AnalyticsApp(
         replication_scheme,
         js_runtime,
         cachedir) {
-  cdb_->onCustomerConfigChange(
+  cdb_->onNamespaceConfigChange(
       std::bind(
           &AnalyticsApp::configureCustomer,
           this,
           std::placeholders::_1));
 
-  cdb_->listCustomers([this] (const CustomerConfig& cfg) {
+  cdb_->listCustomers([this] (const NamespaceConfig& cfg) {
     configureCustomer(cfg);
   });
 
@@ -123,7 +123,7 @@ void AnalyticsApp::configureTable(const TableDefinition& tbl) {
   tsdb_node_->createTable(tbl);
 }
 
-void AnalyticsApp::configureCustomer(const CustomerConfig& config) {
+void AnalyticsApp::configureCustomer(const NamespaceConfig& config) {
   for (const auto& td : logfile_service_.getTableDefinitions(config)) {
     configureTable(td);
   }

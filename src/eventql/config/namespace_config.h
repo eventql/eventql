@@ -25,18 +25,18 @@
 #include "eventql/util/stdtypes.h"
 #include "eventql/util/autoref.h"
 #include "eventql/util/protobuf/MessageObject.h"
-#include "eventql/CustomerConfigProtos.pb.h"
+#include "eventql/config/namespace_config_protos.pb.h"
 
 #include "eventql/eventql.h"
 
 namespace eventql {
 
-struct CustomerConfigRef : public RefCounted {
-  CustomerConfigRef(CustomerConfig _config) : config(_config) {}
-  CustomerConfig config;
+struct NamespaceConfigRef : public RefCounted {
+  NamespaceConfigRef(NamespaceConfig _config) : config(_config) {}
+  NamespaceConfig config;
 };
 
-CustomerConfig createCustomerConfig(const String& customer);
+NamespaceConfig createNamespaceConfig(const String& customer);
 
 void eventDefinitonRemoveField(EventDefinition* def, const String& field);
 

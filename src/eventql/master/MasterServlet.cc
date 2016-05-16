@@ -55,11 +55,11 @@ void MasterServlet::handleHTTPRequest(
     }
 
     if (StringUtil::endsWith(uri.path(), "/analytics/master/fetch_customer_config")) {
-      return fetchCustomerConfig(uri, req, res);
+      return fetchNamespaceConfig(uri, req, res);
     }
 
     if (StringUtil::endsWith(uri.path(), "/analytics/master/update_customer_config")) {
-      return updateCustomerConfig(uri, req, res);
+      return updateNamespaceConfig(uri, req, res);
     }
 
     if (StringUtil::endsWith(uri.path(), "/analytics/master/fetch_userdb")) {
@@ -115,7 +115,7 @@ void MasterServlet::listHeads(
   res->addBody(body);
 }
 
-void MasterServlet::fetchCustomerConfig(
+void MasterServlet::fetchNamespaceConfig(
     const URI& uri,
     http::HTTPRequest* req,
     http::HTTPResponse* res) {
@@ -128,14 +128,14 @@ void MasterServlet::fetchCustomerConfig(
     return;
   }
 
-  auto config = cdb_->fetchCustomerConfig(customer);
+  auto config = cdb_->fetchNamespaceConfig(customer);
   auto body = msg::encode(config);
 
   res->setStatus(http::kStatusOK);
   res->addBody(*body);
 }
 
-void MasterServlet::updateCustomerConfig(
+void MasterServlet::updateNamespaceConfig(
     const URI& uri,
     http::HTTPRequest* req,
     http::HTTPResponse* res) {
@@ -143,8 +143,8 @@ void MasterServlet::updateCustomerConfig(
     RAISE(kIllegalArgumentError, "expected HTTP POST request");
   }
 
-  auto config = msg::decode<CustomerConfig>(req->body());
-  auto updated_config = cdb_->updateCustomerConfig(config);
+  auto config = msg::decode<NamespaceConfig>(req->body());
+  auto updated_config = cdb_->updateNamespaceConfig(config);
   res->setStatus(http::kStatusCreated);
   res->addBody(*msg::encode(updated_config));
 }
@@ -256,15 +256,15 @@ void MasterServlet::createCustomer(
     return;
   }
 
-  auto cfg = createCustomerConfig(customer);
+  auto cfg = createNamespaceConfig(customer);
 
   String force;
   if (URI::getParam(params, "force_reset", &force) && force == "true") {
-    auto head_cfg = cdb_->fetchCustomerConfig(customer);
+    auto head_cfg = cdb_->fetchNamespaceConfig(customer);
     cfg.set_version(head_cfg.version());
   }
 
-  cdb_->updateCustomerConfig(cfg);
+  cdb_->updateNamespaceConfig(cfg);
   res->setStatus(http::kStatusCreated);
 }
 

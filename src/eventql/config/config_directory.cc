@@ -84,8 +84,8 @@ ConfigDirectory::ConfigDirectory(
   db_ = mdb::MDB::open(path, mdb_opts);
 
   if (topics_ & ConfigTopic::CUSTOMERS) {
-    listCustomers([this] (const CustomerConfig& cfg) {
-      customers_.emplace(cfg.customer(), new CustomerConfigRef(cfg));
+    listCustomers([this] (const NamespaceConfig& cfg) {
+      customers_.emplace(cfg.customer(), new NamespaceConfigRef(cfg));
     });
   }
 
@@ -130,7 +130,7 @@ void ConfigDirectory::onClusterConfigChange(
 }
 
 
-RefPtr<CustomerConfigRef> ConfigDirectory::configFor(
+RefPtr<NamespaceConfigRef> ConfigDirectory::configFor(
     const String& customer_key) const {
   if ((topics_ & ConfigTopic::CUSTOMERS) == 0) {
     RAISE(kRuntimeError, "config topic not enabled: CUSTOMERS");
@@ -147,7 +147,7 @@ RefPtr<CustomerConfigRef> ConfigDirectory::configFor(
 }
 
 void ConfigDirectory::listCustomers(
-    Function<void (const CustomerConfig& cfg)> fn) const {
+    Function<void (const NamespaceConfig& cfg)> fn) const {
   if ((topics_ & ConfigTopic::CUSTOMERS) == 0) {
     RAISE(kRuntimeError, "config topic not enabled: CUSTOMERS");
   }
@@ -172,14 +172,14 @@ void ConfigDirectory::listCustomers(
       break;
     }
 
-    fn(msg::decode<CustomerConfig>(value));
+    fn(msg::decode<NamespaceConfig>(value));
   } while (cursor->getNext(&key, &value));
 
   cursor->close();
 }
 
-void ConfigDirectory::onCustomerConfigChange(
-    Function<void (const CustomerConfig& cfg)> fn) {
+void ConfigDirectory::onNamespaceConfigChange(
+    Function<void (const NamespaceConfig& cfg)> fn) {
   if ((topics_ & ConfigTopic::CUSTOMERS) == 0) {
     RAISE(kRuntimeError, "config topic not enabled: CUSTOMERS");
   }
@@ -188,7 +188,7 @@ void ConfigDirectory::onCustomerConfigChange(
   on_customer_change_.emplace_back(fn);
 }
 
-void ConfigDirectory::updateCustomerConfig(CustomerConfig cfg) {
+void ConfigDirectory::updateNamespaceConfig(NamespaceConfig cfg) {
   if ((topics_ & ConfigTopic::CUSTOMERS) == 0) {
     RAISE(kRuntimeError, "config topic not enabled: CUSTOMERS");
   }
@@ -204,7 +204,7 @@ void ConfigDirectory::updateCustomerConfig(CustomerConfig cfg) {
     RAISEF(kRuntimeError, "error: $0", res.body().toString());
   }
 
-  commitCustomerConfig(msg::decode<CustomerConfig>(res.body()));
+  commitNamespaceConfig(msg::decode<NamespaceConfig>(res.body()));
 }
 
 void ConfigDirectory::updateTableDefinition(
@@ -328,7 +328,7 @@ void ConfigDirectory::syncObject(const String& obj) {
   if (topics_ & ConfigTopic::CUSTOMERS) {
     static const String kCustomerPrefix = "customers/";
     if (StringUtil::beginsWith(obj, kCustomerPrefix)) {
-      syncCustomerConfig(obj.substr(kCustomerPrefix.size()));
+      syncNamespaceConfig(obj.substr(kCustomerPrefix.size()));
       return;
     }
   }
@@ -380,7 +380,7 @@ void ConfigDirectory::commitClusterConfig(const ClusterConfig& config) {
   }
 }
 
-void ConfigDirectory::syncCustomerConfig(const String& customer) {
+void ConfigDirectory::syncNamespaceConfig(const String& customer) {
   auto uri = URI(
       StringUtil::format(
           "http://$0/analytics/master/fetch_customer_config?customer=$1",
@@ -393,10 +393,10 @@ void ConfigDirectory::syncCustomerConfig(const String& customer) {
     RAISEF(kRuntimeError, "error: $0", res.body().toString());
   }
 
-  commitCustomerConfig(msg::decode<CustomerConfig>(res.body()));
+  commitNamespaceConfig(msg::decode<NamespaceConfig>(res.body()));
 }
 
-void ConfigDirectory::commitCustomerConfig(const CustomerConfig& config) {
+void ConfigDirectory::commitNamespaceConfig(const NamespaceConfig& config) {
   auto db_key = StringUtil::format("cfg~$0", config.customer());
   auto hkey = StringUtil::format("head~customers/$0", config.customer());
   auto buf = msg::encode(config);
@@ -410,7 +410,7 @@ void ConfigDirectory::commitCustomerConfig(const CustomerConfig& config) {
   txn->update(hkey.data(), hkey.size(), vstr.data(), vstr.size());
   txn->commit();
 
-  customers_[config.customer()] = new CustomerConfigRef(config);
+  customers_[config.customer()] = new NamespaceConfigRef(config);
 
   for (const auto& cb : on_customer_change_) {
     cb(config);

@@ -28,7 +28,7 @@
 #include "eventql/mapreduce/tasks/SaveToTableTask.h"
 #include "eventql/mapreduce/tasks/SaveToTablePartitionTask.h"
 #include "eventql/AnalyticsAuth.h"
-#include "eventql/CustomerConfig.h"
+#include "eventql/config/namespace_config.h"
 #include "eventql/config/config_directory.h"
 
 #include "eventql/eventql.h"

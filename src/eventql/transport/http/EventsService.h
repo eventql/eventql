@@ -26,7 +26,7 @@
 #include "eventql/util/io/inputstream.h"
 #include "eventql/db/TSDBService.h"
 #include "eventql/AnalyticsAuth.h"
-#include "eventql/CustomerConfig.h"
+#include "eventql/config/namespace_config.h"
 #include "eventql/config/config_directory.h"
 #include "eventql/TableDefinition.h"
 #include "eventql/EventScanResult.h"

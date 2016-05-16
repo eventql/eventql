@@ -22,14 +22,14 @@
  * code of your own applications
  */
 #include "eventql/util/protobuf/MessageSchema.h"
-#include "eventql/CustomerConfig.h"
+#include "eventql/config/namespace_config.h"
 
 #include "eventql/eventql.h"
 
 namespace eventql {
 
-CustomerConfig createCustomerConfig(const String& customer) {
-  CustomerConfig conf;
+NamespaceConfig createNamespaceConfig(const String& customer) {
+  NamespaceConfig conf;
   conf.set_customer(customer);
   return conf;
 }

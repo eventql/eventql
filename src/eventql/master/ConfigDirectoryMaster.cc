@@ -107,7 +107,7 @@ ClusterConfig ConfigDirectoryMaster::updateClusterConfig(ClusterConfig config) {
   return config;
 }
 
-CustomerConfig ConfigDirectoryMaster::fetchCustomerConfig(
+NamespaceConfig ConfigDirectoryMaster::fetchNamespaceConfig(
     const String& customer_key) const {
   std::unique_lock<std::mutex> lk(mutex_);
 
@@ -123,11 +123,11 @@ CustomerConfig ConfigDirectoryMaster::fetchCustomerConfig(
       cpath,
       StringUtil::format("config.$0", head_version));
 
-  return msg::decode<CustomerConfig>(FileUtil::read(vpath));
+  return msg::decode<NamespaceConfig>(FileUtil::read(vpath));
 }
 
-CustomerConfig ConfigDirectoryMaster::updateCustomerConfig(
-    CustomerConfig config) {
+NamespaceConfig ConfigDirectoryMaster::updateNamespaceConfig(
+    NamespaceConfig config) {
   std::unique_lock<std::mutex> lk(mutex_);
   uint64_t head_version = 0;
 

@@ -25,7 +25,7 @@
 #include "eventql/util/thread/threadpool.h"
 #include "eventql/db/TSDBService.h"
 #include "eventql/AnalyticsAuth.h"
-#include "eventql/CustomerConfig.h"
+#include "eventql/config/namespace_config.h"
 #include "eventql/config/config_directory.h"
 #include "eventql/JavaScriptContext.h"
 #include "eventql/mapreduce/MapReduceTask.h"

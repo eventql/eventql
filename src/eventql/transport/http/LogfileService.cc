@@ -226,7 +226,7 @@ void LogfileService::setLogfileRegex(
   for (auto& logfile : *logfile_conf->mutable_logfiles()) {
     if (logfile.name() == logfile_name) {
       logfile.set_regex(regex);
-      cdir_->updateCustomerConfig(cconf);
+      cdir_->updateNamespaceConfig(cconf);
       return;
     }
   }
@@ -273,7 +273,7 @@ RefPtr<msg::MessageSchema> LogfileService::getSchema(
 }
 
 Vector<TableDefinition> LogfileService::getTableDefinitions(
-    const CustomerConfig& cfg) {
+    const NamespaceConfig& cfg) {
   Vector<TableDefinition> tbls;
 
   if (!cfg.has_logfile_import_config()) {

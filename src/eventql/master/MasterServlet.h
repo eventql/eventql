@@ -55,12 +55,12 @@ protected:
       http::HTTPRequest* request,
       http::HTTPResponse* response);
 
-  void fetchCustomerConfig(
+  void fetchNamespaceConfig(
       const URI& uri,
       http::HTTPRequest* req,
       http::HTTPResponse* res);
 
-  void updateCustomerConfig(
+  void updateNamespaceConfig(
       const URI& uri,
       http::HTTPRequest* request,
       http::HTTPResponse* response);

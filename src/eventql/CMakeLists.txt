@@ -114,7 +114,7 @@ configure_file(
 
 add_subdirectory(util/mdb)
 
-file(GLOB PROTO_FILES *.proto db/*.proto metrics/*.proto)
+file(GLOB PROTO_FILES *.proto db/*.proto config/*.proto)
 STX_PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${PROTO_FILES})
 #
 #add_executable(test-tsdb-timewindowpartitioner
@@ -183,7 +183,7 @@ add_executable(evqld
     AnalyticsAuth.cc
     transport/http/api_servlet.cc
     config/config_directory.cc
-    CustomerConfig.cc
+    config/namespace_config.cc
     transport/http/default_servlet.cc
     EventScanResult.cc
     transport/http/http_auth.cc

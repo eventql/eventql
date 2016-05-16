@@ -24,7 +24,7 @@
 #pragma once
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/SHA1.h>
-#include <eventql/CustomerConfig.h>
+#include <eventql/config/namespace_config.h>
 #include <eventql/db/ClusterConfig.pb.h>
 #include <eventql/TableDefinition.h>
 
@@ -40,8 +40,8 @@ public:
   ClusterConfig fetchClusterConfig() const;
   ClusterConfig updateClusterConfig(ClusterConfig config);
 
-  CustomerConfig fetchCustomerConfig(const String& customer_key) const;
-  CustomerConfig updateCustomerConfig(CustomerConfig config);
+  NamespaceConfig fetchNamespaceConfig(const String& customer_key) const;
+  NamespaceConfig updateNamespaceConfig(NamespaceConfig config);
 
   TableDefinition fetchTableDefinition(
       const String& customer_key,
