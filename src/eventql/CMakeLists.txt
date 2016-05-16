@@ -259,7 +259,8 @@ add_executable(evql
     evql.cc)
 
 target_link_libraries(evql chartsql stx-http stx-protobuf stx-json stx-base stx-rpc z pcre)
-#
+target_link_libraries(evql editline)
+
 #add_executable(evqlctl
 #    $<TARGET_OBJECTS:stx-mdb>
 #    $<TARGET_OBJECTS:evql-core>

@@ -72,6 +72,18 @@ ExternalProject_Add(mozjs_build
     CONFIGURE_COMMAND sh -c "CC=${CMAKE_C_COMPILER} CXX=${CMAKE_CXX_COMPILER} AR=${CMAKE_AR} RANLIB=${CMAKE_RANLIB} CFLAGS=\"${CMAKE_C_FLAGS} -DJS_THREADSAFE\" CXXFLAGS=\"${CMAKE_CXX_FLAGS} -DJS_THREADSAFE\" LDFLAGS=\"${CMAKE_EXE_LINKER_FLAGS}\" ${PROJECT_SOURCE_DIR}/deps/3rdparty/mozjs/js/src/configure --disable-shared-js"
     INSTALL_COMMAND "true")
 
+ExternalProject_Add(editline_build
+    URL ${PROJECT_SOURCE_DIR}/deps/3rdparty/editline
+    SOURCE_DIR ${PROJECT_BINARY_DIR}/deps/3rdparty/editline
+    BINARY_DIR ${PROJECT_BINARY_DIR}/deps/3rdparty/editline
+    BUILD_COMMAND sh -c "CC=${CMAKE_C_COMPILER} AR=${CMAKE_AR} RANLIB=${CMAKE_RANLIB} CFLAGS=\"${CMAKE_C_FLAGS}\" LDFLAGS=\"${CMAKE_EXE_LINKER_FLAGS}\" make"
+    CONFIGURE_COMMAND sh -c "CC=${CMAKE_C_COMPILER} AR=${CMAKE_AR} RANLIB=${CMAKE_RANLIB} CFLAGS=\"${CMAKE_C_FLAGS}\" LDFLAGS=\"${CMAKE_EXE_LINKER_FLAGS}\" ./configure"
+    INSTALL_COMMAND "true")
+
+add_library(editline STATIC IMPORTED)
+set_target_properties(editline PROPERTIES IMPORTED_LOCATION ${CMAKE_BINARY_DIR}/deps/3rdparty/editline/src/.libs/libeditline.a )
+add_dependencies(editline editline_build)
+
 set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} ${CMAKE_BINARY_DIR}/deps/3rdparty/mozjs/dist/lib)
 set(CMAKE_CXX_FLAGS "-std=c++0x -ftemplate-depth=500 -mno-omit-leaf-frame-pointer -fno-omit-frame-pointer -Wall -Wextra -Wno-unused-parameter -Wno-sign-compare -Wdelete-non-virtual-dtor ${CMAKE_CXX_FLAGS} -Wno-predefined-identifier-outside-function")
 set(CMAKE_C_FLAGS "-std=c11 -mno-omit-leaf-frame-pointer -fno-omit-frame-pointer -Wall -pedantic ${CMAKE_C_FLAGS}")
