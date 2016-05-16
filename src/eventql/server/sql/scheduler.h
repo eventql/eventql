@@ -27,8 +27,25 @@
 #include <eventql/util/autoref.h>
 #include <eventql/sql/result_cursor.h>
 #include <eventql/sql/runtime/QueryPlan.h>
-
 #include "eventql/eventql.h"
+#include <eventql/sql/expressions/table_expression.h>
+#include <eventql/sql/qtree/QueryTreeNode.h>
+#include <eventql/sql/expressions/table/select.h>
+#include <eventql/sql/expressions/table/subquery.h>
+#include <eventql/sql/expressions/table/orderby.h>
+#include <eventql/sql/expressions/table/show_tables.h>
+#include <eventql/sql/expressions/table/limit.h>
+#include <eventql/sql/expressions/table/describe_table.h>
+#include <eventql/sql/expressions/table/groupby.h>
+#include <eventql/sql/expressions/table/nested_loop_join.h>
+#include <eventql/sql/qtree/SelectExpressionNode.h>
+#include <eventql/sql/qtree/SubqueryNode.h>
+#include <eventql/sql/qtree/OrderByNode.h>
+#include <eventql/sql/qtree/DescribeTableNode.h>
+#include <eventql/sql/qtree/LimitNode.h>
+#include <eventql/sql/qtree/GroupByNode.h>
+#include <eventql/sql/qtree/JoinNode.h>
+#include <eventql/sql/runtime/queryplan.h>
 
 namespace eventql {
 
@@ -38,6 +55,46 @@ public:
   ScopedPtr<csql::ResultCursor> execute(
       csql::QueryPlan* query_plan,
       size_t stmt_idx) override;
+
+protected:
+
+  ScopedPtr<csql::TableExpression> buildExpression(
+      csql::Transaction* ctx,
+      RefPtr<csql::QueryTreeNode> node);
+
+  ScopedPtr<csql::TableExpression> buildLimit(
+      csql::Transaction* ctx,
+      RefPtr<csql::LimitNode> node);
+
+  ScopedPtr<csql::TableExpression> buildSelectExpression(
+      csql::Transaction* ctx,
+      RefPtr<csql::SelectExpressionNode> node);
+
+  ScopedPtr<csql::TableExpression> buildSubquery(
+      csql::Transaction* txn,
+      RefPtr<csql::SubqueryNode> node);
+
+  ScopedPtr<csql::TableExpression> buildOrderByExpression(
+      csql::Transaction* txn,
+      RefPtr<csql::OrderByNode> node);
+
+  ScopedPtr<csql::TableExpression> buildSequentialScan(
+      csql::Transaction* txn,
+      RefPtr<csql::SequentialScanNode> node);
+
+  ScopedPtr<csql::TableExpression> buildGroupByExpression(
+      csql::Transaction* txn,
+      RefPtr<csql::GroupByNode> node);
+
+  ScopedPtr<csql::TableExpression> buildJoinExpression(
+      csql::Transaction* txn,
+      RefPtr<csql::JoinNode> node);
+
+  ScopedPtr<csql::TableExpression> buildPipelineGroupBy(
+      csql::Transaction* txn,
+      RefPtr<csql::GroupByNode> node);
+
+  bool isPipelineable(const csql::QueryTreeNode& qtree);
 
 };
 

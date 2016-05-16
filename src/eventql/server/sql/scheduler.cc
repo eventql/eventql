@@ -23,34 +23,12 @@
  * code of your own applications
  */
 #include <eventql/server/sql/scheduler.h>
-#include <eventql/sql/expressions/table_expression.h>
-#include <eventql/sql/qtree/QueryTreeNode.h>
-#include <eventql/sql/expressions/table/select.h>
-#include <eventql/sql/expressions/table/subquery.h>
-#include <eventql/sql/expressions/table/orderby.h>
-#include <eventql/sql/expressions/table/show_tables.h>
-#include <eventql/sql/expressions/table/limit.h>
-#include <eventql/sql/expressions/table/describe_table.h>
-#include <eventql/sql/expressions/table/groupby.h>
-#include <eventql/sql/expressions/table/nested_loop_join.h>
-#include <eventql/sql/qtree/SelectExpressionNode.h>
-#include <eventql/sql/qtree/SubqueryNode.h>
-#include <eventql/sql/qtree/OrderByNode.h>
-#include <eventql/sql/qtree/DescribeTableNode.h>
-#include <eventql/sql/qtree/LimitNode.h>
-#include <eventql/sql/qtree/GroupByNode.h>
-#include <eventql/sql/qtree/JoinNode.h>
-#include <eventql/sql/runtime/queryplan.h>
 
 #include "eventql/eventql.h"
 
 namespace eventql {
 
-static ScopedPtr<csql::TableExpression> buildExpression(
-    csql::Transaction* ctx,
-    RefPtr<csql::QueryTreeNode> node);
-
-static ScopedPtr<csql::TableExpression> buildLimit(
+ScopedPtr<csql::TableExpression> Scheduler::buildLimit(
     csql::Transaction* ctx,
     RefPtr<csql::LimitNode> node) {
   return mkScoped(
@@ -60,7 +38,7 @@ static ScopedPtr<csql::TableExpression> buildLimit(
           buildExpression(ctx, node->inputTable())));
 }
 
-static ScopedPtr<csql::TableExpression> buildSelectExpression(
+ScopedPtr<csql::TableExpression> Scheduler::buildSelectExpression(
     csql::Transaction* ctx,
     RefPtr<csql::SelectExpressionNode> node) {
   Vector<csql::ValueExpression> select_expressions;
@@ -74,7 +52,7 @@ static ScopedPtr<csql::TableExpression> buildSelectExpression(
       std::move(select_expressions)));
 };
 
-static ScopedPtr<csql::TableExpression> buildSubquery(
+ScopedPtr<csql::TableExpression> Scheduler::buildSubquery(
     csql::Transaction* txn,
     RefPtr<csql::SubqueryNode> node) {
   Vector<csql::ValueExpression> select_expressions;
@@ -97,7 +75,7 @@ static ScopedPtr<csql::TableExpression> buildSubquery(
       buildExpression(txn, node->subquery())));
 }
 
-static ScopedPtr<csql::TableExpression> buildOrderByExpression(
+ScopedPtr<csql::TableExpression> Scheduler::buildOrderByExpression(
     csql::Transaction* txn,
     RefPtr<csql::OrderByNode> node) {
   Vector<csql::OrderByExpression::SortExpr> sort_exprs;
@@ -115,7 +93,7 @@ static ScopedPtr<csql::TableExpression> buildOrderByExpression(
           buildExpression(txn, node->inputTable())));
 }
 
-static ScopedPtr<csql::TableExpression> buildSequentialScan(
+ScopedPtr<csql::TableExpression> Scheduler::buildSequentialScan(
     csql::Transaction* txn,
     RefPtr<csql::SequentialScanNode> node) {
   const auto& table_name = node->tableName();
@@ -129,7 +107,7 @@ static ScopedPtr<csql::TableExpression> buildSequentialScan(
   return std::move(seqscan.get());
 }
 
-static ScopedPtr<csql::TableExpression> buildGroupByExpression(
+ScopedPtr<csql::TableExpression> Scheduler::buildGroupByExpression(
     csql::Transaction* txn,
     RefPtr<csql::GroupByNode> node) {
   Vector<csql::ValueExpression> select_expressions;
@@ -155,7 +133,14 @@ static ScopedPtr<csql::TableExpression> buildGroupByExpression(
           buildExpression(txn, node->inputTable())));
 }
 
-static ScopedPtr<csql::TableExpression> buildJoinExpression(
+ScopedPtr<csql::TableExpression> Scheduler::buildPipelineGroupBy(
+      csql::Transaction* txn,
+      RefPtr<csql::GroupByNode> node) {
+  RAISE(kNotYetImplementedError, "nyi");
+}
+
+
+ScopedPtr<csql::TableExpression> Scheduler::buildJoinExpression(
     csql::Transaction* ctx,
     RefPtr<csql::JoinNode> node) {
   Vector<String> column_names;
@@ -190,7 +175,7 @@ static ScopedPtr<csql::TableExpression> buildJoinExpression(
           buildExpression(ctx, node->joinedTable())));
 }
 
-static ScopedPtr<csql::TableExpression> buildExpression(
+ScopedPtr<csql::TableExpression> Scheduler::buildExpression(
     csql::Transaction* ctx,
     RefPtr<csql::QueryTreeNode> node) {
 
@@ -221,9 +206,16 @@ static ScopedPtr<csql::TableExpression> buildExpression(
   }
 
   if (dynamic_cast<csql::GroupByNode*>(node.get())) {
-    return buildGroupByExpression(
-        ctx,
-        node.asInstanceOf<csql::GroupByNode>());
+    auto group_node = node.asInstanceOf<csql::GroupByNode>();
+    if (isPipelineable(*group_node->inputTable())) {
+      return buildGroupByExpression(
+          ctx,
+          group_node);
+    } else {
+      return buildGroupByExpression(
+          ctx,
+          group_node);
+    }
   }
 
   if (dynamic_cast<csql::ShowTablesNode*>(node.get())) {
@@ -257,6 +249,11 @@ ScopedPtr<csql::ResultCursor> Scheduler::execute(
               query_plan->getTransaction(),
               query_plan->getStatement(stmt_idx))));
 };
+
+bool Scheduler::isPipelineable(const csql::QueryTreeNode& qtree) {
+  return true;
+}
+
 
 
 } // namespace eventql
