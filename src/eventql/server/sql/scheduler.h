@@ -46,11 +46,14 @@
 #include <eventql/sql/qtree/GroupByNode.h>
 #include <eventql/sql/qtree/JoinNode.h>
 #include <eventql/sql/runtime/queryplan.h>
+#include <eventql/db/partition_map.h>
 
 namespace eventql {
 
 class Scheduler : public csql::Scheduler {
 public:
+
+  Scheduler(PartitionMap* pmap);
 
   ScopedPtr<csql::ResultCursor> execute(
       csql::QueryPlan* query_plan,
@@ -86,16 +89,21 @@ protected:
       csql::Transaction* txn,
       RefPtr<csql::GroupByNode> node);
 
+  ScopedPtr<csql::TableExpression> buildPipelineGroupByExpression(
+      csql::Transaction* txn,
+      RefPtr<csql::GroupByNode> node);
+
   ScopedPtr<csql::TableExpression> buildJoinExpression(
       csql::Transaction* txn,
       RefPtr<csql::JoinNode> node);
 
-  ScopedPtr<csql::TableExpression> buildPipelineGroupBy(
+  Vector<RefPtr<csql::QueryTreeNode>> pipelineExpression(
       csql::Transaction* txn,
-      RefPtr<csql::GroupByNode> node);
+      RefPtr<csql::QueryTreeNode> qtree);
 
   bool isPipelineable(const csql::QueryTreeNode& qtree);
 
+  PartitionMap* pmap_;
 };
 
 } // namespace eventql
