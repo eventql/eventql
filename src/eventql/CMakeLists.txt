@@ -244,6 +244,7 @@ add_executable(evqld
     server/sql/table_provider.cc
     server/sql/partition_cursor.cc
     server/sql/remote_expression.cc
+    server/sql/scheduler.cc
     z1stats.cc
     evqld.cc)
 
