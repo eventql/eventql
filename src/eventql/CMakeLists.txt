@@ -249,7 +249,7 @@ add_executable(evqld
     z1stats.cc
     evqld.cc)
 
-target_link_libraries(evqld chartsql cplot sstable cstable stx-http stx-protobuf stx-json stx-base stx-rpc stx-mdb js_static.a z pcre)
+target_link_libraries(evqld chartsql cplot sstable cstable stx-http stx-protobuf stx-json stx-base stx-rpc stx-mdb z pcre)
 target_link_libraries(evqld spidermonkey)
 
 add_executable(evql
