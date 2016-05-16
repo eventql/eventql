@@ -244,13 +244,22 @@ add_executable(evqld
     server/sql/table_provider.cc
     server/sql/partition_cursor.cc
     server/sql/remote_expression.cc
+    server/sql/scheduler.cc
+    server/sql/transaction_info.cc
     z1stats.cc
     evqld.cc)
 
-target_link_libraries(evqld chartsql cplot sstable cstable stx-http stx-protobuf stx-json stx-base stx-rpc stx-mdb js_static.a z pcre)
-target_link_libraries(evqld -L${CMAKE_BINARY_DIR}/deps/3rdparty/mozjs/dist/lib -ljs_static)
-add_dependencies(evqld mozjs_build)
-#
+target_link_libraries(evqld chartsql cplot sstable cstable stx-http stx-protobuf stx-json stx-base stx-rpc stx-mdb z pcre)
+target_link_libraries(evqld spidermonkey)
+
+add_executable(evql
+    cli/console.cc
+    server/sql/codec/binary_codec.cc
+    evql.cc)
+
+target_link_libraries(evql chartsql stx-http stx-protobuf stx-json stx-base stx-rpc z pcre)
+target_link_libraries(evql editline)
+
 #add_executable(evqlctl
 #    $<TARGET_OBJECTS:stx-mdb>
 #    $<TARGET_OBJECTS:evql-core>

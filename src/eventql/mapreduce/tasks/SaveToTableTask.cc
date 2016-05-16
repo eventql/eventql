@@ -84,7 +84,7 @@ Option<MapReduceShardResult> SaveToTableTask::execute(
       result_id.get().toString());
 
   auto url = StringUtil::format(
-      "http://$0/transport/http/v1/mapreduce/tasks/save_to_table",
+      "http://$0/api/v1/mapreduce/tasks/save_to_table",
       host.get().addr.ipAndPort());
 
   String params = StringUtil::format(

@@ -39,9 +39,9 @@
 #include "eventql/eventql.h"
 
 void run(const cli::FlagParser& flags) {
-  String api_url = "http://api.eventql.io/transport/http/v1";
+  String api_url = "http://api.eventql.io/api/v1";
   if (getenv("DX_DEVEL")) {
-    api_url = "http://dev.eventql.io/transport/http/v1";
+    api_url = "http://dev.eventql.io/api/v1";
   }
 
   auto api_token = flags.getString("api_token");

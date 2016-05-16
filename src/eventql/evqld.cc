@@ -62,6 +62,7 @@
 #include "eventql/sql/defaults.h"
 #include "eventql/config/config_directory.h"
 #include "eventql/transport/http/status_servlet.h"
+#include "eventql/server/sql/scheduler.h"
 #include <jsapi.h>
 
 #include "eventql/eventql.h"
@@ -325,7 +326,8 @@ int main(int argc, const char** argv) {
             new csql::ValueExpressionBuilder(symbols.get())),
         new csql::QueryPlanBuilder(
             csql::QueryPlanBuilderOptions{},
-            symbols.get())));
+            symbols.get()),
+        mkScoped(new Scheduler(&partition_map))));
 
     sql->setCacheDir(flags.getString("cachedir"));
     sql->symbols()->registerFunction("z1_version", &z1VersionExpr);
@@ -368,7 +370,7 @@ int main(int argc, const char** argv) {
 
   eventql::DefaultServlet default_servlet;
 
-  http_router.addRouteByPrefixMatch("/transport/http/", &analytics_servlet, &tpool);
+  http_router.addRouteByPrefixMatch("/api/", &analytics_servlet, &tpool);
   http_router.addRouteByPrefixMatch("/zstatus", &status_servlet);
   http_router.addRouteByPrefixMatch("/", &default_servlet);
 

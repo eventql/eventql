@@ -27,9 +27,9 @@ fi
 
 if [[ -z "$MAKETOOL" ]]; then
   MAKETOOL="make"
-  if which ninja > /dev/null; then
-    MAKETOOL="ninja"
-  fi
+  #if which ninja > /dev/null; then
+  #  MAKETOOL="ninja"
+  #fi
 fi
 
 echo    "======================  zScale Z1 ======================="

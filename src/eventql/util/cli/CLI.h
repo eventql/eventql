@@ -41,8 +41,11 @@ public:
    */
   void call(const std::vector<std::string>& argv);
 
+  void setDefaultCommand(const String& command);
+
 protected:
   HashMap<String, RefPtr<CLICommand>> commands_;
+  String default_cmd_;
 };
 
 }

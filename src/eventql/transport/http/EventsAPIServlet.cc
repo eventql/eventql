@@ -49,12 +49,12 @@ void EventsAPIServlet::handle(
   http::HTTPResponse res;
   res.populateFromRequest(req);
 
-  if (uri.path() == "/transport/http/v1/events/scan") {
+  if (uri.path() == "/api/v1/events/scan") {
     scanTable(session, uri, req_stream.get(), res_stream.get());
     return;
   }
 
-  if (uri.path() == "/transport/http/v1/events/scan_partition") {
+  if (uri.path() == "/api/v1/events/scan_partition") {
     scanTablePartition(session, uri, req_stream.get(), res_stream.get());
     return;
   }

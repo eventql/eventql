@@ -32,13 +32,20 @@ RefPtr<CLICommand> CLI::defineCommand(const String& command) {
 }
 
 void CLI::call(const std::vector<std::string>& argv) {
-  if (argv.size() == 0) {
-    RAISE(kUsageError, "no command provided");
-  }
+  String cmd_name;
+  Vector<String> cmd_argv;
 
-  auto cmd_name = argv[0];
-  auto cmd_argv = argv;
-  cmd_argv.erase(cmd_argv.begin());
+  if (argv.size() == 0) {
+    if (default_cmd_.empty()) {
+      RAISE(kUsageError, "no command provided");
+    }
+
+    cmd_name = default_cmd_;
+  } else {
+    cmd_name = argv[0];
+    cmd_argv = argv;
+    cmd_argv.erase(cmd_argv.begin());
+  }
 
   auto cmd_iter = commands_.find(cmd_name);
   if (cmd_iter == commands_.end()) {
@@ -49,5 +56,8 @@ void CLI::call(const std::vector<std::string>& argv) {
   cmd->call(cmd_argv);
 }
 
+void CLI::setDefaultCommand(const String& command) {
+  default_cmd_ = command;
+}
 
 }

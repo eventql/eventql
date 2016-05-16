@@ -45,6 +45,8 @@ public:
 
   Transaction(Runtime* runtime);
 
+  ~Transaction();
+
   UnixTime now() const;
 
   Runtime* getRuntime() const;
@@ -54,10 +56,18 @@ public:
   void addTableProvider(RefPtr<TableProvider> provider);
   RefPtr<TableProvider> getTableProvider() const;
 
+  void setUserData(
+      void* user_data,
+      Function<void (void*)> free_fn = [] (void*) {});
+
+  void* getUserData();
+
 protected:
   Runtime* runtime_;
   UnixTime now_;
   RefPtr<TableRepository> table_providers_;
+  void* user_data_;
+  Function<void (void*)> free_user_data_fn_;
 };
 
 
