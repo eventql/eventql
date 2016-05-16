@@ -37,26 +37,33 @@ public:
   RemoteExpression(
       csql::Transaction* txn,
       const String& db_namespace,
-      RefPtr<csql::TableExpressionNode> qtree,
-      Vector<ReplicaRef> hosts,
       AnalyticsAuth* auth);
 
   ~RemoteExpression();
+
+  void addQueryTree(
+      RefPtr<csql::TableExpressionNode> qtree,
+      Vector<ReplicaRef> hosts);
 
   ScopedPtr<csql::ResultCursor> execute() override;
 
 protected:
 
   void executeAsync();
-  void executeOnHost(const InetAddr& host);
+  void executeOnHost(RefPtr<csql::TableExpressionNode> qtree, const InetAddr& host);
 
   bool next(csql::SValue* out_row, size_t out_row_len);
 
+  struct RemoteQuerySpec {
+    RefPtr<csql::TableExpressionNode> qtree;
+    Vector<ReplicaRef> hosts;
+  };
+
   csql::Transaction* txn_;
   String db_namespace_;
-  RefPtr<csql::TableExpressionNode> qtree_;
-  Vector<ReplicaRef> hosts_;
+  Vector<RemoteQuerySpec> queries_;
   AnalyticsAuth* auth_;
+  size_t num_columns_;
   bool eof_;
   bool error_;
   String error_str_;

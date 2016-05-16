@@ -24,12 +24,15 @@
  */
 
 #include <eventql/util/stdtypes.h>
+#include <eventql/sql/Transaction.h>
 #include "eventql/eventql.h"
 
 namespace eventql {
 
 class TransactionInfo {
 public:
+
+  static TransactionInfo* get(csql::Transaction* txn);
 
   TransactionInfo(const String& db_namespace);
 

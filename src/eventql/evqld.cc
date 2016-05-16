@@ -312,6 +312,9 @@ int main(int argc, const char** argv) {
       &partition_map,
       flags.getInt("indexbuild_threads"));
 
+  /* analytics core */
+  AnalyticsAuth auth(&customer_dir);
+
   /* sql */
   RefPtr<csql::Runtime> sql;
   {
@@ -327,7 +330,7 @@ int main(int argc, const char** argv) {
         new csql::QueryPlanBuilder(
             csql::QueryPlanBuilderOptions{},
             symbols.get()),
-        mkScoped(new Scheduler(&partition_map))));
+        mkScoped(new Scheduler(&partition_map, &auth, repl_scheme.get()))));
 
     sql->setCacheDir(flags.getString("cachedir"));
     sql->symbols()->registerFunction("z1_version", &z1VersionExpr);
@@ -336,9 +339,6 @@ int main(int argc, const char** argv) {
   /* spidermonkey javascript runtime */
   JS_Init();
   js::DisableExtraThreads();
-
-  /* analytics core */
-  AnalyticsAuth auth(&customer_dir);
 
   auto analytics_app = mkRef(
       new AnalyticsApp(

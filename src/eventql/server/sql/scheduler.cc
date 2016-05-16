@@ -24,13 +24,20 @@
  */
 #include <eventql/server/sql/scheduler.h>
 #include <eventql/server/sql/transaction_info.h>
+#include <eventql/server/sql/remote_expression.h>
 #include <eventql/sql/qtree/QueryTreeUtil.h>
 
 #include "eventql/eventql.h"
 
 namespace eventql {
 
-Scheduler::Scheduler(PartitionMap* pmap) : pmap_(pmap) {}
+Scheduler::Scheduler(
+    PartitionMap* pmap,
+    AnalyticsAuth* auth,
+    ReplicationScheme* repl_scheme) :
+    pmap_(pmap),
+    auth_(auth),
+    repl_scheme_(repl_scheme) {}
 
 ScopedPtr<csql::TableExpression> Scheduler::buildLimit(
     csql::Transaction* ctx,
@@ -137,14 +144,69 @@ ScopedPtr<csql::TableExpression> Scheduler::buildGroupByExpression(
           buildExpression(txn, node->inputTable())));
 }
 
+ScopedPtr<csql::TableExpression> Scheduler::buildPartialGroupByExpression(
+    csql::Transaction* txn,
+    RefPtr<csql::GroupByNode> node) {
+  Vector<csql::ValueExpression> select_expressions;
+  Vector<csql::ValueExpression> group_expressions;
+
+  for (const auto& slnode : node->selectList()) {
+    select_expressions.emplace_back(
+        txn->getCompiler()->buildValueExpression(
+            txn,
+            slnode->expression()));
+  }
+
+  for (const auto& e : node->groupExpressions()) {
+    group_expressions.emplace_back(
+        txn->getCompiler()->buildValueExpression(txn, e));
+  }
+
+  return mkScoped(
+      new csql::PartialGroupByExpression(
+          txn,
+          std::move(select_expressions),
+          std::move(group_expressions),
+          buildExpression(txn, node->inputTable())));
+}
+
 ScopedPtr<csql::TableExpression> Scheduler::buildPipelineGroupByExpression(
       csql::Transaction* txn,
       RefPtr<csql::GroupByNode> node) {
+  auto remote_aggregate = mkScoped(
+      new RemoteExpression(
+          txn,
+          TransactionInfo::get(txn)->getNamespace(),
+          auth_));
+
   auto shards = pipelineExpression(txn, node.get());
-  RAISE(kNotYetImplementedError);
+  for (size_t i = 0; i < shards.size(); ++i) {
+    auto group_by_copy = mkRef(
+        new csql::GroupByNode(
+            node->selectList(),
+            node->groupExpressions(),
+            shards[i].qtree));
+
+    group_by_copy->setIsPartialAggreagtion(true);
+    remote_aggregate->addQueryTree(group_by_copy.get(), shards[i].hosts);
+  }
+
+  Vector<csql::ValueExpression> select_expressions;
+  for (const auto& slnode : node->selectList()) {
+    select_expressions.emplace_back(
+        txn->getCompiler()->buildValueExpression(
+            txn,
+            slnode->expression()));
+  }
+
+  return mkScoped(
+      new csql::GroupByMergeExpression(
+          txn,
+          std::move(select_expressions),
+          std::move(remote_aggregate)));
 }
 
-Vector<RefPtr<csql::QueryTreeNode>> Scheduler::pipelineExpression(
+Vector<Scheduler::PipelinedExpression> Scheduler::pipelineExpression(
       csql::Transaction* txn,
       RefPtr<csql::QueryTreeNode> qtree) {
   auto seqscan = csql::QueryTreeUtil::findNode<csql::SequentialScanNode>(
@@ -164,7 +226,7 @@ Vector<RefPtr<csql::QueryTreeNode>> Scheduler::pipelineExpression(
   }
 
   auto table = pmap_->findTable(
-      static_cast<TransactionInfo*>(user_data)->getNamespace(),
+      TransactionInfo::get(txn)->getNamespace(),
       table_ref.table_key);
   if (table.isEmpty()) {
     RAISE(kIllegalStateError, "can't pipeline query tree");
@@ -173,7 +235,7 @@ Vector<RefPtr<csql::QueryTreeNode>> Scheduler::pipelineExpression(
   auto partitioner = table.get()->partitioner();
   auto partitions = partitioner->listPartitions(seqscan->constraints());
 
-  Vector<RefPtr<csql::QueryTreeNode>> shards;
+  Vector<PipelinedExpression> shards;
   for (const auto& partition : partitions) {
     auto table_name = StringUtil::format(
         "tsdb://localhost/$0/$1",
@@ -184,7 +246,13 @@ Vector<RefPtr<csql::QueryTreeNode>> Scheduler::pipelineExpression(
     auto shard = csql::QueryTreeUtil::findNode<csql::SequentialScanNode>(
         qtree_copy.get());
     shard->setTableName(table_name);
-    shards.emplace_back(shard);
+
+    auto shard_hosts = repl_scheme_->replicasFor(partition);
+
+    shards.emplace_back(PipelinedExpression {
+      .qtree = shard,
+      .hosts = shard_hosts
+    });
   }
 
   return shards;
@@ -258,6 +326,12 @@ ScopedPtr<csql::TableExpression> Scheduler::buildExpression(
 
   if (dynamic_cast<csql::GroupByNode*>(node.get())) {
     auto group_node = node.asInstanceOf<csql::GroupByNode>();
+    if (group_node->isPartialAggregation()) {
+      return buildPartialGroupByExpression(
+          ctx,
+          group_node);
+    }
+
     if (isPipelineable(*group_node->inputTable())) {
       return buildPipelineGroupByExpression(
           ctx,

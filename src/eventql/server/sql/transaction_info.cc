@@ -27,6 +27,16 @@
 
 namespace eventql {
 
+TransactionInfo* TransactionInfo::get(csql::Transaction* txn) {
+  auto user_data = txn->getUserData();
+  if (!user_data) {
+    RAISE(kRuntimeError, "TransactionInfo missing");
+  }
+
+  return (TransactionInfo*) user_data;
+}
+
+
 TransactionInfo::TransactionInfo(
     const String& db_namespace) :
     db_namespace_(db_namespace) {}

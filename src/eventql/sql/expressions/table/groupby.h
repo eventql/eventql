@@ -1,4 +1,4 @@
-/**
+  /**
  * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
  * Authors:
  *   - Paul Asmuth <paul@zscale.io>
@@ -57,5 +57,62 @@ protected:
   ScratchMemory scratch_;
   bool freed_;
 };
+
+class PartialGroupByExpression : public TableExpression {
+public:
+
+  PartialGroupByExpression(
+      Transaction* txn,
+      Vector<ValueExpression> select_expressions,
+      Vector<ValueExpression> group_expressions,
+      ScopedPtr<TableExpression> input);
+
+  ~PartialGroupByExpression();
+
+  ScopedPtr<ResultCursor> execute() override;
+
+protected:
+
+  bool next(SValue* row, size_t row_len);
+
+  void freeResult();
+
+  Transaction* txn_;
+  Vector<ValueExpression> select_exprs_;
+  Vector<ValueExpression> group_exprs_;
+  ScopedPtr<TableExpression> input_;
+  HashMap<String, Vector<VM::Instance>> groups_;
+  HashMap<String, Vector<VM::Instance>>::const_iterator groups_iter_;
+  ScratchMemory scratch_;
+  bool freed_;
+};
+
+class GroupByMergeExpression : public TableExpression {
+public:
+
+  GroupByMergeExpression(
+      Transaction* txn,
+      Vector<ValueExpression> select_expressions,
+      ScopedPtr<TableExpression> input);
+
+  ~GroupByMergeExpression();
+
+  ScopedPtr<ResultCursor> execute() override;
+
+protected:
+
+  bool next(SValue* row, size_t row_len);
+  void freeResult();
+
+  Transaction* txn_;
+  Vector<ValueExpression> select_exprs_;
+  ScopedPtr<TableExpression> input_;
+  HashMap<String, Vector<VM::Instance>> groups_;
+  HashMap<String, Vector<VM::Instance>>::const_iterator groups_iter_;
+  ScratchMemory scratch_;
+  bool freed_;
+};
+
+
 
 }

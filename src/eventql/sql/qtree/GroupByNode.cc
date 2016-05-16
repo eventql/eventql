@@ -35,7 +35,8 @@ GroupByNode::GroupByNode(
     RefPtr<QueryTreeNode> table) :
     select_list_(select_list),
     group_exprs_(group_exprs),
-    table_(table) {
+    table_(table),
+    is_partial_aggregation_(false) {
   for (const auto& sl : select_list_) {
     column_names_.emplace_back(sl->columnName());
   }
@@ -126,6 +127,15 @@ String GroupByNode::toString() const {
   return str;
 }
 
+void GroupByNode::setIsPartialAggreagtion(bool is_partial_aggregation) {
+  is_partial_aggregation_ = is_partial_aggregation;
+}
+
+bool GroupByNode::isPartialAggregation() const {
+  return is_partial_aggregation_;
+}
+
+
 void GroupByNode::encode(
     QueryTreeCoder* coder,
     const GroupByNode& node,
@@ -141,6 +151,8 @@ void GroupByNode::encode(
   }
 
   coder->encode(node.table_, os);
+
+  os->appendUInt8((uint8_t) node.isPartialAggregation());
 }
 
 RefPtr<QueryTreeNode> GroupByNode::decode (
@@ -160,8 +172,11 @@ RefPtr<QueryTreeNode> GroupByNode::decode (
   }
 
   auto table = coder->decode(is);
+  auto is_partial_aggregation = (bool) is->readUInt8();
 
-  return new GroupByNode(select_list, group_exprs, table);
+  auto node = new GroupByNode(select_list, group_exprs, table);
+  node->setIsPartialAggreagtion(is_partial_aggregation);
+  return node;
 }
 
 

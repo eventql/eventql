@@ -1336,6 +1336,9 @@ void AnalyticsServlet::executeQTree(
     try {
       auto txn = sql_->newTransaction();
       txn->addTableProvider(app_->getTableProvider(session.customer()));
+      txn->setUserData(
+          new TransactionInfo(session.customer()),
+          [] (void* tx_info) { delete (TransactionInfo*) tx_info; });
 
       csql::QueryTreeCoder coder(txn.get());
       auto req_body_is = BufferInputStream::fromBuffer(&req->body());

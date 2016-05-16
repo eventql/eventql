@@ -31,17 +31,14 @@ namespace eventql {
 RemoteExpression::RemoteExpression(
     csql::Transaction* txn,
     const String& db_namespace,
-    RefPtr<csql::TableExpressionNode> qtree,
-    Vector<ReplicaRef> hosts,
     AnalyticsAuth* auth) :
     txn_(txn),
     db_namespace_(db_namespace),
-    qtree_(qtree),
-    hosts_(hosts),
     auth_(auth),
+    num_columns_(0),
     eof_(false),
     error_(false),
-    cancelled_(false){};
+    cancelled_(false) {};
 
 RemoteExpression::~RemoteExpression() {
   cancelled_ = true;
@@ -49,12 +46,23 @@ RemoteExpression::~RemoteExpression() {
   thread_.join();
 }
 
+void RemoteExpression::addQueryTree(
+    RefPtr<csql::TableExpressionNode> qtree,
+    Vector<ReplicaRef> hosts) {
+  queries_.emplace_back(RemoteQuerySpec {
+    .qtree = qtree,
+    .hosts = hosts
+  });
+
+  num_columns_ = std::max(num_columns_, qtree->numColumns());
+}
+
 ScopedPtr<csql::ResultCursor> RemoteExpression::execute() {
   thread_ = std::thread(std::bind(&RemoteExpression::executeAsync, this));
 
   return mkScoped(
     new csql::DefaultResultCursor(
-        qtree_->numColumns(),
+        num_columns_,
         std::bind(
             &RemoteExpression::next,
             this,
@@ -64,23 +72,28 @@ ScopedPtr<csql::ResultCursor> RemoteExpression::execute() {
 
 void RemoteExpression::executeAsync() {
   Vector<String> errors;
-  for (const auto& host : hosts_) {
-    try {
-      executeOnHost(host.addr);
-      break;
-    } catch (const StandardException& e) {
-      logError(
-          "eventql",
-          e,
-          "RemoteExpression::executeOnHost failed @ $0",
-          host.addr.hostAndPort());
-
-      errors.emplace_back(e.what());
-
-      std::unique_lock<std::mutex> lk(mutex_);
-      if (buf_ctr_ > 0) {
+  for (const auto& query : queries_) {
+    for (const auto& host : query.hosts) {
+      try {
+        executeOnHost(query.qtree, host.addr);
         break;
+      } catch (const StandardException& e) {
+        logError(
+            "eventql",
+            e,
+            "RemoteExpression::executeOnHost failed @ $0",
+            host.addr.hostAndPort());
+
+        std::unique_lock<std::mutex> lk(mutex_);
+        if (buf_ctr_ > 0) {
+          errors.emplace_back(e.what());
+          break;
+        }
       }
+    }
+
+    if (errors.size() > 0) {
+      break;
     }
   }
 
@@ -91,11 +104,13 @@ void RemoteExpression::executeAsync() {
   cv_.notify_all();
 }
 
-void RemoteExpression::executeOnHost(const InetAddr& host) {
+void RemoteExpression::executeOnHost(
+    RefPtr<csql::TableExpressionNode> qtree,
+    const InetAddr& host) {
   Buffer req_body;
   auto req_body_os = BufferOutputStream::fromBuffer(&req_body);
   csql::QueryTreeCoder qtree_coder(txn_);
-  qtree_coder.encode(qtree_.get(), req_body_os.get());
+  qtree_coder.encode(qtree.get(), req_body_os.get());
 
   bool error = false;
   csql::BinaryResultParser res_parser;

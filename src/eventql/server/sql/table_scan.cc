@@ -119,15 +119,18 @@ ScopedPtr<csql::ResultCursor> TableScan::openRemotePartition(
   auto seqscan_copy = seqscan_->template deepCopyAs<csql::SequentialScanNode>();
   seqscan_copy->setTableName(table_name);
 
+  auto remote_expr = mkScoped(
+      new RemoteExpression(
+          txn_,
+          tsdb_namespace_,
+          auth_));
+
+  remote_expr->addQueryTree(
+      seqscan_copy.get(),
+      replication_scheme_->replicasFor(partition_key));
+
   return mkScoped(
-      new csql::TableExpressionResultCursor(
-          mkScoped(
-              new RemoteExpression(
-                  txn_,
-                  tsdb_namespace_,
-                  seqscan_copy.get(),
-                  replication_scheme_->replicasFor(partition_key),
-                  auth_))));
+      new csql::TableExpressionResultCursor(std::move(remote_expr)));
 }
 
 }

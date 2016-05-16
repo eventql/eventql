@@ -56,6 +56,9 @@ public:
 
   String toString() const override;
 
+  void setIsPartialAggreagtion(bool is_partial_aggregation);
+  bool isPartialAggregation() const;
+
   size_t getColumnIndex(
       const String& column_name,
       bool allow_add = false) override;
@@ -74,6 +77,7 @@ protected:
   Vector<String> column_names_;
   Vector<RefPtr<ValueExpressionNode>> group_exprs_;
   RefPtr<QueryTreeNode> table_;
+  bool is_partial_aggregation_;
 };
 
 } // namespace csql

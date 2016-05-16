@@ -47,13 +47,18 @@
 #include <eventql/sql/qtree/JoinNode.h>
 #include <eventql/sql/runtime/queryplan.h>
 #include <eventql/db/partition_map.h>
+#include <eventql/AnalyticsAuth.h>
+
 
 namespace eventql {
 
 class Scheduler : public csql::Scheduler {
 public:
 
-  Scheduler(PartitionMap* pmap);
+  Scheduler(
+      PartitionMap* pmap,
+      AnalyticsAuth* auth,
+      ReplicationScheme* repl_scheme);
 
   ScopedPtr<csql::ResultCursor> execute(
       csql::QueryPlan* query_plan,
@@ -89,6 +94,10 @@ protected:
       csql::Transaction* txn,
       RefPtr<csql::GroupByNode> node);
 
+  ScopedPtr<csql::TableExpression> buildPartialGroupByExpression(
+      csql::Transaction* txn,
+      RefPtr<csql::GroupByNode> node);
+
   ScopedPtr<csql::TableExpression> buildPipelineGroupByExpression(
       csql::Transaction* txn,
       RefPtr<csql::GroupByNode> node);
@@ -97,13 +106,20 @@ protected:
       csql::Transaction* txn,
       RefPtr<csql::JoinNode> node);
 
-  Vector<RefPtr<csql::QueryTreeNode>> pipelineExpression(
+  struct PipelinedExpression {
+    RefPtr<csql::QueryTreeNode> qtree;
+    Vector<ReplicaRef> hosts;
+  };
+
+  Vector<PipelinedExpression> pipelineExpression(
       csql::Transaction* txn,
       RefPtr<csql::QueryTreeNode> qtree);
 
   bool isPipelineable(const csql::QueryTreeNode& qtree);
 
   PartitionMap* pmap_;
+  AnalyticsAuth* auth_;
+  ReplicationScheme* repl_scheme_;
 };
 
 } // namespace eventql
