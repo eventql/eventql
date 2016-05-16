@@ -1,5 +1,5 @@
 project(ZenBase)
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 2.8.10)
 cmake_policy(SET CMP0026 OLD)
 
 include(CheckIncludeFile)
@@ -64,13 +64,19 @@ set(HAVE_PCRE true)
 set(PCRE_LIBRARIES "pcre")
 
 include(ExternalProject)
-ExternalProject_Add(mozjs_build
+ExternalProject_Add(spidermonkey_build
     URL ${PROJECT_SOURCE_DIR}/deps/3rdparty/mozjs
     SOURCE_DIR ${PROJECT_BINARY_DIR}/deps/3rdparty/mozjs
     BINARY_DIR ${PROJECT_BINARY_DIR}/deps/3rdparty/mozjs
     BUILD_COMMAND sh -c "CC=${CMAKE_C_COMPILER} CXX=${CMAKE_CXX_COMPILER} AR=${CMAKE_AR} RANLIB=${CMAKE_RANLIB} CFLAGS=\"${CMAKE_C_FLAGS} -DJS_THREADSAFE\" CXXFLAGS=\"${CMAKE_CXX_FLAGS} -DJS_THREADSAFE\" LDFLAGS=\"${CMAKE_EXE_LINKER_FLAGS}\" make JS_THREADSAFE=1"
     CONFIGURE_COMMAND sh -c "CC=${CMAKE_C_COMPILER} CXX=${CMAKE_CXX_COMPILER} AR=${CMAKE_AR} RANLIB=${CMAKE_RANLIB} CFLAGS=\"${CMAKE_C_FLAGS} -DJS_THREADSAFE\" CXXFLAGS=\"${CMAKE_CXX_FLAGS} -DJS_THREADSAFE\" LDFLAGS=\"${CMAKE_EXE_LINKER_FLAGS}\" ${PROJECT_SOURCE_DIR}/deps/3rdparty/mozjs/js/src/configure --disable-shared-js"
-    INSTALL_COMMAND "true")
+    INSTALL_COMMAND "true"
+    LOG_CONFIGURE 1
+    LOG_BUILD 1)
+
+add_library(spidermonkey STATIC IMPORTED)
+set_target_properties(spidermonkey PROPERTIES IMPORTED_LOCATION ${CMAKE_BINARY_DIR}/deps/3rdparty/mozjs/dist/lib/mozjs_static.a)
+add_dependencies(spidermonkey spidermonkey_build)
 
 ExternalProject_Add(editline_build
     URL ${PROJECT_SOURCE_DIR}/deps/3rdparty/editline
@@ -78,10 +84,12 @@ ExternalProject_Add(editline_build
     BINARY_DIR ${PROJECT_BINARY_DIR}/deps/3rdparty/editline
     BUILD_COMMAND sh -c "CC=${CMAKE_C_COMPILER} AR=${CMAKE_AR} RANLIB=${CMAKE_RANLIB} CFLAGS=\"${CMAKE_C_FLAGS}\" LDFLAGS=\"${CMAKE_EXE_LINKER_FLAGS}\" make"
     CONFIGURE_COMMAND sh -c "CC=${CMAKE_C_COMPILER} AR=${CMAKE_AR} RANLIB=${CMAKE_RANLIB} CFLAGS=\"${CMAKE_C_FLAGS}\" LDFLAGS=\"${CMAKE_EXE_LINKER_FLAGS}\" ./configure"
-    INSTALL_COMMAND "true")
+    INSTALL_COMMAND "true"
+    LOG_CONFIGURE 1
+    LOG_BUILD 1)
 
 add_library(editline STATIC IMPORTED)
-set_target_properties(editline PROPERTIES IMPORTED_LOCATION ${CMAKE_BINARY_DIR}/deps/3rdparty/editline/src/.libs/libeditline.a )
+set_target_properties(editline PROPERTIES IMPORTED_LOCATION ${CMAKE_BINARY_DIR}/deps/3rdparty/editline/src/.libs/libeditline.a)
 add_dependencies(editline editline_build)
 
 set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} ${CMAKE_BINARY_DIR}/deps/3rdparty/mozjs/dist/lib)
@@ -90,8 +98,6 @@ set(CMAKE_C_FLAGS "-std=c11 -mno-omit-leaf-frame-pointer -fno-omit-frame-pointer
 set(CMAKE_CXX_LINK_EXECUTABLE "${CMAKE_CXX_LINK_EXECUTABLE} -lpthread")
 set(CMAKE_C_FLAGS_DEBUG "-g ${CMAKE_CXX_FLAGS_DEBUG}")
 set(CMAKE_CXX_FLAGS_DEBUG "-g ${CMAKE_CXX_FLAGS_DEBUG}")
-#set(CMAKE_CXX_FLAGS_DEBUG "-fsanitize=address ${CMAKE_CXX_FLAGS_DEBUG}")
-#set(CMAKE_EXE_LINKER_FLAGS_DEBUG "-fsanitize=address ${CMAKE_EXE_LINKER_FLAGS_DEBUG}")
 
 # OSX FLAGS
 if(APPLE)
