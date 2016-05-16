@@ -73,7 +73,6 @@ public:
    */
   const Vector<String>& getStatementOutputColumns(size_t stmt_idx);
 
-  void setScheduler(RefPtr<Scheduler> scheduler);
   RefPtr<QueryTreeNode> getStatement(size_t stmt_idx) const;
 
   Transaction* getTransaction() const;
@@ -88,7 +87,6 @@ protected:
   Transaction* txn_;
   Vector<RefPtr<QueryTreeNode>> qtrees_;
   Vector<Vector<String>> statement_columns_;
-  RefPtr<Scheduler> scheduler_;
 };
 
 }

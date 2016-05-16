@@ -30,8 +30,7 @@ QueryPlan::QueryPlan(
     Transaction* txn,
     Vector<RefPtr<QueryTreeNode>> qtrees) :
     txn_(txn),
-    qtrees_(qtrees),
-    scheduler_(nullptr) {
+    qtrees_(qtrees) {
   for (const auto& qtree : qtrees_) {
     statement_columns_.emplace_back(
         qtree.asInstanceOf<TableExpressionNode>()->outputColumns());
@@ -39,15 +38,11 @@ QueryPlan::QueryPlan(
 }
 
 ScopedPtr<ResultCursor> QueryPlan::execute(size_t stmt_idx) {
-  if (scheduler_.isNull()) {
-    RAISE(kRuntimeError, "QueryPlan has no scheduler");
-  }
-
   if (stmt_idx >= qtrees_.size()) {
     RAISE(kIndexError, "invalid statement index");
   }
 
-  return scheduler_->execute(this, stmt_idx);
+  return txn_->getRuntime()->getScheduler()->execute(this, stmt_idx);
 }
 
 void QueryPlan::execute(size_t stmt_idx, ResultList* result_list) {
@@ -62,10 +57,6 @@ void QueryPlan::execute(size_t stmt_idx, ResultList* result_list) {
   while (cursor->next(tmp.data(), tmp.size())) {
     result_list->addRow(tmp.data(), tmp.size());
   }
-}
-
-void QueryPlan::setScheduler(RefPtr<Scheduler> scheduler) {
-  scheduler_ = scheduler;
 }
 
 const Vector<String>& QueryPlan::getStatementOutputColumns(size_t stmt_idx) {
