@@ -73,7 +73,7 @@ ExternalProject_Add(spidermonkey_build
     INSTALL_COMMAND "true")
 
 add_library(spidermonkey STATIC IMPORTED)
-set_target_properties(spidermonkey PROPERTIES IMPORTED_LOCATION ${CMAKE_BINARY_DIR}/deps/3rdparty/mozjs/dist/lib/mozjs_static.a)
+set_target_properties(spidermonkey PROPERTIES IMPORTED_LOCATION ${CMAKE_BINARY_DIR}/deps/3rdparty/mozjs/dist/lib/libjs_static.a)
 add_dependencies(spidermonkey spidermonkey_build)
 
 ExternalProject_Add(editline_build
