@@ -185,7 +185,6 @@ add_executable(evqld
     ConfigDirectory.cc
     CustomerConfig.cc
     DefaultServlet.cc
-    DrilldownTree.cc
     EventScanResult.cc
     transport/http/http_auth.cc
     JavaScriptContext.cc
