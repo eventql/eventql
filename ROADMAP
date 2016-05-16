@@ -14,9 +14,9 @@ ROADMAP
 - [ ] partitioning/sharding v2
 - [ ] improved table iterator iface (update, ordered, restricted, etc)
 
--> rename remoteexpression -> pipelinedexpression
--> local execution fastpath in pipelinedexpression {addRemoteQuery, addLocalQuery}
 -> impl pipelining in pipilinedexpr
+-> move pipelined aggregate code to server/sql/pipelined_aggregate
+-> PartialAggregateNode
 
 ...
 
