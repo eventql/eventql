@@ -23,7 +23,7 @@
  */
 #include <eventql/util/http/cookies.h>
 #include <eventql/util/assets.h>
-#include <eventql/DefaultServlet.h>
+#include <eventql/transport/http/default_servlet.h>
 #include <eventql/transport/http/http_auth.h>
 
 namespace eventql {

@@ -184,7 +184,7 @@ add_executable(evqld
     transport/http/api_servlet.cc
     ConfigDirectory.cc
     CustomerConfig.cc
-    DefaultServlet.cc
+    transport/http/default_servlet.cc
     EventScanResult.cc
     transport/http/http_auth.cc
     JavaScriptContext.cc

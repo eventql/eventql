@@ -58,7 +58,7 @@
 #include "eventql/db/ReplicationWorker.h"
 #include "eventql/db/LSMTableIndexCache.h"
 #include "eventql/server/sql/sql_engine.h"
-#include "eventql/DefaultServlet.h"
+#include "eventql/transport/http/default_servlet.h"
 #include "eventql/sql/defaults.h"
 #include "eventql/ConfigDirectory.h"
 #include "eventql/transport/http/status_servlet.h"
