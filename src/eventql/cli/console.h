@@ -21,32 +21,22 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#ifndef _STX_CLI_CLI_H
-#define _STX_CLI_CLI_H
-#include <string>
-#include <vector>
+#pragma once
+#include <eventql/eventql.h>
 #include <eventql/util/exception.h>
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/cli/CLICommand.h>
 
+namespace eventql {
 namespace cli {
 
-class CLI {
+class Console {
 public:
 
-  RefPtr<CLICommand> defineCommand(const String& command);
+  void run();
 
-  /**
-   * Call with an an argv array. This may throw an exception.
-   */
-  void call(const std::vector<std::string>& argv);
-
-  void setDefaultCommand(const String& command);
-
-protected:
-  HashMap<String, RefPtr<CLICommand>> commands_;
-  String default_cmd_;
 };
 
-}
-#endif
+} // namespace cli
+} // namespace eventql
+
