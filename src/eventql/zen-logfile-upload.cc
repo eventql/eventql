@@ -43,7 +43,7 @@ void run(const cli::FlagParser& flags) {
   auto input_file = flags.getString("input_file");
   auto api_token = flags.getString("api_token");
   auto tail = flags.isSet("tail");
-  String api_url = "http://api.eventql.io/transport/http/v1";
+  String api_url = "http://api.eventql.io/api/v1";
 
   logInfo("dx-logfile-upload", "Tailing logfile '$0'", input_file);
 
