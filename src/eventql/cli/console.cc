@@ -27,8 +27,17 @@
 namespace eventql {
 namespace cli {
 
+extern "C" {
+extern char *readline(char *prompt);
+}
+
 void Console::run() {
-  iputs("hello world", 1);
+  char *p;
+
+  while ((p = readline("evql> ")) != NULL) {
+    puts(p);
+    free(p);
+  }
 }
 
 } // namespace cli
