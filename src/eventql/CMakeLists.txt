@@ -251,6 +251,13 @@ add_executable(evqld
 target_link_libraries(evqld chartsql cplot sstable cstable stx-http stx-protobuf stx-json stx-base stx-rpc stx-mdb js_static.a z pcre)
 target_link_libraries(evqld -L${CMAKE_BINARY_DIR}/deps/3rdparty/mozjs/dist/lib -ljs_static)
 add_dependencies(evqld mozjs_build)
+
+add_executable(evql
+    cli/console.cc
+    server/sql/codec/binary_codec.cc
+    evql.cc)
+
+target_link_libraries(evql chartsql stx-http stx-protobuf stx-json stx-base stx-rpc z pcre)
 #
 #add_executable(evqlctl
 #    $<TARGET_OBJECTS:stx-mdb>

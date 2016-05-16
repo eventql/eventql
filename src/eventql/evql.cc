@@ -40,6 +40,7 @@
 #include "eventql/util/cli/flagparser.h"
 #include "eventql/util/cli/term.h"
 #include "eventql/server/sql/codec/binary_codec.h"
+#include "eventql/cli/console.h"
 
 #include "eventql/eventql.h"
 
@@ -368,6 +369,13 @@ void cmd_version(
   stdout_os->write("zli v0.0.1\n");
 }
 
+void cmd_console(
+    const cli::FlagParser& global_flags,
+    const cli::FlagParser& cmd_flags) {
+  eventql::cli::Console console;
+  console.run();
+}
+
 int main(int argc, const char** argv) {
   Application::init();
   Application::logToStderr();
@@ -420,6 +428,11 @@ int main(int argc, const char** argv) {
   /* command: version */
   auto version_cmd = cli.defineCommand("version");
   version_cmd->onCall(std::bind(&cmd_version, flags, std::placeholders::_1));
+
+  /* command: console */
+  auto console_cmd = cli.defineCommand("console");
+  console_cmd->onCall(std::bind(&cmd_console, flags, std::placeholders::_1));
+  cli.setDefaultCommand("console");
 
   //mr_execute_cmd->flags().defineFlag(
   //    "api_host",
