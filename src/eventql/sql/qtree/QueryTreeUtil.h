@@ -2,6 +2,7 @@
  * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
  * Authors:
  *   - Paul Asmuth <paul@zscale.io>
+ *   - Laura Schlimmer <paul@zscale.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -108,7 +109,19 @@ public:
    */
   static Option<ScanConstraint> findConstraint(
       RefPtr<ValueExpressionNode> expr);
+
+  /**
+   * Walk the query tree (depth first) and returns a pointer to the first node
+   * that is of type T. If no such node can be found in the query tree, returns
+   * nullptr.
+   *
+   * T* must be convertible to QueryTreeNode*
+   */
+  template <class T>
+  static T* findNode(QueryTreeNode* tree);
+
 };
 
-
 } // namespace csql
+
+#include "eventql/sql/qtree/QueryTreeUtil_impl.h"

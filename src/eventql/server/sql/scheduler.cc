@@ -23,10 +23,14 @@
  * code of your own applications
  */
 #include <eventql/server/sql/scheduler.h>
+#include <eventql/server/sql/transaction_info.h>
+#include <eventql/sql/qtree/QueryTreeUtil.h>
 
 #include "eventql/eventql.h"
 
 namespace eventql {
+
+Scheduler::Scheduler(PartitionMap* pmap) : pmap_(pmap) {}
 
 ScopedPtr<csql::TableExpression> Scheduler::buildLimit(
     csql::Transaction* ctx,
@@ -133,10 +137,54 @@ ScopedPtr<csql::TableExpression> Scheduler::buildGroupByExpression(
           buildExpression(txn, node->inputTable())));
 }
 
-ScopedPtr<csql::TableExpression> Scheduler::buildPipelineGroupBy(
+ScopedPtr<csql::TableExpression> Scheduler::buildPipelineGroupByExpression(
       csql::Transaction* txn,
       RefPtr<csql::GroupByNode> node) {
-  RAISE(kNotYetImplementedError, "nyi");
+  auto shards = pipelineExpression(txn, node.get());
+  RAISE(kNotYetImplementedError);
+}
+
+Vector<RefPtr<csql::QueryTreeNode>> Scheduler::pipelineExpression(
+      csql::Transaction* txn,
+      RefPtr<csql::QueryTreeNode> qtree) {
+  auto seqscan = csql::QueryTreeUtil::findNode<csql::SequentialScanNode>(
+      qtree.get());
+  if (!seqscan) {
+    RAISE(kIllegalStateError, "can't pipeline query tree");
+  }
+
+  auto table_ref = TSDBTableRef::parse(seqscan->tableName());
+  if (!table_ref.partition_key.isEmpty()) {
+    RAISE(kIllegalStateError, "can't pipeline query tree");
+  }
+
+  auto user_data = txn->getUserData();
+  if (user_data == nullptr) {
+    RAISE(kRuntimeError, "no user data");
+  }
+
+  auto table = pmap_->findTable(
+      static_cast<TransactionInfo*>(user_data)->getNamespace(),
+      table_ref.table_key);
+  if (table.isEmpty()) {
+    RAISE(kIllegalStateError, "can't pipeline query tree");
+  }
+
+  auto partitioner = table.get()->partitioner();
+  auto partitions = partitioner->listPartitions(seqscan->constraints());
+
+  Vector<RefPtr<csql::QueryTreeNode>> shards;
+  for (const auto& partition : partitions) {
+    auto table_name = StringUtil::format(
+        "tsdb://localhost/$0/$1",
+        URI::urlEncode(table_ref.table_key),
+        partition.toString());
+
+    auto qtree_copy = qtree->deepCopy();
+    iputs("table name: $0", table_name);
+  }
+
+  return shards;
 }
 
 
@@ -212,7 +260,7 @@ ScopedPtr<csql::TableExpression> Scheduler::buildExpression(
           ctx,
           group_node);
     } else {
-      return buildGroupByExpression(
+      return buildPipelineGroupByExpression(
           ctx,
           group_node);
     }

@@ -2,6 +2,7 @@
  * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
  * Authors:
  *   - Paul Asmuth <paul@zscale.io>
+ *   - Laura Schlimmer <laura@zscale.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -21,60 +22,25 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include <eventql/util/wallclock.h>
-#include <eventql/sql/Transaction.h>
-#include <eventql/sql/runtime/runtime.h>
-
-#include "eventql/eventql.h"
+#pragma once
 
 namespace csql {
 
-Transaction::Transaction(
-    Runtime* runtime) :
-    runtime_(runtime),
-    now_(WallClock::now()),
-    table_providers_(new TableRepository()),
-    user_data_(nullptr) {}
-
-Transaction::~Transaction() {
-  if (free_user_data_fn_) {
-    free_user_data_fn_(user_data_);
+template <class T>
+T* QueryTreeUtil::findNode(QueryTreeNode* tree) {
+  auto self = dynamic_cast<T*>(tree);
+  if (self != nullptr) {
+    return self;
   }
-}
 
-Runtime* Transaction::getRuntime() const {
-  return runtime_;
-}
+  for (size_t i = 0; i < tree->numChildren(); ++i) {
+    auto node = QueryTreeUtil::findNode<T>(tree->child(i).get());
+    if (node != nullptr) {
+      return node;
+    }
+  }
 
-QueryBuilder* Transaction::getCompiler() const {
-  return runtime_->queryBuilder().get();
-}
-
-SymbolTable* Transaction::getSymbolTable() const {
-  return runtime_->symbols();
-}
-
-UnixTime Transaction::now() const {
-  return now_;
-}
-
-void Transaction::addTableProvider(RefPtr<TableProvider> provider) {
-  table_providers_->addProvider(provider);
-}
-
-RefPtr<TableProvider> Transaction::getTableProvider() const {
-  return table_providers_.get();
-}
-
-void Transaction::setUserData(
-    void* user_data,
-    Function<void (void*)> free_fn /* [] (void*) {} */) {
-  user_data_ = user_data;
-  free_user_data_fn_ = free_fn;
-}
-
-void* Transaction::getUserData() {
-  return user_data_;
+  return nullptr;
 }
 
 

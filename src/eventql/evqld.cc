@@ -327,7 +327,7 @@ int main(int argc, const char** argv) {
         new csql::QueryPlanBuilder(
             csql::QueryPlanBuilderOptions{},
             symbols.get()),
-        mkScoped(new Scheduler())));
+        mkScoped(new Scheduler(&partition_map))));
 
     sql->setCacheDir(flags.getString("cachedir"));
     sql->symbols()->registerFunction("z1_version", &z1VersionExpr);

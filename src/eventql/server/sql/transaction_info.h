@@ -2,6 +2,7 @@
  * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
  * Authors:
  *   - Paul Asmuth <paul@zscale.io>
+ *   - Laura Schlimmer <laura@zscale.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -21,54 +22,24 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#pragma once
-#include <eventql/util/stdtypes.h>
-#include <eventql/util/UnixTime.h>
-#include <eventql/sql/csql.h>
-#include <eventql/sql/runtime/tablerepository.h>
 
+#include <eventql/util/stdtypes.h>
 #include "eventql/eventql.h"
 
-namespace csql {
-class Runtime;
-class SymbolTable;
-class QueryBuilder;
-class TableProvider;
-class TableRepository;
+namespace eventql {
 
-class Transaction {
+class TransactionInfo {
 public:
 
-  static inline sql_txn* get(Transaction* ctx) {
-    return (sql_txn*) ctx;
-  }
+  TransactionInfo(const String& db_namespace);
 
-  Transaction(Runtime* runtime);
-
-  ~Transaction();
-
-  UnixTime now() const;
-
-  Runtime* getRuntime() const;
-  QueryBuilder* getCompiler() const;
-  SymbolTable* getSymbolTable() const;
-
-  void addTableProvider(RefPtr<TableProvider> provider);
-  RefPtr<TableProvider> getTableProvider() const;
-
-  void setUserData(
-      void* user_data,
-      Function<void (void*)> free_fn = [] (void*) {});
-
-  void* getUserData();
+  const String& getNamespace() const;
 
 protected:
-  Runtime* runtime_;
-  UnixTime now_;
-  RefPtr<TableRepository> table_providers_;
-  void* user_data_;
-  Function<void (void*)> free_user_data_fn_;
+
+  String db_namespace_;
 };
 
+} //namespace eventql
 
-} // namespace csql
+
