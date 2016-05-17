@@ -28,6 +28,7 @@
 #include <eventql/sql/parser/parser.h>
 #include <eventql/sql/parser/token.h>
 #include <eventql/sql/parser/tokenize.h>
+#include "eventql/sql/runtime/defaultruntime.h"
 
 #include "eventql/eventql.h"
 using namespace csql;
@@ -717,4 +718,363 @@ TEST_CASE(ParserTest, TestInnerJoin, [] () {
   const auto& join3 = join2->getChildren()[0];
   EXPECT(*join3 == ASTNode::T_INNER_JOIN);
   EXPECT(join3->getChildren().size() == 3);
+});
+
+TEST_CASE(ParserTest, TestSimpleDrawStatement, [] () {
+  auto parser = parseTestQuery("DRAW BARCHART;");
+  EXPECT(parser.getStatements().size() == 1);
+  const auto& stmt = parser.getStatements()[0];
+  EXPECT(*stmt == ASTNode::T_DRAW);
+  EXPECT(stmt->getToken() != nullptr);
+  EXPECT(*stmt->getToken() == Token::T_BARCHART);
+  EXPECT(stmt->getChildren().size() == 0);
+});
+
+TEST_CASE(ParserTest, TestDrawStatementWithAxes, [] () {
+  auto runtime = Runtime::getDefaultRuntime();
+  auto txn = runtime->newTransaction();
+  auto parser = parseTestQuery("DRAW BARCHART AXIS LEFT AXIS RIGHT;");
+  EXPECT(parser.getStatements().size() == 1);
+  const auto& stmt = parser.getStatements()[0];
+  EXPECT(*stmt == ASTNode::T_DRAW);
+  EXPECT(stmt->getToken() != nullptr);
+  EXPECT(*stmt->getToken() == Token::T_BARCHART);
+  EXPECT(stmt->getChildren().size() == 2);
+  EXPECT(*stmt->getChildren()[0] == ASTNode::T_AXIS);
+  EXPECT(*stmt->getChildren()[1] == ASTNode::T_AXIS);
+  EXPECT(*stmt->getChildren()[0]->getToken() == Token::T_AXIS);
+  EXPECT(*stmt->getChildren()[1]->getToken() == Token::T_AXIS);
+  EXPECT(stmt->getChildren()[0]->getChildren().size() == 1);
+  EXPECT(stmt->getChildren()[1]->getChildren().size() == 1);
+  EXPECT(stmt->getChildren()[0]->getToken() != nullptr);
+  EXPECT(stmt->getChildren()[1]->getToken() != nullptr);
+  EXPECT(
+      *stmt->getChildren()[0]->getChildren()[0] == ASTNode::T_AXIS_POSITION);
+  EXPECT(
+      *stmt->getChildren()[1]->getChildren()[0] == ASTNode::T_AXIS_POSITION);
+  EXPECT(stmt->getChildren()[0]->getChildren()[0]->getToken() != nullptr);
+  EXPECT(stmt->getChildren()[1]->getChildren()[0]->getToken() != nullptr);
+  EXPECT(
+      *stmt->getChildren()[0]->getChildren()[0]->getToken() == Token::T_LEFT);
+  EXPECT(
+      *stmt->getChildren()[1]->getChildren()[0]->getToken() == Token::T_RIGHT);
+});
+
+TEST_CASE(ParserTest, TestDrawStatementWithExplicitYDomain, [] () {
+  auto runtime = Runtime::getDefaultRuntime();
+  auto txn = runtime->newTransaction();
+  auto parser = parseTestQuery("DRAW BARCHART YDOMAIN 0, 100;");
+  EXPECT(parser.getStatements().size() == 1);
+  const auto& stmt = parser.getStatements()[0];
+  EXPECT(*stmt == ASTNode::T_DRAW);
+  EXPECT(stmt->getToken() != nullptr);
+  EXPECT(*stmt->getToken() == Token::T_BARCHART);
+  EXPECT(stmt->getChildren().size() == 1);
+  EXPECT(*stmt->getChildren()[0] == ASTNode::T_DOMAIN);
+  EXPECT(stmt->getChildren()[0]->getChildren().size() == 1);
+  EXPECT(*stmt->getChildren()[0]->getChildren()[0] == ASTNode::T_DOMAIN_SCALE);
+  EXPECT(stmt->getChildren()[0]->getChildren()[0]->getChildren().size() == 2);
+});
+
+TEST_CASE(ParserTest, TestDrawStatementWithScaleLogInvYDomain, [] () {
+  auto runtime = Runtime::getDefaultRuntime();
+  auto txn = runtime->newTransaction();
+  auto parser = parseTestQuery(
+      "DRAW BARCHART YDOMAIN 0, 100 LOGARITHMIC INVERT;");
+  EXPECT(parser.getStatements().size() == 1);
+  const auto& stmt = parser.getStatements()[0];
+  EXPECT(*stmt == ASTNode::T_DRAW);
+  EXPECT(stmt->getToken() != nullptr);
+  EXPECT(*stmt->getToken() == Token::T_BARCHART);
+  EXPECT(stmt->getChildren().size() == 1);
+  EXPECT(*stmt->getChildren()[0] == ASTNode::T_DOMAIN);
+  EXPECT(stmt->getChildren().size() == 1);
+  auto domain = stmt->getChildren()[0];
+  EXPECT(domain->getChildren().size() == 3);
+  EXPECT(*domain->getChildren()[0] == ASTNode::T_DOMAIN_SCALE);
+  EXPECT(domain->getChildren()[0]->getChildren().size() == 2);
+  EXPECT(*domain->getChildren()[1] == ASTNode::T_PROPERTY);
+  EXPECT(domain->getChildren()[1]->getToken() != nullptr);
+  EXPECT(*domain->getChildren()[1]->getToken() == Token::T_LOGARITHMIC);
+  EXPECT(*domain->getChildren()[2] == ASTNode::T_PROPERTY);
+  EXPECT(domain->getChildren()[2]->getToken() != nullptr);
+  EXPECT(*domain->getChildren()[2]->getToken() == Token::T_INVERT);
+});
+
+TEST_CASE(ParserTest, TestDrawStatementWithLogInvYDomain, [] () {
+  auto runtime = Runtime::getDefaultRuntime();
+  auto txn = runtime->newTransaction();
+  auto parser = parseTestQuery(
+      "DRAW BARCHART YDOMAIN LOGARITHMIC INVERT;");
+  EXPECT(parser.getStatements().size() == 1);
+  const auto& stmt = parser.getStatements()[0];
+  EXPECT(*stmt == ASTNode::T_DRAW);
+  EXPECT(stmt->getToken() != nullptr);
+  EXPECT(*stmt->getToken() == Token::T_BARCHART);
+  EXPECT(stmt->getChildren().size() == 1);
+  EXPECT(*stmt->getChildren()[0] == ASTNode::T_DOMAIN);
+  EXPECT(stmt->getChildren().size() == 1);
+  auto domain = stmt->getChildren()[0];
+  EXPECT(domain->getChildren().size() == 2);
+  EXPECT(*domain->getChildren()[0] == ASTNode::T_PROPERTY);
+  EXPECT(domain->getChildren()[0]->getToken() != nullptr);
+  EXPECT(*domain->getChildren()[0]->getToken() == Token::T_LOGARITHMIC);
+  EXPECT(*domain->getChildren()[1] == ASTNode::T_PROPERTY);
+  EXPECT(domain->getChildren()[1]->getToken() != nullptr);
+  EXPECT(*domain->getChildren()[1]->getToken() == Token::T_INVERT);
+});
+
+TEST_CASE(ParserTest, TestDrawStatementWithGrid, [] () {
+  auto runtime = Runtime::getDefaultRuntime();
+  auto txn = runtime->newTransaction();
+  auto parser = parseTestQuery(
+      "DRAW BARCHART GRID HORIZONTAL VERTICAL;");
+  EXPECT(parser.getStatements().size() == 1);
+  const auto& stmt = parser.getStatements()[0];
+  EXPECT(*stmt == ASTNode::T_DRAW);
+  EXPECT(stmt->getToken() != nullptr);
+  EXPECT(*stmt->getToken() == Token::T_BARCHART);
+  EXPECT(stmt->getChildren().size() == 1);
+  EXPECT(*stmt->getChildren()[0] == ASTNode::T_GRID);
+  auto grid = stmt->getChildren()[0];
+  EXPECT(grid->getChildren().size() == 2);
+  EXPECT(*grid->getChildren()[0] == ASTNode::T_PROPERTY);
+  EXPECT(grid->getChildren()[0]->getToken() != nullptr);
+  EXPECT(*grid->getChildren()[0]->getToken() == Token::T_HORIZONTAL);
+  EXPECT(*grid->getChildren()[1] == ASTNode::T_PROPERTY);
+  EXPECT(grid->getChildren()[1]->getToken() != nullptr);
+  EXPECT(*grid->getChildren()[1]->getToken() == Token::T_VERTICAL);
+});
+
+TEST_CASE(ParserTest, TestDrawStatementWithTitle, [] () {
+  auto runtime = Runtime::getDefaultRuntime();
+  auto txn = runtime->newTransaction();
+  auto parser = parseTestQuery(
+      "DRAW BARCHART TITLE 'fnordtitle';");
+  EXPECT(parser.getStatements().size() == 1);
+  const auto& stmt = parser.getStatements()[0];
+  EXPECT(*stmt == ASTNode::T_DRAW);
+  EXPECT(stmt->getToken() != nullptr);
+  EXPECT(*stmt->getToken() == Token::T_BARCHART);
+  EXPECT(stmt->getChildren().size() == 1);
+  EXPECT(*stmt->getChildren()[0] == ASTNode::T_PROPERTY);
+  EXPECT(stmt->getChildren()[0]->getChildren().size() == 1);
+  auto title_expr = stmt->getChildren()[0]->getChildren()[0];
+  auto title = runtime->evaluateConstExpression(
+      txn.get(),
+      title_expr).toString();
+  EXPECT_EQ(title.getString(), "fnordtitle");
+});
+
+TEST_CASE(ParserTest, TestDrawStatementWithSubtitle, [] () {
+  auto runtime = Runtime::getDefaultRuntime();
+  auto txn = runtime->newTransaction();
+  auto parser = parseTestQuery(
+      "DRAW BARCHART SUBTITLE 'fnordsubtitle';");
+  EXPECT(parser.getStatements().size() == 1);
+  const auto& stmt = parser.getStatements()[0];
+  EXPECT(*stmt == ASTNode::T_DRAW);
+  EXPECT(stmt->getToken() != nullptr);
+  EXPECT(*stmt->getToken() == Token::T_BARCHART);
+  EXPECT(stmt->getChildren().size() == 1);
+  EXPECT(*stmt->getChildren()[0] == ASTNode::T_PROPERTY);
+  EXPECT(stmt->getChildren()[0]->getChildren().size() == 1);
+  auto title_expr = stmt->getChildren()[0]->getChildren()[0];
+  auto title = runtime->evaluateConstExpression(
+      txn.get(),
+      title_expr).toString();
+  EXPECT_EQ(title.getString(), "fnordsubtitle");
+});
+
+TEST_CASE(ParserTest, TestDrawStatementWithTitleAndSubtitle, [] () {
+  auto runtime = Runtime::getDefaultRuntime();
+  auto txn = runtime->newTransaction();
+  auto parser = parseTestQuery(
+      "DRAW BARCHART TITLE 'fnordtitle' SUBTITLE 'fnordsubtitle';");
+  EXPECT(parser.getStatements().size() == 1);
+  const auto& stmt = parser.getStatements()[0];
+  EXPECT(*stmt == ASTNode::T_DRAW);
+  EXPECT(stmt->getToken() != nullptr);
+  EXPECT(*stmt->getToken() == Token::T_BARCHART);
+  EXPECT(stmt->getChildren().size() == 2);
+
+  EXPECT(*stmt->getChildren()[0] == ASTNode::T_PROPERTY);
+  EXPECT(stmt->getChildren()[0]->getChildren().size() == 1);
+  auto title_expr = stmt->getChildren()[0]->getChildren()[0];
+  auto title = runtime->evaluateConstExpression(
+      txn.get(),
+      title_expr).toString();
+  EXPECT_EQ(title.getString(), "fnordtitle");
+
+  EXPECT(*stmt->getChildren()[1] == ASTNode::T_PROPERTY);
+  EXPECT(stmt->getChildren()[1]->getChildren().size() == 1);
+  auto subtitle_expr = stmt->getChildren()[1]->getChildren()[0];
+  auto subtitle = runtime->evaluateConstExpression(
+      txn.get(),
+      subtitle_expr).toString();
+  EXPECT_EQ(subtitle.getString(), "fnordsubtitle");
+});
+
+TEST_CASE(ParserTest, TestDrawStatementWithAxisTitle, [] () {
+  auto runtime = Runtime::getDefaultRuntime();
+  auto txn = runtime->newTransaction();
+  auto parser = parseTestQuery("DRAW BARCHART AXIS LEFT TITLE 'axistitle';");
+  EXPECT(parser.getStatements().size() == 1);
+  const auto& stmt = parser.getStatements()[0];
+  EXPECT(*stmt == ASTNode::T_DRAW);
+  EXPECT(stmt->getToken() != nullptr);
+  EXPECT(*stmt->getToken() == Token::T_BARCHART);
+  EXPECT(stmt->getChildren().size() == 1);
+  EXPECT(*stmt->getChildren()[0] == ASTNode::T_AXIS);
+  EXPECT(*stmt->getChildren()[0]->getToken() == Token::T_AXIS);
+  EXPECT(stmt->getChildren()[0]->getChildren().size() == 2);
+  EXPECT(
+      *stmt->getChildren()[0]->getChildren()[0] == ASTNode::T_AXIS_POSITION);
+  EXPECT(*stmt->getChildren()[0]->getChildren()[1] == ASTNode::T_PROPERTY);
+  EXPECT(stmt->getChildren()[0]->getChildren()[1]->getChildren().size() == 1);
+  auto title_expr = stmt->getChildren()[0]->getChildren()[1]->getChildren()[0];
+  auto title = runtime->evaluateConstExpression(
+      txn.get(),
+      title_expr).toString();
+  EXPECT_EQ(title.getString(), "axistitle");
+});
+
+TEST_CASE(ParserTest, TestDrawStatementWithAxisLabelPos, [] () {
+  auto runtime = Runtime::getDefaultRuntime();
+  auto txn = runtime->newTransaction();
+  auto parser = parseTestQuery("DRAW BARCHART AXIS LEFT TICKS INSIDE;");
+  EXPECT(parser.getStatements().size() == 1);
+  const auto& stmt = parser.getStatements()[0];
+  EXPECT(*stmt == ASTNode::T_DRAW);
+  EXPECT(stmt->getToken() != nullptr);
+  EXPECT(*stmt->getToken() == Token::T_BARCHART);
+  EXPECT(stmt->getChildren().size() == 1);
+  EXPECT(*stmt->getChildren()[0] == ASTNode::T_AXIS);
+  EXPECT(*stmt->getChildren()[0]->getToken() == Token::T_AXIS);
+  EXPECT(stmt->getChildren()[0]->getChildren().size() == 2);
+  EXPECT(
+      *stmt->getChildren()[0]->getChildren()[0] == ASTNode::T_AXIS_POSITION)
+  auto labels = stmt->getChildren()[0]->getChildren()[1];
+  EXPECT(*labels == ASTNode::T_AXIS_LABELS)
+  EXPECT(labels->getChildren().size() == 1);
+  EXPECT(*labels->getChildren()[0] == ASTNode::T_PROPERTY);
+  EXPECT(labels->getChildren()[0]->getToken() != nullptr);
+  EXPECT(*labels->getChildren()[0]->getToken() == Token::T_INSIDE);
+});
+
+TEST_CASE(ParserTest, TestDrawStatementWithAxisLabelRotate, [] () {
+  auto runtime = Runtime::getDefaultRuntime();
+  auto txn = runtime->newTransaction();
+  auto parser = parseTestQuery("DRAW BARCHART AXIS LEFT TICKS ROTATE 45;");
+  EXPECT(parser.getStatements().size() == 1);
+  const auto& stmt = parser.getStatements()[0];
+  EXPECT(*stmt == ASTNode::T_DRAW);
+  EXPECT(stmt->getToken() != nullptr);
+  EXPECT(*stmt->getToken() == Token::T_BARCHART);
+  EXPECT(stmt->getChildren().size() == 1);
+  EXPECT(*stmt->getChildren()[0] == ASTNode::T_AXIS);
+  EXPECT(*stmt->getChildren()[0]->getToken() == Token::T_AXIS);
+  EXPECT(stmt->getChildren()[0]->getChildren().size() == 2);
+  EXPECT(
+      *stmt->getChildren()[0]->getChildren()[0] == ASTNode::T_AXIS_POSITION)
+  auto labels = stmt->getChildren()[0]->getChildren()[1];
+  EXPECT(*labels == ASTNode::T_AXIS_LABELS)
+  EXPECT(labels->getChildren().size() == 1);
+  EXPECT(*labels->getChildren()[0] == ASTNode::T_PROPERTY);
+  EXPECT(labels->getChildren()[0]->getToken() != nullptr);
+  EXPECT(*labels->getChildren()[0]->getToken() == Token::T_ROTATE);
+  EXPECT(labels->getChildren()[0]->getChildren().size() == 1);
+  auto deg_expr = labels->getChildren()[0]->getChildren()[0];
+  auto deg = runtime->evaluateConstExpression(
+      txn.get(),
+      deg_expr).toString();
+  EXPECT_EQ(deg.getString(), "45");
+});
+
+TEST_CASE(ParserTest, TestDrawStatementWithAxisLabelPosAndRotate, [] () {
+  auto runtime = Runtime::getDefaultRuntime();
+  auto txn = runtime->newTransaction();
+  auto parser = parseTestQuery(
+      "DRAW BARCHART AXIS LEFT TICKS OUTSIDE ROTATE 45;");
+  EXPECT(parser.getStatements().size() == 1);
+  const auto& stmt = parser.getStatements()[0];
+  EXPECT(*stmt == ASTNode::T_DRAW);
+  EXPECT(stmt->getToken() != nullptr);
+  EXPECT(*stmt->getToken() == Token::T_BARCHART);
+  EXPECT(stmt->getChildren().size() == 1);
+  EXPECT(*stmt->getChildren()[0] == ASTNode::T_AXIS);
+  EXPECT(*stmt->getChildren()[0]->getToken() == Token::T_AXIS);
+  EXPECT(stmt->getChildren()[0]->getChildren().size() == 2);
+  EXPECT(
+      *stmt->getChildren()[0]->getChildren()[0] == ASTNode::T_AXIS_POSITION)
+  auto labels = stmt->getChildren()[0]->getChildren()[1];
+  EXPECT(*labels == ASTNode::T_AXIS_LABELS)
+  EXPECT(labels->getChildren().size() == 2);
+  EXPECT(*labels->getChildren()[0] == ASTNode::T_PROPERTY);
+  EXPECT(labels->getChildren()[0]->getToken() != nullptr);
+  EXPECT(*labels->getChildren()[0]->getToken() == Token::T_OUTSIDE);
+  EXPECT(*labels->getChildren()[1] == ASTNode::T_PROPERTY);
+  EXPECT(labels->getChildren()[1]->getToken() != nullptr);
+  EXPECT(*labels->getChildren()[1]->getToken() == Token::T_ROTATE);
+  EXPECT(labels->getChildren()[1]->getChildren().size() == 1);
+  auto deg_expr = labels->getChildren()[1]->getChildren()[0];
+  auto deg = runtime->evaluateConstExpression(
+      txn.get(),
+      deg_expr).toString();
+  EXPECT_EQ(deg.getString(), "45");
+});
+
+TEST_CASE(ParserTest, TestDrawStatementWithSimpleLegend, [] () {
+  auto runtime = Runtime::getDefaultRuntime();
+  auto txn = runtime->newTransaction();
+  auto parser = parseTestQuery("DRAW BARCHART LEGEND TOP LEFT INSIDE;");
+  EXPECT(parser.getStatements().size() == 1);
+  const auto& stmt = parser.getStatements()[0];
+  EXPECT(*stmt == ASTNode::T_DRAW);
+  EXPECT(stmt->getToken() != nullptr);
+  EXPECT(*stmt->getToken() == Token::T_BARCHART);
+  EXPECT(stmt->getChildren().size() == 1);
+  EXPECT(*stmt->getChildren()[0] == ASTNode::T_LEGEND);
+  EXPECT(stmt->getChildren()[0]->getChildren().size() == 3);
+  auto props = stmt->getChildren()[0]->getChildren();
+  EXPECT(*props[0] == ASTNode::T_PROPERTY);
+  EXPECT(props[0]->getToken() != nullptr);
+  EXPECT(*props[0]->getToken() == Token::T_TOP);
+  EXPECT(*props[1] == ASTNode::T_PROPERTY);
+  EXPECT(props[1]->getToken() != nullptr);
+  EXPECT(*props[1]->getToken() == Token::T_LEFT);
+  EXPECT(*props[2] == ASTNode::T_PROPERTY);
+  EXPECT(props[2]->getToken() != nullptr);
+  EXPECT(*props[2]->getToken() == Token::T_INSIDE);
+});
+
+TEST_CASE(ParserTest, TestDrawStatementWithLegendWithTitle, [] () {
+  auto runtime = Runtime::getDefaultRuntime();
+  auto txn = runtime->newTransaction();
+  auto parser = parseTestQuery(
+      "DRAW BARCHART LEGEND TOP LEFT INSIDE TITLE 'fnordylegend';");
+  EXPECT(parser.getStatements().size() == 1);
+  const auto& stmt = parser.getStatements()[0];
+  EXPECT(*stmt == ASTNode::T_DRAW);
+  EXPECT(stmt->getToken() != nullptr);
+  EXPECT(*stmt->getToken() == Token::T_BARCHART);
+  EXPECT(stmt->getChildren().size() == 1);
+  EXPECT(*stmt->getChildren()[0] == ASTNode::T_LEGEND);
+  EXPECT(stmt->getChildren()[0]->getChildren().size() == 4);
+  auto props = stmt->getChildren()[0]->getChildren();
+  EXPECT(*props[0] == ASTNode::T_PROPERTY);
+  EXPECT(props[0]->getToken() != nullptr);
+  EXPECT(*props[0]->getToken() == Token::T_TOP);
+  EXPECT(*props[1] == ASTNode::T_PROPERTY);
+  EXPECT(props[1]->getToken() != nullptr);
+  EXPECT(*props[1]->getToken() == Token::T_LEFT);
+  EXPECT(*props[2] == ASTNode::T_PROPERTY);
+  EXPECT(props[2]->getToken() != nullptr);
+  EXPECT(*props[2]->getToken() == Token::T_INSIDE);
+  EXPECT(props[3]->getChildren().size() == 1);
+  auto title_expr = props[3]->getChildren()[0];
+  auto title = runtime->evaluateConstExpression(
+      txn.get(),
+      title_expr).toString();
+  EXPECT_EQ(title.getString(), "fnordylegend");
 });

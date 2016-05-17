@@ -93,6 +93,7 @@ public:
   Option<String> cacheDir() const;
   void setCacheDir(const String& cachedir);
 
+  RefPtr<QueryBuilder> getCompiler() const;
   RefPtr<QueryBuilder> queryBuilder() const;
   RefPtr<QueryPlanBuilder> queryPlanBuilder() const;
 

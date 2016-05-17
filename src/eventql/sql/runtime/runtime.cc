@@ -194,6 +194,10 @@ void Runtime::setCacheDir(const String& cachedir) {
   cachedir_ = Some(cachedir);
 }
 
+RefPtr<QueryBuilder> Runtime::getCompiler() const {
+  return query_builder_;
+}
+
 RefPtr<QueryBuilder> Runtime::queryBuilder() const {
   return query_builder_;
 }
