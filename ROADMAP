@@ -23,6 +23,12 @@ ROADMAP
 - [ ] evql: human formt
 - [ ] evql: history/reverse-i search
 
+
+---
+-> qtree interface -> rename statement to query
+-> qtree->scheduler: pass queryfuture/
+---
+
 -> SQL service
 -> move pipelined aggregate code to server/sql/pipelined_aggregate
 -> PartialAggregateNode
