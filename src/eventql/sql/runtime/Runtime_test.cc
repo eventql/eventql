@@ -2227,7 +2227,7 @@ TEST_CASE(RuntimeTest, TestSimpleDrawQuery, [] () {
           ','));
 
   String query =
-      "  DRAW BARCHART AXIS LEFT;"
+      "  DRAW LINECHART AXIS LEFT;"
       ""
       "  SELECT"
       "    'series1' as series, one AS x, two AS y"
@@ -2254,6 +2254,42 @@ TEST_CASE(RuntimeTest, TestSimpleDrawQuery, [] () {
 
   EXPECT_EQ(result.getNumColumns(), 1);
   EXPECT_EQ(result.getNumRows(), 1);
-  iputs("got svg: $0", result.getRow(0)[0]);
+  EXPECT_EQ(result.getRow(0)[0], exptected_svg);
+});
+
+TEST_CASE(RuntimeTest, TestSimpleDrawQueryTwo, [] () {
+  auto runtime = Runtime::getDefaultRuntime();
+  auto txn = runtime->newTransaction();
+  txn->addTableProvider(
+      new backends::csv::CSVTableProvider(
+          "gdp_per_country",
+          "src/eventql/sql/testdata/gbp_per_country_simple.csv",
+          ','));
+
+  String query =
+      "  DRAW BARCHART"
+      "    ORIENTATION HORIZONTAL"
+      "    AXIS LEFT"
+      "    AXIS BOTTOM"
+      "    LEGEND TOP RIGHT INSIDE TITLE 'gdp per country';"
+      ""
+      "  SELECT"
+      "    'gross domestic product per country' as series,"
+      "    country as x,"
+      "    gbp as y"
+      "  FROM"
+      "    gdp_per_country"
+      "  LIMIT 30;"
+      "";
+
+  auto qplan = runtime->buildQueryPlan(txn.get(), query);
+  ResultList result;
+  qplan->execute(0, &result);
+
+  auto exptected_svg_path = "src/eventql/sql/testdata/QueryTest_TestSimpleDrawQueryTwo_out.svg.html";
+  auto exptected_svg = FileUtil::read(exptected_svg_path).toString();
+
+  EXPECT_EQ(result.getNumColumns(), 1);
+  EXPECT_EQ(result.getNumRows(), 1);
   EXPECT_EQ(result.getRow(0)[0], exptected_svg);
 });

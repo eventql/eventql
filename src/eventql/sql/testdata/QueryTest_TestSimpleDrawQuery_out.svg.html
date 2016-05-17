@@ -1,185 +1,204 @@
-<svg viewBox='0 0 1024 500' class='chart bar horizontal'>
+<svg viewBox='0 0 800 320' class='fm-chart'>
   <style type='text/css'>
   <![CDATA[
-  .chart text {
+  .fm-chart text, .fm-tooltip {
     font-family: "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
-    font: 10pt sans-serif;
+    font: 10px sans-serif;
   }
 
-  .axis .stroke {
-    stroke: rgb(0,0,0);
+  .fm-chart .axis .stroke {
+    stroke: #aaa;
     stroke-width: 1px;
   }
 
-  .axis .tick {
-    stroke: rgb(0,0,0);
+  .fm-chart .axis .tick {
+    stroke: #aaa;
     stroke-width: 1px;
   }
 
-  .axis .label, .axis .title {
-    fill: #000;
+  .fm-chart .axis .label, .axis .title {
+    fill: #666;
   }
 
-  .axis .label {
-    font-size: 9pt;
+  .fm-chart .axis .label {
+    font-size: 10px;
   }
 
-  .axis .title {
-    font-size: 11pt;
+  .fm-chart .axis .title {
+    font-size: 10px;
   }
 
-  .chart .line {
+  .fm-chart .chart-title {
+    font-size: 12px;
+    font-weight: bold;
+  }
+
+  .fm-chart .chart-subtitle {
+    font-size: 10px;
+  }
+
+  .fm-chart text.label {
+    fill: #666;
+  }
+
+  .fm-chart .legend text {
+    font-size: 10px;
+    fill: #333;
+  }
+
+  .fm-chart .legend text.title {
+    fill: #666;
+  }
+
+  .fm-chart .line {
     fill: none;
     stroke: #000;
   }
 
-  .chart .area {
+  .fm-chart .area {
     opacity: 0.8;
   }
 
-  .chart .bar,
-  .chart .point,
-  .chart .area {
+  .fm-chart .grid .gridline {
+    stroke: #ddd;
+    stroke-width: 0.02em;
+  }
+
+  .fm-chart .bar,
+  .fm-chart .point,
+  .fm-chart .area {
     fill: #000;
   }
 
-  .chart .bar.color6,
-  .chart .point.color6,
-  .chart .area.color6 {
+  .fm-chart .bar.color6,
+  .fm-chart .point.color6,
+  .fm-chart .area.color6 {
     fill: #db843d;
   }
 
-  .chart .lines .line.color6 {
+  .fm-chart .lines .line.color6 {
     strok: #db843d;
   }
 
-  .chart .bar.color5,
-  .chart .point.color5,
-  .chart .area.color5 {
+  .fm-chart .bar.color5,
+  .fm-chart .point.color5,
+  .fm-chart .area.color5 {
     fill: #3d96ae;
   }
 
-  .chart .lines .line.color5 {
+  .fm-chart .lines .line.color5 {
     stroke: #3d96ae;
   }
 
-  .chart .bar.color4,
-  .chart .point.color4,
-  .chart .area.color4 {
+  .fm-chart .bar.color4,
+  .fm-chart .point.color4,
+  .fm-chart .area.color4 {
     fill: #80699b;
   }
 
-  .chart .line.color4 {
+  .fm-chart .line.color4 {
     stroke: #80699b;
   }
 
-  .chart .bar.color3,
-  .chart .point.color3,
-  .chart .area.color3 {
+  .fm-chart .bar.color3,
+  .fm-chart .point.color3,
+  .fm-chart .area.color3 {
     fill: #89a54e;
   }
 
-  .chart .line.color3 {
+  .fm-chart .line.color3 {
     stroke: #89a54e;
   }
 
-  .chart .bar.color2,
-  .chart .point.color2,
-  .chart .area.color2 {
+  .fm-chart .bar.color2,
+  .fm-chart .point.color2,
+  .fm-chart .area.color2 {
     fill: #aa4643;
   }
 
-  .chart .line.color2 {
+  .fm-chart .line.color2 {
     stroke: #aa4643;
   }
 
-  .chart .bar.color1,
-  .chart .point.color1,
-  .chart .area.color1 {
+  .fm-chart .bar.color1,
+  .fm-chart .point.color1,
+  .fm-chart .area.color1 {
     fill: #4572a7;
   }
 
-  .chart .line.color1 {
+  .fm-chart .line.color1 {
     stroke: #4572a7;
   }
 
-  .chart.bar.vertical .axis.left .stroke,
-  .chart.bar.vertical .axis.left .tick,
-  .chart.bar.vertical .axis.right .stroke,
-  .chart.bar.vertical .axis.right .tick {
+  .fm-chart.bar.vertical .axis.left .stroke,
+  .fm-chart.bar.vertical .axis.left .tick,
+  .fm-chart.bar.vertical .axis.right .stroke,
+  .fm-chart.bar.vertical .axis.right .tick {
     display: none;
+  }
+
+  .fm-tooltip {
+    text-align: center;
+    padding: 5px 7px;
+    color: #fff;
+    background: #333;
+    border-radius: 3px;
+    font-size: 13px;
   }
   ]]>
   </style>
-  <g class='axis bottom'>
-    <text x='55.000000' y='470.000000' style='text-anchor:middle; dominant-baseline:text-before-edge;' class='label' >0</text>
-    <text x='243.800000' y='470.000000' style='text-anchor:middle; dominant-baseline:text-before-edge;' class='label' >5.5</text>
-    <text x='432.600000' y='470.000000' style='text-anchor:middle; dominant-baseline:text-before-edge;' class='label' >11</text>
-    <text x='621.400000' y='470.000000' style='text-anchor:middle; dominant-baseline:text-before-edge;' class='label' >16</text>
-    <text x='810.200000' y='470.000000' style='text-anchor:middle; dominant-baseline:text-before-edge;' class='label' >22</text>
-    <text x='999.000000' y='470.000000' style='text-anchor:middle; dominant-baseline:text-before-edge;' class='label' >28</text>
-    <line x1='55.000000' y1='460.000000' x2='55.000000' y2='455.000000' class='tick' />
-    <line x1='243.800000' y1='460.000000' x2='243.800000' y2='455.000000' class='tick' />
-    <line x1='432.600000' y1='460.000000' x2='432.600000' y2='455.000000' class='tick' />
-    <line x1='621.400000' y1='460.000000' x2='621.400000' y2='455.000000' class='tick' />
-    <line x1='810.200000' y1='460.000000' x2='810.200000' y2='455.000000' class='tick' />
-    <line x1='999.000000' y1='460.000000' x2='999.000000' y2='455.000000' class='tick' />
-    <line x1='55.000000' y1='460.000000' x2='999.000000' y2='460.000000' class='stroke' />
-  </g>
   <g class='axis left'>
-    <text x='45.000000' y='433.863000' style='text-anchor:end; dominant-baseline:middle;' class='label' >1.0</text>
-    <text x='45.000000' y='390.449000' style='text-anchor:end; dominant-baseline:middle;' class='label' >2.0</text>
-    <text x='45.000000' y='347.035000' style='text-anchor:end; dominant-baseline:middle;' class='label' >3.0</text>
-    <text x='45.000000' y='303.621000' style='text-anchor:end; dominant-baseline:middle;' class='label' >4.0</text>
-    <text x='45.000000' y='260.207000' style='text-anchor:end; dominant-baseline:middle;' class='label' >5.0</text>
-    <text x='45.000000' y='216.793000' style='text-anchor:end; dominant-baseline:middle;' class='label' >6.0</text>
-    <text x='45.000000' y='173.379000' style='text-anchor:end; dominant-baseline:middle;' class='label' >7.0</text>
-    <text x='45.000000' y='129.965000' style='text-anchor:end; dominant-baseline:middle;' class='label' >8.0</text>
-    <text x='45.000000' y='86.551000' style='text-anchor:end; dominant-baseline:middle;' class='label' >9.0</text>
-    <text x='45.000000' y='43.137000' style='text-anchor:end; dominant-baseline:middle;' class='label' >10</text>
-    <line x1='55.000000' y1='460.000000' x2='60.000000' y2='460.000000' class='tick' />
-    <line x1='55.000000' y1='412.156000' x2='60.000000' y2='412.156000' class='tick' />
-    <line x1='55.000000' y1='368.742000' x2='60.000000' y2='368.742000' class='tick' />
-    <line x1='55.000000' y1='325.328000' x2='60.000000' y2='325.328000' class='tick' />
-    <line x1='55.000000' y1='281.914000' x2='60.000000' y2='281.914000' class='tick' />
-    <line x1='55.000000' y1='238.500000' x2='60.000000' y2='238.500000' class='tick' />
-    <line x1='55.000000' y1='195.086000' x2='60.000000' y2='195.086000' class='tick' />
-    <line x1='55.000000' y1='151.672000' x2='60.000000' y2='151.672000' class='tick' />
-    <line x1='55.000000' y1='108.258000' x2='60.000000' y2='108.258000' class='tick' />
-    <line x1='55.000000' y1='64.844000' x2='60.000000' y2='64.844000' class='tick' />
-    <line x1='55.000000' y1='17.000000' x2='60.000000' y2='17.000000' class='tick' />
-    <line x1='55.000000' y1='17.000000' x2='55.000000' y2='460.000000' class='stroke' />
+    <text x='40.000000' y='308.000000' style='text-anchor:end; dominant-baseline:middle;' class='label' >-0.30</text>
+    <text x='40.000000' y='265.714286' style='text-anchor:end; dominant-baseline:middle;' class='label' >3.64</text>
+    <text x='40.000000' y='223.428571' style='text-anchor:end; dominant-baseline:middle;' class='label' >7.59</text>
+    <text x='40.000000' y='181.142857' style='text-anchor:end; dominant-baseline:middle;' class='label' >11.5</text>
+    <text x='40.000000' y='138.857143' style='text-anchor:end; dominant-baseline:middle;' class='label' >15.5</text>
+    <text x='40.000000' y='96.571429' style='text-anchor:end; dominant-baseline:middle;' class='label' >19.4</text>
+    <text x='40.000000' y='54.285714' style='text-anchor:end; dominant-baseline:middle;' class='label' >23.4</text>
+    <text x='40.000000' y='12.000000' style='text-anchor:end; dominant-baseline:middle;' class='label' >27.3</text>
+    <line x1='50.000000' y1='308.000000' x2='55.000000' y2='308.000000' class='tick' />
+    <line x1='50.000000' y1='265.714286' x2='55.000000' y2='265.714286' class='tick' />
+    <line x1='50.000000' y1='223.428571' x2='55.000000' y2='223.428571' class='tick' />
+    <line x1='50.000000' y1='181.142857' x2='55.000000' y2='181.142857' class='tick' />
+    <line x1='50.000000' y1='138.857143' x2='55.000000' y2='138.857143' class='tick' />
+    <line x1='50.000000' y1='96.571429' x2='55.000000' y2='96.571429' class='tick' />
+    <line x1='50.000000' y1='54.285714' x2='55.000000' y2='54.285714' class='tick' />
+    <line x1='50.000000' y1='12.000000' x2='55.000000' y2='12.000000' class='tick' />
+    <line x1='50.000000' y1='12.000000' x2='50.000000' y2='308.000000' class='stroke' />
   </g>
-  <g class='bars horizontal'>
-    <rect x='55.000000' y='25.800000' width='686.545455' height='10.296000' class='bar color1'></rect>
-    <rect x='55.000000' y='38.384000' width='858.181818' height='10.296000' class='bar color2'></rect>
-    <rect x='55.000000' y='50.968000' width='480.581818' height='10.296000' class='bar color3'></rect>
-    <rect x='55.000000' y='68.920000' width='617.890909' height='10.296000' class='bar color1'></rect>
-    <rect x='55.000000' y='81.504000' width='789.527273' height='10.296000' class='bar color2'></rect>
-    <rect x='55.000000' y='94.088000' width='446.254545' height='10.296000' class='bar color3'></rect>
-    <rect x='55.000000' y='112.040000' width='549.236364' height='10.296000' class='bar color1'></rect>
-    <rect x='55.000000' y='124.624000' width='720.872727' height='10.296000' class='bar color2'></rect>
-    <rect x='55.000000' y='137.208000' width='411.927273' height='10.296000' class='bar color3'></rect>
-    <rect x='55.000000' y='155.160000' width='480.581818' height='10.296000' class='bar color1'></rect>
-    <rect x='55.000000' y='167.744000' width='652.218182' height='10.296000' class='bar color2'></rect>
-    <rect x='55.000000' y='180.328000' width='377.600000' height='10.296000' class='bar color3'></rect>
-    <rect x='55.000000' y='198.280000' width='411.927273' height='10.296000' class='bar color1'></rect>
-    <rect x='55.000000' y='210.864000' width='583.563636' height='10.296000' class='bar color2'></rect>
-    <rect x='55.000000' y='223.448000' width='343.272727' height='10.296000' class='bar color3'></rect>
-    <rect x='55.000000' y='241.400000' width='343.272727' height='10.296000' class='bar color1'></rect>
-    <rect x='55.000000' y='253.984000' width='514.909091' height='10.296000' class='bar color2'></rect>
-    <rect x='55.000000' y='266.568000' width='308.945455' height='10.296000' class='bar color3'></rect>
-    <rect x='55.000000' y='284.520000' width='274.618182' height='10.296000' class='bar color1'></rect>
-    <rect x='55.000000' y='297.104000' width='446.254545' height='10.296000' class='bar color2'></rect>
-    <rect x='55.000000' y='309.688000' width='274.618182' height='10.296000' class='bar color3'></rect>
-    <rect x='55.000000' y='327.640000' width='205.963636' height='10.296000' class='bar color1'></rect>
-    <rect x='55.000000' y='340.224000' width='377.600000' height='10.296000' class='bar color2'></rect>
-    <rect x='55.000000' y='352.808000' width='240.290909' height='10.296000' class='bar color3'></rect>
-    <rect x='55.000000' y='370.760000' width='137.309091' height='10.296000' class='bar color1'></rect>
-    <rect x='55.000000' y='383.344000' width='308.945455' height='10.296000' class='bar color2'></rect>
-    <rect x='55.000000' y='395.928000' width='205.963636' height='10.296000' class='bar color3'></rect>
-    <rect x='55.000000' y='413.880000' width='68.654545' height='10.296000' class='bar color1'></rect>
-    <rect x='55.000000' y='426.464000' width='240.290909' height='10.296000' class='bar color2'></rect>
-    <rect x='55.000000' y='439.048000' width='171.636364' height='10.296000' class='bar color3'></rect>
+  <g class='lines'>
+    <circle cx='775.000000' cy='90.289855' r='0.000000' class='point color1' fm:label='1970-01-01 00:00:00: 20.0' fm:series='series1', style=''></circle>
+    <circle cx='694.444444' cy='111.739130' r='0.000000' class='point color1' fm:label='1970-01-01 00:00:00: 18.0' fm:series='series1', style=''></circle>
+    <circle cx='613.888889' cy='133.188406' r='0.000000' class='point color1' fm:label='1970-01-01 00:00:00: 16.0' fm:series='series1', style=''></circle>
+    <circle cx='533.333333' cy='154.637681' r='0.000000' class='point color1' fm:label='1970-01-01 00:00:00: 14.0' fm:series='series1', style=''></circle>
+    <circle cx='452.777778' cy='176.086957' r='0.000000' class='point color1' fm:label='1970-01-01 00:00:00: 12.0' fm:series='series1', style=''></circle>
+    <circle cx='372.222222' cy='197.536232' r='0.000000' class='point color1' fm:label='1970-01-01 00:00:00: 10.0' fm:series='series1', style=''></circle>
+    <circle cx='291.666667' cy='218.985507' r='0.000000' class='point color1' fm:label='1970-01-01 00:00:00: 8.0' fm:series='series1', style=''></circle>
+    <circle cx='211.111111' cy='240.434783' r='0.000000' class='point color1' fm:label='1970-01-01 00:00:00: 6.0' fm:series='series1', style=''></circle>
+    <circle cx='130.555556' cy='261.884058' r='0.000000' class='point color1' fm:label='1970-01-01 00:00:00: 4.0' fm:series='series1', style=''></circle>
+    <circle cx='50.000000' cy='283.333333' r='0.000000' class='point color1' fm:label='1970-01-01 00:00:00: 2.0' fm:series='series1', style=''></circle>
+    <path stroke-width='2.000000' class='line color1' style='' d='M775.000000 90.289855 L694.444444 111.739130 L613.888889 133.188406 L533.333333 154.637681 L452.777778 176.086957 L372.222222 197.536232 L291.666667 218.985507 L211.111111 240.434783 L130.555556 261.884058 L50.000000 283.333333 ' />
+    <circle cx='775.000000' cy='36.666667' r='0.000000' class='point color2' fm:label='1970-01-01 00:00:00: 25.0' fm:series='series2', style=''></circle>
+    <circle cx='694.444444' cy='58.115942' r='0.000000' class='point color2' fm:label='1970-01-01 00:00:00: 23.0' fm:series='series2', style=''></circle>
+    <circle cx='613.888889' cy='79.565217' r='0.000000' class='point color2' fm:label='1970-01-01 00:00:00: 21.0' fm:series='series2', style=''></circle>
+    <circle cx='533.333333' cy='101.014493' r='0.000000' class='point color2' fm:label='1970-01-01 00:00:00: 19.0' fm:series='series2', style=''></circle>
+    <circle cx='452.777778' cy='122.463768' r='0.000000' class='point color2' fm:label='1970-01-01 00:00:00: 17.0' fm:series='series2', style=''></circle>
+    <circle cx='372.222222' cy='143.913043' r='0.000000' class='point color2' fm:label='1970-01-01 00:00:00: 15.0' fm:series='series2', style=''></circle>
+    <circle cx='291.666667' cy='165.362319' r='0.000000' class='point color2' fm:label='1970-01-01 00:00:00: 13.0' fm:series='series2', style=''></circle>
+    <circle cx='211.111111' cy='186.811594' r='0.000000' class='point color2' fm:label='1970-01-01 00:00:00: 11.0' fm:series='series2', style=''></circle>
+    <circle cx='130.555556' cy='208.260870' r='0.000000' class='point color2' fm:label='1970-01-01 00:00:00: 9.0' fm:series='series2', style=''></circle>
+    <circle cx='50.000000' cy='229.710145' r='0.000000' class='point color2' fm:label='1970-01-01 00:00:00: 7.0' fm:series='series2', style=''></circle>
+    <path stroke-width='2.000000' class='line color2' style='' d='M775.000000 36.666667 L694.444444 58.115942 L613.888889 79.565217 L533.333333 101.014493 L452.777778 122.463768 L372.222222 143.913043 L291.666667 165.362319 L211.111111 186.811594 L130.555556 208.260870 L50.000000 229.710145 ' />
+    <circle cx='775.000000' cy='154.637681' r='0.000000' class='point color3' fm:label='1970-01-01 00:00:00: 14.0' fm:series='series3', style=''></circle>
+    <circle cx='694.444444' cy='165.362319' r='0.000000' class='point color3' fm:label='1970-01-01 00:00:00: 13.0' fm:series='series3', style=''></circle>
+    <circle cx='613.888889' cy='176.086957' r='0.000000' class='point color3' fm:label='1970-01-01 00:00:00: 12.0' fm:series='series3', style=''></circle>
+    <circle cx='533.333333' cy='186.811594' r='0.000000' class='point color3' fm:label='1970-01-01 00:00:00: 11.0' fm:series='series3', style=''></circle>
+    <circle cx='452.777778' cy='197.536232' r='0.000000' class='point color3' fm:label='1970-01-01 00:00:00: 10.0' fm:series='series3', style=''></circle>
+    <circle cx='372.222222' cy='208.260870' r='0.000000' class='point color3' fm:label='1970-01-01 00:00:00: 9.0' fm:series='series3', style=''></circle>
+    <circle cx='291.666667' cy='218.985507' r='0.000000' class='point color3' fm:label='1970-01-01 00:00:00: 8.0' fm:series='series3', style=''></circle>
+    <circle cx='211.111111' cy='229.710145' r='0.000000' class='point color3' fm:label='1970-01-01 00:00:00: 7.0' fm:series='series3', style=''></circle>
+    <circle cx='130.555556' cy='240.434783' r='0.000000' class='point color3' fm:label='1970-01-01 00:00:00: 6.0' fm:series='series3', style=''></circle>
+    <circle cx='50.000000' cy='251.159420' r='0.000000' class='point color3' fm:label='1970-01-01 00:00:00: 5.0' fm:series='series3', style=''></circle>
+    <path stroke-width='2.000000' class='line color3' style='' d='M775.000000 154.637681 L694.444444 165.362319 L613.888889 176.086957 L533.333333 186.811594 L452.777778 197.536232 L372.222222 208.260870 L291.666667 218.985507 L211.111111 229.710145 L130.555556 240.434783 L50.000000 251.159420 ' />
   </g>
 </svg>
