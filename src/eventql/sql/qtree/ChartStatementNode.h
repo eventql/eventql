@@ -30,8 +30,10 @@
 
 namespace csql {
 
-class ChartStatementNode : public QueryTreeNode {
+class ChartStatementNode : public TableExpressionNode {
 public:
+
+  static constexpr const char* kColumnName = "__chart";
 
   ChartStatementNode(const ChartStatementNode& other);
   ChartStatementNode(Vector<RefPtr<QueryTreeNode>> draw_statements);
@@ -39,6 +41,14 @@ public:
   RefPtr<QueryTreeNode> deepCopy() const override;
 
   String toString() const override;
+
+  Vector<String> outputColumns() const override;
+
+  Vector<QualifiedColumn> allColumns() const override;
+
+  size_t getColumnIndex(
+      const String& column_name,
+      bool allow_add = false) override;
 
 protected:
   Vector<RefPtr<QueryTreeNode>> draw_stmts_;

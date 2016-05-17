@@ -46,6 +46,30 @@ ChartStatementNode::ChartStatementNode(
   }
 }
 
+Vector<String> ChartStatementNode::outputColumns() const {
+  return { kColumnName };
+}
+
+Vector<QualifiedColumn> ChartStatementNode::allColumns() const {
+  return {
+    {
+      .qualified_name = kColumnName,
+      .short_name = kColumnName
+    }
+  };
+}
+
+size_t ChartStatementNode::getColumnIndex(
+    const String& column_name,
+    bool allow_add /* = false */) {
+
+  if (column_name == kColumnName) {
+    return 0;
+  } else {
+    return -1;
+  }
+}
+
 RefPtr<QueryTreeNode> ChartStatementNode::deepCopy() const {
   return new ChartStatementNode(*this);
 }
