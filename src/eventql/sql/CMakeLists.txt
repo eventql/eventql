@@ -50,6 +50,7 @@ add_library(chartsql STATIC
     expressions/table/groupby.cc
     expressions/table/nested_loop_join.cc
     extensions/chartsql/chart_expression.cc
+    extensions/chartsql/domainconfig.cc
     parser/astnode.cc
     parser/astutil.cc
     parser/parser.cc

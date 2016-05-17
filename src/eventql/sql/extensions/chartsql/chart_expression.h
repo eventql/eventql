@@ -64,14 +64,30 @@ protected:
     return chart_builder.getChart();
   }
 
-  void applyAxisDefinitions(util::chart::Drawable* chart) const;
+  void applyAxisDefinitions(
+      RefPtr<DrawStatementNode> draw_stmt,
+      util::chart::Drawable* chart) const;
+
   void applyAxisLabels(ASTNode* ast, util::chart::AxisDefinition* axis) const;
-  void applyDomainDefinitions(util::chart::Drawable* chart) const;
-  void applyGrid(util::chart::Drawable* chart) const;
-  void applyLegend(util::chart::Drawable* chart) const;
-  void applyTitle(util::chart::Drawable* chart) const;
+
+  void applyDomainDefinitions(
+      RefPtr<DrawStatementNode> draw_stmt,
+      util::chart::Drawable* chart) const;
+
+  void applyGrid(
+      RefPtr<DrawStatementNode> draw_stmt,
+      util::chart::Drawable* chart) const;
+
+  void applyLegend(
+      RefPtr<DrawStatementNode> draw_stmt,
+      util::chart::Drawable* chart) const;
+
+  void applyTitle(
+      RefPtr<DrawStatementNode> draw_stmt,
+      util::chart::Drawable* chart) const;
 
   Transaction* txn_;
+  Runtime* runtime_;
   RefPtr<ChartStatementNode> qtree_;
   Vector<Vector<ScopedPtr<TableExpression>>> input_tables_;
   size_t counter_;

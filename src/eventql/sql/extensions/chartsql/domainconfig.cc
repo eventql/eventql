@@ -21,7 +21,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include <eventql/sql/runtime/charts/domainconfig.h>
+#include <eventql/sql/extensions/chartsql/domainconfig.h>
 #include <cplot/continuousdomain.h>
 #include <cplot/timedomain.h>
 
