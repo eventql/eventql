@@ -46,6 +46,10 @@ ChartStatementNode::ChartStatementNode(
   }
 }
 
+const Vector<RefPtr<QueryTreeNode>>& ChartStatementNode::getDrawStatements() {
+  return draw_stmts_;
+}
+
 Vector<String> ChartStatementNode::outputColumns() const {
   return { kColumnName };
 }

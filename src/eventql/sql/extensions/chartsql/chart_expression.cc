@@ -23,6 +23,8 @@
  * code of your own applications
  */
 #include <eventql/sql/extensions/chartsql/chart_expression.h>
+#include <cplot/svgtarget.h>
+#include <cplot/canvas.h>
 
 namespace csql {
 
@@ -36,6 +38,17 @@ ChartExpression::ChartExpression(
     counter_(0) {}
 
 ScopedPtr<ResultCursor> ChartExpression::execute() {
+  util::chart::Canvas canvas;
+  for (const auto& draw_stmt : qtree_->getDrawStatements()) {
+    executeDrawStatement(
+        draw_stmt.asInstanceOf<DrawStatementNode>(),
+        &canvas);
+  }
+
+  auto svg_data_os = StringOutputStream::fromString(&svg_data_);
+  util::chart::SVGTarget svg(svg_data_os.get());
+  canvas.render(&svg);
+
   return mkScoped(
       new DefaultResultCursor(
           1,
@@ -45,6 +58,10 @@ ScopedPtr<ResultCursor> ChartExpression::execute() {
               std::placeholders::_1,
               std::placeholders::_2)));
 }
+
+void ChartExpression::executeDrawStatement(
+    RefPtr<DrawStatementNode> draw_stmt,
+    util::chart::Canvas* canvas) {}
 
 size_t ChartExpression::getNumColumns() const {
   return 1;

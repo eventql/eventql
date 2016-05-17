@@ -50,6 +50,8 @@ public:
       const String& column_name,
       bool allow_add = false) override;
 
+  const Vector<RefPtr<QueryTreeNode>>& getDrawStatements();
+
 protected:
   Vector<RefPtr<QueryTreeNode>> draw_stmts_;
 };

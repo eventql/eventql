@@ -45,6 +45,17 @@ protected:
 
   bool next(SValue* row, size_t row_len);
 
+  void executeDrawStatement(
+      RefPtr<DrawStatementNode> draw_stmt,
+      util::chart::Canvas* canvas);
+
+  void applyAxisDefinitions(util::chart::Drawable* chart) const;
+  void applyAxisLabels(ASTNode* ast, util::chart::AxisDefinition* axis) const;
+  void applyDomainDefinitions(util::chart::Drawable* chart) const;
+  void applyGrid(util::chart::Drawable* chart) const;
+  void applyLegend(util::chart::Drawable* chart) const;
+  void applyTitle(util::chart::Drawable* chart) const;
+
   Transaction* txn_;
   RefPtr<ChartStatementNode> qtree_;
   Vector<ScopedPtr<TableExpression>> input_tables_;
