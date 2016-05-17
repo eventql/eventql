@@ -25,7 +25,7 @@
 #include <eventql/util/stdtypes.h>
 #include <eventql/sql/qtree/DrawStatementNode.h>
 #include <eventql/sql/parser/token.h>
-#include <eventql/sql/Transaction.h>
+#include <eventql/sql/transaction.h>
 #include <eventql/util/exception.h>
 #include <eventql/util/autoref.h>
 #include <cplot/canvas.h>

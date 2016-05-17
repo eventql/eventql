@@ -26,7 +26,7 @@
 #include <math.h>
 #include <string.h>
 #include <eventql/sql/expressions/math.h>
-#include <eventql/sql/Transaction.h>
+#include <eventql/sql/transaction.h>
 
 namespace csql {
 namespace expressions {

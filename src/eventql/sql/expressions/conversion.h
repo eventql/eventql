@@ -23,7 +23,7 @@
  */
 #pragma once
 #include <eventql/sql/svalue.h>
-#include <eventql/sql/Transaction.h>
+#include <eventql/sql/transaction.h>
 
 namespace csql {
 namespace expressions {

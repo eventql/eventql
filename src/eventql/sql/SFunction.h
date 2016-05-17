@@ -27,7 +27,7 @@
 #include <eventql/util/util/binarymessagereader.h>
 #include <eventql/util/util/binarymessagewriter.h>
 #include <eventql/sql/svalue.h>
-#include <eventql/sql/Transaction.h>
+#include <eventql/sql/transaction.h>
 
 #include "eventql/eventql.h"
 

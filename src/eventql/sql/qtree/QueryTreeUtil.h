@@ -28,7 +28,7 @@
 #include <eventql/sql/qtree/ValueExpressionNode.h>
 #include <eventql/sql/qtree/ColumnReferenceNode.h>
 #include <eventql/sql/qtree/SequentialScanNode.h>
-#include <eventql/sql/Transaction.h>
+#include <eventql/sql/transaction.h>
 
 #include "eventql/eventql.h"
 

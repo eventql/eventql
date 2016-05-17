@@ -22,7 +22,7 @@
  * code of your own applications
  */
 #include <eventql/util/wallclock.h>
-#include <eventql/sql/Transaction.h>
+#include <eventql/sql/transaction.h>
 #include <eventql/sql/runtime/runtime.h>
 
 #include "eventql/eventql.h"

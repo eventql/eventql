@@ -24,7 +24,7 @@
  */
 
 #include <eventql/util/stdtypes.h>
-#include <eventql/sql/Transaction.h>
+#include <eventql/sql/transaction.h>
 #include "eventql/eventql.h"
 
 namespace eventql {
