@@ -48,10 +48,15 @@ extern char *readline(char *prompt);
 
 void Console::startInteractiveShell() {
   char *p;
-
   while ((p = readline("evql> ")) != NULL) {
-    runQuery(p);
+    String line(p);
     free(p);
+
+    if (line == "quit") {
+      return;
+    } else {
+      runQuery(line);
+    }
   }
 }
 
