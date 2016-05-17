@@ -61,6 +61,7 @@ Status Console::runQuery(const String& query) {
   auto stdout_os = OutputStream::getStdout();
   auto stderr_os = TerminalOutputStream::fromStream(OutputStream::getStderr());
 
+  bool error = false;
   csql::BinaryResultParser res_parser;
 
   res_parser.onTableHeader([] (const Vector<String>& columns) {
@@ -71,13 +72,13 @@ Status Console::runQuery(const String& query) {
     iputs("row: $0", Vector<csql::SValue>(argv, argv + argc));
   });
 
-  res_parser.onError([&stderr_os] (const String& error) {
+  res_parser.onError([&stderr_os, &error] (const String& error_str) {
     stderr_os->print(
         "ERROR:",
         { TerminalStyle::RED, TerminalStyle::UNDERSCORE });
 
-    stderr_os->print(StringUtil::format(" $0\n", error));
-    exit(1);
+    stderr_os->print(StringUtil::format(" $0\n", error_str));
+    error = true;
   });
 
   try {
@@ -125,7 +126,11 @@ Status Console::runQuery(const String& query) {
     return Status(eIOError);
   }
 
-  return Status::success();
+  if (error) {
+    return Status::success();
+  } else {
+    return Status(eIOError);
+  }
 }
 
 } // namespace cli

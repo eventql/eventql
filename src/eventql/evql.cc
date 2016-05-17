@@ -512,19 +512,22 @@ int main(int argc, const char** argv) {
 
   if (flags.isSet("file")) {
     auto query = FileUtil::read(flags.getString("file"));
-    console.runQuery(query.toString());
-    return 0;
+    auto ret = console.runQuery(query.toString());
+    return ret.isSuccess() ? 0 : 1;
   }
 
   if (flags.isSet("exec")) {
-    console.runQuery(flags.getString("exec"));
-    return 0;
+    auto ret = console.runQuery(flags.getString("exec"));
+    return ret.isSuccess() ? 0 : 1;
   }
 
   if (hasSTDIN() || flags.isSet("batch") || !stdout_os->isTTY()) {
     String query;
     while (stdin_is->readLine(&query)) {
-      console.runQuery(query);
+      auto ret = console.runQuery(query);
+      if (ret.isError()) {
+        return 1;
+      }
     }
 
     return 0;
