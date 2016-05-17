@@ -86,7 +86,6 @@ add_library(chartsql STATIC
     qtree/DescribeTableNode.cc
     qtree/DrawStatementNode.cc
     qtree/ChartStatementNode.cc
-    runtime/ResultFormat.cc
     runtime/ValueExpression.cc
     runtime/ScratchMemory.cc
     runtime/runtime.cc
@@ -98,7 +97,6 @@ add_library(chartsql STATIC
     query_plan.cc
     runtime/vm.cc
     runtime/compiler.cc
-    runtime/ExecutionContext.cc
     runtime/QueryBuilder.cc
     runtime/LikePattern.cc
     #runtime/charts/areachartbuilder.cc

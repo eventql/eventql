@@ -25,8 +25,6 @@
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/json/json.h>
 #include <eventql/sql/query_plan.h>
-#include <eventql/sql/runtime/charts/ChartStatement.h>
-#include <eventql/sql/runtime/ResultFormat.h>
 #include <eventql/sql/result_cursor.h>
 
 namespace eventql {
