@@ -71,42 +71,52 @@ protected:
 
   ScopedPtr<csql::TableExpression> buildExpression(
       csql::Transaction* ctx,
+      csql::ExecutionContext* execution_context,
       RefPtr<csql::QueryTreeNode> node);
 
   ScopedPtr<csql::TableExpression> buildLimit(
       csql::Transaction* ctx,
+      csql::ExecutionContext* execution_context,
       RefPtr<csql::LimitNode> node);
 
   ScopedPtr<csql::TableExpression> buildSelectExpression(
       csql::Transaction* ctx,
+      csql::ExecutionContext* execution_context,
       RefPtr<csql::SelectExpressionNode> node);
 
   ScopedPtr<csql::TableExpression> buildSubquery(
       csql::Transaction* txn,
+      csql::ExecutionContext* execution_context,
       RefPtr<csql::SubqueryNode> node);
 
   ScopedPtr<csql::TableExpression> buildOrderByExpression(
       csql::Transaction* txn,
+      csql::ExecutionContext* execution_context,
       RefPtr<csql::OrderByNode> node);
 
   ScopedPtr<csql::TableExpression> buildSequentialScan(
       csql::Transaction* txn,
+      csql::ExecutionContext* execution_context,
       RefPtr<csql::SequentialScanNode> node);
 
   ScopedPtr<csql::TableExpression> buildGroupByExpression(
       csql::Transaction* txn,
+      csql::ExecutionContext* execution_context,
       RefPtr<csql::GroupByNode> node);
 
   ScopedPtr<csql::TableExpression> buildPartialGroupByExpression(
       csql::Transaction* txn,
+      csql::ExecutionContext* execution_context,
       RefPtr<csql::GroupByNode> node);
 
   ScopedPtr<csql::TableExpression> buildPipelineGroupByExpression(
       csql::Transaction* txn,
+      csql::ExecutionContext* execution_context,
       RefPtr<csql::GroupByNode> node);
 
   ScopedPtr<csql::TableExpression> buildJoinExpression(
       csql::Transaction* txn,
+      csql::ExecutionContext* execution_context,
       RefPtr<csql::JoinNode> node);
 
   struct PipelinedQueryTree {
