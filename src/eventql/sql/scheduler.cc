@@ -22,6 +22,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#include "eventql/eventql.h"
 #include <eventql/sql/scheduler.h>
 #include <eventql/sql/expressions/table_expression.h>
 #include <eventql/sql/qtree/QueryTreeNode.h>
@@ -33,6 +34,7 @@
 #include <eventql/sql/expressions/table/describe_table.h>
 #include <eventql/sql/expressions/table/groupby.h>
 #include <eventql/sql/expressions/table/nested_loop_join.h>
+#include <eventql/sql/extensions/chartsql/chart_expression.h>
 #include <eventql/sql/qtree/SelectExpressionNode.h>
 #include <eventql/sql/qtree/SubqueryNode.h>
 #include <eventql/sql/qtree/OrderByNode.h>
@@ -40,9 +42,8 @@
 #include <eventql/sql/qtree/LimitNode.h>
 #include <eventql/sql/qtree/GroupByNode.h>
 #include <eventql/sql/qtree/JoinNode.h>
+#include <eventql/sql/qtree/ChartStatementNode.h>
 #include <eventql/sql/runtime/queryplan.h>
-
-#include "eventql/eventql.h"
 
 namespace csql {
 
@@ -190,6 +191,17 @@ static ScopedPtr<TableExpression> buildJoinExpression(
           buildExpression(ctx, node->joinedTable())));
 }
 
+static ScopedPtr<TableExpression> buildChartExpression(
+    Transaction* txn,
+    RefPtr<ChartStatementNode> node) {
+  Vector<ScopedPtr<csql::TableExpression>> input_tables;
+  return mkScoped(
+      new ChartExpression(
+          txn,
+          node,
+          std::move(input_tables)));
+}
+
 static ScopedPtr<TableExpression> buildExpression(
     Transaction* ctx,
     RefPtr<QueryTreeNode> node) {
@@ -240,6 +252,12 @@ static ScopedPtr<TableExpression> buildExpression(
     return buildJoinExpression(
         ctx,
         node.asInstanceOf<JoinNode>());
+  }
+
+  if (dynamic_cast<ChartStatementNode*>(node.get())) {
+    return buildChartExpression(
+        ctx,
+        node.asInstanceOf<ChartStatementNode>());
   }
 
   RAISEF(
