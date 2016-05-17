@@ -1115,8 +1115,8 @@ void AnalyticsServlet::executeSQL(
 
     if (format == "ascii") {
       executeSQL_ASCII(params, session, req, res, res_stream);
-    //} else if (format == "binary") {
-    //  executeSQL_BINARY(params, session, req, res, res_stream);
+    } else if (format == "binary") {
+      executeSQL_BINARY(params, session, req, res, res_stream);
     } else if (format == "json") {
       executeSQL_JSON(params, session, req, res, res_stream);
     } else if (format == "json_sse") {
@@ -1172,50 +1172,51 @@ void AnalyticsServlet::executeSQL_ASCII(
 //  }
 }
 
-//void AnalyticsServlet::executeSQL_BINARY(
-//    const URI::ParamList& params,
-//    const AnalyticsSession& session,
-//    const http::HTTPRequest* req,
-//    http::HTTPResponse* res,
-//    RefPtr<http::HTTPResponseStream> res_stream) {
-//  String query;
-//  if (!URI::getParam(params, "query", &query)) {
-//    res->setStatus(http::kStatusBadRequest);
-//    res->addBody("missing ?query=... parameter");
-//    res_stream->writeResponse(*res);
-//    return;
-//  }
-//
-//  res->setStatus(http::kStatusOK);
-//  res->setHeader("Connection", "close");
-//  res->setHeader("Content-Type", "application/octet-stream");
-//  res->setHeader("Cache-Control", "no-cache");
-//  res->setHeader("Access-Control-Allow-Origin", "*");
-//  res_stream->startResponse(*res);
-//
-//  {
-//    auto result_format = new csql::BinaryResultFormat(
-//        [res_stream] (const void* data, size_t size) {
-//      res_stream->writeBodyChunk(data, size);
-//    });
-//
-//    try {
-//      auto txn = sql_->newTransaction();
-//
-//      //sql_->executeQuery(
-//      //    txn.get(),
-//      //    query,
-//      //    app_->getExecutionStrategy(session.customer()),
-//      //    result_format);
-//
-//    } catch (const StandardException& e) {
-//      result_format->sendError(e.what());
-//    }
-//  }
-//
-//  res_stream->finishResponse();
-//}
-//
+void AnalyticsServlet::executeSQL_BINARY(
+    const URI::ParamList& params,
+    const AnalyticsSession& session,
+    const http::HTTPRequest* req,
+    http::HTTPResponse* res,
+    RefPtr<http::HTTPResponseStream> res_stream) {
+  String query;
+  if (!URI::getParam(params, "query", &query)) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody("missing ?query=... parameter");
+    res_stream->writeResponse(*res);
+    return;
+  }
+
+  res->setStatus(http::kStatusOK);
+  res->setHeader("Connection", "close");
+  res->setHeader("Content-Type", "application/octet-stream");
+  res->setHeader("Cache-Control", "no-cache");
+  res->setHeader("Access-Control-Allow-Origin", "*");
+  res_stream->startResponse(*res);
+
+  {
+    csql::BinaryResultFormat result_format(
+        [res_stream] (const void* data, size_t size) {
+      res_stream->writeBodyChunk(data, size);
+    });
+
+    try {
+      auto txn = sql_->newTransaction();
+      txn->addTableProvider(app_->getTableProvider(session.customer()));
+      txn->setUserData(
+          new TransactionInfo(session.customer()),
+          [] (void* tx_info) { delete (TransactionInfo*) tx_info; });
+
+      auto qplan = sql_->buildQueryPlan(txn.get(), query);
+
+      result_format.sendResults(qplan.get());
+    } catch (const StandardException& e) {
+      result_format.sendError(e.what());
+    }
+  }
+
+  res_stream->finishResponse();
+}
+
 void AnalyticsServlet::executeSQL_JSON(
     const URI::ParamList& params,
     const AnalyticsSession& session,
