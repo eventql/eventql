@@ -76,6 +76,7 @@ namespace csql {
  */
 
 struct ExecutionStatus {
+  double progress;
   size_t num_subtasks_total;
   size_t num_subtasks_completed;
   size_t num_rows_scanned;
@@ -126,11 +127,11 @@ public:
 
   void sendResults(QueryPlan* query);
   void sendError(const String& error_msg);
+  void sendProgress(double progress);
 
 protected:
 
   void sendTable(QueryPlan* query, size_t stmt_idx);
-  void sendProgress(double progress);
 
   void sendHeader();
   void sendFooter();
