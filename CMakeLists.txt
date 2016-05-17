@@ -69,6 +69,7 @@ ExternalProject_Add(spidermonkey_build
     BINARY_DIR ${PROJECT_BINARY_DIR}/deps/3rdparty/mozjs
     CONFIGURE_COMMAND "true"
     BUILD_COMMAND ./build.sh "${CMAKE_C_COMPILER}" "${CMAKE_CXX_COMPILER}" "${CMAKE_RANLIB}" "${CMAKE_AR}" "${PROJECT_SOURCE_DIR}/deps/3rdparty/mozjs"
+    INSTALL_COMMAND "true"
     LOG_BUILD 1)
 
 add_library(spidermonkey STATIC IMPORTED)
