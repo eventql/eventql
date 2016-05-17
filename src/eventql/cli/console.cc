@@ -23,6 +23,21 @@
  */
 #include <eventql/cli/console.h>
 #include <eventql/util/inspect.h>
+#include "eventql/util/logging.h"
+#include "eventql/util/random.h"
+#include "eventql/util/thread/eventloop.h"
+#include "eventql/util/thread/threadpool.h"
+#include "eventql/util/thread/FixedSizeThreadPool.h"
+#include "eventql/util/io/TerminalOutputStream.h"
+#include "eventql/util/wallclock.h"
+#include "eventql/util/json/json.h"
+#include "eventql/util/json/jsonrpc.h"
+#include "eventql/util/http/httpclient.h"
+#include "eventql/util/http/HTTPSSEResponseHandler.h"
+#include "eventql/util/cli/CLI.h"
+#include "eventql/util/cli/flagparser.h"
+#include "eventql/util/cli/term.h"
+#include "eventql/server/sql/codec/binary_codec.h"
 
 namespace eventql {
 namespace cli {
@@ -31,13 +46,86 @@ extern "C" {
 extern char *readline(char *prompt);
 }
 
-void Console::run() {
+void Console::startInteractiveShell() {
   char *p;
 
   while ((p = readline("evql> ")) != NULL) {
-    puts(p);
+    runQuery(p);
     free(p);
   }
+}
+
+Console::Console(const ConsoleOptions& options) : cfg_(options) {}
+
+Status Console::runQuery(const String& query) {
+  auto stdout_os = OutputStream::getStdout();
+  auto stderr_os = TerminalOutputStream::fromStream(OutputStream::getStderr());
+
+  csql::BinaryResultParser res_parser;
+
+  res_parser.onTableHeader([] (const Vector<String>& columns) {
+    iputs("columns: $0", columns);
+  });
+
+  res_parser.onRow([] (int argc, const csql::SValue* argv) {
+    iputs("row: $0", Vector<csql::SValue>(argv, argv + argc));
+  });
+
+  res_parser.onError([&stderr_os] (const String& error) {
+    stderr_os->print(
+        "ERROR:",
+        { TerminalStyle::RED, TerminalStyle::UNDERSCORE });
+
+    stderr_os->print(StringUtil::format(" $0\n", error));
+    exit(1);
+  });
+
+  try {
+    bool is_tty = stderr_os->isTTY();
+
+    auto url = StringUtil::format(
+        "http://$0:$1/api/v1/sql",
+        cfg_.server_host,
+        cfg_.server_port);
+
+    auto postdata = StringUtil::format(
+          "format=binary&query=$0",
+          URI::urlEncode(query));
+
+    http::HTTPMessage::HeaderList auth_headers;
+    auth_headers.emplace_back(
+        "Authorization",
+        StringUtil::format("Token $0", cfg_.server_auth_token));
+
+    http::HTTPClient http_client(nullptr);
+    auto req = http::HTTPRequest::mkPost(url, postdata, auth_headers);
+    auto res = http_client.executeRequest(
+        req,
+        http::StreamingResponseHandler::getFactory(
+            std::bind(
+                &csql::BinaryResultParser::parse,
+                &res_parser,
+                std::placeholders::_1,
+                std::placeholders::_2)));
+
+    if (!res_parser.eof()) {
+      stderr_os->print(
+          "ERROR:",
+          { TerminalStyle::RED, TerminalStyle::UNDERSCORE });
+
+      stderr_os->print(" connection to server lost");
+      return Status(eIOError);
+    }
+  } catch (const StandardException& e) {
+    stderr_os->print(
+        "ERROR:",
+        { TerminalStyle::RED, TerminalStyle::UNDERSCORE });
+
+    stderr_os->print(StringUtil::format(" $0\n", e.what()));
+    return Status(eIOError);
+  }
+
+  return Status::success();
 }
 
 } // namespace cli

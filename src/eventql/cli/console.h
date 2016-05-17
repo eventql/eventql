@@ -26,15 +26,35 @@
 #include <eventql/util/exception.h>
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/cli/CLICommand.h>
+#include <eventql/util/status.h>
 
 namespace eventql {
 namespace cli {
 
+struct ConsoleOptions {
+  String server_host;
+  int server_port;
+  String server_auth_token;
+  bool batch_mode;
+};
+
 class Console {
 public:
 
-  void run();
+  Console(const ConsoleOptions& options);
 
+  /**
+   * Start an interactive shell. This method will never return
+   */
+  void startInteractiveShell();
+
+  /**
+   * Execute an SQL query
+   */
+  Status runQuery(const String& query);
+
+protected:
+  ConsoleOptions cfg_;
 };
 
 } // namespace cli
