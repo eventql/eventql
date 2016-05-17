@@ -23,6 +23,7 @@
  * code of your own applications
  */
 #include <eventql/sql/extensions/chartsql/chart_expression.h>
+#include <eventql/sql/extensions/chartsql/linechartbuilder.h>
 #include <cplot/svgtarget.h>
 #include <cplot/canvas.h>
 
@@ -31,7 +32,7 @@ namespace csql {
 ChartExpression::ChartExpression(
     Transaction* txn,
     RefPtr<ChartStatementNode> qtree,
-    Vector<ScopedPtr<TableExpression>> input_tables) :
+    Vector<Vector<ScopedPtr<TableExpression>>> input_tables) :
     txn_(txn),
     qtree_(std::move(qtree)),
     input_tables_(std::move(input_tables)),
@@ -39,10 +40,8 @@ ChartExpression::ChartExpression(
 
 ScopedPtr<ResultCursor> ChartExpression::execute() {
   util::chart::Canvas canvas;
-  for (const auto& draw_stmt : qtree_->getDrawStatements()) {
-    executeDrawStatement(
-        draw_stmt.asInstanceOf<DrawStatementNode>(),
-        &canvas);
+  for (size_t i = 0; i < qtree_->getDrawStatements().size(); ++i) {
+    executeDrawStatement(i, &canvas);
   }
 
   auto svg_data_os = StringOutputStream::fromString(&svg_data_);
@@ -60,8 +59,35 @@ ScopedPtr<ResultCursor> ChartExpression::execute() {
 }
 
 void ChartExpression::executeDrawStatement(
-    RefPtr<DrawStatementNode> draw_stmt,
-    util::chart::Canvas* canvas) {}
+    size_t idx,
+    util::chart::Canvas* canvas) {
+  auto draw_stmt = qtree_
+      ->getDrawStatements()[idx]
+      .asInstanceOf<DrawStatementNode>();
+
+  util::chart::Drawable* chart = nullptr;
+
+  switch (draw_stmt->chartType()) {
+    //case DrawStatementNode::ChartType::AREACHART:
+    //  chart = executeDrawStatementWithChartType<AreaChartBuilder>(draw_stmt, canvas);
+    //  break;
+    //case DrawStatementNode::ChartType::BARCHART:
+    //  chart = executeDrawStatementWithChartType<BarChartBuilder>(draw_stmt, canvas);
+    //  break;
+    case DrawStatementNode::ChartType::LINECHART:
+      chart = executeDrawStatementWithChartType<LineChartBuilder>(idx, canvas);
+      break;
+    //case DrawStatementNode::ChartType::POINTCHART:
+    //  chart = executeDrawStatementWithChartType<PointChartBuilder>(draw_stmt, canvas);
+    //  break;
+  }
+
+  applyDomainDefinitions(chart);
+  applyTitle(chart);
+  applyAxisDefinitions(chart);
+  applyGrid(chart);
+  applyLegend(chart); 
+}
 
 size_t ChartExpression::getNumColumns() const {
   return 1;

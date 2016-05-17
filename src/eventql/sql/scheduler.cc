@@ -194,7 +194,7 @@ static ScopedPtr<TableExpression> buildJoinExpression(
 static ScopedPtr<TableExpression> buildChartExpression(
     Transaction* txn,
     RefPtr<ChartStatementNode> node) {
-  Vector<ScopedPtr<csql::TableExpression>> input_tables;
+  Vector<Vector<ScopedPtr<csql::TableExpression>>> input_tables;
   return mkScoped(
       new ChartExpression(
           txn,

@@ -35,7 +35,7 @@ public:
   ChartExpression(
       Transaction* txn,
       RefPtr<ChartStatementNode> qtree,
-      Vector<ScopedPtr<TableExpression>> input_tables);
+      Vector<Vector<ScopedPtr<TableExpression>>> input_tables);
 
   ScopedPtr<ResultCursor> execute() override;
 
@@ -46,8 +46,23 @@ protected:
   bool next(SValue* row, size_t row_len);
 
   void executeDrawStatement(
-      RefPtr<DrawStatementNode> draw_stmt,
+      size_t idx,
       util::chart::Canvas* canvas);
+
+  template <typename ChartBuilderType>
+  util::chart::Drawable* executeDrawStatementWithChartType(
+      size_t idx,
+      util::chart::Canvas* canvas) {
+    ChartBuilderType chart_builder(
+        canvas,
+        qtree_->getDrawStatements()[idx].asInstanceOf<DrawStatementNode>());
+
+    for (auto& source : input_tables_[idx]) {
+      chart_builder.executeStatement(txn_, source->execute());
+    }
+
+    return chart_builder.getChart();
+  }
 
   void applyAxisDefinitions(util::chart::Drawable* chart) const;
   void applyAxisLabels(ASTNode* ast, util::chart::AxisDefinition* axis) const;
@@ -58,7 +73,7 @@ protected:
 
   Transaction* txn_;
   RefPtr<ChartStatementNode> qtree_;
-  Vector<ScopedPtr<TableExpression>> input_tables_;
+  Vector<Vector<ScopedPtr<TableExpression>>> input_tables_;
   size_t counter_;
   String svg_data_;
 };

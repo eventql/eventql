@@ -21,8 +21,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#ifndef _FNORDMETRIC_SQLEXTENSIONS_SERIESADAPTER_H
-#define _FNORDMETRIC_SQLEXTENSIONS_SERIESADAPTER_H
+#pragma once
 #include <stdlib.h>
 #include <assert.h>
 #include <unordered_map>
@@ -32,11 +31,10 @@
 #include <eventql/util/exception.h>
 #include <eventql/sql/runtime/compiler.h>
 #include <eventql/sql/runtime/vm.h>
-#include <eventql/sql/runtime/queryplannode.h>
 
 namespace csql {
 
-class AnySeriesAdapter : public RowSink {
+class AnySeriesAdapter {
 public:
 
   AnySeriesAdapter(
@@ -44,6 +42,10 @@ public:
       int x_ind,
       int y_ind,
       int z_ind);
+
+  virtual ~AnySeriesAdapter() = default;
+
+  virtual bool nextRow(SValue* row, int row_len) = 0;
 
   int name_ind_;
   int x_ind_;
@@ -159,4 +161,3 @@ public:
 };
 
 }
-#endif
