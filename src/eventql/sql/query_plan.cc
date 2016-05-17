@@ -45,6 +45,7 @@ ScopedPtr<ResultCursor> QueryPlan::execute(size_t stmt_idx) {
 
   auto execution_context = &execution_contexts_[stmt_idx];
   if (progress_callback_) {
+    progress_callback_();
     execution_context->setProgressCallback(progress_callback_);
   }
 
