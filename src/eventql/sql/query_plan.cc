@@ -43,9 +43,14 @@ ScopedPtr<ResultCursor> QueryPlan::execute(size_t stmt_idx) {
     RAISE(kIndexError, "invalid statement index");
   }
 
+  auto execution_context = &execution_contexts_[stmt_idx];
+  if (progress_callback_) {
+    execution_context->setProgressCallback(progress_callback_);
+  }
+
   return txn_->getRuntime()->getScheduler()->execute(
       this,
-      &execution_contexts_[stmt_idx],
+      execution_context,
       stmt_idx);
 }
 
@@ -83,19 +88,30 @@ RefPtr<QueryTreeNode> QueryPlan::getStatement(size_t stmt_idx) const {
   return qtrees_[stmt_idx];
 }
 
+double QueryPlan::getQueryProgress(size_t query_idx) const {
+  if (query_idx >= qtrees_.size()) {
+    RAISE(kIndexError, "invalid statement index");
+  }
+
+  return execution_contexts_[query_idx].getProgress();
+}
+
+double QueryPlan::getProgress() const {
+  size_t num_queries = qtrees_.size();
+  double progress = 0;
+  for (size_t i = 0; i < num_queries; ++i) {
+    progress += execution_contexts_[i].getProgress();
+  }
+
+  return progress / num_queries;
+}
+
+void QueryPlan::setProgressCallback(Function<void()> cb) {
+  progress_callback_ = cb;
+}
+
 Transaction* QueryPlan::getTransaction() const {
   return txn_;
 }
-
-//void QueryPlan::storeResults(size_t stmt_idx, ResultList* result_list) {
-//
-//  onOutputRow(
-//      stmt_idx,
-//      std::bind(
-//          &ResultList::addRow,
-//          result_list,
-//          std::placeholders::_1,
-//          std::placeholders::_2));
-//}
 
 }

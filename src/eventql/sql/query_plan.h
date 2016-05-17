@@ -76,6 +76,23 @@ public:
 
   RefPtr<QueryTreeNode> getStatement(size_t stmt_idx) const;
 
+  /**
+   * Returns the progress of the query with index idx as a floating point value
+   * between 0.0 and 1.0
+   */
+  double getQueryProgress(size_t query_idx) const;
+
+  /**
+   * Returns the combined progress of all queries as a floating point value
+   * between 0.0 and 1.0 
+   */
+  double getProgress() const;
+
+  /**
+   * Sets a callback that will be called every time the progress changes
+   */
+  void setProgressCallback(Function<void()> cb);
+
   Transaction* getTransaction() const;
 
 protected:
@@ -83,6 +100,7 @@ protected:
   Vector<RefPtr<QueryTreeNode>> qtrees_;
   Vector<Vector<String>> statement_columns_;
   Vector<ExecutionContext> execution_contexts_;
+  Function<void()> progress_callback_;
 };
 
 }

@@ -33,15 +33,38 @@ ExecutionContext::ExecutionContext() :
     num_tasks_completed_(0) {}
 
 void ExecutionContext::incrementNumTasks() {
+  std::unique_lock<std::mutex> lk(mutex_);
   ++num_tasks_;
 }
 
 void ExecutionContext::incrementNumTasksRunning() {
+  std::unique_lock<std::mutex> lk(mutex_);
   ++num_tasks_running_;
 }
 
 void ExecutionContext::incrementNumTasksCompleted() {
+  std::unique_lock<std::mutex> lk(mutex_);
   ++num_tasks_completed_;
+
+  if (progress_callback_) {
+    progress_callback_();
+  }
+}
+
+void ExecutionContext::setProgressCallback(Function<void()> cb) {
+  progress_callback_ = cb;
+}
+
+double ExecutionContext::getProgress() const {
+  if (num_tasks_ == 0) {
+    return 0;
+  }
+
+  if (num_tasks_completed_ > num_tasks_) {
+    return 1;
+  }
+
+  return (double) num_tasks_completed_ / (double) num_tasks_;
 }
 
 } //namespace csql

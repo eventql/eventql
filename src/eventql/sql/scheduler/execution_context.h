@@ -38,11 +38,16 @@ public:
 
   void incrementNumTasksCompleted();
 
-protected:
+  double getProgress() const;
 
+  void setProgressCallback(Function<void()> cb);
+
+protected:
+  mutable std::mutex mutex_;
   size_t num_tasks_;
   size_t num_tasks_running_;
   size_t num_tasks_completed_;
+  Function<void()> progress_callback_;
 };
 
 } // namespace csql
