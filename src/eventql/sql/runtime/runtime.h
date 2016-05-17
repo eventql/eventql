@@ -29,7 +29,7 @@
 #include <memory>
 #include <eventql/util/thread/threadpool.h>
 #include <eventql/sql/parser/parser.h>
-#include <eventql/sql/runtime/queryplan.h>
+#include <eventql/sql/query_plan.h>
 #include <eventql/sql/runtime/queryplanbuilder.h>
 #include <eventql/sql/runtime/QueryBuilder.h>
 #include <eventql/sql/runtime/symboltable.h>

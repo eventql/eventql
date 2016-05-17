@@ -32,7 +32,7 @@
 #include "eventql/util/http/httpconnectionpool.h"
 #include "eventql/util/http/httpclient.h"
 #include "eventql/sql/svalue.h"
-#include "eventql/sql/runtime/QueryPlan.h"
+#include "eventql/sql/query_plan.h"
 #include "eventql/sql/runtime/ExecutionContext.h"
 
 #include "eventql/eventql.h"

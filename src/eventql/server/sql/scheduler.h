@@ -26,7 +26,7 @@
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/autoref.h>
 #include <eventql/sql/result_cursor.h>
-#include <eventql/sql/runtime/QueryPlan.h>
+#include <eventql/sql/query_plan.h>
 #include "eventql/eventql.h"
 #include <eventql/sql/expressions/table_expression.h>
 #include <eventql/sql/qtree/QueryTreeNode.h>
@@ -45,7 +45,7 @@
 #include <eventql/sql/qtree/LimitNode.h>
 #include <eventql/sql/qtree/GroupByNode.h>
 #include <eventql/sql/qtree/JoinNode.h>
-#include <eventql/sql/runtime/queryplan.h>
+#include <eventql/sql/query_plan.h>
 #include <eventql/db/partition_map.h>
 #include <eventql/AnalyticsAuth.h>
 

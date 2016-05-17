@@ -43,7 +43,7 @@
 #include <eventql/sql/qtree/GroupByNode.h>
 #include <eventql/sql/qtree/JoinNode.h>
 #include <eventql/sql/qtree/ChartStatementNode.h>
-#include <eventql/sql/runtime/queryplan.h>
+#include <eventql/sql/query_plan.h>
 
 namespace csql {
 
