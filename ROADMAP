@@ -14,6 +14,8 @@ ROADMAP
 - [ ] partitioning/sharding v2
 - [ ] improved table iterator iface (update, ordered, restricted, etc)
 
+- [ ] evql: load auth info from ~/.evqlrc
+
 -> move pipelined aggregate code to server/sql/pipelined_aggregate
 -> PartialAggregateNode
 -> qtree rewrite: .lastXX sufix
