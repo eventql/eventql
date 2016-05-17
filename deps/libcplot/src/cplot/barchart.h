@@ -582,7 +582,7 @@ BarChart2D<TX, TY>::BarChart2D(
 
 template <typename TX, typename TY>
 void BarChart2D<TX, TY>::addSeries(Series2D<TX, TY>* series) {
-  auto series3d = new Series3D<TX, TY, TY>(); // FIXPAUL: never free'd!
+  auto series3d = new Series3D<TX, TY, TY>(series->name()); // FIXPAUL: never free'd!
   auto copy_labels = series->hasProperty(Series::P_LABEL);
 
   for (const auto& point : series->getData()) {
