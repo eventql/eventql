@@ -21,8 +21,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include <eventql/sql/runtime/charts/linechartbuilder.h>
-#include <eventql/sql/runtime/charts/drawstatement.h>
+#include <eventql/sql/extensions/chartsql/linechartbuilder.h>
 
 namespace csql {
 

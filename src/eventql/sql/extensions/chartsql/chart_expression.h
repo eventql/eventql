@@ -35,7 +35,8 @@ public:
   ChartExpression(
       Transaction* txn,
       RefPtr<ChartStatementNode> qtree,
-      Vector<Vector<ScopedPtr<TableExpression>>> input_tables);
+      Vector<Vector<ScopedPtr<TableExpression>>> input_tables,
+      Vector<Vector<RefPtr<TableExpressionNode>>> input_table_qtrees);
 
   ScopedPtr<ResultCursor> execute() override;
 
@@ -57,8 +58,11 @@ protected:
         canvas,
         qtree_->getDrawStatements()[idx].asInstanceOf<DrawStatementNode>());
 
-    for (auto& source : input_tables_[idx]) {
-      chart_builder.executeStatement(txn_, source->execute());
+    for (size_t i = 0; i < input_tables_[idx].size(); ++i) {
+      chart_builder.executeStatement(
+          txn_,
+          input_table_qtrees_[idx][i],
+          input_tables_[idx][i]->execute());
     }
 
     return chart_builder.getChart();
@@ -90,6 +94,7 @@ protected:
   Runtime* runtime_;
   RefPtr<ChartStatementNode> qtree_;
   Vector<Vector<ScopedPtr<TableExpression>>> input_tables_;
+  Vector<Vector<RefPtr<TableExpressionNode>>> input_table_qtrees_;
   size_t counter_;
   String svg_data_;
 };

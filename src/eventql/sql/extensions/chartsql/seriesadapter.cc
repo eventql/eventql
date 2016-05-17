@@ -21,7 +21,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include <eventql/sql/runtime/charts/seriesadapter.h>
+#include <eventql/sql/extensions/chartsql/seriesadapter.h>
 #include <eventql/util/exception.h>
 
 namespace csql {

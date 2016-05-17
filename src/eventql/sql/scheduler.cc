@@ -195,11 +195,24 @@ static ScopedPtr<TableExpression> buildChartExpression(
     Transaction* txn,
     RefPtr<ChartStatementNode> node) {
   Vector<Vector<ScopedPtr<csql::TableExpression>>> input_tables;
+  Vector<Vector<RefPtr<csql::TableExpressionNode>>> input_table_qtrees;
+  for (const auto& draw_stmt_qtree : node->getDrawStatements()) {
+    input_tables.emplace_back();
+    input_table_qtrees.emplace_back();
+    auto draw_stmt = draw_stmt_qtree.asInstanceOf<DrawStatementNode>();
+    for (const auto& input_tbl : draw_stmt->inputTables()) {
+      input_tables.back().emplace_back(buildExpression(txn, input_tbl));
+      input_table_qtrees.back().emplace_back(
+          input_tbl.asInstanceOf<TableExpressionNode>());
+    }
+  }
+
   return mkScoped(
       new ChartExpression(
           txn,
           node,
-          std::move(input_tables)));
+          std::move(input_tables),
+          input_table_qtrees));
 }
 
 static ScopedPtr<TableExpression> buildExpression(

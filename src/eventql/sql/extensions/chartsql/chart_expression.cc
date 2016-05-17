@@ -24,6 +24,9 @@
  */
 #include <eventql/sql/extensions/chartsql/chart_expression.h>
 #include <eventql/sql/extensions/chartsql/linechartbuilder.h>
+#include <eventql/sql/extensions/chartsql/areachartbuilder.h>
+#include <eventql/sql/extensions/chartsql/barchartbuilder.h>
+#include <eventql/sql/extensions/chartsql/pointchartbuilder.h>
 #include <eventql/sql/extensions/chartsql/domainconfig.h>
 #include <cplot/svgtarget.h>
 #include <cplot/canvas.h>
@@ -33,11 +36,13 @@ namespace csql {
 ChartExpression::ChartExpression(
     Transaction* txn,
     RefPtr<ChartStatementNode> qtree,
-    Vector<Vector<ScopedPtr<TableExpression>>> input_tables) :
+    Vector<Vector<ScopedPtr<TableExpression>>> input_tables,
+    Vector<Vector<RefPtr<TableExpressionNode>>> input_table_qtrees) :
     txn_(txn),
     runtime_(txn->getRuntime()),
     qtree_(std::move(qtree)),
     input_tables_(std::move(input_tables)),
+    input_table_qtrees_(input_table_qtrees),
     counter_(0) {}
 
 ScopedPtr<ResultCursor> ChartExpression::execute() {
@@ -70,18 +75,18 @@ void ChartExpression::executeDrawStatement(
   util::chart::Drawable* chart = nullptr;
 
   switch (draw_stmt->chartType()) {
-    //case DrawStatementNode::ChartType::AREACHART:
-    //  chart = executeDrawStatementWithChartType<AreaChartBuilder>(draw_stmt, canvas);
-    //  break;
-    //case DrawStatementNode::ChartType::BARCHART:
-    //  chart = executeDrawStatementWithChartType<BarChartBuilder>(draw_stmt, canvas);
-    //  break;
+    case DrawStatementNode::ChartType::AREACHART:
+      chart = executeDrawStatementWithChartType<AreaChartBuilder>(idx, canvas);
+      break;
+    case DrawStatementNode::ChartType::BARCHART:
+      chart = executeDrawStatementWithChartType<BarChartBuilder>(idx, canvas);
+      break;
     case DrawStatementNode::ChartType::LINECHART:
       chart = executeDrawStatementWithChartType<LineChartBuilder>(idx, canvas);
       break;
-    //case DrawStatementNode::ChartType::POINTCHART:
-    //  chart = executeDrawStatementWithChartType<PointChartBuilder>(draw_stmt, canvas);
-    //  break;
+    case DrawStatementNode::ChartType::POINTCHART:
+      chart = executeDrawStatementWithChartType<PointChartBuilder>(idx, canvas);
+      break;
   }
 
   applyDomainDefinitions(draw_stmt, chart);

@@ -21,9 +21,8 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#ifndef _FNORDMETRIC_SQLEXTENSIONS_AREACHARTBUILDER_H
-#define _FNORDMETRIC_SQLEXTENSIONS_AREACHARTBUILDER_H
-#include <eventql/sql/runtime/charts/chartbuilder.h>
+#pragma once
+#include <eventql/sql/extensions/chartsql/chartbuilder.h>
 
 namespace csql {
 class DrawStatement;
@@ -37,5 +36,5 @@ public:
   std::string chartName() const override;
 };
 
-}
-#endif
+} //namespace csql
+

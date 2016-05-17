@@ -49,8 +49,13 @@ add_library(chartsql STATIC
     expressions/table/limit.cc
     expressions/table/groupby.cc
     expressions/table/nested_loop_join.cc
+    extensions/chartsql/areachartbuilder.cc
+    extensions/chartsql/barchartbuilder.cc
     extensions/chartsql/chart_expression.cc
     extensions/chartsql/domainconfig.cc
+    extensions/chartsql/linechartbuilder.cc
+    extensions/chartsql/pointchartbuilder.cc
+    extensions/chartsql/seriesadapter.cc
     parser/astnode.cc
     parser/astutil.cc
     parser/parser.cc

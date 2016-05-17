@@ -21,9 +21,8 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#ifndef _FNORDMETRIC_SQLEXTENSIONS_POINTCHARTBUILDER_H
-#define _FNORDMETRIC_SQLEXTENSIONS_POINTCHARTBUILDER_H
-#include <eventql/sql/runtime/charts/chartbuilder.h>
+#pragma once
+#include <eventql/sql/extensions/chartsql/chartbuilder.h>
 #include <cplot/pointchart.h>
 
 namespace csql {
@@ -43,4 +42,3 @@ protected:
 };
 
 }
-#endif

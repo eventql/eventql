@@ -2224,10 +2224,10 @@ TEST_CASE(RuntimeTest, TestSimpleDrawQuery, [] () {
       new backends::csv::CSVTableProvider(
           "testtable",
           "src/eventql/sql/testdata/testtbl8.csv",
-          '\t'));
+          ','));
 
   String query =
-      "  DRAW LINECHART AXIS LEFT;"
+      "  DRAW BARCHART AXIS LEFT;"
       ""
       "  SELECT"
       "    'series1' as series, one AS x, two AS y"
@@ -2254,5 +2254,6 @@ TEST_CASE(RuntimeTest, TestSimpleDrawQuery, [] () {
 
   EXPECT_EQ(result.getNumColumns(), 1);
   EXPECT_EQ(result.getNumRows(), 1);
+  iputs("got svg: $0", result.getRow(0)[0]);
   EXPECT_EQ(result.getRow(0)[0], exptected_svg);
 });
