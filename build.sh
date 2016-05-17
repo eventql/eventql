@@ -87,3 +87,14 @@ fi
 if [[ $RUN_TESTS == "true" ]]; then
   find ${TARGET_DIR} -maxdepth 1 -name "test-*" -type f -exec ./{} \;
 fi
+
+# pack artifacts
+if [[ $BUILD_ARTIFACTS == "true" ]]; then
+  # eventql
+  tar cz -C ${TARGET_DIR} evqld evql \
+      > ${ARTIFACTS_DIR}/eventql-${TARGET_LBL}.tgz
+
+  # eventql-client
+  tar cz -C ${TARGET_DIR} evql \
+      > ${ARTIFACTS_DIR}/eventql-client-${TARGET_LBL}.tgz
+fi
