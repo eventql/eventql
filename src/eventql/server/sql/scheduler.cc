@@ -42,16 +42,18 @@ Scheduler::Scheduler(
 
 ScopedPtr<csql::TableExpression> Scheduler::buildLimit(
     csql::Transaction* ctx,
+    csql::ExecutionContext* execution_context,
     RefPtr<csql::LimitNode> node) {
   auto expr = new csql::LimitExpression(
           node->limit(),
           node->offset(),
-          buildExpression(ctx, node->inputTable()));
+          buildExpression(ctx, execution_context, node->inputTable()));
   return mkScoped(expr);
 }
 
 ScopedPtr<csql::TableExpression> Scheduler::buildSelectExpression(
     csql::Transaction* ctx,
+    csql::ExecutionContext* execution_context,
     RefPtr<csql::SelectExpressionNode> node) {
   Vector<csql::ValueExpression> select_expressions;
   for (const auto& slnode : node->selectList()) {
@@ -67,30 +69,36 @@ ScopedPtr<csql::TableExpression> Scheduler::buildSelectExpression(
 
 ScopedPtr<csql::TableExpression> Scheduler::buildSubquery(
     csql::Transaction* txn,
+    csql::ExecutionContext* execution_context,
     RefPtr<csql::SubqueryNode> node) {
   Vector<csql::ValueExpression> select_expressions;
   Option<csql::ValueExpression> where_expr;
 
   if (!node->whereExpression().isEmpty()) {
     where_expr = std::move(Option<csql::ValueExpression>(
-        txn->getCompiler()->buildValueExpression(txn, node->whereExpression().get())));
+        txn->getCompiler()->buildValueExpression(
+            txn,
+            node->whereExpression().get())));
   }
 
   for (const auto& slnode : node->selectList()) {
     select_expressions.emplace_back(
-        txn->getCompiler()->buildValueExpression(txn, slnode->expression()));
+        txn->getCompiler()->buildValueExpression(
+            txn,
+            slnode->expression()));
   }
 
   auto expr = new csql::SubqueryExpression(
       txn,
       std::move(select_expressions),
       std::move(where_expr),
-      buildExpression(txn, node->subquery()));
+      buildExpression(txn, execution_context, node->subquery()));
   return mkScoped(expr);
 }
 
 ScopedPtr<csql::TableExpression> Scheduler::buildOrderByExpression(
     csql::Transaction* txn,
+    csql::ExecutionContext* execution_context,
     RefPtr<csql::OrderByNode> node) {
   Vector<csql::OrderByExpression::SortExpr> sort_exprs;
   for (const auto& ss : node->sortSpecs()) {
@@ -103,12 +111,13 @@ ScopedPtr<csql::TableExpression> Scheduler::buildOrderByExpression(
   auto expr = new csql::OrderByExpression(
           txn,
           std::move(sort_exprs),
-          buildExpression(txn, node->inputTable()));
+          buildExpression(txn, execution_context, node->inputTable()));
   return mkScoped(expr);
 }
 
 ScopedPtr<csql::TableExpression> Scheduler::buildSequentialScan(
     csql::Transaction* txn,
+    csql::ExecutionContext* execution_context,
     RefPtr<csql::SequentialScanNode> node) {
   const auto& table_name = node->tableName();
   auto table_provider = txn->getTableProvider();
@@ -123,6 +132,7 @@ ScopedPtr<csql::TableExpression> Scheduler::buildSequentialScan(
 
 ScopedPtr<csql::TableExpression> Scheduler::buildGroupByExpression(
     csql::Transaction* txn,
+    csql::ExecutionContext* execution_context,
     RefPtr<csql::GroupByNode> node) {
   Vector<csql::ValueExpression> select_expressions;
   Vector<csql::ValueExpression> group_expressions;
@@ -143,12 +153,13 @@ ScopedPtr<csql::TableExpression> Scheduler::buildGroupByExpression(
           txn,
           std::move(select_expressions),
           std::move(group_expressions),
-          buildExpression(txn, node->inputTable()));
+          buildExpression(txn, execution_context, node->inputTable()));
   return mkScoped(expr);
 }
 
 ScopedPtr<csql::TableExpression> Scheduler::buildPartialGroupByExpression(
     csql::Transaction* txn,
+    csql::ExecutionContext* execution_context,
     RefPtr<csql::GroupByNode> node) {
   Vector<csql::ValueExpression> select_expressions;
   Vector<csql::ValueExpression> group_expressions;
@@ -169,12 +180,13 @@ ScopedPtr<csql::TableExpression> Scheduler::buildPartialGroupByExpression(
           txn,
           std::move(select_expressions),
           std::move(group_expressions),
-          buildExpression(txn, node->inputTable()));
+          buildExpression(txn, execution_context, node->inputTable()));
   return mkScoped(expr);
 }
 
 ScopedPtr<csql::TableExpression> Scheduler::buildPipelineGroupByExpression(
       csql::Transaction* txn,
+    csql::ExecutionContext* execution_context,
       RefPtr<csql::GroupByNode> node) {
   auto remote_aggregate = mkScoped(
       new PipelinedExpression(
@@ -194,7 +206,7 @@ ScopedPtr<csql::TableExpression> Scheduler::buildPipelineGroupByExpression(
     group_by_copy->setIsPartialAggreagtion(true);
     if (shards[i].is_local) {
       auto partial = 
-          buildPartialGroupByExpression(txn, group_by_copy);
+          buildPartialGroupByExpression(txn, execution_context, group_by_copy);
       remote_aggregate->addLocalQuery(std::move(partial));
     } else {
       remote_aggregate->addRemoteQuery(group_by_copy.get(), shards[i].hosts);
@@ -217,8 +229,8 @@ ScopedPtr<csql::TableExpression> Scheduler::buildPipelineGroupByExpression(
 }
 
 Vector<Scheduler::PipelinedQueryTree> Scheduler::pipelineExpression(
-      csql::Transaction* txn,
-      RefPtr<csql::QueryTreeNode> qtree) {
+    csql::Transaction* txn,
+    RefPtr<csql::QueryTreeNode> qtree) {
   auto seqscan = csql::QueryTreeUtil::findNode<csql::SequentialScanNode>(
       qtree.get());
   if (!seqscan) {
@@ -272,6 +284,7 @@ Vector<Scheduler::PipelinedQueryTree> Scheduler::pipelineExpression(
 
 ScopedPtr<csql::TableExpression> Scheduler::buildJoinExpression(
     csql::Transaction* ctx,
+    csql::ExecutionContext* execution_context,
     RefPtr<csql::JoinNode> node) {
   Vector<String> column_names;
   Vector<csql::ValueExpression> select_expressions;
@@ -300,38 +313,45 @@ ScopedPtr<csql::TableExpression> Scheduler::buildJoinExpression(
           std::move(select_expressions),
           std::move(join_cond_expr),
           std::move(where_expr),
-          buildExpression(ctx, node->baseTable()),
-          buildExpression(ctx, node->joinedTable()));
+          buildExpression(ctx, execution_context, node->baseTable()),
+          buildExpression(ctx, execution_context, node->joinedTable()));
   return mkScoped(expr);
 }
 
 ScopedPtr<csql::TableExpression> Scheduler::buildExpression(
     csql::Transaction* ctx,
+    csql::ExecutionContext* execution_context,
     RefPtr<csql::QueryTreeNode> node) {
 
   if (dynamic_cast<csql::LimitNode*>(node.get())) {
-    return buildLimit(ctx, node.asInstanceOf<csql::LimitNode>());
+    return buildLimit(ctx, execution_context, node.asInstanceOf<csql::LimitNode>());
   }
 
   if (dynamic_cast<csql::SelectExpressionNode*>(node.get())) {
     return buildSelectExpression(
         ctx,
+        execution_context,
         node.asInstanceOf<csql::SelectExpressionNode>());
   }
 
   if (dynamic_cast<csql::SubqueryNode*>(node.get())) {
     return buildSubquery(
         ctx,
+        execution_context,
         node.asInstanceOf<csql::SubqueryNode>());
   }
 
   if (dynamic_cast<csql::OrderByNode*>(node.get())) {
-    return buildOrderByExpression(ctx, node.asInstanceOf<csql::OrderByNode>());
+    return buildOrderByExpression(
+        ctx,
+        execution_context,
+        node.asInstanceOf<csql::OrderByNode>());
   }
 
   if (dynamic_cast<csql::SequentialScanNode*>(node.get())) {
     return buildSequentialScan(
         ctx,
+        execution_context,
         node.asInstanceOf<csql::SequentialScanNode>());
   }
 
@@ -340,16 +360,19 @@ ScopedPtr<csql::TableExpression> Scheduler::buildExpression(
     if (group_node->isPartialAggregation()) {
       return buildPartialGroupByExpression(
           ctx,
+          execution_context,
           group_node);
     }
 
     if (isPipelineable(*group_node->inputTable())) {
       return buildPipelineGroupByExpression(
           ctx,
+          execution_context,
           group_node);
     } else {
       return buildGroupByExpression(
           ctx,
+          execution_context,
           group_node);
     }
   }
@@ -367,6 +390,7 @@ ScopedPtr<csql::TableExpression> Scheduler::buildExpression(
   if (dynamic_cast<csql::JoinNode*>(node.get())) {
     return buildJoinExpression(
         ctx,
+        execution_context,
         node.asInstanceOf<csql::JoinNode>());
   }
 
@@ -387,6 +411,7 @@ ScopedPtr<csql::ResultCursor> Scheduler::execute(
       new csql::TableExpressionResultCursor(
           buildExpression(
               query_plan->getTransaction(),
+              execution_context,
               qtree)));
 };
 
