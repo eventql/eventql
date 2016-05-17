@@ -65,7 +65,11 @@ bool ShowTablesExpression::next(SValue* row, size_t row_len) {
     for (size_t i = 0; i < kNumColumns && i < row_len; ++i) {
       row[i] = buf_[counter_][i];
     }
-    ++counter_;
+
+    if (++counter_ == buf_.size() && completion_callback_) {
+      completion_callback_();
+    }
+
     return true;
   } else {
     return false;

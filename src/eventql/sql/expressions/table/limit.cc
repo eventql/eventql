@@ -55,6 +55,10 @@ size_t LimitExpression::getNumColumns() const {
 
 bool LimitExpression::next(SValue* row, size_t row_len) {
   if (limit_ == 0 || counter_ >= offset_ + limit_) {
+    if (completion_callback_) {
+      completion_callback_();
+      completion_callback_ = nullptr;
+    }
     return false;
   }
 
@@ -68,8 +72,13 @@ bool LimitExpression::next(SValue* row, size_t row_len) {
       return true;
     }
   }
-  
+
+  if (completion_callback_) {
+    completion_callback_();
+    completion_callback_ = nullptr;
+  }
   return false;
 }
+
 
 }

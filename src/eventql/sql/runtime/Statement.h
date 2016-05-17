@@ -25,7 +25,6 @@
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/autoref.h>
 #include <eventql/sql/svalue.h>
-#include <eventql/sql/runtime/ExecutionContext.h>
 
 #include "eventql/eventql.h"
 

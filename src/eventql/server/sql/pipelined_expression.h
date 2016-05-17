@@ -91,6 +91,7 @@ protected:
   Vector<std::thread> threads_;
   size_t queries_started_;
   size_t queries_finished_;
+  Function<void()> completion_callback_;
 };
 
 }

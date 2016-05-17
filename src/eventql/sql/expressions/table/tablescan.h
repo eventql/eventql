@@ -55,6 +55,7 @@ protected:
   ScopedPtr<TableIterator> iter_;
   Vector<ValueExpression> select_exprs_;
   Option<ValueExpression> where_expr_;
+  Function<void()> completion_callback_;
 };
 
 } // namespace csql

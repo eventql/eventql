@@ -118,6 +118,7 @@ protected:
   bool cur_filter_pred_;
   Vector<SValue> cur_buf_;
   size_t cur_pos_;
+  Function<void()> completion_callback_;
 };
 
 

@@ -64,6 +64,7 @@ public:
 
   ScopedPtr<csql::ResultCursor> execute(
       csql::QueryPlan* query_plan,
+      csql::ExecutionContext* execution_context,
       size_t stmt_idx) override;
 
 protected:
@@ -127,6 +128,7 @@ protected:
   PartitionMap* pmap_;
   AnalyticsAuth* auth_;
   ReplicationScheme* repl_scheme_;
+  size_t running_cnt_;
 };
 
 } // namespace eventql

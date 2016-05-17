@@ -114,4 +114,5 @@ RefPtr<QueryTreeNode> SelectExpressionNode::decode(
   return new SelectExpressionNode(select_list);
 }
 
+
 } // namespace csql

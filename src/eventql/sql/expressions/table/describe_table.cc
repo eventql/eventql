@@ -72,7 +72,9 @@ bool DescribeTableStatement::next(SValue* row, size_t row_len) {
         break;
     }
 
-    ++counter_;
+    if (++counter_ == rows_.size() && completion_callback_) {
+      completion_callback_();
+    }
     return true;
   } else {
     return false;

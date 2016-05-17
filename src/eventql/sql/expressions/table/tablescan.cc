@@ -108,6 +108,10 @@ bool TableScan::next(SValue* out, int out_len) {
     return true;
   }
 
+  if (completion_callback_) {
+    completion_callback_();
+    completion_callback_ = nullptr;
+  }
   return false;
 }
 

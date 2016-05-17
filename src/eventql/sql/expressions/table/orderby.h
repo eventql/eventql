@@ -59,6 +59,7 @@ protected:
   Vector<Vector<SValue>> rows_;
   size_t num_rows_;
   size_t pos_;
+  Function<void()> completion_callback_;
 };
 
 }

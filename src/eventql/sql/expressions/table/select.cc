@@ -54,11 +54,16 @@ bool SelectExpression::next(SValue* row, int row_len) {
       VM::evaluate(txn_, select_exprs_[i].program(), 0, nullptr,  &row[i]);
     }
 
+    if (completion_callback_) {
+      completion_callback_();
+    }
+
     return true;
   } else {
     return false;
   }
 }
+
 //bool Select::nextRow(SValue* out, int out_len) {
 //  if (pos_ == 0) {
 //    for (int i = 0; i < select_exprs_.size() && i < out_len; ++i) {

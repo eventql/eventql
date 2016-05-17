@@ -22,31 +22,26 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#pragma once
 #include "eventql/eventql.h"
-#include <eventql/util/stdtypes.h>
-#include <eventql/util/autoref.h>
-#include <eventql/sql/result_cursor.h>
 #include <eventql/sql/scheduler/execution_context.h>
 
 namespace csql {
-class QueryPlan;
 
-class Scheduler : public RefCounted {
-public:
-  virtual ~Scheduler() {};
-  virtual ScopedPtr<ResultCursor> execute(
-      QueryPlan* query_plan,
-      ExecutionContext* execution_context,
-      size_t stmt_idx) = 0;
-};
+ExecutionContext::ExecutionContext() :
+    num_tasks_(0),
+    num_tasks_running_(0),
+    num_tasks_completed_(0) {}
 
-class DefaultScheduler : public Scheduler {
-public:
-  ScopedPtr<ResultCursor> execute(
-      QueryPlan* query_plan,
-      ExecutionContext* execution_context,
-      size_t stmt_idx) override;
-};
+void ExecutionContext::incrementNumTasks() {
+  ++num_tasks_;
+}
 
-} // namespace csql
+void ExecutionContext::incrementNumTasksRunning() {
+  ++num_tasks_running_;
+}
+
+void ExecutionContext::incrementNumTasksCompleted() {
+  ++num_tasks_completed_;
+}
+
+} //namespace csql

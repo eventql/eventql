@@ -73,7 +73,9 @@ bool TableScan::next(csql::SValue* row, size_t row_len) {
       return true;
     } else {
       cur_cursor_.reset(nullptr);
-      ++cur_partition_;
+      if (++cur_partition_ == partitions_.size() && completion_callback_) {
+        completion_callback_();
+      }
     }
   }
 

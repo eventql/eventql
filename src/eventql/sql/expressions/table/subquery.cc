@@ -85,7 +85,16 @@ bool SubqueryExpression::next(SValue* row, int row_len) {
     return true;
   }
 
+  if (completion_callback_) {
+    completion_callback_();
+    completion_callback_ = nullptr;
+  }
+
   return false;
+}
+
+void SubqueryExpression::setCompletionCallback(Function<void()> cb) {
+  completion_callback_ = cb;
 }
 
 //bool Subquery::onInputRow(

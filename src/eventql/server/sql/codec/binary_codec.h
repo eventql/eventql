@@ -33,7 +33,6 @@
 #include "eventql/util/http/httpclient.h"
 #include "eventql/sql/svalue.h"
 #include "eventql/sql/runtime/QueryPlan.h"
-#include "eventql/sql/runtime/ExecutionContext.h"
 
 #include "eventql/eventql.h"
 
@@ -76,6 +75,13 @@ namespace csql {
  *       %0xff
  *
  */
+
+struct ExecutionStatus {
+  size_t num_subtasks_total;
+  size_t num_subtasks_completed;
+  size_t num_rows_scanned;
+};
+
 
 class BinaryResultParser : public RefCounted {
 public:

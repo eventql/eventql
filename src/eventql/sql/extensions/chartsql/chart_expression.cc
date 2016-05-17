@@ -417,10 +417,18 @@ size_t ChartExpression::getNumColumns() const {
   return 1;
 }
 
+void ChartExpression::setCompletionCallback(Function<void()> cb) {
+  completion_callback_ = cb;
+}
+
 bool ChartExpression::next(SValue* row, size_t row_len) {
   if (++counter_ == 1) {
     if (row_len > 0) {
       *row = SValue::newString(svg_data_);
+    }
+
+    if (completion_callback_) {
+      completion_callback_();
     }
 
     return true;

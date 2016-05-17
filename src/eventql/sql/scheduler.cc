@@ -281,6 +281,7 @@ static ScopedPtr<TableExpression> buildExpression(
 
 ScopedPtr<ResultCursor> DefaultScheduler::execute(
     QueryPlan* query_plan,
+    ExecutionContext* execution_context,
     size_t stmt_idx) {
   return mkScoped(
       new TableExpressionResultCursor(

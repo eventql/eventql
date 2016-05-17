@@ -21,65 +21,65 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#pragma once
-#include <eventql/util/stdtypes.h>
-#include <eventql/util/autoref.h>
-#include <eventql/util/thread/taskscheduler.h>
-#include <eventql/sql/svalue.h>
-
-#include "eventql/eventql.h"
-
-namespace csql {
-
-struct ExecutionStatus {
-  ExecutionStatus();
-
-  std::atomic<size_t> num_subtasks_total;
-  std::atomic<size_t> num_subtasks_completed;
-  std::atomic<size_t> num_rows_scanned;
-
-  String toString() const;
-  double progress() const;
-};
-
-
-class ExecutionContext : public RefCounted {
-public:
-
-  ExecutionContext(
-      TaskScheduler* sched,
-      size_t max_concurrent_tasks = 32);
-
-  void onStatusChange(Function<void (const ExecutionStatus& status)> fn);
-
-  void cancel();
-  bool isCancelled() const;
-  void onCancel(Function<void ()> fn);
-
-  void incrNumSubtasksTotal(size_t n);
-  void incrNumSubtasksCompleted(size_t n);
-  void incrNumRowsScanned(size_t n);
-
-  void runAsync(Function<void ()> fn);
-
-  Option<String> cacheDir() const;
-  void setCacheDir(const String& cachedir);
-
-protected:
-
-  void statusChanged();
-
-  TaskScheduler* sched_;
-  size_t max_concurrent_tasks_;
-  Option<String> cachedir_;
-
-  ExecutionStatus status_;
-  mutable std::mutex mutex_;
-  std::condition_variable cv_;
-  Function<void (const ExecutionStatus& status)> on_status_change_;
-  Function<void ()> on_cancel_;
-  bool cancelled_;
-  size_t running_tasks_;
-};
-
-}
+//#pragma once
+//#include <eventql/util/stdtypes.h>
+//#include <eventql/util/autoref.h>
+//#include <eventql/util/thread/taskscheduler.h>
+//#include <eventql/sql/svalue.h>
+//
+//#include "eventql/eventql.h"
+//
+//namespace csql {
+//
+//struct ExecutionStatus {
+//  ExecutionStatus();
+//
+//  std::atomic<size_t> num_subtasks_total;
+//  std::atomic<size_t> num_subtasks_completed;
+//  std::atomic<size_t> num_rows_scanned;
+//
+//  String toString() const;
+//  double progress() const;
+//};
+//
+//
+//class ExecutionContext : public RefCounted {
+//public:
+//
+//  ExecutionContext(
+//      TaskScheduler* sched,
+//      size_t max_concurrent_tasks = 32);
+//
+//  void onStatusChange(Function<void (const ExecutionStatus& status)> fn);
+//
+//  void cancel();
+//  bool isCancelled() const;
+//  void onCancel(Function<void ()> fn);
+//
+//  void incrNumSubtasksTotal(size_t n);
+//  void incrNumSubtasksCompleted(size_t n);
+//  void incrNumRowsScanned(size_t n);
+//
+//  void runAsync(Function<void ()> fn);
+//
+//  Option<String> cacheDir() const;
+//  void setCacheDir(const String& cachedir);
+//
+//protected:
+//
+//  void statusChanged();
+//
+//  TaskScheduler* sched_;
+//  size_t max_concurrent_tasks_;
+//  Option<String> cachedir_;
+//
+//  ExecutionStatus status_;
+//  mutable std::mutex mutex_;
+//  std::condition_variable cv_;
+//  Function<void (const ExecutionStatus& status)> on_status_change_;
+//  Function<void ()> on_cancel_;
+//  bool cancelled_;
+//  size_t running_tasks_;
+//};
+//
+//}

@@ -239,7 +239,6 @@ bool PipelinedExpression::returnRow(
   return true;
 }
 
-
 bool PipelinedExpression::next(csql::SValue* out_row, size_t out_row_len) {
   std::unique_lock<std::mutex> lk(mutex_);
 
@@ -265,6 +264,11 @@ bool PipelinedExpression::next(csql::SValue* out_row, size_t out_row_len) {
   }
 
   buf_.pop_front();
+
+  if (eof_ && buf_.size() == 0 && completion_callback_) {
+    completion_callback_();
+  }
+
   return true;
 }
 

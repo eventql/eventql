@@ -73,6 +73,7 @@ protected:
   Vector<Vector<SValue>> joined_tbl_data_;
   size_t joined_tbl_pos_;
   bool joined_tbl_row_found_;
+  Function<void()> completion_callback_;
 };
 
 //class NestedLoopJoinFactory  : public TaskFactory {

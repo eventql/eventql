@@ -27,6 +27,7 @@
 #include <eventql/sql/qtree/QueryTreeNode.h>
 #include <eventql/sql/scheduler.h>
 #include <eventql/sql/transaction.h>
+#include <eventql/sql/scheduler/execution_context.h>
 
 namespace csql {
 class Runtime;
@@ -77,16 +78,11 @@ public:
 
   Transaction* getTransaction() const;
 
-  //void onOutputComplete(size_t stmt_idx, Function<void ()> fn);
-  //void onOutputRow(size_t stmt_idx, RowSinkFn fn);
-  //void onQueryFinished(Function<void ()> fn);
-
-  //void storeResults(size_t stmt_idx, ResultList* result_list);
-
 protected:
   Transaction* txn_;
   Vector<RefPtr<QueryTreeNode>> qtrees_;
   Vector<Vector<String>> statement_columns_;
+  Vector<ExecutionContext> execution_contexts_;
 };
 
 }

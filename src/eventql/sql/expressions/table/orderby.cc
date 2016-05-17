@@ -116,7 +116,10 @@ bool OrderByExpression::next(SValue* out, int out_len) {
       out[i] = rows_[pos_][i];
     }
 
-    if (++pos_ >= num_rows_) {
+    if (++pos_ == num_rows_) {
+      if (completion_callback_) {
+        completion_callback_();
+      }
       rows_.clear();
     }
 

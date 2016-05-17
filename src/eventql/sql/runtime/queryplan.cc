@@ -30,7 +30,8 @@ QueryPlan::QueryPlan(
     Transaction* txn,
     Vector<RefPtr<QueryTreeNode>> qtrees) :
     txn_(txn),
-    qtrees_(qtrees) {
+    qtrees_(qtrees),
+    execution_contexts_(qtrees_.size()) {
   for (const auto& qtree : qtrees_) {
     statement_columns_.emplace_back(
         qtree.asInstanceOf<TableExpressionNode>()->outputColumns());
@@ -42,7 +43,10 @@ ScopedPtr<ResultCursor> QueryPlan::execute(size_t stmt_idx) {
     RAISE(kIndexError, "invalid statement index");
   }
 
-  return txn_->getRuntime()->getScheduler()->execute(this, stmt_idx);
+  return txn_->getRuntime()->getScheduler()->execute(
+      this,
+      &execution_contexts_[stmt_idx],
+      stmt_idx);
 }
 
 void QueryPlan::execute(size_t stmt_idx, ResultList* result_list) {

@@ -50,6 +50,7 @@ protected:
   String table_name_;
   Vector<ColumnInfo> rows_;
   size_t counter_;
+  Function<void()> completion_callback_;
 };
 
 }

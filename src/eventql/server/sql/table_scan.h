@@ -67,6 +67,7 @@ protected:
   AnalyticsAuth* auth_;
   ScopedPtr<csql::ResultCursor> cur_cursor_;
   size_t cur_partition_;
+  Function<void()> completion_callback_;
 };
 
 }

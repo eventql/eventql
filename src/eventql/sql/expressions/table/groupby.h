@@ -58,6 +58,7 @@ protected:
   HashMap<String, Vector<VM::Instance>>::const_iterator groups_iter_;
   ScratchMemory scratch_;
   bool freed_;
+  Function<void()> completion_callback_;
 };
 
 class PartialGroupByExpression : public TableExpression {
@@ -89,6 +90,7 @@ protected:
   HashMap<String, Vector<VM::Instance>>::const_iterator groups_iter_;
   ScratchMemory scratch_;
   bool freed_;
+  Function<void()> completion_callback_;
 };
 
 class GroupByMergeExpression : public TableExpression {
@@ -117,6 +119,7 @@ protected:
   HashMap<String, Vector<VM::Instance>>::const_iterator groups_iter_;
   ScratchMemory scratch_;
   bool freed_;
+  Function<void()> completion_callback_;
 };
 
 

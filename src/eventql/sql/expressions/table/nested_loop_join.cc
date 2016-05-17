@@ -94,6 +94,10 @@ ScopedPtr<ResultCursor> NestedLoopJoin::executeCartesianJoin() {
         if (!base_tbl_cursor_->next(
               base_tbl_row_.data(),
               base_tbl_row_.size())) {
+          if (completion_callback_) {
+            completion_callback_();
+            completion_callback_ = nullptr;
+          }
           return false;
         }
       }
@@ -156,6 +160,10 @@ ScopedPtr<ResultCursor> NestedLoopJoin::executeInnerJoin() {
         if (!base_tbl_cursor_->next(
               base_tbl_row_.data(),
               base_tbl_row_.size())) {
+          if (completion_callback_) {
+            completion_callback_();
+            completion_callback_ = nullptr;
+          }
           return false;
         }
       }
@@ -234,6 +242,10 @@ ScopedPtr<ResultCursor> NestedLoopJoin::executeOuterJoin() {
         if (!base_tbl_cursor_->next(
               base_tbl_row_.data(),
               base_tbl_row_.size())) {
+          if (completion_callback_) {
+            completion_callback_();
+            completion_callback_ = nullptr;
+          }
           return false;
         }
       }

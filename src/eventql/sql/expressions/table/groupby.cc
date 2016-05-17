@@ -100,6 +100,9 @@ bool GroupByExpression::next(SValue* row, size_t row_len) {
     }
 
     if (++groups_iter_ == groups_.end()) {
+      if (completion_callback_) {
+        completion_callback_();
+      }
       freeResult();
     }
     return true;
@@ -118,7 +121,6 @@ void GroupByExpression::freeResult() {
   groups_.clear();
   freed_ = true;
 }
-
 
 PartialGroupByExpression::PartialGroupByExpression(
     Transaction* txn,
@@ -206,6 +208,9 @@ bool PartialGroupByExpression::next(SValue* row, size_t row_len) {
     }
 
     if (++groups_iter_ == groups_.end()) {
+      if (completion_callback_) {
+        completion_callback_();
+      }
       freeResult();
     }
     return true;
@@ -297,6 +302,9 @@ bool GroupByMergeExpression::next(SValue* row, size_t row_len) {
     }
 
     if (++groups_iter_ == groups_.end()) {
+      if (completion_callback_) {
+        completion_callback_();
+      }
       freeResult();
     }
     return true;
@@ -315,6 +323,5 @@ void GroupByMergeExpression::freeResult() {
   groups_.clear();
   freed_ = true;
 }
-
 
 } // namespace csql

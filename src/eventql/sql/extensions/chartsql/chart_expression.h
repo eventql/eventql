@@ -42,6 +42,8 @@ public:
 
   size_t getNumColumns() const override;
 
+  void setCompletionCallback(Function<void()> cb);
+
 protected:
 
   bool next(SValue* row, size_t row_len);
@@ -97,6 +99,7 @@ protected:
   Vector<Vector<RefPtr<TableExpressionNode>>> input_table_qtrees_;
   size_t counter_;
   String svg_data_;
+  Function<void()> completion_callback_;
 };
 
 } // namespace csql

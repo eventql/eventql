@@ -42,6 +42,8 @@ public:
 
   size_t getNumColumns() const override;
 
+  void setCompletionCallback(Function<void()> cb);
+
 protected:
 
   bool next(SValue* row, int row_len);
@@ -52,6 +54,7 @@ protected:
   ScopedPtr<TableExpression> input_;
   ScopedPtr<ResultCursor> input_cursor_;
   Vector<SValue> buf_;
+  Function<void()> completion_callback_;
 };
 
 }
