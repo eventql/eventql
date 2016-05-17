@@ -2249,7 +2249,7 @@ TEST_CASE(RuntimeTest, TestSimpleDrawQuery, [] () {
   ResultList result;
   qplan->execute(0, &result);
 
-  auto exptected_svg_path = "src/eventql/sql/testdataQueryTest_TestSimpleDrawQuery_out.svg.html";
+  auto exptected_svg_path = "src/eventql/sql/testdata/QueryTest_TestSimpleDrawQuery_out.svg.html";
   auto exptected_svg = FileUtil::read(exptected_svg_path).toString();
 
   EXPECT_EQ(result.getNumColumns(), 1);

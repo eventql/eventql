@@ -48,6 +48,8 @@ protected:
   Transaction* txn_;
   RefPtr<ChartStatementNode> qtree_;
   Vector<ScopedPtr<TableExpression>> input_tables_;
+  size_t counter_;
+  String svg_data_;
 };
 
 } // namespace csql

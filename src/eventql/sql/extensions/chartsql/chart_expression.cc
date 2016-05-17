@@ -32,7 +32,8 @@ ChartExpression::ChartExpression(
     Vector<ScopedPtr<TableExpression>> input_tables) :
     txn_(txn),
     qtree_(std::move(qtree)),
-    input_tables_(std::move(input_tables)) {}
+    input_tables_(std::move(input_tables)),
+    counter_(0) {}
 
 ScopedPtr<ResultCursor> ChartExpression::execute() {
   return mkScoped(
@@ -50,7 +51,15 @@ size_t ChartExpression::getNumColumns() const {
 }
 
 bool ChartExpression::next(SValue* row, size_t row_len) {
-  return false;
+  if (++counter_ == 1) {
+    if (row_len > 0) {
+      *row = SValue::newString(svg_data_);
+    }
+
+    return true;
+  } else {
+    return false;
+  }
 }
 
 } //namespace csql
