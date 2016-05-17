@@ -1112,6 +1112,9 @@ void AnalyticsServlet::executeSQL_BINARY(
           [] (void* tx_info) { delete (TransactionInfo*) tx_info; });
 
       auto qplan = sql_->buildQueryPlan(txn.get(), query);
+      qplan->setProgressCallback([&result_format, &qplan] () {
+        result_format.sendProgress(qplan->getProgress());
+      });
 
       result_format.sendResults(qplan.get());
     } catch (const StandardException& e) {
@@ -1209,6 +1212,9 @@ void AnalyticsServlet::executeSQL_JSONSSE(
     auto qplan = sql_->buildQueryPlan(txn.get(), query);
 
     JSONSSECodec json_sse_codec(sse_stream);
+    qplan->setProgressCallback([&json_sse_codec, &qplan] () {
+      json_sse_codec.sendProgress(qplan->getProgress());
+    });
 
     Vector<csql::ResultList> results;
     for (size_t i = 0; i < qplan->numStatements(); ++i) {
