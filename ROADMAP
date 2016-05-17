@@ -15,6 +15,9 @@ ROADMAP
 - [ ] improved table iterator iface (update, ordered, restricted, etc)
 
 - [ ] evql: load auth info from ~/.evqlrc
+- [ ] rename QueryPlanBuilder -> qtree_builder
+- [ ] QueryTree container ds w/ ownership of QTreeNodes
+
 
 -> move pipelined aggregate code to server/sql/pipelined_aggregate
 -> PartialAggregateNode
