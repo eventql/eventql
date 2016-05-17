@@ -24,7 +24,7 @@ add_library(chartsql STATIC
     svalue.cc
     SFunction.cc
     format.cc
-    Transaction.cc
+    transaction.cc
     #queryendpoint.cc
     #query.cc
     #queryservice.cc
@@ -95,7 +95,7 @@ add_library(chartsql STATIC
     runtime/defaultruntime.cc
     runtime/tablerepository.cc
     runtime/queryplanbuilder.cc
-    runtime/queryplan.cc
+    query_plan.cc
     runtime/vm.cc
     runtime/compiler.cc
     runtime/ExecutionContext.cc

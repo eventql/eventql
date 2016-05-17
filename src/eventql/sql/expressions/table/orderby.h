@@ -24,7 +24,7 @@
  */
 #pragma once
 #include <eventql/util/stdtypes.h>
-#include <eventql/sql/Transaction.h>
+#include <eventql/sql/transaction.h>
 #include <eventql/sql/runtime/ValueExpression.h>
 #include <eventql/sql/qtree/OrderByNode.h>
 #include <eventql/sql/expressions/table_expression.h>

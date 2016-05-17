@@ -23,6 +23,7 @@ ROADMAP
 - [ ] evql: human formt
 - [ ] evql: history/reverse-i search
 
+-> SQL service
 -> move pipelined aggregate code to server/sql/pipelined_aggregate
 -> PartialAggregateNode
 -> qtree rewrite: .lastXX sufix

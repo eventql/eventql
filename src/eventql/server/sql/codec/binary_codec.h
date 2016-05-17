@@ -22,6 +22,7 @@
  * code of your own applications
  */
 #pragma once
+#include "eventql/eventql.h"
 #include <eventql/util/uri.h>
 #include <eventql/util/io/file.h>
 #include <eventql/util/autoref.h>
@@ -32,9 +33,7 @@
 #include "eventql/util/http/httpconnectionpool.h"
 #include "eventql/util/http/httpclient.h"
 #include "eventql/sql/svalue.h"
-#include "eventql/sql/runtime/QueryPlan.h"
-
-#include "eventql/eventql.h"
+#include "eventql/sql/query_plan.h"
 
 namespace csql {
 

@@ -1,6 +1,5 @@
 project(ZenBase)
 cmake_minimum_required(VERSION 2.8.10)
-cmake_policy(SET CMP0026 OLD)
 
 include(CheckIncludeFile)
 include(CheckCXXSourceCompiles)
@@ -68,9 +67,10 @@ ExternalProject_Add(spidermonkey_build
     URL ${PROJECT_SOURCE_DIR}/deps/3rdparty/mozjs
     SOURCE_DIR ${PROJECT_BINARY_DIR}/deps/3rdparty/mozjs
     BINARY_DIR ${PROJECT_BINARY_DIR}/deps/3rdparty/mozjs
-    BUILD_COMMAND sh -c "CC=${CMAKE_C_COMPILER} CXX=${CMAKE_CXX_COMPILER} AR=${CMAKE_AR} RANLIB=${CMAKE_RANLIB} CFLAGS=\"${CMAKE_C_FLAGS} -DJS_THREADSAFE\" CXXFLAGS=\"${CMAKE_CXX_FLAGS} -DJS_THREADSAFE\" LDFLAGS=\"${CMAKE_EXE_LINKER_FLAGS}\" make JS_THREADSAFE=1 &>/dev/null"
-    CONFIGURE_COMMAND sh -c "CC=${CMAKE_C_COMPILER} CXX=${CMAKE_CXX_COMPILER} AR=${CMAKE_AR} RANLIB=${CMAKE_RANLIB} CFLAGS=\"${CMAKE_C_FLAGS} -DJS_THREADSAFE\" CXXFLAGS=\"${CMAKE_CXX_FLAGS} -DJS_THREADSAFE\" LDFLAGS=\"${CMAKE_EXE_LINKER_FLAGS}\" ${PROJECT_SOURCE_DIR}/deps/3rdparty/mozjs/js/src/configure --disable-shared-js &>/dev/null"
-    INSTALL_COMMAND "true")
+    CONFIGURE_COMMAND "true"
+    BUILD_COMMAND ./build.sh "${CMAKE_C_COMPILER}" "${CMAKE_CXX_COMPILER}" "${CMAKE_RANLIB}" "${CMAKE_AR}" "${PROJECT_SOURCE_DIR}/deps/3rdparty/mozjs"
+    INSTALL_COMMAND "true"
+    LOG_BUILD 1)
 
 add_library(spidermonkey STATIC IMPORTED)
 set_target_properties(spidermonkey PROPERTIES IMPORTED_LOCATION ${CMAKE_BINARY_DIR}/deps/3rdparty/mozjs/dist/lib/libjs_static.a)
@@ -80,9 +80,11 @@ ExternalProject_Add(editline_build
     URL ${PROJECT_SOURCE_DIR}/deps/3rdparty/editline
     SOURCE_DIR ${PROJECT_BINARY_DIR}/deps/3rdparty/editline
     BINARY_DIR ${PROJECT_BINARY_DIR}/deps/3rdparty/editline
-    BUILD_COMMAND sh -c "CC=${CMAKE_C_COMPILER} AR=${CMAKE_AR} RANLIB=${CMAKE_RANLIB} CFLAGS=\"${CMAKE_C_FLAGS}\" LDFLAGS=\"${CMAKE_EXE_LINKER_FLAGS}\" make &>/dev/null"
-    CONFIGURE_COMMAND sh -c "CC=${CMAKE_C_COMPILER} AR=${CMAKE_AR} RANLIB=${CMAKE_RANLIB} CFLAGS=\"${CMAKE_C_FLAGS}\" LDFLAGS=\"${CMAKE_EXE_LINKER_FLAGS}\" ./configure &>/dev/null"
-    INSTALL_COMMAND "true")
+    BUILD_COMMAND sh -c "make CC=${CMAKE_C_COMPILER} AR=${CMAKE_AR} RANLIB=${CMAKE_RANLIB} CFLAGS='${CMAKE_C_FLAGS}' LDFLAGS='${CMAKE_EXE_LINKER_FLAGS}'"
+    CONFIGURE_COMMAND sh -c "CC=${CMAKE_C_COMPILER} AR=${CMAKE_AR} RANLIB=${CMAKE_RANLIB} CFLAGS='${CMAKE_C_FLAGS}' LDFLAGS='${CMAKE_EXE_LINKER_FLAGS}' ./configure"
+    INSTALL_COMMAND "true"
+    LOG_BUILD 1
+    LOG_CONFIGURE 1)
 
 add_library(editline STATIC IMPORTED)
 add_dependencies(editline editline_build)

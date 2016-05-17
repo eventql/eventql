@@ -23,7 +23,7 @@
  * code of your own applications
  */
 #include <eventql/sql/expressions/table/describe_table.h>
-#include <eventql/sql/Transaction.h>
+#include <eventql/sql/transaction.h>
 
 namespace csql {
 

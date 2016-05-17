@@ -23,7 +23,7 @@
  */
 #pragma once
 #include <eventql/util/stdtypes.h>
-#include <eventql/sql/runtime/queryplan.h>
+#include <eventql/sql/query_plan.h>
 
 namespace csql {
 

@@ -24,7 +24,7 @@
 #ifndef _FNORDMETRIC_SQL_EXPRESSIONS_BOOLEAN_H
 #define _FNORDMETRIC_SQL_EXPRESSIONS_BOOLEAN_H
 #include <eventql/sql/svalue.h>
-#include <eventql/sql/Transaction.h>
+#include <eventql/sql/transaction.h>
 
 namespace csql {
 namespace expressions {

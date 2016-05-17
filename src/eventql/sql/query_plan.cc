@@ -21,7 +21,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include <eventql/sql/runtime/queryplan.h>
+#include <eventql/sql/query_plan.h>
 #include <eventql/sql/runtime/runtime.h>
 
 namespace csql {

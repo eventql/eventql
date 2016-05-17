@@ -26,7 +26,7 @@
 #include <eventql/util/autoref.h>
 #include <eventql/sql/parser/token.h>
 #include <eventql/sql/parser/astnode.h>
-#include <eventql/sql/runtime/queryplan.h>
+#include <eventql/sql/query_plan.h>
 #include <eventql/sql/runtime/compiler.h>
 
 namespace csql {
