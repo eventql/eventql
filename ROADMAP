@@ -17,7 +17,11 @@ ROADMAP
 - [ ] evql: load auth info from ~/.evqlrc
 - [ ] rename QueryPlanBuilder -> qtree_builder
 - [ ] QueryTree container ds w/ ownership of QTreeNodes
-
+- [ ] evql: run javascript
+- [ ] evql: guess language from file name
+- [ ] evql: batch format
+- [ ] evql: human formt
+- [ ] evql: history/reverse-i search
 
 -> move pipelined aggregate code to server/sql/pipelined_aggregate
 -> PartialAggregateNode
