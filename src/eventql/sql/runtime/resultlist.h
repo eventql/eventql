@@ -35,6 +35,7 @@ class ResultList{
 public:
 
   ResultList() {}
+  ResultList(const Vector<String>& header) : columns_(header) {}
   ResultList(const ResultList& copy) = delete;
   ResultList& operator=(const ResultList& copy) = delete;
 

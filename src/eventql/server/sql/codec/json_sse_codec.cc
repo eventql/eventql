@@ -21,23 +21,72 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include <eventql/sql/codec/json_sse_codec.h>
-#include <eventql/sql/runtime/resultlist.h>
+#include <eventql/server/sql/codec/json_sse_codec.h>
 
 namespace eventql {
 
 JSONSSECodec::JSONSSECodec(
-    csql::QueryPlan* query,
     RefPtr<http::HTTPSSEStream> output) :
-    json_codec_(query),
-    output_(output) {
-  query->onQueryFinished(std::bind(&JSONSSECodec::sendResults, this));
-}
+    output_(output) {}
 
-void JSONSSECodec::sendResults() {
-  Buffer result;
-  json_codec_.printResults(BufferOutputStream::fromBuffer(&result));
-  output_->sendEvent(result, Some(String("result")));
+void JSONSSECodec::sendResults(const Vector<csql::ResultList>& results) {
+  Buffer buf;
+  json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
+
+  json.beginObject();
+  json.addObjectEntry("results");
+  json.beginArray();
+
+  for (size_t k = 0; k < results.size(); ++k) {
+    if (k > 0) {
+      json.addComma();
+    }
+
+    json.beginObject();
+    json.addObjectEntry("type");
+    json.addString("table");
+    json.addComma();
+
+    json.addObjectEntry("columns");
+    json.beginArray();
+
+    auto columns = results[k].getColumns();
+    for (int i = 0; i < columns.size(); ++i) {
+      if (i > 0) {
+        json.addComma();
+      }
+      json.addString(columns[i]);
+    }
+    json.endArray();
+    json.addComma();
+
+    json.addObjectEntry("rows");
+    json.beginArray();
+
+    for (size_t j = 0; j < results[k].getNumRows(); ++j) {
+      if (j > 0) {
+        json.addComma();
+      }
+
+      json.beginArray();
+      const auto& row = results[k].getRow(j);
+      for (size_t i = 0; i < row.size(); ++i) {
+        if (i > 0) {
+          json.addComma();
+        }
+
+        json.addString(row[i]);
+      }
+      json.endArray();
+    }
+
+    json.endArray();
+    json.endObject();
+  }
+  json.endArray();
+  json.endObject();
+
+  output_->sendEvent(buf, Some(String("result")));
 }
 
 void JSONSSECodec::sendProgress(double progress) {

@@ -1284,36 +1284,46 @@ void AnalyticsServlet::executeSQL_JSONSSE(
     const http::HTTPRequest* req,
     http::HTTPResponse* res,
     RefPtr<http::HTTPResponseStream> res_stream) {
-  //String query;
-  //if (!URI::getParam(params, "query", &query)) {
-  //  res->setStatus(http::kStatusBadRequest);
-  //  res->addBody("missing ?query=... parameter");
-  //  res_stream->writeResponse(*res);
-  //  return;
-  //}
+  String query;
+  if (!URI::getParam(params, "query", &query)) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody("missing ?query=... parameter");
+    res_stream->writeResponse(*res);
+    return;
+  }
 
-  //auto sse_stream = mkRef(new http::HTTPSSEStream(res, res_stream));
-  //sse_stream->start();
+  auto sse_stream = mkRef(new http::HTTPSSEStream(res, res_stream));
+  sse_stream->start();
 
-  //try {
-  //  auto txn = sql_->newTransaction();
-  //  auto estrat = app_->getExecutionStrategy(session.customer());
-  //  txn->setTableProvider(estrat->tableProvider());
-  //  auto qplan = sql_->buildQueryPlan(txn.get(), query, estrat);
-  //  JSONSSECodec json_sse_codec(qplan.get(), sse_stream);
-  //  qplan->execute();
-  //} catch (const StandardException& e) {
-  //  Buffer buf;
-  //  json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
-  //  json.beginObject();
-  //  json.addObjectEntry("error");
-  //  json.addString(e.what());
-  //  json.endObject();
+  try {
+    auto txn = sql_->newTransaction();
+    txn->addTableProvider(app_->getTableProvider(session.customer()));
+    txn->setUserData(
+        new TransactionInfo(session.customer()),
+        [] (void* tx_info) { delete (TransactionInfo*) tx_info; });
+    auto qplan = sql_->buildQueryPlan(txn.get(), query);
 
-  //  sse_stream->sendEvent(buf, Some(String("query_error")));
-  //}
+    JSONSSECodec json_sse_codec(sse_stream);
 
-  //sse_stream->finish();
+    Vector<csql::ResultList> results;
+    for (size_t i = 0; i < qplan->numStatements(); ++i) {
+      results.emplace_back(qplan->getStatementOutputColumns(i));
+      qplan->execute(i, &results.back());
+    }
+
+   json_sse_codec.sendResults(results); 
+  } catch (const StandardException& e) {
+    Buffer buf;
+    json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
+    json.beginObject();
+    json.addObjectEntry("error");
+    json.addString(e.what());
+    json.endObject();
+
+    sse_stream->sendEvent(buf, Some(String("query_error")));
+  }
+
+  sse_stream->finish();
 }
 
 void AnalyticsServlet::executeQTree(

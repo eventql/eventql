@@ -25,22 +25,20 @@
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/http/HTTPSSEStream.h>
 #include <eventql/server/sql/codec/json_codec.h>
+#include <eventql/sql/runtime/resultlist.h>
 
 namespace eventql {
 
 class JSONSSECodec{
 public:
 
-  JSONSSECodec(
-      csql::QueryPlan* query,
-      RefPtr<http::HTTPSSEStream> sse_stream);
+  JSONSSECodec(RefPtr<http::HTTPSSEStream> sse_stream);
+
+  void sendResults(const Vector<csql::ResultList>& results);
+  void sendProgress(double progress);
 
 protected:
 
-  void sendResults();
-  void sendProgress(double progress);
-
-  JSONCodec json_codec_;
   RefPtr<http::HTTPSSEStream> output_;
 };
 
