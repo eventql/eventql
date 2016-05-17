@@ -28,10 +28,14 @@ namespace csql {
 
 SelectExpression::SelectExpression(
     Transaction* txn,
+    ExecutionContext* execution_context,
     Vector<ValueExpression> select_expressions) :
     txn_(txn),
+    execution_context_(execution_context),
     select_exprs_(std::move(select_expressions)),
-    pos_(0) {}
+    pos_(0) {
+  execution_context_->incrementNumTasksRunning();
+}
 
 ScopedPtr<ResultCursor> SelectExpression::execute() {
   return mkScoped(

@@ -34,6 +34,7 @@ public:
 
   SubqueryExpression(
       Transaction* txn,
+      ExecutionContext* execution_context,
       Vector<ValueExpression> select_expressions,
       Option<ValueExpression> where_expr,
       ScopedPtr<TableExpression> input);
@@ -49,6 +50,7 @@ protected:
   bool next(SValue* row, int row_len);
 
   Transaction* txn_;
+  ExecutionContext* execution_context_;
   Vector<ValueExpression> select_exprs_;
   Option<ValueExpression> where_expr_;
   ScopedPtr<TableExpression> input_;

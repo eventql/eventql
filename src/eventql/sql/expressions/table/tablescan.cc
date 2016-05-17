@@ -32,9 +32,11 @@ namespace csql {
 
 TableScan::TableScan(
     Transaction* txn,
+    ExecutionContext* execution_context,
     RefPtr<SequentialScanNode> stmt,
     ScopedPtr<TableIterator> iter) :
     txn_(txn),
+    execution_context_(execution_context),
     iter_(std::move(iter)) {
   auto qbuilder = txn->getCompiler();
 
@@ -61,6 +63,8 @@ TableScan::TableScan(
     where_expr_ = std::move(Option<ValueExpression>(
         qbuilder->buildValueExpression(txn, stmt->whereExpression().get())));
   }
+
+  execution_context->incrementNumTasksTotal();
 }
 
 ScopedPtr<ResultCursor> TableScan::execute() {

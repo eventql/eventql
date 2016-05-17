@@ -28,6 +28,7 @@
 #include <eventql/sql/runtime/ValueExpression.h>
 #include <eventql/sql/qtree/OrderByNode.h>
 #include <eventql/sql/expressions/table_expression.h>
+#include <eventql/sql/scheduler/execution_context.h>
 
 namespace csql {
 
@@ -41,6 +42,7 @@ public:
 
   OrderByExpression(
       Transaction* txn,
+      ExecutionContext* execution_context,
       Vector<SortExpr> sort_specs,
       ScopedPtr<TableExpression> input);
 
@@ -53,6 +55,7 @@ protected:
   bool next(SValue* row, int row_len);
 
   Transaction* txn_;
+  ExecutionContext* execution_context_;
   Vector<SortExpr> sort_specs_;
   ScopedPtr<TableExpression> input_;
   ScopedPtr<ResultCursor> input_cursor_;

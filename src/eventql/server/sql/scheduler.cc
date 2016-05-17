@@ -44,11 +44,12 @@ ScopedPtr<csql::TableExpression> Scheduler::buildLimit(
     csql::Transaction* ctx,
     csql::ExecutionContext* execution_context,
     RefPtr<csql::LimitNode> node) {
-  auto expr = new csql::LimitExpression(
+  return mkScoped(
+      new csql::LimitExpression(
+          execution_context,
           node->limit(),
           node->offset(),
-          buildExpression(ctx, execution_context, node->inputTable()));
-  return mkScoped(expr);
+          buildExpression(ctx, execution_context, node->inputTable())));
 }
 
 ScopedPtr<csql::TableExpression> Scheduler::buildSelectExpression(
@@ -61,10 +62,11 @@ ScopedPtr<csql::TableExpression> Scheduler::buildSelectExpression(
         ctx->getCompiler()->buildValueExpression(ctx, slnode->expression()));
   }
 
-  auto expr = new csql::SelectExpression(
-      ctx,
-      std::move(select_expressions));
-  return mkScoped(expr);
+  return mkScoped(
+      new csql::SelectExpression(
+          ctx,
+          execution_context,
+          std::move(select_expressions)));
 };
 
 ScopedPtr<csql::TableExpression> Scheduler::buildSubquery(
@@ -88,12 +90,13 @@ ScopedPtr<csql::TableExpression> Scheduler::buildSubquery(
             slnode->expression()));
   }
 
-  auto expr = new csql::SubqueryExpression(
-      txn,
-      std::move(select_expressions),
-      std::move(where_expr),
-      buildExpression(txn, execution_context, node->subquery()));
-  return mkScoped(expr);
+  return mkScoped(
+      new csql::SubqueryExpression(
+          txn,
+          execution_context,
+          std::move(select_expressions),
+          std::move(where_expr),
+          buildExpression(txn, execution_context, node->subquery())));
 }
 
 ScopedPtr<csql::TableExpression> Scheduler::buildOrderByExpression(
@@ -108,11 +111,12 @@ ScopedPtr<csql::TableExpression> Scheduler::buildOrderByExpression(
     sort_exprs.emplace_back(std::move(se));
   }
 
-  auto expr = new csql::OrderByExpression(
+  return mkScoped(
+      new csql::OrderByExpression(
           txn,
+          execution_context,
           std::move(sort_exprs),
-          buildExpression(txn, execution_context, node->inputTable()));
-  return mkScoped(expr);
+          buildExpression(txn, execution_context, node->inputTable())));
 }
 
 ScopedPtr<csql::TableExpression> Scheduler::buildSequentialScan(
@@ -122,7 +126,10 @@ ScopedPtr<csql::TableExpression> Scheduler::buildSequentialScan(
   const auto& table_name = node->tableName();
   auto table_provider = txn->getTableProvider();
 
-  auto seqscan = table_provider->buildSequentialScan(txn, node);
+  auto seqscan = table_provider->buildSequentialScan(
+      txn,
+      execution_context,
+      node);
   if (seqscan.isEmpty()) {
     RAISEF(kRuntimeError, "table not found: $0", table_name);
   }

@@ -34,7 +34,7 @@ public:
 
   SelectExpression(
       Transaction* txn,
-     // ExecutionContext* context,
+      ExecutionContext* execution_context,
       Vector<ValueExpression> select_expressions);
 
   ScopedPtr<ResultCursor> execute() override;
@@ -48,6 +48,7 @@ protected:
   bool next(SValue* row, int row_len);
 
   Transaction* txn_;
+  ExecutionContext* execution_context_;
   Vector<ValueExpression> select_exprs_;
   size_t pos_;
   Function<void()> completion_callback_;

@@ -49,20 +49,24 @@ namespace csql {
 
 static ScopedPtr<TableExpression> buildExpression(
     Transaction* ctx,
+    ExecutionContext* execution_context,
     RefPtr<QueryTreeNode> node);
 
 static ScopedPtr<TableExpression> buildLimit(
     Transaction* ctx,
+    ExecutionContext* execution_context,
     RefPtr<LimitNode> node) {
   return mkScoped(
       new LimitExpression(
+          execution_context,
           node->limit(),
           node->offset(),
-          buildExpression(ctx, node->inputTable())));
+          buildExpression(ctx, execution_context, node->inputTable())));
 }
 
 static ScopedPtr<TableExpression> buildSelectExpression(
     Transaction* ctx,
+    ExecutionContext* execution_context,
     RefPtr<SelectExpressionNode> node) {
   Vector<ValueExpression> select_expressions;
   for (const auto& slnode : node->selectList()) {
@@ -72,11 +76,13 @@ static ScopedPtr<TableExpression> buildSelectExpression(
 
   return mkScoped(new SelectExpression(
       ctx,
+      execution_context,
       std::move(select_expressions)));
 };
 
 static ScopedPtr<TableExpression> buildSubquery(
     Transaction* txn,
+    ExecutionContext* execution_context,
     RefPtr<SubqueryNode> node) {
   Vector<ValueExpression> select_expressions;
   Option<ValueExpression> where_expr;
@@ -93,13 +99,15 @@ static ScopedPtr<TableExpression> buildSubquery(
 
   return mkScoped(new SubqueryExpression(
       txn,
+      execution_context,
       std::move(select_expressions),
       std::move(where_expr),
-      buildExpression(txn, node->subquery())));
+      buildExpression(txn, execution_context, node->subquery())));
 }
 
 static ScopedPtr<TableExpression> buildOrderByExpression(
     Transaction* txn,
+    ExecutionContext* execution_context,
     RefPtr<OrderByNode> node) {
   Vector<OrderByExpression::SortExpr> sort_exprs;
   for (const auto& ss : node->sortSpecs()) {
@@ -112,12 +120,14 @@ static ScopedPtr<TableExpression> buildOrderByExpression(
   return mkScoped(
       new OrderByExpression(
           txn,
+          execution_context,
           std::move(sort_exprs),
-          buildExpression(txn, node->inputTable())));
+          buildExpression(txn, execution_context, node->inputTable())));
 }
 
 static ScopedPtr<TableExpression> buildSequentialScan(
     Transaction* txn,
+    ExecutionContext* execution_context,
     RefPtr<SequentialScanNode> node) {
   const auto& table_name = node->tableName();
   auto table_provider = txn->getTableProvider();
@@ -132,6 +142,7 @@ static ScopedPtr<TableExpression> buildSequentialScan(
 
 static ScopedPtr<TableExpression> buildGroupByExpression(
     Transaction* txn,
+    ExecutionContext* execution_context,
     RefPtr<GroupByNode> node) {
   Vector<ValueExpression> select_expressions;
   Vector<ValueExpression> group_expressions;
@@ -153,11 +164,12 @@ static ScopedPtr<TableExpression> buildGroupByExpression(
           txn,
           std::move(select_expressions),
           std::move(group_expressions),
-          buildExpression(txn, node->inputTable())));
+          buildExpression(txn, execution_context, node->inputTable())));
 }
 
 static ScopedPtr<TableExpression> buildJoinExpression(
     Transaction* ctx,
+    ExecutionContext* execution_context,
     RefPtr<JoinNode> node) {
   Vector<String> column_names;
   Vector<ValueExpression> select_expressions;
@@ -187,12 +199,13 @@ static ScopedPtr<TableExpression> buildJoinExpression(
           std::move(select_expressions),
           std::move(join_cond_expr),
           std::move(where_expr),
-          buildExpression(ctx, node->baseTable()),
-          buildExpression(ctx, node->joinedTable())));
+          buildExpression(ctx, execution_context, node->baseTable()),
+          buildExpression(ctx, execution_context, node->joinedTable())));
 }
 
 static ScopedPtr<TableExpression> buildChartExpression(
     Transaction* txn,
+    ExecutionContext* execution_context,
     RefPtr<ChartStatementNode> node) {
   Vector<Vector<ScopedPtr<csql::TableExpression>>> input_tables;
   Vector<Vector<RefPtr<csql::TableExpressionNode>>> input_table_qtrees;
@@ -201,7 +214,10 @@ static ScopedPtr<TableExpression> buildChartExpression(
     input_table_qtrees.emplace_back();
     auto draw_stmt = draw_stmt_qtree.asInstanceOf<DrawStatementNode>();
     for (const auto& input_tbl : draw_stmt->inputTables()) {
-      input_tables.back().emplace_back(buildExpression(txn, input_tbl));
+      input_tables.back().emplace_back(buildExpression(
+          txn,
+          execution_context,
+          input_tbl));
       input_table_qtrees.back().emplace_back(
           input_tbl.asInstanceOf<TableExpressionNode>());
     }
@@ -217,37 +233,45 @@ static ScopedPtr<TableExpression> buildChartExpression(
 
 static ScopedPtr<TableExpression> buildExpression(
     Transaction* ctx,
+    ExecutionContext* execution_context,
     RefPtr<QueryTreeNode> node) {
 
   if (dynamic_cast<LimitNode*>(node.get())) {
-    return buildLimit(ctx, node.asInstanceOf<LimitNode>());
+    return buildLimit(ctx, execution_context, node.asInstanceOf<LimitNode>());
   }
 
   if (dynamic_cast<SelectExpressionNode*>(node.get())) {
     return buildSelectExpression(
         ctx,
+        execution_context,
         node.asInstanceOf<SelectExpressionNode>());
   }
 
   if (dynamic_cast<SubqueryNode*>(node.get())) {
     return buildSubquery(
         ctx,
+        execution_context,
         node.asInstanceOf<SubqueryNode>());
   }
 
   if (dynamic_cast<OrderByNode*>(node.get())) {
-    return buildOrderByExpression(ctx, node.asInstanceOf<OrderByNode>());
+    return buildOrderByExpression(
+        ctx,
+        execution_context,
+        node.asInstanceOf<OrderByNode>());
   }
 
   if (dynamic_cast<SequentialScanNode*>(node.get())) {
     return buildSequentialScan(
         ctx,
+        execution_context,
         node.asInstanceOf<SequentialScanNode>());
   }
 
   if (dynamic_cast<GroupByNode*>(node.get())) {
     return buildGroupByExpression(
         ctx,
+        execution_context,
         node.asInstanceOf<GroupByNode>());
   }
 
@@ -264,12 +288,14 @@ static ScopedPtr<TableExpression> buildExpression(
   if (dynamic_cast<JoinNode*>(node.get())) {
     return buildJoinExpression(
         ctx,
+        execution_context,
         node.asInstanceOf<JoinNode>());
   }
 
   if (dynamic_cast<ChartStatementNode*>(node.get())) {
     return buildChartExpression(
         ctx,
+        execution_context,
         node.asInstanceOf<ChartStatementNode>());
   }
 
@@ -287,6 +313,7 @@ ScopedPtr<ResultCursor> DefaultScheduler::execute(
       new TableExpressionResultCursor(
           buildExpression(
               query_plan->getTransaction(),
+              execution_context,
               query_plan->getStatement(stmt_idx))));
 };
 

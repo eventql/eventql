@@ -32,9 +32,11 @@ namespace csql {
 
 OrderByExpression::OrderByExpression(
     Transaction* txn,
+    ExecutionContext* execution_context,
     Vector<SortExpr> sort_specs,
     ScopedPtr<TableExpression> input) :
     txn_(txn),
+    execution_context_(execution_context),
     sort_specs_(std::move(sort_specs)),
     input_(std::move(input)),
     num_rows_(0),

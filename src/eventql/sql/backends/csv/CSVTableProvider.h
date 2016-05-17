@@ -61,6 +61,7 @@ public:
 
   Option<ScopedPtr<TableExpression>> buildSequentialScan(
       Transaction* ctx,
+      ExecutionContext* execution_context,
       RefPtr<SequentialScanNode> seqscan) const override;
 
 protected:

@@ -40,6 +40,7 @@ public:
 
   TableScan(
       Transaction* txn,
+      ExecutionContext* execution_context,
       RefPtr<SequentialScanNode> stmt,
       ScopedPtr<TableIterator> iter);
 
@@ -52,6 +53,7 @@ protected:
   bool next(SValue* out, int out_len);
 
   Transaction* txn_;
+  ExecutionContext* execution_context_;
   ScopedPtr<TableIterator> iter_;
   Vector<ValueExpression> select_exprs_;
   Option<ValueExpression> where_expr_;

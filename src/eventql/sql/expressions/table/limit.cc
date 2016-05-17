@@ -27,13 +27,17 @@
 namespace csql {
 
 LimitExpression::LimitExpression(
+    ExecutionContext* execution_context,
     size_t limit,
     size_t offset,
     ScopedPtr<TableExpression> input) :
+    execution_context_(execution_context),
     limit_(limit),
     offset_(offset),
     input_(std::move(input)),
-    counter_(0) {}
+    counter_(0) {
+  execution_context->incrementNumTasksRunning();
+}
 
 ScopedPtr<ResultCursor> LimitExpression::execute() {
   input_cursor_ = input_->execute();

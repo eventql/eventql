@@ -29,10 +29,12 @@ namespace csql {
 
 SubqueryExpression::SubqueryExpression(
     Transaction* txn,
+    ExecutionContext* execution_context,
     Vector<ValueExpression> select_expressions,
     Option<ValueExpression> where_expr,
     ScopedPtr<TableExpression> input) :
     txn_(txn),
+    execution_context_(execution_context),
     select_exprs_(std::move(select_expressions)),
     where_expr_(std::move(where_expr)),
     input_(std::move(input)) {}
