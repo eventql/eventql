@@ -403,6 +403,15 @@ int main(int argc, const char** argv) {
       "<token>");
 
   flags.defineFlag(
+      "help",
+      cli::FlagParser::T_SWITCH,
+      false,
+      "?",
+      NULL,
+      "help",
+      "<help>");
+
+  flags.defineFlag(
       "loglevel",
       cli::FlagParser::T_STRING,
       false,
@@ -415,6 +424,41 @@ int main(int argc, const char** argv) {
 
   Logger::get()->setMinimumLogLevel(
       strToLogLevel(flags.getString("loglevel")));
+
+  auto stdout_os = OutputStream::getStdout();
+
+  /* print help */
+  if (flags.isSet("help")) {
+    stdout_os->write(
+        "EventQL v0.3.0 - <build info>\n"
+        "Copyright (c) 2016, zScale Techology GmbH. All rights reserved.\n\n"
+    );
+
+    stdout_os->write(
+        "Usage: $ evql [OPTIONS] [query]\n"
+        "       $ evql [OPTIONS] -f file\n"
+        "  -?, --help              Display this help text and exit\n"
+        "  -f, --file <file>       Read query from file\n"
+        "  -l, --lang <lang>       Set the query language ('sql' or 'js')\n"
+        "  -h, --host <hostname>   Set the EventQL server hostname\n"
+        "  -p, --port <port>       Set the EventQL server port\n"
+        "  -u, --user <user>       Set the auth username\n"
+        "  --password <password>   Set the auth password (if required)\n"
+        "  --auth_token <token>    Set the auth token (if required)\n"
+        "  -B, --batch             Run in batch mode (streaming result output)\n"
+        "  -q, --quiet             Be quiet (disables query progress)\n"
+        "  -v, --verbose           Print debug output to STDERR\n"
+        "  --version               Display the version of this binary and exit\n"
+        "                                                       \n"
+        "Examples:                                              \n"
+        "  $ evql                        # start an interactive shell\n"
+        "  $ evql -h localhost -p 9175   # start an interactive shell\n"
+        "  $ evql -f query.sql           # execute query in query.sql\n"
+        "  $ evql -l js -f query.js      # execute query in query.js\n"
+        "  $ evql 'SELECT 42;'           # execute 'SELECT 42'\n"
+    );
+    return 0;
+  }
 
   /* console options */
   eventql::cli::ConsoleOptions console_opts;
