@@ -177,7 +177,8 @@ ScopedPtr<csql::TableExpression> Scheduler::buildPipelineGroupByExpression(
       new PipelinedExpression(
           txn,
           TransactionInfo::get(txn)->getNamespace(),
-          auth_));
+          auth_,
+          kMaxConcurrency));
 
   auto shards = pipelineExpression(txn, node.get());
   for (size_t i = 0; i < shards.size(); ++i) {

@@ -127,7 +127,8 @@ ScopedPtr<csql::ResultCursor> TableScan::openRemotePartition(
       new PipelinedExpression(
           txn_,
           tsdb_namespace_,
-          auth_));
+          auth_,
+          1));
 
   remote_expr->addRemoteQuery(
       seqscan_copy.get(),

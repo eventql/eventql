@@ -55,6 +55,8 @@ namespace eventql {
 class Scheduler : public csql::Scheduler {
 public:
 
+  const size_t kMaxConcurrency = 8;
+
   Scheduler(
       PartitionMap* pmap,
       AnalyticsAuth* auth,

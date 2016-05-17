@@ -31,19 +31,25 @@ namespace eventql {
 PipelinedExpression::PipelinedExpression(
     csql::Transaction* txn,
     const String& db_namespace,
-    AnalyticsAuth* auth) :
+    AnalyticsAuth* auth,
+    size_t max_concurrency) :
     txn_(txn),
     db_namespace_(db_namespace),
     auth_(auth),
+    max_concurrency_(max_concurrency),
     num_columns_(0),
     eof_(false),
     error_(false),
-    cancelled_(false) {};
+    cancelled_(false),
+    queries_started_(0),
+    queries_finished_(0) {};
 
 PipelinedExpression::~PipelinedExpression() {
   cancelled_ = true;
   cv_.notify_all();
-  thread_.join();
+  for (size_t i = 0; i < threads_.size(); ++i) {
+    threads_[i].join();
+  }
 }
 
 void PipelinedExpression::addLocalQuery(ScopedPtr<csql::TableExpression> expr) {
@@ -69,7 +75,11 @@ void PipelinedExpression::addRemoteQuery(
 }
 
 ScopedPtr<csql::ResultCursor> PipelinedExpression::execute() {
-  thread_ = std::thread(std::bind(&PipelinedExpression::executeAsync, this));
+  size_t num_threads = std::min(queries_.size(), max_concurrency_);
+  for (size_t i = 0; i < num_threads; ++i) {
+    threads_.emplace_back(
+      std::thread(std::bind(&PipelinedExpression::executeAsync, this)));
+  }
 
   return mkScoped(
     new csql::DefaultResultCursor(
@@ -86,9 +96,17 @@ size_t PipelinedExpression::getNumColumns() const {
 }
 
 void PipelinedExpression::executeAsync() {
-  Vector<String> errors;
+  while (!cancelled_) {
+    std::unique_lock<std::mutex> lk(mutex_);
+    auto query_idx = queries_started_++;
+    lk.unlock();
 
-  for (const auto& query : queries_) {
+    if (query_idx >= queries_.size()) {
+      break;
+    }
+
+    const auto& query = queries_[query_idx];
+    String error;
     try {
       if (query.is_local) {
         executeLocal(query);
@@ -96,16 +114,19 @@ void PipelinedExpression::executeAsync() {
         executeRemote(query);
       }
     } catch (const StandardException& e) {
-      errors.emplace_back(e.what());
+      error = e.what();
+    }
+
+    lk.lock();
+    error_ = !error.empty();
+    error_str_ += error;
+    eof_ = ++queries_finished_ == queries_.size();
+    cv_.notify_all();
+
+    if (cancelled_ || error_) {
       break;
     }
   }
-
-  std::unique_lock<std::mutex> lk(mutex_);
-  error_ = errors.size() > 0;
-  error_str_ = StringUtil::join(errors, ", ");
-  eof_ = true;
-  cv_.notify_all();
 }
 
 void PipelinedExpression::executeLocal(const QuerySpec& query) {
