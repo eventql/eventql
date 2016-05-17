@@ -12,7 +12,6 @@
 #=============================================================================
 # (To distributed this file outside of CMake, substitute the full
 #  License text for the above reference.)
-cmake_policy(SET CMP0026 OLD)
 
 function(STX_PROTOBUF_GENERATE_CPP SRCS HDRS)
   get_property(PROTOBUF_PROTOC_EXECUTABLE TARGET stx-protoc PROPERTY LOCATION)
