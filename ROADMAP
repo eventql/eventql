@@ -14,14 +14,11 @@ ROADMAP
 - [ ] partitioning/sharding v2
 - [ ] improved table iterator iface (update, ordered, restricted, etc)
 
--> impl pipelining in pipilinedexpr
 -> move pipelined aggregate code to server/sql/pipelined_aggregate
 -> PartialAggregateNode
 
 ...
 
--> remoteexpression -> pipelinedremoteexpressions
--> partial group by + group by merge
 -> qtree rewrite: .lastXX sufix
 -> evql scheduler w/ group by rewrite
 
