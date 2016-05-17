@@ -114,11 +114,15 @@ protected:
     Vector<ReplicaRef> hosts;
   };
 
+  bool isPipelineable(const csql::QueryTreeNode& qtree);
+
   Vector<PipelinedQueryTree> pipelineExpression(
       csql::Transaction* txn,
       RefPtr<csql::QueryTreeNode> qtree);
 
-  bool isPipelineable(const csql::QueryTreeNode& qtree);
+  // rewrite tbl.lastXXX to tbl WHERE time > x and time < x
+  void rewriteTableTimeSuffix(
+      RefPtr<csql::QueryTreeNode> node);
 
   PartitionMap* pmap_;
   AnalyticsAuth* auth_;

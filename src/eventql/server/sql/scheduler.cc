@@ -376,17 +376,71 @@ ScopedPtr<csql::TableExpression> Scheduler::buildExpression(
 ScopedPtr<csql::ResultCursor> Scheduler::execute(
     csql::QueryPlan* query_plan,
     size_t stmt_idx) {
+  auto qtree = query_plan->getStatement(stmt_idx);
+  rewriteTableTimeSuffix(qtree);
+
   return mkScoped(
       new csql::TableExpressionResultCursor(
           buildExpression(
               query_plan->getTransaction(),
-              query_plan->getStatement(stmt_idx))));
+              qtree)));
 };
 
 bool Scheduler::isPipelineable(const csql::QueryTreeNode& qtree) {
   return true;
 }
 
+void Scheduler::rewriteTableTimeSuffix(RefPtr<csql::QueryTreeNode> node) {
+  auto seqscan = dynamic_cast<csql::SequentialScanNode*>(node.get());
+  if (seqscan) {
+    auto table_ref = TSDBTableRef::parse(seqscan->tableName());
+    if (!table_ref.timerange_begin.isEmpty() &&
+        !table_ref.timerange_limit.isEmpty()) {
+      seqscan->setTableName(table_ref.table_key);
+
+      auto pred = mkRef(
+          new csql::CallExpressionNode(
+              "logical_and",
+              Vector<RefPtr<csql::ValueExpressionNode>>{
+                new csql::CallExpressionNode(
+                    "gte",
+                    Vector<RefPtr<csql::ValueExpressionNode>>{
+                      new csql::ColumnReferenceNode("time"),
+                      new csql::LiteralExpressionNode(
+                          csql::SValue(csql::SValue::IntegerType(
+                              table_ref.timerange_begin.get().unixMicros())))
+                    }),
+                new csql::CallExpressionNode(
+                    "lte",
+                    Vector<RefPtr<csql::ValueExpressionNode>>{
+                      new csql::ColumnReferenceNode("time"),
+                      new csql::LiteralExpressionNode(
+                          csql::SValue(csql::SValue::IntegerType(
+                              table_ref.timerange_limit.get().unixMicros())))
+                    })
+              }));
+
+      auto where_expr = seqscan->whereExpression();
+      if (!where_expr.isEmpty()) {
+        pred = mkRef(
+            new csql::CallExpressionNode(
+                "logical_and",
+                Vector<RefPtr<csql::ValueExpressionNode>>{
+                  where_expr.get(),
+                  pred.asInstanceOf<csql::ValueExpressionNode>()
+                }));
+      }
+
+      seqscan->setWhereExpression(
+          pred.asInstanceOf<csql::ValueExpressionNode>());
+    }
+  }
+
+  auto ntables = node->numChildren();
+  for (int i = 0; i < ntables; ++i) {
+    rewriteTableTimeSuffix(node->child(i));
+  }
+}
 
 
 } // namespace eventql
