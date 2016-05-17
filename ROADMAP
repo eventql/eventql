@@ -16,11 +16,7 @@ ROADMAP
 
 -> move pipelined aggregate code to server/sql/pipelined_aggregate
 -> PartialAggregateNode
-
-...
-
 -> qtree rewrite: .lastXX sufix
--> evql scheduler w/ group by rewrite
 
 ???
 - tablecursor::next -> num_rows/batch ??
