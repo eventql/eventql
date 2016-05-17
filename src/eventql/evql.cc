@@ -24,6 +24,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <signal.h>
+#include <poll.h>
 #include "eventql/util/application.h"
 #include "eventql/util/logging.h"
 #include "eventql/util/random.h"
@@ -369,11 +370,47 @@ void cmd_version(
   stdout_os->write("zli v0.0.1\n");
 }
 
+static bool hasSTDIN() {
+  struct pollfd p = {
+    .fd = STDIN_FILENO,
+    .events = POLLIN | POLLRDBAND | POLLRDNORM | POLLPRI
+  };
+
+  return poll(&p, 1, 0) == 1;
+}
+
 int main(int argc, const char** argv) {
   Application::init();
   Application::logToStderr();
 
   cli::FlagParser flags;
+
+  flags.defineFlag(
+      "help",
+      cli::FlagParser::T_SWITCH,
+      false,
+      "?",
+      NULL,
+      "help",
+      "<help>");
+
+  flags.defineFlag(
+      "file",
+      cli::FlagParser::T_STRING,
+      false,
+      "f",
+      NULL,
+      "query file",
+      "<file>");
+
+  flags.defineFlag(
+      "exec",
+      cli::FlagParser::T_STRING,
+      false,
+      "e",
+      NULL,
+      "query string",
+      "<query_str>");
 
   flags.defineFlag(
       "host",
@@ -403,15 +440,6 @@ int main(int argc, const char** argv) {
       "<token>");
 
   flags.defineFlag(
-      "help",
-      cli::FlagParser::T_SWITCH,
-      false,
-      "?",
-      NULL,
-      "help",
-      "<help>");
-
-  flags.defineFlag(
       "loglevel",
       cli::FlagParser::T_STRING,
       false,
@@ -425,7 +453,9 @@ int main(int argc, const char** argv) {
   Logger::get()->setMinimumLogLevel(
       strToLogLevel(flags.getString("loglevel")));
 
+  auto stdin_is = InputStream::getStdin();
   auto stdout_os = OutputStream::getStdout();
+  auto stderr_os = OutputStream::getStderr();
 
   /* print help */
   if (flags.isSet("help")) {
@@ -439,6 +469,7 @@ int main(int argc, const char** argv) {
         "       $ evql [OPTIONS] -f file\n"
         "  -?, --help              Display this help text and exit\n"
         "  -f, --file <file>       Read query from file\n"
+        "  -e, --exec <query_str>  Execute query string\n"
         "  -l, --lang <lang>       Set the query language ('sql' or 'js')\n"
         "  -h, --host <hostname>   Set the EventQL server hostname\n"
         "  -p, --port <port>       Set the EventQL server port\n"
@@ -453,9 +484,10 @@ int main(int argc, const char** argv) {
         "Examples:                                              \n"
         "  $ evql                        # start an interactive shell\n"
         "  $ evql -h localhost -p 9175   # start an interactive shell\n"
+        "  $ evql < query.sql            # execute query from STDIN\n"
         "  $ evql -f query.sql           # execute query in query.sql\n"
         "  $ evql -l js -f query.js      # execute query in query.js\n"
-        "  $ evql 'SELECT 42;'           # execute 'SELECT 42'\n"
+        "  $ evql -e 'SELECT 42;'        # execute 'SELECT 42'\n"
     );
     return 0;
   }
@@ -469,12 +501,36 @@ int main(int argc, const char** argv) {
   /* cli */
   eventql::cli::Console console(console_opts);
 
-  if (flags.getArgv().size() == 0) {
-    console.startInteractiveShell();
+  if (flags.getArgv().size() > 0) {
+    stderr_os->write(
+        StringUtil::format(
+            "invalid argument: '$0', run evql --help for help\n",
+            flags.getArgv()[0]));
+
+    return 1;
+  }
+
+  if (flags.isSet("file")) {
+    auto query = FileUtil::read(flags.getString("file"));
+    console.runQuery(query.toString());
     return 0;
   }
 
-  console.runQuery(flags.getArgv()[0]);
+  if (flags.isSet("exec")) {
+    console.runQuery(flags.getString("exec"));
+    return 0;
+  }
+
+  if (hasSTDIN() || flags.isSet("batch") || !stdout_os->isTTY()) {
+    String query;
+    while (stdin_is->readLine(&query)) {
+      console.runQuery(query);
+    }
+
+    return 0;
+  }
+
+  console.startInteractiveShell();
   return 0;
 }
 
