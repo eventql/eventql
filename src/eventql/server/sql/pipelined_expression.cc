@@ -87,27 +87,16 @@ size_t PipelinedExpression::getNumColumns() const {
 
 void PipelinedExpression::executeAsync() {
   Vector<String> errors;
+
   for (const auto& query : queries_) {
-    for (const auto& host : query.hosts) {
-      try {
-        executeOnHost(query.qtree, host.addr);
-        break;
-      } catch (const StandardException& e) {
-        logError(
-            "eventql",
-            e,
-            "PipelinedExpression::executeOnHost failed @ $0",
-            host.addr.hostAndPort());
-
-        std::unique_lock<std::mutex> lk(mutex_);
-        if (buf_ctr_ > 0) {
-          errors.emplace_back(e.what());
-          break;
-        }
+    try {
+      if (query.is_local) {
+        executeLocal(query);
+      } else {
+        executeRemote(query);
       }
-    }
-
-    if (errors.size() > 0) {
+    } catch (const StandardException& e) {
+      errors.emplace_back(e.what());
       break;
     }
   }
@@ -119,9 +108,41 @@ void PipelinedExpression::executeAsync() {
   cv_.notify_all();
 }
 
+void PipelinedExpression::executeLocal(const QuerySpec& query) {
+  auto cursor = query.expr->execute();
+  Vector<csql::SValue> row(cursor->getNumColumns());
+  while (cursor->next(row.data(), row.size())) {
+    if (!returnRow(&*row.cbegin(), &*row.cend())) {
+      return;
+    }
+  }
+}
+
+void PipelinedExpression::executeRemote(const QuerySpec& query) {
+  size_t row_ctr;
+
+  for (const auto& host : query.hosts) {
+    try {
+      executeOnHost(query.qtree, host.addr, &row_ctr);
+      break;
+    } catch (const StandardException& e) {
+      logError(
+          "eventql",
+          e,
+          "PipelinedExpression::executeOnHost failed @ $0",
+          host.addr.hostAndPort());
+
+      if (row_ctr > 0) {
+        throw e;
+      }
+    }
+  }
+}
+
 void PipelinedExpression::executeOnHost(
     RefPtr<csql::TableExpressionNode> qtree,
-    const InetAddr& host) {
+    const InetAddr& host,
+    size_t* row_ctr) {
   Buffer req_body;
   auto req_body_os = BufferOutputStream::fromBuffer(&req_body);
   csql::QueryTreeCoder qtree_coder(txn_);
@@ -130,20 +151,12 @@ void PipelinedExpression::executeOnHost(
   bool error = false;
   csql::BinaryResultParser res_parser;
 
-  res_parser.onRow([this] (int argc, const csql::SValue* argv) {
-    std::unique_lock<std::mutex> lk(mutex_);
-
-    while (!cancelled_ && buf_.size() > kMaxBufferSize) {
-      cv_.wait(lk);
-    }
-
-    if (cancelled_) {
+  res_parser.onRow([this, row_ctr] (int argc, const csql::SValue* argv) {
+    if (returnRow(argv, argv + argc)) {
+      ++(*row_ctr);
+    } else {
       RAISE(kCancelledError);
     }
-
-    buf_.emplace_back(argv, argv + argc);
-    ++buf_ctr_;
-    cv_.notify_all();
   });
 
   res_parser.onError([this, &error] (const String& error_str) {
@@ -185,6 +198,24 @@ void PipelinedExpression::executeOnHost(
         "HTTP Error: $0",
         res.statusCode());
   }
+}
+
+bool PipelinedExpression::returnRow(
+    const csql::SValue* begin,
+    const csql::SValue* end) {
+  std::unique_lock<std::mutex> lk(mutex_);
+
+  while (!cancelled_ && !error_ && buf_.size() > kMaxBufferSize) {
+    cv_.wait(lk);
+  }
+
+  if (cancelled_ || error_) {
+    return false;
+  }
+
+  buf_.emplace_back(begin, end);
+  cv_.notify_all();
+  return true;
 }
 
 

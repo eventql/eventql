@@ -53,17 +53,26 @@ public:
 
 protected:
 
-  void executeAsync();
-  void executeOnHost(RefPtr<csql::TableExpressionNode> qtree, const InetAddr& host);
-
-  bool next(csql::SValue* out_row, size_t out_row_len);
-
   struct QuerySpec {
     bool is_local;
     ScopedPtr<csql::TableExpression> expr;
     RefPtr<csql::TableExpressionNode> qtree;
     Vector<ReplicaRef> hosts;
   };
+
+  void executeAsync();
+  void executeOnHost(
+      RefPtr<csql::TableExpressionNode> qtree,
+      const InetAddr& host,
+      size_t* row_ctr);
+
+  void executeRemote(const QuerySpec& query);
+
+  void executeLocal(const QuerySpec& query);
+
+  bool returnRow(const csql::SValue* begin, const csql::SValue* end);
+
+  bool next(csql::SValue* out_row, size_t out_row_len);
 
   csql::Transaction* txn_;
   String db_namespace_;
@@ -77,7 +86,6 @@ protected:
   std::mutex mutex_;
   std::condition_variable cv_;
   List<Vector<csql::SValue>> buf_;
-  size_t buf_ctr_;
   std::thread thread_;
 };
 
