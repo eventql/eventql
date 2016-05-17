@@ -2217,4 +2217,42 @@ TEST_CASE(RuntimeTest, TestResultCursor, [] () {
   EXPECT_EQ(num_rows, 5);
 });
 
+TEST_CASE(RuntimeTest, TestSimpleDrawQuery, [] () {
+  auto runtime = Runtime::getDefaultRuntime();
+  auto txn = runtime->newTransaction();
+  txn->addTableProvider(
+      new backends::csv::CSVTableProvider(
+          "testtable",
+          "src/eventql/sql/testdata/testtbl8.csv",
+          '\t'));
 
+  String query =
+      "  DRAW LINECHART AXIS LEFT;"
+      ""
+      "  SELECT"
+      "    'series1' as series, one AS x, two AS y"
+      "  FROM"
+      "    testtable;"
+      ""
+      "  SELECT"
+      "    'series2' as series, one as x, two + 5 as y"
+      "  from"
+      "    testtable;"
+      ""
+      "  SELECT"
+      "    'series3' as series, one as x, two / 2 + 4 as y"
+      "  FROM"
+      "    testtable;"
+      "";
+
+  auto qplan = runtime->buildQueryPlan(txn.get(), query);
+  ResultList result;
+  qplan->execute(0, &result);
+
+  EXPECT_EQ(result.getNumColumns(), 1);
+  EXPECT_EQ(result.getNumRows(), 1);
+  EXPECT_EQ(result.getRow(0)[0], "svg...");
+  //compareChart(
+  //    chart,
+  //    "QueryTest_TestSimpleDrawQuery_out.svg.html");
+});
