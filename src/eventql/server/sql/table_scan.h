@@ -70,6 +70,7 @@ protected:
   AnalyticsAuth* auth_;
   ScopedPtr<csql::ResultCursor> cur_cursor_;
   size_t cur_partition_;
+  size_t nrows_; // remove me
 };
 
 }
