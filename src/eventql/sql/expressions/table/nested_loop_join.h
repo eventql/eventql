@@ -42,12 +42,6 @@ public:
       ScopedPtr<TableExpression> base_tbl,
       ScopedPtr<TableExpression> joined_tbl);
 
-  //bool onInputRow(
-  //    const TaskID& input_id,
-  //    const SValue* row,
-  //    int row_len) override;
-
-  //void onInputsReady() override;
   ScopedPtr<ResultCursor> execute() override;
 
   size_t getNumColumns() const override;
