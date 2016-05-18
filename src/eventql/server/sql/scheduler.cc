@@ -328,6 +328,35 @@ ScopedPtr<csql::TableExpression> Scheduler::buildJoinExpression(
           buildExpression(ctx, execution_context, node->joinedTable())));
 }
 
+ScopedPtr<csql::TableExpression> Scheduler::buildChartExpression(
+    csql::Transaction* txn,
+    csql::ExecutionContext* execution_context,
+    RefPtr<csql::ChartStatementNode> node) {
+  Vector<Vector<ScopedPtr<csql::TableExpression>>> input_tables;
+  Vector<Vector<RefPtr<csql::TableExpressionNode>>> input_table_qtrees;
+  for (const auto& draw_stmt_qtree : node->getDrawStatements()) {
+    input_tables.emplace_back();
+    input_table_qtrees.emplace_back();
+    auto draw_stmt = draw_stmt_qtree.asInstanceOf<csql::DrawStatementNode>();
+    for (const auto& input_tbl : draw_stmt->inputTables()) {
+      input_tables.back().emplace_back(buildExpression(
+          txn,
+          execution_context,
+          input_tbl));
+      input_table_qtrees.back().emplace_back(
+          input_tbl.asInstanceOf<csql::TableExpressionNode>());
+    }
+  }
+
+  return mkScoped(
+      new csql::ChartExpression(
+          txn,
+          node,
+          std::move(input_tables),
+          input_table_qtrees));
+}
+
+
 ScopedPtr<csql::TableExpression> Scheduler::buildExpression(
     csql::Transaction* ctx,
     csql::ExecutionContext* execution_context,
@@ -402,6 +431,13 @@ ScopedPtr<csql::TableExpression> Scheduler::buildExpression(
         ctx,
         execution_context,
         node.asInstanceOf<csql::JoinNode>());
+  }
+
+  if (dynamic_cast<csql::ChartStatementNode*>(node.get())) {
+    return buildChartExpression(
+        ctx,
+        execution_context,
+        node.asInstanceOf<csql::ChartStatementNode>());
   }
 
   RAISEF(

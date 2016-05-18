@@ -38,6 +38,7 @@
 #include <eventql/sql/expressions/table/describe_table.h>
 #include <eventql/sql/expressions/table/groupby.h>
 #include <eventql/sql/expressions/table/nested_loop_join.h>
+#include <eventql/sql/extensions/chartsql/chart_expression.h>
 #include <eventql/sql/qtree/SelectExpressionNode.h>
 #include <eventql/sql/qtree/SubqueryNode.h>
 #include <eventql/sql/qtree/OrderByNode.h>
@@ -45,6 +46,7 @@
 #include <eventql/sql/qtree/LimitNode.h>
 #include <eventql/sql/qtree/GroupByNode.h>
 #include <eventql/sql/qtree/JoinNode.h>
+#include <eventql/sql/qtree/DrawStatementNode.h>
 #include <eventql/sql/query_plan.h>
 #include <eventql/db/partition_map.h>
 #include <eventql/AnalyticsAuth.h>
@@ -118,6 +120,11 @@ protected:
       csql::Transaction* txn,
       csql::ExecutionContext* execution_context,
       RefPtr<csql::JoinNode> node);
+
+  ScopedPtr<csql::TableExpression> buildChartExpression(
+    csql::Transaction* txn,
+    csql::ExecutionContext* execution_context,
+    RefPtr<csql::ChartStatementNode> node);
 
   struct PipelinedQueryTree {
     bool is_local;
