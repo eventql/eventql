@@ -102,7 +102,25 @@ void readHeader(FileHeader* hdr, InputStream* is) {
   auto ncols = is->readUInt32();
   for (size_t i = 0; i < ncols; ++i) {
     ColumnConfig col;
-    col.storage_type = (cstable::ColumnEncoding) is->readUInt32();
+    col.storage_type = (ColumnEncoding) is->readUInt32();
+    switch (col.storage_type) {
+      case ColumnEncoding::BOOLEAN_BITPACKED:
+        col.logical_type = ColumnType::BOOLEAN;
+        break;
+      case ColumnEncoding::UINT32_BITPACKED:
+      case ColumnEncoding::UINT32_PLAIN:
+      case ColumnEncoding::UINT64_PLAIN:
+      case ColumnEncoding::UINT64_LEB128:
+        col.logical_type = ColumnType::UNSIGNED_INT;
+        break;
+      case ColumnEncoding::FLOAT_IEEE754:
+        col.logical_type = ColumnType::FLOAT;
+        break;
+      case ColumnEncoding::STRING_PLAIN:
+        col.logical_type = ColumnType::STRING;
+        break;
+    }
+
     col.column_name = is->readString(is->readUInt32());
     col.column_id = 0;
     col.rlevel_max = is->readUInt32();
