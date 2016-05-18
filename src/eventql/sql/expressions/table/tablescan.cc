@@ -63,8 +63,6 @@ TableScan::TableScan(
     where_expr_ = std::move(Option<ValueExpression>(
         qbuilder->buildValueExpression(txn, stmt->whereExpression().get())));
   }
-
-  execution_context->incrementNumTasksTotal();
 }
 
 ScopedPtr<ResultCursor> TableScan::execute() {
@@ -112,10 +110,6 @@ bool TableScan::next(SValue* out, int out_len) {
     return true;
   }
 
-  if (completion_callback_) {
-    completion_callback_();
-    completion_callback_ = nullptr;
-  }
   return false;
 }
 

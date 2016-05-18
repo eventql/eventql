@@ -49,6 +49,7 @@ public:
 
   Option<ScopedPtr<csql::TableExpression>> buildSequentialScan(
       csql::Transaction* ctx,
+      csql::ExecutionContext* execution_context,
       RefPtr<csql::SequentialScanNode> seqscan) const override;
 
   void listTables(

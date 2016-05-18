@@ -37,6 +37,7 @@ CSTableScanProvider::CSTableScanProvider(
 
 Option<ScopedPtr<TableExpression>> CSTableScanProvider::buildSequentialScan(
     Transaction* txn,
+    ExecutionContext* execution_context,
     RefPtr<SequentialScanNode> node) const {
   if (node->tableName() != table_name_) {
     return None<ScopedPtr<TableExpression>>();
@@ -46,6 +47,7 @@ Option<ScopedPtr<TableExpression>> CSTableScanProvider::buildSequentialScan(
       ScopedPtr<TableExpression>(
           new CSTableScan(
               txn,
+              execution_context,
               node,
               cstable_file_)));
 }

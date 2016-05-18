@@ -32,11 +32,9 @@ public:
 
   ExecutionContext();
 
-  void incrementNumTasks();
-
-  void incrementNumTasksRunning();
-
-  void incrementNumTasksCompleted();
+  void incrementNumTasks(size_t n = 1);
+  void incrementNumTasksRunning(size_t n = 1);
+  void incrementNumTasksCompleted(size_t n = 1);
 
   double getProgress() const;
 

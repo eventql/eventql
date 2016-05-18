@@ -44,6 +44,7 @@ TSDBTableProvider::TSDBTableProvider(
 
 Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
     csql::Transaction* ctx,
+    csql::ExecutionContext* execution_context,
     RefPtr<csql::SequentialScanNode> seqscan) const {
   auto table_ref = TSDBTableRef::parse(seqscan->tableName());
   if (partition_map_->findTable(tsdb_namespace_, table_ref.table_key).isEmpty()) {
@@ -67,6 +68,7 @@ Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
       mkScoped(
           new TableScan(
               ctx,
+              execution_context,
               tsdb_namespace_,
               table_ref.table_key,
               partitions,

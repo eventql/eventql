@@ -28,10 +28,12 @@ namespace eventql {
 
 PartitionCursor::PartitionCursor(
     csql::Transaction* txn,
+    csql::ExecutionContext* execution_context,
     RefPtr<Table> table,
     RefPtr<PartitionSnapshot> snap,
     RefPtr<csql::SequentialScanNode> stmt) :
     txn_(txn),
+    execution_context_(execution_context),
     table_(table),
     snap_(snap),
     stmt_(stmt),
@@ -47,7 +49,8 @@ bool PartitionCursor::next(csql::SValue* row, int row_len) {
       auto cstable = cstable::CSTableReader::openFile(cstable_file);
       auto id_col = cstable->getColumnReader("__lsm_id");
       auto is_update_col = cstable->getColumnReader("__lsm_is_update");
-      cur_scan_.reset(new csql::CSTableScan(txn_, stmt_, cstable));
+      cur_scan_.reset(
+          new csql::CSTableScan(txn_, execution_context_, stmt_, cstable));
 
       cur_scan_->setFilter([this, id_col, is_update_col] () -> bool {
         uint64_t rlvl;

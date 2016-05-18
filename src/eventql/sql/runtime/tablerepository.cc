@@ -97,10 +97,11 @@ Option<TableInfo> TableRepository::describe(const String& table_name) const {
 }
 
 Option<ScopedPtr<TableExpression>> TableRepository::buildSequentialScan(
-      Transaction* ctx,
-      RefPtr<SequentialScanNode> seqscan) const {
+    Transaction* ctx,
+    ExecutionContext* execution_context,
+    RefPtr<SequentialScanNode> seqscan) const {
   for (const auto& provider : providers_) {
-    auto expr = provider->buildSequentialScan(ctx, seqscan);
+    auto expr = provider->buildSequentialScan(ctx, execution_context, seqscan);
     if (!expr.isEmpty()) {
       return expr;
     }

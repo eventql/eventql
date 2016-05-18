@@ -34,6 +34,7 @@ public:
 
   PartitionCursor(
       csql::Transaction* txn,
+      csql::ExecutionContext* execution_context,
       RefPtr<Table> table,
       RefPtr<PartitionSnapshot> snap,
       RefPtr<csql::SequentialScanNode> stmt);
@@ -45,6 +46,7 @@ public:
 protected:
 
   csql::Transaction* txn_;
+  csql::ExecutionContext* execution_context_;
   RefPtr<Table> table_;
   RefPtr<PartitionSnapshot> snap_;
   RefPtr<csql::SequentialScanNode> stmt_;
