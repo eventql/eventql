@@ -47,8 +47,7 @@ TableScan::TableScan(
     partition_map_(partition_map),
     replication_scheme_(replication_scheme),
     auth_(auth),
-    cur_partition_(0),
-    nrows_(0) {
+    cur_partition_(0) {
   execution_context_->incrementNumTasks(partitions_.size());
 }
 
@@ -70,13 +69,11 @@ size_t TableScan::getNumColumns() const {
 bool TableScan::next(csql::SValue* row, size_t row_len) {
   while (cur_partition_ < partitions_.size()) {
     if (cur_cursor_.get() == nullptr) {
-      logInfo("evql.dbg", "TableScan::next -> open partition $0 ($1/$2)", partitions_[cur_partition_].toString(), cur_partition_, partitions_.size());
       cur_cursor_ = openPartition(partitions_[cur_partition_]);
       execution_context_->incrementNumTasksRunning();
     }
 
     if (cur_cursor_.get() && cur_cursor_->next(row, row_len)) {
-      ++nrows_;
       return true;
     } else {
       cur_cursor_.reset(nullptr);
@@ -85,7 +82,6 @@ bool TableScan::next(csql::SValue* row, size_t row_len) {
     }
   }
 
-  logInfo("evql.dbg", "TableScan::next -> finished partition $0 ($1/$2) -- $3 rows returned", partitions_[cur_partition_].toString(), cur_partition_, partitions_.size(), nrows_);
   return false;
 }
 
