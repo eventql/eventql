@@ -484,7 +484,7 @@ bool CSTableScan::fetchNext(SValue* out, int out_len) {
     }
 
     if (row_ready) {
-      break;
+      return true;
     }
   }
 
