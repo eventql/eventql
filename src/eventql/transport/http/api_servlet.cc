@@ -1099,10 +1099,11 @@ void AnalyticsServlet::executeSQL_BINARY(
   res_stream->startResponse(*res);
 
   {
-    csql::BinaryResultFormat result_format(
-        [res_stream] (const void* data, size_t size) {
+    auto write_cb = [res_stream] (const void* data, size_t size) {
       res_stream->writeBodyChunk(data, size);
-    });
+    };
+
+    csql::BinaryResultFormat result_format(write_cb, true);
 
     try {
       auto txn = sql_->newTransaction();

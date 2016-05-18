@@ -118,7 +118,7 @@ class BinaryResultFormat  {
 public:
   typedef Function<void (void* data, size_t size)> WriteCallback;
 
-  BinaryResultFormat(WriteCallback write_cb);
+  BinaryResultFormat(WriteCallback write_cb, bool truncate_rows = false);
   ~BinaryResultFormat();
 
   //void formatResults(
@@ -137,6 +137,7 @@ protected:
   void sendFooter();
 
   WriteCallback write_cb_;
+  bool truncate_rows_;
 };
 
 

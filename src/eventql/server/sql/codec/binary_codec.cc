@@ -287,8 +287,10 @@ bool BinaryResultParser::eof() const {
 
 
 BinaryResultFormat::BinaryResultFormat(
-    WriteCallback write_cb) :
-    write_cb_(write_cb) {
+    WriteCallback write_cb,
+    bool truncate_rows /* = false */) :
+    write_cb_(write_cb),
+    truncate_rows_(truncate_rows) {
   sendHeader();
 }
 
@@ -356,7 +358,12 @@ void BinaryResultFormat::sendTable(
     write_cb_(writer.data(), writer.size());
   }
 
-  Vector<SValue> row(result_cursor->getNumColumns());
+  auto num_cols = result_cursor->getNumColumns();
+  if (truncate_rows_) {
+    num_cols = result_columns.size();
+  }
+
+  Vector<SValue> row(num_cols);
   while (result_cursor->next(row.data(), row.size())) {
     Buffer buf;
     BufferOutputStream writer(&buf);

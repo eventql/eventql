@@ -24,7 +24,7 @@ ROADMAP
 - [ ] evql: history/reverse-i search
 
 
-implement isPipelineable
+bug: can't compare timestamp with timestamp
 
 ---
 -> qtree interface -> rename statement to query
