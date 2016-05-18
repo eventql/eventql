@@ -73,33 +73,6 @@ protected:
   Vector<Vector<SValue>> joined_tbl_data_;
   size_t joined_tbl_pos_;
   bool joined_tbl_row_found_;
-  Function<void()> completion_callback_;
 };
 
-//class NestedLoopJoinFactory  : public TaskFactory {
-//public:
-//
-//  NestedLoopJoinFactory(
-//      JoinType join_type,
-//      const Set<TaskID>& base_tbl_ids,
-//      const Set<TaskID>& joined_tbl_ids,
-//      const Vector<JoinNode::InputColumnRef>& input_map,
-//      Vector<RefPtr<SelectListNode>> select_exprs,
-//      Option<RefPtr<ValueExpressionNode>> join_cond_expr,
-//      Option<RefPtr<ValueExpressionNode>> where_expr);
-//
-//  RefPtr<Task> build(
-//      Transaction* txn,
-//      HashMap<TaskID, ScopedPtr<ResultCursor>> input) const override;
-//
-//protected:
-//  JoinType join_type_;
-//  Set<TaskID> base_tbl_ids_;
-//  Set<TaskID> joined_tbl_ids_;
-//  Vector<JoinNode::InputColumnRef> input_map_;
-//  Vector<RefPtr<SelectListNode>> select_exprs_;
-//  Option<RefPtr<ValueExpressionNode>> join_cond_expr_;
-//  Option<RefPtr<ValueExpressionNode>> where_expr_;
-//};
-//
 }
