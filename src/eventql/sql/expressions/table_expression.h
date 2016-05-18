@@ -22,19 +22,19 @@
  * code of your own applications
  */
 #pragma once
+#include "eventql/eventql.h"
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/autoref.h>
 #include <eventql/util/SHA1.h>
 #include <eventql/sql/svalue.h>
-#include <eventql/sql/runtime/Statement.h>
 #include <eventql/sql/result_cursor.h>
-
-#include "eventql/eventql.h"
 
 namespace csql {
 
-class TableExpression : public Statement {
+class TableExpression  {
 public:
+
+  virtual ~TableExpression() = default;
 
   virtual ScopedPtr<ResultCursor> execute() = 0;
 

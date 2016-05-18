@@ -207,7 +207,7 @@ void JSONOutputStream::addFalse() {
 }
 
 void JSONOutputStream::addFloat(double value) {
-  if (std::isnormal(value)) {
+  if (std::isnormal(value) || value == 0.0f) {
     output_->write(StringUtil::toString(value));
   } else {
     addNull();

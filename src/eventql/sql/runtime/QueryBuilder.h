@@ -25,7 +25,6 @@
 #include <eventql/util/stdtypes.h>
 #include <eventql/sql/qtree/ChartStatementNode.h>
 #include <eventql/sql/runtime/ValueExpressionBuilder.h>
-#include <eventql/sql/runtime/charts/ChartStatement.h>
 #include <eventql/sql/runtime/ValueExpression.h>
 
 #include "eventql/eventql.h"

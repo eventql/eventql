@@ -22,7 +22,6 @@
  * code of your own applications
  */
 #include <eventql/sql/runtime/QueryBuilder.h>
-#include <eventql/sql/runtime/charts/drawstatement.h>
 
 #include "eventql/eventql.h"
 
