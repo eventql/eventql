@@ -34,10 +34,12 @@ SelectExpression::SelectExpression(
     execution_context_(execution_context),
     select_exprs_(std::move(select_expressions)),
     pos_(0) {
-  execution_context_->incrementNumTasksRunning();
+  execution_context_->incrementNumTasks();
 }
 
 ScopedPtr<ResultCursor> SelectExpression::execute() {
+  execution_context_->incrementNumTasksRunning();
+
   return mkScoped(
       new DefaultResultCursor(
           select_exprs_.size(),
@@ -58,9 +60,7 @@ bool SelectExpression::next(SValue* row, int row_len) {
       VM::evaluate(txn_, select_exprs_[i].program(), 0, nullptr,  &row[i]);
     }
 
-    if (completion_callback_) {
-      completion_callback_();
-    }
+    execution_context_->incrementNumTasksCompleted();
 
     return true;
   } else {

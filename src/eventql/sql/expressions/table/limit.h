@@ -51,7 +51,6 @@ protected:
   size_t counter_;
   ScopedPtr<ResultCursor> input_cursor_;
   Vector<SValue> buf_;
-  Function<void()> completion_callback_;
 };
 
 }

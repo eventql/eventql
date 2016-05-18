@@ -113,7 +113,7 @@ ScopedPtr<csql::ResultCursor> TableScan::openLocalPartition(
   return mkScoped(
       new PartitionCursor(
           txn_,
-          execution_context_,
+          &child_execution_context_,
           table.get(),
           partition.get()->getSnapshot(),
           seqscan_));
@@ -132,6 +132,7 @@ ScopedPtr<csql::ResultCursor> TableScan::openRemotePartition(
   auto remote_expr = mkScoped(
       new PipelinedExpression(
           txn_,
+          &child_execution_context_,
           tsdb_namespace_,
           auth_,
           1));

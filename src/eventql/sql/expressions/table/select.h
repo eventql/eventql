@@ -41,8 +41,6 @@ public:
 
   size_t getNumColumns() const override;
 
-  //void onInputsReady() override;
-
 protected:
 
   bool next(SValue* row, int row_len);
@@ -51,7 +49,6 @@ protected:
   ExecutionContext* execution_context_;
   Vector<ValueExpression> select_exprs_;
   size_t pos_;
-  Function<void()> completion_callback_;
 };
 
 }

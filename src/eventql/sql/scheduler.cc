@@ -166,6 +166,7 @@ static ScopedPtr<TableExpression> buildGroupByExpression(
   return mkScoped(
       new GroupByExpression(
           txn,
+          execution_context,
           std::move(select_expressions),
           std::move(group_expressions),
           buildExpression(txn, execution_context, node->inputTable())));

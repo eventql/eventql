@@ -44,10 +44,13 @@ OrderByExpression::OrderByExpression(
   if (sort_specs_.size() == 0) {
     RAISE(kIllegalArgumentError, "can't execute ORDER BY: no sort specs");
   }
+
+  execution_context_->incrementNumTasks();
 }
 
 ScopedPtr<ResultCursor> OrderByExpression::execute() {
   input_cursor_ = input_->execute();
+  execution_context_->incrementNumTasksRunning();
 
   Vector<SValue> row(input_cursor_->getNumColumns());
   while (input_cursor_->next(row.data(), row.size())) {
@@ -119,9 +122,7 @@ bool OrderByExpression::next(SValue* out, int out_len) {
     }
 
     if (++pos_ == num_rows_) {
-      if (completion_callback_) {
-        completion_callback_();
-      }
+      execution_context_->incrementNumTasksCompleted();
       rows_.clear();
     }
 

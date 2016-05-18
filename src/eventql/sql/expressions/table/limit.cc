@@ -35,9 +35,7 @@ LimitExpression::LimitExpression(
     limit_(limit),
     offset_(offset),
     input_(std::move(input)),
-    counter_(0) {
-  execution_context->incrementNumTasksRunning();
-}
+    counter_(0) {}
 
 ScopedPtr<ResultCursor> LimitExpression::execute() {
   input_cursor_ = input_->execute();
@@ -59,10 +57,6 @@ size_t LimitExpression::getNumColumns() const {
 
 bool LimitExpression::next(SValue* row, size_t row_len) {
   if (limit_ == 0 || counter_ >= offset_ + limit_) {
-    if (completion_callback_) {
-      completion_callback_();
-      completion_callback_ = nullptr;
-    }
     return false;
   }
 
@@ -77,10 +71,6 @@ bool LimitExpression::next(SValue* row, size_t row_len) {
     }
   }
 
-  if (completion_callback_) {
-    completion_callback_();
-    completion_callback_ = nullptr;
-  }
   return false;
 }
 
