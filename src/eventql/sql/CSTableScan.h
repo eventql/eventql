@@ -38,11 +38,13 @@ public:
 
   CSTableScan(
       Transaction* txn,
+      ExecutionContext* execution_context,
       RefPtr<SequentialScanNode> stmt,
       const String& cstable_filename);
 
   CSTableScan(
       Transaction* txn,
+      ExecutionContext* execution_context,
       RefPtr<SequentialScanNode> stmt,
       RefPtr<cstable::CSTableReader> cstable);
 
@@ -98,6 +100,7 @@ protected:
   void fetch();
 
   Transaction* txn_;
+  ExecutionContext* execution_context_;
   Vector<String> column_names_;
   ScratchMemory scratch_;
   RefPtr<SequentialScanNode> stmt_;
@@ -118,7 +121,6 @@ protected:
   bool cur_filter_pred_;
   Vector<SValue> cur_buf_;
   size_t cur_pos_;
-  Function<void()> completion_callback_;
 };
 
 

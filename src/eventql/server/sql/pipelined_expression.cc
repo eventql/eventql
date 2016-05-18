@@ -30,10 +30,12 @@ namespace eventql {
 
 PipelinedExpression::PipelinedExpression(
     csql::Transaction* txn,
+    csql::ExecutionContext* ctx,
     const String& db_namespace,
     AnalyticsAuth* auth,
     size_t max_concurrency) :
     txn_(txn),
+    ctx_(ctx),
     db_namespace_(db_namespace),
     auth_(auth),
     max_concurrency_(max_concurrency),
@@ -54,6 +56,7 @@ PipelinedExpression::~PipelinedExpression() {
 
 void PipelinedExpression::addLocalQuery(ScopedPtr<csql::TableExpression> expr) {
   num_columns_ = std::max(num_columns_, expr->getNumColumns());
+  ctx_->incrementNumTasks();
 
   queries_.emplace_back(QuerySpec {
     .is_local = true,
@@ -65,13 +68,14 @@ void PipelinedExpression::addLocalQuery(ScopedPtr<csql::TableExpression> expr) {
 void PipelinedExpression::addRemoteQuery(
     RefPtr<csql::TableExpressionNode> qtree,
     Vector<ReplicaRef> hosts) {
+  num_columns_ = std::max(num_columns_, qtree->numColumns());
+  ctx_->incrementNumTasks();
+
   queries_.emplace_back(QuerySpec {
     .is_local = false,
     .qtree = qtree,
     .hosts = hosts
   });
-
-  num_columns_ = std::max(num_columns_, qtree->numColumns());
 }
 
 ScopedPtr<csql::ResultCursor> PipelinedExpression::execute() {
@@ -105,9 +109,12 @@ void PipelinedExpression::executeAsync() {
       break;
     }
 
+    ctx_->incrementNumTasksRunning();
+
     const auto& query = queries_[query_idx];
     String error;
     try {
+
       if (query.is_local) {
         executeLocal(query);
       } else {
@@ -116,6 +123,8 @@ void PipelinedExpression::executeAsync() {
     } catch (const StandardException& e) {
       error = e.what();
     }
+
+    ctx_->incrementNumTasksCompleted();
 
     lk.lock();
     error_ = !error.empty();
@@ -264,11 +273,6 @@ bool PipelinedExpression::next(csql::SValue* out_row, size_t out_row_len) {
   }
 
   buf_.pop_front();
-
-  if (eof_ && buf_.size() == 0 && completion_callback_) {
-    completion_callback_();
-  }
-
   return true;
 }
 

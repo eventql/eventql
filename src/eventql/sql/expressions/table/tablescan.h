@@ -31,6 +31,7 @@
 #include <eventql/sql/runtime/compiler.h>
 #include <eventql/sql/runtime/vm.h>
 #include <eventql/sql/table_iterator.h>
+#include <eventql/sql/scheduler/execution_context.h>
 #include <eventql/util/exception.h>
 
 namespace csql {
@@ -40,6 +41,7 @@ public:
 
   TableScan(
       Transaction* txn,
+      ExecutionContext* execution_context,
       RefPtr<SequentialScanNode> stmt,
       ScopedPtr<TableIterator> iter);
 
@@ -52,10 +54,10 @@ protected:
   bool next(SValue* out, int out_len);
 
   Transaction* txn_;
+  ExecutionContext* execution_context_;
   ScopedPtr<TableIterator> iter_;
   Vector<ValueExpression> select_exprs_;
   Option<ValueExpression> where_expr_;
-  Function<void()> completion_callback_;
 };
 
 } // namespace csql

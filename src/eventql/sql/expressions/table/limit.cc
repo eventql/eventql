@@ -27,9 +27,11 @@
 namespace csql {
 
 LimitExpression::LimitExpression(
+    ExecutionContext* execution_context,
     size_t limit,
     size_t offset,
     ScopedPtr<TableExpression> input) :
+    execution_context_(execution_context),
     limit_(limit),
     offset_(offset),
     input_(std::move(input)),
@@ -55,10 +57,6 @@ size_t LimitExpression::getNumColumns() const {
 
 bool LimitExpression::next(SValue* row, size_t row_len) {
   if (limit_ == 0 || counter_ >= offset_ + limit_) {
-    if (completion_callback_) {
-      completion_callback_();
-      completion_callback_ = nullptr;
-    }
     return false;
   }
 
@@ -73,10 +71,6 @@ bool LimitExpression::next(SValue* row, size_t row_len) {
     }
   }
 
-  if (completion_callback_) {
-    completion_callback_();
-    completion_callback_ = nullptr;
-  }
   return false;
 }
 

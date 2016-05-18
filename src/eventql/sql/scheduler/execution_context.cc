@@ -32,19 +32,19 @@ ExecutionContext::ExecutionContext() :
     num_tasks_running_(0),
     num_tasks_completed_(0) {}
 
-void ExecutionContext::incrementNumTasks() {
+void ExecutionContext::incrementNumTasks(size_t n /* = 1 */) {
   std::unique_lock<std::mutex> lk(mutex_);
-  ++num_tasks_;
+  num_tasks_ += n;
 }
 
-void ExecutionContext::incrementNumTasksRunning() {
+void ExecutionContext::incrementNumTasksRunning(size_t n /* = 1 */) {
   std::unique_lock<std::mutex> lk(mutex_);
-  ++num_tasks_running_;
+  num_tasks_running_ += n;
 }
 
-void ExecutionContext::incrementNumTasksCompleted() {
+void ExecutionContext::incrementNumTasksCompleted(size_t n /* = 1 */) {
   std::unique_lock<std::mutex> lk(mutex_);
-  ++num_tasks_completed_;
+  num_tasks_completed_ += n;
 
   if (progress_callback_) {
     progress_callback_();

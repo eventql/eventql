@@ -32,9 +32,11 @@ namespace csql {
 
 TableScan::TableScan(
     Transaction* txn,
+    ExecutionContext* execution_context,
     RefPtr<SequentialScanNode> stmt,
     ScopedPtr<TableIterator> iter) :
     txn_(txn),
+    execution_context_(execution_context),
     iter_(std::move(iter)) {
   auto qbuilder = txn->getCompiler();
 
@@ -108,10 +110,6 @@ bool TableScan::next(SValue* out, int out_len) {
     return true;
   }
 
-  if (completion_callback_) {
-    completion_callback_();
-    completion_callback_ = nullptr;
-  }
   return false;
 }
 

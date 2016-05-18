@@ -47,7 +47,6 @@ protected:
   Transaction* txn_;
   size_t counter_;
   Vector<Vector<SValue>> buf_;
-  Function<void()> completion_callback_;
 };
 
 }

@@ -35,6 +35,7 @@ public:
 
   TableScan(
     csql::Transaction* txn,
+    csql::ExecutionContext* execution_context,
     const String& tsdb_namespace,
     const String& table_name,
     const Vector<SHA1Hash>& partitions,
@@ -58,6 +59,8 @@ protected:
   ScopedPtr<csql::ResultCursor> openRemotePartition(const SHA1Hash& partition_id);
 
   csql::Transaction* txn_;
+  csql::ExecutionContext* execution_context_;
+  csql::ExecutionContext child_execution_context_;
   String tsdb_namespace_;
   String table_name_;
   Vector<SHA1Hash> partitions_;
@@ -67,7 +70,6 @@ protected:
   AnalyticsAuth* auth_;
   ScopedPtr<csql::ResultCursor> cur_cursor_;
   size_t cur_partition_;
-  Function<void()> completion_callback_;
 };
 
 }

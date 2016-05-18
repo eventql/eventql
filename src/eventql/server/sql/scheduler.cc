@@ -44,11 +44,12 @@ ScopedPtr<csql::TableExpression> Scheduler::buildLimit(
     csql::Transaction* ctx,
     csql::ExecutionContext* execution_context,
     RefPtr<csql::LimitNode> node) {
-  auto expr = new csql::LimitExpression(
+  return mkScoped(
+      new csql::LimitExpression(
+          execution_context,
           node->limit(),
           node->offset(),
-          buildExpression(ctx, execution_context, node->inputTable()));
-  return mkScoped(expr);
+          buildExpression(ctx, execution_context, node->inputTable())));
 }
 
 ScopedPtr<csql::TableExpression> Scheduler::buildSelectExpression(
@@ -61,10 +62,11 @@ ScopedPtr<csql::TableExpression> Scheduler::buildSelectExpression(
         ctx->getCompiler()->buildValueExpression(ctx, slnode->expression()));
   }
 
-  auto expr = new csql::SelectExpression(
-      ctx,
-      std::move(select_expressions));
-  return mkScoped(expr);
+  return mkScoped(
+      new csql::SelectExpression(
+          ctx,
+          execution_context,
+          std::move(select_expressions)));
 };
 
 ScopedPtr<csql::TableExpression> Scheduler::buildSubquery(
@@ -88,12 +90,13 @@ ScopedPtr<csql::TableExpression> Scheduler::buildSubquery(
             slnode->expression()));
   }
 
-  auto expr = new csql::SubqueryExpression(
-      txn,
-      std::move(select_expressions),
-      std::move(where_expr),
-      buildExpression(txn, execution_context, node->subquery()));
-  return mkScoped(expr);
+  return mkScoped(
+      new csql::SubqueryExpression(
+          txn,
+          execution_context,
+          std::move(select_expressions),
+          std::move(where_expr),
+          buildExpression(txn, execution_context, node->subquery())));
 }
 
 ScopedPtr<csql::TableExpression> Scheduler::buildOrderByExpression(
@@ -108,11 +111,12 @@ ScopedPtr<csql::TableExpression> Scheduler::buildOrderByExpression(
     sort_exprs.emplace_back(std::move(se));
   }
 
-  auto expr = new csql::OrderByExpression(
+  return mkScoped(
+      new csql::OrderByExpression(
           txn,
+          execution_context,
           std::move(sort_exprs),
-          buildExpression(txn, execution_context, node->inputTable()));
-  return mkScoped(expr);
+          buildExpression(txn, execution_context, node->inputTable())));
 }
 
 ScopedPtr<csql::TableExpression> Scheduler::buildSequentialScan(
@@ -122,7 +126,10 @@ ScopedPtr<csql::TableExpression> Scheduler::buildSequentialScan(
   const auto& table_name = node->tableName();
   auto table_provider = txn->getTableProvider();
 
-  auto seqscan = table_provider->buildSequentialScan(txn, node);
+  auto seqscan = table_provider->buildSequentialScan(
+      txn,
+      execution_context,
+      node);
   if (seqscan.isEmpty()) {
     RAISEF(kRuntimeError, "table not found: $0", table_name);
   }
@@ -149,12 +156,13 @@ ScopedPtr<csql::TableExpression> Scheduler::buildGroupByExpression(
         txn->getCompiler()->buildValueExpression(txn, e));
   }
 
-  auto expr = new csql::GroupByExpression(
+  return mkScoped(
+      new csql::GroupByExpression(
           txn,
+          execution_context,
           std::move(select_expressions),
           std::move(group_expressions),
-          buildExpression(txn, execution_context, node->inputTable()));
-  return mkScoped(expr);
+          buildExpression(txn, execution_context, node->inputTable())));
 }
 
 ScopedPtr<csql::TableExpression> Scheduler::buildPartialGroupByExpression(
@@ -176,21 +184,22 @@ ScopedPtr<csql::TableExpression> Scheduler::buildPartialGroupByExpression(
         txn->getCompiler()->buildValueExpression(txn, e));
   }
 
-  auto expr = new csql::PartialGroupByExpression(
+  return mkScoped(
+      new csql::PartialGroupByExpression(
           txn,
           std::move(select_expressions),
           std::move(group_expressions),
-          buildExpression(txn, execution_context, node->inputTable()));
-  return mkScoped(expr);
+          buildExpression(txn, execution_context, node->inputTable())));
 }
 
 ScopedPtr<csql::TableExpression> Scheduler::buildPipelineGroupByExpression(
-      csql::Transaction* txn,
+    csql::Transaction* txn,
     csql::ExecutionContext* execution_context,
-      RefPtr<csql::GroupByNode> node) {
+    RefPtr<csql::GroupByNode> node) {
   auto remote_aggregate = mkScoped(
       new PipelinedExpression(
           txn,
+          execution_context,
           TransactionInfo::get(txn)->getNamespace(),
           auth_,
           kMaxConcurrency));
@@ -221,11 +230,12 @@ ScopedPtr<csql::TableExpression> Scheduler::buildPipelineGroupByExpression(
             slnode->expression()));
   }
 
-  auto expr = new csql::GroupByMergeExpression(
+  return mkScoped(
+      new csql::GroupByMergeExpression(
           txn,
+          execution_context,
           std::move(select_expressions),
-          std::move(remote_aggregate));
-  return mkScoped(expr);
+          std::move(remote_aggregate)));
 }
 
 Vector<Scheduler::PipelinedQueryTree> Scheduler::pipelineExpression(
@@ -306,7 +316,8 @@ ScopedPtr<csql::TableExpression> Scheduler::buildJoinExpression(
         ctx->getCompiler()->buildValueExpression(ctx, node->joinCondition().get())));
   }
 
-  auto expr = new csql::NestedLoopJoin(
+  return mkScoped(
+      new csql::NestedLoopJoin(
           ctx,
           node->joinType(),
           node->inputColumnMap(),
@@ -314,9 +325,37 @@ ScopedPtr<csql::TableExpression> Scheduler::buildJoinExpression(
           std::move(join_cond_expr),
           std::move(where_expr),
           buildExpression(ctx, execution_context, node->baseTable()),
-          buildExpression(ctx, execution_context, node->joinedTable()));
-  return mkScoped(expr);
+          buildExpression(ctx, execution_context, node->joinedTable())));
 }
+
+ScopedPtr<csql::TableExpression> Scheduler::buildChartExpression(
+    csql::Transaction* txn,
+    csql::ExecutionContext* execution_context,
+    RefPtr<csql::ChartStatementNode> node) {
+  Vector<Vector<ScopedPtr<csql::TableExpression>>> input_tables;
+  Vector<Vector<RefPtr<csql::TableExpressionNode>>> input_table_qtrees;
+  for (const auto& draw_stmt_qtree : node->getDrawStatements()) {
+    input_tables.emplace_back();
+    input_table_qtrees.emplace_back();
+    auto draw_stmt = draw_stmt_qtree.asInstanceOf<csql::DrawStatementNode>();
+    for (const auto& input_tbl : draw_stmt->inputTables()) {
+      input_tables.back().emplace_back(buildExpression(
+          txn,
+          execution_context,
+          input_tbl));
+      input_table_qtrees.back().emplace_back(
+          input_tbl.asInstanceOf<csql::TableExpressionNode>());
+    }
+  }
+
+  return mkScoped(
+      new csql::ChartExpression(
+          txn,
+          node,
+          std::move(input_tables),
+          input_table_qtrees));
+}
+
 
 ScopedPtr<csql::TableExpression> Scheduler::buildExpression(
     csql::Transaction* ctx,
@@ -394,6 +433,13 @@ ScopedPtr<csql::TableExpression> Scheduler::buildExpression(
         node.asInstanceOf<csql::JoinNode>());
   }
 
+  if (dynamic_cast<csql::ChartStatementNode*>(node.get())) {
+    return buildChartExpression(
+        ctx,
+        execution_context,
+        node.asInstanceOf<csql::ChartStatementNode>());
+  }
+
   RAISEF(
       kRuntimeError,
       "cannot figure out how to execute that query, sorry. -- $0",
@@ -416,7 +462,20 @@ ScopedPtr<csql::ResultCursor> Scheduler::execute(
 };
 
 bool Scheduler::isPipelineable(const csql::QueryTreeNode& qtree) {
-  return true;
+  if (dynamic_cast<const csql::SequentialScanNode*>(&qtree)) {
+    return true;
+  }
+
+  if (dynamic_cast<const csql::SelectExpressionNode*>(&qtree)) {
+    return true;
+  }
+
+  if (dynamic_cast<const csql::SubqueryNode*>(&qtree)) {
+    return isPipelineable(
+        *dynamic_cast<const csql::SubqueryNode&>(qtree).subquery());
+  }
+
+  return false;
 }
 
 void Scheduler::rewriteTableTimeSuffix(RefPtr<csql::QueryTreeNode> node) {

@@ -90,6 +90,7 @@ TableInfo CSVTableProvider::tableInfo() const {
 
 Option<ScopedPtr<TableExpression>> CSVTableProvider::buildSequentialScan(
     Transaction* txn,
+    ExecutionContext* execution_context,
     RefPtr<SequentialScanNode> seqscan) const {
   if (seqscan->tableName() != table_name_) {
     return None<ScopedPtr<TableExpression>>();
@@ -102,6 +103,7 @@ Option<ScopedPtr<TableExpression>> CSVTableProvider::buildSequentialScan(
       ScopedPtr<TableExpression>(
           new TableScan(
               txn,
+              execution_context,
               seqscan,
               mkScoped(new CSVTableScan(headers_, std::move(stream))))));
 

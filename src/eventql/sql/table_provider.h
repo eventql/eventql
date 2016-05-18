@@ -26,6 +26,7 @@
 #include <eventql/sql/TableInfo.h>
 #include <eventql/sql/expressions/table_expression.h>
 #include <eventql/sql/qtree/SequentialScanNode.h>
+#include <eventql/sql/scheduler/execution_context.h>
 
 namespace csql {
 
@@ -36,6 +37,7 @@ public:
 
   virtual Option<ScopedPtr<TableExpression>> buildSequentialScan(
       Transaction* ctx,
+      ExecutionContext* execution_context,
       RefPtr<SequentialScanNode> seqscan) const = 0;
 
   virtual void listTables(Function<void (const TableInfo& table)> fn) const = 0;

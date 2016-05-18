@@ -34,9 +34,11 @@ namespace csql {
 
 CSTableScan::CSTableScan(
     Transaction* txn,
+    ExecutionContext* execution_context,
     RefPtr<SequentialScanNode> stmt,
     const String& cstable_filename) :
     txn_(txn),
+    execution_context_(execution_context),
     stmt_(stmt->deepCopyAs<SequentialScanNode>()),
     cstable_filename_(cstable_filename),
     colindex_(0),
@@ -49,13 +51,16 @@ CSTableScan::CSTableScan(
     cur_filter_pred_(true),
     cur_pos_(0) {
   column_names_ = stmt_->outputColumns();
+  execution_context_->incrementNumTasks();
 }
 
 CSTableScan::CSTableScan(
     Transaction* txn,
+    ExecutionContext* execution_context,
     RefPtr<SequentialScanNode> stmt,
     RefPtr<cstable::CSTableReader> cstable) :
     txn_(txn),
+    execution_context_(execution_context),
     stmt_(stmt->deepCopyAs<SequentialScanNode>()),
     cstable_(cstable),
     colindex_(0),
@@ -68,9 +73,11 @@ CSTableScan::CSTableScan(
     cur_filter_pred_(true),
     cur_pos_(0) {
   column_names_ = stmt_->outputColumns();
+  execution_context_->incrementNumTasks();
 }
 
 ScopedPtr<ResultCursor> CSTableScan::execute() {
+  execution_context_->incrementNumTasksRunning();
   if (!opened_) {
     open();
   }

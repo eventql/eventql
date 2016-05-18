@@ -34,6 +34,7 @@ public:
 
   GroupByExpression(
       Transaction* txn,
+      ExecutionContext* execution_context,
       Vector<ValueExpression> select_expressions,
       Vector<ValueExpression> group_expressions,
       ScopedPtr<TableExpression> input);
@@ -51,6 +52,7 @@ protected:
   void freeResult();
 
   Transaction* txn_;
+  ExecutionContext* execution_context_;
   Vector<ValueExpression> select_exprs_;
   Vector<ValueExpression> group_exprs_;
   ScopedPtr<TableExpression> input_;
@@ -58,7 +60,6 @@ protected:
   HashMap<String, Vector<VM::Instance>>::const_iterator groups_iter_;
   ScratchMemory scratch_;
   bool freed_;
-  Function<void()> completion_callback_;
 };
 
 class PartialGroupByExpression : public TableExpression {
@@ -90,7 +91,6 @@ protected:
   HashMap<String, Vector<VM::Instance>>::const_iterator groups_iter_;
   ScratchMemory scratch_;
   bool freed_;
-  Function<void()> completion_callback_;
 };
 
 class GroupByMergeExpression : public TableExpression {
@@ -98,6 +98,7 @@ public:
 
   GroupByMergeExpression(
       Transaction* txn,
+      ExecutionContext* execution_context,
       Vector<ValueExpression> select_expressions,
       ScopedPtr<TableExpression> input);
 
@@ -113,13 +114,13 @@ protected:
   void freeResult();
 
   Transaction* txn_;
+  ExecutionContext* execution_context_;
   Vector<ValueExpression> select_exprs_;
   ScopedPtr<TableExpression> input_;
   HashMap<String, Vector<VM::Instance>> groups_;
   HashMap<String, Vector<VM::Instance>>::const_iterator groups_iter_;
   ScratchMemory scratch_;
   bool freed_;
-  Function<void()> completion_callback_;
 };
 
 

@@ -32,6 +32,7 @@ class LimitExpression : public TableExpression {
 public:
 
   LimitExpression(
+      ExecutionContext* execution_context,
       size_t limit,
       size_t offset,
       ScopedPtr<TableExpression> input);
@@ -43,13 +44,13 @@ public:
 protected:
   bool next(SValue* row, size_t row_len);
 
+  ExecutionContext* execution_context_;
   size_t limit_;
   size_t offset_;
   ScopedPtr<TableExpression> input_;
   size_t counter_;
   ScopedPtr<ResultCursor> input_cursor_;
   Vector<SValue> buf_;
-  Function<void()> completion_callback_;
 };
 
 }

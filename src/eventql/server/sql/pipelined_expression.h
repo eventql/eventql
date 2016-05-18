@@ -36,6 +36,7 @@ public:
 
   PipelinedExpression(
       csql::Transaction* txn,
+      csql::ExecutionContext* ctx,
       const String& db_namespace,
       AnalyticsAuth* auth,
       size_t max_concurrency);
@@ -76,6 +77,7 @@ protected:
   bool next(csql::SValue* out_row, size_t out_row_len);
 
   csql::Transaction* txn_;
+  csql::ExecutionContext* ctx_;
   String db_namespace_;
   Vector<QuerySpec> queries_;
   AnalyticsAuth* auth_;
@@ -91,7 +93,6 @@ protected:
   Vector<std::thread> threads_;
   size_t queries_started_;
   size_t queries_finished_;
-  Function<void()> completion_callback_;
 };
 
 }

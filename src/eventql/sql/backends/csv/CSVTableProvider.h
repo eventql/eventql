@@ -22,12 +22,11 @@
  * code of your own applications
  */
 #pragma once
+#include "eventql/eventql.h"
 #include <eventql/util/stdtypes.h>
 #include <eventql/sql/runtime/tablerepository.h>
 #include <eventql/sql/backends/csv/CSVInputStream.h>
 #include <eventql/sql/backends/csv/CSVTableScan.h>
-
-#include "eventql/eventql.h"
 
 namespace csql {
 namespace backends {
@@ -61,6 +60,7 @@ public:
 
   Option<ScopedPtr<TableExpression>> buildSequentialScan(
       Transaction* ctx,
+      ExecutionContext* execution_context,
       RefPtr<SequentialScanNode> seqscan) const override;
 
 protected:

@@ -31,14 +31,18 @@ namespace csql {
 
 GroupByExpression::GroupByExpression(
     Transaction* txn,
+    ExecutionContext* execution_context,
     Vector<ValueExpression> select_expressions,
     Vector<ValueExpression> group_expressions,
     ScopedPtr<TableExpression> input) :
     txn_(txn),
+    execution_context_(execution_context),
     select_exprs_(std::move(select_expressions)),
     group_exprs_(std::move(group_expressions)),
     input_(std::move(input)),
-    freed_(false) {}
+    freed_(false) {
+  execution_context_->incrementNumTasks();
+}
 
 GroupByExpression::~GroupByExpression() {
   if (!freed_) {
@@ -47,6 +51,8 @@ GroupByExpression::~GroupByExpression() {
 }
 
 ScopedPtr<ResultCursor> GroupByExpression::execute() {
+  execution_context_->incrementNumTasksRunning();
+
   auto input_cursor = input_->execute();
   Vector<SValue> row(input_cursor->getNumColumns());
   while (input_cursor->next(row.data(), row.size())) {
@@ -100,9 +106,7 @@ bool GroupByExpression::next(SValue* row, size_t row_len) {
     }
 
     if (++groups_iter_ == groups_.end()) {
-      if (completion_callback_) {
-        completion_callback_();
-      }
+      execution_context_->incrementNumTasksCompleted();
       freeResult();
     }
     return true;
@@ -208,9 +212,6 @@ bool PartialGroupByExpression::next(SValue* row, size_t row_len) {
     }
 
     if (++groups_iter_ == groups_.end()) {
-      if (completion_callback_) {
-        completion_callback_();
-      }
       freeResult();
     }
     return true;
@@ -233,12 +234,16 @@ void PartialGroupByExpression::freeResult() {
 
 GroupByMergeExpression::GroupByMergeExpression(
     Transaction* txn,
+    ExecutionContext* execution_context,
     Vector<ValueExpression> select_expressions,
     ScopedPtr<TableExpression> input) :
     txn_(txn),
+    execution_context_(execution_context),
     select_exprs_(std::move(select_expressions)),
     input_(std::move(input)),
-    freed_(false) {}
+    freed_(false) {
+  execution_context_->incrementNumTasks();
+}
 
 GroupByMergeExpression::~GroupByMergeExpression() {
   if (!freed_) {
@@ -247,6 +252,7 @@ GroupByMergeExpression::~GroupByMergeExpression() {
 }
 
 ScopedPtr<ResultCursor> GroupByMergeExpression::execute() {
+  execution_context_->incrementNumTasksRunning();
   auto input_cursor = input_->execute();
   Vector<SValue> row(2);
 
@@ -302,9 +308,7 @@ bool GroupByMergeExpression::next(SValue* row, size_t row_len) {
     }
 
     if (++groups_iter_ == groups_.end()) {
-      if (completion_callback_) {
-        completion_callback_();
-      }
+      execution_context_->incrementNumTasksCompleted();
       freeResult();
     }
     return true;

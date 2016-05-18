@@ -30,6 +30,7 @@ namespace eventql {
 
 TableScan::TableScan(
     csql::Transaction* txn,
+    csql::ExecutionContext* execution_context,
     const String& tsdb_namespace,
     const String& table_name,
     const Vector<SHA1Hash>& partitions,
@@ -38,6 +39,7 @@ TableScan::TableScan(
     ReplicationScheme* replication_scheme,
     AnalyticsAuth* auth) :
     txn_(txn),
+    execution_context_(execution_context),
     tsdb_namespace_(tsdb_namespace),
     table_name_(table_name),
     partitions_(partitions),
@@ -45,8 +47,9 @@ TableScan::TableScan(
     partition_map_(partition_map),
     replication_scheme_(replication_scheme),
     auth_(auth),
-    cur_partition_(0) {}
-
+    cur_partition_(0) {
+  execution_context_->incrementNumTasks(partitions_.size());
+}
 
 ScopedPtr<csql::ResultCursor> TableScan::execute() {
   return mkScoped(
@@ -67,15 +70,15 @@ bool TableScan::next(csql::SValue* row, size_t row_len) {
   while (cur_partition_ < partitions_.size()) {
     if (cur_cursor_.get() == nullptr) {
       cur_cursor_ = openPartition(partitions_[cur_partition_]);
+      execution_context_->incrementNumTasksRunning();
     }
 
     if (cur_cursor_.get() && cur_cursor_->next(row, row_len)) {
       return true;
     } else {
       cur_cursor_.reset(nullptr);
-      if (++cur_partition_ == partitions_.size() && completion_callback_) {
-        completion_callback_();
-      }
+      ++cur_partition_;
+      execution_context_->incrementNumTasksCompleted();
     }
   }
 
@@ -110,6 +113,7 @@ ScopedPtr<csql::ResultCursor> TableScan::openLocalPartition(
   return mkScoped(
       new PartitionCursor(
           txn_,
+          &child_execution_context_,
           table.get(),
           partition.get()->getSnapshot(),
           seqscan_));
@@ -128,6 +132,7 @@ ScopedPtr<csql::ResultCursor> TableScan::openRemotePartition(
   auto remote_expr = mkScoped(
       new PipelinedExpression(
           txn_,
+          &child_execution_context_,
           tsdb_namespace_,
           auth_,
           1));
