@@ -426,7 +426,20 @@ ScopedPtr<csql::ResultCursor> Scheduler::execute(
 };
 
 bool Scheduler::isPipelineable(const csql::QueryTreeNode& qtree) {
-  return true;
+  if (dynamic_cast<const csql::SequentialScanNode*>(&qtree)) {
+    return true;
+  }
+
+  if (dynamic_cast<const csql::SelectExpressionNode*>(&qtree)) {
+    return true;
+  }
+
+  if (dynamic_cast<const csql::SubqueryNode*>(&qtree)) {
+    return isPipelineable(
+        *dynamic_cast<const csql::SubqueryNode&>(qtree).subquery());
+  }
+
+  return false;
 }
 
 void Scheduler::rewriteTableTimeSuffix(RefPtr<csql::QueryTreeNode> node) {
