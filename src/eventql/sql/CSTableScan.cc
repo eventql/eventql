@@ -170,17 +170,6 @@ bool CSTableScan::next(SValue* out, int out_len) {
   }
 }
 
-//void CSTableScan::onInputsReady() {
-//  logTrace("sql", "Scanning cstable: $0", cstable_filename_);
-//
-//  if (!opened_) {
-//    open();
-//  }
-//
-//
-//  //txn_->incrNumSubtasksCompleted(1);
-//}
-
 bool CSTableScan::fetchNext(SValue* out, int out_len) {
   if (cur_pos_ >= num_records_) {
     return false;
@@ -509,10 +498,10 @@ bool CSTableScan::fetchNext(SValue* out, int out_len) {
             &out[i]);
       }
 
-      break;
+      return true;
   }
 
-  return true;
+  return false;
 }
 
 bool CSTableScan::fetchNextWithoutColumns(SValue* row, int row_len) {

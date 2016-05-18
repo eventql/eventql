@@ -114,18 +114,18 @@ void PipelinedExpression::executeAsync() {
     const auto& query = queries_[query_idx];
     String error;
     try {
-      logDebug("evql.dbg", "PipelinedExpression -> start query $0/$1", query_idx, queries_.size());
+      logInfo("evql.dbg", "PipelinedExpression -> start query $0/$1", query_idx, queries_.size());
       if (query.is_local) {
         executeLocal(query);
       } else {
         executeRemote(query);
       }
     } catch (const StandardException& e) {
-      logDebug("evql.dbg", "PipelinedExpression -> query error $0/$1 -- $2", query_idx, queries_.size(), e.what());
+      logInfo("evql.dbg", "PipelinedExpression -> query error $0/$1 -- $2", query_idx, queries_.size(), e.what());
       error = e.what();
     }
 
-    logDebug("evql.dbg", "PipelinedExpression -> finish query $0/$1", query_idx, queries_.size());
+    logInfo("evql.dbg", "PipelinedExpression -> finish query $0/$1", query_idx, queries_.size());
     ctx_->incrementNumTasksCompleted();
 
     lk.lock();
@@ -175,7 +175,7 @@ void PipelinedExpression::executeOnHost(
     RefPtr<csql::TableExpressionNode> qtree,
     const InetAddr& host,
     size_t* row_ctr) {
-  logDebug("evql.dbg", "PipelinedExpression -> remote exeuction on host $0 starting -- row_ctr=$1", host.ipAndPort(), *row_ctr);
+  logInfo("evql.dbg", "PipelinedExpression -> remote exeuction on host $0 starting -- row_ctr=$1", host.ipAndPort(), *row_ctr);
   Buffer req_body;
   auto req_body_os = BufferOutputStream::fromBuffer(&req_body);
   csql::QueryTreeCoder qtree_coder(txn_);
@@ -232,7 +232,7 @@ void PipelinedExpression::executeOnHost(
         res.statusCode());
   }
 
-  logDebug("evql.dbg", "PipelinedExpression -> remote exeuction on host $0 finished -- row_ctr=$1", host.ipAndPort(), *row_ctr);
+  logInfo("evql.dbg", "PipelinedExpression -> remote exeuction on host $0 finished -- row_ctr=$1", host.ipAndPort(), *row_ctr);
 }
 
 bool PipelinedExpression::returnRow(
@@ -261,7 +261,7 @@ bool PipelinedExpression::next(csql::SValue* out_row, size_t out_row_len) {
   }
 
   if (cancelled_) {
-    logDebug("evql.dbg", "PipelinedExpression -> next cnacelled", 1);
+    logInfo("evql.dbg", "PipelinedExpression -> next cnacelled", 1);
     return false;
   }
 
@@ -270,7 +270,7 @@ bool PipelinedExpression::next(csql::SValue* out_row, size_t out_row_len) {
   }
 
   if (eof_ && buf_.size() == 0) {
-    logDebug("evql.dbg", "PipelinedExpression -> next EOF reached", 1);
+    logInfo("evql.dbg", "PipelinedExpression -> next EOF reached", 1);
     return false;
   }
 

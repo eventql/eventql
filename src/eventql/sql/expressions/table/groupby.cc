@@ -274,6 +274,8 @@ ScopedPtr<ResultCursor> GroupByMergeExpression::execute() {
   while (input_cursor->next(row.data(), row.size())) {
     ++nrows;
     const auto& group_key = row[0].getString();
+    logInfo("evql.dbg", "GroupByMerge read input: $0 -> $1", row[0].getString(), row[1].getString().size());
+
     auto& group = groups_[group_key];
     if (group.size() == 0) {
       for (const auto& e : select_exprs_) {
