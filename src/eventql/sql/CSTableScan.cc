@@ -488,7 +488,7 @@ bool CSTableScan::fetchNext(SValue* out, int out_len) {
     }
 
     if (row_ready) {
-      return true;
+      break;
     }
   }
 
@@ -502,12 +502,10 @@ bool CSTableScan::fetchNext(SValue* out, int out_len) {
             &out[i]);
       }
 
-      return true;
-
-    default:
-      RAISE(kIllegalStateError, "invalid aggregation strategy");
-
+      break;
   }
+
+  return true;
 }
 
 bool CSTableScan::fetchNextWithoutColumns(SValue* row, int row_len) {

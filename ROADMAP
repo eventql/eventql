@@ -24,6 +24,8 @@ ROADMAP
 - [ ] evql: history/reverse-i search
 
 
+implement isPipelineable
+
 ---
 -> qtree interface -> rename statement to query
 -> qtree->scheduler: pass queryfuture/
