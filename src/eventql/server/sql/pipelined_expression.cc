@@ -280,6 +280,7 @@ bool PipelinedExpression::next(csql::SValue* out_row, size_t out_row_len) {
   }
 
   buf_.pop_front();
+  cv_.notify_all();
   return true;
 }
 
