@@ -24,6 +24,7 @@
  */
 #include <eventql/util/io/BufferedOutputStream.h>
 #include <eventql/util/io/fileutil.h>
+#include <eventql/util/logging.h>
 #include <eventql/sql/expressions/table/groupby.h>
 #include <eventql/util/freeondestroy.h>
 
@@ -269,7 +270,9 @@ ScopedPtr<ResultCursor> GroupByMergeExpression::execute() {
     }
   });
 
+  size_t nrows = 0;
   while (input_cursor->next(row.data(), row.size())) {
+    ++nrows;
     const auto& group_key = row[0].getString();
     auto& group = groups_[group_key];
     if (group.size() == 0) {
@@ -285,6 +288,8 @@ ScopedPtr<ResultCursor> GroupByMergeExpression::execute() {
       VM::merge(txn_, e.program(), &group[i], &remote_group[i]);
     }
   }
+
+  logInfo("evql.dbg", "GroupByMerge read $0 rows, $1 groups", nrows, groups_.size());
 
   groups_iter_ = groups_.begin();
   return mkScoped(
