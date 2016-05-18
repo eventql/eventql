@@ -38,6 +38,7 @@
 #include "eventql/util/cli/flagparser.h"
 #include "eventql/util/cli/term.h"
 #include "eventql/server/sql/codec/binary_codec.h"
+#include "eventql/sql/runtime/resultlist.h"
 
 namespace eventql {
 namespace cli {
@@ -68,13 +69,14 @@ Status Console::runQuery(const String& query) {
 
   bool error = false;
   csql::BinaryResultParser res_parser;
+  csql::ResultList results;
 
-  res_parser.onTableHeader([] (const Vector<String>& columns) {
-    iputs("columns: $0", columns);
+  res_parser.onTableHeader([&results] (const Vector<String>& columns) {
+    results.addHeader(columns);
   });
 
-  res_parser.onRow([] (int argc, const csql::SValue* argv) {
-    iputs("row: $0", Vector<csql::SValue>(argv, argv + argc));
+  res_parser.onRow([&results] (int argc, const csql::SValue* argv) {
+    results.addRow(argv, argc);
   });
 
   res_parser.onError([&stderr_os, &error] (const String& error_str) {
@@ -132,10 +134,11 @@ Status Console::runQuery(const String& query) {
   }
 
   if (error) {
-    return Status::success();
-  } else {
     return Status(eIOError);
   }
+
+  results.debugPrint();
+  return Status::success();
 }
 
 } // namespace cli

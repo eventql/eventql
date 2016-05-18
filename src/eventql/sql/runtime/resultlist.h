@@ -78,10 +78,6 @@ public:
   }
 
   bool addRow(const csql::SValue* row, int row_len) {
-    if (row_len > columns_.size()) {
-      row_len = columns_.size();
-    }
-
     Vector<String> str_row;
     for (int i = 0; i < row_len; ++i) {
       str_row.emplace_back(row[i].getString());
@@ -116,8 +112,8 @@ public:
     };
 
     auto print_row = [this, os, &col_widths] (const std::vector<std::string>& row) {
-      for (int n = 0; n < row.size(); ++n) {
-        const auto& val = row[n];
+      for (int n = 0; n < columns_.size(); ++n) {
+        auto val = n < row.size() ? row[n] : String("NULL");
         os->printf("| %s", val.c_str());
         for (int i = col_widths[n] - val.size() - 3; i > 0; --i) {
           os->printf(" ");
