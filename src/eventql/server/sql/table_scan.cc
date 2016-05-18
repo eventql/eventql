@@ -110,13 +110,25 @@ ScopedPtr<csql::ResultCursor> TableScan::openLocalPartition(
     return ScopedPtr<csql::ResultCursor>();
   }
 
-  return mkScoped(
-      new PartitionCursor(
-          txn_,
-          &child_execution_context_,
-          table.get(),
-          partition.get()->getSnapshot(),
-          seqscan_));
+  switch (partition.get()->getTable()->storage()) {
+    case eventql::TBL_STORAGE_COLSM:
+      return mkScoped(
+          new PartitionCursor(
+              txn_,
+              &child_execution_context_,
+              table.get(),
+              partition.get()->getSnapshot(),
+              seqscan_));
+
+    case eventql::TBL_STORAGE_STATIC:
+      return mkScoped(
+          new StaticPartitionCursor(
+              txn_,
+              &child_execution_context_,
+              table.get(),
+              partition.get()->getSnapshot(),
+              seqscan_));
+  }
 }
 
 ScopedPtr<csql::ResultCursor> TableScan::openRemotePartition(

@@ -56,4 +56,29 @@ protected:
   ScopedPtr<csql::CSTableScan> cur_scan_;
 };
 
+class StaticPartitionCursor : public csql::ResultCursor {
+public:
+
+  StaticPartitionCursor(
+      csql::Transaction* txn,
+      csql::ExecutionContext* execution_context,
+      RefPtr<Table> table,
+      RefPtr<PartitionSnapshot> snap,
+      RefPtr<csql::SequentialScanNode> stmt);
+
+  bool next(csql::SValue* row, int row_len) override;
+
+  size_t getNumColumns() override;
+
+protected:
+
+  csql::Transaction* txn_;
+  csql::ExecutionContext* execution_context_;
+  RefPtr<Table> table_;
+  RefPtr<PartitionSnapshot> snap_;
+  RefPtr<csql::SequentialScanNode> stmt_;
+  ScopedPtr<csql::ResultCursor> cur_cursor_;
+  ScopedPtr<csql::CSTableScan> cur_scan_;
+};
+
 }
