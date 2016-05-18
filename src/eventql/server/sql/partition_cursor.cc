@@ -135,28 +135,28 @@ bool StaticPartitionCursor::next(csql::SValue* row, int row_len) {
     cur_scan_.reset(
         new csql::CSTableScan(txn_, execution_context_, stmt_, cstable));
 
-    for (const auto& col : table_->schema()->columns()) {
-      switch (col.second.type) {
-        case msg::FieldType::BOOLEAN:
-          cur_scan_->setColumnType(col.first, SQL_BOOL);
-          break;
-        case msg::FieldType::UINT32:
-          cur_scan_->setColumnType(col.first, SQL_INTEGER);
-          break;
-        case msg::FieldType::UINT64:
-          cur_scan_->setColumnType(col.first, SQL_INTEGER);
-          break;
-        case msg::FieldType::STRING:
-          cur_scan_->setColumnType(col.first, SQL_STRING);
-          break;
-        case msg::FieldType::DOUBLE:
-          cur_scan_->setColumnType(col.first, SQL_FLOAT);
-          break;
-        case msg::FieldType::DATETIME:
-          cur_scan_->setColumnType(col.first, SQL_TIMESTAMP);
-          break;
-      }
-    }
+    //for (const auto& col : table_->schema()->columns()) {
+    //  switch (col.second.type) {
+    //    case msg::FieldType::BOOLEAN:
+    //      cur_scan_->setColumnType(col.first, SQL_BOOL);
+    //      break;
+    //    case msg::FieldType::UINT32:
+    //      cur_scan_->setColumnType(col.first, SQL_INTEGER);
+    //      break;
+    //    case msg::FieldType::UINT64:
+    //      cur_scan_->setColumnType(col.first, SQL_INTEGER);
+    //      break;
+    //    case msg::FieldType::STRING:
+    //      cur_scan_->setColumnType(col.first, SQL_STRING);
+    //      break;
+    //    case msg::FieldType::DOUBLE:
+    //      cur_scan_->setColumnType(col.first, SQL_FLOAT);
+    //      break;
+    //    case msg::FieldType::DATETIME:
+    //      cur_scan_->setColumnType(col.first, SQL_TIMESTAMP);
+    //      break;
+    //  }
+    //}
 
     cur_cursor_ = cur_scan_->execute();
   }
