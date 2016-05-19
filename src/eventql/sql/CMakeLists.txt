@@ -110,7 +110,8 @@ add_library(chartsql STATIC
     scheduler/execution_context.cc
     result_cursor.cc
     scheduler.cc
-    defaults.cc)
+    defaults.cc
+    result_list.cc)
 
 add_dependencies(chartsql stx-protobuf)
 set(CSQL_LIBS chartsql cplot cstable stx-http stx-protobuf stx-json stx-base pcre)

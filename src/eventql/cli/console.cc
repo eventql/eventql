@@ -38,7 +38,7 @@
 #include "eventql/util/cli/flagparser.h"
 #include "eventql/util/cli/term.h"
 #include "eventql/server/sql/codec/binary_codec.h"
-#include "eventql/sql/runtime/resultlist.h"
+#include "eventql/sql/result_list.h"
 
 namespace eventql {
 namespace cli {
@@ -55,6 +55,7 @@ void Console::startInteractiveShell() {
 
     if (line == "quit") {
       return;
+
     } else {
       runQuery(line);
     }
