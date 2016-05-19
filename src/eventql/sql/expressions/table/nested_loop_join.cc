@@ -123,7 +123,7 @@ ScopedPtr<ResultCursor> NestedLoopJoin::executeCartesianJoin() {
         if (base_tbl_row_.size() < base_tbl_mincols_) {
           RAISE(
               kRuntimeError,
-              "INTERNAL ERROR: Nested Loop JOIN joined input row is too small");
+              "INTERNAL ERROR: Nested Loop JOIN base input row is too small");
         }
       }
 
@@ -191,7 +191,7 @@ ScopedPtr<ResultCursor> NestedLoopJoin::executeInnerJoin() {
         if (base_tbl_row_.size() < base_tbl_mincols_) {
           RAISE(
               kRuntimeError,
-              "INTERNAL ERROR: Nested Loop JOIN joined input row is too small");
+              "INTERNAL ERROR: Nested Loop JOIN base input row is too small");
         }
       }
 
@@ -275,7 +275,7 @@ ScopedPtr<ResultCursor> NestedLoopJoin::executeOuterJoin() {
         if (base_tbl_row_.size() < base_tbl_mincols_) {
           RAISE(
               kRuntimeError,
-              "INTERNAL ERROR: Nested Loop JOIN joined input row is too small");
+              "INTERNAL ERROR: Nested Loop JOIN base input row is too small");
         }
       }
 
