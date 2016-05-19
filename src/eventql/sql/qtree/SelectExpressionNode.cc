@@ -41,11 +41,11 @@ Vector<RefPtr<SelectListNode>> SelectExpressionNode::selectList()
   return select_list_;
 }
 
-Vector<String> SelectExpressionNode::outputColumns() const {
+Vector<String> SelectExpressionNode::getResultColumns() const {
   return column_names_;
 }
 
-Vector<QualifiedColumn> SelectExpressionNode::allColumns() const {
+Vector<QualifiedColumn> SelectExpressionNode::getAvailableColumns() const {
   String qualifier;
 
   Vector<QualifiedColumn> cols;
@@ -59,7 +59,7 @@ Vector<QualifiedColumn> SelectExpressionNode::allColumns() const {
   return cols;
 }
 
-size_t SelectExpressionNode::getColumnIndex(
+size_t SelectExpressionNode::getComputedColumnIndex(
     const String& column_name,
     bool allow_add /* = false */) {
   for (int i = 0; i < column_names_.size(); ++i) {

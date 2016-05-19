@@ -420,7 +420,7 @@ QueryTreeNode* QueryPlanBuilder::buildGroupBy(
   Vector<RefPtr<SelectListNode>> select_list_expressions;
   for (const auto& select_expr : select_list->getChildren()) {
     if (*select_expr == ASTNode::T_ALL) {
-      for (const auto& col : subtree_tbl->allColumns()) {
+      for (const auto& col : subtree_tbl->getAvailableColumns()) {
         auto sl = new SelectListNode(new ColumnReferenceNode(col.qualified_name));
         sl->setAlias(col.short_name);
         select_list_expressions.emplace_back(sl);
@@ -435,7 +435,7 @@ QueryTreeNode* QueryPlanBuilder::buildGroupBy(
     QueryTreeUtil::resolveColumns(
         sl->expression(),
         std::bind(
-            &TableExpressionNode::getColumnIndex,
+            &TableExpressionNode::getComputedColumnIndex,
             subtree_tbl.get(),
             std::placeholders::_1,
             false));
@@ -445,7 +445,7 @@ QueryTreeNode* QueryPlanBuilder::buildGroupBy(
     QueryTreeUtil::resolveColumns(
         e,
         std::bind(
-            &TableExpressionNode::getColumnIndex,
+            &TableExpressionNode::getComputedColumnIndex,
             subtree_tbl.get(),
             std::placeholders::_1,
             true));
@@ -629,7 +629,7 @@ QueryTreeNode* QueryPlanBuilder::buildOrderByClause(
       QueryTreeUtil::resolveColumns(
           sort_spec.expr, 
           std::bind(
-              &TableExpressionNode::getColumnIndex,
+              &TableExpressionNode::getComputedColumnIndex,
               subtree_tbl.get(),
               std::placeholders::_1,
               true));
@@ -979,11 +979,11 @@ QueryTreeNode* QueryPlanBuilder::buildJoinTableReference(
     HashMap<String, Vector<String>> common_columns;
     {
       Set<String> tmp_column_set;
-      for (const auto& col : secondary_table->allColumns()) {
+      for (const auto& col : secondary_table->getAvailableColumns()) {
         tmp_column_set.insert(col.short_name);
       }
 
-      for (const auto& col : primary_table->allColumns()) {
+      for (const auto& col : primary_table->getAvailableColumns()) {
         if (tmp_column_set.count(col.short_name) > 0) {
           all_columns.emplace_back(col);
           common_columns.emplace(col.short_name, Vector<String>{});
@@ -993,7 +993,7 @@ QueryTreeNode* QueryPlanBuilder::buildJoinTableReference(
     }
 
     for (const auto& col :
-            base_table.asInstanceOf<TableExpressionNode>()->allColumns()) {
+            base_table.asInstanceOf<TableExpressionNode>()->getAvailableColumns()) {
       if (common_columns.count(col.short_name) == 0) {
         all_columns.emplace_back(col);
       } else {
@@ -1002,7 +1002,7 @@ QueryTreeNode* QueryPlanBuilder::buildJoinTableReference(
     }
 
     for (const auto& col :
-            joined_table.asInstanceOf<TableExpressionNode>()->allColumns()) {
+            joined_table.asInstanceOf<TableExpressionNode>()->getAvailableColumns()) {
       if (common_columns.count(col.short_name) == 0) {
         all_columns.emplace_back(col);
       } else {
@@ -1043,12 +1043,12 @@ QueryTreeNode* QueryPlanBuilder::buildJoinTableReference(
     }
   } else {
     for (const auto& col :
-            base_table.asInstanceOf<TableExpressionNode>()->allColumns()) {
+            base_table.asInstanceOf<TableExpressionNode>()->getAvailableColumns()) {
       all_columns.emplace_back(col);
     }
 
     for (const auto& col :
-            joined_table.asInstanceOf<TableExpressionNode>()->allColumns()) {
+            joined_table.asInstanceOf<TableExpressionNode>()->getAvailableColumns()) {
       all_columns.emplace_back(col);
     }
 
@@ -1192,13 +1192,13 @@ QueryTreeNode* QueryPlanBuilder::buildSubqueryTableReference(
       }
     }
 
-    return subquery_tbl->getColumnIndex(col);
+    return subquery_tbl->getComputedColumnIndex(col);
   };
 
   Vector<RefPtr<SelectListNode>> select_list_expressions;
   for (const auto& select_expr : select_list->getChildren()) {
     if (*select_expr == ASTNode::T_ALL) {
-      for (const auto& col : subquery_tbl->outputColumns()) {
+      for (const auto& col : subquery_tbl->getResultColumns()) {
         auto sl = new SelectListNode(new ColumnReferenceNode(col));
         sl->setAlias(col);
         QueryTreeUtil::resolveColumns(sl->expression(), resolver);

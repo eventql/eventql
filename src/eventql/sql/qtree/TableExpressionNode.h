@@ -65,23 +65,24 @@ public:
    * the output columns, which returns all columns that actually are referenced
    * and need to be returned on execution
    */
-  virtual Vector<QualifiedColumn> allColumns() const = 0; //getAvailableColumns
+  virtual Vector<QualifiedColumn> getAvailableColumns() const = 0;
 
   /**
-   * Returns the nominal output column list. I.e. the names of all output columns
-   * that this table expression will return and that should be displayed to the
-   * user
+   * Returns the nominal output column list. I.e. the names of all result columns
+   * that should be displayed to the user
    */
-  virtual Vector<String> outputColumns() const = 0; // getResultColumns
+  virtual Vector<String> getResultColumns() const = 0;
 
   /**
-   * Returns the number of computed columns that this table expression will return.
-   * Note that the number of computed columns might be larger than the size of the
-   * nominal output column list as returned by outputColumns, as it might inlcude
-   * internal columns that are needed for execution of upstream table expressions,
-   * but should not be returned to the user
+   * Returns the number of computed columns that this table expression will
+   * actually return when executed.
+   *
+   * Note that the number of computed columns might be larger than the size of
+   * the nominal output column list as returned by getResultColumns, as it might
+   * include internal columns that are needed for execution of upstream table
+   * expressions, but should not be returned to the user
    */
-  virtual size_t getNumComputedColumns() const = 0; //getNumComputerColumns
+  virtual size_t getNumComputedColumns() const = 0;
 
   /**
    * Returns the output column index for a named column or -1 if no such column
@@ -95,7 +96,7 @@ public:
    * if the column name refers to a valid column that is not included in the
    * output list yet
    */
-  virtual size_t getColumnIndex( // getOutputColumnIndex
+  virtual size_t getComputedColumnIndex(
       const String& column_name,
       bool allow_add = false) = 0;
 

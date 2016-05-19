@@ -40,18 +40,18 @@ RefPtr<QueryTreeNode> OrderByNode::inputTable() const {
   return table_;
 }
 
-Vector<String> OrderByNode::outputColumns() const {
-  return table_.asInstanceOf<TableExpressionNode>()->outputColumns();
+Vector<String> OrderByNode::getResultColumns() const {
+  return table_.asInstanceOf<TableExpressionNode>()->getResultColumns();
 }
 
-Vector<QualifiedColumn> OrderByNode::allColumns() const {
-  return table_.asInstanceOf<TableExpressionNode>()->allColumns();
+Vector<QualifiedColumn> OrderByNode::getAvailableColumns() const {
+  return table_.asInstanceOf<TableExpressionNode>()->getAvailableColumns();
 }
 
-size_t OrderByNode::getColumnIndex(
+size_t OrderByNode::getComputedColumnIndex(
     const String& column_name,
     bool allow_add /* = false */) {
-  return table_.asInstanceOf<TableExpressionNode>()->getColumnIndex(
+  return table_.asInstanceOf<TableExpressionNode>()->getComputedColumnIndex(
       column_name,
       allow_add);
 }

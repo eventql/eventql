@@ -50,11 +50,11 @@ const Vector<RefPtr<QueryTreeNode>>& ChartStatementNode::getDrawStatements() {
   return draw_stmts_;
 }
 
-Vector<String> ChartStatementNode::outputColumns() const {
+Vector<String> ChartStatementNode::getResultColumns() const {
   return { kColumnName };
 }
 
-Vector<QualifiedColumn> ChartStatementNode::allColumns() const {
+Vector<QualifiedColumn> ChartStatementNode::getAvailableColumns() const {
   return {
     {
       .qualified_name = kColumnName,
@@ -63,7 +63,7 @@ Vector<QualifiedColumn> ChartStatementNode::allColumns() const {
   };
 }
 
-size_t ChartStatementNode::getColumnIndex(
+size_t ChartStatementNode::getComputedColumnIndex(
     const String& column_name,
     bool allow_add /* = false */) {
 

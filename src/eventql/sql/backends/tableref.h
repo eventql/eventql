@@ -34,7 +34,7 @@ class TableRef {
 public:
   virtual ~TableRef() {}
   virtual std::vector<std::string> columns() = 0;
-  virtual int getColumnIndex(const std::string& name) = 0;
+  virtual int getComputedColumnIndex(const std::string& name) = 0;
   virtual std::string getColumnName(int index) = 0;
   virtual void executeScan(TableScan* scan) = 0;
 protected:

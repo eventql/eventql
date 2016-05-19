@@ -147,11 +147,11 @@ Set<String> SequentialScanNode::selectedColumns() const {
   return columns;
 }
 
-Vector<String> SequentialScanNode::outputColumns() const {
+Vector<String> SequentialScanNode::getResultColumns() const {
   return output_columns_;
 }
 
-Vector<QualifiedColumn> SequentialScanNode::allColumns() const {
+Vector<QualifiedColumn> SequentialScanNode::getAvailableColumns() const {
   String qualifier;
   if (table_alias_.empty()) {
     qualifier = table_name_ + ".";
@@ -200,7 +200,7 @@ String SequentialScanNode::normalizeColumnName(const String& column_name) const 
   return column_name;
 }
 
-size_t SequentialScanNode::getColumnIndex(
+size_t SequentialScanNode::getComputedColumnIndex(
     const String& column_name,
     bool allow_add /* = false */) {
   bool have_name = !table_name_.empty();

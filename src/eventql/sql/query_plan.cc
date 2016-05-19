@@ -34,7 +34,7 @@ QueryPlan::QueryPlan(
     execution_contexts_(qtrees_.size()) {
   for (const auto& qtree : qtrees_) {
     statement_columns_.emplace_back(
-        qtree.asInstanceOf<TableExpressionNode>()->outputColumns());
+        qtree.asInstanceOf<TableExpressionNode>()->getResultColumns());
   }
 }
 
@@ -60,7 +60,7 @@ void QueryPlan::execute(size_t stmt_idx, ResultList* result_list) {
     RAISE(kIndexError, "invalid statement index");
   }
 
-  result_list->addHeader(getStatementOutputColumns(stmt_idx));
+  result_list->addHeader(getStatementgetResultColumns(stmt_idx));
 
   auto cursor = execute(stmt_idx);
   Vector<SValue> tmp(cursor->getNumColumns());
@@ -69,7 +69,7 @@ void QueryPlan::execute(size_t stmt_idx, ResultList* result_list) {
   }
 }
 
-const Vector<String>& QueryPlan::getStatementOutputColumns(size_t stmt_idx) {
+const Vector<String>& QueryPlan::getStatementgetResultColumns(size_t stmt_idx) {
   if (stmt_idx >= qtrees_.size()) {
     RAISE(kIndexError, "invalid statement index");
   }

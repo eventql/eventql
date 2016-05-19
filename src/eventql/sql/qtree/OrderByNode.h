@@ -46,9 +46,9 @@ public:
 
   RefPtr<QueryTreeNode> inputTable() const;
 
-  Vector<String> outputColumns() const override;
+  Vector<String> getResultColumns() const override;
 
-  Vector<QualifiedColumn> allColumns() const override;
+  Vector<QualifiedColumn> getAvailableColumns() const override;
 
   const Vector<SortSpec>& sortSpecs() const;
 
@@ -56,7 +56,7 @@ public:
 
   String toString() const override;
 
-  size_t getColumnIndex(
+  size_t getComputedColumnIndex(
       const String& column_name,
       bool allow_add = false) override;
 

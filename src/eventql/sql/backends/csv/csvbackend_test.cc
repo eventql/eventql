@@ -104,12 +104,12 @@ TEST_CASE(CSVInputStreamTest, TestReadSimpleRowsEOF, [] () {
 });
 
 // CSVTableRefTest
-TEST_CASE(CSVInputStreamTest, TestGetColumnIndexWithHeaders, [] () {
+TEST_CASE(CSVInputStreamTest, TestgetComputedColumnIndexWithHeaders, [] () {
   CSVTableRef table_ref(
       CSVInputStream::openFile("test/fixtures/gbp_per_country_simple.csv"),
       true);
 
-  EXPECT_EQ(table_ref.getColumnIndex("country"), 0);
+  EXPECT_EQ(table_ref.getComputedColumnIndex("country"), 0);
 });
 
 // CSVTableRefTest
@@ -133,16 +133,16 @@ TEST_CASE(CSVInputStreamTest, TestReadRowsWithHeaders, [] () {
 });
 
 // CSVTableRefTest
-TEST_CASE(CSVInputStreamTest, TestGetColumnIndexWithoutHeaders, [] () {
+TEST_CASE(CSVInputStreamTest, TestgetComputedColumnIndexWithoutHeaders, [] () {
   CSVTableRef table_ref(
       CSVInputStream::openFile(
           "test/fixtures/gbp_per_country_simple_noheaders.csv"),
       false);
 
-  EXPECT_EQ(table_ref.getColumnIndex("col1"), 0);
-  EXPECT_EQ(table_ref.getColumnIndex("col2"), 1);
-  EXPECT_EQ(table_ref.getColumnIndex("col3"), 2);
-  EXPECT_EQ(table_ref.getColumnIndex("col99"), 98);
+  EXPECT_EQ(table_ref.getComputedColumnIndex("col1"), 0);
+  EXPECT_EQ(table_ref.getComputedColumnIndex("col2"), 1);
+  EXPECT_EQ(table_ref.getComputedColumnIndex("col3"), 2);
+  EXPECT_EQ(table_ref.getComputedColumnIndex("col99"), 98);
 });
 
 // CSVTableRefTest

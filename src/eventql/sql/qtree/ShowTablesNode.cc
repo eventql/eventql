@@ -36,17 +36,17 @@ RefPtr<QueryTreeNode> ShowTablesNode::deepCopy() const {
   return new ShowTablesNode();
 }
 
-Vector<String> ShowTablesNode::outputColumns() const {
+Vector<String> ShowTablesNode::getResultColumns() const {
   return Vector<String>{
     "table_name",
     "description"
   };
 }
 
-Vector<QualifiedColumn> ShowTablesNode::allColumns() const {
+Vector<QualifiedColumn> ShowTablesNode::getAvailableColumns() const {
   Vector<QualifiedColumn> cols;
 
-  for (const auto& c : outputColumns()) {
+  for (const auto& c : getResultColumns()) {
     QualifiedColumn  qc;
     qc.short_name = c;
     qc.qualified_name = c;
@@ -56,7 +56,7 @@ Vector<QualifiedColumn> ShowTablesNode::allColumns() const {
   return cols;
 }
 
-size_t ShowTablesNode::getColumnIndex(
+size_t ShowTablesNode::getComputedColumnIndex(
     const String& column_name,
     bool allow_add /* = false */) {
   return -1; // FIXME

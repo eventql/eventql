@@ -44,7 +44,7 @@ const String& DescribeTableNode::tableName() const {
   return table_name_;
 }
 
-Vector<String> DescribeTableNode::outputColumns() const {
+Vector<String> DescribeTableNode::getResultColumns() const {
   return Vector<String> {
     "column_name",
     "type",
@@ -53,10 +53,10 @@ Vector<String> DescribeTableNode::outputColumns() const {
   };
 }
 
-Vector<QualifiedColumn> DescribeTableNode::allColumns() const {
+Vector<QualifiedColumn> DescribeTableNode::getAvailableColumns() const {
   Vector<QualifiedColumn> cols;
 
-  for (const auto& c : outputColumns()) {
+  for (const auto& c : getResultColumns()) {
     QualifiedColumn  qc;
     qc.short_name = c;
     qc.qualified_name = c;
@@ -66,7 +66,7 @@ Vector<QualifiedColumn> DescribeTableNode::allColumns() const {
   return cols;
 }
 
-size_t DescribeTableNode::getColumnIndex(
+size_t DescribeTableNode::getComputedColumnIndex(
     const String& column_name,
     bool allow_add /* = false */) {
   return -1; // FIXME

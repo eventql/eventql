@@ -44,9 +44,9 @@ public:
 
   Vector<RefPtr<SelectListNode>> selectList() const;
 
-  Vector<String> outputColumns() const override;
+  Vector<String> getResultColumns() const override;
 
-  Vector<QualifiedColumn> allColumns() const override;
+  Vector<QualifiedColumn> getAvailableColumns() const override;
 
   Vector<RefPtr<ValueExpressionNode>> groupExpressions() const;
 
@@ -59,7 +59,7 @@ public:
   void setIsPartialAggreagtion(bool is_partial_aggregation);
   bool isPartialAggregation() const;
 
-  size_t getColumnIndex(
+  size_t getComputedColumnIndex(
       const String& column_name,
       bool allow_add = false) override;
 

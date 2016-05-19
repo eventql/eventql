@@ -47,11 +47,11 @@ public:
   RefPtr<QueryTreeNode> subquery() const;
 
   Vector<RefPtr<SelectListNode>> selectList() const;
-  Vector<String> outputColumns() const override;
+  Vector<String> getResultColumns() const override;
 
-  Vector<QualifiedColumn> allColumns() const override;
+  Vector<QualifiedColumn> getAvailableColumns() const override;
 
-  size_t getColumnIndex(
+  size_t getComputedColumnIndex(
       const String& column_name,
       bool allow_add = false) override;
 

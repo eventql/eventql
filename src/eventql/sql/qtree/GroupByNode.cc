@@ -63,15 +63,15 @@ Vector<RefPtr<SelectListNode>> GroupByNode::selectList() const {
   return select_list_;
 }
 
-Vector<String> GroupByNode::outputColumns() const {
+Vector<String> GroupByNode::getResultColumns() const {
   return column_names_;
 }
 
-Vector<QualifiedColumn> GroupByNode::allColumns() const {
-  return table_.asInstanceOf<TableExpressionNode>()->allColumns();
+Vector<QualifiedColumn> GroupByNode::getAvailableColumns() const {
+  return table_.asInstanceOf<TableExpressionNode>()->getAvailableColumns();
 }
 
-size_t GroupByNode::getColumnIndex(
+size_t GroupByNode::getComputedColumnIndex(
     const String& column_name,
     bool allow_add /* = false */) {
   for (size_t i = 0; i < select_list_.size(); ++i) {
@@ -86,7 +86,7 @@ size_t GroupByNode::getColumnIndex(
 
   auto child_idx = table_
       .asInstanceOf<TableExpressionNode>()
-      ->getColumnIndex(column_name, allow_add);
+      ->getComputedColumnIndex(column_name, allow_add);
 
   if (child_idx != size_t(-1)) {
     auto slnode = new SelectListNode(new ColumnReferenceNode(child_idx));

@@ -45,7 +45,7 @@ std::vector<std::string> MySQLTableRef::columns() {
   return cols;
 }
 
-int MySQLTableRef::getColumnIndex(const std::string& name) {
+int MySQLTableRef::getComputedColumnIndex(const std::string& name) {
   for (int i = 0; i < columns_.size(); ++i) {
     // FIXPAUL case insensitive match
     if (*columns_[i] == name) {

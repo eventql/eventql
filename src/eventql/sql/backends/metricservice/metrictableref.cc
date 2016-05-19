@@ -31,7 +31,7 @@ MetricTableRef::MetricTableRef(
     util::metric_service::IMetric* metric) :
     metric_(metric) {}
 
-int MetricTableRef::getColumnIndex(const std::string& name) {
+int MetricTableRef::getComputedColumnIndex(const std::string& name) {
   if (name == "time") {
     return 0;
   }

@@ -51,57 +51,57 @@ public:
       Transaction* txn,
       RefPtr<TableExpressionNode> stmt,
       ScopedPtr<ResultCursor> result_cursor) {
-    name_ind_ = stmt->getColumnIndex("series");
+    name_ind_ = stmt->getComputedColumnIndex("series");
 
-    x_ind_ = stmt->getColumnIndex("x");
+    x_ind_ = stmt->getComputedColumnIndex("x");
     if (x_ind_ < 0) {
-      x_ind_ = stmt->getColumnIndex("X");
+      x_ind_ = stmt->getComputedColumnIndex("X");
     }
 
-    y_ind_ = stmt->getColumnIndex("y");
+    y_ind_ = stmt->getComputedColumnIndex("y");
     if (y_ind_ < 0) {
-      y_ind_ = stmt->getColumnIndex("Y");
+      y_ind_ = stmt->getComputedColumnIndex("Y");
     }
 
-    z_ind_ = stmt->getColumnIndex("z");
+    z_ind_ = stmt->getComputedColumnIndex("z");
     if (z_ind_ < 0) {
-      z_ind_ = stmt->getColumnIndex("Z");
+      z_ind_ = stmt->getComputedColumnIndex("Z");
     }
 
     prop_indexes_.clear();
 
-    int color_ind = stmt->getColumnIndex("color");
+    int color_ind = stmt->getComputedColumnIndex("color");
     if (color_ind >= 0) {
       prop_indexes_.emplace_back(util::chart::Series::P_COLOR, color_ind);
     }
 
-    int label_ind = stmt->getColumnIndex("label");
+    int label_ind = stmt->getComputedColumnIndex("label");
     if (label_ind >= 0) {
       prop_indexes_.emplace_back(util::chart::Series::P_LABEL, label_ind);
     }
 
-    int line_style_ind = stmt->getColumnIndex("linestyle");
+    int line_style_ind = stmt->getComputedColumnIndex("linestyle");
     if (line_style_ind >= 0) {
       prop_indexes_.emplace_back(
           util::chart::Series::P_LINE_STYLE,
           line_style_ind);
     }
 
-    int line_width_ind = stmt->getColumnIndex("linewidth");
+    int line_width_ind = stmt->getComputedColumnIndex("linewidth");
     if (line_width_ind >= 0) {
       prop_indexes_.emplace_back(
           util::chart::Series::P_LINE_WIDTH,
           line_width_ind);
     }
 
-    int point_style_ind = stmt->getColumnIndex("pointstyle");
+    int point_style_ind = stmt->getComputedColumnIndex("pointstyle");
     if (point_style_ind >= 0) {
       prop_indexes_.emplace_back(
           util::chart::Series::P_POINT_STYLE,
           point_style_ind);
     }
 
-    int point_size_ind = stmt->getColumnIndex("pointsize");
+    int point_size_ind = stmt->getComputedColumnIndex("pointsize");
     if (point_size_ind >= 0) {
       prop_indexes_.emplace_back(
           util::chart::Series::P_POINT_SIZE,

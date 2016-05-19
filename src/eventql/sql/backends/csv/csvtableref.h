@@ -47,7 +47,7 @@ public:
       bool headers = false);
 
   std::vector<std::string> columns() override;
-  int getColumnIndex(const std::string& name) override;
+  int getComputedColumnIndex(const std::string& name) override;
   std::string getColumnName(int index) override;
   void executeScan(TableScan* scan) override;
 

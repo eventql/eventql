@@ -37,7 +37,7 @@ public:
       std::shared_ptr<MySQLConnection> conn,
       const std::string& table_name);
 
-  int getColumnIndex(const std::string& name) override;
+  int getComputedColumnIndex(const std::string& name) override;
   std::string getColumnName(int index) override;
   void executeScan(TableScan* scan) override;
   std::vector<std::string> columns() override;

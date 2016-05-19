@@ -43,18 +43,18 @@ RefPtr<QueryTreeNode> LimitNode::inputTable() const {
   return table_;
 }
 
-Vector<String> LimitNode::outputColumns() const {
-  return table_.asInstanceOf<TableExpressionNode>()->outputColumns();
+Vector<String> LimitNode::getResultColumns() const {
+  return table_.asInstanceOf<TableExpressionNode>()->getResultColumns();
 }
 
-Vector<QualifiedColumn> LimitNode::allColumns() const {
-  return table_.asInstanceOf<TableExpressionNode>()->allColumns();
+Vector<QualifiedColumn> LimitNode::getAvailableColumns() const {
+  return table_.asInstanceOf<TableExpressionNode>()->getAvailableColumns();
 }
 
-size_t LimitNode::getColumnIndex(
+size_t LimitNode::getComputedColumnIndex(
     const String& column_name,
     bool allow_add /* = false */) {
-  return table_.asInstanceOf<TableExpressionNode>()->getColumnIndex(
+  return table_.asInstanceOf<TableExpressionNode>()->getComputedColumnIndex(
       column_name,
       allow_add);
 }

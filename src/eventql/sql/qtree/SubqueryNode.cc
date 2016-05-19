@@ -75,11 +75,11 @@ Vector<RefPtr<SelectListNode>> SubqueryNode::selectList() const {
   return select_list_;
 }
 
-Vector<String> SubqueryNode::outputColumns() const {
+Vector<String> SubqueryNode::getResultColumns() const {
   return column_names_;
 }
 
-Vector<QualifiedColumn> SubqueryNode::allColumns() const {
+Vector<QualifiedColumn> SubqueryNode::getAvailableColumns() const {
   String qualifier;
   if (!alias_.empty()) {
     qualifier = alias_ + ".";
@@ -87,7 +87,7 @@ Vector<QualifiedColumn> SubqueryNode::allColumns() const {
 
   Vector<QualifiedColumn> cols;
   for (const auto& c :
-        subquery_.asInstanceOf<TableExpressionNode>()->outputColumns()) {
+        subquery_.asInstanceOf<TableExpressionNode>()->getResultColumns()) {
     QualifiedColumn qc;
     qc.short_name = c;
     qc.qualified_name = qualifier + c;
@@ -97,7 +97,7 @@ Vector<QualifiedColumn> SubqueryNode::allColumns() const {
   return cols;
 }
 
-size_t SubqueryNode::getColumnIndex(
+size_t SubqueryNode::getComputedColumnIndex(
     const String& column_name,
     bool allow_add /* = false */) {
   auto col = column_name;
@@ -115,7 +115,7 @@ size_t SubqueryNode::getColumnIndex(
 
   auto child_idx = subquery_
       .asInstanceOf<TableExpressionNode>()
-      ->getColumnIndex(col, false);
+      ->getComputedColumnIndex(col, false);
 
   if (child_idx != size_t(-1)) {
     auto slnode = new SelectListNode(new ColumnReferenceNode(child_idx));

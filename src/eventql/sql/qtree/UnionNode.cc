@@ -50,29 +50,29 @@ Vector<RefPtr<QueryTreeNode>> UnionNode::inputTables() const {
   return tables_;
 }
 
-Vector<String> UnionNode::outputColumns() const {
+Vector<String> UnionNode::getResultColumns() const {
   if (tables_.empty()) {
     return Vector<String>{};
   } else {
-    return tables_[0].asInstanceOf<TableExpressionNode>()->outputColumns();
+    return tables_[0].asInstanceOf<TableExpressionNode>()->getResultColumns();
   }
 }
 
-Vector<QualifiedColumn> UnionNode::allColumns() const {
+Vector<QualifiedColumn> UnionNode::getAvailableColumns() const {
   if (tables_.empty()) {
     return Vector<QualifiedColumn>{};
   } else {
-    return tables_[0].asInstanceOf<TableExpressionNode>()->allColumns();
+    return tables_[0].asInstanceOf<TableExpressionNode>()->getAvailableColumns();
   }
 }
 
-size_t UnionNode::getColumnIndex(
+size_t UnionNode::getComputedColumnIndex(
     const String& column_name,
     bool allow_add /* = false */) {
   size_t idx = -1;
 
   for (auto& tbl : tables_) {
-    auto tidx = tbl.asInstanceOf<TableExpressionNode>()->getColumnIndex(
+    auto tidx = tbl.asInstanceOf<TableExpressionNode>()->getComputedColumnIndex(
         column_name,
         allow_add);
 

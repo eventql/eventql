@@ -63,7 +63,7 @@ public:
     return columns_;
   }
 
-  int getColumnIndex(const std::string& column_name) const {
+  int getComputedColumnIndex(const std::string& column_name) const {
     for (int i = 0; i < columns_.size(); ++i) {
       if (columns_[i] == column_name) {
         return i;

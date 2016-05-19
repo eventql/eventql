@@ -1160,7 +1160,7 @@ void AnalyticsServlet::executeSQL_JSON(
         json.addComma();
       }
 
-      auto result_columns = qplan->getStatementOutputColumns(i);
+      auto result_columns = qplan->getStatementgetResultColumns(i);
       auto result_cursor = qplan->execute(i);
       json_codec.printResultTable(result_columns, result_cursor.get());
     }
@@ -1219,7 +1219,7 @@ void AnalyticsServlet::executeSQL_JSONSSE(
 
     Vector<csql::ResultList> results;
     for (size_t i = 0; i < qplan->numStatements(); ++i) {
-      results.emplace_back(qplan->getStatementOutputColumns(i));
+      results.emplace_back(qplan->getStatementgetResultColumns(i));
       qplan->execute(i, &results.back());
     }
 

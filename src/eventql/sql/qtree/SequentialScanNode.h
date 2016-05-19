@@ -120,14 +120,14 @@ public:
   Vector<RefPtr<SelectListNode>> selectList() const;
   Set<String> selectedColumns() const;
 
-  Vector<String> outputColumns() const override;
+  Vector<String> getResultColumns() const override;
 
-  Vector<QualifiedColumn> allColumns() const override;
+  Vector<QualifiedColumn> getAvailableColumns() const override;
 
   void normalizeColumnNames();
   String normalizeColumnName(const String& column_name) const;
 
-  size_t getColumnIndex(
+  size_t getComputedColumnIndex(
       const String& column_name,
       bool allow_add = false) override;
 

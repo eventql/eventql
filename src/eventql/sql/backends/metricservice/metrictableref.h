@@ -35,7 +35,7 @@ class MetricTableRef : public csql::TableRef {
 public:
   MetricTableRef(util::metric_service::IMetric* metric);
 
-  int getColumnIndex(const std::string& name) override;
+  int getComputedColumnIndex(const std::string& name) override;
   std::string getColumnName(int index) override;
   void executeScan(csql::TableScan* scan) override;
   std::vector<std::string> columns() override;

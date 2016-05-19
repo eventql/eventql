@@ -63,7 +63,7 @@ std::vector<std::string> CSVTableRef::columns() {
   return cols;
 }
 
-int CSVTableRef::getColumnIndex(const std::string& name) {
+int CSVTableRef::getComputedColumnIndex(const std::string& name) {
   const auto& header = headers_.find(name);
 
   if (header != headers_.end()) {

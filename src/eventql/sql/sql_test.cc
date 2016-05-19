@@ -51,7 +51,7 @@ class TestTableRef : public TableRef {
   std::vector<std::string> columns() override {
     return {"one", "two", "three"};
   }
-  int getColumnIndex(const std::string& name) override {
+  int getComputedColumnIndex(const std::string& name) override {
     if (name == "one") return 0;
     if (name == "two") return 1;
     if (name == "three") return 2;
@@ -79,7 +79,7 @@ class TestTable2Ref : public TableRef {
   std::vector<std::string> columns() override {
     return {"one", "two", "three"};
   }
-  int getColumnIndex(const std::string& name) override {
+  int getComputedColumnIndex(const std::string& name) override {
     if (name == "one") return 0;
     if (name == "two") return 1;
     if (name == "three") return 2;
@@ -105,7 +105,7 @@ class TestTimeTableRef : public TableRef {
   std::vector<std::string> columns() override {
     return {"time", "value"};
   }
-  int getColumnIndex(const std::string& name) override {
+  int getComputedColumnIndex(const std::string& name) override {
     if (name == "time") return 0;
     if (name == "value") return 1;
     return -1;

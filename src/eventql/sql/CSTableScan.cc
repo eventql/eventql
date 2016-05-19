@@ -50,7 +50,7 @@ CSTableScan::CSTableScan(
     cur_fetch_level_(0),
     cur_filter_pred_(true),
     cur_pos_(0) {
-  column_names_ = stmt_->outputColumns();
+  column_names_ = stmt_->getResultColumns();
   execution_context_->incrementNumTasks();
 }
 
@@ -72,7 +72,7 @@ CSTableScan::CSTableScan(
     cur_fetch_level_(0),
     cur_filter_pred_(true),
     cur_pos_(0) {
-  column_names_ = stmt_->outputColumns();
+  column_names_ = stmt_->getResultColumns();
   execution_context_->incrementNumTasks();
 }
 

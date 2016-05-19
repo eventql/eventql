@@ -72,7 +72,7 @@ public:
    * The statement is referenced by index. The index must be in the range
    * [0, numStatements)
    */
-  const Vector<String>& getStatementOutputColumns(size_t stmt_idx);
+  const Vector<String>& getStatementgetResultColumns(size_t stmt_idx);
 
   RefPtr<QueryTreeNode> getStatement(size_t stmt_idx) const;
 

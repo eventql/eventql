@@ -342,7 +342,7 @@ void BinaryResultFormat::sendResults(QueryPlan* query) {
 void BinaryResultFormat::sendTable(
     QueryPlan* qplan,
     size_t stmt_idx) {
-  auto result_columns = qplan->getStatementOutputColumns(stmt_idx);
+  auto result_columns = qplan->getStatementgetResultColumns(stmt_idx);
   auto result_cursor = qplan->execute(stmt_idx);
 
   // table header

@@ -88,27 +88,27 @@ Vector<RefPtr<SelectListNode>> JoinNode::selectList() const {
   return select_list_;
 }
 
-Vector<String> JoinNode::outputColumns() const {
+Vector<String> JoinNode::getResultColumns() const {
   return column_names_;
 }
 
-Vector<QualifiedColumn> JoinNode::allColumns() const {
+Vector<QualifiedColumn> JoinNode::getAvailableColumns() const {
   Vector<QualifiedColumn> cols;
 
   for (const auto& c :
-      base_table_.asInstanceOf<TableExpressionNode>()->allColumns()) {
+      base_table_.asInstanceOf<TableExpressionNode>()->getAvailableColumns()) {
     cols.emplace_back(c);
   }
 
   for (const auto& c :
-      joined_table_.asInstanceOf<TableExpressionNode>()->allColumns()) {
+      joined_table_.asInstanceOf<TableExpressionNode>()->getAvailableColumns()) {
     cols.emplace_back(c);
   }
 
   return cols;
 }
 
-size_t JoinNode::getColumnIndex(
+size_t JoinNode::getComputedColumnIndex(
     const String& column_name,
     bool allow_add /* = false */) {
   for (int i = 0; i < column_names_.size(); ++i) {
@@ -143,11 +143,11 @@ size_t JoinNode::getInputColumnIndex(
 
   auto base_table_idx = base_table_
       .asInstanceOf<TableExpressionNode>()
-      ->getColumnIndex(column_name, allow_add);
+      ->getComputedColumnIndex(column_name, allow_add);
 
   auto joined_table_idx = joined_table_
       .asInstanceOf<TableExpressionNode>()
-      ->getColumnIndex(column_name, allow_add);
+      ->getComputedColumnIndex(column_name, allow_add);
 
   if (base_table_idx != size_t(-1) && joined_table_idx != size_t(-1)) {
     RAISEF(
