@@ -21,9 +21,9 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include <3rdparty/simdcomp/simdcomp.h>
 #include <eventql/util/inspect.h>
 #include <eventql/util/util/BitPackEncoder.h>
+#include <libsimdcomp/simdcomp.h>
 
 namespace util {
 

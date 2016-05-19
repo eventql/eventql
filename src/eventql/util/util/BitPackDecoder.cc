@@ -23,7 +23,7 @@
  */
 #include <eventql/util/util/BitPackDecoder.h>
 #include <eventql/util/exception.h>
-#include <3rdparty/simdcomp/simdcomp.h>
+#include <libsimdcomp/simdcomp.h>
 
 namespace util {
 
