@@ -84,28 +84,40 @@ void ResultList::debugPrint() const {
 
 void ResultList::debugPrint(OutputStream* os) const {
   std::vector<int> col_widths;
+  int col_min_width = 16;
   int total_width = 0;
+  const int margin = 3;
 
   for (size_t i = 0; i < columns_.size(); ++i) {
-    col_widths.push_back(20);
-    total_width += 20;
+    col_widths.push_back(
+        std::max((int) columns_[i].size() + margin, col_min_width));
+  }
+
+  for (const auto& row : rows_) {
+    for (size_t i = 0; i < columns_.size(); ++i) {
+      col_widths[i] = std::max((int) row[i].size() + margin, col_widths[i]);
+    }
+  }
+
+  for (const auto& col_width : col_widths) {
+    total_width += col_width;
   }
 
   auto print_hsep = [os, &col_widths] () {
-    for (auto w : col_widths) {
-      for (int i = 0; i < w; ++i) {
-        char c = (i == 0 || i == w - 1) ? '+' : '-';
-        os->printf("%c", c);
+    for (int j = 0; j < col_widths.size(); ++j) {
+      for (int i = 0; i < col_widths[j]; ++i) {
+       char c = (i == 0) ? '+' : '-';
+       os->printf("%c", c);
       }
     }
-    os->printf("\n");
+    os->printf("+\n");
   };
 
   auto print_row = [this, os, &col_widths] (const std::vector<std::string>& row) {
     for (int n = 0; n < columns_.size(); ++n) {
       auto val = n < row.size() ? row[n] : String("NULL");
       os->printf("| %s", val.c_str());
-      for (int i = col_widths[n] - val.size() - 3; i > 0; --i) {
+      for (int i = col_widths[n] - val.size() - 3; i >= 0; --i) {
         os->printf(" ");
       }
     }
