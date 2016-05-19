@@ -23,7 +23,7 @@ ROADMAP
 - [ ] evql: human formt
 - [ ] evql: history/reverse-i search
 
-
+bug: raise errors in pipelinedexpr
 bug: can't compare timestamp with timestamp
 
 ---

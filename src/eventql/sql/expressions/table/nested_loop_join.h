@@ -63,9 +63,11 @@ protected:
   ScopedPtr<TableExpression> base_tbl_;
   ScopedPtr<ResultCursor> base_tbl_cursor_;
   Vector<SValue> base_tbl_row_;
+  size_t base_tbl_mincols_;
   ScopedPtr<TableExpression> joined_tbl_;
   Vector<Vector<SValue>> joined_tbl_data_;
   size_t joined_tbl_pos_;
+  size_t joined_tbl_mincols_;
   bool joined_tbl_row_found_;
 };
 

@@ -43,8 +43,25 @@ NestedLoopJoin::NestedLoopJoin(
     join_cond_expr_(std::move(join_cond_expr)),
     where_expr_(std::move(where_expr)),
     base_tbl_(std::move(base_tbl)),
+    base_tbl_mincols_(0),
     joined_tbl_(std::move(joined_tbl)),
-    joined_tbl_pos_(0) {}
+    joined_tbl_pos_(0),
+    joined_tbl_mincols_(0) {
+  for (size_t i = 0; i < input_map_.size(); ++i) {
+    const auto& m = input_map_[i];
+
+    switch (m.table_idx) {
+      case 0:
+        base_tbl_mincols_ = std::max(base_tbl_mincols_, m.column_idx + 1);
+        break;
+      case 1:
+        joined_tbl_mincols_ = std::max(joined_tbl_mincols_, m.column_idx + 1);
+        break;
+      default:
+        RAISE(kRuntimeError, "invalid table index");
+    }
+  }
+}
 
 static const size_t kMaxInMemoryRows = 1000000;
 
@@ -52,6 +69,12 @@ ScopedPtr<ResultCursor> NestedLoopJoin::execute() {
   auto joined_cursor = joined_tbl_->execute();
   Vector<SValue> row(joined_cursor->getNumColumns());
   while (joined_cursor->next(row.data(), row.size())) {
+    if (row.size() < joined_tbl_mincols_) {
+      RAISE(
+          kRuntimeError,
+          "INTERNAL ERROR: Nested Loop JOIN joined input row is too small");
+    }
+
     joined_tbl_data_.emplace_back(row);
 
     if (joined_tbl_data_.size() >= kMaxInMemoryRows) {
@@ -95,6 +118,12 @@ ScopedPtr<ResultCursor> NestedLoopJoin::executeCartesianJoin() {
               base_tbl_row_.data(),
               base_tbl_row_.size())) {
           return false;
+        }
+
+        if (base_tbl_row_.size() < base_tbl_mincols_) {
+          RAISE(
+              kRuntimeError,
+              "INTERNAL ERROR: Nested Loop JOIN joined input row is too small");
         }
       }
 
@@ -157,6 +186,12 @@ ScopedPtr<ResultCursor> NestedLoopJoin::executeInnerJoin() {
               base_tbl_row_.data(),
               base_tbl_row_.size())) {
           return false;
+        }
+
+        if (base_tbl_row_.size() < base_tbl_mincols_) {
+          RAISE(
+              kRuntimeError,
+              "INTERNAL ERROR: Nested Loop JOIN joined input row is too small");
         }
       }
 
@@ -235,6 +270,12 @@ ScopedPtr<ResultCursor> NestedLoopJoin::executeOuterJoin() {
               base_tbl_row_.data(),
               base_tbl_row_.size())) {
           return false;
+        }
+
+        if (base_tbl_row_.size() < base_tbl_mincols_) {
+          RAISE(
+              kRuntimeError,
+              "INTERNAL ERROR: Nested Loop JOIN joined input row is too small");
         }
       }
 
