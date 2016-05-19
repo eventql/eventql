@@ -190,7 +190,6 @@ add_executable(evqld
     JavaScriptContext.cc
     LogfileScanResult.cc
     transport/http/status_servlet.cc
-    TableDefinition.cc
     transport/http/EventsAPIServlet.cc
     transport/http/EventsService.cc
     transport/http/LogfileAPIServlet.cc

@@ -26,7 +26,7 @@
 #include <eventql/util/SHA1.h>
 #include <eventql/config/namespace_config.h>
 #include <eventql/db/ClusterConfig.pb.h>
-#include <eventql/TableDefinition.h>
+#include <eventql/db/TableConfig.pb.h>
 
 #include "eventql/eventql.h"
 

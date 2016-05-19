@@ -52,7 +52,7 @@
 #include "eventql/util/mdb/MDBUtil.h"
 #include "eventql/transport/http/api_servlet.h"
 #include "eventql/AnalyticsApp.h"
-#include "eventql/TableDefinition.h"
+#include "eventql/db/TableConfig.pb.h"
 #include "eventql/db/TSDBService.h"
 #include "eventql/db/TSDBServlet.h"
 #include "eventql/db/ReplicationWorker.h"
