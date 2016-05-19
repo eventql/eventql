@@ -43,7 +43,7 @@ function(STX_PROTOBUF_GENERATE_CPP SRCS HDRS)
              "${CMAKE_BINARY_DIR}/${FIL_WEPREFIX}.pb.h"
       COMMAND  ${PROTOBUF_PROTOC_EXECUTABLE}
       ARGS --cpp_out ${CMAKE_BINARY_DIR} --proto_path ${CMAKE_SOURCE_DIR}/src/eventql/util/3rdparty --proto_path ${CMAKE_SOURCE_DIR}/src ${ABS_FIL}
-      DEPENDS ${ABS_FIL}
+      DEPENDS ${ABS_FIL} protoc
       VERBATIM )
   endforeach()
 
