@@ -17,5 +17,5 @@ if [[ -z "$TARGET_LBL" ]]; then
 fi
 
 mkdir -p $PKG_DIR $TMP_DIR/$PKG_NAME
-cp -R $DIST_DIR/* $TMP_DIR
+cp -R $DIST_DIR/* $TMP_DIR/$PKG_NAME
 tar cz -C $TMP_DIR $PKG_NAME > $PKG_DIR/$PKG_NAME-$TARGET_LBL.tgz
