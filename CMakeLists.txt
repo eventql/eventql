@@ -17,6 +17,7 @@ endif()
 option(ENABLE_TESTS "Build unit tests [default: ON]" ON)
 
 include_directories(deps/3rdparty/)
+include_directories(deps/3rdparty/protobuf)
 include_directories(src/)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/src)
@@ -46,67 +47,67 @@ add_dependencies(spidermonkey spidermonkey_build)
 
 # PROTOBUF
 add_library(protobuf STATIC
-    deps/3rdparty/protobuf/descriptor.cc
-    deps/3rdparty/protobuf/descriptor.pb.cc
-    deps/3rdparty/protobuf/descriptor_database.cc
-    deps/3rdparty/protobuf/dynamic_message.cc
-    deps/3rdparty/protobuf/extension_set.cc
-    deps/3rdparty/protobuf/extension_set_heavy.cc
-    deps/3rdparty/protobuf/generated_message_reflection.cc
-    deps/3rdparty/protobuf/generated_message_util.cc
-    deps/3rdparty/protobuf/io/coded_stream.cc
-    deps/3rdparty/protobuf/io/gzip_stream.cc
-    deps/3rdparty/protobuf/io/printer.cc
-    deps/3rdparty/protobuf/io/tokenizer.cc
-    deps/3rdparty/protobuf/io/zero_copy_stream.cc
-    deps/3rdparty/protobuf/io/zero_copy_stream_impl.cc
-    deps/3rdparty/protobuf/io/zero_copy_stream_impl_lite.cc
-    deps/3rdparty/protobuf/message.cc
-    deps/3rdparty/protobuf/message_lite.cc
-    deps/3rdparty/protobuf/reflection_ops.cc
-    deps/3rdparty/protobuf/repeated_field.cc
-    deps/3rdparty/protobuf/service.cc
-    deps/3rdparty/protobuf/stubs/atomicops_internals_x86_gcc.cc
-    deps/3rdparty/protobuf/stubs/atomicops_internals_x86_msvc.cc
-    deps/3rdparty/protobuf/stubs/common.cc
-    deps/3rdparty/protobuf/stubs/once.cc
-    deps/3rdparty/protobuf/stubs/stringprintf.cc
-    deps/3rdparty/protobuf/stubs/structurally_valid.cc
-    deps/3rdparty/protobuf/stubs/strutil.cc
-    deps/3rdparty/protobuf/stubs/strutil.cc
-    deps/3rdparty/protobuf/stubs/substitute.cc
-    deps/3rdparty/protobuf/text_format.cc
-    deps/3rdparty/protobuf/text_format.cc
-    deps/3rdparty/protobuf/unknown_field_set.cc
-    deps/3rdparty/protobuf/wire_format.cc
-    deps/3rdparty/protobuf/wire_format_lite.cc)
+    deps/3rdparty/protobuf/google/protobuf/descriptor.cc
+    deps/3rdparty/protobuf/google/protobuf/descriptor.pb.cc
+    deps/3rdparty/protobuf/google/protobuf/descriptor_database.cc
+    deps/3rdparty/protobuf/google/protobuf/dynamic_message.cc
+    deps/3rdparty/protobuf/google/protobuf/extension_set.cc
+    deps/3rdparty/protobuf/google/protobuf/extension_set_heavy.cc
+    deps/3rdparty/protobuf/google/protobuf/generated_message_reflection.cc
+    deps/3rdparty/protobuf/google/protobuf/generated_message_util.cc
+    deps/3rdparty/protobuf/google/protobuf/io/coded_stream.cc
+    deps/3rdparty/protobuf/google/protobuf/io/gzip_stream.cc
+    deps/3rdparty/protobuf/google/protobuf/io/printer.cc
+    deps/3rdparty/protobuf/google/protobuf/io/tokenizer.cc
+    deps/3rdparty/protobuf/google/protobuf/io/zero_copy_stream.cc
+    deps/3rdparty/protobuf/google/protobuf/io/zero_copy_stream_impl.cc
+    deps/3rdparty/protobuf/google/protobuf/io/zero_copy_stream_impl_lite.cc
+    deps/3rdparty/protobuf/google/protobuf/message.cc
+    deps/3rdparty/protobuf/google/protobuf/message_lite.cc
+    deps/3rdparty/protobuf/google/protobuf/reflection_ops.cc
+    deps/3rdparty/protobuf/google/protobuf/repeated_field.cc
+    deps/3rdparty/protobuf/google/protobuf/service.cc
+    deps/3rdparty/protobuf/google/protobuf/stubs/atomicops_internals_x86_gcc.cc
+    deps/3rdparty/protobuf/google/protobuf/stubs/atomicops_internals_x86_msvc.cc
+    deps/3rdparty/protobuf/google/protobuf/stubs/common.cc
+    deps/3rdparty/protobuf/google/protobuf/stubs/once.cc
+    deps/3rdparty/protobuf/google/protobuf/stubs/stringprintf.cc
+    deps/3rdparty/protobuf/google/protobuf/stubs/structurally_valid.cc
+    deps/3rdparty/protobuf/google/protobuf/stubs/strutil.cc
+    deps/3rdparty/protobuf/google/protobuf/stubs/strutil.cc
+    deps/3rdparty/protobuf/google/protobuf/stubs/substitute.cc
+    deps/3rdparty/protobuf/google/protobuf/text_format.cc
+    deps/3rdparty/protobuf/google/protobuf/text_format.cc
+    deps/3rdparty/protobuf/google/protobuf/unknown_field_set.cc
+    deps/3rdparty/protobuf/google/protobuf/wire_format.cc
+    deps/3rdparty/protobuf/google/protobuf/wire_format_lite.cc)
 
 
 add_executable(protoc
-    deps/3rdparty/protobuf/compiler/command_line_interface.cc
-    deps/3rdparty/protobuf/compiler/main.cc
-    deps/3rdparty/protobuf/compiler/parser.cc
-    deps/3rdparty/protobuf/compiler/subprocess.cc
-    deps/3rdparty/protobuf/compiler/importer.cc
-    deps/3rdparty/protobuf/compiler/code_generator.cc
-    deps/3rdparty/protobuf/compiler/plugin.cc
-    deps/3rdparty/protobuf/compiler/plugin.pb.cc
-    deps/3rdparty/protobuf/compiler/cpp/cpp_enum.cc
-    deps/3rdparty/protobuf/compiler/cpp/cpp_enum_field.cc
-    deps/3rdparty/protobuf/compiler/cpp/cpp_extension.cc
-    deps/3rdparty/protobuf/compiler/cpp/cpp_field.cc
-    deps/3rdparty/protobuf/compiler/cpp/cpp_file.cc
-    deps/3rdparty/protobuf/compiler/cpp/cpp_generator.cc
-    deps/3rdparty/protobuf/compiler/cpp/cpp_helpers.cc
-    deps/3rdparty/protobuf/compiler/cpp/cpp_message.cc
-    deps/3rdparty/protobuf/compiler/cpp/cpp_message_field.cc
-    deps/3rdparty/protobuf/compiler/cpp/cpp_primitive_field.cc
-    deps/3rdparty/protobuf/compiler/cpp/cpp_service.cc
-    deps/3rdparty/protobuf/compiler/cpp/cpp_string_field.cc
-    deps/3rdparty/protobuf/compiler/zip_writer.cc)
+    deps/3rdparty/protobuf/google/protobuf/compiler/command_line_interface.cc
+    deps/3rdparty/protobuf/google/protobuf/compiler/main.cc
+    deps/3rdparty/protobuf/google/protobuf/compiler/parser.cc
+    deps/3rdparty/protobuf/google/protobuf/compiler/subprocess.cc
+    deps/3rdparty/protobuf/google/protobuf/compiler/importer.cc
+    deps/3rdparty/protobuf/google/protobuf/compiler/code_generator.cc
+    deps/3rdparty/protobuf/google/protobuf/compiler/plugin.cc
+    deps/3rdparty/protobuf/google/protobuf/compiler/plugin.pb.cc
+    deps/3rdparty/protobuf/google/protobuf/compiler/cpp/cpp_enum.cc
+    deps/3rdparty/protobuf/google/protobuf/compiler/cpp/cpp_enum_field.cc
+    deps/3rdparty/protobuf/google/protobuf/compiler/cpp/cpp_extension.cc
+    deps/3rdparty/protobuf/google/protobuf/compiler/cpp/cpp_field.cc
+    deps/3rdparty/protobuf/google/protobuf/compiler/cpp/cpp_file.cc
+    deps/3rdparty/protobuf/google/protobuf/compiler/cpp/cpp_generator.cc
+    deps/3rdparty/protobuf/google/protobuf/compiler/cpp/cpp_helpers.cc
+    deps/3rdparty/protobuf/google/protobuf/compiler/cpp/cpp_message.cc
+    deps/3rdparty/protobuf/google/protobuf/compiler/cpp/cpp_message_field.cc
+    deps/3rdparty/protobuf/google/protobuf/compiler/cpp/cpp_primitive_field.cc
+    deps/3rdparty/protobuf/google/protobuf/compiler/cpp/cpp_service.cc
+    deps/3rdparty/protobuf/google/protobuf/compiler/cpp/cpp_string_field.cc
+    deps/3rdparty/protobuf/google/protobuf/compiler/zip_writer.cc)
 
 target_link_libraries(protoc protobuf z)
-SET(PROTOBUF_PROTOC_EXECUTABLE ${PROJECT_BINARY_DIR}/protoc CACHE INTERNAL "The protocol buffers compiler")
+get_filename_component(PROTOBUF_PROTOC_EXECUTABLE ${PROJECT_BINARY_DIR}/protoc ABSOLUTE)
 set(PROTOC_ARGS --proto_path ${CMAKE_SOURCE_DIR}/src/eventql/core)
 
 add_library(linenoise STATIC deps/3rdparty/linenoise/linenoise.c)
