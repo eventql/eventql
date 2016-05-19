@@ -1,5 +1,5 @@
-project(ZenBase)
-cmake_minimum_required(VERSION 2.8.10)
+project(EventQL)
+cmake_minimum_required(VERSION 2.8.0)
 
 include(CheckIncludeFile)
 include(CheckCXXSourceCompiles)
@@ -9,24 +9,12 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
-set(ZBASE_BUILD_ID $ENV{ZBASE_BUILD_ID})
-if(NOT ZBASE_BUILD_ID)
-  set(ZBASE_BUILD_ID "devel")
+set(EVQL_BUILD_ID $ENV{EVQL_BUILD_ID})
+if(NOT EVQL_BUILD_ID)
+  set(EVQL_BUILD_ID "devel")
 endif()
 
 option(ENABLE_TESTS "Build unit tests [default: ON]" ON)
-
-#set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
-#set(CMAKE_STATIC_LINKER_FLAGS "${CMAKE_STATIC_LINKER_FLAGS} -static")
-
-set(PROTOC_ARGS --proto_path ${CMAKE_SOURCE_DIR}/src/eventql/core)
-
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/src/eventql/util/mysql")
-find_package(MySQL)
-
-if(MYSQL_FOUND)
-  SET(STX_ENABLE_MYSQL TRUE)
-endif()
 
 include_directories(deps/3rdparty/)
 include_directories(src/)
@@ -55,6 +43,24 @@ ExternalProject_Add(spidermonkey_build
 add_library(spidermonkey STATIC IMPORTED)
 set_target_properties(spidermonkey PROPERTIES IMPORTED_LOCATION ${CMAKE_BINARY_DIR}/deps/3rdparty/mozjs/dist/lib/libjs_static.a)
 add_dependencies(spidermonkey spidermonkey_build)
+
+ExternalProject_Add(protobuf_build
+    URL ${PROJECT_SOURCE_DIR}/deps/3rdparty/protobuf
+    SOURCE_DIR ${PROJECT_BINARY_DIR}/deps/3rdparty/protobuf
+    BINARY_DIR ${PROJECT_BINARY_DIR}/deps/3rdparty/protobuf
+    BUILD_COMMAND sh -c "make CC=${CMAKE_C_COMPILER} AR=${CMAKE_AR} RANLIB=${CMAKE_RANLIB} CFLAGS='${CMAKE_C_FLAGS}' LDFLAGS='${CMAKE_EXE_LINKER_FLAGS}'"
+    CONFIGURE_COMMAND sh -c "CC=${CMAKE_C_COMPILER} AR=${CMAKE_AR} RANLIB=${CMAKE_RANLIB} CFLAGS='${CMAKE_C_FLAGS}' LDFLAGS='${CMAKE_EXE_LINKER_FLAGS}' ./configure"
+    INSTALL_COMMAND "true"
+    LOG_BUILD 1
+    LOG_CONFIGURE 1)
+
+SET(PROTOBUF_PROTOC_EXECUTABLE ${PROJECT_BINARY_DIR}/deps/3rdparty/protobuf/src/protoc CACHE INTERNAL "The protocol buffers compiler")
+set(PROTOC_ARGS --proto_path ${CMAKE_SOURCE_DIR}/src/eventql/core)
+include_directories(${PROJECT_BINARY_DIR}/deps/3rdparty/protobuf/src)
+
+add_library(protobuf STATIC IMPORTED)
+add_dependencies(protobuf protobuf_build)
+set_target_properties(protobuf PROPERTIES IMPORTED_LOCATION ${CMAKE_BINARY_DIR}/deps/3rdparty/protobuf/src/.libs/libprotobuf.a)
 
 add_library(linenoise STATIC deps/3rdparty/linenoise/linenoise.c)
 

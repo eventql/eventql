@@ -13,20 +13,6 @@
 # (To distributed this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-FIND_PATH(PROTOBUF_INCLUDE_DIR stubs/common.h /usr/include/google/protobuf)
-FIND_LIBRARY(PROTOBUF_LIBRARY NAMES protobuf PATHS ${GNUWIN32_DIR}/lib)
-FIND_PROGRAM(PROTOBUF_PROTOC_EXECUTABLE protoc)
-
-INCLUDE(FindPackageHandleStandardArgs)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(protobuf DEFAULT_MSG PROTOBUF_INCLUDE_DIR PROTOBUF_LIBRARY PROTOBUF_PROTOC_EXECUTABLE)
-
-include_directories(${PROTOBUF_INCLUDE_DIR})
-
-# ensure that they are cached
-SET(PROTOBUF_INCLUDE_DIR ${PROTOBUF_INCLUDE_DIR} CACHE INTERNAL "The protocol buffers include path")
-SET(PROTOBUF_LIBRARY ${PROTOBUF_LIBRARY} CACHE INTERNAL "The libraries needed to use protocol buffers library")
-SET(PROTOBUF_PROTOC_EXECUTABLE ${PROTOBUF_PROTOC_EXECUTABLE} CACHE INTERNAL "The protocol buffers compiler")
-
 function(STX_PROTOBUF_GENERATE_CPP SRCS HDRS)
   if(NOT ARGN)
     message(SEND_ERROR "Error: STX_PROTOBUF_GENERATE_CPP() called without any proto files")
