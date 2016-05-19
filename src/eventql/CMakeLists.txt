@@ -124,7 +124,7 @@ STX_PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${PROTO_FILES})
 #    $<TARGET_OBJECTS:customerdirectory>
 #    core/TimeWindowPartitioner_test.cc)
 #
-#target_link_libraries(test-tsdb-timewindowpartitioner chartsql cplot sstable cstable stx-http stx-protobuf stx-json stx-base pcre)
+#target_link_libraries(test-tsdb-timewindowpartitioner chartsql cplot sstable cstable stx-http stx-protobuf protobuf stx-json stx-base pcre)
 #
 #add_executable(test-replicationscheme
 #    $<TARGET_OBJECTS:stx-mdb>
@@ -133,7 +133,7 @@ STX_PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${PROTO_FILES})
 #    $<TARGET_OBJECTS:customerdirectory>
 #    core/ReplicationScheme_test.cc)
 #
-#target_link_libraries(test-replicationscheme chartsql cplot sstable cstable stx-http stx-protobuf stx-json stx-base pcre)
+#target_link_libraries(test-replicationscheme chartsql cplot sstable cstable stx-http stx-protobuf protobuf stx-json stx-base pcre)
 #
 #add_executable(test-lsmtableindex
 #    $<TARGET_OBJECTS:stx-mdb>
@@ -142,7 +142,7 @@ STX_PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${PROTO_FILES})
 #    $<TARGET_OBJECTS:customerdirectory>
 #    core/LSMTableIndex_test.cc)
 #
-#target_link_libraries(test-lsmtableindex chartsql cplot sstable cstable stx-http stx-protobuf stx-json stx-base pcre)
+#target_link_libraries(test-lsmtableindex chartsql cplot sstable cstable stx-http stx-protobuf protobuf stx-json stx-base pcre)
 #
 #add_subdirectory(util/mysql)
 #add_subdirectory(util/mdb)
@@ -170,7 +170,7 @@ add_custom_command(
 ##    JavaScriptContext.cc
 ##    JavaScriptContext_test.cc)
 ##
-##target_link_libraries(test-javascriptcontext chartsql cplot sstable cstable stx-http stx-protobuf stx-json stx-base pcre z)
+##target_link_libraries(test-javascriptcontext chartsql cplot sstable cstable stx-http stx-protobuf protobuf stx-json stx-base pcre z)
 ##target_link_libraries(test-javascriptcontext -L${CMAKE_BINARY_DIR}/deps/3rdparty/mozjs/dist/lib -ljs_static)
 
 
@@ -250,7 +250,7 @@ add_executable(evqld
     z1stats.cc
     evqld.cc)
 
-target_link_libraries(evqld chartsql cplot sstable cstable stx-http stx-protobuf stx-json stx-base stx-rpc stx-mdb z pcre)
+target_link_libraries(evqld chartsql cplot sstable cstable stx-http stx-protobuf protobuf stx-json stx-base stx-rpc stx-mdb z pcre)
 target_link_libraries(evqld spidermonkey)
 
 add_executable(evql
@@ -258,7 +258,7 @@ add_executable(evql
     server/sql/codec/binary_codec.cc
     evql.cc)
 
-target_link_libraries(evql chartsql cplot stx-http stx-protobuf stx-json stx-base stx-rpc z pcre)
+target_link_libraries(evql chartsql cplot stx-http stx-protobuf protobuf stx-json stx-base stx-rpc z pcre)
 target_link_libraries(evql linenoise)
 
 #add_executable(evqlctl
@@ -270,7 +270,7 @@ target_link_libraries(evql linenoise)
 #    #eventql/io/sstable/SSTableServlet.cc
 #    evqlctl.cc)
 #
-#target_link_libraries(evqlctl chartsql cplot sstable cstable stx-http stx-protobuf stx-json stx-base stx-rpc pcre)
+#target_link_libraries(evqlctl chartsql cplot sstable cstable stx-http stx-protobuf protobuf stx-json stx-base stx-rpc pcre)
 #add_dependencies(evqlctl customerdirectory)
 #
 #add_executable(zmaster
@@ -286,7 +286,7 @@ target_link_libraries(evql linenoise)
 #    server/sql/codec/binary_codec.cc
 #    evql.cc)
 #
-#target_link_libraries(evql chartsql cplot cstable stx-http stx-protobuf stx-json stx-base pcre)
+#target_link_libraries(evql chartsql cplot cstable stx-http stx-protobuf protobuf stx-json stx-base pcre)
 #
-#target_link_libraries(zmaster chartsql cplot sstable cstable stx-http stx-protobuf stx-json stx-json stx-base pcre)
+#target_link_libraries(zmaster chartsql cplot sstable cstable stx-http stx-protobuf protobuf stx-json stx-json stx-base pcre)
 #add_dependencies(zmaster customerdirectory)

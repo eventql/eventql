@@ -55,7 +55,7 @@ add_library(cstable STATIC
     CSTableWriter.cc)
 
 add_executable(test-cstable cstable_test.cc)
-target_link_libraries(test-cstable cstable stx-protobuf stx-json stx-base)
+target_link_libraries(test-cstable cstable stx-protobuf protobuf stx-json stx-base)
 
 add_executable(cstable-tool cstable_tool.cc)
-target_link_libraries(cstable-tool cstable stx-protobuf stx-json stx-base)
+target_link_libraries(cstable-tool cstable stx-protobuf protobuf stx-json stx-base)

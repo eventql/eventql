@@ -26,8 +26,6 @@
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/buffer.h>
 #include "eventql/util/exception.h"
-#include <eventql/util/3rdparty/google/protobuf/io/zero_copy_stream_impl_lite.h>
-#include <eventql/util/3rdparty/google/protobuf/text_format.h>
 
 namespace msg {
 
@@ -183,15 +181,6 @@ ProtoType parseText(const void* data, size_t size) {
   ProtoType proto;
   parseText<ProtoType>(data, size, &proto);
   return proto;
-}
-
-template <typename ProtoType>
-void parseText(const void* data, size_t size, ProtoType* target) {
-  google::protobuf::io::ArrayInputStream is(data, size);
-
-  if (!google::protobuf::TextFormat::Parse(&is, target)) {
-    RAISE(kRuntimeError, "invalid protobuf message");
-  }
 }
 
 } // namespace msg

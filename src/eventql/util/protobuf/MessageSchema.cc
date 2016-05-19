@@ -27,11 +27,7 @@
 #include <eventql/util/io/fileutil.h>
 #include <eventql/util/protobuf/MessageSchema.h>
 #include <eventql/util/protobuf/msg.h>
-#include <eventql/util/CodingOptions.pb.h>
-#include <eventql/util/3rdparty/google/protobuf/io/zero_copy_stream_impl_lite.h>
-#include <eventql/util/3rdparty/google/protobuf/io/tokenizer.h>
-#include <eventql/util/3rdparty/google/protobuf/compiler/parser.h>
-#include <eventql/util/3rdparty/simdcomp/simdcomp.h>
+#include <libsimdcomp/simdcomp.h>
 
 namespace msg {
 
@@ -77,123 +73,6 @@ size_t MessageSchemaField::typeSize() const {
       return type_size;
 
   }
-}
-
-RefPtr<MessageSchema> MessageSchema::fromProtobuf(
-    const google::protobuf::Descriptor* dsc) {
-  Vector<msg::MessageSchemaField> fields;
-
-  auto nfields = dsc->field_count();
-  for (size_t i = 0; i < nfields; ++i) {
-    auto field = dsc->field(i);
-
-    CodingOptions copts = field->options().GetExtension(coding);
-
-    EncodingHint enc_hint = EncodingHint::NONE;
-    if (copts.encoding() == "BITPACK") enc_hint = EncodingHint::BITPACK;
-    if (copts.encoding() == "LEB128") enc_hint = EncodingHint::LEB128;
-
-    switch (field->type()) {
-
-      case google::protobuf::FieldDescriptor::TYPE_BOOL:
-        fields.emplace_back(
-            field->number(),
-            field->name(),
-            msg::FieldType::BOOLEAN,
-            0,
-            field->is_repeated(),
-            field->is_optional(),
-            enc_hint);
-        break;
-
-      case google::protobuf::FieldDescriptor::TYPE_STRING:
-        fields.emplace_back(
-            field->number(),
-            field->name(),
-            msg::FieldType::STRING,
-            copts.has_maxval() ? copts.maxval() : 0xffffffff,
-            field->is_repeated(),
-            field->is_optional(),
-            enc_hint);
-        break;
-
-      case google::protobuf::FieldDescriptor::TYPE_UINT64:
-        fields.emplace_back(
-            field->number(),
-            field->name(),
-            msg::FieldType::UINT64,
-            copts.has_maxval() ?
-                copts.maxval() : std::numeric_limits<uint64_t>::max(),
-            field->is_repeated(),
-            field->is_optional(),
-            enc_hint);
-        break;
-
-      case google::protobuf::FieldDescriptor::TYPE_UINT32:
-        fields.emplace_back(
-            field->number(),
-            field->name(),
-            msg::FieldType::UINT32,
-            copts.has_maxval() ?
-                copts.maxval() : std::numeric_limits<uint32_t>::max(),
-            field->is_repeated(),
-            field->is_optional(),
-            enc_hint);
-        break;
-
-      case google::protobuf::FieldDescriptor::TYPE_DOUBLE:
-        fields.emplace_back(
-            field->number(),
-            field->name(),
-            msg::FieldType::DOUBLE,
-            0,
-            field->is_repeated(),
-            field->is_optional(),
-            enc_hint);
-        break;
-
-      case google::protobuf::FieldDescriptor::TYPE_ENUM: {
-        size_t maxval = 0;
-        auto enum_dsc = field->enum_type();
-        auto nvals = enum_dsc->value_count();
-        for (int j = 0; j < nvals; ++j) {
-          auto enum_val = enum_dsc->value(j);
-          if (enum_val->number() > maxval) {
-            maxval = enum_val->number();
-          }
-        }
-
-        fields.emplace_back(
-            field->number(),
-            field->name(),
-            msg::FieldType::UINT32,
-            maxval,
-            field->is_repeated(),
-            field->is_optional(),
-            maxval < 250 ? EncodingHint::BITPACK : EncodingHint::LEB128);
-        break;
-      }
-
-      case google::protobuf::FieldDescriptor::TYPE_MESSAGE:
-        fields.emplace_back(
-            MessageSchemaField::mkObjectField(
-                field->number(),
-                field->name(),
-                field->is_repeated(),
-                field->is_optional(),
-                MessageSchema::fromProtobuf(field->message_type())));
-        break;
-
-      default:
-        RAISEF(
-            kNotImplementedError,
-            "field type not implemented: $0",
-            field->type_name());
-
-    }
-  }
-
-  return new msg::MessageSchema(dsc->full_name(), fields);
 }
 
 static void schemaNodeToString(
@@ -631,45 +510,6 @@ Vector<Pair<String, MessageSchemaField>> MessageSchema::columns() const {
   }
 
   return columns;
-}
-
-MessageSchemaRepository::MessageSchemaRepository() :
-    pool_(google::protobuf::DescriptorPool::generated_pool()) {}
-
-RefPtr<MessageSchema> MessageSchemaRepository::getSchema(
-    const String& name) const {
-  auto iter = schemas_.find(name);
-  if (iter != schemas_.end()) {
-    return iter->second;
-  }
-
-  auto desc = pool_.FindMessageTypeByName(name);
-  if (desc != NULL) {
-    return MessageSchema::fromProtobuf(desc);
-  }
-
-  RAISEF(kRuntimeError, "schema not found: '$0'", name);
-}
-
-void MessageSchemaRepository::registerSchema(RefPtr<MessageSchema> schema) {
-  schemas_.emplace(schema->name(), schema);
-}
-
-void MessageSchemaRepository::loadProtobufFile(
-    const String& base_path,
-    const String& file_path) {
-  auto data = FileUtil::read(FileUtil::joinPaths(base_path, file_path));
-  google::protobuf::io::ArrayInputStream is(data.data(), data.size());
-
-  google::protobuf::FileDescriptorProto fd_proto;
-  google::protobuf::io::Tokenizer tokenizer(&is, NULL);
-  google::protobuf::compiler::Parser parser;
-  if (!parser.Parse(&tokenizer, &fd_proto)) {
-    RAISEF(kParseError, "error while parsing .proto file '$0'", file_path);
-  }
-
-  fd_proto.set_name(file_path);
-  pool_.BuildFile(fd_proto);
 }
 
 } // namespace msg
