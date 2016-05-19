@@ -21,29 +21,34 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include <eventql/util/util/BitPackDecoder.h>
-#include <eventql/util/exception.h>
-#include <libsimdcomp/simdcomp.h>
+#include "eventql/util/UnixTime.h"
+#include "eventql/util/charts/timedomain.h"
 
 namespace util {
+namespace chart {
 
-BitPackDecoder::BitPackDecoder(
-    void* data,
-    size_t size,
-    uint32_t max_val) :
-    data_(data),
-    size_(size),
-    maxbits_(max_val > 0 ? bits(max_val) : 0),
-    pos_(0),
-    outbuf_pos_(128) {}
+TimeDomain::TimeDomain(
+    UnixTime min_value,
+    UnixTime max_value,
+    bool is_logarithmic,
+    bool is_inverted) :
+    ContinuousDomain<UnixTime>(
+        min_value,
+        max_value,
+        is_logarithmic,
+        is_inverted) {}
 
-void BitPackDecoder::fetch() {
-  auto new_pos = pos_ + 16 * maxbits_;
-  simdunpack((__m128i*) (((char *) data_) + pos_), outbuf_, maxbits_);
-  pos_ = new_pos;
-  outbuf_pos_ = 0;
+std::string TimeDomain::label(UnixTime value) const {
+  auto range = ContinuousDomain<UnixTime>::getRange();
+
+  if (range < 60 * 60) {
+    return value.toString("%H:%M:%S");
+  } else if (range < 60 * 60 * 24) {
+    return value.toString("%H:%M");
+  } else {
+    return value.toString("%Y-%m-%d %H:%M");
+  }
 }
 
 }
-
-
+}

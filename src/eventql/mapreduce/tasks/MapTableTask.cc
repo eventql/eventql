@@ -25,7 +25,7 @@
 #include "eventql/util/http/HTTPSSEResponseHandler.h"
 #include "eventql/mapreduce/tasks/MapTableTask.h"
 #include "eventql/mapreduce/MapReduceScheduler.h"
-#include <eventql/z1stats.h>
+#include <eventql/server/server_stats.h>
 
 #include "eventql/eventql.h"
 

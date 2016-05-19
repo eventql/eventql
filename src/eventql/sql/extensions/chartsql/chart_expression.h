@@ -28,7 +28,7 @@
 #include <eventql/sql/runtime/defaultruntime.h>
 #include <eventql/sql/qtree/ChartStatementNode.h>
 #include <eventql/sql/qtree/DrawStatementNode.h>
-#include <cplot/canvas.h>
+#include <eventql/util/charts/canvas.h>
 
 namespace csql {
 

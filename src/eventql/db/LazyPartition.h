@@ -24,7 +24,7 @@
 #pragma once
 #include <eventql/util/stdtypes.h>
 #include <eventql/db/Partition.h>
-#include <eventql/z1stats.h>
+#include <eventql/server/server_stats.h>
 
 #include "eventql/eventql.h"
 

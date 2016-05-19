@@ -25,7 +25,7 @@
 #include "eventql/mapreduce/MapReduceScheduler.h"
 #include "eventql/db/FixedShardPartitioner.h"
 #include "eventql/io/sstable/sstablereader.h"
-#include <eventql/z1stats.h>
+#include <eventql/server/server_stats.h>
 
 #include "eventql/eventql.h"
 

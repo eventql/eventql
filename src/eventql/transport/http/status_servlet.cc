@@ -23,7 +23,7 @@
  */
 #include <eventql/transport/http/status_servlet.h>
 #include <eventql/db/PartitionReplication.h>
-#include <eventql/z1stats.h>
+#include <eventql/server/server_stats.h>
 #include <eventql/eventql.h>
 #include "eventql/util/application.h"
 

@@ -28,8 +28,8 @@
 #include <eventql/sql/extensions/chartsql/barchartbuilder.h>
 #include <eventql/sql/extensions/chartsql/pointchartbuilder.h>
 #include <eventql/sql/extensions/chartsql/domainconfig.h>
-#include <cplot/svgtarget.h>
-#include <cplot/canvas.h>
+#include <eventql/util/charts/svgtarget.h>
+#include <eventql/util/charts/canvas.h>
 
 namespace csql {
 

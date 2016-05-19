@@ -22,8 +22,8 @@
  * code of your own applications
  */
 #include <eventql/sql/extensions/chartsql/domainconfig.h>
-#include <cplot/continuousdomain.h>
-#include <cplot/timedomain.h>
+#include <eventql/util/charts/continuousdomain.h>
+#include <eventql/util/charts/timedomain.h>
 
 namespace csql {
 

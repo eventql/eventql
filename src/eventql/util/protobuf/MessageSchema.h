@@ -21,8 +21,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#ifndef _STX_MSG_MESSAGESCHEMA_H
-#define _STX_MSG_MESSAGESCHEMA_H
+#pragma once
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/exception.h>
 #include <eventql/util/autoref.h>
@@ -30,8 +29,6 @@
 #include <eventql/util/util/binarymessagewriter.h>
 #include <eventql/util/protobuf/MessageObject.h>
 #include <eventql/util/json/json.h>
-#include <eventql/util/3rdparty/google/protobuf/descriptor.h>
-#include <eventql/util/3rdparty/google/protobuf/descriptor.pb.h>
 
 /**
  * // http://tools.ietf.org/html/rfc5234
@@ -100,9 +97,6 @@ struct MessageSchemaField {
 class MessageSchema : public RefCounted {
 public:
 
-  static RefPtr<MessageSchema> fromProtobuf(
-      const google::protobuf::Descriptor* dsc);
-
   MessageSchema(
       const String& name,
       Vector<MessageSchemaField> fields);
@@ -153,22 +147,5 @@ protected:
   HashMap<uint32_t, String> field_names_;
 };
 
-class MessageSchemaRepository {
-public:
-
-  MessageSchemaRepository();
-
-  RefPtr<MessageSchema> getSchema(const String& name) const;
-
-  void registerSchema(RefPtr<MessageSchema> schema);
-
-  void loadProtobufFile(const String& base_path, const String& file_path);
-
-protected:
-  HashMap<String, RefPtr<MessageSchema>> schemas_;
-  google::protobuf::DescriptorPool pool_;
-};
-
 } // namespace msg
 
-#endif

@@ -21,29 +21,13 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include <eventql/util/util/BitPackDecoder.h>
-#include <eventql/util/exception.h>
-#include <libsimdcomp/simdcomp.h>
+#include <eventql/server/server_stats.h>
 
-namespace util {
+namespace eventql {
 
-BitPackDecoder::BitPackDecoder(
-    void* data,
-    size_t size,
-    uint32_t max_val) :
-    data_(data),
-    size_(size),
-    maxbits_(max_val > 0 ? bits(max_val) : 0),
-    pos_(0),
-    outbuf_pos_(128) {}
-
-void BitPackDecoder::fetch() {
-  auto new_pos = pos_ + 16 * maxbits_;
-  simdunpack((__m128i*) (((char *) data_) + pos_), outbuf_, maxbits_);
-  pos_ = new_pos;
-  outbuf_pos_ = 0;
+Z1Stats* z1stats() {
+  static Z1Stats singleton;
+  return &singleton;
 }
 
 }
-
-

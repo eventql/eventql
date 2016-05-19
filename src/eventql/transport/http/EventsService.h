@@ -28,7 +28,7 @@
 #include "eventql/AnalyticsAuth.h"
 #include "eventql/config/namespace_config.h"
 #include "eventql/config/config_directory.h"
-#include "eventql/TableDefinition.h"
+#include "eventql/db/TableConfig.pb.h"
 #include "eventql/EventScanResult.h"
 #include "eventql/AnalyticsSession.pb.h"
 #include "eventql/EventScanParams.pb.h"

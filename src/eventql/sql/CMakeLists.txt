@@ -113,8 +113,8 @@ add_library(chartsql STATIC
     defaults.cc
     result_list.cc)
 
-add_dependencies(chartsql stx-protobuf)
-set(CSQL_LIBS chartsql cplot cstable stx-http stx-protobuf stx-json stx-base pcre)
+add_dependencies(chartsql stx-protobuf protobuf)
+set(CSQL_LIBS chartsql cplot cstable stx-http stx-protobuf protobuf stx-json stx-base pcre)
 
 add_executable(test-chartsql-runtime runtime/Runtime_test.cc)
 target_link_libraries(test-chartsql-runtime ${CSQL_LIBS})

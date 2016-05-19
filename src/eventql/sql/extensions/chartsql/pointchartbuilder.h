@@ -23,7 +23,7 @@
  */
 #pragma once
 #include <eventql/sql/extensions/chartsql/chartbuilder.h>
-#include <cplot/pointchart.h>
+#include <eventql/util/charts/pointchart.h>
 
 namespace csql {
 class DrawStatement;

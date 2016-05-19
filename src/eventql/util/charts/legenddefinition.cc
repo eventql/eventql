@@ -21,29 +21,50 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include <eventql/util/util/BitPackDecoder.h>
-#include <eventql/util/exception.h>
-#include <libsimdcomp/simdcomp.h>
+#include "eventql/util/charts/legenddefinition.h"
 
 namespace util {
+namespace chart {
 
-BitPackDecoder::BitPackDecoder(
-    void* data,
-    size_t size,
-    uint32_t max_val) :
-    data_(data),
-    size_(size),
-    maxbits_(max_val > 0 ? bits(max_val) : 0),
-    pos_(0),
-    outbuf_pos_(128) {}
+LegendDefinition::LegendDefinition(
+    kVerticalPosition vert_pos,
+    kHorizontalPosition horiz_pos,
+    kPlacement placement,
+    const std::string& title) :
+    vert_pos_(vert_pos),
+    horiz_pos_(horiz_pos),
+    placement_(placement),
+    title_ (title) {}
 
-void BitPackDecoder::fetch() {
-  auto new_pos = pos_ + 16 * maxbits_;
-  simdunpack((__m128i*) (((char *) data_) + pos_), outbuf_, maxbits_);
-  pos_ = new_pos;
-  outbuf_pos_ = 0;
+const std::string LegendDefinition::title() const {
+  return title_;
+}
+
+LegendDefinition::kVerticalPosition LegendDefinition::verticalPosition() 
+    const {
+  return vert_pos_;
+}
+
+LegendDefinition::kHorizontalPosition LegendDefinition::horizontalPosition() 
+    const {
+  return horiz_pos_;
+}
+
+LegendDefinition::kPlacement LegendDefinition::placement() const {
+  return placement_;
+}
+
+void LegendDefinition::addEntry(
+    const std::string& name,
+    const std::string& color,
+    const std::string& shape /* = "circle" */) {
+  entries_.emplace_back(name, color, shape);
+}
+
+const std::vector<std::tuple<std::string, std::string, std::string>>
+    LegendDefinition::entries() const {
+  return entries_;
 }
 
 }
-
-
+}

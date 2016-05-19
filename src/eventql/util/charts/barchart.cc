@@ -21,29 +21,27 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include <eventql/util/util/BitPackDecoder.h>
-#include <eventql/util/exception.h>
-#include <libsimdcomp/simdcomp.h>
+#include "eventql/util/charts/barchart.h"
 
 namespace util {
+namespace chart {
 
-BitPackDecoder::BitPackDecoder(
-    void* data,
-    size_t size,
-    uint32_t max_val) :
-    data_(data),
-    size_(size),
-    maxbits_(max_val > 0 ? bits(max_val) : 0),
-    pos_(0),
-    outbuf_pos_(128) {}
+BarChart::BarChart(
+    chart::Canvas* canvas,
+    kBarChartOrientation orient /* = O_VERTICAL */,
+    bool stacked /* = false */) :
+    Drawable(canvas),
+    orientation_(orient),
+    stacked_(stacked),
+    show_labels_(false) {}
 
-void BitPackDecoder::fetch() {
-  auto new_pos = pos_ + 16 * maxbits_;
-  simdunpack((__m128i*) (((char *) data_) + pos_), outbuf_, maxbits_);
-  pos_ = new_pos;
-  outbuf_pos_ = 0;
+void BarChart::setOrientation(kBarChartOrientation orientation) {
+  orientation_ = orientation;
+}
+
+void BarChart::setLabels(bool show_labels) {
+  show_labels_ = show_labels;
 }
 
 }
-
-
+}

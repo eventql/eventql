@@ -21,29 +21,40 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include <eventql/util/util/BitPackDecoder.h>
-#include <eventql/util/exception.h>
-#include <libsimdcomp/simdcomp.h>
+#ifndef _libstx_UI_GRIDDEFINITION_H
+#define _libstx_UI_GRIDDEFINITION_H
+#include "eventql/util/charts/domain.h"
+#include "eventql/util/charts/domainprovider.h"
 
 namespace util {
+namespace chart {
 
-BitPackDecoder::BitPackDecoder(
-    void* data,
-    size_t size,
-    uint32_t max_val) :
-    data_(data),
-    size_(size),
-    maxbits_(max_val > 0 ? bits(max_val) : 0),
-    pos_(0),
-    outbuf_pos_(128) {}
+class GridDefinition {
+public:
 
-void BitPackDecoder::fetch() {
-  auto new_pos = pos_ + 16 * maxbits_;
-  simdunpack((__m128i*) (((char *) data_) + pos_), outbuf_, maxbits_);
-  pos_ = new_pos;
-  outbuf_pos_ = 0;
+  enum kPlacement {
+    GRID_HORIZONTAL = 0,
+    GRID_VERTICAL = 1
+  };
+
+  /**
+   * Create a new grid definition
+   */
+  GridDefinition(kPlacement placement);
+
+  /**
+   * Set the domain for this grid
+   */
+  void setDomain(DomainProvider* domain);
+
+  kPlacement placement() const;
+  const std::vector<double> ticks() const;
+
+protected:
+  kPlacement placement_;
+  DomainProvider* domain_;
+};
+
 }
-
 }
-
-
+#endif

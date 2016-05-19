@@ -32,7 +32,7 @@
 #include <eventql/sql/defaults.h>
 #include <eventql/sql/qtree/CallExpressionNode.h>
 #include <eventql/sql/qtree/ColumnReferenceNode.h>
-#include <eventql/z1stats.h>
+#include <eventql/server/server_stats.h>
 
 namespace eventql {
 

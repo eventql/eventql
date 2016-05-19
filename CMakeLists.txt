@@ -100,20 +100,9 @@ if (NOT HAVE_STD_CODECVT)
 endif()
 
 add_subdirectory(src/eventql/util)
-set(HAVE_STX true)
-
 add_subdirectory(src/eventql/io/cstable)
-set(HAVE_CSTABLE true)
-
 add_subdirectory(src/eventql/io/sstable)
-set(HAVE_SSTABLE true)
-
-add_subdirectory(deps/libcplot)
-include_directories(${CPLOT_INCLUDE})
-set(HAVE_CPLOT true)
-
+add_subdirectory(src/eventql/util/charts)
 add_subdirectory(src/eventql/sql)
-set(HAVE_CSQL true)
-
 add_subdirectory(src/eventql)
 add_subdirectory(src/eventql/master)

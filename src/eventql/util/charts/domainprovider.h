@@ -21,29 +21,37 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include <eventql/util/util/BitPackDecoder.h>
-#include <eventql/util/exception.h>
-#include <libsimdcomp/simdcomp.h>
+#ifndef _libstx_DOMAINPROVIDER_H
+#define _libstx_DOMAINPROVIDER_H
+#include <algorithm>
+#include <stdlib.h>
+#include <math.h>
+#include "eventql/util/charts/domain.h"
+#include "eventql/util/exception.h"
 
 namespace util {
+namespace chart {
 
-BitPackDecoder::BitPackDecoder(
-    void* data,
-    size_t size,
-    uint32_t max_val) :
-    data_(data),
-    size_(size),
-    maxbits_(max_val > 0 ? bits(max_val) : 0),
-    pos_(0),
-    outbuf_pos_(128) {}
+class DomainProvider {
+public:
+  DomainProvider(AnyDomain* domain = nullptr);
+  ~DomainProvider();
 
-void BitPackDecoder::fetch() {
-  auto new_pos = pos_ + 16 * maxbits_;
-  simdunpack((__m128i*) (((char *) data_) + pos_), outbuf_, maxbits_);
-  pos_ = new_pos;
-  outbuf_pos_ = 0;
+  AnyDomain* get() const;
+  template <typename T> T* getAs() const;
+  bool empty() const;
+  void reset(AnyDomain* domain, bool free_on_destroy = false);
+
+  const std::vector<double> getTicks() const;
+  const std::vector<std::pair<double, std::string>> getLabels() const;
+
+protected:
+  AnyDomain* domain_;
+  bool free_on_destroy_;
+};
+
+}
 }
 
-}
-
-
+#include "domainprovider_impl.h"
+#endif

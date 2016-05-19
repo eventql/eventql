@@ -27,7 +27,7 @@
 #include <eventql/util/application.h>
 #include <eventql/db/ReplicationWorker.h>
 #include <eventql/db/Partition.h>
-#include <eventql/z1stats.h>
+#include <eventql/server/server_stats.h>
 
 #include "eventql/eventql.h"
 

@@ -26,8 +26,8 @@
 #include <algorithm>
 #include <stdlib.h>
 #include <assert.h>
-#include <cplot/domain.h>
-#include <cplot/drawable.h>
+#include <eventql/util/charts/domain.h>
+#include <eventql/util/charts/drawable.h>
 #include <eventql/sql/svalue.h>
 
 namespace csql {

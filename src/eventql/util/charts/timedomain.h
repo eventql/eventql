@@ -21,29 +21,29 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include <eventql/util/util/BitPackDecoder.h>
-#include <eventql/util/exception.h>
-#include <libsimdcomp/simdcomp.h>
+#ifndef _libstx_TIMEDOMAIN_H
+#define _libstx_TIMEDOMAIN_H
+#include "eventql/util/UnixTime.h"
+#include "eventql/util/charts/continuousdomain.h"
 
 namespace util {
+namespace chart {
 
-BitPackDecoder::BitPackDecoder(
-    void* data,
-    size_t size,
-    uint32_t max_val) :
-    data_(data),
-    size_(size),
-    maxbits_(max_val > 0 ? bits(max_val) : 0),
-    pos_(0),
-    outbuf_pos_(128) {}
+class TimeDomain : public ContinuousDomain<UnixTime> {
+public:
 
-void BitPackDecoder::fetch() {
-  auto new_pos = pos_ + 16 * maxbits_;
-  simdunpack((__m128i*) (((char *) data_) + pos_), outbuf_, maxbits_);
-  pos_ = new_pos;
-  outbuf_pos_ = 0;
+  TimeDomain(
+    UnixTime min_value =
+        std::numeric_limits<UnixTime>::max(),
+    UnixTime max_value =
+        std::numeric_limits<UnixTime>::min(),
+    bool is_logarithmic = false,
+    bool is_inverted = false);
+
+  std::string label(UnixTime value) const;
+
+};
+
 }
-
 }
-
-
+#endif

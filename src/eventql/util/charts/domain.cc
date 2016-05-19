@@ -21,29 +21,38 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include <eventql/util/util/BitPackDecoder.h>
-#include <eventql/util/exception.h>
-#include <libsimdcomp/simdcomp.h>
+#include "eventql/util/charts/domain.h"
+#include "eventql/util/charts/continuousdomain.h"
+#include "eventql/util/charts/discretedomain.h"
+#include "eventql/util/charts/timedomain.h"
 
+#include "eventql/eventql.h"
 namespace util {
+namespace chart {
 
-BitPackDecoder::BitPackDecoder(
-    void* data,
-    size_t size,
-    uint32_t max_val) :
-    data_(data),
-    size_(size),
-    maxbits_(max_val > 0 ? bits(max_val) : 0),
-    pos_(0),
-    outbuf_pos_(128) {}
+const char AnyDomain::kDimensionLetters[] = "xyz";
+const int AnyDomain::kDefaultNumTicks = 8;
+const double AnyDomain::kDefaultDomainPadding = 0.1;
 
-void BitPackDecoder::fetch() {
-  auto new_pos = pos_ + 16 * maxbits_;
-  simdunpack((__m128i*) (((char *) data_) + pos_), outbuf_, maxbits_);
-  pos_ = new_pos;
-  outbuf_pos_ = 0;
+template <> Domain<int64_t>*
+    Domain<int64_t>::mkDomain() {
+  return new ContinuousDomain<int64_t>();
+}
+
+template <> Domain<double>*
+    Domain<double>::mkDomain() {
+  return new ContinuousDomain<double>();
+}
+
+template <> Domain<UnixTime>*
+    Domain<UnixTime>::mkDomain() {
+  return new TimeDomain();
+}
+
+template <> Domain<std::string>* Domain<std::string>::mkDomain() {
+  return new DiscreteDomain<std::string>();
 }
 
 }
-
+}
 
