@@ -367,6 +367,8 @@ public:
   static std::basic_string<char> convertUTF16To8(
       const std::basic_string<char16_t>& str);
 
+  static size_t countUTF8CodePoints(const std::string& str);
+
 protected:
 
   template <typename ValueType, typename... T>
