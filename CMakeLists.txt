@@ -24,23 +24,6 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3 ${CMAKE_CXX_FLAGS_RELEASE}")
 
 set(PROTOC_ARGS --proto_path ${CMAKE_SOURCE_DIR}/src/eventql/core)
 
-add_library(hunspell OBJECT
-    deps/3rdparty/hunspell/affentry.cxx
-    deps/3rdparty/hunspell/affixmgr.cxx
-    deps/3rdparty/hunspell/csutil.cxx
-    deps/3rdparty/hunspell/dictmgr.cxx
-    deps/3rdparty/hunspell/filemgr.cxx
-    deps/3rdparty/hunspell/hashmgr.cxx
-    deps/3rdparty/hunspell/hunspell.cxx
-    deps/3rdparty/hunspell/hunzip.cxx
-    deps/3rdparty/hunspell/phonet.cxx
-    deps/3rdparty/hunspell/replist.cxx
-    deps/3rdparty/hunspell/suggestmgr.cxx
-    deps/3rdparty/hunspell/utf_info.cxx
-    deps/3rdparty/hunspell/hnjalloc.c
-    deps/3rdparty/hunspell/hnjalloc.c
-    deps/3rdparty/hunspell/hyphen.c)
-
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/src/eventql/util/mysql")
 find_package(MySQL)
 
