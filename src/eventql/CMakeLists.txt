@@ -259,7 +259,7 @@ add_executable(evql
     evql.cc)
 
 target_link_libraries(evql chartsql cplot stx-http stx-protobuf stx-json stx-base stx-rpc z pcre)
-target_link_libraries(evql editline)
+target_link_libraries(evql linenoise)
 
 #add_executable(evqlctl
 #    $<TARGET_OBJECTS:stx-mdb>

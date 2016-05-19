@@ -24,23 +24,6 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3 ${CMAKE_CXX_FLAGS_RELEASE}")
 
 set(PROTOC_ARGS --proto_path ${CMAKE_SOURCE_DIR}/src/eventql/core)
 
-add_library(hunspell OBJECT
-    deps/3rdparty/hunspell/affentry.cxx
-    deps/3rdparty/hunspell/affixmgr.cxx
-    deps/3rdparty/hunspell/csutil.cxx
-    deps/3rdparty/hunspell/dictmgr.cxx
-    deps/3rdparty/hunspell/filemgr.cxx
-    deps/3rdparty/hunspell/hashmgr.cxx
-    deps/3rdparty/hunspell/hunspell.cxx
-    deps/3rdparty/hunspell/hunzip.cxx
-    deps/3rdparty/hunspell/phonet.cxx
-    deps/3rdparty/hunspell/replist.cxx
-    deps/3rdparty/hunspell/suggestmgr.cxx
-    deps/3rdparty/hunspell/utf_info.cxx
-    deps/3rdparty/hunspell/hnjalloc.c
-    deps/3rdparty/hunspell/hnjalloc.c
-    deps/3rdparty/hunspell/hyphen.c)
-
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/src/eventql/util/mysql")
 find_package(MySQL)
 
@@ -76,19 +59,7 @@ add_library(spidermonkey STATIC IMPORTED)
 set_target_properties(spidermonkey PROPERTIES IMPORTED_LOCATION ${CMAKE_BINARY_DIR}/deps/3rdparty/mozjs/dist/lib/libjs_static.a)
 add_dependencies(spidermonkey spidermonkey_build)
 
-ExternalProject_Add(editline_build
-    URL ${PROJECT_SOURCE_DIR}/deps/3rdparty/editline
-    SOURCE_DIR ${PROJECT_BINARY_DIR}/deps/3rdparty/editline
-    BINARY_DIR ${PROJECT_BINARY_DIR}/deps/3rdparty/editline
-    BUILD_COMMAND sh -c "make CC=${CMAKE_C_COMPILER} AR=${CMAKE_AR} RANLIB=${CMAKE_RANLIB} CFLAGS='${CMAKE_C_FLAGS}' LDFLAGS='${CMAKE_EXE_LINKER_FLAGS}'"
-    CONFIGURE_COMMAND sh -c "CC=${CMAKE_C_COMPILER} AR=${CMAKE_AR} RANLIB=${CMAKE_RANLIB} CFLAGS='${CMAKE_C_FLAGS}' LDFLAGS='${CMAKE_EXE_LINKER_FLAGS}' ./configure"
-    INSTALL_COMMAND "true"
-    LOG_BUILD 1
-    LOG_CONFIGURE 1)
-
-add_library(editline STATIC IMPORTED)
-add_dependencies(editline editline_build)
-set_target_properties(editline PROPERTIES IMPORTED_LOCATION ${CMAKE_BINARY_DIR}/deps/3rdparty/editline/src/.libs/libeditline.a)
+add_library(linenoise STATIC deps/3rdparty/linenoise/linenoise.c)
 
 set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} ${CMAKE_BINARY_DIR}/deps/3rdparty/mozjs/dist/lib)
 set(CMAKE_CXX_FLAGS "-std=c++0x -ftemplate-depth=500 -mno-omit-leaf-frame-pointer -fno-omit-frame-pointer -Wall -Wextra -Wno-unused-parameter -Wno-sign-compare -Wdelete-non-virtual-dtor ${CMAKE_CXX_FLAGS} -Wno-predefined-identifier-outside-function")
