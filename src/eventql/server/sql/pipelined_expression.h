@@ -32,7 +32,7 @@ namespace eventql {
 
 class PipelinedExpression : public csql::TableExpression {
 public:
-  static const constexpr size_t kMaxBufferSize = 100;
+  static const constexpr size_t kMaxBufferSize = 1024;
 
   PipelinedExpression(
       csql::Transaction* txn,
