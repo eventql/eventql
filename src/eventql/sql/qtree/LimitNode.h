@@ -51,6 +51,8 @@ public:
       const String& column_name,
       bool allow_add = false) override;
 
+  size_t getNumComputedColumns() const override;
+
   size_t limit() const;
 
   size_t offset() const;

@@ -173,7 +173,7 @@ ScopedPtr<ResultCursor> NestedLoopJoin::executeCartesianJoin() {
     }
   };
 
-  return mkScoped(new DefaultResultCursor( select_exprs_.size(), cursor));
+  return mkScoped(new DefaultResultCursor(select_exprs_.size(), cursor));
 }
 
 ScopedPtr<ResultCursor> NestedLoopJoin::executeInnerJoin() {

@@ -127,6 +127,10 @@ size_t SubqueryNode::getColumnIndex(
   return -1;
 }
 
+size_t SubqueryNode::getNumComputedColumns() const {
+  return select_list_.size();
+}
+
 Option<RefPtr<ValueExpressionNode>> SubqueryNode::whereExpression() const {
   return where_expr_;
 }

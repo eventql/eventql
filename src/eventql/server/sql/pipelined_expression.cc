@@ -68,7 +68,7 @@ void PipelinedExpression::addLocalQuery(ScopedPtr<csql::TableExpression> expr) {
 void PipelinedExpression::addRemoteQuery(
     RefPtr<csql::TableExpressionNode> qtree,
     Vector<ReplicaRef> hosts) {
-  num_columns_ = std::max(num_columns_, qtree->numColumns());
+  num_columns_ = std::max(num_columns_, qtree->getNumComputedColumns());
   ctx_->incrementNumTasks();
 
   queries_.emplace_back(QuerySpec {

@@ -59,7 +59,11 @@ Vector<QualifiedColumn> ShowTablesNode::allColumns() const {
 size_t ShowTablesNode::getColumnIndex(
     const String& column_name,
     bool allow_add /* = false */) {
-  return -1;
+  return -1; // FIXME
+}
+
+size_t ShowTablesNode::getNumComputedColumns() const {
+  return 2;
 }
 
 String ShowTablesNode::toString() const {

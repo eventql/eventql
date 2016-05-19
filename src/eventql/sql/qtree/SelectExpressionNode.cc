@@ -71,6 +71,10 @@ size_t SelectExpressionNode::getColumnIndex(
   return -1;
 }
 
+size_t SelectExpressionNode::getNumComputedColumns() const {
+  return select_list_.size();
+}
+
 RefPtr<QueryTreeNode> SelectExpressionNode::deepCopy() const {
   Vector<RefPtr<SelectListNode>> args;
   for (const auto& arg : select_list_) {

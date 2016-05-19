@@ -54,7 +54,7 @@ TableScan::TableScan(
 ScopedPtr<csql::ResultCursor> TableScan::execute() {
   return mkScoped(
       new csql::DefaultResultCursor(
-          seqscan_->numColumns(),
+          seqscan_->getNumComputedColumns(),
           std::bind(
               &TableScan::next,
               this,
@@ -63,7 +63,7 @@ ScopedPtr<csql::ResultCursor> TableScan::execute() {
 };
 
 size_t TableScan::getNumColumns() const {
-  return seqscan_->numColumns();
+  return seqscan_->getNumComputedColumns();
 }
 
 bool TableScan::next(csql::SValue* row, size_t row_len) {

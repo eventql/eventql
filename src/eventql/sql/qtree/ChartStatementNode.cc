@@ -74,6 +74,10 @@ size_t ChartStatementNode::getColumnIndex(
   }
 }
 
+size_t ChartStatementNode::getNumComputedColumns() const {
+  return 1;
+}
+
 RefPtr<QueryTreeNode> ChartStatementNode::deepCopy() const {
   return new ChartStatementNode(*this);
 }

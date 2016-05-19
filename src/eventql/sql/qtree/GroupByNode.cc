@@ -98,6 +98,10 @@ size_t GroupByNode::getColumnIndex(
   return -1;
 }
 
+size_t GroupByNode::getNumComputedColumns() const {
+  return select_list_.size();
+}
+
 Vector<RefPtr<ValueExpressionNode>> GroupByNode::groupExpressions() const {
   return group_exprs_;
 }

@@ -55,6 +55,8 @@ public:
       const String& column_name,
       bool allow_add = false) override;
 
+  size_t getNumComputedColumns() const override;
+
   Option<RefPtr<ValueExpressionNode>> whereExpression() const;
 
   RefPtr<QueryTreeNode> deepCopy() const override;

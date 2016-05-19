@@ -65,6 +65,10 @@ SequentialScanNode::SequentialScanNode(
     select_list_(select_list),
     where_expr_(where_expr),
     aggr_strategy_(aggr_strategy) {
+  for (auto& sl : select_list_) {
+    output_columns_.emplace_back(sl->columnName());
+  }
+
   for (const auto& col : table_info.columns) {
     table_columns_.emplace_back(col.column_name);
   }
@@ -171,6 +175,7 @@ void SequentialScanNode::normalizeColumnNames() {
     expr->setColumnName(normalizeColumnName(expr->columnName()));
   };
 
+  output_columns_.clear();
   for (auto& sl : select_list_) {
     QueryTreeUtil::findColumns(sl->expression(), normalizer);
     output_columns_.emplace_back(sl->columnName());
@@ -228,6 +233,10 @@ size_t SequentialScanNode::getColumnIndex(
   slnode->setAlias(col);
   select_list_.emplace_back(slnode);
   return select_list_.size() - 1;
+}
+
+size_t SequentialScanNode::getNumComputedColumns() const {
+  return select_list_.size();
 }
 
 AggregationStrategy SequentialScanNode::aggregationStrategy() const {

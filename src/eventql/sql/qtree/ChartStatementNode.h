@@ -50,6 +50,8 @@ public:
       const String& column_name,
       bool allow_add = false) override;
 
+  size_t getNumComputedColumns() const override;
+
   const Vector<RefPtr<QueryTreeNode>>& getDrawStatements();
 
 protected:

@@ -108,7 +108,7 @@ bool PartitionCursor::next(csql::SValue* row, int row_len) {
 }
 
 size_t PartitionCursor::getNumColumns() {
-  return stmt_->numColumns();
+  return stmt_->getNumComputedColumns();
 }
 
 StaticPartitionCursor::StaticPartitionCursor(
@@ -166,7 +166,7 @@ bool StaticPartitionCursor::next(csql::SValue* row, int row_len) {
 
 
 size_t StaticPartitionCursor::getNumColumns() {
-  return stmt_->numColumns();
+  return stmt_->getNumComputedColumns();
 }
 
 }

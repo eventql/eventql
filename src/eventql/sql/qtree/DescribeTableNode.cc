@@ -69,7 +69,11 @@ Vector<QualifiedColumn> DescribeTableNode::allColumns() const {
 size_t DescribeTableNode::getColumnIndex(
     const String& column_name,
     bool allow_add /* = false */) {
-  return -1;
+  return -1; // FIXME
+}
+
+size_t DescribeTableNode::getNumComputedColumns() const {
+  return 4;
 }
 
 String DescribeTableNode::toString() const {

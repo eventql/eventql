@@ -81,7 +81,7 @@ public:
    * internal columns that are needed for execution of upstream table expressions,
    * but should not be returned to the user
    */
-  size_t numColumns() const; //getNumComputerColumns
+  virtual size_t getNumComputedColumns() const = 0; //getNumComputerColumns
 
   /**
    * Returns the output column index for a named column or -1 if no such column

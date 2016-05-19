@@ -56,6 +56,10 @@ size_t OrderByNode::getColumnIndex(
       allow_add);
 }
 
+size_t OrderByNode::getNumComputedColumns() const {
+  return table_.asInstanceOf<TableExpressionNode>()->getNumComputedColumns();
+}
+
 const Vector<OrderByNode::SortSpec>& OrderByNode::sortSpecs() const {
   return sort_specs_;
 }

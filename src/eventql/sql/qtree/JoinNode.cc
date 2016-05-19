@@ -128,6 +128,10 @@ size_t JoinNode::getColumnIndex(
   return -1; // FIXME
 }
 
+size_t JoinNode::getNumComputedColumns() const {
+  return select_list_.size();
+}
+
 size_t JoinNode::getInputColumnIndex(
     const String& column_name,
     bool allow_add /* = false */) {
