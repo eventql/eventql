@@ -320,6 +320,7 @@ ScopedPtr<ResultCursor> NestedLoopJoin::executeOuterJoin() {
           for (size_t i = 0; i < input_map_.size(); ++i) {
             switch (input_map_[i].table_idx) {
               case 0:
+                input_buf_[i] = base_tbl_row_[input_map_[i].column_idx];
                 break;
               case 1:
                 input_buf_[i] = SValue{};
