@@ -31,6 +31,7 @@ namespace expressions {
 
 extern const AggregateFunction kCountExpr;
 extern const AggregateFunction kSumExpr;
+extern const AggregateFunction kMaxExpr;
 extern const AggregateFunction kMinExpr;
 
 }

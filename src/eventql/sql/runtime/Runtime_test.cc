@@ -56,7 +56,6 @@ TEST_CASE(RuntimeTest, TestStaticExpression, [] () {
   for (int i = 0; i < 1000; ++i) {
     out = runtime->evaluateConstExpression(txn.get(), expr.get());
   }
-  auto t1 = WallClock::unixMicros();
 
   EXPECT_EQ(out.getInteger(), 3);
 });
@@ -2292,4 +2291,28 @@ TEST_CASE(RuntimeTest, TestSimpleDrawQueryTwo, [] () {
   EXPECT_EQ(result.getNumColumns(), 1);
   EXPECT_EQ(result.getNumRows(), 1);
   EXPECT_EQ(result.getRow(0)[0], exptected_svg);
+});
+
+TEST_CASE(RuntimeTest, TestSumMinMaxCount, [] () {
+  auto runtime = Runtime::getDefaultRuntime();
+  auto txn = runtime->newTransaction();
+
+  txn->addTableProvider(
+      new backends::csv::CSVTableProvider(
+          "testtable",
+          "src/eventql/sql/testdata/testtbl1.csv",
+          '\t'));
+
+  ResultList result;
+  auto query = R"(
+    select sum(value), count(value), min(value), max(value) FROM testtable;
+  )";
+  auto qplan = runtime->buildQueryPlan(txn.get(), query);
+  qplan->execute(0, &result);
+  EXPECT_EQ(result.getNumColumns(), 4);
+  EXPECT_EQ(result.getNumRows(), 1);
+  EXPECT_EQ(result.getRow(0)[0], "11409.000000");
+  EXPECT_EQ(result.getRow(0)[1], "19");
+  EXPECT_EQ(result.getRow(0)[2], "123.000000");
+  EXPECT_EQ(result.getRow(0)[3], "999.000000");
 });
