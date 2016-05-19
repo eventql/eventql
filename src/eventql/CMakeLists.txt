@@ -251,6 +251,7 @@ add_executable(evqld
 
 target_link_libraries(evqld chartsql cplot sstable cstable stx-http stx-protobuf protobuf stx-json stx-base stx-rpc stx-mdb z pcre)
 target_link_libraries(evqld spidermonkey)
+target_link_libraries(evqld protobuf)
 
 add_executable(evql
     cli/console.cc
@@ -259,6 +260,7 @@ add_executable(evql
 
 target_link_libraries(evql chartsql cplot stx-http stx-protobuf protobuf stx-json stx-base stx-rpc z pcre)
 target_link_libraries(evql linenoise)
+target_link_libraries(evql protobuf)
 
 #add_executable(evqlctl
 #    $<TARGET_OBJECTS:stx-mdb>
