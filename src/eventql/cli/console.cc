@@ -39,17 +39,14 @@
 #include "eventql/util/cli/term.h"
 #include "eventql/server/sql/codec/binary_codec.h"
 #include "eventql/sql/runtime/resultlist.h"
+#include "linenoise/linenoise.h"
 
 namespace eventql {
 namespace cli {
 
-extern "C" {
-extern char *readline(char *prompt);
-}
-
 void Console::startInteractiveShell() {
   char *p;
-  while ((p = readline("evql> ")) != NULL) {
+  while ((p = linenoise("evql> ")) != NULL) {
     String line(p);
     free(p);
 
