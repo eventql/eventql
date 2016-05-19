@@ -48,7 +48,7 @@ void Console::startInteractiveShell() {
   char *p;
   while ((p = linenoise("evql> ")) != NULL) {
     String line(p);
-    free(p);
+    linenoiseFree(p);
 
     if (line == "quit") {
       return;
