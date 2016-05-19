@@ -45,8 +45,8 @@ public:
    */
   SVGTarget(
       OutputStream* output_stream) :
-      output_(output_stream),
       viewbox_(true),
+      output_(output_stream),
       indent_(0) {}
 
 #define SVG_append(...) { output_->printf(__VA_ARGS__); }

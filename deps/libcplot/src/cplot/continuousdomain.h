@@ -121,7 +121,6 @@ public:
       auto min_max = getRangeWithPadding();
       double min_value = min_max.first;
       double max_value = min_max.second;
-      double val_range = min_value + (max_value - min_value);
 
       if (is_inverted_) {
         return min_value + (max_value - min_value) * (1.0 - index);

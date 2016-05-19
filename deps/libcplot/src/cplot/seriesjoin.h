@@ -101,7 +101,7 @@ public:
     return data_;
   }
 
-  const size_t seriesCount() const {
+  size_t seriesCount() const {
     return num_series_;
   }
 
