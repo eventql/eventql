@@ -174,169 +174,223 @@ const AggregateFunction kSumExpr {
 /**
  * MEAN() expression
  */
-struct mean_expr_scratchpad {
-  double sum;
-  int count;
-};
-
-void meanExprAcc(sql_txn* ctx, void* scratchpad, int argc, SValue* argv) {
-  SValue* val = argv;
-  auto data = (mean_expr_scratchpad*) scratchpad;
-
-  if (argc != 1) {
-    RAISE(
-        kRuntimeError,
-        "wrong number of arguments for mean(). expected: 1, got: %i\n",
-        argc);
-  }
-
-  switch(val->getType()) {
-    case SQL_NULL:
-      return;
-
-    default:
-      data->sum += val->getFloat();
-      data->count += 1;
-      return;
-  }
-}
-
-void meanExprGet(sql_txn* ctx, void* scratchpad, SValue* out) {
-  auto data = (mean_expr_scratchpad*) scratchpad;
-  *out = SValue(data->sum / data->count);
-}
-
-void meanExprReset(sql_txn* ctx, void* scratchpad) {
-  memset(scratchpad, 0, sizeof(mean_expr_scratchpad));
-}
-
-void meanExprFree(sql_txn* ctx, void* scratchpad) {
-  /* noop */
-}
-
-size_t meanExprScratchpadSize() {
-  return sizeof(mean_expr_scratchpad);
-}
-
-void meanExprMerge(sql_txn* ctx, void* scratchpad, const void* other) {
-  auto this_data = (mean_expr_scratchpad*) scratchpad;
-  auto other_data = (const mean_expr_scratchpad*) other;
-
-  this_data->sum += other_data->sum;
-  this_data->count += other_data->count;
-}
-
-void meanExprSave(sql_txn* ctx, void* scratchpad, OutputStream* os) {
-  auto data = (mean_expr_scratchpad*) scratchpad;
-  os->appendVarUInt(data->count);
-  os->appendDouble(data->sum);
-}
-
-void meanExprLoad(sql_txn* ctx, void* scratchpad, InputStream* is) {
-  auto data = (mean_expr_scratchpad*) scratchpad;
-  data->count = is->readVarUInt();
-  data->sum = is->readDouble();
-}
-
-const AggregateFunction kMeanExpr {
-  .scratch_size = sizeof(mean_expr_scratchpad),
-  .accumulate = &meanExprAcc,
-  .get = &meanExprGet,
-  .reset = &meanExprReset,
-  .init = &meanExprReset,
-  .free = nullptr,
-  .merge = &meanExprMerge,
-  .savestate = &meanExprSave,
-  .loadstate = &meanExprLoad
-};
+//struct mean_expr_scratchpad {
+//  double sum;
+//  int count;
+//};
+//
+//void meanExprAcc(sql_txn* ctx, void* scratchpad, int argc, SValue* argv) {
+//  SValue* val = argv;
+//  auto data = (mean_expr_scratchpad*) scratchpad;
+//
+//  if (argc != 1) {
+//    RAISE(
+//        kRuntimeError,
+//        "wrong number of arguments for mean(). expected: 1, got: %i\n",
+//        argc);
+//  }
+//
+//  switch(val->getType()) {
+//    case SQL_NULL:
+//      return;
+//
+//    default:
+//      data->sum += val->getFloat();
+//      data->count += 1;
+//      return;
+//  }
+//}
+//
+//void meanExprGet(sql_txn* ctx, void* scratchpad, SValue* out) {
+//  auto data = (mean_expr_scratchpad*) scratchpad;
+//  *out = SValue(data->sum / data->count);
+//}
+//
+//void meanExprReset(sql_txn* ctx, void* scratchpad) {
+//  memset(scratchpad, 0, sizeof(mean_expr_scratchpad));
+//}
+//
+//void meanExprFree(sql_txn* ctx, void* scratchpad) {
+//  /* noop */
+//}
+//
+//size_t meanExprScratchpadSize() {
+//  return sizeof(mean_expr_scratchpad);
+//}
+//
+//void meanExprMerge(sql_txn* ctx, void* scratchpad, const void* other) {
+//  auto this_data = (mean_expr_scratchpad*) scratchpad;
+//  auto other_data = (const mean_expr_scratchpad*) other;
+//
+//  this_data->sum += other_data->sum;
+//  this_data->count += other_data->count;
+//}
+//
+//void meanExprSave(sql_txn* ctx, void* scratchpad, OutputStream* os) {
+//  auto data = (mean_expr_scratchpad*) scratchpad;
+//  os->appendVarUInt(data->count);
+//  os->appendDouble(data->sum);
+//}
+//
+//void meanExprLoad(sql_txn* ctx, void* scratchpad, InputStream* is) {
+//  auto data = (mean_expr_scratchpad*) scratchpad;
+//  data->count = is->readVarUInt();
+//  data->sum = is->readDouble();
+//}
+//
+//const AggregateFunction kMeanExpr {
+//  .scratch_size = sizeof(mean_expr_scratchpad),
+//  .accumulate = &meanExprAcc,
+//  .get = &meanExprGet,
+//  .reset = &meanExprReset,
+//  .init = &meanExprReset,
+//  .free = nullptr,
+//  .merge = &meanExprMerge,
+//  .savestate = &meanExprSave,
+//  .loadstate = &meanExprLoad
+//};
 
 /**
  * MAX() expression
  */
-union max_expr_scratchpad {
+struct max_expr_scratchpad {
   double max;
   int count;
 };
 
-void maxExpr(sql_txn* ctx, void* scratchpad, int argc, SValue* argv, SValue* out) {
-  SValue* val = argv;
-  union max_expr_scratchpad* data = (union max_expr_scratchpad*) scratchpad;
+void maxExprAcc(sql_txn* ctx, void* scratchpad, int argc, SValue* argv) {
+  auto data = (max_expr_scratchpad*) scratchpad;
 
-  if (argc != 1) {
-    RAISE(
-        kRuntimeError,
-        "wrong number of arguments for max(). expected: 1, got: %i\n",
-        argc);
-  }
-
-  switch(val->getType()) {
+  switch(argv->getType()) {
     case SQL_NULL:
       return;
 
     default: {
-      auto fval = val->getFloat();
+      auto fval = argv->getFloat();
       if (data->count == 0 || fval > data->max) {
         data->max = fval;
       }
 
       data->count = 1;
-      *out = SValue(data->max);
       return;
     }
+
   }
 }
 
-void maxExprFree(sql_txn* ctx, void* scratchpad) {
-  /* noop */
+void maxExprGet(sql_txn* ctx, void* scratchpad, SValue* out) {
+  *out = SValue::newFloat(((max_expr_scratchpad*) scratchpad)->max);
 }
 
-size_t maxExprScratchpadSize() {
-  return sizeof(union max_expr_scratchpad);
+void maxExprReset(sql_txn* ctx, void* scratchpad) {
+  memset(scratchpad, 0, sizeof(max_expr_scratchpad));
 }
+
+void maxExprMerge(sql_txn* ctx, void* scratchpad, const void* other) {
+  auto data = (max_expr_scratchpad*) scratchpad;
+  auto other_data = (max_expr_scratchpad*) other;
+
+  if (other_data->count == 0) {
+    return;
+  }
+
+  if (data->count == 0 || other_data->max > data->max) {
+    data->max = other_data->max;
+  }
+
+  data->count = 1;
+}
+
+void maxExprSave(sql_txn* ctx, void* scratchpad, OutputStream* os) {
+  os->write((char*) scratchpad, sizeof(max_expr_scratchpad));
+}
+
+void maxExprLoad(sql_txn* ctx, void* scratchpad, InputStream* is) {
+  is->readNextBytes(scratchpad, sizeof(max_expr_scratchpad));
+}
+
+const AggregateFunction kMaxExpr {
+  .scratch_size = sizeof(max_expr_scratchpad),
+  .accumulate = &maxExprAcc,
+  .get = &maxExprGet,
+  .reset = &maxExprReset,
+  .init = &maxExprReset,
+  .free = nullptr,
+  .merge = &maxExprMerge,
+  .savestate = &maxExprSave,
+  .loadstate = &maxExprLoad
+};
 
 /**
  * MIN() expression
  */
-union min_expr_scratchpad {
+struct min_expr_scratchpad {
   double min;
   int count;
 };
 
-void minExpr(sql_txn* ctx, void* scratchpad, int argc, SValue* argv, SValue* out) {
-  SValue* val = argv;
-  union min_expr_scratchpad* data = (union min_expr_scratchpad*) scratchpad;
+void minExprAcc(sql_txn* ctx, void* scratchpad, int argc, SValue* argv) {
+  auto data = (min_expr_scratchpad*) scratchpad;
 
-  if (argc != 1) {
-    RAISE(
-        kRuntimeError,
-        "wrong number of arguments for min(). expected: 1, got: %i\n",
-        argc);
-  }
-
-  switch(val->getType()) {
+  switch(argv->getType()) {
     case SQL_NULL:
       return;
 
     default: {
-      auto fval = val->getFloat();
+      auto fval = argv->getFloat();
       if (data->count == 0 || fval < data->min) {
         data->min = fval;
       }
 
       data->count = 1;
-      *out = SValue(data->min);
       return;
     }
+
   }
 }
 
-void minExprFree(sql_txn* ctx, void* scratchpad) {
-  /* noop */
+void minExprGet(sql_txn* ctx, void* scratchpad, SValue* out) {
+  *out = SValue::newFloat(((min_expr_scratchpad*) scratchpad)->min);
 }
 
-size_t minExprScratchpadSize() {
-  return sizeof(union min_expr_scratchpad);
+void minExprReset(sql_txn* ctx, void* scratchpad) {
+  memset(scratchpad, 0, sizeof(min_expr_scratchpad));
 }
+
+void minExprMerge(sql_txn* ctx, void* scratchpad, const void* other) {
+  auto data = (min_expr_scratchpad*) scratchpad;
+  auto other_data = (min_expr_scratchpad*) other;
+
+  if (other_data->count == 0) {
+    return;
+  }
+
+  if (data->count == 0 || other_data->min < data->min) {
+    data->min = other_data->min;
+  }
+
+  data->count = 1;
+}
+
+void minExprSave(sql_txn* ctx, void* scratchpad, OutputStream* os) {
+  os->write((char*) scratchpad, sizeof(min_expr_scratchpad));
+}
+
+void minExprLoad(sql_txn* ctx, void* scratchpad, InputStream* is) {
+  is->readNextBytes(scratchpad, sizeof(min_expr_scratchpad));
+}
+
+const AggregateFunction kMinExpr {
+  .scratch_size = sizeof(min_expr_scratchpad),
+  .accumulate = &minExprAcc,
+  .get = &minExprGet,
+  .reset = &minExprReset,
+  .init = &minExprReset,
+  .free = nullptr,
+  .merge = &minExprMerge,
+  .savestate = &minExprSave,
+  .loadstate = &minExprLoad
+};
 
 }
 }
