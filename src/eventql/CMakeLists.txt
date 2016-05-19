@@ -247,7 +247,7 @@ add_executable(evqld
     server/sql/pipelined_expression.cc
     server/sql/scheduler.cc
     server/sql/transaction_info.cc
-    z1stats.cc
+    server/server_stats.cc
     evqld.cc)
 
 target_link_libraries(evqld chartsql cplot sstable cstable stx-http stx-protobuf protobuf stx-json stx-base stx-rpc stx-mdb z pcre)

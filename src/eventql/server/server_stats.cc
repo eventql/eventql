@@ -21,7 +21,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include <eventql/z1stats.h>
+#include <eventql/server/server_stats.h>
 
 namespace eventql {
 

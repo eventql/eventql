@@ -35,7 +35,7 @@
 #include <eventql/db/PartitionChangeNotification.h>
 #include <eventql/db/RecordEnvelope.pb.h>
 #include <eventql/db/ServerConfig.h>
-#include <eventql/z1stats.h>
+#include <eventql/server/server_stats.h>
 
 #include "eventql/eventql.h"
 

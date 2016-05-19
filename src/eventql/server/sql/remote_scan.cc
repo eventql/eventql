@@ -27,7 +27,7 @@
 #include <eventql/util/protobuf/msg.h>
 #include <eventql/db/RemoteTSDBScan.h>
 #include <eventql/AnalyticsSession.pb.h>
-#include <eventql/z1stats.h>
+#include <eventql/server/server_stats.h>
 
 #include "eventql/eventql.h"
 

@@ -28,7 +28,7 @@
 #include <eventql/util/protobuf/msg.h>
 #include <eventql/util/http/httpclient.h>
 #include <eventql/util/logging.h>
-#include <eventql/z1stats.h>
+#include <eventql/server/server_stats.h>
 
 #include "eventql/eventql.h"
 
