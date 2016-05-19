@@ -21,38 +21,31 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include "cplot/domain.h"
-#include "cplot/continuousdomain.h"
-#include "cplot/discretedomain.h"
-#include "cplot/timedomain.h"
+#include "eventql/util/charts/griddefinition.h"
 
-#include "eventql/eventql.h"
 namespace util {
 namespace chart {
 
-const char AnyDomain::kDimensionLetters[] = "xyz";
-const int AnyDomain::kDefaultNumTicks = 8;
-const double AnyDomain::kDefaultDomainPadding = 0.1;
+GridDefinition::GridDefinition(
+    kPlacement placement) :
+    placement_(placement),
+    domain_(nullptr) {}
 
-template <> Domain<int64_t>*
-    Domain<int64_t>::mkDomain() {
-  return new ContinuousDomain<int64_t>();
+void GridDefinition::setDomain(DomainProvider* domain) {
+  domain_ = domain;
 }
 
-template <> Domain<double>*
-    Domain<double>::mkDomain() {
-  return new ContinuousDomain<double>();
+GridDefinition::kPlacement GridDefinition::placement() const {
+  return placement_;
 }
 
-template <> Domain<UnixTime>*
-    Domain<UnixTime>::mkDomain() {
-  return new TimeDomain();
-}
-
-template <> Domain<std::string>* Domain<std::string>::mkDomain() {
-  return new DiscreteDomain<std::string>();
+const std::vector<double> GridDefinition::ticks() const {
+  if (domain_ == nullptr || domain_->empty()) {
+    return std::vector<double>();
+  } else {
+    return domain_->get()->getTicks();
+  }
 }
 
 }
 }
-

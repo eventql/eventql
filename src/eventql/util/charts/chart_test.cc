@@ -24,15 +24,15 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "cplot/axisdefinition.h"
-#include "cplot/areachart.h"
-#include "cplot/barchart.h"
-#include "cplot/canvas.h"
-#include "cplot/domain.h"
-#include "cplot/linechart.h"
-#include "cplot/pointchart.h"
-#include "cplot/series.h"
-#include "cplot/svgtarget.h"
+#include "eventql/util/charts/axisdefinition.h"
+#include "eventql/util/charts/areachart.h"
+#include "eventql/util/charts/barchart.h"
+#include "eventql/util/charts/canvas.h"
+#include "eventql/util/charts/domain.h"
+#include "eventql/util/charts/linechart.h"
+#include "eventql/util/charts/pointchart.h"
+#include "eventql/util/charts/series.h"
+#include "eventql/util/charts/svgtarget.h"
 #include "eventql/util/io/fileutil.h"
 #include "eventql/util/test/unittest.h"
 

@@ -21,37 +21,34 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#ifndef _libstx_DOMAINPROVIDER_H
-#define _libstx_DOMAINPROVIDER_H
-#include <algorithm>
-#include <stdlib.h>
-#include <math.h>
-#include "cplot/domain.h"
-#include "eventql/util/exception.h"
+#include "eventql/util/UnixTime.h"
+#include "eventql/util/charts/timedomain.h"
 
 namespace util {
 namespace chart {
 
-class DomainProvider {
-public:
-  DomainProvider(AnyDomain* domain = nullptr);
-  ~DomainProvider();
+TimeDomain::TimeDomain(
+    UnixTime min_value,
+    UnixTime max_value,
+    bool is_logarithmic,
+    bool is_inverted) :
+    ContinuousDomain<UnixTime>(
+        min_value,
+        max_value,
+        is_logarithmic,
+        is_inverted) {}
 
-  AnyDomain* get() const;
-  template <typename T> T* getAs() const;
-  bool empty() const;
-  void reset(AnyDomain* domain, bool free_on_destroy = false);
+std::string TimeDomain::label(UnixTime value) const {
+  auto range = ContinuousDomain<UnixTime>::getRange();
 
-  const std::vector<double> getTicks() const;
-  const std::vector<std::pair<double, std::string>> getLabels() const;
-
-protected:
-  AnyDomain* domain_;
-  bool free_on_destroy_;
-};
+  if (range < 60 * 60) {
+    return value.toString("%H:%M:%S");
+  } else if (range < 60 * 60 * 24) {
+    return value.toString("%H:%M");
+  } else {
+    return value.toString("%Y-%m-%d %H:%M");
+  }
+}
 
 }
 }
-
-#include "domainprovider_impl.h"
-#endif

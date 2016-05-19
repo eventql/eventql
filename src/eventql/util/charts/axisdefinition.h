@@ -26,8 +26,8 @@
 #include <utility>
 #include <string>
 #include <vector>
-#include "cplot/domain.h"
-#include "cplot/domainprovider.h"
+#include "eventql/util/charts/domain.h"
+#include "eventql/util/charts/domainprovider.h"
 
 namespace util {
 namespace chart {

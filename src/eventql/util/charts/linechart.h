@@ -21,30 +21,38 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#ifndef _libstx_POINTCHART_H
-#define _libstx_POINTCHART_H
+#ifndef _libstx_LINECHART_H
+#define _libstx_LINECHART_H
 #include <stdlib.h>
-#include "cplot/axisdefinition.h"
-#include "cplot/domain.h"
-#include "cplot/continuousdomain.h"
-#include "cplot/drawable.h"
-#include "cplot/canvas.h"
-#include "cplot/colorpalette.h"
-#include "cplot/rendertarget.h"
+#include "eventql/util/charts/axisdefinition.h"
+#include "eventql/util/charts/continuousdomain.h"
+#include "eventql/util/charts/domain.h"
+#include "eventql/util/charts/drawable.h"
+#include "eventql/util/charts/canvas.h"
+#include "eventql/util/charts/colorpalette.h"
+#include "eventql/util/charts/rendertarget.h"
 
 namespace util {
 namespace chart {
 
 /**
  * This draws the series data as points.
+ *
+ * OPTIONS
+ *
+ *   line_style = {solid,dashed}, default: solid
+ *   line_width = default: 2
+ *
  */
-class PointChart : public Drawable {
+class LineChart : public Drawable {
 public:
+  static const constexpr int kLabelPadding = 8;
+  static char kDefaultLineStyle[];
+  static char kDefaultLineWidth[];
   static char kDefaultPointStyle[];
   static char kDefaultPointSize[];
-  static const constexpr int kLabelPadding = 8;
 
-  PointChart(chart::Canvas* canvas);
+  LineChart(chart::Canvas* canvas);
 
   void setLabels(bool show_labels);
 
@@ -52,32 +60,40 @@ protected:
   bool show_labels_;
 };
 
-template <typename TX_, typename TY_, typename TZ_>
-class PointChart3D : public PointChart {
+template <typename TX_, typename TY_>
+class LineChart2D : public LineChart {
 public:
   typedef TX_ TX;
   typedef TY_ TY;
-  typedef TZ_ TZ;
 
   /**
-   * Create a new point chart
-   *
-   * @param canvas the canvas to draw this chart on. does not transfer ownership
-   */
-  PointChart3D(Canvas* canvas);
-
-  /**
-   * Create a new point chart
+   * Create a new line chart
    *
    * @param canvas the canvas to draw this chart on. does not transfer ownership
    * @param x_domain the x domain. does not transfer ownership
    * @param y_domain the y domain. does not transfer ownership
    */
-  PointChart3D(Canvas* canvas, AnyDomain* x_domain, AnyDomain* y_domain);
+  LineChart2D(Canvas* canvas);
 
   /**
+   * Create a new line chart
+   *
+   * @param canvas the canvas to draw this chart on. does not transfer ownership
+   * @param x_domain the x domain. does not transfer ownership
+   * @param y_domain the y domain. does not transfer ownership
    */
-  void addSeries(Series3D<TX, TY, TZ>* series);
+  LineChart2D(Canvas* canvas, AnyDomain* x_domain, AnyDomain* y_domain);
+
+  /**
+   * Add a (x: string, y: double) series. This will draw one connected line
+   * through all points in the series
+   *
+   * @param series the series to add. does not transfer ownership
+   * @param line_width the line widht
+   * @param smooth smooth this line?
+   * @param line_style the line style ({solid,dashed})
+   */
+  void addSeries(Series2D<TX, TY>* series);
 
   /**
    * Add an axis to the chart. This method should only be called after all
@@ -120,69 +136,29 @@ protected:
 
   DomainProvider x_domain_;
   DomainProvider y_domain_;
-  std::vector<Series3D<TX, TY, TZ>*> series_;
+  std::vector<Series2D<TX, TY>*> series_;
   ColorPalette color_palette_;
 };
 
-template <typename TX_, typename TY_>
-class PointChart2D : public PointChart3D<TX_, TY_, double> {
-public:
-  typedef TX_ TX;
-  typedef TY_ TY;
+template <typename TX, typename TY>
+LineChart2D<TX, TY>::LineChart2D(Canvas* canvas) : LineChart(canvas) {}
 
-  /**
-   * Create a new point chart
-   *
-   * @param canvas the canvas to draw this chart on. does not transfer ownership
-   */
-  PointChart2D(Canvas* canvas);
-
-  /**
-   * Create a new point chart
-   *
-   * @param canvas the canvas to draw this chart on. does not transfer ownership
-   * @param x_domain the x domain. does not transfer ownership
-   * @param y_domain the y domain. does not transfer ownership
-   */
-  PointChart2D(Canvas* canvas, AnyDomain* x_domain, AnyDomain* y_domain);
-
-  /**
-   * Add a (x: string, y: double) series. This will draw one bar for each point
-   * in the series where x is the label of the bar and y is the height of the
-   * bar
-   *
-   * @param series the series to add. does not transfer ownership
-   */
-  void addSeries(Series2D<TX, TY>* series);
-
-};
-
-template <typename TX, typename TY, typename TZ>
-PointChart3D<TX, TY, TZ>::PointChart3D(Canvas* canvas) : PointChart(canvas) {}
-
-template <typename TX, typename TY, typename TZ>
-PointChart3D<TX, TY, TZ>::PointChart3D(
+template <typename TX, typename TY>
+LineChart2D<TX, TY>::LineChart2D(
     Canvas* canvas,
     AnyDomain* x_domain,
     AnyDomain* y_domain) :
-    PointChart(canvas) {
+    LineChart(canvas) {
   x_domain_.reset(x_domain);
   y_domain_.reset(y_domain);
 }
 
-template <typename TX, typename TY, typename TZ>
-void PointChart3D<TX, TY, TZ>::addSeries(Series3D<TX, TY, TZ>* series) {
+template <typename TX, typename TY>
+void LineChart2D<TX, TY>::addSeries(Series2D<TX, TY>* series) {
   Domain<TX>* x_domain;
   if (x_domain_.empty()) {
     x_domain = Domain<TX>::mkDomain();
     x_domain_.reset(x_domain, true);
-
-    auto cont = dynamic_cast<AnyContinuousDomain*>(x_domain);
-    if (cont != nullptr) {
-      cont->setPadding(
-          AnyDomain::kDefaultDomainPadding,
-          AnyDomain::kDefaultDomainPadding);
-    }
   } else {
     x_domain = x_domain_.getAs<Domain<TX>>();
   }
@@ -214,14 +190,26 @@ void PointChart3D<TX, TY, TZ>::addSeries(Series3D<TX, TY, TZ>* series) {
   }
 
   series->setDefaultProperty(
+      Series::P_LINE_STYLE,
+      LineChart::kDefaultLineStyle);
+
+  series->setDefaultProperty(
+      Series::P_LINE_WIDTH,
+      LineChart::kDefaultLineWidth);
+
+  series->setDefaultProperty(
       Series::P_POINT_STYLE,
-      PointChart::kDefaultPointStyle);
+      LineChart::kDefaultPointStyle);
+
+  series->setDefaultProperty(
+      Series::P_POINT_SIZE,
+      LineChart::kDefaultPointSize);
 
   Drawable::addSeries(series);
 }
 
-template <typename TX, typename TY, typename TZ>
-void PointChart3D<TX, TY, TZ>::render(
+template <typename TX, typename TY>
+void LineChart2D<TX, TY>::render(
     RenderTarget* target,
     Viewport* viewport) const {
   if (x_domain_.get() == nullptr || y_domain_.get() == nullptr) {
@@ -231,13 +219,34 @@ void PointChart3D<TX, TY, TZ>::render(
   x_domain_.get()->build();
   y_domain_.get()->build();
 
-  target->beginGroup("points");
+  target->beginGroup("lines");
 
   for (const auto& series : series_) {
     std::vector<std::pair<double, double>> coords;
 
-    // FIXPAUL catch conversion excpetion
     auto point_style = series->getProperty(Series::P_POINT_STYLE);
+    double point_size;
+    auto line_style = series->getProperty(Series::P_LINE_STYLE);
+    double line_width;
+
+    try {
+      line_width = std::stod(series->getProperty(Series::P_LINE_WIDTH));
+    } catch (const std::exception& e) {
+      RAISE(
+          kRuntimeError,
+          "invalid line width: %s",
+          series->getProperty(Series::P_LINE_WIDTH).c_str());
+    }
+
+    try {
+      point_size = std::stod(series->getProperty(Series::P_POINT_SIZE));
+    } catch (const std::exception& e) {
+      RAISE(
+          kRuntimeError,
+          "invalid point size: %s",
+          series->getProperty(Series::P_POINT_SIZE).c_str());
+    }
+
     auto color = series->getProperty(Series::P_COLOR);
 
     for (const auto& point : series->getData()) {
@@ -251,7 +260,7 @@ void PointChart3D<TX, TY, TZ>::render(
         target->drawText(
             label,
             ss_x,
-            ss_y - point.z() - kLabelPadding,
+            ss_y - point_size - kLabelPadding,
             "middle",
             "text-after-edge",
             "label");
@@ -261,19 +270,29 @@ void PointChart3D<TX, TY, TZ>::render(
           ss_x,
           ss_y,
           point_style,
-          point.z(),
+          point_size,
           color,
           "point",
           label,
           series->name());
+
+      coords.emplace_back(ss_x, ss_y);
     }
+
+    target->drawPath(
+        coords,
+        line_style,
+        line_width,
+        false,
+        color,
+        "line");
   }
 
   target->finishGroup();
 }
 
-template <typename TX, typename TY, typename TZ>
-AxisDefinition* PointChart3D<TX, TY, TZ>::addAxis(
+template <typename TX, typename TY>
+AxisDefinition* LineChart2D<TX, TY>::addAxis(
     AxisDefinition::kPosition position) {
   auto axis = canvas_->addAxis(position);
 
@@ -298,8 +317,8 @@ AxisDefinition* PointChart3D<TX, TY, TZ>::addAxis(
   }
 }
 
-template <typename TX, typename TY, typename TZ>
-GridDefinition* PointChart3D<TX, TY, TZ>::addGrid(
+template <typename TX, typename TY>
+GridDefinition* LineChart2D<TX, TY>::addGrid(
     GridDefinition::kPlacement placement) {
   auto grid = canvas_->addGrid(placement);
 
@@ -316,9 +335,8 @@ GridDefinition* PointChart3D<TX, TY, TZ>::addGrid(
   }
 }
 
-template <typename TX, typename TY, typename TZ>
-AnyDomain* PointChart3D<TX, TY, TZ>::getDomain(
-    AnyDomain::kDimension dimension) {
+template <typename TX, typename TY>
+AnyDomain* LineChart2D<TX, TY>::getDomain(AnyDomain::kDimension dimension) {
   switch (dimension) {
     case AnyDomain::DIM_X:
       return x_domain_.get();
@@ -327,70 +345,9 @@ AnyDomain* PointChart3D<TX, TY, TZ>::getDomain(
       return y_domain_.get();
 
     case AnyDomain::DIM_Z:
-      RAISE(kRuntimeError, "PointChart3D does not have a Z domain");
+      RAISE(kRuntimeError, "LineChart2D does not have a Z domain");
       return nullptr;
   }
-}
-
-template <typename TX, typename TY>
-PointChart2D<TX, TY>::PointChart2D(
-    Canvas* canvas) :
-    PointChart3D<TX, TY, double>(canvas) {}
-
-template <typename TX, typename TY>
-PointChart2D<TX, TY>::PointChart2D(
-    Canvas* canvas,
-    AnyDomain* x_domain,
-    AnyDomain* y_domain) :
-    PointChart3D<TX, TY, double>(canvas, x_domain, y_domain) {}
-
-template <typename TX, typename TY>
-void PointChart2D<TX, TY>::addSeries(Series2D<TX, TY>* series) {
-  auto series3d = new Series3D<TX, TY, double>(); // FIXPAUL: never free'd!
-  auto copy_labels = series->hasProperty(Series::P_LABEL);
-
-  series->setDefaultProperty(
-      Series::P_POINT_SIZE,
-      PointChart::kDefaultPointSize);
-
-  // FIXPAUL copy point style
-  for (const auto& point : series->getData()) {
-    double point_size;
-    try {
-      point_size = std::stod(
-          series->getProperty(Series::P_POINT_SIZE, &point));
-    } catch (const std::exception& e) {
-      RAISE(
-          kRuntimeError,
-          "invalid point size: %s",
-          series->getProperty(Series::P_POINT_SIZE, &point).c_str());
-    }
-
-    series3d->addDatum(
-        Series::Coord<TX>(point.x()),
-        Series::Coord<TY>(point.y()),
-        Series::Coord<double>(point_size));
-
-    if (copy_labels) {
-      series3d->setProperty(
-          Series::P_LABEL,
-          &series3d->getData().back(),
-          series->getProperty(Series::P_LABEL, &point));
-    } else {
-        series3d->setProperty(
-          Series::P_LABEL,
-          &series3d->getData().back(),
-          series->labelFor(&point));
-    }
-  }
-
-  if (series->hasProperty(Series::P_COLOR)) {
-    series3d->setDefaultProperty(
-        Series::P_COLOR,
-        series->getProperty(Series::P_COLOR));
-  }
-
-  PointChart3D<TX, TY, double>::addSeries(series3d);
 }
 
 }

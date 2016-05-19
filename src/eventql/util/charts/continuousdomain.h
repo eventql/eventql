@@ -25,7 +25,7 @@
 #define _libstx_CONTINUOUSDOMAIN_H
 #include "eventql/util/exception.h"
 #include "eventql/util/stringutil.h"
-#include "cplot/domain.h"
+#include "eventql/util/charts/domain.h"
 
 namespace util {
 namespace chart {

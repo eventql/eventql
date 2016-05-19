@@ -24,13 +24,13 @@
 #ifndef _libstx_AREACHART_H
 #define _libstx_AREACHART_H
 #include <stdlib.h>
-#include "cplot/axisdefinition.h"
-#include "cplot/domain.h"
-#include "cplot/continuousdomain.h"
-#include "cplot/drawable.h"
-#include "cplot/canvas.h"
-#include "cplot/colorpalette.h"
-#include "cplot/rendertarget.h"
+#include "eventql/util/charts/axisdefinition.h"
+#include "eventql/util/charts/domain.h"
+#include "eventql/util/charts/continuousdomain.h"
+#include "eventql/util/charts/drawable.h"
+#include "eventql/util/charts/canvas.h"
+#include "eventql/util/charts/colorpalette.h"
+#include "eventql/util/charts/rendertarget.h"
 
 namespace util {
 namespace chart {

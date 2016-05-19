@@ -21,29 +21,37 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#ifndef _libstx_TIMEDOMAIN_H
-#define _libstx_TIMEDOMAIN_H
-#include "eventql/util/UnixTime.h"
-#include "cplot/continuousdomain.h"
+#ifndef _libstx_DOMAINPROVIDER_H
+#define _libstx_DOMAINPROVIDER_H
+#include <algorithm>
+#include <stdlib.h>
+#include <math.h>
+#include "eventql/util/charts/domain.h"
+#include "eventql/util/exception.h"
 
 namespace util {
 namespace chart {
 
-class TimeDomain : public ContinuousDomain<UnixTime> {
+class DomainProvider {
 public:
+  DomainProvider(AnyDomain* domain = nullptr);
+  ~DomainProvider();
 
-  TimeDomain(
-    UnixTime min_value =
-        std::numeric_limits<UnixTime>::max(),
-    UnixTime max_value =
-        std::numeric_limits<UnixTime>::min(),
-    bool is_logarithmic = false,
-    bool is_inverted = false);
+  AnyDomain* get() const;
+  template <typename T> T* getAs() const;
+  bool empty() const;
+  void reset(AnyDomain* domain, bool free_on_destroy = false);
 
-  std::string label(UnixTime value) const;
+  const std::vector<double> getTicks() const;
+  const std::vector<std::pair<double, std::string>> getLabels() const;
 
+protected:
+  AnyDomain* domain_;
+  bool free_on_destroy_;
 };
 
 }
 }
+
+#include "domainprovider_impl.h"
 #endif

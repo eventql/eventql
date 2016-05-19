@@ -26,9 +26,9 @@
 #include <assert.h>
 #include <unordered_map>
 #include <eventql/util/exception.h>
-#include <cplot/canvas.h>
-#include <cplot/barchart.h>
-#include <cplot/series.h>
+#include <eventql/util/charts/canvas.h>
+#include <eventql/util/charts/barchart.h>
+#include <eventql/util/charts/series.h>
 #include <eventql/sql/qtree/DrawStatementNode.h>
 #include <eventql/sql/runtime/compiler.h>
 #include <eventql/sql/runtime/vm.h>

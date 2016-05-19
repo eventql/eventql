@@ -25,11 +25,11 @@
 #define _libstx_DRAWABLE_H
 #include <tuple>
 #include <functional>
-#include "cplot/axisdefinition.h"
-#include "cplot/griddefinition.h"
-#include "cplot/legenddefinition.h"
-#include "cplot/series.h"
-#include "cplot/viewport.h"
+#include "eventql/util/charts/axisdefinition.h"
+#include "eventql/util/charts/griddefinition.h"
+#include "eventql/util/charts/legenddefinition.h"
+#include "eventql/util/charts/series.h"
+#include "eventql/util/charts/viewport.h"
 
 namespace util {
 namespace chart {

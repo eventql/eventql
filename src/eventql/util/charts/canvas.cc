@@ -22,10 +22,10 @@
  * code of your own applications
  */
 #include <stdlib.h>
-#include "cplot/canvas.h"
-#include "cplot/rendertarget.h"
-#include "cplot/domain.h"
-#include "cplot/svgtarget.h"
+#include "eventql/util/charts/canvas.h"
+#include "eventql/util/charts/rendertarget.h"
+#include "eventql/util/charts/domain.h"
+#include "eventql/util/charts/svgtarget.h"
 
 namespace util {
 namespace chart {

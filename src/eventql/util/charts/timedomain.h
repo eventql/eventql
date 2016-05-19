@@ -21,27 +21,29 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include "cplot/barchart.h"
+#ifndef _libstx_TIMEDOMAIN_H
+#define _libstx_TIMEDOMAIN_H
+#include "eventql/util/UnixTime.h"
+#include "eventql/util/charts/continuousdomain.h"
 
 namespace util {
 namespace chart {
 
-BarChart::BarChart(
-    chart::Canvas* canvas,
-    kBarChartOrientation orient /* = O_VERTICAL */,
-    bool stacked /* = false */) :
-    Drawable(canvas),
-    orientation_(orient),
-    stacked_(stacked),
-    show_labels_(false) {}
+class TimeDomain : public ContinuousDomain<UnixTime> {
+public:
 
-void BarChart::setOrientation(kBarChartOrientation orientation) {
-  orientation_ = orientation;
-}
+  TimeDomain(
+    UnixTime min_value =
+        std::numeric_limits<UnixTime>::max(),
+    UnixTime max_value =
+        std::numeric_limits<UnixTime>::min(),
+    bool is_logarithmic = false,
+    bool is_inverted = false);
 
-void BarChart::setLabels(bool show_labels) {
-  show_labels_ = show_labels;
-}
+  std::string label(UnixTime value) const;
+
+};
 
 }
 }
+#endif

@@ -21,58 +21,38 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include <string>
-#include "cplot/canvas.h"
-#include "cplot/drawable.h"
+#include "eventql/util/charts/domain.h"
+#include "eventql/util/charts/continuousdomain.h"
+#include "eventql/util/charts/discretedomain.h"
+#include "eventql/util/charts/timedomain.h"
 
+#include "eventql/eventql.h"
 namespace util {
 namespace chart {
 
-Drawable::Drawable(Canvas* canvas) : canvas_(canvas) {}
+const char AnyDomain::kDimensionLetters[] = "xyz";
+const int AnyDomain::kDefaultNumTicks = 8;
+const double AnyDomain::kDefaultDomainPadding = 0.1;
 
-Drawable::~Drawable() {
-  for (auto series : all_series_) {
-    delete series;
-  }
+template <> Domain<int64_t>*
+    Domain<int64_t>::mkDomain() {
+  return new ContinuousDomain<int64_t>();
 }
 
-void Drawable::setTitle(const std::string& title) {
-  canvas_->setTitle(title);
+template <> Domain<double>*
+    Domain<double>::mkDomain() {
+  return new ContinuousDomain<double>();
 }
 
-void Drawable::setSubtitle(const std::string& subtitle) {
-  canvas_->setSubtitle(subtitle);
+template <> Domain<UnixTime>*
+    Domain<UnixTime>::mkDomain() {
+  return new TimeDomain();
 }
 
-LegendDefinition* Drawable::addLegend(
-    LegendDefinition::kVerticalPosition vert_pos,
-    LegendDefinition::kHorizontalPosition horiz_pos,
-    LegendDefinition::kPlacement placement,
-    const std::string& title) {
-  auto legend = canvas_->addLegend(vert_pos, horiz_pos, placement, title);
-  updateLegend();
-  return legend;
-}
-
-void Drawable::addSeries(Series* series) {
-  all_series_.push_back(series);
-  updateLegend();
-}
-
-void Drawable::updateLegend() {
-  auto legend = canvas_->legend();
-
-  if (legend == nullptr) {
-    return;
-  }
-
-  for (const auto& series : all_series_) {
-    legend->addEntry(
-        series->name(),
-        series->getProperty(Series::P_COLOR),
-        "circle");
-  }
+template <> Domain<std::string>* Domain<std::string>::mkDomain() {
+  return new DiscreteDomain<std::string>();
 }
 
 }
 }
+

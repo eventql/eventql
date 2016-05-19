@@ -27,8 +27,8 @@
 #include <stdlib.h>
 #include <vector>
 #include <string>
-#include "cplot/rendertarget.h"
-#include "cplot/styles/style_default.h"
+#include "eventql/util/charts/rendertarget.h"
+#include "eventql/util/charts/styles/style_default.h"
 #include "eventql/util/io/outputstream.h"
 
 namespace util {

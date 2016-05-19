@@ -27,9 +27,9 @@
 #include <vector>
 #include <string>
 #include <tuple>
-#include "cplot/axisdefinition.h"
-#include "cplot/drawable.h"
-#include "cplot/legenddefinition.h"
+#include "eventql/util/charts/axisdefinition.h"
+#include "eventql/util/charts/drawable.h"
+#include "eventql/util/charts/legenddefinition.h"
 
 namespace util {
 namespace chart {

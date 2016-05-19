@@ -21,33 +21,26 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include "eventql/util/UnixTime.h"
-#include "cplot/timedomain.h"
+#include "eventql/util/charts/barchart.h"
 
 namespace util {
 namespace chart {
 
-TimeDomain::TimeDomain(
-    UnixTime min_value,
-    UnixTime max_value,
-    bool is_logarithmic,
-    bool is_inverted) :
-    ContinuousDomain<UnixTime>(
-        min_value,
-        max_value,
-        is_logarithmic,
-        is_inverted) {}
+BarChart::BarChart(
+    chart::Canvas* canvas,
+    kBarChartOrientation orient /* = O_VERTICAL */,
+    bool stacked /* = false */) :
+    Drawable(canvas),
+    orientation_(orient),
+    stacked_(stacked),
+    show_labels_(false) {}
 
-std::string TimeDomain::label(UnixTime value) const {
-  auto range = ContinuousDomain<UnixTime>::getRange();
+void BarChart::setOrientation(kBarChartOrientation orientation) {
+  orientation_ = orientation;
+}
 
-  if (range < 60 * 60) {
-    return value.toString("%H:%M:%S");
-  } else if (range < 60 * 60 * 24) {
-    return value.toString("%H:%M");
-  } else {
-    return value.toString("%Y-%m-%d %H:%M");
-  }
+void BarChart::setLabels(bool show_labels) {
+  show_labels_ = show_labels;
 }
 
 }

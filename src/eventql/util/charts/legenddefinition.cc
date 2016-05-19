@@ -21,58 +21,50 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include "cplot/domainprovider.h"
+#include "eventql/util/charts/legenddefinition.h"
 
 namespace util {
 namespace chart {
 
-DomainProvider::DomainProvider(
-    AnyDomain* domain /* = nullptr */) :
-    domain_(domain),
-    free_on_destroy_(false) {};
+LegendDefinition::LegendDefinition(
+    kVerticalPosition vert_pos,
+    kHorizontalPosition horiz_pos,
+    kPlacement placement,
+    const std::string& title) :
+    vert_pos_(vert_pos),
+    horiz_pos_(horiz_pos),
+    placement_(placement),
+    title_ (title) {}
 
-DomainProvider::~DomainProvider() {
-  if (free_on_destroy_) {
-    delete domain_;
-  }
+const std::string LegendDefinition::title() const {
+  return title_;
 }
 
-AnyDomain* DomainProvider::get() const {
-  return domain_;
+LegendDefinition::kVerticalPosition LegendDefinition::verticalPosition() 
+    const {
+  return vert_pos_;
 }
 
-bool DomainProvider::empty() const {
-  return domain_ == nullptr;
+LegendDefinition::kHorizontalPosition LegendDefinition::horizontalPosition() 
+    const {
+  return horiz_pos_;
 }
 
-void DomainProvider::reset(
-    AnyDomain* domain,
-    bool free_on_destroy /* = false */) {
-  if (free_on_destroy_) {
-    delete domain_;
-  }
-
-  domain_ = domain;
-  free_on_destroy_ = free_on_destroy;
+LegendDefinition::kPlacement LegendDefinition::placement() const {
+  return placement_;
 }
 
-const std::vector<double> DomainProvider::getTicks() const {
-  if (empty()) {
-    return std::vector<double>{};
-  } else {
-    return domain_->getTicks();
-  }
+void LegendDefinition::addEntry(
+    const std::string& name,
+    const std::string& color,
+    const std::string& shape /* = "circle" */) {
+  entries_.emplace_back(name, color, shape);
 }
 
-const std::vector<std::pair<double, std::string>>
-    DomainProvider::getLabels() const {
-  if (empty()) {
-    return std::vector<std::pair<double, std::string>>{};
-  } else {
-    return domain_->getLabels();
-  }
+const std::vector<std::tuple<std::string, std::string, std::string>>
+    LegendDefinition::entries() const {
+  return entries_;
 }
-
 
 }
 }

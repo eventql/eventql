@@ -23,8 +23,8 @@
  */
 #ifndef _libstx_UI_GRIDDEFINITION_H
 #define _libstx_UI_GRIDDEFINITION_H
-#include "cplot/domain.h"
-#include "cplot/domainprovider.h"
+#include "eventql/util/charts/domain.h"
+#include "eventql/util/charts/domainprovider.h"
 
 namespace util {
 namespace chart {

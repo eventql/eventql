@@ -22,7 +22,7 @@
  * code of your own applications
  */
 #include <eventql/sql/extensions/chartsql/barchartbuilder.h>
-#include <cplot/barchart.h>
+#include <eventql/util/charts/barchart.h>
 
 namespace csql {
 

@@ -22,7 +22,7 @@
  * code of your own applications
  */
 #include <eventql/sql/extensions/chartsql/areachartbuilder.h>
-#include <cplot/areachart.h>
+#include <eventql/util/charts/areachart.h>
 
 namespace csql {
 

@@ -21,31 +21,58 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include "cplot/griddefinition.h"
+#include "eventql/util/charts/domainprovider.h"
 
 namespace util {
 namespace chart {
 
-GridDefinition::GridDefinition(
-    kPlacement placement) :
-    placement_(placement),
-    domain_(nullptr) {}
+DomainProvider::DomainProvider(
+    AnyDomain* domain /* = nullptr */) :
+    domain_(domain),
+    free_on_destroy_(false) {};
 
-void GridDefinition::setDomain(DomainProvider* domain) {
-  domain_ = domain;
-}
-
-GridDefinition::kPlacement GridDefinition::placement() const {
-  return placement_;
-}
-
-const std::vector<double> GridDefinition::ticks() const {
-  if (domain_ == nullptr || domain_->empty()) {
-    return std::vector<double>();
-  } else {
-    return domain_->get()->getTicks();
+DomainProvider::~DomainProvider() {
+  if (free_on_destroy_) {
+    delete domain_;
   }
 }
+
+AnyDomain* DomainProvider::get() const {
+  return domain_;
+}
+
+bool DomainProvider::empty() const {
+  return domain_ == nullptr;
+}
+
+void DomainProvider::reset(
+    AnyDomain* domain,
+    bool free_on_destroy /* = false */) {
+  if (free_on_destroy_) {
+    delete domain_;
+  }
+
+  domain_ = domain;
+  free_on_destroy_ = free_on_destroy;
+}
+
+const std::vector<double> DomainProvider::getTicks() const {
+  if (empty()) {
+    return std::vector<double>{};
+  } else {
+    return domain_->getTicks();
+  }
+}
+
+const std::vector<std::pair<double, std::string>>
+    DomainProvider::getLabels() const {
+  if (empty()) {
+    return std::vector<std::pair<double, std::string>>{};
+  } else {
+    return domain_->getLabels();
+  }
+}
+
 
 }
 }
