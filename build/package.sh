@@ -16,6 +16,6 @@ if [[ -z "$TARGET_LBL" ]]; then
   exit 1
 fi
 
-mkdir -p $PKG_DIR $TMP_DIR/$PKG_NAME-$TARGET_LBL
+mkdir -p $PKG_DIR $TMP_DIR/$PKG_NAME
 cp -R $DIST_DIR/* $TMP_DIR
-tar cz -C $TMP_DIR $PKG_NAME-$TARGET_LBL > $PKG_DIR/$PKG_NAME-$TARGET_LBL.tgz
+tar cz -C $TMP_DIR $PKG_NAME > $PKG_DIR/$PKG_NAME-$TARGET_LBL.tgz
