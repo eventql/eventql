@@ -150,18 +150,18 @@ void PipelinedExpression::executeLocal(const QuerySpec& query) {
 void PipelinedExpression::executeRemote(const QuerySpec& query) {
   size_t row_ctr = 0;
 
-  for (const auto& host : query.hosts) {
+  for (size_t i = 0; i < query.hosts.size(); ++i) {
     try {
-      executeOnHost(query.qtree, host.addr, &row_ctr);
+      executeOnHost(query.qtree, query.hosts[i].addr, &row_ctr);
       break;
     } catch (const StandardException& e) {
       logError(
           "eventql",
           e,
           "PipelinedExpression::executeOnHost failed @ $0",
-          host.addr.hostAndPort());
+          query.hosts[i].addr.hostAndPort());
 
-      if (row_ctr > 0) {
+      if (row_ctr > 0 || i + 1 == query.hosts.size()) {
         throw e;
       }
     }
