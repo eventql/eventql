@@ -2,6 +2,7 @@
  * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
  * Authors:
  *   - Paul Asmuth <paul@zscale.io>
+ *   - Laura Schlimmer <laura@zscale.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -116,8 +117,9 @@ void ResultList::debugPrint(OutputStream* os) const {
   auto print_row = [this, os, &col_widths] (const std::vector<std::string>& row) {
     for (int n = 0; n < columns_.size(); ++n) {
       auto val = n < row.size() ? row[n] : String("NULL");
+      auto val_len = StringUtil::countUTF8CodePoints(val);
       os->printf("| %s", val.c_str());
-      for (int i = col_widths[n] - val.size() - 3; i >= 0; --i) {
+      for (int i = col_widths[n] - val_len - 3; i >= 0; --i) {
         os->printf(" ");
       }
     }
