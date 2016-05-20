@@ -227,6 +227,11 @@ evql_cstable_SOURCES = \
     eventql/io/cstable/CSTableReader.h \
     eventql/io/cstable/CSTableWriter.cc \
     eventql/io/cstable/CSTableWriter.h \
+    eventql/io/cstable/LockManager.h \
+    eventql/io/cstable/columns/UInt64ColumnWriter.h \
+    eventql/io/cstable/columns/v1/ColumnReader.h \
+    eventql/io/cstable/io/PageReader.h \
+    eventql/io/cstable/io/PageWriter.h \
     eventql/io/cstable/ColumnReader.cc \
     eventql/io/cstable/ColumnReader.h \
     eventql/io/cstable/ColumnWriter.cc \
@@ -289,6 +294,10 @@ evql_sstable_SOURCES = \
     eventql/io/sstable/MetaPage.h \
     eventql/io/sstable/RowWriter.cc \
     eventql/io/sstable/RowWriter.h \
+    eventql/io/sstable/SSTableEditor_impl.h \
+    eventql/io/sstable/SSTableServlet.cc \
+    eventql/io/sstable/SSTableServlet.h \
+    eventql/io/sstable/binaryformat.h \
     eventql/io/sstable/SSTableColumnReader.cc \
     eventql/io/sstable/SSTableColumnReader.h \
     eventql/io/sstable/SSTableColumnSchema.cc \
@@ -458,6 +467,9 @@ evql_util_SOURCES = \
     eventql/util/json/jsondocument_impl.h \
     eventql/util/json/jsoninputstream.cc \
     eventql/util/json/jsoninputstream.h \
+    eventql/util/json/JSONRPCCodec.h \
+    eventql/util/json/JSONRPCCodec_impl.h \
+    eventql/util/json/jsonargumentlist.h \
     eventql/util/json/jsonoutputstream.cc \
     eventql/util/json/jsonoutputstream.h \
     eventql/util/json/jsonoutputstream_impl.h \
@@ -512,6 +524,10 @@ evql_util_SOURCES = \
     eventql/util/protobuf/DynamicMessage.cc \
     eventql/util/protobuf/DynamicMessage.h \
     eventql/util/protobuf/JSONEncoder.cc \
+    eventql/util/protobuf/MessageBuilder.cc \
+    eventql/util/protobuf/MessageBuilder.h \
+    eventql/util/protobuf/ProtoRef.h \
+    eventql/util/protobuf/ProtoRef_impl.h \
     eventql/util/protobuf/JSONEncoder.h \
     eventql/util/protobuf/MessageDecoder.cc \
     eventql/util/protobuf/MessageDecoder.h \
@@ -535,6 +551,11 @@ evql_util_SOURCES = \
     eventql/util/rpc/RPCService_impl.h \
     eventql/util/rpc/RPCStub.cc \
     eventql/util/rpc/RPCStub.h \
+    eventql/util/rpc/RPC.cc \
+    eventql/util/rpc/RPCClient.cc \
+    eventql/util/rpc/RPCClient.h \
+    eventql/util/rpc/ServerGroup.cc \
+    eventql/util/rpc/ServerGroup.h \
     eventql/util/rpc/RPC.h \
     eventql/util/rpc/RPC_impl.h \
     eventql/util/stats/counter.h \
@@ -576,7 +597,11 @@ evql_util_SOURCES = \
     eventql/util/thread/future.h \
     eventql/util/thread/queue.h \
     eventql/util/thread/queue_impl.h \
-    eventql/util/thread/wakeup_impl.h \
+    eventql/util/thread/CoalescingDelayedQueue.h \
+    eventql/util/thread/CoalescingDelayedQueue_impl.h \
+    eventql/util/thread/DelayedQueue.h \
+    eventql/util/thread/DelayedQueue_impl.h \
+    eventql/util/thread/future_impl.h \
     eventql/util/time_constants.h \
     eventql/util/uri.cc \
     eventql/util/uri.h \
@@ -597,6 +622,15 @@ evql_util_SOURCES = \
     eventql/util/util/binarymessagereader_impl.h \
     eventql/util/util/binarymessagewriter.cc \
     eventql/util/util/binarymessagewriter.h \
+    eventql/util/MonotonicClock.cc \
+    eventql/util/MonotonicClock.h \
+    eventql/util/MonotonicTime.cc \
+    eventql/util/MonotonicTime.h \
+    eventql/util/MonotonicTime_impl.h \
+    eventql/util/RadixTree.h \
+    eventql/util/RadixTree_impl.h \
+    eventql/util/TimeRange.h \
+    eventql/util/TimeRange_impl.h \
     eventql/util/VFSFile.h \
     eventql/util/wallclock.cc \
     eventql/util/wallclock.h \
@@ -611,6 +645,8 @@ evql_http_SOURCES = \
     eventql/util/http/HTTPResponseStream.cc \
     eventql/util/http/HTTPResponseStream.h \
     eventql/util/http/HTTPSSEParser.cc \
+    eventql/util/http/httpconnectionhandler.h \
+    eventql/util/http/httpserver_example.cc \
     eventql/util/http/HTTPSSEParser.h \
     eventql/util/http/HTTPSSEResponseHandler.cc \
     eventql/util/http/HTTPSSEResponseHandler.h \
@@ -685,6 +721,18 @@ evqld_SOURCES = \
     eventql/JavaScriptContext.h \
     eventql/LogfileScanResult.cc \
     eventql/LogfileScanResult.h \
+    eventql/config/namespace_config.cc \
+    eventql/config/namespace_config.h \
+    eventql/db/DerivedDataset.cc \
+    eventql/db/DerivedDataset.h \
+    eventql/db/PartitionChangeNotification.h \
+    eventql/db/RecordRef.h \
+    eventql/db/ServerConfig.h \
+    eventql/db/TSDBTableInfo.h \
+    eventql/db/TSDBTableScan.h \
+    eventql/db/TSDBTableScan_impl.h \
+    eventql/db/TSDBTableScanlet.h \
+    eventql/db/TablePartitioner.h \
     eventql/config/config_directory.cc \
     eventql/config/config_directory.h \
     eventql/db/CompactionStrategy.cc \
@@ -813,6 +861,8 @@ evqld_SOURCES = \
     eventql/transport/http/status_servlet.h \
     eventql/util/mdb/MDB.cc \
     eventql/util/mdb/MDB.h \
+    eventql/util/mdb/MDBUtil.h \
+    eventql/util/mdb/MDBUtil_impl.h \
     eventql/util/mdb/MDBCursor.cc \
     eventql/util/mdb/MDBCursor.h \
     eventql/util/mdb/MDBTransaction.cc \
@@ -842,6 +892,12 @@ evqld_LDFLAGS = \
 
 dist_noinst_DATA = $(evql_protos)
 BUILT_SOURCES = $(evql_protos:.proto=.pb.h)
+
+EXTRA_DIST = \
+  eventql/util/assets.sh \
+  eventql/util/charts/testdata \
+  eventql/sql/testdata \
+  eventql/mapreduce/prelude.js
 
 %.pb.cc %.pb.h: %.proto
 	$(top_builddir)/deps/3rdparty/protobuf/protoc --proto_path=$(srcdir) --cpp_out=$(builddir) $^
