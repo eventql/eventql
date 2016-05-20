@@ -566,7 +566,6 @@ evql_util_SOURCES = \
     eventql/util/stats/stats.h \
     eventql/util/stats/statsd.cc \
     eventql/util/stats/statsd.h \
-    eventql/util/stats/statsd_test.cc \
     eventql/util/stats/statsdagent.cc \
     eventql/util/stats/statsdagent.h \
     eventql/util/stats/statsrepository.cc \
@@ -644,7 +643,6 @@ evql_http_SOURCES = \
     eventql/util/http/HTTPResponseStream.h \
     eventql/util/http/HTTPSSEParser.cc \
     eventql/util/http/httpconnectionhandler.h \
-    eventql/util/http/httpserver_example.cc \
     eventql/util/http/HTTPSSEParser.h \
     eventql/util/http/HTTPSSEResponseHandler.cc \
     eventql/util/http/HTTPSSEResponseHandler.h \
