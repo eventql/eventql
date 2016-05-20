@@ -11,7 +11,7 @@ PTHREAD_DEF = -DHAVE_PTHREAD=1
 else
 PTHREAD_DEF =
 endif
-COMMON_CFLAGS=
+
 AM_CXXFLAGS = $(PTHREAD_CFLAGS) $(PTHREAD_DEF) $(ZLIB_DEF) -DHAVE_PCRE=1 -std=c++0x -ftemplate-depth=500 -mno-omit-leaf-frame-pointer -fno-omit-frame-pointer -Wall -Wextra -Wno-unused-parameter -Wno-sign-compare -Wdelete-non-virtual-dtor -Wno-predefined-identifier-outside-function -O3 -g
 AM_CFLAGS = $(PTHREAD_CFLAGS) $(PTHREAD_DEF) $(ZLIB_DEF) -DHAVE_PCRE=1 -std=c11 -mno-omit-leaf-frame-pointer -fno-omit-frame-pointer -Wall -pedantic -O3 -g
 AM_LDFLAGS = $(PTHREAD_CFLAGS)
@@ -19,8 +19,8 @@ AM_LDFLAGS = $(PTHREAD_CFLAGS)
 MAINTAINERCLEANFILES =   \
   Makefile.in
 
-#bin_PROGRAMS = evql evqld
-lib_LIBRARIES = libsql.a
+bin_PROGRAMS = evql
+lib_LIBRARIES = libsql.a libcstable.a libsstable.a
 
 libsql_a_SOURCES = \
     eventql/sql/svalue.cc \
@@ -103,6 +103,58 @@ libsql_a_SOURCES = \
     eventql/sql/scheduler.cc \
     eventql/sql/defaults.cc
 
-#protoc_LDADD = $(PTHREAD_LIBS) libprotobuf.la libprotoc.la
-#protoc_SOURCES = google/protobuf/compiler/main.cc
+libcstable_a_SOURCES = \
+    eventql/io/cstable/cstable.cc \
+    eventql/io/cstable/columns/BitPackedIntPageWriter.cc \
+    eventql/io/cstable/columns/UInt64PageWriter.cc \
+    eventql/io/cstable/columns/UInt64PageReader.cc \
+    eventql/io/cstable/columns/UnsignedIntColumnWriter.cc \
+    eventql/io/cstable/columns/UnsignedIntColumnReader.cc \
+    eventql/io/cstable/columns/v1/BitPackedIntColumnReader.cc \
+    eventql/io/cstable/columns/v1/BitPackedIntColumnWriter.cc \
+    eventql/io/cstable/columns/v1/BooleanColumnReader.cc \
+    eventql/io/cstable/columns/v1/BooleanColumnWriter.cc \
+    eventql/io/cstable/columns/v1/ColumnWriter.cc \
+    eventql/io/cstable/columns/v1/DoubleColumnReader.cc \
+    eventql/io/cstable/columns/v1/DoubleColumnWriter.cc \
+    eventql/io/cstable/columns/v1/LEB128ColumnReader.cc \
+    eventql/io/cstable/columns/v1/LEB128ColumnWriter.cc \
+    eventql/io/cstable/columns/v1/StringColumnReader.cc \
+    eventql/io/cstable/columns/v1/StringColumnWriter.cc \
+    eventql/io/cstable/columns/v1/UInt32ColumnReader.cc \
+    eventql/io/cstable/columns/v1/UInt32ColumnWriter.cc \
+    eventql/io/cstable/columns/v1/UInt64ColumnReader.cc \
+    eventql/io/cstable/columns/v1/UInt64ColumnWriter.cc \
+    eventql/io/cstable/io/PageManager.cc \
+    eventql/io/cstable/io/PageIndex.cc \
+    eventql/io/cstable/ColumnWriter.cc \
+    eventql/io/cstable/ColumnReader.cc \
+    eventql/io/cstable/CSTableReader.cc \
+    eventql/io/cstable/CSTableWriter.cc \
+    eventql/io/cstable/RecordMaterializer.cc \
+    eventql/io/cstable/RecordShredder.cc \
+    eventql/io/cstable/TableSchema.cc \
+    eventql/io/cstable/CSTableWriter.cc
 
+libsstable_a_SOURCES = \
+    eventql/io/sstable/cursor.cc \
+    eventql/io/sstable/MetaPage.cc \
+    eventql/io/sstable/fileheaderreader.cc \
+    eventql/io/sstable/fileheaderwriter.cc \
+    eventql/io/sstable/index.cc \
+    eventql/io/sstable/indexprovider.cc \
+    eventql/io/sstable/rowoffsetindex.cc \
+    eventql/io/sstable/RowWriter.cc \
+    eventql/io/sstable/sstablereader.cc \
+    eventql/io/sstable/sstablerepair.cc \
+    eventql/io/sstable/SSTableEditor.cc \
+    eventql/io/sstable/SSTableScan.cc \
+    eventql/io/sstable/SSTableColumnSchema.cc \
+    eventql/io/sstable/SSTableColumnReader.cc \
+    eventql/io/sstable/SSTableColumnWriter.cc \
+    eventql/io/sstable/SSTableWriter.cc
+
+evql_SOURCES = \
+    eventql/cli/console.cc \
+    eventql/server/sql/codec/binary_codec.cc \
+    eventql/evql.cc
