@@ -251,8 +251,34 @@ evql_util_SOURCES = \
     eventql/util/wallclock.cc \
     eventql/util/web/SecureCookie.cc
 
+evql_http_SOURCES = \
+    eventql/util/http/HTTPFileDownload.cc \
+    eventql/util/http/HTTPRequestStream.cc \
+    eventql/util/http/HTTPResponseStream.cc \
+    eventql/util/http/HTTPSSEParser.cc \
+    eventql/util/http/HTTPSSEResponseHandler.cc \
+    eventql/util/http/HTTPSSEStream.cc \
+    eventql/util/http/VFSFileServlet.cc \
+    eventql/util/http/cookies.cc \
+    eventql/util/http/http_test.cc \
+    eventql/util/http/httpclient.cc \
+    eventql/util/http/httpclientconnection.cc \
+    eventql/util/http/httpconnectionpool.cc \
+    eventql/util/http/httpgenerator.cc \
+    eventql/util/http/httpmessage.cc \
+    eventql/util/http/httpparser.cc \
+    eventql/util/http/httprequest.cc \
+    eventql/util/http/httpresponse.cc \
+    eventql/util/http/httpresponsefuture.cc \
+    eventql/util/http/httprouter.cc \
+    eventql/util/http/httpserver.cc \
+    eventql/util/http/httpserverconnection.cc \
+    eventql/util/http/httpservice.cc \
+    eventql/util/http/statshttpservlet.cc
+
 evql_SOURCES = \
     ${evql_util_SOURCES} \
+    ${evql_http_SOURCES} \
     eventql/cli/console.cc \
     eventql/server/sql/codec/binary_codec.cc \
     eventql/evql.cc
