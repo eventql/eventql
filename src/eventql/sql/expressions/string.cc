@@ -66,7 +66,7 @@ void lowerCaseExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
   *out = SValue(val);
 }
 
-void substrExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
+void subStringExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
   if (argc < 2 || argc > 3) {
     RAISEF(
         kRuntimeError,

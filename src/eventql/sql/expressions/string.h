@@ -36,7 +36,7 @@ void upperCaseExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out);
 
 void lowerCaseExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out);
 
-void substrExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out);
+void subStringExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out);
 
 }
 }
