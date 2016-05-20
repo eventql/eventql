@@ -11,6 +11,7 @@ AC_CONFIG_SRCDIR([configure.ac])
 # Check for build env
 AC_PROG_CC
 AC_PROG_CXX
+AX_PROG_CXX_FOR_BUILD
 AC_PROG_RANLIB
 
 # Check for header files

@@ -34,9 +34,8 @@ MAINTAINERCLEANFILES =   \
   Makefile.in
 
 bin_PROGRAMS = evql
-lib_LIBRARIES = libsql.a libcstable.a libsstable.a
 
-libsql_a_SOURCES = \
+evql_sql_SOURCES = \
     eventql/sql/svalue.cc \
     eventql/sql/SFunction.cc \
     eventql/sql/format.cc \
@@ -117,7 +116,7 @@ libsql_a_SOURCES = \
     eventql/sql/scheduler.cc \
     eventql/sql/defaults.cc
 
-libcstable_a_SOURCES = \
+evql_cstable_SOURCES = \
     eventql/io/cstable/cstable.cc \
     eventql/io/cstable/columns/BitPackedIntPageWriter.cc \
     eventql/io/cstable/columns/UInt64PageWriter.cc \
@@ -150,7 +149,7 @@ libcstable_a_SOURCES = \
     eventql/io/cstable/TableSchema.cc \
     eventql/io/cstable/CSTableWriter.cc
 
-libsstable_a_SOURCES = \
+evql_sstable_SOURCES = \
     eventql/io/sstable/cursor.cc \
     eventql/io/sstable/MetaPage.cc \
     eventql/io/sstable/fileheaderreader.cc \
@@ -289,11 +288,11 @@ evql_http_SOURCES = \
 evql_SOURCES = \
     ${evql_util_SOURCES} \
     ${evql_http_SOURCES} \
+    ${evql_sql_SOURCES} \
     eventql/cli/console.cc \
     eventql/server/sql/codec/binary_codec.cc \
     eventql/evql.cc
 
 evql_LDFLAGS = \
-    libsql.a \
     ${top_builddir}/deps/3rdparty/linenoise/liblinenoise.a \
     ${top_builddir}/deps/3rdparty/libsimdcomp/libsimdcomp.a

@@ -3,13 +3,11 @@
 ACLOCAL_AMFLAGS = -I m4
 AUTOMAKE_OPTIONS = foreign
 
-SUBDIRS = . deps/3rdparty/linenoise deps/3rdparty/libsimdcomp src
-
-check-local:
-	@true
-
-clean-local:
-	@true
+SUBDIRS = \
+    . \
+    deps/3rdparty/linenoise \
+    deps/3rdparty/libsimdcomp \
+    src
 
 EXTRA_DIST =                             \
   autogen.sh                             \
