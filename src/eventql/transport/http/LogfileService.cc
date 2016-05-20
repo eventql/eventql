@@ -94,16 +94,17 @@ void LogfileService::insertLoglines(
   HashMap<size_t, LogfileField> match_fields;
   size_t time_idx = -1;
   String time_format;
-  for (const auto& f : logfile.row_fields()) {
-    auto match_idx = regex.getNamedCaptureIndex(f.name());
-    if (match_idx != size_t(-1)) {
-      match_fields.emplace(match_idx, f);
-      if (f.name() == "time") {
-        time_idx = match_idx;
-        time_format = f.format();
-      }
-    }
-  }
+	RAISE(kNotYetImplementedError);
+  //for (const auto& f : logfile.row_fields()) {
+  //  auto match_idx = regex.getNamedCaptureIndex(f.name());
+  //  if (match_idx != size_t(-1)) {
+  //    match_fields.emplace(match_idx, f);
+  //    if (f.name() == "time") {
+  //      time_idx = match_idx;
+  //      time_format = f.format();
+  //    }
+  //  }
+  //}
 
   if (time_idx == size_t(-1)) {
     RAISE(kIllegalStateError, "can't import logfile row without time column");
@@ -112,90 +113,90 @@ void LogfileService::insertLoglines(
   Vector<RecordEnvelope> records;
   static const size_t kInsertBatchSize = 1024;
 
-  for (; is->readLine(&line); line.clear()) {
-    Vector<Pair<const char*, size_t>> match;
-    if (!regex.match(line, &match)) {
-      logTrace(
-          "z1.logs",
-          "Dropping logline for logfile '$0/$1' because it does not match " \
-          "the parsing regex: $2",
-          customer,
-          logfile.name(),
-          line);
+  //for (; is->readLine(&line); line.clear()) {
+  //  Vector<Pair<const char*, size_t>> match;
+  //  if (!regex.match(line, &match)) {
+  //    logTrace(
+  //        "z1.logs",
+  //        "Dropping logline for logfile '$0/$1' because it does not match " \
+  //        "the parsing regex: $2",
+  //        customer,
+  //        logfile.name(),
+  //        line);
 
-      continue;
-    }
+  //    continue;
+  //  }
 
-    Option<UnixTime> time;
-    if (time_format.empty()) {
-      time = Human::parseTime(
-          String(match[time_idx].first, match[time_idx].second));
-    } else {
-      time = UnixTime::parseString(
-          match[time_idx].first,
-          match[time_idx].second,
-          time_format.c_str());
-    }
+  //  Option<UnixTime> time;
+  //  if (time_format.empty()) {
+  //    time = Human::parseTime(
+  //        String(match[time_idx].first, match[time_idx].second));
+  //  } else {
+  //    time = UnixTime::parseString(
+  //        match[time_idx].first,
+  //        match[time_idx].second,
+  //        time_format.c_str());
+  //  }
 
-    if (time.isEmpty()) {
-      logTrace(
-          "z1.logs",
-          "Dropping logline for logfile '$0/$1' because it does not have a " \
-          "'time' column: $2",
-          customer,
-          logfile.name(),
-          line);
+  //  if (time.isEmpty()) {
+  //    logTrace(
+  //        "z1.logs",
+  //        "Dropping logline for logfile '$0/$1' because it does not have a " \
+  //        "'time' column: $2",
+  //        customer,
+  //        logfile.name(),
+  //        line);
 
-      continue;
-    }
+  //    continue;
+  //  }
 
-    auto row = row_base;
-    row.addField("raw", line);
+  //  auto row = row_base;
+  //  row.addField("raw", line);
 
-    for (size_t i = 0; i < match.size(); ++i) {
-      auto mfield = match_fields.find(i);
-      if (mfield == match_fields.end()) {
-        continue;
-      }
+  //  for (size_t i = 0; i < match.size(); ++i) {
+  //    auto mfield = match_fields.find(i);
+  //    if (mfield == match_fields.end()) {
+  //      continue;
+  //    }
 
-      if (mfield->second.has_format() &&
-          mfield->second.type() == "DATETIME") {
-        auto t = UnixTime::parseString(
-            match[i].first,
-            match[i].second,
-            mfield->second.format().c_str());
+  //    if (mfield->second.has_format() &&
+  //        mfield->second.type() == "DATETIME") {
+  //      auto t = UnixTime::parseString(
+  //          match[i].first,
+  //          match[i].second,
+  //          mfield->second.format().c_str());
 
-        if (!t.isEmpty()) {
-          row.addDateTimeField(mfield->second.id(), t.get());
-        }
-        continue;
-      }
+  //      if (!t.isEmpty()) {
+  //        row.addDateTimeField(mfield->second.id(), t.get());
+  //      }
+  //      continue;
+  //    }
 
-      row.addField(
-          mfield->second.id(),
-          String(match[i].first, match[i].second));
-    }
+  //    row.addField(
+  //        mfield->second.id(),
+  //        String(match[i].first, match[i].second));
+  //  }
 
-    Buffer row_buf;
-    msg::MessageEncoder::encode(row.data(), *row.schema(), &row_buf);
+  //  Buffer row_buf;
+  //  msg::MessageEncoder::encode(row.data(), *row.schema(), &row_buf);
 
-    auto record_id = Random::singleton()->sha1();
-    auto partition_key = partitioner.get()->partitionKeyFor(
-        StringUtil::toString(time.get().unixMicros()));
+  //  auto record_id = Random::singleton()->sha1();
+  //  auto partition_key = partitioner.get()->partitionKeyFor(
+  //      StringUtil::toString(time.get().unixMicros()));
 
-    RecordEnvelope envelope;
-    envelope.set_tsdb_namespace(customer);
-    envelope.set_table_name(table_name);
-    envelope.set_partition_sha1(partition_key.toString());
-    envelope.set_record_id(record_id.toString());
-    envelope.set_record_data(row_buf.toString());
-    records.emplace_back(envelope);
+  //  RecordEnvelope envelope;
+  //  envelope.set_tsdb_namespace(customer);
+  //  envelope.set_table_name(table_name);
+  //  envelope.set_partition_sha1(partition_key.toString());
+  //  envelope.set_record_id(record_id.toString());
+  //  envelope.set_record_data(row_buf.toString());
+  //  records.emplace_back(envelope);
 
-    if (records.size() > kInsertBatchSize) {
-      tsdb_->insertRecords(records);
-      records.clear();
-    }
-  }
+  //  if (records.size() > kInsertBatchSize) {
+  //    tsdb_->insertRecords(records);
+  //    records.clear();
+  //  }
+  //}
 
   if (records.size() > 0) {
     tsdb_->insertRecords(records);

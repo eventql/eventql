@@ -37,3 +37,11 @@ MAINTAINERCLEANFILES =   \
   m4/ltversion.m4        \
   m4/lt~obsolete.m4      \
   m4/ltoptions.m4
+
+all-local: deps/3rdparty/mozjs_build/dist/lib/libjs_static.a
+
+deps/3rdparty/mozjs_build/dist/lib/libjs_static.a:
+	mkdir -p deps/3rdparty/mozjs_build
+	(cd deps/3rdparty/mozjs_build && CC=$(CC) CXX=$(CXX) RANLIB=$(RANLIB) AR=$(AR) CFLAGS="-DJS_THREADSAFE" CXXFLAGS="-DJS_THREADSAFE" $(abs_top_srcdir)/deps/3rdparty/mozjs/js/src/configure --disable-shared-js --disable-tests)
+	(cd deps/3rdparty/mozjs_build make JS_THREADSAFE=1)
+

@@ -24,7 +24,7 @@ else
 GETHOSTBYNAME_R_DEF =
 endif
 
-BUNDLED_INCLUDES = -I$(top_srcdir)/deps/3rdparty
+BUNDLED_INCLUDES = -I$(top_srcdir)/deps/3rdparty -I$(top_srcdir)/deps/3rdparty/mozjs_build/dist/include
 
 AM_CXXFLAGS = $(BUNDLED_INCLUDES) $(LINENOISE_CLFAGS) $(PTHREAD_CFLAGS) $(PTHREAD_DEF) $(SYSLOG_DEF) $(ZLIB_DEF) $(GETHOSTBYNAME_R_DEF) -std=c++0x -ftemplate-depth=500 -mno-omit-leaf-frame-pointer -fno-omit-frame-pointer -Wall -Wextra -Wno-unused-parameter -Wno-sign-compare -Wdelete-non-virtual-dtor -Wno-predefined-identifier-outside-function -O3 -g -I@builddir@
 AM_CFLAGS = $(BUNDLED_INCLUDES) $(PTHREAD_CFLAGS) $(PTHREAD_DEF) $(SYSLOG_DEF) $(ZLIB_DEF) $(GETHOSTBYNAME_R_DEF) -std=c11 -mno-omit-leaf-frame-pointer -fno-omit-frame-pointer -Wall -pedantic -O3 -g
@@ -340,7 +340,6 @@ evqld_SOURCES = \
     eventql/AnalyticsAuth.cc \
     eventql/transport/http/api_servlet.cc \
     eventql/config/config_directory.cc \
-    eventql/config/namespace_config_protos.cc \
     eventql/transport/http/default_servlet.cc \
     eventql/EventScanResult.cc \
     eventql/transport/http/http_auth.cc \
@@ -423,11 +422,12 @@ nodist_evqld_SOURCES = \
     @builddir@/eventql/RemoteTSDBScanParams.pb.cc
 
 evqld_LDFLAGS = \
-    ${top_builddir}/deps/3rdparty/libsimdcomp/libsimdcomp.a
+    ${top_builddir}/deps/3rdparty/libsimdcomp/libsimdcomp.a \
+    ${top_builddir}/deps/3rdparty/mozjs_build/dist/lib/libjs_static.a \
+    ${top_builddir}/deps/3rdparty/protobuf/libprotobuf.a
 
 dist_noinst_DATA = $(evql_protos)
 BUILT_SOURCES = $(evql_protos:.proto=.pb.h)
 
 %.pb.cc %.pb.h: %.proto
 	$(top_builddir)/deps/3rdparty/protobuf/protoc --proto_path=$(srcdir) --cpp_out=$(builddir) $^
-
