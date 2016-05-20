@@ -430,8 +430,6 @@ evqld_LDFLAGS = \
     ${top_builddir}/deps/3rdparty/liblmdb/liblmdb.a \
     ${top_builddir}/deps/3rdparty/protobuf/libprotobuf.a
 
-evqld_DEPENDENCIES = mozjs
-
 dist_noinst_DATA = $(evql_protos)
 BUILT_SOURCES = $(evql_protos:.proto=.pb.h)
 
