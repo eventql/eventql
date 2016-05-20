@@ -4,7 +4,7 @@
 AC_PREREQ(2.59)
 AC_INIT([EventQL],[0.3.0],[authors@eventql.io],[eventql])
 AM_INIT_AUTOMAKE([foreign subdir-objects])
-AM_MAINTAINER_MODE([disable])
+AM_MAINTAINER_MODE([enable])
 
 AC_CONFIG_SRCDIR([configure.ac])
 

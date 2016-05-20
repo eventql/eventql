@@ -104,4 +104,8 @@ String UnionNode::toString() const {
   return str;
 }
 
+size_t UnionNode::getNumComputedColumns() const {
+  RAISE(kNotYetImplementedError);
+}
+
 } // namespace csql

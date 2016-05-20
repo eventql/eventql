@@ -77,7 +77,6 @@ evql_sql_SOURCES = \
     eventql/sql/qtree/CallExpressionNode.cc \
     eventql/sql/qtree/ColumnReferenceNode.cc \
     eventql/sql/qtree/JoinCondition.cc \
-    eventql/sql/qtree/JoinNode.cc \
     eventql/sql/qtree/SequentialScanNode.cc \
     eventql/sql/qtree/SubqueryNode.cc \
     eventql/sql/qtree/SelectExpressionNode.cc \
@@ -146,8 +145,7 @@ evql_cstable_SOURCES = \
     eventql/io/cstable/CSTableWriter.cc \
     eventql/io/cstable/RecordMaterializer.cc \
     eventql/io/cstable/RecordShredder.cc \
-    eventql/io/cstable/TableSchema.cc \
-    eventql/io/cstable/CSTableWriter.cc
+    eventql/io/cstable/TableSchema.cc
 
 evql_sstable_SOURCES = \
     eventql/io/sstable/cursor.cc \
@@ -218,6 +216,17 @@ evql_util_SOURCES = \
     eventql/util/io/pagemanager.cc \
     eventql/util/ISO8601.cc \
     eventql/util/CivilTime.cc \
+    eventql/util/json/flatjsonreader.cc \
+    eventql/util/json/json.cc \
+    eventql/util/json/jsondocument.cc \
+    eventql/util/json/jsoninputstream.cc \
+    eventql/util/json/jsonoutputstream.cc \
+    eventql/util/json/jsonpointer.cc \
+    eventql/util/json/jsonrpc.cc \
+    eventql/util/json/jsonrpchttpadapter.cc \
+    eventql/util/json/jsonrpcrequest.cc \
+    eventql/util/json/jsonrpcresponse.cc \
+    eventql/util/json/jsonutil.cc \
     eventql/util/Language.cc \
     eventql/util/logging.cc \
     eventql/util/logging/logoutputstream.cc \
@@ -228,6 +237,13 @@ evql_util_SOURCES = \
     eventql/util/net/udpsocket.cc \
     eventql/util/net/inetaddr.cc \
     eventql/util/net/tcpconnection.cc \
+    eventql/util/protobuf/MessageDecoder.cc \
+    eventql/util/protobuf/MessageEncoder.cc \
+    eventql/util/protobuf/MessagePrinter.cc \
+    eventql/util/protobuf/MessageObject.cc \
+    eventql/util/protobuf/MessageSchema.cc \
+    eventql/util/protobuf/DynamicMessage.cc \
+    eventql/util/protobuf/JSONEncoder.cc \
     eventql/util/random.cc \
     eventql/util/RegExp.cc \
     eventql/util/rpc/RPCRequest.cc \
@@ -289,6 +305,7 @@ evql_SOURCES = \
     ${evql_util_SOURCES} \
     ${evql_http_SOURCES} \
     ${evql_sql_SOURCES} \
+    ${evql_cstable_SOURCES} \
     eventql/cli/console.cc \
     eventql/server/sql/codec/binary_codec.cc \
     eventql/evql.cc
