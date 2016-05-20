@@ -524,8 +524,6 @@ evql_util_SOURCES = \
     eventql/util/protobuf/DynamicMessage.cc \
     eventql/util/protobuf/DynamicMessage.h \
     eventql/util/protobuf/JSONEncoder.cc \
-    eventql/util/protobuf/MessageBuilder.cc \
-    eventql/util/protobuf/MessageBuilder.h \
     eventql/util/protobuf/ProtoRef.h \
     eventql/util/protobuf/ProtoRef_impl.h \
     eventql/util/protobuf/JSONEncoder.h \
