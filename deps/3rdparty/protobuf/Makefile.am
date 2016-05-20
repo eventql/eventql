@@ -46,30 +46,62 @@ libprotobuf_a_SOURCES = \
     google/protobuf/wire_format_lite.cc
 
 protoc_srcs = \
-    google/protobuf/compiler/command_line_interface.cc \
-    google/protobuf/compiler/main.cc \
-    google/protobuf/compiler/parser.cc \
-    google/protobuf/compiler/subprocess.cc \
-    google/protobuf/compiler/importer.cc \
-    google/protobuf/compiler/code_generator.cc \
-    google/protobuf/compiler/plugin.cc \
-    google/protobuf/compiler/plugin.pb.cc \
-    google/protobuf/compiler/cpp/cpp_enum.cc \
-    google/protobuf/compiler/cpp/cpp_enum_field.cc \
-    google/protobuf/compiler/cpp/cpp_extension.cc \
-    google/protobuf/compiler/cpp/cpp_field.cc \
-    google/protobuf/compiler/cpp/cpp_file.cc \
-    google/protobuf/compiler/cpp/cpp_generator.cc \
-    google/protobuf/compiler/cpp/cpp_helpers.cc \
-    google/protobuf/compiler/cpp/cpp_message.cc \
-    google/protobuf/compiler/cpp/cpp_message_field.cc \
-    google/protobuf/compiler/cpp/cpp_primitive_field.cc \
-    google/protobuf/compiler/cpp/cpp_service.cc \
-    google/protobuf/compiler/cpp/cpp_string_field.cc \
-    google/protobuf/compiler/zip_writer.cc
+    $(abs_srcdir)/google/protobuf/descriptor.cc \
+    $(abs_srcdir)/google/protobuf/descriptor.pb.cc \
+    $(abs_srcdir)/google/protobuf/descriptor_database.cc \
+    $(abs_srcdir)/google/protobuf/dynamic_message.cc \
+    $(abs_srcdir)/google/protobuf/extension_set.cc \
+    $(abs_srcdir)/google/protobuf/extension_set_heavy.cc \
+    $(abs_srcdir)/google/protobuf/generated_message_reflection.cc \
+    $(abs_srcdir)/google/protobuf/generated_message_util.cc \
+    $(abs_srcdir)/google/protobuf/io/coded_stream.cc \
+    $(abs_srcdir)/google/protobuf/io/gzip_stream.cc \
+    $(abs_srcdir)/google/protobuf/io/printer.cc \
+    $(abs_srcdir)/google/protobuf/io/tokenizer.cc \
+    $(abs_srcdir)/google/protobuf/io/zero_copy_stream.cc \
+    $(abs_srcdir)/google/protobuf/io/zero_copy_stream_impl.cc \
+    $(abs_srcdir)/google/protobuf/io/zero_copy_stream_impl_lite.cc \
+    $(abs_srcdir)/google/protobuf/message.cc \
+    $(abs_srcdir)/google/protobuf/message_lite.cc \
+    $(abs_srcdir)/google/protobuf/reflection_ops.cc \
+    $(abs_srcdir)/google/protobuf/repeated_field.cc \
+    $(abs_srcdir)/google/protobuf/service.cc \
+    $(abs_srcdir)/google/protobuf/stubs/atomicops_internals_x86_gcc.cc \
+    $(abs_srcdir)/google/protobuf/stubs/atomicops_internals_x86_msvc.cc \
+    $(abs_srcdir)/google/protobuf/stubs/common.cc \
+    $(abs_srcdir)/google/protobuf/stubs/once.cc \
+    $(abs_srcdir)/google/protobuf/stubs/stringprintf.cc \
+    $(abs_srcdir)/google/protobuf/stubs/structurally_valid.cc \
+    $(abs_srcdir)/google/protobuf/stubs/strutil.cc \
+    $(abs_srcdir)/google/protobuf/stubs/substitute.cc \
+    $(abs_srcdir)/google/protobuf/text_format.cc \
+    $(abs_srcdir)/google/protobuf/unknown_field_set.cc \
+    $(abs_srcdir)/google/protobuf/wire_format.cc \
+    $(abs_srcdir)/google/protobuf/wire_format_lite.cc \
+    $(abs_srcdir)/google/protobuf/compiler/command_line_interface.cc \
+    $(abs_srcdir)/google/protobuf/compiler/main.cc \
+    $(abs_srcdir)/google/protobuf/compiler/parser.cc \
+    $(abs_srcdir)/google/protobuf/compiler/subprocess.cc \
+    $(abs_srcdir)/google/protobuf/compiler/importer.cc \
+    $(abs_srcdir)/google/protobuf/compiler/code_generator.cc \
+    $(abs_srcdir)/google/protobuf/compiler/plugin.cc \
+    $(abs_srcdir)/google/protobuf/compiler/plugin.pb.cc \
+    $(abs_srcdir)/google/protobuf/compiler/cpp/cpp_enum.cc \
+    $(abs_srcdir)/google/protobuf/compiler/cpp/cpp_enum_field.cc \
+    $(abs_srcdir)/google/protobuf/compiler/cpp/cpp_extension.cc \
+    $(abs_srcdir)/google/protobuf/compiler/cpp/cpp_field.cc \
+    $(abs_srcdir)/google/protobuf/compiler/cpp/cpp_file.cc \
+    $(abs_srcdir)/google/protobuf/compiler/cpp/cpp_generator.cc \
+    $(abs_srcdir)/google/protobuf/compiler/cpp/cpp_helpers.cc \
+    $(abs_srcdir)/google/protobuf/compiler/cpp/cpp_message.cc \
+    $(abs_srcdir)/google/protobuf/compiler/cpp/cpp_message_field.cc \
+    $(abs_srcdir)/google/protobuf/compiler/cpp/cpp_primitive_field.cc \
+    $(abs_srcdir)/google/protobuf/compiler/cpp/cpp_service.cc \
+    $(abs_srcdir)/google/protobuf/compiler/cpp/cpp_string_field.cc \
+    $(abs_srcdir)/google/protobuf/compiler/zip_writer.cc
 
 protoc:
-	$(CXX_FOR_BUILD) $(CXXFLAGS_FOR_BUILD) $(CPPFLAGS_FOR_BUILD) $(LDFLAGS_FOR_BUILD) $(TARGET_ARCH_FOR_BUILD) -DHAVE_PTHREAD_H=1 -I. ${libprotobuf_a_SOURCES} $(protoc_srcs) $(LOADLIBES_FOR_BUILD) $(LDLIBS_FOR_BUILD) -o protoc
+	$(CXX_FOR_BUILD) $(CXXFLAGS_FOR_BUILD) $(CPPFLAGS_FOR_BUILD) $(LDFLAGS_FOR_BUILD) $(TARGET_ARCH_FOR_BUILD) -DHAVE_PTHREAD_H=1 -I$(abs_srcdir) $(protoc_srcs) $(LOADLIBES_FOR_BUILD) $(LDLIBS_FOR_BUILD) -o protoc
 
 all-local: protoc
 
