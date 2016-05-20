@@ -66,5 +66,36 @@ void lowerCaseExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
   *out = SValue(val);
 }
 
+void substrExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
+  if (argc < 2 || argc > 3) {
+    RAISEF(
+        kRuntimeError,
+        "wrong number of arguments for substr. expected: 2 or 3, got: $2",
+        argc);
+
+  }
+
+  String str = argv[0].getString();
+  int cur = argv[1].getInteger() - 1;
+  if (cur < 0) {
+    cur += str.size() + 1;
+  }
+
+  int end = str.size();
+  if (argc == 3) {
+    int len = argv[2].getInteger();
+    if (cur + len < str.size()) {
+      end = cur + len;
+    }
+  }
+
+  String out_str;
+  for (; cur < end; ++cur) {
+    out_str += str[cur];
+  }
+
+  *out = SValue(out_str);
+}
+
 }
 }
