@@ -7,6 +7,7 @@ SUBDIRS = \
     . \
     deps/3rdparty/linenoise \
     deps/3rdparty/libsimdcomp \
+    deps/3rdparty/protobuf \
     src
 
 EXTRA_DIST =                             \

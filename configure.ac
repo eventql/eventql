@@ -10,8 +10,9 @@ AC_CONFIG_SRCDIR([configure.ac])
 
 # Check for build env
 AC_PROG_CC
+AC_PROG_CC_FOR_BUILD
 AC_PROG_CXX
-AX_PROG_CXX_FOR_BUILD
+AC_PROG_CXX_FOR_BUILD
 AC_PROG_RANLIB
 
 # Check for header files
@@ -64,6 +65,6 @@ ACX_PTHREAD
 AM_CONDITIONAL([HAVE_PTHREAD], [test "x$acx_pthread_ok" = "xyes"])
 
 AC_CONFIG_SUBDIRS([deps/3rdparty/linenoise deps/3rdparty/libsimdcomp])
-AC_CONFIG_FILES([Makefile src/Makefile])
+AC_CONFIG_FILES([Makefile src/Makefile deps/3rdparty/protobuf/Makefile])
 
 AC_OUTPUT
