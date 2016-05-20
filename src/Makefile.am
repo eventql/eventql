@@ -26,14 +26,30 @@ endif
 
 BUNDLED_INCLUDES = -I$(top_srcdir)/deps/3rdparty
 
-AM_CXXFLAGS = $(BUNDLED_INCLUDES) $(LINENOISE_CLFAGS) $(PTHREAD_CFLAGS) $(PTHREAD_DEF) $(SYSLOG_DEF) $(ZLIB_DEF) $(GETHOSTBYNAME_R_DEF) -std=c++0x -ftemplate-depth=500 -mno-omit-leaf-frame-pointer -fno-omit-frame-pointer -Wall -Wextra -Wno-unused-parameter -Wno-sign-compare -Wdelete-non-virtual-dtor -Wno-predefined-identifier-outside-function -O3 -g
+AM_CXXFLAGS = $(BUNDLED_INCLUDES) $(LINENOISE_CLFAGS) $(PTHREAD_CFLAGS) $(PTHREAD_DEF) $(SYSLOG_DEF) $(ZLIB_DEF) $(GETHOSTBYNAME_R_DEF) -std=c++0x -ftemplate-depth=500 -mno-omit-leaf-frame-pointer -fno-omit-frame-pointer -Wall -Wextra -Wno-unused-parameter -Wno-sign-compare -Wdelete-non-virtual-dtor -Wno-predefined-identifier-outside-function -O3 -g -I@builddir@
 AM_CFLAGS = $(BUNDLED_INCLUDES) $(PTHREAD_CFLAGS) $(PTHREAD_DEF) $(SYSLOG_DEF) $(ZLIB_DEF) $(GETHOSTBYNAME_R_DEF) -std=c11 -mno-omit-leaf-frame-pointer -fno-omit-frame-pointer -Wall -pedantic -O3 -g
 AM_LDFLAGS = $(PTHREAD_CFLAGS)
 
 MAINTAINERCLEANFILES =   \
   Makefile.in
 
-bin_PROGRAMS = evql
+bin_PROGRAMS = evql evqld
+
+evql_protos = \
+    eventql/AnalyticsSession.proto \
+    eventql/config/namespace_config_protos.proto \
+    eventql/db/ClusterConfig.proto \
+    eventql/db/LogPartitionCompactionState.proto \
+    eventql/db/PartitionInfo.proto \
+    eventql/db/PartitionState.proto \
+    eventql/db/RecordEnvelope.proto \
+    eventql/db/ReplicationState.proto \
+    eventql/db/TableConfig.proto \
+    eventql/db/TSDBNodeConfig.proto \
+    eventql/db/TSDBTableScanSpec.proto \
+    eventql/EventScanParams.proto \
+    eventql/LogfileScanParams.proto \
+    eventql/RemoteTSDBScanParams.proto
 
 evql_sql_SOURCES = \
     eventql/sql/svalue.cc \
@@ -313,3 +329,105 @@ evql_SOURCES = \
 evql_LDFLAGS = \
     ${top_builddir}/deps/3rdparty/linenoise/liblinenoise.a \
     ${top_builddir}/deps/3rdparty/libsimdcomp/libsimdcomp.a
+
+evqld_SOURCES = \
+    ${evql_util_SOURCES} \
+    ${evql_http_SOURCES} \
+    ${evql_sql_SOURCES} \
+    ${evql_cstable_SOURCES} \
+    ${evql_sstable_SOURCES} \
+    eventql/AnalyticsApp.cc \
+    eventql/AnalyticsAuth.cc \
+    eventql/transport/http/api_servlet.cc \
+    eventql/config/config_directory.cc \
+    eventql/config/namespace_config_protos.cc \
+    eventql/transport/http/default_servlet.cc \
+    eventql/EventScanResult.cc \
+    eventql/transport/http/http_auth.cc \
+    eventql/JavaScriptContext.cc \
+    eventql/LogfileScanResult.cc \
+    eventql/transport/http/status_servlet.cc \
+    eventql/transport/http/EventsAPIServlet.cc \
+    eventql/transport/http/EventsService.cc \
+    eventql/transport/http/LogfileAPIServlet.cc \
+    eventql/transport/http/LogfileService.cc \
+    eventql/transport/http/MapReduceAPIServlet.cc \
+    eventql/transport/http/MapReduceService.cc \
+    eventql/db/CompactionStrategy.cc \
+    eventql/db/CompactionWorker.cc \
+    eventql/db/FixedShardPartitioner.cc \
+    eventql/db/LSMPartitionReader.cc \
+    eventql/db/LSMPartitionReplication.cc \
+    eventql/db/LSMPartitionWriter.cc \
+    eventql/db/LSMTableIndex.cc \
+    eventql/db/LSMTableIndexCache.cc \
+    eventql/db/LazyPartition.cc \
+    eventql/db/LogPartitionReader.cc \
+    eventql/db/LogPartitionReplication.cc \
+    eventql/db/LogPartitionWriter.cc \
+    eventql/db/Partition.cc \
+    eventql/db/partition_map.cc \
+    eventql/db/PartitionReader.cc \
+    eventql/db/PartitionReplication.cc \
+    eventql/db/PartitionSnapshot.cc \
+    eventql/db/PartitionWriter.cc \
+    eventql/db/RecordArena.cc \
+    eventql/db/RecordSet.cc \
+    eventql/db/ReplicationScheme.cc \
+    eventql/db/ReplicationState.cc \
+    eventql/db/ReplicationWorker.cc \
+    eventql/db/StaticPartitionReader.cc \
+    eventql/db/StaticPartitionReplication.cc \
+    eventql/db/StaticPartitionWriter.cc \
+    eventql/db/TSDBClient.cc \
+    eventql/db/TSDBService.cc \
+    eventql/db/TSDBServlet.cc \
+    eventql/db/TSDBTableRef.cc \
+    eventql/db/Table.cc \
+    eventql/db/TimeWindowPartitioner.cc \
+    eventql/mapreduce/MapReduceScheduler.cc \
+    eventql/mapreduce/MapReduceTask.cc \
+    eventql/mapreduce/MapReduceTaskBuilder.cc \
+    eventql/mapreduce/tasks/MapTableTask.cc \
+    eventql/mapreduce/tasks/ReduceTask.cc \
+    eventql/mapreduce/tasks/ReturnResultsTask.cc \
+    eventql/mapreduce/tasks/SaveToTablePartitionTask.cc \
+    eventql/mapreduce/tasks/SaveToTableTask.cc \
+    eventql/server/sql/codec/binary_codec.cc \
+    eventql/server/sql/codec/json_codec.cc \
+    eventql/server/sql/codec/json_sse_codec.cc \
+    eventql/server/sql/sql_engine.cc \
+    eventql/server/sql/table_scan.cc \
+    eventql/server/sql/table_provider.cc \
+    eventql/server/sql/partition_cursor.cc \
+    eventql/server/sql/pipelined_expression.cc \
+    eventql/server/sql/scheduler.cc \
+    eventql/server/sql/transaction_info.cc \
+    eventql/server/server_stats.cc \
+    eventql/evqld.cc
+
+nodist_evqld_SOURCES = \
+    @builddir@/eventql/AnalyticsSession.pb.cc \
+    @builddir@/eventql/config/namespace_config_protos.pb.cc \
+    @builddir@/eventql/db/ClusterConfig.pb.cc \
+    @builddir@/eventql/db/LogPartitionCompactionState.pb.cc \
+    @builddir@/eventql/db/PartitionInfo.pb.cc \
+    @builddir@/eventql/db/PartitionState.pb.cc \
+    @builddir@/eventql/db/RecordEnvelope.pb.cc \
+    @builddir@/eventql/db/ReplicationState.pb.cc \
+    @builddir@/eventql/db/TableConfig.pb.cc \
+    @builddir@/eventql/db/TSDBNodeConfig.pb.cc \
+    @builddir@/eventql/db/TSDBTableScanSpec.pb.cc \
+    @builddir@/eventql/EventScanParams.pb.cc \
+    @builddir@/eventql/LogfileScanParams.pb.cc \
+    @builddir@/eventql/RemoteTSDBScanParams.pb.cc
+
+evqld_LDFLAGS = \
+    ${top_builddir}/deps/3rdparty/libsimdcomp/libsimdcomp.a
+
+dist_noinst_DATA = $(evql_protos)
+BUILT_SOURCES = $(evql_protos:.proto=.pb.h)
+
+%.pb.cc %.pb.h: %.proto
+	$(top_builddir)/deps/3rdparty/protobuf/protoc --proto_path=$(srcdir) --cpp_out=$(builddir) $^
+

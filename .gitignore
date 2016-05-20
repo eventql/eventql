@@ -5,6 +5,8 @@
 *.o
 *.pyc
 *.so
+*.pb.h
+*.pb.cc
 src/evql
 /config.h
 Makefile
