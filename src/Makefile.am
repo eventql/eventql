@@ -52,6 +52,8 @@ evql_protos = \
     eventql/RemoteTSDBScanParams.proto
 
 evql_sql_SOURCES = \
+    eventql/sql/csql.h \
+    eventql/sql/abi.h \
     eventql/sql/CSTableScan.cc \
     eventql/sql/CSTableScan.h \
     eventql/sql/CSTableScanProvider.cc \
@@ -64,8 +66,12 @@ evql_sql_SOURCES = \
     eventql/sql/backends/csv/CSVTableProvider.h \
     eventql/sql/backends/csv/CSVTableScan.cc \
     eventql/sql/backends/csv/CSVTableScan.h \
+    eventql/sql/backends/backend.h \
+    eventql/sql/backends/tableref.h \
     eventql/sql/defaults.cc \
     eventql/sql/defaults.h \
+    eventql/sql/table_provider.h \
+    eventql/sql/table_iterator.h \
     eventql/sql/expressions/aggregate.cc \
     eventql/sql/expressions/aggregate.h \
     eventql/sql/expressions/boolean.cc \
@@ -98,6 +104,8 @@ evql_sql_SOURCES = \
     eventql/sql/expressions/table/subquery.h \
     eventql/sql/expressions/table/tablescan.cc \
     eventql/sql/expressions/table/tablescan.h \
+    eventql/sql/expressions/table_expression.h \
+    eventql/sql/extensions/chartsql/chartbuilder.h \
     eventql/sql/extensions/chartsql/areachartbuilder.cc \
     eventql/sql/extensions/chartsql/areachartbuilder.h \
     eventql/sql/extensions/chartsql/barchartbuilder.cc \
@@ -114,6 +122,7 @@ evql_sql_SOURCES = \
     eventql/sql/extensions/chartsql/seriesadapter.h \
     eventql/sql/format.cc \
     eventql/sql/format.h \
+    eventql/sql/TableInfo.h \
     eventql/sql/parser/astnode.cc \
     eventql/sql/parser/astnode.h \
     eventql/sql/parser/astutil.cc \
@@ -124,6 +133,7 @@ evql_sql_SOURCES = \
     eventql/sql/parser/token.h \
     eventql/sql/parser/tokenize.cc \
     eventql/sql/parser/tokenize.h \
+    eventql/sql/qtree/ValueExpressionNode.h \
     eventql/sql/qtree/CallExpressionNode.cc \
     eventql/sql/qtree/CallExpressionNode.h \
     eventql/sql/qtree/ChartStatementNode.cc \
@@ -154,6 +164,7 @@ evql_sql_SOURCES = \
     eventql/sql/qtree/QueryTreeNode.h \
     eventql/sql/qtree/QueryTreeUtil.cc \
     eventql/sql/qtree/QueryTreeUtil.h \
+    eventql/sql/qtree/QueryTreeUtil_impl.h \
     eventql/sql/qtree/RegexExpressionNode.cc \
     eventql/sql/qtree/RegexExpressionNode.h \
     eventql/sql/qtree/SelectExpressionNode.cc \
@@ -172,6 +183,7 @@ evql_sql_SOURCES = \
     eventql/sql/qtree/UnionNode.h \
     eventql/sql/qtree/qtree_coder.cc \
     eventql/sql/qtree/qtree_coder.h \
+    eventql/sql/qtree/qtree_coder_impl.h \
     eventql/sql/query_plan.cc \
     eventql/sql/query_plan.h \
     eventql/sql/result_cursor.cc \
@@ -200,6 +212,7 @@ evql_sql_SOURCES = \
     eventql/sql/runtime/tablerepository.h \
     eventql/sql/runtime/vm.cc \
     eventql/sql/runtime/vm.h \
+    eventql/sql/runtime/resultlist.h \
     eventql/sql/scheduler.cc \
     eventql/sql/scheduler.h \
     eventql/sql/scheduler/execution_context.cc \
@@ -308,6 +321,7 @@ evql_sstable_SOURCES = \
 evql_util_SOURCES = \
     eventql/util/CivilTime.cc \
     eventql/util/CivilTime.h \
+    eventql/util/CivilTime_impl.h \
     eventql/util/HMAC.cc \
     eventql/util/HMAC.h \
     eventql/util/ISO8601.cc \
@@ -326,6 +340,7 @@ evql_util_SOURCES = \
     eventql/util/UTF8.h \
     eventql/util/UnixTime.cc \
     eventql/util/UnixTime.h \
+    eventql/util/UnixTime_impl.h \
     eventql/util/VFS.cc \
     eventql/util/VFS.h \
     eventql/util/application.cc \
@@ -334,10 +349,12 @@ evql_util_SOURCES = \
     eventql/util/assets.h \
     eventql/util/autoref.cc \
     eventql/util/autoref.h \
+    eventql/util/autoref_impl.h \
     eventql/util/buffer.cc \
     eventql/util/buffer.h \
     eventql/util/bufferutil.cc \
     eventql/util/bufferutil.h \
+    eventql/util/freeondestroy.h \
     eventql/util/charts/areachart.cc \
     eventql/util/charts/areachart.h \
     eventql/util/charts/axisdefinition.cc \
@@ -350,6 +367,14 @@ evql_util_SOURCES = \
     eventql/util/charts/domain.h \
     eventql/util/charts/domainprovider.cc \
     eventql/util/charts/domainprovider.h \
+    eventql/util/charts/domainprovider_impl.h \
+    eventql/util/charts/viewport.h \
+    eventql/util/charts/continuousdomain.h \
+    eventql/util/charts/colorpalette.h \
+    eventql/util/charts/rendertarget.h \
+    eventql/util/charts/discretedomain.h \
+    eventql/util/charts/seriesjoin.h \
+    eventql/util/charts/svgtarget.h \
     eventql/util/charts/drawable.cc \
     eventql/util/charts/drawable.h \
     eventql/util/charts/griddefinition.cc \
@@ -364,6 +389,7 @@ evql_util_SOURCES = \
     eventql/util/charts/series.h \
     eventql/util/charts/timedomain.cc \
     eventql/util/charts/timedomain.h \
+    eventql/util/charts/styles/style_default.h \
     eventql/util/cli/CLI.cc \
     eventql/util/cli/CLI.h \
     eventql/util/cli/CLICommand.cc \
@@ -380,8 +406,10 @@ evql_util_SOURCES = \
     eventql/util/csv/CSVInputStream.h \
     eventql/util/csv/CSVOutputStream.cc \
     eventql/util/csv/CSVOutputStream.h \
+    eventql/util/defines.h \
     eventql/util/duration.cc \
     eventql/util/duration.h \
+    eventql/util/duration_impl.h \
     eventql/util/exception.cc \
     eventql/util/exception.h \
     eventql/util/exceptionhandler.cc \
@@ -394,6 +422,7 @@ evql_util_SOURCES = \
     eventql/util/ieee754.h \
     eventql/util/inspect.cc \
     eventql/util/inspect.h \
+    eventql/util/inspect_impl.h \
     eventql/util/io/BufferedOutputStream.cc \
     eventql/util/io/BufferedOutputStream.h \
     eventql/util/io/FileLock.cc \
@@ -422,26 +451,37 @@ evql_util_SOURCES = \
     eventql/util/json/flatjsonreader.h \
     eventql/util/json/json.cc \
     eventql/util/json/json.h \
+    eventql/util/json/json_impl.h \
+    eventql/util/json/jsontypes.h \
     eventql/util/json/jsondocument.cc \
     eventql/util/json/jsondocument.h \
+    eventql/util/json/jsondocument_impl.h \
     eventql/util/json/jsoninputstream.cc \
     eventql/util/json/jsoninputstream.h \
     eventql/util/json/jsonoutputstream.cc \
     eventql/util/json/jsonoutputstream.h \
+    eventql/util/json/jsonoutputstream_impl.h \
     eventql/util/json/jsonpointer.cc \
     eventql/util/json/jsonpointer.h \
     eventql/util/json/jsonrpc.cc \
     eventql/util/json/jsonrpc.h \
+    eventql/util/json/jsonrpc_impl.h \
     eventql/util/json/jsonrpchttpadapter.cc \
     eventql/util/json/jsonrpchttpadapter.h \
     eventql/util/json/jsonrpcrequest.cc \
     eventql/util/json/jsonrpcrequest.h \
+    eventql/util/json/jsonrpcrequest_impl.h \
     eventql/util/json/jsonrpcresponse.cc \
     eventql/util/json/jsonrpcresponse.h \
+    eventql/util/json/jsonrpcresponse_impl.h \
     eventql/util/json/jsonutil.cc \
     eventql/util/json/jsonutil.h \
     eventql/util/logging.cc \
     eventql/util/logging.h \
+    eventql/util/logging/loglevel.h \
+    eventql/util/logging/logger.h \
+    eventql/util/logging/logger_impl.h \
+    eventql/util/logging/logtarget.h \
     eventql/util/logging/logoutputstream.cc \
     eventql/util/logging/logoutputstream.h \
     eventql/util/logging/syslog.cc \
@@ -458,6 +498,17 @@ evql_util_SOURCES = \
     eventql/util/net/udpserver.h \
     eventql/util/net/udpsocket.cc \
     eventql/util/net/udpsocket.h \
+    eventql/util/option.h \
+    eventql/util/option_impl.h \
+    eventql/util/reflect/indexsequence.h \
+    eventql/util/reflect/metaclass.h \
+    eventql/util/reflect/methodcall.h \
+    eventql/util/reflect/methodcall_impl.h \
+    eventql/util/reflect/property.h \
+    eventql/util/reflect/property_impl.h \
+    eventql/util/reflect/reflect.h \
+    eventql/util/traits.h \
+    eventql/util/protobuf/msg.h \
     eventql/util/protobuf/DynamicMessage.cc \
     eventql/util/protobuf/DynamicMessage.h \
     eventql/util/protobuf/JSONEncoder.cc \
@@ -474,16 +525,29 @@ evql_util_SOURCES = \
     eventql/util/protobuf/MessageSchema.h \
     eventql/util/random.cc \
     eventql/util/random.h \
+    eventql/util/Serializable.h \
     eventql/util/rpc/RPCContext.cc \
     eventql/util/rpc/RPCContext.h \
     eventql/util/rpc/RPCRequest.cc \
     eventql/util/rpc/RPCRequest.h \
     eventql/util/rpc/RPCService.cc \
     eventql/util/rpc/RPCService.h \
+    eventql/util/rpc/RPCService_impl.h \
     eventql/util/rpc/RPCStub.cc \
     eventql/util/rpc/RPCStub.h \
+    eventql/util/rpc/RPC.h \
+    eventql/util/rpc/RPC_impl.h \
+    eventql/util/stats/counter.h \
+    eventql/util/stats/counter_impl.h \
+    eventql/util/stats/counterstat.h \
+    eventql/util/stats/movingwindow.h \
+    eventql/util/stats/multicounter.h \
+    eventql/util/stats/multicounter_impl.h \
+    eventql/util/stats/stat.h \
+    eventql/util/stats/stats.h \
     eventql/util/stats/statsd.cc \
     eventql/util/stats/statsd.h \
+    eventql/util/stats/statsd_test.cc \
     eventql/util/stats/statsdagent.cc \
     eventql/util/stats/statsdagent.h \
     eventql/util/stats/statsrepository.cc \
@@ -492,8 +556,11 @@ evql_util_SOURCES = \
     eventql/util/stats/statssink.h \
     eventql/util/status.cc \
     eventql/util/status.h \
+    eventql/util/stdtypes.h \
     eventql/util/stringutil.cc \
     eventql/util/stringutil.h \
+    eventql/util/hash.h \
+    eventql/util/stringutil_impl.h \
     eventql/util/thread/FixedSizeThreadPool.cc \
     eventql/util/thread/FixedSizeThreadPool.h \
     eventql/util/thread/eventloop.cc \
@@ -502,8 +569,15 @@ evql_util_SOURCES = \
     eventql/util/thread/signalhandler.h \
     eventql/util/thread/threadpool.cc \
     eventql/util/thread/threadpool.h \
+    eventql/util/thread/taskscheduler.h \
+    eventql/util/thread/task.h \
     eventql/util/thread/wakeup.cc \
     eventql/util/thread/wakeup.h \
+    eventql/util/thread/future.h \
+    eventql/util/thread/queue.h \
+    eventql/util/thread/queue_impl.h \
+    eventql/util/thread/wakeup_impl.h \
+    eventql/util/time_constants.h \
     eventql/util/uri.cc \
     eventql/util/uri.h \
     eventql/util/util/Base64.cc \
@@ -520,8 +594,10 @@ evql_util_SOURCES = \
     eventql/util/util/SimpleRateLimit.h \
     eventql/util/util/binarymessagereader.cc \
     eventql/util/util/binarymessagereader.h \
+    eventql/util/util/binarymessagereader_impl.h \
     eventql/util/util/binarymessagewriter.cc \
     eventql/util/util/binarymessagewriter.h \
+    eventql/util/VFSFile.h \
     eventql/util/wallclock.cc \
     eventql/util/wallclock.h \
     eventql/util/web/SecureCookie.cc \
@@ -544,6 +620,8 @@ evql_http_SOURCES = \
     eventql/util/http/VFSFileServlet.h \
     eventql/util/http/cookies.cc \
     eventql/util/http/cookies.h \
+    eventql/util/http/status.h \
+    eventql/util/http/httphandler.h \
     eventql/util/http/httpclient.cc \
     eventql/util/http/httpclient.h \
     eventql/util/http/httpclientconnection.cc \
@@ -562,12 +640,15 @@ evql_http_SOURCES = \
     eventql/util/http/httpresponse.h \
     eventql/util/http/httpresponsefuture.cc \
     eventql/util/http/httpresponsefuture.h \
+    eventql/util/http/httpresponsehandler.h \
     eventql/util/http/httprouter.cc \
     eventql/util/http/httprouter.h \
+    eventql/util/http/httprouter_impl.h \
     eventql/util/http/httpserver.cc \
     eventql/util/http/httpserver.h \
     eventql/util/http/httpserverconnection.cc \
     eventql/util/http/httpserverconnection.h \
+    eventql/util/http/httpstats.h \
     eventql/util/http/httpservice.cc \
     eventql/util/http/httpservice.h \
     eventql/util/http/statshttpservlet.cc \
