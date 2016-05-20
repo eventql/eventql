@@ -12,10 +12,22 @@ else
 PTHREAD_DEF =
 endif
 
+if HAVE_SYSLOG_H
+SYSLOG_DEF = -DHAVE_SYSLOG_H=1
+else
+SYSLOG_DEF =
+endif
+
+if HAVE_GETHOSTBYNAME_R
+GETHOSTBYNAME_R_DEF = -DHAVE_GETHOSTBYNAME_R=1
+else
+GETHOSTBYNAME_R_DEF =
+endif
+
 BUNDLED_INCLUDES = -I$(top_srcdir)/deps/3rdparty
 
-AM_CXXFLAGS = $(BUNDLED_INCLUDES) $(LINENOISE_CLFAGS) $(PTHREAD_CFLAGS) $(PTHREAD_DEF) $(ZLIB_DEF) -std=c++0x -ftemplate-depth=500 -mno-omit-leaf-frame-pointer -fno-omit-frame-pointer -Wall -Wextra -Wno-unused-parameter -Wno-sign-compare -Wdelete-non-virtual-dtor -Wno-predefined-identifier-outside-function -O3 -g
-AM_CFLAGS = $(BUNDLED_INCLUDES) $(PTHREAD_CFLAGS) $(PTHREAD_DEF) $(ZLIB_DEF) -std=c11 -mno-omit-leaf-frame-pointer -fno-omit-frame-pointer -Wall -pedantic -O3 -g
+AM_CXXFLAGS = $(BUNDLED_INCLUDES) $(LINENOISE_CLFAGS) $(PTHREAD_CFLAGS) $(PTHREAD_DEF) $(SYSLOG_DEF) $(ZLIB_DEF) $(GETHOSTBYNAME_R_DEF) -std=c++0x -ftemplate-depth=500 -mno-omit-leaf-frame-pointer -fno-omit-frame-pointer -Wall -Wextra -Wno-unused-parameter -Wno-sign-compare -Wdelete-non-virtual-dtor -Wno-predefined-identifier-outside-function -O3 -g
+AM_CFLAGS = $(BUNDLED_INCLUDES) $(PTHREAD_CFLAGS) $(PTHREAD_DEF) $(SYSLOG_DEF) $(ZLIB_DEF) $(GETHOSTBYNAME_R_DEF) -std=c11 -mno-omit-leaf-frame-pointer -fno-omit-frame-pointer -Wall -pedantic -O3 -g
 AM_LDFLAGS = $(PTHREAD_CFLAGS)
 
 MAINTAINERCLEANFILES =   \
