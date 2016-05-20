@@ -5,6 +5,7 @@
 *.o
 *.pyc
 *.so
+src/evql
 /config.h
 Makefile
 Makefile.in

@@ -113,6 +113,41 @@ RegExp& RegExp::operator=(RegExp&& other) {
   return *this;
 }
 
+bool RegExp::match(const String& subject) const {
+#ifdef HAVE_PCRE
+  return match(subject, nullptr);
+#else
+  return std::regex_match(subject, re_);
+#endif
+}
+
+bool RegExp::match(const Buffer& subject) const {
+#ifdef HAVE_PCRE
+  return match(buffer, nullptr);
+#else
+  return std::regex_match(
+      (char*) subject.data(),
+      (char*) subject.data() + subject.size(),
+      re_);
+#endif
+}
+
+bool RegExp::match(const char* buffer, size_t size) const {
+#ifdef HAVE_PCRE
+  return match(buffer, size, nullptr);
+#else
+  return std::regex_match(buffer, buffer + size, re_);
+#endif
+}
+
+bool RegExp::match(const char* cstr) const {
+#ifdef HAVE_PCRE
+  return match(cstr, (Result*) nullptr);
+#else
+  return std::regex_match(cstr, re_);
+#endif
+}
+
 #ifdef HAVE_PCRE
 
 bool RegExp::match(const char* buffer, size_t size, Result* result) const {

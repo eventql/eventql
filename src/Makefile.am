@@ -166,7 +166,6 @@ evql_util_SOURCES = \
     eventql/util/charts/axisdefinition.cc \
     eventql/util/charts/barchart.cc \
     eventql/util/charts/canvas.cc \
-    eventql/util/charts/chart_test.cc \
     eventql/util/charts/domain.cc \
     eventql/util/charts/domainprovider.cc \
     eventql/util/charts/drawable.cc \
@@ -260,7 +259,6 @@ evql_http_SOURCES = \
     eventql/util/http/HTTPSSEStream.cc \
     eventql/util/http/VFSFileServlet.cc \
     eventql/util/http/cookies.cc \
-    eventql/util/http/http_test.cc \
     eventql/util/http/httpclient.cc \
     eventql/util/http/httpclientconnection.cc \
     eventql/util/http/httpconnectionpool.cc \
