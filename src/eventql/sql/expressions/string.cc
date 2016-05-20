@@ -72,7 +72,6 @@ void subStringExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
         kRuntimeError,
         "wrong number of arguments for substr. expected: 2 or 3, got: $2",
         argc);
-
   }
 
   String str = argv[0].getString();
