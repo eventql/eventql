@@ -2316,3 +2316,38 @@ TEST_CASE(RuntimeTest, TestSumMinMaxCount, [] () {
   EXPECT_EQ(result.getRow(0)[2], "123.000000");
   EXPECT_EQ(result.getRow(0)[3], "999.000000");
 });
+
+TEST_CASE(RuntimeTest, TestSubstrExpression, [] () {
+  auto runtime = Runtime::getDefaultRuntime();
+  auto txn = runtime->newTransaction();
+
+  {
+    auto v = runtime->evaluateConstExpression(
+        txn.get(),
+        String("substr('fnord', 2)"));
+    EXPECT_EQ(v.getString(), "nord");
+  }
+
+  {
+    auto v = runtime->evaluateConstExpression(
+        txn.get(),
+        String("substr('fnord', 2, 1)"));
+    EXPECT_EQ(v.getString(), "n");
+  }
+
+  {
+    auto v = runtime->evaluateConstExpression(
+        txn.get(),
+        String("substr('fnord', -2)"));
+    EXPECT_EQ(v.getString(), "rd");
+  }
+
+  {
+    auto v = runtime->evaluateConstExpression(
+        txn.get(),
+        String("substr('foobar', -3, 2)"));
+    EXPECT_EQ(v.getString(), "ba");
+  }
+
+});
+
