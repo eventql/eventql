@@ -60,5 +60,7 @@ AM_CONDITIONAL([HAVE_ZLIB], [test $HAVE_ZLIB = 1])
 ACX_PTHREAD
 AM_CONDITIONAL([HAVE_PTHREAD], [test "x$acx_pthread_ok" = "xyes"])
 
+AC_CONFIG_SUBDIRS([deps/3rdparty/linenoise])
 AC_CONFIG_FILES([Makefile src/Makefile])
+
 AC_OUTPUT

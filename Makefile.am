@@ -3,7 +3,7 @@
 ACLOCAL_AMFLAGS = -I m4
 AUTOMAKE_OPTIONS = foreign
 
-SUBDIRS = . src
+SUBDIRS = . src deps/3rdparty/linenoise
 DIST_SUBDIRS = $(subdirs) src
 
 check-local:
