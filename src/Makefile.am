@@ -24,7 +24,7 @@ else
 GETHOSTBYNAME_R_DEF =
 endif
 
-BUNDLED_INCLUDES = -I$(top_srcdir)/deps/3rdparty -I$(top_builddir)/deps/3rdparty/spidermonkey/dist/include
+BUNDLED_INCLUDES = -I$(top_srcdir)/deps/3rdparty -I$(top_builddir)/deps/3rdparty/spidermonkey/out/dist/include
 
 AM_CXXFLAGS = $(BUNDLED_INCLUDES) $(LINENOISE_CLFAGS) $(PTHREAD_CFLAGS) $(PTHREAD_DEF) $(SYSLOG_DEF) $(ZLIB_DEF) $(GETHOSTBYNAME_R_DEF) -std=c++0x -ftemplate-depth=500 -mno-omit-leaf-frame-pointer -fno-omit-frame-pointer -Wall -Wextra -Wno-unused-parameter -Wno-sign-compare -Wdelete-non-virtual-dtor -Wno-predefined-identifier-outside-function -O3 -g -I@builddir@
 AM_CFLAGS = $(BUNDLED_INCLUDES) $(PTHREAD_CFLAGS) $(PTHREAD_DEF) $(SYSLOG_DEF) $(ZLIB_DEF) $(GETHOSTBYNAME_R_DEF) -std=c11 -mno-omit-leaf-frame-pointer -fno-omit-frame-pointer -Wall -pedantic -O3 -g
