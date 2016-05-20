@@ -156,9 +156,93 @@ libsstable_a_SOURCES = \
     eventql/io/sstable/SSTableColumnWriter.cc \
     eventql/io/sstable/SSTableWriter.cc
 
+evql_util_SOURCES = \
+    eventql/util/application.cc \
+    eventql/util/autoref.cc \
+    eventql/util/assets.cc \
+    eventql/util/buffer.cc \
+    eventql/util/bufferutil.cc \
+    eventql/util/cli/flagparser.cc \
+    eventql/util/cli/CLI.cc \
+    eventql/util/cli/CLICommand.cc \
+    eventql/util/cli/term.cc \
+    eventql/util/csv/CSVOutputStream.cc \
+    eventql/util/csv/BinaryCSVOutputStream.cc \
+    eventql/util/csv/CSVInputStream.cc \
+    eventql/util/csv/BinaryCSVInputStream.cc \
+    eventql/util/UnixTime.cc \
+    eventql/util/duration.cc \
+    eventql/util/exception.cc \
+    eventql/util/exceptionhandler.cc \
+    eventql/util/fnv.cc \
+    eventql/util/HMAC.cc \
+    eventql/util/human.cc \
+    eventql/util/ieee754.cc \
+    eventql/util/inspect.cc \
+    eventql/util/InternMap.cc \
+    eventql/util/io/file.cc \
+    eventql/util/io/FileLock.cc \
+    eventql/util/io/fileutil.cc \
+    eventql/util/io/filerepository.cc \
+    eventql/util/io/inputstream.cc \
+    eventql/util/io/outputstream.cc \
+    eventql/util/io/BufferedOutputStream.cc \
+    eventql/util/io/TerminalOutputStream.cc \
+    eventql/util/io/TerminalInputStream.cc \
+    eventql/util/io/VFSFileInputStream.cc \
+    eventql/util/io/mmappedfile.cc \
+    eventql/util/io/pagemanager.cc \
+    eventql/util/ISO8601.cc \
+    eventql/util/CivilTime.cc \
+    eventql/util/Language.cc \
+    eventql/util/logging.cc \
+    eventql/util/logging/logoutputstream.cc \
+    eventql/util/logging/syslog.cc \
+    eventql/util/net/dnscache.cc \
+    eventql/util/net/tcpserver.cc \
+    eventql/util/net/udpserver.cc \
+    eventql/util/net/udpsocket.cc \
+    eventql/util/net/inetaddr.cc \
+    eventql/util/net/tcpconnection.cc \
+    eventql/util/random.cc \
+    eventql/util/RegExp.cc \
+    eventql/util/rpc/RPCRequest.cc \
+    eventql/util/rpc/RPCContext.cc \
+    eventql/util/rpc/RPCStub.cc \
+    eventql/util/rpc/RPCService.cc \
+    eventql/util/SHA1.cc \
+    eventql/util/StackTrace.cc \
+    eventql/util/status.cc \
+    eventql/util/stats/statsdagent.cc \
+    eventql/util/stats/statsrepository.cc \
+    eventql/util/stats/statssink.cc \
+    eventql/util/stats/statsd.cc \
+    eventql/util/stringutil.cc \
+    eventql/util/thread/eventloop.cc \
+    eventql/util/thread/signalhandler.cc \
+    eventql/util/thread/threadpool.cc \
+    eventql/util/thread/FixedSizeThreadPool.cc \
+    eventql/util/thread/wakeup.cc \
+    eventql/util/uri.cc \
+    eventql/util/UTF8.cc \
+    eventql/util/util/Base64.cc \
+    eventql/util/util/binarymessagereader.cc \
+    eventql/util/util/binarymessagewriter.cc \
+    eventql/util/util/CumulativeHistogram.cc \
+    eventql/util/util/BitPackDecoder.cc \
+    eventql/util/util/BitPackEncoder.cc \
+    eventql/util/util/SimpleRateLimit.cc \
+    eventql/util/util/PersistentHashSet.cc \
+    eventql/util/VFS.cc \
+    eventql/util/wallclock.cc \
+    eventql/util/web/SecureCookie.cc
+
 evql_SOURCES = \
+    ${evql_util_SOURCES} \
     eventql/cli/console.cc \
     eventql/server/sql/codec/binary_codec.cc \
     eventql/evql.cc
 
-evql_LDFLAGS = ${top_builddir}/deps/3rdparty/linenoise/liblinenoise.a
+evql_LDFLAGS = \
+    libsql.a \
+    ${top_builddir}/deps/3rdparty/linenoise/liblinenoise.a

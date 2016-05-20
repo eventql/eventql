@@ -23,7 +23,6 @@
  * code of your own applications
  */
 #include <eventql/util/RegExp.h>
-#include <eventql/sysconfig.h>
 #include <cstring>
 
 #ifdef HAVE_PCRE
