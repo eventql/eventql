@@ -285,4 +285,5 @@ evql_SOURCES = \
 
 evql_LDFLAGS = \
     libsql.a \
-    ${top_builddir}/deps/3rdparty/linenoise/liblinenoise.a
+    ${top_builddir}/deps/3rdparty/linenoise/liblinenoise.a \
+    ${top_builddir}/deps/3rdparty/libsimdcomp/libsimdcomp.a
