@@ -24,7 +24,7 @@
 #pragma once
 #include <stdlib.h>
 #include <string>
-#include <eventql/buildconfig.h>
+//#include <eventql/buildconfig.h>
 
 namespace eventql {
 

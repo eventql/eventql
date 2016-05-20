@@ -2,10 +2,16 @@
 ## In general, the safest way to proceed is to run ./autogen.sh
 
 AC_PREREQ(2.59)
-
 AC_INIT([EventQL],[0.3.0],[authors@eventql.io],[eventql])
+AM_INIT_AUTOMAKE([foreign subdir-objects])
+AM_MAINTAINER_MODE([disable])
 
-AM_MAINTAINER_MODE([enable])
+AC_CONFIG_SRCDIR([configure.ac])
+
+# Check for build env
+AC_PROG_CC
+AC_PROG_CXX
+AC_PROG_RANLIB
 
 # Check for header files
 AC_HEADER_STDC
@@ -53,9 +59,6 @@ AM_CONDITIONAL([HAVE_ZLIB], [test $HAVE_ZLIB = 1])
 # Check for pthread
 ACX_PTHREAD
 AM_CONDITIONAL([HAVE_PTHREAD], [test "x$acx_pthread_ok" = "xyes"])
-
-# Check for std::hash
-AC_CXX_STL_HASH
 
 AC_CONFIG_FILES([Makefile src/Makefile])
 AC_OUTPUT

@@ -17,7 +17,7 @@ fi
 
 set -ex
 
-autoreconf -f -i -Wall
+autoreconf -fi -Wall,no-obsolete
 
 rm -rf autom4te.cache config.h.in~
 exit 0

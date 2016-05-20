@@ -4,9 +4,7 @@ ACLOCAL_AMFLAGS = -I m4
 AUTOMAKE_OPTIONS = foreign
 
 SUBDIRS = . src
-
-# Always include gmock in distributions.
-DIST_SUBDIRS = $(subdirs) src conformance benchmarks
+DIST_SUBDIRS = $(subdirs) src
 
 check-local:
 	@true

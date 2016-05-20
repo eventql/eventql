@@ -29,3 +29,6 @@ missing
 src/.libs
 src/Makefile
 src/Makefile.in
+.deps
+.dirstamp
+compile
