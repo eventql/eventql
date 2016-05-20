@@ -162,6 +162,20 @@ evql_util_SOURCES = \
     eventql/util/assets.cc \
     eventql/util/buffer.cc \
     eventql/util/bufferutil.cc \
+    eventql/util/charts/areachart.cc \
+    eventql/util/charts/axisdefinition.cc \
+    eventql/util/charts/barchart.cc \
+    eventql/util/charts/canvas.cc \
+    eventql/util/charts/chart_test.cc \
+    eventql/util/charts/domain.cc \
+    eventql/util/charts/domainprovider.cc \
+    eventql/util/charts/drawable.cc \
+    eventql/util/charts/griddefinition.cc \
+    eventql/util/charts/legenddefinition.cc \
+    eventql/util/charts/linechart.cc \
+    eventql/util/charts/pointchart.cc \
+    eventql/util/charts/series.cc \
+    eventql/util/charts/timedomain.cc \
     eventql/util/cli/flagparser.cc \
     eventql/util/cli/CLI.cc \
     eventql/util/cli/CLICommand.cc \
