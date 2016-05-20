@@ -8,6 +8,7 @@
 *.pb.h
 *.pb.cc
 src/evql
+src/evqld
 /config.h
 Makefile
 Makefile.in

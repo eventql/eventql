@@ -384,6 +384,9 @@ evqld_SOURCES = \
     eventql/db/TSDBTableRef.cc \
     eventql/db/Table.cc \
     eventql/db/TimeWindowPartitioner.cc \
+    eventql/util/mdb/MDB.cc \
+    eventql/util/mdb/MDBCursor.cc \
+    eventql/util/mdb/MDBTransaction.cc \
     eventql/mapreduce/MapReduceScheduler.cc \
     eventql/mapreduce/MapReduceTask.cc \
     eventql/mapreduce/MapReduceTaskBuilder.cc \
@@ -424,6 +427,7 @@ nodist_evqld_SOURCES = \
 evqld_LDFLAGS = \
     ${top_builddir}/deps/3rdparty/libsimdcomp/libsimdcomp.a \
     ${top_builddir}/deps/3rdparty/mozjs_build/dist/lib/libjs_static.a \
+    ${top_builddir}/deps/3rdparty/liblmdb/liblmdb.a \
     ${top_builddir}/deps/3rdparty/protobuf/libprotobuf.a
 
 dist_noinst_DATA = $(evql_protos)
