@@ -160,3 +160,5 @@ evql_SOURCES = \
     eventql/cli/console.cc \
     eventql/server/sql/codec/binary_codec.cc \
     eventql/evql.cc
+
+evql_LDFLAGS = ${top_builddir}/deps/3rdparty/linenoise/liblinenoise.a
