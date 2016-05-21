@@ -46,5 +46,6 @@ CLEANFILES =             \
 
 release: clean distdir
 	./build/scripts/build_darwin_x86_64.sh $(PACKAGE) $(VERSION)
+	./build/scripts/package_tarballs.sh $(PACKAGE) $(VERSION)
 
 .PHONY: package
