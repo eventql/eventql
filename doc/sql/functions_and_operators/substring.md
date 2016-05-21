@@ -1,16 +1,15 @@
 
 ### substring
 
-Returns a substring of the provided string.
+Returns a substring of the provided string starting at position `pos`.
 
     substring(str, pos [, len])
 
-A substring of `str` starting at position `pos` until the end of the string is returned.
-
 If `pos` is negative, the returned string will start `pos` characters from the end of `str`.
 
-If `len` is provided, a substring of `str` `len` characters long starting at position `pos`
-is returned. If `len` is smaller than 0, an empty string is returned.
+If `len` is omitted, the result is the substring from position `pos` until the end of `str`.
+If `len` is provided, the substring of `str` `len` characters long starting at position `pos`
+is returned. In case that `len` is smaller than 0, the result will be an empty string.
 
 Examples:
 
