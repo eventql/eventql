@@ -41,6 +41,9 @@ MAINTAINERCLEANFILES =   \
   m4/lt~obsolete.m4      \
   m4/ltoptions.m4
 
+CLEANFILES =             \
+  build/target
+
 package: distdir
 	mkdir -p build/dist-src/
 	rm -rf build/dist-src/$(PACKAGE)-$(VERSION)
