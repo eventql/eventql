@@ -40,3 +40,16 @@ MAINTAINERCLEANFILES =   \
   m4/ltversion.m4        \
   m4/lt~obsolete.m4      \
   m4/ltoptions.m4
+
+
+package: package-src
+
+package-src: distdir
+	mkdir -p build/dist-src/
+	rm -rf build/dist-src/$(PACKAGE)-$(VERSION)
+	mv $(PACKAGE)-$(VERSION) build/dist-src
+	build/scripts/package_src.sh $(PACKAGE) $(VERSION)
+
+
+
+.PHONY: package
