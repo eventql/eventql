@@ -882,7 +882,7 @@ nodist_evqld_SOURCES = \
 
 evqld_LDFLAGS = \
     ${top_builddir}/deps/3rdparty/libsimdcomp/libsimdcomp.a \
-    ${top_builddir}/deps/3rdparty/spidermonkey/dist/lib/libjs_static.a \
+    ${top_builddir}/deps/3rdparty/spidermonkey/out/dist/lib/libjs_static.a \
     ${top_builddir}/deps/3rdparty/liblmdb/liblmdb.a \
     ${top_builddir}/deps/3rdparty/protobuf/libprotobuf.a
 
