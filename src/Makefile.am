@@ -619,11 +619,11 @@ evql_util_SOURCES = \
     eventql/util/util/binarymessagereader_impl.h \
     eventql/util/util/binarymessagewriter.cc \
     eventql/util/util/binarymessagewriter.h \
-    eventql/util/MonotonicClock.cc \
-    eventql/util/MonotonicClock.h \
-    eventql/util/MonotonicTime.cc \
-    eventql/util/MonotonicTime.h \
-    eventql/util/MonotonicTime_impl.h \
+    #eventql/util/MonotonicClock.cc \
+    #eventql/util/MonotonicClock.h \
+    #eventql/util/MonotonicTime.cc \
+    #eventql/util/MonotonicTime.h \
+    #eventql/util/MonotonicTime_impl.h \
     eventql/util/RadixTree.h \
     eventql/util/RadixTree_impl.h \
     eventql/util/TimeRange.h \
