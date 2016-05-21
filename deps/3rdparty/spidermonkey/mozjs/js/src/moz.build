@@ -7,12 +7,12 @@
 if CONFIG['DEHYDRA_PATH']:
     DIRS += ['analysis-tests']
 
-if CONFIG['JS_BUNDLED_EDITLINE']:
-    DIRS += ['editline']
+#if CONFIG['JS_BUNDLED_EDITLINE']:
+#    DIRS += ['editline']
 
 # editline needs to get built before the shell
-if not CONFIG['JS_DISABLE_SHELL']:
-    DIRS += ['shell']
+#if not CONFIG['JS_DISABLE_SHELL']:
+#    DIRS += ['shell']
 
 TEST_DIRS += ['jsapi-tests', 'tests', 'gdb']
 
