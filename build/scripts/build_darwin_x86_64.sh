@@ -24,7 +24,8 @@ set -e
 ../../dist-src/$PACKAGE-$VERSION/configure \
     --host=x86_64-apple-darwin14 \
     CC="x86_64-apple-darwin14-cc" \
-    CXX="x86_64-apple-darwin14-cxx"
+    CXX="x86_64-apple-darwin14-c++" \
+    MOZJS_CXXFLAGS="-DXP_MACOSX=1"
 
 make
 make install DESTDIR=../../dist-bin/$PACKAGE-$VERSION-darwin_x86_64

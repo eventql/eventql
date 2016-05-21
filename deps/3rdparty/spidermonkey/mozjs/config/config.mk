@@ -535,15 +535,15 @@ NSINSTALL_PY := $(PYTHON) $(abspath $(MOZILLA_DIR)/config/nsinstall.py)
 # Single-line commands should be switched over to install_cmd.
 NSINSTALL_NATIVECMD := %nsinstall nsinstall
 
-ifdef NSINSTALL_BIN
-NSINSTALL = $(NSINSTALL_BIN)
-else
-ifeq ($(HOST_OS_ARCH),WINNT)
+#ifdef NSINSTALL_BIN
+#NSINSTALL = $(NSINSTALL_BIN)
+#else
+#ifeq ($(HOST_OS_ARCH),WINNT)
 NSINSTALL = $(NSINSTALL_PY)
-else
-NSINSTALL = $(DEPTH)/config/nsinstall$(HOST_BIN_SUFFIX)
-endif # WINNT
-endif # NSINSTALL_BIN
+#else
+#NSINSTALL = $(DEPTH)/config/nsinstall$(HOST_BIN_SUFFIX)
+#endif # WINNT
+#endif # NSINSTALL_BIN
 
 
 ifeq (,$(CROSS_COMPILE)$(filter-out WINNT, $(OS_ARCH)))

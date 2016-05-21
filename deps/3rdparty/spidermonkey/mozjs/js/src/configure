@@ -7399,7 +7399,6 @@ if test "${enable_profiling+set}" = set; then
   fi
 fi
 
-
 case "$host" in
 *mingw*)
     if test -n "$_WIN32_MSVC"; then
