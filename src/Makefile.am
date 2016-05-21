@@ -698,7 +698,7 @@ evql_SOURCES = \
     eventql/server/sql/codec/binary_codec.h \
     eventql/evql.cc
 
-evql_LDFLAGS = \
+evql_LDADD = \
     ${top_builddir}/deps/3rdparty/linenoise/liblinenoise.a \
     ${top_builddir}/deps/3rdparty/libsimdcomp/libsimdcomp.a
 
@@ -881,7 +881,7 @@ nodist_evqld_SOURCES = \
     @builddir@/eventql/LogfileScanParams.pb.cc \
     @builddir@/eventql/RemoteTSDBScanParams.pb.cc
 
-evqld_LDFLAGS = \
+evqld_LDADD = \
     ${top_builddir}/deps/3rdparty/libsimdcomp/libsimdcomp.a \
     ${top_builddir}/deps/3rdparty/spidermonkey/out/dist/lib/libjs_static.a \
     ${top_builddir}/deps/3rdparty/liblmdb/liblmdb.a \
