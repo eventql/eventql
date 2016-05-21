@@ -17,12 +17,18 @@ mkdir $TARGET_DIR $TARGET_DIR/dist
 cd $TARGET_DIR
 set -e
 
-../../../$PACKAGE-$VERSION/configure \
-    --host=x86_64-apple-darwin14 \
-    CC="x86_64-apple-darwin14-cc" \
-    CXX="x86_64-apple-darwin14-c++" \
-    CXXFLAGS="-stdlib=libc++" \
-    MOZJS_CXXFLAGS="-DXP_MACOSX=1"
+export CC=x86_64-apple-darwin14-cc
+export CXX=x86_64-apple-darwin14-c++
+export LD=x86_64-apple-darwin14-ld
+export AR=x86_64-apple-darwin14-ar
+export AS=x86_64-apple-darwin14-as
+export NM=x86_64-apple-darwin14-nm
+export STRIP=x86_64-apple-darwin14-strip
+export RANLIB=x86_64-apple-darwin14-ranlib
+export OBJDUMP=x86_64-apple-darwin14-objdump
+export CXXFLAGS="-stdlib=libc++"
+export MOZJS_CXXFLAGS="-DXP_MACOSX=1"
 
+./configure --host=x86_64-apple-darwin14
 make
 make install DESTDIR=dist
