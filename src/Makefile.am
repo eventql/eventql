@@ -620,11 +620,6 @@ evql_util_SOURCES = \
     eventql/util/util/binarymessagereader_impl.h \
     eventql/util/util/binarymessagewriter.cc \
     eventql/util/util/binarymessagewriter.h \
-    #eventql/util/MonotonicClock.cc \
-    #eventql/util/MonotonicClock.h \
-    #eventql/util/MonotonicTime.cc \
-    #eventql/util/MonotonicTime.h \
-    #eventql/util/MonotonicTime_impl.h \
     eventql/util/RadixTree.h \
     eventql/util/RadixTree_impl.h \
     eventql/util/TimeRange.h \
@@ -634,6 +629,12 @@ evql_util_SOURCES = \
     eventql/util/wallclock.h \
     eventql/util/web/SecureCookie.cc \
     eventql/util/web/SecureCookie.h
+
+    #eventql/util/MonotonicClock.cc \
+    #eventql/util/MonotonicClock.h \
+    #eventql/util/MonotonicTime.cc \
+    #eventql/util/MonotonicTime.h \
+    #eventql/util/MonotonicTime_impl.h
 
 evql_http_SOURCES = \
     eventql/util/http/HTTPFileDownload.cc \
