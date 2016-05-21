@@ -420,6 +420,18 @@
                   visible_in_menu: false
                   visible_in_toc: false
                   source: "/sql/functions_and_operators/to_float.md"
+                -
+                  url: "/queries/sql/functions-and-operators/substring"
+                  type: page
+                  visible_in_menu: false
+                  visible_in_toc: false
+                  source: "/sql/functions_and_operators/substring.md"
+                -
+                  url: "/queries/sql/functions-and-operators/substr"
+                  type: page
+                  visible_in_menu: false
+                  visible_in_toc: false
+                  source: "/sql/functions_and_operators/substr.md"
             -
               url: "/queries/sql/syntax-reference"
               title: "Syntax Reference"
