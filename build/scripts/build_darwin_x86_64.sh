@@ -21,6 +21,7 @@ set -e
     --host=x86_64-apple-darwin14 \
     CC="x86_64-apple-darwin14-cc" \
     CXX="x86_64-apple-darwin14-c++" \
+    CXXFLAGS="-stdlib=libc++" \
     MOZJS_CXXFLAGS="-DXP_MACOSX=1"
 
 make
