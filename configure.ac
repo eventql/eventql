@@ -64,5 +64,8 @@ AM_CONDITIONAL([HAVE_ZLIB], [test $HAVE_ZLIB = 1])
 ACX_PTHREAD
 AM_CONDITIONAL([HAVE_PTHREAD], [test "x$acx_pthread_ok" = "xyes"])
 
+# Pipe through mozjs cxx flags
+AC_SUBST(MOZJS_CXXFLAGS)
+
 AC_CONFIG_FILES([Makefile src/Makefile deps/3rdparty/protobuf/Makefile deps/3rdparty/linenoise/Makefile deps/3rdparty/libsimdcomp/Makefile deps/3rdparty/liblmdb/Makefile deps/3rdparty/spidermonkey/Makefile])
 AC_OUTPUT
