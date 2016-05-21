@@ -21,6 +21,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#include <algorithm>
 #include <eventql/io/cstable/cstable.h>
 #include <eventql/io/cstable/io/PageManager.h>
 #include <eventql/util/util/binarymessagewriter.h>
