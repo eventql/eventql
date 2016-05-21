@@ -442,6 +442,7 @@ evql_util_SOURCES = \
     eventql/util/io/TerminalOutputStream.h \
     eventql/util/io/VFSFileInputStream.cc \
     eventql/util/io/VFSFileInputStream.h \
+    eventql/util/io/VFSFile.h \
     eventql/util/io/file.cc \
     eventql/util/io/file.h \
     eventql/util/io/filerepository.cc \
