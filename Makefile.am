@@ -44,7 +44,7 @@ MAINTAINERCLEANFILES =   \
 CLEANFILES =             \
   build/target
 
-release: distdir
+release: clean distdir
 	./build/scripts/build_darwin_x86_64.sh $(PACKAGE) $(VERSION)
 
 .PHONY: package
