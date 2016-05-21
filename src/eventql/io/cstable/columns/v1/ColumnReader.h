@@ -26,7 +26,7 @@
 #include <eventql/io/cstable/ColumnReader.h>
 #include <eventql/util/util/binarymessagereader.h>
 #include <eventql/util/util/BitPackDecoder.h>
-
+#include <eventql/util/VFSFile.h>
 
 namespace cstable {
 namespace v1 {
