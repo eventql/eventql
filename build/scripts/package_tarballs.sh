@@ -17,7 +17,7 @@ fi
 tar cz $PACKAGE-$VERSION > $PACKAGE-$VERSION.tgz
 
 # binary packages
-for triple in darwin_x86_64; do
+for triple in darwin_x86_64 linux_x86_64; do
   tar cz -C build/target/$PACKAGE-$VERSION-$triple/dist . \
       > $PACKAGE-$VERSION-$triple.tgz
 done
