@@ -27,7 +27,7 @@ endif
 SPIDERMONKEY_CFLAGS = -I$(top_builddir)/deps/3rdparty/spidermonkey/out/dist/include
 SPIDERMONKEY_LDADD = ${top_builddir}/deps/3rdparty/spidermonkey/out/dist/lib/libjs_static.a
 
-PCRE_CFLAGS = -I$(top_srcdir)/deps/3rdparty -DHAVE_PCRE=1
+PCRE_CFLAGS = -I$(top_srcdir)/deps/3rdparty/pcre -DHAVE_PCRE=1
 PCRE_LDADD = ${top_builddir}/deps/3rdparty/pcre/libpcre.a
 
 LINENOISE_CFLAGS = -I$(top_srcdir)/deps/3rdparty
