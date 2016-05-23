@@ -511,18 +511,20 @@ int main(int argc, const char** argv) {
     }
   }
 
-  iputs("authtoken $0", cli_cfg.getAuthToken());
-  //if (flags.isSet("host")) {
-  //  cli_cfg->setHost(flags.getString("host"));
-  //}
+  if (flags.isSet("host")) {
+    cli_cfg.setHost(flags.getString("host"));
+  }
 
-  eventql::cli::ConsoleOptions console_opts;
-  console_opts.server_host = flags.getString("host");
-  console_opts.server_port = flags.getInt("port");
-  console_opts.server_auth_token = flags.getString("auth_token");
+  if (flags.isSet("auth_token")) {
+    cli_cfg.setAuthToken(flags.getString("auth_token"));
+  }
+
+  if (flags.isSet("port")) {
+    cli_cfg.setPort(flags.getInt("port"));
+  }
 
   /* cli */
-  eventql::cli::Console console(console_opts);
+  eventql::cli::Console console(cli_cfg);
 
   if (flags.getArgv().size() > 0) {
     stderr_os->write(

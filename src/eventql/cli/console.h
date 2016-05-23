@@ -27,6 +27,7 @@
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/cli/CLICommand.h>
 #include <eventql/util/status.h>
+#include <eventql/cli/cli_config.h>
 
 namespace eventql {
 namespace cli {
@@ -41,7 +42,7 @@ struct ConsoleOptions {
 class Console {
 public:
 
-  Console(const ConsoleOptions& options);
+  Console(const CLIConfig cli_cfg);
 
   /**
    * Start an interactive shell. This method will never return
@@ -54,7 +55,7 @@ public:
   Status runQuery(const String& query);
 
 protected:
-  ConsoleOptions cfg_;
+  CLIConfig cfg_;
 };
 
 } // namespace cli
