@@ -42,8 +42,11 @@ PROTOBUF_LDADD = ${top_builddir}/deps/3rdparty/protobuf/libprotobuf.a
 LMDB_CFLAGS = -I$(top_srcdir)/deps/3rdparty
 LMDB_LDADD = ${top_builddir}/deps/3rdparty/liblmdb/liblmdb.a
 
-AM_CXXFLAGS = $(PCRE_CFLAGS) $(SPIDERMONKEY_CFLAGS) $(SIMDCOMP_CFLAGS) $(LINENOISE_CLFAGS) $(PTHREAD_CFLAGS) $(PTHREAD_DEF) $(SYSLOG_DEF) $(ZLIB_DEF) $(GETHOSTBYNAME_R_DEF) -std=c++0x -ftemplate-depth=500 -mno-omit-leaf-frame-pointer -fno-omit-frame-pointer -Wall -Wextra -Wno-unused-parameter -Wno-sign-compare -Wdelete-non-virtual-dtor -Wno-predefined-identifier-outside-function -O3 -g -I@builddir@
-AM_CFLAGS = $(PCRE_CFLAGS) $(SPIDERMONKEY_CFLAGS) $(SIMDCOMP_CFLAGS) $(LINENOISE_CLFAGS) $(PTHREAD_CFLAGS) $(PTHREAD_DEF) $(SYSLOG_DEF) $(ZLIB_DEF) $(GETHOSTBYNAME_R_DEF) -std=c11 -mno-omit-leaf-frame-pointer -fno-omit-frame-pointer -Wall -pedantic -O3 -g
+INIPARSER_CFLAGS = -I$(top_srcdir)/deps/3rdparty
+INIPARSER_LDADD = ${top_builddir}/deps/3rdparty/iniparser/libiniparser.a
+
+AM_CXXFLAGS = $(PCRE_CFLAGS) $(SPIDERMONKEY_CFLAGS) $(SIMDCOMP_CFLAGS) $(LINENOISE_CLFAGS) $(INIPARSER_CFLAGS)  $(PTHREAD_CFLAGS) $(PTHREAD_DEF) $(SYSLOG_DEF) $(ZLIB_DEF) $(GETHOSTBYNAME_R_DEF) -std=c++0x -ftemplate-depth=500 -mno-omit-leaf-frame-pointer -fno-omit-frame-pointer -Wall -Wextra -Wno-unused-parameter -Wno-sign-compare -Wdelete-non-virtual-dtor -Wno-predefined-identifier-outside-function -O3 -g -I@builddir@
+AM_CFLAGS = $(PCRE_CFLAGS) $(SPIDERMONKEY_CFLAGS) $(SIMDCOMP_CFLAGS) $(LINENOISE_CLFAGS) $(INIPARSER_CFLAGS) $(PTHREAD_CFLAGS) $(PTHREAD_DEF) $(SYSLOG_DEF) $(ZLIB_DEF) $(GETHOSTBYNAME_R_DEF) -std=c11 -mno-omit-leaf-frame-pointer -fno-omit-frame-pointer -Wall -pedantic -O3 -g
 AM_LDFLAGS = $(PTHREAD_CFLAGS)
 
 MAINTAINERCLEANFILES =   \
@@ -717,6 +720,7 @@ evql_SOURCES = \
 evql_LDADD = \
     $(LINENOISE_LDADD) \
     $(SIMDCOMP_LDADD) \
+    $(INIPARSER_LDADD) \
     $(PCRE_LDADD)
 
 evqld_SOURCES = \
@@ -903,6 +907,7 @@ evqld_LDADD = \
     $(SIMDCOMP_LDADD) \
     $(SPIDERMONKEY_LDADD) \
     $(LMDB_LDADD) \
+    $(INIPARSER_LDADD) \
     $(PROTOBUF_LDADD) \
     $(PCRE_LDADD)
 
