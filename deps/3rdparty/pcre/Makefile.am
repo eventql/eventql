@@ -65,6 +65,8 @@ include_HEADERS = pcreposix.h
 noinst_LIBRARIES = libpcre.a libpcreposix.a
 
 libpcre_a_SOURCES = \
+  config.h \
+  pcre.h \
   pcre_byte_order.c \
   pcre_chartables.c \
   pcre_compile.c \
