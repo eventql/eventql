@@ -98,20 +98,21 @@ Status CLIConfig::setConfigOption(
 }
 
 Status CLIConfig::setHost(const String& host /* = "localhost" */) {
-  //FIXME check host format
-  server_host_ = host;
+  server_host_ = host; //FIXME check host format
   return Status::success();
 }
 
 Status CLIConfig::setPort(const int port /* = 80 */) {
-  //FIXME check port format
+  if (port < 0 || port > 65535) {
+    return Status(eFlagError, StringUtil::format("invalid port: $0", port));
+  }
+
   server_port_ = port;
   return Status::success();
 }
 
 Status CLIConfig::setAuthToken(const String& auth_token) {
-  //FIXME check auth format
-  server_auth_token_ = auth_token;
+  server_auth_token_ = auth_tokken;
   return Status::success();
 }
 
