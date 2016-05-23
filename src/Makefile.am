@@ -815,6 +815,7 @@ evqld_SOURCES = \
     eventql/db/partition_map.h \
     eventql/eventql.h \
     eventql/evqld.cc \
+    eventql/mapreduce/mapreduce_preludejs.cc \
     eventql/mapreduce/MapReduceScheduler.cc \
     eventql/mapreduce/MapReduceScheduler.h \
     eventql/mapreduce/MapReduceTask.cc \
@@ -913,6 +914,9 @@ EXTRA_DIST = \
   eventql/util/charts/testdata \
   eventql/sql/testdata \
   eventql/mapreduce/prelude.js
+
+eventql/mapreduce/mapreduce_preludejs.cc:
+	echo 'eventql/mapreduce/prelude.js:${srcdir}/eventql/mapreduce/prelude.js' | ${srcdir}/eventql/util/assets.sh $(builddir)/eventql/mapreduce/mapreduce_preludejs.cc
 
 %.pb.cc %.pb.h: %.proto
 	$(top_builddir)/deps/3rdparty/protobuf/protoc --proto_path=$(srcdir) --cpp_out=$(builddir) $^
