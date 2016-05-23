@@ -6,6 +6,7 @@ AUTOMAKE_OPTIONS = foreign
 SUBDIRS = \
     . \
     deps/3rdparty/spidermonkey \
+    deps/3rdparty/pcre \
     deps/3rdparty/linenoise \
     deps/3rdparty/libsimdcomp \
     deps/3rdparty/protobuf \
