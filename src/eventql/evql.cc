@@ -523,6 +523,11 @@ int main(int argc, const char** argv) {
     cli_cfg.setPort(flags.getInt("port"));
   }
 
+  if (cli_cfg.getAuthToken().isEmpty()) {
+    printError("FlagError: flag 'auth_token' is not set");
+    return 1;
+  }
+
   /* cli */
   eventql::cli::Console console(cli_cfg);
 
