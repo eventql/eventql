@@ -28,4 +28,4 @@ export OBJDUMP=x86_64-linux-gnu-objdump
 
 ../../../$PACKAGE-$VERSION/configure --host=x86_64-linux-gnu --prefix=/usr/local
 make
-make install DESTDIR=dist
+make install DESTDIR=$(pwd)/dist
