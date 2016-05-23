@@ -69,7 +69,7 @@ Status CLIConfig::loadDefaultConfigFile() {
 
 Status CLIConfig::loadConfigFile(const String& config_file) {
   IniParserState parser_state(this);
-  if (ini_parse(config_file.c_str(), &ini_parse_handler, &parser_state) == 0) {
+  if (ini_parse(config_file.c_str(), &ini_parse_handler, &parser_state) < 0) {
     parser_state.status = Status(eParseError, "invalid config file");
   }
 
@@ -80,13 +80,12 @@ Status CLIConfig::setConfigOption(
     const String& section,
     const String& key,
     const String& value) {
-  iputs("set config options", 1);
   if (section == "evql") {
     if (key == "host") {
       return setHost(value);
     }
     if (key == "port") {
-      return setPort(value);
+      return setPort(stoi(value));
     }
     if (key == "auth_token") {
       return setAuthToken(value);
@@ -104,9 +103,9 @@ Status CLIConfig::setHost(const String& host) {
   return Status::success();
 }
 
-Status CLIConfig::setPort(const String& port) {
+Status CLIConfig::setPort(const int port) {
   //FIXME check port format
-  server_port_ = stoi(port);
+  server_port_ = port;
   return Status::success();
 }
 

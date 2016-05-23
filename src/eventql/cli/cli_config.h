@@ -40,7 +40,7 @@ public:
   Status loadConfigFile(const String& file_path);
 
   Status setHost(const String& host);
-  Status setPort(const String& port);
+  Status setPort(const int port);
   Status setAuthToken(const String& auth_token);
   Status setBatchMode(const String& batch_mode);
 
