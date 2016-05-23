@@ -39,8 +39,8 @@ public:
   Status loadDefaultConfigFile();
   Status loadConfigFile(const String& file_path);
 
-  Status setHost(const String& host);
-  Status setPort(const int port);
+  Status setHost(const String& host = "localhost");
+  Status setPort(const int port = 80);
   Status setAuthToken(const String& auth_token);
   Status setBatchMode(const String& batch_mode);
 

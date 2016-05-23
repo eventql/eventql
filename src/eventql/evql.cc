@@ -426,7 +426,7 @@ int main(int argc, const char** argv) {
       cli::FlagParser::T_STRING,
       false,
       "h",
-      "localhost",
+      NULL,
       "eventql server hostname",
       "<host>");
 
@@ -435,7 +435,7 @@ int main(int argc, const char** argv) {
       cli::FlagParser::T_INTEGER,
       false,
       "p",
-      "80",
+      NULL,
       "eventql server port",
       "<port>");
 

@@ -97,13 +97,13 @@ Status CLIConfig::setConfigOption(
   return Status(eParseError);
 }
 
-Status CLIConfig::setHost(const String& host) {
+Status CLIConfig::setHost(const String& host /* = "localhost" */) {
   //FIXME check host format
   server_host_ = host;
   return Status::success();
 }
 
-Status CLIConfig::setPort(const int port) {
+Status CLIConfig::setPort(const int port /* = 80 */) {
   //FIXME check port format
   server_port_ = port;
   return Status::success();
