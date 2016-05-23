@@ -24,42 +24,143 @@
  */
 #include <eventql/cli/cli_config.h>
 #include <eventql/util/inspect.h>
+#include <eventql/util/io/fileutil.h>
 #include <inih/ini.h>
 
 namespace eventql {
 namespace cli {
 
-CliConfig::CliConfig() {}
+struct IniParserState {
+  IniParserState(CLIConfig* _cfg) : cfg(_cfg), status(Status::success()) {}
+  CLIConfig* cfg;
+  Status status;
+};
 
-CliConfig::CliConfig(const String& config_file) {
-  loadConfigFile(config_file);
+static int ini_parse_handler(
+    void* user,
+    const char* section,
+    const char* name,
+    const char* value) {
+  auto parser_state = (IniParserState*) user;
+  auto status = parser_state->cfg->setConfigOption(section, name, value);
+  if (status.isSuccess()) {
+    return 1;
+  } else {
+    parser_state->status = status;
+    return 0;
+  }
 }
 
-void CliConfig::loadConfigFile(const String& config_file) {
+CLIConfig::CLIConfig() {}
 
+Status CLIConfig::loadDefaultConfigFile() {
+  char* homedir = getenv("HOME");
+  if (!homedir) {
+    return Status::success();
+  }
+
+  String confg_file_path = FileUtil::joinPaths(homedir, ".evqlrc");
+  if (!FileUtil::exists(confg_file_path)) {
+    return Status::success();
+  }
+
+  return loadConfigFile(confg_file_path);
 }
 
-Option<String> CliConfig::getHost() const {
-  return server_host_;
+Status CLIConfig::loadConfigFile(const String& config_file) {
+  IniParserState parser_state(this);
+  if (ini_parse(config_file.c_str(), &ini_parse_handler, &parser_state) == 0) {
+    parser_state.status = Status(eParseError, "invalid config file");
+  }
+
+  return parser_state.status;
 }
 
-Option<int> CliConfig::getPort() const {
-  return server_port_;
+Status CLIConfig::setConfigOption(
+    const String& section,
+    const String& key,
+    const String& value) {
+  iputs("set config options", 1);
+  if (section == "evql") {
+    if (key == "host") {
+      return setHost(value);
+    }
+    if (key == "port") {
+      return setPort(value);
+    }
+    if (key == "auth_token") {
+      return setAuthToken(value);
+    }
+    if (key == "batch_mode") {
+      return setBatchMode(value);
+    }
+  }
+  return Status(eParseError);
 }
 
-Option<String> CliConfig::getAuthToken() const {
-  return server_auth_token_;
+Status CLIConfig::setHost(const String& host) {
+  //FIXME check host format
+  server_host_ = host;
+  return Status::success();
 }
 
-Option<String> CliConfig::getFile() const {
+Status CLIConfig::setPort(const String& port) {
+  //FIXME check port format
+  server_port_ = stoi(port);
+  return Status::success();
+}
+
+Status CLIConfig::setAuthToken(const String& auth_token) {
+  //FIXME check auth format
+  server_auth_token_ = auth_token;
+  return Status::success();
+}
+
+Status CLIConfig::setBatchMode(const String& batch_mode) {
+  if (batch_mode == "false") {
+    batch_mode_ = false;
+    return Status::success();
+  } else if (batch_mode == "true") {
+    batch_mode_ = true;
+    return Status::success();
+  } else {
+    return Status(eParseError);
+  }
+}
+
+Option<String> CLIConfig::getHost() const {
+  if (server_host_.size() > 0) {
+    return Some<String>(server_host_);
+  } else {
+    return None<String>();
+  }
+}
+
+Option<int> CLIConfig::getPort() const {
+  if (server_port_) {
+    return Some<int>(server_port_);
+  } else {
+    return None<int>();
+  }
+}
+
+Option<String> CLIConfig::getAuthToken() const {
+  if (server_auth_token_.size() > 0) {
+    return Some<String>(server_auth_token_);
+  } else {
+    return None<String>();
+  }
+}
+
+Option<String> CLIConfig::getFile() const {
   return file_;
 }
 
-Option<String> CliConfig::getExec() const {
+Option<String> CLIConfig::getExec() const {
   return exec_;
 }
 
-Option<bool> CliConfig::getBatchMode() const {
+Option<bool> CLIConfig::getBatchMode() const {
   return batch_mode_;
 }
 

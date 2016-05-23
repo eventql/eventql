@@ -26,18 +26,23 @@
 #include <eventql/eventql.h>
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/option.h>
+#include <eventql/util/status.h>
 
 namespace eventql {
 namespace cli {
 
-class CliConfig {
+class CLIConfig {
 public:
 
-  CliConfig();
+  CLIConfig();
 
-  CliConfig(const String& config_file);
+  Status loadDefaultConfigFile();
+  Status loadConfigFile(const String& file_path);
 
-  void loadConfigFile(const String& file_path);
+  Status setHost(const String& host);
+  Status setPort(const String& port);
+  Status setAuthToken(const String& auth_token);
+  Status setBatchMode(const String& batch_mode);
 
   Option<String> getHost() const;
   Option<int> getPort() const;
@@ -45,6 +50,11 @@ public:
   Option<bool> getBatchMode() const;
   Option<String> getFile() const;
   Option<String> getExec() const;
+
+  Status setConfigOption(
+      const String& section,
+      const String& key,
+      const String& value);
 
 protected:
   String server_host_;
