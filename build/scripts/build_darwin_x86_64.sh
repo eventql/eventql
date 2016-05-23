@@ -13,6 +13,7 @@ if ! test -d $PACKAGE-$VERSION; then
 fi
 
 TARGET_DIR=build/target/$PACKAGE-$VERSION-darwin_x86_64
+test -d $TARGET_DIR/dist && rm -rf $TARGET_DIR/dist || true
 mkdir -p $TARGET_DIR $TARGET_DIR/dist || true
 cd $TARGET_DIR
 
