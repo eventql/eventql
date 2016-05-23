@@ -211,27 +211,6 @@ sure both macros are undefined; an emulation function will then be used. */
    */
 /* #undef NO_RECURSE */
 
-/* Name of package */
-#define PACKAGE "pcre"
-
-/* Define to the address where bug reports for this package should be sent. */
-#define PACKAGE_BUGREPORT ""
-
-/* Define to the full name of this package. */
-#define PACKAGE_NAME "PCRE"
-
-/* Define to the full name and version of this package. */
-#define PACKAGE_STRING "PCRE 8.38"
-
-/* Define to the one symbol short name of this package. */
-#define PACKAGE_TARNAME "pcre"
-
-/* Define to the home page for this package. */
-#define PACKAGE_URL ""
-
-/* Define to the version of this package. */
-#define PACKAGE_VERSION "8.38"
-
 /* The value of PARENS_NEST_LIMIT specifies the maximum depth of nested
    parentheses (of any kind) in a pattern. This limits the amount of system
    stack that is used while compiling a pattern. */
@@ -333,9 +312,6 @@ sure both macros are undefined; an emulation function will then be used. */
 
 /* Define to any value for valgrind support to find invalid memory reads. */
 /* #undef SUPPORT_VALGRIND */
-
-/* Version number of package */
-#define VERSION "8.38"
 
 /* Define to empty if `const' does not conform to ANSI C. */
 /* #undef const */
