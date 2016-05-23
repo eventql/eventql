@@ -25,6 +25,8 @@
 #include <unistd.h>
 #include <signal.h>
 #include <poll.h>
+
+#include "eventql/eventql.h"
 #include "eventql/util/application.h"
 #include "eventql/util/logging.h"
 #include "eventql/util/random.h"
@@ -42,8 +44,7 @@
 #include "eventql/util/cli/term.h"
 #include "eventql/server/sql/codec/binary_codec.h"
 #include "eventql/cli/console.h"
-
-#include "eventql/eventql.h"
+#include "eventql/cli/cli_config.h"
 
 thread::EventLoop ev;
 
@@ -379,6 +380,14 @@ static bool hasSTDIN() {
   return poll(&p, 1, 0) == 1;
 }
 
+static void printError(const String& error_string) {
+  auto stderr_os = TerminalOutputStream::fromStream(OutputStream::getStderr());
+  stderr_os->print(
+      "ERROR:",
+      { TerminalStyle::RED, TerminalStyle::UNDERSCORE });
+  stderr_os->print(" " + error_string + "\n");
+}
+
 int main(int argc, const char** argv) {
   Application::init();
   Application::logToStderr();
@@ -493,6 +502,20 @@ int main(int argc, const char** argv) {
   }
 
   /* console options */
+  eventql::cli::CLIConfig cli_cfg;
+  {
+    auto status = cli_cfg.loadDefaultConfigFile();
+    if (!status.isSuccess()) {
+      printError(status.message());
+      return 1;
+    }
+  }
+
+  iputs("authtoken $0", cli_cfg.getAuthToken());
+  //if (flags.isSet("host")) {
+  //  cli_cfg->setHost(flags.getString("host"));
+  //}
+
   eventql::cli::ConsoleOptions console_opts;
   console_opts.server_host = flags.getString("host");
   console_opts.server_port = flags.getInt("port");
