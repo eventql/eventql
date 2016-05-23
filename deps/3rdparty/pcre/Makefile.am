@@ -91,9 +91,7 @@ libpcre_a_SOURCES = \
 
 libpcre_a_CFLAGS = $(VISIBILITY_CFLAGS) $(AM_CFLAGS) -DHAVE_CONFIG_H=1
 libpcre_a_LIBADD =
-libpcre_a_LDFLAGS = $(EXTRA_LIBPCRE_LDFLAGS)
 
 libpcreposix_a_SOURCES = pcreposix.c
 libpcreposix_a_CFLAGS = $(VISIBILITY_CFLAGS) $(AM_CFLAGS) -DHAVE_CONFIG_H=1
-libpcreposix_a_LDFLAGS = $(EXTRA_LIBPCREPOSIX_LDFLAGS)
 libpcreposix_a_LIBADD = libpcre.a
