@@ -79,5 +79,4 @@ AM_CONDITIONAL(WITH_PCRE16, false)
 AM_CONDITIONAL(WITH_JIT, false)
 
 AC_CONFIG_FILES([Makefile src/Makefile deps/3rdparty/protobuf/Makefile deps/3rdparty/linenoise/Makefile deps/3rdparty/libsimdcomp/Makefile deps/3rdparty/liblmdb/Makefile deps/3rdparty/spidermonkey/Makefile deps/3rdparty/pcre/Makefile])
-AC_CONFIG_HEADERS([deps/3rdparty/pcre/config.h:deps/3rdparty/pcre/config.h.in])
 AC_OUTPUT
