@@ -23,24 +23,45 @@
  * code of your own applications
  */
 #include <eventql/cli/cli_config.h>
+#include <eventql/util/inspect.h>
+#include <inih/ini.h>
 
 namespace eventql {
 namespace cli {
 
 CliConfig::CliConfig() {}
 
-String CliConfig::getHost() const {
+CliConfig::CliConfig(const String& config_file) {
+  loadConfigFile(config_file);
+}
+
+void CliConfig::loadConfigFile(const String& config_file) {
+
+}
+
+Option<String> CliConfig::getHost() const {
   return server_host_;
 }
 
-int CliConfig::getPort() const {
+Option<int> CliConfig::getPort() const {
   return server_port_;
 }
 
-String CliConfig::getAuthToken() const {
+Option<String> CliConfig::getAuthToken() const {
   return server_auth_token_;
 }
 
+Option<String> CliConfig::getFile() const {
+  return file_;
+}
+
+Option<String> CliConfig::getExec() const {
+  return exec_;
+}
+
+Option<bool> CliConfig::getBatchMode() const {
+  return batch_mode_;
+}
 
 } // namespace cli
 } // namespace eventql

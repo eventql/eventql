@@ -25,6 +25,7 @@
 #pragma once
 #include <eventql/eventql.h>
 #include <eventql/util/stdtypes.h>
+#include <eventql/util/option.h>
 
 namespace eventql {
 namespace cli {
@@ -34,17 +35,24 @@ public:
 
   CliConfig();
 
-  String getHost() const;
+  CliConfig(const String& config_file);
 
-  int getPort() const;
+  void loadConfigFile(const String& file_path);
 
-  String getAuthToken() const;
+  Option<String> getHost() const;
+  Option<int> getPort() const;
+  Option<String> getAuthToken() const;
+  Option<bool> getBatchMode() const;
+  Option<String> getFile() const;
+  Option<String> getExec() const;
 
 protected:
   String server_host_;
   int server_port_;
   String server_auth_token_;
   bool batch_mode_;
+  String file_;
+  String exec_;
 };
 
 } // namespace cli
