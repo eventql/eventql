@@ -42,11 +42,11 @@ PROTOBUF_LDADD = ${top_builddir}/deps/3rdparty/protobuf/libprotobuf.a
 LMDB_CFLAGS = -I$(top_srcdir)/deps/3rdparty
 LMDB_LDADD = ${top_builddir}/deps/3rdparty/liblmdb/liblmdb.a
 
-INIPARSER_CFLAGS = -I$(top_srcdir)/deps/3rdparty
-INIPARSER_LDADD = ${top_builddir}/deps/3rdparty/iniparser/libiniparser.a
+INIH_CFLAGS = -I$(top_srcdir)/deps/3rdparty
+INIH_LDADD = ${top_builddir}/deps/3rdparty/inih/libinih.a
 
-AM_CXXFLAGS = $(PCRE_CFLAGS) $(SPIDERMONKEY_CFLAGS) $(SIMDCOMP_CFLAGS) $(LINENOISE_CLFAGS) $(INIPARSER_CFLAGS)  $(PTHREAD_CFLAGS) $(PTHREAD_DEF) $(SYSLOG_DEF) $(ZLIB_DEF) $(GETHOSTBYNAME_R_DEF) -std=c++0x -ftemplate-depth=500 -mno-omit-leaf-frame-pointer -fno-omit-frame-pointer -Wall -Wextra -Wno-unused-parameter -Wno-sign-compare -Wdelete-non-virtual-dtor -Wno-predefined-identifier-outside-function -O3 -g -I@builddir@
-AM_CFLAGS = $(PCRE_CFLAGS) $(SPIDERMONKEY_CFLAGS) $(SIMDCOMP_CFLAGS) $(LINENOISE_CLFAGS) $(INIPARSER_CFLAGS) $(PTHREAD_CFLAGS) $(PTHREAD_DEF) $(SYSLOG_DEF) $(ZLIB_DEF) $(GETHOSTBYNAME_R_DEF) -std=c11 -mno-omit-leaf-frame-pointer -fno-omit-frame-pointer -Wall -pedantic -O3 -g
+AM_CXXFLAGS = $(PCRE_CFLAGS) $(SPIDERMONKEY_CFLAGS) $(SIMDCOMP_CFLAGS) $(LINENOISE_CLFAGS) $(INIH_CFLAGS)  $(PTHREAD_CFLAGS) $(PTHREAD_DEF) $(SYSLOG_DEF) $(ZLIB_DEF) $(GETHOSTBYNAME_R_DEF) -std=c++0x -ftemplate-depth=500 -mno-omit-leaf-frame-pointer -fno-omit-frame-pointer -Wall -Wextra -Wno-unused-parameter -Wno-sign-compare -Wdelete-non-virtual-dtor -Wno-predefined-identifier-outside-function -O3 -g -I@builddir@
+AM_CFLAGS = $(PCRE_CFLAGS) $(SPIDERMONKEY_CFLAGS) $(SIMDCOMP_CFLAGS) $(LINENOISE_CLFAGS) $(INIH_CFLAGS) $(PTHREAD_CFLAGS) $(PTHREAD_DEF) $(SYSLOG_DEF) $(ZLIB_DEF) $(GETHOSTBYNAME_R_DEF) -std=c11 -mno-omit-leaf-frame-pointer -fno-omit-frame-pointer -Wall -pedantic -O3 -g
 AM_LDFLAGS = $(PTHREAD_CFLAGS)
 
 MAINTAINERCLEANFILES =   \
@@ -713,6 +713,8 @@ evql_SOURCES = \
     ${evql_cstable_SOURCES} \
     eventql/cli/console.cc \
     eventql/cli/console.h \
+    eventql/cli/cli_config.cc \
+    eventql/cli/cli_config.h \
     eventql/server/sql/codec/binary_codec.cc \
     eventql/server/sql/codec/binary_codec.h \
     eventql/evql.cc
@@ -720,7 +722,7 @@ evql_SOURCES = \
 evql_LDADD = \
     $(LINENOISE_LDADD) \
     $(SIMDCOMP_LDADD) \
-    $(INIPARSER_LDADD) \
+    $(INIH_LDADD) \
     $(PCRE_LDADD)
 
 evqld_SOURCES = \
@@ -907,7 +909,7 @@ evqld_LDADD = \
     $(SIMDCOMP_LDADD) \
     $(SPIDERMONKEY_LDADD) \
     $(LMDB_LDADD) \
-    $(INIPARSER_LDADD) \
+    $(INIH_LDADD) \
     $(PROTOBUF_LDADD) \
     $(PCRE_LDADD)
 
