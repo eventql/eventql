@@ -22,7 +22,6 @@ EXTRA_DIST =                             \
   CHANGELOG
 
 dist_doc_DATA =                          \
-  doc                                    \
   README.md                              \
   LICENSE                                \
   AUTHORS                                \
