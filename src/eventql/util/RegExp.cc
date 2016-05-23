@@ -123,7 +123,7 @@ bool RegExp::match(const String& subject) const {
 
 bool RegExp::match(const Buffer& subject) const {
 #ifdef HAVE_PCRE
-  return match(buffer, nullptr);
+  return match(subject, nullptr);
 #else
   return std::regex_match(
       (char*) subject.data(),
