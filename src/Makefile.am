@@ -24,10 +24,26 @@ else
 GETHOSTBYNAME_R_DEF =
 endif
 
-BUNDLED_INCLUDES = -I$(top_srcdir)/deps/3rdparty -I$(top_srcdir)/deps/3rdparty/protobuf -I$(top_builddir)/deps/3rdparty/spidermonkey/out/dist/include
+SPIDERMONKEY_CFLAGS = -I$(top_builddir)/deps/3rdparty/spidermonkey/out/dist/include
+SPIDERMONKEY_LDADD = ${top_builddir}/deps/3rdparty/spidermonkey/out/dist/lib/libjs_static.a
 
-AM_CXXFLAGS = $(BUNDLED_INCLUDES) $(LINENOISE_CLFAGS) $(PTHREAD_CFLAGS) $(PTHREAD_DEF) $(SYSLOG_DEF) $(ZLIB_DEF) $(GETHOSTBYNAME_R_DEF) -std=c++0x -ftemplate-depth=500 -mno-omit-leaf-frame-pointer -fno-omit-frame-pointer -Wall -Wextra -Wno-unused-parameter -Wno-sign-compare -Wdelete-non-virtual-dtor -Wno-predefined-identifier-outside-function -O3 -g -I@builddir@
-AM_CFLAGS = $(BUNDLED_INCLUDES) $(PTHREAD_CFLAGS) $(PTHREAD_DEF) $(SYSLOG_DEF) $(ZLIB_DEF) $(GETHOSTBYNAME_R_DEF) -std=c11 -mno-omit-leaf-frame-pointer -fno-omit-frame-pointer -Wall -pedantic -O3 -g
+PCRE_CFLAGS = -I$(top_srcdir)/deps/3rdparty -DHAVE_PCRE=1
+PCRE_LDADD = ${top_builddir}/deps/3rdparty/pcre/libpcre.a
+
+LINENOISE_CFLAGS = -I$(top_srcdir)/deps/3rdparty
+LINENOISE_LDADD = ${top_builddir}/deps/3rdparty/linenoise/liblinenoise.a
+
+SIMDCOMP_CFLAGS = -I$(top_srcdir)/deps/3rdparty
+SIMDCOMP_LDADD = ${top_builddir}/deps/3rdparty/libsimdcomp/libsimdcomp.a
+
+PROTOBUF_CFLAGS = -I$(top_srcdir)/deps/3rdparty/protobuf
+PROTOBUF_LDADD = ${top_builddir}/deps/3rdparty/protobuf/libprotobuf.a
+
+LMDB_CFLAGS = -I$(top_srcdir)/deps/3rdparty
+LMDB_LDADD = ${top_builddir}/deps/3rdparty/liblmdb/liblmdb.a
+
+AM_CXXFLAGS = $(PCRE_CFLAGS) $(SPIDERMONKEY_CFLAGS) $(SIMDCOMP_CFLAGS) $(LINENOISE_CLFAGS) $(PTHREAD_CFLAGS) $(PTHREAD_DEF) $(SYSLOG_DEF) $(ZLIB_DEF) $(GETHOSTBYNAME_R_DEF) -std=c++0x -ftemplate-depth=500 -mno-omit-leaf-frame-pointer -fno-omit-frame-pointer -Wall -Wextra -Wno-unused-parameter -Wno-sign-compare -Wdelete-non-virtual-dtor -Wno-predefined-identifier-outside-function -O3 -g -I@builddir@
+AM_CFLAGS = $(PCRE_CFLAGS) $(SPIDERMONKEY_CFLAGS) $(SIMDCOMP_CFLAGS) $(LINENOISE_CLFAGS) $(PTHREAD_CFLAGS) $(PTHREAD_DEF) $(SYSLOG_DEF) $(ZLIB_DEF) $(GETHOSTBYNAME_R_DEF) -std=c11 -mno-omit-leaf-frame-pointer -fno-omit-frame-pointer -Wall -pedantic -O3 -g
 AM_LDFLAGS = $(PTHREAD_CFLAGS)
 
 MAINTAINERCLEANFILES =   \
@@ -699,8 +715,9 @@ evql_SOURCES = \
     eventql/evql.cc
 
 evql_LDADD = \
-    ${top_builddir}/deps/3rdparty/linenoise/liblinenoise.a \
-    ${top_builddir}/deps/3rdparty/libsimdcomp/libsimdcomp.a
+    $(LINENOISE_LDADD) \
+    $(SIMDCOMP_LDADD) \
+    $(PCRE_LDADD)
 
 evqld_SOURCES = \
     ${evql_util_SOURCES} \
@@ -882,10 +899,11 @@ nodist_evqld_SOURCES = \
     @builddir@/eventql/RemoteTSDBScanParams.pb.cc
 
 evqld_LDADD = \
-    ${top_builddir}/deps/3rdparty/libsimdcomp/libsimdcomp.a \
-    ${top_builddir}/deps/3rdparty/spidermonkey/out/dist/lib/libjs_static.a \
-    ${top_builddir}/deps/3rdparty/liblmdb/liblmdb.a \
-    ${top_builddir}/deps/3rdparty/protobuf/libprotobuf.a
+    $(SIMDCOMP_LDADD) \
+    $(SPIDERMONKEY_LDADD) \
+    $(LMDB_LDADD) \
+    $(PROTOBUF_LDADD) \
+    $(PCRE_LDADD)
 
 dist_noinst_DATA = $(evql_protos)
 BUILT_SOURCES = $(evql_protos:.proto=.pb.h)

@@ -38,3 +38,4 @@ src/Makefile.in
 .deps
 .dirstamp
 compile
+test-driver

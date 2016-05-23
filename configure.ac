@@ -5,7 +5,6 @@ AC_PREREQ(2.59)
 AC_INIT([EventQL],[0.3.0],[authors@eventql.io],[eventql])
 AM_INIT_AUTOMAKE([foreign subdir-objects])
 AM_MAINTAINER_MODE([enable])
-
 AC_CONFIG_SRCDIR([configure.ac])
 
 # Check for build env
@@ -69,5 +68,15 @@ AM_CONDITIONAL([HAVE_PTHREAD], [test "x$acx_pthread_ok" = "xyes"])
 # Pipe through mozjs cxx flags
 AC_SUBST(MOZJS_CXXFLAGS)
 
-AC_CONFIG_FILES([Makefile src/Makefile deps/3rdparty/protobuf/Makefile deps/3rdparty/linenoise/Makefile deps/3rdparty/libsimdcomp/Makefile deps/3rdparty/liblmdb/Makefile deps/3rdparty/spidermonkey/Makefile])
+# Options of pcre
+AM_CONDITIONAL(WITH_PCRE_CPP, false)
+AM_CONDITIONAL(WITH_VALGRIND, false)
+AM_CONDITIONAL(WITH_GCOV, false)
+AM_CONDITIONAL(WITH_REBUILD_CHARTABLES, false)
+AM_CONDITIONAL(WITH_PCRE8, false)
+AM_CONDITIONAL(WITH_PCRE32, false)
+AM_CONDITIONAL(WITH_PCRE16, false)
+AM_CONDITIONAL(WITH_JIT, false)
+
+AC_CONFIG_FILES([Makefile src/Makefile deps/3rdparty/protobuf/Makefile deps/3rdparty/linenoise/Makefile deps/3rdparty/libsimdcomp/Makefile deps/3rdparty/liblmdb/Makefile deps/3rdparty/spidermonkey/Makefile deps/3rdparty/pcre/Makefile])
 AC_OUTPUT
