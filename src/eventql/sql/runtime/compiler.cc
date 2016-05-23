@@ -30,10 +30,6 @@
 #include <eventql/sql/runtime/LikePattern.h>
 #include <eventql/sql/svalue.h>
 
-#ifndef HAVE_PCRE
-#error "PCRE is required"
-#endif
-
 namespace csql {
 
 ScopedPtr<VM::Program> Compiler::compile(

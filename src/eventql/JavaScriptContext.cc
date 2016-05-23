@@ -26,7 +26,6 @@
 #include "eventql/JavaScriptContext.h"
 #include "js/Conversions.h"
 #include "jsapi.h"
-#include "jsstr.h"
 #include <iostream>
 #include <locale>
 #include <string>
