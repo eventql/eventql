@@ -3,10 +3,6 @@
 ACLOCAL_AMFLAGS = -I m4
 
 dist_doc_DATA = \
-  doc/pcre.txt \
-  doc/pcre-config.txt \
-  doc/pcregrep.txt \
-  doc/pcretest.txt \
   AUTHORS \
   COPYING \
   ChangeLog \
