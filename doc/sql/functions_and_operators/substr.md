@@ -1,0 +1,4 @@
+### substr
+
+Alias for `substring`
+

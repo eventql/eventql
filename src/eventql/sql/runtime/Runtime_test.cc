@@ -150,7 +150,7 @@ TEST_CASE(RuntimeTest, TestColumnReferenceWithTableNamePrefix, [] () {
   txn->addTableProvider(
       new CSTableScanProvider(
           "testtable",
-          "src/eventql/sql/testdata/testtbl.cst"));
+          "eventql/sql/testdata/testtbl.cst"));
 
   {
     ResultList result;
@@ -179,7 +179,7 @@ TEST_CASE(RuntimeTest, TestSimpleCSTableAggregate, [] () {
   txn->addTableProvider(
       new CSTableScanProvider(
           "testtable",
-          "src/eventql/sql/testdata/testtbl.cst"));
+          "eventql/sql/testdata/testtbl.cst"));
 
   ResultList result;
   auto query = R"(select count(1) from testtable;)";
@@ -197,7 +197,7 @@ TEST_CASE(RuntimeTest, TestNestedCSTableAggregate, [] () {
   txn->addTableProvider(
       new CSTableScanProvider(
           "testtable",
-          "src/eventql/sql/testdata/testtbl.cst"));
+          "eventql/sql/testdata/testtbl.cst"));
 
   ResultList result;
   auto query = R"(select count(event.search_query.time) from testtable;)";
@@ -215,7 +215,7 @@ TEST_CASE(RuntimeTest, TestWithinRecordCSTableAggregate, [] () {
   txn->addTableProvider(
       new CSTableScanProvider(
           "testtable",
-          "src/eventql/sql/testdata/testtbl.cst"));
+          "eventql/sql/testdata/testtbl.cst"));
 
   {
     ResultList result;
@@ -274,7 +274,7 @@ TEST_CASE(RuntimeTest, TestMultiLevelNestedCSTableAggregate, [] () {
   txn->addTableProvider(
       new CSTableScanProvider(
           "testtable",
-          "src/eventql/sql/testdata/testtbl.cst"));
+          "eventql/sql/testdata/testtbl.cst"));
 
   {
     ResultList result;
@@ -353,7 +353,7 @@ TEST_CASE(RuntimeTest, TestMultiLevelNestedCSTableAggrgateWithGroup, [] () {
   txn->addTableProvider(
       new CSTableScanProvider(
           "testtable",
-          "src/eventql/sql/testdata/testtbl.cst"));
+          "eventql/sql/testdata/testtbl.cst"));
 
   {
     ResultList result;
@@ -426,7 +426,7 @@ TEST_CASE(RuntimeTest, TestMultiLevelNestedCSTableAggrgateWithMultiLevelGroup, [
   txn->addTableProvider(
       new CSTableScanProvider(
           "testtable",
-          "src/eventql/sql/testdata/testtbl.cst"));
+          "eventql/sql/testdata/testtbl.cst"));
 
   {
     ResultList result;
@@ -455,7 +455,7 @@ TEST_CASE(RuntimeTest, TestMultiLevelNestedCSTableAggrgateWithWhere, [] () {
   txn->addTableProvider(
       new CSTableScanProvider(
           "testtable",
-          "src/eventql/sql/testdata/testtbl.cst"));
+          "eventql/sql/testdata/testtbl.cst"));
 });
 
 TEST_CASE(RuntimeTest, TestTableNamesWithDots, [] () {
@@ -465,7 +465,7 @@ TEST_CASE(RuntimeTest, TestTableNamesWithDots, [] () {
   txn->addTableProvider(
       new CSTableScanProvider(
           "test.tbl",
-          "src/eventql/sql/testdata/testtbl.cst"));
+          "eventql/sql/testdata/testtbl.cst"));
 
   {
     ResultList result;
@@ -576,7 +576,7 @@ TEST_CASE(RuntimeTest, TestSelectInvalidColumn, [] () {
     txn->addTableProvider(
         new CSTableScanProvider(
             "test.tbl",
-            "src/eventql/sql/testdata/testtbl.cst"));
+            "eventql/sql/testdata/testtbl.cst"));
 
     ResultList result;
     auto query = R"(select fnord from 'test.tbl';)";
@@ -649,7 +649,7 @@ TEST_CASE(RuntimeTest, TestWildcardSelect, [] () {
   txn->addTableProvider(
       new CSTableScanProvider(
           "testtable",
-          "src/eventql/sql/testdata/testtbl.cst"));
+          "eventql/sql/testdata/testtbl.cst"));
 
   {
     ResultList result;
@@ -670,7 +670,7 @@ TEST_CASE(RuntimeTest, TestWildcardSelectWithOrderLimit, [] () {
   txn->addTableProvider(
       new CSTableScanProvider(
           "testtable",
-          "src/eventql/sql/testdata/testtbl.cst"));
+          "eventql/sql/testdata/testtbl.cst"));
 
   {
     ResultList result;
@@ -691,7 +691,7 @@ TEST_CASE(RuntimeTest, TestWildcardSelectWithSubqueries, [] () {
   txn->addTableProvider(
       new backends::csv::CSVTableProvider(
           "testtable",
-          "src/eventql/sql/testdata/testtbl1.csv",
+          "eventql/sql/testdata/testtbl1.csv",
           '\t'));
 
   {
@@ -756,7 +756,7 @@ TEST_CASE(RuntimeTest, TestSelectWithInternalAggrGroupColumns, [] () {
   txn->addTableProvider(
       new CSTableScanProvider(
           "testtable",
-          "src/eventql/sql/testdata/testtbl.cst"));
+          "eventql/sql/testdata/testtbl.cst"));
 
   {
     ResultList result;
@@ -777,7 +777,7 @@ TEST_CASE(RuntimeTest, TestSelectWithInternalGroupColumns, [] () {
   txn->addTableProvider(
       new CSTableScanProvider(
           "testtable",
-          "src/eventql/sql/testdata/testtbl.cst"));
+          "eventql/sql/testdata/testtbl.cst"));
 
   {
     ResultList result;
@@ -796,7 +796,7 @@ TEST_CASE(RuntimeTest, TestSelectWithInternalOrderColumns, [] () {
   txn->addTableProvider(
       new CSTableScanProvider(
           "testtable",
-          "src/eventql/sql/testdata/testtbl.cst"));
+          "eventql/sql/testdata/testtbl.cst"));
 
   {
     ResultList result;
@@ -1435,7 +1435,7 @@ TEST_CASE(RuntimeTest, TestSimpleSelect, [] () {
   txn->addTableProvider(
       new backends::csv::CSVTableProvider(
           "customers",
-          "src/eventql/sql/testdata/testtbl2.csv",
+          "eventql/sql/testdata/testtbl2.csv",
           '\t'));
 
   {
@@ -1508,7 +1508,7 @@ TEST_CASE(RuntimeTest, TestSubqueryInGroupBy, [] () {
   txn->addTableProvider(
       new CSTableScanProvider(
           "testtable",
-          "src/eventql/sql/testdata/testtbl.cst"));
+          "eventql/sql/testdata/testtbl.cst"));
 
   ResultList result;
   auto query = R"(select count(1), t1.fubar + t1.x from (select count(1) as x, 123 as fubar from testtable group by TRUNCATE(time / 2000000)) t1 GROUP BY t1.x;)";
@@ -1529,7 +1529,7 @@ TEST_CASE(RuntimeTest, TestInternalOrderByWithSubquery, [] () {
   txn->addTableProvider(
       new CSTableScanProvider(
           "testtable",
-          "src/eventql/sql/testdata/testtbl.cst"));
+          "eventql/sql/testdata/testtbl.cst"));
 
   ResultList result;
   auto query = R"(select t1.x from (select count(1) as x from testtable group by TRUNCATE(time / 2000000)) t1  order by t1.x DESC LIMIT 2;)";
@@ -1546,7 +1546,7 @@ TEST_CASE(RuntimeTest, TestWildcardWithGroupBy, [] () {
   txn->addTableProvider(
       new backends::csv::CSVTableProvider(
           "testtable",
-          "src/eventql/sql/testdata/testtbl1.csv",
+          "eventql/sql/testdata/testtbl1.csv",
           '\t'));
 
   ResultList result;
@@ -1568,7 +1568,7 @@ TEST_CASE(RuntimeTest, TestInnerJoin, [] () {
   txn->addTableProvider(
       new CSTableScanProvider(
           "testtable",
-          "src/eventql/sql/testdata/testtbl.cst"));
+          "eventql/sql/testdata/testtbl.cst"));
 
   {
     ResultList result;
@@ -1683,12 +1683,12 @@ TEST_CASE(RuntimeTest, TestLeftJoin, [] () {
   txn->addTableProvider(
       new backends::csv::CSVTableProvider(
           "customers",
-          "src/eventql/sql/testdata/testtbl2.csv",
+          "eventql/sql/testdata/testtbl2.csv",
           '\t'));
   txn->addTableProvider(
       new backends::csv::CSVTableProvider(
           "orders",
-          "src/eventql/sql/testdata/testtbl3.csv",
+          "eventql/sql/testdata/testtbl3.csv",
           '\t'));
 
   {
@@ -1744,12 +1744,12 @@ TEST_CASE(RuntimeTest, TestRightJoin, [] () {
   txn->addTableProvider(
       new backends::csv::CSVTableProvider(
           "employees",
-          "src/eventql/sql/testdata/testtbl4.csv",
+          "eventql/sql/testdata/testtbl4.csv",
           '\t'));
   txn->addTableProvider(
       new backends::csv::CSVTableProvider(
           "orders",
-          "src/eventql/sql/testdata/testtbl3.csv",
+          "eventql/sql/testdata/testtbl3.csv",
           '\t'));
 
   {
@@ -1852,17 +1852,17 @@ TEST_CASE(RuntimeTest, TestWildcardJoins, [] () {
   txn->addTableProvider(
       new backends::csv::CSVTableProvider(
           "departments",
-          "src/eventql/sql/testdata/testtbl5.csv",
+          "eventql/sql/testdata/testtbl5.csv",
           '\t'));
   txn->addTableProvider(
       new backends::csv::CSVTableProvider(
           "users",
-          "src/eventql/sql/testdata/testtbl6.csv",
+          "eventql/sql/testdata/testtbl6.csv",
           '\t'));
   txn->addTableProvider(
       new backends::csv::CSVTableProvider(
           "openinghours",
-          "src/eventql/sql/testdata/testtbl7.csv",
+          "eventql/sql/testdata/testtbl7.csv",
           '\t'));
 
   {
@@ -1992,17 +1992,17 @@ TEST_CASE(RuntimeTest, TestNaturalJoin, [] () {
   txn->addTableProvider(
       new backends::csv::CSVTableProvider(
           "departments",
-          "src/eventql/sql/testdata/testtbl5.csv",
+          "eventql/sql/testdata/testtbl5.csv",
           '\t'));
   txn->addTableProvider(
       new backends::csv::CSVTableProvider(
           "users",
-          "src/eventql/sql/testdata/testtbl6.csv",
+          "eventql/sql/testdata/testtbl6.csv",
           '\t'));
   txn->addTableProvider(
       new backends::csv::CSVTableProvider(
           "openinghours",
-          "src/eventql/sql/testdata/testtbl7.csv",
+          "eventql/sql/testdata/testtbl7.csv",
           '\t'));
 
   {
@@ -2112,12 +2112,12 @@ TEST_CASE(RuntimeTest, TestShowTables, [] () {
   txn->addTableProvider(
       new backends::csv::CSVTableProvider(
           "departments",
-          "src/eventql/sql/testdata/testtbl5.csv",
+          "eventql/sql/testdata/testtbl5.csv",
           '\t'));
   txn->addTableProvider(
       new backends::csv::CSVTableProvider(
           "users",
-          "src/eventql/sql/testdata/testtbl6.csv",
+          "eventql/sql/testdata/testtbl6.csv",
           '\t'));
 
   {
@@ -2142,7 +2142,7 @@ TEST_CASE(RuntimeTest, TestDescribeTable, [] () {
   txn->addTableProvider(
       new backends::csv::CSVTableProvider(
           "departments",
-          "src/eventql/sql/testdata/testtbl5.csv",
+          "eventql/sql/testdata/testtbl5.csv",
           '\t'));
 
   {
@@ -2189,12 +2189,12 @@ TEST_CASE(RuntimeTest, TestResultCursor, [] () {
   txn->addTableProvider(
       new backends::csv::CSVTableProvider(
           "departments",
-          "src/eventql/sql/testdata/testtbl5.csv",
+          "eventql/sql/testdata/testtbl5.csv",
           '\t'));
   txn->addTableProvider(
       new backends::csv::CSVTableProvider(
           "users",
-          "src/eventql/sql/testdata/testtbl6.csv",
+          "eventql/sql/testdata/testtbl6.csv",
           '\t'));
 
   auto query = R"(
@@ -2222,7 +2222,7 @@ TEST_CASE(RuntimeTest, TestSimpleDrawQuery, [] () {
   txn->addTableProvider(
       new backends::csv::CSVTableProvider(
           "testtable",
-          "src/eventql/sql/testdata/testtbl8.csv",
+          "eventql/sql/testdata/testtbl8.csv",
           ','));
 
   String query =
@@ -2248,7 +2248,7 @@ TEST_CASE(RuntimeTest, TestSimpleDrawQuery, [] () {
   ResultList result;
   qplan->execute(0, &result);
 
-  auto exptected_svg_path = "src/eventql/sql/testdata/QueryTest_TestSimpleDrawQuery_out.svg.html";
+  auto exptected_svg_path = "eventql/sql/testdata/QueryTest_TestSimpleDrawQuery_out.svg.html";
   auto exptected_svg = FileUtil::read(exptected_svg_path).toString();
 
   EXPECT_EQ(result.getNumColumns(), 1);
@@ -2262,7 +2262,7 @@ TEST_CASE(RuntimeTest, TestSimpleDrawQueryTwo, [] () {
   txn->addTableProvider(
       new backends::csv::CSVTableProvider(
           "gdp_per_country",
-          "src/eventql/sql/testdata/gbp_per_country_simple.csv",
+          "eventql/sql/testdata/gbp_per_country_simple.csv",
           ','));
 
   String query =
@@ -2285,7 +2285,7 @@ TEST_CASE(RuntimeTest, TestSimpleDrawQueryTwo, [] () {
   ResultList result;
   qplan->execute(0, &result);
 
-  auto exptected_svg_path = "src/eventql/sql/testdata/QueryTest_TestSimpleDrawQueryTwo_out.svg.html";
+  auto exptected_svg_path = "eventql/sql/testdata/QueryTest_TestSimpleDrawQueryTwo_out.svg.html";
   auto exptected_svg = FileUtil::read(exptected_svg_path).toString();
 
   EXPECT_EQ(result.getNumColumns(), 1);
@@ -2300,7 +2300,7 @@ TEST_CASE(RuntimeTest, TestSumMinMaxCount, [] () {
   txn->addTableProvider(
       new backends::csv::CSVTableProvider(
           "testtable",
-          "src/eventql/sql/testdata/testtbl1.csv",
+          "eventql/sql/testdata/testtbl1.csv",
           '\t'));
 
   ResultList result;
@@ -2316,3 +2316,38 @@ TEST_CASE(RuntimeTest, TestSumMinMaxCount, [] () {
   EXPECT_EQ(result.getRow(0)[2], "123.000000");
   EXPECT_EQ(result.getRow(0)[3], "999.000000");
 });
+
+TEST_CASE(RuntimeTest, TestSubstrExpression, [] () {
+  auto runtime = Runtime::getDefaultRuntime();
+  auto txn = runtime->newTransaction();
+
+  {
+    auto v = runtime->evaluateConstExpression(
+        txn.get(),
+        String("substr('fnord', 2)"));
+    EXPECT_EQ(v.getString(), "nord");
+  }
+
+  {
+    auto v = runtime->evaluateConstExpression(
+        txn.get(),
+        String("substr('fnord', 2, 1)"));
+    EXPECT_EQ(v.getString(), "n");
+  }
+
+  {
+    auto v = runtime->evaluateConstExpression(
+        txn.get(),
+        String("substr('fnord', -2)"));
+    EXPECT_EQ(v.getString(), "rd");
+  }
+
+  {
+    auto v = runtime->evaluateConstExpression(
+        txn.get(),
+        String("substr('foobar', -3, 2)"));
+    EXPECT_EQ(v.getString(), "ba");
+  }
+
+});
+

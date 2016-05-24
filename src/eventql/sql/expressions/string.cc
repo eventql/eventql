@@ -66,5 +66,40 @@ void lowerCaseExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
   *out = SValue(val);
 }
 
+void subStringExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
+  if (argc < 2 || argc > 3) {
+    RAISEF(
+        kRuntimeError,
+        "wrong number of arguments for substr. expected: 2 or 3, got: $0",
+        argc);
+  }
+
+  String str = argv[0].getString();
+  int64_t strlen = static_cast<int64_t>(str.size());
+  int64_t cur = argv[1].getInteger();
+
+  if (cur == 0) {
+    *out = SValue::newString("");
+    return;
+  }
+
+  if (cur < 0) {
+    cur = std::max(int64_t(0), cur + strlen);
+  } else {
+    cur = std::min(cur - 1, strlen - 1);
+  }
+
+  int64_t len = strlen - cur;
+  if (argc == 3) {
+    len = std::min(argv[2].getInteger(), len);
+  }
+
+  if (len == 0) {
+    *out = SValue::newString("");
+  } else {
+    *out = SValue::newString(str.substr(cur, len));
+  }
+}
+
 }
 }
