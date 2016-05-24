@@ -25,7 +25,7 @@
 #pragma once
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/buffer.h>
-#include <eventql/sysconfig.h>
+//#include <eventql/sysconfig.h>
 #include <string>
 #include <vector>
 
@@ -48,11 +48,16 @@ public:
   RegExp& operator=(const RegExp& other) = delete;
   RegExp& operator=(RegExp&& other);
 
+  bool match(const Buffer& subject) const;
+  bool match(const String& subject) const;
+  bool match(const char* buffer, size_t size) const;
+  bool match(const char* cstring) const;
+
 #ifdef HAVE_PCRE
-  bool match(const Buffer& subject, Result* result = nullptr) const;
-  bool match(const String& subject, Result* result = nullptr) const;
-  bool match(const char* buffer, size_t size, Result* result = nullptr) const;
-  bool match(const char* cstring, Result* result = nullptr) const;
+  bool match(const Buffer& subject, Result* result) const;
+  bool match(const String& subject, Result* result) const;
+  bool match(const char* buffer, size_t size, Result* result) const;
+  bool match(const char* cstring, Result* result) const;
 
   /**
    * Returns the index of a named capture in the regex or size_t(-1) if there

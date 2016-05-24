@@ -26,7 +26,7 @@
 #ifndef libstx_defines_h
 #define libstx_defines_h (1)
 
-#include <eventql/sysconfig.h>
+//#include <eventql/sysconfig.h>
 #include <stddef.h>
 #include <string.h>
 #include <stdio.h>

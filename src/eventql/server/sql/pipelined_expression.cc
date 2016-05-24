@@ -58,10 +58,10 @@ void PipelinedExpression::addLocalQuery(ScopedPtr<csql::TableExpression> expr) {
   num_columns_ = std::max(num_columns_, expr->getNumColumns());
   ctx_->incrementNumTasks();
 
-  queries_.emplace_back(QuerySpec {
-    .is_local = true,
-    .expr = std::move(expr)
-  });
+  QuerySpec query_spec;
+  query_spec.is_local = true;
+  query_spec.expr = std::move(expr);
+  queries_.emplace_back(std::move(query_spec));
 }
 
 
@@ -71,11 +71,11 @@ void PipelinedExpression::addRemoteQuery(
   num_columns_ = std::max(num_columns_, qtree->getNumComputedColumns());
   ctx_->incrementNumTasks();
 
-  queries_.emplace_back(QuerySpec {
-    .is_local = false,
-    .qtree = qtree,
-    .hosts = hosts
-  });
+  QuerySpec query_spec;
+  query_spec.is_local = false;
+  query_spec.qtree = qtree;
+  query_spec.hosts = hosts;
+  queries_.emplace_back(std::move(query_spec));
 }
 
 ScopedPtr<csql::ResultCursor> PipelinedExpression::execute() {

@@ -32,7 +32,6 @@
 //
 // This file contains the implementation of classes GzipInputStream and
 // GzipOutputStream.
-#include <eventql/sysconfig.h>
 
 #ifdef HAVE_ZLIB_H
 #include <google/protobuf/io/gzip_stream.h>
