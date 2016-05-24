@@ -1092,3 +1092,34 @@ TEST_CASE(ParserTest, TestCreateTableStatement, [] () {
   EXPECT_EQ(stmt->getChildren()[0]->getToken()->getString(), "fnord");
   EXPECT(*stmt->getChildren()[1] == ASTNode::T_COLUMN_LIST);
 });
+
+TEST_CASE(ParserTest, TestCreateTableStatement2, [] () {
+  auto runtime = Runtime::getDefaultRuntime();
+  auto txn = runtime->newTransaction();
+  auto parser = parseTestQuery(
+      R"(
+        CREATE TABLE fnord (
+            time DATETIME NOT NULL Primary Key,
+            myvalue STring,
+            other_val REPEATED String,
+            record_val RECORD (
+                val1 uint64 NOT NULL,
+                val2 REPEATED string
+            ),
+            some_other REPEATED RECORD (
+                val1 uint64 NOT NULL,
+                val2 REPEATED STRING
+            ),
+            PRIMARY KEY (time, myvalue)
+        )
+      )");
+  EXPECT(parser.getStatements().size() == 1);
+  const auto& stmt = parser.getStatements()[0];
+  EXPECT(*stmt == ASTNode::T_CREATE_TABLE);
+  EXPECT(stmt->getChildren().size() == 2);
+  EXPECT_EQ(*stmt->getChildren()[0], ASTNode::T_TABLE_NAME);
+  EXPECT_EQ(*stmt->getChildren()[0]->getToken(), Token::T_IDENTIFIER);
+  EXPECT_EQ(stmt->getChildren()[0]->getToken()->getString(), "fnord");
+  EXPECT(*stmt->getChildren()[1] == ASTNode::T_COLUMN_LIST);
+  EXPECT(stmt->getChildren()[1]->getChildren().size() == 6);
+});

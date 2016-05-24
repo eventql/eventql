@@ -26,6 +26,7 @@
 #include <memory>
 #include "parser.h"
 #include "tokenize.h"
+#include "eventql/util/inspect.h"
 
 namespace csql {
 
@@ -420,6 +421,29 @@ ASTNode* Parser::createTableStatement() {
   create_table->appendChild(column_list);
 
   expectAndConsume(Token::T_LPAREN);
+
+  while (*cur_token_ != Token::T_RPAREN) {
+    if (*cur_token_ == Token::T_PRIMARY) {
+      column_list->appendChild(primaryKeyDefinition());
+    } else {
+      auto coldef = columnDefinition();
+
+      if (*cur_token_ == Token::T_PRIMARY) {
+        consumeToken();
+        expectAndConsume(Token::T_KEY);
+        coldef->appendChild(new ASTNode(ASTNode::T_PRIMARY_KEY));
+      }
+
+      column_list->appendChild(coldef);
+    }
+
+    if (*cur_token_ == Token::T_COMMA) {
+      consumeToken();
+    } else {
+      break;
+    }
+  }
+
   expectAndConsume(Token::T_RPAREN);
 
   if (*cur_token_ == Token::T_SEMICOLON) {
@@ -427,6 +451,83 @@ ASTNode* Parser::createTableStatement() {
   }
 
   return create_table;
+}
+
+ASTNode* Parser::columnDefinition() {
+  auto column = new ASTNode(ASTNode::T_COLUMN);
+
+  assertExpectation(Token::T_IDENTIFIER);
+  auto column_name = new ASTNode(ASTNode::T_COLUMN_NAME);
+  column_name->setToken(cur_token_);
+  column->appendChild(column_name);
+  consumeToken();
+
+  bool repeated = false;
+  if (*cur_token_ == Token::T_REPEATED) {
+    repeated = true;
+    consumeToken();
+  }
+
+  if (*cur_token_ == Token::T_RECORD) {
+    consumeToken();
+    auto record_def = new ASTNode(ASTNode::T_RECORD);
+    column->appendChild(record_def);
+
+    expectAndConsume(Token::T_LPAREN);
+    while (*cur_token_ != Token::T_RPAREN) {
+      record_def->appendChild(columnDefinition());
+
+      if (*cur_token_ == Token::T_COMMA) {
+        consumeToken();
+      } else {
+        break;
+      }
+    }
+    expectAndConsume(Token::T_RPAREN);
+  } else {
+    auto id = new ASTNode(ASTNode::T_COLUMN_TYPE);
+    id->setToken(cur_token_);
+    column->appendChild(id);
+    consumeToken();
+
+    if (*cur_token_ == Token::T_NOT) {
+      consumeToken();
+      expectAndConsume(Token::T_NULL);
+      column->appendChild(ASTNode::T_NOT_NULL);
+    }
+  }
+
+  if (repeated) {
+    column->appendChild(new ASTNode(ASTNode::T_REPEATED));
+  }
+
+  return column;
+}
+
+ASTNode* Parser::primaryKeyDefinition() {
+  consumeToken();
+  expectAndConsume(Token::T_KEY);
+
+  auto primary_key = new ASTNode(ASTNode::T_PRIMARY_KEY);
+
+  expectAndConsume(Token::T_LPAREN);
+
+  while (*cur_token_ != Token::T_RPAREN) {
+    auto expr = new ASTNode(ASTNode::T_COLUMN_NAME);
+    expr->setToken(cur_token_);
+    consumeToken();
+    primary_key->appendChild(expr);
+
+    if (*cur_token_ == Token::T_COMMA) {
+      consumeToken();
+    } else {
+      break;
+    }
+  }
+
+  expectAndConsume(Token::T_RPAREN);
+
+  return primary_key;
 }
 
 ASTNode* Parser::importStatement() {

@@ -557,6 +557,16 @@ next:
     goto next;
   }
 
+  if (token == "PRIMARY") {
+    token_list->emplace_back(Token::T_PRIMARY);
+    goto next;
+  }
+
+  if (token == "KEY") {
+    token_list->emplace_back(Token::T_KEY);
+    goto next;
+  }
+
   if (token == "JOIN") {
     token_list->emplace_back(Token::T_JOIN);
     goto next;
@@ -584,6 +594,21 @@ next:
 
   if (token == "USING") {
     token_list->emplace_back(Token::T_USING);
+    goto next;
+  }
+
+  if (token == "REPEATED") {
+    token_list->emplace_back(Token::T_REPEATED);
+    goto next;
+  }
+
+  if (token == "PRIMARY") {
+    token_list->emplace_back(Token::T_PRIMARY);
+    goto next;
+  }
+
+  if (token == "KEY") {
+    token_list->emplace_back(Token::T_KEY);
     goto next;
   }
 

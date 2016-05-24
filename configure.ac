@@ -6,6 +6,7 @@ AC_INIT([EventQL],[0.3.0],[authors@eventql.io],[eventql])
 AM_INIT_AUTOMAKE([foreign subdir-objects serial-tests])
 AM_MAINTAINER_MODE([enable])
 AC_CONFIG_SRCDIR([configure.ac])
+AM_SILENT_RULES([yes])
 
 # Check for build env
 AC_PROG_CC

@@ -174,6 +174,10 @@ bool Token::operator==(kTokenType type) const {
   return type_ == type;
 }
 
+bool Token::operator!=(kTokenType type) const {
+  return type_ != type;
+}
+
 bool Token::operator==(const Token& other) const {
   if (type_ != other.type_) {
     return false;

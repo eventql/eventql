@@ -98,6 +98,12 @@ public:
     T_EXPLAIN_QUERY,
     T_CREATE_TABLE,
     T_COLUMN_LIST,
+    T_PRIMARY_KEY,
+    T_RECORD,
+    T_REPEATED,
+    T_NOT_NULL,
+    T_COLUMN,
+    T_COLUMN_TYPE,
 
     T_DRAW,
     T_IMPORT,
