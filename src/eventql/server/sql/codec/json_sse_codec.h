@@ -25,7 +25,7 @@
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/http/HTTPSSEStream.h>
 #include <eventql/server/sql/codec/json_codec.h>
-#include <eventql/sql/runtime/resultlist.h>
+#include <eventql/sql/result_list.h>
 
 namespace eventql {
 

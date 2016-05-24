@@ -456,6 +456,18 @@ std::basic_string<char> StringUtil::convertUTF16To8(
   return out;
 }
 
+size_t StringUtil::countUTF8CodePoints(const std::string& str) {
+  size_t count = 0;
+  const char* cur = str.data();
+  const char* end = cur + str.length();
+  while (UTF8::nextCodepoint(&cur, end) != 0) {
+    ++count;
+  }
+
+  return count;
+}
+
+
 String StringUtil::stripShell(const std::string& str) {
   String out;
 

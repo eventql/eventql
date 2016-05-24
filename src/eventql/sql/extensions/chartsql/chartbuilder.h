@@ -32,7 +32,6 @@
 #include <eventql/sql/qtree/DrawStatementNode.h>
 #include <eventql/sql/runtime/compiler.h>
 #include <eventql/sql/runtime/vm.h>
-#include <eventql/sql/runtime/resultlist.h>
 #include <eventql/sql/extensions/chartsql/seriesadapter.h>
 
 namespace csql {
