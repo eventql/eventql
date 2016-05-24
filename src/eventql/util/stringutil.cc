@@ -460,7 +460,7 @@ size_t StringUtil::countUTF8CodePoints(const std::string& str) {
   size_t count = 0;
   const char* cur = str.data();
   const char* end = cur + str.length();
-  while (UTF8::nextCodepoint(&cur, end) > 0) {
+  while (UTF8::nextCodepoint(&cur, end) != 0) {
     ++count;
   }
 

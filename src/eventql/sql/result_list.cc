@@ -95,7 +95,11 @@ void ResultList::debugPrint(OutputStream* os) const {
   }
 
   for (const auto& row : rows_) {
-    for (size_t i = 0; i < columns_.size(); ++i) {
+    auto row_len = std::min(columns_.size(), row.size());
+    for (size_t i = 0; i < row_len; ++i) {
+      // N.B. we count the actual string bytes instead of the n. of unicode
+      // points. the worst thing that can happen is overshooting on the column
+      // width
       col_widths[i] = std::max((int) row[i].size() + margin, col_widths[i]);
     }
   }
