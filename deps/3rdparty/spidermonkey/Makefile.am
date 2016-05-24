@@ -9,6 +9,7 @@ libjs_static.a:
 	cp out/dist/lib/libjs_static.a ./
 
 EXTRA_DIST = distfiles.txt jsautokw.h
+BUILT_SOURCES = libjs_static.a
 
 dist-hook:
 	builddir=`pwd`; cd $(srcdir) && cpio -pdum $$builddir/$(distdir) < distfiles.txt

@@ -45,6 +45,7 @@ endif
 
 SPIDERMONKEY_CFLAGS = -I$(top_builddir)/deps/3rdparty/spidermonkey/out/dist/include
 SPIDERMONKEY_LDADD = ${top_builddir}/deps/3rdparty/spidermonkey/out/dist/lib/libjs_static.a
+SPIDERMONKEY_DEPENDENCIES = ${top_builddir}/deps/3rdparty/spidermonkey/out/dist/lib/libjs_static.a
 
 PCRE_CFLAGS = -I$(top_srcdir)/deps/3rdparty/pcre -DHAVE_PCRE=1
 PCRE_LDADD = ${top_builddir}/deps/3rdparty/pcre/libpcre.a
@@ -228,6 +229,8 @@ evql_sql_a_SOURCES = \
     eventql/sql/query_plan.h \
     eventql/sql/result_cursor.cc \
     eventql/sql/result_cursor.h \
+    eventql/sql/result_list.cc \
+    eventql/sql/result_list.h \
     eventql/sql/runtime/LikePattern.cc \
     eventql/sql/runtime/LikePattern.h \
     eventql/sql/runtime/QueryBuilder.cc \
@@ -252,7 +255,6 @@ evql_sql_a_SOURCES = \
     eventql/sql/runtime/tablerepository.h \
     eventql/sql/runtime/vm.cc \
     eventql/sql/runtime/vm.h \
-    eventql/sql/runtime/resultlist.h \
     eventql/sql/scheduler.cc \
     eventql/sql/scheduler.h \
     eventql/sql/scheduler/execution_context.cc \
@@ -957,6 +959,9 @@ evqld_LDADD = \
     $(LMDB_LDADD) \
     $(PROTOBUF_LDADD) \
     $(PCRE_LDADD)
+
+evqld_DEPENDENCIES = \
+    $(SPIDERMONKEY_DEPENDENCIES)
 
 bin_PROGRAMS += evqld
 
