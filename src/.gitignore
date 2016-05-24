@@ -1,4 +1,6 @@
 test_evql_sql_runtime
+test_evql_sql_qtree
+test_evql_sql_parser
 evql
 evqld
 evqlctl

@@ -979,3 +979,39 @@ TESTS += test_evql_sql_runtime
 check_PROGRAMS += test_evql_sql_runtime
 
 
+################# TEST: sql/qtree ####################
+test_evql_sql_qtree_SOURCES = eventql/sql/qtree/QTree_test.cc
+test_evql_sql_qtree_LDADD = \
+    evql_util.a \
+    evql_http.a \
+    evql_sql.a \
+    evql_cstable.a \
+    evql_sstable.a \
+    $(SIMDCOMP_LDADD) \
+    $(SPIDERMONKEY_LDADD) \
+    $(LMDB_LDADD) \
+    $(PROTOBUF_LDADD) \
+    $(PCRE_LDADD)
+
+TESTS += test_evql_sql_qtree
+check_PROGRAMS += test_evql_sql_qtree
+
+
+################# TEST: sql/parser ####################
+test_evql_sql_parser_SOURCES = eventql/sql/parser/Parser_test.cc
+test_evql_sql_parser_LDADD = \
+    evql_util.a \
+    evql_http.a \
+    evql_sql.a \
+    evql_cstable.a \
+    evql_sstable.a \
+    $(SIMDCOMP_LDADD) \
+    $(SPIDERMONKEY_LDADD) \
+    $(LMDB_LDADD) \
+    $(PROTOBUF_LDADD) \
+    $(PCRE_LDADD)
+
+TESTS += test_evql_sql_parser
+check_PROGRAMS += test_evql_sql_parser
+
+
