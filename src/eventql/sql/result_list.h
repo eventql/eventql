@@ -21,54 +21,39 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include <eventql/server/sql/codec/json_codec.h>
+#pragma once
+#include <eventql/util/stdtypes.h>
+#include <eventql/sql/svalue.h>
 
-namespace eventql {
+namespace csql {
 
-JSONCodec::JSONCodec(json::JSONOutputStream* json) : json_(json) {}
+class ResultList{
+public:
 
-void JSONCodec::printResultTable(
-    const Vector<String>& header,
-    csql::ResultCursor* cursor) {
-  json_->beginObject();
-  json_->addObjectEntry("type");
-  json_->addString("table");
-  json_->addComma();
+  ResultList();
+  ResultList(const Vector<String>& header);
+  ResultList(const ResultList& copy) = delete;
+  ResultList& operator=(const ResultList& copy) = delete;
 
-  json_->addObjectEntry("columns");
-  json_->beginArray();
+  ResultList(ResultList&& move);
 
-  for (int n = 0; n < header.size(); ++n) {
-    if (n > 0) {
-      json_->addComma();
-    }
-    json_->addString(header[n]);
-  }
-  json_->endArray();
-  json_->addComma();
+  size_t getNumColumns() const;
+  size_t getNumRows() const;
 
-  json_->addObjectEntry("rows");
-  json_->beginArray();
+  const std::vector<std::string>& getRow(size_t index) const;
+  const std::vector<std::string>& getColumns() const;
 
-  Vector<csql::SValue> row(cursor->getNumColumns());
-  for (size_t i = 0; cursor->next(row.data(), row.size()); ++i) {
-    if (i > 0) {
-      json_->addComma();
-    }
+  int getComputedColumnIndex(const std::string& column_name) const;
 
-    json_->beginArray();
-    for (size_t n = 0; n < row.size(); ++n) {
-      if (n > 0) {
-        json_->addComma();
-      }
+  void addHeader(const std::vector<std::string>& columns);
+  bool addRow(const csql::SValue* row, int row_len);
 
-      json_->addString(row[n].getString());
-    }
-    json_->endArray();
-  }
+  void debugPrint() const;
+  void debugPrint(OutputStream* os) const;
 
-  json_->endArray();
-  json_->endObject();
-}
+protected:
+  std::vector<std::string> columns_;
+  std::vector<std::vector<std::string>> rows_;
+};
 
 }

@@ -49,7 +49,7 @@ TEST_CASE(QTreeTest, TestExtractEqualsConstraint, [] () {
   txn->addTableProvider(
       new CSTableScanProvider(
           "testtable",
-          "src/eventql/sql/testdata/testtbl.cst"));
+          "eventql/sql/testdata/testtbl.cst"));
 
   Vector<String> queries;
   queries.push_back("select 1 from testtable where time = 1234;");
@@ -89,7 +89,7 @@ TEST_CASE(QTreeTest, TestExtractNotEqualsConstraint, [] () {
   txn->addTableProvider(
       new CSTableScanProvider(
           "testtable",
-          "src/eventql/sql/testdata/testtbl.cst"));
+          "eventql/sql/testdata/testtbl.cst"));
 
   Vector<String> queries;
   queries.push_back("select 1 from testtable where time != 1234;");
@@ -129,7 +129,7 @@ TEST_CASE(QTreeTest, TestExtractLessThanConstraint, [] () {
   txn->addTableProvider(
       new CSTableScanProvider(
           "testtable",
-          "src/eventql/sql/testdata/testtbl.cst"));
+          "eventql/sql/testdata/testtbl.cst"));
 
   Vector<String> queries;
   queries.push_back("select 1 from testtable where time < 1234;");
@@ -169,7 +169,7 @@ TEST_CASE(QTreeTest, TestExtractLessThanOrEqualToConstraint, [] () {
   txn->addTableProvider(
       new CSTableScanProvider(
           "testtable",
-          "src/eventql/sql/testdata/testtbl.cst"));
+          "eventql/sql/testdata/testtbl.cst"));
 
   Vector<String> queries;
   queries.push_back("select 1 from testtable where time <= 1234;");
@@ -209,7 +209,7 @@ TEST_CASE(QTreeTest, TestExtractGreaterThanConstraint, [] () {
   txn->addTableProvider(
       new CSTableScanProvider(
           "testtable",
-          "src/eventql/sql/testdata/testtbl.cst"));
+          "eventql/sql/testdata/testtbl.cst"));
 
   Vector<String> queries;
   queries.push_back("select 1 from testtable where time > 1234;");
@@ -249,7 +249,7 @@ TEST_CASE(QTreeTest, TestExtractGreaterThanOrEqualToConstraint, [] () {
   txn->addTableProvider(
       new CSTableScanProvider(
           "testtable",
-          "src/eventql/sql/testdata/testtbl.cst"));
+          "eventql/sql/testdata/testtbl.cst"));
 
   Vector<String> queries;
   queries.push_back("select 1 from testtable where time >= 1234;");
@@ -289,7 +289,7 @@ TEST_CASE(QTreeTest, TestExtractMultipleConstraints, [] () {
   txn->addTableProvider(
       new CSTableScanProvider(
           "testtable",
-          "src/eventql/sql/testdata/testtbl.cst"));
+          "eventql/sql/testdata/testtbl.cst"));
 
   String query = "select 1 from testtable where 1000 + 200 + 30 + 4 > time AND session_id != 400 + 44 AND time >= 1111 * 6;";
 
@@ -340,7 +340,7 @@ TEST_CASE(QTreeTest, TestSimpleConstantFolding, [] () {
   txn->addTableProvider(
       new CSTableScanProvider(
           "testtable",
-          "src/eventql/sql/testdata/testtbl.cst"));
+          "eventql/sql/testdata/testtbl.cst"));
 
   String query = "select 1 + 2 + 3 from testtable where time > ucase('fu') + lcase('Bar');";
 
@@ -371,7 +371,7 @@ TEST_CASE(QTreeTest, TestPruneConstraints, [] () {
   txn->addTableProvider(
       new CSTableScanProvider(
           "testtable",
-          "src/eventql/sql/testdata/testtbl.cst"));
+          "eventql/sql/testdata/testtbl.cst"));
 
   String query = "select 1 from testtable where 1000 + 200 + 30 + 4 > time AND session_id != 400 + 44 AND time >= 1111 * 6;";
   csql::Parser parser;
@@ -429,7 +429,7 @@ TEST_CASE(QTreeTest, TestSerialization, [] () {
   txn->addTableProvider(
       new CSTableScanProvider(
           "testtable",
-          "src/eventql/sql/testdata/testtbl.cst"));
+          "eventql/sql/testdata/testtbl.cst"));
 
   String query = "select 1 + 2 + 3 from testtable where time > ucase('fu') + lcase('Bar') limit 10;";
 
@@ -464,12 +464,12 @@ TEST_CASE(QTreeTest, TestSerializationJoinAndSubquery, [] () {
     txn->addTableProvider(
       new backends::csv::CSVTableProvider(
           "customers",
-          "src/eventql/sql/testdata/testtbl2.csv",
+          "eventql/sql/testdata/testtbl2.csv",
           '\t'));
   txn->addTableProvider(
       new backends::csv::CSVTableProvider(
           "orders",
-          "src/eventql/sql/testdata/testtbl3.csv",
+          "eventql/sql/testdata/testtbl3.csv",
           '\t'));
 
   String query =
