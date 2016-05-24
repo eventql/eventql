@@ -45,6 +45,7 @@ endif
 
 SPIDERMONKEY_CFLAGS = -I$(top_builddir)/deps/3rdparty/spidermonkey/out/dist/include
 SPIDERMONKEY_LDADD = ${top_builddir}/deps/3rdparty/spidermonkey/out/dist/lib/libjs_static.a
+SPIDERMONKEY_DEPENDENCIES = ${top_builddir}/deps/3rdparty/spidermonkey/out/dist/lib/libjs_static.a
 
 PCRE_CFLAGS = -I$(top_srcdir)/deps/3rdparty/pcre -DHAVE_PCRE=1
 PCRE_LDADD = ${top_builddir}/deps/3rdparty/pcre/libpcre.a
@@ -958,6 +959,9 @@ evqld_LDADD = \
     $(LMDB_LDADD) \
     $(PROTOBUF_LDADD) \
     $(PCRE_LDADD)
+
+evqld_DEPENDENCIES = \
+    $(SPIDERMONKEY_DEPENDENCIES)
 
 bin_PROGRAMS += evqld
 
