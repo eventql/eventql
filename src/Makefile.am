@@ -1,5 +1,24 @@
 ## Process this file with automake to produce Makefile.in
 
+MAINTAINERCLEANFILES =   \
+  Makefile.in
+
+EXTRA_DIST = \
+  eventql/util/assets.sh \
+  eventql/util/charts/testdata \
+  eventql/sql/testdata \
+  eventql/mapreduce/prelude.js
+
+# we'll fill those later
+bin_PROGRAMS =
+noinst_LIBRARIES =
+dist_noinst_DATA =
+BUILT_SOURCES =
+TESTS =
+check_PROGRAMS =
+
+
+################# DEPENDENCIES ####################
 if HAVE_ZLIB
 ZLIB_DEF = -DHAVE_ZLIB=1
 else
@@ -46,11 +65,8 @@ AM_CXXFLAGS = $(PCRE_CFLAGS) $(SPIDERMONKEY_CFLAGS) $(SIMDCOMP_CFLAGS) $(LINENOI
 AM_CFLAGS = $(PCRE_CFLAGS) $(SPIDERMONKEY_CFLAGS) $(SIMDCOMP_CFLAGS) $(LINENOISE_CLFAGS) $(PROTOBUF_CFLAGS) $(PTHREAD_CFLAGS) $(PTHREAD_DEF) $(SYSLOG_DEF) $(ZLIB_DEF) $(GETHOSTBYNAME_R_DEF) -std=c11 -mno-omit-leaf-frame-pointer -fno-omit-frame-pointer -Wall -pedantic -O3 -g
 AM_LDFLAGS = $(PTHREAD_CFLAGS)
 
-MAINTAINERCLEANFILES =   \
-  Makefile.in
 
-bin_PROGRAMS = evql evqld
-
+################# PROTOBUFs ####################
 evql_protos = \
     eventql/AnalyticsSession.proto \
     eventql/config/namespace_config_protos.proto \
@@ -67,7 +83,15 @@ evql_protos = \
     eventql/LogfileScanParams.proto \
     eventql/RemoteTSDBScanParams.proto
 
-evql_sql_SOURCES = \
+BUILT_SOURCES += $(evql_protos:.proto=.pb.h)
+dist_noinst_DATA += $(evql_protos)
+
+%.pb.cc %.pb.h: %.proto
+	$(top_builddir)/deps/3rdparty/protobuf/protoc --proto_path=$(srcdir) --cpp_out=$(builddir) $^
+
+
+################# LIB: evql_sql.a ####################
+evql_sql_a_SOURCES = \
     eventql/sql/csql.h \
     eventql/sql/abi.h \
     eventql/sql/CSTableScan.cc \
@@ -238,7 +262,11 @@ evql_sql_SOURCES = \
     eventql/sql/transaction.cc \
     eventql/sql/transaction.h
 
-evql_cstable_SOURCES = \
+noinst_LIBRARIES += evql_sql.a
+
+
+################# LIB: evql_cstable.a ####################
+evql_cstable_a_SOURCES = \
     eventql/io/cstable/CSTableReader.cc \
     eventql/io/cstable/CSTableReader.h \
     eventql/io/cstable/CSTableWriter.cc \
@@ -305,7 +333,11 @@ evql_cstable_SOURCES = \
     eventql/io/cstable/io/PageManager.cc \
     eventql/io/cstable/io/PageManager.h
 
-evql_sstable_SOURCES = \
+noinst_LIBRARIES += evql_cstable.a
+
+
+################# LIB: evql_sstable.a ####################
+evql_sstable_a_SOURCES = \
     eventql/io/sstable/MetaPage.cc \
     eventql/io/sstable/MetaPage.h \
     eventql/io/sstable/RowWriter.cc \
@@ -343,7 +375,11 @@ evql_sstable_SOURCES = \
     eventql/io/sstable/sstablerepair.cc \
     eventql/io/sstable/sstablerepair.h
 
-evql_util_SOURCES = \
+noinst_LIBRARIES += evql_sstable.a
+
+
+################# LIB: evql_util.a ####################
+evql_util_a_SOURCES = \
     eventql/util/CivilTime.cc \
     eventql/util/CivilTime.h \
     eventql/util/CivilTime_impl.h \
@@ -651,7 +687,11 @@ evql_util_SOURCES = \
     #eventql/util/MonotonicTime.h \
     #eventql/util/MonotonicTime_impl.h
 
-evql_http_SOURCES = \
+noinst_LIBRARIES += evql_util.a
+
+
+################# LIB: evql_http.a ####################
+evql_http_a_SOURCES = \
     eventql/util/http/HTTPFileDownload.cc \
     eventql/util/http/HTTPFileDownload.h \
     eventql/util/http/HTTPRequestStream.cc \
@@ -703,11 +743,11 @@ evql_http_SOURCES = \
     eventql/util/http/statshttpservlet.cc \
     eventql/util/http/statshttpservlet.h
 
+noinst_LIBRARIES += evql_http.a
+
+
+################# BIN: evql ####################
 evql_SOURCES = \
-    ${evql_util_SOURCES} \
-    ${evql_http_SOURCES} \
-    ${evql_sql_SOURCES} \
-    ${evql_cstable_SOURCES} \
     eventql/cli/console.cc \
     eventql/cli/console.h \
     eventql/server/sql/codec/binary_codec.cc \
@@ -715,16 +755,19 @@ evql_SOURCES = \
     eventql/evql.cc
 
 evql_LDADD = \
+    evql_util.a \
+    evql_http.a \
+    evql_sql.a \
+    evql_cstable.a \
     $(LINENOISE_LDADD) \
     $(SIMDCOMP_LDADD) \
     $(PCRE_LDADD)
 
+bin_PROGRAMS += evql
+
+
+################# BIN: evqld ####################
 evqld_SOURCES = \
-    ${evql_util_SOURCES} \
-    ${evql_http_SOURCES} \
-    ${evql_sql_SOURCES} \
-    ${evql_cstable_SOURCES} \
-    ${evql_sstable_SOURCES} \
     eventql/AnalyticsApp.cc \
     eventql/AnalyticsApp.h \
     eventql/AnalyticsAuth.cc \
@@ -883,6 +926,7 @@ evqld_SOURCES = \
     eventql/util/mdb/MDBTransaction.cc \
     eventql/util/mdb/MDBTransaction.h
 
+
 nodist_evqld_SOURCES = \
     @builddir@/eventql/AnalyticsSession.pb.cc \
     @builddir@/eventql/config/namespace_config_protos.pb.cc \
@@ -899,24 +943,39 @@ nodist_evqld_SOURCES = \
     @builddir@/eventql/LogfileScanParams.pb.cc \
     @builddir@/eventql/RemoteTSDBScanParams.pb.cc
 
+eventql/mapreduce/mapreduce_preludejs.cc:
+	echo 'eventql/mapreduce/prelude.js:${srcdir}/eventql/mapreduce/prelude.js' | ${srcdir}/eventql/util/assets.sh $(builddir)/eventql/mapreduce/mapreduce_preludejs.cc
+
 evqld_LDADD = \
+    evql_util.a \
+    evql_http.a \
+    evql_sql.a \
+    evql_cstable.a \
+    evql_sstable.a \
     $(SIMDCOMP_LDADD) \
     $(SPIDERMONKEY_LDADD) \
     $(LMDB_LDADD) \
     $(PROTOBUF_LDADD) \
     $(PCRE_LDADD)
 
-dist_noinst_DATA = $(evql_protos)
-BUILT_SOURCES = $(evql_protos:.proto=.pb.h)
+bin_PROGRAMS += evqld
 
-EXTRA_DIST = \
-  eventql/util/assets.sh \
-  eventql/util/charts/testdata \
-  eventql/sql/testdata \
-  eventql/mapreduce/prelude.js
 
-eventql/mapreduce/mapreduce_preludejs.cc:
-	echo 'eventql/mapreduce/prelude.js:${srcdir}/eventql/mapreduce/prelude.js' | ${srcdir}/eventql/util/assets.sh $(builddir)/eventql/mapreduce/mapreduce_preludejs.cc
+################# TEST: sql/runtime ####################
+test_evql_sql_runtime_SOURCES = eventql/sql/runtime/Runtime_test.cc
+test_evql_sql_runtime_LDADD = \
+    evql_util.a \
+    evql_http.a \
+    evql_sql.a \
+    evql_cstable.a \
+    evql_sstable.a \
+    $(SIMDCOMP_LDADD) \
+    $(SPIDERMONKEY_LDADD) \
+    $(LMDB_LDADD) \
+    $(PROTOBUF_LDADD) \
+    $(PCRE_LDADD)
 
-%.pb.cc %.pb.h: %.proto
-	$(top_builddir)/deps/3rdparty/protobuf/protoc --proto_path=$(srcdir) --cpp_out=$(builddir) $^
+TESTS += test_evql_sql_runtime
+check_PROGRAMS += test_evql_sql_runtime
+
+
