@@ -755,10 +755,10 @@ evql_SOURCES = \
     eventql/evql.cc
 
 evql_LDADD = \
-    evql_util.a \
     evql_http.a \
     evql_sql.a \
     evql_cstable.a \
+    evql_util.a \
     $(LINENOISE_LDADD) \
     $(SIMDCOMP_LDADD) \
     $(PCRE_LDADD)
@@ -947,11 +947,11 @@ eventql/mapreduce/mapreduce_preludejs.cc:
 	echo 'eventql/mapreduce/prelude.js:${srcdir}/eventql/mapreduce/prelude.js' | ${srcdir}/eventql/util/assets.sh $(builddir)/eventql/mapreduce/mapreduce_preludejs.cc
 
 evqld_LDADD = \
-    evql_util.a \
     evql_http.a \
     evql_sql.a \
     evql_cstable.a \
     evql_sstable.a \
+    evql_util.a \
     $(SIMDCOMP_LDADD) \
     $(SPIDERMONKEY_LDADD) \
     $(LMDB_LDADD) \
@@ -982,11 +982,11 @@ check_PROGRAMS += test_evql_sql_runtime
 ################# TEST: sql/qtree ####################
 test_evql_sql_qtree_SOURCES = eventql/sql/qtree/QTree_test.cc
 test_evql_sql_qtree_LDADD = \
-    evql_util.a \
     evql_http.a \
     evql_sql.a \
     evql_cstable.a \
     evql_sstable.a \
+    evql_util.a \
     $(SIMDCOMP_LDADD) \
     $(SPIDERMONKEY_LDADD) \
     $(LMDB_LDADD) \
@@ -1000,11 +1000,11 @@ check_PROGRAMS += test_evql_sql_qtree
 ################# TEST: sql/parser ####################
 test_evql_sql_parser_SOURCES = eventql/sql/parser/Parser_test.cc
 test_evql_sql_parser_LDADD = \
-    evql_util.a \
     evql_http.a \
     evql_sql.a \
     evql_cstable.a \
     evql_sstable.a \
+    evql_util.a \
     $(SIMDCOMP_LDADD) \
     $(SPIDERMONKEY_LDADD) \
     $(LMDB_LDADD) \
