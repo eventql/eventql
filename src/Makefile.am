@@ -969,11 +969,11 @@ bin_PROGRAMS += evqld
 ################# TEST: sql/runtime ####################
 test_evql_sql_runtime_SOURCES = eventql/sql/runtime/Runtime_test.cc
 test_evql_sql_runtime_LDADD = \
-    evql_util.a \
     evql_http.a \
     evql_sql.a \
     evql_cstable.a \
     evql_sstable.a \
+    evql_util.a \
     $(SIMDCOMP_LDADD) \
     $(SPIDERMONKEY_LDADD) \
     $(LMDB_LDADD) \
