@@ -1078,3 +1078,11 @@ TEST_CASE(ParserTest, TestDrawStatementWithLegendWithTitle, [] () {
       title_expr).toString();
   EXPECT_EQ(title.getString(), "fnordylegend");
 });
+
+TEST_CASE(ParserTest, TestCreateTableStatement, [] () {
+  auto runtime = Runtime::getDefaultRuntime();
+  auto txn = runtime->newTransaction();
+  auto parser = parseTestQuery("CREATE TABLE fnord()");
+  EXPECT(parser.getStatements().size() == 1);
+
+});
