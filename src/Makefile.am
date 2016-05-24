@@ -204,6 +204,8 @@ evql_sql_SOURCES = \
     eventql/sql/query_plan.h \
     eventql/sql/result_cursor.cc \
     eventql/sql/result_cursor.h \
+    eventql/sql/result_list.cc \
+    eventql/sql/result_list.h \
     eventql/sql/runtime/LikePattern.cc \
     eventql/sql/runtime/LikePattern.h \
     eventql/sql/runtime/QueryBuilder.cc \
@@ -228,7 +230,6 @@ evql_sql_SOURCES = \
     eventql/sql/runtime/tablerepository.h \
     eventql/sql/runtime/vm.cc \
     eventql/sql/runtime/vm.h \
-    eventql/sql/runtime/resultlist.h \
     eventql/sql/scheduler.cc \
     eventql/sql/scheduler.h \
     eventql/sql/scheduler/execution_context.cc \
