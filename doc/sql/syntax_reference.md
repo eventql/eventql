@@ -91,7 +91,7 @@ Syntax Reference
     ( column_definition, column_definition, ...)
 
     column_definition ::=
-      column_name cql_type
+        column_name cql_type
       | column_name column_type [ PRIMARY KEY ] [NOT NULL]
       | column_name REPEATED column_type
       | column_name [REPEATED] RECORD ( column_definition, column_definition, ...)
