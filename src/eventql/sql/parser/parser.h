@@ -100,6 +100,8 @@ protected:
   ASTNode* statement();
   ASTNode* selectStatement();
   ASTNode* selectSublist();
+  ASTNode* createStatement();
+  ASTNode* createTableStatement();
   ASTNode* tableName();
   ASTNode* drawStatement();
   ASTNode* axisClause();

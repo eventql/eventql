@@ -1082,7 +1082,13 @@ TEST_CASE(ParserTest, TestDrawStatementWithLegendWithTitle, [] () {
 TEST_CASE(ParserTest, TestCreateTableStatement, [] () {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
-  auto parser = parseTestQuery("CREATE TABLE fnord()");
+  auto parser = parseTestQuery("CREATE TABLE fnord ()");
   EXPECT(parser.getStatements().size() == 1);
-
+  const auto& stmt = parser.getStatements()[0];
+  EXPECT(*stmt == ASTNode::T_CREATE_TABLE);
+  EXPECT(stmt->getChildren().size() == 2);
+  EXPECT_EQ(*stmt->getChildren()[0], ASTNode::T_TABLE_NAME);
+  EXPECT_EQ(*stmt->getChildren()[0]->getToken(), Token::T_IDENTIFIER);
+  EXPECT_EQ(stmt->getChildren()[0]->getToken()->getString(), "fnord");
+  EXPECT(*stmt->getChildren()[1] == ASTNode::T_COLUMN_LIST);
 });

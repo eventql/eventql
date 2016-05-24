@@ -309,6 +309,8 @@ ASTNode* Parser::statement() {
   switch (cur_token_->getType()) {
     case Token::T_SELECT:
       return selectStatement();
+    case Token::T_CREATE:
+      return createStatement();
     case Token::T_DRAW:
       return drawStatement();
     case Token::T_IMPORT:
@@ -403,6 +405,29 @@ ASTNode* Parser::selectStatement() {
   return select;
 }
 
+ASTNode* Parser::createStatement() {
+  consumeToken();
+  return createTableStatement();
+}
+
+ASTNode* Parser::createTableStatement() {
+  expectAndConsume(Token::T_TABLE);
+
+  auto create_table = new ASTNode(ASTNode::T_CREATE_TABLE);
+  create_table->appendChild(tableName());
+
+  auto column_list = new ASTNode(ASTNode::T_COLUMN_LIST);
+  create_table->appendChild(column_list);
+
+  expectAndConsume(Token::T_LPAREN);
+  expectAndConsume(Token::T_RPAREN);
+
+  if (*cur_token_ == Token::T_SEMICOLON) {
+    consumeToken();
+  }
+
+  return create_table;
+}
 
 ASTNode* Parser::importStatement() {
   auto import = new ASTNode(ASTNode::T_IMPORT);

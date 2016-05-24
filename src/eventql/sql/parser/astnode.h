@@ -96,6 +96,8 @@ public:
     T_SHOW_TABLES,
     T_DESCRIBE_TABLE,
     T_EXPLAIN_QUERY,
+    T_CREATE_TABLE,
+    T_COLUMN_LIST,
 
     T_DRAW,
     T_IMPORT,
