@@ -70,30 +70,35 @@ void subStringExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
   if (argc < 2 || argc > 3) {
     RAISEF(
         kRuntimeError,
-        "wrong number of arguments for substr. expected: 2 or 3, got: $2",
+        "wrong number of arguments for substr. expected: 2 or 3, got: $0",
         argc);
   }
 
   String str = argv[0].getString();
-  int cur = argv[1].getInteger() - 1;
+  int64_t strlen = static_cast<int64_t>(str.size());
+  int64_t cur = argv[1].getInteger();
+
+  if (cur == 0) {
+    *out = SValue::newString("");
+    return;
+  }
+
   if (cur < 0) {
-    cur += str.size() + 1;
+    cur = std::max(int64_t(0), cur + strlen);
+  } else {
+    cur = std::min(cur - 1, strlen - 1);
   }
 
-  int end = str.size();
+  int64_t len = strlen - cur;
   if (argc == 3) {
-    int len = argv[2].getInteger();
-    if (cur + len < str.size()) {
-      end = cur + len;
-    }
+    len = std::min(argv[2].getInteger(), len);
   }
 
-  String out_str;
-  for (; cur < end; ++cur) {
-    out_str += str[cur];
+  if (len == 0) {
+    *out = SValue::newString("");
+  } else {
+    *out = SValue::newString(str.substr(cur, len));
   }
-
-  *out = SValue(out_str);
 }
 
 }
