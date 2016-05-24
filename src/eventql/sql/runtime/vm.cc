@@ -31,10 +31,6 @@
 #include <eventql/util/exception.h>
 #include <eventql/util/RegExp.h>
 
-#ifndef HAVE_PCRE
-#error "PCRE is required"
-#endif
-
 namespace csql {
 
 VM::Program::Program(

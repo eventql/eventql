@@ -28,7 +28,6 @@
 #include "eventql/util/exception.h"
 #include "eventql/util/stringutil.h"
 #include "eventql/util/net/inetaddr.h"
-#include "eventql/sysconfig.h"
 
 InetAddr InetAddr::resolve(const std::string& addr_str) {
   auto parts = StringUtil::split(addr_str, ":");

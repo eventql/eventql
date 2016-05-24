@@ -28,7 +28,6 @@
 #include <string>
 #include "eventql/util/stdtypes.h"
 #include "eventql/util/autoref.h"
-#include "eventql/util/VFSFile.h"
 
 /**
  * A growing/growable buffer class.

@@ -55,6 +55,16 @@ Users can also define their own functions and operators.
     <td>alias for lowercase</td>
     <td><code>lcase("hello world")</code></td>
   </tr>
+  <tr>
+    <td><a class="link" href="/documentation/queries/sql/functions-and-operators/substring">lcase</a></td>
+    <td>Extract substring as specified.</td>
+    <td><code>substring("foobar", 2, 3)</code></td>
+  </tr>
+  <tr>
+    <td><a class="link" href="/documentation/queries/sql/functions-and-operators/substr">lcase</a></td>
+    <td>alias for substring</td>
+    <td><code>substr("foobar", 3)</code></td>
+  </tr>
 </table>
 
 ###### Numeric Functions

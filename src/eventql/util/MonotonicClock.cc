@@ -2,7 +2,6 @@
 #include <eventql/util/duration.h>
 #include <eventql/util/exception.h>
 #include <eventql/util/defines.h>
-#include <eventql/util/sysconfig.h>
 
 #if defined(STX_OS_DARWIN)
 #include <mach/mach.h>

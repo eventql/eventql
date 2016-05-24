@@ -1,6 +1,0 @@
-CONFIGURE_SUBST_FILES = [
-    'file',
-]
-CONFIGURE_DEFINE_FILES = [
-    'file.h',
-]
