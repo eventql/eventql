@@ -78,13 +78,17 @@ void subStringExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
   int64_t strlen = static_cast<int64_t>(str.size());
   int64_t cur = argv[1].getInteger();
 
-  if (cur == 0) {
+  if (cur == 0 || strlen == 0) {
     *out = SValue::newString("");
     return;
   }
 
   if (cur < 0) {
-    cur = std::max(int64_t(0), cur + strlen);
+    cur += strlen;
+    if (cur < 0) {
+      *out = SValue::newString("");
+      return;
+    }
   } else {
     cur = std::min(cur - 1, strlen - 1);
   }

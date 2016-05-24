@@ -2349,5 +2349,25 @@ TEST_CASE(RuntimeTest, TestSubstrExpression, [] () {
     EXPECT_EQ(v.getString(), "ba");
   }
 
+  {
+    auto v = runtime->evaluateConstExpression(
+        txn.get(),
+        String("substr('foobar', -2147483648)"));
+    EXPECT_EQ(v.getString(), "");
+  }
+
+  {
+    auto v = runtime->evaluateConstExpression(
+        txn.get(),
+        String("substr('foobar', 1, 2147483647)"));
+    EXPECT_EQ(v.getString(), "foobar");
+  }
+
+  {
+    auto v = runtime->evaluateConstExpression(
+        txn.get(),
+        String("substr('foobar', 4, 2147483647)"));
+    EXPECT_EQ(v.getString(), "bar");
+  }
 });
 
