@@ -505,6 +505,7 @@ int main(int argc, const char** argv) {
   eventql::cli::CLIConfig cli_cfg;
   {
     auto status = cli_cfg.loadDefaultConfigFile();
+    iputs("status $0", status);
     if (!status.isSuccess()) {
       printError(status.message());
       return 1;
@@ -512,15 +513,27 @@ int main(int argc, const char** argv) {
   }
 
   if (flags.isSet("host")) {
-    cli_cfg.setHost(flags.getString("host"));
+    auto s = cli_cfg.setHost(flags.getString("host"));
+    if (!s.isSuccess()) {
+      printError(StringUtil::format("$0: $1", s.type(), s.message()));
+      return 1;
+    }
   }
 
   if (flags.isSet("auth_token")) {
-    cli_cfg.setAuthToken(flags.getString("auth_token"));
+    auto s = cli_cfg.setAuthToken(flags.getString("auth_token"));
+    if (!s.isSuccess()) {
+      printError(StringUtil::format("$0: $1", s.type(), s.message()));
+      return 1;
+    }
   }
 
   if (flags.isSet("port")) {
-    cli_cfg.setPort(flags.getInt("port"));
+    auto s = cli_cfg.setPort(flags.getInt("port"));
+    if (!s.isSuccess()) {
+      printError(StringUtil::format("$0: $1", s.type(), s.message()));
+      return 1;
+    }
   }
 
   if (cli_cfg.getAuthToken().isEmpty()) {

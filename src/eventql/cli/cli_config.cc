@@ -104,7 +104,7 @@ Status CLIConfig::setHost(const String& host /* = "localhost" */) {
 
 Status CLIConfig::setPort(const int port /* = 80 */) {
   if (port < 0 || port > 65535) {
-    return Status(eFlagError, StringUtil::format("invalid port: $0", port));
+    return Status(eFlagError, StringUtil::format("invalid port $0", port));
   }
 
   server_port_ = port;
@@ -112,7 +112,7 @@ Status CLIConfig::setPort(const int port /* = 80 */) {
 }
 
 Status CLIConfig::setAuthToken(const String& auth_token) {
-  server_auth_token_ = auth_tokken;
+  server_auth_token_ = auth_token;
   return Status::success();
 }
 
