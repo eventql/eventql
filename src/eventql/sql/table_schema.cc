@@ -31,17 +31,17 @@ namespace csql {
 TableSchema::TableSchema(const TableSchema& other) {
   HashMap<ColumnDefinition const*, ColumnDefinition const*> ptr_map;
 
-  for (auto col : other.columns_) {
-    auto new_col = new ColumnDefinition(*col);
-    ptr_map.emplace(col, new_col);
+  for (auto col = other.columns_.rbegin(); col != other.columns_.rend(); ++col) {
+    auto new_col = new ColumnDefinition(**col);
+    ptr_map.emplace(*col, new_col);
     columns_.emplace_back(new_col);
 
-    for (auto subcol : col->column_schema) {
+    for (auto subcol : (*col)->column_schema) {
       auto new_subcol = ptr_map[subcol];
 
       /**
        * N.B. we require the column list to be built up so that a given column
-       * Ci is only ever referenced by another column Cj where j > i.
+       * Ci is only ever referenced by another column Cj where j < i.
        */
       assert(new_subcol != nullptr); // invalid reference order
       new_col->column_schema.emplace_back(new_subcol);
@@ -101,13 +101,12 @@ void TableSchemaBuilder::addRecordColumn(
   col_def->column_options = column_options;
   col_def->column_schema = column_schema.root_columns_;
 
+  schema_.columns_.emplace_back(col_def);
+  schema_.root_columns_.emplace_back(col_def);
   schema_.columns_.insert(
       schema_.columns_.end(),
       column_schema.columns_.begin(),
       column_schema.columns_.end());
-
-  schema_.columns_.emplace_back(col_def);
-  schema_.root_columns_.emplace_back(col_def);
 
   column_schema.columns_.clear();
   column_schema.root_columns_.clear();
