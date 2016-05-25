@@ -168,122 +168,227 @@ void ASTNode::debugPrint(int indent /* = 0 */) const {
   }
 
   switch (type_) {
-    case T_ALL:
-      printf("- ALL");
-      break;
     case T_ROOT:
-      printf("\r");
-      break;
-    case T_SELECT:
-      printf("- SELECT");
-      break;
-    case T_SELECT_LIST:
-      printf("- SELECT_LIST");
-      break;
-    case T_INNER_JOIN:
-      printf("- INNER_JOIN");
-      break;
-    case T_LEFT_JOIN:
-      printf("- LEFT_JOIN");
-      break;
-    case T_RIGHT_JOIN:
-      printf("- RIGHT_JOIN");
-      break;
-    case T_NATURAL_INNER_JOIN:
-      printf("- NATURAL_INNER_JOIN");
-      break;
-    case T_NATURAL_LEFT_JOIN:
-      printf("- NATURAL_LEFT_JOIN");
-      break;
-    case T_NATURAL_RIGHT_JOIN:
-      printf("- NATURAL_RIGHT_JOIN");
-      break;
-    case T_FROM:
-      printf("- FROM");
-      break;
-    case T_WHERE:
-      printf("- WHERE");
-      break;
-    case T_GROUP_BY:
-      printf("- GROUP_BY");
-      break;
-    case T_ORDER_BY:
-      printf("- ORDER_BY");
-      break;
-    case T_LIMIT:
-      printf("- LIMIT");
-      break;
-    case T_OFFSET:
-      printf("- OFFSET");
-      break;
-    case T_HAVING:
-      printf("- HAVING");
-      break;
-    case T_SORT_SPEC:
-      printf("- SORT_SPEC");
-      break;
-    case T_DERIVED_COLUMN:
-      printf("- DERIVED_COLUMN");
-      break;
-    case T_RESOLVED_COLUMN:
-      printf("- RESOLVED_COLUMN");
-      break;
-    case T_COLUMN_NAME:
-      printf("- COLUMN_NAME");
-      break;
-    case T_TABLE_NAME:
-      printf("- TABLE_NAME");
+      printf("- T_ROOT");
       break;
     case T_LITERAL:
-      printf("- LITERAL");
-      break;
-    case T_IF_EXPR:
-      printf("- IF_EXPR");
-      break;
-    case T_NEGATE_EXPR:
-      printf("- NEGATE_EXPR");
-      break;
-    case T_EQ_EXPR:
-      printf("- EQ_EXPR");
-      break;
-    case T_LT_EXPR:
-      printf("- LT_EXPR");
-      break;
-    case T_GT_EXPR:
-      printf("- GT_EXPR");
-      break;
-    case T_NEQ_EXPR:
-      printf("- NEQ_EXPR");
-      break;
-    case T_AND_EXPR:
-      printf("- AND_EXPR");
-      break;
-    case T_OR_EXPR:
-      printf("- OR_EXPR");
-      break;
-    case T_ADD_EXPR:
-      printf("- ADD_EXPR");
-      break;
-    case T_SUB_EXPR:
-      printf("- SUB_EXPR");
-      break;
-    case T_MUL_EXPR:
-      printf("- MUL_EXPR");
-      break;
-    case T_DIV_EXPR:
-      printf("- DIV_EXPR");
-      break;
-    case T_MOD_EXPR:
-      printf("- MOD_EXPR");
-      break;
-    case T_POW_EXPR:
-      printf("- POW_EXPR");
+      printf("- T_LITERAL");
       break;
     case T_METHOD_CALL:
-      printf("- METHOD_CALL");
+      printf("- T_METHOD_CALL");
       break;
     case T_METHOD_CALL_WITHIN_RECORD:
-      printf("- METHOD_CALL_WITHIN_RECORD");
+      printf("- T_METHOD_CALL_WITHIN_RECORD");
+      break;
+    case T_RESOLVED_CALL:
+      printf("- T_RESOLVED_CALL");
+      break;
+    case T_COLUMN_NAME:
+      printf("- T_COLUMN_NAME");
+      break;
+    case T_COLUMN_ALIAS:
+      printf("- T_COLUMN_ALIAS");
+      break;
+    case T_COLUMN_INDEX:
+      printf("- T_COLUMN_INDEX");
+      break;
+    case T_RESOLVED_COLUMN:
+      printf("- T_RESOLVED_COLUMN");
+      break;
+    case T_TABLE_NAME:
+      printf("- T_TABLE_NAME");
+      break;
+    case T_TABLE_ALIAS:
+      printf("- T_TABLE_ALIAS");
+      break;
+    case T_DERIVED_COLUMN:
+      printf("- T_DERIVED_COLUMN");
+      break;
+    case T_PROPERTY:
+      printf("- T_PROPERTY");
+      break;
+    case T_PROPERTY_VALUE:
+      printf("- T_PROPERTY_VALUE");
+      break;
+    case T_VOID:
+      printf("- T_VOID");
+      break;
+    case T_SELECT:
+      printf("- T_SELECT");
+      break;
+    case T_SELECT_DEEP:
+      printf("- T_SELECT_DEEP");
+      break;
+    case T_SELECT_LIST:
+      printf("- T_SELECT_LIST");
+      break;
+    case T_ALL:
+      printf("- T_ALL");
+      break;
+    case T_FROM:
+      printf("- T_FROM");
+      break;
+    case T_WHERE:
+      printf("- T_WHERE");
+      break;
+    case T_GROUP_BY:
+      printf("- T_GROUP_BY");
+      break;
+    case T_ORDER_BY:
+      printf("- T_ORDER_BY");
+      break;
+    case T_SORT_SPEC:
+      printf("- T_SORT_SPEC");
+      break;
+    case T_HAVING:
+      printf("- T_HAVING");
+      break;
+    case T_LIMIT:
+      printf("- T_LIMIT");
+      break;
+    case T_OFFSET:
+      printf("- T_OFFSET");
+      break;
+    case T_JOIN_CONDITION:
+      printf("- T_JOIN_CONDITION");
+      break;
+    case T_JOIN_COLUMNLIST:
+      printf("- T_JOIN_COLUMNLIST");
+      break;
+    case T_INNER_JOIN:
+      printf("- T_INNER_JOIN");
+      break;
+    case T_LEFT_JOIN:
+      printf("- T_LEFT_JOIN");
+      break;
+    case T_RIGHT_JOIN:
+      printf("- T_RIGHT_JOIN");
+      break;
+    case T_NATURAL_INNER_JOIN:
+      printf("- T_NATURAL_INNER_JOIN");
+      break;
+    case T_NATURAL_LEFT_JOIN:
+      printf("- T_NATURAL_LEFT_JOIN");
+      break;
+    case T_NATURAL_RIGHT_JOIN:
+      printf("- T_NATURAL_RIGHT_JOIN");
+      break;
+    case T_IF_EXPR:
+      printf("- T_IF_EXPR");
+      break;
+    case T_EQ_EXPR:
+      printf("- T_EQ_EXPR");
+      break;
+    case T_NEQ_EXPR:
+      printf("- T_NEQ_EXPR");
+      break;
+    case T_LT_EXPR:
+      printf("- T_LT_EXPR");
+      break;
+    case T_LTE_EXPR:
+      printf("- T_LTE_EXPR");
+      break;
+    case T_GT_EXPR:
+      printf("- T_GT_EXPR");
+      break;
+    case T_GTE_EXPR:
+      printf("- T_GTE_EXPR");
+      break;
+    case T_AND_EXPR:
+      printf("- T_AND_EXPR");
+      break;
+    case T_OR_EXPR:
+      printf("- T_OR_EXPR");
+      break;
+    case T_NEGATE_EXPR:
+      printf("- T_NEGATE_EXPR");
+      break;
+    case T_ADD_EXPR:
+      printf("- T_ADD_EXPR");
+      break;
+    case T_SUB_EXPR:
+      printf("- T_SUB_EXPR");
+      break;
+    case T_MUL_EXPR:
+      printf("- T_MUL_EXPR");
+      break;
+    case T_DIV_EXPR:
+      printf("- T_DIV_EXPR");
+      break;
+    case T_MOD_EXPR:
+      printf("- T_MOD_EXPR");
+      break;
+    case T_POW_EXPR:
+      printf("- T_POW_EXPR");
+      break;
+    case T_REGEX_EXPR:
+      printf("- T_REGEX_EXPR");
+      break;
+    case T_LIKE_EXPR:
+      printf("- T_LIKE_EXPR");
+      break;
+    case T_SHOW_TABLES:
+      printf("- T_SHOW_TABLES");
+      break;
+    case T_DESCRIBE_TABLE:
+      printf("- T_DESCRIBE_TABLE");
+      break;
+    case T_EXPLAIN_QUERY:
+      printf("- T_EXPLAIN_QUERY");
+      break;
+    case T_CREATE_TABLE:
+      printf("- T_CREATE_TABLE");
+      break;
+    case T_COLUMN_LIST:
+      printf("- T_COLUMN_LIST");
+      break;
+    case T_PRIMARY_KEY:
+      printf("- T_PRIMARY_KEY");
+      break;
+    case T_RECORD:
+      printf("- T_RECORD");
+      break;
+    case T_REPEATED:
+      printf("- T_REPEATED");
+      break;
+    case T_NOT_NULL:
+      printf("- T_NOT_NULL");
+      break;
+    case T_COLUMN:
+      printf("- T_COLUMN");
+      break;
+    case T_COLUMN_TYPE:
+      printf("- T_COLUMN_TYPE");
+      break;
+    case T_DRAW:
+      printf("- T_DRAW");
+      break;
+    case T_IMPORT:
+      printf("- T_IMPORT");
+      break;
+    case T_AXIS:
+      printf("- T_AXIS");
+      break;
+    case T_AXIS_POSITION:
+      printf("- T_AXIS_POSITION");
+      break;
+    case T_AXIS_LABELS:
+      printf("- T_AXIS_LABELS");
+      break;
+    case T_DOMAIN:
+      printf("- T_DOMAIN");
+      break;
+    case T_DOMAIN_SCALE:
+      printf("- T_DOMAIN_SCALE");
+      break;
+    case T_GRID:
+      printf("- T_GRID");
+      break;
+    case T_LEGEND:
+      printf("- T_LEGEND");
+      break;
+    case T_GROUP_OVER_TIMEWINDOW:
+      printf("- T_GROUP_OVER_TIMEWINDOW");
       break;
     default:
       printf("- <unknown ASTNode>");
