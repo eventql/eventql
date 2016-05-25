@@ -122,6 +122,7 @@ Vector<RefPtr<QueryTreeNode>> QueryPlanBuilder::build(
       case ASTNode::T_SELECT_DEEP:
       case ASTNode::T_SHOW_TABLES:
       case ASTNode::T_DESCRIBE_TABLE:
+      case ASTNode::T_CREATE_TABLE:
         nodes.emplace_back(build(txn, statements[i], tables));
         break;
 
