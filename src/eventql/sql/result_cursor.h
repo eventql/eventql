@@ -79,4 +79,13 @@ protected:
   ScopedPtr<ResultCursor> cursor_;
 };
 
+class EmptyResultCursor : public ResultCursor {
+public:
+
+  bool next(SValue* row, int row_len) override;
+
+  size_t getNumColumns() override;
+
+};
+
 }
