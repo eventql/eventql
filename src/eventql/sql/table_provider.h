@@ -29,6 +29,7 @@
 #include <eventql/sql/expressions/table_expression.h>
 #include <eventql/sql/qtree/SequentialScanNode.h>
 #include <eventql/sql/scheduler/execution_context.h>
+#include "eventql/sql/qtree/nodes/create_table.h"
 
 namespace csql {
 
@@ -46,13 +47,9 @@ public:
 
   virtual Option<TableInfo> describe(const String& table_name) const = 0;
 
-  struct CreateTableRequest {
-    String table_name;
-    TableSchema table_schema;
-    Vector<String> primary_key;
-  };
-
-  virtual Status createTable(const CreateTableRequest& req) = 0;
+  virtual Status createTable(const CreateTableNode& create_table) {
+    RAISE(kRuntimeError, "can't create tables");
+  }
 
 };
 

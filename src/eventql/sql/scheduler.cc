@@ -316,6 +316,8 @@ ScopedPtr<ResultCursor> DefaultScheduler::executeCreateTable(
     Transaction* txn,
     ExecutionContext* execution_context,
     RefPtr<CreateTableNode> create_table) {
+  auto res = txn->getTableProvider()->createTable(*create_table);
+  // FIXME return result...
   return mkScoped(new EmptyResultCursor());
 }
 

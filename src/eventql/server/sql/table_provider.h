@@ -57,6 +57,8 @@ public:
 
   Option<csql::TableInfo> describe(const String& table_name) const override;
 
+  Status createTable(const csql::CreateTableNode& req) override;
+
   const String& getNamespace() const;
 
 protected:
