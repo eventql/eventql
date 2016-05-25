@@ -34,7 +34,7 @@ friend class TableSchemaBuilder;
 public:
 
   enum class ColumnClass { SCALAR, RECORD };
-  enum class ColumnOptions { REPEATED, NOT_NULL };
+  enum class ColumnOptions { REPEATED, NOT_NULL, PRIMARY_KEY };
 
   struct ColumnDefinition {
     ColumnClass column_class;
@@ -52,10 +52,10 @@ public:
 
     String column_type;
     Vector<ColumnOptions> column_options;
-    Vector<ColumnDefinition const*> column_schema;
+    Vector<ColumnDefinition*> column_schema;
   };
 
-  using ColumnList = Vector<ColumnDefinition const*>;
+  using ColumnList = Vector<ColumnDefinition*>;
 
   ~TableSchema();
   TableSchema(const TableSchema& other);
@@ -75,8 +75,8 @@ public:
 
 protected:
   TableSchema() = default;
-  Vector<ColumnDefinition const*> columns_;
-  Vector<ColumnDefinition const*> root_columns_;
+  Vector<ColumnDefinition*> columns_;
+  Vector<ColumnDefinition*> root_columns_;
 };
 
 using TableSchemaRef = RefPtr<TableSchema>;

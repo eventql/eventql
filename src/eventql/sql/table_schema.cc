@@ -29,14 +29,14 @@
 namespace csql {
 
 TableSchema::TableSchema(const TableSchema& other) {
-  HashMap<ColumnDefinition const*, ColumnDefinition const*> ptr_map;
+  HashMap<ColumnDefinition*, ColumnDefinition*> ptr_map;
+  columns_.resize(other.columns_.size());
 
-  for (auto col = other.columns_.rbegin(); col != other.columns_.rend(); ++col) {
-    auto new_col = new ColumnDefinition(**col);
-    ptr_map.emplace(*col, new_col);
-    columns_.emplace_back(new_col);
+  for (size_t i = columns_.size(); i-- > 0; ) {
+    columns_[i] = new ColumnDefinition(*other.columns_[i]);
+    ptr_map.emplace(other.columns_[i], columns_[i]);
 
-    for (auto subcol : (*col)->column_schema) {
+    for (auto& subcol : columns_[i]->column_schema) {
       auto new_subcol = ptr_map[subcol];
 
       /**
@@ -44,7 +44,7 @@ TableSchema::TableSchema(const TableSchema& other) {
        * Ci is only ever referenced by another column Cj where j < i.
        */
       assert(new_subcol != nullptr); // invalid reference order
-      new_col->column_schema.emplace_back(new_subcol);
+      subcol = new_subcol;
     }
   }
 
@@ -111,13 +111,6 @@ void TableSchemaBuilder::addRecordColumn(
       column_schema.columns_.end());
 
   for (auto subcol : column_schema.columns_) {
-    // N.B. we own the columns and are allowed to modify them. the reason
-    // we const_cast here is that we want to return Vector<T const*> in public
-    // methods. we could either store a non-const pointer list and then on each
-    // getter call that return the pointer list, copy the list and cast each
-    // pointer to const individually. we do not want to do that. instead we store
-    // a list to const pointers as a member (that we can return directly in
-    // getter calls) and const_cast back to a mutable pointer when we need it
     auto mutable_subcol = const_cast<TableSchema::ColumnDefinition*>(subcol);
 
     mutable_subcol->full_column_name = StringUtil::format(

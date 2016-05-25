@@ -513,7 +513,7 @@ TEST_CASE(QTreeTest, TestCreateTable, [] () {
 
   String query =
     "  CREATE TABLE fnord ("
-    "      time DATETIME NOT NULL Primary Key,"
+    "      time DATETIME NOT NULL,"
     "      location STring,"
     "      person REPEATED String,"
     "      temperatur RECORD ("
@@ -541,75 +541,6 @@ TEST_CASE(QTreeTest, TestCreateTable, [] () {
   EXPECT_EQ(qtree->getTableName(), "fnord");
 
   auto table_schema = qtree->getTableSchema();
-  auto columns = table_schema.getColumns();
-  EXPECT_EQ(columns.size(), 5);
-
-  EXPECT_EQ(columns[0]->column_name, "time");
-  EXPECT(columns[0]->column_class == TableSchema::ColumnClass::SCALAR);
-  EXPECT_EQ(columns[0]->column_type, "DATETIME");
-  EXPECT(columns[0]->column_options == Vector<TableSchema::ColumnOptions> {
-    TableSchema::ColumnOptions::NOT_NULL
-  });
-
-  EXPECT_EQ(columns[1]->column_name, "location");
-  EXPECT(columns[1]->column_class == TableSchema::ColumnClass::SCALAR);
-  EXPECT_EQ(columns[1]->column_type, "STring");
-  EXPECT(columns[1]->column_options == Vector<TableSchema::ColumnOptions> {});
-
-  EXPECT_EQ(columns[2]->column_name, "person");
-  EXPECT(columns[2]->column_class == TableSchema::ColumnClass::SCALAR);
-  EXPECT_EQ(columns[2]->column_type, "String");
-  EXPECT(columns[2]->column_options == Vector<TableSchema::ColumnOptions> {
-    TableSchema::ColumnOptions::REPEATED
-  });
-
-  EXPECT_EQ(columns[3]->column_name, "temperatur");
-  EXPECT(columns[3]->column_class == TableSchema::ColumnClass::RECORD);
-  EXPECT_EQ(columns[3]->column_type, "RECORD");
-  EXPECT(columns[3]->column_options == Vector<TableSchema::ColumnOptions> {});
-  EXPECT_EQ(columns[3]->column_schema.size(), 2);
-
-  {
-    auto scolumns = columns[3]->column_schema;
-
-    EXPECT_EQ(scolumns[0]->column_name, "val1");
-    EXPECT(scolumns[0]->column_class == TableSchema::ColumnClass::SCALAR);
-    EXPECT_EQ(scolumns[0]->column_type, "uint64");
-    EXPECT(scolumns[0]->column_options == Vector<TableSchema::ColumnOptions> {
-      TableSchema::ColumnOptions::NOT_NULL
-    });
-
-    EXPECT_EQ(scolumns[0]->column_name, "val2");
-    EXPECT(scolumns[0]->column_class == TableSchema::ColumnClass::SCALAR);
-    EXPECT_EQ(scolumns[0]->column_type, "string");
-    EXPECT(scolumns[0]->column_options == Vector<TableSchema::ColumnOptions> {
-      TableSchema::ColumnOptions::REPEATED
-    });
-  }
-
-  EXPECT_EQ(columns[4]->column_name, "some_other");
-  EXPECT(columns[4]->column_class == TableSchema::ColumnClass::RECORD);
-  EXPECT_EQ(columns[4]->column_type, "RECORD");
-  EXPECT(columns[4]->column_options == Vector<TableSchema::ColumnOptions> {});
-  EXPECT_EQ(columns[4]->column_schema.size(), 2);
-
-  {
-    auto scolumns = columns[4]->column_schema;
-
-    EXPECT_EQ(scolumns[0]->column_name, "val1");
-    EXPECT(scolumns[0]->column_class == TableSchema::ColumnClass::SCALAR);
-    EXPECT_EQ(scolumns[0]->column_type, "uint64");
-    EXPECT(scolumns[0]->column_options == Vector<TableSchema::ColumnOptions> {
-      TableSchema::ColumnOptions::NOT_NULL
-    });
-
-    EXPECT_EQ(scolumns[0]->column_name, "val2");
-    EXPECT(scolumns[0]->column_class == TableSchema::ColumnClass::SCALAR);
-    EXPECT_EQ(scolumns[0]->column_type, "STRING");
-    EXPECT(scolumns[0]->column_options == Vector<TableSchema::ColumnOptions> {
-      TableSchema::ColumnOptions::REPEATED
-    });
-  }
 
   auto fcolumns = table_schema.getFlatColumnList();
   EXPECT_EQ(fcolumns.size(), 9);
@@ -643,7 +574,7 @@ TEST_CASE(QTreeTest, TestCreateTable, [] () {
   EXPECT(fcolumns[3]->column_options == Vector<TableSchema::ColumnOptions> {});
   EXPECT_EQ(fcolumns[3]->column_schema.size(), 2);
 
-  EXPECT_EQ(fcolumns[4]->column_name, "val1");
+  EXPECT(fcolumns[4]->column_name == "val1");
   EXPECT_EQ(fcolumns[4]->full_column_name, "temperatur.val1");
   EXPECT(fcolumns[4]->column_class == TableSchema::ColumnClass::SCALAR);
   EXPECT_EQ(fcolumns[4]->column_type, "uint64");
@@ -651,7 +582,7 @@ TEST_CASE(QTreeTest, TestCreateTable, [] () {
     TableSchema::ColumnOptions::NOT_NULL
   });
 
-  EXPECT_EQ(fcolumns[5]->column_name, "val2");
+  EXPECT(fcolumns[5]->column_name == "val2");
   EXPECT_EQ(fcolumns[5]->full_column_name, "temperatur.val2");
   EXPECT(fcolumns[5]->column_class == TableSchema::ColumnClass::SCALAR);
   EXPECT_EQ(fcolumns[5]->column_type, "string");
@@ -662,10 +593,12 @@ TEST_CASE(QTreeTest, TestCreateTable, [] () {
   EXPECT_EQ(fcolumns[6]->column_name, "some_other");
   EXPECT(fcolumns[6]->column_class == TableSchema::ColumnClass::RECORD);
   EXPECT_EQ(fcolumns[6]->column_type, "RECORD");
-  EXPECT(fcolumns[6]->column_options == Vector<TableSchema::ColumnOptions> {});
+  EXPECT(fcolumns[6]->column_options == Vector<TableSchema::ColumnOptions> {
+    TableSchema::ColumnOptions::REPEATED
+  });
   EXPECT_EQ(fcolumns[6]->column_schema.size(), 2);
 
-  EXPECT_EQ(fcolumns[7]->column_name, "val1");
+  EXPECT(fcolumns[7]->column_name == "val1");
   EXPECT_EQ(fcolumns[7]->full_column_name, "some_other.val1");
   EXPECT(fcolumns[7]->column_class == TableSchema::ColumnClass::SCALAR);
   EXPECT_EQ(fcolumns[7]->column_type, "uint64");
@@ -673,13 +606,86 @@ TEST_CASE(QTreeTest, TestCreateTable, [] () {
     TableSchema::ColumnOptions::NOT_NULL
   });
 
-  EXPECT_EQ(fcolumns[8]->column_name, "val2");
+  EXPECT(fcolumns[8]->column_name == "val2");
   EXPECT_EQ(fcolumns[8]->full_column_name, "some_other.val2");
   EXPECT(fcolumns[8]->column_class == TableSchema::ColumnClass::SCALAR);
   EXPECT_EQ(fcolumns[8]->column_type, "STRING");
   EXPECT(fcolumns[8]->column_options == Vector<TableSchema::ColumnOptions> {
     TableSchema::ColumnOptions::REPEATED
   });
+
+
+  auto columns = table_schema.getColumns();
+  EXPECT_EQ(columns.size(), 5);
+
+  EXPECT_EQ(columns[0]->column_name, "time");
+  EXPECT(columns[0]->column_class == TableSchema::ColumnClass::SCALAR);
+  EXPECT_EQ(columns[0]->column_type, "DATETIME");
+  EXPECT(columns[0]->column_options == Vector<TableSchema::ColumnOptions> {
+    TableSchema::ColumnOptions::NOT_NULL
+  });
+
+  EXPECT_EQ(columns[1]->column_name, "location");
+  EXPECT(columns[1]->column_class == TableSchema::ColumnClass::SCALAR);
+  EXPECT_EQ(columns[1]->column_type, "STring");
+  EXPECT(columns[1]->column_options == Vector<TableSchema::ColumnOptions> {});
+
+  EXPECT_EQ(columns[2]->column_name, "person");
+  EXPECT(columns[2]->column_class == TableSchema::ColumnClass::SCALAR);
+  EXPECT_EQ(columns[2]->column_type, "String");
+  EXPECT(columns[2]->column_options == Vector<TableSchema::ColumnOptions> {
+    TableSchema::ColumnOptions::REPEATED
+  });
+
+  EXPECT_EQ(columns[3]->column_name, "temperatur");
+  EXPECT(columns[3]->column_class == TableSchema::ColumnClass::RECORD);
+  EXPECT_EQ(columns[3]->column_type, "RECORD");
+  EXPECT(columns[3]->column_options == Vector<TableSchema::ColumnOptions> {});
+  EXPECT_EQ(columns[3]->column_schema.size(), 2);
+
+  {
+    auto scolumns = columns[3]->column_schema;
+
+    EXPECT(scolumns[0]->column_name == "val1");
+    EXPECT(scolumns[0]->column_class == TableSchema::ColumnClass::SCALAR);
+    EXPECT_EQ(scolumns[0]->column_type, "uint64");
+    EXPECT(scolumns[0]->column_options == Vector<TableSchema::ColumnOptions> {
+      TableSchema::ColumnOptions::NOT_NULL
+    });
+
+    EXPECT(scolumns[1]->column_name == "val2");
+    EXPECT(scolumns[1]->column_class == TableSchema::ColumnClass::SCALAR);
+    EXPECT_EQ(scolumns[1]->column_type, "string");
+    EXPECT(scolumns[1]->column_options == Vector<TableSchema::ColumnOptions> {
+      TableSchema::ColumnOptions::REPEATED
+    });
+  }
+
+  EXPECT_EQ(columns[4]->column_name, "some_other");
+  EXPECT(columns[4]->column_class == TableSchema::ColumnClass::RECORD);
+  EXPECT_EQ(columns[4]->column_type, "RECORD");
+  EXPECT(columns[4]->column_options == Vector<TableSchema::ColumnOptions> {
+    TableSchema::ColumnOptions::REPEATED
+  });
+  EXPECT_EQ(columns[4]->column_schema.size(), 2);
+
+  {
+    auto scolumns = columns[4]->column_schema;
+
+    EXPECT_EQ(scolumns[0]->column_name, "val1");
+    EXPECT(scolumns[0]->column_class == TableSchema::ColumnClass::SCALAR);
+    EXPECT_EQ(scolumns[0]->column_type, "uint64");
+    EXPECT(scolumns[0]->column_options == Vector<TableSchema::ColumnOptions> {
+      TableSchema::ColumnOptions::NOT_NULL
+    });
+
+    EXPECT_EQ(scolumns[1]->column_name, "val2");
+    EXPECT(scolumns[1]->column_class == TableSchema::ColumnClass::SCALAR);
+    EXPECT_EQ(scolumns[1]->column_type, "STRING");
+    EXPECT(scolumns[1]->column_options == Vector<TableSchema::ColumnOptions> {
+      TableSchema::ColumnOptions::REPEATED
+    });
+  }
 
   // FIXME: check primary key
 });

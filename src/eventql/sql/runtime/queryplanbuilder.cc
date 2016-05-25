@@ -1706,6 +1706,101 @@ QueryTreeNode* QueryPlanBuilder::buildDescribeTable(
   return new DescribeTableNode(table_name->getToken()->getString());
 }
 
+static TableSchema buildCreateTableSchema(ASTNode* ast);
+
+static void buildCreateTableSchemaColumn(
+    ASTNode* ast,
+    TableSchemaBuilder* schema) {
+  if (ast->getChildren().size() < 2) {
+    RAISE(kRuntimeError, "corrupt AST");
+  }
+
+  auto column_name = ast->getChildren()[0];
+  if (column_name->getType() != ASTNode::T_COLUMN_NAME ||
+      column_name->getToken() == nullptr) {
+    RAISE(kRuntimeError, "corrupt AST");
+  }
+
+  Vector<TableSchema::ColumnOptions> column_options;
+  for (size_t i = 2; i < ast->getChildren().size(); ++i) {
+    switch (ast->getChildren()[i]->getType()) {
+      case ASTNode::T_NOT_NULL:
+        column_options.emplace_back(TableSchema::ColumnOptions::NOT_NULL);
+        break;
+      case ASTNode::T_REPEATED:
+        column_options.emplace_back(TableSchema::ColumnOptions::REPEATED);
+        break;
+      case ASTNode::T_PRIMARY_KEY:
+        column_options.emplace_back(TableSchema::ColumnOptions::PRIMARY_KEY);
+        break;
+      default:
+        RAISE(kRuntimeError, "corrupt AST");
+    }
+  }
+
+  switch (ast->getChildren()[1]->getType()) {
+
+    case ASTNode::T_COLUMN_TYPE: {
+      auto column_type = ast->getChildren()[1];
+      if (column_type->getType() != ASTNode::T_COLUMN_TYPE ||
+          column_type->getToken() == nullptr) {
+        RAISE(kRuntimeError, "corrupt AST");
+      }
+
+      schema->addScalarColumn(
+          column_name->getToken()->getString(),
+          column_type->getToken()->getString(),
+          column_options);
+
+      break;
+    }
+
+    case ASTNode::T_RECORD: {
+      schema->addRecordColumn(
+          column_name->getToken()->getString(),
+          column_options,
+          buildCreateTableSchema(ast->getChildren()[1]));
+
+      break;
+    }
+
+    default:
+      RAISE(kRuntimeError, "corrupt AST");
+  }
+}
+
+static TableSchema buildCreateTableSchema(ASTNode* ast) {
+  TableSchemaBuilder schema_builder;
+
+  switch (ast->getType()) {
+    case ASTNode::T_COLUMN_LIST:
+    case ASTNode::T_RECORD:
+      break;
+    default:
+      RAISE(kRuntimeError, "corrupt AST");
+  }
+
+  for (const auto& cld : ast->getChildren()) {
+    switch (cld->getType()) {
+
+      case ASTNode::T_COLUMN: {
+        buildCreateTableSchemaColumn(cld, &schema_builder);
+        break;
+      }
+
+      case ASTNode::T_PRIMARY_KEY: {
+        break;
+      }
+
+      default:
+        RAISE(kRuntimeError, "corrupt AST");
+
+    }
+  }
+
+  return schema_builder.getTableSchema();
+}
+
 QueryTreeNode* QueryPlanBuilder::buildCreateTable(
     Transaction* txn,
     ASTNode* ast) {
@@ -1719,10 +1814,12 @@ QueryTreeNode* QueryPlanBuilder::buildCreateTable(
     RAISE(kRuntimeError, "corrupt AST");
   }
 
-  TableSchemaBuilder schema_builder;
+  auto table_schema = buildCreateTableSchema(ast->getChildren()[1]);
 
   return new CreateTableNode(
       table_name->getToken()->getString(),
-      schema_builder.getTableSchema());
+      std::move(table_schema));
 }
+
+
 }
