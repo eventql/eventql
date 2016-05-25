@@ -39,12 +39,16 @@ public:
   const String& getTableName() const;
   const TableSchema& getTableSchema() const;
 
+  const Vector<String> getPrimaryKey() const;
+  void setPrimaryKey(const Vector<String>& columns);
+
   RefPtr<QueryTreeNode> deepCopy() const;
   String toString() const;
 
 protected:
   String table_name_;
   TableSchema table_schema_;
+  Vector<String> primary_key_;
 };
 
 } // namespace csql

@@ -62,7 +62,7 @@ PROTOBUF_LDADD = ${top_builddir}/deps/3rdparty/protobuf/libprotobuf.a
 LMDB_CFLAGS = -I$(top_srcdir)/deps/3rdparty
 LMDB_LDADD = ${top_builddir}/deps/3rdparty/liblmdb/liblmdb.a
 
-AM_CXXFLAGS = $(PCRE_CFLAGS) $(SPIDERMONKEY_CFLAGS) $(SIMDCOMP_CFLAGS) $(LINENOISE_CLFAGS) $(PROTOBUF_CFLAGS) $(PTHREAD_CFLAGS) $(PTHREAD_DEF) $(SYSLOG_DEF) $(ZLIB_DEF) $(GETHOSTBYNAME_R_DEF) -std=c++0x -ftemplate-depth=500 -mno-omit-leaf-frame-pointer -fno-omit-frame-pointer -Wall -Wextra -Wno-unused-parameter -Wno-sign-compare -Wdelete-non-virtual-dtor -Wno-predefined-identifier-outside-function -O3 -g -I@builddir@
+AM_CXXFLAGS = $(PCRE_CFLAGS) $(SPIDERMONKEY_CFLAGS) $(SIMDCOMP_CFLAGS) $(LINENOISE_CLFAGS) $(PROTOBUF_CFLAGS) $(PTHREAD_CFLAGS) $(PTHREAD_DEF) $(SYSLOG_DEF) $(ZLIB_DEF) $(GETHOSTBYNAME_R_DEF) -std=c++0x -ftemplate-depth=500 -mno-omit-leaf-frame-pointer -fno-omit-frame-pointer -Wall -Wextra -Wno-unused-parameter -Wno-sign-compare -Wdelete-non-virtual-dtor -Wno-predefined-identifier-outside-function -O0 -g -I@builddir@
 AM_CFLAGS = $(PCRE_CFLAGS) $(SPIDERMONKEY_CFLAGS) $(SIMDCOMP_CFLAGS) $(LINENOISE_CLFAGS) $(PROTOBUF_CFLAGS) $(PTHREAD_CFLAGS) $(PTHREAD_DEF) $(SYSLOG_DEF) $(ZLIB_DEF) $(GETHOSTBYNAME_R_DEF) -std=c11 -mno-omit-leaf-frame-pointer -fno-omit-frame-pointer -Wall -pedantic -O3 -g
 AM_LDFLAGS = $(PTHREAD_CFLAGS)
 

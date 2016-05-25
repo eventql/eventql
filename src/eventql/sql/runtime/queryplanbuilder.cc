@@ -21,6 +21,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#include <algorithm>
 #include <stdlib.h>
 #include <eventql/sql/parser/astnode.h>
 #include <eventql/sql/parser/astutil.h>
@@ -1789,6 +1790,11 @@ static TableSchema buildCreateTableSchema(ASTNode* ast) {
       }
 
       case ASTNode::T_PRIMARY_KEY: {
+        if (ast->getType() == ASTNode::T_RECORD) {
+          RAISE(
+              kRuntimeError,
+              "invalid column definition: can't use PRIMARY_KEY() within RECORD");
+        }
         break;
       }
 
@@ -1815,11 +1821,54 @@ QueryTreeNode* QueryPlanBuilder::buildCreateTable(
   }
 
   auto table_schema = buildCreateTableSchema(ast->getChildren()[1]);
+  Vector<String> primary_key_columns;
 
-  return new CreateTableNode(
-      table_name->getToken()->getString(),
-      std::move(table_schema));
+  for (const auto& cld : ast->getChildren()[1]->getChildren()) {
+    if (cld->getType() != ASTNode::T_PRIMARY_KEY) {
+      continue;
+    }
+
+    if (!primary_key_columns.empty()) {
+      RAISE(kRuntimeError, "can't have more than one PRIMARY KEY definition");
+    }
+
+    for (const auto& col : cld->getChildren()) {
+      if (col->getType() != ASTNode::T_COLUMN_NAME ||
+          col->getToken() == nullptr) {
+        RAISE(kRuntimeError, "corrupt AST");
+      }
+
+      primary_key_columns.emplace_back(col->getToken()->getString());
+    }
+  }
+
+  for (auto col : table_schema.getFlatColumnList()) {
+    bool is_primary_key = std::find(
+        col->column_options.begin(),
+        col->column_options.end(),
+        TableSchema::ColumnOptions::PRIMARY_KEY) != col->column_options.end();
+
+    if (!is_primary_key) {
+      continue;
+    }
+
+    if (!primary_key_columns.empty()) {
+      RAISE(kRuntimeError, "can't have more than one PRIMARY KEY definition");
+    }
+
+    primary_key_columns.emplace_back(col->full_column_name);
+  }
+
+  auto node = mkRef(
+      new CreateTableNode(
+          table_name->getToken()->getString(),
+          std::move(table_schema)));
+
+  if (!primary_key_columns.empty()) {
+    node->setPrimaryKey(primary_key_columns);
+  }
+
+  return node.get();
 }
-
 
 }

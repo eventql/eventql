@@ -45,6 +45,14 @@ const TableSchema& CreateTableNode::getTableSchema() const {
   return table_schema_;
 }
 
+const Vector<String> CreateTableNode::getPrimaryKey() const {
+  return primary_key_;
+}
+
+void CreateTableNode::setPrimaryKey(const Vector<String>& columns) {
+  primary_key_ = columns;
+}
+
 RefPtr<QueryTreeNode> CreateTableNode::deepCopy() const {
   return new CreateTableNode(*this);
 }

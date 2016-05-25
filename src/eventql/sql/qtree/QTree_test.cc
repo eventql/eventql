@@ -531,13 +531,13 @@ TEST_CASE(QTreeTest, TestCreateTable, [] () {
   parser.parse(query.data(), query.size());
 
   auto qtree_builder = runtime->queryPlanBuilder();
-  auto qtrees = qtree_builder->build(
+  Vector<RefPtr<QueryTreeNode>> qtrees = qtree_builder->build(
       txn.get(),
       parser.getStatements(),
       txn->getTableProvider());
 
   EXPECT_EQ(qtrees.size(), 1);
-  auto qtree = qtrees[0].asInstanceOf<CreateTableNode>();
+  RefPtr<QueryTreeNode> qtree = qtrees[0].asInstanceOf<CreateTableNode>();
   EXPECT_EQ(qtree->getTableName(), "fnord");
 
   auto table_schema = qtree->getTableSchema();
@@ -687,5 +687,8 @@ TEST_CASE(QTreeTest, TestCreateTable, [] () {
     });
   }
 
-  // FIXME: check primary key
+  Vector<String> pkey;
+  pkey.emplace_back("time");
+  pkey.emplace_back("myvalue");
+  EXPECT(qtree->getPrimaryKey() == pkey);
 });
