@@ -932,7 +932,6 @@ evqld_SOURCES = \
     eventql/util/mdb/MDBTransaction.cc \
     eventql/util/mdb/MDBTransaction.h
 
-
 nodist_evqld_SOURCES = \
     @builddir@/eventql/AnalyticsSession.pb.cc \
     @builddir@/eventql/config/namespace_config_protos.pb.cc \
@@ -963,9 +962,6 @@ evqld_LDADD = \
     $(LMDB_LDADD) \
     $(PROTOBUF_LDADD) \
     $(PCRE_LDADD)
-
-evqld_DEPENDENCIES = \
-    $(SPIDERMONKEY_DEPENDENCIES)
 
 bin_PROGRAMS += evqld
 

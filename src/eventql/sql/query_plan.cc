@@ -34,8 +34,12 @@ QueryPlan::QueryPlan(
     qtrees_(qtrees),
     execution_contexts_(qtrees_.size()) {
   for (const auto& qtree : qtrees_) {
-    statement_columns_.emplace_back(
-        qtree.asInstanceOf<TableExpressionNode>()->getResultColumns());
+    if (qtree.isInstanceOf<TableExpressionNode>()) {
+      statement_columns_.emplace_back(
+          qtree.asInstanceOf<TableExpressionNode>()->getResultColumns());
+    } else {
+      statement_columns_.emplace_back();
+    }
   }
 }
 

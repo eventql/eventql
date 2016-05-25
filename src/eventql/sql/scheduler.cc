@@ -334,6 +334,13 @@ ScopedPtr<ResultCursor> DefaultScheduler::execute(
         stmt.asInstanceOf<ChartStatementNode>());
   }
 
+  if (stmt.isInstanceOf<CreateTableNode>()) {
+    return executeCreateTable(
+        query_plan->getTransaction(),
+        execution_context,
+        stmt.asInstanceOf<CreateTableNode>());
+  }
+
   if (stmt.isInstanceOf<TableExpressionNode>()) {
     return executeSelect(
         query_plan->getTransaction(),
@@ -343,7 +350,7 @@ ScopedPtr<ResultCursor> DefaultScheduler::execute(
 
   RAISEF(
       kRuntimeError,
-      "cannot figure out how to execute that statement, sorry. -- $0",
+      "cannot figure out how to execute that statement?!, sorry. -- $0",
       stmt->toString());
 };
 
