@@ -1859,16 +1859,15 @@ QueryTreeNode* QueryPlanBuilder::buildCreateTable(
     primary_key_columns.emplace_back(col->full_column_name);
   }
 
-  auto node = mkRef(
-      new CreateTableNode(
-          table_name->getToken()->getString(),
-          std::move(table_schema)));
+  auto node = new CreateTableNode(
+      table_name->getToken()->getString(),
+      std::move(table_schema));
 
   if (!primary_key_columns.empty()) {
     node->setPrimaryKey(primary_key_columns);
   }
 
-  return node.get();
+  return node;
 }
 
 }

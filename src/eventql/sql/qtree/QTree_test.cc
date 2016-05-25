@@ -537,7 +537,7 @@ TEST_CASE(QTreeTest, TestCreateTable, [] () {
       txn->getTableProvider());
 
   EXPECT_EQ(qtrees.size(), 1);
-  RefPtr<QueryTreeNode> qtree = qtrees[0].asInstanceOf<CreateTableNode>();
+  RefPtr<CreateTableNode> qtree = qtrees[0].asInstanceOf<CreateTableNode>();
   EXPECT_EQ(qtree->getTableName(), "fnord");
 
   auto table_schema = qtree->getTableSchema();
