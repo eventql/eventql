@@ -465,13 +465,13 @@ TEST_CASE(QTreeTest, TestSerializationJoinAndSubquery, [] () {
   auto tables = mkRef(new TableRepository());
   txn->setTableProvider(tables.get());
 
-  tables->addTableProvider(
+  tables->addProvider(
     new backends::csv::CSVTableProvider(
         "customers",
         "eventql/sql/testdata/testtbl2.csv",
         '\t'));
 
-  tables->addTableProvider(
+  tables->addProvider(
       new backends::csv::CSVTableProvider(
           "orders",
           "eventql/sql/testdata/testtbl3.csv",

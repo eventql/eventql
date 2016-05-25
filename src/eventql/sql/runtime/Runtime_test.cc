@@ -1683,12 +1683,12 @@ TEST_CASE(RuntimeTest, TestLeftJoin, [] () {
   auto tables = mkRef(new TableRepository());
   txn->setTableProvider(tables.get());
 
-  tables->addTableProvider(
+  tables->addProvider(
       new backends::csv::CSVTableProvider(
           "customers",
           "eventql/sql/testdata/testtbl2.csv",
           '\t'));
-  tables->addTableProvider(
+  tables->addProvider(
       new backends::csv::CSVTableProvider(
           "orders",
           "eventql/sql/testdata/testtbl3.csv",
@@ -1747,12 +1747,12 @@ TEST_CASE(RuntimeTest, TestRightJoin, [] () {
   auto tables = mkRef(new TableRepository());
   txn->setTableProvider(tables.get());
 
-  tables->addTableProvider(
+  tables->addProvider(
       new backends::csv::CSVTableProvider(
           "employees",
           "eventql/sql/testdata/testtbl4.csv",
           '\t'));
-  tables->addTableProvider(
+  tables->addProvider(
       new backends::csv::CSVTableProvider(
           "orders",
           "eventql/sql/testdata/testtbl3.csv",
@@ -1858,17 +1858,17 @@ TEST_CASE(RuntimeTest, TestWildcardJoins, [] () {
   auto tables = mkRef(new TableRepository());
   txn->setTableProvider(tables.get());
 
-  tables->addTableProvider(
+  tables->addProvider(
       new backends::csv::CSVTableProvider(
           "departments",
           "eventql/sql/testdata/testtbl5.csv",
           '\t'));
-  tables->addTableProvider(
+  tables->addProvider(
       new backends::csv::CSVTableProvider(
           "users",
           "eventql/sql/testdata/testtbl6.csv",
           '\t'));
-  tables->addTableProvider(
+  tables->addProvider(
       new backends::csv::CSVTableProvider(
           "openinghours",
           "eventql/sql/testdata/testtbl7.csv",
@@ -2001,17 +2001,17 @@ TEST_CASE(RuntimeTest, TestNaturalJoin, [] () {
   auto tables = mkRef(new TableRepository());
   txn->setTableProvider(tables.get());
 
-  tables->addTableProvider(
+  tables->addProvider(
       new backends::csv::CSVTableProvider(
           "departments",
           "eventql/sql/testdata/testtbl5.csv",
           '\t'));
-  tables->addTableProvider(
+  tables->addProvider(
       new backends::csv::CSVTableProvider(
           "users",
           "eventql/sql/testdata/testtbl6.csv",
           '\t'));
-  tables->addTableProvider(
+  tables->addProvider(
       new backends::csv::CSVTableProvider(
           "openinghours",
           "eventql/sql/testdata/testtbl7.csv",
@@ -2124,12 +2124,12 @@ TEST_CASE(RuntimeTest, TestShowTables, [] () {
   auto tables = mkRef(new TableRepository());
   txn->setTableProvider(tables.get());
 
-  tables->addTableProvider(
+  tables->addProvider(
       new backends::csv::CSVTableProvider(
           "departments",
           "eventql/sql/testdata/testtbl5.csv",
           '\t'));
-  tables->addTableProvider(
+  tables->addProvider(
       new backends::csv::CSVTableProvider(
           "users",
           "eventql/sql/testdata/testtbl6.csv",
@@ -2204,12 +2204,12 @@ TEST_CASE(RuntimeTest, TestResultCursor, [] () {
   auto tables = mkRef(new TableRepository());
   txn->setTableProvider(tables.get());
 
-  tables->addTableProvider(
+  tables->addProvider(
       new backends::csv::CSVTableProvider(
           "departments",
           "eventql/sql/testdata/testtbl5.csv",
           '\t'));
-  tables->addTableProvider(
+  tables->addProvider(
       new backends::csv::CSVTableProvider(
           "users",
           "eventql/sql/testdata/testtbl6.csv",
