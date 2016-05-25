@@ -28,12 +28,22 @@
 namespace csql {
 
 CreateTableNode::CreateTableNode(
-    TableSchema schema) :
-    schema_(std::move(schema)) {}
+    const String& table_name,
+    TableSchema table_schema) :
+    table_name_(table_name),
+    table_schema_(std::move(table_schema)) {}
 
 CreateTableNode::CreateTableNode(
     const CreateTableNode& node) :
-    schema_(node.schema_) {}
+    table_schema_(node.table_schema_) {}
+
+const String& CreateTableNode::getTableName() const {
+  return table_name_;
+}
+
+const TableSchema& CreateTableNode::getTableSchema() const {
+  return table_schema_;
+}
 
 RefPtr<QueryTreeNode> CreateTableNode::deepCopy() const {
   return new CreateTableNode(*this);

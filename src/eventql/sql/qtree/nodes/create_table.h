@@ -28,22 +28,23 @@
 #include <eventql/sql/table_schema.h>
 #include <eventql/sql/qtree/QueryTreeNode.h>
 
-
 namespace csql {
 
 class CreateTableNode : public QueryTreeNode {
 public:
 
-  CreateTableNode(TableSchema schema);
-
+  CreateTableNode(const String& table_name, TableSchema table_schema);
   CreateTableNode(const CreateTableNode& node);
 
-  RefPtr<QueryTreeNode> deepCopy() const;
+  const String& getTableName() const;
+  const TableSchema& getTableSchema() const;
 
+  RefPtr<QueryTreeNode> deepCopy() const;
   String toString() const;
 
 protected:
-  TableSchema schema_;
+  String table_name_;
+  TableSchema table_schema_;
 };
 
 } // namespace csql
