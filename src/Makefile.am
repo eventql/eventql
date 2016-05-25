@@ -94,25 +94,24 @@ dist_noinst_DATA += $(evql_protos)
 ################# LIB: evql_sql.a ####################
 evql_sql_a_SOURCES = \
     eventql/sql/csql.h \
-    eventql/sql/abi.h \
     eventql/sql/CSTableScan.cc \
     eventql/sql/CSTableScan.h \
     eventql/sql/CSTableScanProvider.cc \
     eventql/sql/CSTableScanProvider.h \
     eventql/sql/SFunction.cc \
     eventql/sql/SFunction.h \
+    eventql/sql/TableInfo.h \
+    eventql/sql/abi.h \
+    eventql/sql/backends/backend.h \
     eventql/sql/backends/csv/CSVInputStream.cc \
     eventql/sql/backends/csv/CSVInputStream.h \
     eventql/sql/backends/csv/CSVTableProvider.cc \
     eventql/sql/backends/csv/CSVTableProvider.h \
     eventql/sql/backends/csv/CSVTableScan.cc \
     eventql/sql/backends/csv/CSVTableScan.h \
-    eventql/sql/backends/backend.h \
     eventql/sql/backends/tableref.h \
     eventql/sql/defaults.cc \
     eventql/sql/defaults.h \
-    eventql/sql/table_provider.h \
-    eventql/sql/table_iterator.h \
     eventql/sql/expressions/aggregate.cc \
     eventql/sql/expressions/aggregate.h \
     eventql/sql/expressions/boolean.cc \
@@ -146,13 +145,13 @@ evql_sql_a_SOURCES = \
     eventql/sql/expressions/table/tablescan.cc \
     eventql/sql/expressions/table/tablescan.h \
     eventql/sql/expressions/table_expression.h \
-    eventql/sql/extensions/chartsql/chartbuilder.h \
     eventql/sql/extensions/chartsql/areachartbuilder.cc \
     eventql/sql/extensions/chartsql/areachartbuilder.h \
     eventql/sql/extensions/chartsql/barchartbuilder.cc \
     eventql/sql/extensions/chartsql/barchartbuilder.h \
     eventql/sql/extensions/chartsql/chart_expression.cc \
     eventql/sql/extensions/chartsql/chart_expression.h \
+    eventql/sql/extensions/chartsql/chartbuilder.h \
     eventql/sql/extensions/chartsql/domainconfig.cc \
     eventql/sql/extensions/chartsql/domainconfig.h \
     eventql/sql/extensions/chartsql/linechartbuilder.cc \
@@ -163,7 +162,6 @@ evql_sql_a_SOURCES = \
     eventql/sql/extensions/chartsql/seriesadapter.h \
     eventql/sql/format.cc \
     eventql/sql/format.h \
-    eventql/sql/TableInfo.h \
     eventql/sql/parser/astnode.cc \
     eventql/sql/parser/astnode.h \
     eventql/sql/parser/astutil.cc \
@@ -174,7 +172,6 @@ evql_sql_a_SOURCES = \
     eventql/sql/parser/token.h \
     eventql/sql/parser/tokenize.cc \
     eventql/sql/parser/tokenize.h \
-    eventql/sql/qtree/ValueExpressionNode.h \
     eventql/sql/qtree/CallExpressionNode.cc \
     eventql/sql/qtree/CallExpressionNode.h \
     eventql/sql/qtree/ChartStatementNode.cc \
@@ -222,6 +219,9 @@ evql_sql_a_SOURCES = \
     eventql/sql/qtree/TableExpressionNode.h \
     eventql/sql/qtree/UnionNode.cc \
     eventql/sql/qtree/UnionNode.h \
+    eventql/sql/qtree/ValueExpressionNode.h \
+    eventql/sql/qtree/nodes/create_table.cc \
+    eventql/sql/qtree/nodes/create_table.h \
     eventql/sql/qtree/qtree_coder.cc \
     eventql/sql/qtree/qtree_coder.h \
     eventql/sql/qtree/qtree_coder_impl.h \
@@ -261,6 +261,10 @@ evql_sql_a_SOURCES = \
     eventql/sql/scheduler/execution_context.h \
     eventql/sql/svalue.cc \
     eventql/sql/svalue.h \
+    eventql/sql/table_iterator.h \
+    eventql/sql/table_provider.h \
+    eventql/sql/table_schema.cc \
+    eventql/sql/table_schema.h \
     eventql/sql/transaction.cc \
     eventql/sql/transaction.h
 
