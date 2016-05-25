@@ -23,6 +23,8 @@
  */
 #pragma once
 #include <eventql/util/option.h>
+#include <eventql/util/status.h>
+#include <eventql/sql/table_schema.h>
 #include <eventql/sql/TableInfo.h>
 #include <eventql/sql/expressions/table_expression.h>
 #include <eventql/sql/qtree/SequentialScanNode.h>
@@ -43,6 +45,14 @@ public:
   virtual void listTables(Function<void (const TableInfo& table)> fn) const = 0;
 
   virtual Option<TableInfo> describe(const String& table_name) const = 0;
+
+  struct CreateTableRequest {
+    String table_name;
+    TableSchema table_schema;
+    Vector<String> primary_key;
+  };
+
+  virtual Status createTable(const CreateTableRequest& req) = 0;
 
 };
 

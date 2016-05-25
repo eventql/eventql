@@ -24,35 +24,11 @@
  */
 #include "eventql/eventql.h"
 #include <eventql/sql/scheduler.h>
-#include <eventql/sql/expressions/table_expression.h>
-#include <eventql/sql/qtree/QueryTreeNode.h>
-#include <eventql/sql/expressions/table/select.h>
-#include <eventql/sql/expressions/table/subquery.h>
-#include <eventql/sql/expressions/table/orderby.h>
-#include <eventql/sql/expressions/table/show_tables.h>
-#include <eventql/sql/expressions/table/limit.h>
-#include <eventql/sql/expressions/table/describe_table.h>
-#include <eventql/sql/expressions/table/groupby.h>
-#include <eventql/sql/expressions/table/nested_loop_join.h>
-#include <eventql/sql/extensions/chartsql/chart_expression.h>
-#include <eventql/sql/qtree/SelectExpressionNode.h>
-#include <eventql/sql/qtree/SubqueryNode.h>
-#include <eventql/sql/qtree/OrderByNode.h>
-#include <eventql/sql/qtree/DescribeTableNode.h>
-#include <eventql/sql/qtree/LimitNode.h>
-#include <eventql/sql/qtree/GroupByNode.h>
-#include <eventql/sql/qtree/JoinNode.h>
-#include <eventql/sql/qtree/ChartStatementNode.h>
 #include <eventql/sql/query_plan.h>
 
 namespace csql {
 
-static ScopedPtr<TableExpression> buildExpression(
-    Transaction* ctx,
-    ExecutionContext* execution_context,
-    RefPtr<QueryTreeNode> node);
-
-static ScopedPtr<TableExpression> buildLimit(
+ScopedPtr<TableExpression> DefaultScheduler::buildLimit(
     Transaction* ctx,
     ExecutionContext* execution_context,
     RefPtr<LimitNode> node) {
@@ -61,10 +37,13 @@ static ScopedPtr<TableExpression> buildLimit(
           execution_context,
           node->limit(),
           node->offset(),
-          buildExpression(ctx, execution_context, node->inputTable())));
+          buildTableExpression(
+              ctx,
+              execution_context,
+              node->inputTable().asInstanceOf<TableExpressionNode>())));
 }
 
-static ScopedPtr<TableExpression> buildSelectExpression(
+ScopedPtr<TableExpression> DefaultScheduler::buildSelectExpression(
     Transaction* ctx,
     ExecutionContext* execution_context,
     RefPtr<SelectExpressionNode> node) {
@@ -80,7 +59,7 @@ static ScopedPtr<TableExpression> buildSelectExpression(
       std::move(select_expressions)));
 };
 
-static ScopedPtr<TableExpression> buildSubquery(
+ScopedPtr<TableExpression> DefaultScheduler::buildSubquery(
     Transaction* txn,
     ExecutionContext* execution_context,
     RefPtr<SubqueryNode> node) {
@@ -102,10 +81,13 @@ static ScopedPtr<TableExpression> buildSubquery(
       execution_context,
       std::move(select_expressions),
       std::move(where_expr),
-      buildExpression(txn, execution_context, node->subquery())));
+      buildTableExpression(
+          txn,
+          execution_context,
+          node->subquery().asInstanceOf<TableExpressionNode>())));
 }
 
-static ScopedPtr<TableExpression> buildOrderByExpression(
+ScopedPtr<TableExpression> DefaultScheduler::buildOrderByExpression(
     Transaction* txn,
     ExecutionContext* execution_context,
     RefPtr<OrderByNode> node) {
@@ -122,10 +104,13 @@ static ScopedPtr<TableExpression> buildOrderByExpression(
           txn,
           execution_context,
           std::move(sort_exprs),
-          buildExpression(txn, execution_context, node->inputTable())));
+          buildTableExpression(
+              txn,
+              execution_context,
+              node->inputTable().asInstanceOf<TableExpressionNode>())));
 }
 
-static ScopedPtr<TableExpression> buildSequentialScan(
+ScopedPtr<TableExpression> DefaultScheduler::buildSequentialScan(
     Transaction* txn,
     ExecutionContext* execution_context,
     RefPtr<SequentialScanNode> node) {
@@ -144,7 +129,7 @@ static ScopedPtr<TableExpression> buildSequentialScan(
   return std::move(seqscan.get());
 }
 
-static ScopedPtr<TableExpression> buildGroupByExpression(
+ScopedPtr<TableExpression> DefaultScheduler::buildGroupByExpression(
     Transaction* txn,
     ExecutionContext* execution_context,
     RefPtr<GroupByNode> node) {
@@ -169,10 +154,13 @@ static ScopedPtr<TableExpression> buildGroupByExpression(
           execution_context,
           std::move(select_expressions),
           std::move(group_expressions),
-          buildExpression(txn, execution_context, node->inputTable())));
+          buildTableExpression(
+              txn,
+              execution_context,
+              node->inputTable().asInstanceOf<TableExpressionNode>())));
 }
 
-static ScopedPtr<TableExpression> buildJoinExpression(
+ScopedPtr<TableExpression> DefaultScheduler::buildJoinExpression(
     Transaction* ctx,
     ExecutionContext* execution_context,
     RefPtr<JoinNode> node) {
@@ -204,42 +192,20 @@ static ScopedPtr<TableExpression> buildJoinExpression(
           std::move(select_expressions),
           std::move(join_cond_expr),
           std::move(where_expr),
-          buildExpression(ctx, execution_context, node->baseTable()),
-          buildExpression(ctx, execution_context, node->joinedTable())));
+          buildTableExpression(
+              ctx,
+              execution_context,
+              node->baseTable().asInstanceOf<TableExpressionNode>()),
+          buildTableExpression(
+              ctx,
+              execution_context,
+              node->joinedTable().asInstanceOf<TableExpressionNode>())));
 }
 
-static ScopedPtr<TableExpression> buildChartExpression(
-    Transaction* txn,
-    ExecutionContext* execution_context,
-    RefPtr<ChartStatementNode> node) {
-  Vector<Vector<ScopedPtr<csql::TableExpression>>> input_tables;
-  Vector<Vector<RefPtr<csql::TableExpressionNode>>> input_table_qtrees;
-  for (const auto& draw_stmt_qtree : node->getDrawStatements()) {
-    input_tables.emplace_back();
-    input_table_qtrees.emplace_back();
-    auto draw_stmt = draw_stmt_qtree.asInstanceOf<DrawStatementNode>();
-    for (const auto& input_tbl : draw_stmt->inputTables()) {
-      input_tables.back().emplace_back(buildExpression(
-          txn,
-          execution_context,
-          input_tbl));
-      input_table_qtrees.back().emplace_back(
-          input_tbl.asInstanceOf<TableExpressionNode>());
-    }
-  }
-
-  return mkScoped(
-      new ChartExpression(
-          txn,
-          node,
-          std::move(input_tables),
-          input_table_qtrees));
-}
-
-static ScopedPtr<TableExpression> buildExpression(
+ScopedPtr<TableExpression> DefaultScheduler::buildTableExpression(
     Transaction* ctx,
     ExecutionContext* execution_context,
-    RefPtr<QueryTreeNode> node) {
+    RefPtr<TableExpressionNode> node) {
 
   if (dynamic_cast<LimitNode*>(node.get())) {
     return buildLimit(ctx, execution_context, node.asInstanceOf<LimitNode>());
@@ -297,29 +263,86 @@ static ScopedPtr<TableExpression> buildExpression(
         node.asInstanceOf<JoinNode>());
   }
 
-  if (dynamic_cast<ChartStatementNode*>(node.get())) {
-    return buildChartExpression(
-        ctx,
-        execution_context,
-        node.asInstanceOf<ChartStatementNode>());
-  }
-
   RAISEF(
       kRuntimeError,
       "cannot figure out how to execute that query, sorry. -- $0",
       node->toString());
 };
 
+ScopedPtr<ResultCursor> DefaultScheduler::executeSelect(
+    Transaction* txn,
+    ExecutionContext* execution_context,
+    RefPtr<TableExpressionNode> select) {
+  return mkScoped(
+      new TableExpressionResultCursor(
+          buildTableExpression(
+              txn,
+              execution_context,
+              select.asInstanceOf<TableExpressionNode>())));
+}
+
+ScopedPtr<ResultCursor> DefaultScheduler::executeDraw(
+    Transaction* txn,
+    ExecutionContext* execution_context,
+    RefPtr<ChartStatementNode> node) {
+  Vector<Vector<ScopedPtr<csql::TableExpression>>> input_tables;
+  Vector<Vector<RefPtr<csql::TableExpressionNode>>> input_table_qtrees;
+  for (const auto& draw_stmt_qtree : node->getDrawStatements()) {
+    input_tables.emplace_back();
+    input_table_qtrees.emplace_back();
+    auto draw_stmt = draw_stmt_qtree.asInstanceOf<DrawStatementNode>();
+    for (const auto& input_tbl : draw_stmt->inputTables()) {
+      input_tables.back().emplace_back(buildTableExpression(
+          txn,
+          execution_context,
+          input_tbl.asInstanceOf<TableExpressionNode>()));
+
+      input_table_qtrees.back().emplace_back(
+          input_tbl.asInstanceOf<TableExpressionNode>());
+    }
+  }
+
+  return mkScoped(
+      new TableExpressionResultCursor(
+          mkScoped(
+              new ChartExpression(
+                  txn,
+                  node,
+                  std::move(input_tables),
+                  input_table_qtrees))));
+}
+
+ScopedPtr<ResultCursor> DefaultScheduler::executeCreateTable(
+    Transaction* txn,
+    ExecutionContext* execution_context,
+    RefPtr<CreateTableNode> create_table) {
+  return mkScoped(new EmptyResultCursor());
+}
+
 ScopedPtr<ResultCursor> DefaultScheduler::execute(
     QueryPlan* query_plan,
     ExecutionContext* execution_context,
     size_t stmt_idx) {
-  return mkScoped(
-      new TableExpressionResultCursor(
-          buildExpression(
-              query_plan->getTransaction(),
-              execution_context,
-              query_plan->getStatement(stmt_idx))));
+  auto stmt = query_plan->getStatement(stmt_idx);
+
+  if (stmt.isInstanceOf<ChartStatementNode>()) {
+    executeDraw(
+        query_plan->getTransaction(),
+        execution_context,
+        stmt.asInstanceOf<ChartStatementNode>());
+  }
+
+  if (stmt.isInstanceOf<TableExpressionNode>()) {
+    executeSelect(
+        query_plan->getTransaction(),
+        execution_context,
+        stmt.asInstanceOf<TableExpressionNode>());
+  }
+
+  RAISEF(
+      kRuntimeError,
+      "cannot figure out how to execute that statement, sorry. -- $0",
+      stmt->toString());
 };
 
 

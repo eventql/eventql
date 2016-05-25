@@ -26,35 +26,14 @@
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/autoref.h>
 #include <eventql/sql/result_cursor.h>
-#include <eventql/sql/query_plan.h>
-#include "eventql/eventql.h"
-#include <eventql/sql/expressions/table_expression.h>
-#include <eventql/sql/qtree/QueryTreeNode.h>
-#include <eventql/sql/expressions/table/select.h>
-#include <eventql/sql/expressions/table/subquery.h>
-#include <eventql/sql/expressions/table/orderby.h>
-#include <eventql/sql/expressions/table/show_tables.h>
-#include <eventql/sql/expressions/table/limit.h>
-#include <eventql/sql/expressions/table/describe_table.h>
-#include <eventql/sql/expressions/table/groupby.h>
-#include <eventql/sql/expressions/table/nested_loop_join.h>
-#include <eventql/sql/extensions/chartsql/chart_expression.h>
-#include <eventql/sql/qtree/SelectExpressionNode.h>
-#include <eventql/sql/qtree/SubqueryNode.h>
-#include <eventql/sql/qtree/OrderByNode.h>
-#include <eventql/sql/qtree/DescribeTableNode.h>
-#include <eventql/sql/qtree/LimitNode.h>
-#include <eventql/sql/qtree/GroupByNode.h>
-#include <eventql/sql/qtree/JoinNode.h>
-#include <eventql/sql/qtree/DrawStatementNode.h>
+#include <eventql/sql/scheduler.h>
 #include <eventql/sql/query_plan.h>
 #include <eventql/db/partition_map.h>
 #include <eventql/AnalyticsAuth.h>
 
-
 namespace eventql {
 
-class Scheduler : public csql::Scheduler {
+class Scheduler : public csql::DefaultScheduler {
 public:
 
   const size_t kMaxConcurrency = 24;
@@ -64,47 +43,17 @@ public:
       AnalyticsAuth* auth,
       ReplicationScheme* repl_scheme);
 
-  ScopedPtr<csql::ResultCursor> execute(
-      csql::QueryPlan* query_plan,
-      csql::ExecutionContext* execution_context,
-      size_t stmt_idx) override;
-
 protected:
 
-  ScopedPtr<csql::TableExpression> buildExpression(
+  ScopedPtr<csql::TableExpression> buildTableExpression(
       csql::Transaction* ctx,
       csql::ExecutionContext* execution_context,
-      RefPtr<csql::QueryTreeNode> node);
-
-  ScopedPtr<csql::TableExpression> buildLimit(
-      csql::Transaction* ctx,
-      csql::ExecutionContext* execution_context,
-      RefPtr<csql::LimitNode> node);
-
-  ScopedPtr<csql::TableExpression> buildSelectExpression(
-      csql::Transaction* ctx,
-      csql::ExecutionContext* execution_context,
-      RefPtr<csql::SelectExpressionNode> node);
-
-  ScopedPtr<csql::TableExpression> buildSubquery(
-      csql::Transaction* txn,
-      csql::ExecutionContext* execution_context,
-      RefPtr<csql::SubqueryNode> node);
-
-  ScopedPtr<csql::TableExpression> buildOrderByExpression(
-      csql::Transaction* txn,
-      csql::ExecutionContext* execution_context,
-      RefPtr<csql::OrderByNode> node);
-
-  ScopedPtr<csql::TableExpression> buildSequentialScan(
-      csql::Transaction* txn,
-      csql::ExecutionContext* execution_context,
-      RefPtr<csql::SequentialScanNode> node);
+      RefPtr<csql::TableExpressionNode> node) override;
 
   ScopedPtr<csql::TableExpression> buildGroupByExpression(
       csql::Transaction* txn,
       csql::ExecutionContext* execution_context,
-      RefPtr<csql::GroupByNode> node);
+      RefPtr<csql::GroupByNode> node) override;
 
   ScopedPtr<csql::TableExpression> buildPartialGroupByExpression(
       csql::Transaction* txn,
@@ -115,16 +64,6 @@ protected:
       csql::Transaction* txn,
       csql::ExecutionContext* execution_context,
       RefPtr<csql::GroupByNode> node);
-
-  ScopedPtr<csql::TableExpression> buildJoinExpression(
-      csql::Transaction* txn,
-      csql::ExecutionContext* execution_context,
-      RefPtr<csql::JoinNode> node);
-
-  ScopedPtr<csql::TableExpression> buildChartExpression(
-    csql::Transaction* txn,
-    csql::ExecutionContext* execution_context,
-    RefPtr<csql::ChartStatementNode> node);
 
   struct PipelinedQueryTree {
     bool is_local;

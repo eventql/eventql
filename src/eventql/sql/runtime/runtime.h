@@ -35,6 +35,7 @@
 #include <eventql/sql/runtime/symboltable.h>
 
 namespace csql {
+class Scheduler;
 
 class Runtime : public RefCounted {
 public:

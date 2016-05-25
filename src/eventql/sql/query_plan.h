@@ -25,7 +25,6 @@
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/autoref.h>
 #include <eventql/sql/qtree/QueryTreeNode.h>
-#include <eventql/sql/scheduler.h>
 #include <eventql/sql/transaction.h>
 #include <eventql/sql/result_list.h>
 #include <eventql/sql/scheduler/execution_context.h>
