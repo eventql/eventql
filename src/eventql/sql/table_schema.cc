@@ -84,6 +84,7 @@ void TableSchemaBuilder::addScalarColumn(
   auto col_def = new TableSchema::ColumnDefinition();
   col_def->column_class = TableSchema::ColumnClass::SCALAR;
   col_def->column_name = column_name;
+  col_def->full_column_name = column_name;
   col_def->column_type = column_type;
   col_def->column_options = column_options;
   schema_.columns_.emplace_back(col_def);
@@ -97,6 +98,7 @@ void TableSchemaBuilder::addRecordColumn(
   auto col_def = new TableSchema::ColumnDefinition();
   col_def->column_class = TableSchema::ColumnClass::RECORD;
   col_def->column_name = column_name;
+  col_def->full_column_name = column_name;
   col_def->column_type = "RECORD";
   col_def->column_options = column_options;
   col_def->column_schema = column_schema.root_columns_;
@@ -107,6 +109,22 @@ void TableSchemaBuilder::addRecordColumn(
       schema_.columns_.end(),
       column_schema.columns_.begin(),
       column_schema.columns_.end());
+
+  for (auto subcol : column_schema.columns_) {
+    // N.B. we own the columns and are allowed to modify them. the reason
+    // we const_cast here is that we want to return Vector<T const*> in public
+    // methods. we could either store a non-const pointer list and then on each
+    // getter call that return the pointer list, copy the list and cast each
+    // pointer to const individually. we do not want to do that. instead we store
+    // a list to const pointers as a member (that we can return directly in
+    // getter calls) and const_cast back to a mutable pointer when we need it
+    auto mutable_subcol = const_cast<TableSchema::ColumnDefinition*>(subcol);
+
+    mutable_subcol->full_column_name = StringUtil::format(
+        "$0.$1",
+        column_name,
+        subcol->full_column_name);
+  }
 
   column_schema.columns_.clear();
   column_schema.root_columns_.clear();

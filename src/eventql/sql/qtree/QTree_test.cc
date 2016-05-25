@@ -615,6 +615,7 @@ TEST_CASE(QTreeTest, TestCreateTable, [] () {
   EXPECT_EQ(fcolumns.size(), 9);
 
   EXPECT_EQ(fcolumns[0]->column_name, "time");
+  EXPECT_EQ(fcolumns[0]->column_name, fcolumns[0]->full_column_name);
   EXPECT(fcolumns[0]->column_class == TableSchema::ColumnClass::SCALAR);
   EXPECT_EQ(fcolumns[0]->column_type, "DATETIME");
   EXPECT(fcolumns[0]->column_options == Vector<TableSchema::ColumnOptions> {
@@ -622,11 +623,13 @@ TEST_CASE(QTreeTest, TestCreateTable, [] () {
   });
 
   EXPECT_EQ(fcolumns[1]->column_name, "location");
+  EXPECT_EQ(fcolumns[1]->column_name, fcolumns[1]->full_column_name);
   EXPECT(fcolumns[1]->column_class == TableSchema::ColumnClass::SCALAR);
   EXPECT_EQ(fcolumns[1]->column_type, "STring");
   EXPECT(fcolumns[1]->column_options == Vector<TableSchema::ColumnOptions> {});
 
   EXPECT_EQ(fcolumns[2]->column_name, "person");
+  EXPECT_EQ(fcolumns[2]->column_name, fcolumns[2]->full_column_name);
   EXPECT(fcolumns[2]->column_class == TableSchema::ColumnClass::SCALAR);
   EXPECT_EQ(fcolumns[2]->column_type, "String");
   EXPECT(fcolumns[2]->column_options == Vector<TableSchema::ColumnOptions> {
@@ -634,12 +637,14 @@ TEST_CASE(QTreeTest, TestCreateTable, [] () {
   });
 
   EXPECT_EQ(fcolumns[3]->column_name, "temperatur");
+  EXPECT_EQ(fcolumns[3]->column_name, fcolumns[3]->full_column_name);
   EXPECT(fcolumns[3]->column_class == TableSchema::ColumnClass::RECORD);
   EXPECT_EQ(fcolumns[3]->column_type, "RECORD");
   EXPECT(fcolumns[3]->column_options == Vector<TableSchema::ColumnOptions> {});
   EXPECT_EQ(fcolumns[3]->column_schema.size(), 2);
 
   EXPECT_EQ(fcolumns[4]->column_name, "val1");
+  EXPECT_EQ(fcolumns[4]->full_column_name, "temperatur.val1");
   EXPECT(fcolumns[4]->column_class == TableSchema::ColumnClass::SCALAR);
   EXPECT_EQ(fcolumns[4]->column_type, "uint64");
   EXPECT(fcolumns[4]->column_options == Vector<TableSchema::ColumnOptions> {
@@ -647,6 +652,7 @@ TEST_CASE(QTreeTest, TestCreateTable, [] () {
   });
 
   EXPECT_EQ(fcolumns[5]->column_name, "val2");
+  EXPECT_EQ(fcolumns[5]->full_column_name, "temperatur.val2");
   EXPECT(fcolumns[5]->column_class == TableSchema::ColumnClass::SCALAR);
   EXPECT_EQ(fcolumns[5]->column_type, "string");
   EXPECT(fcolumns[5]->column_options == Vector<TableSchema::ColumnOptions> {
@@ -660,6 +666,7 @@ TEST_CASE(QTreeTest, TestCreateTable, [] () {
   EXPECT_EQ(fcolumns[6]->column_schema.size(), 2);
 
   EXPECT_EQ(fcolumns[7]->column_name, "val1");
+  EXPECT_EQ(fcolumns[7]->full_column_name, "some_other.val1");
   EXPECT(fcolumns[7]->column_class == TableSchema::ColumnClass::SCALAR);
   EXPECT_EQ(fcolumns[7]->column_type, "uint64");
   EXPECT(fcolumns[7]->column_options == Vector<TableSchema::ColumnOptions> {
@@ -667,6 +674,7 @@ TEST_CASE(QTreeTest, TestCreateTable, [] () {
   });
 
   EXPECT_EQ(fcolumns[8]->column_name, "val2");
+  EXPECT_EQ(fcolumns[8]->full_column_name, "some_other.val2");
   EXPECT(fcolumns[8]->column_class == TableSchema::ColumnClass::SCALAR);
   EXPECT_EQ(fcolumns[8]->column_type, "STRING");
   EXPECT(fcolumns[8]->column_options == Vector<TableSchema::ColumnOptions> {

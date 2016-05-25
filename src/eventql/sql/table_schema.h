@@ -38,7 +38,18 @@ public:
 
   struct ColumnDefinition {
     ColumnClass column_class;
+
+    /**
+     * Contains the name of the column, I.e. "product_id"
+     */
     String column_name;
+
+    /**
+     * Contains the "full" column name. I.e. the `column_name` prefixed with
+     * any parent column names. For example "product_list.product_id"
+     */
+    String full_column_name;
+
     String column_type;
     Vector<ColumnOptions> column_options;
     Vector<ColumnDefinition const*> column_schema;
@@ -50,7 +61,16 @@ public:
   TableSchema(const TableSchema& other);
   TableSchema(TableSchema&& other);
 
+  /**
+   * Returns the column definitions of all top-level columns. I.e. RECORD columns
+   * will be returned as one ColumnDefinition (which contains pointers to the
+   * column's subcolumns)
+   */
   ColumnList getColumns() const;
+
+  /**
+   * Returns a "flattened" list of all columns in the table schema.
+   */
   ColumnList getFlatColumnList() const;
 
 protected:
