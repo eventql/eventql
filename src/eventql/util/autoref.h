@@ -63,6 +63,9 @@ public:
   template <typename T_>
   AutoRef<T_> asInstanceOf() const;
 
+  template <typename T_>
+  bool isInstanceOf() const;
+
 protected:
   T* ref_;
 };
