@@ -65,12 +65,16 @@ TableSchema::TableSchema(
 
 TableSchema::~TableSchema() {
   for (auto c : columns_) {
-    free(c);
+    delete c;
   }
 }
 
-Vector<TableSchema::ColumnDefinition const*> TableSchema::getColumns() const {
+TableSchema::ColumnList TableSchema::getColumns() const {
   return root_columns_;
+}
+
+TableSchema::ColumnList TableSchema::getFlatColumnList() const {
+  return columns_;
 }
 
 void TableSchemaBuilder::addScalarColumn(

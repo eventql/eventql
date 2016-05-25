@@ -44,15 +44,18 @@ public:
     Vector<ColumnDefinition const*> column_schema;
   };
 
+  using ColumnList = Vector<ColumnDefinition const*>;
+
   ~TableSchema();
   TableSchema(const TableSchema& other);
   TableSchema(TableSchema&& other);
 
-  Vector<ColumnDefinition const*> getColumns() const;
+  ColumnList getColumns() const;
+  ColumnList getFlatColumnList() const;
 
 protected:
   TableSchema() = default;
-  Vector<ColumnDefinition*> columns_;
+  Vector<ColumnDefinition const*> columns_;
   Vector<ColumnDefinition const*> root_columns_;
 };
 
