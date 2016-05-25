@@ -1106,7 +1106,7 @@ void AnalyticsServlet::executeSQL_BINARY(
 
     try {
       auto txn = sql_->newTransaction();
-      txn->addTableProvider(app_->getTableProvider(session.customer()));
+      txn->setTableProvider(app_->getTableProvider(session.customer()));
       txn->setUserData(
           new TransactionInfo(session.customer()),
           [] (void* tx_info) { delete (TransactionInfo*) tx_info; });
@@ -1141,7 +1141,7 @@ void AnalyticsServlet::executeSQL_JSON(
 
   try {
     auto txn = sql_->newTransaction();
-    txn->addTableProvider(app_->getTableProvider(session.customer()));
+    txn->setTableProvider(app_->getTableProvider(session.customer()));
     txn->setUserData(
         new TransactionInfo(session.customer()),
         [] (void* tx_info) { delete (TransactionInfo*) tx_info; });
@@ -1205,7 +1205,7 @@ void AnalyticsServlet::executeSQL_JSONSSE(
 
   try {
     auto txn = sql_->newTransaction();
-    txn->addTableProvider(app_->getTableProvider(session.customer()));
+    txn->setTableProvider(app_->getTableProvider(session.customer()));
     txn->setUserData(
         new TransactionInfo(session.customer()),
         [] (void* tx_info) { delete (TransactionInfo*) tx_info; });
@@ -1257,7 +1257,7 @@ void AnalyticsServlet::executeQTree(
 
     try {
       auto txn = sql_->newTransaction();
-      txn->addTableProvider(app_->getTableProvider(session.customer()));
+      txn->setTableProvider(app_->getTableProvider(session.customer()));
       txn->setUserData(
           new TransactionInfo(session.customer()),
           [] (void* tx_info) { delete (TransactionInfo*) tx_info; });
