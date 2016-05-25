@@ -55,7 +55,7 @@ public:
     Vector<ColumnDefinition*> column_schema;
   };
 
-  using ColumnList = Vector<ColumnDefinition*>;
+  using ColumnList = Vector<const ColumnDefinition*>;
 
   ~TableSchema();
   TableSchema(const TableSchema& other);

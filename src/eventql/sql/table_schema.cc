@@ -70,11 +70,11 @@ TableSchema::~TableSchema() {
 }
 
 TableSchema::ColumnList TableSchema::getColumns() const {
-  return root_columns_;
+  return TableSchema::ColumnList(root_columns_.begin(), root_columns_.end());
 }
 
 TableSchema::ColumnList TableSchema::getFlatColumnList() const {
-  return columns_;
+  return TableSchema::ColumnList(columns_.begin(), columns_.end());
 }
 
 void TableSchemaBuilder::addScalarColumn(
