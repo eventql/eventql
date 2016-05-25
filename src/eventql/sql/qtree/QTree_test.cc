@@ -47,7 +47,7 @@ TEST_CASE(QTreeTest, TestExtractEqualsConstraint, [] () {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
-  txn->addTableProvider(
+  txn->setTableProvider(
       new CSTableScanProvider(
           "testtable",
           "eventql/sql/testdata/testtbl.cst"));
@@ -87,7 +87,7 @@ TEST_CASE(QTreeTest, TestExtractNotEqualsConstraint, [] () {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
-  txn->addTableProvider(
+  txn->setTableProvider(
       new CSTableScanProvider(
           "testtable",
           "eventql/sql/testdata/testtbl.cst"));
@@ -127,7 +127,7 @@ TEST_CASE(QTreeTest, TestExtractLessThanConstraint, [] () {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
-  txn->addTableProvider(
+  txn->setTableProvider(
       new CSTableScanProvider(
           "testtable",
           "eventql/sql/testdata/testtbl.cst"));
@@ -167,7 +167,7 @@ TEST_CASE(QTreeTest, TestExtractLessThanOrEqualToConstraint, [] () {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
-  txn->addTableProvider(
+  txn->setTableProvider(
       new CSTableScanProvider(
           "testtable",
           "eventql/sql/testdata/testtbl.cst"));
@@ -207,7 +207,7 @@ TEST_CASE(QTreeTest, TestExtractGreaterThanConstraint, [] () {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
-  txn->addTableProvider(
+  txn->setTableProvider(
       new CSTableScanProvider(
           "testtable",
           "eventql/sql/testdata/testtbl.cst"));
@@ -247,7 +247,7 @@ TEST_CASE(QTreeTest, TestExtractGreaterThanOrEqualToConstraint, [] () {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
-  txn->addTableProvider(
+  txn->setTableProvider(
       new CSTableScanProvider(
           "testtable",
           "eventql/sql/testdata/testtbl.cst"));
@@ -287,7 +287,7 @@ TEST_CASE(QTreeTest, TestExtractMultipleConstraints, [] () {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
-  txn->addTableProvider(
+  txn->setTableProvider(
       new CSTableScanProvider(
           "testtable",
           "eventql/sql/testdata/testtbl.cst"));
@@ -338,7 +338,7 @@ TEST_CASE(QTreeTest, TestSimpleConstantFolding, [] () {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
-  txn->addTableProvider(
+  txn->setTableProvider(
       new CSTableScanProvider(
           "testtable",
           "eventql/sql/testdata/testtbl.cst"));
@@ -369,7 +369,7 @@ TEST_CASE(QTreeTest, TestPruneConstraints, [] () {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
-  txn->addTableProvider(
+  txn->setTableProvider(
       new CSTableScanProvider(
           "testtable",
           "eventql/sql/testdata/testtbl.cst"));
@@ -427,7 +427,7 @@ TEST_CASE(QTreeTest, TestSerialization, [] () {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
-  txn->addTableProvider(
+  txn->setTableProvider(
       new CSTableScanProvider(
           "testtable",
           "eventql/sql/testdata/testtbl.cst"));
@@ -462,13 +462,16 @@ TEST_CASE(QTreeTest, TestSerializationJoinAndSubquery, [] () {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
-  txn->addTableProvider(
+  auto tables = mkRef(new TableRepository());
+  txn->setTableProvider(tables.get());
+
+  tables->addTableProvider(
     new backends::csv::CSVTableProvider(
         "customers",
         "eventql/sql/testdata/testtbl2.csv",
         '\t'));
 
-  txn->addTableProvider(
+  tables->addTableProvider(
       new backends::csv::CSVTableProvider(
           "orders",
           "eventql/sql/testdata/testtbl3.csv",

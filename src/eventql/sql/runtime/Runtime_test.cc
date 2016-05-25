@@ -147,7 +147,7 @@ TEST_CASE(RuntimeTest, TestColumnReferenceWithTableNamePrefix, [] () {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
-  txn->addTableProvider(
+  txn->setTableProvider(
       new CSTableScanProvider(
           "testtable",
           "eventql/sql/testdata/testtbl.cst"));
@@ -176,7 +176,7 @@ TEST_CASE(RuntimeTest, TestSimpleCSTableAggregate, [] () {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
-  txn->addTableProvider(
+  txn->setTableProvider(
       new CSTableScanProvider(
           "testtable",
           "eventql/sql/testdata/testtbl.cst"));
@@ -194,7 +194,7 @@ TEST_CASE(RuntimeTest, TestNestedCSTableAggregate, [] () {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
-  txn->addTableProvider(
+  txn->setTableProvider(
       new CSTableScanProvider(
           "testtable",
           "eventql/sql/testdata/testtbl.cst"));
@@ -212,7 +212,7 @@ TEST_CASE(RuntimeTest, TestWithinRecordCSTableAggregate, [] () {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
-  txn->addTableProvider(
+  txn->setTableProvider(
       new CSTableScanProvider(
           "testtable",
           "eventql/sql/testdata/testtbl.cst"));
@@ -271,7 +271,7 @@ TEST_CASE(RuntimeTest, TestMultiLevelNestedCSTableAggregate, [] () {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
-  txn->addTableProvider(
+  txn->setTableProvider(
       new CSTableScanProvider(
           "testtable",
           "eventql/sql/testdata/testtbl.cst"));
@@ -350,7 +350,7 @@ TEST_CASE(RuntimeTest, TestMultiLevelNestedCSTableAggrgateWithGroup, [] () {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
-  txn->addTableProvider(
+  txn->setTableProvider(
       new CSTableScanProvider(
           "testtable",
           "eventql/sql/testdata/testtbl.cst"));
@@ -423,7 +423,7 @@ TEST_CASE(RuntimeTest, TestMultiLevelNestedCSTableAggrgateWithMultiLevelGroup, [
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
-  txn->addTableProvider(
+  txn->setTableProvider(
       new CSTableScanProvider(
           "testtable",
           "eventql/sql/testdata/testtbl.cst"));
@@ -452,7 +452,7 @@ TEST_CASE(RuntimeTest, TestMultiLevelNestedCSTableAggrgateWithWhere, [] () {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
-  txn->addTableProvider(
+  txn->setTableProvider(
       new CSTableScanProvider(
           "testtable",
           "eventql/sql/testdata/testtbl.cst"));
@@ -462,7 +462,7 @@ TEST_CASE(RuntimeTest, TestTableNamesWithDots, [] () {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
-  txn->addTableProvider(
+  txn->setTableProvider(
       new CSTableScanProvider(
           "test.tbl",
           "eventql/sql/testdata/testtbl.cst"));
@@ -573,7 +573,7 @@ TEST_CASE(RuntimeTest, TestSelectInvalidColumn, [] () {
     auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
-    txn->addTableProvider(
+    txn->setTableProvider(
         new CSTableScanProvider(
             "test.tbl",
             "eventql/sql/testdata/testtbl.cst"));
@@ -646,7 +646,7 @@ TEST_CASE(RuntimeTest, TestWildcardSelect, [] () {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
-  txn->addTableProvider(
+  txn->setTableProvider(
       new CSTableScanProvider(
           "testtable",
           "eventql/sql/testdata/testtbl.cst"));
@@ -667,7 +667,7 @@ TEST_CASE(RuntimeTest, TestWildcardSelectWithOrderLimit, [] () {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
-  txn->addTableProvider(
+  txn->setTableProvider(
       new CSTableScanProvider(
           "testtable",
           "eventql/sql/testdata/testtbl.cst"));
@@ -688,7 +688,7 @@ TEST_CASE(RuntimeTest, TestWildcardSelectWithSubqueries, [] () {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
-  txn->addTableProvider(
+  txn->setTableProvider(
       new backends::csv::CSVTableProvider(
           "testtable",
           "eventql/sql/testdata/testtbl1.csv",
@@ -753,7 +753,7 @@ TEST_CASE(RuntimeTest, TestSelectWithInternalAggrGroupColumns, [] () {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
-  txn->addTableProvider(
+  txn->setTableProvider(
       new CSTableScanProvider(
           "testtable",
           "eventql/sql/testdata/testtbl.cst"));
@@ -774,7 +774,7 @@ TEST_CASE(RuntimeTest, TestSelectWithInternalGroupColumns, [] () {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
-  txn->addTableProvider(
+  txn->setTableProvider(
       new CSTableScanProvider(
           "testtable",
           "eventql/sql/testdata/testtbl.cst"));
@@ -793,7 +793,7 @@ TEST_CASE(RuntimeTest, TestSelectWithInternalOrderColumns, [] () {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
-  txn->addTableProvider(
+  txn->setTableProvider(
       new CSTableScanProvider(
           "testtable",
           "eventql/sql/testdata/testtbl.cst"));
@@ -1432,7 +1432,7 @@ TEST_CASE(RuntimeTest, TestSimpleSelect, [] () {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
-  txn->addTableProvider(
+  txn->setTableProvider(
       new backends::csv::CSVTableProvider(
           "customers",
           "eventql/sql/testdata/testtbl2.csv",
@@ -1505,7 +1505,7 @@ TEST_CASE(RuntimeTest, TestSubqueryInGroupBy, [] () {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
-  txn->addTableProvider(
+  txn->setTableProvider(
       new CSTableScanProvider(
           "testtable",
           "eventql/sql/testdata/testtbl.cst"));
@@ -1526,7 +1526,7 @@ TEST_CASE(RuntimeTest, TestInternalOrderByWithSubquery, [] () {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
-  txn->addTableProvider(
+  txn->setTableProvider(
       new CSTableScanProvider(
           "testtable",
           "eventql/sql/testdata/testtbl.cst"));
@@ -1543,7 +1543,7 @@ TEST_CASE(RuntimeTest, TestWildcardWithGroupBy, [] () {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
-  txn->addTableProvider(
+  txn->setTableProvider(
       new backends::csv::CSVTableProvider(
           "testtable",
           "eventql/sql/testdata/testtbl1.csv",
@@ -1565,7 +1565,7 @@ TEST_CASE(RuntimeTest, TestInnerJoin, [] () {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
-  txn->addTableProvider(
+  txn->setTableProvider(
       new CSTableScanProvider(
           "testtable",
           "eventql/sql/testdata/testtbl.cst"));
@@ -1680,12 +1680,15 @@ TEST_CASE(RuntimeTest, TestLeftJoin, [] () {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
-  txn->addTableProvider(
+  auto tables = mkRef(new TableRepository());
+  txn->setTableProvider(tables.get());
+
+  tables->addTableProvider(
       new backends::csv::CSVTableProvider(
           "customers",
           "eventql/sql/testdata/testtbl2.csv",
           '\t'));
-  txn->addTableProvider(
+  tables->addTableProvider(
       new backends::csv::CSVTableProvider(
           "orders",
           "eventql/sql/testdata/testtbl3.csv",
@@ -1741,12 +1744,15 @@ TEST_CASE(RuntimeTest, TestRightJoin, [] () {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
-  txn->addTableProvider(
+  auto tables = mkRef(new TableRepository());
+  txn->setTableProvider(tables.get());
+
+  tables->addTableProvider(
       new backends::csv::CSVTableProvider(
           "employees",
           "eventql/sql/testdata/testtbl4.csv",
           '\t'));
-  txn->addTableProvider(
+  tables->addTableProvider(
       new backends::csv::CSVTableProvider(
           "orders",
           "eventql/sql/testdata/testtbl3.csv",
@@ -1849,17 +1855,20 @@ TEST_CASE(RuntimeTest, TestWildcardJoins, [] () {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
-  txn->addTableProvider(
+  auto tables = mkRef(new TableRepository());
+  txn->setTableProvider(tables.get());
+
+  tables->addTableProvider(
       new backends::csv::CSVTableProvider(
           "departments",
           "eventql/sql/testdata/testtbl5.csv",
           '\t'));
-  txn->addTableProvider(
+  tables->addTableProvider(
       new backends::csv::CSVTableProvider(
           "users",
           "eventql/sql/testdata/testtbl6.csv",
           '\t'));
-  txn->addTableProvider(
+  tables->addTableProvider(
       new backends::csv::CSVTableProvider(
           "openinghours",
           "eventql/sql/testdata/testtbl7.csv",
@@ -1989,17 +1998,20 @@ TEST_CASE(RuntimeTest, TestNaturalJoin, [] () {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
-  txn->addTableProvider(
+  auto tables = mkRef(new TableRepository());
+  txn->setTableProvider(tables.get());
+
+  tables->addTableProvider(
       new backends::csv::CSVTableProvider(
           "departments",
           "eventql/sql/testdata/testtbl5.csv",
           '\t'));
-  txn->addTableProvider(
+  tables->addTableProvider(
       new backends::csv::CSVTableProvider(
           "users",
           "eventql/sql/testdata/testtbl6.csv",
           '\t'));
-  txn->addTableProvider(
+  tables->addTableProvider(
       new backends::csv::CSVTableProvider(
           "openinghours",
           "eventql/sql/testdata/testtbl7.csv",
@@ -2109,12 +2121,15 @@ TEST_CASE(RuntimeTest, TestShowTables, [] () {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
-  txn->addTableProvider(
+  auto tables = mkRef(new TableRepository());
+  txn->setTableProvider(tables.get());
+
+  tables->addTableProvider(
       new backends::csv::CSVTableProvider(
           "departments",
           "eventql/sql/testdata/testtbl5.csv",
           '\t'));
-  txn->addTableProvider(
+  tables->addTableProvider(
       new backends::csv::CSVTableProvider(
           "users",
           "eventql/sql/testdata/testtbl6.csv",
@@ -2139,7 +2154,7 @@ TEST_CASE(RuntimeTest, TestDescribeTable, [] () {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
-  txn->addTableProvider(
+  txn->setTableProvider(
       new backends::csv::CSVTableProvider(
           "departments",
           "eventql/sql/testdata/testtbl5.csv",
@@ -2186,12 +2201,15 @@ TEST_CASE(RuntimeTest, TestResultCursor, [] () {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
-  txn->addTableProvider(
+  auto tables = mkRef(new TableRepository());
+  txn->setTableProvider(tables.get());
+
+  tables->addTableProvider(
       new backends::csv::CSVTableProvider(
           "departments",
           "eventql/sql/testdata/testtbl5.csv",
           '\t'));
-  txn->addTableProvider(
+  tables->addTableProvider(
       new backends::csv::CSVTableProvider(
           "users",
           "eventql/sql/testdata/testtbl6.csv",
@@ -2219,7 +2237,7 @@ TEST_CASE(RuntimeTest, TestResultCursor, [] () {
 TEST_CASE(RuntimeTest, TestSimpleDrawQuery, [] () {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
-  txn->addTableProvider(
+  txn->setTableProvider(
       new backends::csv::CSVTableProvider(
           "testtable",
           "eventql/sql/testdata/testtbl8.csv",
@@ -2259,7 +2277,7 @@ TEST_CASE(RuntimeTest, TestSimpleDrawQuery, [] () {
 TEST_CASE(RuntimeTest, TestSimpleDrawQueryTwo, [] () {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
-  txn->addTableProvider(
+  txn->setTableProvider(
       new backends::csv::CSVTableProvider(
           "gdp_per_country",
           "eventql/sql/testdata/gbp_per_country_simple.csv",
@@ -2297,7 +2315,7 @@ TEST_CASE(RuntimeTest, TestSumMinMaxCount, [] () {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
-  txn->addTableProvider(
+  txn->setTableProvider(
       new backends::csv::CSVTableProvider(
           "testtable",
           "eventql/sql/testdata/testtbl1.csv",

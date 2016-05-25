@@ -53,7 +53,7 @@ public:
   QueryBuilder* getCompiler() const;
   SymbolTable* getSymbolTable() const;
 
-  void addTableProvider(RefPtr<TableProvider> provider);
+  void setTableProvider(RefPtr<TableProvider> provider);
   RefPtr<TableProvider> getTableProvider() const;
 
   void setUserData(
@@ -65,7 +65,7 @@ public:
 protected:
   Runtime* runtime_;
   UnixTime now_;
-  RefPtr<TableRepository> table_providers_;
+  RefPtr<TableProvider> table_provider_;
   void* user_data_;
   Function<void (void*)> free_user_data_fn_;
 };
