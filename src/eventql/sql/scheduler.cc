@@ -328,14 +328,14 @@ ScopedPtr<ResultCursor> DefaultScheduler::execute(
   auto stmt = query_plan->getStatement(stmt_idx);
 
   if (stmt.isInstanceOf<ChartStatementNode>()) {
-    executeDraw(
+    return executeDraw(
         query_plan->getTransaction(),
         execution_context,
         stmt.asInstanceOf<ChartStatementNode>());
   }
 
   if (stmt.isInstanceOf<TableExpressionNode>()) {
-    executeSelect(
+    return executeSelect(
         query_plan->getTransaction(),
         execution_context,
         stmt.asInstanceOf<TableExpressionNode>());
