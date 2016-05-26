@@ -380,8 +380,10 @@ int main(int argc, const char** argv) {
     return 1;
   }
 
+  auto lang = flags.getString("lang");
+  StringUtil::toLower(&lang);
+
   if (flags.isSet("file")) {
-    auto lang = flags.getString("lang");
     auto query = FileUtil::read(flags.getString("file"));
 
     if (lang == "js" || lang == "javascript") {
@@ -391,6 +393,12 @@ int main(int argc, const char** argv) {
       auto ret = console.runQuery(query.toString());
       return ret.isSuccess() ? 0 : 1;
     }
+  }
+
+  if (lang == "js" || lang == "javascript") {
+    stderr_os->write(
+      "FlagError: please provide a file to execute Javascript, run evql --help for help\n");
+    return 1;
   }
 
   if (flags.isSet("exec")) {
