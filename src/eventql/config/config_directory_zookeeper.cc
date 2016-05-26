@@ -32,7 +32,8 @@ ZookeeperConfigDirectory::ZookeeperConfigDirectory(
     cluster_name_(cluster_name),
     zookeeper_addrs_(zookeeper_addrs),
     zookeeper_timeout_(10000),
-    path_prefix_(StringUtil::format("/eventql/$0/", cluster_name_)),
+    path_prefix_(StringUtil::format("/eventql/$0", cluster_name_)),
+    state_(ZKState::INIT),
     zk_(nullptr) {
   zoo_set_debug_level(ZOO_LOG_LEVEL_DEBUG);
 }
@@ -82,7 +83,7 @@ bool ZookeeperConfigDirectory::start() {
 
   logInfo("evqld", "Loading config from zookeeper...");
 
-  if (!getProtoNode(path_prefix_ + "config", &cluster_config_)) {
+  if (!getProtoNode(path_prefix_ + "/config", &cluster_config_)) {
     logError("evqld", "Cluster '$0' does not exist", cluster_name_);
     return false;
   }
@@ -276,9 +277,38 @@ TableDefinition ZookeeperConfigDirectory::getTableConfig(
   return iter->second;
 }
 
+void ZookeeperConfigDirectory::createTableConfig(
+    const TableDefinition& table) {
+  auto path = StringUtil::format(
+      "$0/namespaces/$1/tables/$2",
+      path_prefix_,
+      table.customer(),
+      table.table_name());
+
+  auto buf = msg::encode(table);
+  auto rc = zoo_create(
+      zk_,
+      path.c_str(),
+      (const char*) buf->data(),
+      buf->size(),
+      &ZOO_OPEN_ACL_UNSAFE,
+      0,
+      NULL /* path_buffer */,
+      0 /* path_buffer_len */);
+
+  if (rc) {
+    RAISEF(kRuntimeError, "zoo_create() failed: $0", getErrorString(rc));
+  }
+}
+
 void ZookeeperConfigDirectory::updateTableConfig(
     const TableDefinition& table,
     bool force /* = false */) {
+  std::unique_lock<std::mutex> lk(mutex_);
+  if (table.version() == 0) {
+    return createTableConfig(table);
+  }
+
   RAISE(kNotYetImplementedError, "zookeeper config directory not yet implemented");
 }
 
@@ -294,6 +324,36 @@ void ZookeeperConfigDirectory::setTableConfigChangeCallback(
     Function<void (const TableDefinition& tbl)> fn) {
   std::unique_lock<std::mutex> lk(mutex_);
   on_table_change_.emplace_back(fn);
+}
+
+const char* ZookeeperConfigDirectory::getErrorString(int err) const {
+  switch (err) {
+    case ZOK: return "Everything is OK";
+    case ZSYSTEMERROR: return "System Error";
+    case ZRUNTIMEINCONSISTENCY: return "A runtime inconsistency was found";
+    case ZDATAINCONSISTENCY: return "A data inconsistency was found";
+    case ZCONNECTIONLOSS: return "Connection to the server has been lost";
+    case ZMARSHALLINGERROR: return "Error while marshalling or unmarshalling data";
+    case ZUNIMPLEMENTED: return "Operation is unimplemented";
+    case ZOPERATIONTIMEOUT: return "Operation timeout";
+    case ZBADARGUMENTS: return "Invalid arguments";
+    case ZINVALIDSTATE: return "Invliad zhandle state";
+    case ZAPIERROR: return "API Error";
+    case ZNONODE: return "Node does not exist";
+    case ZNOAUTH: return "Not authenticated";
+    case ZBADVERSION: return "Version conflict";
+    case ZNOCHILDRENFOREPHEMERALS: return "Ephemeral nodes may not have children";
+    case ZNODEEXISTS: return "The node already exists";
+    case ZNOTEMPTY: return "The node has children";
+    case ZSESSIONEXPIRED: return "The session has been expired by the server";
+    case ZINVALIDCALLBACK: return "Invalid callback specified";
+    case ZINVALIDACL: return "Invalid ACL specified";
+    case ZAUTHFAILED: return "Client authentication failed";
+    case ZCLOSING: return "ZooKeeper is closing";
+    case ZNOTHING: return "(not error) no server responses to process";
+    case ZSESSIONMOVED: return "session moved to another server, so operation is ignored";
+    default: return "ZooKeeper Error";
+  }
 }
 
 } // namespace eventql

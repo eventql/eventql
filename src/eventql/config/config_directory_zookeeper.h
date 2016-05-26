@@ -103,6 +103,8 @@ protected:
       T* proto,
       struct Stat* stat = nullptr);
 
+  void createTableConfig(const TableDefinition& table);
+
   void handleSessionEvent(
       zhandle_t* zk,
       int type,
@@ -114,6 +116,8 @@ protected:
   void handleConnectionLost();
 
   void loadConfig();
+
+  const char* getErrorString(int code) const;
 
   String cluster_name_;
   String zookeeper_addrs_;
