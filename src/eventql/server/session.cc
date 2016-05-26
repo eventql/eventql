@@ -25,6 +25,8 @@
 
 namespace eventql {
 
+Session::Session() : user_id_("<anonymous>") {}
+
 String Session::getUserID() const {
   std::unique_lock<std::mutex> lk(mutex_);
   return user_id_;

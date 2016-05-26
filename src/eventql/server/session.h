@@ -30,6 +30,8 @@ namespace eventql {
 class Session {
 public:
 
+  Session();
+
   String getUserID() const;
   void setUserID(const String& user_id);
 
