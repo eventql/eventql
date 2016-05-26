@@ -98,7 +98,6 @@ Status ZookeeperConfigDirectory::start() {
   }
 
   state_ = ZKState::CONNECTED;
-
   return Status::success();
 }
 
