@@ -77,23 +77,23 @@ AnalyticsApp::AnalyticsApp(
         replication_scheme,
         js_runtime,
         cachedir) {
-  cdb_->onNamespaceConfigChange(
+  cdb_->setNamespaceConfigChangeCallback(
       std::bind(
           &AnalyticsApp::configureCustomer,
           this,
           std::placeholders::_1));
 
-  cdb_->listCustomers([this] (const NamespaceConfig& cfg) {
+  cdb_->listNamespaces([this] (const NamespaceConfig& cfg) {
     configureCustomer(cfg);
   });
 
-  cdb_->onTableDefinitionChange(
+  cdb_->setTableConfigChangeCallback(
       std::bind(
           &AnalyticsApp::configureTable,
           this,
           std::placeholders::_1));
 
-  cdb_->listTableDefinitions([this] (const TableDefinition& tbl) {
+  cdb_->listTables([this] (const TableDefinition& tbl) {
     configureTable(tbl);
   });
 }
@@ -112,11 +112,11 @@ eventql::TSDBService* AnalyticsApp::getTSDBNode() const {
 }
 
 void AnalyticsApp::createTable(const TableDefinition& tbl) {
-  cdb_->updateTableDefinition(tbl);
+  cdb_->updateTableConfig(tbl);
 }
 
 void AnalyticsApp::updateTable(const TableDefinition& tbl, bool force) {
-  cdb_->updateTableDefinition(tbl, force);
+  cdb_->updateTableConfig(tbl, force);
 }
 
 void AnalyticsApp::configureTable(const TableDefinition& tbl) {

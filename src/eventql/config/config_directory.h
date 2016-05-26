@@ -59,23 +59,39 @@ public:
 
   ConfigDirectory(
       const String& path,
-      InetAddr master_addr,
-      uint64_t topics);
+      InetAddr master_addr);
 
-  ClusterConfig clusterConfig() const;
+  ClusterConfig getClusterConfig() const;
+
   void updateClusterConfig(ClusterConfig config);
-  void onClusterConfigChange(Function<void (const ClusterConfig& cfg)> fn);
 
-  RefPtr<NamespaceConfigRef> configFor(const String& customer_key) const;
+  void setClusterConfigChangeCallback(
+      Function<void (const ClusterConfig& cfg)> fn);
+
+  RefPtr<NamespaceConfigRef> getNamespaceConfig(
+      const String& customer_key) const;
+
   void updateNamespaceConfig(NamespaceConfig config);
-  void listCustomers(
-      Function<void (const NamespaceConfig& cfg)> fn) const;
-  void onNamespaceConfigChange(Function<void (const NamespaceConfig& cfg)> fn);
 
-  void updateTableDefinition(const TableDefinition& table, bool force = false);
-  void listTableDefinitions(
+  void listNamespaces(
+      Function<void (const NamespaceConfig& cfg)> fn) const;
+
+  void setNamespaceConfigChangeCallback(
+      Function<void (const NamespaceConfig& cfg)> fn);
+
+  TableDefinition getTableConfig(
+      const String& db_namespace,
+      const String& table_name) const;
+
+  void updateTableConfig(
+      const TableDefinition& table,
+      bool force = false);
+
+  void listTables(
       Function<void (const TableDefinition& tbl)> fn) const;
-  void onTableDefinitionChange(Function<void (const TableDefinition& tbl)> fn);
+
+  void setTableConfigChangeCallback(
+      Function<void (const TableDefinition& tbl)> fn);
 
   void sync();
 

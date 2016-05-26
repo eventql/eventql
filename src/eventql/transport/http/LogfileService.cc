@@ -205,7 +205,7 @@ void LogfileService::insertLoglines(
 Option<LogfileDefinition> LogfileService::findLogfileDefinition(
     const String& customer,
     const String& logfile_name) {
-  auto cconf = cdir_->configFor(customer);
+  auto cconf = cdir_->getNamespaceConfig(customer);
 
   for (const auto& logfile : cconf->config.logfile_import_config().logfiles()) {
     if (logfile.name() == logfile_name) {
@@ -220,7 +220,7 @@ void LogfileService::setLogfileRegex(
     const String& customer,
     const String& logfile_name,
     const String& regex) {
-  auto cconf = cdir_->configFor(customer)->config;
+  auto cconf = cdir_->getNamespaceConfig(customer)->config;
   auto logfile_conf = cconf.mutable_logfile_import_config();
 
   for (auto& logfile : *logfile_conf->mutable_logfiles()) {

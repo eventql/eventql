@@ -70,11 +70,11 @@ ClusterConfig ConfigDirectoryClient::updateClusterConfig(
 
 ConfigDirectory::ConfigDirectory(
     const String& path,
-    const InetAddr master_addr,
-    uint64_t topics) :
+    const InetAddr master_addr) :
     master_addr_(master_addr),
     cclient_(master_addr),
-    topics_(topics),
+    topics_(
+        ConfigTopic::CUSTOMERS | ConfigTopic::TABLES | ConfigTopic::CLUSTERCONFIG),
     watcher_running_(false) {
   mdb::MDBOptions mdb_opts;
   mdb_opts.data_filename = "cdb.db",
@@ -84,7 +84,7 @@ ConfigDirectory::ConfigDirectory(
   db_ = mdb::MDB::open(path, mdb_opts);
 
   if (topics_ & ConfigTopic::CUSTOMERS) {
-    listCustomers([this] (const NamespaceConfig& cfg) {
+    listNamespaces([this] (const NamespaceConfig& cfg) {
       customers_.emplace(cfg.customer(), new NamespaceConfigRef(cfg));
     });
   }
@@ -101,7 +101,7 @@ ConfigDirectory::ConfigDirectory(
   sync();
 }
 
-ClusterConfig ConfigDirectory::clusterConfig() const {
+ClusterConfig ConfigDirectory::getClusterConfig() const {
   if ((topics_ & ConfigTopic::CLUSTERCONFIG) == 0) {
     RAISE(kRuntimeError, "config topic not enabled: CLUSTERCONFIG");
   }
@@ -119,7 +119,7 @@ void ConfigDirectory::updateClusterConfig(ClusterConfig config) {
   commitClusterConfig(cc);
 }
 
-void ConfigDirectory::onClusterConfigChange(
+void ConfigDirectory::setClusterConfigChangeCallback(
     Function<void (const ClusterConfig& cfg)> fn) {
   if ((topics_ & ConfigTopic::CLUSTERCONFIG) == 0) {
     RAISE(kRuntimeError, "config topic not enabled: CLUSTERCONFIG");
@@ -130,7 +130,7 @@ void ConfigDirectory::onClusterConfigChange(
 }
 
 
-RefPtr<NamespaceConfigRef> ConfigDirectory::configFor(
+RefPtr<NamespaceConfigRef> ConfigDirectory::getNamespaceConfig(
     const String& customer_key) const {
   if ((topics_ & ConfigTopic::CUSTOMERS) == 0) {
     RAISE(kRuntimeError, "config topic not enabled: CUSTOMERS");
@@ -146,7 +146,7 @@ RefPtr<NamespaceConfigRef> ConfigDirectory::configFor(
   return iter->second;
 }
 
-void ConfigDirectory::listCustomers(
+void ConfigDirectory::listNamespaces(
     Function<void (const NamespaceConfig& cfg)> fn) const {
   if ((topics_ & ConfigTopic::CUSTOMERS) == 0) {
     RAISE(kRuntimeError, "config topic not enabled: CUSTOMERS");
@@ -178,7 +178,7 @@ void ConfigDirectory::listCustomers(
   cursor->close();
 }
 
-void ConfigDirectory::onNamespaceConfigChange(
+void ConfigDirectory::setNamespaceConfigChangeCallback(
     Function<void (const NamespaceConfig& cfg)> fn) {
   if ((topics_ & ConfigTopic::CUSTOMERS) == 0) {
     RAISE(kRuntimeError, "config topic not enabled: CUSTOMERS");
@@ -207,7 +207,7 @@ void ConfigDirectory::updateNamespaceConfig(NamespaceConfig cfg) {
   commitNamespaceConfig(msg::decode<NamespaceConfig>(res.body()));
 }
 
-void ConfigDirectory::updateTableDefinition(
+void ConfigDirectory::updateTableConfig(
     const TableDefinition& table,
     bool force /* = false */) {
   if ((topics_ & ConfigTopic::TABLES) == 0) {
@@ -239,7 +239,7 @@ void ConfigDirectory::updateTableDefinition(
   commitTableDefinition(msg::decode<TableDefinition>(res.body()));
 }
 
-void ConfigDirectory::listTableDefinitions(
+void ConfigDirectory::listTables(
     Function<void (const TableDefinition& table)> fn) const {
   if ((topics_ & ConfigTopic::TABLES) == 0) {
     RAISE(kRuntimeError, "config topic not enabled: TABLES");
@@ -271,7 +271,7 @@ void ConfigDirectory::listTableDefinitions(
   cursor->close();
 }
 
-void ConfigDirectory::onTableDefinitionChange(
+void ConfigDirectory::setTableConfigChangeCallback(
     Function<void (const TableDefinition& tbl)> fn) {
   if ((topics_ & ConfigTopic::TABLES) == 0) {
     RAISE(kRuntimeError, "config topic not enabled: TABLES");

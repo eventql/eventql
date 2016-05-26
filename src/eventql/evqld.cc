@@ -247,12 +247,10 @@ int main(int argc, const char** argv) {
 
   ConfigDirectory customer_dir(
       cdb_dir,
-      InetAddr::resolve(flags.getString("master")),
-      ConfigTopic::CUSTOMERS | ConfigTopic::TABLES | ConfigTopic::USERDB |
-      ConfigTopic::CLUSTERCONFIG);
+      InetAddr::resolve(flags.getString("master")));
 
   /* clusterconfig */
-  auto cluster_config = customer_dir.clusterConfig();
+  auto cluster_config = customer_dir.getClusterConfig();
   logInfo(
       "eventql",
       "Starting with cluster config: $0",
