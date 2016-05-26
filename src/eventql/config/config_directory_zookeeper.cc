@@ -26,6 +26,18 @@
 
 namespace eventql {
 
+static int free_String_vector(struct String_vector *v) {
+  if (v->data) {
+    int32_t i;
+    for(i=0;i<v->count; i++) {
+      free(v->data[i]);
+    }
+    free(v->data);
+    v->data = 0;
+  }
+  return 0;
+}
+
 ZookeeperConfigDirectory::ZookeeperConfigDirectory(
     const String& cluster_name,
     const String& zookeeper_addrs) :
@@ -83,9 +95,23 @@ bool ZookeeperConfigDirectory::start() {
 
   logInfo("evqld", "Loading config from zookeeper...");
 
-  if (!getProtoNode(path_prefix_ + "/config", &cluster_config_)) {
+  if (!getProtoNode(path_prefix_ + "/config", &cluster_config_, true)) {
     logError("evqld", "Cluster '$0' does not exist", cluster_name_);
     return false;
+  }
+
+  Vector<String> namespaces;
+  {
+    Status rc = listChildren(path_prefix_ + "/namespaces", &namespaces, true);
+    if (!rc.isSuccess()) {
+      logError("evqld", "ZooKeeper Error: '$0'", rc.message());
+      return false;
+    }
+  }
+
+  for (const auto& ns : namespaces) {
+    logDebug("evqld", "Loading namespace config from zookeeper: '$0'", ns);
+
   }
 
   return true;
@@ -99,6 +125,7 @@ void ZookeeperConfigDirectory::stop() {
 bool ZookeeperConfigDirectory::getNode(
     String key,
     Buffer* buf,
+    bool watch /* = false */,
     struct Stat* stat /* = nullptr */) {
   int buf_len = buf->size();
 
@@ -121,6 +148,27 @@ bool ZookeeperConfigDirectory::getNode(
   }
 
   return true;
+}
+
+Status ZookeeperConfigDirectory::listChildren(
+    String key,
+    Vector<String>* children,
+    bool watch /* = false */) {
+  struct String_vector buf;
+  buf.count = 0;
+  buf.data = NULL;
+
+  int rc = zoo_get_children(zk_, key.c_str(), watch, &buf);
+  for (int i = 0; i < buf.count; ++i) {
+    children->emplace_back(buf.data[i]);
+  }
+  free_String_vector(&buf);
+
+  if (rc) {
+    return Status(eIOError, getErrorString(rc));
+  } else {
+    return Status::success();
+  }
 }
 
 /**

@@ -95,13 +95,20 @@ protected:
   bool getNode(
       String key,
       Buffer* buf,
+      bool watch = false,
       struct Stat* stat = nullptr);
 
   template <typename T>
   bool getProtoNode(
       String key,
       T* proto,
+      bool watch = false,
       struct Stat* stat = nullptr);
+
+  Status listChildren(
+      String key,
+      Vector<String>* children,
+      bool watch = false);
 
   void createTableConfig(const TableDefinition& table);
 
@@ -142,9 +149,10 @@ template <typename T>
 bool ZookeeperConfigDirectory::getProtoNode(
     String key,
     T* proto,
+    bool watch /* = false */,
     struct Stat* stat /* = nullptr */) {
   Buffer buf(8192 * 32);
-  if (getNode(key, &buf, stat)) {
+  if (getNode(key, &buf, watch, stat)) {
     msg::decode(buf, proto);
     return true;
   } else {
