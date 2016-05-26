@@ -69,6 +69,10 @@ Status Console::runQuery(const String& query) {
   csql::BinaryResultParser res_parser;
   csql::ResultList results;
 
+  res_parser.onProgress([&results] (const csql::ExecutionStatus& status) {
+    iputs("progress $0", status.progress);
+  });
+
   res_parser.onTableHeader([&results] (const Vector<String>& columns) {
     results.addHeader(columns);
   });
