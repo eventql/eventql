@@ -94,20 +94,21 @@ Status CLIConfig::setConfigOption(
 
   if (key == "host") {
     return setHost(value);
-  }
-  if (key == "port") {
-    return setPort(value);
-  }
-  if (key == "auth_token") {
-    return setAuthToken(value);
-  }
-  if (key == "batch_mode") {
-    return setBatchMode(value);
-  }
 
-  return Status(
-      eParseError,
-      StringUtil::format("config file option '$0' is not valid", key));
+  } else if (key == "port") {
+    return setPort(value);
+
+  } else if (key == "auth_token") {
+    return setAuthToken(value);
+
+  } else if (key == "batch_mode") {
+    return setBatchMode(value);
+
+  } else {
+    return Status(
+        eParseError,
+        StringUtil::format("config file option '$0' is not valid", key));
+  }
 }
 
 Status CLIConfig::setHost(const String& host /* = "localhost" */) {
