@@ -33,7 +33,6 @@ Transaction::Transaction(
     Runtime* runtime) :
     runtime_(runtime),
     now_(WallClock::now()),
-    table_providers_(new TableRepository()),
     user_data_(nullptr) {}
 
 Transaction::~Transaction() {
@@ -58,12 +57,12 @@ UnixTime Transaction::now() const {
   return now_;
 }
 
-void Transaction::addTableProvider(RefPtr<TableProvider> provider) {
-  table_providers_->addProvider(provider);
+void Transaction::setTableProvider(RefPtr<TableProvider> provider) {
+  table_provider_ = provider;
 }
 
 RefPtr<TableProvider> Transaction::getTableProvider() const {
-  return table_providers_.get();
+  return table_provider_;
 }
 
 void Transaction::setUserData(

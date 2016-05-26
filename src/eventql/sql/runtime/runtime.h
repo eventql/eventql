@@ -33,9 +33,9 @@
 #include <eventql/sql/runtime/queryplanbuilder.h>
 #include <eventql/sql/runtime/QueryBuilder.h>
 #include <eventql/sql/runtime/symboltable.h>
-#include <eventql/sql/runtime/resultlist.h>
 
 namespace csql {
+class Scheduler;
 
 class Runtime : public RefCounted {
 public:

@@ -42,82 +42,46 @@ enum ConfigTopic : uint64_t {
   CLUSTERCONFIG = 4
 };
 
-class ConfigDirectoryClient {
-public:
-
-  ConfigDirectoryClient(InetAddr master_addr);
-
-  ClusterConfig fetchClusterConfig();
-  ClusterConfig updateClusterConfig(const ClusterConfig& config);
-
-protected:
-  InetAddr master_addr_;
-};
-
 class ConfigDirectory {
 public:
 
-  ConfigDirectory(
-      const String& path,
-      InetAddr master_addr,
-      uint64_t topics);
+  virtual ~ConfigDirectory() = default;
 
-  ClusterConfig clusterConfig() const;
-  void updateClusterConfig(ClusterConfig config);
-  void onClusterConfigChange(Function<void (const ClusterConfig& cfg)> fn);
+  virtual ClusterConfig getClusterConfig() const = 0;
 
-  RefPtr<NamespaceConfigRef> configFor(const String& customer_key) const;
-  void updateNamespaceConfig(NamespaceConfig config);
-  void listCustomers(
-      Function<void (const NamespaceConfig& cfg)> fn) const;
-  void onNamespaceConfigChange(Function<void (const NamespaceConfig& cfg)> fn);
+  virtual void updateClusterConfig(ClusterConfig config) = 0;
 
-  void updateTableDefinition(const TableDefinition& table, bool force = false);
-  void listTableDefinitions(
-      Function<void (const TableDefinition& tbl)> fn) const;
-  void onTableDefinitionChange(Function<void (const TableDefinition& tbl)> fn);
+  virtual void setClusterConfigChangeCallback(
+      Function<void (const ClusterConfig& cfg)> fn) = 0;
 
-  Option<UserConfig> findUser(const String& userid);
+  virtual RefPtr<NamespaceConfigRef> getNamespaceConfig(
+      const String& customer_key) const = 0;
 
-  void sync();
+  virtual void updateNamespaceConfig(NamespaceConfig config) = 0;
 
-  void startWatcher();
-  void stopWatcher();
+  virtual void listNamespaces(
+      Function<void (const NamespaceConfig& cfg)> fn) const = 0;
 
-protected:
+  virtual void setNamespaceConfigChangeCallback(
+      Function<void (const NamespaceConfig& cfg)> fn) = 0;
 
-  void loadNamespaceConfigs();
-  HashMap<String, uint64_t> fetchMasterHeads() const;
+  virtual TableDefinition getTableConfig(
+      const String& db_namespace,
+      const String& table_name) const = 0;
 
-  void syncObject(const String& obj);
+  virtual void updateTableConfig(
+      const TableDefinition& table,
+      bool force = false) = 0;
 
-  void syncClusterConfig();
-  void commitClusterConfig(const ClusterConfig& config);
+  virtual void listTables(
+      Function<void (const TableDefinition& tbl)> fn) const = 0;
 
-  void syncNamespaceConfig(const String& customer);
-  void commitNamespaceConfig(const NamespaceConfig& config);
+  virtual void setTableConfigChangeCallback(
+      Function<void (const TableDefinition& tbl)> fn) = 0;
 
-  void syncTableDefinitions(const String& customer);
-  void commitTableDefinition(const TableDefinition& tbl);
+  virtual void start() = 0;
+  virtual void stop() = 0;
 
-  void syncUserDB();
-  void commitUserConfig(const UserConfig& usr);
-
-  InetAddr master_addr_;
-  ConfigDirectoryClient cclient_;
-  uint64_t topics_;
-  RefPtr<mdb::MDB> db_;
-  mutable std::mutex mutex_;
-  ClusterConfig cluster_config_;
-  HashMap<String, RefPtr<NamespaceConfigRef>> customers_;
-
-  Vector<Function<void (const ClusterConfig& cfg)>> on_cluster_change_;
-  Vector<Function<void (const NamespaceConfig& cfg)>> on_customer_change_;
-  Vector<Function<void (const TableDefinition& cfg)>> on_table_change_;
-  Vector<Function<void (const UserConfig& cfg)>> on_user_change_;
-
-  std::atomic<bool> watcher_running_;
-  std::thread watcher_thread_;
 };
 
 } // namespace eventql

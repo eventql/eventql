@@ -13,6 +13,7 @@ if ! test -d $PACKAGE-$VERSION; then
 fi
 
 TARGET_DIR=build/target/$PACKAGE-$VERSION-linux_x86_64
+test -d $TARGET_DIR/dist && rm -rf $TARGET_DIR/dist || true
 mkdir -p $TARGET_DIR $TARGET_DIR/dist || true
 cd $TARGET_DIR
 
@@ -28,4 +29,4 @@ export OBJDUMP=x86_64-linux-gnu-objdump
 
 ../../../$PACKAGE-$VERSION/configure --host=x86_64-linux-gnu --prefix=/usr/local
 make
-make install DESTDIR=dist
+make install DESTDIR=$(pwd)/dist

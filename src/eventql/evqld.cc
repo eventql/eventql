@@ -61,6 +61,7 @@
 #include "eventql/transport/http/default_servlet.h"
 #include "eventql/sql/defaults.h"
 #include "eventql/config/config_directory.h"
+#include "eventql/config/config_directory_legacy.h"
 #include "eventql/transport/http/status_servlet.h"
 #include "eventql/server/sql/scheduler.h"
 #include <jsapi.h>
@@ -84,7 +85,7 @@ int main(int argc, const char** argv) {
       cli::FlagParser::T_INTEGER,
       false,
       NULL,
-      "8080",
+      "9175",
       "Start the public http server on this port",
       "<port>");
 
@@ -245,14 +246,12 @@ int main(int argc, const char** argv) {
     FileUtil::mkdir(cdb_dir);
   }
 
-  ConfigDirectory customer_dir(
+  LegacyConfigDirectory customer_dir(
       cdb_dir,
-      InetAddr::resolve(flags.getString("master")),
-      ConfigTopic::CUSTOMERS | ConfigTopic::TABLES | ConfigTopic::USERDB |
-      ConfigTopic::CLUSTERCONFIG);
+      InetAddr::resolve(flags.getString("master")));
 
   /* clusterconfig */
-  auto cluster_config = customer_dir.clusterConfig();
+  auto cluster_config = customer_dir.getClusterConfig();
   logInfo(
       "eventql",
       "Starting with cluster config: $0",
@@ -390,7 +389,7 @@ int main(int argc, const char** argv) {
 
   try {
     partition_map.open();
-    customer_dir.startWatcher();
+    customer_dir.start();
     ev.run();
   } catch (const StandardException& e) {
     logAlert("eventql", e, "FATAL ERROR");
@@ -398,7 +397,7 @@ int main(int argc, const char** argv) {
 
   logInfo("eventql", "Exiting...");
 
-  customer_dir.stopWatcher();
+  customer_dir.stop();
 
   JS_ShutDown();
 

@@ -22,6 +22,7 @@
  * code of your own applications
  */
 #include <eventql/sql/query_plan.h>
+#include <eventql/sql/scheduler.h>
 #include <eventql/sql/runtime/runtime.h>
 
 namespace csql {
@@ -33,8 +34,12 @@ QueryPlan::QueryPlan(
     qtrees_(qtrees),
     execution_contexts_(qtrees_.size()) {
   for (const auto& qtree : qtrees_) {
-    statement_columns_.emplace_back(
-        qtree.asInstanceOf<TableExpressionNode>()->getResultColumns());
+    if (qtree.isInstanceOf<TableExpressionNode>()) {
+      statement_columns_.emplace_back(
+          qtree.asInstanceOf<TableExpressionNode>()->getResultColumns());
+    } else {
+      statement_columns_.emplace_back();
+    }
   }
 }
 

@@ -21,6 +21,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#include <algorithm>
 #include <stdlib.h>
 #include <eventql/sql/parser/astnode.h>
 #include <eventql/sql/parser/astutil.h>
@@ -41,6 +42,8 @@
 #include <eventql/sql/qtree/QueryTreeUtil.h>
 #include <eventql/sql/qtree/ValueExpressionNode.h>
 #include <eventql/sql/qtree/JoinNode.h>
+#include <eventql/sql/qtree/nodes/create_table.h>
+#include <eventql/sql/table_schema.h>
 
 namespace csql {
 
@@ -99,6 +102,10 @@ RefPtr<QueryTreeNode> QueryPlanBuilder::build(
     return node;
   }
 
+  if ((node = buildCreateTable(txn, ast)) != nullptr) {
+    return node;
+  }
+
   ast->debugPrint(2);
   RAISE(kRuntimeError, "can't figure out a query plan for this, sorry :(");
 }
@@ -116,6 +123,7 @@ Vector<RefPtr<QueryTreeNode>> QueryPlanBuilder::build(
       case ASTNode::T_SELECT_DEEP:
       case ASTNode::T_SHOW_TABLES:
       case ASTNode::T_DESCRIBE_TABLE:
+      case ASTNode::T_CREATE_TABLE:
         nodes.emplace_back(build(txn, statements[i], tables));
         break;
 
@@ -1697,6 +1705,169 @@ QueryTreeNode* QueryPlanBuilder::buildDescribeTable(
   }
 
   return new DescribeTableNode(table_name->getToken()->getString());
+}
+
+static TableSchema buildCreateTableSchema(ASTNode* ast);
+
+static void buildCreateTableSchemaColumn(
+    ASTNode* ast,
+    TableSchemaBuilder* schema) {
+  if (ast->getChildren().size() < 2) {
+    RAISE(kRuntimeError, "corrupt AST");
+  }
+
+  auto column_name = ast->getChildren()[0];
+  if (column_name->getType() != ASTNode::T_COLUMN_NAME ||
+      column_name->getToken() == nullptr) {
+    RAISE(kRuntimeError, "corrupt AST");
+  }
+
+  Vector<TableSchema::ColumnOptions> column_options;
+  for (size_t i = 2; i < ast->getChildren().size(); ++i) {
+    switch (ast->getChildren()[i]->getType()) {
+      case ASTNode::T_NOT_NULL:
+        column_options.emplace_back(TableSchema::ColumnOptions::NOT_NULL);
+        break;
+      case ASTNode::T_REPEATED:
+        column_options.emplace_back(TableSchema::ColumnOptions::REPEATED);
+        break;
+      case ASTNode::T_PRIMARY_KEY:
+        column_options.emplace_back(TableSchema::ColumnOptions::PRIMARY_KEY);
+        break;
+      default:
+        RAISE(kRuntimeError, "corrupt AST");
+    }
+  }
+
+  switch (ast->getChildren()[1]->getType()) {
+
+    case ASTNode::T_COLUMN_TYPE: {
+      auto column_type = ast->getChildren()[1];
+      if (column_type->getType() != ASTNode::T_COLUMN_TYPE ||
+          column_type->getToken() == nullptr) {
+        RAISE(kRuntimeError, "corrupt AST");
+      }
+
+      schema->addScalarColumn(
+          column_name->getToken()->getString(),
+          column_type->getToken()->getString(),
+          column_options);
+
+      break;
+    }
+
+    case ASTNode::T_RECORD: {
+      schema->addRecordColumn(
+          column_name->getToken()->getString(),
+          column_options,
+          buildCreateTableSchema(ast->getChildren()[1]));
+
+      break;
+    }
+
+    default:
+      RAISE(kRuntimeError, "corrupt AST");
+  }
+}
+
+static TableSchema buildCreateTableSchema(ASTNode* ast) {
+  TableSchemaBuilder schema_builder;
+
+  switch (ast->getType()) {
+    case ASTNode::T_COLUMN_LIST:
+    case ASTNode::T_RECORD:
+      break;
+    default:
+      RAISE(kRuntimeError, "corrupt AST");
+  }
+
+  for (const auto& cld : ast->getChildren()) {
+    switch (cld->getType()) {
+
+      case ASTNode::T_COLUMN: {
+        buildCreateTableSchemaColumn(cld, &schema_builder);
+        break;
+      }
+
+      case ASTNode::T_PRIMARY_KEY: {
+        if (ast->getType() == ASTNode::T_RECORD) {
+          RAISE(
+              kRuntimeError,
+              "invalid column definition: can't use PRIMARY_KEY() within RECORD");
+        }
+        break;
+      }
+
+      default:
+        RAISE(kRuntimeError, "corrupt AST");
+
+    }
+  }
+
+  return schema_builder.getTableSchema();
+}
+
+QueryTreeNode* QueryPlanBuilder::buildCreateTable(
+    Transaction* txn,
+    ASTNode* ast) {
+  if (!(*ast == ASTNode::T_CREATE_TABLE) || ast->getChildren().size() < 2) {
+    return nullptr;
+  }
+
+  auto table_name = ast->getChildren()[0];
+  if (table_name->getType() != ASTNode::T_TABLE_NAME ||
+      table_name->getToken() == nullptr) {
+    RAISE(kRuntimeError, "corrupt AST");
+  }
+
+  auto table_schema = buildCreateTableSchema(ast->getChildren()[1]);
+  Vector<String> primary_key_columns;
+
+  for (const auto& cld : ast->getChildren()[1]->getChildren()) {
+    if (cld->getType() != ASTNode::T_PRIMARY_KEY) {
+      continue;
+    }
+
+    if (!primary_key_columns.empty()) {
+      RAISE(kRuntimeError, "can't have more than one PRIMARY KEY definition");
+    }
+
+    for (const auto& col : cld->getChildren()) {
+      if (col->getType() != ASTNode::T_COLUMN_NAME ||
+          col->getToken() == nullptr) {
+        RAISE(kRuntimeError, "corrupt AST");
+      }
+
+      primary_key_columns.emplace_back(col->getToken()->getString());
+    }
+  }
+
+  for (auto col : table_schema.getFlatColumnList()) {
+    bool is_primary_key = std::find(
+        col->column_options.begin(),
+        col->column_options.end(),
+        TableSchema::ColumnOptions::PRIMARY_KEY) != col->column_options.end();
+
+    if (!is_primary_key) {
+      continue;
+    }
+
+    if (!primary_key_columns.empty()) {
+      RAISE(kRuntimeError, "can't have more than one PRIMARY KEY definition");
+    }
+
+    primary_key_columns.emplace_back(col->full_column_name);
+  }
+
+  auto node = new CreateTableNode(
+      table_name->getToken()->getString(),
+      std::move(table_schema));
+
+  if (!primary_key_columns.empty()) {
+    node->setPrimaryKey(primary_key_columns);
+  }
+
+  return node;
 }
 
 }

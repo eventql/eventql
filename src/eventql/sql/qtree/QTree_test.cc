@@ -34,6 +34,7 @@
 #include "eventql/sql/qtree/LiteralExpressionNode.h"
 #include "eventql/sql/qtree/QueryTreeUtil.h"
 #include "eventql/sql/qtree/qtree_coder.h"
+#include "eventql/sql/qtree/nodes/create_table.h"
 #include "eventql/sql/CSTableScanProvider.h"
 #include "eventql/sql/backends/csv/CSVTableProvider.h"
 
@@ -46,10 +47,10 @@ TEST_CASE(QTreeTest, TestExtractEqualsConstraint, [] () {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
-  txn->addTableProvider(
+  txn->setTableProvider(
       new CSTableScanProvider(
           "testtable",
-          "src/eventql/sql/testdata/testtbl.cst"));
+          "eventql/sql/testdata/testtbl.cst"));
 
   Vector<String> queries;
   queries.push_back("select 1 from testtable where time = 1234;");
@@ -86,10 +87,10 @@ TEST_CASE(QTreeTest, TestExtractNotEqualsConstraint, [] () {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
-  txn->addTableProvider(
+  txn->setTableProvider(
       new CSTableScanProvider(
           "testtable",
-          "src/eventql/sql/testdata/testtbl.cst"));
+          "eventql/sql/testdata/testtbl.cst"));
 
   Vector<String> queries;
   queries.push_back("select 1 from testtable where time != 1234;");
@@ -126,10 +127,10 @@ TEST_CASE(QTreeTest, TestExtractLessThanConstraint, [] () {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
-  txn->addTableProvider(
+  txn->setTableProvider(
       new CSTableScanProvider(
           "testtable",
-          "src/eventql/sql/testdata/testtbl.cst"));
+          "eventql/sql/testdata/testtbl.cst"));
 
   Vector<String> queries;
   queries.push_back("select 1 from testtable where time < 1234;");
@@ -166,10 +167,10 @@ TEST_CASE(QTreeTest, TestExtractLessThanOrEqualToConstraint, [] () {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
-  txn->addTableProvider(
+  txn->setTableProvider(
       new CSTableScanProvider(
           "testtable",
-          "src/eventql/sql/testdata/testtbl.cst"));
+          "eventql/sql/testdata/testtbl.cst"));
 
   Vector<String> queries;
   queries.push_back("select 1 from testtable where time <= 1234;");
@@ -206,10 +207,10 @@ TEST_CASE(QTreeTest, TestExtractGreaterThanConstraint, [] () {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
-  txn->addTableProvider(
+  txn->setTableProvider(
       new CSTableScanProvider(
           "testtable",
-          "src/eventql/sql/testdata/testtbl.cst"));
+          "eventql/sql/testdata/testtbl.cst"));
 
   Vector<String> queries;
   queries.push_back("select 1 from testtable where time > 1234;");
@@ -246,10 +247,10 @@ TEST_CASE(QTreeTest, TestExtractGreaterThanOrEqualToConstraint, [] () {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
-  txn->addTableProvider(
+  txn->setTableProvider(
       new CSTableScanProvider(
           "testtable",
-          "src/eventql/sql/testdata/testtbl.cst"));
+          "eventql/sql/testdata/testtbl.cst"));
 
   Vector<String> queries;
   queries.push_back("select 1 from testtable where time >= 1234;");
@@ -286,10 +287,10 @@ TEST_CASE(QTreeTest, TestExtractMultipleConstraints, [] () {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
-  txn->addTableProvider(
+  txn->setTableProvider(
       new CSTableScanProvider(
           "testtable",
-          "src/eventql/sql/testdata/testtbl.cst"));
+          "eventql/sql/testdata/testtbl.cst"));
 
   String query = "select 1 from testtable where 1000 + 200 + 30 + 4 > time AND session_id != 400 + 44 AND time >= 1111 * 6;";
 
@@ -337,10 +338,10 @@ TEST_CASE(QTreeTest, TestSimpleConstantFolding, [] () {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
-  txn->addTableProvider(
+  txn->setTableProvider(
       new CSTableScanProvider(
           "testtable",
-          "src/eventql/sql/testdata/testtbl.cst"));
+          "eventql/sql/testdata/testtbl.cst"));
 
   String query = "select 1 + 2 + 3 from testtable where time > ucase('fu') + lcase('Bar');";
 
@@ -368,10 +369,10 @@ TEST_CASE(QTreeTest, TestPruneConstraints, [] () {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
-  txn->addTableProvider(
+  txn->setTableProvider(
       new CSTableScanProvider(
           "testtable",
-          "src/eventql/sql/testdata/testtbl.cst"));
+          "eventql/sql/testdata/testtbl.cst"));
 
   String query = "select 1 from testtable where 1000 + 200 + 30 + 4 > time AND session_id != 400 + 44 AND time >= 1111 * 6;";
   csql::Parser parser;
@@ -426,10 +427,10 @@ TEST_CASE(QTreeTest, TestSerialization, [] () {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
-  txn->addTableProvider(
+  txn->setTableProvider(
       new CSTableScanProvider(
           "testtable",
-          "src/eventql/sql/testdata/testtbl.cst"));
+          "eventql/sql/testdata/testtbl.cst"));
 
   String query = "select 1 + 2 + 3 from testtable where time > ucase('fu') + lcase('Bar') limit 10;";
 
@@ -461,15 +462,19 @@ TEST_CASE(QTreeTest, TestSerializationJoinAndSubquery, [] () {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
-    txn->addTableProvider(
-      new backends::csv::CSVTableProvider(
-          "customers",
-          "src/eventql/sql/testdata/testtbl2.csv",
-          '\t'));
-  txn->addTableProvider(
+  auto tables = mkRef(new TableRepository());
+  txn->setTableProvider(tables.get());
+
+  tables->addProvider(
+    new backends::csv::CSVTableProvider(
+        "customers",
+        "eventql/sql/testdata/testtbl2.csv",
+        '\t'));
+
+  tables->addProvider(
       new backends::csv::CSVTableProvider(
           "orders",
-          "src/eventql/sql/testdata/testtbl3.csv",
+          "eventql/sql/testdata/testtbl3.csv",
           '\t'));
 
   String query =
@@ -503,4 +508,190 @@ TEST_CASE(QTreeTest, TestSerializationJoinAndSubquery, [] () {
   auto qtree2 = coder.decode(buf_is.get());
 
   EXPECT_EQ(qtree->toString(), qtree2->toString());
+});
+
+TEST_CASE(QTreeTest, TestCreateTable, [] () {
+  auto runtime = Runtime::getDefaultRuntime();
+  auto txn = runtime->newTransaction();
+
+  String query =
+    "  CREATE TABLE fnord ("
+    "      time DATETIME NOT NULL,"
+    "      location STring,"
+    "      person REPEATED String,"
+    "      temperatur RECORD ("
+    "          val1 uint64 NOT NULL,"
+    "          val2 REPEATED string"
+    "      ),"
+    "      some_other REPEATED RECORD ("
+    "          val1 uint64 NOT NULL,"
+    "          val2 REPEATED STRING"
+    "      ),"
+    "      PRIMARY KEY (time, myvalue)"
+    "  )";
+
+  csql::Parser parser;
+  parser.parse(query.data(), query.size());
+
+  auto qtree_builder = runtime->queryPlanBuilder();
+  Vector<RefPtr<QueryTreeNode>> qtrees = qtree_builder->build(
+      txn.get(),
+      parser.getStatements(),
+      txn->getTableProvider());
+
+  EXPECT_EQ(qtrees.size(), 1);
+  RefPtr<CreateTableNode> qtree = qtrees[0].asInstanceOf<CreateTableNode>();
+  EXPECT_EQ(qtree->getTableName(), "fnord");
+
+  auto table_schema = qtree->getTableSchema();
+
+  auto fcolumns = table_schema.getFlatColumnList();
+  EXPECT_EQ(fcolumns.size(), 9);
+
+  EXPECT_EQ(fcolumns[0]->column_name, "time");
+  EXPECT_EQ(fcolumns[0]->column_name, fcolumns[0]->full_column_name);
+  EXPECT(fcolumns[0]->column_class == TableSchema::ColumnClass::SCALAR);
+  EXPECT_EQ(fcolumns[0]->column_type, "DATETIME");
+  EXPECT(fcolumns[0]->column_options == Vector<TableSchema::ColumnOptions> {
+    TableSchema::ColumnOptions::NOT_NULL
+  });
+
+  EXPECT_EQ(fcolumns[1]->column_name, "location");
+  EXPECT_EQ(fcolumns[1]->column_name, fcolumns[1]->full_column_name);
+  EXPECT(fcolumns[1]->column_class == TableSchema::ColumnClass::SCALAR);
+  EXPECT_EQ(fcolumns[1]->column_type, "STring");
+  EXPECT(fcolumns[1]->column_options == Vector<TableSchema::ColumnOptions> {});
+
+  EXPECT_EQ(fcolumns[2]->column_name, "person");
+  EXPECT_EQ(fcolumns[2]->column_name, fcolumns[2]->full_column_name);
+  EXPECT(fcolumns[2]->column_class == TableSchema::ColumnClass::SCALAR);
+  EXPECT_EQ(fcolumns[2]->column_type, "String");
+  EXPECT(fcolumns[2]->column_options == Vector<TableSchema::ColumnOptions> {
+    TableSchema::ColumnOptions::REPEATED
+  });
+
+  EXPECT_EQ(fcolumns[3]->column_name, "temperatur");
+  EXPECT_EQ(fcolumns[3]->column_name, fcolumns[3]->full_column_name);
+  EXPECT(fcolumns[3]->column_class == TableSchema::ColumnClass::RECORD);
+  EXPECT_EQ(fcolumns[3]->column_type, "RECORD");
+  EXPECT(fcolumns[3]->column_options == Vector<TableSchema::ColumnOptions> {});
+  EXPECT_EQ(fcolumns[3]->column_schema.size(), 2);
+
+  EXPECT(fcolumns[4]->column_name == "val1");
+  EXPECT_EQ(fcolumns[4]->full_column_name, "temperatur.val1");
+  EXPECT(fcolumns[4]->column_class == TableSchema::ColumnClass::SCALAR);
+  EXPECT_EQ(fcolumns[4]->column_type, "uint64");
+  EXPECT(fcolumns[4]->column_options == Vector<TableSchema::ColumnOptions> {
+    TableSchema::ColumnOptions::NOT_NULL
+  });
+
+  EXPECT(fcolumns[5]->column_name == "val2");
+  EXPECT_EQ(fcolumns[5]->full_column_name, "temperatur.val2");
+  EXPECT(fcolumns[5]->column_class == TableSchema::ColumnClass::SCALAR);
+  EXPECT_EQ(fcolumns[5]->column_type, "string");
+  EXPECT(fcolumns[5]->column_options == Vector<TableSchema::ColumnOptions> {
+    TableSchema::ColumnOptions::REPEATED
+  });
+
+  EXPECT_EQ(fcolumns[6]->column_name, "some_other");
+  EXPECT(fcolumns[6]->column_class == TableSchema::ColumnClass::RECORD);
+  EXPECT_EQ(fcolumns[6]->column_type, "RECORD");
+  EXPECT(fcolumns[6]->column_options == Vector<TableSchema::ColumnOptions> {
+    TableSchema::ColumnOptions::REPEATED
+  });
+  EXPECT_EQ(fcolumns[6]->column_schema.size(), 2);
+
+  EXPECT(fcolumns[7]->column_name == "val1");
+  EXPECT_EQ(fcolumns[7]->full_column_name, "some_other.val1");
+  EXPECT(fcolumns[7]->column_class == TableSchema::ColumnClass::SCALAR);
+  EXPECT_EQ(fcolumns[7]->column_type, "uint64");
+  EXPECT(fcolumns[7]->column_options == Vector<TableSchema::ColumnOptions> {
+    TableSchema::ColumnOptions::NOT_NULL
+  });
+
+  EXPECT(fcolumns[8]->column_name == "val2");
+  EXPECT_EQ(fcolumns[8]->full_column_name, "some_other.val2");
+  EXPECT(fcolumns[8]->column_class == TableSchema::ColumnClass::SCALAR);
+  EXPECT_EQ(fcolumns[8]->column_type, "STRING");
+  EXPECT(fcolumns[8]->column_options == Vector<TableSchema::ColumnOptions> {
+    TableSchema::ColumnOptions::REPEATED
+  });
+
+
+  auto columns = table_schema.getColumns();
+  EXPECT_EQ(columns.size(), 5);
+
+  EXPECT_EQ(columns[0]->column_name, "time");
+  EXPECT(columns[0]->column_class == TableSchema::ColumnClass::SCALAR);
+  EXPECT_EQ(columns[0]->column_type, "DATETIME");
+  EXPECT(columns[0]->column_options == Vector<TableSchema::ColumnOptions> {
+    TableSchema::ColumnOptions::NOT_NULL
+  });
+
+  EXPECT_EQ(columns[1]->column_name, "location");
+  EXPECT(columns[1]->column_class == TableSchema::ColumnClass::SCALAR);
+  EXPECT_EQ(columns[1]->column_type, "STring");
+  EXPECT(columns[1]->column_options == Vector<TableSchema::ColumnOptions> {});
+
+  EXPECT_EQ(columns[2]->column_name, "person");
+  EXPECT(columns[2]->column_class == TableSchema::ColumnClass::SCALAR);
+  EXPECT_EQ(columns[2]->column_type, "String");
+  EXPECT(columns[2]->column_options == Vector<TableSchema::ColumnOptions> {
+    TableSchema::ColumnOptions::REPEATED
+  });
+
+  EXPECT_EQ(columns[3]->column_name, "temperatur");
+  EXPECT(columns[3]->column_class == TableSchema::ColumnClass::RECORD);
+  EXPECT_EQ(columns[3]->column_type, "RECORD");
+  EXPECT(columns[3]->column_options == Vector<TableSchema::ColumnOptions> {});
+  EXPECT_EQ(columns[3]->column_schema.size(), 2);
+
+  {
+    auto scolumns = columns[3]->column_schema;
+
+    EXPECT(scolumns[0]->column_name == "val1");
+    EXPECT(scolumns[0]->column_class == TableSchema::ColumnClass::SCALAR);
+    EXPECT_EQ(scolumns[0]->column_type, "uint64");
+    EXPECT(scolumns[0]->column_options == Vector<TableSchema::ColumnOptions> {
+      TableSchema::ColumnOptions::NOT_NULL
+    });
+
+    EXPECT(scolumns[1]->column_name == "val2");
+    EXPECT(scolumns[1]->column_class == TableSchema::ColumnClass::SCALAR);
+    EXPECT_EQ(scolumns[1]->column_type, "string");
+    EXPECT(scolumns[1]->column_options == Vector<TableSchema::ColumnOptions> {
+      TableSchema::ColumnOptions::REPEATED
+    });
+  }
+
+  EXPECT_EQ(columns[4]->column_name, "some_other");
+  EXPECT(columns[4]->column_class == TableSchema::ColumnClass::RECORD);
+  EXPECT_EQ(columns[4]->column_type, "RECORD");
+  EXPECT(columns[4]->column_options == Vector<TableSchema::ColumnOptions> {
+    TableSchema::ColumnOptions::REPEATED
+  });
+  EXPECT_EQ(columns[4]->column_schema.size(), 2);
+
+  {
+    auto scolumns = columns[4]->column_schema;
+
+    EXPECT_EQ(scolumns[0]->column_name, "val1");
+    EXPECT(scolumns[0]->column_class == TableSchema::ColumnClass::SCALAR);
+    EXPECT_EQ(scolumns[0]->column_type, "uint64");
+    EXPECT(scolumns[0]->column_options == Vector<TableSchema::ColumnOptions> {
+      TableSchema::ColumnOptions::NOT_NULL
+    });
+
+    EXPECT_EQ(scolumns[1]->column_name, "val2");
+    EXPECT(scolumns[1]->column_class == TableSchema::ColumnClass::SCALAR);
+    EXPECT_EQ(scolumns[1]->column_type, "STRING");
+    EXPECT(scolumns[1]->column_options == Vector<TableSchema::ColumnOptions> {
+      TableSchema::ColumnOptions::REPEATED
+    });
+  }
+
+  Vector<String> pkey;
+  pkey.emplace_back("time");
+  pkey.emplace_back("myvalue");
+  EXPECT(qtree->getPrimaryKey() == pkey);
 });

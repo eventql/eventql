@@ -87,7 +87,7 @@ void LogfileAPIServlet::listLogfiles(
     const URI& uri,
     const http::HTTPRequest* req,
     http::HTTPResponse* res) {
-  auto customer_conf = cdir_->configFor(session.customer());
+  auto customer_conf = cdir_->getNamespaceConfig(session.customer());
   const auto& logfile_cfg = customer_conf->config.logfile_import_config();
 
   Buffer buf;
@@ -119,7 +119,7 @@ void LogfileAPIServlet::fetchLogfileDefinition(
     const http::HTTPRequest* req,
     http::HTTPResponse* res) {
   const auto& params = uri.queryParams();
-  auto customer_conf = cdir_->configFor(session.customer());
+  auto customer_conf = cdir_->getNamespaceConfig(session.customer());
   const auto& logfile_cfg = customer_conf->config.logfile_import_config();
 
   String logfile_name;
@@ -156,7 +156,7 @@ void LogfileAPIServlet::setLogfileRegex(
     const http::HTTPRequest* req,
     http::HTTPResponse* res) {
   const auto& params = uri.queryParams();
-  auto customer_conf = cdir_->configFor(session.customer());
+  auto customer_conf = cdir_->getNamespaceConfig(session.customer());
 
   String logfile_name;
   if (!URI::getParam(params, "logfile", &logfile_name)) {

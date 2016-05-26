@@ -78,6 +78,11 @@ Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
               auth_)));
 }
 
+Status TSDBTableProvider::createTable(
+    const csql::CreateTableNode& create_table) {
+  RAISE(kRuntimeError, "not yet implemented");
+}
+
 void TSDBTableProvider::listTables(
     Function<void (const csql::TableInfo& table)> fn) const {
   partition_map_->listTables(

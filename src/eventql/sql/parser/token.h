@@ -91,6 +91,9 @@ public:
     T_SHOW,
     T_DESCRIBE,
     T_EXPLAIN,
+    T_PRIMARY,
+    T_KEY,
+    T_REPEATED,
 
     T_JOIN,
     T_CROSS,
@@ -148,6 +151,7 @@ public:
   bool operator==(const Token& other) const;
   bool operator==(const std::string& string) const;
   bool operator==(kTokenType type) const;
+  bool operator!=(kTokenType type) const;
   kTokenType getType() const;
   static const char* getTypeName(kTokenType type);
   const std::string getString() const;

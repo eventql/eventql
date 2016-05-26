@@ -2,15 +2,6 @@
 
 ACLOCAL_AMFLAGS = -I m4
 
-dist_doc_DATA = \
-  AUTHORS \
-  COPYING \
-  ChangeLog \
-  LICENCE \
-  NEWS \
-  README
-
-
 # Unit tests you want to run when people type 'make check'.
 # TESTS is for binary unit tests, check_SCRIPTS for script-based tests
 TESTS =
@@ -57,16 +48,12 @@ EXTRA_DIST += \
   pcregexp.pas
 
 
-# These are the header files we'll install. We do not distribute pcre.h because
-# it is generated from pcre.h.in.
-nodist_include_HEADERS = pcre.h
-include_HEADERS = pcreposix.h
-
 noinst_LIBRARIES = libpcre.a libpcreposix.a
 
 libpcre_a_SOURCES = \
   config.h \
   pcre.h \
+  pcreposix.h \
   pcre_byte_order.c \
   pcre_chartables.c \
   pcre_compile.c \

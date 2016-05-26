@@ -56,4 +56,12 @@ size_t TableExpressionResultCursor::getNumColumns() {
   return cursor_->getNumColumns();
 }
 
+bool EmptyResultCursor::next(SValue* row, int row_len) {
+  return false;
+}
+
+size_t EmptyResultCursor::getNumColumns() {
+  return 0;
+}
+
 }

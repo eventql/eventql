@@ -23,10 +23,13 @@
  */
 #pragma once
 #include <eventql/util/option.h>
+#include <eventql/util/status.h>
+#include <eventql/sql/table_schema.h>
 #include <eventql/sql/TableInfo.h>
 #include <eventql/sql/expressions/table_expression.h>
 #include <eventql/sql/qtree/SequentialScanNode.h>
 #include <eventql/sql/scheduler/execution_context.h>
+#include "eventql/sql/qtree/nodes/create_table.h"
 
 namespace csql {
 
@@ -43,6 +46,10 @@ public:
   virtual void listTables(Function<void (const TableInfo& table)> fn) const = 0;
 
   virtual Option<TableInfo> describe(const String& table_name) const = 0;
+
+  virtual Status createTable(const CreateTableNode& create_table) {
+    RAISE(kRuntimeError, "can't create tables");
+  }
 
 };
 

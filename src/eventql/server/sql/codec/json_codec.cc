@@ -22,7 +22,6 @@
  * code of your own applications
  */
 #include <eventql/server/sql/codec/json_codec.h>
-#include <eventql/sql/runtime/resultlist.h>
 
 namespace eventql {
 

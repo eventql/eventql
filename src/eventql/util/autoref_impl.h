@@ -105,6 +105,13 @@ AutoRef<T_> AutoRef<T>::asInstanceOf() const {
 }
 
 template <typename T>
+template <typename T_>
+bool AutoRef<T>::isInstanceOf() const {
+  return dynamic_cast<T_*>(ref_) != nullptr;
+}
+
+
+template <typename T>
 AutoRef<T> mkRef(T* ptr) {
   return AutoRef<T>(ptr);
 }
