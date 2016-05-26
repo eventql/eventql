@@ -5,6 +5,7 @@ AC_PREREQ(2.59)
 
 AC_INIT([zookeeper C client],3.4.8,[user@zookeeper.apache.org],[zookeeper])
 AC_CONFIG_SRCDIR([src/zookeeper.c])
+AM_MAINTAINER_MODE([disabled])
 
 # Save initial CFLAGS and CXXFLAGS values before AC_PROG_CC and AC_PROG_CXX
 init_cflags="$CFLAGS"
