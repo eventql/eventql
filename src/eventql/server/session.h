@@ -30,14 +30,18 @@ namespace eventql {
 class Session {
 public:
 
-  const String& getEffectiveNamespace() const;
+  String getUserID() const;
+  void setUserID(const String& user_id);
+
+  String getEffectiveNamespace() const;
   void setEffectiveNamespace(const String& ns);
 
-  const String& getDisplayNamespace() const;
+  String getDisplayNamespace() const;
   void setDisplayNamespace(const String& ns);
 
 protected:
   mutable std::mutex mutex_;
+  String user_id_;
   String effective_namespace_;
   String display_namespace_;
 };

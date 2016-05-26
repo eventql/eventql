@@ -25,7 +25,16 @@
 
 namespace eventql {
 
-const String& Session::getEffectiveNamespace() const {
+String Session::getUserID() const {
+  std::unique_lock<std::mutex> lk(mutex_);
+  return user_id_;
+}
+
+void Session::setUserID(const String& user_id) {
+  user_id_ = user_id;
+}
+
+String Session::getEffectiveNamespace() const {
   std::unique_lock<std::mutex> lk(mutex_);
   return effective_namespace_;
 }
@@ -35,7 +44,7 @@ void Session::setEffectiveNamespace(const String& ns) {
   effective_namespace_ = ns;
 }
 
-const String& Session::getDisplayNamespace() const {
+String Session::getDisplayNamespace() const {
   std::unique_lock<std::mutex> lk(mutex_);
   return display_namespace_;
 }
