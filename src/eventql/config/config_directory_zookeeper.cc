@@ -501,39 +501,37 @@ TableDefinition ZookeeperConfigDirectory::getTableConfig(
   return iter->second;
 }
 
-void ZookeeperConfigDirectory::createTableConfig(
-    const TableDefinition& table) {
+void ZookeeperConfigDirectory::updateTableConfig(
+    const TableDefinition& table,
+    bool force /* = false */) {
+  std::unique_lock<std::mutex> lk(mutex_);
+
+  auto buf = msg::encode(table);
   auto path = StringUtil::format(
       "$0/namespaces/$1/tables/$2",
       path_prefix_,
       table.customer(),
       table.table_name());
 
-  auto buf = msg::encode(table);
-  auto rc = zoo_create(
-      zk_,
-      path.c_str(),
-      (const char*) buf->data(),
-      buf->size(),
-      &ZOO_OPEN_ACL_UNSAFE,
-      0,
-      NULL /* path_buffer */,
-      0 /* path_buffer_len */);
-
-  if (rc) {
-    RAISEF(kRuntimeError, "zoo_create() failed: $0", getErrorString(rc));
-  }
-}
-
-void ZookeeperConfigDirectory::updateTableConfig(
-    const TableDefinition& table,
-    bool force /* = false */) {
-  std::unique_lock<std::mutex> lk(mutex_);
   if (table.version() == 0) {
-    return createTableConfig(table);
-  }
+    // create
+    auto rc = zoo_create(
+        zk_,
+        path.c_str(),
+        (const char*) buf->data(),
+        buf->size(),
+        &ZOO_OPEN_ACL_UNSAFE,
+        0,
+        NULL /* path_buffer */,
+        0 /* path_buffer_len */);
 
-  RAISE(kNotYetImplementedError, "zookeeper config directory not yet implemented");
+    if (rc) {
+      RAISEF(kRuntimeError, "zoo_create() failed: $0", getErrorString(rc));
+    }
+  } else {
+    // update
+    RAISE(kNotYetImplementedError, "zookeeper config directory not yet implemented");
+  }
 }
 
 void ZookeeperConfigDirectory::listTables(

@@ -87,6 +87,23 @@ protected:
     CLOSED = 5
   };
 
+  using CallbackList = Vector<Function<void()>>;
+
+  void handleSessionEvent(int state);
+  void handleConnectionEstablished();
+  void handleConnectionLost();
+  Status handleChangeEvent(const String& vpath, CallbackList* events);
+
+  Status sync(CallbackList* events);
+  Status syncClusterConfig(CallbackList* events);
+  Status syncNamespaces(CallbackList* events);
+  Status syncNamespace(CallbackList* events, const String& ns);
+  Status syncTables(CallbackList* events, const String& ns);
+  Status syncTable(
+      CallbackList* events,
+      const String& ns,
+      const String& table_name);
+
   bool getNode(
       String key,
       Buffer* buf,
@@ -104,25 +121,6 @@ protected:
       String key,
       Vector<String>* children,
       bool watch = false);
-
-  void createTableConfig(const TableDefinition& table);
-
-  using CallbackList = Vector<Function<void()>>;
-
-  void handleSessionEvent(int state);
-  void handleConnectionEstablished();
-  void handleConnectionLost();
-  Status handleChangeEvent(const String& vpath, CallbackList* events);
-
-  Status sync(CallbackList* events);
-  Status syncClusterConfig(CallbackList* events);
-  Status syncNamespaces(CallbackList* events);
-  Status syncNamespace(CallbackList* events, const String& ns);
-  Status syncTables(CallbackList* events, const String& ns);
-  Status syncTable(
-      CallbackList* events,
-      const String& ns,
-      const String& table_name);
 
   const char* getErrorString(int code) const;
 
