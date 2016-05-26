@@ -279,10 +279,6 @@ protected:
     }
   }
 
-  Status authenticateRequest(
-      Session* session,
-      const http::HTTPRequest& req);
-
   RefPtr<AnalyticsApp> app_;
   String cachedir_;
   AnalyticsAuth* auth_;

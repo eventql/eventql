@@ -22,12 +22,14 @@
  * code of your own applications
  */
 #pragma once
+#include "eventql/eventql.h"
+#include "eventql/server/session.h"
+#include "eventql/server/auth/client_auth.h"
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/http/httpservice.h>
 #include <eventql/AnalyticsSession.pb.h>
 #include <eventql/AnalyticsAuth.h>
 
-#include "eventql/eventql.h"
 namespace eventql {
 
 class HTTPAuth {
@@ -39,6 +41,11 @@ public:
   static Option<AnalyticsSession> authenticateRequest(
       const http::HTTPRequest& request,
       AnalyticsAuth* auth);
+
+  static Status authenticateRequest(
+      Session* session,
+      ClientAuth* client_auth,
+      const http::HTTPRequest& req);
 
 };
 

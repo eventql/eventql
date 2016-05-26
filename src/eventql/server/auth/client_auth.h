@@ -25,6 +25,7 @@
 #include "eventql/eventql.h"
 #include "eventql/server/session.h"
 #include "eventql/util/stdtypes.h"
+#include "eventql/util/status.h"
 
 namespace eventql {
 

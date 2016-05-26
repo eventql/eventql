@@ -59,4 +59,23 @@ Option<AnalyticsSession> HTTPAuth::authenticateRequest(
   }
 }
 
+Status HTTPAuth::authenticateRequest(
+    Session* session,
+    ClientAuth* client_auth,
+    const http::HTTPRequest& request) {
+  HashMap<String, String> auth_data;
+
+  if (request.hasHeader("Authorization")) {
+    static const String hdrprefix = "Token ";
+    auto hdrval = request.getHeader("Authorization");
+    if (StringUtil::beginsWith(hdrval, hdrprefix)) {
+      auth_data.emplace(
+          "auth_token",
+          URI::urlDecode(hdrval.substr(hdrprefix.size())));
+    }
+  }
+
+  return client_auth->authenticateSession(session, auth_data);
+}
+
 }

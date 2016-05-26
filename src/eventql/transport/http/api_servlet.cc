@@ -113,7 +113,11 @@ void AnalyticsServlet::handle(
   ScopedPtr<Session> session(new Session());
 
   {
-    auto auth_rc = authenticateRequest(session.get(), req);
+    auto auth_rc = HTTPAuth::authenticateRequest(
+        session.get(),
+        client_auth_,
+        req);
+
     if (!auth_rc.isSuccess()) {
       req_stream->readBody();
       res.setStatus(http::kStatusUnauthorized);
@@ -1255,12 +1259,6 @@ void AnalyticsServlet::executeQTree(
   }
 
   res_stream->finishResponse();
-}
-
-Status AnalyticsServlet::authenticateRequest(
-    Session* session,
-    const http::HTTPRequest& req) {
-  return Status::success();
 }
 
 } // namespace eventql
