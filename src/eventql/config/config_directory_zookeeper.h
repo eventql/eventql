@@ -22,10 +22,11 @@
  * code of your own applications
  */
 #pragma once
-#include <zookeeper.h>
 #include "eventql/eventql.h"
 #include "eventql/config/config_directory.h"
 #include "eventql/util/protobuf/msg.h"
+
+typedef struct _zhandle zhandle_t;
 
 namespace eventql {
 

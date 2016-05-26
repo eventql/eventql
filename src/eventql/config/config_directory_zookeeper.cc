@@ -22,6 +22,7 @@
  * code of your own applications
  */
 #include <regex>
+#include <zookeeper.h>
 #include <eventql/config/config_directory_zookeeper.h>
 #include <eventql/util/protobuf/msg.h>
 
