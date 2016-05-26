@@ -68,7 +68,6 @@ AnalyticsServlet::AnalyticsServlet(
     tsdb_(tsdb),
     customer_dir_(customer_dir),
     logfile_api_(app->logfileService(), customer_dir, cachedir),
-    events_api_(app->eventsService(), customer_dir, cachedir),
     mapreduce_api_(app->mapreduceService(), customer_dir, cachedir),
     pmap_(pmap) {}
 
@@ -111,6 +110,21 @@ void AnalyticsServlet::handle(
     return;
   }
 
+  ScopedPtr<Session> session(new Session());
+
+  {
+    auto auth_rc = authenticateRequest(session.get(), req);
+    if (!auth_rc.isSuccess()) {
+      req_stream->readBody();
+      res.setStatus(http::kStatusUnauthorized);
+      res.addHeader("WWW-Authenticate", "Token");
+      res.addHeader("Content-Type", "text/plain; charset=utf-8");
+      res.addBody(auth_rc.message());
+      res_stream->writeResponse(res);
+      return;
+    }
+  }
+
   auto session_opt = HTTPAuth::authenticateRequest(
       req_stream->request(),
       auth_);
@@ -124,45 +138,26 @@ void AnalyticsServlet::handle(
     return;
   }
 
-  /* authorized below here */
-
-  if (session_opt.isEmpty()) {
-    req_stream->readBody();
-    res.setStatus(http::kStatusUnauthorized);
-    res.addHeader("WWW-Authenticate", "Token");
-    res.addHeader("Content-Type", "text/html; charset=utf-8");
-    res.addBody(Assets::getAsset("eventql/webui/401.html"));
-    res_stream->writeResponse(res);
-    return;
-  }
-
-  const auto& session = session_opt.get();
-
   if (StringUtil::beginsWith(uri.path(), "/api/v1/logfiles")) {
-    logfile_api_.handle(session, req_stream, res_stream);
-    return;
-  }
-
-  if (StringUtil::beginsWith(uri.path(), "/api/v1/events")) {
-    events_api_.handle(session, req_stream, res_stream);
+    logfile_api_.handle(session.get(), req_stream, res_stream);
     return;
   }
 
   if (StringUtil::beginsWith(uri.path(), "/api/v1/mapreduce")) {
-    mapreduce_api_.handle(session, req_stream, res_stream);
+    mapreduce_api_.handle(session.get(), req_stream, res_stream);
     return;
   }
 
   if (uri.path() == "/api/v1/auth/info") {
     req_stream->readBody();
-    getAuthInfo(session, &req, &res);
+    getAuthInfo(session.get(), &req, &res);
     res_stream->writeResponse(res);
     return;
   }
 
   if (uri.path() == "/api/v1/auth/private_api_token") {
     req_stream->readBody();
-    getPrivateAPIToken(session, &req, &res);
+    getPrivateAPIToken(session.get(), &req, &res);
     res_stream->writeResponse(res);
     return;
   }
@@ -171,7 +166,7 @@ void AnalyticsServlet::handle(
   /* TABLES */
   if (uri.path() == "/api/v1/tables") {
     req_stream->readBody();
-    listTables(session, &req, &res);
+    listTables(session.get(), &req, &res);
     res_stream->writeResponse(res);
     return;
   }
@@ -179,7 +174,7 @@ void AnalyticsServlet::handle(
   if (uri.path() == "/api/v1/tables/create_table") {
     req_stream->readBody();
     catchAndReturnErrors(&res, [this, &session, &req, &res] {
-      createTable(session, &req, &res);
+      createTable(session.get(), &req, &res);
     });
     res_stream->writeResponse(res);
     return;
@@ -187,7 +182,7 @@ void AnalyticsServlet::handle(
 
   if (uri.path() == "/api/v1/tables/upload_table") {
     expectHTTPPost(req);
-    uploadTable(uri, session, req_stream.get(), &res);
+    uploadTable(uri, session.get(), req_stream.get(), &res);
     res_stream->writeResponse(res);
     return;
   }
@@ -195,7 +190,7 @@ void AnalyticsServlet::handle(
   if (uri.path() == "/api/v1/tables/add_field") {
     req_stream->readBody();
     catchAndReturnErrors(&res, [this, &session, &req, &res] {
-      addTableField(session, &req, &res);
+      addTableField(session.get(), &req, &res);
     });
     res_stream->writeResponse(res);
     return;
@@ -204,7 +199,7 @@ void AnalyticsServlet::handle(
   if (uri.path() == "/api/v1/tables/remove_field") {
     req_stream->readBody();
     catchAndReturnErrors(&res, [this, &session, &req, &res] {
-      removeTableField(session, &req, &res);
+      removeTableField(session.get(), &req, &res);
     });
     res_stream->writeResponse(res);
     return;
@@ -213,7 +208,7 @@ void AnalyticsServlet::handle(
   if (uri.path() == "/api/v1/tables/add_tag") {
     req_stream->readBody();
     catchAndReturnErrors(&res, [this, &session, &req, &res] {
-      addTableTag(session, &req, &res);
+      addTableTag(session.get(), &req, &res);
     });
     res_stream->writeResponse(res);
     return;
@@ -222,7 +217,7 @@ void AnalyticsServlet::handle(
   if (uri.path() == "/api/v1/tables/remove_tag") {
     req_stream->readBody();
     catchAndReturnErrors(&res, [this, &session, &req, &res] {
-      removeTableTag(session, &req, &res);
+      removeTableTag(session.get(), &req, &res);
     });
     res_stream->writeResponse(res);
     return;
@@ -232,7 +227,7 @@ void AnalyticsServlet::handle(
   if (StringUtil::beginsWith(uri.path(), kTablesPathPrefix)) {
     req_stream->readBody();
     fetchTableDefinition(
-        session,
+        session.get(),
         uri.path().substr(kTablesPathPrefix.size()),
         &req,
         &res);
@@ -244,13 +239,13 @@ void AnalyticsServlet::handle(
   if (uri.path() == "/api/v1/sql" ||
       uri.path() == "/api/v1/sql_stream") {
     req_stream->readBody();
-    executeSQL(session, &req, &res, res_stream);
+    executeSQL(session.get(), &req, &res, res_stream);
     return;
   }
 
   if (uri.path() == "/api/v1/sql/execute_qtree") {
     req_stream->readBody();
-    executeQTree(session, &req, &res, res_stream);
+    executeQTree(session.get(), &req, &res, res_stream);
     return;
   }
 
@@ -267,7 +262,7 @@ void AnalyticsServlet::handle(
 }
 
 void AnalyticsServlet::listTables(
-    const AnalyticsSession& session,
+    Session* session,
     const http::HTTPRequest* req,
     http::HTTPResponse* res) {
   URI uri(req->uri());
@@ -326,9 +321,9 @@ void AnalyticsServlet::listTables(
   };
 
   if (order_filter == "desc") {
-    table_service->listTablesReverse(session.customer(), writeTableJSON);
+    table_service->listTablesReverse(session->getEffectiveNamespace(), writeTableJSON);
   } else {
-    table_service->listTables(session.customer(), writeTableJSON);
+    table_service->listTables(session->getEffectiveNamespace(), writeTableJSON);
   }
 
   json.endArray();
@@ -340,12 +335,12 @@ void AnalyticsServlet::listTables(
 }
 
 void AnalyticsServlet::fetchTableDefinition(
-    const AnalyticsSession& session,
+    Session* session,
     const String& table_name,
     const http::HTTPRequest* req,
     http::HTTPResponse* res) {
 
-  auto table_provider = app_->getTableProvider(session.customer());
+  auto table_provider = app_->getTableProvider(session->getEffectiveNamespace());
   auto table_info_opt = table_provider->describe(table_name);
   if (table_info_opt.isEmpty()) {
     res->setStatus(http::kStatusNotFound);
@@ -355,7 +350,7 @@ void AnalyticsServlet::fetchTableDefinition(
 
   const auto& table_info = table_info_opt.get();
 
-  auto table_opt = pmap_->findTable(session.customer(), table_name);
+  auto table_opt = pmap_->findTable(session->getEffectiveNamespace(), table_name);
   if (table_opt.isEmpty()) {
     res->setStatus(http::kStatusNotFound);
     res->addBody("table not found");
@@ -417,7 +412,7 @@ void AnalyticsServlet::fetchTableDefinition(
 }
 
 void AnalyticsServlet::createTable(
-    const AnalyticsSession& session,
+    Session* session,
     const http::HTTPRequest* req,
     http::HTTPResponse* res) {
   auto jreq = json::parseJSON(req->body());
@@ -452,7 +447,7 @@ void AnalyticsServlet::createTable(
     schema.fromJSON(jschema, jreq.end());
 
     TableDefinition td;
-    td.set_customer(session.customer());
+    td.set_customer(session->getEffectiveNamespace());
     td.set_table_name(table_name.get());
 
     auto tblcfg = td.mutable_config();
@@ -500,7 +495,7 @@ void AnalyticsServlet::createTable(
 }
 
 void AnalyticsServlet::addTableField(
-    const AnalyticsSession& session,
+    Session* session,
     const http::HTTPRequest* req,
     http::HTTPResponse* res) {
 
@@ -514,7 +509,7 @@ void AnalyticsServlet::addTableField(
     return;
   }
 
-  auto table_opt = pmap_->findTable(session.customer(), table_name);
+  auto table_opt = pmap_->findTable(session->getEffectiveNamespace(), table_name);
   if (table_opt.isEmpty()) {
     res->setStatus(http::kStatusNotFound);
     res->addBody("table not found");
@@ -614,7 +609,7 @@ void AnalyticsServlet::addTableField(
 }
 
 void AnalyticsServlet::removeTableField(
-    const AnalyticsSession& session,
+    Session* session,
     const http::HTTPRequest* req,
     http::HTTPResponse* res) {
 
@@ -628,7 +623,7 @@ void AnalyticsServlet::removeTableField(
     return;
   }
 
-  auto table_opt = pmap_->findTable(session.customer(), table_name);
+  auto table_opt = pmap_->findTable(session->getEffectiveNamespace(), table_name);
   if (table_opt.isEmpty()) {
     res->setStatus(http::kStatusNotFound);
     res->addBody("table not found");
@@ -682,7 +677,7 @@ void AnalyticsServlet::removeTableField(
 }
 
 void AnalyticsServlet::addTableTag(
-    const AnalyticsSession& session,
+    Session* session,
     const http::HTTPRequest* req,
     http::HTTPResponse* res) {
 
@@ -696,7 +691,7 @@ void AnalyticsServlet::addTableTag(
     return;
   }
 
-  auto table_opt = pmap_->findTable(session.customer(), table_name);
+  auto table_opt = pmap_->findTable(session->getEffectiveNamespace(), table_name);
   if (table_opt.isEmpty()) {
     res->setStatus(http::kStatusNotFound);
     res->addBody("table not found");
@@ -721,7 +716,7 @@ void AnalyticsServlet::addTableTag(
 }
 
 void AnalyticsServlet::removeTableTag(
-    const AnalyticsSession& session,
+    Session* session,
     const http::HTTPRequest* req,
     http::HTTPResponse* res) {
 
@@ -742,7 +737,7 @@ void AnalyticsServlet::removeTableTag(
     return;
   }
 
-  auto table_opt = pmap_->findTable(session.customer(), table_name);
+  auto table_opt = pmap_->findTable(session->getEffectiveNamespace(), table_name);
   if (table_opt.isEmpty()) {
     res->setStatus(http::kStatusNotFound);
     res->addBody("table not found");
@@ -848,7 +843,7 @@ void AnalyticsServlet::insertIntoTable(
 
 void AnalyticsServlet::uploadTable(
     const URI& uri,
-    const AnalyticsSession& session,
+    Session* session,
     http::HTTPRequestStream* req_stream,
     http::HTTPResponse* res) {
   const auto& params = uri.queryParams();
@@ -868,7 +863,7 @@ void AnalyticsServlet::uploadTable(
   }
 
   auto shard = std::stoull(shard_str);
-  auto schema = tsdb_->tableSchema(session.customer(), table_name);
+  auto schema = tsdb_->tableSchema(session->getEffectiveNamespace(), table_name);
   if (schema.isEmpty()) {
     res->setStatus(http::kStatusNotFound);
     res->addBody("error: table not found");
@@ -907,7 +902,7 @@ void AnalyticsServlet::uploadTable(
       logDebug(
           "analyticsd",
           "Uploading static table; customer=$0, table=$1, shard=$2, size=$3MB",
-          session.customer(),
+          session->getEffectiveNamespace(),
           table_name,
           shard,
           body_size / 1000000.0);
@@ -918,7 +913,7 @@ void AnalyticsServlet::uploadTable(
     }
 
     tsdb_->updatePartitionCSTable(
-        session.customer(),
+        session->getEffectiveNamespace(),
         table_name,
         partition_key,
         tmpfile_path + ".cst",
@@ -934,7 +929,7 @@ void AnalyticsServlet::uploadTable(
 }
 
 void AnalyticsServlet::getAuthInfo(
-    const AnalyticsSession& session,
+    Session* session,
     const http::HTTPRequest* req,
     http::HTTPResponse* res) {
   Buffer buf;
@@ -945,10 +940,10 @@ void AnalyticsServlet::getAuthInfo(
   json.addTrue();
   json.addComma();
   json.addObjectEntry("customer");
-  json.addString(session.customer());
+  json.addString(session->getEffectiveNamespace());
   json.addComma();
   json.addObjectEntry("userid");
-  json.addString(session.userid());
+  json.addString(session->getUserID());
   json.endObject();
 
   res->addBody(buf);
@@ -956,7 +951,7 @@ void AnalyticsServlet::getAuthInfo(
 }
 
 void AnalyticsServlet::getPrivateAPIToken(
-    const AnalyticsSession& session,
+    Session* session,
     const http::HTTPRequest* req,
     http::HTTPResponse* res) {
   URI uri(req->uri());
@@ -973,7 +968,7 @@ void AnalyticsServlet::getPrivateAPIToken(
     privs.set_allow_private_api_write_access(true);
   }
 
-  auto token = auth_->getPrivateAPIToken(session.customer(), privs);
+  auto token = auth_->getPrivateAPIToken(session->getEffectiveNamespace(), privs);
 
   Buffer buf;
   json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
@@ -987,7 +982,7 @@ void AnalyticsServlet::getPrivateAPIToken(
 }
 
 void AnalyticsServlet::executeSQL(
-    const AnalyticsSession& session,
+    Session* session,
     const http::HTTPRequest* req,
     http::HTTPResponse* res,
     RefPtr<http::HTTPResponseStream> res_stream) {
@@ -1025,7 +1020,7 @@ void AnalyticsServlet::executeSQL(
 
 void AnalyticsServlet::executeSQL_ASCII(
     const URI::ParamList& params,
-    const AnalyticsSession& session,
+    Session* session,
     const http::HTTPRequest* req,
     http::HTTPResponse* res,
     RefPtr<http::HTTPResponseStream> res_stream) {
@@ -1039,7 +1034,7 @@ void AnalyticsServlet::executeSQL_ASCII(
 //
 //  try {
 //    auto txn = sql_->newTransaction();
-//    auto estrat = app_->getExecutionStrategy(session.customer());
+//    auto estrat = app_->getExecutionStrategy(session->getEffectiveNamespace());
 //    txn->setTableProvider(estrat->tableProvider());
 //    auto qplan = sql_->buildQueryPlan(txn.get(), query, estrat);
 //
@@ -1063,7 +1058,7 @@ void AnalyticsServlet::executeSQL_ASCII(
 
 void AnalyticsServlet::executeSQL_BINARY(
     const URI::ParamList& params,
-    const AnalyticsSession& session,
+    Session* session,
     const http::HTTPRequest* req,
     http::HTTPResponse* res,
     RefPtr<http::HTTPResponseStream> res_stream) {
@@ -1091,9 +1086,9 @@ void AnalyticsServlet::executeSQL_BINARY(
 
     try {
       auto txn = sql_->newTransaction();
-      txn->setTableProvider(app_->getTableProvider(session.customer()));
+      txn->setTableProvider(app_->getTableProvider(session->getEffectiveNamespace()));
       txn->setUserData(
-          new TransactionInfo(session.customer()),
+          new TransactionInfo(session->getEffectiveNamespace()),
           [] (void* tx_info) { delete (TransactionInfo*) tx_info; });
 
       auto qplan = sql_->buildQueryPlan(txn.get(), query);
@@ -1112,7 +1107,7 @@ void AnalyticsServlet::executeSQL_BINARY(
 
 void AnalyticsServlet::executeSQL_JSON(
     const URI::ParamList& params,
-    const AnalyticsSession& session,
+    Session* session,
     const http::HTTPRequest* req,
     http::HTTPResponse* res,
     RefPtr<http::HTTPResponseStream> res_stream) {
@@ -1126,9 +1121,9 @@ void AnalyticsServlet::executeSQL_JSON(
 
   try {
     auto txn = sql_->newTransaction();
-    txn->setTableProvider(app_->getTableProvider(session.customer()));
+    txn->setTableProvider(app_->getTableProvider(session->getEffectiveNamespace()));
     txn->setUserData(
-        new TransactionInfo(session.customer()),
+        new TransactionInfo(session->getEffectiveNamespace()),
         [] (void* tx_info) { delete (TransactionInfo*) tx_info; });
     auto qplan = sql_->buildQueryPlan(txn.get(), query);
 
@@ -1173,7 +1168,7 @@ void AnalyticsServlet::executeSQL_JSON(
 
 void AnalyticsServlet::executeSQL_JSONSSE(
     const URI::ParamList& params,
-    const AnalyticsSession& session,
+    Session* session,
     const http::HTTPRequest* req,
     http::HTTPResponse* res,
     RefPtr<http::HTTPResponseStream> res_stream) {
@@ -1190,9 +1185,9 @@ void AnalyticsServlet::executeSQL_JSONSSE(
 
   try {
     auto txn = sql_->newTransaction();
-    txn->setTableProvider(app_->getTableProvider(session.customer()));
+    txn->setTableProvider(app_->getTableProvider(session->getEffectiveNamespace()));
     txn->setUserData(
-        new TransactionInfo(session.customer()),
+        new TransactionInfo(session->getEffectiveNamespace()),
         [] (void* tx_info) { delete (TransactionInfo*) tx_info; });
     auto qplan = sql_->buildQueryPlan(txn.get(), query);
 
@@ -1223,7 +1218,7 @@ void AnalyticsServlet::executeSQL_JSONSSE(
 }
 
 void AnalyticsServlet::executeQTree(
-    const AnalyticsSession& session,
+    Session* session,
     const http::HTTPRequest* req,
     http::HTTPResponse* res,
     RefPtr<http::HTTPResponseStream> res_stream) {
@@ -1242,9 +1237,9 @@ void AnalyticsServlet::executeQTree(
 
     try {
       auto txn = sql_->newTransaction();
-      txn->setTableProvider(app_->getTableProvider(session.customer()));
+      txn->setTableProvider(app_->getTableProvider(session->getEffectiveNamespace()));
       txn->setUserData(
-          new TransactionInfo(session.customer()),
+          new TransactionInfo(session->getEffectiveNamespace()),
           [] (void* tx_info) { delete (TransactionInfo*) tx_info; });
 
       csql::QueryTreeCoder coder(txn.get());
@@ -1260,6 +1255,12 @@ void AnalyticsServlet::executeQTree(
   }
 
   res_stream->finishResponse();
+}
+
+Status AnalyticsServlet::authenticateRequest(
+    Session* session,
+    const http::HTTPRequest& req) {
+  return Status::success();
 }
 
 } // namespace eventql

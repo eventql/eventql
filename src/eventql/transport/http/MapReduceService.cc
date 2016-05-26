@@ -60,13 +60,13 @@ MapReduceService::MapReduceService(
         1) {}
 
 void MapReduceService::executeScript(
-    const AnalyticsSession& session,
+    Session* session,
     RefPtr<MapReduceJobSpec> job,
     const String& program_source) {
   logDebug(
       "z1.mapreduce",
       "Launching mapreduce job; customer=$0",
-      session.customer());
+      session->getEffectiveNamespace());
 
   auto task_builder = mkRef(new MapReduceTaskBuilder(
       session,
@@ -76,7 +76,6 @@ void MapReduceService::executeScript(
       tsdb_,
       cachedir_));
 
-
   auto scheduler = mkRef(new MapReduceScheduler(
       session,
       job,
@@ -85,7 +84,7 @@ void MapReduceService::executeScript(
       cachedir_));
 
   auto js_ctx = mkRef(new JavaScriptContext(
-      session.customer(),
+      session->getEffectiveNamespace(),
       job,
       tsdb_,
       task_builder,
@@ -95,7 +94,7 @@ void MapReduceService::executeScript(
 }
 
 Option<SHA1Hash> MapReduceService::mapPartition(
-    const AnalyticsSession& session,
+    Session* session,
     RefPtr<MapReduceJobSpec> job,
     const String& table_name,
     const SHA1Hash& partition_key,
@@ -104,19 +103,19 @@ Option<SHA1Hash> MapReduceService::mapPartition(
     const String& params,
     const Set<String>& required_columns) {
   auto table = pmap_->findTable(
-      session.customer(),
+      session->getEffectiveNamespace(),
       table_name);
 
   if (table.isEmpty()) {
     RAISEF(
         kNotFoundError,
         "table not found: $0/$1",
-        session.customer(),
+        session->getEffectiveNamespace(),
         table_name);
   }
 
   auto partition = pmap_->findPartition(
-      session.customer(),
+      session->getEffectiveNamespace(),
       table_name,
       partition_key);
 
@@ -130,7 +129,7 @@ Option<SHA1Hash> MapReduceService::mapPartition(
   auto output_id = SHA1::compute(
       StringUtil::format(
           "$0~$1~$2~$3~$4~$5~$6~$7~$8",
-          session.customer(),
+          session->getEffectiveNamespace(),
           table_name,
           partition_key.toString(),
           reader->version().toString(),
@@ -155,7 +154,7 @@ Option<SHA1Hash> MapReduceService::mapPartition(
   logDebug(
       "z1.mapreduce",
       "Executing map shard; partition=$0/$1/$2 output=$3",
-      session.customer(),
+      session->getEffectiveNamespace(),
       table_name,
       partition_key.toString(),
       output_id.toString());
@@ -164,7 +163,7 @@ Option<SHA1Hash> MapReduceService::mapPartition(
     z1stats()->mapreduce_num_map_tasks.incr(1);
 
     auto js_ctx = mkRef(new JavaScriptContext(
-        session.customer(),
+        session->getEffectiveNamespace(),
         job,
         tsdb_,
         nullptr,
@@ -201,7 +200,7 @@ Option<SHA1Hash> MapReduceService::mapPartition(
 }
 
 Option<SHA1Hash> MapReduceService::reduceTables(
-    const AnalyticsSession& session,
+    Session* session,
     RefPtr<MapReduceJobSpec> job,
     const Vector<String>& input_tables_ref,
     const String& reduce_fn,
@@ -213,7 +212,7 @@ Option<SHA1Hash> MapReduceService::reduceTables(
   auto output_id = SHA1::compute(
       StringUtil::format(
           "$0~$1~$2~$3~$4",
-          session.customer(),
+          session->getEffectiveNamespace(),
           StringUtil::join(input_tables, "|"),
           SHA1::compute(reduce_fn).toString(),
           SHA1::compute(globals).toString(),
@@ -235,7 +234,7 @@ Option<SHA1Hash> MapReduceService::reduceTables(
   logDebug(
       "z1.mapreduce",
       "Executing reduce shard; customer=$0 input_tables=0/$1 output=$2",
-      session.customer(),
+      session->getEffectiveNamespace(),
       input_tables.size(),
       output_id.toString());
 
@@ -275,7 +274,7 @@ Option<SHA1Hash> MapReduceService::reduceTables(
       logDebug(
         "z1.mapreduce",
         "Executing reduce shard; customer=$0 input_tables=$1/$2 output=$3 mem_used=$4MB",
-        session.customer(),
+        session->getEffectiveNamespace(),
         input_tables.size(),
         num_input_tables_read,
         output_id.toString(),
@@ -289,7 +288,7 @@ Option<SHA1Hash> MapReduceService::reduceTables(
     }
 
     auto js_ctx = mkRef(new JavaScriptContext(
-        session.customer(),
+        session->getEffectiveNamespace(),
         job,
         tsdb_,
         nullptr,
@@ -390,19 +389,19 @@ void MapReduceService::downloadResult(
 }
 
 bool MapReduceService::saveLocalResultToTable(
-    const AnalyticsSession& session,
+    Session* session,
     const String& table_name,
     const SHA1Hash& partition,
     const SHA1Hash& result_id) {
   auto table = pmap_->findTable(
-      session.customer(),
+      session->getEffectiveNamespace(),
       table_name);
 
   if (table.isEmpty()) {
     RAISEF(
         kNotFoundError,
         "table not found: $0/$1",
-        session.customer(),
+        session->getEffectiveNamespace(),
         table_name);
   }
 
@@ -411,7 +410,7 @@ bool MapReduceService::saveLocalResultToTable(
     RAISEF(
         kNotFoundError,
         "result not found: $0/$1",
-        session.customer(),
+        session->getEffectiveNamespace(),
         result_id.toString());
   }
 
@@ -419,7 +418,7 @@ bool MapReduceService::saveLocalResultToTable(
       "z1.mapreduce",
       "Saving result shard to table; result_id=$0 table=$1/$2/$3",
       result_id.toString(),
-      session.customer(),
+      session->getEffectiveNamespace(),
       table_name,
       partition.toString());
 
@@ -459,7 +458,7 @@ bool MapReduceService::saveLocalResultToTable(
   }
 
   tsdb_->updatePartitionCSTable(
-      session.customer(),
+      session->getEffectiveNamespace(),
       table_name,
       partition,
       tmpfile_path,
@@ -469,7 +468,7 @@ bool MapReduceService::saveLocalResultToTable(
 }
 
 bool MapReduceService::saveRemoteResultsToTable(
-    const AnalyticsSession& session,
+    Session* session,
     const String& table_name,
     const SHA1Hash& partition,
     const Vector<String>& input_tables_ref) {
@@ -477,14 +476,14 @@ bool MapReduceService::saveRemoteResultsToTable(
   std::random_shuffle(input_tables.begin(), input_tables.end());
 
   auto table = pmap_->findTable(
-      session.customer(),
+      session->getEffectiveNamespace(),
       table_name);
 
   if (table.isEmpty()) {
     RAISEF(
         kNotFoundError,
         "table not found: $0/$1",
-        session.customer(),
+        session->getEffectiveNamespace(),
         table_name);
   }
 
@@ -492,7 +491,7 @@ bool MapReduceService::saveRemoteResultsToTable(
       "z1.mapreduce",
       "Saving results to table; input_tables=$0 table=$1/$2/$3",
       input_tables.size(),
-      session.customer(),
+      session->getEffectiveNamespace(),
       table_name,
       partition.toString());
 
@@ -537,7 +536,7 @@ bool MapReduceService::saveRemoteResultsToTable(
   }
 
   tsdb_->updatePartitionCSTable(
-      session.customer(),
+      session->getEffectiveNamespace(),
       table_name,
       partition,
       tmpfile_path,

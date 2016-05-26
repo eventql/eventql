@@ -27,6 +27,7 @@
 #include "eventql/util/http/HTTPSSEStream.h"
 #include "eventql/AnalyticsSession.pb.h"
 #include "eventql/transport/http/MapReduceService.h"
+#include "eventql/server/session.h"
 
 #include "eventql/eventql.h"
 
@@ -41,7 +42,7 @@ public:
       const String& cachedir);
 
   void handle(
-      const AnalyticsSession& session,
+      Session* session,
       RefPtr<http::HTTPRequestStream> req_stream,
       RefPtr<http::HTTPResponseStream> res_stream);
 
@@ -59,37 +60,37 @@ protected:
   }
 
   void executeMapReduceScript(
-      const AnalyticsSession& session,
+      Session* session,
       const URI& uri,
       http::HTTPRequestStream* req_stream,
       http::HTTPResponseStream* res_stream);
 
   void fetchResult(
-      const AnalyticsSession& session,
+      Session* session,
       const String& result_id,
       http::HTTPRequestStream* req_stream,
       http::HTTPResponseStream* res_stream);
 
   void executeMapPartitionTask(
-      const AnalyticsSession& session,
+      Session* session,
       const URI& uri,
       http::HTTPRequestStream* req_stream,
       http::HTTPResponseStream* res_stream);
 
   void executeReduceTask(
-      const AnalyticsSession& session,
+      Session* session,
       const URI& uri,
       http::HTTPRequestStream* req_stream,
       http::HTTPResponseStream* res_stream);
 
   void executeSaveToTableTask(
-      const AnalyticsSession& session,
+      Session* session,
       const URI& uri,
       const http::HTTPRequest* req,
       http::HTTPResponse* res);
 
   void executeSaveToTablePartitionTask(
-      const AnalyticsSession& session,
+      Session* session,
       const URI& uri,
       const http::HTTPRequest* req,
       http::HTTPResponse* res);

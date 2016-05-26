@@ -37,7 +37,7 @@ public:
   static const size_t kDefaultMaxConcurrentTasks = 32;
 
   MapReduceScheduler(
-      const AnalyticsSession& session,
+      Session* session,
       RefPtr<MapReduceJobSpec> job,
       thread::ThreadPool* tpool,
       AnalyticsAuth* auth,
@@ -65,7 +65,7 @@ protected:
 
   size_t startJobs();
 
-  AnalyticsSession session_;
+  Session* session_;
   RefPtr<MapReduceJobSpec> job_;
   MapReduceShardList shards_;
   Vector<MapReduceShardStatus> shard_status_;

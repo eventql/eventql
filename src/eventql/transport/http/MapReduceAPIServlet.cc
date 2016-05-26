@@ -45,7 +45,7 @@ MapReduceAPIServlet::MapReduceAPIServlet(
 static const String kResultPathPrefix = "/api/v1/mapreduce/result/";
 
 void MapReduceAPIServlet::handle(
-    const AnalyticsSession& session,
+    Session* session,
     RefPtr<http::HTTPRequestStream> req_stream,
     RefPtr<http::HTTPResponseStream> res_stream) {
   const auto& req = req_stream->request();
@@ -104,7 +104,7 @@ void MapReduceAPIServlet::handle(
 }
 
 void MapReduceAPIServlet::executeMapPartitionTask(
-    const AnalyticsSession& session,
+    Session* session,
     const URI& uri,
     http::HTTPRequestStream* req_stream,
     http::HTTPResponseStream* res_stream) {
@@ -198,7 +198,7 @@ void MapReduceAPIServlet::executeMapPartitionTask(
 }
 
 void MapReduceAPIServlet::executeReduceTask(
-    const AnalyticsSession& session,
+    Session* session,
     const URI& uri,
     http::HTTPRequestStream* req_stream,
     http::HTTPResponseStream* res_stream) {
@@ -265,7 +265,7 @@ void MapReduceAPIServlet::executeReduceTask(
 }
 
 void MapReduceAPIServlet::executeSaveToTableTask(
-    const AnalyticsSession& session,
+    Session* session,
     const URI& uri,
     const http::HTTPRequest* req,
     http::HTTPResponse* res) {
@@ -307,7 +307,7 @@ void MapReduceAPIServlet::executeSaveToTableTask(
 }
 
 void MapReduceAPIServlet::executeSaveToTablePartitionTask(
-    const AnalyticsSession& session,
+    Session* session,
     const URI& uri,
     const http::HTTPRequest* req,
     http::HTTPResponse* res) {
@@ -350,7 +350,7 @@ void MapReduceAPIServlet::executeSaveToTablePartitionTask(
 
 
 void MapReduceAPIServlet::executeMapReduceScript(
-    const AnalyticsSession& session,
+    Session* session,
     const URI& uri,
     http::HTTPRequestStream* req_stream,
     http::HTTPResponseStream* res_stream) {
@@ -460,7 +460,7 @@ void MapReduceAPIServlet::executeMapReduceScript(
 }
 
 void MapReduceAPIServlet::fetchResult(
-    const AnalyticsSession& session,
+    Session* session,
     const String& result_id,
     http::HTTPRequestStream* req_stream,
     http::HTTPResponseStream* res_stream) {

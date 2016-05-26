@@ -22,6 +22,7 @@
  * code of your own applications
  */
 #pragma once
+#include "eventql/eventql.h"
 #include "eventql/util/thread/threadpool.h"
 #include "eventql/db/TSDBService.h"
 #include "eventql/AnalyticsAuth.h"
@@ -29,8 +30,7 @@
 #include "eventql/config/config_directory.h"
 #include "eventql/JavaScriptContext.h"
 #include "eventql/mapreduce/MapReduceTask.h"
-
-#include "eventql/eventql.h"
+#include "eventql/server/session.h"
 
 namespace eventql {
 
@@ -47,12 +47,12 @@ public:
       const String& cachedir);
 
   void executeScript(
-      const AnalyticsSession& session,
+      Session* session,
       RefPtr<MapReduceJobSpec> job,
       const String& program_source);
 
   Option<SHA1Hash> mapPartition(
-      const AnalyticsSession& session,
+      Session* session,
       RefPtr<MapReduceJobSpec> job,
       const String& table_name,
       const SHA1Hash& partition_key,
@@ -62,7 +62,7 @@ public:
       const Set<String>& required_columns);
 
   Option<SHA1Hash> reduceTables(
-      const AnalyticsSession& session,
+      Session* session,
       RefPtr<MapReduceJobSpec> job,
       const Vector<String>& input_tables,
       const String& reduce_fn,
@@ -73,13 +73,13 @@ public:
       const SHA1Hash& result_id);
 
   bool saveLocalResultToTable(
-      const AnalyticsSession& session,
+      Session* session,
       const String& table_name,
       const SHA1Hash& partition,
       const SHA1Hash& result_id);
 
   bool saveRemoteResultsToTable(
-      const AnalyticsSession& session,
+      Session* session,
       const String& table_name,
       const SHA1Hash& partition,
       const Vector<String>& input_tables);

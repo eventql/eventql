@@ -33,7 +33,7 @@ namespace eventql {
 ReturnResultsTask::ReturnResultsTask(
     Vector<RefPtr<MapReduceTask>> sources,
     MapReduceShardList* shards,
-    const AnalyticsSession& session,
+    Session* session,
     const String& serialize_fn,
     const String& globals,
     const String& params) :
@@ -83,7 +83,7 @@ Option<MapReduceShardResult> ReturnResultsTask::execute(
     }
   } else {
     auto js_ctx = mkRef(new JavaScriptContext(
-        session_.customer(),
+        session_->getEffectiveNamespace(),
         job->jobSpec(),
         nullptr,
         nullptr,

@@ -32,7 +32,7 @@
 namespace eventql {
 
 SaveToTablePartitionTask::SaveToTablePartitionTask(
-    const AnalyticsSession& session,
+    Session* session,
     const String& table_name,
     const SHA1Hash& partition_key,
     Vector<RefPtr<MapReduceTask>> sources,
@@ -101,7 +101,7 @@ Option<MapReduceShardResult> SaveToTablePartitionTask::executeRemote(
   logDebug(
       "z1.mapreduce",
       "Saving result to table partition; target=$0/$1/$2 host=$3",
-      session_.customer(),
+      session_->getEffectiveNamespace(),
       table_name_,
       partition_key_.toString(),
       host.addr.hostAndPort());

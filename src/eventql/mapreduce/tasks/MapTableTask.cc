@@ -32,7 +32,7 @@
 namespace eventql {
 
 MapTableTask::MapTableTask(
-    const AnalyticsSession& session,
+    Session* session,
     const TSDBTableRef& table_ref,
     const String& map_function,
     const String& globals,
@@ -49,7 +49,7 @@ MapTableTask::MapTableTask(
     auth_(auth),
     pmap_(pmap),
     repl_(repl) {
-  auto table = pmap_->findTable(session_.customer(), table_ref_.table_key);
+  auto table = pmap_->findTable(session_->getEffectiveNamespace(), table_ref_.table_key);
   if (table.isEmpty()) {
     RAISEF(kNotFoundError, "table not found: $0", table_ref_.table_key);
   }
@@ -119,7 +119,7 @@ Option<MapReduceShardResult> MapTableTask::executeRemote(
   logDebug(
       "z1.mapreduce",
       "Executing map table shard on $0/$1/$2 on $3",
-      session_.customer(),
+      session_->getEffectiveNamespace(),
       shard->table_ref.table_key,
       shard->table_ref.partition_key.get().toString(),
       host.addr.hostAndPort());

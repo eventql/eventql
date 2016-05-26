@@ -39,7 +39,7 @@ class SaveToTableTask : public MapReduceTask {
 public:
 
   SaveToTableTask(
-      const AnalyticsSession& session,
+      Session* session,
       const String& table_name,
       Vector<RefPtr<MapReduceTask>> sources,
       MapReduceShardList* shards,
@@ -51,7 +51,7 @@ public:
       RefPtr<MapReduceScheduler> job) override;
 
 protected:
-  AnalyticsSession session_;
+  Session* session_;
   String table_name_;
   Vector<RefPtr<MapReduceTask>> sources_;
   AnalyticsAuth* auth_;

@@ -40,7 +40,7 @@ LogfileAPIServlet::LogfileAPIServlet(
     cachedir_(cachedir) {}
 
 void LogfileAPIServlet::handle(
-    const AnalyticsSession& session,
+    Session* session,
     RefPtr<http::HTTPRequestStream> req_stream,
     RefPtr<http::HTTPResponseStream> res_stream) {
   const auto& req = req_stream->request();
@@ -83,11 +83,11 @@ void LogfileAPIServlet::handle(
 }
 
 void LogfileAPIServlet::listLogfiles(
-    const AnalyticsSession& session,
+    Session* session,
     const URI& uri,
     const http::HTTPRequest* req,
     http::HTTPResponse* res) {
-  auto customer_conf = cdir_->getNamespaceConfig(session.customer());
+  auto customer_conf = cdir_->getNamespaceConfig(session->getEffectiveNamespace());
   const auto& logfile_cfg = customer_conf->config.logfile_import_config();
 
   Buffer buf;
@@ -114,12 +114,12 @@ void LogfileAPIServlet::listLogfiles(
 }
 
 void LogfileAPIServlet::fetchLogfileDefinition(
-    const AnalyticsSession& session,
+    Session* session,
     const URI& uri,
     const http::HTTPRequest* req,
     http::HTTPResponse* res) {
   const auto& params = uri.queryParams();
-  auto customer_conf = cdir_->getNamespaceConfig(session.customer());
+  auto customer_conf = cdir_->getNamespaceConfig(session->getEffectiveNamespace());
   const auto& logfile_cfg = customer_conf->config.logfile_import_config();
 
   String logfile_name;
@@ -151,12 +151,12 @@ void LogfileAPIServlet::fetchLogfileDefinition(
 }
 
 void LogfileAPIServlet::setLogfileRegex(
-    const AnalyticsSession& session,
+    Session* session,
     const URI& uri,
     const http::HTTPRequest* req,
     http::HTTPResponse* res) {
   const auto& params = uri.queryParams();
-  auto customer_conf = cdir_->getNamespaceConfig(session.customer());
+  auto customer_conf = cdir_->getNamespaceConfig(session->getEffectiveNamespace());
 
   String logfile_name;
   if (!URI::getParam(params, "logfile", &logfile_name)) {
@@ -172,7 +172,7 @@ void LogfileAPIServlet::setLogfileRegex(
     return;
   }
 
-  service_->setLogfileRegex(session.customer(), logfile_name, regex_str);
+  service_->setLogfileRegex(session->getEffectiveNamespace(), logfile_name, regex_str);
 
   res->setStatus(http::kStatusCreated);
   res->addBody("ok");
@@ -258,7 +258,7 @@ void LogfileAPIServlet::renderLogfileDefinition(
 }
 
 void LogfileAPIServlet::uploadLogfile(
-    const AnalyticsSession& session,
+    Session* session,
     const URI& uri,
     http::HTTPRequestStream* req_stream,
     http::HTTPResponse* res) {
@@ -280,7 +280,7 @@ void LogfileAPIServlet::uploadLogfile(
   }
 
   auto logfile_def = service_->findLogfileDefinition(
-      session.customer(),
+      session->getEffectiveNamespace(),
       logfile_name);
 
   if (logfile_def.isEmpty()) {
@@ -326,7 +326,7 @@ void LogfileAPIServlet::uploadLogfile(
   auto is = FileInputStream::fromFile(std::move(tmpfile));
 
   service_->insertLoglines(
-      session.customer(),
+      session->getEffectiveNamespace(),
       logfile_def.get(),
       source_fields,
       is.get());

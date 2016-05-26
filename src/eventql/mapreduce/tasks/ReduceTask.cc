@@ -31,7 +31,7 @@
 namespace eventql {
 
 ReduceTask::ReduceTask(
-    const AnalyticsSession& session,
+    Session* session,
     const String& reduce_fn,
     const String& globals,
     const String& params,
@@ -120,7 +120,7 @@ Option<MapReduceShardResult> ReduceTask::executeRemote(
   logDebug(
       "z1.mapreduce",
       "Executing remote reduce shard on $2; customer=$0 input_tables=$1",
-      session_.customer(),
+      session_->getEffectiveNamespace(),
       input_tables.size(),
       host.addr.hostAndPort());
 

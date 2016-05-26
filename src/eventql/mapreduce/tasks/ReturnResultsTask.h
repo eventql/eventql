@@ -22,11 +22,10 @@
  * code of your own applications
  */
 #pragma once
+#include "eventql/eventql.h"
 #include "eventql/util/stdtypes.h"
 #include "eventql/mapreduce/MapReduceTask.h"
-#include "eventql/AnalyticsSession.pb.h"
-
-#include "eventql/eventql.h"
+#include "eventql/server/session.h"
 
 namespace eventql {
 
@@ -36,7 +35,7 @@ public:
   ReturnResultsTask(
       Vector<RefPtr<MapReduceTask>> sources,
       MapReduceShardList* shards,
-      const AnalyticsSession& session,
+      Session* session,
       const String& serialize_fn,
       const String& globals,
       const String& params);
@@ -47,7 +46,7 @@ public:
 
 protected:
   Vector<RefPtr<MapReduceTask>> sources_;
-  AnalyticsSession session_;
+  Session* session_;
   String serialize_fn_;
   String globals_;
   String params_;

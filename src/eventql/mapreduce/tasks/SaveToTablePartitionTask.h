@@ -35,7 +35,7 @@ class SaveToTablePartitionTask : public MapReduceTask {
 public:
 
   SaveToTablePartitionTask(
-      const AnalyticsSession& session,
+      Session* session,
       const String& table_name,
       const SHA1Hash& partition_key,
       Vector<RefPtr<MapReduceTask>> sources,
@@ -55,7 +55,7 @@ protected:
       const Vector<String>& input_tables,
       const ReplicaRef& host);
 
-  AnalyticsSession session_;
+  Session* session_;
   String table_name_;
   SHA1Hash partition_key_;
   Vector<RefPtr<MapReduceTask>> sources_;

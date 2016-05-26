@@ -22,12 +22,12 @@
  * code of your own applications
  */
 #pragma once
+#include "eventql/eventql.h"
+#include "eventql/server/session.h"
 #include "eventql/util/stdtypes.h"
 #include "eventql/mapreduce/MapReduceTask.h"
 #include "eventql/db/TSDBService.h"
 #include "eventql/AnalyticsAuth.h"
-
-#include "eventql/eventql.h"
 
 namespace eventql {
 
@@ -39,7 +39,7 @@ class MapTableTask : public MapReduceTask {
 public:
 
   MapTableTask(
-      const AnalyticsSession& session,
+      Session* session,
       const TSDBTableRef& table,
       const String& map_function,
       const String& globals,
@@ -62,7 +62,7 @@ protected:
       RefPtr<MapReduceScheduler> job,
       const ReplicaRef& host);
 
-  AnalyticsSession session_;
+  Session* session_;
   TSDBTableRef table_ref_;
   String map_function_;
   String globals_;

@@ -36,7 +36,7 @@
 namespace eventql {
 
 MapReduceTaskBuilder::MapReduceTaskBuilder(
-    const AnalyticsSession& session,
+    Session* session,
     AnalyticsAuth* auth,
     eventql::PartitionMap* pmap,
     eventql::ReplicationScheme* repl,

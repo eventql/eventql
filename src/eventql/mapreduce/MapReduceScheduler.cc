@@ -31,7 +31,7 @@
 namespace eventql {
 
 MapReduceScheduler::MapReduceScheduler(
-    const AnalyticsSession& session,
+    Session* session,
     RefPtr<MapReduceJobSpec> job,
     thread::ThreadPool* tpool,
     AnalyticsAuth* auth,

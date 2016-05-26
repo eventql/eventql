@@ -69,12 +69,12 @@ protected:
       RefPtr<http::HTTPResponseStream> res_stream);
 
   void getAuthInfo(
-      const AnalyticsSession& session,
+      Session* session,
       const http::HTTPRequest* req,
       http::HTTPResponse* res);
 
   void getPrivateAPIToken(
-      const AnalyticsSession& session,
+      Session* session,
       const http::HTTPRequest* req,
       http::HTTPResponse* res);
 
@@ -85,43 +85,43 @@ protected:
 
   void insertIntoMetric(
       const URI& uri,
-      const AnalyticsSession& session,
+      Session* session,
       const http::HTTPRequest* req,
       http::HTTPResponse* res);
 
   void listTables(
-      const AnalyticsSession& session,
+      Session* session,
       const http::HTTPRequest* req,
       http::HTTPResponse* res);
 
   void fetchTableDefinition(
-      const AnalyticsSession& session,
+      Session* session,
       const String& table_name,
       const http::HTTPRequest* req,
       http::HTTPResponse* res);
 
   void createTable(
-      const AnalyticsSession& session,
+      Session* session,
       const http::HTTPRequest* req,
       http::HTTPResponse* res);
 
   void addTableField(
-      const AnalyticsSession& session,
+      Session* session,
       const http::HTTPRequest* req,
       http::HTTPResponse* res);
 
   void removeTableField(
-      const AnalyticsSession& session,
+      Session* session,
       const http::HTTPRequest* req,
       http::HTTPResponse* res);
 
   void addTableTag(
-      const AnalyticsSession& session,
+      Session* session,
       const http::HTTPRequest* req,
       http::HTTPResponse* res);
 
   void removeTableTag(
-      const AnalyticsSession& session,
+      Session* session,
       const http::HTTPRequest* req,
       http::HTTPResponse* res);
 
@@ -132,104 +132,104 @@ protected:
 
   void uploadTable(
       const URI& uri,
-      const AnalyticsSession& session,
+      Session* session,
       http::HTTPRequestStream* req_stream,
       http::HTTPResponse* res);
 
   void executeSQL(
-      const AnalyticsSession& session,
+      Session* session,
       const http::HTTPRequest* req,
       http::HTTPResponse* res,
       RefPtr<http::HTTPResponseStream> res_stream);
 
   void executeSQL_ASCII(
       const URI::ParamList& params,
-      const AnalyticsSession& session,
+      Session* session,
       const http::HTTPRequest* req,
       http::HTTPResponse* res,
       RefPtr<http::HTTPResponseStream> res_stream);
 
   void executeSQL_BINARY(
       const URI::ParamList& params,
-      const AnalyticsSession& session,
+      Session* session,
       const http::HTTPRequest* req,
       http::HTTPResponse* res,
       RefPtr<http::HTTPResponseStream> res_stream);
 
   void executeSQL_JSON(
       const URI::ParamList& params,
-      const AnalyticsSession& session,
+      Session* session,
       const http::HTTPRequest* req,
       http::HTTPResponse* res,
       RefPtr<http::HTTPResponseStream> res_stream);
 
   void executeSQL_JSONSSE(
       const URI::ParamList& params,
-      const AnalyticsSession& session,
+      Session* session,
       const http::HTTPRequest* req,
       http::HTTPResponse* res,
       RefPtr<http::HTTPResponseStream> res_stream);
 
   void executeQTree(
-      const AnalyticsSession& session,
+      Session* session,
       const http::HTTPRequest* req,
       http::HTTPResponse* res,
       RefPtr<http::HTTPResponseStream> res_stream);
 
   void executeSQLAggregatePartition(
-      const AnalyticsSession& session,
+      Session* session,
       const http::HTTPRequest* req,
       http::HTTPResponse* res);
 
   void executeSQLScanPartition(
-      const AnalyticsSession& session,
+      Session* session,
       const http::HTTPRequest* req,
       http::HTTPResponse* res,
       RefPtr<http::HTTPResponseStream> res_stream);
 
   void executeDrilldownQuery(
-      const AnalyticsSession& session,
+      Session* session,
       const http::HTTPRequest* req,
       http::HTTPResponse* res,
       RefPtr<http::HTTPResponseStream> res_stream);
 
   void pipelineInfo(
-      const AnalyticsSession& session,
+      Session* session,
       const http::HTTPRequest* req,
       http::HTTPResponse* res);
 
   void sessionTrackingListEvents(
-      const AnalyticsSession& session,
+      Session* session,
       const http::HTTPRequest* req,
       http::HTTPResponse* res);
 
   void sessionTrackingEventInfo(
-      const AnalyticsSession& session,
+      Session* session,
       const http::HTTPRequest* req,
       http::HTTPResponse* res);
 
   void sessionTrackingEventAdd(
-      const AnalyticsSession& session,
+      Session* session,
       const http::HTTPRequest* req,
       http::HTTPResponse* res);
 
   void sessionTrackingEventRemove(
-      const AnalyticsSession& session,
+      Session* session,
       const http::HTTPRequest* req,
       http::HTTPResponse* res);
 
   void sessionTrackingEventAddField(
-      const AnalyticsSession& session,
+      Session* session,
       const http::HTTPRequest* req,
       http::HTTPResponse* res);
 
   void sessionTrackingEventRemoveField(
-      const AnalyticsSession& session,
+      Session* session,
       const http::HTTPRequest* req,
       http::HTTPResponse* res);
 
   void sessionTrackingListAttributes(
-      const AnalyticsSession& session,
+      Session* session,
       const http::HTTPRequest* req,
       http::HTTPResponse* res);
 
@@ -279,6 +279,10 @@ protected:
     }
   }
 
+  Status authenticateRequest(
+      Session* session,
+      const http::HTTPRequest& req);
+
   RefPtr<AnalyticsApp> app_;
   String cachedir_;
   AnalyticsAuth* auth_;
@@ -288,7 +292,6 @@ protected:
   ConfigDirectory* customer_dir_;
 
   LogfileAPIServlet logfile_api_;
-  EventsAPIServlet events_api_;
   MapReduceAPIServlet mapreduce_api_;
   PartitionMap* pmap_;
 };

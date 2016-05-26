@@ -31,7 +31,7 @@
 namespace eventql {
 
 SaveToTableTask::SaveToTableTask(
-    const AnalyticsSession& session,
+    Session* session,
     const String& table_name,
     Vector<RefPtr<MapReduceTask>> sources,
     MapReduceShardList* shards,
@@ -78,7 +78,7 @@ Option<MapReduceShardResult> SaveToTableTask::execute(
       "z1.mapreduce",
       "Saving result shard to table; result_id=$4 target=$0/$1/$2/$3",
       host.get().addr.hostAndPort(),
-      session_.customer(),
+      session_->getEffectiveNamespace(),
       table_name_,
       shard->partition.toString(),
       result_id.get().toString());

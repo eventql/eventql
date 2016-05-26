@@ -22,6 +22,8 @@
  * code of your own applications
  */
 #pragma once
+#include "eventql/eventql.h"
+#include "eventql/server/session.h"
 #include "eventql/util/stdtypes.h"
 #include "eventql/mapreduce/MapReduceTask.h"
 #include "eventql/db/TSDBService.h"
@@ -29,15 +31,13 @@
 #include "eventql/config/namespace_config.h"
 #include "eventql/config/config_directory.h"
 
-#include "eventql/eventql.h"
-
 namespace eventql {
 
 class MapReduceTaskBuilder : public RefCounted {
 public:
 
   MapReduceTaskBuilder(
-      const AnalyticsSession& session,
+      Session* session,
       AnalyticsAuth* auth,
       eventql::PartitionMap* pmap,
       eventql::ReplicationScheme* repl,
@@ -86,7 +86,7 @@ protected:
       HashMap<String, json::JSONObject>* job_definitions,
       HashMap<String, RefPtr<MapReduceTask>>* jobs);
 
-  AnalyticsSession session_;
+  Session* session_;
   AnalyticsAuth* auth_;
   eventql::PartitionMap* pmap_;
   eventql::ReplicationScheme* repl_;

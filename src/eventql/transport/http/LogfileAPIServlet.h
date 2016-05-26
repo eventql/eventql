@@ -22,13 +22,13 @@
  * code of your own applications
  */
 #pragma once
+#include "eventql/eventql.h"
 #include "eventql/util/stdtypes.h"
 #include "eventql/util/http/httpservice.h"
 #include "eventql/util/http/HTTPSSEStream.h"
 #include "eventql/AnalyticsSession.pb.h"
 #include "eventql/transport/http/LogfileService.h"
-
-#include "eventql/eventql.h"
+#include "eventql/server/session.h"
 
 namespace eventql {
 
@@ -41,32 +41,32 @@ public:
       const String& cachedir);
 
   void handle(
-      const AnalyticsSession& session,
+      Session* session,
       RefPtr<http::HTTPRequestStream> req_stream,
       RefPtr<http::HTTPResponseStream> res_stream);
 
 protected:
 
   void listLogfiles(
-      const AnalyticsSession& session,
+      Session* session,
       const URI& uri,
       const http::HTTPRequest* req,
       http::HTTPResponse* res);
 
   void fetchLogfileDefinition(
-      const AnalyticsSession& session,
+      Session* session,
       const URI& uri,
       const http::HTTPRequest* req,
       http::HTTPResponse* res);
 
   void setLogfileRegex(
-      const AnalyticsSession& session,
+      Session* session,
       const URI& uri,
       const http::HTTPRequest* req,
       http::HTTPResponse* res);
 
   void uploadLogfile(
-      const AnalyticsSession& session,
+      Session* session,
       const URI& uri,
       http::HTTPRequestStream* req_stream,
       http::HTTPResponse* res);
