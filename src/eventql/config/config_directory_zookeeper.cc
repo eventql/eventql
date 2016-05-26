@@ -83,7 +83,8 @@ bool ZookeeperConfigDirectory::start() {
 
   Buffer buf(4096);
   if (!getNode(StringUtil::format("/eventql/$0/config", cluster_name_), &buf)) {
-    logWarning("evqld", "Cluster '$0' does not exist", cluster_name_);
+    logError("evqld", "Cluster '$0' does not exist", cluster_name_);
+    return false;
   }
 
   return true;
