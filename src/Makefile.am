@@ -798,6 +798,8 @@ evqld_SOURCES = \
     eventql/db/TablePartitioner.h \
     eventql/config/config_directory.cc \
     eventql/config/config_directory.h \
+    eventql/config/config_directory_legacy.cc \
+    eventql/config/config_directory_legacy.h \
     eventql/db/CompactionStrategy.cc \
     eventql/db/CompactionStrategy.h \
     eventql/db/CompactionWorker.cc \
