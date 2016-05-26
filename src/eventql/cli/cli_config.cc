@@ -80,23 +80,34 @@ Status CLIConfig::setConfigOption(
     const String& section,
     const String& key,
     const String& value) {
-  if (section == "evql") {
-    if (key == "host") {
-      return setHost(value);
-    }
-    if (key == "port") {
-      return setPort(stoi(value));
-    }
-    if (key == "auth_token") {
-      return setAuthToken(value);
-    }
-    if (key == "batch_mode") {
-      return setBatchMode(value);
-    }
+  if (section != "evql") {
+    return Status(
+        eParseError,
+        StringUtil::format("section '$0' is not valid", section));
   }
+
+  if (value.size() == 0) {
+    return Status(
+        eParseError,
+        StringUtil::format("'$0' value '$1' is not valid", key, value));
+  }
+
+  if (key == "host") {
+    return setHost(value);
+  }
+  if (key == "port") {
+    return setPort(value);
+  }
+  if (key == "auth_token") {
+    return setAuthToken(value);
+  }
+  if (key == "batch_mode") {
+    return setBatchMode(value);
+  }
+
   return Status(
       eParseError,
-      StringUtil::format("invalid option '$0' in config file", key));
+      StringUtil::format("config file option '$0' is not valid", key));
 }
 
 Status CLIConfig::setHost(const String& host /* = "localhost" */) {
@@ -106,11 +117,23 @@ Status CLIConfig::setHost(const String& host /* = "localhost" */) {
 
 Status CLIConfig::setPort(const int port /* = 80 */) {
   if (port < 0 || port > 65535) {
-    return Status(eFlagError, StringUtil::format("invalid port $0", port));
+    return Status(
+        eFlagError,
+        StringUtil::format("'port' value '$0' is not valid", port));
   }
 
   server_port_ = port;
   return Status::success();
+}
+
+Status CLIConfig::setPort(const String& port) {
+  if (!StringUtil::isNumber(port)) {
+    return Status(
+        eFlagError,
+        StringUtil::format("'port' value '$0' is not a valid integer", port));
+  }
+
+  return setPort(stoi(port));
 }
 
 Status CLIConfig::setAuthToken(const String& auth_token) {

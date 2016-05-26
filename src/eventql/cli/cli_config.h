@@ -41,6 +41,7 @@ public:
 
   Status setHost(const String& host = "localhost");
   Status setPort(const int port = 80);
+  Status setPort(const String& port);
   Status setAuthToken(const String& auth_token);
   Status setBatchMode(const String& batch_mode);
 
