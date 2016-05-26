@@ -62,18 +62,12 @@ PROTOBUF_LDADD = ${top_builddir}/deps/3rdparty/protobuf/libprotobuf.a
 LMDB_CFLAGS = -I$(top_srcdir)/deps/3rdparty
 LMDB_LDADD = ${top_builddir}/deps/3rdparty/liblmdb/liblmdb.a
 
-<<<<<<< HEAD
 INIH_CFLAGS = -I$(top_srcdir)/deps/3rdparty
 INIH_LDADD = ${top_builddir}/deps/3rdparty/inih/libinih.a
 
-AM_CXXFLAGS = $(PCRE_CFLAGS) $(SPIDERMONKEY_CFLAGS) $(SIMDCOMP_CFLAGS) $(LINENOISE_CLFAGS) $(INIH_CFLAGS)  $(PTHREAD_CFLAGS) $(PTHREAD_DEF) $(SYSLOG_DEF) $(ZLIB_DEF) $(GETHOSTBYNAME_R_DEF) -std=c++0x -ftemplate-depth=500 -mno-omit-leaf-frame-pointer -fno-omit-frame-pointer -Wall -Wextra -Wno-unused-parameter -Wno-sign-compare -Wdelete-non-virtual-dtor -Wno-predefined-identifier-outside-function -O3 -g -I@builddir@
-AM_CFLAGS = $(PCRE_CFLAGS) $(SPIDERMONKEY_CFLAGS) $(SIMDCOMP_CFLAGS) $(LINENOISE_CLFAGS) $(INIH_CFLAGS) $(PTHREAD_CFLAGS) $(PTHREAD_DEF) $(SYSLOG_DEF) $(ZLIB_DEF) $(GETHOSTBYNAME_R_DEF) -std=c11 -mno-omit-leaf-frame-pointer -fno-omit-frame-pointer -Wall -pedantic -O3 -g
-=======
-AM_CXXFLAGS = $(PCRE_CFLAGS) $(SPIDERMONKEY_CFLAGS) $(SIMDCOMP_CFLAGS) $(LINENOISE_CLFAGS) $(PROTOBUF_CFLAGS) $(PTHREAD_CFLAGS) $(PTHREAD_DEF) $(SYSLOG_DEF) $(ZLIB_DEF) $(GETHOSTBYNAME_R_DEF) -std=c++0x -ftemplate-depth=500 -mno-omit-leaf-frame-pointer -fno-omit-frame-pointer -Wall -Wextra -Wno-unused-parameter -Wno-sign-compare -Wdelete-non-virtual-dtor -Wno-predefined-identifier-outside-function -g -I@builddir@
-AM_CFLAGS = $(PCRE_CFLAGS) $(SPIDERMONKEY_CFLAGS) $(SIMDCOMP_CFLAGS) $(LINENOISE_CLFAGS) $(PROTOBUF_CFLAGS) $(PTHREAD_CFLAGS) $(PTHREAD_DEF) $(SYSLOG_DEF) $(ZLIB_DEF) $(GETHOSTBYNAME_R_DEF) -std=c11 -mno-omit-leaf-frame-pointer -fno-omit-frame-pointer -Wall -pedantic -g
->>>>>>> 012f0e39107f84d886d7d08c748b5465b5652f9e
+AM_CXXFLAGS = $(PCRE_CFLAGS) $(SPIDERMONKEY_CFLAGS) $(SIMDCOMP_CFLAGS) $(LINENOISE_CLFAGS) $(INIH_CFLAGS) $(PROTOBUF_CFLAGS) $(PTHREAD_CFLAGS) $(PTHREAD_DEF) $(SYSLOG_DEF) $(ZLIB_DEF) $(GETHOSTBYNAME_R_DEF) -std=c++0x -ftemplate-depth=500 -mno-omit-leaf-frame-pointer -fno-omit-frame-pointer -Wall -Wextra -Wno-unused-parameter -Wno-sign-compare -Wdelete-non-virtual-dtor -Wno-predefined-identifier-outside-function -g -I@builddir@
+AM_CFLAGS = $(PCRE_CFLAGS) $(SPIDERMONKEY_CFLAGS) $(SIMDCOMP_CFLAGS) $(LINENOISE_CLFAGS) $(INIH_CFLAGS) $(PROTOBUF_CFLAGS) $(PTHREAD_CFLAGS) $(PTHREAD_DEF) $(SYSLOG_DEF) $(ZLIB_DEF) $(GETHOSTBYNAME_R_DEF) -std=c11 -mno-omit-leaf-frame-pointer -fno-omit-frame-pointer -Wall -pedantic -g
 AM_LDFLAGS = $(PTHREAD_CFLAGS)
-
 
 ################# PROTOBUFs ####################
 evql_protos = \
