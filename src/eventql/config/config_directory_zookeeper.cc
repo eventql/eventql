@@ -221,7 +221,8 @@ void ZookeeperConfigDirectory::handleConnectionLost() {
 }
 
 ClusterConfig ZookeeperConfigDirectory::getClusterConfig() const {
-  RAISE(kNotYetImplementedError, "zookeeper config directory not yet implemented");
+  std::unique_lock<std::mutex> lk(mutex_);
+  return cluster_config_;
 }
 
 void ZookeeperConfigDirectory::updateClusterConfig(ClusterConfig config) {
@@ -230,22 +231,33 @@ void ZookeeperConfigDirectory::updateClusterConfig(ClusterConfig config) {
 
 void ZookeeperConfigDirectory::setClusterConfigChangeCallback(
     Function<void (const ClusterConfig& cfg)> fn) {
-  RAISE(kNotYetImplementedError, "zookeeper config directory not yet implemented");
+  std::unique_lock<std::mutex> lk(mutex_);
+  on_cluster_change_.emplace_back(fn);
 }
 
 RefPtr<NamespaceConfigRef> ZookeeperConfigDirectory::getNamespaceConfig(
     const String& customer_key) const {
-  RAISE(kNotYetImplementedError, "zookeeper config directory not yet implemented");
+  std::unique_lock<std::mutex> lk(mutex_);
+  auto iter = namespaces_.find(customer_key);
+  if (iter == namespaces_.end()) {
+    RAISEF(kNotFoundError, "namespace not found: $0", customer_key);
+  }
+
+  return mkRef(new NamespaceConfigRef(iter->second));
 }
 
 void ZookeeperConfigDirectory::listNamespaces(
     Function<void (const NamespaceConfig& cfg)> fn) const {
-  RAISE(kNotYetImplementedError, "zookeeper config directory not yet implemented");
+  std::unique_lock<std::mutex> lk(mutex_);
+  for (const auto& ns : namespaces_) {
+    fn(ns.second);
+  }
 }
 
 void ZookeeperConfigDirectory::setNamespaceConfigChangeCallback(
     Function<void (const NamespaceConfig& cfg)> fn) {
-  RAISE(kNotYetImplementedError, "zookeeper config directory not yet implemented");
+  std::unique_lock<std::mutex> lk(mutex_);
+  on_namespace_change_.emplace_back(fn);
 }
 
 void ZookeeperConfigDirectory::updateNamespaceConfig(NamespaceConfig cfg) {
@@ -255,7 +267,13 @@ void ZookeeperConfigDirectory::updateNamespaceConfig(NamespaceConfig cfg) {
 TableDefinition ZookeeperConfigDirectory::getTableConfig(
     const String& db_namespace,
     const String& table_name) const {
-  RAISE(kNotYetImplementedError, "zookeeper config directory not yet implemented");
+  std::unique_lock<std::mutex> lk(mutex_);
+  auto iter = tables_.find(table_name);
+  if (iter == tables_.end()) {
+    RAISEF(kNotFoundError, "table not found: $0", table_name);
+  }
+
+  return iter->second;
 }
 
 void ZookeeperConfigDirectory::updateTableConfig(
@@ -266,12 +284,16 @@ void ZookeeperConfigDirectory::updateTableConfig(
 
 void ZookeeperConfigDirectory::listTables(
     Function<void (const TableDefinition& table)> fn) const {
-  RAISE(kNotYetImplementedError, "zookeeper config directory not yet implemented");
+  std::unique_lock<std::mutex> lk(mutex_);
+  for (const auto& tbl : tables_) {
+    fn(tbl.second);
+  }
 }
 
 void ZookeeperConfigDirectory::setTableConfigChangeCallback(
     Function<void (const TableDefinition& tbl)> fn) {
-  RAISE(kNotYetImplementedError, "zookeeper config directory not yet implemented");
+  std::unique_lock<std::mutex> lk(mutex_);
+  on_table_change_.emplace_back(fn);
 }
 
 } // namespace eventql

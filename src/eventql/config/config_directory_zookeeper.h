@@ -121,9 +121,17 @@ protected:
   String path_prefix_;
   ZKState state_;
   zhandle_t* zk_;
-  std::mutex mutex_;
+  mutable std::mutex mutex_;
   std::condition_variable cv_;
+
   ClusterConfig cluster_config_;
+  HashMap<String, NamespaceConfig> namespaces_;
+  HashMap<String, TableDefinition> tables_;
+
+  Vector<Function<void (const ClusterConfig& cfg)>> on_cluster_change_;
+  Vector<Function<void (const NamespaceConfig& cfg)>> on_namespace_change_;
+  Vector<Function<void (const TableDefinition& cfg)>> on_table_change_;
+
 };
 
 template <typename T>
