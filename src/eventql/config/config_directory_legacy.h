@@ -66,7 +66,11 @@ public:
   void setTableConfigChangeCallback(
       Function<void (const TableDefinition& tbl)> fn) override;
 
-  Status start() override;
+  Status startAndJoin(const String& cluster_name) override;
+  Status startAndCreate(
+      const String& cluster_name,
+      const ClusterConfig& config) override;
+
   void stop() override;
 
 protected:
@@ -89,6 +93,7 @@ protected:
   protected:
     InetAddr master_addr_;
   };
+
 
   void sync();
 

@@ -283,11 +283,6 @@ int main(int argc, const char** argv) {
     FileUtil::mkdir(cdb_dir);
   }
 
-  Option<ClusterConfig> create_cluster_config;
-  if (flags.isSet("create_cluster")) {
-    create_cluster_config = Some(ClusterConfig{});
-  }
-
   ScopedPtr<ConfigDirectory> config_dir;
   if (flags.getString("config_backend") == "legacy") {
     config_dir.reset(new LegacyConfigDirectory(
@@ -295,10 +290,7 @@ int main(int argc, const char** argv) {
         InetAddr::resolve(flags.getString("legacy_master_addr"))));
   } else if (flags.getString("config_backend") == "zookeeper") {
     config_dir.reset(
-        new ZookeeperConfigDirectory(
-            flags.getString("cluster"),
-            create_cluster_config,
-            flags.getString("zookeeper_addr")));
+        new ZookeeperConfigDirectory(flags.getString("zookeeper_addr")));
   } else {
     RAISE(kRuntimeError, "invalid config backend: " + flags.getString("config_backend"));
   }
@@ -309,7 +301,15 @@ int main(int argc, const char** argv) {
 
   try {
     {
-      auto rc = config_dir->start();
+      auto rc = Status::success();
+      if (flags.isSet("create_cluster")) {
+        rc = config_dir->startAndCreate(
+            flags.getString("cluster"),
+            ClusterConfig{});
+      } else {
+        rc = config_dir->startAndJoin(flags.getString("cluster"));
+      }
+
       if (!rc.isSuccess()) {
         logFatal("evqld", "Can't connect to config backend: $0", rc.message());
         return 1;

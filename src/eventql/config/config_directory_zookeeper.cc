@@ -41,14 +41,10 @@ static int free_String_vector(struct String_vector *v) {
 }
 
 ZookeeperConfigDirectory::ZookeeperConfigDirectory(
-    const String& cluster_name,
-    Option<ClusterConfig> create_cluster_config,
     const String& zookeeper_addrs) :
-    cluster_name_(cluster_name),
-    create_cluster_config_(create_cluster_config),
     zookeeper_addrs_(zookeeper_addrs),
     zookeeper_timeout_(10000),
-    path_prefix_(StringUtil::format("/eventql/$0", cluster_name_)),
+    global_prefix_("/eventql"),
     state_(ZKState::INIT),
     zk_(nullptr) {
   zoo_set_debug_level(ZOO_LOG_LEVEL_ERROR);
@@ -71,12 +67,67 @@ static void zk_watch_cb(
   self->handleZookeeperWatch(type, state, path);
 }
 
-Status ZookeeperConfigDirectory::start() {
+Status ZookeeperConfigDirectory::startAndJoin(const String& cluster_name) {
   std::unique_lock<std::mutex> lk(mutex_);
   if (state_ != ZKState::INIT) {
     return Status(eIllegalStateError, "state != ZK_INIT");
   }
 
+  cluster_name_ = cluster_name;
+  path_prefix_ = StringUtil::format("$0/$1", global_prefix_, cluster_name_);
+
+  {
+    auto rc = connect(&lk);
+    if (!rc.isSuccess()) {
+      return rc;
+    }
+  }
+
+  {
+    auto rc = load();
+    if (!rc.isSuccess()) {
+      return rc;
+    }
+  }
+
+  return Status::success();
+}
+
+Status ZookeeperConfigDirectory::startAndCreate(
+    const String& cluster_name,
+    const ClusterConfig& initial_config) {
+  std::unique_lock<std::mutex> lk(mutex_);
+  if (state_ != ZKState::INIT) {
+    return Status(eIllegalStateError, "state != ZK_INIT");
+  }
+
+  cluster_name_ = cluster_name;
+  path_prefix_ = StringUtil::format("$0/$1", global_prefix_, cluster_name_);
+
+  {
+    auto rc = connect(&lk);
+    if (!rc.isSuccess()) {
+      return rc;
+    }
+  }
+
+  if (hasNode(path_prefix_)) {
+    logWarning("evqld", "cluster already exists, remove --create_cluster flag?");
+  } else {
+    updateClusterConfigWithLock(initial_config);
+  }
+
+  {
+    auto rc = load();
+    if (!rc.isSuccess()) {
+      return rc;
+    }
+  }
+
+  return Status::success();
+}
+
+Status ZookeeperConfigDirectory::connect(std::unique_lock<std::mutex>* lk) {
   state_ = ZKState::CONNECTING;
 
   zk_ = zookeeper_init(
@@ -93,41 +144,49 @@ Status ZookeeperConfigDirectory::start() {
 
   while (state_ < ZKState::LOADING) {
     logInfo("evqld", "Waiting for zookeeper ($0)", zookeeper_addrs_);
-    cv_.wait_for(lk, std::chrono::seconds(1));
+    cv_.wait_for(*lk, std::chrono::seconds(1));
   }
 
-  auto rc = sync(nullptr);
-  if (!rc.isSuccess()) {
-    return rc;
+  if (!hasNode(global_prefix_)) {
+    auto rc = zoo_create(
+        zk_,
+        global_prefix_.c_str(),
+        nullptr,
+        0,
+        &ZOO_OPEN_ACL_UNSAFE,
+        0,
+        nullptr, /* path_buffer */
+        0 /* path_buffer_len */);
+
+    if (rc) {
+      return Status(
+          eIOError,
+          StringUtil::format("zoo_create() failed: $0", getErrorString(rc)));
+    }
   }
 
-  state_ = ZKState::CONNECTED;
   return Status::success();
 }
 
 // PRECONDITION: must hold mutex
-Status ZookeeperConfigDirectory::sync(CallbackList* events) {
+Status ZookeeperConfigDirectory::load() {
   logInfo("evqld", "Loading config from zookeeper...");
 
   {
-    auto rc = syncClusterConfig(events);
-    if (rc.type() == eNotFoundError && !create_cluster_config_.isEmpty()) {
-      updateClusterConfigWithLock(create_cluster_config_.get());
-      rc = Status::success();
-    }
-
+    auto rc = syncClusterConfig(nullptr);
     if (!rc.isSuccess()) {
       return rc;
     }
   }
 
   {
-    auto rc = syncNamespaces(events);
+    auto rc = syncNamespaces(nullptr);
     if (!rc.isSuccess()) {
       return rc;
     }
   }
 
+  state_ = ZKState::CONNECTED;
   return Status::success();
 }
 
@@ -301,6 +360,27 @@ bool ZookeeperConfigDirectory::getNode(
   }
 
   return true;
+}
+
+bool ZookeeperConfigDirectory::hasNode(String key) {
+  char buf[1];
+  int buf_len = 1;
+
+  auto rc = zoo_get(
+      zk_,
+      key.c_str(),
+      0, /* watch */
+      buf,
+      &buf_len,
+      nullptr /* stat */);
+
+  if (rc == 0) {
+    return true;
+  } else if (rc == ZNONODE) {
+    return false;
+  } else {
+    RAISEF(kRuntimeError, "zoo_get() failed: $0", getErrorString(rc));
+  }
 }
 
 Status ZookeeperConfigDirectory::listChildren(

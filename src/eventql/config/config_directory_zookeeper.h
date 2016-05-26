@@ -33,11 +33,7 @@ namespace eventql {
 class ZookeeperConfigDirectory : public ConfigDirectory {
 public:
 
-  ZookeeperConfigDirectory(
-      const String& cluster_name,
-      Option<ClusterConfig> create_cluster_config,
-      const String& zookeeper_addrs);
-
+  ZookeeperConfigDirectory(const String& zookeeper_addrs);
   ~ZookeeperConfigDirectory();
 
   ClusterConfig getClusterConfig() const override;
@@ -72,7 +68,11 @@ public:
   void setTableConfigChangeCallback(
       Function<void (const TableDefinition& tbl)> fn) override;
 
-  Status start() override;
+  Status startAndJoin(const String& cluster_name) override;
+  Status startAndCreate(
+      const String& cluster_name,
+      const ClusterConfig& initial_config) override;
+
   void stop() override;
 
   /** don't call this! (can't be private b/c it needs to be called from c binding) */
@@ -91,6 +91,9 @@ protected:
 
   using CallbackList = Vector<Function<void()>>;
 
+  Status connect(std::unique_lock<std::mutex>* lk);
+  Status load();
+
   void updateClusterConfigWithLock(ClusterConfig config);
 
   void handleSessionEvent(int state);
@@ -107,6 +110,8 @@ protected:
       CallbackList* events,
       const String& ns,
       const String& table_name);
+
+  bool hasNode(String key);
 
   bool getNode(
       String key,
@@ -129,9 +134,9 @@ protected:
   const char* getErrorString(int code) const;
 
   String cluster_name_;
-  Option<ClusterConfig> create_cluster_config_;
   String zookeeper_addrs_;
   size_t zookeeper_timeout_;
+  String global_prefix_;
   String path_prefix_;
   ZKState state_;
   zhandle_t* zk_;
