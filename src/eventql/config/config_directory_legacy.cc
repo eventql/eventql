@@ -21,6 +21,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#include <unistd.h>
 #include <eventql/config/config_directory_legacy.h>
 #include <eventql/server/server_stats.h>
 #include <eventql/util/protobuf/msg.h>

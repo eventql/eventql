@@ -1,0 +1,9 @@
+out
+config.h
+libtool
+stamp-h1
+cli_st
+cli_mt
+.libs
+load_gen
+libzkmt.a

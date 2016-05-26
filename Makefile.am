@@ -12,6 +12,7 @@ SUBDIRS = \
     deps/3rdparty/protobuf \
     deps/3rdparty/liblmdb \
     deps/3rdparty/inih \
+    deps/3rdparty/zookeeper \
     src
 
 EXTRA_DIST =                             \
