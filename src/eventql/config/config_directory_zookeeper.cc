@@ -64,6 +64,10 @@ void ZookeeperConfigDirectory::start() {
   if (!zk_) {
     RAISE_ERRNO("zookeeper_init failed");
   }
+
+  for (;;) {
+    usleep(1000);
+  }
 }
 
 void ZookeeperConfigDirectory::stop() {

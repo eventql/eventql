@@ -289,146 +289,147 @@ int main(int argc, const char** argv) {
     RAISE(kRuntimeError, "invalid config backend: " + flags.getString("config_backend"));
   }
 
-  /* clusterconfig */
-  auto cluster_config = config_dir->getClusterConfig();
-  logInfo(
-      "eventql",
-      "Starting with cluster config: $0",
-      cluster_config.DebugString());
-
-  /* tsdb */
-  Option<String> local_replica;
-  if (flags.isSet("join")) {
-    local_replica = Some(flags.getString("join"));
-  }
-
-  auto repl_scheme = RefPtr<eventql::ReplicationScheme>(
-        new eventql::DHTReplicationScheme(cluster_config, local_replica));
-
-  String node_name = "__anonymous";
-  if (flags.isSet("join")) {
-    node_name = flags.getString("join");
-  }
-
-  auto tsdb_dir = FileUtil::joinPaths(
-      flags.getString("datadir"),
-      "data/" + node_name);
-
-  if (!FileUtil::exists(tsdb_dir)) {
-    FileUtil::mkdir_p(tsdb_dir);
-  }
-
-  auto trash_dir = FileUtil::joinPaths(flags.getString("datadir"), "trash");
-  if (!FileUtil::exists(trash_dir)) {
-    FileUtil::mkdir(trash_dir);
-  }
-
-  FileLock server_lock(FileUtil::joinPaths(tsdb_dir, "__lock"));
-  server_lock.lock();
-
-  eventql::ServerConfig cfg;
-  cfg.db_path = tsdb_dir;
-  cfg.repl_scheme = repl_scheme;
-  cfg.idx_cache = mkRef(new LSMTableIndexCache(tsdb_dir));
-
-  eventql::PartitionMap partition_map(&cfg);
-  eventql::TSDBService tsdb_node(
-      &partition_map,
-      repl_scheme.get(),
-      &ev,
-      &z1stats()->http_client_stats);
-
-  eventql::ReplicationWorker tsdb_replication(
-      repl_scheme.get(),
-      &partition_map,
-      &http);
-
-  eventql::TSDBServlet tsdb_servlet(&tsdb_node, flags.getString("cachedir"));
-  http_router.addRouteByPrefixMatch("/tsdb", &tsdb_servlet, &tpool);
-
-  eventql::CompactionWorker cstable_index(
-      &partition_map,
-      flags.getInt("indexbuild_threads"));
-
-  /* analytics core */
-  AnalyticsAuth auth(config_dir.get());
-
-  /* sql */
-  RefPtr<csql::Runtime> sql;
-  {
-    auto symbols = mkRef(new csql::SymbolTable());
-    csql::installDefaultSymbols(symbols.get());
-    sql = mkRef(new csql::Runtime(
-        thread::ThreadPoolOptions {
-          .thread_name = Some(String("z1d-sqlruntime"))
-        },
-        symbols,
-        new csql::QueryBuilder(
-            new csql::ValueExpressionBuilder(symbols.get())),
-        new csql::QueryPlanBuilder(
-            csql::QueryPlanBuilderOptions{},
-            symbols.get()),
-        mkScoped(new Scheduler(&partition_map, &auth, repl_scheme.get()))));
-
-    sql->setCacheDir(flags.getString("cachedir"));
-    sql->symbols()->registerFunction("z1_version", &z1VersionExpr);
-  }
-
-  /* spidermonkey javascript runtime */
-  JS_Init();
-  js::DisableExtraThreads();
-
-  auto analytics_app = mkRef(
-      new AnalyticsApp(
-          &tsdb_node,
-          &partition_map,
-          repl_scheme.get(),
-          &cstable_index,
-          config_dir.get(),
-          &auth,
-          sql.get(),
-          nullptr,
-          flags.getString("datadir"),
-          flags.getString("cachedir")));
-
-  eventql::AnalyticsServlet analytics_servlet(
-      analytics_app,
-      flags.getString("cachedir"),
-      &auth,
-      sql.get(),
-      &tsdb_node,
-      config_dir.get(),
-      &partition_map);
-
-  eventql::StatusServlet status_servlet(
-      &cfg,
-      &partition_map,
-      http_server.stats(),
-      &z1stats()->http_client_stats);
-
-  eventql::DefaultServlet default_servlet;
-
-  http_router.addRouteByPrefixMatch("/api/", &analytics_servlet, &tpool);
-  http_router.addRouteByPrefixMatch("/zstatus", &status_servlet);
-  http_router.addRouteByPrefixMatch("/", &default_servlet);
-
-  auto rusage_t = std::thread([] () {
-    for (;; usleep(1000000)) {
-      logDebug(
-          "eventql",
-          "Using $0MB of memory (peak $1)",
-          Application::getCurrentMemoryUsage() / 1000000.0,
-          Application::getPeakMemoryUsage() / 1000000.0);
-    }
-  });
-
-  rusage_t.detach();
-
-  Application::setCurrentThreadName("z1d");
-
   try {
-    partition_map.open();
     config_dir->start();
+
+    /* clusterconfig */
+    auto cluster_config = config_dir->getClusterConfig();
+    logInfo(
+        "eventql",
+        "Starting with cluster config: $0",
+        cluster_config.DebugString());
+
+    /* tsdb */
+    Option<String> local_replica;
+    if (flags.isSet("join")) {
+      local_replica = Some(flags.getString("join"));
+    }
+
+    auto repl_scheme = RefPtr<eventql::ReplicationScheme>(
+          new eventql::DHTReplicationScheme(cluster_config, local_replica));
+
+    String node_name = "__anonymous";
+    if (flags.isSet("join")) {
+      node_name = flags.getString("join");
+    }
+
+    auto tsdb_dir = FileUtil::joinPaths(
+        flags.getString("datadir"),
+        "data/" + node_name);
+
+    if (!FileUtil::exists(tsdb_dir)) {
+      FileUtil::mkdir_p(tsdb_dir);
+    }
+
+    auto trash_dir = FileUtil::joinPaths(flags.getString("datadir"), "trash");
+    if (!FileUtil::exists(trash_dir)) {
+      FileUtil::mkdir(trash_dir);
+    }
+
+    FileLock server_lock(FileUtil::joinPaths(tsdb_dir, "__lock"));
+    server_lock.lock();
+
+    eventql::ServerConfig cfg;
+    cfg.db_path = tsdb_dir;
+    cfg.repl_scheme = repl_scheme;
+    cfg.idx_cache = mkRef(new LSMTableIndexCache(tsdb_dir));
+
+    eventql::PartitionMap partition_map(&cfg);
+    eventql::TSDBService tsdb_node(
+        &partition_map,
+        repl_scheme.get(),
+        &ev,
+        &z1stats()->http_client_stats);
+
+    eventql::ReplicationWorker tsdb_replication(
+        repl_scheme.get(),
+        &partition_map,
+        &http);
+
+    eventql::TSDBServlet tsdb_servlet(&tsdb_node, flags.getString("cachedir"));
+    http_router.addRouteByPrefixMatch("/tsdb", &tsdb_servlet, &tpool);
+
+    eventql::CompactionWorker cstable_index(
+        &partition_map,
+        flags.getInt("indexbuild_threads"));
+
+    /* analytics core */
+    AnalyticsAuth auth(config_dir.get());
+
+    /* sql */
+    RefPtr<csql::Runtime> sql;
+    {
+      auto symbols = mkRef(new csql::SymbolTable());
+      csql::installDefaultSymbols(symbols.get());
+      sql = mkRef(new csql::Runtime(
+          thread::ThreadPoolOptions {
+            .thread_name = Some(String("z1d-sqlruntime"))
+          },
+          symbols,
+          new csql::QueryBuilder(
+              new csql::ValueExpressionBuilder(symbols.get())),
+          new csql::QueryPlanBuilder(
+              csql::QueryPlanBuilderOptions{},
+              symbols.get()),
+          mkScoped(new Scheduler(&partition_map, &auth, repl_scheme.get()))));
+
+      sql->setCacheDir(flags.getString("cachedir"));
+      sql->symbols()->registerFunction("z1_version", &z1VersionExpr);
+    }
+
+    /* spidermonkey javascript runtime */
+    JS_Init();
+    js::DisableExtraThreads();
+
+    auto analytics_app = mkRef(
+        new AnalyticsApp(
+            &tsdb_node,
+            &partition_map,
+            repl_scheme.get(),
+            &cstable_index,
+            config_dir.get(),
+            &auth,
+            sql.get(),
+            nullptr,
+            flags.getString("datadir"),
+            flags.getString("cachedir")));
+
+    eventql::AnalyticsServlet analytics_servlet(
+        analytics_app,
+        flags.getString("cachedir"),
+        &auth,
+        sql.get(),
+        &tsdb_node,
+        config_dir.get(),
+        &partition_map);
+
+    eventql::StatusServlet status_servlet(
+        &cfg,
+        &partition_map,
+        http_server.stats(),
+        &z1stats()->http_client_stats);
+
+    eventql::DefaultServlet default_servlet;
+
+    http_router.addRouteByPrefixMatch("/api/", &analytics_servlet, &tpool);
+    http_router.addRouteByPrefixMatch("/zstatus", &status_servlet);
+    http_router.addRouteByPrefixMatch("/", &default_servlet);
+
+    auto rusage_t = std::thread([] () {
+      for (;; usleep(1000000)) {
+        logDebug(
+            "eventql",
+            "Using $0MB of memory (peak $1)",
+            Application::getCurrentMemoryUsage() / 1000000.0,
+            Application::getPeakMemoryUsage() / 1000000.0);
+      }
+    });
+
+    rusage_t.detach();
+
+    Application::setCurrentThreadName("z1d");
+
+    partition_map.open();
     ev.run();
   } catch (const StandardException& e) {
     logAlert("eventql", e, "FATAL ERROR");
