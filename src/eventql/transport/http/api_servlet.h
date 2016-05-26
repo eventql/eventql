@@ -37,6 +37,7 @@
 #include "eventql/transport/http/EventsAPIServlet.h"
 #include "eventql/transport/http/MapReduceAPIServlet.h"
 #include "eventql/RemoteTSDBScanParams.pb.h"
+#include "eventql/server/auth/client_auth.h"
 
 #include "eventql/eventql.h"
 
@@ -51,6 +52,7 @@ public:
       RefPtr<AnalyticsApp> app,
       const String& cachedir,
       AnalyticsAuth* auth,
+      ClientAuth* client_auth,
       csql::Runtime* sql,
       eventql::TSDBService* tsdb,
       ConfigDirectory* customer_dir,
@@ -280,6 +282,7 @@ protected:
   RefPtr<AnalyticsApp> app_;
   String cachedir_;
   AnalyticsAuth* auth_;
+  ClientAuth* client_auth_;
   csql::Runtime* sql_;
   eventql::TSDBService* tsdb_;
   ConfigDirectory* customer_dir_;

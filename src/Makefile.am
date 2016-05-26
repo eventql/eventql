@@ -887,6 +887,7 @@ evqld_SOURCES = \
     eventql/mapreduce/tasks/SaveToTablePartitionTask.h \
     eventql/mapreduce/tasks/SaveToTableTask.cc \
     eventql/mapreduce/tasks/SaveToTableTask.h \
+    eventql/server/auth/client_auth.h \
     eventql/server/session.cc \
     eventql/server/session.h \
     eventql/server/server_stats.cc \

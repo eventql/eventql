@@ -295,6 +295,8 @@ int main(int argc, const char** argv) {
     RAISE(kRuntimeError, "invalid config backend: " + flags.getString("config_backend"));
   }
 
+  ScopedPtr<eventql::ClientAuth> client_auth;
+
   /* spidermonkey javascript runtime */
   JS_Init();
   js::DisableExtraThreads();
@@ -418,6 +420,7 @@ int main(int argc, const char** argv) {
         analytics_app,
         flags.getString("cachedir"),
         &auth,
+        client_auth.get(),
         sql.get(),
         &tsdb_node,
         config_dir.get(),
