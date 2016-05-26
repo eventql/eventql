@@ -888,6 +888,8 @@ evqld_SOURCES = \
     eventql/mapreduce/tasks/SaveToTableTask.cc \
     eventql/mapreduce/tasks/SaveToTableTask.h \
     eventql/server/auth/client_auth.h \
+    eventql/server/auth/client_auth_trust.cc \
+    eventql/server/auth/client_auth_trust.h \
     eventql/server/session.cc \
     eventql/server/session.h \
     eventql/server/server_stats.cc \
