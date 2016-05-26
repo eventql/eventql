@@ -93,7 +93,7 @@ Status ZookeeperConfigDirectory::start() {
     cv_.wait_for(lk, std::chrono::seconds(1));
   }
 
-  auto rc = sync();
+  auto rc = sync(nullptr);
   if (!rc.isSuccess()) {
     return rc;
   }
@@ -103,18 +103,18 @@ Status ZookeeperConfigDirectory::start() {
 }
 
 // PRECONDITION: must hold mutex
-Status ZookeeperConfigDirectory::sync() {
+Status ZookeeperConfigDirectory::sync(CallbackList* events) {
   logInfo("evqld", "Loading config from zookeeper...");
 
   {
-    auto rc = syncClusterConfig();
+    auto rc = syncClusterConfig(events);
     if (!rc.isSuccess()) {
       return rc;
     }
   }
 
   {
-    auto rc = syncNamespaces();
+    auto rc = syncNamespaces(events);
     if (!rc.isSuccess()) {
       return rc;
     }
@@ -124,8 +124,14 @@ Status ZookeeperConfigDirectory::sync() {
 }
 
 // PRECONDITION: must hold mutex
-Status ZookeeperConfigDirectory::syncClusterConfig() {
+Status ZookeeperConfigDirectory::syncClusterConfig(CallbackList* events) {
   if (getProtoNode(path_prefix_ + "/config", &cluster_config_, true)) {
+    if (events) {
+      for (const auto& cb : on_cluster_change_) {
+        events->emplace_back(std::bind(cb, cluster_config_));
+      }
+    }
+
     return Status::success();
   } else {
     return Status(
@@ -135,7 +141,7 @@ Status ZookeeperConfigDirectory::syncClusterConfig() {
 }
 
 // PRECONDITION: must hold mutex
-Status ZookeeperConfigDirectory::syncNamespaces() {
+Status ZookeeperConfigDirectory::syncNamespaces(CallbackList* events) {
   Vector<String> namespaces;
   {
     auto rc = listChildren(path_prefix_ + "/namespaces", &namespaces, true);
@@ -145,7 +151,7 @@ Status ZookeeperConfigDirectory::syncNamespaces() {
   }
 
   for (const auto& ns : namespaces) {
-    auto rc = syncNamespace(ns);
+    auto rc = syncNamespace(events, ns);
     if (!rc.isSuccess()) {
       return rc;
     }
@@ -155,7 +161,9 @@ Status ZookeeperConfigDirectory::syncNamespaces() {
 }
 
 // PRECONDITION: must hold mutex
-Status ZookeeperConfigDirectory::syncNamespace(const String& ns) {
+Status ZookeeperConfigDirectory::syncNamespace(
+    CallbackList* events,
+    const String& ns) {
   logDebug("evqld", "Loading namespace config from zookeeper: '$0'", ns);
 
   {
@@ -168,10 +176,16 @@ Status ZookeeperConfigDirectory::syncNamespace(const String& ns) {
     }
 
     namespaces_[ns] = ns_config;
+
+    if (events) {
+      for (const auto& cb : on_namespace_change_) {
+        events->emplace_back(std::bind(cb, ns_config));
+      }
+    }
   }
 
   {
-    auto rc = syncTables(ns);
+    auto rc = syncTables(events, ns);
     if (!rc.isSuccess()) {
       return rc;
     }
@@ -181,7 +195,9 @@ Status ZookeeperConfigDirectory::syncNamespace(const String& ns) {
 }
 
 // PRECONDITION: must hold mutex
-Status ZookeeperConfigDirectory::syncTables(const String& ns) {
+Status ZookeeperConfigDirectory::syncTables(
+    CallbackList* events,
+    const String& ns) {
   Vector<String> tables;
 
   {
@@ -193,7 +209,7 @@ Status ZookeeperConfigDirectory::syncTables(const String& ns) {
   }
 
   for (const auto& table : tables) {
-    auto rc = syncTable(ns, table);
+    auto rc = syncTable(events, ns, table);
     if (!rc.isSuccess()) {
       return rc;
     }
@@ -204,6 +220,7 @@ Status ZookeeperConfigDirectory::syncTables(const String& ns) {
 
 // PRECONDITION: must hold mutex
 Status ZookeeperConfigDirectory::syncTable(
+    CallbackList* events,
     const String& ns,
     const String& table_name) {
   logDebug(
@@ -226,6 +243,13 @@ Status ZookeeperConfigDirectory::syncTable(
   }
 
   tables_[ns + "~" + table_name] = tbl_config;
+
+  if (events) {
+    for (const auto& cb : on_table_change_) {
+      events->emplace_back(std::bind(cb, tbl_config));
+    }
+  }
+
   return Status::success();
 }
 
@@ -289,6 +313,7 @@ void ZookeeperConfigDirectory::handleZookeeperWatch(
     int state,
     String path) {
   std::unique_lock<std::mutex> lk(mutex_);
+  CallbackList events;
 
   if (StringUtil::beginsWith(path, path_prefix_)) {
     path = path.substr(path_prefix_.size());
@@ -300,36 +325,43 @@ void ZookeeperConfigDirectory::handleZookeeperWatch(
 
   if (type == ZOO_CHILD_EVENT ||
       type == ZOO_CHANGED_EVENT) {
-    handleChangeEvent(path);
+    handleChangeEvent(path, &events);
   }
 
   cv_.notify_all();
+  lk.unlock();
+
+  for (const auto& ev : events) {
+    ev();
+  }
 }
 
-Status ZookeeperConfigDirectory::handleChangeEvent(const String& vpath) {
+Status ZookeeperConfigDirectory::handleChangeEvent(
+    const String& vpath,
+    CallbackList* events) {
   std::smatch m;
 
   if (vpath == "/config") {
-    return syncClusterConfig();
+    return syncClusterConfig(events);
   }
 
   if (vpath == "/namespaces") {
-    return syncNamespaces();
+    return syncNamespaces(events);
   }
 
   std::regex namespace_regex("/namespaces/([0-9A-Za-z_.-]+)/config");
   if (std::regex_match(vpath, m, namespace_regex)) {
-    return syncNamespace(m[1].str());
+    return syncNamespace(events, m[1].str());
   }
 
   std::regex tables_path_regex("/namespaces/([0-9A-Za-z_.-]+)/tables");
   if (std::regex_match(vpath, m, tables_path_regex)) {
-    return syncTables(m[1].str());
+    return syncTables(events, m[1].str());
   }
 
   std::regex table_path_regex("/namespaces/([0-9A-Za-z_.-]+)/tables/([0-9A-Za-z_.-]+)");
   if (std::regex_match(vpath, m, table_path_regex)) {
-    return syncTable(m[1].str(), m[2].str());
+    return syncTable(events, m[1].str(), m[2].str());
   }
 
   logWarning("evqld", "received zookeper watch on unknown path: $0", vpath);

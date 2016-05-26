@@ -107,17 +107,22 @@ protected:
 
   void createTableConfig(const TableDefinition& table);
 
+  using CallbackList = Vector<Function<void()>>;
+
   void handleSessionEvent(int state);
-  Status handleChangeEvent(const String& vpath);
   void handleConnectionEstablished();
   void handleConnectionLost();
+  Status handleChangeEvent(const String& vpath, CallbackList* events);
 
-  Status sync();
-  Status syncClusterConfig();
-  Status syncNamespaces();
-  Status syncNamespace(const String& ns);
-  Status syncTables(const String& ns);
-  Status syncTable(const String& ns, const String& table_name);
+  Status sync(CallbackList* events);
+  Status syncClusterConfig(CallbackList* events);
+  Status syncNamespaces(CallbackList* events);
+  Status syncNamespace(CallbackList* events, const String& ns);
+  Status syncTables(CallbackList* events, const String& ns);
+  Status syncTable(
+      CallbackList* events,
+      const String& ns,
+      const String& table_name);
 
   const char* getErrorString(int code) const;
 
