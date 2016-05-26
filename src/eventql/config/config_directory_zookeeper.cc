@@ -23,12 +23,15 @@
  */
 #include <eventql/config/config_directory_zookeeper.h>
 #include <eventql/util/protobuf/msg.h>
+#include <zookeeper.h>
 
 namespace eventql {
 
 ZookeeperConfigDirectory::ZookeeperConfigDirectory(
     const String& cluster_name,
-    const String& zookeeper_addrs)  {}
+    const String& zookeeper_addrs)  {
+  zoo_set_debug_level(ZOO_LOG_LEVEL_DEBUG);
+}
 
 void ZookeeperConfigDirectory::start() {
 }
