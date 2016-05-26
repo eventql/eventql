@@ -458,7 +458,39 @@ ClusterConfig ZookeeperConfigDirectory::getClusterConfig() const {
 }
 
 void ZookeeperConfigDirectory::updateClusterConfig(ClusterConfig config) {
-  RAISE(kNotYetImplementedError, "zookeeper config directory not yet implemented");
+  std::unique_lock<std::mutex> lk(mutex_);
+
+  auto buf = msg::encode(config);
+  auto path = StringUtil::format("$0/config", path_prefix_);
+
+  if (config.version() == 0) {
+    // create
+    auto rc = zoo_create(
+        zk_,
+        path.c_str(),
+        (const char*) buf->data(),
+        buf->size(),
+        &ZOO_OPEN_ACL_UNSAFE,
+        0,
+        NULL /* path_buffer */,
+        0 /* path_buffer_len */);
+
+    if (rc) {
+      RAISEF(kRuntimeError, "zoo_create() failed: $0", getErrorString(rc));
+    }
+  } else {
+    // update
+    auto rc = zoo_set(
+        zk_,
+        path.c_str(),
+        (const char*) buf->data(),
+        buf->size(),
+        config.version() - 1);
+
+    if (rc) {
+      RAISEF(kRuntimeError, "zoo_create() failed: $0", getErrorString(rc));
+    }
+  }
 }
 
 void ZookeeperConfigDirectory::setClusterConfigChangeCallback(
@@ -493,7 +525,42 @@ void ZookeeperConfigDirectory::setNamespaceConfigChangeCallback(
 }
 
 void ZookeeperConfigDirectory::updateNamespaceConfig(NamespaceConfig cfg) {
-  RAISE(kNotYetImplementedError, "zookeeper config directory not yet implemented");
+  std::unique_lock<std::mutex> lk(mutex_);
+
+  auto buf = msg::encode(cfg);
+  auto path = StringUtil::format(
+      "$0/namespaces/$1/config",
+      path_prefix_,
+      cfg.customer());
+
+  if (cfg.version() == 0) {
+    // create
+    auto rc = zoo_create(
+        zk_,
+        path.c_str(),
+        (const char*) buf->data(),
+        buf->size(),
+        &ZOO_OPEN_ACL_UNSAFE,
+        0,
+        NULL /* path_buffer */,
+        0 /* path_buffer_len */);
+
+    if (rc) {
+      RAISEF(kRuntimeError, "zoo_create() failed: $0", getErrorString(rc));
+    }
+  } else {
+    // update
+    auto rc = zoo_set(
+        zk_,
+        path.c_str(),
+        (const char*) buf->data(),
+        buf->size(),
+        cfg.version() - 1);
+
+    if (rc) {
+      RAISEF(kRuntimeError, "zoo_create() failed: $0", getErrorString(rc));
+    }
+  }
 }
 
 TableDefinition ZookeeperConfigDirectory::getTableConfig(
