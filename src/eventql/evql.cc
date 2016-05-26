@@ -404,6 +404,15 @@ int main(int argc, const char** argv) {
       "<file>");
 
   flags.defineFlag(
+      "lang",
+      cli::FlagParser::T_STRING,
+      false,
+      "l",
+      NULL,
+      "query language",
+      "<lang>");
+
+  flags.defineFlag(
       "exec",
       cli::FlagParser::T_STRING,
       false,
@@ -508,6 +517,10 @@ int main(int argc, const char** argv) {
             flags.getArgv()[0]));
 
     return 1;
+  }
+
+  if (flags.isSet("lang")) {
+    auto lang = flags.getString("lang");
   }
 
   if (flags.isSet("file")) {
