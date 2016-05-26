@@ -62,6 +62,7 @@
 #include "eventql/sql/defaults.h"
 #include "eventql/config/config_directory.h"
 #include "eventql/config/config_directory_legacy.h"
+#include "eventql/config/config_directory_zookeeper.h"
 #include "eventql/transport/http/status_servlet.h"
 #include "eventql/server/sql/scheduler.h"
 #include <jsapi.h>
@@ -128,13 +129,41 @@ int main(int argc, const char** argv) {
       "<num>");
 
   flags.defineFlag(
-      "master",
+      "config_backend",
       cli::FlagParser::T_STRING,
       true,
       NULL,
       NULL,
+      "backend",
+      "<backend>");
+
+  flags.defineFlag(
+      "legacy_master_addr",
+      cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      NULL,
       "url",
       "<addr>");
+
+  flags.defineFlag(
+      "zookeeper_addr",
+      cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      NULL,
+      "url",
+      "<addr>");
+
+  flags.defineFlag(
+      "cluster",
+      cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      NULL,
+      "name",
+      "<name>");
+
 
   flags.defineFlag(
       "join",
@@ -246,12 +275,22 @@ int main(int argc, const char** argv) {
     FileUtil::mkdir(cdb_dir);
   }
 
-  LegacyConfigDirectory customer_dir(
-      cdb_dir,
-      InetAddr::resolve(flags.getString("master")));
+  ScopedPtr<ConfigDirectory> config_dir;
+  if (flags.getString("config_backend") == "legacy") {
+    config_dir.reset(new LegacyConfigDirectory(
+        cdb_dir,
+        InetAddr::resolve(flags.getString("legacy_master_addr"))));
+  } else if (flags.getString("config_backend") == "zookeeper") {
+    config_dir.reset(
+        new ZookeeperConfigDirectory(
+            flags.getString("cluster"),
+            flags.getString("zookeeper_addr")));
+  } else {
+    RAISE(kRuntimeError, "invalid config backend: " + flags.getString("config_backend"));
+  }
 
   /* clusterconfig */
-  auto cluster_config = customer_dir.getClusterConfig();
+  auto cluster_config = config_dir->getClusterConfig();
   logInfo(
       "eventql",
       "Starting with cluster config: $0",
@@ -312,7 +351,7 @@ int main(int argc, const char** argv) {
       flags.getInt("indexbuild_threads"));
 
   /* analytics core */
-  AnalyticsAuth auth(&customer_dir);
+  AnalyticsAuth auth(config_dir.get());
 
   /* sql */
   RefPtr<csql::Runtime> sql;
@@ -345,7 +384,7 @@ int main(int argc, const char** argv) {
           &partition_map,
           repl_scheme.get(),
           &cstable_index,
-          &customer_dir,
+          config_dir.get(),
           &auth,
           sql.get(),
           nullptr,
@@ -358,7 +397,7 @@ int main(int argc, const char** argv) {
       &auth,
       sql.get(),
       &tsdb_node,
-      &customer_dir,
+      config_dir.get(),
       &partition_map);
 
   eventql::StatusServlet status_servlet(
@@ -389,7 +428,7 @@ int main(int argc, const char** argv) {
 
   try {
     partition_map.open();
-    customer_dir.start();
+    config_dir->start();
     ev.run();
   } catch (const StandardException& e) {
     logAlert("eventql", e, "FATAL ERROR");
@@ -397,7 +436,7 @@ int main(int argc, const char** argv) {
 
   logInfo("eventql", "Exiting...");
 
-  customer_dir.stop();
+  config_dir->stop();
 
   JS_ShutDown();
 

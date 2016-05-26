@@ -30,7 +30,9 @@ namespace eventql {
 class ZookeeperConfigDirectory : public ConfigDirectory {
 public:
 
-  ZookeeperConfigDirectory(const String& zookeeper_addrs);
+  ZookeeperConfigDirectory(
+      const String& cluster_name,
+      const String& zookeeper_addrs);
 
   ClusterConfig getClusterConfig() const override;
 

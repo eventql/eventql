@@ -27,6 +27,7 @@
 namespace eventql {
 
 ZookeeperConfigDirectory::ZookeeperConfigDirectory(
+    const String& cluster_name,
     const String& zookeeper_addrs)  {}
 
 void ZookeeperConfigDirectory::start() {
