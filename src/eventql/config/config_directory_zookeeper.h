@@ -22,6 +22,7 @@
  * code of your own applications
  */
 #pragma once
+#include <zookeeper.h>
 #include "eventql/eventql.h"
 #include "eventql/config/config_directory.h"
 
@@ -69,7 +70,18 @@ public:
   void start() override;
   void stop() override;
 
+  /** don't call this! (can't be private b/c it needs to be called from c binding) */
+  void handleZookeeperWatch(
+      zhandle_t* zk,
+      int type,
+      int state,
+      const char* path,
+      void* ctx);
+
 protected:
+  String cluster_name_;
+  String zookeeper_addrs_;
+  zhandle_t* zk_;
 };
 
 } // namespace eventql

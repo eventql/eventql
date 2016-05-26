@@ -23,20 +23,53 @@
  */
 #include <eventql/config/config_directory_zookeeper.h>
 #include <eventql/util/protobuf/msg.h>
-#include <zookeeper.h>
 
 namespace eventql {
 
 ZookeeperConfigDirectory::ZookeeperConfigDirectory(
     const String& cluster_name,
-    const String& zookeeper_addrs)  {
+    const String& zookeeper_addrs) :
+    cluster_name_(cluster_name),
+    zookeeper_addrs_(zookeeper_addrs) {
   zoo_set_debug_level(ZOO_LOG_LEVEL_DEBUG);
 }
 
+static void zk_watch_cb(
+    zhandle_t* zk,
+    int type,
+    int state,
+    const char* path,
+    void* ctx) {
+  auto self = (ZookeeperConfigDirectory*) zoo_get_context(zk);
+  assert(self != nullptr);
+  self->handleZookeeperWatch(zk, type, state, path, ctx);
+}
+
 void ZookeeperConfigDirectory::start() {
+  zk_ = zookeeper_init(
+      zookeeper_addrs_.c_str(),
+      &zk_watch_cb,
+      10000, /* recv timeout in microseconds */
+      0, /* client id */
+      this,
+      0 /* flags */);
+
+  if (!zk_) {
+    RAISE_ERRNO("zookeeper_init failed");
+  }
 }
 
 void ZookeeperConfigDirectory::stop() {
+  zookeeper_close(zk_);
+}
+
+void ZookeeperConfigDirectory::handleZookeeperWatch(
+    zhandle_t* zk,
+    int type,
+    int state,
+    const char* path,
+    void* ctx) {
+  iputs("got zk watch... $0, $1, $2, $3", type, state, path, ctx);
 }
 
 ClusterConfig ZookeeperConfigDirectory::getClusterConfig() const {
