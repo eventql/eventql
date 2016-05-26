@@ -21,6 +21,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#include <regex>
 #include <eventql/config/config_directory_zookeeper.h>
 #include <eventql/util/protobuf/msg.h>
 
@@ -47,7 +48,7 @@ ZookeeperConfigDirectory::ZookeeperConfigDirectory(
     path_prefix_(StringUtil::format("/eventql/$0", cluster_name_)),
     state_(ZKState::INIT),
     zk_(nullptr) {
-  zoo_set_debug_level(ZOO_LOG_LEVEL_ERROR);
+  zoo_set_debug_level(ZOO_LOG_LEVEL_DEBUG);
 }
 
 ZookeeperConfigDirectory::~ZookeeperConfigDirectory() {
@@ -105,12 +106,36 @@ Status ZookeeperConfigDirectory::start() {
 Status ZookeeperConfigDirectory::sync() {
   logInfo("evqld", "Loading config from zookeeper...");
 
-  if (!getProtoNode(path_prefix_ + "/config", &cluster_config_, true)) {
+  {
+    auto rc = syncClusterConfig();
+    if (!rc.isSuccess()) {
+      return rc;
+    }
+  }
+
+  {
+    auto rc = syncNamespaces();
+    if (!rc.isSuccess()) {
+      return rc;
+    }
+  }
+
+  return Status::success();
+}
+
+// PRECONDITION: must hold mutex
+Status ZookeeperConfigDirectory::syncClusterConfig() {
+  if (getProtoNode(path_prefix_ + "/config", &cluster_config_, true)) {
+    return Status::success();
+  } else {
     return Status(
         eNotFoundError,
         StringUtil::format("Cluster '$0' does not exist", cluster_name_));
   }
+}
 
+// PRECONDITION: must hold mutex
+Status ZookeeperConfigDirectory::syncNamespaces() {
   Vector<String> namespaces;
   {
     auto rc = listChildren(path_prefix_ + "/namespaces", &namespaces, true);
@@ -145,7 +170,20 @@ Status ZookeeperConfigDirectory::syncNamespace(const String& ns) {
     namespaces_[ns] = ns_config;
   }
 
+  {
+    auto rc = syncTables(ns);
+    if (!rc.isSuccess()) {
+      return rc;
+    }
+  }
+
+  return Status::success();
+}
+
+// PRECONDITION: must hold mutex
+Status ZookeeperConfigDirectory::syncTables(const String& ns) {
   Vector<String> tables;
+
   {
     auto key = StringUtil::format("$0/namespaces/$1/tables", path_prefix_, ns);
     auto rc = listChildren(key, &tables, true);
@@ -256,15 +294,55 @@ void ZookeeperConfigDirectory::handleZookeeperWatch(
     zhandle_t* zk,
     int type,
     int state,
-    const char* path,
+    const char* path_cstr,
     void* ctx) {
   std::unique_lock<std::mutex> lk(mutex_);
 
+  String path(path_cstr);
+  if (StringUtil::beginsWith(path, path_prefix_)) {
+    path = path.substr(path_prefix_.size());
+  }
+
   if (type == ZOO_SESSION_EVENT) {
-    handleSessionEvent(zk, type, state, path, ctx);
+    handleSessionEvent(zk, type, state, path_cstr, ctx);
+  }
+
+  if (type == ZOO_CHILD_EVENT ||
+      type == ZOO_CHANGED_EVENT) {
+    handleChangeEvent(path);
   }
 
   cv_.notify_all();
+}
+
+Status ZookeeperConfigDirectory::handleChangeEvent(const String& vpath) {
+  std::smatch m;
+
+  if (vpath == "/config") {
+    return syncClusterConfig();
+  }
+
+  if (vpath == "/namespaces") {
+    return syncNamespaces();
+  }
+
+  std::regex namespace_regex("/namespaces/([0-9A-Za-z_.-]+)/config");
+  if (std::regex_match(vpath, m, namespace_regex)) {
+    return syncNamespace(m[1].str());
+  }
+
+  std::regex tables_path_regex("/namespaces/([0-9A-Za-z_.-]+)/tables");
+  if (std::regex_match(vpath, m, tables_path_regex)) {
+    return syncTables(m[1].str());
+  }
+
+  std::regex table_path_regex("/namespaces/([0-9A-Za-z_.-]+)/tables/([0-9A-Za-z_.-]+)");
+  if (std::regex_match(vpath, m, table_path_regex)) {
+    return syncTable(m[1].str(), m[2].str());
+  }
+
+  logWarning("evqld", "received zookeper watch on unknown path: $0", vpath);
+  return Status::success();
 }
 
 void ZookeeperConfigDirectory::handleSessionEvent(

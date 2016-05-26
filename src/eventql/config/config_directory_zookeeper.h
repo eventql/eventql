@@ -119,11 +119,16 @@ protected:
       const char* path,
       void* ctx);
 
+  Status handleChangeEvent(const String& vpath);
+
   void handleConnectionEstablished();
   void handleConnectionLost();
 
   Status sync();
+  Status syncClusterConfig();
+  Status syncNamespaces();
   Status syncNamespace(const String& ns);
+  Status syncTables(const String& ns);
   Status syncTable(const String& ns, const String& table_name);
 
   const char* getErrorString(int code) const;
