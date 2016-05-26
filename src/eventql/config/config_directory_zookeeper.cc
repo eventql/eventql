@@ -276,7 +276,7 @@ bool ZookeeperConfigDirectory::getNode(
   auto rc = zoo_get(
       zk_,
       key.c_str(),
-      0,
+      watch,
       (char*) buf->data(),
       &buf_len,
       stat);
@@ -537,7 +537,16 @@ void ZookeeperConfigDirectory::updateTableConfig(
     }
   } else {
     // update
-    RAISE(kNotYetImplementedError, "zookeeper config directory not yet implemented");
+    auto rc = zoo_set(
+        zk_,
+        path.c_str(),
+        (const char*) buf->data(),
+        buf->size(),
+        table.version() - 1);
+
+    if (rc) {
+      RAISEF(kRuntimeError, "zoo_create() failed: $0", getErrorString(rc));
+    }
   }
 }
 
