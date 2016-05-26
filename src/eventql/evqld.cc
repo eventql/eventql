@@ -289,6 +289,10 @@ int main(int argc, const char** argv) {
     RAISE(kRuntimeError, "invalid config backend: " + flags.getString("config_backend"));
   }
 
+  /* spidermonkey javascript runtime */
+  JS_Init();
+  js::DisableExtraThreads();
+
   try {
     config_dir->start();
 
@@ -377,10 +381,6 @@ int main(int argc, const char** argv) {
       sql->symbols()->registerFunction("z1_version", &z1VersionExpr);
     }
 
-    /* spidermonkey javascript runtime */
-    JS_Init();
-    js::DisableExtraThreads();
-
     auto analytics_app = mkRef(
         new AnalyticsApp(
             &tsdb_node,
@@ -436,9 +436,7 @@ int main(int argc, const char** argv) {
   }
 
   logInfo("eventql", "Exiting...");
-
   config_dir->stop();
-
   JS_ShutDown();
 
   if (flags.isSet("pidfile")) {
