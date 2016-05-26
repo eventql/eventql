@@ -42,8 +42,10 @@ static int free_String_vector(struct String_vector *v) {
 
 ZookeeperConfigDirectory::ZookeeperConfigDirectory(
     const String& cluster_name,
+    Option<ClusterConfig> create_cluster_config,
     const String& zookeeper_addrs) :
     cluster_name_(cluster_name),
+    create_cluster_config_(create_cluster_config),
     zookeeper_addrs_(zookeeper_addrs),
     zookeeper_timeout_(10000),
     path_prefix_(StringUtil::format("/eventql/$0", cluster_name_)),
@@ -109,6 +111,11 @@ Status ZookeeperConfigDirectory::sync(CallbackList* events) {
 
   {
     auto rc = syncClusterConfig(events);
+    if (rc.type() == eNotFoundError && !create_cluster_config_.isEmpty()) {
+      updateClusterConfigWithLock(create_cluster_config_.get());
+      rc = Status::success();
+    }
+
     if (!rc.isSuccess()) {
       return rc;
     }
@@ -139,7 +146,9 @@ Status ZookeeperConfigDirectory::syncClusterConfig(CallbackList* events) {
   } else {
     return Status(
         eNotFoundError,
-        StringUtil::format("Cluster '$0' does not exist", cluster_name_));
+        StringUtil::format(
+            "Cluster '$0' does not exist. Start with --create_cluster to create",
+            cluster_name_));
   }
 }
 
@@ -459,27 +468,68 @@ ClusterConfig ZookeeperConfigDirectory::getClusterConfig() const {
 
 void ZookeeperConfigDirectory::updateClusterConfig(ClusterConfig config) {
   std::unique_lock<std::mutex> lk(mutex_);
+  updateClusterConfigWithLock(config);
+}
 
+void ZookeeperConfigDirectory::updateClusterConfigWithLock(
+    ClusterConfig config) {
   auto buf = msg::encode(config);
-  auto path = StringUtil::format("$0/config", path_prefix_);
 
   if (config.version() == 0) {
     // create
-    auto rc = zoo_create(
-        zk_,
-        path.c_str(),
-        (const char*) buf->data(),
-        buf->size(),
-        &ZOO_OPEN_ACL_UNSAFE,
-        0,
-        NULL /* path_buffer */,
-        0 /* path_buffer_len */);
+    // FIXME if we fail between the three creates, we end up with an incomplete cluster
+    {
+      auto rc = zoo_create(
+          zk_,
+          path_prefix_.c_str(),
+          nullptr,
+          0,
+          &ZOO_OPEN_ACL_UNSAFE,
+          0,
+          nullptr, /* path_buffer */
+          0 /* path_buffer_len */);
 
-    if (rc) {
-      RAISEF(kRuntimeError, "zoo_create() failed: $0", getErrorString(rc));
+      if (rc) {
+        RAISEF(kRuntimeError, "zoo_create() failed: $0", getErrorString(rc));
+      }
+    }
+
+    {
+      auto path = StringUtil::format("$0/config", path_prefix_);
+      auto rc = zoo_create(
+          zk_,
+          path.c_str(),
+          (const char*) buf->data(),
+          buf->size(),
+          &ZOO_OPEN_ACL_UNSAFE,
+          0,
+          NULL /* path_buffer */,
+          0 /* path_buffer_len */);
+
+      if (rc) {
+        RAISEF(kRuntimeError, "zoo_create() failed: $0", getErrorString(rc));
+      }
+    }
+
+    {
+      auto path = StringUtil::format("$0/namespaces", path_prefix_);
+      auto rc = zoo_create(
+          zk_,
+          path.c_str(),
+          nullptr,
+          0,
+          &ZOO_OPEN_ACL_UNSAFE,
+          0,
+          nullptr, /* path_buffer */
+          0 /* path_buffer_len */);
+
+      if (rc) {
+        RAISEF(kRuntimeError, "zoo_create() failed: $0", getErrorString(rc));
+      }
     }
   } else {
     // update
+    auto path = StringUtil::format("$0/config", path_prefix_);
     auto rc = zoo_set(
         zk_,
         path.c_str(),
@@ -526,30 +576,59 @@ void ZookeeperConfigDirectory::setNamespaceConfigChangeCallback(
 
 void ZookeeperConfigDirectory::updateNamespaceConfig(NamespaceConfig cfg) {
   std::unique_lock<std::mutex> lk(mutex_);
-
   auto buf = msg::encode(cfg);
-  auto path = StringUtil::format(
-      "$0/namespaces/$1/config",
-      path_prefix_,
-      cfg.customer());
 
   if (cfg.version() == 0) {
     // create
-    auto rc = zoo_create(
-        zk_,
-        path.c_str(),
-        (const char*) buf->data(),
-        buf->size(),
-        &ZOO_OPEN_ACL_UNSAFE,
-        0,
-        NULL /* path_buffer */,
-        0 /* path_buffer_len */);
+    // FIXME if we fail between the two creates, we end up with an incomplete namespace
+    {
+      auto path = StringUtil::format(
+          "$0/namespaces/$1/config",
+          path_prefix_,
+          cfg.customer());
 
-    if (rc) {
-      RAISEF(kRuntimeError, "zoo_create() failed: $0", getErrorString(rc));
+      auto rc = zoo_create(
+          zk_,
+          path.c_str(),
+          (const char*) buf->data(),
+          buf->size(),
+          &ZOO_OPEN_ACL_UNSAFE,
+          0,
+          NULL /* path_buffer */,
+          0 /* path_buffer_len */);
+
+      if (rc) {
+        RAISEF(kRuntimeError, "zoo_create() failed: $0", getErrorString(rc));
+      }
+    }
+
+    {
+      auto path = StringUtil::format(
+          "$0/namespaces/$1/tables",
+          path_prefix_,
+          cfg.customer());
+
+      auto rc = zoo_create(
+          zk_,
+          path.c_str(),
+          nullptr,
+          0,
+          &ZOO_OPEN_ACL_UNSAFE,
+          0,
+          nullptr, /* path_buffer */
+          0 /* path_buffer_len */);
+
+      if (rc) {
+        RAISEF(kRuntimeError, "zoo_create() failed: $0", getErrorString(rc));
+      }
     }
   } else {
     // update
+    auto path = StringUtil::format(
+        "$0/namespaces/$1/config",
+        path_prefix_,
+        cfg.customer());
+
     auto rc = zoo_set(
         zk_,
         path.c_str(),

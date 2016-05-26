@@ -35,6 +35,7 @@ public:
 
   ZookeeperConfigDirectory(
       const String& cluster_name,
+      Option<ClusterConfig> create_cluster_config,
       const String& zookeeper_addrs);
 
   ~ZookeeperConfigDirectory();
@@ -90,6 +91,8 @@ protected:
 
   using CallbackList = Vector<Function<void()>>;
 
+  void updateClusterConfigWithLock(ClusterConfig config);
+
   void handleSessionEvent(int state);
   void handleConnectionEstablished();
   void handleConnectionLost();
@@ -126,6 +129,7 @@ protected:
   const char* getErrorString(int code) const;
 
   String cluster_name_;
+  Option<ClusterConfig> create_cluster_config_;
   String zookeeper_addrs_;
   size_t zookeeper_timeout_;
   String path_prefix_;

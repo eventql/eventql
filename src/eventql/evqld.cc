@@ -164,6 +164,14 @@ int main(int argc, const char** argv) {
       "name",
       "<name>");
 
+  flags.defineFlag(
+      "create_cluster",
+      cli::FlagParser::T_SWITCH,
+      false,
+      NULL,
+      NULL,
+      "switch",
+      "<switch>");
 
   flags.defineFlag(
       "join",
@@ -275,6 +283,11 @@ int main(int argc, const char** argv) {
     FileUtil::mkdir(cdb_dir);
   }
 
+  Option<ClusterConfig> create_cluster_config;
+  if (flags.isSet("create_cluster")) {
+    create_cluster_config = Some(ClusterConfig{});
+  }
+
   ScopedPtr<ConfigDirectory> config_dir;
   if (flags.getString("config_backend") == "legacy") {
     config_dir.reset(new LegacyConfigDirectory(
@@ -284,6 +297,7 @@ int main(int argc, const char** argv) {
     config_dir.reset(
         new ZookeeperConfigDirectory(
             flags.getString("cluster"),
+            create_cluster_config,
             flags.getString("zookeeper_addr")));
   } else {
     RAISE(kRuntimeError, "invalid config backend: " + flags.getString("config_backend"));
