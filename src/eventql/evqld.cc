@@ -84,7 +84,7 @@ int main(int argc, const char** argv) {
       cli::FlagParser::T_INTEGER,
       false,
       NULL,
-      "8080",
+      "9175",
       "Start the public http server on this port",
       "<port>");
 

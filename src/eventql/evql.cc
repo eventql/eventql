@@ -426,7 +426,7 @@ int main(int argc, const char** argv) {
       cli::FlagParser::T_INTEGER,
       false,
       "p",
-      "80",
+      "9175",
       "eventql server port",
       "<port>");
 
