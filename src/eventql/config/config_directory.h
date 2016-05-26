@@ -79,7 +79,7 @@ public:
   virtual void setTableConfigChangeCallback(
       Function<void (const TableDefinition& tbl)> fn) = 0;
 
-  virtual void start() = 0;
+  virtual bool start() = 0;
   virtual void stop() = 0;
 
 };

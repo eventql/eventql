@@ -53,10 +53,10 @@ static void zk_watch_cb(
   self->handleZookeeperWatch(zk, type, state, path, ctx);
 }
 
-void ZookeeperConfigDirectory::start() {
+bool ZookeeperConfigDirectory::start() {
   std::unique_lock<std::mutex> lk(mutex_);
   if (state_ != ZKState::INIT) {
-    return;
+    return false;
   }
 
   state_ = ZKState::CONNECTING;
@@ -70,7 +70,8 @@ void ZookeeperConfigDirectory::start() {
       0 /* flags */);
 
   if (!zk_) {
-    RAISE_ERRNO("zookeeper_init failed");
+    logFatal("evqld", "zookeeper_init failed");
+    return false;
   }
 
   while (state_ < ZKState::LOADING) {
@@ -79,11 +80,48 @@ void ZookeeperConfigDirectory::start() {
   }
 
   logInfo("evqld", "Loading config from zookeeper...");
+
+  auto cluster_config_buf = getNode(
+      StringUtil::format("/eventql/$0/config", cluster_name_));
+
+  if (cluster_config_buf.size() == 0) {
+    logFatal("evqld", "Cluster '$0' does not exist", cluster_name_);
+    return false;
+  }
+
+  return true;
 }
 
 void ZookeeperConfigDirectory::stop() {
   zookeeper_close(zk_);
   zk_ = nullptr;
+}
+
+Buffer ZookeeperConfigDirectory::getNode(
+    String key,
+    struct Stat* stat /* = nullptr */) {
+  int buf_len = 4096;
+  Buffer buf(buf_len);
+
+  auto rc = zoo_get(
+      zk_,
+      key.c_str(),
+      0,
+      (char*) buf.data(),
+      &buf_len,
+      stat);
+
+  if (rc) {
+    RAISE(kRuntimeError, "zoo_get() failed: $0", rc);
+  }
+
+  if (buf_len > 0) {
+    buf.resize(buf_len);
+  } else {
+    buf.resize(0);
+  }
+
+  return buf;
 }
 
 /**

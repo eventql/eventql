@@ -69,7 +69,7 @@ public:
   void setTableConfigChangeCallback(
       Function<void (const TableDefinition& tbl)> fn) override;
 
-  void start() override;
+  bool start() override;
   void stop() override;
 
   /** don't call this! (can't be private b/c it needs to be called from c binding) */
@@ -91,6 +91,10 @@ protected:
     CLOSED = 5
   };
 
+  Buffer getNode(
+      String key,
+      struct Stat* stat = nullptr);
+
   void handleSessionEvent(
       zhandle_t* zk,
       int type,
@@ -110,6 +114,7 @@ protected:
   zhandle_t* zk_;
   std::mutex mutex_;
   std::condition_variable cv_;
+  ClusterConfig cluster_config_;
 };
 
 } // namespace eventql
