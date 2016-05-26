@@ -91,8 +91,9 @@ protected:
     CLOSED = 5
   };
 
-  Buffer getNode(
+  bool getNode(
       String key,
+      Buffer* buf,
       struct Stat* stat = nullptr);
 
   void handleSessionEvent(

@@ -70,7 +70,7 @@ bool ZookeeperConfigDirectory::start() {
       0 /* flags */);
 
   if (!zk_) {
-    logFatal("evqld", "zookeeper_init failed");
+    logError("evqld", "zookeeper_init failed");
     return false;
   }
 
@@ -81,12 +81,9 @@ bool ZookeeperConfigDirectory::start() {
 
   logInfo("evqld", "Loading config from zookeeper...");
 
-  auto cluster_config_buf = getNode(
-      StringUtil::format("/eventql/$0/config", cluster_name_));
-
-  if (cluster_config_buf.size() == 0) {
-    logFatal("evqld", "Cluster '$0' does not exist", cluster_name_);
-    return false;
+  Buffer buf(4096);
+  if (!getNode(StringUtil::format("/eventql/$0/config", cluster_name_), &buf)) {
+    logWarning("evqld", "Cluster '$0' does not exist", cluster_name_);
   }
 
   return true;
@@ -97,31 +94,31 @@ void ZookeeperConfigDirectory::stop() {
   zk_ = nullptr;
 }
 
-Buffer ZookeeperConfigDirectory::getNode(
+bool ZookeeperConfigDirectory::getNode(
     String key,
+    Buffer* buf,
     struct Stat* stat /* = nullptr */) {
-  int buf_len = 4096;
-  Buffer buf(buf_len);
+  int buf_len = buf->size();
 
   auto rc = zoo_get(
       zk_,
       key.c_str(),
       0,
-      (char*) buf.data(),
+      (char*) buf->data(),
       &buf_len,
       stat);
 
   if (rc) {
-    RAISE(kRuntimeError, "zoo_get() failed: $0", rc);
+    return false;
   }
 
   if (buf_len > 0) {
-    buf.resize(buf_len);
+    buf->resize(buf_len);
   } else {
-    buf.resize(0);
+    buf->resize(0);
   }
 
-  return buf;
+  return true;
 }
 
 /**
