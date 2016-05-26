@@ -91,6 +91,18 @@ protected:
     CLOSED = 5
   };
 
+  void handleSessionEvent(
+      zhandle_t* zk,
+      int type,
+      int state,
+      const char* path,
+      void* ctx);
+
+  void handleConnectionEstablished();
+  void handleConnectionLost();
+
+  void loadConfig();
+
   String cluster_name_;
   String zookeeper_addrs_;
   size_t zookeeper_timeout_;

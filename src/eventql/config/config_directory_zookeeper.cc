@@ -54,6 +54,13 @@ static void zk_watch_cb(
 }
 
 void ZookeeperConfigDirectory::start() {
+  std::unique_lock<std::mutex> lk(mutex_);
+  if (state_ != ZKState::INIT) {
+    return;
+  }
+
+  state_ = ZKState::CONNECTING;
+
   zk_ = zookeeper_init(
       zookeeper_addrs_.c_str(),
       &zk_watch_cb,
@@ -66,24 +73,24 @@ void ZookeeperConfigDirectory::start() {
     RAISE_ERRNO("zookeeper_init failed");
   }
 
-  {
-    std::unique_lock<std::mutex> lk(mutex_);
-    while (state_ < ZKState::CONNECTED) {
-      if (state_ == ZKState::LOADING) {
-        logInfo("evqld", "Loading config from zookeeper...");
-      } else {
-        logInfo("evqld", "Waiting for zookeeper ($0)", zookeeper_addrs_);
-      }
-
-      cv_.wait_for(lk, std::chrono::seconds(1));
-    }
+  while (state_ < ZKState::LOADING) {
+    logInfo("evqld", "Waiting for zookeeper ($0)", zookeeper_addrs_);
+    cv_.wait_for(lk, std::chrono::seconds(1));
   }
+
+  logInfo("evqld", "Loading config from zookeeper...");
 }
 
 void ZookeeperConfigDirectory::stop() {
   zookeeper_close(zk_);
   zk_ = nullptr;
 }
+
+/**
+ * NOTE: if you're reading this and thinking  "wow, paul doesn't know what a
+ * switch statement is, what an idiot" then think again. zookeeper.h defines
+ * all states as extern int's so we can't switch over them :(
+ */
 
 void ZookeeperConfigDirectory::handleZookeeperWatch(
     zhandle_t* zk,
@@ -92,8 +99,89 @@ void ZookeeperConfigDirectory::handleZookeeperWatch(
     const char* path,
     void* ctx) {
   std::unique_lock<std::mutex> lk(mutex_);
+
+  if (type == ZOO_SESSION_EVENT) {
+    handleSessionEvent(zk, type, state, path, ctx);
+  }
+
   cv_.notify_all();
-  iputs("got zk watch... $0, $1, $2, $3", type, state, path, ctx);
+}
+
+void ZookeeperConfigDirectory::handleSessionEvent(
+    zhandle_t* zk,
+    int type,
+    int state,
+    const char* path,
+    void* ctx) {
+
+  if (state == ZOO_EXPIRED_SESSION_STATE ||
+      state == ZOO_EXPIRED_SESSION_STATE ||
+      state == ZOO_AUTH_FAILED_STATE) {
+    handleConnectionLost();
+    return;
+  }
+
+  if (state == ZOO_CONNECTED_STATE) {
+    handleConnectionEstablished();
+    return;
+  }
+
+  if (state == ZOO_CONNECTING_STATE ||
+      state == ZOO_ASSOCIATING_STATE) {
+    return;
+  }
+
+  logCritical("evqld", "ERROR: invalid zookeeper state: $0", state);
+  handleConnectionLost();
+}
+
+void ZookeeperConfigDirectory::handleConnectionEstablished() {
+  switch (state_) {
+    case ZKState::CONNECTING:
+      logInfo("evqld", "Zookeeper connection established");
+      state_ = ZKState::LOADING;
+      return;
+
+    case ZKState::CONNECTION_LOST:
+      logInfo("evqld", "Zookeeper connection re-established");
+      return;
+
+    case ZKState::INIT:
+    case ZKState::LOADING:
+    case ZKState::CLOSED:
+    case ZKState::CONNECTED:
+      logCritical(
+          "evqld",
+          "ERROR: invalid zookeeper state in handleConnectionEstablished");
+      return;
+  }
+}
+
+void ZookeeperConfigDirectory::handleConnectionLost() {
+  switch (state_) {
+    case ZKState::CONNECTING:
+      logError("evqld", "Zookeeper connection failed");
+      return;
+
+    case ZKState::LOADING:
+      logInfo("evqld", "Zookeeper connection lost while loading");
+      state_ = ZKState::CONNECTING;
+      return;
+
+    case ZKState::CONNECTED:
+    case ZKState::CONNECTION_LOST:
+      logWarning("evqld", "Zookeeper connection lost");
+      state_ = ZKState::CONNECTION_LOST;
+      return;
+
+    case ZKState::INIT:
+    case ZKState::CLOSED:
+      state_ = ZKState::CONNECTION_LOST;
+      logCritical(
+          "evqld",
+          "ERROR: invalid zookeeper state in handleConnectionLost");
+      return;
+  }
 }
 
 ClusterConfig ZookeeperConfigDirectory::getClusterConfig() const {
