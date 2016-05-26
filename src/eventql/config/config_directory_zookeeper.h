@@ -35,6 +35,8 @@ public:
       const String& cluster_name,
       const String& zookeeper_addrs);
 
+  ~ZookeeperConfigDirectory();
+
   ClusterConfig getClusterConfig() const override;
 
   void updateClusterConfig(ClusterConfig config) override;

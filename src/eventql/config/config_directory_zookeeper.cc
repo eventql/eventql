@@ -30,8 +30,15 @@ ZookeeperConfigDirectory::ZookeeperConfigDirectory(
     const String& cluster_name,
     const String& zookeeper_addrs) :
     cluster_name_(cluster_name),
-    zookeeper_addrs_(zookeeper_addrs) {
+    zookeeper_addrs_(zookeeper_addrs),
+    zk_(nullptr) {
   zoo_set_debug_level(ZOO_LOG_LEVEL_DEBUG);
+}
+
+ZookeeperConfigDirectory::~ZookeeperConfigDirectory() {
+  if (zk_) {
+    zookeeper_close(zk_);
+  }
 }
 
 static void zk_watch_cb(
@@ -61,6 +68,7 @@ void ZookeeperConfigDirectory::start() {
 
 void ZookeeperConfigDirectory::stop() {
   zookeeper_close(zk_);
+  zk_ = nullptr;
 }
 
 void ZookeeperConfigDirectory::handleZookeeperWatch(
