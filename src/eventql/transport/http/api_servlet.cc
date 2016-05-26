@@ -939,10 +939,10 @@ void AnalyticsServlet::getAuthInfo(
   json.addObjectEntry("valid");
   json.addTrue();
   json.addComma();
-  json.addObjectEntry("customer");
+  json.addObjectEntry("namespace");
   json.addString(session->getEffectiveNamespace());
   json.addComma();
-  json.addObjectEntry("userid");
+  json.addObjectEntry("user_id");
   json.addString(session->getUserID());
   json.endObject();
 
