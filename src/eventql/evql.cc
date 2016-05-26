@@ -505,7 +505,6 @@ int main(int argc, const char** argv) {
   eventql::cli::CLIConfig cli_cfg;
   {
     auto status = cli_cfg.loadDefaultConfigFile();
-    iputs("status $0", status);
     if (!status.isSuccess()) {
       printError(status.message());
       return 1;

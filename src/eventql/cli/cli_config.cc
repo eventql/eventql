@@ -94,7 +94,9 @@ Status CLIConfig::setConfigOption(
       return setBatchMode(value);
     }
   }
-  return Status(eParseError);
+  return Status(
+      eParseError,
+      StringUtil::format("invalid option '$0' in config file", key));
 }
 
 Status CLIConfig::setHost(const String& host /* = "localhost" */) {
