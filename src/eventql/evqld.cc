@@ -294,9 +294,12 @@ int main(int argc, const char** argv) {
   js::DisableExtraThreads();
 
   try {
-    if (!config_dir->start()) {
-      logFatal("evqld", "Can't connect to config backend, exiting...");
-      return 1;
+    {
+      auto rc = config_dir->start();
+      if (!rc.isSuccess()) {
+        logFatal("evqld", "Can't connect to config backend: $0", rc.message());
+        return 1;
+      }
     }
 
     /* clusterconfig */

@@ -47,7 +47,7 @@ ZookeeperConfigDirectory::ZookeeperConfigDirectory(
     path_prefix_(StringUtil::format("/eventql/$0", cluster_name_)),
     state_(ZKState::INIT),
     zk_(nullptr) {
-  zoo_set_debug_level(ZOO_LOG_LEVEL_DEBUG);
+  zoo_set_debug_level(ZOO_LOG_LEVEL_ERROR);
 }
 
 ZookeeperConfigDirectory::~ZookeeperConfigDirectory() {
@@ -67,10 +67,10 @@ static void zk_watch_cb(
   self->handleZookeeperWatch(zk, type, state, path, ctx);
 }
 
-bool ZookeeperConfigDirectory::start() {
+Status ZookeeperConfigDirectory::start() {
   std::unique_lock<std::mutex> lk(mutex_);
   if (state_ != ZKState::INIT) {
-    return false;
+    return Status(eIllegalStateError, "state != ZK_INIT");
   }
 
   state_ = ZKState::CONNECTING;
@@ -84,8 +84,7 @@ bool ZookeeperConfigDirectory::start() {
       0 /* flags */);
 
   if (!zk_) {
-    logError("evqld", "zookeeper_init failed");
-    return false;
+    return Status(eIOError, "zookeeper_init failed");
   }
 
   while (state_ < ZKState::LOADING) {
@@ -93,30 +92,107 @@ bool ZookeeperConfigDirectory::start() {
     cv_.wait_for(lk, std::chrono::seconds(1));
   }
 
+  auto rc = sync();
+  if (!rc.isSuccess()) {
+    return rc;
+  }
+
+  state_ = ZKState::CONNECTED;
+
+  return Status::success();
+}
+
+// PRECONDITION: must hold mutex
+Status ZookeeperConfigDirectory::sync() {
   logInfo("evqld", "Loading config from zookeeper...");
 
   if (!getProtoNode(path_prefix_ + "/config", &cluster_config_, true)) {
-    logError("evqld", "Cluster '$0' does not exist", cluster_name_);
-    return false;
+    return Status(
+        eNotFoundError,
+        StringUtil::format("Cluster '$0' does not exist", cluster_name_));
   }
 
   Vector<String> namespaces;
   {
-    Status rc = listChildren(path_prefix_ + "/namespaces", &namespaces, true);
+    auto rc = listChildren(path_prefix_ + "/namespaces", &namespaces, true);
     if (!rc.isSuccess()) {
-      logError("evqld", "ZooKeeper Error: '$0'", rc.message());
-      return false;
+      return rc;
     }
   }
 
   for (const auto& ns : namespaces) {
-    logDebug("evqld", "Loading namespace config from zookeeper: '$0'", ns);
-
+    auto rc = syncNamespace(ns);
+    if (!rc.isSuccess()) {
+      return rc;
+    }
   }
 
-  return true;
+  return Status::success();
 }
 
+// PRECONDITION: must hold mutex
+Status ZookeeperConfigDirectory::syncNamespace(const String& ns) {
+  logDebug("evqld", "Loading namespace config from zookeeper: '$0'", ns);
+
+  {
+    auto key = StringUtil::format("$0/namespaces/$1/config", path_prefix_, ns);
+    NamespaceConfig ns_config;
+    if (!getProtoNode(key, &ns_config, true)) {
+      return Status(
+          eNotFoundError,
+          StringUtil::format("namespace '$0' does not exist", ns));
+    }
+
+    namespaces_[ns] = ns_config;
+  }
+
+  Vector<String> tables;
+  {
+    auto key = StringUtil::format("$0/namespaces/$1/tables", path_prefix_, ns);
+    auto rc = listChildren(key, &tables, true);
+    if (!rc.isSuccess()) {
+      return rc;
+    }
+  }
+
+  for (const auto& table : tables) {
+    auto rc = syncTable(ns, table);
+    if (!rc.isSuccess()) {
+      return rc;
+    }
+  }
+
+  return Status::success();
+}
+
+// PRECONDITION: must hold mutex
+Status ZookeeperConfigDirectory::syncTable(
+    const String& ns,
+    const String& table_name) {
+  logDebug(
+      "evqld",
+      "Loading table config from zookeeper: '$0/$1'",
+      ns,
+      table_name);
+
+  auto key = StringUtil::format(
+      "$0/namespaces/$1/tables/$2",
+      path_prefix_,
+      ns,
+      table_name);
+
+  TableDefinition tbl_config;
+  if (!getProtoNode(key, &tbl_config, true)) {
+    return Status(
+        eNotFoundError,
+        StringUtil::format("table '$0/$1' does not exist", ns, table_name));
+  }
+
+  tables_[ns + "~" + table_name] = tbl_config;
+  return Status::success();
+}
+
+// PRECONDITION: must NOT hold mutex
 void ZookeeperConfigDirectory::stop() {
   zookeeper_close(zk_);
   zk_ = nullptr;

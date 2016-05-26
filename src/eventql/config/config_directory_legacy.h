@@ -66,7 +66,7 @@ public:
   void setTableConfigChangeCallback(
       Function<void (const TableDefinition& tbl)> fn) override;
 
-  bool start() override;
+  Status start() override;
   void stop() override;
 
 protected:

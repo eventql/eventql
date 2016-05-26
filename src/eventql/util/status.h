@@ -47,6 +47,7 @@ enum kStatusType {
   eNoSuchMethodError,
   eNotImplementedError,
   eNotYetImplementedError,
+  eNotFoundError,
   eNullPointerError,
   eParseError,
   eRangeError,

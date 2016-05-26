@@ -70,7 +70,7 @@ public:
   void setTableConfigChangeCallback(
       Function<void (const TableDefinition& tbl)> fn) override;
 
-  bool start() override;
+  Status start() override;
   void stop() override;
 
   /** don't call this! (can't be private b/c it needs to be called from c binding) */
@@ -122,7 +122,9 @@ protected:
   void handleConnectionEstablished();
   void handleConnectionLost();
 
-  void loadConfig();
+  Status sync();
+  Status syncNamespace(const String& ns);
+  Status syncTable(const String& ns, const String& table_name);
 
   const char* getErrorString(int code) const;
 
