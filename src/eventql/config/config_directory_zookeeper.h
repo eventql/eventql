@@ -81,9 +81,23 @@ public:
       void* ctx);
 
 protected:
+
+  enum class ZKState {
+    INIT = 0,
+    CONNECTING = 1,
+    LOADING = 2,
+    CONNECTED = 3,
+    CONNECTION_LOST = 4,
+    CLOSED = 5
+  };
+
   String cluster_name_;
   String zookeeper_addrs_;
+  size_t zookeeper_timeout_;
+  ZKState state_;
   zhandle_t* zk_;
+  std::mutex mutex_;
+  std::condition_variable cv_;
 };
 
 } // namespace eventql

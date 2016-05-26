@@ -31,6 +31,7 @@ ZookeeperConfigDirectory::ZookeeperConfigDirectory(
     const String& zookeeper_addrs) :
     cluster_name_(cluster_name),
     zookeeper_addrs_(zookeeper_addrs),
+    zookeeper_timeout_(10000),
     zk_(nullptr) {
   zoo_set_debug_level(ZOO_LOG_LEVEL_DEBUG);
 }
@@ -56,7 +57,7 @@ void ZookeeperConfigDirectory::start() {
   zk_ = zookeeper_init(
       zookeeper_addrs_.c_str(),
       &zk_watch_cb,
-      10000, /* recv timeout in microseconds */
+      zookeeper_timeout_,
       0, /* client id */
       this,
       0 /* flags */);
@@ -65,8 +66,17 @@ void ZookeeperConfigDirectory::start() {
     RAISE_ERRNO("zookeeper_init failed");
   }
 
-  for (;;) {
-    usleep(1000);
+  {
+    std::unique_lock<std::mutex> lk(mutex_);
+    while (state_ < ZKState::CONNECTED) {
+      if (state_ == ZKState::LOADING) {
+        logInfo("evqld", "Loading config from zookeeper...");
+      } else {
+        logInfo("evqld", "Waiting for zookeeper ($0)", zookeeper_addrs_);
+      }
+
+      cv_.wait_for(lk, std::chrono::seconds(1));
+    }
   }
 }
 
@@ -81,6 +91,8 @@ void ZookeeperConfigDirectory::handleZookeeperWatch(
     int state,
     const char* path,
     void* ctx) {
+  std::unique_lock<std::mutex> lk(mutex_);
+  cv_.notify_all();
   iputs("got zk watch... $0, $1, $2, $3", type, state, path, ctx);
 }
 
