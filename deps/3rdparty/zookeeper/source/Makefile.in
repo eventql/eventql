@@ -171,7 +171,9 @@ am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)" \
 	"$(DESTDIR)$(pkgincludedir)"
 LTLIBRARIES = $(lib_LTLIBRARIES) $(noinst_LTLIBRARIES)
 libhashtable_la_LIBADD =
-am__objects_1 = hashtable_itr.lo hashtable.lo
+am__dirstamp = $(am__leading_dot)dirstamp
+am__objects_1 = src/hashtable/hashtable_itr.lo \
+	src/hashtable/hashtable.lo
 am_libhashtable_la_OBJECTS = $(am__objects_1)
 libhashtable_la_OBJECTS = $(am_libhashtable_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
@@ -185,20 +187,20 @@ am__libzkmt_la_SOURCES_DIST = src/zookeeper.c include/zookeeper.h \
 	src/zk_adaptor.h generated/zookeeper.jute.c \
 	src/zookeeper_log.h src/zk_log.c src/zk_hashtable.h \
 	src/zk_hashtable.c src/mt_adaptor.c
-am__objects_2 = libzkmt_la-zookeeper.lo libzkmt_la-recordio.lo \
-	libzkmt_la-zookeeper.jute.lo libzkmt_la-zk_log.lo \
-	libzkmt_la-zk_hashtable.lo
+am__objects_2 = src/libzkmt_la-zookeeper.lo src/libzkmt_la-recordio.lo \
+	generated/libzkmt_la-zookeeper.jute.lo \
+	src/libzkmt_la-zk_log.lo src/libzkmt_la-zk_hashtable.lo
 @WANT_SYNCAPI_TRUE@am_libzkmt_la_OBJECTS = $(am__objects_2) \
-@WANT_SYNCAPI_TRUE@	libzkmt_la-mt_adaptor.lo
+@WANT_SYNCAPI_TRUE@	src/libzkmt_la-mt_adaptor.lo
 libzkmt_la_OBJECTS = $(am_libzkmt_la_OBJECTS)
 libzkmt_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(libzkmt_la_CFLAGS) \
 	$(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 @WANT_SYNCAPI_TRUE@am_libzkmt_la_rpath =
 libzkst_la_DEPENDENCIES =
-am__objects_3 = zookeeper.lo recordio.lo zookeeper.jute.lo zk_log.lo \
-	zk_hashtable.lo
-am_libzkst_la_OBJECTS = $(am__objects_3) st_adaptor.lo
+am__objects_3 = src/zookeeper.lo src/recordio.lo \
+	generated/zookeeper.jute.lo src/zk_log.lo src/zk_hashtable.lo
+am_libzkst_la_OBJECTS = $(am__objects_3) src/st_adaptor.lo
 libzkst_la_OBJECTS = $(am_libzkst_la_OBJECTS)
 am_libzookeeper_mt_la_OBJECTS =
 libzookeeper_mt_la_OBJECTS = $(am_libzookeeper_mt_la_OBJECTS)
@@ -217,49 +219,58 @@ libzookeeper_st_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
 @WANT_SYNCAPI_TRUE@am__EXEEXT_2 = zktest-mt$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS)
 am__cli_mt_SOURCES_DIST = src/cli.c
-@WANT_SYNCAPI_TRUE@am_cli_mt_OBJECTS = cli_mt-cli.$(OBJEXT)
+@WANT_SYNCAPI_TRUE@am_cli_mt_OBJECTS = src/cli_mt-cli.$(OBJEXT)
 cli_mt_OBJECTS = $(am_cli_mt_OBJECTS)
 @WANT_SYNCAPI_TRUE@cli_mt_DEPENDENCIES = libzookeeper_mt.la
 cli_mt_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(cli_mt_CFLAGS) $(CFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
-am_cli_st_OBJECTS = cli.$(OBJEXT)
+am_cli_st_OBJECTS = src/cli.$(OBJEXT)
 cli_st_OBJECTS = $(am_cli_st_OBJECTS)
 cli_st_DEPENDENCIES = libzookeeper_st.la
 am__load_gen_SOURCES_DIST = src/load_gen.c
-@WANT_SYNCAPI_TRUE@am_load_gen_OBJECTS = load_gen-load_gen.$(OBJEXT)
+@WANT_SYNCAPI_TRUE@am_load_gen_OBJECTS =  \
+@WANT_SYNCAPI_TRUE@	src/load_gen-load_gen.$(OBJEXT)
 load_gen_OBJECTS = $(am_load_gen_OBJECTS)
 @WANT_SYNCAPI_TRUE@load_gen_DEPENDENCIES = libzookeeper_mt.la
 load_gen_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(load_gen_CFLAGS) \
 	$(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-am__objects_4 = zktest_mt-TestDriver.$(OBJEXT) \
-	zktest_mt-LibCMocks.$(OBJEXT) zktest_mt-LibCSymTable.$(OBJEXT) \
-	zktest_mt-MocksBase.$(OBJEXT) zktest_mt-ZKMocks.$(OBJEXT) \
-	zktest_mt-Util.$(OBJEXT) zktest_mt-ThreadingUtil.$(OBJEXT) \
-	zktest_mt-TestClientRetry.$(OBJEXT) \
-	zktest_mt-TestOperations.$(OBJEXT) \
-	zktest_mt-TestZookeeperInit.$(OBJEXT) \
-	zktest_mt-TestZookeeperClose.$(OBJEXT) \
-	zktest_mt-TestClient.$(OBJEXT) zktest_mt-TestMulti.$(OBJEXT) \
-	zktest_mt-TestWatchers.$(OBJEXT)
+am__objects_4 = tests/zktest_mt-TestDriver.$(OBJEXT) \
+	tests/zktest_mt-LibCMocks.$(OBJEXT) \
+	tests/zktest_mt-LibCSymTable.$(OBJEXT) \
+	tests/zktest_mt-MocksBase.$(OBJEXT) \
+	tests/zktest_mt-ZKMocks.$(OBJEXT) \
+	tests/zktest_mt-Util.$(OBJEXT) \
+	tests/zktest_mt-ThreadingUtil.$(OBJEXT) \
+	tests/zktest_mt-TestClientRetry.$(OBJEXT) \
+	tests/zktest_mt-TestOperations.$(OBJEXT) \
+	tests/zktest_mt-TestZookeeperInit.$(OBJEXT) \
+	tests/zktest_mt-TestZookeeperClose.$(OBJEXT) \
+	tests/zktest_mt-TestClient.$(OBJEXT) \
+	tests/zktest_mt-TestMulti.$(OBJEXT) \
+	tests/zktest_mt-TestWatchers.$(OBJEXT)
 @WANT_SYNCAPI_TRUE@nodist_zktest_mt_OBJECTS = $(am__objects_4) \
-@WANT_SYNCAPI_TRUE@	zktest_mt-PthreadMocks.$(OBJEXT)
+@WANT_SYNCAPI_TRUE@	tests/zktest_mt-PthreadMocks.$(OBJEXT)
 zktest_mt_OBJECTS = $(nodist_zktest_mt_OBJECTS)
 @WANT_SYNCAPI_TRUE@zktest_mt_DEPENDENCIES = libzkmt.la libhashtable.la
 zktest_mt_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(zktest_mt_CXXFLAGS) \
 	$(CXXFLAGS) $(zktest_mt_LDFLAGS) $(LDFLAGS) -o $@
-am__objects_5 = zktest_st-TestDriver.$(OBJEXT) \
-	zktest_st-LibCMocks.$(OBJEXT) zktest_st-LibCSymTable.$(OBJEXT) \
-	zktest_st-MocksBase.$(OBJEXT) zktest_st-ZKMocks.$(OBJEXT) \
-	zktest_st-Util.$(OBJEXT) zktest_st-ThreadingUtil.$(OBJEXT) \
-	zktest_st-TestClientRetry.$(OBJEXT) \
-	zktest_st-TestOperations.$(OBJEXT) \
-	zktest_st-TestZookeeperInit.$(OBJEXT) \
-	zktest_st-TestZookeeperClose.$(OBJEXT) \
-	zktest_st-TestClient.$(OBJEXT) zktest_st-TestMulti.$(OBJEXT) \
-	zktest_st-TestWatchers.$(OBJEXT)
+am__objects_5 = tests/zktest_st-TestDriver.$(OBJEXT) \
+	tests/zktest_st-LibCMocks.$(OBJEXT) \
+	tests/zktest_st-LibCSymTable.$(OBJEXT) \
+	tests/zktest_st-MocksBase.$(OBJEXT) \
+	tests/zktest_st-ZKMocks.$(OBJEXT) \
+	tests/zktest_st-Util.$(OBJEXT) \
+	tests/zktest_st-ThreadingUtil.$(OBJEXT) \
+	tests/zktest_st-TestClientRetry.$(OBJEXT) \
+	tests/zktest_st-TestOperations.$(OBJEXT) \
+	tests/zktest_st-TestZookeeperInit.$(OBJEXT) \
+	tests/zktest_st-TestZookeeperClose.$(OBJEXT) \
+	tests/zktest_st-TestClient.$(OBJEXT) \
+	tests/zktest_st-TestMulti.$(OBJEXT) \
+	tests/zktest_st-TestWatchers.$(OBJEXT)
 nodist_zktest_st_OBJECTS = $(am__objects_5)
 zktest_st_OBJECTS = $(nodist_zktest_st_OBJECTS)
 zktest_st_DEPENDENCIES = libzkst.la libhashtable.la
@@ -717,12 +728,53 @@ clean-noinstLTLIBRARIES:
 	  echo rm -f $${locs}; \
 	  rm -f $${locs}; \
 	}
+src/hashtable/$(am__dirstamp):
+	@$(MKDIR_P) src/hashtable
+	@: > src/hashtable/$(am__dirstamp)
+src/hashtable/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) src/hashtable/$(DEPDIR)
+	@: > src/hashtable/$(DEPDIR)/$(am__dirstamp)
+src/hashtable/hashtable_itr.lo: src/hashtable/$(am__dirstamp) \
+	src/hashtable/$(DEPDIR)/$(am__dirstamp)
+src/hashtable/hashtable.lo: src/hashtable/$(am__dirstamp) \
+	src/hashtable/$(DEPDIR)/$(am__dirstamp)
 
 libhashtable.la: $(libhashtable_la_OBJECTS) $(libhashtable_la_DEPENDENCIES) $(EXTRA_libhashtable_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(LINK)  $(libhashtable_la_OBJECTS) $(libhashtable_la_LIBADD) $(LIBS)
+src/$(am__dirstamp):
+	@$(MKDIR_P) src
+	@: > src/$(am__dirstamp)
+src/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) src/$(DEPDIR)
+	@: > src/$(DEPDIR)/$(am__dirstamp)
+src/libzkmt_la-zookeeper.lo: src/$(am__dirstamp) \
+	src/$(DEPDIR)/$(am__dirstamp)
+src/libzkmt_la-recordio.lo: src/$(am__dirstamp) \
+	src/$(DEPDIR)/$(am__dirstamp)
+generated/$(am__dirstamp):
+	@$(MKDIR_P) generated
+	@: > generated/$(am__dirstamp)
+generated/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) generated/$(DEPDIR)
+	@: > generated/$(DEPDIR)/$(am__dirstamp)
+generated/libzkmt_la-zookeeper.jute.lo: generated/$(am__dirstamp) \
+	generated/$(DEPDIR)/$(am__dirstamp)
+src/libzkmt_la-zk_log.lo: src/$(am__dirstamp) \
+	src/$(DEPDIR)/$(am__dirstamp)
+src/libzkmt_la-zk_hashtable.lo: src/$(am__dirstamp) \
+	src/$(DEPDIR)/$(am__dirstamp)
+src/libzkmt_la-mt_adaptor.lo: src/$(am__dirstamp) \
+	src/$(DEPDIR)/$(am__dirstamp)
 
 libzkmt.la: $(libzkmt_la_OBJECTS) $(libzkmt_la_DEPENDENCIES) $(EXTRA_libzkmt_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(libzkmt_la_LINK) $(am_libzkmt_la_rpath) $(libzkmt_la_OBJECTS) $(libzkmt_la_LIBADD) $(LIBS)
+src/zookeeper.lo: src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
+src/recordio.lo: src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
+generated/zookeeper.jute.lo: generated/$(am__dirstamp) \
+	generated/$(DEPDIR)/$(am__dirstamp)
+src/zk_log.lo: src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
+src/zk_hashtable.lo: src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
+src/st_adaptor.lo: src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
 
 libzkst.la: $(libzkst_la_OBJECTS) $(libzkst_la_DEPENDENCIES) $(EXTRA_libzkst_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(LINK)  $(libzkst_la_OBJECTS) $(libzkst_la_LIBADD) $(LIBS)
@@ -790,22 +842,91 @@ clean-checkPROGRAMS:
 	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
 	echo " rm -f" $$list; \
 	rm -f $$list
+src/cli_mt-cli.$(OBJEXT): src/$(am__dirstamp) \
+	src/$(DEPDIR)/$(am__dirstamp)
 
 cli_mt$(EXEEXT): $(cli_mt_OBJECTS) $(cli_mt_DEPENDENCIES) $(EXTRA_cli_mt_DEPENDENCIES) 
 	@rm -f cli_mt$(EXEEXT)
 	$(AM_V_CCLD)$(cli_mt_LINK) $(cli_mt_OBJECTS) $(cli_mt_LDADD) $(LIBS)
+src/cli.$(OBJEXT): src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
 
 cli_st$(EXEEXT): $(cli_st_OBJECTS) $(cli_st_DEPENDENCIES) $(EXTRA_cli_st_DEPENDENCIES) 
 	@rm -f cli_st$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(cli_st_OBJECTS) $(cli_st_LDADD) $(LIBS)
+src/load_gen-load_gen.$(OBJEXT): src/$(am__dirstamp) \
+	src/$(DEPDIR)/$(am__dirstamp)
 
 load_gen$(EXEEXT): $(load_gen_OBJECTS) $(load_gen_DEPENDENCIES) $(EXTRA_load_gen_DEPENDENCIES) 
 	@rm -f load_gen$(EXEEXT)
 	$(AM_V_CCLD)$(load_gen_LINK) $(load_gen_OBJECTS) $(load_gen_LDADD) $(LIBS)
+tests/$(am__dirstamp):
+	@$(MKDIR_P) tests
+	@: > tests/$(am__dirstamp)
+tests/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) tests/$(DEPDIR)
+	@: > tests/$(DEPDIR)/$(am__dirstamp)
+tests/zktest_mt-TestDriver.$(OBJEXT): tests/$(am__dirstamp) \
+	tests/$(DEPDIR)/$(am__dirstamp)
+tests/zktest_mt-LibCMocks.$(OBJEXT): tests/$(am__dirstamp) \
+	tests/$(DEPDIR)/$(am__dirstamp)
+tests/zktest_mt-LibCSymTable.$(OBJEXT): tests/$(am__dirstamp) \
+	tests/$(DEPDIR)/$(am__dirstamp)
+tests/zktest_mt-MocksBase.$(OBJEXT): tests/$(am__dirstamp) \
+	tests/$(DEPDIR)/$(am__dirstamp)
+tests/zktest_mt-ZKMocks.$(OBJEXT): tests/$(am__dirstamp) \
+	tests/$(DEPDIR)/$(am__dirstamp)
+tests/zktest_mt-Util.$(OBJEXT): tests/$(am__dirstamp) \
+	tests/$(DEPDIR)/$(am__dirstamp)
+tests/zktest_mt-ThreadingUtil.$(OBJEXT): tests/$(am__dirstamp) \
+	tests/$(DEPDIR)/$(am__dirstamp)
+tests/zktest_mt-TestClientRetry.$(OBJEXT): tests/$(am__dirstamp) \
+	tests/$(DEPDIR)/$(am__dirstamp)
+tests/zktest_mt-TestOperations.$(OBJEXT): tests/$(am__dirstamp) \
+	tests/$(DEPDIR)/$(am__dirstamp)
+tests/zktest_mt-TestZookeeperInit.$(OBJEXT): tests/$(am__dirstamp) \
+	tests/$(DEPDIR)/$(am__dirstamp)
+tests/zktest_mt-TestZookeeperClose.$(OBJEXT): tests/$(am__dirstamp) \
+	tests/$(DEPDIR)/$(am__dirstamp)
+tests/zktest_mt-TestClient.$(OBJEXT): tests/$(am__dirstamp) \
+	tests/$(DEPDIR)/$(am__dirstamp)
+tests/zktest_mt-TestMulti.$(OBJEXT): tests/$(am__dirstamp) \
+	tests/$(DEPDIR)/$(am__dirstamp)
+tests/zktest_mt-TestWatchers.$(OBJEXT): tests/$(am__dirstamp) \
+	tests/$(DEPDIR)/$(am__dirstamp)
+tests/zktest_mt-PthreadMocks.$(OBJEXT): tests/$(am__dirstamp) \
+	tests/$(DEPDIR)/$(am__dirstamp)
 
 zktest-mt$(EXEEXT): $(zktest_mt_OBJECTS) $(zktest_mt_DEPENDENCIES) $(EXTRA_zktest_mt_DEPENDENCIES) 
 	@rm -f zktest-mt$(EXEEXT)
 	$(AM_V_CXXLD)$(zktest_mt_LINK) $(zktest_mt_OBJECTS) $(zktest_mt_LDADD) $(LIBS)
+tests/zktest_st-TestDriver.$(OBJEXT): tests/$(am__dirstamp) \
+	tests/$(DEPDIR)/$(am__dirstamp)
+tests/zktest_st-LibCMocks.$(OBJEXT): tests/$(am__dirstamp) \
+	tests/$(DEPDIR)/$(am__dirstamp)
+tests/zktest_st-LibCSymTable.$(OBJEXT): tests/$(am__dirstamp) \
+	tests/$(DEPDIR)/$(am__dirstamp)
+tests/zktest_st-MocksBase.$(OBJEXT): tests/$(am__dirstamp) \
+	tests/$(DEPDIR)/$(am__dirstamp)
+tests/zktest_st-ZKMocks.$(OBJEXT): tests/$(am__dirstamp) \
+	tests/$(DEPDIR)/$(am__dirstamp)
+tests/zktest_st-Util.$(OBJEXT): tests/$(am__dirstamp) \
+	tests/$(DEPDIR)/$(am__dirstamp)
+tests/zktest_st-ThreadingUtil.$(OBJEXT): tests/$(am__dirstamp) \
+	tests/$(DEPDIR)/$(am__dirstamp)
+tests/zktest_st-TestClientRetry.$(OBJEXT): tests/$(am__dirstamp) \
+	tests/$(DEPDIR)/$(am__dirstamp)
+tests/zktest_st-TestOperations.$(OBJEXT): tests/$(am__dirstamp) \
+	tests/$(DEPDIR)/$(am__dirstamp)
+tests/zktest_st-TestZookeeperInit.$(OBJEXT): tests/$(am__dirstamp) \
+	tests/$(DEPDIR)/$(am__dirstamp)
+tests/zktest_st-TestZookeeperClose.$(OBJEXT): tests/$(am__dirstamp) \
+	tests/$(DEPDIR)/$(am__dirstamp)
+tests/zktest_st-TestClient.$(OBJEXT): tests/$(am__dirstamp) \
+	tests/$(DEPDIR)/$(am__dirstamp)
+tests/zktest_st-TestMulti.$(OBJEXT): tests/$(am__dirstamp) \
+	tests/$(DEPDIR)/$(am__dirstamp)
+tests/zktest_st-TestWatchers.$(OBJEXT): tests/$(am__dirstamp) \
+	tests/$(DEPDIR)/$(am__dirstamp)
 
 zktest-st$(EXEEXT): $(zktest_st_OBJECTS) $(zktest_st_DEPENDENCIES) $(EXTRA_zktest_st_DEPENDENCIES) 
 	@rm -f zktest-st$(EXEEXT)
@@ -813,650 +934,596 @@ zktest-st$(EXEEXT): $(zktest_st_OBJECTS) $(zktest_st_DEPENDENCIES) $(EXTRA_zktes
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
+	-rm -f generated/*.$(OBJEXT)
+	-rm -f generated/*.lo
+	-rm -f src/*.$(OBJEXT)
+	-rm -f src/*.lo
+	-rm -f src/hashtable/*.$(OBJEXT)
+	-rm -f src/hashtable/*.lo
+	-rm -f tests/*.$(OBJEXT)
 
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cli.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cli_mt-cli.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hashtable.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hashtable_itr.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libzkmt_la-mt_adaptor.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libzkmt_la-recordio.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libzkmt_la-zk_hashtable.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libzkmt_la-zk_log.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libzkmt_la-zookeeper.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libzkmt_la-zookeeper.jute.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/load_gen-load_gen.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/recordio.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/st_adaptor.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/zk_hashtable.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/zk_log.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/zktest_mt-LibCMocks.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/zktest_mt-LibCSymTable.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/zktest_mt-MocksBase.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/zktest_mt-PthreadMocks.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/zktest_mt-TestClient.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/zktest_mt-TestClientRetry.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/zktest_mt-TestDriver.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/zktest_mt-TestMulti.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/zktest_mt-TestOperations.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/zktest_mt-TestWatchers.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/zktest_mt-TestZookeeperClose.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/zktest_mt-TestZookeeperInit.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/zktest_mt-ThreadingUtil.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/zktest_mt-Util.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/zktest_mt-ZKMocks.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/zktest_st-LibCMocks.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/zktest_st-LibCSymTable.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/zktest_st-MocksBase.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/zktest_st-TestClient.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/zktest_st-TestClientRetry.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/zktest_st-TestDriver.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/zktest_st-TestMulti.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/zktest_st-TestOperations.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/zktest_st-TestWatchers.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/zktest_st-TestZookeeperClose.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/zktest_st-TestZookeeperInit.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/zktest_st-ThreadingUtil.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/zktest_st-Util.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/zktest_st-ZKMocks.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/zookeeper.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/zookeeper.jute.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@generated/$(DEPDIR)/libzkmt_la-zookeeper.jute.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@generated/$(DEPDIR)/zookeeper.jute.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/cli.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/cli_mt-cli.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/libzkmt_la-mt_adaptor.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/libzkmt_la-recordio.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/libzkmt_la-zk_hashtable.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/libzkmt_la-zk_log.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/libzkmt_la-zookeeper.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/load_gen-load_gen.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/recordio.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/st_adaptor.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/zk_hashtable.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/zk_log.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/zookeeper.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/hashtable/$(DEPDIR)/hashtable.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/hashtable/$(DEPDIR)/hashtable_itr.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/zktest_mt-LibCMocks.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/zktest_mt-LibCSymTable.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/zktest_mt-MocksBase.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/zktest_mt-PthreadMocks.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/zktest_mt-TestClient.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/zktest_mt-TestClientRetry.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/zktest_mt-TestDriver.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/zktest_mt-TestMulti.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/zktest_mt-TestOperations.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/zktest_mt-TestWatchers.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/zktest_mt-TestZookeeperClose.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/zktest_mt-TestZookeeperInit.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/zktest_mt-ThreadingUtil.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/zktest_mt-Util.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/zktest_mt-ZKMocks.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/zktest_st-LibCMocks.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/zktest_st-LibCSymTable.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/zktest_st-MocksBase.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/zktest_st-TestClient.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/zktest_st-TestClientRetry.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/zktest_st-TestDriver.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/zktest_st-TestMulti.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/zktest_st-TestOperations.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/zktest_st-TestWatchers.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/zktest_st-TestZookeeperClose.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/zktest_st-TestZookeeperInit.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/zktest_st-ThreadingUtil.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/zktest_st-Util.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/zktest_st-ZKMocks.Po@am__quote@
 
 .c.o:
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+@am__fastdepCC_TRUE@	$(AM_V_CC)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.o$$||'`;\
+@am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $$depbase.Tpo -c -o $@ $< &&\
+@am__fastdepCC_TRUE@	$(am__mv) $$depbase.Tpo $$depbase.Po
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(COMPILE) -c -o $@ $<
 
 .c.obj:
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ `$(CYGPATH_W) '$<'`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+@am__fastdepCC_TRUE@	$(AM_V_CC)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.obj$$||'`;\
+@am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $$depbase.Tpo -c -o $@ `$(CYGPATH_W) '$<'` &&\
+@am__fastdepCC_TRUE@	$(am__mv) $$depbase.Tpo $$depbase.Po
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(COMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
 
 .c.lo:
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LTCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Plo
+@am__fastdepCC_TRUE@	$(AM_V_CC)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.lo$$||'`;\
+@am__fastdepCC_TRUE@	$(LTCOMPILE) -MT $@ -MD -MP -MF $$depbase.Tpo -c -o $@ $< &&\
+@am__fastdepCC_TRUE@	$(am__mv) $$depbase.Tpo $$depbase.Plo
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LTCOMPILE) -c -o $@ $<
 
-hashtable_itr.lo: src/hashtable/hashtable_itr.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT hashtable_itr.lo -MD -MP -MF $(DEPDIR)/hashtable_itr.Tpo -c -o hashtable_itr.lo `test -f 'src/hashtable/hashtable_itr.c' || echo '$(srcdir)/'`src/hashtable/hashtable_itr.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/hashtable_itr.Tpo $(DEPDIR)/hashtable_itr.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/hashtable/hashtable_itr.c' object='hashtable_itr.lo' libtool=yes @AMDEPBACKSLASH@
+src/libzkmt_la-zookeeper.lo: src/zookeeper.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libzkmt_la_CFLAGS) $(CFLAGS) -MT src/libzkmt_la-zookeeper.lo -MD -MP -MF src/$(DEPDIR)/libzkmt_la-zookeeper.Tpo -c -o src/libzkmt_la-zookeeper.lo `test -f 'src/zookeeper.c' || echo '$(srcdir)/'`src/zookeeper.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/libzkmt_la-zookeeper.Tpo src/$(DEPDIR)/libzkmt_la-zookeeper.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/zookeeper.c' object='src/libzkmt_la-zookeeper.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o hashtable_itr.lo `test -f 'src/hashtable/hashtable_itr.c' || echo '$(srcdir)/'`src/hashtable/hashtable_itr.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libzkmt_la_CFLAGS) $(CFLAGS) -c -o src/libzkmt_la-zookeeper.lo `test -f 'src/zookeeper.c' || echo '$(srcdir)/'`src/zookeeper.c
 
-hashtable.lo: src/hashtable/hashtable.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT hashtable.lo -MD -MP -MF $(DEPDIR)/hashtable.Tpo -c -o hashtable.lo `test -f 'src/hashtable/hashtable.c' || echo '$(srcdir)/'`src/hashtable/hashtable.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/hashtable.Tpo $(DEPDIR)/hashtable.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/hashtable/hashtable.c' object='hashtable.lo' libtool=yes @AMDEPBACKSLASH@
+src/libzkmt_la-recordio.lo: src/recordio.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libzkmt_la_CFLAGS) $(CFLAGS) -MT src/libzkmt_la-recordio.lo -MD -MP -MF src/$(DEPDIR)/libzkmt_la-recordio.Tpo -c -o src/libzkmt_la-recordio.lo `test -f 'src/recordio.c' || echo '$(srcdir)/'`src/recordio.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/libzkmt_la-recordio.Tpo src/$(DEPDIR)/libzkmt_la-recordio.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/recordio.c' object='src/libzkmt_la-recordio.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o hashtable.lo `test -f 'src/hashtable/hashtable.c' || echo '$(srcdir)/'`src/hashtable/hashtable.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libzkmt_la_CFLAGS) $(CFLAGS) -c -o src/libzkmt_la-recordio.lo `test -f 'src/recordio.c' || echo '$(srcdir)/'`src/recordio.c
 
-libzkmt_la-zookeeper.lo: src/zookeeper.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libzkmt_la_CFLAGS) $(CFLAGS) -MT libzkmt_la-zookeeper.lo -MD -MP -MF $(DEPDIR)/libzkmt_la-zookeeper.Tpo -c -o libzkmt_la-zookeeper.lo `test -f 'src/zookeeper.c' || echo '$(srcdir)/'`src/zookeeper.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libzkmt_la-zookeeper.Tpo $(DEPDIR)/libzkmt_la-zookeeper.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/zookeeper.c' object='libzkmt_la-zookeeper.lo' libtool=yes @AMDEPBACKSLASH@
+generated/libzkmt_la-zookeeper.jute.lo: generated/zookeeper.jute.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libzkmt_la_CFLAGS) $(CFLAGS) -MT generated/libzkmt_la-zookeeper.jute.lo -MD -MP -MF generated/$(DEPDIR)/libzkmt_la-zookeeper.jute.Tpo -c -o generated/libzkmt_la-zookeeper.jute.lo `test -f 'generated/zookeeper.jute.c' || echo '$(srcdir)/'`generated/zookeeper.jute.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) generated/$(DEPDIR)/libzkmt_la-zookeeper.jute.Tpo generated/$(DEPDIR)/libzkmt_la-zookeeper.jute.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='generated/zookeeper.jute.c' object='generated/libzkmt_la-zookeeper.jute.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libzkmt_la_CFLAGS) $(CFLAGS) -c -o libzkmt_la-zookeeper.lo `test -f 'src/zookeeper.c' || echo '$(srcdir)/'`src/zookeeper.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libzkmt_la_CFLAGS) $(CFLAGS) -c -o generated/libzkmt_la-zookeeper.jute.lo `test -f 'generated/zookeeper.jute.c' || echo '$(srcdir)/'`generated/zookeeper.jute.c
 
-libzkmt_la-recordio.lo: src/recordio.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libzkmt_la_CFLAGS) $(CFLAGS) -MT libzkmt_la-recordio.lo -MD -MP -MF $(DEPDIR)/libzkmt_la-recordio.Tpo -c -o libzkmt_la-recordio.lo `test -f 'src/recordio.c' || echo '$(srcdir)/'`src/recordio.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libzkmt_la-recordio.Tpo $(DEPDIR)/libzkmt_la-recordio.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/recordio.c' object='libzkmt_la-recordio.lo' libtool=yes @AMDEPBACKSLASH@
+src/libzkmt_la-zk_log.lo: src/zk_log.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libzkmt_la_CFLAGS) $(CFLAGS) -MT src/libzkmt_la-zk_log.lo -MD -MP -MF src/$(DEPDIR)/libzkmt_la-zk_log.Tpo -c -o src/libzkmt_la-zk_log.lo `test -f 'src/zk_log.c' || echo '$(srcdir)/'`src/zk_log.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/libzkmt_la-zk_log.Tpo src/$(DEPDIR)/libzkmt_la-zk_log.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/zk_log.c' object='src/libzkmt_la-zk_log.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libzkmt_la_CFLAGS) $(CFLAGS) -c -o libzkmt_la-recordio.lo `test -f 'src/recordio.c' || echo '$(srcdir)/'`src/recordio.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libzkmt_la_CFLAGS) $(CFLAGS) -c -o src/libzkmt_la-zk_log.lo `test -f 'src/zk_log.c' || echo '$(srcdir)/'`src/zk_log.c
 
-libzkmt_la-zookeeper.jute.lo: generated/zookeeper.jute.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libzkmt_la_CFLAGS) $(CFLAGS) -MT libzkmt_la-zookeeper.jute.lo -MD -MP -MF $(DEPDIR)/libzkmt_la-zookeeper.jute.Tpo -c -o libzkmt_la-zookeeper.jute.lo `test -f 'generated/zookeeper.jute.c' || echo '$(srcdir)/'`generated/zookeeper.jute.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libzkmt_la-zookeeper.jute.Tpo $(DEPDIR)/libzkmt_la-zookeeper.jute.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='generated/zookeeper.jute.c' object='libzkmt_la-zookeeper.jute.lo' libtool=yes @AMDEPBACKSLASH@
+src/libzkmt_la-zk_hashtable.lo: src/zk_hashtable.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libzkmt_la_CFLAGS) $(CFLAGS) -MT src/libzkmt_la-zk_hashtable.lo -MD -MP -MF src/$(DEPDIR)/libzkmt_la-zk_hashtable.Tpo -c -o src/libzkmt_la-zk_hashtable.lo `test -f 'src/zk_hashtable.c' || echo '$(srcdir)/'`src/zk_hashtable.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/libzkmt_la-zk_hashtable.Tpo src/$(DEPDIR)/libzkmt_la-zk_hashtable.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/zk_hashtable.c' object='src/libzkmt_la-zk_hashtable.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libzkmt_la_CFLAGS) $(CFLAGS) -c -o libzkmt_la-zookeeper.jute.lo `test -f 'generated/zookeeper.jute.c' || echo '$(srcdir)/'`generated/zookeeper.jute.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libzkmt_la_CFLAGS) $(CFLAGS) -c -o src/libzkmt_la-zk_hashtable.lo `test -f 'src/zk_hashtable.c' || echo '$(srcdir)/'`src/zk_hashtable.c
 
-libzkmt_la-zk_log.lo: src/zk_log.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libzkmt_la_CFLAGS) $(CFLAGS) -MT libzkmt_la-zk_log.lo -MD -MP -MF $(DEPDIR)/libzkmt_la-zk_log.Tpo -c -o libzkmt_la-zk_log.lo `test -f 'src/zk_log.c' || echo '$(srcdir)/'`src/zk_log.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libzkmt_la-zk_log.Tpo $(DEPDIR)/libzkmt_la-zk_log.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/zk_log.c' object='libzkmt_la-zk_log.lo' libtool=yes @AMDEPBACKSLASH@
+src/libzkmt_la-mt_adaptor.lo: src/mt_adaptor.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libzkmt_la_CFLAGS) $(CFLAGS) -MT src/libzkmt_la-mt_adaptor.lo -MD -MP -MF src/$(DEPDIR)/libzkmt_la-mt_adaptor.Tpo -c -o src/libzkmt_la-mt_adaptor.lo `test -f 'src/mt_adaptor.c' || echo '$(srcdir)/'`src/mt_adaptor.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/libzkmt_la-mt_adaptor.Tpo src/$(DEPDIR)/libzkmt_la-mt_adaptor.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/mt_adaptor.c' object='src/libzkmt_la-mt_adaptor.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libzkmt_la_CFLAGS) $(CFLAGS) -c -o libzkmt_la-zk_log.lo `test -f 'src/zk_log.c' || echo '$(srcdir)/'`src/zk_log.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libzkmt_la_CFLAGS) $(CFLAGS) -c -o src/libzkmt_la-mt_adaptor.lo `test -f 'src/mt_adaptor.c' || echo '$(srcdir)/'`src/mt_adaptor.c
 
-libzkmt_la-zk_hashtable.lo: src/zk_hashtable.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libzkmt_la_CFLAGS) $(CFLAGS) -MT libzkmt_la-zk_hashtable.lo -MD -MP -MF $(DEPDIR)/libzkmt_la-zk_hashtable.Tpo -c -o libzkmt_la-zk_hashtable.lo `test -f 'src/zk_hashtable.c' || echo '$(srcdir)/'`src/zk_hashtable.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libzkmt_la-zk_hashtable.Tpo $(DEPDIR)/libzkmt_la-zk_hashtable.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/zk_hashtable.c' object='libzkmt_la-zk_hashtable.lo' libtool=yes @AMDEPBACKSLASH@
+src/cli_mt-cli.o: src/cli.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(cli_mt_CFLAGS) $(CFLAGS) -MT src/cli_mt-cli.o -MD -MP -MF src/$(DEPDIR)/cli_mt-cli.Tpo -c -o src/cli_mt-cli.o `test -f 'src/cli.c' || echo '$(srcdir)/'`src/cli.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/cli_mt-cli.Tpo src/$(DEPDIR)/cli_mt-cli.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/cli.c' object='src/cli_mt-cli.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libzkmt_la_CFLAGS) $(CFLAGS) -c -o libzkmt_la-zk_hashtable.lo `test -f 'src/zk_hashtable.c' || echo '$(srcdir)/'`src/zk_hashtable.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(cli_mt_CFLAGS) $(CFLAGS) -c -o src/cli_mt-cli.o `test -f 'src/cli.c' || echo '$(srcdir)/'`src/cli.c
 
-libzkmt_la-mt_adaptor.lo: src/mt_adaptor.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libzkmt_la_CFLAGS) $(CFLAGS) -MT libzkmt_la-mt_adaptor.lo -MD -MP -MF $(DEPDIR)/libzkmt_la-mt_adaptor.Tpo -c -o libzkmt_la-mt_adaptor.lo `test -f 'src/mt_adaptor.c' || echo '$(srcdir)/'`src/mt_adaptor.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libzkmt_la-mt_adaptor.Tpo $(DEPDIR)/libzkmt_la-mt_adaptor.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/mt_adaptor.c' object='libzkmt_la-mt_adaptor.lo' libtool=yes @AMDEPBACKSLASH@
+src/cli_mt-cli.obj: src/cli.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(cli_mt_CFLAGS) $(CFLAGS) -MT src/cli_mt-cli.obj -MD -MP -MF src/$(DEPDIR)/cli_mt-cli.Tpo -c -o src/cli_mt-cli.obj `if test -f 'src/cli.c'; then $(CYGPATH_W) 'src/cli.c'; else $(CYGPATH_W) '$(srcdir)/src/cli.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/cli_mt-cli.Tpo src/$(DEPDIR)/cli_mt-cli.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/cli.c' object='src/cli_mt-cli.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libzkmt_la_CFLAGS) $(CFLAGS) -c -o libzkmt_la-mt_adaptor.lo `test -f 'src/mt_adaptor.c' || echo '$(srcdir)/'`src/mt_adaptor.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(cli_mt_CFLAGS) $(CFLAGS) -c -o src/cli_mt-cli.obj `if test -f 'src/cli.c'; then $(CYGPATH_W) 'src/cli.c'; else $(CYGPATH_W) '$(srcdir)/src/cli.c'; fi`
 
-zookeeper.lo: src/zookeeper.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT zookeeper.lo -MD -MP -MF $(DEPDIR)/zookeeper.Tpo -c -o zookeeper.lo `test -f 'src/zookeeper.c' || echo '$(srcdir)/'`src/zookeeper.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/zookeeper.Tpo $(DEPDIR)/zookeeper.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/zookeeper.c' object='zookeeper.lo' libtool=yes @AMDEPBACKSLASH@
+src/load_gen-load_gen.o: src/load_gen.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(load_gen_CFLAGS) $(CFLAGS) -MT src/load_gen-load_gen.o -MD -MP -MF src/$(DEPDIR)/load_gen-load_gen.Tpo -c -o src/load_gen-load_gen.o `test -f 'src/load_gen.c' || echo '$(srcdir)/'`src/load_gen.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/load_gen-load_gen.Tpo src/$(DEPDIR)/load_gen-load_gen.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/load_gen.c' object='src/load_gen-load_gen.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o zookeeper.lo `test -f 'src/zookeeper.c' || echo '$(srcdir)/'`src/zookeeper.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(load_gen_CFLAGS) $(CFLAGS) -c -o src/load_gen-load_gen.o `test -f 'src/load_gen.c' || echo '$(srcdir)/'`src/load_gen.c
 
-recordio.lo: src/recordio.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT recordio.lo -MD -MP -MF $(DEPDIR)/recordio.Tpo -c -o recordio.lo `test -f 'src/recordio.c' || echo '$(srcdir)/'`src/recordio.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/recordio.Tpo $(DEPDIR)/recordio.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/recordio.c' object='recordio.lo' libtool=yes @AMDEPBACKSLASH@
+src/load_gen-load_gen.obj: src/load_gen.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(load_gen_CFLAGS) $(CFLAGS) -MT src/load_gen-load_gen.obj -MD -MP -MF src/$(DEPDIR)/load_gen-load_gen.Tpo -c -o src/load_gen-load_gen.obj `if test -f 'src/load_gen.c'; then $(CYGPATH_W) 'src/load_gen.c'; else $(CYGPATH_W) '$(srcdir)/src/load_gen.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/load_gen-load_gen.Tpo src/$(DEPDIR)/load_gen-load_gen.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/load_gen.c' object='src/load_gen-load_gen.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o recordio.lo `test -f 'src/recordio.c' || echo '$(srcdir)/'`src/recordio.c
-
-zookeeper.jute.lo: generated/zookeeper.jute.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT zookeeper.jute.lo -MD -MP -MF $(DEPDIR)/zookeeper.jute.Tpo -c -o zookeeper.jute.lo `test -f 'generated/zookeeper.jute.c' || echo '$(srcdir)/'`generated/zookeeper.jute.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/zookeeper.jute.Tpo $(DEPDIR)/zookeeper.jute.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='generated/zookeeper.jute.c' object='zookeeper.jute.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o zookeeper.jute.lo `test -f 'generated/zookeeper.jute.c' || echo '$(srcdir)/'`generated/zookeeper.jute.c
-
-zk_log.lo: src/zk_log.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT zk_log.lo -MD -MP -MF $(DEPDIR)/zk_log.Tpo -c -o zk_log.lo `test -f 'src/zk_log.c' || echo '$(srcdir)/'`src/zk_log.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/zk_log.Tpo $(DEPDIR)/zk_log.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/zk_log.c' object='zk_log.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o zk_log.lo `test -f 'src/zk_log.c' || echo '$(srcdir)/'`src/zk_log.c
-
-zk_hashtable.lo: src/zk_hashtable.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT zk_hashtable.lo -MD -MP -MF $(DEPDIR)/zk_hashtable.Tpo -c -o zk_hashtable.lo `test -f 'src/zk_hashtable.c' || echo '$(srcdir)/'`src/zk_hashtable.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/zk_hashtable.Tpo $(DEPDIR)/zk_hashtable.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/zk_hashtable.c' object='zk_hashtable.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o zk_hashtable.lo `test -f 'src/zk_hashtable.c' || echo '$(srcdir)/'`src/zk_hashtable.c
-
-st_adaptor.lo: src/st_adaptor.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT st_adaptor.lo -MD -MP -MF $(DEPDIR)/st_adaptor.Tpo -c -o st_adaptor.lo `test -f 'src/st_adaptor.c' || echo '$(srcdir)/'`src/st_adaptor.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/st_adaptor.Tpo $(DEPDIR)/st_adaptor.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/st_adaptor.c' object='st_adaptor.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o st_adaptor.lo `test -f 'src/st_adaptor.c' || echo '$(srcdir)/'`src/st_adaptor.c
-
-cli_mt-cli.o: src/cli.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(cli_mt_CFLAGS) $(CFLAGS) -MT cli_mt-cli.o -MD -MP -MF $(DEPDIR)/cli_mt-cli.Tpo -c -o cli_mt-cli.o `test -f 'src/cli.c' || echo '$(srcdir)/'`src/cli.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/cli_mt-cli.Tpo $(DEPDIR)/cli_mt-cli.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/cli.c' object='cli_mt-cli.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(cli_mt_CFLAGS) $(CFLAGS) -c -o cli_mt-cli.o `test -f 'src/cli.c' || echo '$(srcdir)/'`src/cli.c
-
-cli_mt-cli.obj: src/cli.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(cli_mt_CFLAGS) $(CFLAGS) -MT cli_mt-cli.obj -MD -MP -MF $(DEPDIR)/cli_mt-cli.Tpo -c -o cli_mt-cli.obj `if test -f 'src/cli.c'; then $(CYGPATH_W) 'src/cli.c'; else $(CYGPATH_W) '$(srcdir)/src/cli.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/cli_mt-cli.Tpo $(DEPDIR)/cli_mt-cli.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/cli.c' object='cli_mt-cli.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(cli_mt_CFLAGS) $(CFLAGS) -c -o cli_mt-cli.obj `if test -f 'src/cli.c'; then $(CYGPATH_W) 'src/cli.c'; else $(CYGPATH_W) '$(srcdir)/src/cli.c'; fi`
-
-cli.o: src/cli.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT cli.o -MD -MP -MF $(DEPDIR)/cli.Tpo -c -o cli.o `test -f 'src/cli.c' || echo '$(srcdir)/'`src/cli.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/cli.Tpo $(DEPDIR)/cli.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/cli.c' object='cli.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o cli.o `test -f 'src/cli.c' || echo '$(srcdir)/'`src/cli.c
-
-cli.obj: src/cli.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT cli.obj -MD -MP -MF $(DEPDIR)/cli.Tpo -c -o cli.obj `if test -f 'src/cli.c'; then $(CYGPATH_W) 'src/cli.c'; else $(CYGPATH_W) '$(srcdir)/src/cli.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/cli.Tpo $(DEPDIR)/cli.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/cli.c' object='cli.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o cli.obj `if test -f 'src/cli.c'; then $(CYGPATH_W) 'src/cli.c'; else $(CYGPATH_W) '$(srcdir)/src/cli.c'; fi`
-
-load_gen-load_gen.o: src/load_gen.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(load_gen_CFLAGS) $(CFLAGS) -MT load_gen-load_gen.o -MD -MP -MF $(DEPDIR)/load_gen-load_gen.Tpo -c -o load_gen-load_gen.o `test -f 'src/load_gen.c' || echo '$(srcdir)/'`src/load_gen.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/load_gen-load_gen.Tpo $(DEPDIR)/load_gen-load_gen.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/load_gen.c' object='load_gen-load_gen.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(load_gen_CFLAGS) $(CFLAGS) -c -o load_gen-load_gen.o `test -f 'src/load_gen.c' || echo '$(srcdir)/'`src/load_gen.c
-
-load_gen-load_gen.obj: src/load_gen.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(load_gen_CFLAGS) $(CFLAGS) -MT load_gen-load_gen.obj -MD -MP -MF $(DEPDIR)/load_gen-load_gen.Tpo -c -o load_gen-load_gen.obj `if test -f 'src/load_gen.c'; then $(CYGPATH_W) 'src/load_gen.c'; else $(CYGPATH_W) '$(srcdir)/src/load_gen.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/load_gen-load_gen.Tpo $(DEPDIR)/load_gen-load_gen.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/load_gen.c' object='load_gen-load_gen.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(load_gen_CFLAGS) $(CFLAGS) -c -o load_gen-load_gen.obj `if test -f 'src/load_gen.c'; then $(CYGPATH_W) 'src/load_gen.c'; else $(CYGPATH_W) '$(srcdir)/src/load_gen.c'; fi`
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(load_gen_CFLAGS) $(CFLAGS) -c -o src/load_gen-load_gen.obj `if test -f 'src/load_gen.c'; then $(CYGPATH_W) 'src/load_gen.c'; else $(CYGPATH_W) '$(srcdir)/src/load_gen.c'; fi`
 
 .cc.o:
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.o$$||'`;\
+@am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $$depbase.Tpo -c -o $@ $< &&\
+@am__fastdepCXX_TRUE@	$(am__mv) $$depbase.Tpo $$depbase.Po
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXXCOMPILE) -c -o $@ $<
 
 .cc.obj:
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ `$(CYGPATH_W) '$<'`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.obj$$||'`;\
+@am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $$depbase.Tpo -c -o $@ `$(CYGPATH_W) '$<'` &&\
+@am__fastdepCXX_TRUE@	$(am__mv) $$depbase.Tpo $$depbase.Po
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXXCOMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
 
 .cc.lo:
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LTCXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Plo
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.lo$$||'`;\
+@am__fastdepCXX_TRUE@	$(LTCXXCOMPILE) -MT $@ -MD -MP -MF $$depbase.Tpo -c -o $@ $< &&\
+@am__fastdepCXX_TRUE@	$(am__mv) $$depbase.Tpo $$depbase.Plo
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LTCXXCOMPILE) -c -o $@ $<
 
-zktest_mt-TestDriver.o: tests/TestDriver.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -MT zktest_mt-TestDriver.o -MD -MP -MF $(DEPDIR)/zktest_mt-TestDriver.Tpo -c -o zktest_mt-TestDriver.o `test -f 'tests/TestDriver.cc' || echo '$(srcdir)/'`tests/TestDriver.cc
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/zktest_mt-TestDriver.Tpo $(DEPDIR)/zktest_mt-TestDriver.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/TestDriver.cc' object='zktest_mt-TestDriver.o' libtool=no @AMDEPBACKSLASH@
+tests/zktest_mt-TestDriver.o: tests/TestDriver.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -MT tests/zktest_mt-TestDriver.o -MD -MP -MF tests/$(DEPDIR)/zktest_mt-TestDriver.Tpo -c -o tests/zktest_mt-TestDriver.o `test -f 'tests/TestDriver.cc' || echo '$(srcdir)/'`tests/TestDriver.cc
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/zktest_mt-TestDriver.Tpo tests/$(DEPDIR)/zktest_mt-TestDriver.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/TestDriver.cc' object='tests/zktest_mt-TestDriver.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -c -o zktest_mt-TestDriver.o `test -f 'tests/TestDriver.cc' || echo '$(srcdir)/'`tests/TestDriver.cc
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -c -o tests/zktest_mt-TestDriver.o `test -f 'tests/TestDriver.cc' || echo '$(srcdir)/'`tests/TestDriver.cc
 
-zktest_mt-TestDriver.obj: tests/TestDriver.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -MT zktest_mt-TestDriver.obj -MD -MP -MF $(DEPDIR)/zktest_mt-TestDriver.Tpo -c -o zktest_mt-TestDriver.obj `if test -f 'tests/TestDriver.cc'; then $(CYGPATH_W) 'tests/TestDriver.cc'; else $(CYGPATH_W) '$(srcdir)/tests/TestDriver.cc'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/zktest_mt-TestDriver.Tpo $(DEPDIR)/zktest_mt-TestDriver.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/TestDriver.cc' object='zktest_mt-TestDriver.obj' libtool=no @AMDEPBACKSLASH@
+tests/zktest_mt-TestDriver.obj: tests/TestDriver.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -MT tests/zktest_mt-TestDriver.obj -MD -MP -MF tests/$(DEPDIR)/zktest_mt-TestDriver.Tpo -c -o tests/zktest_mt-TestDriver.obj `if test -f 'tests/TestDriver.cc'; then $(CYGPATH_W) 'tests/TestDriver.cc'; else $(CYGPATH_W) '$(srcdir)/tests/TestDriver.cc'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/zktest_mt-TestDriver.Tpo tests/$(DEPDIR)/zktest_mt-TestDriver.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/TestDriver.cc' object='tests/zktest_mt-TestDriver.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -c -o zktest_mt-TestDriver.obj `if test -f 'tests/TestDriver.cc'; then $(CYGPATH_W) 'tests/TestDriver.cc'; else $(CYGPATH_W) '$(srcdir)/tests/TestDriver.cc'; fi`
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -c -o tests/zktest_mt-TestDriver.obj `if test -f 'tests/TestDriver.cc'; then $(CYGPATH_W) 'tests/TestDriver.cc'; else $(CYGPATH_W) '$(srcdir)/tests/TestDriver.cc'; fi`
 
-zktest_mt-LibCMocks.o: tests/LibCMocks.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -MT zktest_mt-LibCMocks.o -MD -MP -MF $(DEPDIR)/zktest_mt-LibCMocks.Tpo -c -o zktest_mt-LibCMocks.o `test -f 'tests/LibCMocks.cc' || echo '$(srcdir)/'`tests/LibCMocks.cc
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/zktest_mt-LibCMocks.Tpo $(DEPDIR)/zktest_mt-LibCMocks.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/LibCMocks.cc' object='zktest_mt-LibCMocks.o' libtool=no @AMDEPBACKSLASH@
+tests/zktest_mt-LibCMocks.o: tests/LibCMocks.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -MT tests/zktest_mt-LibCMocks.o -MD -MP -MF tests/$(DEPDIR)/zktest_mt-LibCMocks.Tpo -c -o tests/zktest_mt-LibCMocks.o `test -f 'tests/LibCMocks.cc' || echo '$(srcdir)/'`tests/LibCMocks.cc
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/zktest_mt-LibCMocks.Tpo tests/$(DEPDIR)/zktest_mt-LibCMocks.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/LibCMocks.cc' object='tests/zktest_mt-LibCMocks.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -c -o zktest_mt-LibCMocks.o `test -f 'tests/LibCMocks.cc' || echo '$(srcdir)/'`tests/LibCMocks.cc
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -c -o tests/zktest_mt-LibCMocks.o `test -f 'tests/LibCMocks.cc' || echo '$(srcdir)/'`tests/LibCMocks.cc
 
-zktest_mt-LibCMocks.obj: tests/LibCMocks.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -MT zktest_mt-LibCMocks.obj -MD -MP -MF $(DEPDIR)/zktest_mt-LibCMocks.Tpo -c -o zktest_mt-LibCMocks.obj `if test -f 'tests/LibCMocks.cc'; then $(CYGPATH_W) 'tests/LibCMocks.cc'; else $(CYGPATH_W) '$(srcdir)/tests/LibCMocks.cc'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/zktest_mt-LibCMocks.Tpo $(DEPDIR)/zktest_mt-LibCMocks.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/LibCMocks.cc' object='zktest_mt-LibCMocks.obj' libtool=no @AMDEPBACKSLASH@
+tests/zktest_mt-LibCMocks.obj: tests/LibCMocks.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -MT tests/zktest_mt-LibCMocks.obj -MD -MP -MF tests/$(DEPDIR)/zktest_mt-LibCMocks.Tpo -c -o tests/zktest_mt-LibCMocks.obj `if test -f 'tests/LibCMocks.cc'; then $(CYGPATH_W) 'tests/LibCMocks.cc'; else $(CYGPATH_W) '$(srcdir)/tests/LibCMocks.cc'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/zktest_mt-LibCMocks.Tpo tests/$(DEPDIR)/zktest_mt-LibCMocks.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/LibCMocks.cc' object='tests/zktest_mt-LibCMocks.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -c -o zktest_mt-LibCMocks.obj `if test -f 'tests/LibCMocks.cc'; then $(CYGPATH_W) 'tests/LibCMocks.cc'; else $(CYGPATH_W) '$(srcdir)/tests/LibCMocks.cc'; fi`
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -c -o tests/zktest_mt-LibCMocks.obj `if test -f 'tests/LibCMocks.cc'; then $(CYGPATH_W) 'tests/LibCMocks.cc'; else $(CYGPATH_W) '$(srcdir)/tests/LibCMocks.cc'; fi`
 
-zktest_mt-LibCSymTable.o: tests/LibCSymTable.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -MT zktest_mt-LibCSymTable.o -MD -MP -MF $(DEPDIR)/zktest_mt-LibCSymTable.Tpo -c -o zktest_mt-LibCSymTable.o `test -f 'tests/LibCSymTable.cc' || echo '$(srcdir)/'`tests/LibCSymTable.cc
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/zktest_mt-LibCSymTable.Tpo $(DEPDIR)/zktest_mt-LibCSymTable.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/LibCSymTable.cc' object='zktest_mt-LibCSymTable.o' libtool=no @AMDEPBACKSLASH@
+tests/zktest_mt-LibCSymTable.o: tests/LibCSymTable.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -MT tests/zktest_mt-LibCSymTable.o -MD -MP -MF tests/$(DEPDIR)/zktest_mt-LibCSymTable.Tpo -c -o tests/zktest_mt-LibCSymTable.o `test -f 'tests/LibCSymTable.cc' || echo '$(srcdir)/'`tests/LibCSymTable.cc
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/zktest_mt-LibCSymTable.Tpo tests/$(DEPDIR)/zktest_mt-LibCSymTable.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/LibCSymTable.cc' object='tests/zktest_mt-LibCSymTable.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -c -o zktest_mt-LibCSymTable.o `test -f 'tests/LibCSymTable.cc' || echo '$(srcdir)/'`tests/LibCSymTable.cc
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -c -o tests/zktest_mt-LibCSymTable.o `test -f 'tests/LibCSymTable.cc' || echo '$(srcdir)/'`tests/LibCSymTable.cc
 
-zktest_mt-LibCSymTable.obj: tests/LibCSymTable.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -MT zktest_mt-LibCSymTable.obj -MD -MP -MF $(DEPDIR)/zktest_mt-LibCSymTable.Tpo -c -o zktest_mt-LibCSymTable.obj `if test -f 'tests/LibCSymTable.cc'; then $(CYGPATH_W) 'tests/LibCSymTable.cc'; else $(CYGPATH_W) '$(srcdir)/tests/LibCSymTable.cc'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/zktest_mt-LibCSymTable.Tpo $(DEPDIR)/zktest_mt-LibCSymTable.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/LibCSymTable.cc' object='zktest_mt-LibCSymTable.obj' libtool=no @AMDEPBACKSLASH@
+tests/zktest_mt-LibCSymTable.obj: tests/LibCSymTable.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -MT tests/zktest_mt-LibCSymTable.obj -MD -MP -MF tests/$(DEPDIR)/zktest_mt-LibCSymTable.Tpo -c -o tests/zktest_mt-LibCSymTable.obj `if test -f 'tests/LibCSymTable.cc'; then $(CYGPATH_W) 'tests/LibCSymTable.cc'; else $(CYGPATH_W) '$(srcdir)/tests/LibCSymTable.cc'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/zktest_mt-LibCSymTable.Tpo tests/$(DEPDIR)/zktest_mt-LibCSymTable.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/LibCSymTable.cc' object='tests/zktest_mt-LibCSymTable.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -c -o zktest_mt-LibCSymTable.obj `if test -f 'tests/LibCSymTable.cc'; then $(CYGPATH_W) 'tests/LibCSymTable.cc'; else $(CYGPATH_W) '$(srcdir)/tests/LibCSymTable.cc'; fi`
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -c -o tests/zktest_mt-LibCSymTable.obj `if test -f 'tests/LibCSymTable.cc'; then $(CYGPATH_W) 'tests/LibCSymTable.cc'; else $(CYGPATH_W) '$(srcdir)/tests/LibCSymTable.cc'; fi`
 
-zktest_mt-MocksBase.o: tests/MocksBase.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -MT zktest_mt-MocksBase.o -MD -MP -MF $(DEPDIR)/zktest_mt-MocksBase.Tpo -c -o zktest_mt-MocksBase.o `test -f 'tests/MocksBase.cc' || echo '$(srcdir)/'`tests/MocksBase.cc
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/zktest_mt-MocksBase.Tpo $(DEPDIR)/zktest_mt-MocksBase.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/MocksBase.cc' object='zktest_mt-MocksBase.o' libtool=no @AMDEPBACKSLASH@
+tests/zktest_mt-MocksBase.o: tests/MocksBase.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -MT tests/zktest_mt-MocksBase.o -MD -MP -MF tests/$(DEPDIR)/zktest_mt-MocksBase.Tpo -c -o tests/zktest_mt-MocksBase.o `test -f 'tests/MocksBase.cc' || echo '$(srcdir)/'`tests/MocksBase.cc
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/zktest_mt-MocksBase.Tpo tests/$(DEPDIR)/zktest_mt-MocksBase.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/MocksBase.cc' object='tests/zktest_mt-MocksBase.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -c -o zktest_mt-MocksBase.o `test -f 'tests/MocksBase.cc' || echo '$(srcdir)/'`tests/MocksBase.cc
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -c -o tests/zktest_mt-MocksBase.o `test -f 'tests/MocksBase.cc' || echo '$(srcdir)/'`tests/MocksBase.cc
 
-zktest_mt-MocksBase.obj: tests/MocksBase.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -MT zktest_mt-MocksBase.obj -MD -MP -MF $(DEPDIR)/zktest_mt-MocksBase.Tpo -c -o zktest_mt-MocksBase.obj `if test -f 'tests/MocksBase.cc'; then $(CYGPATH_W) 'tests/MocksBase.cc'; else $(CYGPATH_W) '$(srcdir)/tests/MocksBase.cc'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/zktest_mt-MocksBase.Tpo $(DEPDIR)/zktest_mt-MocksBase.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/MocksBase.cc' object='zktest_mt-MocksBase.obj' libtool=no @AMDEPBACKSLASH@
+tests/zktest_mt-MocksBase.obj: tests/MocksBase.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -MT tests/zktest_mt-MocksBase.obj -MD -MP -MF tests/$(DEPDIR)/zktest_mt-MocksBase.Tpo -c -o tests/zktest_mt-MocksBase.obj `if test -f 'tests/MocksBase.cc'; then $(CYGPATH_W) 'tests/MocksBase.cc'; else $(CYGPATH_W) '$(srcdir)/tests/MocksBase.cc'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/zktest_mt-MocksBase.Tpo tests/$(DEPDIR)/zktest_mt-MocksBase.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/MocksBase.cc' object='tests/zktest_mt-MocksBase.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -c -o zktest_mt-MocksBase.obj `if test -f 'tests/MocksBase.cc'; then $(CYGPATH_W) 'tests/MocksBase.cc'; else $(CYGPATH_W) '$(srcdir)/tests/MocksBase.cc'; fi`
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -c -o tests/zktest_mt-MocksBase.obj `if test -f 'tests/MocksBase.cc'; then $(CYGPATH_W) 'tests/MocksBase.cc'; else $(CYGPATH_W) '$(srcdir)/tests/MocksBase.cc'; fi`
 
-zktest_mt-ZKMocks.o: tests/ZKMocks.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -MT zktest_mt-ZKMocks.o -MD -MP -MF $(DEPDIR)/zktest_mt-ZKMocks.Tpo -c -o zktest_mt-ZKMocks.o `test -f 'tests/ZKMocks.cc' || echo '$(srcdir)/'`tests/ZKMocks.cc
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/zktest_mt-ZKMocks.Tpo $(DEPDIR)/zktest_mt-ZKMocks.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/ZKMocks.cc' object='zktest_mt-ZKMocks.o' libtool=no @AMDEPBACKSLASH@
+tests/zktest_mt-ZKMocks.o: tests/ZKMocks.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -MT tests/zktest_mt-ZKMocks.o -MD -MP -MF tests/$(DEPDIR)/zktest_mt-ZKMocks.Tpo -c -o tests/zktest_mt-ZKMocks.o `test -f 'tests/ZKMocks.cc' || echo '$(srcdir)/'`tests/ZKMocks.cc
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/zktest_mt-ZKMocks.Tpo tests/$(DEPDIR)/zktest_mt-ZKMocks.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/ZKMocks.cc' object='tests/zktest_mt-ZKMocks.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -c -o zktest_mt-ZKMocks.o `test -f 'tests/ZKMocks.cc' || echo '$(srcdir)/'`tests/ZKMocks.cc
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -c -o tests/zktest_mt-ZKMocks.o `test -f 'tests/ZKMocks.cc' || echo '$(srcdir)/'`tests/ZKMocks.cc
 
-zktest_mt-ZKMocks.obj: tests/ZKMocks.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -MT zktest_mt-ZKMocks.obj -MD -MP -MF $(DEPDIR)/zktest_mt-ZKMocks.Tpo -c -o zktest_mt-ZKMocks.obj `if test -f 'tests/ZKMocks.cc'; then $(CYGPATH_W) 'tests/ZKMocks.cc'; else $(CYGPATH_W) '$(srcdir)/tests/ZKMocks.cc'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/zktest_mt-ZKMocks.Tpo $(DEPDIR)/zktest_mt-ZKMocks.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/ZKMocks.cc' object='zktest_mt-ZKMocks.obj' libtool=no @AMDEPBACKSLASH@
+tests/zktest_mt-ZKMocks.obj: tests/ZKMocks.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -MT tests/zktest_mt-ZKMocks.obj -MD -MP -MF tests/$(DEPDIR)/zktest_mt-ZKMocks.Tpo -c -o tests/zktest_mt-ZKMocks.obj `if test -f 'tests/ZKMocks.cc'; then $(CYGPATH_W) 'tests/ZKMocks.cc'; else $(CYGPATH_W) '$(srcdir)/tests/ZKMocks.cc'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/zktest_mt-ZKMocks.Tpo tests/$(DEPDIR)/zktest_mt-ZKMocks.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/ZKMocks.cc' object='tests/zktest_mt-ZKMocks.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -c -o zktest_mt-ZKMocks.obj `if test -f 'tests/ZKMocks.cc'; then $(CYGPATH_W) 'tests/ZKMocks.cc'; else $(CYGPATH_W) '$(srcdir)/tests/ZKMocks.cc'; fi`
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -c -o tests/zktest_mt-ZKMocks.obj `if test -f 'tests/ZKMocks.cc'; then $(CYGPATH_W) 'tests/ZKMocks.cc'; else $(CYGPATH_W) '$(srcdir)/tests/ZKMocks.cc'; fi`
 
-zktest_mt-Util.o: tests/Util.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -MT zktest_mt-Util.o -MD -MP -MF $(DEPDIR)/zktest_mt-Util.Tpo -c -o zktest_mt-Util.o `test -f 'tests/Util.cc' || echo '$(srcdir)/'`tests/Util.cc
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/zktest_mt-Util.Tpo $(DEPDIR)/zktest_mt-Util.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/Util.cc' object='zktest_mt-Util.o' libtool=no @AMDEPBACKSLASH@
+tests/zktest_mt-Util.o: tests/Util.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -MT tests/zktest_mt-Util.o -MD -MP -MF tests/$(DEPDIR)/zktest_mt-Util.Tpo -c -o tests/zktest_mt-Util.o `test -f 'tests/Util.cc' || echo '$(srcdir)/'`tests/Util.cc
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/zktest_mt-Util.Tpo tests/$(DEPDIR)/zktest_mt-Util.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/Util.cc' object='tests/zktest_mt-Util.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -c -o zktest_mt-Util.o `test -f 'tests/Util.cc' || echo '$(srcdir)/'`tests/Util.cc
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -c -o tests/zktest_mt-Util.o `test -f 'tests/Util.cc' || echo '$(srcdir)/'`tests/Util.cc
 
-zktest_mt-Util.obj: tests/Util.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -MT zktest_mt-Util.obj -MD -MP -MF $(DEPDIR)/zktest_mt-Util.Tpo -c -o zktest_mt-Util.obj `if test -f 'tests/Util.cc'; then $(CYGPATH_W) 'tests/Util.cc'; else $(CYGPATH_W) '$(srcdir)/tests/Util.cc'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/zktest_mt-Util.Tpo $(DEPDIR)/zktest_mt-Util.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/Util.cc' object='zktest_mt-Util.obj' libtool=no @AMDEPBACKSLASH@
+tests/zktest_mt-Util.obj: tests/Util.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -MT tests/zktest_mt-Util.obj -MD -MP -MF tests/$(DEPDIR)/zktest_mt-Util.Tpo -c -o tests/zktest_mt-Util.obj `if test -f 'tests/Util.cc'; then $(CYGPATH_W) 'tests/Util.cc'; else $(CYGPATH_W) '$(srcdir)/tests/Util.cc'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/zktest_mt-Util.Tpo tests/$(DEPDIR)/zktest_mt-Util.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/Util.cc' object='tests/zktest_mt-Util.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -c -o zktest_mt-Util.obj `if test -f 'tests/Util.cc'; then $(CYGPATH_W) 'tests/Util.cc'; else $(CYGPATH_W) '$(srcdir)/tests/Util.cc'; fi`
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -c -o tests/zktest_mt-Util.obj `if test -f 'tests/Util.cc'; then $(CYGPATH_W) 'tests/Util.cc'; else $(CYGPATH_W) '$(srcdir)/tests/Util.cc'; fi`
 
-zktest_mt-ThreadingUtil.o: tests/ThreadingUtil.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -MT zktest_mt-ThreadingUtil.o -MD -MP -MF $(DEPDIR)/zktest_mt-ThreadingUtil.Tpo -c -o zktest_mt-ThreadingUtil.o `test -f 'tests/ThreadingUtil.cc' || echo '$(srcdir)/'`tests/ThreadingUtil.cc
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/zktest_mt-ThreadingUtil.Tpo $(DEPDIR)/zktest_mt-ThreadingUtil.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/ThreadingUtil.cc' object='zktest_mt-ThreadingUtil.o' libtool=no @AMDEPBACKSLASH@
+tests/zktest_mt-ThreadingUtil.o: tests/ThreadingUtil.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -MT tests/zktest_mt-ThreadingUtil.o -MD -MP -MF tests/$(DEPDIR)/zktest_mt-ThreadingUtil.Tpo -c -o tests/zktest_mt-ThreadingUtil.o `test -f 'tests/ThreadingUtil.cc' || echo '$(srcdir)/'`tests/ThreadingUtil.cc
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/zktest_mt-ThreadingUtil.Tpo tests/$(DEPDIR)/zktest_mt-ThreadingUtil.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/ThreadingUtil.cc' object='tests/zktest_mt-ThreadingUtil.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -c -o zktest_mt-ThreadingUtil.o `test -f 'tests/ThreadingUtil.cc' || echo '$(srcdir)/'`tests/ThreadingUtil.cc
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -c -o tests/zktest_mt-ThreadingUtil.o `test -f 'tests/ThreadingUtil.cc' || echo '$(srcdir)/'`tests/ThreadingUtil.cc
 
-zktest_mt-ThreadingUtil.obj: tests/ThreadingUtil.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -MT zktest_mt-ThreadingUtil.obj -MD -MP -MF $(DEPDIR)/zktest_mt-ThreadingUtil.Tpo -c -o zktest_mt-ThreadingUtil.obj `if test -f 'tests/ThreadingUtil.cc'; then $(CYGPATH_W) 'tests/ThreadingUtil.cc'; else $(CYGPATH_W) '$(srcdir)/tests/ThreadingUtil.cc'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/zktest_mt-ThreadingUtil.Tpo $(DEPDIR)/zktest_mt-ThreadingUtil.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/ThreadingUtil.cc' object='zktest_mt-ThreadingUtil.obj' libtool=no @AMDEPBACKSLASH@
+tests/zktest_mt-ThreadingUtil.obj: tests/ThreadingUtil.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -MT tests/zktest_mt-ThreadingUtil.obj -MD -MP -MF tests/$(DEPDIR)/zktest_mt-ThreadingUtil.Tpo -c -o tests/zktest_mt-ThreadingUtil.obj `if test -f 'tests/ThreadingUtil.cc'; then $(CYGPATH_W) 'tests/ThreadingUtil.cc'; else $(CYGPATH_W) '$(srcdir)/tests/ThreadingUtil.cc'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/zktest_mt-ThreadingUtil.Tpo tests/$(DEPDIR)/zktest_mt-ThreadingUtil.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/ThreadingUtil.cc' object='tests/zktest_mt-ThreadingUtil.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -c -o zktest_mt-ThreadingUtil.obj `if test -f 'tests/ThreadingUtil.cc'; then $(CYGPATH_W) 'tests/ThreadingUtil.cc'; else $(CYGPATH_W) '$(srcdir)/tests/ThreadingUtil.cc'; fi`
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -c -o tests/zktest_mt-ThreadingUtil.obj `if test -f 'tests/ThreadingUtil.cc'; then $(CYGPATH_W) 'tests/ThreadingUtil.cc'; else $(CYGPATH_W) '$(srcdir)/tests/ThreadingUtil.cc'; fi`
 
-zktest_mt-TestClientRetry.o: tests/TestClientRetry.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -MT zktest_mt-TestClientRetry.o -MD -MP -MF $(DEPDIR)/zktest_mt-TestClientRetry.Tpo -c -o zktest_mt-TestClientRetry.o `test -f 'tests/TestClientRetry.cc' || echo '$(srcdir)/'`tests/TestClientRetry.cc
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/zktest_mt-TestClientRetry.Tpo $(DEPDIR)/zktest_mt-TestClientRetry.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/TestClientRetry.cc' object='zktest_mt-TestClientRetry.o' libtool=no @AMDEPBACKSLASH@
+tests/zktest_mt-TestClientRetry.o: tests/TestClientRetry.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -MT tests/zktest_mt-TestClientRetry.o -MD -MP -MF tests/$(DEPDIR)/zktest_mt-TestClientRetry.Tpo -c -o tests/zktest_mt-TestClientRetry.o `test -f 'tests/TestClientRetry.cc' || echo '$(srcdir)/'`tests/TestClientRetry.cc
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/zktest_mt-TestClientRetry.Tpo tests/$(DEPDIR)/zktest_mt-TestClientRetry.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/TestClientRetry.cc' object='tests/zktest_mt-TestClientRetry.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -c -o zktest_mt-TestClientRetry.o `test -f 'tests/TestClientRetry.cc' || echo '$(srcdir)/'`tests/TestClientRetry.cc
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -c -o tests/zktest_mt-TestClientRetry.o `test -f 'tests/TestClientRetry.cc' || echo '$(srcdir)/'`tests/TestClientRetry.cc
 
-zktest_mt-TestClientRetry.obj: tests/TestClientRetry.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -MT zktest_mt-TestClientRetry.obj -MD -MP -MF $(DEPDIR)/zktest_mt-TestClientRetry.Tpo -c -o zktest_mt-TestClientRetry.obj `if test -f 'tests/TestClientRetry.cc'; then $(CYGPATH_W) 'tests/TestClientRetry.cc'; else $(CYGPATH_W) '$(srcdir)/tests/TestClientRetry.cc'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/zktest_mt-TestClientRetry.Tpo $(DEPDIR)/zktest_mt-TestClientRetry.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/TestClientRetry.cc' object='zktest_mt-TestClientRetry.obj' libtool=no @AMDEPBACKSLASH@
+tests/zktest_mt-TestClientRetry.obj: tests/TestClientRetry.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -MT tests/zktest_mt-TestClientRetry.obj -MD -MP -MF tests/$(DEPDIR)/zktest_mt-TestClientRetry.Tpo -c -o tests/zktest_mt-TestClientRetry.obj `if test -f 'tests/TestClientRetry.cc'; then $(CYGPATH_W) 'tests/TestClientRetry.cc'; else $(CYGPATH_W) '$(srcdir)/tests/TestClientRetry.cc'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/zktest_mt-TestClientRetry.Tpo tests/$(DEPDIR)/zktest_mt-TestClientRetry.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/TestClientRetry.cc' object='tests/zktest_mt-TestClientRetry.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -c -o zktest_mt-TestClientRetry.obj `if test -f 'tests/TestClientRetry.cc'; then $(CYGPATH_W) 'tests/TestClientRetry.cc'; else $(CYGPATH_W) '$(srcdir)/tests/TestClientRetry.cc'; fi`
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -c -o tests/zktest_mt-TestClientRetry.obj `if test -f 'tests/TestClientRetry.cc'; then $(CYGPATH_W) 'tests/TestClientRetry.cc'; else $(CYGPATH_W) '$(srcdir)/tests/TestClientRetry.cc'; fi`
 
-zktest_mt-TestOperations.o: tests/TestOperations.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -MT zktest_mt-TestOperations.o -MD -MP -MF $(DEPDIR)/zktest_mt-TestOperations.Tpo -c -o zktest_mt-TestOperations.o `test -f 'tests/TestOperations.cc' || echo '$(srcdir)/'`tests/TestOperations.cc
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/zktest_mt-TestOperations.Tpo $(DEPDIR)/zktest_mt-TestOperations.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/TestOperations.cc' object='zktest_mt-TestOperations.o' libtool=no @AMDEPBACKSLASH@
+tests/zktest_mt-TestOperations.o: tests/TestOperations.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -MT tests/zktest_mt-TestOperations.o -MD -MP -MF tests/$(DEPDIR)/zktest_mt-TestOperations.Tpo -c -o tests/zktest_mt-TestOperations.o `test -f 'tests/TestOperations.cc' || echo '$(srcdir)/'`tests/TestOperations.cc
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/zktest_mt-TestOperations.Tpo tests/$(DEPDIR)/zktest_mt-TestOperations.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/TestOperations.cc' object='tests/zktest_mt-TestOperations.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -c -o zktest_mt-TestOperations.o `test -f 'tests/TestOperations.cc' || echo '$(srcdir)/'`tests/TestOperations.cc
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -c -o tests/zktest_mt-TestOperations.o `test -f 'tests/TestOperations.cc' || echo '$(srcdir)/'`tests/TestOperations.cc
 
-zktest_mt-TestOperations.obj: tests/TestOperations.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -MT zktest_mt-TestOperations.obj -MD -MP -MF $(DEPDIR)/zktest_mt-TestOperations.Tpo -c -o zktest_mt-TestOperations.obj `if test -f 'tests/TestOperations.cc'; then $(CYGPATH_W) 'tests/TestOperations.cc'; else $(CYGPATH_W) '$(srcdir)/tests/TestOperations.cc'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/zktest_mt-TestOperations.Tpo $(DEPDIR)/zktest_mt-TestOperations.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/TestOperations.cc' object='zktest_mt-TestOperations.obj' libtool=no @AMDEPBACKSLASH@
+tests/zktest_mt-TestOperations.obj: tests/TestOperations.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -MT tests/zktest_mt-TestOperations.obj -MD -MP -MF tests/$(DEPDIR)/zktest_mt-TestOperations.Tpo -c -o tests/zktest_mt-TestOperations.obj `if test -f 'tests/TestOperations.cc'; then $(CYGPATH_W) 'tests/TestOperations.cc'; else $(CYGPATH_W) '$(srcdir)/tests/TestOperations.cc'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/zktest_mt-TestOperations.Tpo tests/$(DEPDIR)/zktest_mt-TestOperations.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/TestOperations.cc' object='tests/zktest_mt-TestOperations.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -c -o zktest_mt-TestOperations.obj `if test -f 'tests/TestOperations.cc'; then $(CYGPATH_W) 'tests/TestOperations.cc'; else $(CYGPATH_W) '$(srcdir)/tests/TestOperations.cc'; fi`
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -c -o tests/zktest_mt-TestOperations.obj `if test -f 'tests/TestOperations.cc'; then $(CYGPATH_W) 'tests/TestOperations.cc'; else $(CYGPATH_W) '$(srcdir)/tests/TestOperations.cc'; fi`
 
-zktest_mt-TestZookeeperInit.o: tests/TestZookeeperInit.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -MT zktest_mt-TestZookeeperInit.o -MD -MP -MF $(DEPDIR)/zktest_mt-TestZookeeperInit.Tpo -c -o zktest_mt-TestZookeeperInit.o `test -f 'tests/TestZookeeperInit.cc' || echo '$(srcdir)/'`tests/TestZookeeperInit.cc
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/zktest_mt-TestZookeeperInit.Tpo $(DEPDIR)/zktest_mt-TestZookeeperInit.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/TestZookeeperInit.cc' object='zktest_mt-TestZookeeperInit.o' libtool=no @AMDEPBACKSLASH@
+tests/zktest_mt-TestZookeeperInit.o: tests/TestZookeeperInit.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -MT tests/zktest_mt-TestZookeeperInit.o -MD -MP -MF tests/$(DEPDIR)/zktest_mt-TestZookeeperInit.Tpo -c -o tests/zktest_mt-TestZookeeperInit.o `test -f 'tests/TestZookeeperInit.cc' || echo '$(srcdir)/'`tests/TestZookeeperInit.cc
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/zktest_mt-TestZookeeperInit.Tpo tests/$(DEPDIR)/zktest_mt-TestZookeeperInit.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/TestZookeeperInit.cc' object='tests/zktest_mt-TestZookeeperInit.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -c -o zktest_mt-TestZookeeperInit.o `test -f 'tests/TestZookeeperInit.cc' || echo '$(srcdir)/'`tests/TestZookeeperInit.cc
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -c -o tests/zktest_mt-TestZookeeperInit.o `test -f 'tests/TestZookeeperInit.cc' || echo '$(srcdir)/'`tests/TestZookeeperInit.cc
 
-zktest_mt-TestZookeeperInit.obj: tests/TestZookeeperInit.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -MT zktest_mt-TestZookeeperInit.obj -MD -MP -MF $(DEPDIR)/zktest_mt-TestZookeeperInit.Tpo -c -o zktest_mt-TestZookeeperInit.obj `if test -f 'tests/TestZookeeperInit.cc'; then $(CYGPATH_W) 'tests/TestZookeeperInit.cc'; else $(CYGPATH_W) '$(srcdir)/tests/TestZookeeperInit.cc'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/zktest_mt-TestZookeeperInit.Tpo $(DEPDIR)/zktest_mt-TestZookeeperInit.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/TestZookeeperInit.cc' object='zktest_mt-TestZookeeperInit.obj' libtool=no @AMDEPBACKSLASH@
+tests/zktest_mt-TestZookeeperInit.obj: tests/TestZookeeperInit.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -MT tests/zktest_mt-TestZookeeperInit.obj -MD -MP -MF tests/$(DEPDIR)/zktest_mt-TestZookeeperInit.Tpo -c -o tests/zktest_mt-TestZookeeperInit.obj `if test -f 'tests/TestZookeeperInit.cc'; then $(CYGPATH_W) 'tests/TestZookeeperInit.cc'; else $(CYGPATH_W) '$(srcdir)/tests/TestZookeeperInit.cc'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/zktest_mt-TestZookeeperInit.Tpo tests/$(DEPDIR)/zktest_mt-TestZookeeperInit.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/TestZookeeperInit.cc' object='tests/zktest_mt-TestZookeeperInit.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -c -o zktest_mt-TestZookeeperInit.obj `if test -f 'tests/TestZookeeperInit.cc'; then $(CYGPATH_W) 'tests/TestZookeeperInit.cc'; else $(CYGPATH_W) '$(srcdir)/tests/TestZookeeperInit.cc'; fi`
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -c -o tests/zktest_mt-TestZookeeperInit.obj `if test -f 'tests/TestZookeeperInit.cc'; then $(CYGPATH_W) 'tests/TestZookeeperInit.cc'; else $(CYGPATH_W) '$(srcdir)/tests/TestZookeeperInit.cc'; fi`
 
-zktest_mt-TestZookeeperClose.o: tests/TestZookeeperClose.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -MT zktest_mt-TestZookeeperClose.o -MD -MP -MF $(DEPDIR)/zktest_mt-TestZookeeperClose.Tpo -c -o zktest_mt-TestZookeeperClose.o `test -f 'tests/TestZookeeperClose.cc' || echo '$(srcdir)/'`tests/TestZookeeperClose.cc
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/zktest_mt-TestZookeeperClose.Tpo $(DEPDIR)/zktest_mt-TestZookeeperClose.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/TestZookeeperClose.cc' object='zktest_mt-TestZookeeperClose.o' libtool=no @AMDEPBACKSLASH@
+tests/zktest_mt-TestZookeeperClose.o: tests/TestZookeeperClose.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -MT tests/zktest_mt-TestZookeeperClose.o -MD -MP -MF tests/$(DEPDIR)/zktest_mt-TestZookeeperClose.Tpo -c -o tests/zktest_mt-TestZookeeperClose.o `test -f 'tests/TestZookeeperClose.cc' || echo '$(srcdir)/'`tests/TestZookeeperClose.cc
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/zktest_mt-TestZookeeperClose.Tpo tests/$(DEPDIR)/zktest_mt-TestZookeeperClose.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/TestZookeeperClose.cc' object='tests/zktest_mt-TestZookeeperClose.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -c -o zktest_mt-TestZookeeperClose.o `test -f 'tests/TestZookeeperClose.cc' || echo '$(srcdir)/'`tests/TestZookeeperClose.cc
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -c -o tests/zktest_mt-TestZookeeperClose.o `test -f 'tests/TestZookeeperClose.cc' || echo '$(srcdir)/'`tests/TestZookeeperClose.cc
 
-zktest_mt-TestZookeeperClose.obj: tests/TestZookeeperClose.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -MT zktest_mt-TestZookeeperClose.obj -MD -MP -MF $(DEPDIR)/zktest_mt-TestZookeeperClose.Tpo -c -o zktest_mt-TestZookeeperClose.obj `if test -f 'tests/TestZookeeperClose.cc'; then $(CYGPATH_W) 'tests/TestZookeeperClose.cc'; else $(CYGPATH_W) '$(srcdir)/tests/TestZookeeperClose.cc'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/zktest_mt-TestZookeeperClose.Tpo $(DEPDIR)/zktest_mt-TestZookeeperClose.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/TestZookeeperClose.cc' object='zktest_mt-TestZookeeperClose.obj' libtool=no @AMDEPBACKSLASH@
+tests/zktest_mt-TestZookeeperClose.obj: tests/TestZookeeperClose.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -MT tests/zktest_mt-TestZookeeperClose.obj -MD -MP -MF tests/$(DEPDIR)/zktest_mt-TestZookeeperClose.Tpo -c -o tests/zktest_mt-TestZookeeperClose.obj `if test -f 'tests/TestZookeeperClose.cc'; then $(CYGPATH_W) 'tests/TestZookeeperClose.cc'; else $(CYGPATH_W) '$(srcdir)/tests/TestZookeeperClose.cc'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/zktest_mt-TestZookeeperClose.Tpo tests/$(DEPDIR)/zktest_mt-TestZookeeperClose.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/TestZookeeperClose.cc' object='tests/zktest_mt-TestZookeeperClose.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -c -o zktest_mt-TestZookeeperClose.obj `if test -f 'tests/TestZookeeperClose.cc'; then $(CYGPATH_W) 'tests/TestZookeeperClose.cc'; else $(CYGPATH_W) '$(srcdir)/tests/TestZookeeperClose.cc'; fi`
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -c -o tests/zktest_mt-TestZookeeperClose.obj `if test -f 'tests/TestZookeeperClose.cc'; then $(CYGPATH_W) 'tests/TestZookeeperClose.cc'; else $(CYGPATH_W) '$(srcdir)/tests/TestZookeeperClose.cc'; fi`
 
-zktest_mt-TestClient.o: tests/TestClient.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -MT zktest_mt-TestClient.o -MD -MP -MF $(DEPDIR)/zktest_mt-TestClient.Tpo -c -o zktest_mt-TestClient.o `test -f 'tests/TestClient.cc' || echo '$(srcdir)/'`tests/TestClient.cc
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/zktest_mt-TestClient.Tpo $(DEPDIR)/zktest_mt-TestClient.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/TestClient.cc' object='zktest_mt-TestClient.o' libtool=no @AMDEPBACKSLASH@
+tests/zktest_mt-TestClient.o: tests/TestClient.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -MT tests/zktest_mt-TestClient.o -MD -MP -MF tests/$(DEPDIR)/zktest_mt-TestClient.Tpo -c -o tests/zktest_mt-TestClient.o `test -f 'tests/TestClient.cc' || echo '$(srcdir)/'`tests/TestClient.cc
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/zktest_mt-TestClient.Tpo tests/$(DEPDIR)/zktest_mt-TestClient.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/TestClient.cc' object='tests/zktest_mt-TestClient.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -c -o zktest_mt-TestClient.o `test -f 'tests/TestClient.cc' || echo '$(srcdir)/'`tests/TestClient.cc
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -c -o tests/zktest_mt-TestClient.o `test -f 'tests/TestClient.cc' || echo '$(srcdir)/'`tests/TestClient.cc
 
-zktest_mt-TestClient.obj: tests/TestClient.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -MT zktest_mt-TestClient.obj -MD -MP -MF $(DEPDIR)/zktest_mt-TestClient.Tpo -c -o zktest_mt-TestClient.obj `if test -f 'tests/TestClient.cc'; then $(CYGPATH_W) 'tests/TestClient.cc'; else $(CYGPATH_W) '$(srcdir)/tests/TestClient.cc'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/zktest_mt-TestClient.Tpo $(DEPDIR)/zktest_mt-TestClient.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/TestClient.cc' object='zktest_mt-TestClient.obj' libtool=no @AMDEPBACKSLASH@
+tests/zktest_mt-TestClient.obj: tests/TestClient.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -MT tests/zktest_mt-TestClient.obj -MD -MP -MF tests/$(DEPDIR)/zktest_mt-TestClient.Tpo -c -o tests/zktest_mt-TestClient.obj `if test -f 'tests/TestClient.cc'; then $(CYGPATH_W) 'tests/TestClient.cc'; else $(CYGPATH_W) '$(srcdir)/tests/TestClient.cc'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/zktest_mt-TestClient.Tpo tests/$(DEPDIR)/zktest_mt-TestClient.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/TestClient.cc' object='tests/zktest_mt-TestClient.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -c -o zktest_mt-TestClient.obj `if test -f 'tests/TestClient.cc'; then $(CYGPATH_W) 'tests/TestClient.cc'; else $(CYGPATH_W) '$(srcdir)/tests/TestClient.cc'; fi`
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -c -o tests/zktest_mt-TestClient.obj `if test -f 'tests/TestClient.cc'; then $(CYGPATH_W) 'tests/TestClient.cc'; else $(CYGPATH_W) '$(srcdir)/tests/TestClient.cc'; fi`
 
-zktest_mt-TestMulti.o: tests/TestMulti.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -MT zktest_mt-TestMulti.o -MD -MP -MF $(DEPDIR)/zktest_mt-TestMulti.Tpo -c -o zktest_mt-TestMulti.o `test -f 'tests/TestMulti.cc' || echo '$(srcdir)/'`tests/TestMulti.cc
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/zktest_mt-TestMulti.Tpo $(DEPDIR)/zktest_mt-TestMulti.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/TestMulti.cc' object='zktest_mt-TestMulti.o' libtool=no @AMDEPBACKSLASH@
+tests/zktest_mt-TestMulti.o: tests/TestMulti.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -MT tests/zktest_mt-TestMulti.o -MD -MP -MF tests/$(DEPDIR)/zktest_mt-TestMulti.Tpo -c -o tests/zktest_mt-TestMulti.o `test -f 'tests/TestMulti.cc' || echo '$(srcdir)/'`tests/TestMulti.cc
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/zktest_mt-TestMulti.Tpo tests/$(DEPDIR)/zktest_mt-TestMulti.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/TestMulti.cc' object='tests/zktest_mt-TestMulti.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -c -o zktest_mt-TestMulti.o `test -f 'tests/TestMulti.cc' || echo '$(srcdir)/'`tests/TestMulti.cc
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -c -o tests/zktest_mt-TestMulti.o `test -f 'tests/TestMulti.cc' || echo '$(srcdir)/'`tests/TestMulti.cc
 
-zktest_mt-TestMulti.obj: tests/TestMulti.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -MT zktest_mt-TestMulti.obj -MD -MP -MF $(DEPDIR)/zktest_mt-TestMulti.Tpo -c -o zktest_mt-TestMulti.obj `if test -f 'tests/TestMulti.cc'; then $(CYGPATH_W) 'tests/TestMulti.cc'; else $(CYGPATH_W) '$(srcdir)/tests/TestMulti.cc'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/zktest_mt-TestMulti.Tpo $(DEPDIR)/zktest_mt-TestMulti.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/TestMulti.cc' object='zktest_mt-TestMulti.obj' libtool=no @AMDEPBACKSLASH@
+tests/zktest_mt-TestMulti.obj: tests/TestMulti.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -MT tests/zktest_mt-TestMulti.obj -MD -MP -MF tests/$(DEPDIR)/zktest_mt-TestMulti.Tpo -c -o tests/zktest_mt-TestMulti.obj `if test -f 'tests/TestMulti.cc'; then $(CYGPATH_W) 'tests/TestMulti.cc'; else $(CYGPATH_W) '$(srcdir)/tests/TestMulti.cc'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/zktest_mt-TestMulti.Tpo tests/$(DEPDIR)/zktest_mt-TestMulti.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/TestMulti.cc' object='tests/zktest_mt-TestMulti.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -c -o zktest_mt-TestMulti.obj `if test -f 'tests/TestMulti.cc'; then $(CYGPATH_W) 'tests/TestMulti.cc'; else $(CYGPATH_W) '$(srcdir)/tests/TestMulti.cc'; fi`
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -c -o tests/zktest_mt-TestMulti.obj `if test -f 'tests/TestMulti.cc'; then $(CYGPATH_W) 'tests/TestMulti.cc'; else $(CYGPATH_W) '$(srcdir)/tests/TestMulti.cc'; fi`
 
-zktest_mt-TestWatchers.o: tests/TestWatchers.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -MT zktest_mt-TestWatchers.o -MD -MP -MF $(DEPDIR)/zktest_mt-TestWatchers.Tpo -c -o zktest_mt-TestWatchers.o `test -f 'tests/TestWatchers.cc' || echo '$(srcdir)/'`tests/TestWatchers.cc
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/zktest_mt-TestWatchers.Tpo $(DEPDIR)/zktest_mt-TestWatchers.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/TestWatchers.cc' object='zktest_mt-TestWatchers.o' libtool=no @AMDEPBACKSLASH@
+tests/zktest_mt-TestWatchers.o: tests/TestWatchers.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -MT tests/zktest_mt-TestWatchers.o -MD -MP -MF tests/$(DEPDIR)/zktest_mt-TestWatchers.Tpo -c -o tests/zktest_mt-TestWatchers.o `test -f 'tests/TestWatchers.cc' || echo '$(srcdir)/'`tests/TestWatchers.cc
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/zktest_mt-TestWatchers.Tpo tests/$(DEPDIR)/zktest_mt-TestWatchers.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/TestWatchers.cc' object='tests/zktest_mt-TestWatchers.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -c -o zktest_mt-TestWatchers.o `test -f 'tests/TestWatchers.cc' || echo '$(srcdir)/'`tests/TestWatchers.cc
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -c -o tests/zktest_mt-TestWatchers.o `test -f 'tests/TestWatchers.cc' || echo '$(srcdir)/'`tests/TestWatchers.cc
 
-zktest_mt-TestWatchers.obj: tests/TestWatchers.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -MT zktest_mt-TestWatchers.obj -MD -MP -MF $(DEPDIR)/zktest_mt-TestWatchers.Tpo -c -o zktest_mt-TestWatchers.obj `if test -f 'tests/TestWatchers.cc'; then $(CYGPATH_W) 'tests/TestWatchers.cc'; else $(CYGPATH_W) '$(srcdir)/tests/TestWatchers.cc'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/zktest_mt-TestWatchers.Tpo $(DEPDIR)/zktest_mt-TestWatchers.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/TestWatchers.cc' object='zktest_mt-TestWatchers.obj' libtool=no @AMDEPBACKSLASH@
+tests/zktest_mt-TestWatchers.obj: tests/TestWatchers.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -MT tests/zktest_mt-TestWatchers.obj -MD -MP -MF tests/$(DEPDIR)/zktest_mt-TestWatchers.Tpo -c -o tests/zktest_mt-TestWatchers.obj `if test -f 'tests/TestWatchers.cc'; then $(CYGPATH_W) 'tests/TestWatchers.cc'; else $(CYGPATH_W) '$(srcdir)/tests/TestWatchers.cc'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/zktest_mt-TestWatchers.Tpo tests/$(DEPDIR)/zktest_mt-TestWatchers.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/TestWatchers.cc' object='tests/zktest_mt-TestWatchers.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -c -o zktest_mt-TestWatchers.obj `if test -f 'tests/TestWatchers.cc'; then $(CYGPATH_W) 'tests/TestWatchers.cc'; else $(CYGPATH_W) '$(srcdir)/tests/TestWatchers.cc'; fi`
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -c -o tests/zktest_mt-TestWatchers.obj `if test -f 'tests/TestWatchers.cc'; then $(CYGPATH_W) 'tests/TestWatchers.cc'; else $(CYGPATH_W) '$(srcdir)/tests/TestWatchers.cc'; fi`
 
-zktest_mt-PthreadMocks.o: tests/PthreadMocks.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -MT zktest_mt-PthreadMocks.o -MD -MP -MF $(DEPDIR)/zktest_mt-PthreadMocks.Tpo -c -o zktest_mt-PthreadMocks.o `test -f 'tests/PthreadMocks.cc' || echo '$(srcdir)/'`tests/PthreadMocks.cc
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/zktest_mt-PthreadMocks.Tpo $(DEPDIR)/zktest_mt-PthreadMocks.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/PthreadMocks.cc' object='zktest_mt-PthreadMocks.o' libtool=no @AMDEPBACKSLASH@
+tests/zktest_mt-PthreadMocks.o: tests/PthreadMocks.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -MT tests/zktest_mt-PthreadMocks.o -MD -MP -MF tests/$(DEPDIR)/zktest_mt-PthreadMocks.Tpo -c -o tests/zktest_mt-PthreadMocks.o `test -f 'tests/PthreadMocks.cc' || echo '$(srcdir)/'`tests/PthreadMocks.cc
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/zktest_mt-PthreadMocks.Tpo tests/$(DEPDIR)/zktest_mt-PthreadMocks.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/PthreadMocks.cc' object='tests/zktest_mt-PthreadMocks.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -c -o zktest_mt-PthreadMocks.o `test -f 'tests/PthreadMocks.cc' || echo '$(srcdir)/'`tests/PthreadMocks.cc
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -c -o tests/zktest_mt-PthreadMocks.o `test -f 'tests/PthreadMocks.cc' || echo '$(srcdir)/'`tests/PthreadMocks.cc
 
-zktest_mt-PthreadMocks.obj: tests/PthreadMocks.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -MT zktest_mt-PthreadMocks.obj -MD -MP -MF $(DEPDIR)/zktest_mt-PthreadMocks.Tpo -c -o zktest_mt-PthreadMocks.obj `if test -f 'tests/PthreadMocks.cc'; then $(CYGPATH_W) 'tests/PthreadMocks.cc'; else $(CYGPATH_W) '$(srcdir)/tests/PthreadMocks.cc'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/zktest_mt-PthreadMocks.Tpo $(DEPDIR)/zktest_mt-PthreadMocks.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/PthreadMocks.cc' object='zktest_mt-PthreadMocks.obj' libtool=no @AMDEPBACKSLASH@
+tests/zktest_mt-PthreadMocks.obj: tests/PthreadMocks.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -MT tests/zktest_mt-PthreadMocks.obj -MD -MP -MF tests/$(DEPDIR)/zktest_mt-PthreadMocks.Tpo -c -o tests/zktest_mt-PthreadMocks.obj `if test -f 'tests/PthreadMocks.cc'; then $(CYGPATH_W) 'tests/PthreadMocks.cc'; else $(CYGPATH_W) '$(srcdir)/tests/PthreadMocks.cc'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/zktest_mt-PthreadMocks.Tpo tests/$(DEPDIR)/zktest_mt-PthreadMocks.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/PthreadMocks.cc' object='tests/zktest_mt-PthreadMocks.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -c -o zktest_mt-PthreadMocks.obj `if test -f 'tests/PthreadMocks.cc'; then $(CYGPATH_W) 'tests/PthreadMocks.cc'; else $(CYGPATH_W) '$(srcdir)/tests/PthreadMocks.cc'; fi`
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_mt_CXXFLAGS) $(CXXFLAGS) -c -o tests/zktest_mt-PthreadMocks.obj `if test -f 'tests/PthreadMocks.cc'; then $(CYGPATH_W) 'tests/PthreadMocks.cc'; else $(CYGPATH_W) '$(srcdir)/tests/PthreadMocks.cc'; fi`
 
-zktest_st-TestDriver.o: tests/TestDriver.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -MT zktest_st-TestDriver.o -MD -MP -MF $(DEPDIR)/zktest_st-TestDriver.Tpo -c -o zktest_st-TestDriver.o `test -f 'tests/TestDriver.cc' || echo '$(srcdir)/'`tests/TestDriver.cc
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/zktest_st-TestDriver.Tpo $(DEPDIR)/zktest_st-TestDriver.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/TestDriver.cc' object='zktest_st-TestDriver.o' libtool=no @AMDEPBACKSLASH@
+tests/zktest_st-TestDriver.o: tests/TestDriver.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -MT tests/zktest_st-TestDriver.o -MD -MP -MF tests/$(DEPDIR)/zktest_st-TestDriver.Tpo -c -o tests/zktest_st-TestDriver.o `test -f 'tests/TestDriver.cc' || echo '$(srcdir)/'`tests/TestDriver.cc
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/zktest_st-TestDriver.Tpo tests/$(DEPDIR)/zktest_st-TestDriver.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/TestDriver.cc' object='tests/zktest_st-TestDriver.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -c -o zktest_st-TestDriver.o `test -f 'tests/TestDriver.cc' || echo '$(srcdir)/'`tests/TestDriver.cc
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -c -o tests/zktest_st-TestDriver.o `test -f 'tests/TestDriver.cc' || echo '$(srcdir)/'`tests/TestDriver.cc
 
-zktest_st-TestDriver.obj: tests/TestDriver.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -MT zktest_st-TestDriver.obj -MD -MP -MF $(DEPDIR)/zktest_st-TestDriver.Tpo -c -o zktest_st-TestDriver.obj `if test -f 'tests/TestDriver.cc'; then $(CYGPATH_W) 'tests/TestDriver.cc'; else $(CYGPATH_W) '$(srcdir)/tests/TestDriver.cc'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/zktest_st-TestDriver.Tpo $(DEPDIR)/zktest_st-TestDriver.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/TestDriver.cc' object='zktest_st-TestDriver.obj' libtool=no @AMDEPBACKSLASH@
+tests/zktest_st-TestDriver.obj: tests/TestDriver.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -MT tests/zktest_st-TestDriver.obj -MD -MP -MF tests/$(DEPDIR)/zktest_st-TestDriver.Tpo -c -o tests/zktest_st-TestDriver.obj `if test -f 'tests/TestDriver.cc'; then $(CYGPATH_W) 'tests/TestDriver.cc'; else $(CYGPATH_W) '$(srcdir)/tests/TestDriver.cc'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/zktest_st-TestDriver.Tpo tests/$(DEPDIR)/zktest_st-TestDriver.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/TestDriver.cc' object='tests/zktest_st-TestDriver.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -c -o zktest_st-TestDriver.obj `if test -f 'tests/TestDriver.cc'; then $(CYGPATH_W) 'tests/TestDriver.cc'; else $(CYGPATH_W) '$(srcdir)/tests/TestDriver.cc'; fi`
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -c -o tests/zktest_st-TestDriver.obj `if test -f 'tests/TestDriver.cc'; then $(CYGPATH_W) 'tests/TestDriver.cc'; else $(CYGPATH_W) '$(srcdir)/tests/TestDriver.cc'; fi`
 
-zktest_st-LibCMocks.o: tests/LibCMocks.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -MT zktest_st-LibCMocks.o -MD -MP -MF $(DEPDIR)/zktest_st-LibCMocks.Tpo -c -o zktest_st-LibCMocks.o `test -f 'tests/LibCMocks.cc' || echo '$(srcdir)/'`tests/LibCMocks.cc
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/zktest_st-LibCMocks.Tpo $(DEPDIR)/zktest_st-LibCMocks.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/LibCMocks.cc' object='zktest_st-LibCMocks.o' libtool=no @AMDEPBACKSLASH@
+tests/zktest_st-LibCMocks.o: tests/LibCMocks.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -MT tests/zktest_st-LibCMocks.o -MD -MP -MF tests/$(DEPDIR)/zktest_st-LibCMocks.Tpo -c -o tests/zktest_st-LibCMocks.o `test -f 'tests/LibCMocks.cc' || echo '$(srcdir)/'`tests/LibCMocks.cc
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/zktest_st-LibCMocks.Tpo tests/$(DEPDIR)/zktest_st-LibCMocks.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/LibCMocks.cc' object='tests/zktest_st-LibCMocks.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -c -o zktest_st-LibCMocks.o `test -f 'tests/LibCMocks.cc' || echo '$(srcdir)/'`tests/LibCMocks.cc
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -c -o tests/zktest_st-LibCMocks.o `test -f 'tests/LibCMocks.cc' || echo '$(srcdir)/'`tests/LibCMocks.cc
 
-zktest_st-LibCMocks.obj: tests/LibCMocks.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -MT zktest_st-LibCMocks.obj -MD -MP -MF $(DEPDIR)/zktest_st-LibCMocks.Tpo -c -o zktest_st-LibCMocks.obj `if test -f 'tests/LibCMocks.cc'; then $(CYGPATH_W) 'tests/LibCMocks.cc'; else $(CYGPATH_W) '$(srcdir)/tests/LibCMocks.cc'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/zktest_st-LibCMocks.Tpo $(DEPDIR)/zktest_st-LibCMocks.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/LibCMocks.cc' object='zktest_st-LibCMocks.obj' libtool=no @AMDEPBACKSLASH@
+tests/zktest_st-LibCMocks.obj: tests/LibCMocks.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -MT tests/zktest_st-LibCMocks.obj -MD -MP -MF tests/$(DEPDIR)/zktest_st-LibCMocks.Tpo -c -o tests/zktest_st-LibCMocks.obj `if test -f 'tests/LibCMocks.cc'; then $(CYGPATH_W) 'tests/LibCMocks.cc'; else $(CYGPATH_W) '$(srcdir)/tests/LibCMocks.cc'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/zktest_st-LibCMocks.Tpo tests/$(DEPDIR)/zktest_st-LibCMocks.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/LibCMocks.cc' object='tests/zktest_st-LibCMocks.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -c -o zktest_st-LibCMocks.obj `if test -f 'tests/LibCMocks.cc'; then $(CYGPATH_W) 'tests/LibCMocks.cc'; else $(CYGPATH_W) '$(srcdir)/tests/LibCMocks.cc'; fi`
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -c -o tests/zktest_st-LibCMocks.obj `if test -f 'tests/LibCMocks.cc'; then $(CYGPATH_W) 'tests/LibCMocks.cc'; else $(CYGPATH_W) '$(srcdir)/tests/LibCMocks.cc'; fi`
 
-zktest_st-LibCSymTable.o: tests/LibCSymTable.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -MT zktest_st-LibCSymTable.o -MD -MP -MF $(DEPDIR)/zktest_st-LibCSymTable.Tpo -c -o zktest_st-LibCSymTable.o `test -f 'tests/LibCSymTable.cc' || echo '$(srcdir)/'`tests/LibCSymTable.cc
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/zktest_st-LibCSymTable.Tpo $(DEPDIR)/zktest_st-LibCSymTable.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/LibCSymTable.cc' object='zktest_st-LibCSymTable.o' libtool=no @AMDEPBACKSLASH@
+tests/zktest_st-LibCSymTable.o: tests/LibCSymTable.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -MT tests/zktest_st-LibCSymTable.o -MD -MP -MF tests/$(DEPDIR)/zktest_st-LibCSymTable.Tpo -c -o tests/zktest_st-LibCSymTable.o `test -f 'tests/LibCSymTable.cc' || echo '$(srcdir)/'`tests/LibCSymTable.cc
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/zktest_st-LibCSymTable.Tpo tests/$(DEPDIR)/zktest_st-LibCSymTable.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/LibCSymTable.cc' object='tests/zktest_st-LibCSymTable.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -c -o zktest_st-LibCSymTable.o `test -f 'tests/LibCSymTable.cc' || echo '$(srcdir)/'`tests/LibCSymTable.cc
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -c -o tests/zktest_st-LibCSymTable.o `test -f 'tests/LibCSymTable.cc' || echo '$(srcdir)/'`tests/LibCSymTable.cc
 
-zktest_st-LibCSymTable.obj: tests/LibCSymTable.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -MT zktest_st-LibCSymTable.obj -MD -MP -MF $(DEPDIR)/zktest_st-LibCSymTable.Tpo -c -o zktest_st-LibCSymTable.obj `if test -f 'tests/LibCSymTable.cc'; then $(CYGPATH_W) 'tests/LibCSymTable.cc'; else $(CYGPATH_W) '$(srcdir)/tests/LibCSymTable.cc'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/zktest_st-LibCSymTable.Tpo $(DEPDIR)/zktest_st-LibCSymTable.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/LibCSymTable.cc' object='zktest_st-LibCSymTable.obj' libtool=no @AMDEPBACKSLASH@
+tests/zktest_st-LibCSymTable.obj: tests/LibCSymTable.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -MT tests/zktest_st-LibCSymTable.obj -MD -MP -MF tests/$(DEPDIR)/zktest_st-LibCSymTable.Tpo -c -o tests/zktest_st-LibCSymTable.obj `if test -f 'tests/LibCSymTable.cc'; then $(CYGPATH_W) 'tests/LibCSymTable.cc'; else $(CYGPATH_W) '$(srcdir)/tests/LibCSymTable.cc'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/zktest_st-LibCSymTable.Tpo tests/$(DEPDIR)/zktest_st-LibCSymTable.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/LibCSymTable.cc' object='tests/zktest_st-LibCSymTable.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -c -o zktest_st-LibCSymTable.obj `if test -f 'tests/LibCSymTable.cc'; then $(CYGPATH_W) 'tests/LibCSymTable.cc'; else $(CYGPATH_W) '$(srcdir)/tests/LibCSymTable.cc'; fi`
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -c -o tests/zktest_st-LibCSymTable.obj `if test -f 'tests/LibCSymTable.cc'; then $(CYGPATH_W) 'tests/LibCSymTable.cc'; else $(CYGPATH_W) '$(srcdir)/tests/LibCSymTable.cc'; fi`
 
-zktest_st-MocksBase.o: tests/MocksBase.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -MT zktest_st-MocksBase.o -MD -MP -MF $(DEPDIR)/zktest_st-MocksBase.Tpo -c -o zktest_st-MocksBase.o `test -f 'tests/MocksBase.cc' || echo '$(srcdir)/'`tests/MocksBase.cc
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/zktest_st-MocksBase.Tpo $(DEPDIR)/zktest_st-MocksBase.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/MocksBase.cc' object='zktest_st-MocksBase.o' libtool=no @AMDEPBACKSLASH@
+tests/zktest_st-MocksBase.o: tests/MocksBase.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -MT tests/zktest_st-MocksBase.o -MD -MP -MF tests/$(DEPDIR)/zktest_st-MocksBase.Tpo -c -o tests/zktest_st-MocksBase.o `test -f 'tests/MocksBase.cc' || echo '$(srcdir)/'`tests/MocksBase.cc
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/zktest_st-MocksBase.Tpo tests/$(DEPDIR)/zktest_st-MocksBase.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/MocksBase.cc' object='tests/zktest_st-MocksBase.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -c -o zktest_st-MocksBase.o `test -f 'tests/MocksBase.cc' || echo '$(srcdir)/'`tests/MocksBase.cc
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -c -o tests/zktest_st-MocksBase.o `test -f 'tests/MocksBase.cc' || echo '$(srcdir)/'`tests/MocksBase.cc
 
-zktest_st-MocksBase.obj: tests/MocksBase.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -MT zktest_st-MocksBase.obj -MD -MP -MF $(DEPDIR)/zktest_st-MocksBase.Tpo -c -o zktest_st-MocksBase.obj `if test -f 'tests/MocksBase.cc'; then $(CYGPATH_W) 'tests/MocksBase.cc'; else $(CYGPATH_W) '$(srcdir)/tests/MocksBase.cc'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/zktest_st-MocksBase.Tpo $(DEPDIR)/zktest_st-MocksBase.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/MocksBase.cc' object='zktest_st-MocksBase.obj' libtool=no @AMDEPBACKSLASH@
+tests/zktest_st-MocksBase.obj: tests/MocksBase.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -MT tests/zktest_st-MocksBase.obj -MD -MP -MF tests/$(DEPDIR)/zktest_st-MocksBase.Tpo -c -o tests/zktest_st-MocksBase.obj `if test -f 'tests/MocksBase.cc'; then $(CYGPATH_W) 'tests/MocksBase.cc'; else $(CYGPATH_W) '$(srcdir)/tests/MocksBase.cc'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/zktest_st-MocksBase.Tpo tests/$(DEPDIR)/zktest_st-MocksBase.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/MocksBase.cc' object='tests/zktest_st-MocksBase.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -c -o zktest_st-MocksBase.obj `if test -f 'tests/MocksBase.cc'; then $(CYGPATH_W) 'tests/MocksBase.cc'; else $(CYGPATH_W) '$(srcdir)/tests/MocksBase.cc'; fi`
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -c -o tests/zktest_st-MocksBase.obj `if test -f 'tests/MocksBase.cc'; then $(CYGPATH_W) 'tests/MocksBase.cc'; else $(CYGPATH_W) '$(srcdir)/tests/MocksBase.cc'; fi`
 
-zktest_st-ZKMocks.o: tests/ZKMocks.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -MT zktest_st-ZKMocks.o -MD -MP -MF $(DEPDIR)/zktest_st-ZKMocks.Tpo -c -o zktest_st-ZKMocks.o `test -f 'tests/ZKMocks.cc' || echo '$(srcdir)/'`tests/ZKMocks.cc
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/zktest_st-ZKMocks.Tpo $(DEPDIR)/zktest_st-ZKMocks.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/ZKMocks.cc' object='zktest_st-ZKMocks.o' libtool=no @AMDEPBACKSLASH@
+tests/zktest_st-ZKMocks.o: tests/ZKMocks.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -MT tests/zktest_st-ZKMocks.o -MD -MP -MF tests/$(DEPDIR)/zktest_st-ZKMocks.Tpo -c -o tests/zktest_st-ZKMocks.o `test -f 'tests/ZKMocks.cc' || echo '$(srcdir)/'`tests/ZKMocks.cc
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/zktest_st-ZKMocks.Tpo tests/$(DEPDIR)/zktest_st-ZKMocks.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/ZKMocks.cc' object='tests/zktest_st-ZKMocks.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -c -o zktest_st-ZKMocks.o `test -f 'tests/ZKMocks.cc' || echo '$(srcdir)/'`tests/ZKMocks.cc
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -c -o tests/zktest_st-ZKMocks.o `test -f 'tests/ZKMocks.cc' || echo '$(srcdir)/'`tests/ZKMocks.cc
 
-zktest_st-ZKMocks.obj: tests/ZKMocks.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -MT zktest_st-ZKMocks.obj -MD -MP -MF $(DEPDIR)/zktest_st-ZKMocks.Tpo -c -o zktest_st-ZKMocks.obj `if test -f 'tests/ZKMocks.cc'; then $(CYGPATH_W) 'tests/ZKMocks.cc'; else $(CYGPATH_W) '$(srcdir)/tests/ZKMocks.cc'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/zktest_st-ZKMocks.Tpo $(DEPDIR)/zktest_st-ZKMocks.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/ZKMocks.cc' object='zktest_st-ZKMocks.obj' libtool=no @AMDEPBACKSLASH@
+tests/zktest_st-ZKMocks.obj: tests/ZKMocks.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -MT tests/zktest_st-ZKMocks.obj -MD -MP -MF tests/$(DEPDIR)/zktest_st-ZKMocks.Tpo -c -o tests/zktest_st-ZKMocks.obj `if test -f 'tests/ZKMocks.cc'; then $(CYGPATH_W) 'tests/ZKMocks.cc'; else $(CYGPATH_W) '$(srcdir)/tests/ZKMocks.cc'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/zktest_st-ZKMocks.Tpo tests/$(DEPDIR)/zktest_st-ZKMocks.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/ZKMocks.cc' object='tests/zktest_st-ZKMocks.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -c -o zktest_st-ZKMocks.obj `if test -f 'tests/ZKMocks.cc'; then $(CYGPATH_W) 'tests/ZKMocks.cc'; else $(CYGPATH_W) '$(srcdir)/tests/ZKMocks.cc'; fi`
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -c -o tests/zktest_st-ZKMocks.obj `if test -f 'tests/ZKMocks.cc'; then $(CYGPATH_W) 'tests/ZKMocks.cc'; else $(CYGPATH_W) '$(srcdir)/tests/ZKMocks.cc'; fi`
 
-zktest_st-Util.o: tests/Util.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -MT zktest_st-Util.o -MD -MP -MF $(DEPDIR)/zktest_st-Util.Tpo -c -o zktest_st-Util.o `test -f 'tests/Util.cc' || echo '$(srcdir)/'`tests/Util.cc
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/zktest_st-Util.Tpo $(DEPDIR)/zktest_st-Util.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/Util.cc' object='zktest_st-Util.o' libtool=no @AMDEPBACKSLASH@
+tests/zktest_st-Util.o: tests/Util.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -MT tests/zktest_st-Util.o -MD -MP -MF tests/$(DEPDIR)/zktest_st-Util.Tpo -c -o tests/zktest_st-Util.o `test -f 'tests/Util.cc' || echo '$(srcdir)/'`tests/Util.cc
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/zktest_st-Util.Tpo tests/$(DEPDIR)/zktest_st-Util.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/Util.cc' object='tests/zktest_st-Util.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -c -o zktest_st-Util.o `test -f 'tests/Util.cc' || echo '$(srcdir)/'`tests/Util.cc
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -c -o tests/zktest_st-Util.o `test -f 'tests/Util.cc' || echo '$(srcdir)/'`tests/Util.cc
 
-zktest_st-Util.obj: tests/Util.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -MT zktest_st-Util.obj -MD -MP -MF $(DEPDIR)/zktest_st-Util.Tpo -c -o zktest_st-Util.obj `if test -f 'tests/Util.cc'; then $(CYGPATH_W) 'tests/Util.cc'; else $(CYGPATH_W) '$(srcdir)/tests/Util.cc'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/zktest_st-Util.Tpo $(DEPDIR)/zktest_st-Util.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/Util.cc' object='zktest_st-Util.obj' libtool=no @AMDEPBACKSLASH@
+tests/zktest_st-Util.obj: tests/Util.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -MT tests/zktest_st-Util.obj -MD -MP -MF tests/$(DEPDIR)/zktest_st-Util.Tpo -c -o tests/zktest_st-Util.obj `if test -f 'tests/Util.cc'; then $(CYGPATH_W) 'tests/Util.cc'; else $(CYGPATH_W) '$(srcdir)/tests/Util.cc'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/zktest_st-Util.Tpo tests/$(DEPDIR)/zktest_st-Util.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/Util.cc' object='tests/zktest_st-Util.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -c -o zktest_st-Util.obj `if test -f 'tests/Util.cc'; then $(CYGPATH_W) 'tests/Util.cc'; else $(CYGPATH_W) '$(srcdir)/tests/Util.cc'; fi`
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -c -o tests/zktest_st-Util.obj `if test -f 'tests/Util.cc'; then $(CYGPATH_W) 'tests/Util.cc'; else $(CYGPATH_W) '$(srcdir)/tests/Util.cc'; fi`
 
-zktest_st-ThreadingUtil.o: tests/ThreadingUtil.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -MT zktest_st-ThreadingUtil.o -MD -MP -MF $(DEPDIR)/zktest_st-ThreadingUtil.Tpo -c -o zktest_st-ThreadingUtil.o `test -f 'tests/ThreadingUtil.cc' || echo '$(srcdir)/'`tests/ThreadingUtil.cc
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/zktest_st-ThreadingUtil.Tpo $(DEPDIR)/zktest_st-ThreadingUtil.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/ThreadingUtil.cc' object='zktest_st-ThreadingUtil.o' libtool=no @AMDEPBACKSLASH@
+tests/zktest_st-ThreadingUtil.o: tests/ThreadingUtil.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -MT tests/zktest_st-ThreadingUtil.o -MD -MP -MF tests/$(DEPDIR)/zktest_st-ThreadingUtil.Tpo -c -o tests/zktest_st-ThreadingUtil.o `test -f 'tests/ThreadingUtil.cc' || echo '$(srcdir)/'`tests/ThreadingUtil.cc
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/zktest_st-ThreadingUtil.Tpo tests/$(DEPDIR)/zktest_st-ThreadingUtil.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/ThreadingUtil.cc' object='tests/zktest_st-ThreadingUtil.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -c -o zktest_st-ThreadingUtil.o `test -f 'tests/ThreadingUtil.cc' || echo '$(srcdir)/'`tests/ThreadingUtil.cc
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -c -o tests/zktest_st-ThreadingUtil.o `test -f 'tests/ThreadingUtil.cc' || echo '$(srcdir)/'`tests/ThreadingUtil.cc
 
-zktest_st-ThreadingUtil.obj: tests/ThreadingUtil.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -MT zktest_st-ThreadingUtil.obj -MD -MP -MF $(DEPDIR)/zktest_st-ThreadingUtil.Tpo -c -o zktest_st-ThreadingUtil.obj `if test -f 'tests/ThreadingUtil.cc'; then $(CYGPATH_W) 'tests/ThreadingUtil.cc'; else $(CYGPATH_W) '$(srcdir)/tests/ThreadingUtil.cc'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/zktest_st-ThreadingUtil.Tpo $(DEPDIR)/zktest_st-ThreadingUtil.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/ThreadingUtil.cc' object='zktest_st-ThreadingUtil.obj' libtool=no @AMDEPBACKSLASH@
+tests/zktest_st-ThreadingUtil.obj: tests/ThreadingUtil.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -MT tests/zktest_st-ThreadingUtil.obj -MD -MP -MF tests/$(DEPDIR)/zktest_st-ThreadingUtil.Tpo -c -o tests/zktest_st-ThreadingUtil.obj `if test -f 'tests/ThreadingUtil.cc'; then $(CYGPATH_W) 'tests/ThreadingUtil.cc'; else $(CYGPATH_W) '$(srcdir)/tests/ThreadingUtil.cc'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/zktest_st-ThreadingUtil.Tpo tests/$(DEPDIR)/zktest_st-ThreadingUtil.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/ThreadingUtil.cc' object='tests/zktest_st-ThreadingUtil.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -c -o zktest_st-ThreadingUtil.obj `if test -f 'tests/ThreadingUtil.cc'; then $(CYGPATH_W) 'tests/ThreadingUtil.cc'; else $(CYGPATH_W) '$(srcdir)/tests/ThreadingUtil.cc'; fi`
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -c -o tests/zktest_st-ThreadingUtil.obj `if test -f 'tests/ThreadingUtil.cc'; then $(CYGPATH_W) 'tests/ThreadingUtil.cc'; else $(CYGPATH_W) '$(srcdir)/tests/ThreadingUtil.cc'; fi`
 
-zktest_st-TestClientRetry.o: tests/TestClientRetry.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -MT zktest_st-TestClientRetry.o -MD -MP -MF $(DEPDIR)/zktest_st-TestClientRetry.Tpo -c -o zktest_st-TestClientRetry.o `test -f 'tests/TestClientRetry.cc' || echo '$(srcdir)/'`tests/TestClientRetry.cc
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/zktest_st-TestClientRetry.Tpo $(DEPDIR)/zktest_st-TestClientRetry.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/TestClientRetry.cc' object='zktest_st-TestClientRetry.o' libtool=no @AMDEPBACKSLASH@
+tests/zktest_st-TestClientRetry.o: tests/TestClientRetry.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -MT tests/zktest_st-TestClientRetry.o -MD -MP -MF tests/$(DEPDIR)/zktest_st-TestClientRetry.Tpo -c -o tests/zktest_st-TestClientRetry.o `test -f 'tests/TestClientRetry.cc' || echo '$(srcdir)/'`tests/TestClientRetry.cc
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/zktest_st-TestClientRetry.Tpo tests/$(DEPDIR)/zktest_st-TestClientRetry.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/TestClientRetry.cc' object='tests/zktest_st-TestClientRetry.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -c -o zktest_st-TestClientRetry.o `test -f 'tests/TestClientRetry.cc' || echo '$(srcdir)/'`tests/TestClientRetry.cc
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -c -o tests/zktest_st-TestClientRetry.o `test -f 'tests/TestClientRetry.cc' || echo '$(srcdir)/'`tests/TestClientRetry.cc
 
-zktest_st-TestClientRetry.obj: tests/TestClientRetry.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -MT zktest_st-TestClientRetry.obj -MD -MP -MF $(DEPDIR)/zktest_st-TestClientRetry.Tpo -c -o zktest_st-TestClientRetry.obj `if test -f 'tests/TestClientRetry.cc'; then $(CYGPATH_W) 'tests/TestClientRetry.cc'; else $(CYGPATH_W) '$(srcdir)/tests/TestClientRetry.cc'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/zktest_st-TestClientRetry.Tpo $(DEPDIR)/zktest_st-TestClientRetry.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/TestClientRetry.cc' object='zktest_st-TestClientRetry.obj' libtool=no @AMDEPBACKSLASH@
+tests/zktest_st-TestClientRetry.obj: tests/TestClientRetry.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -MT tests/zktest_st-TestClientRetry.obj -MD -MP -MF tests/$(DEPDIR)/zktest_st-TestClientRetry.Tpo -c -o tests/zktest_st-TestClientRetry.obj `if test -f 'tests/TestClientRetry.cc'; then $(CYGPATH_W) 'tests/TestClientRetry.cc'; else $(CYGPATH_W) '$(srcdir)/tests/TestClientRetry.cc'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/zktest_st-TestClientRetry.Tpo tests/$(DEPDIR)/zktest_st-TestClientRetry.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/TestClientRetry.cc' object='tests/zktest_st-TestClientRetry.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -c -o zktest_st-TestClientRetry.obj `if test -f 'tests/TestClientRetry.cc'; then $(CYGPATH_W) 'tests/TestClientRetry.cc'; else $(CYGPATH_W) '$(srcdir)/tests/TestClientRetry.cc'; fi`
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -c -o tests/zktest_st-TestClientRetry.obj `if test -f 'tests/TestClientRetry.cc'; then $(CYGPATH_W) 'tests/TestClientRetry.cc'; else $(CYGPATH_W) '$(srcdir)/tests/TestClientRetry.cc'; fi`
 
-zktest_st-TestOperations.o: tests/TestOperations.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -MT zktest_st-TestOperations.o -MD -MP -MF $(DEPDIR)/zktest_st-TestOperations.Tpo -c -o zktest_st-TestOperations.o `test -f 'tests/TestOperations.cc' || echo '$(srcdir)/'`tests/TestOperations.cc
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/zktest_st-TestOperations.Tpo $(DEPDIR)/zktest_st-TestOperations.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/TestOperations.cc' object='zktest_st-TestOperations.o' libtool=no @AMDEPBACKSLASH@
+tests/zktest_st-TestOperations.o: tests/TestOperations.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -MT tests/zktest_st-TestOperations.o -MD -MP -MF tests/$(DEPDIR)/zktest_st-TestOperations.Tpo -c -o tests/zktest_st-TestOperations.o `test -f 'tests/TestOperations.cc' || echo '$(srcdir)/'`tests/TestOperations.cc
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/zktest_st-TestOperations.Tpo tests/$(DEPDIR)/zktest_st-TestOperations.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/TestOperations.cc' object='tests/zktest_st-TestOperations.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -c -o zktest_st-TestOperations.o `test -f 'tests/TestOperations.cc' || echo '$(srcdir)/'`tests/TestOperations.cc
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -c -o tests/zktest_st-TestOperations.o `test -f 'tests/TestOperations.cc' || echo '$(srcdir)/'`tests/TestOperations.cc
 
-zktest_st-TestOperations.obj: tests/TestOperations.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -MT zktest_st-TestOperations.obj -MD -MP -MF $(DEPDIR)/zktest_st-TestOperations.Tpo -c -o zktest_st-TestOperations.obj `if test -f 'tests/TestOperations.cc'; then $(CYGPATH_W) 'tests/TestOperations.cc'; else $(CYGPATH_W) '$(srcdir)/tests/TestOperations.cc'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/zktest_st-TestOperations.Tpo $(DEPDIR)/zktest_st-TestOperations.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/TestOperations.cc' object='zktest_st-TestOperations.obj' libtool=no @AMDEPBACKSLASH@
+tests/zktest_st-TestOperations.obj: tests/TestOperations.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -MT tests/zktest_st-TestOperations.obj -MD -MP -MF tests/$(DEPDIR)/zktest_st-TestOperations.Tpo -c -o tests/zktest_st-TestOperations.obj `if test -f 'tests/TestOperations.cc'; then $(CYGPATH_W) 'tests/TestOperations.cc'; else $(CYGPATH_W) '$(srcdir)/tests/TestOperations.cc'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/zktest_st-TestOperations.Tpo tests/$(DEPDIR)/zktest_st-TestOperations.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/TestOperations.cc' object='tests/zktest_st-TestOperations.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -c -o zktest_st-TestOperations.obj `if test -f 'tests/TestOperations.cc'; then $(CYGPATH_W) 'tests/TestOperations.cc'; else $(CYGPATH_W) '$(srcdir)/tests/TestOperations.cc'; fi`
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -c -o tests/zktest_st-TestOperations.obj `if test -f 'tests/TestOperations.cc'; then $(CYGPATH_W) 'tests/TestOperations.cc'; else $(CYGPATH_W) '$(srcdir)/tests/TestOperations.cc'; fi`
 
-zktest_st-TestZookeeperInit.o: tests/TestZookeeperInit.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -MT zktest_st-TestZookeeperInit.o -MD -MP -MF $(DEPDIR)/zktest_st-TestZookeeperInit.Tpo -c -o zktest_st-TestZookeeperInit.o `test -f 'tests/TestZookeeperInit.cc' || echo '$(srcdir)/'`tests/TestZookeeperInit.cc
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/zktest_st-TestZookeeperInit.Tpo $(DEPDIR)/zktest_st-TestZookeeperInit.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/TestZookeeperInit.cc' object='zktest_st-TestZookeeperInit.o' libtool=no @AMDEPBACKSLASH@
+tests/zktest_st-TestZookeeperInit.o: tests/TestZookeeperInit.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -MT tests/zktest_st-TestZookeeperInit.o -MD -MP -MF tests/$(DEPDIR)/zktest_st-TestZookeeperInit.Tpo -c -o tests/zktest_st-TestZookeeperInit.o `test -f 'tests/TestZookeeperInit.cc' || echo '$(srcdir)/'`tests/TestZookeeperInit.cc
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/zktest_st-TestZookeeperInit.Tpo tests/$(DEPDIR)/zktest_st-TestZookeeperInit.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/TestZookeeperInit.cc' object='tests/zktest_st-TestZookeeperInit.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -c -o zktest_st-TestZookeeperInit.o `test -f 'tests/TestZookeeperInit.cc' || echo '$(srcdir)/'`tests/TestZookeeperInit.cc
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -c -o tests/zktest_st-TestZookeeperInit.o `test -f 'tests/TestZookeeperInit.cc' || echo '$(srcdir)/'`tests/TestZookeeperInit.cc
 
-zktest_st-TestZookeeperInit.obj: tests/TestZookeeperInit.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -MT zktest_st-TestZookeeperInit.obj -MD -MP -MF $(DEPDIR)/zktest_st-TestZookeeperInit.Tpo -c -o zktest_st-TestZookeeperInit.obj `if test -f 'tests/TestZookeeperInit.cc'; then $(CYGPATH_W) 'tests/TestZookeeperInit.cc'; else $(CYGPATH_W) '$(srcdir)/tests/TestZookeeperInit.cc'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/zktest_st-TestZookeeperInit.Tpo $(DEPDIR)/zktest_st-TestZookeeperInit.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/TestZookeeperInit.cc' object='zktest_st-TestZookeeperInit.obj' libtool=no @AMDEPBACKSLASH@
+tests/zktest_st-TestZookeeperInit.obj: tests/TestZookeeperInit.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -MT tests/zktest_st-TestZookeeperInit.obj -MD -MP -MF tests/$(DEPDIR)/zktest_st-TestZookeeperInit.Tpo -c -o tests/zktest_st-TestZookeeperInit.obj `if test -f 'tests/TestZookeeperInit.cc'; then $(CYGPATH_W) 'tests/TestZookeeperInit.cc'; else $(CYGPATH_W) '$(srcdir)/tests/TestZookeeperInit.cc'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/zktest_st-TestZookeeperInit.Tpo tests/$(DEPDIR)/zktest_st-TestZookeeperInit.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/TestZookeeperInit.cc' object='tests/zktest_st-TestZookeeperInit.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -c -o zktest_st-TestZookeeperInit.obj `if test -f 'tests/TestZookeeperInit.cc'; then $(CYGPATH_W) 'tests/TestZookeeperInit.cc'; else $(CYGPATH_W) '$(srcdir)/tests/TestZookeeperInit.cc'; fi`
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -c -o tests/zktest_st-TestZookeeperInit.obj `if test -f 'tests/TestZookeeperInit.cc'; then $(CYGPATH_W) 'tests/TestZookeeperInit.cc'; else $(CYGPATH_W) '$(srcdir)/tests/TestZookeeperInit.cc'; fi`
 
-zktest_st-TestZookeeperClose.o: tests/TestZookeeperClose.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -MT zktest_st-TestZookeeperClose.o -MD -MP -MF $(DEPDIR)/zktest_st-TestZookeeperClose.Tpo -c -o zktest_st-TestZookeeperClose.o `test -f 'tests/TestZookeeperClose.cc' || echo '$(srcdir)/'`tests/TestZookeeperClose.cc
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/zktest_st-TestZookeeperClose.Tpo $(DEPDIR)/zktest_st-TestZookeeperClose.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/TestZookeeperClose.cc' object='zktest_st-TestZookeeperClose.o' libtool=no @AMDEPBACKSLASH@
+tests/zktest_st-TestZookeeperClose.o: tests/TestZookeeperClose.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -MT tests/zktest_st-TestZookeeperClose.o -MD -MP -MF tests/$(DEPDIR)/zktest_st-TestZookeeperClose.Tpo -c -o tests/zktest_st-TestZookeeperClose.o `test -f 'tests/TestZookeeperClose.cc' || echo '$(srcdir)/'`tests/TestZookeeperClose.cc
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/zktest_st-TestZookeeperClose.Tpo tests/$(DEPDIR)/zktest_st-TestZookeeperClose.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/TestZookeeperClose.cc' object='tests/zktest_st-TestZookeeperClose.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -c -o zktest_st-TestZookeeperClose.o `test -f 'tests/TestZookeeperClose.cc' || echo '$(srcdir)/'`tests/TestZookeeperClose.cc
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -c -o tests/zktest_st-TestZookeeperClose.o `test -f 'tests/TestZookeeperClose.cc' || echo '$(srcdir)/'`tests/TestZookeeperClose.cc
 
-zktest_st-TestZookeeperClose.obj: tests/TestZookeeperClose.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -MT zktest_st-TestZookeeperClose.obj -MD -MP -MF $(DEPDIR)/zktest_st-TestZookeeperClose.Tpo -c -o zktest_st-TestZookeeperClose.obj `if test -f 'tests/TestZookeeperClose.cc'; then $(CYGPATH_W) 'tests/TestZookeeperClose.cc'; else $(CYGPATH_W) '$(srcdir)/tests/TestZookeeperClose.cc'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/zktest_st-TestZookeeperClose.Tpo $(DEPDIR)/zktest_st-TestZookeeperClose.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/TestZookeeperClose.cc' object='zktest_st-TestZookeeperClose.obj' libtool=no @AMDEPBACKSLASH@
+tests/zktest_st-TestZookeeperClose.obj: tests/TestZookeeperClose.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -MT tests/zktest_st-TestZookeeperClose.obj -MD -MP -MF tests/$(DEPDIR)/zktest_st-TestZookeeperClose.Tpo -c -o tests/zktest_st-TestZookeeperClose.obj `if test -f 'tests/TestZookeeperClose.cc'; then $(CYGPATH_W) 'tests/TestZookeeperClose.cc'; else $(CYGPATH_W) '$(srcdir)/tests/TestZookeeperClose.cc'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/zktest_st-TestZookeeperClose.Tpo tests/$(DEPDIR)/zktest_st-TestZookeeperClose.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/TestZookeeperClose.cc' object='tests/zktest_st-TestZookeeperClose.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -c -o zktest_st-TestZookeeperClose.obj `if test -f 'tests/TestZookeeperClose.cc'; then $(CYGPATH_W) 'tests/TestZookeeperClose.cc'; else $(CYGPATH_W) '$(srcdir)/tests/TestZookeeperClose.cc'; fi`
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -c -o tests/zktest_st-TestZookeeperClose.obj `if test -f 'tests/TestZookeeperClose.cc'; then $(CYGPATH_W) 'tests/TestZookeeperClose.cc'; else $(CYGPATH_W) '$(srcdir)/tests/TestZookeeperClose.cc'; fi`
 
-zktest_st-TestClient.o: tests/TestClient.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -MT zktest_st-TestClient.o -MD -MP -MF $(DEPDIR)/zktest_st-TestClient.Tpo -c -o zktest_st-TestClient.o `test -f 'tests/TestClient.cc' || echo '$(srcdir)/'`tests/TestClient.cc
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/zktest_st-TestClient.Tpo $(DEPDIR)/zktest_st-TestClient.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/TestClient.cc' object='zktest_st-TestClient.o' libtool=no @AMDEPBACKSLASH@
+tests/zktest_st-TestClient.o: tests/TestClient.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -MT tests/zktest_st-TestClient.o -MD -MP -MF tests/$(DEPDIR)/zktest_st-TestClient.Tpo -c -o tests/zktest_st-TestClient.o `test -f 'tests/TestClient.cc' || echo '$(srcdir)/'`tests/TestClient.cc
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/zktest_st-TestClient.Tpo tests/$(DEPDIR)/zktest_st-TestClient.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/TestClient.cc' object='tests/zktest_st-TestClient.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -c -o zktest_st-TestClient.o `test -f 'tests/TestClient.cc' || echo '$(srcdir)/'`tests/TestClient.cc
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -c -o tests/zktest_st-TestClient.o `test -f 'tests/TestClient.cc' || echo '$(srcdir)/'`tests/TestClient.cc
 
-zktest_st-TestClient.obj: tests/TestClient.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -MT zktest_st-TestClient.obj -MD -MP -MF $(DEPDIR)/zktest_st-TestClient.Tpo -c -o zktest_st-TestClient.obj `if test -f 'tests/TestClient.cc'; then $(CYGPATH_W) 'tests/TestClient.cc'; else $(CYGPATH_W) '$(srcdir)/tests/TestClient.cc'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/zktest_st-TestClient.Tpo $(DEPDIR)/zktest_st-TestClient.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/TestClient.cc' object='zktest_st-TestClient.obj' libtool=no @AMDEPBACKSLASH@
+tests/zktest_st-TestClient.obj: tests/TestClient.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -MT tests/zktest_st-TestClient.obj -MD -MP -MF tests/$(DEPDIR)/zktest_st-TestClient.Tpo -c -o tests/zktest_st-TestClient.obj `if test -f 'tests/TestClient.cc'; then $(CYGPATH_W) 'tests/TestClient.cc'; else $(CYGPATH_W) '$(srcdir)/tests/TestClient.cc'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/zktest_st-TestClient.Tpo tests/$(DEPDIR)/zktest_st-TestClient.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/TestClient.cc' object='tests/zktest_st-TestClient.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -c -o zktest_st-TestClient.obj `if test -f 'tests/TestClient.cc'; then $(CYGPATH_W) 'tests/TestClient.cc'; else $(CYGPATH_W) '$(srcdir)/tests/TestClient.cc'; fi`
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -c -o tests/zktest_st-TestClient.obj `if test -f 'tests/TestClient.cc'; then $(CYGPATH_W) 'tests/TestClient.cc'; else $(CYGPATH_W) '$(srcdir)/tests/TestClient.cc'; fi`
 
-zktest_st-TestMulti.o: tests/TestMulti.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -MT zktest_st-TestMulti.o -MD -MP -MF $(DEPDIR)/zktest_st-TestMulti.Tpo -c -o zktest_st-TestMulti.o `test -f 'tests/TestMulti.cc' || echo '$(srcdir)/'`tests/TestMulti.cc
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/zktest_st-TestMulti.Tpo $(DEPDIR)/zktest_st-TestMulti.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/TestMulti.cc' object='zktest_st-TestMulti.o' libtool=no @AMDEPBACKSLASH@
+tests/zktest_st-TestMulti.o: tests/TestMulti.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -MT tests/zktest_st-TestMulti.o -MD -MP -MF tests/$(DEPDIR)/zktest_st-TestMulti.Tpo -c -o tests/zktest_st-TestMulti.o `test -f 'tests/TestMulti.cc' || echo '$(srcdir)/'`tests/TestMulti.cc
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/zktest_st-TestMulti.Tpo tests/$(DEPDIR)/zktest_st-TestMulti.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/TestMulti.cc' object='tests/zktest_st-TestMulti.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -c -o zktest_st-TestMulti.o `test -f 'tests/TestMulti.cc' || echo '$(srcdir)/'`tests/TestMulti.cc
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -c -o tests/zktest_st-TestMulti.o `test -f 'tests/TestMulti.cc' || echo '$(srcdir)/'`tests/TestMulti.cc
 
-zktest_st-TestMulti.obj: tests/TestMulti.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -MT zktest_st-TestMulti.obj -MD -MP -MF $(DEPDIR)/zktest_st-TestMulti.Tpo -c -o zktest_st-TestMulti.obj `if test -f 'tests/TestMulti.cc'; then $(CYGPATH_W) 'tests/TestMulti.cc'; else $(CYGPATH_W) '$(srcdir)/tests/TestMulti.cc'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/zktest_st-TestMulti.Tpo $(DEPDIR)/zktest_st-TestMulti.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/TestMulti.cc' object='zktest_st-TestMulti.obj' libtool=no @AMDEPBACKSLASH@
+tests/zktest_st-TestMulti.obj: tests/TestMulti.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -MT tests/zktest_st-TestMulti.obj -MD -MP -MF tests/$(DEPDIR)/zktest_st-TestMulti.Tpo -c -o tests/zktest_st-TestMulti.obj `if test -f 'tests/TestMulti.cc'; then $(CYGPATH_W) 'tests/TestMulti.cc'; else $(CYGPATH_W) '$(srcdir)/tests/TestMulti.cc'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/zktest_st-TestMulti.Tpo tests/$(DEPDIR)/zktest_st-TestMulti.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/TestMulti.cc' object='tests/zktest_st-TestMulti.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -c -o zktest_st-TestMulti.obj `if test -f 'tests/TestMulti.cc'; then $(CYGPATH_W) 'tests/TestMulti.cc'; else $(CYGPATH_W) '$(srcdir)/tests/TestMulti.cc'; fi`
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -c -o tests/zktest_st-TestMulti.obj `if test -f 'tests/TestMulti.cc'; then $(CYGPATH_W) 'tests/TestMulti.cc'; else $(CYGPATH_W) '$(srcdir)/tests/TestMulti.cc'; fi`
 
-zktest_st-TestWatchers.o: tests/TestWatchers.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -MT zktest_st-TestWatchers.o -MD -MP -MF $(DEPDIR)/zktest_st-TestWatchers.Tpo -c -o zktest_st-TestWatchers.o `test -f 'tests/TestWatchers.cc' || echo '$(srcdir)/'`tests/TestWatchers.cc
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/zktest_st-TestWatchers.Tpo $(DEPDIR)/zktest_st-TestWatchers.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/TestWatchers.cc' object='zktest_st-TestWatchers.o' libtool=no @AMDEPBACKSLASH@
+tests/zktest_st-TestWatchers.o: tests/TestWatchers.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -MT tests/zktest_st-TestWatchers.o -MD -MP -MF tests/$(DEPDIR)/zktest_st-TestWatchers.Tpo -c -o tests/zktest_st-TestWatchers.o `test -f 'tests/TestWatchers.cc' || echo '$(srcdir)/'`tests/TestWatchers.cc
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/zktest_st-TestWatchers.Tpo tests/$(DEPDIR)/zktest_st-TestWatchers.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/TestWatchers.cc' object='tests/zktest_st-TestWatchers.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -c -o zktest_st-TestWatchers.o `test -f 'tests/TestWatchers.cc' || echo '$(srcdir)/'`tests/TestWatchers.cc
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -c -o tests/zktest_st-TestWatchers.o `test -f 'tests/TestWatchers.cc' || echo '$(srcdir)/'`tests/TestWatchers.cc
 
-zktest_st-TestWatchers.obj: tests/TestWatchers.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -MT zktest_st-TestWatchers.obj -MD -MP -MF $(DEPDIR)/zktest_st-TestWatchers.Tpo -c -o zktest_st-TestWatchers.obj `if test -f 'tests/TestWatchers.cc'; then $(CYGPATH_W) 'tests/TestWatchers.cc'; else $(CYGPATH_W) '$(srcdir)/tests/TestWatchers.cc'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/zktest_st-TestWatchers.Tpo $(DEPDIR)/zktest_st-TestWatchers.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/TestWatchers.cc' object='zktest_st-TestWatchers.obj' libtool=no @AMDEPBACKSLASH@
+tests/zktest_st-TestWatchers.obj: tests/TestWatchers.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -MT tests/zktest_st-TestWatchers.obj -MD -MP -MF tests/$(DEPDIR)/zktest_st-TestWatchers.Tpo -c -o tests/zktest_st-TestWatchers.obj `if test -f 'tests/TestWatchers.cc'; then $(CYGPATH_W) 'tests/TestWatchers.cc'; else $(CYGPATH_W) '$(srcdir)/tests/TestWatchers.cc'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/zktest_st-TestWatchers.Tpo tests/$(DEPDIR)/zktest_st-TestWatchers.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/TestWatchers.cc' object='tests/zktest_st-TestWatchers.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -c -o zktest_st-TestWatchers.obj `if test -f 'tests/TestWatchers.cc'; then $(CYGPATH_W) 'tests/TestWatchers.cc'; else $(CYGPATH_W) '$(srcdir)/tests/TestWatchers.cc'; fi`
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(zktest_st_CXXFLAGS) $(CXXFLAGS) -c -o tests/zktest_st-TestWatchers.obj `if test -f 'tests/TestWatchers.cc'; then $(CYGPATH_W) 'tests/TestWatchers.cc'; else $(CYGPATH_W) '$(srcdir)/tests/TestWatchers.cc'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo
 
 clean-libtool:
 	-rm -rf .libs _libs
+	-rm -rf generated/.libs generated/_libs
+	-rm -rf src/.libs src/_libs
+	-rm -rf src/hashtable/.libs src/hashtable/_libs
 
 distclean-libtool:
 	-rm -f libtool config.lt
@@ -1740,6 +1807,14 @@ clean-generic:
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
 	-test . = "$(srcdir)" || test -z "$(CONFIG_CLEAN_VPATH_FILES)" || rm -f $(CONFIG_CLEAN_VPATH_FILES)
+	-rm -f generated/$(DEPDIR)/$(am__dirstamp)
+	-rm -f generated/$(am__dirstamp)
+	-rm -f src/$(DEPDIR)/$(am__dirstamp)
+	-rm -f src/$(am__dirstamp)
+	-rm -f src/hashtable/$(DEPDIR)/$(am__dirstamp)
+	-rm -f src/hashtable/$(am__dirstamp)
+	-rm -f tests/$(DEPDIR)/$(am__dirstamp)
+	-rm -f tests/$(am__dirstamp)
 
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
@@ -1752,7 +1827,7 @@ clean-am: clean-binPROGRAMS clean-checkPROGRAMS clean-generic \
 
 distclean: distclean-am
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
-	-rm -rf ./$(DEPDIR)
+	-rm -rf generated/$(DEPDIR) src/$(DEPDIR) src/hashtable/$(DEPDIR) tests/$(DEPDIR)
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-hdr distclean-libtool distclean-tags
@@ -1800,7 +1875,7 @@ installcheck-am:
 maintainer-clean: maintainer-clean-am
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
 	-rm -rf $(top_srcdir)/autom4te.cache
-	-rm -rf ./$(DEPDIR)
+	-rm -rf generated/$(DEPDIR) src/$(DEPDIR) src/hashtable/$(DEPDIR) tests/$(DEPDIR)
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 

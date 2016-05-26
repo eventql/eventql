@@ -22,7 +22,7 @@ DX_PS_FEATURE(OFF)
 DX_INIT_DOXYGEN([zookeeper],[c-doc.Doxyfile],[docs])
 
 # initialize automake
-AM_INIT_AUTOMAKE([-Wall foreign])
+AM_INIT_AUTOMAKE([-Wall foreign subdir-objects])
 AC_CONFIG_HEADER([config.h])
 
 # Checks for programs.
