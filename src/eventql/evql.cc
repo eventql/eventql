@@ -408,7 +408,7 @@ int main(int argc, const char** argv) {
       cli::FlagParser::T_STRING,
       false,
       "l",
-      NULL,
+      "sql",
       "query language",
       "<lang>");
 
@@ -519,14 +519,17 @@ int main(int argc, const char** argv) {
     return 1;
   }
 
-  if (flags.isSet("lang")) {
-    auto lang = flags.getString("lang");
-  }
-
   if (flags.isSet("file")) {
+    auto lang = flags.getString("lang");
     auto query = FileUtil::read(flags.getString("file"));
-    auto ret = console.runQuery(query.toString());
-    return ret.isSuccess() ? 0 : 1;
+
+    if (lang == "js" || lang == "javascript") {
+      auto ret = console.runJS(query.toString());
+      return ret.isSuccess() ? 0 : 1;
+    } else {
+      auto ret = console.runQuery(query.toString());
+      return ret.isSuccess() ? 0 : 1;
+    }
   }
 
   if (flags.isSet("exec")) {
