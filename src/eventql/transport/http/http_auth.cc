@@ -23,6 +23,7 @@
  */
 #include <eventql/transport/http/http_auth.h>
 #include "eventql/util/http/cookies.h"
+#include "eventql/util/util/Base64.h"
 
 namespace eventql {
 
@@ -66,12 +67,30 @@ Status HTTPAuth::authenticateRequest(
   HashMap<String, String> auth_data;
 
   if (request.hasHeader("Authorization")) {
-    static const String hdrprefix = "Token ";
     auto hdrval = request.getHeader("Authorization");
-    if (StringUtil::beginsWith(hdrval, hdrprefix)) {
-      auth_data.emplace(
-          "auth_token",
-          URI::urlDecode(hdrval.substr(hdrprefix.size())));
+
+    {
+      static const String hdrprefix = "Token ";
+      if (StringUtil::beginsWith(hdrval, hdrprefix)) {
+        auth_data.emplace(
+            "auth_token",
+            URI::urlDecode(hdrval.substr(hdrprefix.size())));
+      }
+    }
+
+    {
+      static const String hdrprefix = "Basic ";
+      if (StringUtil::beginsWith(hdrval, hdrprefix)) {
+        String basic_auth;
+        util::Base64::decode(hdrval.substr(hdrprefix.size()), &basic_auth);
+        auto sep_pos = basic_auth.find(":");
+        if (sep_pos == String::npos) {
+          auth_data.emplace("user", basic_auth);
+        } else {
+          auth_data.emplace("user", basic_auth.substr(0, sep_pos));
+          auth_data.emplace("password", basic_auth.substr(sep_pos + 1));
+        }
+      }
     }
   }
 
