@@ -25,6 +25,7 @@
 #include <zookeeper.h>
 #include "eventql/eventql.h"
 #include "eventql/config/config_directory.h"
+#include "eventql/util/protobuf/msg.h"
 
 namespace eventql {
 
@@ -96,6 +97,12 @@ protected:
       Buffer* buf,
       struct Stat* stat = nullptr);
 
+  template <typename T>
+  bool getProtoNode(
+      String key,
+      T* proto,
+      struct Stat* stat = nullptr);
+
   void handleSessionEvent(
       zhandle_t* zk,
       int type,
@@ -111,11 +118,26 @@ protected:
   String cluster_name_;
   String zookeeper_addrs_;
   size_t zookeeper_timeout_;
+  String path_prefix_;
   ZKState state_;
   zhandle_t* zk_;
   std::mutex mutex_;
   std::condition_variable cv_;
   ClusterConfig cluster_config_;
 };
+
+template <typename T>
+bool ZookeeperConfigDirectory::getProtoNode(
+    String key,
+    T* proto,
+    struct Stat* stat /* = nullptr */) {
+  Buffer buf(8192 * 32);
+  if (getNode(key, &buf, stat)) {
+    msg::decode(buf, proto);
+    return true;
+  } else {
+    return false;
+  }
+}
 
 } // namespace eventql

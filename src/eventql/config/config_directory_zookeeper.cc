@@ -32,6 +32,7 @@ ZookeeperConfigDirectory::ZookeeperConfigDirectory(
     cluster_name_(cluster_name),
     zookeeper_addrs_(zookeeper_addrs),
     zookeeper_timeout_(10000),
+    path_prefix_(StringUtil::format("/eventql/$0/", cluster_name_)),
     zk_(nullptr) {
   zoo_set_debug_level(ZOO_LOG_LEVEL_DEBUG);
 }
@@ -81,8 +82,7 @@ bool ZookeeperConfigDirectory::start() {
 
   logInfo("evqld", "Loading config from zookeeper...");
 
-  Buffer buf(4096);
-  if (!getNode(StringUtil::format("/eventql/$0/config", cluster_name_), &buf)) {
+  if (!getProtoNode(path_prefix_ + "config", &cluster_config_)) {
     logError("evqld", "Cluster '$0' does not exist", cluster_name_);
     return false;
   }
