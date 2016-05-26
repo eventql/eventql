@@ -27,6 +27,7 @@
 #include "eventql/util/stdtypes.h"
 
 enum class LogLevel {
+  kFatal = 10000,
   kEmergency = 9000,
   kAlert = 8000,
   kCritical = 7000,
