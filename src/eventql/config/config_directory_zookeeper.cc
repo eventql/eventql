@@ -48,7 +48,7 @@ ZookeeperConfigDirectory::ZookeeperConfigDirectory(
     path_prefix_(StringUtil::format("/eventql/$0", cluster_name_)),
     state_(ZKState::INIT),
     zk_(nullptr) {
-  zoo_set_debug_level(ZOO_LOG_LEVEL_DEBUG);
+  zoo_set_debug_level(ZOO_LOG_LEVEL_ERROR);
 }
 
 ZookeeperConfigDirectory::~ZookeeperConfigDirectory() {
@@ -65,7 +65,7 @@ static void zk_watch_cb(
     void* ctx) {
   auto self = (ZookeeperConfigDirectory*) zoo_get_context(zk);
   assert(self != nullptr);
-  self->handleZookeeperWatch(zk, type, state, path, ctx);
+  self->handleZookeeperWatch(type, state, path);
 }
 
 Status ZookeeperConfigDirectory::start() {
@@ -284,27 +284,18 @@ Status ZookeeperConfigDirectory::listChildren(
   }
 }
 
-/**
- * NOTE: if you're reading this and thinking  "wow, paul doesn't know what a
- * switch statement is, what an idiot" then think again. zookeeper.h defines
- * all states as extern int's so we can't switch over them :(
- */
-
 void ZookeeperConfigDirectory::handleZookeeperWatch(
-    zhandle_t* zk,
     int type,
     int state,
-    const char* path_cstr,
-    void* ctx) {
+    String path) {
   std::unique_lock<std::mutex> lk(mutex_);
 
-  String path(path_cstr);
   if (StringUtil::beginsWith(path, path_prefix_)) {
     path = path.substr(path_prefix_.size());
   }
 
   if (type == ZOO_SESSION_EVENT) {
-    handleSessionEvent(zk, type, state, path_cstr, ctx);
+    handleSessionEvent(state);
   }
 
   if (type == ZOO_CHILD_EVENT ||
@@ -345,13 +336,13 @@ Status ZookeeperConfigDirectory::handleChangeEvent(const String& vpath) {
   return Status::success();
 }
 
-void ZookeeperConfigDirectory::handleSessionEvent(
-    zhandle_t* zk,
-    int type,
-    int state,
-    const char* path,
-    void* ctx) {
+/**
+ * NOTE: if you're reading this and thinking  "wow, paul doesn't know what a
+ * switch statement is, what an idiot" then think again. zookeeper.h defines
+ * all states as extern int's so we can't switch over them :(
+ */
 
+void ZookeeperConfigDirectory::handleSessionEvent(int state) {
   if (state == ZOO_EXPIRED_SESSION_STATE ||
       state == ZOO_EXPIRED_SESSION_STATE ||
       state == ZOO_AUTH_FAILED_STATE) {

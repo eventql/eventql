@@ -74,12 +74,7 @@ public:
   void stop() override;
 
   /** don't call this! (can't be private b/c it needs to be called from c binding) */
-  void handleZookeeperWatch(
-      zhandle_t* zk,
-      int type,
-      int state,
-      const char* path,
-      void* ctx);
+  void handleZookeeperWatch(int type, int state, String path);
 
 protected:
 
@@ -112,15 +107,8 @@ protected:
 
   void createTableConfig(const TableDefinition& table);
 
-  void handleSessionEvent(
-      zhandle_t* zk,
-      int type,
-      int state,
-      const char* path,
-      void* ctx);
-
+  void handleSessionEvent(int state);
   Status handleChangeEvent(const String& vpath);
-
   void handleConnectionEstablished();
   void handleConnectionLost();
 
