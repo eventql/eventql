@@ -281,21 +281,6 @@ void ConfigDirectory::onTableDefinitionChange(
   on_table_change_.emplace_back(fn);
 }
 
-Option<UserConfig> ConfigDirectory::findUser(
-    const String& userid) {
-  auto txn = db_->startTransaction(true);
-  txn->autoAbort();
-
-  auto db_key = StringUtil::format("user~$0", userid);
-  auto usercfg = txn->get(db_key);
-
-  if (usercfg.isEmpty()) {
-    return None<UserConfig>();
-  } else {
-    return Some(msg::decode<UserConfig>(usercfg.get()));
-  }
-}
-
 void ConfigDirectory::sync() {
   auto master_heads = fetchMasterHeads();
 
@@ -339,12 +324,6 @@ void ConfigDirectory::syncObject(const String& obj) {
       syncTableDefinitions(obj.substr(kTablesPrefix.size()));
       return;
     }
-  }
-
-  if ((topics_ & ConfigTopic::USERDB) &&
-      obj == "userdb") {
-    syncUserDB();
-    return;
   }
 
   if ((topics_ & ConfigTopic::CLUSTERCONFIG) &&
@@ -472,59 +451,6 @@ void ConfigDirectory::commitTableDefinition(const TableDefinition& tbl) {
 
   for (const auto& cb : on_table_change_) {
     cb(tbl);
-  }
-}
-
-void ConfigDirectory::syncUserDB() {
-  auto uri = URI(
-      StringUtil::format(
-          "http://$0/analytics/master/fetch_userdb",
-          master_addr_.hostAndPort()));
-
-  http::HTTPClient http(&z1stats()->http_client_stats);
-  auto res = http.executeRequest(http::HTTPRequest::mkGet(uri));
-  if (res.statusCode() != 200) {
-    RAISEF(kRuntimeError, "error: $0", res.body().toString());
-  }
-
-  auto users = msg::decode<UserDB>(res.body());
-  for (const auto& usr : users.users()) {
-    commitUserConfig(usr);
-  }
-
-  String hkey = "head~userdb";
-  auto vstr = StringUtil::toString(users.version());
-
-  std::unique_lock<std::mutex> lk(mutex_);
-  auto txn = db_->startTransaction(false);
-  txn->autoAbort();
-  txn->update(hkey.data(), hkey.size(), vstr.data(), vstr.size());
-  txn->commit();
-}
-
-void ConfigDirectory::commitUserConfig(const UserConfig& usr) {
-  auto db_key = StringUtil::format("user~$0", usr.userid());
-  auto buf = msg::encode(usr);
-
-  std::unique_lock<std::mutex> lk(mutex_);
-  auto txn = db_->startTransaction(false);
-  txn->autoAbort();
-
-  auto last_version = 0;
-  auto last_td = txn->get(db_key);
-  if (!last_td.isEmpty()) {
-    last_version = msg::decode<UserConfig>(last_td.get()).version();
-  }
-
-  if (last_version >= usr.version()) {
-    return;
-  }
-
-  txn->update(db_key.data(), db_key.size(), buf->data(), buf->size());
-  txn->commit();
-
-  for (const auto& cb : on_user_change_) {
-    cb(usr);
   }
 }
 

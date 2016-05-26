@@ -77,8 +77,6 @@ public:
       Function<void (const TableDefinition& tbl)> fn) const;
   void onTableDefinitionChange(Function<void (const TableDefinition& tbl)> fn);
 
-  Option<UserConfig> findUser(const String& userid);
-
   void sync();
 
   void startWatcher();
@@ -100,9 +98,6 @@ protected:
   void syncTableDefinitions(const String& customer);
   void commitTableDefinition(const TableDefinition& tbl);
 
-  void syncUserDB();
-  void commitUserConfig(const UserConfig& usr);
-
   InetAddr master_addr_;
   ConfigDirectoryClient cclient_;
   uint64_t topics_;
@@ -114,7 +109,6 @@ protected:
   Vector<Function<void (const ClusterConfig& cfg)>> on_cluster_change_;
   Vector<Function<void (const NamespaceConfig& cfg)>> on_customer_change_;
   Vector<Function<void (const TableDefinition& cfg)>> on_table_change_;
-  Vector<Function<void (const UserConfig& cfg)>> on_user_change_;
 
   std::atomic<bool> watcher_running_;
   std::thread watcher_thread_;

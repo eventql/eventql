@@ -109,23 +109,6 @@ void AnalyticsServlet::handle(
     return;
   }
 
-  /* AUTH METHODS */
-  if (uri.path() == "/api/v1/auth/login") {
-    expectHTTPPost(req);
-    req_stream->readBody();
-    performLogin(uri, &req, &res);
-    res_stream->writeResponse(res);
-    return;
-  }
-
-  if (uri.path() == "/api/v1/auth/logout") {
-    expectHTTPPost(req);
-    req_stream->readBody();
-    performLogout(uri, &req, &res);
-    res_stream->writeResponse(res);
-    return;
-  }
-
   auto session_opt = HTTPAuth::authenticateRequest(
       req_stream->request(),
       auth_);
@@ -1276,81 +1259,5 @@ void AnalyticsServlet::executeQTree(
 
   res_stream->finishResponse();
 }
-
-void AnalyticsServlet::performLogin(
-    const URI& uri,
-    const http::HTTPRequest* req,
-    http::HTTPResponse* res) {
-  String next_step;
-  auto session = auth_->performLogin(req->body().toString(), &next_step);
-
-  // login failed, invalid credentials or missing data
-  if (session.isEmpty()) {
-    Buffer buf;
-    json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
-
-    json.beginObject();
-    json.addObjectEntry("success");
-    json.addFalse();
-
-    if (!next_step.empty()) {
-      json.addComma();
-      json.addObjectEntry("next_step");
-      json.addString(next_step);
-    }
-
-    json.endObject();
-
-    res->addHeader("WWW-Authenticate", "Token");
-    res->setStatus(http::kStatusUnauthorized);
-    res->addBody(buf);
-  }
-
-  // login successful
-  if (!session.isEmpty()) {
-    auto token = auth_->encodeAuthToken(session.get());
-
-    res->addCookie(
-        HTTPAuth::kSessionCookieKey,
-        token,
-        WallClock::unixMicros() + HTTPAuth::kSessionLifetimeMicros,
-        "/",
-        getCookieDomain(*req),
-        false,
-        true);
-
-    Buffer buf;
-    json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
-
-    json.beginObject();
-    json.addObjectEntry("success");
-    json.addTrue();
-    json.addComma();
-    json.addObjectEntry("auth_token");
-    json.addString(token);
-    json.endObject();
-
-    res->addHeader("X-AuthToken", token);
-    res->setStatus(http::kStatusOK);
-    res->addBody(buf);
-  }
-}
-
-void AnalyticsServlet::performLogout(
-    const URI& uri,
-    const http::HTTPRequest* req,
-    http::HTTPResponse* res) {
-  res->addCookie(
-      HTTPAuth::kSessionCookieKey,
-      "",
-      0,
-      "/",
-      getCookieDomain(*req));
-
-  res->setStatus(http::kStatusOK);
-  res->addBody("goodbye");
-}
-
-
 
 } // namespace eventql
