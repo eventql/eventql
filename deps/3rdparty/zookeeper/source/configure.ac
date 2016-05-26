@@ -29,22 +29,10 @@ AC_CONFIG_HEADER([config.h])
 AC_ARG_WITH(cppunit,
         [  --without-cppunit       do not use CPPUNIT])
 
-if test "$with_cppunit" = "no" ; then
-   CPPUNIT_PATH="No_CPPUNIT"
-   CPPUNIT_INCLUDE=
-   CPPUNIT_LIBS=
-else
-   AM_PATH_CPPUNIT(1.10.2)
-fi
+CPPUNIT_PATH="No_CPPUNIT"
+CPPUNIT_INCLUDE=
+CPPUNIT_LIBS=
 
-if test "$CALLER" = "ANT" ; then
-CPPUNIT_CFLAGS="$CPPUNIT_CFLAGS -DZKSERVER_CMD=\"\\\"${base_dir}/src/c/tests/zkServer.sh\\\"\""
-else
-CPPUNIT_CFLAGS="$CPPUNIT_CFLAGS -DZKSERVER_CMD=\"\\\"./tests/zkServer.sh\\\"\""
-AC_CHECK_FILES([generated/zookeeper.jute.c generated/zookeeper.jute.h],[],
-    [AC_MSG_ERROR([jute files are missing! Please run "ant compile_jute" while in the zookeeper top level directory.])
-])
-fi
 AC_SUBST(CPPUNIT_CFLAGS)
 
 AC_PROG_CC
