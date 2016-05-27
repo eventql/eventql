@@ -59,6 +59,8 @@ Status MetadataStore::storeMetadataFile(
     const MetadataFile& file) {
   auto file_path = getPath(ns, table_name, txid);
   auto file_path_tmp = file_path + "~" + Random::singleton()->hex64();
+
+  FileUtil::mkdir_p(getBasePath(ns, table_name));
   auto os = FileOutputStream::openFile(file_path_tmp);
 
   auto rc = file.encode(os.get());
@@ -67,21 +69,28 @@ Status MetadataStore::storeMetadataFile(
   }
 
   std::unique_lock<std::mutex> lk(mutex_);
-  if (!FileUtil::exists(file_path)) {
+  if (FileUtil::exists(file_path)) {
+    FileUtil::rm(file_path_tmp);
     return Status(eIOError, "metadata file already exists");
+  } else {
+    FileUtil::mv(file_path_tmp, file_path);
+    return Status::success();
   }
+}
 
-  FileUtil::mv(file_path_tmp, file_path);
-  return Status::success();
+String MetadataStore::getBasePath(
+    const String& ns,
+    const String& table_name) const {
+  return FileUtil::joinPaths(
+      path_prefix_,
+      StringUtil::format("$0/$1/$2", ns, table_name));
 }
 
 String MetadataStore::getPath(
     const String& ns,
     const String& table_name,
     const SHA1Hash& txid) const {
-  return FileUtil::joinPaths(
-      path_prefix_,
-      StringUtil::format("$0/$1/$2", ns, table_name, txid));
+  return FileUtil::joinPaths(getBasePath(ns, table_name), txid.toString());
 }
 
 } // namespace eventql

@@ -67,6 +67,10 @@ public:
     return hash;
   }
 
+  inline void* mutableData() {
+    return hash;
+  }
+
   inline size_t size() const {
     return sizeof(hash);
   }

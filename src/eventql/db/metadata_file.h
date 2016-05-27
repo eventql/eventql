@@ -34,6 +34,8 @@ namespace eventql {
 class MetadataFile : public RefCounted {
 public:
 
+  static const uint32_t kBinaryFormatVersion = 1;
+
   struct PartitionPlacement {
     String server_id;
     uint64_t placement_id;

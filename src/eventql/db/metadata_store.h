@@ -49,6 +49,10 @@ public:
 
 protected:
 
+  String getBasePath(
+      const String& ns,
+      const String& table_name) const;
+
   String getPath(
       const String& ns,
       const String& table_name,
