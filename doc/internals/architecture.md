@@ -68,11 +68,20 @@ successfully retrieved the transaction from one of the other metadata servers.
 ## Partition Assignment
 
 Every partition is assigned to a list of N servers. Each server in this list
-may handle read and write requests to this partition.
+may handle read and write requests to this partition. Every table starts out
+with a single partition that is then further subdivded (splitted) to create
+more partitions.
+
+Each partition stores two server lists:
+
+    servers: the currently live servers that handle this partition
+    joining_servers: the list of servers that are joining the server list
 
 ##### Initial Partition Assignment
 
-
+To create a new table, the TableConfig is created atomically in the coordination
+service. The initial TableConfig must at least contain a single partition
+(covering the whole key range) and a list of servers for this partition.
 
 ##### Partition Split
 
@@ -97,7 +106,7 @@ In case another server for the original partition A has not finished its split
 yet it will get an update telling it that the partition A is no longer valid.
 This case is naturally handled as part of the partition replication lifecyle.
 
-## Partition Replication and Lifecyle
+##### Partition Replication and Lifecyle
 
 Each server, locally, records an a map of server_id -> sequence pairs. In this
 map, it stores until which sequence ID it has replicated a given partition to a
@@ -107,12 +116,15 @@ Partition replication and lifecyle is a simple algorithm:
 
       - For each partition P:
         - For each server which should store the data in partition P
-           (considering splits)
+           (considering splits and joining servers)
           - Check our local replication information for partition P and see if
             we have already pushed all records until the latest sequence to this
             server
           - If not push the unreplicated records to the server and, after it has
             confirmed them, record the new sequence
+          - If this server has confirmed all records and we are a live server
+            for this partition (i.e. not in the joining state), tell the server
+            that inital replication has completed
 
         - If all servers have confirmed all records and we should _not_ store
           this partition on the local server, drop the partition
@@ -125,5 +137,29 @@ Partition replication and lifecyle is a simple algorithm:
 To prevent ABA scenarios each partition to serer assignment has a unique id
 that.
 
+##### Server Join
+
+To add a new server for a given partition, the server places itself in the joining
+list for that partition. While the server is joining, it will not receive any read
+or write requests for the partition but it will receive replicated records
+from the other servers. Once any other (non joining) servers notifies the joining
+server that initial replication has completed, the joining server commits another
+METADATA transaction to mark itself as live.
+
+Additionally there is a force-join option where a new server directly enters
+the live server list. This should never be needed and used except in the case
+where all servers for a given partition are down.
 
 
+##### Server Leave
+
+To remove a server from a given partition, a METADATA transaction is commited
+to delete the server from either the server or the joining list of that partition.
+Once the server is removed from the list, the normal replication and lifecyle
+algorithm will eventually drop the local partition data once it is confirmed to
+be replicated to all other live servers.
+
+Of course, the server leave algorithm should ensure that no partition falls
+below the number of replicas specified by the replication level. In the normal
+case, the master handles all rebalances and initiates the leave operation only
+when it is safe to remove a node.
