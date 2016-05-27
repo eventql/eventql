@@ -27,7 +27,7 @@
 #include "eventql/util/stdtypes.h"
 #include "eventql/mapreduce/MapReduceTask.h"
 #include "eventql/db/TSDBService.h"
-#include "eventql/AnalyticsAuth.h"
+#include "eventql/server/auth/internal_auth.h"
 
 namespace eventql {
 
@@ -45,7 +45,7 @@ public:
       const String& globals,
       const String& params,
       MapReduceShardList* shards,
-      AnalyticsAuth* auth,
+      InternalAuth* auth,
       eventql::PartitionMap* pmap,
       eventql::ReplicationScheme* repl);
 
@@ -67,7 +67,7 @@ protected:
   String map_function_;
   String globals_;
   String params_;
-  AnalyticsAuth* auth_;
+  InternalAuth* auth_;
   eventql::PartitionMap* pmap_;
   eventql::ReplicationScheme* repl_;
   Set<String> required_columns_;

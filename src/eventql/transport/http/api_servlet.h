@@ -30,7 +30,7 @@
 #include "eventql/AnalyticsApp.h"
 #include "eventql/AnalyticsSession.pb.h"
 #include "eventql/sql/runtime/runtime.h"
-#include "eventql/AnalyticsAuth.h"
+#include "eventql/server/auth/internal_auth.h"
 #include "eventql/config/config_directory.h"
 #include "eventql/db/TSDBService.h"
 #include "eventql/transport/http/LogfileAPIServlet.h"
@@ -52,7 +52,7 @@ public:
   AnalyticsServlet(
       RefPtr<AnalyticsApp> app,
       const String& cachedir,
-      AnalyticsAuth* auth,
+      InternalAuth* auth,
       ClientAuth* client_auth,
       InternalAuth* internal_auth,
       csql::Runtime* sql,
@@ -71,11 +71,6 @@ protected:
       RefPtr<http::HTTPResponseStream> res_stream);
 
   void getAuthInfo(
-      Session* session,
-      const http::HTTPRequest* req,
-      http::HTTPResponse* res);
-
-  void getPrivateAPIToken(
       Session* session,
       const http::HTTPRequest* req,
       http::HTTPResponse* res);
@@ -283,7 +278,7 @@ protected:
 
   RefPtr<AnalyticsApp> app_;
   String cachedir_;
-  AnalyticsAuth* auth_;
+  InternalAuth* auth_;
   ClientAuth* client_auth_;
   InternalAuth* internal_auth_;
   csql::Runtime* sql_;

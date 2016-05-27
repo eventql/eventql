@@ -40,7 +40,7 @@ namespace eventql {
 //    csql::Runtime* runtime,
 //    PartitionMap* partition_map,
 //    ReplicationScheme* replication_scheme,
-//    AnalyticsAuth* auth,
+//    InternalAuth* auth,
 //    const String& tsdb_namespace,
 //    RefPtr<csql::QueryTreeNode> query) {
 //  rewriteTableTimeSuffix(query);
@@ -50,7 +50,7 @@ namespace eventql {
 RefPtr<csql::TableProvider> SQLEngine::tableProviderForNamespace(
     PartitionMap* partition_map,
     ReplicationScheme* replication_scheme,
-    AnalyticsAuth* auth,
+    InternalAuth* auth,
     const String& tsdb_namespace) {
   return new TSDBTableProvider(
       tsdb_namespace,
@@ -116,7 +116,7 @@ RefPtr<csql::TableProvider> SQLEngine::tableProviderForNamespace(
 //    csql::Runtime* runtime,
 //    PartitionMap* partition_map,
 //    ReplicationScheme* replication_scheme,
-//    AnalyticsAuth* auth,
+//    InternalAuth* auth,
 //    const String& customer) {
 //  auto strategy = mkRef(new csql::DefaultExecutionStrategy());
 //

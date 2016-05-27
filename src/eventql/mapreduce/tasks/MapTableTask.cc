@@ -38,7 +38,7 @@ MapTableTask::MapTableTask(
     const String& globals,
     const String& params,
     MapReduceShardList* shards,
-    AnalyticsAuth* auth,
+    InternalAuth* auth,
     eventql::PartitionMap* pmap,
     eventql::ReplicationScheme* repl) :
     session_(session),
@@ -137,8 +137,6 @@ Option<MapReduceShardResult> MapTableTask::executeRemote(
       URI::urlEncode(params_),
       URI::urlEncode(StringUtil::join(required_columns_, ",")));
 
-  auto api_token = auth_->encodeAuthToken(session_);
-
   Option<MapReduceShardResult> result;
   Vector<String> errors;
   auto event_handler = [&] (const http::HTTPSSEEvent& ev) {
@@ -162,13 +160,10 @@ Option<MapReduceShardResult> MapTableTask::executeRemote(
     }
   };
 
-  http::HTTPMessage::HeaderList auth_headers;
-  auth_headers.emplace_back(
-      "Authorization",
-      StringUtil::format("Token $0", api_token));
-
   http::HTTPClient http_client(&z1stats()->http_client_stats);
-  auto req = http::HTTPRequest::mkPost(url, params, auth_headers);
+  auto req = http::HTTPRequest::mkPost(url, params);
+  auth_->signRequest(session_, &req);
+
   auto res = http_client.executeRequest(
       req,
       http::HTTPSSEResponseHandler::getFactory(event_handler));

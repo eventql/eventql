@@ -34,7 +34,7 @@ MapReduceScheduler::MapReduceScheduler(
     Session* session,
     RefPtr<MapReduceJobSpec> job,
     thread::ThreadPool* tpool,
-    AnalyticsAuth* auth,
+    InternalAuth* auth,
     const String& cachedir,
     size_t max_concurrent_tasks /* = kDefaultMaxConcurrentTasks */) :
     session_(session),
@@ -275,14 +275,8 @@ void MapReduceScheduler::downloadResult(
       result.get().host.addr,
       result.get().result_id.toString());
 
-  auto api_token = auth_->encodeAuthToken(session_);
-
-  http::HTTPMessage::HeaderList auth_headers;
-  auth_headers.emplace_back(
-      "Authorization",
-      StringUtil::format("Token $0", api_token));
-
-  auto req = http::HTTPRequest::mkGet(url, auth_headers);
+  auto req = http::HTTPRequest::mkGet(url);
+  auth_->signRequest(session_, &req);
   MapReduceService::downloadResult(req, fn);
 }
 

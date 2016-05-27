@@ -25,7 +25,7 @@
 #include "eventql/eventql.h"
 #include "eventql/util/thread/threadpool.h"
 #include "eventql/db/TSDBService.h"
-#include "eventql/AnalyticsAuth.h"
+#include "eventql/server/auth/internal_auth.h"
 #include "eventql/config/namespace_config.h"
 #include "eventql/config/config_directory.h"
 #include "eventql/JavaScriptContext.h"
@@ -39,7 +39,7 @@ public:
 
   MapReduceService(
       ConfigDirectory* cdir,
-      AnalyticsAuth* auth,
+      InternalAuth* auth,
       eventql::TSDBService* tsdb,
       eventql::PartitionMap* pmap,
       eventql::ReplicationScheme* repl,
@@ -90,7 +90,7 @@ public:
 
 protected:
   ConfigDirectory* cdir_;
-  AnalyticsAuth* auth_;
+  InternalAuth* auth_;
   eventql::TSDBService* tsdb_;
   eventql::PartitionMap* pmap_;
   eventql::ReplicationScheme* repl_;

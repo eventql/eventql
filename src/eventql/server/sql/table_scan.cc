@@ -37,7 +37,7 @@ TableScan::TableScan(
     RefPtr<csql::SequentialScanNode> seqscan,
     PartitionMap* partition_map,
     ReplicationScheme* replication_scheme,
-    AnalyticsAuth* auth) :
+    InternalAuth* auth) :
     txn_(txn),
     execution_context_(execution_context),
     tsdb_namespace_(tsdb_namespace),

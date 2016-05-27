@@ -42,7 +42,6 @@
 #include "eventql/server/sql/codec/json_codec.h"
 #include "eventql/server/sql/codec/json_sse_codec.h"
 #include "eventql/server/sql/codec/binary_codec.h"
-#include "eventql/server/sql/transaction_info.h"
 #include "eventql/db/TimeWindowPartitioner.h"
 #include "eventql/db/FixedShardPartitioner.h"
 #include "eventql/transport/http/http_auth.h"
@@ -54,7 +53,7 @@ namespace eventql {
 AnalyticsServlet::AnalyticsServlet(
     RefPtr<AnalyticsApp> app,
     const String& cachedir,
-    AnalyticsAuth* auth,
+    InternalAuth* auth,
     ClientAuth* client_auth,
     InternalAuth* internal_auth,
     csql::Runtime* sql,
@@ -976,37 +975,6 @@ void AnalyticsServlet::getAuthInfo(
   res->setStatus(http::kStatusOK);
 }
 
-void AnalyticsServlet::getPrivateAPIToken(
-    Session* session,
-    const http::HTTPRequest* req,
-    http::HTTPResponse* res) {
-  URI uri(req->uri());
-  const auto& params = uri.queryParams();
-  String devnull;
-
-  AnalyticsPrivileges privs;
-
-  if (URI::getParam(params, "allow_read", &devnull)) {
-    privs.set_allow_private_api_read_access(true);
-  }
-
-  if (URI::getParam(params, "allow_write", &devnull)) {
-    privs.set_allow_private_api_write_access(true);
-  }
-
-  auto token = auth_->getPrivateAPIToken(session->getEffectiveNamespace(), privs);
-
-  Buffer buf;
-  json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
-  json.beginObject();
-  json.addObjectEntry("api_token");
-  json.addString(URI::urlEncode(token));
-  json.endObject();
-
-  res->addBody(buf);
-  res->setStatus(http::kStatusOK);
-}
-
 void AnalyticsServlet::executeSQL(
     Session* session,
     const http::HTTPRequest* req,
@@ -1127,9 +1095,7 @@ void AnalyticsServlet::executeSQL_BINARY(
     try {
       auto txn = sql_->newTransaction();
       txn->setTableProvider(app_->getTableProvider(session->getEffectiveNamespace()));
-      txn->setUserData(
-          new TransactionInfo(session->getEffectiveNamespace()),
-          [] (void* tx_info) { delete (TransactionInfo*) tx_info; });
+      txn->setUserData(session);
 
       auto qplan = sql_->buildQueryPlan(txn.get(), query);
       qplan->setProgressCallback([&result_format, &qplan] () {
@@ -1196,9 +1162,8 @@ void AnalyticsServlet::executeSQL_JSON(
   try {
     auto txn = sql_->newTransaction();
     txn->setTableProvider(app_->getTableProvider(session->getEffectiveNamespace()));
-    txn->setUserData(
-        new TransactionInfo(session->getEffectiveNamespace()),
-        [] (void* tx_info) { delete (TransactionInfo*) tx_info; });
+    txn->setUserData(session);
+
     auto qplan = sql_->buildQueryPlan(txn.get(), query);
 
     Buffer result;
@@ -1290,9 +1255,8 @@ void AnalyticsServlet::executeSQL_JSONSSE(
   try {
     auto txn = sql_->newTransaction();
     txn->setTableProvider(app_->getTableProvider(session->getEffectiveNamespace()));
-    txn->setUserData(
-        new TransactionInfo(session->getEffectiveNamespace()),
-        [] (void* tx_info) { delete (TransactionInfo*) tx_info; });
+    txn->setUserData(session);
+
     auto qplan = sql_->buildQueryPlan(txn.get(), query);
 
     JSONSSECodec json_sse_codec(sse_stream);
@@ -1358,9 +1322,7 @@ void AnalyticsServlet::executeQTree(
     try {
       auto txn = sql_->newTransaction();
       txn->setTableProvider(app_->getTableProvider(session->getEffectiveNamespace()));
-      txn->setUserData(
-          new TransactionInfo(session->getEffectiveNamespace()),
-          [] (void* tx_info) { delete (TransactionInfo*) tx_info; });
+      txn->setUserData(session);
 
       csql::QueryTreeCoder coder(txn.get());
       auto req_body_is = BufferInputStream::fromBuffer(&req->body());

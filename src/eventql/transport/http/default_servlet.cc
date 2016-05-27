@@ -33,27 +33,6 @@ void DefaultServlet::handleHTTPRequest(
     http::HTTPResponse* response) {
   URI uri(request->uri());
 
-  if (uri.path() == "/" &&
-      request->hasHeader("X-ZenBase-Production")) {
-    String auth_cookie;
-    http::Cookies::getCookie(
-        request->cookies(),
-        HTTPAuth::kSessionCookieKey,
-        &auth_cookie);
-
-    if (auth_cookie.empty()) {
-      response->setStatus(http::kStatusFound);
-      response->addHeader("Location", "http://app.eventql.io/");
-      return;
-    }
-  }
-
-  if (uri.path() == "/") {
-    response->setStatus(http::kStatusFound);
-    response->addHeader("Location", "/a/");
-    return;
-  }
-
   if (uri.path() == "/ping") {
     response->setStatus(http::kStatusOK);
     response->addBody("pong");

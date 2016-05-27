@@ -758,8 +758,6 @@ noinst_LIBRARIES += evql_http.a
 evql_core_a_SOURCES = \
     eventql/AnalyticsApp.cc \
     eventql/AnalyticsApp.h \
-    eventql/AnalyticsAuth.cc \
-    eventql/AnalyticsAuth.h \
     eventql/EventScanResult.cc \
     eventql/EventScanResult.h \
     eventql/JavaScriptContext.cc \
@@ -899,8 +897,6 @@ evql_core_a_SOURCES = \
     eventql/server/sql/table_provider.h \
     eventql/server/sql/table_scan.cc \
     eventql/server/sql/table_scan.h \
-    eventql/server/sql/transaction_info.cc \
-    eventql/server/sql/transaction_info.h \
     eventql/transport/http/EventsAPIServlet.cc \
     eventql/transport/http/EventsAPIServlet.h \
     eventql/transport/http/EventsService.cc \

@@ -38,7 +38,7 @@ ReduceTask::ReduceTask(
     Vector<RefPtr<MapReduceTask>> sources,
     size_t num_shards,
     MapReduceShardList* shards,
-    AnalyticsAuth* auth,
+    InternalAuth* auth,
     eventql::ReplicationScheme* repl) :
     session_(session),
     reduce_fn_(reduce_fn),
@@ -138,8 +138,6 @@ Option<MapReduceShardResult> ReduceTask::executeRemote(
     params += "&input_table=" + URI::urlEncode(input_table);
   }
 
-  auto api_token = auth_->encodeAuthToken(session_);
-
   Option<MapReduceShardResult> result;
   Vector<String> errors;
   auto event_handler = [&] (const http::HTTPSSEEvent& ev) {
@@ -163,13 +161,10 @@ Option<MapReduceShardResult> ReduceTask::executeRemote(
     }
   };
 
-  http::HTTPMessage::HeaderList auth_headers;
-  auth_headers.emplace_back(
-      "Authorization",
-      StringUtil::format("Token $0", api_token));
-
   http::HTTPClient http_client(&z1stats()->http_client_stats);
-  auto req = http::HTTPRequest::mkPost(url, params, auth_headers);
+  auto req = http::HTTPRequest::mkPost(url, params);
+  auth_->signRequest(session_, &req);
+
   auto res = http_client.executeRequest(
       req,
       http::HTTPSSEResponseHandler::getFactory(event_handler));

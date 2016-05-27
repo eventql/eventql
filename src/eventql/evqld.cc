@@ -404,9 +404,6 @@ int main(int argc, const char** argv) {
         &partition_map,
         flags.getInt("indexbuild_threads"));
 
-    /* analytics core */
-    AnalyticsAuth auth(config_dir.get());
-
     /* sql */
     RefPtr<csql::Runtime> sql;
     {
@@ -422,7 +419,7 @@ int main(int argc, const char** argv) {
           new csql::QueryPlanBuilder(
               csql::QueryPlanBuilderOptions{},
               symbols.get()),
-          mkScoped(new Scheduler(&partition_map, &auth, repl_scheme.get()))));
+          mkScoped(new Scheduler(&partition_map, internal_auth.get(), repl_scheme.get()))));
 
       sql->setCacheDir(flags.getString("cachedir"));
       sql->symbols()->registerFunction("z1_version", &z1VersionExpr);
@@ -435,7 +432,7 @@ int main(int argc, const char** argv) {
             repl_scheme.get(),
             &cstable_index,
             config_dir.get(),
-            &auth,
+            internal_auth.get(),
             sql.get(),
             nullptr,
             flags.getString("datadir"),
@@ -444,7 +441,7 @@ int main(int argc, const char** argv) {
     eventql::AnalyticsServlet analytics_servlet(
         analytics_app,
         flags.getString("cachedir"),
-        &auth,
+        internal_auth.get(),
         client_auth.get(),
         internal_auth.get(),
         sql.get(),

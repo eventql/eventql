@@ -22,10 +22,10 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#include <thread>
 #include <eventql/sql/expressions/table_expression.h>
-#include <eventql/AnalyticsAuth.h>
+#include <eventql/server/auth/internal_auth.h>
 #include <eventql/db/partition_map.h>
-
 #include "eventql/eventql.h"
 
 namespace eventql {
@@ -38,7 +38,7 @@ public:
       csql::Transaction* txn,
       csql::ExecutionContext* ctx,
       const String& db_namespace,
-      AnalyticsAuth* auth,
+      InternalAuth* auth,
       size_t max_concurrency);
 
   ~PipelinedExpression();
@@ -80,7 +80,7 @@ protected:
   csql::ExecutionContext* ctx_;
   String db_namespace_;
   Vector<QuerySpec> queries_;
-  AnalyticsAuth* auth_;
+  InternalAuth* auth_;
   size_t max_concurrency_;
   size_t num_columns_;
   bool eof_;

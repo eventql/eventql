@@ -42,7 +42,7 @@ namespace eventql {
 
 EventsService::EventsService(
     ConfigDirectory* cdir,
-    AnalyticsAuth* auth,
+    InternalAuth* auth,
     eventql::TSDBService* tsdb,
     eventql::PartitionMap* pmap,
     eventql::ReplicationScheme* repl,
@@ -269,16 +269,12 @@ bool EventsService::scanRemoteTablePartition(
       partition_key.toString(),
       result->capacity());
 
-  auto api_token = auth_->encodeAuthToken(session);
-
-  http::HTTPMessage::HeaderList auth_headers;
-  auth_headers.emplace_back(
-      "Authorization",
-      StringUtil::format("Token $0", api_token));
-
   http::HTTPClient http_client(&z1stats()->http_client_stats);
   auto req_body = msg::encode(params);
-  auto req = http::HTTPRequest::mkPost(url, *req_body, auth_headers);
+  auto req = http::HTTPRequest::mkPost(url, *req_body);
+  //auth_->signRequest(session_, &req);
+  RAISE(kNotImplementedError);
+
   auto res = http_client.executeRequest(req);
 
   if (res.statusCode() == 404) {

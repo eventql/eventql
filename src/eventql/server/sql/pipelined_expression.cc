@@ -32,7 +32,7 @@ PipelinedExpression::PipelinedExpression(
     csql::Transaction* txn,
     csql::ExecutionContext* ctx,
     const String& db_namespace,
-    AnalyticsAuth* auth,
+    InternalAuth* auth,
     size_t max_concurrency) :
     txn_(txn),
     ctx_(ctx),
@@ -195,17 +195,10 @@ void PipelinedExpression::executeOnHost(
 
   auto url = StringUtil::format("http://$0/api/v1/sql/execute_qtree", host);
 
-  AnalyticsPrivileges privileges;
-  privileges.set_allow_private_api_read_access(true);
-  auto api_token = auth_->getPrivateAPIToken(db_namespace_, privileges);
-
-  http::HTTPMessage::HeaderList auth_headers;
-  auth_headers.emplace_back(
-      "Authorization",
-      StringUtil::format("Token $0", api_token));
-
   http::HTTPClient http_client(&z1stats()->http_client_stats);
-  auto req = http::HTTPRequest::mkPost(url, req_body, auth_headers);
+  auto req = http::HTTPRequest::mkPost(url, req_body);
+  auth_->signRequest(static_cast<Session*>(txn_->getUserData()), &req);
+
   auto res = http_client.executeRequest(
       req,
       http::StreamingResponseHandler::getFactory(

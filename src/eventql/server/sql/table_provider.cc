@@ -36,7 +36,7 @@ TSDBTableProvider::TSDBTableProvider(
     const String& tsdb_namespace,
     PartitionMap* partition_map,
     ReplicationScheme* replication_scheme,
-    AnalyticsAuth* auth) :
+    InternalAuth* auth) :
     tsdb_namespace_(tsdb_namespace),
     partition_map_(partition_map),
     replication_scheme_(replication_scheme),

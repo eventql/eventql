@@ -23,7 +23,6 @@
  * code of your own applications
  */
 #include <eventql/server/sql/scheduler.h>
-#include <eventql/server/sql/transaction_info.h>
 #include <eventql/server/sql/pipelined_expression.h>
 #include <eventql/sql/qtree/QueryTreeUtil.h>
 
@@ -33,7 +32,7 @@ namespace eventql {
 
 Scheduler::Scheduler(
     PartitionMap* pmap,
-    AnalyticsAuth* auth,
+    InternalAuth* auth,
     ReplicationScheme* repl_scheme) :
     pmap_(pmap),
     auth_(auth),
@@ -114,7 +113,7 @@ ScopedPtr<csql::TableExpression> Scheduler::buildPipelineGroupByExpression(
       new PipelinedExpression(
           txn,
           execution_context,
-          TransactionInfo::get(txn)->getNamespace(),
+          static_cast<Session*>(txn->getUserData())->getEffectiveNamespace(),
           auth_,
           kMaxConcurrency));
 
@@ -172,7 +171,7 @@ Vector<Scheduler::PipelinedQueryTree> Scheduler::pipelineExpression(
   }
 
   auto table = pmap_->findTable(
-      TransactionInfo::get(txn)->getNamespace(),
+      static_cast<Session*>(txn->getUserData())->getEffectiveNamespace(),
       table_ref.table_key);
   if (table.isEmpty()) {
     RAISE(kIllegalStateError, "can't pipeline query tree");

@@ -27,7 +27,7 @@
 #include "eventql/util/stdtypes.h"
 #include "eventql/mapreduce/MapReduceTask.h"
 #include "eventql/db/TSDBService.h"
-#include "eventql/AnalyticsAuth.h"
+#include "eventql/server/auth/internal_auth.h"
 #include "eventql/config/namespace_config.h"
 #include "eventql/config/config_directory.h"
 
@@ -38,7 +38,7 @@ public:
 
   MapReduceTaskBuilder(
       Session* session,
-      AnalyticsAuth* auth,
+      InternalAuth* auth,
       eventql::PartitionMap* pmap,
       eventql::ReplicationScheme* repl,
       TSDBService* tsdb,
@@ -87,7 +87,7 @@ protected:
       HashMap<String, RefPtr<MapReduceTask>>* jobs);
 
   Session* session_;
-  AnalyticsAuth* auth_;
+  InternalAuth* auth_;
   eventql::PartitionMap* pmap_;
   eventql::ReplicationScheme* repl_;
   TSDBService* tsdb_;

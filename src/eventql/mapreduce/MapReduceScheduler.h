@@ -26,7 +26,7 @@
 #include "eventql/util/thread/threadpool.h"
 #include "eventql/mapreduce/MapReduceTask.h"
 #include "eventql/db/TSDBService.h"
-#include "eventql/AnalyticsAuth.h"
+#include "eventql/server/auth/internal_auth.h"
 
 #include "eventql/eventql.h"
 
@@ -40,7 +40,7 @@ public:
       Session* session,
       RefPtr<MapReduceJobSpec> job,
       thread::ThreadPool* tpool,
-      AnalyticsAuth* auth,
+      InternalAuth* auth,
       const String& cachedir,
       size_t max_concurrent_tasks = kDefaultMaxConcurrentTasks);
 
@@ -72,7 +72,7 @@ protected:
   Vector<Option<MapReduceShardResult>> shard_results_;
   Vector<size_t> shard_perms_;
   thread::ThreadPool* tpool_;
-  AnalyticsAuth* auth_;
+  InternalAuth* auth_;
   String cachedir_;
 
   size_t max_concurrent_tasks_;

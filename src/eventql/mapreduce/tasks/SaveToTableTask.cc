@@ -25,6 +25,7 @@
 #include "eventql/mapreduce/MapReduceScheduler.h"
 #include "eventql/db/FixedShardPartitioner.h"
 #include "eventql/io/sstable/sstablereader.h"
+#include <eventql/util/http/httpclient.h>
 
 #include "eventql/eventql.h"
 
@@ -35,7 +36,7 @@ SaveToTableTask::SaveToTableTask(
     const String& table_name,
     Vector<RefPtr<MapReduceTask>> sources,
     MapReduceShardList* shards,
-    AnalyticsAuth* auth,
+    InternalAuth* auth,
     TSDBService* tsdb) :
     session_(session),
     table_name_(table_name),
@@ -93,15 +94,10 @@ Option<MapReduceShardResult> SaveToTableTask::execute(
       shard->partition.toString(),
       table_name_);
 
-  auto api_token = auth_->encodeAuthToken(session_);
-
-  http::HTTPMessage::HeaderList auth_headers;
-  auth_headers.emplace_back(
-      "Authorization",
-      StringUtil::format("Token $0", api_token));
-
   http::HTTPClient http_client(&z1stats()->http_client_stats);
-  auto req = http::HTTPRequest::mkPost(url, params, auth_headers);
+  auto req = http::HTTPRequest::mkPost(url, params);
+  auth_->signRequest(session_, &req);
+
   auto res = http_client.executeRequest(req);
 
   if (res.statusCode() == 204) {

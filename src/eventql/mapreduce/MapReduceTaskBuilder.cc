@@ -27,7 +27,7 @@
 #include "eventql/mapreduce/tasks/ReturnResultsTask.h"
 #include "eventql/mapreduce/tasks/SaveToTableTask.h"
 #include "eventql/mapreduce/tasks/SaveToTablePartitionTask.h"
-#include "eventql/AnalyticsAuth.h"
+#include "eventql/server/auth/internal_auth.h"
 #include "eventql/config/namespace_config.h"
 #include "eventql/config/config_directory.h"
 
@@ -37,7 +37,7 @@ namespace eventql {
 
 MapReduceTaskBuilder::MapReduceTaskBuilder(
     Session* session,
-    AnalyticsAuth* auth,
+    InternalAuth* auth,
     eventql::PartitionMap* pmap,
     eventql::ReplicationScheme* repl,
     TSDBService* tsdb,

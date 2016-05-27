@@ -47,7 +47,7 @@ public:
       eventql::ReplicationScheme* replication_scheme,
       eventql::CompactionWorker* cstable_index,
       ConfigDirectory* cdb,
-      AnalyticsAuth* auth,
+      InternalAuth* auth,
       csql::Runtime* sql,
       JSRuntime* js_runtime,
       const String& datadir,
@@ -80,7 +80,7 @@ protected:
   eventql::ReplicationScheme* replication_scheme_;
   eventql::CompactionWorker* cstable_index_;
   ConfigDirectory* cdb_;
-  AnalyticsAuth* auth_;
+  InternalAuth* auth_;
   csql::Runtime* sql_;
   String datadir_;
 

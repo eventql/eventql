@@ -28,7 +28,7 @@
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/http/httpservice.h>
 #include <eventql/AnalyticsSession.pb.h>
-#include <eventql/AnalyticsAuth.h>
+#include <eventql/server/auth/internal_auth.h>
 
 namespace eventql {
 
@@ -40,7 +40,7 @@ public:
 
   static Option<AnalyticsSession> authenticateRequest(
       const http::HTTPRequest& request,
-      AnalyticsAuth* auth);
+      InternalAuth* auth);
 
   static Status authenticateRequest(
       Session* session,

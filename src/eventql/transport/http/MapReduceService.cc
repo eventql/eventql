@@ -28,6 +28,7 @@
 #include "eventql/util/protobuf/MessageDecoder.h"
 #include "eventql/util/protobuf/JSONEncoder.h"
 #include "eventql/util/http/HTTPFileDownload.h"
+#include "eventql/util/wallclock.h"
 #include "eventql/io/sstable/SSTableWriter.h"
 #include "eventql/io/sstable/sstablereader.h"
 #include "eventql/io/cstable/CSTableWriter.h"
@@ -40,7 +41,7 @@ namespace eventql {
 
 MapReduceService::MapReduceService(
     ConfigDirectory* cdir,
-    AnalyticsAuth* auth,
+    InternalAuth* auth,
     eventql::TSDBService* tsdb,
     eventql::PartitionMap* pmap,
     eventql::ReplicationScheme* repl,
@@ -248,13 +249,9 @@ Option<SHA1Hash> MapReduceService::reduceTables(
 
     HashMap<String, Vector<String>> groups;
     for (const auto& input_table_url : input_tables) {
-      auto api_token = auth_->encodeAuthToken(session);
-      http::HTTPMessage::HeaderList auth_headers;
-      auth_headers.emplace_back(
-          "Authorization",
-          StringUtil::format("Token $0", api_token));
+      auto req = http::HTTPRequest::mkGet(input_table_url);
+      auth_->signRequest(session, &req);
 
-      auto req = http::HTTPRequest::mkGet(input_table_url, auth_headers);
       MapReduceService::downloadResult(
           req,
           [&groups, &num_bytes_read] (
@@ -510,13 +507,9 @@ bool MapReduceService::saveRemoteResultsToTable(
     cstable::RecordShredder shredder(cstable.get());
 
     for (const auto& input_table_url : input_tables) {
-      auto api_token = auth_->encodeAuthToken(session);
-      http::HTTPMessage::HeaderList auth_headers;
-      auth_headers.emplace_back(
-          "Authorization",
-          StringUtil::format("Token $0", api_token));
+      auto req = http::HTTPRequest::mkGet(input_table_url);
+      auth_->signRequest(session, &req);
 
-      auto req = http::HTTPRequest::mkGet(input_table_url, auth_headers);
       MapReduceService::downloadResult(
           req,
           [&shredder, &schema] (

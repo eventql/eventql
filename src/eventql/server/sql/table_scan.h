@@ -23,7 +23,7 @@
  * code of your own applications
  */
 #include <eventql/sql/expressions/table_expression.h>
-#include <eventql/AnalyticsAuth.h>
+#include <eventql/server/auth/internal_auth.h>
 #include <eventql/db/partition_map.h>
 
 #include "eventql/eventql.h"
@@ -42,7 +42,7 @@ public:
     RefPtr<csql::SequentialScanNode> seqscan,
     PartitionMap* partition_map,
     ReplicationScheme* replication_scheme,
-    AnalyticsAuth* auth);
+    InternalAuth* auth);
 
   ScopedPtr<csql::ResultCursor> execute() override;
 
@@ -67,7 +67,7 @@ protected:
   RefPtr<csql::SequentialScanNode> seqscan_;
   PartitionMap* partition_map_;
   ReplicationScheme* replication_scheme_;
-  AnalyticsAuth* auth_;
+  InternalAuth* auth_;
   ScopedPtr<csql::ResultCursor> cur_cursor_;
   size_t cur_partition_;
 };

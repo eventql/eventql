@@ -25,7 +25,7 @@
 #pragma once
 #include <eventql/util/stdtypes.h>
 #include <eventql/sql/runtime/tablerepository.h>
-#include <eventql/AnalyticsAuth.h>
+#include <eventql/server/auth/internal_auth.h>
 #include <eventql/db/TSDBTableRef.h>
 #include <eventql/db/partition_map.h>
 #include <eventql/db/CompactionWorker.h>
@@ -45,7 +45,7 @@ public:
       const String& tsdb_namespace,
       PartitionMap* partition_map,
       ReplicationScheme* replication_scheme,
-      AnalyticsAuth* auth);
+      InternalAuth* auth);
 
   Option<ScopedPtr<csql::TableExpression>> buildSequentialScan(
       csql::Transaction* ctx,
@@ -68,7 +68,7 @@ protected:
   String tsdb_namespace_;
   PartitionMap* partition_map_;
   ReplicationScheme* replication_scheme_;
-  AnalyticsAuth* auth_;
+  InternalAuth* auth_;
 };
 
 

@@ -29,7 +29,7 @@
 #include <eventql/sql/scheduler.h>
 #include <eventql/sql/query_plan.h>
 #include <eventql/db/partition_map.h>
-#include <eventql/AnalyticsAuth.h>
+#include <eventql/server/auth/internal_auth.h>
 
 namespace eventql {
 
@@ -40,7 +40,7 @@ public:
 
   Scheduler(
       PartitionMap* pmap,
-      AnalyticsAuth* auth,
+      InternalAuth* auth,
       ReplicationScheme* repl_scheme);
 
 protected:
@@ -82,7 +82,7 @@ protected:
       RefPtr<csql::QueryTreeNode> node);
 
   PartitionMap* pmap_;
-  AnalyticsAuth* auth_;
+  InternalAuth* auth_;
   ReplicationScheme* repl_scheme_;
   size_t running_cnt_;
 };

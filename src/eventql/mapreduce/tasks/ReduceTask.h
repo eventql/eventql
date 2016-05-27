@@ -27,7 +27,7 @@
 #include "eventql/util/stdtypes.h"
 #include "eventql/mapreduce/MapReduceTask.h"
 #include "eventql/db/TSDBService.h"
-#include "eventql/AnalyticsAuth.h"
+#include "eventql/server/auth/internal_auth.h"
 
 namespace eventql {
 
@@ -46,7 +46,7 @@ public:
       Vector<RefPtr<MapReduceTask>> sources,
       size_t num_shards,
       MapReduceShardList* shards,
-      AnalyticsAuth* auth,
+      InternalAuth* auth,
       eventql::ReplicationScheme* repl);
 
   Option<MapReduceShardResult> execute(
@@ -67,7 +67,7 @@ protected:
   String params_;
   Vector<RefPtr<MapReduceTask>> sources_;
   size_t num_shards_;
-  AnalyticsAuth* auth_;
+  InternalAuth* auth_;
   eventql::ReplicationScheme* repl_;
 };
 
