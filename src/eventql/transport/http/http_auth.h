@@ -35,13 +35,6 @@ namespace eventql {
 class HTTPAuth {
 public:
 
-  static const char kSessionCookieKey[];
-  static const uint64_t kSessionLifetimeMicros;
-
-  static Option<AnalyticsSession> authenticateRequest(
-      const http::HTTPRequest& request,
-      InternalAuth* auth);
-
   static Status authenticateRequest(
       Session* session,
       ClientAuth* client_auth,

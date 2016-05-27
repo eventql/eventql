@@ -23,14 +23,14 @@
  */
 package eventql;
 
-message AnalyticsPrivileges {
+message LegacyAuthPrivileges {
   optional bool allow_web_access = 1;
   optional bool allow_private_api_write_access = 2;
   optional bool allow_private_api_read_access = 3;
 };
 
-message AnalyticsSession {
-  required string customer = 1;
+message LegacyAuthTokenData {
+  required string db_namespace = 1;
 
   /**
    * Special usernames: __private_api_key, __public_api_key
@@ -45,7 +45,7 @@ message AnalyticsSession {
   /**
    * Privileges for this session
    */
-  required AnalyticsPrivileges privileges = 4;
+  required LegacyAuthPrivileges privileges = 4;
 
 }
 

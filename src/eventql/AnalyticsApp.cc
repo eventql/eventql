@@ -62,13 +62,6 @@ AnalyticsApp::AnalyticsApp(
         partition_map,
         replication_scheme,
         sql),
-    events_service_(
-        cdb,
-        auth,
-        tsdb_node,
-        partition_map,
-        replication_scheme,
-        sql),
     mapreduce_service_(
         cdb,
         auth,
@@ -137,10 +130,6 @@ void AnalyticsApp::insertMetric(
 
 LogfileService* AnalyticsApp::logfileService() {
   return &logfile_service_;
-}
-
-EventsService* AnalyticsApp::eventsService() {
-  return &events_service_;
 }
 
 MapReduceService* AnalyticsApp::mapreduceService() {

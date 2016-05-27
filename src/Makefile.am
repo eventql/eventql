@@ -905,10 +905,6 @@ evql_core_a_SOURCES = \
     eventql/server/sql/table_provider.h \
     eventql/server/sql/table_scan.cc \
     eventql/server/sql/table_scan.h \
-    eventql/transport/http/EventsAPIServlet.cc \
-    eventql/transport/http/EventsAPIServlet.h \
-    eventql/transport/http/EventsService.cc \
-    eventql/transport/http/EventsService.h \
     eventql/transport/http/LogfileAPIServlet.cc \
     eventql/transport/http/LogfileAPIServlet.h \
     eventql/transport/http/LogfileService.cc \

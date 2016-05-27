@@ -68,6 +68,7 @@
 #include "eventql/server/sql/scheduler.h"
 #include "eventql/auth/client_auth.h"
 #include "eventql/auth/client_auth_trust.h"
+#include "eventql/auth/client_auth_legacy.h"
 #include "eventql/auth/internal_auth.h"
 #include "eventql/auth/internal_auth_trust.h"
 #include <jsapi.h>
@@ -141,6 +142,15 @@ int main(int argc, const char** argv) {
       NULL,
       "backend",
       "<backend>");
+
+  flags.defineFlag(
+      "legacy_auth_secret",
+      cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      NULL,
+      "secret",
+      "<secret>");
 
   flags.defineFlag(
       "legacy_master_addr",
@@ -325,7 +335,7 @@ int main(int argc, const char** argv) {
   }
 
   ScopedPtr<eventql::ClientAuth> client_auth;
-  client_auth.reset(new TrustClientAuth());
+  client_auth.reset(new LegacyClientAuth(flags.getString("legacy_auth_secret")));
 
   ScopedPtr<eventql::InternalAuth> internal_auth;
   internal_auth.reset(new TrustInternalAuth());

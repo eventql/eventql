@@ -28,7 +28,6 @@
 #include "eventql/db/TSDBService.h"
 #include "eventql/db/CompactionWorker.h"
 #include "eventql/transport/http/LogfileService.h"
-#include "eventql/transport/http/EventsService.h"
 #include "eventql/transport/http/MapReduceService.h"
 #include "eventql/AnalyticsSession.pb.h"
 #include "eventql/config/config_directory.h"
@@ -67,7 +66,6 @@ public:
   void updateTable(const TableDefinition& tbl, bool force = false);
 
   LogfileService* logfileService();
-  EventsService* eventsService();
   MapReduceService* mapreduceService();
 
 protected:
@@ -85,7 +83,6 @@ protected:
   String datadir_;
 
   LogfileService logfile_service_;
-  EventsService events_service_;
   MapReduceService mapreduce_service_;
 };
 

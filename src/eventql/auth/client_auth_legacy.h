@@ -27,11 +27,15 @@
 #include "eventql/auth/client_auth.h"
 #include "eventql/util/stdtypes.h"
 #include "eventql/util/status.h"
+#include "eventql/util/web/SecureCookie.h"
+#include "eventql/AnalyticsSession.pb.h"
 
 namespace eventql {
 
 class LegacyClientAuth : public ClientAuth {
 public:
+
+  LegacyClientAuth(const String& secret);
 
   Status authenticateSession(
       Session* session,
@@ -41,6 +45,8 @@ public:
       Session* session,
       const String& ns) override;
 
+protected:
+  mutable web::SecureCookieCoder cookie_coder_;
 };
 
 } // namespace eventql
