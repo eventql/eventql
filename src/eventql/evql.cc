@@ -424,15 +424,13 @@ int main(int argc, const char** argv) {
     }
   }
 
-  //if (flags.isSet("user")) {
-  //  console_opts.user = flags.getString("user");
-  //} else {
-  //  console_opts.user = getenv("USER");
-  //}
+  if (flags.isSet("user")) {
+    cli_cfg.setUser(flags.getString("user"));
+  }
 
-  //if (flags.isSet("database")) {
-  //  console_opts.database = flags.getString("database");
-  //}
+  if (flags.isSet("database")) {
+    cli_cfg.setDatabase(flags.getString("database"));
+  }
 
   /* cli */
   eventql::cli::Console console(cli_cfg);

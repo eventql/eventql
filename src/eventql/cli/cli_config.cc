@@ -52,8 +52,13 @@ static int ini_parse_handler(
 }
 
 CLIConfig::CLIConfig() :
-  server_host_("localhost"),
-  server_port_(9175) {}
+    server_host_("localhost"),
+    server_port_(9175) {
+  user_ = getenv("USER");
+  if (user_.empty()) {
+    user_ = "nobody";
+  }
+}
 
 Status CLIConfig::loadDefaultConfigFile() {
   char* homedir = getenv("HOME");
