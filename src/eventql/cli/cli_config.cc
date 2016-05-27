@@ -51,7 +51,9 @@ static int ini_parse_handler(
   }
 }
 
-CLIConfig::CLIConfig() {}
+CLIConfig::CLIConfig() :
+  server_host_("localhost"),
+  server_port_(9175) {}
 
 Status CLIConfig::loadDefaultConfigFile() {
   char* homedir = getenv("HOME");
@@ -181,20 +183,12 @@ Status CLIConfig::setBatchMode(const String& batch_mode) {
   }
 }
 
-Option<String> CLIConfig::getHost() const {
-  if (server_host_.size() > 0) {
-    return Some<String>(server_host_);
-  } else {
-    return None<String>();
-  }
+String CLIConfig::getHost() const {
+  return server_host_;
 }
 
-Option<int> CLIConfig::getPort() const {
-  if (server_port_) {
-    return Some<int>(server_port_);
-  } else {
-    return None<int>();
-  }
+int CLIConfig::getPort() const {
+  return server_port_;
 }
 
 Option<String> CLIConfig::getAuthToken() const {
@@ -213,7 +207,7 @@ Option<String> CLIConfig::getExec() const {
   return exec_;
 }
 
-Option<bool> CLIConfig::getBatchMode() const {
+bool CLIConfig::getBatchMode() const {
   return batch_mode_;
 }
 

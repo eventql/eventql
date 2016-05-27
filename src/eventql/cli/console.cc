@@ -108,8 +108,8 @@ Status Console::runQuery(const String& query) {
   try {
     auto url = StringUtil::format(
         "http://$0:$1/api/v1/sql",
-        cfg_.getHost().get(),
-        cfg_.getPort().get());
+        cfg_.getHost(),
+        cfg_.getPort());
 
     auto postdata = StringUtil::format(
           "format=binary&query=$0&database=$1",
