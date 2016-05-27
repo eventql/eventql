@@ -30,12 +30,12 @@ zookeeper requires us to set a watcher on each individual node if we want to
 watch the whole tree. since each server in the cluster needs to watch the three
 this works out to
 
-  num_watches = num_nodes X num_servers 
+    num_watches = num_nodes X num_servers 
 
 so for example
 
-  100 servers x 10_000 nodes (20-50TB data stored) = 100k watchers [ should still work ]
-  200 servers x 100_000 nodes (200-500TB data stored) = 20 million watchers 
+  - 100 servers x 10_000 nodes (20-50TB data stored) = 100k watchers [ should still work ]
+  - 200 servers x 100_000 nodes (200-500TB data stored) = 20 million watchers 
 
 this latter case is apparently already beyond ZK limits, even though we're only
 talking about roughly ~6MB of configuration data total!
