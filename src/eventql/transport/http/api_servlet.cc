@@ -140,14 +140,10 @@ void AnalyticsServlet::handle(
     }
   }
 
-  auto session_opt = HTTPAuth::authenticateRequest(
-      req_stream->request(),
-      auth_);
-
   if (uri.path() == "/api/v1/tables/insert") {
     req_stream->readBody();
-    catchAndReturnErrors(&res, [this, &session_opt, &req, &res] {
-      insertIntoTable(session_opt, &req, &res);
+    catchAndReturnErrors(&res, [this, &session, &req, &res] {
+      insertIntoTable(session.get(), &req, &res);
     });
     res_stream->writeResponse(res);
     return;
@@ -783,7 +779,7 @@ void AnalyticsServlet::removeTableTag(
 
 
 void AnalyticsServlet::insertIntoTable(
-    const Option<AnalyticsSession>& session,
+    Session* session,
     const http::HTTPRequest* req,
     http::HTTPResponse* res) {
   auto jreq = json::parseJSON(req->body());
@@ -797,22 +793,30 @@ void AnalyticsServlet::insertIntoTable(
       RAISE(kRuntimeError, "missing field: table");
     }
 
-    String ns;
-    if (!session.isEmpty()) {
-      ns = session.get().customer();
+    String insert_database = session->getEffectiveNamespace();
+
+    auto database = json::objectGetString(jrow, jreq.end(), "database");
+    if (!database.isEmpty()) {
+      insert_database = database.get();
     }
 
-    if (req->hasHeader("X-Z1-Namespace")) {
-      ns = req->getHeader("X-Z1-Namespace");
-      auto tc = tsdb_->tableConfig(ns, table.get());
-      if (tc.isEmpty() || !tc.get().config().allow_public_insert()) {
+    if (insert_database.empty()) {
+      RAISE(kRuntimeError, "missing field: database");
+    }
+
+    auto tc = tsdb_->tableConfig(insert_database, table.get());
+    if (tc.isEmpty()) {
+      res->setStatus(http::kStatusForbidden);
+      return;
+    }
+
+    if (!tc.get().config().allow_public_insert() &&
+        insert_database != session->getEffectiveNamespace()) {
+      auto rc = client_auth_->changeNamespace(session, insert_database);
+      if (!rc.isSuccess()) {
         res->setStatus(http::kStatusForbidden);
         return;
       }
-    }
-
-    if (ns.empty()) {
-      RAISE(kRuntimeError, "missing X-Z1-Namespace or Authorization header");
     }
 
     auto id_opt = json::objectGetString(jrow, jreq.end(), "id");
@@ -836,7 +840,7 @@ void AnalyticsServlet::insertIntoTable(
     if (data->type == json::JSON_STRING) {
       auto data_parsed = json::parseJSON(data->data);
       tsdb_->insertRecord(
-          ns,
+          insert_database,
           table.get(),
           record_id,
           record_version,
@@ -844,7 +848,7 @@ void AnalyticsServlet::insertIntoTable(
           data_parsed.end());
     } else {
       tsdb_->insertRecord(
-          ns,
+          insert_database,
           table.get(),
           record_id,
           record_version,

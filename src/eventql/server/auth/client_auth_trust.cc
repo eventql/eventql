@@ -30,7 +30,8 @@ Status TrustClientAuth::authenticateSession(
     HashMap<String, String> auth_data) {
   const auto& user_id = auth_data["user"];
   if (user_id.empty()) {
-    return Status(eRuntimeError, "missing username");
+    session->setUserID("nobody");
+    return Status::success();
   } else {
     session->setUserID(user_id);
     return Status::success();
