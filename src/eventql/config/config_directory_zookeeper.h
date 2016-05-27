@@ -162,6 +162,8 @@ protected:
   mutable std::mutex mutex_;
   std::condition_variable cv_;
 
+  ClusterConfig getPatchedClusterConfig() const;
+
   ClusterConfig cluster_config_;
   HashMap<String, ServerConfig> servers_;
   HashMap<String, String> servers_live_;
