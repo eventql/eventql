@@ -15,6 +15,7 @@ We store three pieces of data under the following paths:
 - must be possible to make HA somehow
 - no key value is ever larger than ~1MB
 
+
 Example Tree:
 
      /eventql/<cluster>/namespaces/<namespace>/tables/<table>/<partition>
@@ -24,7 +25,12 @@ very large cluster we expect up to 10 million (20-50PB) partitions. the values
 stored in each partition key are only a few bytes in practice.
 
 
-### things zookeeper does not do (limits):
+### things zookeeper does that we don't need:
+
+- guarantees about timeliness (data is never stale, etc)
+
+
+### things zookeeper does not do that we will need eventually (limits):
 
 zookeeper requires us to set a watcher on each individual node if we want to
 watch the whole tree. since each server in the cluster needs to watch the three
