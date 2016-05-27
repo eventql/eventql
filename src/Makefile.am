@@ -958,6 +958,8 @@ noinst_LIBRARIES += evql_core.a
 evql_SOURCES = \
     eventql/cli/console.cc \
     eventql/cli/console.h \
+    eventql/cli/cli_config.cc \
+    eventql/cli/cli_config.h \
     eventql/server/sql/codec/binary_codec.cc \
     eventql/server/sql/codec/binary_codec.h \
     eventql/evql.cc

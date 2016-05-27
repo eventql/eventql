@@ -39,12 +39,17 @@ public:
   Status loadDefaultConfigFile();
   Status loadConfigFile(const String& file_path);
 
+  Status setDatabase(const String& database);
+  Status setUser(const String& usern);
   Status setHost(const String& host = "localhost");
   Status setPort(const int port = 80);
   Status setPort(const String& port);
   Status setAuthToken(const String& auth_token);
   Status setBatchMode(const String& batch_mode);
 
+  String getDatabase() const;
+  String getUser() const;
+  String getPassword() const;
   Option<String> getHost() const;
   Option<int> getPort() const;
   Option<String> getAuthToken() const;
@@ -58,6 +63,9 @@ public:
       const String& value);
 
 protected:
+  String database_;
+  String user_;
+  String password_;
   String server_host_;
   int server_port_;
   String server_auth_token_;

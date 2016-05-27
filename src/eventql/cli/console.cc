@@ -114,18 +114,18 @@ Status Console::runQuery(const String& query) {
     auto postdata = StringUtil::format(
           "format=binary&query=$0&database=$1",
           URI::urlEncode(query),
-          URI::urlEncode(cfg_.database));
+          URI::urlEncode(cfg_.getDatabase()));
 
     http::HTTPMessage::HeaderList auth_headers;
-    if (!cfg_.auth_token.empty()) {
+    if (!cfg_.getAuthToken().isEmpty()) {
       auth_headers.emplace_back(
           "Authorization",
-          StringUtil::format("Token $0", cfg_.auth_token));
-    } else if (!cfg_.user.empty()) {
+          StringUtil::format("Token $0", cfg_.getAuthToken().get()));
+    } else if (!cfg_.getUser().empty()) {
       auth_headers.emplace_back(
           "Authorization",
           StringUtil::format("Basic $0",
-              util::Base64::encode(cfg_.user + ":" + cfg_.password)));
+              util::Base64::encode(cfg_.getUser() + ":" + cfg_.getPassword())));
     }
 
     http::HTTPClient http_client(nullptr);
@@ -260,13 +260,13 @@ Status Console::runJS(const String& program_source) {
 
     auto url = StringUtil::format(
         "http://$0:$1/api/v1/mapreduce/execute",
-        cfg_.server_host,
-        cfg_.server_port);
+        cfg_.getHost(),
+        cfg_.getPort());
 
     http::HTTPMessage::HeaderList auth_headers;
     auth_headers.emplace_back(
         "Authorization",
-        StringUtil::format("Token $0", cfg_.server_auth_token));
+        StringUtil::format("Token $0", cfg_.getAuthToken().get()));
 
     if (is_tty) {
       stderr_os->print("Launching job...");
