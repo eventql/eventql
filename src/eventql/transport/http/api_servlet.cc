@@ -1099,6 +1099,12 @@ void AnalyticsServlet::executeSQL_BINARY(
 
     csql::BinaryResultFormat result_format(write_cb, true);
 
+    if (session->getEffectiveNamespace().empty()) {
+      result_format.sendError("No database selected");
+      res_stream->finishResponse();
+      return;
+    }
+
     try {
       auto txn = sql_->newTransaction();
       txn->setTableProvider(app_->getTableProvider(session->getEffectiveNamespace()));
@@ -1130,6 +1136,21 @@ void AnalyticsServlet::executeSQL_JSON(
   if (!URI::getParam(params, "query", &query)) {
     res->setStatus(http::kStatusBadRequest);
     res->addBody("missing ?query=... parameter");
+    res_stream->writeResponse(*res);
+    return;
+  }
+
+  if (session->getEffectiveNamespace().empty()) {
+    Buffer buf;
+    json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
+    json.beginObject();
+    json.addObjectEntry("error");
+    json.addString("No database selected");
+    json.endObject();
+
+    res->setStatus(http::kStatusInternalServerError);
+    res->addHeader("Content-Type", "application/json; charset=utf-8");
+    res->addBody(buf);
     res_stream->writeResponse(*res);
     return;
   }
@@ -1198,6 +1219,16 @@ void AnalyticsServlet::executeSQL_JSONSSE(
   auto sse_stream = mkRef(new http::HTTPSSEStream(res, res_stream));
   sse_stream->start();
 
+  if (session->getEffectiveNamespace().empty()) {
+    Buffer buf;
+    json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
+    json.beginObject();
+    json.addObjectEntry("error");
+    json.addString("No database selected");
+    json.endObject();
+
+    sse_stream->sendEvent(buf, Some(String("query_error")));
+  }
   try {
     auto txn = sql_->newTransaction();
     txn->setTableProvider(app_->getTableProvider(session->getEffectiveNamespace()));
@@ -1249,6 +1280,12 @@ void AnalyticsServlet::executeQTree(
         [res_stream] (const void* data, size_t size) {
       res_stream->writeBodyChunk(data, size);
     });
+
+    if (session->getEffectiveNamespace().empty()) {
+      result_format.sendError("No database selected");
+      res_stream->finishResponse();
+      return;
+    }
 
     try {
       auto txn = sql_->newTransaction();
