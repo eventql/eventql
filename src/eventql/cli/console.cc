@@ -25,6 +25,7 @@
 #include <eventql/util/inspect.h>
 #include "eventql/util/logging.h"
 #include "eventql/util/random.h"
+#include "eventql/util/util/Base64.h"
 #include "eventql/util/thread/eventloop.h"
 #include "eventql/util/thread/threadpool.h"
 #include "eventql/util/thread/FixedSizeThreadPool.h"
@@ -103,6 +104,11 @@ Status Console::runQuery(const String& query) {
       auth_headers.emplace_back(
           "Authorization",
           StringUtil::format("Token $0", cfg_.auth_token));
+    } else if (!cfg_.user.empty()) {
+      auth_headers.emplace_back(
+          "Authorization",
+          StringUtil::format("Basic $0",
+              util::Base64::encode(cfg_.user + ":" + cfg_.password)));
     }
 
     http::HTTPClient http_client(nullptr);
