@@ -31,15 +31,19 @@ namespace eventql {
 class MetadataFile : public RefCounted {
 public:
 
+  struct PartitionPlacement {
+    String server_id;
+    uint64_t placement_id;
+  };
+
   struct PartitionMapEntry {
     String begin;
-    uint64_t placement_id;
-    Vector<String> servers;
-    Vector<String> servers_joining;
+    Vector<PartitionPlacement> servers;
+    Vector<PartitionPlacement> servers_joining;
     bool splitting;
     String split_point;
-    Vector<String> split_servers_low;
-    Vector<String> split_servers_high;
+    Vector<PartitionPlacement> split_servers_low;
+    Vector<PartitionPlacement> split_servers_high;
   };
 
   MetadataFile(

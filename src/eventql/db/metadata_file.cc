@@ -25,5 +25,20 @@
 
 namespace eventql {
 
+MetadataFile::MetadataFile(
+    const SHA1Hash& transaction_id,
+    const Vector<PartitionMapEntry>& partition_map) :
+    transaction_id_(transaction_id),
+    partition_map_(partition_map) {}
+
+const SHA1Hash& MetadataFile::getTransactionID() const {
+  return transaction_id_;
+}
+
+const Vector<MetadataFile::PartitionMapEntry>&
+    MetadataFile::getPartitionMap() const {
+  return partition_map_;
+}
+
 } // namespace eventql
 

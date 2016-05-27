@@ -23,14 +23,128 @@
  */
 #include "eventql/eventql.h"
 #include "eventql/util/stdtypes.h"
+#include "eventql/util/random.h"
 #include "eventql/util/test/unittest.h"
-#include "eventql/db/metadata_service.h"
+#include "eventql/db/metadata_store.h"
 
 using namespace eventql;
 
 UNIT_TEST(MetadataStoreTest);
 
 TEST_CASE(MetadataStoreTest, TestStoreMetadataFile, [] () {
+  auto metadata_store_path = StringUtil::format(
+      "/tmp/test_metadata_store-$0",
+      Random::singleton()->hex64());
 
+  FileUtil::mkdir_p(metadata_store_path);
+
+  {
+    MetadataStore metadata_store(metadata_store_path);
+    Vector<MetadataFile::PartitionMapEntry> pmap;
+
+    {
+      MetadataFile::PartitionMapEntry e;
+      e.begin = "a";
+      e.splitting = false;
+
+      {
+        MetadataFile::PartitionPlacement p;
+        p.server_id = "server1";
+        p.placement_id = 0x42;
+        e.servers.emplace_back(p);
+      }
+
+      {
+        MetadataFile::PartitionPlacement p;
+        p.server_id = "server2";
+        p.placement_id = 0x23;
+        e.servers.emplace_back(p);
+      }
+
+      pmap.emplace_back(e);
+    }
+
+    {
+      MetadataFile::PartitionMapEntry e;
+      e.begin = "b";
+      e.splitting = true;
+      e.split_point = "bx";
+
+      {
+        MetadataFile::PartitionPlacement p;
+        p.server_id = "server3";
+        p.placement_id = 0x42;
+        e.servers_joining.emplace_back(p);
+      }
+
+      {
+        MetadataFile::PartitionPlacement p;
+        p.server_id = "server5";
+        p.placement_id = 0x123;
+        e.split_servers_low.emplace_back(p);
+      }
+
+      {
+        MetadataFile::PartitionPlacement p;
+        p.server_id = "server6";
+        p.placement_id = 0x456;
+        e.split_servers_high.emplace_back(p);
+      }
+
+      pmap.emplace_back(e);
+    }
+
+
+    MetadataFile file(SHA1::compute("mytx"), pmap);
+    auto rc = metadata_store.storeMetadataFile(
+        "ns",
+        "mytbl",
+        SHA1::compute("test"),
+        file);
+
+    EXPECT(rc.isSuccess());
+  }
+
+  {
+    MetadataStore metadata_store(metadata_store_path);
+    RefPtr<MetadataFile> file;
+    auto rc = metadata_store.getMetadataFile(
+        "ns",
+        "mytbl",
+        SHA1::compute("test"),
+        &file);
+
+    EXPECT(rc.isSuccess());
+    EXPECT(file->getTransactionID() == SHA1::compute("mytx"));
+
+    const auto& pmap = file->getPartitionMap();
+    EXPECT_EQ(pmap.size(), 2);
+
+    EXPECT_EQ(pmap[0].begin, "a");
+    EXPECT_EQ(pmap[0].servers.size(), 2);
+    EXPECT_EQ(pmap[0].servers[0].server_id, "server1");
+    EXPECT_EQ(pmap[0].servers[0].placement_id, 0x42);
+    EXPECT_EQ(pmap[0].servers[1].server_id, "server2");
+    EXPECT_EQ(pmap[0].servers[1].placement_id, 0x23);
+    EXPECT_EQ(pmap[0].servers_joining.size(), 0);
+    EXPECT_EQ(pmap[0].splitting, false);
+    EXPECT_EQ(pmap[0].split_point, "");
+    EXPECT_EQ(pmap[0].split_servers_low.size(), 0);
+    EXPECT_EQ(pmap[0].split_servers_high.size(), 0);
+
+    EXPECT_EQ(pmap[1].begin, "b");
+    EXPECT_EQ(pmap[1].servers.size(), 0);
+    EXPECT_EQ(pmap[1].servers_joining.size(), 1);
+    EXPECT_EQ(pmap[1].servers_joining[0].server_id, "server3");
+    EXPECT_EQ(pmap[1].servers_joining[0].placement_id, 0x42);
+    EXPECT_EQ(pmap[1].splitting, true);
+    EXPECT_EQ(pmap[1].split_point, "bx");
+    EXPECT_EQ(pmap[1].split_servers_low.size(), 1);
+    EXPECT_EQ(pmap[1].split_servers_low[0].server_id, "server5");
+    EXPECT_EQ(pmap[1].split_servers_low[0].placement_id, 0x123);
+    EXPECT_EQ(pmap[1].split_servers_high.size(), 1);
+    EXPECT_EQ(pmap[1].split_servers_high[0].server_id, "server6");
+    EXPECT_EQ(pmap[1].split_servers_high[0].placement_id, 0x456);
+  }
 });
 
