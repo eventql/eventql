@@ -111,6 +111,33 @@ Status CLIConfig::setConfigOption(
   }
 }
 
+Status CLIConfig::setDatabase(const String& database) {
+  database_ = database;
+  return Status::success();
+}
+
+String CLIConfig::getDatabase() const {
+  return database_;
+}
+
+Status CLIConfig::setUser(const String& user) {
+  user_ = user;
+  return Status::success();
+}
+
+String CLIConfig::getUser() const {
+  return user_;
+}
+
+Status CLIConfig::setPassword(const String& password) {
+  password_ = password;
+  return Status::success();
+}
+
+String CLIConfig::getPassword() const {
+  return password_;
+}
+
 Status CLIConfig::setHost(const String& host /* = "localhost" */) {
   server_host_ = host; //FIXME check host format
   return Status::success();
