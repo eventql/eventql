@@ -2,6 +2,7 @@
  * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
  * Authors:
  *   - Paul Asmuth <paul@zscale.io>
+ *   - Laura Schlimmer <laura@zscale.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -23,49 +24,49 @@
  */
 #pragma once
 #include <eventql/eventql.h>
-#include <eventql/util/exception.h>
 #include <eventql/util/stdtypes.h>
-#include <eventql/util/cli/CLICommand.h>
+#include <eventql/util/option.h>
 #include <eventql/util/status.h>
-#include <eventql/cli/cli_config.h>
 
 namespace eventql {
 namespace cli {
 
-struct ConsoleOptions {
-  String server_host;
-  int server_port;
-  String database;
-  String auth_token;
-  String user;
-  String password;
-  bool batch_mode;
-};
-
-class Console {
+class CLIConfig {
 public:
 
-  Console(const CLIConfig cli_cfg);
+  CLIConfig();
 
-  /**
-   * Start an interactive shell. This method will never return
-   */
-  void startInteractiveShell();
+  Status loadDefaultConfigFile();
+  Status loadConfigFile(const String& file_path);
 
-  /**
-   * Execute an SQL query
-   */
-  Status runQuery(const String& query);
+  Status setHost(const String& host = "localhost");
+  Status setPort(const int port = 80);
+  Status setPort(const String& port);
+  Status setAuthToken(const String& auth_token);
+  Status setBatchMode(const String& batch_mode);
 
-  /**
-   * Execute a JS job
-   */
-  Status runJS(const String& query);
+  Option<String> getHost() const;
+  Option<int> getPort() const;
+  Option<String> getAuthToken() const;
+  Option<bool> getBatchMode() const;
+  Option<String> getFile() const;
+  Option<String> getExec() const;
+
+  Status setConfigOption(
+      const String& section,
+      const String& key,
+      const String& value);
 
 protected:
-  CLIConfig cfg_;
+  String server_host_;
+  int server_port_;
+  String server_auth_token_;
+  bool batch_mode_;
+  String file_;
+  String exec_;
 };
 
 } // namespace cli
 } // namespace eventql
+
 

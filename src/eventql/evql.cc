@@ -25,6 +25,8 @@
 #include <unistd.h>
 #include <signal.h>
 #include <poll.h>
+
+#include "eventql/eventql.h"
 #include "eventql/util/application.h"
 #include "eventql/util/logging.h"
 #include "eventql/util/random.h"
@@ -42,8 +44,7 @@
 #include "eventql/util/cli/term.h"
 #include "eventql/server/sql/codec/binary_codec.h"
 #include "eventql/cli/console.h"
-
-#include "eventql/eventql.h"
+#include "eventql/cli/cli_config.h"
 
 thread::EventLoop ev;
 
@@ -240,6 +241,14 @@ static bool hasSTDIN() {
   return poll(&p, 1, 0) == 1;
 }
 
+static void printError(const String& error_string) {
+  auto stderr_os = TerminalOutputStream::fromStream(OutputStream::getStderr());
+  stderr_os->print(
+      "ERROR:",
+      { TerminalStyle::RED, TerminalStyle::UNDERSCORE });
+  stderr_os->print(" " + error_string + "\n");
+}
+
 int main(int argc, const char** argv) {
   Application::init();
   Application::logToStderr();
@@ -287,7 +296,7 @@ int main(int argc, const char** argv) {
       cli::FlagParser::T_STRING,
       false,
       "h",
-      "localhost",
+      NULL,
       "eventql server hostname",
       "<host>");
 
@@ -296,7 +305,7 @@ int main(int argc, const char** argv) {
       cli::FlagParser::T_INTEGER,
       false,
       "p",
-      "9175",
+      NULL,
       "eventql server port",
       "<port>");
 
@@ -382,25 +391,51 @@ int main(int argc, const char** argv) {
   }
 
   /* console options */
-  eventql::cli::ConsoleOptions console_opts;
-  console_opts.server_host = flags.getString("host");
-  console_opts.server_port = flags.getInt("port");
+  eventql::cli::CLIConfig cli_cfg;
+  {
+    auto status = cli_cfg.loadDefaultConfigFile();
+    if (!status.isSuccess()) {
+      printError(status.message());
+      return 1;
+    }
+  }
+
+  if (flags.isSet("host")) {
+    auto s = cli_cfg.setHost(flags.getString("host"));
+    if (!s.isSuccess()) {
+      printError(StringUtil::format("$0: $1", s.type(), s.message()));
+      return 1;
+    }
+  }
+
   if (flags.isSet("auth_token")) {
-    console_opts.auth_token = flags.getString("auth_token");
+    auto s = cli_cfg.setAuthToken(flags.getString("auth_token"));
+    if (!s.isSuccess()) {
+      printError(StringUtil::format("$0: $1", s.type(), s.message()));
+      return 1;
+    }
   }
 
-  if (flags.isSet("user")) {
-    console_opts.user = flags.getString("user");
-  } else {
-    console_opts.user = getenv("USER");
+  if (flags.isSet("port")) {
+    auto s = cli_cfg.setPort(flags.getInt("port"));
+    if (!s.isSuccess()) {
+      printError(StringUtil::format("$0: $1", s.type(), s.message()));
+      return 1;
+    }
   }
 
-  if (flags.isSet("database")) {
-    console_opts.database = flags.getString("database");
-  }
+  //if (flags.isSet("user")) {
+  //  console_opts.user = flags.getString("user");
+  //} else {
+  //  console_opts.user = getenv("USER");
+  //}
+
+  //if (flags.isSet("database")) {
+  //  console_opts.database = flags.getString("database");
+  //}
 
   /* cli */
-  eventql::cli::Console console(console_opts);
+  eventql::cli::Console console(cli_cfg);
 
   if (flags.getArgv().size() > 0) {
     stderr_os->write(

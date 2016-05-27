@@ -60,7 +60,7 @@ void Console::startInteractiveShell() {
   }
 }
 
-Console::Console(const ConsoleOptions& options) : cfg_(options) {}
+Console::Console(const CLIConfig cli_cfg) : cfg_(cli_cfg) {}
 
 Status Console::runQuery(const String& query) {
   auto stdout_os = OutputStream::getStdout();
@@ -108,8 +108,8 @@ Status Console::runQuery(const String& query) {
   try {
     auto url = StringUtil::format(
         "http://$0:$1/api/v1/sql",
-        cfg_.server_host,
-        cfg_.server_port);
+        cfg_.getHost().get(),
+        cfg_.getPort().get());
 
     auto postdata = StringUtil::format(
           "format=binary&query=$0&database=$1",
