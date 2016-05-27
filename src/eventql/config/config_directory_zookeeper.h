@@ -116,6 +116,8 @@ protected:
 
   Status sync(CallbackList* events);
   Status syncClusterConfig(CallbackList* events);
+  Status syncLiveServers(CallbackList* events);
+  Status syncLiveServer(CallbackList* events, const String& server);
   Status syncServers(CallbackList* events);
   Status syncServer(CallbackList* events, const String& server);
   Status syncNamespaces(CallbackList* events);
@@ -162,6 +164,7 @@ protected:
 
   ClusterConfig cluster_config_;
   HashMap<String, ServerConfig> servers_;
+  HashMap<String, String> servers_live_;
   HashMap<String, NamespaceConfig> namespaces_;
   HashMap<String, TableDefinition> tables_;
 

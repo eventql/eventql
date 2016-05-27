@@ -278,6 +278,13 @@ Status ZookeeperConfigDirectory::load() {
   }
 
   {
+    auto rc = syncLiveServers(nullptr);
+    if (!rc.isSuccess()) {
+      return rc;
+    }
+  }
+
+  {
     auto rc = syncServers(nullptr);
     if (!rc.isSuccess()) {
       return rc;
@@ -317,6 +324,76 @@ Status ZookeeperConfigDirectory::syncClusterConfig(CallbackList* events) {
 }
 
 // PRECONDITION: must hold mutex
+Status ZookeeperConfigDirectory::syncLiveServers(CallbackList* events) {
+  Vector<String> servers;
+  {
+    auto rc = listChildren(path_prefix_ + "/servers-live", &servers, true);
+    if (!rc.isSuccess()) {
+      return rc;
+    }
+  }
+
+  Set<String> all_servers(servers.begin(), servers.end());
+  for (const auto& s : servers_live_) {
+    all_servers.emplace(s.first);
+  }
+
+  for (const auto& server : all_servers) {
+    auto rc = syncLiveServer(events, server);
+    if (!rc.isSuccess()) {
+      return rc;
+    }
+  }
+
+  return Status::success();
+}
+
+// PRECONDITION: must hold mutex
+Status ZookeeperConfigDirectory::syncLiveServer(
+    CallbackList* events,
+    const String& server) {
+  auto key = StringUtil::format("$0/servers-live/$1", path_prefix_, server);
+  bool exists = hasNode(key);
+  Buffer server_addr(1024);
+  if (exists) {
+    if (!getNode(key, &server_addr, true)) {
+      return Status(
+          eNotFoundError,
+          StringUtil::format("server '$0' does not exist", server));
+    }
+
+    servers_live_[server] = server_addr.toString();
+  } else {
+    servers_live_.erase(server);
+  }
+
+  logInfo("evqld", "Server '$0' -> $1", server, exists ? "UP" : "DOWN");
+
+  if (events) {
+    const auto& iter = servers_.find(server);
+    if (iter == servers_.end()) {
+      return Status(
+          eNotFoundError,
+          StringUtil::format("server '$0' does not exist", server));
+    }
+
+    auto server_config = iter->second;
+    if (exists) {
+      server_config.set_server_status(SERVER_UP);
+      server_config.set_server_addr(server_addr.toString());
+    } else {
+      server_config.set_server_status(SERVER_DOWN);
+    }
+
+    for (const auto& cb : on_server_change_) {
+      events->emplace_back(std::bind(cb, server_config));
+    }
+  }
+
+  return Status::success();
+}
+
+// PRECONDITION: must hold mutex
 Status ZookeeperConfigDirectory::syncServers(CallbackList* events) {
   Vector<String> servers;
   {
@@ -353,6 +430,14 @@ Status ZookeeperConfigDirectory::syncServer(
 
   server_config.set_version(stat.version + 1);
   servers_[server] = server_config;
+
+  const auto& live_server = servers_live_.find(server);
+  if (live_server != servers_live_.end()) {
+    server_config.set_server_status(SERVER_UP);
+    server_config.set_server_addr(live_server->second);
+  } else {
+    server_config.set_server_status(SERVER_DOWN);
+  }
 
   if (events) {
     for (const auto& cb : on_server_change_) {
@@ -601,6 +686,15 @@ Status ZookeeperConfigDirectory::handleChangeEvent(
     return syncServers(events);
   }
 
+  if (vpath == "/servers-live") {
+    return syncLiveServers(events);
+  }
+
+  std::regex live_server_regex("/servers-live/([0-9A-Za-z_.-]+)");
+  if (std::regex_match(vpath, m, live_server_regex)) {
+    return syncLiveServer(events, m[1].str());
+  }
+
   std::regex server_regex("/servers/([0-9A-Za-z_.-]+)");
   if (std::regex_match(vpath, m, server_regex)) {
     return syncServer(events, m[1].str());
@@ -780,7 +874,16 @@ ServerConfig ZookeeperConfigDirectory::getServerConfig(
     RAISEF(kNotFoundError, "server not found: $0", server_name);
   }
 
-  return iter->second;
+  auto server_config = iter->second;
+  const auto& live_server = servers_live_.find(server_name);
+  if (live_server != servers_live_.end()) {
+    server_config.set_server_status(SERVER_UP);
+    server_config.set_server_addr(live_server->second);
+  } else {
+    server_config.set_server_status(SERVER_DOWN);
+  }
+
+  return server_config;
 }
 
 Vector<ServerConfig> ZookeeperConfigDirectory::listServers() const {
@@ -789,6 +892,15 @@ Vector<ServerConfig> ZookeeperConfigDirectory::listServers() const {
   std::unique_lock<std::mutex> lk(mutex_);
   for (const auto& server : servers_) {
     servers.emplace_back(server.second);
+
+    auto& server_config = servers.back();
+    const auto& live_server = servers_live_.find(server_config.server_id());
+    if (live_server != servers_live_.end()) {
+      server_config.set_server_status(SERVER_UP);
+      server_config.set_server_addr(live_server->second);
+    } else {
+      server_config.set_server_status(SERVER_DOWN);
+    }
   }
 
   return servers;
@@ -802,6 +914,9 @@ void ZookeeperConfigDirectory::setServerConfigChangeCallback(
 
 void ZookeeperConfigDirectory::updateServerConfig(ServerConfig cfg) {
   std::unique_lock<std::mutex> lk(mutex_);
+
+  cfg.clear_server_addr();
+  cfg.clear_server_status();
 
   auto buf = msg::encode(cfg);
   auto path = StringUtil::format(
