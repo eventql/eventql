@@ -876,6 +876,8 @@ evql_core_a_SOURCES = \
     eventql/mapreduce/tasks/SaveToTableTask.cc \
     eventql/mapreduce/tasks/SaveToTableTask.h \
     eventql/server/auth/client_auth.h \
+    eventql/server/auth/client_auth_legacy.cc \
+    eventql/server/auth/client_auth_legacy.h \
     eventql/server/auth/client_auth_trust.cc \
     eventql/server/auth/client_auth_trust.h \
     eventql/server/auth/internal_auth.h \
