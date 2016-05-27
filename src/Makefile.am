@@ -754,28 +754,8 @@ evql_http_a_SOURCES = \
 noinst_LIBRARIES += evql_http.a
 
 
-################# BIN: evql ####################
-evql_SOURCES = \
-    eventql/cli/console.cc \
-    eventql/cli/console.h \
-    eventql/server/sql/codec/binary_codec.cc \
-    eventql/server/sql/codec/binary_codec.h \
-    eventql/evql.cc
-
-evql_LDADD = \
-    evql_http.a \
-    evql_sql.a \
-    evql_cstable.a \
-    evql_util.a \
-    $(LINENOISE_LDADD) \
-    $(SIMDCOMP_LDADD) \
-    $(PCRE_LDADD)
-
-bin_PROGRAMS += evql
-
-
-################# BIN: evqld ####################
-evqld_SOURCES = \
+################# LIB: evql_core.a ####################
+evql_core_a_SOURCES = \
     eventql/AnalyticsApp.cc \
     eventql/AnalyticsApp.h \
     eventql/AnalyticsAuth.cc \
@@ -828,6 +808,14 @@ evqld_SOURCES = \
     eventql/db/LogPartitionReplication.h \
     eventql/db/LogPartitionWriter.cc \
     eventql/db/LogPartitionWriter.h \
+    eventql/db/metadata_coordinator.cc \
+    eventql/db/metadata_coordinator.h \
+    eventql/db/metadata_file.cc \
+    eventql/db/metadata_file.h \
+    eventql/db/metadata_operation.cc \
+    eventql/db/metadata_operation.h \
+    eventql/db/metadata_store.cc \
+    eventql/db/metadata_store.h \
     eventql/db/Partition.cc \
     eventql/db/Partition.h \
     eventql/db/PartitionReader.cc \
@@ -869,7 +857,6 @@ evqld_SOURCES = \
     eventql/db/partition_map.cc \
     eventql/db/partition_map.h \
     eventql/eventql.h \
-    eventql/evqld.cc \
     eventql/mapreduce/mapreduce_preludejs.cc \
     eventql/mapreduce/MapReduceScheduler.cc \
     eventql/mapreduce/MapReduceScheduler.h \
@@ -943,7 +930,7 @@ evqld_SOURCES = \
     eventql/util/mdb/MDBTransaction.cc \
     eventql/util/mdb/MDBTransaction.h
 
-nodist_evqld_SOURCES = \
+nodist_evql_core_a_SOURCES = \
     @builddir@/eventql/AnalyticsSession.pb.cc \
     @builddir@/eventql/config/namespace_config_protos.pb.cc \
     @builddir@/eventql/db/ClusterConfig.pb.cc \
@@ -962,7 +949,35 @@ nodist_evqld_SOURCES = \
 eventql/mapreduce/mapreduce_preludejs.cc:
 	echo 'eventql/mapreduce/prelude.js:${srcdir}/eventql/mapreduce/prelude.js' | ${srcdir}/eventql/util/assets.sh $(builddir)/eventql/mapreduce/mapreduce_preludejs.cc
 
+noinst_LIBRARIES += evql_core.a
+
+
+################# BIN: evql ####################
+evql_SOURCES = \
+    eventql/cli/console.cc \
+    eventql/cli/console.h \
+    eventql/server/sql/codec/binary_codec.cc \
+    eventql/server/sql/codec/binary_codec.h \
+    eventql/evql.cc
+
+evql_LDADD = \
+    evql_http.a \
+    evql_sql.a \
+    evql_cstable.a \
+    evql_util.a \
+    $(LINENOISE_LDADD) \
+    $(SIMDCOMP_LDADD) \
+    $(PCRE_LDADD)
+
+bin_PROGRAMS += evql
+
+
+################# BIN: evqld ####################
+evqld_SOURCES = \
+    eventql/evqld.cc
+
 evqld_LDADD = \
+    evql_core.a \
     evql_http.a \
     evql_sql.a \
     evql_cstable.a \
@@ -1030,5 +1045,19 @@ test_evql_sql_parser_LDADD = \
 
 TESTS += test_evql_sql_parser
 check_PROGRAMS += test_evql_sql_parser
+
+
+################# TEST: db/metadata_store ####################
+test_evql_db_metadata_store_SOURCES = eventql/db/metadata_store_test.cc
+test_evql_db_metadata_store_LDADD = \
+    evql_core.a \
+    evql_util.a \
+    $(SIMDCOMP_LDADD) \
+    $(LMDB_LDADD) \
+    $(PROTOBUF_LDADD) \
+    $(PCRE_LDADD)
+
+TESTS += test_evql_db_metadata_store
+check_PROGRAMS += test_evql_db_metadata_store
 
 
