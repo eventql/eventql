@@ -269,7 +269,7 @@ int main(int argc, const char** argv) {
       cli::FlagParser::T_STRING,
       false,
       "l",
-      "sql",
+      NULL,
       "query language",
       "<lang>");
 
@@ -380,24 +380,36 @@ int main(int argc, const char** argv) {
     return 1;
   }
 
-  auto lang = flags.getString("lang");
-  StringUtil::toLower(&lang);
+  String language;
+  if (flags.isSet("lang")) {
+    language = flags.getString("lang");
+    StringUtil::toLower(&language);
+  }
 
   if (flags.isSet("file")) {
-    auto query = FileUtil::read(flags.getString("file"));
+    auto file = flags.getString("file");
+    auto query = FileUtil::read(file);
 
-    if (lang == "js" || lang == "javascript") {
-      auto ret = console.runJS(query.toString());
-      return ret.isSuccess() ? 0 : 1;
-    } else {
+    if (language == "sql" ||
+        (language.empty() && StringUtil::endsWith(file, ".sql"))) {
       auto ret = console.runQuery(query.toString());
       return ret.isSuccess() ? 0 : 1;
+
+    } else if (language == "js" ||
+              (language.empty() && StringUtil::endsWith(file, ".js"))) {
+      auto ret = console.runJS(query.toString());
+      return ret.isSuccess() ? 0 : 1;
+
+    } else {
+      stderr_os->write(
+          "FlagError: unknown language, can't execute file, run evql --help for help\n");
+      return 1;
     }
   }
 
-  if (lang == "js" || lang == "javascript") {
+  if (!language.empty() && language != "sql") {
     stderr_os->write(
-      "FlagError: please provide a file to execute Javascript, run evql --help for help\n");
+      "FlagError: invalid language option, run evql --help for help\n");
     return 1;
   }
 
