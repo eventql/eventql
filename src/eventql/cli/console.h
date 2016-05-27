@@ -34,6 +34,7 @@ namespace cli {
 struct ConsoleOptions {
   String server_host;
   int server_port;
+  String database;
   String auth_token;
   String user;
   String password;

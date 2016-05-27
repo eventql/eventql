@@ -96,8 +96,9 @@ Status Console::runQuery(const String& query) {
         cfg_.server_port);
 
     auto postdata = StringUtil::format(
-          "format=binary&query=$0",
-          URI::urlEncode(query));
+          "format=binary&query=$0&database=$1",
+          URI::urlEncode(query),
+          URI::urlEncode(cfg_.database));
 
     http::HTTPMessage::HeaderList auth_headers;
     if (!cfg_.auth_token.empty()) {

@@ -1099,6 +1099,16 @@ void AnalyticsServlet::executeSQL_BINARY(
 
     csql::BinaryResultFormat result_format(write_cb, true);
 
+    String database;
+    if (URI::getParam(params, "database", &database) && !database.empty()) {
+      auto rc = client_auth_->changeNamespace(session, database);
+      if (!rc.isSuccess()) {
+        result_format.sendError(rc.message());
+        res_stream->finishResponse();
+        return;
+      }
+    }
+
     if (session->getEffectiveNamespace().empty()) {
       result_format.sendError("No database selected");
       res_stream->finishResponse();
@@ -1138,6 +1148,25 @@ void AnalyticsServlet::executeSQL_JSON(
     res->addBody("missing ?query=... parameter");
     res_stream->writeResponse(*res);
     return;
+  }
+
+  String database;
+  if (URI::getParam(params, "database", &database) && !database.empty()) {
+    auto rc = client_auth_->changeNamespace(session, database);
+    if (!rc.isSuccess()) {
+      Buffer buf;
+      json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
+      json.beginObject();
+      json.addObjectEntry("error");
+      json.addString(rc.message());
+      json.endObject();
+
+      res->setStatus(http::kStatusInternalServerError);
+      res->addHeader("Content-Type", "application/json; charset=utf-8");
+      res->addBody(buf);
+      res_stream->writeResponse(*res);
+      return;
+    }
   }
 
   if (session->getEffectiveNamespace().empty()) {
@@ -1219,6 +1248,23 @@ void AnalyticsServlet::executeSQL_JSONSSE(
   auto sse_stream = mkRef(new http::HTTPSSEStream(res, res_stream));
   sse_stream->start();
 
+  String database;
+  if (URI::getParam(params, "database", &database) && !database.empty()) {
+    auto rc = client_auth_->changeNamespace(session, database);
+    if (!rc.isSuccess()) {
+      Buffer buf;
+      json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
+      json.beginObject();
+      json.addObjectEntry("error");
+      json.addString(rc.message());
+      json.endObject();
+
+      sse_stream->sendEvent(buf, Some(String("query_error")));
+      sse_stream->finish();
+      return;
+    }
+  }
+
   if (session->getEffectiveNamespace().empty()) {
     Buffer buf;
     json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
@@ -1228,7 +1274,10 @@ void AnalyticsServlet::executeSQL_JSONSSE(
     json.endObject();
 
     sse_stream->sendEvent(buf, Some(String("query_error")));
+    sse_stream->finish();
+    return;
   }
+
   try {
     auto txn = sql_->newTransaction();
     txn->setTableProvider(app_->getTableProvider(session->getEffectiveNamespace()));
@@ -1280,6 +1329,16 @@ void AnalyticsServlet::executeQTree(
         [res_stream] (const void* data, size_t size) {
       res_stream->writeBodyChunk(data, size);
     });
+
+    //String database;
+    //if (URI::getParam(params, "database", &database) && !database.empty()) {
+    //  auto rc = client_auth_->changeNamespace(session, database);
+    //  if (!rc.isSuccess()) {
+    //    result_format.sendError(rc.message());
+    //    res_stream->finishResponse();
+    //    return;
+    //  }
+    //}
 
     if (session->getEffectiveNamespace().empty()) {
       result_format.sendError("No database selected");

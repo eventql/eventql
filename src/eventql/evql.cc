@@ -440,6 +440,15 @@ int main(int argc, const char** argv) {
       "<user>");
 
   flags.defineFlag(
+      "database",
+      cli::FlagParser::T_STRING,
+      false,
+      "d",
+      NULL,
+      "database",
+      "<db>");
+
+  flags.defineFlag(
       "auth_token",
       cli::FlagParser::T_STRING,
       false,
@@ -480,6 +489,7 @@ int main(int argc, const char** argv) {
         "  -f, --file <file>       Read query from file\n"
         "  -e, --exec <query_str>  Execute query string\n"
         "  -l, --lang <lang>       Set the query language ('sql' or 'js')\n"
+        "  -D, --database <db>     Select a database\n"
         "  -h, --host <hostname>   Set the EventQL server hostname\n"
         "  -p, --port <port>       Set the EventQL server port\n"
         "  -u, --user <user>       Set the auth username\n"
@@ -511,6 +521,10 @@ int main(int argc, const char** argv) {
 
   if (flags.isSet("user")) {
     console_opts.user = flags.getString("user");
+  }
+
+  if (flags.isSet("database")) {
+    console_opts.database = flags.getString("database");
   }
 
   /* cli */
