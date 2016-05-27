@@ -38,4 +38,6 @@ so for example
   200 servers x 100_000 nodes (200-500TB data stored) = 20 million watchers 
 
 this latter case is apparently already beyond ZK limits, even though we're only
-talking about roughly ~6MB of configuration data total!!
+talking about roughly ~6MB of configuration data total!
+
+https://issues.apache.org/jira/browse/ZOOKEEPER-1177
