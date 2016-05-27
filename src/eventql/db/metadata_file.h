@@ -25,6 +25,9 @@
 #include "eventql/eventql.h"
 #include "eventql/util/protobuf/msg.h"
 #include "eventql/util/SHA1.h"
+#include "eventql/util/status.h"
+#include "eventql/util/io/inputstream.h"
+#include "eventql/util/io/outputstream.h"
 
 namespace eventql {
 
@@ -46,6 +49,7 @@ public:
     Vector<PartitionPlacement> split_servers_high;
   };
 
+  MetadataFile();
   MetadataFile(
       const SHA1Hash& transaction_id,
       const Vector<PartitionMapEntry>& partition_map);
@@ -53,6 +57,9 @@ public:
   const SHA1Hash& getTransactionID() const;
 
   const Vector<PartitionMapEntry>& getPartitionMap() const;
+
+  Status decode(InputStream* is);
+  Status encode(OutputStream* os) const;
 
 protected:
   SHA1Hash transaction_id_;

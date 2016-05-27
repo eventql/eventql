@@ -22,8 +22,67 @@
  * code of your own applications
  */
 #include "eventql/db/metadata_store.h"
+#include "eventql/util/io/fileutil.h"
+#include "eventql/util/random.h"
 
 namespace eventql {
+
+MetadataStore::MetadataStore(
+    const String& path_prefix) :
+    path_prefix_(path_prefix) {}
+
+Status MetadataStore::getMetadataFile(
+    const String& ns,
+    const String& table_name,
+    const SHA1Hash& txid,
+    RefPtr<MetadataFile>* file) const {
+  auto file_path = getPath(ns, table_name, txid);
+  if (!FileUtil::exists(file_path)) {
+    return Status(eIOError, "metadata file does not exist");
+  }
+
+  auto is = FileInputStream::openFile(file_path);
+  file->reset(new MetadataFile());
+
+  auto rc = file->get()->decode(is.get());
+  if (!rc.isSuccess()) {
+    return rc;
+  }
+
+  return Status::success();
+}
+
+Status MetadataStore::storeMetadataFile(
+    const String& ns,
+    const String& table_name,
+    const SHA1Hash& txid,
+    const MetadataFile& file) {
+  auto file_path = getPath(ns, table_name, txid);
+  auto file_path_tmp = file_path + "~" + Random::singleton()->hex64();
+  auto os = FileOutputStream::openFile(file_path_tmp);
+
+  auto rc = file.encode(os.get());
+  if (!rc.isSuccess()) {
+    return rc;
+  }
+
+  std::unique_lock<std::mutex> lk(mutex_);
+  if (!FileUtil::exists(file_path)) {
+    return Status(eIOError, "metadata file already exists");
+  }
+
+  FileUtil::mv(file_path_tmp, file_path);
+  return Status::success();
+}
+
+String MetadataStore::getPath(
+    const String& ns,
+    const String& table_name,
+    const SHA1Hash& txid) const {
+  return FileUtil::joinPaths(
+      path_prefix_,
+      StringUtil::format("$0/$1/$2", ns, table_name, txid));
+}
 
 } // namespace eventql
 

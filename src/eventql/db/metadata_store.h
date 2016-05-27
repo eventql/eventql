@@ -39,7 +39,7 @@ public:
       const String& ns,
       const String& table_name,
       const SHA1Hash& txid,
-      RefPtr<MetadataFile>* file);
+      RefPtr<MetadataFile>* file) const;
 
   Status storeMetadataFile(
       const String& ns,
@@ -48,6 +48,13 @@ public:
       const MetadataFile& file);
 
 protected:
+
+  String getPath(
+      const String& ns,
+      const String& table_name,
+      const SHA1Hash& txid) const;
+
+  std::mutex mutex_;
   String path_prefix_;
 };
 

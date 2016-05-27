@@ -77,6 +77,18 @@ T* AutoRef<T>::operator->() const {
 }
 
 template <typename T>
+void AutoRef<T>::reset(T* ref) {
+  if (ref_ != nullptr) {
+    ref_->decRef();
+  }
+
+  ref_ = ref;
+  if (ref_) {
+    ref_->incRef();
+  }
+}
+
+template <typename T>
 T* AutoRef<T>::get() const {
   return ref_;
 }

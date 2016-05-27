@@ -56,6 +56,8 @@ public:
   T& operator*() const;
   T* operator->() const;
 
+  void reset(T*);
+
   T* get() const;
   T* release();
   bool isNull() const;
