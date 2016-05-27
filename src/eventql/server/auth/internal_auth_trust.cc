@@ -21,29 +21,28 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#pragma once
-#include "eventql/eventql.h"
-#include "eventql/server/session.h"
-#include "eventql/util/stdtypes.h"
-#include "eventql/util/status.h"
-#include "eventql/util/http/httprequest.h"
+#include "eventql/server/auth/internal_auth_trust.h"
 
 namespace eventql {
 
-class InternalAuth {
-public:
+Status TrustInternalAuth::verifyRequest(
+    Session* session,
+    const http::HTTPRequest& request) const {
+  auto hdrval = request.getHeader("X-EventQL-Namespace");
+  if (hdrval.empty()) {
+    return Status(eRuntimeError, "missing X-EventQL-Namespace header");
+  } else {
+    session->setEffectiveNamespace(hdrval);
+    return Status::success();
+  }
+}
 
-  virtual ~InternalAuth() = default;
-
-  virtual Status verifyRequest(
-      Session* session,
-      const http::HTTPRequest& request) const = 0;
-
-  virtual Status signRequest(
-      Session* session,
-      http::HTTPRequest* request) const = 0;
-
-};
+Status TrustInternalAuth::signRequest(
+    Session* session,
+    http::HTTPRequest* request) const {
+  request->addHeader("X-EventQL-Namespace", session->getEffectiveNamespace());
+  return Status::success();
+}
 
 } // namespace eventql
 

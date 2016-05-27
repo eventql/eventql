@@ -875,6 +875,9 @@ evql_core_a_SOURCES = \
     eventql/server/auth/client_auth.h \
     eventql/server/auth/client_auth_trust.cc \
     eventql/server/auth/client_auth_trust.h \
+    eventql/server/auth/internal_auth.h \
+    eventql/server/auth/internal_auth_trust.cc \
+    eventql/server/auth/internal_auth_trust.h \
     eventql/server/session.cc \
     eventql/server/session.h \
     eventql/server/server_stats.cc \

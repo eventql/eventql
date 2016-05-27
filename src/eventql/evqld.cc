@@ -68,6 +68,8 @@
 #include "eventql/server/sql/scheduler.h"
 #include "eventql/server/auth/client_auth.h"
 #include "eventql/server/auth/client_auth_trust.h"
+#include "eventql/server/auth/internal_auth.h"
+#include "eventql/server/auth/internal_auth_trust.h"
 #include <jsapi.h>
 
 #include "eventql/eventql.h"
@@ -326,6 +328,7 @@ int main(int argc, const char** argv) {
   client_auth.reset(new TrustClientAuth());
 
   ScopedPtr<eventql::InternalAuth> internal_auth;
+  internal_auth.reset(new TrustInternalAuth());
 
   /* spidermonkey javascript runtime */
   JS_Init();

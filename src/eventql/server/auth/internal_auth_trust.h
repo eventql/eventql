@@ -23,25 +23,20 @@
  */
 #pragma once
 #include "eventql/eventql.h"
-#include "eventql/server/session.h"
-#include "eventql/util/stdtypes.h"
-#include "eventql/util/status.h"
-#include "eventql/util/http/httprequest.h"
+#include "eventql/server/auth/internal_auth.h"
 
 namespace eventql {
 
-class InternalAuth {
+class TrustInternalAuth : public InternalAuth {
 public:
 
-  virtual ~InternalAuth() = default;
-
-  virtual Status verifyRequest(
+  Status verifyRequest(
       Session* session,
-      const http::HTTPRequest& request) const = 0;
+      const http::HTTPRequest& request) const override;
 
-  virtual Status signRequest(
+  Status signRequest(
       Session* session,
-      http::HTTPRequest* request) const = 0;
+      http::HTTPRequest* request) const override;
 
 };
 
