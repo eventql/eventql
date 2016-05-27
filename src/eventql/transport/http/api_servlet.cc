@@ -120,12 +120,23 @@ void AnalyticsServlet::handle(
 
     if (!auth_rc.isSuccess()) {
       req_stream->readBody();
-      res.setStatus(http::kStatusUnauthorized);
-      res.addHeader("WWW-Authenticate", "Token");
-      res.addHeader("Content-Type", "text/plain; charset=utf-8");
-      res.addBody(auth_rc.message());
-      res_stream->writeResponse(res);
-      return;
+
+      if (uri.path() == "/api/v1/sql") {
+        util::BinaryMessageWriter writer;
+        res.setStatus(http::kStatusOK);
+        writer.appendUInt8(0xf4);
+        writer.appendLenencString(auth_rc.message());
+        writer.appendUInt8(0xff);
+        res.addBody(writer.data(), writer.size());
+        res_stream->writeResponse(res);
+      } else {
+        res.setStatus(http::kStatusUnauthorized);
+        res.addHeader("WWW-Authenticate", "Token");
+        res.addHeader("Content-Type", "text/plain; charset=utf-8");
+        res.addBody(auth_rc.message());
+        res_stream->writeResponse(res);
+        return;
+      }
     }
   }
 
