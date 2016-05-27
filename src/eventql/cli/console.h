@@ -56,6 +56,11 @@ public:
    */
   Status runQuery(const String& query);
 
+  /**
+   * Execute a JS job
+   */
+  Status runJS(const String& query);
+
 protected:
   ConsoleOptions cfg_;
 };
