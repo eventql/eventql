@@ -25,7 +25,7 @@
 #pragma once
 #include <eventql/util/stdtypes.h>
 #include <eventql/sql/runtime/tablerepository.h>
-#include <eventql/server/auth/internal_auth.h>
+#include <eventql/auth/internal_auth.h>
 #include <eventql/db/TSDBTableRef.h>
 #include <eventql/db/partition_map.h>
 #include <eventql/db/CompactionWorker.h>

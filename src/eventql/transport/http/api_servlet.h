@@ -30,15 +30,15 @@
 #include "eventql/AnalyticsApp.h"
 #include "eventql/AnalyticsSession.pb.h"
 #include "eventql/sql/runtime/runtime.h"
-#include "eventql/server/auth/internal_auth.h"
+#include "eventql/auth/internal_auth.h"
 #include "eventql/config/config_directory.h"
 #include "eventql/db/TSDBService.h"
 #include "eventql/transport/http/LogfileAPIServlet.h"
 #include "eventql/transport/http/EventsAPIServlet.h"
 #include "eventql/transport/http/MapReduceAPIServlet.h"
 #include "eventql/RemoteTSDBScanParams.pb.h"
-#include "eventql/server/auth/client_auth.h"
-#include "eventql/server/auth/internal_auth.h"
+#include "eventql/auth/client_auth.h"
+#include "eventql/auth/internal_auth.h"
 
 #include "eventql/eventql.h"
 

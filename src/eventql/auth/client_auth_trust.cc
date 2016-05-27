@@ -21,26 +21,28 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include "eventql/server/auth/internal_auth_trust.h"
+#include "eventql/auth/client_auth_trust.h"
 
 namespace eventql {
 
-Status TrustInternalAuth::verifyRequest(
+Status TrustClientAuth::authenticateSession(
     Session* session,
-    const http::HTTPRequest& request) const {
-  auto hdrval = request.getHeader("X-EventQL-Namespace");
-  if (hdrval.empty()) {
-    return Status(eRuntimeError, "missing X-EventQL-Namespace header");
+    HashMap<String, String> auth_data) {
+  const auto& user_id = auth_data["user"];
+  if (user_id.empty()) {
+    session->setUserID("nobody");
+    return Status::success();
   } else {
-    session->setEffectiveNamespace(hdrval);
+    session->setUserID(user_id);
     return Status::success();
   }
 }
 
-Status TrustInternalAuth::signRequest(
+Status TrustClientAuth::changeNamespace(
     Session* session,
-    http::HTTPRequest* request) const {
-  request->addHeader("X-EventQL-Namespace", session->getEffectiveNamespace());
+    const String& ns) {
+  session->setEffectiveNamespace(ns);
+  session->setDisplayNamespace(ns);
   return Status::success();
 }
 

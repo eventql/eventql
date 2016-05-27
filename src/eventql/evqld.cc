@@ -66,10 +66,10 @@
 #include "eventql/config/config_directory_zookeeper.h"
 #include "eventql/transport/http/status_servlet.h"
 #include "eventql/server/sql/scheduler.h"
-#include "eventql/server/auth/client_auth.h"
-#include "eventql/server/auth/client_auth_trust.h"
-#include "eventql/server/auth/internal_auth.h"
-#include "eventql/server/auth/internal_auth_trust.h"
+#include "eventql/auth/client_auth.h"
+#include "eventql/auth/client_auth_trust.h"
+#include "eventql/auth/internal_auth.h"
+#include "eventql/auth/internal_auth_trust.h"
 #include <jsapi.h>
 
 #include "eventql/eventql.h"

@@ -25,7 +25,7 @@
 #include "eventql/util/protobuf/MessageSchema.h"
 #include "eventql/util/io/inputstream.h"
 #include "eventql/db/TSDBService.h"
-#include "eventql/server/auth/internal_auth.h"
+#include "eventql/auth/internal_auth.h"
 #include "eventql/config/namespace_config.h"
 #include "eventql/config/config_directory.h"
 #include "eventql/db/TableConfig.pb.h"

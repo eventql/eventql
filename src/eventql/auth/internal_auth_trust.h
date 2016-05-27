@@ -21,30 +21,24 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include "eventql/server/auth/client_auth_legacy.h"
+#pragma once
+#include "eventql/eventql.h"
+#include "eventql/auth/internal_auth.h"
 
 namespace eventql {
 
-Status LegacyClientAuth::authenticateSession(
-    Session* session,
-    HashMap<String, String> auth_data) {
-  const auto& user_id = auth_data["user"];
-  if (user_id.empty()) {
-    session->setUserID("nobody");
-    return Status::success();
-  } else {
-    session->setUserID(user_id);
-    return Status::success();
-  }
-}
+class TrustInternalAuth : public InternalAuth {
+public:
 
-Status LegacyClientAuth::changeNamespace(
-    Session* session,
-    const String& ns) {
-  session->setEffectiveNamespace(ns);
-  session->setDisplayNamespace(ns);
-  return Status::success();
-}
+  Status verifyRequest(
+      Session* session,
+      const http::HTTPRequest& request) const override;
+
+  Status signRequest(
+      Session* session,
+      http::HTTPRequest* request) const override;
+
+};
 
 } // namespace eventql
 

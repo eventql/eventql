@@ -29,7 +29,7 @@
 #include <eventql/sql/scheduler.h>
 #include <eventql/sql/query_plan.h>
 #include <eventql/db/partition_map.h>
-#include <eventql/server/auth/internal_auth.h>
+#include <eventql/auth/internal_auth.h>
 
 namespace eventql {
 

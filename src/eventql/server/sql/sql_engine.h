@@ -24,7 +24,7 @@
 #pragma once
 #include <eventql/sql/runtime/runtime.h>
 #include <eventql/db/TSDBService.h>
-#include <eventql/server/auth/internal_auth.h>
+#include <eventql/auth/internal_auth.h>
 
 namespace eventql {
 class TSDBService;

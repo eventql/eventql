@@ -24,11 +24,11 @@
 #pragma once
 #include "eventql/eventql.h"
 #include "eventql/server/session.h"
-#include "eventql/server/auth/client_auth.h"
+#include "eventql/auth/client_auth.h"
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/http/httpservice.h>
 #include <eventql/AnalyticsSession.pb.h>
-#include <eventql/server/auth/internal_auth.h>
+#include <eventql/auth/internal_auth.h>
 
 namespace eventql {
 

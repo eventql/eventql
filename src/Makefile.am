@@ -875,14 +875,14 @@ evql_core_a_SOURCES = \
     eventql/mapreduce/tasks/SaveToTablePartitionTask.h \
     eventql/mapreduce/tasks/SaveToTableTask.cc \
     eventql/mapreduce/tasks/SaveToTableTask.h \
-    eventql/server/auth/client_auth.h \
-    eventql/server/auth/client_auth_legacy.cc \
-    eventql/server/auth/client_auth_legacy.h \
-    eventql/server/auth/client_auth_trust.cc \
-    eventql/server/auth/client_auth_trust.h \
-    eventql/server/auth/internal_auth.h \
-    eventql/server/auth/internal_auth_trust.cc \
-    eventql/server/auth/internal_auth_trust.h \
+    eventql/auth/client_auth.h \
+    eventql/auth/client_auth_legacy.cc \
+    eventql/auth/client_auth_legacy.h \
+    eventql/auth/client_auth_trust.cc \
+    eventql/auth/client_auth_trust.h \
+    eventql/auth/internal_auth.h \
+    eventql/auth/internal_auth_trust.cc \
+    eventql/auth/internal_auth_trust.h \
     eventql/server/session.cc \
     eventql/server/session.h \
     eventql/server/server_stats.cc \

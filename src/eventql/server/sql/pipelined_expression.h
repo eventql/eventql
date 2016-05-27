@@ -24,7 +24,7 @@
  */
 #include <thread>
 #include <eventql/sql/expressions/table_expression.h>
-#include <eventql/server/auth/internal_auth.h>
+#include <eventql/auth/internal_auth.h>
 #include <eventql/db/partition_map.h>
 #include "eventql/eventql.h"
 
