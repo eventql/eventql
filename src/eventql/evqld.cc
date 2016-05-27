@@ -84,6 +84,15 @@ int main(int argc, const char** argv) {
   cli::FlagParser flags;
 
   flags.defineFlag(
+      "listen",
+      cli::FlagParser::T_STRING,
+      true,
+      NULL,
+      NULL,
+      "listen",
+      "<host:port>");
+
+  flags.defineFlag(
       "http_port",
       cli::FlagParser::T_INTEGER,
       false,
@@ -275,6 +284,11 @@ int main(int argc, const char** argv) {
   http_server.listen(flags.getInt("http_port"));
   http::HTTPConnectionPool http(&ev, &z1stats()->http_client_stats);
 
+  Option<String> server_name;
+  if (flags.isSet("join")) {
+    server_name = Some(flags.getString("join"));
+  }
+
   /* customer directory */
   if (!FileUtil::exists(flags.getString("datadir"))) {
     RAISE(kRuntimeError, "data dir not found: " + flags.getString("datadir"));
@@ -292,7 +306,10 @@ int main(int argc, const char** argv) {
         InetAddr::resolve(flags.getString("legacy_master_addr"))));
   } else if (flags.getString("config_backend") == "zookeeper") {
     config_dir.reset(
-        new ZookeeperConfigDirectory(flags.getString("zookeeper_addr")));
+        new ZookeeperConfigDirectory(
+            flags.getString("zookeeper_addr"),
+            server_name,
+            flags.getString("listen")));
   } else {
     RAISE(kRuntimeError, "invalid config backend: " + flags.getString("config_backend"));
   }
@@ -329,13 +346,8 @@ int main(int argc, const char** argv) {
         cluster_config.DebugString());
 
     /* tsdb */
-    Option<String> local_replica;
-    if (flags.isSet("join")) {
-      local_replica = Some(flags.getString("join"));
-    }
-
     auto repl_scheme = RefPtr<eventql::ReplicationScheme>(
-          new eventql::DHTReplicationScheme(cluster_config, local_replica));
+          new eventql::DHTReplicationScheme(cluster_config, server_name));
 
     String node_name = "__anonymous";
     if (flags.isSet("join")) {

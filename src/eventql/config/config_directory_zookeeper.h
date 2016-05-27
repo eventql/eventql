@@ -33,7 +33,11 @@ namespace eventql {
 class ZookeeperConfigDirectory : public ConfigDirectory {
 public:
 
-  ZookeeperConfigDirectory(const String& zookeeper_addrs);
+  ZookeeperConfigDirectory(
+      const String& zookeeper_addrs,
+      Option<String> server_name,
+      String listen_addr);
+
   ~ZookeeperConfigDirectory();
 
   ClusterConfig getClusterConfig() const override;
@@ -147,6 +151,8 @@ protected:
   String cluster_name_;
   String zookeeper_addrs_;
   size_t zookeeper_timeout_;
+  Option<String> server_name_;
+  String listen_addr_;
   String global_prefix_;
   String path_prefix_;
   ZKState state_;

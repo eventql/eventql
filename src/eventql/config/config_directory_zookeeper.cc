@@ -41,9 +41,13 @@ static int free_String_vector(struct String_vector *v) {
 }
 
 ZookeeperConfigDirectory::ZookeeperConfigDirectory(
-    const String& zookeeper_addrs) :
+    const String& zookeeper_addrs,
+    Option<String> server_name,
+    String listen_addr) :
     zookeeper_addrs_(zookeeper_addrs),
     zookeeper_timeout_(10000),
+    server_name_(server_name),
+    listen_addr_(listen_addr),
     global_prefix_("/eventql"),
     state_(ZKState::INIT),
     zk_(nullptr) {
@@ -170,7 +174,11 @@ Status ZookeeperConfigDirectory::connect(std::unique_lock<std::mutex>* lk) {
 
 // PRECONDITION: must hold mutex
 Status ZookeeperConfigDirectory::load() {
-  logInfo("evqld", "Loading config from zookeeper...");
+  if (!hasNode(path_prefix_ + "/config")) {
+    return Status(
+        eIOError,
+        StringUtil::format("cluster doesn't exit: $0", cluster_name_));
+  }
 
   auto namespaces_path = StringUtil::format("$0/namespaces", path_prefix_);
   if (!hasNode(namespaces_path)) {
@@ -209,6 +217,58 @@ Status ZookeeperConfigDirectory::load() {
           StringUtil::format("zoo_create() failed: $0", getErrorString(rc)));
     }
   }
+
+  auto servers_live_path = StringUtil::format("$0/servers-live", path_prefix_);
+  if (!hasNode(servers_live_path)) {
+    auto rc = zoo_create(
+        zk_,
+        servers_live_path.c_str(),
+        nullptr,
+        0,
+        &ZOO_OPEN_ACL_UNSAFE,
+        0,
+        nullptr, /* path_buffer */
+        0 /* path_buffer_len */);
+
+    if (rc && rc != ZNODEEXISTS) {
+      return Status(
+          eIOError,
+          StringUtil::format("zoo_create() failed: $0", getErrorString(rc)));
+    }
+  }
+
+  if (!server_name_.isEmpty()) {
+    logInfo("evqld", "Registering with zookeeper...");
+    auto server_cfg_path = StringUtil::format(
+        "$0/servers/$1",
+        path_prefix_,
+        server_name_.get());
+
+    if (!hasNode(server_cfg_path)) {
+      return Status(
+          eIOError,
+          StringUtil::format("server doesn't exit: $0", server_name_.get()));
+    }
+
+    auto server_path = servers_live_path + "/" + server_name_.get();
+    auto rc = zoo_create(
+        zk_,
+        server_path.c_str(),
+        listen_addr_.data(),
+        listen_addr_.size(),
+        &ZOO_OPEN_ACL_UNSAFE,
+        ZOO_EPHEMERAL,
+        nullptr, /* path_buffer */
+        0 /* path_buffer_len */);
+
+    if (rc) {
+      return Status(
+          eIOError,
+          StringUtil::format("zoo_create() failed: $0", getErrorString(rc)));
+    }
+  }
+
+  logInfo("evqld", "Loading config from zookeeper...");
 
   {
     auto rc = syncClusterConfig(nullptr);
