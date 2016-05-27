@@ -521,6 +521,8 @@ int main(int argc, const char** argv) {
 
   if (flags.isSet("user")) {
     console_opts.user = flags.getString("user");
+  } else {
+    console_opts.user = getenv("USER");
   }
 
   if (flags.isSet("database")) {
