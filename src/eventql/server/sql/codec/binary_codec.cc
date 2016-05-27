@@ -258,6 +258,12 @@ size_t BinaryResultParser::parseProgress(const void* data, size_t size) {
     return 0;
   }
 
+  if (on_progress_) {
+    ExecutionStatus status = {};
+    status.progress = progress;
+    on_progress_(status);
+  }
+
   return reader.position();
 }
 

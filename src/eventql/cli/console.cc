@@ -65,10 +65,28 @@ Console::Console(const ConsoleOptions& options) : cfg_(options) {}
 Status Console::runQuery(const String& query) {
   auto stdout_os = OutputStream::getStdout();
   auto stderr_os = TerminalOutputStream::fromStream(OutputStream::getStderr());
+  bool line_dirty = false;
+  bool is_tty = stderr_os->isTTY();
 
   bool error = false;
   csql::BinaryResultParser res_parser;
   csql::ResultList results;
+
+  res_parser.onProgress([&stderr_os, &line_dirty, is_tty] (
+      const csql::ExecutionStatus& status) {
+    auto status_line = StringUtil::format(
+        "Query running: $0%",
+        status.progress * 100);
+
+    if (is_tty) {
+      stderr_os->eraseLine();
+      stderr_os->print("\r" + status_line);
+      line_dirty = true;
+    } else {
+      stderr_os->print(status_line + "\n");
+    }
+
+  });
 
   res_parser.onTableHeader([&results] (const Vector<String>& columns) {
     results.addHeader(columns);
@@ -88,8 +106,6 @@ Status Console::runQuery(const String& query) {
   });
 
   try {
-    bool is_tty = stderr_os->isTTY();
-
     auto url = StringUtil::format(
         "http://$0:$1/api/v1/sql",
         cfg_.server_host,
@@ -140,11 +156,29 @@ Status Console::runQuery(const String& query) {
     return Status(eIOError);
   }
 
+  if (is_tty) {
+    stderr_os->eraseLine();
+    stderr_os->print("\r");
+  }
+
   if (error) {
     return Status(eIOError);
   }
 
   results.debugPrint();
+
+  auto num_rows = results.getNumRows();
+  auto status_line = StringUtil::format(
+      "$0 row$1 returned",
+      num_rows,
+      num_rows > 1 ? "s" : "");
+
+  if (is_tty) {
+    stderr_os->print("\r" + status_line + "\n");
+  } else {
+    stderr_os->print(status_line + "\n");
+  }
+
   return Status::success();
 }
 
