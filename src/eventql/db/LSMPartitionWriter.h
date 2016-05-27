@@ -39,7 +39,7 @@ public:
   static const size_t kMaxArenaRecords = 10000;
 
   LSMPartitionWriter(
-      ServerConfig* cfg,
+      ServerCfg* cfg,
       RefPtr<Partition> partition,
       PartitionSnapshotRef* head);
 

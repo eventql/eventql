@@ -31,7 +31,7 @@
 
 namespace eventql {
 
-struct ServerConfig {
+struct ServerCfg {
   String db_path;
   RefPtr<ReplicationScheme> repl_scheme;
   RefPtr<LSMTableIndexCache> idx_cache;

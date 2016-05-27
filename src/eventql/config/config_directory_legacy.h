@@ -41,6 +41,15 @@ public:
   void setClusterConfigChangeCallback(
       Function<void (const ClusterConfig& cfg)> fn) override;
 
+  ServerConfig getServerConfig(const String& sever_name) const override;
+
+  void updateServerConfig(ServerConfig config) override;
+
+  Vector<ServerConfig> listServers() const override;
+
+  void setServerConfigChangeCallback(
+      Function<void (const ServerConfig& cfg)> fn) override;
+
   RefPtr<NamespaceConfigRef> getNamespaceConfig(
       const String& customer_key) const override;
 

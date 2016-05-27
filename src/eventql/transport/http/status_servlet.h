@@ -35,7 +35,7 @@ class StatusServlet : public http::HTTPService {
 public:
 
   StatusServlet(
-      ServerConfig* config,
+      ServerCfg* config,
       PartitionMap* pmap,
       http::HTTPServerStats* http_server_stats,
       http::HTTPClientStats* http_client_stats);
@@ -72,7 +72,7 @@ protected:
       http::HTTPRequest* request,
       http::HTTPResponse* response);
 
-  ServerConfig* config_;
+  ServerCfg* config_;
   PartitionMap* pmap_;
   http::HTTPServerStats* http_server_stats_;
   http::HTTPClientStats* http_client_stats_;

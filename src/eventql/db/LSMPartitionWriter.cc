@@ -38,7 +38,7 @@
 namespace eventql {
 
 LSMPartitionWriter::LSMPartitionWriter(
-    ServerConfig* cfg,
+    ServerCfg* cfg,
     RefPtr<Partition> partition,
     PartitionSnapshotRef* head) :
     PartitionWriter(head),

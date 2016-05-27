@@ -43,6 +43,15 @@ public:
   void setClusterConfigChangeCallback(
       Function<void (const ClusterConfig& cfg)> fn) override;
 
+  ServerConfig getServerConfig(const String& sever_name) const override;
+
+  void updateServerConfig(ServerConfig config) override;
+
+  Vector<ServerConfig> listServers() const override;
+
+  void setServerConfigChangeCallback(
+      Function<void (const ServerConfig& cfg)> fn) override;
+
   RefPtr<NamespaceConfigRef> getNamespaceConfig(
       const String& customer_key) const override;
 
@@ -103,6 +112,8 @@ protected:
 
   Status sync(CallbackList* events);
   Status syncClusterConfig(CallbackList* events);
+  Status syncServers(CallbackList* events);
+  Status syncServer(CallbackList* events, const String& server);
   Status syncNamespaces(CallbackList* events);
   Status syncNamespace(CallbackList* events, const String& ns);
   Status syncTables(CallbackList* events, const String& ns);
@@ -144,10 +155,12 @@ protected:
   std::condition_variable cv_;
 
   ClusterConfig cluster_config_;
+  HashMap<String, ServerConfig> servers_;
   HashMap<String, NamespaceConfig> namespaces_;
   HashMap<String, TableDefinition> tables_;
 
   Vector<Function<void (const ClusterConfig& cfg)>> on_cluster_change_;
+  Vector<Function<void (const ServerConfig& cfg)>> on_server_change_;
   Vector<Function<void (const NamespaceConfig& cfg)>> on_namespace_change_;
   Vector<Function<void (const TableDefinition& cfg)>> on_table_change_;
 

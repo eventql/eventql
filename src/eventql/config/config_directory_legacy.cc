@@ -90,6 +90,23 @@ void LegacyConfigDirectory::setClusterConfigChangeCallback(
   on_cluster_change_.emplace_back(fn);
 }
 
+ServerConfig LegacyConfigDirectory::getServerConfig(
+    const String& server_name) const {
+  ServerConfig s;
+  s.set_server_id(server_name);
+  return s;
+}
+
+Vector<ServerConfig> LegacyConfigDirectory::listServers() const {
+  return Vector<ServerConfig>{};
+}
+
+void LegacyConfigDirectory::setServerConfigChangeCallback(
+    Function<void (const ServerConfig& cfg)> fn) {
+}
+
+void LegacyConfigDirectory::updateServerConfig(ServerConfig cfg) {
+}
 
 RefPtr<NamespaceConfigRef> LegacyConfigDirectory::getNamespaceConfig(
     const String& customer_key) const {

@@ -87,7 +87,7 @@ static const String kMainMenu = R"(
 )";
 
 StatusServlet::StatusServlet(
-    ServerConfig* config,
+    ServerCfg* config,
     PartitionMap* pmap,
     http::HTTPServerStats* http_server_stats,
     http::HTTPClientStats* http_client_stats) :

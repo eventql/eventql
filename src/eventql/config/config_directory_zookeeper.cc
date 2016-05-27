@@ -172,8 +172,53 @@ Status ZookeeperConfigDirectory::connect(std::unique_lock<std::mutex>* lk) {
 Status ZookeeperConfigDirectory::load() {
   logInfo("evqld", "Loading config from zookeeper...");
 
+  auto namespaces_path = StringUtil::format("$0/namespaces", path_prefix_);
+  if (!hasNode(namespaces_path)) {
+    auto rc = zoo_create(
+        zk_,
+        namespaces_path.c_str(),
+        nullptr,
+        0,
+        &ZOO_OPEN_ACL_UNSAFE,
+        0,
+        nullptr, /* path_buffer */
+        0 /* path_buffer_len */);
+
+    if (rc && rc != ZNODEEXISTS) {
+      return Status(
+          eIOError,
+          StringUtil::format("zoo_create() failed: $0", getErrorString(rc)));
+    }
+  }
+
+  auto servers_path = StringUtil::format("$0/servers", path_prefix_);
+  if (!hasNode(servers_path)) {
+    auto rc = zoo_create(
+        zk_,
+        servers_path.c_str(),
+        nullptr,
+        0,
+        &ZOO_OPEN_ACL_UNSAFE,
+        0,
+        nullptr, /* path_buffer */
+        0 /* path_buffer_len */);
+
+    if (rc && rc != ZNODEEXISTS) {
+      return Status(
+          eIOError,
+          StringUtil::format("zoo_create() failed: $0", getErrorString(rc)));
+    }
+  }
+
   {
     auto rc = syncClusterConfig(nullptr);
+    if (!rc.isSuccess()) {
+      return rc;
+    }
+  }
+
+  {
+    auto rc = syncServers(nullptr);
     if (!rc.isSuccess()) {
       return rc;
     }
@@ -209,6 +254,53 @@ Status ZookeeperConfigDirectory::syncClusterConfig(CallbackList* events) {
             "Cluster '$0' does not exist. Start with --create_cluster to create",
             cluster_name_));
   }
+}
+
+// PRECONDITION: must hold mutex
+Status ZookeeperConfigDirectory::syncServers(CallbackList* events) {
+  Vector<String> servers;
+  {
+    auto rc = listChildren(path_prefix_ + "/servers", &servers, true);
+    if (!rc.isSuccess()) {
+      return rc;
+    }
+  }
+
+  for (const auto& server : servers) {
+    auto rc = syncServer(events, server);
+    if (!rc.isSuccess()) {
+      return rc;
+    }
+  }
+
+  return Status::success();
+}
+
+// PRECONDITION: must hold mutex
+Status ZookeeperConfigDirectory::syncServer(
+    CallbackList* events,
+    const String& server) {
+  logDebug("evqld", "Loading server config from zookeeper: '$0'", server);
+
+  auto key = StringUtil::format("$0/servers/$1", path_prefix_, server);
+  ServerConfig server_config;
+  struct Stat stat;
+  if (!getProtoNode(key, &server_config, true, &stat)) {
+    return Status(
+        eNotFoundError,
+        StringUtil::format("server '$0' does not exist", server));
+  }
+
+  server_config.set_version(stat.version + 1);
+  servers_[server] = server_config;
+
+  if (events) {
+    for (const auto& cb : on_server_change_) {
+      events->emplace_back(std::bind(cb, server_config));
+    }
+  }
+
+  return Status::success();
 }
 
 // PRECONDITION: must hold mutex
@@ -445,6 +537,15 @@ Status ZookeeperConfigDirectory::handleChangeEvent(
     return syncNamespaces(events);
   }
 
+  if (vpath == "/servers") {
+    return syncServers(events);
+  }
+
+  std::regex server_regex("/servers/([0-9A-Za-z_.-]+)");
+  if (std::regex_match(vpath, m, server_regex)) {
+    return syncServer(events, m[1].str());
+  }
+
   std::regex namespace_regex("/namespaces/([0-9A-Za-z_.-]+)/config");
   if (std::regex_match(vpath, m, namespace_regex)) {
     return syncNamespace(events, m[1].str());
@@ -557,7 +658,6 @@ void ZookeeperConfigDirectory::updateClusterConfigWithLock(
 
   if (config.version() == 0) {
     // create
-    // FIXME if we fail between the three creates, we end up with an incomplete cluster
     {
       auto rc = zoo_create(
           zk_,
@@ -569,7 +669,7 @@ void ZookeeperConfigDirectory::updateClusterConfigWithLock(
           nullptr, /* path_buffer */
           0 /* path_buffer_len */);
 
-      if (rc) {
+      if (rc && rc != ZNODEEXISTS) {
         RAISEF(kRuntimeError, "zoo_create() failed: $0", getErrorString(rc));
       }
     }
@@ -584,23 +684,6 @@ void ZookeeperConfigDirectory::updateClusterConfigWithLock(
           &ZOO_OPEN_ACL_UNSAFE,
           0,
           NULL /* path_buffer */,
-          0 /* path_buffer_len */);
-
-      if (rc) {
-        RAISEF(kRuntimeError, "zoo_create() failed: $0", getErrorString(rc));
-      }
-    }
-
-    {
-      auto path = StringUtil::format("$0/namespaces", path_prefix_);
-      auto rc = zoo_create(
-          zk_,
-          path.c_str(),
-          nullptr,
-          0,
-          &ZOO_OPEN_ACL_UNSAFE,
-          0,
-          nullptr, /* path_buffer */
           0 /* path_buffer_len */);
 
       if (rc) {
@@ -627,6 +710,73 @@ void ZookeeperConfigDirectory::setClusterConfigChangeCallback(
     Function<void (const ClusterConfig& cfg)> fn) {
   std::unique_lock<std::mutex> lk(mutex_);
   on_cluster_change_.emplace_back(fn);
+}
+
+ServerConfig ZookeeperConfigDirectory::getServerConfig(
+    const String& server_name) const {
+  std::unique_lock<std::mutex> lk(mutex_);
+  auto iter = servers_.find(server_name);
+  if (iter == servers_.end()) {
+    RAISEF(kNotFoundError, "server not found: $0", server_name);
+  }
+
+  return iter->second;
+}
+
+Vector<ServerConfig> ZookeeperConfigDirectory::listServers() const {
+  Vector<ServerConfig> servers;
+
+  std::unique_lock<std::mutex> lk(mutex_);
+  for (const auto& server : servers_) {
+    servers.emplace_back(server.second);
+  }
+
+  return servers;
+}
+
+void ZookeeperConfigDirectory::setServerConfigChangeCallback(
+    Function<void (const ServerConfig& cfg)> fn) {
+  std::unique_lock<std::mutex> lk(mutex_);
+  on_server_change_.emplace_back(fn);
+}
+
+void ZookeeperConfigDirectory::updateServerConfig(ServerConfig cfg) {
+  std::unique_lock<std::mutex> lk(mutex_);
+
+  auto buf = msg::encode(cfg);
+  auto path = StringUtil::format(
+      "$0/servers/$1",
+      path_prefix_,
+      cfg.server_id());
+
+  if (cfg.version() == 0) {
+    // create
+    auto rc = zoo_create(
+        zk_,
+        path.c_str(),
+        (const char*) buf->data(),
+        buf->size(),
+        &ZOO_OPEN_ACL_UNSAFE,
+        0,
+        NULL /* path_buffer */,
+        0 /* path_buffer_len */);
+
+    if (rc) {
+      RAISEF(kRuntimeError, "zoo_create() failed: $0", getErrorString(rc));
+    }
+  } else {
+    // update
+    auto rc = zoo_set(
+        zk_,
+        path.c_str(),
+        (const char*) buf->data(),
+        buf->size(),
+        cfg.version() - 1);
+
+    if (rc) {
+      RAISEF(kRuntimeError, "zoo_create() failed: $0", getErrorString(rc));
+    }
+  }
 }
 
 RefPtr<NamespaceConfigRef> ZookeeperConfigDirectory::getNamespaceConfig(

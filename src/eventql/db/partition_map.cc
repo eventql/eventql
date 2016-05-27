@@ -43,7 +43,7 @@ static mdb::MDBOptions tsdb_mdb_opts() {
 };
 
 PartitionMap::PartitionMap(
-    ServerConfig* cfg) :
+    ServerCfg* cfg) :
     cfg_(cfg),
     db_(mdb::MDB::open(cfg_->db_path, tsdb_mdb_opts())) {}
 

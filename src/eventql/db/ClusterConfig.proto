@@ -22,3 +22,10 @@ message ClusterConfig {
   optional uint32 dht_num_copies = 4 [default = 3];
 
 };
+
+message ServerConfig {
+  optional uint64 version = 1;
+  required string server_id = 2;
+  optional string server_addr = 3;
+};
+

@@ -43,7 +43,7 @@ public:
       const String& tsdb_namespace,
       RefPtr<Table> table,
       const SHA1Hash& partition_key,
-      ServerConfig* cfg,
+      ServerCfg* cfg,
       PartitionMap* pmap);
 
   RefPtr<Partition> getPartition();

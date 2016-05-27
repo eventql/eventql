@@ -44,7 +44,7 @@ namespace eventql {
 class PartitionMap {
 public:
 
-  PartitionMap(ServerConfig* cfg);
+  PartitionMap(ServerCfg* cfg);
 
   void configureTable(const TableDefinition& config);
   void open();
@@ -119,7 +119,7 @@ protected:
 
   void loadPartitions(const Vector<PartitionKey>& partitions);
 
-  ServerConfig* cfg_;
+  ServerCfg* cfg_;
   RefPtr<mdb::MDB> db_;
 
   mutable std::mutex mutex_;

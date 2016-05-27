@@ -50,7 +50,7 @@ RefPtr<Partition> Partition::create(
     const String& tsdb_namespace,
     RefPtr<Table> table,
     const SHA1Hash& partition_key,
-    ServerConfig* cfg) {
+    ServerCfg* cfg) {
   logDebug(
       "tsdb",
       "Creating new partition; stream='$0' partition='$1'",
@@ -84,7 +84,7 @@ RefPtr<Partition> Partition::reopen(
     const String& tsdb_namespace,
     RefPtr<Table> table,
     const SHA1Hash& partition_key,
-    ServerConfig* cfg) {
+    ServerCfg* cfg) {
   auto pdir_rel = StringUtil::format(
       "$0/$1/$2",
       tsdb_namespace,
@@ -117,7 +117,7 @@ RefPtr<Partition> Partition::reopen(
 }
 
 Partition::Partition(
-    ServerConfig* cfg,
+    ServerCfg* cfg,
     RefPtr<PartitionSnapshot> head,
     RefPtr<Table> table) :
     cfg_(cfg),

@@ -57,16 +57,16 @@ public:
       const String& tsdb_namespace,
       RefPtr<Table> table,
       const SHA1Hash& partition_key,
-      ServerConfig* cfg);
+      ServerCfg* cfg);
 
   static RefPtr<Partition> reopen(
       const String& tsdb_namespace,
       RefPtr<Table> table,
       const SHA1Hash& partition_key,
-      ServerConfig* cfg);
+      ServerCfg* cfg);
 
   Partition(
-      ServerConfig* cfg,
+      ServerCfg* cfg,
       RefPtr<PartitionSnapshot> snap,
       RefPtr<Table> table);
 
@@ -91,7 +91,7 @@ protected:
 
   bool upgradeToLSMv2() const;
 
-  ServerConfig* cfg_;
+  ServerCfg* cfg_;
   PartitionSnapshotRef head_;
   RefPtr<Table> table_;
   RefPtr<PartitionWriter> writer_;

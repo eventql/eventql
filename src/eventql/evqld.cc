@@ -358,7 +358,7 @@ int main(int argc, const char** argv) {
     FileLock server_lock(FileUtil::joinPaths(tsdb_dir, "__lock"));
     server_lock.lock();
 
-    eventql::ServerConfig cfg;
+    eventql::ServerCfg cfg;
     cfg.db_path = tsdb_dir;
     cfg.repl_scheme = repl_scheme;
     cfg.idx_cache = mkRef(new LSMTableIndexCache(tsdb_dir));

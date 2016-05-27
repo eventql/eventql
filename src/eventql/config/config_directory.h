@@ -54,6 +54,15 @@ public:
   virtual void setClusterConfigChangeCallback(
       Function<void (const ClusterConfig& cfg)> fn) = 0;
 
+  virtual ServerConfig getServerConfig(const String& sever_name) const = 0;
+
+  virtual void updateServerConfig(ServerConfig config) = 0;
+
+  virtual Vector<ServerConfig> listServers() const = 0;
+
+  virtual void setServerConfigChangeCallback(
+      Function<void (const ServerConfig& cfg)> fn) = 0;
+
   virtual RefPtr<NamespaceConfigRef> getNamespaceConfig(
       const String& customer_key) const = 0;
 
