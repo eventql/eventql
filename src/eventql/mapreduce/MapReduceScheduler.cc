@@ -213,7 +213,7 @@ Option<String> MapReduceScheduler::getResultURL(size_t task_index) {
 
   return Some(StringUtil::format(
       "http://$0/api/v1/mapreduce/result/$1",
-      result.get().host.addr.ipAndPort(),
+      result.get().host.addr,
       result.get().result_id.toString()));
 }
 
@@ -272,7 +272,7 @@ void MapReduceScheduler::downloadResult(
 
   auto url = StringUtil::format(
       "http://$0/api/v1/mapreduce/result/$1",
-      result.get().host.addr.ipAndPort(),
+      result.get().host.addr,
       result.get().result_id.toString());
 
   auto api_token = auth_->encodeAuthToken(session_);

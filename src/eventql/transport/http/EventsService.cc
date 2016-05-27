@@ -214,7 +214,7 @@ void EventsService::scanRemoteTablePartition(
     const String& table_name,
     const SHA1Hash& partition_key,
     const EventScanParams& params,
-    const Vector<InetAddr>& hosts,
+    const Vector<String>& hosts,
     EventScanResult* result) {
   Vector<String> errors;
 
@@ -252,7 +252,7 @@ bool EventsService::scanRemoteTablePartition(
     const String& table_name,
     const SHA1Hash& partition_key,
     const EventScanParams& params,
-    const InetAddr& host,
+    const String& host,
     EventScanResult* result) {
   logDebug(
       "eventql",
@@ -260,11 +260,11 @@ bool EventsService::scanRemoteTablePartition(
       session.customer(),
       table_name,
       partition_key.toString(),
-      host.hostAndPort());
+      host);
 
   auto url = StringUtil::format(
       "http://$0/api/v1/events/scan_partition?table=$1&partition=$2&limit=$3",
-      host.hostAndPort(),
+      host,
       URI::urlEncode(table_name),
       partition_key.toString(),
       result->capacity());

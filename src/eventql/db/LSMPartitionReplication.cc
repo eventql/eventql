@@ -156,7 +156,7 @@ bool LSMPartitionReplication::replicate() {
           snap_->state.tsdb_namespace(),
           snap_->state.table_key(),
           snap_->key.toString(),
-          r.addr.hostAndPort(),
+          r.addr,
           replica_offset,
           head_offset,
           head_offset - replica_offset);
@@ -175,7 +175,7 @@ bool LSMPartitionReplication::replicate() {
           snap_->state.tsdb_namespace(),
           snap_->state.table_key(),
           snap_->key.toString(),
-          r.addr.hostAndPort());
+          r.addr);
       }
     }
   }
@@ -192,7 +192,7 @@ void LSMPartitionReplication::uploadBatchTo(
     const ReplicaRef& replica,
     const RecordEnvelopeList& batch) {
   auto body = msg::encode(batch);
-  URI uri(StringUtil::format("http://$0/tsdb/replicate", replica.addr.hostAndPort()));
+  URI uri(StringUtil::format("http://$0/tsdb/replicate", replica.addr));
   http::HTTPRequest req(http::HTTPMessage::M_POST, uri.pathAndQuery());
   req.addHeader("Host", uri.hostAndPort());
   req.addHeader("Content-Type", "application/fnord-msg");

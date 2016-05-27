@@ -159,7 +159,7 @@ void PipelinedExpression::executeRemote(const QuerySpec& query) {
           "eventql",
           e,
           "PipelinedExpression::executeOnHost failed @ $0",
-          query.hosts[i].addr.hostAndPort());
+          query.hosts[i].addr);
 
       if (row_ctr > 0 || i + 1 == query.hosts.size()) {
         throw e;
@@ -170,7 +170,7 @@ void PipelinedExpression::executeRemote(const QuerySpec& query) {
 
 void PipelinedExpression::executeOnHost(
     RefPtr<csql::TableExpressionNode> qtree,
-    const InetAddr& host,
+    const String& host,
     size_t* row_ctr) {
   Buffer req_body;
   auto req_body_os = BufferOutputStream::fromBuffer(&req_body);
@@ -193,9 +193,7 @@ void PipelinedExpression::executeOnHost(
     RAISE(kRuntimeError, error_str);
   });
 
-  auto url = StringUtil::format(
-      "http://$0/api/v1/sql/execute_qtree",
-      host.ipAndPort());
+  auto url = StringUtil::format("http://$0/api/v1/sql/execute_qtree", host);
 
   AnalyticsPrivileges privileges;
   privileges.set_allow_private_api_read_access(true);

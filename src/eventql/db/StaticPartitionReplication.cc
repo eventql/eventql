@@ -87,7 +87,7 @@ void StaticPartitionReplication::replicateTo(
     RAISE(kIllegalStateError, "can't replicate to myself");
   }
 
-  auto tsdb_url = StringUtil::format("http://$0/tsdb", replica.addr.hostAndPort());
+  auto tsdb_url = StringUtil::format("http://$0/tsdb", replica.addr);
   eventql::TSDBClient tsdb_client(tsdb_url, http_);
 
   auto pinfo = tsdb_client.partitionInfo(
@@ -152,7 +152,7 @@ bool StaticPartitionReplication::replicate() {
           snap_->state.tsdb_namespace(),
           snap_->state.table_key(),
           snap_->key.toString(),
-          r.addr.hostAndPort());
+          r.addr);
 
       try {
         replicateTo(r, head_version);
@@ -165,18 +165,18 @@ bool StaticPartitionReplication::replicate() {
             snap_->state.tsdb_namespace(),
             snap_->state.table_key(),
             snap_->key.toString(),
-            r.addr.hostAndPort());
+            r.addr);
       } catch (const std::exception& e) {
         success = false;
 
         logError(
-          "tsdb",
-          e,
-          "Error while replicating partition $0/$1/$2 to $3",
-          snap_->state.tsdb_namespace(),
-          snap_->state.table_key(),
-          snap_->key.toString(),
-          r.addr.hostAndPort());
+            "tsdb",
+            e,
+            "Error while replicating partition $0/$1/$2 to $3",
+            snap_->state.tsdb_namespace(),
+            snap_->state.table_key(),
+            snap_->key.toString(),
+            r.addr);
       }
     }
   }

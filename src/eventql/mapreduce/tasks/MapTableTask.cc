@@ -122,11 +122,11 @@ Option<MapReduceShardResult> MapTableTask::executeRemote(
       session_->getEffectiveNamespace(),
       shard->table_ref.table_key,
       shard->table_ref.partition_key.get().toString(),
-      host.addr.hostAndPort());
+      host.addr);
 
   auto url = StringUtil::format(
       "http://$0/api/v1/mapreduce/tasks/map_partition",
-      host.addr.ipAndPort());
+      host.addr);
 
   auto params = StringUtil::format(
       "table=$0&partition=$1&map_function=$2&globals=$3&params=$4&required_columns=$5",

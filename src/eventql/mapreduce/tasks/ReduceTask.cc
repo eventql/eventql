@@ -122,11 +122,11 @@ Option<MapReduceShardResult> ReduceTask::executeRemote(
       "Executing remote reduce shard on $2; customer=$0 input_tables=$1",
       session_->getEffectiveNamespace(),
       input_tables.size(),
-      host.addr.hostAndPort());
+      host.addr);
 
   auto url = StringUtil::format(
       "http://$0/api/v1/mapreduce/tasks/reduce",
-      host.addr.ipAndPort());
+      host.addr);
 
   auto params = StringUtil::format(
       "reduce_fn=$0&globals=$1&params=$2",

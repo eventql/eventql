@@ -65,7 +65,7 @@ protected:
   void executeAsync();
   void executeOnHost(
       RefPtr<csql::TableExpressionNode> qtree,
-      const InetAddr& host,
+      const String& host,
       size_t* row_ctr);
 
   void executeRemote(const QuerySpec& query);

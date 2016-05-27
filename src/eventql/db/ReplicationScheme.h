@@ -37,10 +37,10 @@ namespace eventql {
 struct ReplicaRef {
   ReplicaRef(
       SHA1Hash _unique_id,
-      InetAddr _addr);
+      String _addr);
 
   SHA1Hash unique_id;
-  InetAddr addr;
+  String addr;
   String name;
   bool is_local;
 };
@@ -50,7 +50,7 @@ public:
 
   virtual Vector<ReplicaRef> replicasFor(const SHA1Hash& key) = 0;
 
-  Vector<InetAddr> replicaAddrsFor(const SHA1Hash& key);
+  Vector<String> replicaAddrsFor(const SHA1Hash& key);
 
   virtual bool hasLocalReplica(const SHA1Hash& key) = 0;
 

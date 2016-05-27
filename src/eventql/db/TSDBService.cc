@@ -382,10 +382,7 @@ void TSDBService::insertRecordsRemote(
     record->set_record_data(r.record.toString());
   }
 
-  auto uri = URI(StringUtil::format(
-      "http://$0/tsdb/replicate",
-      host.addr.ipAndPort()));
-
+  auto uri = URI(StringUtil::format("http://$0/tsdb/replicate", host.addr));
   if (flags & (uint64_t) InsertFlags::SYNC_COMMIT) {
     envelope.set_sync_commit(true);
   }

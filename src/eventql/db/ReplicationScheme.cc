@@ -30,13 +30,13 @@ namespace eventql {
 
 ReplicaRef::ReplicaRef(
     SHA1Hash _unique_id,
-    InetAddr _addr) :
+    String _addr) :
     unique_id(_unique_id),
     addr(_addr),
     is_local(false) {}
 
-Vector<InetAddr> ReplicationScheme::replicaAddrsFor(const SHA1Hash& key) {
-  Vector<InetAddr> addrs;
+Vector<String> ReplicationScheme::replicaAddrsFor(const SHA1Hash& key) {
+  Vector<String> addrs;
 
   for (const auto& r : replicasFor(key)) {
     addrs.emplace_back(r.addr);
@@ -81,8 +81,7 @@ DHTReplicationScheme::DHTReplicationScheme(
     cluster_config_(cluster_config),
     local_replica_(local_replica) {
   for (const auto& node : cluster_config_.dht_nodes()) {
-    auto addr = InetAddr::resolve(node.addr());
-
+    auto addr = node.addr();
     for (const auto& token_str : node.sha1_tokens()) {
       auto token = SHA1Hash::fromHexString(token_str);
       ReplicaRef rref(token, addr);
@@ -112,7 +111,7 @@ Vector<ReplicaRef> DHTReplicationScheme::replicasFor(const SHA1Hash& key) {
 
   auto cur = begin;
   do {
-    auto host = cur->second.addr.ipAndPort();
+    auto host = cur->second.addr;
 
     if (hosts.count(host) == 0) {
       replicas.emplace_back(cur->second);

@@ -90,7 +90,7 @@ public:
       const String& table_name,
       const SHA1Hash& partition,
       const EventScanParams& params,
-      const Vector<InetAddr>& hosts,
+      const Vector<String>& hosts,
       EventScanResult* result);
 
   /**
@@ -101,7 +101,7 @@ public:
       const String& table_name,
       const SHA1Hash& partition,
       const EventScanParams& params,
-      const InetAddr& hosts,
+      const String& hosts,
       EventScanResult* result);
 
 protected:

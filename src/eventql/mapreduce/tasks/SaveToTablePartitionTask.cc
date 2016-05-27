@@ -104,11 +104,11 @@ Option<MapReduceShardResult> SaveToTablePartitionTask::executeRemote(
       session_->getEffectiveNamespace(),
       table_name_,
       partition_key_.toString(),
-      host.addr.hostAndPort());
+      host.addr);
 
   auto url = StringUtil::format(
       "http://$0/api/v1/mapreduce/tasks/save_to_table_partition",
-      host.addr.ipAndPort());
+      host.addr);
 
   auto params = StringUtil::format(
       "table_name=$0&partition=$1",
