@@ -325,6 +325,8 @@ int main(int argc, const char** argv) {
   ScopedPtr<eventql::ClientAuth> client_auth;
   client_auth.reset(new TrustClientAuth());
 
+  ScopedPtr<eventql::InternalAuth> internal_auth;
+
   /* spidermonkey javascript runtime */
   JS_Init();
   js::DisableExtraThreads();
@@ -444,6 +446,7 @@ int main(int argc, const char** argv) {
         flags.getString("cachedir"),
         &auth,
         client_auth.get(),
+        internal_auth.get(),
         sql.get(),
         &tsdb_node,
         config_dir.get(),

@@ -56,6 +56,7 @@ AnalyticsServlet::AnalyticsServlet(
     const String& cachedir,
     AnalyticsAuth* auth,
     ClientAuth* client_auth,
+    InternalAuth* internal_auth,
     csql::Runtime* sql,
     eventql::TSDBService* tsdb,
     ConfigDirectory* customer_dir,
@@ -64,6 +65,7 @@ AnalyticsServlet::AnalyticsServlet(
     cachedir_(cachedir),
     auth_(auth),
     client_auth_(client_auth),
+    internal_auth_(internal_auth),
     sql_(sql),
     tsdb_(tsdb),
     customer_dir_(customer_dir),
@@ -149,13 +151,11 @@ void AnalyticsServlet::handle(
     return;
   }
 
-  if (StringUtil::beginsWith(uri.path(), "/api/v1/logfiles")) {
-    logfile_api_.handle(session.get(), req_stream, res_stream);
-    return;
-  }
-
-  if (StringUtil::beginsWith(uri.path(), "/api/v1/mapreduce")) {
-    mapreduce_api_.handle(session.get(), req_stream, res_stream);
+  /* SQL */
+  if (uri.path() == "/api/v1/sql" ||
+      uri.path() == "/api/v1/sql_stream") {
+    req_stream->readBody();
+    executeSQL(session.get(), &req, &res, res_stream);
     return;
   }
 
@@ -166,13 +166,28 @@ void AnalyticsServlet::handle(
     return;
   }
 
-  if (uri.path() == "/api/v1/auth/private_api_token") {
-    req_stream->readBody();
-    getPrivateAPIToken(session.get(), &req, &res);
+  if (session->getEffectiveNamespace().empty()) {
+    internal_auth_->verifyRequest(session.get(), req);
+  }
+
+  if (session->getEffectiveNamespace().empty()) {
+    res.setStatus(http::kStatusUnauthorized);
+    res.addHeader("WWW-Authenticate", "Token");
+    res.addHeader("Content-Type", "text/plain; charset=utf-8");
+    res.addBody("unauthorized");
     res_stream->writeResponse(res);
     return;
   }
 
+  if (StringUtil::beginsWith(uri.path(), "/api/v1/logfiles")) {
+    logfile_api_.handle(session.get(), req_stream, res_stream);
+    return;
+  }
+
+  if (StringUtil::beginsWith(uri.path(), "/api/v1/mapreduce")) {
+    mapreduce_api_.handle(session.get(), req_stream, res_stream);
+    return;
+  }
 
   /* TABLES */
   if (uri.path() == "/api/v1/tables") {
@@ -243,14 +258,6 @@ void AnalyticsServlet::handle(
         &req,
         &res);
     res_stream->writeResponse(res);
-    return;
-  }
-
-  /* SQL */
-  if (uri.path() == "/api/v1/sql" ||
-      uri.path() == "/api/v1/sql_stream") {
-    req_stream->readBody();
-    executeSQL(session.get(), &req, &res, res_stream);
     return;
   }
 
@@ -1016,9 +1023,7 @@ void AnalyticsServlet::executeSQL(
       format = "json";
     }
 
-    if (format == "ascii") {
-      executeSQL_ASCII(params, session, req, res, res_stream);
-    } else if (format == "binary") {
+    if (format == "binary") {
       executeSQL_BINARY(params, session, req, res, res_stream);
     } else if (format == "json") {
       executeSQL_JSON(params, session, req, res, res_stream);

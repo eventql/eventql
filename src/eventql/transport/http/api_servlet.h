@@ -38,6 +38,7 @@
 #include "eventql/transport/http/MapReduceAPIServlet.h"
 #include "eventql/RemoteTSDBScanParams.pb.h"
 #include "eventql/server/auth/client_auth.h"
+#include "eventql/server/auth/internal_auth.h"
 
 #include "eventql/eventql.h"
 
@@ -53,6 +54,7 @@ public:
       const String& cachedir,
       AnalyticsAuth* auth,
       ClientAuth* client_auth,
+      InternalAuth* internal_auth,
       csql::Runtime* sql,
       eventql::TSDBService* tsdb,
       ConfigDirectory* customer_dir,
@@ -283,6 +285,7 @@ protected:
   String cachedir_;
   AnalyticsAuth* auth_;
   ClientAuth* client_auth_;
+  InternalAuth* internal_auth_;
   csql::Runtime* sql_;
   eventql::TSDBService* tsdb_;
   ConfigDirectory* customer_dir_;
