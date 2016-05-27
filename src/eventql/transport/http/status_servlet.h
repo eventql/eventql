@@ -27,6 +27,7 @@
 #include <eventql/util/http/httpstats.h>
 #include <eventql/util/SHA1.h>
 #include <eventql/db/partition_map.h>
+#include <eventql/config/config_directory.h>
 
 #include "eventql/eventql.h"
 namespace eventql {
@@ -37,6 +38,7 @@ public:
   StatusServlet(
       ServerCfg* config,
       PartitionMap* pmap,
+      ConfigDirectory* cdir,
       http::HTTPServerStats* http_server_stats,
       http::HTTPClientStats* http_client_stats);
 
@@ -74,6 +76,7 @@ protected:
 
   ServerCfg* config_;
   PartitionMap* pmap_;
+  ConfigDirectory* cdir_;
   http::HTTPServerStats* http_server_stats_;
   http::HTTPClientStats* http_client_stats_;
 };

@@ -432,6 +432,7 @@ int main(int argc, const char** argv) {
     eventql::StatusServlet status_servlet(
         &cfg,
         &partition_map,
+        config_dir.get(),
         http_server.stats(),
         &z1stats()->http_client_stats);
 

@@ -89,10 +89,12 @@ static const String kMainMenu = R"(
 StatusServlet::StatusServlet(
     ServerCfg* config,
     PartitionMap* pmap,
+    ConfigDirectory* cdir,
     http::HTTPServerStats* http_server_stats,
     http::HTTPClientStats* http_client_stats) :
     config_(config),
     pmap_(pmap),
+    cdir_(cdir),
     http_server_stats_(http_server_stats),
     http_client_stats_(http_client_stats) {}
 
@@ -243,6 +245,15 @@ void StatusServlet::renderDashboard(
       zs->mapreduce_reduce_memory.get() / (1024.0 * 1024.0));
   html += "</table>";
 
+  html += "<h3>Servers</h3>";
+  html += "<table cellspacing=0 border=1>";
+  for (const auto& server : cdir_->listServers()) {
+  html += StringUtil::format(
+      "<tr><td><em>$0</em></td><td><pre>$1</pre></td></tr>",
+      server.server_id(),
+      server.DebugString());
+  }
+  html += "</table>";
 
   response->setStatus(http::kStatusOK);
   response->addHeader("Content-Type", "text/html; charset=utf-8");
