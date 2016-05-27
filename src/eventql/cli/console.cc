@@ -99,9 +99,11 @@ Status Console::runQuery(const String& query) {
           URI::urlEncode(query));
 
     http::HTTPMessage::HeaderList auth_headers;
-    auth_headers.emplace_back(
-        "Authorization",
-        StringUtil::format("Token $0", cfg_.server_auth_token));
+    if (!cfg_.auth_token.empty()) {
+      auth_headers.emplace_back(
+          "Authorization",
+          StringUtil::format("Token $0", cfg_.auth_token));
+    }
 
     http::HTTPClient http_client(nullptr);
     auto req = http::HTTPRequest::mkPost(url, postdata, auth_headers);

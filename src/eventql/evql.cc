@@ -431,6 +431,15 @@ int main(int argc, const char** argv) {
       "<port>");
 
   flags.defineFlag(
+      "user",
+      cli::FlagParser::T_STRING,
+      false,
+      "u",
+      NULL,
+      "username",
+      "<user>");
+
+  flags.defineFlag(
       "auth_token",
       cli::FlagParser::T_STRING,
       false,
@@ -496,7 +505,13 @@ int main(int argc, const char** argv) {
   eventql::cli::ConsoleOptions console_opts;
   console_opts.server_host = flags.getString("host");
   console_opts.server_port = flags.getInt("port");
-  console_opts.server_auth_token = flags.getString("auth_token");
+  if (flags.isSet("auth_token")) {
+    console_opts.auth_token = flags.getString("auth_token");
+  }
+
+  if (flags.isSet("user")) {
+    console_opts.user = flags.getString("user");
+  }
 
   /* cli */
   eventql::cli::Console console(console_opts);

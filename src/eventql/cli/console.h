@@ -34,7 +34,9 @@ namespace cli {
 struct ConsoleOptions {
   String server_host;
   int server_port;
-  String server_auth_token;
+  String auth_token;
+  String user;
+  String password;
   bool batch_mode;
 };
 
