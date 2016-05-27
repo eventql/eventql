@@ -24,6 +24,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <signal.h>
+#include <regex>
 #include <sys/time.h>
 #include <sys/resource.h>
 #include "eventql/util/io/filerepository.h"
@@ -91,15 +92,6 @@ int main(int argc, const char** argv) {
       NULL,
       "listen",
       "<host:port>");
-
-  flags.defineFlag(
-      "http_port",
-      cli::FlagParser::T_INTEGER,
-      false,
-      NULL,
-      "9175",
-      "Start the public http server on this port",
-      "<port>");
 
   flags.defineFlag(
       "cachedir",
@@ -278,10 +270,26 @@ int main(int argc, const char** argv) {
       },
       8);
 
+  /* listen addr */
+  String listen_host;
+  int listen_port;
+  {
+    auto listen_str = flags.getString("listen");
+    std::smatch m;
+    std::regex listen_regex("([a-zA-Z-_.]+):([0-9]+)");
+    if (std::regex_match(listen_str, m, listen_regex)) {
+      listen_host = m[1];
+      listen_port = std::stoi(m[2]);
+    } else {
+      logFatal("evqld", "invalid listen address: $0", listen_str);
+      return 1;
+    }
+  }
+
   /* http */
   http::HTTPRouter http_router;
   http::HTTPServer http_server(&http_router, &ev);
-  http_server.listen(flags.getInt("http_port"));
+  http_server.listen(listen_port);
   http::HTTPConnectionPool http(&ev, &z1stats()->http_client_stats);
 
   Option<String> server_name;
