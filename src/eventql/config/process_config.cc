@@ -28,28 +28,29 @@
 namespace eventql {
 
 ProcessConfig::ProcessConfig(
-      Vector<Pair<String, String>> properties) :
+      HashMap<String, String> properties) :
       properties_(properties) {}
 
 Option<String> ProcessConfig::getProperty(const String& key) const {
-  for (auto p : properties_) {
-    if (p.first == key) {
-      return Some(p.second);
-    }
+  auto p = properties_.find(key);
+  if (p != properties_.end()) {
+    return Some(p->second);
   }
 
   return None<String>();
 }
 
 Status ProcessConfigBuilder::loadFile(const String& file) {
-  return Status(eParseError);
+  /*IniParserState parser_state(this);
+  if (ini_parse(file.c_str(), &ini_parse_handler, &parser_state) < 0) {
+    parser_state.status = Status(eParseError, "invalid config file");
+  }
+
+  return parser_state.status;*/
 }
 
 void ProcessConfigBuilder::setProperty(const String& key, const String& value) {
-  Pair<String, String> p;
-  p.first = key;
-  p.second = value;
-  properties_.emplace_back(p);
+  properties_[key] = value;
 }
 
 void ProcessConfigBuilder::setProperty(
@@ -59,8 +60,8 @@ void ProcessConfigBuilder::setProperty(
   setProperty(StringUtil::format("$0.$1", section, key), value);
 }
 
-ProcessConfig ProcessConfigBuilder::getConfig() {
-  return ProcessConfig(properties_);
+ProcessConfig* ProcessConfigBuilder::getConfig() {
+  return new ProcessConfig(properties_);
 }
 
 

@@ -37,8 +37,8 @@ public:
   Option<String> getProperty(const String& key) const;
 
 protected:
-  ProcessConfig(Vector<Pair<String, String>> properties);
-  Vector<Pair<String, String>> properties_;
+  ProcessConfig(HashMap<String, String> properties);
+  HashMap<String, String> properties_;
 };
 
 class ProcessConfigBuilder {
@@ -52,10 +52,10 @@ public:
       const String& key,
       const String& value);
 
-  ProcessConfig getConfig();
+  ProcessConfig* getConfig();
 
 protected:
-  Vector<Pair<String, String>> properties_;
+  HashMap<String, String> properties_;
 };
 
 
