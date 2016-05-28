@@ -25,5 +25,21 @@
 
 namespace eventql {
 
+SHA1Hash MetadataOperation::getInputTransactionID() const {
+  return input_txid_;
+}
+
+SHA1Hash MetadataOperation::getOutputTransactionID() const {
+  return output_txid_;
+}
+
+Status MetadataOperation::decode(InputStream* is) {
+  return Status(eRuntimeError, "not yet implemented");
+}
+
+Status MetadataOperation::encode(OutputStream* os) const {
+  return Status(eRuntimeError, "not yet implemented");
+}
+
 } // namespace eventql
 

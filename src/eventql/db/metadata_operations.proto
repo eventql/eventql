@@ -21,30 +21,20 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#pragma once
-#include "eventql/eventql.h"
-#include "eventql/util/protobuf/msg.h"
-#include "eventql/util/SHA1.h"
-#include "eventql/util/status.h"
-#include "eventql/util/io/inputstream.h"
-#include "eventql/util/io/outputstream.h"
-#include "eventql/db/metadata_operations.pb.h"
+package eventql;
 
-namespace eventql {
-
-class MetadataOperation {
-public:
-
-  SHA1Hash getInputTransactionID() const;
-  SHA1Hash getOutputTransactionID() const;
-
-  Status decode(InputStream* is);
-  Status encode(OutputStream* os) const;
-
-protected:
-  MetadataOperationType type_;
-  SHA1Hash input_txid_;
-  SHA1Hash output_txid_;
+enum MetadataOperationType {
+  METAOP_ADD_PARTITION = 1;
 };
 
-} // namespace eventql
+message MetadataOperationEnvelope {
+  required MetadataOperationType type = 1;
+  required string input_txid = 2;
+  required string output_txid = 3;
+  optional bytes opdata = 4;
+};
+
+message AddPartitionOperation {
+
+};
+

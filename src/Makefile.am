@@ -76,6 +76,7 @@ AM_LDFLAGS = $(PTHREAD_CFLAGS)
 evql_protos = \
     eventql/AnalyticsSession.proto \
     eventql/config/namespace_config_protos.proto \
+    eventql/db/metadata_operations.proto \
     eventql/db/ClusterConfig.proto \
     eventql/db/LogPartitionCompactionState.proto \
     eventql/db/PartitionInfo.proto \
@@ -937,6 +938,7 @@ evql_core_a_SOURCES = \
 nodist_evql_core_a_SOURCES = \
     @builddir@/eventql/AnalyticsSession.pb.cc \
     @builddir@/eventql/config/namespace_config_protos.pb.cc \
+    @builddir@/eventql/db/metadata_operations.pb.cc \
     @builddir@/eventql/db/ClusterConfig.pb.cc \
     @builddir@/eventql/db/LogPartitionCompactionState.pb.cc \
     @builddir@/eventql/db/PartitionInfo.pb.cc \

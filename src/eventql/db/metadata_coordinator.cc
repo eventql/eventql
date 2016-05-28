@@ -100,8 +100,8 @@ Status MetadataCoordinator::performOperation(
       "Performing metadata operation on: $0/$1 ($2->$3) on $3 ($4)",
       ns,
       table_name,
-      op.getInputTransactionID(),
-      op.getOutputTransactionID(),
+      op.getInputTransactionID().toString(),
+      op.getOutputTransactionID().toString(),
       server,
       server_cfg.server_addr());
 
