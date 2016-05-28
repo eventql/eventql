@@ -35,6 +35,11 @@ public:
 
   MetadataCoordinator(ConfigDirectory* cdir);
 
+  Status performAndCommitOperation(
+      const String& ns,
+      const String& table_name,
+      MetadataOperation op);
+
   Status performOperation(
       const String& ns,
       const String& table_name,

@@ -27,6 +27,30 @@ namespace eventql {
 
 MetadataCoordinator::MetadataCoordinator(ConfigDirectory* cdir) : cdir_(cdir) {}
 
+Status MetadataCoordinator::performAndCommitOperation(
+    const String& ns,
+    const String& table_name,
+    MetadataOperation op) {
+  auto table_config = cdir_->getTableConfig(ns, table_name);
+  if (table_config.metadata_txnid() != op.getInputTransactionID().toString()) {
+    return Status(eConcurrentModificationError, "concurrent modification");
+  }
+
+  Vector<String> servers;
+  for (const auto& s : table_config.metadata_servers()) {
+    servers.emplace_back(s);
+  }
+
+  auto rc = performOperation(ns, table_name, op, servers);
+  if (!rc.isSuccess()) {
+    return rc;
+  }
+
+  table_config.set_metadata_txnid(op.getOutputTransactionID().toString());
+  cdir_->updateTableConfig(table_config);
+  return Status::success();
+}
+
 Status MetadataCoordinator::performOperation(
     const String& ns,
     const String& table_name,
