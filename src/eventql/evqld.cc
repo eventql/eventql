@@ -267,7 +267,7 @@ int main(int argc, const char** argv) {
   }
 
   if (flags.isSet("log_to_syslog")) {
-    Application::logToSyslog("z1d");
+    Application::logToSyslog("evqld");
   }
 
   Logger::get()->setMinimumLogLevel(
