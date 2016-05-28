@@ -451,16 +451,15 @@ int main(int argc, const char** argv) {
   if (flags.isSet("lang")) {
     auto s = cli_cfg.setLanguage(flags.getString("lang"));
     if (!s.isSuccess()) {
-      stderr_os->write(StringUtil::format("$0: $1", s.type(), s.message()));
+      printError(StringUtil::format("$0: $1", s.type(), s.message()));
       return 1;
     }
 
     /* command line for sql only  */
     if (cli_cfg.getFile().isEmpty() &&
         cli_cfg.getLanguage().get() != eventql::cli::CLIConfig::kLanguage::SQL) {
-      //FIXME better error message
-      stderr_os->write(
-        "FlagError: , run evql --help for help\n");
+      printError(
+          "FlagError: command line support for SQL only, run evql --help for help\n"); //FIXME better error message
       return 1;
     }
   }
@@ -469,10 +468,9 @@ int main(int argc, const char** argv) {
   eventql::cli::Console console(cli_cfg);
 
   if (flags.getArgv().size() > 0) {
-    stderr_os->write(
-        StringUtil::format(
-            "invalid argument: '$0', run evql --help for help\n",
-            flags.getArgv()[0]));
+    printError(StringUtil::format(
+        "invalid argument: '$0', run evql --help for help\n",
+        flags.getArgv()[0]));
 
     return 1;
   }
@@ -481,7 +479,7 @@ int main(int argc, const char** argv) {
   if (!file.isEmpty()) {
     auto language = cli_cfg.getLanguageForFile();
     if (language.isEmpty()) {
-      stderr_os->write(
+      printError(
           "FlagError: unknown language to execute file, run evql --help for help\n");
       return 1;
     }
