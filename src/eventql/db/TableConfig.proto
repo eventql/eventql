@@ -111,6 +111,11 @@ message TableDefinition {
   optional uint64 next_field_id = 5;
 
   repeated string tags = 6;
+
+  optional string metadata_txnid = 7;
+
+  repeated string metadata_servers = 8;
+
 };
 
 message TableDefinitionList {

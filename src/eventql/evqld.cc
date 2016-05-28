@@ -55,6 +55,7 @@
 #include "eventql/AnalyticsApp.h"
 #include "eventql/db/TableConfig.pb.h"
 #include "eventql/db/table_service.h"
+#include "eventql/db/metadata_coordinator.h"
 #include "eventql/transport/http/rpc_servlet.h"
 #include "eventql/db/ReplicationWorker.h"
 #include "eventql/db/LSMTableIndexCache.h"
@@ -531,6 +532,41 @@ int main(int argc, const char** argv) {
     config_dir->listTables([&partition_map] (const TableDefinition& tbl) {
       partition_map.configureTable(tbl);
     });
+
+    {
+      Vector<String> all_servers;
+      for (const auto& s : config_dir->listServers()) {
+        all_servers.emplace_back(s.server_id());
+      }
+
+      config_dir->listTables([&config_dir, &all_servers] (const TableDefinition& tbl) {
+        if (tbl.metadata_txnid().empty()) {
+          auto txnid = Random::singleton()->sha1();
+          Vector<String> servers;
+          uint64_t idx = Random::singleton()->random64();
+          for (int i = 0; i < 3; ++i) {
+            servers.emplace_back(all_servers[++idx % all_servers.size()]);
+          }
+
+          logInfo(
+              "evqld",
+              "Backfilling metadata file for table: $0 (servers=$1, txnid=$2)",
+              tbl.table_name(),
+              inspect(servers),
+              txnid.toString());
+
+          eventql::MetadataCoordinator coordinator(config_dir.get());
+          auto rc = coordinator.createFile(txnid, servers);
+          if (!rc.isSuccess()) {
+            logWarning(
+                "evqld",
+                "Backfilling metadata file for table $0 failed: $1",
+                tbl.table_name(),
+                rc.message());
+          }
+        }
+      });
+    }
 
     eventql::AnalyticsServlet analytics_servlet(
         analytics_app,

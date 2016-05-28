@@ -25,10 +25,18 @@
 
 namespace eventql {
 
+MetadataCoordinator::MetadataCoordinator(ConfigDirectory* cdir) : cdir_(cdir) {}
+
 Status MetadataCoordinator::performOperation(
     const String& ns,
     const String& table_name,
     MetadataOperation op) {
+  return Status::success();
+}
+
+Status MetadataCoordinator::createFile(
+    const SHA1Hash& transaction_id,
+    const Vector<String>& servers) {
   return Status::success();
 }
 

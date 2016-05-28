@@ -25,18 +25,34 @@
 #include "eventql/eventql.h"
 #include "eventql/util/status.h"
 #include "eventql/db/metadata_operation.h"
+#include "eventql/db/metadata_file.h"
+#include "eventql/config/config_directory.h"
 
 namespace eventql {
 
 class MetadataCoordinator {
 public:
 
+  MetadataCoordinator(ConfigDirectory* cdir);
+
   Status performOperation(
       const String& ns,
       const String& table_name,
       MetadataOperation op);
 
+  Status createFile(
+      const SHA1Hash& transaction_id,
+      const Vector<String>& servers);
+
 protected:
+
+  Vector<String> pickNewMetadataServers() const;
+
+  Status storeFile(
+      MetadataFile* file,
+      const Vector<String>& servers);
+
+  ConfigDirectory* cdir_;
 };
 
 
