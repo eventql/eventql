@@ -23,39 +23,29 @@
  */
 #pragma once
 #include "eventql/eventql.h"
+#include "eventql/util/stdtypes.h"
 #include "eventql/util/status.h"
-#include "eventql/db/metadata_operation.h"
+#include "eventql/util/SHA1.h"
 #include "eventql/db/metadata_file.h"
-#include "eventql/config/config_directory.h"
+#include "eventql/db/metadata_store.h"
 
 namespace eventql {
 
-class MetadataCoordinator {
+class MetadataService {
 public:
 
-  MetadataCoordinator(ConfigDirectory* cdir);
+  MetadataService(
+      MetadataStore* metadata_store);
 
-  Status performOperation(
+  Status createMetadataFile(
       const String& ns,
       const String& table_name,
-      MetadataOperation op);
-
-  Status createFile(
-      const String& ns,
-      const String& table_name,
-      const SHA1Hash& transaction_id,
-      const Vector<String>& servers);
+      const SHA1Hash& txid);
 
 protected:
 
-  Status createFile(
-      const String& ns,
-      const String& table_name,
-      const SHA1Hash& transaction_id,
-      const String& server);
-
-  ConfigDirectory* cdir_;
+  MetadataStore* metadata_store_;
 };
 
-
 } // namespace eventql
+

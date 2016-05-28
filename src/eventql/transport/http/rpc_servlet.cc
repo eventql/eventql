@@ -40,10 +40,10 @@ namespace eventql {
 
 RPCServlet::RPCServlet(
     TableService* node,
-    MetadataStore* metadata_store,
+    MetadataService* metadata_service,
     const String& tmpdir) :
     node_(node),
-    metadata_store_(metadata_store),
+    metadata_service_(metadata_service),
     tmpdir_(tmpdir) {}
 
 void RPCServlet::handleHTTPRequest(
@@ -122,9 +122,9 @@ void RPCServlet::handleHTTPRequest(
       return;
     }
 
-    if (uri.path() == "/rpc/store_metadata_file") {
+    if (uri.path() == "/rpc/create_metadata_file") {
       req_stream->readBody();
-      storeMetadataFile(uri, &req, &res);
+      createMetadataFile(uri, &req, &res);
       res_stream->writeResponse(res);
       return;
     }
@@ -436,7 +436,7 @@ void RPCServlet::updateCSTable(
   res->setStatus(http::kStatusCreated);
 }
 
-void RPCServlet::storeMetadataFile(
+void RPCServlet::createMetadataFile(
     const URI& uri,
     const http::HTTPRequest* req,
     http::HTTPResponse* res) {
@@ -461,32 +461,18 @@ void RPCServlet::storeMetadataFile(
     return;
   }
 
-  MetadataFile metadata_file;
-  {
-    auto is = req->getBodyInputStream();
-    auto rc = metadata_file.decode(is.get());
-    if (!rc.isSuccess()) {
-      res->setStatus(http::kStatusInternalServerError);
-      res->addBody("ERROR: " + rc.message());
-      return;
-    }
+  auto rc = metadata_service_->createMetadataFile(
+      db_namespace,
+      table_name,
+      SHA1Hash::fromHexString(txid));
+
+  if (rc.isSuccess()) {
+    res->setStatus(http::kStatusCreated);
+  } else {
+    res->setStatus(http::kStatusInternalServerError);
+    res->addBody("ERROR: " + rc.message());
+    return;
   }
-
-  {
-    auto rc = metadata_store_->storeMetadataFile(
-        db_namespace,
-        table_name,
-        SHA1Hash::fromHexString(txid),
-        metadata_file);
-
-    if (!rc.isSuccess()) {
-      res->setStatus(http::kStatusInternalServerError);
-      res->addBody("ERROR: " + rc.message());
-      return;
-    }
-  }
-
-  res->setStatus(http::kStatusCreated);
 }
 
 }

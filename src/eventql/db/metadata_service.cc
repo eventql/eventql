@@ -21,41 +21,25 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#pragma once
-#include "eventql/eventql.h"
-#include "eventql/util/status.h"
-#include "eventql/db/metadata_operation.h"
-#include "eventql/db/metadata_file.h"
-#include "eventql/config/config_directory.h"
+#include "eventql/db/metadata_service.h"
 
 namespace eventql {
 
-class MetadataCoordinator {
-public:
+MetadataService::MetadataService(
+    MetadataStore* metadata_store) :
+    metadata_store_(metadata_store) {}
 
-  MetadataCoordinator(ConfigDirectory* cdir);
-
-  Status performOperation(
-      const String& ns,
-      const String& table_name,
-      MetadataOperation op);
-
-  Status createFile(
-      const String& ns,
-      const String& table_name,
-      const SHA1Hash& transaction_id,
-      const Vector<String>& servers);
-
-protected:
-
-  Status createFile(
-      const String& ns,
-      const String& table_name,
-      const SHA1Hash& transaction_id,
-      const String& server);
-
-  ConfigDirectory* cdir_;
-};
-
+Status MetadataService::createMetadataFile(
+    const String& ns,
+    const String& table_name,
+    const SHA1Hash& txid) {
+  MetadataFile metadata_file(txid, {});
+  return metadata_store_->storeMetadataFile(
+      ns,
+      table_name,
+      txid,
+      metadata_file);
+}
 
 } // namespace eventql
+

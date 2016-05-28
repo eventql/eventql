@@ -56,6 +56,7 @@
 #include "eventql/db/TableConfig.pb.h"
 #include "eventql/db/table_service.h"
 #include "eventql/db/metadata_coordinator.h"
+#include "eventql/db/metadata_service.h"
 #include "eventql/transport/http/rpc_servlet.h"
 #include "eventql/db/ReplicationWorker.h"
 #include "eventql/db/LSMTableIndexCache.h"
@@ -390,6 +391,7 @@ int main(int argc, const char** argv) {
   }
 
   eventql::MetadataStore metadata_store(metadata_dir);
+  eventql::MetadataService metadata_service(&metadata_store);
 
   /* config dir */
   ScopedPtr<ConfigDirectory> config_dir;
@@ -475,7 +477,7 @@ int main(int argc, const char** argv) {
 
     eventql::RPCServlet tsdb_servlet(
         &tsdb_node,
-        &metadata_store,
+        &metadata_service,
         flags.getString("cachedir"));
 
     http_router.addRouteByPrefixMatch("/tsdb", &tsdb_servlet, &tpool);

@@ -27,7 +27,7 @@
 #include <eventql/db/table_service.h>
 #include <eventql/util/http/HTTPSSEStream.h>
 #include "eventql/eventql.h"
-#include "eventql/db/metadata_store.h"
+#include "eventql/db/metadata_service.h"
 
 namespace eventql {
 
@@ -36,7 +36,7 @@ public:
 
   RPCServlet(
       TableService* node,
-      MetadataStore* metadata_store,
+      MetadataService* metadata_service,
       const String& tmpdir);
 
   void handleHTTPRequest(
@@ -87,13 +87,13 @@ protected:
       http::HTTPRequestStream* req_stream,
       http::HTTPResponse* res);
 
-  void storeMetadataFile(
+  void createMetadataFile(
       const URI& uri,
       const http::HTTPRequest* req,
       http::HTTPResponse* res);
 
   TableService* node_;
-  MetadataStore* metadata_store_;
+  MetadataService* metadata_service_;
   String tmpdir_;
   Random rnd_;
 };
