@@ -1123,3 +1123,32 @@ TEST_CASE(ParserTest, TestCreateTableStatement2, [] () {
   EXPECT(*stmt->getChildren()[1] == ASTNode::T_COLUMN_LIST);
   EXPECT(stmt->getChildren()[1]->getChildren().size() == 6);
 });
+
+TEST_CASE(ParserTest, TestInsertIntoStatement, [] () {
+  auto runtime = Runtime::getDefaultRuntime();
+  auto txn = runtime->newTransaction();
+  auto parser = parseTestQuery(
+      R"(
+          INSERT INTO testtabl (
+              evtime,
+              evid,
+              evitems
+          ) VALUES (
+              1464463790,
+              'xxx',
+              [{'id': 1, 'name': 'item1'}, {'id': 2, 'name': 'item2'}]
+          );
+        )
+      )");
+
+  EXPECT(parser.getStatements().size() == 1);
+  const auto& stmt = parser.getStatements()[0];
+  /*EXPECT(*stmt == ASTNode::T_CREATE_TABLE);
+  EXPECT(stmt->getChildren().size() == 2);
+  EXPECT_EQ(*stmt->getChildren()[0], ASTNode::T_TABLE_NAME);
+  EXPECT_EQ(*stmt->getChildren()[0]->getToken(), Token::T_IDENTIFIER);
+  EXPECT_EQ(stmt->getChildren()[0]->getToken()->getString(), "fnord");
+  EXPECT(*stmt->getChildren()[1] == ASTNode::T_COLUMN_LIST);
+  EXPECT(stmt->getChildren()[1]->getChildren().size() == 6);*/
+});
+
