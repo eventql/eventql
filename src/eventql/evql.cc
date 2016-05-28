@@ -225,13 +225,6 @@ thread::EventLoop ev;
 //  }
 //}
 
-void cmd_version(
-    const cli::FlagParser& global_flags,
-    const cli::FlagParser& cmd_flags) {
-  auto stdout_os = OutputStream::getStdout();
-  stdout_os->write("zli v0.0.1\n");
-}
-
 static bool hasSTDIN() {
   struct pollfd p = {
     .fd = STDIN_FILENO,
@@ -263,6 +256,16 @@ int main(int argc, const char** argv) {
       NULL,
       "help",
       "<help>");
+
+  flags.defineFlag(
+      "version",
+      cli::FlagParser::T_SWITCH,
+      false,
+      "V",
+      NULL,
+      "print version",
+      "<switch>");
+
 
   flags.defineFlag(
       "file",
@@ -355,12 +358,21 @@ int main(int argc, const char** argv) {
   auto stderr_os = OutputStream::getStderr();
 
   /* print help */
-  if (flags.isSet("help")) {
+  if (flags.isSet("help") || flags.isSet("version")) {
     stdout_os->write(
-        "EventQL v0.3.0 - <build info>\n"
-        "Copyright (c) 2016, zScale Techology GmbH. All rights reserved.\n\n"
-    );
+        StringUtil::format(
+            "EventQL $0 ($1)\n"
+            "Copyright (c) 2016, zScale Techology GmbH. All rights reserved.\n\n",
+            eventql::kVersionString,
+            eventql::kBuildID));
+  }
 
+  if (flags.isSet("version")) {
+    return 0;
+  }
+
+  /* print help */
+  if (flags.isSet("help")) {
     stdout_os->write(
         "Usage: $ evql [OPTIONS] [query]\n"
         "       $ evql [OPTIONS] -f file\n"

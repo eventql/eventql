@@ -149,7 +149,10 @@ void StatusServlet::renderDashboard(
   String html;
   html += kStyleSheet;
   html += kMainMenu;
-  html += StringUtil::format("<h1>Z1 $0</h1>", kVersionString);
+  html += StringUtil::format(
+      "<h1>EventQL $0 ($1)</h1>",
+      kVersionString,
+      kBuildID);
 
   html += "<table cellspacing=0 border=1>";
   html += StringUtil::format(

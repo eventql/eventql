@@ -68,6 +68,7 @@ AM_CONDITIONAL([HAVE_PTHREAD], [test "x$acx_pthread_ok" = "xyes"])
 
 # Pipe through mozjs cxx flags
 AC_SUBST(MOZJS_CXXFLAGS)
+AC_SUBST(EVQL_BUILDID)
 
 # Options of pcre
 AM_CONDITIONAL(WITH_PCRE_CPP, false)

@@ -32,8 +32,8 @@ static const uint32_t kVersionMinor = 3;
 static const uint32_t kVersionPatch = 0;
 static const std::string kVersionString = "v0.3.0";
 
-#ifdef eventql_BUILD_ID
-static const std::string kBuildID = eventql_BUILD_ID;
+#ifdef EVQL_BUILDID
+static const std::string kBuildID = EVQL_BUILDID;
 #else
 static const std::string kBuildID = "unknown";
 #endif

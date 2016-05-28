@@ -88,9 +88,27 @@ int main(int argc, const char** argv) {
   cli::FlagParser flags;
 
   flags.defineFlag(
+      "help",
+      cli::FlagParser::T_SWITCH,
+      false,
+      "?",
+      NULL,
+      "help",
+      "<help>");
+
+  flags.defineFlag(
+      "version",
+      cli::FlagParser::T_SWITCH,
+      false,
+      "V",
+      NULL,
+      "print version",
+      "<switch>");
+
+  flags.defineFlag(
       "listen",
       cli::FlagParser::T_STRING,
-      true,
+      false,
       NULL,
       NULL,
       "listen",
@@ -99,7 +117,7 @@ int main(int argc, const char** argv) {
   flags.defineFlag(
       "cachedir",
       cli::FlagParser::T_STRING,
-      true,
+      false,
       NULL,
       NULL,
       "cachedir path",
@@ -108,7 +126,7 @@ int main(int argc, const char** argv) {
   flags.defineFlag(
       "datadir",
       cli::FlagParser::T_STRING,
-      true,
+      false,
       NULL,
       NULL,
       "datadir path",
@@ -137,7 +155,7 @@ int main(int argc, const char** argv) {
   flags.defineFlag(
       "config_backend",
       cli::FlagParser::T_STRING,
-      true,
+      false,
       NULL,
       NULL,
       "backend",
@@ -254,6 +272,32 @@ int main(int argc, const char** argv) {
 
   Logger::get()->setMinimumLogLevel(
       strToLogLevel(flags.getString("loglevel")));
+
+  auto stdout_os = OutputStream::getStdout();
+  auto stderr_os = OutputStream::getStderr();
+
+  /* print help */
+  if (flags.isSet("help") || flags.isSet("version")) {
+    stdout_os->write(
+        StringUtil::format(
+            "EventQL $0 ($1)\n"
+            "Copyright (c) 2016, zScale Techology GmbH. All rights reserved.\n\n",
+            kVersionString,
+            kBuildID));
+  }
+
+  if (flags.isSet("version")) {
+    return 0;
+  }
+
+  if (flags.isSet("help")) {
+    stdout_os->write(
+        "Usage: $ evqld [OPTIONS]\n"
+        "  -?, --help              Display this help text and exit\n"
+        "  -V, --version           Display the version of this binary and exit\n"
+    );
+    return 0;
+  }
 
   if (flags.isSet("daemonize")) {
     Application::daemonize();
