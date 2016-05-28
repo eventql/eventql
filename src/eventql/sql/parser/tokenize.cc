@@ -612,6 +612,21 @@ next:
     goto next;
   }
 
+  if (token == "INSERT") {
+    token_list->emplace_back(Token::T_INSERT);
+    goto next;
+  }
+
+  if (token == "INTO") {
+    token_list->emplace_back(Token::T_INTO);
+    goto next;
+  }
+
+  if (token == "VALUES") {
+    token_list->emplace_back(Token::T_VALUES);
+    goto next;
+  }
+
   if (token == "XDOMAIN") {
     token_list->emplace_back(Token::T_XDOMAIN);
     goto next;
