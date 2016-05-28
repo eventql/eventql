@@ -232,15 +232,11 @@ Status CLIConfig::setLanguage(const String& language) {
   } else {
     return Status(
         eFlagError,
-        StringUtil::format("invalid language '$0'\n", language));
+        StringUtil::format("invalid language '$0'", language));
   }
 }
 
 Option<CLIConfig::kLanguage> CLIConfig::getLanguage() {
-  return language_;
-}
-
-Option<CLIConfig::kLanguage> CLIConfig::getLanguageForFile() {
   if (!language_.isEmpty()) {
     return language_;
   }

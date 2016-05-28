@@ -68,7 +68,6 @@ public:
 
   Status setLanguage(const String& language);
   Option<kLanguage> getLanguage();
-  Option<kLanguage> getLanguageForFile();
 
   Option<String> getExec() const;
 

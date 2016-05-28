@@ -455,11 +455,10 @@ int main(int argc, const char** argv) {
       return 1;
     }
 
-    /* command line for sql only  */
     if (cli_cfg.getFile().isEmpty() &&
         cli_cfg.getLanguage().get() != eventql::cli::CLIConfig::kLanguage::SQL) {
       printError(
-          "FlagError: command line support for SQL only, run evql --help for help\n"); //FIXME better error message
+          "FlagError: must set -f <file> for javascript, run --help for help\n");
       return 1;
     }
   }
@@ -477,7 +476,7 @@ int main(int argc, const char** argv) {
 
   auto file = cli_cfg.getFile();
   if (!file.isEmpty()) {
-    auto language = cli_cfg.getLanguageForFile();
+    auto language = cli_cfg.getLanguage();
     if (language.isEmpty()) {
       printError(
           "FlagError: unknown language to execute file, run evql --help for help\n");
