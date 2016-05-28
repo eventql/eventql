@@ -544,9 +544,9 @@ int main(int argc, const char** argv) {
 
       Vector<TableDefinition> backfill_tables;
       config_dir->listTables([&backfill_tables] (const TableDefinition& tbl) {
-        //if (tbl.metadata_txnid().empty()) {
+        if (tbl.metadata_txnid().empty()) {
           backfill_tables.emplace_back(tbl);
-        //}
+        }
       });
 
       for (const auto& tbl : backfill_tables) {
