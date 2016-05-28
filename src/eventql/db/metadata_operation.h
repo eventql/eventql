@@ -25,6 +25,9 @@
 #include "eventql/eventql.h"
 #include "eventql/util/protobuf/msg.h"
 #include "eventql/util/SHA1.h"
+#include "eventql/util/status.h"
+#include "eventql/util/io/inputstream.h"
+#include "eventql/util/io/outputstream.h"
 
 namespace eventql {
 
@@ -33,8 +36,11 @@ public:
 
   virtual ~MetadataOperation() = default;
 
-  SHA1Hash getTransactionID() const;
-  SHA1Hash getBaseTransactionID() const;
+  SHA1Hash getInputTransactionID() const;
+  SHA1Hash getOutputTransactionID() const;
+
+  virtual Status decode(InputStream* is) = 0;
+  virtual Status encode(OutputStream* os) const = 0;
 
 };
 

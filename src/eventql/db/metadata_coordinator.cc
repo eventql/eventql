@@ -30,8 +30,87 @@ MetadataCoordinator::MetadataCoordinator(ConfigDirectory* cdir) : cdir_(cdir) {}
 Status MetadataCoordinator::performOperation(
     const String& ns,
     const String& table_name,
-    MetadataOperation op) {
-  return Status::success();
+    MetadataOperation op,
+    const Vector<String>& servers) {
+  size_t num_servers = servers.size();
+  if (num_servers == 0) {
+    return Status(eIllegalArgumentError, "server list can't be empty");
+  }
+
+  size_t failures = 0;
+  for (const auto& s : servers) {
+    auto rc = performOperation(ns, table_name, op, s);
+    if (!rc.isSuccess()) {
+      logWarning(
+          "evqld",
+          "error while performing metadata operation: $0",
+          rc.message());
+      ++failures;
+    }
+  }
+
+  size_t max_failures = 0;
+  if (num_servers > 1) {
+    max_failures = (num_servers - 1) / 2;
+  }
+
+  if (failures <= max_failures) {
+    return Status::success();
+  } else {
+    return Status(eRuntimeError, "error while performing metadata operation");
+  }
+}
+
+Status MetadataCoordinator::performOperation(
+    const String& ns,
+    const String& table_name,
+    MetadataOperation op,
+    const String& server) {
+  auto server_cfg = cdir_->getServerConfig(server);
+  if (server_cfg.server_addr().empty()) {
+    return Status(eRuntimeError, "server is offline");
+  }
+
+  logDebug(
+      "evqld",
+      "Performing metadata operation on: $0/$1 ($2->$3) on $3 ($4)",
+      ns,
+      table_name,
+      op.getInputTransactionID(),
+      op.getOutputTransactionID(),
+      server,
+      server_cfg.server_addr());
+
+  auto url = StringUtil::format(
+      "http://$0/rpc/perform_metadata_operation?namespace=$1&table=$2",
+      server_cfg.server_addr(),
+      URI::urlEncode(ns),
+      URI::urlEncode(table_name));
+
+  Buffer req_body;
+  {
+    auto os = BufferOutputStream::fromBuffer(&req_body);
+    auto rc = op.encode(os.get());
+    if (!rc.isSuccess()) {
+      return rc;
+    }
+  }
+
+  auto req = http::HTTPRequest::mkPost(url, req_body);
+  //auth_->signRequest(static_cast<Session*>(txn_->getUserData()), &req);
+
+  http::HTTPClient http_client;
+  http::HTTPResponse res;
+  auto rc = http_client.executeRequest(req, &res);
+  if (!rc.isSuccess()) {
+    return rc;
+  }
+
+  if (res.statusCode() == 201) {
+    return Status::success();
+  } else {
+    return Status(eIOError, res.body().toString());
+  }
 }
 
 Status MetadataCoordinator::createFile(

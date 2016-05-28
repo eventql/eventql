@@ -38,7 +38,8 @@ public:
   Status performOperation(
       const String& ns,
       const String& table_name,
-      MetadataOperation op);
+      MetadataOperation op,
+      const Vector<String>& servers);
 
   Status createFile(
       const String& ns,
@@ -52,6 +53,12 @@ protected:
       const String& ns,
       const String& table_name,
       const SHA1Hash& transaction_id,
+      const String& server);
+
+  Status performOperation(
+      const String& ns,
+      const String& table_name,
+      MetadataOperation op,
       const String& server);
 
   ConfigDirectory* cdir_;
