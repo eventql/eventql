@@ -113,32 +113,13 @@ void AnalyticsServlet::handle(
 
   ScopedPtr<Session> session(new Session());
 
-  {
-    auto auth_rc = HTTPAuth::authenticateRequest(
-        session.get(),
-        client_auth_,
-        req);
+  auto auth_rc = HTTPAuth::authenticateRequest(
+      session.get(),
+      client_auth_,
+      req);
 
-    if (!auth_rc.isSuccess()) {
-      req_stream->readBody();
-
-      if (uri.path() == "/api/v1/sql") {
-        util::BinaryMessageWriter writer;
-        res.setStatus(http::kStatusOK);
-        writer.appendUInt8(0xf4);
-        writer.appendLenencString(auth_rc.message());
-        writer.appendUInt8(0xff);
-        res.addBody(writer.data(), writer.size());
-        res_stream->writeResponse(res);
-      } else {
-        res.setStatus(http::kStatusUnauthorized);
-        res.addHeader("WWW-Authenticate", "Token");
-        res.addHeader("Content-Type", "text/plain; charset=utf-8");
-        res.addBody(auth_rc.message());
-        res_stream->writeResponse(res);
-        return;
-      }
-    }
+  if (!auth_rc.isSuccess()) {
+    auth_rc = internal_auth_->verifyRequest(session.get(), req);
   }
 
   if (uri.path() == "/api/v1/tables/insert") {
@@ -148,6 +129,27 @@ void AnalyticsServlet::handle(
     });
     res_stream->writeResponse(res);
     return;
+  }
+
+  if (!auth_rc.isSuccess()) {
+    req_stream->readBody();
+
+    if (uri.path() == "/api/v1/sql") {
+      util::BinaryMessageWriter writer;
+      res.setStatus(http::kStatusOK);
+      writer.appendUInt8(0xf4);
+      writer.appendLenencString(auth_rc.message());
+      writer.appendUInt8(0xff);
+      res.addBody(writer.data(), writer.size());
+      res_stream->writeResponse(res);
+    } else {
+      res.setStatus(http::kStatusUnauthorized);
+      res.addHeader("WWW-Authenticate", "Token");
+      res.addHeader("Content-Type", "text/plain; charset=utf-8");
+      res.addBody(auth_rc.message());
+      res_stream->writeResponse(res);
+      return;
+    }
   }
 
   /* SQL */
@@ -163,10 +165,6 @@ void AnalyticsServlet::handle(
     getAuthInfo(session.get(), &req, &res);
     res_stream->writeResponse(res);
     return;
-  }
-
-  if (session->getEffectiveNamespace().empty()) {
-    internal_auth_->verifyRequest(session.get(), req);
   }
 
   if (session->getEffectiveNamespace().empty()) {
