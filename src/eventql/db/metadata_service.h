@@ -28,6 +28,7 @@
 #include "eventql/util/SHA1.h"
 #include "eventql/db/metadata_file.h"
 #include "eventql/db/metadata_store.h"
+#include "eventql/db/metadata_operation.h"
 
 namespace eventql {
 
@@ -41,6 +42,11 @@ public:
       const String& ns,
       const String& table_name,
       const SHA1Hash& txid);
+
+  Status performMetadataOperation(
+      const String& ns,
+      const String& table_name,
+      MetadataOperation op);
 
 protected:
 

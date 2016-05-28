@@ -41,5 +41,12 @@ Status MetadataService::createMetadataFile(
       metadata_file);
 }
 
+Status MetadataService::performMetadataOperation(
+    const String& ns,
+    const String& table_name,
+    MetadataOperation op) {
+  return Status(eRuntimeError, "not yet implemented");
+}
+
 } // namespace eventql
 

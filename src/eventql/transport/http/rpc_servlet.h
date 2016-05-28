@@ -92,6 +92,11 @@ protected:
       const http::HTTPRequest* req,
       http::HTTPResponse* res);
 
+  void performMetadataOperation(
+      const URI& uri,
+      const http::HTTPRequest* req,
+      http::HTTPResponse* res);
+
   TableService* node_;
   MetadataService* metadata_service_;
   String tmpdir_;

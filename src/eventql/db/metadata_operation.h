@@ -39,14 +39,8 @@ public:
   SHA1Hash getInputTransactionID() const;
   SHA1Hash getOutputTransactionID() const;
 
-  virtual Status decode(InputStream* is) = 0;
-  virtual Status encode(OutputStream* os) const = 0;
-
-};
-
-class AddPartitionOperation {
-public:
-
+  Status decode(InputStream* is);
+  Status encode(OutputStream* os) const;
 
 };
 
