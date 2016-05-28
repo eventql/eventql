@@ -31,15 +31,19 @@
 namespace eventql {
 
 TimeWindowPartitioner::TimeWindowPartitioner(
-    const String& table_name) :
-    table_name_(table_name) {
+    const String& table_name,
+    const String& partition_key) :
+    table_name_(table_name),
+    partition_key_(partition_key) {
   config_.set_partition_size(4 * kMicrosPerHour);
 }
 
 TimeWindowPartitioner::TimeWindowPartitioner(
     const String& table_name,
+    const String& partition_key,
     const TimeWindowPartitionerConfig& config) :
     table_name_(table_name),
+    partition_key_(partition_key),
     config_(config) {}
 
 SHA1Hash TimeWindowPartitioner::partitionKeyFor(
@@ -136,7 +140,7 @@ Vector<SHA1Hash> TimeWindowPartitioner::listPartitions(
   bool has_upper_limit = false;
 
   for (const auto& c : constraints) {
-    if (c.column_name != "time") { // FIXME
+    if (c.column_name != partition_key_) { // FIXME
       continue;
     }
 

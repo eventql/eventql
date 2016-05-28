@@ -56,8 +56,8 @@ public:
 
   TableStorage storage() const;
 
+  const String& getPartitionKey() const;
   TablePartitionerType partitionerType() const;
-
   RefPtr<TablePartitioner> partitioner() const;
 
   void updateConfig(TableDefinition new_config);

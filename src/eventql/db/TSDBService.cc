@@ -234,7 +234,7 @@ void TSDBService::insertRecord(
     RAISEF(kNotFoundError, "table not found: $0", table_name);
   }
 
-  auto partition_key_field_name = "time";
+  auto partition_key_field_name = table.get()->getPartitionKey();
   auto partition_key_field = data.getField(partition_key_field_name);
   if (partition_key_field.isEmpty()) {
     RAISEF(kNotFoundError, "missing field: $0", partition_key_field_name);
