@@ -785,6 +785,8 @@ evql_core_a_SOURCES = \
     eventql/config/config_directory_legacy.h \
     eventql/config/config_directory_zookeeper.cc \
     eventql/config/config_directory_zookeeper.h \
+    eventql/config/process_config.cc \
+    eventql/config/process_config.h \
     eventql/db/CompactionStrategy.cc \
     eventql/db/CompactionStrategy.h \
     eventql/db/CompactionWorker.cc \
