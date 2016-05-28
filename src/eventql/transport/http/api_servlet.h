@@ -38,6 +38,7 @@
 #include "eventql/RemoteTSDBScanParams.pb.h"
 #include "eventql/auth/client_auth.h"
 #include "eventql/auth/internal_auth.h"
+#include "eventql/server/sql_service.h"
 
 #include "eventql/eventql.h"
 
@@ -57,7 +58,8 @@ public:
       csql::Runtime* sql,
       eventql::TSDBService* tsdb,
       ConfigDirectory* customer_dir,
-      PartitionMap* pmap);
+      PartitionMap* pmap,
+      SQLService* sql_service);
 
   void handleHTTPRequest(
       RefPtr<http::HTTPRequestStream> req_stream,
@@ -287,6 +289,8 @@ protected:
   LogfileAPIServlet logfile_api_;
   MapReduceAPIServlet mapreduce_api_;
   PartitionMap* pmap_;
+
+  SQLService* sql_service_;
 };
 
 }

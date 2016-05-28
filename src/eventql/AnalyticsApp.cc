@@ -81,14 +81,14 @@ AnalyticsApp::AnalyticsApp(
   });
 }
 
-RefPtr<csql::TableProvider> AnalyticsApp::getTableProvider(
-    const String& customer) const {
-  return eventql::SQLEngine::tableProviderForNamespace(
-        partition_map_,
-        replication_scheme_,
-        auth_,
-        customer);
-}
+//RefPtr<csql::TableProvider> AnalyticsApp::getTableProvider(
+//    const String& customer) const {
+//  return eventql::SQLEngine::tableProviderForNamespace(
+//        partition_map_,
+//        replication_scheme_,
+//        auth_,
+//        customer);
+//}
 
 eventql::TSDBService* AnalyticsApp::getTSDBNode() const {
   return tsdb_node_;

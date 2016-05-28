@@ -22,44 +22,43 @@
  * code of your own applications
  */
 #pragma once
-#include <eventql/sql/runtime/runtime.h>
+#include "eventql/eventql.h"
+#include <eventql/util/stdtypes.h>
+#include <eventql/db/TableConfig.pb.h>
+#include <eventql/db/Partition.h>
+#include <eventql/db/TSDBNodeConfig.pb.h>
+#include <eventql/db/TSDBTableInfo.h>
+#include <eventql/db/PartitionInfo.pb.h>
+#include <eventql/db/RecordEnvelope.pb.h>
 #include <eventql/db/TSDBService.h>
+#include <eventql/db/partition_map.h>
+#include <eventql/db/TimeWindowPartitioner.h>
+#include <eventql/sql/transaction.h>
 #include <eventql/auth/internal_auth.h>
 
 namespace eventql {
-class TSDBService;
 
-class SQLEngine {
+using TableService = TSDBService;
+
+class SQLService {
 public:
 
-//  static RefPtr<csql::TableProvider> tableProviderForNamespace(
-//      PartitionMap* partition_map,
-//      ReplicationScheme* replication_scheme,
-//      InternalAuth* auth,
-//      const String& tsdb_namespace);
-////
-//  static RefPtr<csql::QueryTreeNode> rewriteQuery(
-//      csql::Runtime* runtime,
-//      PartitionMap* partition_map,
-//      ReplicationScheme* replication_scheme,
-//      InternalAuth* auth,
-//      const String& tsdb_namespace,
-//      RefPtr<csql::QueryTreeNode> query);
-//
-//  static RefPtr<csql::ExecutionStrategy> getExecutionStrategy(
-//      csql::Runtime* runtime,
-//      PartitionMap* partition_map,
-//      ReplicationScheme* replication_scheme,
-//      InternalAuth* auth,
-//      const String& customer);
-//
-//protected:
-//
-//  // rewrite tbl.lastXXX to tbl WHERE time > x and time < x
-//  static void rewriteTableTimeSuffix(
-//      RefPtr<csql::QueryTreeNode> node);
+  SQLService(
+      csql::Runtime* sql,
+      PartitionMap* pmap,
+      ReplicationScheme* repl,
+      InternalAuth* auth,
+      TableService* table_service);
+
+  ScopedPtr<csql::Transaction> startTransaction(Session* session);
+
+protected:
+  csql::Runtime* sql_;
+  PartitionMap* pmap_;
+  ReplicationScheme* repl_;
+  InternalAuth* auth_;
+  TableService* table_service_;
 };
 
-void z1VersionExpr(sql_txn* ctx, int argc, csql::SValue* argv, csql::SValue* out);
+} // namespace eventql
 
-}

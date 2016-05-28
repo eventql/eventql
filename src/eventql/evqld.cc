@@ -497,6 +497,13 @@ int main(int argc, const char** argv) {
       sql->symbols()->registerFunction("z1_version", &z1VersionExpr);
     }
 
+    eventql::SQLService sql_service(
+        sql.get(),
+        &partition_map,
+        repl_scheme.get(),
+        internal_auth.get(),
+        &tsdb_node);
+
     auto analytics_app = mkRef(
         new AnalyticsApp(
             &tsdb_node,
@@ -529,7 +536,8 @@ int main(int argc, const char** argv) {
         sql.get(),
         &tsdb_node,
         config_dir.get(),
-        &partition_map);
+        &partition_map,
+        &sql_service);
 
     eventql::StatusServlet status_servlet(
         &cfg,

@@ -887,6 +887,8 @@ evql_core_a_SOURCES = \
     eventql/server/session.h \
     eventql/server/server_stats.cc \
     eventql/server/server_stats.h \
+    eventql/server/sql_service.cc \
+    eventql/server/sql_service.h \
     eventql/server/sql/codec/binary_codec.cc \
     eventql/server/sql/codec/binary_codec.h \
     eventql/server/sql/codec/json_codec.cc \

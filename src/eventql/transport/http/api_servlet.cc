@@ -59,7 +59,8 @@ AnalyticsServlet::AnalyticsServlet(
     csql::Runtime* sql,
     eventql::TSDBService* tsdb,
     ConfigDirectory* customer_dir,
-    PartitionMap* pmap) :
+    PartitionMap* pmap,
+    SQLService* sql_service) :
     app_(app),
     cachedir_(cachedir),
     auth_(auth),
@@ -70,7 +71,8 @@ AnalyticsServlet::AnalyticsServlet(
     customer_dir_(customer_dir),
     logfile_api_(app->logfileService(), customer_dir, cachedir),
     mapreduce_api_(app->mapreduceService(), customer_dir, cachedir),
-    pmap_(pmap) {}
+    pmap_(pmap),
+    sql_service_(sql_service) {}
 
 void AnalyticsServlet::handleHTTPRequest(
     RefPtr<http::HTTPRequestStream> req_stream,
@@ -356,75 +358,75 @@ void AnalyticsServlet::fetchTableDefinition(
     const http::HTTPRequest* req,
     http::HTTPResponse* res) {
 
-  auto table_provider = app_->getTableProvider(session->getEffectiveNamespace());
-  auto table_info_opt = table_provider->describe(table_name);
-  if (table_info_opt.isEmpty()) {
-    res->setStatus(http::kStatusNotFound);
-    res->addBody("table not found");
-    return;
-  }
+  //auto table_provider = app_->getTableProvider(session->getEffectiveNamespace());
+  //auto table_info_opt = table_provider->describe(table_name);
+  //if (table_info_opt.isEmpty()) {
+  //  res->setStatus(http::kStatusNotFound);
+  //  res->addBody("table not found");
+  //  return;
+  //}
 
-  const auto& table_info = table_info_opt.get();
+  //const auto& table_info = table_info_opt.get();
 
-  auto table_opt = pmap_->findTable(session->getEffectiveNamespace(), table_name);
-  if (table_opt.isEmpty()) {
-    res->setStatus(http::kStatusNotFound);
-    res->addBody("table not found");
-    return;
-  }
+  //auto table_opt = pmap_->findTable(session->getEffectiveNamespace(), table_name);
+  //if (table_opt.isEmpty()) {
+  //  res->setStatus(http::kStatusNotFound);
+  //  res->addBody("table not found");
+  //  return;
+  //}
 
-  Buffer buf;
-  json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
+  //Buffer buf;
+  //json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
 
-  json.beginObject();
-  json.addObjectEntry("table");
-  json.beginObject();
+  //json.beginObject();
+  //json.addObjectEntry("table");
+  //json.beginObject();
 
-  json.addObjectEntry("name");
-  json.addString(table_info.table_name);
-  json.addComma();
+  //json.addObjectEntry("name");
+  //json.addString(table_info.table_name);
+  //json.addComma();
 
-  json.addObjectEntry("tags");
-  json::toJSON(table_info.tags, &json);
-  json.addComma();
+  //json.addObjectEntry("tags");
+  //json::toJSON(table_info.tags, &json);
+  //json.addComma();
 
-  json.addObjectEntry("columns");
-  json.beginArray();
-  for (size_t i = 0; i < table_info.columns.size(); ++i) {
-    const auto& col = table_info.columns[i];
+  //json.addObjectEntry("columns");
+  //json.beginArray();
+  //for (size_t i = 0; i < table_info.columns.size(); ++i) {
+  //  const auto& col = table_info.columns[i];
 
-    if (i > 0) {
-      json.addComma();
-    }
+  //  if (i > 0) {
+  //    json.addComma();
+  //  }
 
-    json.beginObject();
+  //  json.beginObject();
 
-    json.addObjectEntry("column_name");
-    json.addString(col.column_name);
-    json.addComma();
+  //  json.addObjectEntry("column_name");
+  //  json.addString(col.column_name);
+  //  json.addComma();
 
-    json.addObjectEntry("type");
-    json.addString(col.type);
-    json.addComma();
+  //  json.addObjectEntry("type");
+  //  json.addString(col.type);
+  //  json.addComma();
 
-    json.addObjectEntry("is_nullable");
-    json.addBool(col.is_nullable);
+  //  json.addObjectEntry("is_nullable");
+  //  json.addBool(col.is_nullable);
 
-    json.endObject();
-  }
+  //  json.endObject();
+  //}
 
-  json.endArray();
+  //json.endArray();
 
-  json.addComma();
-  json.addObjectEntry("schema");
-  table_opt.get()->schema()->toJSON(&json);
+  //json.addComma();
+  //json.addObjectEntry("schema");
+  //table_opt.get()->schema()->toJSON(&json);
 
-  json.endObject();
-  json.endObject();
+  //json.endObject();
+  //json.endObject();
 
-  res->setStatus(http::kStatusOK);
-  res->setHeader("Content-Type", "application/json; charset=utf-8");
-  res->addBody(buf);
+  //res->setStatus(http::kStatusOK);
+  //res->setHeader("Content-Type", "application/json; charset=utf-8");
+  //res->addBody(buf);
 }
 
 void AnalyticsServlet::createTable(
@@ -1097,10 +1099,7 @@ void AnalyticsServlet::executeSQL_BINARY(
     }
 
     try {
-      auto txn = sql_->newTransaction();
-      txn->setTableProvider(app_->getTableProvider(session->getEffectiveNamespace()));
-      txn->setUserData(session);
-
+      auto txn = sql_service_->startTransaction(session);
       auto qplan = sql_->buildQueryPlan(txn.get(), query);
       qplan->setProgressCallback([&result_format, &qplan] () {
         result_format.sendProgress(qplan->getProgress());
@@ -1164,10 +1163,7 @@ void AnalyticsServlet::executeSQL_JSON(
   }
 
   try {
-    auto txn = sql_->newTransaction();
-    txn->setTableProvider(app_->getTableProvider(session->getEffectiveNamespace()));
-    txn->setUserData(session);
-
+    auto txn = sql_service_->startTransaction(session);
     auto qplan = sql_->buildQueryPlan(txn.get(), query);
 
     Buffer result;
@@ -1257,10 +1253,7 @@ void AnalyticsServlet::executeSQL_JSONSSE(
   }
 
   try {
-    auto txn = sql_->newTransaction();
-    txn->setTableProvider(app_->getTableProvider(session->getEffectiveNamespace()));
-    txn->setUserData(session);
-
+    auto txn = sql_service_->startTransaction(session);
     auto qplan = sql_->buildQueryPlan(txn.get(), query);
 
     JSONSSECodec json_sse_codec(sse_stream);
@@ -1324,9 +1317,7 @@ void AnalyticsServlet::executeQTree(
     }
 
     try {
-      auto txn = sql_->newTransaction();
-      txn->setTableProvider(app_->getTableProvider(session->getEffectiveNamespace()));
-      txn->setUserData(session);
+      auto txn = sql_service_->startTransaction(session);
 
       csql::QueryTreeCoder coder(txn.get());
       auto req_body_is = BufferInputStream::fromBuffer(&req->body());

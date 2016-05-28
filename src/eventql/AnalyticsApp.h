@@ -52,7 +52,7 @@ public:
       const String& datadir,
       const String& cachedir);
 
-  RefPtr<csql::TableProvider> getTableProvider(const String& customer) const;
+  //RefPtr<csql::TableProvider> getTableProvider(const String& customer) const;
   eventql::TSDBService* getTSDBNode() const;
 
   void insertMetric(

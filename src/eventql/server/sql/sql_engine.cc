@@ -47,17 +47,17 @@ namespace eventql {
 //  return query;
 //}
 
-RefPtr<csql::TableProvider> SQLEngine::tableProviderForNamespace(
-    PartitionMap* partition_map,
-    ReplicationScheme* replication_scheme,
-    InternalAuth* auth,
-    const String& tsdb_namespace) {
-  return new TSDBTableProvider(
-      tsdb_namespace,
-      partition_map,
-      replication_scheme,
-      auth);
-}
+//RefPtr<csql::TableProvider> SQLEngine::tableProviderForNamespace(
+//    PartitionMap* partition_map,
+//    ReplicationScheme* replication_scheme,
+//    InternalAuth* auth,
+//    const String& tsdb_namespace) {
+//  return new TSDBTableProvider(
+//      tsdb_namespace,
+//      partition_map,
+//      replication_scheme,
+//      auth);
+//}
 
 //void SQLEngine::rewriteTableTimeSuffix(
 //      RefPtr<csql::QueryTreeNode> node) {
