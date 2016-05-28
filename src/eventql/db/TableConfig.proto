@@ -34,7 +34,7 @@ enum TableStorage {
   TBL_STORAGE_STATIC = 2;
 };
 
-// next id: 12
+// next id: 13
 message TableConfig {
 
   /**
@@ -46,6 +46,11 @@ message TableConfig {
    * The partitioning key for this table
    */
   optional string partition_key = 11 [default = "time"];
+
+  /**
+   * The primary key for this table
+   */
+  repeated string primary_key = 12;
 
   /**
    * The partitioner for this table

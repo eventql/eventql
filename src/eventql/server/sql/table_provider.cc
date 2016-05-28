@@ -216,6 +216,10 @@ Status TSDBTableProvider::createTable(
   tblcfg->set_num_shards(1);
   tblcfg->set_partitioner(eventql::TBL_PARTITION_TIMEWINDOW);
   tblcfg->set_storage(eventql::TBL_STORAGE_COLSM);
+  tblcfg->set_partition_key(partition_key);
+  for (const auto& col : primary_key) {
+    tblcfg->add_primary_key(col);
+  }
 
   iputs("table: $0", td.DebugString());
   return Status::success();
