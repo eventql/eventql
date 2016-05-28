@@ -30,7 +30,7 @@
 #include <eventql/db/TSDBTableInfo.h>
 #include <eventql/db/PartitionInfo.pb.h>
 #include <eventql/db/RecordEnvelope.pb.h>
-#include <eventql/db/TSDBService.h>
+#include <eventql/db/TableService.h>
 #include <eventql/db/partition_map.h>
 #include <eventql/db/TimeWindowPartitioner.h>
 #include <eventql/sql/transaction.h>
@@ -38,7 +38,7 @@
 
 namespace eventql {
 
-using TableService = TSDBService;
+using TableService = TableService;
 
 class SQLService {
 public:

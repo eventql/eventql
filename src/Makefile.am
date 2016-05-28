@@ -845,8 +845,8 @@ evql_core_a_SOURCES = \
     eventql/db/StaticPartitionWriter.h \
     eventql/db/TSDBClient.cc \
     eventql/db/TSDBClient.h \
-    eventql/db/TSDBService.cc \
-    eventql/db/TSDBService.h \
+    eventql/db/TableService.cc \
+    eventql/db/TableService.h \
     eventql/db/TSDBServlet.cc \
     eventql/db/TSDBServlet.h \
     eventql/db/TSDBTableRef.cc \

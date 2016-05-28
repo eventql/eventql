@@ -50,7 +50,7 @@ static bool write_json_to_buf(const char16_t* str, uint32_t strlen, void* out) {
 JavaScriptContext::JavaScriptContext(
     const String& customer,
     RefPtr<MapReduceJobSpec> job,
-    TSDBService* tsdb,
+    TableService* tsdb,
     RefPtr<MapReduceTaskBuilder> task_builder,
     RefPtr<MapReduceScheduler> scheduler,
     size_t memlimit /* = kDefaultMemLimit */) :

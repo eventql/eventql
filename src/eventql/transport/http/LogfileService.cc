@@ -42,7 +42,7 @@ namespace eventql {
 LogfileService::LogfileService(
     ConfigDirectory* cdir,
     InternalAuth* auth,
-    eventql::TSDBService* tsdb,
+    eventql::TableService* tsdb,
     eventql::PartitionMap* pmap,
     eventql::ReplicationScheme* repl,
     csql::Runtime* sql) :

@@ -57,7 +57,7 @@ AnalyticsServlet::AnalyticsServlet(
     ClientAuth* client_auth,
     InternalAuth* internal_auth,
     csql::Runtime* sql,
-    eventql::TSDBService* tsdb,
+    eventql::TableService* tsdb,
     ConfigDirectory* customer_dir,
     PartitionMap* pmap,
     SQLService* sql_service) :

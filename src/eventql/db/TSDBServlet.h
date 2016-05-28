@@ -25,7 +25,7 @@
 #define _FNORD_TSDB_TSDBSERVLET_H
 #include "eventql/util/http/httpservice.h"
 #include <eventql/util/random.h>
-#include <eventql/db/TSDBService.h>
+#include <eventql/db/TableService.h>
 #include <eventql/util/http/HTTPSSEStream.h>
 
 #include "eventql/eventql.h"
@@ -36,7 +36,7 @@ class TSDBServlet : public http::StreamingHTTPService {
 public:
 
   TSDBServlet(
-      TSDBService* node,
+      TableService* node,
       const String& tmpdir);
 
   void handleHTTPRequest(
@@ -87,7 +87,7 @@ protected:
       http::HTTPRequestStream* req_stream,
       http::HTTPResponse* res);
 
-  TSDBService* node_;
+  TableService* node_;
   String tmpdir_;
   Random rnd_;
 };

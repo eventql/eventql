@@ -24,7 +24,7 @@
  */
 #include <eventql/util/SHA1.h>
 #include <eventql/server/sql/table_provider.h>
-#include <eventql/db/TSDBService.h>
+#include <eventql/db/TableService.h>
 #include <eventql/sql/CSTableScan.h>
 
 #include "eventql/eventql.h"
@@ -35,7 +35,7 @@ TSDBTableProvider::TSDBTableProvider(
     const String& tsdb_namespace,
     PartitionMap* partition_map,
     ReplicationScheme* replication_scheme,
-    TSDBService* table_service,
+    TableService* table_service,
     InternalAuth* auth) :
     tsdb_namespace_(tsdb_namespace),
     partition_map_(partition_map),

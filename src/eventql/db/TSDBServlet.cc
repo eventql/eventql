@@ -39,7 +39,7 @@
 namespace eventql {
 
 TSDBServlet::TSDBServlet(
-    TSDBService* node,
+    TableService* node,
     const String& tmpdir) :
     node_(node),
     tmpdir_(tmpdir) {}

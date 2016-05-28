@@ -48,10 +48,10 @@ enum class InsertFlags : uint64_t {
   SYNC_COMMIT = 2
 };
 
-class TSDBService {
+class TableService {
 public:
 
-  TSDBService(
+  TableService(
       PartitionMap* pmap,
       ReplicationScheme* repl,
       thread::EventLoop* ev,

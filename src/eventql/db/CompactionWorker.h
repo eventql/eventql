@@ -24,7 +24,7 @@
 #pragma once
 #include <thread>
 #include <eventql/util/stdtypes.h>
-#include <eventql/db/TSDBService.h>
+#include <eventql/db/TableService.h>
 #include <eventql/util/random.h>
 
 #include "eventql/eventql.h"

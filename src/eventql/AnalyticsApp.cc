@@ -37,7 +37,7 @@
 namespace eventql {
 
 AnalyticsApp::AnalyticsApp(
-    eventql::TSDBService* tsdb_node,
+    eventql::TableService* tsdb_node,
     eventql::PartitionMap* partition_map,
     eventql::ReplicationScheme* replication_scheme,
     eventql::CompactionWorker* cstable_index,
@@ -90,7 +90,7 @@ AnalyticsApp::AnalyticsApp(
 //        customer);
 //}
 
-eventql::TSDBService* AnalyticsApp::getTSDBNode() const {
+eventql::TableService* AnalyticsApp::getTSDBNode() const {
   return tsdb_node_;
 }
 
