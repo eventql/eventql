@@ -357,76 +357,21 @@ void AnalyticsServlet::fetchTableDefinition(
     const String& table_name,
     const http::HTTPRequest* req,
     http::HTTPResponse* res) {
+  auto table = pmap_->findTable(session->getEffectiveNamespace(), table_name);
+  if (table.isEmpty()) {
+    res->setStatus(http::kStatusNotFound);
+    res->addBody("table not found");
+    return;
+  }
 
-  //auto table_provider = app_->getTableProvider(session->getEffectiveNamespace());
-  //auto table_info_opt = table_provider->describe(table_name);
-  //if (table_info_opt.isEmpty()) {
-  //  res->setStatus(http::kStatusNotFound);
-  //  res->addBody("table not found");
-  //  return;
-  //}
+  Buffer buf;
+  json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
+  auto schema = table.get()->schema();
+  schema->toJSON(&json);
 
-  //const auto& table_info = table_info_opt.get();
-
-  //auto table_opt = pmap_->findTable(session->getEffectiveNamespace(), table_name);
-  //if (table_opt.isEmpty()) {
-  //  res->setStatus(http::kStatusNotFound);
-  //  res->addBody("table not found");
-  //  return;
-  //}
-
-  //Buffer buf;
-  //json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
-
-  //json.beginObject();
-  //json.addObjectEntry("table");
-  //json.beginObject();
-
-  //json.addObjectEntry("name");
-  //json.addString(table_info.table_name);
-  //json.addComma();
-
-  //json.addObjectEntry("tags");
-  //json::toJSON(table_info.tags, &json);
-  //json.addComma();
-
-  //json.addObjectEntry("columns");
-  //json.beginArray();
-  //for (size_t i = 0; i < table_info.columns.size(); ++i) {
-  //  const auto& col = table_info.columns[i];
-
-  //  if (i > 0) {
-  //    json.addComma();
-  //  }
-
-  //  json.beginObject();
-
-  //  json.addObjectEntry("column_name");
-  //  json.addString(col.column_name);
-  //  json.addComma();
-
-  //  json.addObjectEntry("type");
-  //  json.addString(col.type);
-  //  json.addComma();
-
-  //  json.addObjectEntry("is_nullable");
-  //  json.addBool(col.is_nullable);
-
-  //  json.endObject();
-  //}
-
-  //json.endArray();
-
-  //json.addComma();
-  //json.addObjectEntry("schema");
-  //table_opt.get()->schema()->toJSON(&json);
-
-  //json.endObject();
-  //json.endObject();
-
-  //res->setStatus(http::kStatusOK);
-  //res->setHeader("Content-Type", "application/json; charset=utf-8");
-  //res->addBody(buf);
+  res->setStatus(http::kStatusOK);
+  res->setHeader("Content-Type", "application/json; charset=utf-8");
+  res->addBody(buf);
 }
 
 void AnalyticsServlet::createTable(
