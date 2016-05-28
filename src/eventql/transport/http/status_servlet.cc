@@ -258,6 +258,11 @@ void StatusServlet::renderDashboard(
   }
   html += "</table>";
 
+  html += "<h3>Cluster Config</h3>";
+  html += StringUtil::format(
+      "<table cellspacing=0 border=1><tr><td><pre>$0</pre></td></tr></table>",
+      cdir_->getClusterConfig().DebugString());
+
   response->setStatus(http::kStatusOK);
   response->addHeader("Content-Type", "text/html; charset=utf-8");
   response->addBody(html);
