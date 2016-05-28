@@ -27,8 +27,12 @@
 #include <eventql/util/exception.h>
 #include <eventql/util/wallclock.h>
 #include <eventql/util/test/unittest.h>
- 
-UNIT_TEST(RuntimeTest);
+#include <eventql/config/process_config.h>
 
-TEST_CASE(RuntimeTest, TestStaticExpression, [] () {
+
+UNIT_TEST(ProcessConfigTest);
+
+TEST_CASE(ProcessConfigTest, TestProcessConfigBuilder, [] () {
+
+});
 
