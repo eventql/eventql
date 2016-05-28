@@ -162,6 +162,15 @@ int main(int argc, const char** argv) {
       "<backend>");
 
   flags.defineFlag(
+      "client_auth_backend",
+      cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      NULL,
+      "backend",
+      "<backend>");
+
+  flags.defineFlag(
       "legacy_auth_secret",
       cli::FlagParser::T_STRING,
       false,
@@ -248,11 +257,11 @@ int main(int argc, const char** argv) {
       false,
       NULL,
       NULL,
-      "don't log to stderr",
+      "log to syslog",
       "<switch>");
 
   flags.defineFlag(
-      "log_to_stderr",
+      "nolog_to_stderr",
       cli::FlagParser::T_SWITCH,
       false,
       NULL,
@@ -262,7 +271,7 @@ int main(int argc, const char** argv) {
 
   flags.parseArgv(argc, argv);
 
-  if (flags.isSet("log_to_stderr") && !flags.isSet("daemonize")) {
+  if (!flags.isSet("nolog_to_stderr") && !flags.isSet("daemonize")) {
     Application::logToStderr();
   }
 
@@ -273,11 +282,9 @@ int main(int argc, const char** argv) {
   Logger::get()->setMinimumLogLevel(
       strToLogLevel(flags.getString("loglevel")));
 
-  auto stdout_os = OutputStream::getStdout();
-  auto stderr_os = OutputStream::getStderr();
-
   /* print help */
   if (flags.isSet("help") || flags.isSet("version")) {
+    auto stdout_os = OutputStream::getStdout();
     stdout_os->write(
         StringUtil::format(
             "EventQL $0 ($1)\n"
@@ -291,6 +298,7 @@ int main(int argc, const char** argv) {
   }
 
   if (flags.isSet("help")) {
+    auto stdout_os = OutputStream::getStdout();
     stdout_os->write(
         "Usage: $ evqld [OPTIONS]\n"
         "  -?, --help              Display this help text and exit\n"
@@ -355,7 +363,8 @@ int main(int argc, const char** argv) {
 
   /* customer directory */
   if (!FileUtil::exists(flags.getString("datadir"))) {
-    RAISE(kRuntimeError, "data dir not found: " + flags.getString("datadir"));
+    logFatal("evqld", "data dir not found: " + flags.getString("datadir"));
+    return 1;
   }
 
   auto cdb_dir = FileUtil::joinPaths(flags.getString("datadir"), "cdb");
@@ -375,11 +384,17 @@ int main(int argc, const char** argv) {
             server_name,
             flags.getString("listen")));
   } else {
-    RAISE(kRuntimeError, "invalid config backend: " + flags.getString("config_backend"));
+    logFatal("evqld", "invalid config backend: " + flags.getString("config_backend"));
   }
 
   ScopedPtr<eventql::ClientAuth> client_auth;
-  client_auth.reset(new LegacyClientAuth(flags.getString("legacy_auth_secret")));
+  if (flags.getString("client_auth_backend") == "trust") {
+    client_auth.reset(new TrustClientAuth());
+  } else if (flags.getString("client_auth_backend") == "legacy") {
+    client_auth.reset(new LegacyClientAuth(flags.getString("legacy_auth_secret")));
+  } else {
+    logFatal("evqld", "invalid client auth backend: " + flags.getString("client_auth_backend"));
+  }
 
   ScopedPtr<eventql::InternalAuth> internal_auth;
   internal_auth.reset(new TrustInternalAuth());
