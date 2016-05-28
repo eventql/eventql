@@ -800,6 +800,11 @@ void AnalyticsServlet::insertIntoTable(
 
     String insert_database = session->getEffectiveNamespace();
 
+    auto hdrval = req->getHeader("X-Z1-Namespace");
+    if (!hdrval.empty()) {
+      insert_database = hdrval;
+    }
+
     auto database = json::objectGetString(jrow, jreq.end(), "database");
     if (!database.isEmpty()) {
       insert_database = database.get();
