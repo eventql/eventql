@@ -265,7 +265,7 @@ int main(int argc, const char** argv) {
       cli::FlagParser::T_SWITCH,
       false,
       NULL,
-      "true",
+      NULL,
       "don't log to stderr",
       "<switch>");
 
