@@ -22,7 +22,7 @@
  * code of your own applications
  */
 #include "eventql/util/util/binarymessagewriter.h"
-#include "eventql/db/TSDBServlet.h"
+#include "eventql/transport/http/rpc_servlet.h"
 #include "eventql/db/RecordEnvelope.pb.h"
 #include "eventql/util/json/json.h"
 #include <eventql/util/wallclock.h>
@@ -38,13 +38,13 @@
 
 namespace eventql {
 
-TSDBServlet::TSDBServlet(
+RPCServlet::RPCServlet(
     TableService* node,
     const String& tmpdir) :
     node_(node),
     tmpdir_(tmpdir) {}
 
-void TSDBServlet::handleHTTPRequest(
+void RPCServlet::handleHTTPRequest(
     RefPtr<http::HTTPRequestStream> req_stream,
     RefPtr<http::HTTPResponseStream> res_stream) {
   const auto& req = req_stream->request();
@@ -132,7 +132,7 @@ void TSDBServlet::handleHTTPRequest(
   res_stream->finishResponse();
 }
 
-void TSDBServlet::insertRecords(
+void RPCServlet::insertRecords(
     const http::HTTPRequest* req,
     http::HTTPResponse* res,
     URI* uri) {
@@ -141,7 +141,7 @@ void TSDBServlet::insertRecords(
   res->setStatus(http::kStatusCreated);
 }
 
-void TSDBServlet::compactPartition(
+void RPCServlet::compactPartition(
     const http::HTTPRequest* req,
     http::HTTPResponse* res,
     URI* uri) {
@@ -176,7 +176,7 @@ void TSDBServlet::compactPartition(
   res->setStatus(http::kStatusCreated);
 }
 
-void TSDBServlet::replicateRecords(
+void RPCServlet::replicateRecords(
     const http::HTTPRequest* req,
     http::HTTPResponse* res,
     URI* uri) {
@@ -190,7 +190,7 @@ void TSDBServlet::replicateRecords(
   res->setStatus(http::kStatusCreated);
 }
 
-void TSDBServlet::streamPartition(
+void RPCServlet::streamPartition(
     const http::HTTPRequest* req,
     http::HTTPResponse* res,
     RefPtr<http::HTTPResponseStream> res_stream,
@@ -267,7 +267,7 @@ void TSDBServlet::streamPartition(
   res_stream->finishResponse();
 }
 
-void TSDBServlet::fetchPartitionInfo(
+void RPCServlet::fetchPartitionInfo(
     const http::HTTPRequest* req,
     http::HTTPResponse* res,
     URI* uri) {
@@ -308,7 +308,7 @@ void TSDBServlet::fetchPartitionInfo(
   }
 }
 
-void TSDBServlet::executeSQL(
+void RPCServlet::executeSQL(
     const http::HTTPRequest* req,
     http::HTTPResponse* res,
     URI* uri) {
@@ -327,7 +327,7 @@ void TSDBServlet::executeSQL(
   res->addBody(result);
 }
 
-void TSDBServlet::executeSQLStream(
+void RPCServlet::executeSQLStream(
     const http::HTTPRequest* req,
     http::HTTPResponse* res,
     RefPtr<http::HTTPResponseStream> res_stream,
@@ -369,7 +369,7 @@ void TSDBServlet::executeSQLStream(
   sse_stream.finish();
 }
 
-void TSDBServlet::updateCSTable(
+void RPCServlet::updateCSTable(
     const URI& uri,
     http::HTTPRequestStream* req_stream,
     http::HTTPResponse* res) {

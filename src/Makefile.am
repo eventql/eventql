@@ -847,8 +847,8 @@ evql_core_a_SOURCES = \
     eventql/db/TSDBClient.h \
     eventql/db/table_service.cc \
     eventql/db/table_service.h \
-    eventql/db/TSDBServlet.cc \
-    eventql/db/TSDBServlet.h \
+    eventql/transport/http/rpc_servlet.cc \
+    eventql/transport/http/rpc_servlet.h \
     eventql/db/TSDBTableRef.cc \
     eventql/db/TSDBTableRef.h \
     eventql/db/Table.cc \

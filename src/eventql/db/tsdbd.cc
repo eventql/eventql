@@ -49,7 +49,7 @@
 #include "eventql/util/protobuf/msg.h"
 #include "eventql/util/protobuf/MessageSchema.h"
 #include "eventql/db/table_service.h"
-#include "eventql/db/TSDBServlet.h"
+#include "eventql/transport/http/rpc_servlet.h"
 #include "eventql/db/TSDBNodeConfig.pb.h"
 
 #include "eventql/eventql.h"
@@ -133,7 +133,7 @@ int main(int argc, const char** argv) {
 
   eventql::TableService tsdb_node(&pmap);
 
-  eventql::TSDBServlet tsdb_servlet(&tsdb_node, "/tmp");
+  eventql::RPCServlet tsdb_servlet(&tsdb_node, "/tmp");
   http_router.addRouteByPrefixMatch("/tsdb", &tsdb_servlet, &tpool);
 
   ev.run();

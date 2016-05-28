@@ -55,7 +55,7 @@
 #include "eventql/AnalyticsApp.h"
 #include "eventql/db/TableConfig.pb.h"
 #include "eventql/db/table_service.h"
-#include "eventql/db/TSDBServlet.h"
+#include "eventql/transport/http/rpc_servlet.h"
 #include "eventql/db/ReplicationWorker.h"
 #include "eventql/db/LSMTableIndexCache.h"
 #include "eventql/server/sql/sql_engine.h"
@@ -470,7 +470,7 @@ int main(int argc, const char** argv) {
         &partition_map,
         &http);
 
-    eventql::TSDBServlet tsdb_servlet(&tsdb_node, flags.getString("cachedir"));
+    eventql::RPCServlet tsdb_servlet(&tsdb_node, flags.getString("cachedir"));
     http_router.addRouteByPrefixMatch("/tsdb", &tsdb_servlet, &tpool);
 
     eventql::CompactionWorker cstable_index(

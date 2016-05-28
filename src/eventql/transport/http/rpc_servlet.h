@@ -32,10 +32,10 @@
 
 namespace eventql {
 
-class TSDBServlet : public http::StreamingHTTPService {
+class RPCServlet : public http::StreamingHTTPService {
 public:
 
-  TSDBServlet(
+  RPCServlet(
       TableService* node,
       const String& tmpdir);
 
