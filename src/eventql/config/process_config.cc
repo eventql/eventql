@@ -32,6 +32,12 @@ ProcessConfig::ProcessConfig(
       properties_(properties) {}
 
 Option<String> ProcessConfig::getProperty(const String& key) const {
+  for (auto p : properties_) {
+    if (p.first == key) {
+      return Some(p.second);
+    }
+  }
+
   return None<String>();
 }
 
