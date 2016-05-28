@@ -66,7 +66,7 @@ public:
   Status setFile(const String& file);
   Option<String> getFile() const;
 
-  Status setLanguage(const String& language);
+  Status setLanguage(String language);
   Option<kLanguage> getLanguage();
 
   Option<String> getExec() const;

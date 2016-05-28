@@ -217,15 +217,14 @@ Option<String> CLIConfig::getFile() const {
   }
 }
 
-Status CLIConfig::setLanguage(const String& language) {
-  String lang = language;
-  StringUtil::toLower(&lang);
+Status CLIConfig::setLanguage(String language) {
+  StringUtil::toUpper(&language);
 
-  if (lang == "sql") {
+  if (language == "SQL") {
     language_ = Some(CLIConfig::kLanguage::SQL);
     return Status::success();
 
-  } else if (lang == "js" || lang == "javascript") {
+  } else if (language == "JS" || language == "JAVASCRIPT") {
     language_ = Some(CLIConfig::kLanguage::JAVASCRIPT);
     return Status::success();
 
