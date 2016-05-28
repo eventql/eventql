@@ -207,6 +207,17 @@ Status TSDBTableProvider::createTable(
         "first column in the PRIMARY KEY must be of type DATETIME");
   }
 
+  TableDefinition td;
+  td.set_customer(tsdb_namespace_);
+  td.set_table_name(create_table.getTableName());
+
+  auto tblcfg = td.mutable_config();
+  tblcfg->set_schema(msg_schema->encode().toString());
+  tblcfg->set_num_shards(1);
+  tblcfg->set_partitioner(eventql::TBL_PARTITION_TIMEWINDOW);
+  tblcfg->set_storage(eventql::TBL_STORAGE_COLSM);
+
+  iputs("table: $0", td.DebugString());
   return Status::success();
 }
 
