@@ -21,14 +21,13 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#ifndef _FNORD_TSDB_TSDBSERVLET_H
-#define _FNORD_TSDB_TSDBSERVLET_H
+#pragma once
 #include "eventql/util/http/httpservice.h"
 #include <eventql/util/random.h>
 #include <eventql/db/table_service.h>
 #include <eventql/util/http/HTTPSSEStream.h>
-
 #include "eventql/eventql.h"
+#include "eventql/db/metadata_store.h"
 
 namespace eventql {
 
@@ -37,6 +36,7 @@ public:
 
   RPCServlet(
       TableService* node,
+      MetadataStore* metadata_store,
       const String& tmpdir);
 
   void handleHTTPRequest(
@@ -87,10 +87,16 @@ protected:
       http::HTTPRequestStream* req_stream,
       http::HTTPResponse* res);
 
+  void storeMetadataFile(
+      const URI& uri,
+      const http::HTTPRequest* req,
+      http::HTTPResponse* res);
+
   TableService* node_;
+  MetadataStore* metadata_store_;
   String tmpdir_;
   Random rnd_;
 };
 
 }
-#endif
+

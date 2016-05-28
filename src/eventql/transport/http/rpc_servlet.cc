@@ -40,6 +40,7 @@ namespace eventql {
 
 RPCServlet::RPCServlet(
     TableService* node,
+    MetadataStore* metadata_store,
     const String& tmpdir) :
     node_(node),
     tmpdir_(tmpdir) {}
@@ -114,6 +115,13 @@ void RPCServlet::handleHTTPRequest(
 
     if (uri.path() == "/tsdb/update_cstable") {
       updateCSTable(uri, req_stream.get(), &res);
+      res_stream->writeResponse(res);
+      return;
+    }
+
+    if (uri.path() == "/rpc/store_metadata_file") {
+      req_stream->readBody();
+      storeMetadataFile(uri, &req, &res);
       res_stream->writeResponse(res);
       return;
     }
@@ -425,7 +433,58 @@ void RPCServlet::updateCSTable(
   res->setStatus(http::kStatusCreated);
 }
 
+void RPCServlet::storeMetadataFile(
+    const URI& uri,
+    const http::HTTPRequest* req,
+    http::HTTPResponse* res) {
+  const auto& params = uri.queryParams();
 
+  String db_namespace;
+  if (!URI::getParam(params, "namespace", &db_namespace)) {
+    RAISE(kRuntimeError, "missing ?namespace=... parameter");
+  }
+
+  String table_name;
+  if (!URI::getParam(params, "table", &table_name)) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody("error: missing ?table=... parameter");
+    return;
+  }
+
+  String txid;
+  if (!URI::getParam(params, "txid", &txid)) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody("missing ?txid=... parameter");
+    return;
+  }
+
+  MetadataFile metadata_file;
+  {
+    auto is = req->getBodyInputStream();
+    auto rc = metadata_file.decode(is.get());
+    if (!rc.isSuccess()) {
+      res->setStatus(http::kStatusInternalServerError);
+      res->addBody("ERROR: " + rc.message());
+      return;
+    }
+  }
+
+  {
+    auto rc = metadata_store_->storeMetadataFile(
+        db_namespace,
+        table_name,
+        SHA1Hash::fromHexString(txid),
+        metadata_file);
+
+    if (!rc.isSuccess()) {
+      res->setStatus(http::kStatusInternalServerError);
+      res->addBody("ERROR: " + rc.message());
+      return;
+    }
+  }
+
+  res->setStatus(http::kStatusCreated);
+}
 
 }
 

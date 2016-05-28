@@ -361,23 +361,36 @@ int main(int argc, const char** argv) {
     server_name = Some(flags.getString("join"));
   }
 
-  /* customer directory */
+  /* data dirdirectory */
   if (!FileUtil::exists(flags.getString("datadir"))) {
     logFatal("evqld", "data dir not found: " + flags.getString("datadir"));
     return 1;
   }
 
-  auto cdb_dir = FileUtil::joinPaths(flags.getString("datadir"), "cdb");
-  if (!FileUtil::exists(cdb_dir)) {
-    FileUtil::mkdir(cdb_dir);
+  String node_name = "__anonymous";
+  if (flags.isSet("join")) {
+    node_name = flags.getString("join");
   }
 
+  auto tsdb_dir = FileUtil::joinPaths(
+      flags.getString("datadir"),
+      "data/" + node_name);
+
+  if (!FileUtil::exists(tsdb_dir)) {
+    FileUtil::mkdir_p(tsdb_dir);
+  }
+
+  /* metadata store */
+  auto metadata_dir = FileUtil::joinPaths(tsdb_dir, "metadata");
+  if (!FileUtil::exists(metadata_dir)) {
+    FileUtil::mkdir(metadata_dir);
+  }
+
+  eventql::MetadataStore metadata_store(metadata_dir);
+
+  /* config dir */
   ScopedPtr<ConfigDirectory> config_dir;
-  if (flags.getString("config_backend") == "legacy") {
-    config_dir.reset(new LegacyConfigDirectory(
-        cdb_dir,
-        InetAddr::resolve(flags.getString("legacy_master_addr"))));
-  } else if (flags.getString("config_backend") == "zookeeper") {
+  if (flags.getString("config_backend") == "zookeeper") {
     config_dir.reset(
         new ZookeeperConfigDirectory(
             flags.getString("zookeeper_addr"),
@@ -431,19 +444,6 @@ int main(int argc, const char** argv) {
     auto repl_scheme = RefPtr<eventql::ReplicationScheme>(
           new eventql::DHTReplicationScheme(cluster_config, server_name));
 
-    String node_name = "__anonymous";
-    if (flags.isSet("join")) {
-      node_name = flags.getString("join");
-    }
-
-    auto tsdb_dir = FileUtil::joinPaths(
-        flags.getString("datadir"),
-        "data/" + node_name);
-
-    if (!FileUtil::exists(tsdb_dir)) {
-      FileUtil::mkdir_p(tsdb_dir);
-    }
-
     auto trash_dir = FileUtil::joinPaths(flags.getString("datadir"), "trash");
     if (!FileUtil::exists(trash_dir)) {
       FileUtil::mkdir(trash_dir);
@@ -470,7 +470,11 @@ int main(int argc, const char** argv) {
         &partition_map,
         &http);
 
-    eventql::RPCServlet tsdb_servlet(&tsdb_node, flags.getString("cachedir"));
+    eventql::RPCServlet tsdb_servlet(
+        &tsdb_node,
+        &metadata_store,
+        flags.getString("cachedir"));
+
     http_router.addRouteByPrefixMatch("/tsdb", &tsdb_servlet, &tpool);
 
     eventql::CompactionWorker cstable_index(
