@@ -71,7 +71,6 @@ public:
 protected:
 
   void configureCustomer(const NamespaceConfig& customer);
-  void configureTable(const TableDefinition& tbl);
 
   eventql::TSDBService* tsdb_node_;
   eventql::PartitionMap* partition_map_;

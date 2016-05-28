@@ -45,9 +45,9 @@ TSDBService::TSDBService(
     repl_(repl),
     http_(ev, http_stats) {}
 
-void TSDBService::createTable(const TableDefinition& table) {
-  pmap_->configureTable(table);
-}
+//void TSDBService::createTable(const TableDefinition& table) {
+//  pmap_->configureTable(table);
+//}
 
 void TSDBService::listTables(
     const String& tsdb_namespace,

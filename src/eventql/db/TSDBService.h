@@ -57,7 +57,7 @@ public:
       thread::EventLoop* ev,
       http::HTTPClientStats* http_stats);
 
-  void createTable(const TableDefinition& config);
+  //void createTable(const TableDefinition& config);
 
   void listTables(
       const String& tsdb_namespace,

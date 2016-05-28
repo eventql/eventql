@@ -510,6 +510,16 @@ int main(int argc, const char** argv) {
             flags.getString("datadir"),
             flags.getString("cachedir")));
 
+    /* open tables */
+    config_dir->setTableConfigChangeCallback(
+        [&partition_map] (const TableDefinition& tbl) {
+      partition_map.configureTable(tbl);
+    });
+
+    config_dir->listTables([&partition_map] (const TableDefinition& tbl) {
+      partition_map.configureTable(tbl);
+    });
+
     eventql::AnalyticsServlet analytics_servlet(
         analytics_app,
         flags.getString("cachedir"),
