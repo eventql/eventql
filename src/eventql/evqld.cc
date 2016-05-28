@@ -272,7 +272,7 @@ int main(int argc, const char** argv) {
   flags.parseArgv(argc, argv);
 
   if (!flags.isSet("nolog_to_stderr") && !flags.isSet("daemonize")) {
-    Application::logToStderr();
+    Application::logToStderr("evqld");
   }
 
   if (flags.isSet("log_to_syslog")) {

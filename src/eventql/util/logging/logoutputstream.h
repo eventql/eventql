@@ -31,7 +31,10 @@
 
 class LogOutputStream : public LogTarget {
 public:
-  LogOutputStream(std::unique_ptr<OutputStream> target);
+
+  LogOutputStream(
+      const String& program_name,
+      std::unique_ptr<OutputStream> target);
 
   void log(
       LogLevel level,
@@ -39,6 +42,7 @@ public:
       const String& message) override;
 
 protected:
+  String program_name_;
   ScopedPtr<OutputStream> target_;
 };
 #endif
