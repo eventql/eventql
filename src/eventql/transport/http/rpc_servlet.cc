@@ -43,6 +43,7 @@ RPCServlet::RPCServlet(
     MetadataStore* metadata_store,
     const String& tmpdir) :
     node_(node),
+    metadata_store_(metadata_store),
     tmpdir_(tmpdir) {}
 
 void RPCServlet::handleHTTPRequest(
@@ -50,6 +51,8 @@ void RPCServlet::handleHTTPRequest(
     RefPtr<http::HTTPResponseStream> res_stream) {
   const auto& req = req_stream->request();
   URI uri(req.uri());
+
+  logDebug("eventql", "HTTP Request: $0 $1", req.method(), req.uri());
 
   http::HTTPResponse res;
   res.populateFromRequest(req);

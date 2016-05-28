@@ -24,6 +24,7 @@
 #include "eventql/db/metadata_store.h"
 #include "eventql/util/io/fileutil.h"
 #include "eventql/util/random.h"
+#include "eventql/util/logging.h"
 
 namespace eventql {
 
@@ -57,6 +58,13 @@ Status MetadataStore::storeMetadataFile(
     const String& table_name,
     const SHA1Hash& txid,
     const MetadataFile& file) {
+  logDebug(
+      "evqld",
+      "Storing metadata file: $0/$1/$2",
+      ns,
+      table_name,
+      txid.toString());
+
   auto file_path = getPath(ns, table_name, txid);
   auto file_path_tmp = file_path + "~" + Random::singleton()->hex64();
 
@@ -83,7 +91,7 @@ String MetadataStore::getBasePath(
     const String& table_name) const {
   return FileUtil::joinPaths(
       path_prefix_,
-      StringUtil::format("$0/$1/$2", ns, table_name));
+      StringUtil::format("$0/$1", ns, table_name));
 }
 
 String MetadataStore::getPath(

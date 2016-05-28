@@ -41,16 +41,24 @@ public:
       MetadataOperation op);
 
   Status createFile(
+      const String& ns,
+      const String& table_name,
       const SHA1Hash& transaction_id,
       const Vector<String>& servers);
 
 protected:
 
-  Vector<String> pickNewMetadataServers() const;
-
   Status storeFile(
+      const String& ns,
+      const String& table_name,
       MetadataFile* file,
       const Vector<String>& servers);
+
+  Status storeFile(
+      const String& ns,
+      const String& table_name,
+      MetadataFile* file,
+      const String& server);
 
   ConfigDirectory* cdir_;
 };

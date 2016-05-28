@@ -35,9 +35,101 @@ Status MetadataCoordinator::performOperation(
 }
 
 Status MetadataCoordinator::createFile(
+    const String& ns,
+    const String& table_name,
     const SHA1Hash& transaction_id,
     const Vector<String>& servers) {
+  MetadataFile metadata_file(transaction_id, {});
+
+  {
+    auto rc = storeFile(ns, table_name, &metadata_file, servers);
+    if (!rc.isSuccess()) {
+      return rc;
+    }
+  }
+
   return Status::success();
+}
+
+Status MetadataCoordinator::storeFile(
+    const String& ns,
+    const String& table_name,
+    MetadataFile* file,
+    const Vector<String>& servers) {
+  iputs("store file", 1);
+  size_t num_servers = servers.size();
+  if (num_servers == 0) {
+    return Status(eIllegalArgumentError, "server list can't be empty");
+  }
+
+  size_t failures = 0;
+  for (const auto& s : servers) {
+    auto rc = storeFile(ns, table_name, file, s);
+    if (!rc.isSuccess()) {
+      logWarning("evqld", "error while storing metadata file: $0", rc.message());
+      ++failures;
+    }
+  }
+
+  size_t max_failures = 0;
+  if (num_servers > 1) {
+    max_failures = (num_servers - 1) / 2;
+  }
+
+  if (failures <= max_failures) {
+    return Status::success();
+  } else {
+    return Status(eRuntimeError, "can't store metadata file");
+  }
+}
+
+Status MetadataCoordinator::storeFile(
+    const String& ns,
+    const String& table_name,
+    MetadataFile* file,
+    const String& server) {
+  auto server_cfg = cdir_->getServerConfig(server);
+  if (server_cfg.server_addr().empty()) {
+    return Status(eRuntimeError, "server is offline");
+  }
+
+  logDebug(
+      "evqld",
+      "storing metadata file: $0/$1/$2 on $3 ($4)",
+      ns,
+      table_name,
+      file->getTransactionID().toString(),
+      server,
+      server_cfg.server_addr());
+
+  auto url = StringUtil::format(
+      "http://$0/rpc/store_metadata_file?namespace=$1&table=$2&txid=$3",
+      server_cfg.server_addr(),
+      URI::urlEncode(ns),
+      URI::urlEncode(table_name),
+      URI::urlEncode(file->getTransactionID().toString()));
+
+  Buffer req_body;
+  {
+    auto os = BufferOutputStream::fromBuffer(&req_body);
+    file->encode(os.get());
+  }
+
+  auto req = http::HTTPRequest::mkPost(url, req_body);
+  //auth_->signRequest(static_cast<Session*>(txn_->getUserData()), &req);
+
+  http::HTTPClient http_client;
+  http::HTTPResponse res;
+  auto rc = http_client.executeRequest(req, &res);
+  if (!rc.isSuccess()) {
+    return rc;
+  }
+
+  if (res.statusCode() == 201) {
+    return Status::success();
+  } else {
+    return Status(eIOError, res.body().toString());
+  }
 }
 
 } // namespace eventql

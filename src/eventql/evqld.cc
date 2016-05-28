@@ -382,9 +382,11 @@ int main(int argc, const char** argv) {
   }
 
   /* metadata store */
-  auto metadata_dir = FileUtil::joinPaths(tsdb_dir, "metadata");
+  auto metadata_dir = FileUtil::joinPaths(
+      flags.getString("datadir"),
+      "metadata/" + node_name);
   if (!FileUtil::exists(metadata_dir)) {
-    FileUtil::mkdir(metadata_dir);
+    FileUtil::mkdir_p(metadata_dir);
   }
 
   eventql::MetadataStore metadata_store(metadata_dir);
@@ -477,6 +479,7 @@ int main(int argc, const char** argv) {
         flags.getString("cachedir"));
 
     http_router.addRouteByPrefixMatch("/tsdb", &tsdb_servlet, &tpool);
+    http_router.addRouteByPrefixMatch("/rpc", &tsdb_servlet, &tpool);
 
     eventql::CompactionWorker cstable_index(
         &partition_map,
@@ -533,40 +536,61 @@ int main(int argc, const char** argv) {
       partition_map.configureTable(tbl);
     });
 
-    {
+    auto backfill_thread = std::thread([&config_dir] {
       Vector<String> all_servers;
       for (const auto& s : config_dir->listServers()) {
         all_servers.emplace_back(s.server_id());
       }
 
-      config_dir->listTables([&config_dir, &all_servers] (const TableDefinition& tbl) {
-        if (tbl.metadata_txnid().empty()) {
-          auto txnid = Random::singleton()->sha1();
-          Vector<String> servers;
-          uint64_t idx = Random::singleton()->random64();
-          for (int i = 0; i < 3; ++i) {
-            servers.emplace_back(all_servers[++idx % all_servers.size()]);
-          }
-
-          logInfo(
-              "evqld",
-              "Backfilling metadata file for table: $0 (servers=$1, txnid=$2)",
-              tbl.table_name(),
-              inspect(servers),
-              txnid.toString());
-
-          eventql::MetadataCoordinator coordinator(config_dir.get());
-          auto rc = coordinator.createFile(txnid, servers);
-          if (!rc.isSuccess()) {
-            logWarning(
-                "evqld",
-                "Backfilling metadata file for table $0 failed: $1",
-                tbl.table_name(),
-                rc.message());
-          }
-        }
+      Vector<TableDefinition> backfill_tables;
+      config_dir->listTables([&backfill_tables] (const TableDefinition& tbl) {
+        //if (tbl.metadata_txnid().empty()) {
+          backfill_tables.emplace_back(tbl);
+        //}
       });
-    }
+
+      for (const auto& tbl : backfill_tables) {
+        auto txnid = Random::singleton()->sha1();
+        Vector<String> servers;
+        uint64_t idx = Random::singleton()->random64();
+        for (int i = 0; i < 3; ++i) {
+          servers.emplace_back(all_servers[++idx % all_servers.size()]);
+        }
+
+        logInfo(
+            "evqld",
+            "Backfilling metadata file for table: $0 (servers=$1, txnid=$2)",
+            tbl.table_name(),
+            inspect(servers),
+            txnid.toString());
+
+        eventql::MetadataCoordinator coordinator(config_dir.get());
+        auto rc = coordinator.createFile(
+            tbl.customer(),
+            tbl.table_name(),
+            txnid,
+            servers);
+
+        if (rc.isSuccess()) {
+          auto new_tbl = tbl;
+          new_tbl.clear_metadata_servers();
+          for (const auto& s : servers) {
+            new_tbl.add_metadata_servers(s);
+            new_tbl.set_metadata_txnid(txnid.toString());
+          }
+
+          config_dir->updateTableConfig(new_tbl);
+        }
+
+        if (!rc.isSuccess()) {
+          logWarning(
+              "evqld",
+              "Backfilling metadata file for table $0 failed: $1",
+              tbl.table_name(),
+              rc.message());
+        }
+      }
+    });
 
     eventql::AnalyticsServlet analytics_servlet(
         analytics_app,
@@ -609,6 +633,7 @@ int main(int argc, const char** argv) {
 
     partition_map.open();
     ev.run();
+    backfill_thread.join();
   } catch (const StandardException& e) {
     logAlert("eventql", e, "FATAL ERROR");
   }
