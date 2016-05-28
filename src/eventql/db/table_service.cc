@@ -37,17 +37,64 @@
 namespace eventql {
 
 TableService::TableService(
+    ConfigDirectory* cdir,
     PartitionMap* pmap,
     ReplicationScheme* repl,
     thread::EventLoop* ev,
     http::HTTPClientStats* http_stats) :
+    cdir_(cdir),
     pmap_(pmap),
     repl_(repl),
     http_(ev, http_stats) {}
 
-//void TableService::createTable(const TableDefinition& table) {
-//  pmap_->configureTable(table);
-//}
+Status TableService::createTable(
+    const String& db_namespace,
+    const String& table_name,
+    const msg::MessageSchema& schema,
+    Vector<String> primary_key) {
+
+  if (primary_key.size() < 1) {
+    return Status(
+        eIllegalArgumentError,
+        "can't create table without PRIMARY KEY");
+  }
+
+  for (const auto& col : primary_key) {
+    if (col.find(".") != String::npos) {
+      return Status(
+          eIllegalArgumentError,
+          StringUtil::format(
+              "nested column '$0' can't be part of the PRIMARY KEY",
+              col));
+    }
+  }
+
+  String partition_key = primary_key[0];
+  auto partition_key_type = schema.fieldType(schema.fieldId(partition_key));
+  if (partition_key_type != msg::FieldType::DATETIME) {
+    return Status(
+        eIllegalArgumentError,
+        "first column in the PRIMARY KEY must be of type DATETIME");
+  }
+
+  TableDefinition td;
+  td.set_customer(db_namespace);
+  td.set_table_name(table_name);
+
+  auto tblcfg = td.mutable_config();
+  tblcfg->set_schema(schema.encode().toString());
+  tblcfg->set_num_shards(1);
+  tblcfg->set_partitioner(eventql::TBL_PARTITION_TIMEWINDOW);
+  tblcfg->set_storage(eventql::TBL_STORAGE_COLSM);
+  tblcfg->set_partition_key(partition_key);
+  for (const auto& col : primary_key) {
+    tblcfg->add_primary_key(col);
+  }
+
+  cdir_->updateTableConfig(td);
+  return Status::success();
+}
+
 
 void TableService::listTables(
     const String& tsdb_namespace,

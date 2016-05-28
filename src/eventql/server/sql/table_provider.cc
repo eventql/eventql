@@ -176,23 +176,6 @@ static Status buildMessageSchema(
 Status TSDBTableProvider::createTable(
     const csql::CreateTableNode& create_table) {
   auto primary_key = create_table.getPrimaryKey();
-  if (primary_key.size() < 1) {
-    return Status(
-        eIllegalArgumentError,
-        "can't create table without PRIMARY KEY");
-  }
-
-  for (const auto& col : primary_key) {
-    if (col.find(".") != String::npos) {
-      return Status(
-          eIllegalArgumentError,
-          StringUtil::format(
-              "nested column '$0' can't be part of the PRIMARY KEY",
-              col));
-    }
-  }
-
-  String partition_key = primary_key[0];
   auto table_schema = create_table.getTableSchema();
   auto msg_schema = mkRef(new msg::MessageSchema(nullptr));
   auto rc = buildMessageSchema(table_schema.getColumns(), msg_schema.get());
@@ -200,31 +183,11 @@ Status TSDBTableProvider::createTable(
     return rc;
   }
 
-  auto partition_key_type = msg_schema->fieldType(
-      msg_schema->fieldId(partition_key));
-
-  if (partition_key_type != msg::FieldType::DATETIME) {
-    return Status(
-        eIllegalArgumentError,
-        "first column in the PRIMARY KEY must be of type DATETIME");
-  }
-
-  TableDefinition td;
-  td.set_customer(tsdb_namespace_);
-  td.set_table_name(create_table.getTableName());
-
-  auto tblcfg = td.mutable_config();
-  tblcfg->set_schema(msg_schema->encode().toString());
-  tblcfg->set_num_shards(1);
-  tblcfg->set_partitioner(eventql::TBL_PARTITION_TIMEWINDOW);
-  tblcfg->set_storage(eventql::TBL_STORAGE_COLSM);
-  tblcfg->set_partition_key(partition_key);
-  for (const auto& col : primary_key) {
-    tblcfg->add_primary_key(col);
-  }
-
-  iputs("table: $0", td.DebugString());
-  return Status::success();
+  return table_service_->createTable(
+      tsdb_namespace_,
+      create_table.getTableName(),
+      *msg_schema,
+      primary_key);
 }
 
 void TSDBTableProvider::listTables(

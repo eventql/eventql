@@ -459,6 +459,7 @@ int main(int argc, const char** argv) {
 
     eventql::PartitionMap partition_map(&cfg);
     eventql::TableService tsdb_node(
+        config_dir.get(),
         &partition_map,
         repl_scheme.get(),
         &ev,

@@ -38,6 +38,7 @@
 #include <eventql/db/RecordEnvelope.pb.h>
 #include <eventql/db/partition_map.h>
 #include <eventql/db/TimeWindowPartitioner.h>
+#include <eventql/config/config_directory.h>
 
 #include "eventql/eventql.h"
 
@@ -52,12 +53,17 @@ class TableService {
 public:
 
   TableService(
+      ConfigDirectory* cdir,
       PartitionMap* pmap,
       ReplicationScheme* repl,
       thread::EventLoop* ev,
       http::HTTPClientStats* http_stats);
 
-  //void createTable(const TableDefinition& config);
+  Status createTable(
+      const String& db_namespace,
+      const String& table_name,
+      const msg::MessageSchema& schema,
+      Vector<String> primary_key);
 
   void listTables(
       const String& tsdb_namespace,
@@ -174,6 +180,7 @@ protected:
       uint64_t flags,
       const ReplicaRef& host);
 
+  ConfigDirectory* cdir_;
   PartitionMap* pmap_;
   ReplicationScheme* repl_;
   http::HTTPConnectionPool http_;
