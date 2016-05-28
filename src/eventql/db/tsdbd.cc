@@ -48,7 +48,7 @@
 #include "eventql/util/mdb/MDBUtil.h"
 #include "eventql/util/protobuf/msg.h"
 #include "eventql/util/protobuf/MessageSchema.h"
-#include "eventql/db/TableService.h"
+#include "eventql/db/table_service.h"
 #include "eventql/db/TSDBServlet.h"
 #include "eventql/db/TSDBNodeConfig.pb.h"
 

@@ -25,7 +25,7 @@
 #define _CM_ANALYTICSAPP_H
 #include "eventql/util/protobuf/MessageSchema.h"
 #include "eventql/db/TSDBClient.h"
-#include "eventql/db/TableService.h"
+#include "eventql/db/table_service.h"
 #include "eventql/db/CompactionWorker.h"
 #include "eventql/transport/http/LogfileService.h"
 #include "eventql/transport/http/MapReduceService.h"

@@ -31,7 +31,7 @@
 #include <eventql/db/CompactionWorker.h>
 #include <eventql/db/TableConfig.pb.h>
 #include <eventql/db/TSDBTableInfo.h>
-#include <eventql/db/TableService.h>
+#include <eventql/db/table_service.h>
 #include "eventql/server/sql/table_scan.h"
 
 #include "eventql/eventql.h"

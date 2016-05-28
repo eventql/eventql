@@ -54,7 +54,7 @@
 #include "eventql/transport/http/api_servlet.h"
 #include "eventql/AnalyticsApp.h"
 #include "eventql/db/TableConfig.pb.h"
-#include "eventql/db/TableService.h"
+#include "eventql/db/table_service.h"
 #include "eventql/db/TSDBServlet.h"
 #include "eventql/db/ReplicationWorker.h"
 #include "eventql/db/LSMTableIndexCache.h"

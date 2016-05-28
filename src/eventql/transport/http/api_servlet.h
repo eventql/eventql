@@ -32,7 +32,7 @@
 #include "eventql/sql/runtime/runtime.h"
 #include "eventql/auth/internal_auth.h"
 #include "eventql/config/config_directory.h"
-#include "eventql/db/TableService.h"
+#include "eventql/db/table_service.h"
 #include "eventql/transport/http/LogfileAPIServlet.h"
 #include "eventql/transport/http/MapReduceAPIServlet.h"
 #include "eventql/RemoteTSDBScanParams.pb.h"

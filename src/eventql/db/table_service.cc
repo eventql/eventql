@@ -28,7 +28,7 @@
 #include <eventql/util/io/fileutil.h>
 #include <eventql/util/wallclock.h>
 #include <eventql/io/sstable/sstablereader.h>
-#include <eventql/db/TableService.h>
+#include <eventql/db/table_service.h>
 #include <eventql/db/LogPartitionReader.h>
 #include <eventql/db/PartitionState.pb.h>
 

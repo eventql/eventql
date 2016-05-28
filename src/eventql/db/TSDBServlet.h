@@ -25,7 +25,7 @@
 #define _FNORD_TSDB_TSDBSERVLET_H
 #include "eventql/util/http/httpservice.h"
 #include <eventql/util/random.h>
-#include <eventql/db/TableService.h>
+#include <eventql/db/table_service.h>
 #include <eventql/util/http/HTTPSSEStream.h>
 
 #include "eventql/eventql.h"

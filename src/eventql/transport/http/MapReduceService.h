@@ -24,7 +24,7 @@
 #pragma once
 #include "eventql/eventql.h"
 #include "eventql/util/thread/threadpool.h"
-#include "eventql/db/TableService.h"
+#include "eventql/db/table_service.h"
 #include "eventql/auth/internal_auth.h"
 #include "eventql/config/namespace_config.h"
 #include "eventql/config/config_directory.h"

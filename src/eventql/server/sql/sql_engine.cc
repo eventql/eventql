@@ -26,7 +26,7 @@
 #include <eventql/eventql.h>
 #include <eventql/server/sql/sql_engine.h>
 #include <eventql/server/sql/table_provider.h>
-#include <eventql/db/TableService.h>
+#include <eventql/db/table_service.h>
 #include <eventql/db/TimeWindowPartitioner.h>
 #include <eventql/db/FixedShardPartitioner.h>
 #include <eventql/sql/defaults.h>
