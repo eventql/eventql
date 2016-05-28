@@ -183,7 +183,7 @@ bool ZookeeperConfigDirectory::getProtoNode(
     T* proto,
     bool watch /* = false */,
     struct Stat* stat /* = nullptr */) {
-  Buffer buf(8192 * 32);
+  Buffer buf(1024 * 512);
   if (getNode(key, &buf, watch, stat)) {
     msg::decode(buf, proto);
     return true;
