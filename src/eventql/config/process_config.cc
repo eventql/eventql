@@ -46,7 +46,17 @@ Status ProcessConfigBuilder::loadFile(const String& file) {
 }
 
 void ProcessConfigBuilder::setProperty(const String& key, const String& value) {
+  Pair<String, String> p;
+  p.first = key;
+  p.second = value;
+  properties_.emplace_back(p);
+}
 
+void ProcessConfigBuilder::setProperty(
+    const String& section,
+    const String& key,
+    const String& value) {
+  setProperty(StringUtil::format("$0.$1", section, key), value);
 }
 
 ProcessConfig ProcessConfigBuilder::getConfig() {

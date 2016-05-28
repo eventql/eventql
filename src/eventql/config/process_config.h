@@ -47,6 +47,10 @@ public:
   Status loadFile(const String& file);
 
   void setProperty(const String& key, const String& value);
+  void setProperty(
+      const String& section,
+      const String& key,
+      const String& value);
 
   ProcessConfig getConfig();
 
