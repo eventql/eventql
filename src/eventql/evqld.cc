@@ -332,7 +332,7 @@ int main(int argc, const char** argv) {
   {
     auto listen_str = flags.getString("listen");
     std::smatch m;
-    std::regex listen_regex("([a-zA-Z-_.]+):([0-9]+)");
+    std::regex listen_regex("([0-9a-zA-Z-_.]+):([0-9]+)");
     if (std::regex_match(listen_str, m, listen_regex)) {
       listen_host = m[1];
       listen_port = std::stoi(m[2]);
