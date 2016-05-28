@@ -112,14 +112,13 @@ void AnalyticsServlet::handle(
   }
 
   ScopedPtr<Session> session(new Session());
-
-  auto auth_rc = HTTPAuth::authenticateRequest(
-      session.get(),
-      client_auth_,
-      req);
-
+  auto internal_auth_rc = internal_auth_->verifyRequest(session.get(), req);
+  auto auth_rc = internal_auth_rc;
   if (!auth_rc.isSuccess()) {
-    auth_rc = internal_auth_->verifyRequest(session.get(), req);
+    auth_rc = HTTPAuth::authenticateRequest(
+        session.get(),
+        client_auth_,
+        req);
   }
 
   if (uri.path() == "/api/v1/tables/insert") {
@@ -133,6 +132,8 @@ void AnalyticsServlet::handle(
 
   if (!auth_rc.isSuccess()) {
     req_stream->readBody();
+
+    logError("evqld", "auth error: $0 -- $1", auth_rc.message(), internal_auth_rc.message());
 
     if (uri.path() == "/api/v1/sql") {
       util::BinaryMessageWriter writer;
