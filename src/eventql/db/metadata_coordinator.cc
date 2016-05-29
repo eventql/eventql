@@ -32,7 +32,11 @@ Status MetadataCoordinator::performAndCommitOperation(
     const String& table_name,
     MetadataOperation op) {
   auto table_config = cdir_->getTableConfig(ns, table_name);
-  if (table_config.metadata_txnid() != op.getInputTransactionID().toString()) {
+  SHA1Hash input_txid(
+      table_config.metadata_txnid().data(),
+      table_config.metadata_txnid().size());
+
+  if (!(input_txid == op.getInputTransactionID())) {
     return Status(eConcurrentModificationError, "concurrent modification");
   }
 
@@ -46,7 +50,8 @@ Status MetadataCoordinator::performAndCommitOperation(
     return rc;
   }
 
-  table_config.set_metadata_txnid(op.getOutputTransactionID().toString());
+  auto output_txid = op.getOutputTransactionID();
+  table_config.set_metadata_txnid(output_txid.data(), output_txid.size());
   cdir_->updateTableConfig(table_config);
   return Status::success();
 }

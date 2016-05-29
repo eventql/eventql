@@ -578,7 +578,7 @@ int main(int argc, const char** argv) {
           new_tbl.clear_metadata_servers();
           for (const auto& s : servers) {
             new_tbl.add_metadata_servers(s);
-            new_tbl.set_metadata_txnid(txnid.toString());
+            new_tbl.set_metadata_txnid(txnid.data(), txnid.size());
           }
 
           config_dir->updateTableConfig(new_tbl);

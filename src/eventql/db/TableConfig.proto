@@ -112,7 +112,7 @@ message TableDefinition {
 
   repeated string tags = 6;
 
-  optional string metadata_txnid = 7;
+  optional bytes metadata_txnid = 7;
   optional uint64 metadata_txnseq = 9;
   repeated string metadata_servers = 8;
 
