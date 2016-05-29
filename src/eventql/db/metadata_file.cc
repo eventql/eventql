@@ -77,7 +77,9 @@ Status MetadataFile::decode(InputStream* is) {
   }
 
   // transaction id
-  is->readNextBytes((char*) transaction_id_.mutableData(), transaction_id_.size());
+  is->readNextBytes(
+      (char*) transaction_id_.mutableData(),
+      transaction_id_.size());
 
   // transaction seq
   transaction_seq_ = is->readUInt64();
@@ -92,6 +94,11 @@ Status MetadataFile::decode(InputStream* is) {
 
     // begin
     e.begin = is->readLenencString();
+
+    // partition id
+    is->readNextBytes(
+        (char*) e.partition_id.mutableData(),
+        e.partition_id.size());
 
     // servers
     auto rc = decodeServerList(&e.servers, is);
@@ -166,6 +173,9 @@ Status MetadataFile::encode(OutputStream* os) const  {
   for (const auto& p : partition_map_) {
     // begin
     os->appendLenencString(p.begin);
+
+    // partition id
+    os->write((const char*) p.partition_id.data(), p.partition_id.size());
 
     // servers
     auto rc = encodeServerList(p.servers, os);
