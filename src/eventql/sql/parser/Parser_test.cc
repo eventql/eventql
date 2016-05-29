@@ -1141,7 +1141,6 @@ TEST_CASE(ParserTest, TestInsertIntoStatement, [] () {
           );
       )");
 
-
   EXPECT(parser.getStatements().size() == 1);
   const auto& stmt = parser.getStatements()[0];
   const auto& children = stmt->getChildren();
