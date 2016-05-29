@@ -56,7 +56,7 @@ protected:
   void replicateTo(const ReplicaRef& replica, uint64_t replicated_offset);
 
   void uploadBatchTo(
-      const ReplicaRef& replica,
+      const String& host,
       const RecordEnvelopeList& batch);
 
   void fetchRecords(

@@ -106,13 +106,26 @@ void LSMPartitionReplication::replicateTo(
     RAISE(kIllegalStateError, "can't replicate to myself");
   }
 
+  auto server_cfg = cdir_->getServerConfig(replica.name);
+  if (server_cfg.server_status() != SERVER_UP) {
+    RAISE(kRuntimeError, "server is down");
+  }
+
   size_t batch_size = 0;
   size_t num_replicated = 0;
   RecordEnvelopeList batch;
   batch.set_sync_commit(true);
   fetchRecords(
       replicated_offset,
-      [this, &batch, &replica, &replicated_offset, &batch_size, &num_replicated] (
+      [
+          this,
+          &batch,
+          &replica,
+          &replicated_offset,
+          &batch_size,
+          &num_replicated,
+          &server_cfg
+        ] (
           const SHA1Hash& record_id,
           const uint64_t record_version,
           const void* record_data,
@@ -130,14 +143,14 @@ void LSMPartitionReplication::replicateTo(
 
     if (batch_size > kMaxBatchSizeBytes ||
         batch.records().size() > kMaxBatchSizeRows) {
-      uploadBatchTo(replica, batch);
+      uploadBatchTo(server_cfg.server_addr(), batch);
       batch.mutable_records()->Clear();
       batch_size = 0;
     }
   });
 
   if (batch.records().size() > 0) {
-    uploadBatchTo(replica, batch);
+    uploadBatchTo(server_cfg.server_addr(), batch);
   }
 }
 
@@ -220,10 +233,10 @@ bool LSMPartitionReplication::replicate() {
 }
 
 void LSMPartitionReplication::uploadBatchTo(
-    const ReplicaRef& replica,
+    const String& host,
     const RecordEnvelopeList& batch) {
   auto body = msg::encode(batch);
-  URI uri(StringUtil::format("http://$0/tsdb/replicate", replica.addr));
+  URI uri(StringUtil::format("http://$0/tsdb/replicate", host));
   http::HTTPRequest req(http::HTTPMessage::M_POST, uri.pathAndQuery());
   req.addHeader("Host", uri.hostAndPort());
   req.addHeader("Content-Type", "application/fnord-msg");
