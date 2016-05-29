@@ -51,13 +51,22 @@ message PartitionDiscoveryResponse {
 };
 
 message MetadataOperationEnvelope {
-  required MetadataOperationType type = 1;
-  required string input_txid = 2;
-  required string output_txid = 3;
-  optional bytes opdata = 4;
+  required string db_namespace = 1;
+  required string table_id = 2;
+  required MetadataOperationType type = 3;
+  required string input_txid = 4;
+  required string output_txid = 5;
+  optional bytes opdata = 6;
 };
 
-message AddPartitionOperation {
+message BackfillAddServerOperation {
+  required bytes partition_id = 1
+  required bytes keyrange_begin = 2;
+  required string server_id = 3;
+};
 
+message BackfillRemoveServerOperation {
+  required bytes partition_id = 1
+  required string server_id = 3;
 };
 

@@ -48,6 +48,7 @@ LSMPartitionWriter::LSMPartitionWriter(
             partition_,
             cfg->idx_cache.get())),
     idx_cache_(cfg->idx_cache.get()),
+    repl_(cfg->repl_scheme.get()),
     max_datafile_size_(kDefaultMaxDatafileSize) {}
 
 Set<SHA1Hash> LSMPartitionWriter::insertRecords(const Vector<RecordRef>& records) {
@@ -356,6 +357,26 @@ Status LSMPartitionWriter::applyMetadataChange(
       snap->state.table_key(),
       snap->key.toString(),
       discovery_info.DebugString());
+
+  // backfill code
+  auto has_local_replica = repl_->hasLocalReplica(snap->key);
+  if (has_local_replica && discovery_info.code() != PDISCOVERY_SERVE) {
+    logDebug(
+        "evqld",
+        "Adding myself to the server list for $0/$1/$2",
+        snap->state.tsdb_namespace(),
+        snap->state.table_key(),
+        snap->key.toString());
+  }
+
+  if (!has_local_replica && discovery_info.code() != PDISCOVERY_UNLOAD) {
+    logDebug(
+        "evqld",
+        "Removing myself from the server list for $0/$1/$2",
+        snap->state.tsdb_namespace(),
+        snap->state.table_key(),
+        snap->key.toString());
+  }
 
   return Status(eRuntimeError, "applyMetadataTransaction not yet implemented");
 }

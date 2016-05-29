@@ -72,6 +72,7 @@ protected:
   RefPtr<Partition> partition_;
   RefPtr<CompactionStrategy> compaction_strategy_;
   LSMTableIndexCache* idx_cache_;
+  ReplicationScheme* repl_;
   size_t max_datafile_size_;
   std::mutex commit_mutex_;
   std::mutex compaction_mutex_;
