@@ -29,8 +29,10 @@ MetadataFile::MetadataFile() {}
 
 MetadataFile::MetadataFile(
     const SHA1Hash& transaction_id,
+    uint64_t transaction_seq,
     const Vector<PartitionMapEntry>& partition_map) :
     transaction_id_(transaction_id),
+    transaction_seq_(transaction_seq),
     partition_map_(partition_map) {}
 
 const SHA1Hash& MetadataFile::getTransactionID() const {
@@ -66,6 +68,7 @@ Status MetadataFile::decode(InputStream* is) {
 
   // transaction id
   is->readNextBytes((char*) transaction_id_.mutableData(), transaction_id_.size());
+  transaction_seq_ = is->readUInt64();
 
   // partition map
   auto pmap_size = is->readVarUInt();
@@ -130,6 +133,9 @@ Status MetadataFile::encode(OutputStream* os) const  {
 
   // transaction id
   os->write((const char*) transaction_id_.data(), transaction_id_.size());
+
+  // transaction seq
+  os->appendUInt64(transaction_seq_);
 
   // partition map
   os->appendVarUInt(partition_map_.size());

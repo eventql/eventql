@@ -33,7 +33,7 @@ Status MetadataService::createMetadataFile(
     const String& ns,
     const String& table_name,
     const SHA1Hash& txid) {
-  MetadataFile metadata_file(txid, {});
+  MetadataFile metadata_file(txid, 1, {});
   return metadata_store_->storeMetadataFile(
       ns,
       table_name,

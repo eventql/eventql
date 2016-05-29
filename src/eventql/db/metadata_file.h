@@ -54,6 +54,7 @@ public:
   MetadataFile();
   MetadataFile(
       const SHA1Hash& transaction_id,
+      uint64_t transaction_seq,
       const Vector<PartitionMapEntry>& partition_map);
 
   const SHA1Hash& getTransactionID() const;
@@ -65,6 +66,7 @@ public:
 
 protected:
   SHA1Hash transaction_id_;
+  uint64_t transaction_seq_;
   Vector<PartitionMapEntry> partition_map_;
 };
 
