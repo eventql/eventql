@@ -1127,28 +1127,47 @@ TEST_CASE(ParserTest, TestCreateTableStatement2, [] () {
 TEST_CASE(ParserTest, TestInsertIntoStatement, [] () {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
+
   auto parser = parseTestQuery(
       R"(
-          INSERT INTO testtabl (
+          INSERT INTO evtbl (
               evtime,
               evid,
-              evitems
+              price
           ) VALUES (
               1464463790,
               'xxx',
-              [{'id': 1, 'name': 'item1'}, {'id': 2, 'name': 'item2'}]
+              1.23
           );
-        )
       )");
+
 
   EXPECT(parser.getStatements().size() == 1);
   const auto& stmt = parser.getStatements()[0];
-  /*EXPECT(*stmt == ASTNode::T_CREATE_TABLE);
-  EXPECT(stmt->getChildren().size() == 2);
-  EXPECT_EQ(*stmt->getChildren()[0], ASTNode::T_TABLE_NAME);
-  EXPECT_EQ(*stmt->getChildren()[0]->getToken(), Token::T_IDENTIFIER);
-  EXPECT_EQ(stmt->getChildren()[0]->getToken()->getString(), "fnord");
-  EXPECT(*stmt->getChildren()[1] == ASTNode::T_COLUMN_LIST);
-  EXPECT(stmt->getChildren()[1]->getChildren().size() == 6);*/
+  const auto& children = stmt->getChildren();
+
+  EXPECT(*stmt == ASTNode::T_INSERT_INTO);
+  EXPECT(children.size() == 3);
+  EXPECT_EQ(*children[0], ASTNode::T_TABLE_NAME);
+  EXPECT_EQ(*children[0]->getToken(), Token::T_IDENTIFIER);
+  EXPECT_EQ(children[0]->getToken()->getString(), "evtbl");
+
+  EXPECT(*children[1] == ASTNode::T_COLUMN_LIST);
+  EXPECT(children[1]->getChildren().size() == 3);
+  EXPECT(*children[1]->getChildren()[0] == ASTNode::T_COLUMN);
+  EXPECT(children[1]->getChildren()[0]->getChildren().size() == 1);
+  EXPECT_EQ(
+      children[1]->getChildren()[0]->getChildren()[0]->getToken()->getString(),
+      "evtime");
+  EXPECT_EQ(
+      children[1]->getChildren()[1]->getChildren()[0]->getToken()->getString(),
+      "evid");
+
+  EXPECT(*children[2] == ASTNode::T_VALUE_LIST);
+  EXPECT(children[2]->getChildren().size() == 3);
+  EXPECT(*children[2]->getChildren()[0] == ASTNode::T_VALUE);
+  EXPECT_EQ(children[2]->getChildren()[0]->getToken()->getString(), "1464463790");
+  EXPECT_EQ(children[2]->getChildren()[1]->getToken()->getString(), "xxx");
+  EXPECT_EQ(children[2]->getChildren()[2]->getToken()->getString(), "1.23");
 });
 
