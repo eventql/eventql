@@ -105,6 +105,7 @@ protected:
   ASTNode* columnDefinition();
   ASTNode* primaryKeyDefinition();
   ASTNode* tableName();
+  ASTNode* insertStatement();
   ASTNode* drawStatement();
   ASTNode* axisClause();
   ASTNode* domainClause();

@@ -312,6 +312,8 @@ ASTNode* Parser::statement() {
       return selectStatement();
     case Token::T_CREATE:
       return createStatement();
+    case Token::T_INSERT:
+      return insertStatement();
     case Token::T_DRAW:
       return drawStatement();
     case Token::T_IMPORT:
@@ -528,6 +530,11 @@ ASTNode* Parser::primaryKeyDefinition() {
   expectAndConsume(Token::T_RPAREN);
 
   return primary_key;
+}
+
+ASTNode* Parser::insertStatement() {
+  consumeToken();
+  RAISE(kNotYetImplementedError, "nyi");
 }
 
 ASTNode* Parser::importStatement() {
