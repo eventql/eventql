@@ -159,7 +159,31 @@ Status MetadataOperation::performBackfillAddServer(
 Status MetadataOperation::performBackfillRemoveServer(
     const MetadataFile& input,
     Vector<MetadataFile::PartitionMapEntry>* output) const {
-  return Status(eRuntimeError, "operation not implemented");
+  auto opdata = msg::decode<BackfillAddServerOperation>(
+      data_.opdata().data(),
+      data_.opdata().size());
+
+  SHA1Hash partition_id(
+      opdata.partition_id().data(),
+      opdata.partition_id().size());
+
+  auto pmap = input.getPartitionMap();
+  for (auto& e : pmap) {
+    if (e.partition_id == partition_id) {
+      for (auto s = e.servers.begin(); s != e.servers.end(); ) {
+        if (s->server_id == opdata.server_id()) {
+          s = e.servers.erase(s);
+        } else {
+          ++s;
+        }
+      }
+
+      break;
+    }
+  }
+
+  *output = pmap;
+  return Status::success();
 }
 
 } // namespace eventql
