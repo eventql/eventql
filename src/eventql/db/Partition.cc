@@ -274,7 +274,7 @@ void Partition::backfillKeyRange() {
 
   logInfo(
       "evqld",
-      "backfilling partition keyrange: $0/$1",
+      "backfilling partition keyrange: $0/$1/$2",
       snap->state.tsdb_namespace(),
       table_->name(),
       partition_id.toString());
