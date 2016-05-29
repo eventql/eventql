@@ -26,6 +26,7 @@
 #include <eventql/server/server_stats.h>
 #include <eventql/eventql.h>
 #include "eventql/util/application.h"
+#include "eventql/db/metadata_client.h"
 
 #include "eventql/eventql.h"
 namespace eventql {
@@ -306,13 +307,29 @@ void StatusServlet::renderTablePage(
       table_name);
 
   if (table.isEmpty()) {
-    html += "ERROR: TABLE NOT FOUND!";
-  } else {
-    html += "<h3>TableDefinition</h3>";
-    html += StringUtil::format(
-        "<pre>$0</pre>",
-        table.get()->config().DebugString());
+    response->setStatus(http::kStatusNotFound);
+    response->addHeader("Content-Type", "text/html; charset=utf-8");
+    response->addBody("ERROR: table not found!");
+    return;
   }
+
+  MetadataClient metadata_client(cdir_);
+  MetadataFile metadata_file;
+  auto rc = metadata_client.fetchLatestMetadataFile(
+      db_namespace,
+      table_name,
+      &metadata_file);
+
+  if (!rc.isSuccess()) {
+    html += StringUtil::format(
+        "<b>ERROR: while fetching metadata: $0</b>",
+        rc.message());
+  }
+
+  html += "<h3>TableDefinition</h3>";
+  html += StringUtil::format(
+      "<pre>$0</pre>",
+      table.get()->config().DebugString());
 
   response->setStatus(http::kStatusOK);
   response->addHeader("Content-Type", "text/html; charset=utf-8");

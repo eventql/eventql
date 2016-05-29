@@ -810,6 +810,8 @@ evql_core_a_SOURCES = \
     eventql/db/LogPartitionReplication.h \
     eventql/db/LogPartitionWriter.cc \
     eventql/db/LogPartitionWriter.h \
+    eventql/db/metadata_client.cc \
+    eventql/db/metadata_client.h \
     eventql/db/metadata_coordinator.cc \
     eventql/db/metadata_coordinator.h \
     eventql/db/metadata_file.cc \
