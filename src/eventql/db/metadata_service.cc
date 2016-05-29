@@ -48,5 +48,11 @@ Status MetadataService::performMetadataOperation(
   return Status(eRuntimeError, "not yet implemented");
 }
 
+Status MetadataService::discoverPartition(
+    const PartitionDiscoveryRequest& request,
+    PartitionDiscoveryResponse* response) {
+  return Status(eRuntimeError, "not yet implemented");
+}
+
 } // namespace eventql
 

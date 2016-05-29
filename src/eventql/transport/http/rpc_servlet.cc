@@ -136,6 +136,13 @@ void RPCServlet::handleHTTPRequest(
       return;
     }
 
+    if (uri.path() == "/rpc/discover_partition_metadata") {
+      req_stream->readBody();
+      discoverPartitionMetadata(uri, &req, &res);
+      res_stream->writeResponse(res);
+      return;
+    }
+
     res.setStatus(http::kStatusNotFound);
     res.addBody("not found");
     res_stream->writeResponse(res);
@@ -524,6 +531,30 @@ void RPCServlet::performMetadataOperation(
     return;
   }
 }
+
+void RPCServlet::discoverPartitionMetadata(
+    const URI& uri,
+    const http::HTTPRequest* req,
+    http::HTTPResponse* res) {
+  const auto& params = uri.queryParams();
+
+  PartitionDiscoveryRequest request;
+  msg::decode(req->body(), &request);
+
+  PartitionDiscoveryResponse response;
+  auto rc = metadata_service_->discoverPartition(request, &response);
+
+  if (rc.isSuccess()) {
+    res->setStatus(http::kStatusOK);
+    res->addBody(*msg::encode(response));
+  } else {
+    res->setStatus(http::kStatusInternalServerError);
+    res->addBody("ERROR: " + rc.message());
+    return;
+  }
+}
+
+
 
 }
 
