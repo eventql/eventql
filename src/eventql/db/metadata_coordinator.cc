@@ -103,7 +103,7 @@ Status MetadataCoordinator::performOperation(
 
   logDebug(
       "evqld",
-      "Performing metadata operation on: $0/$1 ($2->$3) on $3 ($4)",
+      "Performing metadata operation on: $0/$1 ($2->$3) on $4 ($5)",
       ns,
       table_name,
       op.getInputTransactionID().toString(),
