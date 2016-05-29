@@ -45,9 +45,17 @@ LSMPartitionReplication::LSMPartitionReplication(
     PartitionReplication(partition, repl_scheme, http) {}
 
 bool LSMPartitionReplication::needsReplication() const {
+  // check if we have seen the latest metadata transaction, otherwise enqueue
+  auto last_txid = partition_->getTable()->getLastMetadataTransaction();
+  if (last_txid != partition_->getLastMetadataTransaction()) {
+    return true;
+  }
+
+  // check if all replicas named in the current metadata transaction have seen
+  // the latest sequence, otherwise enqueue
   auto replicas = repl_scheme_->replicasFor(snap_->key);
   if (replicas.size() == 0) {
-    return false;
+    RAISE(kRuntimeError, "error: empty replica list")
   }
 
   auto& writer = dynamic_cast<LSMPartitionWriter&>(*partition_->getWriter());
@@ -131,6 +139,26 @@ void LSMPartitionReplication::replicateTo(
 }
 
 bool LSMPartitionReplication::replicate() {
+  // if there is a new metadata transaction, fetch and apply it
+  auto last_txid = partition_->getTable()->getLastMetadataTransaction();
+  if (last_txid != partition_->getLastMetadataTransaction()) {
+    auto rc = fetchAndApplyMetadataTransaction(last_txid);
+    if (!rc.isSuccess()) {
+      RAISEF(
+          kRuntimeError,
+          "error while applying metadata transaction $0: $1",
+          last_txid.getTransactionID().toString(), rc.message());
+    }
+  }
+
+  if (last_txid != partition_->getLastMetadataTransaction()) {
+    RAISEF(
+        kRuntimeError,
+        "error while applying metadata transaction $0",
+        last_txid.getTransactionID().toString());
+  }
+
+  // get the list of other replicaas for this partition
   auto replicas = repl_scheme_->replicasFor(snap_->key);
   if (replicas.size() == 0) {
     return true;

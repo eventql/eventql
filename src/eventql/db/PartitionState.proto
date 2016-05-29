@@ -30,6 +30,7 @@ message LSMTableRef {
   required uint64 last_sequence = 3;
 }
 
+// next id: 12
 message PartitionState {
 
   /**
@@ -77,5 +78,15 @@ message PartitionState {
    * CSTable version
    */
   optional uint64 cstable_version = 6;
+
+  /**
+   * Last known metadata transaction id
+   */
+  optional string last_metadata_txnid = 10;
+
+  /**
+   * Last known metadata transaction sequence
+   */
+  optional uint64 last_metadata_txnseq = 11;
 
 };

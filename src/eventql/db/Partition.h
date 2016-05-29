@@ -36,6 +36,7 @@
 #include <eventql/db/PartitionWriter.h>
 #include <eventql/db/PartitionReader.h>
 #include <eventql/db/ReplicationScheme.h>
+#include <eventql/db/metadata_transaction.h>
 #include <eventql/io/cstable/CSTableReader.h>
 
 #include "eventql/eventql.h"
@@ -86,6 +87,8 @@ public:
 
   String getRelativePath() const;
   String getAbsolutePath() const;
+
+  MetadataTransaction getLastMetadataTransaction() const;
 
 protected:
 

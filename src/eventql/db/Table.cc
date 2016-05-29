@@ -95,6 +95,14 @@ RefPtr<TablePartitioner> Table::partitioner() const {
   return partitioner_;
 }
 
+MetadataTransaction Table::getLastMetadataTransaction() const {
+  std::unique_lock<std::mutex> lk(mutex_);
+
+  return MetadataTransaction(
+      SHA1Hash::fromHexString(config_.metadata_txnid()),
+      config_.metadata_txnseq());
+}
+
 void Table::updateConfig(TableDefinition new_config) {
   std::unique_lock<std::mutex> lk(mutex_);
   config_ = new_config;

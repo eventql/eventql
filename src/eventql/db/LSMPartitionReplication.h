@@ -50,6 +50,9 @@ public:
 
 protected:
 
+  Status fetchAndApplyMetadataTransaction(MetadataTransaction txn);
+
+
   void replicateTo(const ReplicaRef& replica, uint64_t replicated_offset);
 
   void uploadBatchTo(

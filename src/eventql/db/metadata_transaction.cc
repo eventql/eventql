@@ -21,58 +21,30 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#pragma once
-#include "eventql/eventql.h"
-#include <eventql/util/stdtypes.h>
-#include <eventql/util/duration.h>
-#include <eventql/db/Partition.h>
-#include <eventql/db/TablePartitioner.h>
-#include <eventql/util/protobuf/MessageSchema.h>
-#include <eventql/db/TableConfig.pb.h>
-#include <eventql/db/metadata_transaction.h>
+#include "eventql/db/metadata_transaction.h"
 
 namespace eventql {
 
-class Table : public RefCounted{
-public:
+MetadataTransaction::MetadataTransaction(
+    const SHA1Hash& transaction_id,
+    uint64_t transaction_seq) :
+    transaction_id_(transaction_id),
+    transaction_seq_(transaction_seq) {}
 
-  Table(const TableDefinition& config);
-
-  String name() const;
-
-  String tsdbNamespace() const;
-
-  Duration partitionSize() const;
-
-  size_t sstableSize() const;
-
-  size_t numShards() const;
-
-  Duration commitInterval() const;
-
-  RefPtr<msg::MessageSchema> schema() const;
-
-  TableDefinition config() const;
-
-  TableStorage storage() const;
-
-  const String& getPartitionKey() const;
-  TablePartitionerType partitionerType() const;
-  RefPtr<TablePartitioner> partitioner() const;
-
-  MetadataTransaction getLastMetadataTransaction() const;
-
-  void updateConfig(TableDefinition new_config);
-
-protected:
-
-  void loadConfig();
-
-  mutable std::mutex mutex_;
-  TableDefinition config_;
-  RefPtr<msg::MessageSchema> schema_;
-  RefPtr<TablePartitioner> partitioner_;
-};
-
+const SHA1Hash& MetadataTransaction::getTransactionID() const {
+  return transaction_id_;
 }
 
+uint64_t MetadataTransaction::getSequenceNumber() const {
+  return transaction_seq_;
+}
+
+bool MetadataTransaction::operator==(const MetadataTransaction& other) const {
+  return transaction_id_ == other.transaction_id_;
+}
+
+bool MetadataTransaction::operator!=(const MetadataTransaction& other) const {
+  return !(transaction_id_ == other.transaction_id_);
+}
+
+} // namespace eventql

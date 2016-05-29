@@ -52,6 +52,10 @@ public:
       const SHA1Hash& transaction_id,
       const Vector<String>& servers);
 
+  //Status discoverPartition(
+  //    const String& ns,
+  //    const String& table_name)
+
 protected:
 
   Status createFile(

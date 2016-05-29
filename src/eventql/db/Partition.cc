@@ -247,4 +247,12 @@ String Partition::getAbsolutePath() const {
   return head_.getSnapshot()->base_path;
 }
 
+MetadataTransaction Partition::getLastMetadataTransaction() const {
+  auto snap = head_.getSnapshot();
+
+  return MetadataTransaction(
+      SHA1Hash::fromHexString(snap->state.last_metadata_txnid()),
+      snap->state.last_metadata_txnseq());
+}
+
 }

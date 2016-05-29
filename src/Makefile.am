@@ -820,6 +820,8 @@ evql_core_a_SOURCES = \
     eventql/db/metadata_service.h \
     eventql/db/metadata_store.cc \
     eventql/db/metadata_store.h \
+    eventql/db/metadata_transaction.cc \
+    eventql/db/metadata_transaction.h \
     eventql/db/Partition.cc \
     eventql/db/Partition.h \
     eventql/db/PartitionReader.cc \
