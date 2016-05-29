@@ -101,16 +101,6 @@ Syntax Reference
 ### The INSERT statement
 
     INSERT INTO table_name
-      (column_name, ...)
-      VALUES (value, ...)
+      (column_name, ...) VALUES (literal, ...)
+    | FROM JSON literal
 
-    value ::=
-        literal
-      | list
-      | object
-
-    list ::=
-      [ literal, ...]
-
-    object ::=
-      { literal : literal, ...}
