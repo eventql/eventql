@@ -43,8 +43,10 @@ public:
 
   struct PartitionMapEntry {
     String begin;
+    SHA1Hash partition_id;
     Vector<PartitionPlacement> servers;
     Vector<PartitionPlacement> servers_joining;
+    Vector<PartitionPlacement> servers_leaving;
     bool splitting;
     String split_point;
     Vector<PartitionPlacement> split_servers_low;

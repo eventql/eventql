@@ -347,6 +347,16 @@ void LSMPartitionWriter::commitReplicationState(const ReplicationState& state) {
 
 Status LSMPartitionWriter::applyMetadataChange(
     const PartitionDiscoveryResponse& discovery_info) {
+  auto snap = head_->getSnapshot();
+
+  logDebug(
+      "evqld",
+      "Applying metadata change to partition $0/$1/$2: $3",
+      snap->state.tsdb_namespace(),
+      snap->state.table_key(),
+      snap->key.toString(),
+      discovery_info.DebugString());
+
   return Status(eRuntimeError, "applyMetadataTransaction not yet implemented");
 }
 
