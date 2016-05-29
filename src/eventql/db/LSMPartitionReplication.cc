@@ -41,8 +41,9 @@ const size_t LSMPartitionReplication::kMaxBatchSizeBytes = 1024 * 1024 * 50; // 
 LSMPartitionReplication::LSMPartitionReplication(
     RefPtr<Partition> partition,
     RefPtr<ReplicationScheme> repl_scheme,
+    ConfigDirectory* cdir,
     http::HTTPConnectionPool* http) :
-    PartitionReplication(partition, repl_scheme, http) {}
+    PartitionReplication(partition, repl_scheme, http), cdir_(cdir) {}
 
 bool LSMPartitionReplication::needsReplication() const {
   // check if we have seen the latest metadata transaction, otherwise enqueue

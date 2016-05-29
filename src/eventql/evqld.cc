@@ -460,6 +460,7 @@ int main(int argc, const char** argv) {
     eventql::ServerCfg cfg;
     cfg.db_path = tsdb_dir;
     cfg.repl_scheme = repl_scheme;
+    cfg.config_directory = config_dir.get();
     cfg.idx_cache = mkRef(new LSMTableIndexCache(tsdb_dir));
 
     eventql::PartitionMap partition_map(&cfg);
