@@ -106,6 +106,10 @@ RefPtr<QueryTreeNode> QueryPlanBuilder::build(
     return node;
   }
 
+  if ((node = buildInsertInto(txn, ast)) != nullptr) {
+    return node;
+  }
+
   ast->debugPrint(2);
   RAISE(kRuntimeError, "can't figure out a query plan for this, sorry :(");
 }
@@ -124,6 +128,7 @@ Vector<RefPtr<QueryTreeNode>> QueryPlanBuilder::build(
       case ASTNode::T_SHOW_TABLES:
       case ASTNode::T_DESCRIBE_TABLE:
       case ASTNode::T_CREATE_TABLE:
+      case ASTNode::T_INSERT_INTO:
         nodes.emplace_back(build(txn, statements[i], tables));
         break;
 
@@ -1868,6 +1873,16 @@ QueryTreeNode* QueryPlanBuilder::buildCreateTable(
   }
 
   return node;
+}
+
+QueryTreeNode* QueryPlanBuilder::buildInsertInto(
+    Transaction* txn,
+    ASTNode* ast) {
+  if (!(*ast == ASTNode::T_INSERT_INTO) || ast->getChildren().size() < 3) {
+    return nullptr;
+  }
+  
+  RAISE(kNotYetImplementedError, "insert into nyi");
 }
 
 }
