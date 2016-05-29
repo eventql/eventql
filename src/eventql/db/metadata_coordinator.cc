@@ -52,6 +52,7 @@ Status MetadataCoordinator::performAndCommitOperation(
 
   auto output_txid = op.getOutputTransactionID();
   table_config.set_metadata_txnid(output_txid.data(), output_txid.size());
+  table_config.set_metadata_txnseq(table_config.metadata_txnseq() + 1);
   cdir_->updateTableConfig(table_config);
   return Status::success();
 }

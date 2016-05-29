@@ -255,6 +255,10 @@ String Partition::getAbsolutePath() const {
 MetadataTransaction Partition::getLastMetadataTransaction() const {
   auto snap = head_.getSnapshot();
 
+  if (snap->state.last_metadata_txnid().empty()) {
+    return MetadataTransaction(SHA1Hash(), 0);
+  }
+
   return MetadataTransaction(
       SHA1Hash(
           snap->state.last_metadata_txnid().data(),
