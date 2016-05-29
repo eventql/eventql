@@ -60,13 +60,13 @@ message MetadataOperationEnvelope {
 };
 
 message BackfillAddServerOperation {
-  required bytes partition_id = 1
+  required bytes partition_id = 1;
   required bytes keyrange_begin = 2;
   required string server_id = 3;
 };
 
 message BackfillRemoveServerOperation {
-  required bytes partition_id = 1
-  required string server_id = 3;
+  required bytes partition_id = 1;
+  required string server_id = 2;
 };
 
