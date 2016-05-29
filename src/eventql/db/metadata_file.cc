@@ -30,9 +30,11 @@ MetadataFile::MetadataFile() {}
 MetadataFile::MetadataFile(
     const SHA1Hash& transaction_id,
     uint64_t transaction_seq,
+    KeyspaceType keyspace_type,
     const Vector<PartitionMapEntry>& partition_map) :
     transaction_id_(transaction_id),
     transaction_seq_(transaction_seq),
+    keyspace_type_(keyspace_type),
     partition_map_(partition_map) {}
 
 const SHA1Hash& MetadataFile::getTransactionID() const {
@@ -72,7 +74,12 @@ Status MetadataFile::decode(InputStream* is) {
 
   // transaction id
   is->readNextBytes((char*) transaction_id_.mutableData(), transaction_id_.size());
+
+  // transaction seq
   transaction_seq_ = is->readUInt64();
+
+  // keyspace type
+  keyspace_type_ = static_cast<KeyspaceType>(is->readUInt8());
 
   // partition map
   auto pmap_size = is->readVarUInt();
@@ -90,6 +97,12 @@ Status MetadataFile::decode(InputStream* is) {
 
     // servers joining
     decodeServerList(&e.servers_joining, is);
+    if (!rc.isSuccess()) {
+      return rc;
+    }
+
+    // servers leaving
+    decodeServerList(&e.servers_leaving, is);
     if (!rc.isSuccess()) {
       return rc;
     }
@@ -141,6 +154,9 @@ Status MetadataFile::encode(OutputStream* os) const  {
   // transaction seq
   os->appendUInt64(transaction_seq_);
 
+  // keyspace type
+  os->appendUInt8(static_cast<uint8_t>(keyspace_type_));
+
   // partition map
   os->appendVarUInt(partition_map_.size());
   for (const auto& p : partition_map_) {
@@ -155,6 +171,12 @@ Status MetadataFile::encode(OutputStream* os) const  {
 
     // servers_joining
     rc = encodeServerList(p.servers_joining, os);
+    if (!rc.isSuccess()) {
+      return rc;
+    }
+
+    // servers_leaving
+    rc = encodeServerList(p.servers_leaving, os);
     if (!rc.isSuccess()) {
       return rc;
     }

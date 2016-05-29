@@ -34,6 +34,11 @@ enum TableStorage {
   TBL_STORAGE_STATIC = 2;
 };
 
+enum KeyspaceType {
+  KEYSPACE_UINT64 = 1;
+  KEYSPACE_STRING = 2;
+};
+
 // next id: 13
 message TableConfig {
 

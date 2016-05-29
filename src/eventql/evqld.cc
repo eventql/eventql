@@ -570,10 +570,11 @@ int main(int argc, const char** argv) {
             txnid.toString());
 
         eventql::MetadataCoordinator coordinator(config_dir.get());
+        MetadataFile metadata_file(txnid, 1, KEYSPACE_UINT64, {});
         auto rc = coordinator.createFile(
             tbl.customer(),
             tbl.table_name(),
-            txnid,
+            metadata_file,
             servers);
 
         if (rc.isSuccess()) {

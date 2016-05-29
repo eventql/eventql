@@ -23,6 +23,7 @@
  */
 #pragma once
 #include "eventql/eventql.h"
+#include "eventql/db/TableConfig.pb.h"
 #include "eventql/util/protobuf/msg.h"
 #include "eventql/util/SHA1.h"
 #include "eventql/util/status.h"
@@ -57,6 +58,7 @@ public:
   MetadataFile(
       const SHA1Hash& transaction_id,
       uint64_t transaction_seq,
+      KeyspaceType keyspace_type,
       const Vector<PartitionMapEntry>& partition_map);
 
   const SHA1Hash& getTransactionID() const;
@@ -70,6 +72,7 @@ public:
 protected:
   SHA1Hash transaction_id_;
   uint64_t transaction_seq_;
+  KeyspaceType keyspace_type_;
   Vector<PartitionMapEntry> partition_map_;
 };
 

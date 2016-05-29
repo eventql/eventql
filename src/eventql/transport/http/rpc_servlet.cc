@@ -468,17 +468,16 @@ void RPCServlet::createMetadataFile(
     return;
   }
 
-  String txid;
-  if (!URI::getParam(params, "txid", &txid)) {
-    res->setStatus(http::kStatusBadRequest);
-    res->addBody("missing ?txid=... parameter");
-    return;
-  }
+  MetadataFile file;
+  auto is = req->getBodyInputStream();
+  auto rc = file.decode(is.get());
 
-  auto rc = metadata_service_->createMetadataFile(
-      db_namespace,
-      table_name,
-      SHA1Hash::fromHexString(txid));
+  if (rc.isSuccess()) {
+    rc = metadata_service_->createMetadataFile(
+        db_namespace,
+        table_name,
+        file);
+  }
 
   if (rc.isSuccess()) {
     res->setStatus(http::kStatusCreated);

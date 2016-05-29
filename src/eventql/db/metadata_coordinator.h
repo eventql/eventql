@@ -49,7 +49,7 @@ public:
   Status createFile(
       const String& ns,
       const String& table_name,
-      const SHA1Hash& transaction_id,
+      const MetadataFile& file,
       const Vector<String>& servers);
 
   Status discoverPartition(
@@ -61,7 +61,7 @@ protected:
   Status createFile(
       const String& ns,
       const String& table_name,
-      const SHA1Hash& transaction_id,
+      const MetadataFile& file,
       const String& server);
 
   Status performOperation(

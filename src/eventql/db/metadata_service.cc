@@ -48,13 +48,16 @@ Status MetadataService::getMetadataFile(
 Status MetadataService::createMetadataFile(
     const String& ns,
     const String& table_name,
-    const SHA1Hash& txid) {
-  MetadataFile metadata_file(txid, 1, {});
+    const MetadataFile& file) const {
+  if (file.getSequenceNumber() != 1) {
+    return Status(eIllegalArgumentError, "sequence number must be 1");
+  }
+
   return metadata_store_->storeMetadataFile(
       ns,
       table_name,
-      txid,
-      metadata_file);
+      file.getTransactionID(),
+      file);
 }
 
 Status MetadataService::performMetadataOperation(

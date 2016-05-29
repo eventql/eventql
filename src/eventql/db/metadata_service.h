@@ -48,7 +48,7 @@ public:
   Status createMetadataFile(
       const String& ns,
       const String& table_name,
-      const SHA1Hash& txid);
+      const MetadataFile& file) const;
 
   Status performMetadataOperation(
       const String& ns,
