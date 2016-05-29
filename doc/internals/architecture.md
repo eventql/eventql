@@ -1,4 +1,15 @@
 
+## Architecture Overview
+
+Each table's keyspace is split into a number of non-overlapping ranges called
+"partitions" (like bigtable). 
+
+Each partition is simultaneously served by N servers where N is called the
+replication factor. Each server accepts queries and inserts for every partition
+it serves (unlike bigtable). I.e. we can tolerate up to N-1 failures and still
+serve reads and writes. In practice, N is often 3 which would make the number of
+tolerated failures 2.
+
 
 ## Partition Location
 
