@@ -695,3 +695,34 @@ TEST_CASE(QTreeTest, TestCreateTable, [] () {
   pkey.emplace_back("myvalue");
   EXPECT(qtree->getPrimaryKey() == pkey);
 });
+
+TEST_CASE(QTreeTest, TestInsertInto, [] () {
+  auto runtime = Runtime::getDefaultRuntime();
+  auto txn = runtime->newTransaction();
+
+  String query = R"(
+      INSERT INTO evtbl (
+          evtime,
+          evid,
+          rating,
+          is_admin,
+          type
+      ) VALUES (
+          1464463790,
+          'xxx',
+          1.23,
+          true,
+          null
+      );
+    )";
+
+  csql::Parser parser;
+  parser.parse(query.data(), query.size());
+
+  auto qtree_builder = runtime->queryPlanBuilder();
+  Vector<RefPtr<QueryTreeNode>> qtrees = qtree_builder->build(
+      txn.get(),
+      parser.getStatements(),
+      txn->getTableProvider());
+
+});
