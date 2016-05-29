@@ -29,7 +29,7 @@ namespace csql {
 
 InsertIntoNode::InsertIntoNode(
     const String& table_name,
-    Vector<Pair<const String&, SValue>> data) :
+    Vector<Pair<String, SValue>> data) :
     table_name_(table_name),
     data_(data) {}
 
@@ -41,7 +41,7 @@ const String& InsertIntoNode::getTableName() const {
   return table_name_;
 }
 
-Vector<Pair<const String&, SValue>> InsertIntoNode::getData() const {
+Vector<Pair<String, SValue>> InsertIntoNode::getData() const {
   return data_;
 }
 

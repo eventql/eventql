@@ -35,19 +35,19 @@ public:
 
   InsertIntoNode(
       const String& table_name,
-      Vector<Pair<const String&, SValue>> data);
+      Vector<Pair<String, SValue>> data);
 
   InsertIntoNode(const InsertIntoNode& node);
 
   const String& getTableName() const;
-  Vector<Pair<const String&, SValue>> getData() const;
+  Vector<Pair<String, SValue>> getData() const;
 
   RefPtr<QueryTreeNode> deepCopy() const;
   String toString() const;
 
 protected:
   String table_name_;
-  Vector<Pair<const String&, SValue>> data_;
+  Vector<Pair<String, SValue>> data_;
 };
 
 } // namespace csql
