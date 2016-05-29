@@ -56,8 +56,9 @@ Status MetadataStore::getMetadataFile(
 Status MetadataStore::storeMetadataFile(
     const String& ns,
     const String& table_name,
-    const SHA1Hash& txid,
     const MetadataFile& file) {
+  auto txid = file.getTransactionID();
+
   logDebug(
       "evqld",
       "Storing metadata file: $0/$1/$2",

@@ -53,18 +53,37 @@ Status MetadataService::createMetadataFile(
     return Status(eIllegalArgumentError, "sequence number must be 1");
   }
 
-  return metadata_store_->storeMetadataFile(
-      ns,
-      table_name,
-      file.getTransactionID(),
-      file);
+  return metadata_store_->storeMetadataFile(ns, table_name, file);
 }
 
 Status MetadataService::performMetadataOperation(
     const String& ns,
     const String& table_name,
     MetadataOperation op) {
-  return Status(eRuntimeError, "not yet implemented");
+  RefPtr<MetadataFile> input_file;
+  {
+    auto rc = getMetadataFile(ns, table_name, &input_file);
+    if (!rc.isSuccess()) {
+      return rc;
+    }
+  }
+
+  assert(input_file->getTransactionID() == op.getInputTransactionID());
+  Vector<MetadataFile::PartitionMapEntry> new_pmap;
+  {
+    auto rc = op.perform(*input_file, &new_pmap);
+    if (!rc.isSuccess()) {
+      return rc;
+    }
+  }
+
+  MetadataFile output_file(
+      op.getOutputTransactionID(),
+      input_file->getSequenceNumber() + 1,
+      input_file->getKeyspaceType(),
+      new_pmap);
+
+  return metadata_store_->storeMetadataFile(ns, table_name, output_file);
 }
 
 Status MetadataService::discoverPartition(

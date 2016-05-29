@@ -29,6 +29,7 @@
 #include "eventql/util/io/inputstream.h"
 #include "eventql/util/io/outputstream.h"
 #include "eventql/db/metadata_operations.pb.h"
+#include "eventql/db/metadata_file.h"
 
 namespace eventql {
 
@@ -46,6 +47,10 @@ public:
 
   SHA1Hash getInputTransactionID() const;
   SHA1Hash getOutputTransactionID() const;
+
+  Status perform(
+      const MetadataFile& input,
+      Vector<MetadataFile::PartitionMapEntry>* output) const;
 
   Status decode(InputStream* is);
   Status encode(OutputStream* os) const;

@@ -64,6 +64,8 @@ public:
   const SHA1Hash& getTransactionID() const;
   uint64_t getSequenceNumber() const;
 
+  KeyspaceType getKeyspaceType() const;
+
   const Vector<PartitionMapEntry>& getPartitionMap() const;
 
   Status decode(InputStream* is);
