@@ -52,9 +52,9 @@ public:
       const SHA1Hash& transaction_id,
       const Vector<String>& servers);
 
-  //Status discoverPartition(
-  //    const String& ns,
-  //    const String& table_name)
+  Status discoverPartition(
+      const PartitionDiscoveryRequest& request,
+      PartitionDiscoveryResponse* response);
 
 protected:
 

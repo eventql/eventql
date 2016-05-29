@@ -27,6 +27,28 @@ enum MetadataOperationType {
   METAOP_ADD_PARTITION = 1;
 };
 
+message PartitionDiscoveryRequest {
+  required string db_namespace = 1;
+  required string table_id = 2;
+  required uint64 min_txnseq = 3;
+  required bytes partition_id = 4;
+  required bytes keyrange_begin = 5;
+  required bytes keyrange_end = 6;
+};
+
+enum PartitionDiscoveryResponseCode {
+  PDISCOVERY_UNKNOWN = 0;
+  PDISCOVERY_LOAD = 1;
+  PDISCOVERY_SERVE = 2;
+  PDISCOVERY_UNLOAD = 3;
+};
+
+message PartitionDiscoveryResponse {
+  required PartitionDiscoveryResponseCode code = 1;
+  required bytes txnid = 2;
+  required uint64 txnseq = 3;
+};
+
 message MetadataOperationEnvelope {
   required MetadataOperationType type = 1;
   required string input_txid = 2;
