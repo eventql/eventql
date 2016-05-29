@@ -43,6 +43,7 @@
 #include <eventql/sql/qtree/ValueExpressionNode.h>
 #include <eventql/sql/qtree/JoinNode.h>
 #include <eventql/sql/qtree/nodes/create_table.h>
+#include <eventql/sql/qtree/nodes/insert_into.h>
 #include <eventql/sql/table_schema.h>
 
 namespace csql {
@@ -1881,8 +1882,44 @@ QueryTreeNode* QueryPlanBuilder::buildInsertInto(
   if (!(*ast == ASTNode::T_INSERT_INTO) || ast->getChildren().size() < 3) {
     return nullptr;
   }
-  
-  RAISE(kNotYetImplementedError, "insert into nyi");
+
+  auto table_name = ast->getChildren()[0];
+  if (table_name->getType() != ASTNode::T_TABLE_NAME ||
+      table_name->getToken() == nullptr) {
+    RAISE(kRuntimeError, "corrupt AST");
+  }
+
+  if (ast->getChildren()[1]->getType() != ASTNode::T_COLUMN_LIST) {
+    RAISE(kRuntimeError, "corrupt AST");
+  }
+
+  if (ast->getChildren()[2]->getType() != ASTNode::T_VALUE_LIST) {
+    RAISE(kRuntimeError, "corrupt AST");
+  }
+
+  auto columns = ast->getChildren()[1]->getChildren();
+  auto values = ast->getChildren()[2]->getChildren();
+
+  if (columns.size() != values.size()) {
+    RAISE(kRuntimeError, "corrupt AST");
+  }
+
+  Vector<Pair<String, SValue>> data;
+  for (size_t i = 0; i < columns.size(); ++i) {
+    if (columns[i]->getType() != ASTNode::T_COLUMN_NAME ||
+         columns[i]->getToken() == nullptr ||
+         values[i]->getType() != ASTNode::T_VALUE ||
+         values[i]->getToken() == nullptr) {
+      RAISE(kRuntimeError, "corrupt AST");
+    }
+
+    Pair<String, SValue> v;
+    v.first = columns[i]->getToken()->getString();
+    v.second = SValue::newString(values[i]->getToken()->getString());
+    data.emplace_back(v);
+  }
+
+  return new InsertIntoNode(table_name->getToken()->getString(), data);
 }
 
 }
