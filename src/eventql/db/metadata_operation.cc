@@ -113,7 +113,7 @@ Status MetadataOperation::performBackfillAddServer(
   }
 
   auto iter = pmap.begin();
-  while (iter != pmap.end()) {
+  for (; iter != pmap.end(); ++iter) {
     uint64_t e_begin;
     memcpy(&e_begin, iter->begin.data(), sizeof(uint64_t));
 
