@@ -326,6 +326,46 @@ void StatusServlet::renderTablePage(
         rc.message());
   }
 
+  html += "<h3>Partition Map:</h3>";
+  html += "<table cellspacing=0 border=1>";
+  html += "<thead><tr><td>Keyrange</td><td>Partition ID</td><td>Servers</td></tr></thead>";
+  for (const auto& e : metadata_file.getPartitionMap()) {
+    Vector<String> servers;
+    for (const auto& s : e.servers) {
+      servers.emplace_back(s.server_id);
+    }
+    for (const auto& s : e.servers_joining) {
+      servers.emplace_back(s.server_id + " [JOINING]");
+    }
+    for (const auto& s : e.servers_leaving) {
+      servers.emplace_back(s.server_id + " [LEAVING]");
+    }
+
+    String keyrange;
+    switch (metadata_file.getKeyspaceType()) {
+      case KEYSPACE_UINT64: {
+        uint64_t keyrange_uint = -1;
+        memcpy((char*) &keyrange_uint, e.begin.data(), sizeof(e.begin));
+        keyrange = StringUtil::format(
+            "$0 [$1]",
+            UnixTime(keyrange_uint),
+            keyrange_uint);
+        break;
+      }
+      case KEYSPACE_STRING: {
+        keyrange = e.begin;
+        break;
+      }
+    }
+
+    html += StringUtil::format(
+        "<tr><td>$0</td><td>$1</td><td>$2</td></tr>",
+        keyrange,
+        e.partition_id.toString(),
+        StringUtil::join(servers, ", "));
+  }
+  html += "</table>";
+
   html += "<h3>TableDefinition</h3>";
   html += StringUtil::format(
       "<pre>$0</pre>",
