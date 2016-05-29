@@ -343,16 +343,32 @@ void StatusServlet::renderPartitionPage(
       table_name,
       partition_key);
 
-  auto snap = partition.get()->getSnapshot();
-
   if (partition.isEmpty()) {
     html += "ERROR: PARTITION NOT FOUND!";
   } else {
-    html += "<table cellspacing=0 border=0>";
+    auto table = partition.get()->getTable();
+    auto snap = partition.get()->getSnapshot();
+    auto state = snap->state;
+
+    if (table->partitionerType() == TBL_PARTITION_TIMEWINDOW &&
+        state.partition_keyrange_begin().size() == 8 &&
+        state.partition_keyrange_end().size() == 8) {
+      uint64_t ts_begin;
+      uint64_t ts_end;
+      memcpy((char*) &ts_begin, state.partition_keyrange_begin().data(), 8);
+      memcpy((char*) &ts_end, state.partition_keyrange_end().data(), 8);
+
+      html += StringUtil::format(
+          "<span><em>Keyrange:</em> $0 [$1] - $2 [$3]</span> &mdash; ",
+          UnixTime(ts_begin),
+          ts_begin,
+          UnixTime(ts_end),
+          ts_end);
+    }
+
     html += StringUtil::format(
-        "<tr><td><em>Number of Records</em></td><td align='right'>$0</td></tr>",
+        "<span><em>Number of Records</em>: $0</span>",
         snap->nrecs);
-    html += "</table>";
 
     html += "<h3>PartitionInfo</h3>";
     html += StringUtil::format(
