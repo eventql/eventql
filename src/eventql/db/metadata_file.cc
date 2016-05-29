@@ -45,6 +45,10 @@ uint64_t MetadataFile::getSequenceNumber() const {
   return transaction_seq_;
 }
 
+KeyspaceType MetadataFile::getKeyspaceType() const {
+  return keyspace_type_;
+}
+
 const Vector<MetadataFile::PartitionMapEntry>&
     MetadataFile::getPartitionMap() const {
   return partition_map_;
