@@ -56,6 +56,15 @@ public:
   Status encode(OutputStream* os) const;
 
 protected:
+
+  Status performBackfillAddServer(
+      const MetadataFile& input,
+      Vector<MetadataFile::PartitionMapEntry>* output) const;
+
+  Status performBackfillRemoveServer(
+      const MetadataFile& input,
+      Vector<MetadataFile::PartitionMapEntry>* output) const;
+
   MetadataOperationEnvelope data_;
 };
 

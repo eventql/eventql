@@ -58,5 +58,30 @@ Status MetadataOperation::encode(OutputStream* os) const {
   return Status(eRuntimeError, "not yet implemented");
 }
 
+Status MetadataOperation::perform(
+    const MetadataFile& input,
+    Vector<MetadataFile::PartitionMapEntry>* output) const {
+  switch (data_.optype()) {
+    case METAOP_BACKFILL_ADD_SERVER:
+      return performBackfillAddServer(input, output);
+    case METAOP_BACKFILL_REMOVE_SERVER:
+      return performBackfillRemoveServer(input, output);
+    default:
+      return Status(eIllegalArgumentError, "invalid metadata operation type");
+  }
+}
+
+Status MetadataOperation::performBackfillAddServer(
+    const MetadataFile& input,
+    Vector<MetadataFile::PartitionMapEntry>* output) const {
+  return Status(eRuntimeError, "operation not implemented");
+}
+
+Status MetadataOperation::performBackfillRemoveServer(
+    const MetadataFile& input,
+    Vector<MetadataFile::PartitionMapEntry>* output) const {
+  return Status(eRuntimeError, "operation not implemented");
+}
+
 } // namespace eventql
 
