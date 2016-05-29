@@ -106,6 +106,9 @@ protected:
   ASTNode* primaryKeyDefinition();
   ASTNode* tableName();
   ASTNode* insertStatement();
+  ASTNode* insertIntoStatement();
+  ASTNode* insertColumnList();
+  ASTNode* insertValueList();
   ASTNode* drawStatement();
   ASTNode* axisClause();
   ASTNode* domainClause();

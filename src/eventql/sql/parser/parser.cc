@@ -534,7 +534,90 @@ ASTNode* Parser::primaryKeyDefinition() {
 
 ASTNode* Parser::insertStatement() {
   consumeToken();
-  RAISE(kNotYetImplementedError, "nyi");
+  return insertIntoStatement();
+}
+
+ASTNode* Parser::insertIntoStatement() {
+  expectAndConsume(Token::T_INTO);
+
+  auto insert_into = new ASTNode(ASTNode::T_INSERT_INTO);
+  insert_into->appendChild(tableName());
+
+  if (cur_token_->getType() == Token::T_FROM) {
+    RAISE(kNotYetImplementedError, "insert into from json not yet implemented");
+
+  } else {
+    insert_into->appendChild(insertColumnList());
+    insert_into->appendChild(insertValueList());
+  }
+
+  consumeIf(Token::T_SEMICOLON);
+
+  return insert_into;
+}
+
+ASTNode* Parser::insertColumnList() {
+  expectAndConsume(Token::T_LPAREN);
+
+  auto column_list = new ASTNode(ASTNode::T_COLUMN_LIST);
+
+  while (*cur_token_ != Token::T_RPAREN) {
+    auto column = new ASTNode(ASTNode::T_COLUMN);
+
+    assertExpectation(Token::T_IDENTIFIER);
+    auto column_name = new ASTNode(ASTNode::T_COLUMN_NAME);
+    column_name->setToken(cur_token_);
+    column->appendChild(column_name);
+    consumeToken();
+
+    column_list->appendChild(column);
+
+    if (*cur_token_ == Token::T_COMMA) {
+      consumeToken();
+    } else {
+      break;
+    }
+  }
+
+  expectAndConsume(Token::T_RPAREN);
+
+  return column_list;
+}
+
+ASTNode* Parser::insertValueList() {
+  expectAndConsume(Token::T_VALUES);
+  expectAndConsume(Token::T_LPAREN);
+
+  auto value_list = new ASTNode(ASTNode::T_VALUE_LIST);
+
+  while (*cur_token_ != Token::T_RPAREN) {
+    switch (cur_token_->getType()) {
+      case Token::T_STRING:
+      case Token::T_NUMERIC: {
+        auto value = new ASTNode(ASTNode::T_VALUE);
+        value->setToken(cur_token_);
+        consumeToken();
+        value_list->appendChild(value);
+        break;
+      }
+
+      default:
+        RAISEF(
+            kParseError,
+            "unexpected Token $0, expected one of T_STRING, T_NUMERIC",
+            Token::getTypeName(cur_token_->getType()));
+    }
+
+    if (*cur_token_ == Token::T_COMMA) {
+      consumeToken();
+    } else {
+      break;
+    }
+  }
+
+  expectAndConsume(Token::T_RPAREN);
+
+  return value_list;
 }
 
 ASTNode* Parser::importStatement() {
