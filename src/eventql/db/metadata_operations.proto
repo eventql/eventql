@@ -34,6 +34,7 @@ message PartitionDiscoveryRequest {
   required bytes partition_id = 4;
   required bytes keyrange_begin = 5;
   required bytes keyrange_end = 6;
+  required string requester_id = 7;
 };
 
 enum PartitionDiscoveryResponseCode {

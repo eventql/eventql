@@ -219,7 +219,7 @@ Status MetadataCoordinator::createFile(
 }
 
 Status MetadataCoordinator::discoverPartition(
-    const PartitionDiscoveryRequest& request,
+    PartitionDiscoveryRequest request,
     PartitionDiscoveryResponse* response) {
   auto table_cfg = cdir_->getTableConfig(
       request.db_namespace(),
@@ -228,6 +228,8 @@ Status MetadataCoordinator::discoverPartition(
   if (table_cfg.metadata_txnseq() < request.min_txnseq()) {
     return Status(eConcurrentModificationError, "concurrent modification");
   }
+
+  request.set_requester_id(cdir_->getServerID());
 
   http::HTTPClient http_client;
   for (const auto& s : table_cfg.metadata_servers()) {

@@ -53,7 +53,7 @@ public:
       const Vector<String>& servers);
 
   Status discoverPartition(
-      const PartitionDiscoveryRequest& request,
+      PartitionDiscoveryRequest request,
       PartitionDiscoveryResponse* response);
 
 protected:

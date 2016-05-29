@@ -898,6 +898,14 @@ ClusterConfig ZookeeperConfigDirectory::getPatchedClusterConfig() const {
   return patched;
 }
 
+String ZookeeperConfigDirectory::getServerID() const {
+  if (server_name_.isEmpty()) {
+    RAISE(kRuntimeError, "no server id available");
+  }
+
+  return server_name_.get();
+}
+
 ServerConfig ZookeeperConfigDirectory::getServerConfig(
     const String& server_name) const {
   std::unique_lock<std::mutex> lk(mutex_);
