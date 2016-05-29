@@ -1157,14 +1157,9 @@ TEST_CASE(ParserTest, TestInsertIntoStatement, [] () {
 
   EXPECT(*children[1] == ASTNode::T_COLUMN_LIST);
   EXPECT(children[1]->getChildren().size() == 5);
-  EXPECT(*children[1]->getChildren()[0] == ASTNode::T_COLUMN);
-  EXPECT(children[1]->getChildren()[0]->getChildren().size() == 1);
-  EXPECT_EQ(
-      children[1]->getChildren()[0]->getChildren()[0]->getToken()->getString(),
-      "evtime");
-  EXPECT_EQ(
-      children[1]->getChildren()[1]->getChildren()[0]->getToken()->getString(),
-      "evid");
+  EXPECT(*children[1]->getChildren()[0] == ASTNode::T_COLUMN_NAME);
+  EXPECT_EQ(children[1]->getChildren()[0]->getToken()->getString(), "evtime");
+  EXPECT_EQ(children[1]->getChildren()[1]->getToken()->getString(), "evid");
 
   EXPECT(*children[2] == ASTNode::T_VALUE_LIST);
   EXPECT(children[2]->getChildren().size() == 5);

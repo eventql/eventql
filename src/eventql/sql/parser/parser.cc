@@ -562,15 +562,12 @@ ASTNode* Parser::insertColumnList() {
   auto column_list = new ASTNode(ASTNode::T_COLUMN_LIST);
 
   while (*cur_token_ != Token::T_RPAREN) {
-    auto column = new ASTNode(ASTNode::T_COLUMN);
-
     assertExpectation(Token::T_IDENTIFIER);
     auto column_name = new ASTNode(ASTNode::T_COLUMN_NAME);
     column_name->setToken(cur_token_);
-    column->appendChild(column_name);
     consumeToken();
 
-    column_list->appendChild(column);
+    column_list->appendChild(column_name);
 
     if (*cur_token_ == Token::T_COMMA) {
       consumeToken();
