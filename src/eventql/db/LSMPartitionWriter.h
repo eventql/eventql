@@ -56,8 +56,7 @@ public:
   bool needsCompaction() override;
   bool needsUrgentCompaction();
 
-  Status applyMetadataTransaction(
-      const MetadataTransaction& txn,
+  Status applyMetadataChange(
       const PartitionDiscoveryResponse& discovery_info);
 
   ReplicationState fetchReplicationState() const;

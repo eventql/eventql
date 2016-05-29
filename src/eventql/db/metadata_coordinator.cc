@@ -218,4 +218,51 @@ Status MetadataCoordinator::createFile(
   }
 }
 
+Status MetadataCoordinator::discoverPartition(
+    const PartitionDiscoveryRequest& request,
+    PartitionDiscoveryResponse* response) {
+  auto table_cfg = cdir_->getTableConfig(
+      request.db_namespace(),
+      request.table_id());
+
+  if (table_cfg.metadata_txnseq() < request.min_txnseq()) {
+    return Status(eConcurrentModificationError, "concurrent modification");
+  }
+
+  http::HTTPClient http_client;
+  for (const auto& s : table_cfg.metadata_servers()) {
+    auto server = cdir_->getServerConfig(s);
+    if (server.server_status() != SERVER_UP) {
+      continue;
+    }
+
+    auto url = StringUtil::format(
+        "http://$0/rpc/discover_partition_metadata",
+        server.server_addr());
+
+    Buffer req_body;
+    auto req = http::HTTPRequest::mkPost(url, *msg::encode(request));
+    //auth_->signRequest(static_cast<Session*>(txn_->getUserData()), &req);
+
+    http::HTTPResponse res;
+    auto rc = http_client.executeRequest(req, &res);
+    if (!rc.isSuccess()) {
+      logWarning("evqld", "metadata discovery failed: $0", rc.message());
+      continue;
+    }
+
+    if (res.statusCode() == 200) {
+      *response = msg::decode<PartitionDiscoveryResponse>(res.body());
+      return Status::success();
+    } else {
+      logWarning(
+          "evqld",
+          "metadata discovery failed: $0",
+          res.body().toString());
+    }
+  }
+
+  return Status(eIOError, "no metadata server has the request transaction");
+}
+
 } // namespace eventql

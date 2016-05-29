@@ -48,6 +48,10 @@ public:
       const String& table_name,
       MetadataOperation op);
 
+  Status discoverPartition(
+      const PartitionDiscoveryRequest& request,
+      PartitionDiscoveryResponse* response);
+
 protected:
 
   MetadataStore* metadata_store_;
