@@ -25,6 +25,8 @@
 #include <eventql/db/Partition.h>
 #include <eventql/db/LSMPartitionWriter.h>
 #include <eventql/db/LSMTableIndex.h>
+#include <eventql/db/metadata_operation.h>
+#include <eventql/db/metadata_coordinator.h>
 #include <eventql/util/protobuf/msg.h>
 #include <eventql/util/logging.h>
 #include <eventql/util/wallclock.h>
@@ -48,6 +50,7 @@ LSMPartitionWriter::LSMPartitionWriter(
             partition_,
             cfg->idx_cache.get())),
     idx_cache_(cfg->idx_cache.get()),
+    cdir_(cfg->config_directory),
     repl_(cfg->repl_scheme.get()),
     max_datafile_size_(kDefaultMaxDatafileSize) {}
 
@@ -367,6 +370,29 @@ Status LSMPartitionWriter::applyMetadataChange(
         snap->state.tsdb_namespace(),
         snap->state.table_key(),
         snap->key.toString());
+
+    BackfillAddServerOperation opdata;
+    opdata.set_partition_id(snap->key.data(), snap->key.size());
+    opdata.set_keyrange_begin(snap->state.partition_keyrange_begin());
+    opdata.set_server_id(cdir_->getServerID());
+
+    MetadataOperation op(
+        snap->state.tsdb_namespace(),
+        snap->state.table_key(),
+        METAOP_BACKFILL_ADD_SERVER,
+        SHA1Hash(discovery_info.txnid().data(), discovery_info.txnid().size()),
+        Random::singleton()->sha1(),
+        *msg::encode(opdata));
+
+    MetadataCoordinator coordinator(cdir_);
+    auto rc = coordinator.performAndCommitOperation(
+        snap->state.tsdb_namespace(),
+        snap->state.table_key(),
+        op);
+
+    if (!rc.isSuccess()) {
+      return rc;
+    }
   }
 
   if (!has_local_replica && discovery_info.code() != PDISCOVERY_UNLOAD) {
@@ -376,9 +402,46 @@ Status LSMPartitionWriter::applyMetadataChange(
         snap->state.tsdb_namespace(),
         snap->state.table_key(),
         snap->key.toString());
+
+    BackfillRemoveServerOperation opdata;
+    opdata.set_partition_id(snap->key.data(), snap->key.size());
+    opdata.set_server_id(cdir_->getServerID());
+
+    MetadataOperation op(
+        snap->state.tsdb_namespace(),
+        snap->state.table_key(),
+        METAOP_BACKFILL_REMOVE_SERVER,
+        SHA1Hash(discovery_info.txnid().data(), discovery_info.txnid().size()),
+        Random::singleton()->sha1(),
+        *msg::encode(opdata));
+
+    MetadataCoordinator coordinator(cdir_);
+    auto rc = coordinator.performAndCommitOperation(
+        snap->state.tsdb_namespace(),
+        snap->state.table_key(),
+        op);
+
+    if (!rc.isSuccess()) {
+      return rc;
+    }
   }
 
-  return Status(eRuntimeError, "applyMetadataTransaction not yet implemented");
+  // commit
+  {
+    ScopedLock<std::mutex> write_lk(mutex_);
+    snap = head_->getSnapshot()->clone();
+    if (snap->state.last_metadata_txnseq() >= discovery_info.txnseq()) {
+      return Status(eConcurrentModificationError, "version conflict");
+    }
+
+    snap->state.set_last_metadata_txnid(discovery_info.txnid());
+    snap->state.set_last_metadata_txnseq(discovery_info.txnseq());
+
+    snap->writeToDisk();
+    head_->setSnapshot(snap);
+  }
+
+  return Status::success();
 }
 
 } // namespace tdsb

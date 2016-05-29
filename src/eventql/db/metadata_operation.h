@@ -35,6 +35,15 @@ namespace eventql {
 class MetadataOperation {
 public:
 
+  MetadataOperation();
+  MetadataOperation(
+      const String& db_namespace,
+      const String& table_id,
+      MetadataOperationType type,
+      const SHA1Hash& input_txid,
+      const SHA1Hash& output_txid,
+      const Buffer& opdata);
+
   SHA1Hash getInputTransactionID() const;
   SHA1Hash getOutputTransactionID() const;
 
@@ -42,9 +51,7 @@ public:
   Status encode(OutputStream* os) const;
 
 protected:
-  MetadataOperationType type_;
-  SHA1Hash input_txid_;
-  SHA1Hash output_txid_;
+  MetadataOperationEnvelope data_;
 };
 
 } // namespace eventql

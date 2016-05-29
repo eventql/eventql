@@ -24,7 +24,8 @@
 package eventql;
 
 enum MetadataOperationType {
-  METAOP_ADD_PARTITION = 1;
+  METAOP_BACKFILL_ADD_SERVER = 1;
+  METAOP_BACKFILL_REMOVE_SERVER = 2;
 };
 
 message PartitionDiscoveryRequest {
@@ -53,9 +54,9 @@ message PartitionDiscoveryResponse {
 message MetadataOperationEnvelope {
   required string db_namespace = 1;
   required string table_id = 2;
-  required MetadataOperationType type = 3;
-  required string input_txid = 4;
-  required string output_txid = 5;
+  required bytes input_txid = 4;
+  required bytes output_txid = 5;
+  required MetadataOperationType optype = 3;
   optional bytes opdata = 6;
 };
 

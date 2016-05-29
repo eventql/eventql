@@ -25,12 +25,29 @@
 
 namespace eventql {
 
+MetadataOperation::MetadataOperation() {}
+
+MetadataOperation::MetadataOperation(
+    const String& db_namespace,
+    const String& table_id,
+    MetadataOperationType type,
+    const SHA1Hash& input_txid,
+    const SHA1Hash& output_txid,
+    const Buffer& opdata) {
+  data_.set_db_namespace(db_namespace);
+  data_.set_table_id(table_id);
+  data_.set_input_txid(input_txid.data(), input_txid.size());
+  data_.set_output_txid(output_txid.data(), input_txid.size());
+  data_.set_optype(type);
+  data_.set_opdata(opdata.data(), opdata.size());
+}
+
 SHA1Hash MetadataOperation::getInputTransactionID() const {
-  return input_txid_;
+  return SHA1Hash(data_.input_txid().data(), data_.input_txid().size());
 }
 
 SHA1Hash MetadataOperation::getOutputTransactionID() const {
-  return output_txid_;
+  return SHA1Hash(data_.output_txid().data(), data_.output_txid().size());
 }
 
 Status MetadataOperation::decode(InputStream* is) {
