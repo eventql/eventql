@@ -1083,7 +1083,7 @@ TableDefinition ZookeeperConfigDirectory::getTableConfig(
     const String& db_namespace,
     const String& table_name) const {
   std::unique_lock<std::mutex> lk(mutex_);
-  auto iter = tables_.find(table_name);
+  auto iter = tables_.find(db_namespace + "~" + table_name);
   if (iter == tables_.end()) {
     RAISEF(kNotFoundError, "table not found: $0", table_name);
   }
