@@ -22,6 +22,7 @@
  * code of your own applications
  */
 #include "eventql/db/metadata_operation.h"
+#include "eventql/util/random.h"
 
 namespace eventql {
 
@@ -74,7 +75,75 @@ Status MetadataOperation::perform(
 Status MetadataOperation::performBackfillAddServer(
     const MetadataFile& input,
     Vector<MetadataFile::PartitionMapEntry>* output) const {
-  return Status(eRuntimeError, "operation not implemented");
+  if (input.getKeyspaceType() != KEYSPACE_UINT64) {
+    return Status(eIllegalArgumentError, "keyspace type must be uint64");
+  }
+
+  auto opdata = msg::decode<BackfillAddServerOperation>(
+      data_.opdata().data(),
+      data_.opdata().size());
+
+  uint64_t partition_begin;
+  if (opdata.keyrange_begin().size() != sizeof(uint64_t)) {
+    return Status(eIllegalArgumentError, "invalid keyrange begin");
+  }
+
+  memcpy(
+      &partition_begin,
+      opdata.keyrange_begin().data(),
+      sizeof(uint64_t));
+
+  auto pmap = input.getPartitionMap();
+
+  MetadataFile::PartitionMapEntry* entry = nullptr;
+  for (auto& e : pmap) {
+    uint64_t e_begin;
+    memcpy(&e_begin, e.begin.data(), sizeof(uint64_t));
+
+  }
+
+  auto iter = pmap.begin();
+  while (iter != pmap.end()) {
+    uint64_t e_begin;
+    memcpy(&e_begin, iter->begin.data(), sizeof(uint64_t));
+
+    if (e_begin == partition_begin) {
+      entry = &*iter;
+      break;
+    }
+
+    if (e_begin > partition_begin) {
+      break;
+    }
+  }
+
+  if (!entry) {
+    MetadataFile::PartitionMapEntry e;
+    e.begin = opdata.keyrange_begin();
+    e.partition_id = SHA1Hash(
+        opdata.partition_id().data(),
+        opdata.partition_id().size());
+
+    entry = &*pmap.insert(iter, e);
+  }
+
+  bool server_already_exists = false;
+  for (const auto& s : entry->servers) {
+    if (s.server_id == opdata.server_id()) {
+      server_already_exists = true;
+      break;
+    }
+  }
+
+  if (!server_already_exists) {
+    MetadataFile::PartitionPlacement s;
+    s.server_id = opdata.server_id();
+    s.placement_id = Random::singleton()->random64();
+    entry->servers.emplace_back(s);
+  }
+
+  *output = pmap;
+  return Status::success();
 }
 
 Status MetadataOperation::performBackfillRemoveServer(
