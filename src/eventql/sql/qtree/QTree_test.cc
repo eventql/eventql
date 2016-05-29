@@ -35,6 +35,7 @@
 #include "eventql/sql/qtree/QueryTreeUtil.h"
 #include "eventql/sql/qtree/qtree_coder.h"
 #include "eventql/sql/qtree/nodes/create_table.h"
+#include "eventql/sql/qtree/nodes/insert_into.h"
 #include "eventql/sql/CSTableScanProvider.h"
 #include "eventql/sql/backends/csv/CSVTableProvider.h"
 
@@ -725,4 +726,17 @@ TEST_CASE(QTreeTest, TestInsertInto, [] () {
       parser.getStatements(),
       txn->getTableProvider());
 
+  RefPtr<InsertIntoNode> qtree = qtrees[0].asInstanceOf<InsertIntoNode>();
+  EXPECT_EQ(qtree->getTableName(), "evtbl");
+
+  auto data = qtree->getData();
+  EXPECT_EQ(data.size(), 5);
+
+  EXPECT_EQ(data[0].first, "evtime");
+  EXPECT_EQ(data[1].first, "evid");
+  EXPECT_EQ(data[2].first, "rating");
+  EXPECT_EQ(data[3].first, "is_admin");
+  EXPECT_EQ(data[4].first, "type");
+
+  EXPECT_EQ(data[0].second.getString(), "1464463790");
 });
