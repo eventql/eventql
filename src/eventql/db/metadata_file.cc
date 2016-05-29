@@ -39,6 +39,10 @@ const SHA1Hash& MetadataFile::getTransactionID() const {
   return transaction_id_;
 }
 
+uint64_t MetadataFile::getSequenceNumber() const {
+  return transaction_seq_;
+}
+
 const Vector<MetadataFile::PartitionMapEntry>&
     MetadataFile::getPartitionMap() const {
   return partition_map_;

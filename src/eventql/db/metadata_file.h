@@ -58,6 +58,7 @@ public:
       const Vector<PartitionMapEntry>& partition_map);
 
   const SHA1Hash& getTransactionID() const;
+  uint64_t getSequenceNumber() const;
 
   const Vector<PartitionMapEntry>& getPartitionMap() const;
 
