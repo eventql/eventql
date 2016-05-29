@@ -123,8 +123,9 @@ Partition::Partition(
     cfg_(cfg),
     head_(head),
     table_(table) {
-  if (head->state.partition_keyrange_begin().empty() ||
-      head->state.partition_keyrange_end().empty()) {
+  if (table_->partitionerType() == TBL_PARTITION_TIMEWINDOW &&
+      (head->state.partition_keyrange_begin().empty() ||
+      head->state.partition_keyrange_end().empty())) {
     backfillKeyRange();
   }
 
