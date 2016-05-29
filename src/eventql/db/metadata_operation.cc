@@ -159,7 +159,7 @@ Status MetadataOperation::performBackfillAddServer(
 Status MetadataOperation::performBackfillRemoveServer(
     const MetadataFile& input,
     Vector<MetadataFile::PartitionMapEntry>* output) const {
-  auto opdata = msg::decode<BackfillAddServerOperation>(
+  auto opdata = msg::decode<BackfillRemoveServerOperation>(
       data_.opdata().data(),
       data_.opdata().size());
 
