@@ -287,7 +287,11 @@ void LSMPartitionReplication::fetchRecords(
       fn(id, version, record_buf.data(), record_buf.size());
     }
   }
+}
 
+Status LSMPartitionReplication::fetchAndApplyMetadataTransaction(
+    MetadataTransaction txn) {
+  return Status::success();
 }
 
 } // namespace tdsb

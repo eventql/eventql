@@ -99,7 +99,9 @@ MetadataTransaction Table::getLastMetadataTransaction() const {
   std::unique_lock<std::mutex> lk(mutex_);
 
   return MetadataTransaction(
-      SHA1Hash::fromHexString(config_.metadata_txnid()),
+      SHA1Hash(
+          config_.metadata_txnid().data(),
+          config_.metadata_txnid().size()),
       config_.metadata_txnseq());
 }
 

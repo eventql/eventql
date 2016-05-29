@@ -194,4 +194,10 @@ Vector<SHA1Hash> TimeWindowPartitioner::listPartitions(
         config_.partition_size());
 }
 
+Status TimeWindowPartitioner::findKeyRange(
+    const SHA1Hash& partition_id,
+    KeyRange* keyrange) const {
+  return Status(eRuntimeError, "not implemented");
+}
+
 }

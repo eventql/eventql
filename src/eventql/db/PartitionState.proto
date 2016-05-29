@@ -30,7 +30,7 @@ message LSMTableRef {
   required uint64 last_sequence = 3;
 }
 
-// next id: 12
+// next id: 14
 message PartitionState {
 
   /**
@@ -42,6 +42,18 @@ message PartitionState {
    * SHA1 sum (20 bytes) containing this partition's key
    */
   required bytes partition_key = 2;
+
+  /**
+   * The begin (inclusive) of this partition's key range (i.e. the lowest key
+   * that is part of the partition)
+   */
+  optional bytes partition_keyrange_begin = 12;
+
+  /**
+   * The end (exclusive) of this partition's key range (i.e. the first
+   * key higher than the highest key that is still part of this partition)
+   */
+  optional bytes partition_keyrange_end = 13;
 
   /**
    * The table to which this partition belongs
@@ -82,7 +94,7 @@ message PartitionState {
   /**
    * Last known metadata transaction id
    */
-  optional string last_metadata_txnid = 10;
+  optional bytes last_metadata_txnid = 10;
 
   /**
    * Last known metadata transaction sequence

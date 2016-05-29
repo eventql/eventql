@@ -51,6 +51,12 @@ using PartitionKey =
         String,     // table
         SHA1Hash>;  // partition
 
+struct KeyRange {
+  String begin;
+  String end;
+  SHA1Hash partition_id;
+};
+
 class Partition : public RefCounted {
 public:
 
@@ -93,6 +99,7 @@ public:
 protected:
 
   bool upgradeToLSMv2() const;
+  void backfillKeyRange();
 
   ServerCfg* cfg_;
   PartitionSnapshotRef head_;
