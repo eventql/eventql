@@ -382,17 +382,6 @@ int main(int argc, const char** argv) {
     FileUtil::mkdir_p(tsdb_dir);
   }
 
-  /* metadata store */
-  auto metadata_dir = FileUtil::joinPaths(
-      flags.getString("datadir"),
-      "metadata/" + node_name);
-  if (!FileUtil::exists(metadata_dir)) {
-    FileUtil::mkdir_p(metadata_dir);
-  }
-
-  eventql::MetadataStore metadata_store(metadata_dir);
-  eventql::MetadataService metadata_service(&metadata_store);
-
   /* config dir */
   ScopedPtr<ConfigDirectory> config_dir;
   if (flags.getString("config_backend") == "zookeeper") {
@@ -405,6 +394,7 @@ int main(int argc, const char** argv) {
     logFatal("evqld", "invalid config backend: " + flags.getString("config_backend"));
   }
 
+  /* client auth */
   ScopedPtr<eventql::ClientAuth> client_auth;
   if (flags.getString("client_auth_backend") == "trust") {
     client_auth.reset(new TrustClientAuth());
@@ -414,8 +404,20 @@ int main(int argc, const char** argv) {
     logFatal("evqld", "invalid client auth backend: " + flags.getString("client_auth_backend"));
   }
 
+  /* internal auth */
   ScopedPtr<eventql::InternalAuth> internal_auth;
   internal_auth.reset(new TrustInternalAuth());
+
+  /* metadata service */
+  auto metadata_dir = FileUtil::joinPaths(
+      flags.getString("datadir"),
+      "metadata/" + node_name);
+  if (!FileUtil::exists(metadata_dir)) {
+    FileUtil::mkdir_p(metadata_dir);
+  }
+
+  eventql::MetadataStore metadata_store(metadata_dir);
+  eventql::MetadataService metadata_service(config_dir.get(), &metadata_store);
 
   /* spidermonkey javascript runtime */
   JS_Init();

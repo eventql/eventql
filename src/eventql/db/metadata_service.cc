@@ -26,8 +26,24 @@
 namespace eventql {
 
 MetadataService::MetadataService(
+    ConfigDirectory* cdir,
     MetadataStore* metadata_store) :
-    metadata_store_(metadata_store) {}
+    metadata_store_(metadata_store),
+    cdir_(cdir) {}
+
+Status MetadataService::getMetadataFile(
+    const String& ns,
+    const String& table_name,
+    RefPtr<MetadataFile>* file) const {
+  auto table_cfg = cdir_->getTableConfig(ns, table_name);
+  return metadata_store_->getMetadataFile(
+      ns,
+      table_name,
+      SHA1Hash(
+          table_cfg.metadata_txnid().data(),
+          table_cfg.metadata_txnid().size()),
+      file);
+}
 
 Status MetadataService::createMetadataFile(
     const String& ns,
@@ -51,6 +67,22 @@ Status MetadataService::performMetadataOperation(
 Status MetadataService::discoverPartition(
     const PartitionDiscoveryRequest& request,
     PartitionDiscoveryResponse* response) {
+  RefPtr<MetadataFile> file;
+  {
+    auto rc = getMetadataFile(
+        request.db_namespace(),
+        request.table_id(),
+        &file);
+    if (!rc.isSuccess()) {
+      return rc;
+    }
+  }
+
+
+  if (file->getSequenceNumber() < request.min_txnseq()) {
+    return Status(eRuntimeError, "metadata file is too old");
+  }
+
   return Status(eRuntimeError, "not yet implemented");
 }
 
