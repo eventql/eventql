@@ -62,7 +62,12 @@ Status MetadataService::performMetadataOperation(
     MetadataOperation op) {
   RefPtr<MetadataFile> input_file;
   {
-    auto rc = getMetadataFile(ns, table_name, &input_file);
+    auto rc = metadata_store_->getMetadataFile(
+        ns,
+        table_name,
+        op.getInputTransactionID(),
+        &input_file);
+
     if (!rc.isSuccess()) {
       return rc;
     }
