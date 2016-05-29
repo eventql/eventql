@@ -23,6 +23,7 @@
  */
 #include "eventql/db/metadata_operation.h"
 #include "eventql/util/random.h"
+#include "eventql/util/logging.h"
 
 namespace eventql {
 
@@ -52,16 +53,25 @@ SHA1Hash MetadataOperation::getOutputTransactionID() const {
 }
 
 Status MetadataOperation::decode(InputStream* is) {
-  return Status(eRuntimeError, "not yet implemented");
+  auto len = is->readVarUInt();
+  Buffer buf(len);
+  is->readNextBytes(buf.data(), buf.size());
+  msg::decode(buf, &data_);
+  return Status::success();
 }
 
 Status MetadataOperation::encode(OutputStream* os) const {
-  return Status(eRuntimeError, "not yet implemented");
+  auto buf = msg::encode(data_);
+  os->appendVarUInt(buf->size());
+  os->write((const char*) buf->data(), buf->size());
+  return Status::success();
 }
 
 Status MetadataOperation::perform(
     const MetadataFile& input,
     Vector<MetadataFile::PartitionMapEntry>* output) const {
+  logDebug("evqld", "Performing metadata operation: $0", data_.DebugString());
+
   switch (data_.optype()) {
     case METAOP_BACKFILL_ADD_SERVER:
       return performBackfillAddServer(input, output);
