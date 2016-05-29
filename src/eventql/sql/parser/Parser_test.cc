@@ -1133,11 +1133,15 @@ TEST_CASE(ParserTest, TestInsertIntoStatement, [] () {
           INSERT INTO evtbl (
               evtime,
               evid,
-              price
+              rating,
+              is_admin,
+              type
           ) VALUES (
               1464463790,
               'xxx',
-              1.23
+              1.23,
+              true,
+              null
           );
       )");
 
@@ -1152,7 +1156,7 @@ TEST_CASE(ParserTest, TestInsertIntoStatement, [] () {
   EXPECT_EQ(children[0]->getToken()->getString(), "evtbl");
 
   EXPECT(*children[1] == ASTNode::T_COLUMN_LIST);
-  EXPECT(children[1]->getChildren().size() == 3);
+  EXPECT(children[1]->getChildren().size() == 5);
   EXPECT(*children[1]->getChildren()[0] == ASTNode::T_COLUMN);
   EXPECT(children[1]->getChildren()[0]->getChildren().size() == 1);
   EXPECT_EQ(
@@ -1163,10 +1167,12 @@ TEST_CASE(ParserTest, TestInsertIntoStatement, [] () {
       "evid");
 
   EXPECT(*children[2] == ASTNode::T_VALUE_LIST);
-  EXPECT(children[2]->getChildren().size() == 3);
+  EXPECT(children[2]->getChildren().size() == 5);
   EXPECT(*children[2]->getChildren()[0] == ASTNode::T_VALUE);
   EXPECT_EQ(children[2]->getChildren()[0]->getToken()->getString(), "1464463790");
   EXPECT_EQ(children[2]->getChildren()[1]->getToken()->getString(), "xxx");
   EXPECT_EQ(children[2]->getChildren()[2]->getToken()->getString(), "1.23");
+  EXPECT_EQ(*children[2]->getChildren()[3]->getToken(), Token::T_TRUE);
+  EXPECT_EQ(*children[2]->getChildren()[4]->getToken(), Token::T_NULL);
 });
 

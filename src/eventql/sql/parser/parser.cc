@@ -592,6 +592,9 @@ ASTNode* Parser::insertValueList() {
 
   while (*cur_token_ != Token::T_RPAREN) {
     switch (cur_token_->getType()) {
+      case Token::T_TRUE:
+      case Token::T_FALSE:
+      case Token::T_NULL:
       case Token::T_STRING:
       case Token::T_NUMERIC: {
         auto value = new ASTNode(ASTNode::T_VALUE);
