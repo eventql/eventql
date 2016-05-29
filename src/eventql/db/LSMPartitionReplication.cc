@@ -30,6 +30,7 @@
 #include <eventql/util/protobuf/msg.h>
 #include <eventql/util/protobuf/MessageEncoder.h>
 #include <eventql/io/cstable/RecordMaterializer.h>
+#include <eventql/db/metadata_operations.pb.h>
 
 #include "eventql/eventql.h"
 
@@ -292,7 +293,50 @@ void LSMPartitionReplication::fetchRecords(
 
 Status LSMPartitionReplication::fetchAndApplyMetadataTransaction(
     MetadataTransaction txn) {
-  return Status::success();
+  auto table_cfg = partition_->getTable()->config();
+  if (table_cfg.metadata_txnseq() != txn.getSequenceNumber()) {
+    return Status(eConcurrentModificationError, "concurrent modification");
+  }
+
+  PartitionDiscoveryRequest discovery_request;
+  discovery_request.set_db_namespace(snap_->state.tsdb_namespace());
+  discovery_request.set_table_id(snap_->state.table_key());
+  discovery_request.set_min_txnseq(txn.getSequenceNumber());
+  discovery_request.set_partition_id(snap_->state.partition_key());
+  discovery_request.set_keyrange_begin(snap_->state.partition_keyrange_begin());
+  discovery_request.set_keyrange_end(snap_->state.partition_keyrange_end());
+
+  http::HTTPClient http_client;
+  for (const auto& s : table_cfg.metadata_servers()) {
+    auto server = cdir_->getServerConfig(s);
+    if (server.server_status() != SERVER_UP) {
+      continue;
+    }
+
+    auto url = StringUtil::format(
+        "http://$0/rpc/discover_partition_metadata",
+        server.server_addr());
+
+    Buffer req_body;
+    auto req = http::HTTPRequest::mkPost(url, *msg::encode(discovery_request));
+    //auth_->signRequest(static_cast<Session*>(txn_->getUserData()), &req);
+
+    http::HTTPResponse res;
+    auto rc = http_client.executeRequest(req, &res);
+    if (!rc.isSuccess()) {
+      continue;
+    }
+
+    if (res.statusCode() == 200) {
+      auto discovery_response =
+          msg::decode<PartitionDiscoveryResponse>(res.body());
+
+      auto writer = partition_->getWriter().asInstanceOf<LSMPartitionWriter>();
+      return writer->applyMetadataTransaction(txn, discovery_response);
+    }
+  }
+
+  return Status(eIOError, "no metadata server has the request transaction");
 }
 
 } // namespace tdsb

@@ -28,6 +28,8 @@
 #include <eventql/db/RecordArena.h>
 #include <eventql/util/util/PersistentHashSet.h>
 #include <eventql/db/CompactionStrategy.h>
+#include <eventql/db/metadata_transaction.h>
+#include <eventql/db/metadata_operations.pb.h>
 
 #include "eventql/eventql.h"
 
@@ -53,6 +55,10 @@ public:
   bool compact() override;
   bool needsCompaction() override;
   bool needsUrgentCompaction();
+
+  Status applyMetadataTransaction(
+      const MetadataTransaction& txn,
+      const PartitionDiscoveryResponse& discovery_info);
 
   ReplicationState fetchReplicationState() const;
   void commitReplicationState(const ReplicationState& state);

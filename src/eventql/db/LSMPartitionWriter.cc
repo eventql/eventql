@@ -345,4 +345,10 @@ void LSMPartitionWriter::commitReplicationState(const ReplicationState& state) {
   head_->setSnapshot(snap);
 }
 
+Status LSMPartitionWriter::applyMetadataTransaction(
+    const MetadataTransaction& txn,
+    const PartitionDiscoveryResponse& discovery_info) {
+  return Status(eRuntimeError, "applyMetadataTransaction not yet implemented");
+}
+
 } // namespace tdsb
