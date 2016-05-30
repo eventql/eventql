@@ -61,6 +61,8 @@ public:
 
   Status createTable(const csql::CreateTableNode& req) override;
 
+  Status insertRecord(const csql::InsertIntoNode& insert_into) override;
+
   const String& getNamespace() const;
 
 protected:

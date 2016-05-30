@@ -30,6 +30,7 @@
 #include <eventql/sql/qtree/SequentialScanNode.h>
 #include <eventql/sql/scheduler/execution_context.h>
 #include "eventql/sql/qtree/nodes/create_table.h"
+#include "eventql/sql/qtree/nodes/insert_into.h"
 
 namespace csql {
 
@@ -49,6 +50,10 @@ public:
 
   virtual Status createTable(const CreateTableNode& create_table) {
     RAISE(kRuntimeError, "can't create tables");
+  }
+
+  virtual Status insertRecord(const InsertIntoNode& insert_into) {
+    RAISE(kRuntimeError, "can't insert");
   }
 
 };

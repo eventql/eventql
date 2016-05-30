@@ -44,7 +44,8 @@ public:
   InsertIntoNode(const InsertIntoNode& node);
 
   const String& getTableName() const;
-  Vector<Pair<String, SValue>> getData() const;
+  Option<Vector<Pair<String, SValue>>> getData() const;
+  Option<String> getJSONStr() const;
 
   RefPtr<QueryTreeNode> deepCopy() const;
   String toString() const;

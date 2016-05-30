@@ -47,9 +47,22 @@ const String& InsertIntoNode::getTableName() const {
   return table_name_;
 }
 
-Vector<Pair<String, SValue>> InsertIntoNode::getData() const {
-  return data_;
+Option<Vector<Pair<String, SValue>>> InsertIntoNode::getData() const {
+  if (data_.size() > 0) {
+    return Some(data_);
+  } else {
+    return None<Vector<Pair<String, SValue>>>();
+  }
 }
+
+Option<String> InsertIntoNode::getJSONStr() const {
+  if (!json_str_.empty()) {
+    return Some(json_str_);
+  } else {
+    return None<String>();
+  }
+}
+
 
 RefPtr<QueryTreeNode> InsertIntoNode::deepCopy() const {
   return new InsertIntoNode(*this);

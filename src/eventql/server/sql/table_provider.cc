@@ -190,6 +190,24 @@ Status TSDBTableProvider::createTable(
       primary_key);
 }
 
+Status TSDBTableProvider::insertRecord(
+    const csql::InsertIntoNode& insert_into) {
+  auto json_str = insert_into.getJSONStr();
+  if (!json_str.isEmpty()) {
+    auto json = json::parseJSON(json_str.get());
+    table_service_->insertRecord(
+        tsdb_namespace_,
+        insert_into.getTableName(),
+        json.begin(),
+        json.end());
+
+    return Status::success(); //FIXME table_service->insertRecord should return status
+
+  }
+
+  RAISE(kNotYetImplementedError, "NYI");
+}
+
 void TSDBTableProvider::listTables(
     Function<void (const csql::TableInfo& table)> fn) const {
   partition_map_->listTables(
