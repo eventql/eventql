@@ -1171,3 +1171,25 @@ TEST_CASE(ParserTest, TestInsertIntoStatement, [] () {
   EXPECT_EQ(*children[2]->getChildren()[4]->getToken(), Token::T_NULL);
 });
 
+TEST_CASE(ParserTest, TestInsertIntoFromJSONStatement, [] () {
+  auto runtime = Runtime::getDefaultRuntime();
+  auto txn = runtime->newTransaction();
+
+  auto parser = parseTestQuery(
+      R"(
+          INSERT INTO evtbl
+          FROM JSON
+          '{
+              \"evtime\":1464463791,\"evid\":\"xxx\",
+              \"products\":[
+                  {\"id\":1,\"price\":1.23},
+                  {\"id\":2,\"price\":3.52}
+              ]
+          }';
+      )");
+
+  EXPECT(parser.getStatements().size() == 1);
+  const auto& stmt = parser.getStatements()[0];
+  const auto& children = stmt->getChildren();
+
+});
