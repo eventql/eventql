@@ -760,8 +760,6 @@ noinst_LIBRARIES += evql_http.a
 
 ################# LIB: evql_core.a ####################
 evql_core_a_SOURCES = \
-    eventql/AnalyticsApp.cc \
-    eventql/AnalyticsApp.h \
     eventql/EventScanResult.cc \
     eventql/EventScanResult.h \
     eventql/JavaScriptContext.cc \

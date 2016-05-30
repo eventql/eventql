@@ -43,7 +43,6 @@ public:
       eventql::TableService* tsdb,
       eventql::PartitionMap* pmap,
       eventql::ReplicationScheme* repl,
-      JSRuntime* js_runtime,
       const String& cachedir);
 
   void executeScript(
@@ -94,7 +93,6 @@ protected:
   eventql::TableService* tsdb_;
   eventql::PartitionMap* pmap_;
   eventql::ReplicationScheme* repl_;
-  JSRuntime* js_runtime_;
   String cachedir_;
   thread::ThreadPool tpool_;
 };

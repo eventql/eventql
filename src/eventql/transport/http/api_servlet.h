@@ -27,7 +27,6 @@
 #include "eventql/util/http/HTTPSSEStream.h"
 #include "eventql/util/json/json.h"
 #include "eventql/util/web/SecureCookie.h"
-#include "eventql/AnalyticsApp.h"
 #include "eventql/AnalyticsSession.pb.h"
 #include "eventql/sql/runtime/runtime.h"
 #include "eventql/auth/internal_auth.h"
@@ -50,7 +49,6 @@ class AnalyticsServlet : public http::StreamingHTTPService {
 public:
 
   AnalyticsServlet(
-      RefPtr<AnalyticsApp> app,
       const String& cachedir,
       InternalAuth* auth,
       ClientAuth* client_auth,
@@ -60,6 +58,8 @@ public:
       ConfigDirectory* customer_dir,
       PartitionMap* pmap,
       SQLService* sql_service,
+      LogfileService* logfile_service,
+      MapReduceService* mapreduce_service,
       TableService* table_service);
 
   void handleHTTPRequest(
@@ -278,7 +278,6 @@ protected:
     }
   }
 
-  RefPtr<AnalyticsApp> app_;
   String cachedir_;
   InternalAuth* auth_;
   ClientAuth* client_auth_;
@@ -287,12 +286,15 @@ protected:
   eventql::TableService* tsdb_;
   ConfigDirectory* customer_dir_;
 
-  LogfileAPIServlet logfile_api_;
-  MapReduceAPIServlet mapreduce_api_;
   PartitionMap* pmap_;
 
   SQLService* sql_service_;
+  LogfileService* logfile_service_;
+  MapReduceService* mapreduce_service_;
   TableService* table_service_;
+
+  LogfileAPIServlet logfile_api_;
+  MapReduceAPIServlet mapreduce_api_;
 };
 
 }

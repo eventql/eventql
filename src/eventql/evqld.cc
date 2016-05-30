@@ -52,7 +52,6 @@
 #include "eventql/util/mdb/MDB.h"
 #include "eventql/util/mdb/MDBUtil.h"
 #include "eventql/transport/http/api_servlet.h"
-#include "eventql/AnalyticsApp.h"
 #include "eventql/db/TableConfig.pb.h"
 #include "eventql/db/table_service.h"
 #include "eventql/db/metadata_coordinator.h"
@@ -60,6 +59,7 @@
 #include "eventql/transport/http/rpc_servlet.h"
 #include "eventql/db/ReplicationWorker.h"
 #include "eventql/db/LSMTableIndexCache.h"
+#include "eventql/db/CompactionWorker.h"
 #include "eventql/server/sql/sql_engine.h"
 #include "eventql/transport/http/default_servlet.h"
 #include "eventql/sql/defaults.h"
@@ -466,7 +466,7 @@ int main(int argc, const char** argv) {
     cfg.idx_cache = mkRef(new LSMTableIndexCache(tsdb_dir));
 
     eventql::PartitionMap partition_map(&cfg);
-    eventql::TableService tsdb_node(
+    eventql::TableService table_service(
         config_dir.get(),
         &partition_map,
         repl_scheme.get(),
@@ -479,7 +479,7 @@ int main(int argc, const char** argv) {
         &http);
 
     eventql::RPCServlet tsdb_servlet(
-        &tsdb_node,
+        &table_service,
         &metadata_service,
         flags.getString("cachedir"));
 
@@ -511,25 +511,29 @@ int main(int argc, const char** argv) {
       sql->symbols()->registerFunction("z1_version", &z1VersionExpr);
     }
 
+    /* more services */
     eventql::SQLService sql_service(
         sql.get(),
         &partition_map,
         repl_scheme.get(),
         internal_auth.get(),
-        &tsdb_node);
+        &table_service);
 
-    auto analytics_app = mkRef(
-        new AnalyticsApp(
-            &tsdb_node,
-            &partition_map,
-            repl_scheme.get(),
-            &cstable_index,
-            config_dir.get(),
-            internal_auth.get(),
-            sql.get(),
-            nullptr,
-            flags.getString("datadir"),
-            flags.getString("cachedir")));
+    eventql::LogfileService logfile_service(
+        config_dir.get(),
+        internal_auth.get(),
+        &table_service,
+        &partition_map,
+        repl_scheme.get(),
+        sql.get());
+
+    eventql::MapReduceService mapreduce_service(
+        config_dir.get(),
+        internal_auth.get(),
+        &table_service,
+        &partition_map,
+        repl_scheme.get(),
+        flags.getString("cachedir"));
 
     /* open tables */
     config_dir->setTableConfigChangeCallback(
@@ -608,17 +612,18 @@ int main(int argc, const char** argv) {
     });
 
     eventql::AnalyticsServlet analytics_servlet(
-        analytics_app,
         flags.getString("cachedir"),
         internal_auth.get(),
         client_auth.get(),
         internal_auth.get(),
         sql.get(),
-        &tsdb_node,
+        &table_service,
         config_dir.get(),
         &partition_map,
         &sql_service,
-        &tsdb_node);
+        &logfile_service,
+        &mapreduce_service,
+        &table_service);
 
     eventql::StatusServlet status_servlet(
         &cfg,

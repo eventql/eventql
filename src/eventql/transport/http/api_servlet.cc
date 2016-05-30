@@ -51,7 +51,6 @@
 namespace eventql {
 
 AnalyticsServlet::AnalyticsServlet(
-    RefPtr<AnalyticsApp> app,
     const String& cachedir,
     InternalAuth* auth,
     ClientAuth* client_auth,
@@ -61,8 +60,9 @@ AnalyticsServlet::AnalyticsServlet(
     ConfigDirectory* customer_dir,
     PartitionMap* pmap,
     SQLService* sql_service,
+    LogfileService* logfile_service,
+    MapReduceService* mapreduce_service,
     TableService* table_service) :
-    app_(app),
     cachedir_(cachedir),
     auth_(auth),
     client_auth_(client_auth),
@@ -70,11 +70,13 @@ AnalyticsServlet::AnalyticsServlet(
     sql_(sql),
     tsdb_(tsdb),
     customer_dir_(customer_dir),
-    logfile_api_(app->logfileService(), customer_dir, cachedir),
-    mapreduce_api_(app->mapreduceService(), customer_dir, cachedir),
     pmap_(pmap),
     sql_service_(sql_service),
-    table_service_(table_service) {}
+    logfile_service_(logfile_service),
+    mapreduce_service_(mapreduce_service),
+    table_service_(table_service),
+    logfile_api_(logfile_service_, customer_dir, cachedir),
+    mapreduce_api_(mapreduce_service_, customer_dir, cachedir) {}
 
 void AnalyticsServlet::handleHTTPRequest(
     RefPtr<http::HTTPRequestStream> req_stream,
@@ -307,7 +309,6 @@ void AnalyticsServlet::listTables(
   json.addObjectEntry("tables");
   json.beginArray();
 
-  auto table_service = app_->getTSDBNode();
   size_t ntable = 0;
 
   auto writeTableJSON = [&json, &ntable, &tag_filter] (const TSDBTableInfo& table) {
@@ -341,9 +342,9 @@ void AnalyticsServlet::listTables(
   };
 
   if (order_filter == "desc") {
-    table_service->listTablesReverse(session->getEffectiveNamespace(), writeTableJSON);
+    table_service_->listTablesReverse(session->getEffectiveNamespace(), writeTableJSON);
   } else {
-    table_service->listTables(session->getEffectiveNamespace(), writeTableJSON);
+    table_service_->listTables(session->getEffectiveNamespace(), writeTableJSON);
   }
 
   json.endArray();
@@ -621,7 +622,7 @@ void AnalyticsServlet::addTableField(
   td.set_next_field_id(next_field_id + 1);
   td.mutable_config()->set_schema(schema->encode().toString());
 
-  app_->updateTable(td);
+  customer_dir_->updateTableConfig(td);
   res->setStatus(http::kStatusCreated);
   res->addBody("ok");
   return;
@@ -689,7 +690,7 @@ void AnalyticsServlet::removeTableField(
   cur_schema->removeField(cur_schema->fieldId(field));
   td.mutable_config()->set_schema(schema->encode().toString());
 
-  app_->updateTable(td);
+  customer_dir_->updateTableConfig(td);
   res->setStatus(http::kStatusCreated);
   res->addBody("ok");
   return;
@@ -728,7 +729,7 @@ void AnalyticsServlet::addTableTag(
   auto td = table->config();
   td.add_tags(tag);
 
-  app_->updateTable(td);
+  customer_dir_->updateTableConfig(td);
   res->setStatus(http::kStatusCreated);
   res->addBody("ok");
   return;
@@ -779,7 +780,7 @@ void AnalyticsServlet::removeTableTag(
 
   }
 
-  app_->updateTable(td);
+  customer_dir_->updateTableConfig(td);
   res->setStatus(http::kStatusCreated);
   res->addBody("ok");
   return;
