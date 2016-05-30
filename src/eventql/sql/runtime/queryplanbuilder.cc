@@ -1877,37 +1877,6 @@ QueryTreeNode* QueryPlanBuilder::buildCreateTable(
   return node;
 }
 
-static Vector<Pair<String, SValue>> buildInsertIntoData(ASTNode* ast) {
-  if (ast->getChildren().size() < 3 ||
-      ast->getChildren()[2]->getType() != ASTNode::T_VALUE_LIST) {
-    RAISE(kRuntimeError, "corrupt AST");
-  }
-
-  auto columns = ast->getChildren()[1]->getChildren();
-  auto values = ast->getChildren()[2]->getChildren();
-
-  if (columns.size() != values.size()) {
-    RAISE(kRuntimeError, "corrupt AST");
-  }
-
-  Vector<Pair<String, SValue>> data;
-  for (size_t i = 0; i < columns.size(); ++i) {
-    if (columns[i]->getType() != ASTNode::T_COLUMN_NAME ||
-         columns[i]->getToken() == nullptr ||
-         values[i]->getType() != ASTNode::T_VALUE ||
-         values[i]->getToken() == nullptr) {
-      RAISE(kRuntimeError, "corrupt AST");
-    }
-
-    Pair<String, SValue> v;
-    v.first = columns[i]->getToken()->getString();
-    v.second = SValue::newString(values[i]->getToken()->getString());
-    data.emplace_back(v);
-  }
-
-  return data;
-}
-
 QueryTreeNode* QueryPlanBuilder::buildInsertInto(
     Transaction* txn,
     ASTNode* ast) {
@@ -1921,24 +1890,44 @@ QueryTreeNode* QueryPlanBuilder::buildInsertInto(
     RAISE(kRuntimeError, "corrupt AST");
   }
 
-  switch (ast->getChildren()[1]->getType()) {
-    case ASTNode::T_COLUMN_LIST: {
-      auto data = buildInsertIntoData(ast);
-      //return new InsertIntoNode(table_name->getToken()->getString(), data);
-      RAISE(kNotYetImplementedError, "nyi");
-    }
-
-    case ASTNode::T_JSON_STRING: {
-      if (ast->getChildren()[1]->getToken() != nullptr) {
-        return new InsertJSONNode(
-            table_name->getToken()->getString(),
-            ast->getChildren()[1]->getToken()->getString());
-      }
-    }
-
-    default:
-      RAISE(kRuntimeError, "corrupt AST");
+  if (ast->getChildren()[1]->getType() == ASTNode::T_JSON_STRING &&
+      ast->getChildren()[1]->getToken() != nullptr) {
+    return new InsertJSONNode(
+        table_name->getToken()->getString(),
+        ast->getChildren()[1]->getToken()->getString());
   }
+
+  if (ast->getChildren()[1]->getType() != ASTNode::T_COLUMN_LIST ||
+      ast->getChildren().size() < 3 ||
+      ast->getChildren()[2]->getType() != ASTNode::T_VALUE_LIST) {
+    RAISE(kRuntimeError, "corrupt AST");
+  }
+
+  auto columns = ast->getChildren()[1]->getChildren();
+  auto values = ast->getChildren()[2]->getChildren();
+
+  if (columns.size() != values.size()) {
+    RAISE(kRuntimeError, "corrupt AST");
+  }
+
+  Vector<InsertIntoNode::InsertValueSpec> values_spec;
+  for (size_t i = 0; i < columns.size(); ++i) {
+    if (columns[i]->getType() != ASTNode::T_COLUMN_NAME ||
+         columns[i]->getToken() == nullptr ||
+         values[i]->getType() != ASTNode::T_VALUE ||
+         values[i]->getToken() == nullptr) {
+      RAISE(kRuntimeError, "corrupt AST");
+    }
+
+    InsertIntoNode::InsertValueSpec spec;
+    spec.type = InsertIntoNode::InsertValueType::SCALAR;
+    spec.column = columns[i]->getToken()->getString();
+    spec.expr = buildValueExpression(txn, values[i]);
+
+    values_spec.emplace_back(spec);
+  }
+
+  return new InsertIntoNode(table_name->getToken()->getString(), values_spec);
 }
 
 }
