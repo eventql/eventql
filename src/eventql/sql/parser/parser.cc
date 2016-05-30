@@ -545,6 +545,8 @@ ASTNode* Parser::insertIntoStatement() {
   insert_into->appendChild(tableName());
 
   if (cur_token_->getType() == Token::T_FROM) {
+    consumeToken();
+    expectAndConsume(Token::T_JSON);
     insert_into->appendChild(insertFromJSON());
 
   } else {
@@ -622,13 +624,7 @@ ASTNode* Parser::insertValueList() {
 }
 
 ASTNode* Parser::insertFromJSON() {
-  consumeToken();
-
-  expectAndConsume(Token::T_JSON);
   assertExpectation(Token::T_STRING);
-  //FIXME better check if json string is valid
-  json::parseJSON(cur_token_->getString());
-
   auto json = new ASTNode(ASTNode::T_JSON_STRING);
   json->setToken(cur_token_);
 
