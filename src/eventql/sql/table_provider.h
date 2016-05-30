@@ -31,6 +31,7 @@
 #include <eventql/sql/scheduler/execution_context.h>
 #include "eventql/sql/qtree/nodes/create_table.h"
 #include "eventql/sql/qtree/nodes/insert_into.h"
+#include "eventql/sql/qtree/nodes/insert_json.h"
 
 namespace csql {
 
@@ -55,7 +56,9 @@ public:
   virtual Status insertRecord(const InsertIntoNode& insert_into) {
     RAISE(kRuntimeError, "can't insert");
   }
-
+  virtual Status insertRecord(const InsertJSONNode& insert_json) {
+    RAISE(kRuntimeError, "can't insert");
+  }
 };
 
 }

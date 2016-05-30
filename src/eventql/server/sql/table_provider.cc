@@ -192,20 +192,18 @@ Status TSDBTableProvider::createTable(
 
 Status TSDBTableProvider::insertRecord(
     const csql::InsertIntoNode& insert_into) {
-  auto json_str = insert_into.getJSONStr();
-  if (!json_str.isEmpty()) {
-    auto json = json::parseJSON(json_str.get());
-    table_service_->insertRecord(
-        tsdb_namespace_,
-        insert_into.getTableName(),
-        json.begin(),
-        json.end());
-
-    return Status::success(); //FIXME table_service->insertRecord should return status
-
-  }
 
   RAISE(kNotYetImplementedError, "NYI");
+}
+
+Status TSDBTableProvider::insertRecord(
+    const csql::InsertJSONNode& insert_json) {
+  auto json = json::parseJSON(insert_json.getJSON());
+  table_service_->insertRecord(
+      tsdb_namespace_,
+      insert_json.getTableName(),
+      json.begin(),
+      json.end());
 }
 
 void TSDBTableProvider::listTables(

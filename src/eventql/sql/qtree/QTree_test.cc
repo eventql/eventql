@@ -766,6 +766,6 @@ TEST_CASE(QTreeTest, TestInsertIntoFromJSON, [] () {
       parser.getStatements(),
       txn->getTableProvider());
 
-  RefPtr<InsertIntoNode> qtree = qtrees[0].asInstanceOf<InsertIntoNode>();
+  RefPtr<InsertJSONNode> qtree = qtrees[0].asInstanceOf<InsertJSONNode>();
   EXPECT_EQ(qtree->getTableName(), "evtbl");
 });

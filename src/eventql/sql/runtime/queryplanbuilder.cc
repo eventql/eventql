@@ -44,6 +44,7 @@
 #include <eventql/sql/qtree/JoinNode.h>
 #include <eventql/sql/qtree/nodes/create_table.h>
 #include <eventql/sql/qtree/nodes/insert_into.h>
+#include <eventql/sql/qtree/nodes/insert_json.h>
 #include <eventql/sql/table_schema.h>
 
 namespace csql {
@@ -1923,12 +1924,13 @@ QueryTreeNode* QueryPlanBuilder::buildInsertInto(
   switch (ast->getChildren()[1]->getType()) {
     case ASTNode::T_COLUMN_LIST: {
       auto data = buildInsertIntoData(ast);
-      return new InsertIntoNode(table_name->getToken()->getString(), data);
+      //return new InsertIntoNode(table_name->getToken()->getString(), data);
+      RAISE(kNotYetImplementedError, "nyi");
     }
 
     case ASTNode::T_JSON_STRING: {
       if (ast->getChildren()[1]->getToken() != nullptr) {
-        return new InsertIntoNode(
+        return new InsertJSONNode(
             table_name->getToken()->getString(),
             ast->getChildren()[1]->getToken()->getString());
       }
