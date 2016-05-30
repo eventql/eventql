@@ -102,5 +102,5 @@ Syntax Reference
 
     INSERT INTO table_name
       (column_name, ...) VALUES (literal, ...)
-    | FROM JSON literal
+    | FROM JSON "{ ... }"
 
