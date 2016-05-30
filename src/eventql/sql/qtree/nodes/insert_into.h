@@ -37,6 +37,10 @@ public:
       const String& table_name,
       Vector<Pair<String, SValue>> data);
 
+  InsertIntoNode(
+      const String& table_name,
+      const String& json_str);
+
   InsertIntoNode(const InsertIntoNode& node);
 
   const String& getTableName() const;
@@ -48,6 +52,7 @@ public:
 protected:
   String table_name_;
   Vector<Pair<String, SValue>> data_;
+  String json_str_;
 };
 
 } // namespace csql

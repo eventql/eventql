@@ -34,6 +34,12 @@ InsertIntoNode::InsertIntoNode(
     data_(data) {}
 
 InsertIntoNode::InsertIntoNode(
+    const String& table_name,
+    const String& json_str) :
+    table_name_(table_name),
+    json_str_(json_str) {}
+
+InsertIntoNode::InsertIntoNode(
     const InsertIntoNode& node) :
     data_(node.data_) {}
 

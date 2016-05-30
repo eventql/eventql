@@ -1876,24 +1876,9 @@ QueryTreeNode* QueryPlanBuilder::buildCreateTable(
   return node;
 }
 
-QueryTreeNode* QueryPlanBuilder::buildInsertInto(
-    Transaction* txn,
-    ASTNode* ast) {
-  if (!(*ast == ASTNode::T_INSERT_INTO) || ast->getChildren().size() < 3) {
-    return nullptr;
-  }
-
-  auto table_name = ast->getChildren()[0];
-  if (table_name->getType() != ASTNode::T_TABLE_NAME ||
-      table_name->getToken() == nullptr) {
-    RAISE(kRuntimeError, "corrupt AST");
-  }
-
-  if (ast->getChildren()[1]->getType() != ASTNode::T_COLUMN_LIST) {
-    RAISE(kRuntimeError, "corrupt AST");
-  }
-
-  if (ast->getChildren()[2]->getType() != ASTNode::T_VALUE_LIST) {
+static Vector<Pair<String, SValue>> buildInsertIntoData(ASTNode* ast) {
+  if (ast->getChildren().size() < 3 ||
+      ast->getChildren()[2]->getType() != ASTNode::T_VALUE_LIST) {
     RAISE(kRuntimeError, "corrupt AST");
   }
 
@@ -1919,7 +1904,39 @@ QueryTreeNode* QueryPlanBuilder::buildInsertInto(
     data.emplace_back(v);
   }
 
-  return new InsertIntoNode(table_name->getToken()->getString(), data);
+  return data;
+}
+
+QueryTreeNode* QueryPlanBuilder::buildInsertInto(
+    Transaction* txn,
+    ASTNode* ast) {
+  if (!(*ast == ASTNode::T_INSERT_INTO) || ast->getChildren().size() < 2) {
+    return nullptr;
+  }
+
+  auto table_name = ast->getChildren()[0];
+  if (table_name->getType() != ASTNode::T_TABLE_NAME ||
+      table_name->getToken() == nullptr) {
+    RAISE(kRuntimeError, "corrupt AST");
+  }
+
+  switch (ast->getChildren()[1]->getType()) {
+    case ASTNode::T_COLUMN_LIST: {
+      auto data = buildInsertIntoData(ast);
+      return new InsertIntoNode(table_name->getToken()->getString(), data);
+    }
+
+    case ASTNode::T_JSON_STRING: {
+      if (ast->getChildren()[1]->getToken() != nullptr) {
+        return new InsertIntoNode(
+            table_name->getToken()->getString(),
+            ast->getChildren()[1]->getToken()->getString());
+      }
+    }
+
+    default:
+      RAISE(kRuntimeError, "corrupt AST");
+  }
 }
 
 }

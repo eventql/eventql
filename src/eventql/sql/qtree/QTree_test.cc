@@ -740,3 +740,32 @@ TEST_CASE(QTreeTest, TestInsertInto, [] () {
 
   EXPECT_EQ(data[0].second.getString(), "1464463790");
 });
+
+TEST_CASE(QTreeTest, TestInsertIntoFromJSON, [] () {
+  auto runtime = Runtime::getDefaultRuntime();
+  auto txn = runtime->newTransaction();
+
+  String query = R"(
+      INSERT INTO evtbl
+      FROM JSON
+      '{
+          \"evtime\":1464463791,\"evid\":\"xxx\",
+          \"products\":[
+              {\"id\":1,\"price\":1.23},
+              {\"id\":2,\"price\":3.52}
+          ]
+      }';
+  )";
+
+  csql::Parser parser;
+  parser.parse(query.data(), query.size());
+
+  auto qtree_builder = runtime->queryPlanBuilder();
+  Vector<RefPtr<QueryTreeNode>> qtrees = qtree_builder->build(
+      txn.get(),
+      parser.getStatements(),
+      txn->getTableProvider());
+
+  RefPtr<InsertIntoNode> qtree = qtrees[0].asInstanceOf<InsertIntoNode>();
+  EXPECT_EQ(qtree->getTableName(), "evtbl");
+});
