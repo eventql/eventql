@@ -1017,7 +1017,28 @@ void ZookeeperConfigDirectory::updateNamespaceConfig(NamespaceConfig cfg) {
 
   if (cfg.version() == 0) {
     // create
-    // FIXME if we fail between the two creates, we end up with an incomplete namespace
+    // FIXME if we fail between the three creates, we end up with an incomplete namespace
+    {
+      auto path = StringUtil::format(
+          "$0/namespaces/$1",
+          path_prefix_,
+          cfg.customer());
+
+      auto rc = zoo_create(
+          zk_,
+          path.c_str(),
+          nullptr, /* data */
+          0, /* data len */
+          &ZOO_OPEN_ACL_UNSAFE,
+          0,
+          NULL /* path_buffer */,
+          0 /* path_buffer_len */);
+
+      if (rc) {
+        RAISEF(kRuntimeError, "zoo_create() failed: $0", getErrorString(rc));
+      }
+    }
+
     {
       auto path = StringUtil::format(
           "$0/namespaces/$1/config",

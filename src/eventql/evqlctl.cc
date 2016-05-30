@@ -45,19 +45,7 @@
 #include "eventql/util/cli/CLI.h"
 #include "eventql/util/cli/flagparser.h"
 #include "eventql/config/config_directory.h"
-#include "eventql/io/sstable/sstablereader.h"
-#include "eventql/db/TimeWindowPartitioner.h"
-#include "eventql/db/TSDBClient.h"
-#include "eventql/sql/qtree/SequentialScanNode.h"
-#include "eventql/sql/qtree/ColumnReferenceNode.h"
-#include "eventql/sql/qtree/CallExpressionNode.h"
-#include "eventql/sql/qtree/GroupByNode.h"
-#include "eventql/sql/qtree/UnionNode.h"
-#include "eventql/sql/runtime/queryplanbuilder.h"
-#include "eventql/sql/CSTableScan.h"
-#include "eventql/sql/CSTableScanProvider.h"
-#include "eventql/sql/runtime/defaultruntime.h"
-#include "eventql/sql/runtime/tablerepository.h"
+#include "eventql/config/config_directory_zookeeper.h"
 
 using namespace eventql;
 
@@ -71,23 +59,53 @@ void cmd_cluster_status(const cli::FlagParser& flags) {
   //iputs("Cluster config:\n$0", cluster.DebugString());
 }
 
-void cmd_cluster_add_node(const cli::FlagParser& flags) {
-  //ConfigDirectoryClient cclient(
-  //    InetAddr::resolve(flags.getString("master")));
+void cmd_cluster_add_server(const cli::FlagParser& flags) {
+  auto cdir = mkScoped(
+      new ZookeeperConfigDirectory(
+            flags.getString("zookeeper_addr"),
+            None<String>(),
+            ""));
 
-  //auto cluster = cclient.fetchClusterConfig();
-  //auto node = cluster.add_dht_nodes();
-  //node->set_name(flags.getString("name"));
-  //node->set_addr(flags.getString("addr"));
-  //node->set_status(DHTNODE_LIVE);
+  cdir->startAndJoin(flags.getString("cluster_name"));
 
-  //auto vnodes = flags.getInt("vnodes");
-  //for (size_t i = 0; i < vnodes; ++i) {
-  //  auto token = Random::singleton()->sha1().toString();
-  //  *node->add_sha1_tokens() = token;
-  //}
+  ServerConfig cfg;
+  cfg.set_server_id(flags.getString("server_name"));
+  cfg.add_sha1_tokens(Random::singleton()->sha1().toString());
 
-  //cclient.updateClusterConfig(cluster);
+  cdir->updateServerConfig(cfg);
+
+  cdir->stop();
+}
+
+void cmd_cluster_create(const cli::FlagParser& flags) {
+  auto cdir = mkScoped(
+      new ZookeeperConfigDirectory(
+            flags.getString("zookeeper_addr"),
+            None<String>(),
+            ""));
+
+  cdir->startAndJoin(flags.getString("cluster_name"));
+
+  ClusterConfig cfg;
+  cdir->updateClusterConfig(cfg);
+
+  cdir->stop();
+}
+
+void cmd_namespace_create(const cli::FlagParser& flags) {
+  auto cdir = mkScoped(
+      new ZookeeperConfigDirectory(
+            flags.getString("zookeeper_addr"),
+            None<String>(),
+            ""));
+
+  cdir->startAndJoin(flags.getString("cluster_name"));
+
+  NamespaceConfig cfg;
+  cfg.set_customer(flags.getString("namespace"));
+  cdir->updateNamespaceConfig(cfg);
+
+  cdir->stop();
 }
 
 int main(int argc, const char** argv) {
@@ -126,22 +144,22 @@ int main(int argc, const char** argv) {
       "url",
       "<addr>");
 
-  /* command: cluster_add_node */
-  auto cluster_add_node_cmd = cli.defineCommand("cluster-add-node");
-  cluster_add_node_cmd->onCall(
-      std::bind(&cmd_cluster_add_node, std::placeholders::_1));
+  /* command: cluster_add_server */
+  auto cluster_add_server_cmd = cli.defineCommand("cluster-add-server");
+  cluster_add_server_cmd->onCall(
+      std::bind(&cmd_cluster_add_server, std::placeholders::_1));
 
-  cluster_add_node_cmd->flags().defineFlag(
-      "master",
+  cluster_add_server_cmd->flags().defineFlag(
+      "zookeeper_addr",
       cli::FlagParser::T_STRING,
-      true,
+      false,
       NULL,
       NULL,
       "url",
       "<addr>");
 
-  cluster_add_node_cmd->flags().defineFlag(
-      "name",
+  cluster_add_server_cmd->flags().defineFlag(
+      "cluster_name",
       cli::FlagParser::T_STRING,
       true,
       NULL,
@@ -149,23 +167,69 @@ int main(int argc, const char** argv) {
       "node name",
       "<string>");
 
-  cluster_add_node_cmd->flags().defineFlag(
-      "addr",
+  cluster_add_server_cmd->flags().defineFlag(
+      "server_name",
       cli::FlagParser::T_STRING,
       true,
       NULL,
       NULL,
-      "node address",
-      "<ip:port>");
+      "node name",
+      "<string>");
 
-  cluster_add_node_cmd->flags().defineFlag(
-      "vnodes",
-      cli::FlagParser::T_INTEGER,
+  /* command: cluster-create */
+  auto cluster_create_node_cmd = cli.defineCommand("cluster-create");
+  cluster_create_node_cmd->onCall(
+      std::bind(&cmd_cluster_create, std::placeholders::_1));
+
+  cluster_create_node_cmd->flags().defineFlag(
+      "zookeeper_addr",
+      cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      NULL,
+      "url",
+      "<addr>");
+
+  cluster_create_node_cmd->flags().defineFlag(
+      "cluster_name",
+      cli::FlagParser::T_STRING,
       true,
       NULL,
       NULL,
-      "number of vnodes to assign",
-      "<num>");
+      "node name",
+      "<string>");
+
+  /* command: namespace-create */
+  auto namespace_create_node_cmd = cli.defineCommand("namespace-create");
+  namespace_create_node_cmd->onCall(
+      std::bind(&cmd_namespace_create, std::placeholders::_1));
+
+  namespace_create_node_cmd->flags().defineFlag(
+      "zookeeper_addr",
+      cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      NULL,
+      "url",
+      "<addr>");
+
+  namespace_create_node_cmd->flags().defineFlag(
+      "cluster_name",
+      cli::FlagParser::T_STRING,
+      true,
+      NULL,
+      NULL,
+      "node name",
+      "<string>");
+
+  namespace_create_node_cmd->flags().defineFlag(
+      "namespace",
+      cli::FlagParser::T_STRING,
+      true,
+      NULL,
+      NULL,
+      "node name",
+      "<string>");
 
   cli.call(flags.getArgv());
   return 0;
