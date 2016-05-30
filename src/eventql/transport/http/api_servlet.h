@@ -59,7 +59,8 @@ public:
       eventql::TableService* tsdb,
       ConfigDirectory* customer_dir,
       PartitionMap* pmap,
-      SQLService* sql_service);
+      SQLService* sql_service,
+      TableService* table_service);
 
   void handleHTTPRequest(
       RefPtr<http::HTTPRequestStream> req_stream,
@@ -291,6 +292,7 @@ protected:
   PartitionMap* pmap_;
 
   SQLService* sql_service_;
+  TableService* table_service_;
 };
 
 }

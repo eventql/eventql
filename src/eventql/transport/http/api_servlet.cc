@@ -60,7 +60,8 @@ AnalyticsServlet::AnalyticsServlet(
     eventql::TableService* tsdb,
     ConfigDirectory* customer_dir,
     PartitionMap* pmap,
-    SQLService* sql_service) :
+    SQLService* sql_service,
+    TableService* table_service) :
     app_(app),
     cachedir_(cachedir),
     auth_(auth),
@@ -72,7 +73,8 @@ AnalyticsServlet::AnalyticsServlet(
     logfile_api_(app->logfileService(), customer_dir, cachedir),
     mapreduce_api_(app->mapreduceService(), customer_dir, cachedir),
     pmap_(pmap),
-    sql_service_(sql_service) {}
+    sql_service_(sql_service),
+    table_service_(table_service) {}
 
 void AnalyticsServlet::handleHTTPRequest(
     RefPtr<http::HTTPRequestStream> req_stream,
@@ -464,44 +466,43 @@ void AnalyticsServlet::createTable(
     msg::MessageSchema schema(nullptr);
     schema.fromJSON(jschema, jreq.end());
 
-    TableDefinition td;
-    td.set_customer(session->getEffectiveNamespace());
-    td.set_table_name(table_name.get());
+    // legacy static tables
+    if (table_type == "static" || table_type == "static_fixed") {
+      TableDefinition td;
+      if (force) {
+        try {
+          auto old_td = customer_dir_->getTableConfig(
+              session->getEffectiveNamespace(),
+              table_name.get());
 
-    auto tblcfg = td.mutable_config();
-    tblcfg->set_schema(schema.encode().toString());
-    tblcfg->set_num_shards(num_shards.isEmpty() ? 1 : num_shards.get());
+          td.set_version(old_td.version());
+        } catch (const std::exception& e) {
+          // ignore
+        }
+      }
 
-    if (table_type == "timeseries" || table_type == "log_timeseries") {
-      tblcfg->set_partitioner(eventql::TBL_PARTITION_TIMEWINDOW);
-      tblcfg->set_storage(eventql::TBL_STORAGE_COLSM);
+      td.set_customer(session->getEffectiveNamespace());
+      td.set_table_name(table_name.get());
 
-      auto partition_size = json::objectGetUInt64(jreq, "partition_size");
-      auto partcfg = tblcfg->mutable_time_window_partitioner_config();
-      partcfg->set_partition_size(
-          partition_size.isEmpty() ? 4 * kMicrosPerHour : partition_size.get());
-    }
-
-    else if (table_type == "static" || table_type == "static_fixed") {
+      auto tblcfg = td.mutable_config();
+      tblcfg->set_schema(schema.encode().toString());
+      tblcfg->set_num_shards(num_shards.isEmpty() ? 1 : num_shards.get());
       tblcfg->set_partitioner(eventql::TBL_PARTITION_FIXED);
       tblcfg->set_storage(eventql::TBL_STORAGE_STATIC);
+      customer_dir_->updateTableConfig(td);
+    } else {
+      auto rc = table_service_->createTable(
+          session->getEffectiveNamespace(),
+          table_name.get(),
+          schema,
+          { "time" }); // FIXME
+
+      if (!rc.isSuccess()) {
+        RAISE(kRuntimeError, rc.message());
+      }
     }
 
-    else if (table_type == "static_timeseries") {
-      tblcfg->set_partitioner(eventql::TBL_PARTITION_TIMEWINDOW);
-      tblcfg->set_storage(eventql::TBL_STORAGE_STATIC);
-
-      auto partition_size = json::objectGetUInt64(jreq, "partition_size");
-      auto partcfg = tblcfg->mutable_time_window_partitioner_config();
-      partcfg->set_partition_size(
-          partition_size.isEmpty() ? 4 * kMicrosPerHour : partition_size.get());
-    }
-
-    else {
-      RAISEF(kIllegalArgumentError, "invalid table type: $0", table_type);
-    }
-
-    app_->updateTable(td, force);
+    res->setStatus(http::kStatusCreated);
   } catch (const StandardException& e) {
     logError("analyticsd", e, "error");
     res->setStatus(http::kStatusInternalServerError);

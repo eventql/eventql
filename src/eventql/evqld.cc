@@ -617,7 +617,8 @@ int main(int argc, const char** argv) {
         &tsdb_node,
         config_dir.get(),
         &partition_map,
-        &sql_service);
+        &sql_service,
+        &tsdb_node);
 
     eventql::StatusServlet status_servlet(
         &cfg,
