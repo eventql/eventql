@@ -76,6 +76,7 @@ AM_LDFLAGS = $(PTHREAD_CFLAGS)
 evql_protos = \
     eventql/AnalyticsSession.proto \
     eventql/config/namespace_config_protos.proto \
+    eventql/db/metadata_operations.proto \
     eventql/db/ClusterConfig.proto \
     eventql/db/LogPartitionCompactionState.proto \
     eventql/db/PartitionInfo.proto \
@@ -759,8 +760,6 @@ noinst_LIBRARIES += evql_http.a
 
 ################# LIB: evql_core.a ####################
 evql_core_a_SOURCES = \
-    eventql/AnalyticsApp.cc \
-    eventql/AnalyticsApp.h \
     eventql/EventScanResult.cc \
     eventql/EventScanResult.h \
     eventql/JavaScriptContext.cc \
@@ -809,14 +808,20 @@ evql_core_a_SOURCES = \
     eventql/db/LogPartitionReplication.h \
     eventql/db/LogPartitionWriter.cc \
     eventql/db/LogPartitionWriter.h \
+    eventql/db/metadata_client.cc \
+    eventql/db/metadata_client.h \
     eventql/db/metadata_coordinator.cc \
     eventql/db/metadata_coordinator.h \
     eventql/db/metadata_file.cc \
     eventql/db/metadata_file.h \
     eventql/db/metadata_operation.cc \
     eventql/db/metadata_operation.h \
+    eventql/db/metadata_service.cc \
+    eventql/db/metadata_service.h \
     eventql/db/metadata_store.cc \
     eventql/db/metadata_store.h \
+    eventql/db/metadata_transaction.cc \
+    eventql/db/metadata_transaction.h \
     eventql/db/Partition.cc \
     eventql/db/Partition.h \
     eventql/db/PartitionReader.cc \
@@ -935,6 +940,7 @@ evql_core_a_SOURCES = \
 nodist_evql_core_a_SOURCES = \
     @builddir@/eventql/AnalyticsSession.pb.cc \
     @builddir@/eventql/config/namespace_config_protos.pb.cc \
+    @builddir@/eventql/db/metadata_operations.pb.cc \
     @builddir@/eventql/db/ClusterConfig.pb.cc \
     @builddir@/eventql/db/LogPartitionCompactionState.pb.cc \
     @builddir@/eventql/db/PartitionInfo.pb.cc \

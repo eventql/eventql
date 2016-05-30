@@ -22,10 +22,10 @@
  * code of your own applications
  */
 #pragma once
+#include "eventql/eventql.h"
 #include <eventql/util/stdtypes.h>
 #include <eventql/db/PartitionReplication.h>
-
-#include "eventql/eventql.h"
+#include <eventql/config/config_directory.h>
 
 namespace eventql {
 
@@ -37,6 +37,7 @@ public:
   LSMPartitionReplication(
       RefPtr<Partition> partition,
       RefPtr<ReplicationScheme> repl_scheme,
+      ConfigDirectory* cdir,
       http::HTTPConnectionPool* http);
 
   bool needsReplication() const override;
@@ -50,10 +51,12 @@ public:
 
 protected:
 
+  Status fetchAndApplyMetadataTransaction(MetadataTransaction txn);
+
   void replicateTo(const ReplicaRef& replica, uint64_t replicated_offset);
 
   void uploadBatchTo(
-      const ReplicaRef& replica,
+      const String& host,
       const RecordEnvelopeList& batch);
 
   void fetchRecords(
@@ -63,6 +66,9 @@ protected:
           uint64_t record_version,
           const void* record_data,
           size_t record_size)> fn);
+
+  ConfigDirectory* cdir_;
+
 };
 
 } // namespace eventql

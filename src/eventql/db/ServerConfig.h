@@ -30,11 +30,13 @@
 #include "eventql/eventql.h"
 
 namespace eventql {
+class ConfigDirectory;
 
 struct ServerCfg {
   String db_path;
   RefPtr<ReplicationScheme> repl_scheme;
   RefPtr<LSMTableIndexCache> idx_cache;
+  ConfigDirectory* config_directory;
 };
 
 } // namespace eventql

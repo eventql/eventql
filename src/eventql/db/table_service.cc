@@ -31,6 +31,8 @@
 #include <eventql/db/table_service.h>
 #include <eventql/db/LogPartitionReader.h>
 #include <eventql/db/PartitionState.pb.h>
+#include "eventql/db/metadata_coordinator.h"
+#include "eventql/db/metadata_file.h"
 
 #include "eventql/eventql.h"
 
@@ -77,9 +79,30 @@ Status TableService::createTable(
         "first column in the PRIMARY KEY must be of type DATETIME");
   }
 
+  // generate new metadata file
+  Vector<String> all_servers;
+  for (const auto& s : cdir_->listServers()) {
+    all_servers.emplace_back(s.server_id());
+  }
+
+  auto txnid = Random::singleton()->sha1();
+  Vector<String> servers;
+  uint64_t idx = Random::singleton()->random64();
+  for (int i = 0; i < 3; ++i) {
+    servers.emplace_back(all_servers[++idx % all_servers.size()]);
+  }
+
+  MetadataFile metadata_file(txnid, 1, KEYSPACE_UINT64, {});
+
+  // generate new table config
   TableDefinition td;
   td.set_customer(db_namespace);
   td.set_table_name(table_name);
+  td.set_metadata_txnid(txnid.data(), txnid.size());
+  td.set_metadata_txnseq(1);
+  for (const auto& s : servers) {
+    td.add_metadata_servers(s);
+  }
 
   auto tblcfg = td.mutable_config();
   tblcfg->set_schema(schema.encode().toString());
@@ -91,10 +114,22 @@ Status TableService::createTable(
     tblcfg->add_primary_key(col);
   }
 
+  // create metadata file on metadata servers
+  eventql::MetadataCoordinator coordinator(cdir_);
+  auto rc = coordinator.createFile(
+      db_namespace,
+      table_name,
+      metadata_file,
+      servers);
+
+  if (!rc.isSuccess()) {
+    return rc;
+  }
+
+  // create table config
   cdir_->updateTableConfig(td);
   return Status::success();
 }
-
 
 void TableService::listTables(
     const String& tsdb_namespace,

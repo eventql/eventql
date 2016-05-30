@@ -136,6 +136,11 @@ String inspect<SHA1Hash>(const SHA1Hash& hash) {
   return hash.toString();
 }
 
+template <>
+String StringUtil::toString<SHA1Hash>(SHA1Hash hash) {
+  return hash.toString();
+}
+
 /**
  * SHA1 Implementation from
  *    https://code.google.com/p/smallsha1/source/browse/trunk/sha1.h

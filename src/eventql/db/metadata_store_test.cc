@@ -95,11 +95,10 @@ TEST_CASE(MetadataStoreTest, TestStoreMetadataFile, [] () {
     }
 
 
-    MetadataFile file(SHA1::compute("mytx"), pmap);
+    MetadataFile file(SHA1::compute("mytx"), 7, KEYSPACE_STRING, pmap);
     auto rc = metadata_store.storeMetadataFile(
         "ns",
         "mytbl",
-        SHA1::compute("test"),
         file);
 
     EXPECT(rc.isSuccess());
@@ -111,11 +110,12 @@ TEST_CASE(MetadataStoreTest, TestStoreMetadataFile, [] () {
     auto rc = metadata_store.getMetadataFile(
         "ns",
         "mytbl",
-        SHA1::compute("test"),
+        SHA1::compute("mytx"),
         &file);
 
     EXPECT(rc.isSuccess());
     EXPECT(file->getTransactionID() == SHA1::compute("mytx"));
+    EXPECT(file->getSequenceNumber() == 7);
 
     const auto& pmap = file->getPartitionMap();
     EXPECT_EQ(pmap.size(), 2);

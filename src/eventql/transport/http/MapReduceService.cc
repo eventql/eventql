@@ -45,14 +45,12 @@ MapReduceService::MapReduceService(
     eventql::TableService* tsdb,
     eventql::PartitionMap* pmap,
     eventql::ReplicationScheme* repl,
-    JSRuntime* js_runtime,
     const String& cachedir) :
     cdir_(cdir),
     auth_(auth),
     tsdb_(tsdb),
     pmap_(pmap),
     repl_(repl),
-    js_runtime_(js_runtime),
     cachedir_(cachedir),
     tpool_(
         thread::ThreadPoolOptions {

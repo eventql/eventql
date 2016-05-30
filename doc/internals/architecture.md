@@ -1,4 +1,65 @@
 
+## Architecture Overview
+
+Each table's keyspace is split into a number of non-overlapping ranges called
+"partitions" (like bigtable). 
+
+Each partition is simultaneously served by N servers where N is called the
+replication factor. Each server accepts queries and inserts for every partition
+it serves (unlike bigtable). I.e. we can tolerate up to N-1 failures and still
+serve reads and writes. In practice, N is often 3 which would make the number of
+tolerated failures 2.
+
+
+
+## Timeseries Optimizations
+
+##### Ahead-of-time split
+
+the master detects the historical partition size and pre-splits partitions into
+the future for active timeseries
+
+##### Insert Smearing
+
+One inherent scalability limit in our design as well as in the original bigtable
+design is that - naively - every single point in time maps to exactly one 
+partition, regardless of partitionsize.
+
+So if all our writes are at the current wallclock time (i.e at any point in time,
+all incoming writes are for the same part of the keyrange) then all writes are
+handled by the same set of N machines. If we estimate that each machine can only
+write up to 100 mb/s but we would like for each partition to be roughly 1GB in
+size, we'll ultimately hit a botttlneck when more than 100 megabytes of new
+at-the-current-time inserts per second are "lasered" at the same machine.
+
+At this point, we can't make the problem go away by further splitting the hot
+partition anymore while still satisfiny our constraint that a partiotion should
+end up with roughly 1GB of that as  the problem is not the total volume of writes
+(we can handle any volume of writes by making the partitions smaller), but the fact
+that - at the chosen target partition size - filling up a any partition will take
+longer than the wallclock timespan it covers.
+
+To mitigate this bottleneck, we deploy a simple, unobtrusive optimization:
+
+The lower insert limit is fixed by hardware constraints and can be reliably
+inferred from the partition size (the bottleneck can only occur once partition
+size becomes smaller than roughly $target_partition_size/100MB seconds).
+
+We recognize that inserts are usually not sent directly to the responsible
+partition server but first to any other server in our cluster. When a server
+receives an insert for a partition whose keyrange is smaller than 1 minute, it
+will randomly delay fowarding the insert for between 0 and 120 seconds. This
+works out so that (in aggregate) any partition is evenly filled up over a
+timewindow of at least 120 seconds (corresponding to at most ~10MB/s inbound
+write load with a 1GB target partition size), regardless of total insert volume.
+
+The downside of this approach is that for real-time insert volumes above 100mb/s
+you'll see a good minute or so of delay for new writes. The upside is that the
+optimization is simple, preserves all original semantics, requires no explicit
+configuration and is completely transparent to the user while giving us horizontal
+scalability well beyond gigabits of insert load.
+
+Note that you can turn off this optimization both globally and per-insert.
 
 ## Partition Location
 
@@ -64,6 +125,25 @@ successfully retrieved the transaction from one of the other metadata servers.
 
 ##### Change Notification to affected Servers
 
+Once a new metadata transaction was committed (by writing the new metadata
+transaction to the TableConfig in the coordinator service) all other servers in
+the cluster will reliably get notified of the change by the coordinator. When a
+server sees a metadaaa change to a table, it will send a "partition discovery"
+requerst for each partition that it has locally stored for the chnaged table to
+one of the responsible metadata servers. This partition discovery request
+contains the metadata transaction id and the name/id of the partition. The
+response to the partition discovery request is called the partition discovery
+response. The partition covery response contains the should-be status of the
+partition on the requesting host ("LOAD", "SERVE" or "UNLOAD") and the list
+of other servers (and partition ids, in case of a split) the data should be
+pushed.
+
+##### Metadata Transaction Sequence Numbers
+
+The metadata transaction id is a random SHA1 hash. Additionally we store an
+incrementing sequence number with each transaction id to allow us to order
+transactions.
+
 
 ## Partition Assignment
 
@@ -80,8 +160,9 @@ Each partition stores two server lists:
 ##### Initial Partition Assignment
 
 To create a new table, the TableConfig is created atomically in the coordination
-service. The initial TableConfig must at least contain a single partition
-(covering the whole key range) and a list of servers for this partition.
+service. The initial TableConfig must point to an existing metadata file that
+contains at least a single partition (covering the whole key range) and a list
+of servers for this partition.
 
 ##### Partition Split
 
@@ -163,3 +244,6 @@ Of course, the server leave algorithm should ensure that no partition falls
 below the number of replicas specified by the replication level. In the normal
 case, the master handles all rebalances and initiates the leave operation only
 when it is safe to remove a node.
+
+
+

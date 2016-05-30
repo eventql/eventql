@@ -68,4 +68,10 @@ Vector<SHA1Hash> FixedShardPartitioner::listPartitions(
   return listPartitions(table_name_, num_shards_);
 }
 
+Status FixedShardPartitioner::findKeyRange(
+    const SHA1Hash& partition_id,
+    KeyRange* keyrange) const {
+  return Status(eRuntimeError, "not implemented");
+}
+
 }

@@ -36,6 +36,7 @@
 #include <eventql/db/PartitionWriter.h>
 #include <eventql/db/PartitionReader.h>
 #include <eventql/db/ReplicationScheme.h>
+#include <eventql/db/metadata_transaction.h>
 #include <eventql/io/cstable/CSTableReader.h>
 
 #include "eventql/eventql.h"
@@ -49,6 +50,12 @@ using PartitionKey =
         String,     // namespace
         String,     // table
         SHA1Hash>;  // partition
+
+struct KeyRange {
+  String begin;
+  String end;
+  SHA1Hash partition_id;
+};
 
 class Partition : public RefCounted {
 public:
@@ -87,9 +94,12 @@ public:
   String getRelativePath() const;
   String getAbsolutePath() const;
 
+  MetadataTransaction getLastMetadataTransaction() const;
+
 protected:
 
   bool upgradeToLSMv2() const;
+  void backfillKeyRange();
 
   ServerCfg* cfg_;
   PartitionSnapshotRef head_;

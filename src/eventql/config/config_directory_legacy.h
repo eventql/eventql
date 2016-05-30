@@ -34,6 +34,10 @@ public:
       const String& path,
       InetAddr master_addr);
 
+  String getServerID() const override {
+    RAISE(kNotYetImplementedError);
+  }
+
   ClusterConfig getClusterConfig() const override;
 
   void updateClusterConfig(ClusterConfig config) override;

@@ -28,6 +28,7 @@
 
 namespace http {
 
+HTTPClient::HTTPClient() : stats_(&stats_int_) {}
 HTTPClient::HTTPClient(HTTPClientStats* stats) : stats_(stats) {}
 
 HTTPResponse HTTPClient::executeRequest(
@@ -37,6 +38,18 @@ HTTPResponse HTTPClient::executeRequest(
       [] (Promise<HTTPResponse> promise) {
         return new HTTPResponseFuture(promise);
       });
+}
+
+Status HTTPClient::executeRequest(
+    const HTTPRequest& req,
+    HTTPResponse* res) {
+  try {
+    *res = executeRequest(req);
+  } catch (const std::exception& e) {
+    return Status(eIOError, e.what());
+  }
+
+  return Status::success();
 }
 
 HTTPResponse HTTPClient::executeRequest(
