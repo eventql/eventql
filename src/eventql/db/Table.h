@@ -60,6 +60,8 @@ public:
   TablePartitionerType partitionerType() const;
   RefPtr<TablePartitioner> partitioner() const;
 
+  Vector<String> getPrimaryKey() const;
+
   MetadataTransaction getLastMetadataTransaction() const;
 
   void updateConfig(TableDefinition new_config);

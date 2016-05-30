@@ -95,6 +95,13 @@ RefPtr<TablePartitioner> Table::partitioner() const {
   return partitioner_;
 }
 
+Vector<String> Table::getPrimaryKey() const {
+  std::unique_lock<std::mutex> lk(mutex_);
+  return Vector<String>(
+      config_.config().primary_key().begin(),
+      config_.config().primary_key().end());
+}
+
 MetadataTransaction Table::getLastMetadataTransaction() const {
   std::unique_lock<std::mutex> lk(mutex_);
 
