@@ -121,6 +121,12 @@ public:
       const msg::DynamicMessage& data,
       uint64_t flags = 0);
 
+  void insertRecord(
+      const String& tsdb_namespace,
+      const String& table_name,
+      const msg::DynamicMessage& data,
+      uint64_t flags = 0);
+
   void compactPartition(
       const String& tsdb_namespace,
       const String& table_name,
