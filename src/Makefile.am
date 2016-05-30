@@ -230,6 +230,8 @@ evql_sql_a_SOURCES = \
     eventql/sql/qtree/nodes/create_table.h \
     eventql/sql/qtree/nodes/insert_into.cc \
     eventql/sql/qtree/nodes/insert_into.h \
+    eventql/sql/qtree/nodes/insert_json.cc \
+    eventql/sql/qtree/nodes/insert_json.h \
     eventql/sql/qtree/qtree_coder.cc \
     eventql/sql/qtree/qtree_coder.h \
     eventql/sql/qtree/qtree_coder_impl.h \
