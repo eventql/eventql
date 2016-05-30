@@ -25,35 +25,37 @@
 #pragma once
 #include "eventql/eventql.h"
 #include <eventql/util/stdtypes.h>
-#include <eventql/sql/svalue.h>
 #include <eventql/sql/qtree/QueryTreeNode.h>
+#include <eventql/sql/qtree/ValueExpressionNode.h>
 
 namespace csql {
 
 class InsertIntoNode : public QueryTreeNode {
 public:
 
-  InsertIntoNode(
-      const String& table_name,
-      Vector<Pair<String, SValue>> data);
+  enum InsertValueType { SCALAR, RECORD };
+
+  struct InsertValueSpec {
+    InsertValueType type;
+    String column;
+    RefPtr<ValueExpressionNode> expr;
+  };
 
   InsertIntoNode(
       const String& table_name,
-      const String& json_str);
+      Vector<InsertValueSpec> values_spec);
 
   InsertIntoNode(const InsertIntoNode& node);
 
   const String& getTableName() const;
-  Option<Vector<Pair<String, SValue>>> getData() const;
-  Option<String> getJSONStr() const;
+  Vector<InsertValueSpec> getValuesSpec() const;
 
   RefPtr<QueryTreeNode> deepCopy() const;
   String toString() const;
 
 protected:
   String table_name_;
-  Vector<Pair<String, SValue>> data_;
-  String json_str_;
+  Vector<InsertValueSpec> values_spec_;
 };
 
 } // namespace csql

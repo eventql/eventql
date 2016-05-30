@@ -29,40 +29,21 @@ namespace csql {
 
 InsertIntoNode::InsertIntoNode(
     const String& table_name,
-    Vector<Pair<String, SValue>> data) :
+    Vector<InsertIntoNode::InsertValueSpec> values_spec) :
     table_name_(table_name),
-    data_(data) {}
-
-InsertIntoNode::InsertIntoNode(
-    const String& table_name,
-    const String& json_str) :
-    table_name_(table_name),
-    json_str_(json_str) {}
+    values_spec_(values_spec) {}
 
 InsertIntoNode::InsertIntoNode(
     const InsertIntoNode& node) :
-    data_(node.data_) {}
+    values_spec_(node.values_spec_) {}
 
 const String& InsertIntoNode::getTableName() const {
   return table_name_;
 }
 
-Option<Vector<Pair<String, SValue>>> InsertIntoNode::getData() const {
-  if (data_.size() > 0) {
-    return Some(data_);
-  } else {
-    return None<Vector<Pair<String, SValue>>>();
-  }
+Vector<InsertIntoNode::InsertValueSpec> InsertIntoNode::getValuesSpec() const {
+  return values_spec_;
 }
-
-Option<String> InsertIntoNode::getJSONStr() const {
-  if (!json_str_.empty()) {
-    return Some(json_str_);
-  } else {
-    return None<String>();
-  }
-}
-
 
 RefPtr<QueryTreeNode> InsertIntoNode::deepCopy() const {
   return new InsertIntoNode(*this);
