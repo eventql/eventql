@@ -998,6 +998,25 @@ evqld_LDADD = \
 
 bin_PROGRAMS += evqld
 
+################# BIN: evqld ####################
+evqlctl_SOURCES = \
+    eventql/evqlctl.cc
+
+evqlctl_LDADD = \
+    evql_core.a \
+    evql_http.a \
+    evql_sql.a \
+    evql_cstable.a \
+    evql_sstable.a \
+    evql_util.a \
+    $(SIMDCOMP_LDADD) \
+    $(INIH_LDADD) \
+    $(ZOOKEEPER_LDADD) \
+    $(LMDB_LDADD) \
+    $(PROTOBUF_LDADD) \
+    $(PCRE_LDADD)
+
+bin_PROGRAMS += evqlctl
 
 ################# TEST: sql/runtime ####################
 test_evql_sql_runtime_SOURCES = eventql/sql/runtime/Runtime_test.cc

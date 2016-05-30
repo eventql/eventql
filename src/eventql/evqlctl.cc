@@ -21,6 +21,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#include "eventql/eventql.h"
 #include <stdlib.h>
 #include <unistd.h>
 #include <signal.h>
@@ -58,41 +59,40 @@
 #include "eventql/sql/runtime/defaultruntime.h"
 #include "eventql/sql/runtime/tablerepository.h"
 
-#include "eventql/eventql.h"
 using namespace eventql;
 
 thread::EventLoop ev;
 
 void cmd_cluster_status(const cli::FlagParser& flags) {
-  ConfigDirectoryClient cclient(
-      InetAddr::resolve(flags.getString("master")));
+  //ConfigDirectoryClient cclient(
+  //    InetAddr::resolve(flags.getString("master")));
 
-  auto cluster = cclient.fetchClusterConfig();
-  iputs("Cluster config:\n$0", cluster.DebugString());
+  //auto cluster = cclient.fetchClusterConfig();
+  //iputs("Cluster config:\n$0", cluster.DebugString());
 }
 
 void cmd_cluster_add_node(const cli::FlagParser& flags) {
-  ConfigDirectoryClient cclient(
-      InetAddr::resolve(flags.getString("master")));
+  //ConfigDirectoryClient cclient(
+  //    InetAddr::resolve(flags.getString("master")));
 
-  auto cluster = cclient.fetchClusterConfig();
-  auto node = cluster.add_dht_nodes();
-  node->set_name(flags.getString("name"));
-  node->set_addr(flags.getString("addr"));
-  node->set_status(DHTNODE_LIVE);
+  //auto cluster = cclient.fetchClusterConfig();
+  //auto node = cluster.add_dht_nodes();
+  //node->set_name(flags.getString("name"));
+  //node->set_addr(flags.getString("addr"));
+  //node->set_status(DHTNODE_LIVE);
 
-  auto vnodes = flags.getInt("vnodes");
-  for (size_t i = 0; i < vnodes; ++i) {
-    auto token = Random::singleton()->sha1().toString();
-    *node->add_sha1_tokens() = token;
-  }
+  //auto vnodes = flags.getInt("vnodes");
+  //for (size_t i = 0; i < vnodes; ++i) {
+  //  auto token = Random::singleton()->sha1().toString();
+  //  *node->add_sha1_tokens() = token;
+  //}
 
-  cclient.updateClusterConfig(cluster);
+  //cclient.updateClusterConfig(cluster);
 }
 
 int main(int argc, const char** argv) {
   Application::init();
-  Application::logToStderr();
+  Application::logToStderr("evqlctl");
 
   cli::FlagParser flags;
 
