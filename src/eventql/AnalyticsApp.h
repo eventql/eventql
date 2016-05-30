@@ -25,7 +25,7 @@
 #define _CM_ANALYTICSAPP_H
 #include "eventql/util/protobuf/MessageSchema.h"
 #include "eventql/db/TSDBClient.h"
-#include "eventql/db/TSDBService.h"
+#include "eventql/db/table_service.h"
 #include "eventql/db/CompactionWorker.h"
 #include "eventql/transport/http/LogfileService.h"
 #include "eventql/transport/http/MapReduceService.h"
@@ -41,7 +41,7 @@ class AnalyticsApp : public RefCounted {
 public:
 
   AnalyticsApp(
-      eventql::TSDBService* tsdb_node,
+      eventql::TableService* tsdb_node,
       eventql::PartitionMap* partition_map,
       eventql::ReplicationScheme* replication_scheme,
       eventql::CompactionWorker* cstable_index,
@@ -52,8 +52,8 @@ public:
       const String& datadir,
       const String& cachedir);
 
-  RefPtr<csql::TableProvider> getTableProvider(const String& customer) const;
-  eventql::TSDBService* getTSDBNode() const;
+  //RefPtr<csql::TableProvider> getTableProvider(const String& customer) const;
+  eventql::TableService* getTSDBNode() const;
 
   void insertMetric(
       const String& customer,
@@ -71,9 +71,8 @@ public:
 protected:
 
   void configureCustomer(const NamespaceConfig& customer);
-  void configureTable(const TableDefinition& tbl);
 
-  eventql::TSDBService* tsdb_node_;
+  eventql::TableService* tsdb_node_;
   eventql::PartitionMap* partition_map_;
   eventql::ReplicationScheme* replication_scheme_;
   eventql::CompactionWorker* cstable_index_;

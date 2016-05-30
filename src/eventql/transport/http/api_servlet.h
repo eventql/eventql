@@ -32,12 +32,13 @@
 #include "eventql/sql/runtime/runtime.h"
 #include "eventql/auth/internal_auth.h"
 #include "eventql/config/config_directory.h"
-#include "eventql/db/TSDBService.h"
+#include "eventql/db/table_service.h"
 #include "eventql/transport/http/LogfileAPIServlet.h"
 #include "eventql/transport/http/MapReduceAPIServlet.h"
 #include "eventql/RemoteTSDBScanParams.pb.h"
 #include "eventql/auth/client_auth.h"
 #include "eventql/auth/internal_auth.h"
+#include "eventql/server/sql_service.h"
 
 #include "eventql/eventql.h"
 
@@ -55,9 +56,10 @@ public:
       ClientAuth* client_auth,
       InternalAuth* internal_auth,
       csql::Runtime* sql,
-      eventql::TSDBService* tsdb,
+      eventql::TableService* tsdb,
       ConfigDirectory* customer_dir,
-      PartitionMap* pmap);
+      PartitionMap* pmap,
+      SQLService* sql_service);
 
   void handleHTTPRequest(
       RefPtr<http::HTTPRequestStream> req_stream,
@@ -281,12 +283,14 @@ protected:
   ClientAuth* client_auth_;
   InternalAuth* internal_auth_;
   csql::Runtime* sql_;
-  eventql::TSDBService* tsdb_;
+  eventql::TableService* tsdb_;
   ConfigDirectory* customer_dir_;
 
   LogfileAPIServlet logfile_api_;
   MapReduceAPIServlet mapreduce_api_;
   PartitionMap* pmap_;
+
+  SQLService* sql_service_;
 };
 
 }

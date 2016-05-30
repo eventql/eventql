@@ -23,21 +23,21 @@
  */
 #pragma once
 #include <eventql/sql/runtime/runtime.h>
-#include <eventql/db/TSDBService.h>
+#include <eventql/db/table_service.h>
 #include <eventql/auth/internal_auth.h>
 
 namespace eventql {
-class TSDBService;
+class TableService;
 
 class SQLEngine {
 public:
 
-  static RefPtr<csql::TableProvider> tableProviderForNamespace(
-      PartitionMap* partition_map,
-      ReplicationScheme* replication_scheme,
-      InternalAuth* auth,
-      const String& tsdb_namespace);
-//
+//  static RefPtr<csql::TableProvider> tableProviderForNamespace(
+//      PartitionMap* partition_map,
+//      ReplicationScheme* replication_scheme,
+//      InternalAuth* auth,
+//      const String& tsdb_namespace);
+////
 //  static RefPtr<csql::QueryTreeNode> rewriteQuery(
 //      csql::Runtime* runtime,
 //      PartitionMap* partition_map,

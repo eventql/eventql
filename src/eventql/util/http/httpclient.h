@@ -33,9 +33,13 @@ namespace http {
 class HTTPClient {
 public:
 
+  HTTPClient();
   HTTPClient(HTTPClientStats* stats);
 
+  // deprecated
   HTTPResponse executeRequest(const HTTPRequest& req);
+
+  Status executeRequest(const HTTPRequest& req, HTTPResponse* res);
 
   HTTPResponse executeRequest(
       const HTTPRequest& req,
@@ -51,6 +55,7 @@ public:
       Function<HTTPResponseFuture* (Promise<HTTPResponse> promise)> factory);
 
 protected:
+  HTTPClientStats stats_int_;
   HTTPClientStats* stats_;
   thread::EventLoop ev_;
   std::mutex mutex_;

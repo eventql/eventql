@@ -21,28 +21,44 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#ifndef _libstx_UTIL_LOGOUTPUTSTREAM_H
-#define _libstx_UTIL_LOGOUTPUTSTREAM_H
+#pragma once
+#include "eventql/eventql.h"
+#include <eventql/util/stdtypes.h>
+#include <eventql/db/TableConfig.pb.h>
+#include <eventql/db/Partition.h>
+#include <eventql/db/TSDBNodeConfig.pb.h>
+#include <eventql/db/TSDBTableInfo.h>
+#include <eventql/db/PartitionInfo.pb.h>
+#include <eventql/db/RecordEnvelope.pb.h>
+#include <eventql/db/table_service.h>
+#include <eventql/db/partition_map.h>
+#include <eventql/db/TimeWindowPartitioner.h>
+#include <eventql/sql/transaction.h>
+#include <eventql/auth/internal_auth.h>
 
-#include "eventql/util/io/outputstream.h"
-#include "eventql/util/logging/loglevel.h"
-#include "eventql/util/logging/logtarget.h"
-#include "eventql/util/stdtypes.h"
+namespace eventql {
 
-class LogOutputStream : public LogTarget {
+using TableService = TableService;
+
+class SQLService {
 public:
 
-  LogOutputStream(
-      const String& program_name,
-      std::unique_ptr<OutputStream> target);
+  SQLService(
+      csql::Runtime* sql,
+      PartitionMap* pmap,
+      ReplicationScheme* repl,
+      InternalAuth* auth,
+      TableService* table_service);
 
-  void log(
-      LogLevel level,
-      const String& component,
-      const String& message) override;
+  ScopedPtr<csql::Transaction> startTransaction(Session* session);
 
 protected:
-  String program_name_;
-  ScopedPtr<OutputStream> target_;
+  csql::Runtime* sql_;
+  PartitionMap* pmap_;
+  ReplicationScheme* repl_;
+  InternalAuth* auth_;
+  TableService* table_service_;
 };
-#endif
+
+} // namespace eventql
+

@@ -42,7 +42,7 @@ namespace eventql {
 MapReduceService::MapReduceService(
     ConfigDirectory* cdir,
     InternalAuth* auth,
-    eventql::TSDBService* tsdb,
+    eventql::TableService* tsdb,
     eventql::PartitionMap* pmap,
     eventql::ReplicationScheme* repl,
     JSRuntime* js_runtime,

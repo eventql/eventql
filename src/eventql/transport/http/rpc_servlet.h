@@ -21,22 +21,22 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#ifndef _FNORD_TSDB_TSDBSERVLET_H
-#define _FNORD_TSDB_TSDBSERVLET_H
+#pragma once
 #include "eventql/util/http/httpservice.h"
 #include <eventql/util/random.h>
-#include <eventql/db/TSDBService.h>
+#include <eventql/db/table_service.h>
 #include <eventql/util/http/HTTPSSEStream.h>
-
 #include "eventql/eventql.h"
+#include "eventql/db/metadata_service.h"
 
 namespace eventql {
 
-class TSDBServlet : public http::StreamingHTTPService {
+class RPCServlet : public http::StreamingHTTPService {
 public:
 
-  TSDBServlet(
-      TSDBService* node,
+  RPCServlet(
+      TableService* node,
+      MetadataService* metadata_service,
       const String& tmpdir);
 
   void handleHTTPRequest(
@@ -87,10 +87,31 @@ protected:
       http::HTTPRequestStream* req_stream,
       http::HTTPResponse* res);
 
-  TSDBService* node_;
+  void createMetadataFile(
+      const URI& uri,
+      const http::HTTPRequest* req,
+      http::HTTPResponse* res);
+
+  void performMetadataOperation(
+      const URI& uri,
+      const http::HTTPRequest* req,
+      http::HTTPResponse* res);
+
+  void discoverPartitionMetadata(
+      const URI& uri,
+      const http::HTTPRequest* req,
+      http::HTTPResponse* res);
+
+  void fetchLatestMetadataFile(
+      const URI& uri,
+      const http::HTTPRequest* req,
+      http::HTTPResponse* res);
+
+  TableService* node_;
+  MetadataService* metadata_service_;
   String tmpdir_;
   Random rnd_;
 };
 
 }
-#endif
+

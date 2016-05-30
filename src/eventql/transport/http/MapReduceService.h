@@ -24,7 +24,7 @@
 #pragma once
 #include "eventql/eventql.h"
 #include "eventql/util/thread/threadpool.h"
-#include "eventql/db/TSDBService.h"
+#include "eventql/db/table_service.h"
 #include "eventql/auth/internal_auth.h"
 #include "eventql/config/namespace_config.h"
 #include "eventql/config/config_directory.h"
@@ -40,7 +40,7 @@ public:
   MapReduceService(
       ConfigDirectory* cdir,
       InternalAuth* auth,
-      eventql::TSDBService* tsdb,
+      eventql::TableService* tsdb,
       eventql::PartitionMap* pmap,
       eventql::ReplicationScheme* repl,
       JSRuntime* js_runtime,
@@ -91,7 +91,7 @@ public:
 protected:
   ConfigDirectory* cdir_;
   InternalAuth* auth_;
-  eventql::TSDBService* tsdb_;
+  eventql::TableService* tsdb_;
   eventql::PartitionMap* pmap_;
   eventql::ReplicationScheme* repl_;
   JSRuntime* js_runtime_;

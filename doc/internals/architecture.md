@@ -1,4 +1,15 @@
 
+## Architecture Overview
+
+Each table's keyspace is split into a number of non-overlapping ranges called
+"partitions" (like bigtable). 
+
+Each partition is simultaneously served by N servers where N is called the
+replication factor. Each server accepts queries and inserts for every partition
+it serves (unlike bigtable). I.e. we can tolerate up to N-1 failures and still
+serve reads and writes. In practice, N is often 3 which would make the number of
+tolerated failures 2.
+
 
 
 ## Timeseries Optimizations
@@ -111,6 +122,25 @@ successfully retrieved the transaction from one of the other metadata servers.
 
 ##### Change Notification to affected Servers
 
+Once a new metadata transaction was committed (by writing the new metadata
+transaction to the TableConfig in the coordinator service) all other servers in
+the cluster will reliably get notified of the change by the coordinator. When a
+server sees a metadaaa change to a table, it will send a "partition discovery"
+requerst for each partition that it has locally stored for the chnaged table to
+one of the responsible metadata servers. This partition discovery request
+contains the metadata transaction id and the name/id of the partition. The
+response to the partition discovery request is called the partition discovery
+response. The partition covery response contains the should-be status of the
+partition on the requesting host ("LOAD", "SERVE" or "UNLOAD") and the list
+of other servers (and partition ids, in case of a split) the data should be
+pushed.
+
+##### Metadata Transaction Sequence Numbers
+
+The metadata transaction id is a random SHA1 hash. Additionally we store an
+incrementing sequence number with each transaction id to allow us to order
+transactions.
+
 
 ## Partition Assignment
 
@@ -127,8 +157,9 @@ Each partition stores two server lists:
 ##### Initial Partition Assignment
 
 To create a new table, the TableConfig is created atomically in the coordination
-service. The initial TableConfig must at least contain a single partition
-(covering the whole key range) and a list of servers for this partition.
+service. The initial TableConfig must point to an existing metadata file that
+contains at least a single partition (covering the whole key range) and a list
+of servers for this partition.
 
 ##### Partition Split
 
@@ -210,3 +241,6 @@ Of course, the server leave algorithm should ensure that no partition falls
 below the number of replicas specified by the replication level. In the normal
 case, the master handles all rebalances and initiates the leave operation only
 when it is safe to remove a node.
+
+
+

@@ -21,28 +21,38 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#ifndef _libstx_UTIL_LOGOUTPUTSTREAM_H
-#define _libstx_UTIL_LOGOUTPUTSTREAM_H
+#include "eventql/eventql.h"
+#include <eventql/server/sql_service.h>
+#include <eventql/server/sql/table_provider.h>
+#include <eventql/sql/runtime/runtime.h>
 
-#include "eventql/util/io/outputstream.h"
-#include "eventql/util/logging/loglevel.h"
-#include "eventql/util/logging/logtarget.h"
-#include "eventql/util/stdtypes.h"
+namespace eventql {
 
-class LogOutputStream : public LogTarget {
-public:
+SQLService::SQLService(
+    csql::Runtime* sql,
+    PartitionMap* pmap,
+    ReplicationScheme* repl,
+    InternalAuth* auth,
+    TableService* table_service) :
+    sql_(sql),
+    pmap_(pmap),
+    repl_(repl),
+    auth_(auth),
+    table_service_(table_service) {}
 
-  LogOutputStream(
-      const String& program_name,
-      std::unique_ptr<OutputStream> target);
+ScopedPtr<csql::Transaction> SQLService::startTransaction(Session* session) {
+  auto txn = sql_->newTransaction();
+  txn->setUserData(session);
+  txn->setTableProvider(
+      new TSDBTableProvider(
+          session->getEffectiveNamespace(),
+          pmap_,
+          repl_,
+          table_service_,
+          auth_));
 
-  void log(
-      LogLevel level,
-      const String& component,
-      const String& message) override;
+  return txn;
+}
 
-protected:
-  String program_name_;
-  ScopedPtr<OutputStream> target_;
-};
-#endif
+} // namespace eventql
+

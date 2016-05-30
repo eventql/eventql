@@ -26,7 +26,7 @@
 #include "eventql/server/session.h"
 #include "eventql/util/stdtypes.h"
 #include "eventql/mapreduce/MapReduceTask.h"
-#include "eventql/db/TSDBService.h"
+#include "eventql/db/table_service.h"
 #include "eventql/auth/internal_auth.h"
 #include "eventql/config/namespace_config.h"
 #include "eventql/config/config_directory.h"
@@ -41,7 +41,7 @@ public:
       InternalAuth* auth,
       eventql::PartitionMap* pmap,
       eventql::ReplicationScheme* repl,
-      TSDBService* tsdb,
+      TableService* tsdb,
       const String& cachedir);
 
   MapReduceShardList fromJSON(
@@ -90,7 +90,7 @@ protected:
   InternalAuth* auth_;
   eventql::PartitionMap* pmap_;
   eventql::ReplicationScheme* repl_;
-  TSDBService* tsdb_;
+  TableService* tsdb_;
   String cachedir_;
 };
 

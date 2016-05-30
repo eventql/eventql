@@ -25,7 +25,7 @@
 #include "eventql/util/stdtypes.h"
 #include "eventql/util/autoref.h"
 #include "eventql/util/option.h"
-#include "eventql/db/TSDBService.h"
+#include "eventql/db/table_service.h"
 #include "eventql/mapreduce/MapReduceTaskBuilder.h"
 #include "eventql/mapreduce/MapReduceScheduler.h"
 #include <jsapi.h>
@@ -42,7 +42,7 @@ public:
   JavaScriptContext(
       const String& customer,
       RefPtr<MapReduceJobSpec> job,
-      TSDBService* tsdb,
+      TableService* tsdb,
       RefPtr<MapReduceTaskBuilder> task_builder,
       RefPtr<MapReduceScheduler> scheduler,
       size_t memlimit = kDefaultMemLimit);
@@ -115,7 +115,7 @@ protected:
 
   String customer_;
   RefPtr<MapReduceJobSpec> job_;
-  TSDBService* tsdb_;
+  TableService* tsdb_;
   RefPtr<MapReduceTaskBuilder> task_builder_;
   RefPtr<MapReduceScheduler> scheduler_;
   JSRuntime* runtime_;

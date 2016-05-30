@@ -37,7 +37,7 @@ SaveToTableTask::SaveToTableTask(
     Vector<RefPtr<MapReduceTask>> sources,
     MapReduceShardList* shards,
     InternalAuth* auth,
-    TSDBService* tsdb) :
+    TableService* tsdb) :
     session_(session),
     table_name_(table_name),
     sources_(sources),

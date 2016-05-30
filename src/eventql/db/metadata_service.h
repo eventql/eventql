@@ -21,28 +21,48 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#ifndef _libstx_UTIL_LOGOUTPUTSTREAM_H
-#define _libstx_UTIL_LOGOUTPUTSTREAM_H
-
-#include "eventql/util/io/outputstream.h"
-#include "eventql/util/logging/loglevel.h"
-#include "eventql/util/logging/logtarget.h"
+#pragma once
+#include "eventql/eventql.h"
 #include "eventql/util/stdtypes.h"
+#include "eventql/util/status.h"
+#include "eventql/util/SHA1.h"
+#include "eventql/db/metadata_file.h"
+#include "eventql/db/metadata_store.h"
+#include "eventql/db/metadata_operation.h"
+#include "eventql/config/config_directory.h"
 
-class LogOutputStream : public LogTarget {
+namespace eventql {
+
+class MetadataService {
 public:
 
-  LogOutputStream(
-      const String& program_name,
-      std::unique_ptr<OutputStream> target);
+  MetadataService(
+      ConfigDirectory* cdir,
+      MetadataStore* metadata_store);
 
-  void log(
-      LogLevel level,
-      const String& component,
-      const String& message) override;
+  Status getMetadataFile(
+      const String& ns,
+      const String& table_name,
+      RefPtr<MetadataFile>* file) const;
+
+  Status createMetadataFile(
+      const String& ns,
+      const String& table_name,
+      const MetadataFile& file) const;
+
+  Status performMetadataOperation(
+      const String& ns,
+      const String& table_name,
+      MetadataOperation op);
+
+  Status discoverPartition(
+      const PartitionDiscoveryRequest& request,
+      PartitionDiscoveryResponse* response);
 
 protected:
-  String program_name_;
-  ScopedPtr<OutputStream> target_;
+  ConfigDirectory* cdir_;
+  MetadataStore* metadata_store_;
 };
-#endif
+
+} // namespace eventql
+

@@ -44,7 +44,6 @@ public:
   Status storeMetadataFile(
       const String& ns,
       const String& table_name,
-      const SHA1Hash& txid,
       const MetadataFile& file);
 
 protected:

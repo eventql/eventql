@@ -39,7 +39,9 @@ public:
 
   static void init();
 
-  static void logToStderr(LogLevel min_log_level = LogLevel::kInfo);
+  static void logToStderr(
+      const String& program_name,
+      LogLevel min_log_level = LogLevel::kInfo);
 
   static void logToSyslog(
       const String& name,

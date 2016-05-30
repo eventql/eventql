@@ -27,7 +27,9 @@
 #include "eventql/util/wallclock.h"
 
 LogOutputStream::LogOutputStream(
+    const String& program_name,
     std::unique_ptr<OutputStream> target) :
+    program_name_(program_name),
     target_(std::move(target)) {}
 
 void LogOutputStream::log(
@@ -37,8 +39,8 @@ void LogOutputStream::log(
   const auto prefix = StringUtil::format(
       "$0 $1 [$2] ",
       WallClock::now().toString("%Y-%m-%d %H:%M:%S"),
-      logLevelToStr(level),
-      component);
+      program_name_,
+      logLevelToStr(level));
 
   std::string lines = prefix + message;
   StringUtil::replaceAll(&lines, "\n", "\n" + prefix);

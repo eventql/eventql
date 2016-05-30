@@ -28,6 +28,8 @@
 #include <eventql/db/RecordArena.h>
 #include <eventql/util/util/PersistentHashSet.h>
 #include <eventql/db/CompactionStrategy.h>
+#include <eventql/db/metadata_transaction.h>
+#include <eventql/db/metadata_operations.pb.h>
 
 #include "eventql/eventql.h"
 
@@ -54,6 +56,9 @@ public:
   bool needsCompaction() override;
   bool needsUrgentCompaction();
 
+  Status applyMetadataChange(
+      const PartitionDiscoveryResponse& discovery_info);
+
   ReplicationState fetchReplicationState() const;
   void commitReplicationState(const ReplicationState& state);
 
@@ -67,9 +72,12 @@ protected:
   RefPtr<Partition> partition_;
   RefPtr<CompactionStrategy> compaction_strategy_;
   LSMTableIndexCache* idx_cache_;
+  ConfigDirectory* cdir_;
+  ReplicationScheme* repl_;
   size_t max_datafile_size_;
   std::mutex commit_mutex_;
   std::mutex compaction_mutex_;
+  std::mutex metadata_mutex_;
 };
 
 } // namespace tdsb

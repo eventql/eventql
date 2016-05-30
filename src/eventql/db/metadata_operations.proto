@@ -1,0 +1,73 @@
+/**
+ * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
+ * Authors:
+ *   - Paul Asmuth <paul@zscale.io>
+ *
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License ("the license") as
+ * published by the Free Software Foundation, either version 3 of the License,
+ * or any later version.
+ *
+ * In accordance with Section 7(e) of the license, the licensing of the Program
+ * under the license does not imply a trademark license. Therefore any rights,
+ * title and interest in our trademarks remain entirely with us.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the license for more details.
+ *
+ * You can be released from the requirements of the license by purchasing a
+ * commercial license. Buying such a license is mandatory as soon as you develop
+ * commercial activities involving this program without disclosing the source
+ * code of your own applications
+ */
+package eventql;
+
+enum MetadataOperationType {
+  METAOP_BACKFILL_ADD_SERVER = 1;
+  METAOP_BACKFILL_REMOVE_SERVER = 2;
+};
+
+message PartitionDiscoveryRequest {
+  required string db_namespace = 1;
+  required string table_id = 2;
+  required uint64 min_txnseq = 3;
+  required bytes partition_id = 4;
+  required bytes keyrange_begin = 5;
+  required bytes keyrange_end = 6;
+  required string requester_id = 7;
+};
+
+enum PartitionDiscoveryResponseCode {
+  PDISCOVERY_UNKNOWN = 0;
+  PDISCOVERY_LOAD = 1;
+  PDISCOVERY_SERVE = 2;
+  PDISCOVERY_UNLOAD = 3;
+};
+
+message PartitionDiscoveryResponse {
+  required PartitionDiscoveryResponseCode code = 1;
+  required bytes txnid = 2;
+  required uint64 txnseq = 3;
+};
+
+message MetadataOperationEnvelope {
+  required string db_namespace = 1;
+  required string table_id = 2;
+  required bytes input_txid = 4;
+  required bytes output_txid = 5;
+  required MetadataOperationType optype = 3;
+  optional bytes opdata = 6;
+};
+
+message BackfillAddServerOperation {
+  required bytes partition_id = 1;
+  required bytes keyrange_begin = 2;
+  required string server_id = 3;
+};
+
+message BackfillRemoveServerOperation {
+  required bytes partition_id = 1;
+  required string server_id = 2;
+};
+

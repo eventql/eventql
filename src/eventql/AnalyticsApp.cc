@@ -37,7 +37,7 @@
 namespace eventql {
 
 AnalyticsApp::AnalyticsApp(
-    eventql::TSDBService* tsdb_node,
+    eventql::TableService* tsdb_node,
     eventql::PartitionMap* partition_map,
     eventql::ReplicationScheme* replication_scheme,
     eventql::CompactionWorker* cstable_index,
@@ -79,28 +79,18 @@ AnalyticsApp::AnalyticsApp(
   cdb_->listNamespaces([this] (const NamespaceConfig& cfg) {
     configureCustomer(cfg);
   });
-
-  cdb_->setTableConfigChangeCallback(
-      std::bind(
-          &AnalyticsApp::configureTable,
-          this,
-          std::placeholders::_1));
-
-  cdb_->listTables([this] (const TableDefinition& tbl) {
-    configureTable(tbl);
-  });
 }
 
-RefPtr<csql::TableProvider> AnalyticsApp::getTableProvider(
-    const String& customer) const {
-  return eventql::SQLEngine::tableProviderForNamespace(
-        partition_map_,
-        replication_scheme_,
-        auth_,
-        customer);
-}
+//RefPtr<csql::TableProvider> AnalyticsApp::getTableProvider(
+//    const String& customer) const {
+//  return eventql::SQLEngine::tableProviderForNamespace(
+//        partition_map_,
+//        replication_scheme_,
+//        auth_,
+//        customer);
+//}
 
-eventql::TSDBService* AnalyticsApp::getTSDBNode() const {
+eventql::TableService* AnalyticsApp::getTSDBNode() const {
   return tsdb_node_;
 }
 
@@ -112,13 +102,9 @@ void AnalyticsApp::updateTable(const TableDefinition& tbl, bool force) {
   cdb_->updateTableConfig(tbl, force);
 }
 
-void AnalyticsApp::configureTable(const TableDefinition& tbl) {
-  tsdb_node_->createTable(tbl);
-}
-
 void AnalyticsApp::configureCustomer(const NamespaceConfig& config) {
   for (const auto& td : logfile_service_.getTableDefinitions(config)) {
-    configureTable(td);
+    partition_map_->configureTable(td);
   }
 }
 

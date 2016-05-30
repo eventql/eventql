@@ -36,6 +36,9 @@ public:
   enum class ColumnClass { SCALAR, RECORD };
   enum class ColumnOptions { REPEATED, NOT_NULL, PRIMARY_KEY };
 
+  struct ColumnDefinition;
+  using ColumnList = Vector<ColumnDefinition*>;
+
   struct ColumnDefinition {
     ColumnClass column_class;
 
@@ -52,10 +55,12 @@ public:
 
     String column_type;
     Vector<ColumnOptions> column_options;
+
+    ColumnList getSubColumns() const;
+
     Vector<ColumnDefinition*> column_schema;
   };
 
-  using ColumnList = Vector<const ColumnDefinition*>;
 
   ~TableSchema();
   TableSchema(const TableSchema& other);

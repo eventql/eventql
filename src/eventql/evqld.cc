@@ -54,8 +54,10 @@
 #include "eventql/transport/http/api_servlet.h"
 #include "eventql/AnalyticsApp.h"
 #include "eventql/db/TableConfig.pb.h"
-#include "eventql/db/TSDBService.h"
-#include "eventql/db/TSDBServlet.h"
+#include "eventql/db/table_service.h"
+#include "eventql/db/metadata_coordinator.h"
+#include "eventql/db/metadata_service.h"
+#include "eventql/transport/http/rpc_servlet.h"
 #include "eventql/db/ReplicationWorker.h"
 #include "eventql/db/LSMTableIndexCache.h"
 #include "eventql/server/sql/sql_engine.h"
@@ -162,6 +164,15 @@ int main(int argc, const char** argv) {
       "<backend>");
 
   flags.defineFlag(
+      "client_auth_backend",
+      cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      NULL,
+      "backend",
+      "<backend>");
+
+  flags.defineFlag(
       "legacy_auth_secret",
       cli::FlagParser::T_STRING,
       false,
@@ -248,36 +259,34 @@ int main(int argc, const char** argv) {
       false,
       NULL,
       NULL,
-      "don't log to stderr",
+      "log to syslog",
       "<switch>");
 
   flags.defineFlag(
-      "log_to_stderr",
+      "nolog_to_stderr",
       cli::FlagParser::T_SWITCH,
       false,
       NULL,
-      "true",
+      NULL,
       "don't log to stderr",
       "<switch>");
 
   flags.parseArgv(argc, argv);
 
-  if (flags.isSet("log_to_stderr") && !flags.isSet("daemonize")) {
-    Application::logToStderr();
+  if (!flags.isSet("nolog_to_stderr") && !flags.isSet("daemonize")) {
+    Application::logToStderr("evqld");
   }
 
   if (flags.isSet("log_to_syslog")) {
-    Application::logToSyslog("z1d");
+    Application::logToSyslog("evqld");
   }
 
   Logger::get()->setMinimumLogLevel(
       strToLogLevel(flags.getString("loglevel")));
 
-  auto stdout_os = OutputStream::getStdout();
-  auto stderr_os = OutputStream::getStderr();
-
   /* print help */
   if (flags.isSet("help") || flags.isSet("version")) {
+    auto stdout_os = OutputStream::getStdout();
     stdout_os->write(
         StringUtil::format(
             "EventQL $0 ($1)\n"
@@ -291,6 +300,7 @@ int main(int argc, const char** argv) {
   }
 
   if (flags.isSet("help")) {
+    auto stdout_os = OutputStream::getStdout();
     stdout_os->write(
         "Usage: $ evqld [OPTIONS]\n"
         "  -?, --help              Display this help text and exit\n"
@@ -332,7 +342,7 @@ int main(int argc, const char** argv) {
   {
     auto listen_str = flags.getString("listen");
     std::smatch m;
-    std::regex listen_regex("([a-zA-Z-_.]+):([0-9]+)");
+    std::regex listen_regex("([0-9a-zA-Z-_.]+):([0-9]+)");
     if (std::regex_match(listen_str, m, listen_regex)) {
       listen_host = m[1];
       listen_port = std::stoi(m[2]);
@@ -353,36 +363,61 @@ int main(int argc, const char** argv) {
     server_name = Some(flags.getString("join"));
   }
 
-  /* customer directory */
+  /* data dirdirectory */
   if (!FileUtil::exists(flags.getString("datadir"))) {
-    RAISE(kRuntimeError, "data dir not found: " + flags.getString("datadir"));
+    logFatal("evqld", "data dir not found: " + flags.getString("datadir"));
+    return 1;
   }
 
-  auto cdb_dir = FileUtil::joinPaths(flags.getString("datadir"), "cdb");
-  if (!FileUtil::exists(cdb_dir)) {
-    FileUtil::mkdir(cdb_dir);
+  String node_name = "__anonymous";
+  if (flags.isSet("join")) {
+    node_name = flags.getString("join");
   }
 
+  auto tsdb_dir = FileUtil::joinPaths(
+      flags.getString("datadir"),
+      "data/" + node_name);
+
+  if (!FileUtil::exists(tsdb_dir)) {
+    FileUtil::mkdir_p(tsdb_dir);
+  }
+
+  /* config dir */
   ScopedPtr<ConfigDirectory> config_dir;
-  if (flags.getString("config_backend") == "legacy") {
-    config_dir.reset(new LegacyConfigDirectory(
-        cdb_dir,
-        InetAddr::resolve(flags.getString("legacy_master_addr"))));
-  } else if (flags.getString("config_backend") == "zookeeper") {
+  if (flags.getString("config_backend") == "zookeeper") {
     config_dir.reset(
         new ZookeeperConfigDirectory(
             flags.getString("zookeeper_addr"),
             server_name,
             flags.getString("listen")));
   } else {
-    RAISE(kRuntimeError, "invalid config backend: " + flags.getString("config_backend"));
+    logFatal("evqld", "invalid config backend: " + flags.getString("config_backend"));
   }
 
+  /* client auth */
   ScopedPtr<eventql::ClientAuth> client_auth;
-  client_auth.reset(new LegacyClientAuth(flags.getString("legacy_auth_secret")));
+  if (flags.getString("client_auth_backend") == "trust") {
+    client_auth.reset(new TrustClientAuth());
+  } else if (flags.getString("client_auth_backend") == "legacy") {
+    client_auth.reset(new LegacyClientAuth(flags.getString("legacy_auth_secret")));
+  } else {
+    logFatal("evqld", "invalid client auth backend: " + flags.getString("client_auth_backend"));
+  }
 
+  /* internal auth */
   ScopedPtr<eventql::InternalAuth> internal_auth;
   internal_auth.reset(new TrustInternalAuth());
+
+  /* metadata service */
+  auto metadata_dir = FileUtil::joinPaths(
+      flags.getString("datadir"),
+      "metadata/" + node_name);
+  if (!FileUtil::exists(metadata_dir)) {
+    FileUtil::mkdir_p(metadata_dir);
+  }
+
+  eventql::MetadataStore metadata_store(metadata_dir);
+  eventql::MetadataService metadata_service(config_dir.get(), &metadata_store);
 
   /* spidermonkey javascript runtime */
   JS_Init();
@@ -416,19 +451,6 @@ int main(int argc, const char** argv) {
     auto repl_scheme = RefPtr<eventql::ReplicationScheme>(
           new eventql::DHTReplicationScheme(cluster_config, server_name));
 
-    String node_name = "__anonymous";
-    if (flags.isSet("join")) {
-      node_name = flags.getString("join");
-    }
-
-    auto tsdb_dir = FileUtil::joinPaths(
-        flags.getString("datadir"),
-        "data/" + node_name);
-
-    if (!FileUtil::exists(tsdb_dir)) {
-      FileUtil::mkdir_p(tsdb_dir);
-    }
-
     auto trash_dir = FileUtil::joinPaths(flags.getString("datadir"), "trash");
     if (!FileUtil::exists(trash_dir)) {
       FileUtil::mkdir(trash_dir);
@@ -440,10 +462,12 @@ int main(int argc, const char** argv) {
     eventql::ServerCfg cfg;
     cfg.db_path = tsdb_dir;
     cfg.repl_scheme = repl_scheme;
+    cfg.config_directory = config_dir.get();
     cfg.idx_cache = mkRef(new LSMTableIndexCache(tsdb_dir));
 
     eventql::PartitionMap partition_map(&cfg);
-    eventql::TSDBService tsdb_node(
+    eventql::TableService tsdb_node(
+        config_dir.get(),
         &partition_map,
         repl_scheme.get(),
         &ev,
@@ -454,8 +478,13 @@ int main(int argc, const char** argv) {
         &partition_map,
         &http);
 
-    eventql::TSDBServlet tsdb_servlet(&tsdb_node, flags.getString("cachedir"));
+    eventql::RPCServlet tsdb_servlet(
+        &tsdb_node,
+        &metadata_service,
+        flags.getString("cachedir"));
+
     http_router.addRouteByPrefixMatch("/tsdb", &tsdb_servlet, &tpool);
+    http_router.addRouteByPrefixMatch("/rpc", &tsdb_servlet, &tpool);
 
     eventql::CompactionWorker cstable_index(
         &partition_map,
@@ -482,6 +511,13 @@ int main(int argc, const char** argv) {
       sql->symbols()->registerFunction("z1_version", &z1VersionExpr);
     }
 
+    eventql::SQLService sql_service(
+        sql.get(),
+        &partition_map,
+        repl_scheme.get(),
+        internal_auth.get(),
+        &tsdb_node);
+
     auto analytics_app = mkRef(
         new AnalyticsApp(
             &tsdb_node,
@@ -495,6 +531,82 @@ int main(int argc, const char** argv) {
             flags.getString("datadir"),
             flags.getString("cachedir")));
 
+    /* open tables */
+    config_dir->setTableConfigChangeCallback(
+        [&partition_map] (const TableDefinition& tbl) {
+      partition_map.configureTable(tbl);
+    });
+
+    config_dir->listTables([&partition_map] (const TableDefinition& tbl) {
+      partition_map.configureTable(tbl);
+    });
+
+    Vector<String> all_servers;
+    for (const auto& s : config_dir->listServers()) {
+      all_servers.emplace_back(s.server_id());
+    }
+
+    Vector<TableDefinition> backfill_tables;
+    config_dir->listTables([&backfill_tables] (const TableDefinition& tbl) {
+      if (tbl.metadata_txnid().empty()) {
+        backfill_tables.emplace_back(tbl);
+      }
+    });
+
+    auto backfill_thread = std::thread([&config_dir, backfill_tables, all_servers] {
+      for (const auto& tbl : backfill_tables) {
+        try {
+          auto txnid = Random::singleton()->sha1();
+          Vector<String> servers;
+          uint64_t idx = Random::singleton()->random64();
+          for (int i = 0; i < 3; ++i) {
+            servers.emplace_back(all_servers[++idx % all_servers.size()]);
+          }
+
+          logInfo(
+              "evqld",
+              "Backfilling metadata file for table: $0 (servers=$1, txnid=$2)",
+              tbl.table_name(),
+              inspect(servers),
+              txnid.toString());
+
+          eventql::MetadataCoordinator coordinator(config_dir.get());
+          MetadataFile metadata_file(txnid, 1, KEYSPACE_UINT64, {});
+          auto rc = coordinator.createFile(
+              tbl.customer(),
+              tbl.table_name(),
+              metadata_file,
+              servers);
+
+          if (rc.isSuccess()) {
+            auto new_tbl = tbl;
+            new_tbl.clear_metadata_servers();
+            for (const auto& s : servers) {
+              new_tbl.add_metadata_servers(s);
+              new_tbl.set_metadata_txnid(txnid.data(), txnid.size());
+              new_tbl.set_metadata_txnseq(1);
+            }
+
+            config_dir->updateTableConfig(new_tbl);
+          }
+
+          if (!rc.isSuccess()) {
+            logWarning(
+                "evqld",
+                "Backfilling metadata file for table $0 failed: $1",
+                tbl.table_name(),
+                rc.message());
+          }
+        } catch (const std::exception& e) {
+          logWarning(
+              "evqld",
+              "Backfilling metadata file for table $0 failed: $1",
+              tbl.table_name(),
+              e.what());
+        }
+      }
+    });
+
     eventql::AnalyticsServlet analytics_servlet(
         analytics_app,
         flags.getString("cachedir"),
@@ -504,7 +616,8 @@ int main(int argc, const char** argv) {
         sql.get(),
         &tsdb_node,
         config_dir.get(),
-        &partition_map);
+        &partition_map,
+        &sql_service);
 
     eventql::StatusServlet status_servlet(
         &cfg,
@@ -516,7 +629,7 @@ int main(int argc, const char** argv) {
     eventql::DefaultServlet default_servlet;
 
     http_router.addRouteByPrefixMatch("/api/", &analytics_servlet, &tpool);
-    http_router.addRouteByPrefixMatch("/zstatus", &status_servlet);
+    http_router.addRouteByPrefixMatch("/zstatus", &status_servlet, &tpool);
     http_router.addRouteByPrefixMatch("/", &default_servlet);
 
     auto rusage_t = std::thread([] () {
@@ -535,6 +648,7 @@ int main(int argc, const char** argv) {
 
     partition_map.open();
     ev.run();
+    backfill_thread.join();
   } catch (const StandardException& e) {
     logAlert("eventql", e, "FATAL ERROR");
   }

@@ -57,7 +57,7 @@ MapTableTask::MapTableTask(
   Vector<csql::ScanConstraint> constraints;
   if (!table_ref.timerange_begin.isEmpty()) {
     csql::ScanConstraint constraint;
-    constraint.column_name = "time";
+    constraint.column_name = table.get()->getPartitionKey();
     constraint.type = csql::ScanConstraintType::GREATER_THAN_OR_EQUAL_TO;
     constraint.value = csql::SValue(csql::SValue::IntegerType(
         table_ref.timerange_begin.get().unixMicros()));
@@ -66,7 +66,7 @@ MapTableTask::MapTableTask(
 
   if (!table_ref.timerange_limit.isEmpty()) {
     csql::ScanConstraint constraint;
-    constraint.column_name = "time";
+    constraint.column_name = table.get()->getPartitionKey();
     constraint.type = csql::ScanConstraintType::LESS_THAN_OR_EQUAL_TO;
     constraint.value = csql::SValue(csql::SValue::IntegerType(
         table_ref.timerange_limit.get().unixMicros()));

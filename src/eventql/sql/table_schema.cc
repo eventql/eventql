@@ -126,7 +126,9 @@ TableSchema&& TableSchemaBuilder::getTableSchema() {
   return std::move(schema_);
 }
 
+TableSchema::ColumnList TableSchema::ColumnDefinition::getSubColumns() const {
+  return column_schema;
+}
+
 } // namespace csql
-
-
 

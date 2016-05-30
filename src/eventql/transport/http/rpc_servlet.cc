@@ -22,7 +22,7 @@
  * code of your own applications
  */
 #include "eventql/util/util/binarymessagewriter.h"
-#include "eventql/db/TSDBServlet.h"
+#include "eventql/transport/http/rpc_servlet.h"
 #include "eventql/db/RecordEnvelope.pb.h"
 #include "eventql/util/json/json.h"
 #include <eventql/util/wallclock.h>
@@ -38,17 +38,21 @@
 
 namespace eventql {
 
-TSDBServlet::TSDBServlet(
-    TSDBService* node,
+RPCServlet::RPCServlet(
+    TableService* node,
+    MetadataService* metadata_service,
     const String& tmpdir) :
     node_(node),
+    metadata_service_(metadata_service),
     tmpdir_(tmpdir) {}
 
-void TSDBServlet::handleHTTPRequest(
+void RPCServlet::handleHTTPRequest(
     RefPtr<http::HTTPRequestStream> req_stream,
     RefPtr<http::HTTPResponseStream> res_stream) {
   const auto& req = req_stream->request();
   URI uri(req.uri());
+
+  logDebug("eventql", "HTTP Request: $0 $1", req.method(), req.uri());
 
   http::HTTPResponse res;
   res.populateFromRequest(req);
@@ -118,6 +122,34 @@ void TSDBServlet::handleHTTPRequest(
       return;
     }
 
+    if (uri.path() == "/rpc/create_metadata_file") {
+      req_stream->readBody();
+      createMetadataFile(uri, &req, &res);
+      res_stream->writeResponse(res);
+      return;
+    }
+
+    if (uri.path() == "/rpc/perform_metadata_operation") {
+      req_stream->readBody();
+      performMetadataOperation(uri, &req, &res);
+      res_stream->writeResponse(res);
+      return;
+    }
+
+    if (uri.path() == "/rpc/discover_partition_metadata") {
+      req_stream->readBody();
+      discoverPartitionMetadata(uri, &req, &res);
+      res_stream->writeResponse(res);
+      return;
+    }
+
+    if (uri.path() == "/rpc/fetch_latest_metadata_file") {
+      req_stream->readBody();
+      fetchLatestMetadataFile(uri, &req, &res);
+      res_stream->writeResponse(res);
+      return;
+    }
+
     res.setStatus(http::kStatusNotFound);
     res.addBody("not found");
     res_stream->writeResponse(res);
@@ -132,7 +164,7 @@ void TSDBServlet::handleHTTPRequest(
   res_stream->finishResponse();
 }
 
-void TSDBServlet::insertRecords(
+void RPCServlet::insertRecords(
     const http::HTTPRequest* req,
     http::HTTPResponse* res,
     URI* uri) {
@@ -141,7 +173,7 @@ void TSDBServlet::insertRecords(
   res->setStatus(http::kStatusCreated);
 }
 
-void TSDBServlet::compactPartition(
+void RPCServlet::compactPartition(
     const http::HTTPRequest* req,
     http::HTTPResponse* res,
     URI* uri) {
@@ -176,7 +208,7 @@ void TSDBServlet::compactPartition(
   res->setStatus(http::kStatusCreated);
 }
 
-void TSDBServlet::replicateRecords(
+void RPCServlet::replicateRecords(
     const http::HTTPRequest* req,
     http::HTTPResponse* res,
     URI* uri) {
@@ -190,7 +222,7 @@ void TSDBServlet::replicateRecords(
   res->setStatus(http::kStatusCreated);
 }
 
-void TSDBServlet::streamPartition(
+void RPCServlet::streamPartition(
     const http::HTTPRequest* req,
     http::HTTPResponse* res,
     RefPtr<http::HTTPResponseStream> res_stream,
@@ -267,7 +299,7 @@ void TSDBServlet::streamPartition(
   res_stream->finishResponse();
 }
 
-void TSDBServlet::fetchPartitionInfo(
+void RPCServlet::fetchPartitionInfo(
     const http::HTTPRequest* req,
     http::HTTPResponse* res,
     URI* uri) {
@@ -308,7 +340,7 @@ void TSDBServlet::fetchPartitionInfo(
   }
 }
 
-void TSDBServlet::executeSQL(
+void RPCServlet::executeSQL(
     const http::HTTPRequest* req,
     http::HTTPResponse* res,
     URI* uri) {
@@ -327,7 +359,7 @@ void TSDBServlet::executeSQL(
   res->addBody(result);
 }
 
-void TSDBServlet::executeSQLStream(
+void RPCServlet::executeSQLStream(
     const http::HTTPRequest* req,
     http::HTTPResponse* res,
     RefPtr<http::HTTPResponseStream> res_stream,
@@ -369,7 +401,7 @@ void TSDBServlet::executeSQLStream(
   sse_stream.finish();
 }
 
-void TSDBServlet::updateCSTable(
+void RPCServlet::updateCSTable(
     const URI& uri,
     http::HTTPRequestStream* req_stream,
     http::HTTPResponse* res) {
@@ -423,6 +455,144 @@ void TSDBServlet::updateCSTable(
       std::stoull(version));
 
   res->setStatus(http::kStatusCreated);
+}
+
+void RPCServlet::createMetadataFile(
+    const URI& uri,
+    const http::HTTPRequest* req,
+    http::HTTPResponse* res) {
+  const auto& params = uri.queryParams();
+
+  String db_namespace;
+  if (!URI::getParam(params, "namespace", &db_namespace)) {
+    RAISE(kRuntimeError, "missing ?namespace=... parameter");
+  }
+
+  String table_name;
+  if (!URI::getParam(params, "table", &table_name)) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody("error: missing ?table=... parameter");
+    return;
+  }
+
+  MetadataFile file;
+  auto is = req->getBodyInputStream();
+  auto rc = file.decode(is.get());
+
+  if (rc.isSuccess()) {
+    rc = metadata_service_->createMetadataFile(
+        db_namespace,
+        table_name,
+        file);
+  }
+
+  if (rc.isSuccess()) {
+    res->setStatus(http::kStatusCreated);
+  } else {
+    res->setStatus(http::kStatusInternalServerError);
+    res->addBody("ERROR: " + rc.message());
+    return;
+  }
+}
+
+void RPCServlet::performMetadataOperation(
+    const URI& uri,
+    const http::HTTPRequest* req,
+    http::HTTPResponse* res) {
+  const auto& params = uri.queryParams();
+
+  String db_namespace;
+  if (!URI::getParam(params, "namespace", &db_namespace)) {
+    RAISE(kRuntimeError, "missing ?namespace=... parameter");
+  }
+
+  String table_name;
+  if (!URI::getParam(params, "table", &table_name)) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody("error: missing ?table=... parameter");
+    return;
+  }
+
+  MetadataOperation op;
+  {
+    auto is = req->getBodyInputStream();
+    auto rc = op.decode(is.get());
+    if (!rc.isSuccess()) {
+      res->setStatus(http::kStatusInternalServerError);
+      res->addBody("ERROR: " + rc.message());
+      return;
+    }
+  }
+
+  auto rc = metadata_service_->performMetadataOperation(
+      db_namespace,
+      table_name,
+      op);
+
+  if (rc.isSuccess()) {
+    res->setStatus(http::kStatusCreated);
+  } else {
+    res->setStatus(http::kStatusInternalServerError);
+    res->addBody("ERROR: " + rc.message());
+    return;
+  }
+}
+
+void RPCServlet::discoverPartitionMetadata(
+    const URI& uri,
+    const http::HTTPRequest* req,
+    http::HTTPResponse* res) {
+  const auto& params = uri.queryParams();
+
+  PartitionDiscoveryRequest request;
+  msg::decode(req->body(), &request);
+
+  PartitionDiscoveryResponse response;
+  auto rc = metadata_service_->discoverPartition(request, &response);
+
+  if (rc.isSuccess()) {
+    res->setStatus(http::kStatusOK);
+    res->addBody(*msg::encode(response));
+  } else {
+    res->setStatus(http::kStatusInternalServerError);
+    res->addBody("ERROR: " + rc.message());
+    return;
+  }
+}
+
+void RPCServlet::fetchLatestMetadataFile(
+    const URI& uri,
+    const http::HTTPRequest* req,
+    http::HTTPResponse* res) {
+  const auto& params = uri.queryParams();
+
+  String db_namespace;
+  if (!URI::getParam(params, "namespace", &db_namespace)) {
+    RAISE(kRuntimeError, "missing ?namespace=... parameter");
+  }
+
+  String table_name;
+  if (!URI::getParam(params, "table", &table_name)) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody("error: missing ?table=... parameter");
+    return;
+  }
+
+  RefPtr<MetadataFile> file;
+  auto rc = metadata_service_->getMetadataFile(db_namespace, table_name, &file);
+
+  if (rc.isSuccess()) {
+    auto os = res->getBodyOutputStream();
+    rc = file->encode(os.get());
+  }
+
+  if (rc.isSuccess()) {
+    res->setStatus(http::kStatusOK);
+  } else {
+    res->setStatus(http::kStatusInternalServerError);
+    res->addBody("ERROR: " + rc.message());
+    return;
+  }
 }
 
 

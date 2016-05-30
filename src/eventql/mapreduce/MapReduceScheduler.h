@@ -25,7 +25,7 @@
 #include "eventql/util/stdtypes.h"
 #include "eventql/util/thread/threadpool.h"
 #include "eventql/mapreduce/MapReduceTask.h"
-#include "eventql/db/TSDBService.h"
+#include "eventql/db/table_service.h"
 #include "eventql/auth/internal_auth.h"
 
 #include "eventql/eventql.h"

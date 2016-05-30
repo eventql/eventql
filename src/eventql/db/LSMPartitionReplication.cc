@@ -30,6 +30,8 @@
 #include <eventql/util/protobuf/msg.h>
 #include <eventql/util/protobuf/MessageEncoder.h>
 #include <eventql/io/cstable/RecordMaterializer.h>
+#include <eventql/db/metadata_operations.pb.h>
+#include <eventql/db/metadata_coordinator.h>
 
 #include "eventql/eventql.h"
 
@@ -41,13 +43,22 @@ const size_t LSMPartitionReplication::kMaxBatchSizeBytes = 1024 * 1024 * 50; // 
 LSMPartitionReplication::LSMPartitionReplication(
     RefPtr<Partition> partition,
     RefPtr<ReplicationScheme> repl_scheme,
+    ConfigDirectory* cdir,
     http::HTTPConnectionPool* http) :
-    PartitionReplication(partition, repl_scheme, http) {}
+    PartitionReplication(partition, repl_scheme, http), cdir_(cdir) {}
 
 bool LSMPartitionReplication::needsReplication() const {
+  // check if we have seen the latest metadata transaction, otherwise enqueue
+  auto last_txid = partition_->getTable()->getLastMetadataTransaction();
+  if (last_txid != partition_->getLastMetadataTransaction()) {
+    return true;
+  }
+
+  // check if all replicas named in the current metadata transaction have seen
+  // the latest sequence, otherwise enqueue
   auto replicas = repl_scheme_->replicasFor(snap_->key);
   if (replicas.size() == 0) {
-    return false;
+    RAISE(kRuntimeError, "error: empty replica list")
   }
 
   auto& writer = dynamic_cast<LSMPartitionWriter&>(*partition_->getWriter());
@@ -95,13 +106,26 @@ void LSMPartitionReplication::replicateTo(
     RAISE(kIllegalStateError, "can't replicate to myself");
   }
 
+  auto server_cfg = cdir_->getServerConfig(replica.name);
+  if (server_cfg.server_status() != SERVER_UP) {
+    RAISE(kRuntimeError, "server is down");
+  }
+
   size_t batch_size = 0;
   size_t num_replicated = 0;
   RecordEnvelopeList batch;
   batch.set_sync_commit(true);
   fetchRecords(
       replicated_offset,
-      [this, &batch, &replica, &replicated_offset, &batch_size, &num_replicated] (
+      [
+          this,
+          &batch,
+          &replica,
+          &replicated_offset,
+          &batch_size,
+          &num_replicated,
+          &server_cfg
+        ] (
           const SHA1Hash& record_id,
           const uint64_t record_version,
           const void* record_data,
@@ -119,18 +143,38 @@ void LSMPartitionReplication::replicateTo(
 
     if (batch_size > kMaxBatchSizeBytes ||
         batch.records().size() > kMaxBatchSizeRows) {
-      uploadBatchTo(replica, batch);
+      uploadBatchTo(server_cfg.server_addr(), batch);
       batch.mutable_records()->Clear();
       batch_size = 0;
     }
   });
 
   if (batch.records().size() > 0) {
-    uploadBatchTo(replica, batch);
+    uploadBatchTo(server_cfg.server_addr(), batch);
   }
 }
 
 bool LSMPartitionReplication::replicate() {
+  // if there is a new metadata transaction, fetch and apply it
+  auto last_txid = partition_->getTable()->getLastMetadataTransaction();
+  if (last_txid != partition_->getLastMetadataTransaction()) {
+    auto rc = fetchAndApplyMetadataTransaction(last_txid);
+    if (!rc.isSuccess()) {
+      RAISEF(
+          kRuntimeError,
+          "error while applying metadata transaction $0: $1",
+          last_txid.getTransactionID().toString(), rc.message());
+    }
+  }
+
+  if (last_txid != partition_->getLastMetadataTransaction()) {
+    RAISEF(
+        kRuntimeError,
+        "error while applying metadata transaction $0",
+        last_txid.getTransactionID().toString());
+  }
+
+  // get the list of other replicaas for this partition
   auto replicas = repl_scheme_->replicasFor(snap_->key);
   if (replicas.size() == 0) {
     return true;
@@ -189,10 +233,10 @@ bool LSMPartitionReplication::replicate() {
 }
 
 void LSMPartitionReplication::uploadBatchTo(
-    const ReplicaRef& replica,
+    const String& host,
     const RecordEnvelopeList& batch) {
   auto body = msg::encode(batch);
-  URI uri(StringUtil::format("http://$0/tsdb/replicate", replica.addr));
+  URI uri(StringUtil::format("http://$0/tsdb/replicate", host));
   http::HTTPRequest req(http::HTTPMessage::M_POST, uri.pathAndQuery());
   req.addHeader("Host", uri.hostAndPort());
   req.addHeader("Content-Type", "application/fnord-msg");
@@ -259,7 +303,30 @@ void LSMPartitionReplication::fetchRecords(
       fn(id, version, record_buf.data(), record_buf.size());
     }
   }
+}
 
+Status LSMPartitionReplication::fetchAndApplyMetadataTransaction(
+    MetadataTransaction txn) {
+  PartitionDiscoveryRequest discovery_request;
+  discovery_request.set_db_namespace(snap_->state.tsdb_namespace());
+  discovery_request.set_table_id(snap_->state.table_key());
+  discovery_request.set_min_txnseq(txn.getSequenceNumber());
+  discovery_request.set_partition_id(snap_->state.partition_key());
+  discovery_request.set_keyrange_begin(snap_->state.partition_keyrange_begin());
+  discovery_request.set_keyrange_end(snap_->state.partition_keyrange_end());
+
+  MetadataCoordinator coordinator(cdir_);
+  PartitionDiscoveryResponse discovery_response;
+  auto rc = coordinator.discoverPartition(
+      discovery_request,
+      &discovery_response);
+
+  if (!rc.isSuccess()) {
+    return rc;
+  }
+
+  auto writer = partition_->getWriter().asInstanceOf<LSMPartitionWriter>();
+  return writer->applyMetadataChange(discovery_response);
 }
 
 } // namespace tdsb

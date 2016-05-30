@@ -29,10 +29,12 @@
 #include <eventql/util/SHA1.h>
 #include <eventql/db/TSDBTableRef.h>
 #include <eventql/sql/qtree/SequentialScanNode.h>
-
 #include "eventql/eventql.h"
+#include "eventql/util/status.h"
 
 namespace eventql {
+
+struct KeyRange;
 
 class TablePartitioner : public RefCounted {
 public:
@@ -45,6 +47,10 @@ public:
 
   virtual Vector<SHA1Hash> listPartitions(
       const Vector<csql::ScanConstraint>& constraints) const = 0;
+
+  virtual Status findKeyRange(
+      const SHA1Hash& partition_id,
+      KeyRange* keyrange) const = 0;
 
 };
 
