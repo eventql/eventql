@@ -32,6 +32,7 @@
 #include "eventql/util/application.h"
 #include "eventql/util/logging.h"
 #include "eventql/util/random.h"
+#include "eventql/util/assets.h"
 #include "eventql/util/thread/eventloop.h"
 #include "eventql/util/thread/threadpool.h"
 #include "eventql/util/thread/FixedSizeThreadPool.h"
@@ -74,6 +75,7 @@
 #include "eventql/auth/internal_auth.h"
 #include "eventql/auth/internal_auth_trust.h"
 #include <jsapi.h>
+#include "eventql/mapreduce/mapreduce_preludejs.cc"
 
 #include "eventql/eventql.h"
 using namespace eventql;
@@ -86,6 +88,7 @@ void DisableExtraThreads();
 
 int main(int argc, const char** argv) {
   Application::init();
+  __eventql_mapreduce_prelude_js.registerAsset();
 
   cli::FlagParser flags;
 

@@ -22,6 +22,7 @@
  * code of your own applications
  */
 #include "eventql/util/assets.h"
+#include "eventql/util/inspect.h"
 #include "eventql/util/exception.h"
 #include "eventql/util/io/fileutil.h"
 
@@ -37,8 +38,13 @@ Assets::AssetMap* Assets::globalMap() {
 Assets::AssetFile::AssetFile(
     const std::string& name,
     const unsigned char* data,
-    size_t size) {
-  Assets::registerAsset(name, data, size);
+    size_t size) :
+    name_(name),
+    data_(data),
+    size_(size) {}
+
+void Assets::AssetFile::registerAsset() {
+  Assets::registerAsset(name_, data_, size_);
 }
 
 void Assets::registerAsset(
