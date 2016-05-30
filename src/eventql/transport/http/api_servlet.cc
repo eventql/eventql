@@ -51,7 +51,6 @@
 namespace eventql {
 
 AnalyticsServlet::AnalyticsServlet(
-    RefPtr<AnalyticsApp> app,
     const String& cachedir,
     InternalAuth* auth,
     ClientAuth* client_auth,
@@ -60,8 +59,10 @@ AnalyticsServlet::AnalyticsServlet(
     eventql::TableService* tsdb,
     ConfigDirectory* customer_dir,
     PartitionMap* pmap,
-    SQLService* sql_service) :
-    app_(app),
+    SQLService* sql_service,
+    LogfileService* logfile_service,
+    MapReduceService* mapreduce_service,
+    TableService* table_service) :
     cachedir_(cachedir),
     auth_(auth),
     client_auth_(client_auth),
@@ -69,10 +70,13 @@ AnalyticsServlet::AnalyticsServlet(
     sql_(sql),
     tsdb_(tsdb),
     customer_dir_(customer_dir),
-    logfile_api_(app->logfileService(), customer_dir, cachedir),
-    mapreduce_api_(app->mapreduceService(), customer_dir, cachedir),
     pmap_(pmap),
-    sql_service_(sql_service) {}
+    sql_service_(sql_service),
+    logfile_service_(logfile_service),
+    mapreduce_service_(mapreduce_service),
+    table_service_(table_service),
+    logfile_api_(logfile_service_, customer_dir, cachedir),
+    mapreduce_api_(mapreduce_service_, customer_dir, cachedir) {}
 
 void AnalyticsServlet::handleHTTPRequest(
     RefPtr<http::HTTPRequestStream> req_stream,
@@ -305,7 +309,6 @@ void AnalyticsServlet::listTables(
   json.addObjectEntry("tables");
   json.beginArray();
 
-  auto table_service = app_->getTSDBNode();
   size_t ntable = 0;
 
   auto writeTableJSON = [&json, &ntable, &tag_filter] (const TSDBTableInfo& table) {
@@ -339,9 +342,9 @@ void AnalyticsServlet::listTables(
   };
 
   if (order_filter == "desc") {
-    table_service->listTablesReverse(session->getEffectiveNamespace(), writeTableJSON);
+    table_service_->listTablesReverse(session->getEffectiveNamespace(), writeTableJSON);
   } else {
-    table_service->listTables(session->getEffectiveNamespace(), writeTableJSON);
+    table_service_->listTables(session->getEffectiveNamespace(), writeTableJSON);
   }
 
   json.endArray();
@@ -464,44 +467,43 @@ void AnalyticsServlet::createTable(
     msg::MessageSchema schema(nullptr);
     schema.fromJSON(jschema, jreq.end());
 
-    TableDefinition td;
-    td.set_customer(session->getEffectiveNamespace());
-    td.set_table_name(table_name.get());
+    // legacy static tables
+    if (table_type == "static" || table_type == "static_fixed") {
+      TableDefinition td;
+      if (force) {
+        try {
+          auto old_td = customer_dir_->getTableConfig(
+              session->getEffectiveNamespace(),
+              table_name.get());
 
-    auto tblcfg = td.mutable_config();
-    tblcfg->set_schema(schema.encode().toString());
-    tblcfg->set_num_shards(num_shards.isEmpty() ? 1 : num_shards.get());
+          td.set_version(old_td.version());
+        } catch (const std::exception& e) {
+          // ignore
+        }
+      }
 
-    if (table_type == "timeseries" || table_type == "log_timeseries") {
-      tblcfg->set_partitioner(eventql::TBL_PARTITION_TIMEWINDOW);
-      tblcfg->set_storage(eventql::TBL_STORAGE_COLSM);
+      td.set_customer(session->getEffectiveNamespace());
+      td.set_table_name(table_name.get());
 
-      auto partition_size = json::objectGetUInt64(jreq, "partition_size");
-      auto partcfg = tblcfg->mutable_time_window_partitioner_config();
-      partcfg->set_partition_size(
-          partition_size.isEmpty() ? 4 * kMicrosPerHour : partition_size.get());
-    }
-
-    else if (table_type == "static" || table_type == "static_fixed") {
+      auto tblcfg = td.mutable_config();
+      tblcfg->set_schema(schema.encode().toString());
+      tblcfg->set_num_shards(num_shards.isEmpty() ? 1 : num_shards.get());
       tblcfg->set_partitioner(eventql::TBL_PARTITION_FIXED);
       tblcfg->set_storage(eventql::TBL_STORAGE_STATIC);
+      customer_dir_->updateTableConfig(td);
+    } else {
+      auto rc = table_service_->createTable(
+          session->getEffectiveNamespace(),
+          table_name.get(),
+          schema,
+          { "time" }); // FIXME
+
+      if (!rc.isSuccess()) {
+        RAISE(kRuntimeError, rc.message());
+      }
     }
 
-    else if (table_type == "static_timeseries") {
-      tblcfg->set_partitioner(eventql::TBL_PARTITION_TIMEWINDOW);
-      tblcfg->set_storage(eventql::TBL_STORAGE_STATIC);
-
-      auto partition_size = json::objectGetUInt64(jreq, "partition_size");
-      auto partcfg = tblcfg->mutable_time_window_partitioner_config();
-      partcfg->set_partition_size(
-          partition_size.isEmpty() ? 4 * kMicrosPerHour : partition_size.get());
-    }
-
-    else {
-      RAISEF(kIllegalArgumentError, "invalid table type: $0", table_type);
-    }
-
-    app_->updateTable(td, force);
+    res->setStatus(http::kStatusCreated);
   } catch (const StandardException& e) {
     logError("analyticsd", e, "error");
     res->setStatus(http::kStatusInternalServerError);
@@ -620,7 +622,7 @@ void AnalyticsServlet::addTableField(
   td.set_next_field_id(next_field_id + 1);
   td.mutable_config()->set_schema(schema->encode().toString());
 
-  app_->updateTable(td);
+  customer_dir_->updateTableConfig(td);
   res->setStatus(http::kStatusCreated);
   res->addBody("ok");
   return;
@@ -688,7 +690,7 @@ void AnalyticsServlet::removeTableField(
   cur_schema->removeField(cur_schema->fieldId(field));
   td.mutable_config()->set_schema(schema->encode().toString());
 
-  app_->updateTable(td);
+  customer_dir_->updateTableConfig(td);
   res->setStatus(http::kStatusCreated);
   res->addBody("ok");
   return;
@@ -727,7 +729,7 @@ void AnalyticsServlet::addTableTag(
   auto td = table->config();
   td.add_tags(tag);
 
-  app_->updateTable(td);
+  customer_dir_->updateTableConfig(td);
   res->setStatus(http::kStatusCreated);
   res->addBody("ok");
   return;
@@ -778,7 +780,7 @@ void AnalyticsServlet::removeTableTag(
 
   }
 
-  app_->updateTable(td);
+  customer_dir_->updateTableConfig(td);
   res->setStatus(http::kStatusCreated);
   res->addBody("ok");
   return;

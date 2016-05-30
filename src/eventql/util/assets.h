@@ -32,6 +32,13 @@ public:
         const std::string& name,
         const unsigned char* data,
         size_t size);
+
+    void registerAsset();
+
+  protected:
+    String name_;
+    const unsigned char* data_;
+    size_t size_;
   };
 
   static void registerAsset(

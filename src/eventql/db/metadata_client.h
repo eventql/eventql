@@ -23,56 +23,25 @@
  */
 #pragma once
 #include "eventql/eventql.h"
-#include <eventql/util/stdtypes.h>
-#include <eventql/util/duration.h>
-#include <eventql/db/Partition.h>
-#include <eventql/db/TablePartitioner.h>
-#include <eventql/util/protobuf/MessageSchema.h>
-#include <eventql/db/TableConfig.pb.h>
-#include <eventql/db/metadata_transaction.h>
+#include "eventql/util/status.h"
+#include "eventql/db/metadata_operation.h"
+#include "eventql/db/metadata_file.h"
+#include "eventql/config/config_directory.h"
 
 namespace eventql {
 
-class Table : public RefCounted{
+class MetadataClient {
 public:
 
-  Table(const TableDefinition& config);
+  MetadataClient(ConfigDirectory* cdir);
 
-  String name() const;
-
-  String tsdbNamespace() const;
-
-  Duration partitionSize() const;
-
-  size_t sstableSize() const;
-
-  size_t numShards() const;
-
-  Duration commitInterval() const;
-
-  RefPtr<msg::MessageSchema> schema() const;
-
-  TableDefinition config() const;
-
-  TableStorage storage() const;
-
-  const String& getPartitionKey() const;
-  TablePartitionerType partitionerType() const;
-  RefPtr<TablePartitioner> partitioner() const;
-
-  MetadataTransaction getLastMetadataTransaction() const;
-
-  void updateConfig(TableDefinition new_config);
+  Status fetchLatestMetadataFile(
+      const String& ns,
+      const String& table_od,
+      MetadataFile* file);
 
 protected:
-
-  void loadConfig();
-
-  mutable std::mutex mutex_;
-  TableDefinition config_;
-  RefPtr<msg::MessageSchema> schema_;
-  RefPtr<TablePartitioner> partitioner_;
+  ConfigDirectory* cdir_;
 };
 
-}
-
+} // namespace eventql

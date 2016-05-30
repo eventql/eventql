@@ -51,6 +51,10 @@ public:
   Vector<SHA1Hash> listPartitions(
       const Vector<csql::ScanConstraint>& constraints) const override;
 
+  Status findKeyRange(
+      const SHA1Hash& partition_id,
+      KeyRange* keyrange) const override;
+
 protected:
   String table_name_;
   size_t num_shards_;

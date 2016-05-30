@@ -29,12 +29,24 @@ MetadataFile::MetadataFile() {}
 
 MetadataFile::MetadataFile(
     const SHA1Hash& transaction_id,
+    uint64_t transaction_seq,
+    KeyspaceType keyspace_type,
     const Vector<PartitionMapEntry>& partition_map) :
     transaction_id_(transaction_id),
+    transaction_seq_(transaction_seq),
+    keyspace_type_(keyspace_type),
     partition_map_(partition_map) {}
 
 const SHA1Hash& MetadataFile::getTransactionID() const {
   return transaction_id_;
+}
+
+uint64_t MetadataFile::getSequenceNumber() const {
+  return transaction_seq_;
+}
+
+KeyspaceType MetadataFile::getKeyspaceType() const {
+  return keyspace_type_;
 }
 
 const Vector<MetadataFile::PartitionMapEntry>&
@@ -65,7 +77,15 @@ Status MetadataFile::decode(InputStream* is) {
   }
 
   // transaction id
-  is->readNextBytes((char*) transaction_id_.mutableData(), transaction_id_.size());
+  is->readNextBytes(
+      (char*) transaction_id_.mutableData(),
+      transaction_id_.size());
+
+  // transaction seq
+  transaction_seq_ = is->readUInt64();
+
+  // keyspace type
+  keyspace_type_ = static_cast<KeyspaceType>(is->readUInt8());
 
   // partition map
   auto pmap_size = is->readVarUInt();
@@ -75,6 +95,11 @@ Status MetadataFile::decode(InputStream* is) {
     // begin
     e.begin = is->readLenencString();
 
+    // partition id
+    is->readNextBytes(
+        (char*) e.partition_id.mutableData(),
+        e.partition_id.size());
+
     // servers
     auto rc = decodeServerList(&e.servers, is);
     if (!rc.isSuccess()) {
@@ -83,6 +108,12 @@ Status MetadataFile::decode(InputStream* is) {
 
     // servers joining
     decodeServerList(&e.servers_joining, is);
+    if (!rc.isSuccess()) {
+      return rc;
+    }
+
+    // servers leaving
+    decodeServerList(&e.servers_leaving, is);
     if (!rc.isSuccess()) {
       return rc;
     }
@@ -131,11 +162,20 @@ Status MetadataFile::encode(OutputStream* os) const  {
   // transaction id
   os->write((const char*) transaction_id_.data(), transaction_id_.size());
 
+  // transaction seq
+  os->appendUInt64(transaction_seq_);
+
+  // keyspace type
+  os->appendUInt8(static_cast<uint8_t>(keyspace_type_));
+
   // partition map
   os->appendVarUInt(partition_map_.size());
   for (const auto& p : partition_map_) {
     // begin
     os->appendLenencString(p.begin);
+
+    // partition id
+    os->write((const char*) p.partition_id.data(), p.partition_id.size());
 
     // servers
     auto rc = encodeServerList(p.servers, os);
@@ -145,6 +185,12 @@ Status MetadataFile::encode(OutputStream* os) const  {
 
     // servers_joining
     rc = encodeServerList(p.servers_joining, os);
+    if (!rc.isSuccess()) {
+      return rc;
+    }
+
+    // servers_leaving
+    rc = encodeServerList(p.servers_leaving, os);
     if (!rc.isSuccess()) {
       return rc;
     }

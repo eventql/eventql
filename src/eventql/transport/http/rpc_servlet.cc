@@ -40,8 +40,10 @@ namespace eventql {
 
 RPCServlet::RPCServlet(
     TableService* node,
+    MetadataService* metadata_service,
     const String& tmpdir) :
     node_(node),
+    metadata_service_(metadata_service),
     tmpdir_(tmpdir) {}
 
 void RPCServlet::handleHTTPRequest(
@@ -49,6 +51,8 @@ void RPCServlet::handleHTTPRequest(
     RefPtr<http::HTTPResponseStream> res_stream) {
   const auto& req = req_stream->request();
   URI uri(req.uri());
+
+  logDebug("eventql", "HTTP Request: $0 $1", req.method(), req.uri());
 
   http::HTTPResponse res;
   res.populateFromRequest(req);
@@ -114,6 +118,34 @@ void RPCServlet::handleHTTPRequest(
 
     if (uri.path() == "/tsdb/update_cstable") {
       updateCSTable(uri, req_stream.get(), &res);
+      res_stream->writeResponse(res);
+      return;
+    }
+
+    if (uri.path() == "/rpc/create_metadata_file") {
+      req_stream->readBody();
+      createMetadataFile(uri, &req, &res);
+      res_stream->writeResponse(res);
+      return;
+    }
+
+    if (uri.path() == "/rpc/perform_metadata_operation") {
+      req_stream->readBody();
+      performMetadataOperation(uri, &req, &res);
+      res_stream->writeResponse(res);
+      return;
+    }
+
+    if (uri.path() == "/rpc/discover_partition_metadata") {
+      req_stream->readBody();
+      discoverPartitionMetadata(uri, &req, &res);
+      res_stream->writeResponse(res);
+      return;
+    }
+
+    if (uri.path() == "/rpc/fetch_latest_metadata_file") {
+      req_stream->readBody();
+      fetchLatestMetadataFile(uri, &req, &res);
       res_stream->writeResponse(res);
       return;
     }
@@ -423,6 +455,144 @@ void RPCServlet::updateCSTable(
       std::stoull(version));
 
   res->setStatus(http::kStatusCreated);
+}
+
+void RPCServlet::createMetadataFile(
+    const URI& uri,
+    const http::HTTPRequest* req,
+    http::HTTPResponse* res) {
+  const auto& params = uri.queryParams();
+
+  String db_namespace;
+  if (!URI::getParam(params, "namespace", &db_namespace)) {
+    RAISE(kRuntimeError, "missing ?namespace=... parameter");
+  }
+
+  String table_name;
+  if (!URI::getParam(params, "table", &table_name)) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody("error: missing ?table=... parameter");
+    return;
+  }
+
+  MetadataFile file;
+  auto is = req->getBodyInputStream();
+  auto rc = file.decode(is.get());
+
+  if (rc.isSuccess()) {
+    rc = metadata_service_->createMetadataFile(
+        db_namespace,
+        table_name,
+        file);
+  }
+
+  if (rc.isSuccess()) {
+    res->setStatus(http::kStatusCreated);
+  } else {
+    res->setStatus(http::kStatusInternalServerError);
+    res->addBody("ERROR: " + rc.message());
+    return;
+  }
+}
+
+void RPCServlet::performMetadataOperation(
+    const URI& uri,
+    const http::HTTPRequest* req,
+    http::HTTPResponse* res) {
+  const auto& params = uri.queryParams();
+
+  String db_namespace;
+  if (!URI::getParam(params, "namespace", &db_namespace)) {
+    RAISE(kRuntimeError, "missing ?namespace=... parameter");
+  }
+
+  String table_name;
+  if (!URI::getParam(params, "table", &table_name)) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody("error: missing ?table=... parameter");
+    return;
+  }
+
+  MetadataOperation op;
+  {
+    auto is = req->getBodyInputStream();
+    auto rc = op.decode(is.get());
+    if (!rc.isSuccess()) {
+      res->setStatus(http::kStatusInternalServerError);
+      res->addBody("ERROR: " + rc.message());
+      return;
+    }
+  }
+
+  auto rc = metadata_service_->performMetadataOperation(
+      db_namespace,
+      table_name,
+      op);
+
+  if (rc.isSuccess()) {
+    res->setStatus(http::kStatusCreated);
+  } else {
+    res->setStatus(http::kStatusInternalServerError);
+    res->addBody("ERROR: " + rc.message());
+    return;
+  }
+}
+
+void RPCServlet::discoverPartitionMetadata(
+    const URI& uri,
+    const http::HTTPRequest* req,
+    http::HTTPResponse* res) {
+  const auto& params = uri.queryParams();
+
+  PartitionDiscoveryRequest request;
+  msg::decode(req->body(), &request);
+
+  PartitionDiscoveryResponse response;
+  auto rc = metadata_service_->discoverPartition(request, &response);
+
+  if (rc.isSuccess()) {
+    res->setStatus(http::kStatusOK);
+    res->addBody(*msg::encode(response));
+  } else {
+    res->setStatus(http::kStatusInternalServerError);
+    res->addBody("ERROR: " + rc.message());
+    return;
+  }
+}
+
+void RPCServlet::fetchLatestMetadataFile(
+    const URI& uri,
+    const http::HTTPRequest* req,
+    http::HTTPResponse* res) {
+  const auto& params = uri.queryParams();
+
+  String db_namespace;
+  if (!URI::getParam(params, "namespace", &db_namespace)) {
+    RAISE(kRuntimeError, "missing ?namespace=... parameter");
+  }
+
+  String table_name;
+  if (!URI::getParam(params, "table", &table_name)) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody("error: missing ?table=... parameter");
+    return;
+  }
+
+  RefPtr<MetadataFile> file;
+  auto rc = metadata_service_->getMetadataFile(db_namespace, table_name, &file);
+
+  if (rc.isSuccess()) {
+    auto os = res->getBodyOutputStream();
+    rc = file->encode(os.get());
+  }
+
+  if (rc.isSuccess()) {
+    res->setStatus(http::kStatusOK);
+  } else {
+    res->setStatus(http::kStatusInternalServerError);
+    res->addBody("ERROR: " + rc.message());
+    return;
+  }
 }
 
 

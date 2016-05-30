@@ -23,6 +23,7 @@
  */
 #pragma once
 #include "eventql/eventql.h"
+#include "eventql/db/TableConfig.pb.h"
 #include "eventql/util/protobuf/msg.h"
 #include "eventql/util/SHA1.h"
 #include "eventql/util/status.h"
@@ -43,8 +44,10 @@ public:
 
   struct PartitionMapEntry {
     String begin;
+    SHA1Hash partition_id;
     Vector<PartitionPlacement> servers;
     Vector<PartitionPlacement> servers_joining;
+    Vector<PartitionPlacement> servers_leaving;
     bool splitting;
     String split_point;
     Vector<PartitionPlacement> split_servers_low;
@@ -54,9 +57,14 @@ public:
   MetadataFile();
   MetadataFile(
       const SHA1Hash& transaction_id,
+      uint64_t transaction_seq,
+      KeyspaceType keyspace_type,
       const Vector<PartitionMapEntry>& partition_map);
 
   const SHA1Hash& getTransactionID() const;
+  uint64_t getSequenceNumber() const;
+
+  KeyspaceType getKeyspaceType() const;
 
   const Vector<PartitionMapEntry>& getPartitionMap() const;
 
@@ -65,6 +73,8 @@ public:
 
 protected:
   SHA1Hash transaction_id_;
+  uint64_t transaction_seq_;
+  KeyspaceType keyspace_type_;
   Vector<PartitionMapEntry> partition_map_;
 };
 

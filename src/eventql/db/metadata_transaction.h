@@ -23,56 +23,27 @@
  */
 #pragma once
 #include "eventql/eventql.h"
-#include <eventql/util/stdtypes.h>
-#include <eventql/util/duration.h>
-#include <eventql/db/Partition.h>
-#include <eventql/db/TablePartitioner.h>
-#include <eventql/util/protobuf/MessageSchema.h>
-#include <eventql/db/TableConfig.pb.h>
-#include <eventql/db/metadata_transaction.h>
+#include "eventql/util/stdtypes.h"
+#include "eventql/util/SHA1.h"
 
 namespace eventql {
 
-class Table : public RefCounted{
+class MetadataTransaction {
 public:
 
-  Table(const TableDefinition& config);
+  MetadataTransaction(
+      const SHA1Hash& transaction_id,
+      uint64_t transaction_seq);
 
-  String name() const;
+  const SHA1Hash& getTransactionID() const;
+  uint64_t getSequenceNumber() const;
 
-  String tsdbNamespace() const;
-
-  Duration partitionSize() const;
-
-  size_t sstableSize() const;
-
-  size_t numShards() const;
-
-  Duration commitInterval() const;
-
-  RefPtr<msg::MessageSchema> schema() const;
-
-  TableDefinition config() const;
-
-  TableStorage storage() const;
-
-  const String& getPartitionKey() const;
-  TablePartitionerType partitionerType() const;
-  RefPtr<TablePartitioner> partitioner() const;
-
-  MetadataTransaction getLastMetadataTransaction() const;
-
-  void updateConfig(TableDefinition new_config);
+  bool operator==(const MetadataTransaction& other) const;
+  bool operator!=(const MetadataTransaction& other) const;
 
 protected:
-
-  void loadConfig();
-
-  mutable std::mutex mutex_;
-  TableDefinition config_;
-  RefPtr<msg::MessageSchema> schema_;
-  RefPtr<TablePartitioner> partitioner_;
+  SHA1Hash transaction_id_;
+  uint64_t transaction_seq_;
 };
 
-}
-
+} // namespace eventql
