@@ -325,6 +325,19 @@ ScopedPtr<ResultCursor> DefaultScheduler::executeCreateTable(
   return mkScoped(new EmptyResultCursor());
 }
 
+ScopedPtr<ResultCursor> DefaultScheduler::executeInsertInto(
+    Transaction* txn,
+    ExecutionContext* execution_context,
+    RefPtr<InsertIntoNode> insert_into) {
+  auto res = txn->getTableProvider()->insertRecord(*insert_into);
+  if (!res.isSuccess()) {
+    RAISE(kRuntimeError, res.message());
+  }
+
+  // FIXME return result...
+  return mkScoped(new EmptyResultCursor());
+}
+
 ScopedPtr<ResultCursor> DefaultScheduler::execute(
     QueryPlan* query_plan,
     ExecutionContext* execution_context,
@@ -343,6 +356,13 @@ ScopedPtr<ResultCursor> DefaultScheduler::execute(
         query_plan->getTransaction(),
         execution_context,
         stmt.asInstanceOf<CreateTableNode>());
+  }
+
+  if (stmt.isInstanceOf<InsertIntoNode>()) {
+    return executeInsertInto(
+        query_plan->getTransaction(),
+        execution_context,
+        stmt.asInstanceOf<InsertIntoNode>());
   }
 
   if (stmt.isInstanceOf<TableExpressionNode>()) {

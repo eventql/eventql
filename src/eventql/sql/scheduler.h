@@ -31,6 +31,7 @@
 #include <eventql/sql/runtime/ValueExpression.h>
 #include <eventql/sql/scheduler/execution_context.h>
 #include <eventql/sql/qtree/nodes/create_table.h>
+#include <eventql/sql/qtree/nodes/insert_into.h>
 #include <eventql/sql/qtree/TableExpressionNode.h>
 #include <eventql/sql/expressions/table_expression.h>
 #include <eventql/sql/qtree/QueryTreeNode.h>
@@ -88,6 +89,11 @@ protected:
       Transaction* txn,
       ExecutionContext* execution_context,
       RefPtr<CreateTableNode> create_table);
+
+  virtual ScopedPtr<ResultCursor> executeInsertInto(
+      Transaction* txn,
+      ExecutionContext* execution_context,
+      RefPtr<InsertIntoNode> insert_into);
 
   virtual ScopedPtr<TableExpression> buildTableExpression(
       Transaction* ctx,
