@@ -627,6 +627,11 @@ next:
     goto next;
   }
 
+  if (token == "JSON") {
+    token_list->emplace_back(Token::T_JSON);
+    goto next;
+  }
+
   if (token == "XDOMAIN") {
     token_list->emplace_back(Token::T_XDOMAIN);
     goto next;

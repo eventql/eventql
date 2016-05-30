@@ -107,6 +107,7 @@ public:
     T_INSERT_INTO,
     T_VALUE_LIST,
     T_VALUE,
+    T_JSON_STRING,
 
     T_DRAW,
     T_IMPORT,

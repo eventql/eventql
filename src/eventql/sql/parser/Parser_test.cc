@@ -1192,4 +1192,12 @@ TEST_CASE(ParserTest, TestInsertIntoFromJSONStatement, [] () {
   const auto& stmt = parser.getStatements()[0];
   const auto& children = stmt->getChildren();
 
+  EXPECT(*stmt == ASTNode::T_INSERT_INTO);
+  EXPECT_EQ(children.size(), 2);
+
+  EXPECT_EQ(*children[0], ASTNode::T_TABLE_NAME);
+  EXPECT_EQ(*children[0]->getToken(), Token::T_IDENTIFIER);
+  EXPECT_EQ(children[0]->getToken()->getString(), "evtbl");
+
+  EXPECT(*children[1] == ASTNode::T_JSON_STRING);
 });

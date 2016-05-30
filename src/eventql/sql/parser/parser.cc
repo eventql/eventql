@@ -27,6 +27,7 @@
 #include "parser.h"
 #include "tokenize.h"
 #include "eventql/util/inspect.h"
+#include "eventql/util/json/json.h"
 
 namespace csql {
 
@@ -544,7 +545,7 @@ ASTNode* Parser::insertIntoStatement() {
   insert_into->appendChild(tableName());
 
   if (cur_token_->getType() == Token::T_FROM) {
-    RAISE(kNotYetImplementedError, "insert into from json not yet implemented");
+    insert_into->appendChild(insertFromJSON());
 
   } else {
     insert_into->appendChild(insertColumnList());
@@ -618,6 +619,21 @@ ASTNode* Parser::insertValueList() {
   expectAndConsume(Token::T_RPAREN);
 
   return value_list;
+}
+
+ASTNode* Parser::insertFromJSON() {
+  consumeToken();
+
+  expectAndConsume(Token::T_JSON);
+  assertExpectation(Token::T_STRING);
+  //FIXME better check if json string is valid
+  json::parseJSON(cur_token_->getString());
+
+  auto json = new ASTNode(ASTNode::T_JSON_STRING);
+  json->setToken(cur_token_);
+
+  consumeToken();
+  return json;
 }
 
 ASTNode* Parser::importStatement() {

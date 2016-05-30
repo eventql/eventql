@@ -97,6 +97,7 @@ public:
     T_INSERT,
     T_INTO,
     T_VALUES,
+    T_JSON,
 
     T_JOIN,
     T_CROSS,
