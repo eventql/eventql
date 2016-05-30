@@ -103,9 +103,9 @@ void AnalyticsApp::updateTable(const TableDefinition& tbl, bool force) {
 }
 
 void AnalyticsApp::configureCustomer(const NamespaceConfig& config) {
-  for (const auto& td : logfile_service_.getTableDefinitions(config)) {
-    partition_map_->configureTable(td);
-  }
+  //for (const auto& td : logfile_service_.getTableDefinitions(config)) {
+  //  partition_map_->configureTable(td);
+  //}
 }
 
 void AnalyticsApp::insertMetric(
