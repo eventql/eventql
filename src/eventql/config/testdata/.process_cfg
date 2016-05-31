@@ -1,0 +1,7 @@
+[test]
+host = localhost
+port = 8080
+authors = eventQL Authors
+
+[test2]
+mail = authors@test.com
