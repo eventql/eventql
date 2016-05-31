@@ -363,7 +363,9 @@ Status LSMPartitionWriter::applyMetadataChange(
 
   // backfill code
   auto has_local_replica = repl_->hasLocalReplica(snap->key);
-  if (has_local_replica && discovery_info.code() != PDISCOVERY_SERVE) {
+  if (has_local_replica &&
+      discovery_info.code() != PDISCOVERY_SERVE &&
+      !snap->state.partition_keyrange_begin().empty()) {
     logDebug(
         "evqld",
         "Adding myself to the server list for $0/$1/$2",
