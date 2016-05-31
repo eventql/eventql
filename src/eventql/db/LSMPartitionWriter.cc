@@ -373,15 +373,6 @@ Status LSMPartitionWriter::applyMetadataChange(
         snap->state.table_key(),
         snap->key.toString());
 
-    // HACK always base the operation on the most recent transcation
-    auto table_cfg = cdir_->getTableConfig(
-        snap->state.tsdb_namespace(),
-        snap->state.table_key());
-
-    SHA1Hash latest_txnid(
-        table_cfg.metadata_txnid().data(),
-        table_cfg.metadata_txnid().size());
-
     BackfillAddServerOperation opdata;
     opdata.set_partition_id(snap->key.data(), snap->key.size());
     opdata.set_keyrange_begin(snap->state.partition_keyrange_begin());
@@ -391,8 +382,7 @@ Status LSMPartitionWriter::applyMetadataChange(
         snap->state.tsdb_namespace(),
         snap->state.table_key(),
         METAOP_BACKFILL_ADD_SERVER,
-        latest_txnid,
-        //SHA1Hash(discovery_info.txnid().data(), discovery_info.txnid().size()),
+        SHA1Hash(discovery_info.txnid().data(), discovery_info.txnid().size()),
         Random::singleton()->sha1(),
         *msg::encode(opdata));
 

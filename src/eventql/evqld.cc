@@ -567,13 +567,7 @@ int main(int argc, const char** argv) {
             tbl.table_name(),
             partition_id);
 
-        double r =
-            Random::singleton()->random64() /
-            (double) std::numeric_limits<uint64_t>::max();
-
-        //tsdb_replication.enqueuePartition(
-        //    partition.get(),
-        //    kMicrosPerHour * 1 * r);
+        tsdb_replication.enqueuePartition(partition.get());
       }
     });
 
