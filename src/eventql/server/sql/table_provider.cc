@@ -191,19 +191,37 @@ Status TSDBTableProvider::createTable(
 }
 
 Status TSDBTableProvider::insertRecord(
-    const csql::InsertIntoNode& insert_into) {
+    const String& table_name,
+    const msg::DynamicMessage& data) {
 
-  RAISE(kNotYetImplementedError, "NYI");
+  try {
+    table_service_->insertRecord(
+        tsdb_namespace_,
+        table_name,
+        data);
+  } catch (const Exception& e) {
+    return Status(eRuntimeError, e.getMessage());
+  }
+
+  return Status::success();
 }
 
 Status TSDBTableProvider::insertRecord(
-    const csql::InsertJSONNode& insert_json) {
-  auto json = json::parseJSON(insert_json.getJSON());
-  table_service_->insertRecord(
-      tsdb_namespace_,
-      insert_json.getTableName(),
-      json.begin(),
-      json.end());
+    const String& table_name,
+    const json::JSONObject::const_iterator& data_begin,
+    const json::JSONObject::const_iterator& data_end) {
+
+  try {
+    table_service_->insertRecord(
+        tsdb_namespace_,
+        table_name,
+        data_begin,
+        data_end);
+  } catch (const Exception& e) {
+    return Status(eRuntimeError, e.getMessage());
+  }
+
+  return Status::success();
 }
 
 void TSDBTableProvider::listTables(

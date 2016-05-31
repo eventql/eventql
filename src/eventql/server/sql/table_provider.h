@@ -61,8 +61,14 @@ public:
 
   Status createTable(const csql::CreateTableNode& req) override;
 
-  Status insertRecord(const csql::InsertIntoNode& insert_into) override;
-  Status insertRecord(const csql::InsertJSONNode& insert_json) override;
+  Status insertRecord(
+      const String& table_name,
+      const msg::DynamicMessage& data) override;
+
+  Status insertRecord(
+      const String& table_name,
+      const json::JSONObject::const_iterator& data_begin,
+      const json::JSONObject::const_iterator& data_end) override;
 
   const String& getNamespace() const;
 

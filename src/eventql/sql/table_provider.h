@@ -30,8 +30,7 @@
 #include <eventql/sql/qtree/SequentialScanNode.h>
 #include <eventql/sql/scheduler/execution_context.h>
 #include "eventql/sql/qtree/nodes/create_table.h"
-#include "eventql/sql/qtree/nodes/insert_into.h"
-#include "eventql/sql/qtree/nodes/insert_json.h"
+#include "eventql/util/protobuf/DynamicMessage.h"
 
 namespace csql {
 
@@ -53,10 +52,15 @@ public:
     RAISE(kRuntimeError, "can't create tables");
   }
 
-  virtual Status insertRecord(const InsertIntoNode& insert_into) {
+  virtual Status insertRecord(
+      const String& table_name,
+      const msg::DynamicMessage& data) {
     RAISE(kRuntimeError, "can't insert");
   }
-  virtual Status insertRecord(const InsertJSONNode& insert_json) {
+  virtual Status insertRecord(
+      const String& table_name,
+      const json::JSONObject::const_iterator& data_begin,
+      const json::JSONObject::const_iterator& data_end) {
     RAISE(kRuntimeError, "can't insert");
   }
 };
