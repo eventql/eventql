@@ -22,6 +22,7 @@
  * code of your own applications
  */
 #include "eventql/db/metadata_file.h"
+#include "eventql/util/inspect.h"
 
 namespace eventql {
 
@@ -62,24 +63,27 @@ MetadataFile::PartitionMapIter MetadataFile::getPartitionMapEnd() const {
   return partition_map_.end();
 }
 
-// fixme this should be a binary search
 MetadataFile::PartitionMapIter MetadataFile::getPartitionMapAt(
     const String& key) const {
-  auto iter = partition_map_.begin();
+  size_t low = 0;
+  size_t high = partition_map_.size() - 1;
+  while (low != high) {
+    size_t mid = (low + high + 1) / 2;
+    int cmp = compareKeys(partition_map_[mid].begin, key);
+    if (cmp < 0) {
+      low = mid;
+    } else if (cmp > 0) {
+      if (mid == 0) {
+        return partition_map_.begin();
+      }
 
-  while (iter != partition_map_.end()) {
-    if (compareKeys(iter->begin, key) > 0) {
-      break;
+      high = mid - 1;
     } else {
-      iter++;
+      return partition_map_.begin() + mid;
     }
   }
 
-  if (iter != partition_map_.begin()) {
-    --iter;
-  }
-
-  return iter;
+  return partition_map_.begin() + low;
 }
 
 MetadataFile::PartitionMapIter MetadataFile::getPartitionMapRangeBegin(
