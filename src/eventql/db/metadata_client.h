@@ -45,7 +45,7 @@ public:
       const String& ns,
       const String& table_id,
       const KeyRange& keyrange,
-      Set<SHA1Hash>* partitions);
+      PartitionListResponse* res);
 
 protected:
   ConfigDirectory* cdir_;

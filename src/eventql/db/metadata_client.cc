@@ -75,7 +75,7 @@ Status MetadataClient::listPartitions(
     const String& ns,
     const String& table_id,
     const KeyRange& keyrange,
-    Set<SHA1Hash>* partitions) {
+    PartitionListResponse* res) {
   auto table_cfg = cdir_->getTableConfig(ns, table_id);
 
   PartitionListRequest req;
@@ -106,11 +106,7 @@ Status MetadataClient::listPartitions(
     }
 
     if (http_res.statusCode() == 200) {
-      auto res = msg::decode<PartitionListResponse>(http_res.body());
-      for (const auto& p : res.partitions()) {
-        partitions->insert(SHA1Hash(p.data(), p.size()));
-      }
-
+      msg::decode<PartitionListResponse>(http_res.body(), res);
       return Status::success();
     } else {
       logWarning(

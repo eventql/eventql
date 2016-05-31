@@ -129,14 +129,20 @@ Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
           seqscan->constraints());
 
       MetadataClient metadata_client(cdir_);
+      PartitionListResponse partition_list;
       auto rc = metadata_client.listPartitions(
           tsdb_namespace_,
           table_ref.table_key,
           keyrange,
-          &partitions);
+          &partition_list);
 
       if (!rc.isSuccess()) {
         RAISEF(kRuntimeError, "metadata lookup failure: $0", rc.message());
+      }
+
+      for (const auto& p : partition_list.partitions()) {
+        partitions.emplace(
+            SHA1Hash(p.partition_id().data(), p.partition_id().size()));
       }
     } else {
       auto partitioner = table.get()->partitioner();
