@@ -313,6 +313,14 @@ void StatusServlet::renderTablePage(
     return;
   }
 
+  const auto& table_cfg = table.get()->config();
+  html += StringUtil::format(
+      "<span><em>Metatdata TXNID:</em> $0 [$1]</span> &mdash; ",
+      SHA1Hash(
+          table_cfg.metadata_txnid().data(),
+          table_cfg.metadata_txnid().size()).toString(),
+      table_cfg.metadata_txnseq());
+
   MetadataClient metadata_client(cdir_);
   MetadataFile metadata_file;
   auto rc = metadata_client.fetchLatestMetadataFile(
