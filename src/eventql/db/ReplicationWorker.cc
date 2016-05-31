@@ -166,7 +166,7 @@ void ReplicationWorker::work() {
         }
       }
     } else {
-      auto delay = 30 * kMicrosPerSecond; // FIXPAUL increasing delay..
+      auto delay = 600 * kMicrosPerSecond; // FIXPAUL increasing delay..
       queue_.emplace(now + delay, partition);
     }
 
