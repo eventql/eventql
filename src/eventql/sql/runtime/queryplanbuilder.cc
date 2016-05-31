@@ -1913,9 +1913,7 @@ QueryTreeNode* QueryPlanBuilder::buildInsertInto(
   Vector<InsertIntoNode::InsertValueSpec> values_spec;
   for (size_t i = 0; i < columns.size(); ++i) {
     if (columns[i]->getType() != ASTNode::T_COLUMN_NAME ||
-         columns[i]->getToken() == nullptr ||
-         values[i]->getType() != ASTNode::T_VALUE ||
-         values[i]->getToken() == nullptr) {
+         columns[i]->getToken() == nullptr) {
       RAISE(kRuntimeError, "corrupt AST");
     }
 
@@ -1923,7 +1921,6 @@ QueryTreeNode* QueryPlanBuilder::buildInsertInto(
     spec.type = InsertIntoNode::InsertValueType::SCALAR;
     spec.column = columns[i]->getToken()->getString();
     spec.expr = buildValueExpression(txn, values[i]);
-
     values_spec.emplace_back(spec);
   }
 

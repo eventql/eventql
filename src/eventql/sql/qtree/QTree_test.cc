@@ -709,9 +709,9 @@ TEST_CASE(QTreeTest, TestInsertInto, [] () {
           is_admin,
           type
       ) VALUES (
-          1464463790,
+          123,
           'xxx',
-          1.23,
+          1 + 2,
           true,
           null
       );
