@@ -32,6 +32,7 @@
 #include <eventql/sql/scheduler/execution_context.h>
 #include <eventql/sql/qtree/nodes/create_table.h>
 #include <eventql/sql/qtree/nodes/insert_into.h>
+#include <eventql/sql/qtree/nodes/insert_json.h>
 #include <eventql/sql/qtree/TableExpressionNode.h>
 #include <eventql/sql/expressions/table_expression.h>
 #include <eventql/sql/qtree/QueryTreeNode.h>
@@ -94,6 +95,11 @@ protected:
       Transaction* txn,
       ExecutionContext* execution_context,
       RefPtr<InsertIntoNode> insert_into);
+
+  virtual ScopedPtr<ResultCursor> executeInsertJSON(
+      Transaction* txn,
+      ExecutionContext* execution_context,
+      RefPtr<InsertJSONNode> insert_json);
 
   virtual ScopedPtr<TableExpression> buildTableExpression(
       Transaction* ctx,

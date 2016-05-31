@@ -329,7 +329,48 @@ ScopedPtr<ResultCursor> DefaultScheduler::executeInsertInto(
     Transaction* txn,
     ExecutionContext* execution_context,
     RefPtr<InsertIntoNode> insert_into) {
-  auto res = txn->getTableProvider()->insertRecord(*insert_into);
+  auto values_spec = insert_into->getValuesSpec();
+
+  auto msg_schema = mkRef(new msg::MessageSchema(nullptr));
+  auto msg = new msg::DynamicMessage(msg_schema);
+
+  for (auto v : values_spec) {
+    auto expr = txn->getCompiler()->buildValueExpression(txn, v.expr);
+    auto program = expr.program();
+    if (program->has_aggregate_) {
+      RAISE(kRuntimeError, "insert into expression must not contain aggregation"); //FIXME better msg
+    }
+
+    auto scratch = ScratchMemory();
+    auto instance = VM::allocInstance(txn, program, &scratch);
+    SValue result;
+    VM::result(txn, program, &instance, &result);
+
+    msg->addField(v.column, result.getString());
+  }
+
+  auto res = txn->getTableProvider()->insertRecord(
+      insert_into->getTableName(),
+      *msg);
+
+  if (!res.isSuccess()) {
+    RAISE(kRuntimeError, res.message());
+  }
+
+  // FIXME return result...
+  return mkScoped(new EmptyResultCursor());
+}
+
+ScopedPtr<ResultCursor> DefaultScheduler::executeInsertJSON(
+    Transaction* txn,
+    ExecutionContext* execution_context,
+    RefPtr<InsertJSONNode> insert_json) {
+  auto json = json::parseJSON(insert_json->getJSON());
+  auto res = txn->getTableProvider()->insertRecord(
+      insert_json->getTableName(),
+      json.begin(),
+      json.end());
+
   if (!res.isSuccess()) {
     RAISE(kRuntimeError, res.message());
   }
@@ -363,6 +404,13 @@ ScopedPtr<ResultCursor> DefaultScheduler::execute(
         query_plan->getTransaction(),
         execution_context,
         stmt.asInstanceOf<InsertIntoNode>());
+  }
+
+  if (stmt.isInstanceOf<InsertJSONNode>()) {
+    return executeInsertJSON(
+        query_plan->getTransaction(),
+        execution_context,
+        stmt.asInstanceOf<InsertJSONNode>());
   }
 
   if (stmt.isInstanceOf<TableExpressionNode>()) {
