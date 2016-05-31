@@ -36,25 +36,18 @@ TEST_CASE(ProcessConfigTest, TestProcessConfigBuilder, [] () {
   ProcessConfigBuilder builder;
   builder.setProperty("evql", "host", "localhost");
   builder.setProperty("evql", "port", "8080");
-  builder.setProperty("evql", "fuu", "bar");
 
   auto config = builder.getConfig();
   {
-    auto p = config->getProperty("evql", "host");
+    auto p = config->getString("evql", "host");
     EXPECT_FALSE(p.isEmpty());
     EXPECT_EQ(p.get(), "localhost");
   }
 
   {
-    auto p = config->getProperty("evql", "port");
+    auto p = config->getInt("evql", "port");
     EXPECT_FALSE(p.isEmpty());
-    EXPECT_EQ(p.get(), "8080");
-  }
-
-  {
-    auto p = config->getProperty("evql", "fuu");
-    EXPECT_FALSE(p.isEmpty());
-    EXPECT_EQ(p.get(), "bar");
+    EXPECT_EQ(p.get(), 8080);
   }
 });
 
@@ -69,22 +62,22 @@ TEST_CASE(ProcessConfigTest, TestProcessConfigBuilderLoadFile, [] () {
 
   auto config = builder.getConfig();
   {
-    auto p = config->getProperty("test", "host");
+    auto p = config->getString("test", "host");
     EXPECT_FALSE(p.isEmpty());
     EXPECT_EQ(p.get(), "localhost");
   }
   {
-    auto p = config->getProperty("test", "port");
+    auto p = config->getInt("test", "port");
     EXPECT_FALSE(p.isEmpty());
-    EXPECT_EQ(p.get(), "9175");
+    EXPECT_EQ(p.get(), 9175);
   }
   {
-    auto p = config->getProperty("test", "authors");
+    auto p = config->getString("test", "authors");
     EXPECT_FALSE(p.isEmpty());
     EXPECT_EQ(p.get(), "eventQL Authors");
   }
   {
-    auto p = config->getProperty("test2", "mail");
+    auto p = config->getString("test2", "mail");
     EXPECT_FALSE(p.isEmpty());
     EXPECT_EQ(p.get(), "authors@test.com");
   }

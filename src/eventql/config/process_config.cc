@@ -40,19 +40,40 @@ ProcessConfig::ProcessConfig(
       HashMap<String, String> properties) :
       properties_(properties) {}
 
-Option<String> ProcessConfig::getProperty(
+Option<String> ProcessConfig::getString(
     const String& section,
     const String& key) const {
-  return getProperty(StringUtil::format("$0.$1", section, key));
+  return getString(StringUtil::format("$0.$1", section, key));
 }
 
-Option<String> ProcessConfig::getProperty(const String& key) const {
+Option<String> ProcessConfig::getString(const String& key) const {
   auto p = properties_.find(key);
   if (p != properties_.end()) {
     return Some(p->second);
   }
 
   return None<String>();
+}
+
+Option<int64_t> ProcessConfig::getInt(
+    const String& section,
+    const String& key) const {
+  return getInt(StringUtil::format("$0.$1", section, key));
+}
+
+Option<int64_t> ProcessConfig::getInt(const String& key) const {
+  auto p = properties_.find(key);
+  if (p != properties_.end() && StringUtil::isNumber(p->second)) {
+    try {
+      auto value = std::stoi(p->second);
+      return Some<int64_t>(value);
+
+    } catch (std::exception e) {
+      /* fallthrough */
+    }
+  }
+
+  return None<int64_t>();
 }
 
 static int ini_parse_handler(
