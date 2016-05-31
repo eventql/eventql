@@ -25,6 +25,7 @@ package eventql;
 
 enum MetadataOperationType {
   METAOP_BACKFILL_ADD_SERVER = 1;
+  METAOP_BACKFILL_ADD_SERVERS = 3;
   METAOP_BACKFILL_REMOVE_SERVER = 2;
 };
 
@@ -80,6 +81,10 @@ message BackfillAddServerOperation {
   required bytes partition_id = 1;
   required bytes keyrange_begin = 2;
   required string server_id = 3;
+};
+
+message BackfillAddServersOperation {
+  repeated BackfillAddServerOperation ops = 1;
 };
 
 message BackfillRemoveServerOperation {

@@ -61,6 +61,10 @@ protected:
       const MetadataFile& input,
       Vector<MetadataFile::PartitionMapEntry>* output) const;
 
+  Status performBackfillAddServers(
+      const MetadataFile& input,
+      Vector<MetadataFile::PartitionMapEntry>* output) const;
+
   Status performBackfillRemoveServer(
       const MetadataFile& input,
       Vector<MetadataFile::PartitionMapEntry>* output) const;
