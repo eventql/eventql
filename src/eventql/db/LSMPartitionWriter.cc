@@ -353,7 +353,7 @@ Status LSMPartitionWriter::applyMetadataChange(
     const PartitionDiscoveryResponse& discovery_info) {
   auto snap = head_->getSnapshot();
 
-  logDebug(
+  logTrace(
       "evqld",
       "Applying metadata change to partition $0/$1/$2: $3",
       snap->state.tsdb_namespace(),
