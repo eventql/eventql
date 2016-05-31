@@ -24,13 +24,14 @@
 #pragma once
 #include <eventql/util/option.h>
 #include <eventql/util/status.h>
+#include <eventql/sql/svalue.h>
 #include <eventql/sql/table_schema.h>
 #include <eventql/sql/TableInfo.h>
 #include <eventql/sql/expressions/table_expression.h>
 #include <eventql/sql/qtree/SequentialScanNode.h>
 #include <eventql/sql/scheduler/execution_context.h>
 #include "eventql/sql/qtree/nodes/create_table.h"
-#include "eventql/util/protobuf/DynamicMessage.h"
+#include <eventql/util/json/json.h>
 
 namespace csql {
 
@@ -54,9 +55,10 @@ public:
 
   virtual Status insertRecord(
       const String& table_name,
-      const msg::DynamicMessage& data) {
+      Vector<Pair<String, SValue>> data) {
     RAISE(kRuntimeError, "can't insert");
   }
+
   virtual Status insertRecord(
       const String& table_name,
       const json::JSONObject::const_iterator& data_begin,

@@ -192,13 +192,28 @@ Status TSDBTableProvider::createTable(
 
 Status TSDBTableProvider::insertRecord(
     const String& table_name,
-    const msg::DynamicMessage& data) {
+    Vector<Pair<String, csql::SValue>> data) {
+
+  auto schema = table_service_->tableSchema(tsdb_namespace_, table_name);
+  if (schema.isEmpty()) {
+    return Status(eRuntimeError, "table not found");
+  }
+
+  auto msg = new msg::DynamicMessage(schema.get());
+  for (auto e : data) {
+    if (!msg->addField(e.first, e.second.getString())) {
+      return Status(
+          eRuntimeError,
+          StringUtil::format("field not found: $0", e.first)); //FIXME better error msg
+    }
+  }
 
   try {
     table_service_->insertRecord(
         tsdb_namespace_,
         table_name,
-        data);
+        *msg);
+
   } catch (const Exception& e) {
     return Status(eRuntimeError, e.getMessage());
   }

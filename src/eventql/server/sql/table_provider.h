@@ -23,6 +23,7 @@
  * code of your own applications
  */
 #pragma once
+#include "eventql/eventql.h"
 #include <eventql/util/stdtypes.h>
 #include <eventql/sql/runtime/tablerepository.h>
 #include <eventql/auth/internal_auth.h>
@@ -33,8 +34,6 @@
 #include <eventql/db/TSDBTableInfo.h>
 #include <eventql/db/table_service.h>
 #include "eventql/server/sql/table_scan.h"
-
-#include "eventql/eventql.h"
 
 namespace eventql {
 class TableService;
@@ -63,7 +62,7 @@ public:
 
   Status insertRecord(
       const String& table_name,
-      const msg::DynamicMessage& data) override;
+      Vector<Pair<String, csql::SValue>> data) override;
 
   Status insertRecord(
       const String& table_name,

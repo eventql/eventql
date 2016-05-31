@@ -331,27 +331,29 @@ ScopedPtr<ResultCursor> DefaultScheduler::executeInsertInto(
     RefPtr<InsertIntoNode> insert_into) {
   auto values_spec = insert_into->getValuesSpec();
 
-  auto msg_schema = mkRef(new msg::MessageSchema(nullptr));
-  auto msg = new msg::DynamicMessage(msg_schema);
+  Vector<Pair<String, SValue>> data;
 
-  for (auto v : values_spec) {
-    auto expr = txn->getCompiler()->buildValueExpression(txn, v.expr);
+  for (auto spec : values_spec) {
+    auto expr = txn->getCompiler()->buildValueExpression(txn, spec.expr);
     auto program = expr.program();
     if (program->has_aggregate_) {
-      RAISE(kRuntimeError, "insert into expression must not contain aggregation"); //FIXME better msg
+      RAISE(
+          kRuntimeError,
+          "insert into expression must not contain aggregation"); //FIXME better msg
     }
 
-    auto scratch = ScratchMemory();
-    auto instance = VM::allocInstance(txn, program, &scratch);
-    SValue result;
-    VM::result(txn, program, &instance, &result);
+    SValue value;
+    VM::evaluate(txn, program, 0, nullptr, &value);
 
-    msg->addField(v.column, result.getString());
+    Pair<String, SValue> result;
+    result.first = spec.column;
+    result.second = value;
+    data.emplace_back(result);
   }
 
   auto res = txn->getTableProvider()->insertRecord(
       insert_into->getTableName(),
-      *msg);
+      data);
 
   if (!res.isSuccess()) {
     RAISE(kRuntimeError, res.message());
