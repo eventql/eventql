@@ -178,5 +178,11 @@ Status MetadataService::discoverPartition(
   return Status::success();
 }
 
+Status MetadataService::listPartitions(
+    const PartitionListRequest& request,
+    PartitionListResponse* response) {
+  return Status(eRuntimeError, "not yet implemented");
+}
+
 } // namespace eventql
 
