@@ -40,6 +40,7 @@ public:
 
   Scheduler(
       PartitionMap* pmap,
+      ConfigDirectory* cdir,
       InternalAuth* auth,
       ReplicationScheme* repl_scheme);
 

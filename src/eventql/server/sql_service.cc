@@ -31,11 +31,13 @@ namespace eventql {
 SQLService::SQLService(
     csql::Runtime* sql,
     PartitionMap* pmap,
+    ConfigDirectory* cdir,
     ReplicationScheme* repl,
     InternalAuth* auth,
     TableService* table_service) :
     sql_(sql),
     pmap_(pmap),
+    cdir_(cdir),
     repl_(repl),
     auth_(auth),
     table_service_(table_service) {}
@@ -47,6 +49,7 @@ ScopedPtr<csql::Transaction> SQLService::startTransaction(Session* session) {
       new TSDBTableProvider(
           session->getEffectiveNamespace(),
           pmap_,
+          cdir_,
           repl_,
           table_service_,
           auth_));

@@ -34,9 +34,11 @@ namespace eventql {
 
 Scheduler::Scheduler(
     PartitionMap* pmap,
+    ConfigDirectory* cdir,
     InternalAuth* auth,
     ReplicationScheme* repl_scheme) :
     pmap_(pmap),
+    cdir_(cdir),
     auth_(auth),
     repl_scheme_(repl_scheme),
     running_cnt_(0) {}

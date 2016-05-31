@@ -45,6 +45,7 @@ public:
   TSDBTableProvider(
       const String& tsdb_namespace,
       PartitionMap* partition_map,
+      ConfigDirectory* cdir,
       ReplicationScheme* replication_scheme,
       TableService* table_service,
       InternalAuth* auth);
