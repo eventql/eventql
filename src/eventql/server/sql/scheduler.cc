@@ -184,7 +184,10 @@ Vector<Scheduler::PipelinedQueryTree> Scheduler::pipelineExpression(
 
   Set<SHA1Hash> partitions;
   if (table.get()->partitionerType() == TBL_PARTITION_TIMEWINDOW) {
-    auto keyrange = TSDBTableProvider::findKeyRange(seqscan->constraints());
+    auto keyrange = TSDBTableProvider::findKeyRange(
+        table.get()->config().config().partition_key(),
+        seqscan->constraints());
+
     MetadataClient metadata_client(cdir_);
     auto rc = metadata_client.listPartitions(
         db_namespace,

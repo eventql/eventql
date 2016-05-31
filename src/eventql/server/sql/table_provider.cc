@@ -44,6 +44,66 @@ TSDBTableProvider::TSDBTableProvider(
     table_service_(table_service),
     auth_(auth) {}
 
+KeyRange TSDBTableProvider::findKeyRange(
+    const String& partition_key,
+    const Vector<csql::ScanConstraint>& constraints) {
+  uint64_t lower_limit;
+  bool has_lower_limit = false;
+  uint64_t upper_limit;
+  bool has_upper_limit = false;
+
+  for (const auto& c : constraints) {
+    if (c.column_name != partition_key) {
+      continue;
+    }
+
+    uint64_t val;
+    try {
+      val = c.value.getInteger();
+    } catch (const StandardException& e) {
+      continue;
+    }
+
+    switch (c.type) {
+      case csql::ScanConstraintType::EQUAL_TO:
+        lower_limit = val;
+        upper_limit = val;
+        has_lower_limit = true;
+        has_upper_limit = true;
+        break;
+      case csql::ScanConstraintType::NOT_EQUAL_TO:
+        break;
+      case csql::ScanConstraintType::LESS_THAN:
+        upper_limit = val - 1;
+        has_upper_limit = true;
+        break;
+      case csql::ScanConstraintType::LESS_THAN_OR_EQUAL_TO:
+        upper_limit = val;
+        has_upper_limit = true;
+        break;
+      case csql::ScanConstraintType::GREATER_THAN:
+        lower_limit = val + 1;
+        has_lower_limit = true;
+        break;
+      case csql::ScanConstraintType::GREATER_THAN_OR_EQUAL_TO:
+        lower_limit = val;
+        has_lower_limit = true;
+        break;
+    }
+  }
+
+  KeyRange kr;
+  if (has_lower_limit) {
+    kr.begin = String((const char*) &lower_limit, sizeof(lower_limit));
+  }
+
+  if (has_upper_limit) {
+    kr.end = String((const char*) &upper_limit, sizeof(upper_limit));
+  }
+
+  return kr;
+}
+
 Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
     csql::Transaction* ctx,
     csql::ExecutionContext* execution_context,
@@ -62,7 +122,10 @@ Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
   Set<SHA1Hash> partitions;
   if (table_ref.partition_key.isEmpty()) {
     if (table.get()->partitionerType() == TBL_PARTITION_TIMEWINDOW) {
-      auto keyrange = TSDBTableProvider::findKeyRange(seqscan->constraints());
+      auto keyrange = findKeyRange(
+          table.get()->config().config().partition_key(),
+          seqscan->constraints());
+
       MetadataClient metadata_client(cdir_);
       auto rc = metadata_client.listPartitions(
           tsdb_namespace_,
