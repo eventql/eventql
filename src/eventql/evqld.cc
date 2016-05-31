@@ -551,8 +551,18 @@ int main(int argc, const char** argv) {
 
     /* open tables */
     config_dir->setTableConfigChangeCallback(
-        [&partition_map] (const TableDefinition& tbl) {
-      partition_map.configureTable(tbl);
+        [&partition_map, &tsdb_replication] (const TableDefinition& tbl) {
+      Set<SHA1Hash> affected_partitions;
+      partition_map.configureTable(tbl, &affected_partitions);
+
+      for (const auto& partition_id : affected_partitions) {
+        auto partition = partition_map.findPartition(
+            tbl.customer(),
+            tbl.table_name(),
+            partition_id);
+
+        tsdb_replication.enqueuePartition(partition.get());
+      }
     });
 
     config_dir->listTables([&partition_map] (const TableDefinition& tbl) {

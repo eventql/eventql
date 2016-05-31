@@ -200,9 +200,7 @@ Status TimeWindowPartitioner::findKeyRange(
     KeyRange* keyrange) const {
   auto window =  config_.partition_size();
   auto now = WallClock::unixMicros() + window;
-  auto max_lookback = now - 2 * kMicrosPerYear;
-
-  for (auto t = now + kMicrosPerDay; t >= max_lookback; t -= window) {
+  for (auto t = now + kMicrosPerDay; t >= window; t -= window) {
     if (partitionKeyFor(table_name_, t, window) == partition_id) {
       uint64_t ts_begin = (t / window) * window;
       uint64_t ts_end = ts_begin + window;

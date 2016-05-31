@@ -46,7 +46,10 @@ public:
 
   PartitionMap(ServerCfg* cfg);
 
-  void configureTable(const TableDefinition& config);
+  void configureTable(
+      const TableDefinition& config,
+      Set<SHA1Hash>* affected_partitions = nullptr);
+
   void open();
 
   Option<RefPtr<Table>> findTable(
@@ -124,7 +127,7 @@ protected:
 
   mutable std::mutex mutex_;
   OrderedMap<String, RefPtr<Table>> tables_;
-  HashMap<String, ScopedPtr<LazyPartition>> partitions_;
+  OrderedMap<String, ScopedPtr<LazyPartition>> partitions_;
   Vector<PartitionChangeCallbackFn> callbacks_;
 };
 
