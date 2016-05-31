@@ -1094,3 +1094,17 @@ TESTS += test_evql_db_metadata_store
 check_PROGRAMS += test_evql_db_metadata_store
 
 
+################# TEST: db/metadata_file ####################
+test_evql_db_metadata_file_SOURCES = eventql/db/metadata_file_test.cc
+test_evql_db_metadata_file_LDADD = \
+    evql_core.a \
+    evql_util.a \
+    $(SIMDCOMP_LDADD) \
+    $(LMDB_LDADD) \
+    $(PROTOBUF_LDADD) \
+    $(PCRE_LDADD)
+
+TESTS += test_evql_db_metadata_file
+check_PROGRAMS += test_evql_db_metadata_file
+
+

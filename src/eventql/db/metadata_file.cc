@@ -67,7 +67,7 @@ MetadataFile::PartitionMapIter MetadataFile::getPartitionMapAt(
     const String& key) const {
   auto iter = partition_map_.begin();
 
-  while (iter < partition_map_.end()) {
+  while (iter != partition_map_.end()) {
     if (compareKeys(iter->begin, key) > 0) {
       break;
     } else {
