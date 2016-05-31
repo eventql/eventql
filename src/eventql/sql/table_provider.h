@@ -31,7 +31,6 @@
 #include <eventql/sql/qtree/SequentialScanNode.h>
 #include <eventql/sql/scheduler/execution_context.h>
 #include "eventql/sql/qtree/nodes/create_table.h"
-#include <eventql/util/json/json.h>
 
 namespace csql {
 
@@ -61,8 +60,7 @@ public:
 
   virtual Status insertRecord(
       const String& table_name,
-      const json::JSONObject::const_iterator& data_begin,
-      const json::JSONObject::const_iterator& data_end) {
+      const String& json_str) {
     RAISE(kRuntimeError, "can't insert");
   }
 };

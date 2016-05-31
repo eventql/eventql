@@ -22,12 +22,12 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#include "eventql/eventql.h"
 #include <eventql/util/SHA1.h>
 #include <eventql/server/sql/table_provider.h>
 #include <eventql/db/table_service.h>
 #include <eventql/sql/CSTableScan.h>
-
-#include "eventql/eventql.h"
+#include <eventql/util/json/json.h>
 
 namespace eventql {
 
@@ -223,15 +223,15 @@ Status TSDBTableProvider::insertRecord(
 
 Status TSDBTableProvider::insertRecord(
     const String& table_name,
-    const json::JSONObject::const_iterator& data_begin,
-    const json::JSONObject::const_iterator& data_end) {
+    const String& json_str) {
 
+  auto json = json::parseJSON(json_str);
   try {
     table_service_->insertRecord(
         tsdb_namespace_,
         table_name,
-        data_begin,
-        data_end);
+        json.begin(),
+        json.end());
   } catch (const Exception& e) {
     return Status(eRuntimeError, e.getMessage());
   }

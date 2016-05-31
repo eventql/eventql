@@ -329,11 +329,9 @@ ScopedPtr<ResultCursor> DefaultScheduler::executeInsertInto(
     Transaction* txn,
     ExecutionContext* execution_context,
     RefPtr<InsertIntoNode> insert_into) {
-  auto values_spec = insert_into->getValuesSpec();
-
   Vector<Pair<String, SValue>> data;
-
-  for (auto spec : values_spec) {
+  auto value_specs = insert_into->getValueSpecs();
+  for (auto spec : value_specs) {
     auto expr = txn->getCompiler()->buildValueExpression(txn, spec.expr);
     auto program = expr.program();
     if (program->has_aggregate_) {
@@ -367,11 +365,9 @@ ScopedPtr<ResultCursor> DefaultScheduler::executeInsertJSON(
     Transaction* txn,
     ExecutionContext* execution_context,
     RefPtr<InsertJSONNode> insert_json) {
-  auto json = json::parseJSON(insert_json->getJSON());
   auto res = txn->getTableProvider()->insertRecord(
       insert_json->getTableName(),
-      json.begin(),
-      json.end());
+      insert_json->getJSON());
 
   if (!res.isSuccess()) {
     RAISE(kRuntimeError, res.message());

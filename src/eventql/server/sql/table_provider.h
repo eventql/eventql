@@ -66,8 +66,7 @@ public:
 
   Status insertRecord(
       const String& table_name,
-      const json::JSONObject::const_iterator& data_begin,
-      const json::JSONObject::const_iterator& data_end) override;
+      const String& json_str) override;
 
   const String& getNamespace() const;
 
