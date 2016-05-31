@@ -28,8 +28,11 @@
 namespace eventql {
 
 struct IniParserState {
-  IniParserState(ProcessConfigBuilder* _cfg) : cfg(_cfg), status(Status::success()) {}
-  ProcessConfigBuilder* cfg;
+  IniParserState(
+      ProcessConfigBuilder* _cfg_builder) :
+      cfg_builder(_cfg_builder),
+      status(Status::success()) {}
+  ProcessConfigBuilder* cfg_builder;
   Status status;
 };
 
@@ -58,14 +61,8 @@ static int ini_parse_handler(
     const char* name,
     const char* value) {
   auto parser_state = (IniParserState*) user;
-  parser_state->cfg->setProperty(section, name, value);
-  return 1; //FIXME validation
-//  if (status.isSuccess()) {
-//    return 1;
-//  } else {
-//    parser_state->status = status;
-//    return 0;
-//  }
+  parser_state->cfg_builder->setProperty(section, name, value);
+  return 1;
 }
 
 Status ProcessConfigBuilder::loadFile(const String& file) {
