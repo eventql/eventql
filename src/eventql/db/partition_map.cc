@@ -67,15 +67,39 @@ Option<RefPtr<Table>> PartitionMap::findTableWithLock(
   }
 }
 
-void PartitionMap::configureTable(const TableDefinition& table) {
+void PartitionMap::configureTable(
+    const TableDefinition& table,
+    Set<SHA1Hash>* affected_partitions /* = nullptr */) {
   std::unique_lock<std::mutex> lk(mutex_);
   auto tbl_key = table.customer() + "~" + table.table_name();
+  bool metadata_changed = false;
 
-  auto iter = tables_.find(tbl_key);
-  if (iter == tables_.end()) {
-    tables_.emplace(tbl_key, new Table(table));
-  } else {
-    iter->second->updateConfig(table);
+  {
+    auto iter = tables_.find(tbl_key);
+    if (iter == tables_.end()) {
+      tables_.emplace(tbl_key, new Table(table));
+    } else {
+      auto last_metadata_txn = iter->second->getLastMetadataTransaction();
+      if (table.metadata_txnseq() > last_metadata_txn.getSequenceNumber()) {
+        metadata_changed = true;
+      }
+
+      iter->second->updateConfig(table);
+    }
+  }
+
+  if (metadata_changed && affected_partitions != nullptr) {
+    auto key_prefix = tbl_key + "~";
+    auto iter = partitions_.lower_bound(key_prefix);
+    for (; iter != partitions_.end(); ++iter) {
+      if (!StringUtil::beginsWith(iter->first, key_prefix)) {
+        break;
+      }
+
+      auto partition_id_str = iter->first.substr(key_prefix.size());
+      affected_partitions->emplace(
+          SHA1Hash(partition_id_str.data(), partition_id_str.size()));
+    }
   }
 }
 
@@ -119,7 +143,10 @@ void PartitionMap::open() {
     auto table_key = value.toString();
     auto table = findTableWithLock(tsdb_namespace, table_key);
 
-    partitions_.emplace(db_key, mkScoped(new LazyPartition()));
+    auto mem_key = tsdb_namespace + "~" + table_key + "~";
+    mem_key.append((char*) partition_key.data(), partition_key.size());
+
+    partitions_.emplace(mem_key, mkScoped(new LazyPartition()));
 
     if (table.isEmpty()) {
       logWarning(
@@ -166,8 +193,11 @@ RefPtr<Partition> PartitionMap::findOrCreatePartition(
   auto db_key = tsdb_namespace + "~";
   db_key.append((char*) partition_key.data(), partition_key.size());
 
+  auto mem_key = tsdb_namespace + "~" + table_name + "~";
+  mem_key.append((char*) partition_key.data(), partition_key.size());
+
   std::unique_lock<std::mutex> lk(mutex_);
-  auto iter = partitions_.find(db_key);
+  auto iter = partitions_.find(mem_key);
   if (iter != partitions_.end()) {
     if (iter->second->isLoaded()) {
       return iter->second->getPartition();
@@ -197,7 +227,7 @@ RefPtr<Partition> PartitionMap::findOrCreatePartition(
       partition_key,
       cfg_);
 
-  partitions_.emplace(db_key, mkScoped(new LazyPartition(partition)));
+  partitions_.emplace(mem_key, mkScoped(new LazyPartition(partition)));
 
   auto txn = db_->startTransaction(false);
   txn->update(
@@ -223,8 +253,11 @@ Option<RefPtr<Partition>> PartitionMap::findPartition(
   auto db_key = tsdb_namespace + "~";
   db_key.append((char*) partition_key.data(), partition_key.size());
 
+  auto mem_key = tsdb_namespace + "~" + table_name + "~";
+  mem_key.append((char*) partition_key.data(), partition_key.size());
+
   std::unique_lock<std::mutex> lk(mutex_);
-  auto iter = partitions_.find(db_key);
+  auto iter = partitions_.find(mem_key);
   if (iter == partitions_.end()) {
     return None<RefPtr<Partition>>();
   } else {
@@ -333,11 +366,14 @@ bool PartitionMap::dropLocalPartition(
   auto db_key = tsdb_namespace + "~";
   db_key.append((char*) partition_key.data(), partition_key.size());
 
+  auto mem_key = tsdb_namespace + "~" + table_name + "~";
+  mem_key.append((char*) partition_key.data(), partition_key.size());
+
   /* grab the main lock */
   std::unique_lock<std::mutex> lk(mutex_);
 
   /* delete from in memory partition map */
-  auto iter = partitions_.find(db_key);
+  auto iter = partitions_.find(mem_key);
   if (iter == partitions_.end()) {
     /* somebody else already deleted this partition */
     return true;

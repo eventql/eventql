@@ -51,6 +51,22 @@ message PartitionDiscoveryResponse {
   required uint64 txnseq = 3;
 };
 
+message PartitionListRequest {
+  required string db_namespace = 1;
+  required string table_id = 2;
+  required bytes keyrange_begin = 3;
+  required bytes keyrange_end = 4;
+};
+
+message PartitionListResponseEntry {
+  required bytes partition_id = 1;
+  repeated string servers = 2;
+};
+
+message PartitionListResponse {
+  repeated PartitionListResponseEntry partitions = 1;
+};
+
 message MetadataOperationEnvelope {
   required string db_namespace = 1;
   required string table_id = 2;

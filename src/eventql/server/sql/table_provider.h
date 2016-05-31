@@ -23,6 +23,7 @@
  * code of your own applications
  */
 #pragma once
+#include "eventql/eventql.h"
 #include <eventql/util/stdtypes.h>
 #include <eventql/sql/runtime/tablerepository.h>
 #include <eventql/auth/internal_auth.h>
@@ -34,8 +35,6 @@
 #include <eventql/db/table_service.h>
 #include "eventql/server/sql/table_scan.h"
 
-#include "eventql/eventql.h"
-
 namespace eventql {
 class TableService;
 
@@ -45,6 +44,7 @@ public:
   TSDBTableProvider(
       const String& tsdb_namespace,
       PartitionMap* partition_map,
+      ConfigDirectory* cdir,
       ReplicationScheme* replication_scheme,
       TableService* table_service,
       InternalAuth* auth);
@@ -54,12 +54,24 @@ public:
       csql::ExecutionContext* execution_context,
       RefPtr<csql::SequentialScanNode> seqscan) const override;
 
+  static KeyRange findKeyRange(
+      const String& partition_key,
+      const Vector<csql::ScanConstraint>& constraints);
+
   void listTables(
       Function<void (const csql::TableInfo& table)> fn) const override;
 
   Option<csql::TableInfo> describe(const String& table_name) const override;
 
   Status createTable(const csql::CreateTableNode& req) override;
+
+  Status insertRecord(
+      const String& table_name,
+      Vector<Pair<String, csql::SValue>> data) override;
+
+  Status insertRecord(
+      const String& table_name,
+      const String& json_str) override;
 
   const String& getNamespace() const;
 
@@ -69,6 +81,7 @@ protected:
 
   String tsdb_namespace_;
   PartitionMap* partition_map_;
+  ConfigDirectory* cdir_;
   ReplicationScheme* replication_scheme_;
   TableService* table_service_;
   InternalAuth* auth_;

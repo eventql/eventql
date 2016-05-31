@@ -73,12 +73,14 @@ public:
       ServerCfg* cfg);
 
   Partition(
+      SHA1Hash partition_id,
       ServerCfg* cfg,
       RefPtr<PartitionSnapshot> snap,
       RefPtr<Table> table);
 
   ~Partition();
 
+  SHA1Hash getPartitionID() const;
   SHA1Hash uuid() const;
 
   RefPtr<PartitionWriter> getWriter();
@@ -101,6 +103,7 @@ protected:
   bool upgradeToLSMv2() const;
   void backfillKeyRange();
 
+  SHA1Hash partition_id_;
   ServerCfg* cfg_;
   PartitionSnapshotRef head_;
   RefPtr<Table> table_;

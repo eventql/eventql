@@ -54,6 +54,9 @@ public:
     Vector<PartitionPlacement> split_servers_high;
   };
 
+  using PartitionMapIter =
+      Vector<MetadataFile::PartitionMapEntry>::const_iterator;
+
   MetadataFile();
   MetadataFile(
       const SHA1Hash& transaction_id,
@@ -67,6 +70,31 @@ public:
   KeyspaceType getKeyspaceType() const;
 
   const Vector<PartitionMapEntry>& getPartitionMap() const;
+  PartitionMapIter getPartitionMapBegin() const;
+  PartitionMapIter getPartitionMapEnd() const;
+
+  /**
+   * Returns an iterator to the partition that handles the keyrange which
+   * includes the provided key
+   */
+  PartitionMapIter getPartitionMapAt(const String& key) const;
+
+  /**
+   * Returns an iterator to the first partition that contains keys from the range
+   * [begin, end)
+   */
+  PartitionMapIter getPartitionMapRangeBegin(const String& begin) const;
+
+  /**
+   * Returns an iterator to the first partition that does not contain keys from
+   * the range  [begin, end)
+   */
+  PartitionMapIter getPartitionMapRangeEnd(const String& end) const;
+
+  /**
+   * Compare two keys, returns -1 if a < b, 0 if a == b and 1 if a > b
+   */
+  int compareKeys(const String& a, const String& b) const;
 
   Status decode(InputStream* is);
   Status encode(OutputStream* os) const;

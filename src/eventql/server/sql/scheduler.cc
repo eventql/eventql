@@ -23,8 +23,10 @@
  * code of your own applications
  */
 #include <eventql/server/sql/scheduler.h>
+#include <eventql/server/sql/table_provider.h>
 #include <eventql/server/sql/pipelined_expression.h>
 #include <eventql/sql/qtree/QueryTreeUtil.h>
+#include <eventql/db/metadata_client.h>
 
 #include "eventql/eventql.h"
 
@@ -32,9 +34,11 @@ namespace eventql {
 
 Scheduler::Scheduler(
     PartitionMap* pmap,
+    ConfigDirectory* cdir,
     InternalAuth* auth,
     ReplicationScheme* repl_scheme) :
     pmap_(pmap),
+    cdir_(cdir),
     auth_(auth),
     repl_scheme_(repl_scheme),
     running_cnt_(0) {}
@@ -177,8 +181,37 @@ Vector<Scheduler::PipelinedQueryTree> Scheduler::pipelineExpression(
     RAISE(kIllegalStateError, "can't pipeline query tree");
   }
 
-  auto partitioner = table.get()->partitioner();
-  auto partitions = partitioner->listPartitions(seqscan->constraints());
+  auto db_namespace =
+      static_cast<Session*>(txn->getUserData())->getEffectiveNamespace();
+
+  Set<SHA1Hash> partitions;
+  if (table.get()->partitionerType() == TBL_PARTITION_TIMEWINDOW) {
+    auto keyrange = TSDBTableProvider::findKeyRange(
+        table.get()->config().config().partition_key(),
+        seqscan->constraints());
+
+    MetadataClient metadata_client(cdir_);
+    PartitionListResponse partition_list;
+    auto rc = metadata_client.listPartitions(
+        db_namespace,
+        table_ref.table_key,
+        keyrange,
+        &partition_list);
+
+    if (!rc.isSuccess()) {
+      RAISEF(kRuntimeError, "metadata lookup failure: $0", rc.message());
+    }
+
+    for (const auto& p : partition_list.partitions()) {
+      partitions.emplace(
+          SHA1Hash(p.partition_id().data(), p.partition_id().size()));
+    }
+  } else {
+    auto partitioner = table.get()->partitioner();
+    for (const auto& p : partitioner->listPartitions(seqscan->constraints())) {
+      partitions.emplace(p);
+    }
+  }
 
   Vector<PipelinedQueryTree> shards;
   for (const auto& partition : partitions) {

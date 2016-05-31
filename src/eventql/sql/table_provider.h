@@ -24,6 +24,7 @@
 #pragma once
 #include <eventql/util/option.h>
 #include <eventql/util/status.h>
+#include <eventql/sql/svalue.h>
 #include <eventql/sql/table_schema.h>
 #include <eventql/sql/TableInfo.h>
 #include <eventql/sql/expressions/table_expression.h>
@@ -51,6 +52,17 @@ public:
     RAISE(kRuntimeError, "can't create tables");
   }
 
+  virtual Status insertRecord(
+      const String& table_name,
+      Vector<Pair<String, SValue>> data) {
+    RAISE(kRuntimeError, "can't insert");
+  }
+
+  virtual Status insertRecord(
+      const String& table_name,
+      const String& json_str) {
+    RAISE(kRuntimeError, "can't insert");
+  }
 };
 
 }

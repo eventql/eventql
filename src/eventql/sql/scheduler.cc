@@ -325,6 +325,58 @@ ScopedPtr<ResultCursor> DefaultScheduler::executeCreateTable(
   return mkScoped(new EmptyResultCursor());
 }
 
+ScopedPtr<ResultCursor> DefaultScheduler::executeInsertInto(
+    Transaction* txn,
+    ExecutionContext* execution_context,
+    RefPtr<InsertIntoNode> insert_into) {
+  Vector<Pair<String, SValue>> data;
+  auto value_specs = insert_into->getValueSpecs();
+  for (auto spec : value_specs) {
+    auto expr = txn->getCompiler()->buildValueExpression(txn, spec.expr);
+    auto program = expr.program();
+    if (program->has_aggregate_) {
+      RAISE(
+          kRuntimeError,
+          "insert into expression must not contain aggregation"); //FIXME better msg
+    }
+
+    SValue value;
+    VM::evaluate(txn, program, 0, nullptr, &value);
+
+    Pair<String, SValue> result;
+    result.first = spec.column;
+    result.second = value;
+    data.emplace_back(result);
+  }
+
+  auto res = txn->getTableProvider()->insertRecord(
+      insert_into->getTableName(),
+      data);
+
+  if (!res.isSuccess()) {
+    RAISE(kRuntimeError, res.message());
+  }
+
+  // FIXME return result...
+  return mkScoped(new EmptyResultCursor());
+}
+
+ScopedPtr<ResultCursor> DefaultScheduler::executeInsertJSON(
+    Transaction* txn,
+    ExecutionContext* execution_context,
+    RefPtr<InsertJSONNode> insert_json) {
+  auto res = txn->getTableProvider()->insertRecord(
+      insert_json->getTableName(),
+      insert_json->getJSON());
+
+  if (!res.isSuccess()) {
+    RAISE(kRuntimeError, res.message());
+  }
+
+  // FIXME return result...
+  return mkScoped(new EmptyResultCursor());
+}
+
 ScopedPtr<ResultCursor> DefaultScheduler::execute(
     QueryPlan* query_plan,
     ExecutionContext* execution_context,
@@ -343,6 +395,20 @@ ScopedPtr<ResultCursor> DefaultScheduler::execute(
         query_plan->getTransaction(),
         execution_context,
         stmt.asInstanceOf<CreateTableNode>());
+  }
+
+  if (stmt.isInstanceOf<InsertIntoNode>()) {
+    return executeInsertInto(
+        query_plan->getTransaction(),
+        execution_context,
+        stmt.asInstanceOf<InsertIntoNode>());
+  }
+
+  if (stmt.isInstanceOf<InsertJSONNode>()) {
+    return executeInsertJSON(
+        query_plan->getTransaction(),
+        execution_context,
+        stmt.asInstanceOf<InsertJSONNode>());
   }
 
   if (stmt.isInstanceOf<TableExpressionNode>()) {

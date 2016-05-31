@@ -80,12 +80,10 @@ RefPtr<Partition> LazyPartition::getPartition() {
   return partition;
 }
 
-
 bool LazyPartition::isLoaded() const {
   std::unique_lock<std::mutex> lk(mutex_);
   return partition_.get() != nullptr;
 }
 
-
-
 }
+

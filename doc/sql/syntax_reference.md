@@ -97,3 +97,10 @@ Syntax Reference
       | column_name [REPEATED] RECORD ( column_definition, column_definition, ...)
       | PRIMARY KEY ( column_name [, column_name1 , column_name2, ... ] )
 
+
+### The INSERT statement
+
+    INSERT INTO table_name
+      (column_name, ...) VALUES (expr, ...)
+    | FROM JSON "{ ... }"
+

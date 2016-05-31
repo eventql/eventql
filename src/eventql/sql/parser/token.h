@@ -94,6 +94,10 @@ public:
     T_PRIMARY,
     T_KEY,
     T_REPEATED,
+    T_INSERT,
+    T_INTO,
+    T_VALUES,
+    T_JSON,
 
     T_JOIN,
     T_CROSS,

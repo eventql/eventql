@@ -22,6 +22,7 @@
  * code of your own applications
  */
 #include "eventql/db/metadata_file.h"
+#include "eventql/util/inspect.h"
 
 namespace eventql {
 
@@ -52,6 +53,88 @@ KeyspaceType MetadataFile::getKeyspaceType() const {
 const Vector<MetadataFile::PartitionMapEntry>&
     MetadataFile::getPartitionMap() const {
   return partition_map_;
+}
+
+MetadataFile::PartitionMapIter MetadataFile::getPartitionMapBegin() const {
+  return partition_map_.begin();
+}
+
+MetadataFile::PartitionMapIter MetadataFile::getPartitionMapEnd() const {
+  return partition_map_.end();
+}
+
+MetadataFile::PartitionMapIter MetadataFile::getPartitionMapAt(
+    const String& key) const {
+  size_t low = 0;
+  size_t high = partition_map_.size() - 1;
+  while (low != high) {
+    size_t mid = (low + high + 1) / 2;
+    int cmp = compareKeys(partition_map_[mid].begin, key);
+    if (cmp < 0) {
+      low = mid;
+    } else if (cmp > 0) {
+      if (mid == 0) {
+        return partition_map_.begin();
+      }
+
+      high = mid - 1;
+    } else {
+      return partition_map_.begin() + mid;
+    }
+  }
+
+  return partition_map_.begin() + low;
+}
+
+MetadataFile::PartitionMapIter MetadataFile::getPartitionMapRangeBegin(
+    const String& begin) const {
+  if (begin.empty()) {
+    return getPartitionMapBegin();
+  } else {
+    return getPartitionMapAt(begin);
+  }
+}
+
+MetadataFile::PartitionMapIter MetadataFile::getPartitionMapRangeEnd(
+    const String& end) const {
+  if (end.empty()) {
+    return getPartitionMapEnd();
+  } else {
+    return getPartitionMapAt(end) + 1;
+  }
+}
+
+int MetadataFile::compareKeys(const String& a, const String& b) const {
+  switch (keyspace_type_) {
+    case KEYSPACE_STRING: {
+      if (a < b) {
+        return -1;
+      } else if (a > b) {
+        return 1;
+      } else {
+        return 0;
+      }
+    }
+
+    case KEYSPACE_UINT64: {
+      uint64_t a_uint = 0;
+      uint64_t b_uint = 0;
+      if (a.size() == sizeof(uint64_t)) {
+        memcpy(&a_uint, a.data(), sizeof(uint64_t));
+      }
+      if (b.size() == sizeof(uint64_t)) {
+        memcpy(&b_uint, b.data(), sizeof(uint64_t));
+      }
+
+      if (a_uint < b_uint) {
+        return -1;
+      } else if (a_uint > b_uint) {
+        return 1;
+      } else {
+        return 0;
+      }
+    }
+  }
 }
 
 static Status decodeServerList(

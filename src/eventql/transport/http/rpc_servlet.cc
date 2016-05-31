@@ -157,6 +157,13 @@ void RPCServlet::handleHTTPRequest(
       return;
     }
 
+    if (uri.path() == "/rpc/list_partitions") {
+      req_stream->readBody();
+      listPartitions(uri, &req, &res);
+      res_stream->writeResponse(res);
+      return;
+    }
+
     res.setStatus(http::kStatusNotFound);
     res.addBody("not found");
     res_stream->writeResponse(res);
@@ -549,8 +556,6 @@ void RPCServlet::discoverPartitionMetadata(
     const URI& uri,
     const http::HTTPRequest* req,
     http::HTTPResponse* res) {
-  const auto& params = uri.queryParams();
-
   PartitionDiscoveryRequest request;
   msg::decode(req->body(), &request);
 
@@ -644,6 +649,26 @@ void RPCServlet::fetchLatestMetadataFile(
 
   if (rc.isSuccess()) {
     res->setStatus(http::kStatusOK);
+  } else {
+    res->setStatus(http::kStatusInternalServerError);
+    res->addBody("ERROR: " + rc.message());
+    return;
+  }
+}
+
+void RPCServlet::listPartitions(
+    const URI& uri,
+    const http::HTTPRequest* req,
+    http::HTTPResponse* res) {
+  PartitionListRequest request;
+  msg::decode(req->body(), &request);
+
+  PartitionListResponse response;
+  auto rc = metadata_service_->listPartitions(request, &response);
+
+  if (rc.isSuccess()) {
+    res->setStatus(http::kStatusOK);
+    res->addBody(*msg::encode(response));
   } else {
     res->setStatus(http::kStatusInternalServerError);
     res->addBody("ERROR: " + rc.message());

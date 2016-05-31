@@ -519,7 +519,12 @@ int main(int argc, const char** argv) {
           new csql::QueryPlanBuilder(
               csql::QueryPlanBuilderOptions{},
               symbols.get()),
-          mkScoped(new Scheduler(&partition_map, internal_auth.get(), repl_scheme.get()))));
+          mkScoped(
+              new Scheduler(
+                  &partition_map,
+                  config_dir.get(),
+                  internal_auth.get(),
+                  repl_scheme.get()))));
 
       sql->setCacheDir(flags.getString("cachedir"));
       sql->symbols()->registerFunction("z1_version", &z1VersionExpr);
@@ -529,6 +534,7 @@ int main(int argc, const char** argv) {
     eventql::SQLService sql_service(
         sql.get(),
         &partition_map,
+        config_dir.get(),
         repl_scheme.get(),
         internal_auth.get(),
         &table_service);
@@ -551,8 +557,18 @@ int main(int argc, const char** argv) {
 
     /* open tables */
     config_dir->setTableConfigChangeCallback(
-        [&partition_map] (const TableDefinition& tbl) {
-      partition_map.configureTable(tbl);
+        [&partition_map, &tsdb_replication] (const TableDefinition& tbl) {
+      Set<SHA1Hash> affected_partitions;
+      partition_map.configureTable(tbl, &affected_partitions);
+
+      for (const auto& partition_id : affected_partitions) {
+        auto partition = partition_map.findPartition(
+            tbl.customer(),
+            tbl.table_name(),
+            partition_id);
+
+        tsdb_replication.enqueuePartition(partition.get());
+      }
     });
 
     config_dir->listTables([&partition_map] (const TableDefinition& tbl) {

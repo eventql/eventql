@@ -70,7 +70,7 @@ Status MetadataOperation::encode(OutputStream* os) const {
 Status MetadataOperation::perform(
     const MetadataFile& input,
     Vector<MetadataFile::PartitionMapEntry>* output) const {
-  logDebug("evqld", "Performing metadata operation: $0", data_.DebugString());
+  logTrace("evqld", "Performing metadata operation: $0", data_.DebugString());
 
   switch (data_.optype()) {
     case METAOP_BACKFILL_ADD_SERVER:

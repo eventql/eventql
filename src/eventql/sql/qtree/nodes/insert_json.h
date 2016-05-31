@@ -2,6 +2,7 @@
  * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
  * Authors:
  *   - Paul Asmuth <paul@zscale.io>
+ *   - Laura Schlimmer <laura@zscale.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -21,41 +22,32 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#pragma once
 #include "eventql/eventql.h"
-#include <eventql/server/sql_service.h>
-#include <eventql/server/sql/table_provider.h>
-#include <eventql/sql/runtime/runtime.h>
+#include <eventql/util/stdtypes.h>
+#include <eventql/sql/qtree/QueryTreeNode.h>
 
-namespace eventql {
+namespace csql {
 
-SQLService::SQLService(
-    csql::Runtime* sql,
-    PartitionMap* pmap,
-    ConfigDirectory* cdir,
-    ReplicationScheme* repl,
-    InternalAuth* auth,
-    TableService* table_service) :
-    sql_(sql),
-    pmap_(pmap),
-    cdir_(cdir),
-    repl_(repl),
-    auth_(auth),
-    table_service_(table_service) {}
+class InsertJSONNode : public QueryTreeNode {
+public:
 
-ScopedPtr<csql::Transaction> SQLService::startTransaction(Session* session) {
-  auto txn = sql_->newTransaction();
-  txn->setUserData(session);
-  txn->setTableProvider(
-      new TSDBTableProvider(
-          session->getEffectiveNamespace(),
-          pmap_,
-          cdir_,
-          repl_,
-          table_service_,
-          auth_));
+  InsertJSONNode(const String& table_name, const String& json);
 
-  return txn;
-}
+  InsertJSONNode(const InsertJSONNode& node);
 
-} // namespace eventql
+  const String& getTableName() const;
+  const String& getJSON() const;
+
+  RefPtr<QueryTreeNode> deepCopy() const;
+  String toString() const;
+
+protected:
+  String table_name_;
+  String json_;
+};
+
+} // namespace csql
+
+
 

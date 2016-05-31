@@ -26,6 +26,7 @@
 #include "eventql/util/status.h"
 #include "eventql/db/metadata_operation.h"
 #include "eventql/db/metadata_file.h"
+#include "eventql/db/Partition.h"
 #include "eventql/config/config_directory.h"
 
 namespace eventql {
@@ -37,8 +38,14 @@ public:
 
   Status fetchLatestMetadataFile(
       const String& ns,
-      const String& table_od,
+      const String& table_id,
       MetadataFile* file);
+
+  Status listPartitions(
+      const String& ns,
+      const String& table_id,
+      const KeyRange& keyrange,
+      PartitionListResponse* res);
 
 protected:
   ConfigDirectory* cdir_;

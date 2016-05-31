@@ -77,7 +77,7 @@ RefPtr<Partition> Partition::create(
 
   auto snap = mkRef(new PartitionSnapshot(state, pdir, pdir_rel, 0));
   snap->writeToDisk();
-  return new Partition(cfg, snap, table);
+  return new Partition(partition_key, cfg, snap, table);
 }
 
 RefPtr<Partition> Partition::reopen(
@@ -113,13 +113,15 @@ RefPtr<Partition> Partition::reopen(
       nrecs);
 
   auto snap = mkRef(new PartitionSnapshot(state, pdir, pdir_rel, nrecs));
-  return new Partition(cfg, snap, table);
+  return new Partition(partition_key, cfg, snap, table);
 }
 
 Partition::Partition(
+    SHA1Hash partition_id,
     ServerCfg* cfg,
     RefPtr<PartitionSnapshot> head,
     RefPtr<Table> table) :
+    partition_id_(partition_id),
     cfg_(cfg),
     head_(head),
     table_(table) {

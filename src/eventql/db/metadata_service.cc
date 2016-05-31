@@ -178,5 +178,35 @@ Status MetadataService::discoverPartition(
   return Status::success();
 }
 
+Status MetadataService::listPartitions(
+    const PartitionListRequest& request,
+    PartitionListResponse* response) {
+  RefPtr<MetadataFile> file;
+  {
+    auto rc = getMetadataFile(
+        request.db_namespace(),
+        request.table_id(),
+        &file);
+    if (!rc.isSuccess()) {
+      return rc;
+    }
+  }
+
+  auto iter = file->getPartitionMapRangeBegin(request.keyrange_begin());
+  auto end = file->getPartitionMapRangeEnd(request.keyrange_end());
+  for (; iter != end; ++iter) {
+    auto e = response->add_partitions();
+    e->set_partition_id(iter->partition_id.data(), iter->partition_id.size());
+    for (const auto& s : iter->servers) {
+      e->add_servers(s.server_id);
+    }
+    for (const auto& s : iter->servers_leaving) {
+      e->add_servers(s.server_id);
+    }
+  }
+
+  return Status::success();
+}
+
 } // namespace eventql
 

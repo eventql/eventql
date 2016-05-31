@@ -65,6 +65,10 @@ public:
       const PartitionDiscoveryRequest& request,
       PartitionDiscoveryResponse* response);
 
+  Status listPartitions(
+      const PartitionListRequest& request,
+      PartitionListResponse* response);
+
 protected:
   ConfigDirectory* cdir_;
   MetadataStore* metadata_store_;
