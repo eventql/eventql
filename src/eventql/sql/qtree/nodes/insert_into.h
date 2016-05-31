@@ -33,7 +33,7 @@ namespace csql {
 class InsertIntoNode : public QueryTreeNode {
 public:
 
-  enum InsertValueType { SCALAR, RECORD };
+  enum InsertValueType { SCALAR};
 
   struct InsertValueSpec {
     InsertValueType type;
@@ -48,7 +48,7 @@ public:
   InsertIntoNode(const InsertIntoNode& node);
 
   const String& getTableName() const;
-  Vector<InsertValueSpec> getValuesSpec() const;
+  Vector<InsertValueSpec> getValueSpecs() const;
 
   RefPtr<QueryTreeNode> deepCopy() const;
   String toString() const;

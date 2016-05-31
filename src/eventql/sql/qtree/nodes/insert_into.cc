@@ -41,7 +41,7 @@ const String& InsertIntoNode::getTableName() const {
   return table_name_;
 }
 
-Vector<InsertIntoNode::InsertValueSpec> InsertIntoNode::getValuesSpec() const {
+Vector<InsertIntoNode::InsertValueSpec> InsertIntoNode::getValueSpecs() const {
   return values_spec_;
 }
 
