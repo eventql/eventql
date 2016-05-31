@@ -43,22 +43,29 @@ MetadataReplication::MetadataReplication(
 }
 
 void MetadataReplication::applyTableConfigChange(const TableDefinition& cfg) {
+  bool has_local_replica = false;
+  Vector<String> servers;
   for (const auto& s : cfg.metadata_servers()) {
     if (s == server_name_) {
-      ReplicationJob job;
-      job.db_namespace = cfg.customer();
-      job.table_id = cfg.table_name();
-      job.transaction_id = SHA1Hash(
-          cfg.metadata_txnid().data(),
-          cfg.metadata_txnid().size());
-      job.servers = Vector<String>(
-          cfg.metadata_servers().begin(),
-          cfg.metadata_servers().end());
-
-      queue_.insert(job, WallClock::now());
-      break;
+      has_local_replica = true;
+    } else {
+      servers.emplace_back(s);
     }
   }
+
+  if (!has_local_replica) {
+    return;
+  }
+
+  ReplicationJob job;
+  job.db_namespace = cfg.customer();
+  job.table_id = cfg.table_name();
+  job.servers = servers;
+  job.transaction_id = SHA1Hash(
+      cfg.metadata_txnid().data(),
+      cfg.metadata_txnid().size());
+
+  queue_.insert(job, WallClock::now());
 }
 
 void MetadataReplication::replicateWithRetries(const ReplicationJob& job) {
