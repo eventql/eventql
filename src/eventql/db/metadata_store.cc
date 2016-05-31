@@ -53,6 +53,14 @@ Status MetadataStore::getMetadataFile(
   return Status::success();
 }
 
+bool MetadataStore::hasMetadataFile(
+    const String& ns,
+    const String& table_name,
+    const SHA1Hash& txid) {
+  auto file_path = getPath(ns, table_name, txid);
+  return FileUtil::exists(file_path);
+}
+
 Status MetadataStore::storeMetadataFile(
     const String& ns,
     const String& table_name,
