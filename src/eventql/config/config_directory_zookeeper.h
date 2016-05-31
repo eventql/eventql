@@ -40,6 +40,8 @@ public:
 
   ~ZookeeperConfigDirectory();
 
+  String getServerID() const override;
+
   ClusterConfig getClusterConfig() const override;
 
   void updateClusterConfig(ClusterConfig config) override;

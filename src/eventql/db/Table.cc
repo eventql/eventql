@@ -80,6 +80,11 @@ TableStorage Table::storage() const {
   return config_.config().storage();
 }
 
+const String& Table::getPartitionKey() const {
+  std::unique_lock<std::mutex> lk(mutex_);
+  return config_.config().partition_key();
+}
+
 TablePartitionerType Table::partitionerType() const {
   std::unique_lock<std::mutex> lk(mutex_);
   return config_.config().partitioner();
@@ -88,6 +93,16 @@ TablePartitionerType Table::partitionerType() const {
 RefPtr<TablePartitioner> Table::partitioner() const {
   std::unique_lock<std::mutex> lk(mutex_);
   return partitioner_;
+}
+
+MetadataTransaction Table::getLastMetadataTransaction() const {
+  std::unique_lock<std::mutex> lk(mutex_);
+
+  return MetadataTransaction(
+      SHA1Hash(
+          config_.metadata_txnid().data(),
+          config_.metadata_txnid().size()),
+      config_.metadata_txnseq());
 }
 
 void Table::updateConfig(TableDefinition new_config) {
@@ -106,10 +121,13 @@ void Table::loadConfig() {
         partitioner_ = RefPtr<TablePartitioner>(
             new TimeWindowPartitioner(
                 config_.table_name(),
+                config_.config().partition_key(),
                 config_.config().time_window_partitioner_config()));
       } else {
         partitioner_ = RefPtr<TablePartitioner>(
-            new TimeWindowPartitioner(config_.table_name()));
+            new TimeWindowPartitioner(
+                config_.table_name(),
+                config_.config().partition_key()));
       }
       break;
 

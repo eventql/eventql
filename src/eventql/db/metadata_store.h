@@ -41,10 +41,14 @@ public:
       const SHA1Hash& txid,
       RefPtr<MetadataFile>* file) const;
 
+  bool hasMetadataFile(
+      const String& ns,
+      const String& table_name,
+      const SHA1Hash& txid);
+
   Status storeMetadataFile(
       const String& ns,
       const String& table_name,
-      const SHA1Hash& txid,
       const MetadataFile& file);
 
 protected:

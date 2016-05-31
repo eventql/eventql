@@ -31,12 +31,13 @@
 #include <eventql/db/CompactionWorker.h>
 #include <eventql/db/TableConfig.pb.h>
 #include <eventql/db/TSDBTableInfo.h>
+#include <eventql/db/table_service.h>
 #include "eventql/server/sql/table_scan.h"
 
 #include "eventql/eventql.h"
 
 namespace eventql {
-class TSDBService;
+class TableService;
 
 struct TSDBTableProvider : public csql::TableProvider {
 public:
@@ -45,6 +46,7 @@ public:
       const String& tsdb_namespace,
       PartitionMap* partition_map,
       ReplicationScheme* replication_scheme,
+      TableService* table_service,
       InternalAuth* auth);
 
   Option<ScopedPtr<csql::TableExpression>> buildSequentialScan(
@@ -68,6 +70,7 @@ protected:
   String tsdb_namespace_;
   PartitionMap* partition_map_;
   ReplicationScheme* replication_scheme_;
+  TableService* table_service_;
   InternalAuth* auth_;
 };
 

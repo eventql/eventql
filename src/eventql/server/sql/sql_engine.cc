@@ -26,7 +26,7 @@
 #include <eventql/eventql.h>
 #include <eventql/server/sql/sql_engine.h>
 #include <eventql/server/sql/table_provider.h>
-#include <eventql/db/TSDBService.h>
+#include <eventql/db/table_service.h>
 #include <eventql/db/TimeWindowPartitioner.h>
 #include <eventql/db/FixedShardPartitioner.h>
 #include <eventql/sql/defaults.h>
@@ -47,17 +47,17 @@ namespace eventql {
 //  return query;
 //}
 
-RefPtr<csql::TableProvider> SQLEngine::tableProviderForNamespace(
-    PartitionMap* partition_map,
-    ReplicationScheme* replication_scheme,
-    InternalAuth* auth,
-    const String& tsdb_namespace) {
-  return new TSDBTableProvider(
-      tsdb_namespace,
-      partition_map,
-      replication_scheme,
-      auth);
-}
+//RefPtr<csql::TableProvider> SQLEngine::tableProviderForNamespace(
+//    PartitionMap* partition_map,
+//    ReplicationScheme* replication_scheme,
+//    InternalAuth* auth,
+//    const String& tsdb_namespace) {
+//  return new TSDBTableProvider(
+//      tsdb_namespace,
+//      partition_map,
+//      replication_scheme,
+//      auth);
+//}
 
 //void SQLEngine::rewriteTableTimeSuffix(
 //      RefPtr<csql::QueryTreeNode> node) {

@@ -24,7 +24,7 @@
 #pragma once
 #include "eventql/util/protobuf/MessageSchema.h"
 #include "eventql/util/io/inputstream.h"
-#include "eventql/db/TSDBService.h"
+#include "eventql/db/table_service.h"
 #include "eventql/auth/internal_auth.h"
 #include "eventql/config/namespace_config.h"
 #include "eventql/config/config_directory.h"
@@ -44,7 +44,7 @@ public:
   EventsService(
       ConfigDirectory* cdir,
       InternalAuth* auth,
-      eventql::TSDBService* tsdb,
+      eventql::TableService* tsdb,
       eventql::PartitionMap* pmap,
       eventql::ReplicationScheme* repl,
       csql::Runtime* sql);
@@ -107,7 +107,7 @@ public:
 protected:
   ConfigDirectory* cdir_;
   InternalAuth* auth_;
-  eventql::TSDBService* tsdb_;
+  eventql::TableService* tsdb_;
   eventql::PartitionMap* pmap_;
   eventql::ReplicationScheme* repl_;
   csql::Runtime* sql_;

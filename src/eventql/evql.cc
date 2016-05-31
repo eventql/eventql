@@ -244,7 +244,7 @@ static void printError(const String& error_string) {
 
 int main(int argc, const char** argv) {
   Application::init();
-  Application::logToStderr();
+  Application::logToStderr("evql");
 
   cli::FlagParser flags;
 

@@ -28,28 +28,110 @@
 #include <eventql/util/io/fileutil.h>
 #include <eventql/util/wallclock.h>
 #include <eventql/io/sstable/sstablereader.h>
-#include <eventql/db/TSDBService.h>
+#include <eventql/db/table_service.h>
 #include <eventql/db/LogPartitionReader.h>
 #include <eventql/db/PartitionState.pb.h>
+#include "eventql/db/metadata_coordinator.h"
+#include "eventql/db/metadata_file.h"
 
 #include "eventql/eventql.h"
 
 namespace eventql {
 
-TSDBService::TSDBService(
+TableService::TableService(
+    ConfigDirectory* cdir,
     PartitionMap* pmap,
     ReplicationScheme* repl,
     thread::EventLoop* ev,
     http::HTTPClientStats* http_stats) :
+    cdir_(cdir),
     pmap_(pmap),
     repl_(repl),
     http_(ev, http_stats) {}
 
-void TSDBService::createTable(const TableDefinition& table) {
-  pmap_->configureTable(table);
+Status TableService::createTable(
+    const String& db_namespace,
+    const String& table_name,
+    const msg::MessageSchema& schema,
+    Vector<String> primary_key) {
+
+  if (primary_key.size() < 1) {
+    return Status(
+        eIllegalArgumentError,
+        "can't create table without PRIMARY KEY");
+  }
+
+  for (const auto& col : primary_key) {
+    if (col.find(".") != String::npos) {
+      return Status(
+          eIllegalArgumentError,
+          StringUtil::format(
+              "nested column '$0' can't be part of the PRIMARY KEY",
+              col));
+    }
+  }
+
+  String partition_key = primary_key[0];
+  auto partition_key_type = schema.fieldType(schema.fieldId(partition_key));
+  if (partition_key_type != msg::FieldType::DATETIME) {
+    return Status(
+        eIllegalArgumentError,
+        "first column in the PRIMARY KEY must be of type DATETIME");
+  }
+
+  // generate new metadata file
+  Vector<String> all_servers;
+  for (const auto& s : cdir_->listServers()) {
+    all_servers.emplace_back(s.server_id());
+  }
+
+  auto txnid = Random::singleton()->sha1();
+  Vector<String> servers;
+  uint64_t idx = Random::singleton()->random64();
+  for (int i = 0; i < 3; ++i) {
+    servers.emplace_back(all_servers[++idx % all_servers.size()]);
+  }
+
+  MetadataFile metadata_file(txnid, 1, KEYSPACE_UINT64, {});
+
+  // generate new table config
+  TableDefinition td;
+  td.set_customer(db_namespace);
+  td.set_table_name(table_name);
+  td.set_metadata_txnid(txnid.data(), txnid.size());
+  td.set_metadata_txnseq(1);
+  for (const auto& s : servers) {
+    td.add_metadata_servers(s);
+  }
+
+  auto tblcfg = td.mutable_config();
+  tblcfg->set_schema(schema.encode().toString());
+  tblcfg->set_num_shards(1);
+  tblcfg->set_partitioner(eventql::TBL_PARTITION_TIMEWINDOW);
+  tblcfg->set_storage(eventql::TBL_STORAGE_COLSM);
+  tblcfg->set_partition_key(partition_key);
+  for (const auto& col : primary_key) {
+    tblcfg->add_primary_key(col);
+  }
+
+  // create metadata file on metadata servers
+  eventql::MetadataCoordinator coordinator(cdir_);
+  auto rc = coordinator.createFile(
+      db_namespace,
+      table_name,
+      metadata_file,
+      servers);
+
+  if (!rc.isSuccess()) {
+    return rc;
+  }
+
+  // create table config
+  cdir_->updateTableConfig(td);
+  return Status::success();
 }
 
-void TSDBService::listTables(
+void TableService::listTables(
     const String& tsdb_namespace,
     Function<void (const TSDBTableInfo& table)> fn) const {
   pmap_->listTables(
@@ -59,7 +141,7 @@ void TSDBService::listTables(
   });
 }
 
-void TSDBService::listTablesReverse(
+void TableService::listTablesReverse(
     const String& tsdb_namespace,
     Function<void (const TSDBTableInfo& table)> fn) const {
   pmap_->listTablesReverse(
@@ -69,7 +151,7 @@ void TSDBService::listTablesReverse(
   });
 }
 
-void TSDBService::insertRecords(
+void TableService::insertRecords(
     const RecordEnvelopeList& record_list,
     uint64_t flags /* = 0 */) {
   Vector<RefPtr<Partition>> partition_refs;
@@ -127,7 +209,7 @@ void TSDBService::insertRecords(
   }
 }
 
-void TSDBService::insertRecords(
+void TableService::insertRecords(
     const Vector<RecordEnvelope>& records,
     uint64_t flags /* = 0 */) {
   Vector<RefPtr<Partition>> partition_refs;
@@ -185,7 +267,7 @@ void TSDBService::insertRecords(
   }
 }
 
-void TSDBService::insertRecord(
+void TableService::insertRecord(
     const String& tsdb_namespace,
     const String& table_name,
     const SHA1Hash& partition_key,
@@ -198,7 +280,7 @@ void TSDBService::insertRecord(
   insertRecords(tsdb_namespace, table_name, partition_key, records, flags);
 }
 
-void TSDBService::insertRecord(
+void TableService::insertRecord(
     const String& tsdb_namespace,
     const String& table_name,
     const SHA1Hash& record_id,
@@ -222,7 +304,7 @@ void TSDBService::insertRecord(
       flags);
 }
 
-void TSDBService::insertRecord(
+void TableService::insertRecord(
     const String& tsdb_namespace,
     const String& table_name,
     const SHA1Hash& record_id,
@@ -234,7 +316,7 @@ void TSDBService::insertRecord(
     RAISEF(kNotFoundError, "table not found: $0", table_name);
   }
 
-  auto partition_key_field_name = "time";
+  auto partition_key_field_name = table.get()->getPartitionKey();
   auto partition_key_field = data.getField(partition_key_field_name);
   if (partition_key_field.isEmpty()) {
     RAISEF(kNotFoundError, "missing field: $0", partition_key_field_name);
@@ -256,7 +338,7 @@ void TSDBService::insertRecord(
       flags);
 }
 
-void TSDBService::insertRecords(
+void TableService::insertRecords(
     const String& tsdb_namespace,
     const String& table_name,
     const SHA1Hash& partition_key,
@@ -304,7 +386,7 @@ void TSDBService::insertRecords(
         logError(
             "eventql",
             e,
-            "TSDBService::insertRecordsRemote failed");
+            "TableService::insertRecordsRemote failed");
 
         errors.emplace_back(e.what());
       }
@@ -312,12 +394,12 @@ void TSDBService::insertRecords(
 
     RAISEF(
         kRuntimeError,
-        "TSDBService::insertRecordsRemote failed: $0",
+        "TableService::insertRecordsRemote failed: $0",
         StringUtil::join(errors, ", "));
   }
 }
 
-void TSDBService::insertRecordsLocal(
+void TableService::insertRecordsLocal(
     const String& tsdb_namespace,
     const String& table_name,
     const SHA1Hash& partition_key,
@@ -356,7 +438,7 @@ void TSDBService::insertRecordsLocal(
   }
 }
 
-void TSDBService::insertRecordsRemote(
+void TableService::insertRecordsRemote(
     const String& tsdb_namespace,
     const String& table_name,
     const SHA1Hash& partition_key,
@@ -400,7 +482,7 @@ void TSDBService::insertRecordsRemote(
   }
 }
 
-void TSDBService::compactPartition(
+void TableService::compactPartition(
     const String& tsdb_namespace,
     const String& table_name,
     const SHA1Hash& partition_key) {
@@ -417,7 +499,7 @@ void TSDBService::compactPartition(
   }
 }
 
-void TSDBService::updatePartitionCSTable(
+void TableService::updatePartitionCSTable(
     const String& tsdb_namespace,
     const String& table_name,
     const SHA1Hash& partition_key,
@@ -436,7 +518,7 @@ void TSDBService::updatePartitionCSTable(
   pmap_->publishPartitionChange(change);
 }
 
-void TSDBService::fetchPartition(
+void TableService::fetchPartition(
     const String& tsdb_namespace,
     const String& table_name,
     const SHA1Hash& partition_key,
@@ -450,7 +532,7 @@ void TSDBService::fetchPartition(
       fn);
 }
 
-void TSDBService::fetchPartitionWithSampling(
+void TableService::fetchPartitionWithSampling(
     const String& tsdb_namespace,
     const String& table_name,
     const SHA1Hash& partition_key,
@@ -477,7 +559,7 @@ void TSDBService::fetchPartitionWithSampling(
   log_reader->fetchRecordsWithSampling(sample_modulo, sample_index, fn);
 }
 
-Option<PartitionInfo> TSDBService::partitionInfo(
+Option<PartitionInfo> TableService::partitionInfo(
     const String& tsdb_namespace,
     const String& table_key,
     const SHA1Hash& partition_key) {
@@ -493,7 +575,7 @@ Option<PartitionInfo> TSDBService::partitionInfo(
   }
 }
 
-Option<RefPtr<msg::MessageSchema>> TSDBService::tableSchema(
+Option<RefPtr<msg::MessageSchema>> TableService::tableSchema(
     const String& tsdb_namespace,
     const String& table_key) {
   auto table = pmap_->findTable(
@@ -507,7 +589,7 @@ Option<RefPtr<msg::MessageSchema>> TSDBService::tableSchema(
   }
 }
 
-Option<TableDefinition> TSDBService::tableConfig(
+Option<TableDefinition> TableService::tableConfig(
     const String& tsdb_namespace,
     const String& table_key) {
   auto table = pmap_->findTable(
@@ -521,7 +603,7 @@ Option<TableDefinition> TSDBService::tableConfig(
   }
 }
 
-Option<RefPtr<TablePartitioner>> TSDBService::tablePartitioner(
+Option<RefPtr<TablePartitioner>> TableService::tablePartitioner(
     const String& tsdb_namespace,
     const String& table_key) {
   auto table = pmap_->findTable(
@@ -535,7 +617,7 @@ Option<RefPtr<TablePartitioner>> TSDBService::tablePartitioner(
   }
 }
 
-Vector<TimeseriesPartition> TSDBService::listPartitions(
+Vector<TimeseriesPartition> TableService::listPartitions(
     const String& tsdb_namespace,
     const String& table_key,
     const UnixTime& from,
@@ -556,7 +638,7 @@ Vector<TimeseriesPartition> TSDBService::listPartitions(
   return time_partitioner->partitionsFor(from, until);
 }
 
-//const String& TSDBService::dbPath() const {
+//const String& TableService::dbPath() const {
 //  return db_path_;
 //}
 

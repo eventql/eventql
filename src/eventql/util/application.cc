@@ -42,8 +42,10 @@ void Application::init() {
   ehandler->installGlobalHandlers();
 }
 
-void Application::logToStderr(LogLevel min_log_level /* = LogLevel::kInfo */) {
-  auto logger = new LogOutputStream(OutputStream::getStderr());
+void Application::logToStderr(
+    const String& program_name,
+    LogLevel min_log_level /* = LogLevel::kInfo */) {
+  auto logger = new LogOutputStream(program_name, OutputStream::getStderr());
   Logger::get()->setMinimumLogLevel(min_log_level);
   Logger::get()->addTarget(logger);
 }

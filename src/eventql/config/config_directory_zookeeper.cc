@@ -898,6 +898,14 @@ ClusterConfig ZookeeperConfigDirectory::getPatchedClusterConfig() const {
   return patched;
 }
 
+String ZookeeperConfigDirectory::getServerID() const {
+  if (server_name_.isEmpty()) {
+    RAISE(kRuntimeError, "no server id available");
+  }
+
+  return server_name_.get();
+}
+
 ServerConfig ZookeeperConfigDirectory::getServerConfig(
     const String& server_name) const {
   std::unique_lock<std::mutex> lk(mutex_);
@@ -1017,7 +1025,28 @@ void ZookeeperConfigDirectory::updateNamespaceConfig(NamespaceConfig cfg) {
 
   if (cfg.version() == 0) {
     // create
-    // FIXME if we fail between the two creates, we end up with an incomplete namespace
+    // FIXME if we fail between the three creates, we end up with an incomplete namespace
+    {
+      auto path = StringUtil::format(
+          "$0/namespaces/$1",
+          path_prefix_,
+          cfg.customer());
+
+      auto rc = zoo_create(
+          zk_,
+          path.c_str(),
+          nullptr, /* data */
+          0, /* data len */
+          &ZOO_OPEN_ACL_UNSAFE,
+          0,
+          NULL /* path_buffer */,
+          0 /* path_buffer_len */);
+
+      if (rc) {
+        RAISEF(kRuntimeError, "zoo_create() failed: $0", getErrorString(rc));
+      }
+    }
+
     {
       auto path = StringUtil::format(
           "$0/namespaces/$1/config",
@@ -1083,7 +1112,7 @@ TableDefinition ZookeeperConfigDirectory::getTableConfig(
     const String& db_namespace,
     const String& table_name) const {
   std::unique_lock<std::mutex> lk(mutex_);
-  auto iter = tables_.find(table_name);
+  auto iter = tables_.find(db_namespace + "~" + table_name);
   if (iter == tables_.end()) {
     RAISEF(kNotFoundError, "table not found: $0", table_name);
   }

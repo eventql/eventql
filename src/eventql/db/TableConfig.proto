@@ -34,12 +34,28 @@ enum TableStorage {
   TBL_STORAGE_STATIC = 2;
 };
 
+enum KeyspaceType {
+  KEYSPACE_UINT64 = 1;
+  KEYSPACE_STRING = 2;
+};
+
+// next id: 13
 message TableConfig {
 
   /**
    * The schema for this table
    */
   required bytes schema = 1;
+
+  /**
+   * The partitioning key for this table
+   */
+  optional string partition_key = 11 [default = "time"];
+
+  /**
+   * The primary key for this table
+   */
+  repeated string primary_key = 12;
 
   /**
    * The partitioner for this table
@@ -100,6 +116,11 @@ message TableDefinition {
   optional uint64 next_field_id = 5;
 
   repeated string tags = 6;
+
+  optional bytes metadata_txnid = 7;
+  optional uint64 metadata_txnseq = 9;
+  repeated string metadata_servers = 8;
+
 };
 
 message TableDefinitionList {

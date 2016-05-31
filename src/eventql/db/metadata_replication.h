@@ -21,28 +21,50 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#ifndef _libstx_UTIL_LOGOUTPUTSTREAM_H
-#define _libstx_UTIL_LOGOUTPUTSTREAM_H
+#pragma once
+#include "eventql/eventql.h"
+#include "eventql/util/status.h"
+#include "eventql/util/thread/DelayedQueue.h"
+#include "eventql/db/metadata_operation.h"
+#include "eventql/db/metadata_file.h"
+#include "eventql/db/metadata_store.h"
+#include "eventql/config/config_directory.h"
 
-#include "eventql/util/io/outputstream.h"
-#include "eventql/util/logging/loglevel.h"
-#include "eventql/util/logging/logtarget.h"
-#include "eventql/util/stdtypes.h"
+namespace eventql {
 
-class LogOutputStream : public LogTarget {
+class MetadataReplication {
 public:
 
-  LogOutputStream(
-      const String& program_name,
-      std::unique_ptr<OutputStream> target);
+  static const uint64_t kRetryDelayMicros = 30 * kMicrosPerSecond;
 
-  void log(
-      LogLevel level,
-      const String& component,
-      const String& message) override;
+  MetadataReplication(
+      ConfigDirectory* cdir,
+      const String& server_name,
+      MetadataStore* metadata_store);
+
+  void start();
+  void stop();
 
 protected:
-  String program_name_;
-  ScopedPtr<OutputStream> target_;
+
+  struct ReplicationJob {
+    String db_namespace;
+    String table_id;
+    SHA1Hash transaction_id;
+    Vector<String> servers;
+  };
+
+  void applyTableConfigChange(const TableDefinition& cfg);
+
+  void replicateWithRetries(const ReplicationJob& job);
+  Status replicate(const ReplicationJob& job);
+
+  ConfigDirectory* cdir_;
+  String server_name_;
+  MetadataStore* metadata_store_;
+  std::atomic<bool> running_;
+  Vector<std::thread> threads_;
+  thread::DelayedQueue<ReplicationJob> queue_;
 };
-#endif
+
+} // namespace eventql

@@ -21,28 +21,29 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#ifndef _libstx_UTIL_LOGOUTPUTSTREAM_H
-#define _libstx_UTIL_LOGOUTPUTSTREAM_H
-
-#include "eventql/util/io/outputstream.h"
-#include "eventql/util/logging/loglevel.h"
-#include "eventql/util/logging/logtarget.h"
+#pragma once
+#include "eventql/eventql.h"
 #include "eventql/util/stdtypes.h"
+#include "eventql/util/SHA1.h"
 
-class LogOutputStream : public LogTarget {
+namespace eventql {
+
+class MetadataTransaction {
 public:
 
-  LogOutputStream(
-      const String& program_name,
-      std::unique_ptr<OutputStream> target);
+  MetadataTransaction(
+      const SHA1Hash& transaction_id,
+      uint64_t transaction_seq);
 
-  void log(
-      LogLevel level,
-      const String& component,
-      const String& message) override;
+  const SHA1Hash& getTransactionID() const;
+  uint64_t getSequenceNumber() const;
+
+  bool operator==(const MetadataTransaction& other) const;
+  bool operator!=(const MetadataTransaction& other) const;
 
 protected:
-  String program_name_;
-  ScopedPtr<OutputStream> target_;
+  SHA1Hash transaction_id_;
+  uint64_t transaction_seq_;
 };
-#endif
+
+} // namespace eventql

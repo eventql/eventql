@@ -27,17 +27,17 @@
 #include "eventql/util/http/HTTPSSEStream.h"
 #include "eventql/util/json/json.h"
 #include "eventql/util/web/SecureCookie.h"
-#include "eventql/AnalyticsApp.h"
 #include "eventql/AnalyticsSession.pb.h"
 #include "eventql/sql/runtime/runtime.h"
 #include "eventql/auth/internal_auth.h"
 #include "eventql/config/config_directory.h"
-#include "eventql/db/TSDBService.h"
+#include "eventql/db/table_service.h"
 #include "eventql/transport/http/LogfileAPIServlet.h"
 #include "eventql/transport/http/MapReduceAPIServlet.h"
 #include "eventql/RemoteTSDBScanParams.pb.h"
 #include "eventql/auth/client_auth.h"
 #include "eventql/auth/internal_auth.h"
+#include "eventql/server/sql_service.h"
 
 #include "eventql/eventql.h"
 
@@ -49,15 +49,18 @@ class AnalyticsServlet : public http::StreamingHTTPService {
 public:
 
   AnalyticsServlet(
-      RefPtr<AnalyticsApp> app,
       const String& cachedir,
       InternalAuth* auth,
       ClientAuth* client_auth,
       InternalAuth* internal_auth,
       csql::Runtime* sql,
-      eventql::TSDBService* tsdb,
+      eventql::TableService* tsdb,
       ConfigDirectory* customer_dir,
-      PartitionMap* pmap);
+      PartitionMap* pmap,
+      SQLService* sql_service,
+      LogfileService* logfile_service,
+      MapReduceService* mapreduce_service,
+      TableService* table_service);
 
   void handleHTTPRequest(
       RefPtr<http::HTTPRequestStream> req_stream,
@@ -275,18 +278,23 @@ protected:
     }
   }
 
-  RefPtr<AnalyticsApp> app_;
   String cachedir_;
   InternalAuth* auth_;
   ClientAuth* client_auth_;
   InternalAuth* internal_auth_;
   csql::Runtime* sql_;
-  eventql::TSDBService* tsdb_;
+  eventql::TableService* tsdb_;
   ConfigDirectory* customer_dir_;
+
+  PartitionMap* pmap_;
+
+  SQLService* sql_service_;
+  LogfileService* logfile_service_;
+  MapReduceService* mapreduce_service_;
+  TableService* table_service_;
 
   LogfileAPIServlet logfile_api_;
   MapReduceAPIServlet mapreduce_api_;
-  PartitionMap* pmap_;
 };
 
 }

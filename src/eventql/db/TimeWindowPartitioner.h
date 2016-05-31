@@ -43,10 +43,13 @@ struct TimeseriesPartition {
 class TimeWindowPartitioner : public TablePartitioner {
 public:
 
-  TimeWindowPartitioner(const String& table_name);
+  TimeWindowPartitioner(
+      const String& table_name,
+      const String& partition_key);
 
   TimeWindowPartitioner(
       const String& table_name,
+      const String& partition_key,
       const TimeWindowPartitionerConfig& config);
 
   static SHA1Hash partitionKeyFor(
@@ -79,8 +82,13 @@ public:
   Vector<SHA1Hash> listPartitions(
       const Vector<csql::ScanConstraint>& constraints) const override;
 
+  Status findKeyRange(
+      const SHA1Hash& partition_id,
+      KeyRange* keyrange) const override;
+
 protected:
   String table_name_;
+  String partition_key_;
   TimeWindowPartitionerConfig config_;
 };
 

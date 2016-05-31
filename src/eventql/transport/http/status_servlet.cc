@@ -26,6 +26,7 @@
 #include <eventql/server/server_stats.h>
 #include <eventql/eventql.h>
 #include "eventql/util/application.h"
+#include "eventql/db/metadata_client.h"
 
 #include "eventql/eventql.h"
 namespace eventql {
@@ -306,13 +307,77 @@ void StatusServlet::renderTablePage(
       table_name);
 
   if (table.isEmpty()) {
-    html += "ERROR: TABLE NOT FOUND!";
-  } else {
-    html += "<h3>TableDefinition</h3>";
-    html += StringUtil::format(
-        "<pre>$0</pre>",
-        table.get()->config().DebugString());
+    response->setStatus(http::kStatusNotFound);
+    response->addHeader("Content-Type", "text/html; charset=utf-8");
+    response->addBody("ERROR: table not found!");
+    return;
   }
+
+  const auto& table_cfg = table.get()->config();
+  html += StringUtil::format(
+      "<span><em>Metatdata TXNID:</em> $0 [$1]</span> &mdash; ",
+      SHA1Hash(
+          table_cfg.metadata_txnid().data(),
+          table_cfg.metadata_txnid().size()).toString(),
+      table_cfg.metadata_txnseq());
+
+  MetadataClient metadata_client(cdir_);
+  MetadataFile metadata_file;
+  auto rc = metadata_client.fetchLatestMetadataFile(
+      db_namespace,
+      table_name,
+      &metadata_file);
+
+  if (!rc.isSuccess()) {
+    html += StringUtil::format(
+        "<b>ERROR: while fetching metadata: $0</b>",
+        rc.message());
+  } else {
+    html += "<h3>Partition Map:</h3>";
+    html += "<table cellspacing=0 border=1>";
+    html += "<thead><tr><td>Keyrange</td><td>Partition ID</td><td>Servers</td></tr></thead>";
+    for (const auto& e : metadata_file.getPartitionMap()) {
+      Vector<String> servers;
+      for (const auto& s : e.servers) {
+        servers.emplace_back(s.server_id);
+      }
+      for (const auto& s : e.servers_joining) {
+        servers.emplace_back(s.server_id + " [JOINING]");
+      }
+      for (const auto& s : e.servers_leaving) {
+        servers.emplace_back(s.server_id + " [LEAVING]");
+      }
+
+      String keyrange;
+      switch (metadata_file.getKeyspaceType()) {
+        case KEYSPACE_UINT64: {
+          uint64_t keyrange_uint = -1;
+          memcpy((char*) &keyrange_uint, e.begin.data(), sizeof(e.begin));
+          keyrange = StringUtil::format(
+              "$0 [$1]",
+              UnixTime(keyrange_uint),
+              keyrange_uint);
+          break;
+        }
+        case KEYSPACE_STRING: {
+          keyrange = e.begin;
+          break;
+        }
+      }
+
+      html += StringUtil::format(
+          "<tr><td>$0</td><td>$1</td><td>$2</td></tr>",
+          keyrange,
+          e.partition_id.toString(),
+          StringUtil::join(servers, ", "));
+    }
+    html += "</table>";
+  }
+
+  html += "<h3>TableDefinition</h3>";
+  html += StringUtil::format(
+      "<pre>$0</pre>",
+      table.get()->config().DebugString());
 
   response->setStatus(http::kStatusOK);
   response->addHeader("Content-Type", "text/html; charset=utf-8");
@@ -343,16 +408,32 @@ void StatusServlet::renderPartitionPage(
       table_name,
       partition_key);
 
-  auto snap = partition.get()->getSnapshot();
-
   if (partition.isEmpty()) {
     html += "ERROR: PARTITION NOT FOUND!";
   } else {
-    html += "<table cellspacing=0 border=0>";
+    auto table = partition.get()->getTable();
+    auto snap = partition.get()->getSnapshot();
+    auto state = snap->state;
+
+    if (table->partitionerType() == TBL_PARTITION_TIMEWINDOW &&
+        state.partition_keyrange_begin().size() == 8 &&
+        state.partition_keyrange_end().size() == 8) {
+      uint64_t ts_begin;
+      uint64_t ts_end;
+      memcpy((char*) &ts_begin, state.partition_keyrange_begin().data(), 8);
+      memcpy((char*) &ts_end, state.partition_keyrange_end().data(), 8);
+
+      html += StringUtil::format(
+          "<span><em>Keyrange:</em> $0 [$1] - $2 [$3]</span> &mdash; ",
+          UnixTime(ts_begin),
+          ts_begin,
+          UnixTime(ts_end),
+          ts_end);
+    }
+
     html += StringUtil::format(
-        "<tr><td><em>Number of Records</em></td><td align='right'>$0</td></tr>",
+        "<span><em>Number of Records</em>: $0</span>",
         snap->nrecs);
-    html += "</table>";
 
     html += "<h3>PartitionInfo</h3>";
     html += StringUtil::format(

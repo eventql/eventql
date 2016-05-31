@@ -22,6 +22,7 @@
  * code of your own applications
  */
 #include "eventql/util/logging/syslog.h"
+#include "eventql/util/logging.h"
 #ifdef HAVE_SYSLOG_H
 #include <syslog.h>
 #endif
@@ -54,40 +55,6 @@ void SyslogTarget::log(
     const String& component,
     const String& message) {
 #ifdef HAVE_SYSLOG_H
-  switch (level) {
-    case LogLevel::kEmergency:
-      syslog(LOG_EMERG, "[%s] %s", component.c_str(), message.c_str());
-      return;
-
-    case LogLevel::kAlert:
-      syslog(LOG_ALERT, "[%s] %s", component.c_str(), message.c_str());
-      return;
-
-    case LogLevel::kCritical:
-      syslog(LOG_CRIT, "[%s] %s", component.c_str(), message.c_str());
-      return;
-
-    case LogLevel::kError:
-      syslog(LOG_ERR, "[%s] %s", component.c_str(), message.c_str());
-      return;
-
-    case LogLevel::kWarning:
-      syslog(LOG_WARNING, "[%s] %s", component.c_str(), message.c_str());
-      return;
-
-    case LogLevel::kNotice:
-      syslog(LOG_NOTICE, "[%s] %s", component.c_str(), message.c_str());
-      return;
-
-    case LogLevel::kInfo:
-      syslog(LOG_INFO, "[%s] %s", component.c_str(), message.c_str());
-      return;
-
-    case LogLevel::kDebug:
-    case LogLevel::kTrace:
-      syslog(LOG_DEBUG, "[%s] %s", component.c_str(), message.c_str());
-      return;
-
-  }
+  syslog(LOG_NOTICE, "[%s] %s", logLevelToStr(level), message.c_str());
 #endif
 }

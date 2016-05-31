@@ -22,14 +22,14 @@
  * code of your own applications
  */
 #pragma once
+#include "eventql/eventql.h"
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/duration.h>
 #include <eventql/db/Partition.h>
 #include <eventql/db/TablePartitioner.h>
 #include <eventql/util/protobuf/MessageSchema.h>
 #include <eventql/db/TableConfig.pb.h>
-
-#include "eventql/eventql.h"
+#include <eventql/db/metadata_transaction.h>
 
 namespace eventql {
 
@@ -56,9 +56,11 @@ public:
 
   TableStorage storage() const;
 
+  const String& getPartitionKey() const;
   TablePartitionerType partitionerType() const;
-
   RefPtr<TablePartitioner> partitioner() const;
+
+  MetadataTransaction getLastMetadataTransaction() const;
 
   void updateConfig(TableDefinition new_config);
 

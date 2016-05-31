@@ -21,28 +21,27 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#ifndef _libstx_UTIL_LOGOUTPUTSTREAM_H
-#define _libstx_UTIL_LOGOUTPUTSTREAM_H
+#pragma once
+#include "eventql/eventql.h"
+#include "eventql/util/status.h"
+#include "eventql/db/metadata_operation.h"
+#include "eventql/db/metadata_file.h"
+#include "eventql/config/config_directory.h"
 
-#include "eventql/util/io/outputstream.h"
-#include "eventql/util/logging/loglevel.h"
-#include "eventql/util/logging/logtarget.h"
-#include "eventql/util/stdtypes.h"
+namespace eventql {
 
-class LogOutputStream : public LogTarget {
+class MetadataClient {
 public:
 
-  LogOutputStream(
-      const String& program_name,
-      std::unique_ptr<OutputStream> target);
+  MetadataClient(ConfigDirectory* cdir);
 
-  void log(
-      LogLevel level,
-      const String& component,
-      const String& message) override;
+  Status fetchLatestMetadataFile(
+      const String& ns,
+      const String& table_od,
+      MetadataFile* file);
 
 protected:
-  String program_name_;
-  ScopedPtr<OutputStream> target_;
+  ConfigDirectory* cdir_;
 };
-#endif
+
+} // namespace eventql

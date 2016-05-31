@@ -24,8 +24,7 @@
  */
 #include <eventql/util/SHA1.h>
 #include <eventql/server/sql/table_provider.h>
-//#include <eventql/server/sql/table_scan.h>
-#include <eventql/db/TSDBService.h>
+#include <eventql/db/table_service.h>
 #include <eventql/sql/CSTableScan.h>
 
 #include "eventql/eventql.h"
@@ -36,10 +35,12 @@ TSDBTableProvider::TSDBTableProvider(
     const String& tsdb_namespace,
     PartitionMap* partition_map,
     ReplicationScheme* replication_scheme,
+    TableService* table_service,
     InternalAuth* auth) :
     tsdb_namespace_(tsdb_namespace),
     partition_map_(partition_map),
     replication_scheme_(replication_scheme),
+    table_service_(table_service),
     auth_(auth) {}
 
 Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
@@ -78,9 +79,115 @@ Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
               auth_)));
 }
 
+static HashMap<String, msg::FieldType> kTypeMap = {
+  { "STRING", msg::FieldType::STRING },
+  { "BOOL", msg::FieldType::BOOLEAN },
+  { "BOOLEAN", msg::FieldType::BOOLEAN },
+  { "DATETIME", msg::FieldType::DATETIME },
+  { "TIME", msg::FieldType::DATETIME },
+  { "UINT32", msg::FieldType::UINT32 },
+  { "UINT64", msg::FieldType::UINT64 },
+  { "DOUBLE", msg::FieldType::DOUBLE },
+  { "FLOAT", msg::FieldType::DOUBLE }
+};
+
+static Status buildMessageSchema(
+    const csql::TableSchema::ColumnList& columns,
+    msg::MessageSchema* schema) {
+  uint32_t id = 0;
+  Set<String> column_names;
+
+  for (const auto& c : columns) {
+    if (column_names.count(c->column_name) > 0) {
+      return Status(
+          eIllegalArgumentError,
+          StringUtil::format("duplicate column: $0", c->column_name));
+    }
+
+    column_names.emplace(c->column_name);
+
+    bool repeated = false;
+    bool optional = true;
+
+    for (const auto& o : c->column_options) {
+      switch (o) {
+        case csql::TableSchema::ColumnOptions::NOT_NULL:
+          optional = false;
+          break;
+        case csql::TableSchema::ColumnOptions::REPEATED:
+          repeated = true;
+          break;
+        default:
+          continue;
+      }
+    }
+
+    switch (c->column_class) {
+      case csql::TableSchema::ColumnClass::SCALAR: {
+        auto type_str = c->column_type;
+        StringUtil::toUpper(&type_str);
+        auto type = kTypeMap.find(type_str);
+        if (type == kTypeMap.end()) {
+          return Status(
+              eIllegalArgumentError,
+              StringUtil::format(
+                  "invalid type: '$0' for column '$1'",
+                  c->column_type,
+                  c->column_name));
+        }
+
+        schema->addField(
+            msg::MessageSchemaField(
+                ++id,
+                c->column_name,
+                type->second,
+                0, /* type size */
+                repeated,
+                optional));
+
+        break;
+      }
+
+      case csql::TableSchema::ColumnClass::RECORD: {
+        auto s = mkRef(new msg::MessageSchema(nullptr));
+
+        auto rc = buildMessageSchema(c->getSubColumns(), s.get());
+        if (!rc.isSuccess()) {
+          return rc;
+        }
+
+        schema->addField(
+            msg::MessageSchemaField::mkObjectField(
+                ++id,
+                c->column_name,
+                repeated,
+                optional,
+                s));
+
+        break;
+      }
+
+    }
+  }
+
+  return Status::success();
+}
+
 Status TSDBTableProvider::createTable(
     const csql::CreateTableNode& create_table) {
-  RAISE(kRuntimeError, "not yet implemented");
+  auto primary_key = create_table.getPrimaryKey();
+  auto table_schema = create_table.getTableSchema();
+  auto msg_schema = mkRef(new msg::MessageSchema(nullptr));
+  auto rc = buildMessageSchema(table_schema.getColumns(), msg_schema.get());
+  if (!rc.isSuccess()) {
+    return rc;
+  }
+
+  return table_service_->createTable(
+      tsdb_namespace_,
+      create_table.getTableName(),
+      *msg_schema,
+      primary_key);
 }
 
 void TSDBTableProvider::listTables(

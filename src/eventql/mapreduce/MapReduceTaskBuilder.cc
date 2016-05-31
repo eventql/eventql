@@ -40,7 +40,7 @@ MapReduceTaskBuilder::MapReduceTaskBuilder(
     InternalAuth* auth,
     eventql::PartitionMap* pmap,
     eventql::ReplicationScheme* repl,
-    TSDBService* tsdb,
+    TableService* tsdb,
     const String& cachedir) :
     session_(session),
     auth_(auth),

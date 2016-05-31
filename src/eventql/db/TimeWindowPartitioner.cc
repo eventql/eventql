@@ -24,22 +24,27 @@
 #include <eventql/util/util/binarymessagereader.h>
 #include <eventql/util/util/binarymessagewriter.h>
 #include <eventql/util/logging.h>
+#include <eventql/util/wallclock.h>
 #include <eventql/db/TimeWindowPartitioner.h>
-
+#include <eventql/db/Partition.h>
 #include "eventql/eventql.h"
 
 namespace eventql {
 
 TimeWindowPartitioner::TimeWindowPartitioner(
-    const String& table_name) :
-    table_name_(table_name) {
+    const String& table_name,
+    const String& partition_key) :
+    table_name_(table_name),
+    partition_key_(partition_key) {
   config_.set_partition_size(4 * kMicrosPerHour);
 }
 
 TimeWindowPartitioner::TimeWindowPartitioner(
     const String& table_name,
+    const String& partition_key,
     const TimeWindowPartitionerConfig& config) :
     table_name_(table_name),
+    partition_key_(partition_key),
     config_(config) {}
 
 SHA1Hash TimeWindowPartitioner::partitionKeyFor(
@@ -136,7 +141,7 @@ Vector<SHA1Hash> TimeWindowPartitioner::listPartitions(
   bool has_upper_limit = false;
 
   for (const auto& c : constraints) {
-    if (c.column_name != "time") { // FIXME
+    if (c.column_name != partition_key_) { // FIXME
       continue;
     }
 
@@ -188,6 +193,27 @@ Vector<SHA1Hash> TimeWindowPartitioner::listPartitions(
         lower_limit,
         upper_limit,
         config_.partition_size());
+}
+
+Status TimeWindowPartitioner::findKeyRange(
+    const SHA1Hash& partition_id,
+    KeyRange* keyrange) const {
+  auto window =  config_.partition_size();
+  auto now = WallClock::unixMicros() + window;
+  auto max_lookback = now - 2 * kMicrosPerYear;
+
+  for (auto t = now + kMicrosPerDay; t >= max_lookback; t -= window) {
+    if (partitionKeyFor(table_name_, t, window) == partition_id) {
+      uint64_t ts_begin = (t / window) * window;
+      uint64_t ts_end = ts_begin + window;
+      keyrange->partition_id = partition_id;
+      keyrange->begin = String((const char*) &ts_begin, sizeof(ts_begin));
+      keyrange->end = String((const char*) &ts_end, sizeof(ts_end));
+      return Status::success();
+    }
+  }
+
+  return Status(eRuntimeError, "partition keyrange not found");
 }
 
 }
