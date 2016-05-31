@@ -573,7 +573,7 @@ int main(int argc, const char** argv) {
 
         tsdb_replication.enqueuePartition(
             partition.get(),
-            kMicrosPerHour * 4 * r);
+            kMicrosPerHour * 1 * r);
       }
     });
 
