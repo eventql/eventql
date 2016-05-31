@@ -67,7 +67,7 @@ LMDB_LDADD = ${top_builddir}/deps/3rdparty/liblmdb/liblmdb.a
 INIH_CFLAGS = -I$(top_srcdir)/deps/3rdparty
 INIH_LDADD = ${top_builddir}/deps/3rdparty/inih/libinih.a
 
-AM_CXXFLAGS = -DEVQL_BUILDID=\"$(EVQL_BUILDID)\" $(PCRE_CFLAGS) $(SPIDERMONKEY_CFLAGS) $(ZOOKEEPER_CFLAGS) $(INIH_CFLAGS) $(SIMDCOMP_CFLAGS) $(LINENOISE_CLFAGS) $(PROTOBUF_CFLAGS) $(PTHREAD_CFLAGS) $(PTHREAD_DEF) $(SYSLOG_DEF) $(ZLIB_DEF) $(GETHOSTBYNAME_R_DEF) -std=c++0x -ftemplate-depth=500 -mno-omit-leaf-frame-pointer -fno-omit-frame-pointer -Wall -Wextra -Wno-unused-parameter -Wno-sign-compare -Wdelete-non-virtual-dtor -Wno-predefined-identifier-outside-function -g -I@builddir@
+AM_CXXFLAGS = -DEVQL_BUILDID=\"$(EVQL_BUILDID)\" $(PCRE_CFLAGS) $(SPIDERMONKEY_CFLAGS) $(ZOOKEEPER_CFLAGS) $(INIH_CFLAGS) $(SIMDCOMP_CFLAGS) $(LINENOISE_CLFAGS) $(PROTOBUF_CFLAGS) $(PTHREAD_CFLAGS) $(PTHREAD_DEF) $(SYSLOG_DEF) $(ZLIB_DEF) $(GETHOSTBYNAME_R_DEF) -std=c++0x -ftemplate-depth=500 -mno-omit-leaf-frame-pointer -fno-omit-frame-pointer -Wall -Wextra -Wno-unused-parameter -Wno-sign-compare -Wdelete-non-virtual-dtor -Wno-predefined-identifier-outside-function -Wno-invalid-offsetof -g -I@builddir@
 AM_CFLAGS = $(PCRE_CFLAGS) $(SPIDERMONKEY_CFLAGS) $(ZOOKEEPER_CFLAGS) $(INIH_CFLAGS) $(SIMDCOMP_CFLAGS) $(LINENOISE_CLFAGS) $(PROTOBUF_CFLAGS) $(PTHREAD_CFLAGS) $(PTHREAD_DEF) $(SYSLOG_DEF) $(ZLIB_DEF) $(GETHOSTBYNAME_R_DEF) -std=c11 -mno-omit-leaf-frame-pointer -fno-omit-frame-pointer -Wall -pedantic -g
 AM_LDFLAGS = $(PTHREAD_CFLAGS)
 
@@ -228,6 +228,10 @@ evql_sql_a_SOURCES = \
     eventql/sql/qtree/ValueExpressionNode.h \
     eventql/sql/qtree/nodes/create_table.cc \
     eventql/sql/qtree/nodes/create_table.h \
+    eventql/sql/qtree/nodes/insert_into.cc \
+    eventql/sql/qtree/nodes/insert_into.h \
+    eventql/sql/qtree/nodes/insert_json.cc \
+    eventql/sql/qtree/nodes/insert_json.h \
     eventql/sql/qtree/qtree_coder.cc \
     eventql/sql/qtree/qtree_coder.h \
     eventql/sql/qtree/qtree_coder_impl.h \

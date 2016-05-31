@@ -360,6 +360,15 @@ void ASTNode::debugPrint(int indent /* = 0 */) const {
     case T_COLUMN_TYPE:
       printf("- T_COLUMN_TYPE");
       break;
+    case T_INSERT_INTO:
+      printf("- T_INSERT_INTO");
+      break;
+    case T_VALUE_LIST:
+      printf("- T_VALUE_LIST");
+      break;
+    case T_JSON_STRING:
+      printf("- T_JSON_STRING");
+      break;
     case T_DRAW:
       printf("- T_DRAW");
       break;

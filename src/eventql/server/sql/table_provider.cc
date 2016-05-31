@@ -22,13 +22,13 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#include "eventql/eventql.h"
 #include <eventql/util/SHA1.h>
 #include <eventql/server/sql/table_provider.h>
 #include <eventql/db/table_service.h>
 #include <eventql/db/metadata_client.h>
 #include <eventql/sql/CSTableScan.h>
-
-#include "eventql/eventql.h"
+#include <eventql/util/json/json.h>
 
 namespace eventql {
 
@@ -277,6 +277,55 @@ Status TSDBTableProvider::createTable(
       create_table.getTableName(),
       *msg_schema,
       primary_key);
+}
+
+Status TSDBTableProvider::insertRecord(
+    const String& table_name,
+    Vector<Pair<String, csql::SValue>> data) {
+
+  auto schema = table_service_->tableSchema(tsdb_namespace_, table_name);
+  if (schema.isEmpty()) {
+    return Status(eRuntimeError, "table not found");
+  }
+
+  auto msg = new msg::DynamicMessage(schema.get());
+  for (auto e : data) {
+    if (!msg->addField(e.first, e.second.getString())) {
+      return Status(
+          eRuntimeError,
+          StringUtil::format("field not found: $0", e.first)); //FIXME better error msg
+    }
+  }
+
+  try {
+    table_service_->insertRecord(
+        tsdb_namespace_,
+        table_name,
+        *msg);
+
+  } catch (const Exception& e) {
+    return Status(eRuntimeError, e.getMessage());
+  }
+
+  return Status::success();
+}
+
+Status TSDBTableProvider::insertRecord(
+    const String& table_name,
+    const String& json_str) {
+
+  auto json = json::parseJSON(json_str);
+  try {
+    table_service_->insertRecord(
+        tsdb_namespace_,
+        table_name,
+        json.begin(),
+        json.end());
+  } catch (const Exception& e) {
+    return Status(eRuntimeError, e.getMessage());
+  }
+
+  return Status::success();
 }
 
 void TSDBTableProvider::listTables(

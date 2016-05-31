@@ -23,6 +23,7 @@
  * code of your own applications
  */
 #pragma once
+#include "eventql/eventql.h"
 #include <eventql/util/stdtypes.h>
 #include <eventql/sql/runtime/tablerepository.h>
 #include <eventql/auth/internal_auth.h>
@@ -33,8 +34,6 @@
 #include <eventql/db/TSDBTableInfo.h>
 #include <eventql/db/table_service.h>
 #include "eventql/server/sql/table_scan.h"
-
-#include "eventql/eventql.h"
 
 namespace eventql {
 class TableService;
@@ -65,6 +64,14 @@ public:
   Option<csql::TableInfo> describe(const String& table_name) const override;
 
   Status createTable(const csql::CreateTableNode& req) override;
+
+  Status insertRecord(
+      const String& table_name,
+      Vector<Pair<String, csql::SValue>> data) override;
+
+  Status insertRecord(
+      const String& table_name,
+      const String& json_str) override;
 
   const String& getNamespace() const;
 

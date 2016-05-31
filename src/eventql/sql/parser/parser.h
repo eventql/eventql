@@ -105,6 +105,11 @@ protected:
   ASTNode* columnDefinition();
   ASTNode* primaryKeyDefinition();
   ASTNode* tableName();
+  ASTNode* insertStatement();
+  ASTNode* insertIntoStatement();
+  ASTNode* insertColumnList();
+  ASTNode* insertValueList();
+  ASTNode* insertFromJSON();
   ASTNode* drawStatement();
   ASTNode* axisClause();
   ASTNode* domainClause();

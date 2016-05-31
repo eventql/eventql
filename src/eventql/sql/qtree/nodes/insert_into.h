@@ -2,6 +2,7 @@
  * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
  * Authors:
  *   - Paul Asmuth <paul@zscale.io>
+ *   - Laura Schlimmer <laura@zscale.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -24,57 +25,39 @@
 #pragma once
 #include "eventql/eventql.h"
 #include <eventql/util/stdtypes.h>
-#include <eventql/util/duration.h>
-#include <eventql/db/Partition.h>
-#include <eventql/db/TablePartitioner.h>
-#include <eventql/util/protobuf/MessageSchema.h>
-#include <eventql/db/TableConfig.pb.h>
-#include <eventql/db/metadata_transaction.h>
+#include <eventql/sql/qtree/QueryTreeNode.h>
+#include <eventql/sql/qtree/ValueExpressionNode.h>
 
-namespace eventql {
+namespace csql {
 
-class Table : public RefCounted{
+class InsertIntoNode : public QueryTreeNode {
 public:
 
-  Table(const TableDefinition& config);
+  enum InsertValueType { SCALAR};
 
-  String name() const;
+  struct InsertValueSpec {
+    InsertValueType type;
+    String column;
+    RefPtr<ValueExpressionNode> expr;
+  };
 
-  String tsdbNamespace() const;
+  InsertIntoNode(
+      const String& table_name,
+      Vector<InsertValueSpec> values_spec);
 
-  Duration partitionSize() const;
+  InsertIntoNode(const InsertIntoNode& node);
 
-  size_t sstableSize() const;
+  const String& getTableName() const;
+  Vector<InsertValueSpec> getValueSpecs() const;
 
-  size_t numShards() const;
-
-  Duration commitInterval() const;
-
-  RefPtr<msg::MessageSchema> schema() const;
-
-  TableDefinition config() const;
-
-  TableStorage storage() const;
-
-  const String& getPartitionKey() const;
-  TablePartitionerType partitionerType() const;
-  RefPtr<TablePartitioner> partitioner() const;
-
-  Vector<String> getPrimaryKey() const;
-
-  MetadataTransaction getLastMetadataTransaction() const;
-
-  void updateConfig(TableDefinition new_config);
+  RefPtr<QueryTreeNode> deepCopy() const;
+  String toString() const;
 
 protected:
-
-  void loadConfig();
-
-  mutable std::mutex mutex_;
-  TableDefinition config_;
-  RefPtr<msg::MessageSchema> schema_;
-  RefPtr<TablePartitioner> partitioner_;
+  String table_name_;
+  Vector<InsertValueSpec> values_spec_;
 };
 
-}
+} // namespace csql
+
 

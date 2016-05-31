@@ -27,6 +27,7 @@
 #include "parser.h"
 #include "tokenize.h"
 #include "eventql/util/inspect.h"
+#include "eventql/util/json/json.h"
 
 namespace csql {
 
@@ -312,6 +313,8 @@ ASTNode* Parser::statement() {
       return selectStatement();
     case Token::T_CREATE:
       return createStatement();
+    case Token::T_INSERT:
+      return insertStatement();
     case Token::T_DRAW:
       return drawStatement();
     case Token::T_IMPORT:
@@ -528,6 +531,95 @@ ASTNode* Parser::primaryKeyDefinition() {
   expectAndConsume(Token::T_RPAREN);
 
   return primary_key;
+}
+
+ASTNode* Parser::insertStatement() {
+  consumeToken();
+  return insertIntoStatement();
+}
+
+ASTNode* Parser::insertIntoStatement() {
+  expectAndConsume(Token::T_INTO);
+
+  auto insert_into = new ASTNode(ASTNode::T_INSERT_INTO);
+  insert_into->appendChild(tableName());
+
+  if (cur_token_->getType() == Token::T_FROM) {
+    consumeToken();
+    expectAndConsume(Token::T_JSON);
+    insert_into->appendChild(insertFromJSON());
+
+  } else {
+    insert_into->appendChild(insertColumnList());
+    insert_into->appendChild(insertValueList());
+  }
+
+  consumeIf(Token::T_SEMICOLON);
+
+  return insert_into;
+}
+
+ASTNode* Parser::insertColumnList() {
+  expectAndConsume(Token::T_LPAREN);
+
+  auto column_list = new ASTNode(ASTNode::T_COLUMN_LIST);
+
+  while (*cur_token_ != Token::T_RPAREN) {
+    assertExpectation(Token::T_IDENTIFIER);
+    auto column_name = new ASTNode(ASTNode::T_COLUMN_NAME);
+    column_name->setToken(cur_token_);
+    consumeToken();
+
+    column_list->appendChild(column_name);
+
+    if (*cur_token_ == Token::T_COMMA) {
+      consumeToken();
+    } else {
+      break;
+    }
+  }
+
+  expectAndConsume(Token::T_RPAREN);
+
+  return column_list;
+}
+
+ASTNode* Parser::insertValueList() {
+  expectAndConsume(Token::T_VALUES);
+  expectAndConsume(Token::T_LPAREN);
+
+  auto value_list = new ASTNode(ASTNode::T_VALUE_LIST);
+
+  while (*cur_token_ != Token::T_RPAREN) {
+    auto value = expr();
+    if (value == nullptr) {
+      RAISEF(
+          kParseError,
+          "unexpected Token $0, can't build expression",
+          cur_token_->getString());
+    }
+
+    value_list->appendChild(value);
+
+    if (*cur_token_ == Token::T_COMMA) {
+      consumeToken();
+    } else {
+      break;
+    }
+  }
+
+  expectAndConsume(Token::T_RPAREN);
+
+  return value_list;
+}
+
+ASTNode* Parser::insertFromJSON() {
+  assertExpectation(Token::T_STRING);
+  auto json = new ASTNode(ASTNode::T_JSON_STRING);
+  json->setToken(cur_token_);
+
+  consumeToken();
+  return json;
 }
 
 ASTNode* Parser::importStatement() {

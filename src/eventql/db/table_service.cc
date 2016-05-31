@@ -307,6 +307,26 @@ void TableService::insertRecord(
 void TableService::insertRecord(
     const String& tsdb_namespace,
     const String& table_name,
+    const json::JSONObject::const_iterator& data_begin,
+    const json::JSONObject::const_iterator& data_end,
+    uint64_t flags /* = 0 */) {
+  auto table = pmap_->findTable(tsdb_namespace, table_name);
+  if (table.isEmpty()) {
+    RAISEF(kNotFoundError, "table not found: $0", table_name);
+  }
+
+  msg::DynamicMessage record(table.get()->schema());
+  record.fromJSON(data_begin, data_end);
+  insertRecord(
+      tsdb_namespace,
+      table_name,
+      record,
+      flags);
+}
+
+void TableService::insertRecord(
+    const String& tsdb_namespace,
+    const String& table_name,
     const SHA1Hash& record_id,
     uint64_t record_version,
     const msg::DynamicMessage& data,
@@ -334,6 +354,63 @@ void TableService::insertRecord(
       partition_key,
       record_id,
       record_version,
+      record,
+      flags);
+}
+
+void TableService::insertRecord(
+    const String& tsdb_namespace,
+    const String& table_name,
+    const msg::DynamicMessage& data,
+    uint64_t flags /* = 0 */) {
+  auto table = pmap_->findTable(tsdb_namespace, table_name);
+  if (table.isEmpty()) {
+    RAISEF(kNotFoundError, "table not found: $0", table_name);
+  }
+
+  // calculate partition key
+  auto partition_key_field_name = table.get()->getPartitionKey();
+  auto partition_key_field = data.getField(partition_key_field_name);
+  if (partition_key_field.isEmpty()) {
+    RAISEF(kNotFoundError, "missing field: $0", partition_key_field_name);
+  }
+
+  auto partitioner = table.get()->partitioner();
+  auto partition_key = partitioner->partitionKeyFor(partition_key_field.get());
+
+  // calculate primary key
+  SHA1Hash primary_key;
+  auto primary_key_columns = table.get()->getPrimaryKey();
+  if (primary_key_columns.size() == 1) {
+    auto f = data.getField(primary_key_columns[0]);
+    if (f.isEmpty()) {
+      RAISEF(kNotFoundError, "missing field: $0", primary_key_columns[0]);
+    }
+    primary_key = SHA1::compute(f.get());
+  } else {
+    for (const auto& c : primary_key_columns) {
+      auto f = data.getField(c);
+      if (f.isEmpty()) {
+        RAISEF(kNotFoundError, "missing field: $0", c);
+      }
+
+      auto chash = SHA1::compute(f.get());
+      Buffer primary_key_data;
+      primary_key_data.append(primary_key.data(), primary_key.size());
+      primary_key_data.append(chash.data(), chash.size());
+      primary_key = SHA1::compute(primary_key_data);
+    }
+  }
+
+  Buffer record;
+  msg::MessageEncoder::encode(data.data(), *data.schema(), &record);
+
+  insertRecord(
+      tsdb_namespace,
+      table_name,
+      partition_key,
+      primary_key,
+      WallClock::unixMicros(),
       record,
       flags);
 }
