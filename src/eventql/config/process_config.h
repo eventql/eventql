@@ -35,6 +35,7 @@ friend class ProcessConfigBuilder;
 public:
 
   Option<String> getProperty(const String& key) const;
+  Option<String> getProperty(const String& section, const String& key) const;
 
 protected:
   ProcessConfig(HashMap<String, String> properties);
