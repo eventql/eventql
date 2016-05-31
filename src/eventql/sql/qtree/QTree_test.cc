@@ -36,6 +36,7 @@
 #include "eventql/sql/qtree/qtree_coder.h"
 #include "eventql/sql/qtree/nodes/create_table.h"
 #include "eventql/sql/qtree/nodes/insert_into.h"
+#include "eventql/sql/qtree/nodes/insert_json.h"
 #include "eventql/sql/CSTableScanProvider.h"
 #include "eventql/sql/backends/csv/CSVTableProvider.h"
 
@@ -729,16 +730,20 @@ TEST_CASE(QTreeTest, TestInsertInto, [] () {
   RefPtr<InsertIntoNode> qtree = qtrees[0].asInstanceOf<InsertIntoNode>();
   EXPECT_EQ(qtree->getTableName(), "evtbl");
 
-  //auto data = qtree->getData();
-  //EXPECT_EQ(data.size(), 5);
+  auto specs = qtree->getValueSpecs();
+  EXPECT_EQ(specs.size(), 5);
 
-  //EXPECT_EQ(data[0].first, "evtime");
-  //EXPECT_EQ(data[1].first, "evid");
-  //EXPECT_EQ(data[2].first, "rating");
-  //EXPECT_EQ(data[3].first, "is_admin");
-  //EXPECT_EQ(data[4].first, "type");
+  EXPECT_EQ(specs[0].column, "evtime");
+  EXPECT_EQ(specs[1].column, "evid");
+  EXPECT_EQ(specs[2].column, "rating");
+  EXPECT_EQ(specs[3].column, "is_admin");
+  EXPECT_EQ(specs[4].column, "type");
 
-  //EXPECT_EQ(data[0].second.getString(), "1464463790");
+  EXPECT_EQ(specs[0].expr->toSQL(), "123");
+  EXPECT_EQ(specs[1].expr->toSQL(), "\"xxx\"");
+  EXPECT_EQ(specs[2].expr->toSQL(), "3");
+  EXPECT_EQ(specs[3].expr->toSQL(), "true");
+  EXPECT_EQ(specs[4].expr->toSQL(), "NULL");
 });
 
 TEST_CASE(QTreeTest, TestInsertIntoFromJSON, [] () {
