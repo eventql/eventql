@@ -148,6 +148,11 @@ Status Console::runQuery(const String& query) {
       return Status(eIOError);
     }
   } catch (const StandardException& e) {
+    if (is_tty) {
+      stderr_os->eraseLine();
+      stderr_os->print("\r");
+    }
+
     stderr_os->print(
         "ERROR:",
         { TerminalStyle::RED, TerminalStyle::UNDERSCORE });
@@ -165,35 +170,28 @@ Status Console::runQuery(const String& query) {
     return Status(eIOError);
   }
 
-  if (results.getNumRows() == 0) {
-    String line;
+  if (results.getNumRows() > 0) {
+    results.debugPrint();
+
+    auto num_rows = results.getNumRows();
+    auto status_line = StringUtil::format(
+        "$0 row$1 returned",
+        num_rows,
+        num_rows > 1 ? "s" : "");
+
     if (is_tty) {
-      line = "\r";
-    }
-
-    if (results.getNumColumns() == 0) {
-      line += "Query OK \n\n";
+      stderr_os->print("\r" + status_line + "\n\n");
     } else {
-      line += "Empty set \n\n";
+      stderr_os->print(status_line + "\n\n");
     }
 
-    stderr_os->print(line);
-    return Status::success();
-  }
-
-
-  results.debugPrint();
-
-  auto num_rows = results.getNumRows();
-  auto status_line = StringUtil::format(
-      "$0 row$1 returned",
-      num_rows,
-      num_rows > 1 ? "s" : "");
-
-  if (is_tty) {
-    stderr_os->print("\r" + status_line + "\n\n");
   } else {
-    stderr_os->print(status_line + "\n\n");
+    String line = is_tty ? "\r" : "";
+    if (results.getNumColumns() == 0) {
+      stderr_os->print(line + "Query OK \n\n");
+    } else {
+      stderr_os->print(line + "Empty set \n\n");
+    }
   }
 
   return Status::success();
