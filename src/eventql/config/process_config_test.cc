@@ -29,10 +29,32 @@
 #include <eventql/util/test/unittest.h>
 #include <eventql/config/process_config.h>
 
-
+using namespace eventql;
 UNIT_TEST(ProcessConfigTest);
 
 TEST_CASE(ProcessConfigTest, TestProcessConfigBuilder, [] () {
+  ProcessConfigBuilder builder;
+  builder.setProperty("evql", "host", "localhost");
+  builder.setProperty("evql", "port", "8080");
+  builder.setProperty("evql", "fuu", "bar");
 
+  auto config = builder.getConfig();
+  {
+    auto p = config->getProperty("evql", "host");
+    EXPECT_FALSE(p.isEmpty());
+    EXPECT_EQ(p.get(), "localhost");
+  }
+
+  {
+    auto p = config->getProperty("evql", "port");
+    EXPECT_FALSE(p.isEmpty());
+    EXPECT_EQ(p.get(), "8080");
+  }
+
+  {
+    auto p = config->getProperty("evql", "fuu");
+    EXPECT_FALSE(p.isEmpty());
+    EXPECT_EQ(p.get(), "bar");
+  }
 });
 

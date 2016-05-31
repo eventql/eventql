@@ -1095,4 +1095,16 @@ test_evql_db_metadata_store_LDADD = \
 TESTS += test_evql_db_metadata_store
 check_PROGRAMS += test_evql_db_metadata_store
 
+################# TEST: db/metadata_store ####################
+test_evql_config_process_config_SOURCES = eventql/config/process_config_test.cc
+test_evql_config_process_config_LDADD = \
+    evql_core.a \
+    evql_util.a \
+    $(SIMDCOMP_LDADD) \
+    $(LMDB_LDADD) \
+    $(INIH_LDADD) \
+    $(PCRE_LDADD)
+
+TESTS += test_evql_config_process_config
+check_PROGRAMS += test_evql_config_process_config
 
