@@ -23,48 +23,40 @@
  */
 #pragma once
 #include "eventql/eventql.h"
-#include "eventql/util/stdtypes.h"
 #include "eventql/util/status.h"
-#include "eventql/util/SHA1.h"
+#include "eventql/util/thread/queue.h"
+#include "eventql/db/metadata_operation.h"
 #include "eventql/db/metadata_file.h"
+#include "eventql/config/config_directory.h"
 
 namespace eventql {
 
-class MetadataStore {
+class MetadataReplication {
 public:
 
-  MetadataStore(const String& path_prefix);
+  MetadataReplication(
+      ConfigDirectory* cdir,
+      const String& server_name);
 
-  Status getMetadataFile(
-      const String& ns,
-      const String& table_name,
-      const SHA1Hash& txid,
-      RefPtr<MetadataFile>* file) const;
-
-  Status storeMetadataFile(
-      const String& ns,
-      const String& table_name,
-      const MetadataFile& file);
-
-  bool hasMetadataFile(
-      const String& ns,
-      const String& table_name,
-      const SHA1Hash& txid);
+  void start();
+  void stop();
 
 protected:
 
-  String getBasePath(
-      const String& ns,
-      const String& table_name) const;
+  struct ReplicationJob {
+    String db_namespace;
+    String table_id;
+    SHA1Hash transaction_id;
+  };
 
-  String getPath(
-      const String& ns,
-      const String& table_name,
-      const SHA1Hash& txid) const;
+  void applyTableConfigChange(const TableDefinition& cfg);
+  void replicate(const ReplicationJob& job);
 
-  std::mutex mutex_;
-  String path_prefix_;
+  ConfigDirectory* cdir_;
+  String server_name_;
+  std::atomic<bool> running_;
+  Vector<std::thread> threads_;
+  thread::Queue<ReplicationJob> queue_;
 };
 
 } // namespace eventql
-

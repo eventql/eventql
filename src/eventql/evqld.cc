@@ -56,6 +56,7 @@
 #include "eventql/db/TableConfig.pb.h"
 #include "eventql/db/table_service.h"
 #include "eventql/db/metadata_coordinator.h"
+#include "eventql/db/metadata_replication.h"
 #include "eventql/db/metadata_service.h"
 #include "eventql/transport/http/rpc_servlet.h"
 #include "eventql/db/ReplicationWorker.h"
@@ -493,6 +494,13 @@ int main(int argc, const char** argv) {
         &partition_map,
         flags.getInt("indexbuild_threads"));
 
+    /* metadata replication */
+    ScopedPtr<MetadataReplication> metadata_replication;
+    if (!server_name.isEmpty()) {
+      metadata_replication.reset(
+          new MetadataReplication(config_dir.get(), server_name.get()));
+    }
+
     /* sql */
     RefPtr<csql::Runtime> sql;
     {
@@ -656,7 +664,16 @@ int main(int argc, const char** argv) {
     Application::setCurrentThreadName("z1d");
 
     partition_map.open();
+    if (metadata_replication.get()) {
+      metadata_replication->start();
+    }
+
     ev.run();
+
+    if (metadata_replication.get()) {
+      metadata_replication->stop();
+    }
+
     backfill_thread.join();
   } catch (const StandardException& e) {
     logAlert("eventql", e, "FATAL ERROR");
