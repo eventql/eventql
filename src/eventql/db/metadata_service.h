@@ -45,6 +45,12 @@ public:
       const String& table_name,
       RefPtr<MetadataFile>* file) const;
 
+  Status getMetadataFile(
+      const String& ns,
+      const String& table_name,
+      const SHA1Hash& transaction_id,
+      RefPtr<MetadataFile>* file) const;
+
   Status createMetadataFile(
       const String& ns,
       const String& table_name,

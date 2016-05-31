@@ -143,6 +143,13 @@ void RPCServlet::handleHTTPRequest(
       return;
     }
 
+    if (uri.path() == "/rpc/fetch_metadata_file") {
+      req_stream->readBody();
+      fetchMetadataFile(uri, &req, &res);
+      res_stream->writeResponse(res);
+      return;
+    }
+
     if (uri.path() == "/rpc/fetch_latest_metadata_file") {
       req_stream->readBody();
       fetchLatestMetadataFile(uri, &req, &res);
@@ -560,6 +567,52 @@ void RPCServlet::discoverPartitionMetadata(
   }
 }
 
+void RPCServlet::fetchMetadataFile(
+    const URI& uri,
+    const http::HTTPRequest* req,
+    http::HTTPResponse* res) {
+  const auto& params = uri.queryParams();
+
+  String db_namespace;
+  if (!URI::getParam(params, "namespace", &db_namespace)) {
+    RAISE(kRuntimeError, "missing ?namespace=... parameter");
+  }
+
+  String table_name;
+  if (!URI::getParam(params, "table", &table_name)) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody("error: missing ?table=... parameter");
+    return;
+  }
+
+  String txid;
+  if (!URI::getParam(params, "txid", &txid)) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody("error: missing ?txid=... parameter");
+    return;
+  }
+
+  RefPtr<MetadataFile> file;
+  auto rc = metadata_service_->getMetadataFile(
+      db_namespace,
+      table_name,
+      SHA1Hash::fromHexString(txid),
+      &file);
+
+  if (rc.isSuccess()) {
+    auto os = res->getBodyOutputStream();
+    rc = file->encode(os.get());
+  }
+
+  if (rc.isSuccess()) {
+    res->setStatus(http::kStatusOK);
+  } else {
+    res->setStatus(http::kStatusInternalServerError);
+    res->addBody("ERROR: " + rc.message());
+    return;
+  }
+}
+
 void RPCServlet::fetchLatestMetadataFile(
     const URI& uri,
     const http::HTTPRequest* req,
@@ -579,7 +632,10 @@ void RPCServlet::fetchLatestMetadataFile(
   }
 
   RefPtr<MetadataFile> file;
-  auto rc = metadata_service_->getMetadataFile(db_namespace, table_name, &file);
+  auto rc = metadata_service_->getMetadataFile(
+      db_namespace,
+      table_name,
+      &file);
 
   if (rc.isSuccess()) {
     auto os = res->getBodyOutputStream();
@@ -594,8 +650,6 @@ void RPCServlet::fetchLatestMetadataFile(
     return;
   }
 }
-
-
 
 }
 

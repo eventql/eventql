@@ -34,6 +34,18 @@ MetadataService::MetadataService(
 Status MetadataService::getMetadataFile(
     const String& ns,
     const String& table_name,
+    const SHA1Hash& transaction_id,
+    RefPtr<MetadataFile>* file) const {
+  return metadata_store_->getMetadataFile(
+      ns,
+      table_name,
+      transaction_id,
+      file);
+}
+
+Status MetadataService::getMetadataFile(
+    const String& ns,
+    const String& table_name,
     RefPtr<MetadataFile>* file) const {
   auto table_cfg = cdir_->getTableConfig(ns, table_name);
   return metadata_store_->getMetadataFile(
