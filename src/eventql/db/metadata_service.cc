@@ -192,13 +192,27 @@ Status MetadataService::listPartitions(
     }
   }
 
-  for (const auto& p : file->getPartitionMap()) {
+  Vector<MetadataFile::PartitionMapEntry>::const_iterator iter;
+  if (request.keyrange_begin().size() == 0) {
+    iter = file->getPartitionMapBegin();
+  } else {
+    iter = file->getPartitionMapAt(request.keyrange_begin());
+  }
+
+  Vector<MetadataFile::PartitionMapEntry>::const_iterator end;
+  if (request.keyrange_end().size() == 0) {
+    end = file->getPartitionMapEnd();
+  } else {
+    end = file->getPartitionMapAt(request.keyrange_end()) + 1;
+  }
+
+  for (; iter != end; ++iter) {
     auto e = response->add_partitions();
-    e->set_partition_id(p.partition_id.data(), p.partition_id.size());
-    for (const auto& s : p.servers) {
+    e->set_partition_id(iter->partition_id.data(), iter->partition_id.size());
+    for (const auto& s : iter->servers) {
       e->add_servers(s.server_id);
     }
-    for (const auto& s : p.servers_leaving) {
+    for (const auto& s : iter->servers_leaving) {
       e->add_servers(s.server_id);
     }
   }

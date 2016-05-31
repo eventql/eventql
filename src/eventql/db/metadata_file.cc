@@ -54,6 +54,67 @@ const Vector<MetadataFile::PartitionMapEntry>&
   return partition_map_;
 }
 
+MetadataFile::PartitionMapIter MetadataFile::getPartitionMapBegin() const {
+  return partition_map_.begin();
+}
+
+MetadataFile::PartitionMapIter MetadataFile::getPartitionMapEnd() const {
+  return partition_map_.end();
+}
+
+// fixme this should be a binary search
+MetadataFile::PartitionMapIter MetadataFile::getPartitionMapAt(
+    const String& key) const {
+  auto iter = partition_map_.begin();
+
+  while (iter < partition_map_.end()) {
+    if (compareKeys(iter->begin, key) > 0) {
+      break;
+    } else {
+      iter++;
+    }
+  }
+
+  if (iter != partition_map_.begin()) {
+    --iter;
+  }
+
+  return iter;
+}
+
+int MetadataFile::compareKeys(const String& a, const String& b) const {
+  switch (keyspace_type_) {
+    case KEYSPACE_STRING: {
+      if (a < b) {
+        return -1;
+      } else if (a > b) {
+        return 1;
+      } else {
+        return 0;
+      }
+    }
+
+    case KEYSPACE_UINT64: {
+      uint64_t a_uint = 0;
+      uint64_t b_uint = 0;
+      if (a.size() == sizeof(uint64_t)) {
+        memcpy(&a_uint, a.data(), sizeof(uint64_t));
+      }
+      if (b.size() == sizeof(uint64_t)) {
+        memcpy(&b_uint, b.data(), sizeof(uint64_t));
+      }
+
+      if (a_uint < b_uint) {
+        return -1;
+      } else if (a_uint > b_uint) {
+        return 1;
+      } else {
+        return 0;
+      }
+    }
+  }
+}
+
 static Status decodeServerList(
     Vector<MetadataFile::PartitionPlacement>* servers,
     InputStream* is) {
