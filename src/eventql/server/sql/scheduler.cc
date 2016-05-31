@@ -23,8 +23,10 @@
  * code of your own applications
  */
 #include <eventql/server/sql/scheduler.h>
+#include <eventql/server/sql/table_provider.h>
 #include <eventql/server/sql/pipelined_expression.h>
 #include <eventql/sql/qtree/QueryTreeUtil.h>
+#include <eventql/db/metadata_client.h>
 
 #include "eventql/eventql.h"
 
@@ -177,8 +179,28 @@ Vector<Scheduler::PipelinedQueryTree> Scheduler::pipelineExpression(
     RAISE(kIllegalStateError, "can't pipeline query tree");
   }
 
-  auto partitioner = table.get()->partitioner();
-  auto partitions = partitioner->listPartitions(seqscan->constraints());
+  auto db_namespace =
+      static_cast<Session*>(txn->getUserData())->getEffectiveNamespace();
+
+  Set<SHA1Hash> partitions;
+  if (table.get()->partitionerType() == TBL_PARTITION_TIMEWINDOW) {
+    auto keyrange = TSDBTableProvider::findKeyRange(seqscan->constraints());
+    MetadataClient metadata_client(cdir_);
+    auto rc = metadata_client.listPartitions(
+        db_namespace,
+        table_ref.table_key,
+        keyrange,
+        &partitions);
+
+    if (!rc.isSuccess()) {
+      RAISEF(kRuntimeError, "metadata lookup failure: $0", rc.message());
+    }
+  } else {
+    auto partitioner = table.get()->partitioner();
+    for (const auto& p : partitioner->listPartitions(seqscan->constraints())) {
+      partitions.emplace(p);
+    }
+  }
 
   Vector<PipelinedQueryTree> shards;
   for (const auto& partition : partitions) {

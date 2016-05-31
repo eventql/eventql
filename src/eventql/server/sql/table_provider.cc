@@ -25,6 +25,7 @@
 #include <eventql/util/SHA1.h>
 #include <eventql/server/sql/table_provider.h>
 #include <eventql/db/table_service.h>
+#include <eventql/db/metadata_client.h>
 #include <eventql/sql/CSTableScan.h>
 
 #include "eventql/eventql.h"
@@ -58,11 +59,28 @@ Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
   }
 
   auto partitioner = table.get()->partitioner();
-  Vector<SHA1Hash> partitions;
+  Set<SHA1Hash> partitions;
   if (table_ref.partition_key.isEmpty()) {
-    partitions = partitioner->listPartitions(seqscan->constraints());
+    if (table.get()->partitionerType() == TBL_PARTITION_TIMEWINDOW) {
+      auto keyrange = TSDBTableProvider::findKeyRange(seqscan->constraints());
+      MetadataClient metadata_client(cdir_);
+      auto rc = metadata_client.listPartitions(
+          tsdb_namespace_,
+          table_ref.table_key,
+          keyrange,
+          &partitions);
+
+      if (!rc.isSuccess()) {
+        RAISEF(kRuntimeError, "metadata lookup failure: $0", rc.message());
+      }
+    } else {
+      auto partitioner = table.get()->partitioner();
+      for (const auto& p : partitioner->listPartitions(seqscan->constraints())) {
+        partitions.emplace(p);
+      }
+    }
   } else {
-    partitions.emplace_back(table_ref.partition_key.get());
+    partitions.emplace(table_ref.partition_key.get());
   }
 
   return Option<ScopedPtr<csql::TableExpression>>(
@@ -72,7 +90,7 @@ Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
               execution_context,
               tsdb_namespace_,
               table_ref.table_key,
-              partitions,
+              Vector<SHA1Hash>(partitions.begin(), partitions.end()),
               seqscan,
               partition_map_,
               replication_scheme_,

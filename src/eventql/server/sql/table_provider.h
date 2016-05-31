@@ -54,6 +54,9 @@ public:
       csql::ExecutionContext* execution_context,
       RefPtr<csql::SequentialScanNode> seqscan) const override;
 
+  static KeyRange findKeyRange(
+      const Vector<csql::ScanConstraint>& constraints);
+
   void listTables(
       Function<void (const csql::TableInfo& table)> fn) const override;
 
@@ -69,6 +72,7 @@ protected:
 
   String tsdb_namespace_;
   PartitionMap* partition_map_;
+  ConfigDirectory* cdir_;
   ReplicationScheme* replication_scheme_;
   TableService* table_service_;
   InternalAuth* auth_;

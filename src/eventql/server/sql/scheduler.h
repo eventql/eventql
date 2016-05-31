@@ -82,6 +82,7 @@ protected:
       RefPtr<csql::QueryTreeNode> node);
 
   PartitionMap* pmap_;
+  ConfigDirectory* cdir_;
   InternalAuth* auth_;
   ReplicationScheme* repl_scheme_;
   size_t running_cnt_;
