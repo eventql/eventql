@@ -106,7 +106,6 @@ public:
     T_COLUMN_TYPE,
     T_INSERT_INTO,
     T_VALUE_LIST,
-    T_VALUE,
     T_JSON_STRING,
 
     T_DRAW,

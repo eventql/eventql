@@ -591,25 +591,15 @@ ASTNode* Parser::insertValueList() {
   auto value_list = new ASTNode(ASTNode::T_VALUE_LIST);
 
   while (*cur_token_ != Token::T_RPAREN) {
-    switch (cur_token_->getType()) {
-      case Token::T_TRUE:
-      case Token::T_FALSE:
-      case Token::T_NULL:
-      case Token::T_STRING:
-      case Token::T_NUMERIC: {
-        auto value = new ASTNode(ASTNode::T_VALUE);
-        value->setToken(cur_token_);
-        consumeToken();
-        value_list->appendChild(value);
-        break;
-      }
-
-      default:
-        RAISEF(
-            kParseError,
-            "unexpected Token $0, expected one of T_STRING, T_NUMERIC",
-            Token::getTypeName(cur_token_->getType()));
+    auto value = expr();
+    if (value == nullptr) {
+      RAISEF(
+          kParseError,
+          "unexpected Token $0, can't build expression",
+          cur_token_->getString());
     }
+
+    value_list->appendChild(value);
 
     if (*cur_token_ == Token::T_COMMA) {
       consumeToken();

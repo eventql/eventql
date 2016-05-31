@@ -366,9 +366,6 @@ void ASTNode::debugPrint(int indent /* = 0 */) const {
     case T_VALUE_LIST:
       printf("- T_VALUE_LIST");
       break;
-    case T_VALUE:
-      printf("- T_VALUE");
-      break;
     case T_JSON_STRING:
       printf("- T_JSON_STRING");
       break;
