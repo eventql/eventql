@@ -45,12 +45,15 @@ public:
   ~ReplicationWorker();
 
   void enqueuePartition(RefPtr<Partition> partition);
+  void enqueuePartition(RefPtr<Partition> partition, uint64_t delay_usecs);
 
   void updateReplicationScheme(RefPtr<ReplicationScheme> new_repl_scheme);
 
 protected:
 
-  void enqueuePartitionWithLock(RefPtr<Partition> partition);
+  void enqueuePartitionWithLock(
+      RefPtr<Partition> partition,
+      uint64_t delay_usecs = 0);
 
   void start();
   void stop();

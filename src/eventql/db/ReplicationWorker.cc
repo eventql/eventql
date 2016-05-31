@@ -63,14 +63,23 @@ void ReplicationWorker::enqueuePartition(RefPtr<Partition> partition) {
   enqueuePartitionWithLock(partition);
 }
 
-void ReplicationWorker::enqueuePartitionWithLock(RefPtr<Partition> partition) {
+void ReplicationWorker::enqueuePartition(
+    RefPtr<Partition> partition,
+    uint64_t delay_usecs) {
+  std::unique_lock<std::mutex> lk(mutex_);
+  enqueuePartitionWithLock(partition);
+}
+
+void ReplicationWorker::enqueuePartitionWithLock(
+    RefPtr<Partition> partition,
+    uint64_t delay_usecs /* = 0 */) {
   auto uuid = partition->uuid();
   if (waitset_.count(uuid) > 0) {
     return;
   }
 
   queue_.emplace(
-      WallClock::unixMicros() + kReplicationCorkWindowMicros,
+      WallClock::unixMicros() + kReplicationCorkWindowMicros + delay_usecs,
       partition);
 
   z1stats()->replication_queue_length.set(queue_.size());
