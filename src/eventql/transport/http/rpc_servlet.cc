@@ -556,8 +556,6 @@ void RPCServlet::discoverPartitionMetadata(
     const URI& uri,
     const http::HTTPRequest* req,
     http::HTTPResponse* res) {
-  const auto& params = uri.queryParams();
-
   PartitionDiscoveryRequest request;
   msg::decode(req->body(), &request);
 
@@ -662,8 +660,6 @@ void RPCServlet::listPartitions(
     const URI& uri,
     const http::HTTPRequest* req,
     http::HTTPResponse* res) {
-  const auto& params = uri.queryParams();
-
   PartitionListRequest request;
   msg::decode(req->body(), &request);
 

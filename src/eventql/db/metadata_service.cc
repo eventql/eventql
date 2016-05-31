@@ -181,7 +181,29 @@ Status MetadataService::discoverPartition(
 Status MetadataService::listPartitions(
     const PartitionListRequest& request,
     PartitionListResponse* response) {
-  return Status(eRuntimeError, "not yet implemented");
+  RefPtr<MetadataFile> file;
+  {
+    auto rc = getMetadataFile(
+        request.db_namespace(),
+        request.table_id(),
+        &file);
+    if (!rc.isSuccess()) {
+      return rc;
+    }
+  }
+
+  for (const auto& p : file->getPartitionMap()) {
+    auto e = response->add_partitions();
+    e->set_partition_id(p.partition_id.data(), p.partition_id.size());
+    for (const auto& s : p.servers) {
+      e->add_servers(s.server_id);
+    }
+    for (const auto& s : p.servers_leaving) {
+      e->add_servers(s.server_id);
+    }
+  }
+
+  return Status::success();
 }
 
 } // namespace eventql

@@ -58,13 +58,13 @@ message PartitionListRequest {
   required bytes keyrange_end = 4;
 };
 
-message PartitionListReponseEntry {
-  required string partition_id = 1;
+message PartitionListResponseEntry {
+  required bytes partition_id = 1;
   repeated string servers = 2;
 };
 
 message PartitionListResponse {
-  repeated PartitionListReponseEntry partitions = 1;
+  repeated PartitionListResponseEntry partitions = 1;
 };
 
 message MetadataOperationEnvelope {
