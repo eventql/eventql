@@ -58,3 +58,34 @@ TEST_CASE(ProcessConfigTest, TestProcessConfigBuilder, [] () {
   }
 });
 
+TEST_CASE(ProcessConfigTest, TestProcessConfigBuilderLoadFile, [] () {
+  auto test_file_path = "eventql/config/testdata/.process_cfg";
+  ProcessConfigBuilder builder;
+
+  auto status = builder.loadFile(test_file_path);
+  EXPECT_TRUE(status.isSuccess());
+
+  builder.setProperty("test", "port", "9175");
+
+  auto config = builder.getConfig();
+  {
+    auto p = config->getProperty("test", "host");
+    EXPECT_FALSE(p.isEmpty());
+    EXPECT_EQ(p.get(), "localhost");
+  }
+  {
+    auto p = config->getProperty("test", "port");
+    EXPECT_FALSE(p.isEmpty());
+    EXPECT_EQ(p.get(), "9175");
+  }
+  {
+    auto p = config->getProperty("test", "authors");
+    EXPECT_FALSE(p.isEmpty());
+    EXPECT_EQ(p.get(), "eventQL Authors");
+  }
+  {
+    auto p = config->getProperty("test2", "mail");
+    EXPECT_FALSE(p.isEmpty());
+    EXPECT_EQ(p.get(), "authors@test.com");
+  }
+});
