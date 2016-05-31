@@ -24,9 +24,10 @@
 #pragma once
 #include "eventql/eventql.h"
 #include "eventql/util/status.h"
-#include "eventql/util/thread/queue.h"
+#include "eventql/util/thread/DelayedQueue.h"
 #include "eventql/db/metadata_operation.h"
 #include "eventql/db/metadata_file.h"
+#include "eventql/db/metadata_store.h"
 #include "eventql/config/config_directory.h"
 
 namespace eventql {
@@ -34,9 +35,12 @@ namespace eventql {
 class MetadataReplication {
 public:
 
+  static const uint64_t kRetryDelayMicros = 30 * kMicrosPerSecond;
+
   MetadataReplication(
       ConfigDirectory* cdir,
-      const String& server_name);
+      const String& server_name,
+      MetadataStore* metadata_store);
 
   void start();
   void stop();
@@ -47,16 +51,20 @@ protected:
     String db_namespace;
     String table_id;
     SHA1Hash transaction_id;
+    Vector<String> servers;
   };
 
   void applyTableConfigChange(const TableDefinition& cfg);
-  void replicate(const ReplicationJob& job);
+
+  void replicateWithRetries(const ReplicationJob& job);
+  Status replicate(const ReplicationJob& job);
 
   ConfigDirectory* cdir_;
   String server_name_;
+  MetadataStore* metadata_store_;
   std::atomic<bool> running_;
   Vector<std::thread> threads_;
-  thread::Queue<ReplicationJob> queue_;
+  thread::DelayedQueue<ReplicationJob> queue_;
 };
 
 } // namespace eventql

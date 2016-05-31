@@ -498,7 +498,10 @@ int main(int argc, const char** argv) {
     ScopedPtr<MetadataReplication> metadata_replication;
     if (!server_name.isEmpty()) {
       metadata_replication.reset(
-          new MetadataReplication(config_dir.get(), server_name.get()));
+          new MetadataReplication(
+              config_dir.get(),
+              server_name.get(),
+              &metadata_store));
     }
 
     /* sql */

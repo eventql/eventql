@@ -28,9 +28,11 @@ namespace eventql {
 
 MetadataReplication::MetadataReplication(
     ConfigDirectory* cdir,
-    const String& server_name) :
+    const String& server_name,
+    MetadataStore* store) :
     cdir_(cdir),
-    server_name_(server_name) {
+    server_name_(server_name),
+    metadata_store_(store) {
   cdir_->setTableConfigChangeCallback([this] (const TableDefinition& tbl) {
     applyTableConfigChange(tbl);
   });
@@ -49,15 +51,91 @@ void MetadataReplication::applyTableConfigChange(const TableDefinition& cfg) {
       job.transaction_id = SHA1Hash(
           cfg.metadata_txnid().data(),
           cfg.metadata_txnid().size());
+      job.servers = Vector<String>(
+          cfg.metadata_servers().begin(),
+          cfg.metadata_servers().end());
 
-      queue_.insert(job);
+      queue_.insert(job, WallClock::now());
       break;
     }
   }
 }
 
-void MetadataReplication::replicate(const ReplicationJob& job) {
-  iputs("replicate!!", 1);
+void MetadataReplication::replicateWithRetries(const ReplicationJob& job) {
+  auto rc = replicate(job);
+  if (!rc.isSuccess()) {
+    logWarning("evqld", "metadata replication failed: $0", rc.message());
+
+    // check that the transaction we are retrying to fetch is still the most
+    // recent one
+    auto table_cfg = cdir_->getTableConfig(job.db_namespace, job.table_id);
+    SHA1Hash head_txnid(
+        table_cfg.metadata_txnid().data(),
+        table_cfg.metadata_txnid().size());
+
+    if (head_txnid == job.transaction_id) {
+      queue_.insert(job, WallClock::unixMicros() + kRetryDelayMicros);
+    }
+  }
+}
+
+Status MetadataReplication::replicate(const ReplicationJob& job) {
+  bool has_file = metadata_store_->hasMetadataFile(
+      job.db_namespace,
+      job.table_id,
+      job.transaction_id);
+  if (has_file) {
+    return Status::success();
+  }
+
+  http::HTTPClient http_client;
+  for (const auto& s : job.servers) {
+    try {
+      auto server = cdir_->getServerConfig(s);
+      if (server.server_status() != SERVER_UP) {
+        continue;
+      }
+
+      auto url = StringUtil::format(
+          "http://$0/rpc/fetch_metadata_file?namespace=$1&table=$2&txid=$3",
+          server.server_addr(),
+          URI::urlEncode(job.db_namespace),
+          URI::urlEncode(job.table_id),
+          job.transaction_id.toString());
+
+      Buffer body;
+      auto req = http::HTTPRequest::mkPost(url, body);
+      //auth_->signRequest(static_cast<Session*>(txn_->getUserData()), &req);
+
+      http::HTTPResponse res;
+      auto rc = http_client.executeRequest(req, &res);
+      if (!rc.isSuccess()) {
+        logWarning("evqld", "metadata fetch failed: $0", rc.message());
+        continue;
+      }
+
+      if (res.statusCode() != 200) {
+        logWarning(
+            "evqld",
+            "metadata fetch failed: $0",
+            res.body().toString());
+        continue;
+      }
+
+      auto is = res.getBodyInputStream();
+      MetadataFile file;
+      file.decode(is.get());
+
+      return metadata_store_->storeMetadataFile(
+          job.db_namespace,
+          job.table_id,
+          file);
+    } catch (const std::exception& e) {
+      logWarning("evqld", "metadata fetch failed: $0", e.what());
+    }
+  }
+
+  return Status(eIOError, "no metadata server responded");
 }
 
 void MetadataReplication::start() {
@@ -71,7 +149,7 @@ void MetadataReplication::start() {
 
         try {
           if (!job.isEmpty()) {
-            replicate(job.get());
+            replicateWithRetries(job.get());
           }
         } catch (const std::exception& e) {
           logWarning("evqld", "error in metadata replication: $0", e.what());
@@ -86,7 +164,6 @@ void MetadataReplication::stop() {
     return;
   }
 
-  queue_.waitUntilEmpty();
   running_ = false;
   queue_.wakeup();
 
