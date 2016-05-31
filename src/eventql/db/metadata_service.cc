@@ -192,20 +192,8 @@ Status MetadataService::listPartitions(
     }
   }
 
-  Vector<MetadataFile::PartitionMapEntry>::const_iterator iter;
-  if (request.keyrange_begin().size() == 0) {
-    iter = file->getPartitionMapBegin();
-  } else {
-    iter = file->getPartitionMapAt(request.keyrange_begin());
-  }
-
-  Vector<MetadataFile::PartitionMapEntry>::const_iterator end;
-  if (request.keyrange_end().size() == 0) {
-    end = file->getPartitionMapEnd();
-  } else {
-    end = file->getPartitionMapAt(request.keyrange_end()) + 1;
-  }
-
+  auto iter = file->getPartitionMapRangeBegin(request.keyrange_begin());
+  auto end = file->getPartitionMapRangeEnd(request.keyrange_end());
   for (; iter != end; ++iter) {
     auto e = response->add_partitions();
     e->set_partition_id(iter->partition_id.data(), iter->partition_id.size());

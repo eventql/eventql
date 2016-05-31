@@ -82,6 +82,24 @@ MetadataFile::PartitionMapIter MetadataFile::getPartitionMapAt(
   return iter;
 }
 
+MetadataFile::PartitionMapIter MetadataFile::getPartitionMapRangeBegin(
+    const String& begin) const {
+  if (begin.empty()) {
+    return getPartitionMapBegin();
+  } else {
+    return getPartitionMapAt(begin);
+  }
+}
+
+MetadataFile::PartitionMapIter MetadataFile::getPartitionMapRangeEnd(
+    const String& end) const {
+  if (end.empty()) {
+    return getPartitionMapEnd();
+  } else {
+    return getPartitionMapAt(end) + 1;
+  }
+}
+
 int MetadataFile::compareKeys(const String& a, const String& b) const {
   switch (keyspace_type_) {
     case KEYSPACE_STRING: {
