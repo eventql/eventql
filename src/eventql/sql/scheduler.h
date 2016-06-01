@@ -30,6 +30,7 @@
 #include <eventql/sql/query_plan.h>
 #include <eventql/sql/runtime/ValueExpression.h>
 #include <eventql/sql/scheduler/execution_context.h>
+#include <eventql/sql/qtree/nodes/alter_table.h>
 #include <eventql/sql/qtree/nodes/create_table.h>
 #include <eventql/sql/qtree/nodes/insert_into.h>
 #include <eventql/sql/qtree/nodes/insert_json.h>
@@ -100,6 +101,11 @@ protected:
       Transaction* txn,
       ExecutionContext* execution_context,
       RefPtr<InsertJSONNode> insert_json);
+
+  virtual ScopedPtr<ResultCursor> executeAlterTable(
+      Transaction* txn,
+      ExecutionContext* execution_context,
+      RefPtr<AlterTableNode> alter_table);
 
   virtual ScopedPtr<TableExpression> buildTableExpression(
       Transaction* ctx,
