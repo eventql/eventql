@@ -866,6 +866,8 @@ evql_core_a_SOURCES = \
     eventql/db/Table.h \
     eventql/db/TimeWindowPartitioner.cc \
     eventql/db/TimeWindowPartitioner.h \
+    eventql/db/partition_discovery.cc \
+    eventql/db/partition_discovery.h \
     eventql/db/partition_map.cc \
     eventql/db/partition_map.h \
     eventql/eventql.h \
@@ -1110,5 +1112,19 @@ test_evql_db_metadata_file_LDADD = \
 
 TESTS += test_evql_db_metadata_file
 check_PROGRAMS += test_evql_db_metadata_file
+
+
+################# TEST: db/partition_discovery ####################
+test_evql_db_partition_discovery_SOURCES = eventql/db/partition_discovery_test.cc
+test_evql_db_partition_discovery_LDADD = \
+    evql_core.a \
+    evql_util.a \
+    $(SIMDCOMP_LDADD) \
+    $(LMDB_LDADD) \
+    $(PROTOBUF_LDADD) \
+    $(PCRE_LDADD)
+
+TESTS += test_evql_db_partition_discovery
+check_PROGRAMS += test_evql_db_partition_discovery
 
 
