@@ -100,7 +100,12 @@ MetadataFile::PartitionMapIter MetadataFile::getPartitionMapRangeEnd(
   if (end.empty()) {
     return getPartitionMapEnd();
   } else {
-    return getPartitionMapAt(end) + 1;
+    auto iter = getPartitionMapAt(end);
+    if (compareKeys(iter->begin, end) == 0) {
+      return iter;
+    } else {
+      return iter + 1;
+    }
   }
 }
 
