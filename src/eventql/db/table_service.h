@@ -65,6 +65,12 @@ public:
       const msg::MessageSchema& schema,
       Vector<String> primary_key);
 
+  Status alterTable(
+      const String& db_namespace,
+      const String& table_name,
+      const Vector<String>& drop_columns,
+      const Vector<msg::MessageSchemaField>& add_columns) const;
+
   void listTables(
       const String& tsdb_namespace,
       Function<void (const TSDBTableInfo& table)> fn) const;

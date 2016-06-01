@@ -131,6 +131,14 @@ Status TableService::createTable(
   return Status::success();
 }
 
+Status TableService::alterTable(
+    const String& db_namespace,
+    const String& table_name,
+    const Vector<String>& drop_columns,
+    const Vector<msg::MessageSchemaField>& add_columns) const {
+  RAISE(kNotYetImplementedError, "nyi");
+}
+
 void TableService::listTables(
     const String& tsdb_namespace,
     Function<void (const TSDBTableInfo& table)> fn) const {
