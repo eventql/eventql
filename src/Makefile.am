@@ -226,6 +226,8 @@ evql_sql_a_SOURCES = \
     eventql/sql/qtree/UnionNode.cc \
     eventql/sql/qtree/UnionNode.h \
     eventql/sql/qtree/ValueExpressionNode.h \
+    eventql/sql/qtree/nodes/alter_table.cc \
+    eventql/sql/qtree/nodes/alter_table.h \
     eventql/sql/qtree/nodes/create_table.cc \
     eventql/sql/qtree/nodes/create_table.h \
     eventql/sql/qtree/nodes/insert_into.cc \
