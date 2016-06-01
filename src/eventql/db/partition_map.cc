@@ -79,9 +79,11 @@ void PartitionMap::configureTable(
     if (iter == tables_.end()) {
       tables_.emplace(tbl_key, new Table(table));
     } else {
-      auto last_metadata_txn = iter->second->getLastMetadataTransaction();
-      if (table.metadata_txnseq() > last_metadata_txn.getSequenceNumber()) {
-        metadata_changed = true;
+      if (table.config().partitioner() == TBL_PARTITION_TIMEWINDOW) {
+        auto last_metadata_txn = iter->second->getLastMetadataTransaction();
+        if (table.metadata_txnseq() > last_metadata_txn.getSequenceNumber()) {
+          metadata_changed = true;
+        }
       }
 
       iter->second->updateConfig(table);
