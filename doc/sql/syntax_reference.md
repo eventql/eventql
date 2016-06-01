@@ -104,3 +104,18 @@ Syntax Reference
       (column_name, ...) VALUES (expr, ...)
     | FROM JSON "{ ... }"
 
+
+### The ALTER TABLE statement
+
+    ALTER TABLE table_name
+    alter_specification [, alter_specification, ...]
+
+    alter_specification ::=
+        ADD [COLUMN] column_definition
+      | DROP [COLUMN] column_name
+
+    column_definition ::=
+        column_name column_type
+      | column_name REPEATED column_type
+      | column_name [REPEATED] RECORD (column_definition [, column_definition, ...])
+
