@@ -31,12 +31,14 @@
 
 namespace eventql {
 class ConfigDirectory;
+class MetadataStore;
 
 struct ServerCfg {
   String db_path;
   RefPtr<ReplicationScheme> repl_scheme;
   RefPtr<LSMTableIndexCache> idx_cache;
   ConfigDirectory* config_directory;
+  MetadataStore* metadata_store;
 };
 
 } // namespace eventql

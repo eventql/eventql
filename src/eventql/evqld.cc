@@ -468,6 +468,7 @@ int main(int argc, const char** argv) {
     cfg.repl_scheme = repl_scheme;
     cfg.config_directory = config_dir.get();
     cfg.idx_cache = mkRef(new LSMTableIndexCache(tsdb_dir));
+    cfg.metadata_store = &metadata_store;
 
     eventql::PartitionMap partition_map(&cfg);
     eventql::TableService table_service(
