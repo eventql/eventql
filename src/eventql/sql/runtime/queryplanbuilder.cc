@@ -1933,6 +1933,63 @@ QueryTreeNode* QueryPlanBuilder::buildInsertInto(
   return new InsertIntoNode(table_name->getToken()->getString(), values_spec);
 }
 
+static TableSchema::ColumnDefinition* buildAddColumnSchema(ASTNode* ast) {
+  auto column_name = ast->getChildren()[0];
+  if (column_name->getType() != ASTNode::T_COLUMN_NAME ||
+      column_name->getToken() == nullptr) {
+    RAISE(kRuntimeError, "corrupt AST");
+  }
+
+  Vector<TableSchema::ColumnOptions> column_options;
+  for (size_t i = 2; i < ast->getChildren().size(); ++i) {
+    switch (ast->getChildren()[i]->getType()) {
+      case ASTNode::T_NOT_NULL:
+        column_options.emplace_back(TableSchema::ColumnOptions::NOT_NULL);
+        break;
+      case ASTNode::T_REPEATED:
+        column_options.emplace_back(TableSchema::ColumnOptions::REPEATED);
+        break;
+      default:
+        RAISE(kRuntimeError, "corrupt AST");
+    }
+  }
+
+  auto col_def = new TableSchema::ColumnDefinition();
+  col_def->column_name = column_name->getToken()->getString();
+  col_def->column_options = column_options;
+
+  switch (ast->getChildren()[1]->getType()) {
+
+    case ASTNode::T_COLUMN_TYPE: {
+      auto column_type = ast->getChildren()[1];
+      if (column_type->getType() != ASTNode::T_COLUMN_TYPE ||
+          column_type->getToken() == nullptr) {
+        RAISE(kRuntimeError, "corrupt AST");
+      }
+
+      col_def->column_type = column_type->getToken()->getString();
+      col_def->column_class = TableSchema::ColumnClass::SCALAR;
+      break;
+    }
+
+    case ASTNode::T_RECORD: {
+      TableSchema::ColumnList column_schema;
+      for (const auto& c : ast->getChildren()[1]->getChildren()) {
+        column_schema.emplace_back(buildAddColumnSchema(c));
+      }
+      col_def->column_type = "RECORD";
+      col_def->column_class = TableSchema::ColumnClass::RECORD;
+      col_def->column_schema = column_schema;
+      break;
+    }
+
+    default:
+      RAISE(kRuntimeError, "corrupt AST");
+  }
+
+  return col_def;
+}
+
 QueryTreeNode* QueryPlanBuilder::buildAlterTable(
     Transaction* txn,
     ASTNode* ast) {
@@ -1961,7 +2018,7 @@ QueryTreeNode* QueryPlanBuilder::buildAlterTable(
 
       //add column
       case ASTNode::T_COLUMN:
-        //FIXME buil column definition
+        add_columns.emplace_back(buildAddColumnSchema(ast->getChildren()[i]));
         break;
 
       default:
@@ -1973,7 +2030,6 @@ QueryTreeNode* QueryPlanBuilder::buildAlterTable(
       table_name->getToken()->getString(),
       drop_columns,
       add_columns);
-};
-
+}
 
 }

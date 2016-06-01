@@ -806,4 +806,24 @@ TEST_CASE(QTreeTest, TestAlterTable, [] () {
   EXPECT_EQ(drop_columns.size(), 2);
   EXPECT_EQ(drop_columns[0], "place");
   EXPECT_EQ(drop_columns[1], "version");
+
+  auto add_columns = qtree->getColumnsToAdd();
+  EXPECT_EQ(add_columns.size(), 2);
+
+  EXPECT_EQ(add_columns[0]->column_name, "description");
+  EXPECT_EQ(add_columns[0]->column_type, "String");
+  EXPECT(add_columns[0]->column_options == Vector<TableSchema::ColumnOptions> {
+      TableSchema::ColumnOptions::REPEATED
+  });
+  EXPECT_EQ(add_columns[1]->column_name, "product");
+  EXPECT(add_columns[1]->column_options.size() == 0);
+  auto sub_columns = add_columns[1]->column_schema;
+  EXPECT_EQ(sub_columns.size(), 2);
+  EXPECT_EQ(sub_columns[0]->column_name, "id");
+  EXPECT_EQ(sub_columns[0]->column_type, "uint64");
+  EXPECT_EQ(sub_columns[1]->column_name, "slug");
+  EXPECT_EQ(sub_columns[1]->column_type, "string");
+  EXPECT(sub_columns[1]->column_options == Vector<TableSchema::ColumnOptions> {
+      TableSchema::ColumnOptions::REPEATED
+  });
 });
