@@ -632,7 +632,6 @@ ASTNode* Parser::alterStatement() {
   alter_table->appendChild(tableName());
 
   while (*cur_token_ != Token::T_SEMICOLON) {
-
     switch (cur_token_->getType()) {
       case Token::T_ADD:
         alter_table->appendChild(addColumnDefinition());
@@ -650,11 +649,43 @@ ASTNode* Parser::alterStatement() {
           cur_token_->getString().size() > 0 ? ": " : "",
           cur_token_->getString().c_str());
     }
+
+    if (*cur_token_ == Token::T_COMMA) {
+      consumeToken();
+    } else {
+      break;
+    }
   }
 
   consumeIf(Token::T_SEMICOLON);
 
+  return alter_table;
+}
+
+ASTNode* Parser::addColumnDefinition() {
+  consumeToken();
+  consumeIf(Token::T_COLUMN);
+
+  auto column = new ASTNode(ASTNode::T_COLUMN);
+
+  assertExpectation(Token::T_IDENTIFIER);
+  auto column_name = new ASTNode(ASTNode::T_COLUMN_NAME);
+  column_name->setToken(cur_token_);
+  column->appendChild(column_name);
+  consumeToken();
+
   RAISE(kNotYetImplementedError, "nyi");
+}
+
+ASTNode* Parser::dropColumnDefinition() {
+  consumeToken();
+  consumeIf(Token::T_COLUMN);
+  assertExpectation(Token::T_IDENTIFIER);
+  auto column_name = new ASTNode(ASTNode::T_COLUMN_NAME);
+  column_name->setToken(cur_token_);
+  consumeToken();
+
+  return column_name;
 }
 
 ASTNode* Parser::importStatement() {

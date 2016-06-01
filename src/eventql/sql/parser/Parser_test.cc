@@ -1208,22 +1208,45 @@ TEST_CASE(ParserTest, TestInsertIntoFromJSONStatement, [] () {
   EXPECT(*children[1] == ASTNode::T_JSON_STRING);
 });
 
-TEST_CASE(ParserTest, TestAlterTableStatement, [] () {
+TEST_CASE(ParserTest, TestAlterTableAddColumnStatement, [] () {
+  auto runtime = Runtime::getDefaultRuntime();
+  auto txn = runtime->newTransaction();
+
+  //auto parser = parseTestQuery(
+  //    R"(
+  //        ALTER TABLE evtbl
+  //          ADD description REPEATED String,
+  //          ADD COLUMN product RECORD (
+  //              id uint64,
+  //              slug REPEATED string
+  //          );
+  //    )");
+
+  //EXPECT(parser.getStatements().size() == 1);
+  //const auto& stmt = parser.getStatements()[0];
+  //const auto& children = stmt->getChildren();
+
+});
+
+TEST_CASE(ParserTest, TestAlterTableDropColumnStatement, [] () {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
   auto parser = parseTestQuery(
       R"(
           ALTER TABLE evtbl
-            ADD description REPEATED String,
-            ADD COLUMN product RECORD (
-                id uint64,
-                slug REPEATED string
-            );
+            DROP description,
+            DROP column id;
       )");
 
   EXPECT(parser.getStatements().size() == 1);
   const auto& stmt = parser.getStatements()[0];
   const auto& children = stmt->getChildren();
-
+  EXPECT_EQ(children.size(), 3);
+  EXPECT_EQ(*children[0], ASTNode::T_TABLE_NAME);
+  EXPECT_EQ(children[0]->getToken()->getString(), "evtbl");
+  EXPECT_EQ(*children[1], ASTNode::T_COLUMN_NAME);
+  EXPECT_EQ(children[1]->getToken()->getString(), "description");
+  EXPECT_EQ(*children[2], ASTNode::T_COLUMN_NAME);
+  EXPECT_EQ(children[2]->getToken()->getString(), "id");
 });
