@@ -101,7 +101,6 @@ Status MetadataStore::getMetadataFile(
     return rc;
   }
 
-
   // store file in cache
   if (file_size < cache_maxbytes_) {
     std::unique_lock<std::mutex> cache_lk(cache_mutex_);
