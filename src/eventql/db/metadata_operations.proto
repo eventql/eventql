@@ -46,10 +46,18 @@ enum PartitionDiscoveryResponseCode {
   PDISCOVERY_UNLOAD = 3;
 };
 
+message PartitionDiscoveryReplicationTarget {
+  required string server_id = 1;
+  required uint64 placement_id = 2;
+  optional bytes keyrange_begin = 3;
+  optional bytes keyrange_end = 4;
+}
+
 message PartitionDiscoveryResponse {
   required PartitionDiscoveryResponseCode code = 1;
   required bytes txnid = 2;
   required uint64 txnseq = 3;
+  repeated PartitionDiscoveryReplicationTarget replication_targets = 4;
 };
 
 message PartitionListRequest {

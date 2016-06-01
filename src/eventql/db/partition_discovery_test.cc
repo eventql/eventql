@@ -117,6 +117,13 @@ TEST_CASE(PartitionDiscoveryTest, TestServingPartition, [] () {
     auto rc = PartitionDiscovery::discoverPartition(&file, req, &res);
     EXPECT(rc.isSuccess());
     EXPECT(res.code() == PDISCOVERY_UNLOAD);
+    EXPECT(res.replication_targets().size() == 3);
+    EXPECT(res.replication_targets().Get(0).server_id() == "s4");
+    EXPECT(res.replication_targets().Get(0).placement_id() == 13);
+    EXPECT(res.replication_targets().Get(1).server_id() == "s2");
+    EXPECT(res.replication_targets().Get(1).placement_id() == 11);
+    EXPECT(res.replication_targets().Get(2).server_id() == "s1");
+    EXPECT(res.replication_targets().Get(2).placement_id() == 12);
   }
 
   {
@@ -133,6 +140,11 @@ TEST_CASE(PartitionDiscoveryTest, TestServingPartition, [] () {
     auto rc = PartitionDiscovery::discoverPartition(&file, req, &res);
     EXPECT(rc.isSuccess());
     EXPECT(res.code() == PDISCOVERY_SERVE);
+    EXPECT(res.replication_targets().size() == 2);
+    EXPECT(res.replication_targets().Get(0).server_id() == "s4");
+    EXPECT(res.replication_targets().Get(0).placement_id() == 13);
+    EXPECT(res.replication_targets().Get(1).server_id() == "s1");
+    EXPECT(res.replication_targets().Get(1).placement_id() == 12);
   }
 });
 
