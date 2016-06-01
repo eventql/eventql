@@ -37,7 +37,15 @@ public:
   Status runOnce();
 
 protected:
+
+  Status rebalanceTable(TableDefinition tbl_cfg);
+
+  String pickMetadataServer() const;
+  String pickServer() const;
+
   ConfigDirectory* cdir_;
+  Set<String> all_servers_;
+  Vector<String> live_servers_;
 };
 
 } // namespace eventql

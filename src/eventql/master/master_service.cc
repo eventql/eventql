@@ -22,6 +22,7 @@
  * code of your own applications
  */
 #include <eventql/master/master_service.h>
+#include <eventql/util/random.h>
 
 namespace eventql {
 
@@ -30,7 +31,88 @@ MasterService::MasterService(ConfigDirectory* cdir) : cdir_(cdir) {}
 Status MasterService::runOnce() {
   logInfo("evqld", "Rebalancing cluster...");
 
+  all_servers_.clear();
+  live_servers_.clear();
+  for (const auto& s : cdir_->listServers()) {
+    all_servers_.emplace(s.server_id());
+    if (s.server_status() == SERVER_UP) {
+      live_servers_.emplace_back(s.server_id());
+    }
+  }
+
+  if (live_servers_.empty() || all_servers_.empty()) {
+    return Status(eIllegalStateError, "cluster has no live servers");
+  }
+
+  Vector<TableDefinition> tables;
+  cdir_->listTables([&tables] (const TableDefinition& tbl_cfg) {
+    tables.emplace_back(tbl_cfg);
+  });
+
+  for (const auto& tbl_cfg : tables) {
+    auto rc = rebalanceTable(tbl_cfg);
+    if (!rc.isSuccess()) {
+      return rc;
+    }
+  }
+
   return Status::success();
+}
+
+Status MasterService::rebalanceTable(TableDefinition tbl_cfg) {
+  logInfo(
+      "evqld",
+      "Rebalancing table '$0/$1'",
+      tbl_cfg.customer(),
+      tbl_cfg.table_name());
+
+  bool tbl_cfg_dirty = false;
+
+  // replace dead metadata servers with live ones
+  {
+    bool has_dead_server = false;
+    Set<String> server_list;
+    for (const auto& s : tbl_cfg.metadata_servers()) {
+      if (all_servers_.count(s) > 0) {
+        server_list.emplace(s);
+      } else {
+        auto replacement_server = pickMetadataServer();
+        server_list.emplace(replacement_server);
+        has_dead_server = true;
+
+        logInfo(
+            "evqld",
+            "Replacing dead metadata server '$0' with '$1' in table '$2/$3'",
+            s,
+            replacement_server,
+            tbl_cfg.customer(),
+            tbl_cfg.table_name());
+      }
+    }
+
+    if (has_dead_server) {
+      tbl_cfg.mutable_metadata_servers()->Clear();
+      for (const auto& s : server_list) {
+        tbl_cfg.add_metadata_servers(s);
+      }
+      tbl_cfg_dirty = true;
+    }
+  }
+
+  if (tbl_cfg_dirty) {
+    cdir_->updateTableConfig(tbl_cfg);
+  }
+
+  return Status::success();
+}
+
+String MasterService::pickMetadataServer() const {
+  return pickServer();
+}
+
+String MasterService::pickServer() const {
+  uint64_t idx = Random::singleton()->random64();
+  return live_servers_[idx % live_servers_.size()];
 }
 
 } // namespace eventql
