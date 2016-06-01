@@ -44,9 +44,9 @@ const Vector<String> AlterTableNode::getColumnsToDrop() const {
   return drop_columns_;
 }
 
-//const TableSchema::ColumnList AlterTableNode::getColumnsToAdd const {
-//  return add_columns_;
-//}
+const TableSchema::ColumnList AlterTableNode::getColumnsToAdd() const {
+  return add_columns_;
+}
 
 RefPtr<QueryTreeNode> AlterTableNode::deepCopy() const {
   return new AlterTableNode(*this);

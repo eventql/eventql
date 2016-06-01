@@ -41,7 +41,7 @@ public:
 
   const String& getTableName() const;
   const Vector<String> getColumnsToDrop() const;
- // const TableSchema::ColumnList getColumnsToAdd() const;
+  const TableSchema::ColumnList getColumnsToAdd() const;
 
   RefPtr<QueryTreeNode> deepCopy() const;
   String toString() const;
