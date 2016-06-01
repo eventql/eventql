@@ -632,6 +632,26 @@ next:
     goto next;
   }
 
+  if (token == "ALTER") {
+    token_list->emplace_back(Token::T_ALTER);
+    goto next;
+  }
+
+  if (token == "ADD") {
+    token_list->emplace_back(Token::T_ADD);
+    goto next;
+  }
+
+  if (token == "DROP") {
+    token_list->emplace_back(Token::T_DROP);
+    goto next;
+  }
+
+  if (token == "COLUMN") {
+    token_list->emplace_back(Token::T_COLUMN);
+    goto next;
+  }
+
   if (token == "XDOMAIN") {
     token_list->emplace_back(Token::T_XDOMAIN);
     goto next;

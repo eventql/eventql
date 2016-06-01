@@ -315,6 +315,8 @@ ASTNode* Parser::statement() {
       return createStatement();
     case Token::T_INSERT:
       return insertStatement();
+    case Token::T_ALTER:
+      return alterStatement();
     case Token::T_DRAW:
       return drawStatement();
     case Token::T_IMPORT:
@@ -330,7 +332,7 @@ ASTNode* Parser::statement() {
 
   RAISE(
       kParseError,
-      "unexpected token %s%s%s, expected one of SELECT, DRAW or IMPORT",
+      "unexpected token %s%s%s, expected one of SELECT, CREATE, INSERT, ALTER, DRAW or IMPORT",
         Token::getTypeName(cur_token_->getType()),
         cur_token_->getString().size() > 0 ? ": " : "",
         cur_token_->getString().c_str());
@@ -620,6 +622,39 @@ ASTNode* Parser::insertFromJSON() {
 
   consumeToken();
   return json;
+}
+
+ASTNode* Parser::alterStatement() {
+  consumeToken();
+  expectAndConsume(Token::T_TABLE);
+
+  auto alter_table = new ASTNode(ASTNode::T_ALTER_TABLE);
+  alter_table->appendChild(tableName());
+
+  while (*cur_token_ != Token::T_SEMICOLON) {
+
+    switch (cur_token_->getType()) {
+      case Token::T_ADD:
+        alter_table->appendChild(addColumnDefinition());
+        break;
+
+      case Token::T_DROP:
+        alter_table->appendChild(dropColumnDefinition());
+        break;
+
+      default:
+        RAISEF(
+          kParseError,
+          "unexpected token $0$1$2, expected one of ADD or REMOVE",
+          Token::getTypeName(cur_token_->getType()),
+          cur_token_->getString().size() > 0 ? ": " : "",
+          cur_token_->getString().c_str());
+    }
+  }
+
+  consumeIf(Token::T_SEMICOLON);
+
+  RAISE(kNotYetImplementedError, "nyi");
 }
 
 ASTNode* Parser::importStatement() {

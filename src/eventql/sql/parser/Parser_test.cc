@@ -2,6 +2,7 @@
  * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
  * Authors:
  *   - Paul Asmuth <paul@zscale.io>
+ *   - Laura Schlimmer <laura@zscale.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -384,7 +385,7 @@ TEST_CASE(ParserTest, TestSelectWithQuotedTableName, [] () {
 
 TEST_CASE(ParserTest, TestSelectMustBeFirstAssert, [] () {
   const char* err_msg = "unexpected token T_GROUP, expected one of SELECT, "
-      "DRAW or IMPORT";
+      "CREATE, INSERT, ALTER, DRAW or IMPORT";
 
   EXPECT_EXCEPTION(err_msg, [] () {
     auto parser = parseTestQuery("GROUP BY SELECT");
@@ -1205,4 +1206,24 @@ TEST_CASE(ParserTest, TestInsertIntoFromJSONStatement, [] () {
   EXPECT_EQ(children[0]->getToken()->getString(), "evtbl");
 
   EXPECT(*children[1] == ASTNode::T_JSON_STRING);
+});
+
+TEST_CASE(ParserTest, TestAlterTableStatement, [] () {
+  auto runtime = Runtime::getDefaultRuntime();
+  auto txn = runtime->newTransaction();
+
+  auto parser = parseTestQuery(
+      R"(
+          ALTER TABLE evtbl
+            ADD description REPEATED String,
+            ADD COLUMN product RECORD (
+                id uint64,
+                slug REPEATED string
+            );
+      )");
+
+  EXPECT(parser.getStatements().size() == 1);
+  const auto& stmt = parser.getStatements()[0];
+  const auto& children = stmt->getChildren();
+
 });
