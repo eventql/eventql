@@ -135,8 +135,61 @@ Status TableService::alterTable(
     const String& db_namespace,
     const String& table_name,
     const Vector<String>& drop_columns,
-    const msg::MessageSchema& add_columns) const {
-  RAISE(kNotYetImplementedError, "nyi");
+    const Vector<msg::MessageSchemaField>& add_columns) const {
+  auto table = pmap_->findTable(db_namespace, table_name);
+  if (table.isEmpty()) {
+    return Status(eNotFoundError, "table not found");
+  }
+
+  auto td = table.get()->config();
+  auto schema = msg::MessageSchema::decode(td.config().schema());
+
+  //add columns
+  for (auto c : add_columns) {
+    auto cur_schema = schema;
+    auto field = c.name;
+
+    uint32_t next_field_id;
+    if (td.has_next_field_id()) {
+      next_field_id = td.next_field_id();
+    } else {
+      next_field_id = schema->maxFieldId() + 1;
+    }
+    iputs("next field id $0", next_field_id);
+
+    while (StringUtil::includes(field, ".")) {
+      auto prefix_len = field.find(".");
+      auto prefix = field.substr(0, prefix_len);
+
+      field = field.substr(prefix_len + 1);
+      if (!cur_schema->hasField(prefix)) {
+        return Status(
+            eNotFoundError,
+            StringUtil::format("field '$0' not found", field));
+      }
+
+      auto parent_field_id = cur_schema->fieldId(prefix);
+      auto parent_field_type = cur_schema->fieldType(parent_field_id);
+      if (parent_field_type != msg::FieldType::OBJECT) {
+        return Status(
+            eRuntimeError,
+            StringUtil::format(
+                "can't add a field to field '$0' of type $1",
+                prefix,
+                fieldTypeToString(parent_field_type)));
+      }
+
+      cur_schema = cur_schema->fieldSchema(parent_field_id);
+    }
+
+    c.name = field;
+    cur_schema->addField(c);
+    td.set_next_field_id(next_field_id + 1);
+    td.mutable_config()->set_schema(schema->encode().toString());
+  }
+
+  cdir_->updateTableConfig(td);
+  return Status::success();
 }
 
 void TableService::listTables(

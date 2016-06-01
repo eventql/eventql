@@ -291,7 +291,7 @@ Status TSDBTableProvider::alterTable(
       tsdb_namespace_,
       alter_table.getTableName(),
       alter_table.getColumnsToDrop(),
-      *msg_schema);
+      msg_schema->fields());
 }
 
 Status TSDBTableProvider::insertRecord(

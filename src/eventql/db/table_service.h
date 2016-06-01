@@ -69,7 +69,7 @@ public:
       const String& db_namespace,
       const String& table_name,
       const Vector<String>& drop_columns,
-      const msg::MessageSchema& add_columns) const;
+      const Vector<msg::MessageSchemaField>&) const;
 
   void listTables(
       const String& tsdb_namespace,
