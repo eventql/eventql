@@ -144,8 +144,17 @@ Status TableService::alterTable(
   auto td = table.get()->config();
   auto schema = msg::MessageSchema::decode(td.config().schema());
 
+  auto primary_key = table.get()->getPrimaryKey();
+  auto pkey_begin = primary_key.begin();
+  auto pkey_end = primary_key.end();
   //remove columns
   for (auto c : drop_columns) {
+    if (find(pkey_begin, pkey_end, c) != pkey_end) {
+      return Status(
+          eRuntimeError,
+          "primary key column can't be dropped");
+    }
+
     auto cur_schema = schema;
     auto field = c;
     while (StringUtil::includes(field, ".")) {
