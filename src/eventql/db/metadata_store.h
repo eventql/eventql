@@ -32,8 +32,11 @@ namespace eventql {
 
 class MetadataStore {
 public:
+  static const constexpr size_t kDefaultMaxEntries = 1024;
 
-  MetadataStore(const String& path_prefix);
+  MetadataStore(
+      const String& path_prefix,
+      size_t cache_maxentries = kDefaultMaxEntries);
 
   Status getMetadataFile(
       const String& ns,
@@ -51,7 +54,16 @@ public:
       const String& table_name,
       const MetadataFile& file);
 
+  size_t getCacheSize() const;
+
 protected:
+
+  struct CacheEntry {
+    String key;
+    RefPtr<MetadataFile> file;
+    CacheEntry* prev;
+    CacheEntry* next;
+  };
 
   String getBasePath(
       const String& ns,
@@ -62,8 +74,14 @@ protected:
       const String& table_name,
       const SHA1Hash& txid) const;
 
-  std::mutex mutex_;
   String path_prefix_;
+  std::mutex commit_mutex_;
+  size_t cache_maxentries_;
+  mutable std::mutex cache_mutex_;
+  mutable HashMap<String, ScopedPtr<CacheEntry>> cache_idx_;
+  mutable CacheEntry* cache_head_;
+  mutable CacheEntry* cache_tail_;
+  mutable size_t cache_numentries_;
 };
 
 } // namespace eventql

@@ -29,14 +29,61 @@
 namespace eventql {
 
 MetadataStore::MetadataStore(
-    const String& path_prefix) :
-    path_prefix_(path_prefix) {}
+    const String& path_prefix,
+    size_t cache_maxentries /* = kDefaultMaxEntries */) :
+    path_prefix_(path_prefix),
+    cache_maxentries_(cache_maxentries),
+    cache_head_(nullptr),
+    cache_tail_(nullptr),
+    cache_numentries_(0) {}
 
 Status MetadataStore::getMetadataFile(
     const String& ns,
     const String& table_name,
     const SHA1Hash& txid,
     RefPtr<MetadataFile>* file) const {
+  auto cache_key = StringUtil::format("$0~$1~$2", ns, table_name, txid);
+  {
+    std::unique_lock<std::mutex> cache_lk(cache_mutex_);
+    auto cache_iter = cache_idx_.find(cache_key);
+    if (cache_iter != cache_idx_.end()) {
+      // found in cache
+      auto cache_entry = cache_iter->second.get();
+
+      // move cache entry to head of lru list
+      if (cache_entry != cache_head_) {
+        // remove from current position
+        if (cache_entry->prev) {
+          cache_entry->prev->next = cache_entry->next;
+        } else {
+          cache_head_ = cache_entry->next;
+        }
+
+        if (cache_entry->next) {
+          cache_entry->next->prev = cache_entry->prev;
+        } else {
+          cache_tail_ = cache_entry->prev;
+        }
+
+        // relink lru head
+        cache_entry->prev = nullptr;
+        cache_entry->next = cache_head_;
+        if (cache_head_) {
+          cache_head_->prev = cache_entry;
+        }
+        cache_head_ = cache_entry;
+
+        // relink lru tail
+        if (!cache_tail_) {
+          cache_tail_ = cache_entry;
+        }
+      }
+
+      *file = cache_entry->file;
+      return Status::success();
+    }
+  }
+
   auto file_path = getPath(ns, table_name, txid);
   if (!FileUtil::exists(file_path)) {
     return Status(eIOError, "metadata file does not exist");
@@ -48,6 +95,48 @@ Status MetadataStore::getMetadataFile(
   auto rc = file->get()->decode(is.get());
   if (!rc.isSuccess()) {
     return rc;
+  }
+
+
+  // store file in cache
+  {
+    std::unique_lock<std::mutex> cache_lk(cache_mutex_);
+    // make space
+    while (
+        cache_numentries_ > 0 &&
+        cache_numentries_ >= cache_maxentries_) {
+      assert(cache_tail_ != nullptr);
+      auto removed_entry = cache_tail_;
+      if (removed_entry->prev) {
+        removed_entry->prev->next = nullptr;
+      } else {
+        cache_head_ = nullptr;
+      }
+      cache_tail_ = removed_entry->prev;
+      cache_idx_.erase(removed_entry->key);
+      --cache_numentries_;
+    }
+
+    // store new entry
+    {
+      auto cache_entry = new CacheEntry();
+      cache_entry->key = cache_key;
+      cache_entry->file = file->get();
+      cache_entry->prev = nullptr;
+      cache_entry->next = cache_head_;
+
+      if (cache_head_) {
+        cache_head_->prev = cache_entry;
+      }
+      cache_head_ = cache_entry;
+
+      if (!cache_tail_) {
+        cache_tail_ = cache_entry;
+      }
+
+      cache_idx_.emplace(cache_key, mkScoped(cache_entry));
+      ++cache_numentries_;
+    }
   }
 
   return Status::success();
@@ -85,7 +174,7 @@ Status MetadataStore::storeMetadataFile(
     return rc;
   }
 
-  std::unique_lock<std::mutex> lk(mutex_);
+  std::unique_lock<std::mutex> lk(commit_mutex_);
   if (FileUtil::exists(file_path)) {
     FileUtil::rm(file_path_tmp);
     return Status(eIOError, "metadata file already exists");
