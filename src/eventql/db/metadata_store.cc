@@ -73,13 +73,11 @@ Status MetadataStore::getMetadataFile(
         cache_entry->next = cache_head_;
         if (cache_head_) {
           cache_head_->prev = cache_entry;
-        }
-        cache_head_ = cache_entry;
-
-        // relink lru tail
-        if (!cache_tail_) {
+        } else {
           cache_tail_ = cache_entry;
         }
+
+        cache_head_ = cache_entry;
       }
 
       *file = cache_entry->file;
@@ -111,6 +109,7 @@ Status MetadataStore::getMetadataFile(
         cache_size_bytes_ + file_size >= cache_maxbytes_)) {
       assert(cache_tail_ != nullptr);
       auto removed_entry = cache_tail_;
+      String removed_key = removed_entry->key;
       if (removed_entry->prev) {
         removed_entry->prev->next = nullptr;
       } else {
@@ -119,7 +118,7 @@ Status MetadataStore::getMetadataFile(
       cache_tail_ = removed_entry->prev;
       --cache_numentries_;
       cache_size_bytes_ -= removed_entry->size;
-      cache_idx_.erase(removed_entry->key);
+      cache_idx_.erase(removed_key);
     }
 
     // store new entry
@@ -133,12 +132,11 @@ Status MetadataStore::getMetadataFile(
 
       if (cache_head_) {
         cache_head_->prev = cache_entry;
-      }
-      cache_head_ = cache_entry;
-
-      if (!cache_tail_) {
+      } else {
         cache_tail_ = cache_entry;
       }
+
+      cache_head_ = cache_entry;
 
       cache_idx_.emplace(cache_key, mkScoped(cache_entry));
       ++cache_numentries_;
