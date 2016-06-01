@@ -34,6 +34,7 @@
 #include "eventql/sql/qtree/LiteralExpressionNode.h"
 #include "eventql/sql/qtree/QueryTreeUtil.h"
 #include "eventql/sql/qtree/qtree_coder.h"
+#include "eventql/sql/qtree/nodes/alter_table.h"
 #include "eventql/sql/qtree/nodes/create_table.h"
 #include "eventql/sql/qtree/nodes/insert_into.h"
 #include "eventql/sql/qtree/nodes/insert_json.h"
@@ -798,5 +799,11 @@ TEST_CASE(QTreeTest, TestAlterTable, [] () {
       txn.get(),
       parser.getStatements(),
       txn->getTableProvider());
+  RefPtr<AlterTableNode> qtree = qtrees[0].asInstanceOf<AlterTableNode>();
+  EXPECT_EQ(qtree->getTableName(), "evtbl");
 
+  auto drop_columns = qtree->getColumnsToDrop();
+  EXPECT_EQ(drop_columns.size(), 2);
+  EXPECT_EQ(drop_columns[0], "place");
+  EXPECT_EQ(drop_columns[1], "version");
 });
