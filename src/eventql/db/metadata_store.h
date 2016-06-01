@@ -32,10 +32,12 @@ namespace eventql {
 
 class MetadataStore {
 public:
+  static const constexpr size_t kDefaultMaxBytes = 1024 * 1024 * 256; // 256 MB
   static const constexpr size_t kDefaultMaxEntries = 1024;
 
   MetadataStore(
       const String& path_prefix,
+      size_t cache_maxbytes = kDefaultMaxBytes,
       size_t cache_maxentries = kDefaultMaxEntries);
 
   Status getMetadataFile(
@@ -60,6 +62,7 @@ protected:
 
   struct CacheEntry {
     String key;
+    size_t size;
     RefPtr<MetadataFile> file;
     CacheEntry* prev;
     CacheEntry* next;
@@ -76,11 +79,13 @@ protected:
 
   String path_prefix_;
   std::mutex commit_mutex_;
+  size_t cache_maxbytes_;
   size_t cache_maxentries_;
   mutable std::mutex cache_mutex_;
   mutable HashMap<String, ScopedPtr<CacheEntry>> cache_idx_;
   mutable CacheEntry* cache_head_;
   mutable CacheEntry* cache_tail_;
+  mutable size_t cache_size_bytes_;
   mutable size_t cache_numentries_;
 };
 

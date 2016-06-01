@@ -155,7 +155,10 @@ TEST_CASE(MetadataStoreTest, TestMetadataCache, [] () {
       Random::singleton()->hex64());
 
   FileUtil::mkdir_p(metadata_store_path);
-  MetadataStore metadata_store(metadata_store_path, 8);
+  MetadataStore metadata_store(
+      metadata_store_path,
+      MetadataStore::kDefaultMaxBytes,
+      12);
 
   for (size_t i = 0; i < 20; ++i) {
     auto txid = SHA1::compute(StringUtil::format("file$0", i % 20));

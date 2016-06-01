@@ -30,11 +30,14 @@ namespace eventql {
 
 MetadataStore::MetadataStore(
     const String& path_prefix,
+    size_t cache_maxbytes /* = kDefaultMaxBytes */,
     size_t cache_maxentries /* = kDefaultMaxEntries */) :
     path_prefix_(path_prefix),
+    cache_maxbytes_(cache_maxbytes),
     cache_maxentries_(cache_maxentries),
     cache_head_(nullptr),
     cache_tail_(nullptr),
+    cache_size_bytes_(0),
     cache_numentries_(0) {}
 
 Status MetadataStore::getMetadataFile(
@@ -89,6 +92,7 @@ Status MetadataStore::getMetadataFile(
     return Status(eIOError, "metadata file does not exist");
   }
 
+  auto file_size = FileUtil::size(file_path);
   auto is = FileInputStream::openFile(file_path);
   file->reset(new MetadataFile());
 
@@ -99,12 +103,13 @@ Status MetadataStore::getMetadataFile(
 
 
   // store file in cache
-  {
+  if (file_size < cache_maxbytes_) {
     std::unique_lock<std::mutex> cache_lk(cache_mutex_);
     // make space
     while (
-        cache_numentries_ > 0 &&
-        cache_numentries_ >= cache_maxentries_) {
+        cache_numentries_ > 0 && (
+        cache_numentries_ >= cache_maxentries_ ||
+        cache_size_bytes_ + file_size >= cache_maxbytes_)) {
       assert(cache_tail_ != nullptr);
       auto removed_entry = cache_tail_;
       if (removed_entry->prev) {
@@ -113,14 +118,16 @@ Status MetadataStore::getMetadataFile(
         cache_head_ = nullptr;
       }
       cache_tail_ = removed_entry->prev;
-      cache_idx_.erase(removed_entry->key);
       --cache_numentries_;
+      cache_size_bytes_ -= removed_entry->size;
+      cache_idx_.erase(removed_entry->key);
     }
 
     // store new entry
     {
       auto cache_entry = new CacheEntry();
       cache_entry->key = cache_key;
+      cache_entry->size = file_size;
       cache_entry->file = file->get();
       cache_entry->prev = nullptr;
       cache_entry->next = cache_head_;
@@ -136,6 +143,7 @@ Status MetadataStore::getMetadataFile(
 
       cache_idx_.emplace(cache_key, mkScoped(cache_entry));
       ++cache_numentries_;
+      cache_size_bytes_ += file_size;
     }
   }
 
@@ -197,6 +205,11 @@ String MetadataStore::getPath(
     const String& table_name,
     const SHA1Hash& txid) const {
   return FileUtil::joinPaths(getBasePath(ns, table_name), txid.toString());
+}
+
+size_t MetadataStore::getCacheSize() const {
+  std::unique_lock<std::mutex> cache_lk(cache_mutex_);
+  return cache_size_bytes_;
 }
 
 } // namespace eventql
