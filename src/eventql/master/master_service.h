@@ -44,8 +44,11 @@ protected:
   String pickServer() const;
 
   ConfigDirectory* cdir_;
+  size_t replication_factor_;
+  size_t metadata_replication_factor_;
   Set<String> all_servers_;
   Vector<String> live_servers_;
+
 };
 
 } // namespace eventql

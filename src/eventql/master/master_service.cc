@@ -26,7 +26,11 @@
 
 namespace eventql {
 
-MasterService::MasterService(ConfigDirectory* cdir) : cdir_(cdir) {}
+MasterService::MasterService(
+    ConfigDirectory* cdir) :
+    cdir_(cdir),
+    replication_factor_(3),
+    metadata_replication_factor_(3) {}
 
 Status MasterService::runOnce() {
   logInfo("evqld", "Rebalancing cluster...");
@@ -68,7 +72,7 @@ Status MasterService::rebalanceTable(TableDefinition tbl_cfg) {
 
   bool tbl_cfg_dirty = false;
 
-  // replace dead metadata servers with live ones
+  // remove dead metadata servers
   {
     bool has_dead_server = false;
     Set<String> server_list;
@@ -76,18 +80,25 @@ Status MasterService::rebalanceTable(TableDefinition tbl_cfg) {
       if (all_servers_.count(s) > 0) {
         server_list.emplace(s);
       } else {
-        auto replacement_server = pickMetadataServer();
-        server_list.emplace(replacement_server);
         has_dead_server = true;
 
         logInfo(
             "evqld",
-            "Replacing dead metadata server '$0' with '$1' in table '$2/$3'",
+            "Removing dead metadata server '$0' from table '$1/$2'",
             s,
-            replacement_server,
             tbl_cfg.customer(),
             tbl_cfg.table_name());
       }
+    }
+
+    if (server_list.empty()) {
+      logCritical(
+          "evqld",
+          "All metadata servers for table '$0/$1' are dead",
+          tbl_cfg.customer(),
+          tbl_cfg.table_name());
+
+      has_dead_server = false;
     }
 
     if (has_dead_server) {
@@ -96,6 +107,35 @@ Status MasterService::rebalanceTable(TableDefinition tbl_cfg) {
         tbl_cfg.add_metadata_servers(s);
       }
       tbl_cfg_dirty = true;
+    }
+  }
+
+  // remove leaving metadata servers if it doesnt violate our replication
+  // factor constraint
+  {
+    // ...
+  }
+
+  // make sure we have enough metadata servers
+  {
+    size_t nservers = 0;
+    for (const auto& s : tbl_cfg.metadata_servers()) {
+      if (leaving_servers_.count(s) == 0) {
+        ++nservers;
+      }
+    }
+
+    for (; nservers < metadata_replication_factor_; ++nservers) {
+      auto new_server = pickMetadataServer();
+      logInfo(
+          "evqld",
+          "Adding new metadata server '$0' to table '$1/$2'",
+          new_server,
+          tbl_cfg.customer(),
+          tbl_cfg.table_name());
+
+      tbl_cfg.add_metadata_servers(new_server);
+      table_cfg_dirty = true;
     }
   }
 
