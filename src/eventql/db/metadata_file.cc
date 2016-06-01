@@ -176,6 +176,7 @@ Status MetadataFile::decode(InputStream* is) {
   keyspace_type_ = static_cast<KeyspaceType>(is->readUInt8());
 
   // partition map
+  partition_map_.clear();
   auto pmap_size = is->readVarUInt();
   for (size_t i = 0; i < pmap_size; ++i) {
     PartitionMapEntry e;

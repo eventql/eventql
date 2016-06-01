@@ -29,6 +29,8 @@ namespace eventql {
 MasterService::MasterService(
     ConfigDirectory* cdir) :
     cdir_(cdir),
+    metadata_coordinator_(cdir),
+    metadata_client_(cdir),
     replication_factor_(3),
     metadata_replication_factor_(3) {}
 
@@ -54,6 +56,10 @@ Status MasterService::runOnce() {
   });
 
   for (const auto& tbl_cfg : tables) {
+    if (tbl_cfg.config().partitioner() != TBL_PARTITION_TIMEWINDOW) {
+      continue;
+    }
+
     auto rc = rebalanceTable(tbl_cfg);
     if (!rc.isSuccess()) {
       return rc;
@@ -69,6 +75,13 @@ Status MasterService::rebalanceTable(TableDefinition tbl_cfg) {
       "Rebalancing table '$0/$1'",
       tbl_cfg.customer(),
       tbl_cfg.table_name());
+
+  // fetch latest metadata file
+  MetadataFile metadata;
+  auto rc = metadata_client_.fetchMetadataFile(tbl_cfg, &metadata);
+  if (!rc.isSuccess()) {
+    return rc;
+  }
 
   bool tbl_cfg_dirty = false;
 
@@ -135,7 +148,54 @@ Status MasterService::rebalanceTable(TableDefinition tbl_cfg) {
           tbl_cfg.table_name());
 
       tbl_cfg.add_metadata_servers(new_server);
-      table_cfg_dirty = true;
+      tbl_cfg_dirty = true;
+    }
+  }
+
+  // remove dead servers from the metadata file
+  {
+    Set<String> dead_servers;
+    for (const auto& e : metadata.getPartitionMap()) {
+      for (const auto& s : e.servers) {
+        if (all_servers_.count(s.server_id) == 0) {
+          dead_servers.emplace(s.server_id);
+        }
+      }
+      for (const auto& s : e.servers_joining) {
+        if (all_servers_.count(s.server_id) == 0) {
+          dead_servers.emplace(s.server_id);
+        }
+      }
+      for (const auto& s : e.servers_leaving) {
+        if (all_servers_.count(s.server_id) == 0) {
+          dead_servers.emplace(s.server_id);
+        }
+      }
+    }
+
+    logInfo(
+        "evqld",
+        "Removing dead servers from partition map for table '$0/$1': $2",
+        tbl_cfg.customer(),
+        tbl_cfg.table_name(),
+        inspect(dead_servers));
+
+    if (!dead_servers.empty()) {
+      RemoveDeadServersOperation opdata;
+      for (const auto& s : dead_servers) {
+        opdata.add_server_ids(s);
+      }
+
+      tbl_cfg_dirty = true;
+      auto rc = performMetadataOperation(
+          &tbl_cfg,
+          &metadata,
+          METAOP_REMOVE_DEAD_SERVERS,
+          *msg::encode(opdata));
+
+      if (!rc.isSuccess()) {
+        return rc;
+      }
     }
   }
 
@@ -154,6 +214,42 @@ String MasterService::pickServer() const {
   uint64_t idx = Random::singleton()->random64();
   return live_servers_[idx % live_servers_.size()];
 }
+
+Status MasterService::performMetadataOperation(
+    TableDefinition* table_cfg,
+    MetadataFile* metadata_file,
+    MetadataOperationType optype,
+    const Buffer& opdata) {
+  auto new_txnid = Random::singleton()->sha1();
+
+  MetadataOperation op(
+      table_cfg->customer(),
+      table_cfg->table_name(),
+      optype,
+      SHA1Hash(
+          table_cfg->metadata_txnid().data(),
+          table_cfg->metadata_txnid().size()),
+      new_txnid,
+      opdata);
+
+  auto rc = metadata_coordinator_.performOperation(
+      table_cfg->customer(),
+      table_cfg->table_name(),
+      op,
+      Vector<String>(
+          table_cfg->metadata_servers().begin(),
+          table_cfg->metadata_servers().end()));
+
+  if (!rc.isSuccess()) {
+    return rc;
+  }
+
+  table_cfg->set_metadata_txnid(new_txnid.data(), new_txnid.size());
+  table_cfg->set_metadata_txnseq(table_cfg->metadata_txnseq() + 1);
+
+  return metadata_client_.fetchMetadataFile(*table_cfg, metadata_file);
+}
+
 
 } // namespace eventql
 

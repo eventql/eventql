@@ -27,6 +27,7 @@ enum MetadataOperationType {
   METAOP_BACKFILL_ADD_SERVER = 1;
   METAOP_BACKFILL_ADD_SERVERS = 3;
   METAOP_BACKFILL_REMOVE_SERVER = 2;
+  METAOP_REMOVE_DEAD_SERVERS = 4;
 };
 
 message PartitionDiscoveryRequest {
@@ -101,3 +102,6 @@ message BackfillRemoveServerOperation {
   required string server_id = 2;
 };
 
+message RemoveDeadServersOperation {
+  repeated string server_ids = 1;
+};

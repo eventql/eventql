@@ -63,7 +63,65 @@ Status MetadataClient::fetchLatestMetadataFile(
     } else {
       logWarning(
           "evqld",
-          "metadata discovery failed: $0",
+          "metadata fetch failed: $0",
+          res.body().toString());
+    }
+  }
+
+  return Status(eIOError, "no metadata server responded");
+}
+
+Status MetadataClient::fetchMetadataFile(
+    const TableDefinition& table_config,
+    MetadataFile* file) {
+  return fetchMetadataFile(
+      table_config.customer(),
+      table_config.table_name(),
+      SHA1Hash(
+          table_config.metadata_txnid().data(),
+          table_config.metadata_txnid().size()),
+      file);
+}
+
+Status MetadataClient::fetchMetadataFile(
+    const String& ns,
+    const String& table_id,
+    const SHA1Hash& txnid,
+    MetadataFile* file) {
+  auto table_cfg = cdir_->getTableConfig(ns, table_id);
+
+  http::HTTPClient http_client;
+  for (const auto& s : table_cfg.metadata_servers()) {
+    auto server = cdir_->getServerConfig(s);
+    if (server.server_status() != SERVER_UP) {
+      continue;
+    }
+
+    auto url = StringUtil::format(
+        "http://$0/rpc/fetch_metadata_file?namespace=$1&table=$2&txid=$3",
+        server.server_addr(),
+        URI::urlEncode(ns),
+        URI::urlEncode(table_id),
+        txnid);
+
+    Buffer body;
+    auto req = http::HTTPRequest::mkPost(url, body);
+    //auth_->signRequest(static_cast<Session*>(txn_->getUserData()), &req);
+
+    http::HTTPResponse res;
+    auto rc = http_client.executeRequest(req, &res);
+    if (!rc.isSuccess()) {
+      logWarning("evqld", "metadata fetch failed: $0", rc.message());
+      continue;
+    }
+
+    if (res.statusCode() == 200) {
+      auto is = res.getBodyInputStream();
+      return file->decode(is.get());
+    } else {
+      logWarning(
+          "evqld",
+          "metadata fetch failed: $0",
           res.body().toString());
     }
   }

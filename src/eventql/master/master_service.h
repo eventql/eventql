@@ -26,6 +26,8 @@
 #include "eventql/config/config_directory.h"
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/status.h>
+#include <eventql/db/metadata_client.h>
+#include <eventql/db/metadata_coordinator.h>
 
 namespace eventql {
 
@@ -43,12 +45,20 @@ protected:
   String pickMetadataServer() const;
   String pickServer() const;
 
+  Status performMetadataOperation(
+      TableDefinition* table_cfg,
+      MetadataFile* metadata_file,
+      MetadataOperationType optype,
+      const Buffer& opdata);
+
   ConfigDirectory* cdir_;
+  MetadataCoordinator metadata_coordinator_;
+  MetadataClient metadata_client_;
   size_t replication_factor_;
   size_t metadata_replication_factor_;
   Set<String> all_servers_;
   Vector<String> live_servers_;
-
+  Set<String> leaving_servers_;
 };
 
 } // namespace eventql
