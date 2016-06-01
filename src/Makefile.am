@@ -888,6 +888,8 @@ evql_core_a_SOURCES = \
     eventql/mapreduce/tasks/SaveToTablePartitionTask.h \
     eventql/mapreduce/tasks/SaveToTableTask.cc \
     eventql/mapreduce/tasks/SaveToTableTask.h \
+    eventql/master/master_service.h \
+    eventql/master/master_service.cc \
     eventql/auth/client_auth.h \
     eventql/auth/client_auth_legacy.cc \
     eventql/auth/client_auth_legacy.h \
