@@ -122,7 +122,7 @@ Status MetadataStore::getMetadataFile(
     }
 
     // store new entry
-    {
+    if (cache_idx_.find(cache_key) == cache_idx_.end()) {
       auto cache_entry = new CacheEntry();
       cache_entry->key = cache_key;
       cache_entry->size = file_size;
