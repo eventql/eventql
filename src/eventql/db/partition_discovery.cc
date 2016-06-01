@@ -38,49 +38,77 @@ Status PartitionDiscovery::discoverPartition(
       request.partition_id().data(),
       request.partition_id().size());
 
-  bool is_active_partition = false;
-  bool is_active_server = false;
-  bool is_joining_server = false;
-  bool is_leaving_server = false;
-  for (const auto& p : file->getPartitionMap()) {
-    if (p.partition_id == req_partition_id) {
-      is_active_partition = true;
+  auto add_repl_target = [&file, &request, &response] (
+      MetadataFile::PartitionMapIter e,
+      const MetadataFile::PartitionPlacement& s)  {
+    auto t = response->add_replication_targets();
+    t->set_server_id(s.server_id);
+    t->set_placement_id(s.placement_id);
+    t->set_partition_id(e->partition_id.data(), e->partition_id.size());
+    t->set_keyrange_begin(e->begin);
 
-      for (const auto& s : p.servers) {
-        if (s.server_id == request.requester_id()) {
-          is_active_server = true;
-          break;
-        }
-      }
-
-      for (const auto& s : p.servers_joining) {
-        if (s.server_id == request.requester_id()) {
-          is_joining_server = true;
-          break;
-        }
-      }
-
-      for (const auto& s : p.servers_leaving) {
-        if (s.server_id == request.requester_id()) {
-          is_leaving_server = true;
-          break;
-        }
-      }
-
-      break;
-    }
-  }
-
-  if (is_active_partition) {
-    if (is_active_server) {
-      response->set_code(PDISCOVERY_SERVE);
-    } else if (is_joining_server) {
-      response->set_code(PDISCOVERY_LOAD);
+    auto n = e + 1;
+    if (n == file->getPartitionMapEnd()) {
+      t->set_keyrange_end("");
     } else {
+      t->set_keyrange_end(n->begin);
+    }
+  };
+
+  auto iter = file->getPartitionMapRangeBegin(request.keyrange_begin());
+  if (iter->partition_id == req_partition_id) {
+    //valid partition
+    // check the list of active servers
+    for (const auto& s : iter->servers) {
+      if (s.server_id == request.requester_id()) {
+        // if we are in the active server list return SERVE
+        response->set_code(PDISCOVERY_SERVE);
+      } else {
+        add_repl_target(iter, s);
+      }
+    }
+
+    // check the list of joining servers
+    for (const auto& s : iter->servers_joining) {
+      if (s.server_id == request.requester_id()) {
+        // if we are in the joining server list return LOAD
+        response->set_code(PDISCOVERY_LOAD);
+      } else {
+        add_repl_target(iter, s);
+      }
+    }
+
+    // check the list of leaving servers
+    for (const auto& s : iter->servers_leaving) {
+      if (s.server_id == request.requester_id()) {
+        // if we are in the leaving server list return SERVE
+        response->set_code(PDISCOVERY_SERVE);
+      } else {
+        add_repl_target(iter, s);
+      }
+    }
+
+    // if we are neither in the active, joining or leaving server list, return
+    // UNLOAD
+    if (response->code() == PDISCOVERY_UNKNOWN) {
       response->set_code(PDISCOVERY_UNLOAD);
     }
   } else {
+    //split or merged partition -> always return UNLOAD
     response->set_code(PDISCOVERY_UNLOAD);
+
+    auto end = file->getPartitionMapRangeEnd(request.keyrange_end());
+    for (; iter != end; ++iter) {
+      for (const auto& s : iter->servers) {
+        add_repl_target(iter, s);
+      }
+      for (const auto& s : iter->servers_joining) {
+        add_repl_target(iter, s);
+      }
+      for (const auto& s : iter->servers_leaving) {
+        add_repl_target(iter, s);
+      }
+    }
   }
 
   return Status::success();

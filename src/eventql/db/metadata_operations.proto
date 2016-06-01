@@ -49,6 +49,7 @@ enum PartitionDiscoveryResponseCode {
 message PartitionDiscoveryReplicationTarget {
   required string server_id = 1;
   required uint64 placement_id = 2;
+  required bytes partition_id = 5;
   optional bytes keyrange_begin = 3;
   optional bytes keyrange_end = 4;
 }
