@@ -204,6 +204,10 @@ public:
       Transaction* txn,
       ASTNode* ast);
 
+  QueryTreeNode* buildAlterTable(
+      Transaction* txn,
+      ASTNode* ast);
+
   ValueExpressionNode* buildOperator(
       Transaction* txn,
       const std::string& name,

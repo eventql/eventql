@@ -774,3 +774,29 @@ TEST_CASE(QTreeTest, TestInsertIntoFromJSON, [] () {
   RefPtr<InsertJSONNode> qtree = qtrees[0].asInstanceOf<InsertJSONNode>();
   EXPECT_EQ(qtree->getTableName(), "evtbl");
 });
+
+TEST_CASE(QTreeTest, TestAlterTable, [] () {
+  auto runtime = Runtime::getDefaultRuntime();
+  auto txn = runtime->newTransaction();
+
+  String query = R"(
+      ALTER TABLE evtbl
+        ADD description REPEATED String,
+        ADD COLUMN product RECORD (
+            id uint64,
+            slug REPEATED string
+        ),
+        DROP place,
+        DROP column version;
+  )";
+
+  csql::Parser parser;
+  parser.parse(query.data(), query.size());
+
+  auto qtree_builder = runtime->queryPlanBuilder();
+  Vector<RefPtr<QueryTreeNode>> qtrees = qtree_builder->build(
+      txn.get(),
+      parser.getStatements(),
+      txn->getTableProvider());
+
+});

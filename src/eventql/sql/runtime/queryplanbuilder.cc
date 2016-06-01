@@ -42,6 +42,7 @@
 #include <eventql/sql/qtree/QueryTreeUtil.h>
 #include <eventql/sql/qtree/ValueExpressionNode.h>
 #include <eventql/sql/qtree/JoinNode.h>
+#include <eventql/sql/qtree/nodes/alter_table.h>
 #include <eventql/sql/qtree/nodes/create_table.h>
 #include <eventql/sql/qtree/nodes/insert_into.h>
 #include <eventql/sql/qtree/nodes/insert_json.h>
@@ -112,6 +113,10 @@ RefPtr<QueryTreeNode> QueryPlanBuilder::build(
     return node;
   }
 
+  if ((node = buildAlterTable(txn, ast)) != nullptr) {
+    return node;
+  }
+
   ast->debugPrint(2);
   RAISE(kRuntimeError, "can't figure out a query plan for this, sorry :(");
 }
@@ -131,6 +136,7 @@ Vector<RefPtr<QueryTreeNode>> QueryPlanBuilder::build(
       case ASTNode::T_DESCRIBE_TABLE:
       case ASTNode::T_CREATE_TABLE:
       case ASTNode::T_INSERT_INTO:
+      case ASTNode::T_ALTER_TABLE:
         nodes.emplace_back(build(txn, statements[i], tables));
         break;
 
@@ -1926,5 +1932,48 @@ QueryTreeNode* QueryPlanBuilder::buildInsertInto(
 
   return new InsertIntoNode(table_name->getToken()->getString(), values_spec);
 }
+
+QueryTreeNode* QueryPlanBuilder::buildAlterTable(
+    Transaction* txn,
+    ASTNode* ast) {
+  if (!(*ast == ASTNode::T_ALTER_TABLE) || ast->getChildren().size() < 2) {
+    return nullptr;
+  }
+
+  auto table_name = ast->getChildren()[0];
+  if (table_name->getType() != ASTNode::T_TABLE_NAME ||
+      table_name->getToken() == nullptr) {
+    RAISE(kRuntimeError, "corrupt AST");
+  }
+
+  Vector<String> drop_columns;
+  TableSchema::ColumnList add_columns;
+
+  for (size_t i = 1; i < ast->getChildren().size(); ++i) {
+    switch (ast->getChildren()[i]->getType()) {
+      //drop column
+      case ASTNode::T_COLUMN_NAME:
+        if (ast->getChildren()[i]->getToken() != nullptr) {
+          drop_columns.emplace_back(
+              ast->getChildren()[i]->getToken()->getString());
+          break;
+        }
+
+      //add column
+      case ASTNode::T_COLUMN:
+        //FIXME buil column definition
+        break;
+
+      default:
+        RAISE(kRuntimeError, "corrupt AST");
+    }
+  }
+
+  return new AlterTableNode(
+      table_name->getToken()->getString(),
+      drop_columns,
+      add_columns);
+};
+
 
 }
