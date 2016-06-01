@@ -70,7 +70,9 @@ void cmd_cluster_add_server(const cli::FlagParser& flags) {
 
   ServerConfig cfg;
   cfg.set_server_id(flags.getString("server_name"));
-  cfg.add_sha1_tokens(Random::singleton()->sha1().toString());
+  for (size_t i = 0; i < 128; ++i) {
+    cfg.add_sha1_tokens(Random::singleton()->sha1().toString());
+  }
 
   cdir->updateServerConfig(cfg);
 
