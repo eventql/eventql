@@ -281,14 +281,17 @@ Status TSDBTableProvider::createTable(
 
 Status TSDBTableProvider::alterTable(
     const csql::AlterTableNode& alter_table) {
-  Vector<msg::MessageSchemaField> add_columns;
-  //FIXME build schema fields
+  auto msg_schema = mkRef(new msg::MessageSchema(nullptr));
+  auto rc = buildMessageSchema(alter_table.getColumnsToAdd(), msg_schema.get());
+  if (!rc.isSuccess()) {
+    return rc;
+  }
 
   return table_service_->alterTable(
       tsdb_namespace_,
       alter_table.getTableName(),
       alter_table.getColumnsToDrop(),
-      add_columns);
+      *msg_schema);
 }
 
 Status TSDBTableProvider::insertRecord(
