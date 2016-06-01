@@ -1208,7 +1208,7 @@ TEST_CASE(ParserTest, TestInsertIntoFromJSONStatement, [] () {
   EXPECT(*children[1] == ASTNode::T_JSON_STRING);
 });
 
-TEST_CASE(ParserTest, TestAlterTableAddColumnStatement, [] () {
+TEST_CASE(ParserTest, TestAlterTableStatement, [] () {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
@@ -1219,13 +1219,15 @@ TEST_CASE(ParserTest, TestAlterTableAddColumnStatement, [] () {
             ADD COLUMN product RECORD (
                 id uint64,
                 slug REPEATED string
-            );
+            ),
+            DROP place,
+            DROP column version;
       )");
 
   EXPECT(parser.getStatements().size() == 1);
   const auto& stmt = parser.getStatements()[0];
   const auto& children = stmt->getChildren();
-  EXPECT_EQ(children.size(), 3);
+  EXPECT_EQ(children.size(), 5);
   EXPECT_EQ(*children[0], ASTNode::T_TABLE_NAME);
   EXPECT_EQ(children[0]->getToken()->getString(), "evtbl");
 
@@ -1239,27 +1241,10 @@ TEST_CASE(ParserTest, TestAlterTableAddColumnStatement, [] () {
   EXPECT_EQ(children[2]->getChildren()[0]->getToken()->getString(), "product");
   EXPECT_EQ(*children[2]->getChildren()[0], ASTNode::T_COLUMN_NAME);
   EXPECT_EQ(*children[2]->getChildren()[1], ASTNode::T_RECORD);
-});
 
-TEST_CASE(ParserTest, TestAlterTableDropColumnStatement, [] () {
-  auto runtime = Runtime::getDefaultRuntime();
-  auto txn = runtime->newTransaction();
+  EXPECT_EQ(*children[3], ASTNode::T_COLUMN_NAME);
+  EXPECT_EQ(children[3]->getToken()->getString(), "place");
+  EXPECT_EQ(*children[4], ASTNode::T_COLUMN_NAME);
+  EXPECT_EQ(children[4]->getToken()->getString(), "version");
 
-  auto parser = parseTestQuery(
-      R"(
-          ALTER TABLE evtbl
-            DROP description,
-            DROP column id;
-      )");
-
-  EXPECT(parser.getStatements().size() == 1);
-  const auto& stmt = parser.getStatements()[0];
-  const auto& children = stmt->getChildren();
-  EXPECT_EQ(children.size(), 3);
-  EXPECT_EQ(*children[0], ASTNode::T_TABLE_NAME);
-  EXPECT_EQ(children[0]->getToken()->getString(), "evtbl");
-  EXPECT_EQ(*children[1], ASTNode::T_COLUMN_NAME);
-  EXPECT_EQ(children[1]->getToken()->getString(), "description");
-  EXPECT_EQ(*children[2], ASTNode::T_COLUMN_NAME);
-  EXPECT_EQ(children[2]->getToken()->getString(), "id");
 });
