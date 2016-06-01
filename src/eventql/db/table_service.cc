@@ -144,6 +144,38 @@ Status TableService::alterTable(
   auto td = table.get()->config();
   auto schema = msg::MessageSchema::decode(td.config().schema());
 
+  //remove columns
+  for (auto c : drop_columns) {
+    auto cur_schema = schema;
+    auto field = c;
+    while (StringUtil::includes(field, ".")) {
+      auto prefix_len = field.find(".");
+      auto prefix = field.substr(0, prefix_len);
+
+      field = field.substr(prefix_len + 1);
+
+      if (!cur_schema->hasField(prefix)) {
+        return Status(
+            eNotFoundError,
+            StringUtil::format("field '$0' not found", prefix));
+      }
+      cur_schema = cur_schema->fieldSchema(cur_schema->fieldId(prefix));
+    }
+
+    if (!cur_schema->hasField(field)) {
+      return Status(
+          eNotFoundError,
+          StringUtil::format("field '$0' not found", field));
+    }
+
+    if (!td.has_next_field_id()) {
+      td.set_next_field_id(schema->maxFieldId() + 1);
+    }
+
+    cur_schema->removeField(cur_schema->fieldId(field));
+    td.mutable_config()->set_schema(schema->encode().toString());
+  }
+
   //add columns
   for (auto c : add_columns) {
     auto cur_schema = schema;
@@ -155,7 +187,6 @@ Status TableService::alterTable(
     } else {
       next_field_id = schema->maxFieldId() + 1;
     }
-    iputs("next field id $0", next_field_id);
 
     while (StringUtil::includes(field, ".")) {
       auto prefix_len = field.find(".");
