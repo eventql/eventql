@@ -65,6 +65,8 @@ public:
 
   Status createTable(const csql::CreateTableNode& req) override;
 
+  Status alterTable(const csql::AlterTableNode& alter_table) override;
+
   Status insertRecord(
       const String& table_name,
       Vector<Pair<String, csql::SValue>> data) override;

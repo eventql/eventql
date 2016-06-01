@@ -30,6 +30,7 @@
 #include <eventql/sql/expressions/table_expression.h>
 #include <eventql/sql/qtree/SequentialScanNode.h>
 #include <eventql/sql/scheduler/execution_context.h>
+#include "eventql/sql/qtree/nodes/alter_table.h"
 #include "eventql/sql/qtree/nodes/create_table.h"
 
 namespace csql {
@@ -50,6 +51,10 @@ public:
 
   virtual Status createTable(const CreateTableNode& create_table) {
     RAISE(kRuntimeError, "can't create tables");
+  }
+
+  virtual Status alterTable(const AlterTableNode& alter_table) {
+    RAISE(kRuntimeError, "can't alter tables");
   }
 
   virtual Status insertRecord(
