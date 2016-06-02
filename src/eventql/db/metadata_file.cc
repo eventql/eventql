@@ -188,6 +188,16 @@ Status MetadataFile::decode(InputStream* is) {
       // split_point
       e.split_point = is->readLenencString();
 
+      // split_partition_id_low
+      is->readNextBytes(
+          (char*) e.split_partition_id_low.mutableData(),
+          e.split_partition_id_low.size());
+
+      // split_partition_id_high
+      is->readNextBytes(
+          (char*) e.split_partition_id_high.mutableData(),
+          e.split_partition_id_high.size());
+
       // split_servers_low
       decodeServerList(&e.split_servers_low, is);
       if (!rc.isSuccess()) {
@@ -264,6 +274,16 @@ Status MetadataFile::encode(OutputStream* os) const  {
     if (p.splitting) {
       // split_point
       os->appendLenencString(p.split_point);
+
+      // split_partition_id_low
+      os->write(
+          (const char*) p.split_partition_id_low.data(),
+          p.split_partition_id_low.size());
+
+      // split_partition_id_high
+      os->write(
+          (const char*) p.split_partition_id_high.data(),
+          p.split_partition_id_high.size());
 
       // split_servers_low
       rc = encodeServerList(p.split_servers_low, os);

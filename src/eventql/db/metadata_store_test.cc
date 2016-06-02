@@ -70,6 +70,8 @@ TEST_CASE(MetadataStoreTest, TestStoreMetadataFile, [] () {
       e.begin = "b";
       e.splitting = true;
       e.split_point = "bx";
+      e.split_partition_id_low = SHA1::compute("lowlow");
+      e.split_partition_id_high = SHA1::compute("highhigh");
 
       {
         MetadataFile::PartitionPlacement p;
@@ -140,6 +142,8 @@ TEST_CASE(MetadataStoreTest, TestStoreMetadataFile, [] () {
     EXPECT_EQ(pmap[1].servers_joining[0].placement_id, 0x42);
     EXPECT_EQ(pmap[1].splitting, true);
     EXPECT_EQ(pmap[1].split_point, "bx");
+    EXPECT_EQ(pmap[1].split_partition_id_low, SHA1::compute("lowlow"));
+    EXPECT_EQ(pmap[1].split_partition_id_high, SHA1::compute("highhigh"));
     EXPECT_EQ(pmap[1].split_servers_low.size(), 1);
     EXPECT_EQ(pmap[1].split_servers_low[0].server_id, "server5");
     EXPECT_EQ(pmap[1].split_servers_low[0].placement_id, 0x123);
