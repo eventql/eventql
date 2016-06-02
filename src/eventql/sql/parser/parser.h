@@ -111,6 +111,7 @@ protected:
   ASTNode* insertValueList();
   ASTNode* insertFromJSON();
   ASTNode* alterStatement();
+  ASTNode* addColumnDefinition();
   ASTNode* drawStatement();
   ASTNode* axisClause();
   ASTNode* domainClause();

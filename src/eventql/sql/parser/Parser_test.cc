@@ -1216,16 +1216,14 @@ TEST_CASE(ParserTest, TestAlterTableStatement, [] () {
       R"(
           ALTER TABLE evtbl
             ADD description REPEATED String,
-            ADD COLUMN product RECORD (
-                id uint64,
-                slug REPEATED string
-            ),
+            ADD COLUMN product RECORD,
             DROP place,
             DROP column version;
       )");
 
   EXPECT(parser.getStatements().size() == 1);
   const auto& stmt = parser.getStatements()[0];
+  stmt->debugPrint();
   const auto& children = stmt->getChildren();
   EXPECT_EQ(children.size(), 5);
   EXPECT_EQ(*children[0], ASTNode::T_TABLE_NAME);
@@ -1234,6 +1232,7 @@ TEST_CASE(ParserTest, TestAlterTableStatement, [] () {
   EXPECT_EQ(*children[1], ASTNode::T_COLUMN);
   EXPECT_EQ(*children[1]->getChildren()[0], ASTNode::T_COLUMN_NAME);
   EXPECT_EQ(*children[1]->getChildren()[1], ASTNode::T_COLUMN_TYPE);
+  EXPECT_EQ(children[1]->getChildren()[1]->getToken()->getString(), "String");
   EXPECT_EQ(*children[1]->getChildren()[2], ASTNode::T_REPEATED);
   EXPECT_EQ(children[1]->getChildren()[0]->getToken()->getString(), "description");
 
