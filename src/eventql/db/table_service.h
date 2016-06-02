@@ -52,6 +52,19 @@ enum class InsertFlags : uint64_t {
 class TableService {
 public:
 
+  enum AlterTableOperationType {
+    OP_ADD_COLUMN,
+    OP_REMOVE_COLUMN
+  };
+
+  struct AlterTableOperation {
+    AlterTableOperationType optype;
+    String field_name;
+    msg::FieldType field_type;
+    bool is_repeated;
+    bool is_optional;
+  };
+
   TableService(
       ConfigDirectory* cdir,
       PartitionMap* pmap,
@@ -65,18 +78,10 @@ public:
       const msg::MessageSchema& schema,
       Vector<String> primary_key);
 
-  Status addColumn(
+  Status alterTable(
       const String& db_namespace,
       const String& table_name,
-      const String& column_name,
-      msg::FieldType column_type,
-      bool is_repeated,
-      bool is_optional);
-
-  Status removeColumn(
-      const String& db_namespace,
-      const String& table_name,
-      const String& column_name);
+      Vector<AlterTableOperation> operations);
 
   void listTables(
       const String& tsdb_namespace,

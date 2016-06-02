@@ -131,26 +131,17 @@ Status TableService::createTable(
   return Status::success();
 }
 
-Status TableService::addColumn(
-    const String& db_namespace,
-    const String& table_name,
-    const String& column_name,
-    msg::FieldType column_type,
-    bool is_repeated,
-    bool is_optional) {
-  auto table = pmap_->findTable(db_namespace, table_name);
-  if (table.isEmpty()) {
-    return Status(eNotFoundError, "table not found");
-  }
 
-  auto td = table.get()->config();
-  auto schema = msg::MessageSchema::decode(td.config().schema());
+static Status addColumn(
+    TableDefinition* td,
+    TableService::AlterTableOperation operation) {
+  auto schema = msg::MessageSchema::decode(td->config().schema());
   auto cur_schema = schema;
-  auto field = column_name;
+  auto field = operation.field_name;
 
   uint32_t next_field_id;
-  if (td.has_next_field_id()) {
-    next_field_id = td.next_field_id();
+  if (td->has_next_field_id()) {
+    next_field_id = td->next_field_id();
   } else {
     next_field_id = schema->maxFieldId() + 1;
   }
@@ -183,16 +174,16 @@ Status TableService::addColumn(
   if (cur_schema->hasField(field)) {
     return Status(
         eRuntimeError,
-        StringUtil::format("column '$0' already exists ", column_name));
+        StringUtil::format("column '$0' already exists ", operation.field_name));
   }
 
-  if (column_type == msg::FieldType::OBJECT) {
+  if (operation.field_type == msg::FieldType::OBJECT) {
     cur_schema->addField(
           msg::MessageSchemaField::mkObjectField(
               next_field_id,
               field,
-              is_repeated,
-              is_optional,
+              operation.is_repeated,
+              operation.is_optional,
               mkRef(new msg::MessageSchema(nullptr))));
 
 
@@ -201,45 +192,30 @@ Status TableService::addColumn(
           msg::MessageSchemaField(
               next_field_id,
               field,
-              column_type,
+              operation.field_type,
               0,
-              is_repeated,
-              is_optional));
+              operation.is_repeated,
+              operation.is_optional));
   }
 
 
-  td.set_next_field_id(next_field_id + 1);
-  td.mutable_config()->set_schema(schema->encode().toString());
-
-  try {
-    cdir_->updateTableConfig(td);
-  } catch (const Exception& e) {
-    return Status(eRuntimeError, e.getMessage());
-  }
-
+  td->set_next_field_id(next_field_id + 1);
+  td->mutable_config()->set_schema(schema->encode().toString());
   return Status::success();
 }
 
-Status TableService::removeColumn(
-    const String& db_namespace,
-    const String& table_name,
-    const String& column_name) {
-  auto table = pmap_->findTable(db_namespace, table_name);
-  if (table.isEmpty()) {
-    return Status(eNotFoundError, "table not found");
+static Status removeColumn(
+    TableDefinition* td,
+    const Vector<String>& primary_key,
+    const String& field_name) {
+  if (find(primary_key.begin(), primary_key.end(), field_name) !=
+      primary_key.end()) {
+    return Status(eRuntimeError, "field with primary key can't be removed");
   }
 
-  auto pkey = table.get()->getPrimaryKey();
-  if (find(pkey.begin(), pkey.end(), column_name) != pkey.end()) {
-    return Status(
-        eRuntimeError,
-        "primary key column can't be dropped");
-  }
-
-  auto td = table.get()->config();
-  auto schema = msg::MessageSchema::decode(td.config().schema());
+  auto schema = msg::MessageSchema::decode(td->config().schema());
   auto cur_schema = schema;
-  auto field = column_name;
+  auto field = field_name;
 
   while (StringUtil::includes(field, ".")) {
     auto prefix_len = field.find(".");
@@ -261,12 +237,40 @@ Status TableService::removeColumn(
         StringUtil::format("field '$0' not found", field));
   }
 
-  if (!td.has_next_field_id()) {
-    td.set_next_field_id(schema->maxFieldId() + 1);
+  if (!td->has_next_field_id()) {
+    td->set_next_field_id(schema->maxFieldId() + 1);
   }
 
   cur_schema->removeField(cur_schema->fieldId(field));
-  td.mutable_config()->set_schema(schema->encode().toString());
+  td->mutable_config()->set_schema(schema->encode().toString());
+  return Status::success();
+}
+
+Status TableService::alterTable(
+    const String& db_namespace,
+    const String& table_name,
+    Vector<TableService::AlterTableOperation> operations) {
+  auto table = pmap_->findTable(db_namespace, table_name);
+  if (table.isEmpty()) {
+    return Status(eNotFoundError, "table not found");
+  }
+
+  auto primary_key = table.get()->getPrimaryKey();
+  auto td = table.get()->config();
+
+  for (auto o : operations) {
+    if (o.optype == AlterTableOperationType::OP_ADD_COLUMN) {
+      auto rc = addColumn(&td, o);
+      if (!rc.isSuccess()) {
+        return rc;
+      }
+    } else {
+      auto rc = removeColumn(&td, primary_key, o.field_name);
+      if (!rc.isSuccess()) {
+        return rc;
+      }
+    }
+  }
 
   try {
     cdir_->updateTableConfig(td);
@@ -276,7 +280,6 @@ Status TableService::removeColumn(
 
   return Status::success();
 }
-
 
 void TableService::listTables(
     const String& tsdb_namespace,
