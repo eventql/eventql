@@ -311,5 +311,40 @@ Status MetadataFile::encode(OutputStream* os) const  {
   return Status::success();
 }
 
+String encodePartitionKey(
+    KeyspaceType keyspace_type,
+    const String& key) {
+  switch (keyspace_type) {
+    case KEYSPACE_STRING: {
+      return key;
+    }
+
+    case KEYSPACE_UINT64: {
+      uint64_t uint = std::stoull(key);
+      return String((const char*) &uint, sizeof(uint64_t));
+    }
+  }
+}
+
+String decodePartitionKey(
+    KeyspaceType keyspace_type,
+    const String& key) {
+  switch (keyspace_type) {
+    case KEYSPACE_STRING: {
+      return key;
+    }
+
+    case KEYSPACE_UINT64: {
+      if (key.size() == sizeof(uint64_t)) {
+        uint64_t uint;
+        memcpy((void*) &uint, key.data(), sizeof(uint64_t));
+        return StringUtil::toString(uint);
+      } else {
+        return "";
+      }
+    }
+  }
+}
+
 } // namespace eventql
 
