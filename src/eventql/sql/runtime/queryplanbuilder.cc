@@ -1954,9 +1954,7 @@ static AlterTableNode::AlterTableOperation buildAlterTableOperation(
         }
 
         if (!(*ast->getChildren()[0] == ASTNode::T_COLUMN_NAME) ||
-            ast->getChildren()[0]->getToken() == nullptr ||
-            !(*ast->getChildren()[1] == ASTNode::T_COLUMN_TYPE) ||
-            ast->getChildren()[1]->getToken() == nullptr) {
+            ast->getChildren()[0]->getToken() == nullptr) {
           RAISE(kRuntimeError, "corrupt AST");
         }
 
@@ -1964,9 +1962,24 @@ static AlterTableNode::AlterTableOperation buildAlterTableOperation(
         operation.optype =
             AlterTableNode::AlterTableOperationType::OP_ADD_COLUMN;
         operation.column_name = ast->getChildren()[0]->getToken()->getString();
-        operation.column_type = ast->getChildren()[1]->getToken()->getString();
         operation.is_repeated = false;
         operation.is_optional = true;
+
+        switch (ast->getChildren()[1]->getType()) {
+          case ASTNode::T_RECORD:
+            operation.column_type = "RECORD";
+            break;
+
+          case ASTNode::T_COLUMN_TYPE:
+            if (ast->getChildren()[1]->getToken() == nullptr) {
+              RAISE(kRuntimeError, "corrupt AST");
+            }
+            operation.column_type = ast->getChildren()[1]->getToken()->getString();
+            break;
+
+          default:
+            RAISE(kRuntimeError, "corrupt AST");
+        }
 
         for (size_t i = 2; i < ast->getChildren().size(); ++i) {
           switch (ast->getChildren()[i]->getType()) {

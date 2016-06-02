@@ -180,11 +180,17 @@ Status TableService::addColumn(
     cur_schema = cur_schema->fieldSchema(parent_field_id);
   }
 
+  if (cur_schema->hasField(field)) {
+    return Status(
+        eRuntimeError,
+        StringUtil::format("column '$0' already exists ", column_name));
+  }
+
   if (column_type == msg::FieldType::OBJECT) {
     cur_schema->addField(
           msg::MessageSchemaField::mkObjectField(
               next_field_id,
-              column_name,
+              field,
               is_repeated,
               is_optional,
               mkRef(new msg::MessageSchema(nullptr))));
@@ -194,7 +200,7 @@ Status TableService::addColumn(
     cur_schema->addField(
           msg::MessageSchemaField(
               next_field_id,
-              column_name,
+              field,
               column_type,
               0,
               is_repeated,

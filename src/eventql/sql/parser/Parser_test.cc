@@ -1223,7 +1223,6 @@ TEST_CASE(ParserTest, TestAlterTableStatement, [] () {
 
   EXPECT(parser.getStatements().size() == 1);
   const auto& stmt = parser.getStatements()[0];
-  stmt->debugPrint();
   const auto& children = stmt->getChildren();
   EXPECT_EQ(children.size(), 5);
   EXPECT_EQ(*children[0], ASTNode::T_TABLE_NAME);

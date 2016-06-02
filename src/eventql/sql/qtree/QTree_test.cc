@@ -784,7 +784,7 @@ TEST_CASE(QTreeTest, TestAlterTable, [] () {
       ALTER TABLE evtbl
         ADD description REPEATED String,
         DROP place,
-        ADD COLUMN product uint64,
+        ADD COLUMN product RECORD,
         DROP column version;
   )";
 
@@ -816,7 +816,7 @@ TEST_CASE(QTreeTest, TestAlterTable, [] () {
   EXPECT(
     operations[2].optype == AlterTableNode::AlterTableOperationType::OP_ADD_COLUMN);
   EXPECT_EQ(operations[2].column_name, "product");
-  EXPECT_EQ(operations[2].column_type, "uint64");
+  EXPECT_EQ(operations[2].column_type, "RECORD");
   EXPECT_FALSE(operations[2].is_repeated);
   EXPECT_TRUE(operations[2].is_optional);
 
