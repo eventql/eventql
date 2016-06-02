@@ -104,3 +104,7 @@ Syntax Reference
       (column_name, ...) VALUES (expr, ...)
     | FROM JSON "{ ... }"
 
+
+### The CREATE DATABASE statement
+
+    CREATE DATABASE db_name
