@@ -361,72 +361,72 @@ Status LSMPartitionWriter::applyMetadataChange(
       snap->key.toString(),
       discovery_info.DebugString());
 
-  // backfill code
-  auto has_local_replica = repl_->hasLocalReplica(snap->key);
-  if (has_local_replica &&
-      discovery_info.code() != PDISCOVERY_SERVE &&
-      !snap->state.partition_keyrange_begin().empty()) {
-    logDebug(
-        "evqld",
-        "Adding myself to the server list for $0/$1/$2",
-        snap->state.tsdb_namespace(),
-        snap->state.table_key(),
-        snap->key.toString());
+  //// backfill code
+  //auto has_local_replica = repl_->hasLocalReplica(snap->key);
+  //if (has_local_replica &&
+  //    discovery_info.code() != PDISCOVERY_SERVE &&
+  //    !snap->state.partition_keyrange_begin().empty()) {
+  //  logDebug(
+  //      "evqld",
+  //      "Adding myself to the server list for $0/$1/$2",
+  //      snap->state.tsdb_namespace(),
+  //      snap->state.table_key(),
+  //      snap->key.toString());
 
-    BackfillAddServerOperation opdata;
-    opdata.set_partition_id(snap->key.data(), snap->key.size());
-    opdata.set_keyrange_begin(snap->state.partition_keyrange_begin());
-    opdata.set_server_id(cdir_->getServerID());
+  //  BackfillAddServerOperation opdata;
+  //  opdata.set_partition_id(snap->key.data(), snap->key.size());
+  //  opdata.set_keyrange_begin(snap->state.partition_keyrange_begin());
+  //  opdata.set_server_id(cdir_->getServerID());
 
-    MetadataOperation op(
-        snap->state.tsdb_namespace(),
-        snap->state.table_key(),
-        METAOP_BACKFILL_ADD_SERVER,
-        SHA1Hash(discovery_info.txnid().data(), discovery_info.txnid().size()),
-        Random::singleton()->sha1(),
-        *msg::encode(opdata));
+  //  MetadataOperation op(
+  //      snap->state.tsdb_namespace(),
+  //      snap->state.table_key(),
+  //      METAOP_BACKFILL_ADD_SERVER,
+  //      SHA1Hash(discovery_info.txnid().data(), discovery_info.txnid().size()),
+  //      Random::singleton()->sha1(),
+  //      *msg::encode(opdata));
 
-    MetadataCoordinator coordinator(cdir_);
-    auto rc = coordinator.performAndCommitOperation(
-        snap->state.tsdb_namespace(),
-        snap->state.table_key(),
-        op);
+  //  MetadataCoordinator coordinator(cdir_);
+  //  auto rc = coordinator.performAndCommitOperation(
+  //      snap->state.tsdb_namespace(),
+  //      snap->state.table_key(),
+  //      op);
 
-    if (!rc.isSuccess()) {
-      return rc;
-    }
-  }
+  //  if (!rc.isSuccess()) {
+  //    return rc;
+  //  }
+  //}
 
-  if (!has_local_replica && discovery_info.code() != PDISCOVERY_UNLOAD) {
-    logDebug(
-        "evqld",
-        "Removing myself from the server list for $0/$1/$2",
-        snap->state.tsdb_namespace(),
-        snap->state.table_key(),
-        snap->key.toString());
+  //if (!has_local_replica && discovery_info.code() != PDISCOVERY_UNLOAD) {
+  //  logDebug(
+  //      "evqld",
+  //      "Removing myself from the server list for $0/$1/$2",
+  //      snap->state.tsdb_namespace(),
+  //      snap->state.table_key(),
+  //      snap->key.toString());
 
-    BackfillRemoveServerOperation opdata;
-    opdata.set_partition_id(snap->key.data(), snap->key.size());
-    opdata.set_server_id(cdir_->getServerID());
+  //  BackfillRemoveServerOperation opdata;
+  //  opdata.set_partition_id(snap->key.data(), snap->key.size());
+  //  opdata.set_server_id(cdir_->getServerID());
 
-    MetadataOperation op(
-        snap->state.tsdb_namespace(),
-        snap->state.table_key(),
-        METAOP_BACKFILL_REMOVE_SERVER,
-        SHA1Hash(discovery_info.txnid().data(), discovery_info.txnid().size()),
-        Random::singleton()->sha1(),
-        *msg::encode(opdata));
+  //  MetadataOperation op(
+  //      snap->state.tsdb_namespace(),
+  //      snap->state.table_key(),
+  //      METAOP_BACKFILL_REMOVE_SERVER,
+  //      SHA1Hash(discovery_info.txnid().data(), discovery_info.txnid().size()),
+  //      Random::singleton()->sha1(),
+  //      *msg::encode(opdata));
 
-    MetadataCoordinator coordinator(cdir_);
-    auto rc = coordinator.performAndCommitOperation(
-        snap->state.tsdb_namespace(),
-        snap->state.table_key(),
-        op);
+  //  MetadataCoordinator coordinator(cdir_);
+  //  auto rc = coordinator.performAndCommitOperation(
+  //      snap->state.tsdb_namespace(),
+  //      snap->state.table_key(),
+  //      op);
 
-    if (!rc.isSuccess()) {
-      return rc;
-    }
-  }
+  //  if (!rc.isSuccess()) {
+  //    return rc;
+  //  }
+  //}
 
   // commit
   {
