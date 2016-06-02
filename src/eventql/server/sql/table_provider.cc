@@ -177,7 +177,8 @@ static HashMap<String, msg::FieldType> kTypeMap = {
   { "UINT32", msg::FieldType::UINT32 },
   { "UINT64", msg::FieldType::UINT64 },
   { "DOUBLE", msg::FieldType::DOUBLE },
-  { "FLOAT", msg::FieldType::DOUBLE }
+  { "FLOAT", msg::FieldType::DOUBLE },
+  { "RECORD", msg::FieldType::OBJECT }
 };
 
 static Status buildMessageSchema(
@@ -279,19 +280,45 @@ Status TSDBTableProvider::createTable(
       primary_key);
 }
 
-Status TSDBTableProvider::alterTable(
-    const csql::AlterTableNode& alter_table) {
-  auto msg_schema = mkRef(new msg::MessageSchema(nullptr));
-  auto rc = buildMessageSchema(alter_table.getColumnsToAdd(), msg_schema.get());
-  if (!rc.isSuccess()) {
-    return rc;
+Status TSDBTableProvider::alterTable(const csql::AlterTableNode& alter_table) {
+  auto operations = alter_table.getOperations();
+  for (auto o : operations) {
+    if (o.optype == csql::AlterTableNode::AlterTableOperationType::OP_ADD_COLUMN) {
+      auto type_str = o.column_type;
+      StringUtil::toUpper(&type_str);
+      auto type = kTypeMap.find(type_str);
+      if (type == kTypeMap.end()) {
+        return Status(
+            eIllegalArgumentError,
+            StringUtil::format(
+                "invalid type: '$0' for column '$1'",
+                o.column_type,
+                o.column_name));
+      }
+
+      auto rc = table_service_->addColumn(
+          tsdb_namespace_,
+          alter_table.getTableName(),
+          o.column_name,
+          type->second,
+          o.is_repeated,
+          o.is_optional);
+
+      if (!rc.isSuccess()) {
+        return rc;
+      }
+    } else {
+      auto rc = table_service_->removeColumn(
+          tsdb_namespace_,
+          alter_table.getTableName(),
+          o.column_name);
+      if (!rc.isSuccess()) {
+        return rc;
+      }
+    }
   }
 
-  return table_service_->alterTable(
-      tsdb_namespace_,
-      alter_table.getTableName(),
-      alter_table.getColumnsToDrop(),
-      msg_schema->fields());
+  return Status::success();
 }
 
 Status TSDBTableProvider::insertRecord(
