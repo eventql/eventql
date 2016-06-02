@@ -115,7 +115,5 @@ Syntax Reference
       | DROP [COLUMN] column_name
 
     column_definition ::=
-        column_name column_type
-      | column_name REPEATED column_type
-      | column_name [REPEATED] RECORD (column_definition [, column_definition, ...])
+        column_name [REPEATED] column_type | RECORD [NOT NULL]
 
