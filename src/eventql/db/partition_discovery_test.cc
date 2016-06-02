@@ -154,6 +154,170 @@ TEST_CASE(PartitionDiscoveryTest, TestServingPartition, [] () {
   }
 });
 
+TEST_CASE(PartitionDiscoveryTest, TestSplittingPartition, [] () {
+  Vector<MetadataFile::PartitionMapEntry> pmap;
+
+  {
+    MetadataFile::PartitionMapEntry e;
+    e.begin = "a";
+    e.splitting = false;
+    e.partition_id = SHA1::compute("3");
+    e.servers.emplace_back(mkPlacement("s6", 13));
+    e.servers.emplace_back(mkPlacement("s3", 11));
+    e.servers.emplace_back(mkPlacement("s2", 12));
+    pmap.emplace_back(e);
+  }
+
+  {
+    MetadataFile::PartitionMapEntry e;
+    e.begin = "e";
+    e.partition_id = SHA1::compute("4");
+    e.servers.emplace_back(mkPlacement("s4", 13));
+    e.servers.emplace_back(mkPlacement("s3", 11));
+    e.servers.emplace_back(mkPlacement("s1", 12));
+    e.splitting = true;
+    e.split_point = "p";
+    e.split_servers_low.emplace_back(mkPlacement("s8", 43));
+    e.split_servers_low.emplace_back(mkPlacement("s9", 41));
+    e.split_servers_low.emplace_back(mkPlacement("s6", 42));
+    e.split_servers_high.emplace_back(mkPlacement("s5", 51));
+    e.split_servers_high.emplace_back(mkPlacement("s7", 52));
+    e.split_servers_high.emplace_back(mkPlacement("s3", 53));
+    pmap.emplace_back(e);
+  }
+
+  {
+    MetadataFile::PartitionMapEntry e;
+    e.begin = "x";
+    e.splitting = false;
+    e.partition_id = SHA1::compute("5");
+    e.servers.emplace_back(mkPlacement("s1", 10));
+    e.servers.emplace_back(mkPlacement("s2", 11));
+    e.servers.emplace_back(mkPlacement("s3", 12));
+    pmap.emplace_back(e);
+  }
+
+  MetadataFile file(SHA1::compute("mytx"), 7, KEYSPACE_STRING, pmap);
+
+  {
+    auto pid = SHA1::compute("4");
+    PartitionDiscoveryRequest req;
+    req.set_db_namespace("test");
+    req.set_table_id("test");
+    req.set_min_txnseq(1);
+    req.set_partition_id(pid.data(), pid.size());
+    req.set_keyrange_begin("e");
+    req.set_keyrange_end("x");
+    req.set_requester_id("s3");
+    PartitionDiscoveryResponse res;
+    auto rc = PartitionDiscovery::discoverPartition(&file, req, &res);
+    EXPECT(rc.isSuccess());
+    EXPECT(res.code() == PDISCOVERY_SERVE);
+    EXPECT(SHA1Hash(res.txnid().data(), res.txnid().size()) == SHA1::compute("mytx"));
+    EXPECT(res.txnseq() ==  7);
+    EXPECT(res.replication_targets().size() == 8);
+    EXPECT(res.replication_targets().Get(0).server_id() == "s4");
+    EXPECT(res.replication_targets().Get(0).placement_id() == 13);
+    EXPECT(res.replication_targets().Get(0).keyrange_begin() == "e");
+    EXPECT(res.replication_targets().Get(0).keyrange_end() == "x");
+    EXPECT(res.replication_targets().Get(1).server_id() == "s1");
+    EXPECT(res.replication_targets().Get(1).placement_id() == 12);
+    EXPECT(res.replication_targets().Get(1).keyrange_begin() == "e");
+    EXPECT(res.replication_targets().Get(1).keyrange_end() == "x");
+    EXPECT(res.replication_targets().Get(2).server_id() == "s8");
+    EXPECT(res.replication_targets().Get(2).placement_id() == 43);
+    EXPECT(res.replication_targets().Get(2).keyrange_begin() == "e");
+    EXPECT(res.replication_targets().Get(2).keyrange_end() == "p");
+    EXPECT(res.replication_targets().Get(3).server_id() == "s9");
+    EXPECT(res.replication_targets().Get(3).placement_id() == 41);
+    EXPECT(res.replication_targets().Get(3).keyrange_begin() == "e");
+    EXPECT(res.replication_targets().Get(3).keyrange_end() == "p");
+    EXPECT(res.replication_targets().Get(4).server_id() == "s6");
+    EXPECT(res.replication_targets().Get(4).placement_id() == 42);
+    EXPECT(res.replication_targets().Get(4).keyrange_begin() == "e");
+    EXPECT(res.replication_targets().Get(4).keyrange_end() == "p");
+    EXPECT(res.replication_targets().Get(5).server_id() == "s5");
+    EXPECT(res.replication_targets().Get(5).placement_id() == 51);
+    EXPECT(res.replication_targets().Get(5).keyrange_begin() == "p");
+    EXPECT(res.replication_targets().Get(5).keyrange_end() == "x");
+    EXPECT(res.replication_targets().Get(6).server_id() == "s7");
+    EXPECT(res.replication_targets().Get(6).placement_id() == 52);
+    EXPECT(res.replication_targets().Get(6).keyrange_begin() == "p");
+    EXPECT(res.replication_targets().Get(6).keyrange_end() == "x");
+    EXPECT(res.replication_targets().Get(7).server_id() == "s3");
+    EXPECT(res.replication_targets().Get(7).placement_id() == 53);
+    EXPECT(res.replication_targets().Get(7).keyrange_begin() == "p");
+    EXPECT(res.replication_targets().Get(7).keyrange_end() == "x");
+  }
+
+  {
+    auto pid = SHA1::compute("x");
+    PartitionDiscoveryRequest req;
+    req.set_db_namespace("test");
+    req.set_table_id("test");
+    req.set_min_txnseq(1);
+    req.set_partition_id(pid.data(), pid.size());
+    req.set_keyrange_begin("e");
+    req.set_keyrange_end("z");
+    req.set_requester_id("s3");
+    PartitionDiscoveryResponse res;
+    auto rc = PartitionDiscovery::discoverPartition(&file, req, &res);
+    EXPECT(rc.isSuccess());
+    EXPECT(res.code() == PDISCOVERY_UNLOAD);
+    EXPECT(SHA1Hash(res.txnid().data(), res.txnid().size()) == SHA1::compute("mytx"));
+    EXPECT(res.txnseq() ==  7);
+    EXPECT_EQ(res.replication_targets().size(), 12);
+    EXPECT(res.replication_targets().Get(0).server_id() == "s4");
+    EXPECT(res.replication_targets().Get(0).placement_id() == 13);
+    EXPECT(res.replication_targets().Get(0).keyrange_begin() == "e");
+    EXPECT(res.replication_targets().Get(0).keyrange_end() == "x");
+    EXPECT(res.replication_targets().Get(1).server_id() == "s3");
+    EXPECT(res.replication_targets().Get(1).placement_id() == 11);
+    EXPECT(res.replication_targets().Get(1).keyrange_begin() == "e");
+    EXPECT(res.replication_targets().Get(1).keyrange_end() == "x");
+    EXPECT(res.replication_targets().Get(2).server_id() == "s1");
+    EXPECT(res.replication_targets().Get(2).placement_id() == 12);
+    EXPECT(res.replication_targets().Get(2).keyrange_begin() == "e");
+    EXPECT(res.replication_targets().Get(2).keyrange_end() == "x");
+    EXPECT(res.replication_targets().Get(3).server_id() == "s8");
+    EXPECT(res.replication_targets().Get(3).placement_id() == 43);
+    EXPECT(res.replication_targets().Get(3).keyrange_begin() == "e");
+    EXPECT(res.replication_targets().Get(3).keyrange_end() == "p");
+    EXPECT(res.replication_targets().Get(4).server_id() == "s9");
+    EXPECT(res.replication_targets().Get(4).placement_id() == 41);
+    EXPECT(res.replication_targets().Get(4).keyrange_begin() == "e");
+    EXPECT(res.replication_targets().Get(4).keyrange_end() == "p");
+    EXPECT(res.replication_targets().Get(5).server_id() == "s6");
+    EXPECT(res.replication_targets().Get(5).placement_id() == 42);
+    EXPECT(res.replication_targets().Get(5).keyrange_begin() == "e");
+    EXPECT(res.replication_targets().Get(5).keyrange_end() == "p");
+    EXPECT(res.replication_targets().Get(6).server_id() == "s5");
+    EXPECT(res.replication_targets().Get(6).placement_id() == 51);
+    EXPECT(res.replication_targets().Get(6).keyrange_begin() == "p");
+    EXPECT(res.replication_targets().Get(6).keyrange_end() == "x");
+    EXPECT(res.replication_targets().Get(7).server_id() == "s7");
+    EXPECT(res.replication_targets().Get(7).placement_id() == 52);
+    EXPECT(res.replication_targets().Get(7).keyrange_begin() == "p");
+    EXPECT(res.replication_targets().Get(7).keyrange_end() == "x");
+    EXPECT(res.replication_targets().Get(8).server_id() == "s3");
+    EXPECT(res.replication_targets().Get(8).placement_id() == 53);
+    EXPECT(res.replication_targets().Get(8).keyrange_begin() == "p");
+    EXPECT(res.replication_targets().Get(8).keyrange_end() == "x");
+    EXPECT(res.replication_targets().Get(9).server_id() == "s1");
+    EXPECT(res.replication_targets().Get(9).placement_id() == 10);
+    EXPECT(res.replication_targets().Get(9).keyrange_begin() == "x");
+    EXPECT(res.replication_targets().Get(9).keyrange_end() == "");
+    EXPECT(res.replication_targets().Get(10).server_id() == "s2");
+    EXPECT(res.replication_targets().Get(10).placement_id() == 11);
+    EXPECT(res.replication_targets().Get(10).keyrange_begin() == "x");
+    EXPECT(res.replication_targets().Get(10).keyrange_end() == "");
+    EXPECT(res.replication_targets().Get(11).server_id() == "s3");
+    EXPECT(res.replication_targets().Get(11).placement_id() == 12);
+    EXPECT(res.replication_targets().Get(11).keyrange_begin() == "x");
+    EXPECT(res.replication_targets().Get(11).keyrange_end() == "");
+  }
+});
+
 TEST_CASE(PartitionDiscoveryTest, TestFindByID, [] () {
   Vector<MetadataFile::PartitionMapEntry> pmap;
 

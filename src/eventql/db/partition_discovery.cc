@@ -55,6 +55,39 @@ static void addReplicationTarget(
   }
 }
 
+static void addSplittingReplicationTargets(
+    PartitionDiscoveryResponse* response,
+    const MetadataFile* file,
+    MetadataFile::PartitionMapIter e) {
+  String e_end;
+  auto n = e + 1;
+  if (n != file->getPartitionMapEnd()) {
+    e_end = n->begin;
+  }
+
+  for (const auto& s : e->split_servers_low) {
+    auto t = response->add_replication_targets();
+    t->set_server_id(s.server_id);
+    t->set_placement_id(s.placement_id);
+    t->set_partition_id(
+        e->split_partition_id_low.data(),
+        e->split_partition_id_low.size());
+    t->set_keyrange_begin(e->begin);
+    t->set_keyrange_end(e->split_point);
+  }
+
+  for (const auto& s : e->split_servers_high) {
+    auto t = response->add_replication_targets();
+    t->set_server_id(s.server_id);
+    t->set_placement_id(s.placement_id);
+    t->set_partition_id(
+        e->split_partition_id_high.data(),
+        e->split_partition_id_high.size());
+    t->set_keyrange_begin(e->split_point);
+    t->set_keyrange_end(e_end);
+  }
+}
+
 Status PartitionDiscovery::discoverPartitionByKeyRange(
     const MetadataFile* file,
     const PartitionDiscoveryRequest& request,
@@ -111,6 +144,10 @@ Status PartitionDiscovery::discoverPartitionByKeyRange(
       }
     }
 
+    if (iter->splitting) {
+      addSplittingReplicationTargets(response, file, iter);
+    }
+
     // if we are neither in the active, joining or leaving server list, return
     // UNLOAD
     if (response->code() == PDISCOVERY_UNKNOWN) {
@@ -130,6 +167,9 @@ Status PartitionDiscovery::discoverPartitionByKeyRange(
       }
       for (const auto& s : iter->servers_leaving) {
         addReplicationTarget(response, file, iter, s);
+      }
+      if (iter->splitting) {
+        addSplittingReplicationTargets(response, file, iter);
       }
     }
   }

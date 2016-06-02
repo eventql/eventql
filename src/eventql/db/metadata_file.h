@@ -50,6 +50,8 @@ public:
     Vector<PartitionPlacement> servers_leaving;
     bool splitting;
     String split_point;
+    SHA1Hash split_partition_id_low;
+    SHA1Hash split_partition_id_high;
     Vector<PartitionPlacement> split_servers_low;
     Vector<PartitionPlacement> split_servers_high;
   };
