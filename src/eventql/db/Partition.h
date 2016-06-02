@@ -101,7 +101,6 @@ public:
 protected:
 
   bool upgradeToLSMv2() const;
-  void backfillKeyRange();
 
   SHA1Hash partition_id_;
   ServerCfg* cfg_;

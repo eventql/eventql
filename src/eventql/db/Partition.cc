@@ -125,12 +125,6 @@ Partition::Partition(
     cfg_(cfg),
     head_(head),
     table_(table) {
-  if (table_->partitionerType() == TBL_PARTITION_TIMEWINDOW &&
-      (head->state.partition_keyrange_begin().empty() ||
-      head->state.partition_keyrange_end().empty())) {
-    backfillKeyRange();
-  }
-
   z1stats()->num_partitions_loaded.incr(1);
 }
 
@@ -268,41 +262,6 @@ MetadataTransaction Partition::getLastMetadataTransaction() const {
           snap->state.last_metadata_txnid().data(),
           snap->state.last_metadata_txnid().size()),
       snap->state.last_metadata_txnseq());
-}
-
-void Partition::backfillKeyRange() {
-  auto snap = head_.getSnapshot()->clone();
-  SHA1Hash partition_id(
-      snap->state.partition_key().data(),
-      snap->state.partition_key().size());
-
-  logInfo(
-      "evqld",
-      "backfilling partition keyrange: $0/$1/$2",
-      snap->state.tsdb_namespace(),
-      table_->name(),
-      partition_id.toString());
-
-  auto partitioner = table_->partitioner();
-  KeyRange keyrange;
-  auto rc = partitioner->findKeyRange(partition_id, &keyrange);
-  if (!rc.isSuccess()) {
-    logWarning(
-        "evqld",
-        "error while backfilling partition keyrange: $0/$1/$2: $3", 
-        snap->state.tsdb_namespace(),
-        table_->name(),
-        partition_id.toString(),
-        rc.message());
-
-    return;
-  }
-
-  snap->state.set_partition_keyrange_begin(keyrange.begin);
-  snap->state.set_partition_keyrange_end(keyrange.end);
-
-  snap->writeToDisk();
-  head_.setSnapshot(snap);
 }
 
 }
