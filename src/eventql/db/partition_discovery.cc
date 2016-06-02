@@ -56,6 +56,10 @@ Status PartitionDiscovery::discoverPartition(
   };
 
   auto iter = file->getPartitionMapRangeBegin(request.keyrange_begin());
+  if (iter == file->getPartitionMapEnd()) {
+    return Status(eIllegalStateError, "invalid partition map");
+  }
+
   if (iter->partition_id == req_partition_id) {
     //valid partition
     // check the list of active servers

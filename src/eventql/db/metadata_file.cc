@@ -65,6 +65,10 @@ MetadataFile::PartitionMapIter MetadataFile::getPartitionMapEnd() const {
 
 MetadataFile::PartitionMapIter MetadataFile::getPartitionMapAt(
     const String& key) const {
+  if (partition_map_.empty()) {
+    return partition_map_.end();
+  }
+
   size_t low = 0;
   size_t high = partition_map_.size() - 1;
   while (low != high) {
