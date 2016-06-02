@@ -75,10 +75,22 @@ RefPtr<Partition> Partition::create(
   state.set_partition_key(partition_key.data(), partition_key.size());
   state.set_table_key(table->name());
   state.set_uuid(uuid.data(), uuid.size());
+  state.set_partition_keyrange_begin(discovery_info.keyrange_begin());
+  state.set_partition_keyrange_end(discovery_info.keyrange_end());
 
   auto snap = mkRef(new PartitionSnapshot(state, pdir, pdir_rel, 0));
   snap->writeToDisk();
-  return new Partition(partition_key, cfg, snap, table);
+
+  auto partition = mkRef(new Partition(partition_key, cfg, snap, table));
+
+  {
+    auto rc = partition->getWriter()->applyMetadataChange(discovery_info);
+    if (!rc.isSuccess()) {
+      RAISE(kRuntimeError, rc.message());
+    }
+  }
+
+  return partition;
 }
 
 RefPtr<Partition> Partition::reopen(

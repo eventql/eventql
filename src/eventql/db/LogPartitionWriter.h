@@ -47,6 +47,11 @@ public:
   bool compact() override;
   bool needsCompaction() override;
 
+  Status applyMetadataChange(
+      const PartitionDiscoveryResponse& discovery_info) override {
+    return Status::success();
+  }
+
 protected:
   RefPtr<Partition> partition_;
   PersistentHashSet idset_;

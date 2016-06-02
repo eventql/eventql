@@ -22,6 +22,7 @@
  * code of your own applications
  */
 #pragma once
+#include "eventql/eventql.h"
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/autoref.h>
 #include <eventql/db/PartitionWriter.h>
@@ -29,9 +30,6 @@
 #include <eventql/util/util/PersistentHashSet.h>
 #include <eventql/db/CompactionStrategy.h>
 #include <eventql/db/metadata_transaction.h>
-#include <eventql/db/metadata_operations.pb.h>
-
-#include "eventql/eventql.h"
 
 namespace eventql {
 
@@ -57,7 +55,7 @@ public:
   bool needsUrgentCompaction();
 
   Status applyMetadataChange(
-      const PartitionDiscoveryResponse& discovery_info);
+      const PartitionDiscoveryResponse& discovery_info) override;
 
   ReplicationState fetchReplicationState() const;
   void commitReplicationState(const ReplicationState& state);
