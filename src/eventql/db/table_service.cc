@@ -284,7 +284,7 @@ void TableService::insertReplicatedRecords(
   HashMap<String, Vector<RecordRef>> grouped;
 
   for (const auto& record : records.records()) {
-    if (record.has_partition_sha1()) {
+    if (!record.has_partition_sha1()) {
       RAISE(kIllegalArgumentError, "missing partition id");
     }
 
