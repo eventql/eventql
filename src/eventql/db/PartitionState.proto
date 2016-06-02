@@ -30,7 +30,15 @@ message LSMTableRef {
   required uint64 last_sequence = 3;
 }
 
-// next id: 14
+message ReplicationTarget {
+  required string server_id = 1;
+  required uint64 placement_id = 2;
+  required bytes partition_id = 3;
+  optional bytes keyrange_begin = 4;
+  optional bytes keyrange_end = 5;
+};
+
+// next id: 19
 message PartitionState {
 
   /**
@@ -76,6 +84,7 @@ message PartitionState {
   optional uint64 lsm_sequence = 8;
 
   optional ReplicationState replication_state = 9;
+  repeated ReplicationTarget replication_targets = 14;
 
   /**
    * SHA1 sum (20 bytes) containing this partition's uuid. The uuid is used
@@ -94,11 +103,21 @@ message PartitionState {
   /**
    * Last known metadata transaction id
    */
-  optional bytes last_metadata_txnid = 10;
+  optional bytes last_metadata_txnid = 17;
 
   /**
    * Last known metadata transaction sequence
    */
-  optional uint64 last_metadata_txnseq = 11;
+  optional uint64 last_metadata_txnseq = 18;
+
+  /**
+   * Is this an active partition in the partition map and assigned to us?
+   */
+  optional bool is_active = 15;
+
+  /**
+   * Is the partition still loading?
+   */
+  optional bool is_loading = 16;
 
 };

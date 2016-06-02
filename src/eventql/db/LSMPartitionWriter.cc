@@ -351,7 +351,8 @@ void LSMPartitionWriter::commitReplicationState(const ReplicationState& state) {
 
 Status LSMPartitionWriter::applyMetadataChange(
     const PartitionDiscoveryResponse& discovery_info) {
-  auto snap = head_->getSnapshot();
+  ScopedLock<std::mutex> write_lk(mutex_);
+  auto snap = head_->getSnapshot()->clone();
 
   logTrace(
       "evqld",
@@ -361,87 +362,43 @@ Status LSMPartitionWriter::applyMetadataChange(
       snap->key.toString(),
       discovery_info.DebugString());
 
-  //// backfill code
-  //auto has_local_replica = repl_->hasLocalReplica(snap->key);
-  //if (has_local_replica &&
-  //    discovery_info.code() != PDISCOVERY_SERVE &&
-  //    !snap->state.partition_keyrange_begin().empty()) {
-  //  logDebug(
-  //      "evqld",
-  //      "Adding myself to the server list for $0/$1/$2",
-  //      snap->state.tsdb_namespace(),
-  //      snap->state.table_key(),
-  //      snap->key.toString());
-
-  //  BackfillAddServerOperation opdata;
-  //  opdata.set_partition_id(snap->key.data(), snap->key.size());
-  //  opdata.set_keyrange_begin(snap->state.partition_keyrange_begin());
-  //  opdata.set_server_id(cdir_->getServerID());
-
-  //  MetadataOperation op(
-  //      snap->state.tsdb_namespace(),
-  //      snap->state.table_key(),
-  //      METAOP_BACKFILL_ADD_SERVER,
-  //      SHA1Hash(discovery_info.txnid().data(), discovery_info.txnid().size()),
-  //      Random::singleton()->sha1(),
-  //      *msg::encode(opdata));
-
-  //  MetadataCoordinator coordinator(cdir_);
-  //  auto rc = coordinator.performAndCommitOperation(
-  //      snap->state.tsdb_namespace(),
-  //      snap->state.table_key(),
-  //      op);
-
-  //  if (!rc.isSuccess()) {
-  //    return rc;
-  //  }
-  //}
-
-  //if (!has_local_replica && discovery_info.code() != PDISCOVERY_UNLOAD) {
-  //  logDebug(
-  //      "evqld",
-  //      "Removing myself from the server list for $0/$1/$2",
-  //      snap->state.tsdb_namespace(),
-  //      snap->state.table_key(),
-  //      snap->key.toString());
-
-  //  BackfillRemoveServerOperation opdata;
-  //  opdata.set_partition_id(snap->key.data(), snap->key.size());
-  //  opdata.set_server_id(cdir_->getServerID());
-
-  //  MetadataOperation op(
-  //      snap->state.tsdb_namespace(),
-  //      snap->state.table_key(),
-  //      METAOP_BACKFILL_REMOVE_SERVER,
-  //      SHA1Hash(discovery_info.txnid().data(), discovery_info.txnid().size()),
-  //      Random::singleton()->sha1(),
-  //      *msg::encode(opdata));
-
-  //  MetadataCoordinator coordinator(cdir_);
-  //  auto rc = coordinator.performAndCommitOperation(
-  //      snap->state.tsdb_namespace(),
-  //      snap->state.table_key(),
-  //      op);
-
-  //  if (!rc.isSuccess()) {
-  //    return rc;
-  //  }
-  //}
-
-  // commit
-  {
-    ScopedLock<std::mutex> write_lk(mutex_);
-    snap = head_->getSnapshot()->clone();
-    if (snap->state.last_metadata_txnseq() >= discovery_info.txnseq()) {
-      return Status(eConcurrentModificationError, "version conflict");
-    }
-
-    snap->state.set_last_metadata_txnid(discovery_info.txnid());
-    snap->state.set_last_metadata_txnseq(discovery_info.txnseq());
-
-    snap->writeToDisk();
-    head_->setSnapshot(snap);
+  if (snap->state.last_metadata_txnseq() >= discovery_info.txnseq()) {
+    return Status(eConcurrentModificationError, "version conflict");
   }
+
+  snap->state.set_last_metadata_txnid(discovery_info.txnid());
+  snap->state.set_last_metadata_txnseq(discovery_info.txnseq());
+
+  switch (discovery_info.code()) {
+    case PDISCOVERY_LOAD:
+      snap->state.set_is_active(true);
+      snap->state.set_is_loading(true);
+      break;
+
+    case PDISCOVERY_SERVE:
+      snap->state.set_is_active(true);
+      snap->state.set_is_loading(false);
+      break;
+
+    case PDISCOVERY_UNLOAD:
+    case PDISCOVERY_UNKNOWN:
+      snap->state.set_is_active(false);
+      snap->state.set_is_loading(false);
+      break;
+  }
+
+  snap->state.mutable_replication_targets()->Clear();
+  for (const auto& dt : discovery_info.replication_targets()) {
+    auto pt = snap->state.add_replication_targets();
+    pt->set_server_id(dt.server_id());
+    pt->set_placement_id(dt.placement_id());
+    pt->set_partition_id(dt.partition_id());
+    pt->set_keyrange_begin(dt.keyrange_begin());
+    pt->set_keyrange_end(dt.keyrange_end());
+  }
+
+  snap->writeToDisk();
+  head_->setSnapshot(snap);
 
   return Status::success();
 }
