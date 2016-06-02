@@ -1215,7 +1215,7 @@ TEST_CASE(ParserTest, TestAlterTableStatement, [] () {
   auto parser = parseTestQuery(
       R"(
           ALTER TABLE evtbl
-            ADD description REPEATED String,
+            ADD description.id REPEATED String,
             ADD COLUMN product RECORD,
             DROP place,
             DROP column version;
@@ -1233,7 +1233,7 @@ TEST_CASE(ParserTest, TestAlterTableStatement, [] () {
   EXPECT_EQ(*children[1]->getChildren()[1], ASTNode::T_COLUMN_TYPE);
   EXPECT_EQ(children[1]->getChildren()[1]->getToken()->getString(), "String");
   EXPECT_EQ(*children[1]->getChildren()[2], ASTNode::T_REPEATED);
-  EXPECT_EQ(children[1]->getChildren()[0]->getToken()->getString(), "description");
+  EXPECT_EQ(children[1]->getChildren()[0]->getToken()->getString(), "description.id");
 
   EXPECT_EQ(*children[2], ASTNode::T_COLUMN);
   EXPECT_EQ(children[2]->getChildren()[0]->getToken()->getString(), "product");

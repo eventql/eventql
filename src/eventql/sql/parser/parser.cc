@@ -508,43 +508,7 @@ ASTNode* Parser::columnDefinition() {
 
   return column;
 }
-ASTNode* Parser::addColumnDefinition() {
-  auto column = new ASTNode(ASTNode::T_COLUMN);
 
-  assertExpectation(Token::T_IDENTIFIER);
-  auto column_name = new ASTNode(ASTNode::T_COLUMN_NAME); //FIXME accpet dot
-  column_name->setToken(cur_token_);
-  column->appendChild(column_name);
-  consumeToken();
-
-  bool repeated = false;
-  if (*cur_token_ == Token::T_REPEATED) {
-    repeated = true;
-    consumeToken();
-  }
-
-  if (*cur_token_ == Token::T_RECORD) {
-    column->appendChild(new ASTNode(ASTNode::T_RECORD));
-    consumeToken();
-  } else {
-    auto id = new ASTNode(ASTNode::T_COLUMN_TYPE);
-    id->setToken(cur_token_);
-    column->appendChild(id);
-    consumeToken();
-  }
-
-  if (*cur_token_ == Token::T_NOT) {
-    consumeToken();
-    expectAndConsume(Token::T_NULL);
-    column->appendChild(ASTNode::T_NOT_NULL);
-  }
-
-  if (repeated) {
-    column->appendChild(new ASTNode(ASTNode::T_REPEATED));
-  }
-
-  return column;
-}
 
 ASTNode* Parser::primaryKeyDefinition() {
   consumeToken();
@@ -661,6 +625,56 @@ ASTNode* Parser::insertFromJSON() {
   return json;
 }
 
+ASTNode* Parser::nestedColumnName() {
+  /* column_name[.column_name...] */
+  assertExpectation(Token::T_IDENTIFIER);
+  auto name_str = consumeToken()->getString();
+  while (lookahead(0, Token::T_DOT)) {
+    consumeToken();
+    assertExpectation(Token::T_IDENTIFIER);
+    name_str += "." + cur_token_->getString();
+    consumeToken();
+  }
+
+  auto column_name = new ASTNode(ASTNode::T_COLUMN_NAME);
+  column_name->setToken(new Token(Token::T_IDENTIFIER, name_str));
+
+  return column_name;
+}
+
+ASTNode* Parser::addColumnDefinition() {
+  auto column = new ASTNode(ASTNode::T_COLUMN);
+  column->appendChild(nestedColumnName());
+
+  bool repeated = false;
+  if (*cur_token_ == Token::T_REPEATED) {
+    repeated = true;
+    consumeToken();
+  }
+
+  if (*cur_token_ == Token::T_RECORD) {
+    column->appendChild(new ASTNode(ASTNode::T_RECORD));
+    consumeToken();
+  } else {
+    auto id = new ASTNode(ASTNode::T_COLUMN_TYPE);
+    id->setToken(cur_token_);
+    column->appendChild(id);
+    consumeToken();
+  }
+
+  if (*cur_token_ == Token::T_NOT) {
+    consumeToken();
+    expectAndConsume(Token::T_NULL);
+    column->appendChild(ASTNode::T_NOT_NULL);
+  }
+
+  if (repeated) {
+    column->appendChild(new ASTNode(ASTNode::T_REPEATED));
+  }
+
+  return column;
+}
+
 ASTNode* Parser::alterStatement() {
   consumeToken();
   expectAndConsume(Token::T_TABLE);
@@ -679,12 +693,7 @@ ASTNode* Parser::alterStatement() {
       case Token::T_DROP: {
         consumeToken();
         consumeIf(Token::T_COLUMN);
-        assertExpectation(Token::T_IDENTIFIER); //FIXME allow dot
-
-        auto column_name = new ASTNode(ASTNode::T_COLUMN_NAME);
-        column_name->setToken(cur_token_);
-        consumeToken();
-        alter_table->appendChild(column_name);
+        alter_table->appendChild(nestedColumnName());
         break;
       }
 
