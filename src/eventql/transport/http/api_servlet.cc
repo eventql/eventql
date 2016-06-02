@@ -833,39 +833,22 @@ void AnalyticsServlet::insertIntoTable(
       }
     }
 
-    auto id_opt = json::objectGetString(jrow, jreq.end(), "id");
-    auto version_opt = json::objectGetUInt64(jrow, jreq.end(), "version");
-
     auto data = json::objectLookup(jrow, jreq.end(), "data");
     if (data == jreq.end()) {
       RAISE(kRuntimeError, "missing field: data");
     }
-
-    auto record_id =
-        id_opt.isEmpty() ?
-            Random::singleton()->sha1() :
-            SHA1::compute(id_opt.get());
-
-    uint64_t record_version =
-        version_opt.isEmpty() ?
-            WallClock::unixMicros() :
-            version_opt.get();
 
     if (data->type == json::JSON_STRING) {
       auto data_parsed = json::parseJSON(data->data);
       tsdb_->insertRecord(
           insert_database,
           table.get(),
-          record_id,
-          record_version,
           data_parsed.begin(),
           data_parsed.end());
     } else {
       tsdb_->insertRecord(
           insert_database,
           table.get(),
-          record_id,
-          record_version,
           data,
           data + data->size);
     }

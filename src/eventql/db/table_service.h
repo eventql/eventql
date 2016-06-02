@@ -91,34 +91,8 @@ public:
   void insertRecord(
       const String& tsdb_namespace,
       const String& table_name,
-      const SHA1Hash& partition_key,
-      const SHA1Hash& record_id,
-      uint64_t record_version,
-      const Buffer& record,
-      uint64_t flags = 0);
-
-  void insertRecord(
-      const String& tsdb_namespace,
-      const String& table_name,
-      const SHA1Hash& record_id,
-      uint64_t record_version,
       const json::JSONObject::const_iterator& data_begin,
       const json::JSONObject::const_iterator& data_end,
-      uint64_t flags = 0);
-
-  void insertRecord(
-      const String& tsdb_namespace,
-      const String& table_name,
-      const json::JSONObject::const_iterator& data_begin,
-      const json::JSONObject::const_iterator& data_end,
-      uint64_t flags = 0);
-
-  void insertRecord(
-      const String& tsdb_namespace,
-      const String& table_name,
-      const SHA1Hash& record_id,
-      uint64_t record_version,
-      const msg::DynamicMessage& data,
       uint64_t flags = 0);
 
   void insertRecord(
@@ -177,6 +151,12 @@ public:
       const String& table_key);
 
 protected:
+
+  template <typename IterType>
+  void insertRecords(
+      IterType begin,
+      IterType end,
+      uint64_t flags /* = 0 */);
 
   void insertRecordsLocal(
       const String& tsdb_namespace,
