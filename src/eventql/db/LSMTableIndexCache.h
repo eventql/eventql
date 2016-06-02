@@ -32,7 +32,7 @@ namespace eventql {
 
 class LSMTableIndexCache : public RefCounted {
 public:
-  static const size_t kDefaultMaxSize = 1024 * 1024 * 256; // 256 MB;
+  static const size_t kDefaultMaxSize = 1024 * 1024 * 1024; // 1024 MB;
 
   LSMTableIndexCache(
       const String& base_path,
