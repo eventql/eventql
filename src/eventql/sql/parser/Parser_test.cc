@@ -1206,3 +1206,14 @@ TEST_CASE(ParserTest, TestInsertIntoFromJSONStatement, [] () {
 
   EXPECT(*children[1] == ASTNode::T_JSON_STRING);
 });
+
+TEST_CASE(ParserTest, TestCreateDatabaseStatement, [] () {
+  auto runtime = Runtime::getDefaultRuntime();
+  auto txn = runtime->newTransaction();
+
+  auto parser = parseTestQuery("CREATE DATABASE events;");
+
+  EXPECT(parser.getStatements().size() == 1);
+  const auto& stmt = parser.getStatements()[0];
+
+});

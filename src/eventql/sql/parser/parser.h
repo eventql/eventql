@@ -102,6 +102,7 @@ protected:
   ASTNode* selectSublist();
   ASTNode* createStatement();
   ASTNode* createTableStatement();
+  ASTNode* createDatabaseStatement();
   ASTNode* columnDefinition();
   ASTNode* primaryKeyDefinition();
   ASTNode* tableName();
