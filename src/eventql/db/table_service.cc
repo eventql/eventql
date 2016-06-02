@@ -131,11 +131,13 @@ Status TableService::createTable(
   return Status::success();
 }
 
-Status TableService::alterTable(
+Status TableService::addColumn(
     const String& db_namespace,
     const String& table_name,
-    const Vector<String>& drop_columns,
-    const Vector<msg::MessageSchemaField>& add_columns) const {
+    const String& column_name,
+    msg::FieldType column_type,
+    bool is_repeated,
+    bool is_optional) {
   auto table = pmap_->findTable(db_namespace, table_name);
   if (table.isEmpty()) {
     return Status(eNotFoundError, "table not found");
@@ -143,94 +145,132 @@ Status TableService::alterTable(
 
   auto td = table.get()->config();
   auto schema = msg::MessageSchema::decode(td.config().schema());
+  auto cur_schema = schema;
+  auto field = column_name;
 
-  auto primary_key = table.get()->getPrimaryKey();
-  auto pkey_begin = primary_key.begin();
-  auto pkey_end = primary_key.end();
-  //remove columns
-  for (auto c : drop_columns) {
-    if (find(pkey_begin, pkey_end, c) != pkey_end) {
-      return Status(
-          eRuntimeError,
-          "primary key column can't be dropped");
-    }
+  uint32_t next_field_id;
+  if (td.has_next_field_id()) {
+    next_field_id = td.next_field_id();
+  } else {
+    next_field_id = schema->maxFieldId() + 1;
+  }
 
-    auto cur_schema = schema;
-    auto field = c;
-    while (StringUtil::includes(field, ".")) {
-      auto prefix_len = field.find(".");
-      auto prefix = field.substr(0, prefix_len);
+  while (StringUtil::includes(field, ".")) {
+    auto prefix_len = field.find(".");
+    auto prefix = field.substr(0, prefix_len);
 
-      field = field.substr(prefix_len + 1);
-
-      if (!cur_schema->hasField(prefix)) {
-        return Status(
-            eNotFoundError,
-            StringUtil::format("field '$0' not found", prefix));
-      }
-      cur_schema = cur_schema->fieldSchema(cur_schema->fieldId(prefix));
-    }
-
-    if (!cur_schema->hasField(field)) {
+    field = field.substr(prefix_len + 1);
+    if (!cur_schema->hasField(prefix)) {
       return Status(
           eNotFoundError,
           StringUtil::format("field '$0' not found", field));
     }
 
-    if (!td.has_next_field_id()) {
-      td.set_next_field_id(schema->maxFieldId() + 1);
+    auto parent_field_id = cur_schema->fieldId(prefix);
+    auto parent_field_type = cur_schema->fieldType(parent_field_id);
+    if (parent_field_type != msg::FieldType::OBJECT) {
+      return Status(
+          eRuntimeError,
+          StringUtil::format(
+              "can't add a field to field '$0' of type $1",
+              prefix,
+              fieldTypeToString(parent_field_type)));
     }
 
-    cur_schema->removeField(cur_schema->fieldId(field));
-    td.mutable_config()->set_schema(schema->encode().toString());
+    cur_schema = cur_schema->fieldSchema(parent_field_id);
   }
 
-  //add columns
-  for (auto c : add_columns) {
-    auto cur_schema = schema;
-    auto field = c.name;
+  if (column_type == msg::FieldType::OBJECT) {
+    cur_schema->addField(
+          msg::MessageSchemaField::mkObjectField(
+              next_field_id,
+              column_name,
+              is_repeated,
+              is_optional,
+              mkRef(new msg::MessageSchema(nullptr))));
 
-    uint32_t next_field_id;
-    if (td.has_next_field_id()) {
-      next_field_id = td.next_field_id();
-    } else {
-      next_field_id = schema->maxFieldId() + 1;
-    }
 
-    while (StringUtil::includes(field, ".")) {
-      auto prefix_len = field.find(".");
-      auto prefix = field.substr(0, prefix_len);
-
-      field = field.substr(prefix_len + 1);
-      if (!cur_schema->hasField(prefix)) {
-        return Status(
-            eNotFoundError,
-            StringUtil::format("field '$0' not found", field));
-      }
-
-      auto parent_field_id = cur_schema->fieldId(prefix);
-      auto parent_field_type = cur_schema->fieldType(parent_field_id);
-      if (parent_field_type != msg::FieldType::OBJECT) {
-        return Status(
-            eRuntimeError,
-            StringUtil::format(
-                "can't add a field to field '$0' of type $1",
-                prefix,
-                fieldTypeToString(parent_field_type)));
-      }
-
-      cur_schema = cur_schema->fieldSchema(parent_field_id);
-    }
-
-    c.name = field;
-    cur_schema->addField(c);
-    td.set_next_field_id(next_field_id + 1);
-    td.mutable_config()->set_schema(schema->encode().toString());
+  } else {
+    cur_schema->addField(
+          msg::MessageSchemaField(
+              next_field_id,
+              column_name,
+              column_type,
+              0,
+              is_repeated,
+              is_optional));
   }
 
-  cdir_->updateTableConfig(td);
+
+  td.set_next_field_id(next_field_id + 1);
+  td.mutable_config()->set_schema(schema->encode().toString());
+
+  try {
+    cdir_->updateTableConfig(td);
+  } catch (const Exception& e) {
+    return Status(eRuntimeError, e.getMessage());
+  }
+
   return Status::success();
 }
+
+Status TableService::removeColumn(
+    const String& db_namespace,
+    const String& table_name,
+    const String& column_name) {
+  auto table = pmap_->findTable(db_namespace, table_name);
+  if (table.isEmpty()) {
+    return Status(eNotFoundError, "table not found");
+  }
+
+  auto pkey = table.get()->getPrimaryKey();
+  if (find(pkey.begin(), pkey.end(), column_name) != pkey.end()) {
+    return Status(
+        eRuntimeError,
+        "primary key column can't be dropped");
+  }
+
+  auto td = table.get()->config();
+  auto schema = msg::MessageSchema::decode(td.config().schema());
+  auto cur_schema = schema;
+  auto field = column_name;
+
+  while (StringUtil::includes(field, ".")) {
+    auto prefix_len = field.find(".");
+    auto prefix = field.substr(0, prefix_len);
+
+    field = field.substr(prefix_len + 1);
+
+    if (!cur_schema->hasField(prefix)) {
+      return Status(
+          eNotFoundError,
+          StringUtil::format("field '$0' not found", prefix));
+    }
+    cur_schema = cur_schema->fieldSchema(cur_schema->fieldId(prefix));
+  }
+
+  if (!cur_schema->hasField(field)) {
+    return Status(
+        eNotFoundError,
+        StringUtil::format("field '$0' not found", field));
+  }
+
+  if (!td.has_next_field_id()) {
+    td.set_next_field_id(schema->maxFieldId() + 1);
+  }
+
+  cur_schema->removeField(cur_schema->fieldId(field));
+  td.mutable_config()->set_schema(schema->encode().toString());
+
+  try {
+    cdir_->updateTableConfig(td);
+  } catch (const Exception& e) {
+    return Status(eRuntimeError, e.getMessage());
+  }
+
+  return Status::success();
+}
+
 
 void TableService::listTables(
     const String& tsdb_namespace,

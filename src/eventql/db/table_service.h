@@ -65,11 +65,18 @@ public:
       const msg::MessageSchema& schema,
       Vector<String> primary_key);
 
-  Status alterTable(
+  Status addColumn(
       const String& db_namespace,
       const String& table_name,
-      const Vector<String>& drop_columns,
-      const Vector<msg::MessageSchemaField>&) const;
+      const String& column_name,
+      msg::FieldType column_type,
+      bool is_repeated,
+      bool is_optional);
+
+  Status removeColumn(
+      const String& db_namespace,
+      const String& table_name,
+      const String& column_name);
 
   void listTables(
       const String& tsdb_namespace,
