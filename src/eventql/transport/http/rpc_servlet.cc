@@ -164,6 +164,13 @@ void RPCServlet::handleHTTPRequest(
       return;
     }
 
+    if (uri.path() == "/rpc/find_partition") {
+      req_stream->readBody();
+      findPartition(uri, &req, &res);
+      res_stream->writeResponse(res);
+      return;
+    }
+
     res.setStatus(http::kStatusNotFound);
     res.addBody("not found");
     res_stream->writeResponse(res);
@@ -666,6 +673,26 @@ void RPCServlet::listPartitions(
 
   PartitionListResponse response;
   auto rc = metadata_service_->listPartitions(request, &response);
+
+  if (rc.isSuccess()) {
+    res->setStatus(http::kStatusOK);
+    res->addBody(*msg::encode(response));
+  } else {
+    res->setStatus(http::kStatusInternalServerError);
+    res->addBody("ERROR: " + rc.message());
+    return;
+  }
+}
+
+void RPCServlet::findPartition(
+    const URI& uri,
+    const http::HTTPRequest* req,
+    http::HTTPResponse* res) {
+  PartitionFindRequest request;
+  msg::decode(req->body(), &request);
+
+  PartitionFindResponse response;
+  auto rc = metadata_service_->findPartition(request, &response);
 
   if (rc.isSuccess()) {
     res->setStatus(http::kStatusOK);
