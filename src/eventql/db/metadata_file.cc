@@ -114,36 +114,7 @@ MetadataFile::PartitionMapIter MetadataFile::getPartitionMapRangeEnd(
 }
 
 int MetadataFile::compareKeys(const String& a, const String& b) const {
-  switch (keyspace_type_) {
-    case KEYSPACE_STRING: {
-      if (a < b) {
-        return -1;
-      } else if (a > b) {
-        return 1;
-      } else {
-        return 0;
-      }
-    }
-
-    case KEYSPACE_UINT64: {
-      uint64_t a_uint = 0;
-      uint64_t b_uint = 0;
-      if (a.size() == sizeof(uint64_t)) {
-        memcpy(&a_uint, a.data(), sizeof(uint64_t));
-      }
-      if (b.size() == sizeof(uint64_t)) {
-        memcpy(&b_uint, b.data(), sizeof(uint64_t));
-      }
-
-      if (a_uint < b_uint) {
-        return -1;
-      } else if (a_uint > b_uint) {
-        return 1;
-      } else {
-        return 0;
-      }
-    }
-  }
+  return comparePartitionKeys(keyspace_type_, a, b);
 }
 
 static Status decodeServerList(
@@ -309,6 +280,42 @@ Status MetadataFile::encode(OutputStream* os) const  {
   }
 
   return Status::success();
+}
+
+int comparePartitionKeys(
+    KeyspaceType keyspace_type,
+    const String& a,
+    const String& b) {
+  switch (keyspace_type) {
+    case KEYSPACE_STRING: {
+      if (a < b) {
+        return -1;
+      } else if (a > b) {
+        return 1;
+      } else {
+        return 0;
+      }
+    }
+
+    case KEYSPACE_UINT64: {
+      uint64_t a_uint = 0;
+      uint64_t b_uint = 0;
+      if (a.size() == sizeof(uint64_t)) {
+        memcpy(&a_uint, a.data(), sizeof(uint64_t));
+      }
+      if (b.size() == sizeof(uint64_t)) {
+        memcpy(&b_uint, b.data(), sizeof(uint64_t));
+      }
+
+      if (a_uint < b_uint) {
+        return -1;
+      } else if (a_uint > b_uint) {
+        return 1;
+      } else {
+        return 0;
+      }
+    }
+  }
 }
 
 String encodePartitionKey(
