@@ -106,6 +106,14 @@ protected:
   Vector<PartitionMapEntry> partition_map_;
 };
 
+/**
+ * Compare two keys, returns -1 if a < b, 0 if a == b and 1 if a > b
+ */
+int comparePartitionKeys(
+    KeyspaceType keyspace_type,
+    const String& a,
+    const String& b);
+
 String encodePartitionKey(
     KeyspaceType keyspace_type,
     const String& key);

@@ -94,18 +94,18 @@ void LSMPartitionReplication::replicateTo(
   }
 
   size_t batch_size = 0;
-  size_t num_replicated = 0;
   RecordEnvelopeList batch;
-  batch.set_sync_commit(true);
+  batch.set_sync_commit(true); // fixme only on last batch?
   fetchRecords(
       replicated_offset,
+      replica.keyrange_begin(),
+      replica.keyrange_end(),
       [
           this,
           &batch,
           &replica,
           &replicated_offset,
           &batch_size,
-          &num_replicated,
           &server_cfg
         ] (
           const SHA1Hash& record_id,
@@ -121,7 +121,6 @@ void LSMPartitionReplication::replicateTo(
     rec->set_record_data(record_data, record_size);
 
     batch_size += record_size;
-    ++num_replicated;
 
     if (batch_size > kMaxBatchSizeBytes ||
         batch.records().size() > kMaxBatchSizeRows) {
@@ -228,12 +227,18 @@ void LSMPartitionReplication::uploadBatchTo(
 
 void LSMPartitionReplication::fetchRecords(
     size_t start_sequence,
+    const String& keyrange_begin,
+    const String& keyrange_end,
     Function<void (
         const SHA1Hash& record_id,
         uint64_t record_version,
         const void* record_data,
         size_t record_size)> fn) {
   auto schema = partition_->getTable()->schema();
+  auto pkey_fieldname = partition_->getTable()->getPartitionKey();
+  auto pkey_fieldid = schema->fieldId(pkey_fieldname);
+  auto keyspace = partition_->getTable()->getKeyspaceType();
+
   const auto& tables = snap_->state.lsm_tables();
   for (const auto& tbl : tables) {
     if (tbl.last_sequence() < start_sequence) {
@@ -271,6 +276,31 @@ void LSMPartitionReplication::fetchRecords(
 
       msg::MessageObject record;
       materializer.nextRecord(&record);
+
+      String pkey_value;
+      switch (keyspace) {
+        case KEYSPACE_STRING: {
+          pkey_value = record.getString(pkey_fieldid);
+          break;
+        }
+        case KEYSPACE_UINT64: {
+          uint64_t pkey_value_uint = record.getUInt64(pkey_fieldid);
+          pkey_value = String((const char*) &pkey_value, sizeof(uint64_t));
+          break;
+        }
+      }
+
+      if (!keyrange_begin.empty()) {
+        if (comparePartitionKeys(keyspace, pkey_value, keyrange_begin) < 0) {
+          continue;
+        }
+      }
+
+      if (!keyrange_end.empty()) {
+        if (comparePartitionKeys(keyspace, pkey_value, keyrange_end) >= 0) {
+          continue;
+        }
+      }
 
       Buffer record_buf;
       msg::MessageEncoder::encode(record, *schema, &record_buf);

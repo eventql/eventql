@@ -64,6 +64,8 @@ protected:
 
   void fetchRecords(
       size_t start_sequence,
+      const String& keyrange_begin,
+      const String& keyrange_end,
       Function<void (
           const SHA1Hash& record_id,
           uint64_t record_version,
