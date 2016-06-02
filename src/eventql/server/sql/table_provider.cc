@@ -121,7 +121,7 @@ Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
   }
 
   auto partitioner = table.get()->partitioner();
-  Set<SHA1Hash> partitions;
+  Vector<TableScan::PartitionLocation> partitions;
   if (table_ref.partition_key.isEmpty()) {
     if (table.get()->partitionerType() == TBL_PARTITION_TIMEWINDOW) {
       auto keyrange = findKeyRange(
@@ -141,17 +141,39 @@ Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
       }
 
       for (const auto& p : partition_list.partitions()) {
-        partitions.emplace(
-            SHA1Hash(p.partition_id().data(), p.partition_id().size()));
+        TableScan::PartitionLocation pl;
+        pl.partition_id = SHA1Hash(
+            p.partition_id().data(),
+            p.partition_id().size());
+
+        for (const auto& s : p.servers()) {
+          auto server_cfg = cdir_->getServerConfig(s);
+          if (server_cfg.server_status() != SERVER_UP) {
+            continue;
+          }
+
+          ReplicaRef rref(SHA1::compute(s), server_cfg.server_addr());
+          rref.name = s;
+          pl.servers.emplace_back(rref);
+        }
+
+        partitions.emplace_back(pl);
       }
     } else {
       auto partitioner = table.get()->partitioner();
       for (const auto& p : partitioner->listPartitions(seqscan->constraints())) {
-        partitions.emplace(p);
+        TableScan::PartitionLocation pl;
+        pl.partition_id = p;
+        if (!replication_scheme_->hasLocalReplica(p)) {
+          pl.servers = replication_scheme_->replicasFor(p);
+        }
+        partitions.emplace_back(pl);
       }
     }
   } else {
-    partitions.emplace(table_ref.partition_key.get());
+    TableScan::PartitionLocation pl;
+    pl.partition_id = table_ref.partition_key.get();
+    partitions.emplace_back(pl);
   }
 
   return Option<ScopedPtr<csql::TableExpression>>(
@@ -161,10 +183,9 @@ Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
               execution_context,
               tsdb_namespace_,
               table_ref.table_key,
-              Vector<SHA1Hash>(partitions.begin(), partitions.end()),
+              partitions,
               seqscan,
               partition_map_,
-              replication_scheme_,
               auth_)));
 }
 
