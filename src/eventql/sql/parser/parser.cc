@@ -551,8 +551,6 @@ ASTNode* Parser::createDatabaseStatement() {
   expectAndConsume(Token::T_DATABASE);
 
   auto create_database = new ASTNode(ASTNode::T_CREATE_DATABASE);
-  create_database->appendChild(tableName());
-
   auto name = new ASTNode(ASTNode::T_DATABASE_NAME);
   name->setToken(cur_token_);
   create_database->appendChild(name);
