@@ -152,7 +152,7 @@ protected:
       const String& tsdb_namespace,
       const String& table_name,
       const SHA1Hash& partition_key,
-      const Vector<String>& servers,
+      const Set<String>& servers,
       const Vector<RecordRef>& records,
       uint64_t flags = 0);
 

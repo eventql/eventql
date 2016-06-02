@@ -33,6 +33,7 @@
 #include <eventql/db/PartitionState.pb.h>
 #include "eventql/db/metadata_coordinator.h"
 #include "eventql/db/metadata_file.h"
+#include "eventql/db/metadata_client.h"
 
 #include "eventql/eventql.h"
 
@@ -190,24 +191,22 @@ void TableService::insertRecords(
     const msg::DynamicMessage* begin,
     const msg::DynamicMessage* end,
     uint64_t flags /* = 0 */) {
+  MetadataClient metadata_client(cdir_);
   HashMap<SHA1Hash, Vector<RecordRef>> records;
-  HashMap<SHA1Hash, Vector<String>> servers;
+  HashMap<SHA1Hash, Set<String>> servers;
+
+  auto table = pmap_->findTable(tsdb_namespace, table_name);
+  if (table.isEmpty()) {
+    RAISEF(kNotFoundError, "table not found: $0", table_name);
+  }
 
   for (auto record = begin; record != end; ++record) {
-    auto table = pmap_->findTable(tsdb_namespace, table_name);
-    if (table.isEmpty()) {
-      RAISEF(kNotFoundError, "table not found: $0", table_name);
-    }
-
     // calculate partition key
     auto partition_key_field_name = table.get()->getPartitionKey();
     auto partition_key_field = record->getField(partition_key_field_name);
     if (partition_key_field.isEmpty()) {
       RAISEF(kNotFoundError, "missing field: $0", partition_key_field_name);
     }
-
-    auto partitioner = table.get()->partitioner();
-    auto partition_key = partitioner->partitionKeyFor(partition_key_field.get());
 
     // calculate primary key
     SHA1Hash primary_key;
@@ -233,11 +232,36 @@ void TableService::insertRecords(
       }
     }
 
+    // lookup partition
+    PartitionFindResponse find_res;
+    {
+      auto rc = metadata_client.findPartition(
+          tsdb_namespace,
+          table_name,
+          encodePartitionKey(
+              table.get()->getKeyspaceType(),
+              partition_key_field.get()),
+          &find_res);
+
+      if (!rc.isSuccess()) {
+        RAISE(kRuntimeError, rc.message());
+      }
+    }
+
+    SHA1Hash partition_id(
+        find_res.partition_id().data(),
+        find_res.partition_id().size());
+
+    Set<String> partition_servers(
+        find_res.servers_for_insert().begin(),
+        find_res.servers_for_insert().end());
+
     // FIXME
     Buffer buf;
     msg::MessageEncoder::encode(record->data(), *record->schema(), &buf);
 
-    records[partition_key].emplace_back(
+    servers[partition_id] = partition_servers;
+    records[partition_id].emplace_back(
         primary_key,
         WallClock::unixMicros(),
         buf);
@@ -260,14 +284,6 @@ void TableService::insertReplicatedRecords(
   HashMap<String, Vector<RecordRef>> grouped;
 
   for (const auto& record : records.records()) {
-    auto table = pmap_->findTable(
-        record.tsdb_namespace(),
-        record.table_name());
-
-    if (table.isEmpty()) {
-      RAISEF(kNotFoundError, "table not found: $0", record.table_name());
-    }
-
     if (record.has_partition_sha1()) {
       RAISE(kIllegalArgumentError, "missing partition id");
     }
@@ -311,7 +327,7 @@ void TableService::insertRecords(
     const String& tsdb_namespace,
     const String& table_name,
     const SHA1Hash& partition_key,
-    const Vector<String>& servers,
+    const Set<String>& servers,
     const Vector<RecordRef>& records,
     uint64_t flags /* = 0 */) {
   Vector<String> errors;

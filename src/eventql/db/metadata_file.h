@@ -106,5 +106,12 @@ protected:
   Vector<PartitionMapEntry> partition_map_;
 };
 
+String encodePartitionKey(
+    KeyspaceType keyspace_type,
+    const String& key);
+
+String decodePartitionKey(
+    KeyspaceType keyspace_type,
+    const String& key);
 
 } // namespace eventql

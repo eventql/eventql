@@ -78,6 +78,17 @@ message PartitionListResponse {
   repeated PartitionListResponseEntry partitions = 1;
 };
 
+message PartitionFindRequest {
+  required string db_namespace = 1;
+  required string table_id = 2;
+  required bytes key = 3;
+};
+
+message PartitionFindResponse {
+  required bytes partition_id = 1;
+  repeated string servers_for_insert = 2;
+};
+
 message MetadataOperationEnvelope {
   required string db_namespace = 1;
   required string table_id = 2;
