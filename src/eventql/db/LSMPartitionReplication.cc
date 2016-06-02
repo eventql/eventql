@@ -93,6 +93,10 @@ void LSMPartitionReplication::replicateTo(
     RAISE(kRuntimeError, "server is down");
   }
 
+  SHA1Hash target_partition_id(
+      replica.partition_id().data(),
+      replica.partition_id().size());
+
   size_t batch_size = 0;
   RecordEnvelopeList batch;
   batch.set_sync_commit(true); // fixme only on last batch?
@@ -106,7 +110,8 @@ void LSMPartitionReplication::replicateTo(
           &replica,
           &replicated_offset,
           &batch_size,
-          &server_cfg
+          &server_cfg,
+          &target_partition_id
         ] (
           const SHA1Hash& record_id,
           const uint64_t record_version,
@@ -115,7 +120,7 @@ void LSMPartitionReplication::replicateTo(
     auto rec = batch.add_records();
     rec->set_tsdb_namespace(snap_->state.tsdb_namespace());
     rec->set_table_name(snap_->state.table_key());
-    rec->set_partition_sha1(snap_->key.toString());
+    rec->set_partition_sha1(target_partition_id.toString());
     rec->set_record_id(record_id.toString());
     rec->set_record_version(record_version);
     rec->set_record_data(record_data, record_size);
@@ -285,7 +290,7 @@ void LSMPartitionReplication::fetchRecords(
         }
         case KEYSPACE_UINT64: {
           uint64_t pkey_value_uint = record.getUInt64(pkey_fieldid);
-          pkey_value = String((const char*) &pkey_value, sizeof(uint64_t));
+          pkey_value = String((const char*) &pkey_value_uint, sizeof(uint64_t));
           break;
         }
       }

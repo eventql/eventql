@@ -38,7 +38,7 @@ message ReplicationTarget {
   optional bytes keyrange_end = 5;
 };
 
-// next id: 19
+// next id: 20
 message PartitionState {
 
   /**
@@ -83,7 +83,7 @@ message PartitionState {
    */
   optional uint64 lsm_sequence = 8;
 
-  optional ReplicationState replication_state = 9;
+  optional ReplicationState replication_state = 19;
   repeated ReplicationTarget replication_targets = 14;
 
   /**
