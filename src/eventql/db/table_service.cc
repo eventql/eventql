@@ -93,7 +93,18 @@ Status TableService::createTable(
     servers.emplace_back(all_servers[++idx % all_servers.size()]);
   }
 
-  MetadataFile metadata_file(txnid, 1, KEYSPACE_UINT64, {});
+  MetadataFile::PartitionMapEntry initial_partition;
+  initial_partition.begin = "";
+  initial_partition.partition_id = Random::singleton()->sha1();
+  initial_partition.splitting = false;
+  for (const auto& s : servers) {
+    MetadataFile::PartitionPlacement p;
+    p.server_id = s;
+    p.placement_id = Random::singleton()->random64();
+    initial_partition.servers.emplace_back(p);
+  }
+
+  MetadataFile metadata_file(txnid, 1, KEYSPACE_UINT64, { initial_partition });
 
   // generate new table config
   TableDefinition td;
