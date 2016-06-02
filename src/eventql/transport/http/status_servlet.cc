@@ -436,6 +436,10 @@ void StatusServlet::renderPartitionPage(
     }
 
     html += StringUtil::format(
+        "<span><em>Lifecycle State</em>: $0</span> &mdash; ",
+        PartitionLifecycleState_Name(snap->state.lifecycle_state()));
+
+    html += StringUtil::format(
         "<span><em>Number of Records</em>: $0</span>",
         snap->nrecs);
 
