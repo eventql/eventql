@@ -101,7 +101,7 @@ TEST_CASE(PartitionDiscoveryTest, TestServingPartition, [] () {
     pmap.emplace_back(e);
   }
 
-  MetadataFile file(SHA1::compute("mytx"), 0, KEYSPACE_STRING, pmap);
+  MetadataFile file(SHA1::compute("mytx"), 7, KEYSPACE_STRING, pmap);
 
   {
     auto pid = SHA1::compute("4");
@@ -117,6 +117,8 @@ TEST_CASE(PartitionDiscoveryTest, TestServingPartition, [] () {
     auto rc = PartitionDiscovery::discoverPartition(&file, req, &res);
     EXPECT(rc.isSuccess());
     EXPECT(res.code() == PDISCOVERY_UNLOAD);
+    EXPECT(SHA1Hash(res.txnid().data(), res.txnid().size()) == SHA1::compute("mytx"));
+    EXPECT(res.txnseq() ==  7);
     EXPECT(res.replication_targets().size() == 3);
     EXPECT(res.replication_targets().Get(0).server_id() == "s4");
     EXPECT(res.replication_targets().Get(0).placement_id() == 13);
@@ -140,11 +142,178 @@ TEST_CASE(PartitionDiscoveryTest, TestServingPartition, [] () {
     auto rc = PartitionDiscovery::discoverPartition(&file, req, &res);
     EXPECT(rc.isSuccess());
     EXPECT(res.code() == PDISCOVERY_SERVE);
+    EXPECT(SHA1Hash(res.txnid().data(), res.txnid().size()) == SHA1::compute("mytx"));
+    EXPECT(res.txnseq() == 7);
     EXPECT(res.replication_targets().size() == 2);
     EXPECT(res.replication_targets().Get(0).server_id() == "s4");
     EXPECT(res.replication_targets().Get(0).placement_id() == 13);
     EXPECT(res.replication_targets().Get(1).server_id() == "s1");
     EXPECT(res.replication_targets().Get(1).placement_id() == 12);
+    EXPECT(res.keyrange_begin() == "e");
+    EXPECT(res.keyrange_end() == "g");
+  }
+});
+
+TEST_CASE(PartitionDiscoveryTest, TestFindByID, [] () {
+  Vector<MetadataFile::PartitionMapEntry> pmap;
+
+  {
+    MetadataFile::PartitionMapEntry e;
+    e.begin = "";
+    e.splitting = false;
+    e.partition_id = SHA1::compute("1");
+    e.servers.emplace_back(mkPlacement("s6", 13));
+    e.servers.emplace_back(mkPlacement("s3", 11));
+    e.servers.emplace_back(mkPlacement("s2", 12));
+    pmap.emplace_back(e);
+  }
+
+  {
+    MetadataFile::PartitionMapEntry e;
+    e.begin = "b";
+    e.splitting = false;
+    e.partition_id = SHA1::compute("2");
+    e.servers_joining.emplace_back(mkPlacement("s6", 13));
+    e.servers.emplace_back(mkPlacement("s3", 11));
+    e.servers.emplace_back(mkPlacement("s2", 12));
+    pmap.emplace_back(e);
+  }
+
+  {
+    MetadataFile::PartitionMapEntry e;
+    e.begin = "d";
+    e.splitting = false;
+    e.partition_id = SHA1::compute("3");
+    e.servers.emplace_back(mkPlacement("s6", 13));
+    e.servers.emplace_back(mkPlacement("s3", 11));
+    e.servers.emplace_back(mkPlacement("s2", 12));
+    pmap.emplace_back(e);
+  }
+
+  {
+    MetadataFile::PartitionMapEntry e;
+    e.begin = "e";
+    e.splitting = false;
+    e.partition_id = SHA1::compute("4");
+    e.servers.emplace_back(mkPlacement("s4", 13));
+    e.servers.emplace_back(mkPlacement("s2", 11));
+    e.servers.emplace_back(mkPlacement("s1", 12));
+    pmap.emplace_back(e);
+  }
+
+  {
+    MetadataFile::PartitionMapEntry e;
+    e.begin = "g";
+    e.splitting = false;
+    e.partition_id = SHA1::compute("5");
+    e.servers.emplace_back(mkPlacement("s1", 10));
+    e.servers.emplace_back(mkPlacement("s2", 11));
+    e.servers.emplace_back(mkPlacement("s3", 12));
+    pmap.emplace_back(e);
+  }
+
+  MetadataFile file(SHA1::compute("mytx"), 7, KEYSPACE_STRING, pmap);
+
+  {
+    auto pid = SHA1::compute("x");
+    PartitionDiscoveryRequest req;
+    req.set_db_namespace("test");
+    req.set_table_id("test");
+    req.set_min_txnseq(0);
+    req.set_partition_id(pid.data(), pid.size());
+    req.set_requester_id("s3");
+    req.set_lookup_by_id(true);
+    PartitionDiscoveryResponse res;
+    auto rc = PartitionDiscovery::discoverPartition(&file, req, &res);
+    EXPECT(rc.isSuccess());
+    EXPECT(res.code() == PDISCOVERY_UNKNOWN);
+  }
+
+  {
+    auto pid = SHA1::compute("1");
+    PartitionDiscoveryRequest req;
+    req.set_db_namespace("test");
+    req.set_table_id("test");
+    req.set_min_txnseq(0);
+    req.set_partition_id(pid.data(), pid.size());
+    req.set_requester_id("sX");
+    req.set_lookup_by_id(true);
+    PartitionDiscoveryResponse res;
+    auto rc = PartitionDiscovery::discoverPartition(&file, req, &res);
+    EXPECT(rc.isSuccess());
+    EXPECT(res.code() == PDISCOVERY_UNKNOWN);
+  }
+
+  {
+    auto pid = SHA1::compute("1");
+    PartitionDiscoveryRequest req;
+    req.set_db_namespace("test");
+    req.set_table_id("test");
+    req.set_min_txnseq(0);
+    req.set_partition_id(pid.data(), pid.size());
+    req.set_requester_id("s3");
+    req.set_lookup_by_id(true);
+    PartitionDiscoveryResponse res;
+    auto rc = PartitionDiscovery::discoverPartition(&file, req, &res);
+    EXPECT(rc.isSuccess());
+    EXPECT(res.code() == PDISCOVERY_SERVE);
+    EXPECT(SHA1Hash(res.txnid().data(), res.txnid().size()) == SHA1::compute("mytx"));
+    EXPECT(res.txnseq() ==  7);
+    EXPECT(res.replication_targets().size() == 2);
+    EXPECT(res.replication_targets().Get(0).server_id() == "s6");
+    EXPECT(res.replication_targets().Get(0).placement_id() == 13);
+    EXPECT(res.replication_targets().Get(1).server_id() == "s2");
+    EXPECT(res.replication_targets().Get(1).placement_id() == 12);
+    EXPECT(res.keyrange_begin() == "");
+    EXPECT(res.keyrange_end() == "b");
+  }
+
+  {
+    auto pid = SHA1::compute("2");
+    PartitionDiscoveryRequest req;
+    req.set_db_namespace("test");
+    req.set_table_id("test");
+    req.set_min_txnseq(0);
+    req.set_partition_id(pid.data(), pid.size());
+    req.set_requester_id("s6");
+    req.set_lookup_by_id(true);
+    PartitionDiscoveryResponse res;
+    auto rc = PartitionDiscovery::discoverPartition(&file, req, &res);
+    EXPECT(rc.isSuccess());
+    EXPECT(res.code() == PDISCOVERY_LOAD);
+    EXPECT(SHA1Hash(res.txnid().data(), res.txnid().size()) == SHA1::compute("mytx"));
+    EXPECT(res.txnseq() ==  7);
+    EXPECT(res.replication_targets().size() == 2);
+    EXPECT(res.replication_targets().Get(0).server_id() == "s3");
+    EXPECT(res.replication_targets().Get(0).placement_id() == 11);
+    EXPECT(res.replication_targets().Get(1).server_id() == "s2");
+    EXPECT(res.replication_targets().Get(1).placement_id() == 12);
+    EXPECT(res.keyrange_begin() == "b");
+    EXPECT(res.keyrange_end() == "d");
+  }
+
+  {
+    auto pid = SHA1::compute("5");
+    PartitionDiscoveryRequest req;
+    req.set_db_namespace("test");
+    req.set_table_id("test");
+    req.set_min_txnseq(0);
+    req.set_partition_id(pid.data(), pid.size());
+    req.set_requester_id("s3");
+    req.set_lookup_by_id(true);
+    PartitionDiscoveryResponse res;
+    auto rc = PartitionDiscovery::discoverPartition(&file, req, &res);
+    EXPECT(rc.isSuccess());
+    EXPECT(res.code() == PDISCOVERY_SERVE);
+    EXPECT(SHA1Hash(res.txnid().data(), res.txnid().size()) == SHA1::compute("mytx"));
+    EXPECT(res.txnseq() ==  7);
+    EXPECT(res.replication_targets().size() == 2);
+    EXPECT(res.replication_targets().Get(0).server_id() == "s1");
+    EXPECT(res.replication_targets().Get(0).placement_id() == 10);
+    EXPECT(res.replication_targets().Get(1).server_id() == "s2");
+    EXPECT(res.replication_targets().Get(1).placement_id() == 11);
+    EXPECT(res.keyrange_begin() == "g");
+    EXPECT(res.keyrange_end() == "");
   }
 });
 

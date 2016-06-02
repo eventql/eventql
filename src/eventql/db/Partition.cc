@@ -50,6 +50,7 @@ RefPtr<Partition> Partition::create(
     const String& tsdb_namespace,
     RefPtr<Table> table,
     const SHA1Hash& partition_key,
+    const PartitionDiscoveryResponse& discovery_info,
     ServerCfg* cfg) {
   logDebug(
       "tsdb",

@@ -35,9 +35,10 @@ message PartitionDiscoveryRequest {
   required string table_id = 2;
   required uint64 min_txnseq = 3;
   required bytes partition_id = 4;
-  required bytes keyrange_begin = 5;
-  required bytes keyrange_end = 6;
+  optional bytes keyrange_begin = 5;
+  optional bytes keyrange_end = 6;
   required string requester_id = 7;
+  optional bool lookup_by_id = 8;
 };
 
 enum PartitionDiscoveryResponseCode {
@@ -60,6 +61,8 @@ message PartitionDiscoveryResponse {
   required bytes txnid = 2;
   required uint64 txnseq = 3;
   repeated PartitionDiscoveryReplicationTarget replication_targets = 4;
+  optional bytes keyrange_begin = 5;
+  optional bytes keyrange_end = 6;
 };
 
 message PartitionListRequest {

@@ -37,6 +37,7 @@
 #include <eventql/db/PartitionReader.h>
 #include <eventql/db/ReplicationScheme.h>
 #include <eventql/db/metadata_transaction.h>
+#include <eventql/db/metadata_operations.pb.h>
 #include <eventql/io/cstable/CSTableReader.h>
 
 #include "eventql/eventql.h"
@@ -64,6 +65,7 @@ public:
       const String& tsdb_namespace,
       RefPtr<Table> table,
       const SHA1Hash& partition_key,
+      const PartitionDiscoveryResponse& discovery_info,
       ServerCfg* cfg);
 
   static RefPtr<Partition> reopen(
