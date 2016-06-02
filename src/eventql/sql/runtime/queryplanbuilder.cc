@@ -1933,61 +1933,60 @@ QueryTreeNode* QueryPlanBuilder::buildInsertInto(
   return new InsertIntoNode(table_name->getToken()->getString(), values_spec);
 }
 
-static TableSchema::ColumnDefinition* buildAddColumnSchema(ASTNode* ast) {
-  auto column_name = ast->getChildren()[0];
-  if (column_name->getType() != ASTNode::T_COLUMN_NAME ||
-      column_name->getToken() == nullptr) {
-    RAISE(kRuntimeError, "corrupt AST");
-  }
+static AlterTableNode::AlterTableOperation buildAlterTableOperation(
+    ASTNode* ast) {
 
-  Vector<TableSchema::ColumnOptions> column_options;
-  for (size_t i = 2; i < ast->getChildren().size(); ++i) {
-    switch (ast->getChildren()[i]->getType()) {
-      case ASTNode::T_NOT_NULL:
-        column_options.emplace_back(TableSchema::ColumnOptions::NOT_NULL);
-        break;
-      case ASTNode::T_REPEATED:
-        column_options.emplace_back(TableSchema::ColumnOptions::REPEATED);
-        break;
-      default:
-        RAISE(kRuntimeError, "corrupt AST");
-    }
-  }
-
-  auto col_def = new TableSchema::ColumnDefinition();
-  col_def->column_name = column_name->getToken()->getString();
-  col_def->column_options = column_options;
-
-  switch (ast->getChildren()[1]->getType()) {
-
-    case ASTNode::T_COLUMN_TYPE: {
-      auto column_type = ast->getChildren()[1];
-      if (column_type->getType() != ASTNode::T_COLUMN_TYPE ||
-          column_type->getToken() == nullptr) {
-        RAISE(kRuntimeError, "corrupt AST");
+  switch (ast->getType()) {
+    //drop column
+    case ASTNode::T_COLUMN_NAME:
+      if (ast->getToken() != nullptr) {
+        AlterTableNode::AlterTableOperation operation;
+        operation.optype =
+            AlterTableNode::AlterTableOperationType::OP_REMOVE_COLUMN;
+        operation.column_name = ast->getToken()->getString();
+        return operation;
       }
 
-      col_def->column_type = column_type->getToken()->getString();
-      col_def->column_class = TableSchema::ColumnClass::SCALAR;
-      break;
-    }
+    //add column
+    case ASTNode::T_COLUMN: {
+        if (ast->getChildren().size() < 2) {
+          RAISE(kRuntimeError, "corrupt AST");
+        }
 
-    case ASTNode::T_RECORD: {
-      TableSchema::ColumnList column_schema;
-      for (const auto& c : ast->getChildren()[1]->getChildren()) {
-        column_schema.emplace_back(buildAddColumnSchema(c));
-      }
-      col_def->column_type = "RECORD";
-      col_def->column_class = TableSchema::ColumnClass::RECORD;
-      col_def->column_schema = column_schema;
-      break;
+        if (!(*ast->getChildren()[0] == ASTNode::T_COLUMN_NAME) ||
+            ast->getChildren()[0]->getToken() == nullptr ||
+            !(*ast->getChildren()[1] == ASTNode::T_COLUMN_TYPE) ||
+            ast->getChildren()[1]->getToken() == nullptr) {
+          RAISE(kRuntimeError, "corrupt AST");
+        }
+
+        AlterTableNode::AlterTableOperation operation;
+        operation.optype =
+            AlterTableNode::AlterTableOperationType::OP_ADD_COLUMN;
+        operation.column_name = ast->getChildren()[0]->getToken()->getString();
+        operation.column_type = ast->getChildren()[1]->getToken()->getString();
+        operation.is_repeated = false;
+        operation.is_optional = true;
+
+        for (size_t i = 2; i < ast->getChildren().size(); ++i) {
+          switch (ast->getChildren()[i]->getType()) {
+            case ASTNode::T_REPEATED:
+              operation.is_repeated = true;
+              break;
+            case ASTNode::T_NOT_NULL:
+              operation.is_optional = false;
+              break;
+            default:
+              RAISE(kRuntimeError, "corrupt AST");
+          }
+        }
+
+      return operation;
     }
 
     default:
       RAISE(kRuntimeError, "corrupt AST");
   }
-
-  return col_def;
 }
 
 QueryTreeNode* QueryPlanBuilder::buildAlterTable(
@@ -2003,33 +2002,13 @@ QueryTreeNode* QueryPlanBuilder::buildAlterTable(
     RAISE(kRuntimeError, "corrupt AST");
   }
 
-  Vector<String> drop_columns;
-  TableSchema::ColumnList add_columns;
-
-  for (size_t i = 1; i < ast->getChildren().size(); ++i) {
-    switch (ast->getChildren()[i]->getType()) {
-      //drop column
-      case ASTNode::T_COLUMN_NAME:
-        if (ast->getChildren()[i]->getToken() != nullptr) {
-          drop_columns.emplace_back(
-              ast->getChildren()[i]->getToken()->getString());
-          break;
-        }
-
-      //add column
-      case ASTNode::T_COLUMN:
-        add_columns.emplace_back(buildAddColumnSchema(ast->getChildren()[i]));
-        break;
-
-      default:
-        RAISE(kRuntimeError, "corrupt AST");
-    }
+  Vector<AlterTableNode::AlterTableOperation> operations;
+  auto child_nodes = ast->getChildren();
+  for (size_t i = 1; i < child_nodes.size(); ++i) {
+    operations.emplace_back(buildAlterTableOperation(child_nodes[i]));
   }
 
-  return new AlterTableNode(
-      table_name->getToken()->getString(),
-      drop_columns,
-      add_columns);
+  return new AlterTableNode(table_name->getToken()->getString(), operations);
 }
 
 }

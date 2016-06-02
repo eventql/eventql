@@ -783,11 +783,8 @@ TEST_CASE(QTreeTest, TestAlterTable, [] () {
   String query = R"(
       ALTER TABLE evtbl
         ADD description REPEATED String,
-        ADD COLUMN product RECORD (
-            id uint64,
-            slug REPEATED string
-        ),
         DROP place,
+        ADD COLUMN product uint64,
         DROP column version;
   )";
 
@@ -802,28 +799,28 @@ TEST_CASE(QTreeTest, TestAlterTable, [] () {
   RefPtr<AlterTableNode> qtree = qtrees[0].asInstanceOf<AlterTableNode>();
   EXPECT_EQ(qtree->getTableName(), "evtbl");
 
-  auto drop_columns = qtree->getColumnsToDrop();
-  EXPECT_EQ(drop_columns.size(), 2);
-  EXPECT_EQ(drop_columns[0], "place");
-  EXPECT_EQ(drop_columns[1], "version");
+  auto operations = qtree->getOperations();
+  EXPECT_EQ(operations.size(), 4);
 
-  auto add_columns = qtree->getColumnsToAdd();
-  EXPECT_EQ(add_columns.size(), 2);
+  EXPECT(
+    operations[0].optype == AlterTableNode::AlterTableOperationType::OP_ADD_COLUMN);
+  EXPECT_EQ(operations[0].column_name, "description");
+  EXPECT_EQ(operations[0].column_type, "String");
+  EXPECT_TRUE(operations[0].is_repeated);
+  EXPECT_TRUE(operations[0].is_optional);
 
-  EXPECT_EQ(add_columns[0]->column_name, "description");
-  EXPECT_EQ(add_columns[0]->column_type, "String");
-  EXPECT(add_columns[0]->column_options == Vector<TableSchema::ColumnOptions> {
-      TableSchema::ColumnOptions::REPEATED
-  });
-  EXPECT_EQ(add_columns[1]->column_name, "product");
-  EXPECT(add_columns[1]->column_options.size() == 0);
-  auto sub_columns = add_columns[1]->column_schema;
-  EXPECT_EQ(sub_columns.size(), 2);
-  EXPECT_EQ(sub_columns[0]->column_name, "id");
-  EXPECT_EQ(sub_columns[0]->column_type, "uint64");
-  EXPECT_EQ(sub_columns[1]->column_name, "slug");
-  EXPECT_EQ(sub_columns[1]->column_type, "string");
-  EXPECT(sub_columns[1]->column_options == Vector<TableSchema::ColumnOptions> {
-      TableSchema::ColumnOptions::REPEATED
-  });
+  EXPECT(
+    operations[1].optype == AlterTableNode::AlterTableOperationType::OP_REMOVE_COLUMN);
+  EXPECT_EQ(operations[1].column_name, "place");
+
+  EXPECT(
+    operations[2].optype == AlterTableNode::AlterTableOperationType::OP_ADD_COLUMN);
+  EXPECT_EQ(operations[2].column_name, "product");
+  EXPECT_EQ(operations[2].column_type, "uint64");
+  EXPECT_FALSE(operations[2].is_repeated);
+  EXPECT_TRUE(operations[2].is_optional);
+
+  EXPECT(
+    operations[3].optype == AlterTableNode::AlterTableOperationType::OP_REMOVE_COLUMN);
+  EXPECT_EQ(operations[3].column_name, "version");
 });
