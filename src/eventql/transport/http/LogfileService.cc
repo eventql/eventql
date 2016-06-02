@@ -79,8 +79,7 @@ void LogfileService::insertLoglines(
 
   auto table_name = "logs." + logfile.name();
   auto schema = tsdb_->tableSchema(customer, table_name);
-  auto partitioner = tsdb_->tablePartitioner(customer, table_name);
-  if (schema.isEmpty() || partitioner.isEmpty()) {
+  if (schema.isEmpty()) {
     RAISEF(kNotFoundError, "table not found: $0", table_name);
   }
 
@@ -109,7 +108,7 @@ void LogfileService::insertLoglines(
     RAISE(kIllegalStateError, "can't import logfile row without time column");
   }
 
-  Vector<RecordEnvelope> records;
+  Vector<msg::DynamicMessage> records;
   static const size_t kInsertBatchSize = 1024;
 
   for (; is->readLine(&line); line.clear()) {
@@ -176,29 +175,16 @@ void LogfileService::insertLoglines(
           String(match[i].first, match[i].second));
     }
 
-    Buffer row_buf;
-    msg::MessageEncoder::encode(row.data(), *row.schema(), &row_buf);
-
-    auto record_id = Random::singleton()->sha1();
-    auto partition_key = partitioner.get()->partitionKeyFor(
-        StringUtil::toString(time.get().unixMicros()));
-
-    RecordEnvelope envelope;
-    envelope.set_tsdb_namespace(customer);
-    envelope.set_table_name(table_name);
-    envelope.set_partition_sha1(partition_key.toString());
-    envelope.set_record_id(record_id.toString());
-    envelope.set_record_data(row_buf.toString());
-    records.emplace_back(envelope);
+    records.emplace_back(row);
 
     if (records.size() > kInsertBatchSize) {
-      tsdb_->insertRecords(records);
+      tsdb_->insertRecords(customer, table_name, records);
       records.clear();
     }
   }
 
   if (records.size() > 0) {
-    tsdb_->insertRecords(records);
+    tsdb_->insertRecords(customer, table_name, records);
   }
 }
 

@@ -73,21 +73,21 @@ public:
       const String& tsdb_namespace,
       Function<void (const TSDBTableInfo& table)> fn) const;
 
-  void insertRecords(
-      const RecordEnvelopeList& records,
+  // insert one record
+  void insertRecord(
+      const String& tsdb_namespace,
+      const String& table_name,
+      const msg::DynamicMessage& data,
       uint64_t flags = 0);
 
-  void insertRecords(
-      const Vector<RecordEnvelope>& records,
-      uint64_t flags = 0);
-
+  // insert a batch of records
   void insertRecords(
       const String& tsdb_namespace,
       const String& table_name,
-      const SHA1Hash& partition_key,
-      const Vector<RecordRef>& records,
+      const Vector<msg::DynamicMessage>& data,
       uint64_t flags = 0);
 
+  // insert a single record from json
   void insertRecord(
       const String& tsdb_namespace,
       const String& table_name,
@@ -95,10 +95,29 @@ public:
       const json::JSONObject::const_iterator& data_end,
       uint64_t flags = 0);
 
-  void insertRecord(
+  // internal method, dont't use
+  void insertRecords(
+      const RecordEnvelopeList& records,
+      uint64_t flags = 0);
+
+  // internal method, dont't use
+  void insertRecords(
+      const Vector<RecordEnvelope>& records,
+      uint64_t flags = 0);
+
+  // internal method, dont't use
+  void insertRecords(
       const String& tsdb_namespace,
       const String& table_name,
-      const msg::DynamicMessage& data,
+      const Vector<RecordRef>& records,
+      uint64_t flags = 0);
+
+  // internal method, dont't use
+  void insertRecords(
+      const String& tsdb_namespace,
+      const String& table_name,
+      const SHA1Hash& partition_key,
+      const Vector<RecordRef>& records,
       uint64_t flags = 0);
 
   void compactPartition(
@@ -143,10 +162,6 @@ public:
       const String& table_key);
 
   Option<TableDefinition> tableConfig(
-      const String& tsdb_namespace,
-      const String& table_key);
-
-  Option<RefPtr<TablePartitioner>> tablePartitioner(
       const String& tsdb_namespace,
       const String& table_key);
 

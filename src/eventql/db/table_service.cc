@@ -571,20 +571,6 @@ Option<TableDefinition> TableService::tableConfig(
   }
 }
 
-Option<RefPtr<TablePartitioner>> TableService::tablePartitioner(
-    const String& tsdb_namespace,
-    const String& table_key) {
-  auto table = pmap_->findTable(
-      tsdb_namespace,
-      table_key);
-
-  if (table.isEmpty()) {
-    return None<RefPtr<TablePartitioner>>();
-  } else {
-    return Some(table.get()->partitioner());
-  }
-}
-
 Vector<TimeseriesPartition> TableService::listPartitions(
     const String& tsdb_namespace,
     const String& table_key,
@@ -605,10 +591,6 @@ Vector<TimeseriesPartition> TableService::listPartitions(
 
   return time_partitioner->partitionsFor(from, until);
 }
-
-//const String& TableService::dbPath() const {
-//  return db_path_;
-//}
 
 } // namespace tdsb
 
