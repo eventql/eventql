@@ -55,6 +55,7 @@ protected:
     String filename;
     Entry* prev;
     Entry* next;
+    size_t size;
   };
 
   void flushTail();
