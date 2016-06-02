@@ -158,5 +158,38 @@ Status MetadataService::listPartitions(
   return Status::success();
 }
 
+Status MetadataService::findPartition(
+    const PartitionFindRequest& request,
+    PartitionFindResponse* response) {
+  RefPtr<MetadataFile> file;
+  {
+    auto rc = getMetadataFile(
+        request.db_namespace(),
+        request.table_id(),
+        &file);
+    if (!rc.isSuccess()) {
+      return rc;
+    }
+  }
+
+  auto partition = file->getPartitionMapAt(request.key());
+  if (partition == file->getPartitionMapEnd()) {
+    return Status(eRuntimeError, "partition not found");
+  }
+
+  response->set_partition_id(
+      partition->partition_id.data(),
+      partition->partition_id.size());
+
+  for (const auto& s : partition->servers) {
+    response->add_servers_for_insert(s.server_id);
+  }
+  for (const auto& s : partition->servers_leaving) {
+    response->add_servers_for_insert(s.server_id);
+  }
+
+  return Status::success();
+}
+
 } // namespace eventql
 
