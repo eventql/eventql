@@ -38,7 +38,14 @@ message ReplicationTarget {
   optional bytes keyrange_end = 5;
 };
 
-// next id: 20
+enum PartitionLifecycleState {
+  PDISCOVERY_UNKNOWN = 0;
+  PDISCOVERY_LOAD = 1;
+  PDISCOVERY_SERVE = 2;
+  PDISCOVERY_UNLOAD = 3;
+};
+
+// next id: 23
 message PartitionState {
 
   /**
@@ -103,21 +110,13 @@ message PartitionState {
   /**
    * Last known metadata transaction id
    */
-  optional bytes last_metadata_txnid = 17;
+  optional bytes last_metadata_txnid = 21;
 
   /**
    * Last known metadata transaction sequence
    */
-  optional uint64 last_metadata_txnseq = 18;
+  optional uint64 last_metadata_txnseq = 22;
 
-  /**
-   * Is this an active partition in the partition map and assigned to us?
-   */
-  optional bool is_active = 15;
-
-  /**
-   * Is the partition still loading?
-   */
-  optional bool is_loading = 16;
+  optional PartitionLifecycleState lifecycle_state = 20;
 
 };

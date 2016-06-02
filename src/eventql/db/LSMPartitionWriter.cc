@@ -368,24 +368,7 @@ Status LSMPartitionWriter::applyMetadataChange(
 
   snap->state.set_last_metadata_txnid(discovery_info.txnid());
   snap->state.set_last_metadata_txnseq(discovery_info.txnseq());
-
-  switch (discovery_info.code()) {
-    case PDISCOVERY_LOAD:
-      snap->state.set_is_active(true);
-      snap->state.set_is_loading(true);
-      break;
-
-    case PDISCOVERY_SERVE:
-      snap->state.set_is_active(true);
-      snap->state.set_is_loading(false);
-      break;
-
-    case PDISCOVERY_UNLOAD:
-    case PDISCOVERY_UNKNOWN:
-      snap->state.set_is_active(false);
-      snap->state.set_is_loading(false);
-      break;
-  }
+  snap->state.set_lifecycle_state(discovery_info.code());
 
   snap->state.mutable_replication_targets()->Clear();
   for (const auto& dt : discovery_info.replication_targets()) {

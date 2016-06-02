@@ -22,6 +22,7 @@
  * code of your own applications
  */
 package eventql;
+import 'eventql/db/PartitionState.proto';
 
 enum MetadataOperationType {
   METAOP_BACKFILL_ADD_SERVER = 1;
@@ -41,13 +42,6 @@ message PartitionDiscoveryRequest {
   optional bool lookup_by_id = 8;
 };
 
-enum PartitionDiscoveryResponseCode {
-  PDISCOVERY_UNKNOWN = 0;
-  PDISCOVERY_LOAD = 1;
-  PDISCOVERY_SERVE = 2;
-  PDISCOVERY_UNLOAD = 3;
-};
-
 message PartitionDiscoveryReplicationTarget {
   required string server_id = 1;
   required uint64 placement_id = 2;
@@ -57,7 +51,7 @@ message PartitionDiscoveryReplicationTarget {
 }
 
 message PartitionDiscoveryResponse {
-  required PartitionDiscoveryResponseCode code = 1;
+  required PartitionLifecycleState code = 1;
   required bytes txnid = 2;
   required uint64 txnseq = 3;
   repeated PartitionDiscoveryReplicationTarget replication_targets = 4;
