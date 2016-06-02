@@ -191,6 +191,7 @@ void TableService::insertRecords(
     const msg::DynamicMessage* end,
     uint64_t flags /* = 0 */) {
   HashMap<SHA1Hash, Vector<RecordRef>> records;
+  HashMap<SHA1Hash, Vector<String>> servers;
 
   for (auto record = begin; record != end; ++record) {
     auto table = pmap_->findTable(tsdb_namespace, table_name);
@@ -247,47 +248,46 @@ void TableService::insertRecords(
         tsdb_namespace,
         table_name,
         p.first,
+        servers[p.first],
         p.second,
         flags);
   }
 }
 
-template <typename IterType>
-void TableService::insertRecords(
-    IterType begin,
-    IterType end,
+void TableService::insertReplicatedRecords(
+    const RecordEnvelopeList& records,
     uint64_t flags /* = 0 */) {
   HashMap<String, Vector<RecordRef>> grouped;
 
-  for (auto record = begin; record != end; ++record) {
+  for (const auto& record : records.records()) {
     auto table = pmap_->findTable(
-        record->tsdb_namespace(),
-        record->table_name());
+        record.tsdb_namespace(),
+        record.table_name());
 
     if (table.isEmpty()) {
-      RAISEF(kNotFoundError, "table not found: $0", record->table_name());
+      RAISEF(kNotFoundError, "table not found: $0", record.table_name());
     }
 
-    if (record->has_partition_sha1()) {
+    if (record.has_partition_sha1()) {
       RAISE(kIllegalArgumentError, "missing partition id");
     }
 
-    auto partition_key = SHA1Hash::fromHexString(record->partition_sha1());
-    auto record_data = record->record_data().data();
-    auto record_size = record->record_data().size();
-    auto record_version = record->record_version();
+    auto partition_key = SHA1Hash::fromHexString(record.partition_sha1());
+    auto record_data = record.record_data().data();
+    auto record_size = record.record_data().size();
+    auto record_version = record.record_version();
     if (record_version == 0) {
       record_version = WallClock::unixMicros();
     }
 
     auto group_key = StringUtil::format(
         "$0~$1~$2",
-        record->tsdb_namespace(),
-        record->table_name(),
+        record.tsdb_namespace(),
+        record.table_name(),
         partition_key.toString());
 
     grouped[group_key].emplace_back(
-        SHA1Hash::fromHexString(record->record_id()),
+        SHA1Hash::fromHexString(record.record_id()),
         record_version,
         Buffer(record_data, record_size));
   }
@@ -298,7 +298,7 @@ void TableService::insertRecords(
       RAISE(kIllegalStateError);
     }
 
-    insertRecords(
+    insertRecordsLocal(
         group_key[0],
         group_key[1],
         SHA1Hash::fromHexString(group_key[2]),
@@ -308,79 +308,48 @@ void TableService::insertRecords(
 }
 
 void TableService::insertRecords(
-    const RecordEnvelopeList& record_list,
-    uint64_t flags /* = 0 */) {
-  insertRecords(
-      record_list.records().begin(),
-      record_list.records().end(),
-      flags);
-}
-
-void TableService::insertRecords(
-    const Vector<RecordEnvelope>& records,
-    uint64_t flags /* = 0 */) {
-  insertRecords(records.begin(), records.end(), flags);
-}
-
-void TableService::insertRecords(
     const String& tsdb_namespace,
     const String& table_name,
     const SHA1Hash& partition_key,
+    const Vector<String>& servers,
     const Vector<RecordRef>& records,
     uint64_t flags /* = 0 */) {
   Vector<String> errors;
-  auto hosts = repl_->replicasFor(partition_key); // FIXME
 
-  if (flags & (uint64_t) InsertFlags::REPLICATED_WRITE) {
-    if (!repl_->hasLocalReplica(partition_key)) {
-      RAISE(
-          kIllegalStateError,
-          "insert has REPLICATED_WRITE flag, but the specified partition is "
-          "not owned by this host");
-    }
-
-    insertRecordsLocal(
-        tsdb_namespace,
-        table_name,
-        partition_key,
-        records,
-        flags);
-  } else {
-    for (const auto& host : hosts) {
-      try {
-        if (host.is_local) {
-          insertRecordsLocal(
-              tsdb_namespace,
-              table_name,
-              partition_key,
-              records,
-              flags);
-        } else {
-          insertRecordsRemote(
-              tsdb_namespace,
-              table_name,
-              partition_key,
-              records,
-              flags,
-              host);
-        }
-
-        return;
-      } catch (const StandardException& e) {
-        logError(
-            "eventql",
-            e,
-            "TableService::insertRecordsRemote failed");
-
-        errors.emplace_back(e.what());
+  for (const auto& server : servers) {
+    try {
+      if (server == cdir_->getServerID()) {
+        insertRecordsLocal(
+            tsdb_namespace,
+            table_name,
+            partition_key,
+            records,
+            flags);
+      } else {
+        insertRecordsRemote(
+            tsdb_namespace,
+            table_name,
+            partition_key,
+            records,
+            flags,
+            server);
       }
-    }
 
-    RAISEF(
-        kRuntimeError,
-        "TableService::insertRecordsRemote failed: $0",
-        StringUtil::join(errors, ", "));
+      return;
+    } catch (const StandardException& e) {
+      logError(
+          "eventql",
+          e,
+          "TableService::insertRecordsRemote failed");
+
+      errors.emplace_back(e.what());
+    }
   }
+
+  RAISEF(
+      kRuntimeError,
+      "TableService::insertRecordsRemote failed: $0",
+      StringUtil::join(errors, ", "));
 }
 
 void TableService::insertRecordsLocal(
@@ -428,17 +397,17 @@ void TableService::insertRecordsRemote(
     const SHA1Hash& partition_key,
     const Vector<RecordRef>& records,
     uint64_t flags,
-    const ReplicaRef& host) {
-  auto server_cfg = cdir_->getServerConfig(host.name);
+    const String& server_id) {
+  auto server_cfg = cdir_->getServerConfig(server_id);
   if (server_cfg.server_status() != SERVER_UP) {
     RAISE(kRuntimeError, "server is down");
   }
 
   logDebug(
       "z1.core",
-      "Inserting $0 records into tsdb://$1/$2/$3/$4",
+      "Inserting $0 records into $1:$2/$3/$4",
       records.size(),
-      host.name,
+      server_id,
       tsdb_namespace,
       table_name,
       partition_key.toString());

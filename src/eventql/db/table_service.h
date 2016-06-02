@@ -96,29 +96,9 @@ public:
       const json::JSONObject::const_iterator& data_end,
       uint64_t flags = 0);
 
-  // internal method, dont't use
-  void insertRecords(
+  // inertnal method, don't use
+  void insertReplicatedRecords(
       const RecordEnvelopeList& records,
-      uint64_t flags = 0);
-
-  // internal method, dont't use
-  void insertRecords(
-      const Vector<RecordEnvelope>& records,
-      uint64_t flags = 0);
-
-  // internal method, dont't use
-  void insertRecords(
-      const String& tsdb_namespace,
-      const String& table_name,
-      const Vector<RecordRef>& records,
-      uint64_t flags = 0);
-
-  // internal method, dont't use
-  void insertRecords(
-      const String& tsdb_namespace,
-      const String& table_name,
-      const SHA1Hash& partition_key,
-      const Vector<RecordRef>& records,
       uint64_t flags = 0);
 
   void compactPartition(
@@ -168,11 +148,13 @@ public:
 
 protected:
 
-  template <typename IterType>
   void insertRecords(
-      IterType begin,
-      IterType end,
-      uint64_t flags /* = 0 */);
+      const String& tsdb_namespace,
+      const String& table_name,
+      const SHA1Hash& partition_key,
+      const Vector<String>& servers,
+      const Vector<RecordRef>& records,
+      uint64_t flags = 0);
 
   void insertRecordsLocal(
       const String& tsdb_namespace,
@@ -187,7 +169,7 @@ protected:
       const SHA1Hash& partition_key,
       const Vector<RecordRef>& records,
       uint64_t flags,
-      const ReplicaRef& host);
+      const String& server_id);
 
   ConfigDirectory* cdir_;
   PartitionMap* pmap_;

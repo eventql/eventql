@@ -182,9 +182,10 @@ void RPCServlet::insertRecords(
     const http::HTTPRequest* req,
     http::HTTPResponse* res,
     URI* uri) {
-  auto record_list = msg::decode<RecordEnvelopeList>(req->body());
-  node_->insertRecords(record_list);
-  res->setStatus(http::kStatusCreated);
+  //auto record_list = msg::decode<RecordEnvelopeList>(req->body());
+  //node_->insertRecords(record_list);
+  res->addBody("deprecated call");
+  res->setStatus(http::kStatusInternalServerError);
 }
 
 void RPCServlet::compactPartition(
@@ -232,7 +233,7 @@ void RPCServlet::replicateRecords(
     insert_flags |= (uint64_t) InsertFlags::SYNC_COMMIT;
   }
 
-  node_->insertRecords(record_list, insert_flags);
+  node_->insertReplicatedRecords(record_list, insert_flags);
   res->setStatus(http::kStatusCreated);
 }
 
