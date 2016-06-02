@@ -153,6 +153,57 @@ Status PartitionDiscovery::discoverPartitionByKeyRange(
     if (response->code() == PDISCOVERY_UNKNOWN) {
       response->set_code(PDISCOVERY_UNLOAD);
     }
+  } else if (iter->split_partition_id_low == req_partition_id) {
+    // splitting, valid lower split range, always load
+    response->set_code(PDISCOVERY_LOAD);
+    response->set_keyrange_begin(iter->begin);
+    response->set_keyrange_end(iter->split_point);
+
+    for (const auto& s : iter->split_servers_low) {
+      if (s.server_id == request.requester_id()) {
+        continue;
+      }
+
+      auto t = response->add_replication_targets();
+      t->set_server_id(s.server_id);
+      t->set_placement_id(s.placement_id);
+      t->set_partition_id(
+          iter->split_partition_id_low.data(),
+          iter->split_partition_id_low.size());
+
+      t->set_keyrange_begin(iter->begin);
+      t->set_keyrange_end(iter->split_point);
+    }
+  } else if (iter->split_partition_id_high == req_partition_id) {
+    // splitting, higher split range, always load
+    response->set_code(PDISCOVERY_LOAD);
+
+    String iter_end;
+    {
+      auto iter_next = iter + 1;
+      if (iter_next != file->getPartitionMapEnd()) {
+        iter_end = iter_next->begin;
+      }
+    }
+
+    response->set_keyrange_begin(iter->split_point);
+    response->set_keyrange_end(iter_end);
+
+    for (const auto& s : iter->split_servers_high) {
+      if (s.server_id == request.requester_id()) {
+        continue;
+      }
+
+      auto t = response->add_replication_targets();
+      t->set_server_id(s.server_id);
+      t->set_placement_id(s.placement_id);
+      t->set_partition_id(
+          iter->split_partition_id_high.data(),
+          iter->split_partition_id_high.size());
+
+      t->set_keyrange_begin(iter->split_point);
+      t->set_keyrange_end(iter_end);
+    }
   } else {
     //split or merged partition -> always return UNLOAD
     response->set_code(PDISCOVERY_UNLOAD);
@@ -193,6 +244,7 @@ Status PartitionDiscovery::discoverPartitionByID(
   auto iter = file->getPartitionMapBegin();
   auto pmap_end = file->getPartitionMapEnd();
   for (; iter != pmap_end; ++iter) {
+    // found valid partition
     if (iter->partition_id == req_partition_id) {
       response->set_keyrange_begin(iter->begin);
       if (iter + 1 != pmap_end) {
@@ -227,6 +279,65 @@ Status PartitionDiscovery::discoverPartitionByID(
         } else {
           addReplicationTarget(response, file, iter, s);
         }
+      }
+
+      break;
+    }
+
+    // found valid lower half of ongoing split
+    if (iter->split_partition_id_low == req_partition_id) {
+      response->set_code(PDISCOVERY_LOAD);
+      response->set_keyrange_begin(iter->begin);
+      response->set_keyrange_end(iter->split_point);
+
+      for (const auto& s : iter->split_servers_low) {
+        if (s.server_id == request.requester_id()) {
+          continue;
+        }
+
+        auto t = response->add_replication_targets();
+        t->set_server_id(s.server_id);
+        t->set_placement_id(s.placement_id);
+        t->set_partition_id(
+            iter->split_partition_id_low.data(),
+            iter->split_partition_id_low.size());
+
+        t->set_keyrange_begin(iter->begin);
+        t->set_keyrange_end(iter->split_point);
+      }
+
+      break;
+    }
+
+    // found valid upper half of ongoing split
+    if (iter->split_partition_id_high == req_partition_id) {
+      response->set_code(PDISCOVERY_LOAD);
+
+      String iter_end;
+      {
+        auto iter_next = iter + 1;
+        if (iter_next != file->getPartitionMapEnd()) {
+          iter_end = iter_next->begin;
+        }
+      }
+
+      response->set_keyrange_begin(iter->split_point);
+      response->set_keyrange_end(iter_end);
+
+      for (const auto& s : iter->split_servers_high) {
+        if (s.server_id == request.requester_id()) {
+          continue;
+        }
+
+        auto t = response->add_replication_targets();
+        t->set_server_id(s.server_id);
+        t->set_placement_id(s.placement_id);
+        t->set_partition_id(
+            iter->split_partition_id_high.data(),
+            iter->split_partition_id_high.size());
+
+        t->set_keyrange_begin(iter->split_point);
+        t->set_keyrange_end(iter_end);
       }
 
       break;
