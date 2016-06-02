@@ -56,20 +56,11 @@ bool LSMPartitionReplication::needsReplication() const {
 
   // check if all replicas named in the current metadata transaction have seen
   // the latest sequence, otherwise enqueue
-  auto replicas = repl_scheme_->replicasFor(snap_->key);
-  if (replicas.size() == 0) {
-    RAISE(kRuntimeError, "error: empty replica list")
-  }
-
   auto& writer = dynamic_cast<LSMPartitionWriter&>(*partition_->getWriter());
   auto repl_state = writer.fetchReplicationState();
   auto head_offset = snap_->state.lsm_sequence();
-  for (const auto& r : replicas) {
-    if (r.is_local) {
-      continue;
-    }
-
-    const auto& replica_offset = replicatedOffsetFor(repl_state, r.unique_id);
+  for (const auto& r : snap_->state.replication_targets()) {
+    auto replica_offset = replicatedOffsetFor(repl_state, r);
     if (replica_offset < head_offset) {
       return true;
     }
@@ -80,17 +71,12 @@ bool LSMPartitionReplication::needsReplication() const {
 
 size_t LSMPartitionReplication::numFullRemoteCopies() const {
   size_t ncopies = 0;
-  auto replicas = repl_scheme_->replicasFor(snap_->key);
   auto& writer = dynamic_cast<LSMPartitionWriter&>(*partition_->getWriter());
   auto repl_state = writer.fetchReplicationState();
   auto head_offset = snap_->state.lsm_sequence();
 
-  for (const auto& r : replicas) {
-    if (r.is_local) {
-      continue;
-    }
-
-    const auto& replica_offset = replicatedOffsetFor(repl_state, r.unique_id);
+  for (const auto& r : snap_->state.replication_targets()) {
+    auto replica_offset = replicatedOffsetFor(repl_state, r);
     if (replica_offset >= head_offset) {
       ncopies += 1;
     }
@@ -100,13 +86,9 @@ size_t LSMPartitionReplication::numFullRemoteCopies() const {
 }
 
 void LSMPartitionReplication::replicateTo(
-    const ReplicaRef& replica,
+    const ReplicationTarget& replica,
     uint64_t replicated_offset) {
-  if (replica.is_local) {
-    RAISE(kIllegalStateError, "can't replicate to myself");
-  }
-
-  auto server_cfg = cdir_->getServerConfig(replica.name);
+  auto server_cfg = cdir_->getServerConfig(replica.server_id());
   if (server_cfg.server_status() != SERVER_UP) {
     RAISE(kRuntimeError, "server is down");
   }
@@ -175,52 +157,45 @@ bool LSMPartitionReplication::replicate() {
   }
 
   // get the list of other replicaas for this partition
-  auto replicas = repl_scheme_->replicasFor(snap_->key);
-  if (replicas.size() == 0) {
-    return true;
-  }
-
   auto& writer = dynamic_cast<LSMPartitionWriter&>(*partition_->getWriter());
   auto repl_state = writer.fetchReplicationState();
   auto head_offset = snap_->state.lsm_sequence();
   bool dirty = false;
   bool success = true;
 
-  for (const auto& r : replicas) {
-    if (r.is_local) {
+  for (const auto& r : snap_->state.replication_targets()) {
+    auto replica_offset = replicatedOffsetFor(repl_state, r);
+
+    if (replica_offset >= head_offset) {
       continue;
     }
 
-    const auto& replica_offset = replicatedOffsetFor(repl_state, r.unique_id);
+    logDebug(
+        "z1.replication",
+        "Replicating partition $0/$1/$2 to $3 (replicated_seq: $4, head_seq: $5, $6 records)",
+        snap_->state.tsdb_namespace(),
+        snap_->state.table_key(),
+        snap_->key.toString(),
+        r.server_id(),
+        replica_offset,
+        head_offset,
+        head_offset - replica_offset);
 
-    if (replica_offset < head_offset) {
-      logDebug(
-          "z1.replication",
-          "Replicating partition $0/$1/$2 to $3 (replicated_seq: $4, head_seq: $5, $6 records)",
-          snap_->state.tsdb_namespace(),
-          snap_->state.table_key(),
-          snap_->key.toString(),
-          r.addr,
-          replica_offset,
-          head_offset,
-          head_offset - replica_offset);
+    try {
+      replicateTo(r, replica_offset);
+      setReplicatedOffsetFor(&repl_state, r, head_offset);
+      dirty = true;
+    } catch (const std::exception& e) {
+      success = false;
 
-      try {
-        replicateTo(r, replica_offset);
-        setReplicatedOffsetFor(&repl_state, r.unique_id, head_offset);
-        dirty = true;
-      } catch (const std::exception& e) {
-        success = false;
-
-        logError(
-          "z1.replication",
-          e,
-          "Error while replicating partition $0/$1/$2 to $3",
-          snap_->state.tsdb_namespace(),
-          snap_->state.table_key(),
-          snap_->key.toString(),
-          r.addr);
-      }
+      logError(
+        "z1.replication",
+        e,
+        "Error while replicating partition $0/$1/$2 to $3",
+        snap_->state.tsdb_namespace(),
+        snap_->state.table_key(),
+        snap_->key.toString(),
+        r.server_id());
     }
   }
 

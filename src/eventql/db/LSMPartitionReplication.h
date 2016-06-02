@@ -25,6 +25,7 @@
 #include "eventql/eventql.h"
 #include <eventql/util/stdtypes.h>
 #include <eventql/db/PartitionReplication.h>
+#include <eventql/db/PartitionState.pb.h>
 #include <eventql/config/config_directory.h>
 
 namespace eventql {
@@ -53,7 +54,9 @@ protected:
 
   Status fetchAndApplyMetadataTransaction(MetadataTransaction txn);
 
-  void replicateTo(const ReplicaRef& replica, uint64_t replicated_offset);
+  void replicateTo(
+      const ReplicationTarget& replica,
+      uint64_t replicated_offset);
 
   void uploadBatchTo(
       const String& host,
