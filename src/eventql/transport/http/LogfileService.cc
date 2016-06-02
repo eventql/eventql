@@ -178,13 +178,22 @@ void LogfileService::insertLoglines(
     records.emplace_back(row);
 
     if (records.size() > kInsertBatchSize) {
-      tsdb_->insertRecords(customer, table_name, records);
+      tsdb_->insertRecords(
+          customer,
+          table_name,
+          &*records.begin(),
+          &*records.end());
+
       records.clear();
     }
   }
 
   if (records.size() > 0) {
-    tsdb_->insertRecords(customer, table_name, records);
+    tsdb_->insertRecords(
+        customer,
+        table_name,
+        &*records.begin(),
+        &*records.end());
   }
 }
 

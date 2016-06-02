@@ -84,7 +84,8 @@ public:
   void insertRecords(
       const String& tsdb_namespace,
       const String& table_name,
-      const Vector<msg::DynamicMessage>& data,
+      const msg::DynamicMessage* begin,
+      const msg::DynamicMessage* end,
       uint64_t flags = 0);
 
   // insert a single record from json

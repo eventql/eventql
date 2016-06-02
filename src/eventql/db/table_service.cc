@@ -176,56 +176,80 @@ void TableService::insertRecord(
     const String& table_name,
     const msg::DynamicMessage& data,
     uint64_t flags /* = 0 */) {
-  auto table = pmap_->findTable(tsdb_namespace, table_name);
-  if (table.isEmpty()) {
-    RAISEF(kNotFoundError, "table not found: $0", table_name);
-  }
-
-  // calculate partition key
-  auto partition_key_field_name = table.get()->getPartitionKey();
-  auto partition_key_field = data.getField(partition_key_field_name);
-  if (partition_key_field.isEmpty()) {
-    RAISEF(kNotFoundError, "missing field: $0", partition_key_field_name);
-  }
-
-  auto partitioner = table.get()->partitioner();
-  auto partition_key = partitioner->partitionKeyFor(partition_key_field.get());
-
-  // calculate primary key
-  SHA1Hash primary_key;
-  auto primary_key_columns = table.get()->getPrimaryKey();
-  if (primary_key_columns.size() == 1) {
-    auto f = data.getField(primary_key_columns[0]);
-    if (f.isEmpty()) {
-      RAISEF(kNotFoundError, "missing field: $0", primary_key_columns[0]);
-    }
-    primary_key = SHA1::compute(f.get());
-  } else {
-    for (const auto& c : primary_key_columns) {
-      auto f = data.getField(c);
-      if (f.isEmpty()) {
-        RAISEF(kNotFoundError, "missing field: $0", c);
-      }
-
-      auto chash = SHA1::compute(f.get());
-      Buffer primary_key_data;
-      primary_key_data.append(primary_key.data(), primary_key.size());
-      primary_key_data.append(chash.data(), chash.size());
-      primary_key = SHA1::compute(primary_key_data);
-    }
-  }
-
-  Buffer record;
-  msg::MessageEncoder::encode(data.data(), *data.schema(), &record);
-
-  Vector<RecordRef> records;
-  records.emplace_back(primary_key, WallClock::unixMicros(), record);
   insertRecords(
       tsdb_namespace,
       table_name,
-      partition_key,
-      records,
+      &data,
+      &data + 1,
       flags);
+}
+
+void TableService::insertRecords(
+    const String& tsdb_namespace,
+    const String& table_name,
+    const msg::DynamicMessage* begin,
+    const msg::DynamicMessage* end,
+    uint64_t flags /* = 0 */) {
+  HashMap<SHA1Hash, Vector<RecordRef>> records;
+
+  for (auto record = begin; record != end; ++record) {
+    auto table = pmap_->findTable(tsdb_namespace, table_name);
+    if (table.isEmpty()) {
+      RAISEF(kNotFoundError, "table not found: $0", table_name);
+    }
+
+    // calculate partition key
+    auto partition_key_field_name = table.get()->getPartitionKey();
+    auto partition_key_field = record->getField(partition_key_field_name);
+    if (partition_key_field.isEmpty()) {
+      RAISEF(kNotFoundError, "missing field: $0", partition_key_field_name);
+    }
+
+    auto partitioner = table.get()->partitioner();
+    auto partition_key = partitioner->partitionKeyFor(partition_key_field.get());
+
+    // calculate primary key
+    SHA1Hash primary_key;
+    auto primary_key_columns = table.get()->getPrimaryKey();
+    if (primary_key_columns.size() == 1) {
+      auto f = record->getField(primary_key_columns[0]);
+      if (f.isEmpty()) {
+        RAISEF(kNotFoundError, "missing field: $0", primary_key_columns[0]);
+      }
+      primary_key = SHA1::compute(f.get());
+    } else {
+      for (const auto& c : primary_key_columns) {
+        auto f = record->getField(c);
+        if (f.isEmpty()) {
+          RAISEF(kNotFoundError, "missing field: $0", c);
+        }
+
+        auto chash = SHA1::compute(f.get());
+        Buffer primary_key_data;
+        primary_key_data.append(primary_key.data(), primary_key.size());
+        primary_key_data.append(chash.data(), chash.size());
+        primary_key = SHA1::compute(primary_key_data);
+      }
+    }
+
+    // FIXME
+    Buffer buf;
+    msg::MessageEncoder::encode(record->data(), *record->schema(), &buf);
+
+    records[partition_key].emplace_back(
+        primary_key,
+        WallClock::unixMicros(),
+        buf);
+  }
+
+  for (const auto& p : records) {
+    insertRecords(
+        tsdb_namespace,
+        table_name,
+        p.first,
+        p.second,
+        flags);
+  }
 }
 
 template <typename IterType>
