@@ -28,11 +28,9 @@ namespace csql {
 
 AlterTableNode::AlterTableNode(
     const String& table_name,
-    const Vector<String> drop_columns,
-    const TableSchema::ColumnList add_columns) :
+    const Vector<AlterTableNode::AlterTableOperation>& operations) :
     table_name_(table_name),
-    drop_columns_(drop_columns),
-    add_columns_(add_columns) {}
+    operations_(operations) {}
 
 AlterTableNode::AlterTableNode(const AlterTableNode& node) {} //FIXME
 
@@ -40,12 +38,8 @@ const String& AlterTableNode::getTableName() const {
   return table_name_;
 }
 
-const Vector<String> AlterTableNode::getColumnsToDrop() const {
-  return drop_columns_;
-}
-
-const TableSchema::ColumnList AlterTableNode::getColumnsToAdd() const {
-  return add_columns_;
+const Vector<AlterTableNode::AlterTableOperation>& AlterTableNode::getOperations() const {
+  return operations_;
 }
 
 RefPtr<QueryTreeNode> AlterTableNode::deepCopy() const {

@@ -33,23 +33,33 @@ namespace csql {
 class AlterTableNode : public QueryTreeNode {
 public:
 
+  enum AlterTableOperationType {
+    OP_ADD_COLUMN,
+    OP_REMOVE_COLUMN
+  };
+
+  struct AlterTableOperation {
+    AlterTableOperationType optype;
+    String column_name;
+    String column_type;
+    bool is_repeated;
+    bool is_optional;
+  };
+
   AlterTableNode(
       const String& table_name,
-      const Vector<String> drop_columns,
-      const TableSchema::ColumnList add_columns);
+      const Vector<AlterTableOperation>& operations);
   AlterTableNode(const AlterTableNode& node);
 
   const String& getTableName() const;
-  const Vector<String> getColumnsToDrop() const;
-  const TableSchema::ColumnList getColumnsToAdd() const;
+  const Vector<AlterTableOperation>& getOperations() const;
 
   RefPtr<QueryTreeNode> deepCopy() const;
   String toString() const;
 
 protected:
   String table_name_;
-  Vector<String> drop_columns_;
-  TableSchema::ColumnList add_columns_;
+  Vector<AlterTableOperation> operations_;
 };
 
 } // namespace csql
