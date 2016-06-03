@@ -339,7 +339,7 @@ void StatusServlet::renderTablePage(
   } else {
     html += "<h3>Partition Map:</h3>";
     html += "<table cellspacing=0 border=1>";
-    html += "<thead><tr><td>Keyrange</td><td>Partition ID</td><td>Servers</td></tr></thead>";
+    html += "<thead><tr><td>Keyrange</td><td>Partition ID</td><td>Servers</td><td></td></tr></thead>";
     for (const auto& e : metadata_file.getPartitionMap()) {
       Vector<String> servers;
       for (const auto& s : e.servers) {
