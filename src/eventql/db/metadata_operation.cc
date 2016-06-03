@@ -127,6 +127,7 @@ Status MetadataOperation::performBackfillAddServer(
 
   if (!entry) {
     MetadataFile::PartitionMapEntry e;
+    e.splitting = false;
     e.begin = opdata.keyrange_begin();
     e.partition_id = SHA1Hash(
         opdata.partition_id().data(),
@@ -195,6 +196,7 @@ Status MetadataOperation::performBackfillAddServers(
 
     if (!entry) {
       MetadataFile::PartitionMapEntry e;
+      e.splitting = false;
       e.begin = opdata.keyrange_begin();
       e.partition_id = SHA1Hash(
           opdata.partition_id().data(),

@@ -135,7 +135,7 @@ static Status decodeServerList(
 Status MetadataFile::decode(InputStream* is) {
   // file format version
   auto version = is->readUInt32();
-  if (version != kBinaryFormatVersion) {
+  if (version > kBinaryFormatVersion) {
     return Status(eIOError, "invalid file format version");
   }
 
@@ -182,33 +182,53 @@ Status MetadataFile::decode(InputStream* is) {
       return rc;
     }
 
-    // splitting
     e.splitting = is->readUInt8() > 0;
     if (e.splitting) {
-      // split_point
-      e.split_point = is->readLenencString();
+      // splitting
+      switch (version) {
+        case 1: {
+          e.splitting = false;
+          is->readLenencString();
+          Vector<PartitionPlacement> tmp;
+          if (!decodeServerList(&tmp, is).isSuccess()) {
+            return rc;
+          }
+          if (!decodeServerList(&tmp, is).isSuccess()) {
+            return rc;
+          }
+          break;
+        }
 
-      // split_partition_id_low
-      is->readNextBytes(
-          (char*) e.split_partition_id_low.mutableData(),
-          e.split_partition_id_low.size());
+        case 2: {
+          // split_point
+          e.split_point = is->readLenencString();
 
-      // split_partition_id_high
-      is->readNextBytes(
-          (char*) e.split_partition_id_high.mutableData(),
-          e.split_partition_id_high.size());
+          // split_partition_id_low
+          is->readNextBytes(
+              (char*) e.split_partition_id_low.mutableData(),
+              e.split_partition_id_low.size());
 
-      // split_servers_low
-      decodeServerList(&e.split_servers_low, is);
-      if (!rc.isSuccess()) {
-        return rc;
+          // split_partition_id_high
+          is->readNextBytes(
+              (char*) e.split_partition_id_high.mutableData(),
+              e.split_partition_id_high.size());
+
+          // split_servers_low
+          decodeServerList(&e.split_servers_low, is);
+          if (!rc.isSuccess()) {
+            return rc;
+          }
+
+          // split_servers_high
+          decodeServerList(&e.split_servers_high, is);
+          if (!rc.isSuccess()) {
+            return rc;
+          }
+        }
+
+        break;
       }
 
-      // split_servers_high
-      decodeServerList(&e.split_servers_high, is);
-      if (!rc.isSuccess()) {
-        return rc;
-      }
     }
 
     partition_map_.emplace_back(e);
@@ -301,6 +321,8 @@ Status MetadataFile::encode(OutputStream* os) const  {
 
   return Status::success();
 }
+
+MetadataFile::PartitionMapEntry::PartitionMapEntry() : splitting(false) {}
 
 int comparePartitionKeys(
     KeyspaceType keyspace_type,

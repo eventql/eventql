@@ -35,7 +35,7 @@ namespace eventql {
 class MetadataFile : public RefCounted {
 public:
 
-  static const uint32_t kBinaryFormatVersion = 1;
+  static const uint32_t kBinaryFormatVersion = 2;
 
   struct PartitionPlacement {
     String server_id;
@@ -43,6 +43,8 @@ public:
   };
 
   struct PartitionMapEntry {
+    PartitionMapEntry();
+
     String begin;
     SHA1Hash partition_id;
     Vector<PartitionPlacement> servers;
