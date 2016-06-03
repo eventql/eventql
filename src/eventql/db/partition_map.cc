@@ -385,7 +385,6 @@ bool PartitionMap::dropLocalPartition(
   partition_writer->lock();
 
   /* check preconditions */
-  size_t full_copies = 0;
   try {
     auto repl = partition->getReplicationStrategy(cfg_->repl_scheme, nullptr);
     if (!repl->shouldDropPartition()) {
@@ -400,12 +399,11 @@ bool PartitionMap::dropLocalPartition(
   /* start deletion */
   logInfo(
       "z1.core",
-      "Partition $0/$1/$2 is not owned by this node and has $3 other " \
-      "full copies, trying to unload and drop",
+      "Partition $0/$1/$2 is not owned by this node and is fully replicated," \
+      " trying to unload and drop",
       tsdb_namespace,
       table_name,
-      partition_key.toString(),
-      full_copies);
+      partition_key.toString());
 
   /* freeze partition and unlock waiting writers (they will fail) */
   partition_writer->freeze();
