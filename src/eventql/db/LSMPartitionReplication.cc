@@ -138,7 +138,7 @@ void LSMPartitionReplication::replicateTo(
 }
 
 bool LSMPartitionReplication::replicate() {
-  logDebug(
+  logTrace(
       "z1.replication",
       "Replicating partition $0/$1/$2",
       snap_->state.tsdb_namespace(),
@@ -154,17 +154,22 @@ bool LSMPartitionReplication::replicate() {
         rc.message());
   }
 
-  // get the list of other replicaas for this partition
+  // get the list of other replicas for this partition
   auto& writer = dynamic_cast<LSMPartitionWriter&>(*partition_->getWriter());
   auto repl_state = writer.fetchReplicationState();
   auto head_offset = snap_->state.lsm_sequence();
   bool dirty = false;
   bool success = true;
+  HashMap<SHA1Hash, size_t> replicas_per_partition;
 
   for (const auto& r : snap_->state.replication_targets()) {
     auto replica_offset = replicatedOffsetFor(repl_state, r);
+    SHA1Hash target_partition_id(
+        r.partition_id().data(),
+        r.partition_id().size());
 
     if (replica_offset >= head_offset) {
+      ++replicas_per_partition[target_partition_id];
       continue;
     }
 
@@ -183,6 +188,7 @@ bool LSMPartitionReplication::replicate() {
       replicateTo(r, replica_offset);
       setReplicatedOffsetFor(&repl_state, r, head_offset);
       dirty = true;
+      ++replicas_per_partition[target_partition_id];
     } catch (const std::exception& e) {
       success = false;
 
@@ -200,6 +206,45 @@ bool LSMPartitionReplication::replicate() {
   if (dirty) {
     auto& writer = dynamic_cast<LSMPartitionWriter&>(*partition_->getWriter());
     writer.commitReplicationState(repl_state);
+  }
+
+  if (snap_->state.is_splitting()) {
+    HashMap<SHA1Hash, size_t> servers_per_partition;
+    for (const auto& r : snap_->state.replication_targets()) {
+      SHA1Hash target_partition_id(
+          r.partition_id().data(),
+          r.partition_id().size());
+
+      ++servers_per_partition[target_partition_id];
+    }
+
+    bool split_complete = snap_->state.split_partition_ids().size() > 0;
+    for (const auto& p : snap_->state.split_partition_ids()) {
+      SHA1Hash split_partition_id(p.data(), p.size());
+
+      size_t total_servers = servers_per_partition[split_partition_id];
+      size_t complete_servers = replicas_per_partition[split_partition_id];
+      if (complete_servers > total_servers) {
+        RAISE(kIllegalStateError);
+      }
+
+      size_t num_failures = total_servers - complete_servers;
+      size_t max_failures = 0;
+      if (total_servers > 1) {
+        max_failures = (total_servers - 1) / 2;
+      }
+
+      if (total_servers < 1 || num_failures > max_failures) {
+        split_complete = false;
+      }
+    }
+
+    if (split_complete) {
+      auto rc = finalizeSplit();
+      if (!rc.isSuccess()) {
+        return false;
+      }
+    }
   }
 
   return success;
@@ -365,6 +410,17 @@ Status LSMPartitionReplication::fetchAndApplyMetadataTransaction(
 
   auto writer = partition_->getWriter().asInstanceOf<LSMPartitionWriter>();
   return writer->applyMetadataChange(discovery_response);
+}
+
+Status LSMPartitionReplication::finalizeSplit() {
+  logDebug(
+      "z1.replication",
+      "Finalizing split for partition $0/$1/$2",
+      snap_->state.tsdb_namespace(),
+      snap_->state.table_key(),
+      snap_->key.toString());
+
+  return Status::success();
 }
 
 bool LSMPartitionReplication::shouldDropPartition() const {
