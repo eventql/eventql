@@ -371,7 +371,26 @@ void StatusServlet::renderTablePage(
 
       String extra_info;
       if (e.splitting) {
-        extra_info += "SPLITTING @ " + e.split_point;
+        auto split_point = decodePartitionKey(
+            table.get()->getKeyspaceType(),
+            e.split_point);
+
+        Set<String> servers_low;
+        for (const auto& s : e.split_servers_low) {
+          servers_low.emplace(s.server_id);
+        }
+        Set<String> servers_high;
+        for (const auto& s : e.split_servers_high) {
+          servers_high.emplace(s.server_id);
+        }
+
+        extra_info += StringUtil::format(
+            "SPLITTING @ $0 into $1 on $2, $3 on $4",
+            decodePartitionKey(table.get()->getKeyspaceType(), e.split_point),
+            e.split_partition_id_low,
+            inspect(servers_low),
+            e.split_partition_id_high,
+            inspect(servers_high));
       }
 
       html += StringUtil::format(
