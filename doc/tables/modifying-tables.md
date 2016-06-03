@@ -27,5 +27,5 @@ Add a record column with two subcolumns:
         ADD COLUMN product.title STRING;
 
 
-If you want to learn more about hoe to alter the table structure using the HTTP API,
+If you want to learn more about how to alter the table structure using the HTTP API,
 please refer to the [HTTP API reference](/documentation/api/http/).
