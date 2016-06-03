@@ -208,7 +208,9 @@ bool LSMPartitionReplication::replicate() {
     writer.commitReplicationState(repl_state);
   }
 
-  if (snap_->state.is_splitting()) {
+  // finalize split
+  if (snap_->state.is_splitting() &&
+      snap_->state.lifecycle_state() == PDISCOVERY_SERVE) {
     HashMap<SHA1Hash, size_t> servers_per_partition;
     for (const auto& r : snap_->state.replication_targets()) {
       SHA1Hash target_partition_id(
@@ -420,7 +422,24 @@ Status LSMPartitionReplication::finalizeSplit() {
       snap_->state.table_key(),
       snap_->key.toString());
 
-  return Status::success();
+  FinalizeSplitOperation op;
+  op.set_partition_id(snap_->key.data(), snap_->key.size());
+
+  MetadataOperation envelope(
+      snap_->state.tsdb_namespace(),
+      snap_->state.table_key(),
+      METAOP_FINALIZE_SPLIT,
+      SHA1Hash(
+          snap_->state.last_metadata_txnid().data(),
+          snap_->state.last_metadata_txnid().size()),
+      Random::singleton()->sha1(),
+      *msg::encode(op));
+
+  MetadataCoordinator coordinator(cdir_);
+  return coordinator.performAndCommitOperation(
+      snap_->state.tsdb_namespace(),
+      snap_->state.table_key(),
+      envelope);
 }
 
 bool LSMPartitionReplication::shouldDropPartition() const {

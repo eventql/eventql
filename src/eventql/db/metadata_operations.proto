@@ -30,6 +30,7 @@ enum MetadataOperationType {
   METAOP_BACKFILL_REMOVE_SERVER = 2;
   METAOP_REMOVE_DEAD_SERVERS = 4;
   METAOP_SPLIT_PARTITION = 5;
+  METAOP_FINALIZE_SPLIT = 6;
 };
 
 message PartitionDiscoveryRequest {
@@ -122,5 +123,9 @@ message SplitPartitionOperation {
   required bytes split_point = 2;
   repeated string split_servers_low = 3;
   repeated string split_servers_high = 4;
+};
+
+message FinalizeSplitOperation {
+  required bytes partition_id = 1;
 };
 
