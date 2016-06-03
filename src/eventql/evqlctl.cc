@@ -111,6 +111,82 @@ void cmd_namespace_create(const cli::FlagParser& flags) {
   cdir->stop();
 }
 
+void cmd_table_split(const cli::FlagParser& flags) {
+  auto cdir = mkScoped(
+      new ZookeeperConfigDirectory(
+            flags.getString("zookeeper_addr"),
+            None<String>(),
+            ""));
+
+  cdir->startAndJoin(flags.getString("cluster_name"));
+
+  Vector<String> live_servers;
+  for (const auto& s : cdir->listServers()) {
+    if (s.server_status() == SERVER_UP) {
+      live_servers.emplace_back(s.server_id());
+    }
+  }
+
+  if (live_servers.empty()) {
+    logFatal("evqlctl", "no live servers");
+    return;
+  }
+
+  auto table_cfg = cdir->getTableConfig(
+      flags.getString("namespace"),
+      flags.getString("table_name"));
+
+  KeyspaceType keyspace;
+  switch (table_cfg.config().partitioner()) {
+    case TBL_PARTITION_FIXED:
+      RAISE(kIllegalArgumentError);
+    case TBL_PARTITION_TIMEWINDOW:
+      keyspace = KEYSPACE_UINT64;
+      break;
+  }
+
+  auto partition_id = SHA1Hash::fromHexString(flags.getString("partition_id"));
+
+  SplitPartitionOperation op;
+  op.set_partition_id(partition_id.data(), partition_id.size());
+  op.set_split_point(
+      encodePartitionKey(keyspace, flags.getString("split_point")));
+
+  for (size_t i = 0; i < 3; ++i) {
+    uint64_t idx = Random::singleton()->random64();
+    op.add_split_servers_low(live_servers[idx % live_servers.size()]);
+  }
+
+  for (size_t i = 0; i < 3; ++i) {
+    uint64_t idx = Random::singleton()->random64();
+    op.add_split_servers_high(live_servers[idx % live_servers.size()]);
+  }
+
+  MetadataOperation envelope(
+      flags.getString("namespace"),
+      flags.getString("table_name"),
+      METAOP_SPLIT_PARTITION,
+      SHA1Hash(
+          table_cfg.metadata_txnid().data(),
+          table_cfg.metadata_txnid().size()),
+      Random::singleton()->sha1(),
+      *msg::encode(op));
+
+  MetadataCoordinator coordinator(cdir.get());
+  auto rc = coordinator.performAndCommitOperation(
+      flags.getString("namespace"),
+      flags.getString("table_name"),
+      envelope);
+
+  if (!rc.isSuccess()) {
+    logFatal("evqlctl", "ERROR: $0", rc.message());
+  } else {
+    logInfo("evqlctl", "SUCCESS");
+  }
+
+  cdir->stop();
+}
+
 void cmd_rebalance(const cli::FlagParser& flags) {
   auto cdir = mkScoped(
       new ZookeeperConfigDirectory(
@@ -251,6 +327,65 @@ int main(int argc, const char** argv) {
       NULL,
       NULL,
       "node name",
+      "<string>");
+
+  /* command: table-split */
+  auto table_split_node_cmd = cli.defineCommand("table-split");
+  table_split_node_cmd->onCall(
+      std::bind(&cmd_table_split, std::placeholders::_1));
+
+  table_split_node_cmd->flags().defineFlag(
+      "zookeeper_addr",
+      cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      NULL,
+      "url",
+      "<addr>");
+
+  table_split_node_cmd->flags().defineFlag(
+      "cluster_name",
+      cli::FlagParser::T_STRING,
+      true,
+      NULL,
+      NULL,
+      "node name",
+      "<string>");
+
+  table_split_node_cmd->flags().defineFlag(
+      "namespace",
+      cli::FlagParser::T_STRING,
+      true,
+      NULL,
+      NULL,
+      "namespace",
+      "<string>");
+
+  table_split_node_cmd->flags().defineFlag(
+      "table_name",
+      cli::FlagParser::T_STRING,
+      true,
+      NULL,
+      NULL,
+      "table name",
+      "<string>");
+
+  table_split_node_cmd->flags().defineFlag(
+      "partition_id",
+      cli::FlagParser::T_STRING,
+      true,
+      NULL,
+      NULL,
+      "table name",
+      "<string>");
+
+  table_split_node_cmd->flags().defineFlag(
+      "split_point",
+      cli::FlagParser::T_STRING,
+      true,
+      NULL,
+      NULL,
+      "table name",
       "<string>");
 
   /* command: rebalance */
