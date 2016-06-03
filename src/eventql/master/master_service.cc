@@ -77,6 +77,8 @@ Status MasterService::rebalanceTable(TableDefinition tbl_cfg) {
       tbl_cfg.customer(),
       tbl_cfg.table_name());
 
+  ServerAllocator server_alloc(cdir_);
+
   // fetch latest metadata file
   MetadataFile metadata;
   auto rc = metadata_client_.fetchMetadataFile(tbl_cfg, &metadata);
@@ -85,7 +87,6 @@ Status MasterService::rebalanceTable(TableDefinition tbl_cfg) {
   }
 
   bool tbl_cfg_dirty = false;
-  bool metadata_servers_changed = false;
 
   // remove dead metadata servers
   {
@@ -146,7 +147,6 @@ Status MasterService::rebalanceTable(TableDefinition tbl_cfg) {
 
     if (nservers < metadata_replication_factor_) {
       auto new_metadata_servers = current_metadata_servers;
-      ServerAllocator server_alloc(cdir_);
       {
         auto rc = server_alloc.allocateServers(
             metadata_replication_factor_ - nservers,
@@ -182,7 +182,6 @@ Status MasterService::rebalanceTable(TableDefinition tbl_cfg) {
     cdir_->updateTableConfig(tbl_cfg);
     return Status::success();
   }
-
 
   // remove dead servers from the metadata file
   {
@@ -230,6 +229,68 @@ Status MasterService::rebalanceTable(TableDefinition tbl_cfg) {
       }
     }
   }
+
+  // join new servers
+  {
+    JoinServersOperation ops;
+
+    for (const auto& e : metadata.getPartitionMap()) {
+      Set<String> cur_servers;
+      for (const auto& s : e.servers) {
+        cur_servers.emplace(s.server_id);
+      }
+      for (const auto& s : e.servers_joining) {
+        cur_servers.emplace(s.server_id);
+      }
+
+      if (cur_servers.size() < replication_factor_) {
+        auto new_servers = cur_servers;
+        {
+          auto rc = server_alloc.allocateServers(
+              replication_factor_ - cur_servers.size(),
+              &new_servers);
+          if (!rc.isSuccess()) {
+            return rc;
+          }
+        }
+
+        for (const auto& s : new_servers) {
+          if (cur_servers.count(s) > 0) {
+            continue;
+          }
+
+          logInfo(
+              "evqld",
+              "Joining new servers to table '$0/$1': $2",
+              tbl_cfg.customer(),
+              tbl_cfg.table_name(),
+              s);
+
+          auto join_op = ops.add_ops();
+          join_op->set_partition_id(
+              e.partition_id.data(),
+              e.partition_id.size());
+          join_op->set_server_id(s);
+          join_op->set_placement_id(Random::singleton()->random64());
+        }
+      }
+    }
+
+    if (ops.ops().size() != 0) {
+      tbl_cfg_dirty = true;
+      auto rc = performMetadataOperation(
+          &tbl_cfg,
+          &metadata,
+          METAOP_JOIN_SERVERS,
+          *msg::encode(ops));
+
+      if (!rc.isSuccess()) {
+        return rc;
+      }
+    }
+  }
+
+  // FIXME: fill up splitting servers list to N
 
   if (tbl_cfg_dirty) {
     cdir_->updateTableConfig(tbl_cfg);
