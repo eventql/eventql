@@ -20,10 +20,10 @@ that consits of the parent column name followed by a point followed by the actua
 column name.
 
 Add a record column with two subcolumns:
-  ALTER TABLE evtbl
-      ADD COLUMN product RECORD,
-      ADD COLUMN product.id UINT64,
-      ADD COLUMN product.title STRING;
+    ALTER TABLE evtbl
+        ADD COLUMN product RECORD,
+        ADD COLUMN product.id UINT64,
+        ADD COLUMN product.title STRING;
 
 
 If you want to learn more about hoe to alter the table structure using the HTTP API,
