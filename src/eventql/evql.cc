@@ -348,6 +348,15 @@ int main(int argc, const char** argv) {
       "loglevel",
       "<level>");
 
+  flags.defineFlag(
+      "batch",
+      cli::FlagParser::T_SWITCH,
+      false,
+      NULL,
+      NULL,
+      "batch",
+      "<batch>");
+
   flags.parseArgv(argc, argv);
 
   Logger::get()->setMinimumLogLevel(
