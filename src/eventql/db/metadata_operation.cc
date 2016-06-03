@@ -73,6 +73,8 @@ Status MetadataOperation::perform(
   logTrace("evqld", "Performing metadata operation: $0", data_.DebugString());
 
   switch (data_.optype()) {
+    case METAOP_REMOVE_DEAD_SERVERS:
+      return performRemoveDeadServers(input, output);
     case METAOP_SPLIT_PARTITION:
       return performSplitPartition(input, output);
     case METAOP_FINALIZE_SPLIT:
@@ -80,6 +82,44 @@ Status MetadataOperation::perform(
     default:
       return Status(eIllegalArgumentError, "invalid metadata operation type");
   }
+}
+
+static void removeServers(
+    const Set<String>& servers,
+    Vector<MetadataFile::PartitionPlacement>* server_list) {
+  auto iter = server_list->begin();
+  while (iter != server_list->end()) {
+    if (servers.count(iter->server_id) > 0) {
+      iter = server_list->erase(iter);
+    } else {
+      ++iter;
+    }
+  }
+}
+
+Status MetadataOperation::performRemoveDeadServers(
+    const MetadataFile& input,
+    Vector<MetadataFile::PartitionMapEntry>* output) const {
+  auto opdata = msg::decode<RemoveDeadServersOperation>(
+      data_.opdata().data(),
+      data_.opdata().size());
+
+  Set<String> dead_server_ids;
+  for (const auto& s : opdata.server_ids()) {
+    dead_server_ids.emplace(s);
+  }
+
+  auto pmap = input.getPartitionMap();
+  for (auto& p : pmap) {
+    removeServers(dead_server_ids, &p.servers);
+    removeServers(dead_server_ids, &p.servers_joining);
+    removeServers(dead_server_ids, &p.servers_leaving);
+    removeServers(dead_server_ids, &p.split_servers_low);
+    removeServers(dead_server_ids, &p.split_servers_high);
+  }
+
+  *output = pmap;
+  return Status::success();
 }
 
 Status MetadataOperation::performSplitPartition(
