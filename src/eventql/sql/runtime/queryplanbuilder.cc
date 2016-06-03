@@ -42,6 +42,7 @@
 #include <eventql/sql/qtree/QueryTreeUtil.h>
 #include <eventql/sql/qtree/ValueExpressionNode.h>
 #include <eventql/sql/qtree/JoinNode.h>
+#include <eventql/sql/qtree/nodes/create_database.h>
 #include <eventql/sql/qtree/nodes/create_table.h>
 #include <eventql/sql/qtree/nodes/insert_into.h>
 #include <eventql/sql/qtree/nodes/insert_json.h>
@@ -112,6 +113,10 @@ RefPtr<QueryTreeNode> QueryPlanBuilder::build(
     return node;
   }
 
+  if ((node = buildCreateDatabase(txn, ast)) != nullptr) {
+    return node;
+  }
+
   ast->debugPrint(2);
   RAISE(kRuntimeError, "can't figure out a query plan for this, sorry :(");
 }
@@ -130,6 +135,7 @@ Vector<RefPtr<QueryTreeNode>> QueryPlanBuilder::build(
       case ASTNode::T_SHOW_TABLES:
       case ASTNode::T_DESCRIBE_TABLE:
       case ASTNode::T_CREATE_TABLE:
+      case ASTNode::T_CREATE_DATABASE:
       case ASTNode::T_INSERT_INTO:
         nodes.emplace_back(build(txn, statements[i], tables));
         break;
@@ -1875,6 +1881,22 @@ QueryTreeNode* QueryPlanBuilder::buildCreateTable(
   }
 
   return node;
+}
+
+QueryTreeNode* QueryPlanBuilder::buildCreateDatabase(
+    Transaction* txn,
+    ASTNode* ast) {
+  if (!(*ast == ASTNode::T_CREATE_DATABASE) || ast->getChildren().size() != 1) {
+    return nullptr;
+  }
+
+  auto db_name = ast->getChildren()[0];
+  if (db_name->getType() != ASTNode::T_DATABASE_NAME ||
+      db_name->getToken() == nullptr) {
+    RAISE(kRuntimeError, "corrupt AST");
+  }
+
+  return new CreateDatabaseNode(db_name->getToken()->getString());
 }
 
 QueryTreeNode* QueryPlanBuilder::buildInsertInto(
