@@ -28,6 +28,23 @@ namespace eventql {
 
 ServerAllocator::ServerAllocator(ConfigDirectory* cdir) : cdir_(cdir) {}
 
+/**
+ * Allocation algorithm:
+ *
+ * - To calculate server loads:
+ *   - Count the total number of partitions N_total
+ *   - Calculate the total server capacity C_total
+ *   - For each server:
+ *       - Calculate W_server = C_server / C_total
+ *       - Count the used disk space C_server_used
+ *       - Count the total assinged partitions N_server
+ *       - Count the total assinged partitions that are serving N_server_serving
+ *       - Calculate the ratio of serving to total partitions R_serving = N_server_serving / N_server
+ *       - Calculate a load factor L_server_assigned = N_server / (N_total * W_server)
+ *       - Calculate a load factor L_server_disk = (C_server_used / R_serving) / C_server
+ *       - The comined load factor is L_server = max(L_server_assigned, L_server_disk)
+ *    - Pick a given server with probability P_server = min(1, log(L_server) * -0.5)
+ */
 Status ServerAllocator::allocateServers(
     size_t num_servers,
     Set<String>* servers) const {
