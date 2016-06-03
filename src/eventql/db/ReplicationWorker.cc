@@ -159,10 +159,9 @@ void ReplicationWorker::work() {
       if (repl->needsReplication()) {
         enqueuePartitionWithLock(partition);
       } else {
-        auto snap = partition->getSnapshot();
-        auto full_copies = repl->numFullRemoteCopies();
-        if (!repl_scheme->hasLocalReplica(snap->key) &&
-            full_copies >= repl_scheme->minNumCopies()) {
+        repl = partition->getReplicationStrategy(repl_scheme, http_);
+        if (repl->shouldDropPartition()) {
+          auto snap = partition->getSnapshot();
           auto dropped =
               pmap_->dropLocalPartition(
                   snap->state.tsdb_namespace(),

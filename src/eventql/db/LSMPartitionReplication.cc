@@ -69,22 +69,6 @@ bool LSMPartitionReplication::needsReplication() const {
   return false;
 }
 
-size_t LSMPartitionReplication::numFullRemoteCopies() const {
-  size_t ncopies = 0;
-  auto& writer = dynamic_cast<LSMPartitionWriter&>(*partition_->getWriter());
-  auto repl_state = writer.fetchReplicationState();
-  auto head_offset = snap_->state.lsm_sequence();
-
-  for (const auto& r : snap_->state.replication_targets()) {
-    auto replica_offset = replicatedOffsetFor(repl_state, r);
-    if (replica_offset >= head_offset) {
-      ncopies += 1;
-    }
-  }
-
-  return ncopies;
-}
-
 void LSMPartitionReplication::replicateTo(
     const ReplicationTarget& replica,
     uint64_t replicated_offset) {
@@ -337,6 +321,15 @@ Status LSMPartitionReplication::fetchAndApplyMetadataTransaction(
 
   auto writer = partition_->getWriter().asInstanceOf<LSMPartitionWriter>();
   return writer->applyMetadataChange(discovery_response);
+}
+
+bool LSMPartitionReplication::shouldDropPartition() const {
+  if (snap_->state.lifecycle_state() == PDISCOVERY_UNLOAD &&
+      !needsReplication()) {
+    return true;
+  } else {
+    return false;
+  }
 }
 
 } // namespace tdsb

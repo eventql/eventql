@@ -44,9 +44,11 @@ public:
    */
   bool replicate() override;
 
-  size_t numFullRemoteCopies() const override;
+  bool shouldDropPartition() const override;
 
 protected:
+
+  size_t numFullRemoteCopies() const;
 
   void replicateTo(const ReplicaRef& replica, uint64_t head_version);
 

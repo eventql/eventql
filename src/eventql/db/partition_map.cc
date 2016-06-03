@@ -387,14 +387,8 @@ bool PartitionMap::dropLocalPartition(
   /* check preconditions */
   size_t full_copies = 0;
   try {
-    auto repl_scheme = cfg_->repl_scheme;
-
-    full_copies = partition
-        ->getReplicationStrategy(repl_scheme, nullptr)
-        ->numFullRemoteCopies();
-
-    if (repl_scheme->hasLocalReplica(partition_key) ||
-        full_copies < repl_scheme->minNumCopies()) {
+    auto repl = partition->getReplicationStrategy(cfg_->repl_scheme, nullptr);
+    if (!repl->shouldDropPartition()) {
       RAISE(kIllegalStateError, "can't delete partition");
     }
   } catch (const StandardException& e) {

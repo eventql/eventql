@@ -48,7 +48,7 @@ public:
    */
   bool replicate() override;
 
-  size_t numFullRemoteCopies() const override;
+  bool shouldDropPartition() const override;
 
 protected:
 
