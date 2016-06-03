@@ -33,8 +33,9 @@ uint64_t replicatedOffsetFor(
       repl_state,
       SHA1::compute(
           StringUtil::format(
-              "$0~$1",
+              "$0~$1~$2",
               target.server_id(),
+              target.partition_id(),
               target.placement_id())));
 }
 
@@ -46,8 +47,9 @@ void setReplicatedOffsetFor(
       repl_state,
       SHA1::compute(
           StringUtil::format(
-              "$0~$1",
+              "$0~$1~$2",
               target.server_id(),
+              target.partition_id(),
               target.placement_id())),
       replicated_offset);
 }

@@ -568,7 +568,7 @@ int main(int argc, const char** argv) {
             tbl.table_name(),
             partition_id);
 
-        tsdb_replication.enqueuePartition(partition.get());
+        tsdb_replication.enqueuePartition(partition.get(), 0);
       }
     });
 
