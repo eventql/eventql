@@ -81,6 +81,34 @@ void cmd_cluster_add_server(const cli::FlagParser& flags) {
   cdir->stop();
 }
 
+void cmd_cluster_remove_server(const cli::FlagParser& flags) {
+  bool remove_hard = flags.isSet("hard");
+  bool remove_soft = flags.isSet("soft");
+  if (!(remove_hard ^ remove_soft)) {
+    logFatal("evqlctl", "either --hard or --soft must be set");
+    return;
+  }
+
+  auto cdir = mkScoped(
+      new ZookeeperConfigDirectory(
+            flags.getString("zookeeper_addr"),
+            None<String>(),
+            ""));
+
+  cdir->startAndJoin(flags.getString("cluster_name"));
+
+  auto cfg = cdir->getServerConfig(flags.getString("server_name"));
+  if (remove_soft) {
+    cfg.set_is_leaving(true);
+  }
+  if (remove_hard) {
+    cfg.set_is_dead(true);
+  }
+
+  cdir->updateServerConfig(cfg);
+  cdir->stop();
+}
+
 void cmd_cluster_create(const cli::FlagParser& flags) {
   auto cdir = mkScoped(
       new ZookeeperConfigDirectory(
@@ -289,6 +317,56 @@ int main(int argc, const char** argv) {
       NULL,
       "node name",
       "<string>");
+
+  /* command: cluster_remove_server */
+  auto cluster_remove_server_cmd = cli.defineCommand("cluster-remove-server");
+  cluster_remove_server_cmd->onCall(
+      std::bind(&cmd_cluster_remove_server, std::placeholders::_1));
+
+  cluster_remove_server_cmd->flags().defineFlag(
+      "zookeeper_addr",
+      cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      NULL,
+      "url",
+      "<remover>");
+
+  cluster_remove_server_cmd->flags().defineFlag(
+      "cluster_name",
+      cli::FlagParser::T_STRING,
+      true,
+      NULL,
+      NULL,
+      "node name",
+      "<string>");
+
+  cluster_remove_server_cmd->flags().defineFlag(
+      "server_name",
+      cli::FlagParser::T_STRING,
+      true,
+      NULL,
+      NULL,
+      "node name",
+      "<string>");
+
+  cluster_remove_server_cmd->flags().defineFlag(
+      "soft",
+      cli::FlagParser::T_SWITCH,
+      false,
+      NULL,
+      NULL,
+      "switch",
+      "<switch>");
+
+  cluster_remove_server_cmd->flags().defineFlag(
+      "hard",
+      cli::FlagParser::T_SWITCH,
+      false,
+      NULL,
+      NULL,
+      "switch",
+      "<switch>");
 
   /* command: cluster-create */
   auto cluster_create_node_cmd = cli.defineCommand("cluster-create");
