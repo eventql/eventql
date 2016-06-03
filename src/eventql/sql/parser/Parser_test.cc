@@ -1217,7 +1217,7 @@ TEST_CASE(ParserTest, TestCreateDatabaseStatement, [] () {
   const auto& stmt = parser.getStatements()[0];
   EXPECT(*stmt == ASTNode::T_CREATE_DATABASE);
 
-  EXPECT_EQ(stmt->getChildren().size(), 2);
+  EXPECT_EQ(stmt->getChildren().size(), 1);
   EXPECT(*stmt->getChildren()[0] == ASTNode::T_DATABASE_NAME);
   EXPECT_EQ(*stmt->getChildren()[0]->getToken(), Token::T_IDENTIFIER);
   EXPECT_EQ(stmt->getChildren()[0]->getToken()->getString(), "events");
