@@ -81,6 +81,8 @@ Status MetadataOperation::perform(
       return performBackfillRemoveServer(input, output);
     case METAOP_SPLIT_PARTITION:
       return performSplitPartition(input, output);
+    case METAOP_FINALIZE_SPLIT:
+      return performFinalizeSplit(input, output);
     default:
       return Status(eIllegalArgumentError, "invalid metadata operation type");
   }
@@ -319,6 +321,66 @@ Status MetadataOperation::performSplitPartition(
       p.placement_id = Random::singleton()->random64();
       iter->split_servers_high.emplace_back(p);
     }
+
+    success = true;
+    break;
+  }
+
+  if (success) {
+    *output = pmap;
+    return Status::success();
+  } else {
+    return Status(eNotFoundError, "partition not found");
+  }
+}
+
+Status MetadataOperation::performFinalizeSplit(
+    const MetadataFile& input,
+    Vector<MetadataFile::PartitionMapEntry>* output) const {
+  auto opdata = msg::decode<FinalizeSplitOperation>(
+      data_.opdata().data(),
+      data_.opdata().size());
+
+  SHA1Hash partition_id(
+      opdata.partition_id().data(),
+      opdata.partition_id().size());
+
+  bool success = false;
+  auto pmap = input.getPartitionMap();
+  auto iter = pmap.begin();
+  for (; iter != pmap.end(); ++iter) {
+    if (iter->partition_id != partition_id) {
+      continue;
+    }
+
+    if (!iter->splitting) {
+      return Status(eIllegalStateError, "partition is not splitting");
+    }
+
+    MetadataFile::PartitionMapEntry lower_split;
+    MetadataFile::PartitionMapEntry higher_split;
+
+    {
+      lower_split.partition_id = iter->split_partition_id_low;
+      lower_split.begin = iter->begin;
+      for (const auto& s : iter->split_servers_low) {
+        lower_split.servers.emplace_back(s);
+      }
+      lower_split.splitting = false;
+    }
+
+    {
+      higher_split.partition_id = iter->split_partition_id_high;
+      higher_split.begin = iter->split_point;
+      for (const auto& s : iter->split_servers_high) {
+        higher_split.servers.emplace_back(s);
+      }
+      higher_split.splitting = false;
+    }
+
+    iter = pmap.erase(iter);
+    iter = pmap.insert(iter, higher_split);
+    iter = pmap.insert(iter, lower_split);
 
     success = true;
     break;
