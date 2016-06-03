@@ -23,6 +23,7 @@
  */
 #include <eventql/master/master_service.h>
 #include <eventql/util/random.h>
+#include <eventql/db/server_allocator.h>
 
 namespace eventql {
 
@@ -38,15 +39,11 @@ Status MasterService::runOnce() {
   logInfo("evqld", "Rebalancing cluster...");
 
   all_servers_.clear();
-  live_servers_.clear();
   for (const auto& s : cdir_->listServers()) {
     all_servers_.emplace(s.server_id());
-    if (s.server_status() == SERVER_UP) {
-      live_servers_.emplace_back(s.server_id());
-    }
   }
 
-  if (live_servers_.empty() || all_servers_.empty()) {
+  if (all_servers_.empty()) {
     return Status(eIllegalStateError, "cluster has no live servers");
   }
 
@@ -133,21 +130,35 @@ Status MasterService::rebalanceTable(TableDefinition tbl_cfg) {
   {
     size_t nservers = 0;
     for (const auto& s : tbl_cfg.metadata_servers()) {
-      if (leaving_servers_.count(s) == 0) {
+      if (all_servers_.count(s) > 0 &&
+          leaving_servers_.count(s) == 0) {
         ++nservers;
       }
     }
 
-    for (; nservers < metadata_replication_factor_; ++nservers) {
-      auto new_server = pickMetadataServer();
+    if (nservers < metadata_replication_factor_) {
+      Set<String> add_servers;
+      ServerAllocator server_alloc(cdir_);
+      {
+        auto rc = server_alloc.allocateServers(
+            metadata_replication_factor_ - nservers,
+            &add_servers);
+        if (!rc.isSuccess()) {
+          return rc;
+        }
+      }
+
       logInfo(
           "evqld",
-          "Adding new metadata server '$0' to table '$1/$2'",
-          new_server,
+          "Adding new metadata servers to table '$1/$2': $0",
+          inspect(add_servers),
           tbl_cfg.customer(),
           tbl_cfg.table_name());
 
-      tbl_cfg.add_metadata_servers(new_server);
+      for (const auto& s : add_servers) {
+        tbl_cfg.add_metadata_servers(s);
+      }
+
       tbl_cfg_dirty = true;
     }
   }
@@ -204,15 +215,6 @@ Status MasterService::rebalanceTable(TableDefinition tbl_cfg) {
   }
 
   return Status::success();
-}
-
-String MasterService::pickMetadataServer() const {
-  return pickServer();
-}
-
-String MasterService::pickServer() const {
-  uint64_t idx = Random::singleton()->random64();
-  return live_servers_[idx % live_servers_.size()];
 }
 
 Status MasterService::performMetadataOperation(

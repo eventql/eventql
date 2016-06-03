@@ -47,6 +47,7 @@
 #include "eventql/config/config_directory.h"
 #include "eventql/config/config_directory_zookeeper.h"
 #include "eventql/master/master_service.h"
+#include "eventql/db/server_allocator.h"
 
 using namespace eventql;
 
@@ -120,18 +121,6 @@ void cmd_table_split(const cli::FlagParser& flags) {
 
   cdir->startAndJoin(flags.getString("cluster_name"));
 
-  Vector<String> live_servers;
-  for (const auto& s : cdir->listServers()) {
-    if (s.server_status() == SERVER_UP) {
-      live_servers.emplace_back(s.server_id());
-    }
-  }
-
-  if (live_servers.empty()) {
-    logFatal("evqlctl", "no live servers");
-    return;
-  }
-
   auto table_cfg = cdir->getTableConfig(
       flags.getString("namespace"),
       flags.getString("table_name"));
@@ -161,14 +150,32 @@ void cmd_table_split(const cli::FlagParser& flags) {
       split_partition_id_high.size());
   op.set_placement_id(Random::singleton()->random64());
 
-  for (size_t i = 0; i < 3; ++i) {
-    uint64_t idx = Random::singleton()->random64();
-    op.add_split_servers_low(live_servers[idx % live_servers.size()]);
+  ServerAllocator server_alloc(cdir.get());
+
+  Set<String> split_servers_low;
+  {
+    auto rc = server_alloc.allocateServers(3, &split_servers_low);
+    if (!rc.isSuccess()) {
+      logFatal("evqlctl", "ERROR: $0", rc.message());
+      return;
+    }
   }
 
-  for (size_t i = 0; i < 3; ++i) {
-    uint64_t idx = Random::singleton()->random64();
-    op.add_split_servers_high(live_servers[idx % live_servers.size()]);
+  for (const auto& s : split_servers_low) {
+    op.add_split_servers_low(s);
+  }
+
+  Set<String> split_servers_high;
+  {
+    auto rc = server_alloc.allocateServers(3, &split_servers_high);
+    if (!rc.isSuccess()) {
+      logFatal("evqlctl", "ERROR: $0", rc.message());
+      return;
+    }
+  }
+
+  for (const auto& s : split_servers_high) {
+    op.add_split_servers_high(s);
   }
 
   MetadataOperation envelope(

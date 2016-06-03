@@ -34,6 +34,7 @@
 #include "eventql/db/metadata_coordinator.h"
 #include "eventql/db/metadata_file.h"
 #include "eventql/db/metadata_client.h"
+#include "eventql/db/server_allocator.h"
 
 #include "eventql/eventql.h"
 
@@ -81,16 +82,13 @@ Status TableService::createTable(
   }
 
   // generate new metadata file
-  Vector<String> all_servers;
-  for (const auto& s : cdir_->listServers()) {
-    all_servers.emplace_back(s.server_id());
-  }
-
-  auto txnid = Random::singleton()->sha1();
-  Vector<String> servers;
-  uint64_t idx = Random::singleton()->random64();
-  for (int i = 0; i < 3; ++i) {
-    servers.emplace_back(all_servers[++idx % all_servers.size()]);
+  Set<String> servers;
+  ServerAllocator server_alloc(cdir_);
+  {
+    auto rc = server_alloc.allocateServers(3, &servers);
+    if (!rc.isSuccess()) {
+      return rc;
+    }
   }
 
   MetadataFile::PartitionMapEntry initial_partition;
@@ -104,6 +102,7 @@ Status TableService::createTable(
     initial_partition.servers.emplace_back(p);
   }
 
+  auto txnid = Random::singleton()->sha1();
   MetadataFile metadata_file(txnid, 1, KEYSPACE_UINT64, { initial_partition });
 
   // generate new table config
@@ -132,7 +131,7 @@ Status TableService::createTable(
       db_namespace,
       table_name,
       metadata_file,
-      servers);
+      Vector<String>(servers.begin(), servers.end()));
 
   if (!rc.isSuccess()) {
     return rc;
