@@ -146,11 +146,20 @@ void cmd_table_split(const cli::FlagParser& flags) {
   }
 
   auto partition_id = SHA1Hash::fromHexString(flags.getString("partition_id"));
+  auto split_partition_id_low = Random::singleton()->sha1();
+  auto split_partition_id_high = Random::singleton()->sha1();
 
   SplitPartitionOperation op;
   op.set_partition_id(partition_id.data(), partition_id.size());
   op.set_split_point(
       encodePartitionKey(keyspace, flags.getString("split_point")));
+  op.set_split_partition_id_low(
+      split_partition_id_low.data(),
+      split_partition_id_low.size());
+  op.set_split_partition_id_high(
+      split_partition_id_high.data(),
+      split_partition_id_high.size());
+  op.set_placement_id(Random::singleton()->random64());
 
   for (size_t i = 0; i < 3; ++i) {
     uint64_t idx = Random::singleton()->random64();

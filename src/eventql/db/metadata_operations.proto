@@ -25,9 +25,6 @@ package eventql;
 import 'eventql/db/PartitionState.proto';
 
 enum MetadataOperationType {
-  METAOP_BACKFILL_ADD_SERVER = 1;
-  METAOP_BACKFILL_ADD_SERVERS = 3;
-  METAOP_BACKFILL_REMOVE_SERVER = 2;
   METAOP_REMOVE_DEAD_SERVERS = 4;
   METAOP_SPLIT_PARTITION = 5;
   METAOP_FINALIZE_SPLIT = 6;
@@ -103,21 +100,6 @@ message MetadataOperationResult {
   required bytes metadata_file_checksum = 1;
 };
 
-message BackfillAddServerOperation {
-  required bytes partition_id = 1;
-  required bytes keyrange_begin = 2;
-  required string server_id = 3;
-};
-
-message BackfillAddServersOperation {
-  repeated BackfillAddServerOperation ops = 1;
-};
-
-message BackfillRemoveServerOperation {
-  required bytes partition_id = 1;
-  required string server_id = 2;
-};
-
 message RemoveDeadServersOperation {
   repeated string server_ids = 1;
 };
@@ -127,6 +109,9 @@ message SplitPartitionOperation {
   required bytes split_point = 2;
   repeated string split_servers_low = 3;
   repeated string split_servers_high = 4;
+  required bytes split_partition_id_low = 5;
+  required bytes split_partition_id_high = 6;
+  required uint64 placement_id = 7;
 };
 
 message FinalizeSplitOperation {

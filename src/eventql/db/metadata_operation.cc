@@ -73,12 +73,6 @@ Status MetadataOperation::perform(
   logTrace("evqld", "Performing metadata operation: $0", data_.DebugString());
 
   switch (data_.optype()) {
-    case METAOP_BACKFILL_ADD_SERVER:
-      return performBackfillAddServer(input, output);
-    case METAOP_BACKFILL_ADD_SERVERS:
-      return performBackfillAddServers(input, output);
-    case METAOP_BACKFILL_REMOVE_SERVER:
-      return performBackfillRemoveServer(input, output);
     case METAOP_SPLIT_PARTITION:
       return performSplitPartition(input, output);
     case METAOP_FINALIZE_SPLIT:
@@ -86,175 +80,6 @@ Status MetadataOperation::perform(
     default:
       return Status(eIllegalArgumentError, "invalid metadata operation type");
   }
-}
-
-Status MetadataOperation::performBackfillAddServer(
-    const MetadataFile& input,
-    Vector<MetadataFile::PartitionMapEntry>* output) const {
-  if (input.getKeyspaceType() != KEYSPACE_UINT64) {
-    return Status(eIllegalArgumentError, "keyspace type must be uint64");
-  }
-
-  auto opdata = msg::decode<BackfillAddServerOperation>(
-      data_.opdata().data(),
-      data_.opdata().size());
-
-  uint64_t partition_begin;
-  if (opdata.keyrange_begin().size() != sizeof(uint64_t)) {
-    return Status(eIllegalArgumentError, "invalid keyrange begin");
-  }
-
-  memcpy(
-      &partition_begin,
-      opdata.keyrange_begin().data(),
-      sizeof(uint64_t));
-
-  auto pmap = input.getPartitionMap();
-
-  MetadataFile::PartitionMapEntry* entry = nullptr;
-  auto iter = pmap.begin();
-  for (; iter != pmap.end(); ++iter) {
-    uint64_t e_begin;
-    memcpy(&e_begin, iter->begin.data(), sizeof(uint64_t));
-
-    if (e_begin == partition_begin) {
-      entry = &*iter;
-      break;
-    }
-
-    if (e_begin > partition_begin) {
-      break;
-    }
-  }
-
-  if (!entry) {
-    MetadataFile::PartitionMapEntry e;
-    e.splitting = false;
-    e.begin = opdata.keyrange_begin();
-    e.partition_id = SHA1Hash(
-        opdata.partition_id().data(),
-        opdata.partition_id().size());
-
-    entry = &*pmap.insert(iter, e);
-  }
-
-  bool server_already_exists = false;
-  for (const auto& s : entry->servers) {
-    if (s.server_id == opdata.server_id()) {
-      server_already_exists = true;
-      break;
-    }
-  }
-
-  if (!server_already_exists) {
-    MetadataFile::PartitionPlacement s;
-    s.server_id = opdata.server_id();
-    s.placement_id = Random::singleton()->random64();
-    entry->servers.emplace_back(s);
-  }
-
-  *output = pmap;
-  return Status::success();
-}
-
-Status MetadataOperation::performBackfillAddServers(
-    const MetadataFile& input,
-    Vector<MetadataFile::PartitionMapEntry>* output) const {
-  if (input.getKeyspaceType() != KEYSPACE_UINT64) {
-    return Status(eIllegalArgumentError, "keyspace type must be uint64");
-  }
-
-  auto opdata_list = msg::decode<BackfillAddServersOperation>(
-      data_.opdata().data(),
-      data_.opdata().size());
-
-  auto pmap = input.getPartitionMap();
-  for (const auto& opdata : opdata_list.ops()) {
-    uint64_t partition_begin;
-    if (opdata.keyrange_begin().size() != sizeof(uint64_t)) {
-      return Status(eIllegalArgumentError, "invalid keyrange begin");
-    }
-
-    memcpy(
-        &partition_begin,
-        opdata.keyrange_begin().data(),
-        sizeof(uint64_t));
-
-    MetadataFile::PartitionMapEntry* entry = nullptr;
-    auto iter = pmap.begin();
-    for (; iter != pmap.end(); ++iter) {
-      uint64_t e_begin;
-      memcpy(&e_begin, iter->begin.data(), sizeof(uint64_t));
-
-      if (e_begin == partition_begin) {
-        entry = &*iter;
-        break;
-      }
-
-      if (e_begin > partition_begin) {
-        break;
-      }
-    }
-
-    if (!entry) {
-      MetadataFile::PartitionMapEntry e;
-      e.splitting = false;
-      e.begin = opdata.keyrange_begin();
-      e.partition_id = SHA1Hash(
-          opdata.partition_id().data(),
-          opdata.partition_id().size());
-
-      entry = &*pmap.insert(iter, e);
-    }
-
-    bool server_already_exists = false;
-    for (const auto& s : entry->servers) {
-      if (s.server_id == opdata.server_id()) {
-        server_already_exists = true;
-        break;
-      }
-    }
-
-    if (!server_already_exists) {
-      MetadataFile::PartitionPlacement s;
-      s.server_id = opdata.server_id();
-      s.placement_id = Random::singleton()->random64();
-      entry->servers.emplace_back(s);
-    }
-  }
-
-  *output = pmap;
-  return Status::success();
-}
-
-Status MetadataOperation::performBackfillRemoveServer(
-    const MetadataFile& input,
-    Vector<MetadataFile::PartitionMapEntry>* output) const {
-  auto opdata = msg::decode<BackfillRemoveServerOperation>(
-      data_.opdata().data(),
-      data_.opdata().size());
-
-  SHA1Hash partition_id(
-      opdata.partition_id().data(),
-      opdata.partition_id().size());
-
-  auto pmap = input.getPartitionMap();
-  for (auto& e : pmap) {
-    if (e.partition_id == partition_id) {
-      for (auto s = e.servers.begin(); s != e.servers.end(); ) {
-        if (s->server_id == opdata.server_id()) {
-          s = e.servers.erase(s);
-        } else {
-          ++s;
-        }
-      }
-
-      break;
-    }
-  }
-
-  *output = pmap;
-  return Status::success();
 }
 
 Status MetadataOperation::performSplitPartition(
@@ -305,20 +130,24 @@ Status MetadataOperation::performSplitPartition(
 
     iter->splitting = true;
     iter->split_point = opdata.split_point();
-    iter->split_partition_id_low = Random::singleton()->sha1();
-    iter->split_partition_id_high = Random::singleton()->sha1();
+    iter->split_partition_id_low = SHA1Hash(
+        opdata.split_partition_id_low().data(),
+        opdata.split_partition_id_low().size());
+    iter->split_partition_id_high = SHA1Hash(
+        opdata.split_partition_id_high().data(),
+        opdata.split_partition_id_high().size());
 
     for (const auto& s : opdata.split_servers_low()) {
       MetadataFile::PartitionPlacement p;
       p.server_id = s;
-      p.placement_id = Random::singleton()->random64();
+      p.placement_id = opdata.placement_id();
       iter->split_servers_low.emplace_back(p);
     }
 
     for (const auto& s : opdata.split_servers_high()) {
       MetadataFile::PartitionPlacement p;
       p.server_id = s;
-      p.placement_id = Random::singleton()->random64();
+      p.placement_id = opdata.placement_id();
       iter->split_servers_high.emplace_back(p);
     }
 
