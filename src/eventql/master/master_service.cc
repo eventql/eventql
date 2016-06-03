@@ -261,9 +261,10 @@ Status MasterService::rebalanceTable(TableDefinition tbl_cfg) {
 
           logInfo(
               "evqld",
-              "Joining new servers to table '$0/$1': $2",
+              "Joining new servers to table '$0/$1/$2': $3",
               tbl_cfg.customer(),
               tbl_cfg.table_name(),
+              e.partition_id,
               s);
 
           auto join_op = ops.add_ops();
