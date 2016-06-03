@@ -12,17 +12,15 @@ that of another record that already exists will replace that original record).
       (column_name, ...) VALUES (expr, ...)
     | FROM JSON "{ ... }"
 
-Records can be insert as a list of values or JSON.
 
-Insert a record as JSON:
+Example insert as JSON:
 
     INSERT INTO my_table FROM JSON '{"col1": 123, "col2": "somestring"}'
 
+<br />
 
 Via the HTTP API, you can currently insert records as either JSON or Protobuf messages. Please
 refer to the [documentation for your driver or API for the specifics](../../api/).
-
-<br />
 
 Example insert via the HTTP API:
 
