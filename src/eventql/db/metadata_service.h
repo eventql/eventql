@@ -59,7 +59,8 @@ public:
   Status performMetadataOperation(
       const String& ns,
       const String& table_name,
-      MetadataOperation op);
+      const MetadataOperation& op,
+      MetadataOperationResult* result);
 
   Status discoverPartition(
       const PartitionDiscoveryRequest& request,

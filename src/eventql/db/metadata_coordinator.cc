@@ -68,15 +68,26 @@ Status MetadataCoordinator::performOperation(
   }
 
   size_t failures = 0;
+  Set<SHA1Hash> metadata_file_checksums;
   for (const auto& s : servers) {
-    auto rc = performOperation(ns, table_name, op, s);
-    if (!rc.isSuccess()) {
+    MetadataOperationResult result;
+    auto rc = performOperation(ns, table_name, op, s, &result);
+    if (rc.isSuccess()) {
+      metadata_file_checksums.emplace(
+          SHA1Hash(
+              result.metadata_file_checksum().data(),
+              result.metadata_file_checksum().size()));
+    } else {
       logWarning(
           "evqld",
           "error while performing metadata operation: $0",
           rc.message());
       ++failures;
     }
+  }
+
+  if (metadata_file_checksums.size() > 1) {
+    return Status(eRuntimeError, "metadata operation would corrupt file");
   }
 
   size_t max_failures = 0;
@@ -95,7 +106,8 @@ Status MetadataCoordinator::performOperation(
     const String& ns,
     const String& table_name,
     MetadataOperation op,
-    const String& server) {
+    const String& server,
+    MetadataOperationResult* result) {
   auto server_cfg = cdir_->getServerConfig(server);
   if (server_cfg.server_addr().empty()) {
     return Status(eRuntimeError, "server is offline");
@@ -137,6 +149,7 @@ Status MetadataCoordinator::performOperation(
   }
 
   if (res.statusCode() == 201) {
+    *result = msg::decode<MetadataOperationResult>(res.body());
     return Status::success();
   } else {
     return Status(eIOError, res.body().toString());

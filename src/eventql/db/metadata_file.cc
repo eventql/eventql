@@ -322,6 +322,18 @@ Status MetadataFile::encode(OutputStream* os) const  {
   return Status::success();
 }
 
+Status MetadataFile::computeChecksum(SHA1Hash* checksum) const {
+  Buffer buf;
+  auto os = BufferOutputStream::fromBuffer(&buf);
+  auto rc = encode(os.get());
+  if (!rc.isSuccess()) {
+    return rc;
+  }
+
+  *checksum = SHA1::compute(buf.data(), buf.size());
+  return Status::success();
+}
+
 MetadataFile::PartitionMapEntry::PartitionMapEntry() : splitting(false) {}
 
 int comparePartitionKeys(

@@ -546,13 +546,16 @@ void RPCServlet::performMetadataOperation(
     }
   }
 
+  MetadataOperationResult result;
   auto rc = metadata_service_->performMetadataOperation(
       db_namespace,
       table_name,
-      op);
+      op,
+      &result);
 
   if (rc.isSuccess()) {
     res->setStatus(http::kStatusCreated);
+    res->addBody(*msg::encode(result));
   } else {
     res->setStatus(http::kStatusInternalServerError);
     res->addBody("ERROR: " + rc.message());

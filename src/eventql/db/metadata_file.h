@@ -103,6 +103,8 @@ public:
   Status decode(InputStream* is);
   Status encode(OutputStream* os) const;
 
+  Status computeChecksum(SHA1Hash* checksum) const;
+
 protected:
   SHA1Hash transaction_id_;
   uint64_t transaction_seq_;

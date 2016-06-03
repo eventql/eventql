@@ -72,7 +72,8 @@ Status MetadataService::createMetadataFile(
 Status MetadataService::performMetadataOperation(
     const String& ns,
     const String& table_name,
-    MetadataOperation op) {
+    const MetadataOperation& op,
+    MetadataOperationResult* result) {
   RefPtr<MetadataFile> input_file;
   {
     auto rc = metadata_store_->getMetadataFile(
@@ -100,6 +101,18 @@ Status MetadataService::performMetadataOperation(
       input_file->getSequenceNumber() + 1,
       input_file->getKeyspaceType(),
       new_pmap);
+
+  SHA1Hash output_file_checksum;
+  {
+    auto rc = output_file.computeChecksum(&output_file_checksum);
+    if (!rc.isSuccess()) {
+      return rc;
+    }
+  }
+
+  result->set_metadata_file_checksum(
+      output_file_checksum.data(),
+      output_file_checksum.size());
 
   return metadata_store_->storeMetadataFile(ns, table_name, output_file);
 }

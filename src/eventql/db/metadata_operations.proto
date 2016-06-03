@@ -99,6 +99,10 @@ message MetadataOperationEnvelope {
   optional bytes opdata = 6;
 };
 
+message MetadataOperationResult {
+  required bytes metadata_file_checksum = 1;
+};
+
 message BackfillAddServerOperation {
   required bytes partition_id = 1;
   required bytes keyrange_begin = 2;
