@@ -98,6 +98,7 @@ public:
     T_INTO,
     T_VALUES,
     T_JSON,
+    T_SET,
 
     T_JOIN,
     T_CROSS,

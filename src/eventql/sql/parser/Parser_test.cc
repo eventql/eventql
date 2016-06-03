@@ -1206,3 +1206,48 @@ TEST_CASE(ParserTest, TestInsertIntoFromJSONStatement, [] () {
 
   EXPECT(*children[1] == ASTNode::T_JSON_STRING);
 });
+
+TEST_CASE(ParserTest, TestInsertIntoSetStatement, [] () {
+  auto runtime = Runtime::getDefaultRuntime();
+  auto txn = runtime->newTransaction();
+
+  auto parser = parseTestQuery(
+      R"(
+          INSERT INTO evtbl SET
+              evtime = 1464463790,
+              evid = 'xxx',
+              rating = 1 + 2,
+              is_admin = true,
+              type = null
+      )");
+
+  EXPECT(parser.getStatements().size() == 1);
+  const auto& stmt = parser.getStatements()[0];
+  const auto& children = stmt->getChildren();
+
+  EXPECT(*stmt == ASTNode::T_INSERT_INTO);
+  EXPECT(children.size() == 3);
+  EXPECT_EQ(*children[0], ASTNode::T_TABLE_NAME);
+  EXPECT_EQ(*children[0]->getToken(), Token::T_IDENTIFIER);
+  EXPECT_EQ(children[0]->getToken()->getString(), "evtbl");
+
+  EXPECT(*children[1] == ASTNode::T_COLUMN_LIST);
+  EXPECT(children[1]->getChildren().size() == 5);
+  EXPECT(*children[1]->getChildren()[0] == ASTNode::T_COLUMN_NAME);
+  EXPECT_EQ(children[1]->getChildren()[0]->getToken()->getString(), "evtime");
+  EXPECT_EQ(children[1]->getChildren()[1]->getToken()->getString(), "evid");
+
+  EXPECT(*children[2] == ASTNode::T_VALUE_LIST);
+  EXPECT(children[2]->getChildren().size() == 5);
+  EXPECT_EQ(*children[2]->getChildren()[0], ASTNode::T_LITERAL);
+  EXPECT_EQ(children[2]->getChildren()[0]->getToken()->getString(), "1464463790");
+  EXPECT_EQ(children[2]->getChildren()[1]->getToken()->getString(), "xxx");
+
+  EXPECT_EQ(*children[2]->getChildren()[2], ASTNode::T_ADD_EXPR);
+  EXPECT_EQ(children[2]->getChildren()[2]->getChildren().size(), 2);
+  EXPECT_EQ(*children[2]->getChildren()[2]->getChildren()[0], ASTNode::T_LITERAL);
+  EXPECT_EQ(*children[2]->getChildren()[2]->getChildren()[1], ASTNode::T_LITERAL);
+
+  EXPECT_EQ(*children[2]->getChildren()[3]->getToken(), Token::T_TRUE);
+  EXPECT_EQ(*children[2]->getChildren()[4]->getToken(), Token::T_NULL);
+});
