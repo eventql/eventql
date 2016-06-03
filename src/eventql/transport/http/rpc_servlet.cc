@@ -103,19 +103,6 @@ void RPCServlet::handleHTTPRequest(
       return;
     }
 
-    if (uri.path() == "/tsdb/sql") {
-      req_stream->readBody();
-      executeSQL(&req, &res, &uri);
-      res_stream->writeResponse(res);
-      return;
-    }
-
-    if (uri.path() == "/tsdb/sql_stream") {
-      req_stream->readBody();
-      executeSQLStream(&req, &res, res_stream, &uri);
-      return;
-    }
-
     if (uri.path() == "/tsdb/update_cstable") {
       updateCSTable(uri, req_stream.get(), &res);
       res_stream->writeResponse(res);
@@ -360,67 +347,6 @@ void RPCServlet::fetchPartitionInfo(
     res->addHeader("Content-Type", "application/x-protobuf");
     res->addBody(*msg::encode(pinfo.get()));
   }
-}
-
-void RPCServlet::executeSQL(
-    const http::HTTPRequest* req,
-    http::HTTPResponse* res,
-    URI* uri) {
-  auto tsdb_namespace = req->getHeader("X-TSDB-Namespace");
-  auto query = req->body().toString();
-
-  Buffer result;
-  //node_->sqlEngine()->executeQuery(
-  //    tsdb_namespace,
-  //    query,
-  //    new csql::ASCIITableFormat(BufferOutputStream::fromBuffer(&result)));
-
-  res->setStatus(http::kStatusOK);
-  res->addHeader("Content-Type", "text/plain");
-  res->addHeader("Connection", "close");
-  res->addBody(result);
-}
-
-void RPCServlet::executeSQLStream(
-    const http::HTTPRequest* req,
-    http::HTTPResponse* res,
-    RefPtr<http::HTTPResponseStream> res_stream,
-    URI* uri) {
-  http::HTTPSSEStream sse_stream(res, res_stream);
-  sse_stream.start();
-
-  try {
-    const auto& params = uri->queryParams();
-
-    String tsdb_namespace;
-    if (!URI::getParam(params, "namespace", &tsdb_namespace)) {
-      RAISE(kRuntimeError, "missing ?namespace=... parameter");
-    }
-
-    String query;
-    if (!URI::getParam(params, "query", &query)) {
-      RAISE(kRuntimeError, "missing ?query=... parameter");
-    }
-
-    //node_->sqlEngine()->executeQuery(
-    //    tsdb_namespace,
-    //    query,
-    //    new csql::JSONSSEStreamFormat(&sse_stream));
-
-  } catch (const StandardException& e) {
-    logError("sql", e, "SQL execution failed");
-
-    Buffer buf;
-    json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
-    json.beginObject();
-    json.addObjectEntry("error");
-    json.addString(e.what());
-    json.endObject();
-
-    sse_stream.sendEvent(buf, Some(String("error")));
-  }
-
-  sse_stream.finish();
 }
 
 void RPCServlet::updateCSTable(
