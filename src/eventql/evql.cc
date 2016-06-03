@@ -507,6 +507,7 @@ int main(int argc, const char** argv) {
     String query;
     while (stdin_is->readLine(&query)) {
       auto ret = console.runQuery(query);
+      query = "";
       if (ret.isError()) {
         return 1;
       }
