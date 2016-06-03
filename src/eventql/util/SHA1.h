@@ -57,6 +57,7 @@ public:
   SHA1Hash(const void* data, size_t size);
 
   bool operator==(const SHA1Hash& other) const;
+  bool operator!=(const SHA1Hash& other) const;
   bool operator<(const SHA1Hash& other) const;
   bool operator>(const SHA1Hash& other) const;
 

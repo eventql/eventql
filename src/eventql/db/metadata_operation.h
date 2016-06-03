@@ -69,6 +69,10 @@ protected:
       const MetadataFile& input,
       Vector<MetadataFile::PartitionMapEntry>* output) const;
 
+  Status performSplitPartition(
+      const MetadataFile& input,
+      Vector<MetadataFile::PartitionMapEntry>* output) const;
+
   MetadataOperationEnvelope data_;
 };
 

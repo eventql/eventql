@@ -79,6 +79,8 @@ Status MetadataOperation::perform(
       return performBackfillAddServers(input, output);
     case METAOP_BACKFILL_REMOVE_SERVER:
       return performBackfillRemoveServer(input, output);
+    case METAOP_SPLIT_PARTITION:
+      return performSplitPartition(input, output);
     default:
       return Status(eIllegalArgumentError, "invalid metadata operation type");
   }
@@ -221,8 +223,6 @@ Status MetadataOperation::performBackfillAddServers(
   return Status::success();
 }
 
-
-
 Status MetadataOperation::performBackfillRemoveServer(
     const MetadataFile& input,
     Vector<MetadataFile::PartitionMapEntry>* output) const {
@@ -251,6 +251,83 @@ Status MetadataOperation::performBackfillRemoveServer(
 
   *output = pmap;
   return Status::success();
+}
+
+Status MetadataOperation::performSplitPartition(
+    const MetadataFile& input,
+    Vector<MetadataFile::PartitionMapEntry>* output) const {
+  auto opdata = msg::decode<SplitPartitionOperation>(
+      data_.opdata().data(),
+      data_.opdata().size());
+
+  SHA1Hash partition_id(
+      opdata.partition_id().data(),
+      opdata.partition_id().size());
+
+  bool success = false;
+  auto pmap = input.getPartitionMap();
+  auto iter = pmap.begin();
+  for (; iter != pmap.end(); ++iter) {
+    if (iter->partition_id != partition_id) {
+      continue;
+    }
+
+    String iter_end;
+    {
+      auto iter_next = iter + 1;
+      if (iter_next != pmap.end()) {
+        iter_end = iter_next->begin;
+      }
+    }
+
+    if (iter->splitting) {
+      return Status(eIllegalStateError, "partition is already splitting");
+    }
+
+    if (!iter->begin.empty() &&
+        input.compareKeys(opdata.split_point(), iter->begin) < 0) {
+      return Status(eIllegalArgumentError, "split point is out of range");
+    }
+
+    if (!iter_end.empty() &&
+        input.compareKeys(opdata.split_point(), iter_end) >= 0) {
+      return Status(eIllegalArgumentError, "split point is out of range");
+    }
+
+    if (opdata.split_servers_low().size() == 0 ||
+        opdata.split_servers_high().size() == 0) {
+      return Status(eIllegalArgumentError, "split server list can't be empty");
+    }
+
+    iter->splitting = true;
+    iter->split_point = opdata.split_point();
+    iter->split_partition_id_low = Random::singleton()->sha1();
+    iter->split_partition_id_high = Random::singleton()->sha1();
+
+    for (const auto& s : opdata.split_servers_low()) {
+      MetadataFile::PartitionPlacement p;
+      p.server_id = s;
+      p.placement_id = Random::singleton()->random64();
+      iter->split_servers_low.emplace_back(p);
+    }
+
+    for (const auto& s : opdata.split_servers_high()) {
+      MetadataFile::PartitionPlacement p;
+      p.server_id = s;
+      p.placement_id = Random::singleton()->random64();
+      iter->split_servers_high.emplace_back(p);
+    }
+
+    success = true;
+    break;
+  }
+
+  if (success) {
+    *output = pmap;
+    return Status::success();
+  } else {
+    return Status(eNotFoundError, "partition not found");
+  }
 }
 
 } // namespace eventql
