@@ -535,19 +535,28 @@ ASTNode* Parser::primaryKeyDefinition() {
 
 ASTNode* Parser::insertStatement() {
   consumeToken();
-  return insertIntoStatement();
-}
+  consumeIf(Token::T_INTO);
 
-ASTNode* Parser::insertIntoStatement() {
-  expectAndConsume(Token::T_INTO);
 
   auto insert_into = new ASTNode(ASTNode::T_INSERT_INTO);
   insert_into->appendChild(tableName());
 
+  //switch () {
+  //  case Token::L_PAREN:
+
+  //  case Token::T_FROM:
+  //    insert_into->appendChild(insertFromJSON());
+
+  //  case Token::T_SET:
+  //    insert_into->appendChild(insertSet());
+
+  //  default:
+  //    RAISE
+  //}
+
   if (cur_token_->getType() == Token::T_FROM) {
-    consumeToken();
-    expectAndConsume(Token::T_JSON);
-    insert_into->appendChild(insertFromJSON());
+      insert_into->appendChild(insertFromJSON());
+    
 
   } else {
     insert_into->appendChild(insertColumnList());
@@ -614,6 +623,8 @@ ASTNode* Parser::insertValueList() {
 }
 
 ASTNode* Parser::insertFromJSON() {
+  consumeToken();
+  expectAndConsume(Token::T_JSON);
   assertExpectation(Token::T_STRING);
   auto json = new ASTNode(ASTNode::T_JSON_STRING);
   json->setToken(cur_token_);
