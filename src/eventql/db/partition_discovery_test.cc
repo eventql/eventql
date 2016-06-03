@@ -145,6 +145,31 @@ TEST_CASE(PartitionDiscoveryTest, TestServingPartition, [] () {
     EXPECT(res.keyrange_begin() == "e");
     EXPECT(res.keyrange_end() == "g");
   }
+
+  {
+    auto pid = SHA1::compute("4");
+    PartitionDiscoveryRequest req;
+    req.set_db_namespace("test");
+    req.set_table_id("test");
+    req.set_min_txnseq(1);
+    req.set_partition_id(pid.data(), pid.size());
+    req.set_keyrange_begin("e");
+    req.set_keyrange_end("");
+    req.set_requester_id("s2");
+    PartitionDiscoveryResponse res;
+    auto rc = PartitionDiscovery::discoverPartition(&file, req, &res);
+    EXPECT(rc.isSuccess());
+    EXPECT(res.code() == PDISCOVERY_SERVE);
+    EXPECT(SHA1Hash(res.txnid().data(), res.txnid().size()) == SHA1::compute("mytx"));
+    EXPECT(res.txnseq() == 7);
+    EXPECT(res.replication_targets().size() == 2);
+    EXPECT(res.replication_targets().Get(0).server_id() == "s4");
+    EXPECT(res.replication_targets().Get(0).placement_id() == 13);
+    EXPECT(res.replication_targets().Get(1).server_id() == "s1");
+    EXPECT(res.replication_targets().Get(1).placement_id() == 12);
+    EXPECT(res.keyrange_begin() == "e");
+    EXPECT(res.keyrange_end() == "g");
+  }
 });
 
 TEST_CASE(PartitionDiscoveryTest, TestSplittingPartition, [] () {
@@ -252,6 +277,66 @@ TEST_CASE(PartitionDiscoveryTest, TestSplittingPartition, [] () {
     EXPECT(res.replication_targets().Get(7).keyrange_begin() == "p");
     EXPECT(res.replication_targets().Get(7).keyrange_end() == "x");
   }
+
+  {
+    auto pid = SHA1::compute("4");
+    PartitionDiscoveryRequest req;
+    req.set_db_namespace("test");
+    req.set_table_id("test");
+    req.set_min_txnseq(1);
+    req.set_partition_id(pid.data(), pid.size());
+    req.set_keyrange_begin("e");
+    req.set_keyrange_end("");
+    req.set_requester_id("s3");
+    PartitionDiscoveryResponse res;
+    auto rc = PartitionDiscovery::discoverPartition(&file, req, &res);
+    EXPECT(rc.isSuccess());
+    EXPECT(res.code() == PDISCOVERY_SERVE);
+    EXPECT(SHA1Hash(res.txnid().data(), res.txnid().size()) == SHA1::compute("mytx"));
+    EXPECT(res.txnseq() ==  7);
+    EXPECT_EQ(res.is_splitting(), true);
+    EXPECT_EQ(res.split_partition_ids().size(), 2);
+    EXPECT_EQ(
+        SHA1Hash(res.split_partition_ids().Get(0).data(), SHA1Hash::kSize),
+        SHA1::compute("lowlow"));
+    EXPECT_EQ(
+        SHA1Hash(res.split_partition_ids().Get(1).data(), SHA1Hash::kSize),
+        SHA1::compute("highhigh"));
+    EXPECT(res.replication_targets().size() == 8);
+    EXPECT(res.replication_targets().Get(0).server_id() == "s4");
+    EXPECT(res.replication_targets().Get(0).placement_id() == 13);
+    EXPECT(res.replication_targets().Get(0).keyrange_begin() == "e");
+    EXPECT(res.replication_targets().Get(0).keyrange_end() == "x");
+    EXPECT(res.replication_targets().Get(1).server_id() == "s1");
+    EXPECT(res.replication_targets().Get(1).placement_id() == 12);
+    EXPECT(res.replication_targets().Get(1).keyrange_begin() == "e");
+    EXPECT(res.replication_targets().Get(1).keyrange_end() == "x");
+    EXPECT(res.replication_targets().Get(2).server_id() == "s8");
+    EXPECT(res.replication_targets().Get(2).placement_id() == 43);
+    EXPECT(res.replication_targets().Get(2).keyrange_begin() == "e");
+    EXPECT(res.replication_targets().Get(2).keyrange_end() == "p");
+    EXPECT(res.replication_targets().Get(3).server_id() == "s9");
+    EXPECT(res.replication_targets().Get(3).placement_id() == 41);
+    EXPECT(res.replication_targets().Get(3).keyrange_begin() == "e");
+    EXPECT(res.replication_targets().Get(3).keyrange_end() == "p");
+    EXPECT(res.replication_targets().Get(4).server_id() == "s6");
+    EXPECT(res.replication_targets().Get(4).placement_id() == 42);
+    EXPECT(res.replication_targets().Get(4).keyrange_begin() == "e");
+    EXPECT(res.replication_targets().Get(4).keyrange_end() == "p");
+    EXPECT(res.replication_targets().Get(5).server_id() == "s5");
+    EXPECT(res.replication_targets().Get(5).placement_id() == 51);
+    EXPECT(res.replication_targets().Get(5).keyrange_begin() == "p");
+    EXPECT(res.replication_targets().Get(5).keyrange_end() == "x");
+    EXPECT(res.replication_targets().Get(6).server_id() == "s7");
+    EXPECT(res.replication_targets().Get(6).placement_id() == 52);
+    EXPECT(res.replication_targets().Get(6).keyrange_begin() == "p");
+    EXPECT(res.replication_targets().Get(6).keyrange_end() == "x");
+    EXPECT(res.replication_targets().Get(7).server_id() == "s3");
+    EXPECT(res.replication_targets().Get(7).placement_id() == 53);
+    EXPECT(res.replication_targets().Get(7).keyrange_begin() == "p");
+    EXPECT(res.replication_targets().Get(7).keyrange_end() == "x");
+  }
+
 
   {
     auto pid = SHA1::compute("x");
