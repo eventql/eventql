@@ -184,14 +184,14 @@ Status MasterService::rebalanceTable(TableDefinition tbl_cfg) {
       }
     }
 
-    logInfo(
-        "evqld",
-        "Removing dead servers from partition map for table '$0/$1': $2",
-        tbl_cfg.customer(),
-        tbl_cfg.table_name(),
-        inspect(dead_servers));
-
     if (!dead_servers.empty()) {
+      logInfo(
+          "evqld",
+          "Removing dead servers from partition map for table '$0/$1': $2",
+          tbl_cfg.customer(),
+          tbl_cfg.table_name(),
+          inspect(dead_servers));
+
       RemoveDeadServersOperation opdata;
       for (const auto& s : dead_servers) {
         opdata.add_server_ids(s);
