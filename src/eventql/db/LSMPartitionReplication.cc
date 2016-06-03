@@ -67,6 +67,11 @@ bool LSMPartitionReplication::needsReplication() const {
     return true;
   }
 
+  // check if we have joining servers
+  if (snap_->state.has_joining_servers()) {
+    return true;
+  }
+
   // check if all replicas named in the current metadata transaction have seen
   // the latest sequence, otherwise enqueue
   auto& writer = dynamic_cast<LSMPartitionWriter&>(*partition_->getWriter());

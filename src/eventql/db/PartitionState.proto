@@ -36,6 +36,7 @@ message ReplicationTarget {
   required bytes partition_id = 3;
   optional bytes keyrange_begin = 4;
   optional bytes keyrange_end = 5;
+  optional bool is_joining = 6;
 };
 
 enum PartitionLifecycleState {
@@ -45,7 +46,7 @@ enum PartitionLifecycleState {
   PDISCOVERY_UNLOAD = 3;
 };
 
-// next id: 30
+// next id: 31
 message PartitionState {
 
   /**
@@ -121,5 +122,7 @@ message PartitionState {
 
   optional bool is_splitting = 23;
   repeated bytes split_partition_ids = 24;
+
+  optional bool has_joining_servers = 30;
 
 };

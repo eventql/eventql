@@ -48,6 +48,7 @@ message PartitionDiscoveryReplicationTarget {
   required bytes partition_id = 5;
   optional bytes keyrange_begin = 3;
   optional bytes keyrange_end = 4;
+  optional bool is_joining = 6;
 }
 
 message PartitionDiscoveryResponse {

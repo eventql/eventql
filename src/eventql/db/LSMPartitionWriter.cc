@@ -382,6 +382,7 @@ Status LSMPartitionWriter::applyMetadataChange(
     snap->state.add_split_partition_ids(p);
   }
 
+  snap->state.set_has_joining_servers(false);
   snap->state.mutable_replication_targets()->Clear();
   for (const auto& dt : discovery_info.replication_targets()) {
     auto pt = snap->state.add_replication_targets();
@@ -390,6 +391,10 @@ Status LSMPartitionWriter::applyMetadataChange(
     pt->set_partition_id(dt.partition_id());
     pt->set_keyrange_begin(dt.keyrange_begin());
     pt->set_keyrange_end(dt.keyrange_end());
+    if (dt.is_joining()) {
+      pt->set_is_joining(true);
+      snap->state.set_has_joining_servers(true);
+    }
   }
 
   snap->writeToDisk();

@@ -40,12 +40,14 @@ static void addReplicationTarget(
     PartitionDiscoveryResponse* response,
     const MetadataFile* file,
     MetadataFile::PartitionMapIter e,
-    const MetadataFile::PartitionPlacement& s) {
+    const MetadataFile::PartitionPlacement& s,
+    bool is_joining) {
   auto t = response->add_replication_targets();
   t->set_server_id(s.server_id);
   t->set_placement_id(s.placement_id);
   t->set_partition_id(e->partition_id.data(), e->partition_id.size());
   t->set_keyrange_begin(e->begin);
+  t->set_is_joining(is_joining);
 
   auto n = e + 1;
   if (n == file->getPartitionMapEnd()) {
@@ -120,7 +122,7 @@ Status PartitionDiscovery::discoverPartitionByKeyRange(
         // if we are in the active server list return SERVE
         response->set_code(PDISCOVERY_SERVE);
       } else {
-        addReplicationTarget(response, file, iter, s);
+        addReplicationTarget(response, file, iter, s, false);
       }
     }
 
@@ -130,7 +132,7 @@ Status PartitionDiscovery::discoverPartitionByKeyRange(
         // if we are in the joining server list return LOAD
         response->set_code(PDISCOVERY_LOAD);
       } else {
-        addReplicationTarget(response, file, iter, s);
+        addReplicationTarget(response, file, iter, s, true);
       }
     }
 
@@ -140,7 +142,7 @@ Status PartitionDiscovery::discoverPartitionByKeyRange(
         // if we are in the leaving server list return SERVE
         response->set_code(PDISCOVERY_SERVE);
       } else {
-        addReplicationTarget(response, file, iter, s);
+        addReplicationTarget(response, file, iter, s, false);
       }
     }
 
@@ -218,13 +220,13 @@ Status PartitionDiscovery::discoverPartitionByKeyRange(
     auto end = file->getPartitionMapRangeEnd(request.keyrange_end());
     for (; iter != end; ++iter) {
       for (const auto& s : iter->servers) {
-        addReplicationTarget(response, file, iter, s);
+        addReplicationTarget(response, file, iter, s, false);
       }
       for (const auto& s : iter->servers_joining) {
-        addReplicationTarget(response, file, iter, s);
+        addReplicationTarget(response, file, iter, s, true);
       }
       for (const auto& s : iter->servers_leaving) {
-        addReplicationTarget(response, file, iter, s);
+        addReplicationTarget(response, file, iter, s, false);
       }
       if (iter->splitting) {
         addSplittingReplicationTargets(response, file, iter);
@@ -264,7 +266,7 @@ Status PartitionDiscovery::discoverPartitionByID(
           // if we are in the active server list return SERVE
           response->set_code(PDISCOVERY_SERVE);
         } else {
-          addReplicationTarget(response, file, iter, s);
+          addReplicationTarget(response, file, iter, s, false);
         }
       }
 
@@ -274,7 +276,7 @@ Status PartitionDiscovery::discoverPartitionByID(
           // if we are in the joining server list return LOAD
           response->set_code(PDISCOVERY_LOAD);
         } else {
-          addReplicationTarget(response, file, iter, s);
+          addReplicationTarget(response, file, iter, s, true);
         }
       }
 
@@ -284,7 +286,7 @@ Status PartitionDiscovery::discoverPartitionByID(
           // if we are in the leaving server list return SERVE
           response->set_code(PDISCOVERY_SERVE);
         } else {
-          addReplicationTarget(response, file, iter, s);
+          addReplicationTarget(response, file, iter, s, false);
         }
       }
 

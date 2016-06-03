@@ -115,10 +115,13 @@ TEST_CASE(PartitionDiscoveryTest, TestServingPartition, [] () {
     EXPECT(res.replication_targets().size() == 3);
     EXPECT(res.replication_targets().Get(0).server_id() == "s4");
     EXPECT(res.replication_targets().Get(0).placement_id() == 13);
+    EXPECT(res.replication_targets().Get(0).is_joining() == false);
     EXPECT(res.replication_targets().Get(1).server_id() == "s2");
     EXPECT(res.replication_targets().Get(1).placement_id() == 11);
+    EXPECT(res.replication_targets().Get(1).is_joining() == false);
     EXPECT(res.replication_targets().Get(2).server_id() == "s1");
     EXPECT(res.replication_targets().Get(2).placement_id() == 12);
+    EXPECT(res.replication_targets().Get(2).is_joining() == false);
   }
 
   {
@@ -140,8 +143,10 @@ TEST_CASE(PartitionDiscoveryTest, TestServingPartition, [] () {
     EXPECT(res.replication_targets().size() == 2);
     EXPECT(res.replication_targets().Get(0).server_id() == "s4");
     EXPECT(res.replication_targets().Get(0).placement_id() == 13);
+    EXPECT(res.replication_targets().Get(0).is_joining() == false);
     EXPECT(res.replication_targets().Get(1).server_id() == "s1");
     EXPECT(res.replication_targets().Get(1).placement_id() == 12);
+    EXPECT(res.replication_targets().Get(1).is_joining() == false);
     EXPECT(res.keyrange_begin() == "e");
     EXPECT(res.keyrange_end() == "g");
   }
@@ -165,8 +170,10 @@ TEST_CASE(PartitionDiscoveryTest, TestServingPartition, [] () {
     EXPECT(res.replication_targets().size() == 2);
     EXPECT(res.replication_targets().Get(0).server_id() == "s4");
     EXPECT(res.replication_targets().Get(0).placement_id() == 13);
+    EXPECT(res.replication_targets().Get(0).is_joining() == false);
     EXPECT(res.replication_targets().Get(1).server_id() == "s1");
     EXPECT(res.replication_targets().Get(1).placement_id() == 12);
+    EXPECT(res.replication_targets().Get(1).is_joining() == false);
     EXPECT(res.keyrange_begin() == "e");
     EXPECT(res.keyrange_end() == "g");
   }
@@ -248,34 +255,42 @@ TEST_CASE(PartitionDiscoveryTest, TestSplittingPartition, [] () {
     EXPECT(res.replication_targets().Get(0).placement_id() == 13);
     EXPECT(res.replication_targets().Get(0).keyrange_begin() == "e");
     EXPECT(res.replication_targets().Get(0).keyrange_end() == "x");
+    EXPECT(res.replication_targets().Get(0).is_joining() == false);
     EXPECT(res.replication_targets().Get(1).server_id() == "s1");
     EXPECT(res.replication_targets().Get(1).placement_id() == 12);
     EXPECT(res.replication_targets().Get(1).keyrange_begin() == "e");
     EXPECT(res.replication_targets().Get(1).keyrange_end() == "x");
+    EXPECT(res.replication_targets().Get(1).is_joining() == false);
     EXPECT(res.replication_targets().Get(2).server_id() == "s8");
     EXPECT(res.replication_targets().Get(2).placement_id() == 43);
     EXPECT(res.replication_targets().Get(2).keyrange_begin() == "e");
     EXPECT(res.replication_targets().Get(2).keyrange_end() == "p");
+    EXPECT(res.replication_targets().Get(2).is_joining() == false);
     EXPECT(res.replication_targets().Get(3).server_id() == "s9");
     EXPECT(res.replication_targets().Get(3).placement_id() == 41);
     EXPECT(res.replication_targets().Get(3).keyrange_begin() == "e");
     EXPECT(res.replication_targets().Get(3).keyrange_end() == "p");
+    EXPECT(res.replication_targets().Get(3).is_joining() == false);
     EXPECT(res.replication_targets().Get(4).server_id() == "s6");
     EXPECT(res.replication_targets().Get(4).placement_id() == 42);
     EXPECT(res.replication_targets().Get(4).keyrange_begin() == "e");
     EXPECT(res.replication_targets().Get(4).keyrange_end() == "p");
+    EXPECT(res.replication_targets().Get(4).is_joining() == false);
     EXPECT(res.replication_targets().Get(5).server_id() == "s5");
     EXPECT(res.replication_targets().Get(5).placement_id() == 51);
     EXPECT(res.replication_targets().Get(5).keyrange_begin() == "p");
     EXPECT(res.replication_targets().Get(5).keyrange_end() == "x");
+    EXPECT(res.replication_targets().Get(5).is_joining() == false);
     EXPECT(res.replication_targets().Get(6).server_id() == "s7");
     EXPECT(res.replication_targets().Get(6).placement_id() == 52);
     EXPECT(res.replication_targets().Get(6).keyrange_begin() == "p");
     EXPECT(res.replication_targets().Get(6).keyrange_end() == "x");
+    EXPECT(res.replication_targets().Get(6).is_joining() == false);
     EXPECT(res.replication_targets().Get(7).server_id() == "s3");
     EXPECT(res.replication_targets().Get(7).placement_id() == 53);
     EXPECT(res.replication_targets().Get(7).keyrange_begin() == "p");
     EXPECT(res.replication_targets().Get(7).keyrange_end() == "x");
+    EXPECT(res.replication_targets().Get(7).is_joining() == false);
   }
 
   {
@@ -307,34 +322,42 @@ TEST_CASE(PartitionDiscoveryTest, TestSplittingPartition, [] () {
     EXPECT(res.replication_targets().Get(0).placement_id() == 13);
     EXPECT(res.replication_targets().Get(0).keyrange_begin() == "e");
     EXPECT(res.replication_targets().Get(0).keyrange_end() == "x");
+    EXPECT(res.replication_targets().Get(0).is_joining() == false);
     EXPECT(res.replication_targets().Get(1).server_id() == "s1");
     EXPECT(res.replication_targets().Get(1).placement_id() == 12);
     EXPECT(res.replication_targets().Get(1).keyrange_begin() == "e");
     EXPECT(res.replication_targets().Get(1).keyrange_end() == "x");
+    EXPECT(res.replication_targets().Get(1).is_joining() == false);
     EXPECT(res.replication_targets().Get(2).server_id() == "s8");
     EXPECT(res.replication_targets().Get(2).placement_id() == 43);
     EXPECT(res.replication_targets().Get(2).keyrange_begin() == "e");
     EXPECT(res.replication_targets().Get(2).keyrange_end() == "p");
+    EXPECT(res.replication_targets().Get(2).is_joining() == false);
     EXPECT(res.replication_targets().Get(3).server_id() == "s9");
     EXPECT(res.replication_targets().Get(3).placement_id() == 41);
     EXPECT(res.replication_targets().Get(3).keyrange_begin() == "e");
     EXPECT(res.replication_targets().Get(3).keyrange_end() == "p");
+    EXPECT(res.replication_targets().Get(3).is_joining() == false);
     EXPECT(res.replication_targets().Get(4).server_id() == "s6");
     EXPECT(res.replication_targets().Get(4).placement_id() == 42);
     EXPECT(res.replication_targets().Get(4).keyrange_begin() == "e");
     EXPECT(res.replication_targets().Get(4).keyrange_end() == "p");
+    EXPECT(res.replication_targets().Get(4).is_joining() == false);
     EXPECT(res.replication_targets().Get(5).server_id() == "s5");
     EXPECT(res.replication_targets().Get(5).placement_id() == 51);
     EXPECT(res.replication_targets().Get(5).keyrange_begin() == "p");
     EXPECT(res.replication_targets().Get(5).keyrange_end() == "x");
+    EXPECT(res.replication_targets().Get(5).is_joining() == false);
     EXPECT(res.replication_targets().Get(6).server_id() == "s7");
     EXPECT(res.replication_targets().Get(6).placement_id() == 52);
     EXPECT(res.replication_targets().Get(6).keyrange_begin() == "p");
     EXPECT(res.replication_targets().Get(6).keyrange_end() == "x");
+    EXPECT(res.replication_targets().Get(6).is_joining() == false);
     EXPECT(res.replication_targets().Get(7).server_id() == "s3");
     EXPECT(res.replication_targets().Get(7).placement_id() == 53);
     EXPECT(res.replication_targets().Get(7).keyrange_begin() == "p");
     EXPECT(res.replication_targets().Get(7).keyrange_end() == "x");
+    EXPECT(res.replication_targets().Get(7).is_joining() == false);
   }
 
 
@@ -531,7 +554,7 @@ TEST_CASE(PartitionDiscoveryTest, TestFindByID, [] () {
     e.partition_id = SHA1::compute("1");
     e.servers.emplace_back(mkPlacement("s6", 13));
     e.servers.emplace_back(mkPlacement("s3", 11));
-    e.servers.emplace_back(mkPlacement("s2", 12));
+    e.servers_joining.emplace_back(mkPlacement("s2", 12));
     pmap.emplace_back(e);
   }
 
@@ -629,8 +652,10 @@ TEST_CASE(PartitionDiscoveryTest, TestFindByID, [] () {
     EXPECT(res.replication_targets().size() == 2);
     EXPECT(res.replication_targets().Get(0).server_id() == "s6");
     EXPECT(res.replication_targets().Get(0).placement_id() == 13);
+    EXPECT(res.replication_targets().Get(0).is_joining() == false);
     EXPECT(res.replication_targets().Get(1).server_id() == "s2");
     EXPECT(res.replication_targets().Get(1).placement_id() == 12);
+    EXPECT(res.replication_targets().Get(1).is_joining() == true);
     EXPECT(res.keyrange_begin() == "");
     EXPECT(res.keyrange_end() == "b");
   }
@@ -653,8 +678,10 @@ TEST_CASE(PartitionDiscoveryTest, TestFindByID, [] () {
     EXPECT(res.replication_targets().size() == 2);
     EXPECT(res.replication_targets().Get(0).server_id() == "s3");
     EXPECT(res.replication_targets().Get(0).placement_id() == 11);
+    EXPECT(res.replication_targets().Get(0).is_joining() == false);
     EXPECT(res.replication_targets().Get(1).server_id() == "s2");
     EXPECT(res.replication_targets().Get(1).placement_id() == 12);
+    EXPECT(res.replication_targets().Get(1).is_joining() == false);
     EXPECT(res.keyrange_begin() == "b");
     EXPECT(res.keyrange_end() == "d");
   }
@@ -677,8 +704,10 @@ TEST_CASE(PartitionDiscoveryTest, TestFindByID, [] () {
     EXPECT(res.replication_targets().size() == 2);
     EXPECT(res.replication_targets().Get(0).server_id() == "s1");
     EXPECT(res.replication_targets().Get(0).placement_id() == 10);
+    EXPECT(res.replication_targets().Get(0).is_joining() == false);
     EXPECT(res.replication_targets().Get(1).server_id() == "s2");
     EXPECT(res.replication_targets().Get(1).placement_id() == 11);
+    EXPECT(res.replication_targets().Get(1).is_joining() == false);
     EXPECT(res.keyrange_begin() == "g");
     EXPECT(res.keyrange_end() == "");
   }
