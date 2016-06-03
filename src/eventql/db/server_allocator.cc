@@ -31,22 +31,28 @@ ServerAllocator::ServerAllocator(ConfigDirectory* cdir) : cdir_(cdir) {}
 Status ServerAllocator::allocateServers(
     size_t num_servers,
     Set<String>* servers) const {
-  Vector<String> all_servers;
-  for (const auto& s : cdir_->listServers()) {
+  size_t num_alloced = 0;
+  auto all_servers = cdir_->listServers();
+  uint64_t idx = Random::singleton()->random64();
+  for (int i = 0; i < all_servers.size(); ++i) {
+    const auto& s = all_servers[++idx % all_servers.size()];
+
     if (s.is_dead() || s.is_leaving() || s.server_status() != SERVER_UP) {
       continue;
     }
 
-    all_servers.emplace_back(s.server_id());
+    if (servers->count(s.server_id()) > 0) {
+      continue;
+    }
+
+    servers->emplace(s.server_id());
+    if (++num_alloced == num_servers) {
+      break;
+    }
   }
 
-  if (all_servers.size() < num_servers) {
+  if (num_alloced < num_servers) {
     return Status(eRuntimeError, "not enough live servers");
-  }
-
-  uint64_t idx = Random::singleton()->random64();
-  for (int i = 0; i < num_servers; ++i) {
-    servers->emplace(all_servers[++idx % all_servers.size()]);
   }
 
   return Status::success();

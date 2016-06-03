@@ -85,6 +85,7 @@ Status MasterService::rebalanceTable(TableDefinition tbl_cfg) {
   }
 
   bool tbl_cfg_dirty = false;
+  bool metadata_servers_changed = false;
 
   // remove dead metadata servers
   {
@@ -132,8 +133,11 @@ Status MasterService::rebalanceTable(TableDefinition tbl_cfg) {
 
   // make sure we have enough metadata servers
   {
+    Set<String> current_metadata_servers;
     size_t nservers = 0;
     for (const auto& s : tbl_cfg.metadata_servers()) {
+      current_metadata_servers.emplace(s);
+
       if (all_servers_.count(s) > 0 &&
           leaving_servers_.count(s) == 0) {
         ++nservers;
@@ -141,31 +145,44 @@ Status MasterService::rebalanceTable(TableDefinition tbl_cfg) {
     }
 
     if (nservers < metadata_replication_factor_) {
-      Set<String> add_servers;
+      auto new_metadata_servers = current_metadata_servers;
       ServerAllocator server_alloc(cdir_);
       {
         auto rc = server_alloc.allocateServers(
             metadata_replication_factor_ - nservers,
-            &add_servers);
+            &new_metadata_servers);
         if (!rc.isSuccess()) {
           return rc;
         }
       }
 
-      logInfo(
-          "evqld",
-          "Adding new metadata servers to table '$1/$2': $0",
-          inspect(add_servers),
-          tbl_cfg.customer(),
-          tbl_cfg.table_name());
+      for (const auto& s : new_metadata_servers) {
+        if (current_metadata_servers.count(s) == 0) {
+          logInfo(
+              "evqld",
+              "Adding new metadata server to table '$1/$2': $0",
+              s,
+              tbl_cfg.customer(),
+              tbl_cfg.table_name());
 
-      for (const auto& s : add_servers) {
-        tbl_cfg.add_metadata_servers(s);
+          tbl_cfg.add_metadata_servers(s);
+        }
       }
 
       tbl_cfg_dirty = true;
     }
   }
+
+  // if we made a change to the metadata servers above, we need to update the
+  // table config and exit, otherwise we might get stuck in a state where
+  // operations below here could never succeed (due to the operations being
+  // blocked by missing metadata servers, and adding metadata servers being
+  // blocked by the operations failing
+  if (tbl_cfg_dirty) {
+    cdir_->updateTableConfig(tbl_cfg);
+    return Status::success();
+  }
+
 
   // remove dead servers from the metadata file
   {
