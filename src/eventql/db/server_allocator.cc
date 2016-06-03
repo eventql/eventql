@@ -33,7 +33,7 @@ Status ServerAllocator::allocateServers(
     Set<String>* servers) const {
   Vector<String> all_servers;
   for (const auto& s : cdir_->listServers()) {
-    if (s.server_status() != SERVER_UP) {
+    if (s.is_dead() || s.is_leaving() || s.server_status() != SERVER_UP) {
       continue;
     }
 

@@ -40,6 +40,10 @@ Status MasterService::runOnce() {
 
   all_servers_.clear();
   for (const auto& s : cdir_->listServers()) {
+    if (s.is_dead()) {
+      continue;
+    }
+
     all_servers_.emplace(s.server_id());
   }
 
