@@ -369,11 +369,17 @@ void StatusServlet::renderTablePage(
         }
       }
 
+      String extra_info;
+      if (e.splitting) {
+        extra_info += "SPLITTING @ " + e.split_point;
+      }
+
       html += StringUtil::format(
-          "<tr><td>$0</td><td>$1</td><td>$2</td></tr>",
+          "<tr><td>$0</td><td>$1</td><td>$2</td><td>$3</td></tr>",
           keyrange,
           e.partition_id.toString(),
-          StringUtil::join(servers, ", "));
+          StringUtil::join(servers, ", "),
+          extra_info);
     }
     html += "</table>";
   }
