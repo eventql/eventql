@@ -371,6 +371,12 @@ Status LSMPartitionWriter::applyMetadataChange(
   snap->state.set_lifecycle_state(discovery_info.code());
   snap->state.set_is_splitting(discovery_info.is_splitting());
 
+  // backfill keyrange
+  if (snap->state.partition_keyrange_end().size() == 0 &&
+      discovery_info.keyrange_end().size() > 0) {
+    snap->state.set_partition_keyrange_end(discovery_info.keyrange_end());
+  }
+
   snap->state.mutable_split_partition_ids()->Clear();
   for (const auto& p : discovery_info.split_partition_ids()) {
     snap->state.add_split_partition_ids(p);
