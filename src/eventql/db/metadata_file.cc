@@ -118,6 +118,7 @@ int MetadataFile::compareKeys(const String& a, const String& b) const {
 }
 
 static Status decodeServerList(
+    uint64_t version,
     Vector<MetadataFile::PartitionPlacement>* servers,
     InputStream* is) {
   auto n = is->readVarUInt();
@@ -125,7 +126,12 @@ static Status decodeServerList(
   for (size_t i = 0; i < n; ++i) {
     MetadataFile::PartitionPlacement s;
     s.server_id = is->readLenencString();
-    s.placement_id = is->readUInt64();
+    if (version >= 2) {
+      s.placement_id = is->readUInt64();
+    } else {
+      s.placement_id = 0;
+      is->readUInt64();
+    }
     servers->emplace_back(s);
   }
 
@@ -165,19 +171,19 @@ Status MetadataFile::decode(InputStream* is) {
         e.partition_id.size());
 
     // servers
-    auto rc = decodeServerList(&e.servers, is);
+    auto rc = decodeServerList(version, &e.servers, is);
     if (!rc.isSuccess()) {
       return rc;
     }
 
     // servers joining
-    decodeServerList(&e.servers_joining, is);
+    decodeServerList(version, &e.servers_joining, is);
     if (!rc.isSuccess()) {
       return rc;
     }
 
     // servers leaving
-    decodeServerList(&e.servers_leaving, is);
+    decodeServerList(version, &e.servers_leaving, is);
     if (!rc.isSuccess()) {
       return rc;
     }
@@ -190,15 +196,16 @@ Status MetadataFile::decode(InputStream* is) {
           e.splitting = false;
           is->readLenencString();
           Vector<PartitionPlacement> tmp;
-          if (!decodeServerList(&tmp, is).isSuccess()) {
+          if (!decodeServerList(version, &tmp, is).isSuccess()) {
             return rc;
           }
-          if (!decodeServerList(&tmp, is).isSuccess()) {
+          if (!decodeServerList(version, &tmp, is).isSuccess()) {
             return rc;
           }
           break;
         }
 
+        default:
         case 2: {
           // split_point
           e.split_point = is->readLenencString();
@@ -214,13 +221,13 @@ Status MetadataFile::decode(InputStream* is) {
               e.split_partition_id_high.size());
 
           // split_servers_low
-          decodeServerList(&e.split_servers_low, is);
+          decodeServerList(version, &e.split_servers_low, is);
           if (!rc.isSuccess()) {
             return rc;
           }
 
           // split_servers_high
-          decodeServerList(&e.split_servers_high, is);
+          decodeServerList(version, &e.split_servers_high, is);
           if (!rc.isSuccess()) {
             return rc;
           }
