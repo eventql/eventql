@@ -465,6 +465,14 @@ void StatusServlet::renderPartitionPage(
         PartitionLifecycleState_Name(snap->state.lifecycle_state()));
 
     html += StringUtil::format(
+        "<span><em>Splitting?</em>: $0</span> &mdash; ",
+        snap->state.is_splitting());
+
+    html += StringUtil::format(
+        "<span><em>Joining Servers?</em>: $0</span> &mdash; ",
+        snap->state.has_joining_servers());
+
+    html += StringUtil::format(
         "<span><em>Number of Records</em>: $0</span>",
         snap->nrecs);
 
