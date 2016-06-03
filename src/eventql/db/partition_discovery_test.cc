@@ -33,13 +33,6 @@ using namespace eventql;
 
 UNIT_TEST(PartitionDiscoveryTest);
 
-// serving
-// loading
-// splitted exact 2 way
-// splitted 2^n ways
-// splitted three way weird
-// not yet created // out of valid range
-
 static MetadataFile::PartitionPlacement mkPlacement(
     const String& server_id,
     uint64_t placement_id) {
@@ -217,6 +210,14 @@ TEST_CASE(PartitionDiscoveryTest, TestSplittingPartition, [] () {
     EXPECT(res.code() == PDISCOVERY_SERVE);
     EXPECT(SHA1Hash(res.txnid().data(), res.txnid().size()) == SHA1::compute("mytx"));
     EXPECT(res.txnseq() ==  7);
+    EXPECT_EQ(res.is_splitting(), true);
+    EXPECT_EQ(res.split_partition_ids().size(), 2);
+    EXPECT_EQ(
+        SHA1Hash(res.split_partition_ids().Get(0).data(), SHA1Hash::kSize),
+        SHA1::compute("lowlow"));
+    EXPECT_EQ(
+        SHA1Hash(res.split_partition_ids().Get(1).data(), SHA1Hash::kSize),
+        SHA1::compute("highhigh"));
     EXPECT(res.replication_targets().size() == 8);
     EXPECT(res.replication_targets().Get(0).server_id() == "s4");
     EXPECT(res.replication_targets().Get(0).placement_id() == 13);
@@ -266,6 +267,7 @@ TEST_CASE(PartitionDiscoveryTest, TestSplittingPartition, [] () {
     auto rc = PartitionDiscovery::discoverPartition(&file, req, &res);
     EXPECT(rc.isSuccess());
     EXPECT(res.code() == PDISCOVERY_UNLOAD);
+    EXPECT_EQ(res.is_splitting(), false);
     EXPECT(SHA1Hash(res.txnid().data(), res.txnid().size()) == SHA1::compute("mytx"));
     EXPECT(res.txnseq() ==  7);
     EXPECT_EQ(res.replication_targets().size(), 12);
@@ -333,6 +335,7 @@ TEST_CASE(PartitionDiscoveryTest, TestSplittingPartition, [] () {
     auto rc = PartitionDiscovery::discoverPartition(&file, req, &res);
     EXPECT(rc.isSuccess());
     EXPECT(res.code() == PDISCOVERY_LOAD);
+    EXPECT_EQ(res.is_splitting(), false);
     EXPECT(SHA1Hash(res.txnid().data(), res.txnid().size()) == SHA1::compute("mytx"));
     EXPECT(res.txnseq() ==  7);
     EXPECT(res.replication_targets().size() == 2);
@@ -359,6 +362,7 @@ TEST_CASE(PartitionDiscoveryTest, TestSplittingPartition, [] () {
     auto rc = PartitionDiscovery::discoverPartition(&file, req, &res);
     EXPECT(rc.isSuccess());
     EXPECT(res.code() == PDISCOVERY_LOAD);
+    EXPECT_EQ(res.is_splitting(), false);
     EXPECT(SHA1Hash(res.txnid().data(), res.txnid().size()) == SHA1::compute("mytx"));
     EXPECT(res.txnseq() ==  7);
     EXPECT(res.keyrange_begin() == "e");
@@ -388,6 +392,7 @@ TEST_CASE(PartitionDiscoveryTest, TestSplittingPartition, [] () {
     auto rc = PartitionDiscovery::discoverPartition(&file, req, &res);
     EXPECT(rc.isSuccess());
     EXPECT(res.code() == PDISCOVERY_LOAD);
+    EXPECT_EQ(res.is_splitting(), false);
     EXPECT(SHA1Hash(res.txnid().data(), res.txnid().size()) == SHA1::compute("mytx"));
     EXPECT(res.txnseq() ==  7);
     EXPECT(res.replication_targets().size() == 2);
@@ -414,6 +419,7 @@ TEST_CASE(PartitionDiscoveryTest, TestSplittingPartition, [] () {
     auto rc = PartitionDiscovery::discoverPartition(&file, req, &res);
     EXPECT(rc.isSuccess());
     EXPECT(res.code() == PDISCOVERY_LOAD);
+    EXPECT_EQ(res.is_splitting(), false);
     EXPECT(SHA1Hash(res.txnid().data(), res.txnid().size()) == SHA1::compute("mytx"));
     EXPECT(res.txnseq() ==  7);
     EXPECT(res.keyrange_begin() == "p");

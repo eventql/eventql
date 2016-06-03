@@ -49,8 +49,21 @@ LSMPartitionReplication::LSMPartitionReplication(
 
 bool LSMPartitionReplication::needsReplication() const {
   // check if we have seen the latest metadata transaction, otherwise enqueue
+  if (snap_->state.last_metadata_txnid().empty()) {
+    return true;
+  }
+
+  SHA1Hash last_seen_txid(
+      snap_->state.last_metadata_txnid().data(),
+      snap_->state.last_metadata_txnid().size());
+
   auto last_txid = partition_->getTable()->getLastMetadataTransaction();
-  if (last_txid != partition_->getLastMetadataTransaction()) {
+  if (last_txid.getTransactionID() != last_seen_txid) {
+    return true;
+  }
+
+  // check if we are splitting
+  if (snap_->state.is_splitting()) {
     return true;
   }
 
@@ -125,23 +138,20 @@ void LSMPartitionReplication::replicateTo(
 }
 
 bool LSMPartitionReplication::replicate() {
-  // if there is a new metadata transaction, fetch and apply it
-  auto last_txid = partition_->getTable()->getLastMetadataTransaction();
-  if (last_txid != partition_->getLastMetadataTransaction()) {
-    auto rc = fetchAndApplyMetadataTransaction(last_txid);
-    if (!rc.isSuccess()) {
-      RAISEF(
-          kRuntimeError,
-          "error while applying metadata transaction $0: $1",
-          last_txid.getTransactionID().toString(), rc.message());
-    }
-  }
+  logDebug(
+      "z1.replication",
+      "Replicating partition $0/$1/$2",
+      snap_->state.tsdb_namespace(),
+      snap_->state.table_key(),
+      snap_->key.toString());
 
-  if (last_txid != partition_->getLastMetadataTransaction()) {
+  // if there is a new metadata transaction, fetch and apply it
+  auto rc = fetchAndApplyMetadataTransaction();
+  if (!rc.isSuccess()) {
     RAISEF(
         kRuntimeError,
-        "error while applying metadata transaction $0",
-        last_txid.getTransactionID().toString());
+        "error while applying metadata transactionL $0",
+        rc.message());
   }
 
   // get the list of other replicaas for this partition
@@ -297,6 +307,40 @@ void LSMPartitionReplication::fetchRecords(
       fn(id, version, record_buf.data(), record_buf.size());
     }
   }
+}
+
+Status LSMPartitionReplication::fetchAndApplyMetadataTransaction() {
+  auto last_txid = partition_->getTable()->getLastMetadataTransaction();
+  bool has_new_metadata_txn =
+      snap_->state.last_metadata_txnid().empty() ||
+      SHA1Hash(
+          snap_->state.last_metadata_txnid().data(),
+          snap_->state.last_metadata_txnid().size()) != last_txid.getTransactionID();
+
+  if (has_new_metadata_txn) {
+    auto rc = fetchAndApplyMetadataTransaction(last_txid);
+    if (!rc.isSuccess()) {
+      return rc;
+    }
+
+    snap_ = partition_->getSnapshot();
+
+    has_new_metadata_txn =
+        snap_->state.last_metadata_txnid().empty() ||
+        SHA1Hash(
+            snap_->state.last_metadata_txnid().data(),
+            snap_->state.last_metadata_txnid().size()) != last_txid.getTransactionID();
+  }
+
+  if (has_new_metadata_txn) {
+    return Status(
+        eRuntimeError,
+        StringUtil::format(
+            "error while applying metadata transaction $0",
+            last_txid.getTransactionID().toString()));
+  }
+
+  return Status::success();
 }
 
 Status LSMPartitionReplication::fetchAndApplyMetadataTransaction(

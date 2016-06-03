@@ -146,6 +146,13 @@ Status PartitionDiscovery::discoverPartitionByKeyRange(
 
     if (iter->splitting) {
       addSplittingReplicationTargets(response, file, iter);
+      response->set_is_splitting(true);
+      response->add_split_partition_ids(
+          iter->split_partition_id_low.data(),
+          iter->split_partition_id_low.size());
+      response->add_split_partition_ids(
+          iter->split_partition_id_high.data(),
+          iter->split_partition_id_high.size());
     }
 
     // if we are neither in the active, joining or leaving server list, return

@@ -369,6 +369,12 @@ Status LSMPartitionWriter::applyMetadataChange(
   snap->state.set_last_metadata_txnid(discovery_info.txnid());
   snap->state.set_last_metadata_txnseq(discovery_info.txnseq());
   snap->state.set_lifecycle_state(discovery_info.code());
+  snap->state.set_is_splitting(discovery_info.is_splitting());
+
+  snap->state.mutable_split_partition_ids()->Clear();
+  for (const auto& p : discovery_info.split_partition_ids()) {
+    snap->state.add_split_partition_ids(p);
+  }
 
   snap->state.mutable_replication_targets()->Clear();
   for (const auto& dt : discovery_info.replication_targets()) {

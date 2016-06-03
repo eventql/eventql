@@ -52,6 +52,7 @@ public:
 
 protected:
 
+  Status fetchAndApplyMetadataTransaction();
   Status fetchAndApplyMetadataTransaction(MetadataTransaction txn);
 
   void replicateTo(

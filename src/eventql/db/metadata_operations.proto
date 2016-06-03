@@ -58,6 +58,8 @@ message PartitionDiscoveryResponse {
   repeated PartitionDiscoveryReplicationTarget replication_targets = 4;
   optional bytes keyrange_begin = 5;
   optional bytes keyrange_end = 6;
+  optional bool is_splitting = 7;
+  repeated bytes split_partition_ids = 8;
 };
 
 message PartitionListRequest {
