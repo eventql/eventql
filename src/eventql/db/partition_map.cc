@@ -46,8 +46,8 @@ static mdb::MDBOptions tsdb_mdb_opts() {
 PartitionMap::PartitionMap(
     ServerCfg* cfg) :
     cfg_(cfg),
-    cdir_(cfg->config_directory),
-    db_(mdb::MDB::open(cfg_->db_path, tsdb_mdb_opts())) {}
+    db_(mdb::MDB::open(cfg_->db_path, tsdb_mdb_opts())),
+    cdir_(cfg->config_directory) {}
 
 Option<RefPtr<Table>> PartitionMap::findTable(
     const String& stream_ns,
