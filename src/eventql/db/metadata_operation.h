@@ -73,6 +73,10 @@ protected:
       const MetadataFile& input,
       Vector<MetadataFile::PartitionMapEntry>* output) const;
 
+  Status performFinalizeJoin(
+      const MetadataFile& input,
+      Vector<MetadataFile::PartitionMapEntry>* output) const;
+
   MetadataOperationEnvelope data_;
 };
 

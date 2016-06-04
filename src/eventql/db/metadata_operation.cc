@@ -81,6 +81,8 @@ Status MetadataOperation::perform(
       return performFinalizeSplit(input, output);
     case METAOP_JOIN_SERVERS:
       return performJoinServers(input, output);
+    case METAOP_FINALIZE_JOIN:
+      return performFinalizeJoin(input, output);
     default:
       return Status(eIllegalArgumentError, "invalid metadata operation type");
   }
@@ -323,6 +325,57 @@ Status MetadataOperation::performJoinServers(
 
   *output = pmap;
   return Status::success();
+}
+
+Status MetadataOperation::performFinalizeJoin(
+    const MetadataFile& input,
+    Vector<MetadataFile::PartitionMapEntry>* output) const {
+  auto opdata = msg::decode<FinalizeJoinOperation>(
+      data_.opdata().data(),
+      data_.opdata().size());
+
+  SHA1Hash partition_id(
+      opdata.partition_id().data(),
+      opdata.partition_id().size());
+
+  bool success = false;
+  auto pmap  = input.getPartitionMap();
+  for (auto& p : pmap) {
+    if (p.partition_id != partition_id) {
+      continue;
+    }
+
+    bool server_found = false;
+    for (auto s = p.servers_joining.begin(); s != p.servers_joining.end(); ) {
+      if (s->server_id == opdata.server_id() &&
+          s->placement_id == opdata.placement_id()) {
+        server_found = true;
+        s = p.servers_joining.erase(s);
+      } else {
+        ++s;
+      }
+    }
+
+    if (!server_found) {
+      return Status(
+          eIllegalArgumentError,
+          "server not included in join list");
+    }
+
+    MetadataFile::PartitionPlacement s;
+    s.server_id = opdata.server_id();
+    s.placement_id = opdata.placement_id();
+    p.servers.emplace_back(s);
+    success = true;
+    break;
+  }
+
+  if (success) {
+    *output = pmap;
+    return Status::success();
+  } else {
+    return Status(eNotFoundError, "partition join not found");
+  }
 }
 
 } // namespace eventql
