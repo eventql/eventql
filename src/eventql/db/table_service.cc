@@ -342,6 +342,7 @@ void TableService::insertRecords(
     uint64_t flags /* = 0 */) {
   Vector<String> errors;
 
+  size_t nconfirmations = 0;
   for (const auto& server : servers) {
     try {
       if (server == cdir_->getServerID()) {
@@ -361,7 +362,7 @@ void TableService::insertRecords(
             server);
       }
 
-      return;
+      ++nconfirmations;
     } catch (const StandardException& e) {
       logError(
           "eventql",
@@ -372,10 +373,12 @@ void TableService::insertRecords(
     }
   }
 
-  RAISEF(
-      kRuntimeError,
-      "TableService::insertRecordsRemote failed: $0",
-      StringUtil::join(errors, ", "));
+  if (nconfirmations < 1) { // FIXME min consistency level
+    RAISEF(
+        kRuntimeError,
+        "TableService::insertRecordsRemote failed: $0",
+        StringUtil::join(errors, ", "));
+  }
 }
 
 void TableService::insertRecordsLocal(
