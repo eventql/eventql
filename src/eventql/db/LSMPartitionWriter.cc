@@ -172,6 +172,7 @@ bool LSMPartitionWriter::commit() {
   }
 
   // flush arena to disk if pending
+  bool commited = false;
   if (arena.get() && arena->size() > 0) {
     auto snap = head_->getSnapshot();
     auto filename = Random::singleton()->hex64();
@@ -195,14 +196,24 @@ bool LSMPartitionWriter::commit() {
     tblref->set_filename(filename);
     tblref->set_first_sequence(snap->state.lsm_sequence() + 1);
     tblref->set_last_sequence(snap->state.lsm_sequence() + arena->size());
+    tblref->set_size_bytes(FileUtil::size(filepath + ".cst"));
     snap->state.set_lsm_sequence(snap->state.lsm_sequence() + arena->size());
     snap->compacting_arena = nullptr;
     snap->writeToDisk();
     head_->setSnapshot(snap);
-    return true;
-  } else {
-    return false;
+    commited = true;
   }
+
+  commit_mutex_.unlock();
+
+  if (needsSplit()) {
+    auto rc = split();
+    if (!rc.isSuccess()) {
+      logWarning("evqld", "partition split failed: $0", rc.message());
+    }
+  }
+
+  return commited;
 }
 
 bool LSMPartitionWriter::compact() {
@@ -266,6 +277,7 @@ bool LSMPartitionWriter::compact() {
   head_->setSnapshot(snap);
   write_lk.unlock();
 
+  // delete 
   Set<String> delete_filenames;
   for (const auto& tbl : old_tables) {
     delete_filenames.emplace(tbl.filename());
@@ -279,6 +291,16 @@ bool LSMPartitionWriter::compact() {
     FileUtil::rm(FileUtil::joinPaths(snap->base_path, f + ".cst"));
     FileUtil::rm(FileUtil::joinPaths(snap->base_path, f + ".idx"));
     idx_cache_->flush(FileUtil::joinPaths(snap->rel_path, f));
+  }
+
+  compact_lk.unlock();
+
+  // maybe split this partition
+  if (needsSplit()) {
+    auto rc = split();
+    if (!rc.isSuccess()) {
+      logWarning("evqld", "partition split failed: $0", rc.message());
+    }
   }
 
   return true;
@@ -327,6 +349,23 @@ void LSMPartitionWriter::writeArenaToDisk(
   }
 }
 
+bool LSMPartitionWriter::needsSplit() const {
+  return true;
+}
+
+Status LSMPartitionWriter::split() {
+  auto snap = head_->getSnapshot();
+
+  logInfo(
+      "z1.replication",
+      "Splitting partition $0/$1/$2",
+      snap->state.tsdb_namespace(),
+      snap->state.table_key(),
+      snap->key.toString());
+
+  return Status::success();
+}
+
 ReplicationState LSMPartitionWriter::fetchReplicationState() const {
   auto snap = head_->getSnapshot();
   auto repl_state = snap->state.replication_state();
@@ -351,7 +390,8 @@ void LSMPartitionWriter::commitReplicationState(const ReplicationState& state) {
 
 Status LSMPartitionWriter::applyMetadataChange(
     const PartitionDiscoveryResponse& discovery_info) {
-  auto snap = head_->getSnapshot();
+  ScopedLock<std::mutex> write_lk(mutex_);
+  auto snap = head_->getSnapshot()->clone();
 
   logTrace(
       "evqld",
@@ -361,87 +401,43 @@ Status LSMPartitionWriter::applyMetadataChange(
       snap->key.toString(),
       discovery_info.DebugString());
 
-  // backfill code
-  auto has_local_replica = repl_->hasLocalReplica(snap->key);
-  if (has_local_replica &&
-      discovery_info.code() != PDISCOVERY_SERVE &&
-      !snap->state.partition_keyrange_begin().empty()) {
-    logDebug(
-        "evqld",
-        "Adding myself to the server list for $0/$1/$2",
-        snap->state.tsdb_namespace(),
-        snap->state.table_key(),
-        snap->key.toString());
+  if (snap->state.last_metadata_txnseq() >= discovery_info.txnseq()) {
+    return Status(eConcurrentModificationError, "version conflict");
+  }
 
-    BackfillAddServerOperation opdata;
-    opdata.set_partition_id(snap->key.data(), snap->key.size());
-    opdata.set_keyrange_begin(snap->state.partition_keyrange_begin());
-    opdata.set_server_id(cdir_->getServerID());
+  snap->state.set_last_metadata_txnid(discovery_info.txnid());
+  snap->state.set_last_metadata_txnseq(discovery_info.txnseq());
+  snap->state.set_lifecycle_state(discovery_info.code());
+  snap->state.set_is_splitting(discovery_info.is_splitting());
 
-    MetadataOperation op(
-        snap->state.tsdb_namespace(),
-        snap->state.table_key(),
-        METAOP_BACKFILL_ADD_SERVER,
-        SHA1Hash(discovery_info.txnid().data(), discovery_info.txnid().size()),
-        Random::singleton()->sha1(),
-        *msg::encode(opdata));
+  // backfill keyrange
+  if (snap->state.partition_keyrange_end().size() == 0 &&
+      discovery_info.keyrange_end().size() > 0) {
+    snap->state.set_partition_keyrange_end(discovery_info.keyrange_end());
+  }
 
-    MetadataCoordinator coordinator(cdir_);
-    auto rc = coordinator.performAndCommitOperation(
-        snap->state.tsdb_namespace(),
-        snap->state.table_key(),
-        op);
+  snap->state.mutable_split_partition_ids()->Clear();
+  for (const auto& p : discovery_info.split_partition_ids()) {
+    snap->state.add_split_partition_ids(p);
+  }
 
-    if (!rc.isSuccess()) {
-      return rc;
+  snap->state.set_has_joining_servers(false);
+  snap->state.mutable_replication_targets()->Clear();
+  for (const auto& dt : discovery_info.replication_targets()) {
+    auto pt = snap->state.add_replication_targets();
+    pt->set_server_id(dt.server_id());
+    pt->set_placement_id(dt.placement_id());
+    pt->set_partition_id(dt.partition_id());
+    pt->set_keyrange_begin(dt.keyrange_begin());
+    pt->set_keyrange_end(dt.keyrange_end());
+    if (dt.is_joining()) {
+      pt->set_is_joining(true);
+      snap->state.set_has_joining_servers(true);
     }
   }
 
-  if (!has_local_replica && discovery_info.code() != PDISCOVERY_UNLOAD) {
-    logDebug(
-        "evqld",
-        "Removing myself from the server list for $0/$1/$2",
-        snap->state.tsdb_namespace(),
-        snap->state.table_key(),
-        snap->key.toString());
-
-    BackfillRemoveServerOperation opdata;
-    opdata.set_partition_id(snap->key.data(), snap->key.size());
-    opdata.set_server_id(cdir_->getServerID());
-
-    MetadataOperation op(
-        snap->state.tsdb_namespace(),
-        snap->state.table_key(),
-        METAOP_BACKFILL_REMOVE_SERVER,
-        SHA1Hash(discovery_info.txnid().data(), discovery_info.txnid().size()),
-        Random::singleton()->sha1(),
-        *msg::encode(opdata));
-
-    MetadataCoordinator coordinator(cdir_);
-    auto rc = coordinator.performAndCommitOperation(
-        snap->state.tsdb_namespace(),
-        snap->state.table_key(),
-        op);
-
-    if (!rc.isSuccess()) {
-      return rc;
-    }
-  }
-
-  // commit
-  {
-    ScopedLock<std::mutex> write_lk(mutex_);
-    snap = head_->getSnapshot()->clone();
-    if (snap->state.last_metadata_txnseq() >= discovery_info.txnseq()) {
-      return Status(eConcurrentModificationError, "version conflict");
-    }
-
-    snap->state.set_last_metadata_txnid(discovery_info.txnid());
-    snap->state.set_last_metadata_txnseq(discovery_info.txnseq());
-
-    snap->writeToDisk();
-    head_->setSnapshot(snap);
-  }
+  snap->writeToDisk();
+  head_->setSnapshot(snap);
 
   return Status::success();
 }

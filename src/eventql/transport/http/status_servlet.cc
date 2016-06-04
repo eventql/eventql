@@ -339,7 +339,7 @@ void StatusServlet::renderTablePage(
   } else {
     html += "<h3>Partition Map:</h3>";
     html += "<table cellspacing=0 border=1>";
-    html += "<thead><tr><td>Keyrange</td><td>Partition ID</td><td>Servers</td></tr></thead>";
+    html += "<thead><tr><td>Keyrange</td><td>Partition ID</td><td>Servers</td><td></td></tr></thead>";
     for (const auto& e : metadata_file.getPartitionMap()) {
       Vector<String> servers;
       for (const auto& s : e.servers) {
@@ -369,11 +369,36 @@ void StatusServlet::renderTablePage(
         }
       }
 
+      String extra_info;
+      if (e.splitting) {
+        auto split_point = decodePartitionKey(
+            table.get()->getKeyspaceType(),
+            e.split_point);
+
+        Set<String> servers_low;
+        for (const auto& s : e.split_servers_low) {
+          servers_low.emplace(s.server_id);
+        }
+        Set<String> servers_high;
+        for (const auto& s : e.split_servers_high) {
+          servers_high.emplace(s.server_id);
+        }
+
+        extra_info += StringUtil::format(
+            "SPLITTING @ $0 into $1 on $2, $3 on $4",
+            decodePartitionKey(table.get()->getKeyspaceType(), e.split_point),
+            e.split_partition_id_low,
+            inspect(servers_low),
+            e.split_partition_id_high,
+            inspect(servers_high));
+      }
+
       html += StringUtil::format(
-          "<tr><td>$0</td><td>$1</td><td>$2</td></tr>",
+          "<tr><td>$0</td><td>$1</td><td>$2</td><td>$3</td></tr>",
           keyrange,
           e.partition_id.toString(),
-          StringUtil::join(servers, ", "));
+          StringUtil::join(servers, ", "),
+          extra_info);
     }
     html += "</table>";
   }
@@ -434,6 +459,22 @@ void StatusServlet::renderPartitionPage(
           UnixTime(ts_end),
           ts_end);
     }
+
+    html += StringUtil::format(
+        "<span><em>Lifecycle State</em>: $0</span> &mdash; ",
+        PartitionLifecycleState_Name(snap->state.lifecycle_state()));
+
+    html += StringUtil::format(
+        "<span><em>Splitting?</em>: $0</span> &mdash; ",
+        snap->state.is_splitting());
+
+    html += StringUtil::format(
+        "<span><em>Joining Servers?</em>: $0</span> &mdash; ",
+        snap->state.has_joining_servers());
+
+    html += StringUtil::format(
+        "<span><em>Size (Disk)</em>: $0MB</span> &mdash; ",
+        partition.get()->getTotalDiskSize() / 1024.0 / 1024.0);
 
     html += StringUtil::format(
         "<span><em>Number of Records</em>: $0</span>",

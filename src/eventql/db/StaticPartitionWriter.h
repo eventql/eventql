@@ -44,6 +44,11 @@ public:
   bool commit() override;
   bool compact() override;
 
+  Status applyMetadataChange(
+      const PartitionDiscoveryResponse& discovery_info) override {
+    return Status::success();
+  }
+
 };
 
 } // namespace tdsb

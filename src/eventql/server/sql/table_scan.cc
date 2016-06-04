@@ -33,10 +33,9 @@ TableScan::TableScan(
     csql::ExecutionContext* execution_context,
     const String& tsdb_namespace,
     const String& table_name,
-    const Vector<SHA1Hash>& partitions,
+    const Vector<PartitionLocation>& partitions,
     RefPtr<csql::SequentialScanNode> seqscan,
     PartitionMap* partition_map,
-    ReplicationScheme* replication_scheme,
     InternalAuth* auth) :
     txn_(txn),
     execution_context_(execution_context),
@@ -45,7 +44,6 @@ TableScan::TableScan(
     partitions_(partitions),
     seqscan_(seqscan),
     partition_map_(partition_map),
-    replication_scheme_(replication_scheme),
     auth_(auth),
     cur_partition_(0) {
   execution_context_->incrementNumTasks(partitions_.size());
@@ -86,11 +84,11 @@ bool TableScan::next(csql::SValue* row, size_t row_len) {
 }
 
 ScopedPtr<csql::ResultCursor> TableScan::openPartition(
-    const SHA1Hash& partition_key) {
-  if (replication_scheme_->hasLocalReplica(partition_key)) {
-    return openLocalPartition(partition_key);
+    const PartitionLocation& partition) {
+  if (partition.servers.empty()) {
+    return openLocalPartition(partition.partition_id);
   } else {
-    return openRemotePartition(partition_key);
+    return openRemotePartition(partition.partition_id, partition.servers);
   }
 }
 
@@ -132,7 +130,8 @@ ScopedPtr<csql::ResultCursor> TableScan::openLocalPartition(
 }
 
 ScopedPtr<csql::ResultCursor> TableScan::openRemotePartition(
-    const SHA1Hash& partition_key) {
+    const SHA1Hash& partition_key,
+    const Vector<ReplicaRef> servers) {
   auto table_name = StringUtil::format(
       "tsdb://remote/$0/$1",
       URI::urlEncode(table_name_),
@@ -151,7 +150,7 @@ ScopedPtr<csql::ResultCursor> TableScan::openRemotePartition(
 
   remote_expr->addRemoteQuery(
       seqscan_copy.get(),
-      replication_scheme_->replicasFor(partition_key));
+      servers);
 
   return mkScoped(
       new csql::TableExpressionResultCursor(std::move(remote_expr)));

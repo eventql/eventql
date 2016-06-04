@@ -188,5 +188,13 @@ bool StaticPartitionReplication::replicate() {
   return success;
 }
 
+bool StaticPartitionReplication::shouldDropPartition() const {
+  if (repl_scheme_->hasLocalReplica(snap_->key)) {
+    return false;
+  }
+
+  return numFullRemoteCopies() >= repl_scheme_->minNumCopies();
+}
+
 } // namespace tdsb
 

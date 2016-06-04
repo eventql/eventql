@@ -34,6 +34,7 @@ message ServerConfig {
   optional string server_addr = 3;
   optional ServerStatus server_status = 4;
   repeated string sha1_tokens = 5;
-  optional bool leaving = 6;
+  optional bool is_leaving = 6;
+  optional bool is_dead = 7;
 };
 

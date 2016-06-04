@@ -850,6 +850,8 @@ evql_core_a_SOURCES = \
     eventql/db/ReplicationState.h \
     eventql/db/ReplicationWorker.cc \
     eventql/db/ReplicationWorker.h \
+    eventql/db/server_allocator.cc \
+    eventql/db/server_allocator.h \
     eventql/db/StaticPartitionReader.cc \
     eventql/db/StaticPartitionReader.h \
     eventql/db/StaticPartitionReplication.cc \

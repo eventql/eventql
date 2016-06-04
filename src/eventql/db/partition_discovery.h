@@ -41,6 +41,18 @@ public:
       const PartitionDiscoveryRequest& request,
       PartitionDiscoveryResponse* response);
 
+protected:
+
+  static Status discoverPartitionByID(
+      const MetadataFile* file,
+      const PartitionDiscoveryRequest& request,
+      PartitionDiscoveryResponse* response);
+
+  static Status discoverPartitionByKeyRange(
+      const MetadataFile* file,
+      const PartitionDiscoveryRequest& request,
+      PartitionDiscoveryResponse* response);
+
 };
 
 } // namespace eventql

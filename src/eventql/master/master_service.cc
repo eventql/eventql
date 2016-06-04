@@ -23,6 +23,7 @@
  */
 #include <eventql/master/master_service.h>
 #include <eventql/util/random.h>
+#include <eventql/db/server_allocator.h>
 
 namespace eventql {
 
@@ -38,15 +39,15 @@ Status MasterService::runOnce() {
   logInfo("evqld", "Rebalancing cluster...");
 
   all_servers_.clear();
-  live_servers_.clear();
   for (const auto& s : cdir_->listServers()) {
-    all_servers_.emplace(s.server_id());
-    if (s.server_status() == SERVER_UP) {
-      live_servers_.emplace_back(s.server_id());
+    if (s.is_dead()) {
+      continue;
     }
+
+    all_servers_.emplace(s.server_id());
   }
 
-  if (live_servers_.empty() || all_servers_.empty()) {
+  if (all_servers_.empty()) {
     return Status(eIllegalStateError, "cluster has no live servers");
   }
 
@@ -75,6 +76,8 @@ Status MasterService::rebalanceTable(TableDefinition tbl_cfg) {
       "Rebalancing table '$0/$1'",
       tbl_cfg.customer(),
       tbl_cfg.table_name());
+
+  ServerAllocator server_alloc(cdir_);
 
   // fetch latest metadata file
   MetadataFile metadata;
@@ -131,25 +134,53 @@ Status MasterService::rebalanceTable(TableDefinition tbl_cfg) {
 
   // make sure we have enough metadata servers
   {
+    Set<String> current_metadata_servers;
     size_t nservers = 0;
     for (const auto& s : tbl_cfg.metadata_servers()) {
-      if (leaving_servers_.count(s) == 0) {
+      current_metadata_servers.emplace(s);
+
+      if (all_servers_.count(s) > 0 &&
+          leaving_servers_.count(s) == 0) {
         ++nservers;
       }
     }
 
-    for (; nservers < metadata_replication_factor_; ++nservers) {
-      auto new_server = pickMetadataServer();
-      logInfo(
-          "evqld",
-          "Adding new metadata server '$0' to table '$1/$2'",
-          new_server,
-          tbl_cfg.customer(),
-          tbl_cfg.table_name());
+    if (nservers < metadata_replication_factor_) {
+      auto new_metadata_servers = current_metadata_servers;
+      {
+        auto rc = server_alloc.allocateServers(
+            metadata_replication_factor_ - nservers,
+            &new_metadata_servers);
+        if (!rc.isSuccess()) {
+          return rc;
+        }
+      }
 
-      tbl_cfg.add_metadata_servers(new_server);
+      for (const auto& s : new_metadata_servers) {
+        if (current_metadata_servers.count(s) == 0) {
+          logInfo(
+              "evqld",
+              "Adding new metadata server to table '$1/$2': $0",
+              s,
+              tbl_cfg.customer(),
+              tbl_cfg.table_name());
+
+          tbl_cfg.add_metadata_servers(s);
+        }
+      }
+
       tbl_cfg_dirty = true;
     }
+  }
+
+  // if we made a change to the metadata servers above, we need to update the
+  // table config and exit, otherwise we might get stuck in a state where
+  // operations below here could never succeed (due to the operations being
+  // blocked by missing metadata servers, and adding metadata servers being
+  // blocked by the operations failing
+  if (tbl_cfg_dirty) {
+    cdir_->updateTableConfig(tbl_cfg);
+    return Status::success();
   }
 
   // remove dead servers from the metadata file
@@ -173,14 +204,14 @@ Status MasterService::rebalanceTable(TableDefinition tbl_cfg) {
       }
     }
 
-    logInfo(
-        "evqld",
-        "Removing dead servers from partition map for table '$0/$1': $2",
-        tbl_cfg.customer(),
-        tbl_cfg.table_name(),
-        inspect(dead_servers));
-
     if (!dead_servers.empty()) {
+      logInfo(
+          "evqld",
+          "Removing dead servers from partition map for table '$0/$1': $2",
+          tbl_cfg.customer(),
+          tbl_cfg.table_name(),
+          inspect(dead_servers));
+
       RemoveDeadServersOperation opdata;
       for (const auto& s : dead_servers) {
         opdata.add_server_ids(s);
@@ -199,20 +230,74 @@ Status MasterService::rebalanceTable(TableDefinition tbl_cfg) {
     }
   }
 
+  // join new servers
+  {
+    JoinServersOperation ops;
+
+    for (const auto& e : metadata.getPartitionMap()) {
+      Set<String> cur_servers;
+      for (const auto& s : e.servers) {
+        cur_servers.emplace(s.server_id);
+      }
+      for (const auto& s : e.servers_joining) {
+        cur_servers.emplace(s.server_id);
+      }
+
+      if (cur_servers.size() < replication_factor_) {
+        auto new_servers = cur_servers;
+        {
+          auto rc = server_alloc.allocateServers(
+              replication_factor_ - cur_servers.size(),
+              &new_servers);
+          if (!rc.isSuccess()) {
+            return rc;
+          }
+        }
+
+        for (const auto& s : new_servers) {
+          if (cur_servers.count(s) > 0) {
+            continue;
+          }
+
+          logInfo(
+              "evqld",
+              "Joining new servers to table '$0/$1/$2': $3",
+              tbl_cfg.customer(),
+              tbl_cfg.table_name(),
+              e.partition_id,
+              s);
+
+          auto join_op = ops.add_ops();
+          join_op->set_partition_id(
+              e.partition_id.data(),
+              e.partition_id.size());
+          join_op->set_server_id(s);
+          join_op->set_placement_id(Random::singleton()->random64());
+        }
+      }
+    }
+
+    if (ops.ops().size() != 0) {
+      tbl_cfg_dirty = true;
+      auto rc = performMetadataOperation(
+          &tbl_cfg,
+          &metadata,
+          METAOP_JOIN_SERVERS,
+          *msg::encode(ops));
+
+      if (!rc.isSuccess()) {
+        return rc;
+      }
+    }
+  }
+
+  // FIXME: fill up splitting servers list to N
+
   if (tbl_cfg_dirty) {
     cdir_->updateTableConfig(tbl_cfg);
   }
 
   return Status::success();
-}
-
-String MasterService::pickMetadataServer() const {
-  return pickServer();
-}
-
-String MasterService::pickServer() const {
-  uint64_t idx = Random::singleton()->random64();
-  return live_servers_[idx % live_servers_.size()];
 }
 
 Status MasterService::performMetadataOperation(

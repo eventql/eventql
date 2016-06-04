@@ -33,6 +33,8 @@
 #include <eventql/db/PartitionState.pb.h>
 #include "eventql/db/metadata_coordinator.h"
 #include "eventql/db/metadata_file.h"
+#include "eventql/db/metadata_client.h"
+#include "eventql/db/server_allocator.h"
 
 #include "eventql/eventql.h"
 
@@ -80,19 +82,28 @@ Status TableService::createTable(
   }
 
   // generate new metadata file
-  Vector<String> all_servers;
-  for (const auto& s : cdir_->listServers()) {
-    all_servers.emplace_back(s.server_id());
+  Set<String> servers;
+  ServerAllocator server_alloc(cdir_);
+  {
+    auto rc = server_alloc.allocateServers(3, &servers);
+    if (!rc.isSuccess()) {
+      return rc;
+    }
+  }
+
+  MetadataFile::PartitionMapEntry initial_partition;
+  initial_partition.begin = "";
+  initial_partition.partition_id = Random::singleton()->sha1();
+  initial_partition.splitting = false;
+  for (const auto& s : servers) {
+    MetadataFile::PartitionPlacement p;
+    p.server_id = s;
+    p.placement_id = Random::singleton()->random64();
+    initial_partition.servers.emplace_back(p);
   }
 
   auto txnid = Random::singleton()->sha1();
-  Vector<String> servers;
-  uint64_t idx = Random::singleton()->random64();
-  for (int i = 0; i < 3; ++i) {
-    servers.emplace_back(all_servers[++idx % all_servers.size()]);
-  }
-
-  MetadataFile metadata_file(txnid, 1, KEYSPACE_UINT64, {});
+  MetadataFile metadata_file(txnid, 1, KEYSPACE_UINT64, { initial_partition });
 
   // generate new table config
   TableDefinition td;
@@ -120,7 +131,7 @@ Status TableService::createTable(
       db_namespace,
       table_name,
       metadata_file,
-      servers);
+      Vector<String>(servers.begin(), servers.end()));
 
   if (!rc.isSuccess()) {
     return rc;
@@ -151,159 +162,6 @@ void TableService::listTablesReverse(
   });
 }
 
-void TableService::insertRecords(
-    const RecordEnvelopeList& record_list,
-    uint64_t flags /* = 0 */) {
-  Vector<RefPtr<Partition>> partition_refs;
-  HashMap<String, Vector<RecordRef>> grouped;
-
-  for (const auto& record : record_list.records()) {
-    SHA1Hash partition_key;
-
-    auto table = pmap_->findTable(
-        record.tsdb_namespace(),
-        record.table_name());
-
-    if (table.isEmpty()) {
-      RAISEF(kNotFoundError, "table not found: $0", record.table_name());
-    }
-
-    if (record.has_partition_sha1()) {
-      partition_key = SHA1Hash::fromHexString(record.partition_sha1());
-    } else {
-      partition_key = table.get()->partitioner()->partitionKeyFor(
-          record.partition_key());
-    }
-
-    auto record_data = record.record_data().data();
-    auto record_size = record.record_data().size();
-    auto record_version = record.record_version();
-    if (record_version == 0) {
-      record_version = WallClock::unixMicros();
-    }
-
-    auto group_key = StringUtil::format(
-        "$0~$1~$2",
-        record.tsdb_namespace(),
-        record.table_name(),
-        partition_key.toString());
-
-    grouped[group_key].emplace_back(
-        SHA1Hash::fromHexString(record.record_id()),
-        record_version,
-        Buffer(record_data, record_size));
-  }
-
-  for (const auto& group : grouped) {
-    auto group_key = StringUtil::split(group.first, "~");
-    if (group_key.size() != 3) {
-      RAISE(kIllegalStateError);
-    }
-
-    insertRecords(
-        group_key[0],
-        group_key[1],
-        SHA1Hash::fromHexString(group_key[2]),
-        group.second,
-        flags);
-  }
-}
-
-void TableService::insertRecords(
-    const Vector<RecordEnvelope>& records,
-    uint64_t flags /* = 0 */) {
-  Vector<RefPtr<Partition>> partition_refs;
-  HashMap<String, Vector<RecordRef>> grouped;
-
-  for (const auto& record : records) {
-    SHA1Hash partition_key;
-
-    auto table = pmap_->findTable(
-        record.tsdb_namespace(),
-        record.table_name());
-
-    if (table.isEmpty()) {
-      RAISEF(kNotFoundError, "table not found: $0", record.table_name());
-    }
-
-    if (record.has_partition_sha1()) {
-      partition_key = SHA1Hash::fromHexString(record.partition_sha1());
-    } else {
-      partition_key = table.get()->partitioner()->partitionKeyFor(
-          record.partition_key());
-    }
-
-    auto record_data = record.record_data().data();
-    auto record_size = record.record_data().size();
-    auto record_version = record.record_version();
-    if (record_version == 0) {
-      record_version = WallClock::unixMicros();
-    }
-
-    auto group_key = StringUtil::format(
-        "$0~$1~$2",
-        record.tsdb_namespace(),
-        record.table_name(),
-        partition_key.toString());
-
-    grouped[group_key].emplace_back(
-        SHA1Hash::fromHexString(record.record_id()),
-        record_version,
-        Buffer(record_data, record_size));
-  }
-
-  for (const auto& group : grouped) {
-    auto group_key = StringUtil::split(group.first, "~");
-    if (group_key.size() != 3) {
-      RAISE(kIllegalStateError);
-    }
-
-    insertRecords(
-        group_key[0],
-        group_key[1],
-        SHA1Hash::fromHexString(group_key[2]),
-        group.second,
-        flags);
-  }
-}
-
-void TableService::insertRecord(
-    const String& tsdb_namespace,
-    const String& table_name,
-    const SHA1Hash& partition_key,
-    const SHA1Hash& record_id,
-    uint64_t record_version,
-    const Buffer& record,
-    uint64_t flags /* = 0 */) {
-  Vector<RecordRef> records;
-  records.emplace_back(record_id, record_version, record);
-  insertRecords(tsdb_namespace, table_name, partition_key, records, flags);
-}
-
-void TableService::insertRecord(
-    const String& tsdb_namespace,
-    const String& table_name,
-    const SHA1Hash& record_id,
-    uint64_t record_version,
-    const json::JSONObject::const_iterator& data_begin,
-    const json::JSONObject::const_iterator& data_end,
-    uint64_t flags /* = 0 */) {
-  auto table = pmap_->findTable(tsdb_namespace, table_name);
-  if (table.isEmpty()) {
-    RAISEF(kNotFoundError, "table not found: $0", table_name);
-  }
-
-  msg::DynamicMessage record(table.get()->schema());
-  record.fromJSON(data_begin, data_end);
-  insertRecord(
-      tsdb_namespace,
-      table_name,
-      record_id,
-      record_version,
-      record,
-      flags);
-}
-
 void TableService::insertRecord(
     const String& tsdb_namespace,
     const String& table_name,
@@ -327,153 +185,197 @@ void TableService::insertRecord(
 void TableService::insertRecord(
     const String& tsdb_namespace,
     const String& table_name,
-    const SHA1Hash& record_id,
-    uint64_t record_version,
     const msg::DynamicMessage& data,
     uint64_t flags /* = 0 */) {
-  auto table = pmap_->findTable(tsdb_namespace, table_name);
-  if (table.isEmpty()) {
-    RAISEF(kNotFoundError, "table not found: $0", table_name);
-  }
-
-  auto partition_key_field_name = table.get()->getPartitionKey();
-  auto partition_key_field = data.getField(partition_key_field_name);
-  if (partition_key_field.isEmpty()) {
-    RAISEF(kNotFoundError, "missing field: $0", partition_key_field_name);
-  }
-
-  auto partitioner = table.get()->partitioner();
-  auto partition_key = partitioner->partitionKeyFor(partition_key_field.get());
-
-  Buffer record;
-  msg::MessageEncoder::encode(data.data(), *data.schema(), &record);
-
-  insertRecord(
+  insertRecords(
       tsdb_namespace,
       table_name,
-      partition_key,
-      record_id,
-      record_version,
-      record,
+      &data,
+      &data + 1,
       flags);
 }
 
-void TableService::insertRecord(
+void TableService::insertRecords(
     const String& tsdb_namespace,
     const String& table_name,
-    const msg::DynamicMessage& data,
+    const msg::DynamicMessage* begin,
+    const msg::DynamicMessage* end,
     uint64_t flags /* = 0 */) {
+  MetadataClient metadata_client(cdir_);
+  HashMap<SHA1Hash, Vector<RecordRef>> records;
+  HashMap<SHA1Hash, Set<String>> servers;
+
   auto table = pmap_->findTable(tsdb_namespace, table_name);
   if (table.isEmpty()) {
     RAISEF(kNotFoundError, "table not found: $0", table_name);
   }
 
-  // calculate partition key
-  auto partition_key_field_name = table.get()->getPartitionKey();
-  auto partition_key_field = data.getField(partition_key_field_name);
-  if (partition_key_field.isEmpty()) {
-    RAISEF(kNotFoundError, "missing field: $0", partition_key_field_name);
-  }
-
-  auto partitioner = table.get()->partitioner();
-  auto partition_key = partitioner->partitionKeyFor(partition_key_field.get());
-
-  // calculate primary key
-  SHA1Hash primary_key;
-  auto primary_key_columns = table.get()->getPrimaryKey();
-  if (primary_key_columns.size() == 1) {
-    auto f = data.getField(primary_key_columns[0]);
-    if (f.isEmpty()) {
-      RAISEF(kNotFoundError, "missing field: $0", primary_key_columns[0]);
+  for (auto record = begin; record != end; ++record) {
+    // calculate partition key
+    auto partition_key_field_name = table.get()->getPartitionKey();
+    auto partition_key_field = record->getField(partition_key_field_name);
+    if (partition_key_field.isEmpty()) {
+      RAISEF(kNotFoundError, "missing field: $0", partition_key_field_name);
     }
-    primary_key = SHA1::compute(f.get());
-  } else {
-    for (const auto& c : primary_key_columns) {
-      auto f = data.getField(c);
+
+    // calculate primary key
+    SHA1Hash primary_key;
+    auto primary_key_columns = table.get()->getPrimaryKey();
+    if (primary_key_columns.size() == 1) {
+      auto f = record->getField(primary_key_columns[0]);
       if (f.isEmpty()) {
-        RAISEF(kNotFoundError, "missing field: $0", c);
+        RAISEF(kNotFoundError, "missing field: $0", primary_key_columns[0]);
       }
+      primary_key = SHA1::compute(f.get());
+    } else {
+      for (const auto& c : primary_key_columns) {
+        auto f = record->getField(c);
+        if (f.isEmpty()) {
+          RAISEF(kNotFoundError, "missing field: $0", c);
+        }
 
-      auto chash = SHA1::compute(f.get());
-      Buffer primary_key_data;
-      primary_key_data.append(primary_key.data(), primary_key.size());
-      primary_key_data.append(chash.data(), chash.size());
-      primary_key = SHA1::compute(primary_key_data);
+        auto chash = SHA1::compute(f.get());
+        Buffer primary_key_data;
+        primary_key_data.append(primary_key.data(), primary_key.size());
+        primary_key_data.append(chash.data(), chash.size());
+        primary_key = SHA1::compute(primary_key_data);
+      }
     }
+
+    // lookup partition
+    PartitionFindResponse find_res;
+    {
+      auto rc = metadata_client.findPartition(
+          tsdb_namespace,
+          table_name,
+          encodePartitionKey(
+              table.get()->getKeyspaceType(),
+              partition_key_field.get()),
+          &find_res);
+
+      if (!rc.isSuccess()) {
+        RAISE(kRuntimeError, rc.message());
+      }
+    }
+
+    SHA1Hash partition_id(
+        find_res.partition_id().data(),
+        find_res.partition_id().size());
+
+    Set<String> partition_servers(
+        find_res.servers_for_insert().begin(),
+        find_res.servers_for_insert().end());
+
+    // FIXME
+    Buffer buf;
+    msg::MessageEncoder::encode(record->data(), *record->schema(), &buf);
+
+    servers[partition_id] = partition_servers;
+    records[partition_id].emplace_back(
+        primary_key,
+        WallClock::unixMicros(),
+        buf);
   }
 
-  Buffer record;
-  msg::MessageEncoder::encode(data.data(), *data.schema(), &record);
-
-  insertRecord(
-      tsdb_namespace,
-      table_name,
-      partition_key,
-      primary_key,
-      WallClock::unixMicros(),
-      record,
-      flags);
+  for (const auto& p : records) {
+    insertRecords(
+        tsdb_namespace,
+        table_name,
+        p.first,
+        servers[p.first],
+        p.second,
+        flags);
+  }
 }
 
-void TableService::insertRecords(
-    const String& tsdb_namespace,
-    const String& table_name,
-    const SHA1Hash& partition_key,
-    const Vector<RecordRef>& records,
+void TableService::insertReplicatedRecords(
+    const RecordEnvelopeList& records,
     uint64_t flags /* = 0 */) {
-  Vector<String> errors;
-  auto hosts = repl_->replicasFor(partition_key);
+  HashMap<String, Vector<RecordRef>> grouped;
 
-  if (flags & (uint64_t) InsertFlags::REPLICATED_WRITE) {
-    if (!repl_->hasLocalReplica(partition_key)) {
-      RAISE(
-          kIllegalStateError,
-          "insert has REPLICATED_WRITE flag, but the specified partition is "
-          "not owned by this host");
+  for (const auto& record : records.records()) {
+    if (!record.has_partition_sha1()) {
+      RAISE(kIllegalArgumentError, "missing partition id");
+    }
+
+    auto partition_key = SHA1Hash::fromHexString(record.partition_sha1());
+    auto record_data = record.record_data().data();
+    auto record_size = record.record_data().size();
+    auto record_version = record.record_version();
+    if (record_version == 0) {
+      record_version = WallClock::unixMicros();
+    }
+
+    auto group_key = StringUtil::format(
+        "$0~$1~$2",
+        record.tsdb_namespace(),
+        record.table_name(),
+        partition_key.toString());
+
+    grouped[group_key].emplace_back(
+        SHA1Hash::fromHexString(record.record_id()),
+        record_version,
+        Buffer(record_data, record_size));
+  }
+
+  for (const auto& group : grouped) {
+    auto group_key = StringUtil::split(group.first, "~");
+    if (group_key.size() != 3) {
+      RAISE(kIllegalStateError);
     }
 
     insertRecordsLocal(
-        tsdb_namespace,
-        table_name,
-        partition_key,
-        records,
+        group_key[0],
+        group_key[1],
+        SHA1Hash::fromHexString(group_key[2]),
+        group.second,
         flags);
-  } else {
-    for (const auto& host : hosts) {
-      try {
-        if (host.is_local) {
-          insertRecordsLocal(
-              tsdb_namespace,
-              table_name,
-              partition_key,
-              records,
-              flags);
-        } else {
-          insertRecordsRemote(
-              tsdb_namespace,
-              table_name,
-              partition_key,
-              records,
-              flags,
-              host);
-        }
-
-        return;
-      } catch (const StandardException& e) {
-        logError(
-            "eventql",
-            e,
-            "TableService::insertRecordsRemote failed");
-
-        errors.emplace_back(e.what());
-      }
-    }
-
-    RAISEF(
-        kRuntimeError,
-        "TableService::insertRecordsRemote failed: $0",
-        StringUtil::join(errors, ", "));
   }
+}
+
+void TableService::insertRecords(
+    const String& tsdb_namespace,
+    const String& table_name,
+    const SHA1Hash& partition_key,
+    const Set<String>& servers,
+    const Vector<RecordRef>& records,
+    uint64_t flags /* = 0 */) {
+  Vector<String> errors;
+
+  for (const auto& server : servers) {
+    try {
+      if (server == cdir_->getServerID()) {
+        insertRecordsLocal(
+            tsdb_namespace,
+            table_name,
+            partition_key,
+            records,
+            flags);
+      } else {
+        insertRecordsRemote(
+            tsdb_namespace,
+            table_name,
+            partition_key,
+            records,
+            flags,
+            server);
+      }
+
+      return;
+    } catch (const StandardException& e) {
+      logError(
+          "eventql",
+          e,
+          "TableService::insertRecordsRemote failed");
+
+      errors.emplace_back(e.what());
+    }
+  }
+
+  RAISEF(
+      kRuntimeError,
+      "TableService::insertRecordsRemote failed: $0",
+      StringUtil::join(errors, ", "));
 }
 
 void TableService::insertRecordsLocal(
@@ -521,17 +423,17 @@ void TableService::insertRecordsRemote(
     const SHA1Hash& partition_key,
     const Vector<RecordRef>& records,
     uint64_t flags,
-    const ReplicaRef& host) {
-  auto server_cfg = cdir_->getServerConfig(host.name);
+    const String& server_id) {
+  auto server_cfg = cdir_->getServerConfig(server_id);
   if (server_cfg.server_status() != SERVER_UP) {
     RAISE(kRuntimeError, "server is down");
   }
 
   logDebug(
       "z1.core",
-      "Inserting $0 records into tsdb://$1/$2/$3/$4",
+      "Inserting $0 records into $1:$2/$3/$4",
       records.size(),
-      host.name,
+      server_id,
       tsdb_namespace,
       table_name,
       partition_key.toString());
@@ -644,22 +546,6 @@ void TableService::fetchPartitionWithSampling(
   log_reader->fetchRecordsWithSampling(sample_modulo, sample_index, fn);
 }
 
-Option<PartitionInfo> TableService::partitionInfo(
-    const String& tsdb_namespace,
-    const String& table_key,
-    const SHA1Hash& partition_key) {
-  auto partition = pmap_->findPartition(
-      tsdb_namespace,
-      table_key,
-      partition_key);
-
-  if (partition.isEmpty()) {
-    return None<PartitionInfo>();
-  } else {
-    return Some(partition.get()->getInfo());
-  }
-}
-
 Option<RefPtr<msg::MessageSchema>> TableService::tableSchema(
     const String& tsdb_namespace,
     const String& table_key) {
@@ -688,20 +574,6 @@ Option<TableDefinition> TableService::tableConfig(
   }
 }
 
-Option<RefPtr<TablePartitioner>> TableService::tablePartitioner(
-    const String& tsdb_namespace,
-    const String& table_key) {
-  auto table = pmap_->findTable(
-      tsdb_namespace,
-      table_key);
-
-  if (table.isEmpty()) {
-    return None<RefPtr<TablePartitioner>>();
-  } else {
-    return Some(table.get()->partitioner());
-  }
-}
-
 Vector<TimeseriesPartition> TableService::listPartitions(
     const String& tsdb_namespace,
     const String& table_key,
@@ -722,10 +594,6 @@ Vector<TimeseriesPartition> TableService::listPartitions(
 
   return time_partitioner->partitionsFor(from, until);
 }
-
-//const String& TableService::dbPath() const {
-//  return db_path_;
-//}
 
 } // namespace tdsb
 

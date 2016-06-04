@@ -73,58 +73,32 @@ public:
       const String& tsdb_namespace,
       Function<void (const TSDBTableInfo& table)> fn) const;
 
+  // insert one record
+  void insertRecord(
+      const String& tsdb_namespace,
+      const String& table_name,
+      const msg::DynamicMessage& data,
+      uint64_t flags = 0);
+
+  // insert a batch of records
   void insertRecords(
+      const String& tsdb_namespace,
+      const String& table_name,
+      const msg::DynamicMessage* begin,
+      const msg::DynamicMessage* end,
+      uint64_t flags = 0);
+
+  // insert a single record from json
+  void insertRecord(
+      const String& tsdb_namespace,
+      const String& table_name,
+      const json::JSONObject::const_iterator& data_begin,
+      const json::JSONObject::const_iterator& data_end,
+      uint64_t flags = 0);
+
+  // inertnal method, don't use
+  void insertReplicatedRecords(
       const RecordEnvelopeList& records,
-      uint64_t flags = 0);
-
-  void insertRecords(
-      const Vector<RecordEnvelope>& records,
-      uint64_t flags = 0);
-
-  void insertRecords(
-      const String& tsdb_namespace,
-      const String& table_name,
-      const SHA1Hash& partition_key,
-      const Vector<RecordRef>& records,
-      uint64_t flags = 0);
-
-  void insertRecord(
-      const String& tsdb_namespace,
-      const String& table_name,
-      const SHA1Hash& partition_key,
-      const SHA1Hash& record_id,
-      uint64_t record_version,
-      const Buffer& record,
-      uint64_t flags = 0);
-
-  void insertRecord(
-      const String& tsdb_namespace,
-      const String& table_name,
-      const SHA1Hash& record_id,
-      uint64_t record_version,
-      const json::JSONObject::const_iterator& data_begin,
-      const json::JSONObject::const_iterator& data_end,
-      uint64_t flags = 0);
-
-  void insertRecord(
-      const String& tsdb_namespace,
-      const String& table_name,
-      const json::JSONObject::const_iterator& data_begin,
-      const json::JSONObject::const_iterator& data_end,
-      uint64_t flags = 0);
-
-  void insertRecord(
-      const String& tsdb_namespace,
-      const String& table_name,
-      const SHA1Hash& record_id,
-      uint64_t record_version,
-      const msg::DynamicMessage& data,
-      uint64_t flags = 0);
-
-  void insertRecord(
-      const String& tsdb_namespace,
-      const String& table_name,
-      const msg::DynamicMessage& data,
       uint64_t flags = 0);
 
   void compactPartition(
@@ -159,11 +133,6 @@ public:
       const UnixTime& from,
       const UnixTime& until);
 
-  Option<PartitionInfo> partitionInfo(
-      const String& tsdb_namespace,
-      const String& table_key,
-      const SHA1Hash& partition_key);
-
   Option<RefPtr<msg::MessageSchema>> tableSchema(
       const String& tsdb_namespace,
       const String& table_key);
@@ -172,11 +141,15 @@ public:
       const String& tsdb_namespace,
       const String& table_key);
 
-  Option<RefPtr<TablePartitioner>> tablePartitioner(
-      const String& tsdb_namespace,
-      const String& table_key);
-
 protected:
+
+  void insertRecords(
+      const String& tsdb_namespace,
+      const String& table_name,
+      const SHA1Hash& partition_key,
+      const Set<String>& servers,
+      const Vector<RecordRef>& records,
+      uint64_t flags = 0);
 
   void insertRecordsLocal(
       const String& tsdb_namespace,
@@ -191,7 +164,7 @@ protected:
       const SHA1Hash& partition_key,
       const Vector<RecordRef>& records,
       uint64_t flags,
-      const ReplicaRef& host);
+      const String& server_id);
 
   ConfigDirectory* cdir_;
   PartitionMap* pmap_;

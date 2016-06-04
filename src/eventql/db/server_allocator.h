@@ -22,41 +22,26 @@
  * code of your own applications
  */
 #pragma once
-#include <eventql/util/stdtypes.h>
-#include <eventql/util/SHA1.h>
-#include <eventql/db/ReplicationState.pb.h>
-#include <eventql/db/PartitionState.pb.h>
-
 #include "eventql/eventql.h"
+#include "eventql/util/stdtypes.h"
+#include "eventql/util/status.h"
+#include "eventql/util/SHA1.h"
+#include "eventql/config/config_directory.h"
 
 namespace eventql {
 
-uint64_t replicatedOffsetFor(
-    const ReplicationState& repl_state,
-    const ReplicationTarget& target);
+class ServerAllocator {
+public:
 
-void setReplicatedOffsetFor(
-    ReplicationState* repl_state,
-    const ReplicationTarget& target,
-    uint64_t replicated_offset);
+  ServerAllocator(ConfigDirectory* cdir);
 
-uint64_t replicatedOffsetFor(
-    const ReplicationState& repl_state,
-    const SHA1Hash& replica_id);
+  Status allocateServers(
+      size_t num_servers,
+      Set<String>* servers) const;
 
-void setReplicatedOffsetFor(
-    ReplicationState* repl_state,
-    const SHA1Hash& replica_id,
-    uint64_t replicated_offset);
+protected:
+  ConfigDirectory* cdir_;
+};
 
-uint64_t replicatedVersionFor(
-    const ReplicationState& repl_state,
-    const SHA1Hash& replica_id);
-
-void setReplicatedVersionFor(
-    ReplicationState* repl_state,
-    const SHA1Hash& replica_id,
-    uint64_t version);
-
-} // namespace tdsb
+} // namespace eventql
 

@@ -73,160 +73,63 @@ Status MetadataOperation::perform(
   logTrace("evqld", "Performing metadata operation: $0", data_.DebugString());
 
   switch (data_.optype()) {
-    case METAOP_BACKFILL_ADD_SERVER:
-      return performBackfillAddServer(input, output);
-    case METAOP_BACKFILL_ADD_SERVERS:
-      return performBackfillAddServers(input, output);
-    case METAOP_BACKFILL_REMOVE_SERVER:
-      return performBackfillRemoveServer(input, output);
+    case METAOP_REMOVE_DEAD_SERVERS:
+      return performRemoveDeadServers(input, output);
+    case METAOP_SPLIT_PARTITION:
+      return performSplitPartition(input, output);
+    case METAOP_FINALIZE_SPLIT:
+      return performFinalizeSplit(input, output);
+    case METAOP_JOIN_SERVERS:
+      return performJoinServers(input, output);
+    case METAOP_FINALIZE_JOIN:
+      return performFinalizeJoin(input, output);
     default:
       return Status(eIllegalArgumentError, "invalid metadata operation type");
   }
 }
 
-Status MetadataOperation::performBackfillAddServer(
+static void removeServers(
+    const Set<String>& servers,
+    Vector<MetadataFile::PartitionPlacement>* server_list) {
+  auto iter = server_list->begin();
+  while (iter != server_list->end()) {
+    if (servers.count(iter->server_id) > 0) {
+      iter = server_list->erase(iter);
+    } else {
+      ++iter;
+    }
+  }
+}
+
+Status MetadataOperation::performRemoveDeadServers(
     const MetadataFile& input,
     Vector<MetadataFile::PartitionMapEntry>* output) const {
-  if (input.getKeyspaceType() != KEYSPACE_UINT64) {
-    return Status(eIllegalArgumentError, "keyspace type must be uint64");
-  }
-
-  auto opdata = msg::decode<BackfillAddServerOperation>(
+  auto opdata = msg::decode<RemoveDeadServersOperation>(
       data_.opdata().data(),
       data_.opdata().size());
 
-  uint64_t partition_begin;
-  if (opdata.keyrange_begin().size() != sizeof(uint64_t)) {
-    return Status(eIllegalArgumentError, "invalid keyrange begin");
+  Set<String> dead_server_ids;
+  for (const auto& s : opdata.server_ids()) {
+    dead_server_ids.emplace(s);
   }
-
-  memcpy(
-      &partition_begin,
-      opdata.keyrange_begin().data(),
-      sizeof(uint64_t));
 
   auto pmap = input.getPartitionMap();
-
-  MetadataFile::PartitionMapEntry* entry = nullptr;
-  auto iter = pmap.begin();
-  for (; iter != pmap.end(); ++iter) {
-    uint64_t e_begin;
-    memcpy(&e_begin, iter->begin.data(), sizeof(uint64_t));
-
-    if (e_begin == partition_begin) {
-      entry = &*iter;
-      break;
-    }
-
-    if (e_begin > partition_begin) {
-      break;
-    }
-  }
-
-  if (!entry) {
-    MetadataFile::PartitionMapEntry e;
-    e.begin = opdata.keyrange_begin();
-    e.partition_id = SHA1Hash(
-        opdata.partition_id().data(),
-        opdata.partition_id().size());
-
-    entry = &*pmap.insert(iter, e);
-  }
-
-  bool server_already_exists = false;
-  for (const auto& s : entry->servers) {
-    if (s.server_id == opdata.server_id()) {
-      server_already_exists = true;
-      break;
-    }
-  }
-
-  if (!server_already_exists) {
-    MetadataFile::PartitionPlacement s;
-    s.server_id = opdata.server_id();
-    s.placement_id = Random::singleton()->random64();
-    entry->servers.emplace_back(s);
+  for (auto& p : pmap) {
+    removeServers(dead_server_ids, &p.servers);
+    removeServers(dead_server_ids, &p.servers_joining);
+    removeServers(dead_server_ids, &p.servers_leaving);
+    removeServers(dead_server_ids, &p.split_servers_low);
+    removeServers(dead_server_ids, &p.split_servers_high);
   }
 
   *output = pmap;
   return Status::success();
 }
 
-Status MetadataOperation::performBackfillAddServers(
+Status MetadataOperation::performSplitPartition(
     const MetadataFile& input,
     Vector<MetadataFile::PartitionMapEntry>* output) const {
-  if (input.getKeyspaceType() != KEYSPACE_UINT64) {
-    return Status(eIllegalArgumentError, "keyspace type must be uint64");
-  }
-
-  auto opdata_list = msg::decode<BackfillAddServersOperation>(
-      data_.opdata().data(),
-      data_.opdata().size());
-
-  auto pmap = input.getPartitionMap();
-  for (const auto& opdata : opdata_list.ops()) {
-    uint64_t partition_begin;
-    if (opdata.keyrange_begin().size() != sizeof(uint64_t)) {
-      return Status(eIllegalArgumentError, "invalid keyrange begin");
-    }
-
-    memcpy(
-        &partition_begin,
-        opdata.keyrange_begin().data(),
-        sizeof(uint64_t));
-
-    MetadataFile::PartitionMapEntry* entry = nullptr;
-    auto iter = pmap.begin();
-    for (; iter != pmap.end(); ++iter) {
-      uint64_t e_begin;
-      memcpy(&e_begin, iter->begin.data(), sizeof(uint64_t));
-
-      if (e_begin == partition_begin) {
-        entry = &*iter;
-        break;
-      }
-
-      if (e_begin > partition_begin) {
-        break;
-      }
-    }
-
-    if (!entry) {
-      MetadataFile::PartitionMapEntry e;
-      e.begin = opdata.keyrange_begin();
-      e.partition_id = SHA1Hash(
-          opdata.partition_id().data(),
-          opdata.partition_id().size());
-
-      entry = &*pmap.insert(iter, e);
-    }
-
-    bool server_already_exists = false;
-    for (const auto& s : entry->servers) {
-      if (s.server_id == opdata.server_id()) {
-        server_already_exists = true;
-        break;
-      }
-    }
-
-    if (!server_already_exists) {
-      MetadataFile::PartitionPlacement s;
-      s.server_id = opdata.server_id();
-      s.placement_id = Random::singleton()->random64();
-      entry->servers.emplace_back(s);
-    }
-  }
-
-  *output = pmap;
-  return Status::success();
-}
-
-
-
-Status MetadataOperation::performBackfillRemoveServer(
-    const MetadataFile& input,
-    Vector<MetadataFile::PartitionMapEntry>* output) const {
-  auto opdata = msg::decode<BackfillRemoveServerOperation>(
+  auto opdata = msg::decode<SplitPartitionOperation>(
       data_.opdata().data(),
       data_.opdata().size());
 
@@ -234,23 +137,245 @@ Status MetadataOperation::performBackfillRemoveServer(
       opdata.partition_id().data(),
       opdata.partition_id().size());
 
+  bool success = false;
   auto pmap = input.getPartitionMap();
-  for (auto& e : pmap) {
-    if (e.partition_id == partition_id) {
-      for (auto s = e.servers.begin(); s != e.servers.end(); ) {
-        if (s->server_id == opdata.server_id()) {
-          s = e.servers.erase(s);
-        } else {
-          ++s;
-        }
+  auto iter = pmap.begin();
+  for (; iter != pmap.end(); ++iter) {
+    if (iter->partition_id != partition_id) {
+      continue;
+    }
+
+    String iter_end;
+    {
+      auto iter_next = iter + 1;
+      if (iter_next != pmap.end()) {
+        iter_end = iter_next->begin;
+      }
+    }
+
+    if (iter->splitting) {
+      return Status(eIllegalStateError, "partition is already splitting");
+    }
+
+    if (!iter->begin.empty() &&
+        input.compareKeys(opdata.split_point(), iter->begin) < 0) {
+      return Status(eIllegalArgumentError, "split point is out of range");
+    }
+
+    if (!iter_end.empty() &&
+        input.compareKeys(opdata.split_point(), iter_end) >= 0) {
+      return Status(eIllegalArgumentError, "split point is out of range");
+    }
+
+    if (opdata.split_servers_low().size() == 0 ||
+        opdata.split_servers_high().size() == 0) {
+      return Status(eIllegalArgumentError, "split server list can't be empty");
+    }
+
+    iter->splitting = true;
+    iter->split_point = opdata.split_point();
+    iter->split_partition_id_low = SHA1Hash(
+        opdata.split_partition_id_low().data(),
+        opdata.split_partition_id_low().size());
+    iter->split_partition_id_high = SHA1Hash(
+        opdata.split_partition_id_high().data(),
+        opdata.split_partition_id_high().size());
+
+    for (const auto& s : opdata.split_servers_low()) {
+      MetadataFile::PartitionPlacement p;
+      p.server_id = s;
+      p.placement_id = opdata.placement_id();
+      iter->split_servers_low.emplace_back(p);
+    }
+
+    for (const auto& s : opdata.split_servers_high()) {
+      MetadataFile::PartitionPlacement p;
+      p.server_id = s;
+      p.placement_id = opdata.placement_id();
+      iter->split_servers_high.emplace_back(p);
+    }
+
+    success = true;
+    break;
+  }
+
+  if (success) {
+    *output = pmap;
+    return Status::success();
+  } else {
+    return Status(eNotFoundError, "partition not found");
+  }
+}
+
+Status MetadataOperation::performFinalizeSplit(
+    const MetadataFile& input,
+    Vector<MetadataFile::PartitionMapEntry>* output) const {
+  auto opdata = msg::decode<FinalizeSplitOperation>(
+      data_.opdata().data(),
+      data_.opdata().size());
+
+  SHA1Hash partition_id(
+      opdata.partition_id().data(),
+      opdata.partition_id().size());
+
+  bool success = false;
+  auto pmap = input.getPartitionMap();
+  auto iter = pmap.begin();
+  for (; iter != pmap.end(); ++iter) {
+    if (iter->partition_id != partition_id) {
+      continue;
+    }
+
+    if (!iter->splitting) {
+      return Status(eIllegalStateError, "partition is not splitting");
+    }
+
+    MetadataFile::PartitionMapEntry lower_split;
+    MetadataFile::PartitionMapEntry higher_split;
+
+    {
+      lower_split.partition_id = iter->split_partition_id_low;
+      lower_split.begin = iter->begin;
+      for (const auto& s : iter->split_servers_low) {
+        lower_split.servers.emplace_back(s);
+      }
+      lower_split.splitting = false;
+    }
+
+    {
+      higher_split.partition_id = iter->split_partition_id_high;
+      higher_split.begin = iter->split_point;
+      for (const auto& s : iter->split_servers_high) {
+        higher_split.servers.emplace_back(s);
+      }
+      higher_split.splitting = false;
+    }
+
+    iter = pmap.erase(iter);
+    iter = pmap.insert(iter, higher_split);
+    iter = pmap.insert(iter, lower_split);
+
+    success = true;
+    break;
+  }
+
+  if (success) {
+    *output = pmap;
+    return Status::success();
+  } else {
+    return Status(eNotFoundError, "partition not found");
+  }
+}
+
+static bool hasServer(
+    const MetadataFile::PartitionMapEntry& e,
+    const String& server_id) {
+  for (const auto& e : e.servers) {
+    if (e.server_id == server_id) {
+      return true;
+    }
+  }
+
+  for (const auto& e : e.servers_joining) {
+    if (e.server_id == server_id) {
+      return true;
+    }
+  }
+
+  for (const auto& e : e.servers_leaving) {
+    if (e.server_id == server_id) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+Status MetadataOperation::performJoinServers(
+    const MetadataFile& input,
+    Vector<MetadataFile::PartitionMapEntry>* output) const {
+  auto opdata = msg::decode<JoinServersOperation>(
+      data_.opdata().data(),
+      data_.opdata().size());
+
+  HashMap<SHA1Hash, Vector<JoinServerOperation>> ops;
+  for (const auto& o : opdata.ops()) {
+    SHA1Hash partition_id(
+        o.partition_id().data(),
+        o.partition_id().size());
+
+    ops[partition_id].emplace_back(o);
+  }
+
+  auto pmap  = input.getPartitionMap();
+  for (auto& p : pmap) {
+    for (const auto& o : ops[p.partition_id]) {
+      if (hasServer(p, o.server_id())) {
+        return Status(
+            eIllegalArgumentError,
+            "server already exists in server list");
       }
 
-      break;
+      MetadataFile::PartitionPlacement s;
+      s.server_id = o.server_id();
+      s.placement_id = o.placement_id();
+      p.servers_joining.emplace_back(s);
     }
   }
 
   *output = pmap;
   return Status::success();
+}
+
+Status MetadataOperation::performFinalizeJoin(
+    const MetadataFile& input,
+    Vector<MetadataFile::PartitionMapEntry>* output) const {
+  auto opdata = msg::decode<FinalizeJoinOperation>(
+      data_.opdata().data(),
+      data_.opdata().size());
+
+  SHA1Hash partition_id(
+      opdata.partition_id().data(),
+      opdata.partition_id().size());
+
+  bool success = false;
+  auto pmap  = input.getPartitionMap();
+  for (auto& p : pmap) {
+    if (p.partition_id != partition_id) {
+      continue;
+    }
+
+    bool server_found = false;
+    for (auto s = p.servers_joining.begin(); s != p.servers_joining.end(); ) {
+      if (s->server_id == opdata.server_id() &&
+          s->placement_id == opdata.placement_id()) {
+        server_found = true;
+        s = p.servers_joining.erase(s);
+      } else {
+        ++s;
+      }
+    }
+
+    if (!server_found) {
+      return Status(
+          eIllegalArgumentError,
+          "server not included in join list");
+    }
+
+    MetadataFile::PartitionPlacement s;
+    s.server_id = opdata.server_id();
+    s.placement_id = opdata.placement_id();
+    p.servers.emplace_back(s);
+    success = true;
+    break;
+  }
+
+  if (success) {
+    *output = pmap;
+    return Status::success();
+  } else {
+    return Status(eNotFoundError, "partition join not found");
+  }
 }
 
 } // namespace eventql
