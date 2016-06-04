@@ -473,6 +473,10 @@ void StatusServlet::renderPartitionPage(
         snap->state.has_joining_servers());
 
     html += StringUtil::format(
+        "<span><em>Size (Disk)</em>: $0MB</span> &mdash; ",
+        partition.get()->getTotalDiskSize() / 1024.0 / 1024.0);
+
+    html += StringUtil::format(
         "<span><em>Number of Records</em>: $0</span>",
         snap->nrecs);
 

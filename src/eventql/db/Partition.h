@@ -99,6 +99,7 @@ public:
   String getAbsolutePath() const;
 
   MetadataTransaction getLastMetadataTransaction() const;
+  size_t getTotalDiskSize() const;
 
 protected:
 

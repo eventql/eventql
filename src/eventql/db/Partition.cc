@@ -277,4 +277,18 @@ MetadataTransaction Partition::getLastMetadataTransaction() const {
       snap->state.last_metadata_txnseq());
 }
 
+size_t Partition::getTotalDiskSize() const {
+  if (table_->storage() == eventql::TBL_STORAGE_STATIC) {
+    return 0;
+  }
+
+  auto snap = head_.getSnapshot();
+  size_t size = 0;
+  for (const auto& tbl : snap->state.lsm_tables()) {
+    size += tbl.size_bytes();
+  }
+
+  return size;
+}
+
 }
