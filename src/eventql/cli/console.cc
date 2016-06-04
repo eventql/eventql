@@ -62,17 +62,16 @@ void Console::startInteractiveShell() {
 
 Console::Console(const CLIConfig cli_cfg) : cfg_(cli_cfg) {}
 
-Status Console::runQuery(const String& query) {
-  auto stdout_os = OutputStream::getStdout();
-  auto stderr_os = TerminalOutputStream::fromStream(OutputStream::getStderr());
+csql::BinaryResultParser* Console::resultParser(
+    csql::ResultList* results,
+    TerminalOutputStream* stderr_os) {
   bool line_dirty = false;
   bool is_tty = stderr_os->isTTY();
 
   bool error = false;
-  csql::BinaryResultParser res_parser;
-  csql::ResultList results;
+  auto res_parser = new csql::BinaryResultParser();
 
-  res_parser.onProgress([&stderr_os, &line_dirty, is_tty] (
+  res_parser->onProgress([stderr_os, &line_dirty, is_tty] (
       const csql::ExecutionStatus& status) {
     auto status_line = StringUtil::format(
         "Query running: $0%",
@@ -88,15 +87,15 @@ Status Console::runQuery(const String& query) {
 
   });
 
-  res_parser.onTableHeader([&results] (const Vector<String>& columns) {
-    results.addHeader(columns);
+  res_parser->onTableHeader([results] (const Vector<String>& columns) {
+    results->addHeader(columns);
   });
 
-  res_parser.onRow([&results] (int argc, const csql::SValue* argv) {
-    results.addRow(argv, argc);
+  res_parser->onRow([results] (int argc, const csql::SValue* argv) {
+    results->addRow(argv, argc);
   });
 
-  res_parser.onError([&stderr_os, &error] (const String& error_str) {
+  res_parser->onError([&stderr_os, &error] (const String& error_str) {
     stderr_os->print(
         "ERROR:",
         { TerminalStyle::RED, TerminalStyle::UNDERSCORE });
@@ -104,6 +103,56 @@ Status Console::runQuery(const String& query) {
     stderr_os->print(StringUtil::format(" $0\n", error_str));
     error = true;
   });
+
+  return res_parser;
+}
+
+csql::BinaryResultParser* Console::batchResultParser(
+    TerminalOutputStream* stderr_os) {
+  bool line_dirty = false;
+  bool is_tty = stderr_os->isTTY();
+
+  bool error = false;
+  auto res_parser = new csql::BinaryResultParser();
+
+  res_parser->onTableHeader([stderr_os] (const Vector<String>& columns) {
+    for (const auto col : columns) {
+      stderr_os->print(col + "\t");
+    }
+    stderr_os->print("\n");
+  });
+
+  res_parser->onRow([] (int argc, const csql::SValue* argv) {
+    //results->addRow(argv, argc);
+  });
+
+  res_parser->onError([&stderr_os, &error] (const String& error_str) {
+    stderr_os->print(
+        "ERROR:",
+        { TerminalStyle::RED, TerminalStyle::UNDERSCORE });
+
+    stderr_os->print(StringUtil::format(" $0\n", error_str));
+    error = true;
+  });
+
+  return res_parser;
+}
+
+Status Console::runQuery(const String& query) {
+  auto stdout_os = OutputStream::getStdout();
+  //auto stderr_os = TerminalOutputStream::fromStream(OutputStream::getStderr());
+  auto stderr_os = new TerminalOutputStream(OutputStream::getStderr());
+  bool line_dirty = false;
+  bool is_tty = stderr_os->isTTY();
+
+  bool error = false;
+  csql::ResultList results;
+  csql::BinaryResultParser* res_parser = nullptr;
+  if (cfg_.batchModeEnabled()) {
+    res_parser = batchResultParser(stderr_os);
+  } else {
+    res_parser = resultParser(&results, stderr_os);
+  }
 
   try {
     auto url = StringUtil::format(
@@ -135,11 +184,11 @@ Status Console::runQuery(const String& query) {
         http::StreamingResponseHandler::getFactory(
             std::bind(
                 &csql::BinaryResultParser::parse,
-                &res_parser,
+                res_parser,
                 std::placeholders::_1,
                 std::placeholders::_2)));
 
-    if (!res_parser.eof()) {
+    if (!res_parser->eof()) {
       stderr_os->print(
           "ERROR:",
           { TerminalStyle::RED, TerminalStyle::UNDERSCORE });

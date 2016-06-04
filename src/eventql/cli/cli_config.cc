@@ -108,9 +108,6 @@ Status CLIConfig::setConfigOption(
   } else if (key == "auth_token") {
     return setAuthToken(value);
 
-  } else if (key == "batch_mode") {
-    return setBatchMode(value);
-
   } else {
     return Status(
         eParseError,
@@ -176,16 +173,8 @@ Status CLIConfig::setAuthToken(const String& auth_token) {
   return Status::success();
 }
 
-Status CLIConfig::setBatchMode(const String& batch_mode) {
-  if (batch_mode == "false") {
-    batch_mode_ = false;
-    return Status::success();
-  } else if (batch_mode == "true") {
-    batch_mode_ = true;
-    return Status::success();
-  } else {
-    return Status(eParseError);
-  }
+void CLIConfig::enableBatchMode() {
+  batch_mode_ = true;
 }
 
 String CLIConfig::getHost() const {
@@ -212,7 +201,7 @@ Option<String> CLIConfig::getExec() const {
   return exec_;
 }
 
-bool CLIConfig::getBatchMode() const {
+bool CLIConfig::batchModeEnabled() const {
   return batch_mode_;
 }
 

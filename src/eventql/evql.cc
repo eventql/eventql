@@ -453,6 +453,10 @@ int main(int argc, const char** argv) {
     cli_cfg.setDatabase(flags.getString("database"));
   }
 
+  if (flags.isSet("batch")) {
+    cli_cfg.enableBatchMode();
+  }
+
   /* cli */
   eventql::cli::Console console(cli_cfg);
 

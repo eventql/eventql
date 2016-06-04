@@ -58,8 +58,8 @@ public:
   Option<String> getAuthToken() const;
   Status setAuthToken(const String& auth_token);
 
-  bool getBatchMode() const;
-  Status setBatchMode(const String& batch_mode);
+  void enableBatchMode();
+  bool batchModeEnabled() const;
 
   Option<String> getFile() const;
   Option<String> getExec() const;
