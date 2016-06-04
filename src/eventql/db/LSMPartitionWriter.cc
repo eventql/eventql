@@ -172,6 +172,7 @@ bool LSMPartitionWriter::commit() {
   }
 
   // flush arena to disk if pending
+  bool commited = false;
   if (arena.get() && arena->size() > 0) {
     auto snap = head_->getSnapshot();
     auto filename = Random::singleton()->hex64();
@@ -195,14 +196,24 @@ bool LSMPartitionWriter::commit() {
     tblref->set_filename(filename);
     tblref->set_first_sequence(snap->state.lsm_sequence() + 1);
     tblref->set_last_sequence(snap->state.lsm_sequence() + arena->size());
+    tblref->set_size_bytes(FileUtil::size(filepath + ".cst"));
     snap->state.set_lsm_sequence(snap->state.lsm_sequence() + arena->size());
     snap->compacting_arena = nullptr;
     snap->writeToDisk();
     head_->setSnapshot(snap);
-    return true;
-  } else {
-    return false;
+    commited = true;
   }
+
+  commit_mutex_.unlock();
+
+  if (needsSplit()) {
+    auto rc = split();
+    if (!rc.isSuccess()) {
+      logWarning("evqld", "partition split failed: $0", rc.message());
+    }
+  }
+
+  return commited;
 }
 
 bool LSMPartitionWriter::compact() {
@@ -266,6 +277,7 @@ bool LSMPartitionWriter::compact() {
   head_->setSnapshot(snap);
   write_lk.unlock();
 
+  // delete 
   Set<String> delete_filenames;
   for (const auto& tbl : old_tables) {
     delete_filenames.emplace(tbl.filename());
@@ -279,6 +291,16 @@ bool LSMPartitionWriter::compact() {
     FileUtil::rm(FileUtil::joinPaths(snap->base_path, f + ".cst"));
     FileUtil::rm(FileUtil::joinPaths(snap->base_path, f + ".idx"));
     idx_cache_->flush(FileUtil::joinPaths(snap->rel_path, f));
+  }
+
+  compact_lk.unlock();
+
+  // maybe split this partition
+  if (needsSplit()) {
+    auto rc = split();
+    if (!rc.isSuccess()) {
+      logWarning("evqld", "partition split failed: $0", rc.message());
+    }
   }
 
   return true;
@@ -325,6 +347,23 @@ void LSMPartitionWriter::writeArenaToDisk(
     cstable->commit();
     LSMTableIndex::write(vmap, filename + ".idx");
   }
+}
+
+bool LSMPartitionWriter::needsSplit() const {
+  return true;
+}
+
+Status LSMPartitionWriter::split() {
+  auto snap = head_->getSnapshot();
+
+  logInfo(
+      "z1.replication",
+      "Splitting partition $0/$1/$2",
+      snap->state.tsdb_namespace(),
+      snap->state.table_key(),
+      snap->key.toString());
+
+  return Status::success();
 }
 
 ReplicationState LSMPartitionWriter::fetchReplicationState() const {

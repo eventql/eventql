@@ -54,6 +54,9 @@ public:
   bool needsCompaction() override;
   bool needsUrgentCompaction();
 
+  bool needsSplit() const;
+  Status split();
+
   Status applyMetadataChange(
       const PartitionDiscoveryResponse& discovery_info) override;
 
@@ -61,6 +64,7 @@ public:
   void commitReplicationState(const ReplicationState& state);
 
 protected:
+
 
   void writeArenaToDisk(
       RefPtr<RecordArena> arena,
