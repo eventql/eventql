@@ -47,6 +47,8 @@ LSMTableIndexCache::~LSMTableIndexCache() {
 }
 
 RefPtr<LSMTableIndex> LSMTableIndexCache::lookup(const String& filename) {
+  auto file_path = FileUtil::joinPaths(base_path_, filename + ".idx");
+
   ScopedLock<std::mutex> lk(mutex_);
   auto& slot = map_[filename];
   if (slot) {
@@ -62,9 +64,16 @@ RefPtr<LSMTableIndex> LSMTableIndexCache::lookup(const String& filename) {
       head_ = slot->next;
     }
   } else {
+    while (size_ > max_size_) {
+      flushTail();
+    }
+
     slot = new Entry();
     slot->filename = filename;
     slot->idx = new LSMTableIndex();
+    slot->size =
+        FileUtil::size(file_path) + filename.size() * 2 + kConstantOverhead;
+    size_ += slot->size;
   }
 
   slot->next = head_;
@@ -79,16 +88,7 @@ RefPtr<LSMTableIndex> LSMTableIndexCache::lookup(const String& filename) {
   auto idx = slot->idx;
   lk.unlock();
 
-  if (idx->load(FileUtil::joinPaths(base_path_, filename + ".idx"))) {
-    size_ += idx->size() + filename.size() * 2 + kConstantOverhead;
-  }
-
-  if (size_ > max_size_) {
-    lk.lock();
-    while (size_ > max_size_) {
-      flushTail();
-    }
-  }
+  idx->load(file_path);
 
   return idx;
 }
@@ -116,7 +116,7 @@ void LSMTableIndexCache::flush(const String& filename) {
     head_ = slot->next;
   }
 
-  size_ -= (slot->idx->size() + slot->filename.size() * 2 + kConstantOverhead);
+  size_ -= slot->size;
   delete slot;
 }
 
@@ -134,7 +134,7 @@ void LSMTableIndexCache::flushTail() {
   }
 
   tail_ = entry->prev;
-  size_ -= (entry->idx->size() + entry->filename.size() * 2 + kConstantOverhead);
+  size_ -= entry->size;
   map_.erase(entry->filename);
   delete entry;
 }

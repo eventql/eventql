@@ -522,6 +522,11 @@ void TableService::insertRecordsRemote(
     const Vector<RecordRef>& records,
     uint64_t flags,
     const ReplicaRef& host) {
+  auto server_cfg = cdir_->getServerConfig(host.name);
+  if (server_cfg.server_status() != SERVER_UP) {
+    RAISE(kRuntimeError, "server is down");
+  }
+
   logDebug(
       "z1.core",
       "Inserting $0 records into tsdb://$1/$2/$3/$4",
@@ -541,7 +546,10 @@ void TableService::insertRecordsRemote(
     record->set_record_data(r.record.toString());
   }
 
-  auto uri = URI(StringUtil::format("http://$0/tsdb/replicate", host.addr));
+  auto uri = URI(StringUtil::format(
+      "http://$0/tsdb/replicate",
+      server_cfg.server_addr()));
+
   if (flags & (uint64_t) InsertFlags::SYNC_COMMIT) {
     envelope.set_sync_commit(true);
   }

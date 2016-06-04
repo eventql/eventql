@@ -27,6 +27,7 @@
 #include <eventql/eventql.h>
 #include "eventql/util/application.h"
 #include "eventql/db/metadata_client.h"
+#include "eventql/db/metadata_store.h"
 
 #include "eventql/eventql.h"
 namespace eventql {
@@ -187,6 +188,9 @@ void StatusServlet::renderDashboard(
   html += StringUtil::format(
       "<tr><td><em>LSMTableIndexCache size</em></td><td align='right'>$0 MB</td></tr>",
       config_->idx_cache->size() / (1024.0 * 1024.0));
+  html += StringUtil::format(
+      "<tr><td><em>MetadataStore cache size</em></td><td align='right'>$0 MB</td></tr>",
+      config_->metadata_store->getCacheSize() / (1024.0 * 1024.0));
   html += "</table>";
 
   html += "<h3>Replication</h3>";

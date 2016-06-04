@@ -23,53 +23,25 @@
  */
 #pragma once
 #include "eventql/eventql.h"
-#include "eventql/util/protobuf/msg.h"
-#include "eventql/util/SHA1.h"
+#include "eventql/util/stdtypes.h"
 #include "eventql/util/status.h"
-#include "eventql/util/io/inputstream.h"
-#include "eventql/util/io/outputstream.h"
-#include "eventql/db/metadata_operations.pb.h"
+#include "eventql/util/SHA1.h"
 #include "eventql/db/metadata_file.h"
+#include "eventql/db/metadata_store.h"
+#include "eventql/db/metadata_operation.h"
+#include "eventql/config/config_directory.h"
 
 namespace eventql {
 
-class MetadataOperation {
+class PartitionDiscovery {
 public:
 
-  MetadataOperation();
-  MetadataOperation(
-      const String& db_namespace,
-      const String& table_id,
-      MetadataOperationType type,
-      const SHA1Hash& input_txid,
-      const SHA1Hash& output_txid,
-      const Buffer& opdata);
+  static Status discoverPartition(
+      const MetadataFile* file,
+      const PartitionDiscoveryRequest& request,
+      PartitionDiscoveryResponse* response);
 
-  SHA1Hash getInputTransactionID() const;
-  SHA1Hash getOutputTransactionID() const;
-
-  Status perform(
-      const MetadataFile& input,
-      Vector<MetadataFile::PartitionMapEntry>* output) const;
-
-  Status decode(InputStream* is);
-  Status encode(OutputStream* os) const;
-
-protected:
-
-  Status performBackfillAddServer(
-      const MetadataFile& input,
-      Vector<MetadataFile::PartitionMapEntry>* output) const;
-
-  Status performBackfillAddServers(
-      const MetadataFile& input,
-      Vector<MetadataFile::PartitionMapEntry>* output) const;
-
-  Status performBackfillRemoveServer(
-      const MetadataFile& input,
-      Vector<MetadataFile::PartitionMapEntry>* output) const;
-
-  MetadataOperationEnvelope data_;
 };
 
 } // namespace eventql
+

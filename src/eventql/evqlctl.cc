@@ -46,6 +46,7 @@
 #include "eventql/util/cli/flagparser.h"
 #include "eventql/config/config_directory.h"
 #include "eventql/config/config_directory_zookeeper.h"
+#include "eventql/master/master_service.h"
 
 using namespace eventql;
 
@@ -70,7 +71,9 @@ void cmd_cluster_add_server(const cli::FlagParser& flags) {
 
   ServerConfig cfg;
   cfg.set_server_id(flags.getString("server_name"));
-  cfg.add_sha1_tokens(Random::singleton()->sha1().toString());
+  for (size_t i = 0; i < 128; ++i) {
+    cfg.add_sha1_tokens(Random::singleton()->sha1().toString());
+  }
 
   cdir->updateServerConfig(cfg);
 
@@ -106,6 +109,25 @@ void cmd_namespace_create(const cli::FlagParser& flags) {
   cdir->updateNamespaceConfig(cfg);
 
   cdir->stop();
+}
+
+void cmd_rebalance(const cli::FlagParser& flags) {
+  auto cdir = mkScoped(
+      new ZookeeperConfigDirectory(
+            flags.getString("zookeeper_addr"),
+            None<String>(),
+            ""));
+
+  cdir->startAndJoin(flags.getString("cluster_name"));
+  MasterService master(cdir.get());
+  auto rc = master.runOnce();
+  cdir->stop();
+
+  if (!rc.isSuccess()) {
+    logFatal("evqlctl", "ERROR: $0", rc.message());
+  } else {
+    logInfo("evqlctl", "SUCCESS");
+  }
 }
 
 int main(int argc, const char** argv) {
@@ -224,6 +246,29 @@ int main(int argc, const char** argv) {
 
   namespace_create_node_cmd->flags().defineFlag(
       "namespace",
+      cli::FlagParser::T_STRING,
+      true,
+      NULL,
+      NULL,
+      "node name",
+      "<string>");
+
+  /* command: rebalance */
+  auto rebalance_node_cmd = cli.defineCommand("rebalance");
+  rebalance_node_cmd->onCall(
+      std::bind(&cmd_rebalance, std::placeholders::_1));
+
+  rebalance_node_cmd->flags().defineFlag(
+      "zookeeper_addr",
+      cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      NULL,
+      "url",
+      "<addr>");
+
+  rebalance_node_cmd->flags().defineFlag(
+      "cluster_name",
       cli::FlagParser::T_STRING,
       true,
       NULL,

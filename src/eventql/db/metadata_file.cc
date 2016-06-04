@@ -65,6 +65,10 @@ MetadataFile::PartitionMapIter MetadataFile::getPartitionMapEnd() const {
 
 MetadataFile::PartitionMapIter MetadataFile::getPartitionMapAt(
     const String& key) const {
+  if (partition_map_.empty()) {
+    return partition_map_.end();
+  }
+
   size_t low = 0;
   size_t high = partition_map_.size() - 1;
   while (low != high) {
@@ -100,7 +104,12 @@ MetadataFile::PartitionMapIter MetadataFile::getPartitionMapRangeEnd(
   if (end.empty()) {
     return getPartitionMapEnd();
   } else {
-    return getPartitionMapAt(end) + 1;
+    auto iter = getPartitionMapAt(end);
+    if (compareKeys(iter->begin, end) == 0) {
+      return iter;
+    } else {
+      return iter + 1;
+    }
   }
 }
 
@@ -171,6 +180,7 @@ Status MetadataFile::decode(InputStream* is) {
   keyspace_type_ = static_cast<KeyspaceType>(is->readUInt8());
 
   // partition map
+  partition_map_.clear();
   auto pmap_size = is->readVarUInt();
   for (size_t i = 0; i < pmap_size; ++i) {
     PartitionMapEntry e;

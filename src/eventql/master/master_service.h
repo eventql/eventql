@@ -22,23 +22,43 @@
  * code of your own applications
  */
 #pragma once
-#include <eventql/util/stdtypes.h>
-#include <eventql/util/autoref.h>
-#include <eventql/db/ReplicationScheme.h>
-#include <eventql/db/LSMTableIndexCache.h>
-
 #include "eventql/eventql.h"
+#include "eventql/config/config_directory.h"
+#include <eventql/util/stdtypes.h>
+#include <eventql/util/status.h>
+#include <eventql/db/metadata_client.h>
+#include <eventql/db/metadata_coordinator.h>
 
 namespace eventql {
-class ConfigDirectory;
-class MetadataStore;
 
-struct ServerCfg {
-  String db_path;
-  RefPtr<ReplicationScheme> repl_scheme;
-  RefPtr<LSMTableIndexCache> idx_cache;
-  ConfigDirectory* config_directory;
-  MetadataStore* metadata_store;
+class MasterService {
+public:
+
+  MasterService(ConfigDirectory* cdir);
+
+  Status runOnce();
+
+protected:
+
+  Status rebalanceTable(TableDefinition tbl_cfg);
+
+  String pickMetadataServer() const;
+  String pickServer() const;
+
+  Status performMetadataOperation(
+      TableDefinition* table_cfg,
+      MetadataFile* metadata_file,
+      MetadataOperationType optype,
+      const Buffer& opdata);
+
+  ConfigDirectory* cdir_;
+  MetadataCoordinator metadata_coordinator_;
+  MetadataClient metadata_client_;
+  size_t replication_factor_;
+  size_t metadata_replication_factor_;
+  Set<String> all_servers_;
+  Vector<String> live_servers_;
+  Set<String> leaving_servers_;
 };
 
 } // namespace eventql

@@ -24,6 +24,7 @@
 #include "eventql/eventql.h"
 #include "eventql/util/stdtypes.h"
 #include "eventql/util/random.h"
+#include "eventql/util/fnv.h"
 #include "eventql/util/test/unittest.h"
 #include "eventql/db/metadata_store.h"
 
@@ -148,3 +149,37 @@ TEST_CASE(MetadataStoreTest, TestStoreMetadataFile, [] () {
   }
 });
 
+TEST_CASE(MetadataStoreTest, TestMetadataCache, [] () {
+  auto metadata_store_path = StringUtil::format(
+      "/tmp/test_metadata_store-$0",
+      Random::singleton()->hex64());
+
+  FileUtil::mkdir_p(metadata_store_path);
+  MetadataStore metadata_store(
+      metadata_store_path,
+      MetadataStore::kDefaultMaxBytes,
+      12);
+
+  for (size_t i = 0; i < 20; ++i) {
+    auto txid = SHA1::compute(StringUtil::format("file$0", i % 20));
+    MetadataFile file(txid, 1, KEYSPACE_STRING, {});
+    auto rc = metadata_store.storeMetadataFile("ns", "mytbl", file);
+    EXPECT(rc.isSuccess());
+  }
+
+  FNV<uint64_t> fnv;
+  for (size_t i = 0; i < 10000; ++i) {
+    auto idx = fnv.hash((const void*) &i, sizeof(i)) % 20;
+    auto txid = SHA1::compute(StringUtil::format("file$0", idx));
+
+    RefPtr<MetadataFile> file;
+    auto rc = metadata_store.getMetadataFile(
+        "ns",
+        "mytbl",
+        txid,
+        &file);
+
+    EXPECT(rc.isSuccess());
+    EXPECT(file->getTransactionID() == txid);
+  }
+});
