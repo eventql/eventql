@@ -52,7 +52,7 @@ LSMPartitionWriter::LSMPartitionWriter(
     idx_cache_(cfg->idx_cache.get()),
     cdir_(cfg->config_directory),
     repl_(cfg->repl_scheme.get()),
-    max_datafile_size_(kDefaultMaxDatafileSize) {}
+    partition_split_threshold_(kDefaultPartitionSplitThresholdBytes) {}
 
 Set<SHA1Hash> LSMPartitionWriter::insertRecords(const Vector<RecordRef>& records) {
   std::unique_lock<std::mutex> lk(mutex_);
@@ -350,7 +350,13 @@ void LSMPartitionWriter::writeArenaToDisk(
 }
 
 bool LSMPartitionWriter::needsSplit() const {
-  return true;
+  auto snap = head_->getSnapshot();
+  size_t size = 0;
+  for (const auto& tbl : snap->state.lsm_tables()) {
+    size += tbl.size_bytes();
+  }
+
+  return size > partition_split_threshold_;
 }
 
 Status LSMPartitionWriter::split() {

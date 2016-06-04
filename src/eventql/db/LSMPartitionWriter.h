@@ -35,7 +35,7 @@ namespace eventql {
 
 class LSMPartitionWriter : public PartitionWriter {
 public:
-  static const size_t kDefaultMaxDatafileSize = 1024 * 1024 * 128;
+  static const size_t kDefaultPartitionSplitThresholdBytes = 1024 * 1024 * 2;
   static const size_t kMaxArenaRecords = 10000;
 
   LSMPartitionWriter(
@@ -76,7 +76,7 @@ protected:
   LSMTableIndexCache* idx_cache_;
   ConfigDirectory* cdir_;
   ReplicationScheme* repl_;
-  size_t max_datafile_size_;
+  size_t partition_split_threshold_;
   std::mutex commit_mutex_;
   std::mutex compaction_mutex_;
   std::mutex metadata_mutex_;
