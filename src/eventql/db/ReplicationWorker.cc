@@ -157,7 +157,7 @@ void ReplicationWorker::work() {
 
       repl = partition->getReplicationStrategy(repl_scheme, http_);
       if (repl->needsReplication()) {
-        enqueuePartitionWithLock(partition);
+        enqueuePartitionWithLock(partition, kReplicationCorkWindowMicros);
       } else {
         repl = partition->getReplicationStrategy(repl_scheme, http_);
         if (repl->shouldDropPartition()) {
@@ -169,7 +169,7 @@ void ReplicationWorker::work() {
                   snap->key);
 
           if (!dropped) {
-            enqueuePartitionWithLock(partition);
+            enqueuePartitionWithLock(partition, kReplicationCorkWindowMicros);
           }
         }
       }
