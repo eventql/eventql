@@ -46,7 +46,10 @@ public:
 
   Status findMedianValue(
       const String& column,
-      String* midpoint);
+      Function<bool (const String& a, const String b)> comparator,
+      String* min,
+      String* midpoint,
+      String* max);
 
   SHA1Hash version() const override;
 

@@ -373,6 +373,7 @@ Status LSMPartitionWriter::split() {
 
   auto snap = head_->getSnapshot();
   auto table = partition_->getTable();
+  auto keyspace = table->getKeyspaceType();
 
   if (snap->state.lifecycle_state() != PDISCOVERY_SERVE) {
     return Status(eIllegalArgumentError, "can't split non-serving partition");
@@ -380,10 +381,29 @@ Status LSMPartitionWriter::split() {
 
   String midpoint;
   {
+    auto cmp = [keyspace] (const String& a, const String& b) -> bool {
+      return comparePartitionKeys(
+          keyspace,
+          encodePartitionKey(keyspace, a),
+          encodePartitionKey(keyspace, b)) < 0;
+    };
+
     LSMPartitionReader reader(table, snap);
-    auto rc = reader.findMedianValue(table->getPartitionKey(), &midpoint);
+    String minval;
+    String maxval;
+    auto rc = reader.findMedianValue(
+        table->getPartitionKey(),
+        cmp,
+        &minval,
+        &midpoint,
+        &maxval);
+
     if (!rc.isSuccess()) {
       return rc;
+    }
+
+    if (minval == midpoint || maxval == midpoint) {
+      return Status(eRuntimeError, "no suitable split point found");
     }
   }
 
@@ -393,14 +413,14 @@ Status LSMPartitionWriter::split() {
       snap->state.tsdb_namespace(),
       snap->state.table_key(),
       snap->key.toString(),
-      decodePartitionKey(table->getKeyspaceType(), midpoint));
+      midpoint);
 
   auto split_partition_id_low = Random::singleton()->sha1();
   auto split_partition_id_high = Random::singleton()->sha1();
 
   SplitPartitionOperation op;
   op.set_partition_id(snap->key.data(), snap->key.size());
-  op.set_split_point(midpoint);
+  op.set_split_point(encodePartitionKey(keyspace, midpoint));
   op.set_split_partition_id_low(
       split_partition_id_low.data(),
       split_partition_id_low.size());
