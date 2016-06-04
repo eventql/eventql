@@ -240,31 +240,6 @@ var Z1 = (function(global) {
     });
   };
 
-  api.processStream = function(opts) {
-    var calculate_fn = opts["calculate_fn"];
-
-    var partitions = z1_listpartitions(
-        "" + opts["table"],
-        "" + opts["from"],
-        "" + opts["until"]);
-
-    partitions.forEach(function(partition) {
-      var partition_sources = calculate_fn(
-          parseInt(partition.time_begin, 10),
-          parseInt(partition.time_limit, 10));
-
-      if (typeof partition_sources != "object") {
-        throw "Z1.processStream calculate_fn must return a list of jobs";
-      }
-
-      api.saveToTablePartition({
-        table: opts["table"],
-        partition: partition.partition_key,
-        sources: partition_sources
-      });
-    });
-  }
-
   api.writeToOutput = function(str) {
     if (typeof str != "string") {
       throw "argument to Z1.writeToOutput must be a string";

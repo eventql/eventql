@@ -127,12 +127,6 @@ public:
       size_t sample_index,
       Function<void (const Buffer& record)> fn);
 
-  Vector<TimeseriesPartition> listPartitions(
-      const String& tsdb_namespace,
-      const String& table_key,
-      const UnixTime& from,
-      const UnixTime& until);
-
   Option<RefPtr<msg::MessageSchema>> tableSchema(
       const String& tsdb_namespace,
       const String& table_key);
