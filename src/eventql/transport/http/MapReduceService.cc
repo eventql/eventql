@@ -71,6 +71,7 @@ void MapReduceService::executeScript(
       session,
       auth_,
       pmap_,
+      cdir_,
       repl_,
       tsdb_,
       cachedir_));
