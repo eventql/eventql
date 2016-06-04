@@ -79,6 +79,8 @@ Status MetadataOperation::perform(
       return performSplitPartition(input, output);
     case METAOP_FINALIZE_SPLIT:
       return performFinalizeSplit(input, output);
+    case METAOP_JOIN_SERVERS:
+      return performJoinServers(input, output);
     default:
       return Status(eIllegalArgumentError, "invalid metadata operation type");
   }
@@ -261,6 +263,66 @@ Status MetadataOperation::performFinalizeSplit(
   } else {
     return Status(eNotFoundError, "partition not found");
   }
+}
+
+static bool hasServer(
+    const MetadataFile::PartitionMapEntry& e,
+    const String& server_id) {
+  for (const auto& e : e.servers) {
+    if (e.server_id == server_id) {
+      return true;
+    }
+  }
+
+  for (const auto& e : e.servers_joining) {
+    if (e.server_id == server_id) {
+      return true;
+    }
+  }
+
+  for (const auto& e : e.servers_leaving) {
+    if (e.server_id == server_id) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+Status MetadataOperation::performJoinServers(
+    const MetadataFile& input,
+    Vector<MetadataFile::PartitionMapEntry>* output) const {
+  auto opdata = msg::decode<JoinServersOperation>(
+      data_.opdata().data(),
+      data_.opdata().size());
+
+  HashMap<SHA1Hash, Vector<JoinServerOperation>> ops;
+  for (const auto& o : opdata.ops()) {
+    SHA1Hash partition_id(
+        o.partition_id().data(),
+        o.partition_id().size());
+
+    ops[partition_id].emplace_back(o);
+  }
+
+  auto pmap  = input.getPartitionMap();
+  for (auto& p : pmap) {
+    for (const auto& o : ops[p.partition_id]) {
+      if (hasServer(p, o.server_id())) {
+        return Status(
+            eIllegalArgumentError,
+            "server already exists in server list");
+      }
+
+      MetadataFile::PartitionPlacement s;
+      s.server_id = o.server_id();
+      s.placement_id = o.placement_id();
+      p.servers_joining.emplace_back(s);
+    }
+  }
+
+  *output = pmap;
+  return Status::success();
 }
 
 } // namespace eventql
