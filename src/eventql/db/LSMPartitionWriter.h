@@ -35,7 +35,7 @@ namespace eventql {
 
 class LSMPartitionWriter : public PartitionWriter {
 public:
-  static const size_t kDefaultPartitionSplitThresholdBytes = 1024 * 1024 * 2;
+  static const size_t kDefaultPartitionSplitThresholdBytes = 1024 * 1024 * 1;
   static const size_t kMaxArenaRecords = 10000;
 
   LSMPartitionWriter(
@@ -65,7 +65,6 @@ public:
 
 protected:
 
-
   void writeArenaToDisk(
       RefPtr<RecordArena> arena,
       uint64_t sequence,
@@ -80,6 +79,7 @@ protected:
   std::mutex commit_mutex_;
   std::mutex compaction_mutex_;
   std::mutex metadata_mutex_;
+  std::mutex split_mutex_;
 };
 
 } // namespace tdsb

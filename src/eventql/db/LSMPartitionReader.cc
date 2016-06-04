@@ -84,6 +84,12 @@ void LSMPartitionReader::fetchRecords(
   }
 }
 
+Status LSMPartitionReader::findMedianValue(
+    const String& column,
+    String* midpoint) {
+  return Status(eNotYetImplementedError, "not yet implemented");
+}
+
 SHA1Hash LSMPartitionReader::version() const {
   return SHA1::compute(StringUtil::toString(snap_->state.lsm_sequence())); // FIXME include arenas?
 }

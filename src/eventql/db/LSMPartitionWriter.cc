@@ -25,8 +25,10 @@
 #include <eventql/db/Partition.h>
 #include <eventql/db/LSMPartitionWriter.h>
 #include <eventql/db/LSMTableIndex.h>
+#include <eventql/db/LSMPartitionReader.h>
 #include <eventql/db/metadata_operation.h>
 #include <eventql/db/metadata_coordinator.h>
+#include <eventql/db/server_allocator.h>
 #include <eventql/util/protobuf/msg.h>
 #include <eventql/util/logging.h>
 #include <eventql/util/wallclock.h>
@@ -351,6 +353,10 @@ void LSMPartitionWriter::writeArenaToDisk(
 
 bool LSMPartitionWriter::needsSplit() const {
   auto snap = head_->getSnapshot();
+  if (snap->state.lifecycle_state() != PDISCOVERY_SERVE) {
+    return false;
+  }
+
   size_t size = 0;
   for (const auto& tbl : snap->state.lsm_tables()) {
     size += tbl.size_bytes();
@@ -360,16 +366,90 @@ bool LSMPartitionWriter::needsSplit() const {
 }
 
 Status LSMPartitionWriter::split() {
+  ScopedLock<std::mutex> split_lk(split_mutex_, std::defer_lock);
+  if (!split_lk.try_lock()) {
+    return Status(eConcurrentModificationError, "split is already running");
+  }
+
   auto snap = head_->getSnapshot();
+  auto table = partition_->getTable();
+
+  if (snap->state.lifecycle_state() != PDISCOVERY_SERVE) {
+    return Status(eIllegalArgumentError, "can't split non-serving partition");
+  }
+
+  String midpoint;
+  {
+    LSMPartitionReader reader(table, snap);
+    auto rc = reader.findMedianValue(table->getPartitionKey(), &midpoint);
+    if (!rc.isSuccess()) {
+      return rc;
+    }
+  }
 
   logInfo(
       "z1.replication",
-      "Splitting partition $0/$1/$2",
+      "Splitting partition $0/$1/$2 at '$3'",
       snap->state.tsdb_namespace(),
       snap->state.table_key(),
-      snap->key.toString());
+      snap->key.toString(),
+      decodePartitionKey(table->getKeyspaceType(), midpoint));
 
-  return Status::success();
+  auto split_partition_id_low = Random::singleton()->sha1();
+  auto split_partition_id_high = Random::singleton()->sha1();
+
+  SplitPartitionOperation op;
+  op.set_partition_id(snap->key.data(), snap->key.size());
+  op.set_split_point(midpoint);
+  op.set_split_partition_id_low(
+      split_partition_id_low.data(),
+      split_partition_id_low.size());
+  op.set_split_partition_id_high(
+      split_partition_id_high.data(),
+      split_partition_id_high.size());
+  op.set_placement_id(Random::singleton()->random64());
+
+  ServerAllocator server_alloc(cdir_);
+
+  Set<String> split_servers_low;
+  {
+    auto rc = server_alloc.allocateServers(3, &split_servers_low);
+    if (!rc.isSuccess()) {
+      return rc;
+    }
+  }
+
+  for (const auto& s : split_servers_low) {
+    op.add_split_servers_low(s);
+  }
+
+  Set<String> split_servers_high;
+  {
+    auto rc = server_alloc.allocateServers(3, &split_servers_high);
+    if (!rc.isSuccess()) {
+      return rc;
+    }
+  }
+
+  for (const auto& s : split_servers_high) {
+    op.add_split_servers_high(s);
+  }
+
+  MetadataOperation envelope(
+      snap->state.tsdb_namespace(),
+      snap->state.table_key(),
+      METAOP_SPLIT_PARTITION,
+      SHA1Hash(
+          snap->state.last_metadata_txnid().data(),
+          snap->state.last_metadata_txnid().size()),
+      Random::singleton()->sha1(),
+      *msg::encode(op));
+
+  MetadataCoordinator coordinator(cdir_);
+  return coordinator.performAndCommitOperation(
+      snap->state.tsdb_namespace(),
+      snap->state.table_key(),
+      envelope);
 }
 
 ReplicationState LSMPartitionWriter::fetchReplicationState() const {

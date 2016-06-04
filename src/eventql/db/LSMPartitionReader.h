@@ -44,6 +44,10 @@ public:
       const Set<String>& required_columns,
       Function<void (const msg::MessageObject& record)> fn) override;
 
+  Status findMedianValue(
+      const String& column,
+      String* midpoint);
+
   SHA1Hash version() const override;
 
 protected:
