@@ -978,6 +978,8 @@ evql_SOURCES = \
     eventql/cli/console.h \
     eventql/cli/cli_config.cc \
     eventql/cli/cli_config.h \
+    eventql/cli/commands/cli_command.h \
+    eventql/cli/commands/cli_command.cc \
     eventql/server/sql/codec/binary_codec.cc \
     eventql/server/sql/codec/binary_codec.h \
     eventql/evql.cc
