@@ -133,11 +133,6 @@ public:
       const UnixTime& from,
       const UnixTime& until);
 
-  Option<PartitionInfo> partitionInfo(
-      const String& tsdb_namespace,
-      const String& table_key,
-      const SHA1Hash& partition_key);
-
   Option<RefPtr<msg::MessageSchema>> tableSchema(
       const String& tsdb_namespace,
       const String& table_key);

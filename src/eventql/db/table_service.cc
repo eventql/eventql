@@ -546,22 +546,6 @@ void TableService::fetchPartitionWithSampling(
   log_reader->fetchRecordsWithSampling(sample_modulo, sample_index, fn);
 }
 
-Option<PartitionInfo> TableService::partitionInfo(
-    const String& tsdb_namespace,
-    const String& table_key,
-    const SHA1Hash& partition_key) {
-  auto partition = pmap_->findPartition(
-      tsdb_namespace,
-      table_key,
-      partition_key);
-
-  if (partition.isEmpty()) {
-    return None<PartitionInfo>();
-  } else {
-    return Some(partition.get()->getInfo());
-  }
-}
-
 Option<RefPtr<msg::MessageSchema>> TableService::tableSchema(
     const String& tsdb_namespace,
     const String& table_key) {

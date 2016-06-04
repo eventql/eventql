@@ -96,13 +96,6 @@ void RPCServlet::handleHTTPRequest(
       return;
     }
 
-    if (uri.path() == "/tsdb/partition_info") {
-      req_stream->readBody();
-      fetchPartitionInfo(&req, &res, &uri);
-      res_stream->writeResponse(res);
-      return;
-    }
-
     if (uri.path() == "/tsdb/update_cstable") {
       updateCSTable(uri, req_stream.get(), &res);
       res_stream->writeResponse(res);
@@ -306,47 +299,6 @@ void RPCServlet::streamPartition(
   res_stream->writeBodyChunk(Buffer(buf.data(), buf.size()));
 
   res_stream->finishResponse();
-}
-
-void RPCServlet::fetchPartitionInfo(
-    const http::HTTPRequest* req,
-    http::HTTPResponse* res,
-    URI* uri) {
-  const auto& params = uri->queryParams();
-
-  String tsdb_namespace;
-  if (!URI::getParam(params, "namespace", &tsdb_namespace)) {
-    res->setStatus(http::kStatusBadRequest);
-    res->addBody("missing ?namespace=... parameter");
-    return;
-  }
-
-  String table_name;
-  if (!URI::getParam(params, "stream", &table_name)) {
-    res->setStatus(http::kStatusBadRequest);
-    res->addBody("missing ?stream=... parameter");
-    return;
-  }
-
-  String partition_key;
-  if (!URI::getParam(params, "partition", &partition_key)) {
-    res->setStatus(http::kStatusBadRequest);
-    res->addBody("missing ?partition=... parameter");
-    return;
-  }
-
-  auto pinfo = node_->partitionInfo(
-      tsdb_namespace,
-      table_name,
-      SHA1Hash::fromHexString(partition_key));
-
-  if (pinfo.isEmpty()) {
-    res->setStatus(http::kStatusNotFound);
-  } else {
-    res->setStatus(http::kStatusOK);
-    res->addHeader("Content-Type", "application/x-protobuf");
-    res->addBody(*msg::encode(pinfo.get()));
-  }
 }
 
 void RPCServlet::updateCSTable(

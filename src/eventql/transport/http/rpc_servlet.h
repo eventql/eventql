@@ -66,11 +66,6 @@ protected:
       RefPtr<http::HTTPResponseStream> res_stream,
       URI* uri);
 
-  void fetchPartitionInfo(
-      const http::HTTPRequest* req,
-      http::HTTPResponse* res,
-      URI* uri);
-
   void updateCSTable(
       const URI& uri,
       http::HTTPRequestStream* req_stream,
