@@ -55,6 +55,7 @@ protected:
   Status fetchAndApplyMetadataTransaction();
   Status fetchAndApplyMetadataTransaction(MetadataTransaction txn);
   Status finalizeSplit();
+  Status finalizeJoin(const ReplicationTarget& target);
 
   void replicateTo(
       const ReplicationTarget& replica,

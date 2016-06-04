@@ -159,13 +159,14 @@ bool LSMPartitionReplication::replicate() {
         rc.message());
   }
 
-  // get the list of other replicas for this partition
+  // push all outstanding data to all replication targets
   auto& writer = dynamic_cast<LSMPartitionWriter&>(*partition_->getWriter());
   auto repl_state = writer.fetchReplicationState();
   auto head_offset = snap_->state.lsm_sequence();
   bool dirty = false;
   bool success = true;
   HashMap<SHA1Hash, size_t> replicas_per_partition;
+  Vector<ReplicationTarget> completed_joins;
 
   for (const auto& r : snap_->state.replication_targets()) {
     auto replica_offset = replicatedOffsetFor(repl_state, r);
@@ -175,6 +176,9 @@ bool LSMPartitionReplication::replicate() {
 
     if (replica_offset >= head_offset) {
       ++replicas_per_partition[target_partition_id];
+      if (r.is_joining()) {
+        completed_joins.emplace_back(r);
+      }
       continue;
     }
 
@@ -194,6 +198,10 @@ bool LSMPartitionReplication::replicate() {
       setReplicatedOffsetFor(&repl_state, r, head_offset);
       dirty = true;
       ++replicas_per_partition[target_partition_id];
+
+      if (r.is_joining()) {
+        completed_joins.emplace_back(r);
+      }
     } catch (const std::exception& e) {
       success = false;
 
@@ -208,9 +216,18 @@ bool LSMPartitionReplication::replicate() {
     }
   }
 
+  // commit new replication state
   if (dirty) {
     auto& writer = dynamic_cast<LSMPartitionWriter&>(*partition_->getWriter());
     writer.commitReplicationState(repl_state);
+  }
+
+  // finalize joins
+  for (const auto& t : completed_joins) {
+    auto rc = finalizeJoin(t);
+    if (!rc.isSuccess()) {
+      logWarning("evqld", "error while finalizing join: $0", rc.message());
+    }
   }
 
   // finalize split
@@ -434,6 +451,37 @@ Status LSMPartitionReplication::finalizeSplit() {
       snap_->state.tsdb_namespace(),
       snap_->state.table_key(),
       METAOP_FINALIZE_SPLIT,
+      SHA1Hash(
+          snap_->state.last_metadata_txnid().data(),
+          snap_->state.last_metadata_txnid().size()),
+      Random::singleton()->sha1(),
+      *msg::encode(op));
+
+  MetadataCoordinator coordinator(cdir_);
+  return coordinator.performAndCommitOperation(
+      snap_->state.tsdb_namespace(),
+      snap_->state.table_key(),
+      envelope);
+}
+
+Status LSMPartitionReplication::finalizeJoin(const ReplicationTarget& target) {
+  logDebug(
+      "z1.replication",
+      "Finalizing join for partition $0/$1/$2, server $3",
+      snap_->state.tsdb_namespace(),
+      snap_->state.table_key(),
+      snap_->key.toString(),
+      target.server_id());
+
+  FinalizeJoinOperation op;
+  op.set_partition_id(target.partition_id());
+  op.set_server_id(target.server_id());
+  op.set_placement_id(target.placement_id());
+
+  MetadataOperation envelope(
+      snap_->state.tsdb_namespace(),
+      snap_->state.table_key(),
+      METAOP_FINALIZE_JOIN,
       SHA1Hash(
           snap_->state.last_metadata_txnid().data(),
           snap_->state.last_metadata_txnid().size()),

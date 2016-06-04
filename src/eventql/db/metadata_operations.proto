@@ -29,6 +29,7 @@ enum MetadataOperationType {
   METAOP_SPLIT_PARTITION = 5;
   METAOP_FINALIZE_SPLIT = 6;
   METAOP_JOIN_SERVERS = 7;
+  METAOP_FINALIZE_JOIN = 8;
 };
 
 message PartitionDiscoveryRequest {
@@ -128,4 +129,10 @@ message JoinServerOperation {
 
 message JoinServersOperation {
   repeated JoinServerOperation ops = 1;
+};
+
+message FinalizeJoinOperation {
+  required bytes partition_id = 1;
+  required string server_id = 2;
+  required uint64 placement_id = 3;
 };
