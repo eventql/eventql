@@ -23,6 +23,7 @@
  * code of your own applications
  */
 #include <eventql/config/process_config.h>
+#include <eventql/util/io/fileutil.h>
 #include <inih/ini.h>
 
 namespace eventql {
@@ -95,6 +96,20 @@ Status ProcessConfigBuilder::loadFile(const String& file) {
   return parser_state.status;
 }
 
+Status ProcessConfigBuilder::loadDefaultConfigFile() {
+  char* homedir = getenv("HOME");
+  if (!homedir) {
+    return Status::success();
+  }
+
+  String confg_file_path = FileUtil::joinPaths(homedir, ".evqlrc");
+  if (!FileUtil::exists(confg_file_path)) {
+    return Status::success();
+  }
+
+  return loadFile(confg_file_path);
+}
+
 void ProcessConfigBuilder::setProperty(const String& key, const String& value) {
   properties_[key] = value;
 }
@@ -106,8 +121,8 @@ void ProcessConfigBuilder::setProperty(
   setProperty(StringUtil::format("$0.$1", section, key), value);
 }
 
-ProcessConfig* ProcessConfigBuilder::getConfig() {
-  return new ProcessConfig(properties_);
+RefPtr<ProcessConfig> ProcessConfigBuilder::getConfig() {
+  return mkRef(new ProcessConfig(properties_));
 }
 
 

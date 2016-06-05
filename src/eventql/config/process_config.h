@@ -25,12 +25,13 @@
 #pragma once
 #include <eventql/eventql.h>
 #include <eventql/util/stdtypes.h>
+#include <eventql/util/autoref.h>
 #include <eventql/util/option.h>
 #include <eventql/util/status.h>
 
 namespace eventql {
 
-class ProcessConfig {
+class ProcessConfig : public RefCounted {
 friend class ProcessConfigBuilder;
 public:
 
@@ -48,6 +49,7 @@ class ProcessConfigBuilder {
 public:
 
   Status loadFile(const String& file);
+  Status loadDefaultConfigFile();
 
   void setProperty(const String& key, const String& value);
   void setProperty(
@@ -55,7 +57,7 @@ public:
       const String& key,
       const String& value);
 
-  ProcessConfig* getConfig();
+  RefPtr<ProcessConfig> getConfig();
 
 protected:
   HashMap<String, String> properties_;
