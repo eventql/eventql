@@ -1132,3 +1132,14 @@ TESTS += test_evql_db_partition_discovery
 check_PROGRAMS += test_evql_db_partition_discovery
 
 
+################# TEST: io/cstable ####################
+test_evql_io_cstable_SOURCES = eventql/io/cstable/cstable_test.cc
+test_evql_io_cstable_LDADD = \
+    evql_cstable.a \
+    evql_util.a \
+    $(SIMDCOMP_LDADD) \
+    $(PCRE_LDADD)
+
+TESTS += test_evql_io_cstable
+check_PROGRAMS += test_evql_io_cstable
+
