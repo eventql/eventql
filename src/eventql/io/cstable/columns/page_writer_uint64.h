@@ -24,7 +24,7 @@
 #pragma once
 #include <eventql/util/stdtypes.h>
 #include <eventql/io/cstable/cstable.h>
-#include <eventql/io/cstable/io/PageManager.h>
+#include <eventql/io/cstable/page_manager.h>
 #include <eventql/io/cstable/io/PageWriter.h>
 
 namespace cstable {

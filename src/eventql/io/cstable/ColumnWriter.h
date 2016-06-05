@@ -27,7 +27,7 @@
 #include <eventql/util/autoref.h>
 #include <eventql/util/protobuf/MessageObject.h>
 #include <eventql/io/cstable/cstable.h>
-#include <eventql/io/cstable/io/PageManager.h>
+#include <eventql/io/cstable/page_manager.h>
 #include <eventql/io/cstable/columns/page_writer_uint64.h>
 
 namespace cstable {

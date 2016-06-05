@@ -27,7 +27,7 @@
 #include <eventql/util/io/file.h>
 #include <eventql/io/cstable/ColumnWriter.h>
 #include <eventql/io/cstable/LockManager.h>
-#include <eventql/io/cstable/io/PageManager.h>
+#include <eventql/io/cstable/page_manager.h>
 #include <eventql/io/cstable/TableSchema.h>
 
 

@@ -23,7 +23,7 @@
  */
 #include <algorithm>
 #include <eventql/io/cstable/cstable.h>
-#include <eventql/io/cstable/io/PageManager.h>
+#include <eventql/io/cstable/page_manager.h>
 #include <eventql/util/util/binarymessagewriter.h>
 #include <eventql/util/util/binarymessagereader.h>
 #include <eventql/util/SHA1.h>

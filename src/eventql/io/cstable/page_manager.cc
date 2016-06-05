@@ -21,7 +21,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include <eventql/io/cstable/io/PageManager.h>
+#include <eventql/io/cstable/page_manager.h>
 #include <eventql/io/cstable/cstable.h>
 #include <eventql/util/exception.h>
 #include <eventql/util/freeondestroy.h>

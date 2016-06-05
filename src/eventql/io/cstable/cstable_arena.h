@@ -23,27 +23,20 @@
  */
 #pragma once
 #include <eventql/util/stdtypes.h>
-#include <eventql/util/util/binarymessagewriter.h>
-#include <eventql/util/util/BitPackEncoder.h>
+#include <eventql/util/io/file.h>
+#include <eventql/io/cstable/ColumnReader.h>
 #include <eventql/io/cstable/cstable.h>
 #include <eventql/io/cstable/page_manager.h>
-#include <eventql/io/cstable/io/PageWriter.h>
-
 
 namespace cstable {
 
-class BitPackedIntPageWriter : public UnsignedIntPageWriter {
+class CSTableArena {
 public:
 
-  BitPackedIntPageWriter(
-      RefPtr<PageManager> page_mgr,
-      uint32_t max_value = 0xffffffff);
-
-  void appendValue(uint64_t value) override;
-  //void addValue(const void* data, size_t size) override;
-
+  
 protected:
-  uint32_t max_value_;
+
+
 };
 
 } // namespace cstable

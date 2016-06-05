@@ -26,7 +26,7 @@
 #include <eventql/util/io/file.h>
 #include <eventql/io/cstable/ColumnReader.h>
 #include <eventql/io/cstable/cstable.h>
-#include <eventql/io/cstable/io/PageManager.h>
+#include <eventql/io/cstable/page_manager.h>
 
 namespace cstable {
 
