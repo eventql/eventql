@@ -42,6 +42,10 @@ PageManager::PageManager(
     allocated_bytes_(offset),
     index_(index) {}
 
+PageManager::~PageManager() {
+  flushAllPages();
+}
+
 PageRef PageManager::allocPage(PageIndexKey key, uint32_t size) {
   std::unique_lock<std::mutex> lk(mutex_);
 
@@ -80,8 +84,7 @@ void PageManager::writeToPage(
   memcpy((char*) buf->second + pos, data, len);
 }
 
-void PageManager::flushPage(const PageRef& page) {
-  std::unique_lock<std::mutex> lk(mutex_);
+void PageManager::flushPageWithLock(const PageRef& page) {
   if (fd_ < 0) {
     return;
   }
@@ -100,6 +103,37 @@ void PageManager::flushPage(const PageRef& page) {
   }
 
   buffered_pages_.erase(buf);
+}
+
+void PageManager::flushPage(const PageRef& page) {
+  std::unique_lock<std::mutex> lk(mutex_);
+  flushPageWithLock(page);
+}
+
+void PageManager::flushAllPages() {
+  std::unique_lock<std::mutex> lk(mutex_);
+  for (const auto& p : index_) {
+    flushPageWithLock(p.page);
+  }
+}
+
+void PageManager::readPage(
+    const PageRef& page,
+    void* data) const {
+  std::unique_lock<std::mutex> lk(mutex_);
+  auto buf = buffered_pages_.find(page.offset);
+  if (buf != buffered_pages_.end()) {
+    memcpy(data, buf->second, page.size);
+    return;
+  }
+
+  auto ret = pread(fd_, data, page.size, page.offset);
+  if (ret < 0) {
+    RAISE_ERRNO(kIOError, "read() failed");
+  }
+  if (ret != page.size) {
+    RAISE(kIOError, "read() failed");
+  }
 }
 
 uint64_t PageManager::getAllocatedBytes() const {

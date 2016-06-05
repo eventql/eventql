@@ -39,6 +39,8 @@ public:
       uint64_t offset,
       const Vector<PageIndexEntry>& index);
 
+  ~PageManager();
+
   PageRef allocPage(
       PageIndexKey key,
       uint32_t size);
@@ -52,12 +54,19 @@ public:
   void flushPage(const PageRef& page);
   void flushAllPages();
 
+  void readPage(
+      const PageRef& page,
+      void* data) const;
+
   uint64_t getAllocatedBytes() const;
   Vector<PageIndexEntry> getPageIndex() const;
 
   Vector<PageRef> getPages(const PageIndexKey& key) const;
 
 protected:
+
+  void flushPageWithLock(const PageRef& page);
+
   BinaryFormatVersion version_;
   int fd_;
   uint64_t allocated_bytes_;

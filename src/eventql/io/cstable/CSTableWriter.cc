@@ -252,6 +252,8 @@ void CSTableWriter::commitV1() {
 }
 
 void CSTableWriter::commitV2() {
+  page_mgr_->flushAllPages();
+
   // write index
   uint64_t index_offset = page_mgr_->getAllocatedBytes();
   auto index_os = FileOutputStream::fromFileDescriptor(fd_);

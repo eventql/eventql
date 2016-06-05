@@ -34,14 +34,15 @@ public:
 
   UInt64PageReader(PageIndexKey key, PageManager* page_mgr);
 
-  uint64_t readUnsignedInt() const override;
+  uint64_t readUnsignedInt() override;
 
 protected:
   PageManager* page_mgr_;
   Vector<PageRef> pages_;
-  bool has_page_;
   uint64_t page_pos_;
+  uint64_t page_len_;
   uint64_t page_idx_;
+  Buffer page_data_;
 };
 
 } // namespace cstable
