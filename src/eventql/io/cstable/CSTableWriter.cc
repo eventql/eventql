@@ -21,6 +21,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#include "eventql/eventql.h"
 #include <eventql/io/cstable/CSTableWriter.h>
 #include <eventql/io/cstable/columns/column_writer_uint.h>
 #include <eventql/io/cstable/columns/v1/BooleanColumnWriter.h>
@@ -33,8 +34,10 @@
 #include <eventql/util/SHA1.h>
 #include <eventql/util/io/fileutil.h>
 #include <eventql/util/option.h>
-
-#include "eventql/eventql.h"
+#include <sys/fcntl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 namespace cstable {
 
@@ -56,32 +59,29 @@ RefPtr<CSTableWriter> CSTableWriter::createFile(
     Option<RefPtr<LockRef>> lockref /* = None<RefPtr<LockRef>>() */) {
   auto file = File::openFile(filename, File::O_WRITE | File::O_CREATE);
   auto file_os = FileOutputStream::fromFileDescriptor(file.fd());
+  ScopedPtr<PageManager> page_mgr;
 
   FileHeader header;
   header.schema = mkRef(new TableSchema(schema));
   header.columns = header.schema->flatColumns();
 
-  // write header
   size_t header_size ;
   switch (version) {
     case BinaryFormatVersion::v0_1_0:
-      header_size = 0;
       break;
-    case BinaryFormatVersion::v0_2_0:
-      header_size = cstable::v0_2_0::writeHeader(header, file_os.get());
+    case BinaryFormatVersion::v0_2_0: {
+      auto header_size = cstable::v0_2_0::writeHeader(header, file_os.get());
+      page_mgr.reset(new PageManager(file.fd(), header_size, {}));
       break;
+    }
   }
-
-  auto page_mgr = new PageManager(
-      version,
-      std::move(file),
-      header_size);
 
   return new CSTableWriter(
       version,
       header.schema,
-      page_mgr,
-      header.columns);
+      std::move(page_mgr),
+      header.columns,
+      file.releaseFD());
 }
 
 RefPtr<CSTableWriter> CSTableWriter::reopenFile(
@@ -119,7 +119,7 @@ static RefPtr<ColumnWriter> openColumnV1(const ColumnConfig& c) {
 
 static RefPtr<ColumnWriter> openColumnV2(
     const ColumnConfig& c,
-    RefPtr<PageManager> page_mgr) {
+    PageManager* page_mgr) {
   switch (c.logical_type) {
     //case ColumnType::BOOLEAN:
     //  return new BooleanColumnWriter(c, page_mgr, page_idx);
@@ -139,12 +139,14 @@ static RefPtr<ColumnWriter> openColumnV2(
 CSTableWriter::CSTableWriter(
     BinaryFormatVersion version,
     RefPtr<TableSchema> schema,
-    RefPtr<PageManager> page_mgr,
-    Vector<ColumnConfig> columns) :
+    ScopedPtr<PageManager> page_mgr,
+    Vector<ColumnConfig> columns,
+    int fd) :
     version_(version),
     schema_(std::move(schema)),
-    page_mgr_(page_mgr),
+    page_mgr_(std::move(page_mgr)),
     columns_(columns),
+    fd_(fd),
     current_txid_(0),
     num_rows_(0) {
 
@@ -156,12 +158,18 @@ CSTableWriter::CSTableWriter(
         writer = openColumnV1(columns_[i]);
         break;
       case BinaryFormatVersion::v0_2_0:
-        writer = openColumnV2(columns_[i], page_mgr_);
+        writer = openColumnV2(columns_[i], page_mgr_.get());
         break;
     }
 
     column_writers_.emplace_back(writer);
     column_writers_by_name_.emplace(columns_[i].column_name, writer);
+  }
+}
+
+CSTableWriter::~CSTableWriter() {
+  if (fd_ > 0) {
+    close(fd_);
   }
 }
 
@@ -214,8 +222,16 @@ void CSTableWriter::commitV1() {
     header.appendUInt64(col.body_size);
   }
 
-  // FIXME
-  //page_mgr_->writePage(0, header.size(), header.data(), header.size());
+  {
+    auto ret = pwrite(fd_, header.data(), header.size(), 0);
+    if (ret < 0) {
+      RAISE_ERRNO(kIOError, "write() failed");
+    }
+    if (ret != header.size()) {
+      RAISE(kIOError, "write() failed");
+    }
+  }
+
 
   for (size_t i = 0; i < columns_.size(); ++i) {
     const auto& col = columns_[i];
@@ -225,32 +241,44 @@ void CSTableWriter::commitV1() {
     writer->write(buf.data(), buf.size());
     RCHECK(buf.size() == col.body_size, "invalid column body size");
 
-    // FIXME
-    //page_mgr_->writePage(
-    //    col.body_offset,
-    //    col.body_size,
-    //    buf.data(),
-    //    buf.size());
+    auto ret = pwrite(fd_, buf.data(), buf.size(), col.body_offset);
+    if (ret < 0) {
+      RAISE_ERRNO(kIOError, "write() failed");
+    }
+    if (ret != buf.size()) {
+      RAISE(kIOError, "write() failed");
+    }
   }
 }
 
 void CSTableWriter::commitV2() {
-  RAISE(kNotYetImplementedError);
-  // write new index
-  //auto idx_head = page_idx_->write(free_idx_ptr_);
+  // write index
+  Buffer index_buf;
+  auto index_os = BufferOutputStream::fromBuffer(&index_buf);
+  uint64_t index_offset = page_mgr_->getAllocatedBytes();
+  uint64_t index_size = v0_2_0::writeIndex(
+      page_mgr_->getPageIndex(),
+      index_os.get());
 
-  //// build new meta block
-  //MetaBlock mb;
-  //mb.transaction_id = current_txid_ + 1;
-  //mb.num_rows = num_rows_;
-  //mb.head_index_page_offset = idx_head.offset;
-  //mb.head_index_page_size = idx_head.size;
-  //mb.file_size = page_mgr_->getOffset();
+  {
+    auto ret = pwrite(fd_, index_buf.data(), index_buf.size(), index_offset);
+    if (ret < 0) {
+      RAISE_ERRNO(kIOError, "write() failed");
+    }
+    if (ret != index_buf.size()) {
+      RAISE(kIOError, "write() failed");
+    }
+  }
+
+  // build new meta block
+  MetaBlock mb;
+  mb.transaction_id = current_txid_ + 1;
+  mb.num_rows = num_rows_;
+  mb.index_offset = index_offset;
+  mb.index_size = index_size;
 
   //// commit tx to disk
-  //page_mgr_->writeTransaction(mb);
-  //free_idx_ptr_ = cur_idx_ptr_;
-  //cur_idx_ptr_ = Some(idx_head);
+  //writeTransaction(mb);
 }
 
 RefPtr<ColumnWriter> CSTableWriter::getColumnWriter(

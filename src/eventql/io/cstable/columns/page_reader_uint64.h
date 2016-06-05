@@ -33,14 +33,14 @@ class UInt64PageReader : public UnsignedIntPageReader {
 public:
   static const uint64_t kPageSize = 512 * 2;
 
-  UInt64PageReader(RefPtr<PageManager> page_mgr);
+  UInt64PageReader(PageManager* page_mgr);
 
   uint64_t readUnsignedInt() const override;
 
   void readIndex(InputStream* os) const override;
 
 protected:
-  RefPtr<PageManager> page_mgr_;
+  PageManager* page_mgr_;
   Vector<Pair<cstable::PageRef, uint64_t>> pages_;
 };
 

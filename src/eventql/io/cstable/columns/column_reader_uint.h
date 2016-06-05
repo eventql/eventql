@@ -36,7 +36,7 @@ public:
       ColumnConfig config,
       ScopedPtr<UnsignedIntPageReader> rlevel_reader,
       ScopedPtr<UnsignedIntPageReader> dlevel_reader,
-      RefPtr<PageManager> page_mgr);
+      PageManager* page_mgr);
 
   bool readBoolean(
       uint64_t* rlvl,

@@ -31,23 +31,13 @@
 
 namespace cstable {
 
-struct PageRef {
-  uint64_t offset;
-  uint32_t size;
-};
-
-struct PageIndexKey {
-  uint32_t column_id;
-  PageIndexEntryType entry_type;
-};
-
-class PageManager : public RefCounted {
+class PageManager {
 public:
 
   PageManager(
-      BinaryFormatVersion version,
-      File&& file,
-      uint64_t offset);
+      int fd,
+      uint64_t offset,
+      const Vector<PageIndexEntry>& index);
 
   PageRef allocPage(
       PageIndexKey key,
@@ -60,19 +50,18 @@ public:
       size_t len);
 
   void flushPage(const PageRef& page);
+  void flushAllPages();
 
-  void writeTransaction(const MetaBlock& mb);
-
-  uint64_t getOffset() const;
-
-  File* file();
+  uint64_t getAllocatedBytes() const;
+  Vector<PageIndexEntry> getPageIndex() const;
 
 protected:
   BinaryFormatVersion version_;
-  File file_;
-  uint64_t offset_;
-  size_t meta_block_position_;
-  size_t meta_block_size_;
+  int fd_;
+  uint64_t allocated_bytes_;
+  Vector<PageIndexEntry> index_;
+  mutable std::mutex mutex_;
+  OrderedMap<uint64_t, void*> buffered_pages_;
 };
 
 } // namespace cstable

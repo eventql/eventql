@@ -25,98 +25,92 @@
 #include <eventql/io/cstable/cstable.h>
 #include <eventql/util/exception.h>
 #include <eventql/util/freeondestroy.h>
-
+#include <sys/fcntl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <assert.h>
+#include <string.h>
 
 namespace cstable {
 
 PageManager::PageManager(
-    BinaryFormatVersion version,
-    File&& file,
-    uint64_t offset) :
-    version_(version),
-    file_(std::move(file)),
-    offset_(offset) {
-  switch (version) {
-    case BinaryFormatVersion::v0_1_0:
-      meta_block_position_ = 0,
-      meta_block_size_ = 0;
-    case BinaryFormatVersion::v0_2_0:
-      meta_block_position_ = cstable::v0_2_0::kMetaBlockPosition,
-      meta_block_size_ = cstable::v0_2_0::kMetaBlockSize;
-      break;
-  }
-}
+    int fd,
+    uint64_t offset,
+    const Vector<PageIndexEntry>& index) :
+    fd_(fd),
+    allocated_bytes_(offset),
+    index_(index) {}
 
 PageRef PageManager::allocPage(PageIndexKey key, uint32_t size) {
+  std::unique_lock<std::mutex> lk(mutex_);
+
   PageRef page;
-  page.offset = offset_;
+  page.offset = allocated_bytes_;
   page.size = padToNextSector(size);
-  offset_ += page.size;
+
+  PageIndexEntry idx_entry;
+  idx_entry.key = key;
+  idx_entry.page = page;
+
+  auto buf = malloc(page.size);
+  if (!buf) {
+    RAISE(kMallocError, "malloc() failed");
+  }
+
+  allocated_bytes_ += page.size;
+  buffered_pages_.emplace(page.offset, buf);
+  index_.emplace_back(idx_entry);
   return page;
 }
 
-//void PageManager::writePage(const PageRef& page, const Buffer& buffer) {
-//  writePage(page.offset, page.size, buffer.data(), buffer.size());
-//}
-//
-//void PageManager::writePage(
-//    uint64_t page_offset,
-//    uint64_t page_size,
-//    const void* data,
-//    size_t data_size) {
-//  auto page_data = data;
-//
-//  FreeOnDestroy tmp;
-//  if (data_size < page_size) {
-//    page_data = malloc(page_size);
-//    if (!page_data) {
-//      RAISE(kMallocError, "malloc() failed");
-//    }
-//
-//    tmp.store((void*) page_data);
-//    memcpy(tmp.get(), data, data_size);
-//    memset((char*) tmp.get() + data_size, 0, page_size - data_size);
-//  }
-//
-//  file_.pwrite(page_offset, page_data, page_size);
-//}
+void PageManager::writeToPage(
+    const PageRef& page,
+    size_t pos,
+    const void* data,
+    size_t len) {
+  assert(pos + len <= page.size);
+  std::unique_lock<std::mutex> lk(mutex_);
 
-void PageManager::writeTransaction(const MetaBlock& mb) {
-  // fsync all changes before writing new tx
-  file_.fsync();
-
-  // build new meta block
-  Buffer buf;
-  buf.reserve(meta_block_size_);
-  auto os = BufferOutputStream::fromBuffer(&buf);
-
-  switch (version_) {
-    case BinaryFormatVersion::v0_1_0:
-      RAISE(kIllegalArgumentError, "unsupported version: v0.1.0");
-    case BinaryFormatVersion::v0_2_0:
-      cstable::v0_2_0::writeMetaBlock(mb, os.get());
-      break;
+  auto buf = buffered_pages_.find(page.offset);
+  if (buf == buffered_pages_.end()) {
+    RAISE(kIllegalArgumentError, "invalid write access");
   }
 
-  RCHECK(buf.size() == meta_block_size_, "invalid meta block size");
-
-  // write to metablock slot
-  auto mb_index = mb.transaction_id % 2;
-  auto mb_offset = meta_block_position_ + meta_block_size_ * mb_index;
-  file_.pwrite(mb_offset, buf.data(), buf.size());
-
-  // fsync one last time
-  file_.fsync();
+  memcpy((char*) buf->second + pos, data, len);
 }
 
-uint64_t PageManager::getOffset() const {
-  return offset_;
+void PageManager::flushPage(const PageRef& page) {
+  std::unique_lock<std::mutex> lk(mutex_);
+  if (fd_ < 0) {
+    return;
+  }
+
+  auto buf = buffered_pages_.find(page.offset);
+  if (buf == buffered_pages_.end()) {
+    return;
+  }
+
+  auto ret = pwrite(fd_, buf->second, page.size, page.offset);
+  if (ret < 0) {
+    RAISE_ERRNO(kIOError, "write() failed");
+  }
+  if (ret != page.size) {
+    RAISE(kIOError, "write() failed");
+  }
+
+  buffered_pages_.erase(buf);
 }
 
-File* PageManager::file() {
-  return &file_;
+uint64_t PageManager::getAllocatedBytes() const {
+  std::unique_lock<std::mutex> lk(mutex_);
+  return allocated_bytes_;
+}
+
+Vector<PageIndexEntry> PageManager::getPageIndex() const {
+  std::unique_lock<std::mutex> lk(mutex_);
+  return index_;
 }
 
 } // namespace cstable
-
 

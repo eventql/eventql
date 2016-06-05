@@ -139,6 +139,8 @@ public:
    */
   RefPtr<ColumnWriter> getColumnWriter(const String& column_name) const;
 
+  ~CSTableWriter();
+
   bool hasColumn(const String& column_name) const;
 
   void addRow();
@@ -152,22 +154,22 @@ protected:
   CSTableWriter(
       BinaryFormatVersion version,
       RefPtr<TableSchema> schema,
-      RefPtr<PageManager> page_mgr,
-      Vector<ColumnConfig> columns);
+      ScopedPtr<PageManager> page_mgr,
+      Vector<ColumnConfig> columns,
+      int fd);
 
   void commitV1();
   void commitV2();
 
   BinaryFormatVersion version_;
   RefPtr<TableSchema> schema_;
-  RefPtr<PageManager> page_mgr_;
+  ScopedPtr<PageManager> page_mgr_;
   Vector<ColumnConfig> columns_;
+  int fd_;
   Vector<RefPtr<ColumnWriter>> column_writers_;
   HashMap<String, RefPtr<ColumnWriter>> column_writers_by_name_;
   uint64_t current_txid_;
   uint64_t num_rows_;
-  Option<PageRef> cur_idx_ptr_;
-  Option<PageRef> free_idx_ptr_;
 };
 
 } // namespace cstable

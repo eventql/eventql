@@ -91,7 +91,7 @@ public:
 
   DefaultColumnWriter(
       ColumnConfig config,
-      RefPtr<PageManager> page_mgr);
+      PageManager* page_mgr);
 
   void writeNull(uint64_t rlvl, uint64_t dlvl) override;
 

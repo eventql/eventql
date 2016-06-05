@@ -29,7 +29,7 @@ namespace cstable {
 
 UnsignedIntColumnWriter::UnsignedIntColumnWriter(
     ColumnConfig config,
-    RefPtr<PageManager> page_mgr) :
+    PageManager* page_mgr) :
     DefaultColumnWriter(config, page_mgr) {
   PageIndexKey key = {
     .column_id = config.column_id,

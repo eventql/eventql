@@ -26,7 +26,7 @@
 namespace cstable {
 
 UInt64PageReader::UInt64PageReader(
-    RefPtr<PageManager> page_mgr) :
+    PageManager* page_mgr) :
     page_mgr_(page_mgr) {
 
 }

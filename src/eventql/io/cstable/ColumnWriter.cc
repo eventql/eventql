@@ -57,7 +57,7 @@ void ColumnWriter::writeDateTime(
 
 DefaultColumnWriter::DefaultColumnWriter(
     ColumnConfig config,
-    RefPtr<PageManager> page_mgr) :
+    PageManager* page_mgr) :
     ColumnWriter(config.rlevel_max, config.dlevel_max),
     config_(config) {
   if (config.rlevel_max > 0) {

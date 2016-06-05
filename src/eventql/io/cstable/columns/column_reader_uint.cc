@@ -33,7 +33,7 @@ UnsignedIntColumnReader::UnsignedIntColumnReader(
     ColumnConfig config,
     ScopedPtr<UnsignedIntPageReader> rlevel_reader,
     ScopedPtr<UnsignedIntPageReader> dlevel_reader,
-    RefPtr<PageManager> page_mgr) :
+    PageManager* page_mgr) :
     config_(config),
     rlevel_reader_(std::move(rlevel_reader)),
     dlevel_reader_(std::move(dlevel_reader)) {

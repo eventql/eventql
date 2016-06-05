@@ -35,15 +35,13 @@ public:
 
   UInt64PageWriter(
       PageIndexKey key,
-      RefPtr<PageManager> page_mgr);
+      PageManager* page_mgr);
 
   void appendValue(uint64_t value) override;
 
-  void writeIndex(OutputStream* os) const override;
-
 protected:
   PageIndexKey key_;
-  RefPtr<PageManager> page_mgr_;
+  PageManager* page_mgr_;
   bool has_page_;
   size_t page_pos_;
   cstable::PageRef page_;

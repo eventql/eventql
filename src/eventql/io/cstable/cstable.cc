@@ -73,16 +73,8 @@ void readHeader(
     case 2:
       if (metablocks[0].transaction_id > metablocks[1].transaction_id) {
         *metablock = metablocks[0];
-        *free_index = Some(PageRef {
-          .offset = metablocks[1].head_index_page_offset,
-          .size = metablocks[1].head_index_page_size
-        });
       } else {
         *metablock = metablocks[1];
-        *free_index = Some(PageRef {
-          .offset = metablocks[0].head_index_page_offset,
-          .size = metablocks[0].head_index_page_size
-        });
       }
       break;
 
@@ -147,9 +139,8 @@ size_t writeMetaBlock(const MetaBlock& mb, OutputStream* os) {
   util::BinaryMessageWriter buf;
   buf.appendUInt64(mb.transaction_id); // transaction id
   buf.appendUInt64(mb.num_rows); // number of rows
-  buf.appendUInt64(mb.head_index_page_offset); // head index page offset
-  buf.appendUInt32(mb.head_index_page_size); // head index page size
-  buf.appendUInt64(mb.file_size); // file size in bytes
+  buf.appendUInt64(mb.index_offset); // head index page offset
+  buf.appendUInt32(mb.index_size); // head index page size
   os->write((char*) buf.data(), buf.size());
 
   auto hash = SHA1::compute(buf.data(), buf.size());
@@ -171,9 +162,8 @@ bool readMetaBlock(MetaBlock* mb, InputStream* is) {
     util::BinaryMessageReader reader(buf.data(), buf.size());
     mb->transaction_id = *reader.readUInt64();
     mb->num_rows = *reader.readUInt64();
-    mb->head_index_page_offset = *reader.readUInt64();
-    mb->head_index_page_size = *reader.readUInt32();
-    mb->file_size = *reader.readUInt64();
+    mb->index_offset = *reader.readUInt64();
+    mb->index_size = *reader.readUInt32();
     return true;
   } else {
     return false;

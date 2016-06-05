@@ -28,7 +28,7 @@ namespace cstable {
 
 UInt64PageWriter::UInt64PageWriter(
     PageIndexKey key,
-    RefPtr<PageManager> page_mgr) :
+    PageManager* page_mgr) :
     key_(key),
     page_mgr_(page_mgr),
     has_page_(false),

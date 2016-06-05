@@ -34,6 +34,7 @@ class CSTableReader : public RefCounted {
 public:
 
   static RefPtr<CSTableReader> openFile(const String& filename);
+  ~CSTableReader();
 
   bool hasColumn(const String& column_name) const ;
 
@@ -49,15 +50,19 @@ protected:
 
   CSTableReader(
       BinaryFormatVersion version,
+      ScopedPtr<PageManager> page_mgr,
       Vector<ColumnConfig> columns,
       Vector<RefPtr<ColumnReader>> column_readers,
-      uint64_t num_rows);
+      uint64_t num_rows,
+      int fd);
 
   BinaryFormatVersion version_;
+  ScopedPtr<PageManager> page_mgr_;
   Vector<ColumnConfig> columns_;
   HashMap<uint32_t, RefPtr<ColumnReader>> column_readers_by_id_;
   HashMap<String, RefPtr<ColumnReader>> column_readers_by_name_;
   uint64_t num_rows_;
+  int fd_;
 };
 
 } // namespace cstable

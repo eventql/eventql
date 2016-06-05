@@ -36,7 +36,7 @@ class BitPackedIntPageWriter : public UnsignedIntPageWriter {
 public:
 
   BitPackedIntPageWriter(
-      RefPtr<PageManager> page_mgr,
+      PageManager* page_mgr,
       uint32_t max_value = 0xffffffff);
 
   void appendValue(uint64_t value) override;

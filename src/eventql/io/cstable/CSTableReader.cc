@@ -21,6 +21,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#include "eventql/eventql.h"
 #include <eventql/io/cstable/CSTableReader.h>
 #include <eventql/io/cstable/io/PageReader.h>
 #include <eventql/io/cstable/columns/v1/BooleanColumnReader.h>
@@ -34,8 +35,10 @@
 #include <eventql/io/cstable/columns/page_reader_uint64.h>
 #include <eventql/util/io/file.h>
 #include <eventql/util/io/mmappedfile.h>
-
-#include "eventql/eventql.h"
+#include <sys/fcntl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 namespace cstable {
 
@@ -72,7 +75,7 @@ static RefPtr<v1::ColumnReader> openColumnV1(
 
 static RefPtr<ColumnReader> openColumnV2(
     const ColumnConfig& c,
-    RefPtr<PageManager> page_mgr) {
+    PageManager* page_mgr) {
   ScopedPtr<UnsignedIntPageReader> rlevel_reader;
   ScopedPtr<UnsignedIntPageReader> dlevel_reader;
 
@@ -128,39 +131,44 @@ RefPtr<CSTableReader> CSTableReader::openFile(const String& filename) {
 
       return new CSTableReader(
           version,
+          ScopedPtr<PageManager>(nullptr),
           header.columns,
           column_readers,
-          header.num_rows);
+          header.num_rows,
+          -1);
     }
 
     case BinaryFormatVersion::v0_2_0: {
-      auto page_mgr = mkRef(new PageManager(
-          version,
-          std::move(file),
-          metablock.file_size));
+      auto page_mgr = mkScoped(new PageManager(file.fd(), 0, {}));
 
       Vector<RefPtr<ColumnReader>> column_readers;
       for (const auto& col : header.columns) {
-        column_readers.emplace_back(openColumnV2(col, page_mgr));
+        column_readers.emplace_back(openColumnV2(col, page_mgr.get()));
       }
 
       return new CSTableReader(
           version,
+          std::move(page_mgr),
           header.columns,
           column_readers,
-          metablock.num_rows);
+          metablock.num_rows,
+          file.releaseFD());
     }
   }
 }
 
 CSTableReader::CSTableReader(
     BinaryFormatVersion version,
+    ScopedPtr<PageManager> page_mgr,
     Vector<ColumnConfig> columns,
     Vector<RefPtr<ColumnReader>> column_readers,
-    uint64_t num_rows) :
+    uint64_t num_rows,
+    int fd) :
     version_(version),
+    page_mgr_(std::move(page_mgr)),
     columns_(columns),
-    num_rows_(num_rows) {
+    num_rows_(num_rows),
+    fd_(fd) {
   RCHECK(column_readers.size() == columns.size(), "illegal column list");
 
   for (size_t i = 0; i < columns.size(); ++i) {
@@ -169,6 +177,12 @@ CSTableReader::CSTableReader(
     }
 
     column_readers_by_name_.emplace(columns_[i].column_name, column_readers[i]);
+  }
+}
+
+CSTableReader::~CSTableReader() {
+  if (fd_ > 0) {
+    close(fd_);
   }
 }
 
