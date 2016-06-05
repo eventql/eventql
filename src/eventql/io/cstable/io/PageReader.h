@@ -31,7 +31,6 @@ namespace cstable {
 
 class PageReader {
 public:
-  virtual void readIndex(InputStream* os) const = 0;
 };
 
 class UnsignedIntPageReader : public PageReader {

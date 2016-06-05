@@ -31,17 +31,17 @@ namespace cstable {
 
 class UInt64PageReader : public UnsignedIntPageReader {
 public:
-  static const uint64_t kPageSize = 512 * 2;
 
-  UInt64PageReader(PageManager* page_mgr);
+  UInt64PageReader(PageIndexKey key, PageManager* page_mgr);
 
   uint64_t readUnsignedInt() const override;
 
-  void readIndex(InputStream* os) const override;
-
 protected:
   PageManager* page_mgr_;
-  Vector<Pair<cstable::PageRef, uint64_t>> pages_;
+  Vector<PageRef> pages_;
+  bool has_page_;
+  uint64_t page_pos_;
+  uint64_t page_idx_;
 };
 
 } // namespace cstable

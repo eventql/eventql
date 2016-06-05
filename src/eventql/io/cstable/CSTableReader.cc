@@ -85,8 +85,18 @@ static RefPtr<ColumnReader> openColumnV2(
       .entry_type = PageIndexEntryType::RLEVEL
     };
 
-    rlevel_reader = mkScoped(new UInt64PageReader(page_mgr));
+    rlevel_reader = mkScoped(new UInt64PageReader(rlevel_idx_key, page_mgr));
   }
+
+  if (c.dlevel_max > 0) {
+    PageIndexKey dlevel_idx_key {
+      .column_id = c.column_id,
+      .entry_type = PageIndexEntryType::RLEVEL
+    };
+
+    dlevel_reader = mkScoped(new UInt64PageReader(dlevel_idx_key, page_mgr));
+  }
+
 
   switch (c.logical_type) {
     case ColumnType::UNSIGNED_INT:

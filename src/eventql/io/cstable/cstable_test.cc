@@ -450,44 +450,44 @@ TEST_CASE(CSTableTest, TestReMatWithNonRepeatedParent, [] () {
   EXPECT_EQ(robj.asObject()[2].asObject()[1].asObject()[1].asString(), "fnord6");
 });
 
-//TEST_CASE(CSTableTest, TestV2UInt64Plain, [] () {
-//  String filename = "/tmp/__fnord__cstabletest3.cstable";
-//  FileUtil::rm(filename);
-//
-//  TableSchema schema;
-//  schema.addUnsignedInteger(
-//      "mycol",
-//      false,
-//      cstable::ColumnEncoding::UINT64_PLAIN);
-//
-//  {
-//    auto tbl_writer = cstable::CSTableWriter::createFile(filename, schema);
-//    auto mycol = tbl_writer->getColumnWriter("mycol");
-//
-//    for (size_t i = 1; i < 10000; ++i) {
-//      mycol->writeUnsignedInt(0, 0, 23 * i);
-//      mycol->writeUnsignedInt(0, 0, 42 * i);
-//      mycol->writeUnsignedInt(0, 0, 17 * i);
-//    }
-//
-//    tbl_writer->commit();
-//  }
-//
-//  {
-//    auto tbl_reader = cstable::CSTableReader::openFile(filename);
-//    auto mycol = tbl_reader->getColumnReader("mycol");
-//
-//    for (size_t i = 1; i < 10000; ++i) {
-//      uint64_t rlevel;
-//      uint64_t dlevel;
-//      uint64_t val;
-//      mycol->readUnsignedInt(&rlevel, &dlevel, &val);
-//      EXPECT_EQ(val, 23 * i);
-//      mycol->readUnsignedInt(&rlevel, &dlevel, &val);
-//      EXPECT_EQ(val, 42 * i);
-//      mycol->readUnsignedInt(&rlevel, &dlevel, &val);
-//      EXPECT_EQ(val, 17 * i);
-//    }
-//  }
-//});
-//
+TEST_CASE(CSTableTest, TestV2UInt64Plain, [] () {
+  String filename = "/tmp/__fnord__cstabletest3.cstable";
+  FileUtil::rm(filename);
+
+  TableSchema schema;
+  schema.addUnsignedInteger(
+      "mycol",
+      false,
+      cstable::ColumnEncoding::UINT64_PLAIN);
+
+  {
+    auto tbl_writer = cstable::CSTableWriter::createFile(filename, schema);
+    auto mycol = tbl_writer->getColumnWriter("mycol");
+
+    for (size_t i = 1; i < 10000; ++i) {
+      mycol->writeUnsignedInt(0, 0, 23 * i);
+      mycol->writeUnsignedInt(0, 0, 42 * i);
+      mycol->writeUnsignedInt(0, 0, 17 * i);
+    }
+
+    tbl_writer->commit();
+  }
+
+  {
+    auto tbl_reader = cstable::CSTableReader::openFile(filename);
+    auto mycol = tbl_reader->getColumnReader("mycol");
+
+    for (size_t i = 1; i < 10000; ++i) {
+      uint64_t rlevel;
+      uint64_t dlevel;
+      uint64_t val;
+      mycol->readUnsignedInt(&rlevel, &dlevel, &val);
+      EXPECT_EQ(val, 23 * i);
+      mycol->readUnsignedInt(&rlevel, &dlevel, &val);
+      EXPECT_EQ(val, 42 * i);
+      mycol->readUnsignedInt(&rlevel, &dlevel, &val);
+      EXPECT_EQ(val, 17 * i);
+    }
+  }
+});
+

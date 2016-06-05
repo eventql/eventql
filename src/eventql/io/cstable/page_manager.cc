@@ -112,5 +112,19 @@ Vector<PageIndexEntry> PageManager::getPageIndex() const {
   return index_;
 }
 
+Vector<PageRef> PageManager::getPages(const PageIndexKey& key) const {
+  std::unique_lock<std::mutex> lk(mutex_);
+  Vector<PageRef> pages;
+
+  for (const auto& p : index_) {
+    if (p.key.column_id == key.column_id &&
+        p.key.entry_type == key.entry_type) {
+      pages.emplace_back(p.page);
+    }
+  }
+
+  return pages;
+}
+
 } // namespace cstable
 

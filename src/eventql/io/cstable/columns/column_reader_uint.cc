@@ -45,7 +45,7 @@ UnsignedIntColumnReader::UnsignedIntColumnReader(
   switch (config_.storage_type) {
 
     case ColumnEncoding::UINT64_PLAIN:
-      data_reader_ = mkScoped(new UInt64PageReader(page_mgr));
+      data_reader_ = mkScoped(new UInt64PageReader(key, page_mgr));
       break;
 
     default:

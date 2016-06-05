@@ -26,17 +26,17 @@
 namespace cstable {
 
 UInt64PageReader::UInt64PageReader(
+    PageIndexKey key,
     PageManager* page_mgr) :
-    page_mgr_(page_mgr) {
+    page_mgr_(page_mgr),
+    pages_(page_mgr->getPages(key)),
+    has_page_(false),
+    page_pos_(0),
+    page_idx_(0) {}
 
-}
 
 uint64_t UInt64PageReader::readUnsignedInt() const {
   return 0;
-}
-
-void UInt64PageReader::readIndex(InputStream* os) const {
-
 }
 
 } // namespace cstable

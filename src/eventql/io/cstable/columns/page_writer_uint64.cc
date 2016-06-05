@@ -41,6 +41,7 @@ void UInt64PageWriter::appendValue(uint64_t value) {
     }
 
     page_ = page_mgr_->allocPage(key_, kPageSize);
+    page_pos_ = 0;
     has_page_ = true;
   }
 

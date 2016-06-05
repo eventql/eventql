@@ -55,6 +55,8 @@ public:
   uint64_t getAllocatedBytes() const;
   Vector<PageIndexEntry> getPageIndex() const;
 
+  Vector<PageRef> getPages(const PageIndexKey& key) const;
+
 protected:
   BinaryFormatVersion version_;
   int fd_;
