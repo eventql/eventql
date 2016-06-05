@@ -226,6 +226,16 @@ void readHeader(
   }
 }
 
+size_t writeIndex(const Vector<PageIndexEntry>& index, OutputStream* os) {
+  os->appendVarUInt(index.size());
+  for (const auto& entry : index) {
+    os->appendVarUInt((uint8_t) entry.key.entry_type);
+    os->appendVarUInt(entry.key.column_id);
+    os->appendVarUInt(entry.page.offset);
+    os->appendVarUInt(entry.page.size);
+  }
+}
+
 } // namespace v0_2_0
 
 } // namespace cstable

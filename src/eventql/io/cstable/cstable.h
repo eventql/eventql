@@ -102,7 +102,8 @@ static const std::string kVersionString = "v0.2.0-dev";
  *   <index_entry> :=
  *      <lenenc_int>             // entry type (0x1=data, 0x2=repetition level, 0x3=definition level)
  *      <lenenc_int>             // field id
- *      <char>*                  // column index data
+ *      <lenenc_int>             // page offset
+ *      <lenenc_int>             // page size
  *
  *  <data_page>       :=
  *      <char>*                  // page data
