@@ -217,7 +217,7 @@ void readHeader(FileHeader* mb, InputStream* is);
 namespace v0_2_0 {
 static const uint16_t kVersion = 2;
 const size_t kMetaBlockPosition = 14;
-const size_t kMetaBlockSize = 56;
+const size_t kMetaBlockSize = 48;
 size_t writeMetaBlock(const MetaBlock& mb, OutputStream* os);
 bool readMetaBlock(MetaBlock* mb, InputStream* is);
 size_t writeHeader(const FileHeader& hdr, OutputStream* os);

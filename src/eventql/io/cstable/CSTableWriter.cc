@@ -271,14 +271,46 @@ void CSTableWriter::commitV2() {
   }
 
   // build new meta block
+  auto meta_block_position = cstable::v0_2_0::kMetaBlockPosition;
+  auto meta_block_size = cstable::v0_2_0::kMetaBlockSize;
+
   MetaBlock mb;
   mb.transaction_id = current_txid_ + 1;
   mb.num_rows = num_rows_;
   mb.index_offset = index_offset;
   mb.index_size = index_size;
 
-  //// commit tx to disk
-  //writeTransaction(mb);
+  Buffer buf;
+  buf.reserve(meta_block_size);
+  auto os = BufferOutputStream::fromBuffer(&buf);
+
+  switch (version_) {
+    case BinaryFormatVersion::v0_1_0:
+      RAISE(kIllegalArgumentError, "unsupported version: v0.1.0");
+    case BinaryFormatVersion::v0_2_0:
+      cstable::v0_2_0::writeMetaBlock(mb, os.get());
+      break;
+  }
+
+  // fsync file before comitting meta block
+  fsync(fd_);
+
+  // write to metablock slot
+  auto mb_index = mb.transaction_id % 2;
+  auto mb_offset = meta_block_position + meta_block_size * mb_index;
+  RCHECK(buf.size() == meta_block_size, "invalid meta block size");
+  {
+    auto ret = pwrite(fd_, buf.data(), buf.size(), mb_offset);
+    if (ret < 0) {
+      RAISE_ERRNO(kIOError, "write() failed");
+    }
+    if (ret != meta_block_size) {
+      RAISE(kIOError, "write() failed");
+    }
+  }
+
+  // fsync one more time
+  fsync(fd_);
 }
 
 RefPtr<ColumnWriter> CSTableWriter::getColumnWriter(
