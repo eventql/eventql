@@ -21,7 +21,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include <eventql/io/cstable/columns/BitPackedIntPageWriter.h>
+#include <eventql/io/cstable/columns/page_writer_bitpacked.h>
 
 
 namespace cstable {

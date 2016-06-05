@@ -21,8 +21,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include <eventql/io/cstable/columns/UInt64PageReader.h>
-
+#include <eventql/io/cstable/columns/page_reader_uint64.h>
 
 namespace cstable {
 

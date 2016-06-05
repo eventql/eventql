@@ -22,7 +22,7 @@
  * code of your own applications
  */
 #include <eventql/io/cstable/CSTableWriter.h>
-#include <eventql/io/cstable/columns/UnsignedIntColumnWriter.h>
+#include <eventql/io/cstable/columns/column_writer_uint.h>
 #include <eventql/io/cstable/columns/v1/BooleanColumnWriter.h>
 #include <eventql/io/cstable/columns/v1/BitPackedIntColumnWriter.h>
 #include <eventql/io/cstable/columns/v1/UInt32ColumnWriter.h>

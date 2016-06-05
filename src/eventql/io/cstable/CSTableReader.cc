@@ -31,8 +31,8 @@
 #include <eventql/io/cstable/columns/v1/LEB128ColumnReader.h>
 #include <eventql/io/cstable/columns/v1/DoubleColumnReader.h>
 #include <eventql/io/cstable/columns/v1/StringColumnReader.h>
-#include <eventql/io/cstable/columns/UnsignedIntColumnReader.h>
-#include <eventql/io/cstable/columns/UInt64PageReader.h>
+#include <eventql/io/cstable/columns/column_reader_uint.h>
+#include <eventql/io/cstable/columns/page_reader_uint64.h>
 #include <eventql/util/io/file.h>
 #include <eventql/util/io/mmappedfile.h>
 

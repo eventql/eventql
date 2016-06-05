@@ -21,7 +21,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include <eventql/io/cstable/columns/UnsignedIntColumnWriter.h>
+#include <eventql/io/cstable/columns/column_writer_uint.h>
 
 #include "eventql/eventql.h"
 

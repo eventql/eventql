@@ -302,16 +302,16 @@ evql_cstable_a_SOURCES = \
     eventql/io/cstable/RecordShredder.h \
     eventql/io/cstable/TableSchema.cc \
     eventql/io/cstable/TableSchema.h \
-    eventql/io/cstable/columns/BitPackedIntPageWriter.cc \
-    eventql/io/cstable/columns/BitPackedIntPageWriter.h \
-    eventql/io/cstable/columns/UInt64PageReader.cc \
-    eventql/io/cstable/columns/UInt64PageReader.h \
-    eventql/io/cstable/columns/UInt64PageWriter.cc \
-    eventql/io/cstable/columns/UInt64PageWriter.h \
-    eventql/io/cstable/columns/UnsignedIntColumnReader.cc \
-    eventql/io/cstable/columns/UnsignedIntColumnReader.h \
-    eventql/io/cstable/columns/UnsignedIntColumnWriter.cc \
-    eventql/io/cstable/columns/UnsignedIntColumnWriter.h \
+    eventql/io/cstable/columns/column_reader_uint.cc \
+    eventql/io/cstable/columns/column_reader_uint.h \
+    eventql/io/cstable/columns/column_writer_uint.cc \
+    eventql/io/cstable/columns/column_writer_uint.h \
+    eventql/io/cstable/columns/page_reader_uint64.cc \
+    eventql/io/cstable/columns/page_reader_uint64.h \
+    eventql/io/cstable/columns/page_writer_uint64.cc \
+    eventql/io/cstable/columns/page_writer_uint64.h \
+    eventql/io/cstable/columns/page_writer_bitpacked.cc \
+    eventql/io/cstable/columns/page_writer_bitpacked.h \
     eventql/io/cstable/columns/v1/BitPackedIntColumnReader.cc \
     eventql/io/cstable/columns/v1/BitPackedIntColumnReader.h \
     eventql/io/cstable/columns/v1/BitPackedIntColumnWriter.cc \

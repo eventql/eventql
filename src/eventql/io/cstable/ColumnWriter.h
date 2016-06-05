@@ -29,7 +29,7 @@
 #include <eventql/io/cstable/cstable.h>
 #include <eventql/io/cstable/io/PageManager.h>
 #include <eventql/io/cstable/io/PageIndex.h>
-#include <eventql/io/cstable/columns/UInt64PageWriter.h>
+#include <eventql/io/cstable/columns/page_writer_uint64.h>
 
 namespace cstable {
 
