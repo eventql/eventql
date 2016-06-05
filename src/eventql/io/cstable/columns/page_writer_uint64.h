@@ -25,7 +25,6 @@
 #include <eventql/util/stdtypes.h>
 #include <eventql/io/cstable/cstable.h>
 #include <eventql/io/cstable/io/PageManager.h>
-#include <eventql/io/cstable/io/PageIndex.h>
 #include <eventql/io/cstable/io/PageWriter.h>
 
 namespace cstable {
@@ -36,8 +35,7 @@ public:
 
   UInt64PageWriter(
       PageIndexKey key,
-      RefPtr<PageManager> page_mgr,
-      RefPtr<PageIndex> page_idx);
+      RefPtr<PageManager> page_mgr);
 
   void appendValue(uint64_t value) override;
 
@@ -47,10 +45,8 @@ protected:
   PageIndexKey key_;
   RefPtr<PageManager> page_mgr_;
   bool has_page_;
+  size_t page_pos_;
   cstable::PageRef page_;
-  Buffer page_buf_;
-  BufferOutputStream page_os_;
-  Vector<Pair<cstable::PageRef, uint64_t>> pages_;
 };
 
 } // namespace cstable

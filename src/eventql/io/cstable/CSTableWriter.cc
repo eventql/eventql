@@ -81,7 +81,6 @@ RefPtr<CSTableWriter> CSTableWriter::createFile(
       version,
       header.schema,
       page_mgr,
-      new PageIndex(version, page_mgr),
       header.columns);
 }
 
@@ -120,13 +119,12 @@ static RefPtr<ColumnWriter> openColumnV1(const ColumnConfig& c) {
 
 static RefPtr<ColumnWriter> openColumnV2(
     const ColumnConfig& c,
-    RefPtr<PageManager> page_mgr,
-    RefPtr<PageIndex> page_idx) {
+    RefPtr<PageManager> page_mgr) {
   switch (c.logical_type) {
     //case ColumnType::BOOLEAN:
     //  return new BooleanColumnWriter(c, page_mgr, page_idx);
     case ColumnType::UNSIGNED_INT:
-      return new UnsignedIntColumnWriter(c, page_mgr, page_idx);
+      return new UnsignedIntColumnWriter(c, page_mgr);
     //case ColumnType::SIGNED_INT:
     //  return new SignedIntColumnWriter(c, page_mgr, page_idx);
     //case ColumnType::STRING:
@@ -142,12 +140,10 @@ CSTableWriter::CSTableWriter(
     BinaryFormatVersion version,
     RefPtr<TableSchema> schema,
     RefPtr<PageManager> page_mgr,
-    RefPtr<PageIndex> page_idx,
     Vector<ColumnConfig> columns) :
     version_(version),
     schema_(std::move(schema)),
     page_mgr_(page_mgr),
-    page_idx_(page_idx),
     columns_(columns),
     current_txid_(0),
     num_rows_(0) {
@@ -160,7 +156,7 @@ CSTableWriter::CSTableWriter(
         writer = openColumnV1(columns_[i]);
         break;
       case BinaryFormatVersion::v0_2_0:
-        writer = openColumnV2(columns_[i], page_mgr_, page_idx_);
+        writer = openColumnV2(columns_[i], page_mgr_);
         break;
     }
 
@@ -218,7 +214,8 @@ void CSTableWriter::commitV1() {
     header.appendUInt64(col.body_size);
   }
 
-  page_mgr_->writePage(0, header.size(), header.data(), header.size());
+  // FIXME
+  //page_mgr_->writePage(0, header.size(), header.data(), header.size());
 
   for (size_t i = 0; i < columns_.size(); ++i) {
     const auto& col = columns_[i];
@@ -228,30 +225,32 @@ void CSTableWriter::commitV1() {
     writer->write(buf.data(), buf.size());
     RCHECK(buf.size() == col.body_size, "invalid column body size");
 
-    page_mgr_->writePage(
-        col.body_offset,
-        col.body_size,
-        buf.data(),
-        buf.size());
+    // FIXME
+    //page_mgr_->writePage(
+    //    col.body_offset,
+    //    col.body_size,
+    //    buf.data(),
+    //    buf.size());
   }
 }
 
 void CSTableWriter::commitV2() {
+  RAISE(kNotYetImplementedError);
   // write new index
-  auto idx_head = page_idx_->write(free_idx_ptr_);
+  //auto idx_head = page_idx_->write(free_idx_ptr_);
 
-  // build new meta block
-  MetaBlock mb;
-  mb.transaction_id = current_txid_ + 1;
-  mb.num_rows = num_rows_;
-  mb.head_index_page_offset = idx_head.offset;
-  mb.head_index_page_size = idx_head.size;
-  mb.file_size = page_mgr_->getOffset();
+  //// build new meta block
+  //MetaBlock mb;
+  //mb.transaction_id = current_txid_ + 1;
+  //mb.num_rows = num_rows_;
+  //mb.head_index_page_offset = idx_head.offset;
+  //mb.head_index_page_size = idx_head.size;
+  //mb.file_size = page_mgr_->getOffset();
 
-  // commit tx to disk
-  page_mgr_->writeTransaction(mb);
-  free_idx_ptr_ = cur_idx_ptr_;
-  cur_idx_ptr_ = Some(idx_head);
+  //// commit tx to disk
+  //page_mgr_->writeTransaction(mb);
+  //free_idx_ptr_ = cur_idx_ptr_;
+  //cur_idx_ptr_ = Some(idx_head);
 }
 
 RefPtr<ColumnWriter> CSTableWriter::getColumnWriter(

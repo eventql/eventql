@@ -26,8 +26,6 @@
 #include <eventql/io/cstable/ColumnReader.h>
 #include <eventql/io/cstable/io/PageReader.h>
 #include <eventql/io/cstable/io/PageManager.h>
-#include <eventql/io/cstable/io/PageIndex.h>
-
 
 namespace cstable {
 
@@ -38,8 +36,7 @@ public:
       ColumnConfig config,
       ScopedPtr<UnsignedIntPageReader> rlevel_reader,
       ScopedPtr<UnsignedIntPageReader> dlevel_reader,
-      RefPtr<PageManager> page_mgr,
-      PageIndexReader* page_idx);
+      RefPtr<PageManager> page_mgr);
 
   bool readBoolean(
       uint64_t* rlvl,

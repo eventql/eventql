@@ -28,7 +28,6 @@
 #include <eventql/io/cstable/ColumnWriter.h>
 #include <eventql/io/cstable/LockManager.h>
 #include <eventql/io/cstable/io/PageManager.h>
-#include <eventql/io/cstable/io/PageIndex.h>
 #include <eventql/io/cstable/TableSchema.h>
 
 
@@ -154,7 +153,6 @@ protected:
       BinaryFormatVersion version,
       RefPtr<TableSchema> schema,
       RefPtr<PageManager> page_mgr,
-      RefPtr<PageIndex> page_idx,
       Vector<ColumnConfig> columns);
 
   void commitV1();
@@ -163,7 +161,6 @@ protected:
   BinaryFormatVersion version_;
   RefPtr<TableSchema> schema_;
   RefPtr<PageManager> page_mgr_;
-  RefPtr<PageIndex> page_idx_;
   Vector<ColumnConfig> columns_;
   Vector<RefPtr<ColumnWriter>> column_writers_;
   HashMap<String, RefPtr<ColumnWriter>> column_writers_by_name_;

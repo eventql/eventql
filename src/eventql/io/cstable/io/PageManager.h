@@ -36,6 +36,11 @@ struct PageRef {
   uint32_t size;
 };
 
+struct PageIndexKey {
+  uint32_t column_id;
+  PageIndexEntryType entry_type;
+};
+
 class PageManager : public RefCounted {
 public:
 
@@ -44,19 +49,17 @@ public:
       File&& file,
       uint64_t offset);
 
-  PageRef allocPage(uint32_t size);
+  PageRef allocPage(
+      PageIndexKey key,
+      uint32_t size);
 
-  void writePage(const PageRef& page, const Buffer& buffer);
-
-  /**
-   * data_size must be less than or equal to page size. if it is less than page
-   * size an extra memory allocation will be performed
-   */
-  void writePage(
-      uint64_t page_offset,
-      uint64_t page_size,
+  void writeToPage(
+      const PageRef& page,
+      size_t pos,
       const void* data,
-      size_t data_size);
+      size_t len);
+
+  void flushPage(const PageRef& page);
 
   void writeTransaction(const MetaBlock& mb);
 

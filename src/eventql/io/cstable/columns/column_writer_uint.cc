@@ -29,9 +29,8 @@ namespace cstable {
 
 UnsignedIntColumnWriter::UnsignedIntColumnWriter(
     ColumnConfig config,
-    RefPtr<PageManager> page_mgr,
-    RefPtr<PageIndex> page_idx) :
-    DefaultColumnWriter(config, page_mgr, page_idx) {
+    RefPtr<PageManager> page_mgr) :
+    DefaultColumnWriter(config, page_mgr) {
   PageIndexKey key = {
     .column_id = config.column_id,
     .entry_type = PageIndexEntryType::DATA
@@ -40,7 +39,7 @@ UnsignedIntColumnWriter::UnsignedIntColumnWriter(
   switch (config_.storage_type) {
 
     case ColumnEncoding::UINT64_PLAIN:
-      data_writer_ = mkScoped(new UInt64PageWriter(key, page_mgr, page_idx));
+      data_writer_ = mkScoped(new UInt64PageWriter(key, page_mgr));
       break;
 
     default:

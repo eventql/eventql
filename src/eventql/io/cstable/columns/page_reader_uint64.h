@@ -25,9 +25,7 @@
 #include <eventql/util/stdtypes.h>
 #include <eventql/io/cstable/cstable.h>
 #include <eventql/io/cstable/io/PageManager.h>
-#include <eventql/io/cstable/io/PageIndex.h>
 #include <eventql/io/cstable/io/PageReader.h>
-
 
 namespace cstable {
 

@@ -344,8 +344,6 @@ evql_cstable_a_SOURCES = \
     eventql/io/cstable/columns/v1/UInt64ColumnWriter.h \
     eventql/io/cstable/cstable.cc \
     eventql/io/cstable/cstable.h \
-    eventql/io/cstable/io/PageIndex.cc \
-    eventql/io/cstable/io/PageIndex.h \
     eventql/io/cstable/io/PageManager.cc \
     eventql/io/cstable/io/PageManager.h
 

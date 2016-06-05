@@ -24,53 +24,29 @@
 #include <eventql/io/cstable/columns/page_writer_uint64.h>
 #include <eventql/util/inspect.h>
 
-
 namespace cstable {
 
 UInt64PageWriter::UInt64PageWriter(
     PageIndexKey key,
-    RefPtr<PageManager> page_mgr,
-    RefPtr<PageIndex> page_idx) :
+    RefPtr<PageManager> page_mgr) :
     key_(key),
     page_mgr_(page_mgr),
     has_page_(false),
-    page_os_(&page_buf_) {
-  page_idx->addPageWriter(key_, this);
-}
+    page_pos_(0) {}
 
 void UInt64PageWriter::appendValue(uint64_t value) {
-  if (!has_page_ || page_buf_.size() + sizeof(uint64_t) > page_.size) {
+  if (!has_page_ || page_pos_ + sizeof(uint64_t) > page_.size) {
     if (has_page_) {
-      page_mgr_->writePage(page_, page_buf_);
-      pages_.emplace_back(page_, page_buf_.size());
+      page_mgr_->flushPage(page_);
     }
 
-    page_ = page_mgr_->allocPage(kPageSize);
-    if (page_buf_.size() < page_.size) {
-      page_buf_.reserve(page_.size - page_buf_.size());
-    }
-
+    page_ = page_mgr_->allocPage(key_, kPageSize);
     has_page_ = true;
   }
 
-  page_os_.appendUInt64(value);
+  page_mgr_->writeToPage(page_, page_pos_, &value, sizeof(value));
+  page_pos_ += sizeof(uint64_t);
 }
-
-void UInt64PageWriter::writeIndex(OutputStream* os) const {
-  auto pages = pages_;
-  if (has_page_) {
-    page_mgr_->writePage(page_, page_buf_);
-    pages.emplace_back(page_, page_buf_.size());
-  }
-
-  os->appendVarUInt(pages.size());
-  for (const auto& p : pages) {
-    os->appendVarUInt(p.first.offset);
-    os->appendVarUInt(p.first.size);
-    os->appendVarUInt(p.second);
-  }
-}
-
 
 } // namespace cstable
 

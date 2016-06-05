@@ -22,7 +22,6 @@
  * code of your own applications
  */
 #include <eventql/io/cstable/CSTableReader.h>
-#include <eventql/io/cstable/io/PageIndex.h>
 #include <eventql/io/cstable/io/PageReader.h>
 #include <eventql/io/cstable/columns/v1/BooleanColumnReader.h>
 #include <eventql/io/cstable/columns/v1/BitPackedIntColumnReader.h>
@@ -73,8 +72,7 @@ static RefPtr<v1::ColumnReader> openColumnV1(
 
 static RefPtr<ColumnReader> openColumnV2(
     const ColumnConfig& c,
-    RefPtr<PageManager> page_mgr,
-    PageIndexReader* page_idx) {
+    RefPtr<PageManager> page_mgr) {
   ScopedPtr<UnsignedIntPageReader> rlevel_reader;
   ScopedPtr<UnsignedIntPageReader> dlevel_reader;
 
@@ -85,7 +83,6 @@ static RefPtr<ColumnReader> openColumnV2(
     };
 
     rlevel_reader = mkScoped(new UInt64PageReader(page_mgr));
-    page_idx->addPageReader(rlevel_idx_key, rlevel_reader.get());
   }
 
   switch (c.logical_type) {
@@ -94,8 +91,7 @@ static RefPtr<ColumnReader> openColumnV2(
           c,
           std::move(rlevel_reader),
           std::move(dlevel_reader),
-          page_mgr,
-          page_idx);
+          page_mgr);
     default:
       RAISEF(
           kRuntimeError,
@@ -143,10 +139,9 @@ RefPtr<CSTableReader> CSTableReader::openFile(const String& filename) {
           std::move(file),
           metablock.file_size));
 
-      PageIndexReader page_idx(version, page_mgr);
       Vector<RefPtr<ColumnReader>> column_readers;
       for (const auto& col : header.columns) {
-        column_readers.emplace_back(openColumnV2(col, page_mgr, &page_idx));
+        column_readers.emplace_back(openColumnV2(col, page_mgr));
       }
 
       return new CSTableReader(

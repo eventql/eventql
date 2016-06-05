@@ -28,7 +28,6 @@
 #include <eventql/util/protobuf/MessageObject.h>
 #include <eventql/io/cstable/cstable.h>
 #include <eventql/io/cstable/io/PageManager.h>
-#include <eventql/io/cstable/io/PageIndex.h>
 #include <eventql/io/cstable/columns/page_writer_uint64.h>
 
 namespace cstable {
@@ -92,17 +91,16 @@ public:
 
   DefaultColumnWriter(
       ColumnConfig config,
-      RefPtr<PageManager> page_mgr,
-      RefPtr<PageIndex> page_idx);
+      RefPtr<PageManager> page_mgr);
 
   void writeNull(uint64_t rlvl, uint64_t dlvl) override;
 
   ColumnEncoding encoding() const override {
-    return ColumnEncoding::UINT32_BITPACKED;
+    return config_.storage_type;
   }
 
   ColumnType type() const override {
-    return ColumnType::UNSIGNED_INT;
+    return config_.logical_type;
   }
 
 protected:

@@ -33,8 +33,7 @@ public:
 
   UnsignedIntColumnWriter(
       ColumnConfig config,
-      RefPtr<PageManager> page_mgr,
-      RefPtr<PageIndex> page_idx);
+      RefPtr<PageManager> page_mgr);
 
   void writeBoolean(
       uint64_t rlvl,
