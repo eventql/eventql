@@ -253,22 +253,12 @@ void CSTableWriter::commitV1() {
 
 void CSTableWriter::commitV2() {
   // write index
-  Buffer index_buf;
-  auto index_os = BufferOutputStream::fromBuffer(&index_buf);
   uint64_t index_offset = page_mgr_->getAllocatedBytes();
+  auto index_os = FileOutputStream::fromFileDescriptor(fd_);
+  index_os->seekTo(index_offset);
   uint64_t index_size = v0_2_0::writeIndex(
       page_mgr_->getPageIndex(),
       index_os.get());
-
-  {
-    auto ret = pwrite(fd_, index_buf.data(), index_buf.size(), index_offset);
-    if (ret < 0) {
-      RAISE_ERRNO(kIOError, "write() failed");
-    }
-    if (ret != index_buf.size()) {
-      RAISE(kIOError, "write() failed");
-    }
-  }
 
   // build new meta block
   auto meta_block_position = cstable::v0_2_0::kMetaBlockPosition;

@@ -199,6 +199,13 @@ size_t FileOutputStream::printf(const char* format, ...) {
   return pos;
 }
 
+void FileOutputStream::seekTo(size_t offset) {
+  if (lseek(fd_, offset, SEEK_SET) < 0) {
+    RAISE_ERRNO(kIOError, "lseek(%s) failed", fd_);
+  }
+}
+
+
 bool FileOutputStream::isTTY() const {
   return ::isatty(fd_);
 }

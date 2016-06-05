@@ -227,12 +227,30 @@ void readHeader(
 }
 
 size_t writeIndex(const Vector<PageIndexEntry>& index, OutputStream* os) {
-  os->appendVarUInt(index.size());
+  Buffer index_buf;
+  auto buf_os = BufferOutputStream::fromBuffer(&index_buf);
+
+  buf_os->appendVarUInt(index.size());
   for (const auto& entry : index) {
-    os->appendVarUInt((uint8_t) entry.key.entry_type);
-    os->appendVarUInt(entry.key.column_id);
-    os->appendVarUInt(entry.page.offset);
-    os->appendVarUInt(entry.page.size);
+    buf_os->appendVarUInt((uint8_t) entry.key.entry_type);
+    buf_os->appendVarUInt(entry.key.column_id);
+    buf_os->appendVarUInt(entry.page.offset);
+    buf_os->appendVarUInt(entry.page.size);
+  }
+
+  os->write((const char*) index_buf.data(), index_buf.size());
+  return index_buf.size();
+}
+
+void readIndex(Vector<PageIndexEntry>* index, InputStream* is) {
+  auto index_len = is->readVarUInt();
+  for (size_t i = 0; i < index_len; ++i) {
+    PageIndexEntry e;
+    e.key.entry_type = (PageIndexEntryType) is->readVarUInt();
+    e.key.column_id = is->readVarUInt();
+    e.page.offset = is->readVarUInt();
+    e.page.size = is->readVarUInt();
+    index->emplace_back(e);
   }
 }
 

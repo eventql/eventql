@@ -139,7 +139,13 @@ RefPtr<CSTableReader> CSTableReader::openFile(const String& filename) {
     }
 
     case BinaryFormatVersion::v0_2_0: {
-      auto page_mgr = mkScoped(new PageManager(file.fd(), 0, {}));
+      Vector<PageIndexEntry> index;
+      {
+        file_is->seekTo(metablock.index_offset);
+        v0_2_0::readIndex(&index, file_is.get());
+      }
+
+      auto page_mgr = mkScoped(new PageManager(file.fd(), 0, index));
 
       Vector<RefPtr<ColumnReader>> column_readers;
       for (const auto& col : header.columns) {

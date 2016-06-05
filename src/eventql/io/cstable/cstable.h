@@ -223,6 +223,7 @@ bool readMetaBlock(MetaBlock* mb, InputStream* is);
 size_t writeHeader(const FileHeader& hdr, OutputStream* os);
 void readHeader(FileHeader* mb, Vector<MetaBlock>* metablocks, InputStream* is);
 size_t writeIndex(const Vector<PageIndexEntry>& index, OutputStream* os);
+void readIndex(Vector<PageIndexEntry>* index, InputStream* os);
 }
 
 } // namespace cstable
