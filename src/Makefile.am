@@ -980,8 +980,6 @@ evql_SOURCES = \
     eventql/cli/console.h \
     eventql/cli/cli_config.cc \
     eventql/cli/cli_config.h \
-    eventql/cli/commands/cli_command.h \
-    eventql/cli/commands/cli_command.cc \
     eventql/server/sql/codec/binary_codec.cc \
     eventql/server/sql/codec/binary_codec.h \
     eventql/evql.cc
@@ -1022,6 +1020,10 @@ bin_PROGRAMS += evqld
 
 ################# BIN: evqld ####################
 evqlctl_SOURCES = \
+    eventql/cli/commands/cli_command.h \
+    eventql/cli/commands/cli_command.cc \
+    eventql/cli/commands/cluster_add_server.h \
+    eventql/cli/commands/cluster_add_server.cc \
     eventql/evqlctl.cc
 
 evqlctl_LDADD = \
