@@ -279,6 +279,10 @@ Status TSDBTableProvider::createTable(
       primary_key);
 }
 
+Status TSDBTableProvider::createDatabase(const String& database_name) {
+  return Status(eNotYetImplementedError, "create database nyi");
+}
+
 Status TSDBTableProvider::insertRecord(
     const String& table_name,
     Vector<Pair<String, csql::SValue>> data) {

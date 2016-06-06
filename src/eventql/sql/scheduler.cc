@@ -329,7 +329,14 @@ ScopedPtr<ResultCursor> DefaultScheduler::executeCreateDatabase(
     Transaction* txn,
     ExecutionContext* execution_context,
     RefPtr<CreateDatabaseNode> create_database) {
-  RAISE(kNotYetImplementedError, "create database not yet implemented");
+  auto res = txn->getTableProvider()->createDatabase(
+      create_database->getDatabaseName());
+  if (!res.isSuccess()) {
+    RAISE(kRuntimeError, res.message());
+  }
+
+  // FIXME return result...
+  return mkScoped(new EmptyResultCursor());
 }
 
 ScopedPtr<ResultCursor> DefaultScheduler::executeInsertInto(
