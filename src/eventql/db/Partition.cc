@@ -78,7 +78,8 @@ RefPtr<Partition> Partition::create(
   state.set_partition_keyrange_begin(discovery_info.keyrange_begin());
   state.set_partition_keyrange_end(discovery_info.keyrange_end());
 
-  auto snap = mkRef(new PartitionSnapshot(state, pdir, pdir_rel, 0));
+  auto snap = mkRef(
+    new PartitionSnapshot(table.get(), state, pdir, pdir_rel, 0));
   snap->writeToDisk();
 
   auto partition = mkRef(new Partition(partition_key, cfg, snap, table));
@@ -125,7 +126,8 @@ RefPtr<Partition> Partition::reopen(
       partition_key.toString(),
       nrecs);
 
-  auto snap = mkRef(new PartitionSnapshot(state, pdir, pdir_rel, nrecs));
+  auto snap = mkRef(
+      new PartitionSnapshot(table.get(), state, pdir, pdir_rel, nrecs));
   return new Partition(partition_key, cfg, snap, table);
 }
 

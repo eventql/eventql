@@ -21,50 +21,112 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include <eventql/db/partition_arena.h>
-
 #include "eventql/eventql.h"
+#include <eventql/db/partition_arena.h>
+#include <eventql/db/LSMTableIndex.h>
+#include <eventql/util/protobuf/MessageDecoder.h>
 
 namespace eventql {
 
-PartitionArena::PartitionArena() {}
+PartitionArena::PartitionArena(
+    const msg::MessageSchema& schema) :
+    schema_(schema),
+    num_records_(0),
+    cstable_schema_(cstable::TableSchema::fromProtobuf(schema)),
+    cstable_schema_ext_(cstable_schema_) {
+  cstable_schema_ext_.addBool("__lsm_is_update", false);
+  cstable_schema_ext_.addString("__lsm_id", false);
+  cstable_schema_ext_.addUnsignedInteger("__lsm_version", false);
+  cstable_schema_ext_.addUnsignedInteger("__lsm_sequence", false);
 
-bool PartitionArena::insertRecord(const RecordRef& record) {
-  ScopedLock<std::mutex> lk(mutex_);
+  cstable_file_.reset(
+      new cstable::CSTableFile(
+          cstable::BinaryFormatVersion::v0_2_0,
+          cstable_schema_ext_));
 
-  auto old = records_.find(record.record_id);
-  if (old == records_.end()) {
-    records_.emplace(record.record_id, record);
-    return true;
-  } else if(old->second.record_version < record.record_version) {
-    old->second = record;
-    return true;
-  } else {
-    return false;
-  }
+  cstable_writer_ = cstable::CSTableWriter::openFile(cstable_file_.get());
+
+  is_update_col_ = cstable_writer_->getColumnWriter("__lsm_is_update");
+  id_col_ = cstable_writer_->getColumnWriter("__lsm_id");
+  version_col_ = cstable_writer_->getColumnWriter("__lsm_version");
+
+  shredder_.reset(
+      new cstable::RecordShredder(cstable_writer_.get(), &cstable_schema_));
 }
 
-void PartitionArena::fetchRecords(Function<void (const RecordRef& record)> fn) {
-  ScopedLock<std::mutex> lk(mutex_); // FIXME
+bool PartitionArena::insertRecord(const RecordRef& record) {
+  msg::MessageObject obj;
+  msg::MessageDecoder::decode(record.record, schema_, &obj);
+  insertRecord(record.record_id, record.record_version, obj, record.is_update);
+  return true;
+}
 
-  for (const auto& r : records_) {
-    fn(r.second);
+bool PartitionArena::insertRecord(
+    const SHA1Hash& record_id,
+    uint64_t record_version,
+    const msg::MessageObject& record,
+    bool is_update) {
+  ScopedLock<std::mutex> lk(mutex_);
+
+  auto old = record_versions_.find(record_id);
+  if (old == record_versions_.end()) {
+    // record does not exist in arena
+  } else if (old->second.version < record_version) {
+    // record does exist in arena, but the one we're inserting is newer
+    skiplist_[old->second.position] = true;
+  } else {
+    // record in arena is newer than the one we're inserting, return false
+    return false;
   }
+
+  {
+    shredder_->addRecordFromProtobuf(record, schema_);
+    is_update_col_->writeBoolean(0, 0, is_update);
+    String id_str((const char*) record_id.data(), record_id.size());
+    id_col_->writeString(0, 0, id_str);
+    version_col_->writeUnsignedInt(0, 0, record_version);
+  }
+
+  RecordVersion rversion;
+  rversion.version = record_version;
+  rversion.position = num_records_;
+  record_versions_.emplace(record_id, rversion);
+  vmap_.emplace(record_id, record_version);
+  skiplist_.push_back(false);
+  ++num_records_;
+  return true;
 }
 
 uint64_t PartitionArena::fetchRecordVersion(const SHA1Hash& record_id) {
   ScopedLock<std::mutex> lk(mutex_);
-  auto rec = records_.find(record_id);
-  if (rec == records_.end()) {
+  auto rec = record_versions_.find(record_id);
+  if (rec == record_versions_.end()) {
     return 0;
   } else {
-    return rec->second.record_version;
+    return rec->second.version;
   }
 }
 
+
 size_t PartitionArena::size() const {
   ScopedLock<std::mutex> lk(mutex_);
-  return records_.size();
+  return num_records_;
+}
+
+Status PartitionArena::writeToDisk(
+    const String& filename,
+    uint64_t sequence) {
+  auto sequence_col = cstable_writer_->getColumnWriter("__lsm_sequence");
+  for (size_t i = 0; i < num_records_; ++i) {
+    sequence_col->writeUnsignedInt(0, 0, sequence++);
+  }
+
+  cstable_writer_->commit();
+  auto file = File::openFile(filename + ".cst", File::O_WRITE | File::O_CREATE);
+  cstable_file_->writeFile(file.fd());
+
+  LSMTableIndex::write(vmap_, filename + ".idx");
+  return Status::success();
 }
 
 } // namespace eventql

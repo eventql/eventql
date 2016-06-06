@@ -21,15 +21,24 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#include "eventql/eventql.h"
 #include <eventql/util/io/file.h>
 #include <eventql/util/io/fileutil.h>
 #include <eventql/util/protobuf/msg.h>
 #include <eventql/db/PartitionSnapshot.h>
 #include <eventql/db/Table.h>
 
-#include "eventql/eventql.h"
-
 namespace eventql {
+
+PartitionSnapshot::PartitionSnapshot(
+    const Table* table,
+    const PartitionState& _state,
+    const String& _abs_path,
+    const String& _rel_path,
+    size_t _nrecs) :
+    PartitionSnapshot(_state, _abs_path, _rel_path, _nrecs) {
+  head_arena.reset(new PartitionArena(*table->schema()));
+}
 
 PartitionSnapshot::PartitionSnapshot(
     const PartitionState& _state,
@@ -42,8 +51,7 @@ PartitionSnapshot::PartitionSnapshot(
     state(_state),
     base_path(_abs_path),
     rel_path(_rel_path),
-    nrecs(_nrecs),
-    head_arena(new PartitionArena()) {}
+    nrecs(_nrecs) {}
 
 SHA1Hash PartitionSnapshot::uuid() const {
   return SHA1Hash(state.uuid().data(), state.uuid().size());

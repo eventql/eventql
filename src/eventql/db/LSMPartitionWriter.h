@@ -65,11 +65,6 @@ public:
 
 protected:
 
-  void writeArenaToDisk(
-      RefPtr<PartitionArena> arena,
-      uint64_t sequence,
-      const String& filename);
-
   RefPtr<Partition> partition_;
   RefPtr<CompactionStrategy> compaction_strategy_;
   LSMTableIndexCache* idx_cache_;

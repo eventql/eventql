@@ -167,7 +167,8 @@ bool LSMPartitionWriter::commit() {
     if (snap->compacting_arena.get() == nullptr &&
         snap->head_arena->size() > 0) {
       snap->compacting_arena = snap->head_arena;
-      snap->head_arena = mkRef(new PartitionArena());
+      snap->head_arena = mkRef(
+          new PartitionArena(*partition_->getTable()->schema()));
       head_->setSnapshot(snap);
     }
     arena = snap->compacting_arena;
@@ -180,7 +181,7 @@ bool LSMPartitionWriter::commit() {
     auto filename = Random::singleton()->hex64();
     auto filepath = FileUtil::joinPaths(snap->base_path, filename);
     auto t0 = WallClock::unixMicros();
-    writeArenaToDisk(arena, snap->state.lsm_sequence() + 1, filepath);
+    arena->writeToDisk(filepath, snap->state.lsm_sequence() + 1);
     auto t1 = WallClock::unixMicros();
 
     logDebug(
@@ -306,49 +307,6 @@ bool LSMPartitionWriter::compact() {
   }
 
   return true;
-}
-
-void LSMPartitionWriter::writeArenaToDisk(
-      RefPtr<PartitionArena> arena,
-      uint64_t sequence,
-      const String& filename) {
-  auto schema = partition_->getTable()->schema();
-
-  {
-    OrderedMap<SHA1Hash, uint64_t> vmap;
-    auto cstable_schema = cstable::TableSchema::fromProtobuf(*schema);
-    auto cstable_schema_ext = cstable_schema;
-    cstable_schema_ext.addBool("__lsm_is_update", false);
-    cstable_schema_ext.addString("__lsm_id", false);
-    cstable_schema_ext.addUnsignedInteger("__lsm_version", false);
-    cstable_schema_ext.addUnsignedInteger("__lsm_sequence", false);
-
-    auto cstable = cstable::CSTableWriter::createFile(
-        filename + ".cst",
-        cstable::BinaryFormatVersion::v0_1_0,
-        cstable_schema_ext);
-
-    cstable::RecordShredder shredder(cstable.get(), &cstable_schema);
-    auto is_update_col = cstable->getColumnWriter("__lsm_is_update");
-    auto id_col = cstable->getColumnWriter("__lsm_id");
-    auto version_col = cstable->getColumnWriter("__lsm_version");
-    auto sequence_col = cstable->getColumnWriter("__lsm_sequence");
-
-    arena->fetchRecords([&] (const RecordRef& r) {
-      msg::MessageObject obj;
-      msg::MessageDecoder::decode(r.record, *schema, &obj);
-      shredder.addRecordFromProtobuf(obj, *schema);
-      is_update_col->writeBoolean(0, 0, r.is_update);
-      String id_str((const char*) r.record_id.data(), r.record_id.size());
-      id_col->writeString(0, 0, id_str);
-      version_col->writeUnsignedInt(0, 0, r.record_version);
-      sequence_col->writeUnsignedInt(0, 0, sequence++);
-      vmap.emplace(r.record_id, r.record_version);
-    });
-
-    cstable->commit();
-    LSMTableIndex::write(vmap, filename + ".idx");
-  }
 }
 
 bool LSMPartitionWriter::needsSplit() const {

@@ -36,6 +36,13 @@ class Table;
 struct PartitionSnapshot : public RefCounted {
 
   PartitionSnapshot(
+      const Table* table,
+      const PartitionState& state,
+      const String& _abs_path,
+      const String& _rel_path,
+      size_t _nrecs);
+
+  PartitionSnapshot(
       const PartitionState& state,
       const String& _abs_path,
       const String& _rel_path,
