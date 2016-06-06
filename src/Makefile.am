@@ -1032,6 +1032,10 @@ evqlctl_SOURCES = \
     eventql/cli/commands/cluster_remove_server.cc \
     eventql/cli/commands/namespace_create.h \
     eventql/cli/commands/namespace_create.cc \
+    eventql/cli/commands/rebalance.h \
+    eventql/cli/commands/rebalance.cc \
+    eventql/cli/commands/table_split.h \
+    eventql/cli/commands/table_split.cc \
     eventql/evqlctl.cc
 
 evqlctl_LDADD = \
