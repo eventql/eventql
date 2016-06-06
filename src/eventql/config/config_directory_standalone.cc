@@ -26,12 +26,54 @@
 namespace eventql {
 
 StandaloneConfigDirectory::StandaloneConfigDirectory(
+    const String& datadir,
     const String& listen_addr) :
     listen_addr_(listen_addr) {
   cluster_config_.set_replication_factor(1);
+
+  mdb::MDBOptions opts;
+  opts.data_filename = "standalone.db";
+  opts.lock_filename = "standalone.db.lck";
+  db_ = mdb::MDB::open(datadir, opts);
 }
 
 Status StandaloneConfigDirectory::start() {
+  if (db_.get()) {
+    auto txn = db_->startTransaction(false);
+    auto cursor = txn->getCursor();
+
+    for (int i = 0; ; ++i) {
+      Buffer key;
+      Buffer value;
+      if (i == 0) {
+        if (!cursor->getFirst(&key, &value)) {
+          break;
+        }
+      } else {
+        if (!cursor->getNext(&key, &value)) {
+          break;
+        }
+      }
+
+      auto db_key = key.toString();
+
+      if (StringUtil::beginsWith(db_key, "db~")) {
+        auto cfg = msg::decode<NamespaceConfig>(value);
+        namespaces_.emplace(cfg.customer(), cfg);
+      }
+
+      if (StringUtil::beginsWith(db_key, "tbl~")) {
+        auto cfg = msg::decode<TableDefinition>(value);
+        tables_.emplace(
+            StringUtil::format("$0~$1", cfg.customer(), cfg.table_name()),
+            cfg);
+      }
+    }
+
+    cursor->close();
+    txn->abort();
+  }
+
   return Status::success();
 }
 
@@ -119,6 +161,20 @@ void StandaloneConfigDirectory::updateNamespaceConfig(NamespaceConfig cfg) {
   std::unique_lock<std::mutex> lk(mutex_);
   namespaces_.emplace(cfg.customer(), cfg);
   auto callbacks = on_namespace_change_;
+
+  if (db_.get()) {
+    auto db_key = StringUtil::format("db~$0", cfg.customer());
+    auto db_val = *msg::encode(cfg);
+    auto txn = db_->startTransaction(false);
+    txn->update(
+        db_key.data(),
+        db_key.size(),
+        db_val.data(),
+        db_val.size());
+
+    txn->commit();
+  }
+
   lk.unlock();
   for (const auto& cb : callbacks) {
     cb(cfg);
@@ -143,6 +199,24 @@ void StandaloneConfigDirectory::updateTableConfig(
   std::unique_lock<std::mutex> lk(mutex_);
   tables_.emplace(table.customer() + "~" + table.table_name(), table);
   auto callbacks = on_table_change_;
+
+  if (db_.get()) {
+    auto db_key = StringUtil::format(
+        "tbl~$0~$1",
+        table.customer(),
+        table.table_name());
+
+    auto db_val = *msg::encode(table);
+    auto txn = db_->startTransaction(false);
+    txn->update(
+        db_key.data(),
+        db_key.size(),
+        db_val.data(),
+        db_val.size());
+
+    txn->commit();
+  }
+
   lk.unlock();
   for (const auto& cb : callbacks) {
     cb(table);

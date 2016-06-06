@@ -25,6 +25,7 @@
 #include "eventql/eventql.h"
 #include "eventql/config/config_directory.h"
 #include "eventql/util/protobuf/msg.h"
+#include <eventql/util/mdb/MDB.h>
 
 typedef struct _zhandle zhandle_t;
 
@@ -33,7 +34,9 @@ namespace eventql {
 class StandaloneConfigDirectory : public ConfigDirectory {
 public:
 
-  StandaloneConfigDirectory(const String& listen_addr);
+  StandaloneConfigDirectory(
+      const String& datadir,
+      const String& listen_addr);
 
   String getServerID() const override;
 
@@ -84,6 +87,7 @@ public:
 protected:
   mutable std::mutex mutex_;
   String listen_addr_;
+  RefPtr<mdb::MDB> db_;
   ClusterConfig cluster_config_;
   HashMap<String, NamespaceConfig> namespaces_;
   HashMap<String, TableDefinition> tables_;
