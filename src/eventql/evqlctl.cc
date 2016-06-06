@@ -50,6 +50,7 @@
 #include "eventql/master/master_service.h"
 #include "eventql/db/server_allocator.h"
 #include <eventql/cli/commands/cluster_add_server.h>
+#include <eventql/cli/commands/cluster_create.h>
 #include <eventql/cli/commands/cluster_status.h>
 #include <eventql/cli/commands/cluster_remove_server.h>
 
@@ -297,6 +298,7 @@ int main(int argc, const char** argv) {
 
   List<eventql::cli::CLICommand*> commands;
   commands.emplace_back(new eventql::cli::ClusterAddServer(process_config));
+  commands.emplace_back(new eventql::cli::ClusterCreate(process_config));
   commands.emplace_back(new eventql::cli::ClusterRemoveServer(process_config));
   commands.emplace_back(new eventql::cli::ClusterStatus(process_config));
 
