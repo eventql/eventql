@@ -55,6 +55,7 @@
 #include <eventql/cli/commands/cluster_remove_server.h>
 #include <eventql/cli/commands/namespace_create.h>
 #include <eventql/cli/commands/rebalance.h>
+#include <eventql/cli/commands/table_split.h>
 
 using namespace eventql;
 
@@ -321,6 +322,7 @@ int main(int argc, const char** argv) {
   commands.emplace_back(new eventql::cli::ClusterStatus(process_config));
   commands.emplace_back(new eventql::cli::NamespaceCreate(process_config));
   commands.emplace_back(new eventql::cli::Rebalance(process_config));
+  commands.emplace_back(new eventql::cli::TableSplit(process_config));
 
   Vector<String> cmd_argv = flags.getArgv();
   String cmd_name = getCommandName(cmd_argv);
