@@ -45,6 +45,7 @@ void LenencStringPageWriter::appendValue(const char* data, size_t len) {
   } while (tmp);
 
   appendBytes((const char*) &buf, bytes);
+  iputs("append: $0", String(data, len));
   appendBytes(data, len);
 }
 
