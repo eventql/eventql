@@ -1024,6 +1024,8 @@ evqlctl_SOURCES = \
     eventql/cli/commands/cli_command.cc \
     eventql/cli/commands/cluster_add_server.h \
     eventql/cli/commands/cluster_add_server.cc \
+    eventql/cli/commands/cluster_status.h \
+    eventql/cli/commands/cluster_status.cc \
     eventql/evqlctl.cc
 
 evqlctl_LDADD = \
