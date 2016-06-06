@@ -106,9 +106,7 @@ const String& ClusterAddServer::getDescription() const {
   return kDescription_;
 }
 
-const String& ClusterAddServer::printHelp() const {
-  auto help_str = StringUtil::format("$0: $1", kName_, kDescription_);
-  return help_str;
+void ClusterAddServer::printHelp(OutputStream* stdout_os) const {
 }
 
 } // namespace cli

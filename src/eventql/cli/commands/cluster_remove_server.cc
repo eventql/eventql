@@ -138,9 +138,7 @@ const String& ClusterRemoveServer::getDescription() const {
   return kDescription_;
 }
 
-const String& ClusterRemoveServer::printHelp() const {
-  auto help_str = StringUtil::format("$0: $1", kName_, kDescription_);
-  return help_str;
+void ClusterRemoveServer::printHelp(OutputStream* stdout_os) const {
 }
 
 } // namespace cli

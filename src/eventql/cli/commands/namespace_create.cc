@@ -102,9 +102,17 @@ const String& NamespaceCreate::getDescription() const {
   return kDescription_;
 }
 
-const String& NamespaceCreate::printHelp() const {
-  auto help_str = StringUtil::format("$0: $1", kName_, kDescription_);
-  return help_str;
+void NamespaceCreate::printHelp(OutputStream* stdout_os) const {
+  stdout_os->write(StringUtil::format(
+      "evqlctl --$0 - $1\n\n", kName_, kDescription_));
+
+  stdout_os->write(
+      "  --cluster_name <node name>       The name of the cluster\n"
+      "  --namespace                      The name of the namespace to create \n\n\n"
+      "DESCRIPTION \n"
+      "Creates a new namespace" //FIXME more text
+  );
+
 }
 
 } // namespace cli

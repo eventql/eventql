@@ -62,9 +62,8 @@ const String& ClusterStatus::getDescription() const {
   return kDescription_;
 }
 
-const String& ClusterStatus::printHelp() const {
-  auto help_str = StringUtil::format("$0: $1", kName_, kDescription_);
-  return help_str;
+void ClusterStatus::printHelp(OutputStream* stdout_os) const {
+
 }
 
 } // namespace cli

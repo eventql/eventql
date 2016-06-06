@@ -92,9 +92,7 @@ const String& ClusterCreate::getDescription() const {
   return kDescription_;
 }
 
-const String& ClusterCreate::printHelp() const {
-  auto help_str = StringUtil::format("$0: $1", kName_, kDescription_);
-  return help_str;
+void ClusterCreate::printHelp(OutputStream* stdout_os) const {
 }
 
 } // namespace cli

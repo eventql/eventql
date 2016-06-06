@@ -43,7 +43,7 @@ public:
 
   const String& getName() const override;
   const String& getDescription() const override;
-  const String& printHelp() const override;
+  void printHelp(OutputStream* stdout_os) const override;
 
 protected:
   static const String kName_;

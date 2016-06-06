@@ -347,13 +347,13 @@ int main(int argc, const char** argv) {
 
     for (auto c : commands) {
       if (c->getName() == cmd_name) {
-        //c->printHelp(stdout_os.get());
+        c->printHelp(stdout_os.get());
         return 0;
       }
     }
 
     stderr_os->write(
-        StringUtil::format("No manual entry for evqlctl $0", cmd_name));
+        StringUtil::format("No manual entry for evqlctl $0\n", cmd_name));
     return 1;
   }
 

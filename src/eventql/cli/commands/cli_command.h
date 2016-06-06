@@ -45,7 +45,7 @@ public:
   virtual const String& getName() const = 0;
   virtual const String& getDescription() const = 0;
 
-  virtual const String& printHelp() const = 0;
+  virtual void printHelp(OutputStream* stdout_os) const = 0;
 
 };
 
