@@ -27,7 +27,9 @@ namespace eventql {
 
 StandaloneConfigDirectory::StandaloneConfigDirectory(
     const String& listen_addr) :
-    listen_addr_(listen_addr) {}
+    listen_addr_(listen_addr) {
+  cluster_config_.set_replication_factor(1);
+}
 
 Status StandaloneConfigDirectory::start() {
   return Status::success();

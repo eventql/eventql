@@ -58,10 +58,6 @@ bool PartitionCursor::next(csql::SValue* row, int row_len) {
 }
 
 bool PartitionCursor::openNextTable() {
-  if (cur_table_ >= snap_->state.lsm_tables().size() + 2) {
-    return false;
-  }
-
   RefPtr<cstable::CSTableReader> cstable;
   switch (cur_table_) {
     case 0: {
@@ -87,6 +83,10 @@ bool PartitionCursor::openNextTable() {
     }
 
     default: {
+      if (cur_table_ >= snap_->state.lsm_tables().size() + 2) {
+        return false;
+      }
+
       const auto& tbl = (snap_->state.lsm_tables().data())[cur_table_ - 2];
       auto cstable_file = FileUtil::joinPaths(
           snap_->base_path,

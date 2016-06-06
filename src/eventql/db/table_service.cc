@@ -81,11 +81,12 @@ Status TableService::createTable(
         "first column in the PRIMARY KEY must be of type DATETIME");
   }
 
+  auto replication_factor = cdir_->getClusterConfig().replication_factor();
   // generate new metadata file
   Set<String> servers;
   ServerAllocator server_alloc(cdir_);
   {
-    auto rc = server_alloc.allocateServers(3, &servers);
+    auto rc = server_alloc.allocateServers(replication_factor, &servers);
     if (!rc.isSuccess()) {
       return rc;
     }
