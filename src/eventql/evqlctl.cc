@@ -53,6 +53,7 @@
 #include <eventql/cli/commands/cluster_create.h>
 #include <eventql/cli/commands/cluster_status.h>
 #include <eventql/cli/commands/cluster_remove_server.h>
+#include <eventql/cli/commands/namespace_create.h>
 
 using namespace eventql;
 
@@ -301,6 +302,7 @@ int main(int argc, const char** argv) {
   commands.emplace_back(new eventql::cli::ClusterCreate(process_config));
   commands.emplace_back(new eventql::cli::ClusterRemoveServer(process_config));
   commands.emplace_back(new eventql::cli::ClusterStatus(process_config));
+  commands.emplace_back(new eventql::cli::NamespaceCreate(process_config));
 
   String cmd_name;
   Vector<String> cmd_argv = flags.getArgv();
@@ -331,7 +333,6 @@ int main(int argc, const char** argv) {
           stdin_is.get(),
           stdout_os.get(),
           stderr_os.get());
-      iputs("is success $0", rc.isSuccess());
       return rc.isSuccess() ? 0 : 1;
     }
   }
