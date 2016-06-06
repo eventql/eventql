@@ -447,10 +447,6 @@ int main(int argc, const char** argv) {
 
     /* clusterconfig */
     auto cluster_config = config_dir->getClusterConfig();
-    logInfo(
-        "eventql",
-        "Starting with cluster config: $0",
-        cluster_config.DebugString());
 
     /* tsdb */
     auto repl_scheme = RefPtr<eventql::ReplicationScheme>(
