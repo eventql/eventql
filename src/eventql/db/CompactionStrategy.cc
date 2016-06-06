@@ -23,7 +23,7 @@
  */
 #include <eventql/db/CompactionStrategy.h>
 #include <eventql/db/LSMTableIndex.h>
-#include <eventql/io/cstable/CSTableWriter.h>
+#include <eventql/io/cstable/cstable_writer.h>
 #include <eventql/util/io/fileutil.h>
 
 #include "eventql/eventql.h"

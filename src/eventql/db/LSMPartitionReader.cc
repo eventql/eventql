@@ -24,7 +24,7 @@
 #include <eventql/util/fnv.h>
 #include <eventql/util/io/fileutil.h>
 #include <eventql/util/protobuf/MessageDecoder.h>
-#include <eventql/io/cstable/CSTableReader.h>
+#include <eventql/io/cstable/cstable_reader.h>
 #include <eventql/io/cstable/RecordMaterializer.h>
 #include <eventql/db/LSMPartitionReader.h>
 #include <eventql/db/Table.h>

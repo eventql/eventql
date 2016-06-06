@@ -40,8 +40,8 @@
 #include "eventql/io/sstable/SSTableColumnSchema.h"
 #include "eventql/io/sstable/SSTableColumnReader.h"
 #include "eventql/io/sstable/SSTableColumnWriter.h"
-#include "eventql/io/cstable/CSTableWriter.h"
-#include "eventql/io/cstable/CSTableReader.h"
+#include "eventql/io/cstable/cstable_writer.h"
+#include "eventql/io/cstable/cstable_reader.h"
 #include "eventql/io/cstable/CSTableBuilder.h"
 
 namespace util {

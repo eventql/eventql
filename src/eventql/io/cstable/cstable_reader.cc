@@ -22,7 +22,7 @@
  * code of your own applications
  */
 #include "eventql/eventql.h"
-#include <eventql/io/cstable/CSTableReader.h>
+#include <eventql/io/cstable/cstable_reader.h>
 #include <eventql/io/cstable/io/PageReader.h>
 #include <eventql/io/cstable/columns/v1/BooleanColumnReader.h>
 #include <eventql/io/cstable/columns/v1/BitPackedIntColumnReader.h>

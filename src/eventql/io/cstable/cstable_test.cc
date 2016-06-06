@@ -32,8 +32,8 @@
 #include <eventql/io/cstable/columns/v1/StringColumnWriter.h>
 #include <eventql/io/cstable/columns/v1/UInt32ColumnWriter.h>
 #include <eventql/io/cstable/columns/v1/UInt64ColumnWriter.h>
-#include <eventql/io/cstable/CSTableWriter.h>
-#include <eventql/io/cstable/CSTableReader.h>
+#include <eventql/io/cstable/cstable_writer.h>
+#include <eventql/io/cstable/cstable_reader.h>
 #include <eventql/io/cstable/RecordShredder.h>
 #include <eventql/io/cstable/RecordMaterializer.h>
 

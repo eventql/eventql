@@ -38,7 +38,7 @@
 #include <eventql/db/ReplicationScheme.h>
 #include <eventql/db/metadata_transaction.h>
 #include <eventql/db/metadata_operations.pb.h>
-#include <eventql/io/cstable/CSTableReader.h>
+#include <eventql/io/cstable/cstable_reader.h>
 
 #include "eventql/eventql.h"
 

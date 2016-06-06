@@ -27,7 +27,7 @@
 #include <eventql/sql/qtree/SequentialScanNode.h>
 #include <eventql/sql/expressions/table_expression.h>
 #include <eventql/sql/runtime/ValueExpression.h>
-#include <eventql/io/cstable/CSTableReader.h>
+#include <eventql/io/cstable/cstable_reader.h>
 
 #include "eventql/eventql.h"
 

@@ -21,8 +21,8 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include "eventql/eventql.h"
-#include <eventql/io/cstable/CSTableWriter.h>
+#include <eventql/eventql.h>
+#include <eventql/io/cstable/cstable_writer.h>
 #include <eventql/io/cstable/columns/column_writer_uint.h>
 #include <eventql/io/cstable/columns/v1/BooleanColumnWriter.h>
 #include <eventql/io/cstable/columns/v1/BitPackedIntColumnWriter.h>

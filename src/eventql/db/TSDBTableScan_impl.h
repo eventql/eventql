@@ -23,7 +23,7 @@
  */
 #pragma once
 #include <eventql/db/CompactionWorker.h>
-#include <eventql/io/cstable/CSTableReader.h>
+#include <eventql/io/cstable/cstable_reader.h>
 #include <eventql/io/cstable/RecordMaterializer.h>
 #include <eventql/util/protobuf/MessageEncoder.h>
 

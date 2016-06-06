@@ -285,10 +285,10 @@ noinst_LIBRARIES += evql_sql.a
 evql_cstable_a_SOURCES = \
     eventql/io/cstable/cstable_file.cc \
     eventql/io/cstable/cstable_file.h \
-    eventql/io/cstable/CSTableReader.cc \
-    eventql/io/cstable/CSTableReader.h \
-    eventql/io/cstable/CSTableWriter.cc \
-    eventql/io/cstable/CSTableWriter.h \
+    eventql/io/cstable/cstable_reader.cc \
+    eventql/io/cstable/cstable_reader.h \
+    eventql/io/cstable/cstable_writer.cc \
+    eventql/io/cstable/cstable_writer.h \
     eventql/io/cstable/LockManager.h \
     eventql/io/cstable/columns/UInt64ColumnWriter.h \
     eventql/io/cstable/columns/v1/ColumnReader.h \

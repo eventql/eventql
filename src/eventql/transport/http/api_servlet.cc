@@ -45,7 +45,7 @@
 #include "eventql/db/TimeWindowPartitioner.h"
 #include "eventql/db/FixedShardPartitioner.h"
 #include "eventql/transport/http/http_auth.h"
-#include <eventql/io/cstable/CSTableWriter.h>
+#include <eventql/io/cstable/cstable_writer.h>
 #include <eventql/io/cstable/RecordShredder.h>
 
 namespace eventql {
