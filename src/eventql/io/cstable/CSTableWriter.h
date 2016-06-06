@@ -164,7 +164,8 @@ protected:
   CSTableWriter(
       BinaryFormatVersion version,
       RefPtr<TableSchema> schema,
-      ScopedPtr<PageManager> page_mgr,
+      CSTableArena* arena,
+      bool arena_owned,
       Vector<ColumnConfig> columns,
       int fd);
 
@@ -173,7 +174,9 @@ protected:
 
   BinaryFormatVersion version_;
   RefPtr<TableSchema> schema_;
-  ScopedPtr<PageManager> page_mgr_;
+  CSTableArena* arena_;
+  bool arena_owned_;
+  PageManager* page_mgr_;
   Vector<ColumnConfig> columns_;
   int fd_;
   Vector<RefPtr<ColumnWriter>> column_writers_;

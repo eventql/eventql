@@ -58,29 +58,25 @@ RefPtr<CSTableWriter> CSTableWriter::createFile(
     const TableSchema& schema,
     Option<RefPtr<LockRef>> lockref /* = None<RefPtr<LockRef>>() */) {
   auto file = File::openFile(filename, File::O_WRITE | File::O_CREATE);
-  auto file_os = FileOutputStream::fromFileDescriptor(file.fd());
-  ScopedPtr<PageManager> page_mgr;
 
-  FileHeader header;
-  header.schema = mkRef(new TableSchema(schema));
-  header.columns = header.schema->flatColumns();
-
-  size_t header_size ;
+  ScopedPtr<CSTableArena> arena;
   switch (version) {
     case BinaryFormatVersion::v0_1_0:
       break;
     case BinaryFormatVersion::v0_2_0: {
-      auto header_size = cstable::v0_2_0::writeHeader(header, file_os.get());
-      page_mgr.reset(new PageManager(file.fd(), header_size, {}));
+      arena.reset(new CSTableArena(version, schema, file.fd()));
+      uint64_t header_size;
+      arena->writeFileHeader(file.fd(), &header_size);
       break;
     }
   }
 
   return new CSTableWriter(
       version,
-      header.schema,
-      std::move(page_mgr),
-      header.columns,
+      mkRef(new TableSchema(schema)),
+      arena.release(),
+      true,
+      schema.flatColumns(),
       file.releaseFD());
 }
 
@@ -88,6 +84,16 @@ RefPtr<CSTableWriter> CSTableWriter::reopenFile(
     const String& filename,
     Option<RefPtr<LockRef>> lockref /* = None<RefPtr<LockRef>>() */) {
   RAISE(kNotYetImplementedError);
+}
+
+RefPtr<CSTableWriter> CSTableWriter::openArena(CSTableArena* arena) {
+  return new CSTableWriter(
+      arena->getBinaryFormatVersion(),
+      mkRef(new TableSchema(arena->getTableSchema())),
+      arena,
+      false,
+      arena->getTableSchema().flatColumns(),
+      -1);
 }
 
 static RefPtr<ColumnWriter> openColumnV1(const ColumnConfig& c) {
@@ -139,12 +145,15 @@ static RefPtr<ColumnWriter> openColumnV2(
 CSTableWriter::CSTableWriter(
     BinaryFormatVersion version,
     RefPtr<TableSchema> schema,
-    ScopedPtr<PageManager> page_mgr,
+    CSTableArena* arena,
+    bool arena_owned,
     Vector<ColumnConfig> columns,
     int fd) :
     version_(version),
     schema_(std::move(schema)),
-    page_mgr_(std::move(page_mgr)),
+    arena_(arena),
+    arena_owned_(arena_owned),
+    page_mgr_(arena ? arena->getPageManager() : nullptr),
     columns_(columns),
     fd_(fd),
     current_txid_(0),
@@ -158,7 +167,7 @@ CSTableWriter::CSTableWriter(
         writer = openColumnV1(columns_[i]);
         break;
       case BinaryFormatVersion::v0_2_0:
-        writer = openColumnV2(columns_[i], page_mgr_.get());
+        writer = openColumnV2(columns_[i], page_mgr_);
         break;
     }
 
@@ -170,6 +179,10 @@ CSTableWriter::CSTableWriter(
 CSTableWriter::~CSTableWriter() {
   if (fd_ > 0) {
     close(fd_);
+  }
+
+  if (arena_ && arena_owned_) {
+    delete arena_;
   }
 }
 
@@ -232,7 +245,6 @@ void CSTableWriter::commitV1() {
     }
   }
 
-
   for (size_t i = 0; i < columns_.size(); ++i) {
     const auto& col = columns_[i];
     auto writer = column_writers_[i].asInstanceOf<v1::ColumnWriter>();
@@ -252,54 +264,26 @@ void CSTableWriter::commitV1() {
 }
 
 void CSTableWriter::commitV2() {
+  arena_->commitTransaction(++current_txid_, num_rows_);
+
+  if (fd_ < 0) {
+    return;
+  }
+
   page_mgr_->flushAllPages();
 
-  // write index
+  // write new index
   uint64_t index_offset = page_mgr_->getAllocatedBytes();
+  uint64_t index_size;
   auto index_os = FileOutputStream::fromFileDescriptor(fd_);
   index_os->seekTo(index_offset);
-  uint64_t index_size = v0_2_0::writeIndex(
-      page_mgr_->getPageIndex(),
-      index_os.get());
-
-  // build new meta block
-  auto meta_block_position = cstable::v0_2_0::kMetaBlockPosition;
-  auto meta_block_size = cstable::v0_2_0::kMetaBlockSize;
-
-  MetaBlock mb;
-  mb.transaction_id = current_txid_ + 1;
-  mb.num_rows = num_rows_;
-  mb.index_offset = index_offset;
-  mb.index_size = index_size;
-
-  Buffer buf;
-  buf.reserve(meta_block_size);
-  auto os = BufferOutputStream::fromBuffer(&buf);
-
-  switch (version_) {
-    case BinaryFormatVersion::v0_1_0:
-      RAISE(kIllegalArgumentError, "unsupported version: v0.1.0");
-    case BinaryFormatVersion::v0_2_0:
-      cstable::v0_2_0::writeMetaBlock(mb, os.get());
-      break;
-  }
+  arena_->writeFileIndex(fd_, &index_size);
 
   // fsync file before comitting meta block
   fsync(fd_);
 
-  // write to metablock slot
-  auto mb_index = mb.transaction_id % 2;
-  auto mb_offset = meta_block_position + meta_block_size * mb_index;
-  RCHECK(buf.size() == meta_block_size, "invalid meta block size");
-  {
-    auto ret = pwrite(fd_, buf.data(), buf.size(), mb_offset);
-    if (ret < 0) {
-      RAISE_ERRNO(kIOError, "write() failed");
-    }
-    if (ret != meta_block_size) {
-      RAISE(kIOError, "write() failed");
-    }
-  }
+  // write transaction
+  arena_->writeFileTransaction(fd_, index_offset, index_size);
 
   // fsync one more time
   fsync(fd_);
