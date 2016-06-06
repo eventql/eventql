@@ -47,9 +47,9 @@ public:
   void getTransaction(uint64_t* transaction_id, uint64_t* num_rows) const;
 
   void writeFile(int fd);
-  void writeFileHeader(int fd, uint64_t* bytes_written);
-  void writeFilePages(int fd, uint64_t* bytes_written);
-  void writeFileIndex(int fd, uint64_t* bytes_written);
+  void writeFileHeader(int fd);
+  void writeFilePages(int fd);
+  void writeFileIndex(int fd, uint64_t* index_offset, uint64_t* index_size);
   void writeFileTransaction(
       int fd,
       uint64_t index_offset,

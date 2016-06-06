@@ -58,10 +58,11 @@ public:
       const PageRef& page,
       void* data) const;
 
-  uint64_t getAllocatedBytes() const;
   Vector<PageIndexEntry> getPageIndex() const;
-
   Vector<PageRef> getPages(const PageIndexKey& key) const;
+
+  uint64_t getAllocatedBytes() const;
+  int getFD() const;
 
 protected:
 

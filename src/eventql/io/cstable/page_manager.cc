@@ -143,6 +143,10 @@ uint64_t PageManager::getAllocatedBytes() const {
   return allocated_bytes_;
 }
 
+int PageManager::getFD() const {
+  return fd_;
+}
+
 Vector<PageIndexEntry> PageManager::getPageIndex() const {
   std::unique_lock<std::mutex> lk(mutex_);
   return index_;

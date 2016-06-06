@@ -498,35 +498,59 @@ TEST_CASE(CSTableTest, TestV2UInt64PlainShared, [] () {
       false,
       cstable::ColumnEncoding::UINT64_PLAIN);
 
-  CSTableFile arena(BinaryFormatVersion::v0_2_0, schema);
+  String filename = "/tmp/__fnord__cstabletest4.cstable";
+  FileUtil::rm(filename);
 
-  auto tbl_writer = cstable::CSTableWriter::openFile(&arena);
-  auto mycol_writer = tbl_writer->getColumnWriter("mycol");
+  {
+    CSTableFile arena(BinaryFormatVersion::v0_2_0, schema);
+    auto tbl_writer = cstable::CSTableWriter::openFile(&arena);
+    auto mycol_writer = tbl_writer->getColumnWriter("mycol");
 
-  for (size_t i = 1; i < 10000; ++i) {
-    mycol_writer->writeUnsignedInt(0, 0, 23 * i);
-    mycol_writer->writeUnsignedInt(0, 0, 42 * i);
-    mycol_writer->writeUnsignedInt(0, 0, 17 * i);
+    for (size_t i = 1; i < 10000; ++i) {
+      mycol_writer->writeUnsignedInt(0, 0, 23 * i);
+      mycol_writer->writeUnsignedInt(0, 0, 42 * i);
+      mycol_writer->writeUnsignedInt(0, 0, 17 * i);
 
-    if (i % 1000 == 0) {
-      tbl_writer->commit();
-      auto tbl_reader = cstable::CSTableReader::openFile(&arena);
-      auto mycol_reader = tbl_reader->getColumnReader("mycol");
+      if (i % 1000 == 0) {
+        tbl_writer->commit();
+        auto tbl_reader = cstable::CSTableReader::openFile(&arena);
+        auto mycol_reader = tbl_reader->getColumnReader("mycol");
 
-      for (size_t j = 1; j < i; ++j) {
-        uint64_t rlevel;
-        uint64_t dlevel;
-        uint64_t val;
-        mycol_reader->readUnsignedInt(&rlevel, &dlevel, &val);
-        EXPECT_EQ(val, 23 * j);
-        mycol_reader->readUnsignedInt(&rlevel, &dlevel, &val);
-        EXPECT_EQ(val, 42 * j);
-        mycol_reader->readUnsignedInt(&rlevel, &dlevel, &val);
-        EXPECT_EQ(val, 17 * j);
+        for (size_t j = 1; j < i; ++j) {
+          uint64_t rlevel;
+          uint64_t dlevel;
+          uint64_t val;
+          mycol_reader->readUnsignedInt(&rlevel, &dlevel, &val);
+          EXPECT_EQ(val, 23 * j);
+          mycol_reader->readUnsignedInt(&rlevel, &dlevel, &val);
+          EXPECT_EQ(val, 42 * j);
+          mycol_reader->readUnsignedInt(&rlevel, &dlevel, &val);
+          EXPECT_EQ(val, 17 * j);
+        }
       }
     }
+
+    tbl_writer->commit();
+
+    auto file = File::openFile(filename, File::O_WRITE | File::O_CREATE);
+    arena.writeFile(file.fd());
   }
 
-  tbl_writer->commit();
+  {
+    auto tbl_reader = cstable::CSTableReader::openFile(filename);
+    auto mycol = tbl_reader->getColumnReader("mycol");
+
+    for (size_t i = 1; i < 10000; ++i) {
+      uint64_t rlevel;
+      uint64_t dlevel;
+      uint64_t val;
+      mycol->readUnsignedInt(&rlevel, &dlevel, &val);
+      EXPECT_EQ(val, 23 * i);
+      mycol->readUnsignedInt(&rlevel, &dlevel, &val);
+      EXPECT_EQ(val, 42 * i);
+      mycol->readUnsignedInt(&rlevel, &dlevel, &val);
+      EXPECT_EQ(val, 17 * i);
+    }
+  }
 });
 

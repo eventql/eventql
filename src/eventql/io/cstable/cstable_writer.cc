@@ -65,8 +65,7 @@ RefPtr<CSTableWriter> CSTableWriter::createFile(
       break;
     case BinaryFormatVersion::v0_2_0: {
       arena.reset(new CSTableFile(version, schema, file.fd()));
-      uint64_t header_size;
-      arena->writeFileHeader(file.fd(), &header_size);
+      arena->writeFileHeader(file.fd());
       break;
     }
   }
@@ -273,11 +272,9 @@ void CSTableWriter::commitV2() {
   page_mgr_->flushAllPages();
 
   // write new index
-  uint64_t index_offset = page_mgr_->getAllocatedBytes();
+  uint64_t index_offset;
   uint64_t index_size;
-  auto index_os = FileOutputStream::fromFileDescriptor(fd_);
-  index_os->seekTo(index_offset);
-  arena_->writeFileIndex(fd_, &index_size);
+  arena_->writeFileIndex(fd_, &index_offset, &index_size);
 
   // fsync file before comitting meta block
   fsync(fd_);

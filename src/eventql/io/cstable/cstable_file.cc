@@ -86,7 +86,23 @@ void CSTableFile::getTransaction(
   *num_rows = num_rows_;
 }
 
-void CSTableFile::writeFileHeader(int fd, uint64_t* bytes_written) {
+void CSTableFile::writeFile(int fd) {
+  // write header
+  writeFileHeader(fd);
+
+  // write all pages
+  writeFilePages(fd);
+
+  // write index
+  uint64_t index_offset;
+  uint64_t index_size;
+  writeFileIndex(fd, &index_offset, &index_size);
+
+  // write transaction to header
+  writeFileTransaction(fd, index_offset, index_size);
+}
+
+void CSTableFile::writeFileHeader(int fd) {
   auto ret = pwrite(fd, file_header_.data(), file_header_.size(), 0);
   if (ret < 0) {
     RAISE_ERRNO(kIOError, "write() failed");
@@ -94,13 +110,37 @@ void CSTableFile::writeFileHeader(int fd, uint64_t* bytes_written) {
   if (ret != file_header_.size()) {
     RAISE(kIOError, "write() failed");
   }
-  *bytes_written = file_header_.size();
 }
 
-void CSTableFile::writeFileIndex(int fd, uint64_t* bytes_written) {
-  auto file_os = FileOutputStream::fromFileDescriptor(fd);
+void CSTableFile::writeFilePages(int fd) {
+  if (page_mgr_->getFD() == fd) {
+    page_mgr_->flushAllPages();
+    return;
+  }
 
-  *bytes_written = v0_2_0::writeIndex(
+  Buffer buf;
+  for (const auto& e : page_mgr_->getPageIndex()) {
+    buf.resize(e.page.size);
+    page_mgr_->readPage(e.page, buf.data());
+
+    auto ret = pwrite(fd, buf.data(), e.page.size, e.page.offset);
+    if (ret < 0) {
+      RAISE_ERRNO(kIOError, "write() failed");
+    }
+    if (ret != e.page.size) {
+      RAISE(kIOError, "write() failed");
+    }
+  }
+}
+
+void CSTableFile::writeFileIndex(
+    int fd,
+    uint64_t* index_offset,
+    uint64_t* index_size) {
+  *index_offset = page_mgr_->getAllocatedBytes();
+  auto file_os = FileOutputStream::fromFileDescriptor(fd);
+  file_os->seekTo(*index_offset);
+  *index_size = v0_2_0::writeIndex(
       page_mgr_->getPageIndex(),
       file_os.get());
 }
