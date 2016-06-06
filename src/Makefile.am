@@ -290,7 +290,6 @@ evql_cstable_a_SOURCES = \
     eventql/io/cstable/cstable_writer.cc \
     eventql/io/cstable/cstable_writer.h \
     eventql/io/cstable/LockManager.h \
-    eventql/io/cstable/columns/UInt64ColumnWriter.h \
     eventql/io/cstable/columns/v1/ColumnReader.h \
     eventql/io/cstable/io/PageReader.h \
     eventql/io/cstable/io/PageWriter.h \
