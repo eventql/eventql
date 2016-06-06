@@ -21,9 +21,9 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include <eventql/io/cstable/columns/column_writer_string.h>
-
 #include "eventql/eventql.h"
+#include <eventql/io/cstable/columns/column_writer_string.h>
+#include <eventql/io/cstable/columns/page_writer_lenencstring.h>
 
 namespace cstable {
 
@@ -39,7 +39,7 @@ StringColumnWriter::StringColumnWriter(
   switch (config_.storage_type) {
 
     case ColumnEncoding::STRING_PLAIN:
-      //data_writer_ = mkScoped(new UInt64PageWriter(key, page_mgr));
+      data_writer_ = mkScoped(new LenencStringPageWriter(key, page_mgr));
       break;
 
     default:

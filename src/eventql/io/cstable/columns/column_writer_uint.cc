@@ -84,7 +84,6 @@ void UnsignedIntColumnWriter::writeSignedInt(
   writeUnsignedInt(rlvl, dlvl, (uint64_t) value);
 }
 
-
 void UnsignedIntColumnWriter::writeFloat(
     uint64_t rlvl,
     uint64_t dlvl,

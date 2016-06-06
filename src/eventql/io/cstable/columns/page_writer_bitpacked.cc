@@ -23,9 +23,7 @@
  */
 #include <eventql/io/cstable/columns/page_writer_bitpacked.h>
 
-
 namespace cstable {
 
 } // namespace cstable
-
 

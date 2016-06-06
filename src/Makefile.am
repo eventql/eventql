@@ -318,6 +318,8 @@ evql_cstable_a_SOURCES = \
     eventql/io/cstable/columns/page_writer_uint64.h \
     eventql/io/cstable/columns/page_writer_bitpacked.cc \
     eventql/io/cstable/columns/page_writer_bitpacked.h \
+    eventql/io/cstable/columns/page_writer_lenencstring.cc \
+    eventql/io/cstable/columns/page_writer_lenencstring.h \
     eventql/io/cstable/columns/v1/BitPackedIntColumnReader.cc \
     eventql/io/cstable/columns/v1/BitPackedIntColumnReader.h \
     eventql/io/cstable/columns/v1/BitPackedIntColumnWriter.cc \

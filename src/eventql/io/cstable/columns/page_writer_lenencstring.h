@@ -23,36 +23,31 @@
  */
 #pragma once
 #include <eventql/util/stdtypes.h>
-#include <eventql/util/util/binarymessagewriter.h>
-#include <eventql/util/util/BitPackEncoder.h>
 #include <eventql/io/cstable/cstable.h>
 #include <eventql/io/cstable/page_manager.h>
 #include <eventql/io/cstable/io/PageWriter.h>
 
-
 namespace cstable {
 
-class BitPackedIntPageWriter : public UnsignedIntPageWriter {
+class LenencStringPageWriter : public StringPageWriter {
 public:
+  static const uint64_t kPageSize = 512 * 2;
 
-  BitPackedIntPageWriter(
+  LenencStringPageWriter(
       PageIndexKey key,
-      PageManager* page_mgr,
-      uint32_t max_value = 0xffffffff);
+      PageManager* page_mgr);
 
-  void appendValue(uint64_t value) override;
+  void appendValue(const char* data, size_t len) override;
 
 protected:
+
+  void appendBytes(const char* data, size_t len);
+
   PageIndexKey key_;
   PageManager* page_mgr_;
-  uint32_t max_value_;
   bool has_page_;
   size_t page_pos_;
   cstable::PageRef page_;
-  uint32_t inbuf_[128];
-  uint32_t outbuf_[128];
-  size_t inbuf_size_;
-  size_t maxbits_;
 };
 
 } // namespace cstable

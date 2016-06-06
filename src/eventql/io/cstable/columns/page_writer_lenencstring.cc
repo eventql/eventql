@@ -21,40 +21,51 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#pragma once
-#include <eventql/util/stdtypes.h>
-#include <eventql/util/util/binarymessagewriter.h>
-#include <eventql/util/util/BitPackEncoder.h>
-#include <eventql/io/cstable/cstable.h>
-#include <eventql/io/cstable/page_manager.h>
-#include <eventql/io/cstable/io/PageWriter.h>
-
+#include <eventql/io/cstable/columns/page_writer_lenencstring.h>
+#include <eventql/util/inspect.h>
 
 namespace cstable {
 
-class BitPackedIntPageWriter : public UnsignedIntPageWriter {
-public:
+LenencStringPageWriter::LenencStringPageWriter(
+    PageIndexKey key,
+    PageManager* page_mgr) :
+    key_(key),
+    page_mgr_(page_mgr),
+    has_page_(false),
+    page_pos_(0) {}
 
-  BitPackedIntPageWriter(
-      PageIndexKey key,
-      PageManager* page_mgr,
-      uint32_t max_value = 0xffffffff);
+void LenencStringPageWriter::appendValue(const char* data, size_t len) {
+  unsigned char buf[10];
+  size_t bytes = 0;
+  do {
+    buf[bytes] = len & 0x7fU;
+    if (len >>= 7) buf[bytes] |= 0x80U;
+    ++bytes;
+  } while (len);
 
-  void appendValue(uint64_t value) override;
+  appendBytes((const char*) &buf, bytes);
+  appendBytes(data, len);
+}
 
-protected:
-  PageIndexKey key_;
-  PageManager* page_mgr_;
-  uint32_t max_value_;
-  bool has_page_;
-  size_t page_pos_;
-  cstable::PageRef page_;
-  uint32_t inbuf_[128];
-  uint32_t outbuf_[128];
-  size_t inbuf_size_;
-  size_t maxbits_;
-};
+void LenencStringPageWriter::appendBytes(const char* data, size_t len) {
+  while (len > 0) {
+    if (!has_page_ || page_pos_ + len > page_.size) {
+      if (has_page_) {
+        page_mgr_->flushPage(page_);
+      }
+
+      page_ = page_mgr_->allocPage(key_, kPageSize);
+      page_pos_ = 0;
+      has_page_ = true;
+    }
+
+    auto write_len = std::min((uint64_t) len, (uint64_t) page_.size);
+    page_mgr_->writeToPage(page_, page_pos_, data, write_len);
+    page_pos_ += write_len;
+    data += write_len;
+    len -= write_len;
+  }
+}
 
 } // namespace cstable
-
 
