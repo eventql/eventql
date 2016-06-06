@@ -397,7 +397,7 @@ int main(int argc, const char** argv) {
             server_name,
             flags.getString("listen")));
   } else if (flags.getString("config_backend") == "standalone") {
-    config_dir.reset(new StandaloneConfigDirectory());
+    config_dir.reset(new StandaloneConfigDirectory(flags.getString("listen")));
   } else {
     logFatal("evqld", "invalid config backend: " + flags.getString("config_backend"));
     return 1;
