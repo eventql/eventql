@@ -361,7 +361,5 @@ Vector<ColumnConfig> TableSchema::flatColumns() const {
   return columns;
 }
 
-
 } // namespace msg
-
 
