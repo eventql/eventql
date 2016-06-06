@@ -21,51 +21,56 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include <eventql/io/cstable/columns/page_writer_lenencstring.h>
-#include <eventql/util/inspect.h>
+#include <eventql/io/cstable/columns/page_reader_lenencstring.h>
 
 namespace cstable {
 
-LenencStringPageWriter::LenencStringPageWriter(
+LenencStringPageReader::LenencStringPageReader(
     PageIndexKey key,
-    PageManager* page_mgr) :
-    key_(key),
+    const PageManager* page_mgr) :
     page_mgr_(page_mgr),
-    has_page_(false),
-    page_pos_(0) {}
+    pages_(page_mgr->getPages(key)),
+    page_pos_(0),
+    page_len_(0),
+    page_idx_(0) {}
 
-void LenencStringPageWriter::appendValue(const char* data, size_t len) {
-  unsigned char buf[10];
-  size_t bytes = 0;
-  size_t tmp = len;
-  do {
-    buf[bytes] = tmp & 0x7fU;
-    if (tmp >>= 7) buf[bytes] |= 0x80U;
-    ++bytes;
-  } while (tmp);
-
-  appendBytes((const char*) &buf, bytes);
-  appendBytes(data, len);
-}
-
-void LenencStringPageWriter::appendBytes(const char* data, size_t len) {
-  while (len > 0) {
-    if (!has_page_ || page_pos_ >= page_.size) {
-      if (has_page_) {
-        page_mgr_->flushPage(page_);
-      }
-
-      page_ = page_mgr_->allocPage(key_, kPageSize);
-      page_pos_ = 0;
-      has_page_ = true;
+void LenencStringPageReader::readString(String* str) {
+  uint64_t strlen = 0;
+  for (int i = 0; ; ++i) {
+    if (page_pos_ >= page_len_) {
+      loadNextPage();
     }
 
-    auto write_len = std::min((uint64_t) len, (uint64_t) page_.size - page_pos_);
-    page_mgr_->writeToPage(page_, page_pos_, data, write_len);
-    page_pos_ += write_len;
-    data += write_len;
-    len -= write_len;
+    unsigned char b = ((unsigned char*) page_data_.data())[page_pos_++];
+    strlen |= (b & 0x7fULL) << (7 * i);
+
+    if (!(b & 0x80U)) {
+      break;
+    }
   }
+
+  while (strlen) {
+    if (page_pos_ >= page_len_) {
+      loadNextPage();
+    }
+
+    auto read_len = std::min(strlen, page_len_ - page_pos_);
+    *str += String((const char*) page_data_.data() + page_pos_, read_len);
+    page_pos_ += read_len;
+    strlen -= read_len;
+  }
+}
+
+void LenencStringPageReader::loadNextPage() {
+  if (page_idx_ == pages_.size()) {
+    RAISE(kRuntimeError, "end of column reached");
+  }
+
+  page_pos_ = 0;
+  page_len_ = pages_[page_idx_].size;
+  page_data_.resize(page_len_);
+  page_mgr_->readPage(pages_[page_idx_], page_data_.data());
+  ++page_idx_;
 }
 
 } // namespace cstable

@@ -32,6 +32,7 @@
 #include <eventql/io/cstable/columns/v1/DoubleColumnReader.h>
 #include <eventql/io/cstable/columns/v1/StringColumnReader.h>
 #include <eventql/io/cstable/columns/column_reader_uint.h>
+#include <eventql/io/cstable/columns/column_reader_string.h>
 #include <eventql/io/cstable/columns/page_reader_uint64.h>
 #include <eventql/util/io/file.h>
 #include <eventql/util/io/mmappedfile.h>
@@ -101,7 +102,14 @@ static RefPtr<ColumnReader> openColumnV2(
   switch (c.logical_type) {
     case ColumnType::BOOLEAN:
     case ColumnType::UNSIGNED_INT:
+    case ColumnType::DATETIME:
       return new UnsignedIntColumnReader(
+          c,
+          std::move(rlevel_reader),
+          std::move(dlevel_reader),
+          page_mgr);
+    case ColumnType::STRING:
+      return new StringColumnReader(
           c,
           std::move(rlevel_reader),
           std::move(dlevel_reader),
