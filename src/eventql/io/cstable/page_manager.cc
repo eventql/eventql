@@ -58,7 +58,9 @@ PageRef PageManager::allocPage(PageIndexKey key, uint32_t size) {
   idx_entry.page = page;
 
   auto buf = malloc(page.size);
-  if (!buf) {
+  if (buf) {
+    memset(buf, 0, page.size);
+  } else {
     RAISE(kMallocError, "malloc() failed");
   }
 
