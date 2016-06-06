@@ -500,7 +500,7 @@ TEST_CASE(CSTableTest, TestV2UInt64Plain, [] () {
 //
 //  CSTableFile arena(BinaryFormatVersion::v0_2_0, schema);
 //
-//  auto tbl_writer = cstable::CSTableWriter::openArena(&arena);
+//  auto tbl_writer = cstable::CSTableWriter::openFile(&arena);
 //  auto mycol_writer = tbl_writer->getColumnWriter("mycol");
 //
 //  for (size_t i = 1; i < 10000; ++i) {
@@ -510,7 +510,7 @@ TEST_CASE(CSTableTest, TestV2UInt64Plain, [] () {
 //
 //    if (i % 1000 == 0) {
 //      tbl_writer->commit();
-//      auto tbl_reader = cstable::CSTableReader::openArena(&arena);
+//      auto tbl_reader = cstable::CSTableReader::openFile(&arena);
 //      auto mycol_reader = tbl_reader->getColumnReader("mycol");
 //
 //      for (size_t j = 1; j < i; ++j) {

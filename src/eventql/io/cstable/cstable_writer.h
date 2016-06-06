@@ -125,7 +125,7 @@ public:
    *
    * @param arena the arena to write to
    */
-  static RefPtr<CSTableWriter> openArena(CSTableFile* arena);
+  static RefPtr<CSTableWriter> openFile(CSTableFile* arena);
 
   /**
    * Commit the current implicit transaction. Note that after commiting you

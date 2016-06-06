@@ -86,7 +86,7 @@ RefPtr<CSTableWriter> CSTableWriter::reopenFile(
   RAISE(kNotYetImplementedError);
 }
 
-RefPtr<CSTableWriter> CSTableWriter::openArena(CSTableFile* arena) {
+RefPtr<CSTableWriter> CSTableWriter::openFile(CSTableFile* arena) {
   return new CSTableWriter(
       arena->getBinaryFormatVersion(),
       mkRef(new TableSchema(arena->getTableSchema())),
