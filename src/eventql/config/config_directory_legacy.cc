@@ -479,7 +479,7 @@ HashMap<String, uint64_t> LegacyConfigDirectory::fetchMasterHeads() const {
   return heads;
 }
 
-Status LegacyConfigDirectory::startAndJoin(const String& cluster_name) {
+Status LegacyConfigDirectory::start() {
   watcher_running_ = true;
 
   watcher_thread_ = std::thread([this] {
@@ -495,12 +495,6 @@ Status LegacyConfigDirectory::startAndJoin(const String& cluster_name) {
   });
 
   return Status::success();
-}
-
-Status LegacyConfigDirectory::startAndCreate(
-    const String& cluster_name,
-    const ClusterConfig& config) {
-  return startAndJoin("");
 }
 
 void LegacyConfigDirectory::stop() {

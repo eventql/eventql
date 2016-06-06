@@ -65,10 +65,11 @@ void cmd_cluster_add_server(const cli::FlagParser& flags) {
   auto cdir = mkScoped(
       new ZookeeperConfigDirectory(
             flags.getString("zookeeper_addr"),
+            flags.getString("cluster_name"),
             None<String>(),
             ""));
 
-  cdir->startAndJoin(flags.getString("cluster_name"));
+  cdir->start();
 
   ServerConfig cfg;
   cfg.set_server_id(flags.getString("server_name"));
@@ -92,10 +93,11 @@ void cmd_cluster_remove_server(const cli::FlagParser& flags) {
   auto cdir = mkScoped(
       new ZookeeperConfigDirectory(
             flags.getString("zookeeper_addr"),
+            flags.getString("cluster_name"),
             None<String>(),
             ""));
 
-  cdir->startAndJoin(flags.getString("cluster_name"));
+  cdir->start();
 
   auto cfg = cdir->getServerConfig(flags.getString("server_name"));
   if (remove_soft) {
@@ -113,10 +115,11 @@ void cmd_cluster_create(const cli::FlagParser& flags) {
   auto cdir = mkScoped(
       new ZookeeperConfigDirectory(
             flags.getString("zookeeper_addr"),
+            flags.getString("cluster_name"),
             None<String>(),
             ""));
 
-  cdir->startAndJoin(flags.getString("cluster_name"));
+  cdir->start();
 
   ClusterConfig cfg;
   cdir->updateClusterConfig(cfg);
@@ -128,10 +131,11 @@ void cmd_namespace_create(const cli::FlagParser& flags) {
   auto cdir = mkScoped(
       new ZookeeperConfigDirectory(
             flags.getString("zookeeper_addr"),
+            flags.getString("cluster_name"),
             None<String>(),
             ""));
 
-  cdir->startAndJoin(flags.getString("cluster_name"));
+  cdir->start();
 
   NamespaceConfig cfg;
   cfg.set_customer(flags.getString("namespace"));
@@ -144,10 +148,11 @@ void cmd_table_split(const cli::FlagParser& flags) {
   auto cdir = mkScoped(
       new ZookeeperConfigDirectory(
             flags.getString("zookeeper_addr"),
+            flags.getString("cluster_name"),
             None<String>(),
             ""));
 
-  cdir->startAndJoin(flags.getString("cluster_name"));
+  cdir->start();
 
   auto table_cfg = cdir->getTableConfig(
       flags.getString("namespace"),
@@ -235,10 +240,12 @@ void cmd_rebalance(const cli::FlagParser& flags) {
   auto cdir = mkScoped(
       new ZookeeperConfigDirectory(
             flags.getString("zookeeper_addr"),
+            flags.getString("cluster_name"),
             None<String>(),
             ""));
 
-  cdir->startAndJoin(flags.getString("cluster_name"));
+  cdir->start();
+
   MasterService master(cdir.get());
   auto rc = master.runOnce();
   cdir->stop();

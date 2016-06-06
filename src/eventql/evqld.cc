@@ -392,6 +392,7 @@ int main(int argc, const char** argv) {
     config_dir.reset(
         new ZookeeperConfigDirectory(
             flags.getString("zookeeper_addr"),
+            flags.getString("cluster"),
             server_name,
             flags.getString("listen")));
   } else {
@@ -429,15 +430,7 @@ int main(int argc, const char** argv) {
 
   try {
     {
-      auto rc = Status::success();
-      if (flags.isSet("create_cluster")) {
-        rc = config_dir->startAndCreate(
-            flags.getString("cluster"),
-            ClusterConfig{});
-      } else {
-        rc = config_dir->startAndJoin(flags.getString("cluster"));
-      }
-
+      auto rc = config_dir->start();
       if (!rc.isSuccess()) {
         logFatal("evqld", "Can't connect to config backend: $0", rc.message());
         return 1;

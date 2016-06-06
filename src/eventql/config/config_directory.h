@@ -47,6 +47,9 @@ public:
 
   virtual ~ConfigDirectory() = default;
 
+  virtual Status start() = 0;
+  virtual void stop() = 0;
+
   virtual ClusterConfig getClusterConfig() const = 0;
 
   virtual void updateClusterConfig(ClusterConfig config) = 0;
@@ -89,13 +92,6 @@ public:
 
   virtual void setTableConfigChangeCallback(
       Function<void (const TableDefinition& tbl)> fn) = 0;
-
-  virtual Status startAndJoin(const String& cluster_name) = 0;
-  virtual Status startAndCreate(
-      const String& cluster_name,
-      const ClusterConfig& config) = 0;
-
-  virtual void stop() = 0;
 
 };
 
