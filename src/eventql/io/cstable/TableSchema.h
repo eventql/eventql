@@ -38,6 +38,7 @@ public:
     ColumnType type;
     ColumnEncoding encoding;
     uint64_t type_size;
+    uint64_t column_id;
     bool repeated;
     bool optional;
     ScopedPtr<TableSchema> subschema;
@@ -134,6 +135,7 @@ public:
 protected:
   HashMap<String, ScopedPtr<Column>> columns_by_name_;
   Vector<Column*> columns_;
+  size_t next_column_id_;
 };
 
 } // namespace cstable

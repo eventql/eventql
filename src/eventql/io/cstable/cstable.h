@@ -170,7 +170,6 @@ struct MetaBlock {
 namespace cstable {
 
 struct FileHeader {
-  RefPtr<TableSchema> schema;
   Vector<ColumnConfig> columns;
   uint64_t num_rows; // deprecated after v0.1.x
 };

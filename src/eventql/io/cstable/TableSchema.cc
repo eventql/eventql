@@ -28,13 +28,16 @@
 
 namespace cstable {
 
-TableSchema::TableSchema() {}
+TableSchema::TableSchema() : next_column_id_(0) {}
 
-TableSchema::TableSchema(const TableSchema& other) {
+TableSchema::TableSchema(
+    const TableSchema& other) :
+    next_column_id_(other.next_column_id_) {
   for (const auto& c : other.columns_by_name_) {
     auto col_cpy = mkScoped(new Column());
     col_cpy->name = c.second->name;
     col_cpy->type = c.second->type;
+    col_cpy->column_id = c.second->column_id;
     col_cpy->encoding = c.second->encoding;
     col_cpy->type_size = c.second->type_size;
     col_cpy->repeated = c.second->repeated;
@@ -55,6 +58,7 @@ void TableSchema::addBool(
   auto col = mkScoped(new Column());
   col->name = name;
   col->type = ColumnType::BOOLEAN;
+  col->column_id = ++next_column_id_;
   col->encoding = encoding;
   col->type_size = 0;
   col->repeated = false;
@@ -71,6 +75,7 @@ void TableSchema::addBoolArray(
   auto col = mkScoped(new Column());
   col->name = name;
   col->type = ColumnType::BOOLEAN;
+  col->column_id = ++next_column_id_;
   col->encoding = encoding;
   col->type_size = 0;
   col->repeated = true;
@@ -88,6 +93,7 @@ void TableSchema::addUnsignedInteger(
   auto col = mkScoped(new Column());
   col->name = name;
   col->type = ColumnType::UNSIGNED_INT;
+  col->column_id = ++next_column_id_;
   col->encoding = encoding;
   col->type_size = max_value;
   col->repeated = false;
@@ -105,6 +111,7 @@ void TableSchema::addUnsignedIntegerArray(
   auto col = mkScoped(new Column());
   col->name = name;
   col->type = ColumnType::UNSIGNED_INT;
+  col->column_id = ++next_column_id_;
   col->encoding = encoding;
   col->type_size = max_value;
   col->repeated = true;
@@ -121,6 +128,7 @@ void TableSchema::addFloat(
   auto col = mkScoped(new Column());
   col->name = name;
   col->type = ColumnType::FLOAT;
+  col->column_id = ++next_column_id_;
   col->encoding = encoding;
   col->type_size = 0;
   col->repeated = false;
@@ -137,6 +145,7 @@ void TableSchema::addFloatArray(
   auto col = mkScoped(new Column());
   col->name = name;
   col->type = ColumnType::FLOAT;
+  col->column_id = ++next_column_id_;
   col->encoding = encoding;
   col->type_size = 0;
   col->repeated = true;
@@ -154,6 +163,7 @@ void TableSchema::addString(
   auto col = mkScoped(new Column());
   col->name = name;
   col->type = ColumnType::STRING;
+  col->column_id = ++next_column_id_;
   col->encoding = encoding;
   col->type_size = max_len;
   col->repeated = false;
@@ -171,6 +181,7 @@ void TableSchema::addStringArray(
   auto col = mkScoped(new Column());
   col->name = name;
   col->type = ColumnType::STRING;
+  col->column_id = ++next_column_id_;
   col->encoding = encoding;
   col->type_size = max_len;
   col->repeated = true;
@@ -187,6 +198,7 @@ void TableSchema::addSubrecord(
   auto col = mkScoped(new Column());
   col->name = name;
   col->type = ColumnType::SUBRECORD;
+  col->column_id = ++next_column_id_;
   col->repeated = false;
   col->optional = optional;
   col->subschema = mkScoped(new TableSchema(schema));
@@ -202,6 +214,7 @@ void TableSchema::addSubrecordArray(
   auto col = mkScoped(new Column());
   col->name = name;
   col->type = ColumnType::SUBRECORD;
+  col->column_id = ++next_column_id_;
   col->repeated = true;
   col->optional = optional;
   col->subschema = mkScoped(new TableSchema(schema));
@@ -220,6 +233,7 @@ void TableSchema::addColumn(
   auto col = mkScoped(new Column());
   col->name = name;
   col->type = type;
+  col->column_id = ++next_column_id_;
   col->encoding = encoding;
   col->repeated = repeated;
   col->optional = optional;
@@ -328,6 +342,7 @@ static void listFlatColumns(
   } else {
     cstable::ColumnConfig cconf;
     cconf.column_name = colname;
+    cconf.column_id = field->column_id;
     cconf.storage_type = field->encoding;
     cconf.logical_type = field->type;
     cconf.rlevel_max = r_max;

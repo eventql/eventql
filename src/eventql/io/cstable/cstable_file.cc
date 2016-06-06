@@ -38,8 +38,7 @@ CSTableFile::CSTableFile(
     transaction_id_(0),
     num_rows_(0) {
   FileHeader header;
-  header.schema = mkRef(new TableSchema(schema));
-  header.columns = header.schema->flatColumns();
+  header.columns = schema_.flatColumns();
 
   auto header_os = BufferOutputStream::fromBuffer(&file_header_);
   size_t header_size;
