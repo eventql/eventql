@@ -283,8 +283,8 @@ noinst_LIBRARIES += evql_sql.a
 
 ################# LIB: evql_cstable.a ####################
 evql_cstable_a_SOURCES = \
-    eventql/io/cstable/cstable_arena.cc \
-    eventql/io/cstable/cstable_arena.h \
+    eventql/io/cstable/cstable_file.cc \
+    eventql/io/cstable/cstable_file.h \
     eventql/io/cstable/CSTableReader.cc \
     eventql/io/cstable/CSTableReader.h \
     eventql/io/cstable/CSTableWriter.cc \

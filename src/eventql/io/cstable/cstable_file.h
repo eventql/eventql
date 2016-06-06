@@ -30,10 +30,10 @@
 
 namespace cstable {
 
-class CSTableArena {
+class CSTableFile {
 public:
 
-  CSTableArena(
+  CSTableFile(
       BinaryFormatVersion version,
       const TableSchema& schema,
       int fd = -1);

@@ -59,12 +59,12 @@ RefPtr<CSTableWriter> CSTableWriter::createFile(
     Option<RefPtr<LockRef>> lockref /* = None<RefPtr<LockRef>>() */) {
   auto file = File::openFile(filename, File::O_WRITE | File::O_CREATE);
 
-  ScopedPtr<CSTableArena> arena;
+  ScopedPtr<CSTableFile> arena;
   switch (version) {
     case BinaryFormatVersion::v0_1_0:
       break;
     case BinaryFormatVersion::v0_2_0: {
-      arena.reset(new CSTableArena(version, schema, file.fd()));
+      arena.reset(new CSTableFile(version, schema, file.fd()));
       uint64_t header_size;
       arena->writeFileHeader(file.fd(), &header_size);
       break;
@@ -86,7 +86,7 @@ RefPtr<CSTableWriter> CSTableWriter::reopenFile(
   RAISE(kNotYetImplementedError);
 }
 
-RefPtr<CSTableWriter> CSTableWriter::openArena(CSTableArena* arena) {
+RefPtr<CSTableWriter> CSTableWriter::openArena(CSTableFile* arena) {
   return new CSTableWriter(
       arena->getBinaryFormatVersion(),
       mkRef(new TableSchema(arena->getTableSchema())),
@@ -145,7 +145,7 @@ static RefPtr<ColumnWriter> openColumnV2(
 CSTableWriter::CSTableWriter(
     BinaryFormatVersion version,
     RefPtr<TableSchema> schema,
-    CSTableArena* arena,
+    CSTableFile* arena,
     bool arena_owned,
     Vector<ColumnConfig> columns,
     int fd) :

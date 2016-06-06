@@ -28,7 +28,7 @@
 #include <eventql/io/cstable/ColumnWriter.h>
 #include <eventql/io/cstable/LockManager.h>
 #include <eventql/io/cstable/page_manager.h>
-#include <eventql/io/cstable/cstable_arena.h>
+#include <eventql/io/cstable/cstable_file.h>
 #include <eventql/io/cstable/TableSchema.h>
 
 
@@ -125,7 +125,7 @@ public:
    *
    * @param arena the arena to write to
    */
-  static RefPtr<CSTableWriter> openArena(CSTableArena* arena);
+  static RefPtr<CSTableWriter> openArena(CSTableFile* arena);
 
   /**
    * Commit the current implicit transaction. Note that after commiting you
@@ -164,7 +164,7 @@ protected:
   CSTableWriter(
       BinaryFormatVersion version,
       RefPtr<TableSchema> schema,
-      CSTableArena* arena,
+      CSTableFile* arena,
       bool arena_owned,
       Vector<ColumnConfig> columns,
       int fd);
@@ -174,7 +174,7 @@ protected:
 
   BinaryFormatVersion version_;
   RefPtr<TableSchema> schema_;
-  CSTableArena* arena_;
+  CSTableFile* arena_;
   bool arena_owned_;
   PageManager* page_mgr_;
   Vector<ColumnConfig> columns_;

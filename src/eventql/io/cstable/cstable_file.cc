@@ -21,7 +21,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include <eventql/io/cstable/cstable_arena.h>
+#include <eventql/io/cstable/cstable_file.h>
 #include <sys/fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -29,7 +29,7 @@
 
 namespace cstable {
 
-CSTableArena::CSTableArena(
+CSTableFile::CSTableFile(
     BinaryFormatVersion version,
     const TableSchema& schema,
     int fd /* = -1 */) :
@@ -55,23 +55,23 @@ CSTableArena::CSTableArena(
   page_mgr_.reset(new PageManager(fd, header_size, {}));
 }
 
-BinaryFormatVersion CSTableArena::getBinaryFormatVersion() const {
+BinaryFormatVersion CSTableFile::getBinaryFormatVersion() const {
   return version_;
 }
 
-const TableSchema& CSTableArena::getTableSchema() const {
+const TableSchema& CSTableFile::getTableSchema() const {
   return schema_;
 }
 
-PageManager* CSTableArena::getPageManager() {
+PageManager* CSTableFile::getPageManager() {
   return page_mgr_.get();
 }
 
-const PageManager* CSTableArena::getPageManager() const {
+const PageManager* CSTableFile::getPageManager() const {
   return page_mgr_.get();
 }
 
-void CSTableArena::commitTransaction(
+void CSTableFile::commitTransaction(
     uint64_t transaction_id,
     uint64_t num_rows) {
   std::unique_lock<std::mutex> lk(mutex_);
@@ -79,7 +79,7 @@ void CSTableArena::commitTransaction(
   num_rows_ = num_rows;
 }
 
-void CSTableArena::getTransaction(
+void CSTableFile::getTransaction(
     uint64_t* transaction_id,
     uint64_t* num_rows) const {
   std::unique_lock<std::mutex> lk(mutex_);
@@ -87,7 +87,7 @@ void CSTableArena::getTransaction(
   *num_rows = num_rows_;
 }
 
-void CSTableArena::writeFileHeader(int fd, uint64_t* bytes_written) {
+void CSTableFile::writeFileHeader(int fd, uint64_t* bytes_written) {
   auto ret = pwrite(fd, file_header_.data(), file_header_.size(), 0);
   if (ret < 0) {
     RAISE_ERRNO(kIOError, "write() failed");
@@ -98,7 +98,7 @@ void CSTableArena::writeFileHeader(int fd, uint64_t* bytes_written) {
   *bytes_written = file_header_.size();
 }
 
-void CSTableArena::writeFileIndex(int fd, uint64_t* bytes_written) {
+void CSTableFile::writeFileIndex(int fd, uint64_t* bytes_written) {
   auto file_os = FileOutputStream::fromFileDescriptor(fd);
 
   *bytes_written = v0_2_0::writeIndex(
@@ -106,7 +106,7 @@ void CSTableArena::writeFileIndex(int fd, uint64_t* bytes_written) {
       file_os.get());
 }
 
-void CSTableArena::writeFileTransaction(
+void CSTableFile::writeFileTransaction(
     int fd,
     uint64_t index_offset,
     uint64_t index_size) {

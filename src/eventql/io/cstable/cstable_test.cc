@@ -498,7 +498,7 @@ TEST_CASE(CSTableTest, TestV2UInt64Plain, [] () {
 //      false,
 //      cstable::ColumnEncoding::UINT64_PLAIN);
 //
-//  CSTableArena arena(BinaryFormatVersion::v0_2_0, schema);
+//  CSTableFile arena(BinaryFormatVersion::v0_2_0, schema);
 //
 //  auto tbl_writer = cstable::CSTableWriter::openArena(&arena);
 //  auto mycol_writer = tbl_writer->getColumnWriter("mycol");

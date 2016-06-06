@@ -27,7 +27,7 @@
 #include <eventql/io/cstable/ColumnReader.h>
 #include <eventql/io/cstable/cstable.h>
 #include <eventql/io/cstable/page_manager.h>
-#include <eventql/io/cstable/cstable_arena.h>
+#include <eventql/io/cstable/cstable_file.h>
 
 namespace cstable {
 
@@ -36,7 +36,7 @@ public:
 
   static RefPtr<CSTableReader> openFile(const String& filename);
 
-  static RefPtr<CSTableReader> openArena(const CSTableArena* arena);
+  static RefPtr<CSTableReader> openArena(const CSTableFile* arena);
 
   ~CSTableReader();
 
