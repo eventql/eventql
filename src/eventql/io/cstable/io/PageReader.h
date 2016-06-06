@@ -36,6 +36,8 @@ public:
 class UnsignedIntPageReader : public PageReader {
 public:
   virtual uint64_t readUnsignedInt() = 0;
+  virtual uint64_t peek() = 0;
+  virtual bool eofReached() = 0;
 };
 
 class SignedIntPageReader : public PageReader {

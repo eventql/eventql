@@ -29,7 +29,7 @@
 
 namespace cstable {
 
-class StringColumnReader : public ColumnReader {
+class StringColumnReader : public DefaultColumnReader {
 public:
 
   StringColumnReader(
@@ -66,20 +66,7 @@ public:
   void skipValue() override;
   void copyValue(ColumnWriter* writer) override;
 
-  ColumnType type() const override;
-  ColumnEncoding encoding() const override;
-
-  uint64_t maxRepetitionLevel() const override;
-  uint64_t maxDefinitionLevel() const override;
-
-  uint64_t nextRepetitionLevel() override;
-
-  bool eofReached() const override;
-
 protected:
-  ColumnConfig config_;
-  ScopedPtr<UnsignedIntPageReader> rlevel_reader_;
-  ScopedPtr<UnsignedIntPageReader> dlevel_reader_;
   ScopedPtr<StringPageReader> data_reader_;
 };
 

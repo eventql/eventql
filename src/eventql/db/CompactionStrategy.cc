@@ -141,12 +141,9 @@ bool SimpleCompactionStrategy::compact(
 
         for (auto& col : columns) {
           if (col.first.get()) {
-            while (!col.first->eofReached()) {
+            do {
               col.first->copyValue(col.second.get());
-              if (col.first->nextRepetitionLevel() == 0) {
-                break;
-              }
-            }
+            } while (col.first->nextRepetitionLevel() > 0);
           } else {
             col.second->writeNull(0, 0);
           }
@@ -156,12 +153,9 @@ bool SimpleCompactionStrategy::compact(
       } else {
         for (auto& col : columns) {
           if (col.first.get()) {
-            while (!col.first->eofReached()) {
+            do {
               col.first->skipValue();
-              if (col.first->nextRepetitionLevel() == 0) {
-                break;
-              }
-            }
+            } while (col.first->nextRepetitionLevel() > 0);
           }
         }
       }

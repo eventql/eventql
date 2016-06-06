@@ -26,7 +26,7 @@
 #include <eventql/util/autoref.h>
 #include <eventql/util/protobuf/MessageObject.h>
 #include <eventql/io/cstable/cstable.h>
-
+#include <eventql/io/cstable/io/PageReader.h>
 
 namespace cstable {
 class ColumnWriter;
@@ -68,7 +68,6 @@ public:
   virtual void copyValue(ColumnWriter* writer) = 0;
 
   virtual uint64_t nextRepetitionLevel() = 0;
-  virtual bool eofReached() const = 0;
 
   virtual ColumnType type() const = 0;
   virtual ColumnEncoding encoding() const = 0;
@@ -76,6 +75,31 @@ public:
   virtual uint64_t maxRepetitionLevel() const = 0;
   virtual uint64_t maxDefinitionLevel() const = 0;
 
+protected:
+  virtual bool eofReached() const = 0;
+};
+
+class DefaultColumnReader : public ColumnReader {
+public:
+
+  DefaultColumnReader(
+      ColumnConfig config,
+      ScopedPtr<UnsignedIntPageReader> rlevel_reader,
+      ScopedPtr<UnsignedIntPageReader> dlevel_reader);
+
+  uint64_t nextRepetitionLevel() override;
+  bool eofReached() const override;
+
+  ColumnType type() const override;
+  ColumnEncoding encoding() const override;
+
+  uint64_t maxRepetitionLevel() const override;
+  uint64_t maxDefinitionLevel() const override;
+
+protected:
+  ColumnConfig config_;
+  ScopedPtr<UnsignedIntPageReader> rlevel_reader_;
+  ScopedPtr<UnsignedIntPageReader> dlevel_reader_;
 };
 
 } // namespace cstable

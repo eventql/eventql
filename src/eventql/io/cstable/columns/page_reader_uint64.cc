@@ -32,12 +32,26 @@ UInt64PageReader::UInt64PageReader(
     pages_(page_mgr->getPages(key)),
     page_pos_(0),
     page_len_(0),
-    page_idx_(0) {}
+    page_idx_(0),
+    eof_(false) {
+  fetchNext();
+}
 
 uint64_t UInt64PageReader::readUnsignedInt() {
+  if (eof_) {
+    RAISE(kRuntimeError, "end of column reached");
+  }
+
+  auto val = cur_val_;
+  fetchNext();
+  return val;
+}
+
+void UInt64PageReader::fetchNext() {
   if (page_pos_ + sizeof(uint64_t) > page_len_) {
     if (page_idx_ == pages_.size()) {
-      RAISE(kRuntimeError, "end of column reached");
+      eof_ = true;
+      return;
     }
 
     page_pos_ = 0;
@@ -47,10 +61,20 @@ uint64_t UInt64PageReader::readUnsignedInt() {
     ++page_idx_;
   }
 
-  uint64_t val;
-  memcpy(&val, (const char*) page_data_.data() + page_pos_, sizeof(uint64_t));
+  memcpy(
+      &cur_val_,
+      (const char*) page_data_.data() + page_pos_,
+      sizeof(uint64_t));
+
   page_pos_ += sizeof(uint64_t);
-  return val;
+}
+
+uint64_t UInt64PageReader::peek() {
+  return cur_val_;
+}
+
+bool UInt64PageReader::eofReached() {
+  return eof_;
 }
 
 } // namespace cstable

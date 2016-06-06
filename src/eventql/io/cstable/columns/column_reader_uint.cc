@@ -34,9 +34,10 @@ UnsignedIntColumnReader::UnsignedIntColumnReader(
     ScopedPtr<UnsignedIntPageReader> rlevel_reader,
     ScopedPtr<UnsignedIntPageReader> dlevel_reader,
     const PageManager* page_mgr) :
-    config_(config),
-    rlevel_reader_(std::move(rlevel_reader)),
-    dlevel_reader_(std::move(dlevel_reader)) {
+    DefaultColumnReader(
+        config,
+        std::move(rlevel_reader),
+        std::move(dlevel_reader)) {
   PageIndexKey key = {
     .column_id = config.column_id,
     .entry_type = PageIndexEntryType::DATA
@@ -138,14 +139,6 @@ bool UnsignedIntColumnReader::readString(
   }
 }
 
-uint64_t UnsignedIntColumnReader::nextRepetitionLevel() {
-  return 0;
-}
-
-bool UnsignedIntColumnReader::eofReached() const {
-  return false;
-}
-
 void UnsignedIntColumnReader::skipValue() {
   uint64_t rlvl;
   uint64_t dlvl;
@@ -163,22 +156,6 @@ void UnsignedIntColumnReader::copyValue(ColumnWriter* writer) {
   } else {
     writer->writeNull(rlvl, dlvl);
   }
-}
-
-ColumnType UnsignedIntColumnReader::type() const {
-  return ColumnType::UNSIGNED_INT;
-}
-
-ColumnEncoding UnsignedIntColumnReader::encoding() const {
-  return config_.storage_type;
-}
-
-uint64_t UnsignedIntColumnReader::maxRepetitionLevel() const {
-  return config_.rlevel_max;
-}
-
-uint64_t UnsignedIntColumnReader::maxDefinitionLevel() const {
-  return config_.dlevel_max;
 }
 
 } // namespace cstable

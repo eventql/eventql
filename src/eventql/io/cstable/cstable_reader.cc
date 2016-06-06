@@ -92,12 +92,11 @@ static RefPtr<ColumnReader> openColumnV2(
   if (c.dlevel_max > 0) {
     PageIndexKey dlevel_idx_key {
       .column_id = c.column_id,
-      .entry_type = PageIndexEntryType::RLEVEL
+      .entry_type = PageIndexEntryType::DLEVEL
     };
 
     dlevel_reader = mkScoped(new UInt64PageReader(dlevel_idx_key, page_mgr));
   }
-
 
   switch (c.logical_type) {
     case ColumnType::BOOLEAN:

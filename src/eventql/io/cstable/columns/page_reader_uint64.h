@@ -35,14 +35,21 @@ public:
   UInt64PageReader(PageIndexKey key, const PageManager* page_mgr);
 
   uint64_t readUnsignedInt() override;
+  uint64_t peek() override;
+  bool eofReached() override;
 
 protected:
+
+  void fetchNext();
+
   const PageManager* page_mgr_;
   Vector<PageRef> pages_;
   uint64_t page_pos_;
   uint64_t page_len_;
   uint64_t page_idx_;
   Buffer page_data_;
+  bool eof_;
+  uint64_t cur_val_;
 };
 
 } // namespace cstable
