@@ -35,6 +35,7 @@ PartitionArena::PartitionArena(
     cstable_schema_(cstable::TableSchema::fromProtobuf(schema)),
     cstable_schema_ext_(cstable_schema_) {
   cstable_schema_ext_.addBool("__lsm_is_update", false);
+  cstable_schema_ext_.addBool("__lsm_skip", false);
   cstable_schema_ext_.addString("__lsm_id", false);
   cstable_schema_ext_.addUnsignedInteger("__lsm_version", false);
   cstable_schema_ext_.addUnsignedInteger("__lsm_sequence", false);
@@ -117,8 +118,10 @@ Status PartitionArena::writeToDisk(
     const String& filename,
     uint64_t sequence) {
   auto sequence_col = cstable_writer_->getColumnWriter("__lsm_sequence");
+  auto skip_col = cstable_writer_->getColumnWriter("__lsm_skip");
   for (size_t i = 0; i < num_records_; ++i) {
     sequence_col->writeUnsignedInt(0, 0, sequence++);
+    skip_col->writeBoolean(0, 0, skiplist_[i]);
   }
 
   cstable_writer_->commit();
