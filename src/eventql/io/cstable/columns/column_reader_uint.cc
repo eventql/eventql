@@ -23,7 +23,7 @@
  */
 #include <eventql/io/cstable/columns/column_reader_uint.h>
 #include <eventql/io/cstable/columns/page_reader_uint64.h>
-#include <eventql/io/cstable/columns/page_readeR_leb128.h>
+#include <eventql/io/cstable/columns/page_reader_leb128.h>
 #include <eventql/io/cstable/ColumnWriter.h>
 
 #include "eventql/eventql.h"
