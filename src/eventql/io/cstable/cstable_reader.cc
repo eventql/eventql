@@ -99,6 +99,7 @@ static RefPtr<ColumnReader> openColumnV2(
 
 
   switch (c.logical_type) {
+    case ColumnType::BOOLEAN:
     case ColumnType::UNSIGNED_INT:
       return new UnsignedIntColumnReader(
           c,

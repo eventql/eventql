@@ -24,6 +24,8 @@
 #include <eventql/eventql.h>
 #include <eventql/io/cstable/cstable_writer.h>
 #include <eventql/io/cstable/columns/column_writer_uint.h>
+#include <eventql/io/cstable/columns/column_writer_string.h>
+#include <eventql/io/cstable/columns/column_writer_float.h>
 #include <eventql/io/cstable/columns/v1/BooleanColumnWriter.h>
 #include <eventql/io/cstable/columns/v1/BitPackedIntColumnWriter.h>
 #include <eventql/io/cstable/columns/v1/UInt32ColumnWriter.h>
@@ -126,18 +128,16 @@ static RefPtr<ColumnWriter> openColumnV2(
     const ColumnConfig& c,
     PageManager* page_mgr) {
   switch (c.logical_type) {
-    //case ColumnType::BOOLEAN:
-    //  return new BooleanColumnWriter(c, page_mgr, page_idx);
+    case ColumnType::BOOLEAN:
     case ColumnType::UNSIGNED_INT:
+    case ColumnType::DATETIME:
       return new UnsignedIntColumnWriter(c, page_mgr);
     //case ColumnType::SIGNED_INT:
     //  return new SignedIntColumnWriter(c, page_mgr, page_idx);
-    //case ColumnType::STRING:
-    //  return new StringColumnWriter(c, page_mgr, page_idx);
-    //case ColumnType::FLOAT:
-    //  return new FloatColumnWriter(c, page_mgr, page_idx);
-    //case ColumnType::DATETIME:
-    //  return new DateTimeColumnWriter(c, page_mgr, page_idx);
+    case ColumnType::STRING:
+      return new StringColumnWriter(c, page_mgr);
+    case ColumnType::FLOAT:
+      return new FloatColumnWriter(c, page_mgr);
   }
 }
 

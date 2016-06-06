@@ -25,7 +25,6 @@
 #include <eventql/util/stdtypes.h>
 #include <eventql/io/cstable/ColumnWriter.h>
 
-
 namespace cstable {
 
 class UnsignedIntColumnWriter : public DefaultColumnWriter {
@@ -71,5 +70,4 @@ protected:
 };
 
 } // namespace cstable
-
 

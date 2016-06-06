@@ -23,38 +23,51 @@
  */
 #pragma once
 #include <eventql/util/stdtypes.h>
-#include <eventql/util/autoref.h>
-#include <eventql/util/io/outputstream.h>
-
+#include <eventql/io/cstable/ColumnWriter.h>
 
 namespace cstable {
 
-class PageWriter {
+class StringColumnWriter : public DefaultColumnWriter {
 public:
-  virtual ~PageWriter() = default;
-};
 
-class UnsignedIntPageWriter : public PageWriter {
-public:
-  virtual void appendValue(uint64_t value) = 0;
-};
+  StringColumnWriter(
+      ColumnConfig config,
+      PageManager* page_mgr);
 
-class SignedIntPageWriter : public PageWriter {
-public:
-  virtual void appendValue(int64_t value) = 0;
-};
+  void writeBoolean(
+      uint64_t rlvl,
+      uint64_t dlvl,
+      bool value) override;
 
-class FloatPageWriter : public PageWriter {
-public:
-  virtual void appendValue(double value) = 0;
-};
+  void writeUnsignedInt(
+      uint64_t rlvl,
+      uint64_t dlvl,
+      uint64_t value) override;
 
-class StringPageWriter : public PageWriter {
-public:
-  void appendValue(const String& value);
-  virtual void appendValue(const char* data, size_t size) = 0;
+  void writeSignedInt(
+      uint64_t rlvl,
+      uint64_t dlvl,
+      int64_t value) override;
+
+  void writeFloat(
+      uint64_t rlvl,
+      uint64_t dlvl,
+      double value) override;
+
+  void writeString(
+      uint64_t rlvl,
+      uint64_t dlvl,
+      const char* data,
+      size_t size) override;
+
+  void writeDateTime(
+      uint64_t rlvl,
+      uint64_t dlvl,
+      UnixTime value) override;
+
+protected:
+  ScopedPtr<StringPageWriter> data_writer_;
 };
 
 } // namespace cstable
-
 

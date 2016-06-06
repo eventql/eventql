@@ -308,6 +308,10 @@ evql_cstable_a_SOURCES = \
     eventql/io/cstable/columns/column_reader_uint.h \
     eventql/io/cstable/columns/column_writer_uint.cc \
     eventql/io/cstable/columns/column_writer_uint.h \
+    eventql/io/cstable/columns/column_writer_string.cc \
+    eventql/io/cstable/columns/column_writer_string.h \
+    eventql/io/cstable/columns/column_writer_float.cc \
+    eventql/io/cstable/columns/column_writer_float.h \
     eventql/io/cstable/columns/page_reader_uint64.cc \
     eventql/io/cstable/columns/page_reader_uint64.h \
     eventql/io/cstable/columns/page_writer_uint64.cc \
