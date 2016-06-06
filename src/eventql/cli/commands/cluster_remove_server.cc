@@ -44,7 +44,7 @@ Status ClusterRemoveServer::execute(
     OutputStream* stderr_os) {
   auto zookeeper_addr = process_cfg_->getString("evqlctl", "zookeeper_addr");
   if (zookeeper_addr.isEmpty()) {
-    stderr_os->write("Error: no zookeeper address provided"); //FIXME
+    stderr_os->write("ERROR: zookeeper address not specified\n");
     return Status(eFlagError);
   }
 
@@ -91,8 +91,7 @@ Status ClusterRemoveServer::execute(
     bool remove_hard = flags.isSet("hard");
     bool remove_soft = flags.isSet("soft");
     if (!(remove_hard ^ remove_soft)) {
-      //logFatal("evqlctl", "either --hard or --soft must be set");
-      stderr_os->write("evqlctl: either --hard or --soft must be set");
+      stderr_os->write("ERROR: either --hard or --soft must be set\n");
       return Status(eFlagError);
     }
 
@@ -104,7 +103,7 @@ Status ClusterRemoveServer::execute(
 
     auto rc = cdir->startAndJoin(flags.getString("cluster_name"));
     if (!rc.isSuccess()) {
-      stderr_os->write(StringUtil::format("evqlctl: $1", rc.message()));
+      stderr_os->write(StringUtil::format("ERROR: $0\n", rc.message()));
       return rc;
     }
 

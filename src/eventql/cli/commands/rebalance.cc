@@ -44,7 +44,7 @@ Status Rebalance::execute(
     OutputStream* stderr_os) {
   auto zookeeper_addr = process_cfg_->getString("evqlctl", "zookeeper_addr");
   if (zookeeper_addr.isEmpty()) {
-    stderr_os->write("Error: no zookeeper address provided"); //FIXME
+    stderr_os->write("ERROR: zookeeper address not specified\n");
     return Status(eFlagError);
   }
 
@@ -69,7 +69,7 @@ Status Rebalance::execute(
   {
     auto rc = cdir->startAndJoin(flags.getString("cluster_name"));
     if (!rc.isSuccess()) {
-      //logerro
+      stderr_os->write(StringUtil::format("ERROR: $0\n", rc.message()));
       return rc;
     }
   }
@@ -80,10 +80,10 @@ Status Rebalance::execute(
     cdir->stop();
 
     if (!rc.isSuccess()) {
+      stderr_os->write(StringUtil::format("ERROR: $0\n", rc.message()));
       return rc;
-      //logFatal("evqlctl", "ERROR: $0", rc.message());
     } else {
-      //logInfo("evqlctl", "SUCCESS");
+      stdout_os->write("SUCCESS");
     }
   }
 
