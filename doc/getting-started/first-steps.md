@@ -3,8 +3,8 @@
 
 #### start the eventql server
 
-  $ mkdir -p /var/evql/standalone
-  $ evqld --cachedir /tmp --config_backend standalone --client_auth_backend trust --listen localhost:9175 --datadir /var/evql/standalone
+    $ mkdir -p /var/evql/standalone
+    $ evqld --cachedir /tmp --config_backend standalone --client_auth_backend trust --listen localhost:9175 --datadir /var/evql/standalone
 
 #### start the eventql sql console
 
