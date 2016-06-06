@@ -256,6 +256,22 @@ thread::EventLoop ev;
 //  }
 //}
 
+String getCommandName(Vector<String> cmd_argv) {
+  String cmd_name;
+  if (cmd_argv.size() == 0) {
+    return cmd_name;
+  }
+
+  cmd_name = cmd_argv[0];
+  if (StringUtil::beginsWith(cmd_name, "--")) {
+    cmd_name.erase(0, 2);
+  } if (StringUtil::beginsWith(cmd_name, "-")) {
+    cmd_name.erase(cmd_name.begin());
+  }
+
+  return cmd_name;
+}
+
 int main(int argc, const char** argv) {
   ::cli::FlagParser flags;
   flags.defineFlag(
@@ -304,9 +320,9 @@ int main(int argc, const char** argv) {
   commands.emplace_back(new eventql::cli::ClusterStatus(process_config));
   commands.emplace_back(new eventql::cli::NamespaceCreate(process_config));
 
-  String cmd_name;
   Vector<String> cmd_argv = flags.getArgv();
-  if (cmd_argv.size() == 0) {
+  String cmd_name = getCommandName(cmd_argv);
+  if (cmd_name.empty()) {
     //if (default_cmd_.empty()) {
     //  RAISE(kUsageError, "no command provided");
     //}
@@ -315,15 +331,30 @@ int main(int argc, const char** argv) {
     stderr_os->write("UsageError: no command provided\n");
     return 1;
 
-  } else {
-    cmd_name = cmd_argv[0];
-    if (StringUtil::beginsWith(cmd_name, "--")) {
-      cmd_name.erase(0, 2);
-    } else {
-      cmd_name.erase(cmd_name.begin());
+  }
+
+  cmd_argv.erase(cmd_argv.begin());
+
+  if (cmd_name == "help") {
+    cmd_name = getCommandName(cmd_argv);
+    if (cmd_name.empty()) {
+      stdout_os->write(
+        "Usage: $ evqlctl [--help] [-C <path>] [-c name=value] \n"
+        "<command> "
+      );
+      return 0;
     }
 
-    cmd_argv.erase(cmd_argv.begin());
+    for (auto c : commands) {
+      if (c->getName() == cmd_name) {
+        //c->printHelp(stdout_os.get());
+        return 0;
+      }
+    }
+
+    stderr_os->write(
+        StringUtil::format("No manual entry for evqlctl $0", cmd_name));
+    return 1;
   }
 
   for (auto c : commands) {
@@ -340,6 +371,7 @@ int main(int argc, const char** argv) {
   stderr_os->write(StringUtil::format(
       "UsageError: unknown command '$0'",
       cmd_name));
+
   return 1;
   //erster argv ist commando
 
