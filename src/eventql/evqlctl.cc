@@ -130,16 +130,16 @@ int main(int argc, const char** argv) {
     cmd_name = getCommandName(cmd_argv);
     if (cmd_name.empty()) {
       stdout_os->write(
-        "Usage: evqlctl [--help] [-C <path>] [-c name=value] \n"
-        "\t\t<command> [<args>]\n\n"
+        "Usage: evqlctl [OPTIONS] <command> [<args>]\n\n"
+        "   -?, --help                Display this help text and exit\n"
+        "   -C <path>                 Set the path to the config file\n"
+        "   -c name=value             Overwrite a config file value\n\n"
         "evqctl commands:\n"
       );
 
       for (const auto c : commands) {
-        stdout_os->write(StringUtil::format(
-            "   $0 $1\n",
-            c->getName(),
-            c->getDescription()));
+        stdout_os->printf("   %-26.26s", c->getName().c_str());
+        stdout_os->printf("%-86.86s\n", c->getDescription().c_str());
       }
       return 0;
     }
