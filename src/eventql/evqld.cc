@@ -68,6 +68,7 @@
 #include "eventql/config/config_directory.h"
 #include "eventql/config/config_directory_legacy.h"
 #include "eventql/config/config_directory_zookeeper.h"
+#include "eventql/config/config_directory_standalone.h"
 #include "eventql/transport/http/status_servlet.h"
 #include "eventql/server/sql/scheduler.h"
 #include "eventql/auth/client_auth.h"
@@ -395,8 +396,11 @@ int main(int argc, const char** argv) {
             flags.getString("cluster"),
             server_name,
             flags.getString("listen")));
+  } else if (flags.getString("config_backend") == "standalone") {
+    config_dir.reset(new StandaloneConfigDirectory());
   } else {
     logFatal("evqld", "invalid config backend: " + flags.getString("config_backend"));
+    return 1;
   }
 
   /* client auth */
@@ -407,6 +411,7 @@ int main(int argc, const char** argv) {
     client_auth.reset(new LegacyClientAuth(flags.getString("legacy_auth_secret")));
   } else {
     logFatal("evqld", "invalid client auth backend: " + flags.getString("client_auth_backend"));
+    return 1;
   }
 
   /* internal auth */
