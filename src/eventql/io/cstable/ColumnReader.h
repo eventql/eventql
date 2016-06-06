@@ -75,8 +75,6 @@ public:
   virtual uint64_t maxRepetitionLevel() const = 0;
   virtual uint64_t maxDefinitionLevel() const = 0;
 
-protected:
-  virtual bool eofReached() const = 0;
 };
 
 class DefaultColumnReader : public ColumnReader {
@@ -88,7 +86,6 @@ public:
       ScopedPtr<UnsignedIntPageReader> dlevel_reader);
 
   uint64_t nextRepetitionLevel() override;
-  bool eofReached() const override;
 
   ColumnType type() const override;
   ColumnEncoding encoding() const override;

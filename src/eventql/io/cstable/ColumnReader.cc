@@ -72,9 +72,5 @@ uint64_t DefaultColumnReader::nextRepetitionLevel() {
   }
 }
 
-bool DefaultColumnReader::eofReached() const {
-  RAISE(kNotImplementedError);
-}
-
 } // namespace cstable
 
