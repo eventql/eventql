@@ -41,15 +41,27 @@ Status ClusterStatus::execute(
     FileInputStream* stdin_is,
     OutputStream* stdout_os,
     OutputStream* stderr_os) {
-  ::cli::FlagParser flags;
-  flags.defineFlag(
-      "master",
-      ::cli::FlagParser::T_STRING,
-      true,
-      NULL,
-      NULL,
-      "url",
-      "<addr>");
+  auto zookeeper_addr = process_cfg_->getString("evqlctl", "zookeeper_addr");
+  if (zookeeper_addr.isEmpty()) {
+    stderr_os->write("ERROR: zookeeper address not specified\n");
+    return Status(eFlagError);
+  }
+
+  auto cdir = mkScoped(
+        new ZookeeperConfigDirectory(
+              zookeeper_addr.get(),
+              None<String>(),
+              ""));
+
+  auto server_list = cdir->listServers();
+  stdout_os->write(StringUtil::format(
+      "Cluster Status -- $0 Servers\n",
+      server_list.size()));
+
+  for (const auto s : server_list) {
+    stdout_os->printf("   %-26.26s", s.server_addr().c_str());
+    stdout_os->printf("   %-12.12s\n", s.server_status() == ServerStatus::SERVER_UP ? "UP" : "DOWN");
+  }
 
   return Status(eNotYetImplementedError, "nyi");
 }
