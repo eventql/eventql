@@ -33,10 +33,13 @@ namespace cstable {
 class CSTableArena {
 public:
 
-  
+  CSTableArena(const TableSchema& schema);
+
+  PageManager* getPageManager() const;
+
 protected:
-
-
+  TableSchema schema_;
+  PageManager page_mgr_;
 };
 
 } // namespace cstable

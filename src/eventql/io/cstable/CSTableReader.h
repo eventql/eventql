@@ -27,6 +27,7 @@
 #include <eventql/io/cstable/ColumnReader.h>
 #include <eventql/io/cstable/cstable.h>
 #include <eventql/io/cstable/page_manager.h>
+#include <eventql/io/cstable/cstable_arena.h>
 
 namespace cstable {
 
@@ -34,6 +35,9 @@ class CSTableReader : public RefCounted {
 public:
 
   static RefPtr<CSTableReader> openFile(const String& filename);
+
+  static RefPtr<CSTableReader> openArena(const CSTableArena* arena);
+
   ~CSTableReader();
 
   bool hasColumn(const String& column_name) const ;

@@ -491,3 +491,41 @@ TEST_CASE(CSTableTest, TestV2UInt64Plain, [] () {
   }
 });
 
+TEST_CASE(CSTableTest, TestV2UInt64PlainArena, [] () {
+  TableSchema schema;
+  schema.addUnsignedInteger(
+      "mycol",
+      false,
+      cstable::ColumnEncoding::UINT64_PLAIN);
+
+  CSTableArena arena(schema);
+
+  auto tbl_writer = cstable::CSTableWriter::openArena(&arena);
+  auto mycol_writer = tbl_writer->getColumnWriter("mycol");
+
+  for (size_t i = 1; i < 10000; ++i) {
+    mycol_writer->writeUnsignedInt(0, 0, 23 * i);
+    mycol_writer->writeUnsignedInt(0, 0, 42 * i);
+    mycol_writer->writeUnsignedInt(0, 0, 17 * i);
+
+    if (i % 1000 == 0) {
+      tbl_writer->commit();
+      auto tbl_reader = cstable::CSTableReader::openArena(&arena);
+      auto mycol_reader = tbl_reader->getColumnReader("mycol");
+
+      for (size_t j = 1; j < i; ++j) {
+        uint64_t rlevel;
+        uint64_t dlevel;
+        uint64_t val;
+        mycol_reader->readUnsignedInt(&rlevel, &dlevel, &val);
+        EXPECT_EQ(val, 23 * j);
+        mycol_reader->readUnsignedInt(&rlevel, &dlevel, &val);
+        EXPECT_EQ(val, 42 * j);
+        mycol_reader->readUnsignedInt(&rlevel, &dlevel, &val);
+        EXPECT_EQ(val, 17 * j);
+      }
+    }
+  }
+
+  tbl_writer->commit();
+});

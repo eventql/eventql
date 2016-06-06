@@ -28,6 +28,7 @@
 #include <eventql/io/cstable/ColumnWriter.h>
 #include <eventql/io/cstable/LockManager.h>
 #include <eventql/io/cstable/page_manager.h>
+#include <eventql/io/cstable/cstable_arena.h>
 #include <eventql/io/cstable/TableSchema.h>
 
 
@@ -116,6 +117,15 @@ public:
   static RefPtr<CSTableWriter> reopenFile(
       const String& filename,
       Option<RefPtr<LockRef>> lockref = None<RefPtr<LockRef>>());
+
+  /**
+   * Create a new cstable writer that writes to the passed arena. The arena
+   * can be concurrently read by other column readers. You must not use more
+   * than one CSTableWriter on the same arena at the same time.
+   *
+   * @param arena the arena to write to
+   */
+  static RefPtr<CSTableWriter> openArena(CSTableArena* arena);
 
   /**
    * Commit the current implicit transaction. Note that after commiting you
