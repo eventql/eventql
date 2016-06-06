@@ -22,6 +22,7 @@
  * code of your own applications
  */
 #include <eventql/io/cstable/columns/column_writer_uint.h>
+#include <eventql/io/cstable/columns/page_writer_leb128.h>
 
 #include "eventql/eventql.h"
 
@@ -40,6 +41,10 @@ UnsignedIntColumnWriter::UnsignedIntColumnWriter(
 
     case ColumnEncoding::UINT64_PLAIN:
       data_writer_ = mkScoped(new UInt64PageWriter(key, page_mgr));
+      break;
+
+    case ColumnEncoding::UINT64_LEB128:
+      data_writer_ = mkScoped(new LEB128PageWriter(key, page_mgr));
       break;
 
     default:

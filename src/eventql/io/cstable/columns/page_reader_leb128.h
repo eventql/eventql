@@ -21,52 +21,37 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include <eventql/io/cstable/columns/page_writer_lenencstring.h>
-#include <eventql/util/inspect.h>
+#pragma once
+#include <eventql/util/stdtypes.h>
+#include <eventql/io/cstable/cstable.h>
+#include <eventql/io/cstable/page_manager.h>
+#include <eventql/io/cstable/io/PageReader.h>
 
 namespace cstable {
 
-LenencStringPageWriter::LenencStringPageWriter(
-    PageIndexKey key,
-    PageManager* page_mgr) :
-    key_(key),
-    page_mgr_(page_mgr),
-    has_page_(false),
-    page_pos_(0) {}
+class LEB128PageReader : public UnsignedIntPageReader {
+public:
 
-void LenencStringPageWriter::appendValue(const char* data, size_t len) {
-  unsigned char buf[10];
-  size_t bytes = 0;
-  size_t tmp = len;
-  do {
-    buf[bytes] = tmp & 0x7fU;
-    if (tmp >>= 7) buf[bytes] |= 0x80U;
-    ++bytes;
-  } while (tmp);
+  LEB128PageReader(PageIndexKey key, const PageManager* page_mgr);
 
-  appendBytes((const char*) &buf, bytes);
-  appendBytes(data, len);
-}
+  uint64_t readUnsignedInt() override;
+  uint64_t peek() override;
+  bool eofReached() override;
 
-void LenencStringPageWriter::appendBytes(const char* data, size_t len) {
-  while (len > 0) {
-    if (!has_page_ || page_pos_ >= page_.size) {
-      if (has_page_) {
-        page_mgr_->flushPage(page_);
-      }
+protected:
 
-      page_ = page_mgr_->allocPage(key_, kPageSize);
-      page_pos_ = 0;
-      has_page_ = true;
-    }
+  void fetchNext();
 
-    auto write_len = std::min((uint64_t) len, (uint64_t) page_.size - page_pos_);
-    page_mgr_->writeToPage(page_, page_pos_, data, write_len);
-    page_pos_ += write_len;
-    data += write_len;
-    len -= write_len;
-  }
-}
+  const PageManager* page_mgr_;
+  Vector<PageRef> pages_;
+  uint64_t page_pos_;
+  uint64_t page_len_;
+  uint64_t page_idx_;
+  Buffer page_data_;
+  bool eof_;
+  uint64_t cur_val_;
+};
 
 } // namespace cstable
+
 

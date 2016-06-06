@@ -316,10 +316,14 @@ evql_cstable_a_SOURCES = \
     eventql/io/cstable/columns/column_writer_float.h \
     eventql/io/cstable/columns/page_reader_uint64.cc \
     eventql/io/cstable/columns/page_reader_uint64.h \
+    eventql/io/cstable/columns/page_reader_leb128.cc \
+    eventql/io/cstable/columns/page_reader_leb128.h \
     eventql/io/cstable/columns/page_reader_lenencstring.cc \
     eventql/io/cstable/columns/page_reader_lenencstring.h \
     eventql/io/cstable/columns/page_writer_uint64.cc \
     eventql/io/cstable/columns/page_writer_uint64.h \
+    eventql/io/cstable/columns/page_writer_leb128.cc \
+    eventql/io/cstable/columns/page_writer_leb128.h \
     eventql/io/cstable/columns/page_writer_bitpacked.cc \
     eventql/io/cstable/columns/page_writer_bitpacked.h \
     eventql/io/cstable/columns/page_writer_lenencstring.cc \

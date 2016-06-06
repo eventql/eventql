@@ -23,6 +23,7 @@
  */
 #include <eventql/io/cstable/columns/column_reader_uint.h>
 #include <eventql/io/cstable/columns/page_reader_uint64.h>
+#include <eventql/io/cstable/columns/page_readeR_leb128.h>
 #include <eventql/io/cstable/ColumnWriter.h>
 
 #include "eventql/eventql.h"
@@ -47,6 +48,10 @@ UnsignedIntColumnReader::UnsignedIntColumnReader(
 
     case ColumnEncoding::UINT64_PLAIN:
       data_reader_ = mkScoped(new UInt64PageReader(key, page_mgr));
+      break;
+
+    case ColumnEncoding::UINT64_LEB128:
+      data_reader_ = mkScoped(new LEB128PageReader(key, page_mgr));
       break;
 
     default:

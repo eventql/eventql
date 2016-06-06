@@ -1,3 +1,4 @@
+
 /**
  * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
  * Authors:
@@ -21,12 +22,12 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include <eventql/io/cstable/columns/page_writer_lenencstring.h>
+#include <eventql/io/cstable/columns/page_writer_leb128.h>
 #include <eventql/util/inspect.h>
 
 namespace cstable {
 
-LenencStringPageWriter::LenencStringPageWriter(
+LEB128PageWriter::LEB128PageWriter(
     PageIndexKey key,
     PageManager* page_mgr) :
     key_(key),
@@ -34,22 +35,17 @@ LenencStringPageWriter::LenencStringPageWriter(
     has_page_(false),
     page_pos_(0) {}
 
-void LenencStringPageWriter::appendValue(const char* data, size_t len) {
+void LEB128PageWriter::appendValue(uint64_t value) {
   unsigned char buf[10];
   size_t bytes = 0;
-  size_t tmp = len;
   do {
-    buf[bytes] = tmp & 0x7fU;
-    if (tmp >>= 7) buf[bytes] |= 0x80U;
+    buf[bytes] = value & 0x7fU;
+    if (value >>= 7) buf[bytes] |= 0x80U;
     ++bytes;
-  } while (tmp);
+  } while (value);
 
-  appendBytes((const char*) &buf, bytes);
-  appendBytes(data, len);
-}
-
-void LenencStringPageWriter::appendBytes(const char* data, size_t len) {
-  while (len > 0) {
+  const unsigned char* bufptr = buf;
+  while (bytes > 0) {
     if (!has_page_ || page_pos_ >= page_.size) {
       if (has_page_) {
         page_mgr_->flushPage(page_);
@@ -60,13 +56,14 @@ void LenencStringPageWriter::appendBytes(const char* data, size_t len) {
       has_page_ = true;
     }
 
-    auto write_len = std::min((uint64_t) len, (uint64_t) page_.size - page_pos_);
-    page_mgr_->writeToPage(page_, page_pos_, data, write_len);
+    auto write_len = std::min((uint64_t) bytes, (uint64_t) page_.size - page_pos_);
+    page_mgr_->writeToPage(page_, page_pos_, bufptr, write_len);
     page_pos_ += write_len;
-    data += write_len;
-    len -= write_len;
+    bufptr += write_len;
+    bytes -= write_len;
   }
 }
 
 } // namespace cstable
+
 
