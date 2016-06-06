@@ -838,8 +838,8 @@ evql_core_a_SOURCES = \
     eventql/db/PartitionSnapshot.h \
     eventql/db/PartitionWriter.cc \
     eventql/db/PartitionWriter.h \
-    eventql/db/RecordArena.cc \
-    eventql/db/RecordArena.h \
+    eventql/db/partition_arena.cc \
+    eventql/db/partition_arena.h \
     eventql/db/RecordSet.cc \
     eventql/db/RecordSet.h \
     eventql/db/ReplicationScheme.cc \

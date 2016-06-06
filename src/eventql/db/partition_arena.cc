@@ -21,33 +21,51 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#pragma once
-#include <eventql/util/stdtypes.h>
-#include <eventql/util/autoref.h>
-#include <eventql/util/protobuf/MessageObject.h>
-#include <eventql/db/RecordRef.h>
+#include <eventql/db/partition_arena.h>
 
 #include "eventql/eventql.h"
 
 namespace eventql {
 
-class RecordArena : public RefCounted {
-public:
+PartitionArena::PartitionArena() {}
 
-  RecordArena();
+bool PartitionArena::insertRecord(const RecordRef& record) {
+  ScopedLock<std::mutex> lk(mutex_);
 
-  bool insertRecord(const RecordRef& record);
+  auto old = records_.find(record.record_id);
+  if (old == records_.end()) {
+    records_.emplace(record.record_id, record);
+    return true;
+  } else if(old->second.record_version < record.record_version) {
+    old->second = record;
+    return true;
+  } else {
+    return false;
+  }
+}
 
-  void fetchRecords(Function<void (const RecordRef& record)> fn);
+void PartitionArena::fetchRecords(Function<void (const RecordRef& record)> fn) {
+  ScopedLock<std::mutex> lk(mutex_); // FIXME
 
-  uint64_t fetchRecordVersion(const SHA1Hash& record_id);
+  for (const auto& r : records_) {
+    fn(r.second);
+  }
+}
 
-  size_t size() const;
+uint64_t PartitionArena::fetchRecordVersion(const SHA1Hash& record_id) {
+  ScopedLock<std::mutex> lk(mutex_);
+  auto rec = records_.find(record_id);
+  if (rec == records_.end()) {
+    return 0;
+  } else {
+    return rec->second.record_version;
+  }
+}
 
-protected:
-  HashMap<SHA1Hash, RecordRef> records_;
-  mutable std::mutex mutex_;
-};
+size_t PartitionArena::size() const {
+  ScopedLock<std::mutex> lk(mutex_);
+  return records_.size();
+}
 
 } // namespace eventql
 

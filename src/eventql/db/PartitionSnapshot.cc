@@ -43,7 +43,7 @@ PartitionSnapshot::PartitionSnapshot(
     base_path(_abs_path),
     rel_path(_rel_path),
     nrecs(_nrecs),
-    head_arena(new RecordArena()) {}
+    head_arena(new PartitionArena()) {}
 
 SHA1Hash PartitionSnapshot::uuid() const {
   return SHA1Hash(state.uuid().data(), state.uuid().size());

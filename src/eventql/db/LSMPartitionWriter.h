@@ -26,7 +26,7 @@
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/autoref.h>
 #include <eventql/db/PartitionWriter.h>
-#include <eventql/db/RecordArena.h>
+#include <eventql/db/partition_arena.h>
 #include <eventql/util/util/PersistentHashSet.h>
 #include <eventql/db/CompactionStrategy.h>
 #include <eventql/db/metadata_transaction.h>
@@ -66,7 +66,7 @@ public:
 protected:
 
   void writeArenaToDisk(
-      RefPtr<RecordArena> arena,
+      RefPtr<PartitionArena> arena,
       uint64_t sequence,
       const String& filename);
 

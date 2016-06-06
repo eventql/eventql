@@ -158,7 +158,7 @@ bool LSMPartitionWriter::needsUrgentCompaction() {
 
 bool LSMPartitionWriter::commit() {
   ScopedLock<std::mutex> commit_lk(commit_mutex_);
-  RefPtr<RecordArena> arena;
+  RefPtr<PartitionArena> arena;
 
   // flip arenas if records pending
   {
@@ -167,7 +167,7 @@ bool LSMPartitionWriter::commit() {
     if (snap->compacting_arena.get() == nullptr &&
         snap->head_arena->size() > 0) {
       snap->compacting_arena = snap->head_arena;
-      snap->head_arena = mkRef(new RecordArena());
+      snap->head_arena = mkRef(new PartitionArena());
       head_->setSnapshot(snap);
     }
     arena = snap->compacting_arena;
@@ -309,7 +309,7 @@ bool LSMPartitionWriter::compact() {
 }
 
 void LSMPartitionWriter::writeArenaToDisk(
-      RefPtr<RecordArena> arena,
+      RefPtr<PartitionArena> arena,
       uint64_t sequence,
       const String& filename) {
   auto schema = partition_->getTable()->schema();

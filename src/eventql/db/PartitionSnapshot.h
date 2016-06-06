@@ -26,7 +26,7 @@
 #include <eventql/util/autoref.h>
 #include <eventql/util/SHA1.h>
 #include <eventql/db/PartitionState.pb.h>
-#include <eventql/db/RecordArena.h>
+#include <eventql/db/partition_arena.h>
 
 #include "eventql/eventql.h"
 
@@ -51,8 +51,8 @@ struct PartitionSnapshot : public RefCounted {
   const String base_path;
   const String rel_path;
   uint64_t nrecs;
-  RefPtr<RecordArena> head_arena;
-  RefPtr<RecordArena> compacting_arena;
+  RefPtr<PartitionArena> head_arena;
+  RefPtr<PartitionArena> compacting_arena;
 };
 
 class PartitionSnapshotRef {
