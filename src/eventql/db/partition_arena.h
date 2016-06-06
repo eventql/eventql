@@ -55,6 +55,8 @@ public:
       const String& filename,
       uint64_t sequence);
 
+  cstable::CSTableFile* getCSTableFile() const;
+
 protected:
   struct RecordVersion {
     uint64_t version;

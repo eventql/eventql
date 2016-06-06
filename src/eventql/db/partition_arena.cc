@@ -95,6 +95,8 @@ bool PartitionArena::insertRecord(
   vmap_.emplace(record_id, record_version);
   skiplist_.push_back(false);
   ++num_records_;
+
+  cstable_writer_->commit();
   return true;
 }
 
@@ -107,7 +109,6 @@ uint64_t PartitionArena::fetchRecordVersion(const SHA1Hash& record_id) {
     return rec->second.version;
   }
 }
-
 
 size_t PartitionArena::size() const {
   ScopedLock<std::mutex> lk(mutex_);
@@ -130,6 +131,10 @@ Status PartitionArena::writeToDisk(
 
   LSMTableIndex::write(vmap_, filename + ".idx");
   return Status::success();
+}
+
+cstable::CSTableFile* PartitionArena::getCSTableFile() const {
+  return cstable_file_.get();
 }
 
 } // namespace eventql
