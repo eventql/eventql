@@ -132,8 +132,8 @@ int main(int argc, const char** argv) {
       stdout_os->write(
         "Usage: evqlctl [OPTIONS] <command> [<args>]\n\n"
         "   -?, --help                Display this help text and exit\n"
-        "   -C <path>                 Set the path to the config file\n"
-        "   -c name=value             Overwrite a config file value\n\n"
+        "   -c <path>                 Set the path to the config file\n"
+        "   -C name=value             Overwrite a config file value\n\n"
         "evqctl commands:\n"
       );
 
