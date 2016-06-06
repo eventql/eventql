@@ -270,20 +270,20 @@ Status MetadataOperation::performFinalizeSplit(
 static bool hasServer(
     const MetadataFile::PartitionMapEntry& e,
     const String& server_id) {
-  for (const auto& e : e.servers) {
-    if (e.server_id == server_id) {
+  for (const auto& e_ : e.servers) {
+    if (e_.server_id == server_id) {
       return true;
     }
   }
 
-  for (const auto& e : e.servers_joining) {
-    if (e.server_id == server_id) {
+  for (const auto& e_ : e.servers_joining) {
+    if (e_.server_id == server_id) {
       return true;
     }
   }
 
-  for (const auto& e : e.servers_leaving) {
-    if (e.server_id == server_id) {
+  for (const auto& e_ : e.servers_leaving) {
+    if (e_.server_id == server_id) {
       return true;
     }
   }
