@@ -32,12 +32,12 @@ namespace cstable {
 class UInt64PageReader : public UnsignedIntPageReader {
 public:
 
-  UInt64PageReader(PageIndexKey key, PageManager* page_mgr);
+  UInt64PageReader(PageIndexKey key, const PageManager* page_mgr);
 
   uint64_t readUnsignedInt() override;
 
 protected:
-  PageManager* page_mgr_;
+  const PageManager* page_mgr_;
   Vector<PageRef> pages_;
   uint64_t page_pos_;
   uint64_t page_len_;

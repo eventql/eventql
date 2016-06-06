@@ -75,7 +75,7 @@ static RefPtr<v1::ColumnReader> openColumnV1(
 
 static RefPtr<ColumnReader> openColumnV2(
     const ColumnConfig& c,
-    PageManager* page_mgr) {
+    const PageManager* page_mgr) {
   ScopedPtr<UnsignedIntPageReader> rlevel_reader;
   ScopedPtr<UnsignedIntPageReader> dlevel_reader;
 
@@ -141,7 +141,8 @@ RefPtr<CSTableReader> CSTableReader::openFile(const String& filename) {
 
       return new CSTableReader(
           version,
-          ScopedPtr<PageManager>(nullptr),
+          nullptr,
+          true,
           header.columns,
           column_readers,
           header.num_rows,
@@ -164,7 +165,8 @@ RefPtr<CSTableReader> CSTableReader::openFile(const String& filename) {
 
       return new CSTableReader(
           version,
-          std::move(page_mgr),
+          page_mgr.release(),
+          true,
           header.columns,
           column_readers,
           metablock.num_rows,
@@ -173,15 +175,38 @@ RefPtr<CSTableReader> CSTableReader::openFile(const String& filename) {
   }
 }
 
+RefPtr<CSTableReader> CSTableReader::openFile(const CSTableFile* file) {
+  uint64_t transaction_id;
+  uint64_t num_rows;
+  file->getTransaction(&transaction_id, &num_rows);
+
+  auto columns = file->getTableSchema().flatColumns();
+  Vector<RefPtr<ColumnReader>> column_readers;
+  for (const auto& col : columns) {
+    column_readers.emplace_back(openColumnV2(col, file->getPageManager()));
+  }
+
+  return new CSTableReader(
+      file->getBinaryFormatVersion(),
+      file->getPageManager(),
+      false,
+      columns,
+      column_readers,
+      num_rows,
+      -1);
+}
+
 CSTableReader::CSTableReader(
     BinaryFormatVersion version,
-    ScopedPtr<PageManager> page_mgr,
+    const PageManager* page_mgr,
+    bool page_mgr_owned,
     Vector<ColumnConfig> columns,
     Vector<RefPtr<ColumnReader>> column_readers,
     uint64_t num_rows,
     int fd) :
     version_(version),
-    page_mgr_(std::move(page_mgr)),
+    page_mgr_(page_mgr),
+    page_mgr_owned_(page_mgr_owned),
     columns_(columns),
     num_rows_(num_rows),
     fd_(fd) {
@@ -199,6 +224,10 @@ CSTableReader::CSTableReader(
 CSTableReader::~CSTableReader() {
   if (fd_ > 0) {
     close(fd_);
+  }
+
+  if (page_mgr_ && page_mgr_owned_) {
+    delete page_mgr_;
   }
 }
 

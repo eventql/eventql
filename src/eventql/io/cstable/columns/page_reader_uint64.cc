@@ -27,7 +27,7 @@ namespace cstable {
 
 UInt64PageReader::UInt64PageReader(
     PageIndexKey key,
-    PageManager* page_mgr) :
+    const PageManager* page_mgr) :
     page_mgr_(page_mgr),
     pages_(page_mgr->getPages(key)),
     page_pos_(0),

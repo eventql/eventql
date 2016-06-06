@@ -54,14 +54,16 @@ protected:
 
   CSTableReader(
       BinaryFormatVersion version,
-      ScopedPtr<PageManager> page_mgr,
+      const PageManager* page_mgr,
+      bool page_mgr_owned,
       Vector<ColumnConfig> columns,
       Vector<RefPtr<ColumnReader>> column_readers,
       uint64_t num_rows,
       int fd);
 
   BinaryFormatVersion version_;
-  ScopedPtr<PageManager> page_mgr_;
+  const PageManager* page_mgr_;
+  bool page_mgr_owned_;
   Vector<ColumnConfig> columns_;
   HashMap<uint32_t, RefPtr<ColumnReader>> column_readers_by_id_;
   HashMap<String, RefPtr<ColumnReader>> column_readers_by_name_;
