@@ -51,6 +51,7 @@
 #include "eventql/db/server_allocator.h"
 #include <eventql/cli/commands/cluster_add_server.h>
 #include <eventql/cli/commands/cluster_status.h>
+#include <eventql/cli/commands/cluster_remove_server.h>
 
 using namespace eventql;
 
@@ -296,6 +297,7 @@ int main(int argc, const char** argv) {
 
   List<eventql::cli::CLICommand*> commands;
   commands.emplace_back(new eventql::cli::ClusterAddServer(process_config));
+  commands.emplace_back(new eventql::cli::ClusterRemoveServer(process_config));
   commands.emplace_back(new eventql::cli::ClusterStatus(process_config));
 
   String cmd_name;
@@ -327,6 +329,7 @@ int main(int argc, const char** argv) {
           stdin_is.get(),
           stdout_os.get(),
           stderr_os.get());
+      iputs("is success $0", rc.isSuccess());
       return rc.isSuccess() ? 0 : 1;
     }
   }
