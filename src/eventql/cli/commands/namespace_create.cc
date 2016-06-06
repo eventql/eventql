@@ -30,7 +30,7 @@ namespace eventql {
 namespace cli {
 
 const String NamespaceCreate::kName_ = "namespace-create";
-const String NamespaceCreate::kDescription_ = "cluster add server"; //FIXME
+const String NamespaceCreate::kDescription_ = "Create a new namespace.";
 
 NamespaceCreate::NamespaceCreate(
     RefPtr<ProcessConfig> process_cfg) :
@@ -112,9 +112,7 @@ void NamespaceCreate::printHelp(OutputStream* stdout_os) const {
 
   stdout_os->write(
       "  --cluster_name <node name>       The name of the cluster\n"
-      "  --namespace                      The name of the namespace to create \n\n\n"
-      "DESCRIPTION \n"
-      "Creates a new namespace" //FIXME more text
+      "  --namespace <namespace name>     The name of the namespace to create \n"
   );
 
 }

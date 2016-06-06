@@ -30,7 +30,7 @@ namespace eventql {
 namespace cli {
 
 const String ClusterCreate::kName_ = "cluster-create";
-const String ClusterCreate::kDescription_ = "cluster add server"; //FIXME
+const String ClusterCreate::kDescription_ = "Create a new cluster.";
 
 ClusterCreate::ClusterCreate(
     RefPtr<ProcessConfig> process_cfg) :
@@ -97,6 +97,13 @@ const String& ClusterCreate::getDescription() const {
 }
 
 void ClusterCreate::printHelp(OutputStream* stdout_os) const {
+  stdout_os->write(StringUtil::format(
+      "\nevqlctl-$0 - $1\n\n", kName_, kDescription_));
+
+  stdout_os->write(
+      "Usage: evqlctl [OPTIONS]\n"
+      "  --cluster_name <node name>       The name of the cluster to create.\n"
+  );
 }
 
 } // namespace cli

@@ -35,7 +35,7 @@ namespace eventql {
 namespace cli {
 
 const String TableSplit::kName_ = "table-split";
-const String TableSplit::kDescription_ = "cluster add server"; //FIXME
+const String TableSplit::kDescription_ = "Split partition";
 
 TableSplit::TableSplit(
     RefPtr<ProcessConfig> process_cfg) :
@@ -220,6 +220,16 @@ const String& TableSplit::getDescription() const {
 }
 
 void TableSplit::printHelp(OutputStream* stdout_os) const {
+  stdout_os->write(StringUtil::format(
+      "\nevqlctl-$0 - $1\n\n", kName_, kDescription_));
+
+  stdout_os->write(
+      "Usage: evqlctl table-split [OPTIONS]\n"
+      "  --namespace              The name of the namespace.\n"
+      "  --cluster_name           The name of the cluster.\n"
+      "  --table_name             The name of the table to split.\n"
+      "  --partition_id           The id of the partition to split.\n"
+      "  --split_point            \n");
 }
 
 } // namespace cli

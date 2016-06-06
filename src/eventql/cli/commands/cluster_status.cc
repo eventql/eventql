@@ -30,7 +30,7 @@ namespace eventql {
 namespace cli {
 
 const String ClusterStatus::kName_ = "cluster-status";
-const String ClusterStatus::kDescription_ = "cluster add server"; //FIXME
+const String ClusterStatus::kDescription_ = "Display the current cluster status.";
 
 ClusterStatus::ClusterStatus(
     RefPtr<ProcessConfig> process_cfg) :
@@ -63,6 +63,13 @@ const String& ClusterStatus::getDescription() const {
 }
 
 void ClusterStatus::printHelp(OutputStream* stdout_os) const {
+  stdout_os->write(StringUtil::format(
+      "\nevqlctl-$0 - $1\n\n", kName_, kDescription_));
+
+  stdout_os->write(
+      "Usage: evqlctl [OPTIONS]\n"
+      "  --master <addr>       The url of the master.\n"
+  );
 
 }
 

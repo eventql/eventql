@@ -31,7 +31,8 @@ namespace eventql {
 namespace cli {
 
 const String ClusterAddServer::kName_ = "cluster-add-server";
-const String ClusterAddServer::kDescription_ = "cluster add server"; //FIXME
+const String ClusterAddServer::kDescription_ =
+    "Add a server to an existing cluster.";
 
 ClusterAddServer::ClusterAddServer(
     RefPtr<ProcessConfig> process_cfg) :
@@ -111,6 +112,13 @@ const String& ClusterAddServer::getDescription() const {
 }
 
 void ClusterAddServer::printHelp(OutputStream* stdout_os) const {
+  stdout_os->write(StringUtil::format(
+      "\nevqlctl-$0 - $1\n\n", kName_, kDescription_));
+
+  stdout_os->write(
+      "Usage: evqlctl [OPTIONS]\n"
+      "  --cluster_name <node name>       The name of the cluster to add the server to.\n"
+      "  --server_name <server name>      The name of the server to add.\n");
 }
 
 } // namespace cli

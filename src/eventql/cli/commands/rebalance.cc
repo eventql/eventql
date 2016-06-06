@@ -31,7 +31,7 @@ namespace eventql {
 namespace cli {
 
 const String Rebalance::kName_ = "rebalance";
-const String Rebalance::kDescription_ = "cluster add server"; //FIXME
+const String Rebalance::kDescription_ = "Rebalance.";
 
 Rebalance::Rebalance(
     RefPtr<ProcessConfig> process_cfg) :
@@ -107,6 +107,13 @@ const String& Rebalance::getDescription() const {
 }
 
 void Rebalance::printHelp(OutputStream* stdout_os) const {
+  stdout_os->write(StringUtil::format(
+      "\nevqlctl-$0 - $1\n\n", kName_, kDescription_));
+
+  stdout_os->write(
+      "Usage: evqlctl [OPTIONS]\n"
+      "  --cluster_name <node name>       The name of the cluster.\n"
+  );
 }
 
 } // namespace cli
