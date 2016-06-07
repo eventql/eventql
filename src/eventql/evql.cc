@@ -285,7 +285,7 @@ int main(int argc, const char** argv) {
       "<lang>");
 
   flags.defineFlag(
-      "e§xec",
+      "exec",
       cli::FlagParser::T_STRING,
       false,
       "e",

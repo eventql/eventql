@@ -63,38 +63,60 @@ int main(int argc, const char** argv) {
       "<switch>");
 
   flags.defineFlag(
-      "c",
+      "config",
       ::cli::FlagParser::T_STRING,
       false,
-      NULL,
+      "c",
       NULL,
       "path to config file",
       "<config_file>");
+
+  flags.defineFlag(
+      "config_set",
+      ::cli::FlagParser::T_STRING,
+      false,
+      "C",
+      NULL,
+      "set config option",
+      "<key>=<val>");
 
   flags.parseArgv(argc, argv);
   auto stdin_is = FileInputStream::getStdin();
   auto stdout_os = OutputStream::getStdout();
   auto stderr_os = OutputStream::getStderr();
-  ProcessConfigBuilder config_builder;
+  Vector<String> cmd_argv = flags.getArgv();
 
   Application::init();
   Application::logToStderr("evqlctl");
 
-  if (flags.isSet("c")) {
-    auto rc = config_builder.loadFile(flags.getString("c"));
+  /* load config */
+  ProcessConfigBuilder config_builder;
+  if (flags.isSet("config")) {
+    auto rc = config_builder.loadFile(flags.getString("config"));
     if (!rc.isSuccess()) {
-      stderr_os->write(StringUtil::format("ERROR: $0", rc.message()));
+      stderr_os->write(StringUtil::format("ERROR: $0\n", rc.message()));
       return 1;
     }
   } else {
-    auto rc = config_builder.loadDefaultConfigFile();
-    if (!rc.isSuccess()) {
-      //stderr_os->write("WARNING: could not load config file");
+    config_builder.loadDefaultConfigFile();
+  }
+
+  for (const auto& opt : flags.getStrings("config_set")) {
+    auto opt_key_end = opt.find("=");
+    if (opt_key_end == String::npos) {
+      stderr_os->write(
+          StringUtil::format("ERROR: invalid config option: $0\n", opt));
+      return 1;
     }
+
+    config_builder.setProperty(
+        opt.substr(0, opt_key_end),
+        opt.substr(opt_key_end + 1));
   }
 
   auto process_config = config_builder.getConfig();
 
+  /* init commands */
   List<eventql::cli::CLICommand*> commands;
   commands.emplace_back(new eventql::cli::ClusterAddServer(process_config));
   commands.emplace_back(new eventql::cli::ClusterCreate(process_config));
@@ -103,8 +125,6 @@ int main(int argc, const char** argv) {
   commands.emplace_back(new eventql::cli::NamespaceCreate(process_config));
   commands.emplace_back(new eventql::cli::Rebalance(process_config));
   commands.emplace_back(new eventql::cli::TableSplit(process_config));
-
-  Vector<String> cmd_argv = flags.getArgv();
 
   /* print help/version and exit */
   bool print_help = flags.isSet("help");
@@ -133,7 +153,7 @@ int main(int argc, const char** argv) {
     if (help_topic.empty()) {
       stdout_os->write(
         "Usage: evqlctl [OPTIONS] <command> [<args>]\n\n"
-        "   -c <file>                 Load config from file\n"
+        "   -c, --config <file>       Load config from file\n"
         "   -C name=value             Define a config value on the command line\n"
         "   -?, --help <topic>        Display a command's help text and exit\n"
         "   -v, --version             Display the version of this binary and exit\n\n"
