@@ -65,50 +65,14 @@ String CLIConfig::getUser() const {
 bool CLIConfig::getBatchMode() const {
   return cfg_->getBool("evql", "batch");
 }
-//Status CLIConfig::loadDefaultConfigFile() {
-//  char* homedir = getenv("HOME");
-//  if (!homedir) {
-//    return Status::success();
-//  }
-//
-//  String confg_file_path = FileUtil::joinPaths(homedir, ".evqlrc");
-//  if (!FileUtil::exists(confg_file_path)) {
-//    return Status::success();
-//  }
-//
-//  return cfg_builder_.loadFile(confg_file_path);
-//}
-//
+
 Option<String> CLIConfig::getDatabase() const {
   return cfg_->getString("evql", "database");
 }
 
-
 Option<String> CLIConfig::getPassword() const {
   return cfg_->getString("evql", "password");
 }
-
-//Status CLIConfig::setPort(const int port /* = 80 */) {
-//  if (port < 0 || port > 65535) {
-//    return Status(
-//        eFlagError,
-//        StringUtil::format("'port' value '$0' is not valid", port));
-//  }
-//
-//  server_port_ = port;
-//  return Status::success();
-//}
-
-//Status CLIConfig::setPort(const String& port) {
-//  if (!StringUtil::isNumber(port)) {
-//    return Status(
-//        eFlagError,
-//        StringUtil::format("'port' value '$0' is not a valid integer", port));
-//  }
-//
-//  return setPort(stoi(port));
-//}
-
 
 Option<String> CLIConfig::getAuthToken() const {
   return cfg_->getString("evql", "auth_token");
@@ -118,40 +82,33 @@ Option<String> CLIConfig::getFile() const {
   return cfg_->getString("evql", "file");
 }
 
-//Status CLIConfig::setLanguage(String language) {
-//  StringUtil::toUpper(&language);
-//
-//  if (language == "SQL") {
-//    language_ = Some(CLIConfig::kLanguage::SQL);
-//    return Status::success();
-//
-//  } else if (language == "JS" || language == "JAVASCRIPT") {
-//    language_ = Some(CLIConfig::kLanguage::JAVASCRIPT);
-//    return Status::success();
-//
-//  } else {
-//    return Status(
-//        eFlagError,
-//        StringUtil::format("invalid language '$0'", language));
-//  }
-//}
-//
 Option<CLIConfig::kLanguage> CLIConfig::getLanguage() {
-  //if (!language_.isEmpty()) {
-  //  return language_;
-  //}
+  auto l = cfg_->getString("lang");
+  if (!l.isEmpty()) {
+    auto language = l.get();
+    StringUtil::toUpper(&language);
 
-  //if (!file_.empty()) {
-  //  if (StringUtil::endsWith(file_, ".sql")) {
-  //    return Some(CLIConfig::kLanguage::SQL);
-  //  }
-  //  if (StringUtil::endsWith(file_, ".js")) {
-  //    return Some(CLIConfig::kLanguage::JAVASCRIPT);
-  //  }
-  //}
+    if (language == "SQL") {
+      return Some(CLIConfig::kLanguage::SQL);
+    } else if (language == "JS" || language == "JAVASCRIPT") {
+      return Some(CLIConfig::kLanguage::JAVASCRIPT);
+    }
+
+  } else {
+
+    auto file = cfg_->getString("file");
+    if (!file.isEmpty()) {
+      if (StringUtil::endsWith(file.get(), ".sql")) {
+        return Some(CLIConfig::kLanguage::SQL);
+      } else if (StringUtil::endsWith(file.get(), ".js")) {
+        return Some(CLIConfig::kLanguage::JAVASCRIPT);
+      }
+    }
+  }
 
   return None<CLIConfig::kLanguage>();
 }
+
 Option<String> CLIConfig::getExec() const {
   return cfg_->getString("evql", "exec");
 }
