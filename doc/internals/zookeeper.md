@@ -15,14 +15,6 @@ We store three pieces of data under the following paths:
 - no key value is ever larger than ~1MB
 
 
-Example Tree:
-
-     /eventql/<cluster>/namespaces/<namespace>/tables/<table>/<partition>
-
-each partition has one such key and represents ~2-5GB of usable data. so in a 
-very large cluster we expect up to 10 million (20-50PB) partitions. the values
-stored in each partition key are only a few bytes in practice.
-
 
 ### things zookeeper does that we don't need:
 
