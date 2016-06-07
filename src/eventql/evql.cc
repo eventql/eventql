@@ -352,7 +352,7 @@ int main(int argc, const char** argv) {
       "batch",
       cli::FlagParser::T_SWITCH,
       false,
-      NULL,
+      "B",
       NULL,
       "batch",
       "<batch>");
