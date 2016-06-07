@@ -152,7 +152,7 @@ int main(int argc, const char** argv) {
   if (print_help) {
     if (help_topic.empty()) {
       stdout_os->write(
-        "Usage: evqlctl [OPTIONS] <command> [<args>]\n\n"
+        "Usage: $ evqlctl [OPTIONS] <command> [<args>]\n\n"
         "   -c, --config <file>       Load config from file\n"
         "   -C name=value             Define a config value on the command line\n"
         "   -?, --help <topic>        Display a command's help text and exit\n"
