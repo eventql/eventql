@@ -77,6 +77,26 @@ Option<int64_t> ProcessConfig::getInt(const String& key) const {
   return None<int64_t>();
 }
 
+Option<bool> ProcessConfig::getBool(
+    const String& section,
+    const String& key) const {
+  return getBool(StringUtil::format("$0.$1", section, key));
+}
+
+Option<bool> ProcessConfig::getBool(const String& key) const {
+  auto p = properties_.find(key);
+  if (p != properties_.end()) {
+    if (p->second == "true") {
+      return Some(true);
+    }
+    if (p->second == "false") {
+      return Some(false);
+    }
+  }
+
+  return None<bool>();
+}
+
 static int ini_parse_handler(
     void* user,
     const char* section,
