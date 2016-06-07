@@ -143,6 +143,156 @@ Status TableService::createTable(
   return Status::success();
 }
 
+
+static Status addColumn(
+    TableDefinition* td,
+    TableService::AlterTableOperation operation) {
+  auto schema = msg::MessageSchema::decode(td->config().schema());
+  auto cur_schema = schema;
+  auto field = operation.field_name;
+
+  uint32_t next_field_id;
+  if (td->has_next_field_id()) {
+    next_field_id = td->next_field_id();
+  } else {
+    next_field_id = schema->maxFieldId() + 1;
+  }
+
+  while (StringUtil::includes(field, ".")) {
+    auto prefix_len = field.find(".");
+    auto prefix = field.substr(0, prefix_len);
+
+    field = field.substr(prefix_len + 1);
+    if (!cur_schema->hasField(prefix)) {
+      return Status(
+          eNotFoundError,
+          StringUtil::format("field '$0' not found", field));
+    }
+
+    auto parent_field_id = cur_schema->fieldId(prefix);
+    auto parent_field_type = cur_schema->fieldType(parent_field_id);
+    if (parent_field_type != msg::FieldType::OBJECT) {
+      return Status(
+          eRuntimeError,
+          StringUtil::format(
+              "can't add a field to field '$0' of type $1",
+              prefix,
+              fieldTypeToString(parent_field_type)));
+    }
+
+    cur_schema = cur_schema->fieldSchema(parent_field_id);
+  }
+
+  if (cur_schema->hasField(field)) {
+    return Status(
+        eRuntimeError,
+        StringUtil::format("column '$0' already exists ", operation.field_name));
+  }
+
+  if (operation.field_type == msg::FieldType::OBJECT) {
+    cur_schema->addField(
+          msg::MessageSchemaField::mkObjectField(
+              next_field_id,
+              field,
+              operation.is_repeated,
+              operation.is_optional,
+              mkRef(new msg::MessageSchema(nullptr))));
+
+
+  } else {
+    cur_schema->addField(
+          msg::MessageSchemaField(
+              next_field_id,
+              field,
+              operation.field_type,
+              0,
+              operation.is_repeated,
+              operation.is_optional));
+  }
+
+
+  td->set_next_field_id(next_field_id + 1);
+  td->mutable_config()->set_schema(schema->encode().toString());
+  return Status::success();
+}
+
+static Status removeColumn(
+    TableDefinition* td,
+    const Vector<String>& primary_key,
+    const String& field_name) {
+  if (find(primary_key.begin(), primary_key.end(), field_name) !=
+      primary_key.end()) {
+    return Status(eRuntimeError, "field with primary key can't be removed");
+  }
+
+  auto schema = msg::MessageSchema::decode(td->config().schema());
+  auto cur_schema = schema;
+  auto field = field_name;
+
+  while (StringUtil::includes(field, ".")) {
+    auto prefix_len = field.find(".");
+    auto prefix = field.substr(0, prefix_len);
+
+    field = field.substr(prefix_len + 1);
+
+    if (!cur_schema->hasField(prefix)) {
+      return Status(
+          eNotFoundError,
+          StringUtil::format("field '$0' not found", prefix));
+    }
+    cur_schema = cur_schema->fieldSchema(cur_schema->fieldId(prefix));
+  }
+
+  if (!cur_schema->hasField(field)) {
+    return Status(
+        eNotFoundError,
+        StringUtil::format("field '$0' not found", field));
+  }
+
+  if (!td->has_next_field_id()) {
+    td->set_next_field_id(schema->maxFieldId() + 1);
+  }
+
+  cur_schema->removeField(cur_schema->fieldId(field));
+  td->mutable_config()->set_schema(schema->encode().toString());
+  return Status::success();
+}
+
+Status TableService::alterTable(
+    const String& db_namespace,
+    const String& table_name,
+    Vector<TableService::AlterTableOperation> operations) {
+  auto table = pmap_->findTable(db_namespace, table_name);
+  if (table.isEmpty()) {
+    return Status(eNotFoundError, "table not found");
+  }
+
+  auto primary_key = table.get()->getPrimaryKey();
+  auto td = table.get()->config();
+
+  for (auto o : operations) {
+    if (o.optype == AlterTableOperationType::OP_ADD_COLUMN) {
+      auto rc = addColumn(&td, o);
+      if (!rc.isSuccess()) {
+        return rc;
+      }
+    } else {
+      auto rc = removeColumn(&td, primary_key, o.field_name);
+      if (!rc.isSuccess()) {
+        return rc;
+      }
+    }
+  }
+
+  try {
+    cdir_->updateTableConfig(td);
+  } catch (const Exception& e) {
+    return Status(eRuntimeError, e.getMessage());
+  }
+
+  return Status::success();
+}
+
 void TableService::listTables(
     const String& tsdb_namespace,
     Function<void (const TSDBTableInfo& table)> fn) const {

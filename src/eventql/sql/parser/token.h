@@ -99,6 +99,10 @@ public:
     T_INTO,
     T_VALUES,
     T_JSON,
+    T_ALTER,
+    T_ADD,
+    T_DROP,
+    T_COLUMN,
 
     T_JOIN,
     T_CROSS,

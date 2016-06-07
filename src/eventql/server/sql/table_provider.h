@@ -64,8 +64,8 @@ public:
   Option<csql::TableInfo> describe(const String& table_name) const override;
 
   Status createTable(const csql::CreateTableNode& req) override;
-
   Status createDatabase(const String& database_name) override;
+  Status alterTable(const csql::AlterTableNode& alter_table) override;
 
   Status insertRecord(
       const String& table_name,

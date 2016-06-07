@@ -198,7 +198,8 @@ static HashMap<String, msg::FieldType> kTypeMap = {
   { "UINT32", msg::FieldType::UINT32 },
   { "UINT64", msg::FieldType::UINT64 },
   { "DOUBLE", msg::FieldType::DOUBLE },
-  { "FLOAT", msg::FieldType::DOUBLE }
+  { "FLOAT", msg::FieldType::DOUBLE },
+  { "RECORD", msg::FieldType::OBJECT }
 };
 
 static Status buildMessageSchema(
@@ -301,7 +302,46 @@ Status TSDBTableProvider::createTable(
 }
 
 Status TSDBTableProvider::createDatabase(const String& database_name) {
-  return Status(eNotYetImplementedError, "create database nyi");
+  return Status(eRuntimeError, "permission denied");
+}
+
+Status TSDBTableProvider::alterTable(const csql::AlterTableNode& alter_table) {
+  auto operations = alter_table.getOperations();
+  Vector<TableService::AlterTableOperation> tbl_operations;
+  for (auto o : operations) {
+    if (o.optype == csql::AlterTableNode::AlterTableOperationType::OP_ADD_COLUMN) {
+      auto type_str = o.column_type;
+      StringUtil::toUpper(&type_str);
+      auto type = kTypeMap.find(type_str);
+      if (type == kTypeMap.end()) {
+        return Status(
+            eIllegalArgumentError,
+            StringUtil::format(
+                "invalid type: '$0' for column '$1'",
+                o.column_type,
+                o.column_name));
+      }
+
+      TableService::AlterTableOperation operation;
+      operation.optype = TableService::AlterTableOperationType::OP_ADD_COLUMN;
+      operation.field_name = o.column_name;
+      operation.field_type = type->second;
+      operation.is_repeated = o.is_repeated;
+      operation.is_optional = o.is_optional;
+      tbl_operations.emplace_back(operation);
+
+    } else {
+      TableService::AlterTableOperation operation;
+      operation.optype = TableService::AlterTableOperationType::OP_REMOVE_COLUMN;
+      operation.field_name = o.column_name;
+      tbl_operations.emplace_back(operation);
+    }
+  }
+
+  return table_service_->alterTable(
+      tsdb_namespace_,
+      alter_table.getTableName(),
+      tbl_operations);
 }
 
 Status TSDBTableProvider::insertRecord(

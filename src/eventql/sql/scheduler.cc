@@ -391,6 +391,19 @@ ScopedPtr<ResultCursor> DefaultScheduler::executeInsertJSON(
   return mkScoped(new EmptyResultCursor());
 }
 
+ScopedPtr<ResultCursor> DefaultScheduler::executeAlterTable(
+    Transaction* txn,
+    ExecutionContext* execution_context,
+    RefPtr<AlterTableNode> alter_table) {
+  auto res = txn->getTableProvider()->alterTable(*alter_table);
+  if (!res.isSuccess()) {
+    RAISE(kRuntimeError, res.message());
+  }
+
+  // FIXME return result...
+  return mkScoped(new EmptyResultCursor());
+}
+
 ScopedPtr<ResultCursor> DefaultScheduler::execute(
     QueryPlan* query_plan,
     ExecutionContext* execution_context,
@@ -430,6 +443,13 @@ ScopedPtr<ResultCursor> DefaultScheduler::execute(
         query_plan->getTransaction(),
         execution_context,
         stmt.asInstanceOf<InsertJSONNode>());
+  }
+
+  if (stmt.isInstanceOf<AlterTableNode>()) {
+    return executeAlterTable(
+        query_plan->getTransaction(),
+        execution_context,
+        stmt.asInstanceOf<AlterTableNode>());
   }
 
   if (stmt.isInstanceOf<TableExpressionNode>()) {

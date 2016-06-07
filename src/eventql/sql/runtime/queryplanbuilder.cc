@@ -43,6 +43,7 @@
 #include <eventql/sql/qtree/ValueExpressionNode.h>
 #include <eventql/sql/qtree/JoinNode.h>
 #include <eventql/sql/qtree/nodes/create_database.h>
+#include <eventql/sql/qtree/nodes/alter_table.h>
 #include <eventql/sql/qtree/nodes/create_table.h>
 #include <eventql/sql/qtree/nodes/insert_into.h>
 #include <eventql/sql/qtree/nodes/insert_json.h>
@@ -117,6 +118,10 @@ RefPtr<QueryTreeNode> QueryPlanBuilder::build(
     return node;
   }
 
+  if ((node = buildAlterTable(txn, ast)) != nullptr) {
+    return node;
+  }
+
   ast->debugPrint(2);
   RAISE(kRuntimeError, "can't figure out a query plan for this, sorry :(");
 }
@@ -137,6 +142,7 @@ Vector<RefPtr<QueryTreeNode>> QueryPlanBuilder::build(
       case ASTNode::T_CREATE_TABLE:
       case ASTNode::T_CREATE_DATABASE:
       case ASTNode::T_INSERT_INTO:
+      case ASTNode::T_ALTER_TABLE:
         nodes.emplace_back(build(txn, statements[i], tables));
         break;
 
@@ -1947,6 +1953,97 @@ QueryTreeNode* QueryPlanBuilder::buildInsertInto(
   }
 
   return new InsertIntoNode(table_name->getToken()->getString(), values_spec);
+}
+
+static AlterTableNode::AlterTableOperation buildAlterTableOperation(
+    ASTNode* ast) {
+
+  switch (ast->getType()) {
+    //drop column
+    case ASTNode::T_COLUMN_NAME:
+      if (ast->getToken() != nullptr) {
+        AlterTableNode::AlterTableOperation operation;
+        operation.optype =
+            AlterTableNode::AlterTableOperationType::OP_REMOVE_COLUMN;
+        operation.column_name = ast->getToken()->getString();
+        return operation;
+      }
+
+    //add column
+    case ASTNode::T_COLUMN: {
+        if (ast->getChildren().size() < 2) {
+          RAISE(kRuntimeError, "corrupt AST");
+        }
+
+        if (!(*ast->getChildren()[0] == ASTNode::T_COLUMN_NAME) ||
+            ast->getChildren()[0]->getToken() == nullptr) {
+          RAISE(kRuntimeError, "corrupt AST");
+        }
+
+        AlterTableNode::AlterTableOperation operation;
+        operation.optype =
+            AlterTableNode::AlterTableOperationType::OP_ADD_COLUMN;
+        operation.column_name = ast->getChildren()[0]->getToken()->getString();
+        operation.is_repeated = false;
+        operation.is_optional = true;
+
+        switch (ast->getChildren()[1]->getType()) {
+          case ASTNode::T_RECORD:
+            operation.column_type = "RECORD";
+            break;
+
+          case ASTNode::T_COLUMN_TYPE:
+            if (ast->getChildren()[1]->getToken() == nullptr) {
+              RAISE(kRuntimeError, "corrupt AST");
+            }
+            operation.column_type = ast->getChildren()[1]->getToken()->getString();
+            break;
+
+          default:
+            RAISE(kRuntimeError, "corrupt AST");
+        }
+
+        for (size_t i = 2; i < ast->getChildren().size(); ++i) {
+          switch (ast->getChildren()[i]->getType()) {
+            case ASTNode::T_REPEATED:
+              operation.is_repeated = true;
+              break;
+            case ASTNode::T_NOT_NULL:
+              operation.is_optional = false;
+              break;
+            default:
+              RAISE(kRuntimeError, "corrupt AST");
+          }
+        }
+
+      return operation;
+    }
+
+    default:
+      RAISE(kRuntimeError, "corrupt AST");
+  }
+}
+
+QueryTreeNode* QueryPlanBuilder::buildAlterTable(
+    Transaction* txn,
+    ASTNode* ast) {
+  if (!(*ast == ASTNode::T_ALTER_TABLE) || ast->getChildren().size() < 2) {
+    return nullptr;
+  }
+
+  auto table_name = ast->getChildren()[0];
+  if (table_name->getType() != ASTNode::T_TABLE_NAME ||
+      table_name->getToken() == nullptr) {
+    RAISE(kRuntimeError, "corrupt AST");
+  }
+
+  Vector<AlterTableNode::AlterTableOperation> operations;
+  auto child_nodes = ast->getChildren();
+  for (size_t i = 1; i < child_nodes.size(); ++i) {
+    operations.emplace_back(buildAlterTableOperation(child_nodes[i]));
+  }
+
+  return new AlterTableNode(table_name->getToken()->getString(), operations);
 }
 
 }
