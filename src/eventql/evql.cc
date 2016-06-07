@@ -402,7 +402,7 @@ int main(int argc, const char** argv) {
   }
 
   /* console options */
-  ProcessConfigBuilder cfg_builder;
+  eventql::ProcessConfigBuilder cfg_builder;
   {
     auto status = cfg_builder.loadDefaultConfigFile();
     if (!status.isSuccess()) {
@@ -439,16 +439,8 @@ int main(int argc, const char** argv) {
     cfg_builder.setProperty("evql", "lang", flags.getString("lang"));
   }
 
+  /* cli config */
   eventql::cli::CLIConfig cli_cfg(cfg_builder.getConfig());
-
-    /*if (cli_cfg.getFile().isEmpty() &&
-        cli_cfg.getLanguage().get() != eventql::cli::CLIConfig::kLanguage::SQL) {
-      printError(
-          "FlagError: must set -f <file> for javascript, run --help for help\n");
-      return 1;
-    }*/
-  /* cli */
-  eventql::cli::Console console(cli_cfg);
 
   if (flags.getArgv().size() > 0) {
     printError(StringUtil::format(
@@ -458,12 +450,21 @@ int main(int argc, const char** argv) {
     return 1;
   }
 
+  /* cli */
+  eventql::cli::Console console(cli_cfg);
+
   auto file = cli_cfg.getFile();
+  auto language = cli_cfg.getLanguage();
+  if (file.isEmpty() &&
+      !language.isEmpty() &&
+      language.get() == eventql::cli::CLIConfig::kLanguage::JAVASCRIPT) {
+    logFatal("evql", "missing --file flag. Set --file for javascript");
+    return 1;
+  }
+
   if (!file.isEmpty()) {
-    auto language = cli_cfg.getLanguage();
     if (language.isEmpty()) {
-      printError(
-          "FlagError: unknown language to execute file, run evql --help for help\n");
+      logFatal("evql", "invalid --language flag. Must one of 'sql', 'js' or 'javascript'");
       return 1;
     }
 

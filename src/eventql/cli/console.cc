@@ -111,10 +111,11 @@ Status Console::runQuery(const String& query) {
         cfg_.getHost(),
         cfg_.getPort());
 
+    auto db = cfg_.getDatabase().isEmpty() ? "" : cfg_.getDatabase().get();
     auto postdata = StringUtil::format(
           "format=binary&query=$0&database=$1",
           URI::urlEncode(query),
-          URI::urlEncode(cfg_.getDatabase()));
+          URI::urlEncode(db));
 
     http::HTTPMessage::HeaderList auth_headers;
     if (!cfg_.getAuthToken().isEmpty()) {
