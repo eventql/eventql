@@ -33,6 +33,7 @@ namespace eventql {
 
 struct MapTableTaskShard : public MapReduceTaskShard {
   TSDBTableRef table_ref;
+  Vector<ReplicaRef> servers;
 };
 
 class MapTableTask : public MapReduceTask {
@@ -46,8 +47,9 @@ public:
       const String& params,
       MapReduceShardList* shards,
       InternalAuth* auth,
-      eventql::PartitionMap* pmap,
-      eventql::ReplicationScheme* repl);
+      PartitionMap* pmap,
+      ConfigDirectory* cdir,
+      ReplicationScheme* repl);
 
   Option<MapReduceShardResult> execute(
       RefPtr<MapReduceTaskShard> shard,
@@ -68,8 +70,9 @@ protected:
   String globals_;
   String params_;
   InternalAuth* auth_;
-  eventql::PartitionMap* pmap_;
-  eventql::ReplicationScheme* repl_;
+  PartitionMap* pmap_;
+  ConfigDirectory* cdir_;
+  ReplicationScheme* repl_;
   Set<String> required_columns_;
 };
 

@@ -113,14 +113,6 @@ JavaScriptContext::JavaScriptContext(
       JS_DefineFunction(
           ctx_,
           global_,
-          "z1_listpartitions",
-          &JavaScriptContext::listPartitions,
-          0,
-          0);
-
-      JS_DefineFunction(
-          ctx_,
-          global_,
           "z1_executemr",
           &JavaScriptContext::executeMapReduce,
           0,
@@ -218,109 +210,6 @@ bool JavaScriptContext::returnResult(
   }
 
   args.rval().set(JSVAL_TRUE);
-  return true;
-}
-
-
-bool JavaScriptContext::listPartitions(
-    JSContext* ctx,
-    unsigned argc,
-    JS::Value* vp) {
-  auto args = JS::CallArgsFromVp(argc, vp);
-  if (args.length() != 3 ||
-      !args[0].isString() ||
-      !args[1].isString() ||
-      !args[2].isString()) {
-    return false;
-  }
-
-  auto rt = JS_GetRuntime(ctx);
-  auto self = (JavaScriptContext*) JS_GetRuntimePrivate(rt);
-  if (!self) {
-    return false;
-  }
-
-  auto table_name_cstr = JS_EncodeString(ctx, args[0].toString());
-  String table_name(table_name_cstr);
-  JS_free(ctx, table_name_cstr);
-
-  auto from_cstr = JS_EncodeString(ctx, args[1].toString());
-  String from(from_cstr);
-  JS_free(ctx, from_cstr);
-
-  auto until_cstr = JS_EncodeString(ctx, args[2].toString());
-  String until(until_cstr);
-  JS_free(ctx, until_cstr);
-
-  Vector<TimeseriesPartition> partitions;
-  try {
-    partitions = self->tsdb_->listPartitions(
-        self->customer_,
-        table_name,
-        std::stoull(from),
-        std::stoull(until));
-  } catch (const StandardException& e) {
-    self->storeError(e.what());
-    return false;
-  }
-
-  auto part_array_ptr = JS_NewArrayObject(ctx, partitions.size());
-  if (!part_array_ptr) {
-    RAISE(kRuntimeError, "JavaScript execution error: out of memory");
-  }
-
-  JS::RootedObject part_array(ctx, part_array_ptr);
-  for (size_t i = 0; i < partitions.size(); ++i) {
-    auto part_obj_ptr = JS_NewObject(ctx, NULL);
-    if (!part_obj_ptr) {
-      RAISE(kRuntimeError, "reduce function execution error: out of memory");
-    }
-
-    JS::RootedObject part_obj(ctx, part_obj_ptr);
-    if (!JS_SetElement(ctx, part_array, i, part_obj)) {
-      RAISE(kRuntimeError, "JavaScript execution error: out of memory");
-    }
-
-    auto pkey = partitions[i].partition_key.toString();
-    JS::RootedValue pkey_str(ctx);
-    auto pkey_str_ptr = JS_NewStringCopyN(ctx, pkey.data(), pkey.size());
-    if (!pkey_str_ptr) {
-      RAISE(kRuntimeError, "JavaScript execution error: out of memory");
-    } else {
-      pkey_str.setString(pkey_str_ptr);
-    }
-    JS_SetProperty(ctx, part_obj, "partition_key", pkey_str);
-
-    auto time_begin = StringUtil::toString(
-        partitions[i].time_begin.unixMicros());
-    JS::RootedValue time_begin_str(ctx);
-    auto time_begin_str_ptr = JS_NewStringCopyN(
-        ctx,
-        time_begin.data(),
-        time_begin.size());
-    if (!time_begin_str_ptr) {
-      RAISE(kRuntimeError, "JavaScript execution error: out of memory");
-    } else {
-      time_begin_str.setString(time_begin_str_ptr);
-    }
-    JS_SetProperty(ctx, part_obj, "time_begin", time_begin_str);
-
-    auto time_limit = StringUtil::toString(
-        partitions[i].time_limit.unixMicros());
-    JS::RootedValue time_limit_str(ctx);
-    auto time_limit_str_ptr = JS_NewStringCopyN(
-        ctx,
-        time_limit.data(),
-        time_limit.size());
-    if (!time_limit_str_ptr) {
-      RAISE(kRuntimeError, "JavaScript execution error: out of memory");
-    } else {
-      time_limit_str.setString(time_limit_str_ptr);
-    }
-    JS_SetProperty(ctx, part_obj, "time_limit", time_limit_str);
-  }
-
-  args.rval().setObject(*part_array);
   return true;
 }
 

@@ -261,11 +261,10 @@ int main(int argc, const char** argv) {
       "version",
       cli::FlagParser::T_SWITCH,
       false,
-      "V",
+      "v",
       NULL,
       "print version",
       "<switch>");
-
 
   flags.defineFlag(
       "file",
@@ -348,15 +347,6 @@ int main(int argc, const char** argv) {
       "loglevel",
       "<level>");
 
-  flags.defineFlag(
-      "batch",
-      cli::FlagParser::T_SWITCH,
-      false,
-      "B",
-      NULL,
-      "batch",
-      "<batch>");
-
   flags.parseArgv(argc, argv);
 
   Logger::get()->setMinimumLogLevel(
@@ -384,29 +374,29 @@ int main(int argc, const char** argv) {
   if (flags.isSet("help")) {
     stdout_os->write(
         "Usage: $ evql [OPTIONS] [query]\n"
-        "       $ evql [OPTIONS] -f file\n"
-        "  -?, --help              Display this help text and exit\n"
-        "  -f, --file <file>       Read query from file\n"
-        "  -e, --exec <query_str>  Execute query string\n"
-        "  -l, --lang <lang>       Set the query language ('sql' or 'js')\n"
-        "  -D, --database <db>     Select a database\n"
-        "  -h, --host <hostname>   Set the EventQL server hostname\n"
-        "  -p, --port <port>       Set the EventQL server port\n"
-        "  -u, --user <user>       Set the auth username\n"
-        "  --password <password>   Set the auth password (if required)\n"
-        "  --auth_token <token>    Set the auth token (if required)\n"
-        "  -B, --batch             Run in batch mode (streaming result output)\n"
-        "  -q, --quiet             Be quiet (disables query progress)\n"
-        "  -v, --verbose           Print debug output to STDERR\n"
-        "  --version               Display the version of this binary and exit\n"
+        "       $ evql [OPTIONS] -f file\n\n"
+        "   -f, --file <file>         Read query from file\n"
+        "   -e, --exec <query_str>    Execute query string\n"
+        "   -l, --lang <lang>         Set the query language ('sql' or 'js')\n"
+        "   -D, --database <db>       Select a database\n"
+        "   -h, --host <hostname>     Set the EventQL server hostname\n"
+        "   -p, --port <port>         Set the EventQL server port\n"
+        "   -u, --user <user>         Set the auth username\n"
+        "   --password <password>     Set the auth password (if required)\n"
+        "   --auth_token <token>      Set the auth token (if required)\n"
+        "   -B, --batch               Run in batch mode (streaming result output)\n"
+        "   -q, --quiet               Be quiet (disables query progress)\n"
+        "   --verbose                 Print debug output to STDERR\n"
+        "   -v, --version             Display the version of this binary and exit\n"
+        "   -?, --help                Display this help text and exit\n"
         "                                                       \n"
         "Examples:                                              \n"
-        "  $ evql                        # start an interactive shell\n"
-        "  $ evql -h localhost -p 9175   # start an interactive shell\n"
-        "  $ evql < query.sql            # execute query from STDIN\n"
-        "  $ evql -f query.sql           # execute query in query.sql\n"
-        "  $ evql -l js -f query.js      # execute query in query.js\n"
-        "  $ evql -e 'SELECT 42;'        # execute 'SELECT 42'\n"
+        "   $ evql                        # start an interactive shell\n"
+        "   $ evql -h localhost -p 9175   # start an interactive shell\n"
+        "   $ evql < query.sql            # execute query from STDIN\n"
+        "   $ evql -f query.sql           # execute query in query.sql\n"
+        "   $ evql -l js -f query.js      # execute query in query.js\n"
+        "   $ evql -e 'SELECT 42;'        # execute 'SELECT 42'\n"
     );
     return 0;
   }
@@ -453,53 +443,57 @@ int main(int argc, const char** argv) {
     cli_cfg.setDatabase(flags.getString("database"));
   }
 
-  if (flags.isSet("batch")) {
-    cli_cfg.enableBatchMode();
+  if (flags.isSet("file")) {
+    cli_cfg.setFile(flags.getString("file"));
+  }
+
+  if (flags.isSet("lang")) {
+    auto s = cli_cfg.setLanguage(flags.getString("lang"));
+    if (!s.isSuccess()) {
+      printError(StringUtil::format("$0: $1", s.type(), s.message()));
+      return 1;
+    }
+
+    if (cli_cfg.getFile().isEmpty() &&
+        cli_cfg.getLanguage().get() != eventql::cli::CLIConfig::kLanguage::SQL) {
+      printError(
+          "FlagError: must set -f <file> for javascript, run --help for help\n");
+      return 1;
+    }
   }
 
   /* cli */
   eventql::cli::Console console(cli_cfg);
 
   if (flags.getArgv().size() > 0) {
-    stderr_os->write(
-        StringUtil::format(
-            "invalid argument: '$0', run evql --help for help\n",
-            flags.getArgv()[0]));
+    printError(StringUtil::format(
+        "invalid argument: '$0', run evql --help for help\n",
+        flags.getArgv()[0]));
 
     return 1;
   }
 
-  String language;
-  if (flags.isSet("lang")) {
-    language = flags.getString("lang");
-    StringUtil::toLower(&language);
-  }
-
-  if (flags.isSet("file")) {
-    auto file = flags.getString("file");
-    auto query = FileUtil::read(file);
-
-    if (language == "sql" ||
-        (language.empty() && StringUtil::endsWith(file, ".sql"))) {
-      auto ret = console.runQuery(query.toString());
-      return ret.isSuccess() ? 0 : 1;
-
-    } else if (language == "js" ||
-              (language.empty() && StringUtil::endsWith(file, ".js"))) {
-      auto ret = console.runJS(query.toString());
-      return ret.isSuccess() ? 0 : 1;
-
-    } else {
-      stderr_os->write(
-          "FlagError: unknown language, can't execute file, run evql --help for help\n");
+  auto file = cli_cfg.getFile();
+  if (!file.isEmpty()) {
+    auto language = cli_cfg.getLanguage();
+    if (language.isEmpty()) {
+      printError(
+          "FlagError: unknown language to execute file, run evql --help for help\n");
       return 1;
     }
-  }
 
-  if (!language.empty() && language != "sql") {
-    stderr_os->write(
-      "FlagError: invalid language option, run evql --help for help\n");
-    return 1;
+    auto query = FileUtil::read(file.get());
+    switch (language.get()) {
+      case eventql::cli::CLIConfig::kLanguage::SQL: {
+        Status ret = console.runQuery(query.toString());
+        return ret.isSuccess() ? 0 : 1;
+      }
+
+      case eventql::cli::CLIConfig::kLanguage::JAVASCRIPT: {
+        Status ret = console.runJS(query.toString());
+        return ret.isSuccess() ? 0 : 1;
+      }
+    }
   }
 
   if (flags.isSet("exec")) {
@@ -511,7 +505,6 @@ int main(int argc, const char** argv) {
     String query;
     while (stdin_is->readLine(&query)) {
       auto ret = console.runQuery(query);
-      query = "";
       if (ret.isError()) {
         return 1;
       }

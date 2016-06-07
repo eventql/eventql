@@ -193,10 +193,53 @@ Option<String> CLIConfig::getAuthToken() const {
   }
 }
 
-Option<String> CLIConfig::getFile() const {
-  return file_;
+Status CLIConfig::setFile(const String& file) {
+  file_ = file;
+  return Status::success();
 }
 
+Option<String> CLIConfig::getFile() const {
+  if (file_.empty()) {
+    return None<String>();
+  } else {
+    return Some(file_);
+  }
+}
+
+Status CLIConfig::setLanguage(String language) {
+  StringUtil::toUpper(&language);
+
+  if (language == "SQL") {
+    language_ = Some(CLIConfig::kLanguage::SQL);
+    return Status::success();
+
+  } else if (language == "JS" || language == "JAVASCRIPT") {
+    language_ = Some(CLIConfig::kLanguage::JAVASCRIPT);
+    return Status::success();
+
+  } else {
+    return Status(
+        eFlagError,
+        StringUtil::format("invalid language '$0'", language));
+  }
+}
+
+Option<CLIConfig::kLanguage> CLIConfig::getLanguage() {
+  if (!language_.isEmpty()) {
+    return language_;
+  }
+
+  if (!file_.empty()) {
+    if (StringUtil::endsWith(file_, ".sql")) {
+      return Some(CLIConfig::kLanguage::SQL);
+    }
+    if (StringUtil::endsWith(file_, ".js")) {
+      return Some(CLIConfig::kLanguage::JAVASCRIPT);
+    }
+  }
+
+  return None<CLIConfig::kLanguage>();
+}
 Option<String> CLIConfig::getExec() const {
   return exec_;
 }

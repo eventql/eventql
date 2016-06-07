@@ -23,7 +23,7 @@
  */
 #include <eventql/db/CompactionStrategy.h>
 #include <eventql/db/LSMTableIndex.h>
-#include <eventql/io/cstable/CSTableWriter.h>
+#include <eventql/io/cstable/cstable_writer.h>
 #include <eventql/util/io/fileutil.h>
 
 #include "eventql/eventql.h"
@@ -141,12 +141,9 @@ bool SimpleCompactionStrategy::compact(
 
         for (auto& col : columns) {
           if (col.first.get()) {
-            while (!col.first->eofReached()) {
+            do {
               col.first->copyValue(col.second.get());
-              if (col.first->nextRepetitionLevel() == 0) {
-                break;
-              }
-            }
+            } while (col.first->nextRepetitionLevel() > 0);
           } else {
             col.second->writeNull(0, 0);
           }
@@ -156,12 +153,9 @@ bool SimpleCompactionStrategy::compact(
       } else {
         for (auto& col : columns) {
           if (col.first.get()) {
-            while (!col.first->eofReached()) {
+            do {
               col.first->skipValue();
-              if (col.first->nextRepetitionLevel() == 0) {
-                break;
-              }
-            }
+            } while (col.first->nextRepetitionLevel() > 0);
           }
         }
       }
@@ -180,6 +174,7 @@ bool SimpleCompactionStrategy::compact(
   tbl_ref.set_filename(cstable_filename);
   tbl_ref.set_first_sequence(input.begin()->first_sequence());
   tbl_ref.set_last_sequence(input.rbegin()->last_sequence());
+  tbl_ref.set_size_bytes(FileUtil::size(cstable_filepath + ".cst"));
   output->emplace_back(tbl_ref);
 
   return true;

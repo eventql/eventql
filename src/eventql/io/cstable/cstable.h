@@ -84,9 +84,8 @@ static const std::string kVersionString = "v0.2.0-dev";
  *   <metablock> :=
  *       <uint64_t>              // transaction id
  *       <uint64_t>              // number of rows
- *       <uint64_t>              // head index page offset
- *       <uint32_t>              // head index page size
- *       <uint64_t>              // file size in bytes
+ *       <uint64_t>              // index page offset
+ *       <uint32_t>              // index page size
  *       <20 bytes>              // sha1 checksum
  *
  *   <column_info> :=
@@ -98,15 +97,13 @@ static const std::string kVersionString = "v0.2.0-dev";
  *       <lenenc_int>            // max definition level
  *
  *   <index_page> :=
- *       <uint64_t>              // next index page file offset
- *       <uint32_t>              // next index page size
- *       <uint32_t>              // bytes used in this page
- *       <char*>                 // index page data (index_entries back2back)
+ *      <index_entry>*           // index entries back to back
  *
  *   <index_entry> :=
  *      <lenenc_int>             // entry type (0x1=data, 0x2=repetition level, 0x3=definition level)
  *      <lenenc_int>             // field id
- *      <char>*                  // column index data
+ *      <lenenc_int>             // page offset
+ *      <lenenc_int>             // page size
  *
  *  <data_page>       :=
  *      <char>*                  // page data
@@ -162,9 +159,8 @@ struct ColumnConfig {
 struct MetaBlock {
   uint64_t transaction_id;
   uint64_t num_rows;
-  uint64_t head_index_page_offset;
-  uint32_t head_index_page_size;
-  uint64_t file_size;
+  uint64_t index_offset;
+  uint32_t index_size;
 };
 
 } // namespace cstable
@@ -174,7 +170,6 @@ struct MetaBlock {
 namespace cstable {
 
 struct FileHeader {
-  RefPtr<TableSchema> schema;
   Vector<ColumnConfig> columns;
   uint64_t num_rows; // deprecated after v0.1.x
 };
@@ -194,6 +189,22 @@ enum class PageIndexEntryType : uint8_t {
   DLEVEL = 3
 };
 
+struct PageRef {
+  uint64_t offset;
+  uint32_t size;
+};
+
+struct PageIndexKey {
+  uint32_t column_id;
+  PageIndexEntryType entry_type;
+};
+
+struct PageIndexEntry {
+  PageIndexKey key;
+  PageRef page;
+};
+
+
 /* v0.1.0 */
 namespace v0_1_0 {
 const uint16_t kVersion = 1;
@@ -205,11 +216,13 @@ void readHeader(FileHeader* mb, InputStream* is);
 namespace v0_2_0 {
 static const uint16_t kVersion = 2;
 const size_t kMetaBlockPosition = 14;
-const size_t kMetaBlockSize = 56;
+const size_t kMetaBlockSize = 48;
 size_t writeMetaBlock(const MetaBlock& mb, OutputStream* os);
 bool readMetaBlock(MetaBlock* mb, InputStream* is);
 size_t writeHeader(const FileHeader& hdr, OutputStream* os);
 void readHeader(FileHeader* mb, Vector<MetaBlock>* metablocks, InputStream* is);
+size_t writeIndex(const Vector<PageIndexEntry>& index, OutputStream* os);
+void readIndex(Vector<PageIndexEntry>* index, InputStream* os);
 }
 
 } // namespace cstable

@@ -184,8 +184,12 @@ Vector<Scheduler::PipelinedQueryTree> Scheduler::pipelineExpression(
   auto db_namespace =
       static_cast<Session*>(txn->getUserData())->getEffectiveNamespace();
 
-  Set<SHA1Hash> partitions;
-  if (table.get()->partitionerType() == TBL_PARTITION_TIMEWINDOW) {
+  auto local_server_id = cdir_->getServerID();
+
+  HashMap<SHA1Hash, Vector<ReplicaRef>> partitions;
+  Set<SHA1Hash> local_partitions;
+  if (table.get()->partitionerType() == TBL_PARTITION_TIMEWINDOW &&
+      table.get()->storage() == TBL_STORAGE_COLSM) {
     auto keyrange = TSDBTableProvider::findKeyRange(
         table.get()->config().config().partition_key(),
         seqscan->constraints());
@@ -203,35 +207,57 @@ Vector<Scheduler::PipelinedQueryTree> Scheduler::pipelineExpression(
     }
 
     for (const auto& p : partition_list.partitions()) {
-      partitions.emplace(
-          SHA1Hash(p.partition_id().data(), p.partition_id().size()));
+      Vector<ReplicaRef> replicas;
+      SHA1Hash pid(p.partition_id().data(), p.partition_id().size());
+
+      for (const auto& s : p.servers()) {
+        if (s == local_server_id) {
+          local_partitions.emplace(pid);
+        }
+
+        auto server_cfg = cdir_->getServerConfig(s);
+        if (server_cfg.server_status() != SERVER_UP) {
+          continue;
+        }
+
+        ReplicaRef rref(SHA1::compute(s), server_cfg.server_addr());
+        rref.name = s;
+        replicas.emplace_back(rref);
+      }
+
+      partitions.emplace(pid, replicas);
     }
   } else {
     auto partitioner = table.get()->partitioner();
     for (const auto& p : partitioner->listPartitions(seqscan->constraints())) {
-      partitions.emplace(p);
+      auto replicas = repl_scheme_->replicasFor(p);
+      if (repl_scheme_->hasLocalReplica(p)) {
+        local_partitions.emplace(p);
+      }
+
+      partitions.emplace(p, Vector<ReplicaRef>(replicas.begin(), replicas.end()));
     }
   }
 
   Vector<PipelinedQueryTree> shards;
-  for (const auto& partition : partitions) {
+  for (const auto& p : partitions) {
     auto table_name = StringUtil::format(
         "tsdb://localhost/$0/$1",
         URI::urlEncode(table_ref.table_key),
-        partition.toString());
+        p.first.toString());
 
     auto qtree_copy = qtree->deepCopy();
     auto shard = csql::QueryTreeUtil::findNode<csql::SequentialScanNode>(
         qtree_copy.get());
     shard->setTableName(table_name);
 
-    auto shard_hosts = repl_scheme_->replicasFor(partition);
-
-    shards.emplace_back(PipelinedQueryTree {
-      .is_local = repl_scheme_->hasLocalReplica(partition),
+    PipelinedQueryTree pipelined {
+      .is_local = local_partitions.count(p.first) > 0,
       .qtree = shard,
-      .hosts = shard_hosts
-    });
+      .hosts = p.second
+    };
+
+    shards.emplace_back(pipelined);
   }
 
   return shards;

@@ -61,23 +61,19 @@ public:
    */
   virtual bool replicate() = 0;
 
+  static ReplicationState fetchReplicationState(
+      RefPtr<PartitionSnapshot> snap);
+
+  ReplicationState fetchReplicationState() const;
+
   /**
-   * Returns the number of remote hosts (not including self!) for which we have
-   * positively confirmed that they have a full copy of the data for this
-   * partition
-   *
    * IMPORTANT: it is imperative that this method only count hosts for that we
    * have positively confirmed that they have indeed received and acknowledged
    * a full copy of all the data. this invariant can never be broken since we
    * will _drop_ our local copy of the data based on the return value of this
    * method.
    */
-  virtual size_t numFullRemoteCopies() const = 0;
-
-  static ReplicationState fetchReplicationState(
-      RefPtr<PartitionSnapshot> snap);
-
-  ReplicationState fetchReplicationState() const;
+  virtual bool shouldDropPartition() const = 0;
 
 protected:
 

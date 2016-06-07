@@ -60,6 +60,7 @@ public:
   TablePartitionerType partitionerType() const;
   RefPtr<TablePartitioner> partitioner() const;
 
+  KeyspaceType getKeyspaceType() const;
   Vector<String> getPrimaryKey() const;
 
   MetadataTransaction getLastMetadataTransaction() const;

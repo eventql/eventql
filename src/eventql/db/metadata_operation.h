@@ -57,15 +57,23 @@ public:
 
 protected:
 
-  Status performBackfillAddServer(
+  Status performRemoveDeadServers(
       const MetadataFile& input,
       Vector<MetadataFile::PartitionMapEntry>* output) const;
 
-  Status performBackfillAddServers(
+  Status performSplitPartition(
       const MetadataFile& input,
       Vector<MetadataFile::PartitionMapEntry>* output) const;
 
-  Status performBackfillRemoveServer(
+  Status performFinalizeSplit(
+      const MetadataFile& input,
+      Vector<MetadataFile::PartitionMapEntry>* output) const;
+
+  Status performJoinServers(
+      const MetadataFile& input,
+      Vector<MetadataFile::PartitionMapEntry>* output) const;
+
+  Status performFinalizeJoin(
       const MetadataFile& input,
       Vector<MetadataFile::PartitionMapEntry>* output) const;
 

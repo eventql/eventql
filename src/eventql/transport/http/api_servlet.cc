@@ -45,7 +45,7 @@
 #include "eventql/db/TimeWindowPartitioner.h"
 #include "eventql/db/FixedShardPartitioner.h"
 #include "eventql/transport/http/http_auth.h"
-#include <eventql/io/cstable/CSTableWriter.h>
+#include <eventql/io/cstable/cstable_writer.h>
 #include <eventql/io/cstable/RecordShredder.h>
 
 namespace eventql {
@@ -360,76 +360,21 @@ void AnalyticsServlet::fetchTableDefinition(
     const String& table_name,
     const http::HTTPRequest* req,
     http::HTTPResponse* res) {
+  auto table = pmap_->findTable(session->getEffectiveNamespace(), table_name);
+  if (table.isEmpty()) {
+    res->setStatus(http::kStatusNotFound);
+    res->addBody("table not found");
+    return;
+  }
 
-  //auto table_provider = app_->getTableProvider(session->getEffectiveNamespace());
-  //auto table_info_opt = table_provider->describe(table_name);
-  //if (table_info_opt.isEmpty()) {
-  //  res->setStatus(http::kStatusNotFound);
-  //  res->addBody("table not found");
-  //  return;
-  //}
+  Buffer buf;
+  json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
+  auto schema = table.get()->schema();
+  schema->toJSON(&json);
 
-  //const auto& table_info = table_info_opt.get();
-
-  //auto table_opt = pmap_->findTable(session->getEffectiveNamespace(), table_name);
-  //if (table_opt.isEmpty()) {
-  //  res->setStatus(http::kStatusNotFound);
-  //  res->addBody("table not found");
-  //  return;
-  //}
-
-  //Buffer buf;
-  //json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
-
-  //json.beginObject();
-  //json.addObjectEntry("table");
-  //json.beginObject();
-
-  //json.addObjectEntry("name");
-  //json.addString(table_info.table_name);
-  //json.addComma();
-
-  //json.addObjectEntry("tags");
-  //json::toJSON(table_info.tags, &json);
-  //json.addComma();
-
-  //json.addObjectEntry("columns");
-  //json.beginArray();
-  //for (size_t i = 0; i < table_info.columns.size(); ++i) {
-  //  const auto& col = table_info.columns[i];
-
-  //  if (i > 0) {
-  //    json.addComma();
-  //  }
-
-  //  json.beginObject();
-
-  //  json.addObjectEntry("column_name");
-  //  json.addString(col.column_name);
-  //  json.addComma();
-
-  //  json.addObjectEntry("type");
-  //  json.addString(col.type);
-  //  json.addComma();
-
-  //  json.addObjectEntry("is_nullable");
-  //  json.addBool(col.is_nullable);
-
-  //  json.endObject();
-  //}
-
-  //json.endArray();
-
-  //json.addComma();
-  //json.addObjectEntry("schema");
-  //table_opt.get()->schema()->toJSON(&json);
-
-  //json.endObject();
-  //json.endObject();
-
-  //res->setStatus(http::kStatusOK);
-  //res->setHeader("Content-Type", "application/json; charset=utf-8");
-  //res->addBody(buf);
+  res->setStatus(http::kStatusOK);
+  res->setHeader("Content-Type", "application/json; charset=utf-8");
+  res->addBody(buf);
 }
 
 void AnalyticsServlet::createTable(
@@ -833,39 +778,22 @@ void AnalyticsServlet::insertIntoTable(
       }
     }
 
-    auto id_opt = json::objectGetString(jrow, jreq.end(), "id");
-    auto version_opt = json::objectGetUInt64(jrow, jreq.end(), "version");
-
     auto data = json::objectLookup(jrow, jreq.end(), "data");
     if (data == jreq.end()) {
       RAISE(kRuntimeError, "missing field: data");
     }
-
-    auto record_id =
-        id_opt.isEmpty() ?
-            Random::singleton()->sha1() :
-            SHA1::compute(id_opt.get());
-
-    uint64_t record_version =
-        version_opt.isEmpty() ?
-            WallClock::unixMicros() :
-            version_opt.get();
 
     if (data->type == json::JSON_STRING) {
       auto data_parsed = json::parseJSON(data->data);
       tsdb_->insertRecord(
           insert_database,
           table.get(),
-          record_id,
-          record_version,
           data_parsed.begin(),
           data_parsed.end());
     } else {
       tsdb_->insertRecord(
           insert_database,
           table.get(),
-          record_id,
-          record_version,
           data,
           data + data->size);
     }

@@ -59,7 +59,8 @@ public:
   Status performMetadataOperation(
       const String& ns,
       const String& table_name,
-      MetadataOperation op);
+      const MetadataOperation& op,
+      MetadataOperationResult* result);
 
   Status discoverPartition(
       const PartitionDiscoveryRequest& request,
@@ -68,6 +69,10 @@ public:
   Status listPartitions(
       const PartitionListRequest& request,
       PartitionListResponse* response);
+
+  Status findPartition(
+      const PartitionFindRequest& request,
+      PartitionFindResponse* response);
 
 protected:
   ConfigDirectory* cdir_;

@@ -24,7 +24,7 @@
 #include <eventql/util/fnv.h>
 #include <eventql/util/io/fileutil.h>
 #include <eventql/util/protobuf/MessageDecoder.h>
-#include <eventql/io/cstable/CSTableReader.h>
+#include <eventql/io/cstable/cstable_reader.h>
 #include <eventql/io/cstable/RecordMaterializer.h>
 #include <eventql/db/LSMPartitionReader.h>
 #include <eventql/db/Table.h>
@@ -82,6 +82,63 @@ void LSMPartitionReader::fetchRecords(
       }
     }
   }
+}
+
+Status LSMPartitionReader::findMedianValue(
+    const String& column,
+    Function<bool (const String& a, const String b)> comparator,
+    String* min,
+    String* midpoint,
+    String* max) {
+  auto schema = table_->schema();
+  const auto& tables = snap_->state.lsm_tables();
+  Set<SHA1Hash> id_set;
+  Vector<String> values;
+  for (auto tbl = tables.rbegin(); tbl != tables.rend(); ++tbl) {
+    auto cstable_file = FileUtil::joinPaths(
+        snap_->base_path,
+        tbl->filename() + ".cst");
+    auto cstable = cstable::CSTableReader::openFile(cstable_file);
+    auto id_col = cstable->getColumnReader("__lsm_id");
+    auto is_update_col = cstable->getColumnReader("__lsm_is_update");
+    auto value_col = cstable->getColumnReader(column);
+
+    auto nrecs = cstable->numRecords();
+    for (size_t i = 0; i < nrecs; ++i) {
+      uint64_t rlvl;
+      uint64_t dlvl;
+
+      bool is_update;
+      is_update_col->readBoolean(&rlvl, &dlvl, &is_update);
+
+      String id_str;
+      id_col->readString(&rlvl, &dlvl, &id_str);
+      SHA1Hash id(id_str.data(), id_str.size());
+
+      if (id_set.count(id) == 0) {
+        if (is_update) {
+          id_set.emplace(id);
+        }
+
+        String value_str;
+        value_col->readString(&rlvl, &dlvl, &value_str);
+        values.emplace_back(value_str);
+      } else {
+        value_col->skipValue();
+      }
+    }
+  }
+
+  if (values.size() == 0) {
+    return Status(eRuntimeError, "can't calculate median for empty set");
+  }
+
+  std::sort(values.begin(), values.end(), comparator);
+
+  *min = values.front();
+  *midpoint = values[values.size() / 2];
+  *max = values.back();
+  return Status::success();
 }
 
 SHA1Hash LSMPartitionReader::version() const {

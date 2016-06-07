@@ -315,6 +315,8 @@ ASTNode* Parser::statement() {
       return createStatement();
     case Token::T_INSERT:
       return insertStatement();
+    case Token::T_ALTER:
+      return alterStatement();
     case Token::T_DRAW:
       return drawStatement();
     case Token::T_IMPORT:
@@ -330,7 +332,7 @@ ASTNode* Parser::statement() {
 
   RAISE(
       kParseError,
-      "unexpected token %s%s%s, expected one of SELECT, DRAW or IMPORT",
+      "unexpected token %s%s%s, expected one of SELECT, CREATE, INSERT, ALTER, DRAW or IMPORT",
         Token::getTypeName(cur_token_->getType()),
         cur_token_->getString().size() > 0 ? ": " : "",
         cur_token_->getString().c_str());
@@ -411,7 +413,21 @@ ASTNode* Parser::selectStatement() {
 
 ASTNode* Parser::createStatement() {
   consumeToken();
-  return createTableStatement();
+
+  switch (cur_token_->getType()) {
+    case Token::T_TABLE:
+      return createTableStatement();
+    case Token::T_DATABASE:
+      return createDatabaseStatement();
+    default:
+      RAISEF(
+        kParseError,
+        "unexpected token $0$1$2, expected one of SELECT, DRAW or IMPORT",
+          Token::getTypeName(cur_token_->getType()),
+          cur_token_->getString().size() > 0 ? ": " : "",
+          cur_token_->getString().c_str());
+
+  }
 }
 
 ASTNode* Parser::createTableStatement() {
@@ -507,6 +523,7 @@ ASTNode* Parser::columnDefinition() {
   return column;
 }
 
+
 ASTNode* Parser::primaryKeyDefinition() {
   consumeToken();
   expectAndConsume(Token::T_KEY);
@@ -531,6 +548,22 @@ ASTNode* Parser::primaryKeyDefinition() {
   expectAndConsume(Token::T_RPAREN);
 
   return primary_key;
+}
+
+ASTNode* Parser::createDatabaseStatement() {
+  expectAndConsume(Token::T_DATABASE);
+
+  auto create_database = new ASTNode(ASTNode::T_CREATE_DATABASE);
+  auto name = new ASTNode(ASTNode::T_DATABASE_NAME);
+  name->setToken(cur_token_);
+  create_database->appendChild(name);
+  consumeToken();
+
+  if (*cur_token_ == Token::T_SEMICOLON) {
+    consumeToken();
+  }
+
+  return create_database;
 }
 
 ASTNode* Parser::insertStatement() {
@@ -620,6 +653,99 @@ ASTNode* Parser::insertFromJSON() {
 
   consumeToken();
   return json;
+}
+
+ASTNode* Parser::nestedColumnName() {
+  /* column_name[.column_name...] */
+  assertExpectation(Token::T_IDENTIFIER);
+  auto name_str = consumeToken()->getString();
+  while (lookahead(0, Token::T_DOT)) {
+    consumeToken();
+    assertExpectation(Token::T_IDENTIFIER);
+    name_str += "." + cur_token_->getString();
+    consumeToken();
+  }
+
+  auto column_name = new ASTNode(ASTNode::T_COLUMN_NAME);
+  column_name->setToken(new Token(Token::T_IDENTIFIER, name_str));
+
+  return column_name;
+}
+
+ASTNode* Parser::addColumnDefinition() {
+  auto column = new ASTNode(ASTNode::T_COLUMN);
+  column->appendChild(nestedColumnName());
+
+  bool repeated = false;
+  if (*cur_token_ == Token::T_REPEATED) {
+    repeated = true;
+    consumeToken();
+  }
+
+  if (*cur_token_ == Token::T_RECORD) {
+    column->appendChild(new ASTNode(ASTNode::T_RECORD));
+    consumeToken();
+  } else {
+    auto id = new ASTNode(ASTNode::T_COLUMN_TYPE);
+    id->setToken(cur_token_);
+    column->appendChild(id);
+    consumeToken();
+  }
+
+  if (*cur_token_ == Token::T_NOT) {
+    consumeToken();
+    expectAndConsume(Token::T_NULL);
+    column->appendChild(ASTNode::T_NOT_NULL);
+  }
+
+  if (repeated) {
+    column->appendChild(new ASTNode(ASTNode::T_REPEATED));
+  }
+
+  return column;
+}
+
+ASTNode* Parser::alterStatement() {
+  consumeToken();
+  expectAndConsume(Token::T_TABLE);
+
+  auto alter_table = new ASTNode(ASTNode::T_ALTER_TABLE);
+  alter_table->appendChild(tableName());
+
+  while (*cur_token_ != Token::T_SEMICOLON) {
+    switch (cur_token_->getType()) {
+      case Token::T_ADD:
+        consumeToken();
+        consumeIf(Token::T_COLUMN);
+        alter_table->appendChild(addColumnDefinition());
+        break;
+
+      case Token::T_DROP: {
+        consumeToken();
+        consumeIf(Token::T_COLUMN);
+        alter_table->appendChild(nestedColumnName());
+        break;
+      }
+
+      default:
+        RAISEF(
+          kParseError,
+          "unexpected token $0$1$2, expected one of ADD or DROP",
+          Token::getTypeName(cur_token_->getType()),
+          cur_token_->getString().size() > 0 ? ": " : "",
+          cur_token_->getString().c_str());
+    }
+
+    if (*cur_token_ == Token::T_COMMA) {
+      consumeToken();
+    } else {
+      break;
+    }
+  }
+
+  consumeIf(Token::T_SEMICOLON);
+
+  return alter_table;
 }
 
 ASTNode* Parser::importStatement() {

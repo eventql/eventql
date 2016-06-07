@@ -45,6 +45,8 @@ public:
 
 protected:
 
+  bool openNextTable();
+
   csql::Transaction* txn_;
   csql::ExecutionContext* execution_context_;
   RefPtr<Table> table_;

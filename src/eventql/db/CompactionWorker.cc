@@ -34,7 +34,7 @@
 #include <eventql/db/LogPartitionReader.h>
 #include <eventql/util/protobuf/MessageDecoder.h>
 #include <eventql/io/cstable/RecordShredder.h>
-#include <eventql/io/cstable/CSTableWriter.h>
+#include <eventql/io/cstable/cstable_writer.h>
 
 #include "eventql/eventql.h"
 

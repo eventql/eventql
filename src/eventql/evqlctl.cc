@@ -25,258 +25,193 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <signal.h>
-#include "eventql/util/io/filerepository.h"
-#include "eventql/util/io/fileutil.h"
 #include "eventql/util/application.h"
-#include "eventql/util/logging.h"
-#include "eventql/util/random.h"
 #include "eventql/util/thread/eventloop.h"
-#include "eventql/util/thread/threadpool.h"
-#include "eventql/util/thread/FixedSizeThreadPool.h"
-#include "eventql/util/wallclock.h"
-#include "eventql/util/VFS.h"
 #include "eventql/util/cli/flagparser.h"
-#include "eventql/util/json/json.h"
-#include "eventql/util/json/jsonrpc.h"
-#include "eventql/util/http/httprouter.h"
-#include "eventql/util/http/httpserver.h"
-#include "eventql/util/http/httpconnectionpool.h"
-#include "eventql/util/http/VFSFileServlet.h"
-#include "eventql/util/cli/CLI.h"
-#include "eventql/util/cli/flagparser.h"
-#include "eventql/config/config_directory.h"
-#include "eventql/config/config_directory_zookeeper.h"
-#include "eventql/master/master_service.h"
+#include <eventql/config/process_config.h>
+#include <eventql/cli/commands/cluster_add_server.h>
+#include <eventql/cli/commands/cluster_create.h>
+#include <eventql/cli/commands/cluster_status.h>
+#include <eventql/cli/commands/cluster_remove_server.h>
+#include <eventql/cli/commands/namespace_create.h>
+#include <eventql/cli/commands/rebalance.h>
+#include <eventql/cli/commands/table_split.h>
 
 using namespace eventql;
 
 thread::EventLoop ev;
 
-void cmd_cluster_status(const cli::FlagParser& flags) {
-  //ConfigDirectoryClient cclient(
-  //    InetAddr::resolve(flags.getString("master")));
-
-  //auto cluster = cclient.fetchClusterConfig();
-  //iputs("Cluster config:\n$0", cluster.DebugString());
-}
-
-void cmd_cluster_add_server(const cli::FlagParser& flags) {
-  auto cdir = mkScoped(
-      new ZookeeperConfigDirectory(
-            flags.getString("zookeeper_addr"),
-            None<String>(),
-            ""));
-
-  cdir->startAndJoin(flags.getString("cluster_name"));
-
-  ServerConfig cfg;
-  cfg.set_server_id(flags.getString("server_name"));
-  for (size_t i = 0; i < 128; ++i) {
-    cfg.add_sha1_tokens(Random::singleton()->sha1().toString());
-  }
-
-  cdir->updateServerConfig(cfg);
-
-  cdir->stop();
-}
-
-void cmd_cluster_create(const cli::FlagParser& flags) {
-  auto cdir = mkScoped(
-      new ZookeeperConfigDirectory(
-            flags.getString("zookeeper_addr"),
-            None<String>(),
-            ""));
-
-  cdir->startAndJoin(flags.getString("cluster_name"));
-
-  ClusterConfig cfg;
-  cdir->updateClusterConfig(cfg);
-
-  cdir->stop();
-}
-
-void cmd_namespace_create(const cli::FlagParser& flags) {
-  auto cdir = mkScoped(
-      new ZookeeperConfigDirectory(
-            flags.getString("zookeeper_addr"),
-            None<String>(),
-            ""));
-
-  cdir->startAndJoin(flags.getString("cluster_name"));
-
-  NamespaceConfig cfg;
-  cfg.set_customer(flags.getString("namespace"));
-  cdir->updateNamespaceConfig(cfg);
-
-  cdir->stop();
-}
-
-void cmd_rebalance(const cli::FlagParser& flags) {
-  auto cdir = mkScoped(
-      new ZookeeperConfigDirectory(
-            flags.getString("zookeeper_addr"),
-            None<String>(),
-            ""));
-
-  cdir->startAndJoin(flags.getString("cluster_name"));
-  MasterService master(cdir.get());
-  auto rc = master.runOnce();
-  cdir->stop();
-
-  if (!rc.isSuccess()) {
-    logFatal("evqlctl", "ERROR: $0", rc.message());
-  } else {
-    logInfo("evqlctl", "SUCCESS");
-  }
-}
-
 int main(int argc, const char** argv) {
+  ::cli::FlagParser flags;
+
+  flags.defineFlag(
+      "help",
+      ::cli::FlagParser::T_SWITCH,
+      false,
+      "?",
+      NULL,
+      "help",
+      "<help>");
+
+  flags.defineFlag(
+      "version",
+      ::cli::FlagParser::T_SWITCH,
+      false,
+      "v",
+      NULL,
+      "print version",
+      "<switch>");
+
+  flags.defineFlag(
+      "config",
+      ::cli::FlagParser::T_STRING,
+      false,
+      "c",
+      NULL,
+      "path to config file",
+      "<config_file>");
+
+  flags.defineFlag(
+      "config_set",
+      ::cli::FlagParser::T_STRING,
+      false,
+      "C",
+      NULL,
+      "set config option",
+      "<key>=<val>");
+
+  flags.parseArgv(argc, argv);
+  auto stdin_is = FileInputStream::getStdin();
+  auto stdout_os = OutputStream::getStdout();
+  auto stderr_os = OutputStream::getStderr();
+  Vector<String> cmd_argv = flags.getArgv();
+
   Application::init();
   Application::logToStderr("evqlctl");
 
-  cli::FlagParser flags;
+  /* load config */
+  ProcessConfigBuilder config_builder;
+  if (flags.isSet("config")) {
+    auto rc = config_builder.loadFile(flags.getString("config"));
+    if (!rc.isSuccess()) {
+      stderr_os->write(StringUtil::format("ERROR: $0\n", rc.message()));
+      return 1;
+    }
+  } else {
+    config_builder.loadDefaultConfigFile();
+  }
 
-  flags.defineFlag(
-      "loglevel",
-      cli::FlagParser::T_STRING,
-      false,
-      NULL,
-      "INFO",
-      "loglevel",
-      "<level>");
+  for (const auto& opt : flags.getStrings("config_set")) {
+    auto opt_key_end = opt.find("=");
+    if (opt_key_end == String::npos) {
+      stderr_os->write(
+          StringUtil::format("ERROR: invalid config option: $0\n", opt));
+      return 1;
+    }
 
-  flags.parseArgv(argc, argv);
+    config_builder.setProperty(
+        opt.substr(0, opt_key_end),
+        opt.substr(opt_key_end + 1));
+  }
 
-  Logger::get()->setMinimumLogLevel(
-      strToLogLevel(flags.getString("loglevel")));
+  auto process_config = config_builder.getConfig();
 
-  cli::CLI cli;
+  /* init commands */
+  List<eventql::cli::CLICommand*> commands;
+  commands.emplace_back(new eventql::cli::ClusterAddServer(process_config));
+  commands.emplace_back(new eventql::cli::ClusterCreate(process_config));
+  commands.emplace_back(new eventql::cli::ClusterRemoveServer(process_config));
+  commands.emplace_back(new eventql::cli::ClusterStatus(process_config));
+  commands.emplace_back(new eventql::cli::NamespaceCreate(process_config));
+  commands.emplace_back(new eventql::cli::Rebalance(process_config));
+  commands.emplace_back(new eventql::cli::TableSplit(process_config));
 
-  /* command: cluster_status */
-  auto cluster_status_cmd = cli.defineCommand("cluster-status");
-  cluster_status_cmd->onCall(
-      std::bind(&cmd_cluster_status, std::placeholders::_1));
+  /* print help/version and exit */
+  bool print_help = flags.isSet("help");
+  bool print_version = flags.isSet("version");
+  if (cmd_argv.size() > 0 && cmd_argv[0] == "help") {
+    print_help = true;
+    cmd_argv.erase(cmd_argv.begin());
+  }
+  auto help_topic = cmd_argv.size() > 0 ? cmd_argv.front() : "";
 
-  cluster_status_cmd->flags().defineFlag(
-      "master",
-      cli::FlagParser::T_STRING,
-      true,
-      NULL,
-      NULL,
-      "url",
-      "<addr>");
+  if (print_version || (print_help && help_topic.empty())) {
+    auto stdout_os = OutputStream::getStdout();
+    stdout_os->write(
+        StringUtil::format(
+            "EventQL $0 ($1)\n"
+            "Copyright (c) 2016, zScale Techology GmbH. All rights reserved.\n\n",
+            kVersionString,
+            kBuildID));
+  }
 
-  /* command: cluster_add_server */
-  auto cluster_add_server_cmd = cli.defineCommand("cluster-add-server");
-  cluster_add_server_cmd->onCall(
-      std::bind(&cmd_cluster_add_server, std::placeholders::_1));
+  if (print_version) {
+    return 0;
+  }
 
-  cluster_add_server_cmd->flags().defineFlag(
-      "zookeeper_addr",
-      cli::FlagParser::T_STRING,
-      false,
-      NULL,
-      NULL,
-      "url",
-      "<addr>");
+  if (print_help) {
+    if (help_topic.empty()) {
+      stdout_os->write(
+        "Usage: $ evqlctl [OPTIONS] <command> [<args>]\n\n"
+        "   -c, --config <file>       Load config from file\n"
+        "   -C name=value             Define a config value on the command line\n"
+        "   -?, --help <topic>        Display a command's help text and exit\n"
+        "   -v, --version             Display the version of this binary and exit\n\n"
+        "evqctl commands:\n"
+      );
 
-  cluster_add_server_cmd->flags().defineFlag(
-      "cluster_name",
-      cli::FlagParser::T_STRING,
-      true,
-      NULL,
-      NULL,
-      "node name",
-      "<string>");
+      for (const auto c : commands) {
+        stdout_os->printf("   %-26.26s", c->getName().c_str());
+        stdout_os->printf("%-80.80s\n", c->getDescription().c_str());
+      }
 
-  cluster_add_server_cmd->flags().defineFlag(
-      "server_name",
-      cli::FlagParser::T_STRING,
-      true,
-      NULL,
-      NULL,
-      "node name",
-      "<string>");
+      stdout_os->write(
+        "\nSee 'evqlctl help <command>' to read about a specific subcommand.\n"
+      );
 
-  /* command: cluster-create */
-  auto cluster_create_node_cmd = cli.defineCommand("cluster-create");
-  cluster_create_node_cmd->onCall(
-      std::bind(&cmd_cluster_create, std::placeholders::_1));
+      return 0;
+    }
 
-  cluster_create_node_cmd->flags().defineFlag(
-      "zookeeper_addr",
-      cli::FlagParser::T_STRING,
-      false,
-      NULL,
-      NULL,
-      "url",
-      "<addr>");
+    for (auto c : commands) {
+      if (c->getName() == help_topic) {
+        c->printHelp(stdout_os.get());
+        return 0;
+      }
+    }
 
-  cluster_create_node_cmd->flags().defineFlag(
-      "cluster_name",
-      cli::FlagParser::T_STRING,
-      true,
-      NULL,
-      NULL,
-      "node name",
-      "<string>");
+    stderr_os->write(StringUtil::format(
+        "evqlctl: No manual entry for evqlctl '$0'\n",
+        help_topic));
+    return 1;
+  }
 
-  /* command: namespace-create */
-  auto namespace_create_node_cmd = cli.defineCommand("namespace-create");
-  namespace_create_node_cmd->onCall(
-      std::bind(&cmd_namespace_create, std::placeholders::_1));
+  /* execute command */
+  String cmd_name;
+  if (cmd_argv.empty()) {
+    stderr_os->write(
+      "evqlctl: command is not specified. See 'evqlctl --help'.\n");
+    return 1;
+  } else {
+    cmd_name = cmd_argv.front();
+    cmd_argv.erase(cmd_argv.begin());
+  }
 
-  namespace_create_node_cmd->flags().defineFlag(
-      "zookeeper_addr",
-      cli::FlagParser::T_STRING,
-      false,
-      NULL,
-      NULL,
-      "url",
-      "<addr>");
+  for (auto c : commands) {
+    if (c->getName() == cmd_name) {
+      auto rc = c->execute(
+          cmd_argv,
+          stdin_is.get(),
+          stdout_os.get(),
+          stderr_os.get());
 
-  namespace_create_node_cmd->flags().defineFlag(
-      "cluster_name",
-      cli::FlagParser::T_STRING,
-      true,
-      NULL,
-      NULL,
-      "node name",
-      "<string>");
+      return rc.isSuccess() ? 0 : 1;
+    }
+  }
 
-  namespace_create_node_cmd->flags().defineFlag(
-      "namespace",
-      cli::FlagParser::T_STRING,
-      true,
-      NULL,
-      NULL,
-      "node name",
-      "<string>");
+  stderr_os->write(StringUtil::format(
+      "evqlctl: '$0' is not a evqlctl command. See 'evqlctl --help'.\n",
+      cmd_name));
 
-  /* command: rebalance */
-  auto rebalance_node_cmd = cli.defineCommand("rebalance");
-  rebalance_node_cmd->onCall(
-      std::bind(&cmd_rebalance, std::placeholders::_1));
-
-  rebalance_node_cmd->flags().defineFlag(
-      "zookeeper_addr",
-      cli::FlagParser::T_STRING,
-      false,
-      NULL,
-      NULL,
-      "url",
-      "<addr>");
-
-  rebalance_node_cmd->flags().defineFlag(
-      "cluster_name",
-      cli::FlagParser::T_STRING,
-      true,
-      NULL,
-      NULL,
-      "node name",
-      "<string>");
-
-  cli.call(flags.getArgv());
-  return 0;
+  return 1;
 }
 

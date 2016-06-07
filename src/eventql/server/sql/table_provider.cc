@@ -121,9 +121,10 @@ Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
   }
 
   auto partitioner = table.get()->partitioner();
-  Set<SHA1Hash> partitions;
+  Vector<TableScan::PartitionLocation> partitions;
   if (table_ref.partition_key.isEmpty()) {
-    if (table.get()->partitionerType() == TBL_PARTITION_TIMEWINDOW) {
+    if (table.get()->partitionerType() == TBL_PARTITION_TIMEWINDOW &&
+        table.get()->storage() == TBL_STORAGE_COLSM) {
       auto keyrange = findKeyRange(
           table.get()->config().config().partition_key(),
           seqscan->constraints());
@@ -141,17 +142,39 @@ Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
       }
 
       for (const auto& p : partition_list.partitions()) {
-        partitions.emplace(
-            SHA1Hash(p.partition_id().data(), p.partition_id().size()));
+        TableScan::PartitionLocation pl;
+        pl.partition_id = SHA1Hash(
+            p.partition_id().data(),
+            p.partition_id().size());
+
+        for (const auto& s : p.servers()) {
+          auto server_cfg = cdir_->getServerConfig(s);
+          if (server_cfg.server_status() != SERVER_UP) {
+            continue;
+          }
+
+          ReplicaRef rref(SHA1::compute(s), server_cfg.server_addr());
+          rref.name = s;
+          pl.servers.emplace_back(rref);
+        }
+
+        partitions.emplace_back(pl);
       }
     } else {
       auto partitioner = table.get()->partitioner();
       for (const auto& p : partitioner->listPartitions(seqscan->constraints())) {
-        partitions.emplace(p);
+        TableScan::PartitionLocation pl;
+        pl.partition_id = p;
+        if (!replication_scheme_->hasLocalReplica(p)) {
+          pl.servers = replication_scheme_->replicasFor(p);
+        }
+        partitions.emplace_back(pl);
       }
     }
   } else {
-    partitions.emplace(table_ref.partition_key.get());
+    TableScan::PartitionLocation pl;
+    pl.partition_id = table_ref.partition_key.get();
+    partitions.emplace_back(pl);
   }
 
   return Option<ScopedPtr<csql::TableExpression>>(
@@ -161,10 +184,9 @@ Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
               execution_context,
               tsdb_namespace_,
               table_ref.table_key,
-              Vector<SHA1Hash>(partitions.begin(), partitions.end()),
+              partitions,
               seqscan,
               partition_map_,
-              replication_scheme_,
               auth_)));
 }
 
@@ -177,7 +199,8 @@ static HashMap<String, msg::FieldType> kTypeMap = {
   { "UINT32", msg::FieldType::UINT32 },
   { "UINT64", msg::FieldType::UINT64 },
   { "DOUBLE", msg::FieldType::DOUBLE },
-  { "FLOAT", msg::FieldType::DOUBLE }
+  { "FLOAT", msg::FieldType::DOUBLE },
+  { "RECORD", msg::FieldType::OBJECT }
 };
 
 static Status buildMessageSchema(
@@ -277,6 +300,49 @@ Status TSDBTableProvider::createTable(
       create_table.getTableName(),
       *msg_schema,
       primary_key);
+}
+
+Status TSDBTableProvider::createDatabase(const String& database_name) {
+  return Status(eRuntimeError, "permission denied");
+}
+
+Status TSDBTableProvider::alterTable(const csql::AlterTableNode& alter_table) {
+  auto operations = alter_table.getOperations();
+  Vector<TableService::AlterTableOperation> tbl_operations;
+  for (auto o : operations) {
+    if (o.optype == csql::AlterTableNode::AlterTableOperationType::OP_ADD_COLUMN) {
+      auto type_str = o.column_type;
+      StringUtil::toUpper(&type_str);
+      auto type = kTypeMap.find(type_str);
+      if (type == kTypeMap.end()) {
+        return Status(
+            eIllegalArgumentError,
+            StringUtil::format(
+                "invalid type: '$0' for column '$1'",
+                o.column_type,
+                o.column_name));
+      }
+
+      TableService::AlterTableOperation operation;
+      operation.optype = TableService::AlterTableOperationType::OP_ADD_COLUMN;
+      operation.field_name = o.column_name;
+      operation.field_type = type->second;
+      operation.is_repeated = o.is_repeated;
+      operation.is_optional = o.is_optional;
+      tbl_operations.emplace_back(operation);
+
+    } else {
+      TableService::AlterTableOperation operation;
+      operation.optype = TableService::AlterTableOperationType::OP_REMOVE_COLUMN;
+      operation.field_name = o.column_name;
+      tbl_operations.emplace_back(operation);
+    }
+  }
+
+  return table_service_->alterTable(
+      tsdb_namespace_,
+      alter_table.getTableName(),
+      tbl_operations);
 }
 
 Status TSDBTableProvider::insertRecord(

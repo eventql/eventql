@@ -39,10 +39,6 @@
 namespace io {
 
 /**
- * FIXPAUL TODO AllocationPolicy
- */
-
-/**
  * This is an internal class. For usage instructions and extended documentation
  * please refer to "storagebackend.h" and "database.h"
  */

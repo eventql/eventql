@@ -38,6 +38,9 @@ public:
     RAISE(kNotYetImplementedError);
   }
 
+  Status start() override;
+  void stop() override;
+
   ClusterConfig getClusterConfig() const override;
 
   void updateClusterConfig(ClusterConfig config) override;
@@ -79,13 +82,6 @@ public:
   void setTableConfigChangeCallback(
       Function<void (const TableDefinition& tbl)> fn) override;
 
-  Status startAndJoin(const String& cluster_name) override;
-  Status startAndCreate(
-      const String& cluster_name,
-      const ClusterConfig& config) override;
-
-  void stop() override;
-
 protected:
 
   enum ConfigTopic : uint64_t {
@@ -106,7 +102,6 @@ protected:
   protected:
     InetAddr master_addr_;
   };
-
 
   void sync();
 

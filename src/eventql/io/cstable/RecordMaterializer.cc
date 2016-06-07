@@ -57,7 +57,7 @@ void RecordMaterializer::skipRecord() {
       column.fetchIfNotPending();
       column.consume();
 
-      if (column.reader->eofReached()) {
+      if (column.reader->nextRepetitionLevel() == 0) {
         break;
       }
 
@@ -94,7 +94,7 @@ void RecordMaterializer::loadColumn(
 
     column->consume();
 
-    if (column->reader->eofReached()) {
+    if (column->reader->nextRepetitionLevel() == 0) {
       break;
     }
 

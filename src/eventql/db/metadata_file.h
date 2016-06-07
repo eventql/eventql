@@ -35,7 +35,7 @@ namespace eventql {
 class MetadataFile : public RefCounted {
 public:
 
-  static const uint32_t kBinaryFormatVersion = 1;
+  static const uint32_t kBinaryFormatVersion = 2;
 
   struct PartitionPlacement {
     String server_id;
@@ -43,6 +43,8 @@ public:
   };
 
   struct PartitionMapEntry {
+    PartitionMapEntry();
+
     String begin;
     SHA1Hash partition_id;
     Vector<PartitionPlacement> servers;
@@ -50,6 +52,8 @@ public:
     Vector<PartitionPlacement> servers_leaving;
     bool splitting;
     String split_point;
+    SHA1Hash split_partition_id_low;
+    SHA1Hash split_partition_id_high;
     Vector<PartitionPlacement> split_servers_low;
     Vector<PartitionPlacement> split_servers_high;
   };
@@ -99,6 +103,8 @@ public:
   Status decode(InputStream* is);
   Status encode(OutputStream* os) const;
 
+  Status computeChecksum(SHA1Hash* checksum) const;
+
 protected:
   SHA1Hash transaction_id_;
   uint64_t transaction_seq_;
@@ -106,5 +112,20 @@ protected:
   Vector<PartitionMapEntry> partition_map_;
 };
 
+/**
+ * Compare two keys, returns -1 if a < b, 0 if a == b and 1 if a > b
+ */
+int comparePartitionKeys(
+    KeyspaceType keyspace_type,
+    const String& a,
+    const String& b);
+
+String encodePartitionKey(
+    KeyspaceType keyspace_type,
+    const String& key);
+
+String decodePartitionKey(
+    KeyspaceType keyspace_type,
+    const String& key);
 
 } // namespace eventql

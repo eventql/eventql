@@ -80,6 +80,20 @@ TableStorage Table::storage() const {
   return config_.config().storage();
 }
 
+KeyspaceType Table::getKeyspaceType() const {
+  switch (config_.config().partitioner()) {
+
+    case TBL_PARTITION_TIMEWINDOW:
+      return KEYSPACE_UINT64;
+      break;
+
+    case TBL_PARTITION_FIXED:
+      RAISE(kIllegalArgumentError, "static partitions don't have a keyspace");
+      break;
+
+  }
+}
+
 const String& Table::getPartitionKey() const {
   std::unique_lock<std::mutex> lk(mutex_);
   return config_.config().partition_key();

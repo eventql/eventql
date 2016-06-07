@@ -226,6 +226,10 @@ evql_sql_a_SOURCES = \
     eventql/sql/qtree/UnionNode.cc \
     eventql/sql/qtree/UnionNode.h \
     eventql/sql/qtree/ValueExpressionNode.h \
+    eventql/sql/qtree/nodes/create_database.cc \
+    eventql/sql/qtree/nodes/create_database.h \
+    eventql/sql/qtree/nodes/alter_table.cc \
+    eventql/sql/qtree/nodes/alter_table.h \
     eventql/sql/qtree/nodes/create_table.cc \
     eventql/sql/qtree/nodes/create_table.h \
     eventql/sql/qtree/nodes/insert_into.cc \
@@ -283,12 +287,13 @@ noinst_LIBRARIES += evql_sql.a
 
 ################# LIB: evql_cstable.a ####################
 evql_cstable_a_SOURCES = \
-    eventql/io/cstable/CSTableReader.cc \
-    eventql/io/cstable/CSTableReader.h \
-    eventql/io/cstable/CSTableWriter.cc \
-    eventql/io/cstable/CSTableWriter.h \
+    eventql/io/cstable/cstable_file.cc \
+    eventql/io/cstable/cstable_file.h \
+    eventql/io/cstable/cstable_reader.cc \
+    eventql/io/cstable/cstable_reader.h \
+    eventql/io/cstable/cstable_writer.cc \
+    eventql/io/cstable/cstable_writer.h \
     eventql/io/cstable/LockManager.h \
-    eventql/io/cstable/columns/UInt64ColumnWriter.h \
     eventql/io/cstable/columns/v1/ColumnReader.h \
     eventql/io/cstable/io/PageReader.h \
     eventql/io/cstable/io/PageWriter.h \
@@ -302,16 +307,30 @@ evql_cstable_a_SOURCES = \
     eventql/io/cstable/RecordShredder.h \
     eventql/io/cstable/TableSchema.cc \
     eventql/io/cstable/TableSchema.h \
-    eventql/io/cstable/columns/BitPackedIntPageWriter.cc \
-    eventql/io/cstable/columns/BitPackedIntPageWriter.h \
-    eventql/io/cstable/columns/UInt64PageReader.cc \
-    eventql/io/cstable/columns/UInt64PageReader.h \
-    eventql/io/cstable/columns/UInt64PageWriter.cc \
-    eventql/io/cstable/columns/UInt64PageWriter.h \
-    eventql/io/cstable/columns/UnsignedIntColumnReader.cc \
-    eventql/io/cstable/columns/UnsignedIntColumnReader.h \
-    eventql/io/cstable/columns/UnsignedIntColumnWriter.cc \
-    eventql/io/cstable/columns/UnsignedIntColumnWriter.h \
+    eventql/io/cstable/columns/column_reader_uint.cc \
+    eventql/io/cstable/columns/column_reader_uint.h \
+    eventql/io/cstable/columns/column_reader_string.cc \
+    eventql/io/cstable/columns/column_reader_string.h \
+    eventql/io/cstable/columns/column_writer_uint.cc \
+    eventql/io/cstable/columns/column_writer_uint.h \
+    eventql/io/cstable/columns/column_writer_string.cc \
+    eventql/io/cstable/columns/column_writer_string.h \
+    eventql/io/cstable/columns/column_writer_float.cc \
+    eventql/io/cstable/columns/column_writer_float.h \
+    eventql/io/cstable/columns/page_reader_uint64.cc \
+    eventql/io/cstable/columns/page_reader_uint64.h \
+    eventql/io/cstable/columns/page_reader_leb128.cc \
+    eventql/io/cstable/columns/page_reader_leb128.h \
+    eventql/io/cstable/columns/page_reader_lenencstring.cc \
+    eventql/io/cstable/columns/page_reader_lenencstring.h \
+    eventql/io/cstable/columns/page_writer_uint64.cc \
+    eventql/io/cstable/columns/page_writer_uint64.h \
+    eventql/io/cstable/columns/page_writer_leb128.cc \
+    eventql/io/cstable/columns/page_writer_leb128.h \
+    eventql/io/cstable/columns/page_writer_bitpacked.cc \
+    eventql/io/cstable/columns/page_writer_bitpacked.h \
+    eventql/io/cstable/columns/page_writer_lenencstring.cc \
+    eventql/io/cstable/columns/page_writer_lenencstring.h \
     eventql/io/cstable/columns/v1/BitPackedIntColumnReader.cc \
     eventql/io/cstable/columns/v1/BitPackedIntColumnReader.h \
     eventql/io/cstable/columns/v1/BitPackedIntColumnWriter.cc \
@@ -344,10 +363,8 @@ evql_cstable_a_SOURCES = \
     eventql/io/cstable/columns/v1/UInt64ColumnWriter.h \
     eventql/io/cstable/cstable.cc \
     eventql/io/cstable/cstable.h \
-    eventql/io/cstable/io/PageIndex.cc \
-    eventql/io/cstable/io/PageIndex.h \
-    eventql/io/cstable/io/PageManager.cc \
-    eventql/io/cstable/io/PageManager.h
+    eventql/io/cstable/page_manager.cc \
+    eventql/io/cstable/page_manager.h
 
 noinst_LIBRARIES += evql_cstable.a
 
@@ -786,8 +803,12 @@ evql_core_a_SOURCES = \
     eventql/config/config_directory.h \
     eventql/config/config_directory_legacy.cc \
     eventql/config/config_directory_legacy.h \
+    eventql/config/config_directory_standalone.cc \
+    eventql/config/config_directory_standalone.h \
     eventql/config/config_directory_zookeeper.cc \
     eventql/config/config_directory_zookeeper.h \
+    eventql/config/process_config.cc \
+    eventql/config/process_config.h \
     eventql/db/CompactionStrategy.cc \
     eventql/db/CompactionStrategy.h \
     eventql/db/CompactionWorker.cc \
@@ -838,8 +859,8 @@ evql_core_a_SOURCES = \
     eventql/db/PartitionSnapshot.h \
     eventql/db/PartitionWriter.cc \
     eventql/db/PartitionWriter.h \
-    eventql/db/RecordArena.cc \
-    eventql/db/RecordArena.h \
+    eventql/db/partition_arena.cc \
+    eventql/db/partition_arena.h \
     eventql/db/RecordSet.cc \
     eventql/db/RecordSet.h \
     eventql/db/ReplicationScheme.cc \
@@ -848,6 +869,8 @@ evql_core_a_SOURCES = \
     eventql/db/ReplicationState.h \
     eventql/db/ReplicationWorker.cc \
     eventql/db/ReplicationWorker.h \
+    eventql/db/server_allocator.cc \
+    eventql/db/server_allocator.h \
     eventql/db/StaticPartitionReader.cc \
     eventql/db/StaticPartitionReader.h \
     eventql/db/StaticPartitionReplication.cc \
@@ -1016,6 +1039,22 @@ bin_PROGRAMS += evqld
 
 ################# BIN: evqld ####################
 evqlctl_SOURCES = \
+    eventql/cli/commands/cli_command.h \
+    eventql/cli/commands/cli_command.cc \
+    eventql/cli/commands/cluster_add_server.h \
+    eventql/cli/commands/cluster_add_server.cc \
+    eventql/cli/commands/cluster_create.h \
+    eventql/cli/commands/cluster_create.cc \
+    eventql/cli/commands/cluster_status.h \
+    eventql/cli/commands/cluster_status.cc \
+    eventql/cli/commands/cluster_remove_server.h \
+    eventql/cli/commands/cluster_remove_server.cc \
+    eventql/cli/commands/namespace_create.h \
+    eventql/cli/commands/namespace_create.cc \
+    eventql/cli/commands/rebalance.h \
+    eventql/cli/commands/rebalance.cc \
+    eventql/cli/commands/table_split.h \
+    eventql/cli/commands/table_split.cc \
     eventql/evqlctl.cc
 
 evqlctl_LDADD = \
@@ -1101,6 +1140,18 @@ test_evql_db_metadata_store_LDADD = \
 TESTS += test_evql_db_metadata_store
 check_PROGRAMS += test_evql_db_metadata_store
 
+################# TEST: db/metadata_store ####################
+test_evql_config_process_config_SOURCES = eventql/config/process_config_test.cc
+test_evql_config_process_config_LDADD = \
+    evql_core.a \
+    evql_util.a \
+    $(SIMDCOMP_LDADD) \
+    $(LMDB_LDADD) \
+    $(INIH_LDADD) \
+    $(PCRE_LDADD)
+
+TESTS += test_evql_config_process_config
+check_PROGRAMS += test_evql_config_process_config
 
 ################# TEST: db/metadata_file ####################
 test_evql_db_metadata_file_SOURCES = eventql/db/metadata_file_test.cc
@@ -1129,4 +1180,15 @@ test_evql_db_partition_discovery_LDADD = \
 TESTS += test_evql_db_partition_discovery
 check_PROGRAMS += test_evql_db_partition_discovery
 
+
+################# TEST: io/cstable ####################
+test_evql_io_cstable_SOURCES = eventql/io/cstable/cstable_test.cc
+test_evql_io_cstable_LDADD = \
+    evql_cstable.a \
+    evql_util.a \
+    $(SIMDCOMP_LDADD) \
+    $(PCRE_LDADD)
+
+TESTS += test_evql_io_cstable
+check_PROGRAMS += test_evql_io_cstable
 

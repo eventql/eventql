@@ -187,6 +187,12 @@ public:
    */
   bool isTTY() const override;
 
+  /**
+   * Seek to the provided offset in number of bytes from the beginning of the
+   * file
+   */
+  void seekTo(size_t offset);
+
 protected:
   int fd_;
   bool close_on_destroy_;

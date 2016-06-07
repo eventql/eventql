@@ -40,6 +40,37 @@ bool ColumnReader::readDateTime(
   }
 }
 
-} // namespace cstable
+DefaultColumnReader::DefaultColumnReader(
+    ColumnConfig config,
+    ScopedPtr<UnsignedIntPageReader> rlevel_reader,
+    ScopedPtr<UnsignedIntPageReader> dlevel_reader) :
+    config_(config),
+    rlevel_reader_(std::move(rlevel_reader)),
+    dlevel_reader_(std::move(dlevel_reader)) {}
 
+uint64_t DefaultColumnReader::maxRepetitionLevel() const {
+  return config_.rlevel_max;
+}
+
+uint64_t DefaultColumnReader::maxDefinitionLevel() const {
+  return config_.dlevel_max;
+}
+
+ColumnType DefaultColumnReader::type() const {
+  return config_.logical_type;
+}
+
+ColumnEncoding DefaultColumnReader::encoding() const {
+  return config_.storage_type;
+}
+
+uint64_t DefaultColumnReader::nextRepetitionLevel() {
+  if (config_.rlevel_max > 0) {
+    return rlevel_reader_->peek();
+  } else {
+    return 0;
+  }
+}
+
+} // namespace cstable
 

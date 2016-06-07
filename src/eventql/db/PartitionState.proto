@@ -28,9 +28,26 @@ message LSMTableRef {
   required string filename = 1;
   required uint64 first_sequence = 2;
   required uint64 last_sequence = 3;
+  optional uint64 size_bytes = 4;
 }
 
-// next id: 14
+message ReplicationTarget {
+  required string server_id = 1;
+  required uint64 placement_id = 2;
+  required bytes partition_id = 3;
+  optional bytes keyrange_begin = 4;
+  optional bytes keyrange_end = 5;
+  optional bool is_joining = 6;
+};
+
+enum PartitionLifecycleState {
+  PDISCOVERY_UNKNOWN = 0;
+  PDISCOVERY_LOAD = 1;
+  PDISCOVERY_SERVE = 2;
+  PDISCOVERY_UNLOAD = 3;
+};
+
+// next id: 31
 message PartitionState {
 
   /**
@@ -53,7 +70,7 @@ message PartitionState {
    * The end (exclusive) of this partition's key range (i.e. the first
    * key higher than the highest key that is still part of this partition)
    */
-  optional bytes partition_keyrange_end = 13;
+  optional bytes partition_keyrange_end = 27;
 
   /**
    * The table to which this partition belongs
@@ -75,7 +92,8 @@ message PartitionState {
    */
   optional uint64 lsm_sequence = 8;
 
-  optional ReplicationState replication_state = 9;
+  optional ReplicationState replication_state = 19;
+  repeated ReplicationTarget replication_targets = 14;
 
   /**
    * SHA1 sum (20 bytes) containing this partition's uuid. The uuid is used
@@ -94,11 +112,18 @@ message PartitionState {
   /**
    * Last known metadata transaction id
    */
-  optional bytes last_metadata_txnid = 10;
+  optional bytes last_metadata_txnid = 28;
 
   /**
    * Last known metadata transaction sequence
    */
-  optional uint64 last_metadata_txnseq = 11;
+  optional uint64 last_metadata_txnseq = 29;
+
+  optional PartitionLifecycleState lifecycle_state = 20;
+
+  optional bool is_splitting = 23;
+  repeated bytes split_partition_ids = 24;
+
+  optional bool has_joining_servers = 30;
 
 };

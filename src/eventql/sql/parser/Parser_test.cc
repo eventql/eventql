@@ -2,6 +2,7 @@
  * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
  * Authors:
  *   - Paul Asmuth <paul@zscale.io>
+ *   - Laura Schlimmer <laura@zscale.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -384,7 +385,7 @@ TEST_CASE(ParserTest, TestSelectWithQuotedTableName, [] () {
 
 TEST_CASE(ParserTest, TestSelectMustBeFirstAssert, [] () {
   const char* err_msg = "unexpected token T_GROUP, expected one of SELECT, "
-      "DRAW or IMPORT";
+      "CREATE, INSERT, ALTER, DRAW or IMPORT";
 
   EXPECT_EXCEPTION(err_msg, [] () {
     auto parser = parseTestQuery("GROUP BY SELECT");
@@ -1206,3 +1207,58 @@ TEST_CASE(ParserTest, TestInsertIntoFromJSONStatement, [] () {
 
   EXPECT(*children[1] == ASTNode::T_JSON_STRING);
 });
+
+TEST_CASE(ParserTest, TestCreateDatabaseStatement, [] () {
+  auto runtime = Runtime::getDefaultRuntime();
+  auto txn = runtime->newTransaction();
+
+  auto parser = parseTestQuery("CREATE DATABASE events;");
+
+  EXPECT(parser.getStatements().size() == 1);
+  const auto& stmt = parser.getStatements()[0];
+  EXPECT(*stmt == ASTNode::T_CREATE_DATABASE);
+
+  EXPECT_EQ(stmt->getChildren().size(), 1);
+  EXPECT(*stmt->getChildren()[0] == ASTNode::T_DATABASE_NAME);
+  EXPECT_EQ(*stmt->getChildren()[0]->getToken(), Token::T_IDENTIFIER);
+  EXPECT_EQ(stmt->getChildren()[0]->getToken()->getString(), "events");
+});
+
+TEST_CASE(ParserTest, TestAlterTableStatement, [] () {
+  auto runtime = Runtime::getDefaultRuntime();
+  auto txn = runtime->newTransaction();
+
+  auto parser = parseTestQuery(
+      R"(
+          ALTER TABLE evtbl
+            ADD description.id REPEATED String,
+            ADD COLUMN product RECORD,
+            DROP place,
+            DROP column version;
+      )");
+
+  EXPECT(parser.getStatements().size() == 1);
+  const auto& stmt = parser.getStatements()[0];
+  const auto& children = stmt->getChildren();
+  EXPECT_EQ(children.size(), 5);
+  EXPECT_EQ(*children[0], ASTNode::T_TABLE_NAME);
+  EXPECT_EQ(children[0]->getToken()->getString(), "evtbl");
+
+  EXPECT_EQ(*children[1], ASTNode::T_COLUMN);
+  EXPECT_EQ(*children[1]->getChildren()[0], ASTNode::T_COLUMN_NAME);
+  EXPECT_EQ(*children[1]->getChildren()[1], ASTNode::T_COLUMN_TYPE);
+  EXPECT_EQ(children[1]->getChildren()[1]->getToken()->getString(), "String");
+  EXPECT_EQ(*children[1]->getChildren()[2], ASTNode::T_REPEATED);
+  EXPECT_EQ(children[1]->getChildren()[0]->getToken()->getString(), "description.id");
+
+  EXPECT_EQ(*children[2], ASTNode::T_COLUMN);
+  EXPECT_EQ(children[2]->getChildren()[0]->getToken()->getString(), "product");
+  EXPECT_EQ(*children[2]->getChildren()[0], ASTNode::T_COLUMN_NAME);
+  EXPECT_EQ(*children[2]->getChildren()[1], ASTNode::T_RECORD);
+
+  EXPECT_EQ(*children[3], ASTNode::T_COLUMN_NAME);
+  EXPECT_EQ(children[3]->getToken()->getString(), "place");
+  EXPECT_EQ(*children[4], ASTNode::T_COLUMN_NAME);
+  EXPECT_EQ(children[4]->getToken()->getString(), "version");
+});
+

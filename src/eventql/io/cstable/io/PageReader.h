@@ -31,12 +31,13 @@ namespace cstable {
 
 class PageReader {
 public:
-  virtual void readIndex(InputStream* os) const = 0;
 };
 
 class UnsignedIntPageReader : public PageReader {
 public:
-  virtual uint64_t readUnsignedInt() const = 0;
+  virtual uint64_t readUnsignedInt() = 0;
+  virtual uint64_t peek() = 0;
+  virtual bool eofReached() = 0;
 };
 
 class SignedIntPageReader : public PageReader {
@@ -49,6 +50,7 @@ public:
 
 class StringPageReader : public PageReader {
 public:
+  virtual void readString(String* value) = 0;
 };
 
 } // namespace cstable

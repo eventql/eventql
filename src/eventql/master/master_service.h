@@ -42,9 +42,6 @@ protected:
 
   Status rebalanceTable(TableDefinition tbl_cfg);
 
-  String pickMetadataServer() const;
-  String pickServer() const;
-
   Status performMetadataOperation(
       TableDefinition* table_cfg,
       MetadataFile* metadata_file,
@@ -57,7 +54,7 @@ protected:
   size_t replication_factor_;
   size_t metadata_replication_factor_;
   Set<String> all_servers_;
-  Vector<String> live_servers_;
+  Set<String> live_servers_;
   Set<String> leaving_servers_;
 };
 

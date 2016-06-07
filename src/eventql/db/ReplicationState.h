@@ -25,10 +25,20 @@
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/SHA1.h>
 #include <eventql/db/ReplicationState.pb.h>
+#include <eventql/db/PartitionState.pb.h>
 
 #include "eventql/eventql.h"
 
 namespace eventql {
+
+uint64_t replicatedOffsetFor(
+    const ReplicationState& repl_state,
+    const ReplicationTarget& target);
+
+void setReplicatedOffsetFor(
+    ReplicationState* repl_state,
+    const ReplicationTarget& target,
+    uint64_t replicated_offset);
 
 uint64_t replicatedOffsetFor(
     const ReplicationState& repl_state,

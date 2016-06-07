@@ -27,7 +27,7 @@
 #include <eventql/util/io/file.h>
 #include <eventql/util/io/mmappedfile.h>
 #include <eventql/io/cstable/cstable.h>
-#include <eventql/io/cstable/CSTableReader.h>
+#include <eventql/io/cstable/cstable_reader.h>
 #include <eventql/io/cstable/ColumnReader.h>
 #include <eventql/util/protobuf/MessageSchema.h>
 

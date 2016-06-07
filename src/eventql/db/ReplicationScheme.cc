@@ -103,7 +103,7 @@ Vector<ReplicaRef> DHTReplicationScheme::replicasFor(const SHA1Hash& key) {
     return replicas;
   }
 
-  auto ncopies = cluster_config_.dht_num_copies();
+  auto ncopies = cluster_config_.replication_factor();
   auto begin = ring_.lower_bound(key);
   if (begin == ring_.end()) {
     begin = ring_.begin();
@@ -142,7 +142,7 @@ bool DHTReplicationScheme::hasLocalReplica(const SHA1Hash& key) {
 }
 
 size_t DHTReplicationScheme::minNumCopies() const {
-  return cluster_config_.dht_num_copies();
+  return cluster_config_.replication_factor();
 }
 
 } // namespace eventql

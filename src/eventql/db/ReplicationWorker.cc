@@ -60,14 +60,14 @@ ReplicationWorker::~ReplicationWorker() {
 
 void ReplicationWorker::enqueuePartition(RefPtr<Partition> partition) {
   std::unique_lock<std::mutex> lk(mutex_);
-  enqueuePartitionWithLock(partition);
+  enqueuePartitionWithLock(partition, kReplicationCorkWindowMicros);
 }
 
 void ReplicationWorker::enqueuePartition(
     RefPtr<Partition> partition,
     uint64_t delay_usecs) {
   std::unique_lock<std::mutex> lk(mutex_);
-  enqueuePartitionWithLock(partition);
+  enqueuePartitionWithLock(partition, delay_usecs);
 }
 
 void ReplicationWorker::enqueuePartitionWithLock(
@@ -79,7 +79,7 @@ void ReplicationWorker::enqueuePartitionWithLock(
   }
 
   queue_.emplace(
-      WallClock::unixMicros() + kReplicationCorkWindowMicros + delay_usecs,
+      WallClock::unixMicros() + delay_usecs,
       partition);
 
   z1stats()->replication_queue_length.set(queue_.size());
@@ -157,12 +157,11 @@ void ReplicationWorker::work() {
 
       repl = partition->getReplicationStrategy(repl_scheme, http_);
       if (repl->needsReplication()) {
-        enqueuePartitionWithLock(partition);
+        enqueuePartitionWithLock(partition, kReplicationCorkWindowMicros);
       } else {
-        auto snap = partition->getSnapshot();
-        auto full_copies = repl->numFullRemoteCopies();
-        if (!repl_scheme->hasLocalReplica(snap->key) &&
-            full_copies >= repl_scheme->minNumCopies()) {
+        repl = partition->getReplicationStrategy(repl_scheme, http_);
+        if (repl->shouldDropPartition()) {
+          auto snap = partition->getSnapshot();
           auto dropped =
               pmap_->dropLocalPartition(
                   snap->state.tsdb_namespace(),
@@ -170,7 +169,7 @@ void ReplicationWorker::work() {
                   snap->key);
 
           if (!dropped) {
-            enqueuePartitionWithLock(partition);
+            enqueuePartitionWithLock(partition, kReplicationCorkWindowMicros);
           }
         }
       }

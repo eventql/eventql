@@ -38,6 +38,7 @@ public:
     ColumnType type;
     ColumnEncoding encoding;
     uint64_t type_size;
+    uint64_t column_id;
     bool repeated;
     bool optional;
     ScopedPtr<TableSchema> subschema;
@@ -49,12 +50,12 @@ public:
   void addBool(
       const String& name,
       bool optional = true,
-      ColumnEncoding encoding = ColumnEncoding::BOOLEAN_BITPACKED);
+      ColumnEncoding encoding = ColumnEncoding::UINT64_LEB128);
 
   void addBoolArray(
       const String& name,
       bool optional = true,
-      ColumnEncoding encoding = ColumnEncoding::BOOLEAN_BITPACKED);
+      ColumnEncoding encoding = ColumnEncoding::UINT64_LEB128);
 
   void addUnsignedInteger(
       const String& name,
@@ -134,6 +135,7 @@ public:
 protected:
   HashMap<String, ScopedPtr<Column>> columns_by_name_;
   Vector<Column*> columns_;
+  size_t next_column_id_;
 };
 
 } // namespace cstable

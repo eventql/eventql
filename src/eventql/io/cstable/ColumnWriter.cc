@@ -57,8 +57,7 @@ void ColumnWriter::writeDateTime(
 
 DefaultColumnWriter::DefaultColumnWriter(
     ColumnConfig config,
-    RefPtr<PageManager> page_mgr,
-    RefPtr<PageIndex> page_idx) :
+    PageManager* page_mgr) :
     ColumnWriter(config.rlevel_max, config.dlevel_max),
     config_(config) {
   if (config.rlevel_max > 0) {
@@ -68,9 +67,7 @@ DefaultColumnWriter::DefaultColumnWriter(
     };
 
     rlevel_writer_ = mkScoped(
-        new UInt64PageWriter(rlevel_idx_key, page_mgr, page_idx));
-
-    page_idx->addPageWriter(rlevel_idx_key, rlevel_writer_.get());
+        new UInt64PageWriter(rlevel_idx_key, page_mgr));
   }
 
   if (config.dlevel_max > 0) {
@@ -80,9 +77,7 @@ DefaultColumnWriter::DefaultColumnWriter(
     };
 
     dlevel_writer_ = mkScoped(
-        new UInt64PageWriter(dlevel_idx_key, page_mgr, page_idx));
-
-    page_idx->addPageWriter(dlevel_idx_key, dlevel_writer_.get());
+        new UInt64PageWriter(dlevel_idx_key, page_mgr));
   }
 }
 

@@ -1163,6 +1163,8 @@ void free_completions(zhandle_t *zh,int callCompletion,int reason)
     struct ReplyHeader h;
     void_completion_t auth_completion = NULL;
     auth_completion_list_t a_list, *a_tmp;
+    a_list.completion = NULL;
+    a_list.next = NULL;
 
     if (lock_completion_list(&zh->sent_requests) == 0) {
         tmp_list = zh->sent_requests;
@@ -1200,9 +1202,6 @@ void free_completions(zhandle_t *zh,int callCompletion,int reason)
         }
     }
     if (zoo_lock_auth(zh) == 0) {
-        a_list.completion = NULL;
-        a_list.next = NULL;
-    
         get_auth_completions(&zh->auth_h, &a_list);
         zoo_unlock_auth(zh);
     

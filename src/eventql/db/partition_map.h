@@ -126,6 +126,7 @@ protected:
   RefPtr<mdb::MDB> db_;
 
   mutable std::mutex mutex_;
+  ConfigDirectory* cdir_;
   OrderedMap<String, RefPtr<Table>> tables_;
   OrderedMap<String, ScopedPtr<LazyPartition>> partitions_;
   Vector<PartitionChangeCallbackFn> callbacks_;
