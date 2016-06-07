@@ -32,7 +32,6 @@ namespace cli {
 const String& CLIConfig::kDefaultHost = "localhost";
 const int CLIConfig::kDefaultPort = 9175;
 const String& CLIConfig::kDefaultUser = getenv("USER");
-const bool CLIConfig::kDefaultBatchMode = false;
 
 CLIConfig::CLIConfig(RefPtr<ProcessConfig> cfg) : cfg_(cfg) {}
 
@@ -64,12 +63,7 @@ String CLIConfig::getUser() const {
 }
 
 bool CLIConfig::getBatchMode() const {
-  auto batch_mode = cfg_->getBool("evql", "batch");
-  if (batch_mode.isEmpty()) {
-    return kDefaultBatchMode;
-  } else {
-    return batch_mode.get();
-  }
+  return cfg_->getBool("evql", "batch");
 }
 //Status CLIConfig::loadDefaultConfigFile() {
 //  char* homedir = getenv("HOME");

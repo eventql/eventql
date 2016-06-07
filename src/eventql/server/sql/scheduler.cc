@@ -188,7 +188,8 @@ Vector<Scheduler::PipelinedQueryTree> Scheduler::pipelineExpression(
 
   HashMap<SHA1Hash, Vector<ReplicaRef>> partitions;
   Set<SHA1Hash> local_partitions;
-  if (table.get()->partitionerType() == TBL_PARTITION_TIMEWINDOW) {
+  if (table.get()->partitionerType() == TBL_PARTITION_TIMEWINDOW &&
+      table.get()->storage() == TBL_STORAGE_COLSM) {
     auto keyrange = TSDBTableProvider::findKeyRange(
         table.get()->config().config().partition_key(),
         seqscan->constraints());

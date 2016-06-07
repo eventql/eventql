@@ -123,7 +123,8 @@ Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
   auto partitioner = table.get()->partitioner();
   Vector<TableScan::PartitionLocation> partitions;
   if (table_ref.partition_key.isEmpty()) {
-    if (table.get()->partitionerType() == TBL_PARTITION_TIMEWINDOW) {
+    if (table.get()->partitionerType() == TBL_PARTITION_TIMEWINDOW &&
+        table.get()->storage() == TBL_STORAGE_COLSM) {
       auto keyrange = findKeyRange(
           table.get()->config().config().partition_key(),
           seqscan->constraints());

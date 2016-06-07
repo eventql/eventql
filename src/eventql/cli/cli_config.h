@@ -38,7 +38,6 @@ public:
   static const String& kDefaultHost;
   static const int kDefaultPort;
   static const String& kDefaultUser;
-  static const bool kDefaultBatchMode;
 
   enum class kLanguage { SQL, JAVASCRIPT };
 
