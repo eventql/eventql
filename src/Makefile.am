@@ -807,6 +807,8 @@ evql_core_a_SOURCES = \
     eventql/config/config_directory_standalone.h \
     eventql/config/config_directory_zookeeper.cc \
     eventql/config/config_directory_zookeeper.h \
+    eventql/config/process_config.cc \
+    eventql/config/process_config.h \
     eventql/db/CompactionStrategy.cc \
     eventql/db/CompactionStrategy.h \
     eventql/db/CompactionWorker.cc \
@@ -1037,6 +1039,22 @@ bin_PROGRAMS += evqld
 
 ################# BIN: evqld ####################
 evqlctl_SOURCES = \
+    eventql/cli/commands/cli_command.h \
+    eventql/cli/commands/cli_command.cc \
+    eventql/cli/commands/cluster_add_server.h \
+    eventql/cli/commands/cluster_add_server.cc \
+    eventql/cli/commands/cluster_create.h \
+    eventql/cli/commands/cluster_create.cc \
+    eventql/cli/commands/cluster_status.h \
+    eventql/cli/commands/cluster_status.cc \
+    eventql/cli/commands/cluster_remove_server.h \
+    eventql/cli/commands/cluster_remove_server.cc \
+    eventql/cli/commands/namespace_create.h \
+    eventql/cli/commands/namespace_create.cc \
+    eventql/cli/commands/rebalance.h \
+    eventql/cli/commands/rebalance.cc \
+    eventql/cli/commands/table_split.h \
+    eventql/cli/commands/table_split.cc \
     eventql/evqlctl.cc
 
 evqlctl_LDADD = \
@@ -1122,6 +1140,18 @@ test_evql_db_metadata_store_LDADD = \
 TESTS += test_evql_db_metadata_store
 check_PROGRAMS += test_evql_db_metadata_store
 
+################# TEST: db/metadata_store ####################
+test_evql_config_process_config_SOURCES = eventql/config/process_config_test.cc
+test_evql_config_process_config_LDADD = \
+    evql_core.a \
+    evql_util.a \
+    $(SIMDCOMP_LDADD) \
+    $(LMDB_LDADD) \
+    $(INIH_LDADD) \
+    $(PCRE_LDADD)
+
+TESTS += test_evql_config_process_config
+check_PROGRAMS += test_evql_config_process_config
 
 ################# TEST: db/metadata_file ####################
 test_evql_db_metadata_file_SOURCES = eventql/db/metadata_file_test.cc
