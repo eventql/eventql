@@ -314,6 +314,11 @@ int main(int argc, const char** argv) {
     return 0;
   }
 
+  /* conf */
+  ProcessConfigBuilder config_builder;
+
+  auto process_config = config_builder.getConfig();
+
   if (flags.isSet("daemonize")) {
     Application::daemonize();
   }
@@ -329,10 +334,6 @@ int main(int argc, const char** argv) {
 
     pidfile.write(StringUtil::toString(getpid()));
   }
-
-  /* conf */
-  //auto conf_data = FileUtil::read(flags.getString("conf"));
-  //auto conf = msg::parseText<eventql::TSDBNodeConfig>(conf_data);
 
   /* thread pools */
   thread::CachedThreadPool tpool(
@@ -389,21 +390,14 @@ int main(int argc, const char** argv) {
 
   /* config dir */
   ScopedPtr<ConfigDirectory> config_dir;
-  if (flags.getString("config_backend") == "zookeeper") {
-    config_dir.reset(
-        new ZookeeperConfigDirectory(
-            flags.getString("zookeeper_addr"),
-            flags.getString("cluster"),
-            server_name,
-            flags.getString("listen")));
-  } else if (flags.getString("config_backend") == "standalone") {
-    config_dir.reset(
-        new StandaloneConfigDirectory(
-            tsdb_dir,
-            flags.getString("listen")));
-  } else {
-    logFatal("evqld", "invalid config backend: " + flags.getString("config_backend"));
-    return 1;
+  {
+    auto rc = ConfigDirectoryFactory::getConfigDirectoryForServer(
+        process_config.get(),
+        &config_dir);
+    if (!rc.isSuccess()) {
+      logFatal("evqld", "can't open config backend: $0", rc.message());
+      return 1;
+    }
   }
 
   /* client auth */
