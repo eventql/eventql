@@ -113,6 +113,15 @@ int main(int argc, const char** argv) {
       "<switch>");
 
   flags.defineFlag(
+      "standalone",
+      cli::FlagParser::T_SWITCH,
+      false,
+      NULL,
+      NULL,
+      "standalone mode",
+      "<switch>");
+
+  flags.defineFlag(
       "listen",
       cli::FlagParser::T_STRING,
       false,
@@ -122,15 +131,6 @@ int main(int argc, const char** argv) {
       "<host:port>");
 
   flags.defineFlag(
-      "cachedir",
-      cli::FlagParser::T_STRING,
-      false,
-      NULL,
-      NULL,
-      "cachedir path",
-      "<path>");
-
-  flags.defineFlag(
       "datadir",
       cli::FlagParser::T_STRING,
       false,
@@ -138,98 +138,6 @@ int main(int argc, const char** argv) {
       NULL,
       "datadir path",
       "<path>");
-
-#ifndef eventql_HAS_ASSET_BUNDLE
-  flags.defineFlag(
-      "asset_path",
-      cli::FlagParser::T_STRING,
-      false,
-      NULL,
-      "src/",
-      "assets path",
-      "<path>");
-#endif
-
-  flags.defineFlag(
-      "indexbuild_threads",
-      cli::FlagParser::T_INTEGER,
-      false,
-      NULL,
-      "2",
-      "number of indexbuild threads",
-      "<num>");
-
-  flags.defineFlag(
-      "config_backend",
-      cli::FlagParser::T_STRING,
-      false,
-      NULL,
-      NULL,
-      "backend",
-      "<backend>");
-
-  flags.defineFlag(
-      "client_auth_backend",
-      cli::FlagParser::T_STRING,
-      false,
-      NULL,
-      NULL,
-      "backend",
-      "<backend>");
-
-  flags.defineFlag(
-      "legacy_auth_secret",
-      cli::FlagParser::T_STRING,
-      false,
-      NULL,
-      NULL,
-      "secret",
-      "<secret>");
-
-  flags.defineFlag(
-      "legacy_master_addr",
-      cli::FlagParser::T_STRING,
-      false,
-      NULL,
-      NULL,
-      "url",
-      "<addr>");
-
-  flags.defineFlag(
-      "zookeeper_addr",
-      cli::FlagParser::T_STRING,
-      false,
-      NULL,
-      NULL,
-      "url",
-      "<addr>");
-
-  flags.defineFlag(
-      "cluster",
-      cli::FlagParser::T_STRING,
-      false,
-      NULL,
-      NULL,
-      "name",
-      "<name>");
-
-  flags.defineFlag(
-      "create_cluster",
-      cli::FlagParser::T_SWITCH,
-      false,
-      NULL,
-      NULL,
-      "switch",
-      "<switch>");
-
-  flags.defineFlag(
-      "join",
-      cli::FlagParser::T_STRING,
-      false,
-      NULL,
-      NULL,
-      "url",
-      "<name>");
 
   flags.defineFlag(
       "loglevel",
@@ -307,9 +215,23 @@ int main(int argc, const char** argv) {
   if (flags.isSet("help")) {
     auto stdout_os = OutputStream::getStdout();
     stdout_os->write(
-        "Usage: $ evqld [OPTIONS]\n"
-        "  -?, --help              Display this help text and exit\n"
-        "  -V, --version           Display the version of this binary and exit\n"
+        "Usage: $ evqld [OPTIONS]\n\n"
+        "   -c, --config <file>       Load config from file\n"
+        "   -C name=value             Define a config value on the command line\n"
+        "   --standalone              Run in standalone mode\n"
+        "   --datadir <path>          Path to data directory\n"
+        "   --listen <host:port>      Listen on this address (default: localhost:9175)\n"
+        "   --daemonize               Daemonize the server\n"
+        "   --pidfile <file>          Write a PID file\n"
+        "   --loglevel <level>        Minimum log level (default: INFO)\n"
+        "   --[no]log_to_syslog       Do[n't] log to syslog\n"
+        "   --[no]log_to_stderr       Do[n't] log to stderr\n"
+        "   -?, --help                Display this help text and exit\n"
+        "   -v, --version             Display the version of this binary and exit\n"
+        "                                                       \n"
+        "Examples:                                              \n"
+        "   $ evqld --standalone --datadir /var/evql\n"
+        "   $ evqld -c /etc/evqld.conf --daemonize --pidfile /run/evql.pid\n"
     );
     return 0;
   }
