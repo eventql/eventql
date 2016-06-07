@@ -411,7 +411,21 @@ ASTNode* Parser::selectStatement() {
 
 ASTNode* Parser::createStatement() {
   consumeToken();
-  return createTableStatement();
+
+  switch (cur_token_->getType()) {
+    case Token::T_TABLE:
+      return createTableStatement();
+    case Token::T_DATABASE:
+      return createDatabaseStatement();
+    default:
+      RAISEF(
+        kParseError,
+        "unexpected token $0$1$2, expected one of SELECT, DRAW or IMPORT",
+          Token::getTypeName(cur_token_->getType()),
+          cur_token_->getString().size() > 0 ? ": " : "",
+          cur_token_->getString().c_str());
+
+  }
 }
 
 ASTNode* Parser::createTableStatement() {
@@ -531,6 +545,22 @@ ASTNode* Parser::primaryKeyDefinition() {
   expectAndConsume(Token::T_RPAREN);
 
   return primary_key;
+}
+
+ASTNode* Parser::createDatabaseStatement() {
+  expectAndConsume(Token::T_DATABASE);
+
+  auto create_database = new ASTNode(ASTNode::T_CREATE_DATABASE);
+  auto name = new ASTNode(ASTNode::T_DATABASE_NAME);
+  name->setToken(cur_token_);
+  create_database->appendChild(name);
+  consumeToken();
+
+  if (*cur_token_ == Token::T_SEMICOLON) {
+    consumeToken();
+  }
+
+  return create_database;
 }
 
 ASTNode* Parser::insertStatement() {

@@ -200,6 +200,10 @@ public:
       Transaction* txn,
       ASTNode* ast);
 
+  QueryTreeNode* buildCreateDatabase(
+      Transaction* txn,
+      ASTNode* ast);
+
   QueryTreeNode* buildInsertInto(
       Transaction* txn,
       ASTNode* ast);

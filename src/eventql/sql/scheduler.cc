@@ -325,6 +325,20 @@ ScopedPtr<ResultCursor> DefaultScheduler::executeCreateTable(
   return mkScoped(new EmptyResultCursor());
 }
 
+ScopedPtr<ResultCursor> DefaultScheduler::executeCreateDatabase(
+    Transaction* txn,
+    ExecutionContext* execution_context,
+    RefPtr<CreateDatabaseNode> create_database) {
+  auto res = txn->getTableProvider()->createDatabase(
+      create_database->getDatabaseName());
+  if (!res.isSuccess()) {
+    RAISE(kRuntimeError, res.message());
+  }
+
+  // FIXME return result...
+  return mkScoped(new EmptyResultCursor());
+}
+
 ScopedPtr<ResultCursor> DefaultScheduler::executeInsertInto(
     Transaction* txn,
     ExecutionContext* execution_context,
@@ -395,6 +409,13 @@ ScopedPtr<ResultCursor> DefaultScheduler::execute(
         query_plan->getTransaction(),
         execution_context,
         stmt.asInstanceOf<CreateTableNode>());
+  }
+
+  if (stmt.isInstanceOf<CreateDatabaseNode>()) {
+    return executeCreateDatabase(
+        query_plan->getTransaction(),
+        execution_context,
+        stmt.asInstanceOf<CreateDatabaseNode>());
   }
 
   if (stmt.isInstanceOf<InsertIntoNode>()) {

@@ -52,6 +52,10 @@ public:
     RAISE(kRuntimeError, "can't create tables");
   }
 
+  virtual Status createDatabase(const String& database_name) {
+    RAISE(kRuntimeError, "can't create databases");
+  }
+
   virtual Status insertRecord(
       const String& table_name,
       Vector<Pair<String, SValue>> data) {
