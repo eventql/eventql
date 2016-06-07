@@ -66,10 +66,9 @@ public:
   Status runJS(const String& query);
 
 protected:
-  csql::BinaryResultParser* resultParser(
-      csql::ResultList* results,
-      TerminalOutputStream* stderr_os);
-  csql::BinaryResultParser* batchResultParser(TerminalOutputStream* stderr_os);
+  Status runQueryBatch(const String& query);
+  Status runQueryTable(const String& query);
+  Status sendRequest(const String& query, csql::BinaryResultParser* res_parser);
 
   CLIConfig cfg_;
 };
