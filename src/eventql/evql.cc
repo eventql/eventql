@@ -402,9 +402,9 @@ int main(int argc, const char** argv) {
   }
 
   /* console options */
-  eventql::cli::CLIConfig cli_cfg;
+  ProcessConfigBuilder cfg_builder;
   {
-    auto status = cli_cfg.loadDefaultConfigFile();
+    auto status = cfg_builder.loadDefaultConfigFile();
     if (!status.isSuccess()) {
       printError(status.message());
       return 1;
@@ -412,56 +412,41 @@ int main(int argc, const char** argv) {
   }
 
   if (flags.isSet("host")) {
-    auto s = cli_cfg.setHost(flags.getString("host"));
-    if (!s.isSuccess()) {
-      printError(StringUtil::format("$0: $1", s.type(), s.message()));
-      return 1;
-    }
+    cfg_builder.setProperty("evql", "host", flags.getString("host"));
   }
 
   if (flags.isSet("auth_token")) {
-    auto s = cli_cfg.setAuthToken(flags.getString("auth_token"));
-    if (!s.isSuccess()) {
-      printError(StringUtil::format("$0: $1", s.type(), s.message()));
-      return 1;
-    }
+    cfg_builder.setProperty("evql", "auth_token", flags.getString("auth_token"));
   }
 
   if (flags.isSet("port")) {
-    auto s = cli_cfg.setPort(flags.getInt("port"));
-    if (!s.isSuccess()) {
-      printError(StringUtil::format("$0: $1", s.type(), s.message()));
-      return 1;
-    }
+    cfg_builder.setProperty("evql", "port", flags.getString("port"));
   }
 
   if (flags.isSet("user")) {
-    cli_cfg.setUser(flags.getString("user"));
+    cfg_builder.setProperty("evql", "user", flags.getString("user"));
   }
 
   if (flags.isSet("database")) {
-    cli_cfg.setDatabase(flags.getString("database"));
+    cfg_builder.setProperty("evql", "database", flags.getString("database"));
   }
 
   if (flags.isSet("file")) {
-    cli_cfg.setFile(flags.getString("file"));
+    cfg_builder.setProperty("evql", "file", flags.getString("file"));
   }
 
   if (flags.isSet("lang")) {
-    auto s = cli_cfg.setLanguage(flags.getString("lang"));
-    if (!s.isSuccess()) {
-      printError(StringUtil::format("$0: $1", s.type(), s.message()));
-      return 1;
-    }
+    cfg_builder.setProperty("evql", "lang", flags.getString("lang"));
+  }
 
-    if (cli_cfg.getFile().isEmpty() &&
+  eventql::cli::CLIConfig cli_cfg(cfg_builder.getConfig());
+
+    /*if (cli_cfg.getFile().isEmpty() &&
         cli_cfg.getLanguage().get() != eventql::cli::CLIConfig::kLanguage::SQL) {
       printError(
           "FlagError: must set -f <file> for javascript, run --help for help\n");
       return 1;
-    }
-  }
-
+    }*/
   /* cli */
   eventql::cli::Console console(cli_cfg);
 

@@ -121,11 +121,12 @@ Status Console::runQuery(const String& query) {
       auth_headers.emplace_back(
           "Authorization",
           StringUtil::format("Token $0", cfg_.getAuthToken().get()));
-    } else if (!cfg_.getUser().empty()) {
+    } else if (!cfg_.getPassword().isEmpty()) {
       auth_headers.emplace_back(
           "Authorization",
           StringUtil::format("Basic $0",
-              util::Base64::encode(cfg_.getUser() + ":" + cfg_.getPassword())));
+              util::Base64::encode(
+                  cfg_.getUser() + ":" + cfg_.getPassword().get())));
     }
 
     http::HTTPClient http_client(nullptr);
