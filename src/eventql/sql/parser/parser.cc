@@ -549,7 +549,12 @@ ASTNode* Parser::insertStatement() {
     return insertSet();
   }
 
-  RAISE(kRuntimeError, "fff");
+  RAISEF(
+      kParseError,
+      "unexpected token $0$1$2",
+      Token::getTypeName(cur_token_->getType()),
+      cur_token_->getString().size() > 0 ? ": " : "",
+      cur_token_->getString().c_str());
 }
 
 ASTNode* Parser::insertValues() {
