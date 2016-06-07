@@ -41,22 +41,6 @@ using namespace eventql;
 
 thread::EventLoop ev;
 
-String getCommandName(Vector<String> cmd_argv) {
-  String cmd_name;
-  if (cmd_argv.size() == 0) {
-    return cmd_name;
-  }
-
-  cmd_name = cmd_argv[0];
-  if (StringUtil::beginsWith(cmd_name, "--")) {
-    cmd_name.erase(0, 2);
-  } if (StringUtil::beginsWith(cmd_name, "-")) {
-    cmd_name.erase(cmd_name.begin());
-  }
-
-  return cmd_name;
-}
-
 int main(int argc, const char** argv) {
   ::cli::FlagParser flags;
   flags.defineFlag(
@@ -111,24 +95,20 @@ int main(int argc, const char** argv) {
   commands.emplace_back(new eventql::cli::TableSplit(process_config));
 
   Vector<String> cmd_argv = flags.getArgv();
-  String cmd_name = getCommandName(cmd_argv);
-  if (cmd_name.empty()) {
-    //if (default_cmd_.empty()) {
-      stderr_os->write(
-        "evqlctl: command is not specified. See 'evqlctl --help'.\n");
-      return 1;
-    //}
-
-    //cmd_name = default_cmd_;
-
+  String cmd_name;
+  if (cmd_argv.empty()) {
+    stderr_os->write(
+      "evqlctl: command is not specified. See 'evqlctl --help'.\n");
+    return 1;
   } else {
+    cmd_name = cmd_argv.empty() ? cmd_argv.front() : "";
     cmd_argv.erase(cmd_argv.begin());
   }
 
+  if (cmd_name == "help" || flags.isSet("help")) {
+    auto help_topic = cmd_argv.empty() ? cmd_argv.front() : "";
 
-  if (cmd_name == "help") {
-    cmd_name = getCommandName(cmd_argv);
-    if (cmd_name.empty()) {
+    if (help_topic.empty()) {
       stdout_os->write(
         "Usage: evqlctl [OPTIONS] <command> [<args>]\n\n"
         "   -?, --help                Display this help text and exit\n"
@@ -139,13 +119,13 @@ int main(int argc, const char** argv) {
 
       for (const auto c : commands) {
         stdout_os->printf("   %-26.26s", c->getName().c_str());
-        stdout_os->printf("%-86.86s\n", c->getDescription().c_str());
+        stdout_os->printf("%-80.80s\n", c->getDescription().c_str());
       }
       return 0;
     }
 
     for (auto c : commands) {
-      if (c->getName() == cmd_name) {
+      if (c->getName() == help_topic) {
         c->printHelp(stdout_os.get());
         return 0;
       }
@@ -153,7 +133,7 @@ int main(int argc, const char** argv) {
 
     stderr_os->write(StringUtil::format(
         "evqlctl: No manual entry for evqlctl '$0'\n",
-        cmd_name));
+        help_topic));
     return 1;
   }
 
@@ -164,6 +144,7 @@ int main(int argc, const char** argv) {
           stdin_is.get(),
           stdout_os.get(),
           stderr_os.get());
+
       return rc.isSuccess() ? 0 : 1;
     }
   }
@@ -173,6 +154,5 @@ int main(int argc, const char** argv) {
       cmd_name));
 
   return 1;
-
 }
 

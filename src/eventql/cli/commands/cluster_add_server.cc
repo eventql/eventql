@@ -24,7 +24,7 @@
  */
 #include <eventql/cli/commands/cluster_add_server.h>
 #include <eventql/util/cli/flagparser.h>
-#include "eventql/config/config_directory_zookeeper.h"
+#include "eventql/config/config_directory.h"
 #include "eventql/util/random.h"
 
 namespace eventql {
@@ -65,22 +65,20 @@ Status ClusterAddServer::execute(
   try {
     flags.parseArgv(argv);
 
-    auto zookeeper_addr = process_cfg_->getString("evqlctl", "zookeeper_addr");
-    if (zookeeper_addr.isEmpty()) {
-      stderr_os->write("ERROR: zookeeper address not specified");
-      return Status(eFlagError);
-    }
+    ScopedPtr<ConfigDirectory> cdir;
+    {
+      auto rc = ConfigDirectoryFactory::getConfigDirectoryForClient(
+          process_cfg_.get(),
+          &cdir);
 
-    auto cdir = mkScoped(
-        new ZookeeperConfigDirectory(
-              zookeeper_addr.get(),
-              None<String>(),
-              ""));
+      if (rc.isSuccess()) {
+        rc = cdir->start();
+      }
 
-    auto rc = cdir->startAndJoin(flags.getString("cluster_name"));
-    if (!rc.isSuccess()) {
-      stderr_os->write(StringUtil::format("ERROR: $0\n", rc.message()));
-      return rc;
+      if (!rc.isSuccess()) {
+        stderr_os->write(StringUtil::format("ERROR: $0\n", rc.message()));
+        return rc;
+      }
     }
 
     ServerConfig cfg;

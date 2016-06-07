@@ -22,6 +22,8 @@
  * code of your own applications
  */
 #pragma once
+#include "eventql/eventql.h"
+#include "eventql/config/process_config.h"
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/SHA1.h>
 #include <eventql/util/mdb/MDB.h>
@@ -30,8 +32,6 @@
 #include <eventql/config/namespace_config.h>
 #include <eventql/db/ClusterConfig.pb.h>
 #include <eventql/db/TableConfig.pb.h>
-
-#include "eventql/eventql.h"
 
 namespace eventql {
 
@@ -92,6 +92,19 @@ public:
 
   virtual void setTableConfigChangeCallback(
       Function<void (const TableDefinition& tbl)> fn) = 0;
+
+};
+
+class ConfigDirectoryFactory {
+public:
+
+  static Status getConfigDirectoryForServer(
+      const ProcessConfig* cfg,
+      ScopedPtr<ConfigDirectory>* cdir);
+
+  static Status getConfigDirectoryForClient(
+      const ProcessConfig* cfg,
+      ScopedPtr<ConfigDirectory>* cdir);
 
 };
 

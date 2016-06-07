@@ -24,7 +24,7 @@
  */
 #include <eventql/cli/commands/cluster_remove_server.h>
 #include <eventql/util/cli/flagparser.h>
-#include "eventql/config/config_directory_zookeeper.h"
+#include "eventql/config/config_directory.h"
 #include "eventql/util/random.h"
 
 namespace eventql {
@@ -43,12 +43,6 @@ Status ClusterRemoveServer::execute(
     FileInputStream* stdin_is,
     OutputStream* stdout_os,
     OutputStream* stderr_os) {
-  auto zookeeper_addr = process_cfg_->getString("evqlctl", "zookeeper_addr");
-  if (zookeeper_addr.isEmpty()) {
-    stderr_os->write("ERROR: zookeeper address not specified\n");
-    return Status(eFlagError);
-  }
-
   ::cli::FlagParser flags;
   flags.defineFlag(
       "cluster_name",
@@ -96,16 +90,20 @@ Status ClusterRemoveServer::execute(
       return Status(eFlagError);
     }
 
-    auto cdir = mkScoped(
-        new ZookeeperConfigDirectory(
-              zookeeper_addr.get(),
-              None<String>(),
-              ""));
+    ScopedPtr<ConfigDirectory> cdir;
+    {
+      auto rc = ConfigDirectoryFactory::getConfigDirectoryForClient(
+          process_cfg_.get(),
+          &cdir);
 
-    auto rc = cdir->startAndJoin(flags.getString("cluster_name"));
-    if (!rc.isSuccess()) {
-      stderr_os->write(StringUtil::format("ERROR: $0\n", rc.message()));
-      return rc;
+      if (rc.isSuccess()) {
+        rc = cdir->start();
+      }
+
+      if (!rc.isSuccess()) {
+        stderr_os->write(StringUtil::format("ERROR: $0\n", rc.message()));
+        return rc;
+      }
     }
 
     auto cfg = cdir->getServerConfig(flags.getString("server_name"));

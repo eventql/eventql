@@ -26,7 +26,7 @@
 #include "eventql/util/random.h"
 #include <eventql/util/cli/flagparser.h>
 #include "eventql/util/logging.h"
-#include "eventql/config/config_directory_zookeeper.h"
+#include "eventql/config/config_directory.h"
 #include "eventql/db/metadata_operation.h"
 #include "eventql/db/metadata_coordinator.h"
 #include "eventql/db/server_allocator.h"
@@ -101,14 +101,16 @@ Status TableSplit::execute(
   try {
     flags.parseArgv(argv);
 
-    auto cdir = mkScoped(
-        new ZookeeperConfigDirectory(
-              zookeeper_addr.get(),
-              None<String>(),
-              ""));
-
+    ScopedPtr<ConfigDirectory> cdir;
     {
-      auto rc = cdir->startAndJoin(flags.getString("cluster_name"));
+      auto rc = ConfigDirectoryFactory::getConfigDirectoryForClient(
+          process_cfg_.get(),
+          &cdir);
+
+      if (rc.isSuccess()) {
+        rc = cdir->start();
+      }
+
       if (!rc.isSuccess()) {
         stderr_os->write(StringUtil::format("ERROR: $0\n", rc.message()));
         return rc;

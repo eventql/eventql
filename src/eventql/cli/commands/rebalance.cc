@@ -24,7 +24,7 @@
  */
 #include <eventql/cli/commands/rebalance.h>
 #include <eventql/util/cli/flagparser.h>
-#include "eventql/config/config_directory_zookeeper.h"
+#include "eventql/config/config_directory.h"
 #include "eventql/master/master_service.h"
 
 namespace eventql {
@@ -61,31 +61,34 @@ Status Rebalance::execute(
   try {
     flags.parseArgv(argv);
 
-  auto cdir = mkScoped(
-      new ZookeeperConfigDirectory(
-            zookeeper_addr.get(),
-            None<String>(),
-            ""));
-  {
-    auto rc = cdir->startAndJoin(flags.getString("cluster_name"));
-    if (!rc.isSuccess()) {
-      stderr_os->write(StringUtil::format("ERROR: $0\n", rc.message()));
-      return rc;
-    }
-  }
+    ScopedPtr<ConfigDirectory> cdir;
+    {
+      auto rc = ConfigDirectoryFactory::getConfigDirectoryForClient(
+          process_cfg_.get(),
+          &cdir);
 
-  MasterService master(cdir.get());
-  {
-    auto rc = master.runOnce();
-    cdir->stop();
+      if (rc.isSuccess()) {
+        rc = cdir->start();
+      }
 
-    if (!rc.isSuccess()) {
-      stderr_os->write(StringUtil::format("ERROR: $0\n", rc.message()));
-      return rc;
-    } else {
-      stdout_os->write("SUCCESS");
+      if (!rc.isSuccess()) {
+        stderr_os->write(StringUtil::format("ERROR: $0\n", rc.message()));
+        return rc;
+      }
     }
-  }
+
+    MasterService master(cdir.get());
+    {
+      auto rc = master.runOnce();
+      cdir->stop();
+
+      if (!rc.isSuccess()) {
+        stderr_os->write(StringUtil::format("ERROR: $0\n", rc.message()));
+        return rc;
+      } else {
+        stdout_os->write("SUCCESS");
+      }
+    }
 
   } catch (const Exception& e) {
     stderr_os->write(StringUtil::format(
