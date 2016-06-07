@@ -1001,6 +1001,8 @@ evql_SOURCES = \
     eventql/cli/cli_config.h \
     eventql/server/sql/codec/binary_codec.cc \
     eventql/server/sql/codec/binary_codec.h \
+    eventql/config/process_config.cc \
+    eventql/config/process_config.h \
     eventql/evql.cc
 
 evql_LDADD = \

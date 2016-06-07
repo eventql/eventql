@@ -272,7 +272,7 @@ int main(int argc, const char** argv) {
       return 1;
     }
   } else {
-    config_builder.loadDefaultConfigFile();
+    config_builder.loadDefaultConfigFile("evqld");
   }
 
   for (const auto& opt : flags.getStrings("config_set")) {

@@ -63,7 +63,7 @@ void Console::startInteractiveShell() {
 Console::Console(const CLIConfig cli_cfg) : cfg_(cli_cfg) {}
 
 Status Console::runQuery(const String& query) {
-  if (cfg_.batchModeEnabled()) {
+  if (cfg_.getBatchMode()) {
     return runQueryBatch(query);
   } else {
     return runQueryTable(query);
@@ -222,21 +222,23 @@ Status Console::sendRequest(const String& query, csql::BinaryResultParser* res_p
         cfg_.getHost(),
         cfg_.getPort());
 
+    auto db = cfg_.getDatabase().isEmpty() ? "" : cfg_.getDatabase().get();
     auto postdata = StringUtil::format(
           "format=binary&query=$0&database=$1",
           URI::urlEncode(query),
-          URI::urlEncode(cfg_.getDatabase()));
+          URI::urlEncode(db));
 
     http::HTTPMessage::HeaderList auth_headers;
     if (!cfg_.getAuthToken().isEmpty()) {
       auth_headers.emplace_back(
           "Authorization",
           StringUtil::format("Token $0", cfg_.getAuthToken().get()));
-    } else if (!cfg_.getUser().empty()) {
+    } else if (!cfg_.getPassword().isEmpty()) {
       auth_headers.emplace_back(
           "Authorization",
           StringUtil::format("Basic $0",
-              util::Base64::encode(cfg_.getUser() + ":" + cfg_.getPassword())));
+              util::Base64::encode(
+                  cfg_.getUser() + ":" + cfg_.getPassword().get())));
     }
 
     http::HTTPClient http_client(nullptr);
