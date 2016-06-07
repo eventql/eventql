@@ -71,7 +71,7 @@ Status Console::runQuery(const String& query) {
 }
 
 Status Console::runQueryTable(const String& query) {
-  auto stdout_os = OutputStream::getStdout();
+  auto stdout_os = TerminalOutputStream::fromStream(OutputStream::getStdout());
   auto stderr_os = TerminalOutputStream::fromStream(OutputStream::getStderr());
   bool line_dirty = false;
   bool is_tty = stderr_os->isTTY();
@@ -80,18 +80,18 @@ Status Console::runQueryTable(const String& query) {
   csql::ResultList results;
   auto res_parser = new csql::BinaryResultParser();
 
-  res_parser->onProgress([&stderr_os, &line_dirty, is_tty] (
+  res_parser->onProgress([&stdout_os, &line_dirty, is_tty] (
       const csql::ExecutionStatus& status) {
     auto status_line = StringUtil::format(
         "Query running: $0%",
         status.progress * 100);
 
     if (is_tty) {
-      stderr_os->eraseLine();
-      stderr_os->print("\r" + status_line);
+      stdout_os->eraseLine();
+      stdout_os->print("\r" + status_line);
       line_dirty = true;
     } else {
-      stderr_os->print(status_line + "\n");
+      stdout_os->print(status_line + "\n");
     }
 
   });
@@ -160,7 +160,7 @@ Status Console::runQueryTable(const String& query) {
 }
 
 Status Console::runQueryBatch(const String& query) {
-  auto stdout_os = OutputStream::getStdout();
+  auto stdout_os = TerminalOutputStream::fromStream(OutputStream::getStdout());
   auto stderr_os = TerminalOutputStream::fromStream(OutputStream::getStderr());
   bool line_dirty = false;
   bool is_tty = stderr_os->isTTY();
@@ -169,19 +169,18 @@ Status Console::runQueryBatch(const String& query) {
   csql::ResultList results;
   auto res_parser = new csql::BinaryResultParser();
 
-  res_parser->onTableHeader([&stderr_os] (const Vector<String>& columns) {
+  res_parser->onTableHeader([&stdout_os] (const Vector<String>& columns) {
     for (const auto col : columns) {
-      stderr_os->print(col + "\t");
+      stdout_os->print(col + "\t");
     }
-    stderr_os->print("\n");
+    stdout_os->print("\n");
   });
 
-  res_parser->onRow([&stderr_os] (int argc, const csql::SValue* argv) {
+  res_parser->onRow([&stdout_os] (int argc, const csql::SValue* argv) {
     for (size_t i = 0; i < argc; ++i) {
-      stderr_os->print(argv[i].getString() + "\t");
+      stdout_os->print(argv[i].getString() + "\t");
     }
-    stderr_os->print("\n");
-    //results->addRow(argv, argc);
+    stdout_os->print("\n");
   });
 
   res_parser->onError([&stderr_os, &error] (const String& error_str) {
