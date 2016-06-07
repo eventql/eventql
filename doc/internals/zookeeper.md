@@ -31,8 +31,8 @@ this works out to
 
 so for example
 
-  - 100 servers x 10_000 tables (20-50TB data stored) = 100k watchers [ should still work ]
-  - 200 servers x 100_000 tables (200-500TB data stored) = 20 million watchers 
+  - 100 servers x 10_000 tables = 100k watchers [ should still work ]
+  - 200 servers x 100_000 tables = 20 million watchers [ does probably not work anymore ]
 
 this latter case is apparently already beyond ZK limits, even though we're only
 talking about roughly ~6MB of configuration data total!
