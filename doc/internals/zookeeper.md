@@ -18,13 +18,13 @@ We store three pieces of data under the following paths:
 
 ### things zookeeper does that we don't need:
 
-- guarantees about timeliness (data is never stale, etc. evqld actualyl expects the config data to be eventually consistent (it expects to always have an old state locally)
+- guarantees about timeliness (data is never stale, etc) -- evqld actually expects the config data to be eventually consistent (it expects to always have an old state locally)
 
 
 ### things zookeeper does not do that we will need eventually (limits):
 
 zookeeper requires us to set a watcher on each individual node if we want to
-watch the whole tree. since each server in the cluster needs to watch the three
+watch the whole tree. since each server in the cluster needs to watch the tree
 this works out to
 
     num_watches = num_nodes X num_servers 
