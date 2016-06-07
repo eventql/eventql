@@ -43,14 +43,24 @@ thread::EventLoop ev;
 
 int main(int argc, const char** argv) {
   ::cli::FlagParser flags;
+
   flags.defineFlag(
-      "loglevel",
-      ::cli::FlagParser::T_STRING,
+      "help",
+      ::cli::FlagParser::T_SWITCH,
       false,
+      "?",
       NULL,
-      "INFO",
-      "loglevel",
-      "<level>");
+      "help",
+      "<help>");
+
+  flags.defineFlag(
+      "version",
+      ::cli::FlagParser::T_SWITCH,
+      false,
+      "v",
+      NULL,
+      "print version",
+      "<switch>");
 
   flags.defineFlag(
       "c",
@@ -95,25 +105,38 @@ int main(int argc, const char** argv) {
   commands.emplace_back(new eventql::cli::TableSplit(process_config));
 
   Vector<String> cmd_argv = flags.getArgv();
-  String cmd_name;
-  if (cmd_argv.empty()) {
-    stderr_os->write(
-      "evqlctl: command is not specified. See 'evqlctl --help'.\n");
-    return 1;
-  } else {
-    cmd_name = cmd_argv.empty() ? cmd_argv.front() : "";
+
+  /* print help/version and exit */
+  bool print_help = flags.isSet("help");
+  bool print_version = flags.isSet("version");
+  if (cmd_argv.size() > 0 && cmd_argv[0] == "help") {
+    print_help = true;
     cmd_argv.erase(cmd_argv.begin());
   }
+  auto help_topic = cmd_argv.size() > 0 ? cmd_argv.front() : "";
 
-  if (cmd_name == "help" || flags.isSet("help")) {
-    auto help_topic = cmd_argv.empty() ? cmd_argv.front() : "";
+  if (print_version || (print_help && help_topic.empty())) {
+    auto stdout_os = OutputStream::getStdout();
+    stdout_os->write(
+        StringUtil::format(
+            "EventQL $0 ($1)\n"
+            "Copyright (c) 2016, zScale Techology GmbH. All rights reserved.\n\n",
+            kVersionString,
+            kBuildID));
+  }
 
+  if (print_version) {
+    return 0;
+  }
+
+  if (print_help) {
     if (help_topic.empty()) {
       stdout_os->write(
         "Usage: evqlctl [OPTIONS] <command> [<args>]\n\n"
-        "   -?, --help                Display this help text and exit\n"
-        "   -c <path>                 Set the path to the config file\n"
-        "   -C name=value             Overwrite a config file value\n\n"
+        "   -c <file>                 Load config from file\n"
+        "   -C name=value             Define a config value on the command line\n"
+        "   -?, --help <topic>        Display a command's help text and exit\n"
+        "   -v, --version             Display the version of this binary and exit\n\n"
         "evqctl commands:\n"
       );
 
@@ -121,6 +144,11 @@ int main(int argc, const char** argv) {
         stdout_os->printf("   %-26.26s", c->getName().c_str());
         stdout_os->printf("%-80.80s\n", c->getDescription().c_str());
       }
+
+      stdout_os->write(
+        "\nSee 'evqlctl help <command>' to read about a specific subcommand.\n"
+      );
+
       return 0;
     }
 
@@ -135,6 +163,17 @@ int main(int argc, const char** argv) {
         "evqlctl: No manual entry for evqlctl '$0'\n",
         help_topic));
     return 1;
+  }
+
+  /* execute command */
+  String cmd_name;
+  if (cmd_argv.empty()) {
+    stderr_os->write(
+      "evqlctl: command is not specified. See 'evqlctl --help'.\n");
+    return 1;
+  } else {
+    cmd_name = cmd_argv.front();
+    cmd_argv.erase(cmd_argv.begin());
   }
 
   for (auto c : commands) {

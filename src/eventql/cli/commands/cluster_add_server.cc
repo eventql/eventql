@@ -111,12 +111,12 @@ const String& ClusterAddServer::getDescription() const {
 
 void ClusterAddServer::printHelp(OutputStream* stdout_os) const {
   stdout_os->write(StringUtil::format(
-      "\nevqlctl-$0 - $1\n\n", kName_, kDescription_));
+      "evqlctl-$0 - $1\n\n", kName_, kDescription_));
 
   stdout_os->write(
-      "Usage: evqlctl [OPTIONS]\n"
-      "  --cluster_name <node name>       The name of the cluster to add the server to.\n"
-      "  --server_name <server name>      The name of the server to add.\n");
+      "Usage: evqlctl cluster-add-server [OPTIONS]\n"
+      "   --cluster_name <node name>       The name of the cluster to add the server to.\n"
+      "   --server_name <server name>      The name of the server to add.\n");
 }
 
 } // namespace cli

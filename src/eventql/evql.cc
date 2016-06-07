@@ -261,11 +261,10 @@ int main(int argc, const char** argv) {
       "version",
       cli::FlagParser::T_SWITCH,
       false,
-      "V",
+      "v",
       NULL,
       "print version",
       "<switch>");
-
 
   flags.defineFlag(
       "file",
@@ -286,7 +285,7 @@ int main(int argc, const char** argv) {
       "<lang>");
 
   flags.defineFlag(
-      "exec",
+      "e§xec",
       cli::FlagParser::T_STRING,
       false,
       "e",
@@ -376,7 +375,6 @@ int main(int argc, const char** argv) {
     stdout_os->write(
         "Usage: $ evql [OPTIONS] [query]\n"
         "       $ evql [OPTIONS] -f file\n"
-        "  -?, --help              Display this help text and exit\n"
         "  -f, --file <file>       Read query from file\n"
         "  -e, --exec <query_str>  Execute query string\n"
         "  -l, --lang <lang>       Set the query language ('sql' or 'js')\n"
@@ -388,8 +386,9 @@ int main(int argc, const char** argv) {
         "  --auth_token <token>    Set the auth token (if required)\n"
         "  -B, --batch             Run in batch mode (streaming result output)\n"
         "  -q, --quiet             Be quiet (disables query progress)\n"
-        "  -v, --verbose           Print debug output to STDERR\n"
-        "  --version               Display the version of this binary and exit\n"
+        "  --verbose               Print debug output to STDERR\n"
+        "  -v, --version           Display the version of this binary and exit\n"
+        "  -?, --help              Display this help text and exit\n"
         "                                                       \n"
         "Examples:                                              \n"
         "  $ evql                        # start an interactive shell\n"
