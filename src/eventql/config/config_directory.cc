@@ -145,9 +145,6 @@ Status ConfigDirectoryFactory::getConfigDirectoryForServer(
     return Status::success();
   }
 
-
-
-
   return Status(
       eNotFoundError,
       StringUtil::format(

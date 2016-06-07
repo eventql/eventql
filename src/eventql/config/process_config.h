@@ -39,6 +39,8 @@ public:
   Option<String> getString(const String& section, const String& key) const;
   Option<int64_t> getInt(const String& key) const;
   Option<int64_t> getInt(const String& section, const String& key) const;
+  bool getBool(const String& key) const;
+  bool hasProperty(const String& key) const;
 
 protected:
   ProcessConfig(HashMap<String, String> properties);

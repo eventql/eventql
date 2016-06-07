@@ -24,6 +24,7 @@
  */
 #include <eventql/config/process_config.h>
 #include <eventql/util/io/fileutil.h>
+#include <eventql/util/human.h>
 #include <inih/ini.h>
 
 namespace eventql {
@@ -77,6 +78,20 @@ Option<int64_t> ProcessConfig::getInt(const String& key) const {
   return None<int64_t>();
 }
 
+bool ProcessConfig::getBool(const String& key) const {
+  auto p = properties_.find(key);
+  if (p != properties_.end()) {
+    auto v =  Human::parseBoolean(p->second);
+    return v.isEmpty() ? false : v.get();
+  }
+
+  return false;
+}
+
+bool ProcessConfig::hasProperty(const String& key) const {
+  return properties_.find(key) != properties_.end();
+}
+
 static int ini_parse_handler(
     void* user,
     const char* section,
@@ -125,9 +140,5 @@ RefPtr<ProcessConfig> ProcessConfigBuilder::getConfig() {
   return mkRef(new ProcessConfig(properties_));
 }
 
-
 } // namespace eventql
-
-
-
 

@@ -113,6 +113,24 @@ int main(int argc, const char** argv) {
       "<switch>");
 
   flags.defineFlag(
+      "config",
+      ::cli::FlagParser::T_STRING,
+      false,
+      "c",
+      NULL,
+      "path to config file",
+      "<config_file>");
+
+  flags.defineFlag(
+      "config_set",
+      ::cli::FlagParser::T_STRING,
+      false,
+      "C",
+      NULL,
+      "set config option",
+      "<key>=<val>");
+
+  flags.defineFlag(
       "standalone",
       cli::FlagParser::T_SWITCH,
       false,
@@ -238,20 +256,80 @@ int main(int argc, const char** argv) {
 
   /* conf */
   ProcessConfigBuilder config_builder;
+  config_builder.setProperty("server.listen", "localhost:9175");
+
+  if (flags.isSet("standalone")) {
+    config_builder.setProperty("server.name", "standalone");
+    config_builder.setProperty("cluster.coordinator", "standalone");
+  }
+
+  if (flags.isSet("config")) {
+    auto rc = config_builder.loadFile(flags.getString("config"));
+    if (!rc.isSuccess()) {
+      logFatal("error while loading config file: $0", rc.message());
+      return 1;
+    }
+  } else {
+    config_builder.loadDefaultConfigFile();
+  }
+
+  for (const auto& opt : flags.getStrings("config_set")) {
+    auto opt_key_end = opt.find("=");
+    if (opt_key_end == String::npos) {
+      logFatal("invalid config option: $0", opt);
+      return 1;
+    }
+
+    config_builder.setProperty(
+        opt.substr(0, opt_key_end),
+        opt.substr(opt_key_end + 1));
+  }
+
+  if (flags.isSet("listen")) {
+    config_builder.setProperty("server.listen", flags.getString("listen"));
+  }
+
+  if (flags.isSet("daemonize")) {
+    config_builder.setProperty("server.daemonize", "true");
+  }
+
+  if (flags.isSet("pidfile")) {
+    config_builder.setProperty("server.pidfile", flags.getString("pidfile"));
+  }
 
   auto process_config = config_builder.getConfig();
 
-  if (flags.isSet("daemonize")) {
+  if (!process_config->hasProperty("server.datadir")) {
+    logFatal("evqld", "missing 'server.datadir' option or --datadir flag");
+    return 1;
+  }
+
+  if (!FileUtil::exists(process_config->getString("server.datadir"))) {
+    logFatal(
+        "evqld",
+        "data dir not found: $0",
+        process_config->getString("server.datadir"));
+    return 1;
+  }
+
+  if (!process_config->hasProperty("server.name")) {
+    logFatal("evqld", "missing 'server.name' option");
+    return 1;
+  }
+
+  /* daemonize */
+  if (process_config->getBool("server.daemonize")) {
     Application::daemonize();
   }
 
   ScopedPtr<FileLock> pidfile_lock;
-  if (flags.isSet("pidfile")) {
-    pidfile_lock = mkScoped(new FileLock(flags.getString("pidfile")));
+  if (process_config->hasProperty("server.pidfile")) {
+    auto pidfile_path = process_config->getString("server.pidfile").get();
+    pidfile_lock = mkScoped(new FileLock(pidfile_path));
     pidfile_lock->lock(false);
 
     auto pidfile = File::openFile(
-        flags.getString("pidfile"),
+        pidfile_path,
         File::O_WRITE | File::O_CREATEOROPEN | File::O_TRUNCATE);
 
     pidfile.write(StringUtil::toString(getpid()));
@@ -268,14 +346,19 @@ int main(int argc, const char** argv) {
   String listen_host;
   int listen_port;
   {
-    auto listen_str = flags.getString("listen");
+    auto listen_str = process_config->getString("server.listen");
+    if (listen_str.isEmpty()) {
+      logFatal("evqld", "missing 'server.listen' option or --listen flag");
+      return 1;
+    }
+
     std::smatch m;
     std::regex listen_regex("([0-9a-zA-Z-_.]+):([0-9]+)");
-    if (std::regex_match(listen_str, m, listen_regex)) {
+    if (std::regex_match(listen_str.get(), m, listen_regex)) {
       listen_host = m[1];
       listen_port = std::stoi(m[2]);
     } else {
-      logFatal("evqld", "invalid listen address: $0", listen_str);
+      logFatal("evqld", "invalid listen address: $0", listen_str.get());
       return 1;
     }
   }
@@ -286,25 +369,10 @@ int main(int argc, const char** argv) {
   http_server.listen(listen_port);
   http::HTTPConnectionPool http(&ev, &z1stats()->http_client_stats);
 
-  Option<String> server_name;
-  if (flags.isSet("join")) {
-    server_name = Some(flags.getString("join"));
-  }
-
   /* data dirdirectory */
-  if (!FileUtil::exists(flags.getString("datadir"))) {
-    logFatal("evqld", "data dir not found: " + flags.getString("datadir"));
-    return 1;
-  }
-
-  String node_name = "__anonymous";
-  if (flags.isSet("join")) {
-    node_name = flags.getString("join");
-  }
-
   auto tsdb_dir = FileUtil::joinPaths(
-      flags.getString("datadir"),
-      "data/" + node_name);
+      process_config->getString("server.datadir").get(),
+      "data/" + process_config->getString("server.name").get());
 
   if (!FileUtil::exists(tsdb_dir)) {
     FileUtil::mkdir_p(tsdb_dir);
@@ -324,12 +392,13 @@ int main(int argc, const char** argv) {
 
   /* client auth */
   ScopedPtr<eventql::ClientAuth> client_auth;
-  if (flags.getString("client_auth_backend") == "trust") {
+  auto client_auth_opt = process_config->getString("server.client_auth_backend");
+  if (client_auth_opt.get() == "trust") {
     client_auth.reset(new TrustClientAuth());
-  } else if (flags.getString("client_auth_backend") == "legacy") {
+  } else if (client_auth_opt.get() == "legacy") {
     client_auth.reset(new LegacyClientAuth(flags.getString("legacy_auth_secret")));
   } else {
-    logFatal("evqld", "invalid client auth backend: " + flags.getString("client_auth_backend"));
+    logFatal("evqld", "invalid client auth backend: " + client_auth_opt.get());
     return 1;
   }
 
