@@ -34,6 +34,8 @@ namespace cli {
 class CLIConfig {
 public:
 
+  enum class kLanguage { SQL, JAVASCRIPT };
+
   CLIConfig();
 
   Status loadDefaultConfigFile();
@@ -61,7 +63,12 @@ public:
   bool getBatchMode() const;
   Status setBatchMode(const String& batch_mode);
 
+  Status setFile(const String& file);
   Option<String> getFile() const;
+
+  Status setLanguage(String language);
+  Option<kLanguage> getLanguage();
+
   Option<String> getExec() const;
 
   Status setConfigOption(
@@ -79,6 +86,7 @@ protected:
   bool batch_mode_;
   String file_;
   String exec_;
+  Option<kLanguage> language_;
 };
 
 } // namespace cli

@@ -444,49 +444,57 @@ int main(int argc, const char** argv) {
     cli_cfg.setDatabase(flags.getString("database"));
   }
 
-  /* cli */
-  eventql::cli::Console console(cli_cfg);
-
-  if (flags.getArgv().size() > 0) {
-    stderr_os->write(
-        StringUtil::format(
-            "invalid argument: '$0', run evql --help for help\n",
-            flags.getArgv()[0]));
-
-    return 1;
-  }
-
-  String language;
-  if (flags.isSet("lang")) {
-    language = flags.getString("lang");
-    StringUtil::toLower(&language);
-  }
-
   if (flags.isSet("file")) {
-    auto file = flags.getString("file");
-    auto query = FileUtil::read(file);
+    cli_cfg.setFile(flags.getString("file"));
+  }
 
-    if (language == "sql" ||
-        (language.empty() && StringUtil::endsWith(file, ".sql"))) {
-      auto ret = console.runQuery(query.toString());
-      return ret.isSuccess() ? 0 : 1;
+  if (flags.isSet("lang")) {
+    auto s = cli_cfg.setLanguage(flags.getString("lang"));
+    if (!s.isSuccess()) {
+      printError(StringUtil::format("$0: $1", s.type(), s.message()));
+      return 1;
+    }
 
-    } else if (language == "js" ||
-              (language.empty() && StringUtil::endsWith(file, ".js"))) {
-      auto ret = console.runJS(query.toString());
-      return ret.isSuccess() ? 0 : 1;
-
-    } else {
-      stderr_os->write(
-          "FlagError: unknown language, can't execute file, run evql --help for help\n");
+    if (cli_cfg.getFile().isEmpty() &&
+        cli_cfg.getLanguage().get() != eventql::cli::CLIConfig::kLanguage::SQL) {
+      printError(
+          "FlagError: must set -f <file> for javascript, run --help for help\n");
       return 1;
     }
   }
 
-  if (!language.empty() && language != "sql") {
-    stderr_os->write(
-      "FlagError: invalid language option, run evql --help for help\n");
+  /* cli */
+  eventql::cli::Console console(cli_cfg);
+
+  if (flags.getArgv().size() > 0) {
+    printError(StringUtil::format(
+        "invalid argument: '$0', run evql --help for help\n",
+        flags.getArgv()[0]));
+
     return 1;
+  }
+
+  auto file = cli_cfg.getFile();
+  if (!file.isEmpty()) {
+    auto language = cli_cfg.getLanguage();
+    if (language.isEmpty()) {
+      printError(
+          "FlagError: unknown language to execute file, run evql --help for help\n");
+      return 1;
+    }
+
+    auto query = FileUtil::read(file.get());
+    switch (language.get()) {
+      case eventql::cli::CLIConfig::kLanguage::SQL: {
+        Status ret = console.runQuery(query.toString());
+        return ret.isSuccess() ? 0 : 1;
+      }
+
+      case eventql::cli::CLIConfig::kLanguage::JAVASCRIPT: {
+        Status ret = console.runJS(query.toString());
+        return ret.isSuccess() ? 0 : 1;
+      }
+    }
   }
 
   if (flags.isSet("exec")) {
