@@ -52,7 +52,7 @@ class ProcessConfigBuilder {
 public:
 
   Status loadFile(const String& file);
-  Status loadDefaultConfigFile();
+  Status loadDefaultConfigFile(const String& process);
 
   void setProperty(const String& key, const String& value);
   void setProperty(

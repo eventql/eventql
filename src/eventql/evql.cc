@@ -404,7 +404,7 @@ int main(int argc, const char** argv) {
   /* console options */
   eventql::ProcessConfigBuilder cfg_builder;
   {
-    auto status = cfg_builder.loadDefaultConfigFile();
+    auto status = cfg_builder.loadDefaultConfigFile("evql");
     if (!status.isSuccess()) {
       printError(status.message());
       return 1;

@@ -117,18 +117,32 @@ Status ProcessConfigBuilder::loadFile(const String& file) {
   return parser_state.status;
 }
 
-Status ProcessConfigBuilder::loadDefaultConfigFile() {
+Status ProcessConfigBuilder::loadDefaultConfigFile(const String& process) {
+  /* load /etc/{process}.conf */
+  {
+    String config_file_name = StringUtil::format("$0.conf", process);
+    String config_file_path = FileUtil::joinPaths("/etc", config_file_name);
+    if (FileUtil::exists(config_file_path)) {
+      auto rc = loadFile(config_file_path);
+      if (!rc.isSuccess()) {
+        return rc;
+      }
+    }
+  }
+
   char* homedir = getenv("HOME");
   if (!homedir) {
     return Status::success();
   }
 
-  String confg_file_path = FileUtil::joinPaths(homedir, ".evqlrc");
-  if (!FileUtil::exists(confg_file_path)) {
-    return Status::success();
-  }
+  {
+    String confg_file_path = FileUtil::joinPaths(homedir, ".evqlrc");
+    if (!FileUtil::exists(confg_file_path)) {
+      return Status::success();
+    }
 
-  return loadFile(confg_file_path);
+    return loadFile(confg_file_path);
+  }
 }
 
 void ProcessConfigBuilder::setProperty(const String& key, const String& value) {
