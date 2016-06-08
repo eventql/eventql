@@ -352,7 +352,7 @@ int main(int argc, const char** argv) {
       cli::FlagParser::T_SWITCH,
       false,
       "B",
-      "INFO",
+      NULL,
       "batch",
       "<batch mode>");
 
@@ -429,7 +429,7 @@ int main(int argc, const char** argv) {
   }
 
   if (flags.isSet("port")) {
-    cfg_builder.setProperty("evql", "port", flags.getString("port"));
+    cfg_builder.setProperty("evql", "port", StringUtil::toString(flags.getInt("port")));
   }
 
   if (flags.isSet("user")) {
@@ -509,11 +509,10 @@ int main(int argc, const char** argv) {
         return 1;
       }
     }
-
-    return 0;
+  } else {
+    console.startInteractiveShell();
   }
 
-  console.startInteractiveShell();
   return 0;
 }
 
