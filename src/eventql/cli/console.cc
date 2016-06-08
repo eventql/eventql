@@ -63,40 +63,48 @@ void Console::startInteractiveShell() {
 Console::Console(const CLIConfig cli_cfg) : cfg_(cli_cfg) {}
 
 Status Console::runQuery(const String& query) {
-  auto stdout_os = OutputStream::getStdout();
+  if (cfg_.getBatchMode()) {
+    return runQueryBatch(query);
+  } else {
+    return runQueryTable(query);
+  }
+}
+
+Status Console::runQueryTable(const String& query) {
+  auto stdout_os = TerminalOutputStream::fromStream(OutputStream::getStdout());
   auto stderr_os = TerminalOutputStream::fromStream(OutputStream::getStderr());
   bool line_dirty = false;
   bool is_tty = stderr_os->isTTY();
 
   bool error = false;
-  csql::BinaryResultParser res_parser;
   csql::ResultList results;
+  auto res_parser = new csql::BinaryResultParser();
 
-  res_parser.onProgress([&stderr_os, &line_dirty, is_tty] (
+  res_parser->onProgress([&stdout_os, &line_dirty, is_tty] (
       const csql::ExecutionStatus& status) {
     auto status_line = StringUtil::format(
         "Query running: $0%",
         status.progress * 100);
 
     if (is_tty) {
-      stderr_os->eraseLine();
-      stderr_os->print("\r" + status_line);
+      stdout_os->eraseLine();
+      stdout_os->print("\r" + status_line);
       line_dirty = true;
     } else {
-      stderr_os->print(status_line + "\n");
+      stdout_os->print(status_line + "\n");
     }
 
   });
 
-  res_parser.onTableHeader([&results] (const Vector<String>& columns) {
+  res_parser->onTableHeader([&results] (const Vector<String>& columns) {
     results.addHeader(columns);
   });
 
-  res_parser.onRow([&results] (int argc, const csql::SValue* argv) {
+  res_parser->onRow([&results] (int argc, const csql::SValue* argv) {
     results.addRow(argv, argc);
   });
 
-  res_parser.onError([&stderr_os, &error] (const String& error_str) {
+  res_parser->onError([&stderr_os, &error] (const String& error_str) {
     stderr_os->print(
         "ERROR:",
         { TerminalStyle::RED, TerminalStyle::UNDERSCORE });
@@ -105,60 +113,14 @@ Status Console::runQuery(const String& query) {
     error = true;
   });
 
-  try {
-    auto url = StringUtil::format(
-        "http://$0:$1/api/v1/sql",
-        cfg_.getHost(),
-        cfg_.getPort());
-
-    auto postdata = StringUtil::format(
-          "format=binary&query=$0&database=$1",
-          URI::urlEncode(query),
-          URI::urlEncode(cfg_.getDatabase()));
-
-    http::HTTPMessage::HeaderList auth_headers;
-    if (!cfg_.getAuthToken().isEmpty()) {
-      auth_headers.emplace_back(
-          "Authorization",
-          StringUtil::format("Token $0", cfg_.getAuthToken().get()));
-    } else if (!cfg_.getUser().empty()) {
-      auth_headers.emplace_back(
-          "Authorization",
-          StringUtil::format("Basic $0",
-              util::Base64::encode(cfg_.getUser() + ":" + cfg_.getPassword())));
-    }
-
-    http::HTTPClient http_client(nullptr);
-    auto req = http::HTTPRequest::mkPost(url, postdata, auth_headers);
-    auto res = http_client.executeRequest(
-        req,
-        http::StreamingResponseHandler::getFactory(
-            std::bind(
-                &csql::BinaryResultParser::parse,
-                &res_parser,
-                std::placeholders::_1,
-                std::placeholders::_2)));
-
-    if (!res_parser.eof()) {
-      stderr_os->print(
+  auto res = sendRequest(query, res_parser);
+  if (!res.isSuccess()) {
+    stderr_os->print(
           "ERROR:",
           { TerminalStyle::RED, TerminalStyle::UNDERSCORE });
 
-      stderr_os->print(" connection to server lost");
-      return Status(eIOError);
-    }
-  } catch (const StandardException& e) {
-    if (is_tty) {
-      stderr_os->eraseLine();
-      stderr_os->print("\r");
-    }
-
-    stderr_os->print(
-        "ERROR:",
-        { TerminalStyle::RED, TerminalStyle::UNDERSCORE });
-
-    stderr_os->print(StringUtil::format(" $0\n", e.what()));
-    return Status(eIOError);
+    stderr_os->print(res.message());
+    return res;
   }
 
   if (is_tty) {
@@ -195,6 +157,109 @@ Status Console::runQuery(const String& query) {
   }
 
   return Status::success();
+}
+
+Status Console::runQueryBatch(const String& query) {
+  auto stdout_os = TerminalOutputStream::fromStream(OutputStream::getStdout());
+  auto stderr_os = TerminalOutputStream::fromStream(OutputStream::getStderr());
+  bool line_dirty = false;
+  bool is_tty = stderr_os->isTTY();
+
+  bool error = false;
+  csql::ResultList results;
+  auto res_parser = new csql::BinaryResultParser();
+
+  res_parser->onTableHeader([&stdout_os] (const Vector<String>& columns) {
+    for (const auto col : columns) {
+      stdout_os->print(col + "\t");
+    }
+    stdout_os->print("\n");
+  });
+
+  res_parser->onRow([&stdout_os] (int argc, const csql::SValue* argv) {
+    for (size_t i = 0; i < argc; ++i) {
+      stdout_os->print(argv[i].getString() + "\t");
+    }
+    stdout_os->print("\n");
+  });
+
+  res_parser->onError([&stderr_os, &error] (const String& error_str) {
+    stderr_os->print(
+        "ERROR:",
+        { TerminalStyle::RED, TerminalStyle::UNDERSCORE });
+
+    stderr_os->print(StringUtil::format(" $0\n", error_str));
+    error = true;
+  });
+
+  auto res = sendRequest(query, res_parser);
+  if (!res.isSuccess()) {
+    stderr_os->print(
+          "ERROR:",
+          { TerminalStyle::RED, TerminalStyle::UNDERSCORE });
+
+    stderr_os->print(res.message());
+    return res;
+  }
+
+  if (is_tty) {
+    stderr_os->eraseLine();
+    stderr_os->print("\r");
+  }
+
+  if (error) {
+    return Status(eIOError);
+  }
+
+  return Status::success();
+}
+
+Status Console::sendRequest(const String& query, csql::BinaryResultParser* res_parser) {
+  try {
+    auto url = StringUtil::format(
+        "http://$0:$1/api/v1/sql",
+        cfg_.getHost(),
+        cfg_.getPort());
+
+    auto db = cfg_.getDatabase().isEmpty() ? "" : cfg_.getDatabase().get();
+    auto postdata = StringUtil::format(
+          "format=binary&query=$0&database=$1",
+          URI::urlEncode(query),
+          URI::urlEncode(db));
+
+    http::HTTPMessage::HeaderList auth_headers;
+    if (!cfg_.getAuthToken().isEmpty()) {
+      auth_headers.emplace_back(
+          "Authorization",
+          StringUtil::format("Token $0", cfg_.getAuthToken().get()));
+    } else if (!cfg_.getPassword().isEmpty()) {
+      auth_headers.emplace_back(
+          "Authorization",
+          StringUtil::format("Basic $0",
+              util::Base64::encode(
+                  cfg_.getUser() + ":" + cfg_.getPassword().get())));
+    }
+
+    http::HTTPClient http_client(nullptr);
+    auto req = http::HTTPRequest::mkPost(url, postdata, auth_headers);
+    auto res = http_client.executeRequest(
+        req,
+        http::StreamingResponseHandler::getFactory(
+            std::bind(
+                &csql::BinaryResultParser::parse,
+                res_parser,
+                std::placeholders::_1,
+                std::placeholders::_2)));
+
+    if (!res_parser->eof()) {
+      return Status(eIOError, "connection to server lost");
+    }
+
+    return Status::success();
+
+  } catch (const StandardException& e) {
+    return Status(eIOError, StringUtil::format(" $0\n", e.what()));
+  }
 }
 
 Status Console::runJS(const String& program_source) {

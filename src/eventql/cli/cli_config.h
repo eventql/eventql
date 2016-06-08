@@ -27,6 +27,7 @@
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/option.h>
 #include <eventql/util/status.h>
+#include <eventql/config/process_config.h>
 
 namespace eventql {
 namespace cli {
@@ -34,59 +35,36 @@ namespace cli {
 class CLIConfig {
 public:
 
+  static const String& kDefaultHost;
+  static const int kDefaultPort;
+  static const String& kDefaultUser;
+
   enum class kLanguage { SQL, JAVASCRIPT };
 
-  CLIConfig();
-
-  Status loadDefaultConfigFile();
-  Status loadConfigFile(const String& file_path);
-
-  String getDatabase() const;
-  Status setDatabase(const String& database);
+  CLIConfig(RefPtr<ProcessConfig> cfg);
 
   String getHost() const;
-  Status setHost(const String& host = "localhost");
 
   int getPort() const;
-  Status setPort(const int port = 80);
-  Status setPort(const String& port);
 
   String getUser() const;
-  Status setUser(const String& usern);
-
-  String getPassword() const;
-  Status setPassword(const String& password);
-
-  Option<String> getAuthToken() const;
-  Status setAuthToken(const String& auth_token);
 
   bool getBatchMode() const;
-  Status setBatchMode(const String& batch_mode);
 
-  Status setFile(const String& file);
+  Option<String> getDatabase() const;
+
+  Option<String> getPassword() const;
+
+  Option<String> getAuthToken() const;
+
   Option<String> getFile() const;
 
-  Status setLanguage(String language);
   Option<kLanguage> getLanguage();
 
   Option<String> getExec() const;
 
-  Status setConfigOption(
-      const String& section,
-      const String& key,
-      const String& value);
-
 protected:
-  String database_;
-  String user_;
-  String password_;
-  String server_host_;
-  int server_port_;
-  String server_auth_token_;
-  bool batch_mode_;
-  String file_;
-  String exec_;
-  Option<kLanguage> language_;
+  RefPtr<ProcessConfig> cfg_;
 };
 
 } // namespace cli

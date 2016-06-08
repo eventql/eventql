@@ -28,6 +28,9 @@
 #include <eventql/util/cli/CLICommand.h>
 #include <eventql/util/status.h>
 #include <eventql/cli/cli_config.h>
+#include "eventql/server/sql/codec/binary_codec.h"
+#include "eventql/sql/result_list.h"
+#include "eventql/util/io/TerminalOutputStream.h"
 
 namespace eventql {
 namespace cli {
@@ -63,6 +66,10 @@ public:
   Status runJS(const String& query);
 
 protected:
+  Status runQueryBatch(const String& query);
+  Status runQueryTable(const String& query);
+  Status sendRequest(const String& query, csql::BinaryResultParser* res_parser);
+
   CLIConfig cfg_;
 };
 
