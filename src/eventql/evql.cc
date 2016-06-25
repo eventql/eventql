@@ -477,7 +477,7 @@ int main(int argc, const char** argv) {
 
   if (!file.isEmpty()) {
     if (language.isEmpty()) {
-      logFatal("evql", "invalid --lang flag. Must one of 'sql', 'js' or 'javascript'");
+      logFatal("evql", "invalid --lang flag. Must be one of 'sql', 'js' or 'javascript'");
       return 1;
     }
 
