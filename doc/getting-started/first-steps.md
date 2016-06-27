@@ -32,7 +32,7 @@ More documentation on how to install and run the server can be found in the
 ["Installation"](../installation/) and ["Running EventQL"](../running-eventql/)
 pages.
 
-### Step 2: Creating a new table
+### Step 2: Create a new table
 
 Similar to most SQL databases, the core units of data storage in EventQL are tables
 and rows (row are also referred to as records or events). For our example, we'll
