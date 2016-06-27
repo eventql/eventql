@@ -46,16 +46,16 @@ namespace eventql {
 namespace cli {
 
 void Console::startInteractiveShell() {
-  auto history_path = cfg_.getHistoryPath();
+  auto history_path = cfg_.getHistoryPath().c_str();
   linenoiseHistorySetMaxLen(cfg_.getHistoryMaxSize());
-  linenoiseHistoryLoad(history_path.c_str());
+  linenoiseHistoryLoad(history_path);
 
   char *p;
   while ((p = linenoise("evql> ")) != NULL) {
     String line(p);
     linenoiseHistoryAdd(p);
     linenoiseFree(p);
-    linenoiseHistorySave(history_path.c_str());
+    linenoiseHistorySave(history_path);
 
     if (line == "quit") {
       return;
