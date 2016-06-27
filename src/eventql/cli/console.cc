@@ -344,9 +344,17 @@ Status Console::runJS(const String& program_source) {
         cfg_.getPort());
 
     http::HTTPMessage::HeaderList auth_headers;
-    auth_headers.emplace_back(
-        "Authorization",
-        StringUtil::format("Token $0", cfg_.getAuthToken().get()));
+    if (!cfg_.getAuthToken().isEmpty()) {
+      auth_headers.emplace_back(
+          "Authorization",
+          StringUtil::format("Token $0", cfg_.getAuthToken().get()));
+    } else if (!cfg_.getPassword().isEmpty()) {
+      auth_headers.emplace_back(
+          "Authorization",
+          StringUtil::format("Basic $0",
+              util::Base64::encode(
+                  cfg_.getUser() + ":" + cfg_.getPassword().get())));
+    }
 
     if (is_tty) {
       stderr_os->print("Launching job...");
