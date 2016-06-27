@@ -36,9 +36,25 @@ pages.
 
 Similar to most SQL databases, the core units of data storage in EventQL are tables
 and rows (row are also referred to as records or events). For our example, we'll
-create a simple table that stores a clickstream/http server access log.
+create a simple table that stores a http server access log.
 
-    create table test (time datetime, val uint64, primary key (time, val));
+Our table will be called `access_log` and will contain three columns: `time`,
+`session_id` and `url`. We will use the combination of time and session_id
+as our primary key.
+
+To choose a good primary key and get the best performnace, it is important
+to understand how data is partitioned and distributed across machines. Read more
+about primary keys on the ["Partitioning" page](../../collecting-and-storing/tables/partitioning).
+
+Copy the command below into the SQL shell that we started in the previous step
+to create the table:
+
+    CREATE TABLE test (
+        time        datetime,
+        session_id  string,
+        url         string,
+        PRIMARY KEY (time, session_id)
+    );
 
 Note that EventQL can deal with more complex (nested) schemas that allow you
 to store any JSON object into a row. Check out the
@@ -47,8 +63,16 @@ information.
 
 ### Step 3: Insert events
 
-    insert into test (time, val) values (now(), 1337);
+Now we are ready to start inserting events into the `access_log` table. For
+our example, execute the SQL commands below a couple of times to create a bit
+of test data:
 
+    INSERT INTO access_log (time, session_id, url) VALUES (NOW(), "s1", "/page1");
+    INSERT INTO access_log (time, session_id, url) VALUES (NOW(), "s2", "/page2");
+    INSERT INTO access_log (time, session_id, url) VALUES (NOW(), "s3", "/page1");
+
+Later, we will use the HTTP API or one of the driver libraries to insert records
+programatically.
 
 ### Step 4: Query the data
 
