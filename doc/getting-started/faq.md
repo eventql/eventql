@@ -1,4 +1,4 @@
-1.5 FAQ
+1.6 FAQ
 =======
 
 #### Is EventQL a key-value store?

@@ -1,4 +1,4 @@
-1.4 First Steps
+1.2 First Steps
 ===============
 
 This page will guide you through setting up a standalone EventQL server, creating
