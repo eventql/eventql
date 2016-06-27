@@ -46,10 +46,15 @@ namespace eventql {
 namespace cli {
 
 void Console::startInteractiveShell() {
+  linenoiseHistorySetMaxLen(100);
+  linenoiseHistoryLoad("/tmp/evql_history");
+
   char *p;
   while ((p = linenoise("evql> ")) != NULL) {
     String line(p);
+    linenoiseHistoryAdd(p);
     linenoiseFree(p);
+    linenoiseHistorySave("/tmp/evql_history");
 
     if (line == "quit") {
       return;
