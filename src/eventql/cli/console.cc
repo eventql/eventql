@@ -169,11 +169,40 @@ Status Console::runQueryBatch(const String& query) {
   csql::ResultList results;
   auto res_parser = new csql::BinaryResultParser();
 
-  res_parser->onTableHeader([&stdout_os] (const Vector<String>& columns) {
+  bool header_sent = false;
+
+  if (!cfg_.getQuiet()) {
+    res_parser->onProgress([&stderr_os, &line_dirty, is_tty, &header_sent] (
+        const csql::ExecutionStatus& status) {
+      if (!header_sent) {
+        auto status_line = StringUtil::format(
+            "Query running: $0%",
+            status.progress * 100);
+
+        if (is_tty) {
+          stderr_os->eraseLine();
+          stderr_os->print("\r" + status_line);
+          line_dirty = true;
+        } else {
+          stderr_os->print(status_line + "\n");
+        }
+      }
+    });
+  }
+
+  res_parser->onTableHeader([&stdout_os, &stderr_os, &header_sent, &line_dirty] (
+      const Vector<String>& columns) {
+    if (line_dirty) {
+      stderr_os->eraseLine();
+      stderr_os->print("\r");
+      line_dirty = false;
+    }
+
     for (const auto col : columns) {
       stdout_os->print(col + "\t");
     }
     stdout_os->print("\n");
+    header_sent = true;
   });
 
   res_parser->onRow([&stdout_os] (int argc, const csql::SValue* argv) {
@@ -183,7 +212,13 @@ Status Console::runQueryBatch(const String& query) {
     stdout_os->print("\n");
   });
 
-  res_parser->onError([&stderr_os, &error] (const String& error_str) {
+  res_parser->onError([&stderr_os, &error, &line_dirty] (const String& error_str) {
+    if (line_dirty) {
+      stderr_os->eraseLine();
+      stderr_os->print("\r");
+      line_dirty = false;
+    }
+
     stderr_os->print(
         "ERROR:",
         { TerminalStyle::RED, TerminalStyle::UNDERSCORE });
