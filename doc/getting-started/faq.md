@@ -3,6 +3,28 @@
 
 #### Is EventQL a key-value store?
 
+
+#### Why does EventQL require a strict schema? // Why isn't EventQL schemaless?
+
+So why does EventQL require a strict schema for all tables? Would a schemaless
+approach not have been easier to use? &mdash; There are a couple of important
+reasons why we need to have strict schemas in EventQL:
+
+The most important reason is that EventQL is a columnar database, which
+means that it stores data tables as columns rather than as rows. This allows us
+to read only the required columns we need to answer a query rather than scanning
+and discarding unwanted data from full rows which often leads to huge performance
+increases for IO-bound queries on very large datasets.
+
+Disassembling the records for columnar store requires a schema. While it would
+have been possible to generate a schema on the fly when building the columnar
+tables this would have meant a lot of negative implications on performance, IO
+load and the replication architecture.
+
+Furthermore, having a strict schema enables a lot of optimizations and diagnostics
+in the SQL engine that would have been much harder or impossible to build with
+an adaptive/ad-hoc schema approach.
+
 #### What kind of consistency guarantees does EventQL provide?
 
 #### Does EventQL support transactions?

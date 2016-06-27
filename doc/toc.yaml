@@ -19,6 +19,13 @@
           visible_in_toc: true
           source: "getting-started/introduction.md"
         -
+          url: "/getting-started/first-steps"
+          title: "First Steps"
+          type: page
+          visible_in_menu: true
+          visible_in_toc: true
+          source: "getting-started/first-steps.md"
+        -
           url: "/getting-started/concepts"
           title: "Concepts"
           type: page
@@ -41,13 +48,6 @@
           visible_in_menu: true
           visible_in_toc: true
           source: "getting-started/introduction.md"
-        -
-          url: "/getting-started/first-steps"
-          title: "First Steps"
-          type: page
-          visible_in_menu: true
-          visible_in_toc: true
-          source: "getting-started/first-steps.md"
         -
           url: "/getting-started/faq"
           title: "FAQ"
