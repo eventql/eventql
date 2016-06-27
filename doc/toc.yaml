@@ -482,20 +482,20 @@
               visible_in_menu: true
               visible_in_toc: true
               source: "/sql/functions_and_operators.md"
-        -
-          url: "/queries/download-and-export"
-          title: "Downloading &amp; Exporting Data"
-          type: page
-          visible_in_menu: true
-          visible_in_toc: true
-          source: "/queries.md"
-        -
-          url: "/queries/subscribe"
-          title: "Subscribing to changes"
-          type: page
-          visible_in_menu: true
-          visible_in_toc: true
-          source: "/queries.md"
+        #-
+        #  url: "/queries/download-and-export"
+        #  title: "Downloading &amp; Exporting Data"
+        #  type: page
+        #  visible_in_menu: true
+        #  visible_in_toc: true
+        #  source: "/queries.md"
+        #-
+        #  url: "/queries/subscribe"
+        #  title: "Subscribing to changes"
+        #  type: page
+        #  visible_in_menu: true
+        #  visible_in_toc: true
+        #  source: "/queries.md"
     -
       url: "/api"
       title: "Drivers &amp; API"
@@ -504,6 +504,27 @@
       visible_in_toc: true
       source: "/api/overview.md"
       children:
+        -
+          url: "/api/evqlctl"
+          title: "evql Reference"
+          type: page
+          visible_in_menu: true
+          visible_in_toc: true
+          source: "/api/http/index.html"
+        -
+          url: "/api/evqld"
+          title: "evqld Reference"
+          type: page
+          visible_in_menu: true
+          visible_in_toc: true
+          source: "/api/http/index.html"
+        -
+          url: "/api/evqld"
+          title: "evqlctl Reference"
+          type: page
+          visible_in_menu: true
+          visible_in_toc: true
+          source: "/api/http/index.html"
         -
           url: "/api/http"
           title: "HTTP API"
@@ -566,90 +587,76 @@
               visible_in_menu: false
               visible_in_toc: false
               source: "/api/http/auth/login.md"
-        -
-          url: "/api/javascript"
-          title: "JavaScript Query API"
-          type: page
-          visible_in_menu: true
-          visible_in_toc: true
-          source: "/api/http/index.html"
-        -
-          url: "/api/evqlctl"
-          title: "evql Command Line"
-          type: page
-          visible_in_menu: true
-          visible_in_toc: true
-          source: "/api/http/index.html"
-        -
-          url: "/api/evqlld"
-          title: "evqld / evqlctl"
-          type: page
-          visible_in_menu: true
-          visible_in_toc: true
-          source: "/api/http/index.html"
-        -
-          url: "/api/node"
-          title: "Node.js Driver"
-          type: page
-          visible_in_menu: true
-          visible_in_toc: true
-          source: "/api/http/index.html"
-        -
-          url: "/api/java"
-          title: "Java Driver"
-          type: page
-          visible_in_menu: true
-          visible_in_toc: true
-          source: "/api/http/index.html"
-        -
-          url: "/api/ruby"
-          title: "Ruby Driver"
-          type: page
-          visible_in_menu: true
-          visible_in_toc: true
-          source: "/api/http/index.html"
-        -
-          url: "/api/python"
-          title: "Python Driver"
-          type: page
-          visible_in_menu: true
-          visible_in_toc: true
-          source: "/api/http/index.html"
-        -
-          url: "/api/c_cplusplus"
-          title: "C/C++ Driver"
-          type: page
-          visible_in_menu: true
-          visible_in_toc: true
-          source: "/api/http/index.html"
-        -
-          url: "/api/csv-file-connector"
-          title: "CSV File Connector"
-          type: page
-          visible_in_menu: true
-          visible_in_toc: true
-          source: "/api/http/index.html"
-        -
-          url: "/api/logfile-connector"
-          title: "Logfile Connector"
-          type: page
-          visible_in_menu: true
-          visible_in_toc: true
-          source: "/api/http/index.html"
-        -
-          url: "/api/statsd-connector"
-          title: "StatsD Connector"
-          type: page
-          visible_in_menu: true
-          visible_in_toc: true
-          source: "/api/http/index.html"
-        -
-          url: "/api/mysql-postgres-connector"
-          title: "MySQL/Postgres Connector"
-          type: page
-          visible_in_menu: true
-          visible_in_toc: true
-          source: "/api/http/index.html"
+        #-
+        #  url: "/api/javascript"
+        #  title: "JavaScript Query API"
+        #  type: page
+        #  visible_in_menu: true
+        #  visible_in_toc: true
+        #  source: "/api/http/index.html"
+        #-
+        #  url: "/api/node"
+        #  title: "Node.js Driver"
+        #  type: page
+        #  visible_in_menu: true
+        #  visible_in_toc: true
+        #  source: "/api/http/index.html"
+        #-
+        #  url: "/api/java"
+        #  title: "Java Driver"
+        #  type: page
+        #  visible_in_menu: true
+        #  visible_in_toc: true
+        #  source: "/api/http/index.html"
+        #-
+        #  url: "/api/ruby"
+        #  title: "Ruby Driver"
+        #  type: page
+        #  visible_in_menu: true
+        #  visible_in_toc: true
+        #  source: "/api/http/index.html"
+        #-
+        #  url: "/api/python"
+        #  title: "Python Driver"
+        #  type: page
+        #  visible_in_menu: true
+        #  visible_in_toc: true
+        #  source: "/api/http/index.html"
+        #-
+        #  url: "/api/c_cplusplus"
+        #  title: "C/C++ Driver"
+        #  type: page
+        #  visible_in_menu: true
+        #  visible_in_toc: true
+        #  source: "/api/http/index.html"
+        #-
+        #  url: "/api/csv-file-connector"
+        #  title: "CSV File Connector"
+        #  type: page
+        #  visible_in_menu: true
+        #  visible_in_toc: true
+        #  source: "/api/http/index.html"
+        #-
+        #  url: "/api/logfile-connector"
+        #  title: "Logfile Connector"
+        #  type: page
+        #  visible_in_menu: true
+        #  visible_in_toc: true
+        #  source: "/api/http/index.html"
+        #-
+        #  url: "/api/statsd-connector"
+        #  title: "StatsD Connector"
+        #  type: page
+        #  visible_in_menu: true
+        #  visible_in_toc: true
+        #  source: "/api/http/index.html"
+        #-
+        #  url: "/api/mysql-postgres-connector"
+        #  title: "MySQL/Postgres Connector"
+        #  type: page
+        #  visible_in_menu: true
+        #  visible_in_toc: true
+        #  source: "/api/http/index.html"
     -
       url: "/cluster-administration"
       title: "Cluster Administration"
@@ -657,17 +664,17 @@
       visible_in_menu: true
       visible_in_toc: true
       source: "/api/overview.md"
-    -
-      url: "/internals"
-      title: "Internals"
-      type: page
-      visible_in_menu: true
-      visible_in_toc: true
-      source: "/api/overview.md"
-    -
-      url: "/hacking"
-      title: "Hacking"
-      type: page
-      visible_in_menu: true
-      visible_in_toc: true
-      source: "/api/overview.md"
+    #-
+    #  url: "/internals"
+    #  title: "Internals"
+    #  type: page
+    #  visible_in_menu: true
+    #  visible_in_toc: true
+    #  source: "/api/overview.md"
+    #-
+    #  url: "/hacking"
+    #  title: "Hacking"
+    #  type: page
+    #  visible_in_menu: true
+    #  visible_in_toc: true
+    #  source: "/api/overview.md"

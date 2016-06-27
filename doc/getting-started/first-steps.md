@@ -50,10 +50,10 @@ Copy the command below into the SQL shell that we started in the previous step
 to create the table:
 
     CREATE TABLE test (
-        time        datetime,
-        session_id  string,
-        url         string,
-        PRIMARY KEY (time, session_id)
+      time        DATETIME,
+      session_id  STRING,
+      url         STRING,
+      PRIMARY KEY (time, session_id)
     );
 
 Note that EventQL can deal with more complex (nested) schemas that allow you
@@ -71,9 +71,29 @@ of test data:
     INSERT INTO access_log (time, session_id, url) VALUES (NOW(), "s2", "/page2");
     INSERT INTO access_log (time, session_id, url) VALUES (NOW(), "s3", "/page1");
 
-Later, we will use the HTTP API or one of the driver libraries to insert records
-programatically.
+Later, we will use the [HTTP API](../../api/http/) or one of the [driver libraries](../../api/)
+to insert records programatically.
 
 ### Step 4: Query the data
 
-    select * from test;
+Now let's query the data we just inserted. The most simple query returns all rows
+in the table:
+
+    SELECT * FROM access_log;
+
+EventQL aims to be a feature-complete SQL database. We're not there just yet, but
+at this point have most of the standard statements and functions you'd expect (yes,
+including JOINs).
+
+For a more complex query example, let's display the top ten pages in the last 4
+hours:
+
+     SELECT url, count(1) cnt
+     FROM access_log
+     GROUP BY url
+     ORDER BY cnt DESC
+     LIMIT 10;
+
+That's all for now. To dive deeper, check out the ["SQL Query Language" chapter](../../queries/sql/introduction/)
+for more information on all supported SQL statements, functions and extensions
+or have a look at the [JavaScript Query API](../../queries/pipelines/mapreduce/)
