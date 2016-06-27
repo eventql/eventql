@@ -164,15 +164,12 @@ Status Console::runQueryBatch(const String& query) {
   auto stderr_os = TerminalOutputStream::fromStream(OutputStream::getStderr());
   bool line_dirty = false;
   bool is_tty = stderr_os->isTTY();
-
+  bool header_sent = false;
   bool error = false;
-  csql::ResultList results;
   auto res_parser = new csql::BinaryResultParser();
 
-  bool header_sent = false;
-
   if (!cfg_.getQuiet()) {
-    res_parser->onProgress([&stderr_os, &line_dirty, is_tty, &header_sent] (
+    res_parser->onProgress([&stderr_os, &line_dirty, &header_sent, is_tty] (
         const csql::ExecutionStatus& status) {
       if (!header_sent) {
         auto status_line = StringUtil::format(
