@@ -87,7 +87,7 @@ Option<String> CLIConfig::getFile() const {
 }
 
 Option<CLIConfig::kLanguage> CLIConfig::getLanguage() {
-  auto l = cfg_->getString("lang");
+  auto l = cfg_->getString("evql", "lang");
   if (!l.isEmpty()) {
     auto language = l.get();
     StringUtil::toUpper(&language);
@@ -100,7 +100,7 @@ Option<CLIConfig::kLanguage> CLIConfig::getLanguage() {
 
   } else {
 
-    auto file = cfg_->getString("file");
+    auto file = cfg_->getString("evql", "file");
     if (!file.isEmpty()) {
       if (StringUtil::endsWith(file.get(), ".sql")) {
         return Some(CLIConfig::kLanguage::SQL);

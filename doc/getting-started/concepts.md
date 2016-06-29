@@ -1,11 +1,10 @@
-1.2 Concepts
+1.3 Concepts
 ============
 
 This page gives a brief overview of the major concepts in EventQL with links to
 detailed information in the respective chapters.
 
-Tables & Schemas
-----------------
+### Tables & Schemas
 
 The core unit of data storage in EventQL are tables and rows (also referred to
 as records or events). Tables have a strict schema that you must define and that
@@ -51,7 +50,7 @@ large tables (>1000TB). Partitioning and replication are fully automatic and tra
 Updates don't have read-after-write consistency, but strong eventual consistency.
 
 
-## SQL and JavaScript Queries
+### SQL and JavaScript Queries
 
 In addition to the full SQL query language, EventQL can execute JavaScript queries
 and data processing pipelines allowing you to build the most complex data driven

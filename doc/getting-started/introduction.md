@@ -14,7 +14,13 @@ data analysis and processing and has a fully distributed architecture. This
 design allows you to ingest, process and query massive amounts of data at low
 latency, but also makes EventQL less suited for classical transaction processing tasks.
 
-If you want to take the deep dive, these pages explain the major concepts:
+## Getting Started with EventQL
+
+**If you don't like reading documentation, start with the ["First Steps"](../first-steps/) page.** It
+will walk you through starting a server, inserting events and running a query
+in 10 minutes.
+
+To take the deep dive, these pages give a good overview of the the major concepts:
 
   - [Concepts](../concepts/)
   - [Tables & Schemas](../../tables/)
@@ -22,8 +28,3 @@ If you want to take the deep dive, these pages explain the major concepts:
   - [Replication](../../tables/replication/)
   - [The SQL Query Language](../../sql/)
   - [JavaScript Queries](../../queries/)
-  - [Drivers & APIs](../../api/)
-
-
-
-## Getting Started with EventQL
