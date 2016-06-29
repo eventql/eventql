@@ -51,7 +51,7 @@ public:
 
   bool getBatchMode() const;
 
-  bool getQuiet() const;
+  bool getQuietMode() const;
 
   Option<String> getDatabase() const;
 

@@ -2,6 +2,7 @@
  * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
  * Authors:
  *   - Paul Asmuth <paul@zscale.io>
+ *   - Laura Schlimmer <laura@zscale.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -80,21 +81,23 @@ Status Console::runQueryTable(const String& query) {
   csql::ResultList results;
   auto res_parser = new csql::BinaryResultParser();
 
-  res_parser->onProgress([&stdout_os, &line_dirty, is_tty] (
-      const csql::ExecutionStatus& status) {
-    auto status_line = StringUtil::format(
-        "Query running: $0%",
-        status.progress * 100);
+  if (!cfg_.getQuietMode()) {
+    res_parser->onProgress([&stdout_os, &line_dirty, is_tty] (
+        const csql::ExecutionStatus& status) {
+      auto status_line = StringUtil::format(
+          "Query running: $0%",
+          status.progress * 100);
 
-    if (is_tty) {
-      stdout_os->eraseLine();
-      stdout_os->print("\r" + status_line);
-      line_dirty = true;
-    } else {
-      stdout_os->print(status_line + "\n");
-    }
+      if (is_tty) {
+        stdout_os->eraseLine();
+        stdout_os->print("\r" + status_line);
+        line_dirty = true;
+      } else {
+        stdout_os->print(status_line + "\n");
+      }
 
-  });
+    });
+  }
 
   res_parser->onTableHeader([&results] (const Vector<String>& columns) {
     results.addHeader(columns);
@@ -132,29 +135,28 @@ Status Console::runQueryTable(const String& query) {
     return Status(eIOError);
   }
 
+  String status_line = "";
   if (results.getNumRows() > 0) {
     results.debugPrint();
 
     auto num_rows = results.getNumRows();
-    auto status_line = StringUtil::format(
+    status_line = StringUtil::format(
         "$0 row$1 returned",
         num_rows,
         num_rows > 1 ? "s" : "");
 
+  } else {
+    status_line = results.getNumColumns() == 0 ? "Query OK" : "Empty Set";
+  }
+
+  if (!cfg_.getQuietMode()) {
     if (is_tty) {
       stderr_os->print("\r" + status_line + "\n\n");
     } else {
       stderr_os->print(status_line + "\n\n");
     }
-
-  } else {
-    String line = is_tty ? "\r" : "";
-    if (results.getNumColumns() == 0) {
-      stderr_os->print(line + "Query OK \n\n");
-    } else {
-      stderr_os->print(line + "Empty set \n\n");
-    }
   }
+
 
   return Status::success();
 }
@@ -168,7 +170,7 @@ Status Console::runQueryBatch(const String& query) {
   bool error = false;
   auto res_parser = new csql::BinaryResultParser();
 
-  if (!cfg_.getQuiet()) {
+  if (!cfg_.getQuietMode()) {
     res_parser->onProgress([&stderr_os, &line_dirty, &header_sent, is_tty] (
         const csql::ExecutionStatus& status) {
       if (!header_sent) {
