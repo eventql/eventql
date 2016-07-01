@@ -31,6 +31,7 @@ namespace cstable {
 
 class PageReader {
 public:
+  virtual ~PageReader() = default;
 };
 
 class UnsignedIntPageReader : public PageReader {
