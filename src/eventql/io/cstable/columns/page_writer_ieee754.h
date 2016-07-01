@@ -23,35 +23,28 @@
  */
 #pragma once
 #include <eventql/util/stdtypes.h>
-#include <eventql/util/autoref.h>
-#include <eventql/util/io/outputstream.h>
-
+#include <eventql/io/cstable/cstable.h>
+#include <eventql/io/cstable/page_manager.h>
+#include <eventql/io/cstable/io/PageWriter.h>
 
 namespace cstable {
 
-class PageReader {
+class IEEE754PageWriter : public FloatPageWriter {
 public:
-};
+  static const uint64_t kPageSize = 1024 * 512;
 
-class UnsignedIntPageReader : public PageReader {
-public:
-  virtual uint64_t readUnsignedInt() = 0;
-  virtual uint64_t peek() = 0;
-  virtual bool eofReached() = 0;
-};
+  IEEE754PageWriter(
+      PageIndexKey key,
+      PageManager* page_mgr);
 
-class SignedIntPageReader : public PageReader {
-public:
-};
+  void appendValue(double value) override;
 
-class FloatPageReader : public PageReader {
-public:
-  virtual double readFloat() = 0;
-};
-
-class StringPageReader : public PageReader {
-public:
-  virtual void readString(String* value) = 0;
+protected:
+  PageIndexKey key_;
+  PageManager* page_mgr_;
+  bool has_page_;
+  size_t page_pos_;
+  cstable::PageRef page_;
 };
 
 } // namespace cstable

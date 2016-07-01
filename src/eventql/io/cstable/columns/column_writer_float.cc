@@ -22,6 +22,7 @@
  * code of your own applications
  */
 #include <eventql/io/cstable/columns/column_writer_float.h>
+#include <eventql/io/cstable/columns/page_writer_ieee754.h>
 
 #include "eventql/eventql.h"
 
@@ -39,7 +40,7 @@ FloatColumnWriter::FloatColumnWriter(
   switch (config_.storage_type) {
 
     case ColumnEncoding::FLOAT_IEEE754:
-      //data_writer_ = mkScoped(new UInt64PageWriter(key, page_mgr));
+      data_writer_ = mkScoped(new IEEE754PageWriter(key, page_mgr));
       break;
 
     default:

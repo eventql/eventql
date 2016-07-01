@@ -23,35 +23,51 @@
  */
 #pragma once
 #include <eventql/util/stdtypes.h>
-#include <eventql/util/autoref.h>
-#include <eventql/util/io/outputstream.h>
-
+#include <eventql/io/cstable/ColumnReader.h>
+#include <eventql/io/cstable/io/PageReader.h>
+#include <eventql/io/cstable/page_manager.h>
 
 namespace cstable {
 
-class PageReader {
+class FloatColumnReader : public DefaultColumnReader {
 public:
-};
 
-class UnsignedIntPageReader : public PageReader {
-public:
-  virtual uint64_t readUnsignedInt() = 0;
-  virtual uint64_t peek() = 0;
-  virtual bool eofReached() = 0;
-};
+  FloatColumnReader(
+      ColumnConfig config,
+      ScopedPtr<UnsignedIntPageReader> rlevel_reader,
+      ScopedPtr<UnsignedIntPageReader> dlevel_reader,
+      const PageManager* page_mgr);
 
-class SignedIntPageReader : public PageReader {
-public:
-};
+  bool readBoolean(
+      uint64_t* rlvl,
+      uint64_t* dlvl,
+      bool* value) override;
 
-class FloatPageReader : public PageReader {
-public:
-  virtual double readFloat() = 0;
-};
+  bool readFloat(
+      uint64_t* rlvl,
+      uint64_t* dlvl,
+      double* value) override;
 
-class StringPageReader : public PageReader {
-public:
-  virtual void readString(String* value) = 0;
+  bool readSignedInt(
+      uint64_t* rlvl,
+      uint64_t* dlvl,
+      int64_t* value) override;
+
+  bool readUnsignedInt(
+      uint64_t* rlvl,
+      uint64_t* dlvl,
+      uint64_t* value) override;
+
+  bool readString(
+      uint64_t* rlvl,
+      uint64_t* dlvl,
+      String* value) override;
+
+  void skipValue() override;
+  void copyValue(ColumnWriter* writer) override;
+
+protected:
+  ScopedPtr<FloatPageReader> data_reader_;
 };
 
 } // namespace cstable

@@ -33,6 +33,7 @@
 #include <eventql/io/cstable/columns/v1/StringColumnReader.h>
 #include <eventql/io/cstable/columns/column_reader_uint.h>
 #include <eventql/io/cstable/columns/column_reader_string.h>
+#include <eventql/io/cstable/columns/column_reader_float.h>
 #include <eventql/io/cstable/columns/page_reader_bitpacked.h>
 #include <eventql/util/io/file.h>
 #include <eventql/util/io/mmappedfile.h>
@@ -111,6 +112,12 @@ static RefPtr<ColumnReader> openColumnV2(
           page_mgr);
     case ColumnType::STRING:
       return new StringColumnReader(
+          c,
+          std::move(rlevel_reader),
+          std::move(dlevel_reader),
+          page_mgr);
+    case ColumnType::FLOAT:
+      return new FloatColumnReader(
           c,
           std::move(rlevel_reader),
           std::move(dlevel_reader),

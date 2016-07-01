@@ -21,38 +21,35 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#pragma once
-#include <eventql/util/stdtypes.h>
-#include <eventql/util/autoref.h>
-#include <eventql/util/io/outputstream.h>
-
+#include <eventql/io/cstable/columns/page_writer_ieee754.h>
+#include <eventql/util/ieee754.h>
 
 namespace cstable {
 
-class PageReader {
-public:
-};
+IEEE754PageWriter::IEEE754PageWriter(
+    PageIndexKey key,
+    PageManager* page_mgr) :
+    key_(key),
+    page_mgr_(page_mgr),
+    has_page_(false),
+    page_pos_(0) {}
 
-class UnsignedIntPageReader : public PageReader {
-public:
-  virtual uint64_t readUnsignedInt() = 0;
-  virtual uint64_t peek() = 0;
-  virtual bool eofReached() = 0;
-};
+void IEEE754PageWriter::appendValue(double v) {
+  uint64_t value = IEEE754::toBytes(v);
 
-class SignedIntPageReader : public PageReader {
-public:
-};
+  if (!has_page_ || page_pos_ + sizeof(uint64_t) > page_.size) {
+    if (has_page_) {
+      page_mgr_->flushPage(page_);
+    }
 
-class FloatPageReader : public PageReader {
-public:
-  virtual double readFloat() = 0;
-};
+    page_ = page_mgr_->allocPage(key_, kPageSize);
+    page_pos_ = 0;
+    has_page_ = true;
+  }
 
-class StringPageReader : public PageReader {
-public:
-  virtual void readString(String* value) = 0;
-};
+  page_mgr_->writeToPage(page_, page_pos_, &value, sizeof(value));
+  page_pos_ += sizeof(uint64_t);
+}
 
 } // namespace cstable
 

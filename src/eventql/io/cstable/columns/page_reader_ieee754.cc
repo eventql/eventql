@@ -21,39 +21,42 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#pragma once
-#include <eventql/util/stdtypes.h>
-#include <eventql/util/autoref.h>
-#include <eventql/util/io/outputstream.h>
-
+#include <eventql/io/cstable/columns/page_reader_ieee754.h>
+#include <eventql/util/ieee754.h>
 
 namespace cstable {
 
-class PageReader {
-public:
-};
+IEEE754PageReader::IEEE754PageReader(
+    PageIndexKey key,
+    const PageManager* page_mgr) :
+    page_mgr_(page_mgr),
+    pages_(page_mgr->getPages(key)),
+    page_pos_(0),
+    page_len_(0),
+    page_idx_(0) {}
 
-class UnsignedIntPageReader : public PageReader {
-public:
-  virtual uint64_t readUnsignedInt() = 0;
-  virtual uint64_t peek() = 0;
-  virtual bool eofReached() = 0;
-};
+double IEEE754PageReader::readFloat() {
+  if (page_pos_ + sizeof(uint64_t) > page_len_) {
+    if (page_idx_ == pages_.size()) {
+      return 0;
+    }
 
-class SignedIntPageReader : public PageReader {
-public:
-};
+    page_pos_ = 0;
+    page_len_ = pages_[page_idx_].size;
+    page_data_.resize(page_len_);
+    page_mgr_->readPage(pages_[page_idx_], page_data_.data());
+    ++page_idx_;
+  }
 
-class FloatPageReader : public PageReader {
-public:
-  virtual double readFloat() = 0;
-};
+  uint64_t v;
+  memcpy(
+      &v,
+      (const char*) page_data_.data() + page_pos_,
+      sizeof(uint64_t));
 
-class StringPageReader : public PageReader {
-public:
-  virtual void readString(String* value) = 0;
-};
+  page_pos_ += sizeof(uint64_t);
+  return IEEE754::fromBytes(v);
+}
 
 } // namespace cstable
-
 
