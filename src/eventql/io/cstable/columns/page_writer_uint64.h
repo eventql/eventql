@@ -31,7 +31,7 @@ namespace cstable {
 
 class UInt64PageWriter : public UnsignedIntPageWriter {
 public:
-  static const uint64_t kPageSize = 512 * 2;
+  static const uint64_t kPageSize = 1024 * 512;
 
   UInt64PageWriter(
       PageIndexKey key,

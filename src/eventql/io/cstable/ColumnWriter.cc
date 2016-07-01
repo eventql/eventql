@@ -22,6 +22,7 @@
  * code of your own applications
  */
 #include <eventql/io/cstable/ColumnWriter.h>
+#include <eventql/io/cstable/columns/page_writer_bitpacked.h>
 
 #include "eventql/eventql.h"
 
@@ -67,7 +68,10 @@ DefaultColumnWriter::DefaultColumnWriter(
     };
 
     rlevel_writer_ = mkScoped(
-        new UInt64PageWriter(rlevel_idx_key, page_mgr));
+        new BitPackedIntPageWriter(
+            rlevel_idx_key,
+            page_mgr,
+            config.rlevel_max));
   }
 
   if (config.dlevel_max > 0) {
@@ -77,7 +81,10 @@ DefaultColumnWriter::DefaultColumnWriter(
     };
 
     dlevel_writer_ = mkScoped(
-        new UInt64PageWriter(dlevel_idx_key, page_mgr));
+        new BitPackedIntPageWriter(
+            dlevel_idx_key,
+            page_mgr,
+            config.dlevel_max));
   }
 }
 
@@ -93,5 +100,4 @@ void DefaultColumnWriter::writeNull(uint64_t rep_level, uint64_t def_level) {
 }
 
 } // namespace cstable
-
 

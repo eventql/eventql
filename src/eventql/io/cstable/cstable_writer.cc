@@ -138,6 +138,8 @@ static RefPtr<ColumnWriter> openColumnV2(
       return new StringColumnWriter(c, page_mgr);
     case ColumnType::FLOAT:
       return new FloatColumnWriter(c, page_mgr);
+    default:
+      RAISE(kIllegalStateError, "invalid column type");
   }
 }
 
@@ -263,6 +265,10 @@ void CSTableWriter::commitV1() {
 }
 
 void CSTableWriter::commitV2() {
+  for (const auto& c : column_writers_) {
+    c->flush();
+  }
+
   arena_->commitTransaction(++current_txid_, num_rows_);
 
   if (fd_ < 0) {

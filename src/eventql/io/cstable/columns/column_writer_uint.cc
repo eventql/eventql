@@ -21,10 +21,11 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include <eventql/io/cstable/columns/column_writer_uint.h>
-#include <eventql/io/cstable/columns/page_writer_leb128.h>
-
 #include "eventql/eventql.h"
+#include <eventql/io/cstable/columns/column_writer_uint.h>
+#include <eventql/io/cstable/columns/page_writer_uint64.h>
+#include <eventql/io/cstable/columns/page_writer_leb128.h>
+#include <eventql/io/cstable/columns/page_writer_bitpacked.h>
 
 namespace cstable {
 
@@ -45,6 +46,14 @@ UnsignedIntColumnWriter::UnsignedIntColumnWriter(
 
     case ColumnEncoding::UINT64_LEB128:
       data_writer_ = mkScoped(new LEB128PageWriter(key, page_mgr));
+      break;
+
+    case ColumnEncoding::UINT32_BITPACKED:
+      data_writer_ = mkScoped(new BitPackedIntPageWriter(key, page_mgr));
+      break;
+
+    case ColumnEncoding::BOOLEAN_BITPACKED:
+      data_writer_ = mkScoped(new BitPackedIntPageWriter(key, page_mgr, 1));
       break;
 
     default:
@@ -114,6 +123,12 @@ void UnsignedIntColumnWriter::writeDateTime(
     uint64_t dlvl,
     UnixTime time) {
   writeUnsignedInt(rlvl, dlvl, time.unixMicros());
+}
+
+void UnsignedIntColumnWriter::flush() {
+  if (rlevel_writer_.get()) rlevel_writer_->flush();
+  if (dlevel_writer_.get()) dlevel_writer_->flush();
+  data_writer_->flush();
 }
 
 } // namespace cstable

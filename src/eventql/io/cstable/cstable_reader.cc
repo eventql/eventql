@@ -33,7 +33,7 @@
 #include <eventql/io/cstable/columns/v1/StringColumnReader.h>
 #include <eventql/io/cstable/columns/column_reader_uint.h>
 #include <eventql/io/cstable/columns/column_reader_string.h>
-#include <eventql/io/cstable/columns/page_reader_uint64.h>
+#include <eventql/io/cstable/columns/page_reader_bitpacked.h>
 #include <eventql/util/io/file.h>
 #include <eventql/util/io/mmappedfile.h>
 #include <sys/fcntl.h>
@@ -86,7 +86,8 @@ static RefPtr<ColumnReader> openColumnV2(
       .entry_type = PageIndexEntryType::RLEVEL
     };
 
-    rlevel_reader = mkScoped(new UInt64PageReader(rlevel_idx_key, page_mgr));
+    rlevel_reader = mkScoped(
+        new BitPackedIntPageReader(rlevel_idx_key, page_mgr));
   }
 
   if (c.dlevel_max > 0) {
@@ -95,7 +96,8 @@ static RefPtr<ColumnReader> openColumnV2(
       .entry_type = PageIndexEntryType::DLEVEL
     };
 
-    dlevel_reader = mkScoped(new UInt64PageReader(dlevel_idx_key, page_mgr));
+    dlevel_reader = mkScoped(
+        new BitPackedIntPageReader(dlevel_idx_key, page_mgr));
   }
 
   switch (c.logical_type) {

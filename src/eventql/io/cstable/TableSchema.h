@@ -50,12 +50,12 @@ public:
   void addBool(
       const String& name,
       bool optional = true,
-      ColumnEncoding encoding = ColumnEncoding::UINT64_LEB128);
+      ColumnEncoding encoding = ColumnEncoding::BOOLEAN_BITPACKED);
 
   void addBoolArray(
       const String& name,
       bool optional = true,
-      ColumnEncoding encoding = ColumnEncoding::UINT64_LEB128);
+      ColumnEncoding encoding = ColumnEncoding::BOOLEAN_BITPACKED);
 
   void addUnsignedInteger(
       const String& name,

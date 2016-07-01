@@ -78,6 +78,8 @@ public:
   virtual ColumnType type() const = 0;
   virtual ColumnEncoding encoding() const = 0;
 
+  virtual void flush() = 0;
+
   size_t maxRepetitionLevel() const;
   size_t maxDefinitionLevel() const;
 
@@ -101,6 +103,11 @@ public:
 
   ColumnType type() const override {
     return config_.logical_type;
+  }
+
+  void flush() override {
+    if (rlevel_writer_.get()) rlevel_writer_->flush();
+    if (dlevel_writer_.get()) dlevel_writer_->flush();
   }
 
 protected:

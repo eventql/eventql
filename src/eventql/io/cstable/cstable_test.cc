@@ -564,15 +564,15 @@ TEST_CASE(CSTableTest, TestV2CSTableColumnWriterReader, [] () {
 
   cstable::TableSchema schema;
 
-  //schema.addUnsignedIntegerArray(
-  //    "bitpacked",
-  //    true,
-  //    cstable::ColumnEncoding::UINT32_BITPACKED);
+  schema.addUnsignedIntegerArray(
+      "bitpacked",
+      true,
+      cstable::ColumnEncoding::UINT32_BITPACKED);
 
-  //schema.addUnsignedIntegerArray(
-  //    "boolean",
-  //    true,
-  //    cstable::ColumnEncoding::BOOLEAN_BITPACKED);
+  schema.addBoolArray(
+      "boolean",
+      true,
+      cstable::ColumnEncoding::BOOLEAN_BITPACKED);
 
   //schema.addFloatArray(
   //    "double",
@@ -584,7 +584,7 @@ TEST_CASE(CSTableTest, TestV2CSTableColumnWriterReader, [] () {
       true,
       cstable::ColumnEncoding::UINT64_LEB128);
 
-  schema.addStringArray(
+  schema.addString(
       "string",
       true,
       cstable::ColumnEncoding::STRING_PLAIN);
@@ -604,8 +604,8 @@ TEST_CASE(CSTableTest, TestV2CSTableColumnWriterReader, [] () {
       cstable::BinaryFormatVersion::v0_2_0,
       schema);
 
-  //auto bitpacked_writer = tbl_writer->getColumnWriter("bitpacked");
-  //auto boolean_writer = tbl_writer->getColumnWriter("boolean");
+  auto bitpacked_writer = tbl_writer->getColumnWriter("bitpacked");
+  auto boolean_writer = tbl_writer->getColumnWriter("boolean");
   //auto double_writer = tbl_writer->getColumnWriter("double");
   auto leb128_writer = tbl_writer->getColumnWriter("leb128");
   auto string_writer = tbl_writer->getColumnWriter("string");
@@ -614,8 +614,8 @@ TEST_CASE(CSTableTest, TestV2CSTableColumnWriterReader, [] () {
 
   for (auto i = 0; i < num_records; i++) {
     tbl_writer->addRow();
-    //bitpacked_writer->writeUnsignedInt(rep_max, def_max, i);
-    //boolean_writer->writeBoolean(rep_max, def_max, i % 2 == 0);
+    bitpacked_writer->writeUnsignedInt(rep_max, def_max, i);
+    boolean_writer->writeBoolean(rep_max, def_max, i % 2 == 0);
     //double_writer->writeFloat(rep_max, def_max, i * 1.1);
     leb128_writer->writeUnsignedInt(rep_max, def_max, i + 12);
     string_writer->writeString(rep_max, def_max, StringUtil::format("x$0x", i));
@@ -628,16 +628,16 @@ TEST_CASE(CSTableTest, TestV2CSTableColumnWriterReader, [] () {
   auto tbl_reader = cstable::CSTableReader::openFile(filename);
   EXPECT_EQ(tbl_reader->numRecords(), num_records);
 
-  //auto bitpacked_reader = tbl_reader->getColumnReader("bitpacked");
-  //auto boolean_reader = tbl_reader->getColumnReader("boolean");
+  auto bitpacked_reader = tbl_reader->getColumnReader("bitpacked");
+  auto boolean_reader = tbl_reader->getColumnReader("boolean");
   //auto double_reader = tbl_reader->getColumnReader("double");
   auto leb128_reader = tbl_reader->getColumnReader("leb128");
   auto string_reader = tbl_reader->getColumnReader("string");
   //auto uint32_reader = tbl_reader->getColumnReader("uint32");
   auto uint64_reader = tbl_reader->getColumnReader("uint64");
 
-  //EXPECT(bitpacked_reader->type() == ColumnType::UNSIGNED_INT);
-  //EXPECT(boolean_reader->type() == ColumnType::BOOLEAN);
+  EXPECT(bitpacked_reader->type() == ColumnType::UNSIGNED_INT);
+  EXPECT(boolean_reader->type() == ColumnType::BOOLEAN);
   //EXPECT(double_reader->type() == ColumnType::FLOAT);
   EXPECT(leb128_reader->type() == ColumnType::UNSIGNED_INT);
   EXPECT(string_reader->type() == ColumnType::STRING);
@@ -648,17 +648,17 @@ TEST_CASE(CSTableTest, TestV2CSTableColumnWriterReader, [] () {
     uint64_t rlvl;
     uint64_t dlvl;
 
-    //{
-    //  uint64_t val_uint;
-    //  EXPECT_TRUE(bitpacked_reader->readUnsignedInt(&rlvl, &dlvl, &val_uint));
-    //  EXPECT_EQ(val_uint, i);
-    //}
+    {
+      uint64_t val_uint;
+      EXPECT_TRUE(bitpacked_reader->readUnsignedInt(&rlvl, &dlvl, &val_uint));
+      EXPECT_EQ(val_uint, i);
+    }
 
-    //{
-    //  bool val_bool;
-    //  EXPECT_TRUE(boolean_reader->readBoolean(&rlvl, &dlvl, &val_bool));
-    //  EXPECT_EQ(val_bool, i % 2 == 0);
-    //}
+    {
+      bool val_bool;
+      EXPECT_TRUE(boolean_reader->readBoolean(&rlvl, &dlvl, &val_bool));
+      EXPECT_EQ(val_bool, i % 2 == 0);
+    }
 
     //{
     //  double val_float;

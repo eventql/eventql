@@ -88,6 +88,8 @@ public:
       const void* data,
       size_t size) = 0;
 
+  void flush() override {}
+
 protected:
   virtual size_t size() const = 0;
   virtual void write(util::BinaryMessageWriter* writer) = 0;

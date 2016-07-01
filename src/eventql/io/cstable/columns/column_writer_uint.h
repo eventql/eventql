@@ -65,6 +65,8 @@ public:
       uint64_t dlvl,
       UnixTime value) override;
 
+  void flush() override;
+
 protected:
   ScopedPtr<UnsignedIntPageWriter> data_writer_;
 };

@@ -24,6 +24,7 @@
 #include <eventql/io/cstable/columns/column_reader_uint.h>
 #include <eventql/io/cstable/columns/page_reader_uint64.h>
 #include <eventql/io/cstable/columns/page_reader_leb128.h>
+#include <eventql/io/cstable/columns/page_reader_bitpacked.h>
 #include <eventql/io/cstable/ColumnWriter.h>
 
 #include "eventql/eventql.h"
@@ -54,6 +55,11 @@ UnsignedIntColumnReader::UnsignedIntColumnReader(
       data_reader_ = mkScoped(new LEB128PageReader(key, page_mgr));
       break;
 
+    case ColumnEncoding::UINT32_BITPACKED:
+    case ColumnEncoding::BOOLEAN_BITPACKED:
+      data_reader_ = mkScoped(new BitPackedIntPageReader(key, page_mgr));
+      break;
+
     default:
       RAISEF(
           kIllegalArgumentError,
@@ -69,7 +75,7 @@ bool UnsignedIntColumnReader::readBoolean(
     bool* value) {
   uint64_t tmp;
   if (readUnsignedInt(rlvl, dlvl, &tmp)) {
-    *value = tmp > 1;
+    *value = tmp > 0;
     return true;
   } else {
     *value = false;

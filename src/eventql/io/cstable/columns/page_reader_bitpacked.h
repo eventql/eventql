@@ -23,37 +23,38 @@
  */
 #pragma once
 #include <eventql/util/stdtypes.h>
-#include <eventql/util/util/binarymessagewriter.h>
-#include <eventql/util/util/BitPackEncoder.h>
 #include <eventql/io/cstable/cstable.h>
 #include <eventql/io/cstable/page_manager.h>
-#include <eventql/io/cstable/io/PageWriter.h>
+#include <eventql/io/cstable/io/PageReader.h>
 
 namespace cstable {
 
-class BitPackedIntPageWriter : public UnsignedIntPageWriter {
+class BitPackedIntPageReader : public UnsignedIntPageReader {
 public:
-  static const uint64_t kPageSize = 1024; // number of batches
 
-  BitPackedIntPageWriter(
-      PageIndexKey key,
-      PageManager* page_mgr,
-      uint32_t max_value = 0xffffffff);
+  BitPackedIntPageReader(PageIndexKey key, const PageManager* page_mgr);
 
-  void appendValue(uint64_t value) override;
-  void flush() override;
+  uint64_t readUnsignedInt() override;
+  uint64_t peek() override;
+  bool eofReached() override;
 
 protected:
 
-  PageIndexKey key_;
-  PageManager* page_mgr_;
-  uint32_t max_value_;
-  size_t page_pos_;
-  cstable::PageRef page_;
-  uint32_t inbuf_[128];
+  void fetchNext();
+  void fetchNextPage();
+  void fetchNextBatch();
+
+  const PageManager* page_mgr_;
+  Vector<PageRef> pages_;
+  uint64_t page_pos_;
+  uint64_t page_len_;
+  uint64_t page_idx_;
+  Buffer page_data_;
+  bool eof_;
+  uint64_t cur_val_;
   uint32_t outbuf_[128];
-  size_t inbuf_size_;
-  size_t maxbits_;
+  size_t outbuf_pos_;
+  uint32_t maxbits_;
 };
 
 } // namespace cstable

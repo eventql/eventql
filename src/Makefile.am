@@ -321,6 +321,8 @@ evql_cstable_a_SOURCES = \
     eventql/io/cstable/columns/page_reader_uint64.h \
     eventql/io/cstable/columns/page_reader_leb128.cc \
     eventql/io/cstable/columns/page_reader_leb128.h \
+    eventql/io/cstable/columns/page_reader_bitpacked.cc \
+    eventql/io/cstable/columns/page_reader_bitpacked.h \
     eventql/io/cstable/columns/page_reader_lenencstring.cc \
     eventql/io/cstable/columns/page_reader_lenencstring.h \
     eventql/io/cstable/columns/page_writer_uint64.cc \

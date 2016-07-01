@@ -22,8 +22,61 @@
  * code of your own applications
  */
 #include <eventql/io/cstable/columns/page_writer_bitpacked.h>
+#include <libsimdcomp/simdcomp.h>
 
 namespace cstable {
+
+BitPackedIntPageWriter::BitPackedIntPageWriter(
+    PageIndexKey key,
+    PageManager* page_mgr,
+    uint32_t max_value /* = 0xffffffff */) :
+    key_(key),
+    page_mgr_(page_mgr),
+    max_value_(max_value),
+    inbuf_size_(0),
+    maxbits_(max_value > 0 ? bits(max_value) : 0) {
+  page_pos_ = sizeof(max_value);
+  page_ = page_mgr_->allocPage(key_, page_pos_ + 16 * maxbits_ * kPageSize);
+  page_mgr_->writeToPage(page_, 0, (const char*) &max_value, page_pos_);
+}
+
+void BitPackedIntPageWriter::appendValue(uint64_t value) {
+  if (maxbits_ == 0) {
+    return;
+  }
+
+  if (page_pos_ >= page_.size) {
+    page_mgr_->flushPage(page_);
+    page_ = page_mgr_->allocPage(key_, 16 * maxbits_ * kPageSize);
+    page_pos_ = 0;
+  }
+
+  inbuf_[inbuf_size_++] = value;
+
+  if (inbuf_size_ == 128) {
+    flush();
+    inbuf_size_ = 0;
+    page_pos_ += 16 * maxbits_;
+  }
+}
+
+void BitPackedIntPageWriter::flush() {
+  if (inbuf_size_ == 0) {
+    return;
+  }
+
+  while (inbuf_size_ < 128) {
+    inbuf_[inbuf_size_++] = 0;
+  }
+
+  simdpackwithoutmask(inbuf_, (__m128i *) outbuf_, maxbits_);
+
+  page_mgr_->writeToPage(
+      page_,
+      page_pos_,
+      (const char*) outbuf_,
+      16 * maxbits_);
+}
 
 } // namespace cstable
 

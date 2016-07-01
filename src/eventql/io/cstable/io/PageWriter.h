@@ -32,6 +32,7 @@ namespace cstable {
 class PageWriter {
 public:
   virtual ~PageWriter() = default;
+  virtual void flush() {}
 };
 
 class UnsignedIntPageWriter : public PageWriter {
