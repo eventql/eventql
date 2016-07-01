@@ -167,7 +167,11 @@ bool SimpleCompactionStrategy::compact(
         }
       }
     } catch (const std::exception& e) {
-      logError("evqld", "error while compacting table: $0", input_cstable_file);
+      logError(
+          "evqld",
+          "error while compacting table: $0 -- $1",
+          input_cstable_file,
+          e.what());
     }
   }
 
