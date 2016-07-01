@@ -29,7 +29,9 @@ namespace eventql {
 uint64_t replicatedOffsetFor(
     const ReplicationState& repl_state,
     const ReplicationTarget& target) {
-  return replicatedOffsetFor(
+  uint64_t offset = 0;
+
+  offset = replicatedOffsetFor(
       repl_state,
       SHA1::compute(
           StringUtil::format(
@@ -37,6 +39,18 @@ uint64_t replicatedOffsetFor(
               target.server_id(),
               target.partition_id(),
               target.placement_id())));
+
+  if (offset) {
+    return offset;
+  }
+
+  if (target.has_legacy_token()) {
+    offset = replicatedOffsetFor(
+        repl_state,
+        SHA1Hash::fromHexString(target.legacy_token()));
+  }
+
+  return offset;
 }
 
 void setReplicatedOffsetFor(

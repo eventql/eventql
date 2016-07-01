@@ -494,6 +494,21 @@ Status LSMPartitionWriter::applyMetadataChange(
     pt->set_partition_id(dt.partition_id());
     pt->set_keyrange_begin(dt.keyrange_begin());
     pt->set_keyrange_end(dt.keyrange_end());
+
+    // backfill -- remove after rollout
+    try {
+      auto replicas = repl_->replicasFor(
+          SHA1Hash(dt.partition_id().data(), dt.partition_id().size()));
+
+      for (const auto& r : replicas) {
+        if (r.name == dt.server_id()) {
+          pt->set_legacy_token(r.unique_id.toString());
+          break;
+        }
+      }
+    } catch (...) {}
+    // eof backfill
+
     if (dt.is_joining()) {
       pt->set_is_joining(true);
       snap->state.set_has_joining_servers(true);

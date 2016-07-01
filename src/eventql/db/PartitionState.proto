@@ -38,6 +38,7 @@ message ReplicationTarget {
   optional bytes keyrange_begin = 4;
   optional bytes keyrange_end = 5;
   optional bool is_joining = 6;
+  optional string legacy_token = 7;
 };
 
 enum PartitionLifecycleState {

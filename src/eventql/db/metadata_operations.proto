@@ -50,6 +50,7 @@ message PartitionDiscoveryReplicationTarget {
   optional bytes keyrange_begin = 3;
   optional bytes keyrange_end = 4;
   optional bool is_joining = 6;
+  optional string legacy_token = 7;
 }
 
 message PartitionDiscoveryResponse {
