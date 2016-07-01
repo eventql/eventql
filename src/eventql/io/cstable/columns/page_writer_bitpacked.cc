@@ -47,9 +47,7 @@ void BitPackedIntPageWriter::appendValue(uint64_t value) {
     page_ = page_mgr_->allocPage(key_, page_pos_ + 16 * maxbits_ * kPageSize);
     page_mgr_->writeToPage(page_, 0, (const char*) &max_value_, page_pos_);
     has_page_ = true;
-  }
-
-  if (page_pos_ >= page_.size) {
+  } else if (page_pos_ >= page_.size) {
     page_mgr_->flushPage(page_);
     page_ = page_mgr_->allocPage(key_, 16 * maxbits_ * kPageSize);
     page_pos_ = 0;

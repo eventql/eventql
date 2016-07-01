@@ -51,7 +51,7 @@ PageRef PageManager::allocPage(PageIndexKey key, uint32_t size) {
 
   PageRef page;
   page.offset = allocated_bytes_;
-  page.size = padToNextSector(size);
+  page.size = size;
 
   PageIndexEntry idx_entry;
   idx_entry.key = key;
