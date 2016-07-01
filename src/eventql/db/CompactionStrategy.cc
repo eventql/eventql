@@ -72,7 +72,7 @@ bool SimpleCompactionStrategy::compact(
 
   auto cstable = cstable::CSTableWriter::createFile(
       cstable_filepath + ".cst",
-      cstable::BinaryFormatVersion::v0_1_0,
+      cstable::BinaryFormatVersion::v0_2_0,
       cstable_schema_ext);
 
   auto is_update_col = cstable->getColumnWriter("__lsm_is_update");
