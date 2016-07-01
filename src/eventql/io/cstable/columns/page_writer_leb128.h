@@ -31,7 +31,7 @@ namespace cstable {
 
 class LEB128PageWriter : public UnsignedIntPageWriter {
 public:
-  static const uint64_t kPageSize = 512 * 2;
+  static const uint64_t kPageSize = 512 * 1024;
 
   LEB128PageWriter(
       PageIndexKey key,

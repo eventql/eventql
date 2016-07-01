@@ -31,7 +31,7 @@ namespace cstable {
 
 class LenencStringPageWriter : public StringPageWriter {
 public:
-  static const uint64_t kPageSize = 512 * 2;
+  static const uint64_t kPageSize = 512 * 1024;
 
   LenencStringPageWriter(
       PageIndexKey key,
