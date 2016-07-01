@@ -33,13 +33,16 @@ PartitionArena::PartitionArena(
     schema_(schema),
     num_records_(0),
     cstable_schema_(cstable::TableSchema::fromProtobuf(schema)),
-    cstable_schema_ext_(cstable_schema_) {
+    cstable_schema_ext_(cstable_schema_),
+    opened_(false) {
   cstable_schema_ext_.addBool("__lsm_is_update", false);
   cstable_schema_ext_.addBool("__lsm_skip", false);
   cstable_schema_ext_.addString("__lsm_id", false);
   cstable_schema_ext_.addUnsignedInteger("__lsm_version", false);
   cstable_schema_ext_.addUnsignedInteger("__lsm_sequence", false);
+}
 
+void PartitionArena::open() {
   cstable_file_.reset(
       new cstable::CSTableFile(
           cstable::BinaryFormatVersion::v0_2_0,
@@ -53,6 +56,8 @@ PartitionArena::PartitionArena(
 
   shredder_.reset(
       new cstable::RecordShredder(cstable_writer_.get(), &cstable_schema_));
+
+  opened_ = true;
 }
 
 bool PartitionArena::insertRecord(const RecordRef& record) {
@@ -68,6 +73,10 @@ bool PartitionArena::insertRecord(
     const msg::MessageObject& record,
     bool is_update) {
   ScopedLock<std::mutex> lk(mutex_);
+
+  if (!opened_) {
+    open();
+  }
 
   auto old = record_versions_.find(record_id);
   if (old == record_versions_.end()) {
@@ -118,6 +127,10 @@ size_t PartitionArena::size() const {
 Status PartitionArena::writeToDisk(
     const String& filename,
     uint64_t sequence) {
+  if (!opened_) {
+    return Status(eRuntimeError, "partition arena is empty");
+  }
+
   auto sequence_col = cstable_writer_->getColumnWriter("__lsm_sequence");
   auto skip_col = cstable_writer_->getColumnWriter("__lsm_skip");
   for (size_t i = 0; i < num_records_; ++i) {

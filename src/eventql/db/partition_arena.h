@@ -63,6 +63,8 @@ protected:
     uint64_t position;
   };
 
+  void open();
+
   msg::MessageSchema schema_;
   mutable std::mutex mutex_;
   HashMap<SHA1Hash, RecordVersion> record_versions_;
@@ -77,6 +79,7 @@ protected:
   RefPtr<cstable::ColumnWriter> id_col_;
   RefPtr<cstable::ColumnWriter> version_col_;
   ScopedPtr<cstable::RecordShredder> shredder_;
+  bool opened_;
 };
 
 } // namespace eventql
