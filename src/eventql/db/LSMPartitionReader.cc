@@ -49,6 +49,7 @@ void LSMPartitionReader::fetchRecords(
     auto cstable_file = FileUtil::joinPaths(
         snap_->base_path,
         tbl->filename() + ".cst");
+
     auto cstable = cstable::CSTableReader::openFile(cstable_file);
     cstable::RecordMaterializer materializer(
         schema.get(),
@@ -98,6 +99,11 @@ Status LSMPartitionReader::findMedianValue(
     auto cstable_file = FileUtil::joinPaths(
         snap_->base_path,
         tbl->filename() + ".cst");
+
+    if (!FileUtil::exists(cstable_file)) {
+      continue;
+    }
+
     auto cstable = cstable::CSTableReader::openFile(cstable_file);
     auto id_col = cstable->getColumnReader("__lsm_id");
     auto is_update_col = cstable->getColumnReader("__lsm_is_update");
