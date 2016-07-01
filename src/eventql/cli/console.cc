@@ -104,7 +104,12 @@ Status Console::runQueryTable(const String& query) {
     results.addRow(argv, argc);
   });
 
-  res_parser->onError([&stderr_os, &error] (const String& error_str) {
+  res_parser->onError([&stderr_os, &error, is_tty] (const String& error_str) {
+    if (is_tty) {
+      stderr_os->eraseLine();
+      stderr_os->print("\r");
+    }
+
     stderr_os->print(
         "ERROR:",
         { TerminalStyle::RED, TerminalStyle::UNDERSCORE });
