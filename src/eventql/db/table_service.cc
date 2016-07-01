@@ -71,6 +71,14 @@ Status TableService::createTable(
               "nested column '$0' can't be part of the PRIMARY KEY",
               col));
     }
+
+    if (!schema.hasField(col)) {
+      return Status(
+          eIllegalArgumentError,
+          StringUtil::format(
+              "unknown column '$0' can't be part of the PRIMARY KEY",
+              col));
+    }
   }
 
   String partition_key = primary_key[0];
