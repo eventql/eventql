@@ -372,25 +372,41 @@ void TableService::insertRecords(
     // calculate primary key
     SHA1Hash primary_key;
     auto primary_key_columns = table.get()->getPrimaryKey();
-    if (primary_key_columns.size() == 1) {
-      auto f = record->getField(primary_key_columns[0]);
-      if (f.isEmpty()) {
-        RAISEF(kNotFoundError, "missing field: $0", primary_key_columns[0]);
-      }
-      primary_key = SHA1::compute(f.get());
-    } else {
-      for (const auto& c : primary_key_columns) {
-        auto f = record->getField(c);
-        if (f.isEmpty()) {
-          RAISEF(kNotFoundError, "missing field: $0", c);
-        }
+    switch (primary_key_columns.size()) {
 
-        auto chash = SHA1::compute(f.get());
-        Buffer primary_key_data;
-        primary_key_data.append(primary_key.data(), primary_key.size());
-        primary_key_data.append(chash.data(), chash.size());
-        primary_key = SHA1::compute(primary_key_data);
+      // no primary key definition. key value is random SHA1
+      case 0: {
+        primary_key = Random::singleton()->sha1();
+        break;
       }
+
+      // simple primary key, key value is SHA1 of column value
+      case 1: {
+        auto f = record->getField(primary_key_columns[0]);
+        if (f.isEmpty()) {
+          RAISEF(kNotFoundError, "missing field: $0", primary_key_columns[0]);
+        }
+        primary_key = SHA1::compute(f.get());
+        break;
+      }
+
+      // compund primary key, key value is chained SHA1 of column values
+      default: {
+        for (const auto& c : primary_key_columns) {
+          auto f = record->getField(c);
+          if (f.isEmpty()) {
+            RAISEF(kNotFoundError, "missing field: $0", c);
+          }
+
+          auto chash = SHA1::compute(f.get());
+          Buffer primary_key_data;
+          primary_key_data.append(primary_key.data(), primary_key.size());
+          primary_key_data.append(chash.data(), chash.size());
+          primary_key = SHA1::compute(primary_key_data);
+        }
+        break;
+      }
+
     }
 
     // lookup partition
