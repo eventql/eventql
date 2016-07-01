@@ -172,6 +172,8 @@ bool SimpleCompactionStrategy::compact(
           "error while compacting table: $0 -- $1",
           input_cstable_file,
           e.what());
+
+      throw e;
     }
   }
 
