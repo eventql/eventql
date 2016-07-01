@@ -1067,6 +1067,8 @@ evqlctl_SOURCES = \
     eventql/cli/commands/namespace_create.cc \
     eventql/cli/commands/rebalance.h \
     eventql/cli/commands/rebalance.cc \
+    eventql/cli/commands/table_set_primary_key.h \
+    eventql/cli/commands/table_set_primary_key.cc \
     eventql/cli/commands/table_split.h \
     eventql/cli/commands/table_split.cc \
     eventql/evqlctl.cc
