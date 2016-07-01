@@ -589,10 +589,10 @@ TEST_CASE(CSTableTest, TestV2CSTableColumnWriterReader, [] () {
       true,
       cstable::ColumnEncoding::STRING_PLAIN);
 
-  //schema.addUnsignedIntegerArray(
-  //    "uint32",
-  //    true,
-  //    cstable::ColumnEncoding::UINT32_PLAIN);
+  schema.addUnsignedIntegerArray(
+      "uint32",
+      true,
+      cstable::ColumnEncoding::UINT32_PLAIN);
 
   schema.addUnsignedIntegerArray(
       "uint64",
@@ -609,7 +609,7 @@ TEST_CASE(CSTableTest, TestV2CSTableColumnWriterReader, [] () {
   //auto double_writer = tbl_writer->getColumnWriter("double");
   auto leb128_writer = tbl_writer->getColumnWriter("leb128");
   auto string_writer = tbl_writer->getColumnWriter("string");
-  //auto uint32_writer = tbl_writer->getColumnWriter("uint32");
+  auto uint32_writer = tbl_writer->getColumnWriter("uint32");
   auto uint64_writer = tbl_writer->getColumnWriter("uint64");
 
   for (auto i = 0; i < num_records; i++) {
@@ -619,7 +619,7 @@ TEST_CASE(CSTableTest, TestV2CSTableColumnWriterReader, [] () {
     //double_writer->writeFloat(rep_max, def_max, i * 1.1);
     leb128_writer->writeUnsignedInt(rep_max, def_max, i + 12);
     string_writer->writeString(rep_max, def_max, StringUtil::format("x$0x", i));
-    //uint32_writer->writeUnsignedInt(rep_max, def_max, i * 5);
+    uint32_writer->writeUnsignedInt(rep_max, def_max, i * 5);
     uint64_writer->writeUnsignedInt(rep_max, def_max, i * 8);
   }
 
@@ -633,7 +633,7 @@ TEST_CASE(CSTableTest, TestV2CSTableColumnWriterReader, [] () {
   //auto double_reader = tbl_reader->getColumnReader("double");
   auto leb128_reader = tbl_reader->getColumnReader("leb128");
   auto string_reader = tbl_reader->getColumnReader("string");
-  //auto uint32_reader = tbl_reader->getColumnReader("uint32");
+  auto uint32_reader = tbl_reader->getColumnReader("uint32");
   auto uint64_reader = tbl_reader->getColumnReader("uint64");
 
   EXPECT(bitpacked_reader->type() == ColumnType::UNSIGNED_INT);
@@ -641,7 +641,7 @@ TEST_CASE(CSTableTest, TestV2CSTableColumnWriterReader, [] () {
   //EXPECT(double_reader->type() == ColumnType::FLOAT);
   EXPECT(leb128_reader->type() == ColumnType::UNSIGNED_INT);
   EXPECT(string_reader->type() == ColumnType::STRING);
-  //EXPECT(uint32_reader->type() == ColumnType::UNSIGNED_INT);
+  EXPECT(uint32_reader->type() == ColumnType::UNSIGNED_INT);
   EXPECT(uint64_reader->type() == ColumnType::UNSIGNED_INT);
 
   for (auto i = 0; i < num_records; i++) {
@@ -678,11 +678,11 @@ TEST_CASE(CSTableTest, TestV2CSTableColumnWriterReader, [] () {
       EXPECT_EQ(val_str, StringUtil::format("x$0x", i));
     }
 
-    //{
-    //  uint64_t val_uint;
-    //  EXPECT_TRUE(uint32_reader->readUnsignedInt(&rlvl, &dlvl, &val_uint));
-    //  EXPECT_EQ(val_uint, i * 5);
-    //}
+    {
+      uint64_t val_uint;
+      EXPECT_TRUE(uint32_reader->readUnsignedInt(&rlvl, &dlvl, &val_uint));
+      EXPECT_EQ(val_uint, i * 5);
+    }
 
     {
       uint64_t val_uint;
