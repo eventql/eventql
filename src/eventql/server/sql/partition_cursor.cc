@@ -61,7 +61,8 @@ bool PartitionCursor::openNextTable() {
   RefPtr<cstable::CSTableReader> cstable;
   switch (cur_table_) {
     case 0: {
-      if (snap_->head_arena.get()) {
+      if (snap_->head_arena.get() &&
+          snap_->head_arena->getCSTableFile()) {
         cstable = cstable::CSTableReader::openFile(
             snap_->head_arena->getCSTableFile());
         break;
@@ -72,7 +73,8 @@ bool PartitionCursor::openNextTable() {
     }
 
     case 1: {
-      if (snap_->compacting_arena.get()) {
+      if (snap_->compacting_arena.get() &&
+          snap_->head_arena->getCSTableFile()) {
         cstable = cstable::CSTableReader::openFile(
             snap_->compacting_arena->getCSTableFile());
         break;
