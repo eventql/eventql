@@ -54,6 +54,7 @@ protected:
   uint32_t outbuf_[128];
   size_t inbuf_size_;
   size_t maxbits_;
+  bool has_page_;
 };
 
 } // namespace cstable

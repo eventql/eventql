@@ -34,15 +34,19 @@ BitPackedIntPageWriter::BitPackedIntPageWriter(
     page_mgr_(page_mgr),
     max_value_(max_value),
     inbuf_size_(0),
-    maxbits_(max_value > 0 ? bits(max_value) : 0) {
-  page_pos_ = sizeof(max_value);
-  page_ = page_mgr_->allocPage(key_, page_pos_ + 16 * maxbits_ * kPageSize);
-  page_mgr_->writeToPage(page_, 0, (const char*) &max_value, page_pos_);
-}
+    maxbits_(max_value > 0 ? bits(max_value) : 0),
+    has_page_(false) {}
 
 void BitPackedIntPageWriter::appendValue(uint64_t value) {
   if (maxbits_ == 0) {
     return;
+  }
+
+  if (!has_page_) {
+    page_pos_ = sizeof(max_value_);
+    page_ = page_mgr_->allocPage(key_, page_pos_ + 16 * maxbits_ * kPageSize);
+    page_mgr_->writeToPage(page_, 0, (const char*) &max_value_, page_pos_);
+    has_page_ = true;
   }
 
   if (page_pos_ >= page_.size) {
