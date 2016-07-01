@@ -91,7 +91,7 @@ void ReplicationWorker::enqueuePartitionWithLock(
 void ReplicationWorker::start() {
   running_ = true;
 
-  for (int i = 0; i < 4; ++i) {
+  for (int i = 0; i < 0; ++i) {
     threads_.emplace_back(std::bind(&ReplicationWorker::work, this));
   }
 }
