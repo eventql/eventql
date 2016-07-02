@@ -334,8 +334,6 @@ Status ZookeeperConfigDirectory::syncLiveServer(
     servers_live_.erase(server);
   }
 
-  logInfo("evqld", "Server '$0' -> $1", server, exists ? "UP" : "DOWN");
-
   if (events) {
     const auto& iter = servers_.find(server);
     if (iter == servers_.end()) {

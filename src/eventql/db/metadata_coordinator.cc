@@ -78,7 +78,7 @@ Status MetadataCoordinator::performOperation(
               result.metadata_file_checksum().data(),
               result.metadata_file_checksum().size()));
     } else {
-      logWarning(
+      logDebug(
           "evqld",
           "error while performing metadata operation: $0",
           rc.message());
@@ -170,7 +170,7 @@ Status MetadataCoordinator::createFile(
   for (const auto& s : servers) {
     auto rc = createFile(ns, table_name, file, s);
     if (!rc.isSuccess()) {
-      logWarning("evqld", "error while creating metadata file: $0", rc.message());
+      logDebug("evqld", "error while creating metadata file: $0", rc.message());
       ++failures;
     }
   }
@@ -269,7 +269,7 @@ Status MetadataCoordinator::discoverPartition(
     http::HTTPResponse res;
     auto rc = http_client.executeRequest(req, &res);
     if (!rc.isSuccess()) {
-      logWarning("evqld", "metadata discovery failed: $0", rc.message());
+      logDebug("evqld", "metadata discovery failed: $0", rc.message());
       continue;
     }
 
@@ -277,7 +277,7 @@ Status MetadataCoordinator::discoverPartition(
       *response = msg::decode<PartitionDiscoveryResponse>(res.body());
       return Status::success();
     } else {
-      logWarning(
+      logDebug(
           "evqld",
           "metadata discovery failed: $0",
           res.body().toString());
