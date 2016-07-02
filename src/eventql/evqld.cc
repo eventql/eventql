@@ -347,6 +347,7 @@ int main(int argc, const char** argv) {
       thread::ThreadPoolOptions {
         .thread_name = Some(String("evqld-httpserver"))
       },
+      mkScoped(new CatchAndLogExceptionHandler("evqld")),
       8);
 
   /* listen addr */
