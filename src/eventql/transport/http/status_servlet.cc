@@ -407,6 +407,9 @@ void StatusServlet::renderTablePage(
   html += StringUtil::format(
       "<pre>$0</pre>",
       table.get()->config().DebugString());
+  html += StringUtil::format(
+      "<pre>$0</pre>",
+      table.get()->schema()->toString());
 
   response->setStatus(http::kStatusOK);
   response->addHeader("Content-Type", "text/html; charset=utf-8");
