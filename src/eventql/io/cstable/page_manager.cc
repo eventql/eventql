@@ -43,7 +43,9 @@ PageManager::PageManager(
     index_(index) {}
 
 PageManager::~PageManager() {
-  flushAllPages();
+  for (const auto& p : buffered_pages_) {
+    free(p.second);
+  }
 }
 
 PageRef PageManager::allocPage(PageIndexKey key, uint32_t size) {
@@ -104,8 +106,8 @@ void PageManager::flushPageWithLock(const PageRef& page) {
     RAISE(kIOError, "write() failed");
   }
 
-  buffered_pages_.erase(buf);
   free(buf->second);
+  buffered_pages_.erase(buf);
 }
 
 void PageManager::flushPage(const PageRef& page) {
@@ -117,10 +119,6 @@ void PageManager::flushAllPages() {
   std::unique_lock<std::mutex> lk(mutex_);
   for (const auto& p : index_) {
     flushPageWithLock(p.page);
-  }
-
-  for (const auto& p : buffered_pages_) {
-    free(p.second);
   }
 }
 
