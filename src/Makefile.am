@@ -1208,3 +1208,14 @@ test_evql_io_cstable_LDADD = \
 TESTS += test_evql_io_cstable
 check_PROGRAMS += test_evql_io_cstable
 
+
+################# TEST: io/cstable ####################
+cstable_tool_SOURCES = eventql/io/cstable/cstable_tool.cc
+cstable_tool_LDADD = \
+    evql_cstable.a \
+    evql_util.a \
+    $(SIMDCOMP_LDADD) \
+    $(PCRE_LDADD)
+
+bin_PROGRAMS += cstable_tool
+

@@ -132,6 +132,8 @@ public:
 
   Vector<ColumnConfig> flatColumns() const;
 
+  void reassignColumnIDs(size_t* next_column_id);
+
 protected:
   HashMap<String, ScopedPtr<Column>> columns_by_name_;
   Vector<Column*> columns_;

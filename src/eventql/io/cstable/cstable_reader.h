@@ -50,6 +50,10 @@ public:
 
   size_t numRecords() const;
 
+  const PageManager* getPageManager() const {
+    return page_mgr_;
+  }
+
 protected:
 
   CSTableReader(

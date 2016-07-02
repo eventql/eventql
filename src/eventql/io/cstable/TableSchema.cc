@@ -202,6 +202,7 @@ void TableSchema::addSubrecord(
   col->repeated = false;
   col->optional = optional;
   col->subschema = mkScoped(new TableSchema(schema));
+  col->subschema->reassignColumnIDs(&next_column_id_);
 
   columns_.emplace_back(col.get());
   columns_by_name_.emplace(name, std::move(col));
@@ -218,6 +219,7 @@ void TableSchema::addSubrecordArray(
   col->repeated = true;
   col->optional = optional;
   col->subschema = mkScoped(new TableSchema(schema));
+  col->subschema->reassignColumnIDs(&next_column_id_);
 
   columns_.emplace_back(col.get());
   columns_by_name_.emplace(name, std::move(col));
@@ -359,6 +361,15 @@ Vector<ColumnConfig> TableSchema::flatColumns() const {
   }
 
   return columns;
+}
+
+void TableSchema::reassignColumnIDs(size_t* next_column_id) {
+  for (auto& c : columns_) {
+    c->column_id = ++(*next_column_id);
+    if (c->subschema) {
+      c->subschema->reassignColumnIDs(next_column_id);
+    }
+  }
 }
 
 } // namespace msg
