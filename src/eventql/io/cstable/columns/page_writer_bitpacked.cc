@@ -67,8 +67,8 @@ void BitPackedIntPageWriter::flush() {
     return;
   }
 
-  while (inbuf_size_ < 128) {
-    inbuf_[inbuf_size_++] = 0;
+  for (size_t i = inbuf_size_; i < 128; ++i) {
+    inbuf_[i] = 0;
   }
 
   simdpackwithoutmask(inbuf_, (__m128i *) outbuf_, maxbits_);
