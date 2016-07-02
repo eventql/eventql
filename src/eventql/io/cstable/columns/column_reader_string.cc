@@ -77,7 +77,12 @@ bool StringColumnReader::readUnsignedInt(
     uint64_t* value) {
   String tmp;
   if (readString(rlvl, dlvl, &tmp)) {
-    *value = std::stoull(tmp);
+    try {
+      *value = std::stoull(tmp);
+    } catch (...) {
+      RAISEF(kIllegalArgumentError, "can't convert '$0' to uint", tmp);
+    }
+
     return true;
   } else {
     *value = 0;

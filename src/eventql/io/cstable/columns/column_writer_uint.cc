@@ -119,7 +119,13 @@ void UnsignedIntColumnWriter::writeString(
     uint64_t dlvl,
     const char* data,
     size_t size) {
-  uint64_t value = std::stoull(String(data, size));
+  uint64_t value;
+  try {
+    value = std::stoull(String(data, size));
+  } catch (...) {
+    RAISEF(kIllegalArgumentError, "can't convert '$0' to uint", String(data, size));
+  }
+
   writeUnsignedInt(rlvl, dlvl, value);
 }
 
