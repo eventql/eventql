@@ -64,23 +64,37 @@ Status TableService::createTable(
   }
 
   auto columns = schema.columns();
-  for (const auto& col : primary_key) {
-    if (col.find(".") != String::npos) {
-      return Status(
-          eIllegalArgumentError,
-          StringUtil::format(
-              "nested column '$0' can't be part of the PRIMARY KEY",
-              col));
-    }
-
-    for (const auto& c : columns) {
-      if (c.first == col && c.second.repeated) {
+  auto pkey_begin = primary_key.begin();
+  auto pkey_end = primary_key.end();
+  for(const auto& col : columns) {
+    if (col.first.find(".") != String::npos) {
+      if (find(pkey_begin, pkey_end, col.first) != pkey_end) {
         return Status(
           eIllegalArgumentError,
           StringUtil::format(
-              "repeated column '$0' can't be part of the PRIMARY KEY",
-              col));
+              "nested column '$0' can't be part of the PRIMARY KEY",
+              col.first));
+
       }
+
+      auto record_col = StringUtil::split(col.first, ("."))[0];
+      if (find(pkey_begin, pkey_end, record_col) != pkey_end) {
+        return Status(
+          eIllegalArgumentError,
+          StringUtil::format(
+              "nested column '$0' can't be part of the PRIMARY KEY",
+              record_col));
+
+      }
+    }
+
+    if (col.second.repeated &&
+        find(pkey_begin, pkey_end, col.first) != pkey_end) {
+      return Status(
+          eIllegalArgumentError,
+          StringUtil::format(
+              "repeated column '$0' can't be part of the PRIMARY KEY",
+              col.first));
     }
   }
 
