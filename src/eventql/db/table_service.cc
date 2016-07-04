@@ -63,6 +63,7 @@ Status TableService::createTable(
         "can't create table without PRIMARY KEY");
   }
 
+  auto columns = schema.columns();
   for (const auto& col : primary_key) {
     if (col.find(".") != String::npos) {
       return Status(
@@ -70,6 +71,16 @@ Status TableService::createTable(
           StringUtil::format(
               "nested column '$0' can't be part of the PRIMARY KEY",
               col));
+    }
+
+    for (const auto& c : columns) {
+      if (c.first == col && c.second.repeated) {
+        return Status(
+          eIllegalArgumentError,
+          StringUtil::format(
+              "repeated column '$0' can't be part of the PRIMARY KEY",
+              col));
+      }
     }
   }
 
