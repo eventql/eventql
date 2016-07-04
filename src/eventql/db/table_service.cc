@@ -56,6 +56,10 @@ Status TableService::createTable(
     const String& table_name,
     const msg::MessageSchema& schema,
     Vector<String> primary_key) {
+  auto table = pmap_->findTable(db_namespace, table_name);
+  if (!table.isEmpty()) {
+    return Status(eIllegalArgumentError, "table already exists");
+  }
 
   if (primary_key.size() < 1) {
     return Status(
