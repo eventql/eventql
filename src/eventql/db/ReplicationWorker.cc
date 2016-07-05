@@ -109,7 +109,7 @@ ReplicationWorker::ReplicationWorker(
       return a.first < b.first;
     }),
     running_(false),
-    num_replication_threads_(8),
+    num_replication_threads_(32),
     replication_infos_(num_replication_threads_) {
   pmap->subscribeToPartitionChanges([this] (
       RefPtr<eventql::PartitionChangeNotification> change) {
