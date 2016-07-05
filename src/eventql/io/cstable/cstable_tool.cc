@@ -37,6 +37,9 @@ int main(int argc, const char** argv) {
 
   String filename(argv[1]);
   auto cstable = cstable::CSTableReader::openFile(filename);
+  iputs("== GENERAL ==\n >> number of records: $0", cstable->numRecords());
+
+  iputs("\n\n== INDEX ==", 1);
   for (const auto& c : cstable->columns()) {
     iputs(
         ">>  column_id=$0, column_name=$1",
@@ -65,6 +68,22 @@ int main(int argc, const char** argv) {
         type_str,
         e.page.offset,
         e.page.size);
+  }
+
+  for (const auto& c : cstable->columns()) {
+    iputs(
+        "\n\n== COLUMN DATA for $0/$1 ==",
+        c.column_id,
+        c.column_name);
+
+    auto col_reader = cstable->getColumnReader(c.column_name);
+    uint64_t rlevel;
+    uint64_t dlevel;
+    String data;
+    for (auto i = cstable->numRecords(); i--; ) {
+      col_reader->readString(&rlevel, &dlevel, &data);
+      iputs(">>  rlvl=$0 dlvl=$1 data=($2) '$3'", rlevel, dlevel, data.size(), data);
+    }
   }
 
   return 0;
