@@ -25,6 +25,7 @@
 #include <eventql/db/LSMPartitionReader.h>
 #include <eventql/db/LSMPartitionWriter.h>
 #include <eventql/db/ReplicationScheme.h>
+#include <eventql/db/ReplicationWorker.h>
 #include <eventql/util/logging.h>
 #include <eventql/util/io/fileutil.h>
 #include <eventql/util/protobuf/msg.h>
@@ -89,7 +90,8 @@ bool LSMPartitionReplication::needsReplication() const {
 
 void LSMPartitionReplication::replicateTo(
     const ReplicationTarget& replica,
-    uint64_t replicated_offset) {
+    uint64_t replicated_offset,
+    ReplicationInfo* replication_info) {
   auto server_cfg = cdir_->getServerConfig(replica.server_id());
   if (server_cfg.server_status() != SERVER_UP) {
     RAISE(kRuntimeError, "server is down");
@@ -99,6 +101,9 @@ void LSMPartitionReplication::replicateTo(
       replica.partition_id().data(),
       replica.partition_id().size());
 
+  size_t records_sent = 0;
+  size_t bytes_sent = 0;
+
   size_t batch_size = 0;
   RecordEnvelopeList batch;
   batch.set_sync_commit(true); // fixme only on last batch?
@@ -106,15 +111,7 @@ void LSMPartitionReplication::replicateTo(
       replicated_offset,
       replica.keyrange_begin(),
       replica.keyrange_end(),
-      [
-          this,
-          &batch,
-          &replica,
-          &replicated_offset,
-          &batch_size,
-          &server_cfg,
-          &target_partition_id
-        ] (
+      [&] (
           const SHA1Hash& record_id,
           const uint64_t record_version,
           const void* record_data,
@@ -128,10 +125,13 @@ void LSMPartitionReplication::replicateTo(
     rec->set_record_data(record_data, record_size);
 
     batch_size += record_size;
+    bytes_sent += record_size;
+    ++records_sent;
 
     if (batch_size > kMaxBatchSizeBytes ||
         batch.records().size() > kMaxBatchSizeRows) {
       uploadBatchTo(server_cfg.server_addr(), batch);
+      replication_info->setTargetHostStatus(bytes_sent, records_sent);
       batch.mutable_records()->Clear();
       batch_size = 0;
     }
@@ -140,6 +140,8 @@ void LSMPartitionReplication::replicateTo(
   if (batch.records().size() > 0) {
     uploadBatchTo(server_cfg.server_addr(), batch);
   }
+
+  replication_info->setTargetHostStatus(bytes_sent, records_sent);
 }
 
 bool LSMPartitionReplication::replicate(ReplicationInfo* replication_info) {
@@ -193,8 +195,10 @@ bool LSMPartitionReplication::replicate(ReplicationInfo* replication_info) {
         head_offset,
         head_offset - replica_offset);
 
+    replication_info->setTargetHost(r.server_id());
+
     try {
-      replicateTo(r, replica_offset);
+      replicateTo(r, replica_offset, replication_info);
       setReplicatedOffsetFor(&repl_state, r, head_offset);
       dirty = true;
       ++replicas_per_partition[target_partition_id];

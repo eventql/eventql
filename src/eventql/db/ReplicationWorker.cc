@@ -45,12 +45,29 @@ void ReplicationInfo::reset() {
   cur_partition_since_ = UnixTime(0);
   cur_target_host_since_ = UnixTime(0);
   cur_target_host_bytes_sent_ = 0;
+  cur_target_host_records_sent_ = 0;
 }
 
 void ReplicationInfo::setPartition(String name) {
   std::unique_lock<std::mutex> lk(mutex_);
   is_idle_ = false;
   cur_partition_ = name;
+  cur_partition_since_ = WallClock::now();
+}
+
+void ReplicationInfo::setTargetHost(String host_name) {
+  std::unique_lock<std::mutex> lk(mutex_);
+  cur_target_host_ = host_name;
+  cur_target_host_since_ = WallClock::now();
+  cur_target_host_bytes_sent_ = 0;
+  cur_target_host_records_sent_ = 0;
+}
+
+void ReplicationInfo::setTargetHostStatus(
+    size_t bytes_sent,
+    size_t records_sent) {
+  cur_target_host_bytes_sent_ = bytes_sent;
+  cur_target_host_records_sent_ = records_sent;
 }
 
 String ReplicationInfo::toString() const {
@@ -60,12 +77,22 @@ String ReplicationInfo::toString() const {
   }
 
   if (cur_target_host_.empty()) {
-    return StringUtil::format("Replicating partition $0", cur_partition_);
-  } else {
     return StringUtil::format(
-        "Replicating partition $0 to host $1",
+        "Replicating partition $0 (since $1s)",
         cur_partition_,
-        cur_target_host_);
+        (WallClock::unixMicros() - cur_partition_since_.unixMicros()) / kMicrosPerSecond);
+
+  } else {
+    auto duration = (WallClock::unixMicros() - cur_target_host_since_.unixMicros()) / kMicrosPerSecond;
+    return StringUtil::format(
+        "Replicating partition $0 (since $1s) to host $2 (since $3s); records_sent=$4 bytes_sent=$5MB bw=$6kb/s",
+        cur_partition_,
+        (WallClock::unixMicros() - cur_partition_since_.unixMicros()) / kMicrosPerSecond,
+        cur_target_host_,
+        duration,
+        cur_target_host_records_sent_,
+        cur_target_host_bytes_sent_ / double(1024 * 1024),
+        (cur_target_host_bytes_sent_ / (duration < 1 ? 1 : duration)) / 1024);
   }
 }
 

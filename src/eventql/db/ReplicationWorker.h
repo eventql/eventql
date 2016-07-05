@@ -39,6 +39,8 @@ public:
   ReplicationInfo();
   void reset();
   void setPartition(String name);
+  void setTargetHost(String host_name);
+  void setTargetHostStatus(size_t bytes_sent, size_t records_sent);
 
   String toString() const;
 
@@ -50,6 +52,7 @@ protected:
   UnixTime cur_partition_since_;
   UnixTime cur_target_host_since_;
   uint64_t cur_target_host_bytes_sent_;
+  uint64_t cur_target_host_records_sent_;
 };
 
 class ReplicationWorker {
