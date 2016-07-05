@@ -74,7 +74,7 @@ bool PartitionCursor::openNextTable() {
 
     case 1: {
       if (snap_->compacting_arena.get() &&
-          snap_->head_arena->getCSTableFile()) {
+          snap_->compacting_arena->getCSTableFile()) {
         cstable = cstable::CSTableReader::openFile(
             snap_->compacting_arena->getCSTableFile());
         break;
