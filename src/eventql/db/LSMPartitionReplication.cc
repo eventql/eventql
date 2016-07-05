@@ -129,8 +129,6 @@ void LSMPartitionReplication::replicateTo(
     bytes_sent += record_size;
     ++records_sent;
 
-    iputs("uploadd record: $0", record_size);
-
     if (batch_size > kMaxBatchSizeBytes ||
         batch.records().size() > kMaxBatchSizeRows) {
       uploadBatchTo(server_cfg.server_addr(), batch);
@@ -379,9 +377,6 @@ void LSMPartitionReplication::fetchRecords(
 
       Buffer record_buf;
       msg::MessageEncoder::encode(record, *schema, &record_buf);
-
-      //logError("evqld", "fetch record: $0 -> $1", record_buf.size(), msg::MessagePrinter::print(record, *schema));
-
       fn(id, version, record_buf.data(), record_buf.size());
     }
   }
