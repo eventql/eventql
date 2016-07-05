@@ -218,12 +218,22 @@ void ReplicationWorker::work(size_t thread_id) {
         repl = partition->getReplicationStrategy(repl_scheme, http_);
         success = repl->replicate(replication_info);
       } catch (const StandardException& e) {
-        replication_info->reset();
-        logError("tsdb", e, "ReplicationWorker error");
+        logError("evqld", e, "ReplicationWorker error");
         success = false;
       }
 
       replication_info->reset();
+
+      if (!success) {
+        auto snap = partition->getSnapshot();
+
+        logError(
+            "evqld",
+            "Replication failed for partition $0/$1/$2",
+            snap->state.tsdb_namespace(),
+            snap->state.table_key(),
+            snap->key.toString());
+      }
 
       lk.lock();
     }

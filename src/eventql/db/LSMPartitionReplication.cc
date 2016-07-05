@@ -30,6 +30,7 @@
 #include <eventql/util/io/fileutil.h>
 #include <eventql/util/protobuf/msg.h>
 #include <eventql/util/protobuf/MessageEncoder.h>
+#include <eventql/util/protobuf/MessagePrinter.h>
 #include <eventql/io/cstable/RecordMaterializer.h>
 #include <eventql/db/metadata_operations.pb.h>
 #include <eventql/db/metadata_coordinator.h>
@@ -39,7 +40,7 @@
 namespace eventql {
 
 const size_t LSMPartitionReplication::kMaxBatchSizeRows = 8192;
-const size_t LSMPartitionReplication::kMaxBatchSizeBytes = 1024 * 1024 * 50; // 50 MB
+const size_t LSMPartitionReplication::kMaxBatchSizeBytes = 1024 * 1024 * 8; // 8 MB
 
 LSMPartitionReplication::LSMPartitionReplication(
     RefPtr<Partition> partition,
@@ -127,6 +128,8 @@ void LSMPartitionReplication::replicateTo(
     batch_size += record_size;
     bytes_sent += record_size;
     ++records_sent;
+
+    iputs("uploadd record: $0", record_size);
 
     if (batch_size > kMaxBatchSizeBytes ||
         batch.records().size() > kMaxBatchSizeRows) {
@@ -376,6 +379,8 @@ void LSMPartitionReplication::fetchRecords(
 
       Buffer record_buf;
       msg::MessageEncoder::encode(record, *schema, &record_buf);
+
+      //logError("evqld", "fetch record: $0 -> $1", record_buf.size(), msg::MessagePrinter::print(record, *schema));
 
       fn(id, version, record_buf.data(), record_buf.size());
     }
