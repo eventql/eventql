@@ -65,13 +65,6 @@ Status ClusterSetAllocationPolicy::execute(
   try {
     flags.parseArgv(argv);
 
-    bool remove_hard = flags.isSet("hard");
-    bool remove_soft = flags.isSet("soft");
-    if (!(remove_hard ^ remove_soft)) {
-      stderr_os->write("ERROR: either --hard or --soft must be set\n");
-      return Status(eFlagError);
-    }
-
     ScopedPtr<ConfigDirectory> cdir;
     {
       auto rc = ConfigDirectoryFactory::getConfigDirectoryForClient(
@@ -89,12 +82,7 @@ Status ClusterSetAllocationPolicy::execute(
     }
 
     auto cfg = cdir->getServerConfig(flags.getString("server_name"));
-    if (remove_soft) {
-      cfg.set_is_leaving(true);
-    }
-    if (remove_hard) {
-      cfg.set_is_dead(true);
-    }
+    cfg.set_allocation_policy(ALLOC_POLICY_NOALLOC);
 
     cdir->updateServerConfig(cfg);
     cdir->stop();
