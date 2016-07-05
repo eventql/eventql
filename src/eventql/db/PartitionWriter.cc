@@ -57,10 +57,11 @@ void PartitionWriter::updateCSTable(
   auto snap = head_->getSnapshot()->clone();
 
   if (snap->state.cstable_version() >= version) {
-    RAISE(
-        kRuntimeError,
-        "refusing cstable update because the update version is less than or " \
-        "equal to the head version");
+    return;
+    //RAISE(
+    //    kRuntimeError,
+    //    "refusing cstable update because the update version is less than or " \
+    //    "equal to the head version");
   }
 
   logDebug(
