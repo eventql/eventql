@@ -142,7 +142,7 @@ void LSMPartitionReplication::replicateTo(
   }
 }
 
-bool LSMPartitionReplication::replicate() {
+bool LSMPartitionReplication::replicate(ReplicationInfo* replication_info) {
   logTrace(
       "z1.replication",
       "Replicating partition $0/$1/$2",

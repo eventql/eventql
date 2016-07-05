@@ -611,7 +611,8 @@ int main(int argc, const char** argv) {
         &partition_map,
         config_dir.get(),
         http_server.stats(),
-        &z1stats()->http_client_stats);
+        &z1stats()->http_client_stats,
+        &tsdb_replication);
 
     eventql::DefaultServlet default_servlet;
 
