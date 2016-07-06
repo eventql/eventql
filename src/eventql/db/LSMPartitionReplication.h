@@ -46,7 +46,7 @@ public:
   /**
    * Returns true on success, false on error
    */
-  bool replicate() override;
+  bool replicate(ReplicationInfo* replication_info) override;
 
   bool shouldDropPartition() const override;
 
@@ -59,7 +59,8 @@ protected:
 
   void replicateTo(
       const ReplicationTarget& replica,
-      uint64_t replicated_offset);
+      uint64_t replicated_offset,
+      ReplicationInfo* replication_info);
 
   void uploadBatchTo(
       const String& host,

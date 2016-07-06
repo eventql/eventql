@@ -93,12 +93,14 @@ StatusServlet::StatusServlet(
     PartitionMap* pmap,
     ConfigDirectory* cdir,
     http::HTTPServerStats* http_server_stats,
-    http::HTTPClientStats* http_client_stats) :
+    http::HTTPClientStats* http_client_stats,
+    ReplicationWorker* repl_worker) :
     config_(config),
     pmap_(pmap),
     cdir_(cdir),
     http_server_stats_(http_server_stats),
-    http_client_stats_(http_client_stats) {}
+    http_client_stats_(http_client_stats),
+    repl_worker_(repl_worker) {}
 
 void StatusServlet::handleHTTPRequest(
     http::HTTPRequest* request,
@@ -198,6 +200,14 @@ void StatusServlet::renderDashboard(
   html += StringUtil::format(
       "<tr><td><em>Replication Queue Length</em></td><td align='right'>$0</td></tr>",
       zs->replication_queue_length.get());
+
+  auto num_replication_threads = repl_worker_->getNumThreads();
+  for (size_t i = 0; i < num_replication_threads; ++i) {
+    html += StringUtil::format(
+        "<tr><td><em>Replication Thread #$0</em></td><td>$1</td></tr>",
+        i + 1,
+        repl_worker_->getReplicationInfo(i)->toString());
+  }
   html += "</table>";
 
   html += "<h3>HTTP</h3>";

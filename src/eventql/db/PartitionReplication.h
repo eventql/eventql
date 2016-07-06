@@ -33,6 +33,7 @@
 
 namespace eventql {
 
+class ReplicationInfo;
 class PartitionReplication : public RefCounted {
 public:
   static const char kStateFileName[];
@@ -59,7 +60,7 @@ public:
    * Tries to replicate this partition to all other remote nodes to which it
    * still needs to be replicated. Returns true on success, false on error
    */
-  virtual bool replicate() = 0;
+  virtual bool replicate(ReplicationInfo* replication_info) = 0;
 
   static ReplicationState fetchReplicationState(
       RefPtr<PartitionSnapshot> snap);

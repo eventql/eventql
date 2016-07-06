@@ -33,6 +33,69 @@
 
 namespace eventql {
 
+ReplicationInfo::ReplicationInfo() {
+  reset();
+}
+
+void ReplicationInfo::reset() {
+  std::unique_lock<std::mutex> lk(mutex_);
+  is_idle_ = true;
+  cur_partition_.clear();
+  cur_target_host_.clear();
+  cur_partition_since_ = UnixTime(0);
+  cur_target_host_since_ = UnixTime(0);
+  cur_target_host_bytes_sent_ = 0;
+  cur_target_host_records_sent_ = 0;
+}
+
+void ReplicationInfo::setPartition(String name) {
+  std::unique_lock<std::mutex> lk(mutex_);
+  is_idle_ = false;
+  cur_partition_ = name;
+  cur_partition_since_ = WallClock::now();
+}
+
+void ReplicationInfo::setTargetHost(String host_name) {
+  std::unique_lock<std::mutex> lk(mutex_);
+  cur_target_host_ = host_name;
+  cur_target_host_since_ = WallClock::now();
+  cur_target_host_bytes_sent_ = 0;
+  cur_target_host_records_sent_ = 0;
+}
+
+void ReplicationInfo::setTargetHostStatus(
+    size_t bytes_sent,
+    size_t records_sent) {
+  cur_target_host_bytes_sent_ = bytes_sent;
+  cur_target_host_records_sent_ = records_sent;
+}
+
+String ReplicationInfo::toString() const {
+  std::unique_lock<std::mutex> lk(mutex_);
+  if (is_idle_) {
+    return "Idle";
+  }
+
+  if (cur_target_host_.empty()) {
+    return StringUtil::format(
+        "Replicating partition $0 (since $1s)",
+        cur_partition_,
+        (WallClock::unixMicros() - cur_partition_since_.unixMicros()) / kMicrosPerSecond);
+
+  } else {
+    auto duration = (WallClock::unixMicros() - cur_target_host_since_.unixMicros()) / kMicrosPerSecond;
+    return StringUtil::format(
+        "Replicating partition $0 (since $1s) to host $2 (since $3s); records_sent=$4 bytes_sent=$5MB bw=$6kb/s",
+        cur_partition_,
+        (WallClock::unixMicros() - cur_partition_since_.unixMicros()) / kMicrosPerSecond,
+        cur_target_host_,
+        duration,
+        cur_target_host_records_sent_,
+        cur_target_host_bytes_sent_ / double(1024 * 1024),
+        (cur_target_host_bytes_sent_ / (duration < 1 ? 1 : duration)) / 1024);
+  }
+}
+
 ReplicationWorker::ReplicationWorker(
     RefPtr<ReplicationScheme> repl_scheme,
     PartitionMap* pmap,
@@ -45,7 +108,9 @@ ReplicationWorker::ReplicationWorker(
         const Pair<uint64_t, RefPtr<Partition>>& b) {
       return a.first < b.first;
     }),
-    running_(false) {
+    running_(false),
+    num_replication_threads_(32),
+    replication_infos_(num_replication_threads_) {
   pmap->subscribeToPartitionChanges([this] (
       RefPtr<eventql::PartitionChangeNotification> change) {
     enqueuePartition(change->partition);
@@ -91,8 +156,8 @@ void ReplicationWorker::enqueuePartitionWithLock(
 void ReplicationWorker::start() {
   running_ = true;
 
-  for (int i = 0; i < 4; ++i) {
-    threads_.emplace_back(std::bind(&ReplicationWorker::work, this));
+  for (int i = 0; i < num_replication_threads_; ++i) {
+    threads_.emplace_back(std::bind(&ReplicationWorker::work, this, i));
   }
 }
 
@@ -109,8 +174,9 @@ void ReplicationWorker::stop() {
   }
 }
 
-void ReplicationWorker::work() {
+void ReplicationWorker::work(size_t thread_id) {
   Application::setCurrentThreadName("z1d-replication");
+  auto replication_info = &replication_infos_[thread_id];
 
   std::unique_lock<std::mutex> lk(mutex_);
 
@@ -141,13 +207,22 @@ void ReplicationWorker::work() {
     {
       lk.unlock();
 
+      auto snap = partition->getSnapshot();
+      replication_info->setPartition(StringUtil::format(
+          "$0/$1/$2",
+          snap->state.tsdb_namespace(),
+          snap->state.table_key(),
+          snap->key));
+
       try {
         repl = partition->getReplicationStrategy(repl_scheme, http_);
-        success = repl->replicate();
+        success = repl->replicate(replication_info);
       } catch (const StandardException& e) {
         logError("evqld", e, "ReplicationWorker error");
         success = false;
       }
+
+      replication_info->reset();
 
       if (!success) {
         auto snap = partition->getSnapshot();
@@ -192,5 +267,19 @@ void ReplicationWorker::work() {
     z1stats()->replication_queue_length.set(queue_.size());
   }
 }
+
+size_t ReplicationWorker::getNumThreads() const {
+  return num_replication_threads_;
+}
+
+const ReplicationInfo* ReplicationWorker::getReplicationInfo(
+    size_t thread_id) const {
+  if (thread_id >= num_replication_threads_) {
+    return nullptr;
+  }
+
+  return &replication_infos_[thread_id];
+}
+
 
 } // namespace eventql

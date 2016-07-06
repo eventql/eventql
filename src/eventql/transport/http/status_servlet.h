@@ -27,6 +27,7 @@
 #include <eventql/util/http/httpstats.h>
 #include <eventql/util/SHA1.h>
 #include <eventql/db/partition_map.h>
+#include <eventql/db/ReplicationWorker.h>
 #include <eventql/config/config_directory.h>
 
 #include "eventql/eventql.h"
@@ -40,7 +41,8 @@ public:
       PartitionMap* pmap,
       ConfigDirectory* cdir,
       http::HTTPServerStats* http_server_stats,
-      http::HTTPClientStats* http_client_stats);
+      http::HTTPClientStats* http_client_stats,
+      ReplicationWorker* repl_worker);
 
   void handleHTTPRequest(
       http::HTTPRequest* request,
@@ -79,6 +81,7 @@ protected:
   ConfigDirectory* cdir_;
   http::HTTPServerStats* http_server_stats_;
   http::HTTPClientStats* http_client_stats_;
+  ReplicationWorker* repl_worker_;
 };
 
 }

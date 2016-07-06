@@ -44,7 +44,7 @@ public:
   /**
    * Returns true on success, false on error
    */
-  bool replicate() override;
+  bool replicate(ReplicationInfo* replication_info) override;
 
   size_t numFullRemoteCopies() const;
 
