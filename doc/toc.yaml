@@ -509,7 +509,7 @@
               type: page
               visible_in_menu: true
               visible_in_toc: true
-              source: "/sql/introduction.md"
+              source: "/api/javascript/introduction.md"
             -
               url: "/queries/pipelines/stream-processing"
               title: "Stream Processing"
@@ -523,7 +523,7 @@
               type: page
               visible_in_menu: true
               visible_in_toc: true
-              source: "/sql/functions_and_operators.md"
+              source: "/api/javascript/javascript_api.md"
         #-
         #  url: "/queries/download-and-export"
         #  title: "Downloading &amp; Exporting Data"
@@ -547,26 +547,26 @@
       source: "/api/overview.md"
       children:
         -
-          url: "/api/evqlctl"
+          url: "/api/evql"
           title: "evql Reference"
           type: page
           visible_in_menu: true
           visible_in_toc: true
-          source: "/api/http/index.html"
+          source: "/api/evql.md"
         -
           url: "/api/evqld"
           title: "evqld Reference"
           type: page
           visible_in_menu: true
           visible_in_toc: true
-          source: "/api/http/index.html"
+          source: "/api/evqld.md"
         -
-          url: "/api/evqld"
+          url: "/api/evqlctl"
           title: "evqlctl Reference"
           type: page
           visible_in_menu: true
           visible_in_toc: true
-          source: "/api/http/index.html"
+          source: "/api/evqlctl.md"
         -
           url: "/api/http"
           title: "HTTP API"
