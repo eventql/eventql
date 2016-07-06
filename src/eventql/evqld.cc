@@ -319,10 +319,10 @@ int main(int argc, const char** argv) {
     return 1;
   }
 
-  if (!process_config->hasProperty("server.name")) {
-    logFatal("evqld", "missing 'server.name' option");
-    return 1;
-  }
+  //if (!process_config->hasProperty("server.name")) {
+  //  logFatal("evqld", "missing 'server.name' option");
+  //  return 1;
+  //}
 
   /* daemonize */
   if (process_config->getBool("server.daemonize")) {

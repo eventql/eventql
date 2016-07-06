@@ -59,6 +59,8 @@ public:
 
   virtual String getServerID() const = 0;
 
+  virtual bool hasServerID() const { return true; }
+
   virtual ServerConfig getServerConfig(const String& sever_name) const = 0;
 
   virtual void updateServerConfig(ServerConfig config) = 0;
