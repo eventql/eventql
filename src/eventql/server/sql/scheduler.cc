@@ -184,7 +184,10 @@ Vector<Scheduler::PipelinedQueryTree> Scheduler::pipelineExpression(
   auto db_namespace =
       static_cast<Session*>(txn->getUserData())->getEffectiveNamespace();
 
-  auto local_server_id = cdir_->getServerID();
+  String local_server_id;
+  if (cdir_->hasServerID()) {
+    local_server_id = cdir_->getServerID();
+  }
 
   HashMap<SHA1Hash, Vector<ReplicaRef>> partitions;
   Set<SHA1Hash> local_partitions;

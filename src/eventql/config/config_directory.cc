@@ -47,51 +47,11 @@ Status ConfigDirectoryFactory::getConfigDirectoryForServer(
     }
 
     auto server_name = cfg->getString("server.name");
-    if (server_name.isEmpty()) {
-      return Status(
-          eIllegalArgumentError,
-          "missing config option: server.name");
-    }
-
-    auto server_listen = cfg->getString("server.listen");
-    if (server_listen.isEmpty()) {
-      return Status(
-          eIllegalArgumentError,
-          "missing config option: server.listen");
-    }
-
-    auto zookeeper_addr = cfg->getString("zookeeper.hosts");
-    if (zookeeper_addr.isEmpty()) {
-      return Status(
-          eIllegalArgumentError,
-          "missing config option: zookeeper.hosts");
-    }
-
-    cdir->reset(
-        new ZookeeperConfigDirectory(
-            zookeeper_addr.get(),
-            cluster_name.get(),
-            server_name,
-            server_listen.get()));
-
-    return Status::success();
-  }
-
-  // standalone
-  if (config_backend.get() == "zookeeper") {
-    auto cluster_name = cfg->getString("cluster.name");
-    if (cluster_name.isEmpty()) {
-      return Status(
-          eIllegalArgumentError,
-          "missing config option: cluster.name");
-    }
-
-    auto server_name = cfg->getString("server.name");
-    if (server_name.isEmpty()) {
-      return Status(
-          eIllegalArgumentError,
-          "missing config option: server.name");
-    }
+    //if (server_name.isEmpty()) {
+    //  return Status(
+    //      eIllegalArgumentError,
+    //      "missing config option: server.name");
+    //}
 
     auto server_listen = cfg->getString("server.listen");
     if (server_listen.isEmpty()) {
