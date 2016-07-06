@@ -200,7 +200,13 @@ bool LSMPartitionReplication::replicate(ReplicationInfo* replication_info) {
 
     try {
       replicateTo(r, replica_offset, replication_info);
+
       setReplicatedOffsetFor(&repl_state, r, head_offset);
+      {
+        auto& writer = dynamic_cast<LSMPartitionWriter&>(*partition_->getWriter());
+          writer.commitReplicationState(repl_state);
+      }
+
       dirty = true;
       ++replicas_per_partition[target_partition_id];
 
