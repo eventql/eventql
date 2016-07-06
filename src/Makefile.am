@@ -1073,6 +1073,8 @@ evqlctl_SOURCES = \
     eventql/cli/commands/table_set_primary_key.cc \
     eventql/cli/commands/table_split.h \
     eventql/cli/commands/table_split.cc \
+    eventql/cli/commands/table_split_finalize.h \
+    eventql/cli/commands/table_split_finalize.cc \
     eventql/evqlctl.cc
 
 evqlctl_LDADD = \
