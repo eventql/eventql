@@ -38,6 +38,8 @@ public:
   static const String& kDefaultHost;
   static const int kDefaultPort;
   static const String& kDefaultUser;
+  static const String& kDefaultHistoryPath;
+  static const uint64_t kDefaultHistoryMaxSize;
 
   enum class kLanguage { SQL, JAVASCRIPT };
 
@@ -64,6 +66,10 @@ public:
   Option<kLanguage> getLanguage();
 
   Option<String> getExec() const;
+
+  String getHistoryPath() const;
+
+  uint64_t getHistoryMaxSize() const;
 
 protected:
   RefPtr<ProcessConfig> cfg_;
