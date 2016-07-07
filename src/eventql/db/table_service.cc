@@ -82,11 +82,23 @@ Status TableService::createTable(
   }
 
   String partition_key = primary_key[0];
-  auto partition_key_type = schema.fieldType(schema.fieldId(partition_key));
-  if (partition_key_type != msg::FieldType::DATETIME) {
-    return Status(
-        eIllegalArgumentError,
-        "first column in the PRIMARY KEY must be of type DATETIME");
+  eventql::TablePartitionerType partitioner_type;
+  switch (schema.fieldType(schema.fieldId(partition_key))) {
+    case msg::FieldType::DATETIME:
+      partitioner_type = eventql::TBL_PARTITION_TIMEWINDOW;
+      break;
+
+   // case msg::FieldType::STRING:
+   //   partitioner_type =
+   //   break;
+   // case msg::FieldType::UINT64:
+   //   partitioner_type =
+   //   break;
+
+    default:
+      return Status(
+          eIllegalArgumentError,
+          "first column in the PRIMARY KEY must be of type DATETIME, STRNG or UINT64");
   }
 
   auto replication_factor = cdir_->getClusterConfig().replication_factor();
@@ -127,7 +139,7 @@ Status TableService::createTable(
   auto tblcfg = td.mutable_config();
   tblcfg->set_schema(schema.encode().toString());
   tblcfg->set_num_shards(1);
-  tblcfg->set_partitioner(eventql::TBL_PARTITION_TIMEWINDOW);
+  tblcfg->set_partitioner(partitioner_type);
   tblcfg->set_storage(eventql::TBL_STORAGE_COLSM);
   tblcfg->set_partition_key(partition_key);
   for (const auto& col : primary_key) {
