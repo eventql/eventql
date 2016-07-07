@@ -23,6 +23,11 @@ message ClusterConfig {
 
 };
 
+enum AllocationPolicy {
+  ALLOC_POLICY_DEFAULT = 0;
+  ALLOC_POLICY_NOALLOC = 1;
+};
+
 enum ServerStatus {
   SERVER_DOWN = 0;
   SERVER_UP = 1;
@@ -36,5 +41,6 @@ message ServerConfig {
   repeated string sha1_tokens = 5;
   optional bool is_leaving = 6;
   optional bool is_dead = 7;
+  optional AllocationPolicy allocation_policy = 8;
 };
 

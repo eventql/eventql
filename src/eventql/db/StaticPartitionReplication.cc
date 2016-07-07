@@ -127,7 +127,7 @@ void StaticPartitionReplication::replicateTo(
   }
 }
 
-bool StaticPartitionReplication::replicate() {
+bool StaticPartitionReplication::replicate(ReplicationInfo* replication_info) {
   auto replicas = repl_scheme_->replicasFor(snap_->key);
   if (replicas.size() == 0) {
     return true;

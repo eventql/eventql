@@ -134,6 +134,8 @@ bool StringColumnReader::readString(
     *dlvl = 0;
   }
 
+  value->clear();
+
   if (*dlvl == config_.dlevel_max) {
     data_reader_->readString(value);
     return true;

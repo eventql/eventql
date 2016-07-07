@@ -155,6 +155,12 @@ void RPCServlet::handleHTTPRequest(
     res.addBody("not found");
     res_stream->writeResponse(res);
   } catch (const Exception& e) {
+    try {
+      req_stream->readBody();
+    } catch (...) {
+      /* ignore further errors */
+    }
+
     logError("tsdb", e, "error while processing HTTP request");
 
     res.setStatus(http::kStatusInternalServerError);

@@ -33,8 +33,31 @@
 
 namespace eventql {
 
+class ReplicationInfo {
+public:
+
+  ReplicationInfo();
+  void reset();
+  void setPartition(String name);
+  void setTargetHost(String host_name);
+  void setTargetHostStatus(size_t bytes_sent, size_t records_sent);
+
+  String toString() const;
+
+protected:
+  mutable std::mutex mutex_;
+  bool is_idle_;
+  String cur_partition_;
+  String cur_target_host_;
+  UnixTime cur_partition_since_;
+  UnixTime cur_target_host_since_;
+  uint64_t cur_target_host_bytes_sent_;
+  uint64_t cur_target_host_records_sent_;
+};
+
 class ReplicationWorker {
 public:
+
   static const uint64_t kReplicationCorkWindowMicros = 10 * kMicrosPerSecond;
 
   ReplicationWorker(
@@ -47,7 +70,9 @@ public:
   void enqueuePartition(RefPtr<Partition> partition);
   void enqueuePartition(RefPtr<Partition> partition, uint64_t delay_usecs);
 
-  void updateReplicationScheme(RefPtr<ReplicationScheme> new_repl_scheme);
+  size_t getNumThreads() const;
+
+  const ReplicationInfo* getReplicationInfo(size_t thread_id) const;
 
 protected:
 
@@ -57,7 +82,7 @@ protected:
 
   void start();
   void stop();
-  void work();
+  void work(size_t thread_id);
 
   RefPtr<ReplicationScheme> repl_scheme_;
   PartitionMap* pmap_;
@@ -74,6 +99,8 @@ protected:
   Vector<std::thread> threads_;
   mutable std::mutex mutex_;
   std::condition_variable cv_;
+  size_t num_replication_threads_;
+  Vector<ReplicationInfo> replication_infos_;
 };
 
 } // namespace eventql

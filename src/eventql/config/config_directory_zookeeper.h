@@ -43,6 +43,8 @@ public:
 
   String getServerID() const override;
 
+  bool hasServerID() const override;
+
   ClusterConfig getClusterConfig() const override;
 
   void updateClusterConfig(ClusterConfig config) override;

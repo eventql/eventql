@@ -96,6 +96,14 @@ Status TableService::createTable(
               "repeated column '$0' can't be part of the PRIMARY KEY",
               col.first));
     }
+
+    if (!schema.hasField(col)) {
+      return Status(
+          eIllegalArgumentError,
+          StringUtil::format(
+              "column not found '$0'",
+              col));
+    }
   }
 
   String partition_key = primary_key[0];

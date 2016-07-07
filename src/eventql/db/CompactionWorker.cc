@@ -144,7 +144,16 @@ void CompactionWorker::work() {
           pmap_->publishPartitionChange(change);
         }
       } catch (const StandardException& e) {
-        logError("tsdb", e, "CompactionWorker error");
+        auto snap = partition->getSnapshot();
+
+        logError(
+            "tsdb",
+            e,
+            "CompactionWorker error for partition $0/$1/$2",
+            snap->state.tsdb_namespace(),
+            snap->state.table_key(),
+            snap->key.toString());
+
         success = false;
       }
 

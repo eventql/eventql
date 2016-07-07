@@ -356,6 +356,15 @@ int main(int argc, const char** argv) {
       "batch",
       "<batch mode>");
 
+  flags.defineFlag(
+      "quiet",
+      cli::FlagParser::T_SWITCH,
+      false,
+      "q",
+      NULL,
+      "quiet",
+      "<quiet>");
+
   flags.parseArgv(argc, argv);
 
   Logger::get()->setMinimumLogLevel(
@@ -450,6 +459,10 @@ int main(int argc, const char** argv) {
 
   if (flags.isSet("batch")) {
     cfg_builder.setProperty("evql", "batch", "true");
+  }
+
+  if (flags.isSet("quiet")) {
+    cfg_builder.setProperty("evql", "quiet", "true");
   }
 
   /* cli config */

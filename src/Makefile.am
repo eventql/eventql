@@ -1063,6 +1063,8 @@ evqlctl_SOURCES = \
     eventql/cli/commands/cluster_status.cc \
     eventql/cli/commands/cluster_remove_server.h \
     eventql/cli/commands/cluster_remove_server.cc \
+    eventql/cli/commands/cluster_set_allocation_policy.h \
+    eventql/cli/commands/cluster_set_allocation_policy.cc \
     eventql/cli/commands/namespace_create.h \
     eventql/cli/commands/namespace_create.cc \
     eventql/cli/commands/rebalance.h \
@@ -1071,6 +1073,8 @@ evqlctl_SOURCES = \
     eventql/cli/commands/table_set_primary_key.cc \
     eventql/cli/commands/table_split.h \
     eventql/cli/commands/table_split.cc \
+    eventql/cli/commands/table_split_finalize.h \
+    eventql/cli/commands/table_split_finalize.cc \
     eventql/evqlctl.cc
 
 evqlctl_LDADD = \

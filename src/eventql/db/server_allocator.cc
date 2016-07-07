@@ -54,7 +54,10 @@ Status ServerAllocator::allocateServers(
   for (int i = 0; i < all_servers.size(); ++i) {
     const auto& s = all_servers[++idx % all_servers.size()];
 
-    if (s.is_dead() || s.is_leaving() || s.server_status() != SERVER_UP) {
+    if (s.is_dead() ||
+        s.is_leaving() ||
+        s.allocation_policy() == ALLOC_POLICY_NOALLOC ||
+        s.server_status() != SERVER_UP) {
       continue;
     }
 
