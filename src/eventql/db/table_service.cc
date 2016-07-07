@@ -76,7 +76,7 @@ Status TableService::createTable(
       return Status(
           eIllegalArgumentError,
           StringUtil::format(
-              "unknown column '$0' can't be part of the PRIMARY KEY",
+              "column not found '$0'",
               col));
     }
   }
