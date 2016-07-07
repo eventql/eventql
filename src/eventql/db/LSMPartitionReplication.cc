@@ -359,11 +359,16 @@ void LSMPartitionReplication::fetchRecords(
       String pkey_value;
       switch (keyspace) {
         case KEYSPACE_STRING: {
-          pkey_value = record.getString(pkey_fieldid);
+          if (record.fieldCount(pkey_fieldid) > 0) {
+            pkey_value = record.getString(pkey_fieldid);
+          }
           break;
         }
         case KEYSPACE_UINT64: {
-          uint64_t pkey_value_uint = record.getUInt64(pkey_fieldid);
+          uint64_t pkey_value_uint = 0;
+          if (record.fieldCount(pkey_fieldid) > 0) {
+            pkey_value_uint = record.getUInt64(pkey_fieldid);
+          }
           pkey_value = String((const char*) &pkey_value_uint, sizeof(uint64_t));
           break;
         }
