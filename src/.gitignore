@@ -2,3 +2,4 @@ test_evql_*
 evql
 evqld
 evqlctl
+cstable_tool

@@ -158,7 +158,7 @@ bool LSMPartitionReplication::replicate(ReplicationInfo* replication_info) {
   if (!rc.isSuccess()) {
     RAISEF(
         kRuntimeError,
-        "error while applying metadata transactionL $0",
+        "error while applying metadata transaction: $0",
         rc.message());
   }
 
@@ -408,20 +408,6 @@ Status LSMPartitionReplication::fetchAndApplyMetadataTransaction() {
     }
 
     snap_ = partition_->getSnapshot();
-
-    has_new_metadata_txn =
-        snap_->state.last_metadata_txnid().empty() ||
-        SHA1Hash(
-            snap_->state.last_metadata_txnid().data(),
-            snap_->state.last_metadata_txnid().size()) != last_txid.getTransactionID();
-  }
-
-  if (has_new_metadata_txn) {
-    return Status(
-        eRuntimeError,
-        StringUtil::format(
-            "error while applying metadata transaction $0",
-            last_txid.getTransactionID().toString()));
   }
 
   return Status::success();
@@ -462,13 +448,16 @@ Status LSMPartitionReplication::finalizeSplit() {
   FinalizeSplitOperation op;
   op.set_partition_id(snap_->key.data(), snap_->key.size());
 
+  auto table_config = cdir_->getTableConfig(
+      snap_->state.tsdb_namespace(),
+      snap_->state.table_key());
   MetadataOperation envelope(
       snap_->state.tsdb_namespace(),
       snap_->state.table_key(),
       METAOP_FINALIZE_SPLIT,
       SHA1Hash(
-          snap_->state.last_metadata_txnid().data(),
-          snap_->state.last_metadata_txnid().size()),
+          table_config.metadata_txnid().data(),
+          table_config.metadata_txnid().size()),
       Random::singleton()->sha1(),
       *msg::encode(op));
 
@@ -493,13 +482,16 @@ Status LSMPartitionReplication::finalizeJoin(const ReplicationTarget& target) {
   op.set_server_id(target.server_id());
   op.set_placement_id(target.placement_id());
 
+  auto table_config = cdir_->getTableConfig(
+      snap_->state.tsdb_namespace(),
+      snap_->state.table_key());
   MetadataOperation envelope(
       snap_->state.tsdb_namespace(),
       snap_->state.table_key(),
       METAOP_FINALIZE_JOIN,
       SHA1Hash(
-          snap_->state.last_metadata_txnid().data(),
-          snap_->state.last_metadata_txnid().size()),
+          table_config.metadata_txnid().data(),
+          table_config.metadata_txnid().size()),
       Random::singleton()->sha1(),
       *msg::encode(op));
 

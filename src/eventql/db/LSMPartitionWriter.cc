@@ -413,13 +413,16 @@ Status LSMPartitionWriter::split() {
     op.add_split_servers_high(s);
   }
 
+  auto table_config = cdir_->getTableConfig(
+      snap->state.tsdb_namespace(),
+      snap->state.table_key());
   MetadataOperation envelope(
       snap->state.tsdb_namespace(),
       snap->state.table_key(),
       METAOP_SPLIT_PARTITION,
       SHA1Hash(
-          snap->state.last_metadata_txnid().data(),
-          snap->state.last_metadata_txnid().size()),
+          table_config.metadata_txnid().data(),
+          table_config.metadata_txnid().size()),
       Random::singleton()->sha1(),
       *msg::encode(op));
 
