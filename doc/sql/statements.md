@@ -4,8 +4,10 @@ Statements
 The following SQL statements are currently supported.
 
   - SELECT ... ;
-  - INSERT INTO ... ;
   - DRAW ... ;
+  - INSERT INTO ... ;
+  - CREATE TABLE ...;
+  - ALTER TABLE ...;
   - DESCRIBE ... / EXPLAIN ...;
   - SHOW TABLES;
 

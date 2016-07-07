@@ -14,12 +14,13 @@
 
 cql_type is a type, other than a collection or a counter type. CQL data types lists the types. Exceptions: ADD supports a collection type and also, if the table is a counter, a counter type.
 
+A table must have a unique primary key whose first column must be of type DATETIME.
+This column is used as partition key to distribute the rows among the hosts. 
 
-- unique primary key
 - why partition key? immer die erste column von primary key, um rows auf hosts zu verteilen, optimierungen wenn von type time
 for timeseries data it is strongly recommende to choose a time column as partition key
 
-
+<br />
 
 **NOTE:** If you are an EventQL Cloud user you can also create and update table
 schemas from the web interface. Go to `EventQL Cloud > Tables` and click the
