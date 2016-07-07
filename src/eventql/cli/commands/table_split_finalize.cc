@@ -112,15 +112,6 @@ Status TableSplitFinalize::execute(
         flags.getString("namespace"),
         flags.getString("table_name"));
 
-    KeyspaceType keyspace;
-    switch (table_cfg.config().partitioner()) {
-      case TBL_PARTITION_FIXED:
-        RAISE(kIllegalArgumentError);
-      case TBL_PARTITION_TIMEWINDOW:
-        keyspace = KEYSPACE_UINT64;
-        break;
-    }
-
     auto partition_id = SHA1Hash::fromHexString(flags.getString("partition_id"));
     FinalizeSplitOperation op;
     op.set_partition_id(partition_id.data(), partition_id.size());

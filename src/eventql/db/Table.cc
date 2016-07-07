@@ -84,7 +84,12 @@ KeyspaceType Table::getKeyspaceType() const {
   switch (config_.config().partitioner()) {
 
     case TBL_PARTITION_TIMEWINDOW:
+    case TBL_PARTITION_UINT64:
       return KEYSPACE_UINT64;
+      break;
+
+    case TBL_PARTITION_STRING:
+      return KEYSPACE_STRING;
       break;
 
     case TBL_PARTITION_FIXED:
@@ -106,6 +111,12 @@ TablePartitionerType Table::partitionerType() const {
 
 RefPtr<TablePartitioner> Table::partitioner() const {
   std::unique_lock<std::mutex> lk(mutex_);
+  if (!partitioner_.get()) {
+    RAISE(
+        kIllegalArgumentError,
+        "Table::partitioner() called with partitioner_type != FIXED");
+  }
+
   return partitioner_;
 }
 
@@ -150,6 +161,10 @@ void Table::loadConfig() {
                 config_.table_name(),
                 config_.config().partition_key()));
       }
+      break;
+
+    case TBL_PARTITION_UINT64:
+    case TBL_PARTITION_STRING:
       break;
 
     case TBL_PARTITION_FIXED:

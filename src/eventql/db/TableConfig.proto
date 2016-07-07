@@ -27,6 +27,8 @@ package eventql;
 enum TablePartitionerType {
   TBL_PARTITION_TIMEWINDOW = 0;
   TBL_PARTITION_FIXED = 1;
+  TBL_PARTITION_UINT64 = 2;
+  TBL_PARTITION_STRING = 3;
 };
 
 enum TableStorage {

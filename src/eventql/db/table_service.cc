@@ -82,19 +82,17 @@ Status TableService::createTable(
   }
 
   String partition_key = primary_key[0];
-  eventql::TablePartitionerType partitioner_type;
+  TablePartitionerType partitioner_type;
   switch (schema.fieldType(schema.fieldId(partition_key))) {
     case msg::FieldType::DATETIME:
-      partitioner_type = eventql::TBL_PARTITION_TIMEWINDOW;
+      partitioner_type = TBL_PARTITION_TIMEWINDOW;
       break;
-
-   // case msg::FieldType::STRING:
-   //   partitioner_type =
-   //   break;
-   // case msg::FieldType::UINT64:
-   //   partitioner_type =
-   //   break;
-
+    case msg::FieldType::STRING:
+      partitioner_type = TBL_PARTITION_STRING;
+      break;
+    case msg::FieldType::UINT64:
+      partitioner_type = TBL_PARTITION_UINT64;
+      break;
     default:
       return Status(
           eIllegalArgumentError,

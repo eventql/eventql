@@ -474,6 +474,27 @@ void StatusServlet::renderPartitionPage(
           ts_end);
     }
 
+    if (table->partitionerType() == TBL_PARTITION_UINT64 &&
+        state.partition_keyrange_begin().size() == 8 &&
+        state.partition_keyrange_end().size() == 8) {
+      uint64_t range_begin;
+      uint64_t range_end;
+      memcpy((char*) &range_begin, state.partition_keyrange_begin().data(), 8);
+      memcpy((char*) &range_end, state.partition_keyrange_end().data(), 8);
+
+      html += StringUtil::format(
+          "<span><em>Keyrange:</em> $0 - $1</span> &mdash; ",
+          range_begin,
+          range_end);
+    }
+
+    if (table->partitionerType() == TBL_PARTITION_STRING) {
+      html += StringUtil::format(
+          "<span><em>Keyrange:</em> $0 - $1</span> &mdash; ",
+          state.partition_keyrange_begin(),
+          state.partition_keyrange_end());
+    }
+
     html += StringUtil::format(
         "<span><em>Lifecycle State</em>: $0</span> &mdash; ",
         PartitionLifecycleState_Name(snap->state.lifecycle_state()));

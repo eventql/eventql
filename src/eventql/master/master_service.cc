@@ -57,7 +57,7 @@ Status MasterService::runOnce() {
   });
 
   for (const auto& tbl_cfg : tables) {
-    if (tbl_cfg.config().partitioner() != TBL_PARTITION_TIMEWINDOW) {
+    if (tbl_cfg.config().partitioner() == TBL_PARTITION_FIXED) {
       continue;
     }
 
