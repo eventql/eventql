@@ -158,7 +158,7 @@ bool LSMPartitionReplication::replicate(ReplicationInfo* replication_info) {
   if (!rc.isSuccess()) {
     RAISEF(
         kRuntimeError,
-        "error while applying metadata transactionL $0",
+        "error while applying metadata transaction: $0",
         rc.message());
   }
 
@@ -408,20 +408,6 @@ Status LSMPartitionReplication::fetchAndApplyMetadataTransaction() {
     }
 
     snap_ = partition_->getSnapshot();
-
-    has_new_metadata_txn =
-        snap_->state.last_metadata_txnid().empty() ||
-        SHA1Hash(
-            snap_->state.last_metadata_txnid().data(),
-            snap_->state.last_metadata_txnid().size()) != last_txid.getTransactionID();
-  }
-
-  if (has_new_metadata_txn) {
-    return Status(
-        eRuntimeError,
-        StringUtil::format(
-            "error while applying metadata transaction $0",
-            last_txid.getTransactionID().toString()));
   }
 
   return Status::success();
