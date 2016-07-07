@@ -66,6 +66,10 @@ bool CLIConfig::getBatchMode() const {
   return cfg_->getBool("evql", "batch");
 }
 
+bool CLIConfig::getQuietMode() const {
+  return cfg_->getBool("evql", "quiet");
+}
+
 Option<String> CLIConfig::getDatabase() const {
   return cfg_->getString("evql", "database");
 }
