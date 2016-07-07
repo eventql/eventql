@@ -39,8 +39,9 @@ public:
   MapReduceTaskBuilder(
       Session* session,
       InternalAuth* auth,
-      eventql::PartitionMap* pmap,
-      eventql::ReplicationScheme* repl,
+      PartitionMap* pmap,
+      ConfigDirectory* cdir,
+      ReplicationScheme* repl,
       TableService* tsdb,
       const String& cachedir);
 
@@ -88,8 +89,9 @@ protected:
 
   Session* session_;
   InternalAuth* auth_;
-  eventql::PartitionMap* pmap_;
-  eventql::ReplicationScheme* repl_;
+  PartitionMap* pmap_;
+  ConfigDirectory* cdir_;
+  ReplicationScheme* repl_;
   TableService* tsdb_;
   String cachedir_;
 };

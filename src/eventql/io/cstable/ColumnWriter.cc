@@ -22,6 +22,7 @@
  * code of your own applications
  */
 #include <eventql/io/cstable/ColumnWriter.h>
+#include <eventql/io/cstable/columns/page_writer_bitpacked.h>
 
 #include "eventql/eventql.h"
 
@@ -57,8 +58,7 @@ void ColumnWriter::writeDateTime(
 
 DefaultColumnWriter::DefaultColumnWriter(
     ColumnConfig config,
-    RefPtr<PageManager> page_mgr,
-    RefPtr<PageIndex> page_idx) :
+    PageManager* page_mgr) :
     ColumnWriter(config.rlevel_max, config.dlevel_max),
     config_(config) {
   if (config.rlevel_max > 0) {
@@ -68,9 +68,10 @@ DefaultColumnWriter::DefaultColumnWriter(
     };
 
     rlevel_writer_ = mkScoped(
-        new UInt64PageWriter(rlevel_idx_key, page_mgr, page_idx));
-
-    page_idx->addPageWriter(rlevel_idx_key, rlevel_writer_.get());
+        new BitPackedIntPageWriter(
+            rlevel_idx_key,
+            page_mgr,
+            config.rlevel_max));
   }
 
   if (config.dlevel_max > 0) {
@@ -80,9 +81,10 @@ DefaultColumnWriter::DefaultColumnWriter(
     };
 
     dlevel_writer_ = mkScoped(
-        new UInt64PageWriter(dlevel_idx_key, page_mgr, page_idx));
-
-    page_idx->addPageWriter(dlevel_idx_key, dlevel_writer_.get());
+        new BitPackedIntPageWriter(
+            dlevel_idx_key,
+            page_mgr,
+            config.dlevel_max));
   }
 }
 
@@ -98,5 +100,4 @@ void DefaultColumnWriter::writeNull(uint64_t rep_level, uint64_t def_level) {
 }
 
 } // namespace cstable
-
 

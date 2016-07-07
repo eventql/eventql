@@ -31,7 +31,7 @@
 #include "eventql/util/wallclock.h"
 #include "eventql/io/sstable/SSTableWriter.h"
 #include "eventql/io/sstable/sstablereader.h"
-#include "eventql/io/cstable/CSTableWriter.h"
+#include "eventql/io/cstable/cstable_writer.h"
 #include "eventql/io/cstable/RecordShredder.h"
 #include <algorithm>
 
@@ -71,6 +71,7 @@ void MapReduceService::executeScript(
       session,
       auth_,
       pmap_,
+      cdir_,
       repl_,
       tsdb_,
       cachedir_));

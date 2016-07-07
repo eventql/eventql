@@ -21,12 +21,12 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#include "eventql/eventql.h"
+#include "eventql/util/logging.h"
 #include <eventql/db/CompactionStrategy.h>
 #include <eventql/db/LSMTableIndex.h>
-#include <eventql/io/cstable/CSTableWriter.h>
+#include <eventql/io/cstable/cstable_writer.h>
 #include <eventql/util/io/fileutil.h>
-
-#include "eventql/eventql.h"
 
 namespace eventql {
 
@@ -72,7 +72,7 @@ bool SimpleCompactionStrategy::compact(
 
   auto cstable = cstable::CSTableWriter::createFile(
       cstable_filepath + ".cst",
-      cstable::BinaryFormatVersion::v0_1_0,
+      cstable::BinaryFormatVersion::v0_2_0,
       cstable_schema_ext);
 
   auto is_update_col = cstable->getColumnWriter("__lsm_is_update");
@@ -85,86 +85,95 @@ bool SimpleCompactionStrategy::compact(
         base_path,
         tbl.filename() + ".cst");
 
-    auto input_cstable = cstable::CSTableReader::openFile(input_cstable_file);
-    auto input_id_col = input_cstable->getColumnReader("__lsm_id");
-    auto input_version_col = input_cstable->getColumnReader("__lsm_version");
-    auto input_sequence_col = input_cstable->getColumnReader("__lsm_sequence");
-
-    Vector<Pair<
-        RefPtr<cstable::ColumnReader>,
-        RefPtr<cstable::ColumnWriter>>> columns;
-
-    auto flat_columns = cstable_schema.flatColumns();
-    for (const auto& col : flat_columns) {
-      if (input_cstable->hasColumn(col.column_name)) {
-        columns.emplace_back(
-            input_cstable->getColumnReader(col.column_name),
-            cstable->getColumnWriter(col.column_name));
-      } else {
-        if (col.dlevel_max == 0) {
-          RAISE(
-              kIllegalStateError,
-              "can't merge CSTables after a new required column was added");
-        }
-
-        columns.emplace_back(
-            nullptr,
-            cstable->getColumnWriter(col.column_name));
-      }
+    if (!FileUtil::exists(input_cstable_file)) {
+      logWarning("evqld", "missing table file: $0", input_cstable_file);
+      continue;
     }
 
-    auto nrecords = input_cstable->numRecords();
-    for (size_t i = 0; i < nrecords; ++i) {
-      uint64_t rlvl;
-      uint64_t dlvl;
+    try {
+      auto input_cstable = cstable::CSTableReader::openFile(input_cstable_file);
+      auto input_id_col = input_cstable->getColumnReader("__lsm_id");
+      auto input_version_col = input_cstable->getColumnReader("__lsm_version");
+      auto input_sequence_col = input_cstable->getColumnReader("__lsm_sequence");
 
-      String id_str;
-      input_id_col->readString(&rlvl, &dlvl, &id_str);
-      SHA1Hash id(id_str.data(), id_str.size());
+      Vector<Pair<
+          RefPtr<cstable::ColumnReader>,
+          RefPtr<cstable::ColumnWriter>>> columns;
 
-      uint64_t version;
-      input_version_col->readUnsignedInt(&rlvl, &dlvl, &version);
-
-      uint64_t sequence;
-      input_sequence_col->readUnsignedInt(&rlvl, &dlvl, &sequence);
-
-      const auto& vmap_iter = vmap.find(id);
-      if (vmap_iter == vmap.end()) {
-        RAISE(kIllegalStateError, "invalid cstable contents");
-      }
-
-      if (version == vmap_iter->second) {
-        is_update_col->writeBoolean(0, 0, false);
-        id_col->writeString(0, 0, id_str);
-        version_col->writeUnsignedInt(0, 0, version);
-        sequence_col->writeUnsignedInt(0, 0, sequence);
-
-        for (auto& col : columns) {
-          if (col.first.get()) {
-            while (!col.first->eofReached()) {
-              col.first->copyValue(col.second.get());
-              if (col.first->nextRepetitionLevel() == 0) {
-                break;
-              }
-            }
-          } else {
-            col.second->writeNull(0, 0);
+      auto flat_columns = cstable_schema.flatColumns();
+      for (const auto& col : flat_columns) {
+        if (input_cstable->hasColumn(col.column_name)) {
+          columns.emplace_back(
+              input_cstable->getColumnReader(col.column_name),
+              cstable->getColumnWriter(col.column_name));
+        } else {
+          if (col.dlevel_max == 0) {
+            RAISE(
+                kIllegalStateError,
+                "can't merge CSTables after a new required column was added");
           }
-        }
 
-        cstable->addRow();
-      } else {
-        for (auto& col : columns) {
-          if (col.first.get()) {
-            while (!col.first->eofReached()) {
-              col.first->skipValue();
-              if (col.first->nextRepetitionLevel() == 0) {
-                break;
-              }
-            }
-          }
+          columns.emplace_back(
+              nullptr,
+              cstable->getColumnWriter(col.column_name));
         }
       }
+
+      auto nrecords = input_cstable->numRecords();
+      for (size_t i = 0; i < nrecords; ++i) {
+        uint64_t rlvl;
+        uint64_t dlvl;
+
+        String id_str;
+        input_id_col->readString(&rlvl, &dlvl, &id_str);
+        SHA1Hash id(id_str.data(), id_str.size());
+
+        uint64_t version;
+        input_version_col->readUnsignedInt(&rlvl, &dlvl, &version);
+
+        uint64_t sequence;
+        input_sequence_col->readUnsignedInt(&rlvl, &dlvl, &sequence);
+
+        const auto& vmap_iter = vmap.find(id);
+        if (vmap_iter == vmap.end()) {
+          RAISE(kIllegalStateError, "invalid cstable contents");
+        }
+
+        if (version == vmap_iter->second) {
+          is_update_col->writeBoolean(0, 0, false);
+          id_col->writeString(0, 0, id_str);
+          version_col->writeUnsignedInt(0, 0, version);
+          sequence_col->writeUnsignedInt(0, 0, sequence);
+
+          for (auto& col : columns) {
+            if (col.first.get()) {
+              do {
+                col.first->copyValue(col.second.get());
+              } while (col.first->nextRepetitionLevel() > 0);
+            } else {
+              col.second->writeNull(0, 0);
+            }
+          }
+
+          cstable->addRow();
+        } else {
+          for (auto& col : columns) {
+            if (col.first.get()) {
+              do {
+                col.first->skipValue();
+              } while (col.first->nextRepetitionLevel() > 0);
+            }
+          }
+        }
+      }
+    } catch (const std::exception& e) {
+      logError(
+          "evqld",
+          "error while compacting table: $0 -- $1",
+          input_cstable_file,
+          e.what());
+
+      throw e;
     }
   }
 
@@ -180,6 +189,7 @@ bool SimpleCompactionStrategy::compact(
   tbl_ref.set_filename(cstable_filename);
   tbl_ref.set_first_sequence(input.begin()->first_sequence());
   tbl_ref.set_last_sequence(input.rbegin()->last_sequence());
+  tbl_ref.set_size_bytes(FileUtil::size(cstable_filepath + ".cst"));
   output->emplace_back(tbl_ref);
 
   return true;

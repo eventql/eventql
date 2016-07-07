@@ -50,6 +50,7 @@ RefPtr<Partition> Partition::create(
     const String& tsdb_namespace,
     RefPtr<Table> table,
     const SHA1Hash& partition_key,
+    const PartitionDiscoveryResponse& discovery_info,
     ServerCfg* cfg) {
   logDebug(
       "tsdb",
@@ -74,10 +75,23 @@ RefPtr<Partition> Partition::create(
   state.set_partition_key(partition_key.data(), partition_key.size());
   state.set_table_key(table->name());
   state.set_uuid(uuid.data(), uuid.size());
+  state.set_partition_keyrange_begin(discovery_info.keyrange_begin());
+  state.set_partition_keyrange_end(discovery_info.keyrange_end());
 
-  auto snap = mkRef(new PartitionSnapshot(state, pdir, pdir_rel, 0));
+  auto snap = mkRef(
+    new PartitionSnapshot(table.get(), state, pdir, pdir_rel, 0));
   snap->writeToDisk();
-  return new Partition(partition_key, cfg, snap, table);
+
+  auto partition = mkRef(new Partition(partition_key, cfg, snap, table));
+
+  {
+    auto rc = partition->getWriter()->applyMetadataChange(discovery_info);
+    if (!rc.isSuccess()) {
+      RAISE(kRuntimeError, rc.message());
+    }
+  }
+
+  return partition;
 }
 
 RefPtr<Partition> Partition::reopen(
@@ -112,7 +126,8 @@ RefPtr<Partition> Partition::reopen(
       partition_key.toString(),
       nrecs);
 
-  auto snap = mkRef(new PartitionSnapshot(state, pdir, pdir_rel, nrecs));
+  auto snap = mkRef(
+      new PartitionSnapshot(table.get(), state, pdir, pdir_rel, nrecs));
   return new Partition(partition_key, cfg, snap, table);
 }
 
@@ -125,12 +140,6 @@ Partition::Partition(
     cfg_(cfg),
     head_(head),
     table_(table) {
-  if (table_->partitionerType() == TBL_PARTITION_TIMEWINDOW &&
-      (head->state.partition_keyrange_begin().empty() ||
-      head->state.partition_keyrange_end().empty())) {
-    backfillKeyRange();
-  }
-
   z1stats()->num_partitions_loaded.incr(1);
 }
 
@@ -270,39 +279,18 @@ MetadataTransaction Partition::getLastMetadataTransaction() const {
       snap->state.last_metadata_txnseq());
 }
 
-void Partition::backfillKeyRange() {
-  auto snap = head_.getSnapshot()->clone();
-  SHA1Hash partition_id(
-      snap->state.partition_key().data(),
-      snap->state.partition_key().size());
-
-  logInfo(
-      "evqld",
-      "backfilling partition keyrange: $0/$1/$2",
-      snap->state.tsdb_namespace(),
-      table_->name(),
-      partition_id.toString());
-
-  auto partitioner = table_->partitioner();
-  KeyRange keyrange;
-  auto rc = partitioner->findKeyRange(partition_id, &keyrange);
-  if (!rc.isSuccess()) {
-    logWarning(
-        "evqld",
-        "error while backfilling partition keyrange: $0/$1/$2: $3", 
-        snap->state.tsdb_namespace(),
-        table_->name(),
-        partition_id.toString(),
-        rc.message());
-
-    return;
+size_t Partition::getTotalDiskSize() const {
+  if (table_->storage() == eventql::TBL_STORAGE_STATIC) {
+    return 0;
   }
 
-  snap->state.set_partition_keyrange_begin(keyrange.begin);
-  snap->state.set_partition_keyrange_end(keyrange.end);
+  auto snap = head_.getSnapshot();
+  size_t size = 0;
+  for (const auto& tbl : snap->state.lsm_tables()) {
+    size += tbl.size_bytes();
+  }
 
-  snap->writeToDisk();
-  head_.setSnapshot(snap);
+  return size;
 }
 
 }

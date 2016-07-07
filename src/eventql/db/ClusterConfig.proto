@@ -19,8 +19,13 @@ message ClusterConfig {
   optional uint32 version = 1;
 
   repeated DHTNode dht_nodes = 3;
-  optional uint32 dht_num_copies = 4 [default = 3];
+  optional uint32 replication_factor = 4 [default = 3];
 
+};
+
+enum AllocationPolicy {
+  ALLOC_POLICY_DEFAULT = 0;
+  ALLOC_POLICY_NOALLOC = 1;
 };
 
 enum ServerStatus {
@@ -34,6 +39,8 @@ message ServerConfig {
   optional string server_addr = 3;
   optional ServerStatus server_status = 4;
   repeated string sha1_tokens = 5;
-  optional bool leaving = 6;
+  optional bool is_leaving = 6;
+  optional bool is_dead = 7;
+  optional AllocationPolicy allocation_policy = 8;
 };
 

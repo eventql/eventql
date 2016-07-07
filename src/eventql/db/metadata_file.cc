@@ -114,39 +114,11 @@ MetadataFile::PartitionMapIter MetadataFile::getPartitionMapRangeEnd(
 }
 
 int MetadataFile::compareKeys(const String& a, const String& b) const {
-  switch (keyspace_type_) {
-    case KEYSPACE_STRING: {
-      if (a < b) {
-        return -1;
-      } else if (a > b) {
-        return 1;
-      } else {
-        return 0;
-      }
-    }
-
-    case KEYSPACE_UINT64: {
-      uint64_t a_uint = 0;
-      uint64_t b_uint = 0;
-      if (a.size() == sizeof(uint64_t)) {
-        memcpy(&a_uint, a.data(), sizeof(uint64_t));
-      }
-      if (b.size() == sizeof(uint64_t)) {
-        memcpy(&b_uint, b.data(), sizeof(uint64_t));
-      }
-
-      if (a_uint < b_uint) {
-        return -1;
-      } else if (a_uint > b_uint) {
-        return 1;
-      } else {
-        return 0;
-      }
-    }
-  }
+  return comparePartitionKeys(keyspace_type_, a, b);
 }
 
 static Status decodeServerList(
+    uint64_t version,
     Vector<MetadataFile::PartitionPlacement>* servers,
     InputStream* is) {
   auto n = is->readVarUInt();
@@ -154,7 +126,12 @@ static Status decodeServerList(
   for (size_t i = 0; i < n; ++i) {
     MetadataFile::PartitionPlacement s;
     s.server_id = is->readLenencString();
-    s.placement_id = is->readUInt64();
+    if (version >= 2) {
+      s.placement_id = is->readUInt64();
+    } else {
+      s.placement_id = 0;
+      is->readUInt64();
+    }
     servers->emplace_back(s);
   }
 
@@ -164,7 +141,7 @@ static Status decodeServerList(
 Status MetadataFile::decode(InputStream* is) {
   // file format version
   auto version = is->readUInt32();
-  if (version != kBinaryFormatVersion) {
+  if (version > kBinaryFormatVersion) {
     return Status(eIOError, "invalid file format version");
   }
 
@@ -194,40 +171,71 @@ Status MetadataFile::decode(InputStream* is) {
         e.partition_id.size());
 
     // servers
-    auto rc = decodeServerList(&e.servers, is);
+    auto rc = decodeServerList(version, &e.servers, is);
     if (!rc.isSuccess()) {
       return rc;
     }
 
     // servers joining
-    decodeServerList(&e.servers_joining, is);
+    decodeServerList(version, &e.servers_joining, is);
     if (!rc.isSuccess()) {
       return rc;
     }
 
     // servers leaving
-    decodeServerList(&e.servers_leaving, is);
+    decodeServerList(version, &e.servers_leaving, is);
     if (!rc.isSuccess()) {
       return rc;
     }
 
-    // splitting
     e.splitting = is->readUInt8() > 0;
     if (e.splitting) {
-      // split_point
-      e.split_point = is->readLenencString();
+      // splitting
+      switch (version) {
+        case 1: {
+          e.splitting = false;
+          is->readLenencString();
+          Vector<PartitionPlacement> tmp;
+          if (!decodeServerList(version, &tmp, is).isSuccess()) {
+            return rc;
+          }
+          if (!decodeServerList(version, &tmp, is).isSuccess()) {
+            return rc;
+          }
+          break;
+        }
 
-      // split_servers_low
-      decodeServerList(&e.split_servers_low, is);
-      if (!rc.isSuccess()) {
-        return rc;
+        default:
+        case 2: {
+          // split_point
+          e.split_point = is->readLenencString();
+
+          // split_partition_id_low
+          is->readNextBytes(
+              (char*) e.split_partition_id_low.mutableData(),
+              e.split_partition_id_low.size());
+
+          // split_partition_id_high
+          is->readNextBytes(
+              (char*) e.split_partition_id_high.mutableData(),
+              e.split_partition_id_high.size());
+
+          // split_servers_low
+          decodeServerList(version, &e.split_servers_low, is);
+          if (!rc.isSuccess()) {
+            return rc;
+          }
+
+          // split_servers_high
+          decodeServerList(version, &e.split_servers_high, is);
+          if (!rc.isSuccess()) {
+            return rc;
+          }
+        }
+
+        break;
       }
 
-      // split_servers_high
-      decodeServerList(&e.split_servers_high, is);
-      if (!rc.isSuccess()) {
-        return rc;
-      }
     }
 
     partition_map_.emplace_back(e);
@@ -294,6 +302,16 @@ Status MetadataFile::encode(OutputStream* os) const  {
       // split_point
       os->appendLenencString(p.split_point);
 
+      // split_partition_id_low
+      os->write(
+          (const char*) p.split_partition_id_low.data(),
+          p.split_partition_id_low.size());
+
+      // split_partition_id_high
+      os->write(
+          (const char*) p.split_partition_id_high.data(),
+          p.split_partition_id_high.size());
+
       // split_servers_low
       rc = encodeServerList(p.split_servers_low, os);
       if (!rc.isSuccess()) {
@@ -309,6 +327,91 @@ Status MetadataFile::encode(OutputStream* os) const  {
   }
 
   return Status::success();
+}
+
+Status MetadataFile::computeChecksum(SHA1Hash* checksum) const {
+  Buffer buf;
+  auto os = BufferOutputStream::fromBuffer(&buf);
+  auto rc = encode(os.get());
+  if (!rc.isSuccess()) {
+    return rc;
+  }
+
+  *checksum = SHA1::compute(buf.data(), buf.size());
+  return Status::success();
+}
+
+MetadataFile::PartitionMapEntry::PartitionMapEntry() : splitting(false) {}
+
+int comparePartitionKeys(
+    KeyspaceType keyspace_type,
+    const String& a,
+    const String& b) {
+  switch (keyspace_type) {
+    case KEYSPACE_STRING: {
+      if (a < b) {
+        return -1;
+      } else if (a > b) {
+        return 1;
+      } else {
+        return 0;
+      }
+    }
+
+    case KEYSPACE_UINT64: {
+      uint64_t a_uint = 0;
+      uint64_t b_uint = 0;
+      if (a.size() == sizeof(uint64_t)) {
+        memcpy(&a_uint, a.data(), sizeof(uint64_t));
+      }
+      if (b.size() == sizeof(uint64_t)) {
+        memcpy(&b_uint, b.data(), sizeof(uint64_t));
+      }
+
+      if (a_uint < b_uint) {
+        return -1;
+      } else if (a_uint > b_uint) {
+        return 1;
+      } else {
+        return 0;
+      }
+    }
+  }
+}
+
+String encodePartitionKey(
+    KeyspaceType keyspace_type,
+    const String& key) {
+  switch (keyspace_type) {
+    case KEYSPACE_STRING: {
+      return key;
+    }
+
+    case KEYSPACE_UINT64: {
+      uint64_t uint = std::stoull(key);
+      return String((const char*) &uint, sizeof(uint64_t));
+    }
+  }
+}
+
+String decodePartitionKey(
+    KeyspaceType keyspace_type,
+    const String& key) {
+  switch (keyspace_type) {
+    case KEYSPACE_STRING: {
+      return key;
+    }
+
+    case KEYSPACE_UINT64: {
+      if (key.size() == sizeof(uint64_t)) {
+        uint64_t uint;
+        memcpy((void*) &uint, key.data(), sizeof(uint64_t));
+        return StringUtil::toString(uint);
+      } else {
+        return "";
+      }
+    }
+  }
 }
 
 } // namespace eventql

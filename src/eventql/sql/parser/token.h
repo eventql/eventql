@@ -87,6 +87,7 @@ public:
     T_IMPORT,
     T_TABLE,
     T_TABLES,
+    T_DATABASE,
     T_EOF,
     T_SHOW,
     T_DESCRIBE,
@@ -99,6 +100,10 @@ public:
     T_VALUES,
     T_JSON,
     T_SET,
+    T_ALTER,
+    T_ADD,
+    T_DROP,
+    T_COLUMN,
 
     T_JOIN,
     T_CROSS,

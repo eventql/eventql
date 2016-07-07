@@ -21,11 +21,52 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#include "eventql/eventql.h"
 #include <eventql/db/ReplicationState.h>
 
-#include "eventql/eventql.h"
-
 namespace eventql {
+
+uint64_t replicatedOffsetFor(
+    const ReplicationState& repl_state,
+    const ReplicationTarget& target) {
+  uint64_t offset = 0;
+
+  offset = replicatedOffsetFor(
+      repl_state,
+      SHA1::compute(
+          StringUtil::format(
+              "$0~$1~$2",
+              target.server_id(),
+              target.partition_id(),
+              target.placement_id())));
+
+  if (offset) {
+    return offset;
+  }
+
+  if (target.has_legacy_token()) {
+    offset = replicatedOffsetFor(
+        repl_state,
+        SHA1Hash::fromHexString(target.legacy_token()));
+  }
+
+  return offset;
+}
+
+void setReplicatedOffsetFor(
+    ReplicationState* repl_state,
+    const ReplicationTarget& target,
+    uint64_t replicated_offset) {
+  setReplicatedOffsetFor(
+      repl_state,
+      SHA1::compute(
+          StringUtil::format(
+              "$0~$1~$2",
+              target.server_id(),
+              target.partition_id(),
+              target.placement_id())),
+      replicated_offset);
+}
 
 uint64_t replicatedOffsetFor(
     const ReplicationState& repl_state,

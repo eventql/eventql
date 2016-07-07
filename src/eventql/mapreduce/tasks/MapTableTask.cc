@@ -25,7 +25,9 @@
 #include "eventql/util/http/HTTPSSEResponseHandler.h"
 #include "eventql/mapreduce/tasks/MapTableTask.h"
 #include "eventql/mapreduce/MapReduceScheduler.h"
+#include "eventql/db/metadata_client.h"
 #include <eventql/server/server_stats.h>
+#include <eventql/server/sql/table_provider.h>
 
 #include "eventql/eventql.h"
 
@@ -40,6 +42,7 @@ MapTableTask::MapTableTask(
     MapReduceShardList* shards,
     InternalAuth* auth,
     eventql::PartitionMap* pmap,
+    eventql::ConfigDirectory* cdir,
     eventql::ReplicationScheme* repl) :
     session_(session),
     table_ref_(table_ref),
@@ -48,6 +51,7 @@ MapTableTask::MapTableTask(
     params_(params),
     auth_(auth),
     pmap_(pmap),
+    cdir_(cdir),
     repl_(repl) {
   auto table = pmap_->findTable(session_->getEffectiveNamespace(), table_ref_.table_key);
   if (table.isEmpty()) {
@@ -73,16 +77,66 @@ MapTableTask::MapTableTask(
     constraints.emplace_back(constraint);
   }
 
-  auto partitioner = table.get()->partitioner();
-  auto partitions = partitioner->listPartitions(constraints);
+  switch (table.get()->partitionerType()) {
+    case TBL_PARTITION_FIXED: {
+      auto partitioner = table.get()->partitioner();
+      auto partitions = partitioner->listPartitions(constraints);
 
-  for (const auto& partition : partitions) {
-    auto shard = mkRef(new MapTableTaskShard());
-    shard->task = this;
-    shard->table_ref = table_ref_;
-    shard->table_ref.partition_key = partition;
+      for (const auto& partition : partitions) {
+        auto shard = mkRef(new MapTableTaskShard());
+        shard->task = this;
+        shard->table_ref = table_ref_;
+        shard->table_ref.partition_key = partition;
+        shard->servers = repl_->replicasFor(
+            shard->table_ref.partition_key.get());
+        addShard(shard.get(), shards);
+      }
+      break;
+    }
 
-    addShard(shard.get(), shards);
+    case TBL_PARTITION_TIMEWINDOW: {
+      auto keyrange = TSDBTableProvider::findKeyRange(
+          table.get()->getPartitionKey(),
+          constraints);
+
+      MetadataClient metadata_client(cdir_);
+      PartitionListResponse partition_list;
+      auto rc = metadata_client.listPartitions(
+          session->getEffectiveNamespace(),
+          table_ref_.table_key,
+          keyrange,
+          &partition_list);
+
+      if (!rc.isSuccess()) {
+        RAISEF(kRuntimeError, "metadata lookup failure: $0", rc.message());
+      }
+
+      for (const auto& p : partition_list.partitions()) {
+        Vector<ReplicaRef> replicas;
+        SHA1Hash pid(p.partition_id().data(), p.partition_id().size());
+
+        for (const auto& s : p.servers()) {
+          auto server_cfg = cdir_->getServerConfig(s);
+          if (server_cfg.server_status() != SERVER_UP) {
+            continue;
+          }
+
+          ReplicaRef rref(SHA1::compute(s), server_cfg.server_addr());
+          rref.name = s;
+          replicas.emplace_back(rref);
+        }
+
+        auto shard = mkRef(new MapTableTaskShard());
+        shard->task = this;
+        shard->table_ref = table_ref_;
+        shard->table_ref.partition_key = pid;
+        shard->servers = replicas;
+        addShard(shard.get(), shards);
+      }
+
+      break;
+    }
+
   }
 }
 
@@ -92,8 +146,7 @@ Option<MapReduceShardResult> MapTableTask::execute(
   auto shard = shard_base.asInstanceOf<MapTableTaskShard>();
 
   Vector<String> errors;
-  auto hosts = repl_->replicasFor(shard->table_ref.partition_key.get());
-  for (const auto& host : hosts) {
+  for (const auto& host : shard->servers) {
     try {
       return executeRemote(shard, job, host);
     } catch (const StandardException& e) {

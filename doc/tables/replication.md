@@ -22,7 +22,7 @@ should be kept in the cluster. The default replication factor is 3, i.e. there
 are 3 copies of every piece of data for redundancy and performance.
 
 
-### Consistency
+### Consistency & Durability
 
 Please note that if the write-ahead-log is turned off, which is the default, you can loose up to a few seconds of data if a node crashes. Updates/inserts are eventually consistent and have fully automatic conflict resolution (newest write wins with microsecond granularity).
 

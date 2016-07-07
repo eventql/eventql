@@ -68,7 +68,8 @@ protected:
       const String& ns,
       const String& table_name,
       MetadataOperation op,
-      const String& server);
+      const String& server,
+      MetadataOperationResult* result);
 
   ConfigDirectory* cdir_;
 };

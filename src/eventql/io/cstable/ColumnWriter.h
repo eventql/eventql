@@ -27,9 +27,8 @@
 #include <eventql/util/autoref.h>
 #include <eventql/util/protobuf/MessageObject.h>
 #include <eventql/io/cstable/cstable.h>
-#include <eventql/io/cstable/io/PageManager.h>
-#include <eventql/io/cstable/io/PageIndex.h>
-#include <eventql/io/cstable/columns/UInt64PageWriter.h>
+#include <eventql/io/cstable/page_manager.h>
+#include <eventql/io/cstable/columns/page_writer_uint64.h>
 
 namespace cstable {
 
@@ -79,6 +78,8 @@ public:
   virtual ColumnType type() const = 0;
   virtual ColumnEncoding encoding() const = 0;
 
+  virtual void flush() = 0;
+
   size_t maxRepetitionLevel() const;
   size_t maxDefinitionLevel() const;
 
@@ -92,17 +93,21 @@ public:
 
   DefaultColumnWriter(
       ColumnConfig config,
-      RefPtr<PageManager> page_mgr,
-      RefPtr<PageIndex> page_idx);
+      PageManager* page_mgr);
 
   void writeNull(uint64_t rlvl, uint64_t dlvl) override;
 
   ColumnEncoding encoding() const override {
-    return ColumnEncoding::UINT32_BITPACKED;
+    return config_.storage_type;
   }
 
   ColumnType type() const override {
-    return ColumnType::UNSIGNED_INT;
+    return config_.logical_type;
+  }
+
+  void flush() override {
+    if (rlevel_writer_.get()) rlevel_writer_->flush();
+    if (dlevel_writer_.get()) dlevel_writer_->flush();
   }
 
 protected:

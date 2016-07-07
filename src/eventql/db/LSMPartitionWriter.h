@@ -22,22 +22,20 @@
  * code of your own applications
  */
 #pragma once
+#include "eventql/eventql.h"
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/autoref.h>
 #include <eventql/db/PartitionWriter.h>
-#include <eventql/db/RecordArena.h>
+#include <eventql/db/partition_arena.h>
 #include <eventql/util/util/PersistentHashSet.h>
 #include <eventql/db/CompactionStrategy.h>
 #include <eventql/db/metadata_transaction.h>
-#include <eventql/db/metadata_operations.pb.h>
-
-#include "eventql/eventql.h"
 
 namespace eventql {
 
 class LSMPartitionWriter : public PartitionWriter {
 public:
-  static const size_t kDefaultMaxDatafileSize = 1024 * 1024 * 128;
+  static const size_t kDefaultPartitionSplitThresholdBytes = 1024 * 1024 * 512;
   static const size_t kMaxArenaRecords = 10000;
 
   LSMPartitionWriter(
@@ -56,28 +54,27 @@ public:
   bool needsCompaction() override;
   bool needsUrgentCompaction();
 
+  bool needsSplit() const;
+  Status split();
+
   Status applyMetadataChange(
-      const PartitionDiscoveryResponse& discovery_info);
+      const PartitionDiscoveryResponse& discovery_info) override;
 
   ReplicationState fetchReplicationState() const;
   void commitReplicationState(const ReplicationState& state);
 
 protected:
 
-  void writeArenaToDisk(
-      RefPtr<RecordArena> arena,
-      uint64_t sequence,
-      const String& filename);
-
   RefPtr<Partition> partition_;
   RefPtr<CompactionStrategy> compaction_strategy_;
   LSMTableIndexCache* idx_cache_;
   ConfigDirectory* cdir_;
   ReplicationScheme* repl_;
-  size_t max_datafile_size_;
+  size_t partition_split_threshold_;
   std::mutex commit_mutex_;
   std::mutex compaction_mutex_;
   std::mutex metadata_mutex_;
+  std::mutex split_mutex_;
 };
 
 } // namespace tdsb

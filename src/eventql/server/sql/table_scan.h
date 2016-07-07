@@ -33,15 +33,19 @@ namespace eventql {
 class TableScan : public csql::TableExpression {
 public:
 
+  struct PartitionLocation {
+    SHA1Hash partition_id;
+    Vector<ReplicaRef> servers;
+  };
+
   TableScan(
     csql::Transaction* txn,
     csql::ExecutionContext* execution_context,
     const String& tsdb_namespace,
     const String& table_name,
-    const Vector<SHA1Hash>& partitions,
+    const Vector<PartitionLocation>& partitions,
     RefPtr<csql::SequentialScanNode> seqscan,
     PartitionMap* partition_map,
-    ReplicationScheme* replication_scheme,
     InternalAuth* auth);
 
   ScopedPtr<csql::ResultCursor> execute() override;
@@ -52,21 +56,24 @@ protected:
 
   bool next(csql::SValue* row, size_t row_len);
 
-  ScopedPtr<csql::ResultCursor> openPartition(const SHA1Hash& partition_id);
+  ScopedPtr<csql::ResultCursor> openPartition(
+      const PartitionLocation& partition);
 
-  ScopedPtr<csql::ResultCursor> openLocalPartition(const SHA1Hash& partition_id);
+  ScopedPtr<csql::ResultCursor> openLocalPartition(
+      const SHA1Hash& partition_id);
 
-  ScopedPtr<csql::ResultCursor> openRemotePartition(const SHA1Hash& partition_id);
+  ScopedPtr<csql::ResultCursor> openRemotePartition(
+      const SHA1Hash& partition_id,
+      const Vector<ReplicaRef> servers);
 
   csql::Transaction* txn_;
   csql::ExecutionContext* execution_context_;
   csql::ExecutionContext child_execution_context_;
   String tsdb_namespace_;
   String table_name_;
-  Vector<SHA1Hash> partitions_;
+  Vector<PartitionLocation> partitions_;
   RefPtr<csql::SequentialScanNode> seqscan_;
   PartitionMap* partition_map_;
-  ReplicationScheme* replication_scheme_;
   InternalAuth* auth_;
   ScopedPtr<csql::ResultCursor> cur_cursor_;
   size_t cur_partition_;

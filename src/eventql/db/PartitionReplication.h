@@ -33,6 +33,7 @@
 
 namespace eventql {
 
+class ReplicationInfo;
 class PartitionReplication : public RefCounted {
 public:
   static const char kStateFileName[];
@@ -59,25 +60,21 @@ public:
    * Tries to replicate this partition to all other remote nodes to which it
    * still needs to be replicated. Returns true on success, false on error
    */
-  virtual bool replicate() = 0;
+  virtual bool replicate(ReplicationInfo* replication_info) = 0;
+
+  static ReplicationState fetchReplicationState(
+      RefPtr<PartitionSnapshot> snap);
+
+  ReplicationState fetchReplicationState() const;
 
   /**
-   * Returns the number of remote hosts (not including self!) for which we have
-   * positively confirmed that they have a full copy of the data for this
-   * partition
-   *
    * IMPORTANT: it is imperative that this method only count hosts for that we
    * have positively confirmed that they have indeed received and acknowledged
    * a full copy of all the data. this invariant can never be broken since we
    * will _drop_ our local copy of the data based on the return value of this
    * method.
    */
-  virtual size_t numFullRemoteCopies() const = 0;
-
-  static ReplicationState fetchReplicationState(
-      RefPtr<PartitionSnapshot> snap);
-
-  ReplicationState fetchReplicationState() const;
+  virtual bool shouldDropPartition() const = 0;
 
 protected:
 

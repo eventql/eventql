@@ -72,7 +72,8 @@ Status MetadataService::createMetadataFile(
 Status MetadataService::performMetadataOperation(
     const String& ns,
     const String& table_name,
-    MetadataOperation op) {
+    const MetadataOperation& op,
+    MetadataOperationResult* result) {
   RefPtr<MetadataFile> input_file;
   {
     auto rc = metadata_store_->getMetadataFile(
@@ -100,6 +101,18 @@ Status MetadataService::performMetadataOperation(
       input_file->getSequenceNumber() + 1,
       input_file->getKeyspaceType(),
       new_pmap);
+
+  SHA1Hash output_file_checksum;
+  {
+    auto rc = output_file.computeChecksum(&output_file_checksum);
+    if (!rc.isSuccess()) {
+      return rc;
+    }
+  }
+
+  result->set_metadata_file_checksum(
+      output_file_checksum.data(),
+      output_file_checksum.size());
 
   return metadata_store_->storeMetadataFile(ns, table_name, output_file);
 }
@@ -153,6 +166,39 @@ Status MetadataService::listPartitions(
     for (const auto& s : iter->servers_leaving) {
       e->add_servers(s.server_id);
     }
+  }
+
+  return Status::success();
+}
+
+Status MetadataService::findPartition(
+    const PartitionFindRequest& request,
+    PartitionFindResponse* response) {
+  RefPtr<MetadataFile> file;
+  {
+    auto rc = getMetadataFile(
+        request.db_namespace(),
+        request.table_id(),
+        &file);
+    if (!rc.isSuccess()) {
+      return rc;
+    }
+  }
+
+  auto partition = file->getPartitionMapAt(request.key());
+  if (partition == file->getPartitionMapEnd()) {
+    return Status(eRuntimeError, "partition not found");
+  }
+
+  response->set_partition_id(
+      partition->partition_id.data(),
+      partition->partition_id.size());
+
+  for (const auto& s : partition->servers) {
+    response->add_servers_for_insert(s.server_id);
+  }
+  for (const auto& s : partition->servers_leaving) {
+    response->add_servers_for_insert(s.server_id);
   }
 
   return Status::success();

@@ -102,6 +102,7 @@ protected:
   ASTNode* selectSublist();
   ASTNode* createStatement();
   ASTNode* createTableStatement();
+  ASTNode* createDatabaseStatement();
   ASTNode* columnDefinition();
   ASTNode* primaryKeyDefinition();
   ASTNode* tableName();
@@ -109,6 +110,9 @@ protected:
   ASTNode* insertValues();
   ASTNode* insertFromJSON();
   ASTNode* insertSet();
+  ASTNode* alterStatement();
+  ASTNode* nestedColumnName();
+  ASTNode* addColumnDefinition();
   ASTNode* drawStatement();
   ASTNode* axisClause();
   ASTNode* domainClause();

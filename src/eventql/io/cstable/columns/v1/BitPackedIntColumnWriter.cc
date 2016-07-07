@@ -67,7 +67,8 @@ void BitPackedIntColumnWriter::addDatum(
 }
 
 void BitPackedIntColumnWriter::commit() {
-  ColumnWriter::commit();
+  dlvl_writer_.flush();
+  rlvl_writer_.flush();
   data_writer_.flush();
 }
 

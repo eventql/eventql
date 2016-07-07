@@ -42,10 +42,12 @@ static int free_String_vector(struct String_vector *v) {
 
 ZookeeperConfigDirectory::ZookeeperConfigDirectory(
     const String& zookeeper_addrs,
+    const String& cluster_name,
     Option<String> server_name,
     String listen_addr) :
     zookeeper_addrs_(zookeeper_addrs),
     zookeeper_timeout_(10000),
+    cluster_name_(cluster_name),
     server_name_(server_name),
     listen_addr_(listen_addr),
     global_prefix_("/eventql"),
@@ -71,13 +73,12 @@ static void zk_watch_cb(
   self->handleZookeeperWatch(type, state, path);
 }
 
-Status ZookeeperConfigDirectory::startAndJoin(const String& cluster_name) {
+Status ZookeeperConfigDirectory::start() {
   std::unique_lock<std::mutex> lk(mutex_);
   if (state_ != ZKState::INIT) {
     return Status(eIllegalStateError, "state != ZK_INIT");
   }
 
-  cluster_name_ = cluster_name;
   path_prefix_ = StringUtil::format("$0/$1", global_prefix_, cluster_name_);
 
   {
@@ -85,40 +86,6 @@ Status ZookeeperConfigDirectory::startAndJoin(const String& cluster_name) {
     if (!rc.isSuccess()) {
       return rc;
     }
-  }
-
-  {
-    auto rc = load();
-    if (!rc.isSuccess()) {
-      return rc;
-    }
-  }
-
-  return Status::success();
-}
-
-Status ZookeeperConfigDirectory::startAndCreate(
-    const String& cluster_name,
-    const ClusterConfig& initial_config) {
-  std::unique_lock<std::mutex> lk(mutex_);
-  if (state_ != ZKState::INIT) {
-    return Status(eIllegalStateError, "state != ZK_INIT");
-  }
-
-  cluster_name_ = cluster_name;
-  path_prefix_ = StringUtil::format("$0/$1", global_prefix_, cluster_name_);
-
-  {
-    auto rc = connect(&lk);
-    if (!rc.isSuccess()) {
-      return rc;
-    }
-  }
-
-  if (hasNode(path_prefix_)) {
-    logWarning("evqld", "cluster already exists, remove --create_cluster flag?");
-  } else {
-    updateClusterConfigWithLock(initial_config);
   }
 
   {
@@ -366,8 +333,6 @@ Status ZookeeperConfigDirectory::syncLiveServer(
   } else {
     servers_live_.erase(server);
   }
-
-  logInfo("evqld", "Server '$0' -> $1", server, exists ? "UP" : "DOWN");
 
   if (events) {
     const auto& iter = servers_.find(server);
@@ -904,6 +869,10 @@ String ZookeeperConfigDirectory::getServerID() const {
   }
 
   return server_name_.get();
+}
+
+bool ZookeeperConfigDirectory::hasServerID() const {
+  return !server_name_.isEmpty();
 }
 
 ServerConfig ZookeeperConfigDirectory::getServerConfig(

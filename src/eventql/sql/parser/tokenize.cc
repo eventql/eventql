@@ -477,6 +477,11 @@ next:
     goto next;
   }
 
+  if (token == "DATABASE") {
+    token_list->emplace_back(Token::T_DATABASE);
+    goto next;
+  }
+
   if (token == "AXIS") {
     token_list->emplace_back(Token::T_AXIS);
     goto next;
@@ -634,6 +639,26 @@ next:
 
   if (token == "SET") {
     token_list->emplace_back(Token::T_SET);
+    goto next;
+  }
+
+  if (token == "ALTER") {
+    token_list->emplace_back(Token::T_ALTER);
+    goto next;
+  }
+
+  if (token == "ADD") {
+    token_list->emplace_back(Token::T_ADD);
+    goto next;
+  }
+
+  if (token == "DROP") {
+    token_list->emplace_back(Token::T_DROP);
+    goto next;
+  }
+
+  if (token == "COLUMN") {
+    token_list->emplace_back(Token::T_COLUMN);
     goto next;
   }
 

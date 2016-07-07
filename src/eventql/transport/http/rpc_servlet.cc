@@ -96,26 +96,6 @@ void RPCServlet::handleHTTPRequest(
       return;
     }
 
-    if (uri.path() == "/tsdb/partition_info") {
-      req_stream->readBody();
-      fetchPartitionInfo(&req, &res, &uri);
-      res_stream->writeResponse(res);
-      return;
-    }
-
-    if (uri.path() == "/tsdb/sql") {
-      req_stream->readBody();
-      executeSQL(&req, &res, &uri);
-      res_stream->writeResponse(res);
-      return;
-    }
-
-    if (uri.path() == "/tsdb/sql_stream") {
-      req_stream->readBody();
-      executeSQLStream(&req, &res, res_stream, &uri);
-      return;
-    }
-
     if (uri.path() == "/tsdb/update_cstable") {
       updateCSTable(uri, req_stream.get(), &res);
       res_stream->writeResponse(res);
@@ -164,10 +144,23 @@ void RPCServlet::handleHTTPRequest(
       return;
     }
 
+    if (uri.path() == "/rpc/find_partition") {
+      req_stream->readBody();
+      findPartition(uri, &req, &res);
+      res_stream->writeResponse(res);
+      return;
+    }
+
     res.setStatus(http::kStatusNotFound);
     res.addBody("not found");
     res_stream->writeResponse(res);
   } catch (const Exception& e) {
+    try {
+      req_stream->readBody();
+    } catch (...) {
+      /* ignore further errors */
+    }
+
     logError("tsdb", e, "error while processing HTTP request");
 
     res.setStatus(http::kStatusInternalServerError);
@@ -182,9 +175,10 @@ void RPCServlet::insertRecords(
     const http::HTTPRequest* req,
     http::HTTPResponse* res,
     URI* uri) {
-  auto record_list = msg::decode<RecordEnvelopeList>(req->body());
-  node_->insertRecords(record_list);
-  res->setStatus(http::kStatusCreated);
+  //auto record_list = msg::decode<RecordEnvelopeList>(req->body());
+  //node_->insertRecords(record_list);
+  res->addBody("deprecated call");
+  res->setStatus(http::kStatusInternalServerError);
 }
 
 void RPCServlet::compactPartition(
@@ -232,7 +226,7 @@ void RPCServlet::replicateRecords(
     insert_flags |= (uint64_t) InsertFlags::SYNC_COMMIT;
   }
 
-  node_->insertRecords(record_list, insert_flags);
+  node_->insertReplicatedRecords(record_list, insert_flags);
   res->setStatus(http::kStatusCreated);
 }
 
@@ -311,108 +305,6 @@ void RPCServlet::streamPartition(
   res_stream->writeBodyChunk(Buffer(buf.data(), buf.size()));
 
   res_stream->finishResponse();
-}
-
-void RPCServlet::fetchPartitionInfo(
-    const http::HTTPRequest* req,
-    http::HTTPResponse* res,
-    URI* uri) {
-  const auto& params = uri->queryParams();
-
-  String tsdb_namespace;
-  if (!URI::getParam(params, "namespace", &tsdb_namespace)) {
-    res->setStatus(http::kStatusBadRequest);
-    res->addBody("missing ?namespace=... parameter");
-    return;
-  }
-
-  String table_name;
-  if (!URI::getParam(params, "stream", &table_name)) {
-    res->setStatus(http::kStatusBadRequest);
-    res->addBody("missing ?stream=... parameter");
-    return;
-  }
-
-  String partition_key;
-  if (!URI::getParam(params, "partition", &partition_key)) {
-    res->setStatus(http::kStatusBadRequest);
-    res->addBody("missing ?partition=... parameter");
-    return;
-  }
-
-  auto pinfo = node_->partitionInfo(
-      tsdb_namespace,
-      table_name,
-      SHA1Hash::fromHexString(partition_key));
-
-  if (pinfo.isEmpty()) {
-    res->setStatus(http::kStatusNotFound);
-  } else {
-    res->setStatus(http::kStatusOK);
-    res->addHeader("Content-Type", "application/x-protobuf");
-    res->addBody(*msg::encode(pinfo.get()));
-  }
-}
-
-void RPCServlet::executeSQL(
-    const http::HTTPRequest* req,
-    http::HTTPResponse* res,
-    URI* uri) {
-  auto tsdb_namespace = req->getHeader("X-TSDB-Namespace");
-  auto query = req->body().toString();
-
-  Buffer result;
-  //node_->sqlEngine()->executeQuery(
-  //    tsdb_namespace,
-  //    query,
-  //    new csql::ASCIITableFormat(BufferOutputStream::fromBuffer(&result)));
-
-  res->setStatus(http::kStatusOK);
-  res->addHeader("Content-Type", "text/plain");
-  res->addHeader("Connection", "close");
-  res->addBody(result);
-}
-
-void RPCServlet::executeSQLStream(
-    const http::HTTPRequest* req,
-    http::HTTPResponse* res,
-    RefPtr<http::HTTPResponseStream> res_stream,
-    URI* uri) {
-  http::HTTPSSEStream sse_stream(res, res_stream);
-  sse_stream.start();
-
-  try {
-    const auto& params = uri->queryParams();
-
-    String tsdb_namespace;
-    if (!URI::getParam(params, "namespace", &tsdb_namespace)) {
-      RAISE(kRuntimeError, "missing ?namespace=... parameter");
-    }
-
-    String query;
-    if (!URI::getParam(params, "query", &query)) {
-      RAISE(kRuntimeError, "missing ?query=... parameter");
-    }
-
-    //node_->sqlEngine()->executeQuery(
-    //    tsdb_namespace,
-    //    query,
-    //    new csql::JSONSSEStreamFormat(&sse_stream));
-
-  } catch (const StandardException& e) {
-    logError("sql", e, "SQL execution failed");
-
-    Buffer buf;
-    json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
-    json.beginObject();
-    json.addObjectEntry("error");
-    json.addString(e.what());
-    json.endObject();
-
-    sse_stream.sendEvent(buf, Some(String("error")));
-  }
-
-  sse_stream.finish();
 }
 
 void RPCServlet::updateCSTable(
@@ -538,13 +430,16 @@ void RPCServlet::performMetadataOperation(
     }
   }
 
+  MetadataOperationResult result;
   auto rc = metadata_service_->performMetadataOperation(
       db_namespace,
       table_name,
-      op);
+      op,
+      &result);
 
   if (rc.isSuccess()) {
     res->setStatus(http::kStatusCreated);
+    res->addBody(*msg::encode(result));
   } else {
     res->setStatus(http::kStatusInternalServerError);
     res->addBody("ERROR: " + rc.message());
@@ -665,6 +560,26 @@ void RPCServlet::listPartitions(
 
   PartitionListResponse response;
   auto rc = metadata_service_->listPartitions(request, &response);
+
+  if (rc.isSuccess()) {
+    res->setStatus(http::kStatusOK);
+    res->addBody(*msg::encode(response));
+  } else {
+    res->setStatus(http::kStatusInternalServerError);
+    res->addBody("ERROR: " + rc.message());
+    return;
+  }
+}
+
+void RPCServlet::findPartition(
+    const URI& uri,
+    const http::HTTPRequest* req,
+    http::HTTPResponse* res) {
+  PartitionFindRequest request;
+  msg::decode(req->body(), &request);
+
+  PartitionFindResponse response;
+  auto rc = metadata_service_->findPartition(request, &response);
 
   if (rc.isSuccess()) {
     res->setStatus(http::kStatusOK);

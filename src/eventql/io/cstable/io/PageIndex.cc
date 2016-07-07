@@ -30,7 +30,7 @@ namespace cstable {
 
 PageIndex::PageIndex(
     BinaryFormatVersion version,
-    RefPtr<PageManager> page_mgr) :
+    PageManager* page_mgr) :
     version_(version),
     page_mgr_(page_mgr) {}
 
@@ -106,7 +106,7 @@ PageRef PageIndex::write(Option<PageRef> head) {
 
 PageIndexReader::PageIndexReader(
     BinaryFormatVersion version,
-    RefPtr<PageManager> page_mgr) :
+    PageManager* page_mgr) :
     version_(version),
     page_mgr_(page_mgr) {}
 

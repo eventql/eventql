@@ -60,6 +60,10 @@ bool SHA1Hash::operator==(const SHA1Hash& other) const {
   return memcmp((char*) hash, (char*) other.hash, kSize) == 0;
 }
 
+bool SHA1Hash::operator!=(const SHA1Hash& other) const {
+  return memcmp((char*) hash, (char*) other.hash, kSize) != 0;
+}
+
 bool SHA1Hash::operator<(const SHA1Hash& other) const {
   return SHA1::compare(hash, other.hash) < 0;
 }

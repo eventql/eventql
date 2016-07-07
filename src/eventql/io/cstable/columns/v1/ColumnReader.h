@@ -60,10 +60,6 @@ public:
     return rlvl_reader_.peek();
   }
 
-  bool eofReached() const override {
-    return vals_read_ >= vals_total_;
-  }
-
   void storeMmap(RefPtr<VFSFile> mmap) {
     mmap_ = mmap;
   }

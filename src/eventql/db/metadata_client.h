@@ -57,6 +57,12 @@ public:
       const KeyRange& keyrange,
       PartitionListResponse* res);
 
+  Status findPartition(
+      const String& ns,
+      const String& table_id,
+      const String& key,
+      PartitionFindResponse* res);
+
 protected:
   ConfigDirectory* cdir_;
 };

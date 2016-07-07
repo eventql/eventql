@@ -22,12 +22,12 @@
  * code of your own applications
  */
 #pragma once
+#include "eventql/eventql.h"
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/autoref.h>
 #include <eventql/db/PartitionSnapshot.h>
 #include <eventql/db/RecordRef.h>
-
-#include "eventql/eventql.h"
+#include <eventql/db/metadata_operations.pb.h>
 
 namespace eventql {
 
@@ -73,6 +73,9 @@ public:
 
   virtual bool commit() = 0;
   virtual bool compact() = 0;
+
+  virtual Status applyMetadataChange(
+      const PartitionDiscoveryResponse& discovery_info) = 0;
 
 protected:
   PartitionSnapshotRef* head_;

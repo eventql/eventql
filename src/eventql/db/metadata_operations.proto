@@ -22,12 +22,14 @@
  * code of your own applications
  */
 package eventql;
+import 'eventql/db/PartitionState.proto';
 
 enum MetadataOperationType {
-  METAOP_BACKFILL_ADD_SERVER = 1;
-  METAOP_BACKFILL_ADD_SERVERS = 3;
-  METAOP_BACKFILL_REMOVE_SERVER = 2;
   METAOP_REMOVE_DEAD_SERVERS = 4;
+  METAOP_SPLIT_PARTITION = 5;
+  METAOP_FINALIZE_SPLIT = 6;
+  METAOP_JOIN_SERVERS = 7;
+  METAOP_FINALIZE_JOIN = 8;
 };
 
 message PartitionDiscoveryRequest {
@@ -35,16 +37,10 @@ message PartitionDiscoveryRequest {
   required string table_id = 2;
   required uint64 min_txnseq = 3;
   required bytes partition_id = 4;
-  required bytes keyrange_begin = 5;
-  required bytes keyrange_end = 6;
+  optional bytes keyrange_begin = 5;
+  optional bytes keyrange_end = 6;
   required string requester_id = 7;
-};
-
-enum PartitionDiscoveryResponseCode {
-  PDISCOVERY_UNKNOWN = 0;
-  PDISCOVERY_LOAD = 1;
-  PDISCOVERY_SERVE = 2;
-  PDISCOVERY_UNLOAD = 3;
+  optional bool lookup_by_id = 8;
 };
 
 message PartitionDiscoveryReplicationTarget {
@@ -53,13 +49,19 @@ message PartitionDiscoveryReplicationTarget {
   required bytes partition_id = 5;
   optional bytes keyrange_begin = 3;
   optional bytes keyrange_end = 4;
+  optional bool is_joining = 6;
+  optional string legacy_token = 7;
 }
 
 message PartitionDiscoveryResponse {
-  required PartitionDiscoveryResponseCode code = 1;
+  required PartitionLifecycleState code = 1;
   required bytes txnid = 2;
   required uint64 txnseq = 3;
   repeated PartitionDiscoveryReplicationTarget replication_targets = 4;
+  optional bytes keyrange_begin = 5;
+  optional bytes keyrange_end = 6;
+  optional bool is_splitting = 7;
+  repeated bytes split_partition_ids = 8;
 };
 
 message PartitionListRequest {
@@ -78,6 +80,17 @@ message PartitionListResponse {
   repeated PartitionListResponseEntry partitions = 1;
 };
 
+message PartitionFindRequest {
+  required string db_namespace = 1;
+  required string table_id = 2;
+  required bytes key = 3;
+};
+
+message PartitionFindResponse {
+  required bytes partition_id = 1;
+  repeated string servers_for_insert = 2;
+};
+
 message MetadataOperationEnvelope {
   required string db_namespace = 1;
   required string table_id = 2;
@@ -87,21 +100,40 @@ message MetadataOperationEnvelope {
   optional bytes opdata = 6;
 };
 
-message BackfillAddServerOperation {
-  required bytes partition_id = 1;
-  required bytes keyrange_begin = 2;
-  required string server_id = 3;
-};
-
-message BackfillAddServersOperation {
-  repeated BackfillAddServerOperation ops = 1;
-};
-
-message BackfillRemoveServerOperation {
-  required bytes partition_id = 1;
-  required string server_id = 2;
+message MetadataOperationResult {
+  required bytes metadata_file_checksum = 1;
 };
 
 message RemoveDeadServersOperation {
   repeated string server_ids = 1;
+};
+
+message SplitPartitionOperation {
+  required bytes partition_id = 1;
+  required bytes split_point = 2;
+  repeated string split_servers_low = 3;
+  repeated string split_servers_high = 4;
+  required bytes split_partition_id_low = 5;
+  required bytes split_partition_id_high = 6;
+  required uint64 placement_id = 7;
+};
+
+message FinalizeSplitOperation {
+  required bytes partition_id = 1;
+};
+
+message JoinServerOperation {
+  required bytes partition_id = 1;
+  required string server_id = 2;
+  required uint64 placement_id = 3;
+};
+
+message JoinServersOperation {
+  repeated JoinServerOperation ops = 1;
+};
+
+message FinalizeJoinOperation {
+  required bytes partition_id = 1;
+  required string server_id = 2;
+  required uint64 placement_id = 3;
 };

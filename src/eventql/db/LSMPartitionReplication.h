@@ -25,6 +25,7 @@
 #include "eventql/eventql.h"
 #include <eventql/util/stdtypes.h>
 #include <eventql/db/PartitionReplication.h>
+#include <eventql/db/PartitionState.pb.h>
 #include <eventql/config/config_directory.h>
 
 namespace eventql {
@@ -45,15 +46,21 @@ public:
   /**
    * Returns true on success, false on error
    */
-  bool replicate() override;
+  bool replicate(ReplicationInfo* replication_info) override;
 
-  size_t numFullRemoteCopies() const override;
+  bool shouldDropPartition() const override;
 
 protected:
 
+  Status fetchAndApplyMetadataTransaction();
   Status fetchAndApplyMetadataTransaction(MetadataTransaction txn);
+  Status finalizeSplit();
+  Status finalizeJoin(const ReplicationTarget& target);
 
-  void replicateTo(const ReplicaRef& replica, uint64_t replicated_offset);
+  void replicateTo(
+      const ReplicationTarget& replica,
+      uint64_t replicated_offset,
+      ReplicationInfo* replication_info);
 
   void uploadBatchTo(
       const String& host,
@@ -61,6 +68,8 @@ protected:
 
   void fetchRecords(
       size_t start_sequence,
+      const String& keyrange_begin,
+      const String& keyrange_end,
       Function<void (
           const SHA1Hash& record_id,
           uint64_t record_version,

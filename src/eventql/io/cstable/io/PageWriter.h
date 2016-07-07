@@ -31,7 +31,8 @@ namespace cstable {
 
 class PageWriter {
 public:
-  virtual void writeIndex(OutputStream* os) const = 0;
+  virtual ~PageWriter() = default;
+  virtual void flush() {}
 };
 
 class UnsignedIntPageWriter : public PageWriter {
@@ -44,7 +45,7 @@ public:
   virtual void appendValue(int64_t value) = 0;
 };
 
-class DoublePageWriter : public PageWriter {
+class FloatPageWriter : public PageWriter {
 public:
   virtual void appendValue(double value) = 0;
 };

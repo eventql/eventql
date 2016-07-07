@@ -30,7 +30,7 @@
 #include <eventql/util/io/BufferedOutputStream.h>
 #include <eventql/util/logging.h>
 #include <eventql/db/LSMTableIndex.h>
-#include <eventql/io/cstable/CSTableWriter.h>
+#include <eventql/io/cstable/cstable_writer.h>
 
 #include "eventql/eventql.h"
 

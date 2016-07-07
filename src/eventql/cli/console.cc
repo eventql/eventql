@@ -2,6 +2,7 @@
  * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
  * Authors:
  *   - Paul Asmuth <paul@zscale.io>
+ *   - Laura Schlimmer <laura@zscale.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -46,10 +47,16 @@ namespace eventql {
 namespace cli {
 
 void Console::startInteractiveShell() {
+  auto history_path = cfg_.getHistoryPath();
+  linenoiseHistorySetMaxLen(cfg_.getHistoryMaxSize());
+  linenoiseHistoryLoad(history_path.c_str());
+
   char *p;
   while ((p = linenoise("evql> ")) != NULL) {
     String line(p);
+    linenoiseHistoryAdd(p);
     linenoiseFree(p);
+    linenoiseHistorySave(history_path.c_str());
 
     if (line == "quit") {
       return;
@@ -63,40 +70,55 @@ void Console::startInteractiveShell() {
 Console::Console(const CLIConfig cli_cfg) : cfg_(cli_cfg) {}
 
 Status Console::runQuery(const String& query) {
-  auto stdout_os = OutputStream::getStdout();
+  if (cfg_.getBatchMode()) {
+    return runQueryBatch(query);
+  } else {
+    return runQueryTable(query);
+  }
+}
+
+Status Console::runQueryTable(const String& query) {
+  auto stdout_os = TerminalOutputStream::fromStream(OutputStream::getStdout());
   auto stderr_os = TerminalOutputStream::fromStream(OutputStream::getStderr());
   bool line_dirty = false;
   bool is_tty = stderr_os->isTTY();
 
   bool error = false;
-  csql::BinaryResultParser res_parser;
   csql::ResultList results;
+  auto res_parser = new csql::BinaryResultParser();
 
-  res_parser.onProgress([&stderr_os, &line_dirty, is_tty] (
-      const csql::ExecutionStatus& status) {
-    auto status_line = StringUtil::format(
-        "Query running: $0%",
-        status.progress * 100);
+  if (!cfg_.getQuietMode()) {
+    res_parser->onProgress([&stdout_os, &line_dirty, is_tty] (
+        const csql::ExecutionStatus& status) {
+      auto status_line = StringUtil::format(
+          "Query running: $0%",
+          status.progress * 100);
 
-    if (is_tty) {
-      stderr_os->eraseLine();
-      stderr_os->print("\r" + status_line);
-      line_dirty = true;
-    } else {
-      stderr_os->print(status_line + "\n");
-    }
+      if (is_tty) {
+        stdout_os->eraseLine();
+        stdout_os->print("\r" + status_line);
+        line_dirty = true;
+      } else {
+        stdout_os->print(status_line + "\n");
+      }
 
-  });
+    });
+  }
 
-  res_parser.onTableHeader([&results] (const Vector<String>& columns) {
+  res_parser->onTableHeader([&results] (const Vector<String>& columns) {
     results.addHeader(columns);
   });
 
-  res_parser.onRow([&results] (int argc, const csql::SValue* argv) {
+  res_parser->onRow([&results] (int argc, const csql::SValue* argv) {
     results.addRow(argv, argc);
   });
 
-  res_parser.onError([&stderr_os, &error] (const String& error_str) {
+  res_parser->onError([&stderr_os, &error, is_tty] (const String& error_str) {
+    if (is_tty) {
+      stderr_os->eraseLine();
+      stderr_os->print("\r");
+    }
+
     stderr_os->print(
         "ERROR:",
         { TerminalStyle::RED, TerminalStyle::UNDERSCORE });
@@ -105,55 +127,14 @@ Status Console::runQuery(const String& query) {
     error = true;
   });
 
-  try {
-    auto url = StringUtil::format(
-        "http://$0:$1/api/v1/sql",
-        cfg_.getHost(),
-        cfg_.getPort());
-
-    auto postdata = StringUtil::format(
-          "format=binary&query=$0&database=$1",
-          URI::urlEncode(query),
-          URI::urlEncode(cfg_.getDatabase()));
-
-    http::HTTPMessage::HeaderList auth_headers;
-    if (!cfg_.getAuthToken().isEmpty()) {
-      auth_headers.emplace_back(
-          "Authorization",
-          StringUtil::format("Token $0", cfg_.getAuthToken().get()));
-    } else if (!cfg_.getUser().empty()) {
-      auth_headers.emplace_back(
-          "Authorization",
-          StringUtil::format("Basic $0",
-              util::Base64::encode(cfg_.getUser() + ":" + cfg_.getPassword())));
-    }
-
-    http::HTTPClient http_client(nullptr);
-    auto req = http::HTTPRequest::mkPost(url, postdata, auth_headers);
-    auto res = http_client.executeRequest(
-        req,
-        http::StreamingResponseHandler::getFactory(
-            std::bind(
-                &csql::BinaryResultParser::parse,
-                &res_parser,
-                std::placeholders::_1,
-                std::placeholders::_2)));
-
-    if (!res_parser.eof()) {
-      stderr_os->print(
+  auto res = sendRequest(query, res_parser);
+  if (!res.isSuccess()) {
+    stderr_os->print(
           "ERROR:",
           { TerminalStyle::RED, TerminalStyle::UNDERSCORE });
 
-      stderr_os->print(" connection to server lost");
-      return Status(eIOError);
-    }
-  } catch (const StandardException& e) {
-    stderr_os->print(
-        "ERROR:",
-        { TerminalStyle::RED, TerminalStyle::UNDERSCORE });
-
-    stderr_os->print(StringUtil::format(" $0\n", e.what()));
-    return Status(eIOError);
+    stderr_os->print(res.message());
+    return res;
   }
 
   if (is_tty) {
@@ -165,21 +146,165 @@ Status Console::runQuery(const String& query) {
     return Status(eIOError);
   }
 
-  results.debugPrint();
+  String status_line = "";
+  if (results.getNumRows() > 0) {
+    results.debugPrint();
 
-  auto num_rows = results.getNumRows();
-  auto status_line = StringUtil::format(
-      "$0 row$1 returned",
-      num_rows,
-      num_rows > 1 ? "s" : "");
+    auto num_rows = results.getNumRows();
+    status_line = StringUtil::format(
+        "$0 row$1 returned",
+        num_rows,
+        num_rows > 1 ? "s" : "");
+
+  } else {
+    status_line = results.getNumColumns() == 0 ? "Query OK" : "Empty Set";
+  }
+
+  if (!cfg_.getQuietMode()) {
+    if (is_tty) {
+      stderr_os->print("\r" + status_line + "\n\n");
+    } else {
+      stderr_os->print(status_line + "\n\n");
+    }
+  }
+
+
+  return Status::success();
+}
+
+Status Console::runQueryBatch(const String& query) {
+  auto stdout_os = TerminalOutputStream::fromStream(OutputStream::getStdout());
+  auto stderr_os = TerminalOutputStream::fromStream(OutputStream::getStderr());
+  bool line_dirty = false;
+  bool is_tty = stderr_os->isTTY();
+  bool header_sent = false;
+  bool error = false;
+  auto res_parser = new csql::BinaryResultParser();
+
+  if (!cfg_.getQuietMode()) {
+    res_parser->onProgress([&stderr_os, &line_dirty, &header_sent, is_tty] (
+        const csql::ExecutionStatus& status) {
+      if (!header_sent) {
+        auto status_line = StringUtil::format(
+            "Query running: $0%",
+            status.progress * 100);
+
+        if (is_tty) {
+          stderr_os->eraseLine();
+          stderr_os->print("\r" + status_line);
+          line_dirty = true;
+        } else {
+          stderr_os->print(status_line + "\n");
+        }
+      }
+    });
+  }
+
+  res_parser->onTableHeader([&stdout_os, &stderr_os, &header_sent, &line_dirty] (
+      const Vector<String>& columns) {
+    if (line_dirty) {
+      stderr_os->eraseLine();
+      stderr_os->print("\r");
+      line_dirty = false;
+    }
+
+    for (const auto col : columns) {
+      stdout_os->print(col + "\t");
+    }
+    stdout_os->print("\n");
+    header_sent = true;
+  });
+
+  res_parser->onRow([&stdout_os] (int argc, const csql::SValue* argv) {
+    for (size_t i = 0; i < argc; ++i) {
+      stdout_os->print(argv[i].getString() + "\t");
+    }
+    stdout_os->print("\n");
+  });
+
+  res_parser->onError([&stderr_os, &error, &line_dirty] (const String& error_str) {
+    if (line_dirty) {
+      stderr_os->eraseLine();
+      stderr_os->print("\r");
+      line_dirty = false;
+    }
+
+    stderr_os->print(
+        "ERROR:",
+        { TerminalStyle::RED, TerminalStyle::UNDERSCORE });
+
+    stderr_os->print(StringUtil::format(" $0\n", error_str));
+    error = true;
+  });
+
+  auto res = sendRequest(query, res_parser);
+  if (!res.isSuccess()) {
+    stderr_os->print(
+          "ERROR:",
+          { TerminalStyle::RED, TerminalStyle::UNDERSCORE });
+
+    stderr_os->print(res.message());
+    return res;
+  }
 
   if (is_tty) {
-    stderr_os->print("\r" + status_line + "\n");
-  } else {
-    stderr_os->print(status_line + "\n");
+    stderr_os->eraseLine();
+    stderr_os->print("\r");
+  }
+
+  if (error) {
+    return Status(eIOError);
   }
 
   return Status::success();
+}
+
+Status Console::sendRequest(const String& query, csql::BinaryResultParser* res_parser) {
+  try {
+    auto url = StringUtil::format(
+        "http://$0:$1/api/v1/sql",
+        cfg_.getHost(),
+        cfg_.getPort());
+
+    auto db = cfg_.getDatabase().isEmpty() ? "" : cfg_.getDatabase().get();
+    auto postdata = StringUtil::format(
+          "format=binary&query=$0&database=$1",
+          URI::urlEncode(query),
+          URI::urlEncode(db));
+
+    http::HTTPMessage::HeaderList auth_headers;
+    if (!cfg_.getAuthToken().isEmpty()) {
+      auth_headers.emplace_back(
+          "Authorization",
+          StringUtil::format("Token $0", cfg_.getAuthToken().get()));
+    } else if (!cfg_.getPassword().isEmpty()) {
+      auth_headers.emplace_back(
+          "Authorization",
+          StringUtil::format("Basic $0",
+              util::Base64::encode(
+                  cfg_.getUser() + ":" + cfg_.getPassword().get())));
+    }
+
+    http::HTTPClient http_client(nullptr);
+    auto req = http::HTTPRequest::mkPost(url, postdata, auth_headers);
+    auto res = http_client.executeRequest(
+        req,
+        http::StreamingResponseHandler::getFactory(
+            std::bind(
+                &csql::BinaryResultParser::parse,
+                res_parser,
+                std::placeholders::_1,
+                std::placeholders::_2)));
+
+    if (!res_parser->eof()) {
+      return Status(eIOError, "connection to server lost");
+    }
+
+    return Status::success();
+
+  } catch (const StandardException& e) {
+    return Status(eIOError, StringUtil::format(" $0\n", e.what()));
+  }
 }
 
 Status Console::runJS(const String& program_source) {
@@ -264,9 +389,17 @@ Status Console::runJS(const String& program_source) {
         cfg_.getPort());
 
     http::HTTPMessage::HeaderList auth_headers;
-    auth_headers.emplace_back(
-        "Authorization",
-        StringUtil::format("Token $0", cfg_.getAuthToken().get()));
+    if (!cfg_.getAuthToken().isEmpty()) {
+      auth_headers.emplace_back(
+          "Authorization",
+          StringUtil::format("Token $0", cfg_.getAuthToken().get()));
+    } else if (!cfg_.getPassword().isEmpty()) {
+      auth_headers.emplace_back(
+          "Authorization",
+          StringUtil::format("Basic $0",
+              util::Base64::encode(
+                  cfg_.getUser() + ":" + cfg_.getPassword().get())));
+    }
 
     if (is_tty) {
       stderr_os->print("Launching job...");

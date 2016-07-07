@@ -22,6 +22,8 @@
  * code of your own applications
  */
 #pragma once
+#include "eventql/eventql.h"
+#include "eventql/config/process_config.h"
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/SHA1.h>
 #include <eventql/util/mdb/MDB.h>
@@ -30,8 +32,6 @@
 #include <eventql/config/namespace_config.h>
 #include <eventql/db/ClusterConfig.pb.h>
 #include <eventql/db/TableConfig.pb.h>
-
-#include "eventql/eventql.h"
 
 namespace eventql {
 
@@ -47,6 +47,9 @@ public:
 
   virtual ~ConfigDirectory() = default;
 
+  virtual Status start() = 0;
+  virtual void stop() = 0;
+
   virtual ClusterConfig getClusterConfig() const = 0;
 
   virtual void updateClusterConfig(ClusterConfig config) = 0;
@@ -55,6 +58,8 @@ public:
       Function<void (const ClusterConfig& cfg)> fn) = 0;
 
   virtual String getServerID() const = 0;
+
+  virtual bool hasServerID() const { return true; }
 
   virtual ServerConfig getServerConfig(const String& sever_name) const = 0;
 
@@ -90,12 +95,18 @@ public:
   virtual void setTableConfigChangeCallback(
       Function<void (const TableDefinition& tbl)> fn) = 0;
 
-  virtual Status startAndJoin(const String& cluster_name) = 0;
-  virtual Status startAndCreate(
-      const String& cluster_name,
-      const ClusterConfig& config) = 0;
+};
 
-  virtual void stop() = 0;
+class ConfigDirectoryFactory {
+public:
+
+  static Status getConfigDirectoryForServer(
+      const ProcessConfig* cfg,
+      ScopedPtr<ConfigDirectory>* cdir);
+
+  static Status getConfigDirectoryForClient(
+      const ProcessConfig* cfg,
+      ScopedPtr<ConfigDirectory>* cdir);
 
 };
 

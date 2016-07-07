@@ -46,7 +46,7 @@ void eqExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
     return;
   }
 
-  if (lhs->isNumeric() && rhs->isNumeric()) {
+  if (lhs->isConvertibleToNumeric() && rhs->isConvertibleToNumeric()) {
     *out = SValue::newBool(lhs->getFloat() == rhs->getFloat());
     return;
   }

@@ -325,6 +325,20 @@ ScopedPtr<ResultCursor> DefaultScheduler::executeCreateTable(
   return mkScoped(new EmptyResultCursor());
 }
 
+ScopedPtr<ResultCursor> DefaultScheduler::executeCreateDatabase(
+    Transaction* txn,
+    ExecutionContext* execution_context,
+    RefPtr<CreateDatabaseNode> create_database) {
+  auto res = txn->getTableProvider()->createDatabase(
+      create_database->getDatabaseName());
+  if (!res.isSuccess()) {
+    RAISE(kRuntimeError, res.message());
+  }
+
+  // FIXME return result...
+  return mkScoped(new EmptyResultCursor());
+}
+
 ScopedPtr<ResultCursor> DefaultScheduler::executeInsertInto(
     Transaction* txn,
     ExecutionContext* execution_context,
@@ -377,6 +391,19 @@ ScopedPtr<ResultCursor> DefaultScheduler::executeInsertJSON(
   return mkScoped(new EmptyResultCursor());
 }
 
+ScopedPtr<ResultCursor> DefaultScheduler::executeAlterTable(
+    Transaction* txn,
+    ExecutionContext* execution_context,
+    RefPtr<AlterTableNode> alter_table) {
+  auto res = txn->getTableProvider()->alterTable(*alter_table);
+  if (!res.isSuccess()) {
+    RAISE(kRuntimeError, res.message());
+  }
+
+  // FIXME return result...
+  return mkScoped(new EmptyResultCursor());
+}
+
 ScopedPtr<ResultCursor> DefaultScheduler::execute(
     QueryPlan* query_plan,
     ExecutionContext* execution_context,
@@ -397,6 +424,13 @@ ScopedPtr<ResultCursor> DefaultScheduler::execute(
         stmt.asInstanceOf<CreateTableNode>());
   }
 
+  if (stmt.isInstanceOf<CreateDatabaseNode>()) {
+    return executeCreateDatabase(
+        query_plan->getTransaction(),
+        execution_context,
+        stmt.asInstanceOf<CreateDatabaseNode>());
+  }
+
   if (stmt.isInstanceOf<InsertIntoNode>()) {
     return executeInsertInto(
         query_plan->getTransaction(),
@@ -409,6 +443,13 @@ ScopedPtr<ResultCursor> DefaultScheduler::execute(
         query_plan->getTransaction(),
         execution_context,
         stmt.asInstanceOf<InsertJSONNode>());
+  }
+
+  if (stmt.isInstanceOf<AlterTableNode>()) {
+    return executeAlterTable(
+        query_plan->getTransaction(),
+        execution_context,
+        stmt.asInstanceOf<AlterTableNode>());
   }
 
   if (stmt.isInstanceOf<TableExpressionNode>()) {

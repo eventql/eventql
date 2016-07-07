@@ -27,7 +27,7 @@
 #include <eventql/util/autoref.h>
 #include <fnord-logtable/AbstractTableReader.h>
 #include "eventql/io/sstable/sstablereader.h"
-#include "eventql/io/cstable/CSTableReader.h"
+#include "eventql/io/cstable/cstable_reader.h"
 
 namespace util {
 namespace logtable {

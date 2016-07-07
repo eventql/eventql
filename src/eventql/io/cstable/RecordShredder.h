@@ -28,7 +28,7 @@
 #include <eventql/util/autoref.h>
 #include <eventql/util/csv/CSVInputStream.h>
 #include <eventql/io/cstable/ColumnWriter.h>
-#include <eventql/io/cstable/CSTableWriter.h>
+#include <eventql/io/cstable/cstable_writer.h>
 #include <eventql/io/cstable/TableSchema.h>
 #include <eventql/util/protobuf/MessageSchema.h>
 #include <eventql/util/protobuf/DynamicMessage.h>

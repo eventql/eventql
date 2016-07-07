@@ -57,7 +57,7 @@ void RecordMaterializer::skipRecord() {
       column.fetchIfNotPending();
       column.consume();
 
-      if (column.reader->eofReached()) {
+      if (column.reader->nextRepetitionLevel() == 0) {
         break;
       }
 
@@ -94,7 +94,7 @@ void RecordMaterializer::loadColumn(
 
     column->consume();
 
-    if (column->reader->eofReached()) {
+    if (column->reader->nextRepetitionLevel() == 0) {
       break;
     }
 
@@ -327,7 +327,11 @@ uint64_t RecordMaterializer::ColumnState::getUnsignedInteger() const {
     case ColumnType::SIGNED_INT:
       return val_sint;
     case ColumnType::STRING:
-      return std::stoull(val_str);
+      try {
+        return std::stoull(val_str);
+      } catch (...) {
+        RAISEF(kIllegalArgumentError, "can't convert '$0' to uint", val_str);
+      }
     case ColumnType::FLOAT:
       return val_float;
   };

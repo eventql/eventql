@@ -35,12 +35,15 @@ public:
 
   ZookeeperConfigDirectory(
       const String& zookeeper_addrs,
+      const String& cluster_name,
       Option<String> server_name,
       String listen_addr);
 
   ~ZookeeperConfigDirectory();
 
   String getServerID() const override;
+
+  bool hasServerID() const override;
 
   ClusterConfig getClusterConfig() const override;
 
@@ -83,10 +86,7 @@ public:
   void setTableConfigChangeCallback(
       Function<void (const TableDefinition& tbl)> fn) override;
 
-  Status startAndJoin(const String& cluster_name) override;
-  Status startAndCreate(
-      const String& cluster_name,
-      const ClusterConfig& initial_config) override;
+  Status start() override;
 
   void stop() override;
 
@@ -152,9 +152,9 @@ protected:
 
   const char* getErrorString(int code) const;
 
-  String cluster_name_;
   String zookeeper_addrs_;
   size_t zookeeper_timeout_;
+  String cluster_name_;
   Option<String> server_name_;
   String listen_addr_;
   String global_prefix_;

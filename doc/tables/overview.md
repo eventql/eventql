@@ -7,6 +7,7 @@ all rows must adhere to.
 
 Schema changes are instant since they only require a small metadata change on disk.
 
+
 ## Flat Records
 
 The most simple form of a table schema is one that has a flat list of columns

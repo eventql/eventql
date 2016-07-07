@@ -30,6 +30,7 @@
 #include <eventql/db/partition_map.h>
 #include <eventql/db/PartitionState.pb.h>
 #include <eventql/db/PartitionReplication.h>
+#include <eventql/db/metadata_coordinator.h>
 
 #include "eventql/eventql.h"
 
@@ -45,7 +46,8 @@ static mdb::MDBOptions tsdb_mdb_opts() {
 PartitionMap::PartitionMap(
     ServerCfg* cfg) :
     cfg_(cfg),
-    db_(mdb::MDB::open(cfg_->db_path, tsdb_mdb_opts())) {}
+    db_(mdb::MDB::open(cfg_->db_path, tsdb_mdb_opts())),
+    cdir_(cfg->config_directory) {}
 
 Option<RefPtr<Table>> PartitionMap::findTable(
     const String& stream_ns,
@@ -199,34 +201,84 @@ RefPtr<Partition> PartitionMap::findOrCreatePartition(
   mem_key.append((char*) partition_key.data(), partition_key.size());
 
   std::unique_lock<std::mutex> lk(mutex_);
-  auto iter = partitions_.find(mem_key);
-  if (iter != partitions_.end()) {
-    if (iter->second->isLoaded()) {
-      return iter->second->getPartition();
+  Option<RefPtr<Table>> table;
+  {
+    auto iter = partitions_.find(mem_key);
+    if (iter != partitions_.end()) {
+      if (iter->second->isLoaded()) {
+        return iter->second->getPartition();
+      }
+    }
+
+    table = findTableWithLock(tsdb_namespace, table_name);
+    if (table.isEmpty()) {
+      RAISEF(kNotFoundError, "table not found: $0", table_name);
+    }
+
+    if (iter != partitions_.end()) {
+      auto partition = iter->second.get();
+      lk.unlock();
+
+      return partition->getPartition(
+          tsdb_namespace,
+          table.get(),
+          partition_key,
+          cfg_,
+          this);
     }
   }
 
-  auto table = findTableWithLock(tsdb_namespace, table_name);
-  if (table.isEmpty()) {
-    RAISEF(kNotFoundError, "table not found: $0", table_name);
+  lk.unlock();
+
+  PartitionDiscoveryResponse discovery_info;
+
+  if (table.get()->partitionerType() == TBL_PARTITION_TIMEWINDOW) {
+    PartitionDiscoveryRequest discovery_request;
+    discovery_request.set_db_namespace(tsdb_namespace);
+    discovery_request.set_table_id(table_name);
+    discovery_request.set_min_txnseq(0);
+    discovery_request.set_partition_id(
+        partition_key.data(),
+        partition_key.size());
+    discovery_request.set_lookup_by_id(true);
+
+    MetadataCoordinator coordinator(cdir_);
+    PartitionDiscoveryResponse discovery_response;
+    auto rc = coordinator.discoverPartition(
+        discovery_request,
+        &discovery_info);
+
+    if (!rc.isSuccess()) {
+      RAISE(kRuntimeError, rc.message());
+    }
+
+    switch (discovery_info.code()) {
+      case PDISCOVERY_LOAD:
+      case PDISCOVERY_SERVE:
+        break;
+      default:
+        RAISE(kRuntimeError, "trying to load unassigned partition");
+    }
   }
 
-  if (iter != partitions_.end()) {
-    auto partition = iter->second.get();
-    lk.unlock();
-
-    return partition->getPartition(
-        tsdb_namespace,
-        table.get(),
-        partition_key,
-        cfg_,
-        this);
+  lk.lock();
+  {
+    auto iter = partitions_.find(mem_key);
+    if (iter != partitions_.end()) {
+      return iter->second->getPartition(
+          tsdb_namespace,
+          table.get(),
+          partition_key,
+          cfg_,
+          this);
+    }
   }
 
   auto partition = Partition::create(
       tsdb_namespace,
       table.get(),
       partition_key,
+      discovery_info,
       cfg_);
 
   partitions_.emplace(mem_key, mkScoped(new LazyPartition(partition)));
@@ -333,16 +385,9 @@ bool PartitionMap::dropLocalPartition(
   partition_writer->lock();
 
   /* check preconditions */
-  size_t full_copies = 0;
   try {
-    auto repl_scheme = cfg_->repl_scheme;
-
-    full_copies = partition
-        ->getReplicationStrategy(repl_scheme, nullptr)
-        ->numFullRemoteCopies();
-
-    if (repl_scheme->hasLocalReplica(partition_key) ||
-        full_copies < repl_scheme->minNumCopies()) {
+    auto repl = partition->getReplicationStrategy(cfg_->repl_scheme, nullptr);
+    if (!repl->shouldDropPartition()) {
       RAISE(kIllegalStateError, "can't delete partition");
     }
   } catch (const StandardException& e) {
@@ -354,12 +399,11 @@ bool PartitionMap::dropLocalPartition(
   /* start deletion */
   logInfo(
       "z1.core",
-      "Partition $0/$1/$2 is not owned by this node and has $3 other " \
-      "full copies, trying to unload and drop",
+      "Partition $0/$1/$2 is not owned by this node and is fully replicated," \
+      " trying to unload and drop",
       tsdb_namespace,
       table_name,
-      partition_key.toString(),
-      full_copies);
+      partition_key.toString());
 
   /* freeze partition and unlock waiting writers (they will fail) */
   partition_writer->freeze();

@@ -34,6 +34,8 @@
 #include "eventql/sql/qtree/LiteralExpressionNode.h"
 #include "eventql/sql/qtree/QueryTreeUtil.h"
 #include "eventql/sql/qtree/qtree_coder.h"
+#include "eventql/sql/qtree/nodes/create_database.h"
+#include "eventql/sql/qtree/nodes/alter_table.h"
 #include "eventql/sql/qtree/nodes/create_table.h"
 #include "eventql/sql/qtree/nodes/insert_into.h"
 #include "eventql/sql/qtree/nodes/insert_json.h"
@@ -773,4 +775,76 @@ TEST_CASE(QTreeTest, TestInsertIntoFromJSON, [] () {
 
   RefPtr<InsertJSONNode> qtree = qtrees[0].asInstanceOf<InsertJSONNode>();
   EXPECT_EQ(qtree->getTableName(), "evtbl");
+});
+
+TEST_CASE(QTreeTest, TestCreateDatabase, [] () {
+  auto runtime = Runtime::getDefaultRuntime();
+  auto txn = runtime->newTransaction();
+
+  String query = "CREATE DATABASE test;";
+
+  csql::Parser parser;
+  parser.parse(query.data(), query.size());
+
+  auto qtree_builder = runtime->queryPlanBuilder();
+  Vector<RefPtr<QueryTreeNode>> qtrees = qtree_builder->build(
+      txn.get(),
+      parser.getStatements(),
+      txn->getTableProvider());
+
+  RefPtr<AlterTableNode> qtree = qtrees[0].asInstanceOf<AlterTableNode>();
+  EXPECT_EQ(qtree->getTableName(), "evtbl");
+
+  RefPtr<CreateDatabaseNode> qtree = qtrees[0].asInstanceOf<CreateDatabaseNode>();
+  EXPECT_EQ(qtree->getDatabaseName(), "test");
+});
+
+TEST_CASE(QTreeTest, TestAlterTable, [] () {
+  auto runtime = Runtime::getDefaultRuntime();
+  auto txn = runtime->newTransaction();
+
+  String query = R"(
+      ALTER TABLE evtbl
+        ADD description REPEATED String,
+        DROP place,
+        ADD COLUMN product RECORD,
+        DROP column version;
+  )";
+
+  csql::Parser parser;
+  parser.parse(query.data(), query.size());
+
+  auto qtree_builder = runtime->queryPlanBuilder();
+  Vector<RefPtr<QueryTreeNode>> qtrees = qtree_builder->build(
+      txn.get(),
+      parser.getStatements(),
+      txn->getTableProvider());
+
+  RefPtr<AlterTableNode> qtree = qtrees[0].asInstanceOf<AlterTableNode>();
+  EXPECT_EQ(qtree->getTableName(), "evtbl");
+
+  auto operations = qtree->getOperations();
+  EXPECT_EQ(operations.size(), 4);
+
+  EXPECT(
+    operations[0].optype == AlterTableNode::AlterTableOperationType::OP_ADD_COLUMN);
+  EXPECT_EQ(operations[0].column_name, "description");
+  EXPECT_EQ(operations[0].column_type, "String");
+  EXPECT_TRUE(operations[0].is_repeated);
+  EXPECT_TRUE(operations[0].is_optional);
+
+  EXPECT(
+    operations[1].optype == AlterTableNode::AlterTableOperationType::OP_REMOVE_COLUMN);
+  EXPECT_EQ(operations[1].column_name, "place");
+
+  EXPECT(
+    operations[2].optype == AlterTableNode::AlterTableOperationType::OP_ADD_COLUMN);
+  EXPECT_EQ(operations[2].column_name, "product");
+  EXPECT_EQ(operations[2].column_type, "RECORD");
+  EXPECT_FALSE(operations[2].is_repeated);
+  EXPECT_TRUE(operations[2].is_optional);
+
+  EXPECT(
+    operations[3].optype == AlterTableNode::AlterTableOperationType::OP_REMOVE_COLUMN);
+  EXPECT_EQ(operations[3].column_name, "version");
 });

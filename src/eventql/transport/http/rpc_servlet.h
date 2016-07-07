@@ -66,22 +66,6 @@ protected:
       RefPtr<http::HTTPResponseStream> res_stream,
       URI* uri);
 
-  void fetchPartitionInfo(
-      const http::HTTPRequest* req,
-      http::HTTPResponse* res,
-      URI* uri);
-
-  void executeSQL(
-      const http::HTTPRequest* req,
-      http::HTTPResponse* res,
-      URI* uri);
-
-  void executeSQLStream(
-      const http::HTTPRequest* req,
-      http::HTTPResponse* res,
-      RefPtr<http::HTTPResponseStream> res_stream,
-      URI* uri);
-
   void updateCSTable(
       const URI& uri,
       http::HTTPRequestStream* req_stream,
@@ -113,6 +97,11 @@ protected:
       http::HTTPResponse* res);
 
   void listPartitions(
+      const URI& uri,
+      const http::HTTPRequest* req,
+      http::HTTPResponse* res);
+
+  void findPartition(
       const URI& uri,
       const http::HTTPRequest* req,
       http::HTTPResponse* res);

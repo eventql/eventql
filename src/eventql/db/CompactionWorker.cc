@@ -34,7 +34,7 @@
 #include <eventql/db/LogPartitionReader.h>
 #include <eventql/util/protobuf/MessageDecoder.h>
 #include <eventql/io/cstable/RecordShredder.h>
-#include <eventql/io/cstable/CSTableWriter.h>
+#include <eventql/io/cstable/cstable_writer.h>
 
 #include "eventql/eventql.h"
 
@@ -144,7 +144,16 @@ void CompactionWorker::work() {
           pmap_->publishPartitionChange(change);
         }
       } catch (const StandardException& e) {
-        logError("tsdb", e, "CompactionWorker error");
+        auto snap = partition->getSnapshot();
+
+        logError(
+            "tsdb",
+            e,
+            "CompactionWorker error for partition $0/$1/$2",
+            snap->state.tsdb_namespace(),
+            snap->state.table_key(),
+            snap->key.toString());
+
         success = false;
       }
 
