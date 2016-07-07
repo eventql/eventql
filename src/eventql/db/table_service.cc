@@ -63,46 +63,43 @@ Status TableService::createTable(
         "can't create table without PRIMARY KEY");
   }
 
-  auto columns = schema.columns();
-  auto pkey_begin = primary_key.begin();
-  auto pkey_end = primary_key.end();
-  for(const auto& col : columns) {
-    if (col.first.find(".") != String::npos) {
-      if (find(pkey_begin, pkey_end, col.first) != pkey_end) {
-        return Status(
-          eIllegalArgumentError,
-          StringUtil::format(
-              "nested column '$0' can't be part of the PRIMARY KEY",
-              col.first));
-
-      }
-
-      auto record_col = StringUtil::split(col.first, ("."))[0];
-      if (find(pkey_begin, pkey_end, record_col) != pkey_end) {
-        return Status(
-          eIllegalArgumentError,
-          StringUtil::format(
-              "nested column '$0' can't be part of the PRIMARY KEY",
-              record_col));
-
-      }
-    }
-
-    if (col.second.repeated &&
-        find(pkey_begin, pkey_end, col.first) != pkey_end) {
+  auto fields = schema.fields();
+  for (const auto& col : primary_key) {
+    if (col.find(".") != String::npos) {
       return Status(
           eIllegalArgumentError,
           StringUtil::format(
-              "repeated column '$0' can't be part of the PRIMARY KEY",
-              col.first));
-    }
-
-    if (!schema.hasField(col)) {
-      return Status(
-          eIllegalArgumentError,
-          StringUtil::format(
-              "column not found '$0'",
+              "nested column '$0' can't be part of the PRIMARY KEY",
               col));
+    }
+
+    uint32_t field_id;
+    try {
+      field_id = schema.fieldId(col);
+    } catch (Exception& e) {
+      return Status(
+          eIllegalArgumentError,
+          StringUtil::format("column not found: '$0'", col));
+    }
+
+    for (const auto& field : fields) {
+      if (field_id == field.id) {
+        if (field.type == msg::FieldType::OBJECT) {
+          return Status(
+              eIllegalArgumentError,
+              StringUtil::format(
+                  "nested column '$0' can't be part of the PRIMARY KEY",
+                  col));
+        }
+
+        if (field.repeated) {
+          return Status(
+              eIllegalArgumentError,
+              StringUtil::format(
+                  "repeated column '$0' can't be part of the PRIMARY KEY",
+                  col));
+        }
+      }
     }
   }
 
