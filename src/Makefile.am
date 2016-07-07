@@ -595,6 +595,10 @@ evql_util_a_SOURCES = \
     eventql/util/logging/logoutputstream.h \
     eventql/util/logging/syslog.cc \
     eventql/util/logging/syslog.h \
+    eventql/util/mysql/MySQL.cc \
+    eventql/util/mysql/MySQL.h \
+    eventql/util/mysql/MySQLConnection.cc \
+    eventql/util/mysql/MySQLConnection.h \
     eventql/util/net/dnscache.cc \
     eventql/util/net/dnscache.h \
     eventql/util/net/inetaddr.cc \
@@ -1092,6 +1096,25 @@ evqlctl_LDADD = \
     $(PCRE_LDADD)
 
 bin_PROGRAMS += evqlctl
+
+################# BIN: mysql_upload ####################
+mysql_upload_SOURCES = \
+    eventql/tools/mysql/mysql_upload.cc
+
+mysql_upload_LDADD = \
+    evql_core.a \
+    evql_http.a \
+    evql_sql.a \
+    evql_cstable.a \
+    evql_sstable.a \
+    evql_util.a \
+    $(SIMDCOMP_LDADD) \
+    $(INIH_LDADD) \
+    $(LMDB_LDADD) \
+    $(PROTOBUF_LDADD) \
+    $(PCRE_LDADD)
+
+bin_PROGRAMS += mysql_upload
 
 ################# TEST: sql/runtime ####################
 test_evql_sql_runtime_SOURCES = eventql/sql/runtime/Runtime_test.cc

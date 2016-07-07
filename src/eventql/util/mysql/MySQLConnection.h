@@ -28,7 +28,7 @@
 #include <eventql/util/exception.h>
 #include <eventql/util/protobuf/MessageSchema.h>
 #include <functional>
-#include <eventql/buildconfig.h>
+//#include <eventql/buildconfig.h>
 #ifdef STX_ENABLE_MYSQL
 #include <mysql.h>
 #endif

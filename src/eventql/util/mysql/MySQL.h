@@ -23,7 +23,6 @@
  */
 #ifndef _STX_SQL_MYSQL_H
 #define _STX_SQL_MYSQL_H
-#include <eventql/buildconfig.h>
 #ifdef STX_ENABLE_MYSQL
 #include <mysql.h>
 #endif
