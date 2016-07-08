@@ -792,9 +792,6 @@ TEST_CASE(QTreeTest, TestCreateDatabase, [] () {
       parser.getStatements(),
       txn->getTableProvider());
 
-  RefPtr<AlterTableNode> qtree = qtrees[0].asInstanceOf<AlterTableNode>();
-  EXPECT_EQ(qtree->getTableName(), "evtbl");
-
   RefPtr<CreateDatabaseNode> qtree = qtrees[0].asInstanceOf<CreateDatabaseNode>();
   EXPECT_EQ(qtree->getDatabaseName(), "test");
 });
