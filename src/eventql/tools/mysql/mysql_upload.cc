@@ -39,12 +39,13 @@ using namespace eventql;
 void run(const cli::FlagParser& flags) {
   auto source_table = flags.getString("source_table");
   auto destination_table = flags.getString("destination_table");
-  auto api_token = flags.getString("api_token");
-  String api_url = "http://api.zscale.io/api/v1";
+  //String api_url = "http://api.zscale.io/api/v1";
   auto shard_size = flags.getInt("shard_size");
   auto mysql_addr = flags.getString("mysql");
+  auto host = flags.getString("host");
+  auto port = flags.getInt("port");
 
-  logInfo("mysql-upload", "Connecting to MySQL Server...");
+  logInfo("evql-mysql-import", "Connecting to MySQL Server...");
 
   util::mysql::mysqlInit();
   auto mysql_conn = util::mysql::MySQLConnection::openConnection(URI(mysql_addr));
@@ -74,7 +75,6 @@ void run(const cli::FlagParser& flags) {
         "mysql-upload",
         "Table '$0' appears to be empty",
         source_table);
-
     return;
   }
 
@@ -82,41 +82,49 @@ void run(const cli::FlagParser& flags) {
   logDebug("mysql-upload", "Splitting into $0 shards", num_shards);
 
   http::HTTPMessage::HeaderList auth_headers;
-  auth_headers.emplace_back(
-      "Authorization",
-      StringUtil::format("Token $0", api_token));
+  if (flags.isSet("auth_token")) {
+    auth_headers.emplace_back(
+        "Authorization",
+        StringUtil::format("Token $0", flags.getString("auth_token")));
+  //} else if (!cfg_.getPassword().isEmpty()) {
+  //  auth_headers.emplace_back(
+  //      "Authorization",
+  //      StringUtil::format("Basic $0",
+  //          util::Base64::encode(
+  //              cfg_.getUser() + ":" + cfg_.getPassword().get())));
+  }
 
   /* build create table request */
-  Buffer create_req;
-  {
-    json::JSONOutputStream j(BufferOutputStream::fromBuffer(&create_req));
-    j.beginObject();
-    j.addObjectEntry("table_name");
-    j.addString(destination_table);
-    j.addComma();
-    j.addObjectEntry("update");
-    j.addTrue();
-    j.addComma();
-    j.addObjectEntry("num_shards");
-    j.addInteger(num_shards);
-    j.addComma();
-    j.addObjectEntry("schema");
-    schema->toJSON(&j);
-    j.endObject();
-  }
+  //Buffer create_req;
+  //{
+  //  json::JSONOutputStream j(BufferOutputStream::fromBuffer(&create_req));
+  //  j.beginObject();
+  //  j.addObjectEntry("table_name");
+  //  j.addString(destination_table);
+  //  j.addComma();
+  //  j.addObjectEntry("update");
+  //  j.addTrue();
+  //  j.addComma();
+  //  j.addObjectEntry("num_shards");
+  //  j.addInteger(num_shards);
+  //  j.addComma();
+  //  j.addObjectEntry("schema");
+  //  schema->toJSON(&j);
+  //  j.endObject();
+  //}
 
-  {
-    http::HTTPClient http_client;
-    auto create_res = http_client.executeRequest(
-        http::HTTPRequest::mkPost(
-            api_url + "/tables/create_table",
-            create_req,
-            auth_headers));
+  //{
+  //  http::HTTPClient http_client;
+  //  auto create_res = http_client.executeRequest(
+  //      http::HTTPRequest::mkPost(
+  //          api_url + "/tables/create_table",
+  //          create_req,
+  //          auth_headers));
 
-    if (create_res.statusCode() != 201) {
-      RAISE(kRuntimeError, create_res.body().toString());
-    }
-  }
+  //  if (create_res.statusCode() != 201) {
+  //    RAISE(kRuntimeError, create_res.body().toString());
+  //  }
+  //}
 
   /* status line */
   util::SimpleRateLimitedFn status_line(
@@ -151,8 +159,9 @@ void run(const cli::FlagParser& flags) {
         shard_data.size() / 1000000.0);
 
     auto upload_uri = StringUtil::format(
-        "$0/tables/upload_table?table=$1&shard=$2",
-        api_url,
+        "http://$0:$1/api/v1/tables/upload_table?table=$2&shard=$3",
+        host,
+        port,
         URI::urlEncode(destination_table),
         nshard++);
 
@@ -182,6 +191,9 @@ void run(const cli::FlagParser& flags) {
       get_rows_qry,
       [&] (const Vector<String>& row) -> bool {
     shard_csv.appendRow(row);
+    for (const auto& r : row) {
+      iputs("cell $0", r);
+    }
 
     if (++num_rows_shard == shard_size) {
       upload_shard();
@@ -209,7 +221,7 @@ void run(const cli::FlagParser& flags) {
 
 int main(int argc, const char** argv) {
   Application::init();
-  //Application::logToStderr();
+  Application::logToStderr("evql-mysql-import");
 
   cli::FlagParser flags;
 
@@ -241,12 +253,30 @@ int main(int argc, const char** argv) {
       "<name>");
 
   flags.defineFlag(
-      "api_token",
+      "host",
       cli::FlagParser::T_STRING,
-      true,
-      "x",
+      false,
+      "h",
+      "localhost",
+      "eventql server hostname",
+      "<host>");
+
+  flags.defineFlag(
+      "port",
+      cli::FlagParser::T_INTEGER,
+      false,
+      "p",
+      "9175",
+      "eventql server port",
+      "<port>");
+
+  flags.defineFlag(
+      "auth_token",
+      cli::FlagParser::T_STRING,
+      false,
       NULL,
-      "DeepAnalytics API Token",
+      NULL,
+      "auth token",
       "<token>");
 
   flags.defineFlag(
