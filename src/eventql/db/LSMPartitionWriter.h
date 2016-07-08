@@ -35,7 +35,7 @@ namespace eventql {
 
 class LSMPartitionWriter : public PartitionWriter {
 public:
-  static const size_t kDefaultPartitionSplitThresholdBytes = 1024 * 1024 * 2048;
+  static const size_t kDefaultPartitionSplitThresholdBytes = 1024llu * 1024llu * 2048llu;
   static const size_t kMaxArenaRecords = 10000;
 
   LSMPartitionWriter(
