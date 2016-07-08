@@ -124,6 +124,11 @@ public:
       const String& table_name,
       const SHA1Hash& partition_key);
 
+  void commitPartition(
+      const String& tsdb_namespace,
+      const String& table_name,
+      const SHA1Hash& partition_key);
+
   void updatePartitionCSTable(
       const String& tsdb_namespace,
       const String& table_name,

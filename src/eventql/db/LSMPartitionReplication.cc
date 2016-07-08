@@ -107,7 +107,6 @@ void LSMPartitionReplication::replicateTo(
 
   size_t batch_size = 0;
   RecordEnvelopeList batch;
-  batch.set_sync_commit(true); // fixme only on last batch?
   fetchRecords(
       replicated_offset,
       replica.keyrange_begin(),
@@ -138,11 +137,29 @@ void LSMPartitionReplication::replicateTo(
     }
   });
 
-  if (batch.records().size() > 0) {
-    uploadBatchTo(server_cfg.server_addr(), batch);
-  }
-
+  uploadBatchTo(server_cfg.server_addr(), batch);
   replication_info->setTargetHostStatus(bytes_sent, records_sent);
+
+  {
+    URI uri(
+        StringUtil::format(
+            "http://$0/tsdb/commit?namespace=$1&table=$2&partition=$3",
+            server_cfg.server_addr(),
+            URI::urlEncode(snap_->state.tsdb_namespace()),
+            URI::urlEncode(snap_->state.table_key()),
+            snap_->key.toString()));
+
+    http::HTTPRequest req(http::HTTPMessage::M_POST, uri.pathAndQuery());
+    req.addHeader("Host", uri.hostAndPort());
+
+    auto res = http_->executeRequest(req);
+    res.wait();
+
+    const auto& r = res.get();
+    if (r.statusCode() != 201) {
+      RAISEF(kRuntimeError, "received non-201 response: $0", r.body().toString());
+    }
+  }
 }
 
 bool LSMPartitionReplication::replicate(ReplicationInfo* replication_info) {
