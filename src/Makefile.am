@@ -1097,11 +1097,11 @@ evqlctl_LDADD = \
 
 bin_PROGRAMS += evqlctl
 
-################# BIN: mysql_upload ####################
-mysql_upload_SOURCES = \
-    eventql/tools/mysql/mysql_upload.cc
+################# BIN: evql-mysql-import ####################
+evql_mysql_import_SOURCES = \
+    eventql/tools/evql_mysql_import.cc
 
-mysql_upload_LDADD = \
+evql_mysql_import_LDADD = \
     evql_core.a \
     evql_http.a \
     evql_sql.a \
@@ -1114,7 +1114,7 @@ mysql_upload_LDADD = \
     $(PROTOBUF_LDADD) \
     $(PCRE_LDADD)
 
-bin_PROGRAMS += mysql_upload
+bin_PROGRAMS += evql-mysql-import
 
 ################# TEST: sql/runtime ####################
 test_evql_sql_runtime_SOURCES = eventql/sql/runtime/Runtime_test.cc
