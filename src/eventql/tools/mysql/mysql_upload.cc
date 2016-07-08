@@ -51,11 +51,11 @@ void run(const cli::FlagParser& flags) {
   auto mysql_conn = util::mysql::MySQLConnection::openConnection(URI(mysql_addr));
 
   logInfo(
-      "mysql-upload",
+      "evql-mysql-import",
       "Analyzing the input table. This might take a few minutes...");
 
   auto schema = mysql_conn->getTableSchema(source_table);
-  logDebug("mysql-upload", "Table Schema:\n$0", schema->toString());
+  logDebug("evql-mysql-import", "Table Schema:\n$0", schema->toString());
   Vector<String> column_names;
   for (const auto& field : schema->fields()) {
     column_names.emplace_back(field.name);
@@ -77,21 +77,21 @@ void run(const cli::FlagParser& flags) {
 
   if (num_rows == 0) {
     logError(
-        "mysql-upload",
+        "evql-mysql-import",
         "Table '$0' appears to be empty",
         source_table);
     return;
   }
 
   auto num_shards = (num_rows + shard_size - 1) / shard_size;
-  logDebug("mysql-upload", "Splitting into $0 shards", num_shards);
+  logDebug("evql-mysql-import", "Splitting into $0 shards", num_shards);
 
   /* status line */
   util::SimpleRateLimitedFn status_line(
       kMicrosPerSecond,
       [&num_rows_uploaded, num_rows] () {
     logInfo(
-        "mysql-upload",
+        "evql-mysql-import",
         "[$0%] Uploading... $1/$2 rows",
         (size_t) ((num_rows_uploaded / (double) num_rows) * 100),
         num_rows_uploaded,
@@ -140,7 +140,7 @@ void run(const cli::FlagParser& flags) {
     if (num_rows_shard == shard_size ||
         num_rows_uploaded == num_rows) {
       logDebug(
-          "mysql-upload",
+          "evql-mysql-import",
           "Uploading shard $0; size=$1MB",
           nshard + 1,
           shard_data.size() / 1000000.0);
@@ -170,7 +170,7 @@ void run(const cli::FlagParser& flags) {
               "[" + shard_data.toString() + "]",
               auth_headers));
 
-      logDebug("mysql-upload", "Upload finished: $0", insert_uri);
+      logDebug("evql-mysql-import", "Upload finished: $0", insert_uri);
       if (upload_res.statusCode() != 201) {
         RAISE(kRuntimeError, upload_res.body().toString());
       }
@@ -189,7 +189,7 @@ void run(const cli::FlagParser& flags) {
 
   status_line.runForce();
 
-  logInfo("dx-mysql-upload", "Upload finished successfully :)");
+  logInfo("evql-mysql-import", "Upload finished successfully :)");
   exit(0);
 }
 
@@ -251,7 +251,7 @@ int main(int argc, const char** argv) {
       "db",
       "",
       "eventql database",
-      "<databse>");
+      "<database>");
 
   flags.defineFlag(
       "auth_token",
@@ -280,7 +280,14 @@ int main(int argc, const char** argv) {
       "shard size",
       "<num>");
 
-  flags.parseArgv(argc, argv);
+  try {
+    flags.parseArgv(argc, argv);
+  } catch (const StandardException& e) {
+    logError("evql-mysql-import", "$0", e.what());
+    auto stdout_os = OutputStream::getStdout();
+    flags.printUsage(stdout_os.get());
+    return 0;
+  }
 
   Logger::get()->setMinimumLogLevel(
       strToLogLevel(flags.getString("loglevel")));
@@ -288,7 +295,7 @@ int main(int argc, const char** argv) {
   try {
     run(flags);
   } catch (const StandardException& e) {
-    logError("mysql-upload", "[FATAL ERROR] $0", e.what());
+    logError("evql-mysql-import", "[FATAL ERROR] $0", e.what());
   }
 
   return 0;
