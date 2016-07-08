@@ -39,11 +39,11 @@ using namespace eventql;
 void run(const cli::FlagParser& flags) {
   auto source_table = flags.getString("source_table");
   auto destination_table = flags.getString("destination_table");
-  //String api_url = "http://api.zscale.io/api/v1";
   auto shard_size = flags.getInt("shard_size");
   auto mysql_addr = flags.getString("mysql");
   auto host = flags.getString("host");
   auto port = flags.getInt("port");
+  auto db = flags.getString("database");
 
   logInfo("evql-mysql-import", "Connecting to MySQL Server...");
 
@@ -56,7 +56,12 @@ void run(const cli::FlagParser& flags) {
 
   auto schema = mysql_conn->getTableSchema(source_table);
   logDebug("mysql-upload", "Table Schema:\n$0", schema->toString());
+  Vector<String> column_names;
+  for (const auto& field : schema->fields()) {
+    column_names.emplace_back(field.name);
+  }
 
+  /* count rows */
   auto count_rows_qry = StringUtil::format(
       "SELECT count(*) FROM `$0`;",
       source_table);
@@ -81,51 +86,6 @@ void run(const cli::FlagParser& flags) {
   auto num_shards = (num_rows + shard_size - 1) / shard_size;
   logDebug("mysql-upload", "Splitting into $0 shards", num_shards);
 
-  http::HTTPMessage::HeaderList auth_headers;
-  if (flags.isSet("auth_token")) {
-    auth_headers.emplace_back(
-        "Authorization",
-        StringUtil::format("Token $0", flags.getString("auth_token")));
-  //} else if (!cfg_.getPassword().isEmpty()) {
-  //  auth_headers.emplace_back(
-  //      "Authorization",
-  //      StringUtil::format("Basic $0",
-  //          util::Base64::encode(
-  //              cfg_.getUser() + ":" + cfg_.getPassword().get())));
-  }
-
-  /* build create table request */
-  //Buffer create_req;
-  //{
-  //  json::JSONOutputStream j(BufferOutputStream::fromBuffer(&create_req));
-  //  j.beginObject();
-  //  j.addObjectEntry("table_name");
-  //  j.addString(destination_table);
-  //  j.addComma();
-  //  j.addObjectEntry("update");
-  //  j.addTrue();
-  //  j.addComma();
-  //  j.addObjectEntry("num_shards");
-  //  j.addInteger(num_shards);
-  //  j.addComma();
-  //  j.addObjectEntry("schema");
-  //  schema->toJSON(&j);
-  //  j.endObject();
-  //}
-
-  //{
-  //  http::HTTPClient http_client;
-  //  auto create_res = http_client.executeRequest(
-  //      http::HTTPRequest::mkPost(
-  //          api_url + "/tables/create_table",
-  //          create_req,
-  //          auth_headers));
-
-  //  if (create_res.statusCode() != 201) {
-  //    RAISE(kRuntimeError, create_res.body().toString());
-  //  }
-  //}
-
   /* status line */
   util::SimpleRateLimitedFn status_line(
       kMicrosPerSecond,
@@ -138,69 +98,88 @@ void run(const cli::FlagParser& flags) {
         num_rows);
   });
 
-  Vector<String> columns;
-  for (const auto& field : schema->fields()) {
-    columns.emplace_back(field.name);
-  }
-
-  thread::FixedSizeThreadPool tpool(thread::ThreadPoolOptions{}, 4);
-  tpool.start();
-
-  Buffer shard_data;
-  BinaryCSVOutputStream shard_csv(BufferOutputStream::fromBuffer(&shard_data));
-  shard_csv.appendRow(columns);
-
+  /* upload rows */
   size_t nshard = 0;
-  auto upload_shard = [&] {
-    logDebug(
-        "mysql-upload",
-        "Shard $0 ready for upload; size=$1MB",
-        nshard,
-        shard_data.size() / 1000000.0);
+  size_t num_rows_shard = 0;
+  Buffer shard_data;
+  json::JSONOutputStream json(BufferOutputStream::fromBuffer(&shard_data));
 
-    auto upload_uri = StringUtil::format(
-        "http://$0:$1/api/v1/tables/upload_table?table=$2&shard=$3",
-        host,
-        port,
-        URI::urlEncode(destination_table),
-        nshard++);
+  auto get_rows_qry = StringUtil::format("SELECT * FROM `$0`;", source_table);
+  mysql_conn->executeQuery(
+      get_rows_qry,
+      [&] (const Vector<String>& column_values) -> bool {
+    ++num_rows_shard;
+    ++num_rows_uploaded;
 
-    tpool.run([upload_uri, shard_data, auth_headers] () {
-      logDebug("mysql-upload", "Uploading: $0", upload_uri);
+    if (num_rows_shard > 1) {
+      json.addComma();
+    }
+
+    json.beginObject();
+    json.addObjectEntry("database");
+    json.addString(db);
+    json.addComma();
+    json.addObjectEntry("table");
+    json.addString(destination_table);
+    json.addComma();
+    json.addObjectEntry("data");
+    json.beginObject();
+
+    for (size_t i = 0; i < column_names.size() && i < column_values.size(); ++i) {
+      if (i > 0 ){
+        json.addComma();
+      }
+
+      json.addObjectEntry(column_names[i]);
+      json.addString(column_values[i]);
+    }
+
+    json.endObject();
+    json.endObject();
+
+    if (num_rows_shard == shard_size ||
+        num_rows_uploaded == num_rows) {
+      logDebug(
+          "mysql-upload",
+          "Uploading shard $0; size=$1MB",
+          nshard + 1,
+          shard_data.size() / 1000000.0);
+
+      auto insert_uri = StringUtil::format(
+          "http://$0:$1/api/v1/tables/insert",
+          host,
+          port);
+
+      http::HTTPMessage::HeaderList auth_headers;
+      if (flags.isSet("auth_token")) {
+        auth_headers.emplace_back(
+            "Authorization",
+            StringUtil::format("Token $0", flags.getString("auth_token")));
+      //} else if (!cfg_.getPassword().isEmpty()) {
+      //  auth_headers.emplace_back(
+      //      "Authorization",
+      //      StringUtil::format("Basic $0",
+      //          util::Base64::encode(
+      //              cfg_.getUser() + ":" + cfg_.getPassword().get())));
+      }
 
       http::HTTPClient http_client;
       auto upload_res = http_client.executeRequest(
           http::HTTPRequest::mkPost(
-              upload_uri,
-              shard_data,
+              insert_uri,
+              "[" + shard_data.toString() + "]",
               auth_headers));
 
-      logDebug("mysql-upload", "Upload finished: $0", upload_uri);
+      logDebug("mysql-upload", "Upload finished: $0", insert_uri);
       if (upload_res.statusCode() != 201) {
         RAISE(kRuntimeError, upload_res.body().toString());
       }
-    });
 
-    shard_data.clear();
-    shard_csv.appendRow(columns);
-  };
-
-  size_t num_rows_shard = 0;
-  auto get_rows_qry = StringUtil::format("SELECT * FROM `$0`;", source_table);
-  mysql_conn->executeQuery(
-      get_rows_qry,
-      [&] (const Vector<String>& row) -> bool {
-    shard_csv.appendRow(row);
-    for (const auto& r : row) {
-      iputs("cell $0", r);
+      shard_data.clear();
+      ++nshard;
     }
 
-    if (++num_rows_shard == shard_size) {
-      upload_shard();
-      num_rows_shard = 0;
-    }
-
-    if (++num_rows_uploaded < num_rows) {
+    if (num_rows_uploaded < num_rows) {
       status_line.runMaybe();
       return true;
     } else {
@@ -208,12 +187,7 @@ void run(const cli::FlagParser& flags) {
     }
   });
 
-  if (num_rows_shard > 0) {
-    upload_shard();
-  }
-
   status_line.runForce();
-  tpool.stop();
 
   logInfo("dx-mysql-upload", "Upload finished successfully :)");
   exit(0);
@@ -269,6 +243,15 @@ int main(int argc, const char** argv) {
       "9175",
       "eventql server port",
       "<port>");
+
+  flags.defineFlag(
+      "database",
+      cli::FlagParser::T_STRING,
+      false,
+      "db",
+      "",
+      "eventql database",
+      "<databse>");
 
   flags.defineFlag(
       "auth_token",
