@@ -25,10 +25,12 @@
 #include <eventql/db/LSMPartitionReader.h>
 #include <eventql/db/LSMPartitionWriter.h>
 #include <eventql/db/ReplicationScheme.h>
+#include <eventql/db/ReplicationWorker.h>
 #include <eventql/util/logging.h>
 #include <eventql/util/io/fileutil.h>
 #include <eventql/util/protobuf/msg.h>
 #include <eventql/util/protobuf/MessageEncoder.h>
+#include <eventql/util/protobuf/MessagePrinter.h>
 #include <eventql/io/cstable/RecordMaterializer.h>
 #include <eventql/db/metadata_operations.pb.h>
 #include <eventql/db/metadata_coordinator.h>
@@ -38,7 +40,7 @@
 namespace eventql {
 
 const size_t LSMPartitionReplication::kMaxBatchSizeRows = 8192;
-const size_t LSMPartitionReplication::kMaxBatchSizeBytes = 1024 * 1024 * 50; // 50 MB
+const size_t LSMPartitionReplication::kMaxBatchSizeBytes = 1024 * 1024 * 8; // 8 MB
 
 LSMPartitionReplication::LSMPartitionReplication(
     RefPtr<Partition> partition,
@@ -89,7 +91,8 @@ bool LSMPartitionReplication::needsReplication() const {
 
 void LSMPartitionReplication::replicateTo(
     const ReplicationTarget& replica,
-    uint64_t replicated_offset) {
+    uint64_t replicated_offset,
+    ReplicationInfo* replication_info) {
   auto server_cfg = cdir_->getServerConfig(replica.server_id());
   if (server_cfg.server_status() != SERVER_UP) {
     RAISE(kRuntimeError, "server is down");
@@ -99,22 +102,16 @@ void LSMPartitionReplication::replicateTo(
       replica.partition_id().data(),
       replica.partition_id().size());
 
+  size_t records_sent = 0;
+  size_t bytes_sent = 0;
+
   size_t batch_size = 0;
   RecordEnvelopeList batch;
-  batch.set_sync_commit(true); // fixme only on last batch?
   fetchRecords(
       replicated_offset,
       replica.keyrange_begin(),
       replica.keyrange_end(),
-      [
-          this,
-          &batch,
-          &replica,
-          &replicated_offset,
-          &batch_size,
-          &server_cfg,
-          &target_partition_id
-        ] (
+      [&] (
           const SHA1Hash& record_id,
           const uint64_t record_version,
           const void* record_data,
@@ -128,21 +125,44 @@ void LSMPartitionReplication::replicateTo(
     rec->set_record_data(record_data, record_size);
 
     batch_size += record_size;
+    bytes_sent += record_size;
+    ++records_sent;
 
     if (batch_size > kMaxBatchSizeBytes ||
         batch.records().size() > kMaxBatchSizeRows) {
       uploadBatchTo(server_cfg.server_addr(), batch);
+      replication_info->setTargetHostStatus(bytes_sent, records_sent);
       batch.mutable_records()->Clear();
       batch_size = 0;
     }
   });
 
-  if (batch.records().size() > 0) {
-    uploadBatchTo(server_cfg.server_addr(), batch);
+  uploadBatchTo(server_cfg.server_addr(), batch);
+  replication_info->setTargetHostStatus(bytes_sent, records_sent);
+
+  {
+    URI uri(
+        StringUtil::format(
+            "http://$0/tsdb/commit?namespace=$1&table=$2&partition=$3",
+            server_cfg.server_addr(),
+            URI::urlEncode(snap_->state.tsdb_namespace()),
+            URI::urlEncode(snap_->state.table_key()),
+            snap_->key.toString()));
+
+    http::HTTPRequest req(http::HTTPMessage::M_POST, uri.pathAndQuery());
+    req.addHeader("Host", uri.hostAndPort());
+
+    auto res = http_->executeRequest(req);
+    res.wait();
+
+    const auto& r = res.get();
+    if (r.statusCode() != 201) {
+      RAISEF(kRuntimeError, "received non-201 response: $0", r.body().toString());
+    }
   }
 }
 
-bool LSMPartitionReplication::replicate() {
+bool LSMPartitionReplication::replicate(ReplicationInfo* replication_info) {
   logTrace(
       "z1.replication",
       "Replicating partition $0/$1/$2",
@@ -155,7 +175,7 @@ bool LSMPartitionReplication::replicate() {
   if (!rc.isSuccess()) {
     RAISEF(
         kRuntimeError,
-        "error while applying metadata transactionL $0",
+        "error while applying metadata transaction: $0",
         rc.message());
   }
 
@@ -193,9 +213,17 @@ bool LSMPartitionReplication::replicate() {
         head_offset,
         head_offset - replica_offset);
 
+    replication_info->setTargetHost(r.server_id());
+
     try {
-      replicateTo(r, replica_offset);
+      replicateTo(r, replica_offset, replication_info);
+
       setReplicatedOffsetFor(&repl_state, r, head_offset);
+      {
+        auto& writer = dynamic_cast<LSMPartitionWriter&>(*partition_->getWriter());
+          writer.commitReplicationState(repl_state);
+      }
+
       dirty = true;
       ++replicas_per_partition[target_partition_id];
 
@@ -348,11 +376,16 @@ void LSMPartitionReplication::fetchRecords(
       String pkey_value;
       switch (keyspace) {
         case KEYSPACE_STRING: {
-          pkey_value = record.getString(pkey_fieldid);
+          if (record.fieldCount(pkey_fieldid) > 0) {
+            pkey_value = record.getString(pkey_fieldid);
+          }
           break;
         }
         case KEYSPACE_UINT64: {
-          uint64_t pkey_value_uint = record.getUInt64(pkey_fieldid);
+          uint64_t pkey_value_uint = 0;
+          if (record.fieldCount(pkey_fieldid) > 0) {
+            pkey_value_uint = record.getUInt64(pkey_fieldid);
+          }
           pkey_value = String((const char*) &pkey_value_uint, sizeof(uint64_t));
           break;
         }
@@ -372,7 +405,6 @@ void LSMPartitionReplication::fetchRecords(
 
       Buffer record_buf;
       msg::MessageEncoder::encode(record, *schema, &record_buf);
-
       fn(id, version, record_buf.data(), record_buf.size());
     }
   }
@@ -393,20 +425,6 @@ Status LSMPartitionReplication::fetchAndApplyMetadataTransaction() {
     }
 
     snap_ = partition_->getSnapshot();
-
-    has_new_metadata_txn =
-        snap_->state.last_metadata_txnid().empty() ||
-        SHA1Hash(
-            snap_->state.last_metadata_txnid().data(),
-            snap_->state.last_metadata_txnid().size()) != last_txid.getTransactionID();
-  }
-
-  if (has_new_metadata_txn) {
-    return Status(
-        eRuntimeError,
-        StringUtil::format(
-            "error while applying metadata transaction $0",
-            last_txid.getTransactionID().toString()));
   }
 
   return Status::success();
@@ -447,13 +465,16 @@ Status LSMPartitionReplication::finalizeSplit() {
   FinalizeSplitOperation op;
   op.set_partition_id(snap_->key.data(), snap_->key.size());
 
+  auto table_config = cdir_->getTableConfig(
+      snap_->state.tsdb_namespace(),
+      snap_->state.table_key());
   MetadataOperation envelope(
       snap_->state.tsdb_namespace(),
       snap_->state.table_key(),
       METAOP_FINALIZE_SPLIT,
       SHA1Hash(
-          snap_->state.last_metadata_txnid().data(),
-          snap_->state.last_metadata_txnid().size()),
+          table_config.metadata_txnid().data(),
+          table_config.metadata_txnid().size()),
       Random::singleton()->sha1(),
       *msg::encode(op));
 
@@ -478,13 +499,16 @@ Status LSMPartitionReplication::finalizeJoin(const ReplicationTarget& target) {
   op.set_server_id(target.server_id());
   op.set_placement_id(target.placement_id());
 
+  auto table_config = cdir_->getTableConfig(
+      snap_->state.tsdb_namespace(),
+      snap_->state.table_key());
   MetadataOperation envelope(
       snap_->state.tsdb_namespace(),
       snap_->state.table_key(),
       METAOP_FINALIZE_JOIN,
       SHA1Hash(
-          snap_->state.last_metadata_txnid().data(),
-          snap_->state.last_metadata_txnid().size()),
+          table_config.metadata_txnid().data(),
+          table_config.metadata_txnid().size()),
       Random::singleton()->sha1(),
       *msg::encode(op));
 

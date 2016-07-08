@@ -3,10 +3,9 @@ POST /api/v1/tables/create_table
 
 Create a new EventQL table or overwrite an existing table.
 
-Currently, every table must have one column that is named time and is either
-of type datetype or uint64.
+Every table needs a primary key whose first column must be of type DATETIME.
 
-You need to make sure that each field has a unique numeric ID (it's basically
+Please make sure that each field has a unique numeric ID (it's basically
 a protobuf schema).
 
 How to choose a good partition size? Currently it's best to aim for roughly

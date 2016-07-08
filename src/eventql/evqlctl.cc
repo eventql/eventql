@@ -37,6 +37,9 @@
 #include <eventql/cli/commands/rebalance.h>
 #include <eventql/cli/commands/table_set_primary_key.h>
 #include <eventql/cli/commands/table_split.h>
+#include <eventql/cli/commands/table_split_finalize.h>
+#include <eventql/cli/commands/table_disable_replication.h>
+#include <eventql/cli/commands/cluster_set_allocation_policy.h>
 
 using namespace eventql;
 
@@ -126,7 +129,10 @@ int main(int argc, const char** argv) {
   commands.emplace_back(new eventql::cli::NamespaceCreate(process_config));
   commands.emplace_back(new eventql::cli::Rebalance(process_config));
   commands.emplace_back(new eventql::cli::TableSplit(process_config));
+  commands.emplace_back(new eventql::cli::TableSplitFinalize(process_config));
   commands.emplace_back(new eventql::cli::TableSetPrimaryKey(process_config));
+  commands.emplace_back(new eventql::cli::TableDisableReplication(process_config));
+  commands.emplace_back(new eventql::cli::ClusterSetAllocationPolicy(process_config));
 
   /* print help/version and exit */
   bool print_help = flags.isSet("help");

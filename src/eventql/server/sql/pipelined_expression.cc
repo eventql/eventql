@@ -152,6 +152,11 @@ void PipelinedExpression::executeRemote(const QuerySpec& query) {
 
   for (size_t i = 0; i < query.hosts.size(); ++i) {
     try {
+      logTrace(
+          "eventql",
+          "PipelinedExpression::executeOnHost running on $0",
+          query.hosts[i].addr);
+
       executeOnHost(query.qtree, query.hosts[i].addr, &row_ctr);
       break;
     } catch (const StandardException& e) {

@@ -871,6 +871,10 @@ String ZookeeperConfigDirectory::getServerID() const {
   return server_name_.get();
 }
 
+bool ZookeeperConfigDirectory::hasServerID() const {
+  return !server_name_.isEmpty();
+}
+
 ServerConfig ZookeeperConfigDirectory::getServerConfig(
     const String& server_name) const {
   std::unique_lock<std::mutex> lk(mutex_);

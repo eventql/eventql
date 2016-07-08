@@ -2,6 +2,7 @@
  * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
  * Authors:
  *   - Paul Asmuth <paul@zscale.io>
+ *   - Laura Schlimmer <laura@zscale.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -46,10 +47,16 @@ namespace eventql {
 namespace cli {
 
 void Console::startInteractiveShell() {
+  auto history_path = cfg_.getHistoryPath();
+  linenoiseHistorySetMaxLen(cfg_.getHistoryMaxSize());
+  linenoiseHistoryLoad(history_path.c_str());
+
   char *p;
   while ((p = linenoise("evql> ")) != NULL) {
     String line(p);
+    linenoiseHistoryAdd(p);
     linenoiseFree(p);
+    linenoiseHistorySave(history_path.c_str());
 
     if (line == "quit") {
       return;
@@ -80,21 +87,23 @@ Status Console::runQueryTable(const String& query) {
   csql::ResultList results;
   auto res_parser = new csql::BinaryResultParser();
 
-  res_parser->onProgress([&stdout_os, &line_dirty, is_tty] (
-      const csql::ExecutionStatus& status) {
-    auto status_line = StringUtil::format(
-        "Query running: $0%",
-        status.progress * 100);
+  if (!cfg_.getQuietMode()) {
+    res_parser->onProgress([&stdout_os, &line_dirty, is_tty] (
+        const csql::ExecutionStatus& status) {
+      auto status_line = StringUtil::format(
+          "Query running: $0%",
+          status.progress * 100);
 
-    if (is_tty) {
-      stdout_os->eraseLine();
-      stdout_os->print("\r" + status_line);
-      line_dirty = true;
-    } else {
-      stdout_os->print(status_line + "\n");
-    }
+      if (is_tty) {
+        stdout_os->eraseLine();
+        stdout_os->print("\r" + status_line);
+        line_dirty = true;
+      } else {
+        stdout_os->print(status_line + "\n");
+      }
 
-  });
+    });
+  }
 
   res_parser->onTableHeader([&results] (const Vector<String>& columns) {
     results.addHeader(columns);
@@ -104,7 +113,12 @@ Status Console::runQueryTable(const String& query) {
     results.addRow(argv, argc);
   });
 
-  res_parser->onError([&stderr_os, &error] (const String& error_str) {
+  res_parser->onError([&stderr_os, &error, is_tty] (const String& error_str) {
+    if (is_tty) {
+      stderr_os->eraseLine();
+      stderr_os->print("\r");
+    }
+
     stderr_os->print(
         "ERROR:",
         { TerminalStyle::RED, TerminalStyle::UNDERSCORE });
@@ -132,29 +146,28 @@ Status Console::runQueryTable(const String& query) {
     return Status(eIOError);
   }
 
+  String status_line = "";
   if (results.getNumRows() > 0) {
     results.debugPrint();
 
     auto num_rows = results.getNumRows();
-    auto status_line = StringUtil::format(
+    status_line = StringUtil::format(
         "$0 row$1 returned",
         num_rows,
         num_rows > 1 ? "s" : "");
 
+  } else {
+    status_line = results.getNumColumns() == 0 ? "Query OK" : "Empty Set";
+  }
+
+  if (!cfg_.getQuietMode()) {
     if (is_tty) {
       stderr_os->print("\r" + status_line + "\n\n");
     } else {
       stderr_os->print(status_line + "\n\n");
     }
-
-  } else {
-    String line = is_tty ? "\r" : "";
-    if (results.getNumColumns() == 0) {
-      stderr_os->print(line + "Query OK \n\n");
-    } else {
-      stderr_os->print(line + "Empty set \n\n");
-    }
   }
+
 
   return Status::success();
 }
@@ -164,16 +177,42 @@ Status Console::runQueryBatch(const String& query) {
   auto stderr_os = TerminalOutputStream::fromStream(OutputStream::getStderr());
   bool line_dirty = false;
   bool is_tty = stderr_os->isTTY();
-
+  bool header_sent = false;
   bool error = false;
-  csql::ResultList results;
   auto res_parser = new csql::BinaryResultParser();
 
-  res_parser->onTableHeader([&stdout_os] (const Vector<String>& columns) {
+  if (!cfg_.getQuietMode()) {
+    res_parser->onProgress([&stderr_os, &line_dirty, &header_sent, is_tty] (
+        const csql::ExecutionStatus& status) {
+      if (!header_sent) {
+        auto status_line = StringUtil::format(
+            "Query running: $0%",
+            status.progress * 100);
+
+        if (is_tty) {
+          stderr_os->eraseLine();
+          stderr_os->print("\r" + status_line);
+          line_dirty = true;
+        } else {
+          stderr_os->print(status_line + "\n");
+        }
+      }
+    });
+  }
+
+  res_parser->onTableHeader([&stdout_os, &stderr_os, &header_sent, &line_dirty] (
+      const Vector<String>& columns) {
+    if (line_dirty) {
+      stderr_os->eraseLine();
+      stderr_os->print("\r");
+      line_dirty = false;
+    }
+
     for (const auto col : columns) {
       stdout_os->print(col + "\t");
     }
     stdout_os->print("\n");
+    header_sent = true;
   });
 
   res_parser->onRow([&stdout_os] (int argc, const csql::SValue* argv) {
@@ -183,7 +222,13 @@ Status Console::runQueryBatch(const String& query) {
     stdout_os->print("\n");
   });
 
-  res_parser->onError([&stderr_os, &error] (const String& error_str) {
+  res_parser->onError([&stderr_os, &error, &line_dirty] (const String& error_str) {
+    if (line_dirty) {
+      stderr_os->eraseLine();
+      stderr_os->print("\r");
+      line_dirty = false;
+    }
+
     stderr_os->print(
         "ERROR:",
         { TerminalStyle::RED, TerminalStyle::UNDERSCORE });

@@ -93,12 +93,14 @@ StatusServlet::StatusServlet(
     PartitionMap* pmap,
     ConfigDirectory* cdir,
     http::HTTPServerStats* http_server_stats,
-    http::HTTPClientStats* http_client_stats) :
+    http::HTTPClientStats* http_client_stats,
+    ReplicationWorker* repl_worker) :
     config_(config),
     pmap_(pmap),
     cdir_(cdir),
     http_server_stats_(http_server_stats),
-    http_client_stats_(http_client_stats) {}
+    http_client_stats_(http_client_stats),
+    repl_worker_(repl_worker) {}
 
 void StatusServlet::handleHTTPRequest(
     http::HTTPRequest* request,
@@ -198,6 +200,14 @@ void StatusServlet::renderDashboard(
   html += StringUtil::format(
       "<tr><td><em>Replication Queue Length</em></td><td align='right'>$0</td></tr>",
       zs->replication_queue_length.get());
+
+  auto num_replication_threads = repl_worker_->getNumThreads();
+  for (size_t i = 0; i < num_replication_threads; ++i) {
+    html += StringUtil::format(
+        "<tr><td><em>Replication Thread #$0</em></td><td>$1</td></tr>",
+        i + 1,
+        repl_worker_->getReplicationInfo(i)->toString());
+  }
   html += "</table>";
 
   html += "<h3>HTTP</h3>";
@@ -446,6 +456,7 @@ void StatusServlet::renderPartitionPage(
     auto table = partition.get()->getTable();
     auto snap = partition.get()->getSnapshot();
     auto state = snap->state;
+    auto repl = partition.get()->getReplicationStrategy(nullptr, nullptr);
 
     if (table->partitionerType() == TBL_PARTITION_TIMEWINDOW &&
         state.partition_keyrange_begin().size() == 8 &&
@@ -468,6 +479,10 @@ void StatusServlet::renderPartitionPage(
         PartitionLifecycleState_Name(snap->state.lifecycle_state()));
 
     html += StringUtil::format(
+        "<span><em>Needs Replication?</em>: $0</span> &mdash; ",
+        repl->needsReplication());
+
+    html += StringUtil::format(
         "<span><em>Splitting?</em>: $0</span> &mdash; ",
         snap->state.is_splitting());
 
@@ -479,10 +494,6 @@ void StatusServlet::renderPartitionPage(
         "<span><em>Size (Disk)</em>: $0MB</span> &mdash; ",
         partition.get()->getTotalDiskSize() / 1024.0 / 1024.0);
 
-    html += StringUtil::format(
-        "<span><em>Number of Records</em>: $0</span>",
-        snap->nrecs);
-
     html += "<h3>PartitionInfo</h3>";
     html += StringUtil::format(
         "<pre>$0</pre>",
@@ -490,10 +501,6 @@ void StatusServlet::renderPartitionPage(
 
     html += "<h3>PartitionState</h3>";
     html += StringUtil::format("<pre>$0</pre>", snap->state.DebugString());
-
-    auto repl_state = PartitionReplication::fetchReplicationState(snap);
-    html += "<h3>ReplicationState</h3>";
-    html += StringUtil::format("<pre>$0</pre>", repl_state.DebugString());
 
     html += "<h3>TableDefinition</h3>";
     html += StringUtil::format(

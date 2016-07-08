@@ -2,6 +2,7 @@
  * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
  * Authors:
  *   - Paul Asmuth <paul@zscale.io>
+ *   - Laura Schlimmer <laura@zscale.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -22,37 +23,35 @@
  * code of your own applications
  */
 #pragma once
-#include <eventql/util/stdtypes.h>
-#include <eventql/db/PartitionReplication.h>
-
-#include "eventql/eventql.h"
+#include <eventql/eventql.h>
+#include "eventql/cli/commands/cli_command.h"
+#include "eventql/config/process_config.h"
 
 namespace eventql {
+namespace cli {
 
-class StaticPartitionReplication : public PartitionReplication {
+class TableDisableReplication : public CLICommand {
 public:
 
-  StaticPartitionReplication(
-      RefPtr<Partition> partition,
-      RefPtr<ReplicationScheme> repl_scheme,
-      http::HTTPConnectionPool* http);
+  TableDisableReplication(RefPtr<ProcessConfig> process_cfg);
 
-  bool needsReplication() const override;
+  Status execute(
+      const std::vector<std::string>& argv,
+      FileInputStream* stdin_is,
+      OutputStream* stdout_os,
+      OutputStream* stderr_os) override;
 
-  /**
-   * Returns true on success, false on error
-   */
-  bool replicate(ReplicationInfo* replication_info) override;
 
-  bool shouldDropPartition() const override;
+  const String& getName() const override;
+  const String& getDescription() const override;
+  void printHelp(OutputStream* stdout_os) const override;
 
 protected:
-
-  size_t numFullRemoteCopies() const;
-
-  void replicateTo(const ReplicaRef& replica, uint64_t head_version);
-
+  static const String kName_;
+  static const String kDescription_;
+  RefPtr<ProcessConfig> process_cfg_;
 };
 
-} // namespace tdsb
+} // namespace cli
+} // namespace eventql
 

@@ -75,6 +75,14 @@ Status TableService::createTable(
               "nested column '$0' can't be part of the PRIMARY KEY",
               col));
     }
+
+    if (!schema.hasField(col)) {
+      return Status(
+          eIllegalArgumentError,
+          StringUtil::format(
+              "column not found '$0'",
+              col));
+    }
   }
 
   String partition_key = primary_key[0];
@@ -654,6 +662,23 @@ void TableService::compactPartition(
 
   auto writer = partition->getWriter();
   if (writer->compact()) {
+    auto change = mkRef(new PartitionChangeNotification());
+    change->partition = partition;
+    pmap_->publishPartitionChange(change);
+  }
+}
+
+void TableService::commitPartition(
+    const String& tsdb_namespace,
+    const String& table_name,
+    const SHA1Hash& partition_key) {
+  auto partition = pmap_->findOrCreatePartition(
+      tsdb_namespace,
+      table_name,
+      partition_key);
+
+  auto writer = partition->getWriter();
+  if (writer->commit()) {
     auto change = mkRef(new PartitionChangeNotification());
     change->partition = partition;
     pmap_->publishPartitionChange(change);

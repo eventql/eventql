@@ -92,6 +92,7 @@ message TableConfig {
    */
   optional bool allow_public_insert = 10 [default = true];
 
+  optional bool disable_replication = 13 [default = false];
 };
 
 message TimeWindowPartitionerConfig {

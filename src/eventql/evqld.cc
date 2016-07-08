@@ -319,10 +319,10 @@ int main(int argc, const char** argv) {
     return 1;
   }
 
-  if (!process_config->hasProperty("server.name")) {
-    logFatal("evqld", "missing 'server.name' option");
-    return 1;
-  }
+  //if (!process_config->hasProperty("server.name")) {
+  //  logFatal("evqld", "missing 'server.name' option");
+  //  return 1;
+  //}
 
   /* daemonize */
   if (process_config->getBool("server.daemonize")) {
@@ -611,7 +611,8 @@ int main(int argc, const char** argv) {
         &partition_map,
         config_dir.get(),
         http_server.stats(),
-        &z1stats()->http_client_stats);
+        &z1stats()->http_client_stats,
+        &tsdb_replication);
 
     eventql::DefaultServlet default_servlet;
 
