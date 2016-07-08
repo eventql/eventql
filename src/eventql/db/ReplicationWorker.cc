@@ -138,6 +138,10 @@ void ReplicationWorker::enqueuePartition(
 void ReplicationWorker::enqueuePartitionWithLock(
     RefPtr<Partition> partition,
     uint64_t delay_usecs /* = 0 */) {
+  if (partition->getTable()->config().config().disable_replication()) {
+    return;
+  }
+
   auto uuid = partition->uuid();
   if (waitset_.count(uuid) > 0) {
     return;
