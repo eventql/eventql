@@ -1075,6 +1075,8 @@ evqlctl_SOURCES = \
     eventql/cli/commands/table_split.cc \
     eventql/cli/commands/table_split_finalize.h \
     eventql/cli/commands/table_split_finalize.cc \
+    eventql/cli/commands/table_disable_replication.h \
+    eventql/cli/commands/table_disable_replication.cc \
     eventql/evqlctl.cc
 
 evqlctl_LDADD = \
