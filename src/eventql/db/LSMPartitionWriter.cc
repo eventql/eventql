@@ -186,8 +186,10 @@ bool LSMPartitionWriter::commit() {
 
     logDebug(
         "z1.core",
-        "Committing partition $1/$2/$3 ($0 records), took $4s",
+        "Committing partition $3/$4/$5 (num_records=$0, sequence=$1..$2), took $6s",
         arena->size(),
+        snap->state.lsm_sequence() + 1,
+        snap->state.lsm_sequence() + arena->size(),
         snap->state.tsdb_namespace(),
         snap->state.table_key(),
         snap->key.toString(),

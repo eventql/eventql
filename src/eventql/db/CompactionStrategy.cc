@@ -79,6 +79,8 @@ bool SimpleCompactionStrategy::compact(
   auto id_col = cstable->getColumnWriter("__lsm_id");
   auto version_col = cstable->getColumnWriter("__lsm_version");
   auto sequence_col = cstable->getColumnWriter("__lsm_sequence");
+  size_t rows_written = 0;
+  size_t rows_skipped = 0;
 
   for (const auto& tbl : input) {
     auto input_cstable_file = FileUtil::joinPaths(
@@ -156,6 +158,7 @@ bool SimpleCompactionStrategy::compact(
           }
 
           cstable->addRow();
+          ++rows_written;
         } else {
           for (auto& col : columns) {
             if (col.first.get()) {
@@ -164,6 +167,8 @@ bool SimpleCompactionStrategy::compact(
               } while (col.first->nextRepetitionLevel() > 0);
             }
           }
+
+          ++rows_skipped;
         }
       }
     } catch (const std::exception& e) {
@@ -184,6 +189,18 @@ bool SimpleCompactionStrategy::compact(
     vmap_ordered.emplace(p);
   }
   LSMTableIndex::write(vmap_ordered, cstable_filepath + ".idx");
+
+  auto snap = partition_->getSnapshot();
+  logDebug(
+      "z1.core",
+      "Compacting partition $4/$5/$6 (rows_written=$0, rows_skipped=$1 sequence=$2..$3)",
+      rows_written,
+      rows_skipped,
+      input.begin()->first_sequence(),
+      input.rbegin()->last_sequence(),
+      snap->state.tsdb_namespace(),
+      snap->state.table_key(),
+      snap->key.toString());
 
   LSMTableRef tbl_ref;
   tbl_ref.set_filename(cstable_filename);
