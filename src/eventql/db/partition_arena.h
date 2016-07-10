@@ -39,6 +39,7 @@ public:
 
   struct SkiplistReader {
     bool readNext();
+    size_t size() const;
     Vector<bool> skiplist;
     size_t position;
   };

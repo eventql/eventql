@@ -36,7 +36,9 @@ public:
 
   static RefPtr<CSTableReader> openFile(const String& filename);
 
-  static RefPtr<CSTableReader> openFile(const CSTableFile* arena);
+  static RefPtr<CSTableReader> openFile(
+      const CSTableFile* arena,
+      uint64_t limit = -1);
 
   ~CSTableReader();
 

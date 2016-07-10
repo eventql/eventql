@@ -161,5 +161,9 @@ bool PartitionArena::SkiplistReader::readNext() {
   return skiplist[position++];
 }
 
+size_t PartitionArena::SkiplistReader::size() const {
+  return skiplist.size();
+}
+
 } // namespace eventql
 

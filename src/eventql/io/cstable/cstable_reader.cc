@@ -192,7 +192,9 @@ RefPtr<CSTableReader> CSTableReader::openFile(const String& filename) {
   }
 }
 
-RefPtr<CSTableReader> CSTableReader::openFile(const CSTableFile* file) {
+RefPtr<CSTableReader> CSTableReader::openFile(
+    const CSTableFile* file,
+    uint64_t limit /* = -1 */) {
   uint64_t transaction_id;
   uint64_t num_rows;
   file->getTransaction(&transaction_id, &num_rows);
@@ -209,7 +211,7 @@ RefPtr<CSTableReader> CSTableReader::openFile(const CSTableFile* file) {
       false,
       columns,
       column_readers,
-      num_rows,
+      std::min(num_rows, limit),
       -1);
 }
 

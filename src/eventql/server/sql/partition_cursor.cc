@@ -67,11 +67,12 @@ bool PartitionCursor::openNextTable() {
     case 0: {
       if (snap_->head_arena.get() &&
           snap_->head_arena->getCSTableFile()) {
-        cstable = cstable::CSTableReader::openFile(
-            snap_->head_arena->getCSTableFile());
         cur_skiplist_.reset(
             new PartitionArena::SkiplistReader(
                 snap_->head_arena->getSkiplistReader()));
+        cstable = cstable::CSTableReader::openFile(
+            snap_->head_arena->getCSTableFile(),
+            cur_skiplist_->size());
         break;
       } else {
         ++cur_table_;
@@ -82,11 +83,12 @@ bool PartitionCursor::openNextTable() {
     case 1: {
       if (snap_->compacting_arena.get() &&
           snap_->compacting_arena->getCSTableFile()) {
-        cstable = cstable::CSTableReader::openFile(
-            snap_->compacting_arena->getCSTableFile());
         cur_skiplist_.reset(
             new PartitionArena::SkiplistReader(
                 snap_->compacting_arena->getSkiplistReader()));
+        cstable = cstable::CSTableReader::openFile(
+            snap_->compacting_arena->getCSTableFile(),
+            cur_skiplist_->size());
         break;
       } else {
         ++cur_table_;
