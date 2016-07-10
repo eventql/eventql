@@ -37,6 +37,12 @@ namespace eventql {
 class PartitionArena : public RefCounted {
 public:
 
+  struct SkiplistReader {
+    bool readNext();
+    Vector<bool> skiplist;
+    size_t position;
+  };
+
   PartitionArena(const msg::MessageSchema& schema);
 
   bool insertRecord(const RecordRef& record);
@@ -56,6 +62,7 @@ public:
       uint64_t sequence);
 
   cstable::CSTableFile* getCSTableFile() const;
+  SkiplistReader getSkiplistReader() const;
 
 protected:
   struct RecordVersion {
