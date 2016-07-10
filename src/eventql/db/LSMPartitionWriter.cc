@@ -207,7 +207,7 @@ bool LSMPartitionWriter::commit() {
     commited = true;
   }
 
-  commit_mutex_.unlock();
+  commit_lk.unlock();
 
   if (needsSplit()) {
     auto rc = split();
