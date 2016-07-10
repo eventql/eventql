@@ -87,15 +87,6 @@ void MapReduceAPIServlet::handle(
     return;
   }
 
-  if (uri.path() == "/api/v1/mapreduce/tasks/save_to_table_partition") {
-    req_stream->readBody();
-    catchAndReturnErrors(&res, [this, &session, &uri, &req, &res] {
-      executeSaveToTablePartitionTask(session, uri, &req, &res);
-    });
-    res_stream->writeResponse(res);
-    return;
-  }
-
   res.setStatus(http::kStatusNotFound);
   res.addHeader("Connection", "close");
   res.addHeader("Content-Type", "text/html; charset=utf-8");
@@ -286,17 +277,9 @@ void MapReduceAPIServlet::executeSaveToTableTask(
     return;
   }
 
-  String partition;
-  if (!URI::getParam(params, "partition", &partition)) {
-    res->setStatus(http::kStatusBadRequest);
-    res->addBody("missing ?partition=... parameter");
-    return;
-  }
-
-  bool saved = service_->saveLocalResultToTable(
+  bool saved = service_->saveResultToTable(
       session,
       table_name,
-      SHA1Hash::fromHexString(partition),
       SHA1Hash::fromHexString(result_id));
 
   if (saved) {
@@ -305,49 +288,6 @@ void MapReduceAPIServlet::executeSaveToTableTask(
     res->setStatus(http::kStatusNoContent);
   }
 }
-
-void MapReduceAPIServlet::executeSaveToTablePartitionTask(
-    Session* session,
-    const URI& uri,
-    const http::HTTPRequest* req,
-    http::HTTPResponse* res) {
-  URI::ParamList params;
-  URI::parseQueryString(req->body().toString(), &params);
-
-  Vector<String> input_tables;
-  for (const auto& p : params) {
-    if (p.first == "input_table") {
-      input_tables.emplace_back(p.second);
-    }
-  }
-
-  String table_name;
-  if (!URI::getParam(params, "table_name", &table_name)) {
-    res->setStatus(http::kStatusBadRequest);
-    res->addBody("missing ?table_name=... parameter");
-    return;
-  }
-
-  String partition;
-  if (!URI::getParam(params, "partition", &partition)) {
-    res->setStatus(http::kStatusBadRequest);
-    res->addBody("missing ?partition=... parameter");
-    return;
-  }
-
-  bool saved = service_->saveRemoteResultsToTable(
-      session,
-      table_name,
-      SHA1Hash::fromHexString(partition),
-      input_tables);
-
-  if (saved) {
-    res->setStatus(http::kStatusCreated);
-  } else {
-    res->setStatus(http::kStatusNoContent);
-  }
-}
-
 
 void MapReduceAPIServlet::executeMapReduceScript(
     Session* session,
