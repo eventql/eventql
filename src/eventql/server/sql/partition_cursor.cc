@@ -98,8 +98,8 @@ bool PartitionCursor::openNextTable() {
       if (cur_table_ >= snap_->state.lsm_tables().size() + 2) {
         return false;
       }
-
-      const auto& tbl = (snap_->state.lsm_tables().data())[cur_table_ - 2];
+      const auto& tbl = (snap_->state.lsm_tables().data())[
+          snap_->state.lsm_tables().size() - (cur_table_ - 1)];
       auto cstable_file = FileUtil::joinPaths(
           snap_->base_path,
           tbl->filename() + ".cst");
