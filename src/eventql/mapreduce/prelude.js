@@ -93,7 +93,7 @@ var console = {
   }
 };
 
-var Z1 = (function(global) {
+var EVQL = (function(global) {
   var seq = 0;
   var jobs = {};
   var bcastdata = {};
@@ -250,3 +250,6 @@ var Z1 = (function(global) {
 
   return api;
 })(this);
+
+// backwards compat
+Z1 = EVQL;
