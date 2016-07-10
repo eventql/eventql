@@ -85,7 +85,7 @@ bool PartitionArena::insertRecord(
     // record does exist in arena, but the one we're inserting is newer
     skiplist_[old->second.position] = true;
   } else {
-    // record in arena is newer than the one we're inserting, return false
+    // record in arena is newer or equal to the one we're inserting, return false
     return false;
   }
 
@@ -99,11 +99,10 @@ bool PartitionArena::insertRecord(
 
   RecordVersion rversion;
   rversion.version = record_version;
-  rversion.position = num_records_;
-  record_versions_.emplace(record_id, rversion);
-  vmap_.emplace(record_id, record_version);
+  rversion.position = num_records_++;
+  record_versions_[record_id] = rversion;
+  vmap_[record_id] = record_version;
   skiplist_.push_back(false);
-  ++num_records_;
 
   cstable_writer_->commit();
   return true;
