@@ -510,6 +510,10 @@ bool CSTableScan::fetchNextWithoutColumns(SValue* row, int row_len) {
   while (cur_pos_ < num_records_) {
     ++cur_pos_;
 
+    if (!filter_fn_()) {
+      continue;
+    }
+
     if (where_expr_.program() != nullptr) {
       SValue where_tmp;
       VM::evaluate(txn_, where_expr_.program(), 0, nullptr, &where_tmp);
