@@ -42,6 +42,12 @@ MetadataReplication::MetadataReplication(
   });
 }
 
+MetadataReplication::~MetadataReplication() {
+  if (running_) {
+    stop();
+  }
+}
+
 void MetadataReplication::applyTableConfigChange(const TableDefinition& cfg) {
   bool has_local_replica = false;
   Vector<String> servers;
@@ -69,7 +75,13 @@ void MetadataReplication::applyTableConfigChange(const TableDefinition& cfg) {
 }
 
 void MetadataReplication::replicateWithRetries(const ReplicationJob& job) {
-  auto rc = replicate(job);
+  auto rc = Status::success();
+  try {
+    rc = replicate(job);
+  } catch (const std::exception& e) {
+    rc = Status(eRuntimeError, e.what());
+  }
+
   if (!rc.isSuccess()) {
     logWarning("evqld", "metadata replication failed: $0", rc.message());
 

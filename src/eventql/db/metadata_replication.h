@@ -42,6 +42,8 @@ public:
       const String& server_name,
       MetadataStore* metadata_store);
 
+  ~MetadataReplication();
+
   void start();
   void stop();
 
