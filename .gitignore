@@ -10,6 +10,7 @@
 *.pb.cc
 src/evql
 src/evqld
+src/evql-mysql-import
 /config.h
 Makefile
 Makefile.in

@@ -94,6 +94,8 @@ MapTableTask::MapTableTask(
       break;
     }
 
+    case TBL_PARTITION_STRING:
+    case TBL_PARTITION_UINT64:
     case TBL_PARTITION_TIMEWINDOW: {
       auto keyrange = TSDBTableProvider::findKeyRange(
           table.get()->getPartitionKey(),

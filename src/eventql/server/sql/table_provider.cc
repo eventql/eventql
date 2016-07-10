@@ -120,11 +120,20 @@ Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
     return None<ScopedPtr<csql::TableExpression>>();
   }
 
-  auto partitioner = table.get()->partitioner();
   Vector<TableScan::PartitionLocation> partitions;
   if (table_ref.partition_key.isEmpty()) {
-    if (table.get()->partitionerType() == TBL_PARTITION_TIMEWINDOW &&
-        table.get()->storage() == TBL_STORAGE_COLSM) {
+    if (table.get()->partitionerType() == TBL_PARTITION_FIXED ||
+        table.get()->storage() != TBL_STORAGE_COLSM) {
+      auto partitioner = table.get()->partitioner();
+      for (const auto& p : partitioner->listPartitions(seqscan->constraints())) {
+        TableScan::PartitionLocation pl;
+        pl.partition_id = p;
+        if (!replication_scheme_->hasLocalReplica(p)) {
+          pl.servers = replication_scheme_->replicasFor(p);
+        }
+        partitions.emplace_back(pl);
+      }
+    } else {
       auto keyrange = findKeyRange(
           table.get()->config().config().partition_key(),
           seqscan->constraints());
@@ -158,16 +167,6 @@ Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
           pl.servers.emplace_back(rref);
         }
 
-        partitions.emplace_back(pl);
-      }
-    } else {
-      auto partitioner = table.get()->partitioner();
-      for (const auto& p : partitioner->listPartitions(seqscan->constraints())) {
-        TableScan::PartitionLocation pl;
-        pl.partition_id = p;
-        if (!replication_scheme_->hasLocalReplica(p)) {
-          pl.servers = replication_scheme_->replicasFor(p);
-        }
         partitions.emplace_back(pl);
       }
     }

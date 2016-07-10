@@ -22,7 +22,6 @@
  * code of your own applications
  */
 #include <eventql/util/logging.h>
-#include <eventql/buildconfig.h>
 #include <eventql/util/mysql//MySQLConnection.h>
 
 namespace util {

@@ -81,7 +81,7 @@ void PartitionMap::configureTable(
     if (iter == tables_.end()) {
       tables_.emplace(tbl_key, new Table(table));
     } else {
-      if (table.config().partitioner() == TBL_PARTITION_TIMEWINDOW) {
+      if (table.config().partitioner() != TBL_PARTITION_FIXED) {
         auto last_metadata_txn = iter->second->getLastMetadataTransaction();
         if (table.metadata_txnseq() > last_metadata_txn.getSequenceNumber()) {
           metadata_changed = true;
@@ -232,7 +232,7 @@ RefPtr<Partition> PartitionMap::findOrCreatePartition(
 
   PartitionDiscoveryResponse discovery_info;
 
-  if (table.get()->partitionerType() == TBL_PARTITION_TIMEWINDOW) {
+  if (table.get()->partitionerType() != TBL_PARTITION_FIXED) {
     PartitionDiscoveryRequest discovery_request;
     discovery_request.set_db_namespace(tsdb_namespace);
     discovery_request.set_table_id(table_name);
