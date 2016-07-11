@@ -294,6 +294,7 @@ bool LSMPartitionReplication::replicate(ReplicationInfo* replication_info) {
     if (split_complete) {
       auto rc = finalizeSplit();
       if (!rc.isSuccess()) {
+        logWarning("evqld", "error while finalizing split: $0", rc.message());
         return false;
       }
     }
