@@ -507,7 +507,7 @@ void TableService::insertReplicatedRecords(
     }
 
     insertRecordsLocal(
-        group_key[0,
+        group_key[0],
         group_key[1],
         SHA1Hash::fromHexString(group_key[2]),
         group.second,
