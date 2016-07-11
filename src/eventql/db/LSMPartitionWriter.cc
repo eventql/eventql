@@ -87,6 +87,10 @@ Set<SHA1Hash> LSMPartitionWriter::insertRecords(const Vector<RecordRef>& records
   }
 
   const auto& tables = snap->state.lsm_tables();
+  if (tables.size() > kMaxLSMTables) {
+    RAISE(kRuntimeError, "partition is overloaded, can't insert");
+  }
+
   for (auto tbl = tables.rbegin(); tbl != tables.rend(); ++tbl) {
     auto idx = idx_cache_->lookup(
         FileUtil::joinPaths(snap->rel_path, tbl->filename()));
