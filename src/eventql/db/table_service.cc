@@ -487,9 +487,6 @@ void TableService::insertReplicatedRecords(
     auto record_data = record.record_data().data();
     auto record_size = record.record_data().size();
     auto record_version = record.record_version();
-    if (record_version == 0) {
-      record_version = WallClock::unixMicros();
-    }
 
     auto group_key = StringUtil::format(
         "$0~$1~$2",
@@ -510,7 +507,7 @@ void TableService::insertReplicatedRecords(
     }
 
     insertRecordsLocal(
-        group_key[0],
+        group_key[0,
         group_key[1],
         SHA1Hash::fromHexString(group_key[2]),
         group.second,
