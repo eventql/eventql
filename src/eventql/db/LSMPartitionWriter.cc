@@ -74,6 +74,7 @@ Set<SHA1Hash> LSMPartitionWriter::insertRecords(const Vector<RecordRef>& records
 
   HashMap<SHA1Hash, uint64_t> rec_versions;
   for (const auto& r : records) {
+    iputs("insert record: $0 -> $1", r.record_id.toString(), r.record_version);
     rec_versions.emplace(r.record_id, snap->head_arena->fetchRecordVersion(r.record_id));
   }
 
