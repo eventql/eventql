@@ -101,6 +101,8 @@ public:
   MetadataTransaction getLastMetadataTransaction() const;
   size_t getTotalDiskSize() const;
 
+  bool isSplitting() const;
+
 protected:
 
   bool upgradeToLSMv2() const;

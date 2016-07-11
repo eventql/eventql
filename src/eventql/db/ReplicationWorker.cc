@@ -123,23 +123,32 @@ ReplicationWorker::~ReplicationWorker() {
   stop();
 }
 
-void ReplicationWorker::enqueuePartition(RefPtr<Partition> partition) {
-  std::unique_lock<std::mutex> lk(mutex_);
-  enqueuePartitionWithLock(partition, kReplicationCorkWindowMicros);
-}
-
 void ReplicationWorker::enqueuePartition(
     RefPtr<Partition> partition,
-    uint64_t delay_usecs) {
+    uint64_t flags /* = ReplicationOptions::CORK */) {
   std::unique_lock<std::mutex> lk(mutex_);
-  enqueuePartitionWithLock(partition, delay_usecs);
+  enqueuePartitionWithLock(partition, flags);
 }
 
 void ReplicationWorker::enqueuePartitionWithLock(
     RefPtr<Partition> partition,
-    uint64_t delay_usecs /* = 0 */) {
+    uint64_t flags) {
   if (partition->getTable()->config().config().disable_replication()) {
     return;
+  }
+
+  if (partition->isSplitting()) {
+    flags &= ~(uint64_t) ReplicationOptions::CORK;
+    flags |= (uint64_t) ReplicationOptions::URGENT;
+  }
+
+  uint64_t enqueue_at = WallClock::unixMicros();
+  if (flags & (uint64_t) ReplicationOptions::CORK) {
+    enqueue_at += kReplicationCorkWindowMicros;
+  }
+
+  if (flags & (uint64_t) ReplicationOptions::URGENT) {
+    enqueue_at = 0;
   }
 
   auto uuid = partition->uuid();
@@ -147,14 +156,11 @@ void ReplicationWorker::enqueuePartitionWithLock(
     return;
   }
 
-  queue_.emplace(
-      WallClock::unixMicros() + delay_usecs,
-      partition);
-
-  z1stats()->replication_queue_length.set(queue_.size());
-
+  queue_.emplace(enqueue_at, partition);
   waitset_.emplace(uuid);
   cv_.notify_all();
+
+  z1stats()->replication_queue_length.set(queue_.size());
 }
 
 void ReplicationWorker::start() {
@@ -247,7 +253,9 @@ void ReplicationWorker::work(size_t thread_id) {
 
       repl = partition->getReplicationStrategy(repl_scheme, http_);
       if (repl->needsReplication()) {
-        enqueuePartitionWithLock(partition, kReplicationCorkWindowMicros);
+        enqueuePartitionWithLock(
+            partition,
+            (uint64_t) ReplicationOptions::CORK);
       } else {
         repl = partition->getReplicationStrategy(repl_scheme, http_);
         if (repl->shouldDropPartition()) {
@@ -259,7 +267,9 @@ void ReplicationWorker::work(size_t thread_id) {
                   snap->key);
 
           if (!dropped) {
-            enqueuePartitionWithLock(partition, kReplicationCorkWindowMicros);
+            enqueuePartitionWithLock(
+                partition,
+                (uint64_t) ReplicationOptions::CORK);
           }
         }
       }

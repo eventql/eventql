@@ -26,8 +26,8 @@
 #include <eventql/util/io/fileutil.h>
 #include <eventql/util/logging.h>
 #include <eventql/db/LSMTableIndexCache.h>
-
 #include "eventql/eventql.h"
+#include <assert.h>
 
 namespace eventql {
 
@@ -74,6 +74,13 @@ RefPtr<LSMTableIndex> LSMTableIndexCache::lookup(const String& filename) {
     slot->size =
         FileUtil::size(file_path) + filename.size() * 2 + kConstantOverhead;
     size_ += slot->size;
+
+    logInfo(
+        "evqld",
+        "LSMTableIndexCache::load: $0 (size=$1/$2)",
+        filename,
+        size_,
+        slot->size);
   }
 
   slot->next = head_;
@@ -95,6 +102,7 @@ RefPtr<LSMTableIndex> LSMTableIndexCache::lookup(const String& filename) {
 
 void LSMTableIndexCache::flush(const String& filename) {
   ScopedLock<std::mutex> lk(mutex_);
+  logInfo("evqld", "LSMTableIndexCache::flush: $0 (size=$1)", filename, size_);
 
   auto iter = map_.find(filename);
   if (iter == map_.end()) {
@@ -117,15 +125,14 @@ void LSMTableIndexCache::flush(const String& filename) {
   }
 
   size_ -= slot->size;
+  assert(head_ || size_ == 0);
   delete slot;
 }
 
 // PRECONDITION: must hold mutex
 void LSMTableIndexCache::flushTail() {
   auto entry = tail_;
-  if (!entry) {
-    return;
-  }
+  assert(entry != nullptr);
 
   if (entry->prev) {
     entry->prev->next = nullptr;
@@ -136,10 +143,12 @@ void LSMTableIndexCache::flushTail() {
   tail_ = entry->prev;
   size_ -= entry->size;
   map_.erase(entry->filename);
+  assert(head_ || size_ == 0);
   delete entry;
 }
 
 size_t LSMTableIndexCache::size() const {
+  ScopedLock<std::mutex> lk(mutex_);
   return size_;
 }
 

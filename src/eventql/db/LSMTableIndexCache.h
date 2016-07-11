@@ -61,11 +61,11 @@ protected:
   void flushTail();
 
   const String base_path_;
-  std::mutex mutex_;
+  mutable std::mutex mutex_;
   HashMap<String, Entry*> map_;
   Entry* head_;
   Entry* tail_;
-  std::atomic<size_t> size_;
+  size_t size_;
   size_t max_size_;
 };
 
