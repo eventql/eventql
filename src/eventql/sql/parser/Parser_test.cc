@@ -1197,24 +1197,27 @@ TEST_CASE(ParserTest, TestInsertIntoShortStatement, [] () {
   const auto& children = stmt->getChildren();
 
   EXPECT(*stmt == ASTNode::T_INSERT_INTO);
-  EXPECT(children.size() == 2);
+  EXPECT(children.size() == 3);
   EXPECT_EQ(*children[0], ASTNode::T_TABLE_NAME);
   EXPECT_EQ(*children[0]->getToken(), Token::T_IDENTIFIER);
   EXPECT_EQ(children[0]->getToken()->getString(), "evtbl");
 
-  EXPECT(*children[1] == ASTNode::T_VALUE_LIST);
-  EXPECT(children[1]->getChildren().size() == 5);
-  EXPECT_EQ(*children[1]->getChildren()[0], ASTNode::T_LITERAL);
-  EXPECT_EQ(children[1]->getChildren()[0]->getToken()->getString(), "1464463790");
-  EXPECT_EQ(children[1]->getChildren()[1]->getToken()->getString(), "xxx");
+  EXPECT(*children[1] == ASTNode::T_COLUMN_LIST);
+  EXPECT(children[1]->getChildren().size() == 0);
 
-  EXPECT_EQ(*children[1]->getChildren()[2], ASTNode::T_ADD_EXPR);
-  EXPECT_EQ(children[1]->getChildren()[2]->getChildren().size(), 2);
-  EXPECT_EQ(*children[1]->getChildren()[2]->getChildren()[0], ASTNode::T_LITERAL);
-  EXPECT_EQ(*children[1]->getChildren()[2]->getChildren()[1], ASTNode::T_LITERAL);
+  EXPECT(*children[2] == ASTNode::T_VALUE_LIST);
+  EXPECT(children[2]->getChildren().size() == 5);
+  EXPECT_EQ(*children[2]->getChildren()[0], ASTNode::T_LITERAL);
+  EXPECT_EQ(children[2]->getChildren()[0]->getToken()->getString(), "1464463790");
+  EXPECT_EQ(children[2]->getChildren()[1]->getToken()->getString(), "xxx");
 
-  EXPECT_EQ(*children[1]->getChildren()[3]->getToken(), Token::T_TRUE);
-  EXPECT_EQ(*children[1]->getChildren()[4]->getToken(), Token::T_NULL);
+  EXPECT_EQ(*children[2]->getChildren()[2], ASTNode::T_ADD_EXPR);
+  EXPECT_EQ(children[2]->getChildren()[2]->getChildren().size(), 2);
+  EXPECT_EQ(*children[2]->getChildren()[2]->getChildren()[0], ASTNode::T_LITERAL);
+  EXPECT_EQ(*children[2]->getChildren()[2]->getChildren()[1], ASTNode::T_LITERAL);
+
+  EXPECT_EQ(*children[2]->getChildren()[3]->getToken(), Token::T_TRUE);
+  EXPECT_EQ(*children[2]->getChildren()[4]->getToken(), Token::T_NULL);
 });
 
 TEST_CASE(ParserTest, TestInsertIntoFromJSONStatement, [] () {

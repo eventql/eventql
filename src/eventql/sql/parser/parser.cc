@@ -586,8 +586,12 @@ ASTNode* Parser::insertIntoStatement() {
 
     case Token::T_LPAREN:
       insert_into->appendChild(insertColumnList());
+      insert_into->appendChild(insertValueList());
+      break;
 
     case Token::T_VALUES:
+      //empty column list
+      insert_into->appendChild(new ASTNode(ASTNode::T_COLUMN_LIST));
       insert_into->appendChild(insertValueList());
       break;
 
