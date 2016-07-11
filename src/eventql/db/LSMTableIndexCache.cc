@@ -132,9 +132,7 @@ void LSMTableIndexCache::flush(const String& filename) {
 // PRECONDITION: must hold mutex
 void LSMTableIndexCache::flushTail() {
   auto entry = tail_;
-  if (!entry) {
-    return;
-  }
+  assert(entry != nullptr);
 
   if (entry->prev) {
     entry->prev->next = nullptr;
