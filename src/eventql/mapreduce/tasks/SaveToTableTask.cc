@@ -43,8 +43,6 @@ SaveToTableTask::SaveToTableTask(
     sources_(sources),
     auth_(auth) {
   Vector<size_t> input;
-
-  size_t nshard = 0;
   for (const auto& src : sources_) {
     for (auto idx : src->shards()) {
       auto shard = mkRef(new SaveToTableTaskShard());
