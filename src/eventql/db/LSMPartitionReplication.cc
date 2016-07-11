@@ -349,19 +349,15 @@ void LSMPartitionReplication::fetchRecords(
     auto id_col = cstable->getColumnReader("__lsm_id");
     auto version_col = cstable->getColumnReader("__lsm_version");
     auto sequence_col = cstable->getColumnReader("__lsm_sequence");
+    RefPtr<cstable::ColumnReader> skip_col;
+    if (tbl.has_skiplist()) {
+      skip_col = cstable->getColumnReader("__lsm_skip");
+    }
 
     auto nrecs = cstable->numRecords();
     for (size_t i = 0; i < nrecs; ++i) {
       uint64_t rlvl;
       uint64_t dlvl;
-
-      uint64_t sequence;
-      sequence_col->readUnsignedInt(&rlvl, &dlvl, &sequence);
-
-      if (sequence < start_sequence) {
-        materializer.skipRecord();
-        continue;
-      }
 
       String id_str;
       id_col->readString(&rlvl, &dlvl, &id_str);
@@ -369,6 +365,19 @@ void LSMPartitionReplication::fetchRecords(
 
       uint64_t version;
       version_col->readUnsignedInt(&rlvl, &dlvl, &version);
+
+      uint64_t sequence;
+      sequence_col->readUnsignedInt(&rlvl, &dlvl, &sequence);
+
+      bool skip = false;
+      if (skip_col.get()) {
+        skip_col->readBoolean(&rlvl, &dlvl, &skip);
+      }
+
+      if (sequence < start_sequence || skip) {
+        materializer.skipRecord();
+        continue;
+      }
 
       msg::MessageObject record;
       materializer.nextRecord(&record);

@@ -50,10 +50,6 @@ SaveToTableTask::SaveToTableTask(
       auto shard = mkRef(new SaveToTableTaskShard());
       shard->task = this;
       shard->dependencies.emplace_back(idx);
-      shard->partition = FixedShardPartitioner::partitionKeyFor(
-          table_name,
-          nshard++);
-
       addShard(shard.get(), shards);
     }
   }
@@ -77,11 +73,10 @@ Option<MapReduceShardResult> SaveToTableTask::execute(
 
   logDebug(
       "z1.mapreduce",
-      "Saving result shard to table; result_id=$4 target=$0/$1/$2/$3",
+      "Saving result shard to table; result_id=$3 target=$0/$1/$2",
       host.get().addr,
       session_->getEffectiveNamespace(),
       table_name_,
-      shard->partition.toString(),
       result_id.get().toString());
 
   auto url = StringUtil::format(
@@ -89,10 +84,9 @@ Option<MapReduceShardResult> SaveToTableTask::execute(
       host.get().addr);
 
   String params = StringUtil::format(
-      "result_id=$0&partition=$1&table_name=$2",
+      "result_id=$0&table_name=$1",
       result_id.get().toString(),
-      shard->partition.toString(),
-      table_name_);
+      URI::urlEncode(table_name_));
 
   http::HTTPClient http_client(&z1stats()->http_client_stats);
   auto req = http::HTTPRequest::mkPost(url, params);

@@ -39,6 +39,7 @@ LSMPartitionReader::LSMPartitionReader(
     PartitionReader(head),
     table_(table) {}
 
+// FIXME read in memory data
 void LSMPartitionReader::fetchRecords(
     const Set<String>& required_columns,
     Function<void (const msg::MessageObject& record)> fn) {
@@ -55,8 +56,13 @@ void LSMPartitionReader::fetchRecords(
         schema.get(),
         cstable.get(),
         required_columns);
+
     auto id_col = cstable->getColumnReader("__lsm_id");
     auto is_update_col = cstable->getColumnReader("__lsm_is_update");
+    RefPtr<cstable::ColumnReader> skip_col;
+    if (tbl->has_skiplist()) {
+      skip_col = cstable->getColumnReader("__lsm_skip");
+    }
 
     auto nrecs = cstable->numRecords();
     for (size_t i = 0; i < nrecs; ++i) {
@@ -70,7 +76,14 @@ void LSMPartitionReader::fetchRecords(
       id_col->readString(&rlvl, &dlvl, &id_str);
       SHA1Hash id(id_str.data(), id_str.size());
 
-      if (id_set.count(id) == 0) {
+      bool skip = false;
+      if (skip_col.get()) {
+        skip_col->readBoolean(&rlvl, &dlvl, &skip);
+      }
+
+      if (skip || id_set.count(id) > 0) {
+        materializer.skipRecord();
+      } else {
         if (is_update) {
           id_set.emplace(id);
         }
@@ -78,8 +91,6 @@ void LSMPartitionReader::fetchRecords(
         msg::MessageObject record;
         materializer.nextRecord(&record);
         fn(record);
-      } else {
-        materializer.skipRecord();
       }
     }
   }

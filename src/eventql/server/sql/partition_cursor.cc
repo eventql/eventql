@@ -59,12 +59,20 @@ bool PartitionCursor::next(csql::SValue* row, int row_len) {
 
 bool PartitionCursor::openNextTable() {
   RefPtr<cstable::CSTableReader> cstable;
+  RefPtr<cstable::ColumnReader> skip_col;
+
+  cur_skiplist_.reset();
+
   switch (cur_table_) {
     case 0: {
       if (snap_->head_arena.get() &&
           snap_->head_arena->getCSTableFile()) {
+        cur_skiplist_.reset(
+            new PartitionArena::SkiplistReader(
+                snap_->head_arena->getSkiplistReader()));
         cstable = cstable::CSTableReader::openFile(
-            snap_->head_arena->getCSTableFile());
+            snap_->head_arena->getCSTableFile(),
+            cur_skiplist_->size());
         break;
       } else {
         ++cur_table_;
@@ -75,8 +83,12 @@ bool PartitionCursor::openNextTable() {
     case 1: {
       if (snap_->compacting_arena.get() &&
           snap_->compacting_arena->getCSTableFile()) {
+        cur_skiplist_.reset(
+            new PartitionArena::SkiplistReader(
+                snap_->compacting_arena->getSkiplistReader()));
         cstable = cstable::CSTableReader::openFile(
-            snap_->compacting_arena->getCSTableFile());
+            snap_->compacting_arena->getCSTableFile(),
+            cur_skiplist_->size());
         break;
       } else {
         ++cur_table_;
@@ -88,12 +100,15 @@ bool PartitionCursor::openNextTable() {
       if (cur_table_ >= snap_->state.lsm_tables().size() + 2) {
         return false;
       }
-
-      const auto& tbl = (snap_->state.lsm_tables().data())[cur_table_ - 2];
+      const auto& tbl = (snap_->state.lsm_tables().data())[
+          snap_->state.lsm_tables().size() - (cur_table_ - 1)];
       auto cstable_file = FileUtil::joinPaths(
           snap_->base_path,
           tbl->filename() + ".cst");
       cstable = cstable::CSTableReader::openFile(cstable_file);
+      if (tbl->has_skiplist()) {
+        skip_col = cstable->getColumnReader("__lsm_skip");
+      }
       break;
     }
   }
@@ -103,15 +118,27 @@ bool PartitionCursor::openNextTable() {
   cur_scan_.reset(
       new csql::CSTableScan(txn_, execution_context_, stmt_, cstable));
 
-  cur_scan_->setFilter([this, id_col, is_update_col] () -> bool {
+  cur_scan_->setFilter([this, id_col, is_update_col, skip_col] () -> bool {
     uint64_t rlvl;
     uint64_t dlvl;
+
     String id_str;
     id_col->readString(&rlvl, &dlvl, &id_str);
+    SHA1Hash id(id_str.data(), id_str.size());
+
     bool is_update;
     is_update_col->readBoolean(&rlvl, &dlvl, &is_update);
-    SHA1Hash id(id_str.data(), id_str.size());
-    if (id_set_.count(id) > 0) {
+
+    bool skip = false;
+    if (skip_col.get()) {
+      skip_col->readBoolean(&rlvl, &dlvl, &skip);
+    }
+
+    if (cur_skiplist_) {
+      skip = cur_skiplist_->readNext();
+    }
+
+    if (skip || id_set_.count(id) > 0) {
       return false;
     } else {
       if (is_update) {

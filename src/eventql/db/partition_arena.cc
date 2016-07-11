@@ -149,5 +149,21 @@ cstable::CSTableFile* PartitionArena::getCSTableFile() const {
   return cstable_file_.get();
 }
 
+PartitionArena::SkiplistReader PartitionArena::getSkiplistReader() const {
+  ScopedLock<std::mutex> lk(mutex_);
+  SkiplistReader reader;
+  reader.position = 0;
+  reader.skiplist = skiplist_;
+  return reader;
+}
+
+bool PartitionArena::SkiplistReader::readNext() {
+  return skiplist[position++];
+}
+
+size_t PartitionArena::SkiplistReader::size() const {
+  return skiplist.size();
+}
+
 } // namespace eventql
 

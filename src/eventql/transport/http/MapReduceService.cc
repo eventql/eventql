@@ -384,10 +384,9 @@ void MapReduceService::downloadResult(
   }
 }
 
-bool MapReduceService::saveLocalResultToTable(
+bool MapReduceService::saveResultToTable(
     Session* session,
     const String& table_name,
-    const SHA1Hash& partition,
     const SHA1Hash& result_id) {
   auto table = pmap_->findTable(
       session->getEffectiveNamespace(),
@@ -412,129 +411,35 @@ bool MapReduceService::saveLocalResultToTable(
 
   logDebug(
       "z1.mapreduce",
-      "Saving result shard to table; result_id=$0 table=$1/$2/$3",
+      "Saving result shard to table; result_id=$0 table=$1/$2",
       result_id.toString(),
-      session->getEffectiveNamespace(),
-      table_name,
-      partition.toString());
-
-  auto schema = table.get()->schema();
-
-  auto tmpfile_path = FileUtil::joinPaths(
-      cachedir_,
-      StringUtil::format("mr-shard-$0.cst", Random::singleton()->hex128()));
-
-  {
-    auto cstable = cstable::CSTableWriter::createFile(
-        tmpfile_path,
-        cstable::BinaryFormatVersion::v0_1_0,
-        cstable::TableSchema::fromProtobuf(*schema));
-
-    cstable::RecordShredder shredder(cstable.get());
-
-    sstable::SSTableReader sstable(sstable_file.get());
-    auto cursor = sstable.getCursor();
-    while (cursor->valid()) {
-      void* data;
-      size_t data_size;
-      cursor->getData(&data, &data_size);
-
-      auto json = json::parseJSON(String((const char*) data, data_size));
-      msg::DynamicMessage msg(schema);
-      msg.fromJSON(json.begin(), json.end());
-
-      shredder.addRecordFromProtobuf(msg.data(), *schema);
-
-      if (!cursor->next()) {
-        break;
-      }
-    }
-
-    cstable->commit();
-  }
-
-  tsdb_->updatePartitionCSTable(
-      session->getEffectiveNamespace(),
-      table_name,
-      partition,
-      tmpfile_path,
-      WallClock::unixMicros());
-
-  return true;
-}
-
-bool MapReduceService::saveRemoteResultsToTable(
-    Session* session,
-    const String& table_name,
-    const SHA1Hash& partition,
-    const Vector<String>& input_tables_ref) {
-  auto input_tables = input_tables_ref;
-  std::random_shuffle(input_tables.begin(), input_tables.end());
-
-  auto table = pmap_->findTable(
       session->getEffectiveNamespace(),
       table_name);
 
-  if (table.isEmpty()) {
-    RAISEF(
-        kNotFoundError,
-        "table not found: $0/$1",
-        session->getEffectiveNamespace(),
-        table_name);
-  }
-
-  logDebug(
-      "z1.mapreduce",
-      "Saving results to table; input_tables=$0 table=$1/$2/$3",
-      input_tables.size(),
-      session->getEffectiveNamespace(),
-      table_name,
-      partition.toString());
-
   auto schema = table.get()->schema();
 
-  auto tmpfile_path = FileUtil::joinPaths(
-      cachedir_,
-      StringUtil::format("mr-shard-$0.cst", Random::singleton()->hex128()));
+  sstable::SSTableReader sstable(sstable_file.get());
+  auto cursor = sstable.getCursor();
+  while (cursor->valid()) {
+    void* data;
+    size_t data_size;
+    cursor->getData(&data, &data_size);
 
-  {
-    auto cstable = cstable::CSTableWriter::createFile(
-        tmpfile_path,
-        cstable::BinaryFormatVersion::v0_1_0,
-        cstable::TableSchema::fromProtobuf(*schema));
+    auto json = json::parseJSON(String((const char*) data, data_size));
 
-    cstable::RecordShredder shredder(cstable.get());
-
-    for (const auto& input_table_url : input_tables) {
-      auto req = http::HTTPRequest::mkGet(input_table_url);
-      auth_->signRequest(session, &req);
-
-      MapReduceService::downloadResult(
-          req,
-          [&shredder, &schema] (
-              const void* key,
-              size_t key_len,
-              const void* val,
-              size_t val_len) {
-        auto json = json::parseJSON(String((const char*) val, val_len));
-        msg::DynamicMessage msg(schema);
-        msg.fromJSON(json.begin(), json.end());
-
-        shredder.addRecordFromProtobuf(msg.data(), *schema);
-      });
-    }
-
-    cstable->commit();
-  }
-
-  tsdb_->updatePartitionCSTable(
+    tsdb_->insertRecord(
       session->getEffectiveNamespace(),
       table_name,
-      partition,
-      tmpfile_path,
-      WallClock::unixMicros());
+      json.begin(),
+      json.end());
+
+    if (!cursor->next()) {
+      break;
+    }
+  }
 
   return true;
 }
+
 
 } // namespace eventql

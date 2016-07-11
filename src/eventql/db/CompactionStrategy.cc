@@ -97,6 +97,10 @@ bool SimpleCompactionStrategy::compact(
       auto input_id_col = input_cstable->getColumnReader("__lsm_id");
       auto input_version_col = input_cstable->getColumnReader("__lsm_version");
       auto input_sequence_col = input_cstable->getColumnReader("__lsm_sequence");
+      RefPtr<cstable::ColumnReader> input_skip_col;
+      if (tbl.has_skiplist()) {
+        input_skip_col = input_cstable->getColumnReader("__lsm_skip");
+      }
 
       Vector<Pair<
           RefPtr<cstable::ColumnReader>,
@@ -136,12 +140,27 @@ bool SimpleCompactionStrategy::compact(
         uint64_t sequence;
         input_sequence_col->readUnsignedInt(&rlvl, &dlvl, &sequence);
 
+        bool skip = false;
+        if (input_skip_col.get()) {
+          input_skip_col->readBoolean(&rlvl, &dlvl, &skip);
+        }
+
         const auto& vmap_iter = vmap.find(id);
         if (vmap_iter == vmap.end()) {
           RAISE(kIllegalStateError, "invalid cstable contents");
         }
 
-        if (version == vmap_iter->second) {
+        if (skip || version != vmap_iter->second) {
+          for (auto& col : columns) {
+            if (col.first.get()) {
+              do {
+                col.first->skipValue();
+              } while (col.first->nextRepetitionLevel() > 0);
+            }
+          }
+
+          ++rows_skipped;
+        } else {
           is_update_col->writeBoolean(0, 0, false);
           id_col->writeString(0, 0, id_str);
           version_col->writeUnsignedInt(0, 0, version);
@@ -159,16 +178,6 @@ bool SimpleCompactionStrategy::compact(
 
           cstable->addRow();
           ++rows_written;
-        } else {
-          for (auto& col : columns) {
-            if (col.first.get()) {
-              do {
-                col.first->skipValue();
-              } while (col.first->nextRepetitionLevel() > 0);
-            }
-          }
-
-          ++rows_skipped;
         }
       }
     } catch (const std::exception& e) {
@@ -207,6 +216,7 @@ bool SimpleCompactionStrategy::compact(
   tbl_ref.set_first_sequence(input.begin()->first_sequence());
   tbl_ref.set_last_sequence(input.rbegin()->last_sequence());
   tbl_ref.set_size_bytes(FileUtil::size(cstable_filepath + ".cst"));
+  tbl_ref.set_has_skiplist(false);
   output->emplace_back(tbl_ref);
 
   return true;

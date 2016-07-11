@@ -71,17 +71,10 @@ public:
   Option<String> getResultFilename(
       const SHA1Hash& result_id);
 
-  bool saveLocalResultToTable(
+  bool saveResultToTable(
       Session* session,
       const String& table_name,
-      const SHA1Hash& partition,
       const SHA1Hash& result_id);
-
-  bool saveRemoteResultsToTable(
-      Session* session,
-      const String& table_name,
-      const SHA1Hash& partition,
-      const Vector<String>& input_tables);
 
   static void downloadResult(
       const http::HTTPRequest& req,
