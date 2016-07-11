@@ -39,8 +39,8 @@
 
 namespace eventql {
 
-const size_t LSMPartitionReplication::kMaxBatchSizeRows = 8192;
-const size_t LSMPartitionReplication::kMaxBatchSizeBytes = 1024 * 1024 * 8; // 8 MB
+const size_t LSMPartitionReplication::kMaxBatchSizeRows = 1024;
+const size_t LSMPartitionReplication::kMaxBatchSizeBytes = 1024 * 1024 * 2; // 2 MB
 
 LSMPartitionReplication::LSMPartitionReplication(
     RefPtr<Partition> partition,
