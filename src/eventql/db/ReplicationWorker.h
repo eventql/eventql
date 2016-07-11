@@ -58,6 +58,11 @@ protected:
 class ReplicationWorker {
 public:
 
+  enum class ReplicationOptions : uint64_t {
+    CORK = 1,
+    URGENT = 2
+  };
+
   static const uint64_t kReplicationCorkWindowMicros = 10 * kMicrosPerSecond;
 
   ReplicationWorker(
@@ -67,8 +72,9 @@ public:
 
   ~ReplicationWorker();
 
-  void enqueuePartition(RefPtr<Partition> partition);
-  void enqueuePartition(RefPtr<Partition> partition, uint64_t delay_usecs);
+  void enqueuePartition(
+      RefPtr<Partition> partition,
+      uint64_t flags = (uint64_t) ReplicationOptions::CORK);
 
   size_t getNumThreads() const;
 
@@ -78,7 +84,7 @@ protected:
 
   void enqueuePartitionWithLock(
       RefPtr<Partition> partition,
-      uint64_t delay_usecs = 0);
+      uint64_t flags);
 
   void start();
   void stop();
