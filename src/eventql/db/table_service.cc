@@ -634,6 +634,7 @@ void TableService::insertRecordsRemote(
     record->set_partition_sha1(partition_key.toString());
     record->set_record_id(r.record_id.toString());
     record->set_record_data(r.record.toString());
+    record->set_record_version(r.record_version);
   }
 
   auto uri = URI(StringUtil::format(
