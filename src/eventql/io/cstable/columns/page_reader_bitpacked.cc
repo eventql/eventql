@@ -23,6 +23,7 @@
  */
 #include <eventql/io/cstable/columns/page_reader_bitpacked.h>
 #include <libsimdcomp/simdcomp.h>
+#include <assert.h>
 
 namespace cstable {
 
@@ -76,6 +77,7 @@ void BitPackedIntPageReader::fetchNext() {
 
 void BitPackedIntPageReader::fetchNextPage() {
   page_pos_ = 0;
+  assert(page_idx_ < pages_.size());
   page_len_ = pages_[page_idx_].size;
   page_data_.resize(page_len_);
   page_mgr_->readPage(pages_[page_idx_], page_data_.data());
