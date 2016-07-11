@@ -80,12 +80,12 @@ int main(int argc, const char** argv) {
     uint64_t rlevel;
     uint64_t dlevel;
     String data;
-    for (auto i = cstable->numRecords(); i; ) {
+    size_t i = 0;
+    for (size_t j = 0; i < cstable->numRecords(); ++j) {
       col_reader->readString(&rlevel, &dlevel, &data);
-      iputs(">>  rlvl=$0 dlvl=$1 data=($2) '$3'", rlevel, dlevel, data.size(), data);
-
+      iputs(">>  idx=$0/$1 rlvl=$2 dlvl=$3 data=($4) '$5'", i + 1, j + 1, rlevel, dlevel, data.size(), data);
       if (col_reader->nextRepetitionLevel() == 0) {
-        --i;
+        ++i;
       }
     }
   }
