@@ -285,7 +285,7 @@ bool LSMPartitionWriter::compact() {
   head_->setSnapshot(snap);
   write_lk.unlock();
 
-  // delete 
+  // delete
   Set<String> delete_filenames;
   for (const auto& tbl : old_tables) {
     delete_filenames.emplace(tbl.filename());
@@ -294,14 +294,22 @@ bool LSMPartitionWriter::compact() {
     delete_filenames.erase(tbl.filename());
   }
 
+  compact_lk.unlock();
+
   for (const auto& f : delete_filenames) {
-    // FIXME: delayed delete
-    FileUtil::rm(FileUtil::joinPaths(snap->base_path, f + ".cst"));
-    FileUtil::rm(FileUtil::joinPaths(snap->base_path, f + ".idx"));
+    auto trash_dir = FileUtil::joinPaths(snap->base_path, "../../../../../trash");
+    {
+      auto trash_link = File::openFile(
+          FileUtil::joinPaths(trash_dir, Random::singleton()->hex128() + ".trash"),
+          File::O_WRITE | File::O_CREATE);
+
+      trash_link.write(
+          FileUtil::joinPaths(snap->base_path, f + ".cst") + "\n" +
+          FileUtil::joinPaths(snap->base_path, f + ".idx") + "\n");
+    }
+
     idx_cache_->flush(FileUtil::joinPaths(snap->rel_path, f));
   }
-
-  compact_lk.unlock();
 
   // maybe split this partition
   if (needsSplit()) {
