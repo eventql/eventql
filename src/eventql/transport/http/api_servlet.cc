@@ -911,6 +911,36 @@ void AnalyticsServlet::getAuthInfo(
   res->setStatus(http::kStatusOK);
 }
 
+static String getQueryParam(
+    URI::ParamList params,
+    const http::HTTPRequest* req) {
+  if (req->hasHeader("Content-Type")) {
+    auto content_type = req->getHeader("Content-Type");
+
+    if (content_type == "application/json") {
+      auto json = json::parseJSON(req->body().toString());
+      auto query = json::objectGetString(json, "query");
+      if (query.isEmpty()) {
+        RAISE(kRuntimeError, "missing query")
+      } else {
+        return query.get();
+      }
+    }
+
+    if (content_type == "application/sql") {
+      auto query = req->body().toString();
+      return query;
+    }
+  }
+
+  String query;
+  if (URI::getParam(params, "query", &query)) {
+    return query;
+  } else {
+    RAISE(kRuntimeError, "missing ?query=... parameter");
+  }
+}
+
 void AnalyticsServlet::executeSQL(
     Session* session,
     const http::HTTPRequest* req,
@@ -919,7 +949,6 @@ void AnalyticsServlet::executeSQL(
   try {
     URI uri(req->uri());
     URI::ParamList params = uri.queryParams();
-    URI::parseQueryString(req->body().toString(), &params);
 
     String format;
     URI::getParam(params, "format", &format);
@@ -991,9 +1020,11 @@ void AnalyticsServlet::executeSQL_BINARY(
     http::HTTPResponse* res,
     RefPtr<http::HTTPResponseStream> res_stream) {
   String query;
-  if (!URI::getParam(params, "query", &query)) {
+  try {
+    query = getQueryParam(params, req);
+  } catch (const Exception& e) {
     res->setStatus(http::kStatusBadRequest);
-    res->addBody("missing ?query=... parameter");
+    res->addBody(e.getMessage());
     res_stream->writeResponse(*res);
     return;
   }
@@ -1051,9 +1082,11 @@ void AnalyticsServlet::executeSQL_JSON(
     http::HTTPResponse* res,
     RefPtr<http::HTTPResponseStream> res_stream) {
   String query;
-  if (!URI::getParam(params, "query", &query)) {
+  try {
+    query = getQueryParam(params, req);
+  } catch (const Exception& e) {
     res->setStatus(http::kStatusBadRequest);
-    res->addBody("missing ?query=... parameter");
+    res->addBody(e.getMessage());
     res_stream->writeResponse(*res);
     return;
   }
@@ -1142,9 +1175,11 @@ void AnalyticsServlet::executeSQL_JSONSSE(
     http::HTTPResponse* res,
     RefPtr<http::HTTPResponseStream> res_stream) {
   String query;
-  if (!URI::getParam(params, "query", &query)) {
+  try {
+    query = getQueryParam(params, req);
+  } catch (const Exception& e) {
     res->setStatus(http::kStatusBadRequest);
-    res->addBody("missing ?query=... parameter");
+    res->addBody(e.getMessage());
     res_stream->writeResponse(*res);
     return;
   }
