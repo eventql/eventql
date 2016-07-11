@@ -1934,21 +1934,17 @@ QueryTreeNode* QueryPlanBuilder::buildInsertInto(
   auto columns = ast->getChildren()[1]->getChildren();
   auto values = ast->getChildren()[2]->getChildren();
 
-  if (columns.size() != values.size()) {
-    RAISE(kRuntimeError, "corrupt AST");
-  }
-
   Vector<InsertIntoNode::InsertValueSpec> values_spec;
-  for (size_t i = 0; i < columns.size(); ++i) {
-    if (columns[i]->getType() != ASTNode::T_COLUMN_NAME ||
-         columns[i]->getToken() == nullptr) {
-      RAISE(kRuntimeError, "corrupt AST");
-    }
-
+  for (size_t i = 0; i < values.size(); ++i) {
     InsertIntoNode::InsertValueSpec spec;
     spec.type = InsertIntoNode::InsertValueType::SCALAR;
-    spec.column = columns[i]->getToken()->getString();
     spec.expr = buildValueExpression(txn, values[i]);
+    if (columns.size() > i &&
+        columns[i]->getType() == ASTNode::T_COLUMN_NAME &&
+        columns[i]->getToken() != nullptr) {
+      spec.column = columns[i]->getToken()->getString();
+    }
+
     values_spec.emplace_back(spec);
   }
 
