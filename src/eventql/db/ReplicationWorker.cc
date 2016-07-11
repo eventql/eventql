@@ -137,7 +137,7 @@ void ReplicationWorker::enqueuePartitionWithLock(
     return;
   }
 
-  if (partition->getSnapshot()->state.is_splitting()) {
+  if (partition->isSplitting()) {
     flags &= ~(uint64_t) ReplicationOptions::CORK;
     flags |= (uint64_t) ReplicationOptions::URGENT;
   }

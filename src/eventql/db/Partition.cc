@@ -293,4 +293,23 @@ size_t Partition::getTotalDiskSize() const {
   return size;
 }
 
+bool Partition::isSplitting() const {
+  auto snap = head_.getSnapshot();
+  if (snap->state.is_splitting()) {
+    return true;
+  }
+
+  Set<String> keys;
+  for (const auto& t : snap->state.replication_targets()){
+    keys.insert(t.keyrange_begin());
+    keys.insert(t.keyrange_end());
+  }
+
+  if (keys.size() > 2) {
+    return true;
+  }
+
+  return false;
+}
+
 }

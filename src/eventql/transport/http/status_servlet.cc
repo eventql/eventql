@@ -505,7 +505,7 @@ void StatusServlet::renderPartitionPage(
 
     html += StringUtil::format(
         "<span><em>Splitting?</em>: $0</span> &mdash; ",
-        snap->state.is_splitting());
+        partition.get()->isSplitting());
 
     html += StringUtil::format(
         "<span><em>Joining Servers?</em>: $0</span> &mdash; ",
