@@ -28,6 +28,8 @@
 #include <eventql/util/SHA1.h>
 #include <eventql/util/io/inputstream.h>
 #include <eventql/util/io/outputstream.h>
+#include <eventql/util/protobuf/msg.h>
+#include <eventql/util/protobuf/DynamicMessage.h>
 
 namespace eventql {
 
@@ -74,8 +76,20 @@ public:
 
   ShreddedRecordListBuilder();
 
-  ShreddedRecordColumn* addColumn(const String& column_name);
+  ShreddedRecordColumn* getColumn(const String& column_name);
+
   void addRecord(const SHA1Hash& record_id, uint64_t record_version);
+
+  void addRecordFromProtobuf(
+      const SHA1Hash& record_id,
+      uint64_t record_version,
+      const msg::DynamicMessage& msg);
+
+  void addRecordFromProtobuf(
+      const SHA1Hash& record_id,
+      uint64_t record_version,
+      const msg::MessageObject& msg,
+      const msg::MessageSchema& schema);
 
   ShreddedRecordList get();
 
@@ -83,6 +97,7 @@ protected:
   Vector<SHA1Hash> record_ids_;
   Vector<uint64_t> record_versions_;
   List<ShreddedRecordColumn> columns_;
+  HashMap<String, ShreddedRecordColumn*> columns_by_name_;
 };
 
 } // namespace eventql

@@ -125,12 +125,17 @@ void ShreddedRecordList::decode(InputStream* is) {
 
 ShreddedRecordListBuilder::ShreddedRecordListBuilder() {}
 
-ShreddedRecordColumn* ShreddedRecordListBuilder::addColumn(
+ShreddedRecordColumn* ShreddedRecordListBuilder::getColumn(
     const String& column_name) {
-  columns_.emplace_back();
-  auto col = &columns_.back();
-  col->column_name = column_name;
-  return col;
+  auto& col_entry = columns_by_name_[column_name];
+  if (!col_entry) {
+    columns_.emplace_back();
+    auto col = &columns_.back();
+    col->column_name = column_name;
+    col_entry = col;
+  }
+
+  return col_entry;
 }
 
 void ShreddedRecordListBuilder::addRecord(
@@ -138,6 +143,159 @@ void ShreddedRecordListBuilder::addRecord(
     uint64_t record_version) {
   record_ids_.emplace_back(record_id);
   record_versions_.emplace_back(record_version);
+}
+
+void ShreddedRecordListBuilder::addRecordFromProtobuf(
+    const SHA1Hash& record_id,
+    uint64_t record_version,
+    const msg::DynamicMessage& msg) {
+  addRecordFromProtobuf(record_id, record_version, msg.data(), *msg.schema());
+}
+
+void writeProtoNull(
+    uint32_t r,
+    uint32_t d,
+    const String& column,
+    const msg::MessageSchemaField& field,
+    ShreddedRecordListBuilder* writer) {
+  switch (field.type) {
+
+    case msg::FieldType::OBJECT:
+      for (const auto& f : field.schema->columns()) {
+        writeProtoNull(r, d, column + "." + f.first, f.second, writer);
+      }
+
+      break;
+
+    default:
+      auto col = writer->getColumn(column);
+      col->addNull(r, d);
+      break;
+
+  }
+}
+
+void writeProtoField(
+    uint32_t r,
+    uint32_t d,
+    const msg::MessageObject& msg,
+    const String& column,
+    const msg::MessageSchemaField& field,
+    ShreddedRecordListBuilder* writer) {
+  auto col = writer->getColumn(column);
+
+  switch (field.type) {
+
+    case msg::FieldType::STRING: {
+      col->addValue(r, d, msg.asString());
+      break;
+    }
+
+    case msg::FieldType::UINT64: {
+      col->addValue(r, d, StringUtil::toString(msg.asUInt64()));
+      break;
+    }
+
+    case msg::FieldType::UINT32: {
+      col->addValue(r, d, StringUtil::toString(msg.asUInt32()));
+      break;
+    }
+
+    case msg::FieldType::DATETIME: {
+      col->addValue(r, d, StringUtil::toString(msg.asUInt64()));
+      break;
+    }
+
+    case msg::FieldType::DOUBLE: {
+      col->addValue(r, d, StringUtil::toString(msg.asDouble()));
+      break;
+    }
+
+    case msg::FieldType::BOOLEAN: {
+      col->addValue(r, d, StringUtil::toString(msg.asBool() ? "true" : "false"));
+      break;
+    }
+
+    case msg::FieldType::OBJECT:
+      RAISE(kIllegalStateError);
+
+  }
+}
+
+static void addProtoRecordField(
+    uint32_t r,
+    uint32_t rmax,
+    uint32_t d,
+    const msg::MessageObject& msg,
+    const msg::MessageSchema& msg_schema,
+    const String& column,
+    const msg::MessageSchemaField& field,
+    ShreddedRecordListBuilder* writer) {
+  auto next_r = r;
+  auto next_d = d;
+
+  if (field.repeated) {
+    ++rmax;
+  }
+
+  if (field.optional || field.repeated) {
+    ++next_d;
+  }
+
+  size_t n = 0;
+  auto field_id = msg_schema.fieldId(field.name);
+  for (const auto& o : msg.asObject()) {
+    if (o.id != field_id) { // FIXME
+      continue;
+    }
+
+    ++n;
+
+    switch (field.type) {
+      case msg::FieldType::OBJECT: {
+        auto o_schema = msg_schema.fieldSchema(field_id);
+        for (const auto& f : field.schema->columns()) {
+          addProtoRecordField(
+              next_r,
+              rmax,
+              next_d,
+              o,
+              *o_schema,
+              column + field.name + ".",
+              f.second,
+              writer);
+        }
+        break;
+      }
+
+      default:
+        writeProtoField(next_r, next_d, o, column + field.name, field, writer);
+        break;
+    }
+
+    next_r = rmax;
+  }
+
+  if (n == 0) {
+    if (!(field.optional || field.repeated)) {
+      RAISEF(kIllegalArgumentError, "missing field: $0", column + field.name);
+    }
+
+    writeProtoNull(r, d, column + field.name, field, writer);
+    return;
+  }
+}
+
+void ShreddedRecordListBuilder::addRecordFromProtobuf(
+    const SHA1Hash& record_id,
+    uint64_t record_version,
+    const msg::MessageObject& msg,
+    const msg::MessageSchema& schema) {
+  for (const auto& f : schema.columns()) {
+    addProtoRecordField(0, 0, 0, msg, schema, "", f.second, this);
+  }
+
+  addRecord(record_id, record_version);
 }
 
 ShreddedRecordList ShreddedRecordListBuilder::get() {

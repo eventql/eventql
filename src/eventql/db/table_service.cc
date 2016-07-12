@@ -452,13 +452,11 @@ void TableService::insertRecords(
         find_res.servers_for_insert().end());
 
     servers[partition_id] = partition_servers;
-    // FIXFIXFIX
-    //Buffer buf;
-    //msg::MessageEncoder::encode(record->data(), *record->schema(), &buf);
-    //records[partition_id].emplace_back(
-    //    primary_key,
-    //    WallClock::unixMicros(),
-    //    buf);
+    auto& record_list_builder = records[partition_id];
+    record_list_builder.addRecordFromProtobuf(
+        primary_key,
+        WallClock::unixMicros(),
+        *record);
   }
 
   for (auto& p : records) {

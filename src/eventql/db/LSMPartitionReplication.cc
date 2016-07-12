@@ -543,7 +543,7 @@ void LSMPartitionReplication::readBatchPayload(
     }
 
     auto col_reader = cstable->getColumnReader(col.column_name);
-    auto col_writer = upload_builder->addColumn(col.column_name);
+    auto col_writer = upload_builder->getColumn(col.column_name);
 
     for (size_t i = 0; i < upload_batchsize; ) {
       uint64_t rlvl;
