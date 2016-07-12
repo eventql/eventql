@@ -52,8 +52,12 @@ ShreddedRecordList::ShreddedRecordList(
     Vector<uint64_t> record_versions,
     List<ShreddedRecordColumn> columns) :
     record_ids_(std::move(record_ids)),
-    record_versions_(std::move(record_versions)),
-    columns_(std::move(columns)) {}
+    record_versions_(std::move(record_versions)) {
+  columns_.reserve(columns.size());
+  for (auto& c : columns) {
+    columns_.emplace_back(std::move(c));
+  }
+}
 
 size_t ShreddedRecordList::getNumColumns() const {
   return columns_.size();
@@ -63,9 +67,17 @@ size_t ShreddedRecordList::getNumRecords() const {
   return record_ids_.size();
 }
 
-//const SHA1Hash& getRecordID(size_t idx) const;
-//uint64_t getRecordVersion(size_t idx) const;
-//const ShreddedRecordColumn* getColumn(size_t idx) const;
+const SHA1Hash& ShreddedRecordList::getRecordID(size_t idx) const {
+  return record_ids_[idx];
+}
+
+uint64_t ShreddedRecordList::getRecordVersion(size_t idx) const {
+  return record_versions_[idx];
+}
+
+const ShreddedRecordColumn* ShreddedRecordList::getColumn(size_t idx) const {
+  return &columns_[idx];
+}
 
 void ShreddedRecordList::encode(OutputStream* os) const {
   os->appendUInt8(0x1);
@@ -107,9 +119,9 @@ void ShreddedRecordList::decode(InputStream* is) {
     record_versions_.emplace_back(is->readVarUInt());
   }
 
+  columns_.resize(ncols);
   for (uint64_t j = 0; j < ncols; ++j) {
-    columns_.emplace_back();
-    auto& col = columns_.back();
+    auto& col = columns_[j];
     col.column_name = is->readLenencString();
     auto len = is->readVarUInt();
     col.values.reserve(len);

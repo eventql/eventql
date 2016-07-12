@@ -56,79 +56,88 @@ LSMPartitionWriter::LSMPartitionWriter(
     repl_(cfg->repl_scheme.get()),
     partition_split_threshold_(kDefaultPartitionSplitThresholdBytes) {}
 
-//Set<SHA1Hash> LSMPartitionWriter::insertRecords(const Vector<RecordRef>& records) {
-//  std::unique_lock<std::mutex> lk(mutex_);
-//  if (frozen_) {
-//    RAISE(kIllegalStateError, "partition is frozen");
-//  }
-//
-//  auto snap = head_->getSnapshot();
-//
-//  logTrace(
-//      "tsdb",
-//      "Insert $0 record into partition $1/$2/$3",
-//      records.size(),
-//      snap->state.tsdb_namespace(),
-//      snap->state.table_key(),
-//      snap->key.toString());
-//
-//  HashMap<SHA1Hash, uint64_t> rec_versions;
-//  for (const auto& r : records) {
-//    rec_versions.emplace(r.record_id, snap->head_arena->fetchRecordVersion(r.record_id));
-//  }
-//
-//  if (snap->compacting_arena.get() != nullptr) {
-//    for (auto& r : rec_versions) {
-//      auto v = snap->compacting_arena->fetchRecordVersion(r.first);
-//      if (v > r.second) {
-//        r.second = v;
-//      }
-//    }
-//  }
-//
-//  const auto& tables = snap->state.lsm_tables();
-//  if (tables.size() > kMaxLSMTables) {
-//    RAISE(kRuntimeError, "partition is overloaded, can't insert");
-//  }
-//
-//  for (auto tbl = tables.rbegin(); tbl != tables.rend(); ++tbl) {
-//    auto idx = idx_cache_->lookup(
-//        FileUtil::joinPaths(snap->rel_path, tbl->filename()));
-//    idx->lookup(&rec_versions);
-//
-//    // FIMXE early exit...
-//  }
-//
-//  Set<SHA1Hash> inserted_ids;
-//  if (!rec_versions.empty()) {
-//    for (auto r : records) {
-//      auto headv = rec_versions[r.record_id];
-//      if (headv > 0) {
-//        r.is_update = true;
-//      }
-//
-//      if (r.record_version <= headv) {
-//        continue;
-//      }
-//
-//      if (snap->head_arena->insertRecord(r)) {
-//        inserted_ids.emplace(r.record_id);
-//      }
-//    }
-//  }
-//
-//  lk.unlock();
-//
-//  if (needsUrgentCommit()) {
-//    commit();
-//  }
-//
-//  if (needsUrgentCompaction()) {
-//    compact();
-//  }
-//
-//  return inserted_ids;
-//}
+Set<SHA1Hash> LSMPartitionWriter::insertRecords(
+    const ShreddedRecordList& records) {
+  std::unique_lock<std::mutex> lk(mutex_);
+  if (frozen_) {
+    RAISE(kIllegalStateError, "partition is frozen");
+  }
+
+  auto snap = head_->getSnapshot();
+  const auto& tables = snap->state.lsm_tables();
+  if (tables.size() > kMaxLSMTables) {
+    RAISE(kRuntimeError, "partition is overloaded, can't insert");
+  }
+
+  logTrace(
+      "tsdb",
+      "Insert $0 record into partition $1/$2/$3",
+      records.getNumRecords(),
+      snap->state.tsdb_namespace(),
+      snap->state.table_key(),
+      snap->key.toString());
+
+  HashMap<SHA1Hash, uint64_t> rec_versions;
+  for (size_t i = 0; i < records.getNumRecords(); ++i) {
+    const auto& record_id = records.getRecordID(i);
+
+    rec_versions.emplace(
+        record_id,
+        snap->head_arena->fetchRecordVersion(record_id));
+  }
+
+  if (snap->compacting_arena.get() != nullptr) {
+    for (auto& r : rec_versions) {
+      auto v = snap->compacting_arena->fetchRecordVersion(r.first);
+      if (v > r.second) {
+        r.second = v;
+      }
+    }
+  }
+
+  for (auto tbl = tables.rbegin(); tbl != tables.rend(); ++tbl) {
+    auto idx = idx_cache_->lookup(
+        FileUtil::joinPaths(snap->rel_path, tbl->filename()));
+    idx->lookup(&rec_versions);
+
+    // FIMXE early exit...
+  }
+
+  Vector<bool> record_flags_skip(records.getNumRecords(), false);
+  Vector<bool> record_flags_update(records.getNumRecords(), false);
+
+  if (!rec_versions.empty()) {
+    for (size_t i = 0; i < records.getNumRecords(); ++i) {
+      const auto& record_id = records.getRecordID(i);
+      auto headv = rec_versions[record_id];
+      if (headv > 0) {
+        record_flags_update[i] = true;
+      }
+
+      if (records.getRecordVersion(i) <= headv) {
+        record_flags_skip[i] = true;
+        continue;
+      }
+    }
+  }
+
+  auto inserted_ids = snap->head_arena->insertRecords(
+      records,
+      record_flags_skip,
+      record_flags_update);
+
+  lk.unlock();
+
+  if (needsUrgentCommit()) {
+    commit();
+  }
+
+  if (needsUrgentCompaction()) {
+    compact();
+  }
+
+  return inserted_ids;
+}
 
 bool LSMPartitionWriter::needsCommit() {
   return head_->getSnapshot()->head_arena->size() > 0;

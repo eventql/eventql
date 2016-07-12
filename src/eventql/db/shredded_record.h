@@ -68,7 +68,7 @@ public:
 protected:
   Vector<SHA1Hash> record_ids_;
   Vector<uint64_t> record_versions_;
-  List<ShreddedRecordColumn> columns_;
+  Vector<ShreddedRecordColumn> columns_;
 };
 
 class ShreddedRecordListBuilder {
