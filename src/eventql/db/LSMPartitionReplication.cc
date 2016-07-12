@@ -131,6 +131,7 @@ void LSMPartitionReplication::replicateTo(
           cstable.get(),
           upload_batchsize,
           replicated_offset,
+          nrecs_cur,
           tbl.has_skiplist(),
           replica.keyrange_begin(),
           replica.keyrange_end(),
@@ -427,6 +428,7 @@ void LSMPartitionReplication::readBatchMetadata(
     cstable::CSTableReader* cstable,
     size_t upload_batchsize,
     size_t start_sequence,
+    size_t start_position,
     bool has_skiplist,
     const String& keyrange_begin,
     const String& keyrange_end,
@@ -507,6 +509,9 @@ void LSMPartitionReplication::readBatchMetadata(
   }
 
   pkey_col->rewind();
+  for (size_t i = 0; i < start_position; ++i) {
+    pkey_col->skipValue();
+  }
 
   // read id & version
   for (size_t i = 0; i < upload_batchsize; ++i) {

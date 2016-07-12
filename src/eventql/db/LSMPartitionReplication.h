@@ -67,6 +67,7 @@ protected:
       cstable::CSTableReader* cstable,
       size_t upload_batchsize,
       size_t start_sequence,
+      size_t start_position,
       bool has_skiplist,
       const String& keyrange_begin,
       const String& keyrange_end,
