@@ -153,7 +153,11 @@ void LSMPartitionReplication::replicateTo(
           &upload_builder);
 
       // upload batch
-      uploadBatchTo(server_cfg.server_addr(), upload_builder.get());
+      bytes_sent += uploadBatchTo(
+          server_cfg.server_addr(),
+          upload_builder.get());
+
+      records_sent += upload_batchsize - upload_nskipped;
       replication_info->setTargetHostStatus(bytes_sent, records_sent);
     }
   }
@@ -561,7 +565,7 @@ void LSMPartitionReplication::readBatchPayload(
   }
 }
 
-void LSMPartitionReplication::uploadBatchTo(
+size_t LSMPartitionReplication::uploadBatchTo(
     const String& host,
     const ShreddedRecordList& batch) {
   Buffer body;
@@ -580,6 +584,8 @@ void LSMPartitionReplication::uploadBatchTo(
   if (r.statusCode() != 201) {
     RAISEF(kRuntimeError, "received non-201 response: $0", r.body().toString());
   }
+
+  return body.size();
 }
 
 } // namespace tdsb

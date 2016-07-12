@@ -809,6 +809,8 @@ evql_core_a_SOURCES = \
     eventql/db/DerivedDataset.h \
     eventql/db/PartitionChangeNotification.h \
     eventql/db/RecordRef.h \
+    eventql/db/shredded_record.h \
+    eventql/db/shredded_record.cc \
     eventql/db/ServerConfig.h \
     eventql/db/TSDBTableInfo.h \
     eventql/db/TSDBTableScan.h \

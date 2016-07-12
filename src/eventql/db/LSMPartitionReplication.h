@@ -80,7 +80,7 @@ protected:
       const Vector<bool>& upload_skiplist,
       ShreddedRecordListBuilder* upload_builder);
 
-  void uploadBatchTo(
+  size_t uploadBatchTo(
       const String& host,
       const ShreddedRecordList& batch);
 

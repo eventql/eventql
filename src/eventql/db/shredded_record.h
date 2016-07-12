@@ -26,6 +26,8 @@
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/buffer.h>
 #include <eventql/util/SHA1.h>
+#include <eventql/util/io/inputstream.h>
+#include <eventql/util/io/outputstream.h>
 
 namespace eventql {
 
@@ -48,14 +50,14 @@ public:
   ShreddedRecordList(
       Vector<SHA1Hash> record_ids,
       Vector<uint64_t> record_versions,
-      Vector<ShreddedRecordColumn> columns);
+      List<ShreddedRecordColumn> columns);
 
   size_t getNumColumns() const;
   size_t getNumRecords() const;
 
   const SHA1Hash& getRecordID(size_t idx) const;
   uint64_t getRecordVersion(size_t idx) const;
-  const ShreddedRecordColumn* getColumn(size_t idx); const;
+  const ShreddedRecordColumn* getColumn(size_t idx) const;
 
   void encode(OutputStream* os) const;
   void decode(InputStream* is);
@@ -63,7 +65,7 @@ public:
 protected:
   Vector<SHA1Hash> record_ids_;
   Vector<uint64_t> record_versions_;
-  Vector<ShreddedRecordColumn> columns_;
+  List<ShreddedRecordColumn> columns_;
 };
 
 class ShreddedRecordListBuilder {
@@ -79,7 +81,7 @@ public:
 protected:
   Vector<SHA1Hash> record_ids_;
   Vector<uint64_t> record_versions_;
-  Vector<ShreddedRecordColumn> columns_;
+  List<ShreddedRecordColumn> columns_;
 };
 
 } // namespace eventql
