@@ -37,7 +37,7 @@ public:
   StaticPartitionWriter(PartitionSnapshotRef* head);
 
   Set<SHA1Hash> insertRecords(
-      const Vector<RecordRef>& records) override;
+      const ShreddedRecordList& records) override;
 
   bool needsCompaction() override;
 

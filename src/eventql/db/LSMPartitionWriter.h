@@ -45,7 +45,7 @@ public:
       PartitionSnapshotRef* head);
 
   Set<SHA1Hash> insertRecords(
-      const Vector<RecordRef>& records) override;
+      const ShreddedRecordList& records) override;
 
   bool commit() override;
   bool needsCommit();

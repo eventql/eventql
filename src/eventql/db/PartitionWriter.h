@@ -28,6 +28,7 @@
 #include <eventql/db/PartitionSnapshot.h>
 #include <eventql/db/RecordRef.h>
 #include <eventql/db/metadata_operations.pb.h>
+#include <eventql/db/shredded_record.h>
 
 namespace eventql {
 
@@ -37,13 +38,8 @@ public:
 
   PartitionWriter(PartitionSnapshotRef* head);
 
-  bool insertRecord(
-      const SHA1Hash& record_id,
-      uint64_t record_version,
-      const Buffer& record);
-
   virtual Set<SHA1Hash> insertRecords(
-      const Vector<RecordRef>& records) = 0;
+      const ShreddedRecordList& records) = 0;
 
   void updateCSTable(
       const String& tmpfile,

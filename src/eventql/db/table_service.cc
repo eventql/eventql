@@ -545,16 +545,9 @@ void TableService::insertRecordsLocal(
       partition_key);
 
   auto writer = partition->getWriter();
+  auto inserted_ids = writer->insertRecords(records);
 
-  bool dirty = false;
-  //for (const auto& r : records) {
-  //  // FIXFIXFIX
-  //  //if (writer->insertRecord(r.record_id, r.record_version, r.record)) {
-  //  //  dirty = true;
-  //  //}
-  //}
-
-  if (dirty) {
+  if (!inserted_ids.empty()) {
     auto change = mkRef(new PartitionChangeNotification());
     change->partition = partition;
     pmap_->publishPartitionChange(change);
