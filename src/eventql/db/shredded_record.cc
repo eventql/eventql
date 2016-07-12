@@ -236,7 +236,7 @@ void writeProtoField(
     }
 
     case msg::FieldType::BOOLEAN: {
-      col->addValue(r, d, StringUtil::toString(msg.asBool() ? "true" : "false"));
+      col->addValue(r, d, StringUtil::toString(msg.asBool() ? 1 : 0));
       break;
     }
 
