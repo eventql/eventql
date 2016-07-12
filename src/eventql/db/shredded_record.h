@@ -47,6 +47,7 @@ struct ShreddedRecordColumn {
 class ShreddedRecordList {
 public:
 
+  ShreddedRecordList();
   ShreddedRecordList(
       Vector<SHA1Hash> record_ids,
       Vector<uint64_t> record_versions,

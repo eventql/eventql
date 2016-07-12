@@ -45,6 +45,8 @@ void ShreddedRecordColumn::addNull(
   values.emplace_back(v);
 }
 
+ShreddedRecordList::ShreddedRecordList() {}
+
 ShreddedRecordList::ShreddedRecordList(
     Vector<SHA1Hash> record_ids,
     Vector<uint64_t> record_versions,

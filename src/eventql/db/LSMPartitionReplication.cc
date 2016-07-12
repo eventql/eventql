@@ -572,7 +572,14 @@ size_t LSMPartitionReplication::uploadBatchTo(
   auto body_os = BufferOutputStream::fromBuffer(&body);
   batch.encode(body_os.get());
 
-  URI uri(StringUtil::format("http://$0/tsdb/replicate", host));
+  URI uri(
+      StringUtil::format(
+          "http://$0/tsdb/replicate?namespace=$1&table=$2&partition=$3",
+          host,
+          URI::urlEncode(snap_->state.tsdb_namespace()),
+          URI::urlEncode(snap_->state.table_key()),
+          snap_->key.toString()));
+
   http::HTTPRequest req(http::HTTPMessage::M_POST, uri.pathAndQuery());
   req.addHeader("Host", uri.hostAndPort());
   req.addBody(body.data(), body.size());
