@@ -38,6 +38,7 @@ public:
   static const size_t kDefaultPartitionSplitThresholdBytes = 1024llu * 1024llu * 512llu;
   static const size_t kMaxArenaRecords = 1024 * 64;
   static const size_t kMaxLSMTables = 12;
+  static const size_t kMaxDiskSize = 1024llu * 1024llu * 4096llu;
 
   LSMPartitionWriter(
       ServerCfg* cfg,

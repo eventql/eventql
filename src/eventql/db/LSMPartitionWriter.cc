@@ -87,7 +87,12 @@ Set<SHA1Hash> LSMPartitionWriter::insertRecords(const Vector<RecordRef>& records
   }
 
   const auto& tables = snap->state.lsm_tables();
-  if (tables.size() > kMaxLSMTables) {
+  size_t disk_size = 0;
+  for (const auto& t : tables) {
+    disk_size += t.size_bytes();
+  }
+
+  if (tables.size() > kMaxLSMTables || disk_size > kMaxDiskSize) {
     RAISE(kRuntimeError, "partition is overloaded, can't insert");
   }
 
