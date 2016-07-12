@@ -105,61 +105,52 @@ void LSMPartitionReplication::replicateTo(
   size_t records_sent = 0;
   size_t bytes_sent = 0;
 
-  size_t batch_size = 0;
-  RecordEnvelopeList batch;
-  fetchRecords(
-      replicated_offset,
-      replica.keyrange_begin(),
-      replica.keyrange_end(),
-      [&] (
-          const SHA1Hash& record_id,
-          const uint64_t record_version,
-          const void* record_data,
-          size_t record_size) {
-    auto rec = batch.add_records();
-    rec->set_tsdb_namespace(snap_->state.tsdb_namespace());
-    rec->set_table_name(snap_->state.table_key());
-    rec->set_partition_sha1(target_partition_id.toString());
-    rec->set_record_id(record_id.toString());
-    rec->set_record_version(record_version);
-    rec->set_record_data(record_data, record_size);
-
-    batch_size += record_size;
-    bytes_sent += record_size;
-    ++records_sent;
-
-    if (batch_size > kMaxBatchSizeBytes ||
-        batch.records().size() > kMaxBatchSizeRows) {
-      uploadBatchTo(server_cfg.server_addr(), batch);
-      replication_info->setTargetHostStatus(bytes_sent, records_sent);
-      batch.mutable_records()->Clear();
-      batch_size = 0;
+  const auto& tables = snap_->state.lsm_tables();
+  for (const auto& tbl : tables) {
+    if (tbl.last_sequence() < replicated_offset) {
+      continue;
     }
-  });
 
-  uploadBatchTo(server_cfg.server_addr(), batch);
-  replication_info->setTargetHostStatus(bytes_sent, records_sent);
+    // open cstable
+    auto cstable_file = FileUtil::joinPaths(
+        snap_->base_path,
+        tbl.filename() + ".cst");
+    auto cstable = cstable::CSTableReader::openFile(cstable_file);
+    uint64_t nrecs = cstable->numRecords();
 
-  //{
-  //  URI uri(
-  //      StringUtil::format(
-  //          "http://$0/tsdb/commit?namespace=$1&table=$2&partition=$3",
-  //          server_cfg.server_addr(),
-  //          URI::urlEncode(snap_->state.tsdb_namespace()),
-  //          URI::urlEncode(snap_->state.table_key()),
-  //          snap_->key.toString()));
+    // in batches
+    for (uint64_t nrecs_cur = 0; nrecs_cur < nrecs; ) {
+      auto upload_batchsize = std::min(nrecs - nrecs_cur, uint64_t(1024)); // FIXME
+      nrecs_cur += upload_batchsize;
+      Vector<bool> upload_skiplist(upload_batchsize, true);
+      size_t upload_nskipped = 0;
+      ShreddedRecordListBuilder upload_builder;
 
-  //  http::HTTPRequest req(http::HTTPMessage::M_POST, uri.pathAndQuery());
-  //  req.addHeader("Host", uri.hostAndPort());
+      // read metadata
+      readBatchMetadata(
+          cstable.get(),
+          upload_batchsize,
+          replicated_offset,
+          tbl.has_skiplist(),
+          replica.keyrange_begin(),
+          replica.keyrange_end(),
+          &upload_builder,
+          &upload_skiplist,
+          &upload_nskipped);
 
-  //  auto res = http_->executeRequest(req);
-  //  res.wait();
+      // skip batch if no records to upload
+      if (upload_nskipped == upload_batchsize) {
+        continue;
+      }
 
-  //  const auto& r = res.get();
-  //  if (r.statusCode() != 201) {
-  //    RAISEF(kRuntimeError, "received non-201 response: $0", r.body().toString());
-  //  }
-  //}
+      // read data columns
+
+
+      // upload batch
+       uploadBatchTo(server_cfg.server_addr(), upload_builder.get());
+       replication_info->setTargetHostStatus(bytes_sent, records_sent);
+    }
+  }
 }
 
 bool LSMPartitionReplication::replicate(ReplicationInfo* replication_info) {
@@ -303,123 +294,6 @@ bool LSMPartitionReplication::replicate(ReplicationInfo* replication_info) {
   return success;
 }
 
-void LSMPartitionReplication::uploadBatchTo(
-    const String& host,
-    const RecordEnvelopeList& batch) {
-  auto body = msg::encode(batch);
-  URI uri(StringUtil::format("http://$0/tsdb/replicate", host));
-  http::HTTPRequest req(http::HTTPMessage::M_POST, uri.pathAndQuery());
-  req.addHeader("Host", uri.hostAndPort());
-  req.addHeader("Content-Type", "application/fnord-msg");
-  req.addBody(body->data(), body->size());
-
-  auto res = http_->executeRequest(req);
-  res.wait();
-
-  const auto& r = res.get();
-  if (r.statusCode() != 201) {
-    RAISEF(kRuntimeError, "received non-201 response: $0", r.body().toString());
-  }
-}
-
-void LSMPartitionReplication::fetchRecords(
-    size_t start_sequence,
-    const String& keyrange_begin,
-    const String& keyrange_end,
-    Function<void (
-        const SHA1Hash& record_id,
-        uint64_t record_version,
-        const void* record_data,
-        size_t record_size)> fn) {
-  auto schema = partition_->getTable()->schema();
-  auto pkey_fieldname = partition_->getTable()->getPartitionKey();
-  auto pkey_fieldid = schema->fieldId(pkey_fieldname);
-  auto keyspace = partition_->getTable()->getKeyspaceType();
-
-  const auto& tables = snap_->state.lsm_tables();
-  for (const auto& tbl : tables) {
-    if (tbl.last_sequence() < start_sequence) {
-      continue;
-    }
-
-    auto cstable_file = FileUtil::joinPaths(
-        snap_->base_path,
-        tbl.filename() + ".cst");
-    auto cstable = cstable::CSTableReader::openFile(cstable_file);
-    cstable::RecordMaterializer materializer(schema.get(), cstable.get());
-    auto id_col = cstable->getColumnReader("__lsm_id");
-    auto version_col = cstable->getColumnReader("__lsm_version");
-    auto sequence_col = cstable->getColumnReader("__lsm_sequence");
-    RefPtr<cstable::ColumnReader> skip_col;
-    if (tbl.has_skiplist()) {
-      skip_col = cstable->getColumnReader("__lsm_skip");
-    }
-
-    auto nrecs = cstable->numRecords();
-    for (size_t i = 0; i < nrecs; ++i) {
-      uint64_t rlvl;
-      uint64_t dlvl;
-
-      String id_str;
-      id_col->readString(&rlvl, &dlvl, &id_str);
-      SHA1Hash id(id_str.data(), id_str.size());
-
-      uint64_t version;
-      version_col->readUnsignedInt(&rlvl, &dlvl, &version);
-
-      uint64_t sequence;
-      sequence_col->readUnsignedInt(&rlvl, &dlvl, &sequence);
-
-      bool skip = false;
-      if (skip_col.get()) {
-        skip_col->readBoolean(&rlvl, &dlvl, &skip);
-      }
-
-      if (sequence < start_sequence || skip) {
-        materializer.skipRecord();
-        continue;
-      }
-
-      msg::MessageObject record;
-      materializer.nextRecord(&record);
-
-      String pkey_value;
-      switch (keyspace) {
-        case KEYSPACE_STRING: {
-          if (record.fieldCount(pkey_fieldid) > 0) {
-            pkey_value = record.getString(pkey_fieldid);
-          }
-          break;
-        }
-        case KEYSPACE_UINT64: {
-          uint64_t pkey_value_uint = 0;
-          if (record.fieldCount(pkey_fieldid) > 0) {
-            pkey_value_uint = record.getUInt64(pkey_fieldid);
-          }
-          pkey_value = String((const char*) &pkey_value_uint, sizeof(uint64_t));
-          break;
-        }
-      }
-
-      if (!keyrange_begin.empty()) {
-        if (comparePartitionKeys(keyspace, pkey_value, keyrange_begin) < 0) {
-          continue;
-        }
-      }
-
-      if (!keyrange_end.empty()) {
-        if (comparePartitionKeys(keyspace, pkey_value, keyrange_end) >= 0) {
-          continue;
-        }
-      }
-
-      Buffer record_buf;
-      msg::MessageEncoder::encode(record, *schema, &record_buf);
-      fn(id, version, record_buf.data(), record_buf.size());
-    }
-  }
-}
-
 Status LSMPartitionReplication::fetchAndApplyMetadataTransaction() {
   auto last_txid = partition_->getTable()->getLastMetadataTransaction();
   bool has_new_metadata_txn =
@@ -537,6 +411,122 @@ bool LSMPartitionReplication::shouldDropPartition() const {
     return false;
   }
 }
+
+void LSMPartitionReplication::readBatchMetadata(
+    cstable::CSTableReader* cstable,
+    size_t upload_batchsize,
+    size_t start_sequence,
+    bool has_skiplist,
+    const String& keyrange_begin,
+    const String& keyrange_end,
+    ShreddedRecordListBuilder* upload_builder,
+    Vector<bool>* upload_skiplist,
+    size_t* upload_nskipped) {
+  auto pkey_fieldname = partition_->getTable()->getPartitionKey();
+  auto keyspace = partition_->getTable()->getKeyspaceType();
+  auto id_col = cstable->getColumnReader("__lsm_id");
+  auto version_col = cstable->getColumnReader("__lsm_version");
+  auto sequence_col = cstable->getColumnReader("__lsm_sequence");
+  auto pkey_col = cstable->getColumnReader(pkey_fieldname);
+  RefPtr<cstable::ColumnReader> skip_col;
+  if (has_skiplist) {
+    skip_col = cstable->getColumnReader("__lsm_skip");
+  }
+
+  for (size_t i = 0; i < upload_batchsize; ++i) {
+    uint64_t rlvl;
+    uint64_t dlvl;
+
+    String id_str;
+    id_col->readString(&rlvl, &dlvl, &id_str);
+
+    uint64_t version;
+    version_col->readUnsignedInt(&rlvl, &dlvl, &version);
+
+    bool skip = false;
+    if (skip_col.get()) {
+      skip_col->readBoolean(&rlvl, &dlvl, &skip);
+    }
+
+    uint64_t sequence;
+    sequence_col->readUnsignedInt(&rlvl, &dlvl, &sequence);
+    if (sequence < start_sequence) {
+      skip = true;
+    }
+
+    if (skip) {
+      pkey_col->skipValue();
+    } else {
+      String pkey_value;
+      switch (keyspace) {
+        case KEYSPACE_STRING: {
+          pkey_col->readString(&rlvl, &dlvl, &pkey_value);
+          break;
+        }
+        case KEYSPACE_UINT64: {
+          uint64_t pkey_value_uint = 0;
+          pkey_col->readUnsignedInt(&rlvl, &dlvl, &pkey_value_uint);
+          pkey_value = String(
+              (const char*) &pkey_value_uint,
+              sizeof(uint64_t));
+          break;
+        }
+      }
+
+      if (!keyrange_begin.empty()) {
+        if (comparePartitionKeys(keyspace, pkey_value, keyrange_begin) < 0) {
+          skip = true;
+        }
+      }
+
+      if (!keyrange_end.empty()) {
+        if (comparePartitionKeys(keyspace, pkey_value, keyrange_end) >= 0) {
+          skip = true;
+        }
+      }
+    }
+
+    if (skip) {
+      (*upload_skiplist)[i] = false;
+      ++(*upload_nskipped);
+    } else {
+      upload_builder->addRecord(
+          SHA1Hash(id_str.data(), id_str.size()),
+          version);
+    }
+  }
+}
+
+//void LSMPartitionReplication::uploadBatchTo(
+//    const String& host,
+//    const RecordEnvelopeList& batch) {
+//  auto body = msg::encode(batch);
+//  URI uri(StringUtil::format("http://$0/tsdb/replicate", host));
+//  http::HTTPRequest req(http::HTTPMessage::M_POST, uri.pathAndQuery());
+//  req.addHeader("Host", uri.hostAndPort());
+//  req.addHeader("Content-Type", "application/fnord-msg");
+//  req.addBody(body->data(), body->size());
+//
+//  auto res = http_->executeRequest(req);
+//  res.wait();
+//
+//  const auto& r = res.get();
+//  if (r.statusCode() != 201) {
+//    RAISEF(kRuntimeError, "received non-201 response: $0", r.body().toString());
+//  }
+//}
+//
+//void LSMPartitionReplication::fetchRecords(
+//    size_t start_sequence,
+//    const String& keyrange_begin,
+//    const String& keyrange_end,
+//    Function<void (
+//        const SHA1Hash& record_id,
+//        uint64_t record_version,
+//        const void* record_data,
+//        size_t record_size)> fn) {
+//
+//}
 
 } // namespace tdsb
 
