@@ -120,7 +120,7 @@ void LSMPartitionReplication::replicateTo(
 
     // in batches
     for (uint64_t nrecs_cur = 0; nrecs_cur < nrecs; ) {
-      auto upload_batchsize = std::min(nrecs - nrecs_cur, uint64_t(512)); // FIXME
+      auto upload_batchsize = std::min(nrecs - nrecs_cur, uint64_t(256)); // FIXME
       nrecs_cur += upload_batchsize;
       Vector<bool> upload_skiplist(upload_batchsize, true);
       size_t upload_nskipped = 0;
