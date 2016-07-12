@@ -39,14 +39,26 @@ struct ShreddedRecordColumn {
   String column_name;
   Vector<ShreddedRecordValue> values;
   void addValue(uint32_t rlvl, uint32_t dlvl, String value);
+  void addNull(uint32_t rlvl, uint32_t dlvl);
 };
 
 class ShreddedRecordList {
+public:
 
   ShreddedRecordList(
       Vector<SHA1Hash> record_ids,
       Vector<uint64_t> record_versions,
       Vector<ShreddedRecordColumn> columns);
+
+  size_t getNumColumns() const;
+  size_t getNumRecords() const;
+
+  const SHA1Hash& getRecordID(size_t idx) const;
+  uint64_t getRecordVersion(size_t idx) const;
+  const ShreddedRecordColumn* getColumn(size_t idx); const;
+
+  void encode(OutputStream* os) const;
+  void decode(InputStream* is);
 
 protected:
   Vector<SHA1Hash> record_ids_;

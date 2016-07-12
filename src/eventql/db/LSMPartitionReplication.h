@@ -74,12 +74,17 @@ protected:
       Vector<bool>* upload_skiplist,
       size_t* upload_nskipped);
 
+  void readBatchPayload(
+      cstable::CSTableReader* cstable,
+      size_t upload_batchsize,
+      const Vector<bool>& upload_skiplist,
+      ShreddedRecordListBuilder* upload_builder);
+
   void uploadBatchTo(
       const String& host,
       const ShreddedRecordList& batch);
 
   ConfigDirectory* cdir_;
-
 };
 
 } // namespace eventql

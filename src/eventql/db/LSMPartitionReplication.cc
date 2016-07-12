@@ -138,17 +138,23 @@ void LSMPartitionReplication::replicateTo(
           &upload_skiplist,
           &upload_nskipped);
 
+      // FIXME: send metadata list to remote and merge skiplist
+
       // skip batch if no records to upload
       if (upload_nskipped == upload_batchsize) {
         continue;
       }
 
       // read data columns
-
+      readBatchPayload(
+          cstable.get(),
+          upload_batchsize,
+          upload_skiplist,
+          &upload_builder);
 
       // upload batch
-       uploadBatchTo(server_cfg.server_addr(), upload_builder.get());
-       replication_info->setTargetHostStatus(bytes_sent, records_sent);
+      uploadBatchTo(server_cfg.server_addr(), upload_builder.get());
+      replication_info->setTargetHostStatus(bytes_sent, records_sent);
     }
   }
 }
@@ -518,36 +524,63 @@ void LSMPartitionReplication::readBatchMetadata(
   }
 }
 
-//void LSMPartitionReplication::uploadBatchTo(
-//    const String& host,
-//    const RecordEnvelopeList& batch) {
-//  auto body = msg::encode(batch);
-//  URI uri(StringUtil::format("http://$0/tsdb/replicate", host));
-//  http::HTTPRequest req(http::HTTPMessage::M_POST, uri.pathAndQuery());
-//  req.addHeader("Host", uri.hostAndPort());
-//  req.addHeader("Content-Type", "application/fnord-msg");
-//  req.addBody(body->data(), body->size());
-//
-//  auto res = http_->executeRequest(req);
-//  res.wait();
-//
-//  const auto& r = res.get();
-//  if (r.statusCode() != 201) {
-//    RAISEF(kRuntimeError, "received non-201 response: $0", r.body().toString());
-//  }
-//}
-//
-//void LSMPartitionReplication::fetchRecords(
-//    size_t start_sequence,
-//    const String& keyrange_begin,
-//    const String& keyrange_end,
-//    Function<void (
-//        const SHA1Hash& record_id,
-//        uint64_t record_version,
-//        const void* record_data,
-//        size_t record_size)> fn) {
-//
-//}
+void LSMPartitionReplication::readBatchPayload(
+    cstable::CSTableReader* cstable,
+    size_t upload_batchsize,
+    const Vector<bool>& upload_skiplist,
+    ShreddedRecordListBuilder* upload_builder) {
+  auto cstable_schema = cstable::TableSchema::fromProtobuf(
+      *partition_->getTable()->schema());
+
+  auto columns = cstable->columns();
+  for (const auto& col : columns) {
+    if (StringUtil::beginsWith(col.column_name, "__lsm")) {
+      continue;
+    }
+
+    auto col_reader = cstable->getColumnReader(col.column_name);
+    auto col_writer = upload_builder->addColumn(col.column_name);
+
+    for (size_t i = 0; i < upload_batchsize; ) {
+      uint64_t rlvl;
+      uint64_t dlvl;
+
+      String val;
+      col_reader->readString(&rlvl, &dlvl, &val);
+
+      if (dlvl == col.dlevel_max) {
+        col_writer->addValue(rlvl, dlvl, val);
+      } else {
+        col_writer->addNull(rlvl, dlvl);
+      }
+
+      if (rlvl == 0) {
+        ++i;
+      }
+    }
+  }
+}
+
+void LSMPartitionReplication::uploadBatchTo(
+    const String& host,
+    const ShreddedRecordList& batch) {
+  Buffer body;
+  auto body_os = BufferOutputStream::fromBuffer(&body);
+  batch.encode(body_os.get());
+
+  URI uri(StringUtil::format("http://$0/tsdb/replicate", host));
+  http::HTTPRequest req(http::HTTPMessage::M_POST, uri.pathAndQuery());
+  req.addHeader("Host", uri.hostAndPort());
+  req.addBody(body.data(), body.size());
+
+  auto res = http_->executeRequest(req);
+  res.wait();
+
+  const auto& r = res.get();
+  if (r.statusCode() != 201) {
+    RAISEF(kRuntimeError, "received non-201 response: $0", r.body().toString());
+  }
+}
 
 } // namespace tdsb
 
