@@ -91,6 +91,7 @@ Set<SHA1Hash> PartitionArena::insertRecords(
     is_update_col_->writeBoolean(0, 0, update_flags[i]);
     id_col_->writeString(0, 0, (const char*) record_id.data(), record_id.size());
     version_col_->writeUnsignedInt(0, 0, record_version);
+    cstable_writer_->addRow();
 
     RecordVersion rversion;
     inserted_ids.insert(record_id);
