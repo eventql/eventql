@@ -82,6 +82,7 @@ protected:
 
   size_t uploadBatchTo(
       const String& host,
+      const SHA1Hash& target_partition_id,
       const ShreddedRecordList& batch);
 
   ConfigDirectory* cdir_;

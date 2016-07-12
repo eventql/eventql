@@ -155,6 +155,7 @@ void LSMPartitionReplication::replicateTo(
       // upload batch
       bytes_sent += uploadBatchTo(
           server_cfg.server_addr(),
+          SHA1Hash(replica.partition_id().data(), replica.partition_id().size()),
           upload_builder.get());
 
       records_sent += upload_batchsize - upload_nskipped;
@@ -571,6 +572,7 @@ void LSMPartitionReplication::readBatchPayload(
 
 size_t LSMPartitionReplication::uploadBatchTo(
     const String& host,
+    const SHA1Hash& target_partition_id,
     const ShreddedRecordList& batch) {
   Buffer body;
   auto body_os = BufferOutputStream::fromBuffer(&body);
@@ -582,7 +584,7 @@ size_t LSMPartitionReplication::uploadBatchTo(
           host,
           URI::urlEncode(snap_->state.tsdb_namespace()),
           URI::urlEncode(snap_->state.table_key()),
-          snap_->key.toString()));
+          target_partition_id.toString()));
 
   http::HTTPRequest req(http::HTTPMessage::M_POST, uri.pathAndQuery());
   req.addHeader("Host", uri.hostAndPort());
