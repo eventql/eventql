@@ -487,9 +487,6 @@ void TableService::insertReplicatedRecords(
     auto record_data = record.record_data().data();
     auto record_size = record.record_data().size();
     auto record_version = record.record_version();
-    if (record_version == 0) {
-      RAISE(kIllegalArgumentError, "replicated write must have a version");
-    }
 
     auto group_key = StringUtil::format(
         "$0~$1~$2",
