@@ -135,6 +135,18 @@ void ShreddedRecordList::decode(InputStream* is) {
   }
 }
 
+void ShreddedRecordList::debugPrint() const {
+  iputs("== record list; nrecs=$0 ncols=$1", record_ids_.size(), columns_.size());
+
+  for (const auto& c : columns_) {
+    iputs("== column: $0 ($1 vals)", c.column_name, c.values.size());
+
+    for (const auto& v : c.values) {
+      iputs("  >> r=$0 d=$1 v=$2", v.rlvl, v.dlvl, v.value);
+    }
+  }
+}
+
 ShreddedRecordListBuilder::ShreddedRecordListBuilder() {}
 
 ShreddedRecordColumn* ShreddedRecordListBuilder::getColumn(

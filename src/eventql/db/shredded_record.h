@@ -65,6 +65,8 @@ public:
   void encode(OutputStream* os) const;
   void decode(InputStream* is);
 
+  void debugPrint() const;
+
 protected:
   Vector<SHA1Hash> record_ids_;
   Vector<uint64_t> record_versions_;
