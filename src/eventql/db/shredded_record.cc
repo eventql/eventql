@@ -173,8 +173,8 @@ void writeProtoNull(
   switch (field.type) {
 
     case msg::FieldType::OBJECT:
-      for (const auto& f : field.schema->columns()) {
-        writeProtoNull(r, d, column + "." + f.first, f.second, writer);
+      for (const auto& f : field.schema->fields()) {
+        writeProtoNull(r, d, column + "." + f.name, f, writer);
       }
 
       break;
@@ -265,16 +265,15 @@ static void addProtoRecordField(
 
     switch (field.type) {
       case msg::FieldType::OBJECT: {
-        auto o_schema = msg_schema.fieldSchema(field_id);
-        for (const auto& f : field.schema->columns()) {
+        for (const auto& f : field.schema->fields()) {
           addProtoRecordField(
               next_r,
               rmax,
               next_d,
               o,
-              *o_schema,
+              *field.schema,
               column + field.name + ".",
-              f.second,
+              f,
               writer);
         }
         break;
@@ -303,8 +302,8 @@ void ShreddedRecordListBuilder::addRecordFromProtobuf(
     uint64_t record_version,
     const msg::MessageObject& msg,
     const msg::MessageSchema& schema) {
-  for (const auto& f : schema.columns()) {
-    addProtoRecordField(0, 0, 0, msg, schema, "", f.second, this);
+  for (const auto& f : schema.fields()) {
+    addProtoRecordField(0, 0, 0, msg, schema, "", f, this);
   }
 
   addRecord(record_id, record_version);
