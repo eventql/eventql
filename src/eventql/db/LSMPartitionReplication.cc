@@ -552,13 +552,15 @@ void LSMPartitionReplication::readBatchPayload(
       String val;
       col_reader->readString(&rlvl, &dlvl, &val);
 
-      if (dlvl == col.dlevel_max) {
-        col_writer->addValue(rlvl, dlvl, val);
-      } else {
-        col_writer->addNull(rlvl, dlvl);
+      if (upload_skiplist[i]) {
+        if (dlvl == col.dlevel_max) {
+          col_writer->addValue(rlvl, dlvl, val);
+        } else {
+          col_writer->addNull(rlvl, dlvl);
+        }
       }
 
-      if (rlvl == 0) {
+      if (col_reader->nextRepetitionLevel() == 0) {
         ++i;
       }
     }
