@@ -2389,3 +2389,36 @@ TEST_CASE(RuntimeTest, TestSubstrExpression, [] () {
   }
 });
 
+TEST_CASE(RuntimeTest, TestTrimExpr, [] () {
+  auto runtime = Runtime::getDefaultRuntime();
+  auto txn = runtime->newTransaction();
+
+  {
+    auto v = runtime->evaluateConstExpression(
+        txn.get(),
+        String("ltrim(' fnord')"));
+    EXPECT_EQ(v.getString(), "fnord");
+  }
+
+  {
+    auto v = runtime->evaluateConstExpression(
+        txn.get(),
+        String("ltrim('fnord'"));
+    EXPECT_EQ(v.getString(), "fnord");
+  }
+
+  {
+    auto v = runtime->evaluateConstExpression(
+        txn.get(),
+        String("rtrim('fnord')"));
+    EXPECT_EQ(v.getString(), "fnord");
+  }
+
+  {
+    auto v = runtime->evaluateConstExpression(
+        txn.get(),
+        String("rtrim('foobar ')"));
+    EXPECT_EQ(v.getString(), "fnord");
+  }
+});
+

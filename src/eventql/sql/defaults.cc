@@ -115,6 +115,8 @@ void installDefaultSymbols(SymbolTable* rt) {
   rt->registerFunction("lcase", PureFunction(&expressions::lowerCaseExpr));
   rt->registerFunction("substring", PureFunction(&expressions::subStringExpr));
   rt->registerFunction("substr", PureFunction(&expressions::subStringExpr));
+  rt->registerFunction("ltrim", PureFunction(&expressions::ltrimExpr));
+  rt->registerFunction("rtrim", PureFunction(&expressions::rtrimExpr));
 
   /* expressions/internal.h */
   rt->registerFunction("repeat_value", expressions::kRepeatValueExpr);
