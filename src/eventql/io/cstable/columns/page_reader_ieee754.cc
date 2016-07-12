@@ -58,5 +58,11 @@ double IEEE754PageReader::readFloat() {
   return IEEE754::fromBytes(v);
 }
 
+void IEEE754PageReader::rewind() {
+  page_pos_ = 0;
+  page_len_ = 0;
+  page_idx_ = 0;
+}
+
 } // namespace cstable
 

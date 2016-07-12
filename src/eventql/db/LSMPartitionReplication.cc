@@ -505,6 +505,8 @@ void LSMPartitionReplication::readBatchMetadata(
     }
   }
 
+  pkey_col->rewind();
+
   // read id & version
   for (size_t i = 0; i < upload_batchsize; ++i) {
     if ((*upload_skiplist)[i]) {

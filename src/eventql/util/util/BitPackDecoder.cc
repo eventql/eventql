@@ -37,6 +37,11 @@ BitPackDecoder::BitPackDecoder(
     pos_(0),
     outbuf_pos_(128) {}
 
+void BitPackDecoder::rewind() {
+  pos_ = 0;
+  outbuf_pos_ = 128;
+}
+
 void BitPackDecoder::fetch() {
   auto new_pos = pos_ + 16 * maxbits_;
   simdunpack((__m128i*) (((char *) data_) + pos_), outbuf_, maxbits_);

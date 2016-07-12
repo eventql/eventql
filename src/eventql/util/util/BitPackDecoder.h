@@ -38,6 +38,8 @@ public:
   inline uint32_t next();
   inline uint32_t peek();
 
+  void rewind();
+
 protected:
 
   void fetch();

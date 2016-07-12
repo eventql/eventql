@@ -32,6 +32,7 @@ namespace cstable {
 class PageReader {
 public:
   virtual ~PageReader() = default;
+  virtual void rewind() = 0;
 };
 
 class UnsignedIntPageReader : public PageReader {

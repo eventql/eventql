@@ -161,50 +161,59 @@ TEST_CASE(CSTableTest, TestV1CSTableColumnWriterReader, [] () {
   EXPECT_EQ(uint32_reader->type() == ColumnType::UNSIGNED_INT, true);
   EXPECT_EQ(uint64_reader->type() == ColumnType::UNSIGNED_INT, true);
 
-  for (auto i = 0; i < num_records; i++) {
-    uint64_t rlvl;
-    uint64_t dlvl;
+  for (auto j = 0; j < 3; ++j) {
+    bitpacked_reader->rewind();
+    boolean_reader->rewind();
+    double_reader->rewind();
+    leb128_reader->rewind();
+    string_reader->rewind();
+    uint32_reader->rewind();
+    uint64_reader->rewind();
+    for (auto i = 0; i < num_records; i++) {
+      uint64_t rlvl;
+      uint64_t dlvl;
 
-    {
-      uint64_t val_uint;
-      EXPECT_TRUE(bitpacked_reader->readUnsignedInt(&rlvl, &dlvl, &val_uint));
-      EXPECT_EQ(val_uint, i);
-    }
+      {
+        uint64_t val_uint;
+        EXPECT_TRUE(bitpacked_reader->readUnsignedInt(&rlvl, &dlvl, &val_uint));
+        EXPECT_EQ(val_uint, i);
+      }
 
-    {
-      bool val_bool;
-      EXPECT_TRUE(boolean_reader->readBoolean(&rlvl, &dlvl, &val_bool));
-      EXPECT_EQ(val_bool, i % 2 == 0);
-    }
+      {
+        bool val_bool;
+        EXPECT_TRUE(boolean_reader->readBoolean(&rlvl, &dlvl, &val_bool));
+        EXPECT_EQ(val_bool, i % 2 == 0);
+      }
 
-    {
-      double val_float;
-      EXPECT_TRUE(double_reader->readFloat(&rlvl, &dlvl, &val_float));
-      EXPECT_EQ(val_float, i * 1.1);
-    }
+      {
+        double val_float;
+        EXPECT_TRUE(double_reader->readFloat(&rlvl, &dlvl, &val_float));
+        EXPECT_EQ(val_float, i * 1.1);
+      }
 
-    {
-      uint64_t val_uint;
-      EXPECT_TRUE(leb128_reader->readUnsignedInt(&rlvl, &dlvl, &val_uint));
-      EXPECT_EQ(val_uint, i + 12);
-    }
+      {
+        uint64_t val_uint;
+        EXPECT_TRUE(leb128_reader->readUnsignedInt(&rlvl, &dlvl, &val_uint));
+        EXPECT_EQ(val_uint, i + 12);
+      }
 
-    {
-      String val_str;
-      EXPECT_TRUE(string_reader->readString(&rlvl, &dlvl, &val_str));
-      EXPECT_EQ(val_str, StringUtil::format("x$0x", i));
-    }
+      {
+        String val_str;
+        EXPECT_TRUE(string_reader->readString(&rlvl, &dlvl, &val_str));
+        EXPECT_EQ(val_str, StringUtil::format("x$0x", i));
+      }
 
-    {
-      uint64_t val_uint;
-      EXPECT_TRUE(uint32_reader->readUnsignedInt(&rlvl, &dlvl, &val_uint));
-      EXPECT_EQ(val_uint, i * 5);
-    }
+      {
+        uint64_t val_uint;
+        EXPECT_TRUE(uint32_reader->readUnsignedInt(&rlvl, &dlvl, &val_uint));
+        EXPECT_EQ(val_uint, i * 5);
+      }
 
-    {
-      uint64_t val_uint;
-      EXPECT_TRUE(uint64_reader->readUnsignedInt(&rlvl, &dlvl, &val_uint));
-      EXPECT_EQ(val_uint, i * 8);
+      {
+        uint64_t val_uint;
+        EXPECT_TRUE(uint64_reader->readUnsignedInt(&rlvl, &dlvl, &val_uint));
+        EXPECT_EQ(val_uint, i * 8);
+      }
     }
   }
 });
@@ -644,50 +653,60 @@ TEST_CASE(CSTableTest, TestV2CSTableColumnWriterReader, [] () {
   EXPECT(uint32_reader->type() == ColumnType::UNSIGNED_INT);
   EXPECT(uint64_reader->type() == ColumnType::UNSIGNED_INT);
 
-  for (auto i = 0; i < num_records; i++) {
-    uint64_t rlvl;
-    uint64_t dlvl;
+  for (auto j = 0; j < 3; ++j) {
+    bitpacked_reader->rewind();
+    boolean_reader->rewind();
+    double_reader->rewind();
+    leb128_reader->rewind();
+    string_reader->rewind();
+    uint32_reader->rewind();
+    uint64_reader->rewind();
 
-    {
-      uint64_t val_uint;
-      EXPECT_TRUE(bitpacked_reader->readUnsignedInt(&rlvl, &dlvl, &val_uint));
-      EXPECT_EQ(val_uint, i);
-    }
+    for (auto i = 0; i < num_records; i++) {
+      uint64_t rlvl;
+      uint64_t dlvl;
 
-    {
-      bool val_bool;
-      EXPECT_TRUE(boolean_reader->readBoolean(&rlvl, &dlvl, &val_bool));
-      EXPECT_EQ(val_bool, i % 2 == 0);
-    }
+      {
+        uint64_t val_uint;
+        EXPECT_TRUE(bitpacked_reader->readUnsignedInt(&rlvl, &dlvl, &val_uint));
+        EXPECT_EQ(val_uint, i);
+      }
 
-    {
-      double val_float;
-      EXPECT_TRUE(double_reader->readFloat(&rlvl, &dlvl, &val_float));
-      EXPECT_EQ(val_float, i * 1.1);
-    }
+      {
+        bool val_bool;
+        EXPECT_TRUE(boolean_reader->readBoolean(&rlvl, &dlvl, &val_bool));
+        EXPECT_EQ(val_bool, i % 2 == 0);
+      }
 
-    {
-      uint64_t val_uint;
-      EXPECT_TRUE(leb128_reader->readUnsignedInt(&rlvl, &dlvl, &val_uint));
-      EXPECT_EQ(val_uint, i + 12);
-    }
+      {
+        double val_float;
+        EXPECT_TRUE(double_reader->readFloat(&rlvl, &dlvl, &val_float));
+        EXPECT_EQ(val_float, i * 1.1);
+      }
 
-    {
-      String val_str;
-      EXPECT_TRUE(string_reader->readString(&rlvl, &dlvl, &val_str));
-      EXPECT_EQ(val_str, StringUtil::format("x$0x", i));
-    }
+      {
+        uint64_t val_uint;
+        EXPECT_TRUE(leb128_reader->readUnsignedInt(&rlvl, &dlvl, &val_uint));
+        EXPECT_EQ(val_uint, i + 12);
+      }
 
-    {
-      uint64_t val_uint;
-      EXPECT_TRUE(uint32_reader->readUnsignedInt(&rlvl, &dlvl, &val_uint));
-      EXPECT_EQ(val_uint, i * 5);
-    }
+      {
+        String val_str;
+        EXPECT_TRUE(string_reader->readString(&rlvl, &dlvl, &val_str));
+        EXPECT_EQ(val_str, StringUtil::format("x$0x", i));
+      }
 
-    {
-      uint64_t val_uint;
-      EXPECT_TRUE(uint64_reader->readUnsignedInt(&rlvl, &dlvl, &val_uint));
-      EXPECT_EQ(val_uint, i * 8);
+      {
+        uint64_t val_uint;
+        EXPECT_TRUE(uint32_reader->readUnsignedInt(&rlvl, &dlvl, &val_uint));
+        EXPECT_EQ(val_uint, i * 5);
+      }
+
+      {
+        uint64_t val_uint;
+        EXPECT_TRUE(uint64_reader->readUnsignedInt(&rlvl, &dlvl, &val_uint));
+        EXPECT_EQ(val_uint, i * 8);
+      }
     }
   }
 });

@@ -76,9 +76,14 @@ public:
     return ColumnEncoding::FLOAT_IEEE754;
   }
 
+  void rewind() override {
+    rlvl_reader_.rewind();
+    dlvl_reader_.rewind();
+    data_reader_.rewind();
+  }
+
 protected:
   util::BinaryMessageReader data_reader_;
-  double cur_val_;
 };
 
 } // namespace v1

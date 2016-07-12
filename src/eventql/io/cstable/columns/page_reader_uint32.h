@@ -38,6 +38,8 @@ public:
   uint64_t peek() override;
   bool eofReached() override;
 
+  void rewind() override;
+
 protected:
 
   void fetchNext();

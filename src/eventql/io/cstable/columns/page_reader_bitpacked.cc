@@ -114,5 +114,23 @@ bool BitPackedIntPageReader::eofReached() {
   return eof_;
 }
 
+void BitPackedIntPageReader::rewind() {
+  page_pos_ = 0;
+  page_len_ = 0;
+  page_idx_ = 0;
+  eof_ = false;
+  outbuf_pos_ = 128;
+
+  if (pages_.size() > 0) {
+    fetchNextPage();
+    auto max_val = *page_data_.structAt<uint32_t>(0);
+    page_pos_ = sizeof(uint32_t);
+    maxbits_ = max_val > 0 ? bits(max_val) : 0;
+    fetchNext();
+  } else {
+    eof_ = true;
+  }
+}
+
 } // namespace cstable
 

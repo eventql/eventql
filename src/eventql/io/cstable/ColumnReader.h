@@ -75,6 +75,8 @@ public:
   virtual uint64_t maxRepetitionLevel() const = 0;
   virtual uint64_t maxDefinitionLevel() const = 0;
 
+  virtual void rewind() = 0;
+
 };
 
 class DefaultColumnReader : public ColumnReader {

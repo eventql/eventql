@@ -77,6 +77,12 @@ public:
     return ColumnEncoding::BOOLEAN_BITPACKED;
   }
 
+  void rewind() override {
+    rlvl_reader_.rewind();
+    dlvl_reader_.rewind();
+    data_reader_.rewind();
+  }
+
 protected:
   util::BitPackDecoder data_reader_;
   uint8_t cur_val_;

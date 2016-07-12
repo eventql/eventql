@@ -66,6 +66,8 @@ public:
   void skipValue() override;
   void copyValue(ColumnWriter* writer) override;
 
+  void rewind() override;
+
 protected:
   ScopedPtr<UnsignedIntPageReader> data_reader_;
 };
