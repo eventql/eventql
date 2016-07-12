@@ -113,17 +113,20 @@ Set<SHA1Hash> PartitionArena::insertRecords(
     auto col_writer = cstable_writer_->getColumnWriter(col_reader->column_name);
     auto col_maxdlvl = col_writer->maxDefinitionLevel();
     size_t cur_rec = 0;
-    for (const auto& v : col_reader->values) {
+    size_t nvals = col_reader->values.size();
+    for (size_t i = 0; i < nvals; ++i) {
+      const auto& v = col_reader->values[i];
+
+      if (v.rlvl == 0 && i > 0) {
+        ++cur_rec;
+      }
+
       if (!skip_flags[cur_rec]) {
         if (v.dlvl == col_maxdlvl) {
           col_writer->writeString(v.rlvl, v.dlvl, v.value);
         } else {
           col_writer->writeNull(v.rlvl, v.dlvl);
         }
-      }
-
-      if (v.rlvl == 0) {
-        ++cur_rec;
       }
     }
   }
