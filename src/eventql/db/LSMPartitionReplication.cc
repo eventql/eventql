@@ -422,41 +422,47 @@ void LSMPartitionReplication::readBatchMetadata(
     ShreddedRecordListBuilder* upload_builder,
     Vector<bool>* upload_skiplist,
     size_t* upload_nskipped) {
-  auto pkey_fieldname = partition_->getTable()->getPartitionKey();
-  auto keyspace = partition_->getTable()->getKeyspaceType();
-  auto id_col = cstable->getColumnReader("__lsm_id");
-  auto version_col = cstable->getColumnReader("__lsm_version");
-  auto sequence_col = cstable->getColumnReader("__lsm_sequence");
-  auto pkey_col = cstable->getColumnReader(pkey_fieldname);
-  RefPtr<cstable::ColumnReader> skip_col;
+  // read skip col
   if (has_skiplist) {
-    skip_col = cstable->getColumnReader("__lsm_skip");
+    auto skip_col = cstable->getColumnReader("__lsm_skip");
+    for (size_t i = 0; i < upload_batchsize; ++i) {
+      uint64_t rlvl;
+      uint64_t dlvl;
+
+      bool skip = false;
+      if (skip_col.get()) {
+        skip_col->readBoolean(&rlvl, &dlvl, &skip);
+      }
+
+      (*upload_skiplist)[i] = !skip;
+    }
   }
 
+  // read sequence_col
+  auto sequence_col = cstable->getColumnReader("__lsm_sequence");
   for (size_t i = 0; i < upload_batchsize; ++i) {
     uint64_t rlvl;
     uint64_t dlvl;
 
-    String id_str;
-    id_col->readString(&rlvl, &dlvl, &id_str);
-
-    uint64_t version;
-    version_col->readUnsignedInt(&rlvl, &dlvl, &version);
-
-    bool skip = false;
-    if (skip_col.get()) {
-      skip_col->readBoolean(&rlvl, &dlvl, &skip);
-    }
-
     uint64_t sequence;
     sequence_col->readUnsignedInt(&rlvl, &dlvl, &sequence);
-    if (sequence < start_sequence) {
-      skip = true;
-    }
 
-    if (skip) {
-      pkey_col->skipValue();
-    } else {
+    if (sequence < start_sequence) {
+      (*upload_skiplist)[i] = false;
+    }
+  }
+
+  // read primary keys
+  auto pkey_fieldname = partition_->getTable()->getPartitionKey();
+  auto keyspace = partition_->getTable()->getKeyspaceType();
+  auto id_col = cstable->getColumnReader("__lsm_id");
+  auto version_col = cstable->getColumnReader("__lsm_version");
+  auto pkey_col = cstable->getColumnReader(pkey_fieldname);
+  for (size_t i = 0; i < upload_batchsize; ++i) {
+    if ((*upload_skiplist)[i]) {
+      uint64_t rlvl;
+      uint64_t dlvl;
+
       String pkey_value;
       switch (keyspace) {
         case KEYSPACE_STRING: {
@@ -475,24 +481,39 @@ void LSMPartitionReplication::readBatchMetadata(
 
       if (!keyrange_begin.empty()) {
         if (comparePartitionKeys(keyspace, pkey_value, keyrange_begin) < 0) {
-          skip = true;
+          (*upload_skiplist)[i] = false;
         }
       }
 
       if (!keyrange_end.empty()) {
         if (comparePartitionKeys(keyspace, pkey_value, keyrange_end) >= 0) {
-          skip = true;
+          (*upload_skiplist)[i] = false;
         }
       }
-    }
-
-    if (skip) {
-      (*upload_skiplist)[i] = false;
-      ++(*upload_nskipped);
     } else {
+      pkey_col->skipValue();
+    }
+  }
+
+  // read id & version
+  for (size_t i = 0; i < upload_batchsize; ++i) {
+    if ((*upload_skiplist)[i]) {
+      uint64_t rlvl;
+      uint64_t dlvl;
+
+      String id_str;
+      id_col->readString(&rlvl, &dlvl, &id_str);
+
+      uint64_t version;
+      version_col->readUnsignedInt(&rlvl, &dlvl, &version);
+
       upload_builder->addRecord(
           SHA1Hash(id_str.data(), id_str.size()),
           version);
+    } else {
+      id_col->skipValue();
+      version_col->skipValue();
+      ++(*upload_nskipped);
     }
   }
 }
