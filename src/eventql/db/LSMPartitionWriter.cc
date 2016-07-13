@@ -344,6 +344,10 @@ bool LSMPartitionWriter::compact() {
 
 bool LSMPartitionWriter::needsSplit() const {
   auto snap = head_->getSnapshot();
+  if (snap->state.is_splitting()) {
+    return false;
+  }
+
   if (snap->state.lifecycle_state() != PDISCOVERY_SERVE) {
     return false;
   }
