@@ -44,7 +44,10 @@ public:
 
   bool hasColumn(const String& column_name) const ;
 
-  RefPtr<ColumnReader> getColumnReader(const String& column_name);
+  RefPtr<ColumnReader> getColumnReader(
+      const String& column_name,
+      ColumnReader::Visibility visibility = ColumnReader::Visibility::SHARED);
+
   ColumnType getColumnType(const String& column_name);
   ColumnEncoding getColumnEncoding(const String& column_name);
 
@@ -63,7 +66,7 @@ protected:
       const PageManager* page_mgr,
       bool page_mgr_owned,
       Vector<ColumnConfig> columns,
-      Vector<RefPtr<ColumnReader>> column_readers,
+      Vector<Function<RefPtr<ColumnReader> ()>> column_reader_factories,
       uint64_t num_rows,
       int fd);
 
@@ -71,8 +74,10 @@ protected:
   const PageManager* page_mgr_;
   bool page_mgr_owned_;
   Vector<ColumnConfig> columns_;
-  HashMap<uint32_t, RefPtr<ColumnReader>> column_readers_by_id_;
-  HashMap<String, RefPtr<ColumnReader>> column_readers_by_name_;
+  Vector<Function<RefPtr<ColumnReader> ()>> column_reader_factories_;
+  HashMap<String, size_t> columns_by_name_;
+  Vector<RefPtr<ColumnReader>> column_readers_shared_;
+  List<RefPtr<ColumnReader>> column_readers_private_;
   uint64_t num_rows_;
   int fd_;
 };

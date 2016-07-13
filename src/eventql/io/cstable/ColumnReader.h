@@ -34,6 +34,8 @@ class ColumnWriter;
 class ColumnReader : public RefCounted {
 public:
 
+  enum class Visibility { SHARED, PRIVATE };
+
   virtual bool readBoolean(
       uint64_t* rlvl,
       uint64_t* dlvl,

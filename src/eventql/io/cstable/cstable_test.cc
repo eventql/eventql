@@ -169,6 +169,27 @@ TEST_CASE(CSTableTest, TestV1CSTableColumnWriterReader, [] () {
     string_reader->rewind();
     uint32_reader->rewind();
     uint64_reader->rewind();
+
+    {
+      auto private_bitpacked_reader = tbl_reader->getColumnReader("bitpacked", ColumnReader::Visibility::PRIVATE);
+      auto private_boolean_reader = tbl_reader->getColumnReader("boolean", ColumnReader::Visibility::PRIVATE);
+      auto private_double_reader = tbl_reader->getColumnReader("double", ColumnReader::Visibility::PRIVATE);
+      auto private_leb128_reader = tbl_reader->getColumnReader("leb128", ColumnReader::Visibility::PRIVATE);
+      auto private_string_reader = tbl_reader->getColumnReader("string", ColumnReader::Visibility::PRIVATE);
+      auto private_uint32_reader = tbl_reader->getColumnReader("uint32", ColumnReader::Visibility::PRIVATE);
+      auto private_uint64_reader = tbl_reader->getColumnReader("uint64", ColumnReader::Visibility::PRIVATE);
+
+      for (auto i = 0; i < num_records; i++) {
+        private_bitpacked_reader->skipValue();
+        private_boolean_reader->skipValue();
+        private_double_reader->skipValue();
+        private_leb128_reader->skipValue();
+        private_string_reader->skipValue();
+        private_uint32_reader->skipValue();
+        private_uint64_reader->skipValue();
+      }
+    }
+
     for (auto i = 0; i < num_records; i++) {
       uint64_t rlvl;
       uint64_t dlvl;
@@ -661,6 +682,26 @@ TEST_CASE(CSTableTest, TestV2CSTableColumnWriterReader, [] () {
     string_reader->rewind();
     uint32_reader->rewind();
     uint64_reader->rewind();
+
+    {
+      auto private_bitpacked_reader = tbl_reader->getColumnReader("bitpacked", ColumnReader::Visibility::PRIVATE);
+      auto private_boolean_reader = tbl_reader->getColumnReader("boolean", ColumnReader::Visibility::PRIVATE);
+      auto private_double_reader = tbl_reader->getColumnReader("double", ColumnReader::Visibility::PRIVATE);
+      auto private_leb128_reader = tbl_reader->getColumnReader("leb128", ColumnReader::Visibility::PRIVATE);
+      auto private_string_reader = tbl_reader->getColumnReader("string", ColumnReader::Visibility::PRIVATE);
+      auto private_uint32_reader = tbl_reader->getColumnReader("uint32", ColumnReader::Visibility::PRIVATE);
+      auto private_uint64_reader = tbl_reader->getColumnReader("uint64", ColumnReader::Visibility::PRIVATE);
+
+      for (auto i = 0; i < num_records; i++) {
+        private_bitpacked_reader->skipValue();
+        private_boolean_reader->skipValue();
+        private_double_reader->skipValue();
+        private_leb128_reader->skipValue();
+        private_string_reader->skipValue();
+        private_uint32_reader->skipValue();
+        private_uint64_reader->skipValue();
+      }
+    }
 
     for (auto i = 0; i < num_records; i++) {
       uint64_t rlvl;
