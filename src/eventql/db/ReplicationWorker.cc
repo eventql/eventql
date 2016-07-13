@@ -233,18 +233,6 @@ void ReplicationWorker::work(size_t thread_id) {
       }
 
       replication_info->reset();
-
-      if (!success) {
-        auto snap = partition->getSnapshot();
-
-        logError(
-            "evqld",
-            "Replication failed for partition $0/$1/$2",
-            snap->state.tsdb_namespace(),
-            snap->state.table_key(),
-            snap->key.toString());
-      }
-
       lk.lock();
     }
 
