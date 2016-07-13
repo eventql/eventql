@@ -69,6 +69,7 @@ protected:
       size_t start_sequence,
       size_t start_position,
       bool has_skiplist,
+      cstable::ColumnReader* pkey_col,
       const String& keyrange_begin,
       const String& keyrange_end,
       ShreddedRecordListBuilder* upload_builder,

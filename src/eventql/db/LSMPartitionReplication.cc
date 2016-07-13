@@ -117,6 +117,9 @@ void LSMPartitionReplication::replicateTo(
         tbl.filename() + ".cst");
     auto cstable = cstable::CSTableReader::openFile(cstable_file);
     uint64_t nrecs = cstable->numRecords();
+    auto pkey_col = cstable->getColumnReader(
+        partition_->getTable()->getPartitionKey(),
+        cstable::ColumnReader::Visibility::PRIVATE);
 
     // in batches
     for (uint64_t nrecs_cur = 0; nrecs_cur < nrecs; ) {
@@ -133,6 +136,7 @@ void LSMPartitionReplication::replicateTo(
           replicated_offset,
           nrecs_cur,
           tbl.has_skiplist(),
+          pkey_col.get(),
           replica.keyrange_begin(),
           replica.keyrange_end(),
           &upload_builder,
@@ -430,6 +434,7 @@ void LSMPartitionReplication::readBatchMetadata(
     size_t start_sequence,
     size_t start_position,
     bool has_skiplist,
+    cstable::ColumnReader* pkey_col,
     const String& keyrange_begin,
     const String& keyrange_end,
     ShreddedRecordListBuilder* upload_builder,
@@ -466,11 +471,9 @@ void LSMPartitionReplication::readBatchMetadata(
   }
 
   // read primary keys
-  auto pkey_fieldname = partition_->getTable()->getPartitionKey();
   auto keyspace = partition_->getTable()->getKeyspaceType();
   auto id_col = cstable->getColumnReader("__lsm_id");
   auto version_col = cstable->getColumnReader("__lsm_version");
-  auto pkey_col = cstable->getColumnReader(pkey_fieldname);
   for (size_t i = 0; i < upload_batchsize; ++i) {
     if ((*upload_skiplist)[i]) {
       uint64_t rlvl;
@@ -506,11 +509,6 @@ void LSMPartitionReplication::readBatchMetadata(
     } else {
       pkey_col->skipValue();
     }
-  }
-
-  pkey_col->rewind();
-  for (size_t i = 0; i < start_position; ++i) {
-    pkey_col->skipValue();
   }
 
   // read id & version
