@@ -90,7 +90,11 @@ void BitPackedIntPageReader::fetchNextBatch() {
 
   for (size_t b = 0; b < batch_size; ) {
     if (page_pos_ == page_len_) {
-      fetchNextPage();
+      if (page_idx_ < pages_.size()) {
+        fetchNextPage();
+      } else {
+        break;
+      }
     }
 
     auto c = std::min(
