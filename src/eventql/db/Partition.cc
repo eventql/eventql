@@ -110,6 +110,20 @@ RefPtr<Partition> Partition::reopen(
   auto state = msg::decode<PartitionState>(
       FileUtil::read(FileUtil::joinPaths(pdir, "_snapshot")));
 
+  // backfill
+  if (table->partitionerType() == TBL_PARTITION_TIMEWINDOW &&
+      state.has_partition_keyrange_begin() &&
+      state.partition_keyrange_begin().size() == sizeof(uint64_t) &&
+      !state.has_partition_keyrange_end()) {
+    uint64_t pbegin;
+    memcpy((void*) &pbegin, state.partition_keyrange_begin().data(), sizeof(uint64_t));
+    uint64_t pend = pbegin;
+    pend += kMicrosPerDay * 14;
+    state.set_partition_keyrange_end((const char*) &pend, sizeof(uint64_t));
+  }
+
+  // end of backfill
+
   auto nrecs = 0;
   const auto& files = state.sstable_files();
   for (const auto& f : files) {
