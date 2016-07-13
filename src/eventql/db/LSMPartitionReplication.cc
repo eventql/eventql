@@ -146,9 +146,9 @@ void LSMPartitionReplication::replicateTo(
       // FIXME: send metadata list to remote and merge skiplist
 
       // skip batch if no records to upload
-      if (upload_nskipped == upload_batchsize) {
-        continue;
-      }
+      //if (upload_nskipped == upload_batchsize) {
+      //  continue;
+      //}
 
       // read data columns
       readBatchPayload(
