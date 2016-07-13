@@ -586,7 +586,7 @@ TEST_CASE(CSTableTest, TestV2UInt64PlainShared, [] () {
 
 TEST_CASE(CSTableTest, TestV2CSTableColumnWriterReader, [] () {
   String filename = "/tmp/__fnord__cstabletest2.cstable";
-  auto num_records = 4000;
+  auto num_records = 131072;
   uint64_t rep_max = 1;
   uint64_t def_max = 1;
 
