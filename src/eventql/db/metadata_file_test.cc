@@ -169,4 +169,22 @@ TEST_CASE(MetadataFileTest, TestMetadataFileRangeLookups, [] () {
   EXPECT(file.getPartitionMapRangeEnd("") == file.getPartitionMapEnd());
 });
 
+TEST_CASE(MetadataFileTest, TestKeyCompare, [] () {
+  EXPECT(
+      comparePartitionKeys(
+          KEYSPACE_UINT64,
+          encodePartitionKey(KEYSPACE_UINT64, "8"),
+          encodePartitionKey(KEYSPACE_UINT64, "400")) == -1);
 
+  EXPECT(
+      comparePartitionKeys(
+          KEYSPACE_UINT64,
+          encodePartitionKey(KEYSPACE_UINT64, "400"),
+          encodePartitionKey(KEYSPACE_UINT64, "8")) == 1);
+
+  EXPECT(
+      comparePartitionKeys(
+          KEYSPACE_UINT64,
+          encodePartitionKey(KEYSPACE_UINT64, "2"),
+          encodePartitionKey(KEYSPACE_UINT64, "400")) == -1);
+});
