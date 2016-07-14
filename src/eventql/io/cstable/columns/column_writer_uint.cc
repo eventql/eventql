@@ -124,7 +124,13 @@ void UnsignedIntColumnWriter::writeString(
   try {
     value = std::stoull(String(data, size));
   } catch (...) {
-    assert(false); // "can't convert '$0' to uint"
+    if (String(data, size) == "true") {
+      value = 1;
+    } else if (String(data, size) == "false") {
+      value = 0;
+    } else {
+      assert(false); // "can't convert '$0' to uint"
+    }
   }
 
   writeUnsignedInt(rlvl, dlvl, value);
