@@ -203,7 +203,21 @@ bool LSMPartitionWriter::commit() {
     auto filename = Random::singleton()->hex64();
     auto filepath = FileUtil::joinPaths(snap->base_path, filename);
     auto t0 = WallClock::unixMicros();
-    arena->writeToDisk(filepath, snap->state.lsm_sequence() + 1);
+    {
+      auto rc = arena->writeToDisk(filepath, snap->state.lsm_sequence() + 1);
+      if (!rc.isSuccess()) {
+        logError(
+            "evqld",
+            "Error while commiting partition $0/$1/$2: $3",
+            snap->state.tsdb_namespace(),
+            snap->state.table_key(),
+            snap->key.toString(),
+            rc.message());
+
+        return false;
+      }
+    }
+
     auto t1 = WallClock::unixMicros();
 
     logDebug(
