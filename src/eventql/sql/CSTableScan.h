@@ -46,7 +46,8 @@ public:
       Transaction* txn,
       ExecutionContext* execution_context,
       RefPtr<SequentialScanNode> stmt,
-      RefPtr<cstable::CSTableReader> cstable);
+      RefPtr<cstable::CSTableReader> cstable,
+      const String& cstable_filename = "<unknown>");
 
   ScopedPtr<ResultCursor> execute() override;
 

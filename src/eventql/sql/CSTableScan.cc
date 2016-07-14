@@ -58,7 +58,8 @@ CSTableScan::CSTableScan(
     Transaction* txn,
     ExecutionContext* execution_context,
     RefPtr<SequentialScanNode> stmt,
-    RefPtr<cstable::CSTableReader> cstable) :
+    RefPtr<cstable::CSTableReader> cstable,
+    const String& cstable_filename /* = "<unknown>" */) :
     txn_(txn),
     execution_context_(execution_context),
     stmt_(stmt->deepCopyAs<SequentialScanNode>()),
