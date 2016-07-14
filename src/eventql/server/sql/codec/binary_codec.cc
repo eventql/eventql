@@ -300,9 +300,7 @@ BinaryResultFormat::BinaryResultFormat(
   sendHeader();
 }
 
-BinaryResultFormat::~BinaryResultFormat() {
-  sendFooter();
-}
+BinaryResultFormat::~BinaryResultFormat() {}
 
 void BinaryResultFormat::sendProgress(double progress) {
   util::BinaryMessageWriter writer;
@@ -316,6 +314,7 @@ void BinaryResultFormat::sendError(const String& error) {
   writer.appendUInt8(0xf4);
   writer.appendLenencString(error);
   write_cb_(writer.data(), writer.size());
+  sendFooter();
 }
 
 void BinaryResultFormat::sendHeader() {
@@ -339,6 +338,8 @@ void BinaryResultFormat::sendResults(QueryPlan* query) {
     for (int i = 0; i < query->numStatements(); ++i) {
       sendTable(query, i);
     }
+    
+    sendFooter();
   } catch (const StandardException& e) {
     sendError(e.what());
   }
