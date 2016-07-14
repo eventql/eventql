@@ -340,6 +340,8 @@ void BinaryResultFormat::sendResults(QueryPlan* query) {
   } catch (const StandardException& e) {
     sendError(e.what());
   }
+
+  sendFooter();
 }
 
 void BinaryResultFormat::sendTable(
