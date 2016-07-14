@@ -300,9 +300,7 @@ BinaryResultFormat::BinaryResultFormat(
   sendHeader();
 }
 
-BinaryResultFormat::~BinaryResultFormat() {
-  sendFooter();
-}
+BinaryResultFormat::~BinaryResultFormat() {}
 
 void BinaryResultFormat::sendProgress(double progress) {
   util::BinaryMessageWriter writer;
