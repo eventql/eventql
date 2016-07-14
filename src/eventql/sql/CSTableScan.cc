@@ -163,10 +163,18 @@ void CSTableScan::open() {
 }
 
 bool CSTableScan::next(SValue* out, int out_len) {
-  if (columns_.empty()) {
-    return fetchNextWithoutColumns(out, out_len);
-  } else {
-    return fetchNext(out, out_len);
+  try {
+    if (columns_.empty()) {
+      return fetchNextWithoutColumns(out, out_len);
+    } else {
+      return fetchNext(out, out_len);
+    }
+  } catch (const std::exception& e) {
+    RAISEF(
+        kRuntimeError,
+        "error while scanning table $0: $1",
+        cstable_filename_,
+        e.what());
   }
 }
 
