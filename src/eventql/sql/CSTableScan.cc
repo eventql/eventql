@@ -64,6 +64,7 @@ CSTableScan::CSTableScan(
     execution_context_(execution_context),
     stmt_(stmt->deepCopyAs<SequentialScanNode>()),
     cstable_(cstable),
+    cstable_filename_(cstable_filename),
     colindex_(0),
     aggr_strategy_(stmt_->aggregationStrategy()),
     rows_scanned_(0),
