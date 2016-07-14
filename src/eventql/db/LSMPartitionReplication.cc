@@ -421,12 +421,23 @@ Status LSMPartitionReplication::finalizeJoin(const ReplicationTarget& target) {
 }
 
 bool LSMPartitionReplication::shouldDropPartition() const {
-  if (snap_->state.lifecycle_state() == PDISCOVERY_UNLOAD &&
-      !needsReplication()) {
-    return true;
-  } else {
+  if (snap_->state.lifecycle_state() != PDISCOVERY_UNLOAD) {
     return false;
   }
+
+  if (snap_->head_arena.get() && snap_->head_arena->size() > 0) {
+    return false;
+  }
+
+  if (snap_->compacting_arena.get() && snap_->compacting_arena->size() > 0) {
+    return false;
+  }
+
+  if (needsReplication()) {
+    return false;
+  }
+
+  return true;
 }
 
 void LSMPartitionReplication::readBatchMetadata(
