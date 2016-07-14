@@ -27,6 +27,7 @@
 #include <eventql/io/cstable/columns/page_writer_uint64.h>
 #include <eventql/io/cstable/columns/page_writer_leb128.h>
 #include <eventql/io/cstable/columns/page_writer_bitpacked.h>
+#include <assert.h>
 
 namespace cstable {
 
