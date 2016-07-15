@@ -47,9 +47,9 @@ bool SimpleCompactionStrategy::compact(
     return false;
   }
 
-  //if (!needsCompaction(input)) {
-  //  return false;
-  //}
+  if (!needsCompaction(input)) {
+    return false;
+  }
 
   HashMap<SHA1Hash, uint64_t> vmap;
   for (auto tbl = input.rbegin(); tbl != input.rend(); ++tbl) {
