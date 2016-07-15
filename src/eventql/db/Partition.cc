@@ -124,6 +124,25 @@ RefPtr<Partition> Partition::reopen(
 
   // end of backfill
 
+  // find orphaned files
+  if (table->storage() == TBL_STORAGE_COLSM) {
+    Set<String> orphaned_files;
+    FileUtil::ls(pdir, [&orphaned_files] (const String& filename) -> bool {
+      orphaned_files.insert(filename);
+      return true;
+    });
+
+    for (const auto& tbl : state.lsm_tables()) {
+      orphaned_files.erase(tbl.filename() + ".cst");
+      orphaned_files.erase(tbl.filename() + ".idx");
+      orphaned_files.erase("_snapshot");
+    }
+
+    for (const auto& f : orphaned_files) {
+      logInfo("evqld", "Found orphaned file: $0", FileUtil::joinPaths(pdir, f));
+    }
+  }
+
   auto nrecs = 0;
   const auto& files = state.sstable_files();
   for (const auto& f : files) {
