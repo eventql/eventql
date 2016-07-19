@@ -59,6 +59,15 @@ Status HTTPAuth::authenticateRequest(
         }
       }
     }
+  } else {
+    URI uri(request.uri());
+    URI::ParamList params = uri.queryParams();
+    URI::parseQueryString(request.body().toString(), &params);
+
+    String auth_token;
+    if (URI::getParam(params, "auth_token", &auth_token)) {
+      auth_data.emplace("auth_token", URI::urlDecode(auth_token));
+    }
   }
 
   return client_auth->authenticateSession(session, auth_data);
