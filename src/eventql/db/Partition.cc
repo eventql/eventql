@@ -40,6 +40,7 @@
 #include <eventql/db/StaticPartitionReader.h>
 #include <eventql/db/StaticPartitionWriter.h>
 #include <eventql/db/StaticPartitionReplication.h>
+#include <eventql/db/file_tracker.h>
 #include <eventql/server/server_stats.h>
 
 #include "eventql/eventql.h"
@@ -79,7 +80,7 @@ RefPtr<Partition> Partition::create(
   state.set_partition_keyrange_end(discovery_info.keyrange_end());
 
   auto snap = mkRef(
-    new PartitionSnapshot(table.get(), state, pdir, pdir_rel, 0));
+    new PartitionSnapshot(table.get(), state, pdir, pdir_rel, cfg, 0));
   snap->writeToDisk();
 
   auto partition = mkRef(new Partition(partition_key, cfg, snap, table));
@@ -160,7 +161,7 @@ RefPtr<Partition> Partition::reopen(
       nrecs);
 
   auto snap = mkRef(
-      new PartitionSnapshot(table.get(), state, pdir, pdir_rel, nrecs));
+      new PartitionSnapshot(table.get(), state, pdir, pdir_rel, cfg, nrecs));
   return new Partition(partition_key, cfg, snap, table);
 }
 

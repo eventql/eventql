@@ -817,6 +817,8 @@ evql_core_a_SOURCES = \
     eventql/db/TSDBTableScan_impl.h \
     eventql/db/TSDBTableScanlet.h \
     eventql/db/TablePartitioner.h \
+    eventql/db/file_tracker.h \
+    eventql/db/file_tracker.cc \
     eventql/config/config_directory.cc \
     eventql/config/config_directory.h \
     eventql/config/config_directory_legacy.cc \

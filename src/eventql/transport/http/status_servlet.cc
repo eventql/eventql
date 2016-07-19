@@ -28,8 +28,9 @@
 #include "eventql/util/application.h"
 #include "eventql/db/metadata_client.h"
 #include "eventql/db/metadata_store.h"
-
+#include "eventql/db/file_tracker.h"
 #include "eventql/eventql.h"
+
 namespace eventql {
 
 static const String kStyleSheet = R"(
@@ -174,6 +175,9 @@ void StatusServlet::renderDashboard(
   html += StringUtil::format(
       "<tr><td><em>Memory Usage - Peak</em></td><td align='right'>$0 MB</td></tr>",
       Application::getPeakMemoryUsage() / (1024.0 * 1024.0));
+  html += StringUtil::format(
+      "<tr><td><em>Referenced Files</em></td><td align='right'>$0</td></tr>",
+      config_->file_tracker->getNumReferencedFiles());
   html += "</table>";
 
   html += "<h3>Partitions</h3>";

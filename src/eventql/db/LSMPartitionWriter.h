@@ -69,6 +69,7 @@ protected:
   RefPtr<Partition> partition_;
   RefPtr<CompactionStrategy> compaction_strategy_;
   LSMTableIndexCache* idx_cache_;
+  FileTracker* file_tracker_;
   ConfigDirectory* cdir_;
   ReplicationScheme* repl_;
   size_t partition_split_threshold_;

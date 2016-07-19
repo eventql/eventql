@@ -36,8 +36,8 @@
 #include <eventql/util/protobuf/MessageDecoder.h>
 #include <eventql/io/cstable/RecordShredder.h>
 #include <eventql/io/cstable/cstable_writer.h>
-
 #include "eventql/eventql.h"
+#include "eventql/db/file_tracker.h"
 
 namespace eventql {
 
@@ -52,6 +52,7 @@ LSMPartitionWriter::LSMPartitionWriter(
             partition_,
             cfg->idx_cache.get())),
     idx_cache_(cfg->idx_cache.get()),
+    file_tracker_(cfg->file_tracker),
     cdir_(cfg->config_directory),
     repl_(cfg->repl_scheme.get()),
     partition_split_threshold_(kDefaultPartitionSplitThresholdBytes) {}
@@ -330,19 +331,14 @@ bool LSMPartitionWriter::compact() {
 
   compact_lk.unlock();
 
-  for (const auto& f : delete_filenames) {
-    auto trash_dir = FileUtil::joinPaths(snap->base_path, "../../../../../trash");
-    {
-      auto trash_link = File::openFile(
-          FileUtil::joinPaths(trash_dir, Random::singleton()->hex128() + ".trash"),
-          File::O_WRITE | File::O_CREATE);
-
-      trash_link.write(
-          FileUtil::joinPaths(snap->base_path, f + ".cst") + "\n" +
-          FileUtil::joinPaths(snap->base_path, f + ".idx") + "\n");
+  {
+    Set<String> delete_filenames_full;
+    for (const auto& f : delete_filenames) {
+      delete_filenames_full.insert(FileUtil::joinPaths(snap->rel_path, f));
+      idx_cache_->flush(FileUtil::joinPaths(snap->rel_path, f));
     }
 
-    idx_cache_->flush(FileUtil::joinPaths(snap->rel_path, f));
+    file_tracker_->deleteFiles(delete_filenames_full);
   }
 
   // maybe split this partition

@@ -24,23 +24,31 @@
 #pragma once
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/autoref.h>
-#include <eventql/db/ReplicationScheme.h>
-#include <eventql/db/LSMTableIndexCache.h>
 
 #include "eventql/eventql.h"
 
 namespace eventql {
-class ConfigDirectory;
-class MetadataStore;
-class FileTracker;
 
-struct ServerCfg {
-  String db_path;
-  RefPtr<ReplicationScheme> repl_scheme;
-  RefPtr<LSMTableIndexCache> idx_cache;
-  ConfigDirectory* config_directory;
-  MetadataStore* metadata_store;
-  FileTracker* file_tracker;
+class FileTracker {
+public:
+
+  FileTracker(const String& trash_dir);
+
+  void incrementRefcount(const String& filename);
+  void decrementRefcount(const String& filename);
+
+  bool isReferenced(const String& filename) const;
+
+  size_t getNumReferencedFiles() const;
+
+  void deleteFile(const String& filename);
+  void deleteFiles(const Set<String>& filenames);
+
+protected:
+  String trash_dir_;
+  OrderedMap<String, size_t> refs_;
+  Set<String> deleted_;
+  mutable std::mutex mutex_;
 };
 
 } // namespace eventql
