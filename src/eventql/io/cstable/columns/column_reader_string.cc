@@ -163,5 +163,17 @@ void StringColumnReader::copyValue(ColumnWriter* writer) {
   }
 }
 
+void StringColumnReader::rewind() {
+  if (rlevel_reader_) {
+    rlevel_reader_->rewind();
+  }
+
+  if (dlevel_reader_) {
+    dlevel_reader_->rewind();
+  }
+
+  data_reader_->rewind();
+}
+
 } // namespace cstable
 

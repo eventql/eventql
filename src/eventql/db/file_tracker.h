@@ -24,32 +24,32 @@
 #pragma once
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/autoref.h>
-#include <eventql/db/PartitionWriter.h>
-#include <eventql/util/util/PersistentHashSet.h>
 
 #include "eventql/eventql.h"
 
 namespace eventql {
 
-class StaticPartitionWriter : public PartitionWriter {
+class FileTracker {
 public:
 
-  StaticPartitionWriter(PartitionSnapshotRef* head);
+  FileTracker(const String& trash_dir);
 
-  Set<SHA1Hash> insertRecords(
-      const ShreddedRecordList& records) override;
+  void incrementRefcount(const String& filename);
+  void decrementRefcount(const String& filename);
 
-  bool needsCompaction() override;
+  bool isReferenced(const String& filename) const;
 
-  bool commit() override;
-  bool compact() override;
+  size_t getNumReferencedFiles() const;
 
-  Status applyMetadataChange(
-      const PartitionDiscoveryResponse& discovery_info) override {
-    return Status::success();
-  }
+  void deleteFile(const String& filename);
+  void deleteFiles(const Set<String>& filenames);
 
+protected:
+  String trash_dir_;
+  OrderedMap<String, size_t> refs_;
+  Set<String> deleted_;
+  mutable std::mutex mutex_;
 };
 
-} // namespace tdsb
+} // namespace eventql
 

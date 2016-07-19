@@ -105,5 +105,37 @@ void subStringExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
   }
 }
 
+void ltrimExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
+  if (argc != 1) {
+    RAISEF(
+        kRuntimeError,
+        "wrong number of arguments for ltrim. expected: 1, got: $0",
+        argc);
+  }
+
+  String str = argv[0].getString();
+  while (str.front() == ' ') {
+    str = str.substr(1);
+  }
+
+  *out = SValue::newString(str);
+}
+
+void rtrimExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
+  if (argc != 1) {
+    RAISEF(
+        kRuntimeError,
+        "wrong number of arguments for ltrim. expected: 1, got: $0",
+        argc);
+  }
+
+  String str = argv[0].getString();
+  while (str.back() == ' ') {
+    str.pop_back();
+  }
+
+  *out = SValue::newString(str);
+}
+
 }
 }

@@ -388,7 +388,15 @@ String encodePartitionKey(
     }
 
     case KEYSPACE_UINT64: {
-      uint64_t uint = std::stoull(key);
+      uint64_t uint = 0;
+      if (key.size() > 0) {
+        try {
+          uint = std::stoull(key);
+        } catch (...) {
+          RAISEF(kRuntimeError, "invalid partiiton key: >$0<", key);
+        }
+      }
+
       return String((const char*) &uint, sizeof(uint64_t));
     }
   }

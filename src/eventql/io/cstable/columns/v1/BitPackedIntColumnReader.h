@@ -76,10 +76,15 @@ public:
     return ColumnEncoding::UINT32_BITPACKED;
   }
 
+  void rewind() override {
+    rlvl_reader_.rewind();
+    dlvl_reader_.rewind();
+    data_reader_.rewind();
+  }
+
 protected:
   uint32_t max_value_;
   util::BitPackDecoder data_reader_;
-  uint32_t cur_val_;
 };
 
 } // namespace v1

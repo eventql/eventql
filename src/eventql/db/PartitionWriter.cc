@@ -36,15 +36,15 @@ PartitionWriter::PartitionWriter(
     head_(head),
     frozen_(false) {}
 
-bool PartitionWriter::insertRecord(
-    const SHA1Hash& record_id,
-    uint64_t record_version,
-    const Buffer& record) {
-  Vector<RecordRef> recs;
-  recs.emplace_back(record_id, record_version, record);
-  auto ids = insertRecords(recs);
-  return !ids.empty();
-}
+//bool PartitionWriter::insertRecord(
+//    const SHA1Hash& record_id,
+//    uint64_t record_version,
+//    const Buffer& record) {
+//  Vector<RecordRef> recs;
+//  recs.emplace_back(record_id, record_version, record);
+//  auto ids = insertRecords(recs);
+//  return !ids.empty();
+//}
 
 void PartitionWriter::updateCSTable(
     const String& tmpfile,

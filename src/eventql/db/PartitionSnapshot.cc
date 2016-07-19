@@ -27,6 +27,7 @@
 #include <eventql/util/protobuf/msg.h>
 #include <eventql/db/PartitionSnapshot.h>
 #include <eventql/db/Table.h>
+#include <eventql/db/file_tracker.h>
 
 namespace eventql {
 
@@ -35,8 +36,9 @@ PartitionSnapshot::PartitionSnapshot(
     const PartitionState& _state,
     const String& _abs_path,
     const String& _rel_path,
+    ServerCfg* _server_cfg,
     size_t _nrecs) :
-    PartitionSnapshot(_state, _abs_path, _rel_path, _nrecs) {
+    PartitionSnapshot(_state, _abs_path, _rel_path, _server_cfg, _nrecs) {
   head_arena.reset(new PartitionArena(*table->schema()));
 }
 
@@ -44,6 +46,7 @@ PartitionSnapshot::PartitionSnapshot(
     const PartitionState& _state,
     const String& _abs_path,
     const String& _rel_path,
+    ServerCfg* _server_cfg,
     size_t _nrecs) :
     key(
         _state.partition_key().data(),
@@ -51,7 +54,32 @@ PartitionSnapshot::PartitionSnapshot(
     state(_state),
     base_path(_abs_path),
     rel_path(_rel_path),
-    nrecs(_nrecs) {}
+    server_cfg(_server_cfg),
+    nrecs(_nrecs) {
+  auto file_tracker = _server_cfg->file_tracker;
+
+  for (const auto& tbl : state.lsm_tables()) {
+    file_tracker->incrementRefcount(
+        FileUtil::joinPaths(rel_path, tbl.filename() + ".cst"));
+    file_tracker->incrementRefcount(
+        FileUtil::joinPaths(rel_path, tbl.filename() + ".idx"));
+    file_tracker->incrementRefcount(
+        FileUtil::joinPaths(rel_path, "_snapshot"));
+  }
+}
+
+PartitionSnapshot::~PartitionSnapshot() {
+  auto file_tracker = server_cfg->file_tracker;
+
+  for (const auto& tbl : state.lsm_tables()) {
+    file_tracker->decrementRefcount(
+        FileUtil::joinPaths(rel_path, tbl.filename() + ".cst"));
+    file_tracker->decrementRefcount(
+        FileUtil::joinPaths(rel_path, tbl.filename() + ".idx"));
+    file_tracker->decrementRefcount(
+        FileUtil::joinPaths(rel_path, "_snapshot"));
+  }
+}
 
 SHA1Hash PartitionSnapshot::uuid() const {
   return SHA1Hash(state.uuid().data(), state.uuid().size());
@@ -62,6 +90,7 @@ RefPtr<PartitionSnapshot> PartitionSnapshot::clone() const {
       state,
       base_path,
       rel_path,
+      server_cfg,
       nrecs));
 
   snap->head_arena = head_arena;

@@ -73,5 +73,11 @@ void LenencStringPageReader::loadNextPage() {
   ++page_idx_;
 }
 
+void LenencStringPageReader::rewind() {
+  page_pos_ = 0;
+  page_len_ = 0;
+  page_idx_ = 0;
+}
+
 } // namespace cstable
 

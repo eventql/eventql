@@ -262,13 +262,39 @@ void RPCServlet::replicateRecords(
     const http::HTTPRequest* req,
     http::HTTPResponse* res,
     URI* uri) {
-  auto record_list = msg::decode<RecordEnvelopeList>(req->body());
-  auto insert_flags = (uint64_t) InsertFlags::REPLICATED_WRITE;
-  if (record_list.sync_commit()) {
-    insert_flags |= (uint64_t) InsertFlags::SYNC_COMMIT;
+  const auto& params = uri->queryParams();
+
+  String tsdb_namespace;
+  if (!URI::getParam(params, "namespace", &tsdb_namespace)) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody("missing ?namespace=... parameter");
+    return;
   }
 
-  node_->insertReplicatedRecords(record_list, insert_flags);
+  String table_name;
+  if (!URI::getParam(params, "table", &table_name)) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody("missing ?table=... parameter");
+    return;
+  }
+
+  String partition_key;
+  if (!URI::getParam(params, "partition", &partition_key)) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody("missing ?partition=... parameter");
+    return;
+  }
+
+  ShreddedRecordList records;
+  auto body_is = req->getBodyInputStream();
+  records.decode(body_is.get());
+
+  node_->insertReplicatedRecords(
+      tsdb_namespace,
+      table_name,
+      SHA1Hash::fromHexString(partition_key),
+      records);
+
   res->setStatus(http::kStatusCreated);
 }
 

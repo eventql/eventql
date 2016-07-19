@@ -31,6 +31,7 @@
 #include <eventql/io/cstable/cstable_writer.h>
 #include <eventql/io/cstable/cstable_file.h>
 #include <eventql/db/RecordRef.h>
+#include <eventql/db/shredded_record.h>
 
 namespace eventql {
 
@@ -53,6 +54,11 @@ public:
       uint64_t record_version,
       const msg::MessageObject& record,
       bool is_update);
+
+  Set<SHA1Hash> insertRecords(
+      const ShreddedRecordList& records,
+      Vector<bool> skip_flags,
+      const Vector<bool>& update_flags);
 
   uint64_t fetchRecordVersion(const SHA1Hash& record_id);
 
@@ -86,7 +92,6 @@ protected:
   RefPtr<cstable::ColumnWriter> is_update_col_;
   RefPtr<cstable::ColumnWriter> id_col_;
   RefPtr<cstable::ColumnWriter> version_col_;
-  ScopedPtr<cstable::RecordShredder> shredder_;
   bool opened_;
 };
 

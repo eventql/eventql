@@ -371,7 +371,7 @@ void TableService::insertRecords(
     const msg::DynamicMessage* end,
     uint64_t flags /* = 0 */) {
   MetadataClient metadata_client(cdir_);
-  HashMap<SHA1Hash, Vector<RecordRef>> records;
+  HashMap<SHA1Hash, ShreddedRecordListBuilder> records;
   HashMap<SHA1Hash, Set<String>> servers;
 
   auto table = pmap_->findTable(tsdb_namespace, table_name);
@@ -451,71 +451,34 @@ void TableService::insertRecords(
         find_res.servers_for_insert().begin(),
         find_res.servers_for_insert().end());
 
-    // FIXME
-    Buffer buf;
-    msg::MessageEncoder::encode(record->data(), *record->schema(), &buf);
-
     servers[partition_id] = partition_servers;
-    records[partition_id].emplace_back(
+    auto& record_list_builder = records[partition_id];
+    record_list_builder.addRecordFromProtobuf(
         primary_key,
         WallClock::unixMicros(),
-        buf);
+        *record);
   }
 
-  for (const auto& p : records) {
+  for (auto& p : records) {
     insertRecords(
         tsdb_namespace,
         table_name,
         p.first,
         servers[p.first],
-        p.second,
-        flags);
+        p.second.get());
   }
 }
 
 void TableService::insertReplicatedRecords(
-    const RecordEnvelopeList& records,
-    uint64_t flags /* = 0 */) {
-  HashMap<String, Vector<RecordRef>> grouped;
-
-  for (const auto& record : records.records()) {
-    if (!record.has_partition_sha1()) {
-      RAISE(kIllegalArgumentError, "missing partition id");
-    }
-
-    auto partition_key = SHA1Hash::fromHexString(record.partition_sha1());
-    auto record_data = record.record_data().data();
-    auto record_size = record.record_data().size();
-    auto record_version = record.record_version();
-    if (record_version == 0) {
-      record_version = WallClock::unixMicros();
-    }
-
-    auto group_key = StringUtil::format(
-        "$0~$1~$2",
-        record.tsdb_namespace(),
-        record.table_name(),
-        partition_key.toString());
-
-    grouped[group_key].emplace_back(
-        SHA1Hash::fromHexString(record.record_id()),
-        record_version,
-        Buffer(record_data, record_size));
-  }
-
-  for (const auto& group : grouped) {
-    auto group_key = StringUtil::split(group.first, "~");
-    if (group_key.size() != 3) {
-      RAISE(kIllegalStateError);
-    }
-
-    insertRecordsLocal(
-        group_key[0],
-        group_key[1],
-        SHA1Hash::fromHexString(group_key[2]),
-        group.second,
-        flags);
-  }
+    const String& tsdb_namespace,
+    const String& table_name,
+    const SHA1Hash& partition_key,
+    const ShreddedRecordList& records) {
+  insertRecordsLocal(
+      tsdb_namespace,
+      table_name,
+      partition_key,
+      records);
 }
 
 void TableService::insertRecords(
@@ -523,8 +486,7 @@ void TableService::insertRecords(
     const String& table_name,
     const SHA1Hash& partition_key,
     const Set<String>& servers,
-    const Vector<RecordRef>& records,
-    uint64_t flags /* = 0 */) {
+    const ShreddedRecordList& records) {
   Vector<String> errors;
 
   size_t nconfirmations = 0;
@@ -535,15 +497,13 @@ void TableService::insertRecords(
             tsdb_namespace,
             table_name,
             partition_key,
-            records,
-            flags);
+            records);
       } else {
         insertRecordsRemote(
             tsdb_namespace,
             table_name,
             partition_key,
             records,
-            flags,
             server);
       }
 
@@ -570,12 +530,11 @@ void TableService::insertRecordsLocal(
     const String& tsdb_namespace,
     const String& table_name,
     const SHA1Hash& partition_key,
-    const Vector<RecordRef>& records,
-    uint64_t flags) {
+    const ShreddedRecordList& records) {
   logDebug(
       "z1.core",
       "Inserting $0 records into tsdb://localhost/$1/$2/$3",
-      records.size(),
+      records.getNumRecords(),
       tsdb_namespace,
       table_name,
       partition_key.toString());
@@ -586,19 +545,9 @@ void TableService::insertRecordsLocal(
       partition_key);
 
   auto writer = partition->getWriter();
+  auto inserted_ids = writer->insertRecords(records);
 
-  bool dirty = false;
-  for (const auto& r : records) {
-    if (writer->insertRecord(r.record_id, r.record_version, r.record)) {
-      dirty = true;
-    }
-  }
-
-  if (dirty) {
-    if (flags & (uint64_t) InsertFlags::SYNC_COMMIT) {
-      writer->commit();
-    }
-
+  if (!inserted_ids.empty()) {
     auto change = mkRef(new PartitionChangeNotification());
     change->partition = partition;
     pmap_->publishPartitionChange(change);
@@ -609,8 +558,7 @@ void TableService::insertRecordsRemote(
     const String& tsdb_namespace,
     const String& table_name,
     const SHA1Hash& partition_key,
-    const Vector<RecordRef>& records,
-    uint64_t flags,
+    const ShreddedRecordList& records,
     const String& server_id) {
   auto server_cfg = cdir_->getServerConfig(server_id);
   if (server_cfg.server_status() != SERVER_UP) {
@@ -620,34 +568,27 @@ void TableService::insertRecordsRemote(
   logDebug(
       "z1.core",
       "Inserting $0 records into $1:$2/$3/$4",
-      records.size(),
+      records.getNumRecords(),
       server_id,
       tsdb_namespace,
       table_name,
       partition_key.toString());
 
-  RecordEnvelopeList envelope;
-  for (const auto& r : records) {
-    auto record = envelope.add_records();
-    record->set_tsdb_namespace(tsdb_namespace);
-    record->set_table_name(table_name);
-    record->set_partition_sha1(partition_key.toString());
-    record->set_record_id(r.record_id.toString());
-    record->set_record_data(r.record.toString());
-    record->set_record_version(r.record_version);
-  }
+  Buffer body;
+  auto body_os = BufferOutputStream::fromBuffer(&body);
+  records.encode(body_os.get());
 
-  auto uri = URI(StringUtil::format(
-      "http://$0/tsdb/replicate",
-      server_cfg.server_addr()));
-
-  if (flags & (uint64_t) InsertFlags::SYNC_COMMIT) {
-    envelope.set_sync_commit(true);
-  }
+  auto uri = URI(
+      StringUtil::format(
+          "http://$0/tsdb/replicate?namespace=$1&table=$2&partition=$3",
+          server_cfg.server_addr(),
+          URI::urlEncode(tsdb_namespace),
+          URI::urlEncode(table_name),
+          partition_key.toString()));
 
   http::HTTPRequest req(http::HTTPMessage::M_POST, uri.pathAndQuery());
   req.addHeader("Host", uri.hostAndPort());
-  req.addBody(*msg::encode(envelope));
+  req.addBody(body);
 
   auto res = http_.executeRequest(req);
   res.wait();

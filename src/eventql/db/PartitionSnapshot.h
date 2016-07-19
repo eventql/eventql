@@ -27,7 +27,7 @@
 #include <eventql/util/SHA1.h>
 #include <eventql/db/PartitionState.pb.h>
 #include <eventql/db/partition_arena.h>
-
+#include <eventql/db/ServerConfig.h>
 #include "eventql/eventql.h"
 
 namespace eventql {
@@ -40,13 +40,17 @@ struct PartitionSnapshot : public RefCounted {
       const PartitionState& state,
       const String& _abs_path,
       const String& _rel_path,
+      ServerCfg* _server_cfg,
       size_t _nrecs);
 
   PartitionSnapshot(
       const PartitionState& state,
       const String& _abs_path,
       const String& _rel_path,
+      ServerCfg* _server_cfg,
       size_t _nrecs);
+
+  ~PartitionSnapshot();
 
   RefPtr<PartitionSnapshot> clone() const;
   void writeToDisk();
@@ -57,6 +61,7 @@ struct PartitionSnapshot : public RefCounted {
   PartitionState state;
   const String base_path;
   const String rel_path;
+  ServerCfg* server_cfg;
   uint64_t nrecs;
   RefPtr<PartitionArena> head_arena;
   RefPtr<PartitionArena> compacting_arena;

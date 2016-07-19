@@ -54,58 +54,96 @@ void PartitionArena::open() {
   id_col_ = cstable_writer_->getColumnWriter("__lsm_id");
   version_col_ = cstable_writer_->getColumnWriter("__lsm_version");
 
-  shredder_.reset(
-      new cstable::RecordShredder(cstable_writer_.get(), &cstable_schema_));
-
   opened_ = true;
 }
 
-bool PartitionArena::insertRecord(const RecordRef& record) {
-  msg::MessageObject obj;
-  msg::MessageDecoder::decode(record.record, schema_, &obj);
-  insertRecord(record.record_id, record.record_version, obj, record.is_update);
-  return true;
-}
-
-bool PartitionArena::insertRecord(
-    const SHA1Hash& record_id,
-    uint64_t record_version,
-    const msg::MessageObject& record,
-    bool is_update) {
+Set<SHA1Hash> PartitionArena::insertRecords(
+    const ShreddedRecordList& records,
+    Vector<bool> skip_flags,
+    const Vector<bool>& update_flags) {
   ScopedLock<std::mutex> lk(mutex_);
 
   if (!opened_) {
     open();
   }
 
-  auto old = record_versions_.find(record_id);
-  if (old == record_versions_.end()) {
-    // record does not exist in arena
-  } else if (old->second.version < record_version) {
-    // record does exist in arena, but the one we're inserting is newer
-    skiplist_[old->second.position] = true;
-  } else {
-    // record in arena is newer or equal to the one we're inserting, return false
-    return false;
-  }
+  Set<SHA1Hash> inserted_ids;
+  for (size_t i = 0; i < records.getNumRecords(); ++i) {
+    if (skip_flags[i]) {
+      continue;
+    }
 
-  {
-    shredder_->addRecordFromProtobuf(record, schema_);
-    is_update_col_->writeBoolean(0, 0, is_update);
-    String id_str((const char*) record_id.data(), record_id.size());
-    id_col_->writeString(0, 0, id_str);
+    const auto& record_id = records.getRecordID(i);
+    auto record_version = records.getRecordVersion(i);
+
+    auto old = record_versions_.find(record_id);
+    if (old == record_versions_.end()) {
+      // record does not exist in arena
+    } else if (old->second.version < record_version) {
+      // record does exist in arena, but the one we're inserting is newer
+      skiplist_[old->second.position] = true;
+    } else {
+      // record in arena is newer or equal to the one we're inserting, skip
+      skip_flags[i] = true;
+      continue;
+    }
+
+    is_update_col_->writeBoolean(0, 0, update_flags[i]);
+    id_col_->writeString(0, 0, (const char*) record_id.data(), record_id.size());
     version_col_->writeUnsignedInt(0, 0, record_version);
+    cstable_writer_->addRow();
+
+    RecordVersion rversion;
+    inserted_ids.insert(record_id);
+    rversion.version = record_version;
+    rversion.position = num_records_++;
+    record_versions_[record_id] = rversion;
+    vmap_[record_id] = record_version;
+    skiplist_.push_back(false);
   }
 
-  RecordVersion rversion;
-  rversion.version = record_version;
-  rversion.position = num_records_++;
-  record_versions_[record_id] = rversion;
-  vmap_[record_id] = record_version;
-  skiplist_.push_back(false);
+  Set<String> written_columns;
+  for (size_t j = 0; j < records.getNumColumns(); ++j) {
+    auto col_reader = records.getColumn(j);
+    if (!cstable_writer_->hasColumn(col_reader->column_name)) {
+      continue;
+    }
+
+    written_columns.insert(col_reader->column_name);
+    auto col_writer = cstable_writer_->getColumnWriter(col_reader->column_name);
+    auto col_maxdlvl = col_writer->maxDefinitionLevel();
+    size_t cur_rec = 0;
+    size_t nvals = col_reader->values.size();
+    for (size_t i = 0; i < nvals; ++i) {
+      const auto& v = col_reader->values[i];
+
+      if (v.rlvl == 0 && i > 0) {
+        ++cur_rec;
+      }
+
+      if (!skip_flags[cur_rec]) {
+        if (v.dlvl == col_maxdlvl) {
+          col_writer->writeString(v.rlvl, v.dlvl, v.value);
+        } else {
+          col_writer->writeNull(v.rlvl, v.dlvl);
+        }
+      }
+    }
+  }
+
+  for (const auto& col : cstable_writer_->columns()) {
+    if (written_columns.count(col.column_name) > 0) {
+      continue;
+    }
+
+    auto col_writer = cstable_writer_->getColumnWriter(col.column_name);
+    for (size_t i = 0; i < inserted_ids.size(); ++i) {
+      col_writer->writeNull(0, 0);
+    }
+  }
 
   cstable_writer_->commit();
-  return true;
+  return inserted_ids;
 }
 
 uint64_t PartitionArena::fetchRecordVersion(const SHA1Hash& record_id) {

@@ -58,11 +58,13 @@ CSTableScan::CSTableScan(
     Transaction* txn,
     ExecutionContext* execution_context,
     RefPtr<SequentialScanNode> stmt,
-    RefPtr<cstable::CSTableReader> cstable) :
+    RefPtr<cstable::CSTableReader> cstable,
+    const String& cstable_filename /* = "<unknown>" */) :
     txn_(txn),
     execution_context_(execution_context),
     stmt_(stmt->deepCopyAs<SequentialScanNode>()),
     cstable_(cstable),
+    cstable_filename_(cstable_filename),
     colindex_(0),
     aggr_strategy_(stmt_->aggregationStrategy()),
     rows_scanned_(0),
@@ -163,10 +165,18 @@ void CSTableScan::open() {
 }
 
 bool CSTableScan::next(SValue* out, int out_len) {
-  if (columns_.empty()) {
-    return fetchNextWithoutColumns(out, out_len);
-  } else {
-    return fetchNext(out, out_len);
+  try {
+    if (columns_.empty()) {
+      return fetchNextWithoutColumns(out, out_len);
+    } else {
+      return fetchNext(out, out_len);
+    }
+  } catch (const std::exception& e) {
+    RAISEF(
+        kRuntimeError,
+        "error while scanning table $0: $1",
+        cstable_filename_,
+        e.what());
   }
 }
 

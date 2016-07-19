@@ -62,6 +62,7 @@
 #include "eventql/db/ReplicationWorker.h"
 #include "eventql/db/LSMTableIndexCache.h"
 #include "eventql/db/CompactionWorker.h"
+#include "eventql/db/garbage_collector.h"
 #include "eventql/server/sql/sql_engine.h"
 #include "eventql/transport/http/default_servlet.h"
 #include "eventql/sql/defaults.h"
@@ -78,8 +79,9 @@
 #include "eventql/auth/internal_auth_trust.h"
 #include <jsapi.h>
 #include "eventql/mapreduce/mapreduce_preludejs.cc"
-
 #include "eventql/eventql.h"
+#include "eventql/db/file_tracker.h"
+
 using namespace eventql;
 
 thread::EventLoop ev;
@@ -377,7 +379,7 @@ int main(int argc, const char** argv) {
   http_server.listen(listen_port);
   http::HTTPConnectionPool http(&ev, &z1stats()->http_client_stats);
 
-  /* data dirdirectory */
+  /* data directory */
   auto server_name = process_config->getString("server.name");
   String tsdb_dir;
   String metadata_dir;
@@ -411,6 +413,18 @@ int main(int argc, const char** argv) {
   if (!FileUtil::exists(cache_dir)) {
     FileUtil::mkdir(cache_dir);
   }
+
+  /* file tracker */
+  FileTracker file_tracker(trash_dir);
+
+  /* garbage collector */
+  auto gc_mode = GarbageCollectorMode::DISABLED;
+  GarbageCollector gc(
+      gc_mode,
+      server_datadir,
+      trash_dir,
+      cache_dir,
+      &file_tracker);
 
   /* config dir */
   ScopedPtr<ConfigDirectory> config_dir;
@@ -485,6 +499,7 @@ int main(int argc, const char** argv) {
     cfg.config_directory = config_dir.get();
     cfg.idx_cache = mkRef(new LSMTableIndexCache(tsdb_dir));
     cfg.metadata_store = &metadata_store;
+    cfg.file_tracker = &file_tracker;
 
     eventql::PartitionMap partition_map(&cfg);
     eventql::TableService table_service(
@@ -635,6 +650,7 @@ int main(int argc, const char** argv) {
     Application::setCurrentThreadName("evqld");
 
     partition_map.open();
+    gc.startGCThread();
     if (metadata_replication.get()) {
       metadata_replication->start();
     }
@@ -644,6 +660,8 @@ int main(int argc, const char** argv) {
     if (metadata_replication.get()) {
       metadata_replication->stop();
     }
+
+    gc.stopGCThread();
   } catch (const StandardException& e) {
     logAlert("eventql", e, "FATAL ERROR");
   }

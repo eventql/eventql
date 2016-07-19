@@ -32,6 +32,7 @@
 namespace eventql {
 class ConfigDirectory;
 class MetadataStore;
+class FileTracker;
 
 struct ServerCfg {
   String db_path;
@@ -39,6 +40,7 @@ struct ServerCfg {
   RefPtr<LSMTableIndexCache> idx_cache;
   ConfigDirectory* config_directory;
   MetadataStore* metadata_store;
+  FileTracker* file_tracker;
 };
 
 } // namespace eventql

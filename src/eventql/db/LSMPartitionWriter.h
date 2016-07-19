@@ -36,7 +36,7 @@ namespace eventql {
 class LSMPartitionWriter : public PartitionWriter {
 public:
   static const size_t kDefaultPartitionSplitThresholdBytes = 1024llu * 1024llu * 512llu;
-  static const size_t kMaxArenaRecords = 10000;
+  static const size_t kMaxArenaRecords = 1024 * 64;
   static const size_t kMaxLSMTables = 12;
 
   LSMPartitionWriter(
@@ -45,7 +45,7 @@ public:
       PartitionSnapshotRef* head);
 
   Set<SHA1Hash> insertRecords(
-      const Vector<RecordRef>& records) override;
+      const ShreddedRecordList& records) override;
 
   bool commit() override;
   bool needsCommit();
@@ -69,6 +69,7 @@ protected:
   RefPtr<Partition> partition_;
   RefPtr<CompactionStrategy> compaction_strategy_;
   LSMTableIndexCache* idx_cache_;
+  FileTracker* file_tracker_;
   ConfigDirectory* cdir_;
   ReplicationScheme* repl_;
   size_t partition_split_threshold_;

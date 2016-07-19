@@ -22,14 +22,14 @@
  * code of your own applications
  */
 #include "unistd.h"
+#include "eventql/eventql.h"
 #include <eventql/util/logging.h>
 #include <eventql/util/wallclock.h>
 #include <eventql/util/application.h>
 #include <eventql/db/ReplicationWorker.h>
 #include <eventql/db/Partition.h>
 #include <eventql/server/server_stats.h>
-
-#include "eventql/eventql.h"
+#include <assert.h>
 
 namespace eventql {
 
@@ -120,7 +120,7 @@ ReplicationWorker::ReplicationWorker(
 }
 
 ReplicationWorker::~ReplicationWorker() {
-  stop();
+  assert(running_ == false);
 }
 
 void ReplicationWorker::enqueuePartition(
@@ -233,18 +233,6 @@ void ReplicationWorker::work(size_t thread_id) {
       }
 
       replication_info->reset();
-
-      if (!success) {
-        auto snap = partition->getSnapshot();
-
-        logError(
-            "evqld",
-            "Replication failed for partition $0/$1/$2",
-            snap->state.tsdb_namespace(),
-            snap->state.table_key(),
-            snap->key.toString());
-      }
-
       lk.lock();
     }
 

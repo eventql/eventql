@@ -149,11 +149,13 @@ RefPtr<CSTableReader> CSTableReader::openFile(const String& filename) {
     case BinaryFormatVersion::v0_1_0: {
       auto mmap = mkRef(new MmappedFile(std::move(file)));
 
-      Vector<RefPtr<ColumnReader>> column_readers;
+      Vector<Function<RefPtr<ColumnReader> ()>> column_reader_factories;
       for (const auto& col : header.columns) {
-        auto reader = openColumnV1(col, mmap.get());
-        reader->storeMmap(mmap.get());
-        column_readers.emplace_back(reader.get());
+        auto factory = [col, mmap] () -> RefPtr<ColumnReader> {
+          return openColumnV1(col, mmap.get()).get();
+        };
+
+        column_reader_factories.emplace_back(factory);
       }
 
       return new CSTableReader(
@@ -161,7 +163,7 @@ RefPtr<CSTableReader> CSTableReader::openFile(const String& filename) {
           nullptr,
           true,
           header.columns,
-          column_readers,
+          column_reader_factories,
           header.num_rows,
           -1);
     }
@@ -174,10 +176,15 @@ RefPtr<CSTableReader> CSTableReader::openFile(const String& filename) {
       }
 
       auto page_mgr = mkScoped(new PageManager(file.fd(), 0, index));
+      auto page_mgr_ptr = page_mgr.get();
 
-      Vector<RefPtr<ColumnReader>> column_readers;
+      Vector<Function<RefPtr<ColumnReader> ()>> column_reader_factories;
       for (const auto& col : header.columns) {
-        column_readers.emplace_back(openColumnV2(col, page_mgr.get()));
+        auto factory = [col, page_mgr_ptr] () -> RefPtr<ColumnReader> {
+          return openColumnV2(col, page_mgr_ptr);
+        };
+
+        column_reader_factories.emplace_back(factory);
       }
 
       return new CSTableReader(
@@ -185,7 +192,7 @@ RefPtr<CSTableReader> CSTableReader::openFile(const String& filename) {
           page_mgr.release(),
           true,
           header.columns,
-          column_readers,
+          column_reader_factories,
           metablock.num_rows,
           file.releaseFD());
     }
@@ -200,9 +207,14 @@ RefPtr<CSTableReader> CSTableReader::openFile(
   file->getTransaction(&transaction_id, &num_rows);
 
   auto columns = file->getTableSchema().flatColumns();
-  Vector<RefPtr<ColumnReader>> column_readers;
+  auto page_mgr_ptr = file->getPageManager();
+  Vector<Function<RefPtr<ColumnReader> ()>> column_reader_factories;
   for (const auto& col : columns) {
-    column_readers.emplace_back(openColumnV2(col, file->getPageManager()));
+    auto factory = [col, page_mgr_ptr] () -> RefPtr<ColumnReader> {
+      return openColumnV2(col, page_mgr_ptr);
+    };
+
+    column_reader_factories.emplace_back(factory);
   }
 
   return new CSTableReader(
@@ -210,7 +222,7 @@ RefPtr<CSTableReader> CSTableReader::openFile(
       file->getPageManager(),
       false,
       columns,
-      column_readers,
+      column_reader_factories,
       std::min(num_rows, limit),
       -1);
 }
@@ -220,23 +232,21 @@ CSTableReader::CSTableReader(
     const PageManager* page_mgr,
     bool page_mgr_owned,
     Vector<ColumnConfig> columns,
-    Vector<RefPtr<ColumnReader>> column_readers,
+    Vector<Function<RefPtr<ColumnReader> ()>> column_reader_factories,
     uint64_t num_rows,
     int fd) :
     version_(version),
     page_mgr_(page_mgr),
     page_mgr_owned_(page_mgr_owned),
     columns_(columns),
+    column_reader_factories_(column_reader_factories),
+    column_readers_shared_(columns.size()),
     num_rows_(num_rows),
     fd_(fd) {
-  RCHECK(column_readers.size() == columns.size(), "illegal column list");
+  RCHECK(column_reader_factories.size() == columns.size(), "illegal column list");
 
   for (size_t i = 0; i < columns.size(); ++i) {
-    if (columns_[i].column_id > 0) {
-      column_readers_by_id_.emplace(columns_[i].column_id, column_readers[i]);
-    }
-
-    column_readers_by_name_.emplace(columns_[i].column_name, column_readers[i]);
+    columns_by_name_.emplace(columns_[i].column_name, i);
   }
 }
 
@@ -251,13 +261,33 @@ CSTableReader::~CSTableReader() {
 }
 
 RefPtr<ColumnReader> CSTableReader::getColumnReader(
-    const String& column_name) {
-  auto col = column_readers_by_name_.find(column_name);
-  if (col == column_readers_by_name_.end()) {
+    const String& column_name,
+    ColumnReader::Visibility visibility /* = ColumnReader::Visibility::SHARED */) {
+  auto col_iter = columns_by_name_.find(column_name);
+  if (col_iter == columns_by_name_.end()) {
     RAISEF(kNotFoundError, "column not found: $0", column_name);
   }
 
-  return col->second;
+  auto col_idx = col_iter->second;
+
+  switch (visibility) {
+
+    case ColumnReader::Visibility::SHARED: {
+      auto& slot = column_readers_shared_[col_idx];
+      if (!slot.get()) {
+        slot = column_reader_factories_[col_idx]();
+      }
+
+      return slot;
+    }
+
+    case ColumnReader::Visibility::PRIVATE: {
+      auto reader = column_reader_factories_[col_idx]();
+      column_readers_private_.emplace_back(reader);
+      return reader;
+    }
+
+  }
 }
 
 ColumnEncoding CSTableReader::getColumnEncoding(const String& column_name) {
@@ -275,8 +305,8 @@ const Vector<ColumnConfig>& CSTableReader::columns() const {
 }
 
 bool CSTableReader::hasColumn(const String& column_name) const {
-  auto col = column_readers_by_name_.find(column_name);
-  return col != column_readers_by_name_.end();
+  auto col = columns_by_name_.find(column_name);
+  return col != columns_by_name_.end();
 }
 
 size_t CSTableReader::numRecords() const {

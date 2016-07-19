@@ -46,12 +46,6 @@ Status TableSplit::execute(
     FileInputStream* stdin_is,
     OutputStream* stdout_os,
     OutputStream* stderr_os) {
-  auto zookeeper_addr = process_cfg_->getString("evqlctl", "zookeeper_addr");
-  if (zookeeper_addr.isEmpty()) {
-    stderr_os->write("ERROR: zookeeper address not specified\n");
-    return Status(eFlagError);
-  }
-
   ::cli::FlagParser flags;
   flags.defineFlag(
       "cluster_name",

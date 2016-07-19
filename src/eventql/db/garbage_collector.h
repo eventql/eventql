@@ -24,32 +24,57 @@
 #pragma once
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/autoref.h>
-#include <eventql/db/PartitionWriter.h>
-#include <eventql/util/util/PersistentHashSet.h>
-
+#include <eventql/db/file_tracker.h>
 #include "eventql/eventql.h"
+#include <thread>
+#include <condition_variable>
 
 namespace eventql {
 
-class StaticPartitionWriter : public PartitionWriter {
-public:
-
-  StaticPartitionWriter(PartitionSnapshotRef* head);
-
-  Set<SHA1Hash> insertRecords(
-      const ShreddedRecordList& records) override;
-
-  bool needsCompaction() override;
-
-  bool commit() override;
-  bool compact() override;
-
-  Status applyMetadataChange(
-      const PartitionDiscoveryResponse& discovery_info) override {
-    return Status::success();
-  }
-
+enum class GarbageCollectorMode {
+  DISABLED, MANUAL, AUTOMATIC
 };
 
-} // namespace tdsb
+String garbageCollectorModeToString(GarbageCollectorMode mode);
+GarbageCollectorMode garbageCollectorModeFromString(String str);
+
+class GarbageCollector {
+public:
+
+  static const uint64_t kDefaultGCInterval = 30 * kMicrosPerSecond;
+
+  GarbageCollector(
+      GarbageCollectorMode mode,
+      const String& base_dir,
+      const String& trash_dir,
+      const String& cache_dir,
+      FileTracker* file_tracker,
+      size_t gc_interval = kDefaultGCInterval);
+
+  ~GarbageCollector();
+
+  void runGC();
+
+  void startGCThread();
+  void stopGCThread();
+
+protected:
+
+  void emptyTrash();
+  void flushCache();
+
+  GarbageCollectorMode mode_;
+  String base_dir_;
+  String trash_dir_;
+  String cache_dir_;
+  FileTracker* file_tracker_;
+  uint64_t gc_interval_;
+
+  std::thread thread_;
+  bool thread_running_;
+  std::mutex mutex_;
+  std::condition_variable cv_;
+};
+
+} // namespace eventql
 

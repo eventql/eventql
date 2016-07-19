@@ -34,6 +34,8 @@ class ColumnWriter;
 class ColumnReader : public RefCounted {
 public:
 
+  enum class Visibility { SHARED, PRIVATE };
+
   virtual bool readBoolean(
       uint64_t* rlvl,
       uint64_t* dlvl,
@@ -74,6 +76,8 @@ public:
 
   virtual uint64_t maxRepetitionLevel() const = 0;
   virtual uint64_t maxDefinitionLevel() const = 0;
+
+  virtual void rewind() = 0;
 
 };
 

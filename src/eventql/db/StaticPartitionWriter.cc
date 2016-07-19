@@ -36,7 +36,7 @@ StaticPartitionWriter::StaticPartitionWriter(
     PartitionWriter(head) {}
 
 Set<SHA1Hash> StaticPartitionWriter::insertRecords(
-    const Vector<RecordRef>& records) {
+    const ShreddedRecordList& records) {
   RAISE(
       kRuntimeError,
       "can't insert individual records because partition is STATIC");

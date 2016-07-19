@@ -79,5 +79,13 @@ bool UInt32PageReader::eofReached() {
   return eof_;
 }
 
+void UInt32PageReader::rewind() {
+  page_pos_ = 0;
+  page_len_ = 0;
+  page_idx_ = 0;
+  eof_ = false;
+  fetchNext();
+}
+
 } // namespace cstable
 

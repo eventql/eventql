@@ -56,7 +56,6 @@ public:
       const msg::MessageObject& msg,
       const msg::MessageSchema& schema);
 
-
   void addRecordsFromCSV(CSVInputStream* csv);
 
 protected:

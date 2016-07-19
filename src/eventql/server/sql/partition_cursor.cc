@@ -59,6 +59,7 @@ bool PartitionCursor::next(csql::SValue* row, int row_len) {
 
 bool PartitionCursor::openNextTable() {
   RefPtr<cstable::CSTableReader> cstable;
+  String cstable_filename;
   RefPtr<cstable::ColumnReader> skip_col;
 
   cur_skiplist_.reset();
@@ -73,6 +74,11 @@ bool PartitionCursor::openNextTable() {
         cstable = cstable::CSTableReader::openFile(
             snap_->head_arena->getCSTableFile(),
             cur_skiplist_->size());
+        cstable_filename = StringUtil::format(
+            "memory://$0/$1/$2/head_arena",
+            snap_->state.tsdb_namespace(),
+            snap_->state.table_key(),
+            snap_->key.toString());
         break;
       } else {
         ++cur_table_;
@@ -89,6 +95,11 @@ bool PartitionCursor::openNextTable() {
         cstable = cstable::CSTableReader::openFile(
             snap_->compacting_arena->getCSTableFile(),
             cur_skiplist_->size());
+        cstable_filename = StringUtil::format(
+            "memory://$0/$1/$2/compacting_arena",
+            snap_->state.tsdb_namespace(),
+            snap_->state.table_key(),
+            snap_->key.toString());
         break;
       } else {
         ++cur_table_;
@@ -106,6 +117,7 @@ bool PartitionCursor::openNextTable() {
           snap_->base_path,
           tbl->filename() + ".cst");
       cstable = cstable::CSTableReader::openFile(cstable_file);
+      cstable_filename = cstable_file;
       if (tbl->has_skiplist()) {
         skip_col = cstable->getColumnReader("__lsm_skip");
       }
@@ -116,7 +128,12 @@ bool PartitionCursor::openNextTable() {
   auto id_col = cstable->getColumnReader("__lsm_id");
   auto is_update_col = cstable->getColumnReader("__lsm_is_update");
   cur_scan_.reset(
-      new csql::CSTableScan(txn_, execution_context_, stmt_, cstable));
+      new csql::CSTableScan(
+          txn_,
+          execution_context_,
+          stmt_,
+          cstable,
+          cstable_filename));
 
   cur_scan_->setFilter([this, id_col, is_update_col, skip_col] () -> bool {
     uint64_t rlvl;

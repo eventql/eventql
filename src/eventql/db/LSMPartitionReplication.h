@@ -26,6 +26,7 @@
 #include <eventql/util/stdtypes.h>
 #include <eventql/db/PartitionReplication.h>
 #include <eventql/db/PartitionState.pb.h>
+#include <eventql/db/shredded_record.h>
 #include <eventql/config/config_directory.h>
 
 namespace eventql {
@@ -62,22 +63,31 @@ protected:
       uint64_t replicated_offset,
       ReplicationInfo* replication_info);
 
-  void uploadBatchTo(
-      const String& host,
-      const RecordEnvelopeList& batch);
-
-  void fetchRecords(
+  void readBatchMetadata(
+      cstable::CSTableReader* cstable,
+      size_t upload_batchsize,
       size_t start_sequence,
+      size_t start_position,
+      bool has_skiplist,
+      cstable::ColumnReader* pkey_col,
       const String& keyrange_begin,
       const String& keyrange_end,
-      Function<void (
-          const SHA1Hash& record_id,
-          uint64_t record_version,
-          const void* record_data,
-          size_t record_size)> fn);
+      ShreddedRecordListBuilder* upload_builder,
+      Vector<bool>* upload_skiplist,
+      size_t* upload_nskipped);
+
+  void readBatchPayload(
+      cstable::CSTableReader* cstable,
+      size_t upload_batchsize,
+      const Vector<bool>& upload_skiplist,
+      ShreddedRecordListBuilder* upload_builder);
+
+  size_t uploadBatchTo(
+      const String& host,
+      const SHA1Hash& target_partition_id,
+      const ShreddedRecordList& batch);
 
   ConfigDirectory* cdir_;
-
 };
 
 } // namespace eventql

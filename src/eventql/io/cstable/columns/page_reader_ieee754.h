@@ -36,6 +36,8 @@ public:
 
   double readFloat() override;
 
+  void rewind() override;
+
 protected:
 
   const PageManager* page_mgr_;

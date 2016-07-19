@@ -40,6 +40,7 @@
 #include <eventql/db/StaticPartitionReader.h>
 #include <eventql/db/StaticPartitionWriter.h>
 #include <eventql/db/StaticPartitionReplication.h>
+#include <eventql/db/file_tracker.h>
 #include <eventql/server/server_stats.h>
 
 #include "eventql/eventql.h"
@@ -79,7 +80,7 @@ RefPtr<Partition> Partition::create(
   state.set_partition_keyrange_end(discovery_info.keyrange_end());
 
   auto snap = mkRef(
-    new PartitionSnapshot(table.get(), state, pdir, pdir_rel, 0));
+    new PartitionSnapshot(table.get(), state, pdir, pdir_rel, cfg, 0));
   snap->writeToDisk();
 
   auto partition = mkRef(new Partition(partition_key, cfg, snap, table));
@@ -110,6 +111,39 @@ RefPtr<Partition> Partition::reopen(
   auto state = msg::decode<PartitionState>(
       FileUtil::read(FileUtil::joinPaths(pdir, "_snapshot")));
 
+  // backfill
+  if (table->partitionerType() == TBL_PARTITION_TIMEWINDOW &&
+      state.has_partition_keyrange_begin() &&
+      state.partition_keyrange_begin().size() == sizeof(uint64_t) &&
+      !state.has_partition_keyrange_end()) {
+    uint64_t pbegin;
+    memcpy((void*) &pbegin, state.partition_keyrange_begin().data(), sizeof(uint64_t));
+    uint64_t pend = pbegin;
+    pend += kMicrosPerDay * 14;
+    state.set_partition_keyrange_end((const char*) &pend, sizeof(uint64_t));
+  }
+
+  // end of backfill
+
+  // find orphaned files
+  if (table->storage() == TBL_STORAGE_COLSM) {
+    Set<String> orphaned_files;
+    FileUtil::ls(pdir, [&orphaned_files] (const String& filename) -> bool {
+      orphaned_files.insert(filename);
+      return true;
+    });
+
+    for (const auto& tbl : state.lsm_tables()) {
+      orphaned_files.erase(tbl.filename() + ".cst");
+      orphaned_files.erase(tbl.filename() + ".idx");
+      orphaned_files.erase("_snapshot");
+    }
+
+    for (const auto& f : orphaned_files) {
+      logInfo("evqld", "Found orphaned file: $0", FileUtil::joinPaths(pdir, f));
+    }
+  }
+
   auto nrecs = 0;
   const auto& files = state.sstable_files();
   for (const auto& f : files) {
@@ -127,7 +161,7 @@ RefPtr<Partition> Partition::reopen(
       nrecs);
 
   auto snap = mkRef(
-      new PartitionSnapshot(table.get(), state, pdir, pdir_rel, nrecs));
+      new PartitionSnapshot(table.get(), state, pdir, pdir_rel, cfg, nrecs));
   return new Partition(partition_key, cfg, snap, table);
 }
 

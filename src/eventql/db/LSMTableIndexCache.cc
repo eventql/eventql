@@ -75,7 +75,7 @@ RefPtr<LSMTableIndex> LSMTableIndexCache::lookup(const String& filename) {
         FileUtil::size(file_path) + filename.size() * 2 + kConstantOverhead;
     size_ += slot->size;
 
-    logInfo(
+    logTrace(
         "evqld",
         "LSMTableIndexCache::load: $0 (size=$1/$2)",
         filename,
@@ -102,7 +102,7 @@ RefPtr<LSMTableIndex> LSMTableIndexCache::lookup(const String& filename) {
 
 void LSMTableIndexCache::flush(const String& filename) {
   ScopedLock<std::mutex> lk(mutex_);
-  logInfo("evqld", "LSMTableIndexCache::flush: $0 (size=$1)", filename, size_);
+  logTrace("evqld", "LSMTableIndexCache::flush: $0 (size=$1)", filename, size_);
 
   auto iter = map_.find(filename);
   if (iter == map_.end()) {

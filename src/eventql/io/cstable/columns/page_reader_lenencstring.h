@@ -36,6 +36,8 @@ public:
 
   void readString(String* value) override;
 
+  void rewind() override;
+
 protected:
 
   void loadNextPage();

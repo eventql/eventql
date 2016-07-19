@@ -38,6 +38,7 @@
 #include <eventql/db/RecordEnvelope.pb.h>
 #include <eventql/db/partition_map.h>
 #include <eventql/db/TimeWindowPartitioner.h>
+#include <eventql/db/shredded_record.h>
 #include <eventql/config/config_directory.h>
 
 #include "eventql/eventql.h"
@@ -114,10 +115,12 @@ public:
       const json::JSONObject::const_iterator& data_end,
       uint64_t flags = 0);
 
-  // inertnal method, don't use
+  // internal method, don't use
   void insertReplicatedRecords(
-      const RecordEnvelopeList& records,
-      uint64_t flags = 0);
+      const String& tsdb_namespace,
+      const String& table_name,
+      const SHA1Hash& partition_key,
+      const ShreddedRecordList& records);
 
   void compactPartition(
       const String& tsdb_namespace,
@@ -165,22 +168,19 @@ protected:
       const String& table_name,
       const SHA1Hash& partition_key,
       const Set<String>& servers,
-      const Vector<RecordRef>& records,
-      uint64_t flags = 0);
+      const ShreddedRecordList& records);
 
   void insertRecordsLocal(
       const String& tsdb_namespace,
       const String& table_name,
       const SHA1Hash& partition_key,
-      const Vector<RecordRef>& records,
-      uint64_t flags);
+      const ShreddedRecordList& records);
 
   void insertRecordsRemote(
       const String& tsdb_namespace,
       const String& table_name,
       const SHA1Hash& partition_key,
-      const Vector<RecordRef>& records,
-      uint64_t flags,
+      const ShreddedRecordList& records,
       const String& server_id);
 
   ConfigDirectory* cdir_;
