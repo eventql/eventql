@@ -62,6 +62,7 @@
 #include "eventql/db/ReplicationWorker.h"
 #include "eventql/db/LSMTableIndexCache.h"
 #include "eventql/db/CompactionWorker.h"
+#include "eventql/db/garbage_collector.h"
 #include "eventql/server/sql/sql_engine.h"
 #include "eventql/transport/http/default_servlet.h"
 #include "eventql/sql/defaults.h"
@@ -416,6 +417,10 @@ int main(int argc, const char** argv) {
   /* file tracker */
   FileTracker file_tracker(trash_dir);
 
+  /* garbage collector */
+  auto gc_mode = GarbageCollectorMode::DISABLED;
+  GarbageCollector gc(gc_mode, server_datadir, trash_dir, cache_dir);
+
   /* config dir */
   ScopedPtr<ConfigDirectory> config_dir;
   {
@@ -640,6 +645,7 @@ int main(int argc, const char** argv) {
     Application::setCurrentThreadName("evqld");
 
     partition_map.open();
+    gc.startGCThread();
     if (metadata_replication.get()) {
       metadata_replication->start();
     }
@@ -649,6 +655,8 @@ int main(int argc, const char** argv) {
     if (metadata_replication.get()) {
       metadata_replication->stop();
     }
+
+    gc.stopGCThread();
   } catch (const StandardException& e) {
     logAlert("eventql", e, "FATAL ERROR");
   }

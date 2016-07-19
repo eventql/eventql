@@ -819,6 +819,8 @@ evql_core_a_SOURCES = \
     eventql/db/TablePartitioner.h \
     eventql/db/file_tracker.h \
     eventql/db/file_tracker.cc \
+    eventql/db/garbage_collector.h \
+    eventql/db/garbage_collector.cc \
     eventql/config/config_directory.cc \
     eventql/config/config_directory.h \
     eventql/config/config_directory_legacy.cc \
