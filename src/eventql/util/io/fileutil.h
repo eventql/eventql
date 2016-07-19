@@ -25,6 +25,7 @@
 #define _libstx_UTIL_FILEUTIL_H_
 #include "eventql/util/buffer.h"
 #include "eventql/util/stdtypes.h"
+#include <dirent.h>
 
 class FileUtil {
 public:
@@ -85,6 +86,13 @@ public:
   static void ls(
       const std::string& dirname,
       std::function<bool(const std::string&)> callback);
+
+  /**
+   * List files in a directory
+   */
+  static void ls(
+      const std::string& dirname,
+      std::function<bool(const struct dirent*)> callback);
 
   /**
    * Delete a file

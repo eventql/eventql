@@ -208,6 +208,48 @@ void FileUtil::ls(
   closedir(dir);
 }
 
+void FileUtil::ls(
+    const std::string& dirname,
+    std::function<bool(const struct dirent*)> callback) {
+  if (exists(dirname)) {
+    if (!isDirectory(dirname)) {
+      RAISE(
+          kIOError,
+          "file '%s' exists but is not a directory",
+          dirname.c_str());
+    }
+  } else {
+    RAISE(
+        kIOError,
+        "file '%s' does not exist",
+        dirname.c_str());
+  }
+
+  auto dir = opendir(dirname.c_str());
+
+  if (dir == nullptr) {
+    RAISE_ERRNO("opendir(%s) failed", dirname.c_str());
+  }
+
+  struct dirent* entry;
+  while ((entry = readdir(dir)) != NULL) {
+#if defined(__APPLE__)
+    size_t namlen = entry->d_namlen;
+#else
+    size_t namlen = strlen(entry->d_name);
+#endif
+    if (namlen < 1 || *entry->d_name == '.') {
+      continue;
+    }
+
+    if (!callback(entry)) {
+      break;
+    }
+  }
+
+  closedir(dir);
+}
+
 void FileUtil::rm(const std::string& filename) {
   unlink(filename.c_str());
 }
