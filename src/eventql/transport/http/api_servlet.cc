@@ -1257,11 +1257,16 @@ void AnalyticsServlet::executeSQL_CSV(
     CSVOutputStream csv(BufferOutputStream::fromBuffer(&result), ",");
     CSVCodec csv_codec(&csv);
 
-    for (size_t i = 0; i < qplan->numStatements(); ++i) {
-      auto result_columns = qplan->getStatementgetResultColumns(i);
-      auto result_cursor = qplan->execute(i);
-      csv_codec.sendResults(result_columns, result_cursor.get());
+    if (qplan->numStatements() != 1) {
+      res->setStatus(http::kStatusInternalServerError);
+      res->addBody("error: can't send more than one query result as CSV at once");
+      res_stream->writeResponse(*res);
+      return;
     }
+
+    auto result_columns = qplan->getStatementgetResultColumns(0);
+    auto result_cursor = qplan->execute(0);
+    csv_codec.sendResults(result_columns, result_cursor.get());
 
     res->setStatus(http::kStatusOK);
     res->addHeader("Content-Type", "text/csv; charset=utf-8");
