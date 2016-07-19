@@ -28,7 +28,7 @@ export RANLIB=x86_64-linux-gnu-ranlib
 export OBJDUMP=x86_64-linux-gnu-objdump
 export CXXFLAGS="-static-libstdc++ -static-libgcc"
 
-../../../$PACKAGE-$VERSION/configure --host=x86_64-linux-gnu --prefix=/usr/local --enable-mysql-tools
+../../../$PACKAGE-$VERSION/configure --host=x86_64-linux-gnu --prefix=/usr/local
 #(cd src && make clean)
 make
 make install DESTDIR=$(pwd)/dist

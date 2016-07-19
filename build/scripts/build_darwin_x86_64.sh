@@ -29,7 +29,7 @@ export OBJDUMP=x86_64-apple-darwin14-objdump
 export CXXFLAGS="-stdlib=libc++"
 export MOZJS_CXXFLAGS="-DXP_MACOSX=1"
 
-../../../$PACKAGE-$VERSION/configure --host=x86_64-apple-darwin14 --prefix=/usr/local --enable-mysql-tools
+../../../$PACKAGE-$VERSION/configure --host=x86_64-apple-darwin14 --prefix=/usr/local
 #(cd src && make clean)
 make
 make install DESTDIR=$(pwd)/dist
