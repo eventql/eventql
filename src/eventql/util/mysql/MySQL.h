@@ -24,7 +24,7 @@
 #ifndef _STX_SQL_MYSQL_H
 #define _STX_SQL_MYSQL_H
 #ifdef STX_ENABLE_MYSQL
-#include <mysql.h>
+#include <mysql/mysql.h>
 #endif
 
 namespace util {
