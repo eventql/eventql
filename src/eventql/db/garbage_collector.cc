@@ -85,6 +85,10 @@ void GarbageCollector::runGC() {
 }
 
 void GarbageCollector::startGCThread() {
+  if (mode_ != GarbageCollectorMode::AUTOMATIC) {
+    return;
+  }
+
   thread_running_ = true;
 
   thread_ = std::thread([this] {
@@ -156,11 +160,15 @@ void GarbageCollector::emptyTrash() {
 
       auto filename_full = FileUtil::joinPaths(base_dir_, filename);
 
+      if (!FileUtil::exists(filename_full)) {
+        continue;
+      }
+
       if (mode_ == GarbageCollectorMode::DISABLED) {
         logDebug("evqld", "GC disabled, not deleting file: $0", filename_full);
       } else {
         logDebug("evqld", "Deleting file: $0", filename_full);
-        // delete filename_full
+        FileUtil::rm(filename_full);
       }
     }
 
@@ -172,7 +180,7 @@ void GarbageCollector::emptyTrash() {
       logDebug("evqld", "GC disabled, not deleting file: $0", trash_link_full);
     } else {
       logDebug("evqld", "Deleting file: $0", trash_link_full);
-      // delete trash_link_full
+      FileUtil::rm(trash_link_full);
     }
   }
 }

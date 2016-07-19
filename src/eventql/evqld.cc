@@ -260,6 +260,7 @@ int main(int argc, const char** argv) {
   ProcessConfigBuilder config_builder;
   config_builder.setProperty("server.listen", "localhost:9175");
   config_builder.setProperty("server.indexbuild_threads", "2");
+  config_builder.setProperty("server.gc_mode", "DISABLED");
 
   if (flags.isSet("standalone")) {
     config_builder.setProperty("server.name", "standalone");
@@ -418,7 +419,9 @@ int main(int argc, const char** argv) {
   FileTracker file_tracker(trash_dir);
 
   /* garbage collector */
-  auto gc_mode = GarbageCollectorMode::DISABLED;
+  auto gc_mode = garbageCollectorModeFromString(
+      process_config->getString("server.gc_mode").get());
+
   GarbageCollector gc(
       gc_mode,
       server_datadir,
