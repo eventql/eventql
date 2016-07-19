@@ -25,6 +25,7 @@
 #include <eventql/util/autoref.h>
 #include <eventql/util/logging.h>
 #include <eventql/util/application.h>
+#include <eventql/util/io/fileutil.h>
 #include "eventql/eventql.h"
 #include "eventql/db/garbage_collector.h"
 #include <assert.h>
@@ -39,18 +40,18 @@ String garbageCollectorModeToString(GarbageCollectorMode mode) {
   }
 }
 
-GarbageCollectorMode garbageCollectorModeFromString(const String& str) {
-  auto str_upper = StringUtil::toUpper(str);
+GarbageCollectorMode garbageCollectorModeFromString(String str) {
+  StringUtil::toUpper(&str);
 
-  if (str_upper == "DISABLED") {
+  if (str == "DISABLED") {
     return GarbageCollectorMode::DISABLED;
   }
 
-  if (str_upper == "MANUAL") {
+  if (str == "MANUAL") {
     return GarbageCollectorMode::MANUAL;
   }
 
-  if (str_upper == "AUTOMATIC") {
+  if (str == "AUTOMATIC") {
     return GarbageCollectorMode::AUTOMATIC;
   }
 
@@ -63,11 +64,13 @@ GarbageCollector::GarbageCollector(
     const String& base_dir,
     const String& trash_dir,
     const String& cache_dir,
+    FileTracker* file_tracker,
     size_t gc_interval /* = kDefaultGCInterval */) :
     mode_(mode),
     base_dir_(base_dir),
     trash_dir_(trash_dir),
     cache_dir_(cache_dir),
+    file_tracker_(file_tracker),
     gc_interval_(kDefaultGCInterval) {}
 
 GarbageCollector::~GarbageCollector() {
@@ -76,6 +79,9 @@ GarbageCollector::~GarbageCollector() {
 
 void GarbageCollector::runGC() {
   logDebug("evqld", "Running garbage collector...");
+
+  emptyTrash();
+  flushCache();
 }
 
 void GarbageCollector::startGCThread() {
@@ -114,10 +120,64 @@ void GarbageCollector::stopGCThread() {
 }
 
 void GarbageCollector::emptyTrash() {
+  Set<String> trash_links;
+  FileUtil::ls(trash_dir_, [&trash_links] (const String& filename) -> bool {
+    if (StringUtil::endsWith(filename, ".trash")) {
+      trash_links.insert(filename);
+    }
 
+    return true;
+  });
+
+  for (const auto& trash_link : trash_links) {
+    auto trash_link_full = FileUtil::joinPaths(trash_dir_, trash_link);
+    auto trash_link_contents = FileUtil::read(trash_link_full);
+    auto filenames = StringUtil::split(trash_link_contents.toString(), "\n");
+    bool trash_link_deleted = true;
+
+    for (auto filename : filenames) {
+      if (filename.empty()) {
+        continue;
+      }
+
+      if (StringUtil::beginsWith(filename, "//")) {
+        filename = filename.substr(2);
+      } else if (StringUtil::beginsWith(filename, base_dir_)) {
+        filename = filename.substr(base_dir_.size());
+      } else {
+        logWarning("evqld", "Invalid trash link: $0", filename);
+        continue;
+      }
+
+      if (file_tracker_->isReferenced(filename)) {
+        trash_link_deleted = false;
+        break;
+      }
+
+      auto filename_full = FileUtil::joinPaths(base_dir_, filename);
+
+      if (mode_ == GarbageCollectorMode::DISABLED) {
+        logDebug("evqld", "GC disabled, not deleting file: $0", filename_full);
+      } else {
+        logDebug("evqld", "Deleting file: $0", filename_full);
+        // delete filename_full
+      }
+    }
+
+    if (!trash_link_deleted) {
+      continue;
+    }
+
+    if (mode_ == GarbageCollectorMode::DISABLED) {
+      logDebug("evqld", "GC disabled, not deleting file: $0", trash_link_full);
+    } else {
+      logDebug("evqld", "Deleting file: $0", trash_link_full);
+      // delete trash_link_full
+    }
+  }
 }
 
-void GarbageCollector::freeCache() {
+void GarbageCollector::flushCache() {
 
 }
 

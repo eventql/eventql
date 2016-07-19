@@ -419,7 +419,12 @@ int main(int argc, const char** argv) {
 
   /* garbage collector */
   auto gc_mode = GarbageCollectorMode::DISABLED;
-  GarbageCollector gc(gc_mode, server_datadir, trash_dir, cache_dir);
+  GarbageCollector gc(
+      gc_mode,
+      server_datadir,
+      trash_dir,
+      cache_dir,
+      &file_tracker);
 
   /* config dir */
   ScopedPtr<ConfigDirectory> config_dir;

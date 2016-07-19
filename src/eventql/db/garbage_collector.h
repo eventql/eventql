@@ -24,6 +24,7 @@
 #pragma once
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/autoref.h>
+#include <eventql/db/file_tracker.h>
 #include "eventql/eventql.h"
 #include <thread>
 #include <condition_variable>
@@ -35,7 +36,7 @@ enum class GarbageCollectorMode {
 };
 
 String garbageCollectorModeToString(GarbageCollectorMode mode);
-GarbageCollectorMode garbageCollectorModeFromString(const String& str);
+GarbageCollectorMode garbageCollectorModeFromString(String str);
 
 class GarbageCollector {
 public:
@@ -47,6 +48,7 @@ public:
       const String& base_dir,
       const String& trash_dir,
       const String& cache_dir,
+      FileTracker* file_tracker,
       size_t gc_interval = kDefaultGCInterval);
 
   ~GarbageCollector();
@@ -59,12 +61,13 @@ public:
 protected:
 
   void emptyTrash();
-  void freeCache();
+  void flushCache();
 
   GarbageCollectorMode mode_;
   String base_dir_;
   String trash_dir_;
   String cache_dir_;
+  FileTracker* file_tracker_;
   uint64_t gc_interval_;
 
   std::thread thread_;
