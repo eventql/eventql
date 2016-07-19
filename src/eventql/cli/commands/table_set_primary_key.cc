@@ -46,12 +46,6 @@ Status TableSetPrimaryKey::execute(
     FileInputStream* stdin_is,
     OutputStream* stdout_os,
     OutputStream* stderr_os) {
-  auto zookeeper_addr = process_cfg_->getString("evqlctl", "zookeeper_addr");
-  if (zookeeper_addr.isEmpty()) {
-    stderr_os->write("ERROR: zookeeper address not specified\n");
-    return Status(eFlagError);
-  }
-
   ::cli::FlagParser flags;
   flags.defineFlag(
       "cluster_name",
@@ -116,6 +110,50 @@ Status TableSetPrimaryKey::execute(
     cfg.mutable_config()->clear_primary_key();
     for (const auto& k : pkey) {
       cfg.mutable_config()->add_primary_key(k);
+    }
+
+    auto replication_factor = cdir.get()->getClusterConfig().replication_factor();
+    // generate new metadata file
+    Set<String> servers;
+    ServerAllocator server_alloc(cdir.get());
+    {
+      auto rc = server_alloc.allocateServers(replication_factor, &servers);
+      if (!rc.isSuccess()) {
+        return rc;
+      }
+    }
+
+    MetadataFile::PartitionMapEntry initial_partition;
+    initial_partition.begin = "";
+    initial_partition.partition_id = Random::singleton()->sha1();
+    initial_partition.splitting = false;
+    for (const auto& s : servers) {
+      MetadataFile::PartitionPlacement p;
+      p.server_id = s;
+      p.placement_id = Random::singleton()->random64();
+      initial_partition.servers.emplace_back(p);
+    }
+
+    auto txnid = Random::singleton()->sha1();
+    MetadataFile metadata_file(txnid, 1, KEYSPACE_UINT64, { initial_partition });
+
+    eventql::MetadataCoordinator coordinator(cdir.get());
+    auto rc = coordinator.createFile(
+        flags.getString("namespace"),
+        flags.getString("table_name"),
+        metadata_file,
+        Vector<String>(servers.begin(), servers.end()));
+
+    if (!rc.isSuccess()) {
+      return rc;
+    }
+
+    cfg.mutable_config()->set_partitioner(TBL_PARTITION_UINT64);
+    cfg.mutable_config()->set_storage(eventql::TBL_STORAGE_COLSM);
+    cfg.set_metadata_txnid(txnid.data(), txnid.size());
+    cfg.set_metadata_txnseq(1);
+    for (const auto& s : servers) {
+      cfg.add_metadata_servers(s);
     }
 
     iputs("cfg: $0", cfg.DebugString());

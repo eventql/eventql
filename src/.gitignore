@@ -3,4 +3,4 @@ evql
 evqld
 evqlctl
 cstable_tool
-evql-mysql-import
+mysql2evql
