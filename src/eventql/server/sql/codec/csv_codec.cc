@@ -28,48 +28,20 @@ namespace eventql {
 
 CSVCodec::CSVCodec(CSVOutputStream* csv) : csv_(csv) {}
 
-void CSVCodec::printResultTable(
+void CSVCodec::sendResults(
     const Vector<String>& header,
     csql::ResultCursor* cursor) {
-  //json_->beginObject();
-  //json_->addObjectEntry("type");
-  //json_->addString("table");
-  //json_->addComma();
+  csv_->appendRow(header);
 
-  //json_->addObjectEntry("columns");
-  //json_->beginArray();
+  Vector<csql::SValue> row(cursor->getNumColumns());
+  for (size_t i = 0; cursor->next(row.data(), row.size()); ++i) {
+    Vector<String> row_values;
+    for (size_t n = 0; n < row.size(); ++n) {
+      row_values.emplace_back(row[n].getString());
+    }
+    csv_->appendRow(row_values);
+  }
 
-  //for (int n = 0; n < header.size(); ++n) {
-  //  if (n > 0) {
-  //    json_->addComma();
-  //  }
-  //  json_->addString(header[n]);
-  //}
-  //json_->endArray();
-  //json_->addComma();
-
-  //json_->addObjectEntry("rows");
-  //json_->beginArray();
-
-  //Vector<csql::SValue> row(cursor->getNumColumns());
-  //for (size_t i = 0; cursor->next(row.data(), row.size()); ++i) {
-  //  if (i > 0) {
-  //    json_->addComma();
-  //  }
-
-  //  json_->beginArray();
-  //  for (size_t n = 0; n < row.size(); ++n) {
-  //    if (n > 0) {
-  //      json_->addComma();
-  //    }
-
-  //    json_->addString(row[n].getString());
-  //  }
-  //  json_->endArray();
-  //}
-
-  //json_->endArray();
-  //json_->endObject();
 }
 
 }

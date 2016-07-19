@@ -35,7 +35,7 @@ public:
 
   CSVCodec(CSVOutputStream* csv);
 
-  void printResultTable(
+  void sendResults(
       const Vector<String>& header,
       csql::ResultCursor* cursor);
 

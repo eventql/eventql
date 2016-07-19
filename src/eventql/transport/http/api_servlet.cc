@@ -1234,27 +1234,17 @@ void AnalyticsServlet::executeSQL_CSV(
   if (URI::getParam(params, "database", &database) && !database.empty()) {
     auto rc = client_auth_->changeNamespace(session, database);
     if (!rc.isSuccess()) {
-      Buffer buf; //FIXME send CSV output stream?
-      buf.append("error");
-      buf.append(rc.message());
-
       res->setStatus(http::kStatusInternalServerError);
-      res->addHeader("Content-Type", "application/json; charset=utf-8");
-      res->addBody(buf);
+      res->addBody("error: ");
+      res->addBody(rc.message());
       res_stream->writeResponse(*res);
       return;
     }
   }
 
   if (session->getEffectiveNamespace().empty()) {
-    Buffer buf;
-    json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
-    buf.append("error");
-    buf.append("No database selected");
-
     res->setStatus(http::kStatusInternalServerError);
-    res->addHeader("Content-Type", "application/json; charset=utf-8");
-    res->addBody(buf);
+    res->addBody("error: No database selected");
     res_stream->writeResponse(*res);
     return;
   }
@@ -1264,31 +1254,24 @@ void AnalyticsServlet::executeSQL_CSV(
     auto qplan = sql_->buildQueryPlan(txn.get(), query);
 
     Buffer result;
-    CSVOutputStream csv(BufferOutputStream::fromBuffer(&result));
+    CSVOutputStream csv(BufferOutputStream::fromBuffer(&result), ",");
     CSVCodec csv_codec(&csv);
-    //json.beginObject();
-    //json.addObjectEntry("results");
-    //json.beginArray();
 
     for (size_t i = 0; i < qplan->numStatements(); ++i) {
-    //  if (i > 0) {
-    //    json.addComma();
-    //  }
-
       auto result_columns = qplan->getStatementgetResultColumns(i);
       auto result_cursor = qplan->execute(i);
-      csv_codec.printResultTable(result_columns, result_cursor.get());
+      csv_codec.sendResults(result_columns, result_cursor.get());
     }
 
+    res->setStatus(http::kStatusOK);
+    res->addHeader("Content-Type", "text/csv; charset=utf-8");
+    res->addBody(result);
+    res_stream->writeResponse(*res);
 
   } catch (const StandardException& e) {
-    Buffer buf;
-    buf.append("error");
-    buf.append(e.what());
-
     res->setStatus(http::kStatusInternalServerError);
-    res->addHeader("Content-Type", "application/json; charset=utf-8");
-    res->addBody(buf);
+    res->addBody("error: ");
+    res->addBody(e.what());
     res_stream->writeResponse(*res);
   }
 }
