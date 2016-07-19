@@ -8,6 +8,11 @@ AM_MAINTAINER_MODE([enable])
 AC_CONFIG_SRCDIR([configure.ac])
 AM_SILENT_RULES([yes])
 
+# --enable-mysql_tools
+AC_ARG_ENABLE([mysql-tools], AS_HELP_STRING([--enable-mysql-tools], [Enable mysql tools]))
+AM_CONDITIONAL([ENABLE_MYSQL_TOOLS], [test "x$enable_mysql_tools" = "xyes"])
+AC_SUBST(ENABLE_MYSQL_TOOLS)
+
 # Check for build env
 AC_PROG_CC
 AC_PROG_CC_FOR_BUILD

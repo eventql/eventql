@@ -43,6 +43,12 @@ else
 GETHOSTBYNAME_R_DEF =
 endif
 
+if ENABLE_MYSQL_TOOLS
+MYSQL_CFLAGS = -DSTX_ENABLE_MYSQL
+else
+MYSQL_CFLAGS =
+endif
+
 SPIDERMONKEY_CFLAGS = -I$(top_builddir)/deps/3rdparty/spidermonkey/out/dist/include
 SPIDERMONKEY_LDADD = ${top_builddir}/deps/3rdparty/spidermonkey/out/dist/lib/libjs_static.a
 
@@ -67,8 +73,8 @@ LMDB_LDADD = ${top_builddir}/deps/3rdparty/liblmdb/liblmdb.a
 INIH_CFLAGS = -I$(top_srcdir)/deps/3rdparty
 INIH_LDADD = ${top_builddir}/deps/3rdparty/inih/libinih.a
 
-AM_CXXFLAGS = -DEVQL_BUILDID=\"$(EVQL_BUILDID)\" $(PCRE_CFLAGS) $(SPIDERMONKEY_CFLAGS) $(ZOOKEEPER_CFLAGS) $(INIH_CFLAGS) $(SIMDCOMP_CFLAGS) $(LINENOISE_CLFAGS) $(PROTOBUF_CFLAGS) $(PTHREAD_CFLAGS) $(PTHREAD_DEF) $(SYSLOG_DEF) $(ZLIB_DEF) $(GETHOSTBYNAME_R_DEF) -std=c++0x -ftemplate-depth=500 -mno-omit-leaf-frame-pointer -fno-omit-frame-pointer -Wall -Wextra -Wno-unused-parameter -Wno-sign-compare -Wdelete-non-virtual-dtor -Wno-predefined-identifier-outside-function -Wno-invalid-offsetof -g -I@builddir@
-AM_CFLAGS = $(PCRE_CFLAGS) $(SPIDERMONKEY_CFLAGS) $(ZOOKEEPER_CFLAGS) $(INIH_CFLAGS) $(SIMDCOMP_CFLAGS) $(LINENOISE_CLFAGS) $(PROTOBUF_CFLAGS) $(PTHREAD_CFLAGS) $(PTHREAD_DEF) $(SYSLOG_DEF) $(ZLIB_DEF) $(GETHOSTBYNAME_R_DEF) -std=c11 -mno-omit-leaf-frame-pointer -fno-omit-frame-pointer -Wall -pedantic -g
+AM_CXXFLAGS = -DEVQL_BUILDID=\"$(EVQL_BUILDID)\" $(MYSQL_CFLAGS) $(PCRE_CFLAGS) $(SPIDERMONKEY_CFLAGS) $(ZOOKEEPER_CFLAGS) $(INIH_CFLAGS) $(SIMDCOMP_CFLAGS) $(LINENOISE_CLFAGS) $(PROTOBUF_CFLAGS) $(PTHREAD_CFLAGS) $(PTHREAD_DEF) $(SYSLOG_DEF) $(ZLIB_DEF) $(GETHOSTBYNAME_R_DEF) -std=c++0x -ftemplate-depth=500 -mno-omit-leaf-frame-pointer -fno-omit-frame-pointer -Wall -Wextra -Wno-unused-parameter -Wno-sign-compare -Wdelete-non-virtual-dtor -Wno-predefined-identifier-outside-function -Wno-invalid-offsetof -g -I@builddir@
+AM_CFLAGS = $(PCRE_CFLAGS) $(SPIDERMONKEY_CFLAGS) $(MYSQL_CFLAGS) $(ZOOKEEPER_CFLAGS) $(INIH_CFLAGS) $(SIMDCOMP_CFLAGS) $(LINENOISE_CLFAGS) $(PROTOBUF_CFLAGS) $(PTHREAD_CFLAGS) $(PTHREAD_DEF) $(SYSLOG_DEF) $(ZLIB_DEF) $(GETHOSTBYNAME_R_DEF) -std=c11 -mno-omit-leaf-frame-pointer -fno-omit-frame-pointer -Wall -pedantic -g
 AM_LDFLAGS = $(PTHREAD_CFLAGS)
 
 
@@ -1105,6 +1111,7 @@ evqlctl_LDADD = \
 
 bin_PROGRAMS += evqlctl
 
+if ENABLE_MYSQL_TOOLS
 ################# BIN: mysql2evql ####################
 mysql2evql_SOURCES = \
     eventql/tools/mysql2evql.cc
@@ -1123,6 +1130,7 @@ mysql2evql_LDADD = \
     $(PCRE_LDADD)
 
 bin_PROGRAMS += mysql2evql
+endif
 
 ################# TEST: sql/runtime ####################
 test_evql_sql_runtime_SOURCES = eventql/sql/runtime/Runtime_test.cc
