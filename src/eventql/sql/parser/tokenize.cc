@@ -637,6 +637,11 @@ next:
     goto next;
   }
 
+  if (token == "SET") {
+    token_list->emplace_back(Token::T_SET);
+    goto next;
+  }
+
   if (token == "ALTER") {
     token_list->emplace_back(Token::T_ALTER);
     goto next;

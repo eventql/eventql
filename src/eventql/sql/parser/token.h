@@ -99,6 +99,7 @@ public:
     T_INTO,
     T_VALUES,
     T_JSON,
+    T_SET,
     T_ALTER,
     T_ADD,
     T_DROP,

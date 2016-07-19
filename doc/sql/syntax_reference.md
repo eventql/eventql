@@ -103,6 +103,7 @@ Syntax Reference
     INSERT INTO table_name
       (column_name, ...) VALUES (expr, ...)
     | FROM JSON "{ ... }"
+    | SET column_name = expr, ...
 
 
 ### The CREATE DATABASE statement

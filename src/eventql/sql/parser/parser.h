@@ -107,10 +107,9 @@ protected:
   ASTNode* primaryKeyDefinition();
   ASTNode* tableName();
   ASTNode* insertStatement();
-  ASTNode* insertIntoStatement();
-  ASTNode* insertColumnList();
-  ASTNode* insertValueList();
+  ASTNode* insertValues();
   ASTNode* insertFromJSON();
+  ASTNode* insertSet();
   ASTNode* alterStatement();
   ASTNode* nestedColumnName();
   ASTNode* addColumnDefinition();
