@@ -45,8 +45,10 @@ endif
 
 if ENABLE_MYSQL_TOOLS
 MYSQL_CFLAGS = -DSTX_ENABLE_MYSQL
+MYSQL_LDADD = -lmysql
 else
 MYSQL_CFLAGS =
+MYSQL_LDADD =
 endif
 
 SPIDERMONKEY_CFLAGS = -I$(top_builddir)/deps/3rdparty/spidermonkey/out/dist/include
@@ -1119,6 +1121,8 @@ mysql2evql_SOURCES = \
 mysql2evql_LDADD = \
     evql_http.a \
     evql_util.a \
+    $(MYSQL_LDADD) \
+    $(SIMDCOMP_LDADD) \
     $(PROTOBUF_LDADD) \
     $(PCRE_LDADD)
 
