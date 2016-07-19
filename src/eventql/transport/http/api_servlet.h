@@ -169,6 +169,13 @@ protected:
       http::HTTPResponse* res,
       RefPtr<http::HTTPResponseStream> res_stream);
 
+  void executeSQL_CSV(
+      const URI::ParamList& params,
+      Session* session,
+      const http::HTTPRequest* req,
+      http::HTTPResponse* res,
+      RefPtr<http::HTTPResponseStream> res_stream);
+
   void executeQTree(
       Session* session,
       const http::HTTPRequest* req,

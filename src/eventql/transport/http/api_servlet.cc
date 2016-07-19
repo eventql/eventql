@@ -38,9 +38,11 @@
 #include "eventql/util/protobuf/MessageEncoder.h"
 #include "eventql/util/csv/CSVInputStream.h"
 #include "eventql/util/csv/BinaryCSVInputStream.h"
+#include "eventql/util/csv/CSVOutputStream.h"
 #include "eventql/db/TableConfig.pb.h"
 #include "eventql/server/sql/codec/json_codec.h"
 #include "eventql/server/sql/codec/json_sse_codec.h"
+#include <eventql/server/sql/codec/csv_codec.h>
 #include "eventql/server/sql/codec/binary_codec.h"
 #include "eventql/db/TimeWindowPartitioner.h"
 #include "eventql/db/FixedShardPartitioner.h"
@@ -933,6 +935,8 @@ void AnalyticsServlet::executeSQL(
       executeSQL_JSON(params, session, req, res, res_stream);
     } else if (format == "json_sse") {
       executeSQL_JSONSSE(params, session, req, res, res_stream);
+    } else if (format == "csv") {
+      executeSQL_CSV(params, session, req, res, res_stream);
     } else {
       res->setStatus(http::kStatusBadRequest);
       res->addBody("invalid format: " + format);
@@ -1210,6 +1214,83 @@ void AnalyticsServlet::executeSQL_JSONSSE(
   }
 
   sse_stream->finish();
+}
+
+void AnalyticsServlet::executeSQL_CSV(
+    const URI::ParamList& params,
+    Session* session,
+    const http::HTTPRequest* req,
+    http::HTTPResponse* res,
+    RefPtr<http::HTTPResponseStream> res_stream) {
+  String query;
+  if (!URI::getParam(params, "query", &query)) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody("missing ?query=... parameter");
+    res_stream->writeResponse(*res);
+    return;
+  }
+
+  String database;
+  if (URI::getParam(params, "database", &database) && !database.empty()) {
+    auto rc = client_auth_->changeNamespace(session, database);
+    if (!rc.isSuccess()) {
+      Buffer buf; //FIXME send CSV output stream?
+      buf.append("error");
+      buf.append(rc.message());
+
+      res->setStatus(http::kStatusInternalServerError);
+      res->addHeader("Content-Type", "application/json; charset=utf-8");
+      res->addBody(buf);
+      res_stream->writeResponse(*res);
+      return;
+    }
+  }
+
+  if (session->getEffectiveNamespace().empty()) {
+    Buffer buf;
+    json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
+    buf.append("error");
+    buf.append("No database selected");
+
+    res->setStatus(http::kStatusInternalServerError);
+    res->addHeader("Content-Type", "application/json; charset=utf-8");
+    res->addBody(buf);
+    res_stream->writeResponse(*res);
+    return;
+  }
+
+  try {
+    auto txn = sql_service_->startTransaction(session);
+    auto qplan = sql_->buildQueryPlan(txn.get(), query);
+
+    Buffer result;
+    CSVOutputStream csv(BufferOutputStream::fromBuffer(&result));
+    CSVCodec csv_codec(&csv);
+    //json.beginObject();
+    //json.addObjectEntry("results");
+    //json.beginArray();
+
+    for (size_t i = 0; i < qplan->numStatements(); ++i) {
+    //  if (i > 0) {
+    //    json.addComma();
+    //  }
+
+      auto result_columns = qplan->getStatementgetResultColumns(i);
+      auto result_cursor = qplan->execute(i);
+      csv_codec.printResultTable(result_columns, result_cursor.get());
+    }
+
+
+  } catch (const StandardException& e) {
+    Buffer buf;
+    buf.append("error");
+    buf.append(e.what());
+
+    res->setStatus(http::kStatusInternalServerError);
+    res->addHeader("Content-Type", "application/json; charset=utf-8");
+    res->addBody(buf);
+    res_stream->writeResponse(*res);
+  }
 }
 
 void AnalyticsServlet::executeQTree(
