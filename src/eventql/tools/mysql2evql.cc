@@ -176,6 +176,7 @@ void run(const cli::FlagParser& flags) {
       }
 
       shard_data.clear();
+      num_rows_shard = 0;
       ++nshard;
     }
 
@@ -276,7 +277,7 @@ int main(int argc, const char** argv) {
       cli::FlagParser::T_INTEGER,
       false,
       NULL,
-      "262144",
+      "128",
       "shard size",
       "<num>");
 
