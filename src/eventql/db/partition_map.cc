@@ -31,8 +31,8 @@
 #include <eventql/db/PartitionState.pb.h>
 #include <eventql/db/PartitionReplication.h>
 #include <eventql/db/metadata_coordinator.h>
-
 #include "eventql/eventql.h"
+#include "eventql/db/file_tracker.h"
 
 namespace eventql {
 
@@ -432,27 +432,13 @@ bool PartitionMap::dropLocalPartition(
   txn->del(db_key);
   txn->commit();
 
-  /* delete partition data from disk (move to trash) */
-  {
-    auto src_path = FileUtil::joinPaths(
-        cfg_->db_path,
-        StringUtil::format(
-            "$0/$1/$2",
-            tsdb_namespace,
-            SHA1::compute(table_name).toString(),
-            partition_key.toString()));
-
-    auto dst_path = FileUtil::joinPaths(
-        cfg_->db_path,
-        StringUtil::format(
-            "../../trash/$0~$1~$2~$3",
-            tsdb_namespace,
-            SHA1::compute(table_name).toString(),
-            partition_key.toString(),
-            Random::singleton()->hex64()));
-
-    FileUtil::mv(src_path, dst_path);
-  }
+  /* move partition data to trash */
+  cfg_->file_tracker->deleteFile(
+      StringUtil::format(
+          "$0/$1/$2",
+          tsdb_namespace,
+          SHA1::compute(table_name).toString(),
+          partition_key.toString()));
 
   return true;
 }
