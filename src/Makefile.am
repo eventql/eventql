@@ -951,6 +951,8 @@ evql_core_a_SOURCES = \
     eventql/server/sql/codec/json_codec.h \
     eventql/server/sql/codec/json_sse_codec.cc \
     eventql/server/sql/codec/json_sse_codec.h \
+    eventql/server/sql/codec/csv_codec.cc \
+    eventql/server/sql/codec/csv_codec.h \
     eventql/server/sql/partition_cursor.cc \
     eventql/server/sql/partition_cursor.h \
     eventql/server/sql/pipelined_expression.cc \

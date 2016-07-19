@@ -1,0 +1,76 @@
+/**
+ * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
+ * Authors:
+ *   - Paul Asmuth <paul@zscale.io>
+ *   - Laura Schlimmer <laura@zscale.io>
+ *
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License ("the license") as
+ * published by the Free Software Foundation, either version 3 of the License,
+ * or any later version.
+ *
+ * In accordance with Section 7(e) of the license, the licensing of the Program
+ * under the license does not imply a trademark license. Therefore any rights,
+ * title and interest in our trademarks remain entirely with us.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the license for more details.
+ *
+ * You can be released from the requirements of the license by purchasing a
+ * commercial license. Buying such a license is mandatory as soon as you develop
+ * commercial activities involving this program without disclosing the source
+ * code of your own applications
+ */
+#include <eventql/server/sql/codec/csv_codec.h>
+
+namespace eventql {
+
+CSVCodec::CSVCodec(CSVOutputStream* csv) : csv_(csv) {}
+
+void CSVCodec::printResultTable(
+    const Vector<String>& header,
+    csql::ResultCursor* cursor) {
+  //json_->beginObject();
+  //json_->addObjectEntry("type");
+  //json_->addString("table");
+  //json_->addComma();
+
+  //json_->addObjectEntry("columns");
+  //json_->beginArray();
+
+  //for (int n = 0; n < header.size(); ++n) {
+  //  if (n > 0) {
+  //    json_->addComma();
+  //  }
+  //  json_->addString(header[n]);
+  //}
+  //json_->endArray();
+  //json_->addComma();
+
+  //json_->addObjectEntry("rows");
+  //json_->beginArray();
+
+  //Vector<csql::SValue> row(cursor->getNumColumns());
+  //for (size_t i = 0; cursor->next(row.data(), row.size()); ++i) {
+  //  if (i > 0) {
+  //    json_->addComma();
+  //  }
+
+  //  json_->beginArray();
+  //  for (size_t n = 0; n < row.size(); ++n) {
+  //    if (n > 0) {
+  //      json_->addComma();
+  //    }
+
+  //    json_->addString(row[n].getString());
+  //  }
+  //  json_->endArray();
+  //}
+
+  //json_->endArray();
+  //json_->endObject();
+}
+
+}
+
