@@ -178,6 +178,15 @@ void StatusServlet::renderDashboard(
   html += StringUtil::format(
       "<tr><td><em>Referenced Files</em></td><td align='right'>$0</td></tr>",
       config_->file_tracker->getNumReferencedFiles());
+  html += StringUtil::format(
+      "<tr><td><em>Disk Cache Size</em></td><td align='right'>$0 MB</td></tr>",
+      zs->cache_size.get() / (1024.0 * 1024.0));
+  html += StringUtil::format(
+      "<tr><td><em>LSMTableIndexCache size</em></td><td align='right'>$0 MB</td></tr>",
+      config_->idx_cache->size() / (1024.0 * 1024.0));
+  html += StringUtil::format(
+      "<tr><td><em>MetadataStore cache size</em></td><td align='right'>$0 MB</td></tr>",
+      config_->metadata_store->getCacheSize() / (1024.0 * 1024.0));
   html += "</table>";
 
   html += "<h3>Partitions</h3>";
@@ -191,12 +200,6 @@ void StatusServlet::renderDashboard(
   html += StringUtil::format(
       "<tr><td><em>Number of Dirty Partitions</em></td><td align='right'>$0</td></tr>",
       zs->compaction_queue_length.get());
-  html += StringUtil::format(
-      "<tr><td><em>LSMTableIndexCache size</em></td><td align='right'>$0 MB</td></tr>",
-      config_->idx_cache->size() / (1024.0 * 1024.0));
-  html += StringUtil::format(
-      "<tr><td><em>MetadataStore cache size</em></td><td align='right'>$0 MB</td></tr>",
-      config_->metadata_store->getCacheSize() / (1024.0 * 1024.0));
   html += "</table>";
 
   html += "<h3>Replication</h3>";
