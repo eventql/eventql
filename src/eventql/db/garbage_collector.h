@@ -42,7 +42,7 @@ class GarbageCollector {
 public:
 
   static const uint64_t kDefaultGCInterval = 30 * kMicrosPerSecond;
-  static const uint64_t kDefaultCachedirMaxSize = 1024 * 1024 * 1024 * 64; // 64 GB
+  static const uint64_t kDefaultCachedirMaxSize = 1024llu * 1024llu * 1024llu * 64llu; // 64 GB
 
   GarbageCollector(
       GarbageCollectorMode mode,
