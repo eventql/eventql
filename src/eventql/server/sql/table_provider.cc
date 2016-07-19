@@ -353,12 +353,22 @@ Status TSDBTableProvider::insertRecord(
     return Status(eRuntimeError, "table not found");
   }
 
+  auto columns = schema.get()->columns();
   auto msg = new msg::DynamicMessage(schema.get());
-  for (auto e : data) {
-    if (!msg->addField(e.first, e.second.getString())) {
+  for (size_t i = 0; i < data.size(); ++i) {
+    String column = data[i].first;
+    if (column.empty()) {
+      if (i >= columns.size()) {
+        return Status(eRuntimeError, "more values than table columns"); //FIXME better msg
+      }
+
+      column = columns[i].first;
+    }
+
+    if (!msg->addField(column, data[i].second.getString())) {
       return Status(
           eRuntimeError,
-          StringUtil::format("field not found: $0", e.first)); //FIXME better error msg
+          StringUtil::format("field not found: $0", column)); //FIXME better error msg
     }
   }
 
