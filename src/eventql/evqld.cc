@@ -424,10 +424,10 @@ int main(int argc, const char** argv) {
 
   GarbageCollector gc(
       gc_mode,
+      &file_tracker,
       server_datadir,
       trash_dir,
-      cache_dir,
-      &file_tracker);
+      cache_dir);
 
   /* config dir */
   ScopedPtr<ConfigDirectory> config_dir;

@@ -42,13 +42,15 @@ class GarbageCollector {
 public:
 
   static const uint64_t kDefaultGCInterval = 30 * kMicrosPerSecond;
+  static const uint64_t kDefaultCachedirMaxSize = 1024 * 1024 * 1024 * 64; // 64 GB
 
   GarbageCollector(
       GarbageCollectorMode mode,
+      FileTracker* file_tracker,
       const String& base_dir,
       const String& trash_dir,
       const String& cache_dir,
-      FileTracker* file_tracker,
+      uint64_t cache_dir_maxsize = kDefaultCachedirMaxSize,
       size_t gc_interval = kDefaultGCInterval);
 
   ~GarbageCollector();
@@ -64,10 +66,11 @@ protected:
   void flushCache();
 
   GarbageCollectorMode mode_;
+  FileTracker* file_tracker_;
   String base_dir_;
   String trash_dir_;
   String cache_dir_;
-  FileTracker* file_tracker_;
+  uint64_t cache_dir_maxsize_;
   uint64_t gc_interval_;
 
   std::thread thread_;

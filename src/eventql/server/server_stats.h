@@ -36,6 +36,7 @@ struct Z1Stats {
   stats::Counter<uint64_t> mapreduce_reduce_memory;
   stats::Counter<uint64_t> mapreduce_num_map_tasks;
   stats::Counter<uint64_t> mapreduce_num_reduce_tasks;
+  stats::Counter<uint64_t> cache_size;
   http::HTTPClientStats http_client_stats;
 };
 

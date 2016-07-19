@@ -28,7 +28,15 @@
 #include <eventql/util/io/fileutil.h>
 #include "eventql/eventql.h"
 #include "eventql/db/garbage_collector.h"
+#include "eventql/server/server_stats.h"
+#include <algorithm>
 #include <assert.h>
+#include <dirent.h>
+#include <string.h>
+#include <sys/fcntl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 namespace eventql {
 
@@ -61,16 +69,18 @@ GarbageCollectorMode garbageCollectorModeFromString(String str) {
 
 GarbageCollector::GarbageCollector(
     GarbageCollectorMode mode,
+    FileTracker* file_tracker,
     const String& base_dir,
     const String& trash_dir,
     const String& cache_dir,
-    FileTracker* file_tracker,
+    uint64_t cache_dir_maxsize /* = kDefaultCachedirMaxSize */,
     size_t gc_interval /* = kDefaultGCInterval */) :
     mode_(mode),
+    file_tracker_(file_tracker),
     base_dir_(base_dir),
     trash_dir_(trash_dir),
     cache_dir_(cache_dir),
-    file_tracker_(file_tracker),
+    cache_dir_maxsize_(cache_dir_maxsize),
     gc_interval_(kDefaultGCInterval) {}
 
 GarbageCollector::~GarbageCollector() {
@@ -185,8 +195,59 @@ void GarbageCollector::emptyTrash() {
   }
 }
 
-void GarbageCollector::flushCache() {
+struct CacheFile {
+  String filename;
+  uint64_t time;
+  uint64_t size;
+};
 
+void GarbageCollector::flushCache() {
+  Vector<CacheFile> cache_files;
+
+  FileUtil::ls(cache_dir_, [this, &cache_files] (const String& f) -> bool {
+    auto fpath = FileUtil::joinPaths(cache_dir_, f);
+
+    struct stat fstat;
+    if (stat(fpath.c_str(), &fstat) < 0) {
+      logError(
+          "evqld",
+          "Error in GarbageCollector::flushCache: fstat('$0') failed",
+          fpath.c_str());
+
+      return true;
+    }
+
+    CacheFile cf;
+    cf.filename = f;
+    cf.size = fstat.st_size;
+    cf.time = fstat.st_ctime;
+    cache_files.emplace_back(cf);
+    return true;
+  });
+
+  auto comparator = [] (const CacheFile& a, const CacheFile& b) -> bool {
+    return b.time < a.time;
+  };
+
+  std::sort(cache_files.begin(), cache_files.end(), comparator);
+
+  size_t cache_dir_size = 0;
+  for (const auto& cf : cache_files) {
+    if (cache_dir_size > cache_dir_maxsize_) {
+      auto cache_filepath = FileUtil::joinPaths(cache_dir_, cf.filename);
+
+      if (mode_ == GarbageCollectorMode::DISABLED) {
+        logDebug("evqld", "GC disabled, not deleting file: $0", cache_filepath);
+      } else {
+        logDebug("evqld", "Deleting file: $0", cache_filepath);
+        FileUtil::rm(cache_filepath);
+      }
+    } else {
+      cache_dir_size += cf.size;
+    }
+  }
+
+  z1stats()->cache_size.set(cache_dir_size);
 }
 
 } // namespace eventql
