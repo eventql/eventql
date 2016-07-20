@@ -26,7 +26,6 @@
 #include "eventql/mapreduce/tasks/ReduceTask.h"
 #include "eventql/mapreduce/tasks/ReturnResultsTask.h"
 #include "eventql/mapreduce/tasks/SaveToTableTask.h"
-#include "eventql/mapreduce/tasks/SaveToTablePartitionTask.h"
 #include "eventql/auth/internal_auth.h"
 #include "eventql/config/namespace_config.h"
 #include "eventql/config/config_directory.h"
@@ -114,10 +113,6 @@ RefPtr<MapReduceTask> MapReduceTaskBuilder::getJob(
 
   if (op.get() == "save_to_table") {
     job = buildSaveToTableTask(job_def, shards, job_definitions, jobs);
-  }
-
-  if (op.get() == "save_to_table_partition") {
-    job = buildSaveToTablePartitionTask(job_def, shards, job_definitions, jobs);
   }
 
   if (job.get() == nullptr) {
@@ -333,47 +328,6 @@ RefPtr<MapReduceTask> MapReduceTaskBuilder::buildSaveToTableTask(
       shards,
       auth_,
       tsdb_);
-}
-
-RefPtr<MapReduceTask> MapReduceTaskBuilder::buildSaveToTablePartitionTask(
-    const json::JSONObject& job,
-    MapReduceShardList* shards,
-    HashMap<String, json::JSONObject>* job_definitions,
-    HashMap<String, RefPtr<MapReduceTask>>* jobs) {
-  auto table_name = json::objectGetString(job, "table_name");
-  if (table_name.isEmpty()) {
-    RAISE(kRuntimeError, "missing field: table_name");
-  }
-
-  auto partition_key = json::objectGetString(job, "partition_key");
-  if (partition_key.isEmpty()) {
-    RAISE(kRuntimeError, "missing field: partition_key");
-  }
-
-  auto src_begin = json::objectLookup(job, "sources");
-  if (src_begin == job.end()) {
-    RAISE(kRuntimeError, "missing field: sources");
-  }
-
-  Vector<RefPtr<MapReduceTask>> sources;
-  auto nsrc_begin = json::arrayLength(src_begin, job.end());
-  for (size_t i = 0; i < nsrc_begin; ++i) {
-    auto src_id = json::arrayGetString(src_begin, job.end(), i); // O(N^2) but who cares...
-    if (src_id.isEmpty()) {
-      RAISE(kRuntimeError, "illegal source definition");
-    }
-
-    sources.emplace_back(getJob(src_id.get(), shards, job_definitions, jobs));
-  }
-
-  return new SaveToTablePartitionTask(
-      session_,
-      table_name.get(),
-      SHA1Hash::fromHexString(partition_key.get()),
-      sources,
-      shards,
-      auth_,
-      repl_);
 }
 
 } // namespace eventql

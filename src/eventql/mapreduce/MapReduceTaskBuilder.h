@@ -81,12 +81,6 @@ protected:
       HashMap<String, json::JSONObject>* job_definitions,
       HashMap<String, RefPtr<MapReduceTask>>* jobs);
 
-  RefPtr<MapReduceTask> buildSaveToTablePartitionTask(
-      const json::JSONObject& job,
-      MapReduceShardList* shards,
-      HashMap<String, json::JSONObject>* job_definitions,
-      HashMap<String, RefPtr<MapReduceTask>>* jobs);
-
   Session* session_;
   InternalAuth* auth_;
   PartitionMap* pmap_;

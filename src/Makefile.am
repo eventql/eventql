@@ -826,7 +826,6 @@ evql_core_a_SOURCES = \
     eventql/db/TSDBTableScan.h \
     eventql/db/TSDBTableScan_impl.h \
     eventql/db/TSDBTableScanlet.h \
-    eventql/db/TablePartitioner.h \
     eventql/db/file_tracker.h \
     eventql/db/file_tracker.cc \
     eventql/db/garbage_collector.h \
@@ -845,8 +844,6 @@ evql_core_a_SOURCES = \
     eventql/db/CompactionStrategy.h \
     eventql/db/CompactionWorker.cc \
     eventql/db/CompactionWorker.h \
-    eventql/db/FixedShardPartitioner.cc \
-    eventql/db/FixedShardPartitioner.h \
     eventql/db/LSMPartitionReader.cc \
     eventql/db/LSMPartitionReader.h \
     eventql/db/LSMPartitionReplication.cc \
@@ -919,8 +916,6 @@ evql_core_a_SOURCES = \
     eventql/db/TSDBTableRef.h \
     eventql/db/Table.cc \
     eventql/db/Table.h \
-    eventql/db/TimeWindowPartitioner.cc \
-    eventql/db/TimeWindowPartitioner.h \
     eventql/db/partition_discovery.cc \
     eventql/db/partition_discovery.h \
     eventql/db/partition_map.cc \
@@ -939,8 +934,6 @@ evql_core_a_SOURCES = \
     eventql/mapreduce/tasks/ReduceTask.h \
     eventql/mapreduce/tasks/ReturnResultsTask.cc \
     eventql/mapreduce/tasks/ReturnResultsTask.h \
-    eventql/mapreduce/tasks/SaveToTablePartitionTask.cc \
-    eventql/mapreduce/tasks/SaveToTablePartitionTask.h \
     eventql/mapreduce/tasks/SaveToTableTask.cc \
     eventql/mapreduce/tasks/SaveToTableTask.h \
     eventql/master/master_service.h \

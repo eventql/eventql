@@ -32,7 +32,6 @@
 #include <eventql/db/RecordEnvelope.pb.h>
 #include <eventql/db/table_service.h>
 #include <eventql/db/partition_map.h>
-#include <eventql/db/TimeWindowPartitioner.h>
 #include <eventql/sql/transaction.h>
 #include <eventql/auth/internal_auth.h>
 

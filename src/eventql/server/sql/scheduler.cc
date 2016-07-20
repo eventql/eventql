@@ -197,57 +197,44 @@ Vector<Scheduler::PipelinedQueryTree> Scheduler::pipelineExpression(
     local_server_id = cdir_->getServerID();
   }
 
+  auto keyrange = TSDBTableProvider::findKeyRange(
+      table.get()->config().config().partition_key(),
+      seqscan->constraints());
+
+  MetadataClient metadata_client(cdir_);
+  PartitionListResponse partition_list;
+  auto rc = metadata_client.listPartitions(
+      db_namespace,
+      table_ref.table_key,
+      keyrange,
+      &partition_list);
+
+  if (!rc.isSuccess()) {
+    RAISEF(kRuntimeError, "metadata lookup failure: $0", rc.message());
+  }
+
   HashMap<SHA1Hash, Vector<ReplicaRef>> partitions;
   Set<SHA1Hash> local_partitions;
-  if (table.get()->partitionerType() == TBL_PARTITION_FIXED ||
-      table.get()->storage() != TBL_STORAGE_COLSM) {
-    auto partitioner = table.get()->partitioner();
-    for (const auto& p : partitioner->listPartitions(seqscan->constraints())) {
-      auto replicas = repl_scheme_->replicasFor(p);
-      if (repl_scheme_->hasLocalReplica(p)) {
-        local_partitions.emplace(p);
+  for (const auto& p : partition_list.partitions()) {
+    Vector<ReplicaRef> replicas;
+    SHA1Hash pid(p.partition_id().data(), p.partition_id().size());
+
+    for (const auto& s : p.servers()) {
+      if (s == local_server_id) {
+        local_partitions.emplace(pid);
       }
 
-      partitions.emplace(p, Vector<ReplicaRef>(replicas.begin(), replicas.end()));
-    }
-  } else {
-    auto keyrange = TSDBTableProvider::findKeyRange(
-        table.get()->config().config().partition_key(),
-        seqscan->constraints());
-
-    MetadataClient metadata_client(cdir_);
-    PartitionListResponse partition_list;
-    auto rc = metadata_client.listPartitions(
-        db_namespace,
-        table_ref.table_key,
-        keyrange,
-        &partition_list);
-
-    if (!rc.isSuccess()) {
-      RAISEF(kRuntimeError, "metadata lookup failure: $0", rc.message());
-    }
-
-    for (const auto& p : partition_list.partitions()) {
-      Vector<ReplicaRef> replicas;
-      SHA1Hash pid(p.partition_id().data(), p.partition_id().size());
-
-      for (const auto& s : p.servers()) {
-        if (s == local_server_id) {
-          local_partitions.emplace(pid);
-        }
-
-        auto server_cfg = cdir_->getServerConfig(s);
-        if (server_cfg.server_status() != SERVER_UP) {
-          continue;
-        }
-
-        ReplicaRef rref(SHA1::compute(s), server_cfg.server_addr());
-        rref.name = s;
-        replicas.emplace_back(rref);
+      auto server_cfg = cdir_->getServerConfig(s);
+      if (server_cfg.server_status() != SERVER_UP) {
+        continue;
       }
 
-      partitions.emplace(pid, replicas);
+      ReplicaRef rref(SHA1::compute(s), server_cfg.server_addr());
+      rref.name = s;
+      replicas.emplace_back(rref);
     }
+
+    partitions.emplace(pid, replicas);
   }
 
   Vector<PipelinedQueryTree> shards;

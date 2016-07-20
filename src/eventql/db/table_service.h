@@ -37,7 +37,6 @@
 #include <eventql/db/PartitionInfo.pb.h>
 #include <eventql/db/RecordEnvelope.pb.h>
 #include <eventql/db/partition_map.h>
-#include <eventql/db/TimeWindowPartitioner.h>
 #include <eventql/db/shredded_record.h>
 #include <eventql/config/config_directory.h>
 

@@ -122,66 +122,53 @@ Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
 
   Vector<TableScan::PartitionLocation> partitions;
   if (table_ref.partition_key.isEmpty()) {
-    if (table.get()->partitionerType() == TBL_PARTITION_FIXED ||
-        table.get()->storage() != TBL_STORAGE_COLSM) {
-      auto partitioner = table.get()->partitioner();
-      for (const auto& p : partitioner->listPartitions(seqscan->constraints())) {
-        TableScan::PartitionLocation pl;
-        pl.partition_id = p;
-        if (!replication_scheme_->hasLocalReplica(p)) {
-          pl.servers = replication_scheme_->replicasFor(p);
-        }
-        partitions.emplace_back(pl);
+    auto keyrange = findKeyRange(
+        table.get()->config().config().partition_key(),
+        seqscan->constraints());
+
+    MetadataClient metadata_client(cdir_);
+    PartitionListResponse partition_list;
+    auto rc = metadata_client.listPartitions(
+        tsdb_namespace_,
+        table_ref.table_key,
+        keyrange,
+        &partition_list);
+
+    if (!rc.isSuccess()) {
+      RAISEF(kRuntimeError, "metadata lookup failure: $0", rc.message());
+    }
+
+    for (const auto& p : partition_list.partitions()) {
+      TableScan::PartitionLocation pl;
+      pl.partition_id = SHA1Hash(
+          p.partition_id().data(),
+          p.partition_id().size());
+
+      pl.qtree = seqscan->deepCopy().asInstanceOf<csql::SequentialScanNode>();
+
+      if (!pl.qtree->whereExpression().isEmpty()) {
+        auto where_expr = seqscan->whereExpression().get();
+        where_expr = simplifyWhereExpression(
+            table.get(),
+            p.keyrange_begin(),
+            p.keyrange_end(),
+            where_expr);
+
+        pl.qtree->setWhereExpression(where_expr);
       }
-    } else {
-      auto keyrange = findKeyRange(
-          table.get()->config().config().partition_key(),
-          seqscan->constraints());
 
-      MetadataClient metadata_client(cdir_);
-      PartitionListResponse partition_list;
-      auto rc = metadata_client.listPartitions(
-          tsdb_namespace_,
-          table_ref.table_key,
-          keyrange,
-          &partition_list);
-
-      if (!rc.isSuccess()) {
-        RAISEF(kRuntimeError, "metadata lookup failure: $0", rc.message());
-      }
-
-      for (const auto& p : partition_list.partitions()) {
-        TableScan::PartitionLocation pl;
-        pl.partition_id = SHA1Hash(
-            p.partition_id().data(),
-            p.partition_id().size());
-
-        pl.qtree = seqscan->deepCopy().asInstanceOf<csql::SequentialScanNode>();
-
-        if (!pl.qtree->whereExpression().isEmpty()) {
-          auto where_expr = seqscan->whereExpression().get();
-          where_expr = simplifyWhereExpression(
-              table.get(),
-              p.keyrange_begin(),
-              p.keyrange_end(),
-              where_expr);
-
-          pl.qtree->setWhereExpression(where_expr);
+      for (const auto& s : p.servers()) {
+        auto server_cfg = cdir_->getServerConfig(s);
+        if (server_cfg.server_status() != SERVER_UP) {
+          continue;
         }
 
-        for (const auto& s : p.servers()) {
-          auto server_cfg = cdir_->getServerConfig(s);
-          if (server_cfg.server_status() != SERVER_UP) {
-            continue;
-          }
-
-          ReplicaRef rref(SHA1::compute(s), server_cfg.server_addr());
-          rref.name = s;
-          pl.servers.emplace_back(rref);
-        }
-
-        partitions.emplace_back(pl);
+        ReplicaRef rref(SHA1::compute(s), server_cfg.server_addr());
+        rref.name = s;
+        pl.servers.emplace_back(rref);
       }
+
+      partitions.emplace_back(pl);
     }
   } else {
     TableScan::PartitionLocation pl;

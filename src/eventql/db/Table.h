@@ -26,7 +26,6 @@
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/duration.h>
 #include <eventql/db/Partition.h>
-#include <eventql/db/TablePartitioner.h>
 #include <eventql/util/protobuf/MessageSchema.h>
 #include <eventql/db/TableConfig.pb.h>
 #include <eventql/db/metadata_transaction.h>
@@ -58,7 +57,6 @@ public:
 
   const String& getPartitionKey() const;
   TablePartitionerType partitionerType() const;
-  RefPtr<TablePartitioner> partitioner() const;
 
   KeyspaceType getKeyspaceType() const;
   Vector<String> getPrimaryKey() const;
@@ -74,7 +72,6 @@ protected:
   mutable std::mutex mutex_;
   TableDefinition config_;
   RefPtr<msg::MessageSchema> schema_;
-  RefPtr<TablePartitioner> partitioner_;
 };
 
 }
