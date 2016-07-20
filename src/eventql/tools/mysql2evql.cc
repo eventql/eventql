@@ -36,6 +36,40 @@
 
 using namespace eventql;
 
+void uploadTable(
+    const String& host,
+    const uint64_t port,
+    http::HTTPMessage::HeaderList* auth_headers,
+    Buffer* shard_data,
+    const size_t nshard) {
+  logDebug(
+      "mysql2evql",
+      "Uploading shard $0; size=$1MB",
+      nshard + 1,
+      shard_data->size() / 1000000.0);
+
+  auto insert_uri = StringUtil::format(
+      "http://$0:$1/api/v1/tables/insert",
+      host,
+      port);
+
+  http::HTTPClient http_client;
+  auto upload_res = http_client.executeRequest(
+      http::HTTPRequest::mkPost(
+          insert_uri,
+          "[" + shard_data->toString() + "]",
+          *auth_headers));
+
+  logDebug("mysql2evql", "Upload finished: $0", insert_uri);
+  if (upload_res.statusCode() != 201) {
+    logError(
+        "mysql2evql", "[FATAL ERROR]: HTTP Status Code $0 $1",
+        upload_res.statusCode(),
+        upload_res.body().toString());
+    RAISE(kRuntimeError, upload_res.body().toString());
+  }
+}
+
 void run(const cli::FlagParser& flags) {
   auto source_table = flags.getString("source_table");
   auto destination_table = flags.getString("destination_table");
@@ -101,6 +135,20 @@ void run(const cli::FlagParser& flags) {
   /* upload rows */
   size_t nshard = 0;
   size_t num_rows_shard = 0;
+
+  http::HTTPMessage::HeaderList auth_headers;
+  if (flags.isSet("auth_token")) {
+    auth_headers.emplace_back(
+        "Authorization",
+        StringUtil::format("Token $0", flags.getString("auth_token")));
+  //} else if (!cfg_.getPassword().isEmpty()) {
+  //  auth_headers.emplace_back(
+  //      "Authorization",
+  //      StringUtil::format("Basic $0",
+  //          util::Base64::encode(
+  //              cfg_.getUser() + ":" + cfg_.getPassword().get())));
+  }
+
   Buffer shard_data;
   json::JSONOutputStream json(BufferOutputStream::fromBuffer(&shard_data));
 
@@ -137,44 +185,8 @@ void run(const cli::FlagParser& flags) {
     json.endObject();
     json.endObject();
 
-    if (num_rows_shard == shard_size ||
-        num_rows_uploaded == num_rows) {
-      logDebug(
-          "mysql2evql",
-          "Uploading shard $0; size=$1MB",
-          nshard + 1,
-          shard_data.size() / 1000000.0);
-
-      auto insert_uri = StringUtil::format(
-          "http://$0:$1/api/v1/tables/insert",
-          host,
-          port);
-
-      http::HTTPMessage::HeaderList auth_headers;
-      if (flags.isSet("auth_token")) {
-        auth_headers.emplace_back(
-            "Authorization",
-            StringUtil::format("Token $0", flags.getString("auth_token")));
-      //} else if (!cfg_.getPassword().isEmpty()) {
-      //  auth_headers.emplace_back(
-      //      "Authorization",
-      //      StringUtil::format("Basic $0",
-      //          util::Base64::encode(
-      //              cfg_.getUser() + ":" + cfg_.getPassword().get())));
-      }
-
-      http::HTTPClient http_client;
-      auto upload_res = http_client.executeRequest(
-          http::HTTPRequest::mkPost(
-              insert_uri,
-              "[" + shard_data.toString() + "]",
-              auth_headers));
-
-      logDebug("mysql2evql", "Upload finished: $0", insert_uri);
-      if (upload_res.statusCode() != 201) {
-        RAISE(kRuntimeError, upload_res.body().toString());
-      }
-
+    if (num_rows_shard == shard_size) {
+      uploadTable(host, port, &auth_headers, &shard_data, nshard);
       shard_data.clear();
       num_rows_shard = 0;
       ++nshard;
@@ -184,6 +196,9 @@ void run(const cli::FlagParser& flags) {
       status_line.runMaybe();
       return true;
     } else {
+      if (num_rows_shard > 0) {
+        uploadTable(host, port, &auth_headers, &shard_data, nshard);
+      }
       return false;
     }
   });
@@ -191,7 +206,6 @@ void run(const cli::FlagParser& flags) {
   status_line.runForce();
 
   logInfo("mysql2evql", "Upload finished successfully :)");
-  exit(0);
 }
 
 int main(int argc, const char** argv) {
@@ -230,18 +244,18 @@ int main(int argc, const char** argv) {
   flags.defineFlag(
       "host",
       cli::FlagParser::T_STRING,
-      false,
+      true,
       "h",
-      "localhost",
+      NULL,
       "eventql server hostname",
       "<host>");
 
   flags.defineFlag(
       "port",
       cli::FlagParser::T_INTEGER,
-      false,
+      true,
       "p",
-      "9175",
+      NULL,
       "eventql server port",
       "<port>");
 
@@ -295,9 +309,8 @@ int main(int argc, const char** argv) {
 
   try {
     run(flags);
+    return 0;
   } catch (const StandardException& e) {
-    logError("mysql2evql", "[FATAL ERROR] $0", e.what());
+    return 1;
   }
-
-  return 0;
 }
