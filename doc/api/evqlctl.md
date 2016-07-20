@@ -37,19 +37,20 @@ evqlctl-cluster-remove-server - Remove an existing server from an existing clust
 
 evqlctl-cluster-status - Display the current cluster status.
 
-      Usage: evqlctl [OPTIONS]
+      Usage: evqlctl [OPTIONS] -cluster-status
         --master <addr>       The url of the master.
 
 
-evqlctl --namespace-create - Create a new namespace.
+evqlctl-namespace-create - Create a new namespace.
 
+      Usage: evqlctl [OPTIONS] -namespace-create
       --cluster_name <node name>       The name of the cluster
       --namespace <namespace name>     The name of the namespace to create
 
 
 evqlctl-rebalance - Rebalance.
 
-      Usage: evqlctl [OPTIONS]
+      Usage: evqlctl [OPTIONS] 
         --cluster_name <node name>       The name of the cluster.
 
 
