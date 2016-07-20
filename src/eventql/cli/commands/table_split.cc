@@ -92,6 +92,15 @@ Status TableSplit::execute(
       "table name",
       "<string>");
 
+  flags.defineFlag(
+      "finalize",
+      ::cli::FlagParser::T_SWITCH,
+      false,
+      NULL,
+      NULL,
+      "finalize immediately",
+      "<switch>");
+
   try {
     flags.parseArgv(argv);
 
@@ -143,6 +152,10 @@ Status TableSplit::execute(
         split_partition_id_high.data(),
         split_partition_id_high.size());
     op.set_placement_id(Random::singleton()->random64());
+
+    if (flags.isSet("finalize")) {
+      op.set_finalize_immediately(true);
+    }
 
     ServerAllocator server_alloc(cdir.get());
 
