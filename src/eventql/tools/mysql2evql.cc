@@ -41,7 +41,7 @@ struct UploadShard {
   size_t nrows;
 };
 
-void run(const cli::FlagParser& flags) {
+bool run(const cli::FlagParser& flags) {
   auto source_table = flags.getString("source_table");
   auto destination_table = flags.getString("destination_table");
   auto shard_size = flags.getInt("shard_size");
@@ -91,6 +91,7 @@ void run(const cli::FlagParser& flags) {
   }
 
   bool upload_done = false;
+  bool upload_error = false;
   thread::Queue<UploadShard> upload_queue(1);
   Vector<std::thread> upload_threads(num_upload_threads);
   for (size_t i = 0; i < num_upload_threads; ++i) {
@@ -132,6 +133,7 @@ void run(const cli::FlagParser& flags) {
           num_rows_uploaded += shard.get().nrows;
           status_line.runMaybe();
         } catch (const std::exception& e) {
+          upload_error = true;
           logError("mysql2evql", e, "error while uploading table data");
         }
       }
@@ -206,7 +208,14 @@ void run(const cli::FlagParser& flags) {
   }
 
   status_line.runForce();
-  logInfo("mysql2evql", "Upload finished successfully :)");
+
+  if (upload_error) {
+    logInfo("mysql2evql", "Upload finished with errors");
+    return false;
+  } else {
+    logInfo("mysql2evql", "Upload finished successfully :)");
+    return true;
+  }
 }
 
 int main(int argc, const char** argv) {
@@ -328,9 +337,13 @@ int main(int argc, const char** argv) {
       strToLogLevel(flags.getString("loglevel")));
 
   try {
-    run(flags);
-    return 0;
+    if (run(flags)) {
+      return 0;
+    } else {
+      return 1;
+    }
   } catch (const StandardException& e) {
+    logFatal("mysql2evql", "$0", e.what());
     return 1;
   }
 }
