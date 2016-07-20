@@ -230,18 +230,18 @@ int main(int argc, const char** argv) {
   flags.defineFlag(
       "host",
       cli::FlagParser::T_STRING,
-      false,
+      true,
       "h",
-      "localhost",
+      NULL,
       "eventql server hostname",
       "<host>");
 
   flags.defineFlag(
       "port",
       cli::FlagParser::T_INTEGER,
-      false,
+      true,
       "p",
-      "9175",
+      NULL,
       "eventql server port",
       "<port>");
 
