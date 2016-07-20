@@ -186,26 +186,44 @@ Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
   }
 
   Option<SHA1Hash> cache_key;
-  if (partitions.size() == 1 &&
-      partitions.front().servers.empty()) {
+  for (const auto& p : partitions) {
+    if (!p.servers.empty()) { // FIXME better check if local partition
+      cache_key = None<SHA1Hash>();
+      break;
+    }
+
     auto partition = partition_map_->findPartition(
           tsdb_namespace_,
           table_ref.table_key,
-          partitions.front().partition_id);
+          p.partition_id);
 
     uint64_t lsm_sequence = 0;
     if (!partition.isEmpty()) {
       lsm_sequence = partition.get()->getSnapshot()->state.lsm_sequence();
     }
 
-    cache_key = SHA1::compute(
-        StringUtil::format(
-            "$0/$1/$2/$3~$4",
-            tsdb_namespace_,
-            table_ref.table_key,
-            partitions.front().partition_id,
-            lsm_sequence,
-            seqscan->toString()));
+    SHA1Hash expression_fingerprint;
+    for (const auto& slnode : p.qtree->selectList()) {
+      expression_fingerprint = SHA1::compute(
+          expression_fingerprint.toString() + slnode->toString());
+    }
+
+    if (!p.qtree->whereExpression().isEmpty()) {
+      expression_fingerprint = SHA1::compute(
+          expression_fingerprint.toString() +
+          p.qtree->whereExpression().get()->toString());
+    }
+
+    cache_key = Some(
+        SHA1::compute(
+            StringUtil::format(
+                "$0~$1~$2~$3~$4~$5",
+                cache_key.isEmpty() ? "" : cache_key.get().toString(),
+                expression_fingerprint.toString(),
+                tsdb_namespace_,
+                table_ref.table_key,
+                p.partition_id,
+                lsm_sequence)));
   }
 
   return Option<ScopedPtr<csql::TableExpression>>(
