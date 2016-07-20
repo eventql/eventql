@@ -143,7 +143,16 @@ void run(const cli::FlagParser& flags) {
   shard.nrows = 0;
   json::JSONOutputStream json(BufferOutputStream::fromBuffer(&shard.data));
 
-  auto get_rows_qry = StringUtil::format("SELECT * FROM `$0`;", source_table);
+  String where_expr;
+  if (flags.isSet("filter")) {
+    where_expr = "WHERE " + flags.getString("filter");
+  }
+
+  auto get_rows_qry = StringUtil::format(
+      "SELECT * FROM `$0` $1;",
+     source_table,
+     where_expr);
+
   mysql_conn->executeQuery(
       get_rows_qry,
       [&] (const Vector<String>& column_values) -> bool {
@@ -277,6 +286,16 @@ int main(int argc, const char** argv) {
       "mysql://localhost:3306/mydb?user=root",
       "MySQL connection string",
       "<url>");
+
+  flags.defineFlag(
+      "filter",
+      cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      NULL,
+      "boolean sql expression",
+      "<sql_expr>");
+
 
   flags.defineFlag(
       "shard_size",
