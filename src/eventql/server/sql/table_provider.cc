@@ -160,7 +160,12 @@ Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
 
         if (!pl.qtree->whereExpression().isEmpty()) {
           auto where_expr = seqscan->whereExpression().get();
-          where_expr = simplifyWhereExpression(table.get(), p, where_expr);
+          where_expr = simplifyWhereExpression(
+              table.get(),
+              p.keyrange_begin(),
+              p.keyrange_end(),
+              where_expr);
+
           pl.qtree->setWhereExpression(where_expr);
         }
 
@@ -182,6 +187,26 @@ Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
     TableScan::PartitionLocation pl;
     pl.partition_id = table_ref.partition_key.get();
     pl.qtree = seqscan;
+
+    auto partition = partition_map_->findPartition(
+        tsdb_namespace_,
+        table_ref.table_key,
+        pl.partition_id);
+
+    if (!pl.qtree->whereExpression().isEmpty() &&
+        !partition.isEmpty()) {
+      const auto& pstate = partition.get()->getSnapshot()->state;
+
+      auto where_expr = pl.qtree->whereExpression().get();
+      where_expr = simplifyWhereExpression(
+          table.get(),
+          pstate.partition_keyrange_begin(),
+          pstate.partition_keyrange_end(),
+          where_expr);
+
+      pl.qtree->setWhereExpression(where_expr);
+    }
+
     partitions.emplace_back(pl);
   }
 
@@ -495,7 +520,8 @@ const String& TSDBTableProvider::getNamespace() const {
 
 RefPtr<csql::ValueExpressionNode> TSDBTableProvider::simplifyWhereExpression(
       RefPtr<Table> table,
-      const PartitionListResponseEntry& partition,
+      const String& keyrange_begin,
+      const String& keyrange_end,
       RefPtr<csql::ValueExpressionNode> expr) const {
   auto pkey_col = table->getPartitionKey();
   auto pkeyspace = table->getKeyspaceType();
@@ -516,11 +542,11 @@ RefPtr<csql::ValueExpressionNode> TSDBTableProvider::simplifyWhereExpression(
 
       case csql::ScanConstraintType::LESS_THAN:
       case csql::ScanConstraintType::LESS_THAN_OR_EQUAL_TO:
-        if (partition.keyrange_end().size() > 0 &&
+        if (keyrange_end.size() > 0 &&
             comparePartitionKeys(
                 pkeyspace,
                 encodePartitionKey(pkeyspace, c.value.getString()),
-                partition.keyrange_end()) >= 0) {
+                keyrange_end) >= 0) {
           break;
         } else {
           continue;
@@ -528,11 +554,11 @@ RefPtr<csql::ValueExpressionNode> TSDBTableProvider::simplifyWhereExpression(
 
       case csql::ScanConstraintType::GREATER_THAN:
       case csql::ScanConstraintType::GREATER_THAN_OR_EQUAL_TO:
-        if (partition.keyrange_begin().size() > 0 &&
+        if (keyrange_begin.size() > 0 &&
             comparePartitionKeys(
                 pkeyspace,
                 encodePartitionKey(pkeyspace, c.value.getString()),
-                partition.keyrange_begin()) <= 0) {
+                keyrange_begin) <= 0) {
           break;
         } else {
           continue;

@@ -84,7 +84,8 @@ protected:
 
   RefPtr<csql::ValueExpressionNode> simplifyWhereExpression(
       RefPtr<Table> table,
-      const PartitionListResponseEntry& partition,
+      const String& keyrange_begin,
+      const String& keyrange_end,
       RefPtr<csql::ValueExpressionNode> expr) const;
 
   String tsdb_namespace_;
