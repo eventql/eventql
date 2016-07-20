@@ -72,6 +72,14 @@ Option<RefPtr<Table>> PartitionMap::findTableWithLock(
 void PartitionMap::configureTable(
     const TableDefinition& table,
     Set<SHA1Hash>* affected_partitions /* = nullptr */) {
+  if (table.config().partitioner() == TBL_PARTITION_FIXED) {
+    return;
+  }
+
+  if (table.config().storage() != TBL_STORAGE_COLSM) {
+    return;
+  }
+
   std::unique_lock<std::mutex> lk(mutex_);
   auto tbl_key = table.customer() + "~" + table.table_name();
   bool metadata_changed = false;
