@@ -116,6 +116,7 @@ message SplitPartitionOperation {
   required bytes split_partition_id_low = 5;
   required bytes split_partition_id_high = 6;
   required uint64 placement_id = 7;
+  optional bool finalize_immediately = 8;
 };
 
 message FinalizeSplitOperation {

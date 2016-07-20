@@ -55,7 +55,13 @@ LSMPartitionWriter::LSMPartitionWriter(
     file_tracker_(cfg->file_tracker),
     cdir_(cfg->config_directory),
     repl_(cfg->repl_scheme.get()),
-    partition_split_threshold_(kDefaultPartitionSplitThresholdBytes) {}
+    partition_split_threshold_(kDefaultPartitionSplitThresholdBytes) {
+  const auto& table_cfg = partition_->getTable()->config().config();
+
+  if (table_cfg.override_partition_split_threshold() > 0) {
+    partition_split_threshold_ = table_cfg.override_partition_split_threshold();
+  }
+}
 
 Set<SHA1Hash> LSMPartitionWriter::insertRecords(
     const ShreddedRecordList& records) {
@@ -433,6 +439,10 @@ Status LSMPartitionWriter::split() {
       split_partition_id_high.data(),
       split_partition_id_high.size());
   op.set_placement_id(Random::singleton()->random64());
+
+  if (table->config().config().enable_async_split()) {
+    op.set_finalize_immediately(true);
+  }
 
   ServerAllocator server_alloc(cdir_);
 

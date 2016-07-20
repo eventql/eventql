@@ -41,7 +41,7 @@ enum KeyspaceType {
   KEYSPACE_STRING = 2;
 };
 
-// next id: 13
+// next id: 15
 message TableConfig {
 
   /**
@@ -95,6 +95,11 @@ message TableConfig {
   optional bool allow_public_insert = 10 [default = true];
 
   optional bool disable_replication = 13 [default = false];
+
+  optional bool enable_async_split = 14 [default = false];
+
+  optional uint64 override_partition_split_threshold = 15;
+
 };
 
 message TimeWindowPartitionerConfig {
