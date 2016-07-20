@@ -12,16 +12,14 @@
     | column_name [REPEATED] RECORD ( column_definition, column_definition, ...)
     | PRIMARY KEY ( column_name [, column_name1 , column_name2, ... ] )
 
-cql_type is a type, other than a collection or a counter type. CQL data types lists the types. Exceptions: ADD supports a collection type and also, if the table is a counter, a counter type.
 
-A table must have a unique primary key whose first column must be of type DATETIME.
-This column is used as partition key to distribute the rows among the hosts. 
+cql_type must be one of the listed [SQL data types](/documentation/collecting-and-storing/tables/datatypes).
 
-- why partition key? immer die erste column von primary key, um rows auf hosts zu verteilen, optimierungen wenn von type time
-for timeseries data it is strongly recommende to choose a time column as partition key
+A table must have at least one unique primary that must not be of type RECORD.
+EventQL treats the first column of the primary key as partition key to distribute the rows among the hosts.
+While EventQL supports STRING, UINT64 and DATETIME columns as partition key, it is strongly recommended to choose a column of type DATETIME as partition key for timeseries data.
 
 <br />
-
 **NOTE:** If you are an EventQL Cloud user you can also create and update table
 schemas from the web interface. Go to `EventQL Cloud > Tables` and click the
 `Create Table` button on the top right corner.
