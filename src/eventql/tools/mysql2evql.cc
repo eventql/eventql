@@ -36,7 +36,7 @@
 
 using namespace eventql;
 
-Status uploadTable(
+void uploadTable(
     const String& host,
     const uint64_t port,
     http::HTTPMessage::HeaderList* auth_headers,
@@ -62,10 +62,12 @@ Status uploadTable(
 
   logDebug("mysql2evql", "Upload finished: $0", insert_uri);
   if (upload_res.statusCode() != 201) {
-    return Status(eRuntimeError, upload_res.body().toString());
+    logError(
+        "mysql2evql", "[FATAL ERROR]: HTTP Status Code $0 $1",
+        upload_res.statusCode(),
+        upload_res.body().toString());
+    RAISE(kRuntimeError, upload_res.body().toString());
   }
-
-  return Status::success();
 }
 
 void run(const cli::FlagParser& flags) {
@@ -204,7 +206,6 @@ void run(const cli::FlagParser& flags) {
   status_line.runForce();
 
   logInfo("mysql2evql", "Upload finished successfully :)");
-  exit(0);
 }
 
 int main(int argc, const char** argv) {
@@ -308,9 +309,8 @@ int main(int argc, const char** argv) {
 
   try {
     run(flags);
+    return 0;
   } catch (const StandardException& e) {
-    logError("mysql2evql", "[FATAL ERROR] $0", e.what());
+    return 1;
   }
-
-  return 0;
 }
