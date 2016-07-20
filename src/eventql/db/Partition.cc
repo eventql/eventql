@@ -31,15 +31,9 @@
 #include <eventql/util/protobuf/MessageDecoder.h>
 #include <eventql/util/protobuf/msg.h>
 #include <eventql/io/sstable/sstablereader.h>
-#include <eventql/db/LogPartitionReader.h>
-#include <eventql/db/LogPartitionWriter.h>
-#include <eventql/db/LogPartitionReplication.h>
 #include <eventql/db/LSMPartitionReader.h>
 #include <eventql/db/LSMPartitionWriter.h>
 #include <eventql/db/LSMPartitionReplication.h>
-#include <eventql/db/StaticPartitionReader.h>
-#include <eventql/db/StaticPartitionWriter.h>
-#include <eventql/db/StaticPartitionReplication.h>
 #include <eventql/db/file_tracker.h>
 #include <eventql/server/server_stats.h>
 
@@ -189,48 +183,14 @@ SHA1Hash Partition::uuid() const {
 RefPtr<PartitionWriter> Partition::getWriter() {
   std::unique_lock<std::mutex> lk(writer_lock_);
   if (writer_.get() == nullptr) {
-    switch (table_->storage()) {
-
-      case eventql::TBL_STORAGE_COLSM:
-        if (upgradeToLSMv2()) {
-          writer_ = mkRef<PartitionWriter>(
-              new LSMPartitionWriter(cfg_, this, &head_));
-        } else {
-          writer_ = mkRef<PartitionWriter>(new LogPartitionWriter(this, &head_));
-        }
-        break;
-
-      case eventql::TBL_STORAGE_STATIC:
-        writer_ = mkRef<PartitionWriter>(new StaticPartitionWriter(&head_));
-        break;
-
-      default:
-        RAISE(kRuntimeError, "invalid storage class");
-
-    }
+    writer_ = mkRef<PartitionWriter>(new LSMPartitionWriter(cfg_, this, &head_));
   }
 
-  auto writer = writer_;
-  return writer;
+  return writer_;
 }
 
 RefPtr<PartitionReader> Partition::getReader() {
-  switch (table_->storage()) {
-
-    case eventql::TBL_STORAGE_COLSM:
-      if (upgradeToLSMv2()) {
-        return new LSMPartitionReader(table_, head_.getSnapshot());
-      } else {
-        return new LogPartitionReader(table_, head_.getSnapshot());
-      }
-
-    case eventql::TBL_STORAGE_STATIC:
-      return new StaticPartitionReader(table_, head_.getSnapshot());
-
-    default:
-      RAISE(kRuntimeError, "invalid storage class");
-
-  }
+  return new LSMPartitionReader(table_, head_.getSnapshot());
 }
 
 RefPtr<PartitionSnapshot> Partition::getSnapshot() {
@@ -259,32 +219,11 @@ PartitionInfo Partition::getInfo() const {
 RefPtr<PartitionReplication> Partition::getReplicationStrategy(
     RefPtr<ReplicationScheme> repl_scheme,
     http::HTTPConnectionPool* http) {
-  switch (table_->storage()) {
-
-    case eventql::TBL_STORAGE_COLSM:
-      if (upgradeToLSMv2()) {
-        return new LSMPartitionReplication(
-            this,
-            repl_scheme,
-            cfg_->config_directory,
-            http);
-      } else {
-        return new LogPartitionReplication(
-            this,
-            repl_scheme,
-            http);
-      }
-
-    case eventql::TBL_STORAGE_STATIC:
-      return new StaticPartitionReplication(
-          this,
-          repl_scheme,
-          http);
-
-    default:
-      RAISE(kRuntimeError, "invalid storage class");
-
-  }
+  return new LSMPartitionReplication(
+      this,
+      repl_scheme,
+      cfg_->config_directory,
+      http);
 }
 
 bool Partition::upgradeToLSMv2() const {

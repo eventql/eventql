@@ -41,10 +41,6 @@ public:
   virtual Set<SHA1Hash> insertRecords(
       const ShreddedRecordList& records) = 0;
 
-  void updateCSTable(
-      const String& tmpfile,
-      uint64_t version);
-
   /**
    * Lock this partition writer (so that all write attempts will block/hang
    * until the writer is unlocked

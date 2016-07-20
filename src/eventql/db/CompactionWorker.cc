@@ -29,9 +29,7 @@
 #include <eventql/util/wallclock.h>
 #include <eventql/util/application.h>
 #include <eventql/db/CompactionWorker.h>
-#include <eventql/db/LogPartitionCompactionState.pb.h>
 #include <eventql/db/RecordSet.h>
-#include <eventql/db/LogPartitionReader.h>
 #include <eventql/util/protobuf/MessageDecoder.h>
 #include <eventql/io/cstable/RecordShredder.h>
 #include <eventql/io/cstable/cstable_writer.h>

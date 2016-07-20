@@ -86,7 +86,6 @@ evql_protos = \
     eventql/config/namespace_config_protos.proto \
     eventql/db/metadata_operations.proto \
     eventql/db/ClusterConfig.proto \
-    eventql/db/LogPartitionCompactionState.proto \
     eventql/db/PartitionInfo.proto \
     eventql/db/PartitionState.proto \
     eventql/db/RecordEnvelope.proto \
@@ -856,12 +855,6 @@ evql_core_a_SOURCES = \
     eventql/db/LSMTableIndexCache.h \
     eventql/db/LazyPartition.cc \
     eventql/db/LazyPartition.h \
-    eventql/db/LogPartitionReader.cc \
-    eventql/db/LogPartitionReader.h \
-    eventql/db/LogPartitionReplication.cc \
-    eventql/db/LogPartitionReplication.h \
-    eventql/db/LogPartitionWriter.cc \
-    eventql/db/LogPartitionWriter.h \
     eventql/db/metadata_client.cc \
     eventql/db/metadata_client.h \
     eventql/db/metadata_coordinator.cc \
@@ -900,12 +893,6 @@ evql_core_a_SOURCES = \
     eventql/db/ReplicationWorker.h \
     eventql/db/server_allocator.cc \
     eventql/db/server_allocator.h \
-    eventql/db/StaticPartitionReader.cc \
-    eventql/db/StaticPartitionReader.h \
-    eventql/db/StaticPartitionReplication.cc \
-    eventql/db/StaticPartitionReplication.h \
-    eventql/db/StaticPartitionWriter.cc \
-    eventql/db/StaticPartitionWriter.h \
     eventql/db/TSDBClient.cc \
     eventql/db/TSDBClient.h \
     eventql/db/table_service.cc \
@@ -1000,7 +987,6 @@ nodist_evql_core_a_SOURCES = \
     @builddir@/eventql/config/namespace_config_protos.pb.cc \
     @builddir@/eventql/db/metadata_operations.pb.cc \
     @builddir@/eventql/db/ClusterConfig.pb.cc \
-    @builddir@/eventql/db/LogPartitionCompactionState.pb.cc \
     @builddir@/eventql/db/PartitionInfo.pb.cc \
     @builddir@/eventql/db/PartitionState.pb.cc \
     @builddir@/eventql/db/RecordEnvelope.pb.cc \
