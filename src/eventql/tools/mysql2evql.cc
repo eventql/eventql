@@ -40,12 +40,12 @@ void uploadTable(
     const String& host,
     const uint64_t port,
     http::HTTPMessage::HeaderList* auth_headers,
-    Buffer* shard_data,
-    const size_t nshard) {
+    Buffer* shard_data) {
   logDebug(
       "mysql2evql",
-      "Uploading shard $0; size=$1MB",
-      nshard + 1,
+      "Uploading batch; target=$0:$1 size=$2MB",
+      host,
+      port,
       shard_data->size() / 1000000.0);
 
   auto insert_uri = StringUtil::format(
@@ -70,7 +70,7 @@ void uploadTable(
   }
 }
 
-void run(const cli::FlagParser& flags) {
+bool run(const cli::FlagParser& flags) {
   auto source_table = flags.getString("source_table");
   auto destination_table = flags.getString("destination_table");
   auto shard_size = flags.getInt("shard_size");
@@ -95,47 +95,18 @@ void run(const cli::FlagParser& flags) {
     column_names.emplace_back(field.name);
   }
 
-  /* count rows */
-  auto count_rows_qry = StringUtil::format(
-      "SELECT count(*) FROM `$0`;",
-      source_table);
-
-  size_t num_rows = 0;
-  size_t num_rows_uploaded = 0;
-  mysql_conn->executeQuery(
-      count_rows_qry,
-      [&num_rows] (const Vector<String>& row) -> bool {
-    if (row.size() == 1) num_rows = std::stoull(row[0]);
-    return false;
-  });
-
-  if (num_rows == 0) {
-    logError(
-        "mysql2evql",
-        "Table '$0' appears to be empty",
-        source_table);
-    return;
-  }
-
-  auto num_shards = (num_rows + shard_size - 1) / shard_size;
-  logDebug("mysql2evql", "Splitting into $0 shards", num_shards);
-
   /* status line */
+  std::atomic<size_t> num_rows_uploaded;
   util::SimpleRateLimitedFn status_line(
       kMicrosPerSecond,
-      [&num_rows_uploaded, num_rows] () {
+      [&num_rows_uploaded] () {
     logInfo(
         "mysql2evql",
-        "[$0%] Uploading... $1/$2 rows",
-        (size_t) ((num_rows_uploaded / (double) num_rows) * 100),
-        num_rows_uploaded,
-        num_rows);
+        "Uploading... $0 rows",
+        num_rows_uploaded.load());
   });
 
   /* upload rows */
-  size_t nshard = 0;
-  size_t num_rows_shard = 0;
-
   http::HTTPMessage::HeaderList auth_headers;
   if (flags.isSet("auth_token")) {
     auth_headers.emplace_back(
@@ -150,6 +121,7 @@ void run(const cli::FlagParser& flags) {
   }
 
   Buffer shard_data;
+  size_t num_rows_shard = 0;
   json::JSONOutputStream json(BufferOutputStream::fromBuffer(&shard_data));
 
   auto get_rows_qry = StringUtil::format("SELECT * FROM `$0`;", source_table);
@@ -186,25 +158,20 @@ void run(const cli::FlagParser& flags) {
     json.endObject();
 
     if (num_rows_shard == shard_size) {
-      uploadTable(host, port, &auth_headers, &shard_data, nshard);
+      uploadTable(host, port, &auth_headers, &shard_data);
       shard_data.clear();
       num_rows_shard = 0;
-      ++nshard;
     }
 
-    if (num_rows_uploaded < num_rows) {
-      status_line.runMaybe();
-      return true;
-    } else {
-      if (num_rows_shard > 0) {
-        uploadTable(host, port, &auth_headers, &shard_data, nshard);
-      }
-      return false;
-    }
+    status_line.runMaybe();
+    return true;
   });
 
-  status_line.runForce();
+  if (num_rows_shard > 0) {
+    uploadTable(host, port, &auth_headers, &shard_data);
+  }
 
+  status_line.runForce();
   logInfo("mysql2evql", "Upload finished successfully :)");
 }
 
@@ -262,7 +229,7 @@ int main(int argc, const char** argv) {
   flags.defineFlag(
       "database",
       cli::FlagParser::T_STRING,
-      false,
+      true,
       "db",
       "",
       "eventql database",
