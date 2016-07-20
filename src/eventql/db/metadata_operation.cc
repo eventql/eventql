@@ -172,27 +172,65 @@ Status MetadataOperation::performSplitPartition(
       return Status(eIllegalArgumentError, "split server list can't be empty");
     }
 
-    iter->splitting = true;
-    iter->split_point = opdata.split_point();
-    iter->split_partition_id_low = SHA1Hash(
-        opdata.split_partition_id_low().data(),
-        opdata.split_partition_id_low().size());
-    iter->split_partition_id_high = SHA1Hash(
-        opdata.split_partition_id_high().data(),
-        opdata.split_partition_id_high().size());
+    if (opdata.finalize_immediately()) {
+      MetadataFile::PartitionMapEntry lower_split;
+      {
+        lower_split.begin = iter->begin;
+        lower_split.splitting = false;
+        lower_split.partition_id = SHA1Hash(
+            opdata.split_partition_id_low().data(),
+            opdata.split_partition_id_low().size());
 
-    for (const auto& s : opdata.split_servers_low()) {
-      MetadataFile::PartitionPlacement p;
-      p.server_id = s;
-      p.placement_id = opdata.placement_id();
-      iter->split_servers_low.emplace_back(p);
-    }
+        for (const auto& s : opdata.split_servers_low()) {
+          MetadataFile::PartitionPlacement p;
+          p.server_id = s;
+          p.placement_id = opdata.placement_id();
+          lower_split.servers.emplace_back(p);
+        }
+      }
 
-    for (const auto& s : opdata.split_servers_high()) {
-      MetadataFile::PartitionPlacement p;
-      p.server_id = s;
-      p.placement_id = opdata.placement_id();
-      iter->split_servers_high.emplace_back(p);
+      MetadataFile::PartitionMapEntry higher_split;
+      {
+        higher_split.begin = opdata.split_point();
+        higher_split.splitting = false;
+        higher_split.partition_id = SHA1Hash(
+            opdata.split_partition_id_high().data(),
+            opdata.split_partition_id_high().size());
+
+        for (const auto& s : opdata.split_servers_high()) {
+          MetadataFile::PartitionPlacement p;
+          p.server_id = s;
+          p.placement_id = opdata.placement_id();
+          higher_split.servers.emplace_back(p);
+        }
+      }
+
+      iter = pmap.erase(iter);
+      iter = pmap.insert(iter, higher_split);
+      iter = pmap.insert(iter, lower_split);
+    } else {
+      iter->splitting = true;
+      iter->split_point = opdata.split_point();
+      iter->split_partition_id_low = SHA1Hash(
+          opdata.split_partition_id_low().data(),
+          opdata.split_partition_id_low().size());
+      iter->split_partition_id_high = SHA1Hash(
+          opdata.split_partition_id_high().data(),
+          opdata.split_partition_id_high().size());
+
+      for (const auto& s : opdata.split_servers_low()) {
+        MetadataFile::PartitionPlacement p;
+        p.server_id = s;
+        p.placement_id = opdata.placement_id();
+        iter->split_servers_low.emplace_back(p);
+      }
+
+      for (const auto& s : opdata.split_servers_high()) {
+        MetadataFile::PartitionPlacement p;
+        p.server_id = s;
+        p.placement_id = opdata.placement_id();
+        iter->split_servers_high.emplace_back(p);
+      }
     }
 
     success = true;
