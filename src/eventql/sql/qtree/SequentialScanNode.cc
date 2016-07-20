@@ -99,9 +99,18 @@ Option<RefPtr<ValueExpressionNode>> SequentialScanNode::whereExpression() const 
 }
 
 void SequentialScanNode::setWhereExpression(RefPtr<ValueExpressionNode> e) {
-  where_expr_ = Some(e);
+  auto expr_is_true =
+      dynamic_cast<LiteralExpressionNode*>(e.get()) &&
+      dynamic_cast<LiteralExpressionNode*>(e.get())->value().isBool() &&
+      dynamic_cast<LiteralExpressionNode*>(e.get())->value().getBool();
+
   constraints_.clear();
-  QueryTreeUtil::findConstraints(e, &constraints_);
+  if (expr_is_true) {
+    where_expr_ = None<RefPtr<ValueExpressionNode>>();
+  } else {
+    where_expr_ = Some(e);
+    QueryTreeUtil::findConstraints(e, &constraints_);
+  }
 }
 
 const String& SequentialScanNode::tableName() const {
