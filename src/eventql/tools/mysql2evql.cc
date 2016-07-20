@@ -70,7 +70,7 @@ void uploadTable(
   }
 }
 
-bool run(const cli::FlagParser& flags) {
+void run(const cli::FlagParser& flags) {
   auto source_table = flags.getString("source_table");
   auto destination_table = flags.getString("destination_table");
   auto shard_size = flags.getInt("shard_size");
@@ -96,7 +96,7 @@ bool run(const cli::FlagParser& flags) {
   }
 
   /* status line */
-  std::atomic<size_t> num_rows_uploaded;
+  std::atomic<size_t> num_rows_uploaded(0);
   util::SimpleRateLimitedFn status_line(
       kMicrosPerSecond,
       [&num_rows_uploaded] () {
