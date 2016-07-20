@@ -22,7 +22,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include <eventql/cli/commands/table_set_primary_key.h>
+#include <eventql/cli/commands/table_config_set.h>
 #include "eventql/util/random.h"
 #include <eventql/util/cli/flagparser.h>
 #include "eventql/util/logging.h"
@@ -34,30 +34,21 @@
 namespace eventql {
 namespace cli {
 
-const String TableSetPrimaryKey::kName_ = "table-set-primary-key";
-const String TableSetPrimaryKey::kDescription_ = "Set primary key";
+const String TableConfigSet::kName_ = "table-config-set";
+const String TableConfigSet::kDescription_ = "Set table config parameters";
 
-TableSetPrimaryKey::TableSetPrimaryKey(
+TableConfigSet::TableConfigSet(
     RefPtr<ProcessConfig> process_cfg) :
     process_cfg_(process_cfg) {}
 
-Status TableSetPrimaryKey::execute(
+Status TableConfigSet::execute(
     const std::vector<std::string>& argv,
     FileInputStream* stdin_is,
     OutputStream* stdout_os,
     OutputStream* stderr_os) {
   ::cli::FlagParser flags;
   flags.defineFlag(
-      "cluster_name",
-      ::cli::FlagParser::T_STRING,
-      true,
-      NULL,
-      NULL,
-      "node name",
-      "<string>");
-
-  flags.defineFlag(
-      "namespace",
+      "database",
       ::cli::FlagParser::T_STRING,
       true,
       NULL,
@@ -75,7 +66,16 @@ Status TableSetPrimaryKey::execute(
       "<string>");
 
   flags.defineFlag(
-      "primary_key",
+      "param",
+      ::cli::FlagParser::T_STRING,
+      true,
+      NULL,
+      NULL,
+      "key",
+      "<string>");
+
+  flags.defineFlag(
+      "value",
       ::cli::FlagParser::T_STRING,
       true,
       NULL,
@@ -104,59 +104,8 @@ Status TableSetPrimaryKey::execute(
     }
 
     auto cfg = cdir->getTableConfig(
-        flags.getString("namespace"),
+        flags.getString("database"),
         flags.getString("table_name"));
-
-    cfg.mutable_config()->clear_primary_key();
-    for (const auto& k : pkey) {
-      cfg.mutable_config()->add_primary_key(k);
-    }
-    cfg.mutable_config()->set_partition_key(pkey[0]);
-
-    auto replication_factor = cdir.get()->getClusterConfig().replication_factor();
-    // generate new metadata file
-    Set<String> servers;
-    ServerAllocator server_alloc(cdir.get());
-    {
-      auto rc = server_alloc.allocateServers(replication_factor, &servers);
-      if (!rc.isSuccess()) {
-        return rc;
-      }
-    }
-
-    MetadataFile::PartitionMapEntry initial_partition;
-    initial_partition.begin = "";
-    initial_partition.partition_id = Random::singleton()->sha1();
-    initial_partition.splitting = false;
-    for (const auto& s : servers) {
-      MetadataFile::PartitionPlacement p;
-      p.server_id = s;
-      p.placement_id = Random::singleton()->random64();
-      initial_partition.servers.emplace_back(p);
-    }
-
-    auto txnid = Random::singleton()->sha1();
-    MetadataFile metadata_file(txnid, 1, KEYSPACE_UINT64, { initial_partition });
-
-    eventql::MetadataCoordinator coordinator(cdir.get());
-    auto rc = coordinator.createFile(
-        flags.getString("namespace"),
-        flags.getString("table_name"),
-        metadata_file,
-        Vector<String>(servers.begin(), servers.end()));
-
-    if (!rc.isSuccess()) {
-      return rc;
-    }
-
-    cfg.mutable_config()->set_partitioner(TBL_PARTITION_UINT64);
-    cfg.mutable_config()->set_storage(eventql::TBL_STORAGE_COLSM);
-    cfg.set_metadata_txnid(txnid.data(), txnid.size());
-    cfg.set_metadata_txnseq(1);
-    cfg.clear_metadata_servers();
-    for (const auto& s : servers) {
-      cfg.add_metadata_servers(s);
-    }
 
     iputs("cfg: $0", cfg.DebugString());
     cdir->updateTableConfig(cfg);
@@ -172,24 +121,24 @@ Status TableSetPrimaryKey::execute(
   return Status::success();
 }
 
-const String& TableSetPrimaryKey::getName() const {
+const String& TableConfigSet::getName() const {
   return kName_;
 }
 
-const String& TableSetPrimaryKey::getDescription() const {
+const String& TableConfigSet::getDescription() const {
   return kDescription_;
 }
 
-void TableSetPrimaryKey::printHelp(OutputStream* stdout_os) const {
+void TableConfigSet::printHelp(OutputStream* stdout_os) const {
   stdout_os->write(StringUtil::format(
       "\nevqlctl-$0 - $1\n\n", kName_, kDescription_));
 
   stdout_os->write(
-      "Usage: evqlctl table-set-primary-key [OPTIONS]\n"
-      "  --namespace              The name of the namespace.\n"
-      "  --cluster_name           The name of the cluster.\n"
-      "  --table_name             The name of the table to split.\n"
-      "  --primary_key            The primary key (comma separated)\n");
+      "Usage: evqlctl table-config-set [OPTIONS]\n"
+      "  --database               The name of the database to modify.\n"
+      "  --table_name             The name of the table to modify.\n"
+      "  --param                  The parameter to set\n"
+      "  --value                  The value to set the parameter to\n");
 }
 
 } // namespace cli
