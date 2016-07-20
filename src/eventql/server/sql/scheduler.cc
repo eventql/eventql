@@ -85,17 +85,24 @@ ScopedPtr<csql::TableExpression> Scheduler::buildPartialGroupByExpression(
     RefPtr<csql::GroupByNode> node) {
   Vector<csql::ValueExpression> select_expressions;
   Vector<csql::ValueExpression> group_expressions;
+  SHA1Hash expression_fingerprint;
 
   for (const auto& slnode : node->selectList()) {
     select_expressions.emplace_back(
         txn->getCompiler()->buildValueExpression(
             txn,
             slnode->expression()));
+
+    expression_fingerprint = SHA1::compute(
+        expression_fingerprint.toString() + slnode->toString());
   }
 
   for (const auto& e : node->groupExpressions()) {
     group_expressions.emplace_back(
         txn->getCompiler()->buildValueExpression(txn, e));
+
+    expression_fingerprint = SHA1::compute(
+        expression_fingerprint.toString() + e->toString());
   }
 
   return mkScoped(
@@ -103,6 +110,7 @@ ScopedPtr<csql::TableExpression> Scheduler::buildPartialGroupByExpression(
           txn,
           std::move(select_expressions),
           std::move(group_expressions),
+          expression_fingerprint,
           buildTableExpression(
               txn,
               execution_context,

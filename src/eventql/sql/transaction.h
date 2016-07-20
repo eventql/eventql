@@ -62,12 +62,16 @@ public:
 
   void* getUserData();
 
+  String getCacheDirectory() const;
+  void setCacheDirectory(const String& cache_dir);
+
 protected:
   Runtime* runtime_;
   UnixTime now_;
   RefPtr<TableProvider> table_provider_;
   void* user_data_;
   Function<void (void*)> free_user_data_fn_;
+  String cache_dir_;
 };
 
 

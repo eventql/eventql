@@ -572,7 +572,8 @@ int main(int argc, const char** argv) {
         config_dir.get(),
         repl_scheme.get(),
         internal_auth.get(),
-        &table_service);
+        &table_service,
+        cache_dir);
 
     eventql::LogfileService logfile_service(
         config_dir.get(),

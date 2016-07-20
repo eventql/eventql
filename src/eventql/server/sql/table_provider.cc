@@ -176,6 +176,29 @@ Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
     partitions.emplace_back(pl);
   }
 
+  Option<SHA1Hash> cache_key;
+  if (partitions.size() == 1 &&
+      partitions.front().servers.empty()) {
+    auto partition = partition_map_->findPartition(
+          tsdb_namespace_,
+          table_ref.table_key,
+          partitions.front().partition_id);
+
+    uint64_t lsm_sequence = 0;
+    if (!partition.isEmpty()) {
+      lsm_sequence = partition.get()->getSnapshot()->state.lsm_sequence();
+    }
+
+    cache_key = SHA1::compute(
+        StringUtil::format(
+            "$0/$1/$2/$3~$4",
+            tsdb_namespace_,
+            table_ref.table_key,
+            partitions.front().partition_id,
+            lsm_sequence,
+            seqscan->toString()));
+  }
+
   return Option<ScopedPtr<csql::TableExpression>>(
       mkScoped(
           new TableScan(
@@ -185,6 +208,7 @@ Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
               table_ref.table_key,
               partitions,
               seqscan,
+              cache_key,
               partition_map_,
               auth_)));
 }

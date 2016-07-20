@@ -49,7 +49,8 @@ public:
       ConfigDirectory* cdir,
       ReplicationScheme* repl,
       InternalAuth* auth,
-      TableService* table_service);
+      TableService* table_service,
+      const String& cache_dir);
 
   ScopedPtr<csql::Transaction> startTransaction(Session* session);
 
@@ -60,6 +61,7 @@ protected:
   ReplicationScheme* repl_;
   InternalAuth* auth_;
   TableService* table_service_;
+  String cache_dir_;
 };
 
 } // namespace eventql

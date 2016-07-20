@@ -69,6 +69,7 @@ public:
       Transaction* txn,
       Vector<ValueExpression> select_expressions,
       Vector<ValueExpression> group_expressions,
+      SHA1Hash expression_fingerprint,
       ScopedPtr<TableExpression> input);
 
   ~PartialGroupByExpression();
@@ -76,6 +77,8 @@ public:
   ScopedPtr<ResultCursor> execute() override;
 
   size_t getNumColumns() const override;
+
+  Option<SHA1Hash> getCacheKey() const override;
 
 protected:
 
@@ -86,6 +89,7 @@ protected:
   Transaction* txn_;
   Vector<ValueExpression> select_exprs_;
   Vector<ValueExpression> group_exprs_;
+  SHA1Hash expression_fingerprint_;
   ScopedPtr<TableExpression> input_;
   HashMap<String, Vector<VM::Instance>> groups_;
   HashMap<String, Vector<VM::Instance>>::const_iterator groups_iter_;

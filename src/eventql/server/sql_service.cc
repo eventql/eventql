@@ -34,17 +34,20 @@ SQLService::SQLService(
     ConfigDirectory* cdir,
     ReplicationScheme* repl,
     InternalAuth* auth,
-    TableService* table_service) :
+    TableService* table_service,
+    const String& cache_dir) :
     sql_(sql),
     pmap_(pmap),
     cdir_(cdir),
     repl_(repl),
     auth_(auth),
-    table_service_(table_service) {}
+    table_service_(table_service),
+    cache_dir_(cache_dir) {}
 
 ScopedPtr<csql::Transaction> SQLService::startTransaction(Session* session) {
   auto txn = sql_->newTransaction();
   txn->setUserData(session);
+  txn->setCacheDirectory(cache_dir_);
   txn->setTableProvider(
       new TSDBTableProvider(
           session->getEffectiveNamespace(),

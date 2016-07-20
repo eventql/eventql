@@ -35,6 +35,7 @@ TableScan::TableScan(
     const String& table_name,
     const Vector<PartitionLocation>& partitions,
     RefPtr<csql::SequentialScanNode> seqscan,
+    Option<SHA1Hash> cache_key,
     PartitionMap* partition_map,
     InternalAuth* auth) :
     txn_(txn),
@@ -43,6 +44,7 @@ TableScan::TableScan(
     table_name_(table_name),
     partitions_(partitions),
     seqscan_(seqscan),
+    cache_key_(cache_key),
     partition_map_(partition_map),
     auth_(auth),
     cur_partition_(0) {
@@ -154,6 +156,10 @@ ScopedPtr<csql::ResultCursor> TableScan::openRemotePartition(
 
   return mkScoped(
       new csql::TableExpressionResultCursor(std::move(remote_expr)));
+}
+
+Option<SHA1Hash> TableScan::getCacheKey() const {
+  return cache_key_;
 }
 
 }

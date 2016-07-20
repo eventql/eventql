@@ -36,6 +36,7 @@ public:
   struct PartitionLocation {
     SHA1Hash partition_id;
     Vector<ReplicaRef> servers;
+    Option<SHA1Hash> cache_key;
   };
 
   TableScan(
@@ -45,12 +46,15 @@ public:
     const String& table_name,
     const Vector<PartitionLocation>& partitions,
     RefPtr<csql::SequentialScanNode> seqscan,
+    Option<SHA1Hash> cache_key,
     PartitionMap* partition_map,
     InternalAuth* auth);
 
   ScopedPtr<csql::ResultCursor> execute() override;
 
   size_t getNumColumns() const override;
+
+  Option<SHA1Hash> getCacheKey() const override;
 
 protected:
 
@@ -73,6 +77,7 @@ protected:
   String table_name_;
   Vector<PartitionLocation> partitions_;
   RefPtr<csql::SequentialScanNode> seqscan_;
+  Option<SHA1Hash> cache_key_;
   PartitionMap* partition_map_;
   InternalAuth* auth_;
   ScopedPtr<csql::ResultCursor> cur_cursor_;

@@ -76,5 +76,12 @@ void* Transaction::getUserData() {
   return user_data_;
 }
 
+String Transaction::getCacheDirectory() const {
+  return cache_dir_;
+}
+
+void Transaction::setCacheDirectory(const String& cache_dir) {
+  cache_dir_ = cache_dir;
+}
 
 } // namespace csql
