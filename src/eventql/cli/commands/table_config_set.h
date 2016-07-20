@@ -26,6 +26,7 @@
 #include <eventql/eventql.h>
 #include "eventql/cli/commands/cli_command.h"
 #include "eventql/config/process_config.h"
+#include "eventql/db/TableConfig.pb.h"
 
 namespace eventql {
 namespace cli {
@@ -40,12 +41,14 @@ public:
       OutputStream* stdout_os,
       OutputStream* stderr_os) override;
 
-
   const String& getName() const override;
   const String& getDescription() const override;
   void printHelp(OutputStream* stdout_os) const override;
 
 protected:
+
+  Status setDisableReplication(String value, TableDefinition* tbl_cfg);
+
   static const String kName_;
   static const String kDescription_;
   RefPtr<ProcessConfig> process_cfg_;

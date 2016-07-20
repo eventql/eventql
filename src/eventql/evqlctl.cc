@@ -214,6 +214,10 @@ int main(int argc, const char** argv) {
           stdout_os.get(),
           stderr_os.get());
 
+      if (!rc.isSuccess()) {
+        stderr_os->write(StringUtil::format("ERROR: $0\n", rc.message()));
+      }
+
       return rc.isSuccess() ? 0 : 1;
     }
   }

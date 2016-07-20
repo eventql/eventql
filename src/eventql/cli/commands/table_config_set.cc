@@ -85,7 +85,8 @@ Status TableConfigSet::execute(
 
   try {
     flags.parseArgv(argv);
-    auto pkey = StringUtil::split(flags.getString("primary_key"), ",");
+    auto param = flags.getString("param");
+    auto param_value = flags.getString("value");
 
     ScopedPtr<ConfigDirectory> cdir;
     {
@@ -107,19 +108,43 @@ Status TableConfigSet::execute(
         flags.getString("database"),
         flags.getString("table_name"));
 
+    auto rc = Status::success();
+    if (param == "disable_replication") {
+      rc = setDisableReplication(param_value, &cfg);
+    } else {
+      rc = Status(eIllegalArgumentError, "invalid param");
+    }
+
+    if (!rc.isSuccess()) {
+      return rc;
+    }
+
     iputs("cfg: $0", cfg.DebugString());
     cdir->updateTableConfig(cfg);
     cdir->stop();
   } catch (const Exception& e) {
-    stderr_os->write(StringUtil::format(
-        "$0: $1\n",
-        e.getTypeName(),
-        e.getMessage()));
     return Status(e);
   }
 
   return Status::success();
 }
+
+Status TableConfigSet::setDisableReplication(
+    String value,
+    TableDefinition* tbl_cfg) {
+  StringUtil::toLower(&value);
+
+  if (value == "true") {
+    tbl_cfg->mutable_config()->set_disable_replication(true);
+    return Status::success();
+  } else if (value == "false") {
+    tbl_cfg->mutable_config()->set_disable_replication(false);
+    return Status::success();
+  } else {
+    return Status(eIllegalArgumentError, "invalid value");
+  }
+}
+
 
 const String& TableConfigSet::getName() const {
   return kName_;
