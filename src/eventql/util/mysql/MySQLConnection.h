@@ -30,7 +30,7 @@
 #include <functional>
 //#include <eventql/buildconfig.h>
 #ifdef STX_ENABLE_MYSQL
-#include <mysql/mysql.h>
+#include <mysql.h>
 #endif
 
 namespace util {

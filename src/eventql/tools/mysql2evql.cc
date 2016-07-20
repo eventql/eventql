@@ -36,44 +36,16 @@
 
 using namespace eventql;
 
-void uploadTable(
-    const String& host,
-    const uint64_t port,
-    http::HTTPMessage::HeaderList* auth_headers,
-    Buffer* shard_data) {
-  logDebug(
-      "mysql2evql",
-      "Uploading batch; target=$0:$1 size=$2MB",
-      host,
-      port,
-      shard_data->size() / 1000000.0);
-
-  auto insert_uri = StringUtil::format(
-      "http://$0:$1/api/v1/tables/insert",
-      host,
-      port);
-
-  http::HTTPClient http_client;
-  auto upload_res = http_client.executeRequest(
-      http::HTTPRequest::mkPost(
-          insert_uri,
-          "[" + shard_data->toString() + "]",
-          *auth_headers));
-
-  logDebug("mysql2evql", "Upload finished: $0", insert_uri);
-  if (upload_res.statusCode() != 201) {
-    logError(
-        "mysql2evql", "[FATAL ERROR]: HTTP Status Code $0 $1",
-        upload_res.statusCode(),
-        upload_res.body().toString());
-    RAISE(kRuntimeError, upload_res.body().toString());
-  }
-}
+struct UploadShard {
+  Buffer data;
+  size_t nrows;
+};
 
 void run(const cli::FlagParser& flags) {
   auto source_table = flags.getString("source_table");
   auto destination_table = flags.getString("destination_table");
   auto shard_size = flags.getInt("shard_size");
+  auto num_upload_threads = flags.getInt("upload_threads");
   auto mysql_addr = flags.getString("mysql");
   auto host = flags.getString("host");
   auto port = flags.getInt("port");
@@ -97,16 +69,14 @@ void run(const cli::FlagParser& flags) {
 
   /* status line */
   std::atomic<size_t> num_rows_uploaded(0);
-  util::SimpleRateLimitedFn status_line(
-      kMicrosPerSecond,
-      [&num_rows_uploaded] () {
+  util::SimpleRateLimitedFn status_line(kMicrosPerSecond, [&] () {
     logInfo(
         "mysql2evql",
         "Uploading... $0 rows",
         num_rows_uploaded.load());
   });
 
-  /* upload rows */
+  /* start upload threads */
   http::HTTPMessage::HeaderList auth_headers;
   if (flags.isSet("auth_token")) {
     auth_headers.emplace_back(
@@ -120,18 +90,66 @@ void run(const cli::FlagParser& flags) {
   //              cfg_.getUser() + ":" + cfg_.getPassword().get())));
   }
 
-  Buffer shard_data;
-  size_t num_rows_shard = 0;
-  json::JSONOutputStream json(BufferOutputStream::fromBuffer(&shard_data));
+  bool upload_done = false;
+  thread::Queue<UploadShard> upload_queue(1);
+  Vector<std::thread> upload_threads(num_upload_threads);
+  for (size_t i = 0; i < num_upload_threads; ++i) {
+    upload_threads[i] = std::thread([&] {
+      while (!upload_done) {
+        auto shard = upload_queue.interruptiblePop();
+        if (shard.isEmpty()) {
+          continue;
+        }
+
+       logDebug(
+          "mysql2evql",
+          "Uploading batch; target=$0:$1 size=$2MB",
+          host,
+          port,
+          shard.get().data.size() / 1000000.0);
+
+        try {
+          auto insert_uri = StringUtil::format(
+              "http://$0:$1/api/v1/tables/insert",
+              host,
+              port);
+
+          http::HTTPClient http_client;
+          auto upload_res = http_client.executeRequest(
+              http::HTTPRequest::mkPost(
+                  insert_uri,
+                  "[" + shard.get().data.toString() + "]",
+                  auth_headers));
+
+          if (upload_res.statusCode() != 201) {
+            logError(
+                "mysql2evql", "[FATAL ERROR]: HTTP Status Code $0 $1",
+                upload_res.statusCode(),
+                upload_res.body().toString());
+            RAISE(kRuntimeError, upload_res.body().toString());
+          }
+
+          num_rows_uploaded += shard.get().nrows;
+          status_line.runMaybe();
+        } catch (const std::exception& e) {
+          logError("mysql2evql", e, "error while uploading table data");
+        }
+      }
+    });
+  }
+
+  /* fetch rows from mysql */
+  UploadShard shard;
+  shard.nrows = 0;
+  json::JSONOutputStream json(BufferOutputStream::fromBuffer(&shard.data));
 
   auto get_rows_qry = StringUtil::format("SELECT * FROM `$0`;", source_table);
   mysql_conn->executeQuery(
       get_rows_qry,
       [&] (const Vector<String>& column_values) -> bool {
-    ++num_rows_shard;
-    ++num_rows_uploaded;
+    ++shard.nrows;
 
-    if (num_rows_shard > 1) {
+    if (shard.nrows > 1) {
       json.addComma();
     }
 
@@ -157,18 +175,25 @@ void run(const cli::FlagParser& flags) {
     json.endObject();
     json.endObject();
 
-    if (num_rows_shard == shard_size) {
-      uploadTable(host, port, &auth_headers, &shard_data);
-      shard_data.clear();
-      num_rows_shard = 0;
+    if (shard.nrows == shard_size) {
+      upload_queue.insert(shard, true);
+      shard.data.clear();
+      shard.nrows = 0;
     }
 
     status_line.runMaybe();
     return true;
   });
 
-  if (num_rows_shard > 0) {
-    uploadTable(host, port, &auth_headers, &shard_data);
+  if (shard.nrows > 0) {
+    upload_queue.insert(shard, true);
+  }
+
+  upload_queue.waitUntilEmpty();
+  upload_done = true;
+  upload_queue.wakeup();
+  for (auto& t : upload_threads) {
+    t.join();
   }
 
   status_line.runForce();
@@ -260,6 +285,15 @@ int main(int argc, const char** argv) {
       NULL,
       "128",
       "shard size",
+      "<num>");
+
+  flags.defineFlag(
+      "upload_threads",
+      cli::FlagParser::T_INTEGER,
+      false,
+      NULL,
+      "8",
+      "concurrent uploads",
       "<num>");
 
   try {
