@@ -111,6 +111,10 @@ Status TableConfigSet::execute(
     auto rc = Status::success();
     if (param == "disable_replication") {
       rc = setDisableReplication(param_value, &cfg);
+    } else if (param == "enable_async_split") {
+      rc = setEnableAsyncSplit(param_value, &cfg);
+    } else if (param == "override_partition_split_threshold") {
+      rc = setOverridePartitionSplitThreshold(param_value, &cfg);
     } else {
       rc = Status(eIllegalArgumentError, "invalid param");
     }
@@ -145,6 +149,30 @@ Status TableConfigSet::setDisableReplication(
   }
 }
 
+Status TableConfigSet::setEnableAsyncSplit(
+    String value,
+    TableDefinition* tbl_cfg) {
+  StringUtil::toLower(&value);
+
+  if (value == "true") {
+    tbl_cfg->mutable_config()->set_enable_async_split(true);
+    return Status::success();
+  } else if (value == "false") {
+    tbl_cfg->mutable_config()->set_enable_async_split(false);
+    return Status::success();
+  } else {
+    return Status(eIllegalArgumentError, "invalid value");
+  }
+}
+
+Status TableConfigSet::setOverridePartitionSplitThreshold(
+    String value,
+    TableDefinition* tbl_cfg) {
+  tbl_cfg->mutable_config()->set_override_partition_split_threshold(
+      std::stoull(value));
+
+  return Status::success();
+}
 
 const String& TableConfigSet::getName() const {
   return kName_;

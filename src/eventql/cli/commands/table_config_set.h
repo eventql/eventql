@@ -48,6 +48,10 @@ public:
 protected:
 
   Status setDisableReplication(String value, TableDefinition* tbl_cfg);
+  Status setEnableAsyncSplit(String value, TableDefinition* tbl_cfg);
+  Status setOverridePartitionSplitThreshold(
+      String value,
+      TableDefinition* tbl_cfg);
 
   static const String kName_;
   static const String kDescription_;
