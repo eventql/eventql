@@ -34,6 +34,7 @@
 #include <eventql/db/TSDBTableInfo.h>
 #include <eventql/db/table_service.h>
 #include "eventql/server/sql/table_scan.h"
+#include <eventql/db/metadata_client.h>
 
 namespace eventql {
 class TableService;
@@ -80,6 +81,11 @@ public:
 protected:
 
   csql::TableInfo tableInfoForTable(const TSDBTableInfo& table) const;
+
+  RefPtr<csql::ValueExpressionNode> simplifyWhereExpression(
+      RefPtr<Table> table,
+      const PartitionListResponseEntry& partition,
+      RefPtr<csql::ValueExpressionNode> expr) const;
 
   String tsdb_namespace_;
   PartitionMap* partition_map_;

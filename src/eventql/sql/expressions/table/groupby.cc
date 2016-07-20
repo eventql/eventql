@@ -237,7 +237,8 @@ ScopedPtr<ResultCursor> PartialGroupByExpression::execute() {
     auto cache_file_path_tmp =
         cache_file_path + "." + Random::singleton()->hex64();
 
-    auto cache_file_os = FileOutputStream::openFile(cache_file_path_tmp);
+    auto cache_file_os = BufferedOutputStream::fromStream(
+        FileOutputStream::openFile(cache_file_path_tmp));
 
     cache_file_os->appendUInt8(0x01);
     cache_file_os->appendUInt64(groups_.size());
@@ -254,6 +255,7 @@ ScopedPtr<ResultCursor> PartialGroupByExpression::execute() {
       }
     }
 
+    cache_file_os->flush();
     // ignore errors
     ::rename(cache_file_path_tmp.c_str(), cache_file_path.c_str());
   }

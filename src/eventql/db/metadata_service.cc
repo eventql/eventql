@@ -160,6 +160,11 @@ Status MetadataService::listPartitions(
   for (; iter != end; ++iter) {
     auto e = response->add_partitions();
     e->set_partition_id(iter->partition_id.data(), iter->partition_id.size());
+    e->set_keyrange_begin(iter->begin);
+    if (iter + 1 != file->getPartitionMapEnd()) {
+      e->set_keyrange_end(iter[1].begin);
+    }
+
     for (const auto& s : iter->servers) {
       e->add_servers(s.server_id);
     }

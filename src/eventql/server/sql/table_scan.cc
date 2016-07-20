@@ -88,14 +88,18 @@ bool TableScan::next(csql::SValue* row, size_t row_len) {
 ScopedPtr<csql::ResultCursor> TableScan::openPartition(
     const PartitionLocation& partition) {
   if (partition.servers.empty()) {
-    return openLocalPartition(partition.partition_id);
+    return openLocalPartition(partition.partition_id, partition.qtree);
   } else {
-    return openRemotePartition(partition.partition_id, partition.servers);
+    return openRemotePartition(
+        partition.partition_id,
+        partition.qtree,
+        partition.servers);
   }
 }
 
 ScopedPtr<csql::ResultCursor> TableScan::openLocalPartition(
-    const SHA1Hash& partition_key) {
+    const SHA1Hash& partition_key,
+    RefPtr<csql::SequentialScanNode> qtree) {
   auto partition =  partition_map_->findPartition(
       tsdb_namespace_,
       table_name_,
@@ -118,7 +122,7 @@ ScopedPtr<csql::ResultCursor> TableScan::openLocalPartition(
               &child_execution_context_,
               table.get(),
               partition.get()->getSnapshot(),
-              seqscan_));
+              qtree));
 
     case eventql::TBL_STORAGE_STATIC:
       return mkScoped(
@@ -127,19 +131,20 @@ ScopedPtr<csql::ResultCursor> TableScan::openLocalPartition(
               &child_execution_context_,
               table.get(),
               partition.get()->getSnapshot(),
-              seqscan_));
+              qtree));
   }
 }
 
 ScopedPtr<csql::ResultCursor> TableScan::openRemotePartition(
     const SHA1Hash& partition_key,
+    RefPtr<csql::SequentialScanNode> qtree,
     const Vector<ReplicaRef> servers) {
   auto table_name = StringUtil::format(
       "tsdb://remote/$0/$1",
       URI::urlEncode(table_name_),
       partition_key.toString());
 
-  auto seqscan_copy = seqscan_->template deepCopyAs<csql::SequentialScanNode>();
+  auto seqscan_copy = qtree->template deepCopyAs<csql::SequentialScanNode>();
   seqscan_copy->setTableName(table_name);
 
   auto remote_expr = mkScoped(

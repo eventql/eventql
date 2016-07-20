@@ -74,6 +74,8 @@ message PartitionListRequest {
 message PartitionListResponseEntry {
   required bytes partition_id = 1;
   repeated string servers = 2;
+  optional bytes keyrange_begin = 3;
+  optional bytes keyrange_end = 4;
 };
 
 message PartitionListResponse {

@@ -37,6 +37,7 @@ public:
     SHA1Hash partition_id;
     Vector<ReplicaRef> servers;
     Option<SHA1Hash> cache_key;
+    RefPtr<csql::SequentialScanNode> qtree;
   };
 
   TableScan(
@@ -64,10 +65,12 @@ protected:
       const PartitionLocation& partition);
 
   ScopedPtr<csql::ResultCursor> openLocalPartition(
-      const SHA1Hash& partition_id);
+      const SHA1Hash& partition_id,
+      RefPtr<csql::SequentialScanNode> qtree);
 
   ScopedPtr<csql::ResultCursor> openRemotePartition(
       const SHA1Hash& partition_id,
+      RefPtr<csql::SequentialScanNode> qtree,
       const Vector<ReplicaRef> servers);
 
   csql::Transaction* txn_;

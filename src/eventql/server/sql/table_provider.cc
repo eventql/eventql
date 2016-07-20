@@ -26,8 +26,8 @@
 #include <eventql/util/SHA1.h>
 #include <eventql/server/sql/table_provider.h>
 #include <eventql/db/table_service.h>
-#include <eventql/db/metadata_client.h>
 #include <eventql/sql/CSTableScan.h>
+#include <eventql/sql/qtree/QueryTreeUtil.h>
 #include <eventql/util/json/json.h>
 
 namespace eventql {
@@ -156,6 +156,14 @@ Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
             p.partition_id().data(),
             p.partition_id().size());
 
+        pl.qtree = seqscan->deepCopy().asInstanceOf<csql::SequentialScanNode>();
+
+        if (!pl.qtree->whereExpression().isEmpty()) {
+          auto where_expr = seqscan->whereExpression().get();
+          where_expr = simplifyWhereExpression(table.get(), p, where_expr);
+          pl.qtree->setWhereExpression(where_expr);
+        }
+
         for (const auto& s : p.servers()) {
           auto server_cfg = cdir_->getServerConfig(s);
           if (server_cfg.server_status() != SERVER_UP) {
@@ -173,6 +181,7 @@ Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
   } else {
     TableScan::PartitionLocation pl;
     pl.partition_id = table_ref.partition_key.get();
+    pl.qtree = seqscan;
     partitions.emplace_back(pl);
   }
 
@@ -464,6 +473,59 @@ csql::TableInfo TSDBTableProvider::tableInfoForTable(
 
 const String& TSDBTableProvider::getNamespace() const {
   return tsdb_namespace_;
+}
+
+RefPtr<csql::ValueExpressionNode> TSDBTableProvider::simplifyWhereExpression(
+      RefPtr<Table> table,
+      const PartitionListResponseEntry& partition,
+      RefPtr<csql::ValueExpressionNode> expr) const {
+  auto pkey_col = table->getPartitionKey();
+  auto pkeyspace = table->getKeyspaceType();
+
+  Vector<csql::ScanConstraint> constraints;
+  csql::QueryTreeUtil::findConstraints(expr, &constraints);
+
+  for (const auto& c : constraints) {
+    if (c.column_name != pkey_col) {
+      continue;
+    }
+
+    switch (c.type) {
+
+      case csql::ScanConstraintType::EQUAL_TO:
+      case csql::ScanConstraintType::NOT_EQUAL_TO:
+        continue;
+
+      case csql::ScanConstraintType::LESS_THAN:
+      case csql::ScanConstraintType::LESS_THAN_OR_EQUAL_TO:
+        if (partition.keyrange_end().size() > 0 &&
+            comparePartitionKeys(
+                pkeyspace,
+                encodePartitionKey(pkeyspace, c.value.getString()),
+                partition.keyrange_end()) >= 0) {
+          break;
+        } else {
+          continue;
+        }
+
+      case csql::ScanConstraintType::GREATER_THAN:
+      case csql::ScanConstraintType::GREATER_THAN_OR_EQUAL_TO:
+        if (partition.keyrange_begin().size() > 0 &&
+            comparePartitionKeys(
+                pkeyspace,
+                encodePartitionKey(pkeyspace, c.value.getString()),
+                partition.keyrange_begin()) <= 0) {
+          break;
+        } else {
+          continue;
+        }
+
+    }
+
+    expr = csql::QueryTreeUtil::removeConstraintFromPredicate(expr, c);
+  }
+
+  return expr;
 }
 
 } // namespace csql
