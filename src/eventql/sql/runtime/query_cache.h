@@ -22,55 +22,46 @@
  * code of your own applications
  */
 #pragma once
-#include <eventql/util/stdtypes.h>
-#include <eventql/util/UnixTime.h>
-#include <eventql/sql/csql.h>
-#include <eventql/sql/runtime/tablerepository.h>
-
 #include "eventql/eventql.h"
+#include <eventql/util/stdtypes.h>
+#include <eventql/util/SHA1.h>
+#include <eventql/util/io/inputstream.h>
+#include <eventql/util/io/outputstream.h>
 
 namespace csql {
-class Runtime;
-class SymbolTable;
-class QueryBuilder;
-class TableProvider;
-class TableRepository;
-class QueryCache;
 
-class Transaction {
+class QueryCache {
 public:
+  static const size_t kDefaultAssocCacheSize = 8192;
+  static const size_t kDefaultCacheStoreMinHits = 2;
 
-  static inline sql_txn* get(Transaction* ctx) {
-    return (sql_txn*) ctx;
-  }
+  QueryCache(
+      const String& cache_dir,
+      size_t assoc_cache_size = kDefaultAssocCacheSize,
+      size_t cache_store_minhits = kDefaultCacheStoreMinHits);
 
-  Transaction(Runtime* runtime);
+  void getEntry(
+      const SHA1Hash& key,
+      Function<void (InputStream* is)> fn);
 
-  ~Transaction();
-
-  UnixTime now() const;
-
-  Runtime* getRuntime() const;
-  QueryBuilder* getCompiler() const;
-  SymbolTable* getSymbolTable() const;
-
-  void setTableProvider(RefPtr<TableProvider> provider);
-  RefPtr<TableProvider> getTableProvider() const;
-
-  void setUserData(
-      void* user_data,
-      Function<void (void*)> free_fn = [] (void*) {});
-
-  void* getUserData();
+  void storeEntry(
+      const SHA1Hash& key,
+      Function<void (OutputStream* is)> fn);
 
 protected:
-  Runtime* runtime_;
-  UnixTime now_;
-  RefPtr<TableProvider> table_provider_;
-  void* user_data_;
-  Function<void (void*)> free_user_data_fn_;
 
+  void incrementHitcount(const SHA1Hash& key);
+  size_t getHitcount(const SHA1Hash& key) const;
+
+  struct CacheEntryHitcount {
+    SHA1Hash key;
+    size_t hitcount;
+  };
+
+  String cache_dir_;
+  Vector<CacheEntryHitcount> assoc_cache_;
+  size_t cache_store_minhits_;
+  mutable std::mutex mutex_;
 };
-
 
 } // namespace csql

@@ -101,6 +101,9 @@ public:
   void setScheduler(ScopedPtr<Scheduler> scheduler);
   Scheduler* getScheduler();
 
+  QueryCache* getQueryCache() const;
+  void setQueryCache(QueryCache* cache);
+
 protected:
   thread::ThreadPool tpool_;
   RefPtr<SymbolTable> symbol_table_;
@@ -108,6 +111,7 @@ protected:
   RefPtr<QueryPlanBuilder> query_plan_builder_;
   Option<String> cachedir_;
   ScopedPtr<Scheduler> scheduler_;
+  QueryCache* query_cache_;
 };
 
 }

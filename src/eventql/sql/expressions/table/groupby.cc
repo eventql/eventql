@@ -27,6 +27,7 @@
 #include <eventql/util/logging.h>
 #include <eventql/util/random.h>
 #include <eventql/sql/expressions/table/groupby.h>
+#include <eventql/sql/runtime/query_cache.h>
 #include <eventql/util/freeondestroy.h>
 #include <sys/fcntl.h>
 #include <sys/stat.h>
@@ -154,26 +155,17 @@ PartialGroupByExpression::~PartialGroupByExpression() {
 ScopedPtr<ResultCursor> PartialGroupByExpression::execute() {
   bool from_cache = false;
   auto cache_key = getCacheKey();
-  auto cache_dir = txn_->getCacheDirectory();
+  auto cache = txn_->getRuntime()->getQueryCache();
 
   // read cache
-  if (!cache_dir.empty() && !cache_key.isEmpty()) {
-    auto cache_file_path = FileUtil::joinPaths(
-        cache_dir,
-        cache_key.get().toString() + ".qc");
-
-    int cache_file_fd = open(cache_file_path.c_str(), O_RDONLY);
-    if (cache_file_fd >= 0) {
-      auto cache_file_is = FileInputStream::fromFileDescriptor(
-          cache_file_fd,
-          true);
-
-      cache_file_is->readUInt8();
-      auto num_groups = cache_file_is->readUInt64();
+  if (cache && !cache_key.isEmpty()) {
+    cache->getEntry(cache_key.get(), [this, &from_cache] (InputStream* is) {
+      is->readUInt8();
+      auto num_groups = is->readUInt64();
       for (uint64_t i = 0; i < num_groups; ++i) {
-        auto group_key_len = cache_file_is->readUInt32();
+        auto group_key_len = is->readUInt32();
         Buffer group_key(group_key_len);
-        cache_file_is->readNextBytes(group_key.data(), group_key_len);
+        is->readNextBytes(group_key.data(), group_key_len);
         auto& group = groups_[group_key.toString()];
 
         if (group.size() == 0) {
@@ -187,12 +179,12 @@ ScopedPtr<ResultCursor> PartialGroupByExpression::execute() {
               txn_,
               select_exprs_[i].program(),
               &group[i],
-              cache_file_is.get());
+              is);
         }
       }
 
       from_cache = true;
-    }
+    });
   }
 
   // execute
@@ -230,34 +222,23 @@ ScopedPtr<ResultCursor> PartialGroupByExpression::execute() {
   }
 
   // store cache
-  if (!cache_dir.empty() && !cache_key.isEmpty() && !from_cache) {
-    auto cache_file_path = FileUtil::joinPaths(
-        cache_dir,
-        cache_key.get().toString() + ".qc");
-    auto cache_file_path_tmp =
-        cache_file_path + "." + Random::singleton()->hex64();
+  if (cache && !cache_key.isEmpty() && !from_cache) {
+    cache->storeEntry(cache_key.get(), [this] (OutputStream* os) {
+      os->appendUInt8(0x01);
+      os->appendUInt64(groups_.size());
+      for (const auto& g : groups_) {
+        os->appendUInt32(g.first.size());
+        os->write(g.first.data(), g.first.size());
 
-    auto cache_file_os = BufferedOutputStream::fromStream(
-        FileOutputStream::openFile(cache_file_path_tmp));
-
-    cache_file_os->appendUInt8(0x01);
-    cache_file_os->appendUInt64(groups_.size());
-    for (const auto& g : groups_) {
-      cache_file_os->appendUInt32(g.first.size());
-      cache_file_os->write(g.first.data(), g.first.size());
-
-      for (size_t i = 0; i < select_exprs_.size(); ++i) {
-        VM::saveState(
-            txn_,
-            select_exprs_[i].program(),
-            &g.second[i],
-            cache_file_os.get());
+        for (size_t i = 0; i < select_exprs_.size(); ++i) {
+          VM::saveState(
+              txn_,
+              select_exprs_[i].program(),
+              &g.second[i],
+              os);
+        }
       }
-    }
-
-    cache_file_os->flush();
-    // ignore errors
-    ::rename(cache_file_path_tmp.c_str(), cache_file_path.c_str());
+    });
   }
 
   groups_iter_ = groups_.begin();

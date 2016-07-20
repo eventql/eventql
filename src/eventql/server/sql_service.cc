@@ -47,7 +47,6 @@ SQLService::SQLService(
 ScopedPtr<csql::Transaction> SQLService::startTransaction(Session* session) {
   auto txn = sql_->newTransaction();
   txn->setUserData(session);
-  txn->setCacheDirectory(cache_dir_);
   txn->setTableProvider(
       new TSDBTableProvider(
           session->getEffectiveNamespace(),

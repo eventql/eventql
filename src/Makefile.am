@@ -255,6 +255,8 @@ evql_sql_a_SOURCES = \
     eventql/sql/result_list.h \
     eventql/sql/runtime/LikePattern.cc \
     eventql/sql/runtime/LikePattern.h \
+    eventql/sql/runtime/query_cache.cc \
+    eventql/sql/runtime/query_cache.h \
     eventql/sql/runtime/QueryBuilder.cc \
     eventql/sql/runtime/QueryBuilder.h \
     eventql/sql/runtime/ScratchMemory.cc \
