@@ -177,6 +177,8 @@ bool run(const cli::FlagParser& flags) {
       [&] (const Vector<String>& column_values) -> bool {
     ++shard.nrows;
 
+    logTrace("mysql2evql", "Uploading row: $0", inspect(column_values));
+
     if (shard.nrows > 1) {
       json.addComma();
     }
