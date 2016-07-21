@@ -109,7 +109,7 @@ bool run(const cli::FlagParser& flags) {
         }
 
         bool success = false;
-        for (size_t retry = 0; retry < num_retries; ++retry) {
+        for (size_t retry = 0; retry < max_retries; ++retry) {
           sleep(2 * retry);
         
           logDebug(
