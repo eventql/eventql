@@ -110,7 +110,6 @@ bool run(const cli::FlagParser& flags) {
 
         auto retry = 0;
         size_t status_code;
-
         for (; ;) {
           logDebug(
               "mysql2evql",
@@ -143,12 +142,10 @@ bool run(const cli::FlagParser& flags) {
 
           } catch (const std::exception& e) {
             logError("mysql2evql", e, "error while uploading table data");
-
             /* retry upload kMaxRetries times unless an authentication failure occurs */
             if (++retry < max_retries && status_code != 403) {
               auto base_wait = 2;
-              auto increased_wait = base_wait * (pow(base_wait, retry));
-              sleep(increased_wait);
+              sleep(base_wait * (pow(base_wait, retry));
               continue;
             } else {
               upload_error = true;
