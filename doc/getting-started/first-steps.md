@@ -17,7 +17,7 @@ The commands below will start an evqld process that stores its database in
 `/var/evql/standalone`.
 
     $ mkdir -p /var/evql/standalone
-    $ evqld --cachedir /tmp --config_backend standalone --client_auth_backend trust --listen localhost:9175 --datadir /var/evql/standalone
+    $ evqld --standalone --datadir /var/evql/standalone --listen localhost:9175
 
 The server should now be running and listening on `localhost:9175`. Note that we
 didn't pass the `--daemonize` flag, so the server process is not sent into the
