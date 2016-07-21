@@ -213,11 +213,14 @@ bool run(const cli::FlagParser& flags) {
     return !upload_error;
   });
 
-  if (shard.nrows > 0) {
-    upload_queue.insert(shard, true);
+  if (!upload_error) {
+    if (shard.nrows > 0) {
+      upload_queue.insert(shard, true);
+    }
+
+    upload_queue.waitUntilEmpty();
   }
 
-  upload_queue.waitUntilEmpty();
   upload_done = true;
   upload_queue.wakeup();
   for (auto& t : upload_threads) {
