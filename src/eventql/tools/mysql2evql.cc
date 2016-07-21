@@ -108,9 +108,10 @@ bool run(const cli::FlagParser& flags) {
           continue;
         }
 
-        auto retry = 0;
-        size_t status_code;
-        for (; ;) {
+        bool success = false;
+        for (size_t retry = 0; retry < num_retries; ++retry) {
+          sleep(2 * retry);
+        
           logDebug(
               "mysql2evql",
               "Uploading batch; target=$0:$1 size=$2MB",
@@ -119,7 +120,6 @@ bool run(const cli::FlagParser& flags) {
               shard.get().data.size() / 1000000.0);
 
           try {
-
             http::HTTPClient http_client;
             auto upload_res = http_client.executeRequest(
                 http::HTTPRequest::mkPost(
@@ -133,25 +133,25 @@ bool run(const cli::FlagParser& flags) {
                   "mysql2evql", "[FATAL ERROR]: HTTP Status Code $0 $1",
                   upload_res.statusCode(),
                   upload_res.body().toString());
-              RAISE(kRuntimeError, upload_res.body().toString());
+                  
+              if (status_code == 403) {
+                break
+              } else {
+                continue;
+              }
             }
 
             num_rows_uploaded += shard.get().nrows;
             status_line.runMaybe();
+            success = true;
             break;
-
           } catch (const std::exception& e) {
             logError("mysql2evql", e, "error while uploading table data");
-            /* retry upload kMaxRetries times unless an authentication failure occurs */
-            if (++retry < max_retries && status_code != 403) {
-              auto base_wait = 2;
-              sleep(base_wait * (pow(base_wait, retry));
-              continue;
-            } else {
-              upload_error = true;
-              break;
-            }
           }
+        }
+        
+        if (!sucess) {
+          upload_error = true;
         }
       }
     });
@@ -210,7 +210,7 @@ bool run(const cli::FlagParser& flags) {
     }
 
     status_line.runMaybe();
-    return true;
+    return !upload_error;
   });
 
   if (shard.nrows > 0) {
