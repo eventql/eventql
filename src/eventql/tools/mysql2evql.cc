@@ -110,10 +110,11 @@ bool run(const cli::FlagParser& flags) {
         }
 
         auto retry = 0;
-        auto wait = 1;
         size_t status_code;
 
         for (; ;) {
+          iputs("uploading with retries, retry $0", retry);
+
           logDebug(
               "mysql2evql",
               "Uploading batch; target=$0:$1 size=$2MB",
@@ -148,7 +149,9 @@ bool run(const cli::FlagParser& flags) {
 
             /* retry upload kMaxRetries times unless an authentication failure occurs */
             if (++retry < kMaxRetries && status_code != 403) {
-              sleep(wait);
+              auto base_wait = 2;
+              auto increased_wait = base_wait * (pow(base_wait, retry));
+              sleep(increased_wait);
               continue;
             } else {
               upload_error = true;
@@ -222,7 +225,6 @@ bool run(const cli::FlagParser& flags) {
 
   upload_queue.waitUntilEmpty();
   upload_done = true;
-  iputs("upload done", 1);
   upload_queue.wakeup();
   for (auto& t : upload_threads) {
     t.join();
