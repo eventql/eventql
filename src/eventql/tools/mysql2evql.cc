@@ -33,6 +33,7 @@
 #include "eventql/util/util/SimpleRateLimit.h"
 #include <eventql/util/mysql/MySQL.h>
 #include <eventql/util/mysql/MySQLConnection.h>
+#include <unistd.h>
 
 using namespace eventql;
 
@@ -128,13 +129,12 @@ bool run(const cli::FlagParser& flags) {
                     auth_headers));
 
             if (upload_res.statusCode() != 201) {
-              status_code = upload_res.statusCode();
               logError(
                   "mysql2evql", "[FATAL ERROR]: HTTP Status Code $0 $1",
                   upload_res.statusCode(),
                   upload_res.body().toString());
                   
-              if (status_code == 403) {
+              if (upload_res.statusCode() == 403) {
                 break;
               } else {
                 continue;
@@ -150,7 +150,7 @@ bool run(const cli::FlagParser& flags) {
           }
         }
         
-        if (!sucess) {
+        if (!success) {
           upload_error = true;
         }
       }
