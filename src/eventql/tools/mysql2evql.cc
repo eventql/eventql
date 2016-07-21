@@ -41,8 +41,6 @@ struct UploadShard {
   size_t nrows;
 };
 
-static const size_t kMaxRetries = 5;
-
 bool run(const cli::FlagParser& flags) {
   auto source_table = flags.getString("source_table");
   auto destination_table = flags.getString("destination_table");
@@ -52,6 +50,7 @@ bool run(const cli::FlagParser& flags) {
   auto host = flags.getString("host");
   auto port = flags.getInt("port");
   auto db = flags.getString("database");
+  auto max_retries = flags.getInt("max_retries");
 
   logInfo("mysql2evql", "Connecting to MySQL Server...");
 
@@ -148,7 +147,7 @@ bool run(const cli::FlagParser& flags) {
             logError("mysql2evql", e, "error while uploading table data");
 
             /* retry upload kMaxRetries times unless an authentication failure occurs */
-            if (++retry < kMaxRetries && status_code != 403) {
+            if (++retry < max_retries && status_code != 403) {
               auto base_wait = 2;
               auto increased_wait = base_wait * (pow(base_wait, retry));
               sleep(increased_wait);
@@ -345,6 +344,15 @@ int main(int argc, const char** argv) {
       NULL,
       "8",
       "concurrent uploads",
+      "<num>");
+
+  flags.defineFlag(
+      "max_retries",
+      cli::FlagParser::T_INTEGER,
+      false,
+      NULL,
+      "20",
+      "max number of upload retries",
       "<num>");
 
   try {
