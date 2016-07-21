@@ -33,6 +33,7 @@
 #include "eventql/util/util/SimpleRateLimit.h"
 #include <eventql/util/mysql/MySQL.h>
 #include <eventql/util/mysql/MySQLConnection.h>
+#include <unistd.h>
 
 using namespace eventql;
 
@@ -50,6 +51,7 @@ bool run(const cli::FlagParser& flags) {
   auto host = flags.getString("host");
   auto port = flags.getInt("port");
   auto db = flags.getString("database");
+  auto max_retries = flags.getInt("max_retries");
 
   logInfo("mysql2evql", "Connecting to MySQL Server...");
 
@@ -90,6 +92,11 @@ bool run(const cli::FlagParser& flags) {
   //              cfg_.getUser() + ":" + cfg_.getPassword().get())));
   }
 
+  auto insert_uri = StringUtil::format(
+      "http://$0:$1/api/v1/tables/insert",
+      host,
+      port);
+
   bool upload_done = false;
   bool upload_error = false;
   thread::Queue<UploadShard> upload_queue(1);
@@ -102,39 +109,49 @@ bool run(const cli::FlagParser& flags) {
           continue;
         }
 
-       logDebug(
-          "mysql2evql",
-          "Uploading batch; target=$0:$1 size=$2MB",
-          host,
-          port,
-          shard.get().data.size() / 1000000.0);
-
-        try {
-          auto insert_uri = StringUtil::format(
-              "http://$0:$1/api/v1/tables/insert",
+        bool success = false;
+        for (size_t retry = 0; retry < max_retries; ++retry) {
+          sleep(2 * retry);
+        
+          logDebug(
+              "mysql2evql",
+              "Uploading batch; target=$0:$1 size=$2MB",
               host,
-              port);
+              port,
+              shard.get().data.size() / 1000000.0);
 
-          http::HTTPClient http_client;
-          auto upload_res = http_client.executeRequest(
-              http::HTTPRequest::mkPost(
-                  insert_uri,
-                  "[" + shard.get().data.toString() + "]",
-                  auth_headers));
+          try {
+            http::HTTPClient http_client;
+            auto upload_res = http_client.executeRequest(
+                http::HTTPRequest::mkPost(
+                    insert_uri,
+                    "[" + shard.get().data.toString() + "]",
+                    auth_headers));
 
-          if (upload_res.statusCode() != 201) {
-            logError(
-                "mysql2evql", "[FATAL ERROR]: HTTP Status Code $0 $1",
-                upload_res.statusCode(),
-                upload_res.body().toString());
-            RAISE(kRuntimeError, upload_res.body().toString());
+            if (upload_res.statusCode() != 201) {
+              logError(
+                  "mysql2evql", "[FATAL ERROR]: HTTP Status Code $0 $1",
+                  upload_res.statusCode(),
+                  upload_res.body().toString());
+                  
+              if (upload_res.statusCode() == 403) {
+                break;
+              } else {
+                continue;
+              }
+            }
+
+            num_rows_uploaded += shard.get().nrows;
+            status_line.runMaybe();
+            success = true;
+            break;
+          } catch (const std::exception& e) {
+            logError("mysql2evql", e, "error while uploading table data");
           }
-
-          num_rows_uploaded += shard.get().nrows;
-          status_line.runMaybe();
-        } catch (const std::exception& e) {
+        }
+        
+        if (!success) {
           upload_error = true;
-          logError("mysql2evql", e, "error while uploading table data");
         }
       }
     });
@@ -159,6 +176,8 @@ bool run(const cli::FlagParser& flags) {
       get_rows_qry,
       [&] (const Vector<String>& column_values) -> bool {
     ++shard.nrows;
+
+    logTrace("mysql2evql", "Uploading row: $0", inspect(column_values));
 
     if (shard.nrows > 1) {
       json.addComma();
@@ -193,14 +212,17 @@ bool run(const cli::FlagParser& flags) {
     }
 
     status_line.runMaybe();
-    return true;
+    return !upload_error;
   });
 
-  if (shard.nrows > 0) {
-    upload_queue.insert(shard, true);
+  if (!upload_error) {
+    if (shard.nrows > 0) {
+      upload_queue.insert(shard, true);
+    }
+
+    upload_queue.waitUntilEmpty();
   }
 
-  upload_queue.waitUntilEmpty();
   upload_done = true;
   upload_queue.wakeup();
   for (auto& t : upload_threads) {
@@ -322,6 +344,15 @@ int main(int argc, const char** argv) {
       NULL,
       "8",
       "concurrent uploads",
+      "<num>");
+
+  flags.defineFlag(
+      "max_retries",
+      cli::FlagParser::T_INTEGER,
+      false,
+      NULL,
+      "20",
+      "max number of upload retries",
       "<num>");
 
   try {

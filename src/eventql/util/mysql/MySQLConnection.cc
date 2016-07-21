@@ -331,7 +331,7 @@ std::list<std::vector<std::string>> MySQLConnection::executeQuery(
   if (result == nullptr) {
     RAISE(
         kRuntimeError,
-        "mysql query failed: %s -- error: %s\n",
+        "mysql query failed: %s -- error: %s",
         query.c_str(),
         mysql_error(mysql_));
   }
@@ -341,7 +341,11 @@ std::list<std::vector<std::string>> MySQLConnection::executeQuery(
   while ((row = mysql_fetch_row(result))) {
     auto col_lens = mysql_fetch_lengths(result);
     if (col_lens == nullptr) {
-      break;
+      RAISE(
+          kRuntimeError,
+          "mysql query failed: %s -- error: mysql_fetch_lenghts() failed:  %s",
+          query.c_str(),
+          mysql_error(mysql_));
     }
 
     std::vector<std::string> row_vec;
