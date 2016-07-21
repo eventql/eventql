@@ -135,7 +135,7 @@ bool run(const cli::FlagParser& flags) {
                   upload_res.body().toString());
                   
               if (status_code == 403) {
-                break
+                break;
               } else {
                 continue;
               }
