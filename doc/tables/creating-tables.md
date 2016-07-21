@@ -15,10 +15,10 @@
 
 cql_type must be one of the listed [SQL data types](/documentation/collecting-and-storing/tables/datatypes).
 
-A table must have at least one unique [primary key](/documentation/collecting-and-storing/tables/partitioning) that must not be of type RECORD.
-EventQL treats the first column of the primary key as partition key to distribute the rows among the hosts.
-While EventQL supports STRING, UINT64 and DATETIME columns as partition key, it is strongly recommended to choose a column of type DATETIME as partition key for timeseries data as this allows to efficiently restrict scans on a specific time window.
+A table must have at least one unique primary key whose first column is treated as partition key to distribute the rows among the hosts.
+The partition key can be of type `string`, `uint64` or `datetime`. However, for timeseries data it is strongly recommended to choose a column of type `datetime` as partition key as this allows to efficiently restrict scans on a specific time window.
 
+To learn more about primary keys and understand how to choose one to get the best performance, read on the ["Partitioning" page](../../collecting-and-storing/tables/partitioning).
 
 <br />
 **NOTE:** If you are an EventQL Cloud user you can also create and update table
