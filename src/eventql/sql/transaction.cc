@@ -76,5 +76,4 @@ void* Transaction::getUserData() {
   return user_data_;
 }
 
-
 } // namespace csql

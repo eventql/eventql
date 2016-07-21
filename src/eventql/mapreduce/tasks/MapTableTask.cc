@@ -77,68 +77,43 @@ MapTableTask::MapTableTask(
     constraints.emplace_back(constraint);
   }
 
-  switch (table.get()->partitionerType()) {
-    case TBL_PARTITION_FIXED: {
-      auto partitioner = table.get()->partitioner();
-      auto partitions = partitioner->listPartitions(constraints);
+  auto keyrange = TSDBTableProvider::findKeyRange(
+      table.get()->getPartitionKey(),
+      constraints);
 
-      for (const auto& partition : partitions) {
-        auto shard = mkRef(new MapTableTaskShard());
-        shard->task = this;
-        shard->table_ref = table_ref_;
-        shard->table_ref.partition_key = partition;
-        shard->servers = repl_->replicasFor(
-            shard->table_ref.partition_key.get());
-        addShard(shard.get(), shards);
+  MetadataClient metadata_client(cdir_);
+  PartitionListResponse partition_list;
+  auto rc = metadata_client.listPartitions(
+      session->getEffectiveNamespace(),
+      table_ref_.table_key,
+      keyrange,
+      &partition_list);
+
+  if (!rc.isSuccess()) {
+    RAISEF(kRuntimeError, "metadata lookup failure: $0", rc.message());
+  }
+
+  for (const auto& p : partition_list.partitions()) {
+    Vector<ReplicaRef> replicas;
+    SHA1Hash pid(p.partition_id().data(), p.partition_id().size());
+
+    for (const auto& s : p.servers()) {
+      auto server_cfg = cdir_->getServerConfig(s);
+      if (server_cfg.server_status() != SERVER_UP) {
+        continue;
       }
-      break;
+
+      ReplicaRef rref(SHA1::compute(s), server_cfg.server_addr());
+      rref.name = s;
+      replicas.emplace_back(rref);
     }
 
-    case TBL_PARTITION_STRING:
-    case TBL_PARTITION_UINT64:
-    case TBL_PARTITION_TIMEWINDOW: {
-      auto keyrange = TSDBTableProvider::findKeyRange(
-          table.get()->getPartitionKey(),
-          constraints);
-
-      MetadataClient metadata_client(cdir_);
-      PartitionListResponse partition_list;
-      auto rc = metadata_client.listPartitions(
-          session->getEffectiveNamespace(),
-          table_ref_.table_key,
-          keyrange,
-          &partition_list);
-
-      if (!rc.isSuccess()) {
-        RAISEF(kRuntimeError, "metadata lookup failure: $0", rc.message());
-      }
-
-      for (const auto& p : partition_list.partitions()) {
-        Vector<ReplicaRef> replicas;
-        SHA1Hash pid(p.partition_id().data(), p.partition_id().size());
-
-        for (const auto& s : p.servers()) {
-          auto server_cfg = cdir_->getServerConfig(s);
-          if (server_cfg.server_status() != SERVER_UP) {
-            continue;
-          }
-
-          ReplicaRef rref(SHA1::compute(s), server_cfg.server_addr());
-          rref.name = s;
-          replicas.emplace_back(rref);
-        }
-
-        auto shard = mkRef(new MapTableTaskShard());
-        shard->task = this;
-        shard->table_ref = table_ref_;
-        shard->table_ref.partition_key = pid;
-        shard->servers = replicas;
-        addShard(shard.get(), shards);
-      }
-
-      break;
-    }
-
+    auto shard = mkRef(new MapTableTaskShard());
+    shard->task = this;
+    shard->table_ref = table_ref_;
+    shard->table_ref.partition_key = pid;
+    shard->servers = replicas;
+    addShard(shard.get(), shards);
   }
 }
 

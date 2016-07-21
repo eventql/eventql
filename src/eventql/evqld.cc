@@ -66,6 +66,7 @@
 #include "eventql/server/sql/sql_engine.h"
 #include "eventql/transport/http/default_servlet.h"
 #include "eventql/sql/defaults.h"
+#include "eventql/sql/runtime/query_cache.h"
 #include "eventql/config/config_directory.h"
 #include "eventql/config/config_directory_legacy.h"
 #include "eventql/config/config_directory_zookeeper.h"
@@ -540,6 +541,7 @@ int main(int argc, const char** argv) {
     }
 
     /* sql */
+    csql::QueryCache sql_query_cache(cache_dir);
     RefPtr<csql::Runtime> sql;
     {
       auto symbols = mkRef(new csql::SymbolTable());
@@ -563,6 +565,7 @@ int main(int argc, const char** argv) {
 
       sql->setCacheDir(cache_dir);
       sql->symbols()->registerFunction("z1_version", &z1VersionExpr);
+      sql->setQueryCache(&sql_query_cache);
     }
 
     /* more services */
@@ -572,7 +575,8 @@ int main(int argc, const char** argv) {
         config_dir.get(),
         repl_scheme.get(),
         internal_auth.get(),
-        &table_service);
+        &table_service,
+        cache_dir);
 
     eventql::LogfileService logfile_service(
         config_dir.get(),

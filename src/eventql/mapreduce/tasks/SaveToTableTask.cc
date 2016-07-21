@@ -23,7 +23,6 @@
  */
 #include "eventql/mapreduce/tasks/SaveToTableTask.h"
 #include "eventql/mapreduce/MapReduceScheduler.h"
-#include "eventql/db/FixedShardPartitioner.h"
 #include "eventql/io/sstable/sstablereader.h"
 #include <eventql/util/http/httpclient.h>
 

@@ -32,7 +32,6 @@
 #include <eventql/db/RecordEnvelope.pb.h>
 #include <eventql/db/table_service.h>
 #include <eventql/db/partition_map.h>
-#include <eventql/db/TimeWindowPartitioner.h>
 #include <eventql/sql/transaction.h>
 #include <eventql/auth/internal_auth.h>
 
@@ -49,7 +48,8 @@ public:
       ConfigDirectory* cdir,
       ReplicationScheme* repl,
       InternalAuth* auth,
-      TableService* table_service);
+      TableService* table_service,
+      const String& cache_dir);
 
   ScopedPtr<csql::Transaction> startTransaction(Session* session);
 
@@ -60,6 +60,7 @@ protected:
   ReplicationScheme* repl_;
   InternalAuth* auth_;
   TableService* table_service_;
+  String cache_dir_;
 };
 
 } // namespace eventql

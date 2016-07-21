@@ -65,17 +65,6 @@ protected:
       http::HTTPResponse* res,
       URI* uri);
 
-  void streamPartition(
-      const http::HTTPRequest* req,
-      http::HTTPResponse* res,
-      RefPtr<http::HTTPResponseStream> res_stream,
-      URI* uri);
-
-  void updateCSTable(
-      const URI& uri,
-      http::HTTPRequestStream* req_stream,
-      http::HTTPResponse* res);
-
   void createMetadataFile(
       const URI& uri,
       const http::HTTPRequest* req,

@@ -40,6 +40,10 @@ public:
 
   virtual size_t getNumColumns() const = 0;
 
+  virtual Option<SHA1Hash> getCacheKey() const {
+    return None<SHA1Hash>();
+  }
+
 };
 
 }

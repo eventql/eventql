@@ -42,8 +42,6 @@
 #include "eventql/server/sql/codec/json_codec.h"
 #include "eventql/server/sql/codec/json_sse_codec.h"
 #include "eventql/server/sql/codec/binary_codec.h"
-#include "eventql/db/TimeWindowPartitioner.h"
-#include "eventql/db/FixedShardPartitioner.h"
 #include "eventql/transport/http/http_auth.h"
 #include <eventql/io/cstable/cstable_writer.h>
 #include <eventql/io/cstable/RecordShredder.h>
@@ -206,13 +204,6 @@ void AnalyticsServlet::handle(
     catchAndReturnErrors(&res, [this, &session, &req, &res] {
       createTable(session.get(), &req, &res);
     });
-    res_stream->writeResponse(res);
-    return;
-  }
-
-  if (uri.path() == "/api/v1/tables/upload_table") {
-    expectHTTPPost(req);
-    uploadTable(uri, session.get(), req_stream.get(), &res);
     res_stream->writeResponse(res);
     return;
   }
@@ -797,93 +788,6 @@ void AnalyticsServlet::insertIntoTable(
           data,
           data + data->size);
     }
-  }
-
-  res->setStatus(http::kStatusCreated);
-}
-
-void AnalyticsServlet::uploadTable(
-    const URI& uri,
-    Session* session,
-    http::HTTPRequestStream* req_stream,
-    http::HTTPResponse* res) {
-  const auto& params = uri.queryParams();
-
-  String table_name;
-  if (!URI::getParam(params, "table", &table_name)) {
-    res->setStatus(http::kStatusBadRequest);
-    res->addBody("error: missing ?table=... parameter");
-    return;
-  }
-
-  String shard_str;
-  if (!URI::getParam(params, "shard", &shard_str)) {
-    res->setStatus(http::kStatusBadRequest);
-    res->addBody("error: missing ?shard=... parameter");
-    return;
-  }
-
-  auto shard = std::stoull(shard_str);
-  auto schema = tsdb_->tableSchema(session->getEffectiveNamespace(), table_name);
-  if (schema.isEmpty()) {
-    res->setStatus(http::kStatusNotFound);
-    res->addBody("error: table not found");
-    return;
-  }
-
-  auto tmpfile_path = FileUtil::joinPaths(
-      cachedir_,
-      StringUtil::format("upload_$0.tmp", Random::singleton()->hex128()));
-
-  auto partition_key = eventql::FixedShardPartitioner::partitionKeyFor(
-      table_name,
-      shard);
-
-  try {
-    auto cstable = cstable::CSTableWriter::createFile(
-        tmpfile_path + ".cst",
-        cstable::BinaryFormatVersion::v0_1_0,
-        cstable::TableSchema::fromProtobuf(*schema.get()));
-
-    cstable::RecordShredder shredder(cstable.get());
-
-    {
-      auto tmpfile = File::openFile(
-          tmpfile_path,
-          File::O_CREATE | File::O_READ | File::O_WRITE | File::O_AUTODELETE);
-
-      size_t body_size = 0;
-      req_stream->readBody([&tmpfile, &body_size] (const void* data, size_t size) {
-        tmpfile.write(data, size);
-        body_size += size;
-      });
-
-      tmpfile.seekTo(0);
-
-      logDebug(
-          "analyticsd",
-          "Uploading static table; customer=$0, table=$1, shard=$2, size=$3MB",
-          session->getEffectiveNamespace(),
-          table_name,
-          shard,
-          body_size / 1000000.0);
-
-      BinaryCSVInputStream csv(FileInputStream::fromFile(std::move(tmpfile)));
-      shredder.addRecordsFromCSV(&csv);
-      cstable->commit();
-    }
-
-    tsdb_->updatePartitionCSTable(
-        session->getEffectiveNamespace(),
-        table_name,
-        partition_key,
-        tmpfile_path + ".cst",
-        WallClock::unixMicros());
-  } catch (const StandardException& e) {
-    logError("analyticsd", e, "error");
-    res->setStatus(http::kStatusInternalServerError);
-    res->addBody(StringUtil::format("error: $0", e.what()));
-    return;
   }
 
   res->setStatus(http::kStatusCreated);

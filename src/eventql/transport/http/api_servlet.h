@@ -129,12 +129,6 @@ protected:
       const http::HTTPRequest* req,
       http::HTTPResponse* res);
 
-  void uploadTable(
-      const URI& uri,
-      Session* session,
-      http::HTTPRequestStream* req_stream,
-      http::HTTPResponse* res);
-
   void executeSQL(
       Session* session,
       const http::HTTPRequest* req,

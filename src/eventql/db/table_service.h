@@ -37,7 +37,6 @@
 #include <eventql/db/PartitionInfo.pb.h>
 #include <eventql/db/RecordEnvelope.pb.h>
 #include <eventql/db/partition_map.h>
-#include <eventql/db/TimeWindowPartitioner.h>
 #include <eventql/db/shredded_record.h>
 #include <eventql/config/config_directory.h>
 
@@ -131,27 +130,6 @@ public:
       const String& tsdb_namespace,
       const String& table_name,
       const SHA1Hash& partition_key);
-
-  void updatePartitionCSTable(
-      const String& tsdb_namespace,
-      const String& table_name,
-      const SHA1Hash& partition_key,
-      const String& tmpfile_path,
-      uint64_t version);
-
-  void fetchPartition(
-      const String& tsdb_namespace,
-      const String& table_name,
-      const SHA1Hash& partition_key,
-      Function<void (const Buffer& record)> fn);
-
-  void fetchPartitionWithSampling(
-      const String& tsdb_namespace,
-      const String& table_name,
-      const SHA1Hash& partition_key,
-      size_t sample_modulo,
-      size_t sample_index,
-      Function<void (const Buffer& record)> fn);
 
   Option<RefPtr<msg::MessageSchema>> tableSchema(
       const String& tsdb_namespace,

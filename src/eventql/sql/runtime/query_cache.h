@@ -21,22 +21,47 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#ifndef _FNORD_LOGTABLE_TABLECHUNKSUMMARY_H
-#define _FNORD_LOGTABLE_TABLECHUNKSUMMARY_H
+#pragma once
+#include "eventql/eventql.h"
 #include <eventql/util/stdtypes.h>
-#include <eventql/util/autoref.h>
-#include <eventql/util/random.h>
-#include <eventql/util/io/FileLock.h>
-#include <eventql/util/protobuf/MessageSchema.h>
-#include <eventql/util/protobuf/MessageObject.h>
+#include <eventql/util/SHA1.h>
+#include <eventql/util/io/inputstream.h>
+#include <eventql/util/io/outputstream.h>
 
-namespace util {
-namespace logtable {
+namespace csql {
 
-enum class TableChunkSummaryType : uint16_t {
-  UINT_MINMAX
+class QueryCache {
+public:
+  static const size_t kDefaultAssocCacheSize = 8192;
+  static const size_t kDefaultCacheStoreMinHits = 2;
+
+  QueryCache(
+      const String& cache_dir,
+      size_t assoc_cache_size = kDefaultAssocCacheSize,
+      size_t cache_store_minhits = kDefaultCacheStoreMinHits);
+
+  void getEntry(
+      const SHA1Hash& key,
+      Function<void (InputStream* is)> fn);
+
+  void storeEntry(
+      const SHA1Hash& key,
+      Function<void (OutputStream* is)> fn);
+
+protected:
+
+  void incrementHitcount(const SHA1Hash& key);
+  size_t getHitcount(const SHA1Hash& key) const;
+
+  struct CacheEntryHitcount {
+    SHA1Hash key;
+    size_t hitcount;
+  };
+
+  String cache_dir_;
+  Vector<CacheEntryHitcount> assoc_cache_;
+  size_t cache_store_minhits_;
+  mutable std::mutex mutex_;
 };
 
-}
-}
-#endif
+} // namespace csql

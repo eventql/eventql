@@ -29,7 +29,6 @@
 #include <eventql/util/wallclock.h>
 #include <eventql/io/sstable/sstablereader.h>
 #include <eventql/db/table_service.h>
-#include <eventql/db/LogPartitionReader.h>
 #include <eventql/db/PartitionState.pb.h>
 #include "eventql/db/metadata_coordinator.h"
 #include "eventql/db/metadata_file.h"
@@ -631,66 +630,6 @@ void TableService::commitPartition(
     change->partition = partition;
     pmap_->publishPartitionChange(change);
   }
-}
-
-void TableService::updatePartitionCSTable(
-    const String& tsdb_namespace,
-    const String& table_name,
-    const SHA1Hash& partition_key,
-    const String& tmpfile_path,
-    uint64_t version) {
-  auto partition = pmap_->findOrCreatePartition(
-      tsdb_namespace,
-      table_name,
-      partition_key);
-
-  auto writer = partition->getWriter();
-  writer->updateCSTable(tmpfile_path, version);
-
-  auto change = mkRef(new PartitionChangeNotification());
-  change->partition = partition;
-  pmap_->publishPartitionChange(change);
-}
-
-void TableService::fetchPartition(
-    const String& tsdb_namespace,
-    const String& table_name,
-    const SHA1Hash& partition_key,
-    Function<void (const Buffer& record)> fn) {
-  fetchPartitionWithSampling(
-      tsdb_namespace,
-      table_name,
-      partition_key,
-      0,
-      0,
-      fn);
-}
-
-void TableService::fetchPartitionWithSampling(
-    const String& tsdb_namespace,
-    const String& table_name,
-    const SHA1Hash& partition_key,
-    size_t sample_modulo,
-    size_t sample_index,
-    Function<void (const Buffer& record)> fn) {
-  auto partition = pmap_->findPartition(
-      tsdb_namespace,
-      table_name,
-      partition_key);
-
-  if (partition.isEmpty()) {
-    return;
-  }
-
-  auto reader = partition.get()->getReader();
-  auto log_reader = dynamic_cast<LogPartitionReader*>(reader.get());
-  if (!log_reader) {
-    RAISE(
-        kRuntimeError,
-        "raw record fetches are supported only on LOG partitions");
-  }
-
-  log_reader->fetchRecordsWithSampling(sample_modulo, sample_index, fn);
 }
 
 Option<RefPtr<msg::MessageSchema>> TableService::tableSchema(

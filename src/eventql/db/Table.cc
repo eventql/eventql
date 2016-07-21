@@ -22,9 +22,6 @@
  * code of your own applications
  */
 #include <eventql/db/Table.h>
-#include <eventql/db/TimeWindowPartitioner.h>
-#include <eventql/db/FixedShardPartitioner.h>
-
 #include "eventql/eventql.h"
 
 namespace eventql {
@@ -32,7 +29,7 @@ namespace eventql {
 Table::Table(
     const TableDefinition& config) :
     config_(config) {
-  loadConfig();
+  schema_ = msg::MessageSchema::decode(config_.config().schema());
 }
 
 String Table::name() const {
@@ -109,17 +106,6 @@ TablePartitionerType Table::partitionerType() const {
   return config_.config().partitioner();
 }
 
-RefPtr<TablePartitioner> Table::partitioner() const {
-  std::unique_lock<std::mutex> lk(mutex_);
-  if (!partitioner_.get()) {
-    RAISE(
-        kIllegalArgumentError,
-        "Table::partitioner() called with partitioner_type != FIXED");
-  }
-
-  return partitioner_;
-}
-
 Vector<String> Table::getPrimaryKey() const {
   std::unique_lock<std::mutex> lk(mutex_);
   return Vector<String>(
@@ -140,41 +126,7 @@ MetadataTransaction Table::getLastMetadataTransaction() const {
 void Table::updateConfig(TableDefinition new_config) {
   std::unique_lock<std::mutex> lk(mutex_);
   config_ = new_config;
-  loadConfig();
-}
-
-void Table::loadConfig() {
   schema_ = msg::MessageSchema::decode(config_.config().schema());
-
-  switch (config_.config().partitioner()) {
-
-    case TBL_PARTITION_TIMEWINDOW:
-      if (config_.config().has_time_window_partitioner_config()) {
-        partitioner_ = RefPtr<TablePartitioner>(
-            new TimeWindowPartitioner(
-                config_.table_name(),
-                config_.config().partition_key(),
-                config_.config().time_window_partitioner_config()));
-      } else {
-        partitioner_ = RefPtr<TablePartitioner>(
-            new TimeWindowPartitioner(
-                config_.table_name(),
-                config_.config().partition_key()));
-      }
-      break;
-
-    case TBL_PARTITION_UINT64:
-    case TBL_PARTITION_STRING:
-      break;
-
-    case TBL_PARTITION_FIXED:
-      partitioner_ = RefPtr<TablePartitioner>(
-          new FixedShardPartitioner(
-              config_.table_name(),
-              config_.config().num_shards()));
-      break;
-
-  }
 }
 
 }

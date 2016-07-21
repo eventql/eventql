@@ -35,6 +35,7 @@ class SymbolTable;
 class QueryBuilder;
 class TableProvider;
 class TableRepository;
+class QueryCache;
 
 class Transaction {
 public:
@@ -68,6 +69,7 @@ protected:
   RefPtr<TableProvider> table_provider_;
   void* user_data_;
   Function<void (void*)> free_user_data_fn_;
+
 };
 
 
