@@ -568,6 +568,13 @@
           visible_in_toc: true
           source: "/api/evqlctl.md"
         -
+          url: "/api/mysql2evql"
+          title: "mysql2evql Reference"
+          type: page
+          visible_in_menu: true
+          visible_in_toc: true
+          source: "/api/mysql2evql.md"
+        -
           url: "/api/http"
           title: "HTTP API"
           type: page
