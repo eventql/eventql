@@ -598,15 +598,32 @@ int main(int argc, const char** argv) {
     config_dir->setTableConfigChangeCallback(
         [&partition_map, &tsdb_replication] (const TableDefinition& tbl) {
       Set<SHA1Hash> affected_partitions;
-      partition_map.configureTable(tbl, &affected_partitions);
+      try {
+        partition_map.configureTable(tbl, &affected_partitions);
+      } catch (const std::exception& e) {
+        logError(
+            "evqld",
+            "error while applying table config change to $0/$1",
+            tbl.customer(),
+            tbl.table_name());
+      }
 
       for (const auto& partition_id : affected_partitions) {
-        auto partition = partition_map.findPartition(
-            tbl.customer(),
-            tbl.table_name(),
-            partition_id);
+        try {
+          auto partition = partition_map.findPartition(
+              tbl.customer(),
+              tbl.table_name(),
+              partition_id);
 
-        tsdb_replication.enqueuePartition(partition.get(), 0);
+          tsdb_replication.enqueuePartition(partition.get(), 0);
+        } catch (const std::exception& e) {
+          logError(
+              "evqld",
+              "error while applying table config change to $0/$1/$2",
+              tbl.customer(),
+              tbl.table_name(),
+              partition_id.toString());
+        }
       }
     });
 
