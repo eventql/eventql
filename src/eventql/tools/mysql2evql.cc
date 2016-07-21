@@ -112,8 +112,6 @@ bool run(const cli::FlagParser& flags) {
         size_t status_code;
 
         for (; ;) {
-          iputs("uploading with retries, retry $0", retry);
-
           logDebug(
               "mysql2evql",
               "Uploading batch; target=$0:$1 size=$2MB",
