@@ -35,21 +35,21 @@ pages.
 ### Step 2: Create a new table
 
 Similar to most SQL databases, the core units of data storage in EventQL are tables
-and rows (row are also referred to as records or events). For our example, we'll
+and rows (rows are also referred to as records or events). For our example, we'll
 create a simple table that stores a http server access log.
 
 Our table will be called `access_log` and will contain three columns: `time`,
 `session_id` and `url`. We will use the combination of time and session_id
 as our primary key.
 
-To choose a good primary key and get the best performnace, it is important
+To choose a good primary key and get the best performance, it is important
 to understand how data is partitioned and distributed across machines. Read more
 about primary keys on the ["Partitioning" page](../../collecting-and-storing/tables/partitioning).
 
 Copy the command below into the SQL shell that we started in the previous step
 to create the table:
 
-    CREATE TABLE test (
+    CREATE TABLE access_log (
       time        DATETIME,
       session_id  STRING,
       url         STRING,
