@@ -100,9 +100,9 @@ bool run(const cli::FlagParser& flags) {
   bool upload_done = false;
   bool upload_error = false;
   thread::Queue<UploadShard> upload_queue(1);
-  Vector<std::thread> upload_threads(num_upload_threads);
+  List<std::thread> upload_threads;
   for (size_t i = 0; i < num_upload_threads; ++i) {
-    upload_threads[i] = std::thread([&] {
+    auto t = std::thread([&] {
       while (!upload_done) {
         auto shard = upload_queue.interruptiblePop();
         if (shard.isEmpty()) {
@@ -112,7 +112,7 @@ bool run(const cli::FlagParser& flags) {
         bool success = false;
         for (size_t retry = 0; retry < max_retries; ++retry) {
           sleep(2 * retry);
-        
+
           logDebug(
               "mysql2evql",
               "Uploading batch; target=$0:$1 size=$2MB",
@@ -133,7 +133,7 @@ bool run(const cli::FlagParser& flags) {
                   "mysql2evql", "[FATAL ERROR]: HTTP Status Code $0 $1",
                   upload_res.statusCode(),
                   upload_res.body().toString());
-                  
+
               if (upload_res.statusCode() == 403) {
                 break;
               } else {
@@ -149,12 +149,14 @@ bool run(const cli::FlagParser& flags) {
             logError("mysql2evql", e, "error while uploading table data");
           }
         }
-        
+
         if (!success) {
           upload_error = true;
         }
       }
     });
+
+    upload_threads.emplace_back(std::move(t));
   }
 
   /* fetch rows from mysql */
