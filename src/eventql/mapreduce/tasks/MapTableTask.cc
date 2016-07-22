@@ -69,13 +69,6 @@ MapTableTask::MapTableTask(
     kr.end = encodePartitionKey(keyspace, table_ref_.keyrange_limit.get());
   }
 
-  logInfo(
-      "evqld", "run map task: $0/$1 -- $2/$3",
-      inspect(table_ref.keyrange_begin),
-      inspect(table_ref.keyrange_limit),
-      inspect(kr.begin),
-      inspect(kr.end));
-
   MetadataClient metadata_client(cdir_);
   PartitionListResponse partition_list;
   auto rc = metadata_client.listPartitions(
