@@ -344,8 +344,10 @@ bool LSMPartitionWriter::compact(bool force /* = false */) {
   {
     Set<String> delete_filenames_full;
     for (const auto& f : delete_filenames) {
-      delete_filenames_full.insert(FileUtil::joinPaths(snap->rel_path, f));
-      idx_cache_->flush(FileUtil::joinPaths(snap->rel_path, f));
+      auto fpath = FileUtil::joinPaths(snap->rel_path, f);
+      delete_filenames_full.insert(fpath + ".cst");
+      delete_filenames_full.insert(fpath + ".idx");
+      idx_cache_->flush(fpath);
     }
 
     file_tracker_->deleteFiles(delete_filenames_full);
