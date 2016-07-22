@@ -51,7 +51,7 @@ public:
   bool needsCommit();
   bool needsUrgentCommit();
 
-  bool compact() override;
+  bool compact(bool force = false) override;
   bool needsCompaction() override;
   bool needsUrgentCompaction();
 
