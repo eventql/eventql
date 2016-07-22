@@ -282,8 +282,8 @@ void Scheduler::rewriteTableTimeSuffix(RefPtr<csql::QueryTreeNode> node) {
   auto seqscan = dynamic_cast<csql::SequentialScanNode*>(node.get());
   if (seqscan) {
     auto table_ref = TSDBTableRef::parse(seqscan->tableName());
-    if (!table_ref.timerange_begin.isEmpty() &&
-        !table_ref.timerange_limit.isEmpty()) {
+    if (!table_ref.keyrange_begin.isEmpty() &&
+        !table_ref.keyrange_limit.isEmpty()) {
       seqscan->setTableName(table_ref.table_key);
 
       auto pred = mkRef(
@@ -296,7 +296,7 @@ void Scheduler::rewriteTableTimeSuffix(RefPtr<csql::QueryTreeNode> node) {
                       new csql::ColumnReferenceNode("time"),
                       new csql::LiteralExpressionNode(
                           csql::SValue(csql::SValue::IntegerType(
-                              table_ref.timerange_begin.get().unixMicros())))
+                              std::stoull(table_ref.keyrange_begin.get()))))
                     }),
                 new csql::CallExpressionNode(
                     "lte",
@@ -304,7 +304,7 @@ void Scheduler::rewriteTableTimeSuffix(RefPtr<csql::QueryTreeNode> node) {
                       new csql::ColumnReferenceNode("time"),
                       new csql::LiteralExpressionNode(
                           csql::SValue(csql::SValue::IntegerType(
-                              table_ref.timerange_limit.get().unixMicros())))
+                              std::stoull(table_ref.keyrange_limit.get()))))
                     })
               }));
 

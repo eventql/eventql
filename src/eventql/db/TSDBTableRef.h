@@ -37,8 +37,8 @@ struct TSDBTableRef {
   String table_key;
   Option<String> host;
   Option<SHA1Hash> partition_key;
-  Option<UnixTime> timerange_begin;
-  Option<UnixTime> timerange_limit;
+  Option<String> keyrange_begin;
+  Option<String> keyrange_limit;
 };
 
 } // namespace csql

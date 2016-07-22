@@ -109,20 +109,26 @@ var EVQL = (function(global) {
 
     var find_dependecies = function(job) {
       if (job.sources) {
-        job.sources.forEach(function(job_id) {
-          if (dependencies_set[job_id]) {
+        if (!Array.isArray(job.sources)) {
+          throw "sources must be an array";
+        }
+
+        for (var i = 0; i < job.sources.length; ++i) {
+          var djob_id = job.sources[i];
+
+          if (dependencies_set[djob_id]) {
             return;
           }
 
-          var job = jobs[job_id];
-          if (!job) {
-            throw "invalid job id: " + job_id;
+          var djob = jobs[djob_id];
+          if (!djob) {
+            throw "invalid job id: " + djob_id;
           }
 
-          dependencies_set[job_id] = true;
-          dependencies.push(job);
-          find_dependecies(job);
-        });
+          dependencies_set[djob_id] = true;
+          dependencies.push(djob);
+          find_dependecies(djob);
+        }
       }
     };
 
@@ -171,6 +177,10 @@ var EVQL = (function(global) {
   };
 
   api.mapTable = function(opts) {
+    if (!opts["table"]) {
+      throw "missing parameter: table";
+    }
+
     autoBroadcast();
     var job_id = mkJobID();
 
@@ -178,8 +188,8 @@ var EVQL = (function(global) {
       id: job_id,
       op: "map_table",
       table_name: opts["table"],
-      from: opts["from"],
-      until: opts["until"],
+      keyrange_begin: opts["begin"] || opts["from"],
+      keyrange_limit: opts["end"] || opts["until"],
       map_fn: String(opts["map_fn"]),
       globals: __encode_js(bcastdata),
       params: __encode_js(opts["params"] || {}),
@@ -190,6 +200,22 @@ var EVQL = (function(global) {
   };
 
   api.reduce = function(opts) {
+    if (!opts["sources"]) {
+      throw "missing parameter: sources";
+    }
+
+    if (!Array.isArray(opts["sources"])) {
+      throw "sources must be an array";
+    }
+
+    if (!opts["reduce_fn"]) {
+      throw "missing parameter: reduce_fn";
+    }
+
+    if (!opts["shards"]) {
+      throw "missing parameter: shards";
+    }
+
     autoBroadcast();
     var job_id = mkJobID();
 
@@ -207,6 +233,10 @@ var EVQL = (function(global) {
   };
 
   api.downloadResults = function(sources, serialize_fn) {
+    if (!Array.isArray(sources)) {
+      throw "sources must be an array";
+    }
+
     if (!serialize_fn) {
       serialize_fn = "";
     }
@@ -222,20 +252,22 @@ var EVQL = (function(global) {
   };
 
   api.saveToTable = function(opts) {
+    if (!opts["table"]) {
+      throw "missing parameter: table";
+    }
+
+    if (!opts["sources"]) {
+      throw "missing parameter: sources";
+    }
+
+    if (!Array.isArray(opts["sources"])) {
+      throw "sources must be an array";
+    }
+
     executeJob({
       id: mkJobID(),
       op: "save_to_table",
       table_name: opts["table"],
-      sources: opts["sources"]
-    });
-  };
-
-  api.saveToTablePartition = function(opts) {
-    executeJob({
-      id: mkJobID(),
-      op: "save_to_table_partition",
-      table_name: opts["table"],
-      partition_key: opts["partition"],
       sources: opts["sources"]
     });
   };

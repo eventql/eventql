@@ -72,8 +72,8 @@ TSDBTableRef TSDBTableRef::parse(const String& table_ref) {
       auto timespec = suffix.substr(last_prefix.size());
       auto offset = Human::parseDuration(timespec);
       if (!offset.isEmpty()) {
-        ref.timerange_begin = Some(UnixTime(now - offset.get().microseconds()));
-        ref.timerange_limit = Some(UnixTime(now));
+        ref.keyrange_begin = Some(StringUtil::toString(now - offset.get().microseconds()));
+        ref.keyrange_limit = Some(StringUtil::toString(now));
         ref.table_key = ref.table_key.substr(
             0,
             ref.table_key.size() - suffix.size() - 1);
