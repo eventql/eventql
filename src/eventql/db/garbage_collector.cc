@@ -70,14 +70,14 @@ GarbageCollectorMode garbageCollectorModeFromString(String str) {
 GarbageCollector::GarbageCollector(
     GarbageCollectorMode mode,
     FileTracker* file_tracker,
-    const String& base_dir,
+    const String& data_dir,
     const String& trash_dir,
     const String& cache_dir,
     uint64_t cache_dir_maxsize /* = kDefaultCachedirMaxSize */,
     size_t gc_interval /* = kDefaultGCInterval */) :
     mode_(mode),
     file_tracker_(file_tracker),
-    base_dir_(base_dir),
+    data_dir_(data_dir),
     trash_dir_(trash_dir),
     cache_dir_(cache_dir),
     cache_dir_maxsize_(cache_dir_maxsize),
@@ -156,8 +156,8 @@ void GarbageCollector::emptyTrash() {
 
       if (StringUtil::beginsWith(filename, "//")) {
         filename = filename.substr(2);
-      } else if (StringUtil::beginsWith(filename, base_dir_)) {
-        filename = filename.substr(base_dir_.size());
+      } else if (StringUtil::beginsWith(filename, data_dir_)) {
+        filename = filename.substr(data_dir_.size());
       } else {
         logWarning("evqld", "Invalid trash link: $0", filename);
         continue;
@@ -168,8 +168,7 @@ void GarbageCollector::emptyTrash() {
         break;
       }
 
-      auto filename_full = FileUtil::joinPaths(base_dir_, filename);
-
+      auto filename_full = FileUtil::joinPaths(data_dir_, filename);
       if (!FileUtil::exists(filename_full)) {
         continue;
       }

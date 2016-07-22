@@ -426,7 +426,7 @@ int main(int argc, const char** argv) {
   GarbageCollector gc(
       gc_mode,
       &file_tracker,
-      server_datadir,
+      tsdb_dir,
       trash_dir,
       cache_dir);
 

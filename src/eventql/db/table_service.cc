@@ -608,7 +608,7 @@ void TableService::compactPartition(
       partition_key);
 
   auto writer = partition->getWriter();
-  if (writer->compact()) {
+  if (writer->compact(true)) {
     auto change = mkRef(new PartitionChangeNotification());
     change->partition = partition;
     pmap_->publishPartitionChange(change);

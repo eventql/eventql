@@ -47,7 +47,7 @@ public:
   GarbageCollector(
       GarbageCollectorMode mode,
       FileTracker* file_tracker,
-      const String& base_dir,
+      const String& data_dir,
       const String& trash_dir,
       const String& cache_dir,
       uint64_t cache_dir_maxsize = kDefaultCachedirMaxSize,
@@ -67,7 +67,7 @@ protected:
 
   GarbageCollectorMode mode_;
   FileTracker* file_tracker_;
-  String base_dir_;
+  String data_dir_;
   String trash_dir_;
   String cache_dir_;
   uint64_t cache_dir_maxsize_;
