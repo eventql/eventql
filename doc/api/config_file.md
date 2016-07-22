@@ -7,23 +7,14 @@ To learn more about the particular program options, please refer to the [evql](.
 
 Any config file option can be overwritten on the command line by providing the equivalent key value pair.
 
+####File Format
+EventQL uses the INI file format.
+
+    [evql]
+    host = prod.example.com ; execute queries on this server
 
 
-
-
-
-- /etc/{process}.conf oder ~/.evqlrc oder file path bei -c angeben, dann wird config file aus diesem file gelesen
-
-
-format ini file
-segmented into sections, variables as key = value, values can be enclosed with quotes 
-comments can be added at the end of a variable line, separated from the key value pair by a semicolon 
-
-[evql]
-host = prod.example.net
-
-[evqld]
-
-[evqlctl]
-
+####File path
+By default EventQL tries to read the configuration from `/etc/{process}.conf` and `~/.evqlrc`.
+You can specify a custom file path to read your configuration from by using the command line option `-c file_path`.
 
