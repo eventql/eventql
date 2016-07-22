@@ -107,7 +107,7 @@ var EVQL = (function(global) {
     var dependencies_set = {};
     dependencies.push(root_job);
 
-    var find_dependecies = function(job) {
+    var find_dependencies = function(job) {
       if (job.sources) {
         if (!Array.isArray(job.sources)) {
           throw "sources must be an array";
@@ -127,13 +127,12 @@ var EVQL = (function(global) {
 
           dependencies_set[djob_id] = true;
           dependencies.push(djob);
-          find_dependecies(djob);
+          find_dependencies(djob);
         }
       }
     };
 
-    find_dependecies(root_job);
-    console.log(JSON.stringify(dependencies));
+    find_dependencies(root_job);
     z1_executemr(JSON.stringify(dependencies), root_job.id);
   }
 
