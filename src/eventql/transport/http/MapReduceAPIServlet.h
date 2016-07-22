@@ -28,7 +28,7 @@
 #include "eventql/AnalyticsSession.pb.h"
 #include "eventql/transport/http/MapReduceService.h"
 #include "eventql/server/session.h"
-
+#include "eventql/auth/client_auth.h"
 #include "eventql/eventql.h"
 
 namespace eventql {
@@ -39,6 +39,7 @@ public:
   MapReduceAPIServlet(
       MapReduceService* service,
       ConfigDirectory* cdir,
+      ClientAuth* client_auth,
       const String& cachedir);
 
   void handle(
@@ -97,6 +98,7 @@ protected:
 
   MapReduceService* service_;
   ConfigDirectory* cdir_;
+  ClientAuth* client_auth_;
   String cachedir_;
 };
 

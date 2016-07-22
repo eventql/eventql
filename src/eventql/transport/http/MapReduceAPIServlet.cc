@@ -37,9 +37,11 @@ namespace eventql {
 MapReduceAPIServlet::MapReduceAPIServlet(
     MapReduceService* service,
     ConfigDirectory* cdir,
+    ClientAuth* client_auth,
     const String& cachedir) :
     service_(service),
     cdir_(cdir),
+    client_auth_(client_auth),
     cachedir_(cachedir) {}
 
 static const String kResultPathPrefix = "/api/v1/mapreduce/result/";
@@ -56,6 +58,16 @@ void MapReduceAPIServlet::handle(
 
   if (uri.path() == "/api/v1/mapreduce/execute") {
     executeMapReduceScript(session, uri, req_stream.get(), res_stream.get());
+    return;
+  }
+
+  if (session->getEffectiveNamespace().empty()) {
+    req_stream->readBody();
+    res.setStatus(http::kStatusUnauthorized);
+    res.addHeader("Connection", "close");
+    res.addHeader("Content-Type", "text/html; charset=utf-8");
+    res.addBody(Assets::getAsset("eventql/webui/401.html"));
+    res_stream->writeResponse(res);
     return;
   }
 
@@ -87,6 +99,7 @@ void MapReduceAPIServlet::handle(
     return;
   }
 
+  req_stream->readBody();
   res.setStatus(http::kStatusNotFound);
   res.addHeader("Connection", "close");
   res.addHeader("Content-Type", "text/html; charset=utf-8");
@@ -295,6 +308,22 @@ void MapReduceAPIServlet::executeMapReduceScript(
     http::HTTPRequestStream* req_stream,
     http::HTTPResponseStream* res_stream) {
   req_stream->readBody();
+
+  const auto& params = uri.queryParams();
+  String database;
+  if (URI::getParam(params, "database", &database) && !database.empty()) {
+    auto rc = client_auth_->changeNamespace(session, database);
+    if (!rc.isSuccess()) {
+      http::HTTPResponse res;
+      res.populateFromRequest(req_stream->request());
+      res.setStatus(http::kStatusForbidden);
+      res.addHeader("Connection", "close");
+      res.addHeader("Content-Type", "text/html; charset=utf-8");
+      res.addBody(Assets::getAsset("eventql/webui/403.html"));
+      res_stream->writeResponse(res);
+      return;
+    }
+  }
 
   auto sse_stream = mkRef(new http::HTTPSSEStream(req_stream, res_stream));
   sse_stream->start();
