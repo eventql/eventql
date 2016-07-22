@@ -117,7 +117,7 @@ var EVQL = (function(global) {
           var djob_id = job.sources[i];
 
           if (dependencies_set[djob_id]) {
-            return;
+            continue;
           }
 
           var djob = jobs[djob_id];
