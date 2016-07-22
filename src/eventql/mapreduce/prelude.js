@@ -133,6 +133,7 @@ var EVQL = (function(global) {
     };
 
     find_dependecies(root_job);
+    console.log(JSON.stringify(dependencies));
     z1_executemr(JSON.stringify(dependencies), root_job.id);
   }
 
