@@ -71,10 +71,10 @@ MapTableTask::MapTableTask(
 
   logInfo(
       "evqld", "run map task: $0/$1 -- $2/$3",
-      table_ref.keyrange_begin,
-      table_ref.keyrange_limit,
-      kr.begin,
-      kr.end);
+      inspect(table_ref.keyrange_begin),
+      inspect(table_ref.keyrange_limit),
+      inspect(kr.begin),
+      inspect(kr.end));
 
   MetadataClient metadata_client(cdir_);
   PartitionListResponse partition_list;
