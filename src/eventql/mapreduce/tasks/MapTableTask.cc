@@ -58,33 +58,30 @@ MapTableTask::MapTableTask(
     RAISEF(kNotFoundError, "table not found: $0", table_ref_.table_key);
   }
 
-  Vector<csql::ScanConstraint> constraints;
-  if (!table_ref.keyrange_begin.isEmpty()) {
-    csql::ScanConstraint constraint;
-    constraint.column_name = table.get()->getPartitionKey();
-    constraint.type = csql::ScanConstraintType::GREATER_THAN_OR_EQUAL_TO;
-    constraint.value = csql::SValue(table_ref.keyrange_begin.get());
-    constraints.emplace_back(constraint);
+  auto keyspace = table.get()->getKeyspaceType();
+  KeyRange kr;
+
+  if (!table_ref_.keyrange_begin.isEmpty()) {
+    kr.begin = encodePartitionKey(keyspace, table_ref_.keyrange_begin.get());
   }
 
-  if (!table_ref.keyrange_limit.isEmpty()) {
-    csql::ScanConstraint constraint;
-    constraint.column_name = table.get()->getPartitionKey();
-    constraint.type = csql::ScanConstraintType::LESS_THAN_OR_EQUAL_TO;
-    constraint.value = csql::SValue(table_ref.keyrange_limit.get());
-    constraints.emplace_back(constraint);
+  if (!table_ref_.keyrange_limit.isEmpty()) {
+    kr.end = encodePartitionKey(keyspace, table_ref_.keyrange_limit.get());
   }
 
-  auto keyrange = TSDBTableProvider::findKeyRange(
-      table.get()->getPartitionKey(),
-      constraints);
+  logInfo(
+      "evqld", "run map task: $0/$1 -- $2/$3",
+      table_ref.keyrange_begin,
+      table_ref.keyrange_limit,
+      kr.begin,
+      kr.end);
 
   MetadataClient metadata_client(cdir_);
   PartitionListResponse partition_list;
   auto rc = metadata_client.listPartitions(
       session->getEffectiveNamespace(),
       table_ref_.table_key,
-      keyrange,
+      kr,
       &partition_list);
 
   if (!rc.isSuccess()) {
