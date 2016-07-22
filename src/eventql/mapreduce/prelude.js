@@ -232,6 +232,38 @@ var EVQL = (function(global) {
     return job_id;
   };
 
+  api.join = function(opts) {
+    if (!opts["params"]) {
+      opts["params"] = {};
+    }
+
+    if (opts["map_fn"]) {
+      opts["params"].map_fn = opts["map_fn"];
+    }
+
+    return api.reduce({
+      sources: opts["sources"],
+      shards: opts["shards"],
+      params: opts["params"],
+      reduce_fn: function(key, values) {
+        var joined = {};
+
+        while (values.hasNext()) {
+          var val = JSON.parse(values.next());
+          for (k in val) {
+            joined[k] = val[k];
+          }
+        }
+
+        if (params.map_fn) {
+          return params.map_fn(joined);
+        } else {
+          return [[key, joined]];
+        }
+      }
+    })
+  };
+
   api.downloadResults = function(sources, serialize_fn) {
     if (!Array.isArray(sources)) {
       throw "sources must be an array";
