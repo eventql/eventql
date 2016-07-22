@@ -67,7 +67,7 @@ Option<int64_t> ProcessConfig::getInt(const String& key) const {
   auto p = properties_.find(key);
   if (p != properties_.end() && StringUtil::isNumber(p->second)) {
     try {
-      auto value = std::stoi(p->second);
+      auto value = std::stoll(p->second);
       return Some<int64_t>(value);
 
     } catch (std::exception e) {
