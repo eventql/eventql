@@ -184,12 +184,15 @@ var EVQL = (function(global) {
     autoBroadcast();
     var job_id = mkJobID();
 
+    var keyrange_begin = opts["begin"] || opts["from"];
+    var keyrange_limit = opts["end"] || opts["until"];
+
     jobs[job_id] = {
       id: job_id,
       op: "map_table",
       table_name: opts["table"],
-      keyrange_begin: opts["begin"] || opts["from"],
-      keyrange_limit: opts["end"] || opts["until"],
+      keyrange_begin: keyrange_begin ? keyrange_begin.toString() : null,
+      keyrange_limit: keyrange_limit ? keyrange_limit.toString() : null,
       map_fn: String(opts["map_fn"]),
       globals: __encode_js(bcastdata),
       params: __encode_js(opts["params"] || {}),

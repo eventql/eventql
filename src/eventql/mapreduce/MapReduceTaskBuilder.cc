@@ -155,12 +155,6 @@ RefPtr<MapReduceTask> MapReduceTaskBuilder::buildMapTableTask(
     RAISE(kRuntimeError, "missing field: params");
   }
 
-  logInfo(
-      "evqld", "build map task: $0/$1 -- $2",
-      inspect(table_ref.keyrange_begin),
-      inspect(table_ref.keyrange_limit),
-      inspect(job));
-
   auto task = new MapTableTask(
       session_,
       table_ref,
