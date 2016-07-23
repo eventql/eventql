@@ -652,20 +652,20 @@
           visible_in_toc: true
           source: "/api/javascript/javascript_api.md"
     -
-      url: "/drivers"
+      url: "/drivers-tools"
       title: "Drivers & Tools"
       type: page
       visible_in_menu: true
       visible_in_toc: true
-      source: "/api/overview.md"
+      source: "/tools/overview.md"
       children:
         -
-          url: "/api/mysql2evql"
+          url: "/drivers-tools/mysql2evql"
           title: "mysql2evql"
           type: page
           visible_in_menu: true
           visible_in_toc: true
-          source: "/api/mysql2evql.md"
+          source: "/tools/mysql2evql.md"
         #-
         #  url: "/api/node"
         #  title: "Node.js Driver"
