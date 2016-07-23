@@ -28,9 +28,6 @@ we created in [First Steps](../../getting-started/first-steps).
       }
     });
 
-
-
-
     var top_urls = EVQL.reduce({
       sources: [logs_mapped],
       shards: 1,
