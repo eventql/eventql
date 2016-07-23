@@ -1,5 +1,5 @@
-3.1 Tables
-==========
+3. Tables & Records
+===================
 
 The core unit of data storage in EventQL are tables and rows (also referred to
 as records or events). Tables have a strict schema that you must define and that

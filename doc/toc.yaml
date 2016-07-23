@@ -131,83 +131,67 @@
     -
       url: "/tables"
       title: "Tables &amp; Records"
-      type: redirect
+      type: page
+      source: "tables/overview.md"
       visible_in_menu: true
       visible_in_toc: true
-      location: "/tables"
       children:
-        -
-          url: "/tables"
-          title: "Tables"
-          type: page
-          visible_in_menu: true
-          visible_in_toc: true
-          source: "tables/overview.md"
-          children:
-            -
-              url: "/tables/datatypes"
-              title: "Data Types"
-              type: page
-              visible_in_menu: true
-              visible_in_toc: true
-              source: "tables/datatypes.md"
-            -
-              url: "/tables/partitioning"
-              title: "Partitioning"
-              type: page
-              visible_in_menu: true
-              visible_in_toc: true
-              source: "tables/partitioning.md"
-            -
-              url: "/tables/creating-tables"
-              title: "Creating Tables"
-              type: page
-              visible_in_menu: true
-              visible_in_toc: true
-              source: "tables/creating-tables.md"
-            -
-              url: "/tables/modifying-tables"
-              title: "Modifying Tables"
-              type: page
-              visible_in_menu: true
-              visible_in_toc: true
-              source: "tables/modifying-tables.md"
-            #-
-            #  url: "/tables/deleting-tables"
-            #  title: "Deleting Tables"
-            #  type: page
-            #  visible_in_menu: true
-            #  visible_in_toc: true
-            #  source: "tables/deleting-tables.md"
-        -
-          url: "/tables"
-          title: "Records"
-          type: redirect
-          visible_in_menu: true
-          visible_in_toc: true
-          location: "/tables/inserting-records"
-          children:
-            -
-              url: "/tables/inserting-records"
-              title: "Inserting Records"
-              type: page
-              visible_in_menu: true
-              visible_in_toc: true
-              source: "tables/inserting-records.md"
-            -
-              url: "/tables/updating-records"
-              title: "Updating Records"
-              type: page
-              visible_in_menu: true
-              visible_in_toc: true
-              source: "tables/updating-records.md"
-            #-
-            #  url: "/tables/deleting-records"
-            #  title: "Deleting Records"
-            #  type: page
-            #  visible_in_menu: true
-            #  visible_in_toc: true
-            #  source: "tables/deleting-records.md"
+          -
+            url: "/tables/datatypes"
+            title: "Data Types"
+            type: page
+            visible_in_menu: true
+            visible_in_toc: true
+            source: "tables/datatypes.md"
+          -
+            url: "/tables/partitioning"
+            title: "Partitioning"
+            type: page
+            visible_in_menu: true
+            visible_in_toc: true
+            source: "tables/partitioning.md"
+          -
+            url: "/tables/creating-tables"
+            title: "Creating Tables"
+            type: page
+            visible_in_menu: true
+            visible_in_toc: true
+            source: "tables/creating-tables.md"
+          -
+            url: "/tables/modifying-tables"
+            title: "Modifying Tables"
+            type: page
+            visible_in_menu: true
+            visible_in_toc: true
+            source: "tables/modifying-tables.md"
+          #-
+          #  url: "/tables/deleting-tables"
+          #  title: "Deleting Tables"
+          #  type: page
+          #  visible_in_menu: true
+          #  visible_in_toc: true
+          #  source: "tables/deleting-tables.md"
+          -
+            url: "/tables/inserting-records"
+            title: "Inserting Records"
+            type: page
+            visible_in_menu: true
+            visible_in_toc: true
+            source: "tables/inserting-records.md"
+          -
+            url: "/tables/updating-records"
+            title: "Updating Records"
+            type: page
+            visible_in_menu: true
+            visible_in_toc: true
+            source: "tables/updating-records.md"
+          #-
+          #  url: "/tables/deleting-records"
+          #  title: "Deleting Records"
+          #  type: page
+          #  visible_in_menu: true
+          #  visible_in_toc: true
+          #  source: "tables/deleting-records.md"
     -
       url: "/queries/sql"
       title: "SQL Queries"
