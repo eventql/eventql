@@ -8,7 +8,7 @@ to as "massively parallel database architecture".
 
 The partioning is more or less transparent to users. If you want to learn about the
 intricate details of the algorithm, have a look at the internals section.
-Still there are few things that you have to consider while designing your data
+Still there are a few things that you have to consider while designing your data
 model for EventQL:
 
 ## The Primary Key
@@ -72,7 +72,7 @@ Also, not supporting secondary indexes does _not_ imply that you can't filter by
 anything other than the primary key like in some key value stores. You can. All
 WHERE, GROUP BY and JOIN BY clauses that are valid in standard SQL are supported.
 
-If youneed to have fast access to _individual_ records by _more than one_ dimension
+If you need to have fast access to _individual_ records by _more than one_ dimension
 you have to denormalize and insert the record multiple times in different tables
 that are indexed in those respective dimensions.
 
