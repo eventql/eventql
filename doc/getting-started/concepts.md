@@ -7,8 +7,8 @@ detailed information in the respective chapters.
 ### Tables & Schemas
 
 The core unit of data storage in EventQL are tables and rows (also referred to
-as records or events). Tables have a strict schema that you must define and that
-all rows must adhere to. You can currently insert records as either JSON or
+as rows or events). Tables have a strict schema that you must define and that
+all rows must adhere to. You can currently insert rows as either JSON or
 Protobuf messages
 
 #### Columnar Storage Engine
@@ -24,7 +24,7 @@ have to limit yourself in terms of table size. EventQL can handle tables contain
 many thousand individual columns per row just fine.
 
 EventQL implements the Dremel Record Shredding and Assembly algorithm to store
-nested records in columnar format.
+nested rows in columnar format.
 
 
 #### Nested Records
@@ -34,7 +34,7 @@ sound complex but is actually quite simple and allows you to implement
 arbitrary data models traditionally not suited for SQL databases, such as JSON
 events containing arrays or objects.
 
-The nested records concept is best [illustrated by example](../../tables/datatypes/).
+The nested rows concept is best [illustrated by example](../../tables/datatypes/).
 
 
 #### Partitioning, Replication & Consistency

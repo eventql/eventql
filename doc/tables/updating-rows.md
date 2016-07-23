@@ -1,16 +1,16 @@
-3.6 Updating Records
-====================
+3.6 Updating Rows
+=================
 
 EventQL supports updating a row/event after it was written. Like inserts,
 updates are immediately visible once they are executed.
 
 ### Updating full rows (UPSERT)
 
-To update a record, simply perform a new insert with the exact same primary key.
+To update a row, simply perform a new insert with the exact same primary key.
 All rows are unique by primary key and two consecutive inserts with the same
 primary key value are treated as an insert followed by an update (that is,
-every insert with a primary key value equal to that of another record that already
-exists will replace that original record).
+every insert with a primary key value equal to that of another row that already
+exists will replace that original row).
 
 #### Example:
 

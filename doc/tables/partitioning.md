@@ -20,7 +20,7 @@ primary key) in the same table.
 
 Two consecutive writes with the same primary key value are treated as an insert
 followed by an update 0 that is, every insert with a primary key value equal to
-that of another record that already exists will replace that original record.
+that of another row that already exists will replace that original row.
 
 #### Partitioning Key
 
@@ -72,8 +72,8 @@ Also, not supporting secondary indexes does _not_ imply that you can't filter by
 anything other than the primary key like in some key value stores. You can. All
 WHERE, GROUP BY and JOIN BY clauses that are valid in standard SQL are supported.
 
-If youneed to have fast access to _individual_ records by _more than one_ dimension
-you have to denormalize and insert the record multiple times in different tables
+If youneed to have fast access to _individual_ rows by _more than one_ dimension
+you have to denormalize and insert the row multiple times in different tables
 that are indexed in those respective dimensions.
 
 However, most users probably won't need this. Access by a single primary key is

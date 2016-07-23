@@ -2,7 +2,7 @@
 ================
 
 EventQL supports a number of APIs that allow you to programmatically insert 
-records, create and alter tables and execute queries.
+rows, create and alter tables and execute queries.
 
 ### [HTTP API](...)
 

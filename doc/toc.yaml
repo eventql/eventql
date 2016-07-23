@@ -130,7 +130,7 @@
               source: "deployment/cluster_removing_servers.md"
     -
       url: "/tables"
-      title: "Tables &amp; Records"
+      title: "Tables &amp; Rows"
       type: page
       source: "tables/overview.md"
       visible_in_menu: true
@@ -172,26 +172,26 @@
           #  visible_in_toc: true
           #  source: "tables/deleting-tables.md"
           -
-            url: "/tables/inserting-records"
-            title: "Inserting Records"
+            url: "/tables/inserting-rows"
+            title: "Inserting Rows"
             type: page
             visible_in_menu: true
             visible_in_toc: true
-            source: "tables/inserting-records.md"
+            source: "tables/inserting-rows.md"
           -
-            url: "/tables/updating-records"
-            title: "Updating Records"
+            url: "/tables/updating-rows"
+            title: "Updating Rows"
             type: page
             visible_in_menu: true
             visible_in_toc: true
-            source: "tables/updating-records.md"
+            source: "tables/updating-rows.md"
           #-
-          #  url: "/tables/deleting-records"
-          #  title: "Deleting Records"
+          #  url: "/tables/deleting-rows"
+          #  title: "Deleting Rows"
           #  type: page
           #  visible_in_menu: true
           #  visible_in_toc: true
-          #  source: "tables/deleting-records.md"
+          #  source: "tables/deleting-rows.md"
     -
       url: "/queries/sql"
       title: "SQL Queries"
