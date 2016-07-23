@@ -744,13 +744,13 @@
           visible_in_menu: true
           visible_in_toc: true
           source: "internals/replication.md"
-    -
-      url: "/appendix"
-      title: "Appendix"
-      type: page
-      visible_in_menu: true
-      visible_in_toc: true
-      source: "/api/overview.md"
+    #-
+    #  url: "/appendix"
+    #  title: "Appendix"
+    #  type: page
+    #  visible_in_menu: true
+    #  visible_in_toc: true
+    #  source: "/api/overview.md"
     #-
     #  url: "/hacking"
     #  title: "Hacking"
