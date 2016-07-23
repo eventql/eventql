@@ -1,7 +1,7 @@
-3.4 JavaScript API
-==================
+6.2 JavaScript (MapReduce) API
+==============================
 
-#### Logging
+### Logging
 
 The most simple script that you can run is:
 
@@ -11,15 +11,8 @@ Run it with:
 
       $ evql -f helloworld.js
 
-#### Lazy Execution 
 
-#### Sharing State
-
-###### Global Variables
-###### Parameters
-
-
-#### Caching
+### Caching
 
 EVQL will automatically cache your jobs or part of your jobs if you don't tell
 it otherwise. The cache invalidation is fully automatic by default. However
@@ -34,7 +27,6 @@ by default. This may sometimes feel strange if you have put console.log statemen
 into your code, since those parts of the code won't be re-executed (and hence
 you won't see any log messages).
 
-
 You can override this behaviour by either disabling it completely (ensuring
 your code is always executed in full and nothing is ever automatically cached)
 or by providing a cache key manually.
@@ -45,7 +37,8 @@ API Reference
 -------------
 
 Jump to:
-  - [EVQL.log](#z1-log),
+
+  - [EVQL.log](#z1-log)
   - [EVQL.broadcast](#z1-broadcast)
   - [EVQL.mapTable](#z1-maptable)
   - [EVQL.reduce](#z1-reduce)
@@ -96,12 +89,9 @@ be global variables (i.e. defined in the global scope).
 ---
 ### EVQL.mapTable
 
-here be dragons
-
 ---
-### EVQL.reduce
 
-here be dragons
+### EVQL.reduce
 
 ---
 ### EVQL.downloadResults
@@ -172,13 +162,6 @@ an array of temp tables (which are returned by methods like `mapTable` or `reduc
       table: "my_stats",
       sources: tmp
     });
-
-here be dragons
-
----
-### EVQL.saveToTablePartition
-
-here be dragons
 
 ---
 ### EVQL.writeToOutput

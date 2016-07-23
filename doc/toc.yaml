@@ -644,15 +644,8 @@
               visible_in_menu: false
               visible_in_toc: false
               source: "/api/http/auth/login.md"
-        #-
-        #  url: "/api/javascript"
-        #  title: "JavaScript Query API"
-        #  type: page
-        #  visible_in_menu: true
-        #  visible_in_toc: true
-        #  source: "/api/http/index.html"
         -
-          url: "/mapreduce/javascript"
+          url: "/api/javascript_mapreduce"
           title: "MapReduce API (JavaScript)"
           type: page
           visible_in_menu: true
