@@ -186,13 +186,6 @@
             #  visible_in_menu: true
             #  visible_in_toc: true
             #  source: "tables/deleting-records.md"
-        -
-          url: "/collecting-and-storing/replication"
-          title: "Repplication"
-          type: page
-          visible_in_menu: true
-          visible_in_toc: true
-          source: "/tables/replication.md"
     -
       url: "/queries/sql"
       title: "SQL Queries"
@@ -576,13 +569,6 @@
       source: "/api/overview.md"
       children:
         -
-          url: "/api/mysql2evql"
-          title: "mysql2evql Reference"
-          type: page
-          visible_in_menu: true
-          visible_in_toc: true
-          source: "/api/mysql2evql.md"
-        -
           url: "/api/http"
           title: "HTTP API"
           type: page
@@ -659,6 +645,13 @@
       visible_in_toc: true
       source: "/api/overview.md"
       children:
+        -
+          url: "/api/mysql2evql"
+          title: "mysql2evql"
+          type: page
+          visible_in_menu: true
+          visible_in_toc: true
+          source: "/api/mysql2evql.md"
         #-
         #  url: "/api/node"
         #  title: "Node.js Driver"
@@ -729,6 +722,14 @@
       visible_in_menu: true
       visible_in_toc: true
       source: "/api/overview.md"
+      children:
+        -
+          url: "/collecting-and-storing/replication"
+          title: "Replication"
+          type: page
+          visible_in_menu: true
+          visible_in_toc: true
+          source: "/tables/replication.md"
     -
       url: "/examples"
       title: "Examples &amp; Tutorials"
