@@ -38,7 +38,7 @@ Create a file `/etc/evqld.conf` and put in these contents:
     client_auth_backend=trust
 
 The `cluster.name` option contains the cluster name (you can run multiple EventQL
-clusters with a single coordinator). You may set the cluster name o whatever you
+clusters with a single coordinator). You may set the cluster name to whatever you
 want.
 
 The `cluster.coordinator` option specifies that we are going to use zookeeper
@@ -80,28 +80,30 @@ this to use your own naming scheme.
 
 ### Step 5: Starting the EventQL servers
 
-We're almost done. All that is left to do is to start the four servers. Let's
-create the data directories (if you are setting up on multiple machines, run
-each command on the respective machine)
+We're almost done. All that is left to do is to start the four servers.
+
+If trying this out on your local machine, open four terminal windows. If you are
+setting up on multiple machines, run each command on the respective machine.
+
+Create the data directories first:
 
     $ mkdir /var/evql/node{1,2,3,4}
 
-Now we can start the four servers (if trying this out on your local machine, open
-four terminal windows)
+Then start the four servers:
 
     $ evqld -c /etc/evqld.conf -C server.name=node1 --listen localhost:9175
     $ evqld -c /etc/evqld.conf -C server.name=node2 --listen localhost:9176
     $ evqld -c /etc/evqld.conf -C server.name=node3 --listen localhost:9177
     $ evqld -c /etc/evqld.conf -C server.name=node4 --listen localhost:9178
 
-Note that when a server joins the cluster, it will publish the host:port pair that
-was passed to the listen flag to the coordination sercice. So it is important
-that all other servers can open connections to whatever address is specified.
+Note that when a server joins the cluster, it will publish its `listen` address
+to the other servers. So it is important that all other servers can open
+connections to whatever address is specified.
 
 For our example (we assume you run this on your development machine) we use
-localhost with four different ports. However, when running on multiple machines,
-you can't use `localhost` or `0.0.0.0` - you have to specify the externally
-reachable ip address of the server.
+localhost with four different ports as the listen address. However, when running
+on multiple machines, you can't use `localhost` or `0.0.0.0` - you have to specify
+the externally reachable ip address of each server.
 
 That's it! You should now be able to connect to the cluster and start executing
 queries:
