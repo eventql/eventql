@@ -611,13 +611,6 @@
           visible_in_menu: true
           visible_in_toc: true
           source: "/sql/statements.md"
-        -
-          url: "/queries/pipelines/javascript"
-          title: "JavaScript API"
-          type: page
-          visible_in_menu: true
-          visible_in_toc: true
-          source: "/api/javascript/javascript_api.md"
     -
       url: "/api"
       title: "API Reference"
@@ -695,6 +688,13 @@
         #  visible_in_menu: true
         #  visible_in_toc: true
         #  source: "/api/http/index.html"
+        -
+          url: "/queries/pipelines/javascript"
+          title: "MapReduce API (JavaScript)"
+          type: page
+          visible_in_menu: true
+          visible_in_toc: true
+          source: "/api/javascript/javascript_api.md"
     -
       url: "/drivers"
       title: "Drivers & Tools"
