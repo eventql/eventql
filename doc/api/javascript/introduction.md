@@ -10,58 +10,40 @@ on building business logic. Once you have written a pipeline or query you will b
 able to run it on it on 1GB, 100GB or 100TB of data without modifying a single
 line
 
-This guide will walk you through running a simple MapReduce Job. 
-We will calculate the referrer stats of a fictional web shop
-
-#### Create Table
-For our example, we will create a table that stores `time`, `session_id` and `url` for
-each page_view.
-
-Run this from the command line (..against your local or remote server/cluster, database)
-
-    $ evql -e "CREATE TABLE access_logs (time DATETIME PRIMARY KEY, session_id STRING, url STRING);"
+An example says more than a thousand words so here is a simple example that will
+calculate the top url stats from the raw pageview data of our access_log table, that
+we created in [First Steps](../../getting-started/first-steps).
 
 
-#### Insert Data
 
 
-    $ evql -e "INSERT INTO access_logs FROM JSON '{"time": "2016-07-23
-  
-
-#### 
-Now, let
-
-
-An example says more than a thousand words so here is a simple script that
-calculates the bounce rate per page in the last 30 days from raw pageview data
-
-
-    var pageviews_mapped = EVQL.mapTable({
-      table: "web.pageviews",
-      from: "-30d",
-      until: "now",
+    var logs_mapped = EVQL.mapTable({
+      table: "access_logs",
+      required_columns: [
+          "time",
+          "url"
+      ],
       map_fn: function(row) {
-        return [[row.url, row.bounced ? "did-bounce" : "did-not-bounce"]];
+        return [[row.url, 1]];
       }
     });
 
-    var bouncerate_per_page = EVQL.reduce({
-      sources: [pageviews_mapped],
+    var top_urls = EVQL.reduce({
+      sources: [logs_mapped],
+      shards: 1,
       reduce_fn: function(url, visits) {
-        var num_pageviews = 0;
-        var num_bounces = 0;
-
+        var num_views = 0;
         while (visits.hasNext()) {
-          var visit = visits.next();
-          num_pageviews += 1;
-          num_bounces += (visit == "did-bounce") ? 1 : 0;
+          num_views += 1;
         }
 
-        return [[url, num_bounces / num_pageviews]];
+        return [[url, num_views]];
       }
     });
 
-    EVQL.downloadResults(bouncerate_per_page);
+  EVQL.downloadResults([top_urls]);
+
+
 
 
 ### Getting Started with pipelines

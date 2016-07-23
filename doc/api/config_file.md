@@ -1,9 +1,11 @@
 4.1 Configuration File
 =====================
 
-Configuration files are a convenient way to specifiy options that you use regurlay when running EventQL programs, so that you don't have to enter them on the command line each time you run the program.
+Configuration files aren't mandatory but they provide a convenient way to specifiy options that you use regurlay when running EventQL programs, so you don't have to enter them on the command line each time you run the program.
 
-Any config file option can be overwritten on the command line by using the option `-C` followed by the corresponding `key=value` pair.
+You can override every option set in the configuration file by using the command line option `-C` followed by the corresponding `section.key=value` pair.
+
+    $ evql -C client.host=localhost
 
 ###File Format
 EventQL uses the INI file format.
@@ -14,13 +16,13 @@ EventQL uses the INI file format.
 
 ###File path
 By default EventQL tries to read the configuration from `/etc/{process}.conf` and `~/.evqlrc`.
-You can specify a custom file path to read your configuration from by using the command line option `-c file_path`.
+You can specify a custom file path to read your configuration from with the command line option `-c file_path`.
 
 
 ###Configuration options
-The EventQL configuration options arw grouped into the following sections:
+The EventQL configuration options arw grouped in three sections: `client`, `server` and `cluster`.
 
-###evql
+###client
 
 **host** <br>
 &nbsp;&nbsp;&nbsp;&nbsp;(Default: localhost) The IP address or hostname to send the query to.
