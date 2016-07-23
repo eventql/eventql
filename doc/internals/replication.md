@@ -1,4 +1,4 @@
-8.1 Replication
+8.2 Replication
 ===============
 
 Table storage is distributed across a cluster of physical servers and scales

@@ -732,11 +732,18 @@
     -
       url: "/internals"
       title: "Internals"
-      type: page
+      type: redirect
       visible_in_menu: true
       visible_in_toc: true
-      source: "/api/overview.md"
+      location: "/internals/architecture"
       children:
+        -
+          url: "/internals/architecture"
+          title: "Architecture"
+          type: page
+          visible_in_menu: true
+          visible_in_toc: true
+          source: "internals/architecture.md"
         -
           url: "/internals/replication"
           title: "Replication"
@@ -744,6 +751,20 @@
           visible_in_menu: true
           visible_in_toc: true
           source: "internals/replication.md"
+        -
+          url: "/internals/coordination-service"
+          title: "Coordination Service"
+          type: page
+          visible_in_menu: true
+          visible_in_toc: true
+          source: "internals/coordination_service.md"
+        -
+          url: "/internals/life-of-a-query"
+          title: "Life of a Query"
+          type: page
+          visible_in_menu: true
+          visible_in_toc: true
+          source: "internals/life-of-a-query.md"
     #-
     #  url: "/appendix"
     #  title: "Appendix"

@@ -1,4 +1,6 @@
-# ZooKeeper
+8.3 Coordination Service
+========================
+
 We store three pieces of data under the following paths:
 
     ClusterConfig:     /eventql/<cluster_name>/config
