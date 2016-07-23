@@ -57,7 +57,7 @@ To test-drive the pipelines feature, save this into a file called `helloworld.js
 
 And then execute it by running:
 
-      $ evql -f helloworld.js
+    $ evql -f helloworld.js
 
 
 To get started writing your own pipelines, have a look at these pages. If you
