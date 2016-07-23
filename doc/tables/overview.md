@@ -73,7 +73,7 @@ row that we can store in the table:
     {
       "collected_at": "2016-07-05 13:34:51",
       "sensor_id": "sensor1",
-      "measurements": [
+      "measured_values": [
         { "thing_id": "thing1", temperature: 22.3 },
         { "thing_id": "thing2", temperature: 21.8 },
         { "thing_id": "thing3", temperature: 24.5 },
@@ -89,10 +89,10 @@ For example, let's say we wante to calculate the get the average temperature per
 "thing". This is how we could do it
 
     SELECT
-      sum(measurement.temperature) / count(1) as avg_temperature,
-      measurement.thing_id as thing_id
+      sum(measured_values.temperature) / count(1) as avg_temperature,
+      measured_values.thing_id as thing_id
     GROUP BY
-      thing_id;
+      measure_values.thing_id;
 
 At any rate you won't need to understand the nested row feature until you want to
 use it.
