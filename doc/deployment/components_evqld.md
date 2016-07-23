@@ -9,7 +9,7 @@ The EventQL server can be run in two modes called "standalone mode" and "cluster
 mode".
 
 In the standalone mode evqld runs as a standalone process on a single machine and
-has no further depencies. The standalone mode is ideal for evaluating and development
+has no further dependencies. The standalone mode is ideal for evaluating and development
 setups as it allows you to have a server up and running within seconds. To learn
 more about how to run EventQL in standalone mode, read the [First Steps](...) or
 [Standalone](...) pages.
