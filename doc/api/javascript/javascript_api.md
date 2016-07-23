@@ -9,7 +9,7 @@ The most simple script that you can run is:
 
 Run it with:
 
-      $ zli run helloworld.js
+      $ evql -f helloworld.js
 
 #### Lazy Execution 
 
@@ -21,15 +21,15 @@ Run it with:
 
 #### Caching
 
-Z1 will automatically cache your jobs or part of your jobs if you don't tell
+EVQL will automatically cache your jobs or part of your jobs if you don't tell
 it otherwise. The cache invalidation is fully automatic by default. However
-it is good to understand how this works. Z1 will cache and invalidate subparts
+it is good to understand how this works. EVQL will cache and invalidate subparts
 of your job based on two pieces of information: A "checksum" that reflects the
 source data on which that subpart is executed and another checksum that is
 based on your source code and all broadcast variables and parameters.
 
 This means that if you execute the same code, with the same broadcast variables
-and the same parameters on the same data twice, Z1 will return a cached result
+and the same parameters on the same data twice, EVQL will return a cached result
 by default. This may sometimes feel strange if you have put console.log statements
 into your code, since those parts of the code won't be re-executed (and hence
 you won't see any log messages).
@@ -45,36 +45,36 @@ API Reference
 -------------
 
 Jump to:
-  - [Z1.log](#z1-log),
-  - [Z1.broadcast](#z1-broadcast)
-  - [Z1.mapTable](#z1-maptable)
-  - [Z1.reduce](#z1-reduce)
-  - [Z1.downloadResults](#z1-downloadresults)
-  - [Z1.saveToTable](#z1-savetotable)
-  - [Z1.processStream](#z1-processtream)
-  - [Z1.writeToOutput](#z1-writetooutput)
+  - [EVQL.log](#z1-log),
+  - [EVQL.broadcast](#z1-broadcast)
+  - [EVQL.mapTable](#z1-maptable)
+  - [EVQL.reduce](#z1-reduce)
+  - [EVQL.downloadResults](#z1-downloadresults)
+  - [EVQL.saveToTable](#z1-savetotable)
+  - [EVQL.processStream](#z1-processtream)
+  - [EVQL.writeToOutput](#z1-writetooutput)
 
 ---
-### Z1.log
+### EVQL.log
 
-    Z1.log(arg1, ..., argN)
+    EVQL.log(arg1, ..., argN)
 
 Logs the arguments to STDERR. `console.log` is an alias to this method.
 
 ###### Example
 
-    Z1.log("blah")
+    EVQL.log("blah")
     >> STDOUT: blah
 
-    Z1.log("blah", 123, "fubar")
+    EVQL.log("blah", 123, "fubar")
     >> STDOUT: blah, 123, fubar
 
 ---
-### Z1.broadcast
+### EVQL.broadcast
 
 Makes the specified global variable(s) available to all tasks/functions.
 
-    Z1.broadcast(var1 [, varN...])
+    EVQL.broadcast(var1 [, varN...])
 
 Note that the arguments to this methods are the names of the variables as
 strings, not the actual variables themself. Also, all broadcast variables must
@@ -83,9 +83,9 @@ be global variables (i.e. defined in the global scope).
 ##### Example:
 
     var my_constant = 123;
-    Z1.broadcast("my_constant");
+    EVQL.broadcast("my_constant");
 
-    Z1.mapTable({
+    EVQL.mapTable({
       // ...
       map_fn: function (row) {
         return [[row.field1, row.field2 * my_constant]];
@@ -94,21 +94,21 @@ be global variables (i.e. defined in the global scope).
     });
 
 ---
-### Z1.mapTable
+### EVQL.mapTable
 
 here be dragons
 
 ---
-### Z1.reduce
+### EVQL.reduce
 
 here be dragons
 
 ---
-### Z1.downloadResults
+### EVQL.downloadResults
 
 Downloads all rows in the provided sources.
 
-  Z1.downloadResults(sources [, serializer])
+    EVQL.downloadResults(sources [, serializer])
 
 `sources` must be an array of temp tables (which are returned by methods like
 `mapTable` or `reduce`). This method will download all rows from all sources and,
@@ -138,34 +138,50 @@ object and then return it. It looks like this:
 
     function serializer(key, value) {
       var json = JSON.stringify({ key: key, value: value })
-      Z1.writeToOutput(json + "\n");
+      EVQL.writeToOutput(json + "\n");
     }
 
 ##### Example
 
-    var tmp = Z1.mapTable({
+    var tmp = EVQL.mapTable({
       // ...
     });
 
-    Z1.downloadResults([tmp]);
+    EVQL.downloadResults([tmp]);
 
 ##### Return Value
 
 This method does not return anything. If you want to retrieve the results of
-a job, consider using `Z1.execute`
+a job, consider using `EVQL.execute`
 
 ---
-### Z1.saveToTable
+### EVQL.saveToTable
+
+Saves all rows in `sources` to `table`.
+
+    EVQL.saveToTable(opts)
+
+`opts` must be an object with the properties `table`, the name of the to save the results to, and `sources`,
+an array of temp tables (which are returned by methods like `mapTable` or `reduce`)
+
+    var tmp = EVQL.mapTable({
+      //
+    });
+
+    EVQL.saveToTable({
+      table: "my_stats",
+      sources: tmp
+    });
 
 here be dragons
 
 ---
-### Z1.processStream
+### EVQL.saveToTablePartition
 
 here be dragons
 
 ---
-### Z1.writeToOutput
+### EVQL.writeToOutput
 
 This method allows you to manually write to the output file or STDOUT of the
 script (console.log will write to STDERR). This can be used to e.g. the

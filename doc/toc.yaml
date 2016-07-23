@@ -547,6 +547,13 @@
       source: "/api/overview.md"
       children:
         -
+          url: "/api/config_file"
+          title: "Config File"
+          type: page
+          visible_in_menu: true
+          visible_in_toc: true
+          source: "/api/config_file.md"
+        -
           url: "/api/evql"
           title: "evql Reference"
           type: page
