@@ -85,7 +85,7 @@ in a table row and still maintain a strict schema. You can insert nested rows as
 JSON objects or via SQL. Tables with nested rows can be queried like any other
 tables using either SQL or the JavaScript Query framework.
 
-For example, let's say we wante to calculate the get the average temperature per
+For example, let's say we want to calculate the average temperature per
 "thing". This is how we could do it
 
     SELECT
