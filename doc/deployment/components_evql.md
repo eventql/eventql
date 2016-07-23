@@ -1,5 +1,5 @@
-4.1 evql Reference
-==================
+2.3.2 evql
+==========
 
 The evql program is a simple command line utility that executes SQL and MapReduce
 queries on an EventQL server. It supports an interactive shell with line editing

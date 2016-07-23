@@ -1,5 +1,5 @@
-4.3 evqlctl Reference
-==================
+2.3.3 evqlctl
+=============
 
 evqlctl is a client command line utility for performing administrative operations
 on an EventQL server or cluster. You can use it to check and change a clusters
