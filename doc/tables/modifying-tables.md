@@ -1,5 +1,5 @@
-2.1.4 Modyfing Tables
-=====================
+3.4 Modyfing Tables
+===================
 
     ALTER TABLE table_name
     alter_specification [, alter_specification, ...]

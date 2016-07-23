@@ -1,5 +1,5 @@
-2.2.1 Inserting Records
-=======================
+3.5 Inserting Records
+=====================
 
 Before you can insert records, you need to [create a table](../creating-tables/).
 Note that all tables have a mandatory unique primary key.

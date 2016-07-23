@@ -1,5 +1,5 @@
-2.1.2 Partitioning
-==================
+3.2 Partitioning
+================
 
 Tables in EventQL are internally split into many partitions that can be distributed
 over many machines and queried in parallel, allowing you to horizontally scale

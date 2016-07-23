@@ -1,5 +1,5 @@
-2.2.2 Updating Records
-======================
+3.6 Updating Records
+====================
 
 EventQL supports updating a row/event after it was written. Like inserts,
 updates are immediately visible once they are executed.
