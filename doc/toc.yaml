@@ -35,20 +35,6 @@
           partials:
             sidebar_right: 
         -
-          url: "/getting-started/installation"
-          title: "Installation"
-          type: page
-          visible_in_menu: true
-          visible_in_toc: true
-          source: "getting-started/installation.md"
-        -
-          url: "/getting-started/running-eventql"
-          title: "Running EventQL"
-          type: page
-          visible_in_menu: true
-          visible_in_toc: true
-          source: "getting-started/running-eventql.md"
-        -
           url: "/getting-started/faq"
           title: "FAQ"
           type: page
@@ -56,8 +42,73 @@
           visible_in_toc: true
           source: "getting-started/faq.md"
     -
+      url: "/deployment"
+      title: "Deployment"
+      type: redirect
+      visible_in_menu: true
+      visible_in_toc: true
+      location: "/deployment/installation"
+      children:
+        -
+          url: "/deployment/installation"
+          title: "Download &amp; Installation"
+          type: page
+          visible_in_menu: true
+          visible_in_toc: true
+          source: "deployment/installation.md"
+        -
+          url: "/deployment/configuration"
+          title: "Configuration"
+          type: page
+          visible_in_menu: true
+          visible_in_toc: true
+          source: "/api/config_file.md"
+        -
+          url: "/deployment/components"
+          title: "Components"
+          type: page
+          visible_in_menu: true
+          visible_in_toc: true
+          source: "deployment/components.md"
+          children:
+            -
+              url: "/deployment/components/evqld"
+              title: "evqld"
+              type: page
+              visible_in_menu: true
+              visible_in_toc: true
+              source: "deployment/components_evqld.md"
+            -
+              url: "/deployment/components/evql"
+              title: "evql"
+              type: page
+              visible_in_menu: true
+              visible_in_toc: true
+              source: "deployment/components_evql.md"
+            -
+              url: "/deployment/components/evqlctl"
+              title: "evqlctl"
+              type: page
+              visible_in_menu: true
+              visible_in_toc: true
+              source: "deployment/components_evqlctl.md"
+        -
+          url: "/deployment/standalone"
+          title: "Standalone Mode"
+          type: page
+          visible_in_menu: true
+          visible_in_toc: true
+          source: "/api/overview.md"
+        -
+          url: "/deployment/cluster"
+          title: "Cluster Mode"
+          type: page
+          visible_in_menu: true
+          visible_in_toc: true
+          source: "/api/overview.md"
+    -
       url: "/collecting-and-storing"
-      title: "Collecting &amp; Storing Data"
+      title: "Tables &amp; Records"
       type: redirect
       visible_in_menu: true
       visible_in_toc: true
@@ -65,7 +116,7 @@
       children:
         -
           url: "/collecting-and-storing/tables"
-          title: "Tables &amp; Schemas"
+          title: "Tables"
           type: page
           visible_in_menu: true
           visible_in_toc: true
@@ -143,437 +194,387 @@
           visible_in_toc: true
           source: "/tables/replication.md"
     -
-      url: "/queries"
-      title: "Queries"
-      type: page
+      url: "/queries/sql"
+      title: "SQL Queries"
+      type: redirect
       visible_in_menu: true
       visible_in_toc: true
-      source: "/queries.md"
+      location: "/queries/sql/introduction"
       children:
         -
-          url: "/queries/sql"
-          title: "The SQL Query Language"
-          type: redirect
+          url: "/queries/sql/introduction"
+          title: "Introduction"
+          type: page
           visible_in_menu: true
           visible_in_toc: true
-          location: "/queries/sql/introduction"
-          children:
-            -
-              url: "/queries/sql/introduction"
-              title: "Introduction"
-              type: page
-              visible_in_menu: true
-              visible_in_toc: true
-              source: "/sql/introduction.md"
-            -
-              url: "/queries/sql/statements"
-              title: "The SELECT statement"
-              type: page
-              visible_in_menu: true
-              visible_in_toc: true
-              source: "/sql/statements.md"
-            -
-              url: "/queries/sql/functions-and-operators"
-              title: "Functions &amp; Operators"
-              type: page
-              visible_in_menu: true
-              visible_in_toc: true
-              source: "/sql/functions_and_operators.md"
-              children:
-                -
-                  url: "/queries/sql/functions-and-operators/add-operator"
-                  title: "&plus;"
-                  type: page
-                  visible_in_menu: false
-                  visible_in_toc: false
-                  source: "/sql/functions_and_operators/add-operator.md"
-                -
-                  url: "/queries/sql/functions-and-operators/div-operator"
-                  title: "&sol;"
-                  type: page
-                  visible_in_menu: false
-                  visible_in_toc: false
-                  source: "/sql/functions_and_operators/div-operator.md"
-                -
-                  url: "/queries/sql/functions-and-operators/eq-operator"
-                  title: "&equals;&equals;"
-                  type: page
-                  visible_in_menu: false
-                  visible_in_toc: false
-                  source: "/sql/functions_and_operators/eq-operator.md"
-                -
-                  url: "/queries/sql/functions-and-operators/neq-operator"
-                  title: "&excl;&equals;"
-                  type: page
-                  visible_in_menu: false
-                  visible_in_toc: false
-                  source: "/sql/functions_and_operators/neq-operator.md"
-                -
-                  url: "/queries/sql/functions-and-operators/mod-operator"
-                  title: "&percnt;"
-                  type: page
-                  visible_in_menu: false
-                  visible_in_toc: false
-                  source: "/sql/functions_and_operators/mod-operator.md"
-                -
-                  url: "/queries/sql/functions-and-operators/mul-operator"
-                  title: "&ast;"
-                  type: page
-                  visible_in_menu: false
-                  visible_in_toc: false
-                  source: "/sql/functions_and_operators/mul-operator.md"
-                -
-                  url: "/queries/sql/functions-and-operators/neg-operator"
-                  title: "&excl;"
-                  type: page
-                  visible_in_menu: false
-                  visible_in_toc: false
-                  source: "/sql/functions_and_operators/neg-operator.md"
-                -
-                  url: "/queries/sql/functions-and-operators/sub-operator"
-                  title: "&minus;"
-                  type: page
-                  visible_in_menu: false
-                  visible_in_toc: false
-                  source: "/sql/functions_and_operators/sub-operator.md"
-                -
-                  url: "/queries/sql/functions-and-operators/lt-operator"
-                  title: "&lt;"
-                  type: page
-                  visible_in_menu: false
-                  visible_in_toc: false
-                  source: "/sql/functions_and_operators/lt-operator.md"
-                -
-                  url: "/queries/sql/functions-and-operators/lte-operator"
-                  title: "&lt;&equals;"
-                  type: page
-                  visible_in_menu: false
-                  visible_in_toc: false
-                  source: "/sql/functions_and_operators/lte-operator.md"
-                -
-                  url: "/queries/sql/functions-and-operators/gt-operator"
-                  title: "&gt;"
-                  type: page
-                  visible_in_menu: false
-                  visible_in_toc: false
-                  source: "/sql/functions_and_operators/gt-operator.md"
-                -
-                  url: "/queries/sql/functions-and-operators/gte-operator"
-                  title: "&gt;&equals;"
-                  type: page
-                  visible_in_menu: false
-                  visible_in_toc: false
-                  source: "/sql/functions_and_operators/gte-operator.md"
-                -
-                  url: "/queries/sql/functions-and-operators/and"
-                  title: "AND"
-                  type: page
-                  visible_in_menu: false
-                  visible_in_toc: false
-                  source: "/sql/functions_and_operators/and.md"
-                -
-                  url: "/queries/sql/functions-and-operators/count"
-                  title: "count"
-                  type: page
-                  visible_in_menu: false
-                  visible_in_toc: false
-                  source: "/sql/functions_and_operators/count.md"
-                -
-                  url: "/queries/sql/functions-and-operators/date_add"
-                  title: "date_add"
-                  type: page
-                  visible_in_menu: false
-                  visible_in_toc: false
-                  source: "/sql/functions_and_operators/date_add.md"
-                -
-                  url: "/queries/sql/functions-and-operators/date_trunc"
-                  title: "date_trunc"
-                  type: page
-                  visible_in_menu: false
-                  visible_in_toc: false
-                  source: "/sql/functions_and_operators/date_trunc.md"
-                -
-                  url: "/queries/sql/functions-and-operators/endswith"
-                  title: "endswith"
-                  type: page
-                  visible_in_menu: false
-                  visible_in_toc: false
-                  source: "/sql/functions_and_operators/endswith.md"
-                -
-                  url: "/queries/sql/functions-and-operators/from_timestamp"
-                  title: "from_timestamp"
-                  type: page
-                  visible_in_menu: false
-                  visible_in_toc: false
-                  source: "/sql/functions_and_operators/from_timestamp.md"
-                -
-                  url: "/queries/sql/functions-and-operators/if-expression"
-                  title: "if"
-                  type: page
-                  visible_in_menu: false
-                  visible_in_toc: false
-                  source: "/sql/functions_and_operators/if.md"
-                -
-                  url: "/queries/sql/functions-and-operators/isnull"
-                  title: "isnull"
-                  type: page
-                  visible_in_menu: false
-                  visible_in_toc: false
-                  source: "/sql/functions_and_operators/is_null.md"
-                -
-                  url: "/queries/sql/functions-and-operators/lcase"
-                  title: "lcase"
-                  type: page
-                  visible_in_menu: false
-                  visible_in_toc: false
-                  source: "/sql/functions_and_operators/lcase.md"
-                -
-                  url: "/queries/sql/functions-and-operators/lowercase"
-                  title: "lowercase"
-                  type: page
-                  visible_in_menu: false
-                  visible_in_toc: false
-                  source: "/sql/functions_and_operators/lowercase.md"
-                -
-                  url: "/queries/sql/functions-and-operators/max"
-                  title: "max"
-                  type: page
-                  visible_in_menu: false
-                  visible_in_toc: false
-                  source: "/sql/functions_and_operators/max.md"
-                -
-                  url: "/queries/sql/functions-and-operators/mean"
-                  title: "mean"
-                  type: page
-                  visible_in_menu: false
-                  visible_in_toc: false
-                  source: "/sql/functions_and_operators/mean.md"
-                -
-                  url: "/queries/sql/functions-and-operators/min"
-                  title: "min"
-                  type: page
-                  visible_in_menu: false
-                  visible_in_toc: false
-                  source: "/sql/functions_and_operators/min.md"
-                -
-                  url: "/queries/sql/functions-and-operators/mod"
-                  title: "mod"
-                  type: page
-                  visible_in_menu: false
-                  visible_in_toc: false
-                  source: "/sql/functions_and_operators/mod.md"
-                -
-                  url: "/queries/sql/functions-and-operators/or"
-                  title: "or"
-                  type: page
-                  visible_in_menu: false
-                  visible_in_toc: false
-                  source: "/sql/functions_and_operators/or.md"
-                -
-                  url: "/queries/sql/functions-and-operators/pow"
-                  title: "pow"
-                  type: page
-                  visible_in_menu: false
-                  visible_in_toc: false
-                  source: "/sql/functions_and_operators/pow.md"
-                -
-                  url: "/queries/sql/functions-and-operators/regexp-operator"
-                  title: "REGEXP"
-                  type: page
-                  visible_in_menu: false
-                  visible_in_toc: false
-                  source: "/sql/functions_and_operators/regexp-operator.md"
-                -
-                  url: "/queries/sql/functions-and-operators/round"
-                  title: "round"
-                  type: page
-                  visible_in_menu: false
-                  visible_in_toc: false
-                  source: "/sql/functions_and_operators/round.md"
-                -
-                  url: "/queries/sql/functions-and-operators/startswith"
-                  title: "startswith"
-                  type: page
-                  visible_in_menu: false
-                  visible_in_toc: false
-                  source: "/sql/functions_and_operators/startswith.md"
-                -
-                  url: "/queries/sql/functions-and-operators/substr"
-                  title: "substr"
-                  type: page
-                  visible_in_menu: false
-                  visible_in_toc: false
-                  source: "/sql/functions_and_operators/substr.md"
-                -
-                  url: "/queries/sql/functions-and-operators/substring"
-                  title: "substring"
-                  type: page
-                  visible_in_menu: false
-                  visible_in_toc: false
-                  source: "/sql/functions_and_operators/substring.md"
-                -
-                  url: "/queries/sql/functions-and-operators/sum"
-                  title: "sum"
-                  type: page
-                  visible_in_menu: false
-                  visible_in_toc: false
-                  source: "/sql/functions_and_operators/sum.md"
-                -
-                  url: "/queries/sql/functions-and-operators/time_at"
-                  title: "time_at"
-                  type: page
-                  visible_in_menu: false
-                  visible_in_toc: false
-                  source: "/sql/functions_and_operators/time_at.md"
-                -
-                  url: "/queries/sql/functions-and-operators/to_bool"
-                  title: "to_bool"
-                  type: page
-                  visible_in_menu: false
-                  visible_in_toc: false
-                  source: "/sql/functions_and_operators/to_bool.md"
-                -
-                  url: "/queries/sql/functions-and-operators/to_float"
-                  title: "to_float"
-                  type: page
-                  visible_in_menu: false
-                  visible_in_toc: false
-                  source: "/sql/functions_and_operators/to_float.md"
-                -
-                  url: "/queries/sql/functions-and-operators/to_int"
-                  title: "to_int"
-                  type: page
-                  visible_in_menu: false
-                  visible_in_toc: false
-                  source: "/sql/functions_and_operators/to_int.md"
-                -
-                  url: "/queries/sql/functions-and-operators/to_str"
-                  title: "to_str"
-                  type: page
-                  visible_in_menu: false
-                  visible_in_toc: false
-                  source: "/sql/functions_and_operators/to_str.md"
-                -
-                  url: "/queries/sql/functions-and-operators/truncate"
-                  title: "truncate"
-                  type: page
-                  visible_in_menu: false
-                  visible_in_toc: false
-                  source: "/sql/functions_and_operators/truncate.md"
-                -
-                  url: "/queries/sql/functions-and-operators/uppercase"
-                  title: "uppercase"
-                  type: page
-                  visible_in_menu: false
-                  visible_in_toc: false
-                  source: "/sql/functions_and_operators/uppercase.md"
-                -
-                  url: "/queries/sql/functions-and-operators/ucase"
-                  title: "ucase"
-                  type: page
-                  visible_in_menu: false
-                  visible_in_toc: false
-                  source: "/sql/functions_and_operators/ucase.md"
-            -
-              url: "/queries/sql/syntax-reference"
-              title: "Syntax Reference"
-              type: page
-              visible_in_menu: true
-              visible_in_toc: true
-              source: "/sql/syntax_reference.md"
-            -
-              url: "/queries/sql/nested-records"
-              title: "Nested Records"
-              type: page
-              visible_in_menu: true
-              visible_in_toc: true
-              source: "/sql/introduction.md"
-            -
-              url: "/queries/sql/chartsql"
-              title: "ChartSQL"
-              type: page
-              visible_in_menu: true
-              visible_in_toc: true
-              source: "/sql/chartsql.md"
+          source: "/sql/introduction.md"
         -
-          url: "/queries/pipelines"
-          title: "Programmatic Queries"
-          type: redirect
+          url: "/queries/sql/statements"
+          title: "The SELECT statement"
+          type: page
           visible_in_menu: true
           visible_in_toc: true
-          location: "/queries/pipelines/mapreduce"
+          source: "/sql/statements.md"
+        -
+          url: "/queries/sql/functions-and-operators"
+          title: "Functions &amp; Operators"
+          type: page
+          visible_in_menu: true
+          visible_in_toc: true
+          source: "/sql/functions_and_operators.md"
           children:
             -
-              url: "/queries/pipelines/mapreduce"
-              title: "MapReduce"
+              url: "/queries/sql/functions-and-operators/add-operator"
+              title: "&plus;"
               type: page
-              visible_in_menu: true
-              visible_in_toc: true
-              source: "/api/javascript/introduction.md"
+              visible_in_menu: false
+              visible_in_toc: false
+              source: "/sql/functions_and_operators/add-operator.md"
             -
-              url: "/queries/pipelines/stream-processing"
-              title: "Stream Processing"
+              url: "/queries/sql/functions-and-operators/div-operator"
+              title: "&sol;"
               type: page
-              visible_in_menu: true
-              visible_in_toc: true
-              source: "/sql/statements.md"
+              visible_in_menu: false
+              visible_in_toc: false
+              source: "/sql/functions_and_operators/div-operator.md"
             -
-              url: "/queries/pipelines/javascript"
-              title: "JavaScript API"
+              url: "/queries/sql/functions-and-operators/eq-operator"
+              title: "&equals;&equals;"
               type: page
-              visible_in_menu: true
-              visible_in_toc: true
-              source: "/api/javascript/javascript_api.md"
-        #-
-        #  url: "/queries/download-and-export"
-        #  title: "Downloading &amp; Exporting Data"
-        #  type: page
-        #  visible_in_menu: true
-        #  visible_in_toc: true
-        #  source: "/queries.md"
-        #-
-        #  url: "/queries/subscribe"
-        #  title: "Subscribing to changes"
-        #  type: page
-        #  visible_in_menu: true
-        #  visible_in_toc: true
-        #  source: "/queries.md"
+              visible_in_menu: false
+              visible_in_toc: false
+              source: "/sql/functions_and_operators/eq-operator.md"
+            -
+              url: "/queries/sql/functions-and-operators/neq-operator"
+              title: "&excl;&equals;"
+              type: page
+              visible_in_menu: false
+              visible_in_toc: false
+              source: "/sql/functions_and_operators/neq-operator.md"
+            -
+              url: "/queries/sql/functions-and-operators/mod-operator"
+              title: "&percnt;"
+              type: page
+              visible_in_menu: false
+              visible_in_toc: false
+              source: "/sql/functions_and_operators/mod-operator.md"
+            -
+              url: "/queries/sql/functions-and-operators/mul-operator"
+              title: "&ast;"
+              type: page
+              visible_in_menu: false
+              visible_in_toc: false
+              source: "/sql/functions_and_operators/mul-operator.md"
+            -
+              url: "/queries/sql/functions-and-operators/neg-operator"
+              title: "&excl;"
+              type: page
+              visible_in_menu: false
+              visible_in_toc: false
+              source: "/sql/functions_and_operators/neg-operator.md"
+            -
+              url: "/queries/sql/functions-and-operators/sub-operator"
+              title: "&minus;"
+              type: page
+              visible_in_menu: false
+              visible_in_toc: false
+              source: "/sql/functions_and_operators/sub-operator.md"
+            -
+              url: "/queries/sql/functions-and-operators/lt-operator"
+              title: "&lt;"
+              type: page
+              visible_in_menu: false
+              visible_in_toc: false
+              source: "/sql/functions_and_operators/lt-operator.md"
+            -
+              url: "/queries/sql/functions-and-operators/lte-operator"
+              title: "&lt;&equals;"
+              type: page
+              visible_in_menu: false
+              visible_in_toc: false
+              source: "/sql/functions_and_operators/lte-operator.md"
+            -
+              url: "/queries/sql/functions-and-operators/gt-operator"
+              title: "&gt;"
+              type: page
+              visible_in_menu: false
+              visible_in_toc: false
+              source: "/sql/functions_and_operators/gt-operator.md"
+            -
+              url: "/queries/sql/functions-and-operators/gte-operator"
+              title: "&gt;&equals;"
+              type: page
+              visible_in_menu: false
+              visible_in_toc: false
+              source: "/sql/functions_and_operators/gte-operator.md"
+            -
+              url: "/queries/sql/functions-and-operators/and"
+              title: "AND"
+              type: page
+              visible_in_menu: false
+              visible_in_toc: false
+              source: "/sql/functions_and_operators/and.md"
+            -
+              url: "/queries/sql/functions-and-operators/count"
+              title: "count"
+              type: page
+              visible_in_menu: false
+              visible_in_toc: false
+              source: "/sql/functions_and_operators/count.md"
+            -
+              url: "/queries/sql/functions-and-operators/date_add"
+              title: "date_add"
+              type: page
+              visible_in_menu: false
+              visible_in_toc: false
+              source: "/sql/functions_and_operators/date_add.md"
+            -
+              url: "/queries/sql/functions-and-operators/date_trunc"
+              title: "date_trunc"
+              type: page
+              visible_in_menu: false
+              visible_in_toc: false
+              source: "/sql/functions_and_operators/date_trunc.md"
+            -
+              url: "/queries/sql/functions-and-operators/endswith"
+              title: "endswith"
+              type: page
+              visible_in_menu: false
+              visible_in_toc: false
+              source: "/sql/functions_and_operators/endswith.md"
+            -
+              url: "/queries/sql/functions-and-operators/from_timestamp"
+              title: "from_timestamp"
+              type: page
+              visible_in_menu: false
+              visible_in_toc: false
+              source: "/sql/functions_and_operators/from_timestamp.md"
+            -
+              url: "/queries/sql/functions-and-operators/if-expression"
+              title: "if"
+              type: page
+              visible_in_menu: false
+              visible_in_toc: false
+              source: "/sql/functions_and_operators/if.md"
+            -
+              url: "/queries/sql/functions-and-operators/isnull"
+              title: "isnull"
+              type: page
+              visible_in_menu: false
+              visible_in_toc: false
+              source: "/sql/functions_and_operators/is_null.md"
+            -
+              url: "/queries/sql/functions-and-operators/lcase"
+              title: "lcase"
+              type: page
+              visible_in_menu: false
+              visible_in_toc: false
+              source: "/sql/functions_and_operators/lcase.md"
+            -
+              url: "/queries/sql/functions-and-operators/lowercase"
+              title: "lowercase"
+              type: page
+              visible_in_menu: false
+              visible_in_toc: false
+              source: "/sql/functions_and_operators/lowercase.md"
+            -
+              url: "/queries/sql/functions-and-operators/max"
+              title: "max"
+              type: page
+              visible_in_menu: false
+              visible_in_toc: false
+              source: "/sql/functions_and_operators/max.md"
+            -
+              url: "/queries/sql/functions-and-operators/mean"
+              title: "mean"
+              type: page
+              visible_in_menu: false
+              visible_in_toc: false
+              source: "/sql/functions_and_operators/mean.md"
+            -
+              url: "/queries/sql/functions-and-operators/min"
+              title: "min"
+              type: page
+              visible_in_menu: false
+              visible_in_toc: false
+              source: "/sql/functions_and_operators/min.md"
+            -
+              url: "/queries/sql/functions-and-operators/mod"
+              title: "mod"
+              type: page
+              visible_in_menu: false
+              visible_in_toc: false
+              source: "/sql/functions_and_operators/mod.md"
+            -
+              url: "/queries/sql/functions-and-operators/or"
+              title: "or"
+              type: page
+              visible_in_menu: false
+              visible_in_toc: false
+              source: "/sql/functions_and_operators/or.md"
+            -
+              url: "/queries/sql/functions-and-operators/pow"
+              title: "pow"
+              type: page
+              visible_in_menu: false
+              visible_in_toc: false
+              source: "/sql/functions_and_operators/pow.md"
+            -
+              url: "/queries/sql/functions-and-operators/regexp-operator"
+              title: "REGEXP"
+              type: page
+              visible_in_menu: false
+              visible_in_toc: false
+              source: "/sql/functions_and_operators/regexp-operator.md"
+            -
+              url: "/queries/sql/functions-and-operators/round"
+              title: "round"
+              type: page
+              visible_in_menu: false
+              visible_in_toc: false
+              source: "/sql/functions_and_operators/round.md"
+            -
+              url: "/queries/sql/functions-and-operators/startswith"
+              title: "startswith"
+              type: page
+              visible_in_menu: false
+              visible_in_toc: false
+              source: "/sql/functions_and_operators/startswith.md"
+            -
+              url: "/queries/sql/functions-and-operators/substr"
+              title: "substr"
+              type: page
+              visible_in_menu: false
+              visible_in_toc: false
+              source: "/sql/functions_and_operators/substr.md"
+            -
+              url: "/queries/sql/functions-and-operators/substring"
+              title: "substring"
+              type: page
+              visible_in_menu: false
+              visible_in_toc: false
+              source: "/sql/functions_and_operators/substring.md"
+            -
+              url: "/queries/sql/functions-and-operators/sum"
+              title: "sum"
+              type: page
+              visible_in_menu: false
+              visible_in_toc: false
+              source: "/sql/functions_and_operators/sum.md"
+            -
+              url: "/queries/sql/functions-and-operators/time_at"
+              title: "time_at"
+              type: page
+              visible_in_menu: false
+              visible_in_toc: false
+              source: "/sql/functions_and_operators/time_at.md"
+            -
+              url: "/queries/sql/functions-and-operators/to_bool"
+              title: "to_bool"
+              type: page
+              visible_in_menu: false
+              visible_in_toc: false
+              source: "/sql/functions_and_operators/to_bool.md"
+            -
+              url: "/queries/sql/functions-and-operators/to_float"
+              title: "to_float"
+              type: page
+              visible_in_menu: false
+              visible_in_toc: false
+              source: "/sql/functions_and_operators/to_float.md"
+            -
+              url: "/queries/sql/functions-and-operators/to_int"
+              title: "to_int"
+              type: page
+              visible_in_menu: false
+              visible_in_toc: false
+              source: "/sql/functions_and_operators/to_int.md"
+            -
+              url: "/queries/sql/functions-and-operators/to_str"
+              title: "to_str"
+              type: page
+              visible_in_menu: false
+              visible_in_toc: false
+              source: "/sql/functions_and_operators/to_str.md"
+            -
+              url: "/queries/sql/functions-and-operators/truncate"
+              title: "truncate"
+              type: page
+              visible_in_menu: false
+              visible_in_toc: false
+              source: "/sql/functions_and_operators/truncate.md"
+            -
+              url: "/queries/sql/functions-and-operators/uppercase"
+              title: "uppercase"
+              type: page
+              visible_in_menu: false
+              visible_in_toc: false
+              source: "/sql/functions_and_operators/uppercase.md"
+            -
+              url: "/queries/sql/functions-and-operators/ucase"
+              title: "ucase"
+              type: page
+              visible_in_menu: false
+              visible_in_toc: false
+              source: "/sql/functions_and_operators/ucase.md"
+        -
+          url: "/queries/sql/syntax-reference"
+          title: "Syntax Reference"
+          type: page
+          visible_in_menu: true
+          visible_in_toc: true
+          source: "/sql/syntax_reference.md"
+        -
+          url: "/queries/sql/nested-records"
+          title: "Nested Records"
+          type: page
+          visible_in_menu: true
+          visible_in_toc: true
+          source: "/sql/introduction.md"
+        -
+          url: "/queries/sql/chartsql"
+          title: "ChartSQL"
+          type: page
+          visible_in_menu: true
+          visible_in_toc: true
+          source: "/sql/chartsql.md"
+    -
+      url: "/queries/pipelines"
+      title: "MapReduce Queries"
+      type: redirect
+      visible_in_menu: true
+      visible_in_toc: true
+      location: "/queries/pipelines/mapreduce"
+      children:
+        -
+          url: "/queries/pipelines/mapreduce"
+          title: "MapReduce"
+          type: page
+          visible_in_menu: true
+          visible_in_toc: true
+          source: "/api/javascript/introduction.md"
+        -
+          url: "/queries/pipelines/stream-processing"
+          title: "Stream Processing"
+          type: page
+          visible_in_menu: true
+          visible_in_toc: true
+          source: "/sql/statements.md"
+        -
+          url: "/queries/pipelines/javascript"
+          title: "JavaScript API"
+          type: page
+          visible_in_menu: true
+          visible_in_toc: true
+          source: "/api/javascript/javascript_api.md"
     -
       url: "/api"
-      title: "Drivers &amp; API"
+      title: "API Reference"
       type: page
       visible_in_menu: true
       visible_in_toc: true
       source: "/api/overview.md"
       children:
-        -
-          url: "/api/config_file"
-          title: "Config File"
-          type: page
-          visible_in_menu: true
-          visible_in_toc: true
-          source: "/api/config_file.md"
-        -
-          url: "/api/evql"
-          title: "evql Reference"
-          type: page
-          visible_in_menu: true
-          visible_in_toc: true
-          source: "/api/evql.md"
-        -
-          url: "/api/evqld"
-          title: "evqld Reference"
-          type: page
-          visible_in_menu: true
-          visible_in_toc: true
-          source: "/api/evqld.md"
-        -
-          url: "/api/evqlctl"
-          title: "evqlctl Reference"
-          type: page
-          visible_in_menu: true
-          visible_in_toc: true
-          source: "/api/evqlctl.md"
         -
           url: "/api/mysql2evql"
           title: "mysql2evql Reference"
@@ -650,6 +651,14 @@
         #  visible_in_menu: true
         #  visible_in_toc: true
         #  source: "/api/http/index.html"
+    -
+      url: "/drivers"
+      title: "Drivers & Tools"
+      type: page
+      visible_in_menu: true
+      visible_in_toc: true
+      source: "/api/overview.md"
+      children:
         #-
         #  url: "/api/node"
         #  title: "Node.js Driver"
@@ -714,19 +723,19 @@
         #  visible_in_toc: true
         #  source: "/api/http/index.html"
     -
-      url: "/cluster-administration"
-      title: "Cluster Administration"
+      url: "/internals"
+      title: "Internals"
       type: page
       visible_in_menu: true
       visible_in_toc: true
       source: "/api/overview.md"
-    #-
-    #  url: "/internals"
-    #  title: "Internals"
-    #  type: page
-    #  visible_in_menu: true
-    #  visible_in_toc: true
-    #  source: "/api/overview.md"
+    -
+      url: "/examples"
+      title: "Examples &amp; Tutorials"
+      type: page
+      visible_in_menu: true
+      visible_in_toc: true
+      source: "/api/overview.md"
     #-
     #  url: "/hacking"
     #  title: "Hacking"
