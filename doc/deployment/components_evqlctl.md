@@ -1,7 +1,15 @@
-4.3 evqlctl Reference
-==================
+2.3.3 evqlctl
+=============
 
-evqlctl is the EventQL command line tool to manage a cluster.
+evqlctl is a client command line utility for performing administrative operations
+on an EventQL server or cluster. You can use it to check and change a clusters
+configuragtion and current status, to add and remove servers and more.
+
+Most of the evqlctl commands are only applicable when running an EventQL cluster
+and speak directly to the coordination service (e.g. Zookeeper) rather than the
+EventQL server.
+
+    $ evqlctl --help
 
     Usage: $ evqlctl [OPTIONS] <command> [<args>]
 
@@ -10,22 +18,28 @@ evqlctl is the EventQL command line tool to manage a cluster.
        -?, --help <topic>        Display a command's help text and exit
        -v, --version             Display the version of this binary and exit
 
+## Supported Commands:
+
+### cluster-create
+
+Create a new cluster.
+
+      Usage: evqlctl [OPTIONS]
+        --cluster_name <node name>       The name of the cluster to create.
 
 
-evqlctl-cluster-add-server - Add a server to an existing cluster.
+### cluster-add-server
+
+Add a server to an existing cluster.
 
       Usage: evqlctl cluster-add-server [OPTIONS]
          --cluster_name <node name>       The name of the cluster to add the server to.
          --server_name <server name>      The name of the server to add.
 
 
-evqlctl-cluster-create - Create a new cluster.
+### cluster-remove-server
 
-      Usage: evqlctl [OPTIONS]
-        --cluster_name <node name>       The name of the cluster to create.
-
-
-evqlctl-cluster-remove-server - Remove an existing server from an existing cluster.
+Remove an existing server from an existing cluster.
 
       Usage: evqlctl [OPTIONS]
         --cluster_name <node name>       The name of the cluster to add the server to.
@@ -34,45 +48,45 @@ evqlctl-cluster-remove-server - Remove an existing server from an existing clust
         --hard                           The name of the server to add.
 
 
+### cluster-status
 
-evqlctl-cluster-status - Display the current cluster status.
+Display the current cluster status.
 
       Usage: evqlctl [OPTIONS] -cluster-status
         --master <addr>       The url of the master.
 
 
-evqlctl-namespace-create - Create a new namespace.
+### namespace-create
+
+Create a new namespace.
 
       Usage: evqlctl [OPTIONS] -namespace-create
       --cluster_name <node name>       The name of the cluster
       --namespace <namespace name>     The name of the namespace to create
 
 
-evqlctl-rebalance - Rebalance.
+### rebalance
+
+Rebalance a cluster.
 
       Usage: evqlctl [OPTIONS] 
         --cluster_name <node name>       The name of the cluster.
 
+### table-split
 
-evqlctl-table-split - Split partition
+Split partition
 
       Usage: evqlctl table-split [OPTIONS]
         --namespace              The name of the namespace.
         --cluster_name           The name of the cluster.
         --table_name             The name of the table to split.
         --partition_id           The id of the partition to split.
-        --split_point 
-
-evqlctl-table-set-primary-key - Set primary key
-
-      Usage: evqlctl table-set-primary-key [OPTIONS]
-        --namespace              The name of the namespace.
-        --cluster_name           The name of the cluster.
-        --table_name             The name of the table to split.
-        --primary_key            The primary key (comma separated)
+        --split_point
 
 
-evqlctl-table-config-set - Set table config parameters
+### table-config-set
+
+Set table config parameters
 
       Usage: evqlctl table-config-set [OPTIONS]
         --database               The name of the database to modify.
@@ -81,15 +95,3 @@ evqlctl-table-config-set - Set table config parameters
         --value                  The value to set the parameter to
 
 
-evqlctl-table-disable-replication - Disable replication
-
-      Usage: evqlctl table-disable-replication [OPTIONS]
-        --namespace              The name of the namespace.
-        --cluster_name           The name of the cluster.
-        --table_name             The name of the table to split.
-
-evqlctl-cluster-set-allocation-policy - Set allocation policy for a server.
-
-      Usage: evqlctl [OPTIONS]
-        --cluster_name <node name>       The name of the cluster to add the server to.
-        --server_name <server name>      The name of the server to add.
