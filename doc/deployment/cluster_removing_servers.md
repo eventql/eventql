@@ -5,11 +5,12 @@ Sometimes you need to remove a server from a cluster. Either because the hardwar
 or the operation system has become defect or simply because you are re-provisioning
 the datacenter.
 
-Thera are two methods of removing a cluster, called `soft leave` and `hard leave`.
-The difference between these two methods lies in a tradeoff between how quickly
-the server can be removed and not violating any redundancy guarantees.
+Thera are two methods of removing a server from a cluster, called `soft leave`
+and `hard leave`. The difference between these two methods lies in a tradeoff
+between how quickly the server can actually be removed, not creating excessive
+network/IO load and not violating any redundancy guarantees.
 
-#### Soft Leave
+### Soft Leave
 
 When `soft-leaving` a server, a flag is added to that servers configuration that
 tells the cluster not to put any new data onto the server and to start rebalancing
@@ -46,7 +47,7 @@ is `mycluster`, the full command line could look like this:
         --soft
 
 
-#### Hard Leave
+### Hard Leave
 
 The `hard leave` operation will immediately remove the server from the cluster
 and mark all data previously stored on the node as "dead". After this happens,
