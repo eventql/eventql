@@ -1,56 +1,13 @@
-Statements
-==========
+4.2 Statements
+===============
 
 The following SQL statements are currently supported.
 
-  - SELECT ... ;
-  - DRAW ... ;
-  - INSERT INTO ... ;
-  - CREATE TABLE ...;
-  - ALTER TABLE ...;
-  - DESCRIBE ... / EXPLAIN ...;
-  - SHOW TABLES;
+  - [SELECT](...) is used when you want to read (select) your data.
+  - [DRAW](...) is used when you want to visualize query results.
+  - [INSERT](...) is used when you want to add (insert) or update (upsert) data.
+  - [CREATE TABLE](...) is used to create a new table
+  - [ALTER TABLE](...) is used to modify an existing table's schema
+  - [DESCRIBE](...) shows the structure of a table
+  - [SHOW TABLES](...) lists the tables in a database
 
-SELECT Statement
-----------------
-
-
-    SELECT
-        select_expr [, select_expr ...]
-        [FROM table_references
-            [WHERE predicate_expr]
-            [GROUP BY {col_name | expr}, ...]
-            [HAVING predicate_expr]
-            [ORDER BY {col_name | expr} [ASC | DESC], ...]
-            [LIMIT {[offset,] row_count | row_count OFFSET offset}]]
-
-
-##### WITHIN RECORD extensions
-
-...
-
-##### GROUP BY and HAVING extensions
-
-Like MySQL, fnordmetric SQL extends the use of GROUP BY so that the select list
-can refer to nonaggregated columns not named in the GROUP BY clause. This assumes
-that the nongrouped columns will have the same group-wise values. Otherwise, the
-result is undefined. The same applies for the HAVING clause.
-
-If you use a group function in a statement containing no GROUP BY clause, it
-will emit a single group.
-
-
-DRAW Statement
---------------
-
-The DRAW statement allows you to specify that the query result should be returned
-as a chart (or other visualization) rather than a table. Here is a simple example
-of the DRAW statement:
-
-    DRAW LINECHART
-        WITH AXIS BOTTOM
-
-    SELECT time AS x, value AS y
-        FROM example_data;
-
-Read the [documentation for the DRAW statement](/docs/sql/chartsql)

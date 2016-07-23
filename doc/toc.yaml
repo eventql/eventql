@@ -560,27 +560,20 @@
             visible_in_toc: true
             source: "/sql/statements/show_tables.md"
     -
-      url: "/queries/pipelines"
+      url: "/mapreduce"
       title: "MapReduce Queries"
       type: redirect
       visible_in_menu: true
       visible_in_toc: true
-      location: "/queries/pipelines/mapreduce"
+      location: "/mapreduce/introduction"
       children:
         -
-          url: "/queries/pipelines/mapreduce"
-          title: "MapReduce"
+          url: "/mapreduce/introduction"
+          title: "Introduction"
           type: page
           visible_in_menu: true
           visible_in_toc: true
           source: "/api/javascript/introduction.md"
-        -
-          url: "/queries/pipelines/stream-processing"
-          title: "Stream Processing"
-          type: page
-          visible_in_menu: true
-          visible_in_toc: true
-          source: "/sql/statements.md"
     -
       url: "/api"
       title: "API Reference"
@@ -659,7 +652,7 @@
         #  visible_in_toc: true
         #  source: "/api/http/index.html"
         -
-          url: "/queries/pipelines/javascript"
+          url: "/mapreduce/javascript"
           title: "MapReduce API (JavaScript)"
           type: page
           visible_in_menu: true
@@ -759,8 +752,8 @@
           visible_in_toc: true
           source: "internals/replication.md"
     -
-      url: "/examples"
-      title: "Examples &amp; Tuning"
+      url: "/appendix"
+      title: "Appendix"
       type: page
       visible_in_menu: true
       visible_in_toc: true

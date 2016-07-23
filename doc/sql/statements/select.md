@@ -12,16 +12,12 @@ SELECT Statement
             [LIMIT {[offset,] row_count | row_count OFFSET offset}]]
 
 
-##### WITHIN RECORD extensions
+#### GROUP BY and HAVING extensions
 
-...
-
-##### GROUP BY and HAVING extensions
-
-Like MySQL, fnordmetric SQL extends the use of GROUP BY so that the select list
-can refer to nonaggregated columns not named in the GROUP BY clause. This assumes
-that the nongrouped columns will have the same group-wise values. Otherwise, the
-result is undefined. The same applies for the HAVING clause.
+Like other databases, EventQL SQL extends the use of GROUP BY so that the select
+list can refer to nonaggregated columns not named in the GROUP BY clause. This
+assumes that the nongrouped columns will have the same group-wise values. Otherwise,
+the result is undefined. The same applies for the HAVING clause.
 
 If you use a group function in a statement containing no GROUP BY clause, it
 will emit a single group.
