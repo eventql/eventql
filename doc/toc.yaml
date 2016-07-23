@@ -9,7 +9,7 @@
       type: redirect
       visible_in_menu: true
       visible_in_toc: true
-      location: "/getting-started/introduction"
+      location: "/getting-started/first-steps"
       children:
         -
           url: "/getting-started/introduction"
@@ -98,7 +98,7 @@
           type: page
           visible_in_menu: true
           visible_in_toc: true
-          source: "/api/overview.md"
+          source: "deployment/standalone.md"
         -
           url: "/deployment/cluster"
           title: "Cluster Administration"
