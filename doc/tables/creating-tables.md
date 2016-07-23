@@ -34,4 +34,4 @@ schemas from the web interface. Go to `EventQL Cloud > Tables` and click the
 
 ### HTTP API
 
-You can also alter tables using the HTTP API. Please refer to the [HTTP API reference](/documentation/api/http/).
+You can also create tables using the HTTP API. Please refer to the [HTTP API reference](/documentation/api/http/).
