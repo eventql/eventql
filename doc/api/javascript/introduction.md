@@ -10,6 +10,28 @@ on building business logic. Once you have written a pipeline or query you will b
 able to run it on it on 1GB, 100GB or 100TB of data without modifying a single
 line
 
+This guide will walk you through running a simple MapReduce Job. 
+We will calculate the referrer stats of a fictional web shop
+
+#### Create Table
+For our example, we will create a table that stores `time`, `session_id` and `url` for
+each page_view.
+
+Run this from the command line (..against your local or remote server/cluster, database)
+
+    $ evql -e "CREATE TABLE access_logs (time DATETIME PRIMARY KEY, session_id STRING, url STRING);"
+
+
+#### Insert Data
+
+
+    $ evql -e "INSERT INTO access_logs FROM JSON '{"time": "2016-07-23
+  
+
+#### 
+Now, let
+
+
 An example says more than a thousand words so here is a simple script that
 calculates the bounce rate per page in the last 30 days from raw pageview data
 

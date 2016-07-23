@@ -108,7 +108,7 @@ here be dragons
 
 Downloads all rows in the provided sources.
 
-  EVQL.downloadResults(sources [, serializer])
+    EVQL.downloadResults(sources [, serializer])
 
 `sources` must be an array of temp tables (which are returned by methods like
 `mapTable` or `reduce`). This method will download all rows from all sources and,
@@ -157,10 +157,26 @@ a job, consider using `EVQL.execute`
 ---
 ### EVQL.saveToTable
 
+Saves all rows in `sources` to `table`.
+
+    EVQL.saveToTable(opts)
+
+`opts` must be an object with the properties `table`, the name of the to save the results to, and `sources`,
+an array of temp tables (which are returned by methods like `mapTable` or `reduce`)
+
+    var tmp = EVQL.mapTable({
+      //
+    });
+
+    EVQL.saveToTable({
+      table: "my_stats",
+      sources: tmp
+    });
+
 here be dragons
 
 ---
-### EVQL.processStream
+### EVQL.saveToTablePartition
 
 here be dragons
 
