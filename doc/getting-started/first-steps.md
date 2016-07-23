@@ -81,10 +81,6 @@ in the table:
 
     SELECT * FROM access_log;
 
-EventQL aims to be a feature-complete SQL database. We're not there just yet, but
-at this point have most of the standard statements and functions you'd expect (yes,
-including JOINs).
-
 For a more complex query example, let's display the top ten pages in the last 4
 hours:
 

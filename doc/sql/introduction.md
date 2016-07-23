@@ -56,10 +56,6 @@ and functions you'd expect (including JOINs) are implemented.
 </ul>
 </li><p></p>
 
-<p></p><li>
-<a href="/documentation/queries/sql/syntax-reference">Syntax Reference</a><p></p>
-
-<p></p></li>
 </ul>
 
 

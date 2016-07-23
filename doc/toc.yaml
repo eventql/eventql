@@ -559,13 +559,6 @@
             visible_in_menu: true
             visible_in_toc: true
             source: "/sql/statements/show_tables.md"
-        -
-          url: "/queries/sql/syntax-reference"
-          title: "Syntax Reference"
-          type: page
-          visible_in_menu: true
-          visible_in_toc: true
-          source: "/sql/syntax_reference.md"
     -
       url: "/queries/pipelines"
       title: "MapReduce Queries"
