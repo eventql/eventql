@@ -14,6 +14,8 @@ The EventQL command lines connects directly to the EventQL server.
 You can use the EventQL command line to create tables, alter tables, insert records
 and for executing SQL and MapReduce queries.
 
+    $ evql --help
+
     Usage: $ evql [OPTIONS] [query]
            $ evql [OPTIONS] -f file
 
