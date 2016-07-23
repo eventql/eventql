@@ -19,9 +19,9 @@ The commands below will start an evqld process that stores its database in
     $ mkdir -p /var/evql/standalone
     $ evqld --standalone --datadir /var/evql/standalone
 
-The server should now be running and listening on `localhost:9175`. Note that we
-didn't pass the `--daemonize` flag, so the server process is not sent into the
-background.
+That's it. The server should now be running and listening on `localhost:9175`.
+Note that we didn't pass the `--daemonize` flag, so the server process is not
+sent into the background.
 
 Next, open a new terminal and copy the command below to start an interactive sql
 shell:

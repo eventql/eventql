@@ -1,19 +1,16 @@
-2.1 Tables & Schemas
-====================
+3.1 Tables
+==========
 
 The core unit of data storage in EventQL are tables and rows (also referred to
 as records or events). Tables have a strict schema that you must define and that
 all rows must adhere to.
 
-Schema changes are instant since they only require a small metadata change on disk.
-
-
-## Flat Records
-
 The most simple form of a table schema is one that has a flat list of columns
 with a simple data type like `string`, `uint64` or `datetime`. These table
 schemas look exactly like the ones you are probably used to from other databases.
 In fact, EventQL can import tables from all major relational database products.
+
+Schema changes are instant and cheap as they only require a small metadata change.
 
 Let's look at a simple example. Say we wanted to collect data
 from a number of temperature sensors. Our table schema could look something like

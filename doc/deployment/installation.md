@@ -1,4 +1,4 @@
-1.4 Download & Installation
+2.1 Download & Installation
 ===========================
 
 EventQL currently runs on Linux and OSX. The distribution contains three binaries

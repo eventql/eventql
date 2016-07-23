@@ -1,5 +1,5 @@
-4.1 Configuration File
-=====================
+2.2 Configuration
+=================
 
 Configuration files aren't mandatory but they provide a convenient way to specifiy regularly used options, so you don't have to enter them on the command line each time you run the program.
 

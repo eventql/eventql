@@ -12,7 +12,7 @@ network/IO load and not violating any redundancy guarantees.
 
 ### Soft Leave
 
-When `soft-leaving` a server, a flag is added to that servers configuration that
+When `soft-leaving` a server, a flag is added to that server's configuration that
 tells the cluster not to put any new data onto the server and to start rebalancing
 the data owned by the leaving server to other nodes.
 
