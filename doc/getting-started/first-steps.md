@@ -5,7 +5,7 @@ This page will guide you through setting up a standalone EventQL server, creatin
 a table, inserting a few events and finally querying the data.
 
 If you want to learn how to set up a multi-machine cluster, jump straight to
-["Setting up a new cluster"](../../cluster-administration/cluster-setup).
+["Setting up a new cluster"](../../deployment/cluster/setting-up-a-new-cluster).
 
 ### Step 1: Start the EventQL server
 
@@ -71,7 +71,7 @@ of test data:
     INSERT INTO access_log (time, session_id, url) VALUES (NOW(), "s2", "/page2");
     INSERT INTO access_log (time, session_id, url) VALUES (NOW(), "s3", "/page1");
 
-Later, we will use the [HTTP API](../../api/http/) or one of the [driver libraries](../../api/)
+Later, we will use the [HTTP API](../../api/http/) or one of the [driver libraries](../../drivers-tools/)
 to insert rows programatically.
 
 ### Step 4: Query the data
@@ -90,6 +90,6 @@ hours:
      ORDER BY cnt DESC
      LIMIT 10;
 
-That's all for now. To dive deeper, check out the ["SQL Query Language" chapter](../../queries/sql/introduction/)
+That's all for now. To dive deeper, check out the ["SQL Query Language" chapter](../../queries/sql/)
 for more information on all supported SQL statements, functions and extensions
 or have a look at the [JavaScript Query API](../../queries/pipelines/mapreduce/)

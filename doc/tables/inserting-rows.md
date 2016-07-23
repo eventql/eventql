@@ -28,7 +28,7 @@ Example (from JSON):
 ### Insert via HTTP API
 
 You can also insert JSON rows using the HTTP API. Please refer to the
-[API reference for the specifics](/documentation/api/).
+[API reference for the specifics](../../api/http/).
 
 Example insert using the HTTP API:
 

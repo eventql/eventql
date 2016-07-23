@@ -47,7 +47,7 @@ as our coordination service.
 The `zookeeper_hosts` contains a comma seperated list of zookeeper hosts to connect
 to.
 
-For a full list of supported configuration options please refer to the [Configuration](...)
+For a full list of supported configuration options please refer to the [Configuration](../../configuration)
 page.
 
 

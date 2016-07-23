@@ -11,8 +11,8 @@ mode".
 In the standalone mode evqld runs as a standalone process on a single machine and
 has no further dependencies. The standalone mode is ideal for evaluating and development
 setups as it allows you to have a server up and running within seconds. To learn
-more about how to run EventQL in standalone mode, read the [First Steps](...) or
-[Standalone](...) pages.
+more about how to run EventQL in standalone mode, read the [First Steps](../../../getting-started/first-steps/) or
+[Standalone](../../standalone) pages.
 
 In the cluster mode, many instances of the evqld binary are run on a number of
 machines. When running in cluster mode, the individual EventQL Server instances

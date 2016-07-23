@@ -26,5 +26,5 @@ To take the deep dive, these pages give a good overview of the the major concept
   - [Tables & Schemas](../../tables/)
   - [Partitioning](../../tables/partitioning/)
   - [Replication](../../tables/replication/)
-  - [The SQL Query Language](../../sql/)
-  - [JavaScript Queries](../../queries/)
+  - [The SQL Query Language](../../queries/sql/)
+  - [JavaScript Queries](../../mapreduce/introduction/)

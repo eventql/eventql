@@ -13,7 +13,7 @@
     | PRIMARY KEY ( column_name [, column_name1 , column_name2, ... ] )
 
 
-sql_type must be one of the listed [SQL data types](/documentation/collecting-and-storing/tables/datatypes).
+sql_type must be one of the listed [SQL data types](../datatypes/).
 
 A table must have at least one unique primary key whose first column is treated as partition key to distribute the rows among the hosts.
 The partition key can be of type `string`, `uint64` or `datetime`. To learn more about primary keys and understand how to choose one
