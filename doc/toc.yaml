@@ -195,18 +195,11 @@
     -
       url: "/queries/sql"
       title: "SQL Queries"
-      type: redirect
+      type: page
       visible_in_menu: true
       visible_in_toc: true
-      location: "/queries/sql/introduction"
+      source: "/sql/introduction.md"
       children:
-        -
-          url: "/queries/sql/introduction"
-          title: "Introduction"
-          type: page
-          visible_in_menu: true
-          visible_in_toc: true
-          source: "/sql/introduction.md"
         -
           url: "/queries/sql/functions-and-operators"
           title: "Functions &amp; Operators"
