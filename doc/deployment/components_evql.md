@@ -1,8 +1,18 @@
 4.1 evql Reference
 ==================
 
+The evql program is a simple command line utility that executes SQL and MapReduce
+queries on an EventQL server. It supports an interactive shell with line editing
+capabilities and noninteractive use.
 
-evql is the EventQL command line interface to create tables, alter tables, insert and query the data.
+When used interactively, query results are presented in an ASCII-table format.
+When used noninteractively (`-B` flag), the result is presented in a tab-separated
+format.
+
+The EventQL command lines connects directly to the EventQL server.
+
+You can use the EventQL command line to create tables, alter tables, insert records
+and for executing SQL and MapReduce queries.
 
     Usage: $ evql [OPTIONS] [query]
            $ evql [OPTIONS] -f file
@@ -21,8 +31,8 @@ evql is the EventQL command line interface to create tables, alter tables, inser
        --verbose                 Print debug output to STDERR
        -v, --version             Display the version of this binary and exit
        -?, --help                Display this help text and exit
-                                                           
-    Examples:                                              
+
+    Examples:
        $ evql                        # start an interactive shell
        $ evql -h localhost -p 9175   # start an interactive shell
        $ evql < query.sql            # execute query from STDIN
@@ -31,6 +41,7 @@ evql is the EventQL command line interface to create tables, alter tables, inser
        $ evql -e 'SELECT 42;'        # execute 'SELECT 42'
 
 
-####Host, port and user
-By default evql connects to the server `localhost` at port `9175` and set user to the current UNIX user.
-You can easily change it by using the command line options.
+#### Default host, port and user
+
+By default evql connects to the server `localhost` at port `9175` and set user to
+the current UNIX user.
