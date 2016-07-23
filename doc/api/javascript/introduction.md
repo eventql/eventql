@@ -64,7 +64,7 @@ To get started writing your own pipelines, have a look at these pages. If you
 are already familiar with common data processing paradigms like MapReduce you
 won't have to learn any new concepts: jump straight into the API documentation.
 
-  - [JavaScript API Documentation](/docs/api/javascript_api)
+  - [JavaScript API Documentation](../../api/javascript_mapreduce/)
 
 
 
