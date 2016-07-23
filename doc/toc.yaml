@@ -772,10 +772,16 @@
     #  visible_in_menu: true
     #  visible_in_toc: true
     #  source: "/api/overview.md"
-    #-
-    #  url: "/hacking"
-    #  title: "Hacking"
-    #  type: page
-    #  visible_in_menu: true
-    #  visible_in_toc: true
-    #  source: "/api/overview.md"
+    #  children:
+    #    -
+    #      url: "/appendix/building-html5-dashboards"
+    #      title: "Building HTML5 Dashboards"
+    #      type: page
+    #      visible_in_menu: true
+    #      visible_in_toc: true
+    #    -
+    #      url: "/appendix/high-volume-timeseries"
+    #      title: "Tuning for high volume timeseries"
+    #      type: page
+    #      visible_in_menu: true
+    #      visible_in_toc: true
