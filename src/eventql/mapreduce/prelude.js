@@ -107,26 +107,32 @@ var EVQL = (function(global) {
     var dependencies_set = {};
     dependencies.push(root_job);
 
-    var find_dependecies = function(job) {
+    var find_dependencies = function(job) {
       if (job.sources) {
-        job.sources.forEach(function(job_id) {
-          if (dependencies_set[job_id]) {
-            return;
+        if (!Array.isArray(job.sources)) {
+          throw "sources must be an array";
+        }
+
+        for (var i = 0; i < job.sources.length; ++i) {
+          var djob_id = job.sources[i];
+
+          if (dependencies_set[djob_id]) {
+            continue;
           }
 
-          var job = jobs[job_id];
-          if (!job) {
-            throw "invalid job id: " + job_id;
+          var djob = jobs[djob_id];
+          if (!djob) {
+            throw "invalid job id: " + djob_id;
           }
 
-          dependencies_set[job_id] = true;
-          dependencies.push(job);
-          find_dependecies(job);
-        });
+          dependencies_set[djob_id] = true;
+          dependencies.push(djob);
+          find_dependencies(djob);
+        }
       }
     };
 
-    find_dependecies(root_job);
+    find_dependencies(root_job);
     z1_executemr(JSON.stringify(dependencies), root_job.id);
   }
 
@@ -171,15 +177,22 @@ var EVQL = (function(global) {
   };
 
   api.mapTable = function(opts) {
+    if (!opts["table"]) {
+      throw "missing parameter: table";
+    }
+
     autoBroadcast();
     var job_id = mkJobID();
+
+    var keyrange_begin = opts["begin"] || opts["from"];
+    var keyrange_limit = opts["end"] || opts["until"];
 
     jobs[job_id] = {
       id: job_id,
       op: "map_table",
       table_name: opts["table"],
-      from: opts["from"],
-      until: opts["until"],
+      keyrange_begin: keyrange_begin ? keyrange_begin.toString() : null,
+      keyrange_limit: keyrange_limit ? keyrange_limit.toString() : null,
       map_fn: String(opts["map_fn"]),
       globals: __encode_js(bcastdata),
       params: __encode_js(opts["params"] || {}),
@@ -190,6 +203,22 @@ var EVQL = (function(global) {
   };
 
   api.reduce = function(opts) {
+    if (!opts["sources"]) {
+      throw "missing parameter: sources";
+    }
+
+    if (!Array.isArray(opts["sources"])) {
+      throw "sources must be an array";
+    }
+
+    if (!opts["reduce_fn"]) {
+      throw "missing parameter: reduce_fn";
+    }
+
+    if (!opts["shards"]) {
+      throw "missing parameter: shards";
+    }
+
     autoBroadcast();
     var job_id = mkJobID();
 
@@ -206,7 +235,43 @@ var EVQL = (function(global) {
     return job_id;
   };
 
+  api.join = function(opts) {
+    if (!opts["params"]) {
+      opts["params"] = {};
+    }
+
+    if (opts["map_fn"]) {
+      opts["params"].map_fn = opts["map_fn"];
+    }
+
+    return api.reduce({
+      sources: opts["sources"],
+      shards: opts["shards"],
+      params: opts["params"],
+      reduce_fn: function(key, values) {
+        var joined = {};
+
+        while (values.hasNext()) {
+          var val = JSON.parse(values.next());
+          for (k in val) {
+            joined[k] = val[k];
+          }
+        }
+
+        if (params.map_fn) {
+          return params.map_fn(joined);
+        } else {
+          return [[key, joined]];
+        }
+      }
+    })
+  };
+
   api.downloadResults = function(sources, serialize_fn) {
+    if (!Array.isArray(sources)) {
+      throw "sources must be an array";
+    }
+
     if (!serialize_fn) {
       serialize_fn = "";
     }
@@ -222,20 +287,22 @@ var EVQL = (function(global) {
   };
 
   api.saveToTable = function(opts) {
+    if (!opts["table"]) {
+      throw "missing parameter: table";
+    }
+
+    if (!opts["sources"]) {
+      throw "missing parameter: sources";
+    }
+
+    if (!Array.isArray(opts["sources"])) {
+      throw "sources must be an array";
+    }
+
     executeJob({
       id: mkJobID(),
       op: "save_to_table",
       table_name: opts["table"],
-      sources: opts["sources"]
-    });
-  };
-
-  api.saveToTablePartition = function(opts) {
-    executeJob({
-      id: mkJobID(),
-      op: "save_to_table_partition",
-      table_name: opts["table"],
-      partition_key: opts["partition"],
       sources: opts["sources"]
     });
   };

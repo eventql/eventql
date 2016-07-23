@@ -261,7 +261,9 @@ int main(int argc, const char** argv) {
   ProcessConfigBuilder config_builder;
   config_builder.setProperty("server.listen", "localhost:9175");
   config_builder.setProperty("server.indexbuild_threads", "2");
-  config_builder.setProperty("server.gc_mode", "DISABLED");
+  config_builder.setProperty("server.gc_mode", "AUTOMATIC");
+  config_builder.setProperty("server.gc_interval", "30000000");
+  config_builder.setProperty("server.cachedir_maxsize", "68719476736");
 
   if (flags.isSet("standalone")) {
     config_builder.setProperty("server.name", "standalone");
@@ -426,9 +428,11 @@ int main(int argc, const char** argv) {
   GarbageCollector gc(
       gc_mode,
       &file_tracker,
-      server_datadir,
+      tsdb_dir,
       trash_dir,
-      cache_dir);
+      cache_dir,
+      process_config->getInt("server.cachedir_maxsize").get(),
+      process_config->getInt("server.gc_interval").get());
 
   /* config dir */
   ScopedPtr<ConfigDirectory> config_dir;

@@ -64,7 +64,7 @@ public:
   virtual bool needsCompaction() = 0;
 
   virtual bool commit() = 0;
-  virtual bool compact() = 0;
+  virtual bool compact(bool force = false) = 0;
 
   virtual Status applyMetadataChange(
       const PartitionDiscoveryResponse& discovery_info) = 0;

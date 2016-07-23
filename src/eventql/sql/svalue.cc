@@ -277,7 +277,7 @@ SValue::IntegerType SValue::getInteger() const {
 
     case SQL_STRING:
       try {
-        return std::stol(getString());
+        return std::stoll(getString());
       } catch (std::exception e) {
         /* fallthrough */
       }

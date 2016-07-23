@@ -137,15 +137,8 @@ RefPtr<MapReduceTask> MapReduceTaskBuilder::buildMapTableTask(
     table_ref.table_key = table_name.get();
   }
 
-  auto from = json::objectGetUInt64(job, "from");
-  if (!from.isEmpty()) {
-    table_ref.timerange_begin = UnixTime(from.get());
-  }
-
-  auto until = json::objectGetUInt64(job, "until");
-  if (!until.isEmpty()) {
-    table_ref.timerange_limit = UnixTime(until.get());
-  }
+  table_ref.keyrange_begin = json::objectGetString(job, "keyrange_begin");
+  table_ref.keyrange_limit = json::objectGetString(job, "keyrange_limit");
 
   auto map_fn = json::objectGetString(job, "map_fn");
   if (map_fn.isEmpty()) {

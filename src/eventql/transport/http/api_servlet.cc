@@ -74,7 +74,7 @@ AnalyticsServlet::AnalyticsServlet(
     mapreduce_service_(mapreduce_service),
     table_service_(table_service),
     logfile_api_(logfile_service_, customer_dir, cachedir),
-    mapreduce_api_(mapreduce_service_, customer_dir, cachedir) {}
+    mapreduce_api_(mapreduce_service_, customer_dir, client_auth, cachedir) {}
 
 void AnalyticsServlet::handleHTTPRequest(
     RefPtr<http::HTTPRequestStream> req_stream,
@@ -172,6 +172,11 @@ void AnalyticsServlet::handle(
     return;
   }
 
+  if (StringUtil::beginsWith(uri.path(), "/api/v1/mapreduce")) {
+    mapreduce_api_.handle(session.get(), req_stream, res_stream);
+    return;
+  }
+
   if (session->getEffectiveNamespace().empty()) {
     res.setStatus(http::kStatusUnauthorized);
     res.addHeader("WWW-Authenticate", "Token");
@@ -183,11 +188,6 @@ void AnalyticsServlet::handle(
 
   if (StringUtil::beginsWith(uri.path(), "/api/v1/logfiles")) {
     logfile_api_.handle(session.get(), req_stream, res_stream);
-    return;
-  }
-
-  if (StringUtil::beginsWith(uri.path(), "/api/v1/mapreduce")) {
-    mapreduce_api_.handle(session.get(), req_stream, res_stream);
     return;
   }
 

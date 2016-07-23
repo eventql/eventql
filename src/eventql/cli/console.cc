@@ -388,6 +388,12 @@ Status Console::runJS(const String& program_source) {
         cfg_.getHost(),
         cfg_.getPort());
 
+    if (!cfg_.getDatabase().isEmpty()) {
+      url += StringUtil::format(
+          "?database=$0",
+          URI::urlEncode(cfg_.getDatabase().get()));
+    }
+
     http::HTTPMessage::HeaderList auth_headers;
     if (!cfg_.getAuthToken().isEmpty()) {
       auth_headers.emplace_back(

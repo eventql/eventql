@@ -265,7 +265,7 @@ bool LSMPartitionWriter::commit() {
   return commited;
 }
 
-bool LSMPartitionWriter::compact() {
+bool LSMPartitionWriter::compact(bool force /* = false */) {
   ScopedLock<std::mutex> compact_lk(compaction_mutex_, std::defer_lock);
   if (!compact_lk.try_lock()) {
     return false;
@@ -280,6 +280,10 @@ bool LSMPartitionWriter::compact() {
   Vector<LSMTableRef> old_tables(
       snap->state.lsm_tables().begin(),
       snap->state.lsm_tables().end());
+
+  if (!force && !compaction_strategy_->needsCompaction(old_tables)) {
+    return dirty;
+  }
 
   // compact
   auto t0 = WallClock::unixMicros();
@@ -340,8 +344,10 @@ bool LSMPartitionWriter::compact() {
   {
     Set<String> delete_filenames_full;
     for (const auto& f : delete_filenames) {
-      delete_filenames_full.insert(FileUtil::joinPaths(snap->rel_path, f));
-      idx_cache_->flush(FileUtil::joinPaths(snap->rel_path, f));
+      auto fpath = FileUtil::joinPaths(snap->rel_path, f);
+      delete_filenames_full.insert(fpath + ".cst");
+      delete_filenames_full.insert(fpath + ".idx");
+      idx_cache_->flush(fpath);
     }
 
     file_tracker_->deleteFiles(delete_filenames_full);
