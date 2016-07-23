@@ -35,7 +35,7 @@ pages.
 ### Step 2: Create a new table
 
 Similar to most SQL databases, the core units of data storage in EventQL are tables
-and rows (rows are also referred to as records or events). For our example, we'll
+and rows (rows are also referred to as events). For our example, we'll
 create a simple table that stores a http server access log.
 
 Our table will be called `access_log` and will contain three columns: `time`,
@@ -72,7 +72,7 @@ of test data:
     INSERT INTO access_log (time, session_id, url) VALUES (NOW(), "s3", "/page1");
 
 Later, we will use the [HTTP API](../../api/http/) or one of the [driver libraries](../../api/)
-to insert records programatically.
+to insert rows programatically.
 
 ### Step 4: Query the data
 

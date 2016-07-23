@@ -12,8 +12,8 @@ tolerated failures 2.
 
 ## Partition Location
 
-Each table has a METADATA file that records the partition mapping. The TableConfig,
-which is kept in the coordination service records these pieces of information:
+Each table has a METADATA file that rows the partition mapping. The TableConfig,
+which is kept in the coordination service rows these pieces of information:
 
     metadata_txnid: the currently valid METADATA transaction id for this table
     metadata_servers: the list of live metadata servers for this table
@@ -138,7 +138,7 @@ This case is naturally handled as part of the partition replication lifecyle.
 
 ##### Partition Replication and Lifecyle
 
-Each server, locally, records an a map of server_id -> sequence pairs. In this
+Each server, locally, rows an a map of server_id -> sequence pairs. In this
 map, it stores until which sequence ID it has replicated a given partition to a
 given server. Each partition is always notified of changes in the server list.
 
@@ -148,15 +148,15 @@ Partition replication and lifecyle is a simple algorithm:
         - For each server which should store the data in partition P
            (considering splits and joining servers)
           - Check our local replication information for partition P and see if
-            we have already pushed all records until the latest sequence to this
+            we have already pushed all rows until the latest sequence to this
             server
-          - If not push the unreplicated records to the server and, after it has
+          - If not push the unreplicated rows to the server and, after it has
             confirmed them, record the new sequence
-          - If this server has confirmed all records and we are a live server
+          - If this server has confirmed all rows and we are a live server
             for this partition (i.e. not in the joining state), tell the server
             that inital replication has completed
 
-        - If all servers have confirmed all records and we should _not_ store
+        - If all servers have confirmed all rows and we should _not_ store
           this partition on the local server, drop the partition
 
       - On every change in the server list, restart the replication for this
@@ -171,7 +171,7 @@ that.
 
 To add a new server for a given partition, the server places itself in the joining
 list for that partition. While the server is joining, it will not receive any read
-or write requests for the partition but it will receive replicated records
+or write requests for the partition but it will receive replicated rows
 from the other servers. Once any other (non joining) servers notifies the joining
 server that initial replication has completed, the joining server commits another
 METADATA transaction to mark itself as live.

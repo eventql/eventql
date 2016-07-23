@@ -1,12 +1,12 @@
-3.5 Inserting Records
-=====================
+3.5 Inserting Rows
+==================
 
-Before you can insert records, you need to [create a table](../creating-tables/).
+Before you can insert rows, you need to [create a table](../creating-tables/).
 Note that all tables have a mandatory unique primary key.
 
 ### Insert via SQL
 
-You can use the SQL `INSERT INTO` statement to insert new records.
+You can use the SQL `INSERT INTO` statement to insert new rows.
 
     INSERT [INTO] table_name
       [(column_name, ...)] VALUES (expr, ...)
@@ -27,7 +27,7 @@ Example (from JSON):
 
 ### Insert via HTTP API
 
-You can also insert JSON records using the HTTP API. Please refer to the
+You can also insert JSON rows using the HTTP API. Please refer to the
 [API reference for the specifics](/documentation/api/).
 
 Example insert using the HTTP API:

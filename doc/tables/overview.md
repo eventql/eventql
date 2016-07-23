@@ -1,8 +1,8 @@
-3. Tables & Records
-===================
+3. Tables & Rows
+================
 
 The core unit of data storage in EventQL are tables and rows (also referred to
-as records or events). Tables have a strict schema that you must define and that
+as events). Tables have a strict schema that you must define and that
 all rows must adhere to.
 
 The most simple form of a table schema is one that has a flat list of columns
@@ -37,7 +37,7 @@ Now we can insert some data and then query it. Something along these lines:
 
 
 EventQL also accepts and returns rows as JSON or Protobuf. You'll see why
-this is useful once we discuss nested records. These are the same rows as above
+this is useful once we discuss nested rows. These are the same rows as above
 but in the JSON representation:
 
     { "collected_at": "2016-07-05 13:34:51", "sensor_id": "t3", "temperature": 20.3 }
@@ -97,6 +97,6 @@ For example, let's say we want to calculate the average temperature per
 At any rate you won't need to understand the nested row feature until you want to
 use it.
 
-<!-- Check out the ["Nested Records" page](/docs/sql/nested_records) for more details. -->
+<!-- Check out the ["Nested Records" page](/docs/sql/nested_rows) for more details. -->
 
 
