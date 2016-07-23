@@ -1,7 +1,7 @@
 Functions and Operators
 =======================
 
-Z1 provides a large number of functions and operators for the built-in data types.
+EventQL provides a large number of functions and operators for the built-in data types.
 Users can also define their own functions and operators.
 
 ---
