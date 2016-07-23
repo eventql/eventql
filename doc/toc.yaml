@@ -534,12 +534,12 @@
           source: "/sql/statements.md"
           children:
           -
-            url: "/queries/sql/statements"
+            url: "/queries/sql/statements/select"
             title: "SELECT"
             type: page
             visible_in_menu: true
             visible_in_toc: true
-            source: "/sql/statements.md"
+            source: "/sql/statements/select.md"
           -
             url: "/queries/sql/chartsql"
             title: "DRAW"
@@ -548,40 +548,40 @@
             visible_in_toc: true
             source: "/sql/chartsql.md"
           -
-            url: "/queries/sql/statements"
+            url: "/queries/sql/statements/insert"
             title: "INSERT"
             type: page
             visible_in_menu: true
             visible_in_toc: true
-            source: "/sql/statements.md"
+            source: "/sql/statements/insert.md"
           -
-            url: "/queries/sql/statements"
+            url: "/queries/sql/statements/create-table"
             title: "CREATE TABLE"
             type: page
             visible_in_menu: true
             visible_in_toc: true
-            source: "/sql/statements.md"
+            source: "/sql/statements/create_table.md"
           -
-            url: "/queries/sql/statements"
+            url: "/queries/sql/statements/alter-table"
             title: "ALTER TABLE"
             type: page
             visible_in_menu: true
             visible_in_toc: true
-            source: "/sql/statements.md"
+            source: "/sql/statements/alter_table.md"
           -
-            url: "/queries/sql/statements"
+            url: "/queries/sql/statements/describe"
             title: "DESCRIBE"
             type: page
             visible_in_menu: true
             visible_in_toc: true
-            source: "/sql/statements.md"
+            source: "/sql/statements/describe.md"
           -
-            url: "/queries/sql/statements"
+            url: "/queries/sql/statements/show-tables"
             title: "SHOW TABLES"
             type: page
             visible_in_menu: true
             visible_in_toc: true
-            source: "/sql/statements.md"
+            source: "/sql/statements/show_tables.md"
         -
           url: "/queries/sql/syntax-reference"
           title: "Syntax Reference"
