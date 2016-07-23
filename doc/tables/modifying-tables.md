@@ -9,23 +9,30 @@
       | DROP [COLUMN] column_name
 
     column_definition ::=
-        column_name [REPEATED] cql_type [NOT NULL]
+        column_name [REPEATED] sql_type [NOT NULL]
 
 
 Alter table changes the structure of the table by adding or removing columns.
 
+#### Example:
 
-To alter the schema of a RECORD column, the subcolumns are specified by their name
-that consits of the parent column name followed by a point followed by the actual
-column name.
+    ALTER TABLE temperature_measurements ADD COLUMN sensor_location STRING;
 
-Add a record column with two subcolumns:
-
-    ALTER TABLE evtbl
-        ADD COLUMN product RECORD,
-        ADD COLUMN product.id UINT64,
-        ADD COLUMN product.title STRING;
+**NOTE:** If you are an EventQL Cloud user you can also create and update table
+schemas from the web interface. Go to `EventQL Cloud > Tables` and click the
+`Create Table` button on the top right corner.
 
 
-If you want to learn more about how to alter the table structure using the HTTP API,
-please refer to the [HTTP API reference](/documentation/api/http/).
+### Altering RECORD columns
+
+You can also alter the (sub-)schema of a RECORD column. To do so, simply specify
+the column name as `parent1.parent2.parentN.column_name`.
+
+Fore example:
+
+    ALTER TABLE nested_table ADD COLUMN nested.something STRING;
+
+
+### HTTP API
+
+You can also alter tables using the HTTP API. Please refer to the [HTTP API reference](/documentation/api/http/).

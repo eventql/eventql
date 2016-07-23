@@ -9,6 +9,6 @@ ALTER TABLE statement
       | DROP [COLUMN] column_name
 
     column_definition ::=
-        column_name [REPEATED] cql_type [NOT NULL]
+        column_name [REPEATED] sql_type [NOT NULL]
 
 

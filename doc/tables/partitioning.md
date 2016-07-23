@@ -43,13 +43,12 @@ be `time` as this allows to efficiently restrict scans on a specific time window
 Here is a simple example schema for a table that stores temperature measurements
 and its primary and partitioning key:
 
-    schema ev.temperature_measurements {
-      datetime  time;
-      string    sensor_id;
-      double    temperature;
-      PRIMARY_KEY(time, sensor_id);
-      PARTITION_KEY(time);
-    }
+    CREATE TABLE ev.temperature_measurements (
+      collected_at    DATETIME,
+      sensor_id       STRING,
+      temperature     DOUBLE,
+      PRIMARY KEY(time, sensor_id)
+    );
 
 We choose `time` as the partition key as this allows us to efficiently execute
 queries that are restricted on a specific time window. I.e. "aggregate over all
@@ -73,14 +72,10 @@ Also, not supporting secondary indexes does _not_ imply that you can't filter by
 anything other than the primary key like in some key value stores. You can. All
 WHERE, GROUP BY and JOIN BY clauses that are valid in standard SQL are supported.
 
-So why don't we support secondary indexes? There simply is no
-database design in existence that can scale out horizontally and reasonably
-restrict table scans on multiple dimensions at the same time.
+If youneed to have fast access to _individual_ records by _more than one_ dimension
+you have to denormalize and insert the record multiple times in different tables
+that are indexed in those respective dimensions.
 
-If you really need to have fast access to _individual_ records by _more than
-one_ dimension your best bet is to denormalize and insert the record multiple times
-in different tables that are indexed in those respective dimensions. 
-
-However, most users won't need this. Access by a single primary key is always
-fast and if all you care about are aggregate queries for analytics use cases
+However, most users probably won't need this. Access by a single primary key is
+always fast and if all you care about are aggregate queries for analytics use cases
 and retrieving and updating invdividual events by id, you're good to go.
