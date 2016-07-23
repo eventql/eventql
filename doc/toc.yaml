@@ -102,32 +102,32 @@
         -
           url: "/deployment/cluster"
           title: "Cluster Administration"
-          type: page
+          type: redirect
           visible_in_menu: true
           visible_in_toc: true
-          source: "/api/overview.md"
+          location: "/deployment/cluster/setting-up-a-new-cluster"
           children:
           -
-              url: "/deployment/cluster"
+              url: "/deployment/cluster/setting-up-a-new-cluster"
               title: "Initial Setup"
               type: page
               visible_in_menu: true
               visible_in_toc: true
-              source: "/api/overview.md"
+              source: "deployment/cluster_setup.md"
           -
-              url: "/deployment/cluster"
+              url: "/deployment/cluster/adding-servers"
               title: "Adding Servers"
               type: page
               visible_in_menu: true
               visible_in_toc: true
-              source: "/api/overview.md"
+              source: "deployment/cluster_adding_servers.md"
           -
-              url: "/deployment/cluster"
+              url: "/deployment/cluster/removing-servers"
               title: "Removing Servers"
               type: page
               visible_in_menu: true
               visible_in_toc: true
-              source: "/api/overview.md"
+              source: "deployment/cluster_removing_servers.md"
     -
       url: "/collecting-and-storing"
       title: "Tables &amp; Records"
