@@ -1,7 +1,7 @@
 4.1 Configuration File
 =====================
 
-Configuration files aren't mandatory but they provide a convenient way to specifiy options that you use regurlay when running EventQL programs, so you don't have to enter them on the command line each time you run the program.
+Configuration files aren't mandatory but they provide a convenient way to specifiy regularly used options, so you don't have to enter them on the command line each time you run the program.
 
 You can override every option set in the configuration file by using the command line option `-C` followed by the corresponding `section.key=value` pair.
 
