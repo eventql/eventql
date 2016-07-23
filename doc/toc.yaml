@@ -560,27 +560,20 @@
             visible_in_toc: true
             source: "/sql/statements/show_tables.md"
     -
-      url: "/queries/pipelines"
+      url: "/mapreduce"
       title: "MapReduce Queries"
       type: redirect
       visible_in_menu: true
       visible_in_toc: true
-      location: "/queries/pipelines/mapreduce"
+      location: "/mapreduce/introduction"
       children:
         -
-          url: "/queries/pipelines/mapreduce"
-          title: "MapReduce"
+          url: "/mapreduce/introduction"
+          title: "Introduction"
           type: page
           visible_in_menu: true
           visible_in_toc: true
           source: "/api/javascript/introduction.md"
-        -
-          url: "/queries/pipelines/stream-processing"
-          title: "Stream Processing"
-          type: page
-          visible_in_menu: true
-          visible_in_toc: true
-          source: "/sql/statements.md"
     -
       url: "/api"
       title: "API Reference"
@@ -651,35 +644,28 @@
               visible_in_menu: false
               visible_in_toc: false
               source: "/api/http/auth/login.md"
-        #-
-        #  url: "/api/javascript"
-        #  title: "JavaScript Query API"
-        #  type: page
-        #  visible_in_menu: true
-        #  visible_in_toc: true
-        #  source: "/api/http/index.html"
         -
-          url: "/queries/pipelines/javascript"
+          url: "/api/javascript_mapreduce"
           title: "MapReduce API (JavaScript)"
           type: page
           visible_in_menu: true
           visible_in_toc: true
           source: "/api/javascript/javascript_api.md"
     -
-      url: "/drivers"
+      url: "/drivers-tools"
       title: "Drivers & Tools"
       type: page
       visible_in_menu: true
       visible_in_toc: true
-      source: "/api/overview.md"
+      source: "/tools/overview.md"
       children:
         -
-          url: "/api/mysql2evql"
+          url: "/drivers-tools/mysql2evql"
           title: "mysql2evql"
           type: page
           visible_in_menu: true
           visible_in_toc: true
-          source: "/api/mysql2evql.md"
+          source: "/tools/mysql2evql.md"
         #-
         #  url: "/api/node"
         #  title: "Node.js Driver"
@@ -746,11 +732,18 @@
     -
       url: "/internals"
       title: "Internals"
-      type: page
+      type: redirect
       visible_in_menu: true
       visible_in_toc: true
-      source: "/api/overview.md"
+      location: "/internals/architecture"
       children:
+        -
+          url: "/internals/architecture"
+          title: "Architecture"
+          type: page
+          visible_in_menu: true
+          visible_in_toc: true
+          source: "internals/architecture.md"
         -
           url: "/internals/replication"
           title: "Replication"
@@ -758,17 +751,37 @@
           visible_in_menu: true
           visible_in_toc: true
           source: "internals/replication.md"
-    -
-      url: "/examples"
-      title: "Examples &amp; Tuning"
-      type: page
-      visible_in_menu: true
-      visible_in_toc: true
-      source: "/api/overview.md"
+        -
+          url: "/internals/coordination-service"
+          title: "Coordination Service"
+          type: page
+          visible_in_menu: true
+          visible_in_toc: true
+          source: "internals/coordination_service.md"
+        -
+          url: "/internals/life-of-a-query"
+          title: "Life of a Query"
+          type: page
+          visible_in_menu: true
+          visible_in_toc: true
+          source: "internals/life-of-a-query.md"
     #-
-    #  url: "/hacking"
-    #  title: "Hacking"
+    #  url: "/appendix"
+    #  title: "Appendix"
     #  type: page
     #  visible_in_menu: true
     #  visible_in_toc: true
     #  source: "/api/overview.md"
+    #  children:
+    #    -
+    #      url: "/appendix/building-html5-dashboards"
+    #      title: "Building HTML5 Dashboards"
+    #      type: page
+    #      visible_in_menu: true
+    #      visible_in_toc: true
+    #    -
+    #      url: "/appendix/high-volume-timeseries"
+    #      title: "Tuning for high volume timeseries"
+    #      type: page
+    #      visible_in_menu: true
+    #      visible_in_toc: true

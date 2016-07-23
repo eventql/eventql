@@ -1,8 +1,9 @@
-4.4 mysql2evql Reference
-==================
+7.1 mysql2evql
+==============
 
-mysql2evql is the EventQL command line tool to import a MySQL table to an existing EventQL.
-Before you can import your MySQL table, you need to create the corresponding EventQL table with the same table schema than the initial table.
+mysql2evql is a command line tool that allows you to import a MySQL table into
+EventQL. Before you can import your MySQL table, you need to create the
+corresponding table in EventQL with a compatible schema.
 
 
     Usage: $ mysql2evql [OPTIONS]
@@ -21,4 +22,3 @@ Before you can import your MySQL table, you need to create the corresponding Eve
 
     Examples:
       mysql2evql --source_table users --destination_table users --mysql "mysql://localhost:3306/my_db?user=root" --host localhost --port 9175 --database all
-       

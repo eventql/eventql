@@ -1,5 +1,5 @@
-3. Pipelines
-============
+5.1 MapReduce
+=============
 
 To enable the most complex queries and data processing pipelines, EventQL allows you
 to execute batch and stream processing jobs written in JavaScript.
@@ -10,12 +10,11 @@ on building business logic. Once you have written a pipeline or query you will b
 able to run it on it on 1GB, 100GB or 100TB of data without modifying a single
 line
 
+### Example
+
 An example says more than a thousand words so here is a simple example that will
 calculate the top url stats from the raw pageview data of our access_log table, that
 we created in [First Steps](../../getting-started/first-steps).
-
-
-
 
     var logs_mapped = EVQL.mapTable({
       table: "access_logs",
@@ -41,14 +40,14 @@ we created in [First Steps](../../getting-started/first-steps).
       }
     });
 
-  EVQL.downloadResults([top_urls]);
+    EVQL.downloadResults([top_urls]);
 
 
 
 
-### Getting Started with pipelines
+### Getting Started with MapReduce scripts
 
-You develop pipelines on your machine and run them from the command line
+You develop scripts on your local machine and run them from the command line
 using the `evql` tool. Once you are happy with your code you can either continue
 to run it locally or deploy it to your EVQL cluster.
 
@@ -58,15 +57,14 @@ To test-drive the pipelines feature, save this into a file called `helloworld.js
 
 And then execute it by running:
 
-      $ evql -f helloworld.js
+    $ evql -f helloworld.js
 
 
 To get started writing your own pipelines, have a look at these pages. If you
 are already familiar with common data processing paradigms like MapReduce you
 won't have to learn any new concepts: jump straight into the API documentation.
 
-  - [Map Reduce](/docs/piplines/map_reduce)
-  - [JavaScript API Documentation](/docs/pipelines/javascript_api)
+  - [JavaScript API Documentation](/docs/api/javascript_api)
 
 
 

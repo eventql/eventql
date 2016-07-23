@@ -1,5 +1,5 @@
-Functions and Operators
-=======================
+4.1 Functions and Operators
+===========================
 
 EventQL provides a large number of functions and operators for the built-in data types.
 Users can also define their own functions and operators.
