@@ -18,7 +18,7 @@ In the cluster mode, many instances of the evqld binary are run on a number of
 machines. When running in cluster mode, the individual EventQL Server instances
 connect to a coordination service like Zookeeper.
 
-The evqld program has somey options that can be specified at startup. For a
+The evqld program has some options that can be specified at startup. For a
 complete list of options, run this command:
 
     $ evqld  --help
