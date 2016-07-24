@@ -13,7 +13,7 @@ line
 ### Example
 
 An example says more than a thousand words so here is a simple example that will
-calculate the top url stats from the raw pageview data of our access_log table, that
+calculate the most viewed pages from the raw pageview data of our access_log table, that
 we created in [First Steps](../../getting-started/first-steps).
 
     var logs_mapped = EVQL.mapTable({
