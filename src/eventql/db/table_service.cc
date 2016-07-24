@@ -22,6 +22,7 @@
  * code of your own applications
  */
 #include <eventql/util/util/Base64.h>
+#include <algorithm>
 #include <eventql/util/fnv.h>
 #include <eventql/util/protobuf/msg.h>
 #include <eventql/util/protobuf/MessageEncoder.h>
@@ -237,7 +238,7 @@ static Status removeColumn(
     TableDefinition* td,
     const Vector<String>& primary_key,
     const String& field_name) {
-  if (find(primary_key.begin(), primary_key.end(), field_name) !=
+  if (std::find(primary_key.begin(), primary_key.end(), field_name) !=
       primary_key.end()) {
     return Status(eRuntimeError, "field with primary key can't be removed");
   }

@@ -49,6 +49,7 @@ Vector<String> DescribeTableNode::getResultColumns() const {
     "column_name",
     "type",
     "nullable",
+    "primary_key",
     "description"
   };
 }
