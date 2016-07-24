@@ -34,6 +34,7 @@ Leader::Leader(
     ConfigDirectory* cdir,
     uint64_t rebalance_interval) :
     cdir_(cdir),
+    rebalance_(cdir),
     rebalance_interval_(rebalance_interval) {}
 
 Leader::~Leader() {
@@ -41,7 +42,17 @@ Leader::~Leader() {
 }
 
 bool Leader::runLeaderProcedure() {
+  if (!cdir_->isLeader()) {
+    return false;
+  }
+
   logInfo("evqld", "Local node is running the leader procedure");
+
+  auto rc = rebalance_.runOnce();
+  if (!rc.isSuccess()) {
+    logError("evqld", "Rebalance error: $0", rc.message());
+  }
+
   return true;
 }
 

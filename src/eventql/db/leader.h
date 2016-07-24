@@ -25,6 +25,7 @@
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/autoref.h>
 #include <eventql/db/file_tracker.h>
+#include <eventql/db/rebalance.h>
 #include <eventql/config/config_directory.h>
 #include "eventql/eventql.h"
 #include <thread>
@@ -49,6 +50,7 @@ public:
 protected:
 
   ConfigDirectory* cdir_;
+  Rebalance rebalance_;
   uint64_t rebalance_interval_;
   std::thread thread_;
   bool thread_running_;
