@@ -197,7 +197,15 @@ void StandaloneConfigDirectory::updateTableConfig(
     const TableDefinition& table,
     bool force /* = false */) {
   std::unique_lock<std::mutex> lk(mutex_);
-  tables_.emplace(table.customer() + "~" + table.table_name(), table);
+  auto table_id = table.customer() + "~" + table.table_name();
+  if (tables_.find(table_id) != tables_.end()) {
+    RAISEF(
+        kIllegalArgumentError,
+        "table already exists: $0",
+        table.table_name());
+  }
+
+  tables_.emplace(table_id, table);
   auto callbacks = on_table_change_;
 
   if (db_.get()) {

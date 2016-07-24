@@ -56,11 +56,14 @@ Status TableService::createTable(
     const String& table_name,
     const msg::MessageSchema& schema,
     Vector<String> primary_key) {
-
   if (primary_key.size() < 1) {
     return Status(
         eIllegalArgumentError,
         "can't create table without PRIMARY KEY");
+  }
+  
+  if (!pmap_->findTable(db_namespace, table_name).isEmpty()) {
+    return Status(eIllegalArgumentError, "table already exists");
   }
 
   for (const auto& col : primary_key) {
@@ -156,9 +159,13 @@ Status TableService::createTable(
     return rc;
   }
 
-  // create table config
-  cdir_->updateTableConfig(td);
-  return Status::success();
+  try {
+    // create table config
+    cdir_->updateTableConfig(td);
+    return Status::success();
+  } catch (const Exception& e) {
+    return Status(e);
+  }
 }
 
 
