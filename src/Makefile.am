@@ -831,8 +831,6 @@ evql_core_a_SOURCES = \
     eventql/db/LSMTableIndex.h \
     eventql/db/LSMTableIndexCache.cc \
     eventql/db/LSMTableIndexCache.h \
-    eventql/db/Lazypartition.cc \
-    eventql/db/Lazypartition.h \
     eventql/db/metadata_client.cc \
     eventql/db/metadata_client.h \
     eventql/db/metadata_coordinator.cc \

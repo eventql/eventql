@@ -44,6 +44,7 @@ class Table;
 class PartitionReader;
 class PartitionReplication;
 class PartitionWriter;
+class PartitionMap;
 
 using PartitionKey =
     std::tuple<
@@ -111,6 +112,29 @@ protected:
   RefPtr<Table> table_;
   RefPtr<PartitionWriter> writer_;
   std::mutex writer_lock_;
+};
+
+class LazyPartition {
+public:
+
+  LazyPartition();
+  LazyPartition(RefPtr<Partition> partition);
+  ~LazyPartition();
+
+  RefPtr<Partition> getPartition(
+      const String& tsdb_namespace,
+      RefPtr<Table> table,
+      const SHA1Hash& partition_key,
+      ServerCfg* cfg,
+      PartitionMap* pmap);
+
+  RefPtr<Partition> getPartition();
+
+  bool isLoaded() const;
+
+protected:
+  RefPtr<Partition> partition_;
+  mutable std::mutex mutex_;
 };
 
 }
