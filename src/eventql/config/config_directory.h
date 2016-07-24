@@ -47,7 +47,7 @@ public:
 
   virtual ~ConfigDirectory() = default;
 
-  virtual Status start() = 0;
+  virtual Status start(bool create = false) = 0;
   virtual void stop() = 0;
 
   virtual ClusterConfig getClusterConfig() const = 0;

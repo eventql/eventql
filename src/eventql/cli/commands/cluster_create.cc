@@ -53,7 +53,7 @@ Status ClusterCreate::execute(
           &cdir);
 
       if (rc.isSuccess()) {
-        rc = cdir->start();
+        rc = cdir->start(true);
       }
 
       if (!rc.isSuccess()) {

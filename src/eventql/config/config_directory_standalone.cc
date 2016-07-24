@@ -37,7 +37,7 @@ StandaloneConfigDirectory::StandaloneConfigDirectory(
   db_ = mdb::MDB::open(datadir, opts);
 }
 
-Status StandaloneConfigDirectory::start() {
+Status StandaloneConfigDirectory::start(bool create /* = false */) {
   if (db_.get()) {
     auto txn = db_->startTransaction(false);
     auto cursor = txn->getCursor();

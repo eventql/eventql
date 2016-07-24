@@ -90,8 +90,7 @@ public:
   void setTableConfigChangeCallback(
       Function<void (const TableDefinition& tbl)> fn) override;
 
-  Status start() override;
-
+  Status start(bool create = false) override;
   void stop() override;
 
   /** don't call this! (can't be private b/c it needs to be called from c binding) */
@@ -111,7 +110,7 @@ protected:
   using CallbackList = Vector<Function<void()>>;
 
   Status connect(std::unique_lock<std::mutex>* lk);
-  Status load();
+  Status load(bool create);
 
   void updateClusterConfigWithLock(ClusterConfig config);
 

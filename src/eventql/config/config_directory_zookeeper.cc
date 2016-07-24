@@ -74,7 +74,7 @@ static void zk_watch_cb(
   self->handleZookeeperWatch(type, state, path);
 }
 
-Status ZookeeperConfigDirectory::start() {
+Status ZookeeperConfigDirectory::start(bool create /* = false */) {
   std::unique_lock<std::mutex> lk(mutex_);
   if (state_ != ZKState::INIT) {
     return Status(eIllegalStateError, "state != ZK_INIT");
@@ -90,7 +90,7 @@ Status ZookeeperConfigDirectory::start() {
   }
 
   {
-    auto rc = load();
+    auto rc = load(create);
     if (!rc.isSuccess()) {
       return rc;
     }
@@ -141,8 +141,8 @@ Status ZookeeperConfigDirectory::connect(std::unique_lock<std::mutex>* lk) {
 }
 
 // PRECONDITION: must hold mutex
-Status ZookeeperConfigDirectory::load() {
-  if (!hasNode(path_prefix_ + "/config")) {
+Status ZookeeperConfigDirectory::load(bool create) {
+  if (!hasNode(path_prefix_ + "/config") && !create) {
     return Status(
         eIOError,
         StringUtil::format("cluster doesn't exit: $0", cluster_name_));
