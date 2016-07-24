@@ -69,7 +69,6 @@
 #include "eventql/sql/defaults.h"
 #include "eventql/sql/runtime/query_cache.h"
 #include "eventql/config/config_directory.h"
-#include "eventql/config/config_directory_legacy.h"
 #include "eventql/config/config_directory_zookeeper.h"
 #include "eventql/config/config_directory_standalone.h"
 #include "eventql/transport/http/status_servlet.h"

@@ -833,8 +833,6 @@ evql_core_a_SOURCES = \
     eventql/db/leader.cc \
     eventql/config/config_directory.cc \
     eventql/config/config_directory.h \
-    eventql/config/config_directory_legacy.cc \
-    eventql/config/config_directory_legacy.h \
     eventql/config/config_directory_standalone.cc \
     eventql/config/config_directory_standalone.h \
     eventql/config/config_directory_zookeeper.cc \
