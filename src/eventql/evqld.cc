@@ -590,14 +590,6 @@ int main(int argc, const char** argv) {
         &table_service,
         cache_dir);
 
-    eventql::LogfileService logfile_service(
-        config_dir.get(),
-        internal_auth.get(),
-        &table_service,
-        &partition_map,
-        repl_scheme.get(),
-        sql.get());
-
     eventql::MapReduceService mapreduce_service(
         config_dir.get(),
         internal_auth.get(),
@@ -653,7 +645,6 @@ int main(int argc, const char** argv) {
         config_dir.get(),
         &partition_map,
         &sql_service,
-        &logfile_service,
         &mapreduce_service,
         &table_service);
 

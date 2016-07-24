@@ -25,8 +25,8 @@
 
 namespace eventql {
 
-evqld_stats* evqld_stats() {
-  static evqld_stats singleton;
+struct evqld_stats* evqld_stats() {
+  static struct evqld_stats singleton;
   return &singleton;
 }
 

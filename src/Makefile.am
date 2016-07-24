@@ -94,7 +94,6 @@ evql_protos = \
     eventql/db/TSDBNodeConfig.proto \
     eventql/db/TSDBTableScanSpec.proto \
     eventql/EventScanParams.proto \
-    eventql/LogfileScanParams.proto \
     eventql/RemoteTSDBScanParams.proto
 
 BUILT_SOURCES += $(evql_protos:.proto=.pb.h)
@@ -810,8 +809,6 @@ evql_core_a_SOURCES = \
     eventql/EventScanResult.h \
     eventql/JavaScriptContext.cc \
     eventql/JavaScriptContext.h \
-    eventql/LogfileScanResult.cc \
-    eventql/LogfileScanResult.h \
     eventql/config/namespace_config.cc \
     eventql/config/namespace_config.h \
     eventql/db/DerivedDataset.cc \
@@ -957,10 +954,6 @@ evql_core_a_SOURCES = \
     eventql/server/sql/table_provider.h \
     eventql/server/sql/table_scan.cc \
     eventql/server/sql/table_scan.h \
-    eventql/transport/http/LogfileAPIServlet.cc \
-    eventql/transport/http/LogfileAPIServlet.h \
-    eventql/transport/http/LogfileService.cc \
-    eventql/transport/http/LogfileService.h \
     eventql/transport/http/MapReduceAPIServlet.cc \
     eventql/transport/http/MapReduceAPIServlet.h \
     eventql/transport/http/MapReduceService.cc \
@@ -995,7 +988,6 @@ nodist_evql_core_a_SOURCES = \
     @builddir@/eventql/db/TSDBNodeConfig.pb.cc \
     @builddir@/eventql/db/TSDBTableScanSpec.pb.cc \
     @builddir@/eventql/EventScanParams.pb.cc \
-    @builddir@/eventql/LogfileScanParams.pb.cc \
     @builddir@/eventql/RemoteTSDBScanParams.pb.cc
 
 eventql/mapreduce/mapreduce_preludejs.cc:

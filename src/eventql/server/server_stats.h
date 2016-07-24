@@ -40,6 +40,6 @@ struct evqld_stats {
   http::HTTPClientStats http_client_stats;
 };
 
-evqld_stats* evqld_stats();
+struct evqld_stats* evqld_stats();
 
 }
