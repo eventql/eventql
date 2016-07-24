@@ -61,7 +61,7 @@ public:
 
   virtual bool hasServerID() const { return true; }
 
-  virtual bool isLeader() const = 0;
+  virtual bool electLeader() = 0;
 
   virtual String getLeader() const = 0;
 

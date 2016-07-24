@@ -45,7 +45,7 @@ public:
 
   bool hasServerID() const override;
 
-  virtual bool isLeader() const;
+  virtual bool electLeader();
 
   virtual String getLeader() const;
 

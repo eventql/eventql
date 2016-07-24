@@ -42,7 +42,7 @@ Leader::~Leader() {
 }
 
 bool Leader::runLeaderProcedure() {
-  if (!cdir_->isLeader()) {
+  if (!cdir_->electLeader()) {
     return false;
   }
 

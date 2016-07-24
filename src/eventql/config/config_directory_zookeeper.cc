@@ -878,19 +878,24 @@ bool ZookeeperConfigDirectory::hasServerID() const {
   return !server_name_.isEmpty();
 }
 
-bool ZookeeperConfigDirectory::isLeader() const {
+bool ZookeeperConfigDirectory::electLeader() {
   std::unique_lock<std::mutex> lk(mutex_);
 
   if (is_leader_) {
     return true;
   }
 
+  String leader_name;
+  if (!server_name_.isEmpty()) {
+    leader_name = server_name_.get();
+  }
+
   auto key = StringUtil::format("$0/leader", path_prefix_);
   auto rc = zoo_create(
       zk_,
       key.c_str(),
-      nullptr,
-      0,
+      leader_name.data(),
+      leader_name.size(),
       &ZOO_OPEN_ACL_UNSAFE,
       ZOO_EPHEMERAL,
       nullptr, /* path_buffer */
