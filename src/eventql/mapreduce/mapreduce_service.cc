@@ -375,7 +375,11 @@ void MapReduceService::downloadResult(
   handler(nullptr, 0);
 
   if (res.statusCode() != 200) {
-    RAISEF(kRuntimeError, "received non-200 response for $0", req.uri());
+    RAISEF(
+        kRuntimeError,
+        "received non-200 response for $0: $1",
+        req.uri(),
+        res.body().toString());
   }
 
   if (!eos) {
