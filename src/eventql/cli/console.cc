@@ -41,6 +41,7 @@
 #include "eventql/util/cli/term.h"
 #include "eventql/server/sql/codec/binary_codec.h"
 #include "eventql/sql/result_list.h"
+#include "eventql/sql/parser/tokenize.h"
 #include "linenoise/linenoise.h"
 
 namespace eventql {
@@ -52,18 +53,34 @@ void Console::startInteractiveShell() {
   linenoiseHistoryLoad(history_path.c_str());
 
   char *p;
-  while ((p = linenoise("evql> ")) != NULL) {
-    String line(p);
-    linenoiseHistoryAdd(p);
+  String query;
+  while ((p = linenoise(query.empty() ? "evql> " : "   -> ")) != NULL) {
+    query += String(p);
     linenoiseFree(p);
-    linenoiseHistorySave(history_path.c_str());
 
-    if (line == "quit") {
+    if (query == "quit") {
       return;
-
-    } else {
-      runQuery(line);
     }
+
+    Vector<csql::Token> query_tokens;
+    csql::tokenizeQuery(query, &query_tokens);
+    bool query_complete = false;
+    for (const auto& t : query_tokens) {
+      if (t == csql::Token::T_SEMICOLON) {
+        query_complete = true;
+        break;
+      }
+    }
+
+    if (!query_complete) {
+      query += " ";
+      continue;
+    }
+
+    linenoiseHistoryAdd(query.c_str());
+    linenoiseHistorySave(history_path.c_str());
+    runQuery(query);
+    query.clear();
   }
 }
 
