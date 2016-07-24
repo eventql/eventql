@@ -374,13 +374,14 @@ void MapReduceService::downloadResult(
   auto res = http_client.executeRequest(req, handler_factory);
   handler(nullptr, 0);
 
+  if (res.statusCode() != 200) {
+    RAISEF(kRuntimeError, "received non-200 response for $0", req.uri());
+  }
+
   if (!eos) {
     RAISE(kRuntimeError, "unexpected EOF");
   }
 
-  if (res.statusCode() != 200) {
-    RAISEF(kRuntimeError, "received non-200 response for $0", req.uri());
-  }
 }
 
 bool MapReduceService::saveResultToTable(
