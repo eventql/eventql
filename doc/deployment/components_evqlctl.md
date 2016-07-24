@@ -56,28 +56,21 @@ Display the current cluster status.
         --master <addr>       The url of the master.
 
 
-### namespace-create
+### database-create
 
-Create a new namespace.
+Create a new database.
 
-      Usage: evqlctl [OPTIONS] -namespace-create
+      Usage: evqlctl [OPTIONS] -database-create
       --cluster_name <node name>       The name of the cluster
-      --namespace <namespace name>     The name of the namespace to create
+      --database <database name>     The name of the database to create
 
-
-### rebalance
-
-Rebalance a cluster.
-
-      Usage: evqlctl [OPTIONS] 
-        --cluster_name <node name>       The name of the cluster.
 
 ### table-split
 
-Split partition
+Split a partition
 
       Usage: evqlctl table-split [OPTIONS]
-        --namespace              The name of the namespace.
+        --database              The name of the database.
         --cluster_name           The name of the cluster.
         --table_name             The name of the table to split.
         --partition_id           The id of the partition to split.

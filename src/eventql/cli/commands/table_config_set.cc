@@ -57,7 +57,7 @@ Status TableConfigSet::execute(
       "<string>");
 
   flags.defineFlag(
-      "table_name",
+      "table",
       ::cli::FlagParser::T_STRING,
       true,
       NULL,
@@ -106,7 +106,7 @@ Status TableConfigSet::execute(
 
     auto cfg = cdir->getTableConfig(
         flags.getString("database"),
-        flags.getString("table_name"));
+        flags.getString("table"));
 
     auto rc = Status::success();
     if (param == "disable_replication") {
@@ -189,7 +189,7 @@ void TableConfigSet::printHelp(OutputStream* stdout_os) const {
   stdout_os->write(
       "Usage: evqlctl table-config-set [OPTIONS]\n"
       "  --database               The name of the database to modify.\n"
-      "  --table_name             The name of the table to modify.\n"
+      "  --table                  The name of the table to modify.\n"
       "  --param                  The parameter to set\n"
       "  --value                  The value to set the parameter to\n");
 }

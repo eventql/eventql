@@ -58,7 +58,7 @@ Status TableSplit::execute(
       "<string>");
 
   flags.defineFlag(
-      "table_name",
+      "table",
       ::cli::FlagParser::T_STRING,
       true,
       NULL,
@@ -114,7 +114,7 @@ Status TableSplit::execute(
 
     auto table_cfg = cdir->getTableConfig(
         flags.getString("database"),
-        flags.getString("table_name"));
+        flags.getString("table"));
 
     KeyspaceType keyspace;
     switch (table_cfg.config().partitioner()) {
