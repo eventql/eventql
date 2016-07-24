@@ -103,8 +103,8 @@ void ClusterSetAllocationPolicy::printHelp(OutputStream* stdout_os) const {
       "\nevqlctl-$0 - $1\n\n", kName_, kDescription_));
 
   stdout_os->write(
-      "Usage: evqlctl [OPTIONS]\n"
-      "  --server_name <server name>      The name of the server to add.\n");
+      "Usage: evqlctl cluster-set-allocation-policy [OPTIONS]\n"
+      "  --server_name            The name of the server to add.\n");
 }
 
 } // namespace cli
