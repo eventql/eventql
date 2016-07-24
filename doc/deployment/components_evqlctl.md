@@ -24,8 +24,7 @@ EventQL server.
 
 Create a new cluster.
 
-      Usage: evqlctl [OPTIONS]
-        --cluster_name <node name>       The name of the cluster to create.
+      Usage: evqlctl cluster-create [OPTIONS]
 
 
 ### cluster-add-server
@@ -33,36 +32,31 @@ Create a new cluster.
 Add a server to an existing cluster.
 
       Usage: evqlctl cluster-add-server [OPTIONS]
-         --cluster_name <node name>       The name of the cluster to add the server to.
-         --server_name <server name>      The name of the server to add.
-
+        --server_name            The name of the server to add.
 
 ### cluster-remove-server
 
 Remove an existing server from an existing cluster.
 
-      Usage: evqlctl [OPTIONS]
-        --cluster_name <node name>       The name of the cluster to add the server to.
-        --server_name <server name>      The name of the server to add.
-        --soft                           The name of the server to add.
-        --hard                           The name of the server to add.
+      Usage: evqlctl cluster-remove-server [OPTIONS]
+        --server_name            The name of the server to remove.
+        --soft                   Enable the soft-leave operation.
+        --hard                   Enable the hard-leave operation.
 
 
 ### cluster-status
 
 Display the current cluster status.
 
-      Usage: evqlctl [OPTIONS] -cluster-status
-        --master <addr>       The url of the master.
+      Usage: evqlctl cluster-status [OPTIONS]
 
 
 ### database-create
 
 Create a new database.
 
-      Usage: evqlctl [OPTIONS] -database-create
-      --cluster_name <node name>       The name of the cluster
-      --database <database name>     The name of the database to create
+      Usage: evqlctl database-create [OPTIONS]
+        --database               The name of the database to create.
 
 
 ### table-split
@@ -70,7 +64,7 @@ Create a new database.
 Split a partition
 
       Usage: evqlctl table-split [OPTIONS]
-        --database              The name of the database.
+        --database               The name of the database.
         --cluster_name           The name of the cluster.
         --table_name             The name of the table to split.
         --partition_id           The id of the partition to split.
