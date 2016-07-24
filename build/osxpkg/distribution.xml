@@ -6,7 +6,6 @@
     <options customize="never" require-scripts="true" rootVolumeOnly="true" />
     <welcome file="welcome.html"    mime-type="text/html" />
     <license file="license.html"    mime-type="text/html" />
-    <pkg-ref id="io.eventql.eventql" version="0" auth="root">eventql.pkg</pkg-ref>
     <choices-outline>
         <line choice="io.eventql.eventql"/>
     </choices-outline>
@@ -16,6 +15,7 @@
         title="EventQL"
         description="The EventQL Database"
         start_selected="true">
-      <pkg-ref id="io.eventql.eventql"/>
+      <pkg-ref id="io.eventql.eventql.base.pkg"/>
     </choice>
+    <pkg-ref id="io.eventql.eventql.base.pkg" version="0" auth="Root">#base.pkg</pkg-ref>
 </installer-gui-script>
