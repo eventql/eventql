@@ -32,14 +32,12 @@ SQLService::SQLService(
     csql::Runtime* sql,
     PartitionMap* pmap,
     ConfigDirectory* cdir,
-    ReplicationScheme* repl,
     InternalAuth* auth,
     TableService* table_service,
     const String& cache_dir) :
     sql_(sql),
     pmap_(pmap),
     cdir_(cdir),
-    repl_(repl),
     auth_(auth),
     table_service_(table_service),
     cache_dir_(cache_dir) {}

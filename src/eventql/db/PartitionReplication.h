@@ -25,7 +25,6 @@
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/http/httpconnectionpool.h>
 #include <eventql/db/Partition.h>
-#include <eventql/db/ReplicationScheme.h>
 #include <eventql/db/replication_state.h>
 #include <eventql/db/RecordEnvelope.pb.h>
 
@@ -40,7 +39,6 @@ public:
 
   PartitionReplication(
       RefPtr<Partition> partition,
-      RefPtr<ReplicationScheme> repl_scheme,
       http::HTTPConnectionPool* http);
 
   /**
@@ -82,7 +80,6 @@ protected:
 
   RefPtr<Partition> partition_;
   RefPtr<PartitionSnapshot> snap_;
-  RefPtr<ReplicationScheme> repl_scheme_;
   http::HTTPConnectionPool* http_;
 };
 

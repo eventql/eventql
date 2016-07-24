@@ -26,7 +26,6 @@
 #include "eventql/util/autoref.h"
 #include "eventql/util/option.h"
 #include "eventql/util/json/json.h"
-#include "eventql/db/ReplicationScheme.h"
 
 #include "eventql/eventql.h"
 

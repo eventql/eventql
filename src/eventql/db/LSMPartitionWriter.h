@@ -71,7 +71,6 @@ protected:
   LSMTableIndexCache* idx_cache_;
   FileTracker* file_tracker_;
   ConfigDirectory* cdir_;
-  ReplicationScheme* repl_;
   size_t partition_split_threshold_;
   std::mutex commit_mutex_;
   std::mutex compaction_mutex_;

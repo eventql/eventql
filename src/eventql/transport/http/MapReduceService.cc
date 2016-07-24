@@ -44,13 +44,11 @@ MapReduceService::MapReduceService(
     InternalAuth* auth,
     eventql::TableService* tsdb,
     eventql::PartitionMap* pmap,
-    eventql::ReplicationScheme* repl,
     const String& cachedir) :
     cdir_(cdir),
     auth_(auth),
     tsdb_(tsdb),
     pmap_(pmap),
-    repl_(repl),
     cachedir_(cachedir),
     tpool_(
         thread::ThreadPoolOptions {

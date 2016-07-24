@@ -43,12 +43,10 @@ namespace eventql {
 TableService::TableService(
     ConfigDirectory* cdir,
     PartitionMap* pmap,
-    ReplicationScheme* repl,
     thread::EventLoop* ev,
     http::HTTPClientStats* http_stats) :
     cdir_(cdir),
     pmap_(pmap),
-    repl_(repl),
     http_(ev, http_stats) {}
 
 Status TableService::createTable(

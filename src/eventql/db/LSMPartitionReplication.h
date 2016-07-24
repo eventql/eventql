@@ -38,7 +38,6 @@ public:
 
   LSMPartitionReplication(
       RefPtr<Partition> partition,
-      RefPtr<ReplicationScheme> repl_scheme,
       ConfigDirectory* cdir,
       http::HTTPConnectionPool* http);
 

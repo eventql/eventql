@@ -503,15 +503,11 @@ int main(int argc, const char** argv) {
     auto cluster_config = config_dir->getClusterConfig();
 
     /* tsdb */
-    auto repl_scheme = RefPtr<eventql::ReplicationScheme>(
-          new eventql::DHTReplicationScheme(cluster_config, server_name));
-
     FileLock server_lock(FileUtil::joinPaths(tsdb_dir, "__lock"));
     server_lock.lock();
 
     eventql::ServerCfg cfg;
     cfg.db_path = tsdb_dir;
-    cfg.repl_scheme = repl_scheme;
     cfg.config_directory = config_dir.get();
     cfg.idx_cache = mkRef(new LSMTableIndexCache(tsdb_dir));
     cfg.metadata_store = &metadata_store;
@@ -521,12 +517,10 @@ int main(int argc, const char** argv) {
     eventql::TableService table_service(
         config_dir.get(),
         &partition_map,
-        repl_scheme.get(),
         &ev,
         &evqld_stats()->http_client_stats);
 
     eventql::ReplicationWorker tsdb_replication(
-        repl_scheme.get(),
         &partition_map,
         &http);
 

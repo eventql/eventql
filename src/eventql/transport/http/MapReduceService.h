@@ -42,7 +42,6 @@ public:
       InternalAuth* auth,
       eventql::TableService* tsdb,
       eventql::PartitionMap* pmap,
-      eventql::ReplicationScheme* repl,
       const String& cachedir);
 
   void executeScript(
@@ -85,7 +84,6 @@ protected:
   InternalAuth* auth_;
   eventql::TableService* tsdb_;
   eventql::PartitionMap* pmap_;
-  eventql::ReplicationScheme* repl_;
   String cachedir_;
   thread::ThreadPool tpool_;
 };

@@ -24,7 +24,6 @@
 #include <eventql/db/LSMPartitionReplication.h>
 #include <eventql/db/LSMPartitionReader.h>
 #include <eventql/db/LSMPartitionWriter.h>
-#include <eventql/db/ReplicationScheme.h>
 #include <eventql/db/replication_worker.h>
 #include <eventql/util/logging.h>
 #include <eventql/util/io/fileutil.h>
@@ -44,10 +43,9 @@ const size_t LSMPartitionReplication::kMaxBatchSizeBytes = 1024 * 1024 * 2; // 2
 
 LSMPartitionReplication::LSMPartitionReplication(
     RefPtr<Partition> partition,
-    RefPtr<ReplicationScheme> repl_scheme,
     ConfigDirectory* cdir,
     http::HTTPConnectionPool* http) :
-    PartitionReplication(partition, repl_scheme, http), cdir_(cdir) {}
+    PartitionReplication(partition, http), cdir_(cdir) {}
 
 bool LSMPartitionReplication::needsReplication() const {
   // check if we have seen the latest metadata transaction, otherwise enqueue

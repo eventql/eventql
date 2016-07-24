@@ -68,7 +68,6 @@ public:
   TableService(
       ConfigDirectory* cdir,
       PartitionMap* pmap,
-      ReplicationScheme* repl,
       thread::EventLoop* ev,
       http::HTTPClientStats* http_stats);
 
@@ -163,7 +162,6 @@ protected:
 
   ConfigDirectory* cdir_;
   PartitionMap* pmap_;
-  ReplicationScheme* repl_;
   http::HTTPConnectionPool http_;
 };
 

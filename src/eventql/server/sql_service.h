@@ -46,7 +46,6 @@ public:
       csql::Runtime* sql,
       PartitionMap* pmap,
       ConfigDirectory* cdir,
-      ReplicationScheme* repl,
       InternalAuth* auth,
       TableService* table_service,
       const String& cache_dir);
@@ -57,7 +56,6 @@ protected:
   csql::Runtime* sql_;
   PartitionMap* pmap_;
   ConfigDirectory* cdir_;
-  ReplicationScheme* repl_;
   InternalAuth* auth_;
   TableService* table_service_;
   String cache_dir_;

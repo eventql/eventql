@@ -24,9 +24,7 @@
 #pragma once
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/autoref.h>
-#include <eventql/db/ReplicationScheme.h>
 #include <eventql/db/LSMTableIndexCache.h>
-
 #include "eventql/eventql.h"
 
 namespace eventql {
@@ -36,7 +34,6 @@ class FileTracker;
 
 struct ServerCfg {
   String db_path;
-  RefPtr<ReplicationScheme> repl_scheme;
   RefPtr<LSMTableIndexCache> idx_cache;
   ConfigDirectory* config_directory;
   MetadataStore* metadata_store;

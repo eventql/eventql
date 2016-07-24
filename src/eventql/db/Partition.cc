@@ -217,7 +217,6 @@ PartitionInfo Partition::getInfo() const {
 }
 
 RefPtr<PartitionReplication> Partition::getReplicationStrategy(
-    RefPtr<ReplicationScheme> repl_scheme,
     http::HTTPConnectionPool* http) {
   return new LSMPartitionReplication(
       this,

@@ -874,8 +874,6 @@ evql_core_a_SOURCES = \
     eventql/db/partition_arena.h \
     eventql/db/RecordSet.cc \
     eventql/db/RecordSet.h \
-    eventql/db/ReplicationScheme.cc \
-    eventql/db/ReplicationScheme.h \
     eventql/db/replication_state.cc \
     eventql/db/replication_state.h \
     eventql/db/replication_worker.cc \

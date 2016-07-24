@@ -97,10 +97,8 @@ String ReplicationInfo::toString() const {
 }
 
 ReplicationWorker::ReplicationWorker(
-    RefPtr<ReplicationScheme> repl_scheme,
     PartitionMap* pmap,
     http::HTTPConnectionPool* http) :
-    repl_scheme_(repl_scheme),
     pmap_(pmap),
     http_(http),
     queue_([] (

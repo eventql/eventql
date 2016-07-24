@@ -37,13 +37,11 @@ TSDBTableProvider::TSDBTableProvider(
     const String& tsdb_namespace,
     PartitionMap* partition_map,
     ConfigDirectory* cdir,
-    ReplicationScheme* replication_scheme,
     TableService* table_service,
     InternalAuth* auth) :
     tsdb_namespace_(tsdb_namespace),
     partition_map_(partition_map),
     cdir_(cdir),
-    replication_scheme_(replication_scheme),
     table_service_(table_service),
     auth_(auth) {}
 

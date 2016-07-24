@@ -27,7 +27,6 @@
 #include <eventql/util/stdtypes.h>
 #include <eventql/db/partition_map.h>
 #include <eventql/db/PartitionReplication.h>
-#include <eventql/db/ReplicationScheme.h>
 
 #include "eventql/eventql.h"
 
@@ -66,7 +65,6 @@ public:
   static const uint64_t kReplicationCorkWindowMicros = 10 * kMicrosPerSecond;
 
   ReplicationWorker(
-      RefPtr<ReplicationScheme> repl_scheme,
       PartitionMap* pmap,
       http::HTTPConnectionPool* http);
 
@@ -90,7 +88,6 @@ protected:
   void stop();
   void work(size_t thread_id);
 
-  RefPtr<ReplicationScheme> repl_scheme_;
   PartitionMap* pmap_;
   http::HTTPConnectionPool* http_;
 

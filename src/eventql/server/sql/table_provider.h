@@ -46,7 +46,6 @@ public:
       const String& tsdb_namespace,
       PartitionMap* partition_map,
       ConfigDirectory* cdir,
-      ReplicationScheme* replication_scheme,
       TableService* table_service,
       InternalAuth* auth);
 
@@ -92,7 +91,6 @@ protected:
   String tsdb_namespace_;
   PartitionMap* partition_map_;
   ConfigDirectory* cdir_;
-  ReplicationScheme* replication_scheme_;
   TableService* table_service_;
   InternalAuth* auth_;
 };

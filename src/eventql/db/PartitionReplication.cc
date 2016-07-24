@@ -22,7 +22,6 @@
  * code of your own applications
  */
 #include <eventql/db/PartitionReplication.h>
-#include <eventql/db/ReplicationScheme.h>
 #include <eventql/util/logging.h>
 #include <eventql/util/io/fileutil.h>
 #include <eventql/util/protobuf/msg.h>
@@ -35,11 +34,8 @@ const char PartitionReplication::kStateFileName[] = "_repl";
 
 PartitionReplication::PartitionReplication(
     RefPtr<Partition> partition,
-    RefPtr<ReplicationScheme> repl_scheme,
-    http::HTTPConnectionPool* http) :
     partition_(partition),
     snap_(partition_->getSnapshot()),
-    repl_scheme_(repl_scheme),
     http_(http) {}
 
 ReplicationState PartitionReplication::fetchReplicationState(

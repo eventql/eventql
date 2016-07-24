@@ -35,7 +35,6 @@
 #include <eventql/db/PartitionSnapshot.h>
 #include <eventql/db/PartitionWriter.h>
 #include <eventql/db/PartitionReader.h>
-#include <eventql/db/ReplicationScheme.h>
 #include <eventql/db/metadata_transaction.h>
 #include <eventql/db/metadata_operations.pb.h>
 #include <eventql/io/cstable/cstable_reader.h>
@@ -92,7 +91,6 @@ public:
   PartitionInfo getInfo() const;
 
   RefPtr<PartitionReplication> getReplicationStrategy(
-      RefPtr<ReplicationScheme> repl_scheme,
       http::HTTPConnectionPool* http);
 
   String getRelativePath() const;
