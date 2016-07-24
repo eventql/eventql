@@ -12,8 +12,8 @@ tolerated failures 2.
 
 ## Partition Location
 
-Each table has a METADATA file that rows the partition mapping. The TableConfig,
-which is kept in the coordination service rows these pieces of information:
+Each table has a METADATA file that records the partition mapping. The TableConfig,
+which is kept in the coordination service records these pieces of information:
 
     metadata_txnid: the currently valid METADATA transaction id for this table
     metadata_servers: the list of live metadata servers for this table
@@ -138,7 +138,7 @@ This case is naturally handled as part of the partition replication lifecyle.
 
 ##### Partition Replication and Lifecyle
 
-Each server, locally, rows an a map of server_id -> sequence pairs. In this
+Each server, locally, records an a map of server_id -> sequence pairs. In this
 map, it stores until which sequence ID it has replicated a given partition to a
 given server. Each partition is always notified of changes in the server list.
 
