@@ -60,11 +60,11 @@ Status ConfigDirectoryFactory::getConfigDirectoryForServer(
           "missing config option: server.listen");
     }
 
-    auto zookeeper_addr = cfg->getString("zookeeper.hosts");
+    auto zookeeper_addr = cfg->getString("cluster.zookeeper_hosts");
     if (zookeeper_addr.isEmpty()) {
       return Status(
           eIllegalArgumentError,
-          "missing config option: zookeeper.hosts");
+          "missing config option: cluster.zookeeper_hosts");
     }
 
     cdir->reset(
@@ -131,11 +131,11 @@ Status ConfigDirectoryFactory::getConfigDirectoryForClient(
           "missing config option: cluster.name");
     }
 
-    auto zookeeper_addr = cfg->getString("zookeeper.hosts");
+    auto zookeeper_addr = cfg->getString("cluster.zookeeper_hosts");
     if (zookeeper_addr.isEmpty()) {
       return Status(
           eIllegalArgumentError,
-          "missing config option: zookeeper.hosts");
+          "missing config option: cluster.zookeeper_hosts");
     }
 
     cdir->reset(
