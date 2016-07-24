@@ -91,10 +91,10 @@ Create the data directories first:
 
 Then start the four servers:
 
-    $ evqld -c /etc/evqld.conf -C server.name=node1 --listen localhost:9175
-    $ evqld -c /etc/evqld.conf -C server.name=node2 --listen localhost:9176
-    $ evqld -c /etc/evqld.conf -C server.name=node3 --listen localhost:9177
-    $ evqld -c /etc/evqld.conf -C server.name=node4 --listen localhost:9178
+    $ evqld -c /etc/evqld.conf -C server.name=node1 --listen localhost:9175 --datadir /var/evql/node1/
+    $ evqld -c /etc/evqld.conf -C server.name=node2 --listen localhost:9176 --datadir /var/evql/node2/
+    $ evqld -c /etc/evqld.conf -C server.name=node3 --listen localhost:9177 --datadir /var/evql/node3/
+    $ evqld -c /etc/evqld.conf -C server.name=node4 --listen localhost:9178 --datadir /var/evql/node4/
 
 Note that when a server joins the cluster, it will publish its `listen` address
 to the other servers. So it is important that all other servers can open
