@@ -86,7 +86,7 @@ evql_protos = \
     eventql/config/namespace_config_protos.proto \
     eventql/db/metadata_operations.proto \
     eventql/db/cluster_config.proto \
-    eventql/db/PartitionInfo.proto \
+    eventql/db/partition_info.proto \
     eventql/db/partition_state.proto \
     eventql/db/record_envelope.proto \
     eventql/db/replication_state.proto \
@@ -957,7 +957,7 @@ nodist_evql_core_a_SOURCES = \
     @builddir@/eventql/config/namespace_config_protos.pb.cc \
     @builddir@/eventql/db/metadata_operations.pb.cc \
     @builddir@/eventql/db/cluster_config.pb.cc \
-    @builddir@/eventql/db/PartitionInfo.pb.cc \
+    @builddir@/eventql/db/partition_info.pb.cc \
     @builddir@/eventql/db/partition_state.pb.cc \
     @builddir@/eventql/db/record_envelope.pb.cc \
     @builddir@/eventql/db/replication_state.pb.cc \

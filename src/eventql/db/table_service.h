@@ -32,7 +32,7 @@
 #include <eventql/db/table_config.pb.h>
 #include <eventql/db/partition.h>
 #include <eventql/db/table_info.h>
-#include <eventql/db/PartitionInfo.pb.h>
+#include <eventql/db/partition_info.pb.h>
 #include <eventql/db/record_envelope.pb.h>
 #include <eventql/db/partition_map.h>
 #include <eventql/db/shredded_record.h>

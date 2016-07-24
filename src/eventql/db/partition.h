@@ -31,7 +31,7 @@
 #include <eventql/db/server_config.h>
 #include <eventql/db/table.h>
 #include <eventql/db/record_ref.h>
-#include <eventql/db/PartitionInfo.pb.h>
+#include <eventql/db/partition_info.pb.h>
 #include <eventql/db/partition_snapshot.h>
 #include <eventql/db/metadata_transaction.h>
 #include <eventql/db/metadata_operations.pb.h>
