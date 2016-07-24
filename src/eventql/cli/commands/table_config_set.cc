@@ -190,8 +190,8 @@ void TableConfigSet::printHelp(OutputStream* stdout_os) const {
       "Usage: evqlctl table-config-set [OPTIONS]\n"
       "  --database               The name of the database to modify.\n"
       "  --table                  The name of the table to modify.\n"
-      "  --param                  The parameter to set\n"
-      "  --value                  The value to set the parameter to\n");
+      "  --param                  The parameter to set.\n"
+      "  --value                  The value to set the parameter to.\n");
 }
 
 } // namespace cli
