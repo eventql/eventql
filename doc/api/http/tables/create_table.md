@@ -1,9 +1,8 @@
 POST /api/v1/tables/create_table
 ================
 
-Create a new EventQL table or overwrite an existing table.
-
-Every table needs a primary key whose first column must be of type DATETIME.
+Create a new EventQL table or update the schema of an existing table.<br>
+A table must have at least one unique primary key whose first column is treated as partition key to distribute the rows among the hosts. The partition key can be of type `string`, `uint64` or `datetime`. To learn more about primary keys and understand how to choose one to get the best performance, read on the [Partitioning](../../../../tables/partitioning/) page.
 
 Please make sure that each field has a unique numeric ID (it's basically
 a protobuf schema).
@@ -30,23 +29,23 @@ to this new scheme.
 <table class='http_api create_table'>
   <tr>
     <td>table&#95;name</td>
-    <td>name of the table to be created/overwritten</td>
+    <td>The name of the table to be created/overwritten.</td>
   </tr>
   <tr>
     <td>table&#95;type</td>
-    <td>the type of the table to be created. must be "timeseries"</td>
+    <td>The type of the table to be created. Must be "timeseries".</td>
   </tr>
   <tr>
     <td>schema</td>
-    <td>the json schema of the table</td>
+    <td>The json schema of the table.</td>
   </tr>
   <tr>
     <td>update (optional)</td>
-    <td>if true, overwrite an existing table if a table with the same name exists. Note that this should not be used for regular schema maintenance as it's fairly unsafe (it will hard-overwrite the tables schema). Use the add_field/remove_field calls instead to manage an existing table schema.</td>
+    <td>If true, overwrite an existing table if a table with the same name exists. Note that this should not be used for regular schema maintenance as it's fairly unsafe (it will hard-overwrite the tables schema). Use the add_field/remove_field calls instead to manage an existing table schema.</td>
   </tr>
   <tr>
     <td>partition_size (optional)</td>
-    <td>the partition size in microseconds, defaults to 4h</td>
+    <td>The partition size in microseconds, defaults to 4h.</td>
   </tr>
 </table>
 
