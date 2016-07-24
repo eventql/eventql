@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
  *   - Christian Parpart <trapni@dawanda.com>
  *

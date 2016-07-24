@@ -1,7 +1,7 @@
 /**
- * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@zscale.io>
+ *   - Paul Asmuth <paul@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -225,7 +225,7 @@ int main(int argc, const char** argv) {
     stdout_os->write(
         StringUtil::format(
             "EventQL $0 ($1)\n"
-            "Copyright (c) 2016, zScale Techology GmbH. All rights reserved.\n\n",
+            "Copyright (c) 2016, DeepCortex GmbH. All rights reserved.\n\n",
             kVersionString,
             kBuildID));
   }
