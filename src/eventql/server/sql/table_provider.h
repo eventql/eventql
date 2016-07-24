@@ -97,5 +97,6 @@ protected:
   InternalAuth* auth_;
 };
 
+void evqlVersionExpr(sql_txn* ctx, int argc, csql::SValue* argv, csql::SValue* out);
 
 } // namespace csql

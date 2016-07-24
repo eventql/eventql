@@ -944,8 +944,6 @@ evql_core_a_SOURCES = \
     eventql/server/sql/pipelined_expression.h \
     eventql/server/sql/scheduler.cc \
     eventql/server/sql/scheduler.h \
-    eventql/server/sql/sql_engine.cc \
-    eventql/server/sql/sql_engine.h \
     eventql/server/sql/table_provider.cc \
     eventql/server/sql/table_provider.h \
     eventql/server/sql/table_scan.cc \

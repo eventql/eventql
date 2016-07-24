@@ -576,7 +576,7 @@ int main(int argc, const char** argv) {
                   repl_scheme.get()))));
 
       sql->setCacheDir(cache_dir);
-      sql->symbols()->registerFunction("z1_version", &z1VersionExpr);
+      sql->symbols()->registerFunction("version", &evqlVersionExpr);
       sql->setQueryCache(&sql_query_cache);
     }
 

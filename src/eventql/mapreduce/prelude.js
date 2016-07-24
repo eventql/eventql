@@ -7,7 +7,7 @@ function __log() {
     parts.push(String(arguments[i]));
   }
 
-  z1_log(parts.join(", "));
+  evql_log(parts.join(", "));
 }
 
 function __encode_js(obj) {
@@ -133,7 +133,7 @@ var EVQL = (function(global) {
     };
 
     find_dependencies(root_job);
-    z1_executemr(JSON.stringify(dependencies), root_job.id);
+    evql_executemr(JSON.stringify(dependencies), root_job.id);
   }
 
   function autoBroadcast() {
@@ -143,7 +143,7 @@ var EVQL = (function(global) {
       }
 
       if (typeof global[k] == "function") {
-        Z1.broadcast(k);
+        EVQL.broadcast(k);
       }
     }
   }
@@ -160,7 +160,7 @@ var EVQL = (function(global) {
       var var_name = arguments[i];
 
       if (typeof var_name != "string")  {
-        throw "arguments to Z1.broadcast must be strings";
+        throw "arguments to EVQL.broadcast must be strings";
       }
 
       if (var_name == "params") {
@@ -309,10 +309,10 @@ var EVQL = (function(global) {
 
   api.writeToOutput = function(str) {
     if (typeof str != "string") {
-      throw "argument to Z1.writeToOutput must be a string";
+      throw "argument to EVQL.writeToOutput must be a string";
     }
 
-    z1_returnresult(str);
+    evql_returnresult(str);
   };
 
   return api;

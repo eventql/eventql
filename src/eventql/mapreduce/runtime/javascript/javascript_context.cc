@@ -97,7 +97,7 @@ JavaScriptContext::JavaScriptContext(
       JS_DefineFunction(
           ctx_,
           global_,
-          "z1_log",
+          "evql_log",
           &JavaScriptContext::dispatchLog,
           0,
           0);
@@ -105,7 +105,7 @@ JavaScriptContext::JavaScriptContext(
       JS_DefineFunction(
           ctx_,
           global_,
-          "z1_returnresult",
+          "evql_returnresult",
           &JavaScriptContext::returnResult,
           0,
           0);
@@ -113,7 +113,7 @@ JavaScriptContext::JavaScriptContext(
       JS_DefineFunction(
           ctx_,
           global_,
-          "z1_executemr",
+          "evql_executemr",
           &JavaScriptContext::executeMapReduce,
           0,
           0);
@@ -545,7 +545,7 @@ Option<String> JavaScriptContext::getMapReduceJobJSON() {
   JSAutoCompartment js_comp(ctx_, global_);
 
   JS::RootedValue job_def(ctx_);
-  if (!JS_GetProperty(ctx_, global_, "__z1_mr_jobs", &job_def)) {
+  if (!JS_GetProperty(ctx_, global_, "__evql_mr_jobs", &job_def)) {
     return None<String>();
   }
 
