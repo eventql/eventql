@@ -27,10 +27,7 @@
 
 namespace eventql {
 
-static const uint32_t kVersionMajor = 0;
-static const uint32_t kVersionMinor = 3;
-static const uint32_t kVersionPatch = 0;
-static const std::string kVersionString = "v0.3.0";
+static const std::string kVersionString = EVQL_VERSION;
 
 #ifdef EVQL_BUILDID
 static const std::string kBuildID = EVQL_BUILDID;
