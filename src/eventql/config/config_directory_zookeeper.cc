@@ -52,7 +52,8 @@ ZookeeperConfigDirectory::ZookeeperConfigDirectory(
     listen_addr_(listen_addr),
     global_prefix_("/eventql"),
     state_(ZKState::INIT),
-    zk_(nullptr) {
+    zk_(nullptr),
+    is_leader_(false) {
   zoo_set_debug_level(ZOO_LOG_LEVEL_ERROR);
 }
 
@@ -540,7 +541,7 @@ bool ZookeeperConfigDirectory::getNode(
     String key,
     Buffer* buf,
     bool watch /* = false */,
-    struct Stat* stat /* = nullptr */) {
+    struct Stat* stat /* = nullptr */) const {
   int buf_len = buf->size();
 
   auto rc = zoo_get(
@@ -873,6 +874,23 @@ String ZookeeperConfigDirectory::getServerID() const {
 
 bool ZookeeperConfigDirectory::hasServerID() const {
   return !server_name_.isEmpty();
+}
+
+bool ZookeeperConfigDirectory::isLeader() const {
+  std::unique_lock<std::mutex> lk(mutex_);
+  return is_leader_;
+}
+
+String ZookeeperConfigDirectory::getLeader() const {
+  std::unique_lock<std::mutex> lk(mutex_);
+
+  Buffer leader_name(1024);
+  auto key = StringUtil::format("$0/leader", path_prefix_);
+  if (getNode(key, &leader_name, true)) {
+    return leader_name.toString();
+  } else {
+    return "";
+  }
 }
 
 ServerConfig ZookeeperConfigDirectory::getServerConfig(

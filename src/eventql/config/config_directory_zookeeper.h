@@ -140,7 +140,7 @@ protected:
       String key,
       Buffer* buf,
       bool watch = false,
-      struct Stat* stat = nullptr);
+      struct Stat* stat = nullptr) const;
 
   template <typename T>
   bool getProtoNode(
@@ -165,6 +165,7 @@ protected:
   String path_prefix_;
   ZKState state_;
   zhandle_t* zk_;
+  bool is_leader_;
   mutable std::mutex mutex_;
   std::condition_variable cv_;
 
