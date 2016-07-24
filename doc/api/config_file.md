@@ -6,7 +6,7 @@ Configuration files aren't mandatory but they provide a convenient way to specif
 ###File Format
 EventQL uses the INI file format, that is a simple text file grouped into sections that consists of key-value pairs.
 
-    [evql]
+    [client]
     host = prod.example.com ; execute queries on this server
 
 You can override every option set in the configuration file by using the command line option `-C` followed by the corresponding `section.key=value` pair.
