@@ -45,9 +45,9 @@ public:
 
   bool hasServerID() const override;
 
-  virtual bool electLeader();
+  virtual bool electLeader() override;
 
-  virtual String getLeader() const;
+  virtual String getLeader() const override;
 
   ClusterConfig getClusterConfig() const override;
 

@@ -63,6 +63,7 @@ Status ClusterCreate::execute(
     }
 
     ClusterConfig cfg;
+    cfg.set_version(1);
     cdir->updateClusterConfig(cfg);
 
     cdir->stop();
