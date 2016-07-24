@@ -61,6 +61,10 @@ Status TableService::createTable(
         eIllegalArgumentError,
         "can't create table without PRIMARY KEY");
   }
+  
+  if (!pmap_->findTable(db_namespace, table_name).isEmpty()) {
+    return Status(eIllegalArgumentError, "table already exists");
+  }
 
   for (const auto& col : primary_key) {
     if (col.find(".") != String::npos) {
