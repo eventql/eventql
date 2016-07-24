@@ -27,7 +27,6 @@
 #include "eventql/util/http/HTTPSSEStream.h"
 #include "eventql/util/json/json.h"
 #include "eventql/util/web/SecureCookie.h"
-#include "eventql/AnalyticsSession.pb.h"
 #include "eventql/sql/runtime/runtime.h"
 #include "eventql/auth/internal_auth.h"
 #include "eventql/config/config_directory.h"

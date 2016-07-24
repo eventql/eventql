@@ -82,7 +82,7 @@ AM_LDFLAGS = $(PTHREAD_CFLAGS)
 
 ################# PROTOBUFs ####################
 evql_protos = \
-    eventql/AnalyticsSession.proto \
+    eventql/auth/client_auth_legacy_protos.proto \
     eventql/config/namespace_config_protos.proto \
     eventql/db/metadata_operations.proto \
     eventql/db/ClusterConfig.proto \
@@ -972,7 +972,7 @@ evql_core_a_SOURCES = \
     eventql/util/mdb/MDBTransaction.h
 
 nodist_evql_core_a_SOURCES = \
-    @builddir@/eventql/AnalyticsSession.pb.cc \
+    @builddir@/eventql/auth/client_auth_legacy_protos.pb.cc \
     @builddir@/eventql/config/namespace_config_protos.pb.cc \
     @builddir@/eventql/db/metadata_operations.pb.cc \
     @builddir@/eventql/db/ClusterConfig.pb.cc \

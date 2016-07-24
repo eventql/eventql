@@ -29,7 +29,6 @@
 #include "eventql/transport/http/MapReduceAPIServlet.h"
 #include "eventql/mapreduce/MapReduceTask.h"
 #include "eventql/io/sstable/sstablereader.h"
-
 #include "eventql/eventql.h"
 
 namespace eventql {
