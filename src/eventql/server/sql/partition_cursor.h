@@ -23,7 +23,13 @@
  * code of your own applications
  */
 #include <eventql/sql/result_cursor.h>
+#include <eventql/sql/transaction.h>
+#include <eventql/sql/scheduler/execution_context.h>
+#include <eventql/sql/CSTableScan.h>
+#include <eventql/sql/qtree/SequentialScanNode.h>
 #include <eventql/db/partition_map.h>
+#include <eventql/db/partition_reader.h>
+#include <eventql/server/sql/table_provider.h>
 
 #include "eventql/eventql.h"
 

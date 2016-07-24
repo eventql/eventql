@@ -49,5 +49,29 @@ protected:
   RefPtr<PartitionSnapshot> snap_;
 };
 
+class LSMPartitionReader : public PartitionReader {
+public:
+
+  LSMPartitionReader(
+      RefPtr<Table> table,
+      RefPtr<PartitionSnapshot> head);
+
+  void fetchRecords(
+      const Set<String>& required_columns,
+      Function<void (const msg::MessageObject& record)> fn) override;
+
+  Status findMedianValue(
+      const String& column,
+      Function<bool (const String& a, const String b)> comparator,
+      String* min,
+      String* midpoint,
+      String* max);
+
+  SHA1Hash version() const override;
+
+protected:
+  RefPtr<Table> table_;
+};
+
 } // namespace tdsb
 

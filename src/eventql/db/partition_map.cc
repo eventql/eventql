@@ -31,6 +31,8 @@
 #include <eventql/db/partition_state.pb.h>
 #include <eventql/db/partition_replication.h>
 #include <eventql/db/metadata_coordinator.h>
+#include <eventql/db/partition_reader.h>
+#include <eventql/db/partition_writer.h>
 #include "eventql/eventql.h"
 #include "eventql/db/file_tracker.h"
 

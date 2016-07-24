@@ -23,11 +23,15 @@
  * code of your own applications
  */
 #include <thread>
-#include <eventql/sql/expressions/table_expression.h>
+#include "eventql/eventql.h"
 #include <eventql/auth/internal_auth.h>
 #include <eventql/db/partition_map.h>
+#include <eventql/db/partition_map.h>
+#include <eventql/db/partition_reader.h>
+#include <eventql/server/sql/table_provider.h>
 #include <eventql/server/sql/table_scan.h>
-#include "eventql/eventql.h"
+#include <eventql/sql/expressions/table_expression.h>
+#include <eventql/sql/qtree/SequentialScanNode.h>
 
 namespace eventql {
 

@@ -33,6 +33,7 @@
 #include "eventql/io/sstable/sstablereader.h"
 #include "eventql/io/cstable/cstable_writer.h"
 #include "eventql/io/cstable/RecordShredder.h"
+#include "eventql/db/partition_reader.h"
 #include <algorithm>
 
 #include "eventql/eventql.h"

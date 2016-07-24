@@ -87,7 +87,7 @@ evql_protos = \
     eventql/db/metadata_operations.proto \
     eventql/db/cluster_config.proto \
     eventql/db/PartitionInfo.proto \
-    eventql/db/PartitionState.proto \
+    eventql/db/partition_state.proto \
     eventql/db/record_envelope.proto \
     eventql/db/replication_state.proto \
     eventql/db/table_config.proto
@@ -803,7 +803,7 @@ noinst_LIBRARIES += evql_http.a
 evql_core_a_SOURCES = \
     eventql/config/namespace_config.cc \
     eventql/config/namespace_config.h \
-    eventql/db/PartitionChangeNotification.h \
+    eventql/db/partition_change_notification.h \
     eventql/db/record_ref.h \
     eventql/db/shredded_record.h \
     eventql/db/shredded_record.cc \
@@ -827,18 +827,12 @@ evql_core_a_SOURCES = \
     eventql/db/compaction_strategy.h \
     eventql/db/compaction_worker.cc \
     eventql/db/compaction_worker.h \
-    eventql/db/LSMPartitionReader.cc \
-    eventql/db/LSMPartitionReader.h \
-    eventql/db/LSMPartitionReplication.cc \
-    eventql/db/LSMPartitionReplication.h \
-    eventql/db/LSMPartitionWriter.cc \
-    eventql/db/LSMPartitionWriter.h \
     eventql/db/LSMTableIndex.cc \
     eventql/db/LSMTableIndex.h \
     eventql/db/LSMTableIndexCache.cc \
     eventql/db/LSMTableIndexCache.h \
-    eventql/db/LazyPartition.cc \
-    eventql/db/LazyPartition.h \
+    eventql/db/Lazypartition.cc \
+    eventql/db/Lazypartition.h \
     eventql/db/metadata_client.cc \
     eventql/db/metadata_client.h \
     eventql/db/metadata_coordinator.cc \
@@ -855,16 +849,16 @@ evql_core_a_SOURCES = \
     eventql/db/metadata_store.h \
     eventql/db/metadata_transaction.cc \
     eventql/db/metadata_transaction.h \
-    eventql/db/Partition.cc \
-    eventql/db/Partition.h \
-    eventql/db/PartitionReader.cc \
-    eventql/db/PartitionReader.h \
-    eventql/db/PartitionReplication.cc \
-    eventql/db/PartitionReplication.h \
-    eventql/db/PartitionSnapshot.cc \
-    eventql/db/PartitionSnapshot.h \
-    eventql/db/PartitionWriter.cc \
-    eventql/db/PartitionWriter.h \
+    eventql/db/partition.cc \
+    eventql/db/partition.h \
+    eventql/db/partition_reader.cc \
+    eventql/db/partition_reader.h \
+    eventql/db/partition_replication.cc \
+    eventql/db/partition_replication.h \
+    eventql/db/partition_snapshot.cc \
+    eventql/db/partition_snapshot.h \
+    eventql/db/partition_writer.cc \
+    eventql/db/partition_writer.h \
     eventql/db/partition_arena.cc \
     eventql/db/partition_arena.h \
     eventql/db/record_set.cc \
@@ -966,7 +960,7 @@ nodist_evql_core_a_SOURCES = \
     @builddir@/eventql/db/metadata_operations.pb.cc \
     @builddir@/eventql/db/cluster_config.pb.cc \
     @builddir@/eventql/db/PartitionInfo.pb.cc \
-    @builddir@/eventql/db/PartitionState.pb.cc \
+    @builddir@/eventql/db/partition_state.pb.cc \
     @builddir@/eventql/db/record_envelope.pb.cc \
     @builddir@/eventql/db/replication_state.pb.cc \
     @builddir@/eventql/db/table_config.pb.cc

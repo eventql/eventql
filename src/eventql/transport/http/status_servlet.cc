@@ -22,7 +22,7 @@
  * code of your own applications
  */
 #include <eventql/transport/http/status_servlet.h>
-#include <eventql/db/PartitionReplication.h>
+#include <eventql/db/partition_replication.h>
 #include <eventql/server/server_stats.h>
 #include <eventql/eventql.h>
 #include "eventql/util/application.h"

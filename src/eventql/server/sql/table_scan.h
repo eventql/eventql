@@ -23,11 +23,13 @@
  * code of your own applications
  */
 #pragma once
+#include "eventql/eventql.h"
 #include <eventql/sql/expressions/table_expression.h>
 #include <eventql/auth/internal_auth.h>
 #include <eventql/db/partition_map.h>
-
-#include "eventql/eventql.h"
+#include <eventql/sql/transaction.h>
+#include <eventql/sql/scheduler/execution_context.h>
+#include <eventql/sql/qtree/SequentialScanNode.h>
 
 namespace eventql {
 

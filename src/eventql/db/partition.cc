@@ -25,6 +25,7 @@
 #include <eventql/util/io/fileutil.h>
 #include <eventql/util/uri.h>
 #include <eventql/util/logging.h>
+#include <eventql/util/random.h>
 #include <eventql/util/util/binarymessagewriter.h>
 #include <eventql/util/wallclock.h>
 #include <eventql/util/protobuf/MessageEncoder.h>

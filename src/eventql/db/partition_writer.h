@@ -29,6 +29,8 @@
 #include <eventql/db/record_ref.h>
 #include <eventql/db/metadata_operations.pb.h>
 #include <eventql/db/shredded_record.h>
+#include <eventql/db/partition.h>
+#include <eventql/db/compaction_strategy.h>
 
 namespace eventql {
 
@@ -73,6 +75,51 @@ protected:
   PartitionSnapshotRef* head_;
   std::mutex mutex_;
   std::atomic<bool> frozen_;
+};
+
+class LSMPartitionWriter : public PartitionWriter {
+public:
+  static const size_t kDefaultPartitionSplitThresholdBytes = 1024llu * 1024llu * 512llu;
+  static const size_t kMaxArenaRecords = 1024 * 64;
+  static const size_t kMaxLSMTables = 12;
+
+  LSMPartitionWriter(
+      ServerCfg* cfg,
+      RefPtr<Partition> partition,
+      PartitionSnapshotRef* head);
+
+  Set<SHA1Hash> insertRecords(
+      const ShreddedRecordList& records) override;
+
+  bool commit() override;
+  bool needsCommit();
+  bool needsUrgentCommit();
+
+  bool compact(bool force = false) override;
+  bool needsCompaction() override;
+  bool needsUrgentCompaction();
+
+  bool needsSplit() const;
+  Status split();
+
+  Status applyMetadataChange(
+      const PartitionDiscoveryResponse& discovery_info) override;
+
+  ReplicationState fetchReplicationState() const;
+  void commitReplicationState(const ReplicationState& state);
+
+protected:
+
+  RefPtr<Partition> partition_;
+  RefPtr<CompactionStrategy> compaction_strategy_;
+  LSMTableIndexCache* idx_cache_;
+  FileTracker* file_tracker_;
+  ConfigDirectory* cdir_;
+  size_t partition_split_threshold_;
+  std::mutex commit_mutex_;
+  std::mutex compaction_mutex_;
+  std::mutex metadata_mutex_;
+  std::mutex split_mutex_;
 };
 
 } // namespace tdsb
