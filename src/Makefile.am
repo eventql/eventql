@@ -909,6 +909,8 @@ evql_core_a_SOURCES = \
     eventql/db/partition_discovery.h \
     eventql/db/partition_map.cc \
     eventql/db/partition_map.h \
+    eventql/db/rebalance.h \
+    eventql/db/rebalance.cc \
     eventql/eventql.h \
     eventql/mapreduce/mapreduce_preludejs.cc \
     eventql/mapreduce/MapReduceScheduler.cc \
@@ -925,8 +927,6 @@ evql_core_a_SOURCES = \
     eventql/mapreduce/tasks/ReturnResultsTask.h \
     eventql/mapreduce/tasks/SaveToTableTask.cc \
     eventql/mapreduce/tasks/SaveToTableTask.h \
-    eventql/master/master_service.h \
-    eventql/master/master_service.cc \
     eventql/auth/client_auth.h \
     eventql/auth/client_auth_legacy.cc \
     eventql/auth/client_auth_legacy.h \
@@ -1068,8 +1068,6 @@ evqlctl_SOURCES = \
     eventql/cli/commands/cluster_set_allocation_policy.cc \
     eventql/cli/commands/database_create.h \
     eventql/cli/commands/database_create.cc \
-    eventql/cli/commands/rebalance.h \
-    eventql/cli/commands/rebalance.cc \
     eventql/cli/commands/table_config_set.h \
     eventql/cli/commands/table_config_set.cc \
     eventql/cli/commands/table_split.h \

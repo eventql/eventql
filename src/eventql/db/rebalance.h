@@ -2,7 +2,6 @@
  * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
  * Authors:
  *   - Paul Asmuth <paul@zscale.io>
- *   - Laura Schlimmer <laura@zscale.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -23,35 +22,41 @@
  * code of your own applications
  */
 #pragma once
-#include <eventql/eventql.h>
-#include "eventql/cli/commands/cli_command.h"
-#include "eventql/config/process_config.h"
+#include "eventql/eventql.h"
+#include "eventql/config/config_directory.h"
+#include <eventql/util/stdtypes.h>
+#include <eventql/util/status.h>
+#include <eventql/db/metadata_client.h>
+#include <eventql/db/metadata_coordinator.h>
 
 namespace eventql {
-namespace cli {
 
-class Rebalance : public CLICommand {
+class Rebalance {
 public:
-  Rebalance(RefPtr<ProcessConfig> process_cfg);
 
-  Status execute(
-      const std::vector<std::string>& argv,
-      FileInputStream* stdin_is,
-      OutputStream* stdout_os,
-      OutputStream* stderr_os) override;
+  Rebalance(ConfigDirectory* cdir);
 
-
-  const String& getName() const override;
-  const String& getDescription() const override;
-  void printHelp(OutputStream* stdout_os) const override;
+  Status runOnce();
 
 protected:
-  static const String kName_;
-  static const String kDescription_;
-  RefPtr<ProcessConfig> process_cfg_;
+
+  Status rebalanceTable(TableDefinition tbl_cfg);
+
+  Status performMetadataOperation(
+      TableDefinition* table_cfg,
+      MetadataFile* metadata_file,
+      MetadataOperationType optype,
+      const Buffer& opdata);
+
+  ConfigDirectory* cdir_;
+  MetadataCoordinator metadata_coordinator_;
+  MetadataClient metadata_client_;
+  size_t replication_factor_;
+  size_t metadata_replication_factor_;
+  Set<String> all_servers_;
+  Set<String> live_servers_;
+  Set<String> leaving_servers_;
 };
 
-} // namespace cli
 } // namespace eventql
-
 

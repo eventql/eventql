@@ -21,13 +21,13 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include <eventql/master/master_service.h>
-#include <eventql/util/random.h>
+#include <eventql/db/rebalance.h>
 #include <eventql/db/server_allocator.h>
+#include <eventql/util/random.h>
 
 namespace eventql {
 
-MasterService::MasterService(
+Rebalance::Rebalance(
     ConfigDirectory* cdir) :
     cdir_(cdir),
     metadata_coordinator_(cdir),
@@ -35,7 +35,7 @@ MasterService::MasterService(
     replication_factor_(3),
     metadata_replication_factor_(3) {}
 
-Status MasterService::runOnce() {
+Status Rebalance::runOnce() {
   logInfo("evqld", "Rebalancing cluster...");
 
   all_servers_.clear();
@@ -70,7 +70,7 @@ Status MasterService::runOnce() {
   return Status::success();
 }
 
-Status MasterService::rebalanceTable(TableDefinition tbl_cfg) {
+Status Rebalance::rebalanceTable(TableDefinition tbl_cfg) {
   logInfo(
       "evqld",
       "Rebalancing table '$0/$1'",
@@ -300,7 +300,7 @@ Status MasterService::rebalanceTable(TableDefinition tbl_cfg) {
   return Status::success();
 }
 
-Status MasterService::performMetadataOperation(
+Status Rebalance::performMetadataOperation(
     TableDefinition* table_cfg,
     MetadataFile* metadata_file,
     MetadataOperationType optype,
