@@ -134,9 +134,9 @@ void ClusterRemoveServer::printHelp(OutputStream* stdout_os) const {
 
   stdout_os->write(
       "Usage: evqlctl cluster-remove-server [OPTIONS]\n"
-      "  --server_name <server name>      The name of the server to add.\n"
-      "  --soft                           The name of the server to add.\n"
-      "  --hard                           The name of the server to add.\n");
+      "  --server_name            The name of the server to add.\n"
+      "  --soft                   Enable the soft-leave operation.\n"
+      "  --hard                   Enable the hard-leave operation.\n");
 }
 
 } // namespace cli
