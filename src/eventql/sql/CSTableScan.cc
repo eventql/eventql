@@ -41,7 +41,7 @@ CSTableScan::CSTableScan(
     execution_context_(execution_context),
     stmt_(stmt->deepCopyAs<SequentialScanNode>()),
     cstable_filename_(cstable_filename),
-    colindex_(0),
+    colindex_(1),
     aggr_strategy_(stmt_->aggregationStrategy()),
     rows_scanned_(0),
     num_records_(0),
@@ -65,7 +65,7 @@ CSTableScan::CSTableScan(
     stmt_(stmt->deepCopyAs<SequentialScanNode>()),
     cstable_(cstable),
     cstable_filename_(cstable_filename),
-    colindex_(0),
+    colindex_(1),
     aggr_strategy_(stmt_->aggregationStrategy()),
     rows_scanned_(0),
     num_records_(0),
@@ -567,7 +567,7 @@ void CSTableScan::resolveColumns(RefPtr<ValueExpressionNode> expr) const {
     auto colname = fieldref->fieldName();
     auto col = columns_.find(colname);
     if (col == columns_.end()) {
-      RAISEF(kNotFoundError, "column(s) not found: $0", colname);
+      fieldref->setColumnIndex(0);
     } else {
       fieldref->setColumnIndex(col->second.index);
     }
