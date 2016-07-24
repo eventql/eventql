@@ -61,7 +61,7 @@ Status TableService::createTable(
         eIllegalArgumentError,
         "can't create table without PRIMARY KEY");
   }
-  
+
   if (!pmap_->findTable(db_namespace, table_name).isEmpty()) {
     return Status(eIllegalArgumentError, "table already exists");
   }
@@ -108,15 +108,19 @@ Status TableService::createTable(
 
   String partition_key = primary_key[0];
   TablePartitionerType partitioner_type;
+  KeyspaceType keyspace_type;
   switch (schema.fieldType(schema.fieldId(partition_key))) {
     case msg::FieldType::DATETIME:
       partitioner_type = TBL_PARTITION_TIMEWINDOW;
+      keyspace_type = KEYSPACE_UINT64;
       break;
     case msg::FieldType::STRING:
       partitioner_type = TBL_PARTITION_STRING;
+      keyspace_type = KEYSPACE_STRING;
       break;
     case msg::FieldType::UINT64:
       partitioner_type = TBL_PARTITION_UINT64;
+      keyspace_type = KEYSPACE_UINT64;
       break;
     default:
       return Status(
@@ -147,7 +151,7 @@ Status TableService::createTable(
   }
 
   auto txnid = Random::singleton()->sha1();
-  MetadataFile metadata_file(txnid, 1, KEYSPACE_UINT64, { initial_partition });
+  MetadataFile metadata_file(txnid, 1, keyspace_type, { initial_partition });
 
   // generate new table config
   TableDefinition td;
