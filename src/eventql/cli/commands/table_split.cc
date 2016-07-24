@@ -239,6 +239,3 @@ void TableSplit::printHelp(OutputStream* stdout_os) const {
 } // namespace cli
 } // namespace eventql
 
-
-
-
