@@ -1,5 +1,5 @@
-ChartSQL Extensions
-===================
+4.2.2 DRAW
+==========
 
 The DRAW statement allows you to specify that the query result should be
 returned as a chart (or other visualization) rather than a table. The

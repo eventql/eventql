@@ -1,6 +1,5 @@
-SELECT Statement
-================
-
+4.2.1 SELECT
+============
 
     SELECT
         select_expr [, select_expr ...]

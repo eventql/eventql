@@ -1,5 +1,5 @@
-2.1.3 Creating Tables
-=====================
+4.2.4 CREATE TABLE
+==================
 
     CREATE TABLE table_name
     ( column_definition, column_definition, ...)

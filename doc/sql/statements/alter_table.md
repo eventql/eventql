@@ -1,5 +1,5 @@
-ALTER TABLE statement
-=====================
+4.2.5 ALTER TABLE
+=================
 
     ALTER TABLE table_name
     alter_specification [, alter_specification, ...]
@@ -10,5 +10,4 @@ ALTER TABLE statement
 
     column_definition ::=
         column_name [REPEATED] sql_type [NOT NULL]
-
 

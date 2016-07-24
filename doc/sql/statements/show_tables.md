@@ -1,5 +1,5 @@
-SHOW TABLES Statement
-=====================
+4.2.7 SHOW TABLES
+=================
 
     SHOW TABLES;
 
