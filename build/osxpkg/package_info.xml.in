@@ -2,6 +2,6 @@
 <pkg-info
    format-version="2"
    identifier="io.eventql.eventql.base.pkg"
-   version="0"
+   version="@PACKAGE_VERSION@"
    install-location="/"
    auth="root" />
