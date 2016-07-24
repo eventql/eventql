@@ -748,6 +748,48 @@ TEST_CASE(QTreeTest, TestInsertInto, [] () {
   EXPECT_EQ(specs[4].expr->toSQL(), "NULL");
 });
 
+TEST_CASE(QTreeTest, TestInsertShortInto, [] () {
+  auto runtime = Runtime::getDefaultRuntime();
+  auto txn = runtime->newTransaction();
+
+  String query = R"(
+      INSERT evtbl VALUES (
+          123,
+          'xxx',
+          1 + 2,
+          true,
+          null
+      );
+    )";
+
+  csql::Parser parser;
+  parser.parse(query.data(), query.size());
+
+  auto qtree_builder = runtime->queryPlanBuilder();
+  Vector<RefPtr<QueryTreeNode>> qtrees = qtree_builder->build(
+      txn.get(),
+      parser.getStatements(),
+      txn->getTableProvider());
+
+  RefPtr<InsertIntoNode> qtree = qtrees[0].asInstanceOf<InsertIntoNode>();
+  EXPECT_EQ(qtree->getTableName(), "evtbl");
+
+  auto specs = qtree->getValueSpecs();
+  EXPECT_EQ(specs.size(), 5);
+
+  EXPECT_EQ(specs[0].column, "evtime");
+  EXPECT_EQ(specs[1].column, "evid");
+  EXPECT_EQ(specs[2].column, "rating");
+  EXPECT_EQ(specs[3].column, "is_admin");
+  EXPECT_EQ(specs[4].column, "type");
+
+  EXPECT_EQ(specs[0].expr->toSQL(), "123");
+  EXPECT_EQ(specs[1].expr->toSQL(), "\"xxx\"");
+  EXPECT_EQ(specs[2].expr->toSQL(), "3");
+  EXPECT_EQ(specs[3].expr->toSQL(), "true");
+  EXPECT_EQ(specs[4].expr->toSQL(), "NULL");
+});
+
 TEST_CASE(QTreeTest, TestInsertIntoFromJSON, [] () {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();

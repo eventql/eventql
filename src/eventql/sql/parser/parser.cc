@@ -572,19 +572,34 @@ ASTNode* Parser::insertStatement() {
 }
 
 ASTNode* Parser::insertIntoStatement() {
-  expectAndConsume(Token::T_INTO);
+  if (*cur_token_ == Token::T_INTO) {
+    consumeToken();
+  }
 
   auto insert_into = new ASTNode(ASTNode::T_INSERT_INTO);
   insert_into->appendChild(tableName());
 
-  if (cur_token_->getType() == Token::T_FROM) {
-    consumeToken();
-    expectAndConsume(Token::T_JSON);
-    insert_into->appendChild(insertFromJSON());
+  switch (cur_token_->getType()) {
+    case Token::T_FROM:
+      insert_into->appendChild(insertFromJSON());
+      break;
 
-  } else {
-    insert_into->appendChild(insertColumnList());
-    insert_into->appendChild(insertValueList());
+    case Token::T_LPAREN:
+      insert_into->appendChild(insertColumnList());
+      insert_into->appendChild(insertValueList());
+      break;
+
+    case Token::T_VALUES:
+      //empty column list
+      insert_into->appendChild(new ASTNode(ASTNode::T_COLUMN_LIST));
+      insert_into->appendChild(insertValueList());
+      break;
+
+    default:
+      RAISEF(
+          kParseError,
+          "unexpected Token $0, can't build expression",
+          cur_token_->getString());
   }
 
   consumeIf(Token::T_SEMICOLON);
@@ -647,6 +662,8 @@ ASTNode* Parser::insertValueList() {
 }
 
 ASTNode* Parser::insertFromJSON() {
+  consumeToken();
+  expectAndConsume(Token::T_JSON);
   assertExpectation(Token::T_STRING);
   auto json = new ASTNode(ASTNode::T_JSON_STRING);
   json->setToken(cur_token_);
