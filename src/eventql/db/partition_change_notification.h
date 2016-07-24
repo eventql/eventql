@@ -24,30 +24,20 @@
 #pragma once
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/autoref.h>
-#include <eventql/util/option.h>
-#include <eventql/util/protobuf/MessageObject.h>
-#include <eventql/db/PartitionSnapshot.h>
-#include <eventql/sql/CSTableScan.h>
+#include <eventql/db/partition_snapshot.h>
+#include <eventql/db/table.h>
 
 #include "eventql/eventql.h"
 
 namespace eventql {
-class Partition;
 
-class PartitionReader : public RefCounted {
-public:
-
-  PartitionReader(RefPtr<PartitionSnapshot> head);
-
-  virtual void fetchRecords(
-      const Set<String>& required_columns,
-      Function<void (const msg::MessageObject& record)> fn) = 0;
-
-  virtual SHA1Hash version() const = 0;
-
-protected:
-  RefPtr<PartitionSnapshot> snap_;
+struct PartitionChangeNotification : public RefCounted {
+  RefPtr<Partition> partition;
 };
+
+typedef
+    Function<void (RefPtr<PartitionChangeNotification> change)>
+    PartitionChangeCallbackFn;
 
 } // namespace tdsb
 

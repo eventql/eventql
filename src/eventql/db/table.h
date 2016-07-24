@@ -25,7 +25,7 @@
 #include "eventql/eventql.h"
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/duration.h>
-#include <eventql/db/Partition.h>
+#include <eventql/db/partition.h>
 #include <eventql/util/protobuf/MessageSchema.h>
 #include <eventql/db/table_config.pb.h>
 #include <eventql/db/metadata_transaction.h>

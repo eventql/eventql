@@ -25,7 +25,7 @@
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/autoref.h>
 #include <eventql/db/table.h>
-#include <eventql/db/PartitionSnapshot.h>
+#include <eventql/db/partition_snapshot.h>
 
 #include "eventql/eventql.h"
 

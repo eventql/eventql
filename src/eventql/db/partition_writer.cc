@@ -21,18 +21,31 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include <eventql/util/fnv.h>
 #include <eventql/util/io/fileutil.h>
-#include <eventql/io/sstable/sstablereader.h>
-#include <eventql/db/PartitionReader.h>
+#include <eventql/db/partition.h>
+#include <eventql/db/partition_writer.h>
+#include <eventql/util/logging.h>
+#include <eventql/io/sstable/SSTableWriter.h>
 
 #include "eventql/eventql.h"
 
 namespace eventql {
 
-PartitionReader::PartitionReader(
-    RefPtr<PartitionSnapshot> head) :
-    snap_(head) {}
+PartitionWriter::PartitionWriter(
+    PartitionSnapshotRef* head) :
+    head_(head),
+    frozen_(false) {}
+
+void PartitionWriter::lock() {
+  mutex_.lock();
+}
+
+void PartitionWriter::unlock() {
+  mutex_.unlock();
+}
+
+void PartitionWriter::freeze() {
+  frozen_ = true;
+}
 
 } // namespace tdsb
-

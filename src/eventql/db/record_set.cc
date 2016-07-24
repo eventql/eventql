@@ -27,7 +27,7 @@
 #include <eventql/util/util/binarymessagewriter.h>
 #include <eventql/io/sstable/SSTableEditor.h>
 #include <eventql/io/sstable/sstablereader.h>
-#include <eventql/db/RecordSet.h>
+#include <eventql/db/record_set.h>
 
 #include "eventql/eventql.h"
 

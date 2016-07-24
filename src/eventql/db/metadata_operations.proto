@@ -22,7 +22,7 @@
  * code of your own applications
  */
 package eventql;
-import 'eventql/db/PartitionState.proto';
+import 'eventql/db/partition_state.proto';
 
 enum MetadataOperationType {
   METAOP_REMOVE_DEAD_SERVERS = 4;

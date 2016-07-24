@@ -22,10 +22,10 @@
  * code of your own applications
  */
 #include <eventql/util/io/fileutil.h>
-#include <eventql/db/Partition.h>
-#include <eventql/db/LSMPartitionWriter.h>
+#include <eventql/db/partition.h>
+#include <eventql/db/partition_writer.h>
 #include <eventql/db/LSMTableIndex.h>
-#include <eventql/db/LSMPartitionReader.h>
+#include <eventql/db/partition_reader.h>
 #include <eventql/db/metadata_operation.h>
 #include <eventql/db/metadata_coordinator.h>
 #include <eventql/db/server_allocator.h>

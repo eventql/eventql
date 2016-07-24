@@ -26,7 +26,7 @@
 #include "eventql/util/status.h"
 #include "eventql/db/metadata_operation.h"
 #include "eventql/db/metadata_file.h"
-#include "eventql/db/Partition.h"
+#include "eventql/db/partition.h"
 #include "eventql/config/config_directory.h"
 
 namespace eventql {

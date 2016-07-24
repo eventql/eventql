@@ -24,8 +24,8 @@
 #pragma once
 #include "eventql/eventql.h"
 #include <eventql/util/stdtypes.h>
-#include <eventql/db/PartitionReplication.h>
-#include <eventql/db/PartitionState.pb.h>
+#include <eventql/db/partition_replication.h>
+#include <eventql/db/partition_state.pb.h>
 #include <eventql/db/shredded_record.h>
 #include <eventql/config/config_directory.h>
 

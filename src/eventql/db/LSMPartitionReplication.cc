@@ -21,9 +21,9 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include <eventql/db/LSMPartitionReplication.h>
-#include <eventql/db/LSMPartitionReader.h>
-#include <eventql/db/LSMPartitionWriter.h>
+#include <eventql/db/partition_replication.h>
+#include <eventql/db/partition_reader.h>
+#include <eventql/db/partition_writer.h>
 #include <eventql/db/replication_worker.h>
 #include <eventql/util/logging.h>
 #include <eventql/util/io/fileutil.h>

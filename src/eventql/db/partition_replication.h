@@ -24,7 +24,7 @@
 #pragma once
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/http/httpconnectionpool.h>
-#include <eventql/db/Partition.h>
+#include <eventql/db/partition.h>
 #include <eventql/db/replication_state.h>
 #include <eventql/db/record_envelope.pb.h>
 

@@ -32,9 +32,9 @@
 #include <eventql/db/table.h>
 #include <eventql/db/record_ref.h>
 #include <eventql/db/PartitionInfo.pb.h>
-#include <eventql/db/PartitionSnapshot.h>
-#include <eventql/db/PartitionWriter.h>
-#include <eventql/db/PartitionReader.h>
+#include <eventql/db/partition_snapshot.h>
+#include <eventql/db/partition_writer.h>
+#include <eventql/db/partition_reader.h>
 #include <eventql/db/metadata_transaction.h>
 #include <eventql/db/metadata_operations.pb.h>
 #include <eventql/io/cstable/cstable_reader.h>

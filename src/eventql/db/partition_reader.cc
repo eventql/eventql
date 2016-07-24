@@ -21,23 +21,18 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#pragma once
-#include <eventql/util/stdtypes.h>
-#include <eventql/util/autoref.h>
-#include <eventql/db/PartitionSnapshot.h>
-#include <eventql/db/table.h>
+#include <eventql/util/fnv.h>
+#include <eventql/util/io/fileutil.h>
+#include <eventql/io/sstable/sstablereader.h>
+#include <eventql/db/partition_reader.h>
 
 #include "eventql/eventql.h"
 
 namespace eventql {
 
-struct PartitionChangeNotification : public RefCounted {
-  RefPtr<Partition> partition;
-};
-
-typedef
-    Function<void (RefPtr<PartitionChangeNotification> change)>
-    PartitionChangeCallbackFn;
+PartitionReader::PartitionReader(
+    RefPtr<PartitionSnapshot> head) :
+    snap_(head) {}
 
 } // namespace tdsb
 

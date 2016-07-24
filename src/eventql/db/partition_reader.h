@@ -21,31 +21,33 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include <eventql/util/io/fileutil.h>
-#include <eventql/db/Partition.h>
-#include <eventql/db/PartitionWriter.h>
-#include <eventql/util/logging.h>
-#include <eventql/io/sstable/SSTableWriter.h>
+#pragma once
+#include <eventql/util/stdtypes.h>
+#include <eventql/util/autoref.h>
+#include <eventql/util/option.h>
+#include <eventql/util/protobuf/MessageObject.h>
+#include <eventql/db/partition_snapshot.h>
+#include <eventql/sql/CSTableScan.h>
 
 #include "eventql/eventql.h"
 
 namespace eventql {
+class Partition;
 
-PartitionWriter::PartitionWriter(
-    PartitionSnapshotRef* head) :
-    head_(head),
-    frozen_(false) {}
+class PartitionReader : public RefCounted {
+public:
 
-void PartitionWriter::lock() {
-  mutex_.lock();
-}
+  PartitionReader(RefPtr<PartitionSnapshot> head);
 
-void PartitionWriter::unlock() {
-  mutex_.unlock();
-}
+  virtual void fetchRecords(
+      const Set<String>& required_columns,
+      Function<void (const msg::MessageObject& record)> fn) = 0;
 
-void PartitionWriter::freeze() {
-  frozen_ = true;
-}
+  virtual SHA1Hash version() const = 0;
+
+protected:
+  RefPtr<PartitionSnapshot> snap_;
+};
 
 } // namespace tdsb
+

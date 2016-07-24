@@ -27,11 +27,11 @@
 #include <eventql/util/option.h>
 #include <eventql/util/mdb/MDB.h>
 #include <eventql/db/table_config.pb.h>
-#include <eventql/db/Partition.h>
-#include <eventql/db/LazyPartition.h>
+#include <eventql/db/partition.h>
+#include <eventql/db/Lazypartition.h>
 #include <eventql/db/table_info.h>
 #include <eventql/db/PartitionInfo.pb.h>
-#include <eventql/db/PartitionChangeNotification.h>
+#include <eventql/db/partition_change_notification.h>
 #include <eventql/db/record_envelope.pb.h>
 #include <eventql/db/server_config.h>
 #include <eventql/server/server_stats.h>

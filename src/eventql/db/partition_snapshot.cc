@@ -25,7 +25,7 @@
 #include <eventql/util/io/file.h>
 #include <eventql/util/io/fileutil.h>
 #include <eventql/util/protobuf/msg.h>
-#include <eventql/db/PartitionSnapshot.h>
+#include <eventql/db/partition_snapshot.h>
 #include <eventql/db/table.h>
 #include <eventql/db/file_tracker.h>
 

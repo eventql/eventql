@@ -27,7 +27,7 @@
 #include <eventql/util/wallclock.h>
 #include <eventql/util/application.h>
 #include <eventql/db/replication_worker.h>
-#include <eventql/db/Partition.h>
+#include <eventql/db/partition.h>
 #include <eventql/server/server_stats.h>
 #include <assert.h>
 

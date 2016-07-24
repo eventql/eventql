@@ -25,7 +25,7 @@
 #include "eventql/eventql.h"
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/autoref.h>
-#include <eventql/db/PartitionWriter.h>
+#include <eventql/db/partition_writer.h>
 #include <eventql/db/partition_arena.h>
 #include <eventql/util/util/PersistentHashSet.h>
 #include <eventql/db/compaction_strategy.h>

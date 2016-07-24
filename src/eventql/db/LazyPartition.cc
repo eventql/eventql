@@ -21,7 +21,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include <eventql/db/LazyPartition.h>
+#include <eventql/db/Lazypartition.h>
 #include <eventql/db/partition_map.h>
 
 #include "eventql/eventql.h"

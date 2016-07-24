@@ -30,7 +30,7 @@
 #include <eventql/util/wallclock.h>
 #include <eventql/io/sstable/sstablereader.h>
 #include <eventql/db/table_service.h>
-#include <eventql/db/PartitionState.pb.h>
+#include <eventql/db/partition_state.pb.h>
 #include "eventql/db/metadata_coordinator.h"
 #include "eventql/db/metadata_file.h"
 #include "eventql/db/metadata_client.h"
