@@ -44,7 +44,7 @@ want.
 The `cluster.coordinator` option specifies that we are going to use zookeeper
 as our coordination service.
 
-The `zookeeper_hosts` contains a comma seperated list of zookeeper hosts to connect
+The `cluster.zookeeper_hosts` contains a comma seperated list of zookeeper hosts to connect
 to.
 
 For a full list of supported configuration options please refer to the [Configuration](../../configuration)
