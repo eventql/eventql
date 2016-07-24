@@ -49,16 +49,16 @@ Status TableSplitFinalize::execute(
   ::cli::FlagParser flags;
 
   flags.defineFlag(
-      "namespace",
+      "database",
       ::cli::FlagParser::T_STRING,
       true,
       NULL,
       NULL,
-      "namespace",
+      "database",
       "<string>");
 
   flags.defineFlag(
-      "table_name",
+      "table",
       ::cli::FlagParser::T_STRING,
       true,
       NULL,
@@ -95,16 +95,16 @@ Status TableSplitFinalize::execute(
     }
 
     auto table_cfg = cdir->getTableConfig(
-        flags.getString("namespace"),
-        flags.getString("table_name"));
+        flags.getString("database"),
+        flags.getString("table"));
 
     auto partition_id = SHA1Hash::fromHexString(flags.getString("partition_id"));
     FinalizeSplitOperation op;
     op.set_partition_id(partition_id.data(), partition_id.size());
 
     MetadataOperation envelope(
-        flags.getString("namespace"),
-        flags.getString("table_name"),
+        flags.getString("database"),
+        flags.getString("table"),
         METAOP_FINALIZE_SPLIT,
         SHA1Hash(
             table_cfg.metadata_txnid().data(),
@@ -115,8 +115,8 @@ Status TableSplitFinalize::execute(
     MetadataCoordinator coordinator(cdir.get());
     {
       auto rc = coordinator.performAndCommitOperation(
-          flags.getString("namespace"),
-          flags.getString("table_name"),
+          flags.getString("database"),
+          flags.getString("table"),
           envelope);
 
       if (!rc.isSuccess()) {
@@ -154,8 +154,8 @@ void TableSplitFinalize::printHelp(OutputStream* stdout_os) const {
 
   stdout_os->write(
       "Usage: evqlctl table-split [OPTIONS]\n"
-      "  --namespace              The name of the namespace.\n"
-      "  --table_name             The name of the table to split.\n"
+      "  --database               The name of the database.\n"
+      "  --table                  The name of the table to split.\n"
       "  --partition_id           The id of the partition to split.\n"
       "  --split_point            \n");
 }

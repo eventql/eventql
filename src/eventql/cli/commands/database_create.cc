@@ -29,8 +29,8 @@
 namespace eventql {
 namespace cli {
 
-const String DatabaseCreate::kName_ = "namespace-create";
-const String DatabaseCreate::kDescription_ = "Create a new namespace.";
+const String DatabaseCreate::kName_ = "database-create";
+const String DatabaseCreate::kDescription_ = "Create a new database.";
 
 DatabaseCreate::DatabaseCreate(
     RefPtr<ProcessConfig> process_cfg) :
@@ -44,7 +44,7 @@ Status DatabaseCreate::execute(
   ::cli::FlagParser flags;
 
   flags.defineFlag(
-      "namespace",
+      "database",
       ::cli::FlagParser::T_STRING,
       true,
       NULL,
@@ -72,7 +72,7 @@ Status DatabaseCreate::execute(
     }
 
     NamespaceConfig cfg;
-    cfg.set_customer(flags.getString("namespace"));
+    cfg.set_customer(flags.getString("database"));
     cdir->updateNamespaceConfig(cfg);
 
     cdir->stop();
@@ -98,10 +98,11 @@ const String& DatabaseCreate::getDescription() const {
 
 void DatabaseCreate::printHelp(OutputStream* stdout_os) const {
   stdout_os->write(StringUtil::format(
-      "evqlctl --$0 - $1\n\n", kName_, kDescription_));
+      "evqlctl-$0 - $1\n\n", kName_, kDescription_));
 
   stdout_os->write(
-      "  --namespace <namespace name>     The name of the namespace to create \n"
+      "Usage: evqlctl database-create [OPTIONS]\n"
+      "  --database               The name of the database to create.\n"
   );
 
 }

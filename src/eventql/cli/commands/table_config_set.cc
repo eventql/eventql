@@ -53,7 +53,7 @@ Status TableConfigSet::execute(
       true,
       NULL,
       NULL,
-      "namespace",
+      "database",
       "<string>");
 
   flags.defineFlag(
