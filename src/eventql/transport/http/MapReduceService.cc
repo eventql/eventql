@@ -72,7 +72,6 @@ void MapReduceService::executeScript(
       auth_,
       pmap_,
       cdir_,
-      repl_,
       tsdb_,
       cachedir_));
 
@@ -81,6 +80,7 @@ void MapReduceService::executeScript(
       job,
       &tpool_,
       auth_,
+      cdir_,
       cachedir_));
 
   auto js_ctx = mkRef(new JavaScriptContext(

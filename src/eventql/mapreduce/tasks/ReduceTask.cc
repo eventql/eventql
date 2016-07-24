@@ -25,7 +25,7 @@
 #include "eventql/mapreduce/tasks/ReduceTask.h"
 #include "eventql/mapreduce/MapReduceScheduler.h"
 #include <eventql/server/server_stats.h>
-
+#include <eventql/db/server_allocator.h>
 #include "eventql/eventql.h"
 
 namespace eventql {
@@ -39,7 +39,7 @@ ReduceTask::ReduceTask(
     size_t num_shards,
     MapReduceShardList* shards,
     InternalAuth* auth,
-    eventql::ReplicationScheme* repl) :
+    ConfigDirectory* cdir) :
     session_(session),
     reduce_fn_(reduce_fn),
     globals_(globals),
@@ -47,7 +47,7 @@ ReduceTask::ReduceTask(
     sources_(sources),
     num_shards_(num_shards),
     auth_(auth),
-    repl_(repl) {
+    cdir_(cdir) {
   Vector<size_t> input;
 
   for (const auto& src : sources_) {
@@ -85,15 +85,21 @@ Option<MapReduceShardResult> ReduceTask::execute(
   }
 
   std::sort(input_tables.begin(), input_tables.end());
-  auto placement_id = SHA1::compute(
-      StringUtil::format(
-          "$0~$1",
-          StringUtil::join(input_tables, "~"),
-          shard->shard));
 
   Vector<String> errors;
-  auto hosts = repl_->replicasFor(placement_id);
-  for (const auto& host : hosts) {
+  Set<String> servers;
+  auto repl_factor = cdir_->getClusterConfig().replication_factor();
+  ServerAllocator alloc(cdir_);
+  auto rc = alloc.allocateServers(repl_factor, &servers);
+  if (!rc.isSuccess()) {
+    RAISEF(kRuntimeError, "error while allocating servers: $0", rc.message());
+  }
+
+  if (servers.empty()) {
+    RAISE(kRuntimeError, "no available servers");
+  }
+
+  for (const auto& host : servers) {
     try {
       return executeRemote(shard.get(), job, input_tables, host);
     } catch (const StandardException& e) {
@@ -116,17 +122,23 @@ Option<MapReduceShardResult> ReduceTask::executeRemote(
     RefPtr<MapReduceTaskShard> shard,
     RefPtr<MapReduceScheduler> job,
     const Vector<String>& input_tables,
-    const ReplicaRef& host) {
+    const String& server_id) {
+
+  auto server_cfg = cdir_->getServerConfig(server_id);
+  if (server_cfg.server_status() != SERVER_UP) {
+    RAISE(kRuntimeError, "server is down");
+  }
+
   logDebug(
       "z1.mapreduce",
       "Executing remote reduce shard on $2; customer=$0 input_tables=$1",
       session_->getEffectiveNamespace(),
       input_tables.size(),
-      host.addr);
+      server_id);
 
   auto url = StringUtil::format(
       "http://$0/api/v1/mapreduce/tasks/reduce",
-      host.addr);
+      server_cfg.server_addr());
 
   auto params = StringUtil::format(
       "reduce_fn=$0&globals=$1&params=$2",
@@ -147,7 +159,7 @@ Option<MapReduceShardResult> ReduceTask::executeRemote(
 
     if (ev.name.get() == "result_id") {
       result = Some(MapReduceShardResult {
-        .host = host,
+        .server_id = server_id,
         .result_id = SHA1Hash::fromHexString(ev.data)
       });
     }

@@ -42,7 +42,7 @@ struct MapReduceTaskShard : public RefCounted {
 using MapReduceShardList = Vector<RefPtr<MapReduceTaskShard>>;
 
 struct MapReduceShardResult {
-  ReplicaRef host;
+  String server_id;
   SHA1Hash result_id;
 };
 

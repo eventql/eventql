@@ -71,14 +71,14 @@ Option<MapReduceShardResult> SaveToTableTask::execute(
   logDebug(
       "z1.mapreduce",
       "Saving result shard to table; result_id=$3 target=$0/$1/$2",
-      host.get().addr,
+      host.get().server_id(),
       session_->getEffectiveNamespace(),
       table_name_,
       result_id.get().toString());
 
   auto url = StringUtil::format(
       "http://$0/api/v1/mapreduce/tasks/save_to_table",
-      host.get().addr);
+      host.get().server_addr());
 
   String params = StringUtil::format(
       "result_id=$0&table_name=$1",

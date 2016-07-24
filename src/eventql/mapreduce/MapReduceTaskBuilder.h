@@ -41,7 +41,6 @@ public:
       InternalAuth* auth,
       PartitionMap* pmap,
       ConfigDirectory* cdir,
-      ReplicationScheme* repl,
       TableService* tsdb,
       const String& cachedir);
 
@@ -85,7 +84,6 @@ protected:
   InternalAuth* auth_;
   PartitionMap* pmap_;
   ConfigDirectory* cdir_;
-  ReplicationScheme* repl_;
   TableService* tsdb_;
   String cachedir_;
 };

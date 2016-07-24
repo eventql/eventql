@@ -39,14 +39,12 @@ MapReduceTaskBuilder::MapReduceTaskBuilder(
     InternalAuth* auth,
     PartitionMap* pmap,
     ConfigDirectory* cdir,
-    ReplicationScheme* repl,
     TableService* tsdb,
     const String& cachedir) :
     session_(session),
     auth_(auth),
     pmap_(pmap),
     cdir_(cdir),
-    repl_(repl),
     tsdb_(tsdb),
     cachedir_(cachedir) {}
 
@@ -164,8 +162,7 @@ RefPtr<MapReduceTask> MapReduceTaskBuilder::buildMapTableTask(
       shards,
       auth_,
       pmap_,
-      cdir_,
-      repl_);
+      cdir_);
 
   auto required_columns = json::objectLookup(job, "required_columns");
   if (required_columns != job.end()) {
@@ -240,7 +237,7 @@ RefPtr<MapReduceTask> MapReduceTaskBuilder::buildReduceTask(
       num_shards.get(),
       shards,
       auth_,
-      repl_);
+      cdir_);
 }
 
 RefPtr<MapReduceTask> MapReduceTaskBuilder::buildReturnResultsTask(

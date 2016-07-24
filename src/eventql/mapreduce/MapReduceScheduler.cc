@@ -35,12 +35,14 @@ MapReduceScheduler::MapReduceScheduler(
     RefPtr<MapReduceJobSpec> job,
     thread::ThreadPool* tpool,
     InternalAuth* auth,
+    ConfigDirectory* cdir,
     const String& cachedir,
     size_t max_concurrent_tasks /* = kDefaultMaxConcurrentTasks */) :
     session_(session),
     job_(job),
     tpool_(tpool),
     auth_(auth),
+    cdir_(cdir),
     cachedir_(cachedir),
     max_concurrent_tasks_(max_concurrent_tasks) {}
 
@@ -211,9 +213,11 @@ Option<String> MapReduceScheduler::getResultURL(size_t task_index) {
       cachedir_,
       StringUtil::format("mr-result-$0", result.get().result_id.toString()));
 
+  auto server_cfg = cdir_->getServerConfig(result.get().server_id);
+
   return Some(StringUtil::format(
       "http://$0/api/v1/mapreduce/result/$1",
-      result.get().host.addr,
+      server_cfg.server_addr(),
       result.get().result_id.toString()));
 }
 
@@ -235,7 +239,7 @@ Option<SHA1Hash> MapReduceScheduler::getResultID(size_t task_index) {
   return Some(result.get().result_id);
 }
 
-Option<ReplicaRef> MapReduceScheduler::getResultHost(size_t task_index) {
+Option<ServerConfig> MapReduceScheduler::getResultHost(size_t task_index) {
   std::unique_lock<std::mutex> lk(mutex_);
   if (task_index >= shards_.size()) {
     RAISEF(kIndexError, "invalid task index: $0", task_index);
@@ -247,10 +251,10 @@ Option<ReplicaRef> MapReduceScheduler::getResultHost(size_t task_index) {
 
   const auto& result = shard_results_[task_index];
   if (result.isEmpty()) {
-    return None<ReplicaRef>();
+    return None<ServerConfig>();
   }
 
-  return Some(result.get().host);
+  return Some(cdir_->getServerConfig(result.get().server_id));
 }
 
 void MapReduceScheduler::downloadResult(
@@ -270,9 +274,11 @@ void MapReduceScheduler::downloadResult(
     return;
   }
 
+  auto server_cfg = cdir_->getServerConfig(result.get().server_id);
+
   auto url = StringUtil::format(
       "http://$0/api/v1/mapreduce/result/$1",
-      result.get().host.addr,
+      server_cfg.server_addr(),
       result.get().result_id.toString());
 
   auto req = http::HTTPRequest::mkGet(url);

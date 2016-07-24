@@ -41,6 +41,7 @@ public:
       RefPtr<MapReduceJobSpec> job,
       thread::ThreadPool* tpool,
       InternalAuth* auth,
+      ConfigDirectory* cdir,
       const String& cachedir,
       size_t max_concurrent_tasks = kDefaultMaxConcurrentTasks);
 
@@ -51,7 +52,7 @@ public:
 
   Option<String> getResultURL(size_t task_index);
   Option<SHA1Hash> getResultID(size_t task_index);
-  Option<ReplicaRef> getResultHost(size_t task_index);
+  Option<ServerConfig> getResultHost(size_t task_index);
 
   void downloadResult(
       size_t task_index,
@@ -73,6 +74,7 @@ protected:
   Vector<size_t> shard_perms_;
   thread::ThreadPool* tpool_;
   InternalAuth* auth_;
+  ConfigDirectory* cdir_;
   String cachedir_;
 
   size_t max_concurrent_tasks_;

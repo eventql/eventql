@@ -47,7 +47,7 @@ public:
       size_t num_shards,
       MapReduceShardList* shards,
       InternalAuth* auth,
-      eventql::ReplicationScheme* repl);
+      ConfigDirectory* cdir);
 
   Option<MapReduceShardResult> execute(
       RefPtr<MapReduceTaskShard> shard,
@@ -59,7 +59,7 @@ protected:
       RefPtr<MapReduceTaskShard> shard,
       RefPtr<MapReduceScheduler> job,
       const Vector<String>& input_tables,
-      const ReplicaRef& host);
+      const String& server_id);
 
   Session* session_;
   String reduce_fn_;
@@ -68,7 +68,7 @@ protected:
   Vector<RefPtr<MapReduceTask>> sources_;
   size_t num_shards_;
   InternalAuth* auth_;
-  eventql::ReplicationScheme* repl_;
+  ConfigDirectory* cdir_;
 };
 
 } // namespace eventql

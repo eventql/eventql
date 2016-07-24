@@ -42,8 +42,7 @@ MapTableTask::MapTableTask(
     MapReduceShardList* shards,
     InternalAuth* auth,
     eventql::PartitionMap* pmap,
-    eventql::ConfigDirectory* cdir,
-    eventql::ReplicationScheme* repl) :
+    eventql::ConfigDirectory* cdir) :
     session_(session),
     table_ref_(table_ref),
     map_function_(map_function),
@@ -51,8 +50,7 @@ MapTableTask::MapTableTask(
     params_(params),
     auth_(auth),
     pmap_(pmap),
-    cdir_(cdir),
-    repl_(repl) {
+    cdir_(cdir) {
   auto table = pmap_->findTable(session_->getEffectiveNamespace(), table_ref_.table_key);
   if (table.isEmpty()) {
     RAISEF(kNotFoundError, "table not found: $0", table_ref_.table_key);
@@ -82,25 +80,12 @@ MapTableTask::MapTableTask(
   }
 
   for (const auto& p : partition_list.partitions()) {
-    Vector<ReplicaRef> replicas;
     SHA1Hash pid(p.partition_id().data(), p.partition_id().size());
-
-    for (const auto& s : p.servers()) {
-      auto server_cfg = cdir_->getServerConfig(s);
-      if (server_cfg.server_status() != SERVER_UP) {
-        continue;
-      }
-
-      ReplicaRef rref(SHA1::compute(s), server_cfg.server_addr());
-      rref.name = s;
-      replicas.emplace_back(rref);
-    }
-
     auto shard = mkRef(new MapTableTaskShard());
     shard->task = this;
     shard->table_ref = table_ref_;
     shard->table_ref.partition_key = pid;
-    shard->servers = replicas;
+    shard->servers = Vector<String>(p.servers().begin(), p.servers().end());
     addShard(shard.get(), shards);
   }
 }
@@ -133,18 +118,19 @@ Option<MapReduceShardResult> MapTableTask::execute(
 Option<MapReduceShardResult> MapTableTask::executeRemote(
     RefPtr<MapTableTaskShard> shard,
     RefPtr<MapReduceScheduler> job,
-    const ReplicaRef& host) {
+    const String& server_id) {
   logDebug(
       "z1.mapreduce",
       "Executing map table shard on $0/$1/$2 on $3",
       session_->getEffectiveNamespace(),
       shard->table_ref.table_key,
       shard->table_ref.partition_key.get().toString(),
-      host.addr);
+      server_id);
 
+  auto server_cfg = cdir_->getServerConfig(server_id);
   auto url = StringUtil::format(
       "http://$0/api/v1/mapreduce/tasks/map_partition",
-      host.addr);
+      server_cfg.server_addr());
 
   auto params = StringUtil::format(
       "table=$0&partition=$1&map_function=$2&globals=$3&params=$4&required_columns=$5",
@@ -164,7 +150,7 @@ Option<MapReduceShardResult> MapTableTask::executeRemote(
 
     if (ev.name.get() == "result_id") {
       result = Some(MapReduceShardResult {
-        .host = host,
+        .server_id = server_id,
         .result_id = SHA1Hash::fromHexString(ev.data)
       });
     }
