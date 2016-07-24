@@ -104,6 +104,14 @@ String StandaloneConfigDirectory::getServerID() const {
   return "localhost";
 }
 
+bool StandaloneConfigDirectory::isLeader() const {
+  return true;
+}
+
+String StandaloneConfigDirectory::getLeader() const {
+  return "localhost";
+}
+
 ServerConfig StandaloneConfigDirectory::getServerConfig(
     const String& server_name) const {
   if (server_name != "localhost") {
