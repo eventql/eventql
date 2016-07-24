@@ -200,7 +200,7 @@ void PipelinedExpression::executeOnHost(
 
   auto url = StringUtil::format("http://$0/api/v1/sql/execute_qtree", host);
 
-  http::HTTPClient http_client(&z1stats()->http_client_stats);
+  http::HTTPClient http_client(&evqld_stats()->http_client_stats);
   auto req = http::HTTPRequest::mkPost(url, req_body);
   auth_->signRequest(static_cast<Session*>(txn_->getUserData()), &req);
 

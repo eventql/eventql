@@ -246,7 +246,7 @@ void GarbageCollector::flushCache() {
     }
   }
 
-  z1stats()->cache_size.set(cache_dir_size);
+  evqld_stats()->cache_size.set(cache_dir_size);
 }
 
 } // namespace eventql

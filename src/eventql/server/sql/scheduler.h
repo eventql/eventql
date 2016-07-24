@@ -30,6 +30,7 @@
 #include <eventql/sql/query_plan.h>
 #include <eventql/db/partition_map.h>
 #include <eventql/auth/internal_auth.h>
+#include <eventql/server/sql/table_scan.h>
 
 namespace eventql {
 
@@ -41,8 +42,7 @@ public:
   Scheduler(
       PartitionMap* pmap,
       ConfigDirectory* cdir,
-      InternalAuth* auth,
-      ReplicationScheme* repl_scheme);
+      InternalAuth* auth);
 
 protected:
 
@@ -85,7 +85,6 @@ protected:
   PartitionMap* pmap_;
   ConfigDirectory* cdir_;
   InternalAuth* auth_;
-  ReplicationScheme* repl_scheme_;
   size_t running_cnt_;
 };
 

@@ -23,7 +23,7 @@
  */
 #include "eventql/eventql.h"
 #include <eventql/db/partition_arena.h>
-#include <eventql/db/LSMTableIndex.h>
+#include <eventql/db/tablet_index.h>
 #include <eventql/util/protobuf/MessageDecoder.h>
 
 namespace eventql {

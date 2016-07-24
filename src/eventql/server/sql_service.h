@@ -24,12 +24,11 @@
 #pragma once
 #include "eventql/eventql.h"
 #include <eventql/util/stdtypes.h>
-#include <eventql/db/TableConfig.pb.h>
-#include <eventql/db/Partition.h>
-#include <eventql/db/TSDBNodeConfig.pb.h>
-#include <eventql/db/TSDBTableInfo.h>
-#include <eventql/db/PartitionInfo.pb.h>
-#include <eventql/db/RecordEnvelope.pb.h>
+#include <eventql/db/table_config.pb.h>
+#include <eventql/db/partition.h>
+#include <eventql/db/table_info.h>
+#include <eventql/db/partition_info.pb.h>
+#include <eventql/db/record_envelope.pb.h>
 #include <eventql/db/table_service.h>
 #include <eventql/db/partition_map.h>
 #include <eventql/sql/transaction.h>
@@ -46,7 +45,6 @@ public:
       csql::Runtime* sql,
       PartitionMap* pmap,
       ConfigDirectory* cdir,
-      ReplicationScheme* repl,
       InternalAuth* auth,
       TableService* table_service,
       const String& cache_dir);
@@ -57,7 +55,6 @@ protected:
   csql::Runtime* sql_;
   PartitionMap* pmap_;
   ConfigDirectory* cdir_;
-  ReplicationScheme* repl_;
   InternalAuth* auth_;
   TableService* table_service_;
   String cache_dir_;

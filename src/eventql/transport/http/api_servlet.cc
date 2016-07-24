@@ -38,7 +38,7 @@
 #include "eventql/util/protobuf/MessageEncoder.h"
 #include "eventql/util/csv/CSVInputStream.h"
 #include "eventql/util/csv/BinaryCSVInputStream.h"
-#include "eventql/db/TableConfig.pb.h"
+#include "eventql/db/table_config.pb.h"
 #include "eventql/server/sql/codec/json_codec.h"
 #include "eventql/server/sql/codec/json_sse_codec.h"
 #include "eventql/server/sql/codec/binary_codec.h"
@@ -58,7 +58,6 @@ AnalyticsServlet::AnalyticsServlet(
     ConfigDirectory* customer_dir,
     PartitionMap* pmap,
     SQLService* sql_service,
-    LogfileService* logfile_service,
     MapReduceService* mapreduce_service,
     TableService* table_service) :
     cachedir_(cachedir),
@@ -70,10 +69,8 @@ AnalyticsServlet::AnalyticsServlet(
     customer_dir_(customer_dir),
     pmap_(pmap),
     sql_service_(sql_service),
-    logfile_service_(logfile_service),
     mapreduce_service_(mapreduce_service),
     table_service_(table_service),
-    logfile_api_(logfile_service_, customer_dir, cachedir),
     mapreduce_api_(mapreduce_service_, customer_dir, client_auth, cachedir) {}
 
 void AnalyticsServlet::handleHTTPRequest(
@@ -183,11 +180,6 @@ void AnalyticsServlet::handle(
     res.addHeader("Content-Type", "text/plain; charset=utf-8");
     res.addBody("unauthorized");
     res_stream->writeResponse(res);
-    return;
-  }
-
-  if (StringUtil::beginsWith(uri.path(), "/api/v1/logfiles")) {
-    logfile_api_.handle(session.get(), req_stream, res_stream);
     return;
   }
 
@@ -843,7 +835,7 @@ void AnalyticsServlet::executeSQL(
       res_stream->writeResponse(*res);
     }
   } catch (const StandardException& e) {
-    logError("z1.sql", e, "Uncaught SQL error");
+    logError("evqld", e, "Uncaught SQL error");
     res->setStatus(http::kStatusBadRequest);
     res->addBody("invalid request");
     res_stream->writeResponse(*res);

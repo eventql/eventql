@@ -22,7 +22,7 @@
  * code of your own applications
  */
 #include <eventql/transport/http/status_servlet.h>
-#include <eventql/db/PartitionReplication.h>
+#include <eventql/db/partition_replication.h>
 #include <eventql/server/server_stats.h>
 #include <eventql/eventql.h>
 #include "eventql/util/application.h"
@@ -150,7 +150,7 @@ void StatusServlet::renderDashboard(
     http::HTTPRequest* request,
     http::HTTPResponse* response) {
     http::HTTPResponse res;
-  auto zs = z1stats();
+  auto zs = evqld_stats();
   String html;
   html += kStyleSheet;
   //html += kMainMenu;
@@ -456,7 +456,7 @@ void StatusServlet::renderPartitionPage(
     auto table = partition.get()->getTable();
     auto snap = partition.get()->getSnapshot();
     auto state = snap->state;
-    auto repl = partition.get()->getReplicationStrategy(nullptr, nullptr);
+    auto repl = partition.get()->getReplicationStrategy(nullptr);
 
     if (table->partitionerType() == TBL_PARTITION_TIMEWINDOW &&
         state.partition_keyrange_begin().size() == 8 &&

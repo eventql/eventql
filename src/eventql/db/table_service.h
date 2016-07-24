@@ -21,8 +21,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#ifndef _FNORD_TSDB_TSDBNODE_H
-#define _FNORD_TSDB_TSDBNODE_H
+#pragma once
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/random.h>
 #include <eventql/util/option.h>
@@ -30,12 +29,11 @@
 #include <eventql/util/thread/queue.h>
 #include <eventql/util/thread/eventloop.h>
 #include <eventql/util/mdb/MDB.h>
-#include <eventql/db/TableConfig.pb.h>
-#include <eventql/db/Partition.h>
-#include <eventql/db/TSDBNodeConfig.pb.h>
-#include <eventql/db/TSDBTableInfo.h>
-#include <eventql/db/PartitionInfo.pb.h>
-#include <eventql/db/RecordEnvelope.pb.h>
+#include <eventql/db/table_config.pb.h>
+#include <eventql/db/partition.h>
+#include <eventql/db/table_info.h>
+#include <eventql/db/partition_info.pb.h>
+#include <eventql/db/record_envelope.pb.h>
 #include <eventql/db/partition_map.h>
 #include <eventql/db/shredded_record.h>
 #include <eventql/config/config_directory.h>
@@ -68,7 +66,6 @@ public:
   TableService(
       ConfigDirectory* cdir,
       PartitionMap* pmap,
-      ReplicationScheme* repl,
       thread::EventLoop* ev,
       http::HTTPClientStats* http_stats);
 
@@ -163,10 +160,8 @@ protected:
 
   ConfigDirectory* cdir_;
   PartitionMap* pmap_;
-  ReplicationScheme* repl_;
   http::HTTPConnectionPool http_;
 };
 
 } // namespace tdsb
 
-#endif

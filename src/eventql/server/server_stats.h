@@ -28,7 +28,7 @@
 
 namespace eventql {
 
-struct Z1Stats {
+struct evqld_stats {
   stats::Counter<uint64_t> num_partitions;
   stats::Counter<uint64_t> num_partitions_loaded;
   stats::Counter<uint64_t> replication_queue_length;
@@ -40,6 +40,6 @@ struct Z1Stats {
   http::HTTPClientStats http_client_stats;
 };
 
-Z1Stats* z1stats();
+struct evqld_stats* evqld_stats();
 
 }

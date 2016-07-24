@@ -30,7 +30,9 @@
 #include <eventql/util/wallclock.h>
 #include <eventql/io/sstable/sstablereader.h>
 #include <eventql/db/table_service.h>
-#include <eventql/db/PartitionState.pb.h>
+#include <eventql/db/partition_state.pb.h>
+#include <eventql/db/partition_reader.h>
+#include <eventql/db/partition_writer.h>
 #include "eventql/db/metadata_coordinator.h"
 #include "eventql/db/metadata_file.h"
 #include "eventql/db/metadata_client.h"
@@ -43,12 +45,10 @@ namespace eventql {
 TableService::TableService(
     ConfigDirectory* cdir,
     PartitionMap* pmap,
-    ReplicationScheme* repl,
     thread::EventLoop* ev,
     http::HTTPClientStats* http_stats) :
     cdir_(cdir),
     pmap_(pmap),
-    repl_(repl),
     http_(ev, http_stats) {}
 
 Status TableService::createTable(
@@ -565,7 +565,7 @@ void TableService::insertRecordsLocal(
     const SHA1Hash& partition_key,
     const ShreddedRecordList& records) {
   logDebug(
-      "z1.core",
+      "evqld",
       "Inserting $0 records into tsdb://localhost/$1/$2/$3",
       records.getNumRecords(),
       tsdb_namespace,
@@ -599,7 +599,7 @@ void TableService::insertRecordsRemote(
   }
 
   logDebug(
-      "z1.core",
+      "evqld",
       "Inserting $0 records into $1:$2/$3/$4",
       records.getNumRecords(),
       server_id,

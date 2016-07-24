@@ -1,0 +1,132 @@
+/**
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
+ * Authors:
+ *   - Paul Asmuth <paul@eventql.io>
+ *
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License ("the license") as
+ * published by the Free Software Foundation, either version 3 of the License,
+ * or any later version.
+ *
+ * In accordance with Section 7(e) of the license, the licensing of the Program
+ * under the license does not imply a trademark license. Therefore any rights,
+ * title and interest in our trademarks remain entirely with us.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the license for more details.
+ *
+ * You can be released from the requirements of the license by purchasing a
+ * commercial license. Buying such a license is mandatory as soon as you develop
+ * commercial activities involving this program without disclosing the source
+ * code of your own applications
+ */
+package eventql;
+import 'eventql/db/replication_state.proto';
+
+message LSMTableRef {
+  required string filename = 1;
+  required uint64 first_sequence = 2;
+  required uint64 last_sequence = 3;
+  optional uint64 size_bytes = 4;
+  optional bool has_skiplist = 5 [ default = false ];
+  optional bool has_sequence_column = 6 [ default = true ];
+}
+
+message ReplicationTarget {
+  required string server_id = 1;
+  required uint64 placement_id = 2;
+  required bytes partition_id = 3;
+  optional bytes keyrange_begin = 4;
+  optional bytes keyrange_end = 5;
+  optional bool is_joining = 6;
+  optional string legacy_token = 7;
+};
+
+enum PartitionLifecycleState {
+  PDISCOVERY_UNKNOWN = 0;
+  PDISCOVERY_LOAD = 1;
+  PDISCOVERY_SERVE = 2;
+  PDISCOVERY_UNLOAD = 3;
+};
+
+// next id: 31
+message PartitionState {
+
+  /**
+   * This partition's tsdb namespace
+   */
+  required string tsdb_namespace = 1;
+
+  /**
+   * SHA1 sum (20 bytes) containing this partition's key
+   */
+  required bytes partition_key = 2;
+
+  /**
+   * The begin (inclusive) of this partition's key range (i.e. the lowest key
+   * that is part of the partition)
+   */
+  optional bytes partition_keyrange_begin = 12;
+
+  /**
+   * The end (exclusive) of this partition's key range (i.e. the first
+   * key higher than the highest key that is still part of this partition)
+   */
+  optional bytes partition_keyrange_end = 27;
+
+  /**
+   * The table to which this partition belongs
+   */
+  required string table_key = 3;
+
+  /**
+   * The sstable files that contain the partition records/data
+   */
+  repeated string sstable_files = 4;
+
+  /**
+   * LSM table files. Last is most recent
+   */
+  repeated LSMTableRef lsm_tables = 7;
+
+  /**
+   * LSM sequence number
+   */
+  optional uint64 lsm_sequence = 8;
+
+  optional ReplicationState replication_state = 19;
+  repeated ReplicationTarget replication_targets = 14;
+
+  /**
+   * SHA1 sum (20 bytes) containing this partition's uuid. The uuid is used
+   * to prevent A/B/A scenarios when a partition is created, deleted and
+   * recreated. The uuid id is uniqe per PartitionState instanc. I.e. each
+   * time the same partition is created it will have a different uuid (and
+   * the same partition will have different uuids on each host).
+   */
+  required bytes uuid = 5;
+
+  /**
+   * CSTable version
+   */
+  optional uint64 cstable_version = 6;
+
+  /**
+   * Last known metadata transaction id
+   */
+  optional bytes last_metadata_txnid = 28;
+
+  /**
+   * Last known metadata transaction sequence
+   */
+  optional uint64 last_metadata_txnseq = 29;
+
+  optional PartitionLifecycleState lifecycle_state = 20;
+
+  optional bool is_splitting = 23;
+  repeated bytes split_partition_ids = 24;
+
+  optional bool has_joining_servers = 30;
+
+};

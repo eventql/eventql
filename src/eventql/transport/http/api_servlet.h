@@ -27,14 +27,11 @@
 #include "eventql/util/http/HTTPSSEStream.h"
 #include "eventql/util/json/json.h"
 #include "eventql/util/web/SecureCookie.h"
-#include "eventql/AnalyticsSession.pb.h"
 #include "eventql/sql/runtime/runtime.h"
 #include "eventql/auth/internal_auth.h"
 #include "eventql/config/config_directory.h"
 #include "eventql/db/table_service.h"
-#include "eventql/transport/http/LogfileAPIServlet.h"
-#include "eventql/transport/http/MapReduceAPIServlet.h"
-#include "eventql/RemoteTSDBScanParams.pb.h"
+#include "eventql/transport/http/mapreduce_servlet.h"
 #include "eventql/auth/client_auth.h"
 #include "eventql/auth/internal_auth.h"
 #include "eventql/server/sql_service.h"
@@ -58,7 +55,6 @@ public:
       ConfigDirectory* customer_dir,
       PartitionMap* pmap,
       SQLService* sql_service,
-      LogfileService* logfile_service,
       MapReduceService* mapreduce_service,
       TableService* table_service);
 
@@ -283,11 +279,9 @@ protected:
   PartitionMap* pmap_;
 
   SQLService* sql_service_;
-  LogfileService* logfile_service_;
   MapReduceService* mapreduce_service_;
   TableService* table_service_;
 
-  LogfileAPIServlet logfile_api_;
   MapReduceAPIServlet mapreduce_api_;
 };
 

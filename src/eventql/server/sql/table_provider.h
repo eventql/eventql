@@ -27,11 +27,11 @@
 #include <eventql/util/stdtypes.h>
 #include <eventql/sql/runtime/tablerepository.h>
 #include <eventql/auth/internal_auth.h>
-#include <eventql/db/TSDBTableRef.h>
+#include <eventql/db/table_ref.h>
 #include <eventql/db/partition_map.h>
-#include <eventql/db/CompactionWorker.h>
-#include <eventql/db/TableConfig.pb.h>
-#include <eventql/db/TSDBTableInfo.h>
+#include <eventql/db/compaction_worker.h>
+#include <eventql/db/table_config.pb.h>
+#include <eventql/db/table_info.h>
 #include <eventql/db/table_service.h>
 #include "eventql/server/sql/table_scan.h"
 #include <eventql/db/metadata_client.h>
@@ -46,7 +46,6 @@ public:
       const String& tsdb_namespace,
       PartitionMap* partition_map,
       ConfigDirectory* cdir,
-      ReplicationScheme* replication_scheme,
       TableService* table_service,
       InternalAuth* auth);
 
@@ -92,10 +91,10 @@ protected:
   String tsdb_namespace_;
   PartitionMap* partition_map_;
   ConfigDirectory* cdir_;
-  ReplicationScheme* replication_scheme_;
   TableService* table_service_;
   InternalAuth* auth_;
 };
 
+void evqlVersionExpr(sql_txn* ctx, int argc, csql::SValue* argv, csql::SValue* out);
 
 } // namespace csql

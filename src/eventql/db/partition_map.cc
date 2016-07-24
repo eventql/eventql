@@ -28,9 +28,11 @@
 #include <eventql/util/io/fileutil.h>
 #include <eventql/io/sstable/sstablereader.h>
 #include <eventql/db/partition_map.h>
-#include <eventql/db/PartitionState.pb.h>
-#include <eventql/db/PartitionReplication.h>
+#include <eventql/db/partition_state.pb.h>
+#include <eventql/db/partition_replication.h>
 #include <eventql/db/metadata_coordinator.h>
+#include <eventql/db/partition_reader.h>
+#include <eventql/db/partition_writer.h>
 #include "eventql/eventql.h"
 #include "eventql/db/file_tracker.h"
 
@@ -394,7 +396,7 @@ bool PartitionMap::dropLocalPartition(
 
   /* check preconditions */
   try {
-    auto repl = partition->getReplicationStrategy(cfg_->repl_scheme, nullptr);
+    auto repl = partition->getReplicationStrategy(nullptr);
     if (!repl->shouldDropPartition()) {
       RAISE(kIllegalStateError, "can't delete partition");
     }
@@ -406,7 +408,7 @@ bool PartitionMap::dropLocalPartition(
 
   /* start deletion */
   logInfo(
-      "z1.core",
+      "evqld",
       "Partition $0/$1/$2 is not owned by this node and is fully replicated," \
       " trying to unload and drop",
       tsdb_namespace,

@@ -27,7 +27,7 @@
 #include <eventql/util/http/httpstats.h>
 #include <eventql/util/SHA1.h>
 #include <eventql/db/partition_map.h>
-#include <eventql/db/ReplicationWorker.h>
+#include <eventql/db/replication_worker.h>
 #include <eventql/config/config_directory.h>
 
 #include "eventql/eventql.h"

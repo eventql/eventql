@@ -82,20 +82,15 @@ AM_LDFLAGS = $(PTHREAD_CFLAGS)
 
 ################# PROTOBUFs ####################
 evql_protos = \
-    eventql/AnalyticsSession.proto \
+    eventql/auth/client_auth_legacy_protos.proto \
     eventql/config/namespace_config_protos.proto \
     eventql/db/metadata_operations.proto \
-    eventql/db/ClusterConfig.proto \
-    eventql/db/PartitionInfo.proto \
-    eventql/db/PartitionState.proto \
-    eventql/db/RecordEnvelope.proto \
-    eventql/db/ReplicationState.proto \
-    eventql/db/TableConfig.proto \
-    eventql/db/TSDBNodeConfig.proto \
-    eventql/db/TSDBTableScanSpec.proto \
-    eventql/EventScanParams.proto \
-    eventql/LogfileScanParams.proto \
-    eventql/RemoteTSDBScanParams.proto
+    eventql/db/cluster_config.proto \
+    eventql/db/partition_info.proto \
+    eventql/db/partition_state.proto \
+    eventql/db/record_envelope.proto \
+    eventql/db/replication_state.proto \
+    eventql/db/table_config.proto
 
 BUILT_SOURCES += $(evql_protos:.proto=.pb.h)
 dist_noinst_DATA += $(evql_protos)
@@ -806,25 +801,14 @@ noinst_LIBRARIES += evql_http.a
 
 ################# LIB: evql_core.a ####################
 evql_core_a_SOURCES = \
-    eventql/EventScanResult.cc \
-    eventql/EventScanResult.h \
-    eventql/JavaScriptContext.cc \
-    eventql/JavaScriptContext.h \
-    eventql/LogfileScanResult.cc \
-    eventql/LogfileScanResult.h \
     eventql/config/namespace_config.cc \
     eventql/config/namespace_config.h \
-    eventql/db/DerivedDataset.cc \
-    eventql/db/DerivedDataset.h \
-    eventql/db/PartitionChangeNotification.h \
-    eventql/db/RecordRef.h \
+    eventql/db/partition_change_notification.h \
+    eventql/db/record_ref.h \
     eventql/db/shredded_record.h \
     eventql/db/shredded_record.cc \
-    eventql/db/ServerConfig.h \
-    eventql/db/TSDBTableInfo.h \
-    eventql/db/TSDBTableScan.h \
-    eventql/db/TSDBTableScan_impl.h \
-    eventql/db/TSDBTableScanlet.h \
+    eventql/db/server_config.h \
+    eventql/db/table_info.h \
     eventql/db/file_tracker.h \
     eventql/db/file_tracker.cc \
     eventql/db/garbage_collector.h \
@@ -839,22 +823,14 @@ evql_core_a_SOURCES = \
     eventql/config/config_directory_zookeeper.h \
     eventql/config/process_config.cc \
     eventql/config/process_config.h \
-    eventql/db/CompactionStrategy.cc \
-    eventql/db/CompactionStrategy.h \
-    eventql/db/CompactionWorker.cc \
-    eventql/db/CompactionWorker.h \
-    eventql/db/LSMPartitionReader.cc \
-    eventql/db/LSMPartitionReader.h \
-    eventql/db/LSMPartitionReplication.cc \
-    eventql/db/LSMPartitionReplication.h \
-    eventql/db/LSMPartitionWriter.cc \
-    eventql/db/LSMPartitionWriter.h \
-    eventql/db/LSMTableIndex.cc \
-    eventql/db/LSMTableIndex.h \
-    eventql/db/LSMTableIndexCache.cc \
-    eventql/db/LSMTableIndexCache.h \
-    eventql/db/LazyPartition.cc \
-    eventql/db/LazyPartition.h \
+    eventql/db/compaction_strategy.cc \
+    eventql/db/compaction_strategy.h \
+    eventql/db/compaction_worker.cc \
+    eventql/db/compaction_worker.h \
+    eventql/db/tablet_index.cc \
+    eventql/db/tablet_index.h \
+    eventql/db/tablet_index_cache.cc \
+    eventql/db/tablet_index_cache.h \
     eventql/db/metadata_client.cc \
     eventql/db/metadata_client.h \
     eventql/db/metadata_coordinator.cc \
@@ -871,38 +847,36 @@ evql_core_a_SOURCES = \
     eventql/db/metadata_store.h \
     eventql/db/metadata_transaction.cc \
     eventql/db/metadata_transaction.h \
-    eventql/db/Partition.cc \
-    eventql/db/Partition.h \
-    eventql/db/PartitionReader.cc \
-    eventql/db/PartitionReader.h \
-    eventql/db/PartitionReplication.cc \
-    eventql/db/PartitionReplication.h \
-    eventql/db/PartitionSnapshot.cc \
-    eventql/db/PartitionSnapshot.h \
-    eventql/db/PartitionWriter.cc \
-    eventql/db/PartitionWriter.h \
+    eventql/db/partition.cc \
+    eventql/db/partition.h \
+    eventql/db/partition_reader.cc \
+    eventql/db/partition_reader.h \
+    eventql/db/partition_replication.cc \
+    eventql/db/partition_replication.h \
+    eventql/db/partition_snapshot.cc \
+    eventql/db/partition_snapshot.h \
+    eventql/db/partition_writer.cc \
+    eventql/db/partition_writer.h \
     eventql/db/partition_arena.cc \
     eventql/db/partition_arena.h \
-    eventql/db/RecordSet.cc \
-    eventql/db/RecordSet.h \
-    eventql/db/ReplicationScheme.cc \
-    eventql/db/ReplicationScheme.h \
-    eventql/db/ReplicationState.cc \
-    eventql/db/ReplicationState.h \
-    eventql/db/ReplicationWorker.cc \
-    eventql/db/ReplicationWorker.h \
+    eventql/db/record_set.cc \
+    eventql/db/record_set.h \
+    eventql/db/replication_state.cc \
+    eventql/db/replication_state.h \
+    eventql/db/replication_worker.cc \
+    eventql/db/replication_worker.h \
     eventql/db/server_allocator.cc \
     eventql/db/server_allocator.h \
-    eventql/db/TSDBClient.cc \
-    eventql/db/TSDBClient.h \
+    eventql/db/db_client.cc \
+    eventql/db/db_client.h \
     eventql/db/table_service.cc \
     eventql/db/table_service.h \
     eventql/transport/http/rpc_servlet.cc \
     eventql/transport/http/rpc_servlet.h \
-    eventql/db/TSDBTableRef.cc \
-    eventql/db/TSDBTableRef.h \
-    eventql/db/Table.cc \
-    eventql/db/Table.h \
+    eventql/db/table_ref.cc \
+    eventql/db/table_ref.h \
+    eventql/db/table.cc \
+    eventql/db/table.h \
     eventql/db/partition_discovery.cc \
     eventql/db/partition_discovery.h \
     eventql/db/partition_map.cc \
@@ -911,20 +885,22 @@ evql_core_a_SOURCES = \
     eventql/db/rebalance.cc \
     eventql/eventql.h \
     eventql/mapreduce/mapreduce_preludejs.cc \
-    eventql/mapreduce/MapReduceScheduler.cc \
-    eventql/mapreduce/MapReduceScheduler.h \
-    eventql/mapreduce/MapReduceTask.cc \
-    eventql/mapreduce/MapReduceTask.h \
-    eventql/mapreduce/MapReduceTaskBuilder.cc \
-    eventql/mapreduce/MapReduceTaskBuilder.h \
-    eventql/mapreduce/tasks/MapTableTask.cc \
-    eventql/mapreduce/tasks/MapTableTask.h \
-    eventql/mapreduce/tasks/ReduceTask.cc \
-    eventql/mapreduce/tasks/ReduceTask.h \
-    eventql/mapreduce/tasks/ReturnResultsTask.cc \
-    eventql/mapreduce/tasks/ReturnResultsTask.h \
-    eventql/mapreduce/tasks/SaveToTableTask.cc \
-    eventql/mapreduce/tasks/SaveToTableTask.h \
+    eventql/mapreduce/mapreduce_scheduler.cc \
+    eventql/mapreduce/mapreduce_scheduler.h \
+    eventql/mapreduce/mapreduce_task.cc \
+    eventql/mapreduce/mapreduce_task.h \
+    eventql/mapreduce/mapreduce_task_builder.cc \
+    eventql/mapreduce/mapreduce_task_builder.h \
+    eventql/mapreduce/tasks/map_table.cc \
+    eventql/mapreduce/tasks/map_table.h \
+    eventql/mapreduce/tasks/reduce.cc \
+    eventql/mapreduce/tasks/reduce.h \
+    eventql/mapreduce/tasks/return_results.cc \
+    eventql/mapreduce/tasks/return_results.h \
+    eventql/mapreduce/tasks/save_to_table.cc \
+    eventql/mapreduce/tasks/save_to_table.h \
+    eventql/mapreduce/runtime/javascript/javascript_context.cc \
+    eventql/mapreduce/runtime/javascript/javascript_context.h \
     eventql/auth/client_auth.h \
     eventql/auth/client_auth_legacy.cc \
     eventql/auth/client_auth_legacy.h \
@@ -951,20 +927,14 @@ evql_core_a_SOURCES = \
     eventql/server/sql/pipelined_expression.h \
     eventql/server/sql/scheduler.cc \
     eventql/server/sql/scheduler.h \
-    eventql/server/sql/sql_engine.cc \
-    eventql/server/sql/sql_engine.h \
     eventql/server/sql/table_provider.cc \
     eventql/server/sql/table_provider.h \
     eventql/server/sql/table_scan.cc \
     eventql/server/sql/table_scan.h \
-    eventql/transport/http/LogfileAPIServlet.cc \
-    eventql/transport/http/LogfileAPIServlet.h \
-    eventql/transport/http/LogfileService.cc \
-    eventql/transport/http/LogfileService.h \
-    eventql/transport/http/MapReduceAPIServlet.cc \
-    eventql/transport/http/MapReduceAPIServlet.h \
-    eventql/transport/http/MapReduceService.cc \
-    eventql/transport/http/MapReduceService.h \
+    eventql/transport/http/mapreduce_servlet.cc \
+    eventql/transport/http/mapreduce_servlet.h \
+    eventql/mapreduce/mapreduce_service.cc \
+    eventql/mapreduce/mapreduce_service.h \
     eventql/transport/http/api_servlet.cc \
     eventql/transport/http/api_servlet.h \
     eventql/transport/http/default_servlet.cc \
@@ -983,20 +953,15 @@ evql_core_a_SOURCES = \
     eventql/util/mdb/MDBTransaction.h
 
 nodist_evql_core_a_SOURCES = \
-    @builddir@/eventql/AnalyticsSession.pb.cc \
+    @builddir@/eventql/auth/client_auth_legacy_protos.pb.cc \
     @builddir@/eventql/config/namespace_config_protos.pb.cc \
     @builddir@/eventql/db/metadata_operations.pb.cc \
-    @builddir@/eventql/db/ClusterConfig.pb.cc \
-    @builddir@/eventql/db/PartitionInfo.pb.cc \
-    @builddir@/eventql/db/PartitionState.pb.cc \
-    @builddir@/eventql/db/RecordEnvelope.pb.cc \
-    @builddir@/eventql/db/ReplicationState.pb.cc \
-    @builddir@/eventql/db/TableConfig.pb.cc \
-    @builddir@/eventql/db/TSDBNodeConfig.pb.cc \
-    @builddir@/eventql/db/TSDBTableScanSpec.pb.cc \
-    @builddir@/eventql/EventScanParams.pb.cc \
-    @builddir@/eventql/LogfileScanParams.pb.cc \
-    @builddir@/eventql/RemoteTSDBScanParams.pb.cc
+    @builddir@/eventql/db/cluster_config.pb.cc \
+    @builddir@/eventql/db/partition_info.pb.cc \
+    @builddir@/eventql/db/partition_state.pb.cc \
+    @builddir@/eventql/db/record_envelope.pb.cc \
+    @builddir@/eventql/db/replication_state.pb.cc \
+    @builddir@/eventql/db/table_config.pb.cc
 
 eventql/mapreduce/mapreduce_preludejs.cc:
 	echo 'eventql/mapreduce/prelude.js:${srcdir}/eventql/mapreduce/prelude.js' | ${srcdir}/eventql/util/assets.sh $(builddir)/eventql/mapreduce/mapreduce_preludejs.cc

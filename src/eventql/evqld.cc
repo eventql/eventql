@@ -53,18 +53,17 @@
 #include "eventql/util/mdb/MDB.h"
 #include "eventql/util/mdb/MDBUtil.h"
 #include "eventql/transport/http/api_servlet.h"
-#include "eventql/db/TableConfig.pb.h"
+#include "eventql/db/table_config.pb.h"
 #include "eventql/db/table_service.h"
 #include "eventql/db/metadata_coordinator.h"
 #include "eventql/db/metadata_replication.h"
 #include "eventql/db/metadata_service.h"
 #include "eventql/transport/http/rpc_servlet.h"
-#include "eventql/db/ReplicationWorker.h"
-#include "eventql/db/LSMTableIndexCache.h"
-#include "eventql/db/CompactionWorker.h"
+#include "eventql/db/replication_worker.h"
+#include "eventql/db/tablet_index_cache.h"
+#include "eventql/db/compaction_worker.h"
 #include "eventql/db/garbage_collector.h"
 #include "eventql/db/leader.h"
-#include "eventql/server/sql/sql_engine.h"
 #include "eventql/transport/http/default_servlet.h"
 #include "eventql/sql/defaults.h"
 #include "eventql/sql/runtime/query_cache.h"
@@ -73,6 +72,7 @@
 #include "eventql/config/config_directory_standalone.h"
 #include "eventql/transport/http/status_servlet.h"
 #include "eventql/server/sql/scheduler.h"
+#include "eventql/server/sql/table_provider.h"
 #include "eventql/auth/client_auth.h"
 #include "eventql/auth/client_auth_trust.h"
 #include "eventql/auth/client_auth_legacy.h"
@@ -384,7 +384,7 @@ int main(int argc, const char** argv) {
   http::HTTPRouter http_router;
   http::HTTPServer http_server(&http_router, &ev);
   http_server.listen(listen_port);
-  http::HTTPConnectionPool http(&ev, &z1stats()->http_client_stats);
+  http::HTTPConnectionPool http(&ev, &evqld_stats()->http_client_stats);
 
   /* data directory */
   auto server_name = process_config->getString("server.name");
@@ -503,15 +503,11 @@ int main(int argc, const char** argv) {
     auto cluster_config = config_dir->getClusterConfig();
 
     /* tsdb */
-    auto repl_scheme = RefPtr<eventql::ReplicationScheme>(
-          new eventql::DHTReplicationScheme(cluster_config, server_name));
-
     FileLock server_lock(FileUtil::joinPaths(tsdb_dir, "__lock"));
     server_lock.lock();
 
     eventql::ServerCfg cfg;
     cfg.db_path = tsdb_dir;
-    cfg.repl_scheme = repl_scheme;
     cfg.config_directory = config_dir.get();
     cfg.idx_cache = mkRef(new LSMTableIndexCache(tsdb_dir));
     cfg.metadata_store = &metadata_store;
@@ -521,12 +517,10 @@ int main(int argc, const char** argv) {
     eventql::TableService table_service(
         config_dir.get(),
         &partition_map,
-        repl_scheme.get(),
         &ev,
-        &z1stats()->http_client_stats);
+        &evqld_stats()->http_client_stats);
 
     eventql::ReplicationWorker tsdb_replication(
-        repl_scheme.get(),
         &partition_map,
         &http);
 
@@ -572,11 +566,10 @@ int main(int argc, const char** argv) {
               new Scheduler(
                   &partition_map,
                   config_dir.get(),
-                  internal_auth.get(),
-                  repl_scheme.get()))));
+                  internal_auth.get()))));
 
       sql->setCacheDir(cache_dir);
-      sql->symbols()->registerFunction("z1_version", &z1VersionExpr);
+      sql->symbols()->registerFunction("version", &evqlVersionExpr);
       sql->setQueryCache(&sql_query_cache);
     }
 
@@ -585,25 +578,15 @@ int main(int argc, const char** argv) {
         sql.get(),
         &partition_map,
         config_dir.get(),
-        repl_scheme.get(),
         internal_auth.get(),
         &table_service,
         cache_dir);
-
-    eventql::LogfileService logfile_service(
-        config_dir.get(),
-        internal_auth.get(),
-        &table_service,
-        &partition_map,
-        repl_scheme.get(),
-        sql.get());
 
     eventql::MapReduceService mapreduce_service(
         config_dir.get(),
         internal_auth.get(),
         &table_service,
         &partition_map,
-        repl_scheme.get(),
         cache_dir);
 
     /* open tables */
@@ -653,7 +636,6 @@ int main(int argc, const char** argv) {
         config_dir.get(),
         &partition_map,
         &sql_service,
-        &logfile_service,
         &mapreduce_service,
         &table_service);
 
@@ -662,7 +644,7 @@ int main(int argc, const char** argv) {
         &partition_map,
         config_dir.get(),
         http_server.stats(),
-        &z1stats()->http_client_stats,
+        &evqld_stats()->http_client_stats,
         &tsdb_replication);
 
     eventql::DefaultServlet default_servlet;

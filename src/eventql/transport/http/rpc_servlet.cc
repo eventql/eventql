@@ -23,7 +23,7 @@
  */
 #include "eventql/util/util/binarymessagewriter.h"
 #include "eventql/transport/http/rpc_servlet.h"
-#include "eventql/db/RecordEnvelope.pb.h"
+#include "eventql/db/record_envelope.pb.h"
 #include "eventql/util/json/json.h"
 #include <eventql/util/wallclock.h>
 #include <eventql/util/thread/wakeup.h>

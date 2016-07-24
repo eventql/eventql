@@ -28,7 +28,7 @@
 #include "eventql/util/stdtypes.h"
 #include "eventql/util/status.h"
 #include "eventql/util/web/SecureCookie.h"
-#include "eventql/AnalyticsSession.pb.h"
+#include "eventql/auth/client_auth_legacy_protos.pb.h"
 
 namespace eventql {
 
