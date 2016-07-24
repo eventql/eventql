@@ -488,12 +488,15 @@ csql::TableInfo TSDBTableProvider::tableInfoForTable(
     ti.tags.insert(tag);
   }
 
+  auto pkey = table.config.config().primary_key();
   for (const auto& col : table.schema->columns()) {
     csql::ColumnInfo ci;
     ci.column_name = col.first;
     ci.type = col.second.typeName();
     ci.type_size = col.second.typeSize();
     ci.is_nullable = col.second.optional;
+    ci.is_primary_key = find(
+      pkey.begin(), pkey.end(), col.first) != pkey.end();
 
     ti.columns.emplace_back(ci);
   }
