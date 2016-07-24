@@ -89,6 +89,31 @@ be global variables (i.e. defined in the global scope).
 ---
 ### EVQL.mapTable
 
+    EVQL.mapTable(opts);
+
+#### Parameters:
+`opts` is an object with the following properties:
+
+**table**<br>
+&nbsp;&nbsp;&nbsp;(required) 
+
+**map_fn**<br>
+&nbsp;&nbsp;&nbsp;(required) 
+
+**from**<br>
+&nbsp;&nbsp;&nbsp;(optional) 
+
+**params**<br>
+&nbsp;&nbsp;&nbsp;(optional) 
+
+object with mandatory property table 
+optional begin, end or from, until
+required_columns
+params
+map_fn
+
+
+
 ---
 
 ### EVQL.reduce
