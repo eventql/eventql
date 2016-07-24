@@ -45,6 +45,10 @@ public:
 
   bool hasServerID() const override;
 
+  virtual bool isLeader() const;
+
+  virtual String getLeader() const;
+
   ClusterConfig getClusterConfig() const override;
 
   void updateClusterConfig(ClusterConfig config) override;

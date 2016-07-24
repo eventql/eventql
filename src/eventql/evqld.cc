@@ -63,6 +63,7 @@
 #include "eventql/db/LSMTableIndexCache.h"
 #include "eventql/db/CompactionWorker.h"
 #include "eventql/db/garbage_collector.h"
+#include "eventql/db/leader.h"
 #include "eventql/server/sql/sql_engine.h"
 #include "eventql/transport/http/default_servlet.h"
 #include "eventql/sql/defaults.h"
@@ -264,6 +265,8 @@ int main(int argc, const char** argv) {
   config_builder.setProperty("server.gc_mode", "AUTOMATIC");
   config_builder.setProperty("server.gc_interval", "30000000");
   config_builder.setProperty("server.cachedir_maxsize", "68719476736");
+  config_builder.setProperty("server.noleader", "false");
+  config_builder.setProperty("cluster.rebalance_interval", "60000000");
 
   if (flags.isSet("standalone")) {
     config_builder.setProperty("server.name", "standalone");
@@ -478,6 +481,11 @@ int main(int argc, const char** argv) {
   eventql::MetadataStore metadata_store(metadata_dir);
   eventql::MetadataService metadata_service(config_dir.get(), &metadata_store);
 
+  /* leader */
+  Leader leader(
+      config_dir.get(),
+      process_config->getInt("cluster.rebalance_interval").get());
+
   /* spidermonkey javascript runtime */
   JS_Init();
   js::DisableExtraThreads();
@@ -679,6 +687,11 @@ int main(int argc, const char** argv) {
 
     partition_map.open();
     gc.startGCThread();
+
+    if (!process_config->getBool("server.noleader")) {
+      leader.startLeaderThread();
+    }
+
     if (metadata_replication.get()) {
       metadata_replication->start();
     }
@@ -689,6 +702,7 @@ int main(int argc, const char** argv) {
       metadata_replication->stop();
     }
 
+    leader.stopLeaderThread();
     gc.stopGCThread();
   } catch (const StandardException& e) {
     logAlert("eventql", e, "FATAL ERROR");

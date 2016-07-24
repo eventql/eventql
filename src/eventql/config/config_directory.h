@@ -61,6 +61,10 @@ public:
 
   virtual bool hasServerID() const { return true; }
 
+  virtual bool isLeader() const = 0;
+
+  virtual String getLeader() const = 0;
+
   virtual ServerConfig getServerConfig(const String& sever_name) const = 0;
 
   virtual void updateServerConfig(ServerConfig config) = 0;
