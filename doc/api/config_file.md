@@ -76,9 +76,14 @@ gc_mode
 
 
 ###cluster
-***coordinator***
+***name***
+&nbsp;&nbsp;&nbsp;&nbsp;The name of the cluster.
 
-name
+***coordinator***
+&nbsp;&nbsp;&nbsp;&nbsp;The cluster coordinator service, e.g. zookeeper.
+
+***zookeeper_hosts***
+&nbsp;&nbsp;&nbsp;&nbsp;A comma-separated list of zookeeper hosts.
 
 
 ###evqlctl

@@ -38,14 +38,14 @@ API Reference
 
 Jump to:
 
-  - [EVQL.log](#z1-log)
-  - [EVQL.broadcast](#z1-broadcast)
-  - [EVQL.mapTable](#z1-maptable)
-  - [EVQL.reduce](#z1-reduce)
-  - [EVQL.downloadResults](#z1-downloadresults)
-  - [EVQL.saveToTable](#z1-savetotable)
-  - [EVQL.processStream](#z1-processtream)
-  - [EVQL.writeToOutput](#z1-writetooutput)
+  - [EVQL.log](#evql-log)
+  - [EVQL.broadcast](#evql-broadcast)
+  - [EVQL.mapTable](#evql-maptable)
+  - [EVQL.reduce](#evql-reduce)
+  - [EVQL.downloadResults](#evql-downloadresults)
+  - [EVQL.saveToTable](#evql-savetotable)
+  - [EVQL.processStream](#evql-processtream)
+  - [EVQL.writeToOutput](#evql-writetooutput)
 
 ---
 ### EVQL.log
