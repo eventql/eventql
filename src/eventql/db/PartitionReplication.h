@@ -26,7 +26,7 @@
 #include <eventql/util/http/httpconnectionpool.h>
 #include <eventql/db/Partition.h>
 #include <eventql/db/ReplicationScheme.h>
-#include <eventql/db/ReplicationState.h>
+#include <eventql/db/replication_state.h>
 #include <eventql/db/RecordEnvelope.pb.h>
 
 #include "eventql/eventql.h"

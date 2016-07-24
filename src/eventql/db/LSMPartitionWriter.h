@@ -28,7 +28,7 @@
 #include <eventql/db/PartitionWriter.h>
 #include <eventql/db/partition_arena.h>
 #include <eventql/util/util/PersistentHashSet.h>
-#include <eventql/db/CompactionStrategy.h>
+#include <eventql/db/compaction_strategy.h>
 #include <eventql/db/metadata_transaction.h>
 
 namespace eventql {

@@ -21,28 +21,42 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include <eventql/db/DerivedDataset.h>
+#pragma once
+#include <eventql/util/stdtypes.h>
+#include <eventql/util/SHA1.h>
+#include <eventql/db/replication_state.pb.h>
+#include <eventql/db/PartitionState.pb.h>
 
 #include "eventql/eventql.h"
 
 namespace eventql {
 
-DerivedDatasetState::DerivedDatasetState() : last_offset(0) {}
+uint64_t replicatedOffsetFor(
+    const ReplicationState& repl_state,
+    const ReplicationTarget& target);
 
-void DerivedDatasetState::encode(util::BinaryMessageWriter* writer) const {
-  writer->appendVarUInt(last_offset);
-  writer->appendVarUInt(state.size());
-  if (state.size() > 0) {
-    writer->append(state.data(), state.size());
-  }
-}
+void setReplicatedOffsetFor(
+    ReplicationState* repl_state,
+    const ReplicationTarget& target,
+    uint64_t replicated_offset);
 
-void DerivedDatasetState::decode(util::BinaryMessageReader* reader) {
-  last_offset = reader->readVarUInt();
-  auto buf_len = reader->readVarUInt();
-  if (buf_len > 0) {
-    state = Buffer(reader->read(buf_len), buf_len);
-  }
-}
+uint64_t replicatedOffsetFor(
+    const ReplicationState& repl_state,
+    const SHA1Hash& replica_id);
 
-}
+void setReplicatedOffsetFor(
+    ReplicationState* repl_state,
+    const SHA1Hash& replica_id,
+    uint64_t replicated_offset);
+
+uint64_t replicatedVersionFor(
+    const ReplicationState& repl_state,
+    const SHA1Hash& replica_id);
+
+void setReplicatedVersionFor(
+    ReplicationState* repl_state,
+    const SHA1Hash& replica_id,
+    uint64_t version);
+
+} // namespace tdsb
+

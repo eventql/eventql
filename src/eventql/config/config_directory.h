@@ -30,7 +30,7 @@
 #include <eventql/util/net/inetaddr.h>
 #include <eventql/util/http/httpclient.h>
 #include <eventql/config/namespace_config.h>
-#include <eventql/db/ClusterConfig.pb.h>
+#include <eventql/db/cluster_config.pb.h>
 #include <eventql/db/TableConfig.pb.h>
 
 namespace eventql {

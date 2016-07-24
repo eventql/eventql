@@ -25,7 +25,7 @@
 #include <eventql/db/LSMPartitionReader.h>
 #include <eventql/db/LSMPartitionWriter.h>
 #include <eventql/db/ReplicationScheme.h>
-#include <eventql/db/ReplicationWorker.h>
+#include <eventql/db/replication_worker.h>
 #include <eventql/util/logging.h>
 #include <eventql/util/io/fileutil.h>
 #include <eventql/util/protobuf/msg.h>

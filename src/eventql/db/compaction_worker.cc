@@ -28,7 +28,7 @@
 #include <eventql/util/protobuf/msg.h>
 #include <eventql/util/wallclock.h>
 #include <eventql/util/application.h>
-#include <eventql/db/CompactionWorker.h>
+#include <eventql/db/compaction_worker.h>
 #include <eventql/db/RecordSet.h>
 #include <eventql/util/protobuf/MessageDecoder.h>
 #include <eventql/io/cstable/RecordShredder.h>

@@ -28,7 +28,7 @@
 #include <eventql/util/random.h>
 #include <eventql/util/option.h>
 #include <eventql/util/net/inetaddr.h>
-#include <eventql/db/ClusterConfig.pb.h>
+#include <eventql/db/cluster_config.pb.h>
 
 #include "eventql/eventql.h"
 

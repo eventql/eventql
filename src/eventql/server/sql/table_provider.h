@@ -29,7 +29,7 @@
 #include <eventql/auth/internal_auth.h>
 #include <eventql/db/TSDBTableRef.h>
 #include <eventql/db/partition_map.h>
-#include <eventql/db/CompactionWorker.h>
+#include <eventql/db/compaction_worker.h>
 #include <eventql/db/TableConfig.pb.h>
 #include <eventql/db/TSDBTableInfo.h>
 #include <eventql/db/table_service.h>

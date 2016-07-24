@@ -22,7 +22,7 @@
  * code of your own applications
  */
 package eventql;
-import 'eventql/db/ReplicationState.proto';
+import 'eventql/db/replication_state.proto';
 
 message LSMTableRef {
   required string filename = 1;

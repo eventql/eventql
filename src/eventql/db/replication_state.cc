@@ -22,7 +22,7 @@
  * code of your own applications
  */
 #include "eventql/eventql.h"
-#include <eventql/db/ReplicationState.h>
+#include <eventql/db/replication_state.h>
 
 namespace eventql {
 
