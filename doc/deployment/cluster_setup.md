@@ -105,8 +105,12 @@ localhost with four different ports as the listen address. However, when running
 on multiple machines, you can't use `localhost` or `0.0.0.0` - you have to specify
 the externally reachable ip address of each server.
 
-That's it! You should now be able to connect to the cluster and start executing
+That's it! Our cluster is running, let's create a database:
+
+    $ evqlctl -c /etc/evqld.conf database-create --database "mydb"
+
+You should now be able to connect to the cluster and start executing
 queries:
 
-    $ evql -h localhost -p 9175
+    $ evql -h localhost -p 9175 -d mydb
 
