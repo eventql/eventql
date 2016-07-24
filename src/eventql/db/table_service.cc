@@ -66,6 +66,7 @@ Status TableService::createTable(
     return Status(eIllegalArgumentError, "table already exists");
   }
 
+  auto fields = schema.fields();
   for (const auto& col : primary_key) {
     if (col.find(".") != String::npos) {
       return Status(
@@ -75,12 +76,33 @@ Status TableService::createTable(
               col));
     }
 
-    if (!schema.hasField(col)) {
+    uint32_t field_id;
+    try {
+      field_id = schema.fieldId(col);
+    } catch (Exception& e) {
       return Status(
           eIllegalArgumentError,
-          StringUtil::format(
-              "column not found '$0'",
-              col));
+          StringUtil::format("column not found: '$0'", col));
+    }
+
+    for (const auto& field : fields) {
+      if (field_id == field.id) {
+        if (field.type == msg::FieldType::OBJECT) {
+          return Status(
+              eIllegalArgumentError,
+              StringUtil::format(
+                  "nested column '$0' can't be part of the PRIMARY KEY",
+                  col));
+        }
+
+        if (field.repeated) {
+          return Status(
+              eIllegalArgumentError,
+              StringUtil::format(
+                  "repeated column '$0' can't be part of the PRIMARY KEY",
+                  col));
+        }
+      }
     }
   }
 
