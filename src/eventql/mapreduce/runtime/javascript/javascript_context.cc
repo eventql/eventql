@@ -23,7 +23,7 @@
  */
 #include "eventql/util/inspect.h"
 #include "eventql/util/assets.h"
-#include "eventql/JavaScriptContext.h"
+#include "eventql/mapreduce/runtime/javascript/javascript_context.h"
 #include "js/Conversions.h"
 #include "jsapi.h"
 #include <iostream>

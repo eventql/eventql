@@ -24,7 +24,7 @@
 #include "eventql/mapreduce/tasks/ReturnResultsTask.h"
 #include "eventql/mapreduce/MapReduceScheduler.h"
 #include "eventql/io/sstable/sstablereader.h"
-#include "eventql/JavaScriptContext.h"
+#include "eventql/mapreduce/runtime/javascript/javascript_context.h"
 
 #include "eventql/eventql.h"
 

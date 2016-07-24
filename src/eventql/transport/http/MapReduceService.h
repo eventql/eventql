@@ -28,7 +28,7 @@
 #include "eventql/auth/internal_auth.h"
 #include "eventql/config/namespace_config.h"
 #include "eventql/config/config_directory.h"
-#include "eventql/JavaScriptContext.h"
+#include "eventql/mapreduce/runtime/javascript/javascript_context.h"
 #include "eventql/mapreduce/MapReduceTask.h"
 #include "eventql/server/session.h"
 

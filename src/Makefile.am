@@ -803,8 +803,6 @@ noinst_LIBRARIES += evql_http.a
 
 ################# LIB: evql_core.a ####################
 evql_core_a_SOURCES = \
-    eventql/JavaScriptContext.cc \
-    eventql/JavaScriptContext.h \
     eventql/config/namespace_config.cc \
     eventql/config/namespace_config.h \
     eventql/db/DerivedDataset.cc \
@@ -918,6 +916,8 @@ evql_core_a_SOURCES = \
     eventql/mapreduce/tasks/ReturnResultsTask.h \
     eventql/mapreduce/tasks/SaveToTableTask.cc \
     eventql/mapreduce/tasks/SaveToTableTask.h \
+    eventql/mapreduce/runtime/javascript/javascript_context.cc \
+    eventql/mapreduce/runtime/javascript/javascript_context.h \
     eventql/auth/client_auth.h \
     eventql/auth/client_auth_legacy.cc \
     eventql/auth/client_auth_legacy.h \
