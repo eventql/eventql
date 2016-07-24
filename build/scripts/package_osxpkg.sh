@@ -27,6 +27,5 @@ for triple in darwin_x86_64; do
 
   (cd $TMPDIR && mkbom -u 0 -g 80 root flat/base.pkg/Bom)
 
-  (cd $TMPDIR/flat && xar --compression none -c *) \
-      > $PKGDIR/$PACKAGE-$VERSION-$triple.pkg
+  (cd $TMPDIR/flat && xar --compression none -cf "$PKGDIR/$PACKAGE-$VERSION-$triple.pkg" *)
 done
