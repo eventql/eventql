@@ -153,137 +153,130 @@ void StatusServlet::renderDashboard(
   auto zs = z1stats();
   String html;
   html += kStyleSheet;
-  html += kMainMenu;
+  //html += kMainMenu;
   html += StringUtil::format(
       "<h1>EventQL $0 ($1)</h1>",
       kVersionString,
       kBuildID);
 
-  html += "<table cellspacing=0 border=1>";
   html += StringUtil::format(
-      "<tr><td><em>Version</em></td><td align='left'>$0 &mdash; $1.$2.$3</td></tr>",
+      "<span><em>Version:</em> $0 &mdash; $1.$2.$3</span> &mdash; ",
       kVersionString,
       kVersionMajor,
       kVersionMinor,
       kVersionPatch);
   html += StringUtil::format(
-      "<tr><td><em>Build-ID</em></td><td align='left'>$0</td></tr>",
+      "<span><em>Build-ID:</em> $0</span> &mdash; ",
       kBuildID);
   html += StringUtil::format(
-      "<tr><td><em>Memory Usage - Current</em></td><td align='right'>$0 MB</td></tr>",
+      "<span><em>Memory Usage - Current:</em> $0 MB</span> &mdash; ",
       Application::getCurrentMemoryUsage() / (1024.0 * 1024.0));
   html += StringUtil::format(
-      "<tr><td><em>Memory Usage - Peak</em></td><td align='right'>$0 MB</td></tr>",
+      "<span><em>Memory Usage - Peak:</em> $0 MB</span> &mdash; ",
       Application::getPeakMemoryUsage() / (1024.0 * 1024.0));
   html += StringUtil::format(
-      "<tr><td><em>Referenced Files</em></td><td align='right'>$0</td></tr>",
+      "<span><em>Referenced Files:</em> $0</span> &mdash; ",
       config_->file_tracker->getNumReferencedFiles());
   html += StringUtil::format(
-      "<tr><td><em>Disk Cache Size</em></td><td align='right'>$0 MB</td></tr>",
+      "<span><em>Disk Cache Size:</em> $0 MB</span> &mdash; ",
       zs->cache_size.get() / (1024.0 * 1024.0));
   html += StringUtil::format(
-      "<tr><td><em>LSMTableIndexCache size</em></td><td align='right'>$0 MB</td></tr>",
+      "<span><em>LSMTableIndexCache size:</em> $0 MB</span> &mdash; ",
       config_->idx_cache->size() / (1024.0 * 1024.0));
   html += StringUtil::format(
-      "<tr><td><em>MetadataStore cache size</em></td><td align='right'>$0 MB</td></tr>",
+      "<span><em>MetadataStore cache size:</em> $0 MB</span> &mdash; ",
       config_->metadata_store->getCacheSize() / (1024.0 * 1024.0));
-  html += "</table>";
-
-  html += "<h3>Partitions</h3>";
-  html += "<table cellspacing=0 border=1>";
   html += StringUtil::format(
-      "<tr><td><em>Number of Partitions</em></td><td align='right'>$0</td></tr>",
+      "<span><em>Number of Partitions:</em> $0</span> &mdash; ",
       zs->num_partitions.get());
   html += StringUtil::format(
-      "<tr><td><em>Number of Partitions - Loaded</em></td><td align='right'>$0</td></tr>",
+      "<span><em>Number of Partitions - Loaded:</em> $0</span> &mdash; ",
       zs->num_partitions_loaded.get());
   html += StringUtil::format(
-      "<tr><td><em>Number of Dirty Partitions</em></td><td align='right'>$0</td></tr>",
+      "<span><em>Number of Dirty Partitions:</em> $0</span> &mdash; ",
       zs->compaction_queue_length.get());
-  html += "</table>";
-
-  html += "<h3>Replication</h3>";
-  html += "<table cellspacing=0 border=1>";
   html += StringUtil::format(
-      "<tr><td><em>Replication Queue Length</em></td><td align='right'>$0</td></tr>",
+      "<span><em>Replication Queue Length:</em> $0</span>",
       zs->replication_queue_length.get());
 
-  auto num_replication_threads = repl_worker_->getNumThreads();
-  for (size_t i = 0; i < num_replication_threads; ++i) {
-    html += StringUtil::format(
-        "<tr><td><em>Replication Thread #$0</em></td><td>$1</td></tr>",
-        i + 1,
-        repl_worker_->getReplicationInfo(i)->toString());
-  }
-  html += "</table>";
-
   html += "<h3>HTTP</h3>";
-  html += "<table cellspacing=0 border=1>";
   html += StringUtil::format(
-      "<tr><td><em>Server Connections - Current</em></td><td align='right'>$0</td></tr>",
+      "<span><em>Server Connections - Current:</em> $0</span> &mdash; ",
       http_server_stats_->current_connections.get());
   html += StringUtil::format(
-      "<tr><td><em>Server Connections - Total</em></td><td align='right'>$0</td></tr>",
+      "<span><em>Server Connections - Total:</em> $0</span> &mdash; ",
       http_server_stats_->total_connections.get());
   html += StringUtil::format(
-      "<tr><td><em>Server Requests - Current</em></td><td align='right'>$0</td></tr>",
+      "<span><em>Server Requests - Current:</em> $0</span> &mdash; ",
       http_server_stats_->current_requests.get());
   html += StringUtil::format(
-      "<tr><td><em>Server Requests - Total</em></td><td align='right'>$0</td></tr>",
+      "<span><em>Server Requests - Total:</em> $0</span> &mdash; ",
       http_server_stats_->total_requests.get());
   html += StringUtil::format(
-      "<tr><td><em>Server Bytes Received</em></td><td align='right'>$0 MB</td></tr>",
+      "<span><em>Server Bytes Received:</em> $0 MB</span> &mdash; ",
       http_server_stats_->received_bytes.get() / (1024.0 * 1024.0));
   html += StringUtil::format(
-      "<tr><td><em>Server Bytes Sent</em></td><td align='right'>$0 MB</td></tr>",
+      "<span><em>Server Bytes Sent:</em> $0 MB</span> &mdash; ",
       http_server_stats_->sent_bytes.get() / (1024.0 * 1024.0));
   html += StringUtil::format(
-      "<tr><td><em>Client Connections - Current</em></td><td align='right'>$0</td></tr>",
+      "<span><em>Client Connections - Current:</em> $0</span> &mdash; ",
       http_client_stats_->current_connections.get());
   html += StringUtil::format(
-      "<tr><td><em>Client Connections - Total</em></td><td align='right'>$0</td></tr>",
+      "<span><em>Client Connections - Total:</em> $0</span> &mdash; ",
       http_client_stats_->total_connections.get());
   html += StringUtil::format(
-      "<tr><td><em>Client Requests - Current</em></td><td align='right'>$0</td></tr>",
+      "<span><em>Client Requests - Current:</em> $0</span> &mdash; ",
       http_client_stats_->current_requests.get());
   html += StringUtil::format(
-      "<tr><td><em>Client Requests - Total</em></td><td align='right'>$0</td></tr>",
+      "<span><em>Client Requests - Total:</em> $0</span> &mdash; ",
       http_client_stats_->total_requests.get());
   html += StringUtil::format(
-      "<tr><td><em>Client Bytes Received</em></td><td align='right'>$0 MB</td></tr>",
+      "<span><em>Client Bytes Received:</em> $0 MB</span> &mdash; ",
       http_client_stats_->received_bytes.get() / (1024.0 * 1024.0));
   html += StringUtil::format(
-      "<tr><td><em>Client Bytes Sent</em></td><td align='right'>$0 MB</td></tr>",
+      "<span><em>Client Bytes Sent:</em> $0 MB</span>",
       http_client_stats_->sent_bytes.get() / (1024.0 * 1024.0));
-  html += "</table>";
 
   html += "<h3>MapReduce</h3>";
-  html += "<table cellspacing=0 border=1>";
   html += StringUtil::format(
-      "<tr><td><em>Number of Map Tasks - Running</em></td><td align='right'>$0</td></tr>",
+      "<span><em>Number of Map Tasks - Running:</em> $0</span> &mdash; ",
       zs->mapreduce_num_map_tasks.get());
   html += StringUtil::format(
-      "<tr><td><em>Number of Reduce Tasks - Running</em></td><td align='right'>$0</td></tr>",
+      "<span><em>Number of Reduce Tasks - Running:</em> $0</span> &mdash; ",
       zs->mapreduce_num_reduce_tasks.get());
   html += StringUtil::format(
-      "<tr><td><em>Reduce Memory Used</em></td><td align='right'>$0 MB</td></tr>",
+      "<span><em>Reduce Memory Used:</em> $0 MB</span>",
       zs->mapreduce_reduce_memory.get() / (1024.0 * 1024.0));
-  html += "</table>";
+
+  html += "<h3>Cluster</h3>";
+  html += "<table cellspacing=0 border=1>";
+  html += StringUtil::format(
+      "<span><em>Cluster Leader:</em> $0</span>",
+      cdir_->getLeader());
+  html += StringUtil::format(
+      "<div><em>Cluster Config:</em></div><pre>$0</pre>",
+      cdir_->getClusterConfig().DebugString());
 
   html += "<h3>Servers</h3>";
   html += "<table cellspacing=0 border=1>";
   for (const auto& server : cdir_->listServers()) {
   html += StringUtil::format(
-      "<tr><td><em>$0</em></td><td><pre>$1</pre></td></tr>",
+      "<tr><td><em>$0:</em></td><td><pre>$1</pre></td></tr>",
       server.server_id(),
       server.DebugString());
   }
   html += "</table>";
 
-  html += "<h3>Cluster Config</h3>";
-  html += StringUtil::format(
-      "<table cellspacing=0 border=1><tr><td><pre>$0</pre></td></tr></table>",
-      cdir_->getClusterConfig().DebugString());
+  html += "<h3>Background Threads</h3>";
+  html += "<table cellspacing=0 border=1>";
+  auto num_replication_threads = repl_worker_->getNumThreads();
+  for (size_t i = 0; i < num_replication_threads; ++i) {
+    html += StringUtil::format(
+        "<tr><td><em>Replication Thread #$0:</em> $1</td></tr>",
+        i + 1,
+        repl_worker_->getReplicationInfo(i)->toString());
+  }
+  html += "</table>";
 
   response->setStatus(http::kStatusOK);
   response->addHeader("Content-Type", "text/html; charset=utf-8");
@@ -296,7 +289,7 @@ void StatusServlet::renderNamespacePage(
     http::HTTPResponse* response) {
   String html;
   html += kStyleSheet;
-  html += kMainMenu;
+  //html += kMainMenu;
 
   html += StringUtil::format(
       "<h2>Namespace: &nbsp; <span style='font-weight:normal'>$0</span></h2>",
@@ -314,7 +307,7 @@ void StatusServlet::renderTablePage(
     http::HTTPResponse* response) {
   String html;
   html += kStyleSheet;
-  html += kMainMenu;
+  //html += kMainMenu;
 
   html += StringUtil::format(
       "<h2>Table: &nbsp; <span style='font-weight:normal'>"
@@ -441,7 +434,7 @@ void StatusServlet::renderPartitionPage(
     http::HTTPResponse* response) {
   String html;
   html += kStyleSheet;
-  html += kMainMenu;
+  //html += kMainMenu;
 
   html += StringUtil::format(
       "<h2>Partition: &nbsp; <span style='font-weight:normal'>"

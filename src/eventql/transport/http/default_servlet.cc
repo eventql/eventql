@@ -39,6 +39,12 @@ void DefaultServlet::handleHTTPRequest(
     return;
   }
 
+  if (uri.path() == "/") {
+    response->setStatus(http::kStatusFound);
+    response->addHeader("Location", "/eventql/");
+    return;
+  }
+
   response->setStatus(http::kStatusNotFound);
   response->addHeader("Content-Type", "text/plain; charset=utf-8");
   response->addBody("not found");
