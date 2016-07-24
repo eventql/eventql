@@ -153,7 +153,7 @@ void TableSplitFinalize::printHelp(OutputStream* stdout_os) const {
       "\nevqlctl-$0 - $1\n\n", kName_, kDescription_));
 
   stdout_os->write(
-      "Usage: evqlctl table-split [OPTIONS]\n"
+      "Usage: evqlctl table-split-finalize [OPTIONS]\n"
       "  --database               The name of the database.\n"
       "  --table                  The name of the table to split.\n"
       "  --partition_id           The id of the partition to split.\n"

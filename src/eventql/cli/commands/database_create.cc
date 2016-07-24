@@ -98,7 +98,7 @@ const String& DatabaseCreate::getDescription() const {
 
 void DatabaseCreate::printHelp(OutputStream* stdout_os) const {
   stdout_os->write(StringUtil::format(
-      "evqlctl-$0 - $1\n\n", kName_, kDescription_));
+      "\nevqlctl-$0 - $1\n\n", kName_, kDescription_));
 
   stdout_os->write(
       "Usage: evqlctl database-create [OPTIONS]\n"

@@ -100,7 +100,7 @@ void Rebalance::printHelp(OutputStream* stdout_os) const {
       "\nevqlctl-$0 - $1\n\n", kName_, kDescription_));
 
   stdout_os->write(
-      "Usage: evqlctl [OPTIONS]\n"
+      "Usage: evqlctl rebalance [OPTIONS]\n"
       "  \n"
   );
 }
