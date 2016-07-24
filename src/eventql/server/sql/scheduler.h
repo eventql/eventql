@@ -30,6 +30,7 @@
 #include <eventql/sql/query_plan.h>
 #include <eventql/db/partition_map.h>
 #include <eventql/auth/internal_auth.h>
+#include <eventql/server/sql/table_scan.h>
 
 namespace eventql {
 

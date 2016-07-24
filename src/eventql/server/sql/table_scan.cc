@@ -167,4 +167,11 @@ Option<SHA1Hash> TableScan::getCacheKey() const {
   return cache_key_;
 }
 
+ReplicaRef::ReplicaRef(
+    SHA1Hash _unique_id,
+    String _addr) :
+    unique_id(_unique_id),
+    addr(_addr),
+    is_local(false) {}
+
 }

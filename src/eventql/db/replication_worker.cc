@@ -208,7 +208,6 @@ void ReplicationWorker::work(size_t thread_id) {
 
     auto partition = queue_.begin()->second;
     queue_.erase(queue_.begin());
-    auto repl_scheme = repl_scheme_;
 
     RefPtr<PartitionReplication> repl;
     bool success = true;
@@ -223,7 +222,7 @@ void ReplicationWorker::work(size_t thread_id) {
           snap->key));
 
       try {
-        repl = partition->getReplicationStrategy(repl_scheme, http_);
+        repl = partition->getReplicationStrategy(http_);
         success = repl->replicate(replication_info);
       } catch (const StandardException& e) {
         logError("evqld", e, "ReplicationWorker error");
@@ -237,13 +236,13 @@ void ReplicationWorker::work(size_t thread_id) {
     if (success) {
       waitset_.erase(partition->uuid());
 
-      repl = partition->getReplicationStrategy(repl_scheme, http_);
+      repl = partition->getReplicationStrategy(http_);
       if (repl->needsReplication()) {
         enqueuePartitionWithLock(
             partition,
             (uint64_t) ReplicationOptions::CORK);
       } else {
-        repl = partition->getReplicationStrategy(repl_scheme, http_);
+        repl = partition->getReplicationStrategy(http_);
         if (repl->shouldDropPartition()) {
           auto snap = partition->getSnapshot();
           auto dropped =

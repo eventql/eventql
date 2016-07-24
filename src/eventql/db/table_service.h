@@ -21,8 +21,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#ifndef _FNORD_TSDB_TSDBNODE_H
-#define _FNORD_TSDB_TSDBNODE_H
+#pragma once
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/random.h>
 #include <eventql/util/option.h>
@@ -32,7 +31,6 @@
 #include <eventql/util/mdb/MDB.h>
 #include <eventql/db/TableConfig.pb.h>
 #include <eventql/db/Partition.h>
-#include <eventql/db/TSDBNodeConfig.pb.h>
 #include <eventql/db/TSDBTableInfo.h>
 #include <eventql/db/PartitionInfo.pb.h>
 #include <eventql/db/RecordEnvelope.pb.h>
@@ -167,4 +165,3 @@ protected:
 
 } // namespace tdsb
 
-#endif

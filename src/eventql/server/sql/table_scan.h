@@ -22,6 +22,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#pragma once
 #include <eventql/sql/expressions/table_expression.h>
 #include <eventql/auth/internal_auth.h>
 #include <eventql/db/partition_map.h>
@@ -29,6 +30,17 @@
 #include "eventql/eventql.h"
 
 namespace eventql {
+
+struct ReplicaRef {
+  ReplicaRef(
+      SHA1Hash _unique_id,
+      String _addr);
+
+  SHA1Hash unique_id;
+  String addr;
+  String name;
+  bool is_local;
+};
 
 class TableScan : public csql::TableExpression {
 public:

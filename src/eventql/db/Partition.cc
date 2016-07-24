@@ -220,7 +220,6 @@ RefPtr<PartitionReplication> Partition::getReplicationStrategy(
     http::HTTPConnectionPool* http) {
   return new LSMPartitionReplication(
       this,
-      repl_scheme,
       cfg_->config_directory,
       http);
 }

@@ -34,6 +34,7 @@ const char PartitionReplication::kStateFileName[] = "_repl";
 
 PartitionReplication::PartitionReplication(
     RefPtr<Partition> partition,
+    http::HTTPConnectionPool* http) :
     partition_(partition),
     snap_(partition_->getSnapshot()),
     http_(http) {}

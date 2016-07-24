@@ -25,8 +25,8 @@
 #include "eventql/util/stdtypes.h"
 #include "eventql/util/autoref.h"
 #include "eventql/util/option.h"
+#include "eventql/util/SHA1.h"
 #include "eventql/util/json/json.h"
-
 #include "eventql/eventql.h"
 
 namespace eventql {

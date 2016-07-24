@@ -566,8 +566,7 @@ int main(int argc, const char** argv) {
               new Scheduler(
                   &partition_map,
                   config_dir.get(),
-                  internal_auth.get(),
-                  repl_scheme.get()))));
+                  internal_auth.get()))));
 
       sql->setCacheDir(cache_dir);
       sql->symbols()->registerFunction("version", &evqlVersionExpr);
@@ -579,7 +578,6 @@ int main(int argc, const char** argv) {
         sql.get(),
         &partition_map,
         config_dir.get(),
-        repl_scheme.get(),
         internal_auth.get(),
         &table_service,
         cache_dir);
@@ -589,7 +587,6 @@ int main(int argc, const char** argv) {
         internal_auth.get(),
         &table_service,
         &partition_map,
-        repl_scheme.get(),
         cache_dir);
 
     /* open tables */

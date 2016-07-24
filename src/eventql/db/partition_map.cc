@@ -394,7 +394,7 @@ bool PartitionMap::dropLocalPartition(
 
   /* check preconditions */
   try {
-    auto repl = partition->getReplicationStrategy(cfg_->repl_scheme, nullptr);
+    auto repl = partition->getReplicationStrategy(nullptr);
     if (!repl->shouldDropPartition()) {
       RAISE(kIllegalStateError, "can't delete partition");
     }

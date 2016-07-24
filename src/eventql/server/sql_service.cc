@@ -50,7 +50,6 @@ ScopedPtr<csql::Transaction> SQLService::startTransaction(Session* session) {
           session->getEffectiveNamespace(),
           pmap_,
           cdir_,
-          repl_,
           table_service_,
           auth_));
 

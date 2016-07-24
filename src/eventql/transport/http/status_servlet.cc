@@ -456,7 +456,7 @@ void StatusServlet::renderPartitionPage(
     auto table = partition.get()->getTable();
     auto snap = partition.get()->getSnapshot();
     auto state = snap->state;
-    auto repl = partition.get()->getReplicationStrategy(nullptr, nullptr);
+    auto repl = partition.get()->getReplicationStrategy(nullptr);
 
     if (table->partitionerType() == TBL_PARTITION_TIMEWINDOW &&
         state.partition_keyrange_begin().size() == 8 &&

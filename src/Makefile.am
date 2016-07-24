@@ -90,9 +90,7 @@ evql_protos = \
     eventql/db/PartitionState.proto \
     eventql/db/RecordEnvelope.proto \
     eventql/db/replication_state.proto \
-    eventql/db/TableConfig.proto \
-    eventql/db/TSDBNodeConfig.proto \
-    eventql/db/TSDBTableScanSpec.proto
+    eventql/db/TableConfig.proto
 
 BUILT_SOURCES += $(evql_protos:.proto=.pb.h)
 dist_noinst_DATA += $(evql_protos)
@@ -811,9 +809,6 @@ evql_core_a_SOURCES = \
     eventql/db/shredded_record.cc \
     eventql/db/ServerConfig.h \
     eventql/db/TSDBTableInfo.h \
-    eventql/db/TSDBTableScan.h \
-    eventql/db/TSDBTableScan_impl.h \
-    eventql/db/TSDBTableScanlet.h \
     eventql/db/file_tracker.h \
     eventql/db/file_tracker.cc \
     eventql/db/garbage_collector.h \
@@ -974,9 +969,7 @@ nodist_evql_core_a_SOURCES = \
     @builddir@/eventql/db/PartitionState.pb.cc \
     @builddir@/eventql/db/RecordEnvelope.pb.cc \
     @builddir@/eventql/db/replication_state.pb.cc \
-    @builddir@/eventql/db/TableConfig.pb.cc \
-    @builddir@/eventql/db/TSDBNodeConfig.pb.cc \
-    @builddir@/eventql/db/TSDBTableScanSpec.pb.cc
+    @builddir@/eventql/db/TableConfig.pb.cc
 
 eventql/mapreduce/mapreduce_preludejs.cc:
 	echo 'eventql/mapreduce/prelude.js:${srcdir}/eventql/mapreduce/prelude.js' | ${srcdir}/eventql/util/assets.sh $(builddir)/eventql/mapreduce/mapreduce_preludejs.cc

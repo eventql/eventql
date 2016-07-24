@@ -26,6 +26,7 @@
 #include <eventql/sql/expressions/table_expression.h>
 #include <eventql/auth/internal_auth.h>
 #include <eventql/db/partition_map.h>
+#include <eventql/server/sql/table_scan.h>
 #include "eventql/eventql.h"
 
 namespace eventql {
