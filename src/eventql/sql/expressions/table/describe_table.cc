@@ -60,8 +60,10 @@ bool DescribeTableStatement::next(SValue* row, size_t row_len) {
     const auto& col = rows_[counter_];
     switch (row_len) {
       default:
+      case 5:
+        row[4] = SValue::newNull(); //Description
       case 4:
-        row[3] = SValue::newNull(); //Description
+        row[3] = col.is_primary_key ? SValue::newString("YES") : SValue::newString("NO"); //Primary Key
       case 3:
         row[2] = col.is_nullable ? SValue::newString("YES") : SValue::newString("NO"); //Null
       case 2:

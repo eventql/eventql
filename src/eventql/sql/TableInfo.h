@@ -34,6 +34,7 @@ struct ColumnInfo {
   String type;
   bool is_nullable;
   size_t type_size;
+  bool is_primary_key;
 };
 
 struct TableInfo {
