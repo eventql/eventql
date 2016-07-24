@@ -94,29 +94,60 @@ be global variables (i.e. defined in the global scope).
 #### Parameters:
 `opts` is an object with the following properties:
 
-**table**<br>
+`table`<br>
+&nbsp;&nbsp;&nbsp;(required) The name of the input table.
+
+`map_fn`<br>
 &nbsp;&nbsp;&nbsp;(required) 
 
-**map_fn**<br>
-&nbsp;&nbsp;&nbsp;(required) 
+`required_columns`<br>
+&nbsp;&nbsp;&nbsp;(optional)
 
-**from**<br>
+`from`<br>
+&nbsp;&nbsp;&nbsp;(optional) A timestamp to indicate the start of the input data if the primary key includes a DATETIME column.
+
+`until`<br>
+&nbsp;&nbsp;&nbsp;(optional) A timestamp to indicate the end of the input data if the primary key includes a DATETIME column.
+
+`begin`<br>
+&nbsp;&nbsp;&nbsp;(optional) .
+
+`end`<br>
 &nbsp;&nbsp;&nbsp;(optional) 
 
-**params**<br>
+`params`<br>
 &nbsp;&nbsp;&nbsp;(optional) 
 
-object with mandatory property table 
-optional begin, end or from, until
-required_columns
-params
-map_fn
 
+    EVQL.mapTable({
+      table: "access_log",
+      required_columns: ["time", "url"],
+      map_fn: function(row) {
+        return [[row.url, 1]]
+      }
+    });
 
 
 ---
 
 ### EVQL.reduce
+
+    var page_vies = EVQL.mapTable({
+      //
+    });
+
+    var page_stats = EVQL.reduce({
+      sources: [page_views],
+      shards: 2,
+      reduce_fn: function(url, views) {
+        var total_views = 0;
+        while (views.hasNext()) {
+          total_views += 1;
+        }
+
+        return [[url, total_views]];
+      }
+    });
 
 ---
 ### EVQL.downloadResults
@@ -132,11 +163,11 @@ a result file.
 
 To retrieve the results on stdout, invoke the script like this:
 
-    $ zli run myscript.js
+    $ evql -f myscript.js
 
-To save the results into a file, set the -o paramater
+To save the results into a file, redirect standard output
 
-    $ zli run -o output.dat myscript.js
+    $ evql -f myscript.js > output.dat
 
 
 Optionally, this method also accepts a serializer function that determines the
