@@ -142,10 +142,45 @@ Status ZookeeperConfigDirectory::connect(std::unique_lock<std::mutex>* lk) {
 
 // PRECONDITION: must hold mutex
 Status ZookeeperConfigDirectory::load(bool create) {
-  if (!hasNode(path_prefix_ + "/config") && !create) {
-    return Status(
-        eIOError,
-        StringUtil::format("cluster doesn't exit: $0", cluster_name_));
+  if (!hasNode(path_prefix_ + "/config")) {
+    if (create) {
+      auto rc = zoo_create(
+          zk_,
+          path_prefix_.c_str(),
+          nullptr,
+          0,
+          &ZOO_OPEN_ACL_UNSAFE,
+          0,
+          nullptr, /* path_buffer */
+          0 /* path_buffer_len */);
+
+      if (rc && rc != ZNODEEXISTS) {
+        return Status(
+            eIOError,
+            StringUtil::format("zoo_create() failed: $0", getErrorString(rc)));
+      }
+
+      String config_path = path_prefix_ + "/config";
+      rc = zoo_create(
+          zk_,
+          config_path.c_str(),
+          nullptr,
+          0,
+          &ZOO_OPEN_ACL_UNSAFE,
+          0,
+          nullptr, /* path_buffer */
+          0 /* path_buffer_len */);
+
+      if (rc && rc != ZNODEEXISTS) {
+        return Status(
+            eIOError,
+            StringUtil::format("zoo_create() failed: $0", getErrorString(rc)));
+      }
+    } else {
+      return Status(
+          eIOError,
+          StringUtil::format("cluster doesn't exit: $0", cluster_name_));
+    }
   }
 
   auto namespaces_path = StringUtil::format("$0/namespaces", path_prefix_);
