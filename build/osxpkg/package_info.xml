@@ -1,2 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
-<pkg-info />
+<pkg-info
+   format-version="2"
+   identifier="io.eventql.eventql.base.pkg"
+   version="0"
+   install-location="/"
+   auth="root" />
