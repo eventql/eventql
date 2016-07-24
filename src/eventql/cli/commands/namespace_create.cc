@@ -42,14 +42,6 @@ Status NamespaceCreate::execute(
     OutputStream* stdout_os,
     OutputStream* stderr_os) {
   ::cli::FlagParser flags;
-  flags.defineFlag(
-      "cluster_name",
-      ::cli::FlagParser::T_STRING,
-      true,
-      NULL,
-      NULL,
-      "node name",
-      "<string>");
 
   flags.defineFlag(
       "namespace",
@@ -109,7 +101,6 @@ void NamespaceCreate::printHelp(OutputStream* stdout_os) const {
       "evqlctl --$0 - $1\n\n", kName_, kDescription_));
 
   stdout_os->write(
-      "  --cluster_name <node name>       The name of the cluster\n"
       "  --namespace <namespace name>     The name of the namespace to create \n"
   );
 

@@ -47,14 +47,6 @@ Status TableSplit::execute(
     OutputStream* stdout_os,
     OutputStream* stderr_os) {
   ::cli::FlagParser flags;
-  flags.defineFlag(
-      "cluster_name",
-      ::cli::FlagParser::T_STRING,
-      true,
-      NULL,
-      NULL,
-      "node name",
-      "<string>");
 
   flags.defineFlag(
       "namespace",
@@ -239,7 +231,6 @@ void TableSplit::printHelp(OutputStream* stdout_os) const {
   stdout_os->write(
       "Usage: evqlctl table-split [OPTIONS]\n"
       "  --namespace              The name of the namespace.\n"
-      "  --cluster_name           The name of the cluster.\n"
       "  --table_name             The name of the table to split.\n"
       "  --partition_id           The id of the partition to split.\n"
       "  --split_point            \n");

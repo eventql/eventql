@@ -42,21 +42,7 @@ Status Rebalance::execute(
     FileInputStream* stdin_is,
     OutputStream* stdout_os,
     OutputStream* stderr_os) {
-  auto zookeeper_addr = process_cfg_->getString("evqlctl", "zookeeper_addr");
-  if (zookeeper_addr.isEmpty()) {
-    stderr_os->write("ERROR: zookeeper address not specified\n");
-    return Status(eFlagError);
-  }
-
   ::cli::FlagParser flags;
-  flags.defineFlag(
-      "cluster_name",
-      ::cli::FlagParser::T_STRING,
-      true,
-      NULL,
-      NULL,
-      "node name",
-      "<string>");
 
   try {
     flags.parseArgv(argv);
@@ -115,7 +101,7 @@ void Rebalance::printHelp(OutputStream* stdout_os) const {
 
   stdout_os->write(
       "Usage: evqlctl [OPTIONS]\n"
-      "  --cluster_name <node name>       The name of the cluster.\n"
+      "  \n"
   );
 }
 

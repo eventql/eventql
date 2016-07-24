@@ -42,14 +42,6 @@ Status ClusterCreate::execute(
     OutputStream* stdout_os,
     OutputStream* stderr_os) {
   ::cli::FlagParser flags;
-  flags.defineFlag(
-      "cluster_name",
-      ::cli::FlagParser::T_STRING,
-      true,
-      NULL,
-      NULL,
-      "node name",
-      "<string>");
 
   try {
     flags.parseArgv(argv);
@@ -99,8 +91,8 @@ void ClusterCreate::printHelp(OutputStream* stdout_os) const {
       "\nevqlctl-$0 - $1\n\n", kName_, kDescription_));
 
   stdout_os->write(
-      "Usage: evqlctl [OPTIONS]\n"
-      "  --cluster_name <node name>       The name of the cluster to create.\n"
+      "Usage: evqlctl cluster-create [OPTIONS]\n"
+      "  \n"
   );
 }
 

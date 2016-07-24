@@ -44,14 +44,6 @@ Status ClusterSetAllocationPolicy::execute(
     OutputStream* stdout_os,
     OutputStream* stderr_os) {
   ::cli::FlagParser flags;
-  flags.defineFlag(
-      "cluster_name",
-      ::cli::FlagParser::T_STRING,
-      true,
-      NULL,
-      NULL,
-      "node name",
-      "<string>");
 
   flags.defineFlag(
       "server_name",
@@ -112,7 +104,6 @@ void ClusterSetAllocationPolicy::printHelp(OutputStream* stdout_os) const {
 
   stdout_os->write(
       "Usage: evqlctl [OPTIONS]\n"
-      "  --cluster_name <node name>       The name of the cluster to add the server to.\n"
       "  --server_name <server name>      The name of the server to add.\n");
 }
 

@@ -84,7 +84,7 @@ void ClusterStatus::printHelp(OutputStream* stdout_os) const {
 
   stdout_os->write(
       "Usage: evqlctl [OPTIONS]\n"
-      "  --master <addr>       The url of the master.\n"
+      "  \n"
   );
 
 }

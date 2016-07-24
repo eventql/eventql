@@ -44,14 +44,6 @@ Status ClusterRemoveServer::execute(
     OutputStream* stdout_os,
     OutputStream* stderr_os) {
   ::cli::FlagParser flags;
-  flags.defineFlag(
-      "cluster_name",
-      ::cli::FlagParser::T_STRING,
-      true,
-      NULL,
-      NULL,
-      "node name",
-      "<string>");
 
   flags.defineFlag(
       "server_name",
@@ -141,8 +133,7 @@ void ClusterRemoveServer::printHelp(OutputStream* stdout_os) const {
       "\nevqlctl-$0 - $1\n\n", kName_, kDescription_));
 
   stdout_os->write(
-      "Usage: evqlctl [OPTIONS]\n"
-      "  --cluster_name <node name>       The name of the cluster to add the server to.\n"
+      "Usage: evqlctl cluster-remove-server [OPTIONS]\n"
       "  --server_name <server name>      The name of the server to add.\n"
       "  --soft                           The name of the server to add.\n"
       "  --hard                           The name of the server to add.\n");
