@@ -20,7 +20,7 @@ for triple in darwin_x86_64; do
   mkdir -p $TMPDIR $TMPDIR/flat/base.pkg $TMPDIR/flat/Resources/en.lproj $TMPDIR/root
   cp -r build/target/$PACKAGE-$VERSION-$triple/dist/* $TMPDIR/root
   cp build/osxpkg/distribution.xml $TMPDIR/flat/Distribution
-  cp build/osxpkg/package_info.xml $TMPDIR/base.pkg/PackageInfo
+  cp build/osxpkg/package_info.xml $TMPDIR/flat/base.pkg/PackageInfo
 
   (cd $TMPDIR/root && find . | cpio -o --format odc --owner 0:80 | gzip -c) \
       > $TMPDIR/flat/base.pkg/Payload
