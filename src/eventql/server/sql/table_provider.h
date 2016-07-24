@@ -56,6 +56,7 @@ public:
       RefPtr<csql::SequentialScanNode> seqscan) const override;
 
   static KeyRange findKeyRange(
+      KeyspaceType keyspace,
       const String& partition_key,
       const Vector<csql::ScanConstraint>& constraints);
 

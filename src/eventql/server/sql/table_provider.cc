@@ -48,11 +48,12 @@ TSDBTableProvider::TSDBTableProvider(
     auth_(auth) {}
 
 KeyRange TSDBTableProvider::findKeyRange(
+    KeyspaceType keyspace,
     const String& partition_key,
     const Vector<csql::ScanConstraint>& constraints) {
-  uint64_t lower_limit;
+  String lower_limit;
   bool has_lower_limit = false;
-  uint64_t upper_limit;
+  String upper_limit;
   bool has_upper_limit = false;
 
   for (const auto& c : constraints) {
@@ -60,9 +61,9 @@ KeyRange TSDBTableProvider::findKeyRange(
       continue;
     }
 
-    uint64_t val;
+    String val;
     try {
-      val = c.value.getInteger();
+      val = encodePartitionKey(keyspace, c.value.getString());
     } catch (const StandardException& e) {
       continue;
     }
@@ -77,7 +78,7 @@ KeyRange TSDBTableProvider::findKeyRange(
       case csql::ScanConstraintType::NOT_EQUAL_TO:
         break;
       case csql::ScanConstraintType::LESS_THAN:
-        upper_limit = val - 1;
+        upper_limit = val; // FIXME should be predecessor(val)
         has_upper_limit = true;
         break;
       case csql::ScanConstraintType::LESS_THAN_OR_EQUAL_TO:
@@ -85,7 +86,7 @@ KeyRange TSDBTableProvider::findKeyRange(
         has_upper_limit = true;
         break;
       case csql::ScanConstraintType::GREATER_THAN:
-        lower_limit = val + 1;
+        lower_limit = val; // FIXME should be sucessor(val)
         has_lower_limit = true;
         break;
       case csql::ScanConstraintType::GREATER_THAN_OR_EQUAL_TO:
@@ -97,11 +98,11 @@ KeyRange TSDBTableProvider::findKeyRange(
 
   KeyRange kr;
   if (has_lower_limit) {
-    kr.begin = String((const char*) &lower_limit, sizeof(lower_limit));
+    kr.begin = lower_limit;
   }
 
   if (has_upper_limit) {
-    kr.end = String((const char*) &upper_limit, sizeof(upper_limit));
+    kr.end = upper_limit;
   }
 
   return kr;
@@ -150,6 +151,7 @@ Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
   Vector<TableScan::PartitionLocation> partitions;
   if (table_ref.partition_key.isEmpty()) {
     auto keyrange = findKeyRange(
+        table.get()->getKeyspaceType(),
         table.get()->config().config().partition_key(),
         seqscan->constraints());
 

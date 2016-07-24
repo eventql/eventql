@@ -198,6 +198,7 @@ Vector<Scheduler::PipelinedQueryTree> Scheduler::pipelineExpression(
   }
 
   auto keyrange = TSDBTableProvider::findKeyRange(
+      table.get()->getKeyspaceType(),
       table.get()->config().config().partition_key(),
       seqscan->constraints());
 
