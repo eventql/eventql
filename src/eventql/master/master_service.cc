@@ -63,7 +63,7 @@ Status MasterService::runOnce() {
 
     auto rc = rebalanceTable(tbl_cfg);
     if (!rc.isSuccess()) {
-      return rc;
+      logError("evqld", "Error while rebalancing table: $0", rc.message());
     }
   }
 
