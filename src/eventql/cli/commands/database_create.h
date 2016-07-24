@@ -30,9 +30,9 @@
 namespace eventql {
 namespace cli {
 
-class NamespaceCreate : public CLICommand {
+class DatabaseCreate : public CLICommand {
 public:
-  NamespaceCreate(RefPtr<ProcessConfig> process_cfg);
+  DatabaseCreate(RefPtr<ProcessConfig> process_cfg);
 
   Status execute(
       const std::vector<std::string>& argv,

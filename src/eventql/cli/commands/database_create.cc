@@ -22,21 +22,21 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include <eventql/cli/commands/namespace_create.h>
+#include <eventql/cli/commands/database_create.h>
 #include <eventql/util/cli/flagparser.h>
 #include "eventql/config/config_directory.h"
 
 namespace eventql {
 namespace cli {
 
-const String NamespaceCreate::kName_ = "namespace-create";
-const String NamespaceCreate::kDescription_ = "Create a new namespace.";
+const String DatabaseCreate::kName_ = "namespace-create";
+const String DatabaseCreate::kDescription_ = "Create a new namespace.";
 
-NamespaceCreate::NamespaceCreate(
+DatabaseCreate::DatabaseCreate(
     RefPtr<ProcessConfig> process_cfg) :
     process_cfg_(process_cfg) {}
 
-Status NamespaceCreate::execute(
+Status DatabaseCreate::execute(
     const std::vector<std::string>& argv,
     FileInputStream* stdin_is,
     OutputStream* stdout_os,
@@ -88,15 +88,15 @@ Status NamespaceCreate::execute(
   return Status::success();
 }
 
-const String& NamespaceCreate::getName() const {
+const String& DatabaseCreate::getName() const {
   return kName_;
 }
 
-const String& NamespaceCreate::getDescription() const {
+const String& DatabaseCreate::getDescription() const {
   return kDescription_;
 }
 
-void NamespaceCreate::printHelp(OutputStream* stdout_os) const {
+void DatabaseCreate::printHelp(OutputStream* stdout_os) const {
   stdout_os->write(StringUtil::format(
       "evqlctl --$0 - $1\n\n", kName_, kDescription_));
 
