@@ -736,6 +736,8 @@ void ZookeeperConfigDirectory::handleConnectionEstablished() {
 }
 
 void ZookeeperConfigDirectory::handleConnectionLost() {
+  is_leader_ = false;
+
   switch (state_) {
     case ZKState::CONNECTING:
       logError("evqld", "Zookeeper connection failed");
@@ -878,7 +880,30 @@ bool ZookeeperConfigDirectory::hasServerID() const {
 
 bool ZookeeperConfigDirectory::isLeader() const {
   std::unique_lock<std::mutex> lk(mutex_);
-  return is_leader_;
+
+  if (is_leader_) {
+    return true;
+  }
+
+  auto key = StringUtil::format("$0/leader", path_prefix_);
+  auto rc = zoo_create(
+      zk_,
+      key.c_str(),
+      nullptr,
+      0,
+      &ZOO_OPEN_ACL_UNSAFE,
+      ZOO_EPHEMERAL,
+      nullptr, /* path_buffer */
+      0 /* path_buffer_len */);
+
+  if (!rc) {
+    is_leader_ = true;
+    return true;
+  } else if (rc == ZNODEEXISTS) {
+    return false;
+  } else  {
+    RAISEF(kRuntimeError, "zoo_create() failed: $0", getErrorString(rc));
+  }
 }
 
 String ZookeeperConfigDirectory::getLeader() const {
