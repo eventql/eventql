@@ -27,7 +27,7 @@
 #include <eventql/util/SHA1.h>
 #include <eventql/db/PartitionState.pb.h>
 #include <eventql/db/partition_arena.h>
-#include <eventql/db/ServerConfig.h>
+#include <eventql/db/server_config.h>
 #include "eventql/eventql.h"
 
 namespace eventql {

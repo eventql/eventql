@@ -53,7 +53,7 @@
 #include "eventql/util/mdb/MDB.h"
 #include "eventql/util/mdb/MDBUtil.h"
 #include "eventql/transport/http/api_servlet.h"
-#include "eventql/db/TableConfig.pb.h"
+#include "eventql/db/table_config.pb.h"
 #include "eventql/db/table_service.h"
 #include "eventql/db/metadata_coordinator.h"
 #include "eventql/db/metadata_replication.h"

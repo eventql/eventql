@@ -26,14 +26,14 @@
 #include <eventql/util/random.h>
 #include <eventql/util/option.h>
 #include <eventql/util/mdb/MDB.h>
-#include <eventql/db/TableConfig.pb.h>
+#include <eventql/db/table_config.pb.h>
 #include <eventql/db/Partition.h>
 #include <eventql/db/LazyPartition.h>
-#include <eventql/db/TSDBTableInfo.h>
+#include <eventql/db/table_info.h>
 #include <eventql/db/PartitionInfo.pb.h>
 #include <eventql/db/PartitionChangeNotification.h>
-#include <eventql/db/RecordEnvelope.pb.h>
-#include <eventql/db/ServerConfig.h>
+#include <eventql/db/record_envelope.pb.h>
+#include <eventql/db/server_config.h>
 #include <eventql/server/server_stats.h>
 
 #include "eventql/eventql.h"

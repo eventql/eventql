@@ -23,7 +23,7 @@
  */
 #pragma once
 #include "eventql/eventql.h"
-#include "eventql/db/TableConfig.pb.h"
+#include "eventql/db/table_config.pb.h"
 #include "eventql/util/protobuf/msg.h"
 #include "eventql/util/SHA1.h"
 #include "eventql/util/status.h"

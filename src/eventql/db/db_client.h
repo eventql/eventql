@@ -29,7 +29,7 @@
 #include <eventql/util/SHA1.h>
 #include <eventql/util/http/httpconnectionpool.h>
 #include <eventql/db/PartitionInfo.pb.h>
-#include <eventql/db/RecordEnvelope.pb.h>
+#include <eventql/db/record_envelope.pb.h>
 
 #include "eventql/eventql.h"
 

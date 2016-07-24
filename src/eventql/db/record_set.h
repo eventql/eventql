@@ -30,7 +30,7 @@
 #include <eventql/util/util/binarymessagereader.h>
 #include <eventql/util/util/binarymessagewriter.h>
 #include <eventql/util/random.h>
-#include <eventql/db/RecordRef.h>
+#include <eventql/db/record_ref.h>
 
 #include "eventql/eventql.h"
 

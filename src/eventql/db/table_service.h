@@ -29,11 +29,11 @@
 #include <eventql/util/thread/queue.h>
 #include <eventql/util/thread/eventloop.h>
 #include <eventql/util/mdb/MDB.h>
-#include <eventql/db/TableConfig.pb.h>
+#include <eventql/db/table_config.pb.h>
 #include <eventql/db/Partition.h>
-#include <eventql/db/TSDBTableInfo.h>
+#include <eventql/db/table_info.h>
 #include <eventql/db/PartitionInfo.pb.h>
-#include <eventql/db/RecordEnvelope.pb.h>
+#include <eventql/db/record_envelope.pb.h>
 #include <eventql/db/partition_map.h>
 #include <eventql/db/shredded_record.h>
 #include <eventql/config/config_directory.h>

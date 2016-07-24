@@ -22,18 +22,57 @@
  * code of your own applications
  */
 #pragma once
-#include <eventql/util/stdtypes.h>
-#include <eventql/util/protobuf/MessageSchema.h>
-#include <eventql/db/TableConfig.pb.h>
-
 #include "eventql/eventql.h"
+#include <eventql/util/stdtypes.h>
+#include <eventql/util/duration.h>
+#include <eventql/db/Partition.h>
+#include <eventql/util/protobuf/MessageSchema.h>
+#include <eventql/db/table_config.pb.h>
+#include <eventql/db/metadata_transaction.h>
 
 namespace eventql {
 
-struct TSDBTableInfo {
-  String table_name;
-  RefPtr<msg::MessageSchema> schema;
-  TableDefinition config;
+class Table : public RefCounted{
+public:
+
+  Table(const TableDefinition& config);
+
+  String name() const;
+
+  String tsdbNamespace() const;
+
+  Duration partitionSize() const;
+
+  size_t sstableSize() const;
+
+  size_t numShards() const;
+
+  Duration commitInterval() const;
+
+  RefPtr<msg::MessageSchema> schema() const;
+
+  TableDefinition config() const;
+
+  TableStorage storage() const;
+
+  const String& getPartitionKey() const;
+  TablePartitionerType partitionerType() const;
+
+  KeyspaceType getKeyspaceType() const;
+  Vector<String> getPrimaryKey() const;
+
+  MetadataTransaction getLastMetadataTransaction() const;
+
+  void updateConfig(TableDefinition new_config);
+
+protected:
+
+  void loadConfig();
+
+  mutable std::mutex mutex_;
+  TableDefinition config_;
+  RefPtr<msg::MessageSchema> schema_;
 };
 
 }
+

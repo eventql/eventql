@@ -27,7 +27,7 @@
 #include <eventql/io/cstable/cstable_reader.h>
 #include <eventql/io/cstable/RecordMaterializer.h>
 #include <eventql/db/LSMPartitionReader.h>
-#include <eventql/db/Table.h>
+#include <eventql/db/table.h>
 
 #include "eventql/eventql.h"
 

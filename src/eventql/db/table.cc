@@ -21,7 +21,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include <eventql/db/Table.h>
+#include <eventql/db/table.h>
 #include "eventql/eventql.h"
 
 namespace eventql {

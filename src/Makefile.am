@@ -88,9 +88,9 @@ evql_protos = \
     eventql/db/cluster_config.proto \
     eventql/db/PartitionInfo.proto \
     eventql/db/PartitionState.proto \
-    eventql/db/RecordEnvelope.proto \
+    eventql/db/record_envelope.proto \
     eventql/db/replication_state.proto \
-    eventql/db/TableConfig.proto
+    eventql/db/table_config.proto
 
 BUILT_SOURCES += $(evql_protos:.proto=.pb.h)
 dist_noinst_DATA += $(evql_protos)
@@ -804,11 +804,11 @@ evql_core_a_SOURCES = \
     eventql/config/namespace_config.cc \
     eventql/config/namespace_config.h \
     eventql/db/PartitionChangeNotification.h \
-    eventql/db/RecordRef.h \
+    eventql/db/record_ref.h \
     eventql/db/shredded_record.h \
     eventql/db/shredded_record.cc \
-    eventql/db/ServerConfig.h \
-    eventql/db/TSDBTableInfo.h \
+    eventql/db/server_config.h \
+    eventql/db/table_info.h \
     eventql/db/file_tracker.h \
     eventql/db/file_tracker.cc \
     eventql/db/garbage_collector.h \
@@ -867,24 +867,24 @@ evql_core_a_SOURCES = \
     eventql/db/PartitionWriter.h \
     eventql/db/partition_arena.cc \
     eventql/db/partition_arena.h \
-    eventql/db/RecordSet.cc \
-    eventql/db/RecordSet.h \
+    eventql/db/record_set.cc \
+    eventql/db/record_set.h \
     eventql/db/replication_state.cc \
     eventql/db/replication_state.h \
     eventql/db/replication_worker.cc \
     eventql/db/replication_worker.h \
     eventql/db/server_allocator.cc \
     eventql/db/server_allocator.h \
-    eventql/db/TSDBClient.cc \
-    eventql/db/TSDBClient.h \
+    eventql/db/db_client.cc \
+    eventql/db/db_client.h \
     eventql/db/table_service.cc \
     eventql/db/table_service.h \
     eventql/transport/http/rpc_servlet.cc \
     eventql/transport/http/rpc_servlet.h \
-    eventql/db/TSDBTableRef.cc \
-    eventql/db/TSDBTableRef.h \
-    eventql/db/Table.cc \
-    eventql/db/Table.h \
+    eventql/db/table_ref.cc \
+    eventql/db/table_ref.h \
+    eventql/db/table.cc \
+    eventql/db/table.h \
     eventql/db/partition_discovery.cc \
     eventql/db/partition_discovery.h \
     eventql/db/partition_map.cc \
@@ -967,9 +967,9 @@ nodist_evql_core_a_SOURCES = \
     @builddir@/eventql/db/cluster_config.pb.cc \
     @builddir@/eventql/db/PartitionInfo.pb.cc \
     @builddir@/eventql/db/PartitionState.pb.cc \
-    @builddir@/eventql/db/RecordEnvelope.pb.cc \
+    @builddir@/eventql/db/record_envelope.pb.cc \
     @builddir@/eventql/db/replication_state.pb.cc \
-    @builddir@/eventql/db/TableConfig.pb.cc
+    @builddir@/eventql/db/table_config.pb.cc
 
 eventql/mapreduce/mapreduce_preludejs.cc:
 	echo 'eventql/mapreduce/prelude.js:${srcdir}/eventql/mapreduce/prelude.js' | ${srcdir}/eventql/util/assets.sh $(builddir)/eventql/mapreduce/mapreduce_preludejs.cc

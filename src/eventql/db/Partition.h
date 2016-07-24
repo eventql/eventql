@@ -28,9 +28,9 @@
 #include <eventql/util/UnixTime.h>
 #include <eventql/util/protobuf/MessageSchema.h>
 #include <eventql/util/http/httpconnectionpool.h>
-#include <eventql/db/ServerConfig.h>
-#include <eventql/db/Table.h>
-#include <eventql/db/RecordRef.h>
+#include <eventql/db/server_config.h>
+#include <eventql/db/table.h>
+#include <eventql/db/record_ref.h>
 #include <eventql/db/PartitionInfo.pb.h>
 #include <eventql/db/PartitionSnapshot.h>
 #include <eventql/db/PartitionWriter.h>

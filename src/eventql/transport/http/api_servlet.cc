@@ -38,7 +38,7 @@
 #include "eventql/util/protobuf/MessageEncoder.h"
 #include "eventql/util/csv/CSVInputStream.h"
 #include "eventql/util/csv/BinaryCSVInputStream.h"
-#include "eventql/db/TableConfig.pb.h"
+#include "eventql/db/table_config.pb.h"
 #include "eventql/server/sql/codec/json_codec.h"
 #include "eventql/server/sql/codec/json_sse_codec.h"
 #include "eventql/server/sql/codec/binary_codec.h"

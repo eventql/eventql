@@ -26,7 +26,7 @@
 #include <eventql/eventql.h>
 #include "eventql/cli/commands/cli_command.h"
 #include "eventql/config/process_config.h"
-#include "eventql/db/TableConfig.pb.h"
+#include "eventql/db/table_config.pb.h"
 
 namespace eventql {
 namespace cli {

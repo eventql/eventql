@@ -26,7 +26,7 @@
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/autoref.h>
 #include <eventql/db/PartitionSnapshot.h>
-#include <eventql/db/RecordRef.h>
+#include <eventql/db/record_ref.h>
 #include <eventql/db/metadata_operations.pb.h>
 #include <eventql/db/shredded_record.h>
 

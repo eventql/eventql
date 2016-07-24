@@ -24,11 +24,11 @@
 #pragma once
 #include "eventql/eventql.h"
 #include <eventql/util/stdtypes.h>
-#include <eventql/db/TableConfig.pb.h>
+#include <eventql/db/table_config.pb.h>
 #include <eventql/db/Partition.h>
-#include <eventql/db/TSDBTableInfo.h>
+#include <eventql/db/table_info.h>
 #include <eventql/db/PartitionInfo.pb.h>
-#include <eventql/db/RecordEnvelope.pb.h>
+#include <eventql/db/record_envelope.pb.h>
 #include <eventql/db/table_service.h>
 #include <eventql/db/partition_map.h>
 #include <eventql/sql/transaction.h>

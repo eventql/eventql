@@ -21,7 +21,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include <eventql/db/TSDBTableRef.h>
+#include <eventql/db/table_ref.h>
 #include <eventql/util/uri.h>
 #include <eventql/util/wallclock.h>
 #include <eventql/util/human.h>

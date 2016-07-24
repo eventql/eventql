@@ -21,8 +21,8 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include <eventql/db/TSDBClient.h>
-#include <eventql/db/RecordEnvelope.pb.h>
+#include <eventql/db/db_client.h>
+#include <eventql/db/record_envelope.pb.h>
 #include <eventql/util/util/binarymessagereader.h>
 #include <eventql/util/util/binarymessagewriter.h>
 #include <eventql/util/protobuf/msg.h>
