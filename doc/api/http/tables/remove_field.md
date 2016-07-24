@@ -2,6 +2,10 @@ POST /api/v1/tables/remove_field
 ================
 
 Remove an existing field from an existing table.
+To alter the (sub-)schema of a RECORD column, specify the column name as `parent1.parent2.parentN.column_name`.
+
+Please note, that fields that are part of the primary key can't be deleted.
+
 
 ###Resource Information
 <table class='http_api'>
