@@ -270,8 +270,9 @@ int main(int argc, const char** argv) {
 
   if (flags.isSet("standalone")) {
     config_builder.setProperty("server.name", "standalone");
-    config_builder.setProperty("cluster.coordinator", "standalone");
     config_builder.setProperty("server.client_auth_backend", "trust");
+    config_builder.setProperty("server.noleader", "true");
+    config_builder.setProperty("cluster.coordinator", "standalone");
   }
 
   if (flags.isSet("config")) {
