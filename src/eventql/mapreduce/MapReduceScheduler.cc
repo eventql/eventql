@@ -72,7 +72,7 @@ void MapReduceScheduler::execute(const MapReduceShardList& shards) {
 
   for (;;) {
     logDebug(
-        "z1.mapreduce",
+        "evqld",
         "Running job; progress=$0/$1 ($2 runnning)",
         num_shards_completed_,
         shards_.size(),
@@ -150,7 +150,7 @@ size_t MapReduceScheduler::startJobs() {
         error = true;
 
         logError(
-            "z1.mapreduce",
+            "evqld",
             e,
             "MapReduceTaskShard failed");
       }

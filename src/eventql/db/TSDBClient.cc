@@ -153,7 +153,7 @@ void TSDBClient::fetchPartitionWithSampling(
     size_t sample_modulo,
     size_t sample_index,
     Function<void (const Buffer& record)> fn) {
-  http::HTTPClient http(&z1stats()->http_client_stats);
+  http::HTTPClient http(&evqld_stats()->http_client_stats);
 
   auto uri = StringUtil::format(
       "$0/stream?namespace=$1&stream=$2&partition=$3",

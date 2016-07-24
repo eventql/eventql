@@ -69,7 +69,7 @@ Option<MapReduceShardResult> SaveToTableTask::execute(
   }
 
   logDebug(
-      "z1.mapreduce",
+      "evqld",
       "Saving result shard to table; result_id=$3 target=$0/$1/$2",
       host.get().server_id(),
       session_->getEffectiveNamespace(),
@@ -85,7 +85,7 @@ Option<MapReduceShardResult> SaveToTableTask::execute(
       result_id.get().toString(),
       URI::urlEncode(table_name_));
 
-  http::HTTPClient http_client(&z1stats()->http_client_stats);
+  http::HTTPClient http_client(&evqld_stats()->http_client_stats);
   auto req = http::HTTPRequest::mkPost(url, params);
   auth_->signRequest(session_, &req);
 

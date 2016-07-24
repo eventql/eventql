@@ -172,7 +172,7 @@ void LSMPartitionReplication::replicateTo(
 
 bool LSMPartitionReplication::replicate(ReplicationInfo* replication_info) {
   logTrace(
-      "z1.replication",
+      "evqld",
       "Replicating partition $0/$1/$2",
       snap_->state.tsdb_namespace(),
       snap_->state.table_key(),
@@ -211,7 +211,7 @@ bool LSMPartitionReplication::replicate(ReplicationInfo* replication_info) {
     }
 
     logDebug(
-        "z1.replication",
+        "evqld",
         "Replicating partition $0/$1/$2 to $3 (replicated_seq: $4, head_seq: $5, $6 records)",
         snap_->state.tsdb_namespace(),
         snap_->state.table_key(),
@@ -242,7 +242,7 @@ bool LSMPartitionReplication::replicate(ReplicationInfo* replication_info) {
       success = false;
 
       logError(
-        "z1.replication",
+        "evqld",
         e,
         "Error while replicating partition $0/$1/$2 to $3",
         snap_->state.tsdb_namespace(),
@@ -357,7 +357,7 @@ Status LSMPartitionReplication::fetchAndApplyMetadataTransaction(
 
 Status LSMPartitionReplication::finalizeSplit() {
   logDebug(
-      "z1.replication",
+      "evqld",
       "Finalizing split for partition $0/$1/$2",
       snap_->state.tsdb_namespace(),
       snap_->state.table_key(),
@@ -388,7 +388,7 @@ Status LSMPartitionReplication::finalizeSplit() {
 
 Status LSMPartitionReplication::finalizeJoin(const ReplicationTarget& target) {
   logDebug(
-      "z1.replication",
+      "evqld",
       "Finalizing join for partition $0/$1/$2, server $3",
       snap_->state.tsdb_namespace(),
       snap_->state.table_key(),

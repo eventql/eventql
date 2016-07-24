@@ -54,7 +54,7 @@ MapReduceService::MapReduceService(
     cachedir_(cachedir),
     tpool_(
         thread::ThreadPoolOptions {
-          .thread_name = Some(String("z1d-mapreduce"))
+          .thread_name = Some(String("evqld-mapreduce"))
         },
         1) {}
 
@@ -63,7 +63,7 @@ void MapReduceService::executeScript(
     RefPtr<MapReduceJobSpec> job,
     const String& program_source) {
   logDebug(
-      "z1.mapreduce",
+      "evqld",
       "Launching mapreduce job; customer=$0",
       session->getEffectiveNamespace());
 
@@ -152,7 +152,7 @@ Option<SHA1Hash> MapReduceService::mapPartition(
       Random::singleton()->hex64());
 
   logDebug(
-      "z1.mapreduce",
+      "evqld",
       "Executing map shard; partition=$0/$1/$2 output=$3",
       session->getEffectiveNamespace(),
       table_name,
@@ -160,7 +160,7 @@ Option<SHA1Hash> MapReduceService::mapPartition(
       output_id.toString());
 
   try {
-    z1stats()->mapreduce_num_map_tasks.incr(1);
+    evqld_stats()->mapreduce_num_map_tasks.incr(1);
 
     auto js_ctx = mkRef(new JavaScriptContext(
         session->getEffectiveNamespace(),
@@ -189,11 +189,11 @@ Option<SHA1Hash> MapReduceService::mapPartition(
     });
 
   } catch (const Exception& e) {
-    z1stats()->mapreduce_num_map_tasks.decr(1);
+    evqld_stats()->mapreduce_num_map_tasks.decr(1);
     throw e;
   }
 
-  z1stats()->mapreduce_num_map_tasks.decr(1);
+  evqld_stats()->mapreduce_num_map_tasks.decr(1);
 
   FileUtil::mv(output_path_tmp, output_path);
   return Some(output_id);
@@ -232,7 +232,7 @@ Option<SHA1Hash> MapReduceService::reduceTables(
       Random::singleton()->hex64());
 
   logDebug(
-      "z1.mapreduce",
+      "evqld",
       "Executing reduce shard; customer=$0 input_tables=0/$1 output=$2",
       session->getEffectiveNamespace(),
       input_tables.size(),
@@ -244,7 +244,7 @@ Option<SHA1Hash> MapReduceService::reduceTables(
   size_t num_input_tables_read = 0;
   size_t num_bytes_read = 0;
   try {
-    z1stats()->mapreduce_num_reduce_tasks.incr(1);
+    evqld_stats()->mapreduce_num_reduce_tasks.incr(1);
 
     HashMap<String, Vector<String>> groups;
     for (const auto& input_table_url : input_tables) {
@@ -263,12 +263,12 @@ Option<SHA1Hash> MapReduceService::reduceTables(
         lst.emplace_back(String((const char*) val, val_len));
         auto rec_size = key_len + val_len;
         num_bytes_read += rec_size;
-        z1stats()->mapreduce_reduce_memory.incr(rec_size);
+        evqld_stats()->mapreduce_reduce_memory.incr(rec_size);
       });
 
       ++num_input_tables_read;
       logDebug(
-        "z1.mapreduce",
+        "evqld",
         "Executing reduce shard; customer=$0 input_tables=$1/$2 output=$3 mem_used=$4MB",
         session->getEffectiveNamespace(),
         input_tables.size(),
@@ -278,8 +278,8 @@ Option<SHA1Hash> MapReduceService::reduceTables(
     }
 
     if (groups.size() == 0) {
-      z1stats()->mapreduce_reduce_memory.decr(num_bytes_read);
-      z1stats()->mapreduce_num_reduce_tasks.decr(1);
+      evqld_stats()->mapreduce_reduce_memory.decr(num_bytes_read);
+      evqld_stats()->mapreduce_num_reduce_tasks.decr(1);
       return None<SHA1Hash>();
     }
 
@@ -303,13 +303,13 @@ Option<SHA1Hash> MapReduceService::reduceTables(
       }
     }
   } catch (const Exception& e) {
-    z1stats()->mapreduce_reduce_memory.decr(num_bytes_read);
-    z1stats()->mapreduce_num_reduce_tasks.decr(1);
+    evqld_stats()->mapreduce_reduce_memory.decr(num_bytes_read);
+    evqld_stats()->mapreduce_num_reduce_tasks.decr(1);
     throw e;
   }
 
-  z1stats()->mapreduce_reduce_memory.decr(num_bytes_read);
-  z1stats()->mapreduce_num_reduce_tasks.decr(1);
+  evqld_stats()->mapreduce_reduce_memory.decr(num_bytes_read);
+  evqld_stats()->mapreduce_num_reduce_tasks.decr(1);
 
   FileUtil::mv(output_path_tmp, output_path);
   return Some(output_id);
@@ -371,7 +371,7 @@ void MapReduceService::downloadResult(
     return new http::StreamingResponseFuture(promise, handler);
   };
 
-  http::HTTPClient http_client(&z1stats()->http_client_stats);
+  http::HTTPClient http_client(&evqld_stats()->http_client_stats);
   auto res = http_client.executeRequest(req, handler_factory);
   handler(nullptr, 0);
 
@@ -410,7 +410,7 @@ bool MapReduceService::saveResultToTable(
   }
 
   logDebug(
-      "z1.mapreduce",
+      "evqld",
       "Saving result shard to table; result_id=$0 table=$1/$2",
       result_id.toString(),
       session->getEffectiveNamespace(),

@@ -384,7 +384,7 @@ int main(int argc, const char** argv) {
   http::HTTPRouter http_router;
   http::HTTPServer http_server(&http_router, &ev);
   http_server.listen(listen_port);
-  http::HTTPConnectionPool http(&ev, &z1stats()->http_client_stats);
+  http::HTTPConnectionPool http(&ev, &evqld_stats()->http_client_stats);
 
   /* data directory */
   auto server_name = process_config->getString("server.name");
@@ -523,7 +523,7 @@ int main(int argc, const char** argv) {
         &partition_map,
         repl_scheme.get(),
         &ev,
-        &z1stats()->http_client_stats);
+        &evqld_stats()->http_client_stats);
 
     eventql::ReplicationWorker tsdb_replication(
         repl_scheme.get(),
@@ -662,7 +662,7 @@ int main(int argc, const char** argv) {
         &partition_map,
         config_dir.get(),
         http_server.stats(),
-        &z1stats()->http_client_stats,
+        &evqld_stats()->http_client_stats,
         &tsdb_replication);
 
     eventql::DefaultServlet default_servlet;

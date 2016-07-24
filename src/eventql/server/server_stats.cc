@@ -25,8 +25,8 @@
 
 namespace eventql {
 
-Z1Stats* z1stats() {
-  static Z1Stats singleton;
+evqld_stats* evqld_stats() {
+  static evqld_stats singleton;
   return &singleton;
 }
 

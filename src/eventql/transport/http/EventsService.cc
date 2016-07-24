@@ -269,7 +269,7 @@ bool EventsService::scanRemoteTablePartition(
       partition_key.toString(),
       result->capacity());
 
-  http::HTTPClient http_client(&z1stats()->http_client_stats);
+  http::HTTPClient http_client(&evqld_stats()->http_client_stats);
   auto req_body = msg::encode(params);
   auto req = http::HTTPRequest::mkPost(url, *req_body);
   //auth_->signRequest(session_, &req);

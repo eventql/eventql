@@ -29,17 +29,17 @@
 namespace eventql {
 
 LazyPartition::LazyPartition() {
-  z1stats()->num_partitions.incr(1);
+  evqld_stats()->num_partitions.incr(1);
 }
 
 LazyPartition::LazyPartition(
     RefPtr<Partition> partition) :
     partition_(partition) {
-  z1stats()->num_partitions.incr(1);
+  evqld_stats()->num_partitions.incr(1);
 }
 
 LazyPartition::~LazyPartition() {
-  z1stats()->num_partitions.decr(1);
+  evqld_stats()->num_partitions.decr(1);
 }
 
 RefPtr<Partition> LazyPartition::getPartition(

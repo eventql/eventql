@@ -565,7 +565,7 @@ void TableService::insertRecordsLocal(
     const SHA1Hash& partition_key,
     const ShreddedRecordList& records) {
   logDebug(
-      "z1.core",
+      "evqld",
       "Inserting $0 records into tsdb://localhost/$1/$2/$3",
       records.getNumRecords(),
       tsdb_namespace,
@@ -599,7 +599,7 @@ void TableService::insertRecordsRemote(
   }
 
   logDebug(
-      "z1.core",
+      "evqld",
       "Inserting $0 records into $1:$2/$3/$4",
       records.getNumRecords(),
       server_id,

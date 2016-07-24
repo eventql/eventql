@@ -197,7 +197,7 @@ bool SimpleCompactionStrategy::compact(
 
   auto snap = partition_->getSnapshot();
   logDebug(
-      "z1.core",
+      "evqld",
       "Compacting partition $4/$5/$6 (rows_written=$0, rows_skipped=$1 sequence=$2..$3)",
       rows_written,
       rows_skipped,

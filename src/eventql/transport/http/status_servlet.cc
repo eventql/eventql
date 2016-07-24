@@ -150,7 +150,7 @@ void StatusServlet::renderDashboard(
     http::HTTPRequest* request,
     http::HTTPResponse* response) {
     http::HTTPResponse res;
-  auto zs = z1stats();
+  auto zs = evqld_stats();
   String html;
   html += kStyleSheet;
   //html += kMainMenu;

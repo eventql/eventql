@@ -406,7 +406,7 @@ bool PartitionMap::dropLocalPartition(
 
   /* start deletion */
   logInfo(
-      "z1.core",
+      "evqld",
       "Partition $0/$1/$2 is not owned by this node and is fully replicated," \
       " trying to unload and drop",
       tsdb_namespace,

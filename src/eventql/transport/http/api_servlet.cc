@@ -843,7 +843,7 @@ void AnalyticsServlet::executeSQL(
       res_stream->writeResponse(*res);
     }
   } catch (const StandardException& e) {
-    logError("z1.sql", e, "Uncaught SQL error");
+    logError("evqld", e, "Uncaught SQL error");
     res->setStatus(http::kStatusBadRequest);
     res->addBody("invalid request");
     res_stream->writeResponse(*res);

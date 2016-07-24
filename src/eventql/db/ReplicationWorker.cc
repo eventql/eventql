@@ -160,7 +160,7 @@ void ReplicationWorker::enqueuePartitionWithLock(
   waitset_.emplace(uuid);
   cv_.notify_all();
 
-  z1stats()->replication_queue_length.set(queue_.size());
+  evqld_stats()->replication_queue_length.set(queue_.size());
 }
 
 void ReplicationWorker::start() {
@@ -185,7 +185,7 @@ void ReplicationWorker::stop() {
 }
 
 void ReplicationWorker::work(size_t thread_id) {
-  Application::setCurrentThreadName("z1d-replication");
+  Application::setCurrentThreadName("evqld-replication");
   auto replication_info = &replication_infos_[thread_id];
 
   std::unique_lock<std::mutex> lk(mutex_);
@@ -266,7 +266,7 @@ void ReplicationWorker::work(size_t thread_id) {
       queue_.emplace(now + delay, partition);
     }
 
-    z1stats()->replication_queue_length.set(queue_.size());
+    evqld_stats()->replication_queue_length.set(queue_.size());
   }
 }
 

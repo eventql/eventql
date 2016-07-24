@@ -228,7 +228,7 @@ bool LSMPartitionWriter::commit() {
     auto t1 = WallClock::unixMicros();
 
     logDebug(
-        "z1.core",
+        "evqld",
         "Committing partition $3/$4/$5 (num_records=$0, sequence=$1..$2), took $6s",
         arena->size(),
         snap->state.lsm_sequence() + 1,
@@ -293,7 +293,7 @@ bool LSMPartitionWriter::compact(bool force /* = false */) {
   auto t1 = WallClock::unixMicros();
 
   logDebug(
-      "z1.core",
+      "evqld",
       "Compacting partition $0/$1/$2, took $3s",
       snap->state.tsdb_namespace(),
       snap->state.table_key(),
@@ -425,7 +425,7 @@ Status LSMPartitionWriter::split() {
   }
 
   logInfo(
-      "z1.replication",
+      "evqld",
       "Splitting partition $0/$1/$2 at '$3'",
       snap->state.tsdb_namespace(),
       snap->state.table_key(),

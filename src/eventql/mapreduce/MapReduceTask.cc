@@ -52,7 +52,7 @@ void MapReduceJobSpec::updateProgress(const MapReduceJobStatus& status) {
       on_progress_(status);
     }
   } catch (const StandardException& e) {
-    logError("z1.mapreduce", e, "MapReduceJob on_progress callback crashed");
+    logError("evqld", e, "MapReduceJob on_progress callback crashed");
   }
 }
 
@@ -67,7 +67,7 @@ void MapReduceJobSpec::sendResult(const String& value) {
       on_result_(value);
     }
   } catch (const StandardException& e) {
-    logError("z1.mapreduce", e, "MapReduceJob on_result callback crashed");
+    logError("evqld", e, "MapReduceJob on_result callback crashed");
   }
 }
 
@@ -82,7 +82,7 @@ void MapReduceJobSpec::sendLogline(const String& logline) {
       on_logline_(logline);
     }
   } catch (const StandardException& e) {
-    logError("z1.mapreduce", e, "MapReduceJob on_result callback crashed");
+    logError("evqld", e, "MapReduceJob on_result callback crashed");
   }
 }
 

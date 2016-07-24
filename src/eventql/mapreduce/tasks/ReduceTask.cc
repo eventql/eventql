@@ -104,7 +104,7 @@ Option<MapReduceShardResult> ReduceTask::execute(
       return executeRemote(shard.get(), job, input_tables, host);
     } catch (const StandardException& e) {
       logError(
-          "z1.mapreduce",
+          "evqld",
           e,
           "ReduceTask::execute failed");
 
@@ -130,7 +130,7 @@ Option<MapReduceShardResult> ReduceTask::executeRemote(
   }
 
   logDebug(
-      "z1.mapreduce",
+      "evqld",
       "Executing remote reduce shard on $2; customer=$0 input_tables=$1",
       session_->getEffectiveNamespace(),
       input_tables.size(),
@@ -173,7 +173,7 @@ Option<MapReduceShardResult> ReduceTask::executeRemote(
     }
   };
 
-  http::HTTPClient http_client(&z1stats()->http_client_stats);
+  http::HTTPClient http_client(&evqld_stats()->http_client_stats);
   auto req = http::HTTPRequest::mkPost(url, params);
   auth_->signRequest(session_, &req);
 

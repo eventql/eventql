@@ -168,11 +168,11 @@ Partition::Partition(
     cfg_(cfg),
     head_(head),
     table_(table) {
-  z1stats()->num_partitions_loaded.incr(1);
+  evqld_stats()->num_partitions_loaded.incr(1);
 }
 
 Partition::~Partition() {
-  z1stats()->num_partitions_loaded.decr(1);
+  evqld_stats()->num_partitions_loaded.decr(1);
 }
 
 SHA1Hash Partition::uuid() const {
