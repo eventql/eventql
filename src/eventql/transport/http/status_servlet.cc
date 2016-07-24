@@ -160,11 +160,8 @@ void StatusServlet::renderDashboard(
       kBuildID);
 
   html += StringUtil::format(
-      "<span><em>Version:</em> $0 &mdash; $1.$2.$3</span> &mdash; ",
-      kVersionString,
-      kVersionMajor,
-      kVersionMinor,
-      kVersionPatch);
+      "<span><em>Version:</em> $0</span> &mdash; ",
+      kVersionString);
   html += StringUtil::format(
       "<span><em>Build-ID:</em> $0</span> &mdash; ",
       kBuildID);
