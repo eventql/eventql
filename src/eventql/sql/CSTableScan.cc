@@ -515,6 +515,7 @@ bool CSTableScan::fetchNext(SValue* out, int out_len) {
 }
 
 bool CSTableScan::fetchNextWithoutColumns(SValue* row, int row_len) {
+  csql::SValue sql_null;
   Vector<SValue> out_row(select_list_.size(), SValue{});
 
   while (cur_pos_ < num_records_) {
@@ -536,8 +537,8 @@ bool CSTableScan::fetchNextWithoutColumns(SValue* row, int row_len) {
       VM::evaluate(
           txn_,
           select_list_[i].compiled.program(),
-          0,
-          nullptr,
+          1,
+          &sql_null,
           &row[i]);
     }
 
