@@ -1,7 +1,7 @@
 2.2 Configuration
 =================
 
-Configuration files aren't mandatory but they provide a convenient way to specifiy regularly used options, so you don't have to enter them on the command line each time you run the program.
+Configuration files aren't mandatory but they provide a convenient way to specifiy options that you use regurlay when running EventQL programs, so you don't have to enter them on the command line each time you run the program.
 
 ###File Format
 EventQL uses the INI file format, that is a simple text file grouped into sections that consists of key-value pairs.

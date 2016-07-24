@@ -118,30 +118,38 @@ Status ProcessConfigBuilder::loadFile(const String& file) {
 }
 
 Status ProcessConfigBuilder::loadDefaultConfigFile(const String& process) {
-  /* load /etc/{process}.conf */
-  {
-    String config_file_name = StringUtil::format("$0.conf", process);
-    String config_file_path = FileUtil::joinPaths("/etc", config_file_name);
+  if (process == "evqld") {
+    /* load /etc/evqld.conf */
+    auto config_file_path = "/etc/evqld.conf";
+    if (FileUtil::exists(config_file_path)) {
+      return loadFile(config_file_path);
+    } else {
+      return Status::success();
+    }
+
+  } else {
+    /* load /etc/evql.conf */
+    auto config_file_path = "/etc/evql.conf";
     if (FileUtil::exists(config_file_path)) {
       auto rc = loadFile(config_file_path);
       if (!rc.isSuccess()) {
         return rc;
       }
     }
-  }
 
-  char* homedir = getenv("HOME");
-  if (!homedir) {
-    return Status::success();
-  }
-
-  {
-    String confg_file_path = FileUtil::joinPaths(homedir, ".evqlrc");
-    if (!FileUtil::exists(confg_file_path)) {
+    char* homedir = getenv("HOME");
+    if (!homedir) {
       return Status::success();
     }
 
-    return loadFile(confg_file_path);
+    {
+      String confg_file_path = FileUtil::joinPaths(homedir, ".evql.conf");
+      if (!FileUtil::exists(confg_file_path)) {
+        return Status::success();
+      }
+
+      return loadFile(confg_file_path);
+    }
   }
 }
 
