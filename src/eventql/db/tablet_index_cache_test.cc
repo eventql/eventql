@@ -23,7 +23,7 @@
  */
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/test/unittest.h>
-#include <eventql/db/LSMTableIndex.h>
+#include <eventql/db/tablet_index.h>
 
 #include "eventql/eventql.h"
 using namespace eventql;

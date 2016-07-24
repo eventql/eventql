@@ -25,7 +25,7 @@
 #include <eventql/util/autoref.h>
 #include <eventql/util/io/fileutil.h>
 #include <eventql/util/logging.h>
-#include <eventql/db/LSMTableIndexCache.h>
+#include <eventql/db/tablet_index_cache.h>
 #include "eventql/eventql.h"
 #include <assert.h>
 

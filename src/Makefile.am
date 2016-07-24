@@ -827,10 +827,10 @@ evql_core_a_SOURCES = \
     eventql/db/compaction_strategy.h \
     eventql/db/compaction_worker.cc \
     eventql/db/compaction_worker.h \
-    eventql/db/LSMTableIndex.cc \
-    eventql/db/LSMTableIndex.h \
-    eventql/db/LSMTableIndexCache.cc \
-    eventql/db/LSMTableIndexCache.h \
+    eventql/db/tablet_index.cc \
+    eventql/db/tablet_index.h \
+    eventql/db/tablet_index_cache.cc \
+    eventql/db/tablet_index_cache.h \
     eventql/db/metadata_client.cc \
     eventql/db/metadata_client.h \
     eventql/db/metadata_coordinator.cc \

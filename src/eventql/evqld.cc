@@ -60,7 +60,7 @@
 #include "eventql/db/metadata_service.h"
 #include "eventql/transport/http/rpc_servlet.h"
 #include "eventql/db/replication_worker.h"
-#include "eventql/db/LSMTableIndexCache.h"
+#include "eventql/db/tablet_index_cache.h"
 #include "eventql/db/compaction_worker.h"
 #include "eventql/db/garbage_collector.h"
 #include "eventql/db/leader.h"

@@ -24,7 +24,7 @@
 #pragma once
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/autoref.h>
-#include <eventql/db/LSMTableIndexCache.h>
+#include <eventql/db/tablet_index_cache.h>
 #include "eventql/eventql.h"
 
 namespace eventql {

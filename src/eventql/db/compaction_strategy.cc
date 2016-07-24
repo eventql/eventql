@@ -25,7 +25,7 @@
 #include "eventql/util/logging.h"
 #include "eventql/util/random.h"
 #include <eventql/db/compaction_strategy.h>
-#include <eventql/db/LSMTableIndex.h>
+#include <eventql/db/tablet_index.h>
 #include <eventql/io/cstable/cstable_writer.h>
 #include <eventql/util/io/fileutil.h>
 

@@ -29,7 +29,7 @@
 #include <eventql/util/io/mmappedfile.h>
 #include <eventql/util/io/BufferedOutputStream.h>
 #include <eventql/util/logging.h>
-#include <eventql/db/LSMTableIndex.h>
+#include <eventql/db/tablet_index.h>
 #include <eventql/io/cstable/cstable_writer.h>
 
 #include "eventql/eventql.h"
