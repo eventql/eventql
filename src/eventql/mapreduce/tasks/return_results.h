@@ -22,39 +22,34 @@
  * code of your own applications
  */
 #pragma once
-#include "eventql/util/stdtypes.h"
-#include "eventql/mapreduce/MapReduceTask.h"
-#include "eventql/db/table_service.h"
-#include "eventql/auth/internal_auth.h"
-
 #include "eventql/eventql.h"
+#include "eventql/util/stdtypes.h"
+#include "eventql/mapreduce/mapreduce_task.h"
+#include "eventql/server/session.h"
 
 namespace eventql {
 
-struct SaveToTableTaskShard : public MapReduceTaskShard {
-  SHA1Hash partition;
-};
-
-class SaveToTableTask : public MapReduceTask {
+class ReturnResultsTask : public MapReduceTask {
 public:
 
-  SaveToTableTask(
-      Session* session,
-      const String& table_name,
+  ReturnResultsTask(
       Vector<RefPtr<MapReduceTask>> sources,
       MapReduceShardList* shards,
-      InternalAuth* auth,
-      TableService* tsdb);
+      Session* session,
+      const String& serialize_fn,
+      const String& globals,
+      const String& params);
 
   Option<MapReduceShardResult> execute(
       RefPtr<MapReduceTaskShard> shard,
       RefPtr<MapReduceScheduler> job) override;
 
 protected:
-  Session* session_;
-  String table_name_;
   Vector<RefPtr<MapReduceTask>> sources_;
-  InternalAuth* auth_;
+  Session* session_;
+  String serialize_fn_;
+  String globals_;
+  String params_;
 };
 
 } // namespace eventql

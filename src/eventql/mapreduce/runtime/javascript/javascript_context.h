@@ -26,8 +26,8 @@
 #include "eventql/util/autoref.h"
 #include "eventql/util/option.h"
 #include "eventql/db/table_service.h"
-#include "eventql/mapreduce/MapReduceTaskBuilder.h"
-#include "eventql/mapreduce/MapReduceScheduler.h"
+#include "eventql/mapreduce/mapreduce_task_builder.h"
+#include "eventql/mapreduce/mapreduce_scheduler.h"
 #include <jsapi.h>
 
 #include "eventql/eventql.h"

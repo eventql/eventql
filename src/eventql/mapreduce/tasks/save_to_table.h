@@ -22,53 +22,39 @@
  * code of your own applications
  */
 #pragma once
-#include "eventql/eventql.h"
-#include "eventql/server/session.h"
 #include "eventql/util/stdtypes.h"
-#include "eventql/mapreduce/MapReduceTask.h"
+#include "eventql/mapreduce/mapreduce_task.h"
 #include "eventql/db/table_service.h"
 #include "eventql/auth/internal_auth.h"
 
+#include "eventql/eventql.h"
+
 namespace eventql {
 
-struct ReduceTaskShard : public MapReduceTaskShard {
-  size_t shard;
+struct SaveToTableTaskShard : public MapReduceTaskShard {
+  SHA1Hash partition;
 };
 
-class ReduceTask : public MapReduceTask {
+class SaveToTableTask : public MapReduceTask {
 public:
 
-  ReduceTask(
+  SaveToTableTask(
       Session* session,
-      const String& reduce_fn,
-      const String& globals,
-      const String& params,
+      const String& table_name,
       Vector<RefPtr<MapReduceTask>> sources,
-      size_t num_shards,
       MapReduceShardList* shards,
       InternalAuth* auth,
-      ConfigDirectory* cdir);
+      TableService* tsdb);
 
   Option<MapReduceShardResult> execute(
       RefPtr<MapReduceTaskShard> shard,
       RefPtr<MapReduceScheduler> job) override;
 
 protected:
-
-  Option<MapReduceShardResult> executeRemote(
-      RefPtr<MapReduceTaskShard> shard,
-      RefPtr<MapReduceScheduler> job,
-      const Vector<String>& input_tables,
-      const String& server_id);
-
   Session* session_;
-  String reduce_fn_;
-  String globals_;
-  String params_;
+  String table_name_;
   Vector<RefPtr<MapReduceTask>> sources_;
-  size_t num_shards_;
   InternalAuth* auth_;
-  ConfigDirectory* cdir_;
 };
 
 } // namespace eventql

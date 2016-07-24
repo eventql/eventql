@@ -21,11 +21,11 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include "eventql/mapreduce/MapReduceTaskBuilder.h"
-#include "eventql/mapreduce/tasks/MapTableTask.h"
-#include "eventql/mapreduce/tasks/ReduceTask.h"
-#include "eventql/mapreduce/tasks/ReturnResultsTask.h"
-#include "eventql/mapreduce/tasks/SaveToTableTask.h"
+#include "eventql/mapreduce/mapreduce_task_builder.h"
+#include "eventql/mapreduce/tasks/map_table.h"
+#include "eventql/mapreduce/tasks/reduce.h"
+#include "eventql/mapreduce/tasks/return_results.h"
+#include "eventql/mapreduce/tasks/save_to_table.h"
 #include "eventql/auth/internal_auth.h"
 #include "eventql/config/namespace_config.h"
 #include "eventql/config/config_directory.h"

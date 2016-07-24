@@ -25,7 +25,7 @@
 #include "eventql/util/stdtypes.h"
 #include "eventql/util/http/httpservice.h"
 #include "eventql/util/http/HTTPSSEStream.h"
-#include "eventql/transport/http/MapReduceService.h"
+#include "eventql/mapreduce/mapreduce_service.h"
 #include "eventql/server/session.h"
 #include "eventql/auth/client_auth.h"
 #include "eventql/eventql.h"

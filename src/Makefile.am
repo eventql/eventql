@@ -885,20 +885,20 @@ evql_core_a_SOURCES = \
     eventql/db/rebalance.cc \
     eventql/eventql.h \
     eventql/mapreduce/mapreduce_preludejs.cc \
-    eventql/mapreduce/MapReduceScheduler.cc \
-    eventql/mapreduce/MapReduceScheduler.h \
-    eventql/mapreduce/MapReduceTask.cc \
-    eventql/mapreduce/MapReduceTask.h \
-    eventql/mapreduce/MapReduceTaskBuilder.cc \
-    eventql/mapreduce/MapReduceTaskBuilder.h \
-    eventql/mapreduce/tasks/MapTableTask.cc \
-    eventql/mapreduce/tasks/MapTableTask.h \
-    eventql/mapreduce/tasks/ReduceTask.cc \
-    eventql/mapreduce/tasks/ReduceTask.h \
-    eventql/mapreduce/tasks/ReturnResultsTask.cc \
-    eventql/mapreduce/tasks/ReturnResultsTask.h \
-    eventql/mapreduce/tasks/SaveToTableTask.cc \
-    eventql/mapreduce/tasks/SaveToTableTask.h \
+    eventql/mapreduce/mapreduce_scheduler.cc \
+    eventql/mapreduce/mapreduce_scheduler.h \
+    eventql/mapreduce/mapreduce_task.cc \
+    eventql/mapreduce/mapreduce_task.h \
+    eventql/mapreduce/mapreduce_task_builder.cc \
+    eventql/mapreduce/mapreduce_task_builder.h \
+    eventql/mapreduce/tasks/map_table.cc \
+    eventql/mapreduce/tasks/map_table.h \
+    eventql/mapreduce/tasks/reduce.cc \
+    eventql/mapreduce/tasks/reduce.h \
+    eventql/mapreduce/tasks/return_results.cc \
+    eventql/mapreduce/tasks/return_results.h \
+    eventql/mapreduce/tasks/save_to_table.cc \
+    eventql/mapreduce/tasks/save_to_table.h \
     eventql/mapreduce/runtime/javascript/javascript_context.cc \
     eventql/mapreduce/runtime/javascript/javascript_context.h \
     eventql/auth/client_auth.h \
@@ -931,10 +931,10 @@ evql_core_a_SOURCES = \
     eventql/server/sql/table_provider.h \
     eventql/server/sql/table_scan.cc \
     eventql/server/sql/table_scan.h \
-    eventql/transport/http/MapReduceAPIServlet.cc \
-    eventql/transport/http/MapReduceAPIServlet.h \
-    eventql/transport/http/MapReduceService.cc \
-    eventql/transport/http/MapReduceService.h \
+    eventql/transport/http/mapreduce_servlet.cc \
+    eventql/transport/http/mapreduce_servlet.h \
+    eventql/mapreduce/mapreduce_service.cc \
+    eventql/mapreduce/mapreduce_service.h \
     eventql/transport/http/api_servlet.cc \
     eventql/transport/http/api_servlet.h \
     eventql/transport/http/default_servlet.cc \

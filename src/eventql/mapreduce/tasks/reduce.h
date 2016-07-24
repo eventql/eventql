@@ -25,55 +25,52 @@
 #include "eventql/eventql.h"
 #include "eventql/server/session.h"
 #include "eventql/util/stdtypes.h"
-#include "eventql/mapreduce/MapReduceTask.h"
+#include "eventql/mapreduce/mapreduce_task.h"
 #include "eventql/db/table_service.h"
-#include "eventql/db/table_ref.h"
 #include "eventql/auth/internal_auth.h"
 
 namespace eventql {
 
-struct MapTableTaskShard : public MapReduceTaskShard {
-  TSDBTableRef table_ref;
-  Vector<String> servers;
+struct ReduceTaskShard : public MapReduceTaskShard {
+  size_t shard;
 };
 
-class MapTableTask : public MapReduceTask {
+class ReduceTask : public MapReduceTask {
 public:
 
-  MapTableTask(
+  ReduceTask(
       Session* session,
-      const TSDBTableRef& table,
-      const String& map_function,
+      const String& reduce_fn,
       const String& globals,
       const String& params,
+      Vector<RefPtr<MapReduceTask>> sources,
+      size_t num_shards,
       MapReduceShardList* shards,
       InternalAuth* auth,
-      PartitionMap* pmap,
       ConfigDirectory* cdir);
 
   Option<MapReduceShardResult> execute(
       RefPtr<MapReduceTaskShard> shard,
       RefPtr<MapReduceScheduler> job) override;
 
-  void setRequiredColumns(const Set<String>& columns);
-
 protected:
 
   Option<MapReduceShardResult> executeRemote(
-      RefPtr<MapTableTaskShard> shard,
+      RefPtr<MapReduceTaskShard> shard,
       RefPtr<MapReduceScheduler> job,
+      const Vector<String>& input_tables,
       const String& server_id);
 
   Session* session_;
-  TSDBTableRef table_ref_;
-  String map_function_;
+  String reduce_fn_;
   String globals_;
   String params_;
+  Vector<RefPtr<MapReduceTask>> sources_;
+  size_t num_shards_;
   InternalAuth* auth_;
-  PartitionMap* pmap_;
   ConfigDirectory* cdir_;
-  Set<String> required_columns_;
 };
 
 } // namespace eventql
+
 

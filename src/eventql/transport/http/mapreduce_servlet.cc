@@ -26,8 +26,8 @@
 #include <eventql/util/fnv.h>
 #include "eventql/util/protobuf/msg.h"
 #include "eventql/util/io/BufferedOutputStream.h"
-#include "eventql/transport/http/MapReduceAPIServlet.h"
-#include "eventql/mapreduce/MapReduceTask.h"
+#include "eventql/transport/http/mapreduce_servlet.h"
+#include "eventql/mapreduce/mapreduce_task.h"
 #include "eventql/io/sstable/sstablereader.h"
 #include "eventql/eventql.h"
 

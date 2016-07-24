@@ -25,7 +25,7 @@
 #include "eventql/eventql.h"
 #include "eventql/server/session.h"
 #include "eventql/util/stdtypes.h"
-#include "eventql/mapreduce/MapReduceTask.h"
+#include "eventql/mapreduce/mapreduce_task.h"
 #include "eventql/db/table_service.h"
 #include "eventql/auth/internal_auth.h"
 #include "eventql/config/namespace_config.h"

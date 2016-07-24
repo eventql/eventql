@@ -29,7 +29,7 @@
 #include "eventql/config/namespace_config.h"
 #include "eventql/config/config_directory.h"
 #include "eventql/mapreduce/runtime/javascript/javascript_context.h"
-#include "eventql/mapreduce/MapReduceTask.h"
+#include "eventql/mapreduce/mapreduce_task.h"
 #include "eventql/server/session.h"
 
 namespace eventql {

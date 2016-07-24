@@ -23,8 +23,8 @@
  */
 #include "eventql/util/logging.h"
 #include "eventql/util/http/HTTPFileDownload.h"
-#include "eventql/mapreduce/MapReduceScheduler.h"
-#include "eventql/transport/http/MapReduceService.h"
+#include "eventql/mapreduce/mapreduce_scheduler.h"
+#include "eventql/mapreduce/mapreduce_service.h"
 
 #include "eventql/eventql.h"
 

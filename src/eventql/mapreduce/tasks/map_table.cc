@@ -23,8 +23,8 @@
  */
 #include "eventql/util/SHA1.h"
 #include "eventql/util/http/HTTPSSEResponseHandler.h"
-#include "eventql/mapreduce/tasks/MapTableTask.h"
-#include "eventql/mapreduce/MapReduceScheduler.h"
+#include "eventql/mapreduce/tasks/map_table.h"
+#include "eventql/mapreduce/mapreduce_scheduler.h"
 #include "eventql/db/metadata_client.h"
 #include <eventql/server/server_stats.h>
 #include <eventql/server/sql/table_provider.h>

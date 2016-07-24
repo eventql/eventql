@@ -21,8 +21,8 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include "eventql/mapreduce/tasks/ReturnResultsTask.h"
-#include "eventql/mapreduce/MapReduceScheduler.h"
+#include "eventql/mapreduce/tasks/return_results.h"
+#include "eventql/mapreduce/mapreduce_scheduler.h"
 #include "eventql/io/sstable/sstablereader.h"
 #include "eventql/mapreduce/runtime/javascript/javascript_context.h"
 

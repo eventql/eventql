@@ -22,8 +22,8 @@
  * code of your own applications
  */
 #include "eventql/util/http/HTTPSSEResponseHandler.h"
-#include "eventql/mapreduce/tasks/ReduceTask.h"
-#include "eventql/mapreduce/MapReduceScheduler.h"
+#include "eventql/mapreduce/tasks/reduce.h"
+#include "eventql/mapreduce/mapreduce_scheduler.h"
 #include <eventql/server/server_stats.h>
 #include <eventql/db/server_allocator.h>
 #include "eventql/eventql.h"

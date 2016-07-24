@@ -21,8 +21,8 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include "eventql/mapreduce/tasks/SaveToTableTask.h"
-#include "eventql/mapreduce/MapReduceScheduler.h"
+#include "eventql/mapreduce/tasks/save_to_table.h"
+#include "eventql/mapreduce/mapreduce_scheduler.h"
 #include "eventql/io/sstable/sstablereader.h"
 #include <eventql/util/http/httpclient.h>
 
