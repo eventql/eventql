@@ -2,6 +2,7 @@
   url: "/"
   type: page
   source: "index.html"
+  title: "Documentation"
   children:
     -
       url: "/getting-started"
