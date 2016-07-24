@@ -92,9 +92,7 @@ evql_protos = \
     eventql/db/ReplicationState.proto \
     eventql/db/TableConfig.proto \
     eventql/db/TSDBNodeConfig.proto \
-    eventql/db/TSDBTableScanSpec.proto \
-    eventql/EventScanParams.proto \
-    eventql/RemoteTSDBScanParams.proto
+    eventql/db/TSDBTableScanSpec.proto
 
 BUILT_SOURCES += $(evql_protos:.proto=.pb.h)
 dist_noinst_DATA += $(evql_protos)
@@ -805,8 +803,6 @@ noinst_LIBRARIES += evql_http.a
 
 ################# LIB: evql_core.a ####################
 evql_core_a_SOURCES = \
-    eventql/EventScanResult.cc \
-    eventql/EventScanResult.h \
     eventql/JavaScriptContext.cc \
     eventql/JavaScriptContext.h \
     eventql/config/namespace_config.cc \
@@ -986,9 +982,7 @@ nodist_evql_core_a_SOURCES = \
     @builddir@/eventql/db/ReplicationState.pb.cc \
     @builddir@/eventql/db/TableConfig.pb.cc \
     @builddir@/eventql/db/TSDBNodeConfig.pb.cc \
-    @builddir@/eventql/db/TSDBTableScanSpec.pb.cc \
-    @builddir@/eventql/EventScanParams.pb.cc \
-    @builddir@/eventql/RemoteTSDBScanParams.pb.cc
+    @builddir@/eventql/db/TSDBTableScanSpec.pb.cc
 
 eventql/mapreduce/mapreduce_preludejs.cc:
 	echo 'eventql/mapreduce/prelude.js:${srcdir}/eventql/mapreduce/prelude.js' | ${srcdir}/eventql/util/assets.sh $(builddir)/eventql/mapreduce/mapreduce_preludejs.cc

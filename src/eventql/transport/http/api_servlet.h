@@ -33,7 +33,6 @@
 #include "eventql/config/config_directory.h"
 #include "eventql/db/table_service.h"
 #include "eventql/transport/http/MapReduceAPIServlet.h"
-#include "eventql/RemoteTSDBScanParams.pb.h"
 #include "eventql/auth/client_auth.h"
 #include "eventql/auth/internal_auth.h"
 #include "eventql/server/sql_service.h"
