@@ -250,22 +250,56 @@ Option<SHA1Hash> MapReduceService::reduceTables(
       auto req = http::HTTPRequest::mkGet(input_table_url);
       auth_->signRequest(session, &req);
 
-      MapReduceService::downloadResult(
-          req,
-          [&groups, &num_bytes_read] (
-              const void* key,
-              size_t key_len,
-              const void* val,
-              size_t val_len) {
-        auto key_str = String((const char*) key, key_len);
-        auto& lst = groups[key_str];
-        lst.emplace_back(String((const char*) val, val_len));
-        auto rec_size = key_len + val_len;
-        num_bytes_read += rec_size;
-        evqld_stats()->mapreduce_reduce_memory.incr(rec_size);
-      });
+      bool result_downloaded = false;
+      Vector<String> errors;
+      for (size_t i = 0; i < 10; ++i) {
+        HashMap<String, Vector<String>> this_groups;
+        size_t this_num_bytes_read = 0;
+        try {
+          MapReduceService::downloadResult(
+              req,
+              [&this_groups, &this_num_bytes_read] (
+                  const void* key,
+                  size_t key_len,
+                  const void* val,
+                  size_t val_len) {
+            auto key_str = String((const char*) key, key_len);
+            auto& lst = this_groups[key_str];
+            lst.emplace_back(String((const char*) val, val_len));
+            auto rec_size = key_len + val_len;
+            this_num_bytes_read += rec_size;
+          });
 
-      ++num_input_tables_read;
+          for (const auto& r : this_groups) {
+            auto& lst = groups[r.first];
+            lst.insert(lst.end(), r.second.begin(), r.second.end());
+          }
+
+          evqld_stats()->mapreduce_reduce_memory.incr(this_num_bytes_read);
+          num_bytes_read += this_num_bytes_read;
+          ++num_input_tables_read;
+          result_downloaded = true;
+          break;
+        } catch (const std::exception& e) {
+          logError(
+              "evqld",
+              e,
+              "Error while downloading mapreduce tempfile $0",
+              input_table_url);
+          errors.emplace_back(e.what());
+        }
+
+        sleep((i + 1) * 10);
+      }
+
+      if (!result_downloaded) { // FIXME bail out if configured to be strict
+        logError(
+            kRuntimeError,
+            "Error while downloading mapreduce tempfile $0: $1",
+            input_table_url,
+            StringUtil::join(errors, ", "));
+      }
+
       logDebug(
         "evqld",
         "Executing reduce shard; customer=$0 input_tables=$1/$2 output=$3 mem_used=$4MB",
@@ -385,7 +419,6 @@ void MapReduceService::downloadResult(
   if (!eos) {
     RAISE(kRuntimeError, "unexpected EOF");
   }
-
 }
 
 bool MapReduceService::saveResultToTable(
