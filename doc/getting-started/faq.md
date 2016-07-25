@@ -1,6 +1,5 @@
-1.4 FAQ
+1.3 FAQ
 =======
-
 
 ### Why does EventQL require a strict schema? // Why isn't EventQL schemaless?
 

@@ -18,7 +18,7 @@ This guide assumes you have a zookeeper instance running on `localhost:2181`. Yo
 should change the parameters accordingly for your setup.
 
 If you don't have a running zookeeper instance, please refer to the
-[official zookeeper tutorial](...).
+[official zookeeper tutorial](https://zookeeper.apache.org/doc/r3.3.3/zookeeperStarted.html).
 
 ### Step 2: Creating the configuration files
 

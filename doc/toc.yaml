@@ -26,15 +26,15 @@
           visible_in_menu: true
           visible_in_toc: true
           source: "getting-started/first-steps.md"
-        -
-          url: "/getting-started/concepts"
-          title: "Concepts"
-          type: page
-          visible_in_menu: true
-          visible_in_toc: true
-          source: "getting-started/concepts.md"
-          partials:
-            sidebar_right: 
+        #-
+        #  url: "/getting-started/concepts"
+        #  title: "Concepts"
+        #  type: page
+        #  visible_in_menu: true
+        #  visible_in_toc: true
+        #  source: "getting-started/concepts.md"
+        #  partials:
+        #    sidebar_right: 
         -
           url: "/getting-started/faq"
           title: "FAQ"
