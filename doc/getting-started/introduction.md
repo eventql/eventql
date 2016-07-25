@@ -22,9 +22,5 @@ in 10 minutes.
 
 To take the deep dive, these pages give a good overview of the the major concepts:
 
-  - [Concepts](../concepts/)
-  - [Tables & Schemas](../../tables/)
+  - [Tables & Rows](../../tables/)
   - [Partitioning](../../tables/partitioning/)
-  - [Replication](../../tables/replication/)
-  - [The SQL Query Language](../../queries/sql/)
-  - [JavaScript Queries](../../mapreduce/introduction/)

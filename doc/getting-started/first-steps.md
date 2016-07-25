@@ -29,7 +29,7 @@ shell:
     $ evql --database test
 
 More documentation on how to install and run the server can be found in the
-["Installation"](../installation/) and ["Running EventQL"](../running-eventql/)
+["Installation"](../../deployment/installation/) and ["evqld"](../../deployment/components/evqld)
 pages.
 
 ### Step 2: Create a new table
@@ -44,7 +44,7 @@ as our primary key.
 
 To choose a good primary key and get the best performance, it is important
 to understand how data is partitioned and distributed across machines. Read more
-about primary keys on the ["Partitioning" page](../../collecting-and-storing/tables/partitioning).
+about primary keys on the ["Partitioning" page](../../tables/partitioning).
 
 Copy the command below into the SQL shell that we started in the previous step
 to create the table:
@@ -58,8 +58,7 @@ to create the table:
 
 Note that EventQL can deal with more complex (nested) schemas that allow you
 to store any JSON object into a row. Check out the
-["Tables & Schemas"](../../collecting-and-storing/tables/) page for more
-information.
+["Tables & Rows"](../../tables/) page for more information.
 
 ### Step 3: Insert events
 
@@ -90,6 +89,6 @@ hours:
      ORDER BY cnt DESC
      LIMIT 10;
 
-That's all for now. To dive deeper, check out the ["SQL Query Language" chapter](../../queries/sql/)
+That's all for now. To dive deeper, check out the ["SQL Query Language" chapter](../../sql/)
 for more information on all supported SQL statements, functions and extensions
-or have a look at the [JavaScript Query API](../../queries/pipelines/mapreduce/)
+or have a look at the [JavaScript Query API](../../mapreduce/introduction/)

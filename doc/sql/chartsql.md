@@ -108,7 +108,6 @@ city like this:
         FROM city_temperatures;
 
 
-[See more examples of queries with DRAW statements](/examples).
 
 
 Labels, Colors & more
@@ -168,7 +167,6 @@ respected by the linechart and areachart.
 
     SELECT ... as x, ... as y, "2" as line_width FROM ...;
 
-[See the point and line styles reference](/documentation/chartsql/point_and_line_styles)
 
 Drawing Timeseries Data
 -----------------------
@@ -319,7 +317,6 @@ Draw a line chart with two independent Y axes using two DRAW statements:
     SELECT ....;
 
 
-[See an example for multiple Y axes](/examples/linecharts/multiple_y_axes/)
 
 #### Combining Chart Types
 
@@ -332,5 +329,4 @@ Draw a line chart and bar chart over each other:
     SELECT ....;
 
 
-[See an example for a combined type chart](/examples/combined/barsandlines/)
 

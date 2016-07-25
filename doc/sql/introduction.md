@@ -12,45 +12,45 @@ and functions you'd expect (including JOINs) are implemented.
 <br />
 <ul class="toc">
 <li>
-<a href="/documentation/queries/sql/functions-and-operators">Functions &amp; Operators</a><p></p>
+<a href="/documentation/sql/functions-and-operators">Functions &amp; Operators</a><p></p>
 
 <p></p></li><p></p>
 
 <p></p><li>
-<a href="/documentation/queries/sql/statements">Statements</a>
+<a href="/documentation/sql/statements">Statements</a>
 <ul>
 <li>
-<a href="/documentation/queries/sql/statements/select">SELECT</a><p></p>
+<a href="/documentation/sql/statements/select">SELECT</a><p></p>
 
 <p></p></li><p></p>
 
 <p></p><li>
-<a href="/documentation/queries/sql/chartsql">DRAW</a><p></p>
+<a href="/documentation/sql/statements/draw">DRAW</a><p></p>
 
 <p></p></li><p></p>
 
 <p></p><li>
-<a href="/documentation/queries/sql/statements/insert">INSERT</a><p></p>
+<a href="/documentation/sql/statements/insert">INSERT</a><p></p>
 
 <p></p></li><p></p>
 
 <p></p><li>
-<a href="/documentation/queries/sql/statements/create-table">CREATE TABLE</a><p></p>
+<a href="/documentation/sql/statements/create-table">CREATE TABLE</a><p></p>
 
 <p></p></li><p></p>
 
 <p></p><li>
-<a href="/documentation/queries/sql/statements/alter-table">ALTER TABLE</a><p></p>
+<a href="/documentation/sql/statements/alter-table">ALTER TABLE</a><p></p>
 
 <p></p></li><p></p>
 
 <p></p><li>
-<a href="/documentation/queries/sql/statements/describe">DESCRIBE</a><p></p>
+<a href="/documentation/sql/statements/describe">DESCRIBE</a><p></p>
 
 <p></p></li><p></p>
 
 <p></p><li>
-<a href="/documentation/queries/sql/statements/show-tables">SHOW TABLES</a><p></p>
+<a href="/documentation/sql/statements/show-tables">SHOW TABLES</a><p></p>
 
 <p></p></li>
 </ul>
