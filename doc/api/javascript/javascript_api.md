@@ -101,7 +101,7 @@ be global variables (i.e. defined in the global scope).
 &nbsp;&nbsp;&nbsp;(required) 
 
 `required_columns`<br>
-&nbsp;&nbsp;&nbsp;(optional)
+&nbsp;&nbsp;&nbsp;(optional) An array of the table's columns that are required for the mapping.
 
 `from`<br>
 &nbsp;&nbsp;&nbsp;(optional) A timestamp to indicate the start of the input data if the primary key includes a DATETIME column.
@@ -132,6 +132,20 @@ be global variables (i.e. defined in the global scope).
 
 ### EVQL.reduce
 
+    EVQL.reduce(opts);
+
+`opts` is an object consisting of the following properties
+
+`sources`<br>
+&nbsp;&nbsp;&nbsp;(required) An array of temp tables (which are returned by methods like
+`mapTable` or `reduce`).
+
+`reduce_fn`<br>
+&nbsp;&nbsp;&nbsp;(required)
+
+`shards`<br>
+&nbsp;&nbsp;&nbsp;(optional)
+
     var page_vies = EVQL.mapTable({
       //
     });
@@ -148,6 +162,8 @@ be global variables (i.e. defined in the global scope).
         return [[url, total_views]];
       }
     });
+
+
 
 ---
 ### EVQL.downloadResults
