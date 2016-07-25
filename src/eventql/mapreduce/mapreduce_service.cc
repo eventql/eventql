@@ -35,6 +35,7 @@
 #include "eventql/io/cstable/RecordShredder.h"
 #include "eventql/db/partition_reader.h"
 #include <algorithm>
+#include <unistd.h>
 
 #include "eventql/eventql.h"
 
@@ -252,7 +253,7 @@ Option<SHA1Hash> MapReduceService::reduceTables(
 
       bool result_downloaded = false;
       Vector<String> errors;
-      for (size_t i = 0; i < 10; ++i) {
+      for (size_t i = 0; i < 6; ++i) {
         HashMap<String, Vector<String>> this_groups;
         size_t this_num_bytes_read = 0;
         try {
