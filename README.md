@@ -37,17 +37,13 @@ To run the test suite:
 
 ## Features
 
-* Supports INSERT, UPDATE and DELETE operations (Log-Structured-Merge-Tree design)
+* Supports INSERT, UPDATE and DELETE operations
 * Supports flat and complex/nested tables (OBJECT/ARRAY column types). Table rows can be inserted and retrieved as JSON objects.
-* Columnar Storage Engin -- Tightly packed storage for all primitive data types (see Column Storage Types). Queries only read required data from referenced columns
-* (Almost) complete SQL 2009 support. (Yes, it does JOINs)
-* Run (streaming) MapReduces in JavaScript, mix JavaScript and SQL
-* Support for user defined functions in JavaScript
-* Fully transparent query caching when the same query is repeatedly executed on (partially) unchanged data
-* Distributed Storage and Query Execution -- Tables are split into ordered partitions by primary key
-* Queries and jobs are automatically parallelized and executed on many machines in parallel
-* Strong eventual consistency for inserts, updates and deletes
+* Rows are stored in a column oriented fashion. Queries only read required data for referenced columns.
+* (Almost) complete SQL 2009 support. (It does JOINs!)
+* Tables are transparently split into ordered partitions by primary key and distributed onto many machines
+* Queries are also automatically parallelized and executed on many machines in parallel
 * Scales to hundreds of terrabytes per table, thousands of tables per cluster
-* High Availability
-* Shared nothing" design. A Z1 cluster consists of many independent tableservers and one master. The master is not directly involved in replication, queries and inserts/updates.
+* "Shared nothing" design. An EventQL cluster consists of many equally privileged servers
+* Fully transparent query caching when the same query is repeatedly executed on (partially) unchanged data
 * Written in modern C++11 with extensive documentation. Commercial support available
