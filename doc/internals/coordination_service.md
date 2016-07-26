@@ -1,4 +1,4 @@
-8.3 Coordination Service
+8.2 Coordination Service
 ========================
 
 We store three pieces of data under the following paths:

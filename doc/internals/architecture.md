@@ -44,6 +44,22 @@ that store the respective partitions, minimizing data transfers. On each shard,
 the subset of the data that is required to answer the query (i.e. only the
 actually referenced columns in the table) are loaded from the cstables on disk.
 
+### Consistency & Durability
+
+Updates don't have read-after-write consistency, but strong eventual consistency.
+Please note that if the write-ahead-log is turned off, which is the default, you
+can loose up to a few seconds of data if a node crashes. Updates/inserts are eventually consistent and have fully automatic conflict resolution (newest write wins with microsecond granularity).
+
+### Replication Factor
+
+The sharding across nodes and rebalances are fully automatic and transparent.
+This means you will never have to worry or think about it.
+
+Still, you can optionally control the "replication factor" of any table. The
+replication factor is an integral number of copies of each piece of data that
+should be kept in the cluster. The default replication factor is 3, i.e. there
+are 3 copies of every piece of data for redundancy and performance.
+
 
 ## Partitioning
 

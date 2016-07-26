@@ -1,4 +1,4 @@
-8.4 Life of a Query
+8.3 Life of a Query
 ===================
 
 #### Step 1: Tokenizing (Query String -> Tokens)

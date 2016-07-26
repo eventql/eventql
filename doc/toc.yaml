@@ -755,13 +755,6 @@
           visible_in_toc: true
           source: "internals/architecture.md"
         -
-          url: "/internals/replication"
-          title: "Replication"
-          type: page
-          visible_in_menu: true
-          visible_in_toc: true
-          source: "internals/replication.md"
-        -
           url: "/internals/coordination-service"
           title: "Coordination Service"
           type: page
