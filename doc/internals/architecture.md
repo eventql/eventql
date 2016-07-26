@@ -1,7 +1,7 @@
 8.1 Architecture
 ================
 
-This page starts by gibing a brief "10,000 feet" overview of the general
+This page starts by giving a brief "10,000 feet" overview of the general
 architecture of EventQL and then takes a closer look at some of the subsystems
 with links to detailed information in the respective chapters. The primary
 audience for this page are EventQL developers and users that want to learn
