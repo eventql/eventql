@@ -24,3 +24,4 @@ To take the deep dive, these pages give a good overview of the the major concept
 
   - [Tables & Rows](../../tables/)
   - [Partitioning](../../tables/partitioning/)
+  - [Architecture](../../internals/architecture/)
