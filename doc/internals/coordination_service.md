@@ -22,21 +22,3 @@ We store three pieces of data under the following paths:
 
 - guarantees about timeliness (data is never stale, etc) -- evqld actually expects the config data to be eventually consistent (it expects to always have an old state locally)
 
-
-### things zookeeper does not do that we will need eventually (limits):
-
-zookeeper requires us to set a watcher on each individual node if we want to
-watch the whole tree. since each server in the cluster needs to watch the tree
-this works out to
-
-    num_watches = num_nodes X num_servers 
-
-so for example
-
-  - 100 servers x 10_000 tables = 100k watchers [ should still work ]
-  - 200 servers x 100_000 tables = 20 million watchers [ does probably not work anymore ]
-
-this latter case is apparently already beyond ZK limits, even though we're only
-talking about roughly ~6MB of configuration data total!
-
-https://issues.apache.org/jira/browse/ZOOKEEPER-1177
