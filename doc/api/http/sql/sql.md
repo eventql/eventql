@@ -17,7 +17,7 @@ queries that should each end with a semicolon.
 <table class='http_api'>
   <tr>
     <td>format</td>
-    <td>The response format. Must be"json" or "json_sse". Defaults to "json"</td>
+    <td>The response format. Must be "json" or "json_sse". Defaults to "json"</td>
   </tr>
   <tr>
     <td>query</td>
@@ -26,7 +26,7 @@ queries that should each end with a semicolon.
 </table>
 
 ### Result Formats
-The query result is sent as JSON string that contains an array of results. 
+The query result is sent as JSON string that contains an array of results.
 Every result set is made up of a list of columns and a list of lists of values.
 
 
@@ -51,16 +51,16 @@ Every result set is made up of a list of columns and a list of lists of values.
 
 #### json_sse
 To obtain continuous query status updates, EventQL supports Server-Sent Events, that is an event stream sent over HTTP.
-The client just listens to that stream and receives updates as well as the acutal query result or error messages from the EventQL server.
+The client just listens to that stream and receives updates as well as the actual query result or error messages from the EventQL server.
 
-Events with the follwing types are sent by EventQL:
+Events with the following types are sent by EventQL:
 
 The `status` event provides information about the current status of the query execution. <br>
 It has the properties `status`, , `message`, a description of the current status that is one of Waiting, Running and Downloading, and `progress`, the status in percent.
 
-The `result` event provides the acutal result JSON string.
+The `result` event provides the actual result JSON string.
 
-An `error` is sent if somethin goes wrong during the query execution. It contains the error message returned by the EventQL server.
+An `error` is sent if something goes wrong during the query execution. It contains the error message returned by the EventQL server.
 
 ##### Example using Javascript
 
@@ -79,4 +79,3 @@ An `error` is sent if somethin goes wrong during the query execution. It contain
       var error = e.data;
       query.close();
     });
-    

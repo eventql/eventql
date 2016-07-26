@@ -70,7 +70,7 @@ Makes the specified global variable(s) available to all tasks/functions.
     EVQL.broadcast(var1 [, varN...])
 
 Note that the arguments to this methods are the names of the variables as
-strings, not the actual variables themself. Also, all broadcast variables must
+strings, not the actual variables themselves. Also, all broadcast variables must
 be global variables (i.e. defined in the global scope).
 
 ##### Example:
@@ -98,7 +98,7 @@ be global variables (i.e. defined in the global scope).
 &nbsp;&nbsp;&nbsp;(required) The name of the input table.
 
 `map_fn`<br>
-&nbsp;&nbsp;&nbsp;(required) 
+&nbsp;&nbsp;&nbsp;(required)
 
 `required_columns`<br>
 &nbsp;&nbsp;&nbsp;(optional) An array of the table's columns that are required for the mapping.
@@ -113,10 +113,10 @@ be global variables (i.e. defined in the global scope).
 &nbsp;&nbsp;&nbsp;(optional) .
 
 `end`<br>
-&nbsp;&nbsp;&nbsp;(optional) 
+&nbsp;&nbsp;&nbsp;(optional)
 
 `params`<br>
-&nbsp;&nbsp;&nbsp;(optional) 
+&nbsp;&nbsp;&nbsp;(optional)
 
 
     EVQL.mapTable({

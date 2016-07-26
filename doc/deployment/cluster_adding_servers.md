@@ -6,7 +6,7 @@ most cases, adding a new server will not result in any rebalances of data (i.e.
 it doesn't create any additional network traffic or load on the servers).
 
 In general, having more servers in an EventQL cluster means you'll be able to
-more or less linearily store more data and execute queries faster. So adding
+more or less linearly store more data and execute queries faster. So adding
 more servers is always good.
 
 To add a new server, you must first choose a name for the server. This can be
@@ -27,5 +27,3 @@ is `mycluster`, the full command line could look like this:
         -C cluster.coordinator=zookeeper \
         -C cluster.zookeeper_hosts=nue01.prod.fnrd.net:2181 \
         --server_name "nodeX"
-
-
