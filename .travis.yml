@@ -1,8 +1,15 @@
 language: cpp
-script:
-- ./autogen.sh
-- ./configure
-- make
 compiler: clang
-sudo: required
 dist: trusty
+
+env:
+  - CXXFLAGS="-stdlib=libc++"
+
+script:
+  - ./autogen.sh
+  - ./configure
+  - make
+
+before_install:
+  - sudo apt-get -qq update
+  - sudo apt-get install -y libc++-dev
