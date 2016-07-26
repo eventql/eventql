@@ -1,5 +1,8 @@
 language: cpp
-script: make
+script:
+- ./autogen.sh
+- ./configure
+- make
 compiler: clang
 sudo: required
 dist: trusty
