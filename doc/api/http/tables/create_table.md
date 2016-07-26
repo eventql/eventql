@@ -9,7 +9,7 @@ a protobuf schema).
 
 How to choose a good partition size? Currently it's best to aim for roughly
 250MB-1Gper partition. If unsure, leave it with the default. In the future the
-parition size will be automatically adjusted on the fly so you don't have to
+partition size will be automatically adjusted on the fly so you don't have to
 choose one. Tables with a fixed partition size will automatically transition
 to this new scheme.
 

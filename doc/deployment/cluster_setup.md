@@ -44,7 +44,7 @@ want.
 The `cluster.coordinator` option specifies that we are going to use zookeeper
 as our coordination service.
 
-The `cluster.zookeeper_hosts` contains a comma seperated list of zookeeper hosts to connect
+The `cluster.zookeeper_hosts` contains a comma separated list of zookeeper hosts to connect
 to.
 
 For a full list of supported configuration options please refer to the [Configuration](../../configuration)
@@ -113,4 +113,3 @@ You should now be able to connect to the cluster and start executing
 queries:
 
     $ evql -h localhost -p 9175 -d mydb
-

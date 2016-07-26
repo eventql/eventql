@@ -1,7 +1,7 @@
 6. API Reference
 ================
 
-EventQL supports a number of APIs that allow you to programmatically insert 
+EventQL supports a number of APIs that allow you to programmatically insert
 rows, create and alter tables and execute queries.
 
 ### [HTTP API](http/)
@@ -14,5 +14,5 @@ access EventQL.
 ### [MapReduce &mdash; JavaScript API](javascript_mapreduce)
 
 The MapReduce JavaScript API allows you to write JavaScript programs that scan,
-aggreate and transform data in EventQL. JavaScript programs that use the MapReduce
+aggregate and transform data in EventQL. JavaScript programs that use the MapReduce
 API are automatically distributed and parallelized within EventQL.
