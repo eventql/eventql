@@ -43,64 +43,48 @@ The EventQL configuration options arw grouped in three sections: `client`, `serv
 &nbsp;&nbsp;&nbsp;&nbsp;(Default: localhost) The IP address or hostname to send the query to.
 
 **port**<br>
-&nbsp;&nbsp;&nbsp;&nbsp;(Default: 9175) The port for the host.
+&nbsp;&nbsp;&nbsp;&nbsp;(Default: 9175) The host's port.
 
 **database**<br>
 &nbsp;&nbsp;&nbsp;&nbsp;The database that should be used for following statements.
 
-**user**
+**user**<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The current user's username.
 
-**password**
+**password**<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The current user's password.
 
-**auth_token**
+**auth\_token**<br>
+&nbsp;&nbsp;&nbsp;&nbsp;
 
 
 ###server
-**name**
+**name**<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The name of the server.
 
-**datadir**
+**datadir**<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The location of the EvenQL data directory.
 
-**listen**
+**listen**<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The address (host:port) the server listens to.
 
-indexbuild_threads
+**indexbuild\_threads**<br>
 
-client_auth_backend
+**client\_auth\_backend**<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Must be either `trust` or `legacy`.
 
-legacy_auth_secret
+**legacy\_auth\_secret**<br>
 
-deamonize
-
-pidfile
-
-gc_mode
+**pidfile**
 
 
 ###cluster
-***name***
+***name***<br>
 &nbsp;&nbsp;&nbsp;&nbsp;The name of the cluster.
 
-***coordinator***
+***coordinator***<br>
 &nbsp;&nbsp;&nbsp;&nbsp;The cluster coordinator service, e.g. zookeeper.
 
-***zookeeper_hosts***
+***zookeeper\_hosts***<br>
 &nbsp;&nbsp;&nbsp;&nbsp;A comma-separated list of zookeeper hosts.
-
-
-###evqlctl
-cluster_name
-
-server_name
-
-master
-
-table_name
-
-namespace
-
-partition_id
-
-split_point
-
-primary_key
-
 
