@@ -1,6 +1,52 @@
 8.1 Architecture
 ================
 
+This page starts by gibing a brief "10,000 feet" overview of the general
+architecture of EventQL and then takes a closer look at some of the subsystems
+with links to detailed information in the respective chapters. The primary
+audience for this page are EventQL developers and users that want to learn
+about the internals of EventQL. However, this page is still an early draft version
+and might still be a bit hard to follow -- will be improved soon.
+
+EventQL is a distributed database by design and is deployed onto a number of
+machines called a "cluster". A cluster consists of many, equally privileged,
+EventQL server instances that connect to a coordination service, like ZooKeeper.
+
+The core unit of data storage in EventQL are tables and rows.  Each table has a
+strict schema anda mandatory, unique primary key. This primary key is used to
+automatically split a table into many ordered partitions of roughly 500MB.
+Each partition is then assigned to N servers (in practice N is usually 3) in the 
+cluster. Partioning is fully transparent to the user -- from a user perspective
+interacting with an EventQL cluter feels just like interacting with an ordinary
+SQL database.
+
+The partioning scheme is based on Google's BigTable and is how available storage
+and query performance can scale almost linearly ("horizontally") in the number
+of servers.
+
+So each EventQL server in a cluster stores a number of table partitions that
+were assigned to it. Internally, a single table partition is stored as a log
+structured merge tree of "cstables", also known as "columnar storage table". A
+cstable is a container file that stores many rows of a given schema in
+column-oriented layout.
+
+Clients connect to an EventQL cluster to create and manage tables, insert and
+update rows into tables and execute queries. When a client wants to executes a
+SQL (or MapReduce) query on the data it can be sent to any server in the cluster.
+
+To execute a query, a server will first identify all tables referenced from the
+query and then, for each table, identify the partitions that need to be scanned
+to answer the query (taking into account WHERE restrictions on the primary key).
+It will then rewrite the query into shards (in a simple query, one shard per
+partition) so that as much work as possible can be performed on the individual
+query shard. The, all shards of the query are executed in parallel on the servers
+that store the respective partitions, minimizing data transfers. On each shard,
+the subset of the data that is required to answer the query (i.e. only the
+actually referenced columns in the table) are loaded from the cstables on disk.
+
+
+## Partitioning
+
 Each table's keyspace is split into a number of non-overlapping ranges called
 "partitions" (like bigtable). 
 
@@ -9,8 +55,6 @@ replication factor. Each server accepts queries and inserts for every partition
 it serves (unlike bigtable). I.e. we can tolerate up to N-1 failures and still
 serve reads and writes. In practice, N is often 3 which would make the number of
 tolerated failures 2.
-
-## Partition Location
 
 Each table has a METADATA file that records the partition mapping. The TableConfig,
 which is kept in the coordination service records these pieces of information:
@@ -242,3 +286,31 @@ configuration and is completely transparent to the user while giving us horizont
 scalability well beyond gigabits of insert load.
 
 Note that you can turn off this optimization both globally and per-insert.
+
+
+#### Columnar Storage Engine
+
+EventQL is a column-oriented database. This means that when executing a query, it
+doesn't have to read the full row from disk (like row-oriented databases) but
+only those columns which are actually required by the query. This feature is
+fully transparent to the user: The only thing you will notice is dramatically
+increased IO performance and therefore query execution speed.
+
+Since queries don't have to read the full row from disk every time, you don't
+have to limit yourself in terms of table size. EventQL can handle tables containing
+many thousand individual columns per row just fine.
+
+EventQL implements the Dremel Record Shredding and Assembly algorithm to store
+nested rows in columnar format.
+
+
+#### Nested Records
+
+Tables can have "nested" schemas via the OBJECT and REPEATED types. This may
+sound complex but is actually quite simple and allows you to implement 
+arbitrary data models traditionally not suited for SQL databases, such as JSON
+events containing arrays or objects.
+
+The nested rows concept is best [illustrated by example](../../tables/datatypes/).
+
+
