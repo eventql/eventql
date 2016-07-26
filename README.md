@@ -5,6 +5,19 @@ collection and analytics. It runs super-fast SQL and JavaScript queries.
 
 Documentation: [eventql.io](http://eventql.io/)
 
+## Features
+
+* Tables are transparently split into ordered partitions by primary key and distributed onto many machines
+* Supports INSERT, UPDATE and DELETE operations
+* Supports flat and complex/nested tables (OBJECT/ARRAY column types). Table rows can be inserted and retrieved as JSON objects.
+* Rows are stored in a column oriented fashion. Queries only read required data for referenced columns.
+* (Almost) complete SQL 2009 support. (It does JOINs!)
+* Queries are also automatically parallelized and executed on many machines in parallel
+* Scales to hundreds of terrabytes per table, thousands of tables per cluster
+* "Shared nothing" design. An EventQL cluster consists of many equally privileged servers
+* Fully transparent query caching when the same query is repeatedly executed on (partially) unchanged data
+* Written in modern C++11 with extensive documentation. Commercial support available
+
 ## Build
 
 Before we can start we need to install some build dependencies. Currently
@@ -35,15 +48,3 @@ To run the test suite:
 
     $ make test
 
-## Features
-
-* Supports INSERT, UPDATE and DELETE operations
-* Supports flat and complex/nested tables (OBJECT/ARRAY column types). Table rows can be inserted and retrieved as JSON objects.
-* Rows are stored in a column oriented fashion. Queries only read required data for referenced columns.
-* (Almost) complete SQL 2009 support. (It does JOINs!)
-* Tables are transparently split into ordered partitions by primary key and distributed onto many machines
-* Queries are also automatically parallelized and executed on many machines in parallel
-* Scales to hundreds of terrabytes per table, thousands of tables per cluster
-* "Shared nothing" design. An EventQL cluster consists of many equally privileged servers
-* Fully transparent query caching when the same query is repeatedly executed on (partially) unchanged data
-* Written in modern C++11 with extensive documentation. Commercial support available
