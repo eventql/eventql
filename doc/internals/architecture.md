@@ -13,7 +13,7 @@ machines called a "cluster". A cluster consists of many, equally privileged,
 EventQL server instances that connect to a coordination service, like ZooKeeper.
 
 The core unit of data storage in EventQL are tables and rows.  Each table has a
-strict schema anda mandatory, unique primary key. This primary key is used to
+strict schema and a mandatory, unique primary key. This primary key is used to
 automatically split a table into many ordered partitions of roughly 500MB.
 Each partition is then assigned to N servers (in practice N is usually 3) in the 
 cluster. Partioning is fully transparent to the user -- from a user perspective
@@ -26,23 +26,25 @@ of servers.
 
 So each EventQL server in a cluster stores a number of table partitions that
 were assigned to it. Internally, a single table partition is stored as a log
-structured merge tree of "cstables", also known as "columnar storage table". A
+structured merge tree of "cstables", also known as "columnar storage tables". A
 cstable is a container file that stores many rows of a given schema in
 column-oriented layout.
 
 Clients connect to an EventQL cluster to create and manage tables, insert and
 update rows into tables and execute queries. When a client wants to executes a
-SQL (or MapReduce) query on the data it can be sent to any server in the cluster.
+SQL (or MapReduce) query on the data it can sent the query to any server in the
+cluster.
 
 To execute a query, a server will first identify all tables referenced from the
 query and then, for each table, identify the partitions that need to be scanned
 to answer the query (taking into account WHERE restrictions on the primary key).
 It will then rewrite the query into shards (in a simple query, one shard per
-partition) so that as much work as possible can be performed on the individual
-query shard. The, all shards of the query are executed in parallel on the servers
+partition) so that as much work as possible can be performed local to the data. 
+Then, all shards of the query are executed in parallel on the servers
 that store the respective partitions, minimizing data transfers. On each shard,
 the subset of the data that is required to answer the query (i.e. only the
-actually referenced columns in the table) are loaded from the cstables on disk.
+actually referenced columns in the table) is loaded from the cstables on disk.
+Finally, all shard results are merged and sent back to the client.
 
 ### Consistency & Durability
 
