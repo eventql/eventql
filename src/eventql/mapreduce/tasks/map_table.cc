@@ -21,15 +21,15 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#include "eventql/eventql.h"
 #include "eventql/util/SHA1.h"
+#include "eventql/util/wallclock.h"
 #include "eventql/util/http/HTTPSSEResponseHandler.h"
 #include "eventql/mapreduce/tasks/map_table.h"
 #include "eventql/mapreduce/mapreduce_scheduler.h"
 #include "eventql/db/metadata_client.h"
 #include <eventql/server/server_stats.h>
 #include <eventql/server/sql/table_provider.h>
-
-#include "eventql/eventql.h"
 
 namespace eventql {
 
@@ -176,9 +176,11 @@ Option<MapReduceShardResult> MapTableTask::executeRemote(
   auto req = http::HTTPRequest::mkPost(url, params);
   auth_->signRequest(session_, &req);
 
+  auto t0 = WallClock::unixMicros();
   auto res = http_client.executeRequest(
       req,
       http::HTTPSSEResponseHandler::getFactory(event_handler));
+  auto t1 = WallClock::unixMicros();
 
   if (res.statusCode() != 200) {
     errors.emplace_back(
@@ -200,11 +202,12 @@ Option<MapReduceShardResult> MapTableTask::executeRemote(
 
   {
     auto logline = StringUtil::format(
-        "Map table shard on $0/$1/$2 finished successfully on $3",
+        "Map table shard on $0/$1/$2 finished successfully on $3, took $4s",
         session_->getEffectiveNamespace(),
         shard->table_ref.table_key,
         shard->table_ref.partition_key.get().toString(),
-        server_id);
+        server_id,
+        double(t1 - t0) / kMicrosPerSecond);
 
     logDebug("evqld", logline);
     job->sendDebugLogline(logline);
