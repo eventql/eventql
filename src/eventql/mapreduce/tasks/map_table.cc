@@ -30,6 +30,7 @@
 #include "eventql/db/metadata_client.h"
 #include <eventql/server/server_stats.h>
 #include <eventql/server/sql/table_provider.h>
+#include <algorithm>
 
 namespace eventql {
 
@@ -86,6 +87,7 @@ MapTableTask::MapTableTask(
     shard->table_ref = table_ref_;
     shard->table_ref.partition_key = pid;
     shard->servers = Vector<String>(p.servers().begin(), p.servers().end());
+    std::random_shuffle(shard->servers.begin(), shard->servers.end());
     addShard(shard.get(), shards);
   }
 }

@@ -27,8 +27,8 @@
 #include <eventql/server/sql/pipelined_expression.h>
 #include <eventql/sql/qtree/QueryTreeUtil.h>
 #include <eventql/db/metadata_client.h>
-
 #include "eventql/eventql.h"
+#include <algorithm>
 
 namespace eventql {
 
@@ -233,6 +233,7 @@ Vector<Scheduler::PipelinedQueryTree> Scheduler::pipelineExpression(
       replicas.emplace_back(rref);
     }
 
+    std::random_shuffle(replicas.begin(), replicas.end());
     partitions.emplace(pid, replicas);
   }
 
