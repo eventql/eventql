@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
  *   - Paul Asmuth <paul@eventql.io>
@@ -59,7 +59,8 @@ protected:
       RefPtr<MapReduceTaskShard> shard,
       RefPtr<MapReduceScheduler> job,
       const Vector<String>& input_tables,
-      const String& server_id);
+      const String& server_id,
+      const SHA1Hash& placement_id);
 
   Session* session_;
   String reduce_fn_;

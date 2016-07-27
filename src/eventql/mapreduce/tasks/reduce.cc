@@ -26,6 +26,7 @@
 #include "eventql/mapreduce/mapreduce_scheduler.h"
 #include <eventql/server/server_stats.h>
 #include <eventql/db/server_allocator.h>
+#include <eventql/util/wallclock.h>
 #include "eventql/eventql.h"
 
 namespace eventql {
@@ -113,7 +114,7 @@ Option<MapReduceShardResult> ReduceTask::execute(
 
   for (const auto& host : servers) {
     try {
-      return executeRemote(shard.get(), job, input_tables, host);
+      return executeRemote(shard.get(), job, input_tables, host, placement_id);
     } catch (const StandardException& e) {
       logError(
           "evqld",
@@ -134,8 +135,8 @@ Option<MapReduceShardResult> ReduceTask::executeRemote(
     RefPtr<MapReduceTaskShard> shard,
     RefPtr<MapReduceScheduler> job,
     const Vector<String>& input_tables,
-    const String& server_id) {
-
+    const String& server_id,
+    const SHA1Hash& placement_id) {
   auto server_cfg = cdir_->getServerConfig(server_id);
   if (server_cfg.server_status() != SERVER_UP) {
     RAISE(kRuntimeError, "server is down");
@@ -147,6 +148,13 @@ Option<MapReduceShardResult> ReduceTask::executeRemote(
       session_->getEffectiveNamespace(),
       input_tables.size(),
       server_id);
+
+  job->sendDebugLogline(
+      StringUtil::format(
+          "Executing reduce shard $0 with $1 inputs on $2",
+          placement_id,
+          input_tables.size(),
+          server_id));
 
   auto url = StringUtil::format(
       "http://$0/api/v1/mapreduce/tasks/reduce",
@@ -189,16 +197,34 @@ Option<MapReduceShardResult> ReduceTask::executeRemote(
   auto req = http::HTTPRequest::mkPost(url, params);
   auth_->signRequest(session_, &req);
 
+  auto t0 = WallClock::unixMicros();
   auto res = http_client.executeRequest(
       req,
       http::HTTPSSEResponseHandler::getFactory(event_handler));
+  auto t1 = WallClock::unixMicros();
+
+  if (res.statusCode() != 200) {
+    errors.emplace_back(
+        StringUtil::format("HTTP error ($0): $1", res.statusCode(), url));
+  }
+
+  if (errors.size() > 0) {
+    job->sendDebugLogline(
+        StringUtil::format(
+            "Reduce shard $0 failed on $1: $2",
+            placement_id,
+            server_id,
+            StringUtil::join(errors, "; ")));
+  } else {
+    job->sendDebugLogline(
+        StringUtil::format(
+            "Reduce shard $0 finished successfully on $1 in $2s",
+              server_id,
+              double(t1 - t0) / kMicrosPerSecond));
+  }
 
   if (!errors.empty()) {
     RAISE(kRuntimeError, StringUtil::join(errors, "; "));
-  }
-
-  if (res.statusCode() != 200) {
-    RAISEF(kRuntimeError, "HTTP error: $0", url);
   }
 
   return result;
