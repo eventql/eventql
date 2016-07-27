@@ -151,7 +151,7 @@ Option<MapReduceShardResult> ReduceTask::executeRemote(
 
   job->sendDebugLogline(
       StringUtil::format(
-          "Executing reduce shard $0 with $1 inputs on $2",
+          "Reduce shard $0 with $1 inputs starting to execute on $2",
           placement_id,
           input_tables.size(),
           server_id));
@@ -219,8 +219,9 @@ Option<MapReduceShardResult> ReduceTask::executeRemote(
     job->sendDebugLogline(
         StringUtil::format(
             "Reduce shard $0 finished successfully on $1 in $2s",
-              server_id,
-              double(t1 - t0) / kMicrosPerSecond));
+            placement_id,
+            server_id,
+            double(t1 - t0) / kMicrosPerSecond));
   }
 
   if (!errors.empty()) {

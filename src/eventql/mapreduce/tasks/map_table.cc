@@ -151,7 +151,7 @@ Option<MapReduceShardResult> MapTableTask::executeRemote(
 
   if (!cache_only) {
     auto logline = StringUtil::format(
-        "Executing map table shard on $0/$1/$2 on $3",
+        "Map table shard starting to execute on $0/$1/$2 on $3",
         session_->getEffectiveNamespace(),
         shard->table_ref.table_key,
         shard->table_ref.partition_key.get().toString(),
