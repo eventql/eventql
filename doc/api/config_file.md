@@ -1,7 +1,7 @@
 2.2 Configuration
 =================
 
-Configuration files aren't mandatory but they provide a convenient way to specifiy options that you use regurlay when running EventQL programs, so you don't have to enter them on the command line each time you run the program.
+Configuration files aren't mandatory but they provide a convenient way to specify options that you use regularly when running EventQL programs, so you don't have to enter them on the command line each time you run the program.
 
 ###File Format
 EventQL uses the INI file format, that is a simple text file grouped into sections that consists of key-value pairs.
@@ -17,7 +17,7 @@ You can override every option set in the configuration file by using the command
 
 ###File path
 
-If not set explicitely with the --config option, EventQL will search for the configuration
+If not set explicitly with the --config option, EventQL will search for the configuration
 file at the following locations:
 
 
@@ -87,4 +87,3 @@ The EventQL configuration options arw grouped in three sections: `client`, `serv
 
 ***zookeeper\_hosts***<br>
 &nbsp;&nbsp;&nbsp;&nbsp;A comma-separated list of zookeeper hosts.
-

@@ -34,7 +34,7 @@ namespace eventql {
 
 class MapReduceScheduler : public RefCounted {
 public:
-  static const size_t kDefaultMaxConcurrentTasks = 32;
+  static const size_t kDefaultMaxConcurrentTasks = 64;
 
   MapReduceScheduler(
       Session* session,

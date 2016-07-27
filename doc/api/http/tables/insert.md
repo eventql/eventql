@@ -25,7 +25,7 @@ inserted. You may therefore insert one or more rows per request.
   </tr>
   <tr>
     <td>data</td>
-    <td>JSON Object containing the actual data to be inserte.</td>
+    <td>JSON Object containing the actual data to be inserted.</td>
   </tr>
 </table>
 
@@ -60,4 +60,3 @@ inserted. You may therefore insert one or more rows per request.
 
         << HTTP/1.1 201 CREATED
         << Content-Length: 0
-

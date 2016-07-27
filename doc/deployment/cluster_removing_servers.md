@@ -3,10 +3,10 @@
 
 Sometimes you need to remove a server from a cluster. Either because the hardware
 or the operation system has become defect or simply because you are re-provisioning
-the datacenter.
+the data center.
 
-Thera are two methods of removing a server from a cluster, called `soft leave`
-and `hard leave`. The difference between these two methods lies in a tradeoff
+There are two methods of removing a server from a cluster, called `soft leave`
+and `hard leave`. The difference between these two methods lies in a trade-off
 between how quickly the server can actually be removed, not creating excessive
 network/IO load and not violating any redundancy guarantees.
 
@@ -25,7 +25,7 @@ pace and you should not actually disconnect the leaving server until all data wa
 moved away from there.
 
 Depending on the amount of data stored on the leaving server, cluster size and
-available network bandwith a slow leave operation might take many hours to days
+available network bandwidth a slow leave operation might take many hours to days
 to complete.
 
 The slow leave operation is therefore applicable, if you are reprovisioning and
@@ -53,7 +53,7 @@ The `hard leave` operation will immediately remove the server from the cluster
 and mark all data previously stored on the node as "dead". After this happens,
 the other (live) servers will detect that some partitions have fewer replicas
 than they should have and will immediately start to assign new servers to those
-partitions and start replicating. 
+partitions and start replicating.
 
 This means a hard leave is instant: you can immediately disconnect the server
 after the hard-leave operation has completed. A hard leave is also applicable
@@ -70,4 +70,3 @@ Do not use the hard leave to reprovision the cluster, but only for defect nodes.
 The command to perform a hard leave is (assuming you want to remove `nodeX`)
 
     $ evqlctl cluster-remove-server --server_name "nodeX" --hard
-
