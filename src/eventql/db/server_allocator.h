@@ -33,11 +33,24 @@ namespace eventql {
 class ServerAllocator {
 public:
 
+  enum AllocationPolicy {
+    MUST_ALLOCATE,
+    BEST_EFFORT,
+    IDLE
+  };
+
   ServerAllocator(ConfigDirectory* cdir);
 
   Status allocateServers(
       size_t num_servers,
       Set<String>* servers) const;
+
+  Status allocateStable(
+      AllocationPolicy policy,
+      const SHA1Hash& token,
+      size_t num_servers,
+      const Set<String>& exclude_servers,
+      Vector<String>* out) const;
 
 protected:
   ConfigDirectory* cdir_;
