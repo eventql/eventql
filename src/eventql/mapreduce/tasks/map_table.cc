@@ -129,10 +129,14 @@ Option<MapReduceShardResult> MapTableTask::execute(
     }
   }
 
-  RAISEF(
-      kRuntimeError,
-      "MapTableTask::execute failed: $0",
-      StringUtil::join(errors, ", "));
+  if (true) { // fixme tolerate errors setting
+    return None<MapReduceShardResult>();
+  } else {
+    RAISEF(
+        kRuntimeError,
+        "MapTableTask::execute failed: $0",
+        StringUtil::join(errors, ", "));
+  }
 }
 
 Option<MapReduceShardResult> MapTableTask::executeRemote(
