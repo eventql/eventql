@@ -100,7 +100,10 @@ Option<MapReduceShardResult> MapTableTask::execute(
   // first round: try cache only
   for (const auto& host : shard->servers) {
     try {
-      return executeRemote(shard, job, host, true);
+      auto res = executeRemote(shard, job, host, true);
+      if (!res.isEmpty()) {
+        return res;
+      }
     } catch (const StandardException& e) {
       logError(
           "evqld",
