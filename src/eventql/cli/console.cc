@@ -335,6 +335,7 @@ Status Console::runJS(const String& program_source) {
     String error_string;
     bool line_dirty = false;
     bool is_tty = stderr_os->isTTY();
+    String status_line;
 
     auto event_handler = [&] (const http::HTTPSSEEvent& ev) {
       if (ev.name.isEmpty()) {
@@ -348,7 +349,7 @@ Status Console::runJS(const String& program_source) {
         auto tasks_running = json::objectGetUInt64(obj, "num_tasks_running");
         auto progress = json::objectGetFloat(obj, "progress");
 
-        auto status_line = StringUtil::format(
+        status_line = StringUtil::format(
             "[$0/$1] $2 tasks running ($3%)",
             tasks_completed.isEmpty() ? 0 : tasks_completed.get(),
             tasks_total.isEmpty() ? 0 : tasks_total.get(),
@@ -366,10 +367,12 @@ Status Console::runJS(const String& program_source) {
         return;
       }
 
+      bool line_erased = false;
       if (line_dirty) {
         stderr_os->eraseLine();
         stderr_os->print("\r");
         line_dirty = false;
+        line_erased = true;
       }
 
       if (ev.name.get() == "job_started") {
@@ -395,6 +398,12 @@ Status Console::runJS(const String& program_source) {
 
       if (ev.name.get() == "log") {
         stderr_os->print(URI::urlDecode(ev.data) + "\n");
+
+        if (line_erased) {
+          stderr_os->print(status_line);
+          line_dirty = true;
+        }
+
         return;
       }
 
