@@ -146,10 +146,58 @@ void MapReduceAPIServlet::executeMapPartitionTask(
     return;
   }
 
+  auto job_spec = mkRef(new MapReduceJobSpec{});
+  String js_globals = "{}";
+  URI::getParam(params, "globals", &js_globals);
+
+  String js_params = "{}";
+  URI::getParam(params, "params", &js_params);
+
+  String required_columns_str;
+  URI::getParam(params, "required_columns", &required_columns_str);
+
+  Set<String> required_columns;
+  for (const auto& col : StringUtil::split(required_columns_str, ",")) {
+    if (col.length() == 0) {
+      continue;
+    }
+
+    required_columns.insert(col);
+  }
+
+  String cache_only;
+  if (URI::getParam(params, "cache_only", &cache_only)) {
+    auto shard_id = service_->mapPartition(
+        session,
+        job_spec,
+        table_name,
+        SHA1Hash::fromHexString(partition_key),
+        map_fn,
+        js_globals,
+        js_params,
+        required_columns,
+        true);
+
+    if (shard_id.isEmpty()) {
+      http::HTTPResponse res;
+      res.populateFromRequest(req_stream->request());
+      res.setStatus(204, "No Content");
+      res_stream->writeResponse(res);
+    } else {
+      auto sse_stream = mkRef(new http::HTTPSSEStream(req_stream, res_stream));
+      sse_stream->start();
+      sse_stream->sendEvent(
+          shard_id.get().toString(),
+          Some(String("result_id")));
+      sse_stream->finish();
+    }
+
+    return;
+  }
+
   auto sse_stream = mkRef(new http::HTTPSSEStream(req_stream, res_stream));
   sse_stream->start();
 
-  auto job_spec = mkRef(new MapReduceJobSpec{});
   job_spec->onLogline([sse_stream] (const String& logline) {
     if (sse_stream->isClosed()) {
       return;
@@ -159,24 +207,6 @@ void MapReduceAPIServlet::executeMapPartitionTask(
   });
 
   try {
-    String js_globals = "{}";
-    URI::getParam(params, "globals", &js_globals);
-
-    String js_params = "{}";
-    URI::getParam(params, "params", &js_params);
-
-    String required_columns_str;
-    URI::getParam(params, "required_columns", &required_columns_str);
-
-    Set<String> required_columns;
-    for (const auto& col : StringUtil::split(required_columns_str, ",")) {
-      if (col.length() == 0) {
-        continue;
-      }
-
-      required_columns.insert(col);
-    }
-
     auto shard_id = service_->mapPartition(
         session,
         job_spec,

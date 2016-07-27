@@ -97,10 +97,25 @@ Option<MapReduceShardResult> MapTableTask::execute(
     RefPtr<MapReduceScheduler> job) {
   auto shard = shard_base.asInstanceOf<MapTableTaskShard>();
 
+  // first round: try cache only
+  for (const auto& host : shard->servers) {
+    try {
+      return executeRemote(shard, job, host, true);
+    } catch (const StandardException& e) {
+      logError(
+          "evqld",
+          e,
+          "MapTableTask::execute failed");
+
+      continue;
+    }
+  }
+
+  // second round: cache or execute
   Vector<String> errors;
   for (const auto& host : shard->servers) {
     try {
-      return executeRemote(shard, job, host);
+      return executeRemote(shard, job, host, false);
     } catch (const StandardException& e) {
       logError(
           "evqld",
@@ -120,13 +135,14 @@ Option<MapReduceShardResult> MapTableTask::execute(
 Option<MapReduceShardResult> MapTableTask::executeRemote(
     RefPtr<MapTableTaskShard> shard,
     RefPtr<MapReduceScheduler> job,
-    const String& server_id) {
+    const String& server_id,
+    bool cache_only) {
   auto server_cfg = cdir_->getServerConfig(server_id);
   if (server_cfg.server_status() != SERVER_UP) {
     RAISE(kRuntimeError, "server is down");
   }
 
-  {
+  if (!cache_only) {
     auto logline = StringUtil::format(
         "Executing map table shard on $0/$1/$2 on $3",
         session_->getEffectiveNamespace(),
@@ -150,6 +166,10 @@ Option<MapReduceShardResult> MapTableTask::executeRemote(
       URI::urlEncode(globals_),
       URI::urlEncode(params_),
       URI::urlEncode(StringUtil::join(required_columns_, ",")));
+
+  if (cache_only) {
+    url += "&cache_only = true";
+  }
 
   Option<MapReduceShardResult> result;
   Vector<String> errors;
@@ -184,12 +204,16 @@ Option<MapReduceShardResult> MapTableTask::executeRemote(
       http::HTTPSSEResponseHandler::getFactory(event_handler));
   auto t1 = WallClock::unixMicros();
 
+  if (res.statusCode() == 204) {
+    return None<MapReduceShardResult>();
+  }
+
   if (res.statusCode() != 200) {
     errors.emplace_back(
         StringUtil::format("HTTP Error ($0): $1", res.statusCode(), url));
   }
 
-  if (!errors.empty()) {
+  if (!cache_only && !errors.empty()) {
     job->sendDebugLogline(
         StringUtil::format(
             "Map table shard on $0/$1/$2 failed on $3: $4",
@@ -202,7 +226,17 @@ Option<MapReduceShardResult> MapTableTask::executeRemote(
     RAISE(kRuntimeError, StringUtil::join(errors, "; "));
   }
 
-  {
+  if (cache_only) {
+    auto logline = StringUtil::format(
+        "Map table shard on $0/$1/$2 loaded successfully from cache on $3",
+        session_->getEffectiveNamespace(),
+        shard->table_ref.table_key,
+        shard->table_ref.partition_key.get().toString(),
+        server_id);
+
+    logDebug("evqld", logline);
+    job->sendDebugLogline(logline);
+  } else {
     auto logline = StringUtil::format(
         "Map table shard on $0/$1/$2 finished successfully on $3, took $4s",
         session_->getEffectiveNamespace(),

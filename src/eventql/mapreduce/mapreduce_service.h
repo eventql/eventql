@@ -57,7 +57,8 @@ public:
       const String& map_fn,
       const String& globals,
       const String& params,
-      const Set<String>& required_columns);
+      const Set<String>& required_columns,
+      bool cache_only = false);
 
   Option<SHA1Hash> reduceTables(
       Session* session,

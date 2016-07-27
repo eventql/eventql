@@ -62,7 +62,8 @@ protected:
   Option<MapReduceShardResult> executeRemote(
       RefPtr<MapTableTaskShard> shard,
       RefPtr<MapReduceScheduler> job,
-      const String& server_id);
+      const String& server_id,
+      bool cache_only);
 
   Session* session_;
   TSDBTableRef table_ref_;

@@ -101,7 +101,8 @@ Option<SHA1Hash> MapReduceService::mapPartition(
     const String& map_fn,
     const String& globals,
     const String& params,
-    const Set<String>& required_columns) {
+    const Set<String>& required_columns,
+    bool cache_only /* = false */) {
   auto table = pmap_->findTable(
       session->getEffectiveNamespace(),
       table_name);
@@ -144,6 +145,8 @@ Option<SHA1Hash> MapReduceService::mapPartition(
 
   if (FileUtil::exists(output_path)) {
     return Some(output_id);
+  } else if (cache_only) {
+    return None<SHA1Hash>();
   }
 
   auto output_path_tmp = StringUtil::format(
