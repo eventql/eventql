@@ -168,7 +168,7 @@ Option<MapReduceShardResult> MapTableTask::executeRemote(
       URI::urlEncode(StringUtil::join(required_columns_, ",")));
 
   if (cache_only) {
-    url += "&cache_only = true";
+    url += "&cache_only=true";
   }
 
   Option<MapReduceShardResult> result;
