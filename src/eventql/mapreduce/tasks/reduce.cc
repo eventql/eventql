@@ -84,13 +84,25 @@ Option<MapReduceShardResult> ReduceTask::execute(
             shard->shard));
   }
 
-  std::sort(input_tables.begin(), input_tables.end());
+  auto input_tables_sorted = input_tables;
+  std::sort(input_tables_sorted.begin(), input_tables_sorted.end());
+  auto placement_id = SHA1::compute(
+      StringUtil::format(
+          "$0~$1",
+          StringUtil::join(input_tables_sorted, "~"),
+          shard->shard));
 
   Vector<String> errors;
-  Set<String> servers;
+  Vector<String> servers;
   auto repl_factor = cdir_->getClusterConfig().replication_factor();
   ServerAllocator alloc(cdir_);
-  auto rc = alloc.allocateServers(repl_factor, &servers);
+  auto rc = alloc.allocateStable(
+      ServerAllocator::BEST_EFFORT,
+      placement_id,
+      repl_factor,
+      Set<String>{},
+      &servers);
+
   if (!rc.isSuccess()) {
     RAISEF(kRuntimeError, "error while allocating servers: $0", rc.message());
   }
