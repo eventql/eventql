@@ -119,15 +119,23 @@ Option<MapReduceShardResult> MapTableTask::executeRemote(
     RefPtr<MapTableTaskShard> shard,
     RefPtr<MapReduceScheduler> job,
     const String& server_id) {
-  logDebug(
-      "evqld",
-      "Executing map table shard on $0/$1/$2 on $3",
-      session_->getEffectiveNamespace(),
-      shard->table_ref.table_key,
-      shard->table_ref.partition_key.get().toString(),
-      server_id);
-
   auto server_cfg = cdir_->getServerConfig(server_id);
+  if (server_cfg.server_status() != SERVER_UP) {
+    RAISE(kRuntimeError, "server is down");
+  }
+
+  {
+    auto logline = StringUtil::format(
+        "Executing map table shard on $0/$1/$2 on $3",
+        session_->getEffectiveNamespace(),
+        shard->table_ref.table_key,
+        shard->table_ref.partition_key.get().toString(),
+        server_id);
+
+    logDebug("evqld", logline);
+    job->sendDebugLogline(logline);
+  }
+
   auto url = StringUtil::format(
       "http://$0/api/v1/mapreduce/tasks/map_partition",
       server_cfg.server_addr());
@@ -172,12 +180,34 @@ Option<MapReduceShardResult> MapTableTask::executeRemote(
       req,
       http::HTTPSSEResponseHandler::getFactory(event_handler));
 
+  if (res.statusCode() != 200) {
+    errors.emplace_back(
+        StringUtil::format("HTTP Error ($0): $1", res.statusCode(), url));
+  }
+
   if (!errors.empty()) {
+    job->sendDebugLogline(
+        StringUtil::format(
+            "Map table shard on $0/$1/$2 failed on $3: $4",
+            session_->getEffectiveNamespace(),
+            shard->table_ref.table_key,
+            shard->table_ref.partition_key.get().toString(),
+            server_id,
+            StringUtil::join(errors, "; ")));
+
     RAISE(kRuntimeError, StringUtil::join(errors, "; "));
   }
 
-  if (res.statusCode() != 200) {
-    RAISEF(kRuntimeError, "HTTP Error: $0", url);
+  {
+    auto logline = StringUtil::format(
+        "Map table shard on $0/$1/$2 finished successfully on $3",
+        session_->getEffectiveNamespace(),
+        shard->table_ref.table_key,
+        shard->table_ref.partition_key.get().toString(),
+        server_id);
+
+    logDebug("evqld", logline);
+    job->sendDebugLogline(logline);
   }
 
   return result;

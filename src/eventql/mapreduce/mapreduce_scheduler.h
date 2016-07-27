@@ -49,6 +49,7 @@ public:
 
   void sendResult(const String& value);
   void sendLogline(const String& logline);
+  void sendDebugLogline(const String& logline);
 
   Option<String> getResultURL(size_t task_index);
   Option<SHA1Hash> getResultID(size_t task_index);
