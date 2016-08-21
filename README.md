@@ -44,7 +44,13 @@ To build EventQL from a git checkout:
     $ make V=1
     $ src/evql -h
 
+To run EventQL Server with Docker:
+    $ git clone git@github.com:eventql/eventql.git
+    $ cd eventql/docker/server
+    $ chmod +x run.sh && ./run.sh
+
+Running on port 9175
+
 To run the test suite:
 
     $ make test
-
