@@ -368,7 +368,7 @@ void Database::shutdown() {
   }
 
   mapreduce_service_.reset(nullptr);
-  JS_ShutDown();
+  //JS_ShutDown();
 
   sql_service_.reset(nullptr);
   sql_.reset(nullptr);
@@ -407,6 +407,17 @@ void Database::shutdown() {
   file_tracker_.reset(nullptr);
   server_cfg_.reset(nullptr);
   server_lock_.reset(nullptr);
+}
+
+std::unique_ptr<Session> Database::createContext() {
+  return std::unique_ptr<Session>(new Session());
+}
+
+void Database::startThread(
+    Session* context,
+    std::function<void()> entrypoint) {
+  auto t = std::thread(entrypoint);
+  t.detach();
 }
 
 } // namespace tdsb

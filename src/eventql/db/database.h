@@ -53,6 +53,7 @@ class MetadataReplication;
 class SQLService;
 class MapReduceService;
 class Leader;
+class Session;
 
 class Database {
 public:
@@ -61,6 +62,18 @@ public:
 
   ReturnCode start();
   void shutdown();
+
+  /**
+   * Create a new database connection context
+   */
+  std::unique_ptr<Session> createContext();
+
+  /**
+   * Start a thread from which database operations can be executed
+   */
+  void startThread(
+      Session* context,
+      std::function<void()> entrypoint);
 
 protected:
   ProcessConfig* cfg_;

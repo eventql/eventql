@@ -874,6 +874,8 @@ evql_core_a_SOURCES = \
     eventql/db/db_client.h \
     eventql/db/table_service.cc \
     eventql/db/table_service.h \
+    eventql/transport/http/http_transport.cc \
+    eventql/transport/http/http_transport.h \
     eventql/transport/http/rpc_servlet.cc \
     eventql/transport/http/rpc_servlet.h \
     eventql/db/table_ref.cc \

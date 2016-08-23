@@ -46,7 +46,6 @@ HTTPServerConnection::HTTPServerConnection(
     on_write_completed_cb_(nullptr),
     closed_(false),
     stats_(stats) {
-  iputs("start conn: $0", (void*) this);
   logTrace("http.server", "New HTTP connection: $0", inspect(*this));
   stats_->total_connections.incr(1);
   stats_->current_connections.incr(1);
@@ -81,7 +80,6 @@ HTTPServerConnection::HTTPServerConnection(
 }
 
 HTTPServerConnection::~HTTPServerConnection() {
-  iputs("free conn: $0", (void*) this);
   stats_->current_connections.decr(1);
 }
 

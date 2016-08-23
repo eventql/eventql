@@ -23,37 +23,23 @@
  */
 #pragma once
 #include "eventql/eventql.h"
-#include "eventql/util/return_code.h"
-#include <eventql/transport/http/http_transport.h>
+#include "eventql/db/database.h"
+#include "eventql/util/http/httpserver.h"
+#include "eventql/util/http/httprouter.h"
 
 namespace eventql {
-class Database;
 
-class Listener {
+class HTTPTransport {
 public:
 
-  Listener(Database* database);
+  HTTPTransport(Database* database);
 
-  ReturnCode bind(int listen_port);
-
-  void run();
-  void shutdown();
+  void handleConnection(int fd, std::string prelude_bytes);
 
 protected:
-
-  void open(int fd);
-
-  struct EstablishingConnection {
-    int fd;
-    uint64_t accepted_at;
-  };
-
   Database* database_;
-  uint64_t connect_timeout_;
-  std::atomic<bool> running_;
-  int ssock_;
-  std::list<EstablishingConnection> connections_;
-  HTTPTransport http_transport_;
+  http::HTTPRouter http_router_;
+  http::HTTPServerStats http_stats_;
 };
 
 } // namespace eventql
