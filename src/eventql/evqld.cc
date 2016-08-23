@@ -352,14 +352,6 @@ int main(int argc, const char** argv) {
     pidfile.write(StringUtil::toString(getpid()));
   }
 
-  /* thread pools */
-  thread::CachedThreadPool tpool(
-      thread::ThreadPoolOptions {
-        .thread_name = Some(String("evqld-httpserver"))
-      },
-      mkScoped(new CatchAndLogExceptionHandler("evqld")),
-      8);
-
   /* listen addr */
   String listen_host;
   int listen_port;
@@ -531,8 +523,8 @@ int main(int argc, const char** argv) {
         &metadata_service,
         cache_dir);
 
-    http_router.addRouteByPrefixMatch("/tsdb", &tsdb_servlet, &tpool);
-    http_router.addRouteByPrefixMatch("/rpc", &tsdb_servlet, &tpool);
+    http_router.addRouteByPrefixMatch("/tsdb", &tsdb_servlet);
+    http_router.addRouteByPrefixMatch("/rpc", &tsdb_servlet);
 
     eventql::CompactionWorker cstable_index(
         &partition_map,
@@ -651,8 +643,8 @@ int main(int argc, const char** argv) {
 
     eventql::DefaultServlet default_servlet;
 
-    http_router.addRouteByPrefixMatch("/api/", &analytics_servlet, &tpool);
-    http_router.addRouteByPrefixMatch("/eventql", &status_servlet, &tpool);
+    http_router.addRouteByPrefixMatch("/api/", &analytics_servlet);
+    http_router.addRouteByPrefixMatch("/eventql", &status_servlet);
     http_router.addRouteByPrefixMatch("/", &default_servlet);
 
     auto rusage_t = std::thread([] () {
@@ -684,7 +676,7 @@ int main(int argc, const char** argv) {
     // db.start
 
     // listen
-    Listener listener;
+    Listener listener(&http_router);
     rc = listener.bind(listen_port);
     if (rc.isSuccess()) {
       listener.run();

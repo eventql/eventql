@@ -32,16 +32,83 @@
 #include <ctime>
 #include <sys/time.h>
 #include <sys/types.h>
+#include <thread>
 #ifdef __MACH__
 #include <mach/clock.h>
 #include <mach/mach.h>
 #endif
+#include "eventql/util/http/httpserverconnection.h"
 #include "eventql/eventql.h"
 #include "eventql/server/listener.h"
 #include "eventql/util/return_code.h"
 #include "eventql/util/logging.h"
 
 namespace eventql {
+
+namespace {
+
+class LocalTaskScheduler : public TaskScheduler {
+public:
+
+  void run(std::function<void()> task) override {
+    task();
+  }
+
+  void runOnReadable(std::function<void()> task, int fd) override {
+    fd_set op_read, op_write;
+    FD_ZERO(&op_read);
+    FD_ZERO(&op_write);
+    FD_SET(fd, &op_read);
+
+    auto res = select(fd + 1, &op_read, &op_write, &op_read, NULL);
+
+    if (res == 0) {
+      RAISE(kIOError, "unexpected timeout while select()ing");
+    }
+
+    if (res == -1) {
+      RAISE_ERRNO(kIOError, "select() failed");
+    }
+
+    task();
+  }
+
+  void runOnWritable(std::function<void()> task, int fd) override{
+    run([task, fd] () {
+      fd_set op_read, op_write;
+      FD_ZERO(&op_read);
+      FD_ZERO(&op_write);
+      FD_SET(fd, &op_write);
+
+      auto res = select(fd + 1, &op_read, &op_write, &op_write, NULL);
+
+      if (res == 0) {
+        RAISE(kIOError, "unexpected timeout while select()ing");
+      }
+
+      if (res == -1) {
+        RAISE_ERRNO(kIOError, "select() failed");
+      }
+
+      task();
+    });
+  }
+
+  void runOnWakeup(
+      std::function<void()> task,
+      Wakeup* wakeup,
+      long generation) override {
+    run([task, wakeup, generation] () {
+      wakeup->waitForWakeup(generation);
+      task();
+    });
+  }
+
+};
+
+static LocalTaskScheduler local_scheduler;
+
+} // namespace
 
 uint64_t getMonoTime() {
 #ifdef __MACH__
@@ -62,7 +129,9 @@ uint64_t getMonoTime() {
 #endif
 }
 
-Listener::Listener() :
+Listener::Listener(
+    http::HTTPHandlerFactory* http_handler) :
+    http_handler_(http_handler),
     connect_timeout_(2 * kMicrosPerSecond), 
     running_(true),
     ssock_(-1) {}
@@ -242,7 +311,26 @@ void Listener::open(int fd) {
     return;
   }
 
-  iputs("gotconn: $0 -> $1", fd, std::string(&first_byte, 1));
+  auto t = std::thread([fd, first_byte, this] {
+    logDebug("eventql", "Opening new http connection; fd=$0", fd);
+    auto http_conn = mkRef(
+        new http::HTTPServerConnection(
+            http_handler_,
+            ScopedPtr<net::TCPConnection>(new net::TCPConnection(fd)),
+            &local_scheduler,
+            &http_stats_));
+
+    try {
+      http_conn->start(std::string(&first_byte, 1));
+    } catch (const std::exception& e){
+      logError(
+          "eventql",
+          "HTTP connection error: $0",
+          e.what());
+    }
+  });
+
+  t.detach();
 }
 
 } // namespace eventql

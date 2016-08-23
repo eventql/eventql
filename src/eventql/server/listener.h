@@ -23,15 +23,15 @@
  */
 #pragma once
 #include "eventql/eventql.h"
-#include "eventql/util/thread/eventloop.h"
 #include "eventql/util/return_code.h"
+#include <eventql/util/http/httpserver.h>
 
 namespace eventql {
 
 class Listener {
 public:
 
-  Listener();
+  Listener(http::HTTPHandlerFactory* http_handler);
 
   ReturnCode bind(int listen_port);
 
@@ -47,6 +47,8 @@ protected:
     uint64_t accepted_at;
   };
 
+  http::HTTPHandlerFactory* http_handler_;
+  http::HTTPServerStats http_stats_;
   uint64_t connect_timeout_;
   std::atomic<bool> running_;
   int ssock_;

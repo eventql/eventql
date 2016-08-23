@@ -34,7 +34,7 @@ namespace thread {
 class EventLoop : public TaskScheduler {
 public:
   void run(std::function<void()> task) override;
-  void runAsync(std::function<void()> task) override;
+  //void runAsync(std::function<void()> task) override;
 
   void runOnReadable(std::function<void()> task, int fd) override;
   void runOnReadable(

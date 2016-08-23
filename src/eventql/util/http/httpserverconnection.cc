@@ -34,23 +34,6 @@ std::string inspect(const http::HTTPServerConnection& conn) {
 
 namespace http {
 
-void HTTPServerConnection::start(
-    HTTPHandlerFactory* handler_factory,
-    ScopedPtr<net::TCPConnection> conn,
-    TaskScheduler* scheduler,
-    HTTPServerStats* stats) {
-  auto http_conn = new HTTPServerConnection(
-      handler_factory,
-      std::move(conn),
-      scheduler,
-      stats);
-
-  // N.B. we don't leak the connection here. it is ref counted and will
-  // free itself
-  http_conn->incRef();
-  http_conn->nextRequest();
-}
-
 HTTPServerConnection::HTTPServerConnection(
     HTTPHandlerFactory* handler_factory,
     ScopedPtr<net::TCPConnection> conn,
@@ -63,6 +46,7 @@ HTTPServerConnection::HTTPServerConnection(
     on_write_completed_cb_(nullptr),
     closed_(false),
     stats_(stats) {
+  iputs("start conn: $0", (void*) this);
   logTrace("http.server", "New HTTP connection: $0", inspect(*this));
   stats_->total_connections.incr(1);
   stats_->current_connections.incr(1);
@@ -97,7 +81,12 @@ HTTPServerConnection::HTTPServerConnection(
 }
 
 HTTPServerConnection::~HTTPServerConnection() {
+  iputs("free conn: $0", (void*) this);
   stats_->current_connections.decr(1);
+}
+
+void HTTPServerConnection::start(const std::string& prelude_bytes /* = "" */) {
+  nextRequest(prelude_bytes);
 }
 
 void HTTPServerConnection::read() {
@@ -213,7 +202,7 @@ void HTTPServerConnection::awaitWrite() {
       *conn_);
 }
 
-void HTTPServerConnection::nextRequest() {
+void HTTPServerConnection::nextRequest(const std::string& prelude_bytes) {
   parser_.reset();
   cur_request_.reset(new HTTPRequest());
   cur_handler_.reset(nullptr);
@@ -225,6 +214,10 @@ void HTTPServerConnection::nextRequest() {
     std::unique_lock<std::recursive_mutex> lk(mutex_);
     body_buf_.append(data, size);
   });
+
+  if (!prelude_bytes.empty()) {
+    parser_.parse((char *) prelude_bytes.data(), prelude_bytes.size());
+  }
 
   awaitRead();
 }
@@ -264,7 +257,7 @@ void HTTPServerConnection::readRequestBody(
     if (last_chunk || body_buf_.size() > 0) {
       BufferRef chunk(new Buffer(body_buf_));
 
-      scheduler_->runAsync([callback, chunk, last_chunk] {
+      scheduler_->run([callback, chunk, last_chunk] {
         callback(
             (const char*) chunk->data(),
             chunk->size(),
@@ -349,9 +342,6 @@ void HTTPServerConnection::close() {
   closed_ = true;
   scheduler_->cancelFD(conn_->fd());
   conn_->close();
-
-  lk.unlock();
-  decRef();
 }
 
 bool HTTPServerConnection::isClosed() const {
