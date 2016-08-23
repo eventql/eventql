@@ -64,6 +64,7 @@
 #include "eventql/db/compaction_worker.h"
 #include "eventql/db/garbage_collector.h"
 #include "eventql/db/leader.h"
+#include "eventql/db/database.h"
 #include "eventql/transport/http/default_servlet.h"
 #include "eventql/sql/defaults.h"
 #include "eventql/sql/runtime/query_cache.h"
@@ -87,10 +88,6 @@
 using namespace eventql;
 
 thread::EventLoop ev;
-
-namespace js {
-void DisableExtraThreads();
-}
 
 int main(int argc, const char** argv) {
   Application::init();
@@ -314,42 +311,9 @@ int main(int argc, const char** argv) {
   }
 
   auto process_config = config_builder.getConfig();
-
   if (!process_config->hasProperty("server.datadir")) {
     logFatal("evqld", "missing 'server.datadir' option or --datadir flag");
     return 1;
-  }
-
-  auto server_datadir = process_config->getString("server.datadir").get();
-  if (!FileUtil::exists(server_datadir)) {
-    logFatal(
-        "evqld",
-        "data dir not found: $0",
-        server_datadir);
-    return 1;
-  }
-
-  //if (!process_config->hasProperty("server.name")) {
-  //  logFatal("evqld", "missing 'server.name' option");
-  //  return 1;
-  //}
-
-  /* daemonize */
-  if (process_config->getBool("server.daemonize")) {
-    Application::daemonize();
-  }
-
-  ScopedPtr<FileLock> pidfile_lock;
-  if (process_config->hasProperty("server.pidfile")) {
-    auto pidfile_path = process_config->getString("server.pidfile").get();
-    pidfile_lock = mkScoped(new FileLock(pidfile_path));
-    pidfile_lock->lock(false);
-
-    auto pidfile = File::openFile(
-        pidfile_path,
-        File::O_WRITE | File::O_CREATEOROPEN | File::O_TRUNCATE);
-
-    pidfile.write(StringUtil::toString(getpid()));
   }
 
   /* listen addr */
@@ -373,336 +337,47 @@ int main(int argc, const char** argv) {
     }
   }
 
-  auto rc = ReturnCode::success();
+  /* pidfile */
+  ScopedPtr<FileLock> pidfile_lock;
+  if (process_config->hasProperty("server.pidfile")) {
+    auto pidfile_path = process_config->getString("server.pidfile").get();
+    pidfile_lock = mkScoped(new FileLock(pidfile_path));
+    pidfile_lock->lock(false);
 
-  /* http */
-  http::HTTPRouter http_router;
-  http::HTTPServer http_server(&http_router, &ev);
-  http::HTTPConnectionPool http(&ev, &evqld_stats()->http_client_stats);
+    auto pidfile = File::openFile(
+        pidfile_path,
+        File::O_WRITE | File::O_CREATEOROPEN | File::O_TRUNCATE);
 
-  /* data directory */
-  auto server_name = process_config->getString("server.name");
-  String tsdb_dir;
-  String metadata_dir;
-  if (server_name.isEmpty()) {
-    tsdb_dir = FileUtil::joinPaths(server_datadir, "data/__anonymous");
-    metadata_dir = FileUtil::joinPaths(server_datadir, "metadata/__anonymous");
-  } else {
-    tsdb_dir = FileUtil::joinPaths(
-        server_datadir,
-        "data/" + server_name.get());
-    metadata_dir = FileUtil::joinPaths(
-        server_datadir,
-        "metadata/" + server_name.get());
+    pidfile.write(StringUtil::toString(getpid()));
   }
 
-  auto trash_dir = FileUtil::joinPaths(server_datadir, "trash");
-  auto cache_dir = FileUtil::joinPaths(server_datadir, "cache");
-
-  if (!FileUtil::exists(tsdb_dir)) {
-    FileUtil::mkdir_p(tsdb_dir);
+  /* daemonize */
+  if (process_config->getBool("server.daemonize")) {
+    Application::daemonize();
   }
 
-  if (!FileUtil::exists(metadata_dir)) {
-    FileUtil::mkdir_p(metadata_dir);
-  }
+  /* start database */
+  Database db(process_config.get());
+  auto rc = db.start();
 
-  if (!FileUtil::exists(trash_dir)) {
-    FileUtil::mkdir(trash_dir);
-  }
-
-  if (!FileUtil::exists(cache_dir)) {
-    FileUtil::mkdir(cache_dir);
-  }
-
-  /* file tracker */
-  FileTracker file_tracker(trash_dir);
-
-  /* garbage collector */
-  auto gc_mode = garbageCollectorModeFromString(
-      process_config->getString("server.gc_mode").get());
-
-  GarbageCollector gc(
-      gc_mode,
-      &file_tracker,
-      tsdb_dir,
-      trash_dir,
-      cache_dir,
-      process_config->getInt("server.cachedir_maxsize").get(),
-      process_config->getInt("server.gc_interval").get());
-
-  /* config dir */
-  ScopedPtr<ConfigDirectory> config_dir;
-  {
-    auto rc = ConfigDirectoryFactory::getConfigDirectoryForServer(
-        process_config.get(),
-        &config_dir);
-    if (!rc.isSuccess()) {
-      logFatal("evqld", "can't open config backend: $0", rc.message());
-      return 1;
-    }
-  }
-
-  /* client auth */
-  if (!process_config->hasProperty("server.client_auth_backend")) {
-    logFatal("evqld", "missing 'server.client_auth_backend'");
-    return 1;
-  }
-
-  ScopedPtr<eventql::ClientAuth> client_auth;
-  auto client_auth_opt = process_config->getString("server.client_auth_backend");
-  if (client_auth_opt.get() == "trust") {
-    client_auth.reset(new TrustClientAuth());
-  } else if (client_auth_opt.get() == "legacy") {
-    if (!process_config->hasProperty("server.legacy_auth_secret")) {
-      logFatal("evqld", "missing 'server.legacy_auth_secret'");
-      return 1;
-    }
-
-    client_auth.reset(
-        new LegacyClientAuth(
-            process_config->getString("server.legacy_auth_secret").get()));
-  } else {
-    logFatal("evqld", "invalid client auth backend: " + client_auth_opt.get());
-    return 1;
-  }
-
-  /* internal auth */
-  ScopedPtr<eventql::InternalAuth> internal_auth;
-  internal_auth.reset(new TrustInternalAuth());
-
-  /* metadata service */
-  eventql::MetadataStore metadata_store(metadata_dir);
-  eventql::MetadataService metadata_service(config_dir.get(), &metadata_store);
-
-  /* leader */
-  Leader leader(
-      config_dir.get(),
-      process_config->getInt("cluster.rebalance_interval").get());
-
-  /* spidermonkey javascript runtime */
-  JS_Init();
-  js::DisableExtraThreads();
-
-  try {
-    {
-      auto rc = config_dir->start();
-      if (!rc.isSuccess()) {
-        logFatal("evqld", "Can't connect to config backend: $0", rc.message());
-        return 1;
-      }
-    }
-
-    /* clusterconfig */
-    auto cluster_config = config_dir->getClusterConfig();
-
-    /* tsdb */
-    FileLock server_lock(FileUtil::joinPaths(tsdb_dir, "__lock"));
-    server_lock.lock();
-
-    eventql::ServerCfg cfg;
-    cfg.db_path = tsdb_dir;
-    cfg.config_directory = config_dir.get();
-    cfg.idx_cache = mkRef(new LSMTableIndexCache(tsdb_dir));
-    cfg.metadata_store = &metadata_store;
-    cfg.file_tracker = &file_tracker;
-
-    eventql::PartitionMap partition_map(&cfg);
-    eventql::TableService table_service(
-        config_dir.get(),
-        &partition_map,
-        &ev,
-        &evqld_stats()->http_client_stats);
-
-    eventql::ReplicationWorker tsdb_replication(
-        &partition_map,
-        &http);
-
-    eventql::RPCServlet tsdb_servlet(
-        &table_service,
-        &metadata_service,
-        cache_dir);
-
-    http_router.addRouteByPrefixMatch("/tsdb", &tsdb_servlet);
-    http_router.addRouteByPrefixMatch("/rpc", &tsdb_servlet);
-
-    eventql::CompactionWorker cstable_index(
-        &partition_map,
-        process_config->getInt("server.indexbuild_threads").get());
-
-    /* metadata replication */
-    ScopedPtr<MetadataReplication> metadata_replication;
-    if (!server_name.isEmpty()) {
-      metadata_replication.reset(
-          new MetadataReplication(
-              config_dir.get(),
-              server_name.get(),
-              &metadata_store));
-    }
-
-    /* sql */
-    csql::QueryCache sql_query_cache(cache_dir);
-    RefPtr<csql::Runtime> sql;
-    {
-      auto symbols = mkRef(new csql::SymbolTable());
-      csql::installDefaultSymbols(symbols.get());
-      sql = mkRef(new csql::Runtime(
-          thread::ThreadPoolOptions {
-            .thread_name = Some(String("evqld-sqlruntime"))
-          },
-          symbols,
-          new csql::QueryBuilder(
-              new csql::ValueExpressionBuilder(symbols.get())),
-          new csql::QueryPlanBuilder(
-              csql::QueryPlanBuilderOptions{},
-              symbols.get()),
-          mkScoped(
-              new Scheduler(
-                  &partition_map,
-                  config_dir.get(),
-                  internal_auth.get()))));
-
-      sql->setCacheDir(cache_dir);
-      sql->symbols()->registerFunction("version", &evqlVersionExpr);
-      sql->setQueryCache(&sql_query_cache);
-    }
-
-    /* more services */
-    eventql::SQLService sql_service(
-        sql.get(),
-        &partition_map,
-        config_dir.get(),
-        internal_auth.get(),
-        &table_service,
-        cache_dir);
-
-    eventql::MapReduceService mapreduce_service(
-        config_dir.get(),
-        internal_auth.get(),
-        &table_service,
-        &partition_map,
-        cache_dir);
-
-    /* open tables */
-    config_dir->setTableConfigChangeCallback(
-        [&partition_map, &tsdb_replication] (const TableDefinition& tbl) {
-      Set<SHA1Hash> affected_partitions;
-      try {
-        partition_map.configureTable(tbl, &affected_partitions);
-      } catch (const std::exception& e) {
-        logError(
-            "evqld",
-            "error while applying table config change to $0/$1",
-            tbl.customer(),
-            tbl.table_name());
-      }
-
-      for (const auto& partition_id : affected_partitions) {
-        try {
-          auto partition = partition_map.findPartition(
-              tbl.customer(),
-              tbl.table_name(),
-              partition_id);
-
-          tsdb_replication.enqueuePartition(partition.get(), 0);
-        } catch (const std::exception& e) {
-          logError(
-              "evqld",
-              "error while applying table config change to $0/$1/$2",
-              tbl.customer(),
-              tbl.table_name(),
-              partition_id.toString());
-        }
-      }
-    });
-
-    config_dir->listTables([&partition_map] (const TableDefinition& tbl) {
-      partition_map.configureTable(tbl);
-    });
-
-    eventql::AnalyticsServlet analytics_servlet(
-        cache_dir,
-        internal_auth.get(),
-        client_auth.get(),
-        internal_auth.get(),
-        sql.get(),
-        &table_service,
-        config_dir.get(),
-        &partition_map,
-        &sql_service,
-        &mapreduce_service,
-        &table_service);
-
-    eventql::StatusServlet status_servlet(
-        &cfg,
-        &partition_map,
-        config_dir.get(),
-        http_server.stats(),
-        &evqld_stats()->http_client_stats,
-        &tsdb_replication);
-
-    eventql::DefaultServlet default_servlet;
-
-    http_router.addRouteByPrefixMatch("/api/", &analytics_servlet);
-    http_router.addRouteByPrefixMatch("/eventql", &status_servlet);
-    http_router.addRouteByPrefixMatch("/", &default_servlet);
-
-    auto rusage_t = std::thread([] () {
-      for (;; usleep(1000000)) {
-        logDebug(
-            "eventql",
-            "Using $0MB of memory (peak $1)",
-            Application::getCurrentMemoryUsage() / 1000000.0,
-            Application::getPeakMemoryUsage() / 1000000.0);
-      }
-    });
-
-    rusage_t.detach();
-
-    Application::setCurrentThreadName("evqld");
-
-    tsdb_replication.start();
-    partition_map.open();
-    gc.startGCThread();
-
-    if (!process_config->getBool("server.noleader")) {
-      leader.startLeaderThread();
-    }
-
-    if (metadata_replication.get()) {
-      metadata_replication->start();
-    }
-
-    // db.start
-
-    // listen
-    Listener listener(&http_router);
+  /* start listener */
+  Listener listener(nullptr);
+  if (rc.isSuccess()) {
     rc = listener.bind(listen_port);
-    if (rc.isSuccess()) {
-      listener.run();
-    }
-
-    // db.stop
-
-    // shutdown
-    if (metadata_replication.get()) {
-      metadata_replication->stop();
-    }
-
-    leader.stopLeaderThread();
-    gc.stopGCThread();
-    tsdb_replication.stop();
-  } catch (const StandardException& e) {
-    rc = ReturnCode::error("ERUNTIME", e.what());
   }
+
+  if (rc.isSuccess()) {
+    listener.run();
+  }
+
+  /* shutdown */
+  db.shutdown();
 
   if (!rc.isSuccess()) {
     logAlert("eventql", "FATAL ERROR: $0", rc.getMessage());
   }
 
   logInfo("eventql", "Exiting...");
-  config_dir->stop();
-  JS_ShutDown();
 
   if (pidfile_lock.get()) {
     pidfile_lock.reset(nullptr);

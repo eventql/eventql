@@ -816,6 +816,8 @@ evql_core_a_SOURCES = \
     eventql/db/garbage_collector.cc \
     eventql/db/leader.h \
     eventql/db/leader.cc \
+    eventql/db/database.h \
+    eventql/db/database.cc \
     eventql/config/config_directory.cc \
     eventql/config/config_directory.h \
     eventql/config/config_directory_standalone.cc \
