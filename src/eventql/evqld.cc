@@ -73,6 +73,7 @@
 #include "eventql/transport/http/status_servlet.h"
 #include "eventql/server/sql/scheduler.h"
 #include "eventql/server/sql/table_provider.h"
+#include "eventql/server/listener.h"
 #include "eventql/auth/client_auth.h"
 #include "eventql/auth/client_auth_trust.h"
 #include "eventql/auth/client_auth_legacy.h"
@@ -380,10 +381,11 @@ int main(int argc, const char** argv) {
     }
   }
 
+  auto rc = ReturnCode::success();
+
   /* http */
   http::HTTPRouter http_router;
   http::HTTPServer http_server(&http_router, &ev);
-  http_server.listen(listen_port);
   http::HTTPConnectionPool http(&ev, &evqld_stats()->http_client_stats);
 
   /* data directory */
@@ -667,6 +669,7 @@ int main(int argc, const char** argv) {
 
     Application::setCurrentThreadName("evqld");
 
+    tsdb_replication.start();
     partition_map.open();
     gc.startGCThread();
 
@@ -678,16 +681,31 @@ int main(int argc, const char** argv) {
       metadata_replication->start();
     }
 
-    ev.run();
+    // db.start
 
+    // listen
+    Listener listener;
+    rc = listener.bind(listen_port);
+    if (rc.isSuccess()) {
+      listener.start();
+    }
+
+    // db.stop
+
+    // shutdown
     if (metadata_replication.get()) {
       metadata_replication->stop();
     }
 
     leader.stopLeaderThread();
     gc.stopGCThread();
+    tsdb_replication.stop();
   } catch (const StandardException& e) {
-    logAlert("eventql", e, "FATAL ERROR");
+    rc = ReturnCode::error("ERUNTIME", e.what());
+  }
+
+  if (!rc.isSuccess()) {
+    logAlert("eventql", "FATAL ERROR: $0", rc.getMessage());
   }
 
   logInfo("eventql", "Exiting...");
@@ -699,6 +717,6 @@ int main(int argc, const char** argv) {
     FileUtil::rm(process_config->getString("server.pidfile").get());
   }
 
-  exit(0);
+  exit(rc.isSuccess() ? 0 : 1);
 }
 

@@ -113,8 +113,6 @@ ReplicationWorker::ReplicationWorker(
       RefPtr<eventql::PartitionChangeNotification> change) {
     enqueuePartition(change->partition);
   });
-
-  start();
 }
 
 ReplicationWorker::~ReplicationWorker() {

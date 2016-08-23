@@ -624,6 +624,7 @@ evql_util_a_SOURCES = \
     eventql/util/reflect/property.h \
     eventql/util/reflect/property_impl.h \
     eventql/util/reflect/reflect.h \
+    eventql/util/return_code.h \
     eventql/util/traits.h \
     eventql/util/protobuf/msg.h \
     eventql/util/protobuf/DynamicMessage.cc \
@@ -931,6 +932,8 @@ evql_core_a_SOURCES = \
     eventql/server/sql/table_provider.h \
     eventql/server/sql/table_scan.cc \
     eventql/server/sql/table_scan.h \
+    eventql/server/listener.cc \
+    eventql/server/listener.h \
     eventql/transport/http/mapreduce_servlet.cc \
     eventql/transport/http/mapreduce_servlet.h \
     eventql/mapreduce/mapreduce_service.cc \
