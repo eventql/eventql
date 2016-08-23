@@ -44,12 +44,9 @@ namespace eventql {
 
 TableService::TableService(
     ConfigDirectory* cdir,
-    PartitionMap* pmap,
-    thread::EventLoop* ev,
-    http::HTTPClientStats* http_stats) :
+    PartitionMap* pmap) :
     cdir_(cdir),
-    pmap_(pmap),
-    http_(ev, http_stats) {}
+    pmap_(pmap) {}
 
 Status TableService::createTable(
     const String& db_namespace,
@@ -623,10 +620,8 @@ void TableService::insertRecordsRemote(
   req.addHeader("Host", uri.hostAndPort());
   req.addBody(body);
 
-  auto res = http_.executeRequest(req);
-  res.wait();
-
-  const auto& r = res.get();
+  http::HTTPClient http;
+  auto r = http.executeRequest(req);
   if (r.statusCode() != 201) {
     RAISEF(kRuntimeError, "received non-201 response: $0", r.body().toString());
   }

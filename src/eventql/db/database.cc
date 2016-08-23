@@ -229,16 +229,10 @@ ReturnCode Database::start() {
   partition_map_.reset(new PartitionMap(server_cfg_.get()));
 
   table_service_.reset(
-      new TableService(
-        config_dir_.get(),
-        partition_map_.get(),
-        nullptr,
-        nullptr));
+      new TableService(config_dir_.get(), partition_map_.get()));
 
   replication_worker_.reset(
-      new ReplicationWorker(
-          partition_map_.get(),
-          nullptr));
+      new ReplicationWorker(partition_map_.get()));
 
   compaction_worker_.reset(
       new CompactionWorker(

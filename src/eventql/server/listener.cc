@@ -130,8 +130,8 @@ uint64_t getMonoTime() {
 }
 
 Listener::Listener(
-    http::HTTPHandlerFactory* http_handler) :
-    http_handler_(http_handler),
+    Database* database) :
+    database_(database),
     connect_timeout_(2 * kMicrosPerSecond), 
     running_(true),
     ssock_(-1) {}
@@ -311,26 +311,26 @@ void Listener::open(int fd) {
     return;
   }
 
-  auto t = std::thread([fd, first_byte, this] {
-    logDebug("eventql", "Opening new http connection; fd=$0", fd);
-    auto http_conn = mkRef(
-        new http::HTTPServerConnection(
-            http_handler_,
-            ScopedPtr<net::TCPConnection>(new net::TCPConnection(fd)),
-            &local_scheduler,
-            &http_stats_));
+  //auto t = std::thread([fd, first_byte, this] {
+  //  logDebug("eventql", "Opening new http connection; fd=$0", fd);
+  //  auto http_conn = mkRef(
+  //      new http::HTTPServerConnection(
+  //          http_handler_,
+  //          ScopedPtr<net::TCPConnection>(new net::TCPConnection(fd)),
+  //          &local_scheduler,
+  //          &http_stats_));
 
-    try {
-      http_conn->start(std::string(&first_byte, 1));
-    } catch (const std::exception& e){
-      logError(
-          "eventql",
-          "HTTP connection error: $0",
-          e.what());
-    }
-  });
+  //  try {
+  //    http_conn->start(std::string(&first_byte, 1));
+  //  } catch (const std::exception& e){
+  //    logError(
+  //        "eventql",
+  //        "HTTP connection error: $0",
+  //        e.what());
+  //  }
+  //});
 
-  t.detach();
+  //t.detach();
 }
 
 } // namespace eventql

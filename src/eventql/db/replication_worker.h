@@ -64,10 +64,7 @@ public:
 
   static const uint64_t kReplicationCorkWindowMicros = 10 * kMicrosPerSecond;
 
-  ReplicationWorker(
-      PartitionMap* pmap,
-      http::HTTPConnectionPool* http);
-
+  ReplicationWorker(PartitionMap* pmap);
   ~ReplicationWorker();
 
   void enqueuePartition(
@@ -89,7 +86,6 @@ protected:
   void work(size_t thread_id);
 
   PartitionMap* pmap_;
-  http::HTTPConnectionPool* http_;
 
   Set<SHA1Hash> waitset_;
   std::multiset<

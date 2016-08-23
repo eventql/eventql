@@ -27,11 +27,12 @@
 #include <eventql/util/http/httpserver.h>
 
 namespace eventql {
+class Database;
 
 class Listener {
 public:
 
-  Listener(http::HTTPHandlerFactory* http_handler);
+  Listener(Database* database);
 
   ReturnCode bind(int listen_port);
 
@@ -47,8 +48,7 @@ protected:
     uint64_t accepted_at;
   };
 
-  http::HTTPHandlerFactory* http_handler_;
-  http::HTTPServerStats http_stats_;
+  Database* database_;
   uint64_t connect_timeout_;
   std::atomic<bool> running_;
   int ssock_;
