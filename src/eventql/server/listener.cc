@@ -103,9 +103,55 @@ void Listener::accept() {
     logError("eventql", "accept() failed");
   }
 
-  iputs("open connection: $0", conn_fd);
+  int flags = ::fcntl(conn_fd, F_GETFL, 0);
+  flags = flags | O_NONBLOCK;
 
+  if (::fcntl(conn_fd, F_SETFL, flags) != 0) {
+    logError(
+        "eventql",
+        "fcntl(F_SETFL, O_NONBLOCK) failed, closing connection: $0",
+        strerror(errno));
+
+    close(conn_fd);
+    return;
+  }
+
+  ev_.runOnReadable(std::bind(&Listener::open, this, conn_fd), conn_fd);
   ev_.runOnReadable(std::bind(&Listener::accept, this), ssock_);
+}
+
+void Listener::open(int fd) {
+  char first_byte;
+  auto res = ::read(fd, &first_byte, 1);
+  if (res != 1) {
+    if (errno == EWOULDBLOCK) {
+      ev_.runOnReadable(std::bind(&Listener::open, this, fd), fd);
+      return;
+    } else {
+      logError(
+          "eventql",
+          "error while reading first byte, closing connection: $0",
+          strerror(errno));
+
+      close(fd);
+      return;
+    }
+  }
+
+  int flags = ::fcntl(fd, F_GETFL, 0);
+  flags = flags & ~O_NONBLOCK;
+
+  if (::fcntl(fd, F_SETFL, flags) != 0) {
+    logError(
+        "eventql",
+        "fcntl(F_SETFL, O_NONBLOCK) failed, closing connection: $0",
+        strerror(errno));
+
+    close(fd);
+    return;
+  }
+
+  iputs("gotconn: $0 -> $1", fd, std::string(&first_byte, 1));
 }
 
 } // namespace eventql

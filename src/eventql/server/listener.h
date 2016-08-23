@@ -39,7 +39,9 @@ public:
   void stop();
 
 protected:
+
   void accept();
+  void open(int fd);
 
   thread::EventLoop ev_;
   int ssock_;
