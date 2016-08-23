@@ -21,7 +21,6 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#pragma once
 #include <unistd.h>
 #include <sys/uio.h>
 #include <sys/types.h>
@@ -33,6 +32,7 @@
 #include "eventql/eventql.h"
 #include "eventql/server/listener.h"
 #include "eventql/util/return_code.h"
+#include "eventql/util/logging.h"
 
 namespace eventql {
 
@@ -83,14 +83,29 @@ ReturnCode Listener::bind(int listen_port) {
         "listen() failed: %s",
         strerror(errno));
   }
+
+  logNotice("eventql", "Listening on port $0", listen_port);
+  ev_.runOnReadable(std::bind(&Listener::accept, this), ssock_);
+  return ReturnCode::success();
 }
 
 void Listener::start() {
-
+  ev_.run();
 }
 
 void Listener::stop() {
+  ev_.shutdown();
+}
 
+void Listener::accept() {
+  int conn_fd = ::accept(ssock_, NULL, NULL);
+  if (conn_fd < 0) {
+    logError("eventql", "accept() failed");
+  }
+
+  iputs("open connection: $0", conn_fd);
+
+  ev_.runOnReadable(std::bind(&Listener::accept, this), ssock_);
 }
 
 } // namespace eventql

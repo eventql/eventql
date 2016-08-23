@@ -23,6 +23,7 @@
  */
 #pragma once
 #include "eventql/eventql.h"
+#include "eventql/util/thread/eventloop.h"
 #include "eventql/util/return_code.h"
 
 namespace eventql {
@@ -38,6 +39,9 @@ public:
   void stop();
 
 protected:
+  void accept();
+
+  thread::EventLoop ev_;
   int ssock_;
 };
 
