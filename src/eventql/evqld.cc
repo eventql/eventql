@@ -687,7 +687,7 @@ int main(int argc, const char** argv) {
     Listener listener;
     rc = listener.bind(listen_port);
     if (rc.isSuccess()) {
-      listener.start();
+      listener.run();
     }
 
     // db.stop

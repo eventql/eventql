@@ -29,6 +29,13 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <fcntl.h>
+#include <ctime>
+#include <sys/time.h>
+#include <sys/types.h>
+#ifdef __MACH__
+#include <mach/clock.h>
+#include <mach/mach.h>
+#endif
 #include "eventql/eventql.h"
 #include "eventql/server/listener.h"
 #include "eventql/util/return_code.h"
@@ -36,7 +43,29 @@
 
 namespace eventql {
 
-Listener::Listener() : ssock_(-1) {}
+uint64_t getMonoTime() {
+#ifdef __MACH__
+  clock_serv_t cclock;
+  mach_timespec_t mts;
+  host_get_clock_service(mach_host_self(), SYSTEM_CLOCK, &cclock);
+  clock_get_time(cclock, &mts);
+  mach_port_deallocate(mach_task_self(), cclock);
+  return std::uint64_t(mts.tv_sec) * 1000000 + mts.tv_nsec / 1000;
+#else
+  timespec ts;
+  if (clock_gettime(CLOCK_MONOTONIC, &ts) != 0) {
+    logFatal("clock_gettime(CLOCK_MONOTONIC) failed");
+    abort();
+  } else {
+    return std::uint64_t(ts.tv_sec) * 1000000 + ts.tv_nsec / 1000;
+  }
+#endif
+}
+
+Listener::Listener() :
+    connect_timeout_(2 * kMicrosPerSecond), 
+    running_(true),
+    ssock_(-1) {}
 
 ReturnCode Listener::bind(int listen_port) {
   ssock_ = ::socket(AF_INET, SOCK_STREAM, 0);
@@ -85,57 +114,119 @@ ReturnCode Listener::bind(int listen_port) {
   }
 
   logNotice("eventql", "Listening on port $0", listen_port);
-  ev_.runOnReadable(std::bind(&Listener::accept, this), ssock_);
   return ReturnCode::success();
 }
 
-void Listener::start() {
-  ev_.run();
+void Listener::run() {
+  while (running_.load()) {
+    fd_set op_read, op_write, op_error;
+    FD_ZERO(&op_read);
+    FD_ZERO(&op_write);
+    FD_ZERO(&op_error);
+
+    int max_fd = ssock_;
+    FD_SET(ssock_, &op_read);
+
+    auto now = getMonoTime();
+    while (!connections_.empty()) {
+      if (connections_.front().accepted_at + connect_timeout_ > now) {
+        break;
+      }
+
+      logError(
+          "eventql",
+          "timeout while reading first byte, closing connection");
+
+      close(connections_.front().fd);
+      connections_.pop_front();
+    }
+
+    uint64_t timeout = 0;
+    if (!connections_.empty()) {
+      timeout = (connections_.front().accepted_at + connect_timeout_) - now;
+    }
+
+    for (const auto& c : connections_) {
+      if (c.fd > max_fd) {
+        max_fd = c.fd;
+      }
+
+      FD_SET(c.fd, &op_read);
+    }
+
+    int res;
+    if (timeout) {
+      struct timeval tv;
+      tv.tv_sec = timeout / kMicrosPerSecond;
+      tv.tv_usec = timeout % kMicrosPerSecond;
+      res = select(max_fd + 1, &op_read, &op_write, &op_error, &tv);
+    } else {
+      res = select(max_fd + 1, &op_read, &op_write, &op_error, NULL);
+    }
+
+    switch (res) {
+      case 0:
+        continue;
+      case -1:
+        if (errno == EINTR) {
+          continue;
+        }
+
+        logError("eventql", "select() failed");
+        return;
+    }
+
+    if (FD_ISSET(ssock_, &op_read)) {
+      int conn_fd = ::accept(ssock_, NULL, NULL);
+      if (conn_fd < 0) {
+        logError("eventql", "accept() failed");
+      }
+
+      int flags = ::fcntl(conn_fd, F_GETFL, 0);
+      flags = flags | O_NONBLOCK;
+
+      if (::fcntl(conn_fd, F_SETFL, flags) != 0) {
+        logError(
+            "eventql",
+            "fcntl(F_SETFL, O_NONBLOCK) failed, closing connection: $0",
+            strerror(errno));
+
+        close(conn_fd);
+        return;
+      }
+
+      EstablishingConnection c;
+      c.fd = conn_fd;
+      c.accepted_at = getMonoTime();
+      connections_.emplace_back(c);
+    }
+
+    auto iter = connections_.begin();
+    while (iter != connections_.end()) {
+      if (FD_ISSET(iter->fd, &op_read)) {
+        open(iter->fd);
+        iter = connections_.erase(iter);
+      } else {
+        iter++;
+      }
+    }
+  }
 }
 
-void Listener::stop() {
-  ev_.shutdown();
-}
-
-void Listener::accept() {
-  int conn_fd = ::accept(ssock_, NULL, NULL);
-  if (conn_fd < 0) {
-    logError("eventql", "accept() failed");
-  }
-
-  int flags = ::fcntl(conn_fd, F_GETFL, 0);
-  flags = flags | O_NONBLOCK;
-
-  if (::fcntl(conn_fd, F_SETFL, flags) != 0) {
-    logError(
-        "eventql",
-        "fcntl(F_SETFL, O_NONBLOCK) failed, closing connection: $0",
-        strerror(errno));
-
-    close(conn_fd);
-    return;
-  }
-
-  ev_.runOnReadable(std::bind(&Listener::open, this, conn_fd), conn_fd);
-  ev_.runOnReadable(std::bind(&Listener::accept, this), ssock_);
+void Listener::shutdown() {
 }
 
 void Listener::open(int fd) {
   char first_byte;
   auto res = ::read(fd, &first_byte, 1);
   if (res != 1) {
-    if (errno == EWOULDBLOCK) {
-      ev_.runOnReadable(std::bind(&Listener::open, this, fd), fd);
-      return;
-    } else {
-      logError(
-          "eventql",
-          "error while reading first byte, closing connection: $0",
-          strerror(errno));
+    logError(
+        "eventql",
+        "error while reading first byte, closing connection: $0",
+        strerror(errno));
 
-      close(fd);
-      return;
-    }
+    close(fd);
+    return;
   }
 
   int flags = ::fcntl(fd, F_GETFL, 0);

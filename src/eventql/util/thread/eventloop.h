@@ -35,7 +35,14 @@ class EventLoop : public TaskScheduler {
 public:
   void run(std::function<void()> task) override;
   void runAsync(std::function<void()> task) override;
+
   void runOnReadable(std::function<void()> task, int fd) override;
+  void runOnReadable(
+      std::function<void()> task,
+      int fd,
+      uint64_t timeout_micros,
+      std::function<void()> on_timeout);
+
   void runOnWritable(std::function<void()> task, int fd) override;
   void runOnWakeup(
       std::function<void()> task,

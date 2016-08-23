@@ -35,16 +35,22 @@ public:
 
   ReturnCode bind(int listen_port);
 
-  void start();
-  void stop();
+  void run();
+  void shutdown();
 
 protected:
 
-  void accept();
   void open(int fd);
 
-  thread::EventLoop ev_;
+  struct EstablishingConnection {
+    int fd;
+    uint64_t accepted_at;
+  };
+
+  uint64_t connect_timeout_;
+  std::atomic<bool> running_;
   int ssock_;
+  std::list<EstablishingConnection> connections_;
 };
 
 } // namespace eventql
