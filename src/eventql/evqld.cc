@@ -370,14 +370,13 @@ int main(int argc, const char** argv) {
     listener.run();
   }
 
-  /* shutdown */
-  db.shutdown();
-
   if (!rc.isSuccess()) {
     logAlert("eventql", "FATAL ERROR: $0", rc.getMessage());
   }
 
+  /* shutdown */
   logInfo("eventql", "Exiting...");
+  db.shutdown();
 
   if (pidfile_lock.get()) {
     pidfile_lock.reset(nullptr);
