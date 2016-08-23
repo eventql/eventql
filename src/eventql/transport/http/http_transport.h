@@ -26,6 +26,7 @@
 #include "eventql/db/database.h"
 #include "eventql/util/http/httpserver.h"
 #include "eventql/util/http/httprouter.h"
+#include "eventql/transport/http/default_servlet.h"
 
 namespace eventql {
 
@@ -40,6 +41,7 @@ protected:
   Database* database_;
   http::HTTPRouter http_router_;
   http::HTTPServerStats http_stats_;
+  DefaultServlet default_servlet_;
 };
 
 } // namespace eventql

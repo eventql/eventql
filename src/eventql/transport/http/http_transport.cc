@@ -115,11 +115,9 @@ HTTPTransport::HTTPTransport(Database* database) : database_(database) {
   //    &evqld_stats()->http_client_stats,
   //    &tsdb_replication);
 
-  //eventql::DefaultServlet default_servlet;
-
   //http_router.addRouteByPrefixMatch("/api/", &analytics_servlet);
   //http_router.addRouteByPrefixMatch("/eventql", &status_servlet);
-  //http_router.addRouteByPrefixMatch("/", &default_servlet);
+  http_router_.addRouteByPrefixMatch("/", &default_servlet_);
 }
 
 void HTTPTransport::handleConnection(int fd, std::string prelude_bytes) {
