@@ -24,6 +24,8 @@ Table of Contents
     6.9 QUERY_CONTINUE
     6.10 QUERY_DISCARD
     6.11 QUERY_PROGRESS
+    6.12 RPC
+    6.13 RPC_RESULT
 
 
 1. Preface
