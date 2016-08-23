@@ -8,11 +8,21 @@ Table of Contents
   2. Overview
   3. Life of a Connection
   4. Frame header
-    4.1. opcode
-    4.2. flags
-    4.3. length
+    4.1 opcode
+    4.2 flags
+    4.3 length
   5. Messages
-
+    5.1 HELLO
+    5.2 PING
+    5.3 ERROR
+    5.4 ACK
+    5.5 KILL
+    5.6 KILLED
+    5.7 QUERY
+    5.8 QUERY_RESULT
+    5.9 QUERY_CONTINUE
+    5.10 QUERY_DISCARD
+    5.11 QUERY_PROGRESS
 
 1. Preface
 
@@ -106,19 +116,20 @@ Binary Protocols.
 
 5. Messages
 
-5.1 HELLO
-
-
-5.2 ERROR
-
 
 5.2 PING
 
-  The body of a ping message is always empty. On an operational connection, the
-  ping message may be sent at _any_ time by either the client or the server, even
-  while a request is running.
+  On an operational connection, the ping message may be sent at _any_ time by
+  either the client or the server, even while a request is running.
 
   The PING message may safely be ignored.
+
+  Payload:
+    <no payload>
+
+  Response:
+    <no response>
+
 
 5.7 QUERY
 
@@ -141,7 +152,7 @@ Binary Protocols.
     query          The zero-terminated query string
 
 
-  Returns:
+  Response:
     After sending a query message, the client should expect to receive one of
     these response messages:
       - PING
@@ -158,7 +169,7 @@ Binary Protocols.
     After the request is complete, the server will not send any further messages.
 
 
-5.7 QUERY_RESULT
+5.8 QUERY_RESULT
 
   The QUERY_RESULT message contains a description of the result table as well
   as zero or more rows from the result tables. Results are always paged, i.e.
@@ -184,6 +195,7 @@ Binary Protocols.
     lenencstr*     column_names
     lenencint      num_rows_modified
     lenencint      num_rows_scanned
+    lenencint      num_bytes_scanned
     lenencint      query_runtime_ms
 
   Fields:
@@ -191,8 +203,14 @@ Binary Protocols.
                    0x02 METADATA - This QUERY_RESULT event contains metadata
                    0x04 STATS - This QUERY_RESULT event contains stats
 
+    FIXME
 
-5.7 QUERY_CONTINUE
+  Response:
+    If the COMPLETE flag is set, no response should be sent. If the flag is not
+    set the client must respond with QUERY_CONTINUE or QUERY_DISCARD.
+
+
+5.9 QUERY_CONTINUE
 
   The QUERY_CONTINUE message may be sent by the client in response to a
   QUERY_RESULT message that did not have the COMPLETED flag set.
@@ -200,7 +218,7 @@ Binary Protocols.
   Payload:
     <no payload>
 
-  Returns:
+  Response:
     After sending a QUERY_CONTINUE message, the client should expect to receive
     one of these response messages:
       - PING
@@ -208,7 +226,7 @@ Binary Protocols.
       - QUERY_RESULT
 
 
-5.7 QUERY_DISCARD
+5.10 QUERY_DISCARD
 
   The QUERY_DISCARD message may be sent by the client in response to a
   QUERY_RESULT message that did not have the COMPLETED flag set.
@@ -216,7 +234,7 @@ Binary Protocols.
   Payload:
     <no payload>
 
-  Returns:
+  Response:
     After sending a QUERY_CONTINUE message, the client should expect to receive
     one of these response messages:
       - PING
@@ -224,7 +242,7 @@ Binary Protocols.
       - QUERY_RESULT
 
 
-5.7 QUERY_PROGRESS
+5.11 QUERY_PROGRESS
 
   The QUERY_PROGRESS message is an information message from the server to the
   client. It contains information about the progress of query execution and
@@ -234,4 +252,15 @@ Binary Protocols.
   The QUERY_PROGRESS message may safely be ignored.
 
   Payload:
-    <payload...>
+    lenencint      num_rows_modified
+    lenencint      num_rows_scanned
+    lenencint      num_bytes_scanned
+    lenencint      query_progress_permill
+    lenencint      query_elapsed_ms
+    lenencint      query_eta_ms
+
+  Fields:
+    FIXME
+
+  Response:
+    <no response>
