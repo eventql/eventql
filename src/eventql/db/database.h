@@ -25,6 +25,10 @@
 #include <eventql/eventql.h>
 #include <eventql/util/return_code.h>
 
+namespace csql {
+class Runtime;
+}
+
 namespace eventql {
 class ProcessConfig;
 class Session;
@@ -36,6 +40,9 @@ class LSMTableIndexCache;
 class MetadataStore;
 class InternalAuth;
 class ClientAuth;
+class SQLService;
+class TableService;
+class MapReduceService;
 
 struct DatabaseContext {
   PartitionMap* partition_map;
@@ -46,6 +53,10 @@ struct DatabaseContext {
   MetadataStore* metadata_store;
   InternalAuth* internal_auth;
   ClientAuth* client_auth;
+  csql::Runtime* sql_runtime;
+  SQLService* sql_service;
+  TableService* table_service;
+  MapReduceService* mapreduce_service;
 };
 
 class Database {

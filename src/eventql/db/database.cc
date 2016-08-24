@@ -360,6 +360,12 @@ ReturnCode DatabaseImpl::start() {
     dbctx->replication_worker = replication_worker_.get();
     dbctx->lsm_index_cache = server_cfg_->idx_cache.get();
     dbctx->metadata_store = metadata_store_.get();
+    dbctx->internal_auth = internal_auth_.get();
+    dbctx->client_auth = client_auth_.get();
+    dbctx->sql_runtime = sql_.get();
+    dbctx->sql_service = sql_service_.get();
+    dbctx->table_service = table_service_.get();
+    dbctx->mapreduce_service = mapreduce_service_.get();
     database_context_ = std::move(dbctx);
   }
 
