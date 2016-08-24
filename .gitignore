@@ -41,3 +41,4 @@ src/Makefile.in
 .dirstamp
 compile
 test-driver
+libtool

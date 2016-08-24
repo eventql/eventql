@@ -29,7 +29,11 @@
 
 namespace eventql {
 
+#ifdef EVQL_VERSION
 static const std::string kVersionString = EVQL_VERSION;
+#else
+static const std::string kVersionString = "unknown";
+#endif
 
 #ifdef EVQL_BUILDID
 static const std::string kBuildID = EVQL_BUILDID;

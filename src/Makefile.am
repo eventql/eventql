@@ -1,5 +1,14 @@
 ## Process this file with automake to produce Makefile.in
 
+bin_PROGRAMS = evqld
+
+#if ENABLE_EMBEDDED_SERVER
+#lib_LTLIBRARIES = libevql_server.la
+#else
+#endif
+
+noinst_LIBRARIES = libevqld.a
+
 MAINTAINERCLEANFILES =   \
   Makefile.in
 
@@ -8,14 +17,6 @@ EXTRA_DIST = \
   eventql/util/charts/testdata \
   eventql/sql/testdata \
   eventql/mapreduce/prelude.js
-
-# we'll fill those later
-bin_PROGRAMS =
-noinst_LIBRARIES =
-dist_noinst_DATA =
-BUILT_SOURCES =
-TESTS =
-check_PROGRAMS =
 
 
 ################# DEPENDENCIES ####################
@@ -75,12 +76,11 @@ LMDB_LDADD = ${top_builddir}/deps/3rdparty/liblmdb/liblmdb.a
 INIH_CFLAGS = -I$(top_srcdir)/deps/3rdparty
 INIH_LDADD = ${top_builddir}/deps/3rdparty/inih/libinih.a
 
-AM_CXXFLAGS = -DEVQL_VERSION=\"v@PACKAGE_VERSION@\" -DEVQL_BUILDID=\"$(EVQL_BUILDID)\" $(MYSQL_CFLAGS) $(PCRE_CFLAGS) $(SPIDERMONKEY_CFLAGS) $(ZOOKEEPER_CFLAGS) $(INIH_CFLAGS) $(SIMDCOMP_CFLAGS) $(LINENOISE_CLFAGS) $(PROTOBUF_CFLAGS) $(PTHREAD_CFLAGS) $(PTHREAD_DEF) $(SYSLOG_DEF) $(ZLIB_DEF) $(GETHOSTBYNAME_R_DEF) -std=c++0x -ftemplate-depth=500 -mno-omit-leaf-frame-pointer -fno-omit-frame-pointer -Wall -Wextra -Wno-unused-parameter -Wno-sign-compare -Wdelete-non-virtual-dtor -Wno-predefined-identifier-outside-function -Wno-invalid-offsetof -g -I@builddir@
+AM_CXXFLAGS = -DEVQL_VERSION=\"v@PACKAGE_VERSION@\" -DEVQL_BUILDID=\"$(EVQL_BUILDID)\" $(MYSQL_CFLAGS) $(PCRE_CFLAGS) $(SPIDERMONKEY_CFLAGS) $(ZOOKEEPER_CFLAGS) $(INIH_CFLAGS) $(SIMDCOMP_CFLAGS) $(LINENOISE_CLFAGS) $(PROTOBUF_CFLAGS) $(PTHREAD_CFLAGS) $(PTHREAD_DEF) $(SYSLOG_DEF) $(ZLIB_DEF) $(GETHOSTBYNAME_R_DEF) -std=c++0x -ftemplate-depth=500 -mno-omit-leaf-frame-pointer -fno-omit-frame-pointer -Wall -Wextra -Wno-unused-parameter -Wno-sign-compare -Wdelete-non-virtual-dtor -Wno-predefined-identifier-outside-function -Wno-invalid-offsetof -g -fvisibility=hidden -I@builddir@
 AM_CFLAGS = $(PCRE_CFLAGS) $(SPIDERMONKEY_CFLAGS) $(MYSQL_CFLAGS) $(ZOOKEEPER_CFLAGS) $(INIH_CFLAGS) $(SIMDCOMP_CFLAGS) $(LINENOISE_CLFAGS) $(PROTOBUF_CFLAGS) $(PTHREAD_CFLAGS) $(PTHREAD_DEF) $(SYSLOG_DEF) $(ZLIB_DEF) $(GETHOSTBYNAME_R_DEF) -std=c11 -mno-omit-leaf-frame-pointer -fno-omit-frame-pointer -Wall -pedantic -g
 AM_LDFLAGS = $(PTHREAD_CFLAGS)
 
-
-################# PROTOBUFs ####################
+################# LIB: libevqld.a ####################
 evql_protos = \
     eventql/auth/client_auth_legacy_protos.proto \
     eventql/config/namespace_config_protos.proto \
@@ -92,343 +92,13 @@ evql_protos = \
     eventql/db/replication_state.proto \
     eventql/db/table_config.proto
 
-BUILT_SOURCES += $(evql_protos:.proto=.pb.h)
-dist_noinst_DATA += $(evql_protos)
+BUILT_SOURCES = $(evql_protos:.proto=.pb.h)
+dist_noinst_DATA = $(evql_protos)
 
 %.pb.cc %.pb.h: %.proto
 	$(top_builddir)/deps/3rdparty/protobuf/protoc --proto_path=$(srcdir) --cpp_out=$(builddir) $^
 
-
-################# LIB: evql_sql.a ####################
-evql_sql_a_SOURCES = \
-    eventql/sql/csql.h \
-    eventql/sql/CSTableScan.cc \
-    eventql/sql/CSTableScan.h \
-    eventql/sql/CSTableScanProvider.cc \
-    eventql/sql/CSTableScanProvider.h \
-    eventql/sql/SFunction.cc \
-    eventql/sql/SFunction.h \
-    eventql/sql/TableInfo.h \
-    eventql/sql/abi.h \
-    eventql/sql/backends/backend.h \
-    eventql/sql/backends/csv/CSVInputStream.cc \
-    eventql/sql/backends/csv/CSVInputStream.h \
-    eventql/sql/backends/csv/CSVTableProvider.cc \
-    eventql/sql/backends/csv/CSVTableProvider.h \
-    eventql/sql/backends/csv/CSVTableScan.cc \
-    eventql/sql/backends/csv/CSVTableScan.h \
-    eventql/sql/backends/tableref.h \
-    eventql/sql/defaults.cc \
-    eventql/sql/defaults.h \
-    eventql/sql/expressions/aggregate.cc \
-    eventql/sql/expressions/aggregate.h \
-    eventql/sql/expressions/boolean.cc \
-    eventql/sql/expressions/boolean.h \
-    eventql/sql/expressions/conversion.cc \
-    eventql/sql/expressions/conversion.h \
-    eventql/sql/expressions/datetime.cc \
-    eventql/sql/expressions/datetime.h \
-    eventql/sql/expressions/internal.cc \
-    eventql/sql/expressions/internal.h \
-    eventql/sql/expressions/math.cc \
-    eventql/sql/expressions/math.h \
-    eventql/sql/expressions/string.cc \
-    eventql/sql/expressions/string.h \
-    eventql/sql/expressions/table/describe_table.cc \
-    eventql/sql/expressions/table/describe_table.h \
-    eventql/sql/expressions/table/groupby.cc \
-    eventql/sql/expressions/table/groupby.h \
-    eventql/sql/expressions/table/limit.cc \
-    eventql/sql/expressions/table/limit.h \
-    eventql/sql/expressions/table/nested_loop_join.cc \
-    eventql/sql/expressions/table/nested_loop_join.h \
-    eventql/sql/expressions/table/orderby.cc \
-    eventql/sql/expressions/table/orderby.h \
-    eventql/sql/expressions/table/select.cc \
-    eventql/sql/expressions/table/select.h \
-    eventql/sql/expressions/table/show_tables.cc \
-    eventql/sql/expressions/table/show_tables.h \
-    eventql/sql/expressions/table/subquery.cc \
-    eventql/sql/expressions/table/subquery.h \
-    eventql/sql/expressions/table/tablescan.cc \
-    eventql/sql/expressions/table/tablescan.h \
-    eventql/sql/expressions/table_expression.h \
-    eventql/sql/extensions/chartsql/areachartbuilder.cc \
-    eventql/sql/extensions/chartsql/areachartbuilder.h \
-    eventql/sql/extensions/chartsql/barchartbuilder.cc \
-    eventql/sql/extensions/chartsql/barchartbuilder.h \
-    eventql/sql/extensions/chartsql/chart_expression.cc \
-    eventql/sql/extensions/chartsql/chart_expression.h \
-    eventql/sql/extensions/chartsql/chartbuilder.h \
-    eventql/sql/extensions/chartsql/domainconfig.cc \
-    eventql/sql/extensions/chartsql/domainconfig.h \
-    eventql/sql/extensions/chartsql/linechartbuilder.cc \
-    eventql/sql/extensions/chartsql/linechartbuilder.h \
-    eventql/sql/extensions/chartsql/pointchartbuilder.cc \
-    eventql/sql/extensions/chartsql/pointchartbuilder.h \
-    eventql/sql/extensions/chartsql/seriesadapter.cc \
-    eventql/sql/extensions/chartsql/seriesadapter.h \
-    eventql/sql/format.cc \
-    eventql/sql/format.h \
-    eventql/sql/parser/astnode.cc \
-    eventql/sql/parser/astnode.h \
-    eventql/sql/parser/astutil.cc \
-    eventql/sql/parser/astutil.h \
-    eventql/sql/parser/parser.cc \
-    eventql/sql/parser/parser.h \
-    eventql/sql/parser/token.cc \
-    eventql/sql/parser/token.h \
-    eventql/sql/parser/tokenize.cc \
-    eventql/sql/parser/tokenize.h \
-    eventql/sql/qtree/CallExpressionNode.cc \
-    eventql/sql/qtree/CallExpressionNode.h \
-    eventql/sql/qtree/ChartStatementNode.cc \
-    eventql/sql/qtree/ChartStatementNode.h \
-    eventql/sql/qtree/ColumnReferenceNode.cc \
-    eventql/sql/qtree/ColumnReferenceNode.h \
-    eventql/sql/qtree/DescribeTableNode.cc \
-    eventql/sql/qtree/DescribeTableNode.h \
-    eventql/sql/qtree/DrawStatementNode.cc \
-    eventql/sql/qtree/DrawStatementNode.h \
-    eventql/sql/qtree/GroupByNode.cc \
-    eventql/sql/qtree/GroupByNode.h \
-    eventql/sql/qtree/IfExpressionNode.cc \
-    eventql/sql/qtree/IfExpressionNode.h \
-    eventql/sql/qtree/JoinCondition.cc \
-    eventql/sql/qtree/JoinCondition.h \
-    eventql/sql/qtree/JoinNode.cc \
-    eventql/sql/qtree/JoinNode.h \
-    eventql/sql/qtree/LikeExpressionNode.cc \
-    eventql/sql/qtree/LikeExpressionNode.h \
-    eventql/sql/qtree/LimitNode.cc \
-    eventql/sql/qtree/LimitNode.h \
-    eventql/sql/qtree/LiteralExpressionNode.cc \
-    eventql/sql/qtree/LiteralExpressionNode.h \
-    eventql/sql/qtree/OrderByNode.cc \
-    eventql/sql/qtree/OrderByNode.h \
-    eventql/sql/qtree/QueryTreeNode.cc \
-    eventql/sql/qtree/QueryTreeNode.h \
-    eventql/sql/qtree/QueryTreeUtil.cc \
-    eventql/sql/qtree/QueryTreeUtil.h \
-    eventql/sql/qtree/QueryTreeUtil_impl.h \
-    eventql/sql/qtree/RegexExpressionNode.cc \
-    eventql/sql/qtree/RegexExpressionNode.h \
-    eventql/sql/qtree/SelectExpressionNode.cc \
-    eventql/sql/qtree/SelectExpressionNode.h \
-    eventql/sql/qtree/SelectListNode.cc \
-    eventql/sql/qtree/SelectListNode.h \
-    eventql/sql/qtree/SequentialScanNode.cc \
-    eventql/sql/qtree/SequentialScanNode.h \
-    eventql/sql/qtree/ShowTablesNode.cc \
-    eventql/sql/qtree/ShowTablesNode.h \
-    eventql/sql/qtree/SubqueryNode.cc \
-    eventql/sql/qtree/SubqueryNode.h \
-    eventql/sql/qtree/TableExpressionNode.cc \
-    eventql/sql/qtree/TableExpressionNode.h \
-    eventql/sql/qtree/UnionNode.cc \
-    eventql/sql/qtree/UnionNode.h \
-    eventql/sql/qtree/ValueExpressionNode.h \
-    eventql/sql/qtree/nodes/create_database.cc \
-    eventql/sql/qtree/nodes/create_database.h \
-    eventql/sql/qtree/nodes/alter_table.cc \
-    eventql/sql/qtree/nodes/alter_table.h \
-    eventql/sql/qtree/nodes/create_table.cc \
-    eventql/sql/qtree/nodes/create_table.h \
-    eventql/sql/qtree/nodes/insert_into.cc \
-    eventql/sql/qtree/nodes/insert_into.h \
-    eventql/sql/qtree/nodes/insert_json.cc \
-    eventql/sql/qtree/nodes/insert_json.h \
-    eventql/sql/qtree/qtree_coder.cc \
-    eventql/sql/qtree/qtree_coder.h \
-    eventql/sql/qtree/qtree_coder_impl.h \
-    eventql/sql/query_plan.cc \
-    eventql/sql/query_plan.h \
-    eventql/sql/result_cursor.cc \
-    eventql/sql/result_cursor.h \
-    eventql/sql/result_list.cc \
-    eventql/sql/result_list.h \
-    eventql/sql/runtime/LikePattern.cc \
-    eventql/sql/runtime/LikePattern.h \
-    eventql/sql/runtime/query_cache.cc \
-    eventql/sql/runtime/query_cache.h \
-    eventql/sql/runtime/QueryBuilder.cc \
-    eventql/sql/runtime/QueryBuilder.h \
-    eventql/sql/runtime/ScratchMemory.cc \
-    eventql/sql/runtime/ScratchMemory.h \
-    eventql/sql/runtime/ValueExpression.cc \
-    eventql/sql/runtime/ValueExpression.h \
-    eventql/sql/runtime/ValueExpressionBuilder.cc \
-    eventql/sql/runtime/ValueExpressionBuilder.h \
-    eventql/sql/runtime/compiler.cc \
-    eventql/sql/runtime/compiler.h \
-    eventql/sql/runtime/defaultruntime.cc \
-    eventql/sql/runtime/defaultruntime.h \
-    eventql/sql/runtime/queryplanbuilder.cc \
-    eventql/sql/runtime/queryplanbuilder.h \
-    eventql/sql/runtime/runtime.cc \
-    eventql/sql/runtime/runtime.h \
-    eventql/sql/runtime/symboltable.cc \
-    eventql/sql/runtime/symboltable.h \
-    eventql/sql/runtime/tablerepository.cc \
-    eventql/sql/runtime/tablerepository.h \
-    eventql/sql/runtime/vm.cc \
-    eventql/sql/runtime/vm.h \
-    eventql/sql/scheduler.cc \
-    eventql/sql/scheduler.h \
-    eventql/sql/scheduler/execution_context.cc \
-    eventql/sql/scheduler/execution_context.h \
-    eventql/sql/svalue.cc \
-    eventql/sql/svalue.h \
-    eventql/sql/table_iterator.h \
-    eventql/sql/table_provider.h \
-    eventql/sql/table_schema.cc \
-    eventql/sql/table_schema.h \
-    eventql/sql/transaction.cc \
-    eventql/sql/transaction.h
-
-noinst_LIBRARIES += evql_sql.a
-
-
-################# LIB: evql_cstable.a ####################
-evql_cstable_a_SOURCES = \
-    eventql/io/cstable/cstable_file.cc \
-    eventql/io/cstable/cstable_file.h \
-    eventql/io/cstable/cstable_reader.cc \
-    eventql/io/cstable/cstable_reader.h \
-    eventql/io/cstable/cstable_writer.cc \
-    eventql/io/cstable/cstable_writer.h \
-    eventql/io/cstable/LockManager.h \
-    eventql/io/cstable/columns/v1/ColumnReader.h \
-    eventql/io/cstable/io/PageReader.h \
-    eventql/io/cstable/io/PageWriter.h \
-    eventql/io/cstable/ColumnReader.cc \
-    eventql/io/cstable/ColumnReader.h \
-    eventql/io/cstable/ColumnWriter.cc \
-    eventql/io/cstable/ColumnWriter.h \
-    eventql/io/cstable/RecordMaterializer.cc \
-    eventql/io/cstable/RecordMaterializer.h \
-    eventql/io/cstable/RecordShredder.cc \
-    eventql/io/cstable/RecordShredder.h \
-    eventql/io/cstable/TableSchema.cc \
-    eventql/io/cstable/TableSchema.h \
-    eventql/io/cstable/columns/column_reader_float.cc \
-    eventql/io/cstable/columns/column_reader_float.h \
-    eventql/io/cstable/columns/column_reader_uint.cc \
-    eventql/io/cstable/columns/column_reader_uint.h \
-    eventql/io/cstable/columns/column_reader_string.cc \
-    eventql/io/cstable/columns/column_reader_string.h \
-    eventql/io/cstable/columns/column_writer_uint.cc \
-    eventql/io/cstable/columns/column_writer_uint.h \
-    eventql/io/cstable/columns/column_writer_string.cc \
-    eventql/io/cstable/columns/column_writer_string.h \
-    eventql/io/cstable/columns/column_writer_float.cc \
-    eventql/io/cstable/columns/column_writer_float.h \
-    eventql/io/cstable/columns/page_reader_ieee754.cc \
-    eventql/io/cstable/columns/page_reader_ieee754.h \
-    eventql/io/cstable/columns/page_reader_uint32.cc \
-    eventql/io/cstable/columns/page_reader_uint32.h \
-    eventql/io/cstable/columns/page_reader_uint64.cc \
-    eventql/io/cstable/columns/page_reader_uint64.h \
-    eventql/io/cstable/columns/page_reader_leb128.cc \
-    eventql/io/cstable/columns/page_reader_leb128.h \
-    eventql/io/cstable/columns/page_reader_bitpacked.cc \
-    eventql/io/cstable/columns/page_reader_bitpacked.h \
-    eventql/io/cstable/columns/page_reader_lenencstring.cc \
-    eventql/io/cstable/columns/page_reader_lenencstring.h \
-    eventql/io/cstable/columns/page_writer_ieee754.cc \
-    eventql/io/cstable/columns/page_writer_ieee754.h \
-    eventql/io/cstable/columns/page_writer_uint32.cc \
-    eventql/io/cstable/columns/page_writer_uint32.h \
-    eventql/io/cstable/columns/page_writer_uint64.cc \
-    eventql/io/cstable/columns/page_writer_uint64.h \
-    eventql/io/cstable/columns/page_writer_leb128.cc \
-    eventql/io/cstable/columns/page_writer_leb128.h \
-    eventql/io/cstable/columns/page_writer_bitpacked.cc \
-    eventql/io/cstable/columns/page_writer_bitpacked.h \
-    eventql/io/cstable/columns/page_writer_lenencstring.cc \
-    eventql/io/cstable/columns/page_writer_lenencstring.h \
-    eventql/io/cstable/columns/v1/BitPackedIntColumnReader.cc \
-    eventql/io/cstable/columns/v1/BitPackedIntColumnReader.h \
-    eventql/io/cstable/columns/v1/BitPackedIntColumnWriter.cc \
-    eventql/io/cstable/columns/v1/BitPackedIntColumnWriter.h \
-    eventql/io/cstable/columns/v1/BooleanColumnReader.cc \
-    eventql/io/cstable/columns/v1/BooleanColumnReader.h \
-    eventql/io/cstable/columns/v1/BooleanColumnWriter.cc \
-    eventql/io/cstable/columns/v1/BooleanColumnWriter.h \
-    eventql/io/cstable/columns/v1/ColumnWriter.cc \
-    eventql/io/cstable/columns/v1/ColumnWriter.h \
-    eventql/io/cstable/columns/v1/DoubleColumnReader.cc \
-    eventql/io/cstable/columns/v1/DoubleColumnReader.h \
-    eventql/io/cstable/columns/v1/DoubleColumnWriter.cc \
-    eventql/io/cstable/columns/v1/DoubleColumnWriter.h \
-    eventql/io/cstable/columns/v1/LEB128ColumnReader.cc \
-    eventql/io/cstable/columns/v1/LEB128ColumnReader.h \
-    eventql/io/cstable/columns/v1/LEB128ColumnWriter.cc \
-    eventql/io/cstable/columns/v1/LEB128ColumnWriter.h \
-    eventql/io/cstable/columns/v1/StringColumnReader.cc \
-    eventql/io/cstable/columns/v1/StringColumnReader.h \
-    eventql/io/cstable/columns/v1/StringColumnWriter.cc \
-    eventql/io/cstable/columns/v1/StringColumnWriter.h \
-    eventql/io/cstable/columns/v1/UInt32ColumnReader.cc \
-    eventql/io/cstable/columns/v1/UInt32ColumnReader.h \
-    eventql/io/cstable/columns/v1/UInt32ColumnWriter.cc \
-    eventql/io/cstable/columns/v1/UInt32ColumnWriter.h \
-    eventql/io/cstable/columns/v1/UInt64ColumnReader.cc \
-    eventql/io/cstable/columns/v1/UInt64ColumnReader.h \
-    eventql/io/cstable/columns/v1/UInt64ColumnWriter.cc \
-    eventql/io/cstable/columns/v1/UInt64ColumnWriter.h \
-    eventql/io/cstable/cstable.cc \
-    eventql/io/cstable/cstable.h \
-    eventql/io/cstable/page_manager.cc \
-    eventql/io/cstable/page_manager.h
-
-noinst_LIBRARIES += evql_cstable.a
-
-
-################# LIB: evql_sstable.a ####################
-evql_sstable_a_SOURCES = \
-    eventql/io/sstable/MetaPage.cc \
-    eventql/io/sstable/MetaPage.h \
-    eventql/io/sstable/RowWriter.cc \
-    eventql/io/sstable/RowWriter.h \
-    eventql/io/sstable/SSTableEditor_impl.h \
-    eventql/io/sstable/SSTableServlet.cc \
-    eventql/io/sstable/SSTableServlet.h \
-    eventql/io/sstable/binaryformat.h \
-    eventql/io/sstable/SSTableColumnReader.cc \
-    eventql/io/sstable/SSTableColumnReader.h \
-    eventql/io/sstable/SSTableColumnSchema.cc \
-    eventql/io/sstable/SSTableColumnSchema.h \
-    eventql/io/sstable/SSTableColumnWriter.cc \
-    eventql/io/sstable/SSTableColumnWriter.h \
-    eventql/io/sstable/SSTableEditor.cc \
-    eventql/io/sstable/SSTableEditor.h \
-    eventql/io/sstable/SSTableScan.cc \
-    eventql/io/sstable/SSTableScan.h \
-    eventql/io/sstable/SSTableWriter.cc \
-    eventql/io/sstable/SSTableWriter.h \
-    eventql/io/sstable/cursor.cc \
-    eventql/io/sstable/cursor.h \
-    eventql/io/sstable/fileheaderreader.cc \
-    eventql/io/sstable/fileheaderreader.h \
-    eventql/io/sstable/fileheaderwriter.cc \
-    eventql/io/sstable/fileheaderwriter.h \
-    eventql/io/sstable/index.cc \
-    eventql/io/sstable/index.h \
-    eventql/io/sstable/indexprovider.cc \
-    eventql/io/sstable/indexprovider.h \
-    eventql/io/sstable/rowoffsetindex.cc \
-    eventql/io/sstable/rowoffsetindex.h \
-    eventql/io/sstable/sstablereader.cc \
-    eventql/io/sstable/sstablereader.h \
-    eventql/io/sstable/sstablerepair.cc \
-    eventql/io/sstable/sstablerepair.h
-
-noinst_LIBRARIES += evql_sstable.a
-
-
-################# LIB: evql_util.a ####################
-evql_util_a_SOURCES = \
+libevqld_a_SOURCES = \
     eventql/util/CivilTime.cc \
     eventql/util/CivilTime.h \
     eventql/util/CivilTime_impl.h \
@@ -733,19 +403,7 @@ evql_util_a_SOURCES = \
     eventql/util/wallclock.cc \
     eventql/util/wallclock.h \
     eventql/util/web/SecureCookie.cc \
-    eventql/util/web/SecureCookie.h
-
-    #eventql/util/MonotonicClock.cc \
-    #eventql/util/MonotonicClock.h \
-    #eventql/util/MonotonicTime.cc \
-    #eventql/util/MonotonicTime.h \
-    #eventql/util/MonotonicTime_impl.h
-
-noinst_LIBRARIES += evql_util.a
-
-
-################# LIB: evql_http.a ####################
-evql_http_a_SOURCES = \
+    eventql/util/web/SecureCookie.h \
     eventql/util/http/HTTPFileDownload.cc \
     eventql/util/http/HTTPFileDownload.h \
     eventql/util/http/HTTPRequestStream.cc \
@@ -795,13 +453,317 @@ evql_http_a_SOURCES = \
     eventql/util/http/httpservice.cc \
     eventql/util/http/httpservice.h \
     eventql/util/http/statshttpservlet.cc \
-    eventql/util/http/statshttpservlet.h
-
-noinst_LIBRARIES += evql_http.a
-
-
-################# LIB: evql_core.a ####################
-evql_core_a_SOURCES = \
+    eventql/util/http/statshttpservlet.h \
+    eventql/io/cstable/cstable_file.cc \
+    eventql/io/cstable/cstable_file.h \
+    eventql/io/cstable/cstable_reader.cc \
+    eventql/io/cstable/cstable_reader.h \
+    eventql/io/cstable/cstable_writer.cc \
+    eventql/io/cstable/cstable_writer.h \
+    eventql/io/cstable/LockManager.h \
+    eventql/io/cstable/columns/v1/ColumnReader.h \
+    eventql/io/cstable/io/PageReader.h \
+    eventql/io/cstable/io/PageWriter.h \
+    eventql/io/cstable/ColumnReader.cc \
+    eventql/io/cstable/ColumnReader.h \
+    eventql/io/cstable/ColumnWriter.cc \
+    eventql/io/cstable/ColumnWriter.h \
+    eventql/io/cstable/RecordMaterializer.cc \
+    eventql/io/cstable/RecordMaterializer.h \
+    eventql/io/cstable/RecordShredder.cc \
+    eventql/io/cstable/RecordShredder.h \
+    eventql/io/cstable/TableSchema.cc \
+    eventql/io/cstable/TableSchema.h \
+    eventql/io/cstable/columns/column_reader_float.cc \
+    eventql/io/cstable/columns/column_reader_float.h \
+    eventql/io/cstable/columns/column_reader_uint.cc \
+    eventql/io/cstable/columns/column_reader_uint.h \
+    eventql/io/cstable/columns/column_reader_string.cc \
+    eventql/io/cstable/columns/column_reader_string.h \
+    eventql/io/cstable/columns/column_writer_uint.cc \
+    eventql/io/cstable/columns/column_writer_uint.h \
+    eventql/io/cstable/columns/column_writer_string.cc \
+    eventql/io/cstable/columns/column_writer_string.h \
+    eventql/io/cstable/columns/column_writer_float.cc \
+    eventql/io/cstable/columns/column_writer_float.h \
+    eventql/io/cstable/columns/page_reader_ieee754.cc \
+    eventql/io/cstable/columns/page_reader_ieee754.h \
+    eventql/io/cstable/columns/page_reader_uint32.cc \
+    eventql/io/cstable/columns/page_reader_uint32.h \
+    eventql/io/cstable/columns/page_reader_uint64.cc \
+    eventql/io/cstable/columns/page_reader_uint64.h \
+    eventql/io/cstable/columns/page_reader_leb128.cc \
+    eventql/io/cstable/columns/page_reader_leb128.h \
+    eventql/io/cstable/columns/page_reader_bitpacked.cc \
+    eventql/io/cstable/columns/page_reader_bitpacked.h \
+    eventql/io/cstable/columns/page_reader_lenencstring.cc \
+    eventql/io/cstable/columns/page_reader_lenencstring.h \
+    eventql/io/cstable/columns/page_writer_ieee754.cc \
+    eventql/io/cstable/columns/page_writer_ieee754.h \
+    eventql/io/cstable/columns/page_writer_uint32.cc \
+    eventql/io/cstable/columns/page_writer_uint32.h \
+    eventql/io/cstable/columns/page_writer_uint64.cc \
+    eventql/io/cstable/columns/page_writer_uint64.h \
+    eventql/io/cstable/columns/page_writer_leb128.cc \
+    eventql/io/cstable/columns/page_writer_leb128.h \
+    eventql/io/cstable/columns/page_writer_bitpacked.cc \
+    eventql/io/cstable/columns/page_writer_bitpacked.h \
+    eventql/io/cstable/columns/page_writer_lenencstring.cc \
+    eventql/io/cstable/columns/page_writer_lenencstring.h \
+    eventql/io/cstable/columns/v1/BitPackedIntColumnReader.cc \
+    eventql/io/cstable/columns/v1/BitPackedIntColumnReader.h \
+    eventql/io/cstable/columns/v1/BitPackedIntColumnWriter.cc \
+    eventql/io/cstable/columns/v1/BitPackedIntColumnWriter.h \
+    eventql/io/cstable/columns/v1/BooleanColumnReader.cc \
+    eventql/io/cstable/columns/v1/BooleanColumnReader.h \
+    eventql/io/cstable/columns/v1/BooleanColumnWriter.cc \
+    eventql/io/cstable/columns/v1/BooleanColumnWriter.h \
+    eventql/io/cstable/columns/v1/ColumnWriter.cc \
+    eventql/io/cstable/columns/v1/ColumnWriter.h \
+    eventql/io/cstable/columns/v1/DoubleColumnReader.cc \
+    eventql/io/cstable/columns/v1/DoubleColumnReader.h \
+    eventql/io/cstable/columns/v1/DoubleColumnWriter.cc \
+    eventql/io/cstable/columns/v1/DoubleColumnWriter.h \
+    eventql/io/cstable/columns/v1/LEB128ColumnReader.cc \
+    eventql/io/cstable/columns/v1/LEB128ColumnReader.h \
+    eventql/io/cstable/columns/v1/LEB128ColumnWriter.cc \
+    eventql/io/cstable/columns/v1/LEB128ColumnWriter.h \
+    eventql/io/cstable/columns/v1/StringColumnReader.cc \
+    eventql/io/cstable/columns/v1/StringColumnReader.h \
+    eventql/io/cstable/columns/v1/StringColumnWriter.cc \
+    eventql/io/cstable/columns/v1/StringColumnWriter.h \
+    eventql/io/cstable/columns/v1/UInt32ColumnReader.cc \
+    eventql/io/cstable/columns/v1/UInt32ColumnReader.h \
+    eventql/io/cstable/columns/v1/UInt32ColumnWriter.cc \
+    eventql/io/cstable/columns/v1/UInt32ColumnWriter.h \
+    eventql/io/cstable/columns/v1/UInt64ColumnReader.cc \
+    eventql/io/cstable/columns/v1/UInt64ColumnReader.h \
+    eventql/io/cstable/columns/v1/UInt64ColumnWriter.cc \
+    eventql/io/cstable/columns/v1/UInt64ColumnWriter.h \
+    eventql/io/cstable/cstable.cc \
+    eventql/io/cstable/cstable.h \
+    eventql/io/cstable/page_manager.cc \
+    eventql/io/cstable/page_manager.h \
+    eventql/io/sstable/MetaPage.cc \
+    eventql/io/sstable/MetaPage.h \
+    eventql/io/sstable/RowWriter.cc \
+    eventql/io/sstable/RowWriter.h \
+    eventql/io/sstable/SSTableEditor_impl.h \
+    eventql/io/sstable/SSTableServlet.cc \
+    eventql/io/sstable/SSTableServlet.h \
+    eventql/io/sstable/binaryformat.h \
+    eventql/io/sstable/SSTableColumnReader.cc \
+    eventql/io/sstable/SSTableColumnReader.h \
+    eventql/io/sstable/SSTableColumnSchema.cc \
+    eventql/io/sstable/SSTableColumnSchema.h \
+    eventql/io/sstable/SSTableColumnWriter.cc \
+    eventql/io/sstable/SSTableColumnWriter.h \
+    eventql/io/sstable/SSTableEditor.cc \
+    eventql/io/sstable/SSTableEditor.h \
+    eventql/io/sstable/SSTableScan.cc \
+    eventql/io/sstable/SSTableScan.h \
+    eventql/io/sstable/SSTableWriter.cc \
+    eventql/io/sstable/SSTableWriter.h \
+    eventql/io/sstable/cursor.cc \
+    eventql/io/sstable/cursor.h \
+    eventql/io/sstable/fileheaderreader.cc \
+    eventql/io/sstable/fileheaderreader.h \
+    eventql/io/sstable/fileheaderwriter.cc \
+    eventql/io/sstable/fileheaderwriter.h \
+    eventql/io/sstable/index.cc \
+    eventql/io/sstable/index.h \
+    eventql/io/sstable/indexprovider.cc \
+    eventql/io/sstable/indexprovider.h \
+    eventql/io/sstable/rowoffsetindex.cc \
+    eventql/io/sstable/rowoffsetindex.h \
+    eventql/io/sstable/sstablereader.cc \
+    eventql/io/sstable/sstablereader.h \
+    eventql/io/sstable/sstablerepair.cc \
+    eventql/io/sstable/sstablerepair.h \
+    eventql/sql/csql.h \
+    eventql/sql/CSTableScan.cc \
+    eventql/sql/CSTableScan.h \
+    eventql/sql/CSTableScanProvider.cc \
+    eventql/sql/CSTableScanProvider.h \
+    eventql/sql/SFunction.cc \
+    eventql/sql/SFunction.h \
+    eventql/sql/TableInfo.h \
+    eventql/sql/abi.h \
+    eventql/sql/backends/backend.h \
+    eventql/sql/backends/csv/CSVInputStream.cc \
+    eventql/sql/backends/csv/CSVInputStream.h \
+    eventql/sql/backends/csv/CSVTableProvider.cc \
+    eventql/sql/backends/csv/CSVTableProvider.h \
+    eventql/sql/backends/csv/CSVTableScan.cc \
+    eventql/sql/backends/csv/CSVTableScan.h \
+    eventql/sql/backends/tableref.h \
+    eventql/sql/defaults.cc \
+    eventql/sql/defaults.h \
+    eventql/sql/expressions/aggregate.cc \
+    eventql/sql/expressions/aggregate.h \
+    eventql/sql/expressions/boolean.cc \
+    eventql/sql/expressions/boolean.h \
+    eventql/sql/expressions/conversion.cc \
+    eventql/sql/expressions/conversion.h \
+    eventql/sql/expressions/datetime.cc \
+    eventql/sql/expressions/datetime.h \
+    eventql/sql/expressions/internal.cc \
+    eventql/sql/expressions/internal.h \
+    eventql/sql/expressions/math.cc \
+    eventql/sql/expressions/math.h \
+    eventql/sql/expressions/string.cc \
+    eventql/sql/expressions/string.h \
+    eventql/sql/expressions/table/describe_table.cc \
+    eventql/sql/expressions/table/describe_table.h \
+    eventql/sql/expressions/table/groupby.cc \
+    eventql/sql/expressions/table/groupby.h \
+    eventql/sql/expressions/table/limit.cc \
+    eventql/sql/expressions/table/limit.h \
+    eventql/sql/expressions/table/nested_loop_join.cc \
+    eventql/sql/expressions/table/nested_loop_join.h \
+    eventql/sql/expressions/table/orderby.cc \
+    eventql/sql/expressions/table/orderby.h \
+    eventql/sql/expressions/table/select.cc \
+    eventql/sql/expressions/table/select.h \
+    eventql/sql/expressions/table/show_tables.cc \
+    eventql/sql/expressions/table/show_tables.h \
+    eventql/sql/expressions/table/subquery.cc \
+    eventql/sql/expressions/table/subquery.h \
+    eventql/sql/expressions/table/tablescan.cc \
+    eventql/sql/expressions/table/tablescan.h \
+    eventql/sql/expressions/table_expression.h \
+    eventql/sql/extensions/chartsql/areachartbuilder.cc \
+    eventql/sql/extensions/chartsql/areachartbuilder.h \
+    eventql/sql/extensions/chartsql/barchartbuilder.cc \
+    eventql/sql/extensions/chartsql/barchartbuilder.h \
+    eventql/sql/extensions/chartsql/chart_expression.cc \
+    eventql/sql/extensions/chartsql/chart_expression.h \
+    eventql/sql/extensions/chartsql/chartbuilder.h \
+    eventql/sql/extensions/chartsql/domainconfig.cc \
+    eventql/sql/extensions/chartsql/domainconfig.h \
+    eventql/sql/extensions/chartsql/linechartbuilder.cc \
+    eventql/sql/extensions/chartsql/linechartbuilder.h \
+    eventql/sql/extensions/chartsql/pointchartbuilder.cc \
+    eventql/sql/extensions/chartsql/pointchartbuilder.h \
+    eventql/sql/extensions/chartsql/seriesadapter.cc \
+    eventql/sql/extensions/chartsql/seriesadapter.h \
+    eventql/sql/format.cc \
+    eventql/sql/format.h \
+    eventql/sql/parser/astnode.cc \
+    eventql/sql/parser/astnode.h \
+    eventql/sql/parser/astutil.cc \
+    eventql/sql/parser/astutil.h \
+    eventql/sql/parser/parser.cc \
+    eventql/sql/parser/parser.h \
+    eventql/sql/parser/token.cc \
+    eventql/sql/parser/token.h \
+    eventql/sql/parser/tokenize.cc \
+    eventql/sql/parser/tokenize.h \
+    eventql/sql/qtree/CallExpressionNode.cc \
+    eventql/sql/qtree/CallExpressionNode.h \
+    eventql/sql/qtree/ChartStatementNode.cc \
+    eventql/sql/qtree/ChartStatementNode.h \
+    eventql/sql/qtree/ColumnReferenceNode.cc \
+    eventql/sql/qtree/ColumnReferenceNode.h \
+    eventql/sql/qtree/DescribeTableNode.cc \
+    eventql/sql/qtree/DescribeTableNode.h \
+    eventql/sql/qtree/DrawStatementNode.cc \
+    eventql/sql/qtree/DrawStatementNode.h \
+    eventql/sql/qtree/GroupByNode.cc \
+    eventql/sql/qtree/GroupByNode.h \
+    eventql/sql/qtree/IfExpressionNode.cc \
+    eventql/sql/qtree/IfExpressionNode.h \
+    eventql/sql/qtree/JoinCondition.cc \
+    eventql/sql/qtree/JoinCondition.h \
+    eventql/sql/qtree/JoinNode.cc \
+    eventql/sql/qtree/JoinNode.h \
+    eventql/sql/qtree/LikeExpressionNode.cc \
+    eventql/sql/qtree/LikeExpressionNode.h \
+    eventql/sql/qtree/LimitNode.cc \
+    eventql/sql/qtree/LimitNode.h \
+    eventql/sql/qtree/LiteralExpressionNode.cc \
+    eventql/sql/qtree/LiteralExpressionNode.h \
+    eventql/sql/qtree/OrderByNode.cc \
+    eventql/sql/qtree/OrderByNode.h \
+    eventql/sql/qtree/QueryTreeNode.cc \
+    eventql/sql/qtree/QueryTreeNode.h \
+    eventql/sql/qtree/QueryTreeUtil.cc \
+    eventql/sql/qtree/QueryTreeUtil.h \
+    eventql/sql/qtree/QueryTreeUtil_impl.h \
+    eventql/sql/qtree/RegexExpressionNode.cc \
+    eventql/sql/qtree/RegexExpressionNode.h \
+    eventql/sql/qtree/SelectExpressionNode.cc \
+    eventql/sql/qtree/SelectExpressionNode.h \
+    eventql/sql/qtree/SelectListNode.cc \
+    eventql/sql/qtree/SelectListNode.h \
+    eventql/sql/qtree/SequentialScanNode.cc \
+    eventql/sql/qtree/SequentialScanNode.h \
+    eventql/sql/qtree/ShowTablesNode.cc \
+    eventql/sql/qtree/ShowTablesNode.h \
+    eventql/sql/qtree/SubqueryNode.cc \
+    eventql/sql/qtree/SubqueryNode.h \
+    eventql/sql/qtree/TableExpressionNode.cc \
+    eventql/sql/qtree/TableExpressionNode.h \
+    eventql/sql/qtree/UnionNode.cc \
+    eventql/sql/qtree/UnionNode.h \
+    eventql/sql/qtree/ValueExpressionNode.h \
+    eventql/sql/qtree/nodes/create_database.cc \
+    eventql/sql/qtree/nodes/create_database.h \
+    eventql/sql/qtree/nodes/alter_table.cc \
+    eventql/sql/qtree/nodes/alter_table.h \
+    eventql/sql/qtree/nodes/create_table.cc \
+    eventql/sql/qtree/nodes/create_table.h \
+    eventql/sql/qtree/nodes/insert_into.cc \
+    eventql/sql/qtree/nodes/insert_into.h \
+    eventql/sql/qtree/nodes/insert_json.cc \
+    eventql/sql/qtree/nodes/insert_json.h \
+    eventql/sql/qtree/qtree_coder.cc \
+    eventql/sql/qtree/qtree_coder.h \
+    eventql/sql/qtree/qtree_coder_impl.h \
+    eventql/sql/query_plan.cc \
+    eventql/sql/query_plan.h \
+    eventql/sql/result_cursor.cc \
+    eventql/sql/result_cursor.h \
+    eventql/sql/result_list.cc \
+    eventql/sql/result_list.h \
+    eventql/sql/runtime/LikePattern.cc \
+    eventql/sql/runtime/LikePattern.h \
+    eventql/sql/runtime/query_cache.cc \
+    eventql/sql/runtime/query_cache.h \
+    eventql/sql/runtime/QueryBuilder.cc \
+    eventql/sql/runtime/QueryBuilder.h \
+    eventql/sql/runtime/ScratchMemory.cc \
+    eventql/sql/runtime/ScratchMemory.h \
+    eventql/sql/runtime/ValueExpression.cc \
+    eventql/sql/runtime/ValueExpression.h \
+    eventql/sql/runtime/ValueExpressionBuilder.cc \
+    eventql/sql/runtime/ValueExpressionBuilder.h \
+    eventql/sql/runtime/compiler.cc \
+    eventql/sql/runtime/compiler.h \
+    eventql/sql/runtime/defaultruntime.cc \
+    eventql/sql/runtime/defaultruntime.h \
+    eventql/sql/runtime/queryplanbuilder.cc \
+    eventql/sql/runtime/queryplanbuilder.h \
+    eventql/sql/runtime/runtime.cc \
+    eventql/sql/runtime/runtime.h \
+    eventql/sql/runtime/symboltable.cc \
+    eventql/sql/runtime/symboltable.h \
+    eventql/sql/runtime/tablerepository.cc \
+    eventql/sql/runtime/tablerepository.h \
+    eventql/sql/runtime/vm.cc \
+    eventql/sql/runtime/vm.h \
+    eventql/sql/scheduler.cc \
+    eventql/sql/scheduler.h \
+    eventql/sql/scheduler/execution_context.cc \
+    eventql/sql/scheduler/execution_context.h \
+    eventql/sql/svalue.cc \
+    eventql/sql/svalue.h \
+    eventql/sql/table_iterator.h \
+    eventql/sql/table_provider.h \
+    eventql/sql/table_schema.cc \
+    eventql/sql/table_schema.h \
+    eventql/sql/transaction.cc \
+    eventql/sql/transaction.h \
     eventql/config/namespace_config.cc \
     eventql/config/namespace_config.h \
     eventql/db/partition_change_notification.h \
@@ -960,7 +922,17 @@ evql_core_a_SOURCES = \
     eventql/util/mdb/MDBTransaction.cc \
     eventql/util/mdb/MDBTransaction.h
 
-nodist_evql_core_a_SOURCES = \
+#libevqld_a_LIBADD = \
+#    $(ZOOKEEPER_LDADD) \
+#    $(LINENOISE_LDADD) \
+#    $(INIH_LDADD) \
+#    $(SIMDCOMP_LDADD) \
+#    $(SPIDERMONKEY_LDADD) \
+#    $(PCRE_LDADD)
+
+libevqld_a_LDFLAGS = -fvisibility=hidden -static -a -rpath $(libdir)
+
+nodist_libevqld_a_SOURCES = \
     @builddir@/eventql/auth/client_auth_legacy_protos.pb.cc \
     @builddir@/eventql/config/namespace_config_protos.pb.cc \
     @builddir@/eventql/db/metadata_operations.pb.cc \
@@ -974,238 +946,288 @@ nodist_evql_core_a_SOURCES = \
 eventql/mapreduce/mapreduce_preludejs.cc:
 	echo 'eventql/mapreduce/prelude.js:${srcdir}/eventql/mapreduce/prelude.js' | ${srcdir}/eventql/util/assets.sh $(builddir)/eventql/mapreduce/mapreduce_preludejs.cc
 
-noinst_LIBRARIES += evql_core.a
-
-
-################# BIN: evql ####################
-evql_SOURCES = \
-    eventql/cli/console.cc \
-    eventql/cli/console.h \
-    eventql/cli/cli_config.cc \
-    eventql/cli/cli_config.h \
-    eventql/server/sql/codec/binary_codec.cc \
-    eventql/server/sql/codec/binary_codec.h \
-    eventql/config/process_config.cc \
-    eventql/config/process_config.h \
-    eventql/evql.cc
-
-evql_LDADD = \
-    evql_http.a \
-    evql_sql.a \
-    evql_cstable.a \
-    evql_util.a \
+BUNDLED_LIBS = \
+    $(ZOOKEEPER_LDADD) \
     $(LINENOISE_LDADD) \
     $(INIH_LDADD) \
     $(SIMDCOMP_LDADD) \
+    $(LMDB_LDADD) \
+    $(PROTOBUF_LDADD) \
+    $(SPIDERMONKEY_LDADD) \
     $(PCRE_LDADD)
 
-bin_PROGRAMS += evql
-
+libevqld.a: $(libevqld_a_OBJECTS)
+	rm -f $@
+	$(AR) r $@ $(libevqld_a_OBJECTS) $(BUNDLED_LIBS)
+	$(RANLIB) $@
 
 ################# BIN: evqld ####################
 evqld_SOURCES = \
+    eventql/util/application.cc \
+    eventql/util/application.h \
+    eventql/util/cli/flagparser.cc \
+    eventql/util/cli/flagparser.h \
+    eventql/util/logging/logger.h \
+    eventql/util/logging/logger_impl.h \
+    eventql/util/exception.cc \
+    eventql/util/exception.h \
+    eventql/util/exceptionhandler.cc \
+    eventql/util/exceptionhandler.h \
+    eventql/util/io/fileutil.cc \
+    eventql/util/io/fileutil.h \
+    eventql/util/io/file.cc \
+    eventql/util/io/file.h \
+    eventql/util/io/FileLock.cc \
+    eventql/util/io/FileLock.h \
+    eventql/util/stringutil.cc \
+    eventql/util/stringutil.h \
+    eventql/util/hash.h \
+    eventql/util/stringutil_impl.h \
+    eventql/util/buffer.cc \
+    eventql/util/buffer.h \
+    eventql/util/bufferutil.cc \
+    eventql/util/bufferutil.h \
+    eventql/util/logging.cc \
+    eventql/util/logging.h \
+    eventql/util/logging/loglevel.h \
+    eventql/util/logging/logger.h \
+    eventql/util/logging/logger_impl.h \
+    eventql/util/logging/logtarget.h \
+    eventql/util/logging/logoutputstream.cc \
+    eventql/util/logging/logoutputstream.h \
+    eventql/util/logging/syslog.cc \
+    eventql/util/logging/syslog.h \
+    eventql/util/thread/signalhandler.cc \
+    eventql/util/thread/signalhandler.h \
+    eventql/util/autoref.cc \
+    eventql/util/autoref.h \
+    eventql/util/autoref_impl.h \
+    eventql/util/wallclock.cc \
+    eventql/util/wallclock.h \
+    eventql/util/ISO8601.cc \
+    eventql/util/ISO8601.h \
+    eventql/util/UTF8.cc \
+    eventql/util/UTF8.h \
+    eventql/util/UnixTime.cc \
+    eventql/util/UnixTime.h \
+    eventql/util/UnixTime_impl.h \
+    eventql/util/CivilTime.cc \
+    eventql/util/CivilTime.h \
+    eventql/util/CivilTime_impl.h \
+    eventql/util/io/mmappedfile.cc \
+    eventql/util/io/mmappedfile.h \
+    eventql/util/io/outputstream.cc \
+    eventql/util/io/outputstream.h \
+    eventql/util/fnv.cc \
+    eventql/util/fnv.h \
+    eventql/util/ieee754.cc \
+    eventql/util/ieee754.h \
     eventql/evqld.cc
 
-evqld_LDADD = \
-    evql_core.a \
-    evql_http.a \
-    evql_sql.a \
-    evql_cstable.a \
-    evql_sstable.a \
-    evql_util.a \
-    $(SIMDCOMP_LDADD) \
-    $(INIH_LDADD) \
-    $(SPIDERMONKEY_LDADD) \
-    $(ZOOKEEPER_LDADD) \
-    $(LMDB_LDADD) \
-    $(PROTOBUF_LDADD) \
-    $(PCRE_LDADD)
+evqld_LDADD = libevqld.a
+evqld_CXXFLAGS=${AM_CXXFLAGS}
 
-bin_PROGRAMS += evqld
-
-################# BIN: evqld ####################
-evqlctl_SOURCES = \
-    eventql/cli/commands/cli_command.h \
-    eventql/cli/commands/cli_command.cc \
-    eventql/cli/commands/cluster_add_server.h \
-    eventql/cli/commands/cluster_add_server.cc \
-    eventql/cli/commands/cluster_create.h \
-    eventql/cli/commands/cluster_create.cc \
-    eventql/cli/commands/cluster_status.h \
-    eventql/cli/commands/cluster_status.cc \
-    eventql/cli/commands/cluster_remove_server.h \
-    eventql/cli/commands/cluster_remove_server.cc \
-    eventql/cli/commands/cluster_set_allocation_policy.h \
-    eventql/cli/commands/cluster_set_allocation_policy.cc \
-    eventql/cli/commands/database_create.h \
-    eventql/cli/commands/database_create.cc \
-    eventql/cli/commands/table_config_set.h \
-    eventql/cli/commands/table_config_set.cc \
-    eventql/cli/commands/table_split.h \
-    eventql/cli/commands/table_split.cc \
-    eventql/cli/commands/table_split_finalize.h \
-    eventql/cli/commands/table_split_finalize.cc \
-    eventql/evqlctl.cc
-
-evqlctl_LDADD = \
-    evql_core.a \
-    evql_http.a \
-    evql_sql.a \
-    evql_cstable.a \
-    evql_sstable.a \
-    evql_util.a \
-    $(SIMDCOMP_LDADD) \
-    $(INIH_LDADD) \
-    $(ZOOKEEPER_LDADD) \
-    $(LMDB_LDADD) \
-    $(PROTOBUF_LDADD) \
-    $(PCRE_LDADD)
-
-bin_PROGRAMS += evqlctl
-
-if ENABLE_MYSQL_TOOLS
-################# BIN: mysql2evql ####################
-mysql2evql_SOURCES = \
-    eventql/tools/mysql2evql.cc
-
-mysql2evql_LDADD = \
-    evql_http.a \
-    evql_util.a \
-    $(MYSQL_LDADD) \
-    $(SIMDCOMP_LDADD) \
-    $(PROTOBUF_LDADD) \
-    $(PCRE_LDADD)
-
-bin_PROGRAMS += mysql2evql
-endif
-
-################# TEST: sql/runtime ####################
-test_evql_sql_runtime_SOURCES = eventql/sql/runtime/Runtime_test.cc
-test_evql_sql_runtime_LDADD = \
-    evql_http.a \
-    evql_sql.a \
-    evql_cstable.a \
-    evql_sstable.a \
-    evql_util.a \
-    $(SIMDCOMP_LDADD) \
-    $(SPIDERMONKEY_LDADD) \
-    $(LMDB_LDADD) \
-    $(PROTOBUF_LDADD) \
-    $(PCRE_LDADD)
-
-TESTS += test_evql_sql_runtime
-check_PROGRAMS += test_evql_sql_runtime
+################## BIN: evql ####################
+#evql_SOURCES = \
+#    eventql/cli/console.cc \
+#    eventql/cli/console.h \
+#    eventql/cli/cli_config.cc \
+#    eventql/cli/cli_config.h \
+#    eventql/server/sql/codec/binary_codec.cc \
+#    eventql/server/sql/codec/binary_codec.h \
+#    eventql/config/process_config.cc \
+#    eventql/config/process_config.h \
+#    eventql/evql.cc
+#
+#evql_LDADD = evql_server.a evql_util.a
+#bin_PROGRAMS += evql
 
 
-################# TEST: sql/qtree ####################
-test_evql_sql_qtree_SOURCES = eventql/sql/qtree/QTree_test.cc
-test_evql_sql_qtree_LDADD = \
-    evql_http.a \
-    evql_sql.a \
-    evql_cstable.a \
-    evql_sstable.a \
-    evql_util.a \
-    $(SIMDCOMP_LDADD) \
-    $(SPIDERMONKEY_LDADD) \
-    $(LMDB_LDADD) \
-    $(PROTOBUF_LDADD) \
-    $(PCRE_LDADD)
-
-TESTS += test_evql_sql_qtree
-check_PROGRAMS += test_evql_sql_qtree
 
 
-################# TEST: sql/parser ####################
-test_evql_sql_parser_SOURCES = eventql/sql/parser/Parser_test.cc
-test_evql_sql_parser_LDADD = \
-    evql_http.a \
-    evql_sql.a \
-    evql_cstable.a \
-    evql_sstable.a \
-    evql_util.a \
-    $(SIMDCOMP_LDADD) \
-    $(SPIDERMONKEY_LDADD) \
-    $(LMDB_LDADD) \
-    $(PROTOBUF_LDADD) \
-    $(PCRE_LDADD)
+################ BIN: evqlctl ###################
+#evqlctl_SOURCES = \
+#    eventql/cli/commands/cli_command.h \
+#    eventql/cli/commands/cli_command.cc \
+#    eventql/cli/commands/cluster_add_server.h \
+#    eventql/cli/commands/cluster_add_server.cc \
+#    eventql/cli/commands/cluster_create.h \
+#    eventql/cli/commands/cluster_create.cc \
+#    eventql/cli/commands/cluster_status.h \
+#    eventql/cli/commands/cluster_status.cc \
+#    eventql/cli/commands/cluster_remove_server.h \
+#    eventql/cli/commands/cluster_remove_server.cc \
+#    eventql/cli/commands/cluster_set_allocation_policy.h \
+#    eventql/cli/commands/cluster_set_allocation_policy.cc \
+#    eventql/cli/commands/database_create.h \
+#    eventql/cli/commands/database_create.cc \
+#    eventql/cli/commands/table_config_set.h \
+#    eventql/cli/commands/table_config_set.cc \
+#    eventql/cli/commands/table_split.h \
+#    eventql/cli/commands/table_split.cc \
+#    eventql/cli/commands/table_split_finalize.h \
+#    eventql/cli/commands/table_split_finalize.cc \
+#    eventql/evqlctl.cc
+#
+#evqlctl_LDADD = \
+#    evql_core.a \
+#    evql_http.a \
+#    evql_sql.a \
+#    evql_cstable.a \
+#    evql_sstable.a \
+#    evql_util.a \
+#    $(SIMDCOMP_LDADD) \
+#    $(INIH_LDADD) \
+#    $(ZOOKEEPER_LDADD) \
+#    $(LMDB_LDADD) \
+#    $(PROTOBUF_LDADD) \
+#    $(PCRE_LDADD)
+#
+#bin_PROGRAMS += evqlctl
+#
+#if ENABLE_MYSQL_TOOLS
+################## BIN: mysql2evql ####################
+#mysql2evql_SOURCES = \
+#    eventql/tools/mysql2evql.cc
+#
+#mysql2evql_LDADD = \
+#    evql_http.a \
+#    evql_util.a \
+#    $(MYSQL_LDADD) \
+#    $(SIMDCOMP_LDADD) \
+#    $(PROTOBUF_LDADD) \
+#    $(PCRE_LDADD)
+#
+#bin_PROGRAMS += mysql2evql
+#endif
 
-TESTS += test_evql_sql_parser
-check_PROGRAMS += test_evql_sql_parser
-
-
-################# TEST: db/metadata_store ####################
-test_evql_db_metadata_store_SOURCES = eventql/db/metadata_store_test.cc
-test_evql_db_metadata_store_LDADD = \
-    evql_core.a \
-    evql_util.a \
-    $(SIMDCOMP_LDADD) \
-    $(LMDB_LDADD) \
-    $(PROTOBUF_LDADD) \
-    $(PCRE_LDADD)
-
-TESTS += test_evql_db_metadata_store
-check_PROGRAMS += test_evql_db_metadata_store
-
-################# TEST: db/metadata_store ####################
-test_evql_config_process_config_SOURCES = eventql/config/process_config_test.cc
-test_evql_config_process_config_LDADD = \
-    evql_core.a \
-    evql_util.a \
-    $(SIMDCOMP_LDADD) \
-    $(LMDB_LDADD) \
-    $(INIH_LDADD) \
-    $(PCRE_LDADD)
-
-TESTS += test_evql_config_process_config
-check_PROGRAMS += test_evql_config_process_config
-
-################# TEST: db/metadata_file ####################
-test_evql_db_metadata_file_SOURCES = eventql/db/metadata_file_test.cc
-test_evql_db_metadata_file_LDADD = \
-    evql_core.a \
-    evql_util.a \
-    $(SIMDCOMP_LDADD) \
-    $(LMDB_LDADD) \
-    $(PROTOBUF_LDADD) \
-    $(PCRE_LDADD)
-
-TESTS += test_evql_db_metadata_file
-check_PROGRAMS += test_evql_db_metadata_file
-
-
-################# TEST: db/partition_discovery ####################
-test_evql_db_partition_discovery_SOURCES = eventql/db/partition_discovery_test.cc
-test_evql_db_partition_discovery_LDADD = \
-    evql_core.a \
-    evql_util.a \
-    $(SIMDCOMP_LDADD) \
-    $(LMDB_LDADD) \
-    $(PROTOBUF_LDADD) \
-    $(PCRE_LDADD)
-
-TESTS += test_evql_db_partition_discovery
-check_PROGRAMS += test_evql_db_partition_discovery
-
-
-################# TEST: io/cstable ####################
-test_evql_io_cstable_SOURCES = eventql/io/cstable/cstable_test.cc
-test_evql_io_cstable_LDADD = \
-    evql_cstable.a \
-    evql_util.a \
-    $(SIMDCOMP_LDADD) \
-    $(PCRE_LDADD)
-
-TESTS += test_evql_io_cstable
-check_PROGRAMS += test_evql_io_cstable
-
-
-################# TEST: io/cstable ####################
-cstable_tool_SOURCES = eventql/io/cstable/cstable_tool.cc
-cstable_tool_LDADD = \
-    evql_cstable.a \
-    evql_util.a \
-    $(SIMDCOMP_LDADD) \
-    $(PCRE_LDADD)
-
-bin_PROGRAMS += cstable_tool
-
+################## TEST: sql/runtime ####################
+#test_evql_sql_runtime_SOURCES = eventql/sql/runtime/Runtime_test.cc
+#test_evql_sql_runtime_LDADD = \
+#    evql_http.a \
+#    evql_sql.a \
+#    evql_cstable.a \
+#    evql_sstable.a \
+#    evql_util.a \
+#    $(SIMDCOMP_LDADD) \
+#    $(SPIDERMONKEY_LDADD) \
+#    $(LMDB_LDADD) \
+#    $(PROTOBUF_LDADD) \
+#    $(PCRE_LDADD)
+#
+#TESTS += test_evql_sql_runtime
+#check_PROGRAMS += test_evql_sql_runtime
+#
+#
+################## TEST: sql/qtree ####################
+#test_evql_sql_qtree_SOURCES = eventql/sql/qtree/QTree_test.cc
+#test_evql_sql_qtree_LDADD = \
+#    evql_http.a \
+#    evql_sql.a \
+#    evql_cstable.a \
+#    evql_sstable.a \
+#    evql_util.a \
+#    $(SIMDCOMP_LDADD) \
+#    $(SPIDERMONKEY_LDADD) \
+#    $(LMDB_LDADD) \
+#    $(PROTOBUF_LDADD) \
+#    $(PCRE_LDADD)
+#
+#TESTS += test_evql_sql_qtree
+#check_PROGRAMS += test_evql_sql_qtree
+#
+#
+################## TEST: sql/parser ####################
+#test_evql_sql_parser_SOURCES = eventql/sql/parser/Parser_test.cc
+#test_evql_sql_parser_LDADD = \
+#    evql_http.a \
+#    evql_sql.a \
+#    evql_cstable.a \
+#    evql_sstable.a \
+#    evql_util.a \
+#    $(SIMDCOMP_LDADD) \
+#    $(SPIDERMONKEY_LDADD) \
+#    $(LMDB_LDADD) \
+#    $(PROTOBUF_LDADD) \
+#    $(PCRE_LDADD)
+#
+#TESTS += test_evql_sql_parser
+#check_PROGRAMS += test_evql_sql_parser
+#
+#
+################## TEST: db/metadata_store ####################
+#test_evql_db_metadata_store_SOURCES = eventql/db/metadata_store_test.cc
+#test_evql_db_metadata_store_LDADD = \
+#    evql_core.a \
+#    evql_util.a \
+#    $(SIMDCOMP_LDADD) \
+#    $(LMDB_LDADD) \
+#    $(PROTOBUF_LDADD) \
+#    $(PCRE_LDADD)
+#
+#TESTS += test_evql_db_metadata_store
+#check_PROGRAMS += test_evql_db_metadata_store
+#
+################## TEST: db/metadata_store ####################
+#test_evql_config_process_config_SOURCES = eventql/config/process_config_test.cc
+#test_evql_config_process_config_LDADD = \
+#    evql_core.a \
+#    evql_util.a \
+#    $(SIMDCOMP_LDADD) \
+#    $(LMDB_LDADD) \
+#    $(INIH_LDADD) \
+#    $(PCRE_LDADD)
+#
+#TESTS += test_evql_config_process_config
+#check_PROGRAMS += test_evql_config_process_config
+#
+################## TEST: db/metadata_file ####################
+#test_evql_db_metadata_file_SOURCES = eventql/db/metadata_file_test.cc
+#test_evql_db_metadata_file_LDADD = \
+#    evql_core.a \
+#    evql_util.a \
+#    $(SIMDCOMP_LDADD) \
+#    $(LMDB_LDADD) \
+#    $(PROTOBUF_LDADD) \
+#    $(PCRE_LDADD)
+#
+#TESTS += test_evql_db_metadata_file
+#check_PROGRAMS += test_evql_db_metadata_file
+#
+#
+################## TEST: db/partition_discovery ####################
+#test_evql_db_partition_discovery_SOURCES = eventql/db/partition_discovery_test.cc
+#test_evql_db_partition_discovery_LDADD = \
+#    evql_core.a \
+#    evql_util.a \
+#    $(SIMDCOMP_LDADD) \
+#    $(LMDB_LDADD) \
+#    $(PROTOBUF_LDADD) \
+#    $(PCRE_LDADD)
+#
+#TESTS += test_evql_db_partition_discovery
+#check_PROGRAMS += test_evql_db_partition_discovery
+#
+#
+################## TEST: io/cstable ####################
+#test_evql_io_cstable_SOURCES = eventql/io/cstable/cstable_test.cc
+#test_evql_io_cstable_LDADD = \
+#    evql_cstable.a \
+#    evql_util.a \
+#    $(SIMDCOMP_LDADD) \
+#    $(PCRE_LDADD)
+#
+#TESTS += test_evql_io_cstable
+#check_PROGRAMS += test_evql_io_cstable
+#
+#
+################## TEST: io/cstable ####################
+#cstable_tool_SOURCES = eventql/io/cstable/cstable_tool.cc
+#cstable_tool_LDADD = \
+#    evql_cstable.a \
+#    evql_util.a \
+#    $(SIMDCOMP_LDADD) \
+#    $(PCRE_LDADD)
+#
+#bin_PROGRAMS += cstable_tool
+#
