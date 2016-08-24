@@ -114,9 +114,9 @@ void MessageDecoder::decode(
       case FieldType::BOOLEAN: {
         auto val = reader.readVarUInt();
         if (val == 1) {
-          msg->addChild(fid, msg::TRUE);
+          msg->addChild(fid, msg::MSG_TRUE);
         } else {
-          msg->addChild(fid, msg::FALSE);
+          msg->addChild(fid, msg::MSG_FALSE);
         }
         break;
       }
