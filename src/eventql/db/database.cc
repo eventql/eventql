@@ -116,14 +116,6 @@ ReturnCode Database::start() {
   }
 
   try {
-    server_lock_.reset(new FileLock(FileUtil::joinPaths(tsdb_dir, "__lock")));
-    server_lock_->lock();
-  } catch (const std::exception& e) {
-    shutdown();
-    return ReturnCode::error("EIO", e.what());
-  }
-
-  try {
     if (!FileUtil::exists(tsdb_dir)) {
       FileUtil::mkdir_p(tsdb_dir);
     }
@@ -139,6 +131,14 @@ ReturnCode Database::start() {
     if (!FileUtil::exists(cache_dir)) {
       FileUtil::mkdir(cache_dir);
     }
+  } catch (const std::exception& e) {
+    shutdown();
+    return ReturnCode::error("EIO", e.what());
+  }
+
+  try {
+    server_lock_.reset(new FileLock(FileUtil::joinPaths(tsdb_dir, "__lock")));
+    server_lock_->lock();
   } catch (const std::exception& e) {
     shutdown();
     return ReturnCode::error("EIO", e.what());
