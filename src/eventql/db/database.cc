@@ -324,6 +324,7 @@ ReturnCode DatabaseImpl::start() {
   /* spidermonkey javascript runtime */
   JS_Init();
   js::DisableExtraThreads();
+  __eventql_mapreduce_prelude_js.registerAsset();
 
   /* more services */
   sql_service_.reset(

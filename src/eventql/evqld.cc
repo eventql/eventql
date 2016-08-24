@@ -27,72 +27,15 @@
 #include <regex>
 #include <sys/time.h>
 #include <sys/resource.h>
-#include "eventql/util/io/filerepository.h"
-#include "eventql/util/io/fileutil.h"
+#include "eventql/eventql.h"
 #include "eventql/util/application.h"
 #include "eventql/util/logging.h"
-#include "eventql/util/random.h"
-#include "eventql/util/assets.h"
-#include "eventql/util/thread/eventloop.h"
-#include "eventql/util/thread/threadpool.h"
-#include "eventql/util/thread/FixedSizeThreadPool.h"
-#include "eventql/util/wallclock.h"
-#include "eventql/util/VFS.h"
-#include "eventql/util/rpc/ServerGroup.h"
-#include "eventql/util/rpc/RPC.h"
-#include "eventql/util/rpc/RPCClient.h"
 #include "eventql/util/cli/flagparser.h"
-#include "eventql/util/json/json.h"
-#include "eventql/util/json/jsonrpc.h"
-#include "eventql/util/http/httprouter.h"
-#include "eventql/util/http/httpserver.h"
-#include "eventql/util/http/VFSFileServlet.h"
 #include "eventql/util/io/FileLock.h"
-#include "eventql/util/stats/statsdagent.h"
-#include "eventql/io/sstable/SSTableServlet.h"
-#include "eventql/util/mdb/MDB.h"
-#include "eventql/util/mdb/MDBUtil.h"
-#include "eventql/transport/http/api_servlet.h"
-#include "eventql/db/table_config.pb.h"
-#include "eventql/db/table_service.h"
-#include "eventql/db/metadata_coordinator.h"
-#include "eventql/db/metadata_replication.h"
-#include "eventql/db/metadata_service.h"
-#include "eventql/transport/http/rpc_servlet.h"
-#include "eventql/db/replication_worker.h"
-#include "eventql/db/tablet_index_cache.h"
-#include "eventql/db/compaction_worker.h"
-#include "eventql/db/garbage_collector.h"
-#include "eventql/db/leader.h"
-#include "eventql/db/database.h"
-#include "eventql/transport/http/default_servlet.h"
-#include "eventql/sql/defaults.h"
-#include "eventql/sql/runtime/query_cache.h"
-#include "eventql/config/config_directory.h"
-#include "eventql/config/config_directory_zookeeper.h"
-#include "eventql/config/config_directory_standalone.h"
-#include "eventql/transport/http/status_servlet.h"
-#include "eventql/server/sql/scheduler.h"
-#include "eventql/server/sql/table_provider.h"
-#include "eventql/server/listener.h"
-#include "eventql/auth/client_auth.h"
-#include "eventql/auth/client_auth_trust.h"
-#include "eventql/auth/client_auth_legacy.h"
-#include "eventql/auth/internal_auth.h"
-#include "eventql/auth/internal_auth_trust.h"
-#include <jsapi.h>
-#include "eventql/mapreduce/mapreduce_preludejs.cc"
-#include "eventql/eventql.h"
-#include "eventql/db/file_tracker.h"
-
-using namespace eventql;
-
-thread::EventLoop ev;
+#include "eventql/util/io/fileutil.h"
 
 int main(int argc, const char** argv) {
   Application::init();
-  __eventql_mapreduce_prelude_js.registerAsset();
-
   cli::FlagParser flags;
 
   flags.defineFlag(
@@ -218,13 +161,25 @@ int main(int argc, const char** argv) {
 
   /* print help */
   if (flags.isSet("help") || flags.isSet("version")) {
+#ifdef EVQL_VERSION
+    static const std::string version = EVQL_VERSION;
+#else
+    static const std::string version = "unknown";
+#endif
+
+#ifdef EVQL_BUILDID
+    static const std::string build_id = EVQL_BUILDID;
+#else
+    static const std::string build_id = "unknown";
+#endif
+
     auto stdout_os = OutputStream::getStdout();
     stdout_os->write(
         StringUtil::format(
             "EventQL $0 ($1)\n"
             "Copyright (c) 2016, DeepCortex GmbH. All rights reserved.\n\n",
-            kVersionString,
-            kBuildID));
+            version,
+            build_id));
   }
 
   if (flags.isSet("version")) {
