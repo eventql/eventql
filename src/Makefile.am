@@ -1,6 +1,7 @@
 ## Process this file with automake to produce Makefile.in
 
 bin_PROGRAMS = evql evqld evqlctl
+lib_LTLIBRARIES = libevqlclient.la
 noinst_LTLIBRARIES = libevqlcore.la
 
 MAINTAINERCLEANFILES =   \
@@ -37,33 +38,78 @@ else
 GETHOSTBYNAME_R_DEF =
 endif
 
-SPIDERMONKEY_CFLAGS = -I$(top_builddir)/deps/3rdparty/spidermonkey/out/dist/include
-SPIDERMONKEY_LDADD = ${top_builddir}/deps/3rdparty/spidermonkey/out/dist/lib/libjs_static.a
-
-ZOOKEEPER_CFLAGS = -I$(top_srcdir)/deps/3rdparty/zookeeper/source/include -I$(top_srcdir)/deps/3rdparty/zookeeper/source/generated
-ZOOKEEPER_LDADD = ${top_builddir}/deps/3rdparty/zookeeper/libzkmt.a ${top_builddir}/deps/3rdparty/zookeeper/libhashtable.a
-
-PCRE_CFLAGS = -I$(top_srcdir)/deps/3rdparty/pcre -DHAVE_PCRE=1
-PCRE_LDADD = ${top_builddir}/deps/3rdparty/pcre/libpcre.a
-
-LINENOISE_CFLAGS = -I$(top_srcdir)/deps/3rdparty
-LINENOISE_LDADD = ${top_builddir}/deps/3rdparty/linenoise/liblinenoise.a
-
-SIMDCOMP_CFLAGS = -I$(top_srcdir)/deps/3rdparty
-SIMDCOMP_LDADD = ${top_builddir}/deps/3rdparty/libsimdcomp/libsimdcomp.a
-
-PROTOBUF_CFLAGS = -I$(top_srcdir)/deps/3rdparty/protobuf
-PROTOBUF_LDADD = ${top_builddir}/deps/3rdparty/protobuf/libprotobuf.a
-
-LMDB_CFLAGS = -I$(top_srcdir)/deps/3rdparty
-LMDB_LDADD = ${top_builddir}/deps/3rdparty/liblmdb/liblmdb.a
-
-INIH_CFLAGS = -I$(top_srcdir)/deps/3rdparty
-INIH_LDADD = ${top_builddir}/deps/3rdparty/inih/libinih.a
-
 AM_CXXFLAGS = -DEVQL_VERSION=\"v@PACKAGE_VERSION@\" -DEVQL_BUILDID=\"$(EVQL_BUILDID)\" $(MYSQL_CFLAGS) $(PCRE_CFLAGS) $(SPIDERMONKEY_CFLAGS) $(ZOOKEEPER_CFLAGS) $(INIH_CFLAGS) $(SIMDCOMP_CFLAGS) $(LINENOISE_CLFAGS) $(PROTOBUF_CFLAGS) $(PTHREAD_CFLAGS) $(PTHREAD_DEF) $(SYSLOG_DEF) $(ZLIB_DEF) $(GETHOSTBYNAME_R_DEF) -std=c++0x -ftemplate-depth=500 -mno-omit-leaf-frame-pointer -fno-omit-frame-pointer -Wall -Wextra -Wno-unused-parameter -Wno-sign-compare -Wdelete-non-virtual-dtor -Wno-predefined-identifier-outside-function -Wno-invalid-offsetof -g -fvisibility=hidden -I@builddir@
 AM_CFLAGS = $(PCRE_CFLAGS) $(SPIDERMONKEY_CFLAGS) $(MYSQL_CFLAGS) $(ZOOKEEPER_CFLAGS) $(INIH_CFLAGS) $(SIMDCOMP_CFLAGS) $(LINENOISE_CLFAGS) $(PROTOBUF_CFLAGS) $(PTHREAD_CFLAGS) $(PTHREAD_DEF) $(SYSLOG_DEF) $(ZLIB_DEF) $(GETHOSTBYNAME_R_DEF) -std=c11 -mno-omit-leaf-frame-pointer -fno-omit-frame-pointer -Wall -pedantic -g
 AM_LDFLAGS = $(PTHREAD_CFLAGS)
+
+################# BIN: evqld ####################
+evqld_SOURCES = eventql/evqld.cc
+
+evqld_LDADD = \
+    libevqlcore.la \
+    $(ZOOKEEPER_LDADD) \
+    $(LINENOISE_LDADD) \
+    $(INIH_LDADD) \
+    $(SIMDCOMP_LDADD) \
+    $(LMDB_LDADD) \
+    $(PROTOBUF_LDADD) \
+    $(SPIDERMONKEY_LDADD) \
+    $(PCRE_LDADD)
+
+################## BIN: evql ####################
+evql_SOURCES = \
+    eventql/cli/console.cc \
+    eventql/cli/console.h \
+    eventql/cli/cli_config.cc \
+    eventql/cli/cli_config.h \
+    eventql/evql.cc
+
+evql_LDADD = \
+    libevqlcore.la \
+    $(ZOOKEEPER_LDADD) \
+    $(LINENOISE_LDADD) \
+    $(INIH_LDADD) \
+    $(SIMDCOMP_LDADD) \
+    $(LMDB_LDADD) \
+    $(PROTOBUF_LDADD) \
+    $(SPIDERMONKEY_LDADD) \
+    $(PCRE_LDADD)
+
+################ BIN: evqlctl ###################
+evqlctl_SOURCES = \
+    eventql/cli/commands/cli_command.h \
+    eventql/cli/commands/cli_command.cc \
+    eventql/cli/commands/cluster_add_server.h \
+    eventql/cli/commands/cluster_add_server.cc \
+    eventql/cli/commands/cluster_create.h \
+    eventql/cli/commands/cluster_create.cc \
+    eventql/cli/commands/cluster_status.h \
+    eventql/cli/commands/cluster_status.cc \
+    eventql/cli/commands/cluster_remove_server.h \
+    eventql/cli/commands/cluster_remove_server.cc \
+    eventql/cli/commands/cluster_set_allocation_policy.h \
+    eventql/cli/commands/cluster_set_allocation_policy.cc \
+    eventql/cli/commands/database_create.h \
+    eventql/cli/commands/database_create.cc \
+    eventql/cli/commands/table_config_set.h \
+    eventql/cli/commands/table_config_set.cc \
+    eventql/cli/commands/table_split.h \
+    eventql/cli/commands/table_split.cc \
+    eventql/cli/commands/table_split_finalize.h \
+    eventql/cli/commands/table_split_finalize.cc \
+    eventql/evqlctl.cc
+
+evqlctl_LDADD = \
+    libevqlcore.la \
+    $(SIMDCOMP_LDADD) \
+    $(INIH_LDADD) \
+    $(ZOOKEEPER_LDADD) \
+    $(LMDB_LDADD) \
+    $(PROTOBUF_LDADD) \
+    $(PCRE_LDADD)
+
+################ LIB: libevqlclient.a ###################
+libevqlclient_la_SOURCES = eventql/client.c
 
 ################# LIB: libevqlcore.a ####################
 evql_protos = \
@@ -923,200 +969,3 @@ nodist_libevqlcore_la_SOURCES = \
 eventql/mapreduce/mapreduce_preludejs.cc:
 	echo 'eventql/mapreduce/prelude.js:${srcdir}/eventql/mapreduce/prelude.js' | ${srcdir}/eventql/util/assets.sh $(builddir)/eventql/mapreduce/mapreduce_preludejs.cc
 
-################# BIN: evqld ####################
-evqld_SOURCES = eventql/evqld.cc
-
-evqld_LDADD = \
-    libevqlcore.la \
-    $(ZOOKEEPER_LDADD) \
-    $(LINENOISE_LDADD) \
-    $(INIH_LDADD) \
-    $(SIMDCOMP_LDADD) \
-    $(LMDB_LDADD) \
-    $(PROTOBUF_LDADD) \
-    $(SPIDERMONKEY_LDADD) \
-    $(PCRE_LDADD)
-
-################## BIN: evql ####################
-evql_SOURCES = \
-    eventql/cli/console.cc \
-    eventql/cli/console.h \
-    eventql/cli/cli_config.cc \
-    eventql/cli/cli_config.h \
-    eventql/evql.cc
-
-evql_LDADD = \
-    libevqlcore.la \
-    $(ZOOKEEPER_LDADD) \
-    $(LINENOISE_LDADD) \
-    $(INIH_LDADD) \
-    $(SIMDCOMP_LDADD) \
-    $(LMDB_LDADD) \
-    $(PROTOBUF_LDADD) \
-    $(SPIDERMONKEY_LDADD) \
-    $(PCRE_LDADD)
-
-
-################ BIN: evqlctl ###################
-evqlctl_SOURCES = \
-    eventql/cli/commands/cli_command.h \
-    eventql/cli/commands/cli_command.cc \
-    eventql/cli/commands/cluster_add_server.h \
-    eventql/cli/commands/cluster_add_server.cc \
-    eventql/cli/commands/cluster_create.h \
-    eventql/cli/commands/cluster_create.cc \
-    eventql/cli/commands/cluster_status.h \
-    eventql/cli/commands/cluster_status.cc \
-    eventql/cli/commands/cluster_remove_server.h \
-    eventql/cli/commands/cluster_remove_server.cc \
-    eventql/cli/commands/cluster_set_allocation_policy.h \
-    eventql/cli/commands/cluster_set_allocation_policy.cc \
-    eventql/cli/commands/database_create.h \
-    eventql/cli/commands/database_create.cc \
-    eventql/cli/commands/table_config_set.h \
-    eventql/cli/commands/table_config_set.cc \
-    eventql/cli/commands/table_split.h \
-    eventql/cli/commands/table_split.cc \
-    eventql/cli/commands/table_split_finalize.h \
-    eventql/cli/commands/table_split_finalize.cc \
-    eventql/evqlctl.cc
-
-evqlctl_LDADD = \
-    libevqlcore.la \
-    $(SIMDCOMP_LDADD) \
-    $(INIH_LDADD) \
-    $(ZOOKEEPER_LDADD) \
-    $(LMDB_LDADD) \
-    $(PROTOBUF_LDADD) \
-    $(PCRE_LDADD)
-
-################## TEST: sql/runtime ####################
-#test_evql_sql_runtime_SOURCES = eventql/sql/runtime/Runtime_test.cc
-#test_evql_sql_runtime_LDADD = \
-#    evql_http.a \
-#    evql_sql.a \
-#    evql_cstable.a \
-#    evql_sstable.a \
-#    evql_util.a \
-#    $(SIMDCOMP_LDADD) \
-#    $(SPIDERMONKEY_LDADD) \
-#    $(LMDB_LDADD) \
-#    $(PROTOBUF_LDADD) \
-#    $(PCRE_LDADD)
-#
-#TESTS += test_evql_sql_runtime
-#check_PROGRAMS += test_evql_sql_runtime
-#
-#
-################## TEST: sql/qtree ####################
-#test_evql_sql_qtree_SOURCES = eventql/sql/qtree/QTree_test.cc
-#test_evql_sql_qtree_LDADD = \
-#    evql_http.a \
-#    evql_sql.a \
-#    evql_cstable.a \
-#    evql_sstable.a \
-#    evql_util.a \
-#    $(SIMDCOMP_LDADD) \
-#    $(SPIDERMONKEY_LDADD) \
-#    $(LMDB_LDADD) \
-#    $(PROTOBUF_LDADD) \
-#    $(PCRE_LDADD)
-#
-#TESTS += test_evql_sql_qtree
-#check_PROGRAMS += test_evql_sql_qtree
-#
-#
-################## TEST: sql/parser ####################
-#test_evql_sql_parser_SOURCES = eventql/sql/parser/Parser_test.cc
-#test_evql_sql_parser_LDADD = \
-#    evql_http.a \
-#    evql_sql.a \
-#    evql_cstable.a \
-#    evql_sstable.a \
-#    evql_util.a \
-#    $(SIMDCOMP_LDADD) \
-#    $(SPIDERMONKEY_LDADD) \
-#    $(LMDB_LDADD) \
-#    $(PROTOBUF_LDADD) \
-#    $(PCRE_LDADD)
-#
-#TESTS += test_evql_sql_parser
-#check_PROGRAMS += test_evql_sql_parser
-#
-#
-################## TEST: db/metadata_store ####################
-#test_evql_db_metadata_store_SOURCES = eventql/db/metadata_store_test.cc
-#test_evql_db_metadata_store_LDADD = \
-#    evql_core.a \
-#    evql_util.a \
-#    $(SIMDCOMP_LDADD) \
-#    $(LMDB_LDADD) \
-#    $(PROTOBUF_LDADD) \
-#    $(PCRE_LDADD)
-#
-#TESTS += test_evql_db_metadata_store
-#check_PROGRAMS += test_evql_db_metadata_store
-#
-################## TEST: db/metadata_store ####################
-#test_evql_config_process_config_SOURCES = eventql/config/process_config_test.cc
-#test_evql_config_process_config_LDADD = \
-#    evql_core.a \
-#    evql_util.a \
-#    $(SIMDCOMP_LDADD) \
-#    $(LMDB_LDADD) \
-#    $(INIH_LDADD) \
-#    $(PCRE_LDADD)
-#
-#TESTS += test_evql_config_process_config
-#check_PROGRAMS += test_evql_config_process_config
-#
-################## TEST: db/metadata_file ####################
-#test_evql_db_metadata_file_SOURCES = eventql/db/metadata_file_test.cc
-#test_evql_db_metadata_file_LDADD = \
-#    evql_core.a \
-#    evql_util.a \
-#    $(SIMDCOMP_LDADD) \
-#    $(LMDB_LDADD) \
-#    $(PROTOBUF_LDADD) \
-#    $(PCRE_LDADD)
-#
-#TESTS += test_evql_db_metadata_file
-#check_PROGRAMS += test_evql_db_metadata_file
-#
-#
-################## TEST: db/partition_discovery ####################
-#test_evql_db_partition_discovery_SOURCES = eventql/db/partition_discovery_test.cc
-#test_evql_db_partition_discovery_LDADD = \
-#    evql_core.a \
-#    evql_util.a \
-#    $(SIMDCOMP_LDADD) \
-#    $(LMDB_LDADD) \
-#    $(PROTOBUF_LDADD) \
-#    $(PCRE_LDADD)
-#
-#TESTS += test_evql_db_partition_discovery
-#check_PROGRAMS += test_evql_db_partition_discovery
-#
-#
-################## TEST: io/cstable ####################
-#test_evql_io_cstable_SOURCES = eventql/io/cstable/cstable_test.cc
-#test_evql_io_cstable_LDADD = \
-#    evql_cstable.a \
-#    evql_util.a \
-#    $(SIMDCOMP_LDADD) \
-#    $(PCRE_LDADD)
-#
-#TESTS += test_evql_io_cstable
-#check_PROGRAMS += test_evql_io_cstable
-#
-#
-################## TEST: io/cstable ####################
-#cstable_tool_SOURCES = eventql/io/cstable/cstable_tool.cc
-#cstable_tool_LDADD = \
-#    evql_cstable.a \
-#    evql_util.a \
-#    $(SIMDCOMP_LDADD) \
-#    $(PCRE_LDADD)
-#
-#bin_PROGRAMS += cstable_tool
-#

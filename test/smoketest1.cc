@@ -24,6 +24,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <signal.h>
+#include <iostream>
 #include <regex>
 #include <sys/time.h>
 #include <sys/resource.h>
@@ -32,11 +33,52 @@
 #include "eventql/util/logging.h"
 #include "eventql/util/io/fileutil.h"
 
-int main(int argc, const char** argv) {
-  Application::init();
-  Application::logToStderr("evql-test");
-  Logger::get()->setMinimumLogLevel(strToLogLevel("DEBUG"));
+evql_conf_t* server_conf;
+evql_server_t* server;
 
+void testserver_start() {
+  server_conf = evql_conf_init();
+  if (!server_conf) {
+    std::cerr << "FAIL: smoketest - can't start testserver";
+    exit(1);
+  }
+
+  evql_conf_set(server_conf, "server.datadir", "/tmp/evql-smoketest-1");
+  evql_conf_set(server_conf, "server.indexbuild_threads", "1");
+  evql_conf_set(server_conf, "server.gc_mode", "AUTOMATIC");
+  evql_conf_set(server_conf, "server.gc_interval", "30000000");
+  evql_conf_set(server_conf, "server.cachedir_maxsize", "68719476736");
+  evql_conf_set(server_conf, "server.noleader", "true");
+  evql_conf_set(server_conf, "server.name", "testserver");
+  evql_conf_set(server_conf, "server.client_auth_backend", "trust");
+  evql_conf_set(server_conf, "server.noleader", "true");
+  evql_conf_set(server_conf, "cluster.coordinator", "standalone");
+
+  server = evql_server_init(server_conf);
+  if (!server) {
+    std::cerr << "FAIL: smoketest - can't start testserver";
+    exit(1);
+  }
+
+  if (!evql_server_start(server)) {
+    std::cerr
+        << "FAIL: smoketest - can't start testserver: "
+        << evql_server_geterror(server);
+
+    exit(1);
+  }
+}
+
+void testserver_stop() {
+  evql_server_shutdown(server);
+  evql_server_free(server);
+  evql_conf_free(server_conf);
+}
+
+int main(int argc, const char** argv) {
+  testserver_start();
+
+  testserver_stop();
   return 0;
 }
 
