@@ -7,7 +7,7 @@ bin_PROGRAMS = evqld
 #else
 #endif
 
-noinst_LIBRARIES = libevqld.a
+noinst_LTLIBRARIES = libevqlcore.la
 
 MAINTAINERCLEANFILES =   \
   Makefile.in
@@ -44,14 +44,6 @@ else
 GETHOSTBYNAME_R_DEF =
 endif
 
-if ENABLE_MYSQL_TOOLS
-MYSQL_CFLAGS = -DSTX_ENABLE_MYSQL
-MYSQL_LDADD = -lmysqlclient
-else
-MYSQL_CFLAGS =
-MYSQL_LDADD =
-endif
-
 SPIDERMONKEY_CFLAGS = -I$(top_builddir)/deps/3rdparty/spidermonkey/out/dist/include
 SPIDERMONKEY_LDADD = ${top_builddir}/deps/3rdparty/spidermonkey/out/dist/lib/libjs_static.a
 
@@ -80,7 +72,7 @@ AM_CXXFLAGS = -DEVQL_VERSION=\"v@PACKAGE_VERSION@\" -DEVQL_BUILDID=\"$(EVQL_BUIL
 AM_CFLAGS = $(PCRE_CFLAGS) $(SPIDERMONKEY_CFLAGS) $(MYSQL_CFLAGS) $(ZOOKEEPER_CFLAGS) $(INIH_CFLAGS) $(SIMDCOMP_CFLAGS) $(LINENOISE_CLFAGS) $(PROTOBUF_CFLAGS) $(PTHREAD_CFLAGS) $(PTHREAD_DEF) $(SYSLOG_DEF) $(ZLIB_DEF) $(GETHOSTBYNAME_R_DEF) -std=c11 -mno-omit-leaf-frame-pointer -fno-omit-frame-pointer -Wall -pedantic -g
 AM_LDFLAGS = $(PTHREAD_CFLAGS)
 
-################# LIB: libevqld.a ####################
+################# LIB: libevqlcore.a ####################
 evql_protos = \
     eventql/auth/client_auth_legacy_protos.proto \
     eventql/config/namespace_config_protos.proto \
@@ -98,7 +90,7 @@ dist_noinst_DATA = $(evql_protos)
 %.pb.cc %.pb.h: %.proto
 	$(top_builddir)/deps/3rdparty/protobuf/protoc --proto_path=$(srcdir) --cpp_out=$(builddir) $^
 
-libevqld_a_SOURCES = \
+libevqlcore_la_SOURCES = \
     eventql/util/CivilTime.cc \
     eventql/util/CivilTime.h \
     eventql/util/CivilTime_impl.h \
@@ -922,17 +914,9 @@ libevqld_a_SOURCES = \
     eventql/util/mdb/MDBTransaction.cc \
     eventql/util/mdb/MDBTransaction.h
 
-#libevqld_a_LIBADD = \
-#    $(ZOOKEEPER_LDADD) \
-#    $(LINENOISE_LDADD) \
-#    $(INIH_LDADD) \
-#    $(SIMDCOMP_LDADD) \
-#    $(SPIDERMONKEY_LDADD) \
-#    $(PCRE_LDADD)
+libevqlcore_la_LDFLAGS = -fvisibility=hidden -static -a
 
-libevqld_a_LDFLAGS = -fvisibility=hidden -static -a -rpath $(libdir)
-
-nodist_libevqld_a_SOURCES = \
+nodist_libevqlcore_la_SOURCES = \
     @builddir@/eventql/auth/client_auth_legacy_protos.pb.cc \
     @builddir@/eventql/config/namespace_config_protos.pb.cc \
     @builddir@/eventql/db/metadata_operations.pb.cc \
@@ -945,21 +929,6 @@ nodist_libevqld_a_SOURCES = \
 
 eventql/mapreduce/mapreduce_preludejs.cc:
 	echo 'eventql/mapreduce/prelude.js:${srcdir}/eventql/mapreduce/prelude.js' | ${srcdir}/eventql/util/assets.sh $(builddir)/eventql/mapreduce/mapreduce_preludejs.cc
-
-BUNDLED_LIBS = \
-    $(ZOOKEEPER_LDADD) \
-    $(LINENOISE_LDADD) \
-    $(INIH_LDADD) \
-    $(SIMDCOMP_LDADD) \
-    $(LMDB_LDADD) \
-    $(PROTOBUF_LDADD) \
-    $(SPIDERMONKEY_LDADD) \
-    $(PCRE_LDADD)
-
-libevqld.a: $(libevqld_a_OBJECTS)
-	rm -f $@
-	$(AR) r $@ $(libevqld_a_OBJECTS) $(BUNDLED_LIBS)
-	$(RANLIB) $@
 
 ################# BIN: evqld ####################
 evqld_SOURCES = \
@@ -1024,7 +993,17 @@ evqld_SOURCES = \
     eventql/util/ieee754.h \
     eventql/evqld.cc
 
-evqld_LDADD = libevqld.a
+evqld_LDADD = \
+  libevqlcore.a \
+  $(ZOOKEEPER_LDADD) \
+  $(LINENOISE_LDADD) \
+  $(INIH_LDADD) \
+  $(SIMDCOMP_LDADD) \
+  $(LMDB_LDADD) \
+  $(PROTOBUF_LDADD) \
+  $(SPIDERMONKEY_LDADD) \
+  $(PCRE_LDADD)
+
 evqld_CXXFLAGS=${AM_CXXFLAGS}
 
 ################## BIN: evql ####################
