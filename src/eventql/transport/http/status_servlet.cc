@@ -102,24 +102,24 @@ void StatusServlet::handleHTTPRequest(
       url.path().substr(kPathPrefix.size()),
       "/");
 
-  //if (path_parts.size() == 2 && path_parts[0] == "db") {
-  //  renderNamespacePage(
-  //      path_parts[1],
-  //      request,
-  //      response);
+  if (path_parts.size() == 2 && path_parts[0] == "db") {
+    renderNamespacePage(
+        path_parts[1],
+        request,
+        response);
 
-  //  return;
-  //}
+    return;
+  }
 
-  //if (path_parts.size() == 3 && path_parts[0] == "db") {
-  //  renderTablePage(
-  //      path_parts[1],
-  //      path_parts[2],
-  //      request,
-  //      response);
+  if (path_parts.size() == 3 && path_parts[0] == "db") {
+    renderTablePage(
+        path_parts[1],
+        path_parts[2],
+        request,
+        response);
 
-  //  return;
-  //}
+    return;
+  }
 
   //if (path_parts.size() == 4 && path_parts[0] == "db") {
   //  renderPartitionPage(
@@ -234,255 +234,260 @@ void StatusServlet::renderDashboard(
   response->addBody(html);
 }
 
-//void StatusServlet::renderNamespacePage(
-//    const String& db_namespace,
-//    http::HTTPRequest* request,
-//    http::HTTPResponse* response) {
-//  String html;
-//  html += kStyleSheet;
-//  //html += kMainMenu;
-//
-//  html += StringUtil::format(
-//      "<h2>Namespace: &nbsp; <span style='font-weight:normal'>$0</span></h2>",
-//      db_namespace);
-//
-//  response->setStatus(http::kStatusOK);
-//  response->addHeader("Content-Type", "text/html; charset=utf-8");
-//  response->addBody(html);
-//}
-//
-//void StatusServlet::renderTablePage(
-//    const String& db_namespace,
-//    const String& table_name,
-//    http::HTTPRequest* request,
-//    http::HTTPResponse* response) {
-//  String html;
-//  html += kStyleSheet;
-//  //html += kMainMenu;
-//
-//  html += StringUtil::format(
-//      "<h2>Table: &nbsp; <span style='font-weight:normal'>"
-//      "<a href='/zstatus/db/$0'>$0</a> &mdash;"
-//      "$1</span></h2>",
-//      db_namespace,
-//      table_name);
-//
-//  auto table = pmap_->findTable(
-//      db_namespace,
-//      table_name);
-//
-//  if (table.isEmpty()) {
-//    response->setStatus(http::kStatusNotFound);
-//    response->addHeader("Content-Type", "text/html; charset=utf-8");
-//    response->addBody("ERROR: table not found!");
-//    return;
-//  }
-//
-//  const auto& table_cfg = table.get()->config();
-//  html += StringUtil::format(
-//      "<span><em>Metatdata TXNID:</em> $0 [$1]</span> &mdash; ",
-//      SHA1Hash(
-//          table_cfg.metadata_txnid().data(),
-//          table_cfg.metadata_txnid().size()).toString(),
-//      table_cfg.metadata_txnseq());
-//
-//  MetadataClient metadata_client(cdir_);
-//  MetadataFile metadata_file;
-//  auto rc = metadata_client.fetchLatestMetadataFile(
-//      db_namespace,
-//      table_name,
-//      &metadata_file);
-//
-//  if (!rc.isSuccess()) {
-//    html += StringUtil::format(
-//        "<b>ERROR: while fetching metadata: $0</b>",
-//        rc.message());
-//  } else {
-//    html += "<h3>Partition Map:</h3>";
-//    html += "<table cellspacing=0 border=1>";
-//    html += "<thead><tr><td>Keyrange</td><td>Partition ID</td><td>Servers</td><td></td></tr></thead>";
-//    for (const auto& e : metadata_file.getPartitionMap()) {
-//      Vector<String> servers;
-//      for (const auto& s : e.servers) {
-//        servers.emplace_back(s.server_id);
-//      }
-//      for (const auto& s : e.servers_joining) {
-//        servers.emplace_back(s.server_id + " [JOINING]");
-//      }
-//      for (const auto& s : e.servers_leaving) {
-//        servers.emplace_back(s.server_id + " [LEAVING]");
-//      }
-//
-//      String keyrange;
-//      switch (metadata_file.getKeyspaceType()) {
-//        case KEYSPACE_UINT64: {
-//          uint64_t keyrange_uint = -1;
-//          memcpy((char*) &keyrange_uint, e.begin.data(), sizeof(e.begin));
-//          keyrange = StringUtil::format(
-//              "$0 [$1]",
-//              UnixTime(keyrange_uint),
-//              keyrange_uint);
-//          break;
-//        }
-//        case KEYSPACE_STRING: {
-//          keyrange = e.begin;
-//          break;
-//        }
-//      }
-//
-//      String extra_info;
-//      if (e.splitting) {
-//        auto split_point = decodePartitionKey(
-//            table.get()->getKeyspaceType(),
-//            e.split_point);
-//
-//        Set<String> servers_low;
-//        for (const auto& s : e.split_servers_low) {
-//          servers_low.emplace(s.server_id);
-//        }
-//        Set<String> servers_high;
-//        for (const auto& s : e.split_servers_high) {
-//          servers_high.emplace(s.server_id);
-//        }
-//
-//        extra_info += StringUtil::format(
-//            "SPLITTING @ $0 into $1 on $2, $3 on $4",
-//            decodePartitionKey(table.get()->getKeyspaceType(), e.split_point),
-//            e.split_partition_id_low,
-//            inspect(servers_low),
-//            e.split_partition_id_high,
-//            inspect(servers_high));
-//      }
-//
-//      html += StringUtil::format(
-//          "<tr><td>$0</td><td>$1</td><td>$2</td><td>$3</td></tr>",
-//          keyrange,
-//          e.partition_id.toString(),
-//          StringUtil::join(servers, ", "),
-//          extra_info);
-//    }
-//    html += "</table>";
-//  }
-//
-//  html += "<h3>TableDefinition</h3>";
-//  html += StringUtil::format(
-//      "<pre>$0</pre>",
-//      table.get()->config().DebugString());
-//  html += StringUtil::format(
-//      "<pre>$0</pre>",
-//      table.get()->schema()->toString());
-//
-//  response->setStatus(http::kStatusOK);
-//  response->addHeader("Content-Type", "text/html; charset=utf-8");
-//  response->addBody(html);
-//}
-//
-//void StatusServlet::renderPartitionPage(
-//    const String& db_namespace,
-//    const String& table_name,
-//    const SHA1Hash& partition_key,
-//    http::HTTPRequest* request,
-//    http::HTTPResponse* response) {
-//  String html;
-//  html += kStyleSheet;
-//  //html += kMainMenu;
-//
-//  html += StringUtil::format(
-//      "<h2>Partition: &nbsp; <span style='font-weight:normal'>"
-//      "<a href='/zstatus/db/$0'>$0</a> &mdash;"
-//      "<a href='/zstatus/db/$0/$1'>$1</a> &mdash;"
-//      "$2</span></h2>",
-//      db_namespace,
-//      table_name,
-//      partition_key.toString());
-//
-//  auto partition = pmap_->findPartition(
-//      db_namespace,
-//      table_name,
-//      partition_key);
-//
-//  if (partition.isEmpty()) {
-//    html += "ERROR: PARTITION NOT FOUND!";
-//  } else {
-//    auto table = partition.get()->getTable();
-//    auto snap = partition.get()->getSnapshot();
-//    auto state = snap->state;
-//    auto repl = partition.get()->getReplicationStrategy();
-//
-//    if (table->partitionerType() == TBL_PARTITION_TIMEWINDOW &&
-//        state.partition_keyrange_begin().size() == 8 &&
-//        state.partition_keyrange_end().size() == 8) {
-//      uint64_t ts_begin;
-//      uint64_t ts_end;
-//      memcpy((char*) &ts_begin, state.partition_keyrange_begin().data(), 8);
-//      memcpy((char*) &ts_end, state.partition_keyrange_end().data(), 8);
-//
-//      html += StringUtil::format(
-//          "<span><em>Keyrange:</em> $0 [$1] - $2 [$3]</span> &mdash; ",
-//          UnixTime(ts_begin),
-//          ts_begin,
-//          UnixTime(ts_end),
-//          ts_end);
-//    }
-//
-//    if (table->partitionerType() == TBL_PARTITION_UINT64 &&
-//        state.partition_keyrange_begin().size() == 8 &&
-//        state.partition_keyrange_end().size() == 8) {
-//      uint64_t range_begin;
-//      uint64_t range_end;
-//      memcpy((char*) &range_begin, state.partition_keyrange_begin().data(), 8);
-//      memcpy((char*) &range_end, state.partition_keyrange_end().data(), 8);
-//
-//      html += StringUtil::format(
-//          "<span><em>Keyrange:</em> $0 - $1</span> &mdash; ",
-//          range_begin,
-//          range_end);
-//    }
-//
-//    if (table->partitionerType() == TBL_PARTITION_STRING) {
-//      html += StringUtil::format(
-//          "<span><em>Keyrange:</em> $0 - $1</span> &mdash; ",
-//          state.partition_keyrange_begin(),
-//          state.partition_keyrange_end());
-//    }
-//
-//    html += StringUtil::format(
-//        "<span><em>Lifecycle State</em>: $0</span> &mdash; ",
-//        PartitionLifecycleState_Name(snap->state.lifecycle_state()));
-//
-//    html += StringUtil::format(
-//        "<span><em>Needs Replication?</em>: $0</span> &mdash; ",
-//        repl->needsReplication());
-//
-//    html += StringUtil::format(
-//        "<span><em>Splitting?</em>: $0</span> &mdash; ",
-//        partition.get()->isSplitting());
-//
-//    html += StringUtil::format(
-//        "<span><em>Joining Servers?</em>: $0</span> &mdash; ",
-//        snap->state.has_joining_servers());
-//
-//    html += StringUtil::format(
-//        "<span><em>Size (Disk)</em>: $0MB</span> &mdash; ",
-//        partition.get()->getTotalDiskSize() / 1024.0 / 1024.0);
-//
-//    html += "<h3>PartitionInfo</h3>";
-//    html += StringUtil::format(
-//        "<pre>$0</pre>",
-//        partition.get()->getInfo().DebugString());
-//
-//    html += "<h3>PartitionState</h3>";
-//    html += StringUtil::format("<pre>$0</pre>", snap->state.DebugString());
-//
-//    html += "<h3>TableDefinition</h3>";
-//    html += StringUtil::format(
-//        "<pre>$0</pre>",
-//        partition.get()->getTable()->config().DebugString());
-//  }
-//
-//  response->setStatus(http::kStatusOK);
-//  response->addHeader("Content-Type", "text/html; charset=utf-8");
-//  response->addBody(html);
-//}
+void StatusServlet::renderNamespacePage(
+    const String& db_namespace,
+    http::HTTPRequest* request,
+    http::HTTPResponse* response) {
+  String html;
+  html += kStyleSheet;
+  //html += kMainMenu;
+
+  html += StringUtil::format(
+      "<h2>Namespace: &nbsp; <span style='font-weight:normal'>$0</span></h2>",
+      db_namespace);
+
+  response->setStatus(http::kStatusOK);
+  response->addHeader("Content-Type", "text/html; charset=utf-8");
+  response->addBody(html);
+}
+
+void StatusServlet::renderTablePage(
+    const String& db_namespace,
+    const String& table_name,
+    http::HTTPRequest* request,
+    http::HTTPResponse* response) {
+  auto ctx = db_->getSession()->getDatabaseContext();
+  auto pmap = ctx->partition_map;
+
+  String html;
+  html += kStyleSheet;
+  //html += kMainMenu;
+
+  html += StringUtil::format(
+      "<h2>Table: &nbsp; <span style='font-weight:normal'>"
+      "<a href='/zstatus/db/$0'>$0</a> &mdash;"
+      "$1</span></h2>",
+      db_namespace,
+      table_name);
+
+  auto table = pmap->findTable(
+      db_namespace,
+      table_name);
+
+  if (table.isEmpty()) {
+    response->setStatus(http::kStatusNotFound);
+    response->addHeader("Content-Type", "text/html; charset=utf-8");
+    response->addBody("ERROR: table not found!");
+    return;
+  }
+
+  const auto& table_cfg = table.get()->config();
+  html += StringUtil::format(
+      "<span><em>Metatdata TXNID:</em> $0 [$1]</span> &mdash; ",
+      SHA1Hash(
+          table_cfg.metadata_txnid().data(),
+          table_cfg.metadata_txnid().size()).toString(),
+      table_cfg.metadata_txnseq());
+
+  MetadataClient metadata_client(ctx->config_directory);
+  MetadataFile metadata_file;
+  auto rc = metadata_client.fetchLatestMetadataFile(
+      db_namespace,
+      table_name,
+      &metadata_file);
+
+  if (!rc.isSuccess()) {
+    html += StringUtil::format(
+        "<b>ERROR: while fetching metadata: $0</b>",
+        rc.message());
+  } else {
+    html += "<h3>Partition Map:</h3>";
+    html += "<table cellspacing=0 border=1>";
+    html += "<thead><tr><td>Keyrange</td><td>Partition ID</td><td>Servers</td><td></td></tr></thead>";
+    for (const auto& e : metadata_file.getPartitionMap()) {
+      Vector<String> servers;
+      for (const auto& s : e.servers) {
+        servers.emplace_back(s.server_id);
+      }
+      for (const auto& s : e.servers_joining) {
+        servers.emplace_back(s.server_id + " [JOINING]");
+      }
+      for (const auto& s : e.servers_leaving) {
+        servers.emplace_back(s.server_id + " [LEAVING]");
+      }
+
+      String keyrange;
+      switch (metadata_file.getKeyspaceType()) {
+        case KEYSPACE_UINT64: {
+          uint64_t keyrange_uint = -1;
+          memcpy((char*) &keyrange_uint, e.begin.data(), sizeof(e.begin));
+          keyrange = StringUtil::format(
+              "$0 [$1]",
+              UnixTime(keyrange_uint),
+              keyrange_uint);
+          break;
+        }
+        case KEYSPACE_STRING: {
+          keyrange = e.begin;
+          break;
+        }
+      }
+
+      String extra_info;
+      if (e.splitting) {
+        auto split_point = decodePartitionKey(
+            table.get()->getKeyspaceType(),
+            e.split_point);
+
+        Set<String> servers_low;
+        for (const auto& s : e.split_servers_low) {
+          servers_low.emplace(s.server_id);
+        }
+        Set<String> servers_high;
+        for (const auto& s : e.split_servers_high) {
+          servers_high.emplace(s.server_id);
+        }
+
+        extra_info += StringUtil::format(
+            "SPLITTING @ $0 into $1 on $2, $3 on $4",
+            decodePartitionKey(table.get()->getKeyspaceType(), e.split_point),
+            e.split_partition_id_low,
+            inspect(servers_low),
+            e.split_partition_id_high,
+            inspect(servers_high));
+      }
+
+      html += StringUtil::format(
+          "<tr><td>$0</td><td>$1</td><td>$2</td><td>$3</td></tr>",
+          keyrange,
+          e.partition_id.toString(),
+          StringUtil::join(servers, ", "),
+          extra_info);
+    }
+    html += "</table>";
+  }
+
+  html += "<h3>TableDefinition</h3>";
+  html += StringUtil::format(
+      "<pre>$0</pre>",
+      table.get()->config().DebugString());
+  html += StringUtil::format(
+      "<pre>$0</pre>",
+      table.get()->schema()->toString());
+
+  response->setStatus(http::kStatusOK);
+  response->addHeader("Content-Type", "text/html; charset=utf-8");
+  response->addBody(html);
+}
+
+void StatusServlet::renderPartitionPage(
+    const String& db_namespace,
+    const String& table_name,
+    const SHA1Hash& partition_key,
+    http::HTTPRequest* request,
+    http::HTTPResponse* response) {
+  auto ctx = db_->getSession()->getDatabaseContext();
+  auto pmap = ctx->partition_map;
+  String html;
+  html += kStyleSheet;
+  //html += kMainMenu;
+
+  html += StringUtil::format(
+      "<h2>Partition: &nbsp; <span style='font-weight:normal'>"
+      "<a href='/zstatus/db/$0'>$0</a> &mdash;"
+      "<a href='/zstatus/db/$0/$1'>$1</a> &mdash;"
+      "$2</span></h2>",
+      db_namespace,
+      table_name,
+      partition_key.toString());
+
+  auto partition = pmap->findPartition(
+      db_namespace,
+      table_name,
+      partition_key);
+
+  if (partition.isEmpty()) {
+    html += "ERROR: PARTITION NOT FOUND!";
+  } else {
+    auto table = partition.get()->getTable();
+    auto snap = partition.get()->getSnapshot();
+    auto state = snap->state;
+    auto repl = partition.get()->getReplicationStrategy();
+
+    if (table->partitionerType() == TBL_PARTITION_TIMEWINDOW &&
+        state.partition_keyrange_begin().size() == 8 &&
+        state.partition_keyrange_end().size() == 8) {
+      uint64_t ts_begin;
+      uint64_t ts_end;
+      memcpy((char*) &ts_begin, state.partition_keyrange_begin().data(), 8);
+      memcpy((char*) &ts_end, state.partition_keyrange_end().data(), 8);
+
+      html += StringUtil::format(
+          "<span><em>Keyrange:</em> $0 [$1] - $2 [$3]</span> &mdash; ",
+          UnixTime(ts_begin),
+          ts_begin,
+          UnixTime(ts_end),
+          ts_end);
+    }
+
+    if (table->partitionerType() == TBL_PARTITION_UINT64 &&
+        state.partition_keyrange_begin().size() == 8 &&
+        state.partition_keyrange_end().size() == 8) {
+      uint64_t range_begin;
+      uint64_t range_end;
+      memcpy((char*) &range_begin, state.partition_keyrange_begin().data(), 8);
+      memcpy((char*) &range_end, state.partition_keyrange_end().data(), 8);
+
+      html += StringUtil::format(
+          "<span><em>Keyrange:</em> $0 - $1</span> &mdash; ",
+          range_begin,
+          range_end);
+    }
+
+    if (table->partitionerType() == TBL_PARTITION_STRING) {
+      html += StringUtil::format(
+          "<span><em>Keyrange:</em> $0 - $1</span> &mdash; ",
+          state.partition_keyrange_begin(),
+          state.partition_keyrange_end());
+    }
+
+    html += StringUtil::format(
+        "<span><em>Lifecycle State</em>: $0</span> &mdash; ",
+        PartitionLifecycleState_Name(snap->state.lifecycle_state()));
+
+    html += StringUtil::format(
+        "<span><em>Needs Replication?</em>: $0</span> &mdash; ",
+        repl->needsReplication());
+
+    html += StringUtil::format(
+        "<span><em>Splitting?</em>: $0</span> &mdash; ",
+        partition.get()->isSplitting());
+
+    html += StringUtil::format(
+        "<span><em>Joining Servers?</em>: $0</span> &mdash; ",
+        snap->state.has_joining_servers());
+
+    html += StringUtil::format(
+        "<span><em>Size (Disk)</em>: $0MB</span> &mdash; ",
+        partition.get()->getTotalDiskSize() / 1024.0 / 1024.0);
+
+    html += "<h3>PartitionInfo</h3>";
+    html += StringUtil::format(
+        "<pre>$0</pre>",
+        partition.get()->getInfo().DebugString());
+
+    html += "<h3>PartitionState</h3>";
+    html += StringUtil::format("<pre>$0</pre>", snap->state.DebugString());
+
+    html += "<h3>TableDefinition</h3>";
+    html += StringUtil::format(
+        "<pre>$0</pre>",
+        partition.get()->getTable()->config().DebugString());
+  }
+
+  response->setStatus(http::kStatusOK);
+  response->addHeader("Content-Type", "text/html; charset=utf-8");
+  response->addBody(html);
+}
 
 }
