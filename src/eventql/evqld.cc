@@ -277,8 +277,8 @@ int main(int argc, const char** argv) {
     evql_conf_set(conf, "cluster.coordinator", "standalone");
   }
 
-  auto config_file_path = flags.getString("config");
-  {
+  if (flags.isSet("config")) {
+    auto config_file_path = flags.getString("config");
     int rc = evql_conf_load(
         conf,
         config_file_path.empty() ? nullptr : config_file_path.c_str());

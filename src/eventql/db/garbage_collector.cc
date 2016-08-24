@@ -131,6 +131,8 @@ void GarbageCollector::stopGCThread() {
 
   thread_running_ = false;
   cv_.notify_all();
+  lk.unlock();
+  thread_.join();
 }
 
 void GarbageCollector::emptyTrash() {

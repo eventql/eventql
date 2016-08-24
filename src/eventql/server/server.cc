@@ -21,6 +21,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#include <regex>
 #include <eventql/eventql.h>
 #include <eventql/config/process_config.h>
 #include <eventql/db/database.h>
@@ -88,40 +89,37 @@ int evql_server_start(evql_server_t* server) {
   }
 }
 
-//int evql_server_listen(evql_server_t* server, int kill_fd) {
-////  /* listen addr */
-//  String listen_host;
-//  int listen_port;
-//  {
-//    auto listen_str = process_config->getString("server.listen");
-//    if (listen_str.isEmpty()) {
-//      logFatal("evqld", "missing 'server.listen' option or --listen flag");
-//      return 1;
-//    }
-//
-//    std::smatch m;
-//    std::regex listen_regex("([0-9a-zA-Z-_.]+):([0-9]+)");
-//    if (std::regex_match(listen_str.get(), m, listen_regex)) {
-//      listen_host = m[1];
-//      listen_port = std::stoi(m[2]);
-//    } else {
-//      logFatal("evqld", "invalid listen address: $0", listen_str.get());
-//      return 1;
-//    }
-//  }
-//
-//
-//  ///* start listener */
-//  //Listener listener(nullptr);
-//  //if (rc.isSuccess()) {
-//  //  rc = listener.bind(listen_port);
-//  //}
-//
-//  //if (rc.isSuccess()) {
-//  //  listener.run();
-//  //}
-//}
-//
+int evql_server_listen(evql_server_t* server, int kill_fd) {
+  String listen_host;
+  int listen_port;
+  {
+    auto listen_str = server->config->getString("server.listen");
+    if (listen_str.isEmpty()) {
+      server->error = "missing 'server.listen' option or --listen flag";
+      return 1;
+    }
+
+    std::smatch m;
+    std::regex listen_regex("([0-9a-zA-Z-_.]+):([0-9]+)");
+    if (std::regex_match(listen_str.get(), m, listen_regex)) {
+      listen_host = m[1];
+      listen_port = std::stoi(m[2]);
+    } else {
+      server->error = "invalid listen address: " + listen_str.get();
+      return 1;
+    }
+  }
+
+  eventql::Listener listener(server->database);
+  auto rc = listener.bind(listen_port);
+  if (!rc.isSuccess()) {
+    server->error = rc.getMessage();
+    return 1;
+  }
+
+  listener.run();
+  return 0;
+}
 
 //int evql_server_handle(evql_server_t* server, int fd, int flags);
 
