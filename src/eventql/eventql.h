@@ -46,21 +46,21 @@ extern "C" {
 #endif
 
 /**
- * The EventQL server handle
+ * The EventQL config handle
  */
-struct evql_server_s;
-typedef struct evql_server_s evql_server_t;
+struct evql_conf_s;
+typedef struct evql_conf_s evql_conf_t;
 
 /**
- * Initiate a new EventQL server
+ * Create a new EventQL server config
  */
-evql_server_t* evql_server_init();
+evql_conf_t* evql_conf_init();
 
 /**
  * Set a server config property
  */
-void evql_server_cfgset(
-    evql_server_t* server,
+void evql_conf_set(
+    evql_conf_t* conf,
     const char* key,
     const char* value);
 
@@ -70,23 +70,26 @@ void evql_server_cfgset(
  * @param fpath the file path or NULL for the default paths
  * @return 0 on success and 1 on error
  */
-int evql_server_cfgload(
-    evql_server_t* server,
+int evql_conf_load(
+    evql_conf_t* conf,
     const char* fpath);
 
 /**
- * Get a server config property
+ * Free an eventql server config
  */
-const char* evql_server_cfgget(
-    evql_server_t* server,
-    const char* key);
+void evql_conf_free(evql_conf_t* conf);
+
 
 /**
- * Get a boolean server config property
+ * The EventQL server handle
  */
-int evql_server_cfggetbool(
-    evql_server_t* server,
-    const char* key);
+struct evql_server_s;
+typedef struct evql_server_s evql_server_t;
+
+/**
+ * Initiate a new EventQL server
+ */
+evql_server_t* evql_server_init(evql_conf_t* conf);
 
 /**
  * Start the server (this method returns immediately)
@@ -135,6 +138,20 @@ void evql_server_free(evql_server_t* server);
  * Return the latest error message
  */
 const char* evql_server_geterror(evql_server_t* server);
+
+/**
+ * Get a server config property
+ */
+const char* evql_server_getconf(
+    evql_server_t* server,
+    const char* key);
+
+/**
+ * Get a boolean server config property
+ */
+int evql_server_getconfbool(
+    evql_server_t* server,
+    const char* key);
 
 #ifdef __cplusplus
 }

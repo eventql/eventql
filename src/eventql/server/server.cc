@@ -21,39 +21,71 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#pragma once
 #include <eventql/eventql.h>
 #include <eventql/config/process_config.h>
 
-struct evql_server_s {
-  eventql::ProcessConfigBuilder* config_builder;
-  eventql::ProcessConfig* config;
+struct evql_conf_s {
+  eventql::ProcessConfigBuilder config_builder;
+  std::string error;
 };
 
-evql_server_t* evql_server_init() {
-  auto server = static_cast<evql_server_t*>(malloc(sizeof(evql_server_t)));
-  if (!server) {
-    return nullptr;
-  }
+evql_conf_t* evql_conf_init() {
+  auto conf = new evql_conf_s();
+  return conf;
+}
 
-  server->config_builder = new eventql::ProcessConfigBuilder();
-  server->config = nullptr;
+void evql_conf_free(evql_conf_t* conf)  {
+  delete conf;
+}
+
+void evql_conf_set(
+    evql_conf_t* conf,
+    const char* key,
+    const char* value) {
+  conf->config_builder.setProperty(key, value);
+}
+
+struct evql_server_s {
+  eventql::ProcessConfig* config;
+  std::string error;
+};
+
+evql_server_t* evql_server_init(evql_conf_t* conf) {
+  auto conf_builder = conf->config_builder;
+
+  auto server = new evql_server_s();
+  server->config = conf_builder.getConfig().release();
   return server;
 }
 
+//int evql_server_start(evql_server_t* server) {
 //
-//void evql_server_cfgset(
+//}
+//
+//int evql_server_listen(evql_server_t* server, int kill_fd) {
+//
+//}
+//
+////int evql_server_handle(evql_server_t* server, int fd, int flags);
+//
+//void evql_server_shutdown(evql_server_t* server) {
+//
+//}
+
+void evql_server_free(evql_server_t* server) {
+  delete server->config;
+  delete server;
+}
+
+const char* evql_server_geterror(evql_server_t* server) {
+  return server->error.c_str();
+}
+
+//const char evql_server_confget(
 //    evql_server_t* server,
-//    const char* key,
-//    const char* value);
-//
-//int evql_server_start(evql_server_t* server);
-//int evql_server_listen(evql_server_t* server, int kill_fd);
-//int evql_server_handle(evql_server_t* server, int fd, int flags);
-//void evql_server_shutdown(evql_server_t* server);
-//void evql_server_free(evql_server_t* server);
-//const char* evql_server_geterror(evql_server_t* server);
-//
+//    const char* key) {
+//  server->config->setProperty(key, value);
+//}
 
 //  //Database db(process_config.get());
 //  //auto rc = db.start();

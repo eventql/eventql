@@ -255,42 +255,40 @@ int main(int argc, const char** argv) {
     return 0;
   }
 
-  /* init server */
-  auto server = evql_server_init();
-  if (!server) {
+  /* conf */
+  auto conf = evql_conf_init();
+  if (!conf) {
     logFatal("evqld", "error while initializing EventQL server");
     return 1;
   }
 
-  /* conf */
-  evql_server_cfgset(server, "server.listen", "localhost:9175");
-  evql_server_cfgset(server, "server.indexbuild_threads", "2");
-  evql_server_cfgset(server, "server.gc_mode", "AUTOMATIC");
-  evql_server_cfgset(server, "server.gc_interval", "30000000");
-  evql_server_cfgset(server, "server.cachedir_maxsize", "68719476736");
-  evql_server_cfgset(server, "server.noleader", "false");
-  evql_server_cfgset(server, "cluster.rebalance_interval", "60000000");
+  evql_conf_set(conf, "server.listen", "localhost:9175");
+  evql_conf_set(conf, "server.indexbuild_threads", "2");
+  evql_conf_set(conf, "server.gc_mode", "AUTOMATIC");
+  evql_conf_set(conf, "server.gc_interval", "30000000");
+  evql_conf_set(conf, "server.cachedir_maxsize", "68719476736");
+  evql_conf_set(conf, "server.noleader", "false");
+  evql_conf_set(conf, "cluster.rebalance_interval", "60000000");
 
   if (flags.isSet("standalone")) {
-    evql_server_cfgset(server, "server.name", "standalone");
-    evql_server_cfgset(server, "server.client_auth_backend", "trust");
-    evql_server_cfgset(server, "server.noleader", "true");
-    evql_server_cfgset(server, "cluster.coordinator", "standalone");
+    evql_conf_set(conf, "server.name", "standalone");
+    evql_conf_set(conf, "server.client_auth_backend", "trust");
+    evql_conf_set(conf, "server.noleader", "true");
+    evql_conf_set(conf, "cluster.coordinator", "standalone");
   }
 
   auto config_file_path = flags.getString("config");
   {
-    int rc = evql_server_cfgload(
-        server,
+    int rc = evql_conf_load(
+        conf,
         config_file_path.empty() ? nullptr : config_file_path.c_str());
 
     if (rc) {
       logFatal(
           "evqld",
-          "error while loading config file: $0",
-          evql_server_geterror(server));
+          "error while loading config file");
 
-      evql_server_free(server);
+      evql_conf_free(conf);
       return 1;
     }
   }
@@ -299,37 +297,46 @@ int main(int argc, const char** argv) {
     auto opt_key_end = opt.find("=");
     if (opt_key_end == String::npos) {
       logFatal("invalid config option: $0", opt);
-      evql_server_free(server);
+      evql_conf_free(conf);
       return 1;
     }
 
     auto opt_key = opt.substr(0, opt_key_end);
     auto opt_value = opt.substr(opt_key_end + 1);
-    evql_server_cfgset(server, opt_key.c_str(), opt_value.c_str());
+    evql_conf_set(conf, opt_key.c_str(), opt_value.c_str());
   }
 
   if (flags.isSet("listen")) {
     auto listen = flags.getString("listen");
-    evql_server_cfgset(server, "server.listen", listen.c_str());
+    evql_conf_set(conf, "server.listen", listen.c_str());
   }
 
   if (flags.isSet("datadir")) {
     auto datadir = flags.getString("datadir");
-    evql_server_cfgset(server, "server.datadir", datadir.c_str());
+    evql_conf_set(conf, "server.datadir", datadir.c_str());
   }
 
   if (flags.isSet("daemonize")) {
-    evql_server_cfgset(server, "server.daemonize", "true");
+    evql_conf_set(conf, "server.daemonize", "true");
   }
 
   if (flags.isSet("pidfile")) {
     auto pidfile = flags.getString("pidfile");
-    evql_server_cfgset(server, "server.pidfile", pidfile.c_str());
+    evql_conf_set(conf, "server.pidfile", pidfile.c_str());
   }
 
-  if (!evql_server_cfgget(server, "server.datadir")) {
+  /* init server */
+  auto server = evql_server_init(conf);
+  if (!server) {
+    logFatal("evqld", "error while initializing EventQL server");
+    evql_conf_free(conf);
+    return 1;
+  }
+
+  if (!evql_server_getconf(server, "server.datadir")) {
     logFatal("evqld", "missing 'server.datadir' option or --datadir flag");
     evql_server_free(server);
+    evql_conf_free(conf);
     return 1;
   }
 
@@ -337,7 +344,7 @@ int main(int argc, const char** argv) {
   ScopedPtr<FileLock> pidfile_lock;
   String pidfile_path;
   {
-    auto pidfile_path_cstr = evql_server_cfgget(server, "server.pidfile");
+    auto pidfile_path_cstr = evql_server_getconf(server, "server.pidfile");
     if (pidfile_path_cstr) {
       pidfile_path = std::string(pidfile_path_cstr);
     }
@@ -355,7 +362,7 @@ int main(int argc, const char** argv) {
   }
 
   /* daemonize */
-  if (evql_server_cfggetbool(server, "server.daemonize")) {
+  if (evql_server_getconfbool(server, "server.daemonize")) {
     Application::daemonize();
   }
 
@@ -379,6 +386,7 @@ int main(int argc, const char** argv) {
   }
 
   evql_server_free(server);
+  evql_conf_free(conf);
 
   return rc;
 }
