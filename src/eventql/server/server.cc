@@ -23,6 +23,8 @@
  */
 #include <eventql/eventql.h>
 #include <eventql/config/process_config.h>
+#include <eventql/db/database.h>
+#include <eventql/server/listener.h>
 
 struct evql_conf_s {
   eventql::ProcessConfigBuilder config_builder;
@@ -45,8 +47,22 @@ void evql_conf_set(
   conf->config_builder.setProperty(key, value);
 }
 
+int evql_conf_load(
+    evql_conf_t* conf,
+    const char* fpath) {
+  Status rc = Status::success();
+  if (fpath) {
+    rc = conf->config_builder.loadFile(fpath);
+  } else {
+    rc = conf->config_builder.loadDefaultConfigFile("evqld");
+  }
+
+  return rc.isSuccess() ? 0 : 1;
+}
+
 struct evql_server_s {
   eventql::ProcessConfig* config;
+  eventql::Database* database;
   std::string error;
 };
 
@@ -55,42 +71,25 @@ evql_server_t* evql_server_init(evql_conf_t* conf) {
 
   auto server = new evql_server_s();
   server->config = conf_builder.getConfig().release();
+  server->database = nullptr;
   return server;
 }
 
-//int evql_server_start(evql_server_t* server) {
-//
-//}
-//
+int evql_server_start(evql_server_t* server) {
+  server->database = eventql::Database::newDatabase(server->config);
+  auto rc = server->database->start();
+  if (rc.isSuccess()) {
+    return 0;
+  } else {
+    server->error = rc.getMessage();
+    delete server->database;
+    server->database = nullptr;
+    return 1;
+  }
+}
+
 //int evql_server_listen(evql_server_t* server, int kill_fd) {
-//
-//}
-//
-////int evql_server_handle(evql_server_t* server, int fd, int flags);
-//
-//void evql_server_shutdown(evql_server_t* server) {
-//
-//}
-
-void evql_server_free(evql_server_t* server) {
-  delete server->config;
-  delete server;
-}
-
-const char* evql_server_geterror(evql_server_t* server) {
-  return server->error.c_str();
-}
-
-//const char evql_server_confget(
-//    evql_server_t* server,
-//    const char* key) {
-//  server->config->setProperty(key, value);
-//}
-
-//  //Database db(process_config.get());
-//  //auto rc = db.start();
-//
-//  /* listen addr */
+////  /* listen addr */
 //  String listen_host;
 //  int listen_port;
 //  {
@@ -121,4 +120,37 @@ const char* evql_server_geterror(evql_server_t* server) {
 //  //if (rc.isSuccess()) {
 //  //  listener.run();
 //  //}
+//}
+//
+
+//int evql_server_handle(evql_server_t* server, int fd, int flags);
+
+void evql_server_shutdown(evql_server_t* server) {
+  if (server->database) {
+    server->database->shutdown();
+    delete server->database;
+    server->database = nullptr;
+  }
+}
+
+void evql_server_free(evql_server_t* server) {
+  delete server->config;
+  delete server;
+}
+
+const char* evql_server_geterror(evql_server_t* server) {
+  return server->error.c_str();
+}
+
+const char* evql_server_getconf(
+    evql_server_t* server,
+    const char* key) {
+  return server->config->getCString(key);
+}
+
+int evql_server_getconfbool(
+    evql_server_t* server,
+    const char* key) {
+  return server->config->getBool(key) ? 1 : 0;
+}
 

@@ -42,6 +42,21 @@ ProcessConfig::ProcessConfig(
       HashMap<String, String> properties) :
       properties_(properties) {}
 
+const char* ProcessConfig::getCString(
+    const String& section,
+    const String& key) const {
+  return getCString(StringUtil::format("$0.$1", section, key));
+}
+
+const char* ProcessConfig::getCString(const String& key) const {
+  auto p = properties_.find(key);
+  if (p != properties_.end()) {
+    return p->second.c_str();
+  }
+
+  return nullptr;
+}
+
 Option<String> ProcessConfig::getString(
     const String& section,
     const String& key) const {

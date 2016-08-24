@@ -22,6 +22,8 @@
  * code of your own applications
  */
 #include <eventql/db/database.h>
+#include <eventql/util/autoref.h>
+#include "eventql/util/io/FileLock.h"
 #include "eventql/util/io/filerepository.h"
 #include "eventql/util/io/fileutil.h"
 #include "eventql/util/application.h"
@@ -86,9 +88,53 @@ void DisableExtraThreads();
 
 namespace eventql {
 
-Database::Database(ProcessConfig* process_config) : cfg_(process_config) {}
+class DatabaseImpl : public Database {
+public:
 
-ReturnCode Database::start() {
+  DatabaseImpl(ProcessConfig* process_config);
+
+  ReturnCode start() override;
+  void shutdown() override;
+
+  std::unique_ptr<Session> createContext() override;
+
+  void startThread(
+      Session* context,
+      std::function<void()> entrypoint) override;
+
+protected:
+  ProcessConfig* cfg_;
+  std::unique_ptr<FileLock> server_lock_;
+  std::unique_ptr<ServerCfg> server_cfg_;
+  std::unique_ptr<FileTracker> file_tracker_;
+  std::unique_ptr<GarbageCollector> garbage_collector_;
+  std::unique_ptr<ConfigDirectory> config_dir_;
+  std::unique_ptr<ClientAuth> client_auth_;
+  std::unique_ptr<InternalAuth> internal_auth_;
+  std::unique_ptr<MetadataStore> metadata_store_;
+  std::unique_ptr<MetadataService> metadata_service_;
+  std::unique_ptr<PartitionMap> partition_map_;
+  std::unique_ptr<TableService> table_service_;
+  std::unique_ptr<ReplicationWorker> replication_worker_;
+  std::unique_ptr<CompactionWorker> compaction_worker_;
+  std::unique_ptr<MetadataReplication> metadata_replication_;
+  std::unique_ptr<csql::QueryCache> sql_query_cache_;
+  RefPtr<csql::SymbolTable> sql_symbols_;
+  RefPtr<csql::Runtime> sql_;
+  std::unique_ptr<SQLService> sql_service_;
+  std::unique_ptr<MapReduceService> mapreduce_service_;
+  std::unique_ptr<Leader> leader_;
+};
+
+Database* Database::newDatabase(ProcessConfig* process_config) {
+  return new DatabaseImpl(process_config);
+}
+
+DatabaseImpl::DatabaseImpl(
+    ProcessConfig* process_config) :
+    cfg_(process_config) {}
+
+ReturnCode DatabaseImpl::start() {
   /* data directory */
   auto server_datadir = cfg_->getString("server.datadir").get();
   if (!FileUtil::exists(server_datadir)) {
@@ -361,7 +407,7 @@ ReturnCode Database::start() {
   return ReturnCode::success();
 }
 
-void Database::shutdown() {
+void DatabaseImpl::shutdown() {
   if (leader_) {
     leader_->stopLeaderThread();
     leader_.reset(nullptr);
@@ -409,11 +455,11 @@ void Database::shutdown() {
   server_lock_.reset(nullptr);
 }
 
-std::unique_ptr<Session> Database::createContext() {
+std::unique_ptr<Session> DatabaseImpl::createContext() {
   return std::unique_ptr<Session>(new Session());
 }
 
-void Database::startThread(
+void DatabaseImpl::startThread(
     Session* context,
     std::function<void()> entrypoint) {
   auto t = std::thread(entrypoint);
