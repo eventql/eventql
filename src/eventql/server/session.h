@@ -26,11 +26,12 @@
 #include "eventql/util/stdtypes.h"
 
 namespace eventql {
+struct DatabaseContext;
 
 class Session {
 public:
 
-  Session();
+  Session(const DatabaseContext* database_context = nullptr);
 
   String getUserID() const;
   void setUserID(const String& user_id);
@@ -41,8 +42,11 @@ public:
   String getDisplayNamespace() const;
   void setDisplayNamespace(const String& ns);
 
+  const DatabaseContext* getDatabaseContext();
+
 protected:
   mutable std::mutex mutex_;
+  const DatabaseContext* database_context_;
   String user_id_;
   String effective_namespace_;
   String display_namespace_;

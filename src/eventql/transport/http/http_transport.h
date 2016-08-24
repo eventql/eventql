@@ -27,6 +27,8 @@
 #include "eventql/util/http/httpserver.h"
 #include "eventql/util/http/httprouter.h"
 #include "eventql/transport/http/default_servlet.h"
+#include "eventql/transport/http/status_servlet.h"
+#include "eventql/transport/http/api_servlet.h"
 
 namespace eventql {
 
@@ -42,6 +44,7 @@ protected:
   http::HTTPRouter http_router_;
   http::HTTPServerStats http_stats_;
   DefaultServlet default_servlet_;
+  StatusServlet status_servlet_;
 };
 
 } // namespace eventql

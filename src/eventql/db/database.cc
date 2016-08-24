@@ -123,6 +123,7 @@ protected:
   std::unique_ptr<SQLService> sql_service_;
   std::unique_ptr<MapReduceService> mapreduce_service_;
   std::unique_ptr<Leader> leader_;
+  std::unique_ptr<DatabaseContext> database_context_;
   pthread_key_t local_session_;
 };
 
@@ -350,6 +351,18 @@ ReturnCode DatabaseImpl::start() {
           partition_map_.get(),
           cache_dir));
 
+  /* database context */
+  {
+    std::unique_ptr<DatabaseContext> dbctx(new DatabaseContext());
+    dbctx->partition_map = partition_map_.get();
+    dbctx->file_tracker = file_tracker_.get();
+    dbctx->config_directory = config_dir_.get();
+    dbctx->replication_worker = replication_worker_.get();
+    dbctx->lsm_index_cache = server_cfg_->idx_cache.get();
+    dbctx->metadata_store = metadata_store_.get();
+    database_context_ = std::move(dbctx);
+  }
+
   /* open tables */
   config_dir_->setTableConfigChangeCallback([this] (const TableDefinition& tbl) {
     Set<SHA1Hash> affected_partitions;
@@ -417,54 +430,50 @@ ReturnCode DatabaseImpl::start() {
 void DatabaseImpl::shutdown() {
   if (leader_) {
     leader_->stopLeaderThread();
-    leader_.reset(nullptr);
   }
 
-  mapreduce_service_.reset(nullptr);
-  //JS_ShutDown();
+  if (metadata_replication_) {
+    metadata_replication_->stop();
+  }
 
+  if (replication_worker_) {
+    replication_worker_->stop();
+  }
+
+  if (garbage_collector_) {
+    garbage_collector_->stopGCThread();
+  }
+
+  if (config_dir_) {
+    config_dir_->stop();
+  }
+
+  leader_.reset(nullptr);
+  mapreduce_service_.reset(nullptr);
   sql_service_.reset(nullptr);
   sql_.reset(nullptr);
   sql_symbols_.reset(nullptr);
   sql_query_cache_.reset(nullptr);
-
-  if (metadata_replication_) {
-    metadata_replication_->stop();
-    metadata_replication_.reset(nullptr);
-  }
-
+  metadata_replication_.reset(nullptr);
   compaction_worker_.reset(nullptr);
-
-  if (replication_worker_) {
-    replication_worker_->stop();
-    replication_worker_.reset(nullptr);
-  }
-
+  replication_worker_.reset(nullptr);
   table_service_.reset(nullptr);
   partition_map_.reset(nullptr);
   metadata_service_.reset(nullptr);
   metadata_store_.reset(nullptr);
   internal_auth_.reset(nullptr);
   client_auth_.reset(nullptr);
-
-  if (config_dir_) {
-    config_dir_->stop();
-    config_dir_.reset(nullptr);
-  }
-
-  if (garbage_collector_) {
-    garbage_collector_->stopGCThread();
-    garbage_collector_.reset(nullptr);
-  }
-
+  config_dir_.reset(nullptr);
+  garbage_collector_.reset(nullptr);
   file_tracker_.reset(nullptr);
+  database_context_.reset(nullptr);
   server_cfg_.reset(nullptr);
   server_lock_.reset(nullptr);
 }
 
 void DatabaseImpl::startThread(std::function<void(Session*)> entrypoint) {
   auto t = std::thread([this, entrypoint] () {
-    auto session = new Session();
+    auto session = new Session(database_context_.get());
     pthread_setspecific(local_session_, session);
 
     try {

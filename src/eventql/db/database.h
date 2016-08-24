@@ -28,6 +28,21 @@
 namespace eventql {
 class ProcessConfig;
 class Session;
+class PartitionMap;
+class FileTracker;
+class ConfigDirectory;
+class ReplicationWorker;
+class LSMTableIndexCache;
+class MetadataStore;
+
+struct DatabaseContext {
+  PartitionMap* partition_map;
+  FileTracker* file_tracker;
+  ConfigDirectory* config_directory;
+  ReplicationWorker* replication_worker;
+  LSMTableIndexCache* lsm_index_cache;
+  MetadataStore* metadata_store;
+};
 
 class Database {
 public:

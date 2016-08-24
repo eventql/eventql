@@ -93,30 +93,12 @@ static LocalTaskScheduler local_scheduler;
 
 } // namespace
 
-HTTPTransport::HTTPTransport(Database* database) : database_(database) {
-  //eventql::AnalyticsServlet analytics_servlet(
-  //    cache_dir,
-  //    internal_auth.get(),
-  //    client_auth.get(),
-  //    internal_auth.get(),
-  //    sql.get(),
-  //    &table_service,
-  //    config_dir.get(),
-  //    &partition_map,
-  //    &sql_service,
-  //    &mapreduce_service,
-  //    &table_service);
-
-  //eventql::StatusServlet status_servlet(
-  //    &cfg,
-  //    &partition_map,
-  //    config_dir.get(),
-  //    http_server.stats(),
-  //    &evqld_stats()->http_client_stats,
-  //    &tsdb_replication);
-
-  //http_router.addRouteByPrefixMatch("/api/", &analytics_servlet);
-  //http_router.addRouteByPrefixMatch("/eventql", &status_servlet);
+HTTPTransport::HTTPTransport(
+    Database* database) :
+    database_(database),
+    status_servlet_(database) {
+  //http_router_.addRouteByPrefixMatch("/api/", &analytics_servlet_);
+  http_router_.addRouteByPrefixMatch("/eventql", &status_servlet_);
   http_router_.addRouteByPrefixMatch("/", &default_servlet_);
 }
 
