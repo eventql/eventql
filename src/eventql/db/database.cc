@@ -81,6 +81,7 @@
 #include "eventql/mapreduce/mapreduce_preludejs.cc"
 #include "eventql/eventql.h"
 #include "eventql/db/file_tracker.h"
+#include <pthread.h>
 
 namespace js {
 void DisableExtraThreads();
@@ -92,15 +93,13 @@ class DatabaseImpl : public Database {
 public:
 
   DatabaseImpl(ProcessConfig* process_config);
+  ~DatabaseImpl();
 
   ReturnCode start() override;
   void shutdown() override;
 
-  std::unique_ptr<Session> createContext() override;
-
-  void startThread(
-      Session* context,
-      std::function<void()> entrypoint) override;
+  void startThread(std::function<void(Session* session)> entrypoint) override;
+  Session* getSession() override;
 
 protected:
   ProcessConfig* cfg_;
@@ -124,6 +123,7 @@ protected:
   std::unique_ptr<SQLService> sql_service_;
   std::unique_ptr<MapReduceService> mapreduce_service_;
   std::unique_ptr<Leader> leader_;
+  pthread_key_t local_session_;
 };
 
 Database* Database::newDatabase(ProcessConfig* process_config) {
@@ -132,7 +132,13 @@ Database* Database::newDatabase(ProcessConfig* process_config) {
 
 DatabaseImpl::DatabaseImpl(
     ProcessConfig* process_config) :
-    cfg_(process_config) {}
+    cfg_(process_config) {
+  pthread_key_create(&local_session_, NULL);
+}
+
+DatabaseImpl::~DatabaseImpl() {
+  pthread_key_delete(local_session_);
+}
 
 ReturnCode DatabaseImpl::start() {
   /* data directory */
@@ -456,15 +462,25 @@ void DatabaseImpl::shutdown() {
   server_lock_.reset(nullptr);
 }
 
-std::unique_ptr<Session> DatabaseImpl::createContext() {
-  return std::unique_ptr<Session>(new Session());
+void DatabaseImpl::startThread(std::function<void(Session*)> entrypoint) {
+  auto t = std::thread([this, entrypoint] () {
+    auto session = new Session();
+    pthread_setspecific(local_session_, session);
+
+    try {
+      entrypoint(session);
+    } catch (const std::exception& e) {
+      // do nothing
+    }
+
+    delete session;
+  });
+
+  t.detach();
 }
 
-void DatabaseImpl::startThread(
-    Session* context,
-    std::function<void()> entrypoint) {
-  auto t = std::thread(entrypoint);
-  t.detach();
+Session* DatabaseImpl::getSession() {
+  return (Session*) pthread_getspecific(local_session_);
 }
 
 } // namespace tdsb

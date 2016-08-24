@@ -123,8 +123,7 @@ HTTPTransport::HTTPTransport(Database* database) : database_(database) {
 void HTTPTransport::handleConnection(int fd, std::string prelude_bytes) {
   logDebug("eventql", "Opening new http connection; fd=$0", fd);
 
-  auto ctx = database_->createContext().release();
-  database_->startThread(ctx, [this, ctx, fd, prelude_bytes] {
+  database_->startThread([this, fd, prelude_bytes] (Session* session) {
     try {
       auto http_conn = mkRef(
           new http::HTTPServerConnection(
@@ -140,8 +139,6 @@ void HTTPTransport::handleConnection(int fd, std::string prelude_bytes) {
           "HTTP connection error: $0",
           e.what());
     }
-
-    delete ctx;
   });
 }
 

@@ -39,16 +39,14 @@ public:
   virtual void shutdown() = 0;
 
   /**
-   * Create a new database connection context
-   */
-  virtual std::unique_ptr<Session> createContext() = 0;
-
-  /**
    * Start a thread from which database operations can be executed
    */
-  virtual void startThread(
-      Session* context,
-      std::function<void()> entrypoint) = 0;
+  virtual void startThread(std::function<void(Session* session)> entrypoint) = 0;
+
+  /**
+   * Get session for the current thread
+   */
+  virtual Session* getSession() = 0;
 
 };
 
