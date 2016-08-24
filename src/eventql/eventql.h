@@ -23,6 +23,8 @@
  */
 #pragma once
 #include <stdlib.h>
+
+#ifdef __cplusplus
 #include <string>
 
 namespace eventql {
@@ -36,3 +38,75 @@ static const std::string kBuildID = "unknown";
 #endif
 
 }
+
+#endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/**
+ * The EventQL server handle
+ */
+struct evql_server_s;
+typedef struct evql_server_s evql_server_t;
+
+/**
+ * Initiate a new EventQL server
+ */
+evql_server_t* evql_server_init();
+
+/**
+ * Set a server config property
+ */
+void evql_server_cfgset(
+    evql_server_t* server,
+    const char* key,
+    const char* value);
+
+/**
+ * Start the server (this method returns immediately)
+ */
+int evql_server_start(evql_server_t* server);
+
+/**
+ * Listen to inbound network connections. Calling this method is optional -
+ * you can use an EventQL server once it was started without listening to
+ * conncetions.
+ *
+ * The kill_fd parameter is optional. If the paramter is set to -1, the method
+ * will _never_ return. If the kill_fd parameter is set to a valid file
+ * descriptor, the method will return once the kill_fd become readable.
+ */
+int evql_server_listen(evql_server_t* server, int kill_fd);
+
+/**
+ * Start a new EventQL server connection/thread. You must pass a valid file
+ * descriptor. The server will internally start a new query thread and start
+ * reading queries from the fd;
+ */
+int evql_server_handle(evql_server_t* server, int fd, int flags);
+
+/**
+ * Stop the EventQL server and return most of the held resources (including the
+ * server lock). This method must be called after evql_server_start and before
+ * evql_server_free.
+ *
+ * It is legal to start and stop the same server instance more than once.
+ */
+void evql_server_shutdown(evql_server_t* server);
+
+/**
+ * Free an eventql server instance.
+ */
+void evql_server_free(evql_server_t* server);
+
+/**
+ * Return the latest error message
+ */
+const char* evql_server_geterror(evql_server_t* server);
+
+#ifdef __cplusplus
+}
+#endif
+
