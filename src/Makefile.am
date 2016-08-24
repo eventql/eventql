@@ -1,12 +1,6 @@
 ## Process this file with automake to produce Makefile.in
 
-bin_PROGRAMS = evqld
-
-#if ENABLE_EMBEDDED_SERVER
-#lib_LTLIBRARIES = libevql_server.la
-#else
-#endif
-
+bin_PROGRAMS = evql evqld evqlctl
 noinst_LTLIBRARIES = libevqlcore.la
 
 MAINTAINERCLEANFILES =   \
@@ -17,7 +11,6 @@ EXTRA_DIST = \
   eventql/util/charts/testdata \
   eventql/sql/testdata \
   eventql/mapreduce/prelude.js
-
 
 ################# DEPENDENCIES ####################
 if HAVE_ZLIB
@@ -931,154 +924,71 @@ eventql/mapreduce/mapreduce_preludejs.cc:
 	echo 'eventql/mapreduce/prelude.js:${srcdir}/eventql/mapreduce/prelude.js' | ${srcdir}/eventql/util/assets.sh $(builddir)/eventql/mapreduce/mapreduce_preludejs.cc
 
 ################# BIN: evqld ####################
-evqld_SOURCES = \
-    eventql/util/application.cc \
-    eventql/util/application.h \
-    eventql/util/cli/flagparser.cc \
-    eventql/util/cli/flagparser.h \
-    eventql/util/logging/logger.h \
-    eventql/util/logging/logger_impl.h \
-    eventql/util/exception.cc \
-    eventql/util/exception.h \
-    eventql/util/exceptionhandler.cc \
-    eventql/util/exceptionhandler.h \
-    eventql/util/io/fileutil.cc \
-    eventql/util/io/fileutil.h \
-    eventql/util/io/file.cc \
-    eventql/util/io/file.h \
-    eventql/util/io/FileLock.cc \
-    eventql/util/io/FileLock.h \
-    eventql/util/stringutil.cc \
-    eventql/util/stringutil.h \
-    eventql/util/hash.h \
-    eventql/util/stringutil_impl.h \
-    eventql/util/buffer.cc \
-    eventql/util/buffer.h \
-    eventql/util/bufferutil.cc \
-    eventql/util/bufferutil.h \
-    eventql/util/logging.cc \
-    eventql/util/logging.h \
-    eventql/util/logging/loglevel.h \
-    eventql/util/logging/logger.h \
-    eventql/util/logging/logger_impl.h \
-    eventql/util/logging/logtarget.h \
-    eventql/util/logging/logoutputstream.cc \
-    eventql/util/logging/logoutputstream.h \
-    eventql/util/logging/syslog.cc \
-    eventql/util/logging/syslog.h \
-    eventql/util/thread/signalhandler.cc \
-    eventql/util/thread/signalhandler.h \
-    eventql/util/autoref.cc \
-    eventql/util/autoref.h \
-    eventql/util/autoref_impl.h \
-    eventql/util/wallclock.cc \
-    eventql/util/wallclock.h \
-    eventql/util/ISO8601.cc \
-    eventql/util/ISO8601.h \
-    eventql/util/UTF8.cc \
-    eventql/util/UTF8.h \
-    eventql/util/UnixTime.cc \
-    eventql/util/UnixTime.h \
-    eventql/util/UnixTime_impl.h \
-    eventql/util/CivilTime.cc \
-    eventql/util/CivilTime.h \
-    eventql/util/CivilTime_impl.h \
-    eventql/util/io/mmappedfile.cc \
-    eventql/util/io/mmappedfile.h \
-    eventql/util/io/outputstream.cc \
-    eventql/util/io/outputstream.h \
-    eventql/util/fnv.cc \
-    eventql/util/fnv.h \
-    eventql/util/ieee754.cc \
-    eventql/util/ieee754.h \
-    eventql/evqld.cc
+evqld_SOURCES = eventql/evqld.cc
 
 evqld_LDADD = \
-  libevqlcore.a \
-  $(ZOOKEEPER_LDADD) \
-  $(LINENOISE_LDADD) \
-  $(INIH_LDADD) \
-  $(SIMDCOMP_LDADD) \
-  $(LMDB_LDADD) \
-  $(PROTOBUF_LDADD) \
-  $(SPIDERMONKEY_LDADD) \
-  $(PCRE_LDADD)
-
-evqld_CXXFLAGS=${AM_CXXFLAGS}
+    libevqlcore.la \
+    $(ZOOKEEPER_LDADD) \
+    $(LINENOISE_LDADD) \
+    $(INIH_LDADD) \
+    $(SIMDCOMP_LDADD) \
+    $(LMDB_LDADD) \
+    $(PROTOBUF_LDADD) \
+    $(SPIDERMONKEY_LDADD) \
+    $(PCRE_LDADD)
 
 ################## BIN: evql ####################
-#evql_SOURCES = \
-#    eventql/cli/console.cc \
-#    eventql/cli/console.h \
-#    eventql/cli/cli_config.cc \
-#    eventql/cli/cli_config.h \
-#    eventql/server/sql/codec/binary_codec.cc \
-#    eventql/server/sql/codec/binary_codec.h \
-#    eventql/config/process_config.cc \
-#    eventql/config/process_config.h \
-#    eventql/evql.cc
-#
-#evql_LDADD = evql_server.a evql_util.a
-#bin_PROGRAMS += evql
+evql_SOURCES = \
+    eventql/cli/console.cc \
+    eventql/cli/console.h \
+    eventql/cli/cli_config.cc \
+    eventql/cli/cli_config.h \
+    eventql/evql.cc
 
-
+evql_LDADD = \
+    libevqlcore.la \
+    $(ZOOKEEPER_LDADD) \
+    $(LINENOISE_LDADD) \
+    $(INIH_LDADD) \
+    $(SIMDCOMP_LDADD) \
+    $(LMDB_LDADD) \
+    $(PROTOBUF_LDADD) \
+    $(SPIDERMONKEY_LDADD) \
+    $(PCRE_LDADD)
 
 
 ################ BIN: evqlctl ###################
-#evqlctl_SOURCES = \
-#    eventql/cli/commands/cli_command.h \
-#    eventql/cli/commands/cli_command.cc \
-#    eventql/cli/commands/cluster_add_server.h \
-#    eventql/cli/commands/cluster_add_server.cc \
-#    eventql/cli/commands/cluster_create.h \
-#    eventql/cli/commands/cluster_create.cc \
-#    eventql/cli/commands/cluster_status.h \
-#    eventql/cli/commands/cluster_status.cc \
-#    eventql/cli/commands/cluster_remove_server.h \
-#    eventql/cli/commands/cluster_remove_server.cc \
-#    eventql/cli/commands/cluster_set_allocation_policy.h \
-#    eventql/cli/commands/cluster_set_allocation_policy.cc \
-#    eventql/cli/commands/database_create.h \
-#    eventql/cli/commands/database_create.cc \
-#    eventql/cli/commands/table_config_set.h \
-#    eventql/cli/commands/table_config_set.cc \
-#    eventql/cli/commands/table_split.h \
-#    eventql/cli/commands/table_split.cc \
-#    eventql/cli/commands/table_split_finalize.h \
-#    eventql/cli/commands/table_split_finalize.cc \
-#    eventql/evqlctl.cc
-#
-#evqlctl_LDADD = \
-#    evql_core.a \
-#    evql_http.a \
-#    evql_sql.a \
-#    evql_cstable.a \
-#    evql_sstable.a \
-#    evql_util.a \
-#    $(SIMDCOMP_LDADD) \
-#    $(INIH_LDADD) \
-#    $(ZOOKEEPER_LDADD) \
-#    $(LMDB_LDADD) \
-#    $(PROTOBUF_LDADD) \
-#    $(PCRE_LDADD)
-#
-#bin_PROGRAMS += evqlctl
-#
-#if ENABLE_MYSQL_TOOLS
-################## BIN: mysql2evql ####################
-#mysql2evql_SOURCES = \
-#    eventql/tools/mysql2evql.cc
-#
-#mysql2evql_LDADD = \
-#    evql_http.a \
-#    evql_util.a \
-#    $(MYSQL_LDADD) \
-#    $(SIMDCOMP_LDADD) \
-#    $(PROTOBUF_LDADD) \
-#    $(PCRE_LDADD)
-#
-#bin_PROGRAMS += mysql2evql
-#endif
+evqlctl_SOURCES = \
+    eventql/cli/commands/cli_command.h \
+    eventql/cli/commands/cli_command.cc \
+    eventql/cli/commands/cluster_add_server.h \
+    eventql/cli/commands/cluster_add_server.cc \
+    eventql/cli/commands/cluster_create.h \
+    eventql/cli/commands/cluster_create.cc \
+    eventql/cli/commands/cluster_status.h \
+    eventql/cli/commands/cluster_status.cc \
+    eventql/cli/commands/cluster_remove_server.h \
+    eventql/cli/commands/cluster_remove_server.cc \
+    eventql/cli/commands/cluster_set_allocation_policy.h \
+    eventql/cli/commands/cluster_set_allocation_policy.cc \
+    eventql/cli/commands/database_create.h \
+    eventql/cli/commands/database_create.cc \
+    eventql/cli/commands/table_config_set.h \
+    eventql/cli/commands/table_config_set.cc \
+    eventql/cli/commands/table_split.h \
+    eventql/cli/commands/table_split.cc \
+    eventql/cli/commands/table_split_finalize.h \
+    eventql/cli/commands/table_split_finalize.cc \
+    eventql/evqlctl.cc
+
+evqlctl_LDADD = \
+    libevqlcore.la \
+    $(SIMDCOMP_LDADD) \
+    $(INIH_LDADD) \
+    $(ZOOKEEPER_LDADD) \
+    $(LMDB_LDADD) \
+    $(PROTOBUF_LDADD) \
+    $(PCRE_LDADD)
 
 ################## TEST: sql/runtime ####################
 #test_evql_sql_runtime_SOURCES = eventql/sql/runtime/Runtime_test.cc
