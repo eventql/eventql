@@ -34,6 +34,8 @@ class ConfigDirectory;
 class ReplicationWorker;
 class LSMTableIndexCache;
 class MetadataStore;
+class InternalAuth;
+class ClientAuth;
 
 struct DatabaseContext {
   PartitionMap* partition_map;
@@ -42,6 +44,8 @@ struct DatabaseContext {
   ReplicationWorker* replication_worker;
   LSMTableIndexCache* lsm_index_cache;
   MetadataStore* metadata_store;
+  InternalAuth* internal_auth;
+  ClientAuth* client_auth;
 };
 
 class Database {

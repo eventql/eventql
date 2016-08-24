@@ -45,6 +45,7 @@ protected:
   http::HTTPServerStats http_stats_;
   DefaultServlet default_servlet_;
   StatusServlet status_servlet_;
+  APIServlet api_servlet_;
 };
 
 } // namespace eventql
