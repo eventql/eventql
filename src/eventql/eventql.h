@@ -65,7 +65,33 @@ void evql_server_cfgset(
     const char* value);
 
 /**
+ * Load config properties from a file
+ *
+ * @param fpath the file path or NULL for the default paths
+ * @return 0 on success and 1 on error
+ */
+int evql_server_cfgload(
+    evql_server_t* server,
+    const char* fpath);
+
+/**
+ * Get a server config property
+ */
+const char* evql_server_cfgget(
+    evql_server_t* server,
+    const char* key);
+
+/**
+ * Get a boolean server config property
+ */
+int evql_server_cfggetbool(
+    evql_server_t* server,
+    const char* key);
+
+/**
  * Start the server (this method returns immediately)
+ *
+ * @return 0 on success and 1 on error
  */
 int evql_server_start(evql_server_t* server);
 
@@ -77,6 +103,8 @@ int evql_server_start(evql_server_t* server);
  * The kill_fd parameter is optional. If the paramter is set to -1, the method
  * will _never_ return. If the kill_fd parameter is set to a valid file
  * descriptor, the method will return once the kill_fd become readable.
+ *
+ * @return 0 on success and 1 on error
  */
 int evql_server_listen(evql_server_t* server, int kill_fd);
 
@@ -84,6 +112,8 @@ int evql_server_listen(evql_server_t* server, int kill_fd);
  * Start a new EventQL server connection/thread. You must pass a valid file
  * descriptor. The server will internally start a new query thread and start
  * reading queries from the fd;
+ *
+ * @return 0 on success and 1 on error
  */
 int evql_server_handle(evql_server_t* server, int fd, int flags);
 

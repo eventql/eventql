@@ -255,92 +255,95 @@ int main(int argc, const char** argv) {
     return 0;
   }
 
-  /* conf */
-  ProcessConfigBuilder config_builder;
-  config_builder.setProperty("server.listen", "localhost:9175");
-  config_builder.setProperty("server.indexbuild_threads", "2");
-  config_builder.setProperty("server.gc_mode", "AUTOMATIC");
-  config_builder.setProperty("server.gc_interval", "30000000");
-  config_builder.setProperty("server.cachedir_maxsize", "68719476736");
-  config_builder.setProperty("server.noleader", "false");
-  config_builder.setProperty("cluster.rebalance_interval", "60000000");
-
-  if (flags.isSet("standalone")) {
-    config_builder.setProperty("server.name", "standalone");
-    config_builder.setProperty("server.client_auth_backend", "trust");
-    config_builder.setProperty("server.noleader", "true");
-    config_builder.setProperty("cluster.coordinator", "standalone");
+  /* init server */
+  auto server = evql_server_init();
+  if (!server) {
+    logFatal("evqld", "error while initializing EventQL server");
+    return 1;
   }
 
-  if (flags.isSet("config")) {
-    auto rc = config_builder.loadFile(flags.getString("config"));
-    if (!rc.isSuccess()) {
-      logFatal("error while loading config file: $0", rc.message());
+  /* conf */
+  evql_server_cfgset(server, "server.listen", "localhost:9175");
+  evql_server_cfgset(server, "server.indexbuild_threads", "2");
+  evql_server_cfgset(server, "server.gc_mode", "AUTOMATIC");
+  evql_server_cfgset(server, "server.gc_interval", "30000000");
+  evql_server_cfgset(server, "server.cachedir_maxsize", "68719476736");
+  evql_server_cfgset(server, "server.noleader", "false");
+  evql_server_cfgset(server, "cluster.rebalance_interval", "60000000");
+
+  if (flags.isSet("standalone")) {
+    evql_server_cfgset(server, "server.name", "standalone");
+    evql_server_cfgset(server, "server.client_auth_backend", "trust");
+    evql_server_cfgset(server, "server.noleader", "true");
+    evql_server_cfgset(server, "cluster.coordinator", "standalone");
+  }
+
+  auto config_file_path = flags.getString("config");
+  {
+    int rc = evql_server_cfgload(
+        server,
+        config_file_path.empty() ? nullptr : config_file_path.c_str());
+
+    if (rc) {
+      logFatal(
+          "evqld",
+          "error while loading config file: $0",
+          evql_server_geterror(server));
+
+      evql_server_free(server);
       return 1;
     }
-  } else {
-    config_builder.loadDefaultConfigFile("evqld");
   }
 
   for (const auto& opt : flags.getStrings("config_set")) {
     auto opt_key_end = opt.find("=");
     if (opt_key_end == String::npos) {
       logFatal("invalid config option: $0", opt);
+      evql_server_free(server);
       return 1;
     }
 
-    config_builder.setProperty(
-        opt.substr(0, opt_key_end),
-        opt.substr(opt_key_end + 1));
+    auto opt_key = opt.substr(0, opt_key_end);
+    auto opt_value = opt.substr(opt_key_end + 1);
+    evql_server_cfgset(server, opt_key.c_str(), opt_value.c_str());
   }
 
   if (flags.isSet("listen")) {
-    config_builder.setProperty("server.listen", flags.getString("listen"));
+    auto listen = flags.getString("listen");
+    evql_server_cfgset(server, "server.listen", listen.c_str());
   }
 
   if (flags.isSet("datadir")) {
-    config_builder.setProperty("server.datadir", flags.getString("datadir"));
+    auto datadir = flags.getString("datadir");
+    evql_server_cfgset(server, "server.datadir", datadir.c_str());
   }
 
   if (flags.isSet("daemonize")) {
-    config_builder.setProperty("server.daemonize", "true");
+    evql_server_cfgset(server, "server.daemonize", "true");
   }
 
   if (flags.isSet("pidfile")) {
-    config_builder.setProperty("server.pidfile", flags.getString("pidfile"));
+    auto pidfile = flags.getString("pidfile");
+    evql_server_cfgset(server, "server.pidfile", pidfile.c_str());
   }
 
-  auto process_config = config_builder.getConfig();
-  if (!process_config->hasProperty("server.datadir")) {
+  if (!evql_server_cfgget(server, "server.datadir")) {
     logFatal("evqld", "missing 'server.datadir' option or --datadir flag");
+    evql_server_free(server);
     return 1;
-  }
-
-  /* listen addr */
-  String listen_host;
-  int listen_port;
-  {
-    auto listen_str = process_config->getString("server.listen");
-    if (listen_str.isEmpty()) {
-      logFatal("evqld", "missing 'server.listen' option or --listen flag");
-      return 1;
-    }
-
-    std::smatch m;
-    std::regex listen_regex("([0-9a-zA-Z-_.]+):([0-9]+)");
-    if (std::regex_match(listen_str.get(), m, listen_regex)) {
-      listen_host = m[1];
-      listen_port = std::stoi(m[2]);
-    } else {
-      logFatal("evqld", "invalid listen address: $0", listen_str.get());
-      return 1;
-    }
   }
 
   /* pidfile */
   ScopedPtr<FileLock> pidfile_lock;
-  if (process_config->hasProperty("server.pidfile")) {
-    auto pidfile_path = process_config->getString("server.pidfile").get();
+  String pidfile_path;
+  {
+    auto pidfile_path_cstr = evql_server_cfgget(server, "server.pidfile");
+    if (pidfile_path_cstr) {
+      pidfile_path = std::string(pidfile_path_cstr);
+    }
+  }
+
+  if (!pidfile_path.empty()) {
     pidfile_lock = mkScoped(new FileLock(pidfile_path));
     pidfile_lock->lock(false);
 
@@ -352,37 +355,31 @@ int main(int argc, const char** argv) {
   }
 
   /* daemonize */
-  if (process_config->getBool("server.daemonize")) {
+  if (evql_server_cfggetbool(server, "server.daemonize")) {
     Application::daemonize();
   }
 
   /* start database */
-  Database db(process_config.get());
-  auto rc = db.start();
-
-  /* start listener */
-  Listener listener(nullptr);
-  if (rc.isSuccess()) {
-    rc = listener.bind(listen_port);
+  int rc = evql_server_start(server);
+  if (!rc) {
+    rc = evql_server_listen(server, -1);
   }
 
-  if (rc.isSuccess()) {
-    listener.run();
-  }
-
-  if (!rc.isSuccess()) {
-    logAlert("eventql", "FATAL ERROR: $0", rc.getMessage());
+  if (rc) {
+    logAlert("eventql", "FATAL ERROR: $0", evql_server_geterror(server));
   }
 
   /* shutdown */
   logInfo("eventql", "Exiting...");
-  db.shutdown();
+  evql_server_shutdown(server);
 
   if (pidfile_lock.get()) {
     pidfile_lock.reset(nullptr);
-    FileUtil::rm(process_config->getString("server.pidfile").get());
+    FileUtil::rm(pidfile_path);
   }
 
-  exit(rc.isSuccess() ? 0 : 1);
+  evql_server_free(server);
+
+  return rc;
 }
 
