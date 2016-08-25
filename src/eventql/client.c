@@ -25,6 +25,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/socket.h>
+#include <sys/uio.h>
 #include <netdb.h>
 
 /**
@@ -150,8 +151,21 @@ static int evql_client_sendframe(
     uint16_t opcode,
     const char* payload,
     size_t payload_len) {
-  evql_client_seterror(client, "sendframe not yet implemented");
-  return -1;
+  const char header[8];
+
+  struct iovec iov[2];
+  iov[0].iov_base = (void*) header;
+  iov[0].iov_len = sizeof(header);
+  iov[1].iov_base = (void*) payload;
+  iov[1].iov_len = payload_len;
+
+  int ret = writev(client->fd, iov, 2);
+  if (ret < 0) {
+    evql_client_seterror(client, "writev() failed");
+    return -1;
+  }
+
+  return 0;
 }
 
 static int evql_client_recvframe(
@@ -281,12 +295,13 @@ int evql_client_connect(
       (const struct sockaddr *) &saddr,
       sizeof(saddr));
 
-  if (rc == 0) {
+  if (rc < 0) {
+    evql_client_seterror(client, "connect() failed");
+  } else {
     rc = evql_client_handshake(client);
   }
 
   if (rc < 0) {
-    evql_client_seterror(client, "connect() failed");
     close(client->fd);
     client->fd = -1;
   }

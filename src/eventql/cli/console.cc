@@ -104,7 +104,7 @@ ReturnCode Console::connect() {
       cfg_.getPort(),
       0);
 
-  if (!rc) {
+  if (rc < 0) {
     return ReturnCode::error("EIO", "%s", evql_client_geterror(client_));
   }
 
