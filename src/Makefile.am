@@ -38,6 +38,30 @@ else
 GETHOSTBYNAME_R_DEF =
 endif
 
+SPIDERMONKEY_CFLAGS = -I$(top_builddir)/deps/3rdparty/spidermonkey/out/dist/include
+SPIDERMONKEY_LDADD = ${top_builddir}/deps/3rdparty/spidermonkey/out/dist/lib/libjs_static.a
+
+ZOOKEEPER_CFLAGS = -I$(top_srcdir)/deps/3rdparty/zookeeper/source/include -I$(top_srcdir)/deps/3rdparty/zookeeper/source/generated
+ZOOKEEPER_LDADD = ${top_builddir}/deps/3rdparty/zookeeper/libzkmt.a ${top_builddir}/deps/3rdparty/zookeeper/libhashtable.a
+
+PCRE_CFLAGS = -I$(top_srcdir)/deps/3rdparty/pcre -DHAVE_PCRE=1
+PCRE_LDADD = ${top_builddir}/deps/3rdparty/pcre/libpcre.a
+
+LINENOISE_CFLAGS = -I$(top_srcdir)/deps/3rdparty
+LINENOISE_LDADD = ${top_builddir}/deps/3rdparty/linenoise/liblinenoise.a
+
+SIMDCOMP_CFLAGS = -I$(top_srcdir)/deps/3rdparty
+SIMDCOMP_LDADD = ${top_builddir}/deps/3rdparty/libsimdcomp/libsimdcomp.a
+
+PROTOBUF_CFLAGS = -I$(top_srcdir)/deps/3rdparty/protobuf
+PROTOBUF_LDADD = ${top_builddir}/deps/3rdparty/protobuf/libprotobuf.a
+
+LMDB_CFLAGS = -I$(top_srcdir)/deps/3rdparty
+LMDB_LDADD = ${top_builddir}/deps/3rdparty/liblmdb/liblmdb.a
+
+INIH_CFLAGS = -I$(top_srcdir)/deps/3rdparty
+INIH_LDADD = ${top_builddir}/deps/3rdparty/inih/libinih.a
+
 AM_CXXFLAGS = -DEVQL_VERSION=\"v@PACKAGE_VERSION@\" -DEVQL_BUILDID=\"$(EVQL_BUILDID)\" $(MYSQL_CFLAGS) $(PCRE_CFLAGS) $(SPIDERMONKEY_CFLAGS) $(ZOOKEEPER_CFLAGS) $(INIH_CFLAGS) $(SIMDCOMP_CFLAGS) $(LINENOISE_CLFAGS) $(PROTOBUF_CFLAGS) $(PTHREAD_CFLAGS) $(PTHREAD_DEF) $(SYSLOG_DEF) $(ZLIB_DEF) $(GETHOSTBYNAME_R_DEF) -std=c++0x -ftemplate-depth=500 -mno-omit-leaf-frame-pointer -fno-omit-frame-pointer -Wall -Wextra -Wno-unused-parameter -Wno-sign-compare -Wdelete-non-virtual-dtor -Wno-predefined-identifier-outside-function -Wno-invalid-offsetof -g -fvisibility=hidden -I@builddir@
 AM_CFLAGS = $(PCRE_CFLAGS) $(SPIDERMONKEY_CFLAGS) $(MYSQL_CFLAGS) $(ZOOKEEPER_CFLAGS) $(INIH_CFLAGS) $(SIMDCOMP_CFLAGS) $(LINENOISE_CLFAGS) $(PROTOBUF_CFLAGS) $(PTHREAD_CFLAGS) $(PTHREAD_DEF) $(SYSLOG_DEF) $(ZLIB_DEF) $(GETHOSTBYNAME_R_DEF) -std=c11 -mno-omit-leaf-frame-pointer -fno-omit-frame-pointer -Wall -pedantic -g
 AM_LDFLAGS = $(PTHREAD_CFLAGS)
