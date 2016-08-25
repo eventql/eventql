@@ -21,9 +21,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include "eventql/transport/native/native_transport.h"
 #include "eventql/transport/native/native_connection.h"
-#include "eventql/util/logging.h"
 #include <string.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -39,22 +37,76 @@
 
 namespace eventql {
 
-NativeTransport::NativeTransport(Database* database) : db_(database) {}
+NativeConnection::NativeConnection(int fd) : fd_(fd) {}
 
-void NativeTransport::handleConnection(int fd, std::string prelude_bytes) {
-  logDebug("eventql", "Opening new native connection; fd=$0", fd);
+NativeConnection::~NativeConnection() { 
+  close();
+}
 
-  int old_flags = fcntl(fd, F_GETFL, 0);
-  if (fcntl(fd, F_SETFL, old_flags | O_NONBLOCK) != 0) {
-    close(fd);
+ReturnCode NativeConnection::read(
+    char* data,
+    size_t len,
+    uint64_t timeout_us) {
+  if (fd_ < 0) {
+    return ReturnCode::error("EIO", "connection closed");
+  }
+
+  size_t pos = 0;
+  while (pos < len) {
+    int read_rc = ::read(fd_, data + pos, len - pos);
+    switch (read_rc) {
+      case 0:
+        close();
+        return ReturnCode::error("EIO", "connection unexpectedly closed");
+      case -1:
+        if (errno == EAGAIN || errno == EINTR) {
+          break;
+        } else {
+          close();
+          return ReturnCode::error("EIO", strerror(errno));
+        }
+      default:
+        pos += read_rc;
+        break;
+    }
+
+    struct pollfd p;
+    p.fd = fd_;
+    p.events = POLLIN;
+
+    int poll_rc = poll(&p, 1, timeout_us / 1000);
+    switch (poll_rc) {
+      case 0:
+        close();
+        return ReturnCode::error("EIO", "operation timed out");
+      case -1:
+        if (errno == EAGAIN || errno == EINTR) {
+          break;
+        } else {
+          close();
+          return ReturnCode::error("EIO", strerror(errno));
+        }
+    }
+  }
+
+  ReturnCode::success();
+}
+
+ReturnCode NativeConnection::recvFrame(
+    uint16_t* opcode,
+    std::string* payload,
+    uint16_t* flags /* = nullptr */) {
+  ReturnCode::success();
+}
+
+void NativeConnection::close() {
+  if (fd_ < 0) {
     return;
   }
 
-  db_->startThread([this, fd, prelude_bytes] (Session* session) {
-    NativeConnection conn(fd);
-  });
+  ::close(fd_);
+  fd_ = -1;
 }
-
 
 } // namespace eventql
 

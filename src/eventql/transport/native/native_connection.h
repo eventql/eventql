@@ -23,7 +23,7 @@
  */
 #pragma once
 #include "eventql/eventql.h"
-#include "eventql/util/return_code"
+#include "eventql/util/return_code.h"
 
 namespace eventql {
 
@@ -31,6 +31,7 @@ class NativeConnection{
 public:
 
   NativeConnection(int fd);
+  ~NativeConnection();
 
   ReturnCode recvFrame(
       uint16_t* opcode,
@@ -40,6 +41,17 @@ public:
   void close();
 
 protected:
+
+  ReturnCode read(
+      char* data,
+      size_t len,
+      uint64_t timeout_us);
+
+  ReturnCode write(
+      char* data,
+      size_t len,
+      uint64_t timeout_us);
+
   int fd_;
 };
 
