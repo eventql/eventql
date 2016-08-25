@@ -98,6 +98,15 @@ int evql_client_connectfd(
     long flags);
 
 /**
+ * Execute a query
+ */
+int evql_query(
+    evql_client_t* client,
+    const char* query_string,
+    const char* database,
+    long flags);
+
+/**
  * Return the latest error message
  */
 const char* evql_client_geterror(evql_client_t* client);

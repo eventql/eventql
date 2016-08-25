@@ -171,9 +171,10 @@ Binary Protocols.
   A QUERY message must not be sent while another request is still running.
 
   Payload:
-    lenencint      max_rows
-    lenencint      flags
     lenencstr      query
+    lenencint      flags
+    lenencint      max_rows
+    lenencstr      database        | if flags 0x02 SWITCH_DATABASE is set
 
   Fields:
     max_rows       The maximum number of rows that should be returned in the
@@ -182,6 +183,7 @@ Binary Protocols.
                    frame
 
     flags          0x01 ENABLE_PROGRESS - Send progress events
+                   0x02 SWITCH_DATABASE - Switch database
 
     query          The zero-terminated query string
 

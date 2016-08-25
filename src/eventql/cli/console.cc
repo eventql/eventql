@@ -125,91 +125,96 @@ Status Console::runQueryTable(const String& query) {
   bool line_dirty = false;
   bool is_tty = stderr_os->isTTY();
 
-  bool error = false;
-  csql::ResultList results;
-  auto res_parser = new csql::BinaryResultParser();
+  //bool error = false;
+  //csql::ResultList results;
+  //auto res_parser = new csql::BinaryResultParser();
 
-  if (!cfg_.getQuietMode()) {
-    res_parser->onProgress([&stdout_os, &line_dirty, is_tty] (
-        const csql::ExecutionStatus& status) {
-      auto status_line = StringUtil::format(
-          "Query running: $0%",
-          status.progress * 100);
+  //if (!cfg_.getQuietMode()) {
+  //  res_parser->onProgress([&stdout_os, &line_dirty, is_tty] (
+  //      const csql::ExecutionStatus& status) {
+  //    auto status_line = StringUtil::format(
+  //        "Query running: $0%",
+  //        status.progress * 100);
 
-      if (is_tty) {
-        stdout_os->eraseLine();
-        stdout_os->print("\r" + status_line);
-        line_dirty = true;
-      } else {
-        stdout_os->print(status_line + "\n");
-      }
+  //    if (is_tty) {
+  //      stdout_os->eraseLine();
+  //      stdout_os->print("\r" + status_line);
+  //      line_dirty = true;
+  //    } else {
+  //      stdout_os->print(status_line + "\n");
+  //    }
 
-    });
-  }
+  //  });
+  //}
 
-  res_parser->onTableHeader([&results] (const Vector<String>& columns) {
-    results.addHeader(columns);
-  });
+  //res_parser->onTableHeader([&results] (const Vector<String>& columns) {
+  //  results.addHeader(columns);
+  //});
 
-  res_parser->onRow([&results] (int argc, const csql::SValue* argv) {
-    results.addRow(argv, argc);
-  });
+  //res_parser->onRow([&results] (int argc, const csql::SValue* argv) {
+  //  results.addRow(argv, argc);
+  //});
 
-  res_parser->onError([&stderr_os, &error, is_tty] (const String& error_str) {
-    if (is_tty) {
-      stderr_os->eraseLine();
-      stderr_os->print("\r");
-    }
+  //res_parser->onError([&stderr_os, &error, is_tty] (const String& error_str) {
+  //  if (is_tty) {
+  //    stderr_os->eraseLine();
+  //    stderr_os->print("\r");
+  //  }
 
-    stderr_os->print(
-        "ERROR:",
-        { TerminalStyle::RED, TerminalStyle::UNDERSCORE });
+  //  stderr_os->print(
+  //      "ERROR:",
+  //      { TerminalStyle::RED, TerminalStyle::UNDERSCORE });
 
-    stderr_os->print(StringUtil::format(" $0\n", error_str));
-    error = true;
-  });
+  //  stderr_os->print(StringUtil::format(" $0\n", error_str));
+  //  error = true;
+  //});
 
-  auto res = sendRequest(query, res_parser);
-  if (!res.isSuccess()) {
+  int rc = evql_query(client_, query.c_str(), "test", 0);
+  if (rc == -1) {
     stderr_os->print(
           "ERROR:",
           { TerminalStyle::RED, TerminalStyle::UNDERSCORE });
 
-    stderr_os->print(res.message());
-    return res;
-  }
-
-  if (is_tty) {
-    stderr_os->eraseLine();
-    stderr_os->print("\r");
-  }
-
-  if (error) {
+    stderr_os->print(" ");
+    stderr_os->print(evql_client_geterror(client_));
+    stderr_os->print("\n");
     return Status(eIOError);
   }
 
-  String status_line = "";
-  if (results.getNumRows() > 0) {
-    results.debugPrint();
+  //auto res = sendRequest(query, res_parser);
+  //if (!res.isSuccess()) {
+  //}
 
-    auto num_rows = results.getNumRows();
-    status_line = StringUtil::format(
-        "$0 row$1 returned",
-        num_rows,
-        num_rows > 1 ? "s" : "");
+  //if (is_tty) {
+  //  stderr_os->eraseLine();
+  //  stderr_os->print("\r");
+  //}
 
-  } else {
-    status_line = results.getNumColumns() == 0 ? "Query OK" : "Empty Set";
-  }
+  //if (error) {
+  //  return Status(eIOError);
+  //}
 
-  if (!cfg_.getQuietMode()) {
-    if (is_tty) {
-      stderr_os->print("\r" + status_line + "\n\n");
-    } else {
-      stderr_os->print(status_line + "\n\n");
-    }
-  }
+  //String status_line = "";
+  //if (results.getNumRows() > 0) {
+  //  results.debugPrint();
 
+  //  auto num_rows = results.getNumRows();
+  //  status_line = StringUtil::format(
+  //      "$0 row$1 returned",
+  //      num_rows,
+  //      num_rows > 1 ? "s" : "");
+
+  //} else {
+  //  status_line = results.getNumColumns() == 0 ? "Query OK" : "Empty Set";
+  //}
+
+  //if (!cfg_.getQuietMode()) {
+  //  if (is_tty) {
+  //    stderr_os->print("\r" + status_line + "\n\n");
+  //  } else {
+  //    stderr_os->print(status_line + "\n\n");
+  //  }
+  //}
 
   return Status::success();
 }

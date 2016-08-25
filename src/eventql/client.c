@@ -541,6 +541,65 @@ int evql_client_connectfd(
   return evql_client_handshake(client);
 }
 
+int evql_query(
+    evql_client_t* client,
+    const char* query_string,
+    const char* database,
+    long flags) {
+  /* send query frame */
+  {
+    evql_framebuf_t qframe;
+    evql_framebuf_init(&qframe);
+    evql_framebuf_writelenencstr(&qframe, query_string, strlen(query_string));
+    evql_framebuf_writelenencint(&qframe, flags); // flags
+    evql_framebuf_writelenencint(&qframe, 10); // max rows
+    if (database) {
+      evql_framebuf_writelenencstr(&qframe, database, strlen(database));
+    }
+
+    int rc = evql_client_sendframe(
+        client,
+        EVQL_OP_QUERY,
+        &qframe,
+        client->timeout_us,
+        0);
+
+    evql_framebuf_destroy(&qframe);
+
+    if (rc < 0) {
+      evql_client_close(client);
+      return -1;
+    }
+  }
+
+  /* receive response frames */
+  int complete = 0;
+  while (!complete) {
+    uint16_t response_opcode;
+    evql_framebuf_t* response_frame;
+    int rc = evql_client_recvframe(
+        client,
+        &response_opcode,
+        &response_frame,
+        client->timeout_us,
+        NULL);
+
+    if (rc < 0) {
+      evql_client_close(client);
+      return -1;
+    }
+
+    switch (response_opcode) {
+      default:
+        evql_client_seterror(client, "received unexpected opcode");
+        evql_client_close(client);
+        return -1;
+    }
+  }
+
+  return 0;
+}
+
 void evql_client_destroy(evql_client_t* client) {
   if (client->fd >= 0) {
     close(client->fd);
