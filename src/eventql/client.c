@@ -219,18 +219,6 @@ static int evql_client_write(
     p.fd = client->fd;
     p.events = POLLOUT;
 
-    int poll_rc = poll(&p, 1, timeout_us / 1000);
-    switch (poll_rc) {
-      case 0:
-        evql_client_seterror(client, "operation timed out");
-        evql_client_close(client);
-        return -1;
-      case -1:
-        evql_client_seterror(client, strerror(errno));
-        evql_client_close(client);
-        return -1;
-    }
-
     int write_rc = write(client->fd, data + pos, len - pos);
     switch (write_rc) {
       case 0:
@@ -249,6 +237,22 @@ static int evql_client_write(
         pos += write_rc;
         break;
     }
+
+    int poll_rc = poll(&p, 1, timeout_us / 1000);
+    switch (poll_rc) {
+      case 0:
+        evql_client_seterror(client, "operation timed out");
+        evql_client_close(client);
+        return -1;
+      case -1:
+        if (errno == EAGAIN || errno == EINTR) {
+          break;
+        } else {
+          evql_client_seterror(client, strerror(errno));
+          evql_client_close(client);
+          return -1;
+        }
+    }
   }
 
   return 0;
@@ -261,22 +265,6 @@ static int evql_client_read(
     uint64_t timeout_us) {
   size_t pos = 0;
   while (pos < len) {
-    struct pollfd p;
-    p.fd = client->fd;
-    p.events = POLLIN;
-
-    int poll_rc = poll(&p, 1, timeout_us / 1000);
-    switch (poll_rc) {
-      case 0:
-        evql_client_seterror(client, "operation timed out");
-        evql_client_close(client);
-        return -1;
-      case -1:
-        evql_client_seterror(client, strerror(errno));
-        evql_client_close(client);
-        return -1;
-    }
-
     int read_rc = read(client->fd, data + pos, len - pos);
     switch (read_rc) {
       case 0:
@@ -294,6 +282,26 @@ static int evql_client_read(
       default:
         pos += read_rc;
         break;
+    }
+
+    struct pollfd p;
+    p.fd = client->fd;
+    p.events = POLLIN;
+
+    int poll_rc = poll(&p, 1, timeout_us / 1000);
+    switch (poll_rc) {
+      case 0:
+        evql_client_seterror(client, "operation timed out");
+        evql_client_close(client);
+        return -1;
+      case -1:
+        if (errno == EAGAIN || errno == EINTR) {
+          break;
+        } else {
+          evql_client_seterror(client, strerror(errno));
+          evql_client_close(client);
+          return -1;
+        }
     }
   }
 
