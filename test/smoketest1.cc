@@ -35,8 +35,15 @@
 
 evql_conf_t* server_conf;
 evql_server_t* server;
+evql_client_t* client;
+int loopback[2];
 
 void testserver_start() {
+  if (!pipe(loopback)) {
+    std::cerr << "FAIL: smoketest - error while creating loopback pipe";
+    exit(1);
+  }
+
   server_conf = evql_conf_init();
   if (!server_conf) {
     std::cerr << "FAIL: smoketest - can't start testserver";
@@ -60,13 +67,22 @@ void testserver_start() {
     exit(1);
   }
 
-  if (!evql_server_start(server)) {
+  if (evql_server_start(server)) {
     std::cerr
         << "FAIL: smoketest - can't start testserver: "
         << evql_server_geterror(server);
 
     exit(1);
   }
+
+  client = evql_client_init();
+  if (!client) {
+    std::cerr << "FAIL: smoketest - can't start testclient";
+    exit(1);
+  }
+
+  if (evql_client_connectfd());
+
 }
 
 void testserver_stop() {
