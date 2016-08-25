@@ -58,9 +58,10 @@ enum {
 };
 
 typedef struct {
-  char* payload;
-  size_t payload_len;
-  size_t payload_capacity;
+  char* data;
+  size_t length;
+  size_t capacity;
+  size_t cursor;
 } evql_framebuf_t;
 
 struct evql_client_s {
@@ -75,10 +76,8 @@ struct evql_client_s {
  */
 static void evql_framebuf_init(evql_framebuf_t* frame);
 static void evql_framebuf_destroy(evql_framebuf_t* frame);
-
-static void evql_framebuf_resize(
-    evql_framebuf_t* frame,
-    size_t len);
+static void evql_framebuf_clear(evql_framebuf_t* frame);
+static void evql_framebuf_resize(evql_framebuf_t* frame, size_t len);
 
 static void evql_framebuf_write(
     evql_framebuf_t* frame,
@@ -97,6 +96,7 @@ static void evql_framebuf_writelenencstr(
 static void evql_client_seterror(evql_client_t* client, const char* error);
 
 static int evql_client_handshake(evql_client_t* client);
+static void evql_client_close(evql_client_t* client);
 
 static int evql_client_sendframe(
     evql_client_t* client,
@@ -116,40 +116,44 @@ static int evql_client_recvframe(
  */
 
 static void evql_framebuf_init(evql_framebuf_t* frame) {
-  frame->payload = NULL;
-  frame->payload_len = 0;
-  frame->payload_capacity = 0;
+  frame->data = NULL;
+  frame->length = 0;
+  frame->capacity = 0;
+  frame->cursor = 0;
 }
 
 static void evql_framebuf_destroy(evql_framebuf_t* frame) {
-  if (frame->payload) {
-    free(frame->payload);
+  if (frame->data) {
+    free(frame->data);
   }
 }
 
-static void evql_framebuf_resize(
-    evql_framebuf_t* frame,
-    size_t len) {
-  if (len <= frame->payload_capacity) {
+static void evql_framebuf_resize(evql_framebuf_t* frame, size_t len) {
+  if (len <= frame->capacity) {
     return;
   }
 
-  frame->payload_len = len;
-  frame->payload_capacity = len;
-  frame->payload = realloc(frame->payload, len);
-  if (!frame->payload) {
+  frame->length = len;
+  frame->capacity = len;
+  frame->data = realloc(frame->data, len);
+  if (!frame->data) {
     printf("malloc() failed\n");
     abort();
   }
+}
+
+static void evql_framebuf_clear(evql_framebuf_t* frame) {
+  frame->cursor = 0;
+  frame->length = 0;
 }
 
 static void evql_framebuf_write(
     evql_framebuf_t* frame,
     const char* data,
     size_t len) {
-  size_t oldlen = frame->payload_len;
-  evql_framebuf_resize(frame, frame->payload_len + len);
-  memcpy(frame->payload + oldlen, data, len);
+  size_t oldlen = frame->length;
+  evql_framebuf_resize(frame, frame->length + len);
+  memcpy(frame->data + oldlen, data, len);
 }
 
 static void evql_framebuf_writelenencint(
@@ -198,6 +202,7 @@ static int evql_client_sendframe(
   int ret = writev(client->fd, iov, 2);
   if (ret < 0) {
     evql_client_seterror(client, "writev() failed");
+    evql_client_close(client);
     return -1;
   }
 
@@ -214,9 +219,11 @@ static int evql_client_recvframe(
   switch (ret) {
     case 0:
       evql_client_seterror(client, "connection unexpectedly closed");
+      evql_client_close(client);
       return -1;
     case -1:
       evql_client_seterror(client, strerror(errno));
+      evql_client_close(client);
       return -1;
   }
 
@@ -229,17 +236,22 @@ static int evql_client_recvframe(
 
   if (payload_len > MAX_PAYLOAD_LEN) {
     evql_client_seterror(client, "received invalid frame header");
+    evql_client_close(client);
     return -1;
   }
 
+
+  evql_framebuf_clear(&client->recv_buf);
   evql_framebuf_resize(&client->recv_buf, payload_len);
-  ret = read(client->fd, client->recv_buf.payload, payload_len);
+  ret = read(client->fd, client->recv_buf.data, payload_len);
   switch (ret) {
     case 0:
       evql_client_seterror(client, "connection unexpectedly closed");
+      evql_client_close(client);
       return -1;
     case -1:
       evql_client_seterror(client, strerror(errno));
+      evql_client_close(client);
       return -1;
   }
 
@@ -259,13 +271,14 @@ static int evql_client_handshake(evql_client_t* client) {
     int rc = evql_client_sendframe(
         client,
         EVQL_OP_HELLO,
-        hello_frame.payload,
-        hello_frame.payload_len,
+        hello_frame.data,
+        hello_frame.length,
         0);
 
     evql_framebuf_destroy(&hello_frame);
 
     if (rc < 0) {
+      evql_client_close(client);
       return -1;
     }
   }
@@ -281,6 +294,7 @@ static int evql_client_handshake(evql_client_t* client) {
         NULL);
 
     if (rc < 0) {
+      evql_client_close(client);
       return -1;
     }
 
@@ -290,11 +304,21 @@ static int evql_client_handshake(evql_client_t* client) {
         break;
       default:
         evql_client_seterror(client, "received unexpected opcode");
+        evql_client_close(client);
         return -1;
     }
   }
 
   return 0;
+}
+
+static void evql_client_close(evql_client_t* client) {
+  if (client->fd > 0) {
+    close(client->fd);
+  }
+
+  client->fd = -1;
+  client->connected = 0;
 }
 
 static void evql_client_seterror(evql_client_t* client, const char* error) {
@@ -334,12 +358,10 @@ int evql_client_connect(
     long flags) {
   if (client->fd >= 0) {
     close(client->fd);
-    client->fd = -1;
   }
 
-  if (client->connected) {
-    client->connected = 0;
-  }
+  client->connected = 0;
+  client->fd = -1;
 
   struct hostent* h = gethostbyname(host);
   if (h == NULL) {
@@ -366,16 +388,12 @@ int evql_client_connect(
 
   if (rc < 0) {
     evql_client_seterror(client, "connect() failed");
-  } else {
-    rc = evql_client_handshake(client);
-  }
-
-  if (rc < 0) {
     close(client->fd);
     client->fd = -1;
+    return -1;
   }
 
-  return rc;
+  return evql_client_handshake(client);
 }
 
 int evql_client_connectfd(
@@ -384,21 +402,11 @@ int evql_client_connectfd(
     long flags) {
   if (client->fd >= 0) {
     close(client->fd);
-    client->fd = -1;
   }
 
-  if (client->connected) {
-    client->connected = 0;
-  }
-
+  client->connected = 0;
   client->fd = fd;
-  if (evql_client_handshake(client) == 0) {
-    return 0;
-  } else {
-    close(client->fd);
-    client->fd = -1;
-    return -1;
-  }
+  return evql_client_handshake(client);
 }
 
 void evql_client_destroy(evql_client_t* client) {
