@@ -134,6 +134,91 @@ ReturnCode NativeConnection::recvFrame(
   return read(&(*payload)[0], payload_len, timeout_);
 }
 
+ReturnCode NativeConnection::sendFrame(
+    uint16_t opcode,
+    const char* data,
+    size_t len,
+    uint16_t flags /* = 0 */) {
+  auto rc = sendFrameAsync(opcode, data, len, flags);
+  if (!rc.isSuccess()) {
+    return rc;
+  }
+
+  return flushBuffer(true, timeout_);
+}
+
+ReturnCode NativeConnection::sendFrameAsync(
+    uint16_t opcode,
+    const char* data,
+    size_t len,
+    uint16_t flags /* = 0 */) {
+  uint16_t opcode_n = htons(opcode);
+  uint16_t flags_n = htons(flags);
+  uint32_t payload_len_n = htonl(len);
+
+  char header[8];
+  memcpy(&header[0], (const char*) &opcode_n, 2);
+  memcpy(&header[2], (const char*) &flags_n, 2);
+  memcpy(&header[4], (const char*) &payload_len_n, 4);
+  writeAsync(header, sizeof(header));
+  writeAsync(data, len);
+
+  return flushBuffer(false, 0);
+}
+
+ReturnCode NativeConnection::flushBuffer(bool block, uint64_t timeout_us) {
+  if (fd_ < 0) {
+    return ReturnCode::error("EIO", "connection closed");
+  }
+
+  while (!write_buf_.empty()) {
+    int write_rc = ::write(fd_, write_buf_.data(), write_buf_.size());
+    switch (write_rc) {
+      case 0:
+        close();
+        return ReturnCode::error("EIO", "connection unexpectedly closed");
+      case -1:
+        if (errno == EAGAIN || errno == EINTR) {
+          break;
+        } else {
+          close();
+          return ReturnCode::error("EIO", strerror(errno));
+        }
+      default:
+        write_buf_ = write_buf_.substr(write_rc);
+        break;
+    }
+
+    if (write_buf_.empty() || !block) {
+      break;
+    }
+
+    struct pollfd p;
+    p.fd = fd_;
+    p.events = POLLOUT;
+
+    int poll_rc = poll(&p, 1, timeout_us / 1000);
+    switch (poll_rc) {
+      case 0:
+        close();
+        return ReturnCode::error("EIO", "operation timed out");
+      case -1:
+        if (errno == EAGAIN || errno == EINTR) {
+          break;
+        } else {
+          close();
+          return ReturnCode::error("EIO", strerror(errno));
+        }
+    }
+  }
+
+  return ReturnCode::success();
+}
+
+void NativeConnection::writeAsync(const char* data, size_t len) {
+  write_buf_ += std::string(data, len);
+}
+
 void NativeConnection::close() {
   if (fd_ < 0) {
     return;

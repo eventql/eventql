@@ -86,7 +86,7 @@ ReturnCode NativeTransport::performHandshake(NativeConnection* conn) {
 
   /* send READY frame */
   {
-    auto rc = conn->writeFrame(EVQL_OP_READY, nullptr, 0);
+    auto rc = conn->sendFrame(EVQL_OP_READY, nullptr, 0);
     if (!rc.isSuccess()) {
       conn->close();
       return rc;

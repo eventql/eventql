@@ -43,19 +43,25 @@ public:
       std::string* payload,
       uint16_t* flags = nullptr);
 
-  ReturnCode writeFrame(
+  ReturnCode sendFrame(
       uint16_t opcode,
       const char* data,
       size_t len,
-      uint16_t* flags = nullptr);
+      uint16_t flags = 0);
 
-  ReturnCode flushBuffer(bool block);
+  ReturnCode sendFrameAsync(
+      uint16_t opcode,
+      const char* data,
+      size_t len,
+      uint16_t flags = 0);
+
+  ReturnCode flushBuffer(bool block, uint64_t timeout_us);
   void close();
 
 protected:
 
   ReturnCode read(char* data, size_t len, uint64_t timeout_us);
-  ReturnCode writeAsync(char* data, size_t len);
+  void writeAsync(const char* data, size_t len);
 
   int fd_;
   uint64_t timeout_;
