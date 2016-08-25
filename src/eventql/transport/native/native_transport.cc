@@ -38,44 +38,34 @@
 #include <poll.h>
 
 namespace eventql {
+namespace native_transport {
 
-NativeTransport::NativeTransport(Database* database) : db_(database) {}
-
-void NativeTransport::handleConnection(int fd, std::string prelude_bytes) {
-  logDebug("eventql", "Opening new native connection; fd=$0", fd);
-
-  int old_flags = fcntl(fd, F_GETFL, 0);
-  if (fcntl(fd, F_SETFL, old_flags | O_NONBLOCK) != 0) {
-    close(fd);
-    return;
-  }
-
-  db_->startThread([this, fd, prelude_bytes] (Session* session) {
-    NativeConnection conn(fd, prelude_bytes);
-
-    auto rc = performHandshake(&conn);
-    if (!rc.isSuccess()) {
-      logError("eventql", "Handshake error: $0", rc.getMessage());
-      conn.close();
-      return;
-    }
-
-    logDebug("eventql", "Native connection established; fd=$0", fd);
-    uint16_t opcode;
-    std::string payload;
-    while (rc.isSuccess()) {
-      rc = conn.recvFrame(&opcode, &payload);
-
-      if (rc.isSuccess()) {
-        rc = performOperation(&conn, opcode, payload);
-      }
-    }
-
-    conn.close();
-  });
+ReturnCode performOperation_QUERY(
+    Database* database,
+    NativeConnection* conn,
+    const std::string& payload) {
+  return ReturnCode::success();
 }
 
-ReturnCode NativeTransport::performHandshake(NativeConnection* conn) {
+ReturnCode performOperation(
+    Database* database,
+    NativeConnection* conn,
+    uint16_t opcode,
+    const std::string& payload) {
+  logDebug("eventql", "Performing operation; opcode=$0", opcode);
+
+  switch (opcode) {
+    case EVQL_OP_QUERY:
+      return performOperation_QUERY(database, conn, payload);
+    default:
+      conn->close();
+      return ReturnCode::error("ERUNTIME", "invalid opcode");
+  }
+
+  return ReturnCode::success();
+}
+
+ReturnCode performHandshake(Database* database, NativeConnection* conn) {
   /* read HELLO frame */
   {
     uint16_t opcode;
@@ -107,13 +97,40 @@ ReturnCode NativeTransport::performHandshake(NativeConnection* conn) {
   return ReturnCode::success();
 }
 
-ReturnCode NativeTransport::performOperation(
-    NativeConnection* conn,
-    uint16_t opcode,
-    const std::string& payload) {
-  logDebug("eventql", "Performing operation; opcode=$0", opcode);
-  return ReturnCode::success();
+void startConnection(Database* db, int fd, std::string prelude_bytes) {
+  logDebug("eventql", "Opening new native connection; fd=$0", fd);
+
+  int old_flags = fcntl(fd, F_GETFL, 0);
+  if (fcntl(fd, F_SETFL, old_flags | O_NONBLOCK) != 0) {
+    close(fd);
+    return;
+  }
+
+  db->startThread([db, fd, prelude_bytes] (Session* session) {
+    NativeConnection conn(fd, prelude_bytes);
+
+    auto rc = performHandshake(db, &conn);
+    if (!rc.isSuccess()) {
+      logError("eventql", "Handshake error: $0", rc.getMessage());
+      conn.close();
+      return;
+    }
+
+    logDebug("eventql", "Native connection established; fd=$0", fd);
+    uint16_t opcode;
+    std::string payload;
+    while (rc.isSuccess()) {
+      rc = conn.recvFrame(&opcode, &payload);
+
+      if (rc.isSuccess()) {
+        rc = performOperation(db, &conn, opcode, payload);
+      }
+    }
+
+    conn.close();
+  });
 }
 
+} // namespace native_transport
 } // namespace eventql
 

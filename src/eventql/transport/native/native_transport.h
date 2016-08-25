@@ -27,25 +27,9 @@
 #include "eventql/util/return_code.h"
 
 namespace eventql {
-class NativeConnection;
+namespace native_transport {
 
-class NativeTransport {
-public:
+void startConnection(Database* db, int fd, std::string prelude_bytes);
 
-  NativeTransport(Database* database);
-
-  void handleConnection(int fd, std::string prelude_bytes);
-
-protected:
-
-  ReturnCode performHandshake(NativeConnection* conn);
-
-  ReturnCode performOperation(
-      NativeConnection* conn,
-      uint16_t opcode,
-      const std::string& payload);
-
-  Database* db_;
-};
-
+} // namespace native_transport
 } // namespace eventql

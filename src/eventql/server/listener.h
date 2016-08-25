@@ -55,7 +55,6 @@ protected:
   int ssock_;
   std::list<EstablishingConnection> connections_;
   HTTPTransport http_transport_;
-  NativeTransport native_transport_;
 };
 
 } // namespace eventql
