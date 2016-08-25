@@ -21,41 +21,21 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#pragma once
-#include "eventql/eventql.h"
-#include "eventql/util/return_code.h"
-#include <eventql/transport/http/http_transport.h>
-#include <eventql/transport/native/native_transport.h>
+#include "eventql/transport/native/native_transport.h"
+#include "eventql/util/logging.h"
 
 namespace eventql {
-class Database;
 
-class Listener {
-public:
+NativeTransport::NativeTransport(Database* database) : db_(database) {}
 
-  Listener(Database* database);
+void NativeTransport::handleConnection(int fd, std::string prelude_bytes) {
+  logDebug("eventql", "Opening new native connection; fd=$0", fd);
 
-  ReturnCode bind(int listen_port);
+  db_->startThread([this, fd, prelude_bytes] (Session* session) {
 
-  void run();
-  void shutdown();
+  });
+}
 
-protected:
-
-  void open(int fd);
-
-  struct EstablishingConnection {
-    int fd;
-    uint64_t accepted_at;
-  };
-
-  Database* database_;
-  uint64_t connect_timeout_;
-  std::atomic<bool> running_;
-  int ssock_;
-  std::list<EstablishingConnection> connections_;
-  HTTPTransport http_transport_;
-  NativeTransport native_transport_;
-};
 
 } // namespace eventql
+

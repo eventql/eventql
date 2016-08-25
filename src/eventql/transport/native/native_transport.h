@@ -23,39 +23,19 @@
  */
 #pragma once
 #include "eventql/eventql.h"
-#include "eventql/util/return_code.h"
-#include <eventql/transport/http/http_transport.h>
-#include <eventql/transport/native/native_transport.h>
+#include "eventql/db/database.h"
 
 namespace eventql {
-class Database;
 
-class Listener {
+class NativeTransport {
 public:
 
-  Listener(Database* database);
+  NativeTransport(Database* database);
 
-  ReturnCode bind(int listen_port);
-
-  void run();
-  void shutdown();
+  void handleConnection(int fd, std::string prelude_bytes);
 
 protected:
-
-  void open(int fd);
-
-  struct EstablishingConnection {
-    int fd;
-    uint64_t accepted_at;
-  };
-
-  Database* database_;
-  uint64_t connect_timeout_;
-  std::atomic<bool> running_;
-  int ssock_;
-  std::list<EstablishingConnection> connections_;
-  HTTPTransport http_transport_;
-  NativeTransport native_transport_;
+  Database* db_;
 };
 
 } // namespace eventql

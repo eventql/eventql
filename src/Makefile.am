@@ -824,6 +824,8 @@ EVQL_CORE_SOURCES_ = \
     eventql/transport/http/http_transport.h \
     eventql/transport/http/rpc_servlet.cc \
     eventql/transport/http/rpc_servlet.h \
+    eventql/transport/native/native_transport.cc \
+    eventql/transport/native/native_transport.h \
     eventql/db/table_ref.cc \
     eventql/db/table_ref.h \
     eventql/db/table.cc \
@@ -984,6 +986,7 @@ evqlctl_LDADD = \
     $(ZOOKEEPER_LDADD) \
     $(LMDB_LDADD) \
     $(PROTOBUF_LDADD) \
+    $(SPIDERMONKEY_LDADD) \
     $(PCRE_LDADD)
 
 ################ LIB: libevqlclient.a ###################

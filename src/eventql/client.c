@@ -32,12 +32,15 @@
 #include <limits.h>
 #include <stdint.h>
 #include <errno.h>
+#include <fcntl.h>
 
 #if CHAR_BIT != 8
 #error "unsupported char size"
 #endif
 
-static const size_t MAX_PAYLOAD_LEN = 1024 * 1024 * 256;
+static const size_t EVQL_DEFAULT_TIMEOUT_US = 1000 * 1000  * 1; // 1 second
+static const size_t EVQL_FRAME_MAX_SIZE = 1024 * 1024 * 256;
+static const size_t EVQL_FRAME_HEADER_SIZE = 8;
 
 /**
  * Internal struct declarations
@@ -58,10 +61,12 @@ enum {
 };
 
 typedef struct {
+  char* header;
   char* data;
   size_t length;
   size_t capacity;
   size_t cursor;
+  char header_inline[8];
 } evql_framebuf_t;
 
 struct evql_client_s {
@@ -69,6 +74,7 @@ struct evql_client_s {
   char* error;
   int connected;
   evql_framebuf_t recv_buf;
+  uint64_t timeout_us;
 };
 
 /**
@@ -98,17 +104,30 @@ static void evql_client_seterror(evql_client_t* client, const char* error);
 static int evql_client_handshake(evql_client_t* client);
 static void evql_client_close(evql_client_t* client);
 
+static int evql_client_write(
+    evql_client_t* client,
+    const char* data,
+    size_t len,
+    uint64_t timeout_us);
+
+static int evql_client_read(
+    evql_client_t* client,
+    char* data,
+    size_t len,
+    uint64_t timeout_us);
+
 static int evql_client_sendframe(
     evql_client_t* client,
     uint16_t opcode,
-    const char* payload,
-    size_t payload_len,
+    evql_framebuf_t* frame,
+    uint64_t timeout_us,
     uint16_t flags);
 
 static int evql_client_recvframe(
     evql_client_t* client,
     uint16_t* opcode,
     evql_framebuf_t** frame,
+    uint64_t timeout_us,
     uint16_t* flags);
 
 /**
@@ -116,6 +135,7 @@ static int evql_client_recvframe(
  */
 
 static void evql_framebuf_init(evql_framebuf_t* frame) {
+  frame->header = frame->header_inline;
   frame->data = NULL;
   frame->length = 0;
   frame->capacity = 0;
@@ -135,11 +155,20 @@ static void evql_framebuf_resize(evql_framebuf_t* frame, size_t len) {
 
   frame->length = len;
   frame->capacity = len;
-  frame->data = realloc(frame->data, len);
-  if (!frame->data) {
+  if (frame->data) {
+    frame->header = realloc(
+        frame->header,
+        frame->capacity + EVQL_FRAME_HEADER_SIZE);
+  } else {
+    frame->header = malloc(frame->capacity + EVQL_FRAME_HEADER_SIZE);
+  }
+
+  if (!frame->header) {
     printf("malloc() failed\n");
     abort();
   }
+
+  frame->data = frame->header + EVQL_FRAME_HEADER_SIZE;
 }
 
 static void evql_framebuf_clear(evql_framebuf_t* frame) {
@@ -181,28 +210,23 @@ static void evql_framebuf_writelenencstr(
 static int evql_client_sendframe(
     evql_client_t* client,
     uint16_t opcode,
-    const char* payload,
-    size_t payload_len,
+    evql_framebuf_t* frame,
+    uint64_t timeout_us,
     uint16_t flags) {
   uint16_t opcode_n = htons(opcode);
   uint16_t flags_n = htons(flags);
-  uint32_t payload_len_n = htonl(payload_len_n);
+  uint32_t payload_len_n = htonl(frame->length);
 
-  char header[8];
-  memcpy(header + 0, (const char*) &opcode_n, 2);
-  memcpy(header + 2, (const char*) &flags_n, 2);
-  memcpy(header + 4, (const char*) &payload_len_n, 4);
+  memcpy(frame->header + 0, (const char*) &opcode_n, 2);
+  memcpy(frame->header + 2, (const char*) &flags_n, 2);
+  memcpy(frame->header + 4, (const char*) &payload_len_n, 4);
 
-  struct iovec iov[2];
-  iov[0].iov_base = header;
-  iov[0].iov_len = sizeof(header);
-  iov[1].iov_base = (void*) payload;
-  iov[1].iov_len = payload_len;
+  int ret = evql_client_write(
+      client, frame->header,
+      frame->length + 8,
+      client->timeout_us);
 
-  int ret = writev(client->fd, iov, 2);
-  if (ret < 0) {
-    evql_client_seterror(client, "writev() failed");
-    evql_client_close(client);
+  if (ret == -1) {
     return -1;
   }
 
@@ -213,18 +237,17 @@ static int evql_client_recvframe(
     evql_client_t* client,
     uint16_t* opcode,
     evql_framebuf_t** frame,
+    uint64_t timeout_us,
     uint16_t* recvflags) {
   char header[8];
-  int ret = read(client->fd, &header, sizeof(header));
-  switch (ret) {
-    case 0:
-      evql_client_seterror(client, "connection unexpectedly closed");
-      evql_client_close(client);
-      return -1;
-    case -1:
-      evql_client_seterror(client, strerror(errno));
-      evql_client_close(client);
-      return -1;
+  int rc = evql_client_read(
+      client,
+      &header,
+      sizeof(header),
+      client->timeout_us);
+
+  if (rc == -1) {
+    return -1;
   }
 
   *opcode = htons(*((uint16_t*) &header[0]));
@@ -234,7 +257,7 @@ static int evql_client_recvframe(
     *recvflags = flags;
   }
 
-  if (payload_len > MAX_PAYLOAD_LEN) {
+  if (payload_len > EVQL_FRAME_MAX_SIZE) {
     evql_client_seterror(client, "received invalid frame header");
     evql_client_close(client);
     return -1;
@@ -243,16 +266,14 @@ static int evql_client_recvframe(
 
   evql_framebuf_clear(&client->recv_buf);
   evql_framebuf_resize(&client->recv_buf, payload_len);
-  ret = read(client->fd, client->recv_buf.data, payload_len);
-  switch (ret) {
-    case 0:
-      evql_client_seterror(client, "connection unexpectedly closed");
-      evql_client_close(client);
-      return -1;
-    case -1:
-      evql_client_seterror(client, strerror(errno));
-      evql_client_close(client);
-      return -1;
+  rc = evql_client_read(
+      client->fd,
+      client->recv_buf.data,
+      payload_len,
+      client->timeout_us);
+
+  if (rc == -1) {
+    return -1;
   }
 
   *frame = &client->recv_buf;
@@ -271,8 +292,8 @@ static int evql_client_handshake(evql_client_t* client) {
     int rc = evql_client_sendframe(
         client,
         EVQL_OP_HELLO,
-        hello_frame.data,
-        hello_frame.length,
+        &hello_frame,
+        client->timeout_us,
         0);
 
     evql_framebuf_destroy(&hello_frame);
@@ -291,6 +312,7 @@ static int evql_client_handshake(evql_client_t* client) {
         client,
         &response_opcode,
         &response_frame,
+        client->timeout_us,
         NULL);
 
     if (rc < 0) {
@@ -348,6 +370,7 @@ evql_client_t* evql_client_init() {
   client->fd = -1;
   client->error = NULL;
   client->connected = 0;
+  client->timeout_us = EVQL_DEFAULT_TIMEOUT_US;
   return client;
 }
 
@@ -393,6 +416,14 @@ int evql_client_connect(
     return -1;
   }
 
+  int old_flags = fcntl(client->fd, F_GETFL, 0);
+  if (fcntl(client->fd, F_SETFL, old_flags | O_NONBLOCK) != 0) {
+    evql_client_seterror(client, strerror(errno));
+    close(client->fd);
+    client->fd = -1;
+    return -1;
+  }
+
   return evql_client_handshake(client);
 }
 
@@ -406,6 +437,15 @@ int evql_client_connectfd(
 
   client->connected = 0;
   client->fd = fd;
+
+  int old_flags = fcntl(client->fd, F_GETFL, 0);
+  if (fcntl(client->fd, F_SETFL, old_flags | O_NONBLOCK) != 0) {
+    evql_client_seterror(client, strerror(errno));
+    close(client->fd);
+    client->fd = -1;
+    return -1;
+  }
+
   return evql_client_handshake(client);
 }
 
