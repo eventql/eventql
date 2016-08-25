@@ -40,6 +40,11 @@ protected:
 
   ReturnCode performHandshake(NativeConnection* conn);
 
+  ReturnCode performOperation(
+      NativeConnection* conn,
+      uint16_t opcode,
+      const std::string& payload);
+
   Database* db_;
 };
 

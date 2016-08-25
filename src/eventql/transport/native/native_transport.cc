@@ -61,6 +61,17 @@ void NativeTransport::handleConnection(int fd, std::string prelude_bytes) {
     }
 
     logDebug("eventql", "Native connection established; fd=$0", fd);
+    uint16_t opcode;
+    std::string payload;
+    while (rc.isSuccess()) {
+      rc = conn.recvFrame(&opcode, &payload);
+
+      if (rc.isSuccess()) {
+        rc = performOperation(&conn, opcode, payload);
+      }
+    }
+
+    conn.close();
   });
 }
 
@@ -93,7 +104,14 @@ ReturnCode NativeTransport::performHandshake(NativeConnection* conn) {
     }
   }
 
+  return ReturnCode::success();
+}
 
+ReturnCode NativeTransport::performOperation(
+    NativeConnection* conn,
+    uint16_t opcode,
+    const std::string& payload) {
+  logDebug("eventql", "Performing operation; opcode=$0", opcode);
   return ReturnCode::success();
 }
 
