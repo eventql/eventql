@@ -50,6 +50,39 @@ extern "C" {
 #endif
 
 /**
+ * The EventQL client handle
+ */
+struct evql_client_s;
+typedef struct evql_client_s evql_client_t;
+
+/**
+ * Create a new eventql client
+ */
+evql_client_t* evql_client_init();
+
+/**
+ * Destroy a eventql client
+ */
+void evql_client_destroy(evql_client_t* client);
+
+/**
+ * Connect to an eventql server
+ */
+void evql_client_connect(
+    evql_client_t* client,
+    const char* host,
+    unsigned int port,
+    long flags);
+
+/**
+ * Connect to an eventql server
+ */
+void evql_client_connectfd(
+    evql_client_t* client,
+    int fd,
+    long flags);
+
+/**
  * The EventQL config handle
  */
 struct evql_conf_s;

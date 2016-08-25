@@ -302,6 +302,14 @@ int main(int argc, const char** argv) {
   /* cli */
   eventql::cli::Console console(cli_cfg);
 
+  {
+    auto rc = console.connect();
+    if (!rc.isSuccess()) {
+      logFatal("evql", "error while connecting to server: $0", rc.getMessage());
+      return 1;
+    }
+  }
+
   auto file = cli_cfg.getFile();
   auto language = cli_cfg.getLanguage();
   if (file.isEmpty() &&

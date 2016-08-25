@@ -122,6 +122,7 @@ Binary Protocols.
     0x0008  QUERY_CONTINUE
     0x0008  QUERY_DISCARD
     0x0009  QUERY_PROGRESS
+    0x0010  READY
 
   Messages are described in Section 6.
 
@@ -136,6 +137,19 @@ Binary Protocols.
 
 
 6. Messages
+
+6.2 HELLO
+
+  FIXME
+
+  Payload:
+    lenencint      protocol_version
+    lenencstr      eventql_version
+    lenencint      flags
+
+  Response:
+    <no response>
+
 
 6.2 PING
 

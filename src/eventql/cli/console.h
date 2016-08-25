@@ -31,6 +31,7 @@
 #include "eventql/server/sql/codec/binary_codec.h"
 #include "eventql/sql/result_list.h"
 #include "eventql/util/io/TerminalOutputStream.h"
+#include "eventql/util/return_code.h"
 
 namespace eventql {
 namespace cli {
@@ -64,6 +65,11 @@ public:
    * Execute a JS job
    */
   Status runJS(const String& query);
+
+  /**
+   * Connect to the server
+   */
+  ReturnCode connect();
 
 protected:
   Status runQueryBatch(const String& query);
