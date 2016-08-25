@@ -215,10 +215,6 @@ static int evql_client_write(
     uint64_t timeout_us) {
   size_t pos = 0;
   while (pos < len) {
-    struct pollfd p;
-    p.fd = client->fd;
-    p.events = POLLOUT;
-
     int write_rc = write(client->fd, data + pos, len - pos);
     switch (write_rc) {
       case 0:
@@ -238,6 +234,13 @@ static int evql_client_write(
         break;
     }
 
+    if (pos == len) {
+      break;
+    }
+
+    struct pollfd p;
+    p.fd = client->fd;
+    p.events = POLLOUT;
     int poll_rc = poll(&p, 1, timeout_us / 1000);
     switch (poll_rc) {
       case 0:
@@ -284,10 +287,13 @@ static int evql_client_read(
         break;
     }
 
+    if (pos == len) {
+      break;
+    }
+
     struct pollfd p;
     p.fd = client->fd;
     p.events = POLLIN;
-
     int poll_rc = poll(&p, 1, timeout_us / 1000);
     switch (poll_rc) {
       case 0:
@@ -323,7 +329,8 @@ static int evql_client_sendframe(
   memcpy(frame->header + 4, (const char*) &payload_len_n, 4);
 
   int ret = evql_client_write(
-      client, frame->header,
+      client,
+      frame->header,
       frame->length + 8,
       client->timeout_us);
 
@@ -363,7 +370,6 @@ static int evql_client_recvframe(
     evql_client_close(client);
     return -1;
   }
-
 
   evql_framebuf_clear(&client->recv_buf);
   evql_framebuf_resize(&client->recv_buf, payload_len);

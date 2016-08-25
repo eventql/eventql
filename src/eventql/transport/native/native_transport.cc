@@ -51,7 +51,18 @@ void NativeTransport::handleConnection(int fd, std::string prelude_bytes) {
   }
 
   db_->startThread([this, fd, prelude_bytes] (Session* session) {
-    NativeConnection conn(fd);
+    NativeConnection conn(fd, prelude_bytes);
+
+    uint16_t opcode;
+    std::string payload;
+    auto rc = conn.recvFrame(&opcode, &payload);
+    if (!rc.isSuccess()) {
+      logError("eventql", "Connection error: $0", rc.getMessage());
+      conn.close();
+      return;
+    }
+
+    iputs("got frame: $0", opcode);
   });
 }
 

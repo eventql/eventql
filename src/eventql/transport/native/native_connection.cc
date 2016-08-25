@@ -22,6 +22,7 @@
  * code of your own applications
  */
 #include "eventql/transport/native/native_connection.h"
+#include "eventql/util/inspect.h"
 #include <string.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -37,7 +38,12 @@
 
 namespace eventql {
 
-NativeConnection::NativeConnection(int fd) : fd_(fd) {}
+NativeConnection::NativeConnection(
+    int fd,
+    const std::string& prelude_bytes /* = "" */) :
+    fd_(fd),
+    timeout_(1000 * 1000),
+    read_buf_(prelude_bytes) {}
 
 NativeConnection::~NativeConnection() { 
   close();
@@ -47,11 +53,17 @@ ReturnCode NativeConnection::read(
     char* data,
     size_t len,
     uint64_t timeout_us) {
+  size_t pos = 0;
+  if (!read_buf_.empty()) {
+    pos = std::min(len, read_buf_.size());
+    memcpy(data, read_buf_.data(), pos);
+    read_buf_ = read_buf_.substr(pos);
+  }
+
   if (fd_ < 0) {
     return ReturnCode::error("EIO", "connection closed");
   }
 
-  size_t pos = 0;
   while (pos < len) {
     int read_rc = ::read(fd_, data + pos, len - pos);
     switch (read_rc) {
@@ -68,6 +80,10 @@ ReturnCode NativeConnection::read(
       default:
         pos += read_rc;
         break;
+    }
+
+    if (pos == len) {
+      break;
     }
 
     struct pollfd p;
@@ -89,14 +105,33 @@ ReturnCode NativeConnection::read(
     }
   }
 
-  ReturnCode::success();
+  return ReturnCode::success();
 }
 
 ReturnCode NativeConnection::recvFrame(
     uint16_t* opcode,
     std::string* payload,
-    uint16_t* flags /* = nullptr */) {
-  ReturnCode::success();
+    uint16_t* recvflags /* = nullptr */) {
+  char header[8];
+  auto rc = read(header, sizeof(header), timeout_);
+  if (!rc.isSuccess()) {
+    return rc;
+  }
+
+  *opcode = htons(*((uint16_t*) &header[0]));
+  uint16_t flags = htons(*((uint16_t*) &header[2]));
+  uint32_t payload_len = htonl(*((uint32_t*) &header[4]));
+  if (recvflags) {
+    *recvflags = flags;
+  }
+
+  if (payload_len > kMaxFrameSize) {
+    close();
+    return ReturnCode::error("EIO", "received invalid frame header");
+  }
+
+  payload->resize(payload_len);
+  return read(&(*payload)[0], payload_len, timeout_);
 }
 
 void NativeConnection::close() {

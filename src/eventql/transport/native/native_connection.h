@@ -30,7 +30,12 @@ namespace eventql {
 class NativeConnection{
 public:
 
-  NativeConnection(int fd);
+  static const size_t kMaxFrameSize = 1024 * 1024 * 256; // 256 MB
+
+  NativeConnection(
+      int fd,
+      const std::string& prelude_bytes = "");
+
   ~NativeConnection();
 
   ReturnCode recvFrame(
@@ -53,6 +58,8 @@ protected:
       uint64_t timeout_us);
 
   int fd_;
+  uint64_t timeout_;
+  std::string read_buf_;
 };
 
 } // namespace eventql
