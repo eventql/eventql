@@ -110,8 +110,8 @@ Binary Protocols.
 
 5.1. opcode
 
-  A 16-bit little-endian integer that distinguishes the type of message:
-    0x005e  HELLO
+  A 16-bit big-endian integer that distinguishes the type of message:
+    0x5e00  HELLO
     0x0001  PING
     0x0002  ERROR
     0x0003  ACK
@@ -132,7 +132,7 @@ Binary Protocols.
 
 5.3. length
 
-  A 32-bit little-endian integer representing the length of the payload of the
+  A 32-bit big-endian integer representing the length of the payload of the
   frame (note: currently a frame is limited to 256MB in length).
 
 

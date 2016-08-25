@@ -23,22 +23,27 @@
  */
 #include <eventql/eventql.h>
 #include <string.h>
+#include <stdio.h>
 #include <unistd.h>
 #include <sys/socket.h>
 #include <sys/uio.h>
 #include <netdb.h>
+#include <arpa/inet.h>
+#include <limits.h>
+#include <stdint.h>
+#include <errno.h>
+
+#if CHAR_BIT != 8
+#error "unsupported char size"
+#endif
+
+static const size_t MAX_PAYLOAD_LEN = 1024 * 1024 * 256;
 
 /**
  * Internal struct declarations
  */
-struct evql_client_s {
-  int fd;
-  char* error;
-  int connected;
-};
-
 enum {
-  EVQL_OP_HELLO           = 0x005e,
+  EVQL_OP_HELLO           = 0x5e00,
   EVQL_OP_PING            = 0x0001,
   EVQL_OP_ERROR           = 0x0002,
   EVQL_OP_ACK             = 0x0003,
@@ -58,12 +63,22 @@ typedef struct {
   size_t payload_capacity;
 } evql_framebuf_t;
 
+struct evql_client_s {
+  int fd;
+  char* error;
+  int connected;
+  evql_framebuf_t recv_buf;
+};
 
 /**
  * Internal API declarations
  */
-static evql_framebuf_t* evql_framebuf_init();
-static void evql_framebuf_free(evql_framebuf_t* frame);
+static void evql_framebuf_init(evql_framebuf_t* frame);
+static void evql_framebuf_destroy(evql_framebuf_t* frame);
+
+static void evql_framebuf_resize(
+    evql_framebuf_t* frame,
+    size_t len);
 
 static void evql_framebuf_write(
     evql_framebuf_t* frame,
@@ -87,41 +102,54 @@ static int evql_client_sendframe(
     evql_client_t* client,
     uint16_t opcode,
     const char* payload,
-    size_t payload_len);
+    size_t payload_len,
+    uint16_t flags);
 
 static int evql_client_recvframe(
     evql_client_t* client,
     uint16_t* opcode,
-    evql_framebuf_t** frame);
+    evql_framebuf_t** frame,
+    uint16_t* flags);
 
 /**
  * Internal API implementation
  */
 
-static evql_framebuf_t* evql_framebuf_init() {
-  evql_framebuf_t* frame = malloc(sizeof(evql_framebuf_t));
-  if (!frame) {
-    return NULL;
-  }
-
+static void evql_framebuf_init(evql_framebuf_t* frame) {
   frame->payload = NULL;
   frame->payload_len = 0;
   frame->payload_capacity = 0;
-  return frame;
 }
 
-static void evql_framebuf_free(evql_framebuf_t* frame) {
+static void evql_framebuf_destroy(evql_framebuf_t* frame) {
   if (frame->payload) {
     free(frame->payload);
   }
+}
 
-  free(frame);
+static void evql_framebuf_resize(
+    evql_framebuf_t* frame,
+    size_t len) {
+  if (len <= frame->payload_capacity) {
+    return;
+  }
+
+  frame->payload_len = len;
+  frame->payload_capacity = len;
+  frame->payload = realloc(frame->payload, len);
+  if (!frame->payload) {
+    printf("malloc() failed\n");
+    abort();
+  }
 }
 
 static void evql_framebuf_write(
     evql_framebuf_t* frame,
     const char* data,
     size_t len) {
+  size_t oldlen = frame->payload_len;
+  evql_framebuf_resize(frame, frame->payload_len + len);
+  memcpy(frame->payload + oldlen, data, len);
 }
 
 static void evql_framebuf_writelenencint(
@@ -150,11 +178,19 @@ static int evql_client_sendframe(
     evql_client_t* client,
     uint16_t opcode,
     const char* payload,
-    size_t payload_len) {
-  const char header[8];
+    size_t payload_len,
+    uint16_t flags) {
+  uint16_t opcode_n = htons(opcode);
+  uint16_t flags_n = htons(flags);
+  uint32_t payload_len_n = htonl(payload_len_n);
+
+  char header[8];
+  memcpy(header + 0, (const char*) &opcode_n, 2);
+  memcpy(header + 2, (const char*) &flags_n, 2);
+  memcpy(header + 4, (const char*) &payload_len_n, 4);
 
   struct iovec iov[2];
-  iov[0].iov_base = (void*) header;
+  iov[0].iov_base = header;
   iov[0].iov_len = sizeof(header);
   iov[1].iov_base = (void*) payload;
   iov[1].iov_len = payload_len;
@@ -171,31 +207,63 @@ static int evql_client_sendframe(
 static int evql_client_recvframe(
     evql_client_t* client,
     uint16_t* opcode,
-    evql_framebuf_t** frame) {
-  evql_client_seterror(client, "recvframe not yet implemented");
-  return -1;
+    evql_framebuf_t** frame,
+    uint16_t* recvflags) {
+  char header[8];
+  int ret = read(client->fd, &header, sizeof(header));
+  switch (ret) {
+    case 0:
+      evql_client_seterror(client, "connection unexpectedly closed");
+      return -1;
+    case -1:
+      evql_client_seterror(client, strerror(errno));
+      return -1;
+  }
+
+  *opcode = htons(*((uint16_t*) &header[0]));
+  uint16_t flags = htons(*((uint16_t*) &header[2]));
+  uint32_t payload_len = htonl(*((uint32_t*) &header[4]));
+  if (recvflags) {
+    *recvflags = flags;
+  }
+
+  if (payload_len > MAX_PAYLOAD_LEN) {
+    evql_client_seterror(client, "received invalid frame header");
+    return -1;
+  }
+
+  evql_framebuf_resize(&client->recv_buf, payload_len);
+  ret = read(client->fd, client->recv_buf.payload, payload_len);
+  switch (ret) {
+    case 0:
+      evql_client_seterror(client, "connection unexpectedly closed");
+      return -1;
+    case -1:
+      evql_client_seterror(client, strerror(errno));
+      return -1;
+  }
+
+  *frame = &client->recv_buf;
+  return 0;
 }
 
 static int evql_client_handshake(evql_client_t* client) {
   /* send hello frame */
   {
-    evql_framebuf_t* hello_frame = evql_framebuf_init();
-    if (!hello_frame) {
-      evql_client_seterror(client, "error while allocating hello frame");
-      return -1;
-    }
-
-    evql_framebuf_writelenencint(hello_frame, 1); // protocol version
-    evql_framebuf_writelenencstr(hello_frame, "eventql", 7); // eventql version
-    evql_framebuf_writelenencint(hello_frame, 0); // flags
+    evql_framebuf_t hello_frame;
+    evql_framebuf_init(&hello_frame);
+    evql_framebuf_writelenencint(&hello_frame, 1); // protocol version
+    evql_framebuf_writelenencstr(&hello_frame, "eventql", 7); // eventql version
+    evql_framebuf_writelenencint(&hello_frame, 0); // flags
 
     int rc = evql_client_sendframe(
         client,
         EVQL_OP_HELLO,
-        hello_frame->payload,
-        hello_frame->payload_len);
+        hello_frame.payload,
+        hello_frame.payload_len,
+        0);
 
-    evql_framebuf_free(hello_frame);
+    evql_framebuf_destroy(&hello_frame);
 
     if (rc < 0) {
       return -1;
@@ -209,7 +277,8 @@ static int evql_client_handshake(evql_client_t* client) {
     int rc = evql_client_recvframe(
         client,
         &response_opcode,
-        &response_frame);
+        &response_frame,
+        NULL);
 
     if (rc < 0) {
       return -1;

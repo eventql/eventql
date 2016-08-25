@@ -100,6 +100,8 @@ evql_LDADD = \
     $(SPIDERMONKEY_LDADD) \
     $(PCRE_LDADD)
 
+evql_LDFLAGS = -static
+
 ################ BIN: evqlctl ###################
 evqlctl_SOURCES = \
     eventql/cli/commands/cli_command.h \

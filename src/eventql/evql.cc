@@ -66,6 +66,7 @@ static void printError(const String& error_string) {
 }
 
 int main(int argc, const char** argv) {
+  printf("hello\n");
   Application::init();
   Application::logToStderr("evql");
 
