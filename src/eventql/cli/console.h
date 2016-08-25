@@ -50,6 +50,12 @@ class Console {
 public:
 
   Console(const CLIConfig cli_cfg);
+  ~Console();
+
+  /**
+   * Connect to the server
+   */
+  ReturnCode connect();
 
   /**
    * Start an interactive shell. This method will never return
@@ -66,17 +72,13 @@ public:
    */
   Status runJS(const String& query);
 
-  /**
-   * Connect to the server
-   */
-  ReturnCode connect();
-
 protected:
   Status runQueryBatch(const String& query);
   Status runQueryTable(const String& query);
   Status sendRequest(const String& query, csql::BinaryResultParser* res_parser);
 
   CLIConfig cfg_;
+  evql_client_t* client_;
 };
 
 } // namespace cli

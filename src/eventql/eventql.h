@@ -68,7 +68,7 @@ void evql_client_destroy(evql_client_t* client);
 /**
  * Connect to an eventql server
  */
-void evql_client_connect(
+int evql_client_connect(
     evql_client_t* client,
     const char* host,
     unsigned int port,
@@ -77,10 +77,16 @@ void evql_client_connect(
 /**
  * Connect to an eventql server
  */
-void evql_client_connectfd(
+int evql_client_connectfd(
     evql_client_t* client,
     int fd,
     long flags);
+
+/**
+ * Return the latest error message
+ */
+const char* evql_client_geterror(evql_client_t* client);
+
 
 /**
  * The EventQL config handle

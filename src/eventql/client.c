@@ -23,6 +23,9 @@
  */
 #include <eventql/eventql.h>
 #include <string.h>
+#include <unistd.h>
+#include <sys/socket.h>
+#include <netdb.h>
 
 /**
  * Internal struct declarations
@@ -60,8 +63,18 @@ typedef struct {
  */
 static evql_framebuf_t* evql_framebuf_init();
 static void evql_framebuf_free(evql_framebuf_t* frame);
-static evql_framebuf_t* evql_framebuf_writelenencint(uint64_t val);
-static evql_framebuf_t* evql_framebuf_writelenencstr(
+
+static void evql_framebuf_write(
+    evql_framebuf_t* frame,
+    const char* data,
+    size_t len);
+
+static void evql_framebuf_writelenencint(
+    evql_framebuf_t* frame,
+    uint64_t val);
+
+static void evql_framebuf_writelenencstr(
+    evql_framebuf_t* frame,
     const char* val,
     size_t len);
 
@@ -104,6 +117,34 @@ static void evql_framebuf_free(evql_framebuf_t* frame) {
   free(frame);
 }
 
+static void evql_framebuf_write(
+    evql_framebuf_t* frame,
+    const char* data,
+    size_t len) {
+}
+
+static void evql_framebuf_writelenencint(
+    evql_framebuf_t* frame,
+    uint64_t val) {
+  unsigned char buf[10];
+  size_t bytes = 0;
+  do {
+    buf[bytes] = val & 0x7fU;
+    if (val >>= 7) buf[bytes] |= 0x80U;
+    ++bytes;
+  } while (val);
+
+  evql_framebuf_write(frame, (const char*) buf, bytes);
+}
+
+static void evql_framebuf_writelenencstr(
+    evql_framebuf_t* frame,
+    const char* val,
+    size_t len) {
+  evql_framebuf_writelenencint(frame, len);
+  evql_framebuf_write(frame, val, len);
+}
+
 static int evql_client_sendframe(
     evql_client_t* client,
     uint16_t opcode,
@@ -130,9 +171,9 @@ static int evql_client_handshake(evql_client_t* client) {
       return -1;
     }
 
-    evql_framebuf_writelenencint(1); // protocol version
-    evql_framebuf_writelenencstr("eventql") // eventql version
-    evql_framebuf_writelenencint(0); // flags
+    evql_framebuf_writelenencint(hello_frame, 1); // protocol version
+    evql_framebuf_writelenencstr(hello_frame, "eventql", 7); // eventql version
+    evql_framebuf_writelenencint(hello_frame, 0); // flags
 
     int rc = evql_client_sendframe(
         client,
@@ -203,11 +244,92 @@ evql_client_t* evql_client_init() {
   return client;
 }
 
+int evql_client_connect(
+    evql_client_t* client,
+    const char* host,
+    unsigned int port,
+    long flags) {
+  if (client->fd >= 0) {
+    close(client->fd);
+    client->fd = -1;
+  }
+
+  if (client->connected) {
+    client->connected = 0;
+  }
+
+  struct hostent* h = gethostbyname(host);
+  if (h == NULL) {
+    evql_client_seterror(client, "gethostbyname() failed");
+    return -1;
+  }
+
+  client->fd = socket(AF_INET, SOCK_STREAM, 0);
+  if (client->fd < 0) {
+    evql_client_seterror(client, "socket() creation failed");
+    return -1;
+  }
+
+  struct sockaddr_in saddr;
+  saddr.sin_family = AF_INET;
+  saddr.sin_port = htons(port);
+  memcpy(&(saddr.sin_addr), h->h_addr, sizeof(saddr.sin_addr));
+  memset(&(saddr.sin_zero), 0, 8);
+
+  int rc = connect(
+      client->fd,
+      (const struct sockaddr *) &saddr,
+      sizeof(saddr));
+
+  if (rc == 0) {
+    rc = evql_client_handshake(client);
+  }
+
+  if (rc < 0) {
+    evql_client_seterror(client, "connect() failed");
+    close(client->fd);
+    client->fd = -1;
+  }
+
+  return rc;
+}
+
+int evql_client_connectfd(
+    evql_client_t* client,
+    int fd,
+    long flags) {
+  if (client->fd >= 0) {
+    close(client->fd);
+    client->fd = -1;
+  }
+
+  if (client->connected) {
+    client->connected = 0;
+  }
+
+  client->fd = fd;
+  if (evql_client_handshake(client) == 0) {
+    return 0;
+  } else {
+    close(client->fd);
+    client->fd = -1;
+    return -1;
+  }
+}
+
 void evql_client_destroy(evql_client_t* client) {
+  if (client->fd >= 0) {
+    close(client->fd);
+  }
+
   if (client->error) {
     free(client->error);
   }
 
   free(client);
+}
+
+const char* evql_client_geterror(evql_client_t* client) {
+  return client->error;
 }
 

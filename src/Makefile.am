@@ -90,6 +90,7 @@ evql_SOURCES = \
 
 evql_LDADD = \
     libevqlcore.la \
+    libevqlclient.la \
     $(ZOOKEEPER_LDADD) \
     $(LINENOISE_LDADD) \
     $(INIH_LDADD) \

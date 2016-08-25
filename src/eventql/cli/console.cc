@@ -84,7 +84,32 @@ void Console::startInteractiveShell() {
   }
 }
 
-Console::Console(const CLIConfig cli_cfg) : cfg_(cli_cfg) {}
+Console::Console(const CLIConfig cli_cfg) : cfg_(cli_cfg), client_(nullptr) {}
+
+Console::~Console() {
+  if (client_) {
+    evql_client_destroy(client_);
+  }
+}
+
+ReturnCode Console::connect() {
+  client_ = evql_client_init();
+  if (!client_) {
+    return ReturnCode::error("ERUNTIME", "can't initialize eventql client");
+  }
+
+  auto rc = evql_client_connect(
+      client_,
+      cfg_.getHost().c_str(),
+      cfg_.getPort(),
+      0);
+
+  if (!rc) {
+    return ReturnCode::error("EIO", "%s", evql_client_geterror(client_));
+  }
+
+  return ReturnCode::success();
+}
 
 Status Console::runQuery(const String& query) {
   if (cfg_.getBatchMode()) {
