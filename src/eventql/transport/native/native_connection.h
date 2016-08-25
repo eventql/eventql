@@ -43,23 +43,24 @@ public:
       std::string* payload,
       uint16_t* flags = nullptr);
 
+  ReturnCode writeFrame(
+      uint16_t opcode,
+      const char* data,
+      size_t len,
+      uint16_t* flags = nullptr);
+
+  ReturnCode flushBuffer(bool block);
   void close();
 
 protected:
 
-  ReturnCode read(
-      char* data,
-      size_t len,
-      uint64_t timeout_us);
-
-  ReturnCode write(
-      char* data,
-      size_t len,
-      uint64_t timeout_us);
+  ReturnCode read(char* data, size_t len, uint64_t timeout_us);
+  ReturnCode writeAsync(char* data, size_t len);
 
   int fd_;
   uint64_t timeout_;
   std::string read_buf_;
+  std::string write_buf_;
 };
 
 } // namespace eventql

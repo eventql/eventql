@@ -24,8 +24,10 @@
 #pragma once
 #include "eventql/eventql.h"
 #include "eventql/db/database.h"
+#include "eventql/util/return_code.h"
 
 namespace eventql {
+class NativeConnection;
 
 class NativeTransport {
 public:
@@ -35,6 +37,9 @@ public:
   void handleConnection(int fd, std::string prelude_bytes);
 
 protected:
+
+  ReturnCode performHandshake(NativeConnection* conn);
+
   Database* db_;
 };
 

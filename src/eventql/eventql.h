@@ -49,6 +49,21 @@ static const std::string kBuildID = "unknown";
 extern "C" {
 #endif
 
+enum {
+  EVQL_OP_HELLO           = 0x5e00,
+  EVQL_OP_PING            = 0x0001,
+  EVQL_OP_ERROR           = 0x0002,
+  EVQL_OP_ACK             = 0x0003,
+  EVQL_OP_KILL            = 0x0004,
+  EVQL_OP_KILLED          = 0x0005,
+  EVQL_OP_QUERY           = 0x0006,
+  EVQL_OP_QUERY_RESULT    = 0x0007,
+  EVQL_OP_QUERY_CONTINUE  = 0x0008,
+  EVQL_OP_QUERY_DISCARD   = 0x0008,
+  EVQL_OP_QUERY_PROGRESS  = 0x0009,
+  EVQL_OP_READY           = 0x0010
+};
+
 /**
  * The EventQL client handle
  */

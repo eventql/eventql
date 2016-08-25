@@ -53,19 +53,49 @@ void NativeTransport::handleConnection(int fd, std::string prelude_bytes) {
   db_->startThread([this, fd, prelude_bytes] (Session* session) {
     NativeConnection conn(fd, prelude_bytes);
 
-    uint16_t opcode;
-    std::string payload;
-    auto rc = conn.recvFrame(&opcode, &payload);
+    auto rc = performHandshake(&conn);
     if (!rc.isSuccess()) {
-      logError("eventql", "Connection error: $0", rc.getMessage());
+      logError("eventql", "Handshake error: $0", rc.getMessage());
       conn.close();
       return;
     }
 
-    iputs("got frame: $0", opcode);
+    logDebug("eventql", "Native connection established; fd=$0", fd);
   });
 }
 
+ReturnCode NativeTransport::performHandshake(NativeConnection* conn) {
+  /* read HELLO frame */
+  {
+    uint16_t opcode;
+    std::string payload;
+    auto rc = conn->recvFrame(&opcode, &payload);
+    if (!rc.isSuccess()) {
+      conn->close();
+      return rc;
+    }
+
+    switch (opcode) {
+      case EVQL_OP_HELLO:
+        break;
+      default:
+        conn->close();
+        return ReturnCode::error("ERUNTIME", "invalid opcode");
+    }
+  }
+
+  /* send READY frame */
+  {
+    auto rc = conn->writeFrame(EVQL_OP_READY, nullptr, 0);
+    if (!rc.isSuccess()) {
+      conn->close();
+      return rc;
+    }
+  }
+
+
+  return ReturnCode::success();
+}
 
 } // namespace eventql
 
