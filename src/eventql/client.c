@@ -33,6 +33,7 @@
 #include <stdint.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <poll.h>
 
 #if CHAR_BIT != 8
 #error "unsupported char size"
@@ -144,7 +145,7 @@ static void evql_framebuf_init(evql_framebuf_t* frame) {
 
 static void evql_framebuf_destroy(evql_framebuf_t* frame) {
   if (frame->data) {
-    free(frame->data);
+    free(frame->header);
   }
 }
 
@@ -207,6 +208,98 @@ static void evql_framebuf_writelenencstr(
   evql_framebuf_write(frame, val, len);
 }
 
+static int evql_client_write(
+    evql_client_t* client,
+    const char* data,
+    size_t len,
+    uint64_t timeout_us) {
+  size_t pos = 0;
+  while (pos < len) {
+    struct pollfd p;
+    p.fd = client->fd;
+    p.events = POLLOUT;
+
+    int poll_rc = poll(&p, 1, timeout_us / 1000);
+    switch (poll_rc) {
+      case 0:
+        evql_client_seterror(client, "operation timed out");
+        evql_client_close(client);
+        return -1;
+      case -1:
+        evql_client_seterror(client, strerror(errno));
+        evql_client_close(client);
+        return -1;
+    }
+
+    int write_rc = write(client->fd, data + pos, len - pos);
+    switch (write_rc) {
+      case 0:
+        evql_client_seterror(client, "connection unexpectedly closed");
+        evql_client_close(client);
+        return -1;
+      case -1:
+        if (errno == EAGAIN || errno == EINTR) {
+          break;
+        } else {
+          evql_client_seterror(client, strerror(errno));
+          evql_client_close(client);
+          return -1;
+        }
+      default:
+        pos += write_rc;
+        break;
+    }
+  }
+
+  return 0;
+}
+
+static int evql_client_read(
+    evql_client_t* client,
+    char* data,
+    size_t len,
+    uint64_t timeout_us) {
+  size_t pos = 0;
+  while (pos < len) {
+    struct pollfd p;
+    p.fd = client->fd;
+    p.events = POLLIN;
+
+    int poll_rc = poll(&p, 1, timeout_us / 1000);
+    switch (poll_rc) {
+      case 0:
+        evql_client_seterror(client, "operation timed out");
+        evql_client_close(client);
+        return -1;
+      case -1:
+        evql_client_seterror(client, strerror(errno));
+        evql_client_close(client);
+        return -1;
+    }
+
+    int read_rc = read(client->fd, data + pos, len - pos);
+    switch (read_rc) {
+      case 0:
+        evql_client_seterror(client, "connection unexpectedly closed");
+        evql_client_close(client);
+        return -1;
+      case -1:
+        if (errno == EAGAIN || errno == EINTR) {
+          break;
+        } else {
+          evql_client_seterror(client, strerror(errno));
+          evql_client_close(client);
+          return -1;
+        }
+      default:
+        pos += read_rc;
+        break;
+    }
+  }
+
+  return 0;
+}
+
 static int evql_client_sendframe(
     evql_client_t* client,
     uint16_t opcode,
@@ -242,7 +335,7 @@ static int evql_client_recvframe(
   char header[8];
   int rc = evql_client_read(
       client,
-      &header,
+      header,
       sizeof(header),
       client->timeout_us);
 
@@ -267,7 +360,7 @@ static int evql_client_recvframe(
   evql_framebuf_clear(&client->recv_buf);
   evql_framebuf_resize(&client->recv_buf, payload_len);
   rc = evql_client_read(
-      client->fd,
+      client,
       client->recv_buf.data,
       payload_len,
       client->timeout_us);
