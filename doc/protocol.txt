@@ -245,12 +245,11 @@ Binary Protocols.
     lenencint      flags
     lenencint      num_result_columns
     lenencint      num_result_rows
-    lenencint      num_rows_modified   | if EVQL_QUERY_RESULT_COMPLETE
-    lenencint      num_rows_scanned    | if EVQL_QUERY_RESULT_COMPLETE
-    lenencint      num_bytes_scanned   | if EVQL_QUERY_RESULT_COMPLETE
-    lenencint      query_runtime_ms    | if EVQL_QUERY_RESULT_COMPLETE
-    lenencstr      database            | if EVQL_QUERY_RESULT_COMPLETE
-    lenencstr*     column_names
+    lenencint      num_rows_modified   | if EVQL_QUERY_RESULT_HASSTATS
+    lenencint      num_rows_scanned    | if EVQL_QUERY_RESULT_HASSTATS
+    lenencint      num_bytes_scanned   | if EVQL_QUERY_RESULT_HASSTATS
+    lenencint      query_runtime_ms    | if EVQL_QUERY_RESULT_HASSTATS
+    lenencstr*     column_names        | if EVQL_QUERY_RESULT_HASCOLNAMES
     lenencstr*     data
 
   Fields:

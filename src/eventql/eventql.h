@@ -68,11 +68,14 @@ enum {
 enum {
   EVQL_QUERY_SWITCHDB     = 0x1,
   EVQL_QUERY_MULTISTMT    = 0x2,
-  EVQL_QUERY_PROGRESS     = 0x4
+  EVQL_QUERY_PROGRESS     = 0x4,
+  EVQL_QUERY_NOSTATS      = 0x8
 };
 
 enum {
-  EVQL_QUERY_RESULT_COMPLETE  = 0x1
+  EVQL_QUERY_RESULT_COMPLETE     = 0x1,
+  EVQL_QUERY_RESULT_HASSTATS     = 0x2,
+  EVQL_QUERY_RESULT_HASCOLNAMES  = 0x4
 };
 
 /**
@@ -116,6 +119,48 @@ int evql_query(
     const char* query_string,
     const char* database,
     long flags);
+
+/**
+ * Fetch the next row of the result table
+ */
+int evql_fetch_row(
+    evql_client_t* client,
+    const char*** fields,
+    size_t** field_lengths);
+
+/**
+ * Fetch a column name from the result
+ */
+int evql_column_name(
+    evql_client_t* client,
+    size_t column_index,
+    const char** name,
+    size_t* name_len);
+
+/**
+ * Get the number of fields in the result
+ */
+int evql_num_columns(evql_client_t* client);
+
+/**
+ * Discard the remainder of the result
+ */
+int evql_discard_result(evql_client_t* client);
+
+/**
+ * Continue with the next result
+ */
+int evql_next_result(evql_client_t* client);
+
+/**
+ * Check whether any more results exist
+ */
+int evql_more_results(evql_client_t* client);
+
+/**
+ * Free the current result
+ */
+void evql_free_result(evql_client_t* client);
 
 /**
  * Return the latest error message

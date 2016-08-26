@@ -34,6 +34,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <poll.h>
+#include <assert.h>
 
 #if CHAR_BIT != 8
 #error "unsupported char size"
@@ -61,6 +62,8 @@ struct evql_client_s {
   char* error;
   int connected;
   evql_framebuf_t recv_buf;
+  size_t rbuf_nrows;
+  size_t rbuf_ncols;
   uint64_t timeout_us;
   size_t batch_size;
 };
@@ -415,6 +418,8 @@ static int evql_client_recvframe(
 
   evql_framebuf_clear(&client->recv_buf);
   evql_framebuf_resize(&client->recv_buf, payload_len);
+  evql_free_result(client);
+
   rc = evql_client_read(
       client,
       client->recv_buf.data,
@@ -521,6 +526,8 @@ evql_client_t* evql_client_init() {
   client->connected = 0;
   client->timeout_us = EVQL_CLIENT_DEFAULT_NETWORK_TIMEOUT_US;
   client->batch_size = EVQL_CLIENT_DEFAULT_BATCH_SIZE;
+  client->rbuf_nrows = 0;
+  client->rbuf_ncols = 0;
   evql_framebuf_init(&client->recv_buf);
   return client;
 }
@@ -600,6 +607,76 @@ int evql_client_connectfd(
   return evql_client_handshake(client);
 }
 
+static int evql_read_query_result_header(
+    evql_client_t* client) {
+  evql_framebuf_t* r_buf = &client->recv_buf;
+
+  uint64_t r_flags;
+  if (evql_framebuf_readlenencint(r_buf, &r_flags) == -1) {
+    evql_client_seterror(client, "error while reading query result header");
+    evql_client_close(client);
+    return -1;
+  }
+
+  uint64_t r_ncols;
+  if (evql_framebuf_readlenencint(r_buf, &r_ncols) == -1) {
+    evql_client_seterror(client, "error while reading query result header");
+    evql_client_close(client);
+    return -1;
+  }
+
+  uint64_t r_nrows;
+  if (evql_framebuf_readlenencint(r_buf, &r_nrows) == -1) {
+    evql_client_seterror(client, "error while reading query result header");
+    evql_client_close(client);
+    return -1;
+  }
+
+  if (r_flags & EVQL_QUERY_RESULT_HASSTATS) {
+    uint64_t tmp;
+    if (evql_framebuf_readlenencint(r_buf, &tmp) == -1) {
+      evql_client_seterror(client, "error while reading query result header");
+      evql_client_close(client);
+      return -1;
+    }
+
+    if (evql_framebuf_readlenencint(r_buf, &tmp) == -1) {
+      evql_client_seterror(client, "error while reading query result header");
+      evql_client_close(client);
+      return -1;
+    }
+
+    if (evql_framebuf_readlenencint(r_buf, &tmp) == -1) {
+      evql_client_seterror(client, "error while reading query result header");
+      evql_client_close(client);
+      return -1;
+    }
+
+    if (evql_framebuf_readlenencint(r_buf, &tmp) == -1) {
+      evql_client_seterror(client, "error while reading query result header");
+      evql_client_close(client);
+      return -1;
+    }
+  }
+
+  if (r_flags & EVQL_QUERY_RESULT_HASCOLNAMES) {
+    for (size_t i = 0; i < r_ncols; ++i) {
+      const char* colname;
+      size_t colname_len;
+      if (evql_framebuf_readlenencstr(r_buf, &colname, &colname_len) == -1) {
+        evql_client_seterror(client, "error while reading query result header");
+        evql_client_close(client);
+        return -1;
+      }
+    }
+  }
+
+  client->rbuf_nrows = r_nrows;
+  client->rbuf_ncols = r_ncols;
+
+  return 0;
+}
+
 int evql_query(
     evql_client_t* client,
     const char* query_string,
@@ -632,10 +709,10 @@ int evql_query(
   }
 
   /* receive response frames */
-  int complete = 0;
-  while (!complete) {
-    uint16_t response_opcode;
-    evql_framebuf_t* response_frame;
+  int done = 0;
+  uint16_t response_opcode;
+  evql_framebuf_t* response_frame;
+  while (!done) {
     int rc = evql_client_recvframe(
         client,
         &response_opcode,
@@ -649,6 +726,10 @@ int evql_query(
     }
 
     switch (response_opcode) {
+      case EVQL_OP_QUERY_RESULT:
+        done = 1;
+        break;
+
       case EVQL_OP_ERROR: {
         const char* err;
         size_t err_len;
@@ -669,7 +750,13 @@ int evql_query(
     }
   }
 
-  return 0;
+  assert(response_opcode == EVQL_OP_QUERY_RESULT);
+  return evql_read_query_result_header(client);
+}
+
+void evql_free_result(evql_client_t* client) {
+  client->rbuf_nrows = 0;
+  client->rbuf_ncols = 0;
 }
 
 void evql_client_destroy(evql_client_t* client) {
@@ -681,6 +768,7 @@ void evql_client_destroy(evql_client_t* client) {
     free(client->error);
   }
 
+  evql_free_result(client);
   evql_framebuf_destroy(&client->recv_buf);
   free(client);
 }

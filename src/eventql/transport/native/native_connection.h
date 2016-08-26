@@ -27,7 +27,7 @@
 
 namespace eventql {
 
-class NativeConnection{
+class NativeConnection {
 public:
 
   static const size_t kMaxFrameSize = 1024 * 1024 * 256; // 256 MB

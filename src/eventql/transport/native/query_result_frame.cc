@@ -53,7 +53,9 @@ void QueryResultFrame::setIsLast(bool is_last) {
 }
 
 void QueryResultFrame::writeTo(NativeConnection* conn) {
-  uint64_t flags;
+  uint64_t flags = 0;
+  flags |= EVQL_QUERY_RESULT_HASCOLNAMES;
+  flags |= EVQL_QUERY_RESULT_HASSTATS;
   if (is_last_) {
     flags |= EVQL_QUERY_RESULT_COMPLETE;
   }
@@ -63,13 +65,12 @@ void QueryResultFrame::writeTo(NativeConnection* conn) {
   header_.appendVarUInt(columns_.size());
   header_.appendVarUInt(num_rows_);
 
-  if (is_last_) {
+  //if (is_last_) {
     header_.appendVarUInt(0); // num_rows_modified
     header_.appendVarUInt(0); // num_rows_scanned
     header_.appendVarUInt(0); // num_bytes_scanned
     header_.appendVarUInt(0); // query_runtime_ms
-    header_.appendLenencString(""); // database
-  }
+  //}
 
   for (const auto& c : columns_) {
     header_.appendLenencString(c);
