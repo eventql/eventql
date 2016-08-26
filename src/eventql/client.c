@@ -498,6 +498,77 @@ static int evql_client_handshake(evql_client_t* client) {
   return 0;
 }
 
+static int evql_read_query_result_header(
+    evql_client_t* client) {
+  evql_framebuf_t* r_buf = &client->recv_buf;
+
+  uint64_t r_flags;
+  if (evql_framebuf_readlenencint(r_buf, &r_flags) == -1) {
+    evql_client_seterror(client, "error while reading query result header");
+    evql_client_close_hard(client);
+    return -1;
+  }
+
+  uint64_t r_ncols;
+  if (evql_framebuf_readlenencint(r_buf, &r_ncols) == -1) {
+    evql_client_seterror(client, "error while reading query result header");
+    evql_client_close_hard(client);
+    return -1;
+  }
+
+  uint64_t r_nrows;
+  if (evql_framebuf_readlenencint(r_buf, &r_nrows) == -1) {
+    evql_client_seterror(client, "error while reading query result header");
+    evql_client_close_hard(client);
+    return -1;
+  }
+
+  if (r_flags & EVQL_QUERY_RESULT_HASSTATS) {
+    uint64_t tmp;
+    if (evql_framebuf_readlenencint(r_buf, &tmp) == -1) {
+      evql_client_seterror(client, "error while reading query result header");
+      evql_client_close_hard(client);
+      return -1;
+    }
+
+    if (evql_framebuf_readlenencint(r_buf, &tmp) == -1) {
+      evql_client_seterror(client, "error while reading query result header");
+      evql_client_close_hard(client);
+      return -1;
+    }
+
+    if (evql_framebuf_readlenencint(r_buf, &tmp) == -1) {
+      evql_client_seterror(client, "error while reading query result header");
+      evql_client_close_hard(client);
+      return -1;
+    }
+
+    if (evql_framebuf_readlenencint(r_buf, &tmp) == -1) {
+      evql_client_seterror(client, "error while reading query result header");
+      evql_client_close_hard(client);
+      return -1;
+    }
+  }
+
+  if (r_flags & EVQL_QUERY_RESULT_HASCOLNAMES) {
+    for (size_t i = 0; i < r_ncols; ++i) {
+      const char* colname;
+      size_t colname_len;
+      if (evql_framebuf_readlenencstr(r_buf, &colname, &colname_len) == -1) {
+        evql_client_seterror(client, "error while reading query result header");
+        evql_client_close_hard(client);
+        return -1;
+      }
+    }
+  }
+
+  client->qbuf_valid = 1;
+  client->qbuf_nrows = r_nrows;
+  client->qbuf_ncols = r_ncols;
+  evql_client_rbuf_alloc(client, r_ncols);
+  return 0;
+}
+
 static void evql_client_close_hard(evql_client_t* client) {
   if (client->fd > 0) {
     close(client->fd);
@@ -650,82 +721,16 @@ int evql_client_connectfd(
   return evql_client_handshake(client);
 }
 
-static int evql_read_query_result_header(
-    evql_client_t* client) {
-  evql_framebuf_t* r_buf = &client->recv_buf;
-
-  uint64_t r_flags;
-  if (evql_framebuf_readlenencint(r_buf, &r_flags) == -1) {
-    evql_client_seterror(client, "error while reading query result header");
-    evql_client_close_hard(client);
-    return -1;
-  }
-
-  uint64_t r_ncols;
-  if (evql_framebuf_readlenencint(r_buf, &r_ncols) == -1) {
-    evql_client_seterror(client, "error while reading query result header");
-    evql_client_close_hard(client);
-    return -1;
-  }
-
-  uint64_t r_nrows;
-  if (evql_framebuf_readlenencint(r_buf, &r_nrows) == -1) {
-    evql_client_seterror(client, "error while reading query result header");
-    evql_client_close_hard(client);
-    return -1;
-  }
-
-  if (r_flags & EVQL_QUERY_RESULT_HASSTATS) {
-    uint64_t tmp;
-    if (evql_framebuf_readlenencint(r_buf, &tmp) == -1) {
-      evql_client_seterror(client, "error while reading query result header");
-      evql_client_close_hard(client);
-      return -1;
-    }
-
-    if (evql_framebuf_readlenencint(r_buf, &tmp) == -1) {
-      evql_client_seterror(client, "error while reading query result header");
-      evql_client_close_hard(client);
-      return -1;
-    }
-
-    if (evql_framebuf_readlenencint(r_buf, &tmp) == -1) {
-      evql_client_seterror(client, "error while reading query result header");
-      evql_client_close_hard(client);
-      return -1;
-    }
-
-    if (evql_framebuf_readlenencint(r_buf, &tmp) == -1) {
-      evql_client_seterror(client, "error while reading query result header");
-      evql_client_close_hard(client);
-      return -1;
-    }
-  }
-
-  if (r_flags & EVQL_QUERY_RESULT_HASCOLNAMES) {
-    for (size_t i = 0; i < r_ncols; ++i) {
-      const char* colname;
-      size_t colname_len;
-      if (evql_framebuf_readlenencstr(r_buf, &colname, &colname_len) == -1) {
-        evql_client_seterror(client, "error while reading query result header");
-        evql_client_close_hard(client);
-        return -1;
-      }
-    }
-  }
-
-  client->qbuf_valid = 1;
-  client->qbuf_nrows = r_nrows;
-  client->qbuf_ncols = r_ncols;
-  evql_client_rbuf_alloc(client, r_ncols);
-  return 0;
-}
-
 int evql_query(
     evql_client_t* client,
     const char* query_string,
     const char* database,
     long flags) {
+  if (!client->connected) {
+    evql_client_seterror(client, "not connected");
+    return -1;
+  }
+
   /* send query frame */
   {
     evql_framebuf_t qframe;
@@ -836,12 +841,22 @@ int evql_column_name(
     size_t column_index,
     const char** name,
     size_t* name_len) {
+  if (!client->qbuf_valid) {
+    evql_client_seterror(client, "no active result");
+    return -1;
+  }
+
   *name = fubar;
   *name_len = strlen(fubar);
   return 0;
 }
 
 int evql_num_columns(evql_client_t* client, size_t* ncols) {
+  if (!client->qbuf_valid) {
+    evql_client_seterror(client, "no active result");
+    return -1;
+  }
+
   *ncols = client->qbuf_ncols;
   return 0;
 }
