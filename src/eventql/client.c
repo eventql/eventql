@@ -958,11 +958,6 @@ void evql_client_qbuf_free(evql_client_t* client) {
 }
 
 void evql_client_releasebuffers(evql_client_t* client) {
-  if (client->error) {
-    free(client->error);
-    client->error = NULL;
-  }
-
   evql_client_qbuf_free(client);
   evql_client_rbuf_free(client);
   evql_client_cbuf_free(client);
