@@ -97,7 +97,9 @@ HTTPTransport::HTTPTransport(
     Database* database) :
     database_(database),
     status_servlet_(database),
-    api_servlet_(database) {
+    api_servlet_(database),
+    rpc_servlet_(database) {
+  http_router_.addRouteByPrefixMatch("/rpc/", &rpc_servlet_);
   http_router_.addRouteByPrefixMatch("/api/", &api_servlet_);
   http_router_.addRouteByPrefixMatch("/eventql", &status_servlet_);
   http_router_.addRouteByPrefixMatch("/", &default_servlet_);

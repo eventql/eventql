@@ -366,6 +366,7 @@ ReturnCode DatabaseImpl::start() {
     dbctx->sql_service = sql_service_.get();
     dbctx->table_service = table_service_.get();
     dbctx->mapreduce_service = mapreduce_service_.get();
+    dbctx->metadata_service = metadata_service_.get();
     database_context_ = std::move(dbctx);
   }
 

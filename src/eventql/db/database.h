@@ -43,6 +43,7 @@ class ClientAuth;
 class SQLService;
 class TableService;
 class MapReduceService;
+class MetadataService;
 
 struct DatabaseContext {
   PartitionMap* partition_map;
@@ -57,6 +58,7 @@ struct DatabaseContext {
   SQLService* sql_service;
   TableService* table_service;
   MapReduceService* mapreduce_service;
+  MetadataService* metadata_service;
 };
 
 class Database {
