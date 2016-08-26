@@ -754,6 +754,38 @@ int evql_query(
   return evql_read_query_result_header(client);
 }
 
+int evql_fetch_row(
+    evql_client_t* client,
+    const char*** fields,
+    size_t** field_lengths) {
+  if (client->rbuf_nrows == 0) {
+    return 0;
+  }
+
+  //for (int i = 0; i < client->rbuf_ncols; ++i) {
+  //  
+  //}
+
+  --client->rbuf_nrows;
+  return -1;
+}
+
+static const char* fubar = "fubar";
+int evql_column_name(
+    evql_client_t* client,
+    size_t column_index,
+    const char** name,
+    size_t* name_len) {
+  *name = fubar;
+  *name_len = strlen(fubar);
+  return 0;
+}
+
+int evql_num_columns(evql_client_t* client, size_t* ncols) {
+  *ncols = client->rbuf_ncols;
+  return 0;
+}
+
 void evql_free_result(evql_client_t* client) {
   client->rbuf_nrows = 0;
   client->rbuf_ncols = 0;
@@ -773,7 +805,12 @@ void evql_client_destroy(evql_client_t* client) {
   free(client);
 }
 
+static const char* EVQL_CLIENT_UNSPECIFIED_ERROR = "<unspecified error>";
 const char* evql_client_geterror(evql_client_t* client) {
-  return client->error;
+  if (client->error) {
+    return client->error;
+  } else {
+    return EVQL_CLIENT_UNSPECIFIED_ERROR;
+  }
 }
 

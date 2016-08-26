@@ -140,7 +140,7 @@ int evql_column_name(
 /**
  * Get the number of fields in the result
  */
-int evql_num_columns(evql_client_t* client);
+int evql_num_columns(evql_client_t* client, size_t* ncols);
 
 /**
  * Discard the remainder of the result

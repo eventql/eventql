@@ -125,10 +125,6 @@ Status Console::runQueryTable(const String& query) {
   bool line_dirty = false;
   bool is_tty = stderr_os->isTTY();
 
-  //bool error = false;
-  //csql::ResultList results;
-  //auto res_parser = new csql::BinaryResultParser();
-
   //if (!cfg_.getQuietMode()) {
   //  res_parser->onProgress([&stdout_os, &line_dirty, is_tty] (
   //      const csql::ExecutionStatus& status) {
@@ -147,29 +143,6 @@ Status Console::runQueryTable(const String& query) {
   //  });
   //}
 
-  //res_parser->onTableHeader([&results] (const Vector<String>& columns) {
-  //  results.addHeader(columns);
-  //});
-
-  //res_parser->onRow([&results] (int argc, const csql::SValue* argv) {
-  //  results.addRow(argv, argc);
-  //});
-
-  //res_parser->onError([&stderr_os, &error, is_tty] (const String& error_str) {
-  //  if (is_tty) {
-  //    stderr_os->eraseLine();
-  //    stderr_os->print("\r");
-  //  }
-
-  //  stderr_os->print(
-  //      "ERROR:",
-  //      { TerminalStyle::RED, TerminalStyle::UNDERSCORE });
-
-  //  stderr_os->print(StringUtil::format(" $0\n", error_str));
-  //  error = true;
-  //});
-
-
   std::string qry_db;
   uint64_t qry_flags = 0;
   if (!cfg_.getDatabase().isEmpty()) {
@@ -178,6 +151,55 @@ Status Console::runQueryTable(const String& query) {
   }
 
   int rc = evql_query(client_, query.c_str(), qry_db.c_str(), qry_flags);
+
+  csql::ResultList results;
+  std::vector<std::string> result_columns;
+  size_t result_ncols;
+  if (rc == 0) {
+    rc = evql_num_columns(client_, &result_ncols);
+  }
+
+  for (int i = 0; rc == 0 && i < result_ncols; ++i) {
+    const char* colname;
+    size_t colname_len;
+    rc = evql_column_name(client_, i, &colname, &colname_len);
+    if (rc == -1) {
+      break;
+    }
+
+    result_columns.emplace_back(colname, colname_len);
+  }
+
+  if (rc == 0) {
+    results.addHeader(result_columns);
+  }
+
+  while (rc >= 0) {
+    const char** fields;
+    size_t* field_lens;
+    rc = evql_fetch_row(client_, &fields, &field_lens);
+    if (rc == -1) {
+      break;
+    }
+
+    std::vector<std::string> row;
+    for (int i = 0; rc == 0 && i < result_ncols; ++i) {
+      row.emplace_back(fields[i], field_lens[i]);
+    }
+
+    results.addRow(row);
+    if (rc == 0) {
+      break;
+    }
+  }
+
+  evql_free_result(client_);
+
+  if (is_tty) {
+    stderr_os->eraseLine();
+    stderr_os->print("\r");
+  }
+
   if (rc == -1) {
     stderr_os->print(
           "ERROR:",
@@ -186,45 +208,32 @@ Status Console::runQueryTable(const String& query) {
     stderr_os->print(" ");
     stderr_os->print(evql_client_geterror(client_));
     stderr_os->print("\n");
+
     return Status(eIOError);
+  } else {
+    String status_line = "";
+    if (results.getNumRows() > 0) {
+      results.debugPrint();
+
+      auto num_rows = results.getNumRows();
+      status_line = StringUtil::format(
+          "$0 row$1 returned",
+          num_rows,
+          num_rows > 1 ? "s" : "");
+    } else {
+      status_line = results.getNumColumns() == 0 ? "Query OK" : "Empty Set";
+    }
+
+    if (!cfg_.getQuietMode()) {
+      if (is_tty) {
+        stderr_os->print("\r" + status_line + "\n\n");
+      } else {
+        stderr_os->print(status_line + "\n\n");
+      }
+    }
+
+    return Status::success();
   }
-
-  //auto res = sendRequest(query, res_parser);
-  //if (!res.isSuccess()) {
-  //}
-
-  //if (is_tty) {
-  //  stderr_os->eraseLine();
-  //  stderr_os->print("\r");
-  //}
-
-  //if (error) {
-  //  return Status(eIOError);
-  //}
-
-  //String status_line = "";
-  //if (results.getNumRows() > 0) {
-  //  results.debugPrint();
-
-  //  auto num_rows = results.getNumRows();
-  //  status_line = StringUtil::format(
-  //      "$0 row$1 returned",
-  //      num_rows,
-  //      num_rows > 1 ? "s" : "");
-
-  //} else {
-  //  status_line = results.getNumColumns() == 0 ? "Query OK" : "Empty Set";
-  //}
-
-  //if (!cfg_.getQuietMode()) {
-  //  if (is_tty) {
-  //    stderr_os->print("\r" + status_line + "\n\n");
-  //  } else {
-  //    stderr_os->print(status_line + "\n\n");
-  //  }
-  //}
-
-  return Status::success();
 }
 
 Status Console::runQueryBatch(const String& query) {

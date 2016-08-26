@@ -46,6 +46,7 @@ public:
   int getComputedColumnIndex(const std::string& column_name) const;
 
   void addHeader(const std::vector<std::string>& columns);
+  void addRow(const std::vector<std::string>& row);
   bool addRow(const csql::SValue* row, int row_len);
 
   void debugPrint() const;
