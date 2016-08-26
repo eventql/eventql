@@ -136,7 +136,7 @@ ReturnCode NativeConnection::recvFrame(
 
 ReturnCode NativeConnection::sendFrame(
     uint16_t opcode,
-    const char* data,
+    const void* data,
     size_t len,
     uint16_t flags /* = 0 */) {
   auto rc = sendFrameAsync(opcode, data, len, flags);
@@ -149,7 +149,7 @@ ReturnCode NativeConnection::sendFrame(
 
 ReturnCode NativeConnection::sendFrameAsync(
     uint16_t opcode,
-    const char* data,
+    const void* data,
     size_t len,
     uint16_t flags /* = 0 */) {
   uint16_t opcode_n = htons(opcode);
@@ -215,8 +215,8 @@ ReturnCode NativeConnection::flushBuffer(bool block, uint64_t timeout_us) {
   return ReturnCode::success();
 }
 
-void NativeConnection::writeAsync(const char* data, size_t len) {
-  write_buf_ += std::string(data, len);
+void NativeConnection::writeAsync(const void* data, size_t len) {
+  write_buf_ += std::string((const char*) data, len);
 }
 
 void NativeConnection::close() {

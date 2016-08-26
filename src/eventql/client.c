@@ -85,6 +85,15 @@ static void evql_framebuf_writelenencstr(
     const char* val,
     size_t len);
 
+static int evql_framebuf_readlenencint(
+    evql_framebuf_t* frame,
+    uint64_t* val);
+
+static int evql_framebuf_readlenencstr(
+    evql_framebuf_t* frame,
+    const char** val,
+    size_t* len);
+
 static void evql_client_seterror(evql_client_t* client, const char* error);
 
 static int evql_client_handshake(evql_client_t* client);
@@ -171,6 +180,19 @@ static void evql_framebuf_write(
   memcpy(frame->data + oldlen, data, len);
 }
 
+static int evql_framebuf_read(
+    evql_framebuf_t* frame,
+    const char** data,
+    size_t len) {
+  if (frame->cursor + len > frame->length) {
+    return -1;
+  } else {
+    *data = frame->data + frame->cursor;
+    frame->cursor += len;
+    return 0;
+  }
+}
+
 static void evql_framebuf_writelenencint(
     evql_framebuf_t* frame,
     uint64_t val) {
@@ -191,6 +213,39 @@ static void evql_framebuf_writelenencstr(
     size_t len) {
   evql_framebuf_writelenencint(frame, len);
   evql_framebuf_write(frame, val, len);
+}
+
+static int evql_framebuf_readlenencint(
+    evql_framebuf_t* frame,
+    uint64_t* val) {
+  *val = 0;
+  for (int i = 0; i < 10; ++i) {
+    unsigned char* b;
+    if (evql_framebuf_read(frame, (const char**) &b, 1) == -1) {
+      return -1;
+    }
+
+    *val |= ((*b) & 0x7fULL) << (7 * i);
+
+    if (!((*b) & 0x80U)) {
+      break;
+    }
+  }
+
+  return 0;
+}
+
+static int evql_framebuf_readlenencstr(
+    evql_framebuf_t* frame,
+    const char** val,
+    size_t* len) {
+  uint64_t strlen;
+  if (evql_framebuf_readlenencint(frame, &strlen) == -1) {
+    return -1;
+  }
+
+  *len = strlen;
+  return evql_framebuf_read(frame, val, strlen);
 }
 
 static int evql_client_write(
@@ -463,6 +518,7 @@ evql_client_t* evql_client_init() {
   client->error = NULL;
   client->connected = 0;
   client->timeout_us = EVQL_DEFAULT_TIMEOUT_US;
+  evql_framebuf_init(&client->recv_buf);
   return client;
 }
 
@@ -590,6 +646,19 @@ int evql_query(
     }
 
     switch (response_opcode) {
+      case EVQL_OP_ERROR: {
+        const char* err;
+        size_t err_len;
+        if (evql_framebuf_readlenencstr(response_frame, &err, &err_len) == 0) {
+          evql_client_seterror(client, err);
+        } else {
+          evql_client_seterror(client, "<unspecified error>");
+        }
+
+        evql_client_close(client);
+        return -1;
+      }
+
       default:
         evql_client_seterror(client, "received unexpected opcode");
         evql_client_close(client);
@@ -609,6 +678,7 @@ void evql_client_destroy(evql_client_t* client) {
     free(client->error);
   }
 
+  evql_framebuf_destroy(&client->recv_buf);
   free(client);
 }
 

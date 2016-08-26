@@ -24,6 +24,11 @@
 #include "eventql/transport/native/native_transport.h"
 #include "eventql/transport/native/native_connection.h"
 #include "eventql/util/logging.h"
+#include "eventql/util/util/binarymessagereader.h"
+#include "eventql/server/session.h"
+#include "eventql/server/sql_service.h"
+#include "eventql/sql/runtime/runtime.h"
+#include "eventql/auth/client_auth.h"
 #include <string.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -40,10 +45,86 @@
 namespace eventql {
 namespace native_transport {
 
+ReturnCode sendError(
+    NativeConnection* conn,
+    const std::string& error) {
+  util::BinaryMessageWriter e_frame;
+  e_frame.appendLenencString(error);
+  char zero = 0;
+  e_frame.append(&zero, 1);
+  return conn->sendFrame(EVQL_OP_ERROR, e_frame.data(), e_frame.size());
+}
+
 ReturnCode performOperation_QUERY(
     Database* database,
     NativeConnection* conn,
     const std::string& payload) {
+  auto session = database->getSession();
+  auto dbctx = session->getDatabaseContext();
+
+  /* read query frame */
+  std::string q_query;
+  uint64_t q_flags;
+  uint64_t q_maxrows;
+  std::string q_database;
+  try {
+    util::BinaryMessageReader q_frame(payload.data(), payload.size());
+    q_query = q_frame.readLenencString();
+    q_flags = q_frame.readVarUInt();
+    q_maxrows = q_frame.readVarUInt();
+    q_database = q_frame.readLenencString();
+  } catch (const std::exception& e) {
+    return ReturnCode::error("ERUNTIME", "invalid QUERY frame");
+  }
+
+  /* switch database */
+  if (q_flags & EVQL_QUERY_SWITCHDB) {
+    auto rc = dbctx->client_auth->changeNamespace(session, q_database);
+    if (!rc.isSuccess()) {
+      return sendError(conn, rc.message());
+    }
+  }
+
+  if (session->getEffectiveNamespace().empty()) {
+    return sendError(conn, "No database selected");
+  }
+
+  /* execute queries */
+  try {
+    auto txn = dbctx->sql_service->startTransaction(session);
+    auto qplan = dbctx->sql_runtime->buildQueryPlan(txn.get(), q_query);
+
+    //qplan->setProgressCallback([&result_format, &qplan] () {
+    //  result_format.sendProgress(qplan->getProgress());
+    //});
+
+    if (qplan->numStatements() > 1 && !(q_flags & EVQL_QUERY_MULTISTMT)) {
+      return sendError(
+          conn,
+          "you must set EVQL_QUERY_MULTISTMT to enable multiple statements");
+    }
+
+    for (int i = 0; i < qplan->numStatements(); ++i) {
+      /* execute query */
+      auto result_columns = qplan->getStatementgetResultColumns(i);
+      auto result_cursor = qplan->execute(i);
+      auto result_ncols = result_cursor->getNumColumns();
+
+      /* send response frames */
+      Vector<csql::SValue> row(result_ncols);
+      while (result_cursor->next(row.data(), row.size())) {
+
+        /* wait for discard or continue */
+      }
+
+      /* send final response frame */
+
+      /* wait for discard or continue (next query) */
+    }
+  } catch (const StandardException& e) {
+    return sendError(conn, e.what());
+  }
+
   return ReturnCode::success();
 }
 

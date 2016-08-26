@@ -45,13 +45,13 @@ public:
 
   ReturnCode sendFrame(
       uint16_t opcode,
-      const char* data,
+      const void* data,
       size_t len,
       uint16_t flags = 0);
 
   ReturnCode sendFrameAsync(
       uint16_t opcode,
-      const char* data,
+      const void* data,
       size_t len,
       uint16_t flags = 0);
 
@@ -61,7 +61,7 @@ public:
 protected:
 
   ReturnCode read(char* data, size_t len, uint64_t timeout_us);
-  void writeAsync(const char* data, size_t len);
+  void writeAsync(const void* data, size_t len);
 
   int fd_;
   uint64_t timeout_;

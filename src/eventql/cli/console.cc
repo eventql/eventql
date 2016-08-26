@@ -169,7 +169,15 @@ Status Console::runQueryTable(const String& query) {
   //  error = true;
   //});
 
-  int rc = evql_query(client_, query.c_str(), "test", 0);
+
+  std::string qry_db;
+  uint64_t qry_flags = 0;
+  if (!cfg_.getDatabase().isEmpty()) {
+    qry_db = cfg_.getDatabase().get();
+    qry_flags |= EVQL_QUERY_SWITCHDB;
+  }
+
+  int rc = evql_query(client_, query.c_str(), qry_db.c_str(), qry_flags);
   if (rc == -1) {
     stderr_os->print(
           "ERROR:",

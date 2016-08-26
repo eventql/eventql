@@ -105,6 +105,12 @@ Binary Protocols.
 
   [lenencstr*]     A list of [lenencstr] values
 
+  [zerobyte]       A single '\0' byte
+
+  We also define this notation for optinal fields:
+
+     <field> | if <expr>
+
 
 5. Frame header
 
@@ -164,6 +170,17 @@ Binary Protocols.
   Response:
     <no response>
 
+
+6.2 ERROR
+
+  FIXME
+
+  Payload:
+    lenencstr      error_string
+    zerobyte
+
+  Response:
+    <no response>
 
 6.7 QUERY
 
