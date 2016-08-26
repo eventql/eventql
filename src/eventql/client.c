@@ -112,7 +112,7 @@ static void evql_client_seterror(evql_client_t* client, const char* error);
 static void evql_client_qbuf_free(evql_client_t* client);
 
 static int evql_client_handshake(evql_client_t* client);
-static void evql_client_close(evql_client_t* client);
+static void evql_client_close_hard(evql_client_t* client);
 
 static int evql_client_write(
     evql_client_t* client,
@@ -274,14 +274,14 @@ static int evql_client_write(
     switch (write_rc) {
       case 0:
         evql_client_seterror(client, "connection unexpectedly closed");
-        evql_client_close(client);
+        evql_client_close_hard(client);
         return -1;
       case -1:
         if (errno == EAGAIN || errno == EINTR) {
           break;
         } else {
           evql_client_seterror(client, strerror(errno));
-          evql_client_close(client);
+          evql_client_close_hard(client);
           return -1;
         }
       default:
@@ -300,14 +300,14 @@ static int evql_client_write(
     switch (poll_rc) {
       case 0:
         evql_client_seterror(client, "operation timed out");
-        evql_client_close(client);
+        evql_client_close_hard(client);
         return -1;
       case -1:
         if (errno == EAGAIN || errno == EINTR) {
           break;
         } else {
           evql_client_seterror(client, strerror(errno));
-          evql_client_close(client);
+          evql_client_close_hard(client);
           return -1;
         }
     }
@@ -327,14 +327,14 @@ static int evql_client_read(
     switch (read_rc) {
       case 0:
         evql_client_seterror(client, "connection unexpectedly closed");
-        evql_client_close(client);
+        evql_client_close_hard(client);
         return -1;
       case -1:
         if (errno == EAGAIN || errno == EINTR) {
           break;
         } else {
           evql_client_seterror(client, strerror(errno));
-          evql_client_close(client);
+          evql_client_close_hard(client);
           return -1;
         }
       default:
@@ -353,14 +353,14 @@ static int evql_client_read(
     switch (poll_rc) {
       case 0:
         evql_client_seterror(client, "operation timed out");
-        evql_client_close(client);
+        evql_client_close_hard(client);
         return -1;
       case -1:
         if (errno == EAGAIN || errno == EINTR) {
           break;
         } else {
           evql_client_seterror(client, strerror(errno));
-          evql_client_close(client);
+          evql_client_close_hard(client);
           return -1;
         }
     }
@@ -422,7 +422,7 @@ static int evql_client_recvframe(
 
   if (payload_len > EVQL_FRAME_MAX_SIZE) {
     evql_client_seterror(client, "received invalid frame header");
-    evql_client_close(client);
+    evql_client_close_hard(client);
     return -1;
   }
 
@@ -463,7 +463,7 @@ static int evql_client_handshake(evql_client_t* client) {
     evql_framebuf_destroy(&hello_frame);
 
     if (rc < 0) {
-      evql_client_close(client);
+      evql_client_close_hard(client);
       return -1;
     }
   }
@@ -480,7 +480,7 @@ static int evql_client_handshake(evql_client_t* client) {
         NULL);
 
     if (rc < 0) {
-      evql_client_close(client);
+      evql_client_close_hard(client);
       return -1;
     }
 
@@ -490,7 +490,7 @@ static int evql_client_handshake(evql_client_t* client) {
         break;
       default:
         evql_client_seterror(client, "received unexpected opcode");
-        evql_client_close(client);
+        evql_client_close_hard(client);
         return -1;
     }
   }
@@ -498,7 +498,7 @@ static int evql_client_handshake(evql_client_t* client) {
   return 0;
 }
 
-static void evql_client_close(evql_client_t* client) {
+static void evql_client_close_hard(evql_client_t* client) {
   if (client->fd > 0) {
     close(client->fd);
   }
@@ -657,21 +657,21 @@ static int evql_read_query_result_header(
   uint64_t r_flags;
   if (evql_framebuf_readlenencint(r_buf, &r_flags) == -1) {
     evql_client_seterror(client, "error while reading query result header");
-    evql_client_close(client);
+    evql_client_close_hard(client);
     return -1;
   }
 
   uint64_t r_ncols;
   if (evql_framebuf_readlenencint(r_buf, &r_ncols) == -1) {
     evql_client_seterror(client, "error while reading query result header");
-    evql_client_close(client);
+    evql_client_close_hard(client);
     return -1;
   }
 
   uint64_t r_nrows;
   if (evql_framebuf_readlenencint(r_buf, &r_nrows) == -1) {
     evql_client_seterror(client, "error while reading query result header");
-    evql_client_close(client);
+    evql_client_close_hard(client);
     return -1;
   }
 
@@ -679,25 +679,25 @@ static int evql_read_query_result_header(
     uint64_t tmp;
     if (evql_framebuf_readlenencint(r_buf, &tmp) == -1) {
       evql_client_seterror(client, "error while reading query result header");
-      evql_client_close(client);
+      evql_client_close_hard(client);
       return -1;
     }
 
     if (evql_framebuf_readlenencint(r_buf, &tmp) == -1) {
       evql_client_seterror(client, "error while reading query result header");
-      evql_client_close(client);
+      evql_client_close_hard(client);
       return -1;
     }
 
     if (evql_framebuf_readlenencint(r_buf, &tmp) == -1) {
       evql_client_seterror(client, "error while reading query result header");
-      evql_client_close(client);
+      evql_client_close_hard(client);
       return -1;
     }
 
     if (evql_framebuf_readlenencint(r_buf, &tmp) == -1) {
       evql_client_seterror(client, "error while reading query result header");
-      evql_client_close(client);
+      evql_client_close_hard(client);
       return -1;
     }
   }
@@ -708,7 +708,7 @@ static int evql_read_query_result_header(
       size_t colname_len;
       if (evql_framebuf_readlenencstr(r_buf, &colname, &colname_len) == -1) {
         evql_client_seterror(client, "error while reading query result header");
-        evql_client_close(client);
+        evql_client_close_hard(client);
         return -1;
       }
     }
@@ -747,7 +747,7 @@ int evql_query(
     evql_framebuf_destroy(&qframe);
 
     if (rc < 0) {
-      evql_client_close(client);
+      evql_client_close_hard(client);
       return -1;
     }
   }
@@ -765,7 +765,7 @@ int evql_query(
         NULL);
 
     if (rc < 0) {
-      evql_client_close(client);
+      evql_client_close_hard(client);
       return -1;
     }
 
@@ -783,13 +783,13 @@ int evql_query(
           evql_client_seterror(client, "<unspecified error>");
         }
 
-        evql_client_close(client);
+        evql_client_close_hard(client);
         return -1;
       }
 
       default:
         evql_client_seterror(client, "received unexpected opcode");
-        evql_client_close(client);
+        evql_client_close_hard(client);
         return -1;
     }
   }
@@ -819,7 +819,7 @@ int evql_fetch_row(
 
     if (rc == -1) {
       evql_client_seterror(client, "invalid encoding");
-      evql_client_close(client);
+      evql_client_close_hard(client);
       return -1;
     }
   }
@@ -864,10 +864,32 @@ void evql_client_qbuf_free(evql_client_t* client) {
 void evql_client_releasebuffers(evql_client_t* client) {
 }
 
-void evql_client_destroy(evql_client_t* client) {
-  if (client->fd >= 0) {
+int evql_client_close(evql_client_t* client) {
+  evql_client_releasebuffers(client);
+
+  int rc = 0;
+  if (client->fd > 0) {
+    evql_framebuf_t bye_frame;
+    evql_framebuf_init(&bye_frame);
+
+    rc = evql_client_sendframe(
+        client,
+        EVQL_OP_BYE,
+        &bye_frame,
+        client->timeout_us,
+        0);
+
+    evql_framebuf_destroy(&bye_frame);
     close(client->fd);
   }
+
+  client->fd = -1;
+  client->connected = 0;
+  return rc;
+}
+
+void evql_client_destroy(evql_client_t* client) {
+  evql_client_close_hard(client);
 
   if (client->error) {
     free(client->error);

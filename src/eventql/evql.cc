@@ -310,38 +310,45 @@ int main(int argc, const char** argv) {
     }
   }
 
+  int rc = 0;
+
   auto file = cli_cfg.getFile();
   auto language = cli_cfg.getLanguage();
   if (file.isEmpty() &&
       !language.isEmpty() &&
       language.get() == eventql::cli::CLIConfig::kLanguage::JAVASCRIPT) {
     logFatal("evql", "missing --file flag. Set --file for javascript");
-    return 1;
+    rc = 1;
+    goto exit;
   }
 
   if (!file.isEmpty()) {
     if (language.isEmpty()) {
       logFatal("evql", "invalid --lang flag. Must be one of 'sql', 'js' or 'javascript'");
-      return 1;
+      rc = 1;
+      goto exit;
     }
 
     auto query = FileUtil::read(file.get());
     switch (language.get()) {
       case eventql::cli::CLIConfig::kLanguage::SQL: {
         Status ret = console.runQuery(query.toString());
-        return ret.isSuccess() ? 0 : 1;
+        rc = ret.isSuccess() ? 0 : 1;
+        goto exit;
       }
 
       case eventql::cli::CLIConfig::kLanguage::JAVASCRIPT: {
         Status ret = console.runJS(query.toString());
-        return ret.isSuccess() ? 0 : 1;
+        rc = ret.isSuccess() ? 0 : 1;
+        goto exit;
       }
     }
   }
 
   if (flags.isSet("exec")) {
     auto ret = console.runQuery(flags.getString("exec"));
-    return ret.isSuccess() ? 0 : 1;
+    rc = ret.isSuccess() ? 0 : 1;
+    goto exit;
   }
 
   if (hasSTDIN() || flags.isSet("batch") || !stdout_os->isTTY()) {
@@ -350,13 +357,16 @@ int main(int argc, const char** argv) {
       auto ret = console.runQuery(query);
       query = "";
       if (ret.isError()) {
-        return 1;
+        rc = 1;
+        goto exit;
       }
     }
   } else {
     console.startInteractiveShell();
   }
 
-  return 0;
+exit:
+  console.close();
+  return rc;
 }
 

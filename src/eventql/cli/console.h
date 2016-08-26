@@ -58,6 +58,11 @@ public:
   ReturnCode connect();
 
   /**
+   * Close the server connection
+   */
+  void close();
+
+  /**
    * Start an interactive shell. This method will never return
    */
   void startInteractiveShell();

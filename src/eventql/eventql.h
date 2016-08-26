@@ -162,6 +162,11 @@ void evql_client_releasebuffers(evql_client_t* client);
 const char* evql_client_geterror(evql_client_t* client);
 
 /**
+ * Close the connection gracefully
+ */
+int evql_client_close(evql_client_t* client);
+
+/**
  * Destroy a eventql client
  */
 void evql_client_destroy(evql_client_t* client);

@@ -93,9 +93,11 @@ Console::~Console() {
 }
 
 ReturnCode Console::connect() {
-  client_ = evql_client_init();
   if (!client_) {
-    return ReturnCode::error("ERUNTIME", "can't initialize eventql client");
+    client_ = evql_client_init();
+    if (!client_) {
+      return ReturnCode::error("ERUNTIME", "can't initialize eventql client");
+    }
   }
 
   auto rc = evql_client_connect(
@@ -109,6 +111,12 @@ ReturnCode Console::connect() {
   }
 
   return ReturnCode::success();
+}
+
+void Console::close() {
+  if (client_) {
+    evql_client_close(client_);
+  }
 }
 
 Status Console::runQuery(const String& query) {
