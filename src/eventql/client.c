@@ -49,6 +49,7 @@ static const size_t EVQL_CLIENT_DEFAULT_BATCH_SIZE = 1024;
 /**
  * Internal struct declarations
  */
+
 typedef struct {
   char* header;
   char* data;
@@ -77,9 +78,11 @@ struct evql_client_s {
       (sizeof(const char*) + sizeof(size_t)) * EVQL_CLIENT_INLINE_RBUF_SIZE];
 };
 
+
 /**
  * Internal API declarations
  */
+
 static void evql_framebuf_init(evql_framebuf_t* frame);
 static void evql_framebuf_destroy(evql_framebuf_t* frame);
 static void evql_framebuf_clear(evql_framebuf_t* frame);
@@ -141,6 +144,7 @@ static int evql_client_recvframe(
     evql_framebuf_t** frame,
     uint64_t timeout_us,
     uint16_t* flags);
+
 
 /**
  * Internal API implementation
@@ -644,7 +648,6 @@ static int evql_client_query_continue(evql_client_t* client) {
   return evql_client_query_readresultframe(client);
 }
 
-
 static void evql_client_close_hard(evql_client_t* client) {
   if (client->fd > 0) {
     close(client->fd);
@@ -707,6 +710,7 @@ static void evql_client_seterror(evql_client_t* client, const char* error) {
   client->error[error_len] = 0;
   memcpy(client->error, error, error_len);
 }
+
 
 /**
  * Public API implementation
