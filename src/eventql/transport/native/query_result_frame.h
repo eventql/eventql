@@ -22,58 +22,37 @@
  * code of your own applications
  */
 #pragma once
+#include <string>
+#include <vector>
 #include "eventql/eventql.h"
 #include "eventql/util/return_code.h"
+#include "eventql/util/util/binarymessagewriter.h"
+#include "eventql/transport/native/native_connection.h"
+#include "eventql/sql/svalue.h"
 
 namespace eventql {
+namespace native_transport {
 
-class NativeConnection{
+class QueryResultFrame {
 public:
 
-  static const size_t kMaxFrameSize = 1024 * 1024 * 256; // 256 MB
-  static const size_t kMaxFrameSizeSoft = 1024 * 1024 * 32; // 32 MB
+  QueryResultFrame(const std::vector<std::string>& columns);
 
-  NativeConnection(
-      int fd,
-      const std::string& prelude_bytes = "");
+  void addRow(const std::vector<csql::SValue>& row);
+  size_t getRowCount() const;
+  size_t getRowBytes() const;
 
-  ~NativeConnection();
+  void setIsLast(bool is_last);
 
-  ReturnCode recvFrame(
-      uint16_t* opcode,
-      std::string* payload,
-      uint16_t* flags = nullptr);
-
-  ReturnCode sendFrame(
-      uint16_t opcode,
-      const void* data,
-      size_t len,
-      uint16_t flags = 0);
-
-  ReturnCode sendFrameAsync(
-      uint16_t opcode,
-      const void* data,
-      size_t len,
-      uint16_t flags = 0);
-
-  void writeFrameHeaderAsync(
-      uint16_t opcode,
-      size_t len,
-      uint16_t flags = 0);
-
-  void writeAsync(const void* data, size_t len);
-
-  ReturnCode flushBuffer(bool block, uint64_t timeout_us = 0);
-  void close();
+  void writeTo(NativeConnection* conn);
+  void clear();
 
 protected:
-
-  ReturnCode read(char* data, size_t len, uint64_t timeout_us);
-
-  int fd_;
-  uint64_t timeout_;
-  std::string read_buf_;
-  std::string write_buf_;
+  std::vector<std::string> columns_;
+  bool is_last_;
+  size_t num_rows_;
+  util::BinaryMessageWriter data_;
 };
 
+} // namespace native_transport
 } // namespace eventql

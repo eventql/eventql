@@ -244,17 +244,16 @@ Binary Protocols.
     lenencint      flags
     lenencint      num_result_columns
     lenencint      num_result_rows
-    lenencstr*     data
+    lenencint      num_rows_modified   | if EVQL_QUERY_RESULT_COMPLETE
+    lenencint      num_rows_scanned    | if EVQL_QUERY_RESULT_COMPLETE
+    lenencint      num_bytes_scanned   | if EVQL_QUERY_RESULT_COMPLETE
+    lenencint      query_runtime_ms    | if EVQL_QUERY_RESULT_COMPLETE
+    lenencstr      database            | if EVQL_QUERY_RESULT_COMPLETE
     lenencstr*     column_names
-    lenencint      num_rows_modified
-    lenencint      num_rows_scanned
-    lenencint      num_bytes_scanned
-    lenencint      query_runtime_ms
+    lenencstr*     data
 
   Fields:
-    flags          0x01 COMPLETE - This is the last QUERY_RESULT event
-                   0x02 METADATA - This QUERY_RESULT event contains metadata
-                   0x04 STATS - This QUERY_RESULT event contains stats
+    flags          0x01 EVQL_QUERY_RESULT_COMPLETE - This is the last QUERY_RESULT event
 
     FIXME
 

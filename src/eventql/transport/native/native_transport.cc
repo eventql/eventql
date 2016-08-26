@@ -23,6 +23,7 @@
  */
 #include "eventql/transport/native/native_transport.h"
 #include "eventql/transport/native/native_connection.h"
+#include "eventql/transport/native/query_result_frame.h"
 #include "eventql/util/logging.h"
 #include "eventql/util/util/binarymessagereader.h"
 #include "eventql/server/session.h"
@@ -77,6 +78,10 @@ ReturnCode performOperation_QUERY(
     return ReturnCode::error("ERUNTIME", "invalid QUERY frame");
   }
 
+  if (q_maxrows == 0) {
+    q_maxrows = 1;
+  }
+
   /* switch database */
   if (q_flags & EVQL_QUERY_SWITCHDB) {
     auto rc = dbctx->client_auth->changeNamespace(session, q_database);
@@ -106,18 +111,27 @@ ReturnCode performOperation_QUERY(
 
     for (int i = 0; i < qplan->numStatements(); ++i) {
       /* execute query */
-      auto result_columns = qplan->getStatementgetResultColumns(i);
       auto result_cursor = qplan->execute(i);
       auto result_ncols = result_cursor->getNumColumns();
 
+      QueryResultFrame r_frame(qplan->getStatementgetResultColumns(i));
       /* send response frames */
       Vector<csql::SValue> row(result_ncols);
       while (result_cursor->next(row.data(), row.size())) {
+        r_frame.addRow(row);
 
-        /* wait for discard or continue */
+        if (r_frame.getRowCount() > q_maxrows ||
+            r_frame.getRowBytes() > NativeConnection::kMaxFrameSizeSoft) {
+          r_frame.writeTo(conn);
+          r_frame.clear();
+
+          /* wait for discard or continue */
+        }
+
       }
 
-      /* send final response frame */
+      r_frame.setIsLast(true);
+      r_frame.writeTo(conn);
 
       /* wait for discard or continue (next query) */
     }

@@ -70,6 +70,10 @@ enum {
   EVQL_QUERY_PROGRESS     = 0x4
 };
 
+enum {
+  EVQL_QUERY_RESULT_COMPLETE  = 0x1
+};
+
 /**
  * The EventQL client handle
  */

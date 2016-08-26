@@ -152,23 +152,20 @@ ReturnCode NativeConnection::sendFrameAsync(
     const void* data,
     size_t len,
     uint16_t flags /* = 0 */) {
-  uint16_t opcode_n = htons(opcode);
-  uint16_t flags_n = htons(flags);
-  uint32_t payload_len_n = htonl(len);
-
-  char header[8];
-  memcpy(&header[0], (const char*) &opcode_n, 2);
-  memcpy(&header[2], (const char*) &flags_n, 2);
-  memcpy(&header[4], (const char*) &payload_len_n, 4);
-  writeAsync(header, sizeof(header));
+  writeFrameHeaderAsync(opcode, len, flags);
   writeAsync(data, len);
-
   return flushBuffer(false, 0);
 }
 
-ReturnCode NativeConnection::flushBuffer(bool block, uint64_t timeout_us) {
+ReturnCode NativeConnection::flushBuffer(
+    bool block,
+    uint64_t timeout_us /* = 0 */) {
   if (fd_ < 0) {
     return ReturnCode::error("EIO", "connection closed");
+  }
+
+  if (block && !timeout_us) {
+    timeout_us = timeout_;
   }
 
   while (!write_buf_.empty()) {
@@ -213,6 +210,21 @@ ReturnCode NativeConnection::flushBuffer(bool block, uint64_t timeout_us) {
   }
 
   return ReturnCode::success();
+}
+
+void NativeConnection::writeFrameHeaderAsync(
+    uint16_t opcode,
+    size_t len,
+    uint16_t flags /* = 0 */) {
+  uint16_t opcode_n = htons(opcode);
+  uint16_t flags_n = htons(flags);
+  uint32_t payload_len_n = htonl(len);
+
+  char header[8];
+  memcpy(&header[0], (const char*) &opcode_n, 2);
+  memcpy(&header[2], (const char*) &flags_n, 2);
+  memcpy(&header[4], (const char*) &payload_len_n, 4);
+  writeAsync(header, sizeof(header));
 }
 
 void NativeConnection::writeAsync(const void* data, size_t len) {

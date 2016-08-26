@@ -828,6 +828,8 @@ EVQL_CORE_SOURCES_ = \
     eventql/transport/native/native_connection.h \
     eventql/transport/native/native_transport.cc \
     eventql/transport/native/native_transport.h \
+    eventql/transport/native/query_result_frame.cc \
+    eventql/transport/native/query_result_frame.h \
     eventql/db/table_ref.cc \
     eventql/db/table_ref.h \
     eventql/db/table.cc \
