@@ -208,7 +208,6 @@ Binary Protocols.
   Response:
     After sending a query message, the client should expect to receive one of
     these response messages:
-      - PING
       - ERROR
       - QUERY_PROGRESS
       - QUERY_RESULT
