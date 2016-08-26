@@ -43,7 +43,9 @@
 static const size_t EVQL_FRAME_MAX_SIZE = 1024 * 1024 * 256;
 static const size_t EVQL_FRAME_HEADER_SIZE = 8;
 static const size_t EVQL_CLIENT_DEFAULT_NETWORK_TIMEOUT_US = 1000 * 1000  * 1; // 1 second
-static const size_t EVQL_CLIENT_DEFAULT_BATCH_SIZE = 1024;
+//static const size_t EVQL_CLIENT_DEFAULT_BATCH_SIZE = 1024;
+static const size_t EVQL_CLIENT_DEFAULT_BATCH_SIZE = 10;
+#define EVQL_CLIENT_INLINE_RBUF_SIZE 10
 
 /**
  * Internal struct declarations
@@ -69,6 +71,8 @@ struct evql_client_s {
   const char** rbuf_ptrs;
   size_t* rbuf_lens;
   size_t rbuf_size;
+  char rbuf_inline[
+      (sizeof(const char*) + sizeof(size_t)) * EVQL_CLIENT_INLINE_RBUF_SIZE];
 };
 
 /**
@@ -506,7 +510,8 @@ static void evql_client_rbuf_alloc(evql_client_t* client, size_t rbuf_size) {
     return;
   }
 
-  if (client->rbuf_ptrs) {
+  if (client->rbuf_ptrs &&
+      (void*) client->rbuf_ptrs != (void*) client->rbuf_inline) {
     free(client->rbuf_ptrs);
   }
 
@@ -551,9 +556,9 @@ evql_client_t* evql_client_init() {
   client->connected = 0;
   client->timeout_us = EVQL_CLIENT_DEFAULT_NETWORK_TIMEOUT_US;
   client->batch_size = EVQL_CLIENT_DEFAULT_BATCH_SIZE;
-  client->rbuf_ptrs = NULL;
-  client->rbuf_lens = NULL;
-  client->rbuf_size = 0;
+  client->rbuf_ptrs = (const char**) client->rbuf_inline;
+  client->rbuf_lens = (size_t*) client->rbuf_ptrs + EVQL_CLIENT_INLINE_RBUF_SIZE;
+  client->rbuf_size = EVQL_CLIENT_INLINE_RBUF_SIZE;
   client->qbuf_nrows = 0;
   client->qbuf_ncols = 0;
   evql_framebuf_init(&client->recv_buf);
@@ -839,7 +844,8 @@ void evql_client_destroy(evql_client_t* client) {
     free(client->error);
   }
 
-  if (client->rbuf_ptrs) {
+  if (client->rbuf_ptrs &&
+      (void*) client->rbuf_ptrs != (void*) client->rbuf_inline) {
     free(client->rbuf_ptrs);
   }
 
