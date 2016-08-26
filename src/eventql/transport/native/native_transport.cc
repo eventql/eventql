@@ -262,11 +262,20 @@ void startConnection(Database* db, int fd, std::string prelude_bytes) {
     logDebug("eventql", "Native connection established; fd=$0", fd);
     uint16_t opcode;
     std::string payload;
-    while (rc.isSuccess()) {
+    bool cont = true;
+    while (cont && rc.isSuccess()) {
       rc = conn.recvFrame(&opcode, &payload);
+      if (!rc.isSuccess()) {
+        break;
+      }
 
-      if (rc.isSuccess()) {
-        rc = performOperation(db, &conn, opcode, payload);
+      switch (opcode) {
+        case EVQL_OP_BYE:
+          cont = false;
+          break;
+        default:
+          rc = performOperation(db, &conn, opcode, payload);
+          break;
       }
     }
 
