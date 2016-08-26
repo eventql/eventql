@@ -109,13 +109,14 @@ ReturnCode performOperation_QUERY(
           "you must set EVQL_QUERY_MULTISTMT to enable multiple statements");
     }
 
-    for (int i = 0; i < qplan->numStatements(); ++i) {
+    auto num_statements = qplan->numStatements();
+    for (int i = 0; i < num_statements; ++i) {
       /* execute query */
       auto result_cursor = qplan->execute(i);
       auto result_ncols = result_cursor->getNumColumns();
 
-      QueryResultFrame r_frame(qplan->getStatementgetResultColumns(i));
       /* send response frames */
+      QueryResultFrame r_frame(qplan->getStatementgetResultColumns(i));
       Vector<csql::SValue> row(result_ncols);
       while (result_cursor->next(row.data(), row.size())) {
         r_frame.addRow(row);
@@ -126,14 +127,61 @@ ReturnCode performOperation_QUERY(
           r_frame.clear();
 
           /* wait for discard or continue */
-        }
+          uint16_t n_opcode;
+          std::string n_payload;
+          auto rc = conn->recvFrame(&n_opcode, &n_payload);
+          if (!rc.isSuccess()) {
+            return rc;
+          }
 
+          bool cont = true;
+          switch (n_opcode) {
+            case EVQL_OP_QUERY_CONTINUE:
+              break;
+            case EVQL_OP_QUERY_DISCARD:
+              cont = false;
+              break;
+            default:
+              conn->close();
+              return ReturnCode::error("ERUNTIME", "unexpected opcode");
+          }
+
+          if (!cont) {
+            break;
+          }
+        }
       }
 
       r_frame.setIsLast(true);
       r_frame.writeTo(conn);
 
+      if (i + 1 == num_statements) {
+        break;
+      }
+
       /* wait for discard or continue (next query) */
+      uint16_t n_opcode;
+      std::string n_payload;
+      auto rc = conn->recvFrame(&n_opcode, &n_payload);
+      if (!rc.isSuccess()) {
+        return rc;
+      }
+
+      bool cont = true;
+      switch (n_opcode) {
+        case EVQL_OP_QUERY_NEXT:
+          break;
+        case EVQL_OP_QUERY_DISCARD:
+          cont = false;
+          break;
+        default:
+          conn->close();
+          return ReturnCode::error("ERUNTIME", "unexpected opcode");
+      }
+
+      if (!cont) {
+        break;
+      }
     }
   } catch (const StandardException& e) {
     return sendError(conn, e.what());

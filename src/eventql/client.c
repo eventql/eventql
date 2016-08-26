@@ -39,9 +39,10 @@
 #error "unsupported char size"
 #endif
 
-static const size_t EVQL_DEFAULT_TIMEOUT_US = 1000 * 1000  * 1; // 1 second
 static const size_t EVQL_FRAME_MAX_SIZE = 1024 * 1024 * 256;
 static const size_t EVQL_FRAME_HEADER_SIZE = 8;
+static const size_t EVQL_CLIENT_DEFAULT_NETWORK_TIMEOUT_US = 1000 * 1000  * 1; // 1 second
+static const size_t EVQL_CLIENT_DEFAULT_BATCH_SIZE = 1024;
 
 /**
  * Internal struct declarations
@@ -61,6 +62,7 @@ struct evql_client_s {
   int connected;
   evql_framebuf_t recv_buf;
   uint64_t timeout_us;
+  size_t batch_size;
 };
 
 /**
@@ -517,7 +519,8 @@ evql_client_t* evql_client_init() {
   client->fd = -1;
   client->error = NULL;
   client->connected = 0;
-  client->timeout_us = EVQL_DEFAULT_TIMEOUT_US;
+  client->timeout_us = EVQL_CLIENT_DEFAULT_NETWORK_TIMEOUT_US;
+  client->batch_size = EVQL_CLIENT_DEFAULT_BATCH_SIZE;
   evql_framebuf_init(&client->recv_buf);
   return client;
 }
