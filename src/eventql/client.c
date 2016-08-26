@@ -43,8 +43,7 @@
 static const size_t EVQL_FRAME_MAX_SIZE = 1024 * 1024 * 256;
 static const size_t EVQL_FRAME_HEADER_SIZE = 8;
 static const size_t EVQL_CLIENT_DEFAULT_NETWORK_TIMEOUT_US = 1000 * 1000  * 1; // 1 second
-//static const size_t EVQL_CLIENT_DEFAULT_BATCH_SIZE = 1024;
-static const size_t EVQL_CLIENT_DEFAULT_BATCH_SIZE = 10;
+static const size_t EVQL_CLIENT_DEFAULT_BATCH_SIZE = 1024;
 #define EVQL_CLIENT_INLINE_RBUF_SIZE 10
 
 /**
@@ -67,6 +66,8 @@ struct evql_client_s {
   size_t batch_size;
   evql_framebuf_t recv_buf;
   int qbuf_valid;
+  int qbuf_islast;
+  int qbuf_pendingstmt;
   size_t qbuf_nrows;
   size_t qbuf_ncols;
   const char** rbuf_ptrs;
@@ -161,11 +162,12 @@ static void evql_framebuf_destroy(evql_framebuf_t* frame) {
 
 static void evql_framebuf_resize(evql_framebuf_t* frame, size_t len) {
   if (len <= frame->capacity) {
+    frame->length = len;
     return;
   }
 
+  frame->capacity = len; // FIXME
   frame->length = len;
-  frame->capacity = len;
   if (frame->data) {
     frame->header = realloc(
         frame->header,
@@ -414,9 +416,9 @@ static int evql_client_recvframe(
     return -1;
   }
 
-  *opcode = htons(*((uint16_t*) &header[0]));
-  uint16_t flags = htons(*((uint16_t*) &header[2]));
-  uint32_t payload_len = htonl(*((uint32_t*) &header[4]));
+  *opcode = ntohs(*((uint16_t*) &header[0]));
+  uint16_t flags = ntohs(*((uint16_t*) &header[2]));
+  uint32_t payload_len = ntohl(*((uint32_t*) &header[4]));
   if (recvflags) {
     *recvflags = flags;
   }
@@ -499,9 +501,49 @@ static int evql_client_handshake(evql_client_t* client) {
   return 0;
 }
 
-static int evql_read_query_result_header(
-    evql_client_t* client) {
-  evql_framebuf_t* r_buf = &client->recv_buf;
+static int evql_client_query_readresultframe(evql_client_t* client) {
+  int done = 0;
+  uint16_t response_opcode;
+  evql_framebuf_t* r_buf;
+  while (!done) {
+    int rc = evql_client_recvframe(
+        client,
+        &response_opcode,
+        &r_buf,
+        client->timeout_us,
+        NULL);
+
+    if (rc < 0) {
+      evql_client_close_hard(client);
+      return -1;
+    }
+
+    switch (response_opcode) {
+      case EVQL_OP_QUERY_RESULT:
+        done = 1;
+        break;
+
+      case EVQL_OP_ERROR: {
+        const char* err;
+        size_t err_len;
+        if (evql_framebuf_readlenencstr(r_buf, &err, &err_len) == 0) {
+          evql_client_seterror(client, err);
+        } else {
+          evql_client_seterror(client, "<unspecified error>");
+        }
+
+        evql_client_close_hard(client);
+        return -1;
+      }
+
+      default:
+        evql_client_seterror(client, "received unexpected opcode");
+        evql_client_close_hard(client);
+        return -1;
+    }
+  }
+
+  assert(response_opcode == EVQL_OP_QUERY_RESULT);
 
   uint64_t r_flags;
   if (evql_framebuf_readlenencint(r_buf, &r_flags) == -1) {
@@ -564,11 +606,44 @@ static int evql_read_query_result_header(
   }
 
   client->qbuf_valid = 1;
+  client->qbuf_islast = (r_flags & EVQL_QUERY_RESULT_COMPLETE) > 0;
+  client->qbuf_pendingstmt = (r_flags & EVQL_QUERY_RESULT_PENDINGSTMT) > 0;
   client->qbuf_nrows = r_nrows;
   client->qbuf_ncols = r_ncols;
   evql_client_rbuf_alloc(client, r_ncols);
   return 0;
 }
+
+static int evql_client_query_continue(evql_client_t* client) {
+  if (!client->connected) {
+    evql_client_seterror(client, "not connected");
+    return -1;
+  }
+
+  /* send CONTINUE frame */
+  {
+    evql_framebuf_t cframe;
+    evql_framebuf_init(&cframe);
+
+    int rc = evql_client_sendframe(
+        client,
+        EVQL_OP_QUERY_CONTINUE,
+        &cframe,
+        client->timeout_us,
+        0);
+
+    evql_framebuf_destroy(&cframe);
+
+    if (rc < 0) {
+      evql_client_close_hard(client);
+      return -1;
+    }
+  }
+
+  /* receive response frames */
+  return evql_client_query_readresultframe(client);
+}
+
 
 static void evql_client_close_hard(evql_client_t* client) {
   if (client->fd > 0) {
@@ -652,6 +727,8 @@ evql_client_t* evql_client_init() {
   client->rbuf_lens = (size_t*) client->rbuf_ptrs + EVQL_CLIENT_INLINE_RBUF_SIZE;
   client->rbuf_size = EVQL_CLIENT_INLINE_RBUF_SIZE;
   client->qbuf_valid = 0;
+  client->qbuf_islast = 0;
+  client->qbuf_pendingstmt = 0;
   client->qbuf_nrows = 0;
   client->qbuf_ncols = 0;
   evql_framebuf_init(&client->recv_buf);
@@ -770,49 +847,7 @@ int evql_query(
   }
 
   /* receive response frames */
-  int done = 0;
-  uint16_t response_opcode;
-  evql_framebuf_t* response_frame;
-  while (!done) {
-    int rc = evql_client_recvframe(
-        client,
-        &response_opcode,
-        &response_frame,
-        client->timeout_us,
-        NULL);
-
-    if (rc < 0) {
-      evql_client_close_hard(client);
-      return -1;
-    }
-
-    switch (response_opcode) {
-      case EVQL_OP_QUERY_RESULT:
-        done = 1;
-        break;
-
-      case EVQL_OP_ERROR: {
-        const char* err;
-        size_t err_len;
-        if (evql_framebuf_readlenencstr(response_frame, &err, &err_len) == 0) {
-          evql_client_seterror(client, err);
-        } else {
-          evql_client_seterror(client, "<unspecified error>");
-        }
-
-        evql_client_close_hard(client);
-        return -1;
-      }
-
-      default:
-        evql_client_seterror(client, "received unexpected opcode");
-        evql_client_close_hard(client);
-        return -1;
-    }
-  }
-
-  assert(response_opcode == EVQL_OP_QUERY_RESULT);
-  return evql_read_query_result_header(client);
+  return evql_client_query_readresultframe(client);
 }
 
 int evql_fetch_row(
@@ -824,8 +859,15 @@ int evql_fetch_row(
     return -1;
   }
 
-  if (client->qbuf_nrows == 0) {
-    return 0;
+  while (client->qbuf_nrows == 0) {
+    if (client->qbuf_islast) {
+      return 0; // eof
+    }
+
+    /* fetch next piece */
+    if (evql_client_query_continue(client) == -1) {
+      return -1;
+    }
   }
 
   for (int i = 0; i < client->qbuf_ncols; ++i) {
@@ -879,6 +921,8 @@ void evql_client_qbuf_free(evql_client_t* client) {
   }
 
   client->qbuf_valid = 0;
+  client->qbuf_islast = 0;
+  client->qbuf_pendingstmt = 0;
   client->qbuf_nrows = 0;
   client->qbuf_ncols = 0;
 

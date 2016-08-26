@@ -118,9 +118,9 @@ ReturnCode NativeConnection::recvFrame(
     return rc;
   }
 
-  *opcode = htons(*((uint16_t*) &header[0]));
-  uint16_t flags = htons(*((uint16_t*) &header[2]));
-  uint32_t payload_len = htonl(*((uint32_t*) &header[4]));
+  *opcode = ntohs(*((uint16_t*) &header[0]));
+  uint16_t flags = ntohs(*((uint16_t*) &header[2]));
+  uint32_t payload_len = ntohl(*((uint32_t*) &header[4]));
   if (recvflags) {
     *recvflags = flags;
   }
