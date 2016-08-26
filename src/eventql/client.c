@@ -44,7 +44,8 @@ static const size_t EVQL_FRAME_MAX_SIZE = 1024 * 1024 * 256;
 static const size_t EVQL_FRAME_HEADER_SIZE = 8;
 static const size_t EVQL_CLIENT_DEFAULT_NETWORK_TIMEOUT_US = 1000 * 1000  * 1; // 1 second
 static const size_t EVQL_CLIENT_DEFAULT_BATCH_SIZE = 1024;
-#define EVQL_CLIENT_INLINE_RBUF_SIZE 10
+#define EVQL_CLIENT_INLINE_RBUF_SIZE 64
+#define EVQL_CLIENT_INLINE_CBUF_SIZE 1024
 
 /**
  * Internal struct declarations
@@ -79,6 +80,7 @@ struct evql_client_s {
   char** cbuf;
   size_t cbuf_nbytes;
   size_t cbuf_nentries;
+  size_t cbuf_inline[EVQL_CLIENT_INLINE_CBUF_SIZE];
 };
 
 
@@ -749,9 +751,9 @@ evql_client_t* evql_client_init() {
   client->qbuf_pendingstmt = 0;
   client->qbuf_nrows = 0;
   client->qbuf_ncols = 0;
-  client->cbuf = NULL;
+  client->cbuf = (char**) client->cbuf_inline;
   client->cbuf_nentries = 0;
-  client->cbuf_nbytes = 0;
+  client->cbuf_nbytes = EVQL_CLIENT_INLINE_CBUF_SIZE;
   evql_framebuf_init(&client->recv_buf);
   return client;
 }
@@ -1012,7 +1014,7 @@ static void evql_client_cbuf_alloc(evql_client_t* client, size_t cbuf_len) {
     free(client->cbuf);
   }
 
-  client->cbuf = malloc(cbuf_len);
+  client->cbuf = malloc(cbuf_len); // FIXME
   client->cbuf_nbytes = cbuf_len;
   if (!client->cbuf) {
     abort();
@@ -1042,13 +1044,13 @@ static void evql_client_cbuf_set(
 }
 
 static void evql_client_cbuf_free(evql_client_t* client) {
-  if (client->cbuf) {
+  if (client->cbuf && (void*) client->cbuf != (void*) client->cbuf_inline) {
     free(client->cbuf);
-    client->cbuf = NULL;
   }
 
-  client->cbuf_nbytes = 0;
+  client->cbuf = (char**) client->cbuf_inline;
   client->cbuf_nentries = 0;
+  client->cbuf_nbytes = EVQL_CLIENT_INLINE_CBUF_SIZE;
 }
 
 static const char* EVQL_CLIENT_UNSPECIFIED_ERROR = "<unspecified error>";
