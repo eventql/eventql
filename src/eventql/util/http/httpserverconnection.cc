@@ -34,6 +34,24 @@ std::string inspect(const http::HTTPServerConnection& conn) {
 
 namespace http {
 
+void HTTPServerConnection::start(
+    HTTPHandlerFactory* handler_factory,
+    ScopedPtr<net::TCPConnection> conn,
+    TaskScheduler* scheduler,
+    HTTPServerStats* stats,
+    const std::string& prelude_bytes /* = "" */) {
+  auto http_conn = new HTTPServerConnection(
+      handler_factory,
+      std::move(conn),
+      scheduler,
+      stats);
+
+  // N.B. we don't leak the connection here. it is ref counted and will
+  // free itself
+  http_conn->incRef();
+  http_conn->nextRequest(prelude_bytes);
+}
+
 HTTPServerConnection::HTTPServerConnection(
     HTTPHandlerFactory* handler_factory,
     ScopedPtr<net::TCPConnection> conn,
@@ -81,10 +99,6 @@ HTTPServerConnection::HTTPServerConnection(
 
 HTTPServerConnection::~HTTPServerConnection() {
   stats_->current_connections.decr(1);
-}
-
-void HTTPServerConnection::start(const std::string& prelude_bytes /* = "" */) {
-  nextRequest(prelude_bytes);
 }
 
 void HTTPServerConnection::read() {
@@ -255,7 +269,7 @@ void HTTPServerConnection::readRequestBody(
     if (last_chunk || body_buf_.size() > 0) {
       BufferRef chunk(new Buffer(body_buf_));
 
-      scheduler_->run([callback, chunk, last_chunk] {
+      scheduler_->run([callback, chunk, last_chunk] { // FIXME runAsyc
         callback(
             (const char*) chunk->data(),
             chunk->size(),
@@ -340,6 +354,9 @@ void HTTPServerConnection::close() {
   closed_ = true;
   scheduler_->cancelFD(conn_->fd());
   conn_->close();
+
+  lk.unlock();
+  decRef();
 }
 
 bool HTTPServerConnection::isClosed() const {

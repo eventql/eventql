@@ -28,71 +28,6 @@
 
 namespace eventql {
 
-namespace {
-
-class LocalTaskScheduler : public TaskScheduler {
-public:
-
-  void run(std::function<void()> task) override {
-    task();
-  }
-
-  void runOnReadable(std::function<void()> task, int fd) override {
-    fd_set op_read, op_write;
-    FD_ZERO(&op_read);
-    FD_ZERO(&op_write);
-    FD_SET(fd, &op_read);
-
-    auto res = select(fd + 1, &op_read, &op_write, &op_read, NULL);
-
-    if (res == 0) {
-      RAISE(kIOError, "unexpected timeout while select()ing");
-    }
-
-    if (res == -1) {
-      RAISE_ERRNO(kIOError, "select() failed");
-    }
-
-    task();
-  }
-
-  void runOnWritable(std::function<void()> task, int fd) override{
-    run([task, fd] () {
-      fd_set op_read, op_write;
-      FD_ZERO(&op_read);
-      FD_ZERO(&op_write);
-      FD_SET(fd, &op_write);
-
-      auto res = select(fd + 1, &op_read, &op_write, &op_write, NULL);
-
-      if (res == 0) {
-        RAISE(kIOError, "unexpected timeout while select()ing");
-      }
-
-      if (res == -1) {
-        RAISE_ERRNO(kIOError, "select() failed");
-      }
-
-      task();
-    });
-  }
-
-  void runOnWakeup(
-      std::function<void()> task,
-      Wakeup* wakeup,
-      long generation) override {
-    run([task, wakeup, generation] () {
-      wakeup->waitForWakeup(generation);
-      task();
-    });
-  }
-
-};
-
-static LocalTaskScheduler local_scheduler;
-
-} // namespace
-
 HTTPTransport::HTTPTransport(
     Database* database) :
     database_(database),
@@ -108,23 +43,32 @@ HTTPTransport::HTTPTransport(
 void HTTPTransport::handleConnection(int fd, std::string prelude_bytes) {
   logDebug("eventql", "Opening new http connection; fd=$0", fd);
 
-  database_->startThread([this, fd, prelude_bytes] (Session* session) {
-    try {
-      auto http_conn = mkRef(
-          new http::HTTPServerConnection(
-              &http_router_,
-              ScopedPtr<net::TCPConnection>(new net::TCPConnection(fd)),
-              &local_scheduler,
-              &http_stats_));
+  try {
+        http::HTTPServerConnection::start(
+            &http_router_,
+            ScopedPtr<net::TCPConnection>(new net::TCPConnection(fd)),
+            &ev_,
+            &http_stats_,
+            prelude_bytes);
 
-      http_conn->start(prelude_bytes);
-    } catch (const std::exception& e){
-      logError(
-          "eventql",
-          "HTTP connection error: $0",
-          e.what());
-    }
+    //http_conn->start(prelude_bytes);
+  } catch (const std::exception& e){
+    logError(
+        "eventql",
+        "HTTP connection error: $0",
+        e.what());
+  }
+}
+
+void HTTPTransport::startIOThread() {
+  io_thread_ = std::thread([this] () {
+    ev_.run();
   });
+}
+
+void HTTPTransport::stopIOThread() {
+  ev_.shutdown();
+  io_thread_.join();
 }
 
 } // namespace eventql

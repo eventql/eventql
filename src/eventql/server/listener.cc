@@ -125,6 +125,8 @@ ReturnCode Listener::bind(int listen_port) {
 }
 
 void Listener::run() {
+  http_transport_.startIOThread();
+
   while (running_.load()) {
     fd_set op_read, op_write, op_error;
     FD_ZERO(&op_read);
@@ -180,7 +182,7 @@ void Listener::run() {
         }
 
         logError("eventql", "select() failed");
-        return;
+        goto exit;
     }
 
     if (FD_ISSET(ssock_, &op_read)) {
@@ -199,7 +201,7 @@ void Listener::run() {
             strerror(errno));
 
         close(conn_fd);
-        return;
+        continue;
       }
 
       EstablishingConnection c;
@@ -218,6 +220,10 @@ void Listener::run() {
       }
     }
   }
+
+exit:
+  http_transport_.stopIOThread();
+  return;
 }
 
 void Listener::shutdown() {

@@ -80,15 +80,14 @@ public:
    *         });
    *
    **/
-  HTTPServerConnection(
+  static void start(
       HTTPHandlerFactory* handler_factory,
       ScopedPtr<net::TCPConnection> conn,
       TaskScheduler* scheduler,
-      HTTPServerStats* stats);
+      HTTPServerStats* stats,
+      const std::string& prelude_bytes = "");
 
   ~HTTPServerConnection();
-
-  void start(const std::string& prelude_bytes = "");
 
   void readRequestBody(
       Function<void (
@@ -117,6 +116,11 @@ public:
   bool isClosed() const;
 
 protected:
+  HTTPServerConnection(
+      HTTPHandlerFactory* handler_factory,
+      ScopedPtr<net::TCPConnection> conn,
+      TaskScheduler* scheduler,
+      HTTPServerStats* stats);
 
   void nextRequest(const std::string& prelude_bytes = "");
   void dispatchRequest();
