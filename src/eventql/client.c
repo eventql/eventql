@@ -62,8 +62,8 @@ struct evql_client_s {
   char* error;
   int connected;
   evql_framebuf_t recv_buf;
-  size_t rbuf_nrows;
-  size_t rbuf_ncols;
+  size_t qbuf_nrows;
+  size_t qbuf_ncols;
   uint64_t timeout_us;
   size_t batch_size;
 };
@@ -526,8 +526,8 @@ evql_client_t* evql_client_init() {
   client->connected = 0;
   client->timeout_us = EVQL_CLIENT_DEFAULT_NETWORK_TIMEOUT_US;
   client->batch_size = EVQL_CLIENT_DEFAULT_BATCH_SIZE;
-  client->rbuf_nrows = 0;
-  client->rbuf_ncols = 0;
+  client->qbuf_nrows = 0;
+  client->qbuf_ncols = 0;
   evql_framebuf_init(&client->recv_buf);
   return client;
 }
@@ -671,8 +671,8 @@ static int evql_read_query_result_header(
     }
   }
 
-  client->rbuf_nrows = r_nrows;
-  client->rbuf_ncols = r_ncols;
+  client->qbuf_nrows = r_nrows;
+  client->qbuf_ncols = r_ncols;
 
   return 0;
 }
@@ -758,15 +758,15 @@ int evql_fetch_row(
     evql_client_t* client,
     const char*** fields,
     size_t** field_lengths) {
-  if (client->rbuf_nrows == 0) {
+  if (client->qbuf_nrows == 0) {
     return 0;
   }
 
-  //for (int i = 0; i < client->rbuf_ncols; ++i) {
+  //for (int i = 0; i < client->qbuf_ncols; ++i) {
   //  
   //}
 
-  --client->rbuf_nrows;
+  --client->qbuf_nrows;
   return -1;
 }
 
@@ -782,13 +782,13 @@ int evql_column_name(
 }
 
 int evql_num_columns(evql_client_t* client, size_t* ncols) {
-  *ncols = client->rbuf_ncols;
+  *ncols = client->qbuf_ncols;
   return 0;
 }
 
 void evql_free_result(evql_client_t* client) {
-  client->rbuf_nrows = 0;
-  client->rbuf_ncols = 0;
+  client->qbuf_nrows = 0;
+  client->qbuf_ncols = 0;
 }
 
 void evql_client_destroy(evql_client_t* client) {
