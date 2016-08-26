@@ -191,7 +191,7 @@ Status Console::runQueryTable(const String& query) {
     }
 
     std::vector<std::string> row;
-    for (int i = 0; rc == 0 && i < result_ncols; ++i) {
+    for (int i = 0; i < result_ncols; ++i) {
       row.emplace_back(fields[i], field_lens[i]);
     }
 

@@ -827,7 +827,7 @@ int evql_fetch_row(
   *fields = client->rbuf_ptrs;
   *field_lengths = client->rbuf_lens;
   --client->qbuf_nrows;
-  return 0;
+  return 1;
 }
 
 static const char* fubar = "fubar";
