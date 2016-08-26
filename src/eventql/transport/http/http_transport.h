@@ -34,6 +34,20 @@
 
 namespace eventql {
 
+class SessionTaskScheduler : public TaskScheduler {
+public:
+  SessionTaskScheduler(Database* db);
+  void run(std::function<void()> task) override;
+  void runOnReadable(std::function<void()> task, int fd) override;
+  void runOnWritable(std::function<void()> task, int fd) override;
+  void runOnWakeup(
+      std::function<void()> task,
+      Wakeup* wakeup,
+      long generation) override;
+protected:
+  Database* db_;
+};
+
 class HTTPTransport {
 public:
 
@@ -54,6 +68,7 @@ protected:
   APIServlet api_servlet_;
   RPCServlet rpc_servlet_;
   std::thread io_thread_;
+  SessionTaskScheduler session_scheduler_;
 };
 
 } // namespace eventql

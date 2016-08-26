@@ -28,15 +28,51 @@
 
 namespace eventql {
 
+SessionTaskScheduler::SessionTaskScheduler(Database* db) : db_(db) {}
+
+void SessionTaskScheduler::run(std::function<void()> task) {
+  db_->startThread([task] (Session* session) {
+    task();
+  });
+}
+
+void SessionTaskScheduler::runOnReadable(std::function<void()> task, int fd) {
+  abort();
+}
+
+void SessionTaskScheduler::runOnWritable(std::function<void()> task, int fd) {
+  abort();
+}
+
+void SessionTaskScheduler::runOnWakeup(
+    std::function<void()> task,
+    Wakeup* wakeup,
+    long generation) {
+  abort();
+}
+
 HTTPTransport::HTTPTransport(
     Database* database) :
     database_(database),
     status_servlet_(database),
     api_servlet_(database),
-    rpc_servlet_(database) {
-  http_router_.addRouteByPrefixMatch("/rpc/", &rpc_servlet_);
-  http_router_.addRouteByPrefixMatch("/api/", &api_servlet_);
-  http_router_.addRouteByPrefixMatch("/eventql", &status_servlet_);
+    rpc_servlet_(database),
+    session_scheduler_(database) {
+  http_router_.addRouteByPrefixMatch(
+      "/rpc/",
+      &rpc_servlet_,
+      &session_scheduler_);
+
+  http_router_.addRouteByPrefixMatch(
+      "/api/",
+      &api_servlet_,
+      &session_scheduler_);
+
+  http_router_.addRouteByPrefixMatch(
+      "/eventql",
+      &status_servlet_,
+      &session_scheduler_);
+
   http_router_.addRouteByPrefixMatch("/", &default_servlet_);
 }
 
