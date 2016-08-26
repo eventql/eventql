@@ -63,12 +63,12 @@ struct evql_client_s {
   int fd;
   char* error;
   int connected;
+  uint64_t timeout_us;
+  size_t batch_size;
   evql_framebuf_t recv_buf;
   int qbuf_valid;
   size_t qbuf_nrows;
   size_t qbuf_ncols;
-  uint64_t timeout_us;
-  size_t batch_size;
   const char** rbuf_ptrs;
   size_t* rbuf_lens;
   size_t rbuf_size;
@@ -108,6 +108,7 @@ static int evql_framebuf_readlenencstr(
     size_t* len);
 
 static void evql_client_rbuf_alloc(evql_client_t* client, size_t rbuf_size);
+static void evql_client_rbuf_free(evql_client_t* client);
 static void evql_client_seterror(evql_client_t* client, const char* error);
 static void evql_client_qbuf_free(evql_client_t* client);
 
@@ -606,6 +607,17 @@ static void evql_client_rbuf_alloc(evql_client_t* client, size_t rbuf_size) {
   client->rbuf_lens = (size_t*) (client->rbuf_ptrs + rbuf_size);
 }
 
+static void evql_client_rbuf_free(evql_client_t* client) {
+  if (client->rbuf_ptrs &&
+      (void*) client->rbuf_ptrs != (void*) client->rbuf_inline) {
+    free(client->rbuf_ptrs);
+  }
+
+  client->rbuf_ptrs = (const char**) client->rbuf_inline;
+  client->rbuf_lens = (size_t*) client->rbuf_ptrs + EVQL_CLIENT_INLINE_RBUF_SIZE;
+  client->rbuf_size = EVQL_CLIENT_INLINE_RBUF_SIZE;
+}
+
 static void evql_client_seterror(evql_client_t* client, const char* error) {
   if (client->error) {
     free(client->error);
@@ -877,6 +889,14 @@ void evql_client_qbuf_free(evql_client_t* client) {
 }
 
 void evql_client_releasebuffers(evql_client_t* client) {
+  if (client->error) {
+    free(client->error);
+    client->error = NULL;
+  }
+
+  evql_client_qbuf_free(client);
+  evql_client_rbuf_free(client);
+  //evql_framebuf_release(&client->recv_buf);
 }
 
 int evql_client_close(evql_client_t* client) {
@@ -911,11 +931,7 @@ void evql_client_destroy(evql_client_t* client) {
   }
 
   evql_client_qbuf_free(client);
-
-  if (client->rbuf_ptrs &&
-      (void*) client->rbuf_ptrs != (void*) client->rbuf_inline) {
-    free(client->rbuf_ptrs);
-  }
+  evql_client_rbuf_free(client);
 
   evql_framebuf_destroy(&client->recv_buf);
   free(client);
