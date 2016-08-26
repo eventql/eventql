@@ -80,7 +80,7 @@ struct evql_client_s {
   char** cbuf;
   size_t cbuf_nbytes;
   size_t cbuf_nentries;
-  size_t cbuf_inline[EVQL_CLIENT_INLINE_CBUF_SIZE];
+  char cbuf_inline[EVQL_CLIENT_INLINE_CBUF_SIZE];
 };
 
 
