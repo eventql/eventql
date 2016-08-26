@@ -66,6 +66,9 @@ struct evql_client_s {
   size_t qbuf_ncols;
   uint64_t timeout_us;
   size_t batch_size;
+  const char** rbuf_ptrs;
+  size_t* rbuf_lens;
+  size_t rbuf_size;
 };
 
 /**
@@ -99,6 +102,7 @@ static int evql_framebuf_readlenencstr(
     const char** val,
     size_t* len);
 
+static void evql_client_rbuf_alloc(evql_client_t* client, size_t rbuf_size);
 static void evql_client_seterror(evql_client_t* client, const char* error);
 
 static int evql_client_handshake(evql_client_t* client);
@@ -497,6 +501,27 @@ static void evql_client_close(evql_client_t* client) {
   client->connected = 0;
 }
 
+static void evql_client_rbuf_alloc(evql_client_t* client, size_t rbuf_size) {
+  if (rbuf_size <= client->rbuf_size) {
+    return;
+  }
+
+  if (client->rbuf_ptrs) {
+    free(client->rbuf_ptrs);
+  }
+
+  client->rbuf_ptrs = malloc(
+      sizeof(const char*) * rbuf_size +
+      sizeof(size_t) * rbuf_size);
+
+  if (!client->rbuf_ptrs) {
+    abort();
+  }
+
+  client->rbuf_size = rbuf_size;
+  client->rbuf_lens = (size_t*) (client->rbuf_ptrs + rbuf_size);
+}
+
 static void evql_client_seterror(evql_client_t* client, const char* error) {
   if (client->error) {
     free(client->error);
@@ -526,6 +551,9 @@ evql_client_t* evql_client_init() {
   client->connected = 0;
   client->timeout_us = EVQL_CLIENT_DEFAULT_NETWORK_TIMEOUT_US;
   client->batch_size = EVQL_CLIENT_DEFAULT_BATCH_SIZE;
+  client->rbuf_ptrs = NULL;
+  client->rbuf_lens = NULL;
+  client->rbuf_size = 0;
   client->qbuf_nrows = 0;
   client->qbuf_ncols = 0;
   evql_framebuf_init(&client->recv_buf);
@@ -673,7 +701,7 @@ static int evql_read_query_result_header(
 
   client->qbuf_nrows = r_nrows;
   client->qbuf_ncols = r_ncols;
-
+  evql_client_rbuf_alloc(client, r_ncols);
   return 0;
 }
 
@@ -762,12 +790,23 @@ int evql_fetch_row(
     return 0;
   }
 
-  //for (int i = 0; i < client->qbuf_ncols; ++i) {
-  //  
-  //}
+  for (int i = 0; i < client->qbuf_ncols; ++i) {
+    int rc = evql_framebuf_readlenencstr(
+          &client->recv_buf,
+          &client->rbuf_ptrs[i],
+          &client->rbuf_lens[i]);
 
+    if (rc == -1) {
+      evql_client_seterror(client, "invalid encoding");
+      evql_client_close(client);
+      return -1;
+    }
+  }
+
+  *fields = client->rbuf_ptrs;
+  *field_lengths = client->rbuf_lens;
   --client->qbuf_nrows;
-  return -1;
+  return 0;
 }
 
 static const char* fubar = "fubar";
@@ -798,6 +837,10 @@ void evql_client_destroy(evql_client_t* client) {
 
   if (client->error) {
     free(client->error);
+  }
+
+  if (client->rbuf_ptrs) {
+    free(client->rbuf_ptrs);
   }
 
   evql_free_result(client);
