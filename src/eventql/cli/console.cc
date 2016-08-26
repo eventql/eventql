@@ -186,7 +186,7 @@ Status Console::runQueryTable(const String& query) {
     const char** fields;
     size_t* field_lens;
     rc = evql_fetch_row(client_, &fields, &field_lens);
-    if (rc == -1) {
+    if (rc < 1) {
       break;
     }
 
@@ -196,9 +196,6 @@ Status Console::runQueryTable(const String& query) {
     }
 
     results.addRow(row);
-    if (rc == 0) {
-      break;
-    }
   }
 
   evql_client_releasebuffers(client_);
