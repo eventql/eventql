@@ -52,17 +52,16 @@ extern "C" {
 enum {
   EVQL_OP_HELLO           = 0x5e00,
   EVQL_OP_PING            = 0x0001,
-  EVQL_OP_ERROR           = 0x0002,
-  EVQL_OP_ACK             = 0x0003,
-  EVQL_OP_KILL            = 0x0004,
-  EVQL_OP_KILLED          = 0x0005,
+  EVQL_OP_PONG            = 0x0002,
+  EVQL_OP_ERROR           = 0x0003,
+  EVQL_OP_READY           = 0x0004,
+  EVQL_OP_BYE             = 0x0005,
   EVQL_OP_QUERY           = 0x0006,
   EVQL_OP_QUERY_RESULT    = 0x0007,
   EVQL_OP_QUERY_CONTINUE  = 0x0008,
   EVQL_OP_QUERY_DISCARD   = 0x0009,
   EVQL_OP_QUERY_PROGRESS  = 0x0010,
-  EVQL_OP_QUERY_NEXT      = 0x0011,
-  EVQL_OP_READY           = 0x0012
+  EVQL_OP_QUERY_NEXT      = 0x0011
 };
 
 enum {
@@ -88,11 +87,6 @@ typedef struct evql_client_s evql_client_t;
  * Create a new eventql client
  */
 evql_client_t* evql_client_init();
-
-/**
- * Destroy a eventql client
- */
-void evql_client_destroy(evql_client_t* client);
 
 /**
  * Connect to an eventql server
@@ -160,12 +154,17 @@ int evql_more_results(evql_client_t* client);
 /**
  * Free the current result
  */
-void evql_free_result(evql_client_t* client);
+void evql_client_releasebuffers(evql_client_t* client);
 
 /**
  * Return the latest error message
  */
 const char* evql_client_geterror(evql_client_t* client);
+
+/**
+ * Destroy a eventql client
+ */
+void evql_client_destroy(evql_client_t* client);
 
 
 /**

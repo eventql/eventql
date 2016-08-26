@@ -193,7 +193,7 @@ Status Console::runQueryTable(const String& query) {
     }
   }
 
-  evql_free_result(client_);
+  evql_client_releasebuffers(client_);
 
   if (is_tty) {
     stderr_os->eraseLine();

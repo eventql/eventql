@@ -64,6 +64,7 @@ struct evql_client_s {
   char* error;
   int connected;
   evql_framebuf_t recv_buf;
+  int qbuf_valid;
   size_t qbuf_nrows;
   size_t qbuf_ncols;
   uint64_t timeout_us;
@@ -108,6 +109,7 @@ static int evql_framebuf_readlenencstr(
 
 static void evql_client_rbuf_alloc(evql_client_t* client, size_t rbuf_size);
 static void evql_client_seterror(evql_client_t* client, const char* error);
+static void evql_client_qbuf_free(evql_client_t* client);
 
 static int evql_client_handshake(evql_client_t* client);
 static void evql_client_close(evql_client_t* client);
@@ -424,9 +426,9 @@ static int evql_client_recvframe(
     return -1;
   }
 
+  evql_client_qbuf_free(client);
   evql_framebuf_clear(&client->recv_buf);
   evql_framebuf_resize(&client->recv_buf, payload_len);
-  evql_free_result(client);
 
   rc = evql_client_read(
       client,
@@ -515,14 +517,20 @@ static void evql_client_rbuf_alloc(evql_client_t* client, size_t rbuf_size) {
     free(client->rbuf_ptrs);
   }
 
-  client->rbuf_ptrs = malloc(
+  void* rbuf_alloc = malloc(
       sizeof(const char*) * rbuf_size +
       sizeof(size_t) * rbuf_size);
 
-  if (!client->rbuf_ptrs) {
+  if (!rbuf_alloc) {
     abort();
   }
 
+  memset(
+      rbuf_alloc,
+      0,
+      sizeof(const char*) * rbuf_size + sizeof(size_t) * rbuf_size);
+
+  client->rbuf_ptrs = rbuf_alloc;
   client->rbuf_size = rbuf_size;
   client->rbuf_lens = (size_t*) (client->rbuf_ptrs + rbuf_size);
 }
@@ -556,9 +564,11 @@ evql_client_t* evql_client_init() {
   client->connected = 0;
   client->timeout_us = EVQL_CLIENT_DEFAULT_NETWORK_TIMEOUT_US;
   client->batch_size = EVQL_CLIENT_DEFAULT_BATCH_SIZE;
+  memset(client->rbuf_inline, 0, sizeof(client->rbuf_inline));
   client->rbuf_ptrs = (const char**) client->rbuf_inline;
   client->rbuf_lens = (size_t*) client->rbuf_ptrs + EVQL_CLIENT_INLINE_RBUF_SIZE;
   client->rbuf_size = EVQL_CLIENT_INLINE_RBUF_SIZE;
+  client->qbuf_valid = 0;
   client->qbuf_nrows = 0;
   client->qbuf_ncols = 0;
   evql_framebuf_init(&client->recv_buf);
@@ -704,6 +714,7 @@ static int evql_read_query_result_header(
     }
   }
 
+  client->qbuf_valid = 1;
   client->qbuf_nrows = r_nrows;
   client->qbuf_ncols = r_ncols;
   evql_client_rbuf_alloc(client, r_ncols);
@@ -791,6 +802,11 @@ int evql_fetch_row(
     evql_client_t* client,
     const char*** fields,
     size_t** field_lengths) {
+  if (!client->qbuf_valid) {
+    evql_client_seterror(client, "no active result");
+    return -1;
+  }
+
   if (client->qbuf_nrows == 0) {
     return 0;
   }
@@ -830,9 +846,22 @@ int evql_num_columns(evql_client_t* client, size_t* ncols) {
   return 0;
 }
 
-void evql_free_result(evql_client_t* client) {
+void evql_client_qbuf_free(evql_client_t* client) {
+  if (!client->qbuf_valid) {
+    return;
+  }
+
+  client->qbuf_valid = 0;
   client->qbuf_nrows = 0;
   client->qbuf_ncols = 0;
+
+  for (int i = 0; i < client->rbuf_size; ++i) {
+    client->rbuf_ptrs[i] = NULL;
+    client->rbuf_lens[i] = 0;
+  }
+}
+
+void evql_client_releasebuffers(evql_client_t* client) {
 }
 
 void evql_client_destroy(evql_client_t* client) {
@@ -844,12 +873,13 @@ void evql_client_destroy(evql_client_t* client) {
     free(client->error);
   }
 
+  evql_client_qbuf_free(client);
+
   if (client->rbuf_ptrs &&
       (void*) client->rbuf_ptrs != (void*) client->rbuf_inline) {
     free(client->rbuf_ptrs);
   }
 
-  evql_free_result(client);
   evql_framebuf_destroy(&client->recv_buf);
   free(client);
 }
