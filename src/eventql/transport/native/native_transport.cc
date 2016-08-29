@@ -152,10 +152,12 @@ ReturnCode performOperation_QUERY(
         }
       }
 
+      bool pending_statement = i + 1 < num_statements;
       r_frame.setIsLast(true);
+      r_frame.setHasPendingStatement(pending_statement);
       r_frame.writeTo(conn);
 
-      if (i + 1 == num_statements) {
+      if (!pending_statement) {
         break;
       }
 

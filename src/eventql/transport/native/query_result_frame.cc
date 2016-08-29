@@ -30,6 +30,7 @@ QueryResultFrame::QueryResultFrame(
     const std::vector<std::string>& columns) :
     columns_(columns),
     is_last_(false),
+    has_pending_stmt_(false),
     num_rows_(0) {}
 
 void QueryResultFrame::addRow(const std::vector<csql::SValue>& row) {
@@ -52,12 +53,19 @@ void QueryResultFrame::setIsLast(bool is_last) {
   is_last_ = is_last;
 }
 
+void QueryResultFrame::setHasPendingStatement(bool has_pending_stmt) {
+  has_pending_stmt_ = has_pending_stmt;
+}
+
 void QueryResultFrame::writeTo(NativeConnection* conn) {
   uint64_t flags = 0;
   flags |= EVQL_QUERY_RESULT_HASCOLNAMES;
   flags |= EVQL_QUERY_RESULT_HASSTATS;
   if (is_last_) {
     flags |= EVQL_QUERY_RESULT_COMPLETE;
+  }
+  if (has_pending_stmt_) {
+    flags |= EVQL_QUERY_RESULT_PENDINGSTMT;
   }
 
   util::BinaryMessageWriter header_;
@@ -87,6 +95,7 @@ void QueryResultFrame::writeTo(NativeConnection* conn) {
 
 void QueryResultFrame::clear() {
   is_last_ = false;
+  has_pending_stmt_ = false;
   num_rows_ = 0;
   data_.clear();
 }

@@ -43,6 +43,7 @@ public:
   size_t getRowBytes() const;
 
   void setIsLast(bool is_last);
+  void setHasPendingStatement(bool has_pending_stmt);
 
   void writeTo(NativeConnection* conn);
   void clear();
@@ -50,6 +51,7 @@ public:
 protected:
   std::vector<std::string> columns_;
   bool is_last_;
+  bool has_pending_stmt_;
   size_t num_rows_;
   util::BinaryMessageWriter data_;
 };

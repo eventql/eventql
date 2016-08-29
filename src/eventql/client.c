@@ -1014,7 +1014,11 @@ int evql_next_result(evql_client_t* client) {
   }
 
   /* receive response frames */
-  return evql_client_query_readresultframe(client);
+  if (evql_client_query_readresultframe(client) == 0) {
+    return 1;
+  } else {
+    return -1;
+  }
 }
 
 int evql_column_name(
