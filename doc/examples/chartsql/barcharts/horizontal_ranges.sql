@@ -1,6 +1,3 @@
-IMPORT TABLE example_data
-   FROM 'csv:examples/data/areadata.csv?headers=true';
-
 DRAW BARCHART
     ORIENTATION HORIZONTAL
     AXIS BOTTOM

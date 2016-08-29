@@ -1,6 +1,3 @@
-IMPORT TABLE gdp_per_capita
-   FROM 'csv:examples/data/gdp_per_capita.csv?headers=true';
-
 DRAW BARCHART WITH
     ORIENTATION VERTICAL
     AXIS BOTTOM

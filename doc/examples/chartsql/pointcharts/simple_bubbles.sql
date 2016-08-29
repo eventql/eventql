@@ -1,6 +1,3 @@
-IMPORT TABLE example_data
-   FROM 'csv:examples/data/point_example.csv?headers=true';
-
 DRAW POINTCHART WITH
    AXIS BOTTOM
    AXIS LEFT

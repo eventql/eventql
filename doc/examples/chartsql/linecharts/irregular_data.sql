@@ -1,6 +1,3 @@
-IMPORT TABLE example_data
-   FROM 'csv:examples/data/irregular_data.csv?headers=true';
-
 DRAW LINECHART WITH
    AXIS BOTTOM
    AXIS LEFT

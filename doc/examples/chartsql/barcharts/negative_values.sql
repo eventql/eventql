@@ -1,6 +1,3 @@
-IMPORT TABLE city_temperatures
-   FROM 'csv:examples/data/city_temperatures.csv?headers=true';
-
 DRAW BARCHART WITH
    ORIENTATION VERTICAL
    LEGEND TOP LEFT INSIDE

@@ -1,6 +1,3 @@
-IMPORT TABLE city_temperatures
-    FROM 'csv:examples/data/city_temperatures.csv?headers=true';
-
 DRAW LINECHART WITH
     AXIS BOTTOM
     AXIS LEFT TITLE "New York"

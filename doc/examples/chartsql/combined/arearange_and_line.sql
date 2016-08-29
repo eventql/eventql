@@ -1,6 +1,3 @@
-IMPORT TABLE example_data
-   FROM 'csv:examples/data/areadata2.csv?headers=true';
-
 DRAW AREACHART WITH
    AXIS LEFT
    AXIS BOTTOM

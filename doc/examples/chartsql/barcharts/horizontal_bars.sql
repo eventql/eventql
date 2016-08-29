@@ -1,6 +1,3 @@
-IMPORT TABLE gdp_per_country
-   FROM 'csv:examples/data/gbp_per_country_simple.csv?headers=true';
-
 DRAW BARCHART WITH
     ORIENTATION HORIZONTAL
     LABELS
