@@ -27,6 +27,7 @@
 #include <unistd.h>
 #include <sys/socket.h>
 #include <sys/uio.h>
+#include <netinet/tcp.h>
 #include <netdb.h>
 #include <arpa/inet.h>
 #include <limits.h>
@@ -842,6 +843,9 @@ int evql_client_connect(
     evql_client_seterror(client, "socket() creation failed");
     return -1;
   }
+
+  size_t nodelay = 1;
+  setsockopt(client->fd, IPPROTO_TCP, TCP_NODELAY, &nodelay, sizeof(nodelay));
 
   struct sockaddr_in saddr;
   saddr.sin_family = AF_INET;

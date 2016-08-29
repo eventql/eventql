@@ -42,6 +42,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <poll.h>
+#include <netinet/tcp.h>
 
 namespace eventql {
 namespace native_transport {
@@ -250,6 +251,9 @@ void startConnection(Database* db, int fd, std::string prelude_bytes) {
     close(fd);
     return;
   }
+
+  size_t nodelay = 1;
+  setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, &nodelay, sizeof(nodelay));
 
   db->startThread([db, fd, prelude_bytes] (Session* session) {
     NativeConnection conn(fd, prelude_bytes);
