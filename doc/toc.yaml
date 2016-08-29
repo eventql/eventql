@@ -822,14 +822,16 @@
           url: "/examples/chartsql"
           title: "ChartSQL"
           type: page
+          doc_type: example_gallery
           visible_in_menu: true
           visible_in_toc: true
-          source: "examples/chartsql/examples.html"
+          source: "examples/chartsql/index.html"
           children:
             -
               url: "/examples/chartsql/linecharts"
               title: "Line Charts"
               type: redirect
+              doc_type: example
               visible_in_menu: true
               visible_in_toc: false
               location: "/examples/chartsql/linecharts/simple_lines"
@@ -902,6 +904,7 @@
               url: "/examples/chartsql/areacharts"
               title: "Area Charts"
               type: redirect
+              doc_type: example
               visible_in_menu: true
               visible_in_toc: false
               location: "/examples/chartsql/areacharts/simple_area"
@@ -934,6 +937,7 @@
               url: "/examples/chartsql/barcharts"
               title: "Bar Charts"
               type: redirect
+              doc_type: example
               visible_in_menu: true
               visible_in_toc: false
               location: "/examples/chartsql/barcharts/vertical_bars"
@@ -990,6 +994,7 @@
               url: "/examples/chartsql/pointcharts"
               title: "Bubble &amp; Scatter Charts"
               type: redirect
+              doc_type: example
               visible_in_menu: true
               visible_in_toc: false
               location: "/examples/chartsql/pointcharts/simple_bubbles"
@@ -1022,6 +1027,7 @@
               url: "/examples/chartsql/combined"
               title: "Combined Charts"
               type: redirect
+              doc_type: example
               visible_in_menu: true
               visible_in_toc: false
               location: "/examples/chartsql/combined/barsandlines"
