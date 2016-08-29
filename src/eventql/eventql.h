@@ -117,6 +117,12 @@ int evql_query(
 
 /**
  * Fetch the next row of the result table
+ *
+ * @return This method returns negative one (-1) on error, zero (0) if there
+ * are no more rows to read (EOF) and positive one (1) if the next row was read.
+ *
+ * If the method returns with negative one or zero, the contents of the fields
+ * and field_lenghts parameters are unchanged.
  */
 int evql_fetch_row(
     evql_client_t* client,
@@ -144,13 +150,12 @@ int evql_discard_result(evql_client_t* client);
 
 /**
  * Continue with the next result
+ *
+ * @return This method returns negative one (-1) on error, zero (0) if there
+ * are no more results to read (EOF) and positive one (1) if the next result
+ * is available for reading.
  */
 int evql_next_result(evql_client_t* client);
-
-/**
- * Check whether any more results exist
- */
-int evql_more_results(evql_client_t* client);
 
 /**
  * Free the current result

@@ -716,6 +716,63 @@ static void evql_client_rbuf_free(evql_client_t* client) {
   client->rbuf_size = EVQL_CLIENT_INLINE_RBUF_SIZE;
 }
 
+static void evql_client_cbuf_alloc(evql_client_t* client, size_t cbuf_len) {
+  if (client->cbuf_nbytes >= cbuf_len) {
+    return;
+  }
+
+  if (client->cbuf) {
+    free(client->cbuf);
+  }
+
+  client->cbuf = malloc(cbuf_len); // FIXME
+  client->cbuf_nbytes = cbuf_len;
+  if (!client->cbuf) {
+    abort();
+  }
+}
+
+static void evql_client_cbuf_set(
+    evql_client_t* client,
+    size_t n,
+    const char** ptrs,
+    size_t* lens) {
+  size_t cbuf_len = sizeof(const char*) * (n + 1);
+  for (size_t i = 0; i < n; ++i) {
+    cbuf_len += lens[i] + 1;
+  }
+
+  evql_client_cbuf_alloc(client, cbuf_len);
+  client->cbuf_nentries = n;
+  char* data = (char*) &client->cbuf[n + 1];
+  client->cbuf[0] = data;
+  for (size_t i = 0; i < n; ++i) {
+    memcpy(data, ptrs[i], lens[i]);
+    data[lens[i]] = 0;
+    data += lens[i] + 1;
+    client->cbuf[i + 1] = data;
+  }
+}
+
+static void evql_client_cbuf_free(evql_client_t* client) {
+  if (client->cbuf && (void*) client->cbuf != (void*) client->cbuf_inline) {
+    free(client->cbuf);
+  }
+
+  client->cbuf = (char**) client->cbuf_inline;
+  client->cbuf_nentries = 0;
+  client->cbuf_nbytes = EVQL_CLIENT_INLINE_CBUF_SIZE;
+}
+
+static const char* EVQL_CLIENT_UNSPECIFIED_ERROR = "<unspecified error>";
+const char* evql_client_geterror(evql_client_t* client) {
+  if (client->error) {
+    return client->error;
+  } else {
+    return EVQL_CLIENT_UNSPECIFIED_ERROR;
+  }
+}
+
 static void evql_client_seterror(evql_client_t* client, const char* error) {
   if (client->error) {
     free(client->error);
@@ -916,6 +973,36 @@ int evql_fetch_row(
   return 1;
 }
 
+int evql_next_result(evql_client_t* client) {
+  if (!client->connected) {
+    evql_client_seterror(client, "not connected");
+    return -1;
+  }
+
+  /* send QUERY_NEXT frame */
+  {
+    evql_framebuf_t cframe;
+    evql_framebuf_init(&cframe);
+
+    int rc = evql_client_sendframe(
+        client,
+        EVQL_OP_QUERY_NEXT,
+        &cframe,
+        client->timeout_us,
+        0);
+
+    evql_framebuf_destroy(&cframe);
+
+    if (rc < 0) {
+      evql_client_close_hard(client);
+      return -1;
+    }
+  }
+
+  /* receive response frames */
+  return evql_client_query_readresultframe(client);
+}
+
 int evql_column_name(
     evql_client_t* client,
     size_t column_index,
@@ -1007,62 +1094,5 @@ void evql_client_destroy(evql_client_t* client) {
 
   evql_framebuf_destroy(&client->recv_buf);
   free(client);
-}
-
-static void evql_client_cbuf_alloc(evql_client_t* client, size_t cbuf_len) {
-  if (client->cbuf_nbytes >= cbuf_len) {
-    return;
-  }
-
-  if (client->cbuf) {
-    free(client->cbuf);
-  }
-
-  client->cbuf = malloc(cbuf_len); // FIXME
-  client->cbuf_nbytes = cbuf_len;
-  if (!client->cbuf) {
-    abort();
-  }
-}
-
-static void evql_client_cbuf_set(
-    evql_client_t* client,
-    size_t n,
-    const char** ptrs,
-    size_t* lens) {
-  size_t cbuf_len = sizeof(const char*) * (n + 1);
-  for (size_t i = 0; i < n; ++i) {
-    cbuf_len += lens[i] + 1;
-  }
-
-  evql_client_cbuf_alloc(client, cbuf_len);
-  client->cbuf_nentries = n;
-  char* data = (char*) &client->cbuf[n + 1];
-  client->cbuf[0] = data;
-  for (size_t i = 0; i < n; ++i) {
-    memcpy(data, ptrs[i], lens[i]);
-    data[lens[i]] = 0;
-    data += lens[i] + 1;
-    client->cbuf[i + 1] = data;
-  }
-}
-
-static void evql_client_cbuf_free(evql_client_t* client) {
-  if (client->cbuf && (void*) client->cbuf != (void*) client->cbuf_inline) {
-    free(client->cbuf);
-  }
-
-  client->cbuf = (char**) client->cbuf_inline;
-  client->cbuf_nentries = 0;
-  client->cbuf_nbytes = EVQL_CLIENT_INLINE_CBUF_SIZE;
-}
-
-static const char* EVQL_CLIENT_UNSPECIFIED_ERROR = "<unspecified error>";
-const char* evql_client_geterror(evql_client_t* client) {
-  if (client->error) {
-    return client->error;
-  } else {
-    return EVQL_CLIENT_UNSPECIFIED_ERROR;
-  }
 }
 
