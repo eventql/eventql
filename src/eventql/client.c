@@ -979,6 +979,20 @@ int evql_next_result(evql_client_t* client) {
     return -1;
   }
 
+  if (!client->qbuf_valid) {
+    evql_client_seterror(client, "not active query");
+    return -1;
+  }
+
+  if (!client->qbuf_islast) {
+    evql_client_seterror(client, "current query not finished yet");
+    return -1;
+  }
+
+  if (!client->qbuf_pendingstmt) {
+    return 0;
+  }
+
   /* send QUERY_NEXT frame */
   {
     evql_framebuf_t cframe;
