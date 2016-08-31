@@ -70,6 +70,7 @@ for each segment file:
 
   - segment_id -- the segment file id
   - base_segment_id -- the id of the segment file on which this file is based
+  - included_segment_id -- a list of segment ids included in this segment
   - acked_servers -- the list of servers that have acknowledged the segment file
   - is_major -- is this a major segment (false by default)
 
@@ -88,7 +89,10 @@ the is_major flag set.
 When compacting a partition (i.e. folding the list of minor segments into
 a new major segment) the server writes out a new segment file. The new segment
 file has the base_segment_id set to the id of the most recent minor segment
-included in the new segment.
+included in the new segment. Additionaly, when compacting a table, a list of
+up to MAX_SEGMENT_HISTORY included segment ids (i.e. the ids of previous segments
+that have been compacted into the new segment) might be added to the new segment
+entry.
 
 Note that the old segments do not get deleted immediately after compaction, but
 are later deleted in the replication procedure.
@@ -166,12 +170,43 @@ Note that this replication procedure only applies to partitions in the LOADING
 or LIVE states. Paritions in the UNLOAD stage have a special replication
 procedure (see below)
 
+We define the following helper procedures:
+
+    is_referenced(partition P, segment S):
+      - set the next_id variable to the root segment id
+      - iterate over all segments in the list from new to old as S:
+        - Check if the segment id of S equals next_id
+          - If yes
+            - Check if the included_segment_id list of S includes the search id
+              - If yes, return true
+            - Check if the segment id of S equals our search id:
+              - If yes, return true
+              - If no, set next_id to the base_segment_id of S and continue
+          - If no, return false
+      - if we completed the loop without a match, return false
+
+    is_reference_weak(partition P, segment S):
+      - set the next_id variable to the root segment id
+      - iterate over all segments in the list from new to old as S:
+        - Check if the segment id of S equals next_id
+          - If yes
+            - Check if the included_segment_id list of S includes the search id
+              - If yes, return true
+            - Check if the segment id of S equals our search id:
+              - If yes, return false
+              - If no
+                - Check if the segment S is major
+                  - If yes, return true
+                  - If no, set next_id to the base_segment_id of S and continue
+          - If no, return true
+      - if we completed the loop without a match, return true
+
 If we are the leader for a given partition, execute this replication procedure:
 
     replicate_partition(P):
     - For each segment file S in the partition P, from oldest to newest
-      - Check if the segment S is (transitively) referenced by the root segment
-        - If yes, check if the segment is referenced through a major segment
+      - Check if is_referenced(P, S);
+        - If yes, check if is_reference_weak(P, S)
           - If yes, delete the segment
         - If no, merge the segment into the current partition and then delete it
 
@@ -197,8 +232,8 @@ If we are a follower for a given partition, execute this replication procedure:
 
     - For each segment file S in the partition
       - Check if partition leader is in the acked_servers list for S
-        - If yes, check if this segment is referenced by the root segment
-          - If yes, check if the reference is through another major segment
+        - If yes, check if is_referenced(P, S):
+          - If yes, check if is_reference_weak(P, S)
             - If yes, delete the segment
         - If no, push the segment to the partition leader
           - If the offer was declined with SEGMENT_EXISTS, add R to the
@@ -217,8 +252,7 @@ Upon receiving a segment from another node, execute this procedure:
         - If no, check if the partition state is LOADING and the root segment id
           is NULL
           - If yes, accept and fast-forward-add the segment
-        - If no, check if the segment exists locally and is referenced by the
-          root segment
+        - If no, check if is_referenced(P, S)
           - If yes, decline with EXISTS
           - If no, accept and merge the segment into the partition
 
@@ -228,8 +262,7 @@ Upon receiving a segment from another node, execute this procedure:
           - If yes
             - Accept and fast-forward-add the segment to the current partition
             - Add the leader to the acked_servers for the new segment entry
-          - If no, check if the segment exists locally and is referenced by the
-            root segment
+          - If no, check if is_referenced(P, S)
             - If yes, decline with EXISTS
             - If no, check if the segment is a major segment
               - If yes
