@@ -365,6 +365,23 @@ perform this special replication procedure:
 ### Binary Protocol Additions
 
 
+Affected Subsystems
+-------------------
+
+Besides the replication subsystem which needs to be re-written in large parts
+this change will also affect the query, insert and compaction subsystems.
+
+### Changes to the Query Subsystem
+
+FIXME
+
+
+Rollout and Backwards Compatibility
+-----------------------------------
+
+FIXME
+
+
 Alternatives Considered
 -----------------------
 
@@ -394,5 +411,5 @@ row based replication.
 Code Locations
 --------------
 
-
+FIXME
 
