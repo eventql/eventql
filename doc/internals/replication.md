@@ -172,11 +172,15 @@ Upon receiving a segment from another node, execute this procedure:
 
       - If no, check if the sender is the leader for this partition
         - if yes, check if the segments base_segment_id equals the local root segment id
-          - If yes, accept and fast-forward-add the segment to the current partition
+          - If yes
+            - Accept and fast-forward-add the segment to the current partition
+            - Add the leader to the acknowledged_servers for the new segment entry
           - If no, check if the segment exists locally and is referenced by the root segment
             - If yes, decline with EXISTS
             - If no, check if the segment is a major segment
-              - If yes, accept and fast-forward-add the segment to the current partition
+              - If yes
+                - Accept and fast-forward-add the segment to the current partition
+                - Add the leader to the acknowledged_servers for the new segment entry
               - If no, decline with OUT_OF_ORDER
         - If no, decline with INVALID
 
