@@ -113,15 +113,52 @@ can become the leader at any time.
 
 JOINING servers are not eligible to be elected as leaders.
 
+### Segment Merge and Fast-Forward
+
+If we take a step back and look at the problem a different way, we are trying
+to create a single, consistent chain of segments. Each segment is immutable
+but multiple servers are involved and we do not rely on the leader lock to be
+perfect, so it is possible that the chain "splits". I.e. two hosts compute
+independent, conflicting segments based on the same base segment.
+
+The main idea behind the whole segment based replication design is this: We can
+assing a unique id to each segment and then store, with each segment, the id
+of the last segment this one was based on. This way, when receving a segment
+from another node, we can easily tell if the chain split / we have a conflict
+or not.
+
+Based on that, we have two different procedures to handle incoming data.
+
+In the steady case, where there is only one leader creating new segments and we
+have a perfect, unoforked chain, each new segment that any node sees will always
+be based on the last one it has seen. In this case, we can simply store the new
+segment on disk and add it to our local segment list without ever looking at
+the data. This is extremely cheap. We could potentially add millions of rows
+with a metadata operation (adding the segment entry) that takes milliseconds.
+We will call this operation "fast forward" from now on.
+
+However, when we receive a segment that is not based on the latest segment we
+have seen, we cannot fast forward it. Note that this case does not only happen
+when there was a fork in the chain, but can also happen if we've been offline
+for a sufficiently long time. In this case, we will perform another operation
+that we wil call "merge". The merge operation simply reads in the segment
+and inserts every row into the local partition like it was a new write. N.B.
+that due to the way primary keys in EventQL work, repeated writes with the exact
+same value are idempotent, i.e. regardless of how often you write a given
+(exact same) row the result is always the same.
+
+Another sidenote is that the "merge" operation is pretty much exactly what
+we previously did with row based replication for _every_ row and a lot of other
+products still do. So another way to look at segment based replication is that
+it allows us to "fast-forward" pretty much all of the work in replication in the
+steady case.
+
 ### Replication Order
 
 With respect to a given source and target server combination it is guaranteed
 that the segments will be sent in sequential order. I.e. they will be sent in
 the order in which they were added to the segments list and no segment will be
 sent until it's predecessor segment has been acknowledged.
-
-### Segment Merge and Fast-Forward
-
 
 ### Replication Procedure
 
