@@ -12,18 +12,29 @@ partition itself is stored on disk as a list of segment files. A segment file in
 turn is an immutable data file containing one or more rows.
 
 These segment files form an abstract log structured merge tree: when rows are
-inserted or updated in a partition, these updates are first buffered in memory
+inserted or updated in a partition, the updates are first buffered in memory
 and after a threshold is reached, written out to disk as a new segment file.
 
-So the sum of the number of rows from all segment files may be larger than the
-logical number of rows in the partition when updates are involved.
-
-The smallest unit of data that is replicated in EventQL are whole segment
+Now, the smallest unit of data that is replicated in EventQL are these segment
 files.
 
 Replication in EventQL is push-based, which means that a server that stores
 a segment file is resposible for making sure that all other servers which should
 store the segment file also have it.
+
+On a very high level the replication algorithm is thus very simple: Every time
+a server writes out a new segment file for a partition, it adds the segment file
+into a queue to be pushed out to every other server that should have it. On
+receiving a segment file, a server adds it to it's local log structured merge
+tree.
+
+If everything runs smoothly, all the EventQL replication does is to copy files
+in the 1-500MB range between servers. This is pretty much as cheap and efficient
+as it could get: we can easily saturate available IO and network bandwith with
+just using a minimal amount of CPU ressources. Also, the algorithm transfers
+only the minimal required amount (neglecting parity-based schemes) of data in
+the steady operation case. I.e each row is copied exactly N-1 times between
+servers where N is the replication factor.
 
 Durability Considerations
 -------------------------
