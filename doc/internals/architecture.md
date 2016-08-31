@@ -27,8 +27,9 @@ interacting with an EventQL cluter feels just like interacting with an ordinary
 SQL database.
 
 Each copy of a partition is stored on the respective server's disk as a log
-structured merge tree of "columnar storage tables" (cstables). A cstable is a
-container file that stores many rows of a given schema in column-oriented layout.
+structured merge tree of segment files. Each segment file is encoded using the
+cstable file format. CSTable is a container file format that stores many rows
+of a given schema in column-oriented layout.
 
 ### Queries
 
