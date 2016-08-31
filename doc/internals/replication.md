@@ -143,13 +143,15 @@ We will call this operation "fast forward" from now on.
 
 However, when we receive a segment that is not based on the latest segment we
 have seen, we cannot fast forward it. Note that this case does not only happen
-when there was a fork in the chain, but can also happen if we've been offline
-for a sufficiently long time. In this case, we will perform another operation
-that we wil call "merge". The merge operation simply reads in the segment
-and inserts every row into the local partition like it was a new write. N.B.
-that due to the way primary keys in EventQL work, repeated writes with the exact
-same value are idempotent, i.e. regardless of how often you write a given
-(exact same) row the result is always the same.
+when there was a fork in the chain, but can also happen if a node has been
+offline for a sufficiently long time. In this case, we will perform another
+operation that we wil call "merge". 
+
+The merge operation simply reads in the segment and inserts every row into the
+local partition like it was a new write. N.B. that due to the way primary keys
+in EventQL work, repeated writes with the exact same value are idempotent, i.e.
+regardless of how often you write a given (exact same) row the result is always
+the same.
 
 Another sidenote is that the "merge" operation is pretty much exactly what
 we previously did with row based replication for _every_ row and a lot of other
