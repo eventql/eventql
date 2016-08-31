@@ -64,7 +64,7 @@ The sharding across nodes and rebalances are fully automatic and transparent.
 This means you will never have to worry or think about it.
 
 Each table has a configurable replication factor N that controls on how many
-server each partition is stored. EventQL can tolerate up to N-1 failures and
+servers each partition is stored. EventQL can tolerate up to N-1 failures and
 still serve reads and writes for every partition. By default, N is 3 which
 would make the number of tolerated failures 2.
 
