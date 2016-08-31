@@ -136,10 +136,11 @@ Based on that, we have two different procedures to handle incoming data.
 In the steady case, where there is only one leader creating new segments and we
 have a perfect, unoforked chain, each new segment that any node sees will always
 be based on the last one it has seen. In this case, we can simply store the new
-segment on disk and add it to our local segment list without ever looking at
-the data. This is extremely cheap. We could potentially add millions of rows
-with a metadata operation (adding the segment entry) that takes milliseconds.
-We will call this operation "fast forward" from now on.
+segment on disk, add it to our local segment list and change the root segment id
+to the id of the new segment without ever looking at the data. This is extremely
+cheap. We could potentially add millions of rows with a metadata operation
+(adding the segment entry) that takes milliseconds. We will call this operation
+"fast forward" from now on.
 
 However, when we receive a segment that is not based on the latest segment we
 have seen, we cannot fast forward it. Note that this case does not only happen
