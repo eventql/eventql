@@ -1,0 +1,8 @@
+[ ] binary protocol
+[ ] segments based replication
+[ ] unique vs. non-unique primary keys
+[ ] sorted + seekable cstables
+[ ] fast single-key lookups
+[ ] fast order by primary key scans
+[ ] raw scan api
+[ ] new mapreduce api
