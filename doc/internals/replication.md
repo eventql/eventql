@@ -162,6 +162,10 @@ sent until it's predecessor segment has been acknowledged.
 
 ### Replication Procedure
 
+Note that this replication procedure only applies to partitions in the LOADING
+or LIVE states. Paritions in the UNLOAD stage have a special replication
+procedure (see below)
+
 If we are the leader for a given partition, execute this replication procedure:
 
     replicate_partition(P):
@@ -210,6 +214,9 @@ Upon receiving a segment from another node, execute this procedure:
       - If yes, check if the segments base_segment_id equals the local root
         segment id
         - If yes, accept and fast-forward-add the segment
+        - If no, check if the partition state is LOADING and the root segment id
+          is NULL
+          - If yes, accept and fast-forward-add the segment
         - If no, check if the segment exists locally and is referenced by the
           root segment
           - If yes, decline with EXISTS
@@ -281,13 +288,14 @@ both partitions P1 and P2 will also have three segments A, B and C.
 Once all new partition leaders have confirmed the segment, the leader performs
 the SPLIT_FINALIZE operation.
 
-The special case of async splits: We allow asynchronous splits to be enabled
-for table. With async splits the partition split immediately finalizes once
-it was initiated (before the old data is copied out to the new partitions). 
-
-Also the leader partition will still accept writes while it's splitting so with
+Since the leader partition will still accept writes while it's splitting, with
 a large enough arrival rate it's impossible to make sure all records are pushed
 out to the new leaders before marking the partition split as done.
+
+Also, there is the special case of async splits: We allow asynchronous splits
+to be enabled for table. With async splits the partition split immediately
+finalizes once it was initiated (before the old data is copied out to the new
+partitions).
 
 This complicates the end of the partition lifecycle. We can't just drop all
 partition replicas once the split is complete for the reasons above. Instead,
@@ -308,6 +316,7 @@ perform this special replication procedure:
             - If an error occurs, abort and retry later
     - At this point we ensured all segments have been acked by all new targets
       and the partition may be deleted (moves to the PARTITION_UNLOAD_FINAL stage)
+
 
 ### Binary Protocol Additions
 
