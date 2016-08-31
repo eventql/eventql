@@ -4,7 +4,7 @@ Segment Based Replication
 Paul Asmuth <paul@eventql.io>
 September, 2016
 
-This document describes EventQL's segment based repliaction system.
+This document describes EventQL's segment based replication system.
 
 
 Design Overview
