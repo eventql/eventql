@@ -70,7 +70,7 @@ for each segment file:
 
   - segment_id -- the segment file id
   - base_segment_id -- the id of the segment file on which this file is based
-  - acknowledged_servers -- the list of servers that have acknowledged the segment file
+  - acked_servers -- the list of servers that have acknowledged the segment file
   - is_major -- is this a major segment (false by default)
 
 Additionally, a server keeps for each partition that it stores a "root segment
@@ -103,8 +103,8 @@ leader election algrithm should be pluggable and is not discussed here.
 
 Suffice to say that it should always name exactly one of the replicas as the
 leader. Still, even if for a short period of time two nodes consider themselves
-the leader for a given partition, no corruption will occur. It will merely result
-in a lot of unnecessary merges.
+the leader for a given partition, no corruption will occur. It will merely
+result in a lot of unnecessary merges.
 
 At any time, only the leader of a given partition accepts writes for that
 partition. This implies that the leader is also the only server that produces
@@ -167,7 +167,7 @@ If we are the leader for a given partition, execute this replication procedure:
     replicate_partition(P):
     - For each segment file S in the partition P, from oldest to newest
       - Check if the segment S is (transitively) referenced by the root segment
-        - If yes, check if the segment is referenced through another major segment
+        - If yes, check if the segment is referenced through a major segment
           - If yes, delete the segment
         - If no, merge the segment into the current partition and then delete it
 
@@ -175,55 +175,64 @@ If we are the leader for a given partition, execute this replication procedure:
     - For each replica R of the partition that is not ourselves:
       - Iterate the segments list as S from old to new, starting at the most
         recent major segment referenced by the root segment id
-        - If the replica R is not included in the acknowledged_servers list for segment S
+        - If the replica R is not included in the acked_servers list for
+          segment S
           - Offer the segment S to replica R
-            - If the offer was declined with SEGMENT_EXISTS, add R to the acknowledged_servers list for S
-            - If the offer was declined with OVERLOADED or INVALID, abort and retry later
-            - If the offer was declined with OUT_OF_ORDER, remove the replica R from the acknowledged_server list and restart replication
-            - If the offer was accepted, add R to the acknowledged_servers list for S
+            - If the offer was declined with SEGMENT_EXISTS, add R to the
+              acked_servers list for S
+            - If the offer was declined with OVERLOADED or INVALID, abort and
+              retry later
+            - If the offer was declined with OUT_OF_ORDER, remove the replica R
+              from the acknowledged_server list and restart replication
+            - If the offer was accepted, add R to the acked_servers list
+              for S
             - If an error occurs, abort and retry later
 
 
 If we are a follower for a given partition, execute this replication procedure:
 
     - For each segment file S in the partition
-      - Check if partition leader is in the acknowledged_servers list for this segment
-        - If yes, check if this segment is (transitively) referenced by the root segment
-          - If yes, check if the segment is referenced through another major segment
+      - Check if partition leader is in the acked_servers list for S
+        - If yes, check if this segment is referenced by the root segment
+          - If yes, check if the reference is through another major segment
             - If yes, delete the segment
         - If no, push the segment to the partition leader
-          - If the offer was declined with SEGMENT_EXISTS, add R to the acknowledged_servers list for S
-          - If the offer was declined with OVERLOADED or INVALID, abort and retry later
-          - If the offer was accepted, add R to the acknowledged_servers list for S
+          - If the offer was declined with SEGMENT_EXISTS, add R to the
+            acked_servers list for S
+          - If the offer was declined with OVERLOADED or INVALID, retry later
+          - If the offer was accepted, add R to the acked_servers list for S
           - If an error occurs, abort and retry later
 
 
 Upon receiving a segment from another node, execute this procedure:
 
     - Check if we are the leader for this partition
-      - If yes, check if the segments base_segment_id equals the local root segment id
-        - If yes, accept and fast-forward-add the segment to the current partition
-        - If no, check if the segment exists locally and is referenced by the root segment
+      - If yes, check if the segments base_segment_id equals the local root
+        segment id
+        - If yes, accept and fast-forward-add the segment
+        - If no, check if the segment exists locally and is referenced by the
+          root segment
           - If yes, decline with EXISTS
           - If no, accept and merge the segment into the partition
 
       - If no, check if the sender is the leader for this partition
-        - if yes, check if the segments base_segment_id equals the local root segment id
+        - if yes, check if the segments base_segment_id equals the local root
+           segment id
           - If yes
             - Accept and fast-forward-add the segment to the current partition
-            - Add the leader to the acknowledged_servers for the new segment entry
-          - If no, check if the segment exists locally and is referenced by the root segment
+            - Add the leader to the acked_servers for the new segment entry
+          - If no, check if the segment exists locally and is referenced by the
+            root segment
             - If yes, decline with EXISTS
             - If no, check if the segment is a major segment
               - If yes
-                - Accept and fast-forward-add the segment to the current partition
-                - Add the leader to the acknowledged_servers for the new segment entry
+                - Accept and fast-forward-add the segment
+                - Add the leader to the acked_servers for the new segment entry
               - If no, decline with OUT_OF_ORDER
         - If no, decline with INVALID
 
 
-ABA Considerations
-------------------
+### ABA Considerations
 
 One ABA scenario occurs when a follower recives a major segment followed by
 a minor segment, then another major segment and then another minor segment
@@ -233,7 +242,7 @@ view the minor segment is not based on the latest segment. This is handled by
 responding with an out of order error code.
 
 Another ABA scenario occurs in this case: Say replica R is leader for partition
-P. Now all other replicas have pushed all their data to R. Now, R is dis-assigned
+P. Now all other replicas have pushed all their data to R. Now, R is unsassigned
 from the partition by the master and another replica takes over as leader. Later,
 R is re-assigned to the partition and becomes leader again, starting out with a
 an empty partition. Now, all other replicas will accept the empty partition from
@@ -241,6 +250,8 @@ R and delete their local data because they think it was already acknowledged by
 R. This is prevented by assinging a placement id to each replica+partition
 combination that is unique on each new assignment. The placement id is what we
 actually store in the assigned_servers list.
+
+### Binary Protocol Additions
 
 
 Alternatives Considered
@@ -252,7 +263,7 @@ The current row-based replication needs to run through the lsm insert code for
 each insert at least 6 times (assuming a replication level of 3). This is a
 considerable overhead -- the row only gets stored 3 out of those 6 times (and
 rejected on the other 3 inserts) but just checking if the row should be accepted
-or rejected is a fairly expensive operation and -- depending on cache contents --
+or rejected is a fairly expensive operation and, depending on cache contents,
 might require multiple disk roundtrips.
 
 ### Operation-log-based replication?
