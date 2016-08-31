@@ -13,20 +13,20 @@ Table of Contents
     5.2 flags
     5.3 length
   6. Messages
-    6.1 HELLO
-    6.2 PING
-    6.3 ERROR
-    6.4 ACK
-    6.5 KILL
-    6.6 KILLED
-    6.7 QUERY
-    6.8 QUERY_RESULT
-    6.9 QUERY_CONTINUE
-    6.10 QUERY_DISCARD
-    6.11 QUERY_PROGRESS
-    6.12 RPC
-    6.13 RPC_RESULT
-
+    6.1 S2C Messages
+      6.1.1 HELLO
+      6.1.2 PING
+      6.1.3 PONG
+      6.1.4 ERROR
+      6.1.5 READY
+      6.1.6 BYE
+      6.1.7 QUERY
+      6.1.8 QUERY_RESULT
+      6.1.9 QUERY_CONTINUE
+      6.1.10 QUERY_DISCARD
+      6.1.11 QUERY_PROGRESS
+      6.1.12 QUERY_NEXT
+    6.2 S2S Messages
 
 1. Preface
 
