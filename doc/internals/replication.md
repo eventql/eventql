@@ -219,8 +219,8 @@ If we are the leader for a given partition, execute this replication procedure:
           - Offer the segment S to replica R
             - If the offer was declined with SEGMENT_EXISTS, add R to the
               acked_servers list for S
-            - If the offer was declined with OVERLOADED or INVALID, abort and
-              retry later
+            - If the offer was declined with OVERLOADED, INVALID or INFLIGHT
+              abort and retry later
             - If the offer was declined with OUT_OF_ORDER, remove the replica R
               from the acknowledged_server list and restart replication
             - If the offer was accepted, add R to the acked_servers list
@@ -238,12 +238,20 @@ If we are a follower for a given partition, execute this replication procedure:
         - If no, push the segment to the partition leader
           - If the offer was declined with SEGMENT_EXISTS, add R to the
             acked_servers list for S
-          - If the offer was declined with OVERLOADED or INVALID, retry later
+          - If the offer was declined with OVERLOADED, INVALID or INFLIGHT
+            abort and retry later
           - If the offer was accepted, add R to the acked_servers list for S
           - If an error occurs, abort and retry later
 
 
 Upon receiving a segment from another node, execute this procedure:
+
+    - Check if we are already receiving more than MAX_REPL_INCOMING_SEGMENTS
+      segments simultaneously
+      - If yes, decline with OVERLOADED and abort
+
+    - Check if we are simultaneously receiving a segment with the same ID
+      - If yes, decline with INFLIGHT and abort
 
     - Check if we are the leader for this partition
       - If yes, check if the segments base_segment_id equals the local root
