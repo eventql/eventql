@@ -85,4 +85,8 @@ documents and specifications for the individual subsystems:
   - Segment Based Replication
   - Partitioning
   - Binary Protocol
+  - Storage Engine
+  - Write Ahead Log
+  - Parallel GroupBy
+  - Distributed Join
 

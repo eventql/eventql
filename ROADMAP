@@ -6,3 +6,6 @@
 [ ] fast order by primary key scans
 [ ] raw scan api
 [ ] new mapreduce api
+[ ] write ahead log
+[ ] new parallel groupby
+[ ] distributed join
