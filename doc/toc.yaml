@@ -777,6 +777,13 @@
               visible_in_toc: true
               source: "internals/replication.md"
             -
+              url: "/internals/binary-protocol"
+              title: "Binary Protocol"
+              type: page
+              visible_in_menu: true
+              visible_in_toc: true
+              source: "internals/protocol.txt"
+            -
               url: "/internals/life-of-a-query"
               title: "Life of a Query"
               type: page
