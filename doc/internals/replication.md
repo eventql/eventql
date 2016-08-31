@@ -70,27 +70,30 @@ for each segment file:
 
   - segment_id -- the segment file id
   - base_segment_id -- the id of the segment file on which this file is based
-  - is_major -- if this is a major or a minor segment
   - acknowledged_servers -- the list of servers that have acknowledged the segment file
+  - is_major -- is this a major segment (false by default)
 
 Additionally, a server keeps for each partition that it stores a "root segment
 id". Every time a server creates a new segment file, it writes it out to disk,
 adds a new entry to the segment list and sets the base_segment_id of the new
-entry to the current root segment id and is_major to false. Then it sets the
-current root segment id to the new segment id and enqueues the new segment for
-replication.
+entry to the current root segment id. Then it sets the current root segment id
+to the new segment id and enqueues the new segment for replication.
+
+The initial root segment id is "NULL". This first segment created thus has
+a base_segment_id of NULL. Also, the first segment (based on NULL) must have
+the is_major flag set.
 
 ### Compaction
 
-When compacting a partition (i.e. folding a number of minor segments into the
-next major segment) the server writes out a new segment file. The new
-segment file has is_major set to true and base_segment_id to the id of the
-most recent minor segment the compated segment was based on. It then sets the
-root segment id to the id of the new major segment.
+When compacting a partition (i.e. folding the list of minor segments into
+a new major segment) the server writes out a new segment file. The new segment
+file has the base_segment_id set to the id of the most recent minor segment
+included in the new segment.
 
-Note that the old minor and major segments do not get deleted immediately after
-compaction to allow follwers to catch up. (The files are later deleted in the
-replication procedure)
+Note that the old segments do not get deleted immediately after compaction, but
+are later deleted in the replication procedure.
+
+Only the leader of a partition performs compaction.
 
 ### Partition Leader
 
@@ -108,6 +111,8 @@ partition. This implies that the leader is also the only server that produces
 new segments for the partition. However any other replicat of the partition
 can become the leader at any time.
 
+JOINING servers are not eligible to be elected as leaders.
+
 ### Replication Order
 
 With respect to a given source and target server combination it is guaranteed
@@ -118,40 +123,40 @@ sent until it's predecessor segment has been acknowledged.
 ### Segment Merge and Fast-Forward
 
 
-
 ### Replication Procedure
 
 If we are the leader for a given partition, execute this replication procedure:
 
+    replicate_partition(P):
+    - For each segment file S in the partition P, from oldest to newest
+      - Check if the segment S is (transitively) referenced by the root segment
+        - If yes, check if the segment is referenced through another major segment
+          - If yes, delete the segment
+        - If no, merge the segment into the current partition and then delete it
+
+    replicate_partition_to(P, R)
     - For each replica R of the partition that is not ourselves:
-      - For each segment file S in the partition
+      - Iterate the segments list as S from old to new, starting at the most
+        recent major segment referenced by the root segment id
         - If the replica R is not included in the acknowledged_servers list for segment S
           - Offer the segment S to replica R
             - If the offer was declined with SEGMENT_EXISTS, add R to the acknowledged_servers list for S
-            - If the offer was declined with OVERLOADED, abort and retry later
-            - If the offer was declined with OUT_OF_ORDER, rmove the replica R from the acknowledged_server list and restart replication
+            - If the offer was declined with OVERLOADED or INVALID, abort and retry later
+            - If the offer was declined with OUT_OF_ORDER, remove the replica R from the acknowledged_server list and restart replication
             - If the offer was accepted, add R to the acknowledged_servers list for S
             - If an error occurs, abort and retry later
-
-
-   - For each segment file S in the partition, from oldest to newest
-      - Check if the segment S is (transitively) referenced by the root segment
-        - If yes, check if the segment is referenced through a major segment
-           - If yes, check if the segment S has been pushed to all followers
-             - If yes, delete the segment
-        - If no, merge the segment into the current partition and then delete it
 
 
 If we are a follower for a given partition, execute this replication procedure:
 
     - For each segment file S in the partition
       - Check if partition leader is in the acknowledged_servers list for this segment
-        - If yes, check if this segment is (trasitively) referenced by the root segment, discounting major segments
-          - If no, delete the segment
+        - If yes, check if this segment is (transitively) referenced by the root segment
+          - If yes, check if the segment is referenced through another major segment
+            - If yes, delete the segment
         - If no, push the segment to the partition leader
           - If the offer was declined with SEGMENT_EXISTS, add R to the acknowledged_servers list for S
-          - If the offer was declined with OVERLOADED, abort and retry later
-          - If the offer was declined with OUT_OF_ORDER, remove the replica R from the acknowledged_server list and restart replication
+          - If the offer was declined with OVERLOADED or INVALID, abort and retry later
           - If the offer was accepted, add R to the acknowledged_servers list for S
           - If an error occurs, abort and retry later
 
@@ -159,9 +164,21 @@ If we are a follower for a given partition, execute this replication procedure:
 Upon receiving a segment from another node, execute this procedure:
 
     - Check if we are the leader for this partition
-      - If yes,
+      - If yes, check if the segments base_segment_id equals the local root segment id
+        - If yes, accept and fast-forward-add the segment to the current partition
+        - If no, check if the segment exists locally and is referenced by the root segment
+          - If yes, decline with EXISTS
+          - If no, accept and merge the segment into the partition
 
-      - If no
+      - If no, check if the sender is the leader for this partition
+        - if yes, check if the segments base_segment_id equals the local root segment id
+          - If yes, accept and fast-forward-add the segment to the current partition
+          - If no, check if the segment exists locally and is referenced by the root segment
+            - If yes, decline with EXISTS
+            - If no, check if the segment is a major segment
+              - If yes, accept and fast-forward-add the segment to the current partition
+              - If no, decline with OUT_OF_ORDER
+        - If no, decline with INVALID
 
 
 ABA Considerations
@@ -174,6 +191,15 @@ the previous minor segment has been acknowledged. From the receivers point of
 view the minor segment is not based on the latest segment. This is handled by
 responding with an out of order error code.
 
+Another ABA scenario occurs in this case: Say replica R is leader for partition
+P. Now all other replicas have pushed all their data to R. Now, R is dis-assigned
+from the partition by the master and another replica takes over as leader. Later,
+R is re-assigned to the partition and becomes leader again, starting out with a
+an empty partition. Now, all other replicas will accept the empty partition from
+R and delete their local data because they think it was already acknowledged by
+R. This is prevented by assinging a placement id to each replica+partition
+combination that is unique on each new assignment. The placement id is what we
+actually store in the assigned_servers list.
 
 
 Alternatives Considered
