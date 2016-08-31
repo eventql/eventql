@@ -335,6 +335,8 @@ Status TableService::alterTable(
     }
   }
 
+  td.set_version(td.version() + 1);
+
   try {
     cdir_->updateTableConfig(td);
   } catch (const Exception& e) {
