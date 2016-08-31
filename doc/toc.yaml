@@ -741,7 +741,7 @@
         #  source: "/api/http/index.html"
     -
       url: "/internals"
-      title: "Internals"
+      title: "internals"
       type: redirect
       visible_in_menu: true
       visible_in_toc: true
@@ -755,19 +755,34 @@
           visible_in_toc: true
           source: "internals/architecture.md"
         -
-          url: "/internals/coordination-service"
-          title: "Coordination Service"
-          type: page
+          url: "/internals/"
+          title: "Design Documents"
+          type: redirect
           visible_in_menu: true
           visible_in_toc: true
-          source: "internals/coordination_service.md"
-        -
-          url: "/internals/life-of-a-query"
-          title: "Life of a Query"
-          type: page
-          visible_in_menu: true
-          visible_in_toc: true
-          source: "internals/life-of-a-query.md"
+          location: "/internals/architecture"
+          children:
+            -
+              url: "/internals/partitioning"
+              title: "Table Partitioning"
+              type: page
+              visible_in_menu: true
+              visible_in_toc: true
+              source: "internals/partitioning.md"
+            -
+              url: "/internals/statement-based-replication"
+              title: "Segment-Based Replication"
+              type: page
+              visible_in_menu: true
+              visible_in_toc: true
+              source: "internals/replication.md"
+            -
+              url: "/internals/life-of-a-query"
+              title: "Life of a Query"
+              type: page
+              visible_in_menu: true
+              visible_in_toc: true
+              source: "internals/life-of-a-query.md"
     #-
     #  url: "/appendix"
     #  title: "Appendix"
