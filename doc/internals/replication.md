@@ -312,7 +312,6 @@ perform this special replication procedure:
 ### Binary Protocol Additions
 
 
-
 Alternatives Considered
 -----------------------
 
