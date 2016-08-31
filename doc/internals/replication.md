@@ -6,8 +6,24 @@ This document describes EventQL's segment based repliaction system.
 Design Overview
 ---------------
 
-The smallest unit of data that is replicated in EventQL is a segment file.
+EventQL stores data as rows in tables. Each table is split into a list of
+partitions. Each partition contains a subset of the rows in the table. The
+partition itself is stored on disk as a list of segment files. A segment file in
+turn is an immutable data file containing one or more rows.
 
+These segment files form an abstract log structured merge tree: when rows are
+inserted or updated in a partition, these updates are first buffered in memory
+and after a threshold is reached, written out to disk as a new segment file.
+
+So the sum of the number of rows from all segment files may be larger than the
+logical number of rows in the partition when updates are involved.
+
+The smallest unit of data that is replicated in EventQL are whole segment
+files.
+
+Replication in EventQL is push-based, which means that a server that stores
+a segment file is resposible for making sure that all other servers which should
+store the segment file also have it.
 
 Durability Considerations
 -------------------------
@@ -37,6 +53,7 @@ Implementation Details
 ----------------------
 
     The procedure
+
 
 
 Alternatives Considered
