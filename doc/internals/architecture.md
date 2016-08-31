@@ -79,8 +79,9 @@ started.
   - Columnar Storage and Parallel I/O
   - Dividing Infinity - Distributed Partitioning Schemes
 
-After having a general overview of the system, have a look at these design
-documents and specifications for the individual subsystems:
+
+Once you have gotten a general overview of the system, have a look at these
+design documents and specifications for the individual subsystems:
 
   - Segment Based Replication
   - Partitioning
