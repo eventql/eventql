@@ -741,7 +741,7 @@
         #  source: "/api/http/index.html"
     -
       url: "/internals"
-      title: "internals"
+      title: "Internals"
       type: redirect
       visible_in_menu: true
       visible_in_toc: true
@@ -766,6 +766,7 @@
               url: "/internals/partitioning"
               title: "Table Partitioning"
               type: page
+              content_type: txt
               visible_in_menu: true
               visible_in_toc: true
               source: "internals/partitioning.md"
@@ -773,6 +774,7 @@
               url: "/internals/statement-based-replication"
               title: "Segment-Based Replication"
               type: page
+              content_type: txt
               visible_in_menu: true
               visible_in_toc: true
               source: "internals/replication.md"
@@ -780,6 +782,7 @@
               url: "/internals/binary-protocol"
               title: "Binary Protocol"
               type: page
+              content_type: txt
               visible_in_menu: true
               visible_in_toc: true
               source: "internals/protocol.txt"
