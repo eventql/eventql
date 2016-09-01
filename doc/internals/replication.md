@@ -365,14 +365,35 @@ perform this special replication procedure:
       and the partition may be deleted (moves to the PARTITION_UNLOAD_FINAL stage)
 
 
-### Binary Protocol Additions
-
-
 Affected Subsystems
 -------------------
 
 Besides the replication subsystem which needs to be re-written in large parts
 this change will also affect the query, insert and compaction subsystems.
+
+### Binary Protocol Additions
+
+We add the following new opcodes to the binary protocol:
+
+  SEGMENT_OFFER
+    Offer a segment from one server to another, reponse is SEGMENT_ACCEPT or
+    SEGMENT_DECLINE
+
+  SEGMENT_ACCEPT
+    Tell the offering node to start transmitting the segment.
+
+  SEGMENT_DECLINE
+    Tell the offering node that the segment should not be transmitted at this
+    time. Valid reasons are SEGMENT_EXISTS, OVERLOADED, INVALID, INFLIGHT and
+    OUT_OF_ORDER
+
+  SEGMENT_TRANSIT
+    In response to a SEGMENT_ACCEPT operation, the offering node will send
+    one or more SEGMENT_TRANSIT frame containing the segment data.
+
+  SEGMENT_ACK
+    The receiving server confirms each SEGMENT_TRANSIT op with a SEGMENT_ACK.
+
 
 ### Changes to the Query Subsystem
 
