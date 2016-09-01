@@ -1,6 +1,7 @@
-
-                         EVENTQL BINARY PROTOCOL v1
-
+--------------------------------------------------------------------------------
+EVENTQL - EVENTQL BINARY PROTOCOL v1
+--------------------------------------------------------------------------------
+v0.2 - September, 2016                             Paul Asmuth <paul@eventql.io>
 
 Table of Contents
 

@@ -1,38 +1,43 @@
-Partitioning
-============
+--------------------------------------------------------------------------------
+EVENTQL - TABLE PARTITIONING
+--------------------------------------------------------------------------------
+v0.8 - August, 2016                                Paul Asmuth <paul@eventql.io>
 
-Paul Asmuth <paul@eventql.io>
-September, 2016
+Table of Contents
 
-The EventQL partioning design is based on the BigTable partitionign scheme
-[link to paper] with a few major differences.
+  1. Preface
+  2. Design Overview
 
 
-Design Overview
----------------
+1. Preface
 
-Each table's keyspace is split into a number of non-overlapping ranges called
-"partitions". Each partition is defined by the it's start and end position in
-the keyspace, i.e. the lowest and highest row id that will still be contained
-in the partition. The mapping of partitions for a table is recorded in a
-METADATA file.
+  The EventQL partioning design is based on the BigTable partitionign scheme
+  [link to paper] with a few major differences.
 
-Each partition is simultaneously served by N servers where N is called the
-replication factor.
+2. Design Overview
 
-From all replicas of a partition, we elect one as the leader and designate the
-other replicas as followers. All partitions can accept read operations for the
-data (allthough the leader will always have the most recent snapshot) but only
-the leader accepts writes.
+  Each table's keyspace is split into a number of non-overlapping ranges called
+  "partitions". Each partition is defined by the it's start and end position in
+  the keyspace, i.e. the lowest and highest row id that will still be contained
+  in the partition. The mapping of partitions for a table is recorded in a
+  METADATA file.
 
-How exactly the rows are stored on disks is not part of this design document.
-For this document, we assume that a partition is stored as a single unit on
-disk.
+  Each partition is simultaneously served by N servers where N is called the
+  replication factor.
 
-Similarily, the exact replication semantics (i.e. how a copy of a partition on
-one node is transferred to another node) is also not in the scope of this
-document; we will assume there exists a mechanism that can synchronize two
-copies of the same partition.
+  From all replicas of a partition, we elect one as the leader and designate the
+  other replicas as followers. All partitions can accept read operations for the
+  data (allthough the leader will always have the most recent snapshot) but only
+  the leader accepts writes.
+
+  How exactly the rows are stored on disks is not part of this design document.
+  For this document, we assume that a partition is stored as a single unit on
+  disk.
+
+  Similarily, the exact replication semantics (i.e. how a copy of a partition on
+  one node is transferred to another node) is also not in the scope of this
+  document; we will assume there exists a mechanism that can synchronize two
+  copies of the same partition.
 
 ### Metadata File
 
