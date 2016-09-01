@@ -7,18 +7,43 @@ Table of Contents
 
   1. Preface
   2. Design Overview
-
+    2.1 Metadata File
+  3. Partition Lifecyle
+  4. Partition Assignment
+    4.1 Partition Split
+    4.2 Server Join
+    4.3 Server Leave
+  5. Metadata File
+    5.1 Create Metadata File
+    5.1 Change Metadata File
+    5.2 Join Metadata Server
+    5.3 Remove Metadata Server
+    5.4 Background Metadata Replication
+  6. Implementation Details
+    6.1 Change Notification
+    6.2 Placement IDs
+  7. Alternatives Considered
+    7.1 Consistent Hashing
+  8. Code Locations
 
 1. Preface
 
-  The EventQL partioning design is based on the BigTable partitionign scheme
+  The EventQL partioning design is based on the BigTable partitioning scheme
   [link to paper] with a few major differences.
 
 2. Design Overview
 
-  Each table's keyspace is split into a number of non-overlapping ranges called
+  We define a table's keyspace as the range [begin, end] of all valid
+  partioning key values.
+
+  For numeric keys, the keyspace could be the interval [UINT64_MIN, UINT64_MAX].
+  For string keys, the keyspace is the interval ["", "") where an empty string
+  in the begin or end position represents the highest or lowest permissible
+  value respectively.
+
+  The table's keyspace is split into a number of non-overlapping ranges called
   "partitions". Each partition is defined by the it's start and end position in
-  the keyspace, i.e. the lowest and highest row id that will still be contained
+  the keyspace, i.e. the lowest and highest key that will still be contained
   in the partition. The mapping of partitions for a table is recorded in a
   METADATA file.
 
@@ -39,52 +64,51 @@ Table of Contents
   document; we will assume there exists a mechanism that can synchronize two
   copies of the same partition.
 
-### Metadata File
+2.1 Metadata File
 
-All partitioning information is stored in a METADATA file. The metadata file
-consists mainly of a number of entries for each partition in the table. Each
-entry in the metadata file contains these pieces of information:
+  All partitioning information is stored in a METADATA file. The metadata file
+  consists mainly of a number of entries for each partition in the table. Each
+  entry in the metadata file contains these pieces of information:
 
-   - begin - the begin of the partition in the keyspace (i.e. the first contained key)
-   - partition_id - a unique/random id for this partition
-   - servers - the list of servers that serve this partition
-   - servers_joining - the list of servers that are joining into this partition
-   - servers_leaving - the list of servers that are leaving from the partition
-   - split_point
-   - split_partition_id_low
-   - split_partition_id_high
-   - split_servers_low
-   - split_servers_high
+     - begin - the begin of the partition in the keyspace (i.e. the first contained key)
+     - partition_id - a unique/random id for this partition
+     - servers - the list of servers that serve this partition
+     - servers_joining - the list of servers that are joining into this partition
+     - servers_leaving - the list of servers that are leaving from the partition
+     - split_point
+     - split_partition_id_low
+     - split_partition_id_high
+     - split_servers_low
+     - split_servers_high
 
-The metadata file supports transactional (compare-and-swap) updates.
+  The metadata file supports transactional (compare-and-swap) updates.
 
 
-Partition Lifecyle
-------------------
+3. Partition Lifecyle
 
-Each replica of a partition (i.e. each copy of a partition that is local to
-a specific server) has a defined lifetime separated into four stages:
+  Each replica of a partition (i.e. each copy of a partition that is local to
+  a specific server) has a defined lifetime separated into four stages:
 
-  - LOAD -- the local server is joining the replica list for the partition.
-    it doesn't take part in leader election and does not server any read
-    requests yet. from the LOAD state, we can transition to the LIVE or
-    UNLOAD state
+    - LOAD -- the local server is joining the replica list for the partition.
+      it doesn't take part in leader election and does not server any read
+      requests yet. from the LOAD state, we can transition to the LIVE or
+      UNLOAD state
 
-  - LIVE -- the local server is a live serving replica for this partition. it
-    servers both writes and reads and takes part in the leader election. from
-    the LIVE state we can transition to the UNLOAD state only
+    - LIVE -- the local server is a live serving replica for this partition. it
+      servers both writes and reads and takes part in the leader election. from
+      the LIVE state we can transition to the UNLOAD state only
 
-  - UNLOAD -- the local server has either left the replica list for the
-    partition or the partition has split and does not exist anymore. the local
-    server does not server reads or writes and does not take part in leader
-    election. we transition to the UNLOAD_FINAL stage once we have pushed
-    out all unreplicated rows to all new leaders
+    - UNLOAD -- the local server has either left the replica list for the
+      partition or the partition has split and does not exist anymore. the local
+      server does not server reads or writes and does not take part in leader
+      election. we transition to the UNLOAD_FINAL stage once we have pushed
+      out all unreplicated rows to all new leaders
 
-  - UNLOAD_FINAL -- this state is the final state and allows the server to
-    delete the partitions data from disk. from the unload final state we can
-    not transition back to any other state
+    - UNLOAD_FINAL -- this state is the final state and allows the server to
+      delete the partitions data from disk. from the unload final state we can
+      not transition back to any other state
 
-Partition replication and lifecyle is a simple abstract algorithm:
+  Partition replication and lifecyle is a simple abstract algorithm:
 
       - For each partition P:
         - For each server which should store the data in partition P
@@ -99,184 +123,179 @@ Partition replication and lifecyle is a simple abstract algorithm:
 
       - On every insert, restart the replication for the affected partition
 
-In practice the algorithm is a bit more involved and documented in the
-replication design document.
+  In practice the algorithm is a bit more involved and documented in the
+  replication design document.
 
 
-Partition Assignment
---------------------
+4. Partition Assignment
 
-Every table starts out with a single partition covering the whole keyspace (from
-negative to positive infinity) that is then further subdivded (splitted) to
-create more partitions.
+  Every table starts out with a single partition covering the whole keyspace (from
+  negative to positive infinity) that is then further subdivded (splitted) to
+  create more partitions.
 
-When a new table is created, we add this single partition (covering the whole
-key range) and a list of servers for the partition to the metadata file.
+  When a new table is created, we add this single partition (covering the whole
+  key range) and a list of servers for the partition to the metadata file.
 
-### Partition Split
+4.1 Partition Split
 
-Only the leading server for the partition may initiate a split. To split a
-parent partition A into B1 and B1, the splitting server decides on the split
-point and the initial server assignment for the new partitions B1 and B2 and then
-commits a METADATA transaction recording an ongoing split into the entry for
-partition A.
+  Only the leading server for the partition may initiate a split. To split a
+  parent partition A into B1 and B1, the splitting server decides on the split
+  point and the initial server assignment for the new partitions B1 and B2 and then
+  commits a METADATA transaction recording an ongoing split into the entry for
+  partition A.
 
-Once the split is commited, the splitting server immediately starts to perform
-the split operation.
+  Once the split is commited, the splitting server immediately starts to perform
+  the split operation.
 
-The split procedure is simple: the current partition is read in and sent to
-the leading servers for the new partition. Once all new leading servers have
-confirmed that they have committed the data to durable storage, the splitting
-server commits a new METADATA transaction to finalize the split. In this
-transcation, the partition A is removed from the partition list and the new
-partitions B1 and B2 are added.
+  The split procedure is simple: the current partition is read in and sent to
+  the leading servers for the new partition. Once all new leading servers have
+  confirmed that they have committed the data to durable storage, the splitting
+  server commits a new METADATA transaction to finalize the split. In this
+  transcation, the partition A is removed from the partition list and the new
+  partitions B1 and B2 are added.
 
-### Server Join
+4.2 Server Join
 
-To add a new server for a given partition, the server places itself in the joining
-list for that partition. While the server is joining, it will not receive any read
-or write requests for the partition but it will receive replicated rows
-from the other servers. Once the leading server has pushed all data to the
-joining server, it will commit a METADATA transaction to move the joining servers
-from LOAD to LIVE.
+  To add a new server for a given partition, the server places itself in the joining
+  list for that partition. While the server is joining, it will not receive any read
+  or write requests for the partition but it will receive replicated rows
+  from the other servers. Once the leading server has pushed all data to the
+  joining server, it will commit a METADATA transaction to move the joining servers
+  from LOAD to LIVE.
 
-Additionally there is a force-join option where a new server directly enters
-the live server list. This is never used except in the case where all servers
-for a given partition are down.
+  Additionally there is a force-join option where a new server directly enters
+  the live server list. This is never used except in the case where all servers
+  for a given partition are down.
 
-### Server Leave
+4.3 Server Leave
 
-To remove a server from a given partition, a METADATA transaction is commited
-to delete the server from either the server or the joining list of that partition.
-Once the server is removed from the list, the normal replication and lifecyle
-algorithm will eventually drop the local partition data once it is confirmed to
-be replicated to all other live servers.
+  To remove a server from a given partition, a METADATA transaction is commited
+  to delete the server from either the server or the joining list of that partition.
+  Once the server is removed from the list, the normal replication and lifecyle
+  algorithm will eventually drop the local partition data once it is confirmed to
+  be replicated to all other live servers.
 
-Of course, the server leave algorithm should ensure that no partition falls
-below the number of replicas specified by the replication level. In the normal
-case, the master handles all rebalances and initiates the leave operation only
-when it is safe to remove a node.
-
-
-METADATA File
--------------
-
-The metadata file is not stored in the coordination service as it would be too
-large for e.g. ZooKeeper..
-
-Instead, the METADATA file of each table is stored as a simple file on N nodes
-which are recorded in the coordination service. Since we need to perform
-compare-and-swap updates on the metadata file, we use the coordination service
-(e.g.) zookeeper to store a bit of metadata, namely a transaction and sequence
-ID that allows us to safely update the metadata file from any node at any time.
-
-This is the exact information that we store in the coordination service for each
-table:
-
-    metadata_txnid: the currently valid METADATA transaction id for this table
-    metadata_sequence: the currently valid METADATA sequence number
-    metadata_servers: the list of live metadata servers for this table
-
-The metadata transaction id is a random SHA1 hash. Additionally we store an
-incrementing sequence number with each transaction id to allow us to order
-transactions.
-
-The METADATA file supports these general operations:
-
-### Create Metadata File
-
-When a table is created, we pick three random servers from the cluster, create
-a new metadata file with a random metadata_txnid and sequence number of 1.
-We then store the metadata file on each of the servers and store the
-metadata_txnid, metadata_sequence and metadata_servers information into the
-coordination service.
-
-### Change Metadata File
-
-To change the metadata file, a change requester creates a change request. The
-change request contains the modification (e.g. SPLIT_PARTITION), the transaction
-id the change is based on and a new (random) transaction id.
-
-To commit the change, the requests sends the change request to any coordinating
-metadata server. The coordinationg metadata server generates a new METADATA file
-for the new transcation id and applies the operation. The coordinating metadata
-server then asks each other metadata server to store the new transaction.
-Once a majority of the metadata servers (including the coordinating metadata
-server) have confirmed that they have commited the new transaction to durable
-storage, the coordinating metadata server performs a compare-and-swap update in
-the coordination service to record the new transaction id as the current
-transaction id. If the update suceeds, the change is commited and the coordinating
-metadata server returns a success response to the requester.
-
-The compare-and-swap update will fail if another transaction was (atomically)
-commited in the meantime or the list of metadata servers changed. If the update
-fails, the coordinating metadata server asks the other metadata servers to clean
-up the aborted transaction file and returns an error the the requester.
-
-### Join Metadata Server
-
-A new metadata server can join itself into the list of metadata servers for a given
-table. Once the join was requested by e.g. the master, the metadata server reads
-the latest metadata transaction id from the coordination service and tries to
-download the METADATA file for that transaction from any of the currently live
-metadata servers. Once it has successfully fetched the latest transaction it
-performs a compare-and-swap update in the coordination service to add itself
-to the list of live metadata servers. If another transaction was commited while
-the new metadata server was trying to join (and hence, the locally stored
-transaction isn't the most recent one), the update will fail and the procedure
-is restarted from the beginning.
-
-### Remove Metadata Server
-
-To leave the list of metadata servers, an update is written to the coordination
-service to the remove the host from the list of metadata servers.
-
-### Background Metadata Replication
-
-If a metadata server was unavailable for some time and does not have the
-latest transaction stored it will not serve any metadata requests until it has
-successfully retrieved the transaction from one of the other metadata servers.
-
-Additionally, each server watches the information from the coordination service
-and ensures that it has the most recent metadata file for each partition to
-which it is assigned as a meta dataserver (by downloading the files from one
-of the other servers).
+  Of course, the server leave algorithm should ensure that no partition falls
+  below the number of replicas specified by the replication level. In the normal
+  case, the master handles all rebalances and initiates the leave operation only
+  when it is safe to remove a node.
 
 
-Implementation Details
-----------------------
+5. METADATA File
 
-### Change Notification
+  The metadata file is not stored in the coordination service as it would be too
+  large for e.g. ZooKeeper..
 
-Once a new metadata transaction was committed (by writing the new metadata
-transaction to the coordination service) all other servers in
-the cluster will reliably get notified of the change by the coordinator. When a
-server sees a metadata change to a table, it will send a "partition discovery"
-requerst for each partition that it has locally stored for the chnaged table to
-one of the responsible metadata servers. This partition discovery request
-contains the metadata transaction id and the name/id of the partition. The
-response to the partition discovery request is called the partition discovery
-response. The partition covery response contains the should-be status of the
-partition on the requesting host ("LOAD", "SERVE" or "UNLOAD") and the list
-of other servers (and partition ids, in case of a split) the data should be
-pushed.
+  Instead, the METADATA file of each table is stored as a simple file on N nodes
+  which are recorded in the coordination service. Since we need to perform
+  compare-and-swap updates on the metadata file, we use the coordination service
+  (e.g.) zookeeper to store a bit of metadata, namely a transaction and sequence
+  ID that allows us to safely update the metadata file from any node at any time.
 
-### Placement IDs
+  This is the exact information that we store in the coordination service for each
+  table:
 
-One important implementation detail is that every time we add or remove a server
-to a partition, we assign a unique "placement" ID to prevent ABA scenarios,
+      metadata_txnid: the currently valid METADATA transaction id for this table
+      metadata_sequence: the currently valid METADATA sequence number
+      metadata_servers: the list of live metadata servers for this table
+
+  The metadata transaction id is a random SHA1 hash. Additionally we store an
+  incrementing sequence number with each transaction id to allow us to order
+  transactions.
+
+  The METADATA file supports these general operations:
+
+5.1 Create Metadata File
+
+  When a table is created, we pick three random servers from the cluster, create
+  a new metadata file with a random metadata_txnid and sequence number of 1.
+  We then store the metadata file on each of the servers and store the
+  metadata_txnid, metadata_sequence and metadata_servers information into the
+  coordination service.
+
+5.1 Change Metadata File
+
+  To change the metadata file, a change requester creates a change request. The
+  change request contains the modification (e.g. SPLIT_PARTITION), the transaction
+  id the change is based on and a new (random) transaction id.
+
+  To commit the change, the requests sends the change request to any coordinating
+  metadata server. The coordinationg metadata server generates a new METADATA file
+  for the new transcation id and applies the operation. The coordinating metadata
+  server then asks each other metadata server to store the new transaction.
+  Once a majority of the metadata servers (including the coordinating metadata
+  server) have confirmed that they have commited the new transaction to durable
+  storage, the coordinating metadata server performs a compare-and-swap update in
+  the coordination service to record the new transaction id as the current
+  transaction id. If the update suceeds, the change is commited and the coordinating
+  metadata server returns a success response to the requester.
+
+  The compare-and-swap update will fail if another transaction was (atomically)
+  commited in the meantime or the list of metadata servers changed. If the update
+  fails, the coordinating metadata server asks the other metadata servers to clean
+  up the aborted transaction file and returns an error the the requester.
+
+5.2 Join Metadata Server
+
+  A new metadata server can join itself into the list of metadata servers for a given
+  table. Once the join was requested by e.g. the master, the metadata server reads
+  the latest metadata transaction id from the coordination service and tries to
+  download the METADATA file for that transaction from any of the currently live
+  metadata servers. Once it has successfully fetched the latest transaction it
+  performs a compare-and-swap update in the coordination service to add itself
+  to the list of live metadata servers. If another transaction was commited while
+  the new metadata server was trying to join (and hence, the locally stored
+  transaction isn't the most recent one), the update will fail and the procedure
+  is restarted from the beginning.
+
+5.3 Remove Metadata Server
+
+  To leave the list of metadata servers, an update is written to the coordination
+  service to the remove the host from the list of metadata servers.
+
+5.4 Background Metadata Replication
+
+  If a metadata server was unavailable for some time and does not have the
+  latest transaction stored it will not serve any metadata requests until it has
+  successfully retrieved the transaction from one of the other metadata servers.
+
+  Additionally, each server watches the information from the coordination service
+  and ensures that it has the most recent metadata file for each partition to
+  which it is assigned as a meta dataserver (by downloading the files from one
+  of the other servers).
 
 
-Alternatives Considered
------------------------
+6. Implementation Details
 
-### Consistent Hashing
+6.1 Change Notification
 
-FIXME
+  Once a new metadata transaction was committed (by writing the new metadata
+  transaction to the coordination service) all other servers in
+  the cluster will reliably get notified of the change by the coordinator. When a
+  server sees a metadata change to a table, it will send a "partition discovery"
+  requerst for each partition that it has locally stored for the chnaged table to
+  one of the responsible metadata servers. This partition discovery request
+  contains the metadata transaction id and the name/id of the partition. The
+  response to the partition discovery request is called the partition discovery
+  response. The partition covery response contains the should-be status of the
+  partition on the requesting host ("LOAD", "SERVE" or "UNLOAD") and the list
+  of other servers (and partition ids, in case of a split) the data should be
+  pushed.
+
+6.2 Placement IDs
+
+  One important implementation detail is that every time we add or remove a server
+  to a partition, we assign a unique "placement" ID to prevent ABA scenarios,
 
 
-Code Locations
---------------
+7. Alternatives Considered
 
-FIXME
+7.1 Consistent Hashing
+
+  FIXME
+
+
+8 .Code Locations
+
+  FIXME
 
