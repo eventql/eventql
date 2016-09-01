@@ -766,6 +766,7 @@
               url: "/internals/partitioning"
               title: "Table Partitioning"
               type: page
+              doctitle: "8.2.1 Table Partitioning"
               content_type: txt
               visible_in_menu: true
               visible_in_toc: true
@@ -774,6 +775,7 @@
               url: "/internals/statement-based-replication"
               title: "Segment-Based Replication"
               type: page
+              doctitle: "8.2.2 Segment-Based Replication"
               content_type: txt
               visible_in_menu: true
               visible_in_toc: true
@@ -782,6 +784,7 @@
               url: "/internals/binary-protocol"
               title: "Binary Protocol"
               type: page
+              doctitle: "8.2.3 Binary Protocol"
               content_type: txt
               visible_in_menu: true
               visible_in_toc: true
