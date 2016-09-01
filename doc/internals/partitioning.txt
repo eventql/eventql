@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 EVENTQL - TABLE PARTITIONING
 --------------------------------------------------------------------------------
-v0.8 - August, 2016                                Paul Asmuth <paul@eventql.io>
+v0.8 - August, 2016                                Paul Asmuth &lt;paul@eventql.io&gt;
 
 Table of Contents
 
