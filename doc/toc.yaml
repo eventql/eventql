@@ -2,6 +2,7 @@
   url: "/"
   type: page
   source: "index.html"
+  content_type: html
   title: "Documentation"
   children:
     -
@@ -587,6 +588,7 @@
           url: "/api/http"
           title: "HTTP API"
           type: page
+          content_type: html
           visible_in_menu: true
           visible_in_toc: true
           source: "/api/http/index.html"
