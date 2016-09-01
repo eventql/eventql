@@ -414,7 +414,7 @@ Table of Contents
 
     SEGMENT_TRANSIT
       In response to a SEGMENT_ACCEPT operation, the offering node will send
-      one or more SEGMENT_TRANSIT frame containing the segment data.
+      one or more SEGMENT_TRANSIT frames containing the segment data.
 
     SEGMENT_ACK
       The receiving server confirms each SEGMENT_TRANSIT op with a SEGMENT_ACK.
@@ -434,25 +434,28 @@ Table of Contents
 
 6.1 Row-based replication
 
-  The current row-based replication needs to run through the lsm insert code for
-  each insert at least 6 times (assuming a replication level of 3). This is a
-  considerable overhead -- the row only gets stored 3 out of those 6 times (and
-  rejected on the other 3 inserts) but just checking if the row should be accepted
-  or rejected is a fairly expensive operation and, depending on cache contents,
+  The problem with the old row-based replication scheme was that it had to run
+  through the regular partition insert code for each row individually at least
+  6 times (assuming a replication level of 3). This was a considerable overhead:
+  The row only gets stored on disk 3 out of those 6 times (and rejected on
+  the other 3 inserts), but just checking if the row should be accepted or
+  rejected is a fairly expensive operation and, depending on cache contents,
   might require multiple disk roundtrips.
 
 6.2 Operation-log-based replication
 
-  The major issue is that we need to duplicate data (we need to store the actual
-  columnar data files plus an operation log). In the worst case this would increas
-  our disk footprint by more than 100% because the operation log is not columnar.
+  The major issue with an operation log based approach is that that we would
+  have to duplicate data (we would need to store the actual columnar data files
+  plus an operation log). In the worst case this would increase our disk
+  footprint by more than 100% because the operation log is not columnar.
 
   Of course, we could delete the operation log once we have pushed it out to all
   servers. However, what do we do once a new server joins or a partition splits?
-  We would have to create a synthetic operation log from the cstable files.
+  We would have to create a synthetic operation log from the cstable files which
+  would be expensive.
 
-  Finally, any operation-log-based approach would incur the same overheads as the
-  row based replication.
+  Additionally, any operation-log-based approach would incur the same overheads
+  as the row based replication.
 
 
 7. Code Locations
