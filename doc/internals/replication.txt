@@ -194,7 +194,7 @@ Table of Contents
 3.5 Replication Procedure
 
   Note that this replication procedure only applies to partitions in the LOADING
-  or LIVE states. Paritions in the UNLOAD stage have a special replication
+  or LIVE states. Partitions in the UNLOAD stage have a special replication
   procedure (see below)
 
   We define the following helper procedures:
@@ -331,21 +331,21 @@ Table of Contents
   The server join operation remains largely unchanged. Joining nodes do not
   participate in leader election but are otherwise considered normal followers.
   Once a partition leader has sent the latest segment to a joining node, it will
-  initiate a JOIN_FINALIZE metadat operation.
+  initiate a JOIN_FINALIZE metadata operation.
 
 
-3.8 Changes to the Partition Split
+3.8 Changes to the Partition Split Operation
 
   The partition split operation complicates things a bit. The problem is that
   in the event of a leader failover of the splitting partition, we do not want
-  to re-start the partition from scratch. Also we have to ensure that a replica
-  that is offline during the partition split and comes online later does not
-  overwrite the new (splitted) operations with it's old data.
+  to re-start the partition split from scratch. Also we have to ensure that a
+  replica that is offline during the partition split and comes online later does
+  not overwrite the new (splitted) partitions with it's old data.
 
   Forgetting about these issues for a second, the split procedure operation is
-  largely unchanged too. Splits are only initiated by the leader. Once a partition
-  starts splitting the partition leaders for all target partitions are added to the
-  follower list with a keyrange restriction.
+  remains conceptually unchanged. Splits are only initiated by the leader. Once
+  a partition starts splitting the partition leaders for all target partitions
+  are added to the follower list with a keyrange restriction.
 
   Due to the general replication procedure, only the leader of a given partition
   will actually push data to the new partitions. It will rewrite each segment
