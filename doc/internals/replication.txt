@@ -349,10 +349,13 @@ Table of Contents
 
   Due to the general replication procedure, only the leader of a given partition
   will actually push data to the new partitions. It will rewrite each segment
-  file to exclude all records that do not fit in the target keyrange, but otherwise
-  leave the segment unchanged, i.e. not change it's id. So if for example our
-  partition P has segments A, B and C and is splitting into partitions P1 and P2,
-  both partitions P1 and P2 will also have three segments A, B and C.
+  file to exclude all records that do not matchthe target keyrange, but otherwise
+  leave the segment unchanged, i.e. not change it's id or base_segment_id.
+
+  If, for example, our partition P has segments A, B and C and is splitting into
+  partitions P1 and P2, both new partitions P1 and P2 will also have three
+  segmen files A', B' and C' with the same segment ids and base_segment_ids as
+  the original A, B and C segment files.
 
   Once all new partition leaders have confirmed the segment, the leader performs
   the SPLIT_FINALIZE operation.
@@ -362,7 +365,7 @@ Table of Contents
   out to the new leaders before marking the partition split as done.
 
   Also, there is the special case of async splits: We allow asynchronous splits
-  to be enabled for table. With async splits the partition split immediately
+  to be enabled for ta able. With async splits, the partition split immediately
   finalizes once it was initiated (before the old data is copied out to the new
   partitions).
 
