@@ -1,4 +1,4 @@
-3.4 Modyfing Tables
+3.4 Modifying Tables
 ===================
 
     ALTER TABLE table_name

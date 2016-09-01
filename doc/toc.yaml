@@ -2,6 +2,7 @@
   url: "/"
   type: page
   source: "index.html"
+  content_type: html
   title: "Documentation"
   children:
     -
@@ -629,6 +630,7 @@
           url: "/api/http"
           title: "HTTP API"
           type: page
+          content_type: html
           visible_in_menu: true
           visible_in_toc: true
           source: "/api/http/index.html"
@@ -790,19 +792,32 @@
       location: "/internals/architecture"
       children:
         -
-          url: "/internals/architecture"
-          title: "Architecture"
+          url: "/internals/partitioning"
+          title: "Table Partitioning"
           type: page
+          doctitle: "8.2.1 Table Partitioning"
+          content_type: txt
           visible_in_menu: true
           visible_in_toc: true
-          source: "internals/architecture.md"
+          source: "internals/partitioning.txt"
         -
-          url: "/internals/coordination-service"
-          title: "Coordination Service"
+          url: "/internals/statement-based-replication"
+          title: "Segment-Based Replication"
           type: page
+          doctitle: "8.2.2 Segment-Based Replication"
+          content_type: txt
           visible_in_menu: true
           visible_in_toc: true
-          source: "internals/coordination_service.md"
+          source: "internals/replication.txt"
+        -
+          url: "/internals/binary-protocol"
+          title: "Binary Protocol"
+          type: page
+          doctitle: "8.2.3 Binary Protocol"
+          content_type: txt
+          visible_in_menu: true
+          visible_in_toc: true
+          source: "internals/protocol.txt"
         -
           url: "/internals/life-of-a-query"
           title: "Life of a Query"
@@ -822,6 +837,7 @@
           url: "/examples/chartsql"
           title: "ChartSQL"
           type: page
+          content_type: html
           doc_type: example_gallery
           visible_in_menu: true
           visible_in_toc: true
@@ -840,6 +856,7 @@
                   url: "/examples/chartsql/linecharts/simple_lines"
                   title: "Simple timeseries line chart"
                   type: page
+                  content_type: html
                   doc_type: example
                   visible_in_menu: true
                   visible_in_toc: false
@@ -848,6 +865,7 @@
                   url: "/examples/chartsql/linecharts/lines_with_points"
                   title: "Lines with points"
                   type: page
+                  content_type: html
                   doc_type: example
                   visible_in_menu: true
                   visible_in_toc: false
@@ -856,6 +874,7 @@
                   url: "/examples/chartsql/linecharts/explicit_domain"
                   title: "Explicit range/domain"
                   type: page
+                  content_type: html
                   doc_type: example
                   visible_in_menu: true
                   visible_in_toc: false
@@ -864,6 +883,7 @@
                   url: "/examples/chartsql/linecharts/lines_with_labels"
                   title: "Lines with data labels"
                   type: page
+                  content_type: html
                   doc_type: example
                   visible_in_menu: true
                   visible_in_toc: false
@@ -872,6 +892,7 @@
                   url: "/examples/chartsql/linecharts/multiple_y_axes"
                   title: "Multiple Y Axes"
                   type: page
+                  content_type: html
                   doc_type: example
                   visible_in_menu: true
                   visible_in_toc: false
@@ -880,6 +901,7 @@
                   url: "/examples/chartsql/linecharts/logarithmic_domain"
                   title: "Logarithmic domain"
                   type: page
+                  content_type: html
                   doc_type: example
                   visible_in_menu: true
                   visible_in_toc: false
@@ -888,6 +910,7 @@
                   url: "/examples/chartsql/linecharts/irregular_data"
                   title: "Data with irregular intervals"
                   type: page
+                  content_type: html
                   doc_type: example
                   visible_in_menu: true
                   visible_in_toc: false
@@ -896,6 +919,7 @@
                   url: "/examples/chartsql/linecharts/inverted_axis"
                   title: "Inverted Axis"
                   type: page
+                  content_type: html
                   doc_type: example
                   visible_in_menu: true
                   visible_in_toc: false
@@ -913,6 +937,7 @@
                   url: "/examples/chartsql/areacharts/simple_area"
                   title: "Simple are chart"
                   type: page
+                  content_type: html
                   doc_type: example
                   visible_in_menu: true
                   visible_in_toc: false
@@ -921,6 +946,7 @@
                   url: "/examples/chartsql/areacharts/area_with_points"
                   title: "Area with border/points"
                   type: page
+                  content_type: html
                   doc_type: example
                   visible_in_menu: true
                   visible_in_toc: false
@@ -929,6 +955,7 @@
                   url: "/examples/chartsql/areacharts/area_ranges"
                   title: "Area ranges"
                   type: page
+                  content_type: html
                   doc_type: example
                   visible_in_menu: true
                   visible_in_toc: false
@@ -946,6 +973,7 @@
                   url: "/examples/chartsql/barcharts/vertical_bars"
                   title: "Vertical bar chart, multiple series"
                   type: page
+                  content_type: html
                   doc_type: example
                   visible_in_menu: true
                   visible_in_toc: false
@@ -954,6 +982,7 @@
                   url: "/examples/chartsql/barcharts/horizontal_bars"
                   title: "Horizontal bar chart with labels"
                   type: page
+                  content_type: html
                   doc_type: example
                   visible_in_menu: true
                   visible_in_toc: false
@@ -962,6 +991,7 @@
                   url: "/examples/chartsql/barcharts/stacked_bars"
                   title: "Stacked bar chart"
                   type: page
+                  content_type: html
                   doc_type: example
                   visible_in_menu: true
                   visible_in_toc: false
@@ -970,6 +1000,7 @@
                   url: "/examples/chartsql/barcharts/vertical_ranges"
                   title: "Vertical range bars"
                   type: page
+                  content_type: html
                   doc_type: example
                   visible_in_menu: true
                   visible_in_toc: false
@@ -978,6 +1009,7 @@
                   url: "/examples/chartsql/barcharts/horizontal_ranges"
                   title: "Horizontal range bars"
                   type: page
+                  content_type: html
                   doc_type: example
                   visible_in_menu: true
                   visible_in_toc: false
@@ -986,6 +1018,7 @@
                   url: "/examples/chartsql/barcharts/negative_values"
                   title: "Bars with negative values"
                   type: page
+                  content_type: html
                   doc_type: example
                   visible_in_menu: true
                   visible_in_toc: false
@@ -1003,6 +1036,7 @@
                   url: "/examples/chartsql/pointcharts/simple_bubbles"
                   title: "Simple bubble chart"
                   type: page
+                  content_type: html
                   doc_type: example
                   visible_in_menu: true
                   visible_in_toc: false
@@ -1011,6 +1045,7 @@
                   url: "/examples/chartsql/pointcharts/simple_scatter"
                   title: "Simple scatter chart"
                   type: page
+                  content_type: html
                   doc_type: example
                   visible_in_menu: true
                   visible_in_toc: false
@@ -1019,6 +1054,7 @@
                   url: "/examples/chartsql/pointcharts/pointchart_with_labels"
                   title: "Point chart with data labels"
                   type: page
+                  content_type: html
                   doc_type: example
                   visible_in_menu: true
                   visible_in_toc: false
@@ -1036,6 +1072,7 @@
                   url: "/examples/chartsql/combined/barsandlines"
                   title: "Bars and Lines"
                   type: page
+                  content_type: html
                   doc_type: example
                   visible_in_menu: true
                   visible_in_toc: false
@@ -1044,12 +1081,11 @@
                   url: "/examples/chartsql/combined/arearange_and_line"
                   title: "Areas with lines"
                   type: page
+                  content_type: html
                   doc_type: example
                   visible_in_menu: true
                   visible_in_toc: false
                   source: "examples/chartsql/examples.html"
-    #-
-    #  url: "/appendix"
     #  title: "Appendix"
     #  type: page
     #  visible_in_menu: true

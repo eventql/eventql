@@ -206,7 +206,7 @@ void StandaloneConfigDirectory::updateTableConfig(
     bool force /* = false */) {
   std::unique_lock<std::mutex> lk(mutex_);
   auto table_id = table.customer() + "~" + table.table_name();
-  if (tables_.find(table_id) != tables_.end()) {
+  if (table.version() == 0 && tables_.find(table_id) != tables_.end()) {
     RAISEF(
         kIllegalArgumentError,
         "table already exists: $0",

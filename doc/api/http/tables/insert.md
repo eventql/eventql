@@ -20,6 +20,10 @@ inserted. You may therefore insert one or more rows per request.
 ###Parameters
 <table class='http_api create_table'>
   <tr>
+    <td>database</td>
+    <td>Name of the database.</td>
+  </tr>
+  <tr>
     <td>table</td>
     <td>Name of the table into which the row should be inserted.</td>
   </tr>
@@ -38,6 +42,7 @@ inserted. You may therefore insert one or more rows per request.
         >>
         >> [
         >>   {
+        >>     "database": "sensor_database",
         >>     "table": "my_sensor_table",
         >>     "data": {
         >>       "time": "2015-10-11T17:53:03Z",
@@ -46,6 +51,7 @@ inserted. You may therefore insert one or more rows per request.
         >>     }
         >>   },
         >>   {
+        >>     "database": "sensor_database",
         >>     "table": "my_sensor_table",
         >>     "data": {
         >>       "time": "2015-10-11T17:53:04Z",
