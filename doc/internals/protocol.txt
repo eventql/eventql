@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 EVENTQL - EVENTQL BINARY PROTOCOL v1
 --------------------------------------------------------------------------------
-v0.2 - September, 2016                             Paul Asmuth <paul@eventql.io>
+v0.2 - September, 2016                             Paul Asmuth &lt;paul@eventql.io&gt;
 
 Table of Contents
 
@@ -110,7 +110,7 @@ Binary Protocols.
 
   We also define this notation for optinal fields:
 
-     <field> | if <expr>
+     &lt;field&gt; | if &lt;expr&gt;
 
 
 5. Frame header
@@ -155,7 +155,7 @@ Binary Protocols.
     lenencint      flags
 
   Response:
-    <no response>
+    &lt;no response&gt;
 
 
 6.2 PING
@@ -166,10 +166,10 @@ Binary Protocols.
   The PING message may safely be ignored.
 
   Payload:
-    <no payload>
+    &lt;no payload&gt;
 
   Response:
-    <no response>
+    &lt;no response&gt;
 
 
 6.2 ERROR
@@ -181,7 +181,7 @@ Binary Protocols.
     zerobyte
 
   Response:
-    <no response>
+    &lt;no response&gt;
 
 6.7 QUERY
 
@@ -267,7 +267,7 @@ Binary Protocols.
   QUERY_RESULT message that did not have the COMPLETED flag set.
 
   Payload:
-    <no payload>
+    &lt;no payload&gt;
 
   Response:
     After sending a QUERY_CONTINUE message, the client should expect to receive
@@ -283,7 +283,7 @@ Binary Protocols.
   QUERY_RESULT message that did not have the COMPLETED flag set.
 
   Payload:
-    <no payload>
+    &lt;no payload&gt;
 
   Response:
     After sending a QUERY_CONTINUE message, the client should expect to receive
@@ -314,4 +314,4 @@ Binary Protocols.
     FIXME
 
   Response:
-    <no response>
+    &lt;no response&gt;
