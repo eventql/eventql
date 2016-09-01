@@ -777,7 +777,7 @@
               content_type: txt
               visible_in_menu: true
               visible_in_toc: true
-              source: "internals/replication.md"
+              source: "internals/replication.txt"
             -
               url: "/internals/binary-protocol"
               title: "Binary Protocol"
