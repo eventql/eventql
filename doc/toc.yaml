@@ -214,6 +214,7 @@
               url: "/sql/functions-and-operators/add-operator"
               title: "&plus;"
               type: page
+              doc_type: "sql_function"
               visible_in_menu: false
               visible_in_toc: false
               source: "/sql/functions_and_operators/add-operator.md"
@@ -221,6 +222,7 @@
               url: "/sql/functions-and-operators/div-operator"
               title: "&sol;"
               type: page
+              doc_type: "sql_function"
               visible_in_menu: false
               visible_in_toc: false
               source: "/sql/functions_and_operators/div-operator.md"
@@ -228,6 +230,7 @@
               url: "/sql/functions-and-operators/eq-operator"
               title: "&equals;&equals;"
               type: page
+              doc_type: "sql_function"
               visible_in_menu: false
               visible_in_toc: false
               source: "/sql/functions_and_operators/eq-operator.md"
@@ -235,6 +238,7 @@
               url: "/sql/functions-and-operators/neq-operator"
               title: "&excl;&equals;"
               type: page
+              doc_type: "sql_function"
               visible_in_menu: false
               visible_in_toc: false
               source: "/sql/functions_and_operators/neq-operator.md"
@@ -242,6 +246,7 @@
               url: "/sql/functions-and-operators/mod-operator"
               title: "&percnt;"
               type: page
+              doc_type: "sql_function"
               visible_in_menu: false
               visible_in_toc: false
               source: "/sql/functions_and_operators/mod-operator.md"
@@ -249,6 +254,7 @@
               url: "/sql/functions-and-operators/mul-operator"
               title: "&ast;"
               type: page
+              doc_type: "sql_function"
               visible_in_menu: false
               visible_in_toc: false
               source: "/sql/functions_and_operators/mul-operator.md"
@@ -256,6 +262,7 @@
               url: "/sql/functions-and-operators/neg-operator"
               title: "&excl;"
               type: page
+              doc_type: "sql_function"
               visible_in_menu: false
               visible_in_toc: false
               source: "/sql/functions_and_operators/neg-operator.md"
@@ -263,6 +270,7 @@
               url: "/sql/functions-and-operators/sub-operator"
               title: "&minus;"
               type: page
+              doc_type: "sql_function"
               visible_in_menu: false
               visible_in_toc: false
               source: "/sql/functions_and_operators/sub-operator.md"
@@ -270,6 +278,7 @@
               url: "/sql/functions-and-operators/lt-operator"
               title: "&lt;"
               type: page
+              doc_type: "sql_function"
               visible_in_menu: false
               visible_in_toc: false
               source: "/sql/functions_and_operators/lt-operator.md"
@@ -277,6 +286,7 @@
               url: "/sql/functions-and-operators/lte-operator"
               title: "&lt;&equals;"
               type: page
+              doc_type: "sql_function"
               visible_in_menu: false
               visible_in_toc: false
               source: "/sql/functions_and_operators/lte-operator.md"
@@ -284,6 +294,7 @@
               url: "/sql/functions-and-operators/gt-operator"
               title: "&gt;"
               type: page
+              doc_type: "sql_function"
               visible_in_menu: false
               visible_in_toc: false
               source: "/sql/functions_and_operators/gt-operator.md"
@@ -291,6 +302,7 @@
               url: "/sql/functions-and-operators/gte-operator"
               title: "&gt;&equals;"
               type: page
+              doc_type: "sql_function"
               visible_in_menu: false
               visible_in_toc: false
               source: "/sql/functions_and_operators/gte-operator.md"
@@ -298,6 +310,7 @@
               url: "/sql/functions-and-operators/and"
               title: "AND"
               type: page
+              doc_type: "sql_function"
               visible_in_menu: false
               visible_in_toc: false
               source: "/sql/functions_and_operators/and.md"
@@ -305,6 +318,7 @@
               url: "/sql/functions-and-operators/count"
               title: "count"
               type: page
+              doc_type: "sql_function"
               visible_in_menu: false
               visible_in_toc: false
               source: "/sql/functions_and_operators/count.md"
@@ -312,6 +326,7 @@
               url: "/sql/functions-and-operators/date_add"
               title: "date_add"
               type: page
+              doc_type: "sql_function"
               visible_in_menu: false
               visible_in_toc: false
               source: "/sql/functions_and_operators/date_add.md"
@@ -319,6 +334,7 @@
               url: "/sql/functions-and-operators/date_trunc"
               title: "date_trunc"
               type: page
+              doc_type: "sql_function"
               visible_in_menu: false
               visible_in_toc: false
               source: "/sql/functions_and_operators/date_trunc.md"
@@ -326,6 +342,7 @@
               url: "/sql/functions-and-operators/endswith"
               title: "endswith"
               type: page
+              doc_type: "sql_function"
               visible_in_menu: false
               visible_in_toc: false
               source: "/sql/functions_and_operators/endswith.md"
@@ -333,6 +350,7 @@
               url: "/sql/functions-and-operators/from_timestamp"
               title: "from_timestamp"
               type: page
+              doc_type: "sql_function"
               visible_in_menu: false
               visible_in_toc: false
               source: "/sql/functions_and_operators/from_timestamp.md"
@@ -340,6 +358,7 @@
               url: "/sql/functions-and-operators/if-expression"
               title: "if"
               type: page
+              doc_type: "sql_function"
               visible_in_menu: false
               visible_in_toc: false
               source: "/sql/functions_and_operators/if.md"
@@ -347,6 +366,7 @@
               url: "/sql/functions-and-operators/isnull"
               title: "isnull"
               type: page
+              doc_type: "sql_function"
               visible_in_menu: false
               visible_in_toc: false
               source: "/sql/functions_and_operators/is_null.md"
@@ -354,6 +374,7 @@
               url: "/sql/functions-and-operators/lcase"
               title: "lcase"
               type: page
+              doc_type: "sql_function"
               visible_in_menu: false
               visible_in_toc: false
               source: "/sql/functions_and_operators/lcase.md"
@@ -361,6 +382,7 @@
               url: "/sql/functions-and-operators/lowercase"
               title: "lowercase"
               type: page
+              doc_type: "sql_function"
               visible_in_menu: false
               visible_in_toc: false
               source: "/sql/functions_and_operators/lowercase.md"
@@ -368,6 +390,7 @@
               url: "/sql/functions-and-operators/max"
               title: "max"
               type: page
+              doc_type: "sql_function"
               visible_in_menu: false
               visible_in_toc: false
               source: "/sql/functions_and_operators/max.md"
@@ -375,6 +398,7 @@
               url: "/sql/functions-and-operators/mean"
               title: "mean"
               type: page
+              doc_type: "sql_function"
               visible_in_menu: false
               visible_in_toc: false
               source: "/sql/functions_and_operators/mean.md"
@@ -382,6 +406,7 @@
               url: "/sql/functions-and-operators/min"
               title: "min"
               type: page
+              doc_type: "sql_function"
               visible_in_menu: false
               visible_in_toc: false
               source: "/sql/functions_and_operators/min.md"
@@ -389,6 +414,7 @@
               url: "/sql/functions-and-operators/mod"
               title: "mod"
               type: page
+              doc_type: "sql_function"
               visible_in_menu: false
               visible_in_toc: false
               source: "/sql/functions_and_operators/mod.md"
@@ -396,6 +422,7 @@
               url: "/sql/functions-and-operators/or"
               title: "or"
               type: page
+              doc_type: "sql_function"
               visible_in_menu: false
               visible_in_toc: false
               source: "/sql/functions_and_operators/or.md"
@@ -403,6 +430,7 @@
               url: "/sql/functions-and-operators/pow"
               title: "pow"
               type: page
+              doc_type: "sql_function"
               visible_in_menu: false
               visible_in_toc: false
               source: "/sql/functions_and_operators/pow.md"
@@ -410,6 +438,7 @@
               url: "/sql/functions-and-operators/regexp-operator"
               title: "REGEXP"
               type: page
+              doc_type: "sql_function"
               visible_in_menu: false
               visible_in_toc: false
               source: "/sql/functions_and_operators/regexp-operator.md"
@@ -417,6 +446,7 @@
               url: "/sql/functions-and-operators/round"
               title: "round"
               type: page
+              doc_type: "sql_function"
               visible_in_menu: false
               visible_in_toc: false
               source: "/sql/functions_and_operators/round.md"
@@ -424,6 +454,7 @@
               url: "/sql/functions-and-operators/startswith"
               title: "startswith"
               type: page
+              doc_type: "sql_function"
               visible_in_menu: false
               visible_in_toc: false
               source: "/sql/functions_and_operators/startswith.md"
@@ -431,6 +462,7 @@
               url: "/sql/functions-and-operators/substr"
               title: "substr"
               type: page
+              doc_type: "sql_function"
               visible_in_menu: false
               visible_in_toc: false
               source: "/sql/functions_and_operators/substr.md"
@@ -438,6 +470,7 @@
               url: "/sql/functions-and-operators/substring"
               title: "substring"
               type: page
+              doc_type: "sql_function"
               visible_in_menu: false
               visible_in_toc: false
               source: "/sql/functions_and_operators/substring.md"
@@ -445,6 +478,7 @@
               url: "/sql/functions-and-operators/sum"
               title: "sum"
               type: page
+              doc_type: "sql_function"
               visible_in_menu: false
               visible_in_toc: false
               source: "/sql/functions_and_operators/sum.md"
@@ -452,6 +486,7 @@
               url: "/sql/functions-and-operators/time_at"
               title: "time_at"
               type: page
+              doc_type: "sql_function"
               visible_in_menu: false
               visible_in_toc: false
               source: "/sql/functions_and_operators/time_at.md"
@@ -459,6 +494,7 @@
               url: "/sql/functions-and-operators/to_bool"
               title: "to_bool"
               type: page
+              doc_type: "sql_function"
               visible_in_menu: false
               visible_in_toc: false
               source: "/sql/functions_and_operators/to_bool.md"
@@ -466,6 +502,7 @@
               url: "/sql/functions-and-operators/to_float"
               title: "to_float"
               type: page
+              doc_type: "sql_function"
               visible_in_menu: false
               visible_in_toc: false
               source: "/sql/functions_and_operators/to_float.md"
@@ -473,6 +510,7 @@
               url: "/sql/functions-and-operators/to_int"
               title: "to_int"
               type: page
+              doc_type: "sql_function"
               visible_in_menu: false
               visible_in_toc: false
               source: "/sql/functions_and_operators/to_int.md"
@@ -480,6 +518,7 @@
               url: "/sql/functions-and-operators/to_str"
               title: "to_str"
               type: page
+              doc_type: "sql_function"
               visible_in_menu: false
               visible_in_toc: false
               source: "/sql/functions_and_operators/to_str.md"
@@ -487,6 +526,7 @@
               url: "/sql/functions-and-operators/truncate"
               title: "truncate"
               type: page
+              doc_type: "sql_function"
               visible_in_menu: false
               visible_in_toc: false
               source: "/sql/functions_and_operators/truncate.md"
@@ -494,6 +534,7 @@
               url: "/sql/functions-and-operators/uppercase"
               title: "uppercase"
               type: page
+              doc_type: "sql_function"
               visible_in_menu: false
               visible_in_toc: false
               source: "/sql/functions_and_operators/uppercase.md"
@@ -501,6 +542,7 @@
               url: "/sql/functions-and-operators/ucase"
               title: "ucase"
               type: page
+              doc_type: "sql_function"
               visible_in_menu: false
               visible_in_toc: false
               source: "/sql/functions_and_operators/ucase.md"
@@ -750,56 +792,300 @@
       location: "/internals/architecture"
       children:
         -
-          url: "/internals/architecture"
-          title: "Architecture"
+          url: "/internals/partitioning"
+          title: "Table Partitioning"
+          type: page
+          doctitle: "8.2.1 Table Partitioning"
+          content_type: txt
+          visible_in_menu: true
+          visible_in_toc: true
+          source: "internals/partitioning.txt"
+        -
+          url: "/internals/statement-based-replication"
+          title: "Segment-Based Replication"
+          type: page
+          doctitle: "8.2.2 Segment-Based Replication"
+          content_type: txt
+          visible_in_menu: true
+          visible_in_toc: true
+          source: "internals/replication.txt"
+        -
+          url: "/internals/binary-protocol"
+          title: "Binary Protocol"
+          type: page
+          doctitle: "8.2.3 Binary Protocol"
+          content_type: txt
+          visible_in_menu: true
+          visible_in_toc: true
+          source: "internals/protocol.txt"
+        -
+          url: "/internals/life-of-a-query"
+          title: "Life of a Query"
           type: page
           visible_in_menu: true
           visible_in_toc: true
-          source: "internals/architecture.md"
+          source: "internals/life-of-a-query.md"
+    -
+      url: "/examples"
+      title: "Examples"
+      type: redirect
+      visible_in_menu: true
+      visible_in_toc: true
+      location: "/examples/chartsql"
+      children:
         -
-          url: "/internals/"
-          title: "Design Documents"
-          type: redirect
+          url: "/examples/chartsql"
+          title: "ChartSQL"
+          type: page
+          content_type: html
+          doc_type: example_gallery
           visible_in_menu: true
           visible_in_toc: true
-          location: "/internals/architecture"
+          source: "examples/chartsql/index.html"
           children:
             -
-              url: "/internals/partitioning"
-              title: "Table Partitioning"
-              type: page
-              doctitle: "8.2.1 Table Partitioning"
-              content_type: txt
+              url: "/examples/chartsql/linecharts"
+              title: "Line Charts"
+              type: redirect
+              doc_type: example
               visible_in_menu: true
-              visible_in_toc: true
-              source: "internals/partitioning.txt"
+              visible_in_toc: false
+              location: "/examples/chartsql/linecharts/simple_lines"
+              children:
+                -
+                  url: "/examples/chartsql/linecharts/simple_lines"
+                  title: "Simple timeseries line chart"
+                  type: page
+                  content_type: html
+                  doc_type: example
+                  visible_in_menu: true
+                  visible_in_toc: false
+                  source: "examples/chartsql/examples.html"
+                -
+                  url: "/examples/chartsql/linecharts/lines_with_points"
+                  title: "Lines with points"
+                  type: page
+                  content_type: html
+                  doc_type: example
+                  visible_in_menu: true
+                  visible_in_toc: false
+                  source: "examples/chartsql/examples.html"
+                -
+                  url: "/examples/chartsql/linecharts/explicit_domain"
+                  title: "Explicit range/domain"
+                  type: page
+                  content_type: html
+                  doc_type: example
+                  visible_in_menu: true
+                  visible_in_toc: false
+                  source: "examples/chartsql/examples.html"
+                -
+                  url: "/examples/chartsql/linecharts/lines_with_labels"
+                  title: "Lines with data labels"
+                  type: page
+                  content_type: html
+                  doc_type: example
+                  visible_in_menu: true
+                  visible_in_toc: false
+                  source: "examples/chartsql/examples.html"
+                -
+                  url: "/examples/chartsql/linecharts/multiple_y_axes"
+                  title: "Multiple Y Axes"
+                  type: page
+                  content_type: html
+                  doc_type: example
+                  visible_in_menu: true
+                  visible_in_toc: false
+                  source: "examples/chartsql/examples.html"
+                -
+                  url: "/examples/chartsql/linecharts/logarithmic_domain"
+                  title: "Logarithmic domain"
+                  type: page
+                  content_type: html
+                  doc_type: example
+                  visible_in_menu: true
+                  visible_in_toc: false
+                  source: "examples/chartsql/examples.html"
+                -
+                  url: "/examples/chartsql/linecharts/irregular_data"
+                  title: "Data with irregular intervals"
+                  type: page
+                  content_type: html
+                  doc_type: example
+                  visible_in_menu: true
+                  visible_in_toc: false
+                  source: "examples/chartsql/examples.html"
+                -
+                  url: "/examples/chartsql/linecharts/inverted_axis"
+                  title: "Inverted Axis"
+                  type: page
+                  content_type: html
+                  doc_type: example
+                  visible_in_menu: true
+                  visible_in_toc: false
+                  source: "examples/chartsql/examples.html"
             -
-              url: "/internals/statement-based-replication"
-              title: "Segment-Based Replication"
-              type: page
-              doctitle: "8.2.2 Segment-Based Replication"
-              content_type: txt
+              url: "/examples/chartsql/areacharts"
+              title: "Area Charts"
+              type: redirect
+              doc_type: example
               visible_in_menu: true
-              visible_in_toc: true
-              source: "internals/replication.txt"
+              visible_in_toc: false
+              location: "/examples/chartsql/areacharts/simple_area"
+              children:
+                -
+                  url: "/examples/chartsql/areacharts/simple_area"
+                  title: "Simple are chart"
+                  type: page
+                  content_type: html
+                  doc_type: example
+                  visible_in_menu: true
+                  visible_in_toc: false
+                  source: "examples/chartsql/examples.html"
+                -
+                  url: "/examples/chartsql/areacharts/area_with_points"
+                  title: "Area with border/points"
+                  type: page
+                  content_type: html
+                  doc_type: example
+                  visible_in_menu: true
+                  visible_in_toc: false
+                  source: "examples/chartsql/examples.html"
+                -
+                  url: "/examples/chartsql/areacharts/area_ranges"
+                  title: "Area ranges"
+                  type: page
+                  content_type: html
+                  doc_type: example
+                  visible_in_menu: true
+                  visible_in_toc: false
+                  source: "examples/chartsql/examples.html"
             -
-              url: "/internals/binary-protocol"
-              title: "Binary Protocol"
-              type: page
-              doctitle: "8.2.3 Binary Protocol"
-              content_type: txt
+              url: "/examples/chartsql/barcharts"
+              title: "Bar Charts"
+              type: redirect
+              doc_type: example
               visible_in_menu: true
-              visible_in_toc: true
-              source: "internals/protocol.txt"
+              visible_in_toc: false
+              location: "/examples/chartsql/barcharts/vertical_bars"
+              children:
+                -
+                  url: "/examples/chartsql/barcharts/vertical_bars"
+                  title: "Vertical bar chart, multiple series"
+                  type: page
+                  content_type: html
+                  doc_type: example
+                  visible_in_menu: true
+                  visible_in_toc: false
+                  source: "examples/chartsql/examples.html"
+                -
+                  url: "/examples/chartsql/barcharts/horizontal_bars"
+                  title: "Horizontal bar chart with labels"
+                  type: page
+                  content_type: html
+                  doc_type: example
+                  visible_in_menu: true
+                  visible_in_toc: false
+                  source: "examples/chartsql/examples.html"
+                -
+                  url: "/examples/chartsql/barcharts/stacked_bars"
+                  title: "Stacked bar chart"
+                  type: page
+                  content_type: html
+                  doc_type: example
+                  visible_in_menu: true
+                  visible_in_toc: false
+                  source: "examples/chartsql/examples.html"
+                -
+                  url: "/examples/chartsql/barcharts/vertical_ranges"
+                  title: "Vertical range bars"
+                  type: page
+                  content_type: html
+                  doc_type: example
+                  visible_in_menu: true
+                  visible_in_toc: false
+                  source: "examples/chartsql/examples.html"
+                -
+                  url: "/examples/chartsql/barcharts/horizontal_ranges"
+                  title: "Horizontal range bars"
+                  type: page
+                  content_type: html
+                  doc_type: example
+                  visible_in_menu: true
+                  visible_in_toc: false
+                  source: "examples/chartsql/examples.html"
+                -
+                  url: "/examples/chartsql/barcharts/negative_values"
+                  title: "Bars with negative values"
+                  type: page
+                  content_type: html
+                  doc_type: example
+                  visible_in_menu: true
+                  visible_in_toc: false
+                  source: "examples/chartsql/examples.html"
             -
-              url: "/internals/life-of-a-query"
-              title: "Life of a Query"
-              type: page
+              url: "/examples/chartsql/pointcharts"
+              title: "Bubble &amp; Scatter Charts"
+              type: redirect
+              doc_type: example
               visible_in_menu: true
-              visible_in_toc: true
-              source: "internals/life-of-a-query.md"
-    #-
-    #  url: "/appendix"
+              visible_in_toc: false
+              location: "/examples/chartsql/pointcharts/simple_bubbles"
+              children:
+                -
+                  url: "/examples/chartsql/pointcharts/simple_bubbles"
+                  title: "Simple bubble chart"
+                  type: page
+                  content_type: html
+                  doc_type: example
+                  visible_in_menu: true
+                  visible_in_toc: false
+                  source: "examples/chartsql/examples.html"
+                -
+                  url: "/examples/chartsql/pointcharts/simple_scatter"
+                  title: "Simple scatter chart"
+                  type: page
+                  content_type: html
+                  doc_type: example
+                  visible_in_menu: true
+                  visible_in_toc: false
+                  source: "examples/chartsql/examples.html"
+                -
+                  url: "/examples/chartsql/pointcharts/pointchart_with_labels"
+                  title: "Point chart with data labels"
+                  type: page
+                  content_type: html
+                  doc_type: example
+                  visible_in_menu: true
+                  visible_in_toc: false
+                  source: "examples/chartsql/examples.html"
+            -
+              url: "/examples/chartsql/combined"
+              title: "Combined Charts"
+              type: redirect
+              doc_type: example
+              visible_in_menu: true
+              visible_in_toc: false
+              location: "/examples/chartsql/combined/barsandlines"
+              children:
+                -
+                  url: "/examples/chartsql/combined/barsandlines"
+                  title: "Bars and Lines"
+                  type: page
+                  content_type: html
+                  doc_type: example
+                  visible_in_menu: true
+                  visible_in_toc: false
+                  source: "examples/chartsql/examples.html"
+                -
+                  url: "/examples/chartsql/combined/arearange_and_line"
+                  title: "Areas with lines"
+                  type: page
+                  content_type: html
+                  doc_type: example
+                  visible_in_menu: true
+                  visible_in_toc: false
+                  source: "examples/chartsql/examples.html"
     #  title: "Appendix"
     #  type: page
     #  visible_in_menu: true
