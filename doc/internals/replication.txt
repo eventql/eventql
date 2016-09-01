@@ -77,9 +77,9 @@ Table of Contents
   hard drive error, up to 1 minute (or whatever the compaction timeout plus
   replication delay is) of recent writes may be lost.
 
-  Given that most transactional databases (like MySQL or Postgres) do not give an
-  stronger guarantees than this and EventQL is specfically intended for analytical
-  usecases, we consider it a fair tradeoff.
+  Given that most transactional databases (like MySQL or Postgres) do not give
+  any stronger guarantees than this and EventQL is specfically intended for
+  analytical usecases, we consider it a fair tradeoff.
 
 
 3. Implementation Details
