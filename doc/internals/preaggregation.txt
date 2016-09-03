@@ -64,16 +64,15 @@ Table of Contents
   The proposed approach is to implement pre-aggregation as a separate internal
   subsystem, touching as few of the core subsystems as possible.
 
-  Pre-aggregation is optinally enabled for a table by setting a pre-aggregation
+  Pre-aggregation is optionally enabled for a table by setting a pre-aggregation
   config for the table (further specified in section 3).
 
   Once enabled, we elect N hosts as "aggregation nodes" for the table. Each
   insert into the pre-aggregation-enabled table will bypass the normal insert
-  code and will instead be sent randomly to one of the N aggregation hosts
-  (N.B. actual load balancing might not be random). Each aggregation node then
-  performs the pre-aggreagtion routine locally on all received input rows and,
-  at the end of the aggregation interval, forwards the output rows to the
-  regular table insert procedure.
+  code and will instead be sent  to one of the N aggregation hosts. Each
+  aggregation node then performs the pre-aggreagtion routine locally on all
+  received input rows and, at the end of the aggregation interval, forwards the
+  output rows to the regular table insert procedure.
 
   Of course, this scheme will result in up to N * C instead of C output rows.
   While this would not impact the correctness of any aggregate queries over the
@@ -87,9 +86,9 @@ Table of Contents
 
 3. Implementation Details
 
-  A separate issue that we need to address is that the API should allow fo
-  exactly-once-inserts in the case of failures. If the inserting receives an
-  error code after posting an insert to one of the aggregating servers, it
+  A separate issue that we need to address is that the API should allow for
+  exactly-once-inserts in the case of failures. If the inserting client receives
+  an error code after sending an insert to one of the aggregating servers, it
   can't be sure if the value was stored or not, so we must support idempotent
   retries.
 
