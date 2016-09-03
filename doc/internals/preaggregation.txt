@@ -287,7 +287,7 @@ Table of Contents
 
   However, in the interest of keeping the design simple and minimally invasive
   to the other subsystems, modifying the compaction routine is left open for
-  when/if the issue turns out to be practical limitation.
+  when/if the issue turns out to be a practical limitation.
 
 
 7. Code Locations
