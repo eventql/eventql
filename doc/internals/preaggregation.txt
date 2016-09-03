@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 EVENTQL - PRE-AGGREGATION
 --------------------------------------------------------------------------------
-v0.1 - September, 2016                             Paul Asmuth <paul@eventql.io>
+v0.8 - September, 2016                             Paul Asmuth <paul@eventql.io>
 
 Table of Contents
 
