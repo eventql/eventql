@@ -182,6 +182,9 @@ Table of Contents
 
 4.5 Leader Election
 
+  We use the coordination service to elect the N aggregating servers from the
+  list of available servers for every table.
+
 4.6 Load Balancing
 
   Each input row should be sent to one of the aggregating servers for the table
