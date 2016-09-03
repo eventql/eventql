@@ -9,12 +9,15 @@ Table of Contents
   2. Definitions
   3. Design Overview
   4. Implementation Details
-    4.1 Configuration
-    4.2 Pre-Aggregation Procedure
-    4.3 Leader Election
-    4.4 Load Balancing
-    4.5 Changes to the INSERT statement
-    4.6 Changes to the SELECT statement
+    4.1 Table Eligibility
+    4.2 Configuration
+    4.3 Aggregation Functions
+    4.4 Pre-Aggregation Procedure
+    4.5 Leader Election
+    4.6 Load Balancing
+    4.7 Changes to the ALTER statement
+    4.8 Changes to the INSERT statement
+    4.9 Changes to the SELECT statement
   5. Reliability Considerations
   6. Alternatives Considered
     6.1 Implement as standalone service
@@ -55,12 +58,12 @@ Table of Contents
   rows for a given input time interval and produces another rowset M, so that
   any query that computes aggregations on the measurements (and optionally
   groups by time or one of the dimensions) will return the same result for both
-  input rowsets N and M. Note that the number of rows in M will always be less
-  or equal to the number of rows in N.
+  input rowsets N and M. The number of rows in M will always be less or equal
+  to the number of rows in N.
 
   The length of the recurring aggregation time interval represents a lower bound
   on the time granularity over which the data can be grouped in queries. Hence
-  we'll refer to length of an individual aggregation time interval as the
+  we'll refer to the length of an individual aggregation time interval as the
   "granularity" of the aggregation from now on.
 
   We also define the "cardinality of an aggregation" for a given time interval
@@ -78,8 +81,8 @@ Table of Contents
   config for the table (further specified in section 4).
 
   Once enabled, we elect N hosts as "aggregation nodes" for the table. Each
-  insert into the pre-aggregation-enabled table will bypass the normal insert
-  code and will instead be sent to one of the N aggregation hosts. Each
+  insert into the pre-aggregation-enabled table will initially bypass the normal
+  insert code and will instead be sent to one of the N aggregation hosts. Each
   aggregation node then performs the pre-aggreagtion routine locally on all
   received input rows and, at the end of the aggregation interval, forwards the
   output rows to the regular table insert procedure.
@@ -90,25 +93,74 @@ Table of Contents
   table. For UX reasons, and because we consider it an implementation detail
   that should not have to be explained in user-facing documentation, we
   automatically insert a default aggregation clause into every SELECT select
-  statement that refers to pre-aggregation-enabled tables. This default
+  statement which refers to pre-aggregation-enabled tables. This default
   aggregation clause is statically derived from the pre-aggregation config.
 
 
 4. Implementation Details
 
-4.1 Configuration
+4.1 Table Eligibility
 
-  The pre-aggregation config may be changed at anye time.
+  Pre-aggregation may only be enabled for tables that meet the following
+  requirements:
 
-4.2 Pre-Aggregation Procedure
+    - Must have a non-unique primary key of time DATETIME
 
-4.3 Leader Election
+4.2 Configuration
 
-4.4 Load Balancing
+  We add the following fields ("the pre-aggregation config") to the table
+  configuration (which in turn is stored in the coordination service).
 
-4.5 Changes to the INSERT statement
+    - granularity            -- The aggregation granularity
+    - dimensions             -- A list of dimensions, for each dimension:
+      - dimensions.column    -- The column name for the dimension
+    - measures               -- A list of measures, for each measure:
+      - measure.column       -- The column name for the measure
+      - measure.aggr_fn      -- The aggregation function to be used
 
-4.6 Changes to the SELECT statement
+  The pre-aggregation config may be changed by the user at any time. On any
+  change to either the pre-aggregation config or the table schema the server
+  must check and update the pre-aggregation config in such a fashion that it
+  never refers to non-existing columns.
+
+4.3 Aggregation Functions
+
+  An aggregation function is responsible for converting a number of values for
+  a given measure, dimension and time interval into a single aggregated value
+  that will be stored into one column of the output row.
+
+  Aggregation functions may optionally take a number of configuration
+  parameters. The parameters are encoded as <key>=<value> pairs where key and
+  value are both strings.
+
+  Additionally, not every aggregation function is required to support every
+  (output) column type.
+
+  The following is not meant as a definite list of supported aggregation
+  functions but mereley as the list of initially considered and supported
+  methods:
+
+    - COUNT
+    - SUM
+    - MEAN
+    - MIN
+    - MAX
+    - DELTA
+    - CARDINALITY_APPROX
+    - QUANTILES
+    - QUANTILES_APPROX
+
+4.4 Pre-Aggregation Procedure
+
+4.5 Leader Election
+
+4.6 Load Balancing
+
+4.7 Changes to the ALTER statement
+
+4.8 Changes to the INSERT statement
+
+4.9 Changes to the SELECT statement
 
 
 5. Relability Considerations
