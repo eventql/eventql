@@ -118,18 +118,17 @@ Table of Contents
   As part of the separate writea-ahead-logging effort, we will add (optional)
   durable write-ahead storage for accepted input rows.
 
-  A separate issue that is not currently addressed is that the current API
-  and implementation do not allow for exactly-once-inserts in the case of
-  failures: If we receive an error code after posting an insert to one of the
-  aggregating servers, we can't be sure if the value was stored or not and any
-  retries would not be idempotent. Still, in practice it is much more likely
-  that the value was _not_ inserted. For now we'll do a limited number of
-  retries and consider the pre-aggregation an at-least-once system.
+  A separate issue that is not addressed is that the API and implementation do
+  not allow for exactly-once-inserts in the case of failures: If the client
+  recevies an error code after sending an insert to one of the aggregating
+  servers, it can't be sure if the value was stored or not so it can't correctly
+  decide if it should retry or not.
 
-  At a later point, we will solve this by adding an optional transaction IDs to
-  every insert and ignoring duplicate inserts, however this would be done in an
-  independent effort as a similar issue exists for inserts into regular (i.e.
-  not pre-aggregation-enabled) tables with a non unique primary key.
+  However, this is really more of a philosophical concern (solving the problem
+  would defeat a large part of the benefits of pre-aggregation). Users that need
+  strict exactly-once semantics can not use this optimization and should insert
+  the rows individually, without pre-aggregation (which _is_ an idempotent
+  operation and safe to retry).
 
 
 6. Alternatives Considered
