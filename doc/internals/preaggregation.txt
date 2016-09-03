@@ -203,9 +203,10 @@ Table of Contents
 
 4.8 Changes to the INSERT statement
 
-  The INSERT statment must check if the table is pre-aggregation-enabled and
-  if so, divert the insert into the pre-aggregation subsystem. A new flag
-  INSERT_NOPREAGGR is added that optionally disabled this behaviour.
+  The INSERT statment must be modified to check if the table is
+  pre-aggregation-enabled and if so, divert the insert into the pre-aggregation
+  subsystem. A new flag INSERT_NOPREAGGR is added that optionally disabled this
+  behaviour.
 
 4.9 Changes to the SELECT statement
 
