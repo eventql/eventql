@@ -8,6 +8,12 @@ Table of Contents
   1. Introduction
   2. Design Overview
   3. Implementation Details
+    3.1 Configuration
+    3.2 Pre-Aggregation Procedure
+    3.3 Leader Election
+    3.4 Load Balancing
+    3.5 Changes to the INSERT statement
+    3.6 Changes to the SELECT statement
   4. Reliability Considerations
   5. Alternatives Considered
     5.1 Implement as standalone service
@@ -69,11 +75,10 @@ Table of Contents
 
   Once enabled, we elect N hosts as "aggregation nodes" for the table. Each
   insert into the pre-aggregation-enabled table will bypass the normal insert
-  code and will instead be sent randomly to one of the N aggregation hosts
-  (N.B. actual load balancing might not be random). Each aggregation node then
-  performs the pre-aggreagtion routine locally on all received input rows and,
-  at the end of the aggregation interval, forwards the output rows to the
-  regular table insert procedure.
+  code and will instead be sent to one of the N aggregation hosts. Each
+  aggregation node then performs the pre-aggreagtion routine locally on all
+  received input rows and, at the end of the aggregation interval, forwards the
+  output rows to the regular table insert procedure.
 
   Of course, this scheme will result in up to N * C instead of C output rows.
   While this would not impact the correctness of any aggregate queries over the
@@ -87,6 +92,19 @@ Table of Contents
 
 3. Implementation Details
 
+3.1 Configuration
+
+  The pre-aggregation config may be changed at anye time.
+
+3.2 Pre-Aggregation Procedure
+
+3.3 Leader Election
+
+3.4 Load Balancing
+
+3.5 Changes to the INSERT statement
+
+3.6 Changes to the SELECT statement
 
 
 4. Relability Considerations
