@@ -170,13 +170,14 @@ Table of Contents
   For each incoming row, the matching entry is created or retrieved from the
   map of running aggregations. Then, the aggregation function for each measure
   is called with the corresponding column's value from the input row and the
-  last aggregation state from the map entry. The result of the invocation is
-  then written back to the aggregation state in the map entry.
+  last aggregation state from the map entry. Finally, the result of the
+  invocation is written back to the aggregation state in the map entry.
 
   Once a new entry is added to the aggregation map a timer is started that fires
   after G (granularity) seconds have passed one the wall clock. Once the timer
   fires, the entry is removed from the map and inserted into the table using
-  the regular table insert mechansim.
+  the regular table insert mechansim (using the nominal time retrieved from
+  the map's key as the rows primary key value).
 
 4.5 Leader Election
 
@@ -184,9 +185,28 @@ Table of Contents
 
 4.7 Changes to the ALTER statement
 
+  The ALTER TABLE must be changed to atomically remove columns from the
+  pre-aggregation config when columns are removed from the table schema.
+
+  Forthermore, the new ALTER TABLE SET PREAGGREGATION statement must be
+  implemented.
+
 4.8 Changes to the INSERT statement
 
+  The INSERT statment must check if the table is pre-aggregation-enabled and
+  if so, divert the insert into the pre-aggregation subsystem. A new flag
+  INSERT_NOPREAGGR is added that optionally disabled this behaviour.
+
 4.9 Changes to the SELECT statement
+
+  The SELECT statement execution must be altered to insert an aggregation node
+  for every query on a pre-aggregation-enabled table that does not already
+  contain an eligible aggregation clause.
+
+  The synthetic aggregation node is a group over the quotient of primary key
+  column value and granularity (using truncating division) where all columns
+  referred to from measurement definitions are aggregated using the respective
+  aggregation function's output merge function.
 
 
 5. Relability Considerations
