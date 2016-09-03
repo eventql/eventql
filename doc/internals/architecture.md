@@ -35,7 +35,7 @@ of a given schema in column-oriented layout.
 
 Clients connect to an EventQL cluster to create and manage tables, insert and
 update rows into tables and execute queries. When a client wants to executes a
-SQL (or MapReduce) query on the data it can sent the query to any server in the
+SQL (or MapReduce) query on the data it can send the query to any server in the
 cluster.
 
 To execute a query, a server will first identify all tables referenced from the
