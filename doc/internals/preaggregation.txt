@@ -125,9 +125,9 @@ Table of Contents
 
 4.3 Aggregation Functions
 
-  An aggregation function is responsible for converting a number of values for
-  a given measure, dimension and time interval into a single aggregated value
-  that will be stored into one column of the output row.
+  An aggregation function is responsible for converting a number of scalar
+  input values for a given measure, dimension and time interval into a single
+  scalar aggregated value that will be stored into one column of the output row.
 
   Aggregation functions may optionally take a number of configuration
   parameters. The parameters are encoded as <key>=<value> pairs where key and
@@ -151,6 +151,32 @@ Table of Contents
     - QUANTILES_APPROX
 
 4.4 Pre-Aggregation Procedure
+
+  The pre-aggregation procedure is run for a specific table and on a specific
+  host. All the work it performs is done on the local machine and all data is
+  kept in memory.
+
+  Conceptually, the procedure stores a map of running aggregations. Each entry
+  in the map contains a vector of aggregation states for each measure.
+
+  The key for the map is another vector of strings. The key vector has one
+  element for each dimension in the aggregation config plus one element for the
+  time. The elements for the dimensions are set to the values of the respective
+  columns in the input row (or NULL if the input row is missing the column). The
+  time element is set to quotient of the input row's primary key column value
+  and the granularity (using truncating division). Input rows without a primary
+  key column value are rejected.
+
+  For each incoming row, the matching entry is created or retrieved from the
+  map of running aggregations. Then, the aggregation function for each measure
+  is called with the corresponding column's value from the input row and the
+  last aggregation state from the map entry. The result of the invocation is
+  then written back to the aggregation state in the map entry.
+
+  Once a new entry is added to the aggregation map a timer is started that fires
+  after G (granularity) seconds have passed one the wall clock. Once the timer
+  fires, the entry is removed from the map and inserted into the table using
+  the regular table insert mechansim.
 
 4.5 Leader Election
 
