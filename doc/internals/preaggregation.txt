@@ -6,19 +6,20 @@ v0.1 - September, 2016                             Paul Asmuth <paul@eventql.io>
 Table of Contents
 
   1. Introduction
-  2. Design Overview
-  3. Implementation Details
-    3.1 Configuration
-    3.2 Pre-Aggregation Procedure
-    3.3 Leader Election
-    3.4 Load Balancing
-    3.5 Changes to the INSERT statement
-    3.6 Changes to the SELECT statement
-  4. Reliability Considerations
-  5. Alternatives Considered
-    5.1 Implement as standalone service
-    5.2 Implement in the compaction routine
-  6. Code Locations
+  2. Definitions
+  3. Design Overview
+  4. Implementation Details
+    4.1 Configuration
+    4.2 Pre-Aggregation Procedure
+    4.3 Leader Election
+    4.4 Load Balancing
+    4.5 Changes to the INSERT statement
+    4.6 Changes to the SELECT statement
+  5. Reliability Considerations
+  6. Alternatives Considered
+    6.1 Implement as standalone service
+    6.2 Implement in the compaction routine
+  7. Code Locations
 
 
 1. Introduction
@@ -32,25 +33,9 @@ Table of Contents
   queries on the data. Measurements are (usually numeric) columns that will only
   be used in aggregations (i.e. from aggregate function in the SELECT list).
 
-  For this usecase it's highly beneficial to pre-aggregate the measurements for
-  each input dimension over a recurring time interval before writing them to
-  disk.
-
-  The pre-aggregation routine conceptually accepts a rowset N and produces
-  another rowset M, so that any query that computes aggregations on the
-  measurements (and optionally groups by the dimensions) will return the same
-  result for both input rowsets N and M. Note that the number of rows in M will
-  always be less or equal to the number of rows in N.
-
-  The length of the recurring time interval represents a lower bound on the
-  (time) granularity over which the data can be grouped in queries. Hence we'll
-  refer to length of an individual aggregation time interval as the
-  "granularity" of the aggregation from now on.
-
-  We also define the "cardinality of an aggregation" for a given time interval
-  as the number of rows in the output rowset M. Given an arrival rate of events
-  R and a granularity G, the pre-aggregation function transforms R * G input
-  rows into C output rows where C is the cardinality of the aggregation.
+  For this usecase it's usually highly beneficial to pre-aggregate the
+  measurements for each input dimension over a recurring time interval before
+  writing them to disk.
 
   To see why this may result in huge performance increases, consider this
   somewhat realistic usecase: We're running an ad network and are displaying
@@ -59,19 +44,38 @@ Table of Contents
   interesting, we also want to be able to get an individual click rate for each
   of the websites on which our ads are displayed.
 
-  So, let's say our ads are displayed on 4,000 individual websites at any given
-  time. That would make C=4,000, R=100,000 impressions/second and G=1 minute.
-  This works out so that the size of the data after pre-aggreagtion would be
+  If our ads are displayed on 4,000 individual websites at any given time, the
+  examples works out so that the size of the data after pre-aggreagtion would be
   roughly 0.07% of the size of the input data. A 1500x speedup.
 
 
-2. Design Overview
+2. Definitions
+
+  We define an abstract pre-aggregation routine, that accepts a rowset N of
+  rows for a given input time interval and produces another rowset M, so that
+  any query that computes aggregations on the measurements (and optionally
+  groups by time or one of the dimensions) will return the same result for both
+  input rowsets N and M. Note that the number of rows in M will always be less
+  or equal to the number of rows in N.
+
+  The length of the recurring aggregation time interval represents a lower bound
+  on the time granularity over which the data can be grouped in queries. Hence
+  we'll refer to length of an individual aggregation time interval as the
+  "granularity" of the aggregation from now on.
+
+  We also define the "cardinality of an aggregation" for a given time interval
+  as the number of rows in the output rowset M. Given an arrival rate of events
+  R and a granularity G, the pre-aggregation function transforms R * G input
+  rows into C output rows where C is the cardinality of the aggregation.
+
+
+3. Design Overview
 
   The proposed approach is to implement pre-aggregation as a separate internal
   subsystem, touching as few of the core subsystems as possible.
 
   Pre-aggregation is optionally enabled for a table by setting a pre-aggregation
-  config for the table (further specified in section 3).
+  config for the table (further specified in section 4).
 
   Once enabled, we elect N hosts as "aggregation nodes" for the table. Each
   insert into the pre-aggregation-enabled table will bypass the normal insert
@@ -90,24 +94,24 @@ Table of Contents
   aggregation clause is statically derived from the pre-aggregation config.
 
 
-3. Implementation Details
+4. Implementation Details
 
-3.1 Configuration
+4.1 Configuration
 
   The pre-aggregation config may be changed at anye time.
 
-3.2 Pre-Aggregation Procedure
+4.2 Pre-Aggregation Procedure
 
-3.3 Leader Election
+4.3 Leader Election
 
-3.4 Load Balancing
+4.4 Load Balancing
 
-3.5 Changes to the INSERT statement
+4.5 Changes to the INSERT statement
 
-3.6 Changes to the SELECT statement
+4.6 Changes to the SELECT statement
 
 
-4. Relability Considerations
+5. Relability Considerations
 
   The proposed implementation has no provisions to handle pending data on server
   shutdown or server crashes, so in these events some input rows will be lost.
@@ -128,9 +132,9 @@ Table of Contents
   not pre-aggregation-enabled) tables with a non unique primary key.
 
 
-4. Alternatives Considered
+6. Alternatives Considered
 
-4.1 Implement as standalone service
+6.1 Implement as standalone service
 
   On first look, pre-aggregation might seem like a feature that does not belong
   in the core database, but could be provided as a separate service that
@@ -155,7 +159,7 @@ Table of Contents
   part of the aggregated row (which would defeat the purpose of streaming
   aggregation).
 
-4.2 Implement in the compaction routine
+6.2 Implement in the compaction routine
 
   One downside of the proposed approach is that with constant arrival rate R and
   granularity G, the number of stored rows for a given input stream still scales
@@ -171,7 +175,7 @@ Table of Contents
   when/if the issue turns out to be practical limitation.
 
 
-5. Code Locations
+7. Code Locations
 
   FIXME
 
