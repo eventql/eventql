@@ -7,7 +7,10 @@ Table of Contents
 
   1. Introduction
   2. Design Overview
-  3. Code Locations
+  4. Alternatives Considered
+    4.1 Implement as standalone service
+    4.2 Implement in the compaction routine
+  5. Code Locations
 
 
 1. Introduction
@@ -53,11 +56,6 @@ Table of Contents
   This works out so that the size of the data after pre-aggreagtion would be
   roughly 0.07% of the size of the input data. A 1500x speedup.
 
-  On first look, pre-aggregation might seem like a feature that does not belong
-  in the core database, but could be provided as a separate service that
-  performs the pre-aggregation and then simply stores the aggregated rows into
-  the database.
-
 
 1. Design Overview
 
@@ -66,7 +64,7 @@ Table of Contents
   it as a separate internal subsystem, touching as few of the core subsystems
   as possible.
 
-  Pre-aggregation is optinally enabeld for a table by setting a pre-aggregation
+  Pre-aggregation is optinally enabled for a table by setting a pre-aggregation
   config for the table (further specified in section 4).
 
   Once enabled, we elect N hosts as "aggregation nodes" for the table. Each
@@ -82,13 +80,55 @@ Table of Contents
   data, it would still be visible to the user when doing a simple select on the
   table. For UX reasons, and because we consider it an implementation detail
   that should not have to be explained in user-facing documentation, we
-  automatically insert a default aggregation into every SELECT. The default
-  aggregation is derieved from the pre-aggregation config.
+  automatically insert a default aggregation clause into every SELECT select
+  statement that refers to pre-aggregation-enabled tables. This default
+  aggregation clause is statically derived from the pre-aggregation config.
 
-3. Code Locations
-
-  FIXME
 
 4. Alternatives Considered
 
+4.1 Implement as standalone service
+
+  On first look, pre-aggregation might seem like a feature that does not belong
+  in the core database, but could be provided as a separate service that
+  performs the pre-aggregation and then simply stores the aggregated rows into
+  the database.
+
+  However, with this scheme it would be painful to support more complex
+  aggregation modes, like estimating the number of unique strings or estimating
+  quantiles.
+
+  Both of these problems would be easily solvable using probabilistic data
+  structures, but if the pre-aggregation was performed in a standalone service
+  we would have to precompute and serialize these data structures before sending
+  them to the database. And we can't treat the data as binary blobs in the
+  database if we want to run useful (and fast) queries on it, so this
+  would leave us with one of two choices:
+
+  Either duplicate all data strcture code from the database into the standalone
+  service or a fat client and then make sure that both copies always match 100%
+  so the serialization works (which would be a PITA). Or alternatively, keep
+  the code only in the database and send all the raw values to the database as
+  part of the aggregated row (which would defeat the purpose of streaming
+  aggregation).
+
+4.2 Implement in the compaction routine
+
+  One downside of the proposed approach is that with constant arrival rate R and
+  granularity G, the number of stored rows for a given input stream still scales
+  linearly in the number of hosts we assign to the stream (and therefore,
+  strictly speaking also in the arrival rate R).
+
+  One alternative solution, implementing the pre-aggregation in the partition
+  compaction routine, avoids this and ends up with a constant number of stored
+  rows regardless of the number of servers assigned to the aggregation.
+
+  However, in the interest of keeping the design simple and minimally invasive
+  to the other subsystems, modifying the compaction routine is left open for
+  when/if the issue turns out to be practical limitation.
+
+
+5. Code Locations
+
+  FIXME
 
