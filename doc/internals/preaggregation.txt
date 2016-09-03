@@ -112,6 +112,7 @@ Table of Contents
   configuration (which in turn is stored in the coordination service).
 
     - granularity            -- The aggregation granularity
+    - num_servers            -- The number of servers that should run the aggr.
     - dimensions             -- A list of dimensions, for each dimension:
       - dimensions.column    -- The column name for the dimension
     - measures               -- A list of measures, for each measure:
@@ -182,6 +183,15 @@ Table of Contents
 4.5 Leader Election
 
 4.6 Load Balancing
+
+  Each input row should be sent to one of the aggregating servers for the table
+  in such a fashion that the distribution of rows over servers will be
+  approximately uniformly. This could be implemented as a random pick for every
+  row or a simple round-robin scheme.
+
+  However, we're explicitly _not_ using a consistent assignment scheme based
+  on the rows dimension as that would open the system up to hotspotting issues
+  if the distribution of the input data is not uniform (which is likely).
 
 4.7 Changes to the ALTER statement
 
