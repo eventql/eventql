@@ -13,20 +13,17 @@ Table of Contents
 1. Introduction
 
   One of the primary usecases of EventQL is multidimensional analysis of
-  timeseries data. These cases usually involve a table that is partitionied
-  by a DATETIME primary key and a number of other columns that can be classified
-  into "dimensions" and "measurements".
+  timeseries data. These type of analyses usually involve a table that is
+  indexed by a DATETIME primary key and contains a number of other columns that
+  can be classified into "dimensions" and "measurements".
 
-  Dimensions are columns that we're later going to use in the GROUP BY statement
-  of the query. Measurements are (usually numeric) columns that we will only
-  use in aggregations.
+  Dimensions are columns that may be referred in the GROUP BY statement of
+  queries on the data. Measurements are (usually numeric) columns that will only
+  be used in aggregations (i.e. from aggregate function in the SELECT list).
 
-  For this usecase it is highly beneficial to pre-aggregate the measurements
-  for each input dimension over a recurring time interval. The length of the
-  recurring time interval represents a lower bound on the (time) granularity
-  over which the data can be grouped in queries. Hence we'll refer to length
-  of an individual aggregation time interval as the "granularity" of the
-  aggregation from now on.
+  For this usecase it's highly beneficial to pre-aggregate the measurements for
+  each input dimension over a recurring time interval before writing them to
+  disk.
 
   The pre-aggregation routine conceptually accepts a rowset N and produces
   another rowset M, so that any query that computes aggregations on the
@@ -34,21 +31,26 @@ Table of Contents
   result for both input rowsets N and M. Note that the number of rows in M will
   always be less or equal to the number of rows in N.
 
-  We define the "cardinality of an aggregation" for a given time interval as the
-  number of rows in the output rowset M. Given an arrival rate of events R and
-  a granularity G, the pre-aggregation function transforms R * G input rows
-  into C output rows where C is the cardinality of the aggregation.
+  The length of the recurring time interval represents a lower bound on the
+  (time) granularity over which the data can be grouped in queries. Hence we'll
+  refer to length of an individual aggregation time interval as the
+  "granularity" of the aggregation from now on.
 
-  To see why pre-aggregtion may result in huge performance increases, consider
-  this fairly realistic usecase: We're running an ad network and displaying
+  We also define the "cardinality of an aggregation" for a given time interval
+  as the number of rows in the output rowset M. Given an arrival rate of events
+  R and a granularity G, the pre-aggregation function transforms R * G input
+  rows into C output rows where C is the cardinality of the aggregation.
+
+  To see why this may result in huge performance increases, consider this
+  somewhat realistic usecase: We're running an ad network and are displaying
   100,000 ad impressions per second. We want to measure the rate at which these
   ads are clicked with 1-minute granularity. To make things a bit more
   interesting, we also want to be able to get an individual click rate for each
   of the websites on which our ads are displayed.
 
-  Let's say our ads are displayed on 4,000 individual websites at any given
+  So, let's say our ads are displayed on 4,000 individual websites at any given
   time. That would make C=4,000, R=100,000 impressions/second and G=1 minute.
-  This works out so that the size of the data after pre-aggreagtion woudl be
+  This works out so that the size of the data after pre-aggreagtion would be
   roughly 0.07% of the size of the input data. A 1500x speedup.
 
 
