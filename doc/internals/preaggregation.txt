@@ -183,7 +183,11 @@ Table of Contents
 4.5 Leader Election
 
   We use the coordination service to elect the N aggregating servers from the
-  list of available servers for every table.
+  list of available servers for every table. The aggregating servers may, in
+  principle, be randomly chosen from all live servers in the cluster.
+
+  The implementation of the election routine is pluggable (as is the
+  coordination service) and not in the scope of this document.
 
 4.6 Load Balancing
 
