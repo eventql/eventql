@@ -792,39 +792,54 @@
       location: "/internals/architecture"
       children:
         -
-          url: "/internals/partitioning"
-          title: "Table Partitioning"
+          url: "/internals/architecture"
+          title: "Architecture"
           type: page
-          doctitle: "8.2.1 Table Partitioning"
-          content_type: txt
           visible_in_menu: true
           visible_in_toc: true
-          source: "internals/partitioning.txt"
+          source: "internals/architecture.md"
         -
-          url: "/internals/statement-based-replication"
-          title: "Segment-Based Replication"
-          type: page
-          doctitle: "8.2.2 Segment-Based Replication"
-          content_type: txt
+          url: "/internals/"
+          title: "Design Documents"
+          type: redirect
           visible_in_menu: true
           visible_in_toc: true
-          source: "internals/replication.txt"
-        -
-          url: "/internals/binary-protocol"
-          title: "Binary Protocol"
-          type: page
-          doctitle: "8.2.3 Binary Protocol"
-          content_type: txt
-          visible_in_menu: true
-          visible_in_toc: true
-          source: "internals/protocol.txt"
-        -
-          url: "/internals/life-of-a-query"
-          title: "Life of a Query"
-          type: page
-          visible_in_menu: true
-          visible_in_toc: true
-          source: "internals/life-of-a-query.md"
+          location: "/internals/architecture"
+          children:
+          -
+            url: "/internals/partitioning"
+            title: "Table Partitioning"
+            type: page
+            doctitle: "8.2.1 Table Partitioning"
+            content_type: txt
+            visible_in_menu: true
+            visible_in_toc: true
+            source: "internals/partitioning.txt"
+          -
+            url: "/internals/statement-based-replication"
+            title: "Segment-Based Replication"
+            type: page
+            doctitle: "8.2.2 Segment-Based Replication"
+            content_type: txt
+            visible_in_menu: true
+            visible_in_toc: true
+            source: "internals/replication.txt"
+          -
+            url: "/internals/binary-protocol"
+            title: "Binary Protocol"
+            type: page
+            doctitle: "8.2.3 Binary Protocol"
+            content_type: txt
+            visible_in_menu: true
+            visible_in_toc: true
+            source: "internals/protocol.txt"
+          -
+            url: "/internals/life-of-a-query"
+            title: "Life of a Query"
+            type: page
+            visible_in_menu: true
+            visible_in_toc: true
+            source: "internals/life-of-a-query.md"
     -
       url: "/examples"
       title: "Examples"
