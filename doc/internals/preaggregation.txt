@@ -7,10 +7,12 @@ Table of Contents
 
   1. Introduction
   2. Design Overview
-  4. Alternatives Considered
-    4.1 Implement as standalone service
-    4.2 Implement in the compaction routine
-  5. Code Locations
+  3. Implementation Details
+  4. ACID Considerations
+  5. Alternatives Considered
+    5.1 Implement as standalone service
+    5.2 Implement in the compaction routine
+  6. Code Locations
 
 
 1. Introduction
@@ -57,15 +59,13 @@ Table of Contents
   roughly 0.07% of the size of the input data. A 1500x speedup.
 
 
-1. Design Overview
+2. Design Overview
 
-  Considering that the pre-aggregation feature should "almost" have been a
-  standalone service and not a feature, the proposed approach is to implement
-  it as a separate internal subsystem, touching as few of the core subsystems
-  as possible.
+  The proposed approach is to implement pre-aggregation as a separate internal
+  subsystem, touching as few of the core subsystems as possible.
 
   Pre-aggregation is optinally enabled for a table by setting a pre-aggregation
-  config for the table (further specified in section 4).
+  config for the table (further specified in section 3).
 
   Once enabled, we elect N hosts as "aggregation nodes" for the table. Each
   insert into the pre-aggregation-enabled table will bypass the normal insert
@@ -83,6 +83,23 @@ Table of Contents
   automatically insert a default aggregation clause into every SELECT select
   statement that refers to pre-aggregation-enabled tables. This default
   aggregation clause is statically derived from the pre-aggregation config.
+
+
+3. Implementation Details
+
+  A separate issue that we need to address is that the API should allow fo
+  exactly-once-inserts in the case of failures. If the inserting receives an
+  error code after posting an insert to one of the aggregating servers, it
+  can't be sure if the value was stored or not, so we must support idempotent
+  retries.
+
+
+4. ACID Considerations
+
+  The proposed implementation has no provisions to handle pending data on server
+  shutdown or server crashes, so in these events some input rows will be lost.
+  As part of the separate writea-ahead-logging effort, we will add (optional)
+  durable write-ahead storage for accepted input rows.
 
 
 4. Alternatives Considered
