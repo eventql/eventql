@@ -162,6 +162,15 @@ int main(int argc, const char** argv) {
       "<token>");
 
   flags.defineFlag(
+      "history_path",
+      cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      NULL,
+      "history path",
+      "<path>");
+
+  flags.defineFlag(
       "loglevel",
       cli::FlagParser::T_STRING,
       false,
@@ -286,6 +295,13 @@ int main(int argc, const char** argv) {
 
   if (flags.isSet("quiet")) {
     cfg_builder.setProperty("evql", "quiet", "true");
+  }
+
+  if (flags.isSet("history_path")) {
+    cfg_builder.setProperty(
+        "evql",
+        "history_path",
+        flags.getString("history_path"));
   }
 
   /* cli config */
