@@ -171,6 +171,15 @@ int main(int argc, const char** argv) {
       "<path>");
 
   flags.defineFlag(
+      "history_max_len",
+      cli::FlagParser::T_INTEGER,
+      false,
+      NULL,
+      NULL,
+      "history length",
+      "<number of history entries>");
+
+  flags.defineFlag(
       "loglevel",
       cli::FlagParser::T_STRING,
       false,
@@ -234,6 +243,8 @@ int main(int argc, const char** argv) {
         "   -u, --user <user>         Set the auth username\n"
         "   --password <password>     Set the auth password (if required)\n"
         "   --auth_token <token>      Set the auth token (if required)\n"
+        "   --history_path <path>     Set the history file path\n"
+        "   --history_max_len <len>   Set the maximum length of the history\n"
         "   -B, --batch               Run in batch mode (streaming result output)\n"
         "   -q, --quiet               Be quiet (disables query progress)\n"
         "   --verbose                 Print debug output to STDERR\n"
@@ -302,6 +313,13 @@ int main(int argc, const char** argv) {
         "evql",
         "history_path",
         flags.getString("history_path"));
+  }
+
+  if (flags.isSet("history_max_len")) {
+    cfg_builder.setProperty(
+        "evql",
+        "history_max_len",
+        StringUtil::toString(flags.getInt("history_max_len")));
   }
 
   /* cli config */

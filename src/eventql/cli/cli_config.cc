@@ -140,7 +140,7 @@ Option<String> CLIConfig::getHistoryPath() const {
 }
 
 uint64_t CLIConfig::getHistoryMaxSize() const {
-  auto max_size = cfg_->getInt("evql", "history_max_size");
+  auto max_size = cfg_->getInt("evql", "history_max_len");
   if (max_size.isEmpty()) {
     return kDefaultHistoryMaxSize;
   } else {
