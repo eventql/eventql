@@ -1,8 +1,7 @@
 EventQL v0.3.2 beta;
 
-  * Fixed a bug in the evql client where a check for $HOME and $USER was missing
-
-  * Added the flags history_path and history_max_len to the evql client
+  * Fixed a bug in the eventql client (evql) where missing HOME and end USER
+    env variables would lead to an assertion on some libc++ implementations
 
 
 EventQL v0.3.1 (v0.3.1, git2da7f66) beta; 2016-09-04 16:11:19 +0000
