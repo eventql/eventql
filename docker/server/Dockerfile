@@ -12,7 +12,7 @@ RUN   apt-get update      &&      \
                           zlib1g-dev
 
 
-RUN   curl http://dl.eventql.io/eventql/v0.3.0-rc0/eventql-0.3.0-rc0-linux_x86_64.tgz | tar xvz
+RUN   curl http://dl.eventql.io/eventql/v0.3.1/eventql-0.3.1-linux_x86_64.tgz | tar xvz
 
 RUN  mkdir -p /var/evql
 

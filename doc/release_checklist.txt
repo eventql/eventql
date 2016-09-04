@@ -1,0 +1,9 @@
+- [ ] Update version in configure.ac
+- [ ] Update version in documentation/index.html
+- [ ] Build with fresh workspace in jenkins
+- [ ] Add build info to CHANGELOG
+- [ ] Create git tag
+- [ ] Upload tarballs to dl.eventql.io and create md5sum files
+- [ ] Change download links on the eventql.io download page
+- [ ] Create release on github and upload tarballs
+- [ ] Update download link in docker file
