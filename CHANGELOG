@@ -1,4 +1,4 @@
-EventQL v0.3.1 beta;
+EventQL v0.3.1 (v0.3.1, git2da7f66) beta; 2016-09-04 16:11:19 +0000
 
   * Fixed a bug in the standalone backend where any ALTER TABLE statements
     would fail with "table already exists"
