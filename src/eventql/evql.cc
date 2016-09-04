@@ -188,6 +188,15 @@ int main(int argc, const char** argv) {
       "quiet",
       "<quiet>");
 
+  flags.defineFlag(
+      "args",
+      ::cli::FlagParser::T_STRING,
+      false,
+      "D",
+      NULL,
+      "set arguments",
+      "<key>=<val>");
+
   flags.parseArgv(argc, argv);
 
   Logger::get()->setMinimumLogLevel(
@@ -227,6 +236,7 @@ int main(int argc, const char** argv) {
         "   --auth_token <token>      Set the auth token (if required)\n"
         "   -B, --batch               Run in batch mode (streaming result output)\n"
         "   -q, --quiet               Be quiet (disables query progress)\n"
+        "   -D, --args                Define an argument value on the command line\n"
         "   --verbose                 Print debug output to STDERR\n"
         "   -v, --version             Display the version of this binary and exit\n"
         "   -?, --help                Display this help text and exit\n"
@@ -288,6 +298,20 @@ int main(int argc, const char** argv) {
     cfg_builder.setProperty("evql", "quiet", "true");
   }
 
+  HashMap<String, String> arguments;
+  for (const auto arg : flags.getStrings("args")) {
+    auto key_end = arg.find("=");
+    if (key_end == String::npos) {
+      printError(StringUtil::format(
+          "invalid argument: $0, run evql --help for help\n",
+          arg));
+
+      return 1;
+    }
+
+    arguments[arg.substr(0, key_end)] = arg.substr(key_end + 1);
+  }
+
   /* cli config */
   eventql::cli::CLIConfig cli_cfg(cfg_builder.getConfig());
 
@@ -300,7 +324,7 @@ int main(int argc, const char** argv) {
   }
 
   /* cli */
-  eventql::cli::Console console(cli_cfg);
+  eventql::cli::Console console(cli_cfg, arguments);
 
   auto file = cli_cfg.getFile();
   auto language = cli_cfg.getLanguage();

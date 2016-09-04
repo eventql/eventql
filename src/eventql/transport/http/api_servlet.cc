@@ -812,17 +812,38 @@ void AnalyticsServlet::executeSQL(
     const http::HTTPRequest* req,
     http::HTTPResponse* res,
     RefPtr<http::HTTPResponseStream> res_stream) {
-  try {
-    URI uri(req->uri());
-    URI::ParamList params = uri.queryParams();
-    URI::parseQueryString(req->body().toString(), &params);
+  Vector<std::pair<String, String>> params;
+  if (req->hasHeader("Content-Type") &&
+      req->getHeader("Content-Type") == "application/json") {
 
-    String format;
-    URI::getParam(params, "format", &format);
-    if (format.empty()) {
-      format = "json";
+    auto json = json::parseJSON(req->body().toString());
+    auto format = json::objectGetString(json, "format");
+    if (!format.isEmpty()) {
+      params.emplace_back(std::make_pair("format", format.get()));
     }
 
+    auto database = json::objectGetString(json, "database");
+    if (!database.isEmpty()) {
+      params.emplace_back(std::make_pair("database", database.get()));
+    }
+
+    auto query = json::objectGetString(json, "query");
+    if (!query.isEmpty()) {
+      params.emplace_back(std::make_pair("query", query.get()));
+    }
+
+  } else {
+
+    URI uri(req->uri());
+    params = uri.queryParams();
+  }
+
+  String format;
+  if (!URI::getParam(params, "format", &format)) {
+    format = "json";
+  }
+
+  try {
     if (format == "binary") {
       executeSQL_BINARY(params, session, req, res, res_stream);
     } else if (format == "json") {
