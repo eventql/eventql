@@ -1,10 +1,39 @@
-v0.3.0
-======
-  - renamed to eventqlr
-  - deleted old webui code, non-core services
-  - rewritten sql query execution to internally use and return result cursors
-  - implemented unified DAG scheduler for sql+mapreduce
-  - implemented binary network protocol
+EventQL v0.3.1 beta;
+
+  * Fixed a bug in the standalone backend where any ALTER TABLE statements
+    would fail with "table already exists"
+
+  * Changed the mapreduce reduce shard allocation so that (in most cases)
+    repeated executions of the same job will result in (unchanged) reduce
+    shards being scheduled on the same machines as before to improve cache
+    hit rates.
+
+  * Changed the default policy for handling failed mapreduce shards from ERROR
+    (return an error to the user) to IGNORE (ignore the missing shard and
+    continue without it)
+
+  * Changed kDefaultMaxConcurrentTasks (the default maximum number of threads
+    to be started for a single sql query) from 32 to 64
+
+  * Added a new execution step to the mapreduce scheduler where, before running
+    a given map task on any of the candidate servers, we try to retrieve it
+    from cache on each of the candidate servers (and bail early if we find it).
+
+  * Added verbose debug-logging to the MapReduce scheduler.
+
+  * Added many documentation improvements, dockerfiles, examples, etc
+
+
+EventQL v0.3.0 (v0.3.0-rc0, gita2fa235) beta; 2016-07-25 22:53:29 +0000
+
+  * Renamed the project to EventQL (the previous name was ZenDB Z1)
+
+  * Removed the old web interface and all non-core services such as the logfile
+    service
+
+  * Changed the sql query execution code to use and return result cursors (as
+    opposed to non-interruptable result streams)
+
 
 v0.2.4 (2016-02-24)
 ===================
