@@ -1,3 +1,10 @@
+EventQL v0.3.2 beta;
+
+  * Fixed a bug in the evql client where a check for $HOME and $USER was missing
+
+  * Added the flags history_path and history_max_len to the evql client
+
+
 EventQL v0.3.1 beta;
 
   * Fixed a bug in the standalone backend where any ALTER TABLE statements
