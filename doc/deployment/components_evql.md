@@ -28,6 +28,8 @@ and for executing SQL and MapReduce queries.
        -u, --user <user>         Set the auth username
        --password <password>     Set the auth password (if required)
        --auth_token <token>      Set the auth token (if required)
+       --history_path <path>     Set the history file path
+       --history_max_len <len>   Set the maximum length of the history
        -B, --batch               Run in batch mode (streaming result output)
        -q, --quiet               Be quiet (disables query progress)
        --verbose                 Print debug output to STDERR
