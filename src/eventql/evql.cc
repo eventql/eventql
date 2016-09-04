@@ -162,7 +162,7 @@ int main(int argc, const char** argv) {
       "<token>");
 
   flags.defineFlag(
-      "history_path",
+      "history_file",
       cli::FlagParser::T_STRING,
       false,
       NULL,
@@ -171,7 +171,7 @@ int main(int argc, const char** argv) {
       "<path>");
 
   flags.defineFlag(
-      "history_max_len",
+      "history_maxlen",
       cli::FlagParser::T_INTEGER,
       false,
       NULL,
@@ -243,9 +243,9 @@ int main(int argc, const char** argv) {
         "   -u, --user <user>         Set the auth username\n"
         "   --password <password>     Set the auth password (if required)\n"
         "   --auth_token <token>      Set the auth token (if required)\n"
-        "   --history_path <path>     Set the history file path\n"
-        "   --history_max_len <len>   Set the maximum length of the history\n"
         "   -B, --batch               Run in batch mode (streaming result output)\n"
+        "   --history_file <path>     Set the history file path\n"
+        "   --history_max_len <len>   Set the maximum length of the history\n"
         "   -q, --quiet               Be quiet (disables query progress)\n"
         "   --verbose                 Print debug output to STDERR\n"
         "   -v, --version             Display the version of this binary and exit\n"
@@ -308,18 +308,18 @@ int main(int argc, const char** argv) {
     cfg_builder.setProperty("evql", "quiet", "true");
   }
 
-  if (flags.isSet("history_path")) {
+  if (flags.isSet("history_file")) {
     cfg_builder.setProperty(
         "evql",
-        "history_path",
-        flags.getString("history_path"));
+        "history_file",
+        flags.getString("history_file"));
   }
 
-  if (flags.isSet("history_max_len")) {
+  if (flags.isSet("history_maxlen")) {
     cfg_builder.setProperty(
         "evql",
-        "history_max_len",
-        StringUtil::toString(flags.getInt("history_max_len")));
+        "history_maxlen",
+        StringUtil::toString(flags.getInt("history_maxlen")));
   }
 
   /* cli config */

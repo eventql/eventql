@@ -129,7 +129,7 @@ Option<String> CLIConfig::getExec() const {
 }
 
 Option<String> CLIConfig::getHistoryPath() const {
-  auto path = cfg_->getString("evql", "history_path");
+  auto path = cfg_->getString("evql", "history_file");
   if (!path.isEmpty()) {
     return Some(path.get());
   } else if (!default_history_path_.empty()) {
@@ -140,7 +140,7 @@ Option<String> CLIConfig::getHistoryPath() const {
 }
 
 uint64_t CLIConfig::getHistoryMaxSize() const {
-  auto max_size = cfg_->getInt("evql", "history_max_len");
+  auto max_size = cfg_->getInt("evql", "history_maxlen");
   if (max_size.isEmpty()) {
     return kDefaultHistoryMaxSize;
   } else {
