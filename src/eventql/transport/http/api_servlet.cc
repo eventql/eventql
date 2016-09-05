@@ -91,13 +91,45 @@ void APIServlet::handle(
     return;
   }
 
-  auto internal_auth_rc = dbctx->internal_auth->verifyRequest(session, req);
-  auto auth_rc = internal_auth_rc;
-  if (!auth_rc.isSuccess()) {
-    auth_rc = HTTPAuth::authenticateRequest(
-        session,
-        dbctx->client_auth,
-        req);
+  if (!dbctx->process_config->getBool("server.anonymous")) {
+    auto internal_auth_rc = dbctx->internal_auth->verifyRequest(session, req);
+    auto auth_rc = internal_auth_rc;
+    if (!auth_rc.isSuccess()) {
+      auth_rc = HTTPAuth::authenticateRequest(
+          session,
+          dbctx->client_auth,
+          req);
+    }
+
+    if (!auth_rc.isSuccess()) {
+      req_stream->readBody();
+
+      if (uri.path() == "/api/v1/sql") {
+        util::BinaryMessageWriter writer;
+        res.setStatus(http::kStatusOK);
+        writer.appendUInt8(0xf4);
+        writer.appendLenencString(auth_rc.message());
+        writer.appendUInt8(0xff);
+        res.addBody(writer.data(), writer.size());
+        res_stream->writeResponse(res);
+      } else {
+        res.setStatus(http::kStatusUnauthorized);
+        res.addHeader("WWW-Authenticate", "Token");
+        res.addHeader("Content-Type", "text/plain; charset=utf-8");
+        res.addBody(auth_rc.message());
+        res_stream->writeResponse(res);
+        return;
+      }
+    }
+
+    if (session->getEffectiveNamespace().empty()) {
+      res.setStatus(http::kStatusUnauthorized);
+      res.addHeader("WWW-Authenticate", "Token");
+      res.addHeader("Content-Type", "text/plain; charset=utf-8");
+      res.addBody("unauthorized");
+      res_stream->writeResponse(res);
+      return;
+    }
   }
 
   if (uri.path() == "/api/v1/tables/insert") {
@@ -107,27 +139,6 @@ void APIServlet::handle(
     });
     res_stream->writeResponse(res);
     return;
-  }
-
-  if (!auth_rc.isSuccess()) {
-    req_stream->readBody();
-
-    if (uri.path() == "/api/v1/sql") {
-      util::BinaryMessageWriter writer;
-      res.setStatus(http::kStatusOK);
-      writer.appendUInt8(0xf4);
-      writer.appendLenencString(auth_rc.message());
-      writer.appendUInt8(0xff);
-      res.addBody(writer.data(), writer.size());
-      res_stream->writeResponse(res);
-    } else {
-      res.setStatus(http::kStatusUnauthorized);
-      res.addHeader("WWW-Authenticate", "Token");
-      res.addHeader("Content-Type", "text/plain; charset=utf-8");
-      res.addBody(auth_rc.message());
-      res_stream->writeResponse(res);
-      return;
-    }
   }
 
   /* SQL */
@@ -147,15 +158,6 @@ void APIServlet::handle(
 
   if (StringUtil::beginsWith(uri.path(), "/api/v1/mapreduce")) {
     mapreduce_api_.handle(session, req_stream, res_stream);
-    return;
-  }
-
-  if (session->getEffectiveNamespace().empty()) {
-    res.setStatus(http::kStatusUnauthorized);
-    res.addHeader("WWW-Authenticate", "Token");
-    res.addHeader("Content-Type", "text/plain; charset=utf-8");
-    res.addBody("unauthorized");
-    res_stream->writeResponse(res);
     return;
   }
 
