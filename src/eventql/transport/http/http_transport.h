@@ -21,62 +21,54 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#ifndef libstx_EV_EVENTLOOP_H
-#define libstx_EV_EVENTLOOP_H
-#include <list>
-#include <sys/select.h>
-#include <thread>
-#include <vector>
-#include "eventql/util/thread/taskscheduler.h"
+#pragma once
+#include "eventql/eventql.h"
+#include "eventql/db/database.h"
+#include "eventql/util/http/httpserver.h"
+#include "eventql/util/http/httprouter.h"
+#include "eventql/util/thread/eventloop.h"
+#include "eventql/transport/http/default_servlet.h"
+#include "eventql/transport/http/status_servlet.h"
+#include "eventql/transport/http/api_servlet.h"
+#include "eventql/transport/http/rpc_servlet.h"
 
-namespace thread {
+namespace eventql {
 
-class EventLoop : public TaskScheduler {
+class SessionTaskScheduler : public TaskScheduler {
 public:
+  SessionTaskScheduler(Database* db);
   void run(std::function<void()> task) override;
-  //void runAsync(std::function<void()> task) override;
-
   void runOnReadable(std::function<void()> task, int fd) override;
-  void runOnReadable(
-      std::function<void()> task,
-      int fd,
-      uint64_t timeout_micros,
-      std::function<void()> on_timeout);
-
   void runOnWritable(std::function<void()> task, int fd) override;
   void runOnWakeup(
       std::function<void()> task,
       Wakeup* wakeup,
-      long wakeup_generation) override;
-
-  void cancelFD(int fd) override;
-
-  EventLoop();
-  ~EventLoop();
-  void run();
-  void runOnce();
-  void shutdown();
-  void wakeup();
-
+      long generation) override;
 protected:
-
-  void poll();
-  void setupRunQWakeupPipe();
-  void onRunQWakeup();
-  void appendToRunQ(std::function<void()> task);
-
-  fd_set op_read_;
-  fd_set op_write_;
-  fd_set op_error_;
-  int max_fd_;
-  std::atomic<bool> running_;
-  int runq_wakeup_pipe_[2];
-  std::list<std::function<void()>> runq_;
-  std::mutex runq_mutex_;
-  std::thread::id threadid_;
-  std::vector<std::function<void()>> callbacks_;
-  size_t num_fds_;
+  Database* db_;
 };
 
-}
-#endif
+class HTTPTransport {
+public:
+
+  HTTPTransport(Database* database);
+
+  void handleConnection(int fd, std::string prelude_bytes);
+
+  void startIOThread();
+  void stopIOThread();
+
+protected:
+  Database* database_;
+  thread::EventLoop ev_;
+  http::HTTPRouter http_router_;
+  http::HTTPServerStats http_stats_;
+  DefaultServlet default_servlet_;
+  StatusServlet status_servlet_;
+  APIServlet api_servlet_;
+  RPCServlet rpc_servlet_;
+  std::thread io_thread_;
+  SessionTaskScheduler session_scheduler_;
+};
+
+} // namespace eventql

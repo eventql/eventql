@@ -23,33 +23,57 @@
  */
 #pragma once
 #include "eventql/eventql.h"
-#include "eventql/util/stdtypes.h"
+#include "eventql/util/return_code.h"
 
 namespace eventql {
-struct DatabaseContext;
 
-class Session {
+class NativeConnection {
 public:
 
-  Session(const DatabaseContext* database_context = nullptr);
+  static const size_t kMaxFrameSize = 1024 * 1024 * 256; // 256 MB
+  static const size_t kMaxFrameSizeSoft = 1024 * 1024 * 32; // 32 MB
 
-  String getUserID() const;
-  void setUserID(const String& user_id);
+  NativeConnection(
+      int fd,
+      const std::string& prelude_bytes = "");
 
-  String getEffectiveNamespace() const;
-  void setEffectiveNamespace(const String& ns);
+  ~NativeConnection();
 
-  String getDisplayNamespace() const;
-  void setDisplayNamespace(const String& ns);
+  ReturnCode recvFrame(
+      uint16_t* opcode,
+      std::string* payload,
+      uint16_t* flags = nullptr);
 
-  const DatabaseContext* getDatabaseContext();
+  ReturnCode sendFrame(
+      uint16_t opcode,
+      const void* data,
+      size_t len,
+      uint16_t flags = 0);
+
+  ReturnCode sendFrameAsync(
+      uint16_t opcode,
+      const void* data,
+      size_t len,
+      uint16_t flags = 0);
+
+  void writeFrameHeaderAsync(
+      uint16_t opcode,
+      size_t len,
+      uint16_t flags = 0);
+
+  void writeAsync(const void* data, size_t len);
+
+  ReturnCode flushBuffer(bool block, uint64_t timeout_us = 0);
+  void close();
 
 protected:
-  mutable std::mutex mutex_;
-  const DatabaseContext* database_context_;
-  String user_id_;
-  String effective_namespace_;
-  String display_namespace_;
+
+  ReturnCode read(char* data, size_t len, uint64_t timeout_us);
+
+  int fd_;
+  uint64_t timeout_;
+  std::string read_buf_;
+  std::string write_buf_;
 };
 
 } // namespace eventql

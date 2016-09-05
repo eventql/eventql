@@ -13,7 +13,8 @@ SUBDIRS = \
     deps/3rdparty/liblmdb \
     deps/3rdparty/inih \
     deps/3rdparty/zookeeper \
-    src
+    src \
+    test
 
 EXTRA_DIST =                             \
   doc                                    \

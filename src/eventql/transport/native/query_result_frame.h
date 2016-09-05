@@ -22,34 +22,39 @@
  * code of your own applications
  */
 #pragma once
+#include <string>
+#include <vector>
 #include "eventql/eventql.h"
-#include "eventql/util/stdtypes.h"
+#include "eventql/util/return_code.h"
+#include "eventql/util/util/binarymessagewriter.h"
+#include "eventql/transport/native/native_connection.h"
+#include "eventql/sql/svalue.h"
 
 namespace eventql {
-struct DatabaseContext;
+namespace native_transport {
 
-class Session {
+class QueryResultFrame {
 public:
 
-  Session(const DatabaseContext* database_context = nullptr);
+  QueryResultFrame(const std::vector<std::string>& columns);
 
-  String getUserID() const;
-  void setUserID(const String& user_id);
+  void addRow(const std::vector<csql::SValue>& row);
+  size_t getRowCount() const;
+  size_t getRowBytes() const;
 
-  String getEffectiveNamespace() const;
-  void setEffectiveNamespace(const String& ns);
+  void setIsLast(bool is_last);
+  void setHasPendingStatement(bool has_pending_stmt);
 
-  String getDisplayNamespace() const;
-  void setDisplayNamespace(const String& ns);
-
-  const DatabaseContext* getDatabaseContext();
+  void writeTo(NativeConnection* conn);
+  void clear();
 
 protected:
-  mutable std::mutex mutex_;
-  const DatabaseContext* database_context_;
-  String user_id_;
-  String effective_namespace_;
-  String display_namespace_;
+  std::vector<std::string> columns_;
+  bool is_last_;
+  bool has_pending_stmt_;
+  size_t num_rows_;
+  util::BinaryMessageWriter data_;
 };
 
+} // namespace native_transport
 } // namespace eventql
