@@ -633,22 +633,17 @@ void APIServlet::executeSQL(
     http::HTTPResponse* res,
     RefPtr<http::HTTPResponseStream> res_stream) {
   try {
-    URI uri(req->uri());
-    URI::ParamList params = uri.queryParams();
-    URI::parseQueryString(req->body().toString(), &params);
+    auto jreq = json::parseJSON(req->body());
 
-    String format;
-    URI::getParam(params, "format", &format);
-    if (format.empty()) {
-      format = "json";
-    }
+    auto format_opt = json::objectGetString(jreq, "format");
+    auto format = format_opt.isEmpty() ? "json" : format_opt.get();
 
     if (format == "binary") {
-      executeSQL_BINARY(params, session, req, res, res_stream);
+      executeSQL_BINARY(jreq, session, req, res, res_stream);
     } else if (format == "json") {
-      executeSQL_JSON(params, session, req, res, res_stream);
+      executeSQL_JSON(jreq, session, req, res, res_stream);
     } else if (format == "json_sse") {
-      executeSQL_JSONSSE(params, session, req, res, res_stream);
+      executeSQL_JSONSSE(jreq, session, req, res, res_stream);
     } else {
       res->setStatus(http::kStatusBadRequest);
       res->addBody("invalid format: " + format);
@@ -663,7 +658,7 @@ void APIServlet::executeSQL(
 }
 
 void APIServlet::executeSQL_ASCII(
-    const URI::ParamList& params,
+    const json::JSONObject jreq,
     Session* session,
     const http::HTTPRequest* req,
     http::HTTPResponse* res,
@@ -701,15 +696,15 @@ void APIServlet::executeSQL_ASCII(
 }
 
 void APIServlet::executeSQL_BINARY(
-    const URI::ParamList& params,
+    const json::JSONObject jreq,
     Session* session,
     const http::HTTPRequest* req,
     http::HTTPResponse* res,
     RefPtr<http::HTTPResponseStream> res_stream) {
   auto dbctx = session->getDatabaseContext();
 
-  String query;
-  if (!URI::getParam(params, "query", &query)) {
+  auto query = json::objectGetString(jreq, "query");
+  if (query.isEmpty()) {
     res->setStatus(http::kStatusBadRequest);
     res->addBody("missing ?query=... parameter");
     res_stream->writeResponse(*res);
@@ -730,9 +725,9 @@ void APIServlet::executeSQL_BINARY(
 
     csql::BinaryResultFormat result_format(write_cb, true);
 
-    String database;
-    if (URI::getParam(params, "database", &database) && !database.empty()) {
-      auto rc = dbctx->client_auth->changeNamespace(session, database);
+    auto database = getRequestDatabase(session, req, jreq);
+    if (!database.isEmpty()) {
+      auto rc = dbctx->client_auth->changeNamespace(session, database.get());
       if (!rc.isSuccess()) {
         result_format.sendError(rc.message());
         res_stream->finishResponse();
@@ -748,7 +743,7 @@ void APIServlet::executeSQL_BINARY(
 
     try {
       auto txn = dbctx->sql_service->startTransaction(session);
-      auto qplan = dbctx->sql_runtime->buildQueryPlan(txn.get(), query);
+      auto qplan = dbctx->sql_runtime->buildQueryPlan(txn.get(), query.get());
       qplan->setProgressCallback([&result_format, &qplan] () {
         result_format.sendProgress(qplan->getProgress());
       });
@@ -763,24 +758,24 @@ void APIServlet::executeSQL_BINARY(
 }
 
 void APIServlet::executeSQL_JSON(
-    const URI::ParamList& params,
+    const json::JSONObject jreq,
     Session* session,
     const http::HTTPRequest* req,
     http::HTTPResponse* res,
     RefPtr<http::HTTPResponseStream> res_stream) {
   auto dbctx = session->getDatabaseContext();
 
-  String query;
-  if (!URI::getParam(params, "query", &query)) {
+  auto query = json::objectGetString(jreq, "query");
+  if (query.isEmpty()) {
     res->setStatus(http::kStatusBadRequest);
     res->addBody("missing ?query=... parameter");
     res_stream->writeResponse(*res);
     return;
   }
 
-  String database;
-  if (URI::getParam(params, "database", &database) && !database.empty()) {
-    auto rc = dbctx->client_auth->changeNamespace(session, database);
+  auto database = getRequestDatabase(session, req, jreq);
+  if (!database.isEmpty()) {
+    auto rc = dbctx->client_auth->changeNamespace(session, database.get());
     if (!rc.isSuccess()) {
       Buffer buf;
       json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
@@ -814,7 +809,7 @@ void APIServlet::executeSQL_JSON(
 
   try {
     auto txn = dbctx->sql_service->startTransaction(session);
-    auto qplan = dbctx->sql_runtime->buildQueryPlan(txn.get(), query);
+    auto qplan = dbctx->sql_runtime->buildQueryPlan(txn.get(), query.get());
 
     Buffer result;
     json::JSONOutputStream json(BufferOutputStream::fromBuffer(&result));
@@ -856,15 +851,15 @@ void APIServlet::executeSQL_JSON(
 }
 
 void APIServlet::executeSQL_JSONSSE(
-    const URI::ParamList& params,
+    const json::JSONObject jreq,
     Session* session,
     const http::HTTPRequest* req,
     http::HTTPResponse* res,
     RefPtr<http::HTTPResponseStream> res_stream) {
   auto dbctx = session->getDatabaseContext();
 
-  String query;
-  if (!URI::getParam(params, "query", &query)) {
+  auto query = json::objectGetString(jreq, "query");
+  if (query.isEmpty()) {
     res->setStatus(http::kStatusBadRequest);
     res->addBody("missing ?query=... parameter");
     res_stream->writeResponse(*res);
@@ -874,9 +869,9 @@ void APIServlet::executeSQL_JSONSSE(
   auto sse_stream = mkRef(new http::HTTPSSEStream(res, res_stream));
   sse_stream->start();
 
-  String database;
-  if (URI::getParam(params, "database", &database) && !database.empty()) {
-    auto rc = dbctx->client_auth->changeNamespace(session, database);
+  auto database = getRequestDatabase(session, req, jreq);
+  if (!database.isEmpty()) {
+    auto rc = dbctx->client_auth->changeNamespace(session, database.get());
     if (!rc.isSuccess()) {
       Buffer buf;
       json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
@@ -906,7 +901,7 @@ void APIServlet::executeSQL_JSONSSE(
 
   try {
     auto txn = dbctx->sql_service->startTransaction(session);
-    auto qplan = dbctx->sql_runtime->buildQueryPlan(txn.get(), query);
+    auto qplan = dbctx->sql_runtime->buildQueryPlan(txn.get(), query.get());
 
     JSONSSECodec json_sse_codec(sse_stream);
     qplan->setProgressCallback([&json_sse_codec, &qplan] () {

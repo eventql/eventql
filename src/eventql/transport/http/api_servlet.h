@@ -108,28 +108,28 @@ protected:
       RefPtr<http::HTTPResponseStream> res_stream);
 
   void executeSQL_ASCII(
-      const URI::ParamList& params,
+      const json::JSONObject jreq,
       Session* session,
       const http::HTTPRequest* req,
       http::HTTPResponse* res,
       RefPtr<http::HTTPResponseStream> res_stream);
 
   void executeSQL_BINARY(
-      const URI::ParamList& params,
+      const json::JSONObject jreq,
       Session* session,
       const http::HTTPRequest* req,
       http::HTTPResponse* res,
       RefPtr<http::HTTPResponseStream> res_stream);
 
   void executeSQL_JSON(
-      const URI::ParamList& params,
+      const json::JSONObject jreq,
       Session* session,
       const http::HTTPRequest* req,
       http::HTTPResponse* res,
       RefPtr<http::HTTPResponseStream> res_stream);
 
   void executeSQL_JSONSSE(
-      const URI::ParamList& params,
+      const json::JSONObject jreq,
       Session* session,
       const http::HTTPRequest* req,
       http::HTTPResponse* res,
