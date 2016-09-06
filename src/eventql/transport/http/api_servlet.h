@@ -255,6 +255,43 @@ protected:
     }
   }
 
+  Option<String> getRequestDatabase(
+      Session* session,
+      const http::HTTPRequest* req,
+      const URI::ParamList& params,
+      const json::JSONObject& json) {
+    {
+      auto database = json::objectGetString(json, "database");
+      if (!database.isEmpty()) {
+        return database;
+      }
+    }
+
+    {
+      String database;
+      URI::getParam(params, "database", &database);
+      if (!database.empty()) {
+        return database;
+      }
+    }
+
+    {
+      auto hdrval = req->getHeader("X-Z1-Namespace");
+      if (!hdrval.empty()) {
+        return hdrval;
+      }
+    }
+
+    {
+      String database = session->getEffectiveNamespace();
+      if (!database.empty()) {
+        return Some(database);
+      }
+    }
+
+    return None<String>();
+  }
+
   Database* db_;
   MapReduceAPIServlet mapreduce_api_;
 };
