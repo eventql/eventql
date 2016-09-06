@@ -251,28 +251,23 @@ void APIServlet::listTables(
     const http::HTTPRequest* req,
     http::HTTPResponse* res) {
   auto dbctx = session->getDatabaseContext();
-
-  URI uri(req->uri());
-  const auto& params = uri.queryParams();
   auto jreq = json::parseJSON(req->body());
 
   /* database */
-  auto database = getRequestDatabase(session, req, params, jreq);
+  auto database = getRequestDatabase(session, req, jreq);
   if (database.isEmpty()) {
     RAISE(kRuntimeError, "missing field: database");
   }
 
   /* param tag */
+  auto tag_filter_opt = json::objectGetString(jreq, "tag");
   String tag_filter;
-  URI::getParam(params, "tag", &tag_filter);
-
-  if (tag_filter == "all") {
-    tag_filter.clear();
+  if (!tag_filter_opt.isEmpty() && tag_filter_opt.get() != "all") {
+    tag_filter = tag_filter_opt.get();
   }
 
   /* param sort_fn */
-  String order_filter;
-  URI::getParam(params, "order", &order_filter);
+  auto order_filter = json::objectGetString(jreq, "order");
 
   Buffer buf;
   json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
@@ -313,7 +308,7 @@ void APIServlet::listTables(
 
   };
 
-  if (order_filter == "desc") {
+  if (!order_filter.isEmpty() && order_filter.get() == "desc") {
     dbctx->table_service->listTablesReverse(database.get(), writeTableJSON);
   } else {
     dbctx->table_service->listTables(database.get(), writeTableJSON);
@@ -359,6 +354,11 @@ void APIServlet::createTable(
 
   auto jreq = json::parseJSON(req->body());
 
+  auto database = getRequestDatabase(session, req, jreq);
+  if (database.isEmpty()) {
+    RAISE(kRuntimeError, "missing field: database");
+  }
+
   auto table_name = json::objectGetString(jreq, "table_name");
   if (table_name.isEmpty()) {
     res->setStatus(http::kStatusBadRequest);
@@ -394,7 +394,7 @@ void APIServlet::createTable(
       if (force) {
         try {
           auto old_td = dbctx->config_directory->getTableConfig(
-              session->getEffectiveNamespace(),
+              database.get(),
               table_name.get());
 
           td.set_version(old_td.version());
@@ -403,7 +403,7 @@ void APIServlet::createTable(
         }
       }
 
-      td.set_customer(session->getEffectiveNamespace());
+      td.set_customer(database.get());
       td.set_table_name(table_name.get());
 
       auto tblcfg = td.mutable_config();
@@ -414,7 +414,7 @@ void APIServlet::createTable(
       dbctx->config_directory->updateTableConfig(td);
     } else {
       auto rc = dbctx->table_service->createTable(
-          session->getEffectiveNamespace(),
+          database.get(),
           table_name.get(),
           schema,
           { "time" }); // FIXME

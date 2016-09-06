@@ -258,19 +258,10 @@ protected:
   Option<String> getRequestDatabase(
       Session* session,
       const http::HTTPRequest* req,
-      const URI::ParamList& params,
       const json::JSONObject& json) {
     {
       auto database = json::objectGetString(json, "database");
       if (!database.isEmpty()) {
-        return database;
-      }
-    }
-
-    {
-      String database;
-      URI::getParam(params, "database", &database);
-      if (!database.empty()) {
         return database;
       }
     }
