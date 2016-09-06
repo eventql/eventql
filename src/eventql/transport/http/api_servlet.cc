@@ -502,65 +502,45 @@ void APIServlet::removeTableField(
     const http::HTTPRequest* req,
     http::HTTPResponse* res) {
   auto dbctx = session->getDatabaseContext();
+  auto jreq = json::parseJSON(req->body());
 
-  URI uri(req->uri());
-  const auto& params = uri.queryParams();
+  /* database */
+  auto database = getRequestDatabase(session, req, jreq);
+  if (database.isEmpty()) {
+    RAISE(kRuntimeError, "missing field: database");
+  }
 
-  String table_name;
-  if (!URI::getParam(params, "table", &table_name)) {
+  auto table_name = json::objectGetString(jreq, "table");
+  if (table_name.isEmpty()) {
     res->setStatus(http::kStatusBadRequest);
-    res->addBody("missing ?table=... parameter");
+    res->addBody("missing field: table");
     return;
   }
 
-  auto table_opt = dbctx->partition_map->findTable(session->getEffectiveNamespace(), table_name);
-  if (table_opt.isEmpty()) {
-    res->setStatus(http::kStatusNotFound);
-    res->addBody("table not found");
-    return;
-  }
-  const auto& table = table_opt.get();
-
-  String field_name;
-  if (!URI::getParam(params, "field_name", &field_name)) {
+  auto field_name = json::objectGetString(jreq, "field_name");
+  if (field_name.isEmpty()) {
     res->setStatus(http::kStatusBadRequest);
-    res->addBody("missing &field_name=... parameter");
+    res->addBody("missing field: field_name");
     return;
   }
 
-  auto td = table->config();
-  auto schema = msg::MessageSchema::decode(td.config().schema());
-  auto cur_schema = schema;
-  auto field = field_name;
+  Vector<TableService::AlterTableOperation> operations;
+  TableService::AlterTableOperation operation;
+  operation.optype = TableService::AlterTableOperationType::OP_REMOVE_COLUMN;
+  operation.field_name = field_name.get();
+  operations.emplace_back(operation);
 
-  while (StringUtil::includes(field, ".")) {
-    auto prefix_len = field.find(".");
-    auto prefix = field.substr(0, prefix_len);
+  auto rc = dbctx->table_service->alterTable(
+      database.get(),
+      table_name.get(),
+      operations);
 
-    field = field.substr(prefix_len + 1);
-
-    if (!cur_schema->hasField(prefix)) {
-      res->setStatus(http::kStatusNotFound);
-      res->addBody("field not found");
-      return;
-    }
-    cur_schema = cur_schema->fieldSchema(cur_schema->fieldId(prefix));
-  }
-
-  if (!cur_schema->hasField(field)) {
-    res->setStatus(http::kStatusNotFound);
-    res->addBody("field not found");
+  if (!rc.isSuccess()) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody(StringUtil::format("error: $0", rc.message()));
     return;
   }
 
-  if (!td.has_next_field_id()) {
-    td.set_next_field_id(schema->maxFieldId() + 1);
-  }
-
-  cur_schema->removeField(cur_schema->fieldId(field));
-  td.mutable_config()->set_schema(schema->encode().toString());
-
-  dbctx->config_directory->updateTableConfig(td);
   res->setStatus(http::kStatusCreated);
   res->addBody("ok");
   return;
