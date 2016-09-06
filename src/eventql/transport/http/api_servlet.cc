@@ -164,7 +164,9 @@ void APIServlet::handle(
   /* TABLES */
   if (uri.path() == "/api/v1/tables") {
     req_stream->readBody();
-    listTables(session, &req, &res);
+    catchAndReturnErrors(&res, [this, session, &req, &res] {
+      listTables(session, &req, &res);
+    });
     res_stream->writeResponse(res);
     return;
   }
@@ -252,6 +254,13 @@ void APIServlet::listTables(
 
   URI uri(req->uri());
   const auto& params = uri.queryParams();
+  auto jreq = json::parseJSON(req->body());
+
+  /* database */
+  auto database = getRequestDatabase(session, req, params, jreq);
+  if (database.isEmpty()) {
+    RAISE(kRuntimeError, "missing field: database");
+  }
 
   /* param tag */
   String tag_filter;
@@ -305,9 +314,9 @@ void APIServlet::listTables(
   };
 
   if (order_filter == "desc") {
-    dbctx->table_service->listTablesReverse(session->getEffectiveNamespace(), writeTableJSON);
+    dbctx->table_service->listTablesReverse(database.get(), writeTableJSON);
   } else {
-    dbctx->table_service->listTables(session->getEffectiveNamespace(), writeTableJSON);
+    dbctx->table_service->listTables(database.get(), writeTableJSON);
   }
 
   json.endArray();
