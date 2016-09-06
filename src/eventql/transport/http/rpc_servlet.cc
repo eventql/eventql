@@ -35,6 +35,9 @@
 #include <eventql/util/fnv.h>
 #include <eventql/io/sstable/sstablereader.h>
 #include "eventql/server/session.h"
+#include "eventql/server/sql_service.h"
+#include "eventql/server/sql/codec/binary_codec.h"
+#include "eventql/sql/runtime/runtime.h"
 
 namespace eventql {
 
@@ -136,6 +139,13 @@ void RPCServlet::handleHTTPRequest(
     if (uri.path() == "/rpc/find_partition") {
       req_stream->readBody();
       findPartition(uri, &req, &res);
+      res_stream->writeResponse(res);
+      return;
+    }
+
+    if (uri.path() == "/rpc/execute_qtree") {
+      req_stream->readBody();
+      executeQTree(uri, &req, &res, res_stream);
       res_stream->writeResponse(res);
       return;
     }
@@ -538,5 +548,60 @@ void RPCServlet::findPartition(
   }
 }
 
+void RPCServlet::executeQTree(
+    const URI& uri,
+    const http::HTTPRequest* req,
+    http::HTTPResponse* res,
+    RefPtr<http::HTTPResponseStream> res_stream) {
+  auto session = db_->getSession();
+  auto dbctx = session->getDatabaseContext();
+
+  res->setStatus(http::kStatusOK);
+  res->setHeader("Connection", "close");
+  res->setHeader("Content-Type", "application/octet-stream");
+  res->setHeader("Cache-Control", "no-cache");
+  res->setHeader("Access-Control-Allow-Origin", "*");
+  res_stream->startResponse(*res);
+
+  {
+    csql::BinaryResultFormat result_format(
+        [res_stream] (const void* data, size_t size) {
+      res_stream->writeBodyChunk(data, size);
+    });
+
+    //String database;
+    //if (URI::getParam(params, "database", &database) && !database.empty()) {
+    //  auto rc = dbctx->client_auth->changeNamespace(session, database);
+    //  if (!rc.isSuccess()) {
+    //    result_format.sendError(rc.message());
+    //    res_stream->finishResponse();
+    //    return;
+    //  }
+    //}
+
+    if (session->getEffectiveNamespace().empty()) {
+      result_format.sendError("No database selected");
+      res_stream->finishResponse();
+      return;
+    }
+
+    try {
+      auto txn = dbctx->sql_service->startTransaction(session);
+
+      csql::QueryTreeCoder coder(txn.get());
+      auto req_body_is = BufferInputStream::fromBuffer(&req->body());
+      auto qtree = coder.decode(req_body_is.get());
+      auto qplan = dbctx->sql_runtime->buildQueryPlan(txn.get(), { qtree });
+
+      result_format.sendResults(qplan.get());
+    } catch (const StandardException& e) {
+      logError("evql", "SQL Error: $0", e.what());
+      result_format.sendError(e.what());
+    }
+  }
+
+  res_stream->finishResponse();
+
+}
 }
 

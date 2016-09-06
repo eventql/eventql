@@ -98,6 +98,12 @@ protected:
       const http::HTTPRequest* req,
       http::HTTPResponse* res);
 
+  void executeQTree(
+      const URI& uri,
+      const http::HTTPRequest* req,
+      http::HTTPResponse* res,
+      RefPtr<http::HTTPResponseStream> res_stream);
+
   Database* db_;
   Random rnd_;
 };

@@ -135,12 +135,6 @@ protected:
       http::HTTPResponse* res,
       RefPtr<http::HTTPResponseStream> res_stream);
 
-  void executeQTree(
-      Session* session,
-      const http::HTTPRequest* req,
-      http::HTTPResponse* res,
-      RefPtr<http::HTTPResponseStream> res_stream);
-
   void executeSQLAggregatePartition(
       Session* session,
       const http::HTTPRequest* req,
