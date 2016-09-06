@@ -216,14 +216,9 @@ void APIServlet::handle(
     return;
   }
 
-  static const String kTablesPathPrefix = "/api/v1/tables/";
-  if (StringUtil::beginsWith(uri.path(), kTablesPathPrefix)) {
+  if (uri.path() == "/api/v1/tables/describe") {
     req_stream->readBody();
-    fetchTableDefinition(
-        session,
-        uri.path().substr(kTablesPathPrefix.size()),
-        &req,
-        &res);
+    fetchTableDefinition(session, &req, &res);
     res_stream->writeResponse(res);
     return;
   }
@@ -324,22 +319,39 @@ void APIServlet::listTables(
 
 void APIServlet::fetchTableDefinition(
     Session* session,
-    const String& table_name,
     const http::HTTPRequest* req,
     http::HTTPResponse* res) {
   auto dbctx = session->getDatabaseContext();
+  auto jreq = json::parseJSON(req->body());
 
-  auto table = dbctx->partition_map->findTable(session->getEffectiveNamespace(), table_name);
-  if (table.isEmpty()) {
+  /* database */
+  auto database = getRequestDatabase(session, req, jreq);
+  if (database.isEmpty()) {
+    RAISE(kRuntimeError, "missing field: database");
+  }
+
+  auto table_name = json::objectGetString(jreq, "table");
+  if (table_name.isEmpty()) {
+    RAISE(kRuntimeError, "missing field: table");
+  }
+
+  //auto table = dbctx->partition_map->findTable(database.get(), table_name.get());
+  //if (table.isEmpty()) {
+  //  res->setStatus(http::kStatusNotFound);
+  //  res->addBody("table not found");
+  //  return;
+  //}
+
+  Buffer buf;
+  json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
+  auto schema = dbctx->table_service->tableSchema(database.get(), table_name.get());
+  if (schema.isEmpty()) {
     res->setStatus(http::kStatusNotFound);
     res->addBody("table not found");
     return;
   }
-
-  Buffer buf;
-  json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
-  auto schema = table.get()->schema();
-  schema->toJSON(&json);
+  //auto schema = table.get()->schema();
+  schema.get()->toJSON(&json);
 
   res->setStatus(http::kStatusOK);
   res->setHeader("Content-Type", "application/json; charset=utf-8");

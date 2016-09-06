@@ -78,7 +78,6 @@ protected:
 
   void fetchTableDefinition(
       Session* session,
-      const String& table_name,
       const http::HTTPRequest* req,
       http::HTTPResponse* res);
 
