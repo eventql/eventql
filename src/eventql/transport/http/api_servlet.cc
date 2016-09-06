@@ -198,24 +198,6 @@ void APIServlet::handle(
     return;
   }
 
-  if (uri.path() == "/api/v1/tables/add_tag") {
-    req_stream->readBody();
-    catchAndReturnErrors(&res, [this, &session, &req, &res] {
-      addTableTag(session, &req, &res);
-    });
-    res_stream->writeResponse(res);
-    return;
-  }
-
-  if (uri.path() == "/api/v1/tables/remove_tag") {
-    req_stream->readBody();
-    catchAndReturnErrors(&res, [this, &session, &req, &res] {
-      removeTableTag(session, &req, &res);
-    });
-    res_stream->writeResponse(res);
-    return;
-  }
-
   if (uri.path() == "/api/v1/tables/describe") {
     req_stream->readBody();
     fetchTableDefinition(session, &req, &res);
@@ -550,102 +532,6 @@ void APIServlet::removeTableField(
   res->addBody("ok");
   return;
 }
-
-void APIServlet::addTableTag(
-    Session* session,
-    const http::HTTPRequest* req,
-    http::HTTPResponse* res) {
-  auto dbctx = session->getDatabaseContext();
-
-  URI uri(req->uri());
-  const auto& params = uri.queryParams();
-
-  String table_name;
-  if (!URI::getParam(params, "table", &table_name)) {
-    res->setStatus(http::kStatusBadRequest);
-    res->addBody("missing ?table=... parameter");
-    return;
-  }
-
-  auto table_opt = dbctx->partition_map->findTable(session->getEffectiveNamespace(), table_name);
-  if (table_opt.isEmpty()) {
-    res->setStatus(http::kStatusNotFound);
-    res->addBody("table not found");
-    return;
-  }
-  const auto& table = table_opt.get();
-
-  String tag;
-  if (!URI::getParam(params, "tag", &tag)) {
-    res->setStatus(http::kStatusBadRequest);
-    res->addBody("missing &tag=... parameter");
-    return;
-  }
-
-  auto td = table->config();
-  td.add_tags(tag);
-
-  dbctx->config_directory->updateTableConfig(td);
-  res->setStatus(http::kStatusCreated);
-  res->addBody("ok");
-  return;
-}
-
-void APIServlet::removeTableTag(
-    Session* session,
-    const http::HTTPRequest* req,
-    http::HTTPResponse* res) {
-  auto dbctx = session->getDatabaseContext();
-
-  URI uri(req->uri());
-  const auto& params = uri.queryParams();
-
-  String table_name;
-  if (!URI::getParam(params, "table", &table_name)) {
-    res->setStatus(http::kStatusBadRequest);
-    res->addBody("missing ?table=... parameter");
-    return;
-  }
-
-  String tag;
-  if (!URI::getParam(params, "tag", &tag)) {
-    res->setStatus(http::kStatusBadRequest);
-    res->addBody("missing ?tag=... parameter");
-    return;
-  }
-
-  auto table_opt = dbctx->partition_map->findTable(
-      session->getEffectiveNamespace(),
-      table_name);
-
-  if (table_opt.isEmpty()) {
-    res->setStatus(http::kStatusNotFound);
-    res->addBody("table not found");
-    return;
-  }
-
-  auto table = table_opt.get();
-  auto td = table->config();
-  auto tags = td.mutable_tags();
-
-
-  for (size_t i = tags->size() - 1; ; --i) {
-    if (tags->Get(i) == tag) {
-      tags->DeleteSubrange(i, 1);
-    }
-
-    if (i == 0) {
-      break;
-    }
-
-  }
-
-  dbctx->config_directory->updateTableConfig(td);
-  res->setStatus(http::kStatusCreated);
-  res->addBody("ok");
-  return;
-}
-
 
 void APIServlet::insertIntoTable(
     Session* session,

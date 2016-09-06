@@ -96,16 +96,6 @@ protected:
       const http::HTTPRequest* req,
       http::HTTPResponse* res);
 
-  void addTableTag(
-      Session* session,
-      const http::HTTPRequest* req,
-      http::HTTPResponse* res);
-
-  void removeTableTag(
-      Session* session,
-      const http::HTTPRequest* req,
-      http::HTTPResponse* res);
-
   void insertIntoTable(
       Session* session,
       const http::HTTPRequest* req,
