@@ -440,111 +440,58 @@ void APIServlet::addTableField(
     const http::HTTPRequest* req,
     http::HTTPResponse* res) {
   auto dbctx = session->getDatabaseContext();
+  auto jreq = json::parseJSON(req->body());
 
-  URI uri(req->uri());
-  const auto& params = uri.queryParams();
+  /* database */
+  auto database = getRequestDatabase(session, req, jreq);
+  if (database.isEmpty()) {
+    RAISE(kRuntimeError, "missing field: database");
+  }
 
-  String table_name;
-  if (!URI::getParam(params, "table", &table_name)) {
+  auto table_name = json::objectGetString(jreq, "table");
+  if (table_name.isEmpty()) {
     res->setStatus(http::kStatusBadRequest);
-    res->addBody("missing ?table=... parameter");
+    res->addBody("missing field: table");
     return;
   }
 
-  auto table_opt = dbctx->partition_map->findTable(session->getEffectiveNamespace(), table_name);
-  if (table_opt.isEmpty()) {
-    res->setStatus(http::kStatusNotFound);
-    res->addBody("table not found");
-    return;
-  }
-  const auto& table = table_opt.get();
-
-  String field_name;
-  if (!URI::getParam(params, "field_name", &field_name)) {
+  auto field_name = json::objectGetString(jreq, "field_name");
+  if (field_name.isEmpty()) {
     res->setStatus(http::kStatusBadRequest);
-    res->addBody("missing &field_name=... parameter");
+    res->addBody("missing field: field_name");
     return;
   }
 
-  String field_type_str;
-  if (!URI::getParam(params, "field_type", &field_type_str)) {
+  auto field_type_str = json::objectGetString(jreq, "field_type");
+  if (field_type_str.isEmpty()) {
     res->setStatus(http::kStatusBadRequest);
-    res->addBody("missing &field_name=... parameter");
+    res->addBody("missing field: field_type");
     return;
   }
 
-  String repeated_param;
-  URI::getParam(params, "repeated", &repeated_param);
-  auto repeated = Human::parseBoolean(repeated_param);
+  auto repeated = json::objectGetBool(jreq, "repeated");
+  auto optional = json::objectGetBool(jreq, "optional");
 
-  String optional_param;
-  URI::getParam(params, "optional", &optional_param);
-  auto optional = Human::parseBoolean(optional_param);
+  Vector<TableService::AlterTableOperation> operations;
+  TableService::AlterTableOperation operation;
+  operation.optype = TableService::AlterTableOperationType::OP_ADD_COLUMN;
+  operation.field_name = field_name.get();
+  operation.field_type = msg::fieldTypeFromString(field_type_str.get());
+  operation.is_repeated = repeated.isEmpty() ? false : repeated.get();
+  operation.is_optional =  optional.isEmpty() ? false : optional.get();
+  operations.emplace_back(operation);
 
-  auto td = table->config();
-  auto schema = msg::MessageSchema::decode(td.config().schema());
+  auto rc = dbctx->table_service->alterTable(
+      database.get(),
+      table_name.get(),
+      operations);
 
-  uint32_t next_field_id;
-  if (td.has_next_field_id()) {
-    next_field_id = td.next_field_id();
-  } else {
-    next_field_id = schema->maxFieldId() + 1;
+  if (!rc.isSuccess()) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody(StringUtil::format("error: $0", rc.message()));
+    return;
   }
 
-  auto cur_schema = schema;
-  auto field = field_name;
-
-  while (StringUtil::includes(field, ".")) {
-    auto prefix_len = field.find(".");
-    auto prefix = field.substr(0, prefix_len);
-
-    field = field.substr(prefix_len + 1);
-    if (!cur_schema->hasField(prefix)) {
-      res->setStatus(http::kStatusNotFound);
-      res->addBody(StringUtil::format("field $0 not found", prefix));
-      return;
-    }
-
-    auto parent_field_id = cur_schema->fieldId(prefix);
-    auto parent_field_type = cur_schema->fieldType(parent_field_id);
-    if (parent_field_type != msg::FieldType::OBJECT) {
-      res->setStatus(http::kStatusBadRequest);
-      res->addBody(StringUtil::format(
-        "can't add field to a field of type $0",
-        fieldTypeToString(parent_field_type)));
-      return;
-    }
-
-    cur_schema = cur_schema->fieldSchema(parent_field_id);
-  }
-
-  auto field_type = msg::fieldTypeFromString(field_type_str);
-  if (field_type == msg::FieldType::OBJECT) {
-    cur_schema->addField(
-          msg::MessageSchemaField::mkObjectField(
-              next_field_id,
-              field,
-              repeated.isEmpty() ? false : repeated.get(),
-              optional.isEmpty() ? false : optional.get(),
-              mkRef(new msg::MessageSchema(nullptr))));
-
-
-  } else {
-    cur_schema->addField(
-          msg::MessageSchemaField(
-              next_field_id,
-              field,
-              field_type,
-              0,
-              repeated.isEmpty() ? false : repeated.get(),
-              optional.isEmpty() ? false : optional.get()));
-  }
-
-
-  td.set_next_field_id(next_field_id + 1);
-  td.mutable_config()->set_schema(schema->encode().toString());
-
-  dbctx->config_directory->updateTableConfig(td);
   res->setStatus(http::kStatusCreated);
   res->addBody("ok");
   return;
