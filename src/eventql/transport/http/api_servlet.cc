@@ -335,13 +335,6 @@ void APIServlet::fetchTableDefinition(
     RAISE(kRuntimeError, "missing field: table");
   }
 
-  //auto table = dbctx->partition_map->findTable(database.get(), table_name.get());
-  //if (table.isEmpty()) {
-  //  res->setStatus(http::kStatusNotFound);
-  //  res->addBody("table not found");
-  //  return;
-  //}
-
   Buffer buf;
   json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
   auto schema = dbctx->table_service->tableSchema(database.get(), table_name.get());
@@ -350,7 +343,7 @@ void APIServlet::fetchTableDefinition(
     res->addBody("table not found");
     return;
   }
-  //auto schema = table.get()->schema();
+
   schema.get()->toJSON(&json);
 
   res->setStatus(http::kStatusOK);
