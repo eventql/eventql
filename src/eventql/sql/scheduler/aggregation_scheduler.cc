@@ -77,11 +77,32 @@ ReturnCode AggregationScheduler::handleFrame(
     uint16_t flags,
     const char* payload,
     size_t payload_size) {
-  iputs("got fraem: $0 ($1)", opcode, payload_size);
+  switch (connection->state) {
+
+    case ConnectionState::HANDSHAKE:
+      switch (opcode) {
+        case EVQL_OP_READY:
+          connection->state = ConnectionState::READY;
+          return handleReady(connection);
+        default:
+          return ReturnCode::error("ERUNTIME", "unexpected opcode");
+      }
+      break;
+
+    default:
+      break;
+
+  }
+
+  return ReturnCode::error("ERUNTIME", "unexpected opcode");
+}
+
+ReturnCode AggregationScheduler::handleReady(Connection* connection) {
   return ReturnCode::success();
 }
 
 ReturnCode AggregationScheduler::handleHandshake(Connection* connection) {
+  connection->state = ConnectionState::HANDSHAKE;
   native_transport::HelloFrame f_hello;
   f_hello.writeToString(&connection->write_buf);
   return ReturnCode::success();

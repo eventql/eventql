@@ -87,6 +87,7 @@ protected:
       const char* payload,
       size_t payload_size);
 
+  ReturnCode handleReady(Connection* connection);
   ReturnCode handleHandshake(Connection* connection);
   ReturnCode startNextPart();
   ReturnCode startConnection(AggregationPart* part);
