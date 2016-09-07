@@ -73,6 +73,8 @@ protected:
     Buffer write_buf;
     bool needs_write;
     bool needs_read;
+    uint64_t read_timeout;
+    uint64_t write_timeout;
     AggregationPart* part;
   };
 
@@ -93,6 +95,8 @@ protected:
   size_t max_concurrent_tasks_per_host_;
   size_t num_parts_;
   size_t num_parts_complete_;
+  size_t io_timeout_;
+  size_t idle_timeout_;
 };
 
 } // namespace eventql

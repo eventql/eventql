@@ -45,7 +45,9 @@ AggregationScheduler::AggregationScheduler(
     max_concurrent_tasks_(max_concurrent_tasks),
     max_concurrent_tasks_per_host_(max_concurrent_tasks_per_host),
     num_parts_(0),
-    num_parts_complete_(0) {}
+    num_parts_complete_(0),
+    io_timeout_(kMicrosPerSecond),
+    idle_timeout_(kMicrosPerSecond) {}
 
 //void Aggregatio::addLocalPart(
 //    const csql::GroupByNode* query);
@@ -284,6 +286,8 @@ ReturnCode AggregationScheduler::startConnection(AggregationPart* part) {
   connection.needs_write = true;
   connection.needs_read = false;
   connection.state = ConnectionState::CONNECTING;
+  connection.write_timeout = MonotonicClock::now() + io_timeout_;
+  connection.read_timeout = 0;
   connections_.push_back(connection);
   return ReturnCode::success();
 }
