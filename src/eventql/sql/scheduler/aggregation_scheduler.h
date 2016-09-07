@@ -91,7 +91,8 @@ protected:
   ConfigDirectory* config_;
   size_t max_concurrent_tasks_;
   size_t max_concurrent_tasks_per_host_;
-  bool done_;
+  size_t num_parts_;
+  size_t num_parts_complete_;
 };
 
 } // namespace eventql

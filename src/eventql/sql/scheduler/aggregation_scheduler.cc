@@ -43,7 +43,9 @@ AggregationScheduler::AggregationScheduler(
     size_t max_concurrent_tasks_per_host) :
     config_(config),
     max_concurrent_tasks_(max_concurrent_tasks),
-    max_concurrent_tasks_per_host_(max_concurrent_tasks_per_host) {}
+    max_concurrent_tasks_per_host_(max_concurrent_tasks_per_host),
+    num_parts_(0),
+    num_parts_complete_(0) {}
 
 //void Aggregatio::addLocalPart(
 //    const csql::GroupByNode* query);
@@ -56,6 +58,7 @@ void AggregationScheduler::addRemotePart(
   part->state = AggregationPartState::INIT;
   part->hosts = hosts;
   runq_.push_back(part);
+  ++num_parts_;
 }
 
 void AggregationScheduler::setResultCallback(
@@ -71,7 +74,7 @@ ReturnCode AggregationScheduler::execute() {
     }
   }
 
-  while (true) {
+  while (num_parts_complete_ < num_parts_) {
     fd_set op_read, op_write, op_error;
     int max_fd = 0;
     FD_ZERO(&op_read);
@@ -220,6 +223,7 @@ ReturnCode AggregationScheduler::failPart(AggregationPart* part) {
   }
 
   delete part;
+  ++num_parts_complete_;
 
   auto tolerate_failures = true;
   if (tolerate_failures) {
