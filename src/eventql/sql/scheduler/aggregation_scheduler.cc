@@ -301,6 +301,16 @@ ReturnCode AggregationScheduler::performWrite(Connection* connection) {
 
 ReturnCode AggregationScheduler::startNextPart() {
   auto iter = runq_.begin();
+
+  while (iter != runq_.end()) {
+    const auto& iter_host = (*iter)->hosts.front();
+    if (connections_per_host_[iter_host] < max_concurrent_tasks_per_host_) {
+      break;
+    } else {
+      ++iter;
+    }
+  }
+
   if (iter == runq_.end()) {
     return ReturnCode::success();
   }
@@ -326,6 +336,14 @@ ReturnCode AggregationScheduler::failPart(AggregationPart* part) {
   while (part->hosts.size() > 1) {
     part->hosts.erase(part->hosts.begin());
     part->state = AggregationPartState::RETRY;
+
+    const auto& part_host = part->hosts.front();
+    if (connections_per_host_[part_host] >= max_concurrent_tasks_per_host_) {
+      --num_parts_running_;
+      runq_.emplace_back(part);
+      return ReturnCode::success();
+    }
+
     auto rc = startConnection(part);
     if (!rc.isSuccess()) {
       return rc;
@@ -358,7 +376,7 @@ ReturnCode AggregationScheduler::startConnection(AggregationPart* part) {
     return ReturnCode::error("ERUNTIME", "server is down");
   }
 
-  auto server_addr = InetAddr::resolve(server_cfg.server_addr());
+  auto server_addr = InetAddr::resolve(server_cfg.server_addr()); // FIXME
   auto server_ip = server_addr.ip();
 
   logDebug("evql", "Opening connection to $0", connection.host);
@@ -393,14 +411,15 @@ ReturnCode AggregationScheduler::startConnection(AggregationPart* part) {
         strerror(errno));
   }
 
+  ++connections_per_host_[connection.host];
   connections_.push_back(connection);
   return ReturnCode::success();
 }
 
 void AggregationScheduler::closeConnection(Connection* connection) {
+  --connections_per_host_[connection->host];
   ::close(connection->fd);
 }
 
 } // namespace eventql
-
 

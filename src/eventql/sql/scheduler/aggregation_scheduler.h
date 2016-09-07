@@ -99,6 +99,7 @@ protected:
   std::deque<AggregationPart*> runq_;
   std::list<Connection> connections_;
   ConfigDirectory* config_;
+  std::map<std::string, size_t> connections_per_host_;
   size_t max_concurrent_tasks_;
   size_t max_concurrent_tasks_per_host_;
   size_t num_parts_;
