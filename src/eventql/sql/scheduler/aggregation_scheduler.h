@@ -63,14 +63,16 @@ protected:
   };
 
   enum class ConnectionState {
-    INIT, CONNECTING, HELLO_SENT, CONNECTED, QUERY_SENT, IDLE, CLOSE
+    CONNECTING, HANDSHAKE, CONNECTED, READY, QUERY, IDLE, CLOSE
   };
 
   struct Connection {
     ConnectionState state;
     std::string host;
     int fd;
-    Buffer write_buf;
+    std::string read_buf;
+    std::string write_buf;
+    size_t write_buf_pos;
     bool needs_write;
     bool needs_read;
     uint64_t read_timeout;
@@ -78,12 +80,18 @@ protected:
     AggregationPart* part;
   };
 
-  void sendFrame();
-  void recvFrame();
+  ReturnCode handleFrame(
+      Connection* connection,
+      uint16_t opcode,
+      uint16_t flags,
+      const char* payload,
+      size_t payload_size);
+
+  ReturnCode handleHandshake(Connection* connection);
   ReturnCode startNextPart();
   ReturnCode startConnection(AggregationPart* part);
-  ReturnCode startConnectionHandshake(Connection* connection);
   ReturnCode failPart(AggregationPart* part);
+  void completePart(AggregationPart* part);
   ReturnCode performWrite(Connection* connection);
   ReturnCode performRead(Connection* connection);
   void closeConnection(Connection* connection);
@@ -95,6 +103,7 @@ protected:
   size_t max_concurrent_tasks_per_host_;
   size_t num_parts_;
   size_t num_parts_complete_;
+  size_t num_parts_running_;
   size_t io_timeout_;
   size_t idle_timeout_;
 };

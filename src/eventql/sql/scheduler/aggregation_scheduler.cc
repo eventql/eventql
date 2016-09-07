@@ -35,6 +35,7 @@
 #include "eventql/util/logging.h"
 #include "eventql/util/wallclock.h"
 #include "eventql/sql/scheduler/aggregation_scheduler.h"
+#include "eventql/transport/native/frames/hello.h"
 
 namespace eventql {
 
@@ -47,6 +48,7 @@ AggregationScheduler::AggregationScheduler(
     max_concurrent_tasks_per_host_(max_concurrent_tasks_per_host),
     num_parts_(0),
     num_parts_complete_(0),
+    num_parts_running_(0),
     io_timeout_(kMicrosPerSecond),
     idle_timeout_(kMicrosPerSecond) {}
 
@@ -69,16 +71,32 @@ void AggregationScheduler::setResultCallback(
 
 }
 
-ReturnCode AggregationScheduler::execute() {
-  for (size_t i = 0; i < max_concurrent_tasks_; ++i) {
-    auto rc = startNextPart();
-    if (!rc.isSuccess()) {
-      return rc;
-    }
-  }
+ReturnCode AggregationScheduler::handleFrame(
+    Connection* connection,
+    uint16_t opcode,
+    uint16_t flags,
+    const char* payload,
+    size_t payload_size) {
+  iputs("got fraem: $0 ($1)", opcode, payload_size);
+  return ReturnCode::success();
+}
 
+ReturnCode AggregationScheduler::handleHandshake(Connection* connection) {
+  native_transport::HelloFrame f_hello;
+  f_hello.writeToString(&connection->write_buf);
+  return ReturnCode::success();
+}
+
+ReturnCode AggregationScheduler::execute() {
   fd_set op_read, op_write, op_error;
   while (num_parts_complete_ < num_parts_) {
+    for (size_t i = num_parts_running_; i < max_concurrent_tasks_; ++i) {
+      auto rc = startNextPart();
+      if (!rc.isSuccess()) {
+        return rc;
+      }
+    }
+
     int max_fd = 0;
     FD_ZERO(&op_read);
     FD_ZERO(&op_error);
@@ -94,7 +112,8 @@ ReturnCode AggregationScheduler::execute() {
         timeout = connection.read_timeout;
       }
 
-      if (connection.write_buf.size() > 0) {
+      if (connection.write_buf.size() > 0 ||
+          connection.state == ConnectionState::CONNECTING) {
         FD_SET(connection.fd, &op_write);
         max_fd = std::max(max_fd, connection.fd);
       }
@@ -182,20 +201,80 @@ ReturnCode AggregationScheduler::execute() {
 }
 
 ReturnCode AggregationScheduler::performRead(Connection* connection) {
+  size_t batch_size = 4096;
+  auto begin = connection->read_buf.size();
+  connection->read_buf.resize(begin + batch_size);
+
+  int ret = ::read(
+      connection->fd,
+      (void*) (&connection->read_buf[0] + begin),
+      batch_size);
+
+  if (ret == 0) {
+    return ReturnCode::error("EIO", "unexpected end of file");
+  }
+
+  if (ret == -1) {
+    if (ret == EAGAIN) {
+      connection->read_buf.resize(begin);
+      return ReturnCode::success();
+    }
+
+    return ReturnCode::error(
+        "EIO",
+        "write() failed: %s",
+        strerror(errno));
+  }
+
+  connection->read_buf.resize(begin + ret);
+  if (connection->read_buf.size() < 8) {
+    return ReturnCode::success();
+  }
+
+  auto frame_len = ntohl(*((uint32_t*) &connection->read_buf[4]));
+  auto frame_len_full = frame_len + 8;
+  if (connection->read_buf.size() < frame_len_full) {
+    return ReturnCode::success();
+  }
+
+  auto rc = handleFrame(
+      connection,
+      ntohs(*((uint16_t*) &connection->read_buf[0])),
+      ntohs(*((uint16_t*) &connection->read_buf[2])),
+      connection->read_buf.data() + 8,
+      frame_len);
+
+  if (!rc.isSuccess()) {
+    return rc;
+  }
+
+  if (connection->read_buf.size() == frame_len_full) {
+    connection->read_buf.clear();
+  } else {
+    auto rem = connection->read_buf.size() - frame_len_full;
+    memmove(
+        &connection->read_buf[0],
+        &connection->read_buf[frame_len_full],
+        rem);
+
+    connection->read_buf.resize(rem);
+  }
+
   return ReturnCode::success();
 }
 
 ReturnCode AggregationScheduler::performWrite(Connection* connection) {
   if (connection->state == ConnectionState::CONNECTING) {
+    connection->state = ConnectionState::CONNECTED;
     connection->read_timeout = MonotonicClock::now() + idle_timeout_;
-    return startConnectionHandshake(connection);
+    return handleHandshake(connection);
   }
 
   assert(connection->write_buf.size() > 0);
   int ret = ::write(
       connection->fd,
-      (const char*) connection->write_buf.data() + connection->write_buf.mark(),
-      connection->write_buf.size() - connection->write_buf.mark());
+      connection->write_buf.data() + connection->write_buf_pos,
+      connection->write_buf.size() - connection->write_buf_pos);
 
   if (ret == -1) {
     if (ret == EAGAIN) {
@@ -208,9 +287,10 @@ ReturnCode AggregationScheduler::performWrite(Connection* connection) {
         strerror(errno));
   }
 
-  connection->write_buf.setMark(connection->write_buf.mark() + ret);
-  if (connection->write_buf.mark() == connection->write_buf.size()) {
+  connection->write_buf_pos += ret;
+  if (connection->write_buf_pos >= connection->write_buf.size()) {
     connection->write_buf.clear();
+    connection->write_buf_pos = 0;
     connection->write_timeout = 0;
   } else {
     connection->write_timeout = MonotonicClock::now() + io_timeout_;
@@ -231,7 +311,9 @@ ReturnCode AggregationScheduler::startNextPart() {
 
   auto part = *iter;
   runq_.erase(iter);
+  ++num_parts_running_;
 
+  part->state = AggregationPartState::RUNNING;
   auto rc = startConnection(part);
   if (!rc.isSuccess()) {
     rc = failPart(part);
@@ -252,6 +334,7 @@ ReturnCode AggregationScheduler::failPart(AggregationPart* part) {
 
   delete part;
   ++num_parts_complete_;
+  --num_parts_running_;
 
   auto tolerate_failures = true;
   if (tolerate_failures) {
@@ -263,11 +346,12 @@ ReturnCode AggregationScheduler::failPart(AggregationPart* part) {
 
 ReturnCode AggregationScheduler::startConnection(AggregationPart* part) {
   Connection connection;
-  connection.state = ConnectionState::INIT;
   connection.host = part->hosts[0];
   connection.part = part;
-
-  part->state = AggregationPartState::RUNNING;
+  connection.write_buf_pos = 0;
+  connection.state = ConnectionState::CONNECTING;
+  connection.write_timeout = MonotonicClock::now() + io_timeout_;
+  connection.read_timeout = 0;
 
   auto server_cfg = config_->getServerConfig(connection.host);
   if (server_cfg.server_status() != SERVER_UP) {
@@ -278,7 +362,7 @@ ReturnCode AggregationScheduler::startConnection(AggregationPart* part) {
   auto server_ip = server_addr.ip();
 
   logDebug("evql", "Opening connection to $0", connection.host);
-  int fd = socket(AF_INET, SOCK_STREAM, 0);
+  auto fd = connection.fd = socket(AF_INET, SOCK_STREAM, 0);
   if (fd == -1) {
     return ReturnCode::error(
         "EIO",
@@ -309,26 +393,13 @@ ReturnCode AggregationScheduler::startConnection(AggregationPart* part) {
         strerror(errno));
   }
 
-  connection.fd = fd;
-  connection.state = ConnectionState::CONNECTING;
-  connection.write_timeout = MonotonicClock::now() + io_timeout_;
-  connection.read_timeout = 0;
   connections_.push_back(connection);
-  return ReturnCode::success();
-}
-
-ReturnCode AggregationScheduler::startConnectionHandshake(
-    Connection* connection) {
-  logDebug("evql", "start connection handshake");
   return ReturnCode::success();
 }
 
 void AggregationScheduler::closeConnection(Connection* connection) {
   ::close(connection->fd);
 }
-
-//void sendFrame();
-//void recvFrame();
 
 } // namespace eventql
 
