@@ -128,8 +128,12 @@ ScopedPtr<csql::TableExpression> Scheduler::buildPipelineGroupByExpression(
   //        auth_,
   //        kMaxConcurrency));
 
+  size_t max_concurrent_tasks = 100; //FIXME
+  size_t max_concurrent_tasks_per_host = 10; //FIXME
   std::unique_ptr<AggregationScheduler> aggr_scheduler(
-      new AggregationScheduler());
+      new AggregationScheduler(
+          max_concurrent_tasks,
+          max_concurrent_tasks_per_host));
 
   auto shards = pipelineExpression(txn, node.get());
   for (size_t i = 0; i < shards.size(); ++i) {
