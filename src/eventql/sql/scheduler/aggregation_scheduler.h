@@ -32,6 +32,10 @@ namespace eventql {
 class AggregationScheduler {
 public:
 
+  AggregationScheduler(
+      size_t max_concurrent_tasks,
+      size_t max_concurrent_tasks_per_host);
+
   void addLocalPart(
       const csql::GroupByNode* query);
 
@@ -46,21 +50,33 @@ public:
 
 protected:
 
-  void sendFrame();
-  void recvFrame();
-
-  enum AggregationPartState {
+  enum class AggregationPartState {
     INIT, RUNNING, RETRY, DONE
   };
 
   struct AggregationPart {
     AggregationPartState state;
+    std::vector<std::string> hosts;
   };
 
-  struct ConnectionState {
+  enum class ConnectionState {
+    INIT, HELLO_SENT, CONNECTED, QUERY_SENT, IDLE
   };
+
+  struct Connection {
+    ConnectionState state;
+    std::string host;
+  };
+
+  void sendFrame();
+  void recvFrame();
+  void startNextPart();
+  void startConnection(AggregationPart* part);
 
   std::deque<AggregationPart> parts_;
+  std::deque<Connection> connections_;
+  size_t max_concurrent_tasks_;
+  size_t max_concurrent_tasks_per_host_;
   bool done_;
 };
 

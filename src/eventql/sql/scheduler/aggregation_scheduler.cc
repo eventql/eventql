@@ -22,10 +22,17 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#include <assert.h>
+#include "eventql/util/logging.h"
 #include "eventql/sql/scheduler/aggregation_scheduler.h"
 
 namespace eventql {
 
+AggregationScheduler::AggregationScheduler(
+    size_t max_concurrent_tasks,
+    size_t max_concurrent_tasks_per_host) :
+    max_concurrent_tasks_(max_concurrent_tasks),
+    max_concurrent_tasks_per_host_(max_concurrent_tasks_per_host) {}
 
 //void Aggregatio::addLocalPart(
 //    const csql::GroupByNode* query);
@@ -33,7 +40,11 @@ namespace eventql {
 void AggregationScheduler::addRemotePart(
     const csql::GroupByNode* query,
     const std::vector<std::string>& hosts) {
-
+  assert(hosts.size() > 0);
+  AggregationPart part;
+  part.state = AggregationPartState::INIT;
+  part.hosts = hosts;
+  parts_.push_back(part);
 }
 
 void AggregationScheduler::setResultCallback(
@@ -42,7 +53,45 @@ void AggregationScheduler::setResultCallback(
 }
 
 ReturnCode AggregationScheduler::execute() {
+  for (size_t i = 0; i < max_concurrent_tasks_; ++i) {
+    startNextPart();
+  }
   return ReturnCode::success();
+}
+
+void AggregationScheduler::startNextPart() {
+  auto iter = parts_.begin();
+  while (iter != parts_.end()) {
+    switch (iter->state) {
+      case AggregationPartState::INIT:
+      case AggregationPartState::RETRY:
+        break;
+
+      case AggregationPartState::RUNNING:
+      case AggregationPartState::DONE:
+        ++iter;
+        continue;
+    }
+
+    break;
+  }
+
+  if (iter == parts_.end()) {
+    return;
+  }
+
+  startConnection(&*iter);
+}
+
+void AggregationScheduler::startConnection(AggregationPart* part) {
+  Connection connection;
+  connection.state = ConnectionState::INIT;
+  connection.host = part->hosts[0];
+  connections_.push_back(connection);
+
+  part->state = AggregationPartState::RUNNING;
+
+  logDebug("evql", "Opening connection to $0", connection.host);
 }
 
 
