@@ -98,6 +98,7 @@ ReturnCode AggregationScheduler::handleFrame(
 }
 
 ReturnCode AggregationScheduler::handleReady(Connection* connection) {
+  logDebug("evqld", "Executing partial aggregate on $0", connection->host);
   return ReturnCode::success();
 }
 
@@ -161,7 +162,7 @@ ReturnCode AggregationScheduler::execute() {
     for (auto conn = connections_.begin(); conn != connections_.end(); ) {
       if ((conn->read_timeout > 0 && conn->read_timeout <= now) ||
           (conn->write_timeout > 0 && conn->write_timeout <= now)) {
-        logDebug("evqld", "Connection timed out");
+        logDebug("evqld", "Client connection timed out");
 
         auto part = conn->part;
         closeConnection(&*conn);
@@ -179,6 +180,7 @@ ReturnCode AggregationScheduler::execute() {
 
         auto rc = performRead(&*conn);
         if (!rc.isSuccess()) {
+          logDebug("evqld", "Client error: $0", rc.getMessage());
           auto part = conn->part;
           closeConnection(&*conn);
           conn = connections_.erase(conn);
@@ -202,6 +204,7 @@ ReturnCode AggregationScheduler::execute() {
 
         auto rc = performWrite(&*conn);
         if (!rc.isSuccess()) {
+          logDebug("evqld", "Client error: $0", rc.getMessage());
           auto part = conn->part;
           closeConnection(&*conn);
           conn = connections_.erase(conn);
@@ -222,32 +225,33 @@ ReturnCode AggregationScheduler::execute() {
 }
 
 ReturnCode AggregationScheduler::performRead(Connection* connection) {
-  size_t batch_size = 4096;
-  auto begin = connection->read_buf.size();
-  connection->read_buf.resize(begin + batch_size);
+  static const size_t batch_size = 4096;
 
-  int ret = ::read(
-      connection->fd,
-      (void*) (&connection->read_buf[0] + begin),
-      batch_size);
+  for (int ret = 1; ret > 0; ) {
+    auto begin = connection->read_buf.size();
+    connection->read_buf.resize(begin + batch_size);
 
-  if (ret == 0) {
-    return ReturnCode::error("EIO", "unexpected end of file");
-  }
+    ret = ::read(
+        connection->fd,
+        (void*) (&connection->read_buf[0] + begin),
+        batch_size);
 
-  if (ret == -1) {
-    if (ret == EAGAIN) {
-      connection->read_buf.resize(begin);
-      return ReturnCode::success();
+    if (ret == 0) {
+      return ReturnCode::error("EIO", "unexpected end of file");
     }
 
-    return ReturnCode::error(
-        "EIO",
-        "write() failed: %s",
-        strerror(errno));
+    if (ret == -1 && errno != EAGAIN && errno != EINTR) {
+      return ReturnCode::error(
+          "EIO",
+          "read() failed: %s",
+          strerror(errno));
+    }
+
+    if (ret > 0) {
+      connection->read_buf.resize(begin + ret);
+    }
   }
 
-  connection->read_buf.resize(begin + ret);
   if (connection->read_buf.size() < 8) {
     return ReturnCode::success();
   }
@@ -298,7 +302,7 @@ ReturnCode AggregationScheduler::performWrite(Connection* connection) {
       connection->write_buf.size() - connection->write_buf_pos);
 
   if (ret == -1) {
-    if (ret == EAGAIN) {
+    if (errno == EAGAIN) {
       return ReturnCode::success();
     }
 
@@ -347,6 +351,7 @@ ReturnCode AggregationScheduler::startNextPart() {
   part->state = AggregationPartState::RUNNING;
   auto rc = startConnection(part);
   if (!rc.isSuccess()) {
+    logDebug("evqld", "Client error: $0", rc.getMessage());
     rc = failPart(part);
   }
 
@@ -366,8 +371,10 @@ ReturnCode AggregationScheduler::failPart(AggregationPart* part) {
     }
 
     auto rc = startConnection(part);
-    if (!rc.isSuccess()) {
+    if (rc.isSuccess()) {
       return rc;
+    } else {
+      logDebug("evqld", "Client error: $0", rc.getMessage());
     }
   }
 
