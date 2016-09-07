@@ -55,7 +55,7 @@ void AggregationScheduler::addRemotePart(
   auto part = new AggregationPart();
   part->state = AggregationPartState::INIT;
   part->hosts = hosts;
-  parts_.push_back(part);
+  runq_.push_back(part);
 }
 
 void AggregationScheduler::setResultCallback(
@@ -186,29 +186,21 @@ ReturnCode AggregationScheduler::performWrite(Connection* connection) {
 }
 
 ReturnCode AggregationScheduler::startNextPart() {
-  auto iter = parts_.begin();
-  while (iter != parts_.end()) {
-    switch ((*iter)->state) {
-      case AggregationPartState::INIT:
-      case AggregationPartState::RETRY:
-        break;
-
-      case AggregationPartState::RUNNING:
-      case AggregationPartState::DONE:
-        ++iter;
-        continue;
-    }
-
-    break;
-  }
-
-  if (iter == parts_.end()) {
+  auto iter = runq_.begin();
+  if (iter == runq_.end()) {
     return ReturnCode::success();
   }
 
-  auto rc = startConnection(&**iter);
+  assert(
+      (*iter)->state == AggregationPartState::INIT ||
+      (*iter)->state == AggregationPartState::RETRY);
+
+  auto part = *iter;
+  runq_.erase(iter);
+
+  auto rc = startConnection(part);
   if (!rc.isSuccess()) {
-    rc = failPart(&**iter);
+    rc = failPart(part);
   }
 
   return rc;
@@ -227,8 +219,6 @@ ReturnCode AggregationScheduler::failPart(AggregationPart* part) {
     }
   }
 
-  part->state = AggregationPartState::FAILED;
-  parts_.remove(part); // FIXME should be O(1)
   delete part;
 
   auto tolerate_failures = true;

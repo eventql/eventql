@@ -54,7 +54,7 @@ public:
 protected:
 
   enum class AggregationPartState {
-    INIT, RUNNING, RETRY, DONE, FAILED
+    INIT, RUNNING, RETRY, DONE
   };
 
   struct AggregationPart {
@@ -86,7 +86,7 @@ protected:
   ReturnCode performRead(Connection* connection);
   void closeConnection(Connection* connection);
 
-  std::list<AggregationPart*> parts_;
+  std::deque<AggregationPart*> runq_;
   std::list<Connection> connections_;
   ConfigDirectory* config_;
   size_t max_concurrent_tasks_;
