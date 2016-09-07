@@ -327,6 +327,185 @@ void APIServlet::fetchTableDefinition(
   res->addBody(buf);
 }
 
+//buildColumnSchema
+
+//ReturnCode buildTableSchema(
+//    JSONObject::const_iterator begin,
+//    JSONObject::const_iterator end,
+//    TableSchema* schema) {
+//
+//  auto num_cols = json::arrayLength(begin, end);
+//  for (size_t i = 0; i < num_cols; ++i) {
+//    auto jcol = json::arrayLookup(begin, end, i);
+//    auto type = json::objectGetString(jcol, "type");
+//    if (type.isEmpty()) {
+//      return ReturnCode::error("missing field: type");
+//    }
+//
+//    auto name = json::objectGetString(jcol, "name");
+//    if (name.isEmpty()) {
+//      return ReturnCode::error("missing field: name");
+//    }
+//
+//    TableSchema::Column col;
+//  }
+//}
+
+//static Status buildMessageSchema(
+//    JSONObject::const_iterator begin,
+//    JSONObject::const_iterator end,
+//    msg::MessageSchema* schema) {
+//  uint32_t id = 0;
+//  Set<String> column_names;
+//
+//  auto num_cols = json::arrayLength(begin, end);
+//  for (size_t i = 0; i < num_cols; ++i) {
+//    auto col = json::objectLookup(
+//    if (column_names.count(c->column_name) > 0) {
+//      return Status(
+//          eIllegalArgumentError,
+//          StringUtil::format("duplicate column: $0", c->column_name));
+//    }
+//
+//    column_names.emplace(c->column_name);
+//
+//    bool repeated = false;
+//    bool optional = true;
+//
+//    for (const auto& o : c->column_options) {
+//      switch (o) {
+//        case csql::TableSchema::ColumnOptions::NOT_NULL:
+//          optional = false;
+//          break;
+//        case csql::TableSchema::ColumnOptions::REPEATED:
+//          repeated = true;
+//          break;
+//        default:
+//          continue;
+//      }
+//    }
+//
+//    switch (c->column_class) {
+//      case csql::TableSchema::ColumnClass::SCALAR: {
+//        auto type_str = c->column_type;
+//        StringUtil::toUpper(&type_str);
+//        auto type = kTypeMap.find(type_str);
+//        if (type == kTypeMap.end()) {
+//          return Status(
+//              eIllegalArgumentError,
+//              StringUtil::format(
+//                  "invalid type: '$0' for column '$1'",
+//                  c->column_type,
+//                  c->column_name));
+//        }
+//
+//        schema->addField(
+//            msg::MessageSchemaField(
+//                ++id,
+//                c->column_name,
+//                type->second,
+//                0, /* type size */
+//                repeated,
+//                optional));
+//
+//        break;
+//      }
+//
+//      case csql::TableSchema::ColumnClass::RECORD: {
+//        auto s = mkRef(new msg::MessageSchema(nullptr));
+//
+//        auto rc = buildMessageSchema(c->getSubColumns(), s.get());
+//        if (!rc.isSuccess()) {
+//          return rc;
+//        }
+//
+//        schema->addField(
+//            msg::MessageSchemaField::mkObjectField(
+//                ++id,
+//                c->column_name,
+//                repeated,
+//                optional,
+//                s));
+//
+//        break;
+//      }
+//
+//    }
+//  }
+//
+//  return Status::success();
+//}
+//static ReturnCode buildMessageSchema(
+//    json::JSONObject::const_iterator cols,
+//    json::JSONObject::const_iterator end,
+//    MessageSchema* schema,
+//    size_t id = 1) {
+//  //§auto tname = json::objectGetString(begin, end, "name");
+//  //§if (!tname.isEmpty()) {
+//  //§  name_ = tname.get();
+//  //§}
+//
+//  //§auto cols = json::objectLookup(begin, end, "columns");
+//  //§if (cols == end) {
+//  //§  RAISE(kRuntimeError, "missing field: columns");
+//  //§}
+//
+//  auto ncols = json::arrayLength(cols, end);
+//  for (size_t i = 0; i < ncols; ++i) {
+//    auto col = json::arrayLookup(cols, end, i); // O(N^2) but who cares...
+//
+//    //auto id = json::objectGetUInt64(col, end, "id");
+//    //if (id.isEmpty()) {
+//    //  RAISE(kRuntimeError, "missing field: id");
+//    //}
+//
+//    auto name = json::objectGetString(col, end, "name");
+//    if (name.isEmpty()) {
+//      RAISE(kRuntimeError, "missing field: name");
+//    }
+//
+//    auto type = json::objectGetString(col, end, "type");
+//    if (type.isEmpty()) {
+//      RAISE(kRuntimeError, "missing field: type");
+//    }
+//
+//    auto optional = json::objectGetBool(col, end, "optional");
+//    auto repeated = json::objectGetBool(col, end, "repeated");
+//
+//    auto field_type = fieldTypeFromString(type.get());
+//
+//    if (field_type == msg::FieldType::OBJECT) {
+//      auto child_schema_json = json::objectLookup(col, end, "schema");
+//      if (child_schema_json == end) {
+//        RAISE(kRuntimeError, "missing field: schema");
+//      }
+//
+//      auto child_schema = mkRef(new MessageSchema(nullptr));
+//      auto rc = buildMessageSchema(child_schema_json, end, child_schema.get());
+//
+//      schema->addField(
+//          MessageSchemaField::mkObjectField(
+//              id.get(),
+//              name.get(),
+//              repeated.isEmpty() ? false : repeated.get(),
+//              optional.isEmpty() ? false : optional.get(),
+//              child_schema));
+//    } else {
+//      schema->addField(
+//          MessageSchemaField(
+//              id.get(),
+//              name.get(),
+//              field_type,
+//              0, //type_size
+//              repeated.isEmpty() ? false : repeated.get(),
+//              optional.isEmpty() ? false : optional.get()));
+//    }
+//  }
+//
+//  return ReturnCode::success();
+//}
+
+
 void APIServlet::createTable(
     Session* session,
     const http::HTTPRequest* req,
@@ -347,69 +526,45 @@ void APIServlet::createTable(
     return;
   }
 
-  auto jschema = json::objectLookup(jreq, "schema");
-  if (jschema == jreq.end()) {
+  auto jcolumns = json::objectLookup(jreq, "columns");
+  if (jcolumns == jreq.end()) {
     res->setStatus(http::kStatusBadRequest);
-    res->addBody("missing field: schema");
+    res->addBody("missing field: columns");
     return;
   }
 
-  auto num_shards = json::objectGetUInt64(jreq, "num_shards");
-
-  String table_type = "static";
-  auto jtable_type = json::objectGetString(jreq, "table_type");
-  if (!jtable_type.isEmpty()) {
-    table_type = jtable_type.get();
+  auto jprimary_key = json::objectLookup(jreq, "primary_key");
+  if (jprimary_key == jreq.end()) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody("missing field: primary_key");
+    return;
   }
 
-  auto update_param = json::objectGetBool(jreq, "update");
-  auto force = !update_param.isEmpty() && update_param.get();
-
-  try {
-    msg::MessageSchema schema(nullptr);
-    schema.fromJSON(jschema, jreq.end());
-
-    // legacy static tables
-    if (table_type == "static" || table_type == "static_fixed") {
-      TableDefinition td;
-      if (force) {
-        try {
-          auto old_td = dbctx->config_directory->getTableConfig(
-              database.get(),
-              table_name.get());
-
-          td.set_version(old_td.version());
-        } catch (const std::exception& e) {
-          // ignore
-        }
-      }
-
-      td.set_customer(database.get());
-      td.set_table_name(table_name.get());
-
-      auto tblcfg = td.mutable_config();
-      tblcfg->set_schema(schema.encode().toString());
-      tblcfg->set_num_shards(num_shards.isEmpty() ? 1 : num_shards.get());
-      tblcfg->set_partitioner(eventql::TBL_PARTITION_FIXED);
-      tblcfg->set_storage(eventql::TBL_STORAGE_STATIC);
-      dbctx->config_directory->updateTableConfig(td);
-    } else {
-      auto rc = dbctx->table_service->createTable(
-          database.get(),
-          table_name.get(),
-          schema,
-          { "time" }); // FIXME
-
-      if (!rc.isSuccess()) {
-        RAISE(kRuntimeError, rc.message());
+  msg::MessageSchema schema(nullptr);
+  //schema.fromJSON(jreq, 
+  Vector<String> primary_key;
+  {
+    auto num_keys = json::arrayLength(jprimary_key, jreq.end());
+    for (size_t i = 0; i < num_keys; ++i) {
+      auto key = json::arrayGetString(jprimary_key, jreq.end(), i);
+      if (key.isEmpty()) {
+        //TODO handle
+      } else {
+        primary_key.emplace_back(key.get());
       }
     }
+  }
 
-    res->setStatus(http::kStatusCreated);
-  } catch (const StandardException& e) {
-    logError("analyticsd", e, "error");
+  auto rc = dbctx->table_service->createTable(
+      database.get(),
+      table_name.get(),
+      schema,
+      primary_key);
+
+  if (!rc.isSuccess()) {
+    logError("eventql", rc.message(), "error");
     res->setStatus(http::kStatusInternalServerError);
-    res->addBody(StringUtil::format("error: $0", e.what()));
+    res->addBody(StringUtil::format("error: $0", rc.message()));
     return;
   }
 
@@ -417,21 +572,21 @@ void APIServlet::createTable(
 }
 
 void APIServlet::addTableField(
-    Session* session,
-    const http::HTTPRequest* req,
-    http::HTTPResponse* res) {
-  auto dbctx = session->getDatabaseContext();
-  auto jreq = json::parseJSON(req->body());
+  Session* session,
+  const http::HTTPRequest* req,
+  http::HTTPResponse* res) {
+auto dbctx = session->getDatabaseContext();
+auto jreq = json::parseJSON(req->body());
 
-  /* database */
-  auto database = getRequestDatabase(session, req, jreq);
-  if (database.isEmpty()) {
-    RAISE(kRuntimeError, "missing field: database");
-  }
+/* database */
+auto database = getRequestDatabase(session, req, jreq);
+if (database.isEmpty()) {
+  RAISE(kRuntimeError, "missing field: database");
+}
 
-  auto table_name = json::objectGetString(jreq, "table");
-  if (table_name.isEmpty()) {
-    res->setStatus(http::kStatusBadRequest);
+auto table_name = json::objectGetString(jreq, "table");
+if (table_name.isEmpty()) {
+  res->setStatus(http::kStatusBadRequest);
     res->addBody("missing field: table");
     return;
   }
