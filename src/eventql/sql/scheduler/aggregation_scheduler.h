@@ -26,6 +26,8 @@
 #include "eventql/eventql.h"
 #include "eventql/sql/qtree/GroupByNode.h"
 #include "eventql/util/return_code.h"
+#include "eventql/util/buffer.h"
+#include "eventql/config/config_directory.h"
 
 namespace eventql {
 
@@ -33,6 +35,7 @@ class AggregationScheduler {
 public:
 
   AggregationScheduler(
+      ConfigDirectory* config,
       size_t max_concurrent_tasks,
       size_t max_concurrent_tasks_per_host);
 
@@ -51,7 +54,7 @@ public:
 protected:
 
   enum class AggregationPartState {
-    INIT, RUNNING, RETRY, DONE
+    INIT, RUNNING, RETRY, DONE, FAILED
   };
 
   struct AggregationPart {
@@ -60,21 +63,32 @@ protected:
   };
 
   enum class ConnectionState {
-    INIT, HELLO_SENT, CONNECTED, QUERY_SENT, IDLE
+    INIT, CONNECTING, HELLO_SENT, CONNECTED, QUERY_SENT, IDLE, CLOSE
   };
 
   struct Connection {
     ConnectionState state;
     std::string host;
+    int fd;
+    Buffer write_buf;
+    bool needs_write;
+    bool needs_read;
+    AggregationPart* part;
   };
 
   void sendFrame();
   void recvFrame();
-  void startNextPart();
-  void startConnection(AggregationPart* part);
+  ReturnCode startNextPart();
+  ReturnCode startConnection(AggregationPart* part);
+  ReturnCode startConnectionHandshake(Connection* connection);
+  ReturnCode failPart(AggregationPart* part);
+  ReturnCode performWrite(Connection* connection);
+  ReturnCode performRead(Connection* connection);
+  void closeConnection(Connection* connection);
 
-  std::deque<AggregationPart> parts_;
-  std::deque<Connection> connections_;
+  std::list<AggregationPart*> parts_;
+  std::list<Connection> connections_;
+  ConfigDirectory* config_;
   size_t max_concurrent_tasks_;
   size_t max_concurrent_tasks_per_host_;
   bool done_;

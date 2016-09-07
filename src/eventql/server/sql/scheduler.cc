@@ -132,6 +132,7 @@ ScopedPtr<csql::TableExpression> Scheduler::buildPipelineGroupByExpression(
   size_t max_concurrent_tasks_per_host = 10; //FIXME
   std::unique_ptr<AggregationScheduler> aggr_scheduler(
       new AggregationScheduler(
+          cdir_,
           max_concurrent_tasks,
           max_concurrent_tasks_per_host));
 
