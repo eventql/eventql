@@ -52,6 +52,9 @@ AggregationScheduler::AggregationScheduler(
     io_timeout_(kMicrosPerSecond),
     idle_timeout_(kMicrosPerSecond) {}
 
+AggregationScheduler::~AggregationScheduler() {
+  shutdown();
+}
 //void Aggregatio::addLocalPart(
 //    const csql::GroupByNode* query);
 //
@@ -115,6 +118,7 @@ ReturnCode AggregationScheduler::execute() {
     for (size_t i = num_parts_running_; i < max_concurrent_tasks_; ++i) {
       auto rc = startNextPart();
       if (!rc.isSuccess()) {
+        shutdown();
         return rc;
       }
     }
@@ -152,6 +156,7 @@ ReturnCode AggregationScheduler::execute() {
 
     int res = select(max_fd + 1, &op_read, &op_write, &op_error, &tv);
     if (res == -1 && errno != EINTR) {
+      shutdown();
       return ReturnCode::error(
           "EIO",
           "select() failed: %s",
@@ -171,6 +176,7 @@ ReturnCode AggregationScheduler::execute() {
         if (rc.isSuccess()) {
           continue;
         } else {
+          shutdown();
           return rc;
         }
       }
@@ -188,6 +194,7 @@ ReturnCode AggregationScheduler::execute() {
           if (rc.isSuccess()) {
             continue;
           } else {
+            shutdown();
             return rc;
           }
         }
@@ -212,6 +219,7 @@ ReturnCode AggregationScheduler::execute() {
           if (rc.isSuccess()) {
             continue;
           } else {
+            shutdown();
             return rc;
           }
         }
@@ -221,7 +229,22 @@ ReturnCode AggregationScheduler::execute() {
     }
   }
 
+  shutdown();
   return ReturnCode::success();
+}
+
+void AggregationScheduler::shutdown() {
+  auto runq_iter = runq_.begin();
+  while (runq_iter != runq_.end()) {
+    delete *runq_iter;
+    runq_iter = runq_.erase(runq_iter);
+  }
+
+  auto connections_iter = connections_.begin();
+  while (connections_iter != connections_.end()) {
+    closeConnection(&*connections_iter);
+    connections_iter = connections_.erase(connections_iter);
+  }
 }
 
 ReturnCode AggregationScheduler::performRead(Connection* connection) {

@@ -39,6 +39,8 @@ public:
       size_t max_concurrent_tasks,
       size_t max_concurrent_tasks_per_host);
 
+  ~AggregationScheduler();
+
   void addLocalPart(
       const csql::GroupByNode* query);
 
@@ -50,6 +52,7 @@ public:
       const std::function<void ()> fn);
 
   ReturnCode execute();
+  void shutdown();
 
 protected:
 
