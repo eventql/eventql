@@ -740,8 +740,6 @@ EVQL_CORE_SOURCES_ = \
     eventql/sql/scheduler.h \
     eventql/sql/scheduler/execution_context.cc \
     eventql/sql/scheduler/execution_context.h \
-    eventql/sql/scheduler/aggregation_scheduler.cc \
-    eventql/sql/scheduler/aggregation_scheduler.h \
     eventql/sql/svalue.cc \
     eventql/sql/svalue.h \
     eventql/sql/table_iterator.h \
@@ -830,6 +828,8 @@ EVQL_CORE_SOURCES_ = \
     eventql/transport/native/native_connection.h \
     eventql/transport/native/native_transport.cc \
     eventql/transport/native/native_transport.h \
+    eventql/transport/native/pipelined_rpc.cc \
+    eventql/transport/native/pipelined_rpc.h \
     eventql/transport/native/query_result_frame.cc \
     eventql/transport/native/query_result_frame.h \
     eventql/transport/native/frames/hello.cc \

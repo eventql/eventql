@@ -26,7 +26,7 @@
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/SHA1.h>
 #include <eventql/sql/runtime/defaultruntime.h>
-#include <eventql/sql/scheduler/aggregation_scheduler.h>
+#include <eventql/transport/native/pipelined_rpc.h>
 
 namespace csql {
 
@@ -105,7 +105,9 @@ public:
       Transaction* txn,
       ExecutionContext* execution_context,
       Vector<ValueExpression> select_expressions,
-      ScopedPtr<eventql::AggregationScheduler> aggr_scheduler);
+      eventql::ConfigDirectory* config,
+      size_t max_concurrent_tasks,
+      size_t max_concurrent_tasks_per_host);
 
   ~GroupByMergeExpression();
 
@@ -121,7 +123,7 @@ protected:
   Transaction* txn_;
   ExecutionContext* execution_context_;
   Vector<ValueExpression> select_exprs_;
-  ScopedPtr<eventql::AggregationScheduler> aggr_scheduler_;
+  eventql::PipelinedRPC rpc_scheduler_;
   HashMap<String, Vector<VM::Instance>> groups_;
   HashMap<String, Vector<VM::Instance>>::const_iterator groups_iter_;
   ScratchMemory scratch_;

@@ -313,11 +313,13 @@ GroupByMergeExpression::GroupByMergeExpression(
     Transaction* txn,
     ExecutionContext* execution_context,
     Vector<ValueExpression> select_expressions,
-    ScopedPtr<eventql::AggregationScheduler> aggr_scheduler) :
+    eventql::ConfigDirectory* config,
+    size_t max_concurrent_tasks,
+    size_t max_concurrent_tasks_per_host) :
     txn_(txn),
     execution_context_(execution_context),
     select_exprs_(std::move(select_expressions)),
-    aggr_scheduler_(std::move(aggr_scheduler)),
+    rpc_scheduler_(config, max_concurrent_tasks, max_concurrent_tasks_per_host),
     freed_(false) {
   execution_context_->incrementNumTasks();
 }
@@ -344,26 +346,26 @@ ScopedPtr<ResultCursor> GroupByMergeExpression::execute() {
     }
   });
 
-  aggr_scheduler_->setResultCallback([this] () {
-    logDebug("evqld", "got result!", 1);
-    //const auto& group_key = row[0].getString();
+  //aggr_scheduler_->setResultCallback([this] () {
+  //  logDebug("evqld", "got result!", 1);
+  //  //const auto& group_key = row[0].getString();
 
-    //auto& group = groups_[group_key];
-    //if (group.size() == 0) {
-    //  for (const auto& e : select_exprs_) {
-    //    group.emplace_back(VM::allocInstance(txn_, e.program(), &scratch_));
-    //  }
-    //}
+  //  //auto& group = groups_[group_key];
+  //  //if (group.size() == 0) {
+  //  //  for (const auto& e : select_exprs_) {
+  //  //    group.emplace_back(VM::allocInstance(txn_, e.program(), &scratch_));
+  //  //  }
+  //  //}
 
-    //auto is = StringInputStream::fromString(row[1].getString());
-    //for (size_t i = 0; i < select_exprs_.size(); ++i) {
-    //  const auto& e = select_exprs_[i];
-    //  VM::loadState(txn_, e.program(), &remote_group[i], is.get());
-    //  VM::merge(txn_, e.program(), &group[i], &remote_group[i]);
-    //}
-  });
+  //  //auto is = StringInputStream::fromString(row[1].getString());
+  //  //for (size_t i = 0; i < select_exprs_.size(); ++i) {
+  //  //  const auto& e = select_exprs_[i];
+  //  //  VM::loadState(txn_, e.program(), &remote_group[i], is.get());
+  //  //  VM::merge(txn_, e.program(), &group[i], &remote_group[i]);
+  //  //}
+  //});
 
-  auto rc = aggr_scheduler_->execute();
+  auto rc = rpc_scheduler_.execute();
   if (!rc.isSuccess()) {
     RAISE(kRuntimeError, rc.getMessage());
   }

@@ -34,12 +34,12 @@
 #include <fcntl.h>
 #include "eventql/util/logging.h"
 #include "eventql/util/wallclock.h"
-#include "eventql/sql/scheduler/aggregation_scheduler.h"
+#include "eventql/transport/native/pipelined_rpc.h"
 #include "eventql/transport/native/frames/hello.h"
 
 namespace eventql {
 
-AggregationScheduler::AggregationScheduler(
+PipelinedRPC::PipelinedRPC(
     ConfigDirectory* config,
     size_t max_concurrent_tasks,
     size_t max_concurrent_tasks_per_host) :
@@ -55,7 +55,7 @@ AggregationScheduler::AggregationScheduler(
 //void Aggregatio::addLocalPart(
 //    const csql::GroupByNode* query);
 //
-void AggregationScheduler::addRemotePart(
+void PipelinedRPC::addRemotePart(
     const csql::GroupByNode* query,
     const std::vector<std::string>& hosts) {
   assert(hosts.size() > 0);
@@ -66,12 +66,12 @@ void AggregationScheduler::addRemotePart(
   ++num_parts_;
 }
 
-void AggregationScheduler::setResultCallback(
+void PipelinedRPC::setResultCallback(
     const std::function<void ()> fn) {
 
 }
 
-ReturnCode AggregationScheduler::handleFrame(
+ReturnCode PipelinedRPC::handleFrame(
     Connection* connection,
     uint16_t opcode,
     uint16_t flags,
@@ -97,18 +97,18 @@ ReturnCode AggregationScheduler::handleFrame(
   return ReturnCode::error("ERUNTIME", "unexpected opcode");
 }
 
-ReturnCode AggregationScheduler::handleReady(Connection* connection) {
+ReturnCode PipelinedRPC::handleReady(Connection* connection) {
   return ReturnCode::success();
 }
 
-ReturnCode AggregationScheduler::handleHandshake(Connection* connection) {
+ReturnCode PipelinedRPC::handleHandshake(Connection* connection) {
   connection->state = ConnectionState::HANDSHAKE;
   native_transport::HelloFrame f_hello;
   f_hello.writeToString(&connection->write_buf);
   return ReturnCode::success();
 }
 
-ReturnCode AggregationScheduler::execute() {
+ReturnCode PipelinedRPC::execute() {
   fd_set op_read, op_write, op_error;
   while (num_parts_complete_ < num_parts_) {
     for (size_t i = num_parts_running_; i < max_concurrent_tasks_; ++i) {
@@ -221,7 +221,7 @@ ReturnCode AggregationScheduler::execute() {
   return ReturnCode::success();
 }
 
-ReturnCode AggregationScheduler::performRead(Connection* connection) {
+ReturnCode PipelinedRPC::performRead(Connection* connection) {
   size_t batch_size = 4096;
   auto begin = connection->read_buf.size();
   connection->read_buf.resize(begin + batch_size);
@@ -284,7 +284,7 @@ ReturnCode AggregationScheduler::performRead(Connection* connection) {
   return ReturnCode::success();
 }
 
-ReturnCode AggregationScheduler::performWrite(Connection* connection) {
+ReturnCode PipelinedRPC::performWrite(Connection* connection) {
   if (connection->state == ConnectionState::CONNECTING) {
     connection->state = ConnectionState::CONNECTED;
     connection->read_timeout = MonotonicClock::now() + idle_timeout_;
@@ -320,7 +320,7 @@ ReturnCode AggregationScheduler::performWrite(Connection* connection) {
   return ReturnCode::success();
 }
 
-ReturnCode AggregationScheduler::startNextPart() {
+ReturnCode PipelinedRPC::startNextPart() {
   auto iter = runq_.begin();
 
   while (iter != runq_.end()) {
@@ -353,7 +353,7 @@ ReturnCode AggregationScheduler::startNextPart() {
   return rc;
 }
 
-ReturnCode AggregationScheduler::failPart(AggregationPart* part) {
+ReturnCode PipelinedRPC::failPart(AggregationPart* part) {
   while (part->hosts.size() > 1) {
     part->hosts.erase(part->hosts.begin());
     part->state = AggregationPartState::RETRY;
@@ -383,7 +383,7 @@ ReturnCode AggregationScheduler::failPart(AggregationPart* part) {
   }
 }
 
-ReturnCode AggregationScheduler::startConnection(AggregationPart* part) {
+ReturnCode PipelinedRPC::startConnection(AggregationPart* part) {
   Connection connection;
   connection.host = part->hosts[0];
   connection.part = part;
@@ -437,7 +437,7 @@ ReturnCode AggregationScheduler::startConnection(AggregationPart* part) {
   return ReturnCode::success();
 }
 
-void AggregationScheduler::closeConnection(Connection* connection) {
+void PipelinedRPC::closeConnection(Connection* connection) {
   --connections_per_host_[connection->host];
   ::close(connection->fd);
 }

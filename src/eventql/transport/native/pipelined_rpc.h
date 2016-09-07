@@ -31,10 +31,10 @@
 
 namespace eventql {
 
-class AggregationScheduler {
+class PipelinedRPC {
 public:
 
-  AggregationScheduler(
+  PipelinedRPC(
       ConfigDirectory* config,
       size_t max_concurrent_tasks,
       size_t max_concurrent_tasks_per_host);
