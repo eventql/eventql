@@ -27,6 +27,7 @@
 #include <eventql/server/sql/pipelined_expression.h>
 #include <eventql/sql/qtree/QueryTreeUtil.h>
 #include <eventql/db/metadata_client.h>
+#include <eventql/sql/scheduler/aggregation_scheduler.h>
 #include "eventql/eventql.h"
 #include <algorithm>
 
@@ -119,13 +120,16 @@ ScopedPtr<csql::TableExpression> Scheduler::buildPipelineGroupByExpression(
     csql::Transaction* txn,
     csql::ExecutionContext* execution_context,
     RefPtr<csql::GroupByNode> node) {
-  auto remote_aggregate = mkScoped(
-      new PipelinedExpression(
-          txn,
-          execution_context,
-          static_cast<Session*>(txn->getUserData())->getEffectiveNamespace(),
-          auth_,
-          kMaxConcurrency));
+  //auto remote_aggregate = mkScoped(
+  //    new PipelinedExpression(
+  //        txn,
+  //        execution_context,
+  //        static_cast<Session*>(txn->getUserData())->getEffectiveNamespace(),
+  //        auth_,
+  //        kMaxConcurrency));
+
+  std::unique_ptr<AggregationScheduler> aggr_scheduler(
+      new AggregationScheduler());
 
   auto shards = pipelineExpression(txn, node.get());
   for (size_t i = 0; i < shards.size(); ++i) {
@@ -136,13 +140,18 @@ ScopedPtr<csql::TableExpression> Scheduler::buildPipelineGroupByExpression(
             shards[i].qtree));
 
     group_by_copy->setIsPartialAggreagtion(true);
-    if (shards[i].is_local) {
-      auto partial = 
-          buildPartialGroupByExpression(txn, execution_context, group_by_copy);
-      remote_aggregate->addLocalQuery(std::move(partial));
-    } else {
-      remote_aggregate->addRemoteQuery(group_by_copy.get(), shards[i].hosts);
-    }
+    //if (shards[i].is_local) {
+    //  //auto partial =
+    //  //    buildPartialGroupByExpression(txn, execution_context, group_by_copy);
+    //  aggr_scheduler->addLocalPart(group_by_copy.get());
+    //} else {
+      std::vector<std::string> hosts;
+      for (const auto& h : shards[i].hosts) {
+        hosts.emplace_back(h.name);
+      }
+
+      aggr_scheduler->addRemotePart(group_by_copy.get(), hosts);
+    //}
   }
 
   Vector<csql::ValueExpression> select_expressions;
@@ -158,7 +167,7 @@ ScopedPtr<csql::TableExpression> Scheduler::buildPipelineGroupByExpression(
           txn,
           execution_context,
           std::move(select_expressions),
-          std::move(remote_aggregate)));
+          std::move(aggr_scheduler)));
 }
 
 Vector<Scheduler::PipelinedQueryTree> Scheduler::pipelineExpression(

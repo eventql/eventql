@@ -26,6 +26,7 @@
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/SHA1.h>
 #include <eventql/sql/runtime/defaultruntime.h>
+#include <eventql/sql/scheduler/aggregation_scheduler.h>
 
 namespace csql {
 
@@ -104,7 +105,7 @@ public:
       Transaction* txn,
       ExecutionContext* execution_context,
       Vector<ValueExpression> select_expressions,
-      ScopedPtr<TableExpression> input);
+      ScopedPtr<eventql::AggregationScheduler> aggr_scheduler);
 
   ~GroupByMergeExpression();
 
@@ -120,7 +121,7 @@ protected:
   Transaction* txn_;
   ExecutionContext* execution_context_;
   Vector<ValueExpression> select_exprs_;
-  ScopedPtr<TableExpression> input_;
+  ScopedPtr<eventql::AggregationScheduler> aggr_scheduler_;
   HashMap<String, Vector<VM::Instance>> groups_;
   HashMap<String, Vector<VM::Instance>>::const_iterator groups_iter_;
   ScratchMemory scratch_;
