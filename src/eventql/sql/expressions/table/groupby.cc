@@ -30,6 +30,7 @@
 #include <eventql/sql/runtime/query_cache.h>
 #include <eventql/util/freeondestroy.h>
 #include <eventql/util/logging.h>
+#include <eventql/server/session.h>
 #include <sys/fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -384,6 +385,25 @@ ScopedPtr<ResultCursor> GroupByMergeExpression::execute() {
 
 size_t GroupByMergeExpression::getNumColumns() const {
   return select_exprs_.size();
+}
+
+void GroupByMergeExpression::addPart(
+    GroupByNode* node,
+    std::vector<std::string> hosts) {
+
+  std::string req_body;
+  auto req_body_os = StringOutputStream::fromString(&req_body);
+  QueryTreeCoder qtree_coder(txn_);
+  qtree_coder.encode(node, req_body_os.get());
+
+  eventql::native_transport::RPCFrame frame;
+  frame.setBody(std::move(req_body));
+  frame.setMethod("internal.sql.partial_aggregate");
+  frame.setDatabase(
+      static_cast<eventql::Session*>(
+          txn_->getUserData())->getEffectiveNamespace());
+
+  rpc_scheduler_.addRPC(std::move(frame), hosts);
 }
 
 bool GroupByMergeExpression::next(SValue* row, size_t row_len) {

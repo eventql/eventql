@@ -115,6 +115,8 @@ public:
 
   size_t getNumColumns() const override;
 
+  void addPart(GroupByNode* node, std::vector<std::string> hosts);
+
 protected:
 
   bool next(SValue* row, size_t row_len);

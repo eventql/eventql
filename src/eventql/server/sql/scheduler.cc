@@ -130,28 +130,6 @@ ScopedPtr<csql::TableExpression> Scheduler::buildPipelineGroupByExpression(
   size_t max_concurrent_tasks = 100; //FIXME
   size_t max_concurrent_tasks_per_host = 10; //FIXME
 
-  //auto shards = pipelineExpression(txn, node.get());
-  //for (size_t i = 0; i < shards.size(); ++i) {
-  //  auto group_by_copy = mkRef(
-  //      new csql::GroupByNode(
-  //          node->selectList(),
-  //          node->groupExpressions(),
-  //          shards[i].qtree));
-
-  //  group_by_copy->setIsPartialAggreagtion(true);
-  //  //if (shards[i].is_local) {
-  //  //  //auto partial =
-  //  //  //    buildPartialGroupByExpression(txn, execution_context, group_by_copy);
-  //  //  aggr_scheduler->addLocalPart(group_by_copy.get());
-  //  //} else {
-  //    std::vector<std::string> hosts;
-  //    for (const auto& h : shards[i].hosts) {
-  //      hosts.emplace_back(h.name);
-  //    }
-
-  //    aggr_scheduler->addRemotePart(group_by_copy.get(), hosts);
-  //  //}
-  //}
 
   Vector<csql::ValueExpression> select_expressions;
   for (const auto& slnode : node->selectList()) {
@@ -161,7 +139,7 @@ ScopedPtr<csql::TableExpression> Scheduler::buildPipelineGroupByExpression(
             slnode->expression()));
   }
 
-  return mkScoped(
+  auto expr = mkScoped(
       new csql::GroupByMergeExpression(
           txn,
           execution_context,
@@ -169,6 +147,31 @@ ScopedPtr<csql::TableExpression> Scheduler::buildPipelineGroupByExpression(
           cdir_,
           max_concurrent_tasks,
           max_concurrent_tasks_per_host));
+
+  auto shards = pipelineExpression(txn, node.get());
+  for (size_t i = 0; i < shards.size(); ++i) {
+    auto group_by_copy = mkRef(
+        new csql::GroupByNode(
+            node->selectList(),
+            node->groupExpressions(),
+            shards[i].qtree));
+
+    group_by_copy->setIsPartialAggreagtion(true);
+    //if (shards[i].is_local) {
+    //  //auto partial =
+    //  //    buildPartialGroupByExpression(txn, execution_context, group_by_copy);
+    //  aggr_scheduler->addLocalPart(group_by_copy.get());
+    //} else {
+      std::vector<std::string> hosts;
+      for (const auto& h : shards[i].hosts) {
+        hosts.emplace_back(h.name);
+      }
+
+      expr->addPart(group_by_copy.get(), hosts);
+    //}
+  }
+  
+  return std::move(expr);
 }
 
 Vector<Scheduler::PipelinedQueryTree> Scheduler::pipelineExpression(
