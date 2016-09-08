@@ -21,38 +21,58 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#pragma once
-#include <string>
-#include <vector>
-#include "eventql/eventql.h"
-#include "eventql/util/return_code.h"
-#include "eventql/util/util/binarymessagewriter.h"
-#include "eventql/transport/native/native_connection.h"
-#include "eventql/sql/svalue.h"
+#include "eventql/transport/native/frames/rpc.h"
 
 namespace eventql {
 namespace native_transport {
 
-class RPCFrame {
-public:
 
-  RPCFrame();
+RPCFrame::RPCFrame() : flags_(0) {};
 
-  void setMethod(const std::string& method);
-  void setContentType(const std::string& content_type);
-  void setDatabase(const std::string& database);
-  void setBody(const std::string& body);
+void RPCFrame::setMethod(const std::string& method) {
+  method_ = method;
+}
 
-  void writeToString(std::string* str, bool header = true);
-  void clear();
+void RPCFrame::setContentType(const std::string& content_type) {
+  content_type_ = content_type;
+  flags_ |= EVQL_RPC_HASCTYPE;
+}
 
-protected:
-  uint64_t flags_;
-  std::string method_;
-  std::string content_type_;
-  std::string database_;
-  std::string body_;
-};
+void RPCFrame::setDatabase(const std::string& database) {
+  database_ = database;
+  flags_ |= EVQL_RPC_SWITCHDB;
+}
+
+void RPCFrame::setBody(const std::string& body) {
+  body_ = body;
+}
+
+void RPCFrame::writeToString(std::string* str, bool header /*= true*/) {
+  util::BinaryMessageWriter writer;
+
+  if (header) {
+    writer.appendNUInt16(EVQL_OP_HELLO);
+    writer.appendNUInt16(0); // flags
+    writer.appendNUInt32(0); // frame size
+  }
+
+  writer.appendVarUInt(flags_);
+  writer.appendLenencString(method_);
+  if (flags_ & EVQL_RPC_HASCTYPE) {
+    writer.appendLenencString(content_type_);
+  }
+  if (flags_ & EVQL_RPC_SWITCHDB) {
+    writer.appendLenencString(database_);
+  }
+  writer.appendLenencString(body_);
+
+  if (header) {
+    writer.updateNUInt32(4, writer.size() - 8); // update frame size
+  }
+
+  *str = std::string((const char*) writer.data(), writer.size());
+}
 
 } // namespace native_transport
 } // namespace eventql
+
