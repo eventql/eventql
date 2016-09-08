@@ -66,7 +66,7 @@ protected:
   };
 
   enum class ConnectionState {
-    CONNECTING, HANDSHAKE, CONNECTED, READY, QUERY, IDLE, CLOSE
+    CONNECTING, HANDSHAKE, CONNECTED, READY, QUERY, CLOSE
   };
 
   struct Connection {
@@ -90,8 +90,14 @@ protected:
       const char* payload,
       size_t payload_size);
 
-  ReturnCode handleReady(Connection* connection);
   ReturnCode handleHandshake(Connection* connection);
+  ReturnCode handleReady(Connection* connection);
+  ReturnCode handleIdle(Connection* connection);
+  ReturnCode handleResult(
+      Connection* connection,
+      const char* payload,
+      size_t payload_size);
+
   ReturnCode startNextPart();
   ReturnCode startConnection(Task* task);
   ReturnCode failPart(Task* task);

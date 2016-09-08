@@ -34,6 +34,7 @@
 #include <fcntl.h>
 #include "eventql/util/logging.h"
 #include "eventql/util/wallclock.h"
+#include "eventql/util/util/binarymessagereader.h"
 #include "eventql/transport/native/pipelined_rpc.h"
 #include "eventql/transport/native/frames/hello.h"
 #include "eventql/transport/native/frames/error.h"
@@ -99,6 +100,15 @@ ReturnCode PipelinedRPC::handleFrame(
       }
       break;
 
+    case ConnectionState::QUERY:
+      switch (opcode) {
+        case EVQL_OP_RPC_RESULT:
+          return handleResult(connection, payload, payload_size);
+        default:
+          return ReturnCode::error("ERUNTIME", "unexpected opcode");
+      }
+      break;
+
     default:
       break;
 
@@ -114,10 +124,36 @@ ReturnCode PipelinedRPC::handleReady(Connection* connection) {
   return ReturnCode::success();
 }
 
+ReturnCode PipelinedRPC::handleResult(
+    Connection* connection,
+    const char* payload,
+    size_t payload_size) {
+  logDebug("evqld", "Received RPC result from $0", connection->host);
+
+  util::BinaryMessageReader frame_reader(payload, payload_size);
+  auto flags = frame_reader.readVarUInt();
+  auto body_len = frame_reader.readVarUInt();
+  auto body = frame_reader.readString(body_len);
+
+  if (flags & EVQL_RPC_RESULT_COMPLETE) {
+    auto task = connection->task;
+    completePart(task);
+    connection->task = nullptr;
+    return handleIdle(connection);
+  } else {
+    return ReturnCode::success();
+  }
+}
+
 ReturnCode PipelinedRPC::handleHandshake(Connection* connection) {
   connection->state = ConnectionState::HANDSHAKE;
   native_transport::HelloFrame f_hello;
   f_hello.writeToString(&connection->write_buf);
+  return ReturnCode::success();
+}
+
+ReturnCode PipelinedRPC::handleIdle(Connection* connection) {
+  connection->state = ConnectionState::CLOSE;
   return ReturnCode::success();
 }
 
@@ -412,9 +448,7 @@ ReturnCode PipelinedRPC::failPart(Task* task) {
     }
   }
 
-  delete task;
-  ++num_tasks_complete_;
-  --num_tasks_running_;
+  completePart(task);
 
   auto tolerate_failures = true;
   if (tolerate_failures) {
@@ -422,6 +456,12 @@ ReturnCode PipelinedRPC::failPart(Task* task) {
   } else {
     return ReturnCode::error("ERUNTIME", "aggregation failed");
   }
+}
+
+void PipelinedRPC::completePart(Task* task) {
+  delete task;
+  ++num_tasks_complete_;
+  --num_tasks_running_;
 }
 
 ReturnCode PipelinedRPC::startConnection(Task* task) {
