@@ -836,6 +836,8 @@ EVQL_CORE_SOURCES_ = \
     eventql/transport/native/frames/hello.h \
     eventql/transport/native/frames/rpc.cc \
     eventql/transport/native/frames/rpc.h \
+    eventql/transport/native/frames/error.cc \
+    eventql/transport/native/frames/error.h \
     eventql/db/table_ref.cc \
     eventql/db/table_ref.h \
     eventql/db/table.cc \

@@ -193,6 +193,16 @@ ReturnCode performOperation_QUERY(
   return ReturnCode::success();
 }
 
+ReturnCode performOperation_RPC(
+    Database* database,
+    NativeConnection* conn,
+    const std::string& payload) {
+  auto session = database->getSession();
+  auto dbctx = session->getDatabaseContext();
+
+  return sendError(conn, "blah");
+}
+
 ReturnCode performOperation(
     Database* database,
     NativeConnection* conn,
@@ -203,6 +213,8 @@ ReturnCode performOperation(
   switch (opcode) {
     case EVQL_OP_QUERY:
       return performOperation_QUERY(database, conn, payload);
+    case EVQL_OP_RPC:
+        return performOperation_RPC(database, conn, payload);
     default:
       conn->close();
       return ReturnCode::error("ERUNTIME", "invalid opcode");

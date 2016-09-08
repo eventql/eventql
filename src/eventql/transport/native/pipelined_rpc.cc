@@ -36,6 +36,7 @@
 #include "eventql/util/wallclock.h"
 #include "eventql/transport/native/pipelined_rpc.h"
 #include "eventql/transport/native/frames/hello.h"
+#include "eventql/transport/native/frames/error.h"
 
 namespace eventql {
 namespace native_transport {
@@ -80,6 +81,12 @@ ReturnCode PipelinedRPC::handleFrame(
     uint16_t flags,
     const char* payload,
     size_t payload_size) {
+  if (opcode == EVQL_OP_ERROR) {
+    ErrorFrame error;
+    error.parseFrom(payload, payload_size);
+    return ReturnCode::error("ERUNTIME", error.getError());
+  }
+
   switch (connection->state) {
 
     case ConnectionState::HANDSHAKE:
@@ -274,6 +281,8 @@ ReturnCode PipelinedRPC::performRead(Connection* connection) {
 
     if (ret > 0) {
       connection->read_buf.resize(begin + ret);
+    } else {
+      connection->read_buf.resize(begin);
     }
   }
 
