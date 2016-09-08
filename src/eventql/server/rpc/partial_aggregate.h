@@ -41,6 +41,8 @@ public:
 
   ReturnCode execute();
 
+  void writeResultTo(std::string* result);
+
   void clear();
 
 protected:

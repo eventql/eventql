@@ -28,6 +28,7 @@
 #include "eventql/eventql.h"
 #include "eventql/util/return_code.h"
 #include "eventql/sql/svalue.h"
+#include "eventql/transport/native/native_connection.h"
 
 namespace eventql {
 namespace native_transport {
@@ -39,6 +40,8 @@ public:
 
   void setBody(std::string body);
 
+  void setBody(const char* data, size_t len);
+
   void setIsComplete(bool is_complete);
 
   const std::string& getBody() const;
@@ -46,6 +49,8 @@ public:
   std::string& getBody();
 
   bool getIsComplete();
+
+  ReturnCode writeTo(NativeConnection* conn);
 
 protected:
   uint64_t flags_;

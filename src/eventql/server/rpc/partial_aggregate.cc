@@ -57,6 +57,10 @@ ReturnCode PartialAggregationOperation::execute() {
   return ReturnCode::success();
 }
 
+void PartialAggregationOperation::writeResultTo(std::string* result) {
+  *result = "blah";
+}
+
 } // namespace rpc
 } // namespace eventql
 

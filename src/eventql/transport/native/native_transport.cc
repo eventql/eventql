@@ -24,6 +24,7 @@
 #include "eventql/transport/native/native_transport.h"
 #include "eventql/transport/native/native_connection.h"
 #include "eventql/transport/native/query_result_frame.h"
+#include "eventql/transport/native/frames/rpc_result.h"
 #include "eventql/util/logging.h"
 #include "eventql/util/util/binarymessagereader.h"
 #include "eventql/server/session.h"
@@ -125,15 +126,22 @@ ReturnCode performOperation_QUERY(
 
         if (r_frame.getRowCount() > q_maxrows ||
             r_frame.getRowBytes() > NativeConnection::kMaxFrameSizeSoft) {
-          r_frame.writeTo(conn);
+          {
+            auto rc = r_frame.writeTo(conn);
+            if (!rc.isSuccess()) {
+              return rc;
+            }
+          }
           r_frame.clear();
 
           /* wait for discard or continue */
           uint16_t n_opcode;
           std::string n_payload;
-          auto rc = conn->recvFrame(&n_opcode, &n_payload);
-          if (!rc.isSuccess()) {
-            return rc;
+          {
+            auto rc = conn->recvFrame(&n_opcode, &n_payload);
+            if (!rc.isSuccess()) {
+              return rc;
+            }
           }
 
           bool cont = true;
@@ -194,6 +202,8 @@ ReturnCode performOperation_QUERY(
   return ReturnCode::success();
 }
 
+static constexpr size_t kRPCResultChunkSize = 4000000;
+
 ReturnCode performOperation_RPC(
     Database* database,
     NativeConnection* conn,
@@ -202,7 +212,30 @@ ReturnCode performOperation_RPC(
   rpc.parseFrom(payload.data(), payload.size());
   auto rc = rpc.execute();
   if (rc.isSuccess()) {
-    return sendError(conn, "success ;)");
+    std::string result;
+    rpc.writeResultTo(&result);
+    const char* result_begin = &*result.begin();
+    const char* result_end = &*result.end();
+    while (result_begin != result_end) {
+      const char* chunk_end;
+      if (result_end - result_begin < kRPCResultChunkSize) {
+        chunk_end = result_end;
+      } else {
+        chunk_end = result_begin + kRPCResultChunkSize;
+      }
+
+      RPCResultFrame result_frame;
+      result_frame.setBody(result_begin, chunk_end - result_begin);
+      result_frame.setIsComplete(chunk_end == result_end);
+      auto rc = result_frame.writeTo(conn);
+      if (!rc.isSuccess()) {
+        return rc;
+      }
+
+      result_begin = chunk_end;
+    }
+
+    return ReturnCode::success();
   } else {
     return sendError(conn, rc.getMessage());
   }

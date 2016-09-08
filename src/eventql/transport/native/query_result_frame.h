@@ -45,7 +45,7 @@ public:
   void setIsLast(bool is_last);
   void setHasPendingStatement(bool has_pending_stmt);
 
-  void writeTo(NativeConnection* conn);
+  ReturnCode writeTo(NativeConnection* conn);
   void clear();
 
 protected:
