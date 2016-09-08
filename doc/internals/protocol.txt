@@ -17,7 +17,7 @@ Table of Contents
     6.1 S2C Messages
       6.1.1 HELLO
       6.1.2 PING
-      6.1.3 PONG
+      6.1.3 HEARTBEAT
       6.1.4 ERROR
       6.1.5 READY
       6.1.6 BYE
@@ -27,6 +27,8 @@ Table of Contents
       6.1.10 QUERY_DISCARD
       6.1.11 QUERY_PROGRESS
       6.1.12 QUERY_NEXT
+      6.1.13 RPC
+      6.1.14 RPC_RESULT
     6.2 S2S Messages
 
 1. Preface
@@ -120,7 +122,7 @@ Binary Protocols.
   A 16-bit big-endian integer that distinguishes the type of message:
     0x5e00   HELLO
     0x0001   PING
-    0x0002   PONG
+    0x0002   HEARTBEAT
     0x0003   ERROR
     0x0004   READY
     0x0005   BYE
@@ -130,6 +132,8 @@ Binary Protocols.
     0x0009   QUERY_DISCARD
     0x0010   QUERY_PROGRESS
     0x0011   QUERY_NEXT
+    0x0012   RPC
+    0x0013   RPC_RESULT
 
   Messages are described in Section 6.
 
@@ -200,8 +204,10 @@ Binary Protocols.
                    rows as possible should be returned in the first response
                    frame
 
-    flags          0x01 ENABLE_PROGRESS - Send progress events
-                   0x02 SWITCH_DATABASE - Switch database
+    flags          0x01 QUERY_SWITCHDB - Switch database
+                   0x02 QUERY_MULTISTMT - Allow multiple result sets
+                   0x04 QUERY_PROGRESS - Send progress frames
+                   0x08 QUERY_NOSTATS - Omit stats in query result
 
     query          The zero-terminated query string
 
@@ -252,13 +258,19 @@ Binary Protocols.
     lenencstr*     data
 
   Fields:
-    flags          0x01 EVQL_QUERY_RESULT_COMPLETE - This is the last QUERY_RESULT event
-
-    FIXME
+    flags          0x01 QUERY_RESULT_COMPLETE - This is the last result frame
+                   0x02 QUERY_RESULT_HASSTATS - This result frame includes stats
+                   0x04 QUERY_RESULT_HASCOLNAMES - This frame includes colnames
+                   0x08 QUERY_RESULT_PENDINGSTMT - This is NOT the last statement
 
   Response:
-    If the COMPLETE flag is set, no response should be sent. If the flag is not
-    set the client must respond with QUERY_CONTINUE or QUERY_DISCARD.
+    If the COMPLETE flag is not set, the client must respond with
+    QUERY_CONTINUE or QUERY_DISCARD.
+
+    If the COMPLETE flag is set, but the PENDINGSTMT flag is also set, the
+    client must respond with QUERY_NEXT or QUERY_DISCARD.
+
+    Otherwise, the client must not send any response.
 
 
 6.9 QUERY_CONTINUE
@@ -315,3 +327,64 @@ Binary Protocols.
 
   Response:
     <no response>
+
+
+6.13 RPC
+
+  The RPC message initiates a new rpc request and is only sent by the client.
+  A RPC message must not be sent while another request is still running.
+
+  Payload:
+    lenencint      flags
+    lenencstr      method
+    lenencstr      content_type    | if flags 0x01 HASCTYPE is set
+    lenencstr      database        | if flags 0x02 SWITCHDB is set
+    lenencstr      body
+
+  Fields:
+    flags          0x01 RPC_HASCTYPE - Content type field is set
+                   0x02 RPC_SWITCHDB - Switch database
+    method         The name of the rpc method to call
+    content_type   The content type of the request body
+    database       Switch the database before executing the RPC
+    body           The request body
+
+
+  Response:
+    After sending a RPC message, the client should expect to receive one of
+    these response messages:
+      - ERROR
+      - HEARTBEAT
+      - RPC_RESULT
+
+    The request is considered completed once any one of these conditions is
+    satisfied:
+      - The server has responded with a ERROR message
+      - The server has responded with a RPC_RESULT message with the COMPLETE
+        flag set
+
+    After the request is complete, the server will not send any further messages.
+
+
+6.14 RPC_RESULT
+
+  The RPC_RESULT message contains a the result of a successful RPC call. Results
+  may be paged, i.e. depending on the result size the rpc result will be split
+  into many RPC_RESULT frames.
+
+  After receiving a RPC_RESULT frame, the client must check if the COMPLETED
+  flag is set. If the flag is set, the rpc can be considered complete and the
+  client should not expect any further frames from the server. If the flag is
+  not set, the client must wait for the next RPC_RESULT frame.
+
+  Payload:
+    lenencint      flags
+    lenencstr      body
+
+  Fields:
+    flags          0x01 RPC_RESULT_COMPLETE - This is the last RPC_RESULT event
+    body           The (Nth chunk) of the rpc result
+
+  Response:
+    No response.
+
