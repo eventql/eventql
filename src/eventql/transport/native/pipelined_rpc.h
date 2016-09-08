@@ -28,8 +28,10 @@
 #include "eventql/util/return_code.h"
 #include "eventql/util/buffer.h"
 #include "eventql/config/config_directory.h"
+#include "eventql/transport/native/frames/rpc.h"
 
 namespace eventql {
+namespace native_transport {
 
 class PipelinedRPC {
 public:
@@ -41,11 +43,8 @@ public:
 
   ~PipelinedRPC();
 
-  void addLocalPart(
-      const csql::GroupByNode* query);
-
-  void addRemotePart(
-      const csql::GroupByNode* query,
+  void addRPC(
+      RPCFrame&& rpc,
       const std::vector<std::string>& hosts);
 
   void setResultCallback(
@@ -56,13 +55,14 @@ public:
 
 protected:
 
-  enum class AggregationPartState {
+  enum class TaskState {
     INIT, RUNNING, RETRY, DONE
   };
 
-  struct AggregationPart {
-    AggregationPartState state;
+  struct Task {
+    TaskState state;
     std::vector<std::string> hosts;
+    RPCFrame rpc;
   };
 
   enum class ConnectionState {
@@ -80,7 +80,7 @@ protected:
     bool needs_read;
     uint64_t read_timeout;
     uint64_t write_timeout;
-    AggregationPart* part;
+    Task* task;
   };
 
   ReturnCode handleFrame(
@@ -93,25 +93,26 @@ protected:
   ReturnCode handleReady(Connection* connection);
   ReturnCode handleHandshake(Connection* connection);
   ReturnCode startNextPart();
-  ReturnCode startConnection(AggregationPart* part);
-  ReturnCode failPart(AggregationPart* part);
-  void completePart(AggregationPart* part);
+  ReturnCode startConnection(Task* task);
+  ReturnCode failPart(Task* task);
+  void completePart(Task* task);
   ReturnCode performWrite(Connection* connection);
   ReturnCode performRead(Connection* connection);
   void closeConnection(Connection* connection);
 
-  std::deque<AggregationPart*> runq_;
+  std::deque<Task*> runq_;
   std::list<Connection> connections_;
   ConfigDirectory* config_;
   std::map<std::string, size_t> connections_per_host_;
   size_t max_concurrent_tasks_;
   size_t max_concurrent_tasks_per_host_;
-  size_t num_parts_;
-  size_t num_parts_complete_;
-  size_t num_parts_running_;
+  size_t num_tasks_;
+  size_t num_tasks_complete_;
+  size_t num_tasks_running_;
   size_t io_timeout_;
   size_t idle_timeout_;
 };
 
+} // namespace native_transport
 } // namespace eventql
 

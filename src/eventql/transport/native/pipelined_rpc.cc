@@ -38,6 +38,7 @@
 #include "eventql/transport/native/frames/hello.h"
 
 namespace eventql {
+namespace native_transport {
 
 PipelinedRPC::PipelinedRPC(
     ConfigDirectory* config,
@@ -46,9 +47,9 @@ PipelinedRPC::PipelinedRPC(
     config_(config),
     max_concurrent_tasks_(max_concurrent_tasks),
     max_concurrent_tasks_per_host_(max_concurrent_tasks_per_host),
-    num_parts_(0),
-    num_parts_complete_(0),
-    num_parts_running_(0),
+    num_tasks_(0),
+    num_tasks_complete_(0),
+    num_tasks_running_(0),
     io_timeout_(kMicrosPerSecond),
     idle_timeout_(kMicrosPerSecond) {}
 
@@ -56,15 +57,16 @@ PipelinedRPC::~PipelinedRPC() {
   shutdown();
 }
 
-void PipelinedRPC::addRemotePart(
-    const csql::GroupByNode* query,
+void PipelinedRPC::addRPC(
+    RPCFrame&& rpc,
     const std::vector<std::string>& hosts) {
   assert(hosts.size() > 0);
-  auto part = new AggregationPart();
-  part->state = AggregationPartState::INIT;
-  part->hosts = hosts;
-  runq_.push_back(part);
-  ++num_parts_;
+  auto task = new Task();
+  task->state = TaskState::INIT;
+  task->hosts = hosts;
+  task->rpc = std::move(rpc);
+  runq_.push_back(task);
+  ++num_tasks_;
 }
 
 void PipelinedRPC::setResultCallback(
@@ -99,7 +101,7 @@ ReturnCode PipelinedRPC::handleFrame(
 }
 
 ReturnCode PipelinedRPC::handleReady(Connection* connection) {
-  logDebug("evqld", "Executing partial aggregate on $0", connection->host);
+  logDebug("evqld", "Executing RPC on $0", connection->host);
   return ReturnCode::success();
 }
 
@@ -112,8 +114,8 @@ ReturnCode PipelinedRPC::handleHandshake(Connection* connection) {
 
 ReturnCode PipelinedRPC::execute() {
   fd_set op_read, op_write, op_error;
-  while (num_parts_complete_ < num_parts_) {
-    for (size_t i = num_parts_running_; i < max_concurrent_tasks_; ++i) {
+  while (num_tasks_complete_ < num_tasks_) {
+    for (size_t i = num_tasks_running_; i < max_concurrent_tasks_; ++i) {
       auto rc = startNextPart();
       if (!rc.isSuccess()) {
         shutdown();
@@ -167,10 +169,10 @@ ReturnCode PipelinedRPC::execute() {
           (conn->write_timeout > 0 && conn->write_timeout <= now)) {
         logDebug("evqld", "Client connection timed out");
 
-        auto part = conn->part;
+        auto task = conn->task;
         closeConnection(&*conn);
         conn = connections_.erase(conn);
-        auto rc = failPart(part);
+        auto rc = failPart(task);
         if (rc.isSuccess()) {
           continue;
         } else {
@@ -185,10 +187,10 @@ ReturnCode PipelinedRPC::execute() {
         auto rc = performRead(&*conn);
         if (!rc.isSuccess()) {
           logDebug("evqld", "Client error: $0", rc.getMessage());
-          auto part = conn->part;
+          auto task = conn->task;
           closeConnection(&*conn);
           conn = connections_.erase(conn);
-          rc = failPart(part);
+          rc = failPart(task);
           if (rc.isSuccess()) {
             continue;
           } else {
@@ -210,10 +212,10 @@ ReturnCode PipelinedRPC::execute() {
         auto rc = performWrite(&*conn);
         if (!rc.isSuccess()) {
           logDebug("evqld", "Client error: $0", rc.getMessage());
-          auto part = conn->part;
+          auto task = conn->task;
           closeConnection(&*conn);
           conn = connections_.erase(conn);
-          rc = failPart(part);
+          rc = failPart(task);
           if (rc.isSuccess()) {
             continue;
           } else {
@@ -362,36 +364,36 @@ ReturnCode PipelinedRPC::startNextPart() {
   }
 
   assert(
-      (*iter)->state == AggregationPartState::INIT ||
-      (*iter)->state == AggregationPartState::RETRY);
+      (*iter)->state == TaskState::INIT ||
+      (*iter)->state == TaskState::RETRY);
 
-  auto part = *iter;
+  auto task = *iter;
   runq_.erase(iter);
-  ++num_parts_running_;
+  ++num_tasks_running_;
 
-  part->state = AggregationPartState::RUNNING;
-  auto rc = startConnection(part);
+  task->state = TaskState::RUNNING;
+  auto rc = startConnection(task);
   if (!rc.isSuccess()) {
     logDebug("evqld", "Client error: $0", rc.getMessage());
-    rc = failPart(part);
+    rc = failPart(task);
   }
 
   return rc;
 }
 
-ReturnCode PipelinedRPC::failPart(AggregationPart* part) {
-  while (part->hosts.size() > 1) {
-    part->hosts.erase(part->hosts.begin());
-    part->state = AggregationPartState::RETRY;
+ReturnCode PipelinedRPC::failPart(Task* task) {
+  while (task->hosts.size() > 1) {
+    task->hosts.erase(task->hosts.begin());
+    task->state = TaskState::RETRY;
 
-    const auto& part_host = part->hosts.front();
-    if (connections_per_host_[part_host] >= max_concurrent_tasks_per_host_) {
-      --num_parts_running_;
-      runq_.emplace_back(part);
+    const auto& task_host = task->hosts.front();
+    if (connections_per_host_[task_host] >= max_concurrent_tasks_per_host_) {
+      --num_tasks_running_;
+      runq_.emplace_back(task);
       return ReturnCode::success();
     }
 
-    auto rc = startConnection(part);
+    auto rc = startConnection(task);
     if (rc.isSuccess()) {
       return rc;
     } else {
@@ -399,9 +401,9 @@ ReturnCode PipelinedRPC::failPart(AggregationPart* part) {
     }
   }
 
-  delete part;
-  ++num_parts_complete_;
-  --num_parts_running_;
+  delete task;
+  ++num_tasks_complete_;
+  --num_tasks_running_;
 
   auto tolerate_failures = true;
   if (tolerate_failures) {
@@ -411,10 +413,10 @@ ReturnCode PipelinedRPC::failPart(AggregationPart* part) {
   }
 }
 
-ReturnCode PipelinedRPC::startConnection(AggregationPart* part) {
+ReturnCode PipelinedRPC::startConnection(Task* task) {
   Connection connection;
-  connection.host = part->hosts[0];
-  connection.part = part;
+  connection.host = task->hosts[0];
+  connection.task = task;
   connection.write_buf_pos = 0;
   connection.state = ConnectionState::CONNECTING;
   connection.write_timeout = MonotonicClock::now() + io_timeout_;
@@ -470,5 +472,6 @@ void PipelinedRPC::closeConnection(Connection* connection) {
   ::close(connection->fd);
 }
 
+} // namespace native_transport
 } // namespace eventql
 
