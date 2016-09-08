@@ -28,15 +28,80 @@
 #include "eventql/eventql.h"
 #include "eventql/util/application.h"
 #include "eventql/util/logging.h"
+#include "eventql/util/return_code.h"
 #include "eventql/util/cli/CLI.h"
 #include "eventql/util/io/inputstream.h"
 #include "eventql/util/cli/term.h"
 #include "eventql/util/cli/flagparser.h"
+#include "eventql/util/thread/threadpool.h"
 #include "eventql/cli/cli_config.h"
 
+ReturnCode sendQuery(
+    const String& query,
+    const String& qry_db,
+    evql_client_t* client) {
+  uint64_t qry_flags = 0;
+  if (!qry_db.empty()) {
+    qry_flags |= EVQL_QUERY_SWITCHDB;
+  }
+
+  int rc = evql_query(client, query.c_str(), qry_db.c_str(), qry_flags);
+
+  //csql::ResultList results;
+  //std::vector<std::string> result_columns;
+  size_t result_ncols;
+  if (rc == 0) {
+    rc = evql_num_columns(client, &result_ncols);
+  }
+
+  //for (int i = 0; rc == 0 && i < result_ncols; ++i) {
+  //  const char* colname;
+  //  size_t colname_len;
+  //  rc = evql_column_name(client, i, &colname, &colname_len);
+  //  if (rc == -1) {
+  //    break;
+  //  }
+
+  //  result_columns.emplace_back(colname, colname_len);
+  //}
+
+  //if (rc == 0) {
+  //  results.addHeader(result_columns);
+  //}
+
+  while (rc >= 0) {
+    const char** fields;
+    size_t* field_lens;
+    rc = evql_fetch_row(client, &fields, &field_lens);
+    if (rc < 1) {
+      break;
+    }
+
+    std::vector<std::string> row;
+    for (int i = 0; i < result_ncols; ++i) {
+      row.emplace_back(fields[i], field_lens[i]);
+      logInfo("evqlbenchmark", "got row $0", fields[i]);
+    }
+
+    //results.addRow(row);
+  }
+
+  evql_client_releasebuffers(client);
+
+  //if (is_tty) {
+  //  stderr_os->eraseLine();
+  //  stderr_os->print("\r");
+  //}
+
+  if (rc == -1) {
+    return ReturnCode::error("EIOERROR", evql_client_geterror(client));
+  } else {
+    return ReturnCode::success();
+  }
+
+}
 
 int main(int argc, const char** argv) {
-  
   cli::FlagParser flags;
 
   flags.defineFlag(
@@ -83,6 +148,15 @@ int main(int argc, const char** argv) {
       NULL,
       "database",
       "<db>");
+
+  flags.defineFlag(
+      "query",
+      cli::FlagParser::T_STRING,
+      true,
+      "q",
+      NULL,
+      "query str",
+      "<query>");
 
   flags.defineFlag(
       "threads",
@@ -163,12 +237,12 @@ int main(int argc, const char** argv) {
   }
 
   if (flags.isSet("host")) {
-    cfg_builder.setProperty("evqlbenchmark", "host", flags.getString("host"));
+    cfg_builder.setProperty("evql", "host", flags.getString("host"));
   }
 
   if (flags.isSet("port")) {
     cfg_builder.setProperty(
-        "evqlbenchmark",
+        "evql",
         "port",
         StringUtil::toString(flags.getInt("port")));
   }
@@ -186,16 +260,47 @@ int main(int argc, const char** argv) {
     return 0;
   }
 
-  auto rc = evql_client_connect(
-      client,
-      cfg.getHost().c_str(),
-      cfg.getPort(),
-      0);
+  {
+    auto rc = evql_client_connect(
+        client,
+        cfg.getHost().c_str(),
+        cfg.getPort(),
+        0);
 
-  logInfo("evqlbenchmark", "connecting to eventql client on $0:$1", cfg.getHost(), cfg.getPort());
-  if (rc < 0) {
-    logFatal("evqlbenchmark", "can't connect to eventql client: $0", evql_client_geterror(client));
-    return 0;
+    logInfo("evqlbenchmark", "connecting to eventql client on $0:$1", cfg.getHost(), cfg.getPort());
+    if (rc < 0) {
+      logFatal("evqlbenchmark", "can't connect to eventql client: $0", evql_client_geterror(client));
+      return 0;
+    }
   }
+
+  String qry_db;
+  if (flags.isSet("database")) {
+    qry_db = flags.getString("database");
+  }
+
+  auto qry_str = flags.getString("query");
+
+  auto errors = 0;
+  auto num_requests = 0;
+
+
+  //thread::ThreadPoolOptions thread_opts;
+  //auto max_concurrent_threads = 5; //FIXME get from flags
+  //auto tpool = new thread::ThreadPool(thread_opts, max_concurrent_threads);
+  //tpool->run([qry_db, qry_str, client] {
+    iputs("run", 1);
+    /* send query */
+
+    auto rc = sendQuery(qry_str, qry_db, client);
+    if (!rc.isSuccess()) {
+      logFatal("evqlbenchmark", "executing query failed: $0", rc.getMessage());
+      evql_client_close(client);
+    }
+
+  //});
+
+
+  evql_client_close(client);
   return 1;
 }
