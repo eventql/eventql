@@ -25,9 +25,11 @@
 #include <unistd.h>
 #include <signal.h>
 #include <poll.h>
+#include <thread>
 #include "eventql/eventql.h"
 #include "eventql/util/application.h"
 #include "eventql/util/logging.h"
+#include "eventql/util/UnixTime.h"
 #include "eventql/util/return_code.h"
 #include "eventql/util/cli/CLI.h"
 #include "eventql/util/io/inputstream.h"
@@ -47,27 +49,10 @@ ReturnCode sendQuery(
 
   int rc = evql_query(client, query.c_str(), qry_db.c_str(), qry_flags);
 
-  //csql::ResultList results;
-  //std::vector<std::string> result_columns;
   size_t result_ncols;
   if (rc == 0) {
     rc = evql_num_columns(client, &result_ncols);
   }
-
-  //for (int i = 0; rc == 0 && i < result_ncols; ++i) {
-  //  const char* colname;
-  //  size_t colname_len;
-  //  rc = evql_column_name(client, i, &colname, &colname_len);
-  //  if (rc == -1) {
-  //    break;
-  //  }
-
-  //  result_columns.emplace_back(colname, colname_len);
-  //}
-
-  //if (rc == 0) {
-  //  results.addHeader(result_columns);
-  //}
 
   while (rc >= 0) {
     const char** fields;
@@ -76,22 +61,9 @@ ReturnCode sendQuery(
     if (rc < 1) {
       break;
     }
-
-    std::vector<std::string> row;
-    for (int i = 0; i < result_ncols; ++i) {
-      row.emplace_back(fields[i], field_lens[i]);
-      logInfo("evqlbenchmark", "got row $0", fields[i]);
-    }
-
-    //results.addRow(row);
   }
 
   evql_client_releasebuffers(client);
-
-  //if (is_tty) {
-  //  stderr_os->eraseLine();
-  //  stderr_os->print("\r");
-  //}
 
   if (rc == -1) {
     return ReturnCode::error("EIOERROR", evql_client_geterror(client));
@@ -163,18 +135,27 @@ int main(int argc, const char** argv) {
       cli::FlagParser::T_INTEGER,
       false,
       "t",
-      NULL,
+      "10",
       "number of threads",
       "<threads>");
 
   flags.defineFlag(
-      "requests",
+      "rate",
       cli::FlagParser::T_INTEGER,
       false,
       "r",
+      "1",
+      "number of requests per second",
+      "<rate>");
+
+  flags.defineFlag(
+      "max",
+      cli::FlagParser::T_INTEGER,
+      false,
+      "n",
       NULL,
-      "number of requests",
-      "<requests>");
+      "number of requests per second",
+      "<rate>");
 
   flags.defineFlag(
       "loglevel",
@@ -253,26 +234,6 @@ int main(int argc, const char** argv) {
 
   eventql::cli::CLIConfig cfg(cfg_builder.getConfig());
 
-  /* connect to eventql client */
-  auto client = evql_client_init();
-  if (!client) {
-    logFatal("evqlbenchmark", "can't initialize eventql client");
-    return 0;
-  }
-
-  {
-    auto rc = evql_client_connect(
-        client,
-        cfg.getHost().c_str(),
-        cfg.getPort(),
-        0);
-
-    logInfo("evqlbenchmark", "connecting to eventql client on $0:$1", cfg.getHost(), cfg.getPort());
-    if (rc < 0) {
-      logFatal("evqlbenchmark", "can't connect to eventql client: $0", evql_client_geterror(client));
-      return 0;
-    }
-  }
 
   String qry_db;
   if (flags.isSet("database")) {
@@ -280,27 +241,89 @@ int main(int argc, const char** argv) {
   }
 
   auto qry_str = flags.getString("query");
+  auto rate = flags.getInt("rate");
+  auto num_threads = flags.getInt("threads");
+  size_t max_requests;
+  if (flags.isSet("max")) {
+    max_requests = flags.getInt("max");
+  }
 
   auto errors = 0;
-  auto num_requests = 0;
+  auto requests_sent = 0;
+  Vector<std::thread> threads;
+  for (size_t i = 0; i < num_threads; ++i) {
+    threads.emplace_back(std::thread([&] () {
+      /* connect to eventql client */
+      auto client = evql_client_init();
+      if (!client) {
+        logFatal("evqlbenchmark", "can't initialize eventql client");
+        return 0;
+      }
 
+      {
+        auto rc = evql_client_connect(
+            client,
+            cfg.getHost().c_str(),
+            cfg.getPort(),
+            0);
 
-  //thread::ThreadPoolOptions thread_opts;
-  //auto max_concurrent_threads = 5; //FIXME get from flags
-  //auto tpool = new thread::ThreadPool(thread_opts, max_concurrent_threads);
-  //tpool->run([qry_db, qry_str, client] {
-    iputs("run", 1);
-    /* send query */
+        logInfo("evqlbenchmark", "connecting to eventql client on $0:$1", cfg.getHost(), cfg.getPort());
+        if (rc < 0) {
+          logFatal("evqlbenchmark", "can't connect to eventql client: $0", evql_client_geterror(client));
+          return 0;
+        }
+      }
+ //     while (!stop) { //lock?
+      auto rc = sendQuery(qry_str, qry_db, client);
+      if (!rc.isSuccess()) {
+        logFatal("evqlbenchmark", "executing query failed: $0", rc.getMessage());
+        ++errors;
+      } else {
+        ++requests_sent;
+      }
 
-    auto rc = sendQuery(qry_str, qry_db, client);
-    if (!rc.isSuccess()) {
-      logFatal("evqlbenchmark", "executing query failed: $0", rc.getMessage());
-      evql_client_close(client);
-    }
+    //    if (errors > 10 || (max_requests && max_requests > requests_sent)) {
+    //      iputs("stop", 1);
+    //      stop = true;
+    //    }
+    //  }
+    }));
+  }
 
-  //});
+  for (auto& t : threads) {
+    t.join();
+  }
 
+  //UnixTime starttime;
+  //for (size_t i = 0; i < max_requests; ++i) {
+  //  auto rc = sendQuery(qry_str, qry_db, client);
+  //  if (!rc.isSuccess()) {
+  //    logFatal("evqlbenchmark", "executing query failed: $0", rc.getMessage());
+  //    ++errors;
+  //  } else {
+  //    ++success;
+  //  }
+  //}
+
+  //for (
+
+  ////thread::ThreadPoolOptions thread_opts;
+  ////auto max_concurrent_threads = 5; //FIXME get from flags
+  ////auto tpool = new thread::ThreadPool(thread_opts, max_concurrent_threads);
+  ////tpool->run([qry_db, qry_str, client] {
+  ////});
+
+  //UnixTime end;
+  //auto duration = end - starttime;
+  //stdout_os->write(StringUtil::format(
+  //  "total   successful    error      milliseconds\n"
+  //  "   $0      $1            $2      $3\n\n",
+  //  errors + success,
+  //  success,
+  //  errors,
+  //  duration.milliseconds()
+  //));
 
   evql_client_close(client);
-  return 1;
+  return 0;
 }
