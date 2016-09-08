@@ -28,6 +28,7 @@
 #include "eventql/util/util/binarymessagereader.h"
 #include "eventql/server/session.h"
 #include "eventql/server/sql_service.h"
+#include "eventql/server/rpc/partial_aggregate.h"
 #include "eventql/sql/runtime/runtime.h"
 #include "eventql/auth/client_auth.h"
 #include <string.h>
@@ -197,10 +198,14 @@ ReturnCode performOperation_RPC(
     Database* database,
     NativeConnection* conn,
     const std::string& payload) {
-  auto session = database->getSession();
-  auto dbctx = session->getDatabaseContext();
-
-  return sendError(conn, "blah");
+  rpc::PartialAggregationOperation rpc(database);
+  rpc.parseFrom(payload.data(), payload.size());
+  auto rc = rpc.execute();
+  if (rc.isSuccess()) {
+    return sendError(conn, "success ;)");
+  } else {
+    return sendError(conn, rc.getMessage());
+  }
 }
 
 ReturnCode performOperation(

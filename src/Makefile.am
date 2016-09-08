@@ -899,6 +899,8 @@ EVQL_CORE_SOURCES_ = \
     eventql/server/sql/table_scan.h \
     eventql/server/listener.cc \
     eventql/server/listener.h \
+    eventql/server/rpc/partial_aggregate.cc \
+    eventql/server/rpc/partial_aggregate.h \
     eventql/transport/http/mapreduce_servlet.cc \
     eventql/transport/http/mapreduce_servlet.h \
     eventql/mapreduce/mapreduce_service.cc \
