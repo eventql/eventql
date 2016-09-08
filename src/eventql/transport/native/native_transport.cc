@@ -210,10 +210,10 @@ ReturnCode performOperation_RPC(
     const std::string& payload) {
   rpc::PartialAggregationOperation rpc(database);
   rpc.parseFrom(payload.data(), payload.size());
-  auto rc = rpc.execute();
+  std::string result;
+  auto os = StringOutputStream::fromString(&result);
+  auto rc = rpc.execute(os.get());
   if (rc.isSuccess()) {
-    std::string result;
-    rpc.writeResultTo(&result);
     const char* result_begin = &*result.begin();
     const char* result_end = &*result.end();
     while (result_begin != result_end) {

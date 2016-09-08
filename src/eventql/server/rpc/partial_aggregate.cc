@@ -46,7 +46,7 @@ ReturnCode PartialAggregationOperation::parseFrom(const char* data, size_t len) 
   return ReturnCode::success();
 }
 
-ReturnCode PartialAggregationOperation::execute() {
+ReturnCode PartialAggregationOperation::execute(OutputStream* os) {
   auto session = static_cast<Session*>(txn_->getUserData());
   auto dbctx = session->getDatabaseContext();
   if (session->getEffectiveNamespace().empty()) {
@@ -55,10 +55,6 @@ ReturnCode PartialAggregationOperation::execute() {
 
   auto qplan = dbctx->sql_runtime->buildQueryPlan(txn_.get(), { qtree_ });
   return ReturnCode::success();
-}
-
-void PartialAggregationOperation::writeResultTo(std::string* result) {
-  *result = "blah";
 }
 
 } // namespace rpc

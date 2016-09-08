@@ -39,9 +39,7 @@ public:
 
   ReturnCode parseFrom(const char* data, size_t len);
 
-  ReturnCode execute();
-
-  void writeResultTo(std::string* result);
+  ReturnCode execute(OutputStream* os);
 
   void clear();
 
