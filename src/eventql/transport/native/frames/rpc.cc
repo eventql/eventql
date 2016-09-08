@@ -34,17 +34,17 @@ ReturnCode RPCFrame::parseFrom(const std::string& payload) {
   util::BinaryMessageReader frame(payload.data(), payload.size());
   auto flags = frame.readVarUInt();
 
-  setMethod(frame.readLenencString());
+  method_ = frame.readLenencString();
 
   if (flags & EVQL_RPC_HASCTYPE) {
-    setContentType(frame.readLenencString());
+    content_type_ = frame.readLenencString();
   }
 
   if (flags & EVQL_RPC_SWITCHDB) {
-    setDatabase(frame.readLenencString());
+    database_ = frame.readLenencString();
   }
 
-  setBody(frame.readLenencString());
+  body_ = frame.readLenencString();
 
   return ReturnCode::success();
 }
