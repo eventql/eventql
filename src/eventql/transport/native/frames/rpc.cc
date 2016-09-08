@@ -22,12 +22,32 @@
  * code of your own applications
  */
 #include "eventql/transport/native/frames/rpc.h"
+#include "eventql/util/util/binarymessagereader.h"
 
 namespace eventql {
 namespace native_transport {
 
 
 RPCFrame::RPCFrame() : flags_(0) {};
+
+ReturnCode RPCFrame::parseFrom(const std::string& payload) {
+  util::BinaryMessageReader frame(payload.data(), payload.size());
+  auto flags = frame.readVarUInt();
+
+  method_ = frame.readLenencString();
+
+  if (flags & EVQL_RPC_HASCTYPE) {
+    content_type_ = frame.readLenencString();
+  }
+
+  if (flags & EVQL_RPC_SWITCHDB) {
+    database_ = frame.readLenencString();
+  }
+
+  body_ = frame.readLenencString();
+
+  return ReturnCode::success();
+}
 
 void RPCFrame::setMethod(const std::string& method) {
   method_ = method;
@@ -41,6 +61,10 @@ void RPCFrame::setContentType(const std::string& content_type) {
 void RPCFrame::setDatabase(const std::string& database) {
   database_ = database;
   flags_ |= EVQL_RPC_SWITCHDB;
+}
+
+const std::string& RPCFrame::getDatabase() const {
+  return database_;
 }
 
 void RPCFrame::setBody(const std::string& body) {

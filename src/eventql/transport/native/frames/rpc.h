@@ -43,6 +43,10 @@ public:
   void setDatabase(const std::string& database);
   void setBody(const std::string& body);
 
+  ReturnCode parseFrom(const std::string& data);
+
+  const std::string& getDatabase() const;
+
   void writeToString(std::string* str, bool header = true);
   void clear();
 

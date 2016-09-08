@@ -25,6 +25,7 @@
 #include "eventql/transport/native/native_connection.h"
 #include "eventql/transport/native/query_result_frame.h"
 #include "eventql/transport/native/frames/rpc_result.h"
+#include "eventql/transport/native/frames/rpc.h"
 #include "eventql/util/logging.h"
 #include "eventql/util/util/binarymessagereader.h"
 #include "eventql/server/session.h"
@@ -208,8 +209,37 @@ ReturnCode performOperation_RPC(
     Database* database,
     NativeConnection* conn,
     const std::string& payload) {
+  /* read from frame */
+  RPCFrame rpc_frame;
+  {
+    auto rc = rpc_frame.parseFrom(payload);
+    if (!rc.isSuccess()) {
+      return rc;
+    }
+  }
+
+  auto session = database->getSession();
+  auto dbctx = session->getDatabaseContext();
+
+  /* switch database */
+  auto q_database = rpc_frame.getDatabase();
+  if (!q_database.empty()) {
+    auto rc = dbctx->client_auth->changeNamespace(session, q_database);
+    if (!rc.isSuccess()) {
+      return sendError(conn, rc.message());
+    }
+  }
+
+  ReturnCode parseFrom(const std::string& data);
   rpc::PartialAggregationOperation rpc(database);
-  rpc.parseFrom(payload.data(), payload.size());
+  {
+    auto rc = rpc.parseFrom(payload.data(), payload.size());
+    if (!rc.isSuccess()) {
+      return rc;
+    }
+  }
+
+  
   std::string result;
   auto os = StringOutputStream::fromString(&result);
   auto rc = rpc.execute(os.get());
