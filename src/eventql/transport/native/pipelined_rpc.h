@@ -55,12 +55,7 @@ public:
 
 protected:
 
-  enum class TaskState {
-    INIT, RUNNING, RETRY, DONE
-  };
-
   struct Task {
-    TaskState state;
     std::vector<std::string> hosts;
     std::string rpc_request;
   };
@@ -98,14 +93,15 @@ protected:
       const char* payload,
       size_t payload_size);
 
-  Task* popNextTask(const std::string* hostname = nullptr);
-  ReturnCode startNextPart();
+  Task* popTask(const std::string* hostname = nullptr);
+  ReturnCode failTask(Task* task);
+  void completeTask(Task* task);
+
+  ReturnCode startNextTask();
   ReturnCode startConnection(Task* task);
-  ReturnCode failPart(Task* task);
-  void completePart(Task* task);
+  void closeConnection(Connection* connection);
   ReturnCode performWrite(Connection* connection);
   ReturnCode performRead(Connection* connection);
-  void closeConnection(Connection* connection);
 
   std::deque<Task*> runq_;
   std::list<Connection> connections_;

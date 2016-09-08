@@ -64,7 +64,6 @@ void PipelinedRPC::addRPC(
     const std::vector<std::string>& hosts) {
   assert(hosts.size() > 0);
   auto task = new Task();
-  task->state = TaskState::INIT;
   task->hosts = hosts;
   rpc.writeToString(&task->rpc_request);
   runq_.push_back(task);
@@ -137,7 +136,7 @@ ReturnCode PipelinedRPC::handleResult(
 
   if (flags & EVQL_RPC_RESULT_COMPLETE) {
     auto task = connection->task;
-    completePart(task);
+    completeTask(task);
     connection->task = nullptr;
     return handleIdle(connection);
   } else {
@@ -153,10 +152,8 @@ ReturnCode PipelinedRPC::handleHandshake(Connection* connection) {
 }
 
 ReturnCode PipelinedRPC::handleIdle(Connection* connection) {
-  auto next_task = popNextTask(&connection->host); // get next task
+  auto next_task = popTask(&connection->host); // get next task
   if (next_task) {
-    ++num_tasks_running_;
-    next_task->state = TaskState::RUNNING;
     connection->state = ConnectionState::QUERY;
     connection->task = next_task;
     connection->write_buf += connection->task->rpc_request;
@@ -171,7 +168,7 @@ ReturnCode PipelinedRPC::execute() {
   fd_set op_read, op_write, op_error;
   while (num_tasks_complete_ < num_tasks_) {
     for (size_t i = num_tasks_running_; i < max_concurrent_tasks_; ++i) {
-      auto rc = startNextPart();
+      auto rc = startNextTask();
       if (!rc.isSuccess()) {
         shutdown();
         return rc;
@@ -227,7 +224,7 @@ ReturnCode PipelinedRPC::execute() {
         auto task = conn->task;
         closeConnection(&*conn);
         conn = connections_.erase(conn);
-        auto rc = failPart(task);
+        auto rc = failTask(task);
         if (rc.isSuccess()) {
           continue;
         } else {
@@ -245,7 +242,7 @@ ReturnCode PipelinedRPC::execute() {
           auto task = conn->task;
           closeConnection(&*conn);
           conn = connections_.erase(conn);
-          rc = failPart(task);
+          rc = failTask(task);
           if (rc.isSuccess()) {
             continue;
           } else {
@@ -270,7 +267,7 @@ ReturnCode PipelinedRPC::execute() {
           auto task = conn->task;
           closeConnection(&*conn);
           conn = connections_.erase(conn);
-          rc = failPart(task);
+          rc = failTask(task);
           if (rc.isSuccess()) {
             continue;
           } else {
@@ -404,25 +401,22 @@ ReturnCode PipelinedRPC::performWrite(Connection* connection) {
   return ReturnCode::success();
 }
 
-ReturnCode PipelinedRPC::startNextPart() {
-  auto task = popNextTask();
+ReturnCode PipelinedRPC::startNextTask() {
+  auto task = popTask();
   if (!task) {
     return ReturnCode::success();
   }
 
-  task->state = TaskState::RUNNING;
-  ++num_tasks_running_;
-
   auto rc = startConnection(task);
   if (!rc.isSuccess()) {
     logDebug("evqld", "Client error: $0", rc.getMessage());
-    rc = failPart(task);
+    rc = failTask(task);
   }
 
   return rc;
 }
 
-PipelinedRPC::Task* PipelinedRPC::popNextTask(
+PipelinedRPC::Task* PipelinedRPC::popTask(
     const std::string* host /* = nullptr */) {
   auto iter = runq_.begin();
 
@@ -445,19 +439,15 @@ PipelinedRPC::Task* PipelinedRPC::popNextTask(
     return nullptr;
   }
 
-  assert(
-      (*iter)->state == TaskState::INIT ||
-      (*iter)->state == TaskState::RETRY);
-
   auto task = *iter;
   runq_.erase(iter);
+  ++num_tasks_running_;
   return task;
 }
 
-ReturnCode PipelinedRPC::failPart(Task* task) {
+ReturnCode PipelinedRPC::failTask(Task* task) {
   while (task->hosts.size() > 1) {
     task->hosts.erase(task->hosts.begin());
-    task->state = TaskState::RETRY;
 
     const auto& task_host = task->hosts.front();
     if (connections_per_host_[task_host] >= max_concurrent_tasks_per_host_) {
@@ -474,7 +464,7 @@ ReturnCode PipelinedRPC::failPart(Task* task) {
     }
   }
 
-  completePart(task);
+  completeTask(task);
 
   auto tolerate_failures = true;
   if (tolerate_failures) {
@@ -484,7 +474,7 @@ ReturnCode PipelinedRPC::failPart(Task* task) {
   }
 }
 
-void PipelinedRPC::completePart(Task* task) {
+void PipelinedRPC::completeTask(Task* task) {
   delete task;
   ++num_tasks_complete_;
   --num_tasks_running_;
