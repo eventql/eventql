@@ -239,14 +239,13 @@ ReturnCode performOperation_RPC(
     }
   }
 
-  
   std::string result;
   auto os = StringOutputStream::fromString(&result);
   auto rc = rpc.execute(os.get());
   if (rc.isSuccess()) {
     const char* result_begin = &*result.begin();
     const char* result_end = &*result.end();
-    while (result_begin != result_end) {
+    do {
       const char* chunk_end;
       if (result_end - result_begin < kRPCResultChunkSize) {
         chunk_end = result_end;
@@ -263,7 +262,7 @@ ReturnCode performOperation_RPC(
       }
 
       result_begin = chunk_end;
-    }
+    } while (result_begin != result_end);
 
     return ReturnCode::success();
   } else {
