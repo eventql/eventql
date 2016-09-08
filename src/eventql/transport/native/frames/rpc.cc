@@ -51,7 +51,7 @@ void RPCFrame::writeToString(std::string* str, bool header /*= true*/) {
   util::BinaryMessageWriter writer;
 
   if (header) {
-    writer.appendNUInt16(EVQL_OP_HELLO);
+    writer.appendNUInt16(EVQL_OP_RPC);
     writer.appendNUInt16(0); // flags
     writer.appendNUInt32(0); // frame size
   }

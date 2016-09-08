@@ -62,7 +62,7 @@ protected:
   struct Task {
     TaskState state;
     std::vector<std::string> hosts;
-    RPCFrame rpc;
+    std::string rpc_request;
   };
 
   enum class ConnectionState {

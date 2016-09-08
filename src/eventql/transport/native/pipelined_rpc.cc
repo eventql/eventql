@@ -64,7 +64,7 @@ void PipelinedRPC::addRPC(
   auto task = new Task();
   task->state = TaskState::INIT;
   task->hosts = hosts;
-  task->rpc = std::move(rpc);
+  rpc.writeToString(&task->rpc_request);
   runq_.push_back(task);
   ++num_tasks_;
 }
@@ -102,6 +102,8 @@ ReturnCode PipelinedRPC::handleFrame(
 
 ReturnCode PipelinedRPC::handleReady(Connection* connection) {
   logDebug("evqld", "Executing RPC on $0", connection->host);
+  connection->state = ConnectionState::QUERY;
+  connection->write_buf += connection->task->rpc_request;
   return ReturnCode::success();
 }
 
