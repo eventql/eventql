@@ -347,8 +347,8 @@ ScopedPtr<ResultCursor> GroupByMergeExpression::execute() {
     }
   });
 
-  //aggr_scheduler_->setResultCallback([this] () {
-  //  logDebug("evqld", "got result!", 1);
+  auto result_handler = [this] (void* priv, const char* data, size_t size) {
+    logDebug("evqld", "got result! $0", size);
   //  //const auto& group_key = row[0].getString();
 
   //  //auto& group = groups_[group_key];
@@ -364,7 +364,9 @@ ScopedPtr<ResultCursor> GroupByMergeExpression::execute() {
   //  //  VM::loadState(txn_, e.program(), &remote_group[i], is.get());
   //  //  VM::merge(txn_, e.program(), &group[i], &remote_group[i]);
   //  //}
-  //});
+  };
+
+  rpc_scheduler_.setResultCallback(result_handler);
 
   auto rc = rpc_scheduler_.execute();
   if (!rc.isSuccess()) {

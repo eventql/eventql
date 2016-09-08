@@ -36,6 +36,10 @@ namespace native_transport {
 class PipelinedRPC {
 public:
 
+  using ResultCallbackType =
+      std::function<
+          void (void* privdata, const char* data, size_t size)>;
+
   PipelinedRPC(
       ConfigDirectory* config,
       size_t max_concurrent_tasks,
@@ -45,10 +49,10 @@ public:
 
   void addRPC(
       RPCFrame&& rpc,
-      const std::vector<std::string>& hosts);
+      const std::vector<std::string>& hosts,
+      void* privdata = nullptr);
 
-  void setResultCallback(
-      const std::function<void ()> fn);
+  void setResultCallback(ResultCallbackType fn);
 
   ReturnCode execute();
   void shutdown();
@@ -58,6 +62,8 @@ protected:
   struct Task {
     std::vector<std::string> hosts;
     std::string rpc_request;
+    std::string rpc_response;
+    void* privdata;
   };
 
   enum class ConnectionState {
@@ -103,6 +109,7 @@ protected:
   ReturnCode performWrite(Connection* connection);
   ReturnCode performRead(Connection* connection);
 
+  ResultCallbackType result_cb_;
   std::deque<Task*> runq_;
   std::list<Connection> connections_;
   ConfigDirectory* config_;

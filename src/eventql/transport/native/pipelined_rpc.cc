@@ -61,18 +61,19 @@ PipelinedRPC::~PipelinedRPC() {
 
 void PipelinedRPC::addRPC(
     RPCFrame&& rpc,
-    const std::vector<std::string>& hosts) {
+    const std::vector<std::string>& hosts,
+    void* privdata /* = nullptr */) {
   assert(hosts.size() > 0);
   auto task = new Task();
   task->hosts = hosts;
+  task->privdata = privdata;
   rpc.writeToString(&task->rpc_request);
   runq_.push_back(task);
   ++num_tasks_;
 }
 
-void PipelinedRPC::setResultCallback(
-    const std::function<void ()> fn) {
-
+void PipelinedRPC::setResultCallback(ResultCallbackType fn) {
+  result_cb_ = fn;
 }
 
 ReturnCode PipelinedRPC::handleFrame(
@@ -134,8 +135,17 @@ ReturnCode PipelinedRPC::handleResult(
   auto body_len = frame_reader.readVarUInt();
   auto body = frame_reader.readString(body_len);
 
+  auto task = connection->task;
+  task->rpc_response += std::string(body, body_len);
+
   if (flags & EVQL_RPC_RESULT_COMPLETE) {
-    auto task = connection->task;
+    if (result_cb_) {
+        result_cb_(
+            task->privdata,
+            task->rpc_response.data(),
+            task->rpc_response.size());
+    }
+
     completeTask(task);
     connection->task = nullptr;
     return handleIdle(connection);
