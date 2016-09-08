@@ -153,7 +153,17 @@ ReturnCode PipelinedRPC::handleHandshake(Connection* connection) {
 }
 
 ReturnCode PipelinedRPC::handleIdle(Connection* connection) {
-  connection->state = ConnectionState::CLOSE;
+  auto next_task = popNextTask(&connection->host); // get next task
+  if (next_task) {
+    ++num_tasks_running_;
+    next_task->state = TaskState::RUNNING;
+    connection->state = ConnectionState::QUERY;
+    connection->task = next_task;
+    connection->write_buf += connection->task->rpc_request;
+  } else {
+    connection->state = ConnectionState::CLOSE;
+  }
+
   return ReturnCode::success();
 }
 
@@ -395,19 +405,44 @@ ReturnCode PipelinedRPC::performWrite(Connection* connection) {
 }
 
 ReturnCode PipelinedRPC::startNextPart() {
+  auto task = popNextTask();
+  if (!task) {
+    return ReturnCode::success();
+  }
+
+  task->state = TaskState::RUNNING;
+  ++num_tasks_running_;
+
+  auto rc = startConnection(task);
+  if (!rc.isSuccess()) {
+    logDebug("evqld", "Client error: $0", rc.getMessage());
+    rc = failPart(task);
+  }
+
+  return rc;
+}
+
+PipelinedRPC::Task* PipelinedRPC::popNextTask(
+    const std::string* host /* = nullptr */) {
   auto iter = runq_.begin();
 
   while (iter != runq_.end()) {
     const auto& iter_host = (*iter)->hosts.front();
-    if (connections_per_host_[iter_host] < max_concurrent_tasks_per_host_) {
-      break;
-    } else {
+    if (host && iter_host != *host) {
       ++iter;
+      continue;
     }
+
+    if (connections_per_host_[iter_host] >= max_concurrent_tasks_per_host_) {
+      ++iter;
+      continue;
+    }
+
+    break;
   }
 
   if (iter == runq_.end()) {
-    return ReturnCode::success();
+    return nullptr;
   }
 
   assert(
@@ -416,16 +451,7 @@ ReturnCode PipelinedRPC::startNextPart() {
 
   auto task = *iter;
   runq_.erase(iter);
-  ++num_tasks_running_;
-
-  task->state = TaskState::RUNNING;
-  auto rc = startConnection(task);
-  if (!rc.isSuccess()) {
-    logDebug("evqld", "Client error: $0", rc.getMessage());
-    rc = failPart(task);
-  }
-
-  return rc;
+  return task;
 }
 
 ReturnCode PipelinedRPC::failPart(Task* task) {

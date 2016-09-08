@@ -98,6 +98,7 @@ protected:
       const char* payload,
       size_t payload_size);
 
+  Task* popNextTask(const std::string* hostname = nullptr);
   ReturnCode startNextPart();
   ReturnCode startConnection(Task* task);
   ReturnCode failPart(Task* task);
