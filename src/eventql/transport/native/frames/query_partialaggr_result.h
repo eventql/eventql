@@ -22,58 +22,37 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include "eventql/transport/native/frames/rpc_result.h"
-#include "eventql/util/util/binarymessagewriter.h"
+#pragma once
+#include <string>
+#include <vector>
+#include "eventql/eventql.h"
+#include "eventql/util/return_code.h"
+#include "eventql/sql/svalue.h"
+#include "eventql/transport/native/native_connection.h"
 
 namespace eventql {
 namespace native_transport {
 
-//RPCResultFrame::RPCResultFrame() : flags_(0) {}
-//
-//void RPCResultFrame::setBody(std::string body) {
-//  body_ = body;
-//}
-//
-//void RPCResultFrame::setBody(const char* data, size_t len) {
-//  body_ = std::string(data, len);
-//}
-//
-//void RPCResultFrame::setIsComplete(bool is_complete) {
-//  if (is_complete) {
-//    flags_ |= EVQL_RPC_RESULT_COMPLETE;
-//  } else {
-//    flags_ &= ~EVQL_RPC_RESULT_COMPLETE;
-//  }
-//}
-//
-//const std::string& RPCResultFrame::getBody() const {
-//  return body_;
-//}
-//
-//std::string& RPCResultFrame::getBody() {
-//  return body_;
-//}
-//
-//bool RPCResultFrame::getIsComplete() {
-//  return flags_ & EVQL_RPC_RESULT_COMPLETE;
-//}
-//
-//ReturnCode RPCResultFrame::writeTo(NativeConnection* conn) {
-//  util::BinaryMessageWriter header_;
-//  header_.appendVarUInt(flags_); // flags
-//  header_.appendVarUInt(body_.size());
-//
-//  conn->writeFrameHeaderAsync(
-//      EVQL_OP_RPC_RESULT,
-//      header_.size() + body_.size());
-//
-//  conn->writeAsync(header_.data(), header_.size());
-//  conn->writeAsync(body_.data(), body_.size());
-//  return conn->flushBuffer(true);
-//}
-//
+class QueryPartialAggrResultFrame {
+public:
+
+  QueryPartialAggrResultFrame();
+
+  void setBody(std::string body);
+
+  void setBody(const char* data, size_t len);
+
+  const std::string& getBody() const;
+
+  std::string& getBody();
+
+  ReturnCode writeTo(NativeConnection* conn);
+
+protected:
+  uint64_t flags_;
+  std::string body_;
+};
 
 } // namespace native_transport
 } // namespace eventql
-
 
