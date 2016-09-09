@@ -22,49 +22,61 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#include "eventql/transport/native/native_transport.h"
+#include "eventql/transport/native/native_connection.h"
 #include "eventql/transport/native/frames/query_partial_aggr.h"
+#include "eventql/util/logging.h"
 #include "eventql/util/util/binarymessagereader.h"
+#include "eventql/server/session.h"
+#include "eventql/server/sql_service.h"
+#include "eventql/sql/runtime/runtime.h"
+#include "eventql/auth/client_auth.h"
 
 namespace eventql {
 namespace native_transport {
 
-
-QueryPartialAggrFrame::QueryPartialAggrFrame() : flags_(0) {};
-
-ReturnCode QueryPartialAggrFrame::parseFrom(
+ReturnCode performOperation_QUERY_PARTIALAGGR(
+    Database* database,
+    NativeConnection* conn,
     const char* payload,
     size_t payload_size) {
-  util::BinaryMessageReader frame(payload, payload_size);
-  flags_ = frame.readVarUInt();
-  database_ = frame.readLenencString();
-  encoded_qtree_ = frame.readLenencString();
+  QueryPartialAggrFrame frame;
+  {
+    auto rc = frame.parseFrom(payload, payload_size);
+    if (!rc.isSuccess()) {
+      return rc;
+    }
+  }
+
+  auto session = database->getSession();
+  auto dbctx = session->getDatabaseContext();
+  /* switch database */
+  {
+    auto rc = dbctx->client_auth->changeNamespace(session, frame.getDatabase());
+    if (!rc.isSuccess()) {
+      return conn->sendErrorFrame(rc.message());
+    }
+  }
+
+  try {
+    auto txn = dbctx->sql_service->startTransaction(session);
+
+    csql::QueryTreeCoder coder(txn.get());
+
+    auto req_body_is = StringInputStream::fromString(frame.getEncodedQTree());
+    auto qtree = coder.decode(req_body_is.get());
+    auto qplan = dbctx->sql_runtime->buildQueryPlan(txn.get(), { qtree });
+    auto execute = qplan->execute(0);
+    csql::SValue row[2];
+    while (execute->next(row, 2)) {
+      iputs("got row", 1);
+    }
+
+  } catch (const std::exception& e) {
+    conn->sendErrorFrame(e.what());
+  }
 
   return ReturnCode::success();
-}
-
-void QueryPartialAggrFrame::setDatabase(const std::string& database) {
-  database_ = database;
-}
-
-const std::string& QueryPartialAggrFrame::getDatabase() const {
-  return database_;
-}
-
-const std::string& QueryPartialAggrFrame::getEncodedQTree() const {
-  return encoded_qtree_;
-}
-
-void QueryPartialAggrFrame::setEncodedQtree(const std::string& encoded_qtree) {
-  encoded_qtree_ = encoded_qtree;
-}
-
-void QueryPartialAggrFrame::writeToString(std::string* str) {
-  util::BinaryMessageWriter writer;
-  writer.appendVarUInt(flags_);
-  writer.appendLenencString(database_);
-  writer.appendLenencString(encoded_qtree_);
-
-  *str = std::string((const char*) writer.data(), writer.size());
 }
 
 } // namespace native_transport

@@ -42,9 +42,10 @@ public:
   void setDatabase(const std::string& database);
   void setEncodedQtree(const std::string& encoded_qtree);
 
-  ReturnCode parseFrom(const std::string& data);
+  ReturnCode parseFrom(const char* payload, size_t payload_size);
 
   const std::string& getDatabase() const;
+  const std::string& getEncodedQTree() const;
 
   void writeToString(std::string* str);
   void clear();

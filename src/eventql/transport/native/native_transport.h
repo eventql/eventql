@@ -45,5 +45,12 @@ ReturnCode performOperation_QUERY(
     NativeConnection* conn,
     const std::string& payload);
 
+ReturnCode performOperation_QUERY_PARTIALAGGR(
+    Database* database,
+    NativeConnection* conn,
+    const char* payload,
+    size_t payload_size);
+
 } // namespace native_transport
 } // namespace eventql
+

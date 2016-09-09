@@ -137,6 +137,12 @@ ReturnCode performOperation(
   switch (opcode) {
     case EVQL_OP_QUERY:
       return performOperation_QUERY(database, conn, payload);
+    case EVQL_OP_QUERY_PARTIALAGGR:
+      return performOperation_QUERY_PARTIALAGGR(
+          database,
+          conn,
+          payload.data(),
+          payload.size());
     default:
       conn->sendErrorFrame("invalid opcode");
       conn->close();
@@ -145,8 +151,6 @@ ReturnCode performOperation(
 
   return ReturnCode::success();
 }
-
-
 
 } // namespace native_transport
 } // namespace eventql
