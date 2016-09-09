@@ -14,7 +14,7 @@ Table of Contents
     5.2 flags
     5.3 length
   6. Messages
-    6.1 S2C Messages
+    6.1 Client-to-Server (C2S) Messages
       6.1.1 HELLO
       6.1.2 PING
       6.1.3 HEARTBEAT
@@ -27,7 +27,7 @@ Table of Contents
       6.1.10 QUERY_DISCARD
       6.1.11 QUERY_PROGRESS
       6.1.12 QUERY_NEXT
-    6.2 S2S Messages
+    6.2 Server-to-Server (S2S) Messages
       6.2.1 QUERY_PARTIALAGGR
       6.2.2 QUERY_PARTIALAGGR_RESULT
 
@@ -153,7 +153,7 @@ Binary Protocols.
 
 6. Messages
 
-6.2 HELLO
+6.1.2 HELLO
 
   FIXME
 
@@ -166,7 +166,7 @@ Binary Protocols.
     <no response>
 
 
-6.2 PING
+6.1.2 PING
 
   On an operational connection, the ping message may be sent at _any_ time by
   either the client or the server, even while a request is running.
@@ -180,7 +180,7 @@ Binary Protocols.
     <no response>
 
 
-6.2 ERROR
+6.1.2 ERROR
 
   FIXME
 
@@ -191,7 +191,7 @@ Binary Protocols.
   Response:
     <no response>
 
-6.7 QUERY
+6.1.7 QUERY
 
   The QUERY message initiates a new request and is only sent by the client.
   A QUERY message must not be sent while another request is still running.
@@ -232,7 +232,7 @@ Binary Protocols.
     After the request is complete, the server will not send any further messages.
 
 
-6.8 QUERY_RESULT
+6.1.8 QUERY_RESULT
 
   The QUERY_RESULT message contains a description of the result table as well
   as zero or more rows from the result tables. Results are always paged, i.e.
@@ -277,7 +277,7 @@ Binary Protocols.
     Otherwise, the client must not send any response.
 
 
-6.9 QUERY_CONTINUE
+6.1.9 QUERY_CONTINUE
 
   The QUERY_CONTINUE message may be sent by the client in response to a
   QUERY_RESULT message that did not have the COMPLETED flag set.
@@ -293,7 +293,7 @@ Binary Protocols.
       - QUERY_RESULT
 
 
-6.10 QUERY_DISCARD
+6.1.10 QUERY_DISCARD
 
   The QUERY_DISCARD message may be sent by the client in response to a
   QUERY_RESULT message that did not have the COMPLETED flag set.
@@ -309,7 +309,7 @@ Binary Protocols.
       - QUERY_RESULT
 
 
-6.11 QUERY_PROGRESS
+6.1.11 QUERY_PROGRESS
 
   The QUERY_PROGRESS message is an information message from the server to the
   client. It contains information about the progress of query execution and
@@ -333,7 +333,7 @@ Binary Protocols.
     <no response>
 
 
-6.13 QUERY_PARTIALAGGR
+6.2.1 QUERY_PARTIALAGGR
 
   The QUERY_PARTIALAGGR is used to execute a partial aggregation on a remote
   server.
@@ -363,7 +363,7 @@ Binary Protocols.
     the server will not send any further messages.
 
 
-6.14 QUERY_PARTIALAGGR_RESULT
+6.2.2 QUERY_PARTIALAGGR_RESULT
 
   The QUERY_PARTIALAGGR_RESULT message contains a the result of a successful
   QUERY_PARTIALAGGR call. Results may be paged, i.e. depending on the result size
