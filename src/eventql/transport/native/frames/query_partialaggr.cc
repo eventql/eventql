@@ -22,7 +22,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include "eventql/transport/native/frames/query_partial_aggr.h"
+#include "eventql/transport/native/frames/query_partialaggr.h"
 #include "eventql/util/util/binarymessagereader.h"
 
 namespace eventql {
