@@ -28,7 +28,6 @@
 #include "eventql/util/return_code.h"
 #include "eventql/util/buffer.h"
 #include "eventql/config/config_directory.h"
-#include "eventql/transport/native/frames/rpc.h"
 
 namespace eventql {
 namespace native_transport {
@@ -38,7 +37,12 @@ public:
 
   using ResultCallbackType =
       std::function<
-          void (void* privdata, const char* data, size_t size)>;
+          ReturnCode (
+              void* privdata,
+              uint16_t opcode,
+              uint16_t flags,
+              const char* payload,
+              size_t payload_len)>;
 
   PipelinedRPC(
       ConfigDirectory* config,
@@ -48,7 +52,9 @@ public:
   ~PipelinedRPC();
 
   void addRPC(
-      RPCFrame&& rpc,
+      uint16_t opcode,
+      uint16_t flags,
+      std::string&& payload,
       const std::vector<std::string>& hosts,
       void* privdata = nullptr);
 
@@ -61,8 +67,9 @@ protected:
 
   struct Task {
     std::vector<std::string> hosts;
-    std::string rpc_request;
-    std::string rpc_response;
+    uint16_t opcode;
+    uint16_t flags;
+    std::string payload;
     void* privdata;
   };
 
@@ -96,6 +103,8 @@ protected:
   ReturnCode handleIdle(Connection* connection);
   ReturnCode handleResult(
       Connection* connection,
+      uint16_t opcode,
+      uint16_t flags,
       const char* payload,
       size_t payload_size);
 
@@ -108,6 +117,12 @@ protected:
   void closeConnection(Connection* connection);
   ReturnCode performWrite(Connection* connection);
   ReturnCode performRead(Connection* connection);
+  void sendFrame(
+      Connection* connection,
+      uint16_t opcode,
+      uint16_t flags,
+      const char* payload,
+      size_t payload_len);
 
   ResultCallbackType result_cb_;
   std::deque<Task*> runq_;

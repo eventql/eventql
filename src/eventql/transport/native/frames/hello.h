@@ -41,7 +41,7 @@ public:
   void setFlags(uint64_t flags);
   uint64_t getFlags() const;
 
-  void writeToString(std::string* str, bool header = true);
+  void writeToString(std::string* str);
 
   void clear();
 

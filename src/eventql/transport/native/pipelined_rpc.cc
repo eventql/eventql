@@ -60,14 +60,18 @@ PipelinedRPC::~PipelinedRPC() {
 }
 
 void PipelinedRPC::addRPC(
-    RPCFrame&& rpc,
+    uint16_t opcode,
+    uint16_t flags,
+    std::string&& payload,
     const std::vector<std::string>& hosts,
     void* privdata /* = nullptr */) {
   assert(hosts.size() > 0);
   auto task = new Task();
+  task->opcode = opcode;
+  task->flags = flags;
+  task->payload = std::move(payload);
   task->hosts = hosts;
   task->privdata = privdata;
-  rpc.writeToString(&task->rpc_request);
   runq_.push_back(task);
   ++num_tasks_;
 }
@@ -101,13 +105,7 @@ ReturnCode PipelinedRPC::handleFrame(
       break;
 
     case ConnectionState::QUERY:
-      switch (opcode) {
-        case EVQL_OP_RPC_RESULT:
-          return handleResult(connection, payload, payload_size);
-        default:
-          return ReturnCode::error("ERUNTIME", "unexpected opcode");
-      }
-      break;
+      return handleResult(connection, opcode, flags, payload, payload_size);
 
     default:
       break;
@@ -117,35 +115,55 @@ ReturnCode PipelinedRPC::handleFrame(
   return ReturnCode::error("ERUNTIME", "unexpected opcode");
 }
 
+void PipelinedRPC::sendFrame(
+    Connection* connection,
+    uint16_t opcode,
+    uint16_t flags,
+    const char* payload,
+    size_t payload_len) {
+  auto os = StringOutputStream::fromString(&connection->write_buf);
+  os->appendNUInt16(opcode);
+  os->appendNUInt16(flags);
+  os->appendNUInt32(payload_len);
+  os->write(payload, payload_len);
+}
+
 ReturnCode PipelinedRPC::handleReady(Connection* connection) {
   logDebug("evqld", "Executing RPC on $0", connection->host);
   connection->state = ConnectionState::QUERY;
-  connection->write_buf += connection->task->rpc_request;
+  sendFrame(
+      connection,
+      connection->task->opcode,
+      connection->task->flags,
+      connection->task->payload.data(),
+      connection->task->payload.size());
+
   return ReturnCode::success();
 }
 
 ReturnCode PipelinedRPC::handleResult(
     Connection* connection,
+    uint16_t opcode,
+    uint16_t flags,
     const char* payload,
     size_t payload_size) {
   logDebug("evqld", "Received RPC result from $0", connection->host);
 
-  util::BinaryMessageReader frame_reader(payload, payload_size);
-  auto flags = frame_reader.readVarUInt();
-  auto body_len = frame_reader.readVarUInt();
-  auto body = frame_reader.readString(body_len);
-
   auto task = connection->task;
-  task->rpc_response += std::string(body, body_len);
+  if (result_cb_) {
+    auto rc = result_cb_(
+        task->privdata,
+        opcode,
+        flags,
+        payload,
+        payload_size);
 
-  if (flags & EVQL_RPC_RESULT_COMPLETE) {
-    if (result_cb_) {
-        result_cb_(
-            task->privdata,
-            task->rpc_response.data(),
-            task->rpc_response.size());
+    if (!rc.isSuccess()) {
+      return rc;
     }
+  }
 
+  if (flags & EVQL_ENDOFREQUEST) {
     completeTask(task);
     connection->task = nullptr;
     return handleIdle(connection);
@@ -156,8 +174,18 @@ ReturnCode PipelinedRPC::handleResult(
 
 ReturnCode PipelinedRPC::handleHandshake(Connection* connection) {
   connection->state = ConnectionState::HANDSHAKE;
+
+  std::string payload;
   native_transport::HelloFrame f_hello;
-  f_hello.writeToString(&connection->write_buf);
+  f_hello.writeToString(&payload);
+
+  sendFrame(
+      connection,
+      EVQL_OP_HELLO,
+      0,
+      payload.data(),
+      payload.size());
+
   return ReturnCode::success();
 }
 
@@ -166,7 +194,12 @@ ReturnCode PipelinedRPC::handleIdle(Connection* connection) {
   if (next_task) {
     connection->state = ConnectionState::QUERY;
     connection->task = next_task;
-    connection->write_buf += connection->task->rpc_request;
+    sendFrame(
+        connection,
+        connection->task->opcode,
+        connection->task->flags,
+        connection->task->payload.data(),
+        connection->task->payload.size());
   } else {
     connection->state = ConnectionState::CLOSE;
   }
