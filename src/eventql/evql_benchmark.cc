@@ -42,26 +42,41 @@
 struct TimeWindow {
   static constexpr auto kMillisPerWindow = 1 * kMillisPerSecond;
 
-  TimeWindow() : num_requests_(0) {}
+  TimeWindow(size_t requests_per_window) :
+      requests_per_window_(requests_per_window),
+      requests_done_(0) {}
 
   void addRequest() {
-    ++num_requests_;
+    ++requests_done_;
   }
 
-  int64_t getRemainingMillis() {
+  uint64_t getRemainingMillis() {
     UnixTime now;
     auto duration = now - start_;
-    return kMillisPerWindow - duration.milliseconds();
+    if (kMillisPerWindow < duration.milliseconds()) {
+      return 0;
+    } else {
+      return kMillisPerWindow - duration.milliseconds();
+    }
+  }
+
+  size_t getRemainingRequests() {
+    if (requests_per_window_ < requests_done_) {
+      return 0;
+    } else {
+      return requests_per_window_ - requests_done_;
+    }
   }
 
   void clear() {
-    num_requests_ = 0;
+    requests_done_ = 0;
     UnixTime now;
     start_ = now;
   }
 
 protected:
-  size_t num_requests_;
+  size_t requests_per_window_;
+  size_t requests_done_;
   UnixTime start_;
 };
 
@@ -327,12 +342,10 @@ int main(int argc, const char** argv) {
   }
 
   auto qry_str = flags.getString("query");
-  auto rate = flags.getInt("rate");
-
   const UnixTime global_start;
 
   std::mutex m;
-  TimeWindow twindow;
+  TimeWindow twindow(flags.getInt("rate"));
 
   RequestStats rstats;
   if (flags.isSet("max")) {
@@ -367,14 +380,16 @@ int main(int argc, const char** argv) {
       for (;;) {
         m.lock(); //FIXME
         /* check remaining time in current timewindow */
-        if (twindow.getRemainingMillis() <= 0) {
+        if (twindow.getRemainingMillis() == 0) {
           /* start a new timewindow */
           twindow.clear();
           m.unlock(); //FIXME
           continue;
         }
         m.unlock(); //FIXME
-        //FIXME add sleep
+
+        auto sleep = twindow.getRemainingRequests() * 100 / twindow.getRemainingMillis();
+        std::this_thread::sleep_for(std::chrono::milliseconds(sleep));
         /* send query */
         auto rc = sendQuery(qry_str, qry_db, client);
         m.lock(); //FIXME
@@ -384,6 +399,7 @@ int main(int argc, const char** argv) {
         } else {
           rstats.addSuccessfulRequest();
         }
+        twindow.addRequest();
         m.unlock(); //FIXME
 
         print(&rstats, stdout_os.get());
