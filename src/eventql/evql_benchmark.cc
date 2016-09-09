@@ -90,8 +90,27 @@ void print(
   ));
 }
 
-static constexpr auto kTWindowSize = 1 * kMillisPerSecond;
 static constexpr auto kMaxErrors = 10;
+
+struct TimeWindow {
+  static constexpr auto kMillisPerWindow = 1 * kMillisPerSecond;
+
+  void clear() {
+    num_requests = 0;
+    UnixTime now;
+    start = now;
+  }
+
+  int64_t getRemainingMillis() {
+    UnixTime now;
+    auto duration = now - start;
+    return kMillisPerWindow - duration.milliseconds();
+  }
+
+  size_t num_requests;
+  UnixTime start;
+};
+
 
 int main(int argc, const char** argv) {
   cli::FlagParser flags;
@@ -273,8 +292,7 @@ int main(int argc, const char** argv) {
   const UnixTime global_start;
 
   std::mutex m;
-  UnixTime twindow_start;
-  auto requests_per_twindow = 0;
+  TimeWindow twindow;
   auto errors = 0;
   auto requests_sent = 0;
 
@@ -305,13 +323,9 @@ int main(int argc, const char** argv) {
       for (;;) {
         /* check remaining time in current timewindow */
         m.lock();
-        UnixTime now;
-        auto duration = now - twindow_start;
-
         /* start a new timewindow */
-        if (duration.milliseconds() >= kTWindowSize) {
-          twindow_start = now;
-          requests_per_twindow = 0;
+        if (twindow.getRemainingMillis() <= 0) {
+          twindow.clear();
           m.unlock();
           continue;
         }
@@ -326,7 +340,6 @@ int main(int argc, const char** argv) {
         } else {
           ++requests_sent;
         }
-
         m.unlock();
 
         print(errors, requests_sent, global_start, stdout_os.get());
