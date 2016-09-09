@@ -365,26 +365,26 @@ int main(int argc, const char** argv) {
       }
 
       for (;;) {
-        m.lock();
+        m.lock(); //FIXME
         /* check remaining time in current timewindow */
         if (twindow.getRemainingMillis() <= 0) {
           /* start a new timewindow */
           twindow.clear();
-          m.unlock();
+          m.unlock(); //FIXME
           continue;
         }
-        m.unlock();
-
+        m.unlock(); //FIXME
+        //FIXME add sleep
         /* send query */
         auto rc = sendQuery(qry_str, qry_db, client);
-        m.lock();
+        m.lock(); //FIXME
         if (!rc.isSuccess()) {
           logFatal("evqlbenchmark", "executing query failed: $0", rc.getMessage());
           rstats.addFailedRequest();
         } else {
           rstats.addSuccessfulRequest();
         }
-        m.unlock();
+        m.unlock(); //FIXME
 
         print(&rstats, stdout_os.get());
         if (rstats.stop()) {
