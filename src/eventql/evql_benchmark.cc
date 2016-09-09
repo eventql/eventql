@@ -100,12 +100,12 @@ struct RequestStats {
   }
 
   bool stop() {
-    if (failed_requests_ >= kMaxErrors)
-    if (!has_max_) {
-      return false;
+    if (failed_requests_ >= kMaxErrors) {
+      return true;
     }
 
-    return getTotal() >= max_requests_;
+    return (has_max_ &&
+            failed_requests_ + successful_requests_ >= max_requests_);
   }
 
 protected:
