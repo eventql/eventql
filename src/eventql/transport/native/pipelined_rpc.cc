@@ -344,6 +344,7 @@ void PipelinedRPC::shutdown() {
 
 ReturnCode PipelinedRPC::performRead(Connection* connection) {
   size_t batch_size = 4096;
+  bool eof = false;
 
   for (int ret = 1; ret > 0; ) {
     auto begin = connection->read_buf.size();
@@ -354,21 +355,27 @@ ReturnCode PipelinedRPC::performRead(Connection* connection) {
         (void*) (&connection->read_buf[0] + begin),
         batch_size);
 
-    if (ret == 0) {
-      return ReturnCode::error("EIO", "unexpected end of file");
-    }
+    switch (ret) {
 
-    if (ret == -1 && errno != EAGAIN && errno != EINTR) {
-      return ReturnCode::error(
-          "EIO",
-          "read() failed: %s",
-          strerror(errno));
-    }
+      case -1:
+        if (errno == EAGAIN || errno == EINTR) {
+          connection->read_buf.resize(begin);
+          break;
+        } else {
+          return ReturnCode::error(
+              "EIO",
+              "read() failed: %s",
+              strerror(errno));
+        }
 
-    if (ret > 0) {
-      connection->read_buf.resize(begin + ret);
-    } else {
-      connection->read_buf.resize(begin);
+      case 0:
+        eof = true;
+        /* fallthrough */
+
+      default:
+        connection->read_buf.resize(begin + ret);
+        break;
+
     }
   }
 
@@ -379,7 +386,11 @@ ReturnCode PipelinedRPC::performRead(Connection* connection) {
   auto frame_len = ntohl(*((uint32_t*) &connection->read_buf[4]));
   auto frame_len_full = frame_len + 8;
   if (connection->read_buf.size() < frame_len_full) {
-    return ReturnCode::success();
+    if (eof) {
+      return ReturnCode::error("EIO", "connection to server lost");
+    } else {
+      return ReturnCode::success(); // wait for more data
+    }
   }
 
   auto rc = handleFrame(
