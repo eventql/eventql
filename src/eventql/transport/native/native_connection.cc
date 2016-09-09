@@ -37,6 +37,7 @@
 #include <poll.h>
 
 namespace eventql {
+namespace native_transport {
 
 NativeConnection::NativeConnection(
     int fd,
@@ -240,5 +241,6 @@ void NativeConnection::close() {
   fd_ = -1;
 }
 
+} // namespace native_connection
 } // namespace eventql
 

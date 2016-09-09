@@ -24,8 +24,6 @@
 #include "eventql/transport/native/native_transport.h"
 #include "eventql/transport/native/native_connection.h"
 #include "eventql/transport/native/query_result_frame.h"
-#include "eventql/transport/native/frames/rpc_result.h"
-#include "eventql/transport/native/frames/rpc.h"
 #include "eventql/util/logging.h"
 #include "eventql/util/util/binarymessagereader.h"
 #include "eventql/server/session.h"
@@ -49,278 +47,6 @@
 
 namespace eventql {
 namespace native_transport {
-
-ReturnCode sendError(
-    NativeConnection* conn,
-    const std::string& error) {
-  util::BinaryMessageWriter e_frame;
-  e_frame.appendLenencString(error);
-  char zero = 0;
-  e_frame.append(&zero, 1);
-  return conn->sendFrame(EVQL_OP_ERROR, e_frame.data(), e_frame.size());
-}
-
-ReturnCode performOperation_QUERY(
-    Database* database,
-    NativeConnection* conn,
-    const std::string& payload) {
-  auto session = database->getSession();
-  auto dbctx = session->getDatabaseContext();
-
-  /* read query frame */
-  std::string q_query;
-  uint64_t q_flags;
-  uint64_t q_maxrows;
-  std::string q_database;
-  try {
-    util::BinaryMessageReader q_frame(payload.data(), payload.size());
-    q_query = q_frame.readLenencString();
-    q_flags = q_frame.readVarUInt();
-    q_maxrows = q_frame.readVarUInt();
-    q_database = q_frame.readLenencString();
-  } catch (const std::exception& e) {
-    return ReturnCode::error("ERUNTIME", "invalid QUERY frame");
-  }
-
-  if (q_maxrows == 0) {
-    q_maxrows = 1;
-  }
-
-  /* switch database */
-  if (q_flags & EVQL_QUERY_SWITCHDB) {
-    auto rc = dbctx->client_auth->changeNamespace(session, q_database);
-    if (!rc.isSuccess()) {
-      return sendError(conn, rc.message());
-    }
-  }
-
-  if (session->getEffectiveNamespace().empty()) {
-    return sendError(conn, "No database selected");
-  }
-
-  /* execute queries */
-  try {
-    auto txn = dbctx->sql_service->startTransaction(session);
-    auto qplan = dbctx->sql_runtime->buildQueryPlan(txn.get(), q_query);
-
-    //qplan->setProgressCallback([&result_format, &qplan] () {
-    //  result_format.sendProgress(qplan->getProgress());
-    //});
-
-    if (qplan->numStatements() > 1 && !(q_flags & EVQL_QUERY_MULTISTMT)) {
-      return sendError(
-          conn,
-          "you must set EVQL_QUERY_MULTISTMT to enable multiple statements");
-    }
-
-    auto num_statements = qplan->numStatements();
-    for (int i = 0; i < num_statements; ++i) {
-      /* execute query */
-      auto result_cursor = qplan->execute(i);
-      auto result_ncols = result_cursor->getNumColumns();
-
-      /* send response frames */
-      QueryResultFrame r_frame(qplan->getStatementgetResultColumns(i));
-      Vector<csql::SValue> row(result_ncols);
-      while (result_cursor->next(row.data(), row.size())) {
-        r_frame.addRow(row);
-
-        if (r_frame.getRowCount() > q_maxrows ||
-            r_frame.getRowBytes() > NativeConnection::kMaxFrameSizeSoft) {
-          {
-            auto rc = r_frame.writeTo(conn);
-            if (!rc.isSuccess()) {
-              return rc;
-            }
-          }
-          r_frame.clear();
-
-          /* wait for discard or continue */
-          uint16_t n_opcode;
-          std::string n_payload;
-          {
-            auto rc = conn->recvFrame(&n_opcode, &n_payload);
-            if (!rc.isSuccess()) {
-              return rc;
-            }
-          }
-
-          bool cont = true;
-          switch (n_opcode) {
-            case EVQL_OP_QUERY_CONTINUE:
-              break;
-            case EVQL_OP_QUERY_DISCARD:
-              cont = false;
-              break;
-            default:
-              conn->close();
-              return ReturnCode::error("ERUNTIME", "unexpected opcode");
-          }
-
-          if (!cont) {
-            break;
-          }
-        }
-      }
-
-      bool pending_statement = i + 1 < num_statements;
-      r_frame.setIsLast(true);
-      r_frame.setHasPendingStatement(pending_statement);
-      r_frame.writeTo(conn);
-
-      if (!pending_statement) {
-        break;
-      }
-
-      /* wait for discard or continue (next query) */
-      uint16_t n_opcode;
-      std::string n_payload;
-      auto rc = conn->recvFrame(&n_opcode, &n_payload);
-      if (!rc.isSuccess()) {
-        return rc;
-      }
-
-      bool cont = true;
-      switch (n_opcode) {
-        case EVQL_OP_QUERY_NEXT:
-          break;
-        case EVQL_OP_QUERY_DISCARD:
-          cont = false;
-          break;
-        default:
-          conn->close();
-          return ReturnCode::error("ERUNTIME", "unexpected opcode");
-      }
-
-      if (!cont) {
-        break;
-      }
-    }
-  } catch (const StandardException& e) {
-    return sendError(conn, e.what());
-  }
-
-  return ReturnCode::success();
-}
-
-static constexpr size_t kRPCResultChunkSize = 4000000;
-
-ReturnCode performOperation_RPC(
-    Database* database,
-    NativeConnection* conn,
-    const std::string& payload) {
-  /* read from frame */
-  RPCFrame rpc_frame;
-  {
-    auto rc = rpc_frame.parseFrom(payload);
-    if (!rc.isSuccess()) {
-      return rc;
-    }
-  }
-
-  auto session = database->getSession();
-  auto dbctx = session->getDatabaseContext();
-
-  /* switch database */
-  auto q_database = rpc_frame.getDatabase();
-  if (!q_database.empty()) {
-    auto rc = dbctx->client_auth->changeNamespace(session, q_database);
-    if (!rc.isSuccess()) {
-      return sendError(conn, rc.message());
-    }
-  }
-
-  ReturnCode parseFrom(const std::string& data);
-  rpc::PartialAggregationOperation rpc(database);
-  {
-    auto rc = rpc.parseFrom(payload.data(), payload.size());
-    if (!rc.isSuccess()) {
-      return rc;
-    }
-  }
-
-  std::string result;
-  auto os = StringOutputStream::fromString(&result);
-  auto rc = rpc.execute(os.get());
-  if (rc.isSuccess()) {
-    const char* result_begin = &*result.begin();
-    const char* result_end = &*result.end();
-    do {
-      const char* chunk_end;
-      if (result_end - result_begin < kRPCResultChunkSize) {
-        chunk_end = result_end;
-      } else {
-        chunk_end = result_begin + kRPCResultChunkSize;
-      }
-
-      RPCResultFrame result_frame;
-      result_frame.setBody(result_begin, chunk_end - result_begin);
-      result_frame.setIsComplete(chunk_end == result_end);
-      auto rc = result_frame.writeTo(conn);
-      if (!rc.isSuccess()) {
-        return rc;
-      }
-
-      result_begin = chunk_end;
-    } while (result_begin != result_end);
-
-    return ReturnCode::success();
-  } else {
-    return sendError(conn, rc.getMessage());
-  }
-}
-
-ReturnCode performOperation(
-    Database* database,
-    NativeConnection* conn,
-    uint16_t opcode,
-    const std::string& payload) {
-  logDebug("eventql", "Performing operation; opcode=$0", opcode);
-
-  switch (opcode) {
-    case EVQL_OP_QUERY:
-      return performOperation_QUERY(database, conn, payload);
-    case EVQL_OP_RPC:
-        return performOperation_RPC(database, conn, payload);
-    default:
-      conn->close();
-      return ReturnCode::error("ERUNTIME", "invalid opcode");
-  }
-
-  return ReturnCode::success();
-}
-
-ReturnCode performHandshake(Database* database, NativeConnection* conn) {
-  /* read HELLO frame */
-  {
-    uint16_t opcode;
-    std::string payload;
-    auto rc = conn->recvFrame(&opcode, &payload);
-    if (!rc.isSuccess()) {
-      conn->close();
-      return rc;
-    }
-
-    switch (opcode) {
-      case EVQL_OP_HELLO:
-        break;
-      default:
-        conn->close();
-        return ReturnCode::error("ERUNTIME", "invalid opcode");
-    }
-  }
-
-  /* send READY frame */
-  {
-    auto rc = conn->sendFrame(EVQL_OP_READY, nullptr, 0);
-    if (!rc.isSuccess()) {
-      conn->close();
-      return rc;
-    }
-  }
-
-  return ReturnCode::success();
-}
 
 void startConnection(Database* db, int fd, std::string prelude_bytes) {
   logDebug("eventql", "Opening new native connection; fd=$0", fd);
@@ -367,6 +93,58 @@ void startConnection(Database* db, int fd, std::string prelude_bytes) {
     conn.close();
   });
 }
+
+ReturnCode performHandshake(Database* database, NativeConnection* conn) {
+  /* read HELLO frame */
+  {
+    uint16_t opcode;
+    std::string payload;
+    auto rc = conn->recvFrame(&opcode, &payload);
+    if (!rc.isSuccess()) {
+      conn->close();
+      return rc;
+    }
+
+    switch (opcode) {
+      case EVQL_OP_HELLO:
+        break;
+      default:
+        conn->close();
+        return ReturnCode::error("ERUNTIME", "invalid opcode");
+    }
+  }
+
+  /* send READY frame */
+  {
+    auto rc = conn->sendFrame(EVQL_OP_READY, nullptr, 0);
+    if (!rc.isSuccess()) {
+      conn->close();
+      return rc;
+    }
+  }
+
+  return ReturnCode::success();
+}
+
+ReturnCode performOperation(
+    Database* database,
+    NativeConnection* conn,
+    uint16_t opcode,
+    const std::string& payload) {
+  logDebug("eventql", "Performing operation; opcode=$0", opcode);
+
+  switch (opcode) {
+    case EVQL_OP_QUERY:
+      return performOperation_QUERY(database, conn, payload);
+    default:
+      conn->close();
+      return ReturnCode::error("ERUNTIME", "invalid opcode");
+  }
+
+  return ReturnCode::success();
+}
+
+
 
 } // namespace native_transport
 } // namespace eventql

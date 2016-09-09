@@ -26,6 +26,7 @@
 #include "eventql/util/return_code.h"
 
 namespace eventql {
+namespace native_transport {
 
 class NativeConnection {
 public:
@@ -76,4 +77,6 @@ protected:
   std::string write_buf_;
 };
 
+} // namespace native_transport
 } // namespace eventql
+
