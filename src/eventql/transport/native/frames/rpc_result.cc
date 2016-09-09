@@ -28,50 +28,50 @@
 namespace eventql {
 namespace native_transport {
 
-RPCResultFrame::RPCResultFrame() : flags_(0) {}
-
-void RPCResultFrame::setBody(std::string body) {
-  body_ = body;
-}
-
-void RPCResultFrame::setBody(const char* data, size_t len) {
-  body_ = std::string(data, len);
-}
-
-void RPCResultFrame::setIsComplete(bool is_complete) {
-  if (is_complete) {
-    flags_ |= EVQL_RPC_RESULT_COMPLETE;
-  } else {
-    flags_ &= ~EVQL_RPC_RESULT_COMPLETE;
-  }
-}
-
-const std::string& RPCResultFrame::getBody() const {
-  return body_;
-}
-
-std::string& RPCResultFrame::getBody() {
-  return body_;
-}
-
-bool RPCResultFrame::getIsComplete() {
-  return flags_ & EVQL_RPC_RESULT_COMPLETE;
-}
-
-ReturnCode RPCResultFrame::writeTo(NativeConnection* conn) {
-  util::BinaryMessageWriter header_;
-  header_.appendVarUInt(flags_); // flags
-  header_.appendVarUInt(body_.size());
-
-  conn->writeFrameHeaderAsync(
-      EVQL_OP_RPC_RESULT,
-      header_.size() + body_.size());
-
-  conn->writeAsync(header_.data(), header_.size());
-  conn->writeAsync(body_.data(), body_.size());
-  return conn->flushBuffer(true);
-}
-
+//RPCResultFrame::RPCResultFrame() : flags_(0) {}
+//
+//void RPCResultFrame::setBody(std::string body) {
+//  body_ = body;
+//}
+//
+//void RPCResultFrame::setBody(const char* data, size_t len) {
+//  body_ = std::string(data, len);
+//}
+//
+//void RPCResultFrame::setIsComplete(bool is_complete) {
+//  if (is_complete) {
+//    flags_ |= EVQL_RPC_RESULT_COMPLETE;
+//  } else {
+//    flags_ &= ~EVQL_RPC_RESULT_COMPLETE;
+//  }
+//}
+//
+//const std::string& RPCResultFrame::getBody() const {
+//  return body_;
+//}
+//
+//std::string& RPCResultFrame::getBody() {
+//  return body_;
+//}
+//
+//bool RPCResultFrame::getIsComplete() {
+//  return flags_ & EVQL_RPC_RESULT_COMPLETE;
+//}
+//
+//ReturnCode RPCResultFrame::writeTo(NativeConnection* conn) {
+//  util::BinaryMessageWriter header_;
+//  header_.appendVarUInt(flags_); // flags
+//  header_.appendVarUInt(body_.size());
+//
+//  conn->writeFrameHeaderAsync(
+//      EVQL_OP_RPC_RESULT,
+//      header_.size() + body_.size());
+//
+//  conn->writeAsync(header_.data(), header_.size());
+//  conn->writeAsync(body_.data(), body_.size());
+//  return conn->flushBuffer(true);
+//}
+//
 
 } // namespace native_transport
 } // namespace eventql

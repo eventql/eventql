@@ -2,6 +2,7 @@
  * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
  *   - Paul Asmuth <paul@eventql.io>
+ *   - Laura Schlimmer <laura@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -33,29 +34,25 @@
 namespace eventql {
 namespace native_transport {
 
-class RPCFrame {
+class QueryPartialAggrFrame {
 public:
 
-  RPCFrame();
+  QueryPartialAggrFrame();
 
-  void setMethod(const std::string& method);
-  void setContentType(const std::string& content_type);
   void setDatabase(const std::string& database);
-  void setBody(const std::string& body);
+  void setEncodedQtree(const std::string& encoded_qtree);
 
   ReturnCode parseFrom(const std::string& data);
 
   const std::string& getDatabase() const;
 
-  void writeToString(std::string* str, bool header = true);
+  void writeToString(std::string* str);
   void clear();
 
 protected:
   uint64_t flags_;
-  std::string method_;
-  std::string content_type_;
   std::string database_;
-  std::string body_;
+  std::string encoded_qtree_;
 };
 
 } // namespace native_transport

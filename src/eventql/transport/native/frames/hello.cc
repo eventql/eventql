@@ -28,22 +28,12 @@ namespace native_transport {
 
 HelloFrame::HelloFrame() : flags_(0) {}
 
-void HelloFrame::writeToString(std::string* str, bool header /* = true */) {
+void HelloFrame::writeToString(std::string* str) {
   util::BinaryMessageWriter writer;
-
-  if (header) {
-    writer.appendNUInt16(EVQL_OP_HELLO);
-    writer.appendNUInt16(0); // flags
-    writer.appendNUInt32(0); // frame size
-  }
 
   writer.appendVarUInt(1);
   writer.appendLenencString(EVQL_VERSION);
   writer.appendVarUInt(flags_);
-
-  if (header) {
-    writer.updateNUInt32(4, writer.size() - 8); // update frame size
-  }
 
   *str = std::string((const char*) writer.data(), writer.size());
 }

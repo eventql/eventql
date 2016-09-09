@@ -31,6 +31,7 @@
 #include <eventql/util/freeondestroy.h>
 #include <eventql/util/logging.h>
 #include <eventql/server/session.h>
+#include <eventql/transport/native/frames/query_partial_aggr.h>
 #include <sys/fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -347,8 +348,14 @@ ScopedPtr<ResultCursor> GroupByMergeExpression::execute() {
     }
   });
 
-  auto result_handler = [this] (void* priv, const char* data, size_t size) {
-    logDebug("evqld", "got result! $0", size);
+  auto result_handler = [this] (
+      void* priv,
+      uint16_t opcode,
+      uint16_t flags,
+      const char* payload,
+      size_t payload_size) -> ReturnCode {
+    logDebug("evqld", "got result! $0/$1", opcode, payload_size);
+    return ReturnCode::success();
   //  //const auto& group_key = row[0].getString();
 
   //  //auto& group = groups_[group_key];
@@ -393,19 +400,25 @@ void GroupByMergeExpression::addPart(
     GroupByNode* node,
     std::vector<std::string> hosts) {
 
-  std::string req_body;
-  auto req_body_os = StringOutputStream::fromString(&req_body);
+  std::string qtree_coded;
+  auto qtree_coded_os = StringOutputStream::fromString(&qtree_coded);
   QueryTreeCoder qtree_coder(txn_);
-  qtree_coder.encode(node, req_body_os.get());
+  qtree_coder.encode(node, qtree_coded_os.get());
 
-  eventql::native_transport::RPCFrame frame;
-  frame.setBody(std::move(req_body));
-  frame.setMethod("internal.sql.partial_aggregate");
+  eventql::native_transport::QueryPartialAggrFrame frame;
+  frame.setEncodedQtree(std::move(qtree_coded));
   frame.setDatabase(
       static_cast<eventql::Session*>(
           txn_->getUserData())->getEffectiveNamespace());
 
-  rpc_scheduler_.addRPC(std::move(frame), hosts);
+  std::string payload;
+  frame.writeToString(&payload);
+
+  rpc_scheduler_.addRPC(
+      EVQL_OP_QUERY_PARTIALAGGR,
+      0,
+      std::move(payload),
+      hosts);
 }
 
 bool GroupByMergeExpression::next(SValue* row, size_t row_len) {
