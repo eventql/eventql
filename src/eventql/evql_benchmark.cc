@@ -147,18 +147,16 @@ ReturnCode sendQuery(
   } else {
     return ReturnCode::success();
   }
-
 }
 
 void print(
     RequestStats* rstats,
     OutputStream* stdout_os) {
-  UnixTime now;
   stdout_os->write(StringUtil::format(
-    "total: $0  --  successful: $1  --  failed: $2  -- rate: \n",
-    rstats->getTotal(),
-    rstats->getSuccessfulRequest(),
-    rstats->getFailedRequests()));
+      "total: $0  --  successful: $1  --  failed: $2  -- rate: \n",
+      rstats->getTotal(),
+      rstats->getSuccessfulRequest(),
+      rstats->getFailedRequests()));
 }
 
 int main(int argc, const char** argv) {
