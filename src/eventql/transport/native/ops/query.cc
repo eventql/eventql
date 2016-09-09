@@ -64,12 +64,12 @@ ReturnCode performOperation_QUERY(
   if (q_flags & EVQL_QUERY_SWITCHDB) {
     auto rc = dbctx->client_auth->changeNamespace(session, q_database);
     if (!rc.isSuccess()) {
-      return sendError(conn, rc.message());
+      return conn->sendErrorFrame(rc.message());
     }
   }
 
   if (session->getEffectiveNamespace().empty()) {
-    return sendError(conn, "No database selected");
+    return conn->sendErrorFrame("No database selected");
   }
 
   /* execute queries */
@@ -82,8 +82,7 @@ ReturnCode performOperation_QUERY(
     //});
 
     if (qplan->numStatements() > 1 && !(q_flags & EVQL_QUERY_MULTISTMT)) {
-      return sendError(
-          conn,
+      return conn->sendErrorFrame(
           "you must set EVQL_QUERY_MULTISTMT to enable multiple statements");
     }
 
@@ -171,7 +170,7 @@ ReturnCode performOperation_QUERY(
       }
     }
   } catch (const StandardException& e) {
-    return sendError(conn, e.what());
+    return conn->sendErrorFrame(e.what());
   }
 
   return ReturnCode::success();
