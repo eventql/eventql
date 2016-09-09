@@ -148,6 +148,19 @@ ReturnCode NativeConnection::sendFrame(
   return flushBuffer(true, timeout_);
 }
 
+ReturnCode NativeConnection::sendErrorFrame(const std::string& error) {
+  util::BinaryMessageWriter e_frame;
+  e_frame.appendLenencString(error);
+  char zero = 0;
+  e_frame.append(&zero, 1);
+
+  return conn->sendFrame(
+      EVQL_OP_ERROR,
+      e_frame.data(),
+      e_frame.size(),
+      EVQL_ENDOFREQUEST);
+}
+
 ReturnCode NativeConnection::sendFrameAsync(
     uint16_t opcode,
     const void* data,

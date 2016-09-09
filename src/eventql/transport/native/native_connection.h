@@ -51,6 +51,8 @@ public:
       size_t len,
       uint16_t flags = 0);
 
+  ReturnCode sendErrorFrame(const std::string& error);
+
   ReturnCode sendFrameAsync(
       uint16_t opcode,
       const void* data,
