@@ -109,6 +109,7 @@ ReturnCode performHandshake(Database* database, NativeConnection* conn) {
       case EVQL_OP_HELLO:
         break;
       default:
+        conn->sendErrorFrame("invalid opcode");
         conn->close();
         return ReturnCode::error("ERUNTIME", "invalid opcode");
     }
@@ -137,6 +138,7 @@ ReturnCode performOperation(
     case EVQL_OP_QUERY:
       return performOperation_QUERY(database, conn, payload);
     default:
+      conn->sendErrorFrame("invalid opcode");
       conn->close();
       return ReturnCode::error("ERUNTIME", "invalid opcode");
   }
