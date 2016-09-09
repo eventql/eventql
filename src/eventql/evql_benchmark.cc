@@ -151,20 +151,14 @@ ReturnCode sendQuery(
 }
 
 void print(
-    size_t num_errors,
-    size_t num_succes,
-    UnixTime start,
+    RequestStats* rstats,
     OutputStream* stdout_os) {
   UnixTime now;
-  auto duration = now - start;
   stdout_os->write(StringUtil::format(
-    "total   successful    error      milliseconds\n"
-    "   $0      $1            $2      $3\n\n",
-    num_errors + num_succes,
-    num_succes,
-    num_errors,
-    duration.milliseconds()
-  ));
+    "total: $0  --  successful: $1  --  failed: $2  -- rate: \n",
+    rstats->getTotal(),
+    rstats->getSuccessfulRequest(),
+    rstats->getFailedRequests()));
 }
 
 int main(int argc, const char** argv) {
@@ -394,7 +388,7 @@ int main(int argc, const char** argv) {
         }
         m.unlock();
 
-        //print(errors, requests_sent, global_start, stdout_os.get());
+        print(&rstats, stdout_os.get());
         if (rstats.stop()) {
           break;
         }
@@ -408,6 +402,6 @@ int main(int argc, const char** argv) {
     t.join();
   }
 
-  //print(errors, requests_sent, global_start, stdout_os.get());
+  print(&rstats, stdout_os.get());
   return 0;
 }
