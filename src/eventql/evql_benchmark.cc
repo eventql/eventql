@@ -38,6 +38,83 @@
 #include "eventql/util/thread/threadpool.h"
 #include "eventql/cli/cli_config.h"
 
+
+struct TimeWindow {
+  static constexpr auto kMillisPerWindow = 1 * kMillisPerSecond;
+
+  TimeWindow() : num_requests_(0) {}
+
+  void addRequest() {
+    ++num_requests_;
+  }
+
+  int64_t getRemainingMillis() {
+    UnixTime now;
+    auto duration = now - start_;
+    return kMillisPerWindow - duration.milliseconds();
+  }
+
+  void clear() {
+    num_requests_ = 0;
+    UnixTime now;
+    start_ = now;
+  }
+
+protected:
+  size_t num_requests_;
+  UnixTime start_;
+};
+
+struct RequestStats {
+  static constexpr auto kMaxErrors = 10;
+
+  RequestStats() :
+      failed_requests_(0),
+      successful_requests_(0),
+      max_requests_(0),
+      has_max_(false) {}
+
+  void addFailedRequest() {
+    ++failed_requests_;
+  }
+
+  void addSuccessfulRequest() {
+    ++successful_requests_;
+  }
+
+  uint64_t getFailedRequests() {
+    return failed_requests_;
+  }
+
+  uint64_t getSuccessfulRequest() {
+    return successful_requests_;
+  }
+
+  uint64_t getTotal() {
+    return successful_requests_ + failed_requests_;
+  }
+
+  void setMaximumRequests(uint64_t max_requests) {
+    max_requests_ = max_requests;
+    has_max_ = true;
+  }
+
+  bool stop() {
+    if (failed_requests_ >= kMaxErrors)
+    if (!has_max_) {
+      return false;
+    }
+
+    return getTotal() >= max_requests_;
+  }
+
+protected:
+  uint64_t failed_requests_;
+  uint64_t successful_requests_;
+  uint64_t max_requests_;
+  bool has_max_;
+};
+
 ReturnCode sendQuery(
     const String& query,
     const String& qry_db,
@@ -89,28 +166,6 @@ void print(
     duration.milliseconds()
   ));
 }
-
-static constexpr auto kMaxErrors = 10;
-
-struct TimeWindow {
-  static constexpr auto kMillisPerWindow = 1 * kMillisPerSecond;
-
-  void clear() {
-    num_requests = 0;
-    UnixTime now;
-    start = now;
-  }
-
-  int64_t getRemainingMillis() {
-    UnixTime now;
-    auto duration = now - start;
-    return kMillisPerWindow - duration.milliseconds();
-  }
-
-  size_t num_requests;
-  UnixTime start;
-};
-
 
 int main(int argc, const char** argv) {
   cli::FlagParser flags;
@@ -281,21 +336,18 @@ int main(int argc, const char** argv) {
 
   auto qry_str = flags.getString("query");
   auto rate = flags.getInt("rate");
-  auto num_threads = flags.getInt("threads");
-  size_t max_requests;
-  bool has_max = false;
-  if (flags.isSet("max")) {
-    max_requests = flags.getInt("max");
-    has_max = true;
-  }
 
   const UnixTime global_start;
 
   std::mutex m;
   TimeWindow twindow;
-  auto errors = 0;
-  auto requests_sent = 0;
 
+  RequestStats rstats;
+  if (flags.isSet("max")) {
+    rstats.setMaximumRequests(flags.getInt("max"));
+  }
+
+  auto num_threads = flags.getInt("threads");
   Vector<std::thread> threads;
   for (size_t i = 0; i < num_threads; ++i) {
     threads.emplace_back(std::thread([&] () {
@@ -321,10 +373,10 @@ int main(int argc, const char** argv) {
       }
 
       for (;;) {
-        /* check remaining time in current timewindow */
         m.lock();
-        /* start a new timewindow */
+        /* check remaining time in current timewindow */
         if (twindow.getRemainingMillis() <= 0) {
+          /* start a new timewindow */
           twindow.clear();
           m.unlock();
           continue;
@@ -336,14 +388,14 @@ int main(int argc, const char** argv) {
         m.lock();
         if (!rc.isSuccess()) {
           logFatal("evqlbenchmark", "executing query failed: $0", rc.getMessage());
-          ++errors;
+          rstats.addFailedRequest();
         } else {
-          ++requests_sent;
+          rstats.addSuccessfulRequest();
         }
         m.unlock();
 
-        print(errors, requests_sent, global_start, stdout_os.get());
-        if (errors > kMaxErrors || (has_max && requests_sent >= max_requests)) {
+        //print(errors, requests_sent, global_start, stdout_os.get());
+        if (rstats.stop()) {
           break;
         }
       }
@@ -356,6 +408,6 @@ int main(int argc, const char** argv) {
     t.join();
   }
 
-  print(errors, requests_sent, global_start, stdout_os.get());
+  //print(errors, requests_sent, global_start, stdout_os.get());
   return 0;
 }
