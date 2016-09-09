@@ -27,9 +27,9 @@ Table of Contents
       6.1.10 QUERY_DISCARD
       6.1.11 QUERY_PROGRESS
       6.1.12 QUERY_NEXT
-      6.1.13 RPC
-      6.1.14 RPC_RESULT
     6.2 S2S Messages
+      6.2.1 QUERY_PARTIALAGGR
+      6.2.2 QUERY_PARTIALAGGR_RESULT
 
 1. Preface
 
@@ -132,14 +132,18 @@ Binary Protocols.
     0x0009   QUERY_DISCARD
     0x0010   QUERY_PROGRESS
     0x0011   QUERY_NEXT
-    0x0012   RPC
-    0x0013   RPC_RESULT
+    0x0012   QUERY_PARTIALAGGR
+    0x0013   QUERY_PARTIALAGGR_RESULT
 
   Messages are described in Section 6.
 
 5.2. flags
 
-  Flags applying to this frame. The flags are currently unused and ignored.
+  Flags applying to this frame.
+
+    0x01  EVQL_ENDOFREQUEST
+          This is the last response frame for the currently running request
+
 
 5.3. length
 
@@ -329,61 +333,55 @@ Binary Protocols.
     <no response>
 
 
-6.13 RPC
+6.13 QUERY_PARTIALAGGR
 
-  The RPC message initiates a new rpc request and is only sent by the client.
-  A RPC message must not be sent while another request is still running.
+  The QUERY_PARTIALAGGR is used to execute a partial aggregation on a remote
+  server.
+
+  The QUERY_PARTIALAGGR message initiates a new request. A QUERY_PARTIALAGGR
+  message must not be sent while another request is still running.
 
   Payload:
     lenencint      flags
-    lenencstr      method
-    lenencstr      content_type    | if flags 0x01 HASCTYPE is set
-    lenencstr      database        | if flags 0x02 SWITCHDB is set
-    lenencstr      body
+    lenencstr      database
+    lenencstr      encoded_qtree
 
   Fields:
-    flags          0x01 RPC_HASCTYPE - Content type field is set
-                   0x02 RPC_SWITCHDB - Switch database
-    method         The name of the rpc method to call
-    content_type   The content type of the request body
-    database       Switch the database before executing the RPC
-    body           The request body
-
+    flags          Currently unused
+    datbase        The database on which the query should be executed
+    encoded_qtree  The encoded query tree
 
   Response:
-    After sending a RPC message, the client should expect to receive one of
-    these response messages:
+    After sending a QUERY_PARTIALAGGR message, the client should expect to
+    receive one of these response messages:
       - ERROR
       - HEARTBEAT
-      - RPC_RESULT
+      - QUERY_PARTIALAGGR_RESULT
 
-    The request is considered completed once any one of these conditions is
-    satisfied:
-      - The server has responded with a ERROR message
-      - The server has responded with a RPC_RESULT message with the COMPLETE
-        flag set
-
-    After the request is complete, the server will not send any further messages.
+    The request is considered completed once the client has received a response
+    frame with the EVQL_ENDOFREQUEST flag set.  After the request is complete,
+    the server will not send any further messages.
 
 
-6.14 RPC_RESULT
+6.14 QUERY_PARTIALAGGR_RESULT
 
-  The RPC_RESULT message contains a the result of a successful RPC call. Results
-  may be paged, i.e. depending on the result size the rpc result will be split
-  into many RPC_RESULT frames.
+  The QUERY_PARTIALAGGR_RESULT message contains a the result of a successful
+  QUERY_PARTIALAGGR call. Results may be paged, i.e. depending on the result size
+  the result will be split into many QUERY_PARTIALAGGR_RESULT frames.
 
-  After receiving a RPC_RESULT frame, the client must check if the COMPLETED
-  flag is set. If the flag is set, the rpc can be considered complete and the
-  client should not expect any further frames from the server. If the flag is
-  not set, the client must wait for the next RPC_RESULT frame.
+  After receiving a QUERY_PARTIALAGGR_RESULT frame, the client must check if the
+  EVQL_ENDOFREQUEST flag is set. If the flag is set, the request can be
+  considered complete and the client should not expect any further frames from
+  the server. If the flag is not set, the client must wait for the next
+  QUERY_PARTIALAGGR_RESULT frame.
 
   Payload:
     lenencint      flags
     lenencstr      body
 
   Fields:
-    flags          0x01 RPC_RESULT_COMPLETE - This is the last RPC_RESULT event
-    body           The (Nth chunk) of the rpc result
+    flags          Currently unused 
+    result         The (Nth chunk) of the result
 
   Response:
     No response.
