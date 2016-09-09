@@ -31,7 +31,7 @@
 #include <eventql/util/freeondestroy.h>
 #include <eventql/util/logging.h>
 #include <eventql/server/session.h>
-#include <eventql/transport/native/frames/query_partial_aggr.h>
+#include <eventql/transport/native/frames/query_partialaggr.h>
 #include <sys/fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>

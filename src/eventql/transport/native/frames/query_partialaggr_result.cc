@@ -22,41 +22,41 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#pragma once
-#include <string>
-#include <vector>
-#include "eventql/eventql.h"
-#include "eventql/util/return_code.h"
-#include "eventql/sql/svalue.h"
-#include "eventql/transport/native/native_connection.h"
+#include "eventql/transport/native/frames/query_partialaggr_result.h"
+#include "eventql/util/util/binarymessagewriter.h"
 
 namespace eventql {
 namespace native_transport {
 
-class RPCResultFrame {
-public:
+QueryPartialAggrResultFrame::QueryPartialAggrResultFrame() : flags_(0) {}
 
-  RPCResultFrame();
+void QueryPartialAggrResultFrame::setBody(std::string body) {
+  body_ = body;
+}
 
-  void setBody(std::string body);
+void QueryPartialAggrResultFrame::setBody(const char* data, size_t len) {
+  body_ = std::string(data, len);
+}
 
-  void setBody(const char* data, size_t len);
+const std::string& QueryPartialAggrResultFrame::getBody() const {
+  return body_;
+}
 
-  void setIsComplete(bool is_complete);
+std::string& QueryPartialAggrResultFrame::getBody() {
+  return body_;
+}
 
-  const std::string& getBody() const;
+ReturnCode QueryPartialAggrResultFrame::writeTo(NativeConnection* conn) {
+  util::BinaryMessageWriter writer;
+  writer.appendVarUInt(flags_);
+  writer.appendLenencString(body_);
 
-  std::string& getBody();
+  conn->writeAsync(writer.data(), writer.size());
+  return conn->flushBuffer(true);
+}
 
-  bool getIsComplete();
-
-  ReturnCode writeTo(NativeConnection* conn);
-
-protected:
-  uint64_t flags_;
-  std::string body_;
-};
 
 } // namespace native_transport
 } // namespace eventql
+
 
