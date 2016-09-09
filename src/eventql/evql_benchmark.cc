@@ -248,11 +248,14 @@ int main(int argc, const char** argv) {
     max_requests = flags.getInt("max");
   }
 
+  UnixTime starttime;
+  std::mutex m;
   auto errors = 0;
   auto requests_sent = 0;
   Vector<std::thread> threads;
   for (size_t i = 0; i < num_threads; ++i) {
     threads.emplace_back(std::thread([&] () {
+
       /* connect to eventql client */
       auto client = evql_client_init();
       if (!client) {
@@ -273,20 +276,26 @@ int main(int argc, const char** argv) {
           return 0;
         }
       }
- //     while (!stop) { //lock?
-      auto rc = sendQuery(qry_str, qry_db, client);
-      if (!rc.isSuccess()) {
-        logFatal("evqlbenchmark", "executing query failed: $0", rc.getMessage());
-        ++errors;
-      } else {
-        ++requests_sent;
+
+      /* send query */
+      for (;;) {
+        auto rc = sendQuery(qry_str, qry_db, client);
+
+        m.lock();
+        if (!rc.isSuccess()) {
+          logFatal("evqlbenchmark", "executing query failed: $0", rc.getMessage());
+          ++errors;
+        } else {
+          ++requests_sent;
+        }
+        m.unlock();
+
+        if (errors > 10 || (max_requests > 0 && requests_sent >= max_requests)) { //FIXME add kMaxErrors and calculate rate 
+          break;
+        }
       }
 
-    //    if (errors > 10 || (max_requests && max_requests > requests_sent)) {
-    //      iputs("stop", 1);
-    //      stop = true;
-    //    }
-    //  }
+      evql_client_close(client);
     }));
   }
 
@@ -294,36 +303,16 @@ int main(int argc, const char** argv) {
     t.join();
   }
 
-  //UnixTime starttime;
-  //for (size_t i = 0; i < max_requests; ++i) {
-  //  auto rc = sendQuery(qry_str, qry_db, client);
-  //  if (!rc.isSuccess()) {
-  //    logFatal("evqlbenchmark", "executing query failed: $0", rc.getMessage());
-  //    ++errors;
-  //  } else {
-  //    ++success;
-  //  }
-  //}
+  UnixTime end;
+  auto duration = end - starttime;
+  stdout_os->write(StringUtil::format(
+    "total   successful    error      milliseconds\n"
+    "   $0      $1            $2      $3\n\n",
+    errors + requests_sent,
+    requests_sent,
+    errors,
+    duration.milliseconds()
+  ));
 
-  //for (
-
-  ////thread::ThreadPoolOptions thread_opts;
-  ////auto max_concurrent_threads = 5; //FIXME get from flags
-  ////auto tpool = new thread::ThreadPool(thread_opts, max_concurrent_threads);
-  ////tpool->run([qry_db, qry_str, client] {
-  ////});
-
-  //UnixTime end;
-  //auto duration = end - starttime;
-  //stdout_os->write(StringUtil::format(
-  //  "total   successful    error      milliseconds\n"
-  //  "   $0      $1            $2      $3\n\n",
-  //  errors + success,
-  //  success,
-  //  errors,
-  //  duration.milliseconds()
-  //));
-
-  evql_client_close(client);
   return 0;
 }
