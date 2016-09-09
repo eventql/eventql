@@ -73,7 +73,25 @@ ReturnCode sendQuery(
 
 }
 
+void print(
+    size_t num_errors,
+    size_t num_succes,
+    UnixTime start,
+    OutputStream* stdout_os) {
+  UnixTime now;
+  auto duration = now - start;
+  stdout_os->write(StringUtil::format(
+    "total   successful    error      milliseconds\n"
+    "   $0      $1            $2      $3\n\n",
+    num_errors + num_succes,
+    num_succes,
+    num_errors,
+    duration.milliseconds()
+  ));
+}
+
 static constexpr auto kTWindowSize = 1 * kMillisPerSecond;
+static constexpr auto kMaxErrors = 10;
 
 int main(int argc, const char** argv) {
   cli::FlagParser flags;
@@ -208,7 +226,7 @@ int main(int argc, const char** argv) {
     return 1;
   }
 
-  logInfo("evqlbenchmark", "starting benchmaek");
+  logInfo("evqlbenchmark", "starting benchmark");
   /* options */
   eventql::ProcessConfigBuilder cfg_builder;
   {
@@ -246,8 +264,10 @@ int main(int argc, const char** argv) {
   auto rate = flags.getInt("rate");
   auto num_threads = flags.getInt("threads");
   size_t max_requests;
+  bool has_max = false;
   if (flags.isSet("max")) {
     max_requests = flags.getInt("max");
+    has_max = true;
   }
 
   const UnixTime global_start;
@@ -276,7 +296,6 @@ int main(int argc, const char** argv) {
             cfg.getPort(),
             0);
 
-        logInfo("evqlbenchmark", "connecting to eventql client on $0:$1", cfg.getHost(), cfg.getPort());
         if (rc < 0) {
           logFatal("evqlbenchmark", "can't connect to eventql client: $0", evql_client_geterror(client));
           return 0;
@@ -284,7 +303,7 @@ int main(int argc, const char** argv) {
       }
 
       for (;;) {
-        /* check current timewindow */
+        /* check remaining time in current timewindow */
         m.lock();
         UnixTime now;
         auto duration = now - twindow_start;
@@ -310,7 +329,8 @@ int main(int argc, const char** argv) {
 
         m.unlock();
 
-        if (errors > 10 || (max_requests > 0 && requests_sent >= max_requests)) { //FIXME add kMaxErrors and calculate rate 
+        print(errors, requests_sent, global_start, stdout_os.get());
+        if (errors > kMaxErrors || (has_max && requests_sent >= max_requests)) {
           break;
         }
       }
@@ -323,16 +343,6 @@ int main(int argc, const char** argv) {
     t.join();
   }
 
-  UnixTime end;
-  auto duration = end - global_start;
-  stdout_os->write(StringUtil::format(
-    "total   successful    error      milliseconds\n"
-    "   $0      $1            $2      $3\n\n",
-    errors + requests_sent,
-    requests_sent,
-    errors,
-    duration.milliseconds()
-  ));
-
+  print(errors, requests_sent, global_start, stdout_os.get());
   return 0;
 }
