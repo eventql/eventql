@@ -73,6 +73,8 @@ ReturnCode sendQuery(
 
 }
 
+static constexpr auto kTWindowSize = 1 * kMillisPerSecond;
+
 int main(int argc, const char** argv) {
   cli::FlagParser flags;
 
@@ -248,10 +250,14 @@ int main(int argc, const char** argv) {
     max_requests = flags.getInt("max");
   }
 
-  UnixTime starttime;
+  const UnixTime global_start;
+
   std::mutex m;
+  UnixTime twindow_start;
+  auto requests_per_twindow = 0;
   auto errors = 0;
   auto requests_sent = 0;
+
   Vector<std::thread> threads;
   for (size_t i = 0; i < num_threads; ++i) {
     threads.emplace_back(std::thread([&] () {
@@ -277,10 +283,23 @@ int main(int argc, const char** argv) {
         }
       }
 
-      /* send query */
       for (;;) {
-        auto rc = sendQuery(qry_str, qry_db, client);
+        /* check current timewindow */
+        m.lock();
+        UnixTime now;
+        auto duration = now - twindow_start;
 
+        /* start a new timewindow */
+        if (duration.milliseconds() >= kTWindowSize) {
+          twindow_start = now;
+          requests_per_twindow = 0;
+          m.unlock();
+          continue;
+        }
+        m.unlock();
+
+        /* send query */
+        auto rc = sendQuery(qry_str, qry_db, client);
         m.lock();
         if (!rc.isSuccess()) {
           logFatal("evqlbenchmark", "executing query failed: $0", rc.getMessage());
@@ -288,6 +307,7 @@ int main(int argc, const char** argv) {
         } else {
           ++requests_sent;
         }
+
         m.unlock();
 
         if (errors > 10 || (max_requests > 0 && requests_sent >= max_requests)) { //FIXME add kMaxErrors and calculate rate 
@@ -304,7 +324,7 @@ int main(int argc, const char** argv) {
   }
 
   UnixTime end;
-  auto duration = end - starttime;
+  auto duration = end - global_start;
   stdout_os->write(StringUtil::format(
     "total   successful    error      milliseconds\n"
     "   $0      $1            $2      $3\n\n",
