@@ -28,7 +28,9 @@
 namespace eventql {
 namespace native_transport {
 
-QueryPartialAggrResultFrame::QueryPartialAggrResultFrame() : flags_(0) {}
+QueryPartialAggrResultFrame::QueryPartialAggrResultFrame() :
+    flags_(0),
+    num_rows_(0) {}
 
 void QueryPartialAggrResultFrame::setBody(std::string body) {
   body_ = body;
@@ -46,13 +48,14 @@ std::string& QueryPartialAggrResultFrame::getBody() {
   return body_;
 }
 
-ReturnCode QueryPartialAggrResultFrame::writeTo(NativeConnection* conn) {
-  util::BinaryMessageWriter writer;
-  writer.appendVarUInt(flags_);
-  writer.appendLenencString(body_);
+void QueryPartialAggrResultFrame::setNumRows(size_t num_rows) {
+  num_rows_ = num_rows;
+}
 
-  conn->writeAsync(writer.data(), writer.size());
-  return conn->flushBuffer(true);
+void QueryPartialAggrResultFrame::writeTo(OutputStream* os) {
+  os->appendVarUInt(flags_);
+  os->appendVarUInt(num_rows_);
+  os->appendString(body_);
 }
 
 

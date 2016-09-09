@@ -377,11 +377,13 @@ Binary Protocols.
 
   Payload:
     lenencint      flags
-    lenencstr      body
+    lenencint      num_rows
+    lenencstr*     body
 
   Fields:
-    flags          Currently unused 
-    result         The (Nth chunk) of the result
+    flags          Currently unused
+    num_rows       The number of result rows in this frame
+    body           A list of group, scratch pairs (num_rows * 2 strings)
 
   Response:
     No response.

@@ -43,13 +43,15 @@ public:
   void setBody(const char* data, size_t len);
 
   const std::string& getBody() const;
-
   std::string& getBody();
 
-  ReturnCode writeTo(NativeConnection* conn);
+  void setNumRows(size_t num_rows);
+
+  void writeTo(OutputStream* os);
 
 protected:
   uint64_t flags_;
+  size_t num_rows_;
   std::string body_;
 };
 

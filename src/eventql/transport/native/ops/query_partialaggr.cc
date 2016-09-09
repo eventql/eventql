@@ -24,7 +24,8 @@
  */
 #include "eventql/transport/native/native_transport.h"
 #include "eventql/transport/native/native_connection.h"
-#include "eventql/transport/native/frames/query_partial_aggr.h"
+#include "eventql/transport/native/frames/query_partialaggr.h"
+#include "eventql/transport/native/frames/query_partialaggr_result.h"
 #include "eventql/util/logging.h"
 #include "eventql/util/util/binarymessagereader.h"
 #include "eventql/server/session.h"
@@ -34,6 +35,8 @@
 
 namespace eventql {
 namespace native_transport {
+
+static const size_t kPartialAggrResponseSoftMaxSize = 1024 * 1024 * 8; // 8MB
 
 ReturnCode performOperation_QUERY_PARTIALAGGR(
     Database* database,
@@ -67,11 +70,40 @@ ReturnCode performOperation_QUERY_PARTIALAGGR(
     auto qtree = coder.decode(req_body_is.get());
     auto qplan = dbctx->sql_runtime->buildQueryPlan(txn.get(), { qtree });
     auto execute = qplan->execute(0);
-    csql::SValue row[2];
-    while (execute->next(row, 2)) {
-      iputs("got row", 1);
-    }
 
+    for (bool eof = false; !eof; ) {
+      QueryPartialAggrResultFrame result_frame;
+      auto os = StringOutputStream::fromString(&result_frame.getBody());
+      csql::SValue row[2];
+      size_t num_rows = 0;
+
+      while ((eof = !execute->next(row, 2)) == false) {
+        ++num_rows;
+        os->appendLenencString(row[0].getString());
+        os->appendLenencString(row[1].getString());
+
+        auto body_len = result_frame.getBody().size();
+        if (body_len > kPartialAggrResponseSoftMaxSize) {
+          break;
+        }
+      }
+
+      result_frame.setNumRows(num_rows);
+
+      std::string payload;
+      auto payload_os = StringOutputStream::fromString(&payload);
+      result_frame.writeTo(payload_os.get());
+
+      auto rc = conn->sendFrame(
+          EVQL_OP_QUERY_PARTIALAGGR_RESULT,
+          payload.data(),
+          payload.size(),
+          eof ? EVQL_ENDOFREQUEST : 0);
+
+      if (!rc.isSuccess()) {
+        return rc;
+      }
+    }
   } catch (const std::exception& e) {
     conn->sendErrorFrame(e.what());
   }
