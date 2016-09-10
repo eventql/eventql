@@ -98,8 +98,6 @@ EVQL_CORE_SOURCES_ = \
     eventql/util/RegExp.h \
     eventql/util/SHA1.cc \
     eventql/util/SHA1.h \
-    eventql/util/StackTrace.cc \
-    eventql/util/StackTrace.h \
     eventql/util/UTF8.cc \
     eventql/util/UTF8.h \
     eventql/util/UnixTime.cc \
