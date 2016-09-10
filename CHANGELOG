@@ -16,6 +16,8 @@ EventQL v0.4.0 beta;
   * Added a native transport layer (a framed TCP-based protocol). See
     doc/internals/protocol.txt for the specification
 
+  * Added a c client driver library (libevqlclient)
+
   * Added a thread-local storage and retrieval mechanism for the current
     session. This also adds a new requirement that all operations must be
     executed from within a valid database thread.
