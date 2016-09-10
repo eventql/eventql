@@ -52,6 +52,7 @@ public:
       uint16_t flags = 0);
 
   ReturnCode sendErrorFrame(const std::string& error);
+  ReturnCode sendHeartbeatFrame();
 
   ReturnCode sendFrameAsync(
       uint16_t opcode,

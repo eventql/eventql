@@ -162,6 +162,14 @@ ReturnCode NativeConnection::sendErrorFrame(const std::string& error) {
       EVQL_ENDOFREQUEST);
 }
 
+ReturnCode NativeConnection::sendHeartbeatFrame() {
+  if (write_buf_.empty()) {
+    return sendFrameAsync(EVQL_OP_HEARTBEAT, nullptr, 0, 0);
+  } else {
+    return flushBuffer(false, 0);
+  }
+}
+
 ReturnCode NativeConnection::sendFrameAsync(
     uint16_t opcode,
     const void* data,
