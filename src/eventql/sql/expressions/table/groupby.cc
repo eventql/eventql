@@ -356,6 +356,7 @@ ScopedPtr<ResultCursor> GroupByMergeExpression::execute() {
       size_t payload_size) -> ReturnCode {
     MemoryInputStream is(payload, payload_size);
 
+    auto res_flags = is.readVarUInt();
     auto res_count = is.readVarUInt();
     for (size_t j = 0; j < res_count; ++j) {
       const char* key;
