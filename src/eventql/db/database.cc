@@ -489,7 +489,7 @@ void DatabaseImpl::startThread(std::function<void(Session*)> entrypoint) {
     try {
       entrypoint(session);
     } catch (const std::exception& e) {
-      // do nothing
+      logError("eventql", "Database Thread crashed: $0", e.what());
     }
 
     delete session;
