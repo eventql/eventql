@@ -57,7 +57,7 @@ public:
       const void* payload,
       size_t payload_len) override;
 
-  bool isOutboxEmpty() const;
+  bool isOutboxEmpty() const override;
   ReturnCode flushOutbox(bool block, uint64_t timeout_us = 0) override;
 
   void close() override;
