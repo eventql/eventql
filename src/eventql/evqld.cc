@@ -302,6 +302,11 @@ int main(int argc, const char** argv) {
     return 1;
   }
 
+  /* daemonize */
+  if (evql_server_getconfbool(server, "server.daemonize")) {
+    Application::daemonize();
+  }
+
   /* pidfile */
   ScopedPtr<FileLock> pidfile_lock;
   String pidfile_path;
@@ -321,11 +326,6 @@ int main(int argc, const char** argv) {
         File::O_WRITE | File::O_CREATEOROPEN | File::O_TRUNCATE);
 
     pidfile.write(StringUtil::toString(getpid()));
-  }
-
-  /* daemonize */
-  if (evql_server_getconfbool(server, "server.daemonize")) {
-    Application::daemonize();
   }
 
   /* start database */
