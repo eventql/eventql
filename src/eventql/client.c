@@ -587,8 +587,6 @@ static int evql_client_query_readresultframe(evql_client_t* client) {
         } else {
           evql_client_seterror(client, "<unspecified error>");
         }
-
-        evql_client_close_hard(client);
         return -1;
       }
 
