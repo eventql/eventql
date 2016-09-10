@@ -46,8 +46,8 @@ TCPConnection::TCPConnection(
     int fd,
     const std::string& prelude_bytes /* = "" */) :
     fd_(fd),
-    timeout_(1000 * 1000),
-    read_buf_(prelude_bytes) {
+    read_buf_(prelude_bytes),
+    io_timeout_(kMicrosPerSecond) {
   logDebug(
       "eventql",
       "Opening new native connection; id=$0 fd=$1",
@@ -125,10 +125,11 @@ ReturnCode TCPConnection::read(
 
 ReturnCode TCPConnection::recvFrame(
     uint16_t* opcode,
+    uint16_t* recvflags,
     std::string* payload,
-    uint16_t* recvflags /* = nullptr */) {
+    uint64_t timeout_us) {
   char header[8];
-  auto rc = read(header, sizeof(header), timeout_);
+  auto rc = read(header, sizeof(header), timeout_us);
   if (!rc.isSuccess()) {
     return rc;
   }
@@ -146,27 +147,27 @@ ReturnCode TCPConnection::recvFrame(
   }
 
   payload->resize(payload_len);
-  return read(&(*payload)[0], payload_len, timeout_);
+  return read(&(*payload)[0], payload_len, io_timeout_);
 }
 
 ReturnCode TCPConnection::sendFrame(
     uint16_t opcode,
-    const void* data,
-    size_t len,
-    uint16_t flags /* = 0 */) {
-  auto rc = sendFrameAsync(opcode, data, len, flags);
+    uint16_t flags,
+    const void* payload,
+    size_t payload_len) {
+  auto rc = sendFrameAsync(opcode, flags, payload, payload_len);
   if (!rc.isSuccess()) {
     return rc;
   }
 
-  return flushOutbox(true, timeout_);
+  return flushOutbox(true, io_timeout_);
 }
 
 ReturnCode TCPConnection::sendFrameAsync(
     uint16_t opcode,
+    uint16_t flags,
     const void* data,
-    size_t len,
-    uint16_t flags /* = 0 */) {
+    size_t len) {
   writeFrameHeaderAsync(opcode, len, flags);
   writeAsync(data, len);
   return flushOutbox(false, 0);
@@ -180,7 +181,7 @@ ReturnCode TCPConnection::flushOutbox(
   }
 
   if (block && !timeout_us) {
-    timeout_us = timeout_;
+    timeout_us = io_timeout_;
   }
 
   while (!write_buf_.empty()) {

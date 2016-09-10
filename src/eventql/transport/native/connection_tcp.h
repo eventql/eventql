@@ -40,20 +40,21 @@ public:
 
   ReturnCode recvFrame(
       uint16_t* opcode,
+      uint16_t* flags,
       std::string* payload,
-      uint16_t* flags = 0) override;
+      uint64_t timeout_us) override;
 
   ReturnCode sendFrame(
       uint16_t opcode,
-      const void* data,
-      size_t len,
-      uint16_t flags = 0) override;
+      uint16_t flags,
+      const void* payload,
+      size_t payload_len) override;
 
   ReturnCode sendFrameAsync(
       uint16_t opcode,
-      const void* data,
-      size_t len,
-      uint16_t flags = 0) override;
+      uint16_t flags,
+      const void* payload,
+      size_t payload_len) override;
 
   bool isOutboxEmpty() const;
   ReturnCode flushOutbox(bool block, uint64_t timeout_us = 0) override;
@@ -72,9 +73,9 @@ protected:
   ReturnCode read(char* data, size_t len, uint64_t timeout_us);
 
   int fd_;
-  uint64_t timeout_;
   std::string read_buf_;
   std::string write_buf_;
+  uint64_t io_timeout_;
 };
 
 } // namespace native_transport

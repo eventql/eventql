@@ -38,8 +38,9 @@ public:
 
   virtual ReturnCode recvFrame(
       uint16_t* opcode,
+      uint16_t* flags,
       std::string* payload,
-      uint16_t* flags = 0) = 0;
+      uint64_t timeout_us) = 0;
 
   //virtual ReturnCode peekFrameAsync(
   //    uint16_t* opcode,
@@ -47,15 +48,15 @@ public:
 
   virtual ReturnCode sendFrame(
       uint16_t opcode,
-      const void* data,
-      size_t len,
-      uint16_t flags = 0) = 0;
+      uint16_t flags,
+      const void* payload,
+      size_t payload_len) = 0;
 
   virtual ReturnCode sendFrameAsync(
       uint16_t opcode,
+      uint16_t flags,
       const void* data,
-      size_t len,
-      uint16_t flags = 0) = 0;
+      size_t len) = 0;
 
   ReturnCode sendErrorFrame(const std::string& error);
   ReturnCode sendHeartbeatFrame();

@@ -100,9 +100,9 @@ ReturnCode performOperation_QUERY_PARTIALAGGR(
 
       auto rc = conn->sendFrame(
           EVQL_OP_QUERY_PARTIALAGGR_RESULT,
+          eof ? EVQL_ENDOFREQUEST : 0,
           payload.data(),
-          payload.size(),
-          eof ? EVQL_ENDOFREQUEST : 0);
+          payload.size());
 
       if (!rc.isSuccess()) {
         return rc;

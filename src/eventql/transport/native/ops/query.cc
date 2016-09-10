@@ -41,6 +41,7 @@ ReturnCode performOperation_QUERY(
     const std::string& payload) {
   auto session = database->getSession();
   auto dbctx = session->getDatabaseContext();
+  auto idle_timeout = kMicrosPerSecond; // FIXME
 
   /* read query frame */
   std::string q_query;
@@ -116,9 +117,15 @@ ReturnCode performOperation_QUERY(
 
           /* wait for discard or continue */
           uint16_t n_opcode;
+          uint16_t n_flags;
           std::string n_payload;
           {
-            auto rc = conn->recvFrame(&n_opcode, &n_payload);
+            auto rc = conn->recvFrame(
+                &n_opcode,
+                &n_flags,
+                &n_payload,
+                idle_timeout);
+
             if (!rc.isSuccess()) {
               return rc;
             }
@@ -153,8 +160,14 @@ ReturnCode performOperation_QUERY(
 
       /* wait for discard or continue (next query) */
       uint16_t n_opcode;
+      uint16_t n_flags;
       std::string n_payload;
-      auto rc = conn->recvFrame(&n_opcode, &n_payload);
+      auto rc = conn->recvFrame(
+          &n_opcode,
+          &n_flags,
+          &n_payload,
+          idle_timeout);
+
       if (!rc.isSuccess()) {
         return rc;
       }

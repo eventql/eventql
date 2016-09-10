@@ -54,6 +54,7 @@ void Server::startConnection(std::unique_ptr<NativeConnection> connection) {
   auto conn_ptr = connection.release();
   db_->startThread([this, conn_ptr] (Session* session) {
     std::unique_ptr<NativeConnection> conn(conn_ptr);
+    auto idle_timeout = kMicrosPerSecond; // FIXME
 
     auto rc = performHandshake(conn.get());
     if (!rc.isSuccess()) {
@@ -68,10 +69,11 @@ void Server::startConnection(std::unique_ptr<NativeConnection> connection) {
         (const void*) conn.get());
 
     uint16_t opcode;
+    uint16_t flags;
     std::string payload;
     bool cont = true;
     while (cont && rc.isSuccess()) {
-      rc = conn->recvFrame(&opcode, &payload);
+      rc = conn->recvFrame(&opcode, &flags, &payload, idle_timeout);
       if (!rc.isSuccess()) {
         break;
       }
@@ -91,11 +93,14 @@ void Server::startConnection(std::unique_ptr<NativeConnection> connection) {
 }
 
 ReturnCode Server::performHandshake(NativeConnection* conn) {
+  auto handshake_timeout = kMicrosPerSecond; // FIXME
+
   /* read HELLO frame */
   {
     uint16_t opcode;
+    uint16_t flags;
     std::string payload;
-    auto rc = conn->recvFrame(&opcode, &payload);
+    auto rc = conn->recvFrame(&opcode, &flags, &payload, handshake_timeout);
     if (!rc.isSuccess()) {
       conn->close();
       return rc;
@@ -113,7 +118,7 @@ ReturnCode Server::performHandshake(NativeConnection* conn) {
 
   /* send READY frame */
   {
-    auto rc = conn->sendFrame(EVQL_OP_READY, nullptr, 0);
+    auto rc = conn->sendFrame(EVQL_OP_READY, 0, nullptr, 0);
     if (!rc.isSuccess()) {
       conn->close();
       return rc;

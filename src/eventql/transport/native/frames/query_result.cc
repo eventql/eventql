@@ -88,9 +88,9 @@ ReturnCode QueryResultFrame::writeTo(NativeConnection* conn) {
 
   return conn->sendFrame(
       EVQL_OP_QUERY_RESULT,
+      is_last_ ? EVQL_ENDOFREQUEST : 0,
       payload.data(),
-      payload.size(),
-      is_last_ ? EVQL_ENDOFREQUEST : 0);
+      payload.size());
 }
 
 void QueryResultFrame::clear() {

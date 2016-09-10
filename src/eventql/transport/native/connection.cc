@@ -35,14 +35,14 @@ ReturnCode NativeConnection::sendErrorFrame(const std::string& error) {
 
   return sendFrame(
       EVQL_OP_ERROR,
+      EVQL_ENDOFREQUEST,
       e_frame.data(),
-      e_frame.size(),
-      EVQL_ENDOFREQUEST);
+      e_frame.size());
 }
 
 ReturnCode NativeConnection::sendHeartbeatFrame() {
   if (isOutboxEmpty()) {
-    return sendFrameAsync(EVQL_OP_HEARTBEAT, nullptr, 0, 0);
+    return sendFrameAsync(EVQL_OP_HEARTBEAT, 0, nullptr, 0);
   } else {
     return flushOutbox(false, 0);
   }
