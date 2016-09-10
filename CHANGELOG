@@ -19,6 +19,8 @@ EventQL v0.4.0 beta;
 
   * Removed the obsolete "sha1_tokens" field from the cluster/server config
 
+  * Removed the PCRE dependency
+
   * Added a native transport layer (a framed TCP-based protocol). See
     doc/internals/protocol.txt for the specification
 
