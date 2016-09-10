@@ -13,6 +13,8 @@ EventQL v0.4.0 beta;
   * Changed the http server code to execute incoming requests from within a
     database thread (previously this was a generic thread pool)
 
+  * Removed the obsolete "sha1_tokens" field from the cluster/server config
+
   * Added a native transport layer (a framed TCP-based protocol). See
     doc/internals/protocol.txt for the specification
 
