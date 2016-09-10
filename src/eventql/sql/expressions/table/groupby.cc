@@ -348,29 +348,37 @@ ScopedPtr<ResultCursor> GroupByMergeExpression::execute() {
     }
   });
 
-  auto result_handler = [this] (
+  auto result_handler = [this, &remote_group] (
       void* priv,
       uint16_t opcode,
       uint16_t flags,
       const char* payload,
       size_t payload_size) -> ReturnCode {
-    logDebug("evqld", "got result! $0/$1", opcode, payload_size);
+    MemoryInputStream is(payload, payload_size);
+
+    auto res_count = is.readVarUInt();
+    for (size_t j = 0; j < res_count; ++j) {
+      const char* key;
+      size_t key_len;
+      if (!is.readLenencStringZ(&key, &key_len)) {
+        return ReturnCode::error("EIO", "invalid partialaggr result encoding");
+      }
+
+      auto& group = groups_[std::string(key, key_len)];
+      if (group.size() == 0) {
+        for (const auto& e : select_exprs_) {
+          group.emplace_back(VM::allocInstance(txn_, e.program(), &scratch_));
+        }
+      }
+
+      for (size_t i = 0; i < select_exprs_.size(); ++i) {
+        const auto& e = select_exprs_[i];
+        VM::loadState(txn_, e.program(), &remote_group[i], &is);
+        VM::merge(txn_, e.program(), &group[i], &remote_group[i]);
+      }
+    }
+
     return ReturnCode::success();
-  //  //const auto& group_key = row[0].getString();
-
-  //  //auto& group = groups_[group_key];
-  //  //if (group.size() == 0) {
-  //  //  for (const auto& e : select_exprs_) {
-  //  //    group.emplace_back(VM::allocInstance(txn_, e.program(), &scratch_));
-  //  //  }
-  //  //}
-
-  //  //auto is = StringInputStream::fromString(row[1].getString());
-  //  //for (size_t i = 0; i < select_exprs_.size(); ++i) {
-  //  //  const auto& e = select_exprs_[i];
-  //  //  VM::loadState(txn_, e.program(), &remote_group[i], is.get());
-  //  //  VM::merge(txn_, e.program(), &group[i], &remote_group[i]);
-  //  //}
   };
 
   rpc_scheduler_.setResultCallback(result_handler);

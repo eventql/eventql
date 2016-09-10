@@ -80,7 +80,7 @@ ReturnCode performOperation_QUERY_PARTIALAGGR(
       while ((eof = !execute->next(row, 2)) == false) {
         ++num_rows;
         os->appendLenencString(row[0].getString());
-        os->appendLenencString(row[1].getString());
+        os->appendString(row[1].getString());
 
         auto body_len = result_frame.getBody().size();
         if (body_len > kPartialAggrResponseSoftMaxSize) {
