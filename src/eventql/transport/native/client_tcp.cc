@@ -35,7 +35,7 @@
 #include "eventql/util/logging.h"
 #include "eventql/util/wallclock.h"
 #include "eventql/util/util/binarymessagereader.h"
-#include "eventql/transport/native/pipelined_rpc.h"
+#include "eventql/transport/native/client_tcp.h"
 #include "eventql/transport/native/frames/hello.h"
 #include "eventql/transport/native/frames/error.h"
 

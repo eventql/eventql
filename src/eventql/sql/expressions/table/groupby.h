@@ -26,7 +26,7 @@
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/SHA1.h>
 #include <eventql/sql/runtime/defaultruntime.h>
-#include <eventql/transport/native/pipelined_rpc.h>
+#include <eventql/transport/native/client_tcp.h>
 
 namespace csql {
 
