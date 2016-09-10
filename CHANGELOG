@@ -26,7 +26,7 @@ EventQL v0.4.0 beta;
 
   * Added the following new configuration options: server.c2s_io_timeout,
     server.c2s_idle_timeout, server.s2s_io_timeout, server.s2s_idle_timeout,
-    server.heartbeat_interval
+    server.heartbeat_interval, cluster.allowed_hosts
 
 
 EventQL v0.3.2 beta;

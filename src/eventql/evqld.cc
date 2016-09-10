@@ -217,13 +217,14 @@ int main(int argc, const char** argv) {
     return 1;
   }
 
+  evql_conf_set(conf, "cluster.rebalance_interval", "60000000");
+  evql_conf_set(conf, "cluster.allowed_hosts", "");
   evql_conf_set(conf, "server.listen", "localhost:9175");
   evql_conf_set(conf, "server.indexbuild_threads", "2");
   evql_conf_set(conf, "server.gc_mode", "AUTOMATIC");
   evql_conf_set(conf, "server.gc_interval", "30000000");
   evql_conf_set(conf, "server.cachedir_maxsize", "68719476736");
   evql_conf_set(conf, "server.noleader", "false");
-  evql_conf_set(conf, "cluster.rebalance_interval", "60000000");
   evql_conf_set(conf, "server.c2s_io_timeout", "1000000");
   evql_conf_set(conf, "server.c2s_idle_timeout", "10000000");
   evql_conf_set(conf, "server.s2s_io_timeout", "1000000");
@@ -231,10 +232,11 @@ int main(int argc, const char** argv) {
   evql_conf_set(conf, "server.heartbeat_interval", "1000000");
 
   if (flags.isSet("standalone")) {
+    evql_conf_set(conf, "cluster.coordinator", "standalone");
+    evql_conf_set(conf, "cluster.allowed_hosts", "0.0.0.0/0");
     evql_conf_set(conf, "server.name", "standalone");
     evql_conf_set(conf, "server.client_auth_backend", "trust");
     evql_conf_set(conf, "server.noleader", "true");
-    evql_conf_set(conf, "cluster.coordinator", "standalone");
   }
 
   if (flags.isSet("config")) {

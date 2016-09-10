@@ -70,6 +70,16 @@ The EventQL configuration options are grouped in three sections: `client`, `serv
     <td></td>
   </tr>
   <tr>
+    <td><b>cluster.allowed_hosts</b></td>
+    <td>&mdash;</td>
+    <td>
+      A comma-separated list of CIDR network ranges that are allowed to
+      connect as internal nodes to the cluster. This setting does not affect
+      which hosts are allowed to connect as a client. You can set this option
+      to "0.0.0.0/0" to allow all hosts to connect as internal nodes.
+    </td>
+  </tr>
+  <tr>
     <th colspan="3" align="left">server.*</th>
   </tr>
   <tr>
