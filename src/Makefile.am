@@ -824,8 +824,8 @@ EVQL_CORE_SOURCES_ = \
     eventql/transport/http/http_transport.h \
     eventql/transport/http/rpc_servlet.cc \
     eventql/transport/http/rpc_servlet.h \
-    eventql/transport/native/native_connection.cc \
-    eventql/transport/native/native_connection.h \
+    eventql/transport/native/connection_tcp.cc \
+    eventql/transport/native/connection_tcp.h \
     eventql/transport/native/native_transport.cc \
     eventql/transport/native/native_transport.h \
     eventql/transport/native/pipelined_rpc.cc \

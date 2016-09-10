@@ -21,7 +21,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include "eventql/transport/native/native_connection.h"
+#include "eventql/transport/native/connection_tcp.h"
 #include "eventql/util/inspect.h"
 #include "eventql/util/util/binarymessagewriter.h"
 #include <string.h>

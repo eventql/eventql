@@ -23,7 +23,7 @@
  * code of your own applications
  */
 #include "eventql/transport/native/native_transport.h"
-#include "eventql/transport/native/native_connection.h"
+#include "eventql/transport/native/connection_tcp.h"
 #include "eventql/transport/native/frames/query_partialaggr.h"
 #include "eventql/transport/native/frames/query_partialaggr_result.h"
 #include "eventql/util/logging.h"

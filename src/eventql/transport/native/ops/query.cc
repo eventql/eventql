@@ -22,7 +22,7 @@
  * code of your own applications
  */
 #include "eventql/transport/native/native_transport.h"
-#include "eventql/transport/native/native_connection.h"
+#include "eventql/transport/native/connection_tcp.h"
 #include "eventql/transport/native/query_result_frame.h"
 #include "eventql/util/logging.h"
 #include "eventql/util/util/binarymessagereader.h"
