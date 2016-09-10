@@ -38,7 +38,8 @@ void HTTPServerConnection::start(
     HTTPHandlerFactory* handler_factory,
     ScopedPtr<net::TCPConnection> conn,
     TaskScheduler* scheduler,
-    HTTPServerStats* stats) {
+    HTTPServerStats* stats,
+    const std::string& prelude_bytes /* = "" */) {
   auto http_conn = new HTTPServerConnection(
       handler_factory,
       std::move(conn),
@@ -48,7 +49,7 @@ void HTTPServerConnection::start(
   // N.B. we don't leak the connection here. it is ref counted and will
   // free itself
   http_conn->incRef();
-  http_conn->nextRequest();
+  http_conn->nextRequest(prelude_bytes);
 }
 
 HTTPServerConnection::HTTPServerConnection(
@@ -213,7 +214,7 @@ void HTTPServerConnection::awaitWrite() {
       *conn_);
 }
 
-void HTTPServerConnection::nextRequest() {
+void HTTPServerConnection::nextRequest(const std::string& prelude_bytes) {
   parser_.reset();
   cur_request_.reset(new HTTPRequest());
   cur_handler_.reset(nullptr);
@@ -225,6 +226,10 @@ void HTTPServerConnection::nextRequest() {
     std::unique_lock<std::recursive_mutex> lk(mutex_);
     body_buf_.append(data, size);
   });
+
+  if (!prelude_bytes.empty()) {
+    parser_.parse((char *) prelude_bytes.data(), prelude_bytes.size());
+  }
 
   awaitRead();
 }
@@ -264,7 +269,7 @@ void HTTPServerConnection::readRequestBody(
     if (last_chunk || body_buf_.size() > 0) {
       BufferRef chunk(new Buffer(body_buf_));
 
-      scheduler_->runAsync([callback, chunk, last_chunk] {
+      scheduler_->run([callback, chunk, last_chunk] { // FIXME runAsyc
         callback(
             (const char*) chunk->data(),
             chunk->size(),

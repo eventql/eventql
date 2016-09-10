@@ -65,9 +65,7 @@ public:
 
   TableService(
       ConfigDirectory* cdir,
-      PartitionMap* pmap,
-      thread::EventLoop* ev,
-      http::HTTPClientStats* http_stats);
+      PartitionMap* pmap);
 
   Status createTable(
       const String& db_namespace,
@@ -160,7 +158,6 @@ protected:
 
   ConfigDirectory* cdir_;
   PartitionMap* pmap_;
-  http::HTTPConnectionPool http_;
 };
 
 } // namespace tdsb

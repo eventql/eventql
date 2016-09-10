@@ -59,8 +59,8 @@ union MessageObjectValues {
 
 struct TrueType {};
 struct FalseType {};
-static const TrueType TRUE {};
-static const FalseType FALSE {};
+static const TrueType MSG_TRUE {};
+static const FalseType MSG_FALSE {};
 
 struct MessageObject {
   explicit MessageObject(uint32_t id = 0);

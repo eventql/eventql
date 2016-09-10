@@ -21,6 +21,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#include "eventql/eventql.h"
 #include "eventql/util/util/binarymessagewriter.h"
 #include "eventql/transport/http/rpc_servlet.h"
 #include "eventql/db/record_envelope.pb.h"
@@ -33,18 +34,11 @@
 #include <eventql/util/util/Base64.h>
 #include <eventql/util/fnv.h>
 #include <eventql/io/sstable/sstablereader.h>
-
-#include "eventql/eventql.h"
+#include "eventql/server/session.h"
 
 namespace eventql {
 
-RPCServlet::RPCServlet(
-    TableService* node,
-    MetadataService* metadata_service,
-    const String& tmpdir) :
-    node_(node),
-    metadata_service_(metadata_service),
-    tmpdir_(tmpdir) {}
+RPCServlet::RPCServlet(Database* database) : db_(database) {}
 
 void RPCServlet::handleHTTPRequest(
     RefPtr<http::HTTPRequestStream> req_stream,
@@ -171,7 +165,7 @@ void RPCServlet::insertRecords(
     http::HTTPResponse* res,
     URI* uri) {
   //auto record_list = msg::decode<RecordEnvelopeList>(req->body());
-  //node_->insertRecords(record_list);
+  //dbctx->table_service->insertRecords(record_list);
   res->addBody("deprecated call");
   res->setStatus(http::kStatusInternalServerError);
 }
@@ -180,6 +174,9 @@ void RPCServlet::compactPartition(
     const http::HTTPRequest* req,
     http::HTTPResponse* res,
     URI* uri) {
+  auto session = db_->getSession();
+  auto dbctx = session->getDatabaseContext();
+
   const auto& params = uri->queryParams();
 
   String tsdb_namespace;
@@ -203,7 +200,7 @@ void RPCServlet::compactPartition(
     return;
   }
 
-  node_->compactPartition(
+  dbctx->table_service->compactPartition(
       tsdb_namespace,
       table_name,
       SHA1Hash::fromHexString(partition_key));
@@ -215,6 +212,9 @@ void RPCServlet::commitPartition(
     const http::HTTPRequest* req,
     http::HTTPResponse* res,
     URI* uri) {
+  auto session = db_->getSession();
+  auto dbctx = session->getDatabaseContext();
+
   const auto& params = uri->queryParams();
 
   String tsdb_namespace;
@@ -238,7 +238,7 @@ void RPCServlet::commitPartition(
     return;
   }
 
-  node_->commitPartition(
+  dbctx->table_service->commitPartition(
       tsdb_namespace,
       table_name,
       SHA1Hash::fromHexString(partition_key));
@@ -250,6 +250,9 @@ void RPCServlet::replicateRecords(
     const http::HTTPRequest* req,
     http::HTTPResponse* res,
     URI* uri) {
+  auto session = db_->getSession();
+  auto dbctx = session->getDatabaseContext();
+
   const auto& params = uri->queryParams();
 
   String tsdb_namespace;
@@ -277,7 +280,7 @@ void RPCServlet::replicateRecords(
   auto body_is = req->getBodyInputStream();
   records.decode(body_is.get());
 
-  node_->insertReplicatedRecords(
+  dbctx->table_service->insertReplicatedRecords(
       tsdb_namespace,
       table_name,
       SHA1Hash::fromHexString(partition_key),
@@ -290,6 +293,9 @@ void RPCServlet::createMetadataFile(
     const URI& uri,
     const http::HTTPRequest* req,
     http::HTTPResponse* res) {
+  auto session = db_->getSession();
+  auto dbctx = session->getDatabaseContext();
+
   const auto& params = uri.queryParams();
 
   String db_namespace;
@@ -309,7 +315,7 @@ void RPCServlet::createMetadataFile(
   auto rc = file.decode(is.get());
 
   if (rc.isSuccess()) {
-    rc = metadata_service_->createMetadataFile(
+    rc = dbctx->metadata_service->createMetadataFile(
         db_namespace,
         table_name,
         file);
@@ -328,6 +334,9 @@ void RPCServlet::performMetadataOperation(
     const URI& uri,
     const http::HTTPRequest* req,
     http::HTTPResponse* res) {
+  auto session = db_->getSession();
+  auto dbctx = session->getDatabaseContext();
+
   const auto& params = uri.queryParams();
 
   String db_namespace;
@@ -354,7 +363,7 @@ void RPCServlet::performMetadataOperation(
   }
 
   MetadataOperationResult result;
-  auto rc = metadata_service_->performMetadataOperation(
+  auto rc = dbctx->metadata_service->performMetadataOperation(
       db_namespace,
       table_name,
       op,
@@ -374,11 +383,14 @@ void RPCServlet::discoverPartitionMetadata(
     const URI& uri,
     const http::HTTPRequest* req,
     http::HTTPResponse* res) {
+  auto session = db_->getSession();
+  auto dbctx = session->getDatabaseContext();
+
   PartitionDiscoveryRequest request;
   msg::decode(req->body(), &request);
 
   PartitionDiscoveryResponse response;
-  auto rc = metadata_service_->discoverPartition(request, &response);
+  auto rc = dbctx->metadata_service->discoverPartition(request, &response);
 
   if (rc.isSuccess()) {
     res->setStatus(http::kStatusOK);
@@ -394,6 +406,9 @@ void RPCServlet::fetchMetadataFile(
     const URI& uri,
     const http::HTTPRequest* req,
     http::HTTPResponse* res) {
+  auto session = db_->getSession();
+  auto dbctx = session->getDatabaseContext();
+
   const auto& params = uri.queryParams();
 
   String db_namespace;
@@ -416,7 +431,7 @@ void RPCServlet::fetchMetadataFile(
   }
 
   RefPtr<MetadataFile> file;
-  auto rc = metadata_service_->getMetadataFile(
+  auto rc = dbctx->metadata_service->getMetadataFile(
       db_namespace,
       table_name,
       SHA1Hash::fromHexString(txid),
@@ -440,6 +455,9 @@ void RPCServlet::fetchLatestMetadataFile(
     const URI& uri,
     const http::HTTPRequest* req,
     http::HTTPResponse* res) {
+  auto session = db_->getSession();
+  auto dbctx = session->getDatabaseContext();
+
   const auto& params = uri.queryParams();
 
   String db_namespace;
@@ -455,7 +473,7 @@ void RPCServlet::fetchLatestMetadataFile(
   }
 
   RefPtr<MetadataFile> file;
-  auto rc = metadata_service_->getMetadataFile(
+  auto rc = dbctx->metadata_service->getMetadataFile(
       db_namespace,
       table_name,
       &file);
@@ -478,11 +496,14 @@ void RPCServlet::listPartitions(
     const URI& uri,
     const http::HTTPRequest* req,
     http::HTTPResponse* res) {
+  auto session = db_->getSession();
+  auto dbctx = session->getDatabaseContext();
+
   PartitionListRequest request;
   msg::decode(req->body(), &request);
 
   PartitionListResponse response;
-  auto rc = metadata_service_->listPartitions(request, &response);
+  auto rc = dbctx->metadata_service->listPartitions(request, &response);
 
   if (rc.isSuccess()) {
     res->setStatus(http::kStatusOK);
@@ -498,11 +519,14 @@ void RPCServlet::findPartition(
     const URI& uri,
     const http::HTTPRequest* req,
     http::HTTPResponse* res) {
+  auto session = db_->getSession();
+  auto dbctx = session->getDatabaseContext();
+
   PartitionFindRequest request;
   msg::decode(req->body(), &request);
 
   PartitionFindResponse response;
-  auto rc = metadata_service_->findPartition(request, &response);
+  auto rc = dbctx->metadata_service->findPartition(request, &response);
 
   if (rc.isSuccess()) {
     res->setStatus(http::kStatusOK);

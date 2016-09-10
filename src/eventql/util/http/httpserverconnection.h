@@ -84,7 +84,8 @@ public:
       HTTPHandlerFactory* handler_factory,
       ScopedPtr<net::TCPConnection> conn,
       TaskScheduler* scheduler,
-      HTTPServerStats* stats);
+      HTTPServerStats* stats,
+      const std::string& prelude_bytes = "");
 
   ~HTTPServerConnection();
 
@@ -121,7 +122,7 @@ protected:
       TaskScheduler* scheduler,
       HTTPServerStats* stats);
 
-  void nextRequest();
+  void nextRequest(const std::string& prelude_bytes = "");
   void dispatchRequest();
 
   void read();

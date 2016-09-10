@@ -23,33 +23,38 @@
  */
 #pragma once
 #include "eventql/eventql.h"
-#include "eventql/util/stdtypes.h"
+#include "eventql/util/return_code.h"
+#include <eventql/transport/http/http_transport.h>
+#include <eventql/transport/native/native_transport.h>
 
 namespace eventql {
-struct DatabaseContext;
+class Database;
 
-class Session {
+class Listener {
 public:
 
-  Session(const DatabaseContext* database_context = nullptr);
+  Listener(Database* database);
 
-  String getUserID() const;
-  void setUserID(const String& user_id);
+  ReturnCode bind(int listen_port);
 
-  String getEffectiveNamespace() const;
-  void setEffectiveNamespace(const String& ns);
-
-  String getDisplayNamespace() const;
-  void setDisplayNamespace(const String& ns);
-
-  const DatabaseContext* getDatabaseContext();
+  void run();
+  void shutdown();
 
 protected:
-  mutable std::mutex mutex_;
-  const DatabaseContext* database_context_;
-  String user_id_;
-  String effective_namespace_;
-  String display_namespace_;
+
+  void open(int fd);
+
+  struct EstablishingConnection {
+    int fd;
+    uint64_t accepted_at;
+  };
+
+  Database* database_;
+  uint64_t connect_timeout_;
+  std::atomic<bool> running_;
+  int ssock_;
+  std::list<EstablishingConnection> connections_;
+  HTTPTransport http_transport_;
 };
 
 } // namespace eventql

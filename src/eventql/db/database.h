@@ -23,69 +23,64 @@
  */
 #pragma once
 #include <eventql/eventql.h>
-#include <eventql/util/exception.h>
-#include <eventql/util/stdtypes.h>
-#include <eventql/util/cli/CLICommand.h>
-#include <eventql/util/status.h>
-#include <eventql/cli/cli_config.h>
-#include "eventql/server/sql/codec/binary_codec.h"
-#include "eventql/sql/result_list.h"
-#include "eventql/util/io/TerminalOutputStream.h"
-#include "eventql/util/return_code.h"
+#include <eventql/util/return_code.h>
+
+namespace csql {
+class Runtime;
+}
 
 namespace eventql {
-namespace cli {
+class ProcessConfig;
+class Session;
+class PartitionMap;
+class FileTracker;
+class ConfigDirectory;
+class ReplicationWorker;
+class LSMTableIndexCache;
+class MetadataStore;
+class InternalAuth;
+class ClientAuth;
+class SQLService;
+class TableService;
+class MapReduceService;
+class MetadataService;
 
-struct ConsoleOptions {
-  String server_host;
-  int server_port;
-  String database;
-  String auth_token;
-  String user;
-  String password;
-  bool batch_mode;
+struct DatabaseContext {
+  PartitionMap* partition_map;
+  FileTracker* file_tracker;
+  ConfigDirectory* config_directory;
+  ReplicationWorker* replication_worker;
+  LSMTableIndexCache* lsm_index_cache;
+  MetadataStore* metadata_store;
+  InternalAuth* internal_auth;
+  ClientAuth* client_auth;
+  csql::Runtime* sql_runtime;
+  SQLService* sql_service;
+  TableService* table_service;
+  MapReduceService* mapreduce_service;
+  MetadataService* metadata_service;
 };
 
-class Console {
+class Database {
 public:
 
-  Console(const CLIConfig cli_cfg);
-  ~Console();
+  static Database* newDatabase(ProcessConfig* process_config);
+  virtual ~Database() = default;
+
+  virtual ReturnCode start() = 0;
+  virtual void shutdown() = 0;
 
   /**
-   * Connect to the server
+   * Start a thread from which database operations can be executed
    */
-  ReturnCode connect();
+  virtual void startThread(std::function<void(Session* session)> entrypoint) = 0;
 
   /**
-   * Close the server connection
+   * Get session for the current thread
    */
-  void close();
+  virtual Session* getSession() = 0;
 
-  /**
-   * Start an interactive shell. This method will never return
-   */
-  void startInteractiveShell();
-
-  /**
-   * Execute an SQL query
-   */
-  Status runQuery(const String& query);
-
-  /**
-   * Execute a JS job
-   */
-  Status runJS(const String& query);
-
-protected:
-  Status runQueryBatch(const String& query);
-  Status runQueryTable(const String& query);
-  Status sendRequest(const String& query, csql::BinaryResultParser* res_parser);
-
-  CLIConfig cfg_;
-  evql_client_t* client_;
 };
 
-} // namespace cli
 } // namespace eventql
 

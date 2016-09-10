@@ -41,6 +41,7 @@ src/Makefile.in
 .dirstamp
 compile
 test-driver
+libtool
 docker/server/cache/*
 docker/server/data/*
 docker/server/trash/*

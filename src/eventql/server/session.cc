@@ -25,7 +25,10 @@
 
 namespace eventql {
 
-Session::Session() : user_id_("<anonymous>") {}
+Session::Session(
+    const DatabaseContext* database_context) :
+    database_context_(database_context),
+    user_id_("<anonymous>") {}
 
 String Session::getUserID() const {
   std::unique_lock<std::mutex> lk(mutex_);
@@ -54,6 +57,10 @@ String Session::getDisplayNamespace() const {
 void Session::setDisplayNamespace(const String& ns) {
   std::unique_lock<std::mutex> lk(mutex_);
   display_namespace_ = ns;
+}
+
+const DatabaseContext* Session::getDatabaseContext() {
+  return database_context_;
 }
 
 } // namespace eventql

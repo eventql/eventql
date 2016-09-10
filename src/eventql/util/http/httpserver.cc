@@ -46,13 +46,13 @@ HTTPServer::HTTPServer(
     handler_factory_(handler_factory),
     scheduler_(scheduler),
     ssock_(scheduler) {
-  ssock_.onConnection([this] (std::unique_ptr<net::TCPConnection> conn) {
-    HTTPServerConnection::start(
-        handler_factory_,
-        std::move(conn),
-        scheduler_,
-        &stats_);
-  });
+  //ssock_.onConnection([this] (std::unique_ptr<net::TCPConnection> conn) {
+  //  HTTPServerConnection::start(
+  //      handler_factory_,
+  //      std::move(conn),
+  //      scheduler_,
+  //      &stats_);
+  //});
 }
 
 void HTTPServer::listen(int port) {

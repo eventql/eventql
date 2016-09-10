@@ -55,9 +55,9 @@ bool DynamicMessage::addField(uint32_t field_id, const String& value) {
         return false;
       } else {
         if (v.get()) {
-          data_.addChild(field_id, msg::TRUE);
+          data_.addChild(field_id, msg::MSG_TRUE);
         } else {
-          data_.addChild(field_id, msg::FALSE);
+          data_.addChild(field_id, msg::MSG_FALSE);
         }
         return true;
       }
@@ -171,9 +171,9 @@ bool DynamicMessage::addBoolField(const String& name, bool val) {
   }
 
   if (val) {
-    data_.addChild(field_id, msg::TRUE);
+    data_.addChild(field_id, msg::MSG_TRUE);
   } else {
-    data_.addChild(field_id, msg::FALSE);
+    data_.addChild(field_id, msg::MSG_FALSE);
   }
 
   return true;

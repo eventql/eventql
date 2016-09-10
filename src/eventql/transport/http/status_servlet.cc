@@ -29,6 +29,7 @@
 #include "eventql/db/metadata_client.h"
 #include "eventql/db/metadata_store.h"
 #include "eventql/db/file_tracker.h"
+#include "eventql/server/session.h"
 #include "eventql/eventql.h"
 
 namespace eventql {
@@ -84,31 +85,19 @@ static const String kStyleSheet = R"(
 
 static const String kMainMenu = R"(
   <div class="menu">
-    <a href="/zstatus/">Dashboard</a>
-    <a href="/zstatus/db/">DB</a>
+    <a href="/eventql/">Dashboard</a>
+    <a href="/eventql/db/">DB</a>
   </div>
 )";
 
-StatusServlet::StatusServlet(
-    ServerCfg* config,
-    PartitionMap* pmap,
-    ConfigDirectory* cdir,
-    http::HTTPServerStats* http_server_stats,
-    http::HTTPClientStats* http_client_stats,
-    ReplicationWorker* repl_worker) :
-    config_(config),
-    pmap_(pmap),
-    cdir_(cdir),
-    http_server_stats_(http_server_stats),
-    http_client_stats_(http_client_stats),
-    repl_worker_(repl_worker) {}
+StatusServlet::StatusServlet(Database* db) : db_(db) {}
 
 void StatusServlet::handleHTTPRequest(
     http::HTTPRequest* request,
     http::HTTPResponse* response) {
   URI url(request->uri());
 
-  static const String kPathPrefix = "/zstatus/";
+  static const String kPathPrefix = "/eventql/";
   auto path_parts = StringUtil::split(
       url.path().substr(kPathPrefix.size()),
       "/");
@@ -132,16 +121,16 @@ void StatusServlet::handleHTTPRequest(
     return;
   }
 
-  if (path_parts.size() == 4 && path_parts[0] == "db") {
-    renderPartitionPage(
-        path_parts[1],
-        path_parts[2],
-        SHA1Hash::fromHexString(path_parts[3]),
-        request,
-        response);
+  //if (path_parts.size() == 4 && path_parts[0] == "db") {
+  //  renderPartitionPage(
+  //      path_parts[1],
+  //      path_parts[2],
+  //      SHA1Hash::fromHexString(path_parts[3]),
+  //      request,
+  //      response);
 
-    return;
-  }
+  //  return;
+  //}
 
   renderDashboard(request, response);
 }
@@ -150,6 +139,9 @@ void StatusServlet::renderDashboard(
     http::HTTPRequest* request,
     http::HTTPResponse* response) {
     http::HTTPResponse res;
+  auto ctx = db_->getSession()->getDatabaseContext();
+  auto cdir = ctx->config_directory;
+
   auto zs = evqld_stats();
   String html;
   html += kStyleSheet;
@@ -173,16 +165,16 @@ void StatusServlet::renderDashboard(
       Application::getPeakMemoryUsage() / (1024.0 * 1024.0));
   html += StringUtil::format(
       "<span><em>Referenced Files:</em> $0</span> &mdash; ",
-      config_->file_tracker->getNumReferencedFiles());
+      ctx->file_tracker->getNumReferencedFiles());
   html += StringUtil::format(
       "<span><em>Disk Cache Size:</em> $0 MB</span> &mdash; ",
       zs->cache_size.get() / (1024.0 * 1024.0));
   html += StringUtil::format(
       "<span><em>LSMTableIndexCache size:</em> $0 MB</span> &mdash; ",
-      config_->idx_cache->size() / (1024.0 * 1024.0));
+      ctx->lsm_index_cache->size() / (1024.0 * 1024.0));
   html += StringUtil::format(
       "<span><em>MetadataStore cache size:</em> $0 MB</span> &mdash; ",
-      config_->metadata_store->getCacheSize() / (1024.0 * 1024.0));
+      ctx->metadata_store->getCacheSize() / (1024.0 * 1024.0));
   html += StringUtil::format(
       "<span><em>Number of Partitions:</em> $0</span> &mdash; ",
       zs->num_partitions.get());
@@ -195,44 +187,6 @@ void StatusServlet::renderDashboard(
   html += StringUtil::format(
       "<span><em>Replication Queue Length:</em> $0</span>",
       zs->replication_queue_length.get());
-
-  html += "<h3>HTTP</h3>";
-  html += StringUtil::format(
-      "<span><em>Server Connections - Current:</em> $0</span> &mdash; ",
-      http_server_stats_->current_connections.get());
-  html += StringUtil::format(
-      "<span><em>Server Connections - Total:</em> $0</span> &mdash; ",
-      http_server_stats_->total_connections.get());
-  html += StringUtil::format(
-      "<span><em>Server Requests - Current:</em> $0</span> &mdash; ",
-      http_server_stats_->current_requests.get());
-  html += StringUtil::format(
-      "<span><em>Server Requests - Total:</em> $0</span> &mdash; ",
-      http_server_stats_->total_requests.get());
-  html += StringUtil::format(
-      "<span><em>Server Bytes Received:</em> $0 MB</span> &mdash; ",
-      http_server_stats_->received_bytes.get() / (1024.0 * 1024.0));
-  html += StringUtil::format(
-      "<span><em>Server Bytes Sent:</em> $0 MB</span> &mdash; ",
-      http_server_stats_->sent_bytes.get() / (1024.0 * 1024.0));
-  html += StringUtil::format(
-      "<span><em>Client Connections - Current:</em> $0</span> &mdash; ",
-      http_client_stats_->current_connections.get());
-  html += StringUtil::format(
-      "<span><em>Client Connections - Total:</em> $0</span> &mdash; ",
-      http_client_stats_->total_connections.get());
-  html += StringUtil::format(
-      "<span><em>Client Requests - Current:</em> $0</span> &mdash; ",
-      http_client_stats_->current_requests.get());
-  html += StringUtil::format(
-      "<span><em>Client Requests - Total:</em> $0</span> &mdash; ",
-      http_client_stats_->total_requests.get());
-  html += StringUtil::format(
-      "<span><em>Client Bytes Received:</em> $0 MB</span> &mdash; ",
-      http_client_stats_->received_bytes.get() / (1024.0 * 1024.0));
-  html += StringUtil::format(
-      "<span><em>Client Bytes Sent:</em> $0 MB</span>",
-      http_client_stats_->sent_bytes.get() / (1024.0 * 1024.0));
 
   html += "<h3>MapReduce</h3>";
   html += StringUtil::format(
@@ -249,14 +203,14 @@ void StatusServlet::renderDashboard(
   html += "<table cellspacing=0 border=1>";
   html += StringUtil::format(
       "<span><em>Cluster Leader:</em> $0</span>",
-      cdir_->getLeader());
+      cdir->getLeader());
   html += StringUtil::format(
       "<div><em>Cluster Config:</em></div><pre>$0</pre>",
-      cdir_->getClusterConfig().DebugString());
+      cdir->getClusterConfig().DebugString());
 
   html += "<h3>Servers</h3>";
   html += "<table cellspacing=0 border=1>";
-  for (const auto& server : cdir_->listServers()) {
+  for (const auto& server : cdir->listServers()) {
   html += StringUtil::format(
       "<tr><td><em>$0:</em></td><td><pre>$1</pre></td></tr>",
       server.server_id(),
@@ -266,12 +220,12 @@ void StatusServlet::renderDashboard(
 
   html += "<h3>Background Threads</h3>";
   html += "<table cellspacing=0 border=1>";
-  auto num_replication_threads = repl_worker_->getNumThreads();
+  auto num_replication_threads = ctx->replication_worker->getNumThreads();
   for (size_t i = 0; i < num_replication_threads; ++i) {
     html += StringUtil::format(
         "<tr><td><em>Replication Thread #$0:</em> $1</td></tr>",
         i + 1,
-        repl_worker_->getReplicationInfo(i)->toString());
+        ctx->replication_worker->getReplicationInfo(i)->toString());
   }
   html += "</table>";
 
@@ -302,6 +256,9 @@ void StatusServlet::renderTablePage(
     const String& table_name,
     http::HTTPRequest* request,
     http::HTTPResponse* response) {
+  auto ctx = db_->getSession()->getDatabaseContext();
+  auto pmap = ctx->partition_map;
+
   String html;
   html += kStyleSheet;
   //html += kMainMenu;
@@ -313,7 +270,7 @@ void StatusServlet::renderTablePage(
       db_namespace,
       table_name);
 
-  auto table = pmap_->findTable(
+  auto table = pmap->findTable(
       db_namespace,
       table_name);
 
@@ -332,7 +289,7 @@ void StatusServlet::renderTablePage(
           table_cfg.metadata_txnid().size()).toString(),
       table_cfg.metadata_txnseq());
 
-  MetadataClient metadata_client(cdir_);
+  MetadataClient metadata_client(ctx->config_directory);
   MetadataFile metadata_file;
   auto rc = metadata_client.fetchLatestMetadataFile(
       db_namespace,
@@ -429,6 +386,8 @@ void StatusServlet::renderPartitionPage(
     const SHA1Hash& partition_key,
     http::HTTPRequest* request,
     http::HTTPResponse* response) {
+  auto ctx = db_->getSession()->getDatabaseContext();
+  auto pmap = ctx->partition_map;
   String html;
   html += kStyleSheet;
   //html += kMainMenu;
@@ -442,7 +401,7 @@ void StatusServlet::renderPartitionPage(
       table_name,
       partition_key.toString());
 
-  auto partition = pmap_->findPartition(
+  auto partition = pmap->findPartition(
       db_namespace,
       table_name,
       partition_key);
@@ -453,7 +412,7 @@ void StatusServlet::renderPartitionPage(
     auto table = partition.get()->getTable();
     auto snap = partition.get()->getSnapshot();
     auto state = snap->state;
-    auto repl = partition.get()->getReplicationStrategy(nullptr);
+    auto repl = partition.get()->getReplicationStrategy();
 
     if (table->partitionerType() == TBL_PARTITION_TIMEWINDOW &&
         state.partition_keyrange_begin().size() == 8 &&
