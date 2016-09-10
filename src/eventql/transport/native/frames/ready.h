@@ -22,40 +22,33 @@
  * code of your own applications
  */
 #pragma once
+#include <string>
+#include <vector>
 #include "eventql/eventql.h"
 #include "eventql/util/return_code.h"
-#include <eventql/transport/http/http_transport.h>
-#include <eventql/transport/native/server.h>
+#include "eventql/util/util/binarymessagewriter.h"
+#include "eventql/transport/native/connection_tcp.h"
+#include "eventql/sql/svalue.h"
 
 namespace eventql {
-class Database;
+namespace native_transport {
 
-class Listener {
+class ReadyFrame {
 public:
 
-  Listener(Database* database);
+  ReadyFrame();
 
-  ReturnCode bind(int listen_port);
+  void setIdleTimeout(uint64_t idle_timeout);
+  uint64_t getIdleTimeout() const;
 
-  void run();
-  void shutdown();
+  void writeTo(OutputStream* os);
+
+  void clear();
 
 protected:
-
-  void open(int fd);
-
-  struct EstablishingConnection {
-    int fd;
-    uint64_t accepted_at;
-  };
-
-  Database* database_;
-  uint64_t io_timeout_;
-  std::atomic<bool> running_;
-  int ssock_;
-  std::list<EstablishingConnection> connections_;
-  HTTPTransport http_transport_;
-  native_transport::Server native_server_;
+  uint64_t idle_timeout_;
 };
 
+} // namespace native_transport
 } // namespace eventql
+

@@ -34,50 +34,40 @@ public:
   static const size_t kMaxFrameSize = 1024 * 1024 * 256; // 256 MB
   static const size_t kMaxFrameSizeSoft = 1024 * 1024 * 32; // 32 MB
 
-  NativeConnection(
-      int fd,
-      const std::string& prelude_bytes = "");
+  virtual ~NativeConnection() = default;
 
-  ~NativeConnection();
-
-  ReturnCode recvFrame(
+  virtual ReturnCode recvFrame(
       uint16_t* opcode,
+      uint16_t* flags,
       std::string* payload,
-      uint16_t* flags = nullptr);
+      uint64_t timeout_us) = 0;
 
-  ReturnCode sendFrame(
+  //virtual ReturnCode peekFrameAsync(
+  //    uint16_t* opcode,
+  //    uint16_t* flags = 0) = 0;
+
+  virtual ReturnCode sendFrame(
       uint16_t opcode,
+      uint16_t flags,
+      const void* payload,
+      size_t payload_len) = 0;
+
+  virtual ReturnCode sendFrameAsync(
+      uint16_t opcode,
+      uint16_t flags,
       const void* data,
-      size_t len,
-      uint16_t flags = 0);
+      size_t len) = 0;
 
   ReturnCode sendErrorFrame(const std::string& error);
   ReturnCode sendHeartbeatFrame();
 
-  ReturnCode sendFrameAsync(
-      uint16_t opcode,
-      const void* data,
-      size_t len,
-      uint16_t flags = 0);
+  virtual bool isOutboxEmpty() const = 0;
+  virtual ReturnCode flushOutbox(bool block, uint64_t timeout_us = 0) = 0;
 
-  void writeFrameHeaderAsync(
-      uint16_t opcode,
-      size_t len,
-      uint16_t flags = 0);
+  virtual void close() = 0;
 
-  void writeAsync(const void* data, size_t len);
+  virtual void setIOTimeout(uint64_t timeout_us) = 0;
 
-  ReturnCode flushBuffer(bool block, uint64_t timeout_us = 0);
-  void close();
-
-protected:
-
-  ReturnCode read(char* data, size_t len, uint64_t timeout_us);
-
-  int fd_;
-  uint64_t timeout_;
-  std::string read_buf_;
-  std::string write_buf_;
 };
 
 } // namespace native_transport

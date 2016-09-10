@@ -21,7 +21,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include "eventql/transport/native/query_result_frame.h"
+#include "eventql/transport/native/frames/query_result.h"
 
 namespace eventql {
 namespace native_transport {
@@ -68,29 +68,29 @@ ReturnCode QueryResultFrame::writeTo(NativeConnection* conn) {
     flags |= EVQL_QUERY_RESULT_PENDINGSTMT;
   }
 
-  util::BinaryMessageWriter header_;
-  header_.appendVarUInt(flags); // flags
-  header_.appendVarUInt(columns_.size());
-  header_.appendVarUInt(num_rows_);
+  util::BinaryMessageWriter payload;
+  payload.appendVarUInt(flags); // flags
+  payload.appendVarUInt(columns_.size());
+  payload.appendVarUInt(num_rows_);
 
   //if (is_last_) {
-    header_.appendVarUInt(0); // num_rows_modified
-    header_.appendVarUInt(0); // num_rows_scanned
-    header_.appendVarUInt(0); // num_bytes_scanned
-    header_.appendVarUInt(0); // query_runtime_ms
+    payload.appendVarUInt(0); // num_rows_modified
+    payload.appendVarUInt(0); // num_rows_scanned
+    payload.appendVarUInt(0); // num_bytes_scanned
+    payload.appendVarUInt(0); // query_runtime_ms
   //}
 
   for (const auto& c : columns_) {
-    header_.appendLenencString(c);
+    payload.appendLenencString(c);
   }
 
-  conn->writeFrameHeaderAsync(
-      EVQL_OP_QUERY_RESULT,
-      header_.size() + data_.size());
+  payload.append(data_.data(), data_.size());
 
-  conn->writeAsync(header_.data(), header_.size());
-  conn->writeAsync(data_.data(), data_.size());
-  return conn->flushBuffer(true);
+  return conn->sendFrame(
+      EVQL_OP_QUERY_RESULT,
+      is_last_ ? EVQL_ENDOFREQUEST : 0,
+      payload.data(),
+      payload.size());
 }
 
 void QueryResultFrame::clear() {

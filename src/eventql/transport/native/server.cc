@@ -21,9 +21,9 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include "eventql/transport/native/native_transport.h"
-#include "eventql/transport/native/native_connection.h"
-#include "eventql/transport/native/query_result_frame.h"
+#include "eventql/transport/native/server.h"
+#include "eventql/transport/native/connection_tcp.h"
+#include "eventql/transport/native/frames/ready.h"
 #include "eventql/util/logging.h"
 #include "eventql/util/util/binarymessagereader.h"
 #include "eventql/server/session.h"
@@ -48,34 +48,36 @@
 namespace eventql {
 namespace native_transport {
 
-void startConnection(Database* db, int fd, std::string prelude_bytes) {
-  logDebug("eventql", "Opening new native connection; fd=$0", fd);
+Server::Server(Database* db) : db_(db) {}
 
-  int old_flags = fcntl(fd, F_GETFL, 0);
-  if (fcntl(fd, F_SETFL, old_flags | O_NONBLOCK) != 0) {
-    close(fd);
-    return;
-  }
+void Server::startConnection(std::unique_ptr<NativeConnection> connection) {
+  auto conn_ptr = connection.release();
+  db_->startThread([this, conn_ptr] (Session* session) {
+    std::unique_ptr<NativeConnection> conn(conn_ptr);
 
-  size_t nodelay = 1;
-  setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, &nodelay, sizeof(nodelay));
-
-  db->startThread([db, fd, prelude_bytes] (Session* session) {
-    NativeConnection conn(fd, prelude_bytes);
-
-    auto rc = performHandshake(db, &conn);
+    auto rc = performHandshake(conn.get());
     if (!rc.isSuccess()) {
       logError("eventql", "Handshake error: $0", rc.getMessage());
-      conn.close();
+      conn->close();
       return;
     }
 
-    logDebug("eventql", "Native connection established; fd=$0", fd);
+    logDebug(
+        "eventql",
+        "Native connection established; id=$0",
+        (const void*) conn.get());
+
     uint16_t opcode;
+    uint16_t flags;
     std::string payload;
     bool cont = true;
     while (cont && rc.isSuccess()) {
-      rc = conn.recvFrame(&opcode, &payload);
+      rc = conn->recvFrame(
+          &opcode,
+          &flags,
+          &payload,
+          session->getIdleTimeout());
+
       if (!rc.isSuccess()) {
         break;
       }
@@ -85,21 +87,30 @@ void startConnection(Database* db, int fd, std::string prelude_bytes) {
           cont = false;
           break;
         default:
-          rc = performOperation(db, &conn, opcode, payload);
+          rc = performOperation(conn.get(), opcode, payload);
           break;
       }
     }
 
-    conn.close();
+    conn->close();
   });
 }
 
-ReturnCode performHandshake(Database* database, NativeConnection* conn) {
+ReturnCode Server::performHandshake(NativeConnection* conn) {
+  auto session = db_->getSession();
+  auto config = db_->getConfig();
+
   /* read HELLO frame */
   {
     uint16_t opcode;
+    uint16_t flags;
     std::string payload;
-    auto rc = conn->recvFrame(&opcode, &payload);
+    auto rc = conn->recvFrame(
+        &opcode,
+        &flags,
+        &payload,
+        session->getIdleTimeout());
+
     if (!rc.isSuccess()) {
       conn->close();
       return rc;
@@ -115,9 +126,24 @@ ReturnCode performHandshake(Database* database, NativeConnection* conn) {
     }
   }
 
+  if (session->isInternal()) {
+    session->setIdleTimeout(config->getInt("server.s2s_idle_timeout").get());
+    conn->setIOTimeout(config->getInt("server.s2s_io_timeout").get());
+  } else {
+    session->setIdleTimeout(config->getInt("server.c2s_idle_timeout").get());
+    conn->setIOTimeout(config->getInt("server.c2s_io_timeout").get());
+  }
+
   /* send READY frame */
   {
-    auto rc = conn->sendFrame(EVQL_OP_READY, nullptr, 0);
+    ReadyFrame ready_frame;
+    ready_frame.setIdleTimeout(session->getIdleTimeout());
+
+    std::string payload;
+    auto payload_os = StringOutputStream::fromString(&payload);
+    ready_frame.writeTo(payload_os.get());
+
+    auto rc = conn->sendFrame(EVQL_OP_READY, 0, payload.data(), payload.size());
     if (!rc.isSuccess()) {
       conn->close();
       return rc;
@@ -127,8 +153,7 @@ ReturnCode performHandshake(Database* database, NativeConnection* conn) {
   return ReturnCode::success();
 }
 
-ReturnCode performOperation(
-    Database* database,
+ReturnCode Server::performOperation(
     NativeConnection* conn,
     uint16_t opcode,
     const std::string& payload) {
@@ -136,10 +161,10 @@ ReturnCode performOperation(
 
   switch (opcode) {
     case EVQL_OP_QUERY:
-      return performOperation_QUERY(database, conn, payload);
+      return performOperation_QUERY(db_, conn, payload);
     case EVQL_OP_QUERY_PARTIALAGGR:
       return performOperation_QUERY_PARTIALAGGR(
-          database,
+          db_,
           conn,
           payload.data(),
           payload.size());

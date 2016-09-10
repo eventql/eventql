@@ -21,9 +21,10 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include "eventql/transport/native/native_connection.h"
+#include "eventql/transport/native/connection_tcp.h"
 #include "eventql/util/inspect.h"
 #include "eventql/util/util/binarymessagewriter.h"
+#include "eventql/util/logging.h"
 #include <string.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -36,22 +37,35 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <poll.h>
+#include <netinet/tcp.h>
 
 namespace eventql {
 namespace native_transport {
 
-NativeConnection::NativeConnection(
+TCPConnection::TCPConnection(
     int fd,
+    uint64_t io_timeout,
     const std::string& prelude_bytes /* = "" */) :
     fd_(fd),
-    timeout_(1000 * 1000),
-    read_buf_(prelude_bytes) {}
+    read_buf_(prelude_bytes),
+    io_timeout_(io_timeout) {
+  logDebug(
+      "eventql",
+      "Opening new native connection; id=$0 fd=$1",
+      (const void*) this,
+      fd);
 
-NativeConnection::~NativeConnection() { 
+  fcntl(fd, F_SETFL, fcntl(fd, F_GETFL, 0) | O_NONBLOCK);
+
+  size_t nodelay = 1;
+  setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, &nodelay, sizeof(nodelay));
+}
+
+TCPConnection::~TCPConnection() {
   close();
 }
 
-ReturnCode NativeConnection::read(
+ReturnCode TCPConnection::read(
     char* data,
     size_t len,
     uint64_t timeout_us) {
@@ -110,12 +124,13 @@ ReturnCode NativeConnection::read(
   return ReturnCode::success();
 }
 
-ReturnCode NativeConnection::recvFrame(
+ReturnCode TCPConnection::recvFrame(
     uint16_t* opcode,
+    uint16_t* recvflags,
     std::string* payload,
-    uint16_t* recvflags /* = nullptr */) {
+    uint64_t timeout_us) {
   char header[8];
-  auto rc = read(header, sizeof(header), timeout_);
+  auto rc = read(header, sizeof(header), timeout_us);
   if (!rc.isSuccess()) {
     return rc;
   }
@@ -133,54 +148,33 @@ ReturnCode NativeConnection::recvFrame(
   }
 
   payload->resize(payload_len);
-  return read(&(*payload)[0], payload_len, timeout_);
+  return read(&(*payload)[0], payload_len, io_timeout_);
 }
 
-ReturnCode NativeConnection::sendFrame(
+ReturnCode TCPConnection::sendFrame(
     uint16_t opcode,
-    const void* data,
-    size_t len,
-    uint16_t flags /* = 0 */) {
-  auto rc = sendFrameAsync(opcode, data, len, flags);
+    uint16_t flags,
+    const void* payload,
+    size_t payload_len) {
+  auto rc = sendFrameAsync(opcode, flags, payload, payload_len);
   if (!rc.isSuccess()) {
     return rc;
   }
 
-  return flushBuffer(true, timeout_);
+  return flushOutbox(true, io_timeout_);
 }
 
-ReturnCode NativeConnection::sendErrorFrame(const std::string& error) {
-  util::BinaryMessageWriter e_frame;
-  e_frame.appendLenencString(error);
-  char zero = 0;
-  e_frame.append(&zero, 1);
-
-  return sendFrame(
-      EVQL_OP_ERROR,
-      e_frame.data(),
-      e_frame.size(),
-      EVQL_ENDOFREQUEST);
-}
-
-ReturnCode NativeConnection::sendHeartbeatFrame() {
-  if (write_buf_.empty()) {
-    return sendFrameAsync(EVQL_OP_HEARTBEAT, nullptr, 0, 0);
-  } else {
-    return flushBuffer(false, 0);
-  }
-}
-
-ReturnCode NativeConnection::sendFrameAsync(
+ReturnCode TCPConnection::sendFrameAsync(
     uint16_t opcode,
+    uint16_t flags,
     const void* data,
-    size_t len,
-    uint16_t flags /* = 0 */) {
+    size_t len) {
   writeFrameHeaderAsync(opcode, len, flags);
   writeAsync(data, len);
-  return flushBuffer(false, 0);
+  return flushOutbox(false, 0);
 }
 
-ReturnCode NativeConnection::flushBuffer(
+ReturnCode TCPConnection::flushOutbox(
     bool block,
     uint64_t timeout_us /* = 0 */) {
   if (fd_ < 0) {
@@ -188,7 +182,7 @@ ReturnCode NativeConnection::flushBuffer(
   }
 
   if (block && !timeout_us) {
-    timeout_us = timeout_;
+    timeout_us = io_timeout_;
   }
 
   while (!write_buf_.empty()) {
@@ -235,7 +229,7 @@ ReturnCode NativeConnection::flushBuffer(
   return ReturnCode::success();
 }
 
-void NativeConnection::writeFrameHeaderAsync(
+void TCPConnection::writeFrameHeaderAsync(
     uint16_t opcode,
     size_t len,
     uint16_t flags /* = 0 */) {
@@ -250,17 +244,25 @@ void NativeConnection::writeFrameHeaderAsync(
   writeAsync(header, sizeof(header));
 }
 
-void NativeConnection::writeAsync(const void* data, size_t len) {
+void TCPConnection::writeAsync(const void* data, size_t len) {
   write_buf_ += std::string((const char*) data, len);
 }
 
-void NativeConnection::close() {
+bool TCPConnection::isOutboxEmpty() const {
+  return write_buf_.empty();
+}
+
+void TCPConnection::close() {
   if (fd_ < 0) {
     return;
   }
 
   ::close(fd_);
   fd_ = -1;
+}
+
+void TCPConnection::setIOTimeout(uint64_t timeout_us) {
+  io_timeout_ = timeout_us;
 }
 
 } // namespace native_connection

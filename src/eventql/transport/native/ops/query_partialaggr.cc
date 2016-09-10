@@ -22,8 +22,8 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include "eventql/transport/native/native_transport.h"
-#include "eventql/transport/native/native_connection.h"
+#include "eventql/transport/native/server.h"
+#include "eventql/transport/native/connection_tcp.h"
 #include "eventql/transport/native/frames/query_partialaggr.h"
 #include "eventql/transport/native/frames/query_partialaggr_result.h"
 #include "eventql/util/logging.h"
@@ -100,9 +100,9 @@ ReturnCode performOperation_QUERY_PARTIALAGGR(
 
       auto rc = conn->sendFrame(
           EVQL_OP_QUERY_PARTIALAGGR_RESULT,
+          eof ? EVQL_ENDOFREQUEST : 0,
           payload.data(),
-          payload.size(),
-          eof ? EVQL_ENDOFREQUEST : 0);
+          payload.size());
 
       if (!rc.isSuccess()) {
         return rc;

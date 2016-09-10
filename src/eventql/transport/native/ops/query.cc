@@ -21,12 +21,13 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include "eventql/transport/native/native_transport.h"
-#include "eventql/transport/native/native_connection.h"
-#include "eventql/transport/native/query_result_frame.h"
+#include "eventql/transport/native/server.h"
+#include "eventql/transport/native/connection_tcp.h"
+#include "eventql/transport/native/frames/query_result.h"
 #include "eventql/transport/native/frames/query_progress.h"
 #include "eventql/util/logging.h"
 #include "eventql/util/util/binarymessagereader.h"
+#include "eventql/db/database.h"
 #include "eventql/server/session.h"
 #include "eventql/server/sql_service.h"
 #include "eventql/sql/runtime/runtime.h"
@@ -83,12 +84,30 @@ ReturnCode performOperation_QUERY(
     auto txn = dbctx->sql_service->startTransaction(session);
     auto qplan = dbctx->sql_runtime->buildQueryPlan(txn.get(), q_query);
 
-    qplan->setProgressCallback([&qplan] () {
+    qplan->setProgressCallback([&qplan, &conn] () {
       auto progress = qplan->getProgress();
       QueryProgressFrame progress_frame;
       progress_frame.setQueryProgressPermill(progress);
-      iputs("progress $0", progress);
-    //  result_format.sendProgress(qplan->getProgress());
+      std::string payload;
+      progress_frame.writeToString(&payload);
+
+      if (conn->isOutboxEmpty()) {
+        auto rc = conn->sendFrameAsync(
+            EVQL_OP_QUERY_PROGRESS,
+            0,
+            payload.data(),
+            payload.size());
+
+        if (!rc.isSuccess()) {
+          iputs("error while sending progrss : $0", rc.getMessage()); //FIXME handle error
+        }
+
+      } else {
+        auto rc = conn->flushOutbox(false, 0);
+        if (!rc.isSuccess()) {
+          iputs("error while flushing outbox : $0", rc.getMessage()); //FIXME handle error
+        }
+      }
     });
 
     if (qplan->numStatements() > 1 && !(q_flags & EVQL_QUERY_MULTISTMT)) {
@@ -120,9 +139,15 @@ ReturnCode performOperation_QUERY(
 
           /* wait for discard or continue */
           uint16_t n_opcode;
+          uint16_t n_flags;
           std::string n_payload;
           {
-            auto rc = conn->recvFrame(&n_opcode, &n_payload);
+            auto rc = conn->recvFrame(
+                &n_opcode,
+                &n_flags,
+                &n_payload,
+                session->getIdleTimeout());
+
             if (!rc.isSuccess()) {
               return rc;
             }
@@ -157,8 +182,14 @@ ReturnCode performOperation_QUERY(
 
       /* wait for discard or continue (next query) */
       uint16_t n_opcode;
+      uint16_t n_flags;
       std::string n_payload;
-      auto rc = conn->recvFrame(&n_opcode, &n_payload);
+      auto rc = conn->recvFrame(
+          &n_opcode,
+          &n_flags,
+          &n_payload,
+          session->getIdleTimeout());
+
       if (!rc.isSuccess()) {
         return rc;
       }

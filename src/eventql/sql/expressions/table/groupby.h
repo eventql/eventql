@@ -26,7 +26,7 @@
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/SHA1.h>
 #include <eventql/sql/runtime/defaultruntime.h>
-#include <eventql/transport/native/pipelined_rpc.h>
+#include <eventql/transport/native/client_tcp.h>
 
 namespace csql {
 
@@ -105,7 +105,8 @@ public:
       Transaction* txn,
       ExecutionContext* execution_context,
       Vector<ValueExpression> select_expressions,
-      eventql::ConfigDirectory* config,
+      eventql::ProcessConfig* config,
+      eventql::ConfigDirectory* config_dir,
       size_t max_concurrent_tasks,
       size_t max_concurrent_tasks_per_host);
 
@@ -125,7 +126,7 @@ protected:
   Transaction* txn_;
   ExecutionContext* execution_context_;
   Vector<ValueExpression> select_exprs_;
-  eventql::native_transport::PipelinedRPC rpc_scheduler_;
+  eventql::native_transport::TCPAsyncClient rpc_scheduler_;
   HashMap<String, Vector<VM::Instance>> groups_;
   HashMap<String, Vector<VM::Instance>>::const_iterator groups_iter_;
   ScratchMemory scratch_;

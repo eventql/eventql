@@ -112,7 +112,11 @@ size_t GroupByExpression::getNumColumns() const {
 bool GroupByExpression::next(SValue* row, size_t row_len) {
   if (groups_iter_ != groups_.end()) {
     for (size_t i = 0; i < select_exprs_.size(); ++i) {
-      VM::result(txn_, select_exprs_[i].program(), &groups_iter_->second[i], &row[i]);
+      VM::result(
+          txn_,
+          select_exprs_[i].program(),
+          &groups_iter_->second[i],
+          &row[i]);
     }
 
     if (++groups_iter_ == groups_.end()) {
@@ -315,13 +319,18 @@ GroupByMergeExpression::GroupByMergeExpression(
     Transaction* txn,
     ExecutionContext* execution_context,
     Vector<ValueExpression> select_expressions,
-    eventql::ConfigDirectory* config,
+    eventql::ProcessConfig* config,
+    eventql::ConfigDirectory* config_dir,
     size_t max_concurrent_tasks,
     size_t max_concurrent_tasks_per_host) :
     txn_(txn),
     execution_context_(execution_context),
     select_exprs_(std::move(select_expressions)),
-    rpc_scheduler_(config, max_concurrent_tasks, max_concurrent_tasks_per_host),
+    rpc_scheduler_(
+        config,
+        config_dir,
+        max_concurrent_tasks,
+        max_concurrent_tasks_per_host),
     freed_(false) {
   execution_context_->incrementNumTasks();
 }
@@ -445,7 +454,11 @@ void GroupByMergeExpression::addPart(
 bool GroupByMergeExpression::next(SValue* row, size_t row_len) {
   if (groups_iter_ != groups_.end()) {
     for (size_t i = 0; i < select_exprs_.size(); ++i) {
-      VM::result(txn_, select_exprs_[i].program(), &groups_iter_->second[i], &row[i]);
+      VM::result(
+          txn_,
+          select_exprs_[i].program(),
+          &groups_iter_->second[i],
+          &row[i]);
     }
 
     if (++groups_iter_ == groups_.end()) {

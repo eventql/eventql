@@ -28,7 +28,7 @@
 #include "eventql/eventql.h"
 #include "eventql/util/return_code.h"
 #include "eventql/util/util/binarymessagewriter.h"
-#include "eventql/transport/native/native_connection.h"
+#include "eventql/transport/native/connection_tcp.h"
 #include "eventql/sql/svalue.h"
 
 namespace eventql {

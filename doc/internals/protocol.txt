@@ -180,7 +180,7 @@ Binary Protocols.
     <no response>
 
 
-6.1.2 ERROR
+6.1.4 ERROR
 
   FIXME
 
@@ -190,6 +190,19 @@ Binary Protocols.
 
   Response:
     <no response>
+
+
+6.1.5 READY
+
+  FIXME
+
+  Payload:
+    lenencint      flags
+    lenencint      idle_timeout_us
+
+  Response:
+    <no response>
+
 
 6.1.7 QUERY
 

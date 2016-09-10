@@ -44,6 +44,7 @@
 #include "eventql/db/database.h"
 #include "eventql/util/return_code.h"
 #include "eventql/util/logging.h"
+#include "eventql/transport/native/connection_tcp.h"
 
 namespace eventql {
 
@@ -69,10 +70,14 @@ uint64_t getMonoTime() {
 Listener::Listener(
     Database* database) :
     database_(database),
-    connect_timeout_(2 * kMicrosPerSecond), 
+    io_timeout_(
+        std::max(
+            database->getConfig()->getInt("server.s2s_io_timeout").get(),
+            database->getConfig()->getInt("server.c2s_io_timeout").get())),
     running_(true),
     ssock_(-1),
-    http_transport_(database) {}
+    http_transport_(database),
+    native_server_(database) {}
 
 ReturnCode Listener::bind(int listen_port) {
   ssock_ = ::socket(AF_INET, SOCK_STREAM, 0);
@@ -138,7 +143,7 @@ void Listener::run() {
 
     auto now = getMonoTime();
     while (!connections_.empty()) {
-      if (connections_.front().accepted_at + connect_timeout_ > now) {
+      if (connections_.front().accepted_at + io_timeout_ > now) {
         break;
       }
 
@@ -152,7 +157,7 @@ void Listener::run() {
 
     uint64_t timeout = 0;
     if (!connections_.empty()) {
-      timeout = (connections_.front().accepted_at + connect_timeout_) - now;
+      timeout = (connections_.front().accepted_at + io_timeout_) - now;
     }
 
     for (const auto& c : connections_) {
@@ -258,12 +263,15 @@ void Listener::open(int fd) {
   switch (first_byte) {
 
     // native
-    case '^':
-      native_transport::startConnection(
-          database_,
-          fd,
-          std::string(&first_byte, 1));
+   case '^': {
+      native_server_.startConnection(
+          std::unique_ptr<native_transport::NativeConnection>(
+              new native_transport::TCPConnection(
+                  fd,
+                  io_timeout_,
+                  std::string(&first_byte, 1))));
       break;
+    }
 
     // http
     default:

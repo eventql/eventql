@@ -21,41 +21,33 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#pragma once
-#include "eventql/eventql.h"
-#include "eventql/util/return_code.h"
-#include <eventql/transport/http/http_transport.h>
-#include <eventql/transport/native/server.h>
+#include "eventql/transport/native/connection.h"
+#include "eventql/util/util/binarymessagewriter.h"
 
 namespace eventql {
-class Database;
+namespace native_transport {
 
-class Listener {
-public:
+ReturnCode NativeConnection::sendErrorFrame(const std::string& error) {
+  util::BinaryMessageWriter e_frame;
+  e_frame.appendLenencString(error);
+  char zero = 0;
+  e_frame.append(&zero, 1);
 
-  Listener(Database* database);
+  return sendFrame(
+      EVQL_OP_ERROR,
+      EVQL_ENDOFREQUEST,
+      e_frame.data(),
+      e_frame.size());
+}
 
-  ReturnCode bind(int listen_port);
+ReturnCode NativeConnection::sendHeartbeatFrame() {
+  if (isOutboxEmpty()) {
+    return sendFrameAsync(EVQL_OP_HEARTBEAT, 0, nullptr, 0);
+  } else {
+    return flushOutbox(false, 0);
+  }
+}
 
-  void run();
-  void shutdown();
-
-protected:
-
-  void open(int fd);
-
-  struct EstablishingConnection {
-    int fd;
-    uint64_t accepted_at;
-  };
-
-  Database* database_;
-  uint64_t io_timeout_;
-  std::atomic<bool> running_;
-  int ssock_;
-  std::list<EstablishingConnection> connections_;
-  HTTPTransport http_transport_;
-  native_transport::Server native_server_;
-};
-
+} // namespace native_transport
 } // namespace eventql
+

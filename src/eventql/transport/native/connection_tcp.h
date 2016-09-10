@@ -24,38 +24,63 @@
 #pragma once
 #include "eventql/eventql.h"
 #include "eventql/util/return_code.h"
-#include <eventql/transport/http/http_transport.h>
-#include <eventql/transport/native/server.h>
+#include "eventql/transport/native/connection.h"
 
 namespace eventql {
-class Database;
+namespace native_transport {
 
-class Listener {
+class TCPConnection : public NativeConnection {
 public:
 
-  Listener(Database* database);
+  TCPConnection(
+      int fd,
+      uint64_t io_timeout,
+      const std::string& prelude_bytes = "");
 
-  ReturnCode bind(int listen_port);
+  ~TCPConnection();
 
-  void run();
-  void shutdown();
+  ReturnCode recvFrame(
+      uint16_t* opcode,
+      uint16_t* flags,
+      std::string* payload,
+      uint64_t timeout_us) override;
+
+  ReturnCode sendFrame(
+      uint16_t opcode,
+      uint16_t flags,
+      const void* payload,
+      size_t payload_len) override;
+
+  ReturnCode sendFrameAsync(
+      uint16_t opcode,
+      uint16_t flags,
+      const void* payload,
+      size_t payload_len) override;
+
+  bool isOutboxEmpty() const;
+  ReturnCode flushOutbox(bool block, uint64_t timeout_us = 0) override;
+
+  void close() override;
+
+  void setIOTimeout(uint64_t timeout_us) override;
 
 protected:
 
-  void open(int fd);
+  void writeFrameHeaderAsync(
+      uint16_t opcode,
+      size_t len,
+      uint16_t flags = 0);
 
-  struct EstablishingConnection {
-    int fd;
-    uint64_t accepted_at;
-  };
+  void writeAsync(const void* data, size_t len);
 
-  Database* database_;
+  ReturnCode read(char* data, size_t len, uint64_t timeout_us);
+
+  int fd_;
+  std::string read_buf_;
+  std::string write_buf_;
   uint64_t io_timeout_;
-  std::atomic<bool> running_;
-  int ssock_;
-  std::list<EstablishingConnection> connections_;
-  HTTPTransport http_transport_;
-  native_transport::Server native_server_;
 };
 
+} // namespace native_transport
 } // namespace eventql
+

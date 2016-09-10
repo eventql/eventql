@@ -35,31 +35,32 @@
 #include "eventql/util/logging.h"
 #include "eventql/util/wallclock.h"
 #include "eventql/util/util/binarymessagereader.h"
-#include "eventql/transport/native/pipelined_rpc.h"
+#include "eventql/transport/native/client_tcp.h"
 #include "eventql/transport/native/frames/hello.h"
 #include "eventql/transport/native/frames/error.h"
 
 namespace eventql {
 namespace native_transport {
 
-PipelinedRPC::PipelinedRPC(
-    ConfigDirectory* config,
+TCPAsyncClient::TCPAsyncClient(
+    ProcessConfig* config,
+    ConfigDirectory* config_dir,
     size_t max_concurrent_tasks,
     size_t max_concurrent_tasks_per_host) :
-    config_(config),
+    config_(config_dir),
     max_concurrent_tasks_(max_concurrent_tasks),
     max_concurrent_tasks_per_host_(max_concurrent_tasks_per_host),
     num_tasks_(0),
     num_tasks_complete_(0),
     num_tasks_running_(0),
-    io_timeout_(kMicrosPerSecond),
-    idle_timeout_(kMicrosPerSecond) {}
+    io_timeout_(config->getInt("server.s2s_io_timeout").get()),
+    idle_timeout_(config->getInt("server.s2s_idle_timeout").get()) {}
 
-PipelinedRPC::~PipelinedRPC() {
+TCPAsyncClient::~TCPAsyncClient() {
   shutdown();
 }
 
-void PipelinedRPC::addRPC(
+void TCPAsyncClient::addRPC(
     uint16_t opcode,
     uint16_t flags,
     std::string&& payload,
@@ -76,11 +77,11 @@ void PipelinedRPC::addRPC(
   ++num_tasks_;
 }
 
-void PipelinedRPC::setResultCallback(ResultCallbackType fn) {
+void TCPAsyncClient::setResultCallback(ResultCallbackType fn) {
   result_cb_ = fn;
 }
 
-ReturnCode PipelinedRPC::handleFrame(
+ReturnCode TCPAsyncClient::handleFrame(
     Connection* connection,
     uint16_t opcode,
     uint16_t flags,
@@ -115,7 +116,7 @@ ReturnCode PipelinedRPC::handleFrame(
   return ReturnCode::error("ERUNTIME", "unexpected opcode");
 }
 
-void PipelinedRPC::sendFrame(
+void TCPAsyncClient::sendFrame(
     Connection* connection,
     uint16_t opcode,
     uint16_t flags,
@@ -128,7 +129,7 @@ void PipelinedRPC::sendFrame(
   os->write(payload, payload_len);
 }
 
-ReturnCode PipelinedRPC::handleReady(Connection* connection) {
+ReturnCode TCPAsyncClient::handleReady(Connection* connection) {
   logDebug("evqld", "Executing RPC on $0", connection->host);
   connection->state = ConnectionState::QUERY;
   sendFrame(
@@ -141,7 +142,7 @@ ReturnCode PipelinedRPC::handleReady(Connection* connection) {
   return ReturnCode::success();
 }
 
-ReturnCode PipelinedRPC::handleResult(
+ReturnCode TCPAsyncClient::handleResult(
     Connection* connection,
     uint16_t opcode,
     uint16_t flags,
@@ -172,7 +173,7 @@ ReturnCode PipelinedRPC::handleResult(
   }
 }
 
-ReturnCode PipelinedRPC::handleHandshake(Connection* connection) {
+ReturnCode TCPAsyncClient::handleHandshake(Connection* connection) {
   connection->state = ConnectionState::HANDSHAKE;
 
   std::string payload;
@@ -189,7 +190,7 @@ ReturnCode PipelinedRPC::handleHandshake(Connection* connection) {
   return ReturnCode::success();
 }
 
-ReturnCode PipelinedRPC::handleIdle(Connection* connection) {
+ReturnCode TCPAsyncClient::handleIdle(Connection* connection) {
   auto next_task = popTask(&connection->host); // get next task
   if (next_task) {
     connection->state = ConnectionState::QUERY;
@@ -207,7 +208,7 @@ ReturnCode PipelinedRPC::handleIdle(Connection* connection) {
   return ReturnCode::success();
 }
 
-ReturnCode PipelinedRPC::execute() {
+ReturnCode TCPAsyncClient::execute() {
   fd_set op_read, op_write, op_error;
   while (num_tasks_complete_ < num_tasks_) {
     for (size_t i = num_tasks_running_; i < max_concurrent_tasks_; ++i) {
@@ -328,7 +329,7 @@ ReturnCode PipelinedRPC::execute() {
   return ReturnCode::success();
 }
 
-void PipelinedRPC::shutdown() {
+void TCPAsyncClient::shutdown() {
   auto runq_iter = runq_.begin();
   while (runq_iter != runq_.end()) {
     delete *runq_iter;
@@ -342,7 +343,7 @@ void PipelinedRPC::shutdown() {
   }
 }
 
-ReturnCode PipelinedRPC::performRead(Connection* connection) {
+ReturnCode TCPAsyncClient::performRead(Connection* connection) {
   size_t batch_size = 4096;
   bool eof = false;
 
@@ -419,7 +420,7 @@ ReturnCode PipelinedRPC::performRead(Connection* connection) {
   return ReturnCode::success();
 }
 
-ReturnCode PipelinedRPC::performWrite(Connection* connection) {
+ReturnCode TCPAsyncClient::performWrite(Connection* connection) {
   if (connection->state == ConnectionState::CONNECTING) {
     connection->state = ConnectionState::CONNECTED;
     connection->read_timeout = MonotonicClock::now() + idle_timeout_;
@@ -455,7 +456,7 @@ ReturnCode PipelinedRPC::performWrite(Connection* connection) {
   return ReturnCode::success();
 }
 
-ReturnCode PipelinedRPC::startNextTask() {
+ReturnCode TCPAsyncClient::startNextTask() {
   auto task = popTask();
   if (!task) {
     return ReturnCode::success();
@@ -470,7 +471,7 @@ ReturnCode PipelinedRPC::startNextTask() {
   return rc;
 }
 
-PipelinedRPC::Task* PipelinedRPC::popTask(
+TCPAsyncClient::Task* TCPAsyncClient::popTask(
     const std::string* host /* = nullptr */) {
   auto iter = runq_.begin();
 
@@ -499,7 +500,7 @@ PipelinedRPC::Task* PipelinedRPC::popTask(
   return task;
 }
 
-ReturnCode PipelinedRPC::failTask(Task* task) {
+ReturnCode TCPAsyncClient::failTask(Task* task) {
   while (task->hosts.size() > 1) {
     task->hosts.erase(task->hosts.begin());
 
@@ -528,13 +529,13 @@ ReturnCode PipelinedRPC::failTask(Task* task) {
   }
 }
 
-void PipelinedRPC::completeTask(Task* task) {
+void TCPAsyncClient::completeTask(Task* task) {
   delete task;
   ++num_tasks_complete_;
   --num_tasks_running_;
 }
 
-ReturnCode PipelinedRPC::startConnection(Task* task) {
+ReturnCode TCPAsyncClient::startConnection(Task* task) {
   Connection connection;
   connection.host = task->hosts[0];
   connection.task = task;
@@ -588,7 +589,7 @@ ReturnCode PipelinedRPC::startConnection(Task* task) {
   return ReturnCode::success();
 }
 
-void PipelinedRPC::closeConnection(Connection* connection) {
+void TCPAsyncClient::closeConnection(Connection* connection) {
   --connections_per_host_[connection->host];
   ::close(connection->fd);
 }

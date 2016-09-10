@@ -32,7 +32,7 @@
 namespace eventql {
 namespace native_transport {
 
-class PipelinedRPC {
+class TCPAsyncClient {
 public:
 
   using ResultCallbackType =
@@ -44,12 +44,13 @@ public:
               const char* payload,
               size_t payload_len)>;
 
-  PipelinedRPC(
-      ConfigDirectory* config,
+  TCPAsyncClient(
+      ProcessConfig* config,
+      ConfigDirectory* config_dir,
       size_t max_concurrent_tasks,
       size_t max_concurrent_tasks_per_host);
 
-  ~PipelinedRPC();
+  ~TCPAsyncClient();
 
   void addRPC(
       uint16_t opcode,
