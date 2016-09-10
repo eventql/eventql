@@ -21,7 +21,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include "eventql/transport/native/query_result_frame.h"
+#include "eventql/transport/native/frames/query_result.h"
 
 namespace eventql {
 namespace native_transport {

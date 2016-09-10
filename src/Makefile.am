@@ -832,14 +832,14 @@ EVQL_CORE_SOURCES_ = \
     eventql/transport/native/native_transport.h \
     eventql/transport/native/pipelined_rpc.cc \
     eventql/transport/native/pipelined_rpc.h \
-    eventql/transport/native/query_result_frame.cc \
-    eventql/transport/native/query_result_frame.h \
     eventql/transport/native/frames/hello.cc \
     eventql/transport/native/frames/hello.h \
     eventql/transport/native/frames/query_partialaggr.cc \
     eventql/transport/native/frames/query_partialaggr.h \
     eventql/transport/native/frames/query_partialaggr_result.cc \
     eventql/transport/native/frames/query_partialaggr_result.h \
+    eventql/transport/native/frames/query_result.cc \
+    eventql/transport/native/frames/query_result.h \
     eventql/transport/native/frames/error.cc \
     eventql/transport/native/frames/error.h \
     eventql/transport/native/ops/query.cc \

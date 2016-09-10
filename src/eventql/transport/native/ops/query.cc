@@ -23,7 +23,7 @@
  */
 #include "eventql/transport/native/native_transport.h"
 #include "eventql/transport/native/connection_tcp.h"
-#include "eventql/transport/native/query_result_frame.h"
+#include "eventql/transport/native/frames/query_result.h"
 #include "eventql/util/logging.h"
 #include "eventql/util/util/binarymessagereader.h"
 #include "eventql/server/session.h"
