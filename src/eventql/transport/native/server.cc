@@ -146,7 +146,7 @@ ReturnCode Server::performHandshake(NativeConnection* conn) {
   }
 
   /* set timeouts */
-  if (session->isInternal()) {
+  if (hello_frame.isInternal()) {
     session->setIdleTimeout(config->getInt("server.s2s_idle_timeout").get());
     conn->setIOTimeout(config->getInt("server.s2s_io_timeout").get());
   } else {
@@ -155,7 +155,7 @@ ReturnCode Server::performHandshake(NativeConnection* conn) {
   }
 
   /* auth */
-  if (session->isInternal()) {
+  if (hello_frame.isInternal()) {
     auto auth_rc = InternalAuth::authenticateInternal(
         session,
         conn,

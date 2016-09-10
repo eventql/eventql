@@ -22,6 +22,9 @@
  * code of your own applications
  */
 #include "eventql/auth/internal_auth.h"
+#include "eventql/util/cidr.h"
+#include "eventql/db/database.h"
+#include "eventql/config/process_config.h"
 
 namespace eventql {
 
@@ -29,7 +32,31 @@ ReturnCode InternalAuth::authenticateInternal(
     Session* session,
     native_transport::NativeConnection* connection,
     const std::vector<std::pair<std::string, std::string>>& auth_data) {
-  return ReturnCode::success();
+  auto dbctx = session->getDatabaseContext();
+  auto remote_host = connection->getRemoteHost();
+  auto allowed_hosts = StringUtil::split(
+      dbctx->config->getString("cluster.allowed_hosts").get(),
+      ",");
+
+  bool is_host_allowed = false;
+  for (auto cidr_range : allowed_hosts) {
+    // FIXME precompile patterns
+    StringUtil::ltrim(&cidr_range);
+    StringUtil::rtrim(&cidr_range);
+    if (cidr_match(cidr_range, remote_host)) {
+      is_host_allowed = true;
+      break;
+    }
+  }
+
+  if (is_host_allowed) {
+    session->setIsInternal(true);
+    return ReturnCode::success();
+  } else {
+    return ReturnCode::error(
+        "EAUTH",
+        "host is not allowed to connect (cluster.allowed_hosts)");
+  }
 }
 
 } // namespace eventql

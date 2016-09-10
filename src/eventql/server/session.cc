@@ -103,8 +103,8 @@ uint64_t Session::getHeartbeatInterval() const {
   return heartbeat_interval_;
 }
 
-void Session::setIsInternal() {
-  is_internal_ = true;
+void Session::setIsInternal(bool is_internal) {
+  is_internal_ = is_internal;
 }
 
 uint64_t Session::isInternal() const {

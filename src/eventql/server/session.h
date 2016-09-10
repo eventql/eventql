@@ -54,7 +54,7 @@ public:
 
   uint64_t getHeartbeatInterval() const;
 
-  void setIsInternal();
+  void setIsInternal(bool is_internal);
   uint64_t isInternal() const;
 
 protected:
