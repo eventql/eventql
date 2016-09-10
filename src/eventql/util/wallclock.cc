@@ -30,6 +30,7 @@
 #include <mach/mach.h>
 #endif
 #include "eventql/util/wallclock.h"
+#include "eventql/util/logging.h"
 
 UnixTime WallClock::now() {
   return UnixTime(WallClock::getUnixMicros());
