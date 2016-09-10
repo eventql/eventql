@@ -22,13 +22,16 @@
  * code of your own applications
  */
 #include "eventql/server/session.h"
+#include "eventql/util/wallclock.h"
 
 namespace eventql {
 
 Session::Session(
     const DatabaseContext* database_context) :
     database_context_(database_context),
-    user_id_("<anonymous>") {}
+    user_id_("<anonymous>"),
+    heartbeat_last_(MonotonicClock::now()),
+    heartbeat_interval_(kMicrosPerSecond / 10) {}
 
 String Session::getUserID() const {
   std::unique_lock<std::mutex> lk(mutex_);
@@ -61,6 +64,23 @@ void Session::setDisplayNamespace(const String& ns) {
 
 const DatabaseContext* Session::getDatabaseContext() {
   return database_context_;
+}
+
+void Session::setHeartbeatCallback(std::function<ReturnCode ()> cb) {
+  heartbeat_cb_ = cb;
+}
+
+ReturnCode Session::triggerHeartbeat() {
+  auto now = MonotonicClock::now();
+  if (now >= heartbeat_last_ + heartbeat_interval_) {
+    if (heartbeat_cb_) {
+      return heartbeat_cb_();
+    }
+
+    heartbeat_last_ = now;
+  }
+
+  return ReturnCode::success();
 }
 
 } // namespace eventql
