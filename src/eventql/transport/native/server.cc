@@ -48,14 +48,14 @@
 namespace eventql {
 namespace native_transport {
 
-void startConnection(
-    Database* db,
-    std::unique_ptr<NativeConnection> connection) {
+Server::Server(Database* db) : db_(db) {}
+
+void Server::startConnection(std::unique_ptr<NativeConnection> connection) {
   auto conn_ptr = connection.release();
-  db->startThread([db, conn_ptr] (Session* session) {
+  db_->startThread([this, conn_ptr] (Session* session) {
     std::unique_ptr<NativeConnection> conn(conn_ptr);
 
-    auto rc = performHandshake(db, conn.get());
+    auto rc = performHandshake(conn.get());
     if (!rc.isSuccess()) {
       logError("eventql", "Handshake error: $0", rc.getMessage());
       conn->close();
@@ -81,7 +81,7 @@ void startConnection(
           cont = false;
           break;
         default:
-          rc = performOperation(db, conn.get(), opcode, payload);
+          rc = performOperation(conn.get(), opcode, payload);
           break;
       }
     }
@@ -90,7 +90,7 @@ void startConnection(
   });
 }
 
-ReturnCode performHandshake(Database* database, NativeConnection* conn) {
+ReturnCode Server::performHandshake(NativeConnection* conn) {
   /* read HELLO frame */
   {
     uint16_t opcode;
@@ -123,8 +123,7 @@ ReturnCode performHandshake(Database* database, NativeConnection* conn) {
   return ReturnCode::success();
 }
 
-ReturnCode performOperation(
-    Database* database,
+ReturnCode Server::performOperation(
     NativeConnection* conn,
     uint16_t opcode,
     const std::string& payload) {
@@ -132,10 +131,10 @@ ReturnCode performOperation(
 
   switch (opcode) {
     case EVQL_OP_QUERY:
-      return performOperation_QUERY(database, conn, payload);
+      return performOperation_QUERY(db_, conn, payload);
     case EVQL_OP_QUERY_PARTIALAGGR:
       return performOperation_QUERY_PARTIALAGGR(
-          database,
+          db_,
           conn,
           payload.data(),
           payload.size());

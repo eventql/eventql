@@ -73,7 +73,8 @@ Listener::Listener(
     connect_timeout_(2 * kMicrosPerSecond), 
     running_(true),
     ssock_(-1),
-    http_transport_(database) {}
+    http_transport_(database),
+    native_server_(database) {}
 
 ReturnCode Listener::bind(int listen_port) {
   ssock_ = ::socket(AF_INET, SOCK_STREAM, 0);
@@ -260,8 +261,7 @@ void Listener::open(int fd) {
 
     // native
    case '^': {
-      native_transport::startConnection(
-          database_,
+      native_server_.startConnection(
           std::unique_ptr<native_transport::NativeConnection>(
               new native_transport::TCPConnection(
                   fd,
