@@ -22,6 +22,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#include <algorithm>
 #include <assert.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
@@ -481,9 +482,16 @@ TCPAsyncClient::Task* TCPAsyncClient::popTask(
 
   while (iter != runq_.end()) {
     const auto& iter_host = (*iter)->hosts.front();
-    if (host && iter_host != *host) {
-      ++iter;
-      continue;
+    if (host) {
+      auto match = std::find(
+          (*iter)->hosts.begin(),
+          (*iter)->hosts.end(),
+          *host);
+
+      if (match == (*iter)->hosts.end()) {
+        ++iter;
+        continue;
+      }
     }
 
     if (connections_per_host_[iter_host] >= max_concurrent_tasks_per_host_) {
