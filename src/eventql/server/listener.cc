@@ -175,6 +175,7 @@ void Listener::run() {
       int conn_fd = ::accept(ssock_, NULL, NULL);
       if (conn_fd < 0) {
         logError("eventql", "accept() failed");
+        continue;
       }
 
       int flags = ::fcntl(conn_fd, F_GETFL, 0);
