@@ -98,8 +98,9 @@ void Server::startConnection(std::unique_ptr<NativeConnection> connection) {
 }
 
 ReturnCode Server::performHandshake(NativeConnection* conn) {
-  auto session = db_->getSession();
   auto config = db_->getConfig();
+  auto session = db_->getSession();
+  auto dbctx = session->getDatabaseContext();
 
   /* read HELLO frame */
   HelloFrame hello_frame;
@@ -134,6 +135,7 @@ ReturnCode Server::performHandshake(NativeConnection* conn) {
     }
   }
 
+
   /* check that client idle timeout is valid */
   if (hello_frame.getIdleTimeout() < session->getHeartbeatInterval()) {
     conn->sendErrorFrame(
@@ -151,6 +153,17 @@ ReturnCode Server::performHandshake(NativeConnection* conn) {
   } else {
     session->setIdleTimeout(config->getInt("server.c2s_idle_timeout").get());
     conn->setIOTimeout(config->getInt("server.c2s_io_timeout").get());
+  }
+
+  /* switch database */
+  if (hello_frame.hasDatabase()) {
+    auto rc = dbctx->client_auth->changeNamespace(
+        session,
+        hello_frame.getDatabase());
+
+    if (!rc.isSuccess()) {
+      return conn->sendErrorFrame(rc.message());
+    }
   }
 
   /* send READY frame */

@@ -71,7 +71,8 @@ enum {
 };
 
 enum {
-  EVQL_HELLO_INTERNAL                 = 0x1
+  EVQL_HELLO_INTERNAL                 = 0x1,
+  EVQL_HELLO_SWITCHDB                 = 0x2
 };
 
 enum {
@@ -127,6 +128,7 @@ int evql_client_connect(
     evql_client_t* client,
     const char* host,
     unsigned int port,
+    const char* database,
     long flags);
 
 /**

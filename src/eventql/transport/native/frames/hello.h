@@ -47,6 +47,10 @@ public:
   void addAuthData(const std::string& key, const std::string& value);
   const std::vector<std::pair<std::string, std::string>>& getAuthData() const;
 
+  void setDatabase(const std::string& database);
+  const std::string& getDatabase() const;
+  bool hasDatabase() const;
+
   ReturnCode readFrom(InputStream* is);
   void writeTo(OutputStream* os);
 
@@ -55,6 +59,7 @@ public:
 protected:
   uint64_t flags_;
   uint64_t idle_timeout_;
+  std::string database_;
   std::vector<std::pair<std::string, std::string>> auth_data_;
 };
 

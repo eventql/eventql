@@ -134,7 +134,7 @@ static void evql_client_cbuf_set(
     const char** ptrs,
     size_t* lens);
 
-static int evql_client_handshake(evql_client_t* client);
+static int evql_client_handshake(evql_client_t* client, const char* database);
 static void evql_client_close_hard(evql_client_t* client);
 
 static int evql_client_write(
@@ -467,18 +467,26 @@ static int evql_client_recvframe(
   return 0;
 }
 
-static int evql_client_handshake(evql_client_t* client) {
+static int evql_client_handshake(evql_client_t* client, const char* database) {
   /* send hello frame */
   {
+    uint16_t hello_flags = 0;
+    if (database) {
+      hello_flags |= EVQL_HELLO_SWITCHDB;
+    }
+
     evql_framebuf_t hello_frame;
     evql_framebuf_init(&hello_frame);
     evql_framebuf_writelenencint(&hello_frame, 1); // protocol version
     evql_framebuf_writelenencstr(&hello_frame, "eventql", 7); // eventql version
-    evql_framebuf_writelenencint(&hello_frame, 0); // flags
+    evql_framebuf_writelenencint(&hello_frame, hello_flags); // flags
     evql_framebuf_writelenencint(&hello_frame, client->idle_timeout_us);
     evql_framebuf_writelenencint(&hello_frame, client->authdata_len);
     if (client->authdata) {
       evql_framebuf_write(&hello_frame, client->authdata, client->authdata_len);
+    }
+    if (database) {
+      evql_framebuf_writelenencstr(&hello_frame, database, strlen(database));
     }
 
     int rc = evql_client_sendframe(
@@ -885,10 +893,28 @@ int evql_client_setauth(
   return 0;
 }
 
+int evql_client_setopt(
+    evql_client_t* client,
+    int opt,
+    const char* val,
+    size_t val_len,
+    long flags) {
+  switch (opt) {
+    //case EVQL_CLIENT_IOTIMEOUT:
+    // return 0;
+    default:
+      break;
+  }
+
+  evql_client_seterror(client, "invalid option");
+  return -1;
+}
+
 int evql_client_connect(
     evql_client_t* client,
     const char* host,
     unsigned int port,
+    const char* database,
     long flags) {
   if (client->fd >= 0) {
     close(client->fd);
@@ -938,7 +964,7 @@ int evql_client_connect(
     return -1;
   }
 
-  return evql_client_handshake(client);
+  return evql_client_handshake(client, database);
 }
 
 int evql_client_connectfd(
@@ -960,7 +986,7 @@ int evql_client_connectfd(
     return -1;
   }
 
-  return evql_client_handshake(client);
+  return evql_client_handshake(client, NULL);
 }
 
 int evql_query(

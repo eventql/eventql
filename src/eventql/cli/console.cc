@@ -143,10 +143,18 @@ ReturnCode Console::connect() {
         0);
   }
 
+  std::string database;
+  bool switch_database = false;
+  if (!cfg_.getDatabase().isEmpty()) {
+    switch_database = true;
+    database = cfg_.getDatabase().get();
+  }
+
   auto rc = evql_client_connect(
       client_,
       cfg_.getHost().c_str(),
       cfg_.getPort(),
+      switch_database ? database.c_str() : nullptr,
       0);
 
   if (rc < 0) {
@@ -187,14 +195,7 @@ Status Console::runQuery(const String& query) {
   //  });
   //}
 
-  std::string qry_db;
-  uint64_t qry_flags = 0;
-  if (!cfg_.getDatabase().isEmpty()) {
-    qry_db = cfg_.getDatabase().get();
-    qry_flags |= EVQL_QUERY_SWITCHDB;
-  }
-
-  int rc = evql_query(client_, query.c_str(), qry_db.c_str(), qry_flags);
+  int rc = evql_query(client_, query.c_str(), NULL, 0);
 
   csql::ResultList results;
   std::vector<std::string> result_columns;

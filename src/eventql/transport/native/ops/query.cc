@@ -52,7 +52,9 @@ ReturnCode performOperation_QUERY(
     q_query = q_frame.readLenencString();
     q_flags = q_frame.readVarUInt();
     q_maxrows = q_frame.readVarUInt();
-    q_database = q_frame.readLenencString();
+    if (q_flags & EVQL_QUERY_SWITCHDB) {
+      q_database = q_frame.readLenencString();
+    }
   } catch (const std::exception& e) {
     return ReturnCode::error("ERUNTIME", "invalid QUERY frame");
   }

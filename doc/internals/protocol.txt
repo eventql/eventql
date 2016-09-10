@@ -168,9 +168,11 @@ Binary Protocols.
     lenencint      idle_timeout
     lenencint      authdata_len
     cstr*          authdata
+    lenencstr      database              | if HELLO_SWITCHDB
 
   Fields:
     flags          0x01 HELLO_INTERNAL - This is an internal S2S connection
+    flags          0x02 HELLO_SWITCHDB - Switch to a database on connect
 
   Response:
     <no response>

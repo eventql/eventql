@@ -48,6 +48,19 @@ uint64_t HelloFrame::getIdleTimeout() const {
   return idle_timeout_;
 }
 
+void HelloFrame::setDatabase(const std::string& database) {
+  database_ = database;
+  flags_ |= EVQL_HELLO_SWITCHDB;
+}
+
+bool HelloFrame::hasDatabase() const {
+  return flags_ & EVQL_HELLO_SWITCHDB;
+}
+
+const std::string& HelloFrame::getDatabase() const {
+  return database_;
+}
+
 void HelloFrame::addAuthData(const std::string& key, const std::string& value) {
   auth_data_.emplace_back(key, value);
 }
@@ -76,6 +89,10 @@ ReturnCode HelloFrame::readFrom(InputStream* is) {
     }
   }
 
+  if (hasDatabase()) {
+    database_ = is->readLenencString();
+  }
+
   return ReturnCode::success();
 }
 
@@ -94,6 +111,10 @@ void HelloFrame::writeTo(OutputStream* os) {
   }
 
   os->appendLenencString(auth_data);
+
+  if (hasDatabase()) {
+    os->appendLenencString(database_);
+  }
 }
 
 } // namespace native_transport
