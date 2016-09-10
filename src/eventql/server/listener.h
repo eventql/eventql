@@ -25,7 +25,7 @@
 #include "eventql/eventql.h"
 #include "eventql/util/return_code.h"
 #include <eventql/transport/http/http_transport.h>
-#include <eventql/transport/native/native_transport.h>
+#include <eventql/transport/native/server.h>
 
 namespace eventql {
 class Database;

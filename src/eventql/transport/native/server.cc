@@ -21,7 +21,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include "eventql/transport/native/native_transport.h"
+#include "eventql/transport/native/server.h"
 #include "eventql/transport/native/connection_tcp.h"
 #include "eventql/transport/native/frames/query_result.h"
 #include "eventql/util/logging.h"
