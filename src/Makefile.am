@@ -79,7 +79,7 @@ evql_protos = \
 BUILT_SOURCES = $(evql_protos:.proto=.pb.h)
 dist_noinst_DATA = $(evql_protos)
 
-%.pb.cc %.pb.h: %.proto
+%.pb.cc %.pb.h: %.proto $(top_builddir)/deps/3rdparty/protobuf/protoc
 	$(top_builddir)/deps/3rdparty/protobuf/protoc --proto_path=$(srcdir) --cpp_out=$(builddir) $^
 
 EVQL_CORE_SOURCES_ = \
