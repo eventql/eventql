@@ -893,9 +893,6 @@ ClusterConfig ZookeeperConfigDirectory::getPatchedClusterConfig() const {
     } else {
       dhtnode->set_addr(old_addrs[s.second.server_id()]);
     }
-    for (const auto& t : s.second.sha1_tokens()) {
-      dhtnode->add_sha1_tokens(t);
-    }
   }
 
   return patched;

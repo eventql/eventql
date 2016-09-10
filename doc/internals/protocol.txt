@@ -161,6 +161,10 @@ Binary Protocols.
     lenencint      protocol_version
     lenencstr      eventql_version
     lenencint      flags
+    lenencint      idle_timeout
+
+  Fields:
+    flags          0x01 HELLO_INTERNAL - This is an internal S2S connection
 
   Response:
     <no response>

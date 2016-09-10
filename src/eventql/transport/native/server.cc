@@ -24,6 +24,7 @@
 #include "eventql/transport/native/server.h"
 #include "eventql/transport/native/connection_tcp.h"
 #include "eventql/transport/native/frames/ready.h"
+#include "eventql/transport/native/frames/hello.h"
 #include "eventql/util/logging.h"
 #include "eventql/util/util/binarymessagereader.h"
 #include "eventql/server/session.h"
@@ -101,6 +102,7 @@ ReturnCode Server::performHandshake(NativeConnection* conn) {
   auto config = db_->getConfig();
 
   /* read HELLO frame */
+  HelloFrame hello_frame;
   {
     uint16_t opcode;
     uint16_t flags;
@@ -121,11 +123,28 @@ ReturnCode Server::performHandshake(NativeConnection* conn) {
         break;
       default:
         conn->sendErrorFrame("invalid opcode");
-        conn->close();
         return ReturnCode::error("ERUNTIME", "invalid opcode");
+    }
+
+    MemoryInputStream payload_is(payload.data(), payload.size());
+    rc = hello_frame.readFrom(&payload_is);
+    if (!rc.isSuccess()) {
+      conn->sendErrorFrame("invalid HELLO frame");
+      return rc;
     }
   }
 
+  /* check that client idle timeout is valid */
+  if (hello_frame.getIdleTimeout() < session->getHeartbeatInterval()) {
+    conn->sendErrorFrame(
+        StringUtil::format(
+            "idle timeout too short, minimum is: $0us",
+            session->getHeartbeatInterval()));
+
+    return ReturnCode::error("ERUNTIME", "client timeout to short");
+  }
+
+  /* set timeouts */
   if (session->isInternal()) {
     session->setIdleTimeout(config->getInt("server.s2s_idle_timeout").get());
     conn->setIOTimeout(config->getInt("server.s2s_io_timeout").get());
@@ -145,7 +164,6 @@ ReturnCode Server::performHandshake(NativeConnection* conn) {
 
     auto rc = conn->sendFrame(EVQL_OP_READY, 0, payload.data(), payload.size());
     if (!rc.isSuccess()) {
-      conn->close();
       return rc;
     }
   }

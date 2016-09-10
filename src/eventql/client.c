@@ -43,7 +43,8 @@
 
 static const size_t EVQL_FRAME_MAX_SIZE = 1024 * 1024 * 256;
 static const size_t EVQL_FRAME_HEADER_SIZE = 8;
-static const size_t EVQL_CLIENT_DEFAULT_NETWORK_TIMEOUT_US = 1000 * 1000  * 1; // 1 second
+static const size_t EVQL_CLIENT_DEFAULT_IO_TIMEOUT_US = 1000 * 1000  * 1; // 1 second
+static const size_t EVQL_CLIENT_DEFAULT_IDLE_TIMEOUT_US = 1000 * 1000  * 5; // 5 seconds
 static const size_t EVQL_CLIENT_DEFAULT_BATCH_SIZE = 1024;
 #define EVQL_CLIENT_INLINE_RBUF_SIZE 64
 #define EVQL_CLIENT_INLINE_CBUF_SIZE 1024
@@ -65,7 +66,8 @@ struct evql_client_s {
   int fd;
   char* error;
   int connected;
-  uint64_t timeout_us;
+  uint64_t io_timeout_us;
+  uint64_t idle_timeout_us;
   size_t batch_size;
   evql_framebuf_t recv_buf;
   int qbuf_valid;
@@ -148,7 +150,6 @@ static int evql_client_sendframe(
     evql_client_t* client,
     uint16_t opcode,
     evql_framebuf_t* frame,
-    uint64_t timeout_us,
     uint16_t flags);
 
 static int evql_client_recvframe(
@@ -393,7 +394,6 @@ static int evql_client_sendframe(
     evql_client_t* client,
     uint16_t opcode,
     evql_framebuf_t* frame,
-    uint64_t timeout_us,
     uint16_t flags) {
   uint16_t opcode_n = htons(opcode);
   uint16_t flags_n = htons(flags);
@@ -407,7 +407,7 @@ static int evql_client_sendframe(
       client,
       frame->header,
       frame->length + 8,
-      client->timeout_us);
+      client->io_timeout_us);
 
   if (ret == -1) {
     return -1;
@@ -427,7 +427,7 @@ static int evql_client_recvframe(
       client,
       header,
       sizeof(header),
-      client->timeout_us);
+      timeout_us);
 
   if (rc == -1) {
     return -1;
@@ -454,7 +454,7 @@ static int evql_client_recvframe(
       client,
       client->recv_buf.data,
       payload_len,
-      client->timeout_us);
+      client->io_timeout_us);
 
   if (rc == -1) {
     return -1;
@@ -472,12 +472,12 @@ static int evql_client_handshake(evql_client_t* client) {
     evql_framebuf_writelenencint(&hello_frame, 1); // protocol version
     evql_framebuf_writelenencstr(&hello_frame, "eventql", 7); // eventql version
     evql_framebuf_writelenencint(&hello_frame, 0); // flags
+    evql_framebuf_writelenencint(&hello_frame, client->idle_timeout_us);
 
     int rc = evql_client_sendframe(
         client,
         EVQL_OP_HELLO,
         &hello_frame,
-        client->timeout_us,
         0);
 
     evql_framebuf_destroy(&hello_frame);
@@ -496,7 +496,7 @@ static int evql_client_handshake(evql_client_t* client) {
         client,
         &response_opcode,
         &response_frame,
-        client->timeout_us,
+        client->idle_timeout_us,
         NULL);
 
     if (rc < 0) {
@@ -508,6 +508,23 @@ static int evql_client_handshake(evql_client_t* client) {
       case EVQL_OP_READY:
         client->connected = 1;
         break;
+      case EVQL_OP_ERROR: {
+        const char* err;
+        size_t err_len;
+        int err_rc = evql_framebuf_readlenencstr(
+            &client->recv_buf,
+            &err,
+            &err_len);
+
+        if (err_rc == 0) {
+          evql_client_seterror(client, err);
+        } else {
+          evql_client_seterror(client, "<unspecified error>");
+        }
+
+        evql_client_close_hard(client);
+        return -1;
+      }
       default:
         evql_client_seterror(client, "received unexpected opcode");
         evql_client_close_hard(client);
@@ -527,7 +544,7 @@ static int evql_client_query_readresultframe(evql_client_t* client) {
         client,
         &response_opcode,
         &r_buf,
-        client->timeout_us,
+        client->idle_timeout_us,
         NULL);
 
     if (rc < 0) {
@@ -658,7 +675,6 @@ static int evql_client_query_continue(evql_client_t* client) {
         client,
         EVQL_OP_QUERY_CONTINUE,
         &cframe,
-        client->timeout_us,
         0);
 
     evql_framebuf_destroy(&cframe);
@@ -806,7 +822,8 @@ evql_client_t* evql_client_init() {
   client->fd = -1;
   client->error = NULL;
   client->connected = 0;
-  client->timeout_us = EVQL_CLIENT_DEFAULT_NETWORK_TIMEOUT_US;
+  client->io_timeout_us = EVQL_CLIENT_DEFAULT_IO_TIMEOUT_US;
+  client->idle_timeout_us = EVQL_CLIENT_DEFAULT_IDLE_TIMEOUT_US;
   client->batch_size = EVQL_CLIENT_DEFAULT_BATCH_SIZE;
   memset(client->rbuf_inline, 0, sizeof(client->rbuf_inline));
   client->rbuf_ptrs = (const char**) client->rbuf_inline;
@@ -927,7 +944,6 @@ int evql_query(
         client,
         EVQL_OP_QUERY,
         &qframe,
-        client->timeout_us,
         0);
 
     evql_framebuf_destroy(&qframe);
@@ -1010,7 +1026,6 @@ int evql_next_result(evql_client_t* client) {
         client,
         EVQL_OP_QUERY_NEXT,
         &cframe,
-        client->timeout_us,
         0);
 
     evql_framebuf_destroy(&cframe);
@@ -1095,7 +1110,6 @@ int evql_client_close(evql_client_t* client) {
         client,
         EVQL_OP_BYE,
         &bye_frame,
-        client->timeout_us,
         0);
 
     evql_framebuf_destroy(&bye_frame);

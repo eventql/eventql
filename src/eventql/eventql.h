@@ -71,6 +71,10 @@ enum {
 };
 
 enum {
+  EVQL_HELLO_INTERNAL                 = 0x1
+};
+
+enum {
   EVQL_QUERY_SWITCHDB     = 0x1,
   EVQL_QUERY_MULTISTMT    = 0x2,
   EVQL_QUERY_PROGRESS     = 0x4,
