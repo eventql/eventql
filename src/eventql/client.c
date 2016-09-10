@@ -67,7 +67,6 @@ struct evql_client_s {
   char* error;
   int connected;
   char* authdata;
-  size_t authdata_count;
   size_t authdata_len;
   size_t authdata_capacity;
   uint64_t io_timeout_us;
@@ -477,7 +476,7 @@ static int evql_client_handshake(evql_client_t* client) {
     evql_framebuf_writelenencstr(&hello_frame, "eventql", 7); // eventql version
     evql_framebuf_writelenencint(&hello_frame, 0); // flags
     evql_framebuf_writelenencint(&hello_frame, client->idle_timeout_us);
-    evql_framebuf_writelenencint(&hello_frame, client->authdata_count);
+    evql_framebuf_writelenencint(&hello_frame, client->authdata_len);
     if (client->authdata) {
       evql_framebuf_write(&hello_frame, client->authdata, client->authdata_len);
     }
@@ -830,7 +829,6 @@ evql_client_t* evql_client_init() {
   client->error = NULL;
   client->connected = 0;
   client->authdata = NULL;
-  client->authdata_count = 0;
   client->authdata_len = 0;
   client->authdata_capacity = 0;
   client->io_timeout_us = EVQL_CLIENT_DEFAULT_IO_TIMEOUT_US;
@@ -850,6 +848,41 @@ evql_client_t* evql_client_init() {
   client->cbuf_nbytes = EVQL_CLIENT_INLINE_CBUF_SIZE;
   evql_framebuf_init(&client->recv_buf);
   return client;
+}
+
+int evql_client_setauth(
+    evql_client_t* client,
+    const char* key,
+    size_t key_len,
+    const char* val,
+    size_t val_len,
+    long flags) {
+  size_t elen = key_len + val_len + 2;
+  if (client->authdata_len + elen > client->authdata_capacity) {
+    client->authdata_capacity = client->authdata_len + elen; // FIXME
+
+    if (client->authdata) {
+      client->authdata = realloc(client->authdata, client->authdata_capacity);
+    } else {
+      client->authdata = malloc(client->authdata_capacity);
+    }
+
+    if (!client->authdata) {
+      printf("malloc() failed\n");
+      abort();
+    }
+  }
+
+  char* dst = client->authdata + client->authdata_len;
+  client->authdata_len += elen;
+
+  memcpy(dst, key, key_len);
+  dst += key_len;
+  *(dst++) = 0;
+  memcpy(dst, val, val_len);
+  dst += val_len;
+  *dst = 0;
+  return 0;
 }
 
 int evql_client_connect(

@@ -107,6 +107,42 @@ ReturnCode Console::connect() {
     }
   }
 
+  if (!cfg_.getUser().isEmpty()) {
+    std::string akey = "user";
+    std::string aval = cfg_.getUser().get();
+    evql_client_setauth(
+        client_,
+        akey.data(),
+        akey.size(),
+        aval.data(),
+        aval.size(),
+        0);
+  }
+
+  if (!cfg_.getPassword().isEmpty()) {
+    std::string akey = "password";
+    std::string aval = cfg_.getPassword().get();
+    evql_client_setauth(
+        client_,
+        akey.data(),
+        akey.size(),
+        aval.data(),
+        aval.size(),
+        0);
+  }
+
+  if (!cfg_.getAuthToken().isEmpty()) {
+    std::string akey = "auth_token";
+    std::string aval = cfg_.getAuthToken().get();
+    evql_client_setauth(
+        client_,
+        akey.data(),
+        akey.size(),
+        aval.data(),
+        aval.size(),
+        0);
+  }
+
   auto rc = evql_client_connect(
       client_,
       cfg_.getHost().c_str(),

@@ -70,7 +70,7 @@ ReturnCode HelloFrame::readFrom(InputStream* is) {
   auto auth_data_len = is->readVarUInt();
   if (auth_data_len > 0) {
     auto auth_data = is->readString(auth_data_len);
-    auto auth_data_parts = StringUtil::split(auth_data, "\0");
+    auto auth_data_parts = StringUtil::split(auth_data, std::string("\0", 1));
     for (size_t i = 0; i + 1 < auth_data_parts.size(); i += 2) {
       auth_data_.emplace_back(auth_data_parts[i], auth_data_parts[i+1]);
     }
