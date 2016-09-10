@@ -6,8 +6,19 @@ EventQL v0.4.0 beta;
 
   * Changed the evql client to use the new native protocol
 
+  * Changed the connection acceptor code to read the first byte of an incoming
+    connection and switch protocols (currently HTTP and native) based on this
+    first byte
+
+  * Changed the http server code to execute incoming requests from within a
+    database thread (previously this was a generic thread pool)
+
   * Added a native transport layer (a framed TCP-based protocol). See
     doc/internals/protocol.txt for the specification
+
+  * Added a thread-local storage and retrieval mechanism for the current
+    session. This also adds a new requirement that all operations must be
+    executed from within a valid database thread.
 
 
 EventQL v0.3.2 beta;
