@@ -21,11 +21,12 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#include <stdlib.h>
+#include <string.h>
+#include <arpa/inet.h>
 #include <eventql/util/util/binarymessagewriter.h>
 #include <eventql/util/exception.h>
 #include <eventql/util/ieee754.h>
-#include <stdlib.h>
-#include <string.h>
 
 namespace util {
 
