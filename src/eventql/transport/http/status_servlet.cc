@@ -151,6 +151,10 @@ void StatusServlet::renderDashboard(
       kVersionString,
       kBuildID);
 
+  struct rlimit fd_limit;
+  memset(&fd_limit, 0, sizeof(fd_limit));
+  ::getrlimit(RLIMIT_NOFILE, &fd_limit);
+
   html += StringUtil::format(
       "<span><em>Version:</em> $0</span> &mdash; ",
       kVersionString);
@@ -163,6 +167,10 @@ void StatusServlet::renderDashboard(
   html += StringUtil::format(
       "<span><em>Memory Usage - Peak:</em> $0 MB</span> &mdash; ",
       Application::getPeakMemoryUsage() / (1024.0 * 1024.0));
+  html += StringUtil::format(
+      "<span><em>Max FDs:</em> $0 (soft) / $1 (hard)</span> &mdash; ",
+      fd_limit.rlim_cur,
+      fd_limit.rlim_max);
   html += StringUtil::format(
       "<span><em>Referenced Files:</em> $0</span> &mdash; ",
       ctx->file_tracker->getNumReferencedFiles());
