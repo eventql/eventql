@@ -21,6 +21,8 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#include <sys/time.h>
+#include <sys/resource.h>
 #include <eventql/transport/http/status_servlet.h>
 #include <eventql/db/partition_replication.h>
 #include <eventql/server/server_stats.h>
