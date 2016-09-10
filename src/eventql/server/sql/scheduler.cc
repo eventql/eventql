@@ -37,6 +37,7 @@ Scheduler::Scheduler(
     PartitionMap* pmap,
     ConfigDirectory* cdir,
     InternalAuth* auth) :
+    config_(config),
     pmap_(pmap),
     cdir_(cdir),
     auth_(auth),
