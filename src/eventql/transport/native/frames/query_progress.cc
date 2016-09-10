@@ -22,6 +22,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#include "eventql/util/util/binarymessagewriter.h"
 #include "eventql/transport/native/frames/query_progress.h"
 
 namespace eventql {
@@ -51,7 +52,7 @@ void QueryProgressFrame::setQueryProgressPermill(uint64_t query_progress_permill
   query_progress_permill_ = query_progress_permill;
 }
 
-void QueryProgressFrame::setQueryElpasedMillis(uint64_t query_elapsed_ms) {
+void QueryProgressFrame::setQueryElapsedMillis(uint64_t query_elapsed_ms) {
   query_elapsed_ms_ = query_elapsed_ms;
 }
 
@@ -60,7 +61,15 @@ void QueryProgressFrame::setQueryETAMillis(uint64_t query_eta_ms) {
 }
 
 void QueryProgressFrame::writeToString(std::string* str) {
-  //TODO
+  util::BinaryMessageWriter writer;
+  writer.appendVarUInt(num_rows_modified_);
+  writer.appendVarUInt(num_rows_scanned_);
+  writer.appendVarUInt(num_bytes_scanned_);
+  writer.appendVarUInt(query_progress_permill_);
+  writer.appendVarUInt(query_elapsed_ms_);
+  writer.appendVarUInt(query_eta_ms_);
+
+  *str = std::string((const char*) writer.data(), writer.size());
 }
 
 void QueryProgressFrame::clear() {

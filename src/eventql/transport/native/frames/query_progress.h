@@ -23,13 +23,7 @@
  * code of your own applications
  */
 #pragma once
-#include <string>
-#include <vector>
 #include "eventql/eventql.h"
-#include "eventql/util/return_code.h"
-#include "eventql/util/util/binarymessagewriter.h"
-#include "eventql/transport/native/native_connection.h"
-#include "eventql/sql/svalue.h"
 
 namespace eventql {
 namespace native_transport {
@@ -43,7 +37,7 @@ public:
   void setNumRowsScanned(uint64_t num_rows_scanned);
   void setNumBytesScanned(uint64_t num_bytes_scanned);
   void setQueryProgressPermill(uint64_t query_progress_permill);
-  void setQueryElpasedMillis(uint64_t query_elapsed_ms);
+  void setQueryElapsedMillis(uint64_t query_elapsed_ms);
   void setQueryETAMillis(uint64_t query_eta_ms);
 
   void writeToString(std::string* str);

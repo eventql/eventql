@@ -544,6 +544,7 @@ static int evql_client_query_readresultframe(evql_client_t* client) {
         break;
 
       case EVQL_OP_QUERY_PROGRESS:
+        printf("got progress");
         // FIXME handle query progress
         break;
 
