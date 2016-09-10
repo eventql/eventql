@@ -135,7 +135,6 @@ ReturnCode Server::performHandshake(NativeConnection* conn) {
     }
   }
 
-
   /* check that client idle timeout is valid */
   if (hello_frame.getIdleTimeout() < session->getHeartbeatInterval()) {
     conn->sendErrorFrame(
@@ -153,6 +152,39 @@ ReturnCode Server::performHandshake(NativeConnection* conn) {
   } else {
     session->setIdleTimeout(config->getInt("server.c2s_idle_timeout").get());
     conn->setIOTimeout(config->getInt("server.c2s_io_timeout").get());
+  }
+
+  /* auth */
+  if (session->isInternal()) {
+    auto auth_rc = InternalAuth::authenticateInternal(
+        session,
+        conn,
+        hello_frame.getAuthData());
+
+    if (!auth_rc.isSuccess()) {
+      conn->sendErrorFrame(auth_rc.getMessage());
+      return auth_rc;
+    }
+  } else {
+    std::unordered_map<std::string, std::string> auth_data;
+    for (const auto& p : hello_frame.getAuthData()) {
+      auth_data.insert(p);
+    }
+
+    auto auth_rc = dbctx->client_auth->authenticateNonInteractive(
+        session,
+        auth_data);
+
+    if (!auth_rc.isSuccess() &&
+        hello_frame.getInteractiveAuth() &&
+        dbctx->client_auth->authenticateInteractiveSupported()) {
+      auth_rc = dbctx->client_auth->authenticateInteractive(session, conn);
+    }
+
+    if (!auth_rc.isSuccess()) {
+      conn->sendErrorFrame(auth_rc.message());
+      return ReturnCode::error("EAUTH", auth_rc.message());
+    }
   }
 
   /* switch database */

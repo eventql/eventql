@@ -72,7 +72,8 @@ enum {
 
 enum {
   EVQL_HELLO_INTERNAL                 = 0x1,
-  EVQL_HELLO_SWITCHDB                 = 0x2
+  EVQL_HELLO_SWITCHDB                 = 0x2,
+  EVQL_HELLO_INTERACTIVEAUTH          = 0x4
 };
 
 enum {

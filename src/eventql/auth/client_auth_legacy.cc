@@ -30,7 +30,7 @@ LegacyClientAuth::LegacyClientAuth(
     const String& secret) :
     cookie_coder_(secret) {}
 
-Status LegacyClientAuth::authenticateSession(
+Status LegacyClientAuth::authenticateNonInteractive(
     Session* session,
     HashMap<String, String> auth_data) {
   const auto& auth_token_str = auth_data["auth_token"];

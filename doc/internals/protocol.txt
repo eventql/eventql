@@ -173,6 +173,7 @@ Binary Protocols.
   Fields:
     flags          0x01 HELLO_INTERNAL - This is an internal S2S connection
     flags          0x02 HELLO_SWITCHDB - Switch to a database on connect
+    flags          0x02 HELLO_INTERACTIVEAUTH - Enable interactive auth
 
   Response:
     <no response>

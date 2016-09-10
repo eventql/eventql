@@ -879,6 +879,7 @@ EVQL_CORE_SOURCES_ = \
     eventql/auth/client_auth_legacy.h \
     eventql/auth/client_auth_trust.cc \
     eventql/auth/client_auth_trust.h \
+    eventql/auth/internal_auth.cc \
     eventql/auth/internal_auth.h \
     eventql/auth/internal_auth_trust.cc \
     eventql/auth/internal_auth_trust.h \

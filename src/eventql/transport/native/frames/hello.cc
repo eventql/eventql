@@ -40,6 +40,18 @@ bool HelloFrame::isInternal() const {
   return flags_ & EVQL_HELLO_INTERNAL;
 }
 
+void HelloFrame::setInteractiveAuth(bool enable_interactive) {
+  if (enable_interactive) {
+    flags_ |= EVQL_HELLO_INTERACTIVEAUTH;
+  } else {
+    flags_ &= ~EVQL_HELLO_INTERACTIVEAUTH;
+  }
+}
+
+bool HelloFrame::getInteractiveAuth() const {
+  return flags_ & EVQL_HELLO_INTERACTIVEAUTH;
+}
+
 void HelloFrame::setIdleTimeout(uint64_t idle_timeout) {
   idle_timeout_ = idle_timeout;
 }
