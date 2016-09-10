@@ -30,5 +30,6 @@ export CXXFLAGS="-static-libstdc++ -static-libgcc"
 
 ../../../$PACKAGE-$VERSION/configure --host=x86_64-linux-gnu --prefix=/usr/local
 #(cd src && make clean)
+(cd deps && make)
 make
 make install DESTDIR=$(pwd)/dist
