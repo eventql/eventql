@@ -60,6 +60,11 @@ ReturnCode performOperation_QUERY(
     q_maxrows = 1;
   }
 
+  /* set heartbeat callback */
+  session->setHeartbeatCallback([conn] () -> ReturnCode {
+    return conn->sendHeartbeatFrame();
+  });
+
   /* switch database */
   if (q_flags & EVQL_QUERY_SWITCHDB) {
     auto rc = dbctx->client_auth->changeNamespace(session, q_database);

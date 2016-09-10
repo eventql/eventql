@@ -355,10 +355,16 @@ ScopedPtr<ResultCursor> GroupByMergeExpression::execute() {
       const char* payload,
       size_t payload_size) -> ReturnCode {
     switch (opcode) {
-      case EVQL_OP_HEARTBEAT:
+
+      case EVQL_OP_HEARTBEAT: {
+        auto session = static_cast<eventql::Session*>(txn_->getUserData());
+        session->triggerHeartbeat();
         return ReturnCode::success();
+      }
+
       case EVQL_OP_QUERY_PARTIALAGGR_RESULT:
         break;
+
     };
 
     MemoryInputStream is(payload, payload_size);
