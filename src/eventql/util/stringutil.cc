@@ -117,6 +117,18 @@ std::string StringUtil::toString(bool value) {
   return value ? "true" : "false";
 }
 
+void StringUtil::ltrim(std::string* str) {
+  while (str->front() == ' ') {
+    str->erase(str->begin());
+  }
+}
+
+void StringUtil::rtrim(std::string* str) {
+  while (str->back() == ' ') {
+    str->pop_back();
+  }
+}
+
 void StringUtil::stripTrailingSlashes(std::string* str) {
   while (str->back() == '/') {
     str->pop_back();
