@@ -261,6 +261,10 @@ void TCPConnection::close() {
   fd_ = -1;
 }
 
+void TCPConnection::setIOTimeout(uint64_t timeout_us) {
+  io_timeout_ = timeout_us;
+}
+
 } // namespace native_connection
 } // namespace eventql
 
