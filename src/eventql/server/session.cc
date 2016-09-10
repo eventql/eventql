@@ -90,4 +90,12 @@ ReturnCode Session::triggerHeartbeat() {
   return ReturnCode::success();
 }
 
+void Session::setIdleTimeout(uint64_t timeout_us) {
+  idle_timeout_ = timeout_us;
+}
+
+uint64_t Session::getIdleTimeout() const {
+  return idle_timeout_;
+}
+
 } // namespace eventql
