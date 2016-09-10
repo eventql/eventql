@@ -24,6 +24,7 @@
 #include "eventql/transport/native/native_transport.h"
 #include "eventql/transport/native/native_connection.h"
 #include "eventql/transport/native/query_result_frame.h"
+#include "eventql/transport/native/frames/query_progress.h"
 #include "eventql/util/logging.h"
 #include "eventql/util/util/binarymessagereader.h"
 #include "eventql/server/session.h"
@@ -82,9 +83,13 @@ ReturnCode performOperation_QUERY(
     auto txn = dbctx->sql_service->startTransaction(session);
     auto qplan = dbctx->sql_runtime->buildQueryPlan(txn.get(), q_query);
 
-    //qplan->setProgressCallback([&result_format, &qplan] () {
+    qplan->setProgressCallback([&qplan] () {
+      auto progress = qplan->getProgress();
+      QueryProgressFrame progress_frame;
+      progress_frame.setQueryProgressPermill(progress);
+      iputs("progress $0", progress);
     //  result_format.sendProgress(qplan->getProgress());
-    //});
+    });
 
     if (qplan->numStatements() > 1 && !(q_flags & EVQL_QUERY_MULTISTMT)) {
       return conn->sendErrorFrame(
