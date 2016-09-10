@@ -101,5 +101,5 @@ AM_CONDITIONAL(WITH_PCRE32, false)
 AM_CONDITIONAL(WITH_PCRE16, false)
 AM_CONDITIONAL(WITH_JIT, false)
 
-AC_CONFIG_FILES([Makefile src/Makefile test/Makefile deps/3rdparty/protobuf/Makefile deps/3rdparty/linenoise/Makefile deps/3rdparty/libsimdcomp/Makefile deps/3rdparty/liblmdb/Makefile deps/3rdparty/spidermonkey/Makefile deps/3rdparty/pcre/Makefile deps/3rdparty/zookeeper/Makefile deps/3rdparty/inih/Makefile build/osxpkg/distribution.xml build/osxpkg/package_info.xml])
+AC_CONFIG_FILES([Makefile src/Makefile test/Makefile deps/Makefile deps/3rdparty/protobuf/Makefile deps/3rdparty/linenoise/Makefile deps/3rdparty/libsimdcomp/Makefile deps/3rdparty/liblmdb/Makefile deps/3rdparty/spidermonkey/Makefile deps/3rdparty/pcre/Makefile deps/3rdparty/zookeeper/Makefile deps/3rdparty/inih/Makefile build/osxpkg/distribution.xml build/osxpkg/package_info.xml])
 AC_OUTPUT
