@@ -23,6 +23,7 @@
  */
 #include "eventql/transport/native/native_connection.h"
 #include "eventql/util/inspect.h"
+#include "eventql/util/util/binarymessagewriter.h"
 #include <string.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -37,6 +38,7 @@
 #include <poll.h>
 
 namespace eventql {
+namespace native_transport {
 
 NativeConnection::NativeConnection(
     int fd,
@@ -147,6 +149,19 @@ ReturnCode NativeConnection::sendFrame(
   return flushBuffer(true, timeout_);
 }
 
+ReturnCode NativeConnection::sendErrorFrame(const std::string& error) {
+  util::BinaryMessageWriter e_frame;
+  e_frame.appendLenencString(error);
+  char zero = 0;
+  e_frame.append(&zero, 1);
+
+  return sendFrame(
+      EVQL_OP_ERROR,
+      e_frame.data(),
+      e_frame.size(),
+      EVQL_ENDOFREQUEST);
+}
+
 ReturnCode NativeConnection::sendFrameAsync(
     uint16_t opcode,
     const void* data,
@@ -240,5 +255,6 @@ void NativeConnection::close() {
   fd_ = -1;
 }
 
+} // namespace native_connection
 } // namespace eventql
 

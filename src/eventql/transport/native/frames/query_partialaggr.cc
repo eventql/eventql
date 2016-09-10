@@ -2,6 +2,7 @@
  * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
  *   - Paul Asmuth <paul@eventql.io>
+ *   - Laura Schlimmer <laura@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -21,40 +22,51 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#pragma once
-#include <string>
-#include <vector>
-#include "eventql/eventql.h"
-#include "eventql/util/return_code.h"
-#include "eventql/util/util/binarymessagewriter.h"
-#include "eventql/transport/native/native_connection.h"
-#include "eventql/sql/svalue.h"
+#include "eventql/transport/native/frames/query_partialaggr.h"
+#include "eventql/util/util/binarymessagereader.h"
 
 namespace eventql {
 namespace native_transport {
 
-class QueryResultFrame {
-public:
 
-  QueryResultFrame(const std::vector<std::string>& columns);
+QueryPartialAggrFrame::QueryPartialAggrFrame() : flags_(0) {};
 
-  void addRow(const std::vector<csql::SValue>& row);
-  size_t getRowCount() const;
-  size_t getRowBytes() const;
+ReturnCode QueryPartialAggrFrame::parseFrom(
+    const char* payload,
+    size_t payload_size) {
+  util::BinaryMessageReader frame(payload, payload_size);
+  flags_ = frame.readVarUInt();
+  database_ = frame.readLenencString();
+  encoded_qtree_ = frame.readLenencString();
 
-  void setIsLast(bool is_last);
-  void setHasPendingStatement(bool has_pending_stmt);
+  return ReturnCode::success();
+}
 
-  ReturnCode writeTo(NativeConnection* conn);
-  void clear();
+void QueryPartialAggrFrame::setDatabase(const std::string& database) {
+  database_ = database;
+}
 
-protected:
-  std::vector<std::string> columns_;
-  bool is_last_;
-  bool has_pending_stmt_;
-  size_t num_rows_;
-  util::BinaryMessageWriter data_;
-};
+const std::string& QueryPartialAggrFrame::getDatabase() const {
+  return database_;
+}
+
+const std::string& QueryPartialAggrFrame::getEncodedQTree() const {
+  return encoded_qtree_;
+}
+
+void QueryPartialAggrFrame::setEncodedQtree(const std::string& encoded_qtree) {
+  encoded_qtree_ = encoded_qtree;
+}
+
+void QueryPartialAggrFrame::writeToString(std::string* str) {
+  util::BinaryMessageWriter writer;
+  writer.appendVarUInt(flags_);
+  writer.appendLenencString(database_);
+  writer.appendLenencString(encoded_qtree_);
+
+  *str = std::string((const char*) writer.data(), writer.size());
+}
 
 } // namespace native_transport
 } // namespace eventql
+

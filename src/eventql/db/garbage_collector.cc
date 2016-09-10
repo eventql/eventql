@@ -132,7 +132,11 @@ void GarbageCollector::stopGCThread() {
   thread_running_ = false;
   cv_.notify_all();
   lk.unlock();
-  thread_.join();
+  try {
+    thread_.join();
+  } catch (const std::exception& e) {
+    /* ignore */
+  }
 }
 
 void GarbageCollector::emptyTrash() {

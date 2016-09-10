@@ -2,6 +2,7 @@
  * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
  *   - Paul Asmuth <paul@eventql.io>
+ *   - Laura Schlimmer <laura@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -21,25 +22,39 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#ifndef _libstx_UTIL_WALLCLOCK_H
-#define _libstx_UTIL_WALLCLOCK_H
-#include <stdlib.h>
-#include <stdint.h>
-#include "eventql/util/UnixTime.h"
+#pragma once
+#include <string>
+#include <vector>
+#include "eventql/eventql.h"
+#include "eventql/util/return_code.h"
+#include "eventql/sql/svalue.h"
+#include "eventql/transport/native/native_connection.h"
 
-class WallClock {
+namespace eventql {
+namespace native_transport {
+
+class QueryPartialAggrResultFrame {
 public:
-  static UnixTime now();
-  static uint64_t unixSeconds();
-  static uint64_t getUnixMillis();
-  static uint64_t unixMillis();
-  static uint64_t getUnixMicros();
-  static uint64_t unixMicros();
+
+  QueryPartialAggrResultFrame();
+
+  void setBody(std::string body);
+
+  void setBody(const char* data, size_t len);
+
+  const std::string& getBody() const;
+  std::string& getBody();
+
+  void setNumRows(size_t num_rows);
+
+  void writeTo(OutputStream* os);
+
+protected:
+  uint64_t flags_;
+  size_t num_rows_;
+  std::string body_;
 };
 
-class MonotonicClock {
-public:
-  static uint64_t now();
-};
+} // namespace native_transport
+} // namespace eventql
 
-#endif

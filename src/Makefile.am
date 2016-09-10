@@ -828,8 +828,20 @@ EVQL_CORE_SOURCES_ = \
     eventql/transport/native/native_connection.h \
     eventql/transport/native/native_transport.cc \
     eventql/transport/native/native_transport.h \
+    eventql/transport/native/pipelined_rpc.cc \
+    eventql/transport/native/pipelined_rpc.h \
     eventql/transport/native/query_result_frame.cc \
     eventql/transport/native/query_result_frame.h \
+    eventql/transport/native/frames/hello.cc \
+    eventql/transport/native/frames/hello.h \
+    eventql/transport/native/frames/query_partialaggr.cc \
+    eventql/transport/native/frames/query_partialaggr.h \
+    eventql/transport/native/frames/query_partialaggr_result.cc \
+    eventql/transport/native/frames/query_partialaggr_result.h \
+    eventql/transport/native/frames/error.cc \
+    eventql/transport/native/frames/error.h \
+    eventql/transport/native/ops/query.cc \
+    eventql/transport/native/ops/query_partialaggr.cc \
     eventql/db/table_ref.cc \
     eventql/db/table_ref.h \
     eventql/db/table.cc \
@@ -891,6 +903,8 @@ EVQL_CORE_SOURCES_ = \
     eventql/server/sql/table_scan.h \
     eventql/server/listener.cc \
     eventql/server/listener.h \
+    eventql/server/rpc/partial_aggregate.cc \
+    eventql/server/rpc/partial_aggregate.h \
     eventql/transport/http/mapreduce_servlet.cc \
     eventql/transport/http/mapreduce_servlet.h \
     eventql/mapreduce/mapreduce_service.cc \

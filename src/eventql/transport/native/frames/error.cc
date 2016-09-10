@@ -2,6 +2,7 @@
  * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
  *   - Paul Asmuth <paul@eventql.io>
+ *   - Laura Schlimmer <laura@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -21,25 +22,23 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#ifndef _libstx_UTIL_WALLCLOCK_H
-#define _libstx_UTIL_WALLCLOCK_H
-#include <stdlib.h>
-#include <stdint.h>
-#include "eventql/util/UnixTime.h"
+#include "eventql/util/util/binarymessagereader.h"
+#include "eventql/transport/native/frames/error.h"
 
-class WallClock {
-public:
-  static UnixTime now();
-  static uint64_t unixSeconds();
-  static uint64_t getUnixMillis();
-  static uint64_t unixMillis();
-  static uint64_t getUnixMicros();
-  static uint64_t unixMicros();
-};
+namespace eventql {
+namespace native_transport {
 
-class MonotonicClock {
-public:
-  static uint64_t now();
-};
+void ErrorFrame::parseFrom(const char* payload, size_t payload_size) {
+  util::BinaryMessageReader reader(payload, payload_size);
+  error_ = reader.readLenencString();
+}
 
-#endif
+const std::string& ErrorFrame::getError() const {
+  return error_;
+}
+
+
+} // namespace native_transport
+} // namespace eventql
+
+

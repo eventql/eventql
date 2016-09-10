@@ -2,6 +2,7 @@
  * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
  *   - Paul Asmuth <paul@eventql.io>
+ *   - Laura Schlimmer <laura@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -21,25 +22,39 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#ifndef _libstx_UTIL_WALLCLOCK_H
-#define _libstx_UTIL_WALLCLOCK_H
-#include <stdlib.h>
-#include <stdint.h>
-#include "eventql/util/UnixTime.h"
+#pragma once
+#include <string>
+#include <vector>
+#include "eventql/eventql.h"
+#include "eventql/util/return_code.h"
+#include "eventql/util/util/binarymessagewriter.h"
+#include "eventql/transport/native/native_connection.h"
+#include "eventql/sql/svalue.h"
 
-class WallClock {
+namespace eventql {
+namespace native_transport {
+
+class QueryPartialAggrFrame {
 public:
-  static UnixTime now();
-  static uint64_t unixSeconds();
-  static uint64_t getUnixMillis();
-  static uint64_t unixMillis();
-  static uint64_t getUnixMicros();
-  static uint64_t unixMicros();
+
+  QueryPartialAggrFrame();
+
+  void setDatabase(const std::string& database);
+  void setEncodedQtree(const std::string& encoded_qtree);
+
+  ReturnCode parseFrom(const char* payload, size_t payload_size);
+
+  const std::string& getDatabase() const;
+  const std::string& getEncodedQTree() const;
+
+  void writeToString(std::string* str);
+  void clear();
+
+protected:
+  uint64_t flags_;
+  std::string database_;
+  std::string encoded_qtree_;
 };
 
-class MonotonicClock {
-public:
-  static uint64_t now();
-};
-
-#endif
+} // namespace native_transport
+} // namespace eventql

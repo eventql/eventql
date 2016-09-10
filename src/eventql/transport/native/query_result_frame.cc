@@ -57,7 +57,7 @@ void QueryResultFrame::setHasPendingStatement(bool has_pending_stmt) {
   has_pending_stmt_ = has_pending_stmt;
 }
 
-void QueryResultFrame::writeTo(NativeConnection* conn) {
+ReturnCode QueryResultFrame::writeTo(NativeConnection* conn) {
   uint64_t flags = 0;
   flags |= EVQL_QUERY_RESULT_HASCOLNAMES;
   flags |= EVQL_QUERY_RESULT_HASSTATS;
@@ -90,7 +90,7 @@ void QueryResultFrame::writeTo(NativeConnection* conn) {
 
   conn->writeAsync(header_.data(), header_.size());
   conn->writeAsync(data_.data(), data_.size());
-  conn->flushBuffer(true);
+  return conn->flushBuffer(true);
 }
 
 void QueryResultFrame::clear() {

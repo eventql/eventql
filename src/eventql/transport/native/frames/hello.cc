@@ -21,25 +21,22 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#ifndef _libstx_UTIL_WALLCLOCK_H
-#define _libstx_UTIL_WALLCLOCK_H
-#include <stdlib.h>
-#include <stdint.h>
-#include "eventql/util/UnixTime.h"
+#include "eventql/transport/native/frames/hello.h"
 
-class WallClock {
-public:
-  static UnixTime now();
-  static uint64_t unixSeconds();
-  static uint64_t getUnixMillis();
-  static uint64_t unixMillis();
-  static uint64_t getUnixMicros();
-  static uint64_t unixMicros();
-};
+namespace eventql {
+namespace native_transport {
 
-class MonotonicClock {
-public:
-  static uint64_t now();
-};
+HelloFrame::HelloFrame() : flags_(0) {}
 
-#endif
+void HelloFrame::writeToString(std::string* str) {
+  util::BinaryMessageWriter writer;
+
+  writer.appendVarUInt(1);
+  writer.appendLenencString(EVQL_VERSION);
+  writer.appendVarUInt(flags_);
+
+  *str = std::string((const char*) writer.data(), writer.size());
+}
+
+} // namespace native_transport
+} // namespace eventql

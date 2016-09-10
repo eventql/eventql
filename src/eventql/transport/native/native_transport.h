@@ -28,8 +28,29 @@
 
 namespace eventql {
 namespace native_transport {
+class NativeConnection;
 
 void startConnection(Database* db, int fd, std::string prelude_bytes);
 
+ReturnCode performHandshake(Database* database, NativeConnection* conn);
+
+ReturnCode performOperation(
+    Database* database,
+    NativeConnection* conn,
+    uint16_t opcode,
+    const std::string& payload);
+
+ReturnCode performOperation_QUERY(
+    Database* database,
+    NativeConnection* conn,
+    const std::string& payload);
+
+ReturnCode performOperation_QUERY_PARTIALAGGR(
+    Database* database,
+    NativeConnection* conn,
+    const char* payload,
+    size_t payload_size);
+
 } // namespace native_transport
 } // namespace eventql
+

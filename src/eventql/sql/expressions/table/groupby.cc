@@ -29,6 +29,9 @@
 #include <eventql/sql/expressions/table/groupby.h>
 #include <eventql/sql/runtime/query_cache.h>
 #include <eventql/util/freeondestroy.h>
+#include <eventql/util/logging.h>
+#include <eventql/server/session.h>
+#include <eventql/transport/native/frames/query_partialaggr.h>
 #include <sys/fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -312,11 +315,13 @@ GroupByMergeExpression::GroupByMergeExpression(
     Transaction* txn,
     ExecutionContext* execution_context,
     Vector<ValueExpression> select_expressions,
-    ScopedPtr<TableExpression> input) :
+    eventql::ConfigDirectory* config,
+    size_t max_concurrent_tasks,
+    size_t max_concurrent_tasks_per_host) :
     txn_(txn),
     execution_context_(execution_context),
     select_exprs_(std::move(select_expressions)),
-    input_(std::move(input)),
+    rpc_scheduler_(config, max_concurrent_tasks, max_concurrent_tasks_per_host),
     freed_(false) {
   execution_context_->incrementNumTasks();
 }
@@ -329,8 +334,6 @@ GroupByMergeExpression::~GroupByMergeExpression() {
 
 ScopedPtr<ResultCursor> GroupByMergeExpression::execute() {
   execution_context_->incrementNumTasksRunning();
-  auto input_cursor = input_->execute();
-  Vector<SValue> row(2);
 
   ScratchMemory scratch;
   Vector<VM::Instance> remote_group;
@@ -345,23 +348,47 @@ ScopedPtr<ResultCursor> GroupByMergeExpression::execute() {
     }
   });
 
-  while (input_cursor->next(row.data(), row.size())) {
-    const auto& group_key = row[0].getString();
+  auto result_handler = [this, &remote_group] (
+      void* priv,
+      uint16_t opcode,
+      uint16_t flags,
+      const char* payload,
+      size_t payload_size) -> ReturnCode {
+    MemoryInputStream is(payload, payload_size);
 
-    auto& group = groups_[group_key];
-    if (group.size() == 0) {
-      for (const auto& e : select_exprs_) {
-        group.emplace_back(VM::allocInstance(txn_, e.program(), &scratch_));
+    auto res_flags = is.readVarUInt();
+    auto res_count = is.readVarUInt();
+    for (size_t j = 0; j < res_count; ++j) {
+      const char* key;
+      size_t key_len;
+      if (!is.readLenencStringZ(&key, &key_len)) {
+        return ReturnCode::error("EIO", "invalid partialaggr result encoding");
+      }
+
+      auto& group = groups_[std::string(key, key_len)];
+      if (group.size() == 0) {
+        for (const auto& e : select_exprs_) {
+          group.emplace_back(VM::allocInstance(txn_, e.program(), &scratch_));
+        }
+      }
+
+      for (size_t i = 0; i < select_exprs_.size(); ++i) {
+        const auto& e = select_exprs_[i];
+        VM::loadState(txn_, e.program(), &remote_group[i], &is);
+        VM::merge(txn_, e.program(), &group[i], &remote_group[i]);
       }
     }
 
-    auto is = StringInputStream::fromString(row[1].getString());
-    for (size_t i = 0; i < select_exprs_.size(); ++i) {
-      const auto& e = select_exprs_[i];
-      VM::loadState(txn_, e.program(), &remote_group[i], is.get());
-      VM::merge(txn_, e.program(), &group[i], &remote_group[i]);
-    }
+    return ReturnCode::success();
+  };
+
+  rpc_scheduler_.setResultCallback(result_handler);
+
+  auto rc = rpc_scheduler_.execute();
+  if (!rc.isSuccess()) {
+    RAISE(kRuntimeError, rc.getMessage());
   }
+  logDebug("evql", "successful aggregation");
 
   groups_iter_ = groups_.begin();
   return mkScoped(
@@ -376,6 +403,31 @@ ScopedPtr<ResultCursor> GroupByMergeExpression::execute() {
 
 size_t GroupByMergeExpression::getNumColumns() const {
   return select_exprs_.size();
+}
+
+void GroupByMergeExpression::addPart(
+    GroupByNode* node,
+    std::vector<std::string> hosts) {
+
+  std::string qtree_coded;
+  auto qtree_coded_os = StringOutputStream::fromString(&qtree_coded);
+  QueryTreeCoder qtree_coder(txn_);
+  qtree_coder.encode(node, qtree_coded_os.get());
+
+  eventql::native_transport::QueryPartialAggrFrame frame;
+  frame.setEncodedQtree(std::move(qtree_coded));
+  frame.setDatabase(
+      static_cast<eventql::Session*>(
+          txn_->getUserData())->getEffectiveNamespace());
+
+  std::string payload;
+  frame.writeToString(&payload);
+
+  rpc_scheduler_.addRPC(
+      EVQL_OP_QUERY_PARTIALAGGR,
+      0,
+      std::move(payload),
+      hosts);
 }
 
 bool GroupByMergeExpression::next(SValue* row, size_t row_len) {

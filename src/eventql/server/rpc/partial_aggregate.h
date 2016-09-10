@@ -21,25 +21,33 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#ifndef _libstx_UTIL_WALLCLOCK_H
-#define _libstx_UTIL_WALLCLOCK_H
-#include <stdlib.h>
-#include <stdint.h>
-#include "eventql/util/UnixTime.h"
+#pragma once
+#include <string>
+#include <vector>
+#include "eventql/eventql.h"
+#include "eventql/util/return_code.h"
+#include "eventql/db/database.h"
+#include "eventql/sql/transaction.h"
 
-class WallClock {
+namespace eventql {
+namespace rpc {
+
+class PartialAggregationOperation {
 public:
-  static UnixTime now();
-  static uint64_t unixSeconds();
-  static uint64_t getUnixMillis();
-  static uint64_t unixMillis();
-  static uint64_t getUnixMicros();
-  static uint64_t unixMicros();
+
+  PartialAggregationOperation(Database* db);
+
+  ReturnCode parseFrom(const char* data, size_t len);
+
+  ReturnCode execute(OutputStream* os);
+
+  void clear();
+
+protected:
+  std::unique_ptr<csql::Transaction> txn_;
+  RefPtr<csql::QueryTreeNode> qtree_;
 };
 
-class MonotonicClock {
-public:
-  static uint64_t now();
-};
+} // namespace rpc
+} // namespace eventql
 
-#endif

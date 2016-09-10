@@ -2,6 +2,7 @@
  * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
  *   - Paul Asmuth <paul@eventql.io>
+ *   - Laura Schlimmer <laura@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -21,25 +22,44 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#ifndef _libstx_UTIL_WALLCLOCK_H
-#define _libstx_UTIL_WALLCLOCK_H
-#include <stdlib.h>
-#include <stdint.h>
-#include "eventql/util/UnixTime.h"
+#include "eventql/transport/native/frames/query_partialaggr_result.h"
+#include "eventql/util/util/binarymessagewriter.h"
 
-class WallClock {
-public:
-  static UnixTime now();
-  static uint64_t unixSeconds();
-  static uint64_t getUnixMillis();
-  static uint64_t unixMillis();
-  static uint64_t getUnixMicros();
-  static uint64_t unixMicros();
-};
+namespace eventql {
+namespace native_transport {
 
-class MonotonicClock {
-public:
-  static uint64_t now();
-};
+QueryPartialAggrResultFrame::QueryPartialAggrResultFrame() :
+    flags_(0),
+    num_rows_(0) {}
 
-#endif
+void QueryPartialAggrResultFrame::setBody(std::string body) {
+  body_ = body;
+}
+
+void QueryPartialAggrResultFrame::setBody(const char* data, size_t len) {
+  body_ = std::string(data, len);
+}
+
+const std::string& QueryPartialAggrResultFrame::getBody() const {
+  return body_;
+}
+
+std::string& QueryPartialAggrResultFrame::getBody() {
+  return body_;
+}
+
+void QueryPartialAggrResultFrame::setNumRows(size_t num_rows) {
+  num_rows_ = num_rows;
+}
+
+void QueryPartialAggrResultFrame::writeTo(OutputStream* os) {
+  os->appendVarUInt(flags_);
+  os->appendVarUInt(num_rows_);
+  os->appendString(body_);
+}
+
+
+} // namespace native_transport
+} // namespace eventql
+
+

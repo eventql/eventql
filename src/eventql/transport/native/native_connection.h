@@ -26,6 +26,7 @@
 #include "eventql/util/return_code.h"
 
 namespace eventql {
+namespace native_transport {
 
 class NativeConnection {
 public:
@@ -49,6 +50,8 @@ public:
       const void* data,
       size_t len,
       uint16_t flags = 0);
+
+  ReturnCode sendErrorFrame(const std::string& error);
 
   ReturnCode sendFrameAsync(
       uint16_t opcode,
@@ -76,4 +79,6 @@ protected:
   std::string write_buf_;
 };
 
+} // namespace native_transport
 } // namespace eventql
+
