@@ -23,7 +23,6 @@
  * code of your own applications
  */
 #include <eventql/cli/cli_config.h>
-#include <eventql/util/inspect.h>
 #include <eventql/util/io/fileutil.h>
 
 namespace eventql {
@@ -31,13 +30,19 @@ namespace cli {
 
 const String& CLIConfig::kDefaultHost = "localhost";
 const int CLIConfig::kDefaultPort = 9175;
-const String& CLIConfig::kDefaultUser = getenv("USER");
-const String& CLIConfig::kDefaultHistoryPath = FileUtil::joinPaths(
-    getenv("HOME"),
-    ".evql_history");
 const uint64_t CLIConfig::kDefaultHistoryMaxSize = 100;
 
-CLIConfig::CLIConfig(RefPtr<ProcessConfig> cfg) : cfg_(cfg) {}
+CLIConfig::CLIConfig(RefPtr<ProcessConfig> cfg) : cfg_(cfg) {
+  auto user = getenv("USER");
+  if (user) {
+    default_user_ = user;
+  }
+
+  auto home = getenv("HOME");
+  if (home) {
+    default_history_path_ = FileUtil::joinPaths(home, ".evql_history");
+  }
+}
 
 String CLIConfig::getHost() const {
   auto host = cfg_->getString("evql", "host");
@@ -57,12 +62,14 @@ int CLIConfig::getPort() const {
   }
 }
 
-String CLIConfig::getUser() const {
+Option<String> CLIConfig::getUser() const {
   auto user = cfg_->getString("evql", "user");
-  if (user.isEmpty()) {
-    return kDefaultUser;
+  if (!user.isEmpty()) {
+    return Some(user.get());
+  } else if (!default_user_.empty()) {
+    return Some(default_user_);
   } else {
-    return user.get();
+    return None<String>();
   }
 }
 
@@ -121,17 +128,19 @@ Option<String> CLIConfig::getExec() const {
   return cfg_->getString("evql", "exec");
 }
 
-String CLIConfig::getHistoryPath() const {
-  auto path = cfg_->getString("evql", "history_path");
-  if (path.isEmpty()) {
-    return kDefaultHistoryPath;
+Option<String> CLIConfig::getHistoryPath() const {
+  auto path = cfg_->getString("evql", "history_file");
+  if (!path.isEmpty()) {
+    return Some(path.get());
+  } else if (!default_history_path_.empty()) {
+    return Some(default_history_path_);
   } else {
-    return path.get();
+    return None<String>();
   }
 }
 
 uint64_t CLIConfig::getHistoryMaxSize() const {
-  auto max_size = cfg_->getInt("evql", "history_max_size");
+  auto max_size = cfg_->getInt("evql", "history_maxlen");
   if (max_size.isEmpty()) {
     return kDefaultHistoryMaxSize;
   } else {

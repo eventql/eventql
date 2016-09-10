@@ -1,3 +1,11 @@
+EventQL v0.3.2 beta;
+
+  * Fixed a bug in the eventql client (evql) where missing HOME and end USER
+    env variables would lead to an assertion on some libc++ implementations
+
+  * Added --history_file and --history_maxlen flags to the eventql client (evql)
+
+
 EventQL v0.3.1 (v0.3.1, git2da7f66) beta; 2016-09-04 16:11:19 +0000
 
   * Fixed a bug in the standalone backend where any ALTER TABLE statements
