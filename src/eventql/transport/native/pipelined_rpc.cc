@@ -277,7 +277,7 @@ ReturnCode PipelinedRPC::execute() {
       }
 
       if (FD_ISSET(conn->fd, &op_read)) {
-        conn->read_timeout = 0;
+        conn->read_timeout = MonotonicClock::now() + idle_timeout_;
 
         auto rc = performRead(&*conn);
         if (!rc.isSuccess()) {

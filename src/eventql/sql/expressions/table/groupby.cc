@@ -388,7 +388,6 @@ ScopedPtr<ResultCursor> GroupByMergeExpression::execute() {
   if (!rc.isSuccess()) {
     RAISE(kRuntimeError, rc.getMessage());
   }
-  logDebug("evql", "successful aggregation");
 
   groups_iter_ = groups_.begin();
   return mkScoped(
