@@ -1,3 +1,15 @@
+EventQL v0.3.2 beta;
+
+  * Changed the parallel GROUP BY operation to use the new native protocol and
+    to schedule all remote partial group bys from a a single thread using
+    asynchronous I/O (currently via poll()).
+
+  * Changed the evql client to use the new native protocol
+
+  * Added a native transport layer (a framed TCP-based protocol). See
+    doc/internals/protocol.txt for the specification
+
+
 EventQL v0.3.1 (v0.3.1, git2da7f66) beta; 2016-09-04 16:11:19 +0000
 
   * Fixed a bug in the standalone backend where any ALTER TABLE statements
