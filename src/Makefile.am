@@ -162,6 +162,8 @@ EVQL_CORE_SOURCES_ = \
     eventql/util/cli/flagparser.h \
     eventql/util/cli/term.cc \
     eventql/util/cli/term.h \
+    eventql/util/cidr.cc \
+    eventql/util/cidr.h \
     eventql/util/csv/BinaryCSVInputStream.cc \
     eventql/util/csv/BinaryCSVInputStream.h \
     eventql/util/csv/BinaryCSVOutputStream.cc \
