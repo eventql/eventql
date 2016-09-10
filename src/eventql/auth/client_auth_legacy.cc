@@ -53,7 +53,11 @@ Status LegacyClientAuth::authenticateNonInteractive(
 Status LegacyClientAuth::changeNamespace(
     Session* session,
     const String& ns) {
-  if (ns == session->getEffectiveNamespace()) {
+  if (session->isInternal()) {
+    session->setEffectiveNamespace(ns);
+    session->setDisplayNamespace(ns);
+    return Status::success();
+  } else if (ns == session->getEffectiveNamespace()) {
     return Status::success();
   } else {
     return Status(eRuntimeError, "access denied");
