@@ -3,7 +3,7 @@
 
 Configuration files aren't mandatory but they provide a convenient way to specify options that you use regularly when running EventQL programs, so you don't have to enter them on the command line each time you run the program.
 
-###File Format
+### Configuration File Format
 EventQL uses the INI file format, that is a simple text file grouped into sections that consists of key-value pairs.
 
     [client]
@@ -15,75 +15,166 @@ You can override every option set in the configuration file by using the command
 
 
 
-###File path
+### Configuration File Path
 
-If not set explicitly with the --config option, EventQL will search for the configuration
-file at the following locations:
+If no explicit config path is provided using the `--config` option, EventQL will
+search for the configuration file at the following locations:
 
-
-#### /etc/evqld.conf
-&nbsp;&nbsp;&nbsp;&nbsp; evqld configuration file
-
-#### /etc/evql.conf
-&nbsp;&nbsp;&nbsp;&nbsp; evql and evqlctl configuration file
-
-#### ~/.evql.conf
-&nbsp;&nbsp;&nbsp;&nbsp; evql and evqlctl configuration file, overwrites options from
-/etc/evql.conf
-
-
-
-
-###Configuration options
-The EventQL configuration options arw grouped in three sections: `client`, `server` and `cluster`.
-
-###client
-
-**host** <br>
-&nbsp;&nbsp;&nbsp;&nbsp;(Default: localhost) The IP address or hostname to send the query to.
-
-**port**<br>
-&nbsp;&nbsp;&nbsp;&nbsp;(Default: 9175) The host's port.
-
-**database**<br>
-&nbsp;&nbsp;&nbsp;&nbsp;The database that should be used for following statements.
-
-**user**<br>
-&nbsp;&nbsp;&nbsp;&nbsp;The current user's username.
-
-**password**<br>
-&nbsp;&nbsp;&nbsp;&nbsp;The current user's password.
-
-**auth\_token**<br>
-&nbsp;&nbsp;&nbsp;&nbsp;
+<table style="font-size:90%;">
+  <tr>
+    <th>Binaries</th>
+    <th>Config Search Paths</th>
+  </tr>
+  <tr>
+    <td>evqld</td>
+    <td>/etc/evqld.conf</td>
+  </tr>
+  <tr>
+    <td>evql, evqlctl</td>
+    <td>/etc/evql.conf<br/>~/.evql.conf</td>
+  </tr>
+</table>
 
 
-###server
-**name**<br>
-&nbsp;&nbsp;&nbsp;&nbsp;The name of the server.
+### Configuration Options
 
-**datadir**<br>
-&nbsp;&nbsp;&nbsp;&nbsp;The location of the EvenQL data directory.
+The EventQL configuration options are grouped in three sections: `client`, `server` and `cluster`.
 
-**listen**<br>
-&nbsp;&nbsp;&nbsp;&nbsp;The address (host:port) the server listens to.
+<table style="font-size:90%;">
+  <tr>
+    <th>Option</th>
+    <th>Default Value</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <th colspan="3" align="left">cluster.*</th>
+  </tr>
+  <tr>
+    <td><b>cluster.name</b></td>
+    <td>&mdash;</td>
+    <td>The name of the cluster</td>
+  </tr>
+  <tr>
+    <td><b>cluster.coordinator</b></td>
+    <td>&mdash;</td>
+    <td>The cluster coordinator service. Legal values: "zookeeper"</td>
+  </tr>
+  <tr>
+    <td><b>cluster.zookeeper_hosts</b></td>
+    <td>&mdash;</td>
+    <td>A comma-separated list of zookeeper hosts (only used when cluster.coordinator=zookeeper)</td>
+  </tr>
+  <tr>
+    <td><b>cluster.rebalance_interval</b></td>
+    <td>60000000</td>
+    <td></td>
+  </tr>
+  <tr>
+    <th colspan="3" align="left">server.*</th>
+  </tr>
+  <tr>
+    <td><b>server.datadir</b></td>
+    <td>&mdash;</td>
+    <td>The location of the EvenQL data directory (mandatory)</td>
+  </tr>
+  <tr>
+    <td><b>server.listen</b></td>
+    <td>&mdash;</td>
+    <td>
+      The address (host:port) on which the server should listen. NOTE that this
+      address is published to the coordinator service and must be a reachable 
+      by all other servers in the cluster. I.e. you can't use localhost or
+      0.0.0.0. (mandatory)
+    </td>
+  </tr>
+  <tr>
+    <td><b>server.name</b></td>
+    <td>&mdash;</td>
+    <td>The name of the server (optional)</td>
+  </tr>
+  <tr>
+    <td><b>server.pidfile</b></td>
+    <td>&mdash;</td>
+    <td>
+      If set, the server will write a pidfile to the provided path and aquire
+      an exclusive lock on the pidfile. If the exclusive lock fails, the server
+      will exit.
+    </td>
+  </tr>
+  <tr>
+    <td><b>server.daemonize</b></td>
+    <td>false</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td><b>server.indexbuild_threads</b></td>
+    <td>2</td>
+    <td>The number of background compaction threads to start</td>
+  </tr>
+  <tr>
+    <td><b>server.client_auth_backend</b></td>
+    <td>&mdash;</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td><b>server.internal_auth_backend</b></td>
+    <td>&mdash;</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td><b>server.noleader</b></td>
+    <td>false</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td><b>server.gc_mode</b></td>
+    <td>AUTOMATIC</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td><b>server.gc_interval</b></td>
+    <td>30000000</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td><b>server.cachedir_maxsize</b></td>
+    <td>68719476736</td>
+    <td></td>
+  </tr>
+  <tr>
+    <th colspan="3" align="left">client.*</th>
+  </tr>
+  <tr>
+    <td><b>client.host</b></td>
+    <td>localhost</td>
+    <td>The hostname of the EventQL server</td>
+  </tr>
+  <tr>
+    <td><b>client.port</b></td>
+    <td>9175</td>
+    <td>The port of the EventQL server</td>
+  </tr>
+  <tr>
+    <td><b>client.database</b></td>
+    <td>&mdash;</td>
+    <td>The database that should be used for following queries (optional)</td>
+  </tr>
+  <tr>
+    <td><b>client.user</b></td>
+    <td>&mdash;</td>
+    <td>Username to use when connecting to server (optional)</td>
+  </tr>
+  <tr>
+    <td><b>client.password</b></td>
+    <td>&mdash;</td>
+    <td>Password to use when connecting to server (optional)</td>
+  </tr>
+  <tr>
+    <td><b>client.auth_token</b></td>
+    <td>&mdash;</td>
+    <td>Auth-Token to use when connecting to server (optional)</td>
+  </tr>
+</table>
 
-**indexbuild\_threads**<br>
-
-**client\_auth\_backend**<br>
-&nbsp;&nbsp;&nbsp;&nbsp;Must be either `trust` or `legacy`.
-
-**legacy\_auth\_secret**<br>
-
-**pidfile**
 
 
-###cluster
-***name***<br>
-&nbsp;&nbsp;&nbsp;&nbsp;The name of the cluster.
-
-***coordinator***<br>
-&nbsp;&nbsp;&nbsp;&nbsp;The cluster coordinator service, e.g. zookeeper.
-
-***zookeeper\_hosts***<br>
-&nbsp;&nbsp;&nbsp;&nbsp;A comma-separated list of zookeeper hosts.
