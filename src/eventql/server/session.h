@@ -55,7 +55,7 @@ public:
   uint64_t getHeartbeatInterval() const;
 
   void setIsInternal();
-  uint64_t getIsInternal() const;
+  uint64_t isInternal() const;
 
 protected:
   mutable std::mutex mutex_;
@@ -67,6 +67,7 @@ protected:
   uint64_t heartbeat_last_;
   uint64_t heartbeat_interval_;
   uint64_t idle_timeout_;
+  bool is_internal_;
 };
 
 } // namespace eventql

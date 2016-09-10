@@ -38,7 +38,8 @@ Session::Session(
     idle_timeout_(
         std::max(
             dbctx->config->getInt("server.s2s_idle_timeout").get(),
-            dbctx->config->getInt("server.c2s_idle_timeout").get())) {}
+            dbctx->config->getInt("server.c2s_idle_timeout").get())),
+    is_internal_(false) {}
 
 String Session::getUserID() const {
   std::unique_lock<std::mutex> lk(mutex_);
@@ -100,6 +101,14 @@ uint64_t Session::getIdleTimeout() const {
 
 uint64_t Session::getHeartbeatInterval() const {
   return heartbeat_interval_;
+}
+
+void Session::setIsInternal() {
+  is_internal_ = true;
+}
+
+uint64_t Session::isInternal() const {
+  return is_internal_;
 }
 
 } // namespace eventql

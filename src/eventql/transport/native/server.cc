@@ -126,8 +126,7 @@ ReturnCode Server::performHandshake(NativeConnection* conn) {
     }
   }
 
-
-  if (session->getIsInternal()) {
+  if (session->isInternal()) {
     session->setIdleTimeout(config->getInt("server.s2s_idle_timeout").get());
     conn->setIOTimeout(config->getInt("server.s2s_io_timeout").get());
   } else {
