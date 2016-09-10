@@ -130,7 +130,7 @@ ScopedPtr<csql::TableExpression> Scheduler::buildPipelineGroupByExpression(
   //        kMaxConcurrency));
 
   size_t max_concurrent_tasks = 100; //FIXME
-  size_t max_concurrent_tasks_per_host = 10; //FIXME
+  size_t max_concurrent_tasks_per_host = 4; //FIXME
 
 
   Vector<csql::ValueExpression> select_expressions;
