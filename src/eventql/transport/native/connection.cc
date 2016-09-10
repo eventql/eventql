@@ -21,61 +21,32 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#pragma once
-#include "eventql/eventql.h"
-#include "eventql/util/return_code.h"
 #include "eventql/transport/native/connection.h"
+#include "eventql/util/util/binarymessagewriter.h"
 
 namespace eventql {
 namespace native_transport {
 
-class TCPConnection : public NativeConnection {
-public:
+ReturnCode NativeConnection::sendErrorFrame(const std::string& error) {
+  util::BinaryMessageWriter e_frame;
+  e_frame.appendLenencString(error);
+  char zero = 0;
+  e_frame.append(&zero, 1);
 
-  TCPConnection(
-      int fd,
-      const std::string& prelude_bytes = "");
+  return sendFrame(
+      EVQL_OP_ERROR,
+      e_frame.data(),
+      e_frame.size(),
+      EVQL_ENDOFREQUEST);
+}
 
-  ~TCPConnection();
-
-  ReturnCode recvFrame(
-      uint16_t* opcode,
-      std::string* payload,
-      uint16_t* flags = 0) override;
-
-  ReturnCode sendFrame(
-      uint16_t opcode,
-      const void* data,
-      size_t len,
-      uint16_t flags = 0) override;
-
-  ReturnCode sendFrameAsync(
-      uint16_t opcode,
-      const void* data,
-      size_t len,
-      uint16_t flags = 0) override;
-
-  bool isOutboxEmpty() const;
-  ReturnCode flushOutbox(bool block, uint64_t timeout_us = 0) override;
-
-  void close() override;
-
-protected:
-
-  void writeFrameHeaderAsync(
-      uint16_t opcode,
-      size_t len,
-      uint16_t flags = 0);
-
-  void writeAsync(const void* data, size_t len);
-
-  ReturnCode read(char* data, size_t len, uint64_t timeout_us);
-
-  int fd_;
-  uint64_t timeout_;
-  std::string read_buf_;
-  std::string write_buf_;
-};
+ReturnCode NativeConnection::sendHeartbeatFrame() {
+  if (isOutboxEmpty()) {
+    return sendFrameAsync(EVQL_OP_HEARTBEAT, nullptr, 0, 0);
+  } else {
+    return flushOutbox(false, 0);
+  }
+}
 
 } // namespace native_transport
 } // namespace eventql

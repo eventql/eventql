@@ -61,7 +61,7 @@ void startConnection(Database* db, int fd, std::string prelude_bytes) {
   setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, &nodelay, sizeof(nodelay));
 
   db->startThread([db, fd, prelude_bytes] (Session* session) {
-    NativeConnection conn(fd, prelude_bytes);
+    TCPConnection conn(fd, prelude_bytes);
 
     auto rc = performHandshake(db, &conn);
     if (!rc.isSuccess()) {

@@ -24,57 +24,47 @@
 #pragma once
 #include "eventql/eventql.h"
 #include "eventql/util/return_code.h"
-#include "eventql/transport/native/connection.h"
 
 namespace eventql {
 namespace native_transport {
 
-class TCPConnection : public NativeConnection {
+class NativeConnection {
 public:
 
-  TCPConnection(
-      int fd,
-      const std::string& prelude_bytes = "");
+  static const size_t kMaxFrameSize = 1024 * 1024 * 256; // 256 MB
+  static const size_t kMaxFrameSizeSoft = 1024 * 1024 * 32; // 32 MB
 
-  ~TCPConnection();
+  virtual ~NativeConnection() = default;
 
-  ReturnCode recvFrame(
+  virtual ReturnCode recvFrame(
       uint16_t* opcode,
       std::string* payload,
-      uint16_t* flags = 0) override;
+      uint16_t* flags = 0) = 0;
 
-  ReturnCode sendFrame(
+  //virtual ReturnCode peekFrameAsync(
+  //    uint16_t* opcode,
+  //    uint16_t* flags = 0) = 0;
+
+  virtual ReturnCode sendFrame(
       uint16_t opcode,
       const void* data,
       size_t len,
-      uint16_t flags = 0) override;
+      uint16_t flags = 0) = 0;
 
-  ReturnCode sendFrameAsync(
+  virtual ReturnCode sendFrameAsync(
       uint16_t opcode,
       const void* data,
       size_t len,
-      uint16_t flags = 0) override;
+      uint16_t flags = 0) = 0;
 
-  bool isOutboxEmpty() const;
-  ReturnCode flushOutbox(bool block, uint64_t timeout_us = 0) override;
+  ReturnCode sendErrorFrame(const std::string& error);
+  ReturnCode sendHeartbeatFrame();
 
-  void close() override;
+  virtual bool isOutboxEmpty() const = 0;
+  virtual ReturnCode flushOutbox(bool block, uint64_t timeout_us = 0) = 0;
 
-protected:
+  virtual void close() = 0;
 
-  void writeFrameHeaderAsync(
-      uint16_t opcode,
-      size_t len,
-      uint16_t flags = 0);
-
-  void writeAsync(const void* data, size_t len);
-
-  ReturnCode read(char* data, size_t len, uint64_t timeout_us);
-
-  int fd_;
-  uint64_t timeout_;
-  std::string read_buf_;
-  std::string write_buf_;
 };
 
 } // namespace native_transport

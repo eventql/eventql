@@ -40,18 +40,18 @@
 namespace eventql {
 namespace native_transport {
 
-NativeConnection::NativeConnection(
+TCPConnection::TCPConnection(
     int fd,
     const std::string& prelude_bytes /* = "" */) :
     fd_(fd),
     timeout_(1000 * 1000),
     read_buf_(prelude_bytes) {}
 
-NativeConnection::~NativeConnection() { 
+TCPConnection::~TCPConnection() { 
   close();
 }
 
-ReturnCode NativeConnection::read(
+ReturnCode TCPConnection::read(
     char* data,
     size_t len,
     uint64_t timeout_us) {
@@ -110,7 +110,7 @@ ReturnCode NativeConnection::read(
   return ReturnCode::success();
 }
 
-ReturnCode NativeConnection::recvFrame(
+ReturnCode TCPConnection::recvFrame(
     uint16_t* opcode,
     std::string* payload,
     uint16_t* recvflags /* = nullptr */) {
@@ -136,7 +136,7 @@ ReturnCode NativeConnection::recvFrame(
   return read(&(*payload)[0], payload_len, timeout_);
 }
 
-ReturnCode NativeConnection::sendFrame(
+ReturnCode TCPConnection::sendFrame(
     uint16_t opcode,
     const void* data,
     size_t len,
@@ -146,41 +146,20 @@ ReturnCode NativeConnection::sendFrame(
     return rc;
   }
 
-  return flushBuffer(true, timeout_);
+  return flushOutbox(true, timeout_);
 }
 
-ReturnCode NativeConnection::sendErrorFrame(const std::string& error) {
-  util::BinaryMessageWriter e_frame;
-  e_frame.appendLenencString(error);
-  char zero = 0;
-  e_frame.append(&zero, 1);
-
-  return sendFrame(
-      EVQL_OP_ERROR,
-      e_frame.data(),
-      e_frame.size(),
-      EVQL_ENDOFREQUEST);
-}
-
-ReturnCode NativeConnection::sendHeartbeatFrame() {
-  if (write_buf_.empty()) {
-    return sendFrameAsync(EVQL_OP_HEARTBEAT, nullptr, 0, 0);
-  } else {
-    return flushBuffer(false, 0);
-  }
-}
-
-ReturnCode NativeConnection::sendFrameAsync(
+ReturnCode TCPConnection::sendFrameAsync(
     uint16_t opcode,
     const void* data,
     size_t len,
     uint16_t flags /* = 0 */) {
   writeFrameHeaderAsync(opcode, len, flags);
   writeAsync(data, len);
-  return flushBuffer(false, 0);
+  return flushOutbox(false, 0);
 }
 
-ReturnCode NativeConnection::flushBuffer(
+ReturnCode TCPConnection::flushOutbox(
     bool block,
     uint64_t timeout_us /* = 0 */) {
   if (fd_ < 0) {
@@ -235,7 +214,7 @@ ReturnCode NativeConnection::flushBuffer(
   return ReturnCode::success();
 }
 
-void NativeConnection::writeFrameHeaderAsync(
+void TCPConnection::writeFrameHeaderAsync(
     uint16_t opcode,
     size_t len,
     uint16_t flags /* = 0 */) {
@@ -250,11 +229,15 @@ void NativeConnection::writeFrameHeaderAsync(
   writeAsync(header, sizeof(header));
 }
 
-void NativeConnection::writeAsync(const void* data, size_t len) {
+void TCPConnection::writeAsync(const void* data, size_t len) {
   write_buf_ += std::string((const char*) data, len);
 }
 
-void NativeConnection::close() {
+bool TCPConnection::isOutboxEmpty() const {
+  return write_buf_.empty();
+}
+
+void TCPConnection::close() {
   if (fd_ < 0) {
     return;
   }
