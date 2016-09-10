@@ -61,6 +61,10 @@ ReturnCode performOperation_QUERY_PARTIALAGGR(
     }
   }
 
+  session->setHeartbeatCallback([conn] () -> ReturnCode {
+    return conn->sendHeartbeatFrame();
+  });
+
   try {
     auto txn = dbctx->sql_service->startTransaction(session);
 

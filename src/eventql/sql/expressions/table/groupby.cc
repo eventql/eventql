@@ -354,6 +354,13 @@ ScopedPtr<ResultCursor> GroupByMergeExpression::execute() {
       uint16_t flags,
       const char* payload,
       size_t payload_size) -> ReturnCode {
+    switch (opcode) {
+      case EVQL_OP_HEARTBEAT:
+        return ReturnCode::success();
+      case EVQL_OP_QUERY_PARTIALAGGR_RESULT:
+        break;
+    };
+
     MemoryInputStream is(payload, payload_size);
 
     auto res_flags = is.readVarUInt();
