@@ -125,7 +125,7 @@ protected:
   Transaction* txn_;
   ExecutionContext* execution_context_;
   Vector<ValueExpression> select_exprs_;
-  eventql::native_transport::PipelinedRPC rpc_scheduler_;
+  eventql::native_transport::TCPAsyncClient rpc_scheduler_;
   HashMap<String, Vector<VM::Instance>> groups_;
   HashMap<String, Vector<VM::Instance>>::const_iterator groups_iter_;
   ScratchMemory scratch_;
