@@ -369,11 +369,12 @@ ScopedPtr<ResultCursor> GroupByMergeExpression::execute() {
       uint16_t flags,
       const char* payload,
       size_t payload_size) -> ReturnCode {
+    session->triggerHeartbeat();
+
     switch (opcode) {
 
       case EVQL_OP_HEARTBEAT: {
         auto session = static_cast<eventql::Session*>(txn_->getUserData());
-        session->triggerHeartbeat();
         return ReturnCode::success();
       }
 
