@@ -44,6 +44,9 @@ public:
               const char* payload,
               size_t payload_len)>;
 
+  using RPCStartedCallbackType = std::function<void (void* privdata)>;
+  using RPCCompletedCallbackType = std::function<void (void* privdata)>;
+
   TCPAsyncClient(
       ProcessConfig* config,
       ConfigDirectory* config_dir,
@@ -60,6 +63,8 @@ public:
       void* privdata = nullptr);
 
   void setResultCallback(ResultCallbackType fn);
+  void setRPCStartedCallback(RPCStartedCallbackType fn);
+  void setRPCCompletedCallback(RPCCompletedCallbackType fn);
 
   ReturnCode execute();
   void shutdown();
@@ -126,6 +131,8 @@ protected:
       size_t payload_len);
 
   ResultCallbackType result_cb_;
+  RPCStartedCallbackType rpc_started_cb_;
+  RPCCompletedCallbackType rpc_completed_cb_;
   std::deque<Task*> runq_;
   std::list<Connection> connections_;
   ConfigDirectory* config_;
