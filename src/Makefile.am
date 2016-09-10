@@ -76,7 +76,7 @@ evql_protos = \
     eventql/db/replication_state.proto \
     eventql/db/table_config.proto
 
-BUILT_SOURCES = $(evql_protos:.proto=.pb.h)
+BUILT_SOURCES = $(evql_protos:.proto=.pb.h) eventql/mapreduce/mapreduce_preludejs.cc
 dist_noinst_DATA = $(evql_protos)
 
 %.pb.cc %.pb.h: %.proto
