@@ -48,34 +48,30 @@
 namespace eventql {
 namespace native_transport {
 
-void startConnection(Database* db, int fd, std::string prelude_bytes) {
-  logDebug("eventql", "Opening new native connection; fd=$0", fd);
+void startConnection(
+    Database* db,
+    std::unique_ptr<NativeConnection> connection) {
+  auto conn_ptr = connection.release();
+  db->startThread([db, conn_ptr] (Session* session) {
+    std::unique_ptr<NativeConnection> conn(conn_ptr);
 
-  int old_flags = fcntl(fd, F_GETFL, 0);
-  if (fcntl(fd, F_SETFL, old_flags | O_NONBLOCK) != 0) {
-    close(fd);
-    return;
-  }
-
-  size_t nodelay = 1;
-  setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, &nodelay, sizeof(nodelay));
-
-  db->startThread([db, fd, prelude_bytes] (Session* session) {
-    TCPConnection conn(fd, prelude_bytes);
-
-    auto rc = performHandshake(db, &conn);
+    auto rc = performHandshake(db, conn.get());
     if (!rc.isSuccess()) {
       logError("eventql", "Handshake error: $0", rc.getMessage());
-      conn.close();
+      conn->close();
       return;
     }
 
-    logDebug("eventql", "Native connection established; fd=$0", fd);
+    logDebug(
+        "eventql",
+        "Native connection established; id=$0",
+        (const void*) conn.get());
+
     uint16_t opcode;
     std::string payload;
     bool cont = true;
     while (cont && rc.isSuccess()) {
-      rc = conn.recvFrame(&opcode, &payload);
+      rc = conn->recvFrame(&opcode, &payload);
       if (!rc.isSuccess()) {
         break;
       }
@@ -85,12 +81,12 @@ void startConnection(Database* db, int fd, std::string prelude_bytes) {
           cont = false;
           break;
         default:
-          rc = performOperation(db, &conn, opcode, payload);
+          rc = performOperation(db, conn.get(), opcode, payload);
           break;
       }
     }
 
-    conn.close();
+    conn->close();
   });
 }
 

@@ -30,7 +30,9 @@ namespace eventql {
 namespace native_transport {
 class NativeConnection;
 
-void startConnection(Database* db, int fd, std::string prelude_bytes);
+void startConnection(
+    Database* db,
+    std::unique_ptr<NativeConnection> connection);
 
 ReturnCode performHandshake(Database* database, NativeConnection* conn);
 

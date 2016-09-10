@@ -24,6 +24,7 @@
 #include "eventql/transport/native/connection_tcp.h"
 #include "eventql/util/inspect.h"
 #include "eventql/util/util/binarymessagewriter.h"
+#include "eventql/util/logging.h"
 #include <string.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -36,6 +37,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <poll.h>
+#include <netinet/tcp.h>
 
 namespace eventql {
 namespace native_transport {
@@ -45,7 +47,18 @@ TCPConnection::TCPConnection(
     const std::string& prelude_bytes /* = "" */) :
     fd_(fd),
     timeout_(1000 * 1000),
-    read_buf_(prelude_bytes) {}
+    read_buf_(prelude_bytes) {
+  logDebug(
+      "eventql",
+      "Opening new native connection; id=$0 fd=$1",
+      (const void*) this,
+      fd);
+
+  fcntl(fd, F_SETFL, fcntl(fd, F_GETFL, 0) | O_NONBLOCK);
+
+  size_t nodelay = 1;
+  setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, &nodelay, sizeof(nodelay));
+}
 
 TCPConnection::~TCPConnection() { 
   close();

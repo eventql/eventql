@@ -44,6 +44,7 @@
 #include "eventql/db/database.h"
 #include "eventql/util/return_code.h"
 #include "eventql/util/logging.h"
+#include "eventql/transport/native/connection_tcp.h"
 
 namespace eventql {
 
@@ -258,12 +259,15 @@ void Listener::open(int fd) {
   switch (first_byte) {
 
     // native
-    case '^':
+   case '^': {
       native_transport::startConnection(
           database_,
-          fd,
-          std::string(&first_byte, 1));
+          std::unique_ptr<native_transport::NativeConnection>(
+              new native_transport::TCPConnection(
+                  fd,
+                  std::string(&first_byte, 1))));
       break;
+    }
 
     // http
     default:
