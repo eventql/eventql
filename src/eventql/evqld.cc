@@ -228,7 +228,7 @@ int main(int argc, const char** argv) {
   evql_conf_set(conf, "server.c2s_idle_timeout", "10000000");
   evql_conf_set(conf, "server.s2s_io_timeout", "1000000");
   evql_conf_set(conf, "server.s2s_idle_timeout", "5000000");
-  evql_conf_set(conf, "server.hearbeat_rate", "1000000");
+  evql_conf_set(conf, "server.heartbeat_interval", "1000000");
 
   if (flags.isSet("standalone")) {
     evql_conf_set(conf, "server.name", "standalone");

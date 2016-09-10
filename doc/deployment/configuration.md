@@ -177,7 +177,7 @@ The EventQL configuration options are grouped in three sections: `client`, `serv
     </td>
   </tr>
   <tr>
-    <td><b>server.hearbeat_rate</b></td>
+    <td><b>server.heartbeat_interval</b></td>
     <td>1s</td>
     <td>
       How often should the server send a keepalive/heartbeat frame on a busy
