@@ -65,8 +65,8 @@ void Server::startConnection(std::unique_ptr<NativeConnection> connection) {
 
     logDebug(
         "eventql",
-        "Native connection established; id=$0",
-        (const void*) conn.get());
+        "Native connection established; remote=$0",
+        conn->getRemoteHost());
 
     uint16_t opcode;
     uint16_t flags;

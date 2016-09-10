@@ -62,6 +62,8 @@ public:
 
   void close() override;
 
+  std::string getRemoteHost() const override;
+
   void setIOTimeout(uint64_t timeout_us) override;
 
 protected:
@@ -79,6 +81,7 @@ protected:
   std::string read_buf_;
   std::string write_buf_;
   uint64_t io_timeout_;
+  std::string remote_host_;
 };
 
 } // namespace native_transport
