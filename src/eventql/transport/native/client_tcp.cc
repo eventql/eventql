@@ -43,17 +43,18 @@ namespace eventql {
 namespace native_transport {
 
 TCPAsyncClient::TCPAsyncClient(
-    ConfigDirectory* config,
+    ProcessConfig* config,
+    ConfigDirectory* config_dir,
     size_t max_concurrent_tasks,
     size_t max_concurrent_tasks_per_host) :
-    config_(config),
+    config_(config_dir),
     max_concurrent_tasks_(max_concurrent_tasks),
     max_concurrent_tasks_per_host_(max_concurrent_tasks_per_host),
     num_tasks_(0),
     num_tasks_complete_(0),
     num_tasks_running_(0),
-    io_timeout_(kMicrosPerSecond),
-    idle_timeout_(kMicrosPerSecond) {}
+    io_timeout_(config->getInt("server.s2s_io_timeout").get()),
+    idle_timeout_(config->getInt("server.s2s_idle_timeout").get()) {}
 
 TCPAsyncClient::~TCPAsyncClient() {
   shutdown();

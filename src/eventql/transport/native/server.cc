@@ -54,7 +54,6 @@ void Server::startConnection(std::unique_ptr<NativeConnection> connection) {
   auto conn_ptr = connection.release();
   db_->startThread([this, conn_ptr] (Session* session) {
     std::unique_ptr<NativeConnection> conn(conn_ptr);
-    auto idle_timeout = kMicrosPerSecond; // FIXME
 
     auto rc = performHandshake(conn.get());
     if (!rc.isSuccess()) {
@@ -73,7 +72,12 @@ void Server::startConnection(std::unique_ptr<NativeConnection> connection) {
     std::string payload;
     bool cont = true;
     while (cont && rc.isSuccess()) {
-      rc = conn->recvFrame(&opcode, &flags, &payload, idle_timeout);
+      rc = conn->recvFrame(
+          &opcode,
+          &flags,
+          &payload,
+          session->getIdleTimeout());
+
       if (!rc.isSuccess()) {
         break;
       }
@@ -93,14 +97,20 @@ void Server::startConnection(std::unique_ptr<NativeConnection> connection) {
 }
 
 ReturnCode Server::performHandshake(NativeConnection* conn) {
-  auto handshake_timeout = kMicrosPerSecond; // FIXME
+  auto session = db_->getSession();
+  auto config = db_->getConfig();
 
   /* read HELLO frame */
   {
     uint16_t opcode;
     uint16_t flags;
     std::string payload;
-    auto rc = conn->recvFrame(&opcode, &flags, &payload, handshake_timeout);
+    auto rc = conn->recvFrame(
+        &opcode,
+        &flags,
+        &payload,
+        session->getIdleTimeout());
+
     if (!rc.isSuccess()) {
       conn->close();
       return rc;
@@ -114,6 +124,15 @@ ReturnCode Server::performHandshake(NativeConnection* conn) {
         conn->close();
         return ReturnCode::error("ERUNTIME", "invalid opcode");
     }
+  }
+
+
+  if (session->getIsInternal()) {
+    session->setIdleTimeout(config->getInt("server.s2s_idle_timeout").get());
+    conn->setIOTimeout(config->getInt("server.s2s_io_timeout").get());
+  } else {
+    session->setIdleTimeout(config->getInt("server.c2s_idle_timeout").get());
+    conn->setIOTimeout(config->getInt("server.c2s_io_timeout").get());
   }
 
   /* send READY frame */

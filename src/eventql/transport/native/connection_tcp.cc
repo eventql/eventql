@@ -44,10 +44,11 @@ namespace native_transport {
 
 TCPConnection::TCPConnection(
     int fd,
+    uint64_t io_timeout,
     const std::string& prelude_bytes /* = "" */) :
     fd_(fd),
     read_buf_(prelude_bytes),
-    io_timeout_(kMicrosPerSecond) {
+    io_timeout_(io_timeout) {
   logDebug(
       "eventql",
       "Opening new native connection; id=$0 fd=$1",
@@ -60,7 +61,7 @@ TCPConnection::TCPConnection(
   setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, &nodelay, sizeof(nodelay));
 }
 
-TCPConnection::~TCPConnection() { 
+TCPConnection::~TCPConnection() {
   close();
 }
 

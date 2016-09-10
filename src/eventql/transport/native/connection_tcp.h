@@ -34,6 +34,7 @@ public:
 
   TCPConnection(
       int fd,
+      uint64_t io_timeout,
       const std::string& prelude_bytes = "");
 
   ~TCPConnection();
@@ -60,6 +61,8 @@ public:
   ReturnCode flushOutbox(bool block, uint64_t timeout_us = 0) override;
 
   void close() override;
+
+  void setIOTimeout(uint64_t timeout_us) override;
 
 protected:
 

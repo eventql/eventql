@@ -70,7 +70,10 @@ uint64_t getMonoTime() {
 Listener::Listener(
     Database* database) :
     database_(database),
-    connect_timeout_(2 * kMicrosPerSecond), 
+    io_timeout_(
+        std::max(
+            database->getConfig()->getInt("server.s2s_io_timeout").get(),
+            database->getConfig()->getInt("server.c2s_io_timeout").get())),
     running_(true),
     ssock_(-1),
     http_transport_(database),
@@ -140,7 +143,7 @@ void Listener::run() {
 
     auto now = getMonoTime();
     while (!connections_.empty()) {
-      if (connections_.front().accepted_at + connect_timeout_ > now) {
+      if (connections_.front().accepted_at + io_timeout_ > now) {
         break;
       }
 
@@ -154,7 +157,7 @@ void Listener::run() {
 
     uint64_t timeout = 0;
     if (!connections_.empty()) {
-      timeout = (connections_.front().accepted_at + connect_timeout_) - now;
+      timeout = (connections_.front().accepted_at + io_timeout_) - now;
     }
 
     for (const auto& c : connections_) {
@@ -265,6 +268,7 @@ void Listener::open(int fd) {
           std::unique_ptr<native_transport::NativeConnection>(
               new native_transport::TCPConnection(
                   fd,
+                  io_timeout_,
                   std::string(&first_byte, 1))));
       break;
     }

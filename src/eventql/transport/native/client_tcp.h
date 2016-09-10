@@ -45,7 +45,8 @@ public:
               size_t payload_len)>;
 
   TCPAsyncClient(
-      ConfigDirectory* config,
+      ProcessConfig* config,
+      ConfigDirectory* config_dir,
       size_t max_concurrent_tasks,
       size_t max_concurrent_tasks_per_host);
 

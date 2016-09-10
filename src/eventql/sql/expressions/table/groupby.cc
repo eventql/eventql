@@ -319,13 +319,18 @@ GroupByMergeExpression::GroupByMergeExpression(
     Transaction* txn,
     ExecutionContext* execution_context,
     Vector<ValueExpression> select_expressions,
-    eventql::ConfigDirectory* config,
+    eventql::ProcessConfig* config,
+    eventql::ConfigDirectory* config_dir,
     size_t max_concurrent_tasks,
     size_t max_concurrent_tasks_per_host) :
     txn_(txn),
     execution_context_(execution_context),
     select_exprs_(std::move(select_expressions)),
-    rpc_scheduler_(config, max_concurrent_tasks, max_concurrent_tasks_per_host),
+    rpc_scheduler_(
+        config,
+        config_dir,
+        max_concurrent_tasks,
+        max_concurrent_tasks_per_host),
     freed_(false) {
   execution_context_->incrementNumTasks();
 }

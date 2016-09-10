@@ -105,7 +105,8 @@ public:
       Transaction* txn,
       ExecutionContext* execution_context,
       Vector<ValueExpression> select_expressions,
-      eventql::ConfigDirectory* config,
+      eventql::ProcessConfig* config,
+      eventql::ConfigDirectory* config_dir,
       size_t max_concurrent_tasks,
       size_t max_concurrent_tasks_per_host);
 

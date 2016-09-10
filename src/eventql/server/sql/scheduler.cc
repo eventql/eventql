@@ -33,6 +33,7 @@
 namespace eventql {
 
 Scheduler::Scheduler(
+    ProcessConfig* config,
     PartitionMap* pmap,
     ConfigDirectory* cdir,
     InternalAuth* auth) :
@@ -144,6 +145,7 @@ ScopedPtr<csql::TableExpression> Scheduler::buildPipelineGroupByExpression(
           txn,
           execution_context,
           std::move(select_expressions),
+          config_,
           cdir_,
           max_concurrent_tasks,
           max_concurrent_tasks_per_host));

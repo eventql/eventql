@@ -41,7 +41,6 @@ ReturnCode performOperation_QUERY(
     const std::string& payload) {
   auto session = database->getSession();
   auto dbctx = session->getDatabaseContext();
-  auto idle_timeout = kMicrosPerSecond; // FIXME
 
   /* read query frame */
   std::string q_query;
@@ -124,7 +123,7 @@ ReturnCode performOperation_QUERY(
                 &n_opcode,
                 &n_flags,
                 &n_payload,
-                idle_timeout);
+                session->getIdleTimeout());
 
             if (!rc.isSuccess()) {
               return rc;
@@ -166,7 +165,7 @@ ReturnCode performOperation_QUERY(
           &n_opcode,
           &n_flags,
           &n_payload,
-          idle_timeout);
+          session->getIdleTimeout());
 
       if (!rc.isSuccess()) {
         return rc;

@@ -50,7 +50,7 @@ protected:
   };
 
   Database* database_;
-  uint64_t connect_timeout_;
+  uint64_t io_timeout_;
   std::atomic<bool> running_;
   int ssock_;
   std::list<EstablishingConnection> connections_;

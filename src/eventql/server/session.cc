@@ -22,16 +22,23 @@
  * code of your own applications
  */
 #include "eventql/server/session.h"
+#include "eventql/db/database.h"
+#include "eventql/config/process_config.h"
 #include "eventql/util/wallclock.h"
 
 namespace eventql {
 
 Session::Session(
-    const DatabaseContext* database_context) :
-    database_context_(database_context),
+    const DatabaseContext* dbctx) :
+    database_context_(dbctx),
     user_id_("<anonymous>"),
     heartbeat_last_(MonotonicClock::now()),
-    heartbeat_interval_(kMicrosPerSecond / 10) {}
+    heartbeat_interval_(
+        dbctx->config->getInt("server.heartbeat_interval").get()),
+    idle_timeout_(
+        std::max(
+            dbctx->config->getInt("server.s2s_idle_timeout").get(),
+            dbctx->config->getInt("server.c2s_idle_timeout").get())) {}
 
 String Session::getUserID() const {
   std::unique_lock<std::mutex> lk(mutex_);
