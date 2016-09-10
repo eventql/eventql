@@ -834,6 +834,8 @@ EVQL_CORE_SOURCES_ = \
     eventql/transport/native/client_tcp.h \
     eventql/transport/native/frames/hello.cc \
     eventql/transport/native/frames/hello.h \
+    eventql/transport/native/frames/ready.cc \
+    eventql/transport/native/frames/ready.h \
     eventql/transport/native/frames/query_partialaggr.cc \
     eventql/transport/native/frames/query_partialaggr.h \
     eventql/transport/native/frames/query_partialaggr_result.cc \

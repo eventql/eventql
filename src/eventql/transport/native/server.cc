@@ -23,7 +23,7 @@
  */
 #include "eventql/transport/native/server.h"
 #include "eventql/transport/native/connection_tcp.h"
-#include "eventql/transport/native/frames/query_result.h"
+#include "eventql/transport/native/frames/ready.h"
 #include "eventql/util/logging.h"
 #include "eventql/util/util/binarymessagereader.h"
 #include "eventql/server/session.h"
@@ -136,7 +136,14 @@ ReturnCode Server::performHandshake(NativeConnection* conn) {
 
   /* send READY frame */
   {
-    auto rc = conn->sendFrame(EVQL_OP_READY, 0, nullptr, 0);
+    ReadyFrame ready_frame;
+    ready_frame.setIdleTimeout(session->getIdleTimeout());
+
+    std::string payload;
+    auto payload_os = StringOutputStream::fromString(&payload);
+    ready_frame.writeTo(payload_os.get());
+
+    auto rc = conn->sendFrame(EVQL_OP_READY, 0, payload.data(), payload.size());
     if (!rc.isSuccess()) {
       conn->close();
       return rc;
