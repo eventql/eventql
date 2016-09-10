@@ -127,18 +127,11 @@ void Console::close() {
 }
 
 Status Console::runQuery(const String& query) {
-  if (cfg_.getBatchMode()) {
-    return runQueryBatch(query);
-  } else {
-    return runQueryTable(query);
-  }
-}
-
-Status Console::runQueryTable(const String& query) {
   auto stdout_os = TerminalOutputStream::fromStream(OutputStream::getStdout());
   auto stderr_os = TerminalOutputStream::fromStream(OutputStream::getStderr());
   bool line_dirty = false;
   bool is_tty = stderr_os->isTTY();
+  bool batchmode = cfg_.getBatchMode();
 
   //if (!cfg_.getQuietMode()) {
   //  res_parser->onProgress([&stdout_os, &line_dirty, is_tty] (
@@ -186,7 +179,14 @@ Status Console::runQueryTable(const String& query) {
   }
 
   if (rc == 0) {
-    results.addHeader(result_columns);
+    if (batchmode) {
+      for (const auto col : result_columns) {
+        stdout_os->print(col + "\t");
+      }
+      stdout_os->print("\n");
+    } else {
+      results.addHeader(result_columns);
+    }
   }
 
   while (rc >= 0) {
@@ -197,12 +197,20 @@ Status Console::runQueryTable(const String& query) {
       break;
     }
 
-    std::vector<std::string> row;
-    for (int i = 0; i < result_ncols; ++i) {
-      row.emplace_back(fields[i], field_lens[i]);
-    }
+    if (batchmode) {
+      for (int i = 0; i < result_ncols; ++i) {
+        stdout_os->print(std::string(fields[i], field_lens[i]));
+        stdout_os->print("\t");
+      }
+      stdout_os->print("\n");
+    } else {
+      std::vector<std::string> row;
+      for (int i = 0; i < result_ncols; ++i) {
+        row.emplace_back(fields[i], field_lens[i]);
+      }
 
-    results.addRow(row);
+      results.addRow(row);
+    }
   }
 
   evql_client_releasebuffers(client_);
@@ -223,10 +231,12 @@ Status Console::runQueryTable(const String& query) {
 
     return Status(eIOError);
   } else {
+    if (!batchmode && results.getNumRows() > 0) {
+      results.debugPrint();
+    }
+
     String status_line = "";
     if (results.getNumRows() > 0) {
-      results.debugPrint();
-
       auto num_rows = results.getNumRows();
       status_line = StringUtil::format(
           "$0 row$1 returned",
@@ -246,93 +256,6 @@ Status Console::runQueryTable(const String& query) {
 
     return Status::success();
   }
-}
-
-Status Console::runQueryBatch(const String& query) {
-  auto stdout_os = TerminalOutputStream::fromStream(OutputStream::getStdout());
-  auto stderr_os = TerminalOutputStream::fromStream(OutputStream::getStderr());
-  bool line_dirty = false;
-  bool is_tty = stderr_os->isTTY();
-  bool header_sent = false;
-  bool error = false;
-  auto res_parser = new csql::BinaryResultParser();
-
-  if (!cfg_.getQuietMode()) {
-    res_parser->onProgress([&stderr_os, &line_dirty, &header_sent, is_tty] (
-        const csql::ExecutionStatus& status) {
-      if (!header_sent) {
-        auto status_line = StringUtil::format(
-            "Query running: $0%",
-            status.progress * 100);
-
-        if (is_tty) {
-          stderr_os->eraseLine();
-          stderr_os->print("\r" + status_line);
-          line_dirty = true;
-        } else {
-          stderr_os->print(status_line + "\n");
-        }
-      }
-    });
-  }
-
-  res_parser->onTableHeader([&stdout_os, &stderr_os, &header_sent, &line_dirty] (
-      const Vector<String>& columns) {
-    if (line_dirty) {
-      stderr_os->eraseLine();
-      stderr_os->print("\r");
-      line_dirty = false;
-    }
-
-    for (const auto col : columns) {
-      stdout_os->print(col + "\t");
-    }
-    stdout_os->print("\n");
-    header_sent = true;
-  });
-
-  res_parser->onRow([&stdout_os] (int argc, const csql::SValue* argv) {
-    for (size_t i = 0; i < argc; ++i) {
-      stdout_os->print(argv[i].getString() + "\t");
-    }
-    stdout_os->print("\n");
-  });
-
-  res_parser->onError([&stderr_os, &error, &line_dirty] (const String& error_str) {
-    if (line_dirty) {
-      stderr_os->eraseLine();
-      stderr_os->print("\r");
-      line_dirty = false;
-    }
-
-    stderr_os->print(
-        "ERROR:",
-        { TerminalStyle::RED, TerminalStyle::UNDERSCORE });
-
-    stderr_os->print(StringUtil::format(" $0\n", error_str));
-    error = true;
-  });
-
-  auto res = sendRequest(query, res_parser);
-  if (!res.isSuccess()) {
-    stderr_os->print(
-          "ERROR:",
-          { TerminalStyle::RED, TerminalStyle::UNDERSCORE });
-
-    stderr_os->print(res.message());
-    return res;
-  }
-
-  if (is_tty) {
-    stderr_os->eraseLine();
-    stderr_os->print("\r");
-  }
-
-  if (error) {
-    return Status(eIOError);
-  }
-
-  return Status::success();
 }
 
 Status Console::sendRequest(const String& query, csql::BinaryResultParser* res_parser) {

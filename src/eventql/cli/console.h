@@ -78,8 +78,7 @@ public:
   Status runJS(const String& query);
 
 protected:
-  Status runQueryBatch(const String& query);
-  Status runQueryTable(const String& query);
+
   Status sendRequest(const String& query, csql::BinaryResultParser* res_parser);
 
   CLIConfig cfg_;
