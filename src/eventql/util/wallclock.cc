@@ -76,7 +76,7 @@ uint64_t MonotonicClock::now() {
 #else
   timespec ts;
   if (clock_gettime(CLOCK_MONOTONIC, &ts) != 0) {
-    logFatal("clock_gettime(CLOCK_MONOTONIC) failed");
+    logFatal("evqld", "clock_gettime(CLOCK_MONOTONIC) failed");
     abort();
   } else {
     return std::uint64_t(ts.tv_sec) * 1000000 + ts.tv_nsec / 1000;
