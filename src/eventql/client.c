@@ -472,6 +472,7 @@ static int evql_client_handshake(evql_client_t* client) {
     evql_framebuf_writelenencint(&hello_frame, 1); // protocol version
     evql_framebuf_writelenencstr(&hello_frame, "eventql", 7); // eventql version
     evql_framebuf_writelenencint(&hello_frame, 0); // flags
+    evql_framebuf_writelenencint(&hello_frame, 0); // idle timeout
 
     int rc = evql_client_sendframe(
         client,

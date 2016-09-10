@@ -38,15 +38,20 @@ public:
 
   HelloFrame();
 
-  void setFlags(uint64_t flags);
-  uint64_t getFlags() const;
+  void setIsInternal(bool is_internal);
+  bool isInternal() const;
 
-  void writeToString(std::string* str);
+  void setIdleTimeout(uint64_t timeout_us);
+  uint64_t getIdleTimeout() const;
+
+  ReturnCode readFrom(InputStream* is);
+  void writeTo(OutputStream* os);
 
   void clear();
 
 protected:
   uint64_t flags_;
+  uint64_t idle_timeout_;
 };
 
 } // namespace native_transport

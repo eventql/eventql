@@ -177,8 +177,12 @@ ReturnCode TCPAsyncClient::handleHandshake(Connection* connection) {
   connection->state = ConnectionState::HANDSHAKE;
 
   std::string payload;
+  auto payload_os = StringOutputStream::fromString(&payload);
+
   native_transport::HelloFrame f_hello;
-  f_hello.writeToString(&payload);
+  f_hello.setIsInternal(true);
+  f_hello.setIdleTimeout(idle_timeout_);
+  f_hello.writeTo(payload_os.get());
 
   sendFrame(
       connection,

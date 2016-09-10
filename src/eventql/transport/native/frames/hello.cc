@@ -26,16 +26,45 @@
 namespace eventql {
 namespace native_transport {
 
-HelloFrame::HelloFrame() : flags_(0) {}
+HelloFrame::HelloFrame() : flags_(0), idle_timeout_(0) {}
 
-void HelloFrame::writeToString(std::string* str) {
-  util::BinaryMessageWriter writer;
+void HelloFrame::setIsInternal(bool is_internal) {
+  if (is_internal) {
+    flags_ |= EVQL_HELLO_INTERNAL;
+  } else {
+    flags_ &= ~EVQL_HELLO_INTERNAL;
+  }
+}
 
-  writer.appendVarUInt(1);
-  writer.appendLenencString(EVQL_VERSION);
-  writer.appendVarUInt(flags_);
+bool HelloFrame::isInternal() const {
+  return flags_ & EVQL_HELLO_INTERNAL;
+}
 
-  *str = std::string((const char*) writer.data(), writer.size());
+void HelloFrame::setIdleTimeout(uint64_t idle_timeout) {
+  idle_timeout_ = idle_timeout;
+}
+
+uint64_t HelloFrame::getIdleTimeout() const {
+  return idle_timeout_;
+}
+
+ReturnCode HelloFrame::readFrom(InputStream* is) {
+  auto v = is->readVarUInt();
+  if (v != 1) {
+    return ReturnCode::error("ERUNTIME", "invalid protocol version");
+  }
+
+  auto evql_version = is->readLenencString();
+  flags_ = is->readVarUInt();
+  idle_timeout_ = is->readVarUInt();
+  return ReturnCode::success();
+}
+
+void HelloFrame::writeTo(OutputStream* os) {
+  os->appendVarUInt(1);
+  os->appendLenencString(EVQL_VERSION);
+  os->appendVarUInt(flags_);
+  os->appendVarUInt(idle_timeout_);
 }
 
 } // namespace native_transport
