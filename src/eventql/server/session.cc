@@ -98,4 +98,9 @@ uint64_t Session::getIdleTimeout() const {
   return idle_timeout_;
 }
 
+uint64_t Session::getHeartbeatInterval() const {
+  return heartbeat_interval_;
+}
+
 } // namespace eventql
+
