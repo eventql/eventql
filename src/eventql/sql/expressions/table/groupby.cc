@@ -358,10 +358,6 @@ ScopedPtr<ResultCursor> GroupByMergeExpression::execute() {
     }
   });
 
-  for (size_t i = 0; i < num_parts_; ++i) {
-    execution_context_->incrementNumTasksRunning();
-  }
-
   uint64_t num_parts_completed = 0;
   auto result_handler = [this, &remote_group, &num_parts_completed] (
       void* priv,
@@ -417,14 +413,16 @@ ScopedPtr<ResultCursor> GroupByMergeExpression::execute() {
   };
 
   rpc_scheduler_.setResultCallback(result_handler);
+  rpc_scheduler_.setRPCStartedCallback([this] (void* privdata) {
+    execution_context_->incrementNumTasksRunning();
+  });
+  rpc_scheduler_.setRPCCompletedCallback([this] (void* privdata) {
+    execution_context_->incrementNumTasksCompleted();
+  });
 
   auto rc = rpc_scheduler_.execute();
   if (!rc.isSuccess()) {
     RAISE(kRuntimeError, rc.getMessage());
-  }
-
-  for (size_t i = num_parts_completed; i < num_parts_; ++i) {
-    execution_context_->incrementNumTasksCompleted();
   }
 
   groups_iter_ = groups_.begin();
