@@ -100,6 +100,27 @@ typedef struct evql_client_s evql_client_t;
 evql_client_t* evql_client_init();
 
 /**
+ * Set an auth parameter
+ */
+int evql_client_setauth(
+    evql_client_t* client,
+    const char* key,
+    size_t key_len,
+    const char* val,
+    size_t val_len,
+    long flags);
+
+/**
+ * Set an option
+ */
+int evql_client_setopt(
+    evql_client_t* client,
+    int opt,
+    const char* val,
+    size_t val_len,
+    long flags);
+
+/**
  * Connect to an eventql server
  */
 int evql_client_connect(

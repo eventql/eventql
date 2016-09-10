@@ -44,6 +44,9 @@ public:
   void setIdleTimeout(uint64_t timeout_us);
   uint64_t getIdleTimeout() const;
 
+  void addAuthData(const std::string& key, const std::string& value);
+  const std::vector<std::pair<std::string, std::string>>& getAuthData() const;
+
   ReturnCode readFrom(InputStream* is);
   void writeTo(OutputStream* os);
 
@@ -52,6 +55,7 @@ public:
 protected:
   uint64_t flags_;
   uint64_t idle_timeout_;
+  std::vector<std::pair<std::string, std::string>> auth_data_;
 };
 
 } // namespace native_transport

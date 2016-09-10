@@ -108,6 +108,10 @@ Binary Protocols.
 
   [lenencstr*]     A list of [lenencstr] values
 
+  [cstr]           A zero-byte-terminated string
+
+  [cstr*]          A list of [cstr] values
+
   [zerobyte]       A single '\0' byte
 
   We also define this notation for optinal fields:
@@ -162,6 +166,8 @@ Binary Protocols.
     lenencstr      eventql_version
     lenencint      flags
     lenencint      idle_timeout
+    lenencint      authdata_len
+    cstr*          authdata
 
   Fields:
     flags          0x01 HELLO_INTERNAL - This is an internal S2S connection

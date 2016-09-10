@@ -66,6 +66,10 @@ struct evql_client_s {
   int fd;
   char* error;
   int connected;
+  char* authdata;
+  size_t authdata_count;
+  size_t authdata_len;
+  size_t authdata_capacity;
   uint64_t io_timeout_us;
   uint64_t idle_timeout_us;
   size_t batch_size;
@@ -473,6 +477,10 @@ static int evql_client_handshake(evql_client_t* client) {
     evql_framebuf_writelenencstr(&hello_frame, "eventql", 7); // eventql version
     evql_framebuf_writelenencint(&hello_frame, 0); // flags
     evql_framebuf_writelenencint(&hello_frame, client->idle_timeout_us);
+    evql_framebuf_writelenencint(&hello_frame, client->authdata_count);
+    if (client->authdata) {
+      evql_framebuf_write(&hello_frame, client->authdata, client->authdata_len);
+    }
 
     int rc = evql_client_sendframe(
         client,
@@ -821,6 +829,10 @@ evql_client_t* evql_client_init() {
   client->fd = -1;
   client->error = NULL;
   client->connected = 0;
+  client->authdata = NULL;
+  client->authdata_count = 0;
+  client->authdata_len = 0;
+  client->authdata_capacity = 0;
   client->io_timeout_us = EVQL_CLIENT_DEFAULT_IO_TIMEOUT_US;
   client->idle_timeout_us = EVQL_CLIENT_DEFAULT_IDLE_TIMEOUT_US;
   client->batch_size = EVQL_CLIENT_DEFAULT_BATCH_SIZE;
@@ -1125,6 +1137,10 @@ void evql_client_destroy(evql_client_t* client) {
 
   if (client->error) {
     free(client->error);
+  }
+
+  if (client->authdata) {
+    free(client->authdata);
   }
 
   evql_client_qbuf_free(client);
