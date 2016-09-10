@@ -331,7 +331,8 @@ GroupByMergeExpression::GroupByMergeExpression(
         config_dir,
         max_concurrent_tasks,
         max_concurrent_tasks_per_host),
-    freed_(false) {
+    freed_(false),
+    num_parts_(0) {
   execution_context_->incrementNumTasks();
 }
 
@@ -357,7 +358,12 @@ ScopedPtr<ResultCursor> GroupByMergeExpression::execute() {
     }
   });
 
-  auto result_handler = [this, &remote_group] (
+  for (size_t i = 0; i < num_parts_; ++i) {
+    execution_context_->incrementNumTasksRunning();
+  }
+
+  uint64_t num_parts_completed = 0;
+  auto result_handler = [this, &remote_group, &num_parts_completed] (
       void* priv,
       uint16_t opcode,
       uint16_t flags,
@@ -375,6 +381,11 @@ ScopedPtr<ResultCursor> GroupByMergeExpression::execute() {
         break;
 
     };
+
+    if (flags & EVQL_ENDOFREQUEST) {
+      ++num_parts_completed;
+      execution_context_->incrementNumTasksCompleted();
+    }
 
     MemoryInputStream is(payload, payload_size);
 
@@ -411,6 +422,10 @@ ScopedPtr<ResultCursor> GroupByMergeExpression::execute() {
     RAISE(kRuntimeError, rc.getMessage());
   }
 
+  for (size_t i = num_parts_completed; i < num_parts_; ++i) {
+    execution_context_->incrementNumTasksCompleted();
+  }
+
   groups_iter_ = groups_.begin();
   return mkScoped(
       new DefaultResultCursor(
@@ -429,7 +444,6 @@ size_t GroupByMergeExpression::getNumColumns() const {
 void GroupByMergeExpression::addPart(
     GroupByNode* node,
     std::vector<std::string> hosts) {
-
   std::string qtree_coded;
   auto qtree_coded_os = StringOutputStream::fromString(&qtree_coded);
   QueryTreeCoder qtree_coder(txn_);
@@ -449,6 +463,9 @@ void GroupByMergeExpression::addPart(
       0,
       std::move(payload),
       hosts);
+
+  execution_context_->incrementNumTasks();
+  ++num_parts_;
 }
 
 bool GroupByMergeExpression::next(SValue* row, size_t row_len) {

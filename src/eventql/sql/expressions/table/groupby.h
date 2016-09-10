@@ -131,6 +131,7 @@ protected:
   HashMap<String, Vector<VM::Instance>>::const_iterator groups_iter_;
   ScratchMemory scratch_;
   bool freed_;
+  size_t num_parts_;
 };
 
 }
