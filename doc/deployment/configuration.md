@@ -139,7 +139,52 @@ The EventQL configuration options are grouped in three sections: `client`, `serv
   <tr>
     <td><b>server.cachedir_maxsize</b></td>
     <td>68719476736</td>
-    <td></td>
+    <td>Unit: Bytes</td>
+  </tr>
+  <tr>
+    <td><b>server.c2s_io_timeout</b></td>
+    <td>1s</td>
+    <td>
+      How long should the server wait for data on a connection to a client when
+      it expects the data to arrive immediately. (optional, unit: microseconds)
+    </td>
+  </tr>
+  <tr>
+    <td><b>server.c2s_idle_timeout</b></td>
+    <td>10s</td>
+    <td>
+      How long should the server wait for new data on an idle connection to a
+      client. An idle connection is a connection where no data is expected
+      to arrive immediately. (optional, unit: microseconds)
+    </td>
+  </tr>
+  <tr>
+    <td><b>server.s2s_io_timeout</b></td>
+    <td>1s</td>
+    <td>
+      How long should the server wait for data on a connection to another
+      server when it expects the data to arrive immediately. (optional,
+      unit: microseconds)
+    </td>
+  </tr>
+  <tr>
+    <td><b>server.s2s_idle_timeout</b></td>
+    <td>5s</td>
+    <td>
+      How long should the server wait for new data on an idle connection to
+      another server. An idle connection is a connection where no data is
+      expected to arrive immediately. (optional, unit: microseconds)
+    </td>
+  </tr>
+  <tr>
+    <td><b>server.hearbeat_rate</b></td>
+    <td>1s</td>
+    <td>
+      How often should the server send a keepalive/heartbeat frame on a busy
+      connection. Note that this value must be lower than the idle timeout and
+      also puts a lower limit on the idle timeout that a connection client may
+      choose. (optional, unit: microseconds)
+    </td>
   </tr>
   <tr>
     <th colspan="3" align="left">client.*</th>

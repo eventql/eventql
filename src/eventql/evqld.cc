@@ -224,6 +224,11 @@ int main(int argc, const char** argv) {
   evql_conf_set(conf, "server.cachedir_maxsize", "68719476736");
   evql_conf_set(conf, "server.noleader", "false");
   evql_conf_set(conf, "cluster.rebalance_interval", "60000000");
+  evql_conf_set(conf, "server.c2s_io_timeout", "1000000");
+  evql_conf_set(conf, "server.c2s_idle_timeout", "10000000");
+  evql_conf_set(conf, "server.s2s_io_timeout", "1000000");
+  evql_conf_set(conf, "server.s2s_idle_timeout", "5000000");
+  evql_conf_set(conf, "server.hearbeat_rate", "1000000");
 
   if (flags.isSet("standalone")) {
     evql_conf_set(conf, "server.name", "standalone");
