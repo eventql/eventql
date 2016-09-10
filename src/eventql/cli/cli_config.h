@@ -37,8 +37,6 @@ public:
 
   static const String& kDefaultHost;
   static const int kDefaultPort;
-  static const String& kDefaultUser;
-  static const String& kDefaultHistoryPath;
   static const uint64_t kDefaultHistoryMaxSize;
 
   enum class kLanguage { SQL, JAVASCRIPT };
@@ -49,7 +47,7 @@ public:
 
   int getPort() const;
 
-  String getUser() const;
+  Option<String> getUser() const;
 
   bool getBatchMode() const;
 
@@ -67,12 +65,14 @@ public:
 
   Option<String> getExec() const;
 
-  String getHistoryPath() const;
+  Option<String> getHistoryPath() const;
 
   uint64_t getHistoryMaxSize() const;
 
 protected:
   RefPtr<ProcessConfig> cfg_;
+  String default_user_;
+  String default_history_path_;
 };
 
 } // namespace cli

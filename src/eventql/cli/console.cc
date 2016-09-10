@@ -49,8 +49,12 @@ namespace cli {
 
 void Console::startInteractiveShell() {
   auto history_path = cfg_.getHistoryPath();
-  linenoiseHistorySetMaxLen(cfg_.getHistoryMaxSize());
-  linenoiseHistoryLoad(history_path.c_str());
+  if (!history_path.isEmpty()) {
+    linenoiseHistorySetMaxLen(cfg_.getHistoryMaxSize());
+    linenoiseHistoryLoad(history_path.get().c_str());
+  } else {
+    logWarning("evql", "history file can't be written - please specify the --history_path flag or $HOME");
+  }
 
   char *p;
   String query;
@@ -77,9 +81,12 @@ void Console::startInteractiveShell() {
       continue;
     }
 
-    linenoiseHistoryAdd(query.c_str());
-    linenoiseHistorySave(history_path.c_str());
     runQuery(query);
+    if (!history_path.isEmpty()) {
+      linenoiseHistoryAdd(query.c_str());
+      linenoiseHistorySave(history_path.get().c_str());
+    }
+
     query.clear();
   }
 }
@@ -346,12 +353,12 @@ Status Console::sendRequest(const String& query, csql::BinaryResultParser* res_p
       auth_headers.emplace_back(
           "Authorization",
           StringUtil::format("Token $0", cfg_.getAuthToken().get()));
-    } else if (!cfg_.getPassword().isEmpty()) {
+    } else if (!cfg_.getUser().isEmpty() && !cfg_.getPassword().isEmpty()) {
       auth_headers.emplace_back(
           "Authorization",
           StringUtil::format("Basic $0",
               util::Base64::encode(
-                  cfg_.getUser() + ":" + cfg_.getPassword().get())));
+                  cfg_.getUser().get() + ":" + cfg_.getPassword().get())));
     }
 
     http::HTTPClient http_client(nullptr);
@@ -477,12 +484,12 @@ Status Console::runJS(const String& program_source) {
       auth_headers.emplace_back(
           "Authorization",
           StringUtil::format("Token $0", cfg_.getAuthToken().get()));
-    } else if (!cfg_.getPassword().isEmpty()) {
+    } else if (!cfg_.getUser().isEmpty() && !cfg_.getPassword().isEmpty()) {
       auth_headers.emplace_back(
           "Authorization",
           StringUtil::format("Basic $0",
               util::Base64::encode(
-                  cfg_.getUser() + ":" + cfg_.getPassword().get())));
+                  cfg_.getUser().get() + ":" + cfg_.getPassword().get())));
     }
 
     if (is_tty) {
