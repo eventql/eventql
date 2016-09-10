@@ -509,6 +509,23 @@ static int evql_client_handshake(evql_client_t* client) {
       case EVQL_OP_READY:
         client->connected = 1;
         break;
+      case EVQL_OP_ERROR: {
+        const char* err;
+        size_t err_len;
+        int err_rc = evql_framebuf_readlenencstr(
+            &client->recv_buf,
+            &err,
+            &err_len);
+
+        if (err_rc == 0) {
+          evql_client_seterror(client, err);
+        } else {
+          evql_client_seterror(client, "<unspecified error>");
+        }
+
+        evql_client_close_hard(client);
+        return -1;
+      }
       default:
         evql_client_seterror(client, "received unexpected opcode");
         evql_client_close_hard(client);
