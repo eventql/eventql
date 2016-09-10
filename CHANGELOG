@@ -13,6 +13,10 @@ EventQL v0.4.0 beta;
   * Changed the http server code to execute incoming requests from within a
     database thread (previously this was a generic thread pool)
 
+  * Changed the internal cluster auth to require all internal hosts to be
+    whitelisted using the cluster.allowed_hosts option. In standalone mode,
+    the whitelist is defaulted to 0.0.0.0/0
+
   * Removed the obsolete "sha1_tokens" field from the cluster/server config
 
   * Added a native transport layer (a framed TCP-based protocol). See
