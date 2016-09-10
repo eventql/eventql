@@ -48,25 +48,6 @@
 
 namespace eventql {
 
-uint64_t getMonoTime() {
-#ifdef __MACH__
-  clock_serv_t cclock;
-  mach_timespec_t mts;
-  host_get_clock_service(mach_host_self(), SYSTEM_CLOCK, &cclock);
-  clock_get_time(cclock, &mts);
-  mach_port_deallocate(mach_task_self(), cclock);
-  return std::uint64_t(mts.tv_sec) * 1000000 + mts.tv_nsec / 1000;
-#else
-  timespec ts;
-  if (clock_gettime(CLOCK_MONOTONIC, &ts) != 0) {
-    logFatal("clock_gettime(CLOCK_MONOTONIC) failed");
-    abort();
-  } else {
-    return std::uint64_t(ts.tv_sec) * 1000000 + ts.tv_nsec / 1000;
-  }
-#endif
-}
-
 Listener::Listener(
     Database* database) :
     database_(database),
@@ -141,7 +122,7 @@ void Listener::run() {
     int max_fd = ssock_;
     FD_SET(ssock_, &op_read);
 
-    auto now = getMonoTime();
+    auto now = MonotonicClock::now();
     while (!connections_.empty()) {
       if (connections_.front().accepted_at + io_timeout_ > now) {
         break;
@@ -211,7 +192,7 @@ void Listener::run() {
 
       EstablishingConnection c;
       c.fd = conn_fd;
-      c.accepted_at = getMonoTime();
+      c.accepted_at = MonotonicClock::now();
       connections_.emplace_back(c);
     }
 
