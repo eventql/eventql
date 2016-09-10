@@ -540,6 +540,9 @@ static int evql_client_query_readresultframe(evql_client_t* client) {
         done = 1;
         break;
 
+      case EVQL_OP_HEARTBEAT:
+        break;
+
       case EVQL_OP_QUERY_PROGRESS:
         // FIXME handle query progress
         break;
