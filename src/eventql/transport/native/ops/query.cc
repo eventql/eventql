@@ -106,14 +106,14 @@ ReturnCode performOperation_QUERY(
 
         progress_last = now;
 
-        auto progress = qplan->getProgress();
-        QueryProgressFrame progress_frame;
-        progress_frame.setQueryProgressPermill(progress * 1000);
-        std::string payload;
-        auto payload_os = StringOutputStream::fromString(&payload);
-        progress_frame.writeTo(payload_os.get());
-
         if (conn->isOutboxEmpty()) {
+          auto progress = qplan->getProgress();
+          QueryProgressFrame progress_frame;
+          progress_frame.setQueryProgressPermill(progress * 1000);
+          std::string payload;
+          auto payload_os = StringOutputStream::fromString(&payload);
+          progress_frame.writeTo(payload_os.get());
+
           return conn->sendFrameAsync(
               EVQL_OP_QUERY_PROGRESS,
               0,
