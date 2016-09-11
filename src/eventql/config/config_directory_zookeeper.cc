@@ -25,6 +25,7 @@
 #include <zookeeper.h>
 #include <eventql/config/config_directory_zookeeper.h>
 #include <eventql/util/protobuf/msg.h>
+#include <eventql/util/logging.h>
 
 namespace eventql {
 
