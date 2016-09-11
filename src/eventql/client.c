@@ -89,6 +89,12 @@ struct evql_client_s {
   char cbuf_inline[EVQL_CLIENT_INLINE_CBUF_SIZE];
   void (*progress_cb) (evql_client_t* client, void* privdata);
   void* progress_cb_privdata;
+  uint64_t progress_num_rows_modified;
+  uint64_t progress_num_rows_scanned;
+  uint64_t progress_num_bytes_scanned;
+  uint64_t progress_permill;
+  uint64_t progress_elapsed_ms;
+  uint64_t progress_eta_ms;
 };
 
 
@@ -554,7 +560,32 @@ static int evql_client_handshake(evql_client_t* client, const char* database) {
 static void evql_client_query_readprogressframe(
     evql_client_t* client,
     evql_framebuf_t* fbuf) {
-  // FIXME read progress information and store into client struct
+  if (evql_framebuf_readlenencint(
+        fbuf, &client->progress_num_rows_modified) == -1) {
+    return;
+  }
+
+  if (evql_framebuf_readlenencint(
+        fbuf, &client->progress_num_rows_scanned) == -1) {
+    return;
+ }
+
+  if (evql_framebuf_readlenencint(
+        fbuf, &client->progress_num_bytes_scanned) == -1) {
+    return;
+  }
+
+  if (evql_framebuf_readlenencint(fbuf, &client->progress_permill) == -1) {
+    return;
+  }
+
+  if (evql_framebuf_readlenencint(fbuf, &client->progress_elapsed_ms) == -1) {
+    return;
+  }
+
+  if (evql_framebuf_readlenencint(fbuf, &client->progress_eta_ms) == -1) {
+    return;
+  }
 
   if (client->progress_cb) {
     client->progress_cb(client, client->progress_cb_privdata);
@@ -882,6 +913,12 @@ evql_client_t* evql_client_init() {
   client->cbuf_nbytes = EVQL_CLIENT_INLINE_CBUF_SIZE;
   client->progress_cb = NULL;
   client->progress_cb_privdata = NULL;
+  client->progress_num_rows_modified = 0;
+  client->progress_num_rows_scanned = 0;
+  client->progress_num_bytes_scanned = 0;
+  client->progress_permill = 0;
+  client->progress_elapsed_ms = 0;
+  client->progress_eta_ms = 0;
   evql_framebuf_init(&client->recv_buf);
   return client;
 }
@@ -1178,6 +1215,31 @@ void evql_client_setprogresscb(
     void* privdata) {
   client->progress_cb = cb;
   client->progress_cb_privdata = privdata;
+}
+
+void evql_client_getstat(evql_client_t* client, uint64_t stat, uint64_t* data) {
+  switch (stat) {
+    case PROGRESS_NUM_ROWS_MODIFIED:
+      *data = client->progress_num_rows_modified;
+      break;
+    case PROGRESS_NUM_ROWS_SCANNED:
+      *data = client->progress_num_rows_scanned;
+      break;
+    case PROGRESS_NUM_BYTES_SCANNED:
+      *data = client->progress_num_bytes_scanned;
+      break;
+    case PROGRESS_PERMILL:
+      *data = client->progress_permill;
+      break;
+    case PROGRESS_ELAPSED_MS:
+      *data = client->progress_elapsed_ms;
+      break;
+    case PROGRESS_ETA_MS:
+      *data = client->progress_eta_ms;
+      break;
+    default:
+      break;
+  }
 }
 
 void evql_client_releasebuffers(evql_client_t* client) {
