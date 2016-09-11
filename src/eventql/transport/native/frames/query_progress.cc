@@ -60,16 +60,13 @@ void QueryProgressFrame::setQueryETAMillis(uint64_t query_eta_ms) {
   query_eta_ms_ = query_eta_ms;
 }
 
-void QueryProgressFrame::writeToString(std::string* str) {
-  util::BinaryMessageWriter writer;
-  writer.appendVarUInt(num_rows_modified_);
-  writer.appendVarUInt(num_rows_scanned_);
-  writer.appendVarUInt(num_bytes_scanned_);
-  writer.appendVarUInt(query_progress_permill_);
-  writer.appendVarUInt(query_elapsed_ms_);
-  writer.appendVarUInt(query_eta_ms_);
-
-  *str = std::string((const char*) writer.data(), writer.size());
+void QueryProgressFrame::writeTo(OutputStream* os) {
+  os->appendVarUInt(num_rows_modified_);
+  os->appendVarUInt(num_rows_scanned_);
+  os->appendVarUInt(num_bytes_scanned_);
+  os->appendVarUInt(query_progress_permill_);
+  os->appendVarUInt(query_elapsed_ms_);
+  os->appendVarUInt(query_eta_ms_);
 }
 
 void QueryProgressFrame::clear() {

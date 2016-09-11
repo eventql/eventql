@@ -24,6 +24,7 @@
  */
 #pragma once
 #include "eventql/eventql.h"
+#include "eventql/util/io/outputstream.h"
 
 namespace eventql {
 namespace native_transport {
@@ -40,7 +41,7 @@ public:
   void setQueryElapsedMillis(uint64_t query_elapsed_ms);
   void setQueryETAMillis(uint64_t query_eta_ms);
 
-  void writeToString(std::string* str);
+  void writeTo(OutputStream* os);
   void clear();
 
 protected:

@@ -110,7 +110,8 @@ ReturnCode performOperation_QUERY(
       QueryProgressFrame progress_frame;
       progress_frame.setQueryProgressPermill(progress * 1000);
       std::string payload;
-      progress_frame.writeToString(&payload);
+      auto payload_os = StringOutputStream::fromString(&payload);
+      progress_frame.writeTo(payload_os.get());
 
       if (conn->isOutboxEmpty()) {
         return conn->sendFrameAsync(
