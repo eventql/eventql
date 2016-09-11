@@ -23,6 +23,9 @@
  */
 #include "eventql/db/metadata_service.h"
 #include "eventql/db/partition_discovery.h"
+#include "eventql/db/metadata_coordinator.h"
+#include "eventql/util/random.h"
+#include "eventql/db/server_allocator.h"
 
 namespace eventql {
 
@@ -192,7 +195,11 @@ Status MetadataService::findPartition(
 
   auto partition = file->getPartitionMapAt(request.key());
   if (partition == file->getPartitionMapEnd()) {
-    return Status(eRuntimeError, "partition not found");
+    if (request.allow_create()) {
+      return createPartition(request, response);
+    } else {
+      return Status(eRuntimeError, "partition not found");
+    }
   }
 
   response->set_partition_id(
@@ -204,6 +211,119 @@ Status MetadataService::findPartition(
   }
   for (const auto& s : partition->servers_leaving) {
     response->add_servers_for_insert(s.server_id);
+  }
+
+  return Status::success();
+}
+
+Status MetadataService::createPartition(
+    const PartitionFindRequest& request,
+    PartitionFindResponse* response) {
+  auto table_config = cdir_->getTableConfig(
+      request.db_namespace(),
+      request.table_id());
+
+  if (!table_config.config().enable_fixed_partitions()) {
+    return Status(eRuntimeError, "partition not found");
+  }
+
+  assert(
+      table_config.config().partitioner() == TBL_PARTITION_TIMEWINDOW ||
+      table_config.config().partitioner() == TBL_PARTITION_UINT64);
+
+  uint64_t fixed_partition_size = table_config.config().fixed_partition_size();
+  assert(fixed_partition_size > 0);
+
+  uint64_t p_point = std::stoull(
+      decodePartitionKey(KEYSPACE_UINT64, request.key()));
+  auto p_begin = (p_point / fixed_partition_size) * fixed_partition_size;
+  auto p_end = p_begin + fixed_partition_size;
+
+  // FIXME: if p_begin or p_end overlap into another partition, adjust
+  // accordingly
+
+  auto new_partition_id = Random::singleton()->sha1();
+  std::string new_begin;
+  std::string new_end;
+
+  logDebug(
+      "evqld",
+      "Creating new finite partition; db=$0 table=$1 partition_id=$2 "
+      "interval=[$3..$4)",
+      request.db_namespace(),
+      request.table_id(),
+      new_partition_id.toString(),
+      p_begin,
+      p_end);
+
+  Set<String> new_servers;
+  {
+    ServerAllocator server_alloc(cdir_);
+    auto rc = server_alloc.allocateServers(3, &new_servers);
+    if (!rc.isSuccess()) {
+      return rc;
+    }
+  }
+
+  CreatePartitionOperation op;
+  op.set_partition_id(new_partition_id.data(), new_partition_id.size());
+  op.set_begin(new_begin);
+  op.set_end(new_end);
+  op.set_placement_id(Random::singleton()->random64());
+  for (const auto& s : new_servers) {
+    *op.add_servers() = s;
+  }
+
+  MetadataOperation envelope(
+      request.db_namespace(),
+      request.table_id(),
+      METAOP_CREATE_PARTITION,
+      SHA1Hash(
+          table_config.metadata_txnid().data(),
+          table_config.metadata_txnid().size()),
+      Random::singleton()->sha1(),
+      *msg::encode(op));
+
+  MetadataCoordinator coordinator(cdir_);
+  auto create_rc = coordinator.performAndCommitOperation(
+      request.db_namespace(),
+      request.table_id(),
+      envelope);
+
+  if (create_rc.isSuccess()) {
+    response->set_partition_id(
+        new_partition_id.data(),
+        new_partition_id.size());
+
+    for (const auto& s : new_servers) {
+      response->add_servers_for_insert(s);
+    }
+  } else {
+    RefPtr<MetadataFile> file;
+    auto rc = getMetadataFile(
+        request.db_namespace(),
+        request.table_id(),
+        &file);
+
+    if (!rc.isSuccess()) {
+      return rc;
+    }
+
+    auto partition = file->getPartitionMapAt(request.key());
+    if (partition == file->getPartitionMapEnd()) {
+      return Status(eRuntimeError, "partition create failed");
+    }
+
+    response->set_partition_id(
+        partition->partition_id.data(),
+        partition->partition_id.size());
+
+    for (const auto& s : partition->servers) {
+      response->add_servers_for_insert(s.server_id);
+    }
+    for (const auto& s : partition->servers_leaving) {
+      response->add_servers_for_insert(s.server_id);
+    }
   }
 
   return Status::success();

@@ -74,6 +74,10 @@ public:
       const PartitionFindRequest& request,
       PartitionFindResponse* response);
 
+  Status createPartition(
+      const PartitionFindRequest& request,
+      PartitionFindResponse* response);
+
 protected:
   ConfigDirectory* cdir_;
   MetadataStore* metadata_store_;
