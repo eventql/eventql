@@ -146,7 +146,9 @@ Status MetadataOperation::performSplitPartition(
     }
 
     String iter_end;
-    {
+    if (input.hasFinitePartitions() & MFILE_FINITE) {
+      iter_end = iter->end;
+    } else {
       auto iter_next = iter + 1;
       if (iter_next != pmap.end()) {
         iter_end = iter_next->begin;
@@ -181,6 +183,10 @@ Status MetadataOperation::performSplitPartition(
             opdata.split_partition_id_low().data(),
             opdata.split_partition_id_low().size());
 
+        if (input.hasFinitePartitions()) {
+          lower_split.end = iter->split_point;
+        }
+
         for (const auto& s : opdata.split_servers_low()) {
           MetadataFile::PartitionPlacement p;
           p.server_id = s;
@@ -196,6 +202,10 @@ Status MetadataOperation::performSplitPartition(
         higher_split.partition_id = SHA1Hash(
             opdata.split_partition_id_high().data(),
             opdata.split_partition_id_high().size());
+
+        if (input.hasFinitePartitions()) {
+          higher_split.end = iter->end;
+        }
 
         for (const auto& s : opdata.split_servers_high()) {
           MetadataFile::PartitionPlacement p;
@@ -273,20 +283,26 @@ Status MetadataOperation::performFinalizeSplit(
 
     {
       lower_split.partition_id = iter->split_partition_id_low;
+      lower_split.splitting = false;
       lower_split.begin = iter->begin;
+      if (input.hasFinitePartitions()) {
+        lower_split.end = iter->split_point;
+      }
       for (const auto& s : iter->split_servers_low) {
         lower_split.servers.emplace_back(s);
       }
-      lower_split.splitting = false;
     }
 
     {
       higher_split.partition_id = iter->split_partition_id_high;
       higher_split.begin = iter->split_point;
+      higher_split.splitting = false;
+      if (input.hasFinitePartitions()) {
+        higher_split.end = iter->end;
+      }
       for (const auto& s : iter->split_servers_high) {
         higher_split.servers.emplace_back(s);
       }
-      higher_split.splitting = false;
     }
 
     iter = pmap.erase(iter);
