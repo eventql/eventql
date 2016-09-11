@@ -132,7 +132,7 @@ MetadataFile::PartitionMapIter MetadataFile::getPartitionMapRangeEnd(
   }
 
   auto iter = lookup(end);
-  if (iter == partition_map_.end() || iter->begin == end) {
+  if (iter == partition_map_.end() || compareKeys(iter->begin, end) >= 0) {
     return iter;
   } else {
     return iter + 1;
