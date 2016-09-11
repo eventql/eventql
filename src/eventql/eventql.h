@@ -23,6 +23,7 @@
  */
 #pragma once
 #include <stdlib.h>
+#include <stdint.h>
 
 #ifdef __cplusplus
 #include <string>
