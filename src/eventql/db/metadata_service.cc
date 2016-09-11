@@ -260,8 +260,12 @@ Status MetadataService::createPartition(
 
   Set<String> new_servers;
   {
+    auto cconf = cdir_->getClusterConfig();
     ServerAllocator server_alloc(cdir_);
-    auto rc = server_alloc.allocateServers(3, &new_servers);
+    auto rc = server_alloc.allocateServers(
+        cconf.replication_factor(),
+        &new_servers);
+
     if (!rc.isSuccess()) {
       return rc;
     }
