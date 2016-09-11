@@ -1227,11 +1227,11 @@ void evql_client_setprogresscb(
 
 uint64_t evql_client_getstat(evql_client_t* client, uint64_t stat) {
   switch (stat) {
-    case EVQL_STAT_NUMROWSMODIFIED:
+    case EVQL_STAT_ROWSMODIFIED:
       return client->progress_num_rows_modified;
-    case EVQL_STAT_NUMROWSSCANNED:
+    case EVQL_STAT_ROWSSCANNED:
       return client->progress_num_rows_scanned;
-    case EVQL_STAT_NUMBYTESSCANNED:
+    case EVQL_STAT_BYTESSCANNED:
       return client->progress_num_bytes_scanned;
     case EVQL_STAT_PROGRESSPERMILL:
       return client->progress_permill;
