@@ -88,7 +88,7 @@ ReturnCode performOperation_QUERY(
     auto qplan = dbctx->sql_runtime->buildQueryPlan(txn.get(), q_query);
 
     /* set progress callback */
-    if (q_flags & EVQL_OP_QUERY_PROGRESS) {
+    if (q_flags & EVQL_QUERY_PROGRESS) {
       auto progress_interval_op= dbctx->config->getInt(
           "server.query_progress_rate_limit");
       auto progress_interval = progress_interval_op.get();
