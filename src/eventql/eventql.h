@@ -90,6 +90,16 @@ enum {
   EVQL_QUERY_RESULT_PENDINGSTMT  = 0x8
 };
 
+
+enum STAT {
+  PROGRESS_NUM_ROWS_MODIFIED  = 0x1L,
+  PROGRESS_NUM_ROWS_SCANNED   = 0x2L,
+  PROGRESS_NUM_BYTES_SCANNED  = 0x3L,
+  PROGRESS_PERMILL            = 0x4L,
+  PROGRESS_ELAPSED_MS         = 0x5L,
+  PROGRESS_ETA_MS             = 0x6L
+};
+
 /**
  * The EventQL client handle
  */
@@ -206,6 +216,8 @@ void evql_client_setprogresscb(
     evql_client_t* client,
     void (*cb) (evql_client_t* client, void* privdata),
     void* privdata);
+
+void evql_client_getstat(evql_client_t* client, uint64_t stat, uint64_t* data);
 
 /**
  * Free the current result
