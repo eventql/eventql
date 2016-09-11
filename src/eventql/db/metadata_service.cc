@@ -244,9 +244,7 @@ Status MetadataService::createPartition(
   // FIXME: if p_begin or p_end overlap into another partition, adjust
   // accordingly
 
-  auto new_partition_id = Random::singleton()->sha1();
-  std::string new_begin;
-  std::string new_end;
+  auto partition_id = Random::singleton()->sha1();
 
   logDebug(
       "evqld",
@@ -254,7 +252,7 @@ Status MetadataService::createPartition(
       "interval=[$3..$4)",
       request.db_namespace(),
       request.table_id(),
-      new_partition_id.toString(),
+      partition_id.toString(),
       p_begin,
       p_end);
 
@@ -272,9 +270,11 @@ Status MetadataService::createPartition(
   }
 
   CreatePartitionOperation op;
-  op.set_partition_id(new_partition_id.data(), new_partition_id.size());
-  op.set_begin(new_begin);
-  op.set_end(new_end);
+  op.set_partition_id(partition_id.data(), partition_id.size());
+  op.set_begin(
+      encodePartitionKey(KEYSPACE_UINT64, StringUtil::toString(p_begin)));
+  op.set_end(
+      encodePartitionKey(KEYSPACE_UINT64, StringUtil::toString(p_end)));
   op.set_placement_id(Random::singleton()->random64());
   for (const auto& s : new_servers) {
     *op.add_servers() = s;
@@ -298,8 +298,8 @@ Status MetadataService::createPartition(
 
   if (create_rc.isSuccess()) {
     response->set_partition_id(
-        new_partition_id.data(),
-        new_partition_id.size());
+        partition_id.data(),
+        partition_id.size());
 
     for (const auto& s : new_servers) {
       response->add_servers_for_insert(s);
