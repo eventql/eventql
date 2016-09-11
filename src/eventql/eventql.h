@@ -192,6 +192,22 @@ int evql_discard_result(evql_client_t* client);
 int evql_next_result(evql_client_t* client);
 
 /**
+ * Set a callback function that is periodically called while the query is
+ * running. This can be used in conjunction with the evql_client_getstat method
+ * to e.g. print a progress indicator.
+ *
+ * NOTE that in order to actually receive progress events, the caller has to
+ * set the EVQL_QUERY_PROGRESS flag when calling evql_query
+ *
+ * @param cb the callback function
+ * @param privdata an opaque user-data pointer
+ */
+void evql_client_setprogresscb(
+    evql_client_t* client,
+    void (*cb) (evql_client_t* client, void* privdata),
+    void* privdata);
+
+/**
  * Free the current result
  */
 void evql_client_releasebuffers(evql_client_t* client);

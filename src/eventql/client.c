@@ -87,6 +87,8 @@ struct evql_client_s {
   size_t cbuf_nbytes;
   size_t cbuf_nentries;
   char cbuf_inline[EVQL_CLIENT_INLINE_CBUF_SIZE];
+  void (*progress_cb) (evql_client_t* client, void* privdata);
+  void* progress_cb_privdata;
 };
 
 
@@ -161,7 +163,6 @@ static int evql_client_recvframe(
     evql_framebuf_t** frame,
     uint64_t timeout_us,
     uint16_t* flags);
-
 
 /**
  * Internal API implementation
@@ -550,6 +551,16 @@ static int evql_client_handshake(evql_client_t* client, const char* database) {
   return 0;
 }
 
+static void evql_client_query_readprogressframe(
+    evql_client_t* client,
+    evql_framebuf_t* fbuf) {
+  // FIXME read progress information and store into client struct
+
+  if (client->progress_cb) {
+    client->progress_cb(client, client->progress_cb_privdata);
+  }
+}
+
 static int evql_client_query_readresultframe(evql_client_t* client) {
   int done = 0;
   uint16_t response_opcode;
@@ -576,8 +587,7 @@ static int evql_client_query_readresultframe(evql_client_t* client) {
         break;
 
       case EVQL_OP_QUERY_PROGRESS:
-        printf("got progress");
-        // FIXME handle query progress
+        evql_client_query_readprogressframe(client, r_buf);
         break;
 
       case EVQL_OP_ERROR: {
@@ -788,6 +798,23 @@ static void evql_client_cbuf_set(
   }
 }
 
+static void evql_client_qbuf_free(evql_client_t* client) {
+  if (!client->qbuf_valid) {
+    return;
+  }
+
+  client->qbuf_valid = 0;
+  client->qbuf_islast = 0;
+  client->qbuf_pendingstmt = 0;
+  client->qbuf_nrows = 0;
+  client->qbuf_ncols = 0;
+
+  for (int i = 0; i < client->rbuf_size; ++i) {
+    client->rbuf_ptrs[i] = NULL;
+    client->rbuf_lens[i] = 0;
+  }
+}
+
 static void evql_client_cbuf_free(evql_client_t* client) {
   if (client->cbuf && (void*) client->cbuf != (void*) client->cbuf_inline) {
     free(client->cbuf);
@@ -853,6 +880,8 @@ evql_client_t* evql_client_init() {
   client->cbuf = (char**) client->cbuf_inline;
   client->cbuf_nentries = 0;
   client->cbuf_nbytes = EVQL_CLIENT_INLINE_CBUF_SIZE;
+  client->progress_cb = NULL;
+  client->progress_cb_privdata = NULL;
   evql_framebuf_init(&client->recv_buf);
   return client;
 }
@@ -1143,21 +1172,12 @@ int evql_num_columns(evql_client_t* client, size_t* ncols) {
   return 0;
 }
 
-void evql_client_qbuf_free(evql_client_t* client) {
-  if (!client->qbuf_valid) {
-    return;
-  }
-
-  client->qbuf_valid = 0;
-  client->qbuf_islast = 0;
-  client->qbuf_pendingstmt = 0;
-  client->qbuf_nrows = 0;
-  client->qbuf_ncols = 0;
-
-  for (int i = 0; i < client->rbuf_size; ++i) {
-    client->rbuf_ptrs[i] = NULL;
-    client->rbuf_lens[i] = 0;
-  }
+void evql_client_setprogresscb(
+    evql_client_t* client,
+    void (*cb) (evql_client_t* client, void* privdata),
+    void* privdata) {
+  client->progress_cb = cb;
+  client->progress_cb_privdata = privdata;
 }
 
 void evql_client_releasebuffers(evql_client_t* client) {
