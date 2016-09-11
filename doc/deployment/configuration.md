@@ -161,7 +161,7 @@ The EventQL configuration options are grouped in three sections: `client`, `serv
   </tr>
   <tr>
     <td><b>server.c2s_idle_timeout</b></td>
-    <td>10s</td>
+    <td>30min</td>
     <td>
       How long should the server wait for new data on an idle connection to a
       client. An idle connection is a connection where no data is expected
