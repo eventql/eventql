@@ -22,6 +22,7 @@ TESTS = \
   unit_metadata_file \
   unit_metadata_store \
   unit_metadata_operation_split \
+  unit_metadata_operation_createpartition \
   unit_partition_discovery
 
 check_PROGRAMS = $(TESTS)
@@ -55,6 +56,15 @@ unit_metadata_store_LDADD = \
 
 unit_metadata_operation_split_SOURCES = unit/metadata_operation_split.cc
 unit_metadata_operation_split_LDADD = \
+    @top_builddir@/src/libevqlcore.a \
+    @top_builddir@/src/libevqlclient.la \
+    $(INIH_LDADD) \
+    $(SIMDCOMP_LDADD) \
+    $(LMDB_LDADD) \
+    $(PROTOBUF_LDADD)
+
+unit_metadata_operation_createpartition_SOURCES = unit/metadata_operation_createpartition.cc
+unit_metadata_operation_createpartition_LDADD = \
     @top_builddir@/src/libevqlcore.a \
     @top_builddir@/src/libevqlclient.la \
     $(INIH_LDADD) \
