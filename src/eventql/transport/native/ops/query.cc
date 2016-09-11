@@ -91,15 +91,16 @@ ReturnCode performOperation_QUERY(
         "server.query_progress_rate_limit");
     auto progress_last = MonotonicClock::now();
 
+    /* set progress callback */
     qplan->setProgressCallback([
         &qplan,
         &conn,
         &progress_interval,
-        &progress_last] () {
+        &progress_last] () -> ReturnCode {
       if (!progress_interval.isEmpty()) {
         auto now = MonotonicClock::now();
         if (now >= progress_last + progress_interval.get()) {
-          return;
+          return ReturnCode::success();
         }
 
         progress_last = now;
@@ -112,21 +113,13 @@ ReturnCode performOperation_QUERY(
       progress_frame.writeToString(&payload);
 
       if (conn->isOutboxEmpty()) {
-        auto rc = conn->sendFrameAsync(
+        return conn->sendFrameAsync(
             EVQL_OP_QUERY_PROGRESS,
             0,
             payload.data(),
             payload.size());
-
-        if (!rc.isSuccess()) {
-          iputs("error while sending progrss : $0", rc.getMessage()); //FIXME handle error
-        }
-
       } else {
-        auto rc = conn->flushOutbox(false, 0);
-        if (!rc.isSuccess()) {
-          iputs("error while flushing outbox : $0", rc.getMessage()); //FIXME handle error
-        }
+        return conn->flushOutbox(false, 0);
       }
     });
 
