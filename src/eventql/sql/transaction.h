@@ -24,6 +24,7 @@
 #pragma once
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/UnixTime.h>
+#include <eventql/util/return_code.h>
 #include <eventql/sql/csql.h>
 #include <eventql/sql/runtime/tablerepository.h>
 
@@ -63,13 +64,16 @@ public:
 
   void* getUserData();
 
+  void setHeartbeatCallback(std::function<ReturnCode ()> cb);
+  ReturnCode triggerHeartbeat();
+
 protected:
   Runtime* runtime_;
   UnixTime now_;
   RefPtr<TableProvider> table_provider_;
   void* user_data_;
   Function<void (void*)> free_user_data_fn_;
-
+  std::function<ReturnCode ()> heartbeat_cb_;
 };
 
 

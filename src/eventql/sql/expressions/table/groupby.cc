@@ -65,7 +65,15 @@ ScopedPtr<ResultCursor> GroupByExpression::execute() {
 
   auto input_cursor = input_->execute();
   Vector<SValue> row(input_cursor->getNumColumns());
+  size_t cnt = 0;
   while (input_cursor->next(row.data(), row.size())) {
+    if (++cnt % 512 == 0) {
+      auto rc = txn_->triggerHeartbeat();
+      if (!rc.isSuccess()) {
+        RAISE(kRuntimeError, rc.getMessage());
+      }
+    }
+
     Vector<SValue> gkey(group_exprs_.size(), SValue{});
     for (size_t i = 0; i < group_exprs_.size(); ++i) {
       VM::evaluate(
@@ -198,7 +206,15 @@ ScopedPtr<ResultCursor> PartialGroupByExpression::execute() {
   if (!from_cache) {
     auto input_cursor = input_->execute();
     Vector<SValue> row(input_cursor->getNumColumns());
+    size_t cnt = 0;
     while (input_cursor->next(row.data(), row.size())) {
+      if (++cnt % 512 == 0) {
+        auto rc = txn_->triggerHeartbeat();
+        if (!rc.isSuccess()) {
+          RAISE(kRuntimeError, rc.getMessage());
+        }
+      }
+
       Vector<SValue> gkey(group_exprs_.size(), SValue{});
       for (size_t i = 0; i < group_exprs_.size(); ++i) {
         VM::evaluate(
