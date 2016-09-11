@@ -108,7 +108,7 @@ ReturnCode performOperation_QUERY(
 
       auto progress = qplan->getProgress();
       QueryProgressFrame progress_frame;
-      progress_frame.setQueryProgressPermill(progress);
+      progress_frame.setQueryProgressPermill(progress * 1000);
       std::string payload;
       progress_frame.writeToString(&payload);
 
