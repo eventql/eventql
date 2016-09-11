@@ -184,7 +184,7 @@ Status MetadataOperation::performSplitPartition(
             opdata.split_partition_id_low().size());
 
         if (input.hasFinitePartitions()) {
-          lower_split.end = iter->split_point;
+          lower_split.end = opdata.split_point();
         }
 
         for (const auto& s : opdata.split_servers_low()) {
