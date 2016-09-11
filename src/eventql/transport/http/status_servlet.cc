@@ -123,16 +123,16 @@ void StatusServlet::handleHTTPRequest(
     return;
   }
 
-  //if (path_parts.size() == 4 && path_parts[0] == "db") {
-  //  renderPartitionPage(
-  //      path_parts[1],
-  //      path_parts[2],
-  //      SHA1Hash::fromHexString(path_parts[3]),
-  //      request,
-  //      response);
+  if (path_parts.size() == 4 && path_parts[0] == "db") {
+    renderPartitionPage(
+        path_parts[1],
+        path_parts[2],
+        SHA1Hash::fromHexString(path_parts[3]),
+        request,
+        response);
 
-  //  return;
-  //}
+    return;
+  }
 
   renderDashboard(request, response);
 }
