@@ -40,12 +40,46 @@ bool HelloFrame::isInternal() const {
   return flags_ & EVQL_HELLO_INTERNAL;
 }
 
+void HelloFrame::setInteractiveAuth(bool enable_interactive) {
+  if (enable_interactive) {
+    flags_ |= EVQL_HELLO_INTERACTIVEAUTH;
+  } else {
+    flags_ &= ~EVQL_HELLO_INTERACTIVEAUTH;
+  }
+}
+
+bool HelloFrame::getInteractiveAuth() const {
+  return flags_ & EVQL_HELLO_INTERACTIVEAUTH;
+}
+
 void HelloFrame::setIdleTimeout(uint64_t idle_timeout) {
   idle_timeout_ = idle_timeout;
 }
 
 uint64_t HelloFrame::getIdleTimeout() const {
   return idle_timeout_;
+}
+
+void HelloFrame::setDatabase(const std::string& database) {
+  database_ = database;
+  flags_ |= EVQL_HELLO_SWITCHDB;
+}
+
+bool HelloFrame::hasDatabase() const {
+  return flags_ & EVQL_HELLO_SWITCHDB;
+}
+
+const std::string& HelloFrame::getDatabase() const {
+  return database_;
+}
+
+void HelloFrame::addAuthData(const std::string& key, const std::string& value) {
+  auth_data_.emplace_back(key, value);
+}
+
+const std::vector<std::pair<std::string, std::string>>&
+    HelloFrame::getAuthData() const {
+  return auth_data_;
 }
 
 ReturnCode HelloFrame::readFrom(InputStream* is) {
@@ -57,6 +91,20 @@ ReturnCode HelloFrame::readFrom(InputStream* is) {
   auto evql_version = is->readLenencString();
   flags_ = is->readVarUInt();
   idle_timeout_ = is->readVarUInt();
+
+  auto auth_data_len = is->readVarUInt();
+  if (auth_data_len > 0) {
+    auto auth_data = is->readString(auth_data_len);
+    auto auth_data_parts = StringUtil::split(auth_data, std::string("\0", 1));
+    for (size_t i = 0; i + 1 < auth_data_parts.size(); i += 2) {
+      auth_data_.emplace_back(auth_data_parts[i], auth_data_parts[i+1]);
+    }
+  }
+
+  if (hasDatabase()) {
+    database_ = is->readLenencString();
+  }
+
   return ReturnCode::success();
 }
 
@@ -65,6 +113,20 @@ void HelloFrame::writeTo(OutputStream* os) {
   os->appendLenencString(EVQL_VERSION);
   os->appendVarUInt(flags_);
   os->appendVarUInt(idle_timeout_);
+
+  std::string auth_data;
+  for (const auto& p : auth_data_) {
+    auth_data += p.first;
+    auth_data.push_back(0);
+    auth_data += p.second;
+    auth_data.push_back(0);
+  }
+
+  os->appendLenencString(auth_data);
+
+  if (hasDatabase()) {
+    os->appendLenencString(database_);
+  }
 }
 
 } // namespace native_transport

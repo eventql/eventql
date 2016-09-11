@@ -21,6 +21,8 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#include <sys/time.h>
+#include <sys/resource.h>
 #include <eventql/transport/http/status_servlet.h>
 #include <eventql/db/partition_replication.h>
 #include <eventql/server/server_stats.h>
@@ -121,16 +123,16 @@ void StatusServlet::handleHTTPRequest(
     return;
   }
 
-  //if (path_parts.size() == 4 && path_parts[0] == "db") {
-  //  renderPartitionPage(
-  //      path_parts[1],
-  //      path_parts[2],
-  //      SHA1Hash::fromHexString(path_parts[3]),
-  //      request,
-  //      response);
+  if (path_parts.size() == 4 && path_parts[0] == "db") {
+    renderPartitionPage(
+        path_parts[1],
+        path_parts[2],
+        SHA1Hash::fromHexString(path_parts[3]),
+        request,
+        response);
 
-  //  return;
-  //}
+    return;
+  }
 
   renderDashboard(request, response);
 }
@@ -151,6 +153,10 @@ void StatusServlet::renderDashboard(
       kVersionString,
       kBuildID);
 
+  struct rlimit fd_limit;
+  memset(&fd_limit, 0, sizeof(fd_limit));
+  ::getrlimit(RLIMIT_NOFILE, &fd_limit);
+
   html += StringUtil::format(
       "<span><em>Version:</em> $0</span> &mdash; ",
       kVersionString);
@@ -163,6 +169,10 @@ void StatusServlet::renderDashboard(
   html += StringUtil::format(
       "<span><em>Memory Usage - Peak:</em> $0 MB</span> &mdash; ",
       Application::getPeakMemoryUsage() / (1024.0 * 1024.0));
+  html += StringUtil::format(
+      "<span><em>Max FDs:</em> $0 (soft) / $1 (hard)</span> &mdash; ",
+      fd_limit.rlim_cur,
+      fd_limit.rlim_max);
   html += StringUtil::format(
       "<span><em>Referenced Files:</em> $0</span> &mdash; ",
       ctx->file_tracker->getNumReferencedFiles());

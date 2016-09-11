@@ -66,6 +66,8 @@ public:
 
   virtual void close() = 0;
 
+  virtual std::string getRemoteHost() const = 0;
+
   virtual void setIOTimeout(uint64_t timeout_us) = 0;
 
 };

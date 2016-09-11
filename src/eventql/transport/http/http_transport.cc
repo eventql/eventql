@@ -64,6 +64,11 @@ HTTPTransport::HTTPTransport(
       &session_scheduler_);
 
   http_router_.addRouteByPrefixMatch(
+      "/tsdb/",
+      &rpc_servlet_,
+      &session_scheduler_);
+
+  http_router_.addRouteByPrefixMatch(
       "/api/",
       &api_servlet_,
       &session_scheduler_);

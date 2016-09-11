@@ -49,16 +49,34 @@ TCPConnection::TCPConnection(
     fd_(fd),
     read_buf_(prelude_bytes),
     io_timeout_(io_timeout) {
-  logDebug(
-      "eventql",
-      "Opening new native connection; id=$0 fd=$1",
-      (const void*) this,
-      fd);
+  logTrace("eventql", "Opening new tcp connection; fd=$1", fd);
 
   fcntl(fd, F_SETFL, fcntl(fd, F_GETFL, 0) | O_NONBLOCK);
 
   size_t nodelay = 1;
   setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, &nodelay, sizeof(nodelay));
+
+  struct sockaddr_storage saddr;
+  socklen_t slen = sizeof(saddr);
+  if (getpeername(fd, (struct sockaddr*) &saddr, &slen) == 0) {
+    char ipstr[INET6_ADDRSTRLEN];
+    switch (saddr.ss_family) {
+      case AF_INET: {
+        struct sockaddr_in* s = (struct sockaddr_in*) &saddr;
+        if (inet_ntop(AF_INET, &s->sin_addr, ipstr, sizeof(ipstr))) {
+          remote_host_ = std::string(ipstr);
+        }
+        break;
+      }
+      case AF_INET6: {
+        struct sockaddr_in6* s = (struct sockaddr_in6*) &saddr;
+        if (inet_ntop(AF_INET6, &s->sin6_addr, ipstr, sizeof(ipstr))) {
+          remote_host_ = std::string(ipstr);
+        }
+        break;
+      }
+    }
+  }
 }
 
 TCPConnection::~TCPConnection() {
@@ -263,6 +281,10 @@ void TCPConnection::close() {
 
 void TCPConnection::setIOTimeout(uint64_t timeout_us) {
   io_timeout_ = timeout_us;
+}
+
+std::string TCPConnection::getRemoteHost() const {
+  return remote_host_;
 }
 
 } // namespace native_connection

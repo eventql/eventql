@@ -121,17 +121,8 @@ ScopedPtr<csql::TableExpression> Scheduler::buildPipelineGroupByExpression(
     csql::Transaction* txn,
     csql::ExecutionContext* execution_context,
     RefPtr<csql::GroupByNode> node) {
-  //auto remote_aggregate = mkScoped(
-  //    new PipelinedExpression(
-  //        txn,
-  //        execution_context,
-  //        static_cast<Session*>(txn->getUserData())->getEffectiveNamespace(),
-  //        auth_,
-  //        kMaxConcurrency));
-
   size_t max_concurrent_tasks = 100; //FIXME
-  size_t max_concurrent_tasks_per_host = 10; //FIXME
-
+  size_t max_concurrent_tasks_per_host = 4; //FIXME
 
   Vector<csql::ValueExpression> select_expressions;
   for (const auto& slnode : node->selectList()) {
@@ -160,20 +151,14 @@ ScopedPtr<csql::TableExpression> Scheduler::buildPipelineGroupByExpression(
             shards[i].qtree));
 
     group_by_copy->setIsPartialAggreagtion(true);
-    //if (shards[i].is_local) {
-    //  //auto partial =
-    //  //    buildPartialGroupByExpression(txn, execution_context, group_by_copy);
-    //  aggr_scheduler->addLocalPart(group_by_copy.get());
-    //} else {
-      std::vector<std::string> hosts;
-      for (const auto& h : shards[i].hosts) {
-        hosts.emplace_back(h.name);
-      }
+    std::vector<std::string> hosts;
+    for (const auto& h : shards[i].hosts) {
+      hosts.emplace_back(h.name);
+    }
 
-      expr->addPart(group_by_copy.get(), hosts);
-    //}
+    expr->addPart(group_by_copy.get(), hosts);
   }
-  
+
   return std::move(expr);
 }
 

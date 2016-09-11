@@ -23,48 +23,50 @@
  */
 #pragma once
 #include <string>
-#include <vector>
-#include "eventql/eventql.h"
-#include "eventql/util/return_code.h"
-#include "eventql/util/util/binarymessagewriter.h"
-#include "eventql/transport/native/connection_tcp.h"
-#include "eventql/sql/svalue.h"
+#include <stdio.h>
+#include <unistd.h>
+#include <sys/socket.h>
+#include <sys/uio.h>
+#include <netdb.h>
+#include <arpa/inet.h>
+#include <limits.h>
+#include <stdint.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <poll.h>
+#include <netinet/tcp.h>
 
-namespace eventql {
-namespace native_transport {
+bool cidr_match(
+    const std::string& cidr_range,
+    const std::string& ip) {
+  auto cidr_mask_pos = cidr_range.find("/");
+  if (cidr_mask_pos == std::string::npos) {
+    return false;
+  }
 
-class HelloFrame {
-public:
+  auto cidr_ip = cidr_range.substr(0, cidr_mask_pos);
+  uint16_t cidr_mask;
+  try {
+    cidr_mask = std::stoul(cidr_range.substr(cidr_mask_pos + 1));
+  } catch (...) {
+    return false;
+  }
 
-  HelloFrame();
+  struct sockaddr_in sip;
+  if (inet_pton(AF_INET, ip.c_str(), &(sip.sin_addr)) != 1) {
+    return false;
+  }
 
-  void setIsInternal(bool is_internal);
-  bool isInternal() const;
+  struct sockaddr_in cidr_sip;
+  if (inet_pton(AF_INET, cidr_ip.c_str(), &(cidr_sip.sin_addr)) != 1) {
+    return false;
+  }
 
-  void setInteractiveAuth(bool enable_interactive);
-  bool getInteractiveAuth() const;
+  if (cidr_mask == 0) {
+    return true;
+  }
 
-  void setIdleTimeout(uint64_t timeout_us);
-  uint64_t getIdleTimeout() const;
+  long mask_expaneded = htonl(0xFFFFFFFFu << (32 - cidr_mask));
+  return !((sip.sin_addr.s_addr ^ cidr_sip.sin_addr.s_addr) & mask_expaneded);
+}
 
-  void addAuthData(const std::string& key, const std::string& value);
-  const std::vector<std::pair<std::string, std::string>>& getAuthData() const;
-
-  void setDatabase(const std::string& database);
-  const std::string& getDatabase() const;
-  bool hasDatabase() const;
-
-  ReturnCode readFrom(InputStream* is);
-  void writeTo(OutputStream* os);
-
-  void clear();
-
-protected:
-  uint64_t flags_;
-  uint64_t idle_timeout_;
-  std::string database_;
-  std::vector<std::pair<std::string, std::string>> auth_data_;
-};
-
-} // namespace native_transport
-} // namespace eventql

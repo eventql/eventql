@@ -62,6 +62,20 @@ public:
   static void stripTrailingSlashes(std::string* str);
 
   /**
+   * Remove leading whitespace from the string
+   *
+   * @param str the string to remove leading whitespace from
+   */
+  static void ltrim(std::string* str);
+
+  /**
+   * Remove trailing whitespace from the string
+   *
+   * @param str the string to remove trailing whitespace from
+   */
+  static void rtrim(std::string* str);
+
+  /**
    * Remove all characters except [A-Za-z0-9_-.] from the string
    *
    * @param str the string to remove chars from

@@ -57,10 +57,12 @@ public:
       const void* payload,
       size_t payload_len) override;
 
-  bool isOutboxEmpty() const;
+  bool isOutboxEmpty() const override;
   ReturnCode flushOutbox(bool block, uint64_t timeout_us = 0) override;
 
   void close() override;
+
+  std::string getRemoteHost() const override;
 
   void setIOTimeout(uint64_t timeout_us) override;
 
@@ -79,6 +81,7 @@ protected:
   std::string read_buf_;
   std::string write_buf_;
   uint64_t io_timeout_;
+  std::string remote_host_;
 };
 
 } // namespace native_transport

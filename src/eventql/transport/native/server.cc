@@ -65,8 +65,8 @@ void Server::startConnection(std::unique_ptr<NativeConnection> connection) {
 
     logDebug(
         "eventql",
-        "Native connection established; id=$0",
-        (const void*) conn.get());
+        "Native connection established; remote=$0",
+        conn->getRemoteHost());
 
     uint16_t opcode;
     uint16_t flags;
@@ -98,8 +98,9 @@ void Server::startConnection(std::unique_ptr<NativeConnection> connection) {
 }
 
 ReturnCode Server::performHandshake(NativeConnection* conn) {
-  auto session = db_->getSession();
   auto config = db_->getConfig();
+  auto session = db_->getSession();
+  auto dbctx = session->getDatabaseContext();
 
   /* read HELLO frame */
   HelloFrame hello_frame;
@@ -145,12 +146,56 @@ ReturnCode Server::performHandshake(NativeConnection* conn) {
   }
 
   /* set timeouts */
-  if (session->isInternal()) {
+  if (hello_frame.isInternal()) {
     session->setIdleTimeout(config->getInt("server.s2s_idle_timeout").get());
     conn->setIOTimeout(config->getInt("server.s2s_io_timeout").get());
   } else {
     session->setIdleTimeout(config->getInt("server.c2s_idle_timeout").get());
     conn->setIOTimeout(config->getInt("server.c2s_io_timeout").get());
+  }
+
+  /* auth */
+  if (hello_frame.isInternal()) {
+    auto auth_rc = InternalAuth::authenticateInternal(
+        session,
+        conn,
+        hello_frame.getAuthData());
+
+    if (!auth_rc.isSuccess()) {
+      conn->sendErrorFrame(auth_rc.getMessage());
+      return auth_rc;
+    }
+  } else {
+    std::unordered_map<std::string, std::string> auth_data;
+    for (const auto& p : hello_frame.getAuthData()) {
+      auth_data.insert(p);
+    }
+
+    auto auth_rc = dbctx->client_auth->authenticateNonInteractive(
+        session,
+        auth_data);
+
+    if (!auth_rc.isSuccess() &&
+        hello_frame.getInteractiveAuth() &&
+        dbctx->client_auth->authenticateInteractiveSupported()) {
+      auth_rc = dbctx->client_auth->authenticateInteractive(session, conn);
+    }
+
+    if (!auth_rc.isSuccess()) {
+      conn->sendErrorFrame(auth_rc.message());
+      return ReturnCode::error("EAUTH", auth_rc.message());
+    }
+  }
+
+  /* switch database */
+  if (hello_frame.hasDatabase()) {
+    auto rc = dbctx->client_auth->changeNamespace(
+        session,
+        hello_frame.getDatabase());
+
+    if (!rc.isSuccess()) {
+      return conn->sendErrorFrame(rc.message());
+    }
   }
 
   /* send READY frame */

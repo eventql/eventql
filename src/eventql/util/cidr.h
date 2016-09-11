@@ -23,48 +23,8 @@
  */
 #pragma once
 #include <string>
-#include <vector>
-#include "eventql/eventql.h"
-#include "eventql/util/return_code.h"
-#include "eventql/util/util/binarymessagewriter.h"
-#include "eventql/transport/native/connection_tcp.h"
-#include "eventql/sql/svalue.h"
 
-namespace eventql {
-namespace native_transport {
+bool cidr_match(
+    const std::string& cidr_range,
+    const std::string& ip);
 
-class HelloFrame {
-public:
-
-  HelloFrame();
-
-  void setIsInternal(bool is_internal);
-  bool isInternal() const;
-
-  void setInteractiveAuth(bool enable_interactive);
-  bool getInteractiveAuth() const;
-
-  void setIdleTimeout(uint64_t timeout_us);
-  uint64_t getIdleTimeout() const;
-
-  void addAuthData(const std::string& key, const std::string& value);
-  const std::vector<std::pair<std::string, std::string>>& getAuthData() const;
-
-  void setDatabase(const std::string& database);
-  const std::string& getDatabase() const;
-  bool hasDatabase() const;
-
-  ReturnCode readFrom(InputStream* is);
-  void writeTo(OutputStream* os);
-
-  void clear();
-
-protected:
-  uint64_t flags_;
-  uint64_t idle_timeout_;
-  std::string database_;
-  std::vector<std::pair<std::string, std::string>> auth_data_;
-};
-
-} // namespace native_transport
-} // namespace eventql

@@ -388,7 +388,8 @@ Status TSDBTableProvider::createTable(
       tsdb_namespace_,
       create_table.getTableName(),
       *msg_schema,
-      primary_key);
+      primary_key,
+      create_table.getProperties());
 }
 
 Status TSDBTableProvider::createDatabase(const String& database_name) {

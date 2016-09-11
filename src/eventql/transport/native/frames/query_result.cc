@@ -34,8 +34,12 @@ QueryResultFrame::QueryResultFrame(
     num_rows_(0) {}
 
 void QueryResultFrame::addRow(const std::vector<csql::SValue>& row) {
-  for (const auto& v : row) {
-    data_.appendLenencString(v.getString());
+  for (size_t i = 0; i < columns_.size(); ++i) {
+    if (i < row.size()) {
+      data_.appendLenencString(row[i].getString());
+    } else {
+      data_.appendLenencString("");
+    }
   }
 
   ++num_rows_;

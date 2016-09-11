@@ -43,9 +43,6 @@ SPIDERMONKEY_LDADD = ${top_builddir}/deps/3rdparty/spidermonkey/out/dist/lib/lib
 ZOOKEEPER_CFLAGS = -I$(top_srcdir)/deps/3rdparty/zookeeper/source/include -I$(top_srcdir)/deps/3rdparty/zookeeper/source/generated
 ZOOKEEPER_LDADD = ${top_builddir}/deps/3rdparty/zookeeper/libzkmt.a ${top_builddir}/deps/3rdparty/zookeeper/libhashtable.a
 
-PCRE_CFLAGS = -I$(top_srcdir)/deps/3rdparty/pcre -DHAVE_PCRE=1
-PCRE_LDADD = ${top_builddir}/deps/3rdparty/pcre/libpcre.a
-
 LINENOISE_CFLAGS = -I$(top_srcdir)/deps/3rdparty
 LINENOISE_LDADD = ${top_builddir}/deps/3rdparty/linenoise/liblinenoise.a
 
@@ -61,9 +58,9 @@ LMDB_LDADD = ${top_builddir}/deps/3rdparty/liblmdb/liblmdb.a
 INIH_CFLAGS = -I$(top_srcdir)/deps/3rdparty
 INIH_LDADD = ${top_builddir}/deps/3rdparty/inih/libinih.a
 
-AM_CXXFLAGS = -DEVQL_VERSION=\"v@PACKAGE_VERSION@\" -DEVQL_BUILDID=\"$(EVQL_BUILDID)\" $(MYSQL_CFLAGS) $(PCRE_CFLAGS) $(SPIDERMONKEY_CFLAGS) $(ZOOKEEPER_CFLAGS) $(INIH_CFLAGS) $(SIMDCOMP_CFLAGS) $(LINENOISE_CLFAGS) $(PROTOBUF_CFLAGS) $(PTHREAD_CFLAGS) $(PTHREAD_DEF) $(SYSLOG_DEF) $(ZLIB_DEF) $(GETHOSTBYNAME_R_DEF) -std=c++0x -ftemplate-depth=500 -mno-omit-leaf-frame-pointer -fno-omit-frame-pointer -Wall -Wextra -Wno-unused-parameter -Wno-sign-compare -Wdelete-non-virtual-dtor -Wno-predefined-identifier-outside-function -Wno-invalid-offsetof -g -fvisibility=hidden -I@builddir@
-AM_CFLAGS = $(PCRE_CFLAGS) $(SPIDERMONKEY_CFLAGS) $(MYSQL_CFLAGS) $(ZOOKEEPER_CFLAGS) $(INIH_CFLAGS) $(SIMDCOMP_CFLAGS) $(LINENOISE_CLFAGS) $(PROTOBUF_CFLAGS) $(PTHREAD_CFLAGS) $(PTHREAD_DEF) $(SYSLOG_DEF) $(ZLIB_DEF) $(GETHOSTBYNAME_R_DEF) -std=c11 -mno-omit-leaf-frame-pointer -fno-omit-frame-pointer -Wall -pedantic -g
-AM_LDFLAGS = $(PTHREAD_CFLAGS)
+AM_CXXFLAGS = -DEVQL_VERSION=\"v@PACKAGE_VERSION@\" -DEVQL_BUILDID=\"$(EVQL_BUILDID)\" $(MYSQL_CFLAGS) $(SPIDERMONKEY_CFLAGS) $(ZOOKEEPER_CFLAGS) $(INIH_CFLAGS) $(SIMDCOMP_CFLAGS) $(LINENOISE_CLFAGS) $(PROTOBUF_CFLAGS) $(PTHREAD_CFLAGS) $(PTHREAD_DEF) $(SYSLOG_DEF) $(ZLIB_DEF) $(GETHOSTBYNAME_R_DEF) -std=c++0x -ftemplate-depth=500 -mno-omit-leaf-frame-pointer -fno-omit-frame-pointer -Wall -Wextra -Wno-unused-parameter -Wno-sign-compare -Wdelete-non-virtual-dtor -Wno-predefined-identifier-outside-function -Wno-invalid-offsetof -g -fvisibility=hidden -I@builddir@
+AM_CFLAGS = $(SPIDERMONKEY_CFLAGS) $(MYSQL_CFLAGS) $(ZOOKEEPER_CFLAGS) $(INIH_CFLAGS) $(SIMDCOMP_CFLAGS) $(LINENOISE_CLFAGS) $(PROTOBUF_CFLAGS) $(PTHREAD_CFLAGS) $(PTHREAD_DEF) $(SYSLOG_DEF) $(ZLIB_DEF) $(GETHOSTBYNAME_R_DEF) -std=c11 -D_GNU_SOURCE -mno-omit-leaf-frame-pointer -fno-omit-frame-pointer -Wall -pedantic -g
+AM_LDFLAGS = $(PTHREAD_CFLAGS) -ldl
 
 evql_protos = \
     eventql/auth/client_auth_legacy_protos.proto \
@@ -76,7 +73,7 @@ evql_protos = \
     eventql/db/replication_state.proto \
     eventql/db/table_config.proto
 
-BUILT_SOURCES = $(evql_protos:.proto=.pb.h)
+BUILT_SOURCES = $(evql_protos:.proto=.pb.h) eventql/mapreduce/mapreduce_preludejs.cc
 dist_noinst_DATA = $(evql_protos)
 
 %.pb.cc %.pb.h: %.proto
@@ -98,8 +95,6 @@ EVQL_CORE_SOURCES_ = \
     eventql/util/RegExp.h \
     eventql/util/SHA1.cc \
     eventql/util/SHA1.h \
-    eventql/util/StackTrace.cc \
-    eventql/util/StackTrace.h \
     eventql/util/UTF8.cc \
     eventql/util/UTF8.h \
     eventql/util/UnixTime.cc \
@@ -162,6 +157,8 @@ EVQL_CORE_SOURCES_ = \
     eventql/util/cli/flagparser.h \
     eventql/util/cli/term.cc \
     eventql/util/cli/term.h \
+    eventql/util/cidr.cc \
+    eventql/util/cidr.h \
     eventql/util/csv/BinaryCSVInputStream.cc \
     eventql/util/csv/BinaryCSVInputStream.h \
     eventql/util/csv/BinaryCSVOutputStream.cc \
@@ -881,6 +878,7 @@ EVQL_CORE_SOURCES_ = \
     eventql/auth/client_auth_legacy.h \
     eventql/auth/client_auth_trust.cc \
     eventql/auth/client_auth_trust.h \
+    eventql/auth/internal_auth.cc \
     eventql/auth/internal_auth.h \
     eventql/auth/internal_auth_trust.cc \
     eventql/auth/internal_auth_trust.h \
@@ -954,8 +952,7 @@ evqld_LDADD = \
     $(SIMDCOMP_LDADD) \
     $(LMDB_LDADD) \
     $(PROTOBUF_LDADD) \
-    $(SPIDERMONKEY_LDADD) \
-    $(PCRE_LDADD)
+    $(SPIDERMONKEY_LDADD)
 
 ################## BIN: evql ####################
 evql_SOURCES = \
@@ -974,8 +971,7 @@ evql_LDADD = \
     $(SIMDCOMP_LDADD) \
     $(LMDB_LDADD) \
     $(PROTOBUF_LDADD) \
-    $(SPIDERMONKEY_LDADD) \
-    $(PCRE_LDADD)
+    $(SPIDERMONKEY_LDADD)
 
 evql_LDFLAGS = -static
 
@@ -1010,8 +1006,7 @@ evqlctl_LDADD = \
     $(ZOOKEEPER_LDADD) \
     $(LMDB_LDADD) \
     $(PROTOBUF_LDADD) \
-    $(SPIDERMONKEY_LDADD) \
-    $(PCRE_LDADD)
+    $(SPIDERMONKEY_LDADD)
 
 ################ LIB: libevqlclient.a ###################
 libevqlclient_la_SOURCES = eventql/client.c

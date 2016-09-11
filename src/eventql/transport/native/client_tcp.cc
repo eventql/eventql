@@ -81,6 +81,14 @@ void TCPAsyncClient::setResultCallback(ResultCallbackType fn) {
   result_cb_ = fn;
 }
 
+void TCPAsyncClient::setRPCStartedCallback(RPCStartedCallbackType fn) {
+  rpc_started_cb_ = fn;
+}
+
+void TCPAsyncClient::setRPCCompletedCallback(RPCCompletedCallbackType fn) {
+  rpc_completed_cb_ = fn;
+}
+
 ReturnCode TCPAsyncClient::handleFrame(
     Connection* connection,
     uint16_t opcode,
@@ -501,6 +509,11 @@ TCPAsyncClient::Task* TCPAsyncClient::popTask(
   auto task = *iter;
   runq_.erase(iter);
   ++num_tasks_running_;
+
+  if (rpc_started_cb_) {
+    rpc_started_cb_(task->privdata);
+  }
+
   return task;
 }
 
@@ -534,6 +547,10 @@ ReturnCode TCPAsyncClient::failTask(Task* task) {
 }
 
 void TCPAsyncClient::completeTask(Task* task) {
+  if (rpc_completed_cb_) {
+    rpc_completed_cb_(task->privdata);
+  }
+
   delete task;
   ++num_tasks_complete_;
   --num_tasks_running_;

@@ -52,7 +52,8 @@ Status TableService::createTable(
     const String& db_namespace,
     const String& table_name,
     const msg::MessageSchema& schema,
-    Vector<String> primary_key) {
+    Vector<String> primary_key,
+    const std::vector<std::pair<std::string, std::string>>& properties) {
   if (primary_key.size() < 1) {
     return Status(
         eIllegalArgumentError,

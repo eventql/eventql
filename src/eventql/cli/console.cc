@@ -107,10 +107,54 @@ ReturnCode Console::connect() {
     }
   }
 
+  if (!cfg_.getUser().isEmpty()) {
+    std::string akey = "user";
+    std::string aval = cfg_.getUser().get();
+    evql_client_setauth(
+        client_,
+        akey.data(),
+        akey.size(),
+        aval.data(),
+        aval.size(),
+        0);
+  }
+
+  if (!cfg_.getPassword().isEmpty()) {
+    std::string akey = "password";
+    std::string aval = cfg_.getPassword().get();
+    evql_client_setauth(
+        client_,
+        akey.data(),
+        akey.size(),
+        aval.data(),
+        aval.size(),
+        0);
+  }
+
+  if (!cfg_.getAuthToken().isEmpty()) {
+    std::string akey = "auth_token";
+    std::string aval = cfg_.getAuthToken().get();
+    evql_client_setauth(
+        client_,
+        akey.data(),
+        akey.size(),
+        aval.data(),
+        aval.size(),
+        0);
+  }
+
+  std::string database;
+  bool switch_database = false;
+  if (!cfg_.getDatabase().isEmpty()) {
+    switch_database = true;
+    database = cfg_.getDatabase().get();
+  }
+
   auto rc = evql_client_connect(
       client_,
       cfg_.getHost().c_str(),
       cfg_.getPort(),
+      switch_database ? database.c_str() : nullptr,
       0);
 
   if (rc < 0) {
@@ -151,14 +195,7 @@ Status Console::runQuery(const String& query) {
   //  });
   //}
 
-  std::string qry_db;
-  uint64_t qry_flags = 0;
-  if (!cfg_.getDatabase().isEmpty()) {
-    qry_db = cfg_.getDatabase().get();
-    qry_flags |= EVQL_QUERY_SWITCHDB;
-  }
-
-  int rc = evql_query(client_, query.c_str(), qry_db.c_str(), qry_flags);
+  int rc = evql_query(client_, query.c_str(), NULL, 0);
 
   csql::ResultList results;
   std::vector<std::string> result_columns;
@@ -189,6 +226,7 @@ Status Console::runQuery(const String& query) {
     }
   }
 
+  size_t result_nrows = 0;
   while (rc >= 0) {
     const char** fields;
     size_t* field_lens;
@@ -197,6 +235,7 @@ Status Console::runQuery(const String& query) {
       break;
     }
 
+    ++result_nrows;
     if (batchmode) {
       for (int i = 0; i < result_ncols; ++i) {
         stdout_os->print(std::string(fields[i], field_lens[i]));
@@ -236,14 +275,15 @@ Status Console::runQuery(const String& query) {
     }
 
     String status_line = "";
-    if (results.getNumRows() > 0) {
-      auto num_rows = results.getNumRows();
+    if (result_nrows > 0) {
       status_line = StringUtil::format(
           "$0 row$1 returned",
-          num_rows,
-          num_rows > 1 ? "s" : "");
+          result_nrows,
+          result_nrows > 1 ? "s" : "");
+    } else if (result_ncols > 0) {
+      status_line = "Empty Set";
     } else {
-      status_line = results.getNumColumns() == 0 ? "Query OK" : "Empty Set";
+      status_line = "Query OK";
     }
 
     if (!cfg_.getQuietMode()) {

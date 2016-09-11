@@ -27,6 +27,7 @@
 #include <stdarg.h>
 #include <string>
 #include <unistd.h>
+#include <arpa/inet.h>
 #include "eventql/util/buffer.h"
 #include "eventql/util/exception.h"
 #include "eventql/util/io/outputstream.h"
