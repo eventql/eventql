@@ -170,6 +170,12 @@ void Console::close() {
   }
 }
 
+using ProgressCBType = std::function<void ()>;
+
+void callProgressCB(evql_client_t* client, void* cb) {
+  (*static_cast<ProgressCBType*>(cb))();
+}
+
 Status Console::runQuery(const String& query) {
   auto stdout_os = TerminalOutputStream::fromStream(OutputStream::getStdout());
   auto stderr_os = TerminalOutputStream::fromStream(OutputStream::getStderr());
@@ -177,25 +183,29 @@ Status Console::runQuery(const String& query) {
   bool is_tty = stderr_os->isTTY();
   bool batchmode = cfg_.getBatchMode();
 
-  //if (!cfg_.getQuietMode()) {
-  //  res_parser->onProgress([&stdout_os, &line_dirty, is_tty] (
-  //      const csql::ExecutionStatus& status) {
-  //    auto status_line = StringUtil::format(
-  //        "Query running: $0%",
-  //        status.progress * 100);
+  ProgressCBType on_progress = [this, &stdout_os, &line_dirty, is_tty] () {
+    uint64_t progress;
+    evql_client_getstat(client_, PROGRESS_PERMILL, &progress);
+    auto status_line = StringUtil::format(
+        "Query running: $0%",
+        progress / 10);
+    if (is_tty) {
+      stdout_os->eraseLine();
+      stdout_os->print("\r" + status_line);
+      line_dirty = true;
+    } else {
+      stdout_os->print(status_line + "\n");
+    }
+  };
 
-  //    if (is_tty) {
-  //      stdout_os->eraseLine();
-  //      stdout_os->print("\r" + status_line);
-  //      line_dirty = true;
-  //    } else {
-  //      stdout_os->print(status_line + "\n");
-  //    }
+  evql_client_setprogresscb(client_, callProgressCB, &on_progress);
 
-  //  });
-  //}
+  int query_flags = 0;
+  if (!cfg_.getQuietMode()) {
+    query_flags |= EVQL_QUERY_PROGRESS;
+  }
 
-  int rc = evql_query(client_, query.c_str(), NULL, 0);
+  int rc = evql_query(client_, query.c_str(), NULL, query_flags);
 
   csql::ResultList results;
   std::vector<std::string> result_columns;
