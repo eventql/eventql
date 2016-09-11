@@ -26,6 +26,7 @@
 #include "eventql/transport/native/frames/query_result.h"
 #include "eventql/transport/native/frames/query_progress.h"
 #include "eventql/util/logging.h"
+#include "eventql/util/MonotonicClock.h"
 #include "eventql/util/util/binarymessagereader.h"
 #include "eventql/db/database.h"
 #include "eventql/server/session.h"
@@ -84,7 +85,24 @@ ReturnCode performOperation_QUERY(
     auto txn = dbctx->sql_service->startTransaction(session);
     auto qplan = dbctx->sql_runtime->buildQueryPlan(txn.get(), q_query);
 
-    qplan->setProgressCallback([&qplan, &conn] () {
+    auto progress_interval = dbctx->config->getInt(
+        "server.query_progress_rate_limit");
+    auto progress_last = MonotonicClock::now();
+
+    qplan->setProgressCallback([
+        &qplan,
+        &conn,
+        &progress_interval,
+        &progress_last] () {
+      if (!progress_interval.isEmpty()) {
+        auto now = MonotonicClock::now();
+        if (now >= progress_last + progress_interval.get()) {
+          return;
+        }
+
+        progress_last = now;
+      }
+
       auto progress = qplan->getProgress();
       QueryProgressFrame progress_frame;
       progress_frame.setQueryProgressPermill(progress);
