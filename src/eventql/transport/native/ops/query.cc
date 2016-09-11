@@ -24,7 +24,9 @@
 #include "eventql/transport/native/server.h"
 #include "eventql/transport/native/connection_tcp.h"
 #include "eventql/transport/native/frames/query_result.h"
+#include "eventql/transport/native/frames/query_progress.h"
 #include "eventql/util/logging.h"
+#include "eventql/util/wallclock.h"
 #include "eventql/util/util/binarymessagereader.h"
 #include "eventql/db/database.h"
 #include "eventql/server/session.h"
@@ -85,9 +87,43 @@ ReturnCode performOperation_QUERY(
     auto txn = dbctx->sql_service->startTransaction(session);
     auto qplan = dbctx->sql_runtime->buildQueryPlan(txn.get(), q_query);
 
-    //qplan->setProgressCallback([&result_format, &qplan] () {
-    //  result_format.sendProgress(qplan->getProgress());
-    //});
+    /* set progress callback */
+    if (q_flags & EVQL_QUERY_PROGRESS) {
+      auto progress_interval_op= dbctx->config->getInt(
+          "server.query_progress_rate_limit");
+      auto progress_interval = progress_interval_op.get();
+      uint64_t progress_last = 0;
+
+      qplan->setProgressCallback([
+          &qplan,
+          &conn,
+          &progress_interval,
+          &progress_last] () -> ReturnCode {
+        auto now = MonotonicClock::now();
+        if (now < progress_last + progress_interval) {
+          return ReturnCode::success();
+        }
+
+        progress_last = now;
+
+        if (conn->isOutboxEmpty()) {
+          auto progress = qplan->getProgress();
+          QueryProgressFrame progress_frame;
+          progress_frame.setQueryProgressPermill(progress * 1000);
+          std::string payload;
+          auto payload_os = StringOutputStream::fromString(&payload);
+          progress_frame.writeTo(payload_os.get());
+
+          return conn->sendFrameAsync(
+              EVQL_OP_QUERY_PROGRESS,
+              0,
+              payload.data(),
+              payload.size());
+        } else {
+          return conn->flushOutbox(false, 0);
+        }
+      });
+    }
 
     if (qplan->numStatements() > 1 && !(q_flags & EVQL_QUERY_MULTISTMT)) {
       return conn->sendErrorFrame(

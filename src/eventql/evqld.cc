@@ -230,6 +230,7 @@ int main(int argc, const char** argv) {
   evql_conf_set(conf, "server.s2s_io_timeout", "1000000");
   evql_conf_set(conf, "server.s2s_idle_timeout", "5000000");
   evql_conf_set(conf, "server.heartbeat_interval", "1000000");
+  evql_conf_set(conf, "server.query_progress_rate_limit", "250000");
 
   if (flags.isSet("standalone")) {
     evql_conf_set(conf, "cluster.coordinator", "standalone");

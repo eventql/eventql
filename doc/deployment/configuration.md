@@ -197,6 +197,14 @@ The EventQL configuration options are grouped in three sections: `client`, `serv
     </td>
   </tr>
   <tr>
+    <td><b>server.query_progress_rate_limit</b></td>
+    <td>250ms</td>
+    <td>
+      How often should the server send a progress event.
+      (optional, unit: microseconds)
+    </td>
+  </tr>
+  <tr>
     <th colspan="3" align="left">client.*</th>
   </tr>
   <tr>
