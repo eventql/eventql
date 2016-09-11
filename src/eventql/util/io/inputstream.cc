@@ -175,6 +175,10 @@ double InputStream::readDouble() {
   return IEEE754::fromBytes(val);
 }
 
+bool ZeroCopyInputStream::readLenencStringZ(const char** data, size_t* len) {
+  *len = readVarUInt();
+  return readZ(data, *len);
+}
 
 std::unique_ptr<FileInputStream> FileInputStream::openFile(
     const std::string& file_path) {
@@ -360,6 +364,16 @@ bool StringInputStream::readNextByte(char* target) {
   }
 }
 
+bool StringInputStream::readZ(const char** data, size_t len) {
+  if (cur_ + len <= str_.size()) {
+    *data = str_.data() + cur_;
+    cur_ += len;
+    return true;
+  } else {
+    return false;
+  }
+}
+
 size_t StringInputStream::skipNextBytes(size_t n_bytes) {
   auto nskipped = n_bytes;
   if (cur_ + n_bytes > str_.size()) {
@@ -406,6 +420,16 @@ bool BufferInputStream::readNextByte(char* target) {
   }
 }
 
+bool BufferInputStream::readZ(const char** data, size_t len) {
+  if (cur_ + len <= buf_->size()) {
+    *data = buf_->structAt<char>(cur_);
+    cur_ += len;
+    return true;
+  } else {
+    return false;
+  }
+}
+
 size_t BufferInputStream::skipNextBytes(size_t n_bytes) {
   auto nskipped = n_bytes;
   if (cur_ + n_bytes > buf_->size()) {
@@ -442,6 +466,16 @@ MemoryInputStream::MemoryInputStream(
 bool MemoryInputStream::readNextByte(char* target) {
   if (cur_ < size_) {
     *target = *(((char*) data_) + cur_++);
+    return true;
+  } else {
+    return false;
+  }
+}
+
+bool MemoryInputStream::readZ(const char** data, size_t len) {
+  if (cur_ + len <= size_) {
+    *data = (((char*) data_) + cur_);
+    cur_ += len;
     return true;
   } else {
     return false;

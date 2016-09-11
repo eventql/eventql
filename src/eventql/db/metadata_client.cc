@@ -22,6 +22,7 @@
  * code of your own applications
  */
 #include "eventql/db/metadata_client.h"
+#include <eventql/util/logging.h>
 
 namespace eventql {
 

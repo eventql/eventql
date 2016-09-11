@@ -1,3 +1,48 @@
+EventQL v0.4.0 beta;
+
+  * Changed the parallel GROUP BY operation to use the new native protocol and
+    to schedule all remote partial group bys from a a single thread using
+    asynchronous I/O (currently via poll()).
+
+  * Changed the evql client to use the new native protocol
+
+  * Changed the connection acceptor code to read the first byte of an incoming
+    connection and switch protocols (currently HTTP and native) based on this
+    first byte
+
+  * Changed the http server code to execute incoming requests from within a
+    database thread (previously this was a generic thread pool)
+
+  * Changed the internal cluster auth to require all internal hosts to be
+    whitelisted using the cluster.allowed_hosts option. In standalone mode,
+    the whitelist is defaulted to 0.0.0.0/0
+
+  * Removed the obsolete "sha1_tokens" field from the cluster/server config
+
+  * Removed the PCRE dependency
+
+  * Added a native transport layer (a framed TCP-based protocol). See
+    doc/internals/protocol.txt for the specification
+
+  * Added a c client driver library (libevqlclient)
+
+  * Added a thread-local storage and retrieval mechanism for the current
+    session. This also adds a new requirement that all operations must be
+    executed from within a valid database thread.
+
+  * Added the following new configuration options: server.c2s_io_timeout,
+    server.c2s_idle_timeout, server.s2s_io_timeout, server.s2s_idle_timeout,
+    server.heartbeat_interval, cluster.allowed_hosts
+
+
+EventQL v0.3.2 beta;
+
+  * Fixed a bug in the eventql client (evql) where missing HOME and USER
+    env variables would lead to an assertion on some libc++ implementations
+
+  * Added --history_file and --history_maxlen flags to the eventql client (evql)
+
+
 EventQL v0.3.1 (v0.3.1, git2da7f66) beta; 2016-09-04 16:11:19 +0000
 
   * Fixed a bug in the standalone backend where any ALTER TABLE statements

@@ -226,19 +226,26 @@ int main(int argc, const char** argv) {
     return 1;
   }
 
+  evql_conf_set(conf, "cluster.rebalance_interval", "60000000");
+  evql_conf_set(conf, "cluster.allowed_hosts", "");
   evql_conf_set(conf, "server.listen", "localhost:9175");
   evql_conf_set(conf, "server.indexbuild_threads", "2");
   evql_conf_set(conf, "server.gc_mode", "AUTOMATIC");
   evql_conf_set(conf, "server.gc_interval", "30000000");
   evql_conf_set(conf, "server.cachedir_maxsize", "68719476736");
   evql_conf_set(conf, "server.noleader", "false");
-  evql_conf_set(conf, "cluster.rebalance_interval", "60000000");
+  evql_conf_set(conf, "server.c2s_io_timeout", "1000000");
+  evql_conf_set(conf, "server.c2s_idle_timeout", "1800000000");
+  evql_conf_set(conf, "server.s2s_io_timeout", "1000000");
+  evql_conf_set(conf, "server.s2s_idle_timeout", "5000000");
+  evql_conf_set(conf, "server.heartbeat_interval", "1000000");
 
   if (flags.isSet("standalone")) {
+    evql_conf_set(conf, "cluster.coordinator", "standalone");
+    evql_conf_set(conf, "cluster.allowed_hosts", "0.0.0.0/0");
     evql_conf_set(conf, "server.name", "standalone");
     evql_conf_set(conf, "server.client_auth_backend", "trust");
     evql_conf_set(conf, "server.noleader", "true");
-    evql_conf_set(conf, "cluster.coordinator", "standalone");
   }
 
   if (flags.isSet("config")) {
@@ -308,6 +315,11 @@ int main(int argc, const char** argv) {
     return 1;
   }
 
+  /* daemonize */
+  if (evql_server_getconfbool(server, "server.daemonize")) {
+    Application::daemonize();
+  }
+
   /* pidfile */
   ScopedPtr<FileLock> pidfile_lock;
   String pidfile_path;
@@ -327,11 +339,6 @@ int main(int argc, const char** argv) {
         File::O_WRITE | File::O_CREATEOROPEN | File::O_TRUNCATE);
 
     pidfile.write(StringUtil::toString(getpid()));
-  }
-
-  /* daemonize */
-  if (evql_server_getconfbool(server, "server.daemonize")) {
-    Application::daemonize();
   }
 
   /* start database */

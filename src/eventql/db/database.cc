@@ -99,7 +99,8 @@ public:
   void shutdown() override;
 
   void startThread(std::function<void(Session* session)> entrypoint) override;
-  Session* getSession() override;
+  Session* getSession() const override;
+  const ProcessConfig* getConfig() const override;
 
 protected:
   ProcessConfig* cfg_;
@@ -319,6 +320,7 @@ ReturnCode DatabaseImpl::start() {
             sql_symbols_.get()),
         mkScoped(
             new Scheduler(
+                cfg_,
                 partition_map_.get(),
                 config_dir_.get(),
                 internal_auth_.get()))));
@@ -354,6 +356,7 @@ ReturnCode DatabaseImpl::start() {
   /* database context */
   {
     std::unique_ptr<DatabaseContext> dbctx(new DatabaseContext());
+    dbctx->config = cfg_;
     dbctx->partition_map = partition_map_.get();
     dbctx->file_tracker = file_tracker_.get();
     dbctx->config_directory = config_dir_.get();
@@ -487,7 +490,7 @@ void DatabaseImpl::startThread(std::function<void(Session*)> entrypoint) {
     try {
       entrypoint(session);
     } catch (const std::exception& e) {
-      // do nothing
+      logError("eventql", "Database Thread crashed: $0", e.what());
     }
 
     delete session;
@@ -496,8 +499,12 @@ void DatabaseImpl::startThread(std::function<void(Session*)> entrypoint) {
   t.detach();
 }
 
-Session* DatabaseImpl::getSession() {
+Session* DatabaseImpl::getSession() const {
   return (Session*) pthread_getspecific(local_session_);
+}
+
+const ProcessConfig* DatabaseImpl::getConfig() const {
+  return cfg_;
 }
 
 } // namespace tdsb

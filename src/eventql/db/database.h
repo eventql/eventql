@@ -46,6 +46,7 @@ class MapReduceService;
 class MetadataService;
 
 struct DatabaseContext {
+  ProcessConfig* config;
   PartitionMap* partition_map;
   FileTracker* file_tracker;
   ConfigDirectory* config_directory;
@@ -79,7 +80,12 @@ public:
   /**
    * Get session for the current thread
    */
-  virtual Session* getSession() = 0;
+  virtual Session* getSession() const = 0;
+
+  /**
+   * Get the process config
+   */
+  virtual const ProcessConfig* getConfig() const = 0;
 
 };
 

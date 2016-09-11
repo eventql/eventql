@@ -61,5 +61,16 @@ String CreateTableNode::toString() const {
   return "(create-table)";
 }
 
+const std::vector<std::pair<std::string, std::string>>&
+    CreateTableNode::getProperties() const {
+  return properties_;
+}
+
+void CreateTableNode::addProperty(
+    const std::string& key,
+    const std::string& value) {
+  properties_.emplace_back(key, value);
+}
+
 } // namespace csql
 

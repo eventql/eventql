@@ -11,7 +11,6 @@ message DHTNode {
   required string name = 2;
   required string addr = 3;
   required DHTNodeStatus status = 4;
-  repeated string sha1_tokens = 1;
 };
 
 message ClusterConfig {
@@ -38,7 +37,6 @@ message ServerConfig {
   required string server_id = 2;
   optional string server_addr = 3;
   optional ServerStatus server_status = 4;
-  repeated string sha1_tokens = 5;
   optional bool is_leaving = 6;
   optional bool is_dead = 7;
   optional AllocationPolicy allocation_policy = 8;

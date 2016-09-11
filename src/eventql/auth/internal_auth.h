@@ -26,7 +26,9 @@
 #include "eventql/server/session.h"
 #include "eventql/util/stdtypes.h"
 #include "eventql/util/status.h"
+#include "eventql/util/return_code.h"
 #include "eventql/util/http/httprequest.h"
+#include "eventql/transport/native/connection.h"
 
 namespace eventql {
 
@@ -34,6 +36,11 @@ class InternalAuth {
 public:
 
   virtual ~InternalAuth() = default;
+
+  static ReturnCode authenticateInternal(
+      Session* session,
+      native_transport::NativeConnection* connection,
+      const std::vector<std::pair<std::string, std::string>>& auth_data);
 
   virtual Status verifyRequest(
       Session* session,

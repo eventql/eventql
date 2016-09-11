@@ -49,8 +49,12 @@ namespace cli {
 
 void Console::startInteractiveShell() {
   auto history_path = cfg_.getHistoryPath();
-  linenoiseHistorySetMaxLen(cfg_.getHistoryMaxSize());
-  linenoiseHistoryLoad(history_path.c_str());
+  if (!history_path.isEmpty()) {
+    linenoiseHistorySetMaxLen(cfg_.getHistoryMaxSize());
+    linenoiseHistoryLoad(history_path.get().c_str());
+  } else {
+    logWarning("evql", "history file can't be written - please specify the --history_path flag or $HOME");
+  }
 
   char *p;
   String query;
@@ -77,9 +81,12 @@ void Console::startInteractiveShell() {
       continue;
     }
 
-    linenoiseHistoryAdd(query.c_str());
-    linenoiseHistorySave(history_path.c_str());
     runQuery(query);
+    if (!history_path.isEmpty()) {
+      linenoiseHistoryAdd(query.c_str());
+      linenoiseHistorySave(history_path.get().c_str());
+    }
+
     query.clear();
   }
 }
@@ -100,10 +107,54 @@ ReturnCode Console::connect() {
     }
   }
 
+  if (!cfg_.getUser().isEmpty()) {
+    std::string akey = "user";
+    std::string aval = cfg_.getUser().get();
+    evql_client_setauth(
+        client_,
+        akey.data(),
+        akey.size(),
+        aval.data(),
+        aval.size(),
+        0);
+  }
+
+  if (!cfg_.getPassword().isEmpty()) {
+    std::string akey = "password";
+    std::string aval = cfg_.getPassword().get();
+    evql_client_setauth(
+        client_,
+        akey.data(),
+        akey.size(),
+        aval.data(),
+        aval.size(),
+        0);
+  }
+
+  if (!cfg_.getAuthToken().isEmpty()) {
+    std::string akey = "auth_token";
+    std::string aval = cfg_.getAuthToken().get();
+    evql_client_setauth(
+        client_,
+        akey.data(),
+        akey.size(),
+        aval.data(),
+        aval.size(),
+        0);
+  }
+
+  std::string database;
+  bool switch_database = false;
+  if (!cfg_.getDatabase().isEmpty()) {
+    switch_database = true;
+    database = cfg_.getDatabase().get();
+  }
+
   auto rc = evql_client_connect(
       client_,
       cfg_.getHost().c_str(),
       cfg_.getPort(),
+      switch_database ? database.c_str() : nullptr,
       0);
 
   if (rc < 0) {
@@ -120,18 +171,11 @@ void Console::close() {
 }
 
 Status Console::runQuery(const String& query) {
-  if (cfg_.getBatchMode()) {
-    return runQueryBatch(query);
-  } else {
-    return runQueryTable(query);
-  }
-}
-
-Status Console::runQueryTable(const String& query) {
   auto stdout_os = TerminalOutputStream::fromStream(OutputStream::getStdout());
   auto stderr_os = TerminalOutputStream::fromStream(OutputStream::getStderr());
   bool line_dirty = false;
   bool is_tty = stderr_os->isTTY();
+  bool batchmode = cfg_.getBatchMode();
 
   //if (!cfg_.getQuietMode()) {
   //  res_parser->onProgress([&stdout_os, &line_dirty, is_tty] (
@@ -151,14 +195,7 @@ Status Console::runQueryTable(const String& query) {
   //  });
   //}
 
-  std::string qry_db;
-  uint64_t qry_flags = 0;
-  if (!cfg_.getDatabase().isEmpty()) {
-    qry_db = cfg_.getDatabase().get();
-    qry_flags |= EVQL_QUERY_SWITCHDB;
-  }
-
-  int rc = evql_query(client_, query.c_str(), qry_db.c_str(), qry_flags);
+  int rc = evql_query(client_, query.c_str(), NULL, 0);
 
   csql::ResultList results;
   std::vector<std::string> result_columns;
@@ -179,9 +216,17 @@ Status Console::runQueryTable(const String& query) {
   }
 
   if (rc == 0) {
-    results.addHeader(result_columns);
+    if (batchmode) {
+      for (const auto col : result_columns) {
+        stdout_os->print(col + "\t");
+      }
+      stdout_os->print("\n");
+    } else {
+      results.addHeader(result_columns);
+    }
   }
 
+  size_t result_nrows = 0;
   while (rc >= 0) {
     const char** fields;
     size_t* field_lens;
@@ -190,12 +235,21 @@ Status Console::runQueryTable(const String& query) {
       break;
     }
 
-    std::vector<std::string> row;
-    for (int i = 0; i < result_ncols; ++i) {
-      row.emplace_back(fields[i], field_lens[i]);
-    }
+    ++result_nrows;
+    if (batchmode) {
+      for (int i = 0; i < result_ncols; ++i) {
+        stdout_os->print(std::string(fields[i], field_lens[i]));
+        stdout_os->print("\t");
+      }
+      stdout_os->print("\n");
+    } else {
+      std::vector<std::string> row;
+      for (int i = 0; i < result_ncols; ++i) {
+        row.emplace_back(fields[i], field_lens[i]);
+      }
 
-    results.addRow(row);
+      results.addRow(row);
+    }
   }
 
   evql_client_releasebuffers(client_);
@@ -216,17 +270,20 @@ Status Console::runQueryTable(const String& query) {
 
     return Status(eIOError);
   } else {
-    String status_line = "";
-    if (results.getNumRows() > 0) {
+    if (!batchmode && results.getNumRows() > 0) {
       results.debugPrint();
+    }
 
-      auto num_rows = results.getNumRows();
+    String status_line = "";
+    if (result_nrows > 0) {
       status_line = StringUtil::format(
           "$0 row$1 returned",
-          num_rows,
-          num_rows > 1 ? "s" : "");
+          result_nrows,
+          result_nrows > 1 ? "s" : "");
+    } else if (result_ncols > 0) {
+      status_line = "Empty Set";
     } else {
-      status_line = results.getNumColumns() == 0 ? "Query OK" : "Empty Set";
+      status_line = "Query OK";
     }
 
     if (!cfg_.getQuietMode()) {
@@ -239,93 +296,6 @@ Status Console::runQueryTable(const String& query) {
 
     return Status::success();
   }
-}
-
-Status Console::runQueryBatch(const String& query) {
-  auto stdout_os = TerminalOutputStream::fromStream(OutputStream::getStdout());
-  auto stderr_os = TerminalOutputStream::fromStream(OutputStream::getStderr());
-  bool line_dirty = false;
-  bool is_tty = stderr_os->isTTY();
-  bool header_sent = false;
-  bool error = false;
-  auto res_parser = new csql::BinaryResultParser();
-
-  if (!cfg_.getQuietMode()) {
-    res_parser->onProgress([&stderr_os, &line_dirty, &header_sent, is_tty] (
-        const csql::ExecutionStatus& status) {
-      if (!header_sent) {
-        auto status_line = StringUtil::format(
-            "Query running: $0%",
-            status.progress * 100);
-
-        if (is_tty) {
-          stderr_os->eraseLine();
-          stderr_os->print("\r" + status_line);
-          line_dirty = true;
-        } else {
-          stderr_os->print(status_line + "\n");
-        }
-      }
-    });
-  }
-
-  res_parser->onTableHeader([&stdout_os, &stderr_os, &header_sent, &line_dirty] (
-      const Vector<String>& columns) {
-    if (line_dirty) {
-      stderr_os->eraseLine();
-      stderr_os->print("\r");
-      line_dirty = false;
-    }
-
-    for (const auto col : columns) {
-      stdout_os->print(col + "\t");
-    }
-    stdout_os->print("\n");
-    header_sent = true;
-  });
-
-  res_parser->onRow([&stdout_os] (int argc, const csql::SValue* argv) {
-    for (size_t i = 0; i < argc; ++i) {
-      stdout_os->print(argv[i].getString() + "\t");
-    }
-    stdout_os->print("\n");
-  });
-
-  res_parser->onError([&stderr_os, &error, &line_dirty] (const String& error_str) {
-    if (line_dirty) {
-      stderr_os->eraseLine();
-      stderr_os->print("\r");
-      line_dirty = false;
-    }
-
-    stderr_os->print(
-        "ERROR:",
-        { TerminalStyle::RED, TerminalStyle::UNDERSCORE });
-
-    stderr_os->print(StringUtil::format(" $0\n", error_str));
-    error = true;
-  });
-
-  auto res = sendRequest(query, res_parser);
-  if (!res.isSuccess()) {
-    stderr_os->print(
-          "ERROR:",
-          { TerminalStyle::RED, TerminalStyle::UNDERSCORE });
-
-    stderr_os->print(res.message());
-    return res;
-  }
-
-  if (is_tty) {
-    stderr_os->eraseLine();
-    stderr_os->print("\r");
-  }
-
-  if (error) {
-    return Status(eIOError);
-  }
-
-  return Status::success();
 }
 
 Status Console::sendRequest(const String& query, csql::BinaryResultParser* res_parser) {
@@ -346,12 +316,12 @@ Status Console::sendRequest(const String& query, csql::BinaryResultParser* res_p
       auth_headers.emplace_back(
           "Authorization",
           StringUtil::format("Token $0", cfg_.getAuthToken().get()));
-    } else if (!cfg_.getPassword().isEmpty()) {
+    } else if (!cfg_.getUser().isEmpty() && !cfg_.getPassword().isEmpty()) {
       auth_headers.emplace_back(
           "Authorization",
           StringUtil::format("Basic $0",
               util::Base64::encode(
-                  cfg_.getUser() + ":" + cfg_.getPassword().get())));
+                  cfg_.getUser().get() + ":" + cfg_.getPassword().get())));
     }
 
     http::HTTPClient http_client(nullptr);
@@ -477,12 +447,12 @@ Status Console::runJS(const String& program_source) {
       auth_headers.emplace_back(
           "Authorization",
           StringUtil::format("Token $0", cfg_.getAuthToken().get()));
-    } else if (!cfg_.getPassword().isEmpty()) {
+    } else if (!cfg_.getUser().isEmpty() && !cfg_.getPassword().isEmpty()) {
       auth_headers.emplace_back(
           "Authorization",
           StringUtil::format("Basic $0",
               util::Base64::encode(
-                  cfg_.getUser() + ":" + cfg_.getPassword().get())));
+                  cfg_.getUser().get() + ":" + cfg_.getPassword().get())));
     }
 
     if (is_tty) {

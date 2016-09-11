@@ -44,35 +44,21 @@
 #include "eventql/db/database.h"
 #include "eventql/util/return_code.h"
 #include "eventql/util/logging.h"
+#include "eventql/transport/native/connection_tcp.h"
 
 namespace eventql {
-
-uint64_t getMonoTime() {
-#ifdef __MACH__
-  clock_serv_t cclock;
-  mach_timespec_t mts;
-  host_get_clock_service(mach_host_self(), SYSTEM_CLOCK, &cclock);
-  clock_get_time(cclock, &mts);
-  mach_port_deallocate(mach_task_self(), cclock);
-  return std::uint64_t(mts.tv_sec) * 1000000 + mts.tv_nsec / 1000;
-#else
-  timespec ts;
-  if (clock_gettime(CLOCK_MONOTONIC, &ts) != 0) {
-    logFatal("clock_gettime(CLOCK_MONOTONIC) failed");
-    abort();
-  } else {
-    return std::uint64_t(ts.tv_sec) * 1000000 + ts.tv_nsec / 1000;
-  }
-#endif
-}
 
 Listener::Listener(
     Database* database) :
     database_(database),
-    connect_timeout_(2 * kMicrosPerSecond), 
+    io_timeout_(
+        std::max(
+            database->getConfig()->getInt("server.s2s_io_timeout").get(),
+            database->getConfig()->getInt("server.c2s_io_timeout").get())),
     running_(true),
     ssock_(-1),
-    http_transport_(database) {}
+    http_transport_(database),
+    native_server_(database) {}
 
 ReturnCode Listener::bind(int listen_port) {
   ssock_ = ::socket(AF_INET, SOCK_STREAM, 0);
@@ -136,9 +122,9 @@ void Listener::run() {
     int max_fd = ssock_;
     FD_SET(ssock_, &op_read);
 
-    auto now = getMonoTime();
+    auto now = MonotonicClock::now();
     while (!connections_.empty()) {
-      if (connections_.front().accepted_at + connect_timeout_ > now) {
+      if (connections_.front().accepted_at + io_timeout_ > now) {
         break;
       }
 
@@ -152,7 +138,7 @@ void Listener::run() {
 
     uint64_t timeout = 0;
     if (!connections_.empty()) {
-      timeout = (connections_.front().accepted_at + connect_timeout_) - now;
+      timeout = (connections_.front().accepted_at + io_timeout_) - now;
     }
 
     for (const auto& c : connections_) {
@@ -189,6 +175,7 @@ void Listener::run() {
       int conn_fd = ::accept(ssock_, NULL, NULL);
       if (conn_fd < 0) {
         logError("eventql", "accept() failed");
+        continue;
       }
 
       int flags = ::fcntl(conn_fd, F_GETFL, 0);
@@ -206,7 +193,7 @@ void Listener::run() {
 
       EstablishingConnection c;
       c.fd = conn_fd;
-      c.accepted_at = getMonoTime();
+      c.accepted_at = MonotonicClock::now();
       connections_.emplace_back(c);
     }
 
@@ -258,12 +245,15 @@ void Listener::open(int fd) {
   switch (first_byte) {
 
     // native
-    case '^':
-      native_transport::startConnection(
-          database_,
-          fd,
-          std::string(&first_byte, 1));
+   case '^': {
+      native_server_.startConnection(
+          std::unique_ptr<native_transport::NativeConnection>(
+              new native_transport::TCPConnection(
+                  fd,
+                  io_timeout_,
+                  std::string(&first_byte, 1))));
       break;
+    }
 
     // http
     default:

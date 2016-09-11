@@ -103,7 +103,7 @@ bool BooleanColumnReader::readString(
     String* value) {
   uint64_t tmp;
   if (readUnsignedInt(rlvl, dlvl, &tmp)) {
-    *value = (value > 0 ? "true" : "false");
+    *value = (tmp > 0 ? "true" : "false");
     return true;
   } else {
     *value = "";

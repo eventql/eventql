@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 EVENTQL - EVENTQL BINARY PROTOCOL v1
 --------------------------------------------------------------------------------
-v0.2 - September, 2016                             Paul Asmuth &lt;paul@eventql.io&gt;
+v0.2 - September, 2016                             Paul Asmuth <paul@eventql.io>
 
 Table of Contents
 
@@ -14,10 +14,10 @@ Table of Contents
     5.2 flags
     5.3 length
   6. Messages
-    6.1 S2C Messages
+    6.1 Client-to-Server (C2S) Messages
       6.1.1 HELLO
       6.1.2 PING
-      6.1.3 PONG
+      6.1.3 HEARTBEAT
       6.1.4 ERROR
       6.1.5 READY
       6.1.6 BYE
@@ -27,7 +27,9 @@ Table of Contents
       6.1.10 QUERY_DISCARD
       6.1.11 QUERY_PROGRESS
       6.1.12 QUERY_NEXT
-    6.2 S2S Messages
+    6.2 Server-to-Server (S2S) Messages
+      6.2.1 QUERY_PARTIALAGGR
+      6.2.2 QUERY_PARTIALAGGR_RESULT
 
 1. Preface
 
@@ -106,11 +108,15 @@ Binary Protocols.
 
   [lenencstr*]     A list of [lenencstr] values
 
+  [cstr]           A zero-byte-terminated string
+
+  [cstr*]          A list of [cstr] values
+
   [zerobyte]       A single '\0' byte
 
   We also define this notation for optinal fields:
 
-     &lt;field&gt; | if &lt;expr&gt;
+     <field> | if <expr>
 
 
 5. Frame header
@@ -120,7 +126,7 @@ Binary Protocols.
   A 16-bit big-endian integer that distinguishes the type of message:
     0x5e00   HELLO
     0x0001   PING
-    0x0002   PONG
+    0x0002   HEARTBEAT
     0x0003   ERROR
     0x0004   READY
     0x0005   BYE
@@ -130,12 +136,18 @@ Binary Protocols.
     0x0009   QUERY_DISCARD
     0x0010   QUERY_PROGRESS
     0x0011   QUERY_NEXT
+    0x0012   QUERY_PARTIALAGGR
+    0x0013   QUERY_PARTIALAGGR_RESULT
 
   Messages are described in Section 6.
 
 5.2. flags
 
-  Flags applying to this frame. The flags are currently unused and ignored.
+  Flags applying to this frame.
+
+    0x01  EVQL_ENDOFREQUEST
+          This is the last response frame for the currently running request
+
 
 5.3. length
 
@@ -145,7 +157,7 @@ Binary Protocols.
 
 6. Messages
 
-6.2 HELLO
+6.1.2 HELLO
 
   FIXME
 
@@ -153,12 +165,21 @@ Binary Protocols.
     lenencint      protocol_version
     lenencstr      eventql_version
     lenencint      flags
+    lenencint      idle_timeout
+    lenencint      authdata_len
+    cstr*          authdata
+    lenencstr      database              | if HELLO_SWITCHDB
+
+  Fields:
+    flags          0x01 HELLO_INTERNAL - This is an internal S2S connection
+    flags          0x02 HELLO_SWITCHDB - Switch to a database on connect
+    flags          0x02 HELLO_INTERACTIVEAUTH - Enable interactive auth
 
   Response:
-    &lt;no response&gt;
+    <no response>
 
 
-6.2 PING
+6.1.2 PING
 
   On an operational connection, the ping message may be sent at _any_ time by
   either the client or the server, even while a request is running.
@@ -166,13 +187,13 @@ Binary Protocols.
   The PING message may safely be ignored.
 
   Payload:
-    &lt;no payload&gt;
+    <no payload>
 
   Response:
-    &lt;no response&gt;
+    <no response>
 
 
-6.2 ERROR
+6.1.4 ERROR
 
   FIXME
 
@@ -181,9 +202,22 @@ Binary Protocols.
     zerobyte
 
   Response:
-    &lt;no response&gt;
+    <no response>
 
-6.7 QUERY
+
+6.1.5 READY
+
+  FIXME
+
+  Payload:
+    lenencint      flags
+    lenencint      idle_timeout_us
+
+  Response:
+    <no response>
+
+
+6.1.7 QUERY
 
   The QUERY message initiates a new request and is only sent by the client.
   A QUERY message must not be sent while another request is still running.
@@ -200,8 +234,10 @@ Binary Protocols.
                    rows as possible should be returned in the first response
                    frame
 
-    flags          0x01 ENABLE_PROGRESS - Send progress events
-                   0x02 SWITCH_DATABASE - Switch database
+    flags          0x01 QUERY_SWITCHDB - Switch database
+                   0x02 QUERY_MULTISTMT - Allow multiple result sets
+                   0x04 QUERY_PROGRESS - Send progress frames
+                   0x08 QUERY_NOSTATS - Omit stats in query result
 
     query          The zero-terminated query string
 
@@ -222,7 +258,7 @@ Binary Protocols.
     After the request is complete, the server will not send any further messages.
 
 
-6.8 QUERY_RESULT
+6.1.8 QUERY_RESULT
 
   The QUERY_RESULT message contains a description of the result table as well
   as zero or more rows from the result tables. Results are always paged, i.e.
@@ -252,22 +288,28 @@ Binary Protocols.
     lenencstr*     data
 
   Fields:
-    flags          0x01 EVQL_QUERY_RESULT_COMPLETE - This is the last QUERY_RESULT event
-
-    FIXME
+    flags          0x01 QUERY_RESULT_COMPLETE - This is the last result frame
+                   0x02 QUERY_RESULT_HASSTATS - This result frame includes stats
+                   0x04 QUERY_RESULT_HASCOLNAMES - This frame includes colnames
+                   0x08 QUERY_RESULT_PENDINGSTMT - This is NOT the last statement
 
   Response:
-    If the COMPLETE flag is set, no response should be sent. If the flag is not
-    set the client must respond with QUERY_CONTINUE or QUERY_DISCARD.
+    If the COMPLETE flag is not set, the client must respond with
+    QUERY_CONTINUE or QUERY_DISCARD.
+
+    If the COMPLETE flag is set, but the PENDINGSTMT flag is also set, the
+    client must respond with QUERY_NEXT or QUERY_DISCARD.
+
+    Otherwise, the client must not send any response.
 
 
-6.9 QUERY_CONTINUE
+6.1.9 QUERY_CONTINUE
 
   The QUERY_CONTINUE message may be sent by the client in response to a
   QUERY_RESULT message that did not have the COMPLETED flag set.
 
   Payload:
-    &lt;no payload&gt;
+    <no payload>
 
   Response:
     After sending a QUERY_CONTINUE message, the client should expect to receive
@@ -277,13 +319,13 @@ Binary Protocols.
       - QUERY_RESULT
 
 
-6.10 QUERY_DISCARD
+6.1.10 QUERY_DISCARD
 
   The QUERY_DISCARD message may be sent by the client in response to a
   QUERY_RESULT message that did not have the COMPLETED flag set.
 
   Payload:
-    &lt;no payload&gt;
+    <no payload>
 
   Response:
     After sending a QUERY_CONTINUE message, the client should expect to receive
@@ -293,7 +335,7 @@ Binary Protocols.
       - QUERY_RESULT
 
 
-6.11 QUERY_PROGRESS
+6.1.11 QUERY_PROGRESS
 
   The QUERY_PROGRESS message is an information message from the server to the
   client. It contains information about the progress of query execution and
@@ -314,4 +356,61 @@ Binary Protocols.
     FIXME
 
   Response:
-    &lt;no response&gt;
+    <no response>
+
+
+6.2.1 QUERY_PARTIALAGGR
+
+  The QUERY_PARTIALAGGR is used to execute a partial aggregation on a remote
+  server.
+
+  The QUERY_PARTIALAGGR message initiates a new request. A QUERY_PARTIALAGGR
+  message must not be sent while another request is still running.
+
+  Payload:
+    lenencint      flags
+    lenencstr      database
+    lenencstr      encoded_qtree
+
+  Fields:
+    flags          Currently unused
+    datbase        The database on which the query should be executed
+    encoded_qtree  The encoded query tree
+
+  Response:
+    After sending a QUERY_PARTIALAGGR message, the client should expect to
+    receive one of these response messages:
+      - ERROR
+      - HEARTBEAT
+      - QUERY_PARTIALAGGR_RESULT
+
+    The request is considered completed once the client has received a response
+    frame with the EVQL_ENDOFREQUEST flag set.  After the request is complete,
+    the server will not send any further messages.
+
+
+6.2.2 QUERY_PARTIALAGGR_RESULT
+
+  The QUERY_PARTIALAGGR_RESULT message contains a the result of a successful
+  QUERY_PARTIALAGGR call. Results may be paged, i.e. depending on the result size
+  the result will be split into many QUERY_PARTIALAGGR_RESULT frames.
+
+  After receiving a QUERY_PARTIALAGGR_RESULT frame, the client must check if the
+  EVQL_ENDOFREQUEST flag is set. If the flag is set, the request can be
+  considered complete and the client should not expect any further frames from
+  the server. If the flag is not set, the client must wait for the next
+  QUERY_PARTIALAGGR_RESULT frame.
+
+  Payload:
+    lenencint      flags
+    lenencint      num_rows
+    lenencstr*     body
+
+  Fields:
+    flags          Currently unused
+    num_rows       The number of result rows in this frame
+    body           A list of group, scratch pairs (num_rows * 2 strings)
+
+  Response:
+    No response.
+

@@ -25,7 +25,7 @@
 #include "eventql/eventql.h"
 #include "eventql/util/return_code.h"
 #include <eventql/transport/http/http_transport.h>
-#include <eventql/transport/native/native_transport.h>
+#include <eventql/transport/native/server.h>
 
 namespace eventql {
 class Database;
@@ -50,11 +50,12 @@ protected:
   };
 
   Database* database_;
-  uint64_t connect_timeout_;
+  uint64_t io_timeout_;
   std::atomic<bool> running_;
   int ssock_;
   std::list<EstablishingConnection> connections_;
   HTTPTransport http_transport_;
+  native_transport::Server native_server_;
 };
 
 } // namespace eventql

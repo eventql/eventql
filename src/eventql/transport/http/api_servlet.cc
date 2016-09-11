@@ -540,18 +540,63 @@ void APIServlet::createTable(
     return;
   }
 
-  msg::MessageSchema schema(nullptr);
-  //schema.fromJSON(jreq, 
-  Vector<String> primary_key;
-  {
-    auto num_keys = json::arrayLength(jprimary_key, jreq.end());
-    for (size_t i = 0; i < num_keys; ++i) {
-      auto key = json::arrayGetString(jprimary_key, jreq.end(), i);
-      if (key.isEmpty()) {
-        //TODO handle
-      } else {
-        primary_key.emplace_back(key.get());
+  auto jpkey = json::objectLookup(jreq, "primary_key");
+  if (jpkey == jreq.end()) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody("missing field: primary_key");
+    return;
+  }
+
+  std::vector<std::string> primary_key;
+  auto primary_key_count = json::arrayLength(jpkey, jreq.end());
+  for (size_t i = 0; i < primary_key_count; ++i) {
+    auto pkey_part = json::arrayGetString(jpkey, jreq.end(), i);
+    if (pkey_part.isEmpty()) {
+      res->setStatus(http::kStatusBadRequest);
+      res->addBody("invalid field: primary_key");
+      return;
+    }
+
+    primary_key.emplace_back(pkey_part.get());
+  }
+
+  std::vector<std::pair<std::string, std::string>> properties;
+  auto jprops = json::objectLookup(jreq, "properties");
+  if (jprops != jreq.end()) {
+    auto props_count = json::arrayLength(jprops, jreq.end());
+    for (size_t i = 0; i < props_count; ++i) {
+      auto jprop = json::arrayLookup(jprops, jreq.end(), i);
+      if (jprop == jreq.end()) {
+        res->setStatus(http::kStatusBadRequest);
+        res->addBody("invalid field: properties");
+        return;
       }
+
+      auto prop_key = json::arrayGetString(jprop, jreq.end(), 0);
+      auto prop_value = json::arrayGetString(jprop, jreq.end(), 1);
+      if (prop_key.isEmpty() || prop_value.isEmpty()) {
+        res->setStatus(http::kStatusBadRequest);
+        res->addBody("invalid field: primary_key");
+        return;
+      }
+
+      properties.emplace_back(prop_key.get(), prop_value.get());
+    }
+  }
+
+  try {
+    msg::MessageSchema schema(nullptr);
+    schema.fromJSON(jschema, jreq.end());
+
+    auto rc = dbctx->table_service->createTable(
+        session->getEffectiveNamespace(),
+        table_name.get(),
+        schema,
+        primary_key,
+        properties);
+
+    if (!rc.isSuccess()) {
+      RAISE(kRuntimeError, rc.message());
     }
   }
 

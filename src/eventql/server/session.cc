@@ -22,13 +22,24 @@
  * code of your own applications
  */
 #include "eventql/server/session.h"
+#include "eventql/db/database.h"
+#include "eventql/config/process_config.h"
+#include "eventql/util/wallclock.h"
 
 namespace eventql {
 
 Session::Session(
-    const DatabaseContext* database_context) :
-    database_context_(database_context),
-    user_id_("<anonymous>") {}
+    const DatabaseContext* dbctx) :
+    database_context_(dbctx),
+    user_id_("<anonymous>"),
+    heartbeat_last_(MonotonicClock::now()),
+    heartbeat_interval_(
+        dbctx->config->getInt("server.heartbeat_interval").get()),
+    idle_timeout_(
+        std::max(
+            dbctx->config->getInt("server.s2s_idle_timeout").get(),
+            dbctx->config->getInt("server.c2s_idle_timeout").get())),
+    is_internal_(false) {}
 
 String Session::getUserID() const {
   std::unique_lock<std::mutex> lk(mutex_);
@@ -63,4 +74,42 @@ const DatabaseContext* Session::getDatabaseContext() {
   return database_context_;
 }
 
+void Session::setHeartbeatCallback(std::function<ReturnCode ()> cb) {
+  heartbeat_cb_ = cb;
+}
+
+ReturnCode Session::triggerHeartbeat() {
+  auto now = MonotonicClock::now();
+  if (now >= heartbeat_last_ + heartbeat_interval_) {
+    if (heartbeat_cb_) {
+      return heartbeat_cb_();
+    }
+
+    heartbeat_last_ = now;
+  }
+
+  return ReturnCode::success();
+}
+
+void Session::setIdleTimeout(uint64_t timeout_us) {
+  idle_timeout_ = timeout_us;
+}
+
+uint64_t Session::getIdleTimeout() const {
+  return idle_timeout_;
+}
+
+uint64_t Session::getHeartbeatInterval() const {
+  return heartbeat_interval_;
+}
+
+void Session::setIsInternal(bool is_internal) {
+  is_internal_ = is_internal;
+}
+
+uint64_t Session::isInternal() const {
+  return is_internal_;
+}
+
 } // namespace eventql
+

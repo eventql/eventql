@@ -21,11 +21,12 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#include <stdlib.h>
+#include <string.h>
+#include <arpa/inet.h>
 #include <eventql/util/util/binarymessagewriter.h>
 #include <eventql/util/exception.h>
 #include <eventql/util/ieee754.h>
-#include <stdlib.h>
-#include <string.h>
 
 namespace util {
 
@@ -70,8 +71,28 @@ void BinaryMessageWriter::appendUInt32(uint32_t value) {
   append(&value, sizeof(value));
 }
 
+void BinaryMessageWriter::appendNUInt16(uint16_t value) {
+  uint16_t v = htons(value);
+  append(&v, sizeof(v));
+}
+
+void BinaryMessageWriter::updateNUInt16(size_t offset, uint16_t value) {
+  uint16_t v = htons(value);
+  update(offset, &v, sizeof(v));
+}
+
 void BinaryMessageWriter::updateUInt32(size_t offset, uint32_t value) {
   update(offset, &value, sizeof(value));
+}
+
+void BinaryMessageWriter::appendNUInt32(uint32_t value) {
+  uint32_t v = htonl(value);
+  append(&v, sizeof(v));
+}
+
+void BinaryMessageWriter::updateNUInt32(size_t offset, uint32_t value) {
+  uint32_t v = htonl(value);
+  update(offset, &v, sizeof(v));
 }
 
 void BinaryMessageWriter::appendUInt64(uint64_t value) {
