@@ -71,7 +71,8 @@ public:
       const String& db_namespace,
       const String& table_name,
       const msg::MessageSchema& schema,
-      Vector<String> primary_key);
+      Vector<String> primary_key,
+      const std::vector<std::pair<std::string, std::string>>& properties);
 
   Status alterTable(
       const String& db_namespace,
