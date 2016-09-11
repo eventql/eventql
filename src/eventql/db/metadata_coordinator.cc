@@ -22,6 +22,7 @@
  * code of your own applications
  */
 #include "eventql/db/metadata_coordinator.h"
+#include <eventql/util/logging.h>
 
 namespace eventql {
 

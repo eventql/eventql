@@ -3,19 +3,7 @@
 MAINTAINERCLEANFILES =   \
   Makefile.in
 
-AM_CXXFLAGS = -std=c++0x -ftemplate-depth=500 -mno-omit-leaf-frame-pointer -fno-omit-frame-pointer -Wall -Wextra -Wno-unused-parameter -Wno-sign-compare -Wdelete-non-virtual-dtor -Wno-predefined-identifier-outside-function -Wno-invalid-offsetof -g -I@builddir@ -I@top_srcdir@/src
-
-SPIDERMONKEY_CFLAGS = -I$(top_builddir)/deps/3rdparty/spidermonkey/out/dist/include
-SPIDERMONKEY_LDADD = ${top_builddir}/deps/3rdparty/spidermonkey/out/dist/lib/libjs_static.a
-
-ZOOKEEPER_CFLAGS = -I$(top_srcdir)/deps/3rdparty/zookeeper/source/include -I$(top_srcdir)/deps/3rdparty/zookeeper/source/generated
-ZOOKEEPER_LDADD = ${top_builddir}/deps/3rdparty/zookeeper/libzkmt.a ${top_builddir}/deps/3rdparty/zookeeper/libhashtable.a
-
-PCRE_CFLAGS = -I$(top_srcdir)/deps/3rdparty/pcre -DHAVE_PCRE=1
-PCRE_LDADD = ${top_builddir}/deps/3rdparty/pcre/libpcre.a
-
-LINENOISE_CFLAGS = -I$(top_srcdir)/deps/3rdparty
-LINENOISE_LDADD = ${top_builddir}/deps/3rdparty/linenoise/liblinenoise.a
+AM_CXXFLAGS = -std=c++0x -ftemplate-depth=500 -mno-omit-leaf-frame-pointer -fno-omit-frame-pointer -Wall -Wextra -Wno-unused-parameter -Wno-sign-compare -Wdelete-non-virtual-dtor -Wno-predefined-identifier-outside-function -Wno-invalid-offsetof -g -I@builddir@ -I@top_srcdir@/src -I@top_srcdir@/deps/3rdparty/protobuf
 
 SIMDCOMP_CFLAGS = -I$(top_srcdir)/deps/3rdparty
 SIMDCOMP_LDADD = ${top_builddir}/deps/3rdparty/libsimdcomp/libsimdcomp.a
@@ -30,21 +18,46 @@ INIH_CFLAGS = -I$(top_srcdir)/deps/3rdparty
 INIH_LDADD = ${top_builddir}/deps/3rdparty/inih/libinih.a
 
 
-check_PROGRAMS = smoketest1
-TESTS = smoketest1
+TESTS = \
+  unit_metadata_file \
+  unit_metadata_store \
+  unit_partition_discovery
 
-smoketest1_SOURCES = smoketest1.cc
-smoketest1_LDADD = \
-    @top_builddir@/src/libevqlcore.la \
+check_PROGRAMS = $(TESTS)
+
+#smoketest1_SOURCES = smoketest1.cc
+#smoketest1_LDADD = \
+#    @top_builddir@/src/libevqlcore.la \
+#    @top_builddir@/src/libevqlclient.la \
+#    $(INIH_LDADD) \
+#    $(SIMDCOMP_LDADD) \
+#    $(LMDB_LDADD) \
+#    $(PROTOBUF_LDADD)
+
+unit_metadata_file_SOURCES = unit/metadata_file.cc
+unit_metadata_file_LDADD = \
+    @top_builddir@/src/libevqlcore.a \
     @top_builddir@/src/libevqlclient.la \
-    $(ZOOKEEPER_LDADD) \
-    $(LINENOISE_LDADD) \
     $(INIH_LDADD) \
     $(SIMDCOMP_LDADD) \
     $(LMDB_LDADD) \
-    $(PROTOBUF_LDADD) \
-    $(SPIDERMONKEY_LDADD) \
-    $(PCRE_LDADD)
+    $(PROTOBUF_LDADD)
 
+unit_metadata_store_SOURCES = unit/metadata_store.cc
+unit_metadata_store_LDADD = \
+    @top_builddir@/src/libevqlcore.a \
+    @top_builddir@/src/libevqlclient.la \
+    $(INIH_LDADD) \
+    $(SIMDCOMP_LDADD) \
+    $(LMDB_LDADD) \
+    $(PROTOBUF_LDADD)
 
+unit_partition_discovery_SOURCES = unit/partition_discovery.cc
+unit_partition_discovery_LDADD = \
+    @top_builddir@/src/libevqlcore.a \
+    @top_builddir@/src/libevqlclient.la \
+    $(INIH_LDADD) \
+    $(SIMDCOMP_LDADD) \
+    $(LMDB_LDADD) \
+    $(PROTOBUF_LDADD)
 

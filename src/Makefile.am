@@ -2,6 +2,7 @@
 
 bin_PROGRAMS = evql evqld evqlctl
 lib_LTLIBRARIES = libevqlclient.la
+check_LIBRARIES = libevqlcore.a
 
 MAINTAINERCLEANFILES =   \
   Makefile.in
@@ -73,11 +74,22 @@ evql_protos = \
     eventql/db/replication_state.proto \
     eventql/db/table_config.proto
 
-BUILT_SOURCES = $(evql_protos:.proto=.pb.h) eventql/mapreduce/mapreduce_preludejs.cc
+EVQL_PROTO_SOURCES_ = \
+    eventql/auth/client_auth_legacy_protos.pb.cc \
+    eventql/config/namespace_config_protos.pb.cc \
+    eventql/db/metadata_operations.pb.cc \
+    eventql/db/cluster_config.pb.cc \
+    eventql/db/partition_info.pb.cc \
+    eventql/db/partition_state.pb.cc \
+    eventql/db/record_envelope.pb.cc \
+    eventql/db/replication_state.pb.cc \
+    eventql/db/table_config.pb.cc
+
+BUILT_SOURCES = ${EVQL_PROTO_SOURCES_} eventql/mapreduce/mapreduce_preludejs.cc
 dist_noinst_DATA = $(evql_protos)
 
 %.pb.cc %.pb.h: %.proto
-	$(top_builddir)/deps/3rdparty/protobuf/protoc --proto_path=$(srcdir) --cpp_out=$(builddir) $^
+	$(top_builddir)/deps/3rdparty/protobuf/protoc --proto_path=$(srcdir) --cpp_out=$(srcdir) $^
 
 EVQL_CORE_SOURCES_ = \
     eventql/util/CivilTime.cc \
@@ -926,22 +938,14 @@ EVQL_CORE_SOURCES_ = \
     eventql/util/mdb/MDBCursor.cc \
     eventql/util/mdb/MDBCursor.h \
     eventql/util/mdb/MDBTransaction.cc \
-    eventql/util/mdb/MDBTransaction.h \
-    @builddir@/eventql/auth/client_auth_legacy_protos.pb.cc \
-    @builddir@/eventql/config/namespace_config_protos.pb.cc \
-    @builddir@/eventql/db/metadata_operations.pb.cc \
-    @builddir@/eventql/db/cluster_config.pb.cc \
-    @builddir@/eventql/db/partition_info.pb.cc \
-    @builddir@/eventql/db/partition_state.pb.cc \
-    @builddir@/eventql/db/record_envelope.pb.cc \
-    @builddir@/eventql/db/replication_state.pb.cc \
-    @builddir@/eventql/db/table_config.pb.cc
+    eventql/util/mdb/MDBTransaction.h
 
 eventql/mapreduce/mapreduce_preludejs.cc:
 	echo 'eventql/mapreduce/prelude.js:${srcdir}/eventql/mapreduce/prelude.js' | ${srcdir}/eventql/util/assets.sh $(builddir)/eventql/mapreduce/mapreduce_preludejs.cc
 
 ################# BIN: evqld ####################
 evqld_SOURCES = ${EVQL_CORE_SOURCES_} eventql/evqld.cc
+nodist_evqld_SOURCES = ${EVQL_PROTO_SOURCES_}
 
 evqld_LDADD = \
     $(ZOOKEEPER_LDADD) \
@@ -1008,4 +1012,7 @@ evqlctl_LDADD = \
 
 ################ LIB: libevqlclient.a ###################
 libevqlclient_la_SOURCES = eventql/client.c
+
+################ LIB: libevqlcore.a ###################
+libevqlcore_a_SOURCES = $(EVQL_CORE_SOURCES_) $(EVQL_PROTO_SOURCES_)
 
