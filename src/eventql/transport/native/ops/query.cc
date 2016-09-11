@@ -98,10 +98,10 @@ ReturnCode performOperation_QUERY(
           &qplan,
           &conn,
           &progress_interval,
-          &progress_last] () -> ReturnCode {
+          &progress_last] () {
         auto now = MonotonicClock::now();
         if (now < progress_last + progress_interval) {
-          return ReturnCode::success();
+          return;
         }
 
         progress_last = now;
@@ -114,13 +114,13 @@ ReturnCode performOperation_QUERY(
           auto payload_os = StringOutputStream::fromString(&payload);
           progress_frame.writeTo(payload_os.get());
 
-          return conn->sendFrameAsync(
+          conn->sendFrameAsync(
               EVQL_OP_QUERY_PROGRESS,
               0,
               payload.data(),
               payload.size());
         } else {
-          return conn->flushOutbox(false, 0);
+          conn->flushOutbox(false, 0);
         }
       });
     }

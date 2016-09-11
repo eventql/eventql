@@ -184,8 +184,7 @@ Status Console::runQuery(const String& query) {
   bool batchmode = cfg_.getBatchMode();
 
   ProgressCBType on_progress = [this, &stdout_os, &line_dirty, is_tty] () {
-    uint64_t progress;
-    evql_client_getstat(client_, PROGRESS_PERMILL, &progress);
+    uint64_t progress =evql_client_getstat(client_, EVQL_STAT_PROGRESSPERMILL);
     auto status_line = StringUtil::format(
         "Query running: $0%",
         progress / 10);

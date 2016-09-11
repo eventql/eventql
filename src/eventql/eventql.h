@@ -91,13 +91,13 @@ enum {
 };
 
 
-enum STAT {
-  PROGRESS_NUM_ROWS_MODIFIED  = 0x1L,
-  PROGRESS_NUM_ROWS_SCANNED   = 0x2L,
-  PROGRESS_NUM_BYTES_SCANNED  = 0x3L,
-  PROGRESS_PERMILL            = 0x4L,
-  PROGRESS_ELAPSED_MS         = 0x5L,
-  PROGRESS_ETA_MS             = 0x6L
+enum {
+  EVQL_STAT_NUMROWSMODIFIED  = 0x1L,
+  EVQL_STAT_NUMROWSSCANNED   = 0x2L,
+  EVQL_STAT_NUMBYTESSCANNED  = 0x3L,
+  EVQL_STAT_PROGRESSPERMILL  = 0x4L,
+  EVQL_STAT_TIMEELAPSED_MS   = 0x5L,
+  EVQL_STAT_ETA_MS           = 0x6L
 };
 
 /**
@@ -217,7 +217,7 @@ void evql_client_setprogresscb(
     void (*cb) (evql_client_t* client, void* privdata),
     void* privdata);
 
-void evql_client_getstat(evql_client_t* client, uint64_t stat, uint64_t* data);
+uint64_t evql_client_getstat(evql_client_t* client, uint64_t stat);
 
 /**
  * Free the current result
