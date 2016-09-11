@@ -188,7 +188,13 @@ Status TableService::createTable(
   auto txnid = Random::singleton()->sha1();
   std::unique_ptr<MetadataFile> metadata_file;
   if (tblcfg->enable_fixed_partitions()) {
-    metadata_file.reset(new MetadataFile(txnid, 1, keyspace_type, { }));
+    metadata_file.reset(
+        new MetadataFile(
+            txnid,
+            1,
+            keyspace_type,
+            { },
+            MFILE_FINITE));
   } else {
     MetadataFile::PartitionMapEntry initial_partition;
     initial_partition.begin = "";
@@ -202,7 +208,7 @@ Status TableService::createTable(
     }
 
     metadata_file.reset(
-        new MetadataFile(txnid, 1, keyspace_type, { initial_partition }));
+        new MetadataFile(txnid, 1, keyspace_type, { initial_partition }, 0));
   }
 
   td.set_metadata_txnid(txnid.data(), txnid.size());

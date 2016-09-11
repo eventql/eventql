@@ -63,6 +63,7 @@ AM_CXXFLAGS = -DEVQL_VERSION=\"v@PACKAGE_VERSION@\" -DEVQL_BUILDID=\"$(EVQL_BUIL
 AM_CFLAGS = $(SPIDERMONKEY_CFLAGS) $(MYSQL_CFLAGS) $(ZOOKEEPER_CFLAGS) $(INIH_CFLAGS) $(SIMDCOMP_CFLAGS) $(LINENOISE_CLFAGS) $(PROTOBUF_CFLAGS) $(PTHREAD_CFLAGS) $(PTHREAD_DEF) $(SYSLOG_DEF) $(ZLIB_DEF) $(GETHOSTBYNAME_R_DEF) -std=c11 -D_GNU_SOURCE -mno-omit-leaf-frame-pointer -fno-omit-frame-pointer -Wall -pedantic -g
 AM_LDFLAGS = $(PTHREAD_CFLAGS) -ldl
 
+
 evql_protos = \
     eventql/auth/client_auth_legacy_protos.proto \
     eventql/config/namespace_config_protos.proto \
@@ -89,7 +90,9 @@ BUILT_SOURCES = ${EVQL_PROTO_SOURCES_} eventql/mapreduce/mapreduce_preludejs.cc
 dist_noinst_DATA = $(evql_protos)
 
 %.pb.cc %.pb.h: %.proto
-	$(top_builddir)/deps/3rdparty/protobuf/protoc --proto_path=$(srcdir) --cpp_out=$(srcdir) $^
+	@$(top_builddir)/deps/3rdparty/protobuf/protoc --proto_path=$(srcdir) --cpp_out=$(srcdir) $^
+	@echo "  PROTOC   $^"
+
 
 EVQL_CORE_SOURCES_ = \
     eventql/util/CivilTime.cc \
@@ -944,8 +947,7 @@ eventql/mapreduce/mapreduce_preludejs.cc:
 	echo 'eventql/mapreduce/prelude.js:${srcdir}/eventql/mapreduce/prelude.js' | ${srcdir}/eventql/util/assets.sh $(builddir)/eventql/mapreduce/mapreduce_preludejs.cc
 
 ################# BIN: evqld ####################
-evqld_SOURCES = ${EVQL_CORE_SOURCES_} eventql/evqld.cc
-nodist_evqld_SOURCES = ${EVQL_PROTO_SOURCES_}
+evqld_SOURCES = ${EVQL_CORE_SOURCES_} ${EVQL_PROTO_SOURCES_} eventql/evqld.cc
 
 evqld_LDADD = \
     $(ZOOKEEPER_LDADD) \
@@ -959,6 +961,7 @@ evqld_LDADD = \
 ################## BIN: evql ####################
 evql_SOURCES = \
     ${EVQL_CORE_SOURCES_} \
+    $(EVQL_PROTO_SOURCES_) \
     eventql/cli/console.cc \
     eventql/cli/console.h \
     eventql/cli/cli_config.cc \
@@ -980,6 +983,7 @@ evql_LDFLAGS = -static
 ################ BIN: evqlctl ###################
 evqlctl_SOURCES = \
     ${EVQL_CORE_SOURCES_} \
+    $(EVQL_PROTO_SOURCES_) \
     eventql/cli/commands/cli_command.h \
     eventql/cli/commands/cli_command.cc \
     eventql/cli/commands/cluster_add_server.h \

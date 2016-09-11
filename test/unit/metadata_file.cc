@@ -62,8 +62,9 @@ TEST_CASE(MetadataFileTest, TestMetadataFileStringLookups, [] () {
     pmap.emplace_back(e);
   }
 
-  MetadataFile file(SHA1::compute("mytx"), 0, KEYSPACE_STRING, pmap);
+  MetadataFile file(SHA1::compute("mytx"), 0, KEYSPACE_STRING, pmap, 0);
 
+  EXPECT(file.hasFinitePartitions() == false);
   EXPECT(file.getPartitionMapAt("a") == file.getPartitionMapBegin());
   EXPECT(file.getPartitionMapAt("b") == file.getPartitionMapBegin() + 1);
   EXPECT(file.getPartitionMapAt("bx") == file.getPartitionMapBegin() + 1);
@@ -109,8 +110,9 @@ TEST_CASE(MetadataFileTest, TestMetadataFileUIntLookups, [] () {
     pmap.emplace_back(e);
   }
 
-  MetadataFile file(SHA1::compute("mytx"), 0, KEYSPACE_UINT64, pmap);
+  MetadataFile file(SHA1::compute("mytx"), 0, KEYSPACE_UINT64, pmap, 0);
 
+  EXPECT(file.hasFinitePartitions() == false);
   EXPECT(file.getPartitionMapAt(uint_encode(0)) == file.getPartitionMapBegin());
   EXPECT(file.getPartitionMapAt(uint_encode(1)) == file.getPartitionMapBegin());
   EXPECT(file.getPartitionMapAt(uint_encode(2)) == file.getPartitionMapBegin() + 1);
@@ -151,8 +153,8 @@ TEST_CASE(MetadataFileTest, TestMetadataFileRangeLookups, [] () {
     pmap.emplace_back(e);
   }
 
-  MetadataFile file(SHA1::compute("mytx"), 0, KEYSPACE_STRING, pmap);
-
+  MetadataFile file(SHA1::compute("mytx"), 0, KEYSPACE_STRING, pmap, 0);
+  EXPECT(file.hasFinitePartitions() == false);
   EXPECT(file.getPartitionMapRangeBegin("") == file.getPartitionMapBegin());
   EXPECT(file.getPartitionMapRangeBegin("a") == file.getPartitionMapBegin());
   EXPECT(file.getPartitionMapRangeBegin("b") == file.getPartitionMapBegin() + 1);

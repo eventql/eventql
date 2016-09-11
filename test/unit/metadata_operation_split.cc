@@ -68,7 +68,7 @@ TEST_CASE(MetadataOperationSplit, TestSplitBegin, [] () {
     pmap.emplace_back(e);
   }
 
-  MetadataFile input(SHA1::compute("mytx"), 0, KEYSPACE_UINT64, pmap);
+  MetadataFile input(SHA1::compute("mytx"), 0, KEYSPACE_UINT64, pmap, 0);
 
   auto split_partition_id = SHA1::compute("A");
   auto split_partition_id_low = SHA1::compute("X1");
@@ -119,7 +119,7 @@ TEST_CASE(MetadataOperationSplit, TestSplitBegin, [] () {
   EXPECT_EQ(output[3].partition_id, SHA1::compute("D"));
   EXPECT_EQ(output[3].splitting, false);
 
-  MetadataFile input2(SHA1::compute("mytx2"), 0, KEYSPACE_UINT64, output);
+  MetadataFile input2(SHA1::compute("mytx2"), 0, KEYSPACE_UINT64, output, 0);
 
   FinalizeSplitOperation op2;
   op2.set_partition_id(split_partition_id.data(), split_partition_id.size());
@@ -205,7 +205,7 @@ TEST_CASE(MetadataOperationSplit, TestSplitMiddle, [] () {
     pmap.emplace_back(e);
   }
 
-  MetadataFile input(SHA1::compute("mytx"), 0, KEYSPACE_UINT64, pmap);
+  MetadataFile input(SHA1::compute("mytx"), 0, KEYSPACE_UINT64, pmap, 0);
 
   auto split_partition_id = SHA1::compute("C");
   auto split_partition_id_low = SHA1::compute("X1");
@@ -256,7 +256,7 @@ TEST_CASE(MetadataOperationSplit, TestSplitMiddle, [] () {
   EXPECT_EQ(output[3].partition_id, SHA1::compute("D"));
   EXPECT_EQ(output[3].splitting, false);
 
-  MetadataFile input2(SHA1::compute("mytx2"), 0, KEYSPACE_UINT64, output);
+  MetadataFile input2(SHA1::compute("mytx2"), 0, KEYSPACE_UINT64, output, 0);
 
   FinalizeSplitOperation op2;
   op2.set_partition_id(split_partition_id.data(), split_partition_id.size());
@@ -342,7 +342,7 @@ TEST_CASE(MetadataOperationSplit, TestSplitEnd, [] () {
     pmap.emplace_back(e);
   }
 
-  MetadataFile input(SHA1::compute("mytx"), 0, KEYSPACE_UINT64, pmap);
+  MetadataFile input(SHA1::compute("mytx"), 0, KEYSPACE_UINT64, pmap, 0);
 
   auto split_partition_id = SHA1::compute("D");
   auto split_partition_id_low = SHA1::compute("X1");
@@ -393,7 +393,7 @@ TEST_CASE(MetadataOperationSplit, TestSplitEnd, [] () {
   EXPECT_EQ(output[3].partition_id, SHA1::compute("D"));
   EXPECT_EQ(output[3].splitting, true);
 
-  MetadataFile input2(SHA1::compute("mytx2"), 0, KEYSPACE_UINT64, output);
+  MetadataFile input2(SHA1::compute("mytx2"), 0, KEYSPACE_UINT64, output, 0);
 
   FinalizeSplitOperation op2;
   op2.set_partition_id(split_partition_id.data(), split_partition_id.size());

@@ -32,11 +32,13 @@ MetadataFile::MetadataFile(
     const SHA1Hash& transaction_id,
     uint64_t transaction_seq,
     KeyspaceType keyspace_type,
-    const Vector<PartitionMapEntry>& partition_map) :
+    const Vector<PartitionMapEntry>& partition_map,
+    uint64_t flags) :
     transaction_id_(transaction_id),
     transaction_seq_(transaction_seq),
     keyspace_type_(keyspace_type),
-    partition_map_(partition_map) {}
+    partition_map_(partition_map),
+    flags_(flags) {}
 
 const SHA1Hash& MetadataFile::getTransactionID() const {
   return transaction_id_;
@@ -145,6 +147,12 @@ Status MetadataFile::decode(InputStream* is) {
     return Status(eIOError, "invalid file format version");
   }
 
+  // flags
+  flags_ = 0;
+  if (version > 2) {
+    flags_ = is->readVarUInt();
+  }
+
   // transaction id
   is->readNextBytes(
       (char*) transaction_id_.mutableData(),
@@ -164,6 +172,11 @@ Status MetadataFile::decode(InputStream* is) {
 
     // begin
     e.begin = is->readLenencString();
+
+    // end
+    if (flags_ & MFILE_FINITE) {
+      e.end = is->readLenencString();
+    }
 
     // partition id
     is->readNextBytes(
@@ -260,6 +273,9 @@ Status MetadataFile::encode(OutputStream* os) const  {
   // file format version
   os->appendUInt32(kBinaryFormatVersion);
 
+  // file format version
+  os->appendVarUInt(flags_);
+
   // transaction id
   os->write((const char*) transaction_id_.data(), transaction_id_.size());
 
@@ -274,6 +290,11 @@ Status MetadataFile::encode(OutputStream* os) const  {
   for (const auto& p : partition_map_) {
     // begin
     os->appendLenencString(p.begin);
+
+    // end
+    if (flags_ & MFILE_FINITE) {
+      os->appendLenencString(p.end);
+    }
 
     // partition id
     os->write((const char*) p.partition_id.data(), p.partition_id.size());
@@ -339,6 +360,14 @@ Status MetadataFile::computeChecksum(SHA1Hash* checksum) const {
 
   *checksum = SHA1::compute(buf.data(), buf.size());
   return Status::success();
+}
+
+uint64_t MetadataFile::getFlags() const {
+  return flags_;
+}
+
+bool MetadataFile::hasFinitePartitions() const {
+  return flags_ & MFILE_FINITE;
 }
 
 MetadataFile::PartitionMapEntry::PartitionMapEntry() : splitting(false) {}

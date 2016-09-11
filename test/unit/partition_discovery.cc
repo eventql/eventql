@@ -94,7 +94,7 @@ TEST_CASE(PartitionDiscoveryTest, TestServingPartition, [] () {
     pmap.emplace_back(e);
   }
 
-  MetadataFile file(SHA1::compute("mytx"), 7, KEYSPACE_STRING, pmap);
+  MetadataFile file(SHA1::compute("mytx"), 7, KEYSPACE_STRING, pmap, 0);
 
   {
     auto pid = SHA1::compute("4");
@@ -224,7 +224,7 @@ TEST_CASE(PartitionDiscoveryTest, TestSplittingPartition, [] () {
     pmap.emplace_back(e);
   }
 
-  MetadataFile file(SHA1::compute("mytx"), 7, KEYSPACE_STRING, pmap);
+  MetadataFile file(SHA1::compute("mytx"), 7, KEYSPACE_STRING, pmap, 0);
 
   {
     auto pid = SHA1::compute("4");
@@ -602,7 +602,7 @@ TEST_CASE(PartitionDiscoveryTest, TestFindByID, [] () {
     pmap.emplace_back(e);
   }
 
-  MetadataFile file(SHA1::compute("mytx"), 7, KEYSPACE_STRING, pmap);
+  MetadataFile file(SHA1::compute("mytx"), 7, KEYSPACE_STRING, pmap, 0);
 
   {
     auto pid = SHA1::compute("x");

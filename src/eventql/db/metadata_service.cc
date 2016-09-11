@@ -25,6 +25,7 @@
 #include "eventql/db/partition_discovery.h"
 #include "eventql/db/metadata_coordinator.h"
 #include "eventql/util/random.h"
+#include "eventql/util/logging.h"
 #include "eventql/db/server_allocator.h"
 
 namespace eventql {
@@ -103,7 +104,8 @@ Status MetadataService::performMetadataOperation(
       op.getOutputTransactionID(),
       input_file->getSequenceNumber() + 1,
       input_file->getKeyspaceType(),
-      new_pmap);
+      new_pmap,
+      input_file->getFlags());
 
   SHA1Hash output_file_checksum;
   {
