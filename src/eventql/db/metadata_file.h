@@ -115,6 +115,8 @@ public:
   bool hasFinitePartitions() const;
 
 protected:
+  PartitionMapIter lookup(const String& key) const;
+
   uint64_t flags_;
   SHA1Hash transaction_id_;
   uint64_t transaction_seq_;

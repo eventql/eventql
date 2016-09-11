@@ -65,7 +65,7 @@ MetadataFile::PartitionMapIter MetadataFile::getPartitionMapEnd() const {
   return partition_map_.end();
 }
 
-MetadataFile::PartitionMapIter MetadataFile::getPartitionMapAt(
+MetadataFile::PartitionMapIter MetadataFile::lookup(
     const String& key) const {
   if (partition_map_.empty()) {
     return partition_map_.end();
@@ -92,12 +92,36 @@ MetadataFile::PartitionMapIter MetadataFile::getPartitionMapAt(
   return partition_map_.begin() + low;
 }
 
+MetadataFile::PartitionMapIter MetadataFile::getPartitionMapAt(
+    const String& key) const {
+  auto iter = lookup(key);
+  if (flags_ & MFILE_FINITE) {
+    if (compareKeys(iter->begin, key) <= 0 &&
+        compareKeys(iter->end, key) > 0) {
+      return iter;
+    } else {
+      return partition_map_.end();
+    }
+  } else {
+    return iter;
+  }
+}
+
 MetadataFile::PartitionMapIter MetadataFile::getPartitionMapRangeBegin(
     const String& begin) const {
   if (begin.empty()) {
     return getPartitionMapBegin();
+  }
+
+  auto iter = lookup(begin);
+  if (flags_ & MFILE_FINITE) {
+    if (iter == partition_map_.end() || compareKeys(iter->end, begin) > 0) {
+      return iter;
+    } else {
+      return iter + 1;
+    }
   } else {
-    return getPartitionMapAt(begin);
+    return iter;
   }
 }
 
@@ -105,13 +129,13 @@ MetadataFile::PartitionMapIter MetadataFile::getPartitionMapRangeEnd(
     const String& end) const {
   if (end.empty()) {
     return getPartitionMapEnd();
+  }
+
+  auto iter = lookup(end);
+  if (iter == partition_map_.end() || iter->begin == end) {
+    return iter;
   } else {
-    auto iter = getPartitionMapAt(end);
-    if (compareKeys(iter->begin, end) == 0) {
-      return iter;
-    } else {
-      return iter + 1;
-    }
+    return iter + 1;
   }
 }
 
