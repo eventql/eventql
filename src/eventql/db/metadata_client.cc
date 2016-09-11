@@ -182,7 +182,7 @@ Status MetadataClient::findPartition(
     const String& table_id,
     const String& key,
     PartitionFindResponse* res) {
- auto table_cfg = cdir_->getTableConfig(ns, table_id);
+  auto table_cfg = cdir_->getTableConfig(ns, table_id);
 
   PartitionFindRequest req;
   req.set_db_namespace(ns);
@@ -222,7 +222,54 @@ Status MetadataClient::findPartition(
   }
 
   return Status(eIOError, "no metadata server responded");
+}
 
+Status MetadataClient::findOrCreatePartition(
+    const String& ns,
+    const String& table_id,
+    const String& key,
+    PartitionFindResponse* res) {
+  auto table_cfg = cdir_->getTableConfig(ns, table_id);
+
+  PartitionFindRequest req;
+  req.set_db_namespace(ns);
+  req.set_table_id(table_id);
+  req.set_key(key);
+  req.set_allow_create(true);
+
+  http::HTTPClient http_client;
+  for (const auto& s : table_cfg.metadata_servers()) {
+    auto server = cdir_->getServerConfig(s);
+    if (server.server_status() != SERVER_UP) {
+      continue;
+    }
+
+    auto url = StringUtil::format(
+        "http://$0/rpc/find_partition",
+        server.server_addr());
+
+    auto http_req = http::HTTPRequest::mkPost(url, *msg::encode(req));
+    //auth_->signRequest(static_cast<Session*>(txn_->getUserData()), &req);
+
+    http::HTTPResponse http_res;
+    auto rc = http_client.executeRequest(http_req, &http_res);
+    if (!rc.isSuccess()) {
+      logWarning("evqld", "metadata request failed: $0", rc.message());
+      continue;
+    }
+
+    if (http_res.statusCode() == 200) {
+      msg::decode<PartitionFindResponse>(http_res.body(), res);
+      return Status::success();
+    } else {
+      logWarning(
+          "evqld",
+          "metadata request failed: $0",
+          http_res.body().toString());
+    }
+  }
+
+  return Status(eIOError, "no metadata server responded");
 }
 
 } // namespace eventql

@@ -86,6 +86,7 @@ message PartitionFindRequest {
   required string db_namespace = 1;
   required string table_id = 2;
   required bytes key = 3;
+  required bool allow_create = 4;
 };
 
 message PartitionFindResponse {

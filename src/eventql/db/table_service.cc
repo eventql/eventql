@@ -481,7 +481,7 @@ void TableService::insertRecords(
         break;
       }
 
-      // compund primary key, key value is chained SHA1 of column values
+      // compound primary key, key value is chained SHA1 of column values
       default: {
         for (const auto& c : primary_key_columns) {
           auto f = record->getField(c);
@@ -503,7 +503,7 @@ void TableService::insertRecords(
     // lookup partition
     PartitionFindResponse find_res;
     {
-      auto rc = metadata_client.findPartition(
+      auto rc = metadata_client.findOrCreatePartition(
           tsdb_namespace,
           table_name,
           encodePartitionKey(
