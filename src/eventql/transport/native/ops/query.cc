@@ -87,42 +87,44 @@ ReturnCode performOperation_QUERY(
     auto txn = dbctx->sql_service->startTransaction(session);
     auto qplan = dbctx->sql_runtime->buildQueryPlan(txn.get(), q_query);
 
-    auto progress_interval = dbctx->config->getInt(
-        "server.query_progress_rate_limit");
-    auto progress_last = MonotonicClock::now();
-
     /* set progress callback */
-    qplan->setProgressCallback([
-        &qplan,
-        &conn,
-        &progress_interval,
-        &progress_last] () -> ReturnCode {
-      if (!progress_interval.isEmpty()) {
-        auto now = MonotonicClock::now();
-        if (now >= progress_last + progress_interval.get()) {
-          return ReturnCode::success();
+    if (q_flags & EVQL_OP_QUERY_PROGRESS) {
+      auto progress_interval = dbctx->config->getInt(
+          "server.query_progress_rate_limit");
+      auto progress_last = MonotonicClock::now();
+
+      qplan->setProgressCallback([
+          &qplan,
+          &conn,
+          &progress_interval,
+          &progress_last] () -> ReturnCode {
+        if (!progress_interval.isEmpty()) {
+          auto now = MonotonicClock::now();
+          if (now >= progress_last + progress_interval.get()) {
+            return ReturnCode::success();
+          }
+
+          progress_last = now;
         }
 
-        progress_last = now;
-      }
+        auto progress = qplan->getProgress();
+        QueryProgressFrame progress_frame;
+        progress_frame.setQueryProgressPermill(progress * 1000);
+        std::string payload;
+        auto payload_os = StringOutputStream::fromString(&payload);
+        progress_frame.writeTo(payload_os.get());
 
-      auto progress = qplan->getProgress();
-      QueryProgressFrame progress_frame;
-      progress_frame.setQueryProgressPermill(progress * 1000);
-      std::string payload;
-      auto payload_os = StringOutputStream::fromString(&payload);
-      progress_frame.writeTo(payload_os.get());
-
-      if (conn->isOutboxEmpty()) {
-        return conn->sendFrameAsync(
-            EVQL_OP_QUERY_PROGRESS,
-            0,
-            payload.data(),
-            payload.size());
-      } else {
-        return conn->flushOutbox(false, 0);
-      }
-    });
+        if (conn->isOutboxEmpty()) {
+          return conn->sendFrameAsync(
+              EVQL_OP_QUERY_PROGRESS,
+              0,
+              payload.data(),
+              payload.size());
+        } else {
+          return conn->flushOutbox(false, 0);
+        }
+      });
+    }
 
     if (qplan->numStatements() > 1 && !(q_flags & EVQL_QUERY_MULTISTMT)) {
       return conn->sendErrorFrame(
