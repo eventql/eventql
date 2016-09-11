@@ -34,11 +34,11 @@ MetadataFile::MetadataFile(
     KeyspaceType keyspace_type,
     const Vector<PartitionMapEntry>& partition_map,
     uint64_t flags) :
+    flags_(flags),
     transaction_id_(transaction_id),
     transaction_seq_(transaction_seq),
     keyspace_type_(keyspace_type),
-    partition_map_(partition_map),
-    flags_(flags) {}
+    partition_map_(partition_map) {}
 
 const SHA1Hash& MetadataFile::getTransactionID() const {
   return transaction_id_;
@@ -94,6 +94,10 @@ MetadataFile::PartitionMapIter MetadataFile::lookup(
 
 MetadataFile::PartitionMapIter MetadataFile::getPartitionMapAt(
     const String& key) const {
+  if (key.empty() || partition_map_.empty()) {
+    return getPartitionMapEnd();
+  }
+
   auto iter = lookup(key);
   if (flags_ & MFILE_FINITE) {
     if (compareKeys(iter->begin, key) <= 0 &&
@@ -109,7 +113,7 @@ MetadataFile::PartitionMapIter MetadataFile::getPartitionMapAt(
 
 MetadataFile::PartitionMapIter MetadataFile::getPartitionMapRangeBegin(
     const String& begin) const {
-  if (begin.empty()) {
+  if (begin.empty() || partition_map_.empty()) {
     return getPartitionMapBegin();
   }
 
@@ -127,7 +131,7 @@ MetadataFile::PartitionMapIter MetadataFile::getPartitionMapRangeBegin(
 
 MetadataFile::PartitionMapIter MetadataFile::getPartitionMapRangeEnd(
     const String& end) const {
-  if (end.empty()) {
+  if (end.empty() || partition_map_.empty()) {
     return getPartitionMapEnd();
   }
 

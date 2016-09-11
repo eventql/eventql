@@ -335,3 +335,29 @@ TEST_CASE(MetadataFileTest, TestKeyCompare, [] () {
           encodePartitionKey(KEYSPACE_UINT64, "2"),
           encodePartitionKey(KEYSPACE_UINT64, "400")) == -1);
 });
+
+TEST_CASE(MetadataFileTest, TestMetadataFileEmptyRangeLookups, [] () {
+  Vector<MetadataFile::PartitionMapEntry> pmap;
+
+  MetadataFile file(
+      SHA1::compute("mytx"),
+      0,
+      KEYSPACE_UINT64,
+      pmap,
+      MFILE_FINITE);
+
+  EXPECT(file.hasFinitePartitions() == true);
+  EXPECT(file.getPartitionMapAt("") == file.getPartitionMapEnd());
+  EXPECT(file.getPartitionMapAt("0") == file.getPartitionMapEnd());
+  EXPECT(file.getPartitionMapAt("10") == file.getPartitionMapEnd());
+  EXPECT(file.getPartitionMapAt("99") == file.getPartitionMapEnd());
+  EXPECT(file.getPartitionMapRangeBegin("") == file.getPartitionMapBegin());
+  EXPECT(file.getPartitionMapRangeBegin("0") == file.getPartitionMapBegin());
+  EXPECT(file.getPartitionMapRangeBegin("10") == file.getPartitionMapBegin());
+  EXPECT(file.getPartitionMapRangeBegin("99") == file.getPartitionMapBegin());
+  EXPECT(file.getPartitionMapRangeEnd("") == file.getPartitionMapEnd());
+  EXPECT(file.getPartitionMapRangeEnd("0") == file.getPartitionMapEnd());
+  EXPECT(file.getPartitionMapRangeEnd("10") == file.getPartitionMapEnd());
+  EXPECT(file.getPartitionMapRangeEnd("99") == file.getPartitionMapEnd());
+});
+
