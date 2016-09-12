@@ -80,16 +80,6 @@ ReturnCode sendQuery(
   }
 }
 
-void print(
-    RequestStats* rstats,
-    OutputStream* stdout_os) {
-  stdout_os->write(StringUtil::format(
-      "total: $0  --  successful: $1  --  failed: $2  -- rate: \n",
-      rstats->successful_requests + rstats->failed_requests,
-      rstats->successful_requests,
-      rstats->failed_requests));
-}
-
 int main(int argc, const char** argv) {
   cli::FlagParser flags;
 
@@ -190,15 +180,13 @@ int main(int argc, const char** argv) {
 
   Application::init();
   Application::logToStderr("evqlbenchmark");
-  auto stdin_is = InputStream::getStdin();
-  auto stdout_os = OutputStream::getStdout();
-  auto stderr_os = OutputStream::getStderr();
+  auto stdout_os = TerminalOutputStream::fromStream(OutputStream::getStdout());
+  bool is_tty = stdout_os->isTTY();
 
   bool print_help = flags.isSet("help");
   bool print_version = flags.isSet("version");
   if (print_version || print_help) {
-    auto stdout_os = OutputStream::getStdout();
-    stdout_os->write(
+    stdout_os->print(
         StringUtil::format(
             "EventQL $0 ($1)\n"
             "Copyright (c) 2016, DeepCortex GmbH. All rights reserved.\n\n",
@@ -211,7 +199,7 @@ int main(int argc, const char** argv) {
   }
 
   if (print_help) {
-    stdout_os->write(
+    stdout_os->print(
       "Usage: $ evqlbenchmark [OPTIONS] <command> [<args>]\n\n"
       "   -D, --database <db>       Select a database\n"
       "   -h, --host <hostname>     Set the EventQL server hostname\n"
@@ -222,8 +210,6 @@ int main(int argc, const char** argv) {
       );
     return 1;
   }
-
-  logInfo("evqlbenchmark", "starting benchmark");
 
   String qry_db;
   if (flags.isSet("database")) {
@@ -317,7 +303,18 @@ int main(int argc, const char** argv) {
           ++rstats.successful_requests;
         }
 
-        print(&rstats, stdout_os.get());
+        auto stats_line = StringUtil::format(
+            "total: $0  --  successful: $1  --  failed: $2", //Add rate
+            rstats.successful_requests + rstats.failed_requests,
+            rstats.successful_requests,
+            rstats.failed_requests);
+
+        if (is_tty) {
+          stdout_os->eraseLine();
+          stdout_os->print("\r" + stats_line);
+        } else {
+          stdout_os->print(stats_line + "\n");
+        }
         /* stop */
         if (rstats.failed_requests > kMaxErrors ||
             (has_max_requests &&
@@ -334,6 +331,5 @@ int main(int argc, const char** argv) {
     t.join();
   }
 
-  print(&rstats, stdout_os.get());
   return 0;
 }
