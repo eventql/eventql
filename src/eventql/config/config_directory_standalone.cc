@@ -204,7 +204,6 @@ TableDefinition StandaloneConfigDirectory::getTableConfig(
 void StandaloneConfigDirectory::updateTableConfig(
     const TableDefinition& table,
     bool force /* = false */) {
-  iputs("update table: $0", table.version());
   std::unique_lock<std::mutex> lk(mutex_);
   auto table_id = table.customer() + "~" + table.table_name();
   auto old_table_version = 0;
