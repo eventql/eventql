@@ -29,7 +29,7 @@
 #include "eventql/eventql.h"
 #include "eventql/util/application.h"
 #include "eventql/util/logging.h"
-#include "eventql/util/UnixTime.h"
+#include "eventql/util/WallClock.h"
 #include "eventql/util/return_code.h"
 #include "eventql/util/cli/CLI.h"
 #include "eventql/util/io/inputstream.h"
@@ -38,6 +38,9 @@
 #include "eventql/util/thread/threadpool.h"
 #include "eventql/cli/cli_config.h"
 
+struct Waiter { //FIXME better naming
+  uint64_t num_requests;
+};
 
 struct TimeWindow {
   static constexpr auto kMillisPerWindow = 1 * kMillisPerSecond;
@@ -80,54 +83,11 @@ protected:
   UnixTime start_;
 };
 
+static constexpr auto kMaxErrors = 10;
 struct RequestStats {
-  static constexpr auto kMaxErrors = 10;
+  uint64_t failed_requests;
+  uint64_t successful_requests;
 
-  RequestStats() :
-      failed_requests_(0),
-      successful_requests_(0),
-      max_requests_(0),
-      has_max_(false) {}
-
-  void addFailedRequest() {
-    ++failed_requests_;
-  }
-
-  void addSuccessfulRequest() {
-    ++successful_requests_;
-  }
-
-  uint64_t getFailedRequests() {
-    return failed_requests_;
-  }
-
-  uint64_t getSuccessfulRequest() {
-    return successful_requests_;
-  }
-
-  uint64_t getTotal() {
-    return successful_requests_ + failed_requests_;
-  }
-
-  void setMaximumRequests(uint64_t max_requests) {
-    max_requests_ = max_requests;
-    has_max_ = true;
-  }
-
-  bool stop() {
-    if (failed_requests_ >= kMaxErrors) {
-      return true;
-    }
-
-    return (has_max_ &&
-            failed_requests_ + successful_requests_ >= max_requests_);
-  }
-
-protected:
-  uint64_t failed_requests_;
-  uint64_t successful_requests_;
-  uint64_t max_requests_;
-  bool has_max_;
 };
 
 ReturnCode sendQuery(
@@ -169,9 +129,9 @@ void print(
     OutputStream* stdout_os) {
   stdout_os->write(StringUtil::format(
       "total: $0  --  successful: $1  --  failed: $2  -- rate: \n",
-      rstats->getTotal(),
-      rstats->getSuccessfulRequest(),
-      rstats->getFailedRequests()));
+      rstats->successful_requests + rstats->failed_requests,
+      rstats->successful_requests,
+      rstats->failed_requests));
 }
 
 int main(int argc, const char** argv) {
@@ -198,7 +158,7 @@ int main(int argc, const char** argv) {
   flags.defineFlag(
       "host",
       cli::FlagParser::T_STRING,
-      false,
+      true,
       "h",
       NULL,
       "eventql server hostname",
@@ -207,7 +167,7 @@ int main(int argc, const char** argv) {
   flags.defineFlag(
       "port",
       cli::FlagParser::T_INTEGER,
-      false,
+      true,
       "p",
       NULL,
       "eventql server port",
@@ -308,53 +268,43 @@ int main(int argc, const char** argv) {
   }
 
   logInfo("evqlbenchmark", "starting benchmark");
-  /* options */
-  eventql::ProcessConfigBuilder cfg_builder;
-  {
-    auto status = cfg_builder.loadDefaultConfigFile("evql");
-    if (!status.isSuccess()) {
-      logFatal("evqlbenchmark", "error while loading config file %s", status.message());
-      return 0;
-    }
-  }
-
-  if (flags.isSet("host")) {
-    cfg_builder.setProperty("evql", "host", flags.getString("host"));
-  }
-
-  if (flags.isSet("port")) {
-    cfg_builder.setProperty(
-        "evql",
-        "port",
-        StringUtil::toString(flags.getInt("port")));
-  }
-
-  if (flags.isSet("database")) {
-    cfg_builder.setProperty("evql", "database", flags.getString("database"));
-  }
-
-  eventql::cli::CLIConfig cfg(cfg_builder.getConfig());
-
 
   String qry_db;
   if (flags.isSet("database")) {
     qry_db = flags.getString("database");
   }
 
+  uint64_t num_threads;
+  uint64_t max_requests;
+  bool has_max_requests = false;
+  try {
+    num_threads = flags.getInt("threads");
+    max_requests = flags.getInt("max");
+    has_max_requests = true;
+  } catch (const std::exception& e) {
+    logFatal("evqlbenchmark", e.what());
+    return 0;
+  }
+
   auto qry_str = flags.getString("query");
   const UnixTime global_start;
 
   std::mutex m;
-  TimeWindow twindow(flags.getInt("rate"));
 
   RequestStats rstats;
-  if (flags.isSet("max")) {
-    rstats.setMaximumRequests(flags.getInt("max"));
-  }
+  rstats.successful_requests = 0;
+  rstats.failed_requests = 0;
 
-  auto num_threads = flags.getInt("threads");
+  Vector<Waiter> waiters;
+  Vector<uint64_t> request_times; //FIxME use ringbuffer
+
   Vector<std::thread> threads;
   for (size_t i = 0; i < num_threads; ++i) {
+    /* init waiter */
+    Waiter waiter;
+    waiter.num_requests = 0;
+    waiters.emplace_back(waiter);
+
     threads.emplace_back(std::thread([&] () {
 
       /* connect to eventql client */
@@ -367,43 +317,39 @@ int main(int argc, const char** argv) {
       {
         auto rc = evql_client_connect(
             client,
-            cfg.getHost().c_str(),
-            cfg.getPort(),
+            flags.getString("host").c_str(),
+            flags.getInt("port"),
+            qry_db.c_str(),
             0);
 
         if (rc < 0) {
-          logFatal("evqlbenchmark", "can't connect to eventql client: $0", evql_client_geterror(client));
+          logFatal(
+              "evqlbenchmark",
+              "can't connect to eventql client: $0",
+              evql_client_geterror(client));
           return 0;
         }
       }
 
       for (;;) {
-        m.lock(); //FIXME
-        /* check remaining time in current timewindow */
-        if (twindow.getRemainingMillis() == 0) {
-          /* start a new timewindow */
-          twindow.clear();
-          m.unlock(); //FIXME
-          continue;
-        }
-        m.unlock(); //FIXME
+        auto now = WallClock::now();
+        request_times.emplace_back(now);
 
-        auto sleep = twindow.getRemainingRequests() * 100 / twindow.getRemainingMillis();
-        std::this_thread::sleep_for(std::chrono::milliseconds(sleep));
-        /* send query */
         auto rc = sendQuery(qry_str, qry_db, client);
-        m.lock(); //FIXME
+        m.lock();
         if (!rc.isSuccess()) {
           logFatal("evqlbenchmark", "executing query failed: $0", rc.getMessage());
-          rstats.addFailedRequest();
+          ++rstats.failed_requests;
         } else {
-          rstats.addSuccessfulRequest();
+          ++rstats.successful_requests;
         }
-        twindow.addRequest();
         m.unlock(); //FIXME
 
         print(&rstats, stdout_os.get());
-        if (rstats.stop()) {
+        /* stop */
+        if (rstats.failed_requests > kMaxErrors ||
+            (has_max_requests &&
+            rstats.failed_requests + rstats.successful_requests >= max_requests)) {
           break;
         }
       }
