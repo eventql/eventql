@@ -225,7 +225,7 @@ Status MetadataService::createPartition(
       request.db_namespace(),
       request.table_id());
 
-  if (!table_config.config().enable_fixed_partitions()) {
+  if (!table_config.config().enable_finite_partitions()) {
     return Status(eRuntimeError, "partition not found");
   }
 
@@ -233,13 +233,13 @@ Status MetadataService::createPartition(
       table_config.config().partitioner() == TBL_PARTITION_TIMEWINDOW ||
       table_config.config().partitioner() == TBL_PARTITION_UINT64);
 
-  uint64_t fixed_partition_size = table_config.config().fixed_partition_size();
-  assert(fixed_partition_size > 0);
+  uint64_t finite_partition_size = table_config.config().finite_partition_size();
+  assert(finite_partition_size > 0);
 
   uint64_t p_point = std::stoull(
       decodePartitionKey(KEYSPACE_UINT64, request.key()));
-  auto p_begin = (p_point / fixed_partition_size) * fixed_partition_size;
-  auto p_end = p_begin + fixed_partition_size;
+  auto p_begin = (p_point / finite_partition_size) * finite_partition_size;
+  auto p_end = p_begin + finite_partition_size;
 
   // FIXME: if p_begin or p_end overlap into another partition, adjust
   // accordingly
