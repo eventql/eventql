@@ -313,7 +313,7 @@ Status ZookeeperConfigDirectory::syncClusterConfig(CallbackList* events) {
     cluster_config_.set_version(stat.version + 1);
     if (events) {
       for (const auto& cb : on_cluster_change_) {
-        events->emplace_back(std::bind(cb, getPatchedClusterConfig()));
+        events->emplace_back(std::bind(cb, cluster_config_));
       }
     }
 
@@ -803,7 +803,7 @@ void ZookeeperConfigDirectory::handleConnectionLost() {
 // PRECONDITION: must NOT hold mutex
 ClusterConfig ZookeeperConfigDirectory::getClusterConfig() const {
   std::unique_lock<std::mutex> lk(mutex_);
-  return getPatchedClusterConfig();
+  return cluster_config_;
 }
 
 // PRECONDITION: must NOT hold mutex
@@ -872,31 +872,6 @@ void ZookeeperConfigDirectory::setClusterConfigChangeCallback(
     Function<void (const ClusterConfig& cfg)> fn) {
   std::unique_lock<std::mutex> lk(mutex_);
   on_cluster_change_.emplace_back(fn);
-}
-
-// PRECONDITION: must hold mutex
-ClusterConfig ZookeeperConfigDirectory::getPatchedClusterConfig() const {
-  ClusterConfig patched = cluster_config_;
-
-  HashMap<String, String> old_addrs;
-  for (const auto& n : patched.dht_nodes()) {
-    old_addrs[n.name()] = n.addr();
-  }
-
-  patched.clear_dht_nodes();
-  for (const auto& s : servers_) {
-    auto dhtnode = patched.add_dht_nodes();
-    dhtnode->set_name(s.second.server_id());
-    dhtnode->set_status(DHTNODE_LIVE);
-    const auto& live_server = servers_live_.find(s.second.server_id());
-    if (live_server != servers_live_.end()) {
-      dhtnode->set_addr(live_server->second);
-    } else {
-      dhtnode->set_addr(old_addrs[s.second.server_id()]);
-    }
-  }
-
-  return patched;
 }
 
 String ZookeeperConfigDirectory::getServerID() const {
