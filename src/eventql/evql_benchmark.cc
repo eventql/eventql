@@ -296,7 +296,9 @@ int main(int argc, const char** argv) {
   rstats.failed_requests = 0;
 
   Vector<Waiter> waiters;
-  Vector<uint64_t> request_times; //FIxME use ringbuffer
+
+  auto num_stored_times = 10;
+  std::queue<uint64_t> times(num_stored_times);
 
   Vector<std::thread> threads;
   for (size_t i = 0; i < num_threads; ++i) {
@@ -332,18 +334,18 @@ int main(int argc, const char** argv) {
       }
 
       for (;;) {
+        /* insert time of current request */
+        m.lock();
         auto now = WallClock::now();
-        request_times.emplace_back(now);
+        m.unlock();
 
         auto rc = sendQuery(qry_str, qry_db, client);
-        m.lock();
         if (!rc.isSuccess()) {
           logFatal("evqlbenchmark", "executing query failed: $0", rc.getMessage());
           ++rstats.failed_requests;
         } else {
           ++rstats.successful_requests;
         }
-        m.unlock(); //FIXME
 
         print(&rstats, stdout_os.get());
         /* stop */
