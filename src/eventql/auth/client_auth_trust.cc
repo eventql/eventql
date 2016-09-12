@@ -25,7 +25,7 @@
 
 namespace eventql {
 
-Status TrustClientAuth::authenticateSession(
+Status TrustClientAuth::authenticateNonInteractive(
     Session* session,
     HashMap<String, String> auth_data) {
   const auto& user_id = auth_data["user"];

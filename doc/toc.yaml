@@ -64,7 +64,7 @@
           type: page
           visible_in_menu: true
           visible_in_toc: true
-          source: "/api/config_file.md"
+          source: "/deployment/configuration.md"
         -
           url: "/deployment/components"
           title: "Components"
@@ -792,39 +792,63 @@
       location: "/internals/architecture"
       children:
         -
-          url: "/internals/partitioning"
-          title: "Table Partitioning"
+          url: "/internals/architecture"
+          title: "Architecture"
           type: page
-          doctitle: "8.2.1 Table Partitioning"
-          content_type: txt
           visible_in_menu: true
           visible_in_toc: true
-          source: "internals/partitioning.txt"
+          source: "internals/architecture.md"
         -
-          url: "/internals/statement-based-replication"
-          title: "Segment-Based Replication"
-          type: page
-          doctitle: "8.2.2 Segment-Based Replication"
-          content_type: txt
+          url: "/internals/"
+          title: "Design Documents"
+          type: redirect
           visible_in_menu: true
           visible_in_toc: true
-          source: "internals/replication.txt"
-        -
-          url: "/internals/binary-protocol"
-          title: "Binary Protocol"
-          type: page
-          doctitle: "8.2.3 Binary Protocol"
-          content_type: txt
-          visible_in_menu: true
-          visible_in_toc: true
-          source: "internals/protocol.txt"
-        -
-          url: "/internals/life-of-a-query"
-          title: "Life of a Query"
-          type: page
-          visible_in_menu: true
-          visible_in_toc: true
-          source: "internals/life-of-a-query.md"
+          location: "/internals/architecture"
+          children:
+          -
+            url: "/internals/partitioning"
+            title: "Table Partitioning"
+            type: page
+            doctitle: "8.2.1 Table Partitioning"
+            content_type: txt
+            visible_in_menu: true
+            visible_in_toc: true
+            source: "internals/partitioning.txt"
+          -
+            url: "/internals/statement-based-replication"
+            title: "Segment-Based Replication"
+            type: page
+            doctitle: "8.2.2 Segment-Based Replication"
+            content_type: txt
+            visible_in_menu: true
+            visible_in_toc: true
+            source: "internals/replication.txt"
+          -
+            url: "/internals/binary-protocol"
+            title: "Binary Protocol"
+            type: page
+            doctitle: "8.2.3 Binary Protocol"
+            content_type: txt
+            visible_in_menu: true
+            visible_in_toc: true
+            source: "internals/protocol.txt"
+          -
+            url: "/internals/preaggregation"
+            title: "Pre-Aggregation"
+            type: page
+            doctitle: "8.2.4 Preaggregation"
+            content_type: txt
+            visible_in_menu: true
+            visible_in_toc: true
+            source: "internals/preaggregation.txt"
+          -
+            url: "/internals/life-of-a-query"
+            title: "Life of a Query"
+            type: page
+            visible_in_menu: true
+            visible_in_toc: true
+            source: "internals/life-of-a-query.md"
     -
       url: "/examples"
       title: "Examples"
@@ -849,7 +873,7 @@
               type: redirect
               doc_type: example
               visible_in_menu: true
-              visible_in_toc: false
+              visible_in_toc: true
               location: "/examples/chartsql/linecharts/simple_lines"
               children:
                 -
@@ -858,7 +882,7 @@
                   type: page
                   content_type: html
                   doc_type: example
-                  visible_in_menu: true
+                  visible_in_menu: false
                   visible_in_toc: false
                   source: "examples/chartsql/examples.html"
                 -
@@ -867,7 +891,7 @@
                   type: page
                   content_type: html
                   doc_type: example
-                  visible_in_menu: true
+                  visible_in_menu: false
                   visible_in_toc: false
                   source: "examples/chartsql/examples.html"
                 -
@@ -876,7 +900,7 @@
                   type: page
                   content_type: html
                   doc_type: example
-                  visible_in_menu: true
+                  visible_in_menu: false
                   visible_in_toc: false
                   source: "examples/chartsql/examples.html"
                 -
@@ -885,7 +909,7 @@
                   type: page
                   content_type: html
                   doc_type: example
-                  visible_in_menu: true
+                  visible_in_menu: false
                   visible_in_toc: false
                   source: "examples/chartsql/examples.html"
                 -
@@ -894,7 +918,7 @@
                   type: page
                   content_type: html
                   doc_type: example
-                  visible_in_menu: true
+                  visible_in_menu: false
                   visible_in_toc: false
                   source: "examples/chartsql/examples.html"
                 -
@@ -903,7 +927,7 @@
                   type: page
                   content_type: html
                   doc_type: example
-                  visible_in_menu: true
+                  visible_in_menu: false
                   visible_in_toc: false
                   source: "examples/chartsql/examples.html"
                 -
@@ -912,7 +936,7 @@
                   type: page
                   content_type: html
                   doc_type: example
-                  visible_in_menu: true
+                  visible_in_menu: false
                   visible_in_toc: false
                   source: "examples/chartsql/examples.html"
                 -
@@ -921,7 +945,7 @@
                   type: page
                   content_type: html
                   doc_type: example
-                  visible_in_menu: true
+                  visible_in_menu: false
                   visible_in_toc: false
                   source: "examples/chartsql/examples.html"
             -
@@ -930,7 +954,7 @@
               type: redirect
               doc_type: example
               visible_in_menu: true
-              visible_in_toc: false
+              visible_in_toc: true
               location: "/examples/chartsql/areacharts/simple_area"
               children:
                 -
@@ -939,7 +963,7 @@
                   type: page
                   content_type: html
                   doc_type: example
-                  visible_in_menu: true
+                  visible_in_menu: false
                   visible_in_toc: false
                   source: "examples/chartsql/examples.html"
                 -
@@ -948,7 +972,7 @@
                   type: page
                   content_type: html
                   doc_type: example
-                  visible_in_menu: true
+                  visible_in_menu: false
                   visible_in_toc: false
                   source: "examples/chartsql/examples.html"
                 -
@@ -957,7 +981,7 @@
                   type: page
                   content_type: html
                   doc_type: example
-                  visible_in_menu: true
+                  visible_in_menu: false
                   visible_in_toc: false
                   source: "examples/chartsql/examples.html"
             -
@@ -966,7 +990,7 @@
               type: redirect
               doc_type: example
               visible_in_menu: true
-              visible_in_toc: false
+              visible_in_toc: true
               location: "/examples/chartsql/barcharts/vertical_bars"
               children:
                 -
@@ -975,7 +999,7 @@
                   type: page
                   content_type: html
                   doc_type: example
-                  visible_in_menu: true
+                  visible_in_menu: false
                   visible_in_toc: false
                   source: "examples/chartsql/examples.html"
                 -
@@ -984,7 +1008,7 @@
                   type: page
                   content_type: html
                   doc_type: example
-                  visible_in_menu: true
+                  visible_in_menu: false
                   visible_in_toc: false
                   source: "examples/chartsql/examples.html"
                 -
@@ -993,7 +1017,7 @@
                   type: page
                   content_type: html
                   doc_type: example
-                  visible_in_menu: true
+                  visible_in_menu: false
                   visible_in_toc: false
                   source: "examples/chartsql/examples.html"
                 -
@@ -1002,7 +1026,7 @@
                   type: page
                   content_type: html
                   doc_type: example
-                  visible_in_menu: true
+                  visible_in_menu: false
                   visible_in_toc: false
                   source: "examples/chartsql/examples.html"
                 -
@@ -1011,7 +1035,7 @@
                   type: page
                   content_type: html
                   doc_type: example
-                  visible_in_menu: true
+                  visible_in_menu: false
                   visible_in_toc: false
                   source: "examples/chartsql/examples.html"
                 -
@@ -1020,7 +1044,7 @@
                   type: page
                   content_type: html
                   doc_type: example
-                  visible_in_menu: true
+                  visible_in_menu: false
                   visible_in_toc: false
                   source: "examples/chartsql/examples.html"
             -
@@ -1029,7 +1053,7 @@
               type: redirect
               doc_type: example
               visible_in_menu: true
-              visible_in_toc: false
+              visible_in_toc: true
               location: "/examples/chartsql/pointcharts/simple_bubbles"
               children:
                 -
@@ -1038,7 +1062,7 @@
                   type: page
                   content_type: html
                   doc_type: example
-                  visible_in_menu: true
+                  visible_in_menu: false
                   visible_in_toc: false
                   source: "examples/chartsql/examples.html"
                 -
@@ -1047,7 +1071,7 @@
                   type: page
                   content_type: html
                   doc_type: example
-                  visible_in_menu: true
+                  visible_in_menu: false
                   visible_in_toc: false
                   source: "examples/chartsql/examples.html"
                 -
@@ -1056,7 +1080,7 @@
                   type: page
                   content_type: html
                   doc_type: example
-                  visible_in_menu: true
+                  visible_in_menu: false
                   visible_in_toc: false
                   source: "examples/chartsql/examples.html"
             -
@@ -1065,7 +1089,7 @@
               type: redirect
               doc_type: example
               visible_in_menu: true
-              visible_in_toc: false
+              visible_in_toc: true
               location: "/examples/chartsql/combined/barsandlines"
               children:
                 -
@@ -1074,7 +1098,7 @@
                   type: page
                   content_type: html
                   doc_type: example
-                  visible_in_menu: true
+                  visible_in_menu: false
                   visible_in_toc: false
                   source: "examples/chartsql/examples.html"
                 -
@@ -1083,7 +1107,7 @@
                   type: page
                   content_type: html
                   doc_type: example
-                  visible_in_menu: true
+                  visible_in_menu: false
                   visible_in_toc: false
                   source: "examples/chartsql/examples.html"
     #  title: "Appendix"

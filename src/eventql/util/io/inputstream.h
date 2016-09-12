@@ -181,6 +181,26 @@ public:
 
 };
 
+class ZeroCopyInputStream : public RewindableInputStream {
+public:
+
+  /**
+   * Read the next n bytes from the file. Returns true if the bytes were
+   * read and false if the end of the stream was reached.
+   *
+   * @param data return the string pointer into this pointer
+   * @param len the number of bytes to read
+   */
+  virtual bool readZ(const char** data, size_t len) = 0;
+
+  /**
+   * Reads a LEB128 prefix-length-encoded string from the stream. Returns true
+   * if the string was read and false otherwise.
+   */
+  virtual bool readLenencStringZ(const char** data, size_t* len);
+
+};
+
 class FileInputStream : public RewindableInputStream {
 public:
   enum kByteOrderMark {
@@ -300,9 +320,10 @@ protected:
   size_t buf_pos_;
   int fd_;
   bool close_on_destroy_;
+public:
 };
 
-class StringInputStream : public RewindableInputStream {
+class StringInputStream : public ZeroCopyInputStream {
 public:
 
   /**
@@ -327,6 +348,15 @@ public:
    * @param target the target char pointer
    */
   bool readNextByte(char* target) override;
+
+  /**
+   * Read the next n bytes from the file. Returns true if the bytes were
+   * read and false if the end of the stream was reached.
+   *
+   * @param data return the string pointer into this pointer
+   * @param len the number of bytes to read
+   */
+  bool readZ(const char** data, size_t len) override;
 
   /**
    * Skip the next N bytes in the stream. Returns the number of bytes skipped.
@@ -358,7 +388,7 @@ protected:
   size_t cur_;
 };
 
-class BufferInputStream : public RewindableInputStream {
+class BufferInputStream : public ZeroCopyInputStream {
 public:
 
   /**
@@ -382,6 +412,15 @@ public:
    * @param target the target char pointer
    */
   bool readNextByte(char* target) override;
+
+  /**
+   * Read the next n bytes from the file. Returns true if the bytes were
+   * read and false if the end of the stream was reached.
+   *
+   * @param data return the string pointer into this pointer
+   * @param len the number of bytes to read
+   */
+  bool readZ(const char** data, size_t len) override;
 
   /**
    * Skip the next N bytes in the stream. Returns the number of bytes skipped.
@@ -413,7 +452,7 @@ protected:
   size_t cur_;
 };
 
-class MemoryInputStream : public RewindableInputStream {
+class MemoryInputStream : public ZeroCopyInputStream {
 public:
 
   /**
@@ -430,6 +469,15 @@ public:
    * @param target the target char pointer
    */
   bool readNextByte(char* target) override;
+
+  /**
+   * Read the next n bytes from the file. Returns true if the bytes were
+   * read and false if the end of the stream was reached.
+   *
+   * @param data return the string pointer into this pointer
+   * @param len the number of bytes to read
+   */
+  bool readZ(const char** data, size_t len) override;
 
   /**
    * Skip the next N bytes in the stream. Returns the number of bytes skipped.

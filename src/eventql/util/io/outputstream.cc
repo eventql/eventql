@@ -27,6 +27,7 @@
 #include <stdarg.h>
 #include <string>
 #include <unistd.h>
+#include <arpa/inet.h>
 #include "eventql/util/buffer.h"
 #include "eventql/util/exception.h"
 #include "eventql/util/io/outputstream.h"
@@ -80,8 +81,18 @@ void OutputStream::appendUInt16(uint16_t value) {
   write((char*) &value, sizeof(value));
 }
 
+void OutputStream::appendNUInt16(uint16_t value) {
+  uint16_t nvalue = htons(value);
+  write((char*) &nvalue, sizeof(nvalue));
+}
+
 void OutputStream::appendUInt32(uint32_t value) {
   write((char*) &value, sizeof(value));
+}
+
+void OutputStream::appendNUInt32(uint32_t value) {
+  uint32_t nvalue = htonl(value);
+  write((char*) &nvalue, sizeof(nvalue));
 }
 
 void OutputStream::appendUInt64(uint64_t value) {

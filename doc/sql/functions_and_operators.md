@@ -70,32 +70,32 @@ Users can also define their own functions and operators.
 ###### Numeric Functions
 <table class="small functions_and_operators">
   <tr>
-    <td><a class="link" href="/documentation/sql/functions-and-operators/add-operator">+</a></<td>
+    <td><a class="link" href="/documentation/sql/functions-and-operators/add-operator">+</a></td>
     <td>Sum of two values</td>
     <td><code>2 + 2</code></td>
   </tr>
   <tr>
-    <td><a class="link" href="/documentation/sql/functions-and-operators/mul-operator">*</a></<td>
+    <td><a class="link" href="/documentation/sql/functions-and-operators/mul-operator">*</a></td>
     <td>Multiply two numbers</td>
     <td><code>4 * 2</code></td>
   </tr>
   <tr>
-    <td><a class="link" href="/documentation/sql/functions-and-operators/mul-operator">/</a></<td>
+    <td><a class="link" href="/documentation/sql/functions-and-operators/mul-operator">/</a></td>
     <td>Division operator</td>
     <td><code>4 / 2</code></td>
   </tr>
   <tr>
-    <td><a class="link" href="/documentation/sql/functions-and-operators/pow">pow</a></<td>
+    <td><a class="link" href="/documentation/sql/functions-and-operators/pow">pow</a></td>
     <td>Power operator</td>
     <td><code>pow(2, 32)</code></td>
   </tr>
   <tr>
-    <td><a class="link" href="/documentation/sql/functions-and-operators/round">round</a></<td>
+    <td><a class="link" href="/documentation/sql/functions-and-operators/round">round</a></td>
     <td>Round a number</td>
     <td><code>round(0.234, 2)</code></td>
   </tr>
   <tr>
-    <td><a class="link" href="/documentation/sql/functions-and-operators/truncate">truncate</a></<td>
+    <td><a class="link" href="/documentation/sql/functions-and-operators/truncate">truncate</a></td>
     <td>Truncate a number</td>
     <td><code>truncate(0.234, 2)</code></td>
   </tr>
@@ -104,52 +104,52 @@ Users can also define their own functions and operators.
 ###### Boolean Functions
 <table class="small functions_and_operators">
   <tr>
-    <td><a class="link" href="/documentation/sql/functions-and-operators/neg-operator">!</a></<td>
+    <td><a class="link" href="/documentation/sql/functions-and-operators/neg-operator">!</a></td>
     <td>Logical Negation operator</td>
     <td><code>!true</code></td>
   </tr>
   <tr>
-    <td><a class="link" href="/documentation/sql/functions-and-operators/eq-operator">==</a></<td>
+    <td><a class="link" href="/documentation/sql/functions-and-operators/eq-operator">==</a></td>
     <td>'Equal' operator</td>
     <td><code>2 == 2</code></td>
   </tr>
   <tr>
-    <td><a class="link" href="/documentation/sql/functions-and-operators/neq-operator">!=</a></<td>
+    <td><a class="link" href="/documentation/sql/functions-and-operators/neq-operator">!=</a></td>
     <td>'Not equal' operator</td>
     <td><code>2 != 3</code></td>
   </tr>
   <tr>
-    <td><a class="link" href="/documentation/sql/functions-and-operators/lt-operator">&lt;</a></<td>
+    <td><a class="link" href="/documentation/sql/functions-and-operators/lt-operator">&lt;</a></td>
     <td>'Less than' operator</td>
-    <td><code>2 < 4</code></td>
+    <td><code>2 &lt; 4</code></td>
   </tr>
   <tr>
-    <td><a class="link" href="/documentation/sql/functions-and-operators/lte-operator">&lt;=</a></<td>
+    <td><a class="link" href="/documentation/sql/functions-and-operators/lte-operator">&lt;=</a></td>
     <td>'Less or equal than' operator</td>
-    <td><code>2 <= 4</code></td>
+    <td><code>2 &lt;= 4</code></td>
   </tr>
   <tr>
-    <td><a class="link" href="/documentation/sql/functions-and-operators/gt-operator">&gt;</a></<td>
+    <td><a class="link" href="/documentation/sql/functions-and-operators/gt-operator">&gt;</a></td>
     <td>'Greather than' operator</td>
-    <td><code>4 > 2</code></td>
+    <td><code>4 &gt; 2</code></td>
   </tr>
   <tr>
-    <td><a class="link" href="/documentation/sql/functions-and-operators/gte-operator">&gt;=</a></<td>
+    <td><a class="link" href="/documentation/sql/functions-and-operators/gte-operator">&gt;=</a></td>
     <td>'Greather or equal than' operator</td>
-    <td><code>4 >= 2</code></td>
+    <td><code>4 &gt;= 2</code></td>
   </tr>
   <tr>
-    <td><a class="link" href="/documentation/sql/functions-and-operators/and">AND</a></<td>
+    <td><a class="link" href="/documentation/sql/functions-and-operators/and">AND</a></td>
     <td>Logical and</td>
-    <td><code>1 < 2 AND 2 < 3</code></td>
+    <td><code>1 &lt; 2 AND 2 &lt; 3</code></td>
   </tr>
   <tr>
-    <td><a class="link" href="/documentation/sql/functions-and-operators/or">OR</a></<td>
+    <td><a class="link" href="/documentation/sql/functions-and-operators/or">OR</a></td>
     <td>Logical or</td>
-    <td><code>1 < 2 OR 2 < 3</code></td>
+    <td><code>1 &lt; 2 OR 2 &lt; 3</code></td>
   </tr>
   <tr>
-    <td><a class="link" href="/documentation/sql/functions-and-operators/isnull">isnull</a></<td>
+    <td><a class="link" href="/documentation/sql/functions-and-operators/isnull">isnull</a></td>
     <td>Check if value is null</td>
     <td><code>isnull(null)</code></td>
   </tr>
@@ -158,22 +158,22 @@ Users can also define their own functions and operators.
 ###### DateTime Functions
 <table class="small functions_and_operators">
   <tr>
-    <td><a class="link" href="/documentation/sql/functions-and-operators/from_timestamp">from_timestamp</a></<td>
+    <td><a class="link" href="/documentation/sql/functions-and-operators/from_timestamp">from_timestamp</a></td>
     <td>Convert a timestamp to a DateTime value</td>
     <td><code>from_timestamp(1462125626)</code></td>
   </tr>
   <tr>
-    <td><a class="link" href="/documentation/sql/functions-and-operators/date_trunc">date_trunc</a></<td>
+    <td><a class="link" href="/documentation/sql/functions-and-operators/date_trunc">date_trunc</a></td>
     <td>Truncate to specified precision</td>
     <td><code>date_trunc("d", 1462125626)</code></td>
   </tr>
   <tr>
-    <td><a class="link" href="/documentation/sql/functions-and-operators/date_add">date_add</a></<td>
+    <td><a class="link" href="/documentation/sql/functions-and-operators/date_add">date_add</a></td>
     <td>Add interval</td>
     <td><code>date_add(1462125626, '1', 'DAY')</code></td>
   </tr>
   <tr>
-    <td><a class="link" href="/documentation/sql/functions-and-operators/time_at">time_at</a></<td>
+    <td><a class="link" href="/documentation/sql/functions-and-operators/time_at">time_at</a></td>
     <td>Get DateTime value for interval from now</td>
     <td><code>time_at('-12hours')</code></td>
   </tr>
@@ -182,27 +182,27 @@ Users can also define their own functions and operators.
 ###### Aggregate Functions
 <table class="small functions_and_operators">
   <tr>
-    <td><a class="link" href="/documentation/sql/functions-and-operators/sum">sum</a></<td>
+    <td><a class="link" href="/documentation/sql/functions-and-operators/sum">sum</a></td>
     <td>Sum of all values in the result set</td>
     <td><code>sum(price)</code></td>
   </tr>
   <tr>
-    <td><a class="link" href="/documentation/sql/functions-and-operators/count">count</a></<td>
+    <td><a class="link" href="/documentation/sql/functions-and-operators/count">count</a></td>
     <td>Number of values in the result set</td>
     <td><code>count(1)</code></td>
   </tr>
   <tr>
-    <td><a class="link" href="/documentation/sql/functions-and-operators/min">min</a></<td>
+    <td><a class="link" href="/documentation/sql/functions-and-operators/min">min</a></td>
     <td>Minimum of values in the result set</td>
     <td><code>min(price)</code></td>
   </tr>
   <tr>
-    <td><a class="link" href="/documentation/sql/functions-and-operators/max">max</a></<td>
+    <td><a class="link" href="/documentation/sql/functions-and-operators/max">max</a></td>
     <td>Maximum of values in the result set</td>
     <td><code>max(price)</code></td>
   </tr>
   <tr>
-    <td><a class="link" href="/documentation/sql/functions-and-operators/mean">mean</a></<td>
+    <td><a class="link" href="/documentation/sql/functions-and-operators/mean">mean</a></td>
     <td>mean of values in the result set</td>
     <td><code>mean(price)</code></td>
   </tr>
@@ -211,22 +211,22 @@ Users can also define their own functions and operators.
 ###### Conversion Functions
 <table class="small functions_and_operators">
   <tr>
-    <td><a class="link" href="/documentation/sql/functions-and-operators/to_str">to_str</a></<td>
+    <td><a class="link" href="/documentation/sql/functions-and-operators/to_str">to_str</a></td>
     <td>Convert to string</td>
     <td><code>to_str(1)</code></td>
   </tr>
   <tr>
-    <td><a class="link" href="/documentation/sql/functions-and-operators/to_int">to_int</a></<td>
+    <td><a class="link" href="/documentation/sql/functions-and-operators/to_int">to_int</a></td>
     <td>Convert to integer</td>
     <td><code>to_int(142.23)</code></td>
   </tr>
   <tr>
-    <td><a class="link" href="/documentation/sql/functions-and-operators/to_float">to_float</a></<td>
+    <td><a class="link" href="/documentation/sql/functions-and-operators/to_float">to_float</a></td>
     <td>Convert to float</td>
     <td><code>to_float(12)</code></td>
   </tr>
   <tr>
-    <td><a class="link" href="/documentation/sql/functions-and-operators/to_bool">to_bool</a></<td>
+    <td><a class="link" href="/documentation/sql/functions-and-operators/to_bool">to_bool</a></td>
     <td>Convert to string</td>
     <td><code>to_bool(1)</code></td>
   </tr>

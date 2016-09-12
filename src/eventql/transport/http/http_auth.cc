@@ -61,7 +61,7 @@ Status HTTPAuth::authenticateRequest(
     }
   }
 
-  return client_auth->authenticateSession(session, auth_data);
+  return client_auth->authenticateNonInteractive(session, auth_data);
 }
 
 }

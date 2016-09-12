@@ -64,14 +64,24 @@ public:
   void appendUInt8(uint8_t value);
 
   /**
-   * Writes a plain uint16 to the stream.
+   * Writes a plain (host byte order) uint16 to the stream.
    */
   void appendUInt16(uint16_t value);
 
   /**
-   * Writes a plain uint32 to the stream.
+   * Writes a plain (network byte order) uint16 to the stream.
+   */
+  void appendNUInt16(uint16_t value);
+
+  /**
+   * Writes a plain (host byte order) uint32 to the stream.
    */
   void appendUInt32(uint32_t value);
+
+  /**
+   * Writes a plain (network byte order) uint32 to the stream.
+   */
+  void appendNUInt32(uint32_t value);
 
   /**
    * Writes a plain uint64 to the stream.

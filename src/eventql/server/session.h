@@ -24,10 +24,12 @@
 #pragma once
 #include "eventql/eventql.h"
 #include "eventql/util/stdtypes.h"
+#include "eventql/util/return_code.h"
 
 namespace eventql {
 struct DatabaseContext;
 
+// A session is _not_ thread safe
 class Session {
 public:
 
@@ -44,12 +46,28 @@ public:
 
   const DatabaseContext* getDatabaseContext();
 
+  void setHeartbeatCallback(std::function<ReturnCode ()> cb);
+  ReturnCode triggerHeartbeat();
+
+  void setIdleTimeout(uint64_t timeout_us);
+  uint64_t getIdleTimeout() const;
+
+  uint64_t getHeartbeatInterval() const;
+
+  void setIsInternal(bool is_internal);
+  uint64_t isInternal() const;
+
 protected:
   mutable std::mutex mutex_;
   const DatabaseContext* database_context_;
   String user_id_;
   String effective_namespace_;
   String display_namespace_;
+  std::function<ReturnCode ()> heartbeat_cb_;
+  uint64_t heartbeat_last_;
+  uint64_t heartbeat_interval_;
+  uint64_t idle_timeout_;
+  bool is_internal_;
 };
 
 } // namespace eventql

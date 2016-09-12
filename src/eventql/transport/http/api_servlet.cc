@@ -370,47 +370,63 @@ void APIServlet::createTable(
     table_type = jtable_type.get();
   }
 
-  auto update_param = json::objectGetBool(jreq, "update");
-  auto force = !update_param.isEmpty() && update_param.get();
+  auto jpkey = json::objectLookup(jreq, "primary_key");
+  if (jpkey == jreq.end()) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody("missing field: primary_key");
+    return;
+  }
+
+  std::vector<std::string> primary_key;
+  auto primary_key_count = json::arrayLength(jpkey, jreq.end());
+  for (size_t i = 0; i < primary_key_count; ++i) {
+    auto pkey_part = json::arrayGetString(jpkey, jreq.end(), i);
+    if (pkey_part.isEmpty()) {
+      res->setStatus(http::kStatusBadRequest);
+      res->addBody("invalid field: primary_key");
+      return;
+    }
+
+    primary_key.emplace_back(pkey_part.get());
+  }
+
+  std::vector<std::pair<std::string, std::string>> properties;
+  auto jprops = json::objectLookup(jreq, "properties");
+  if (jprops != jreq.end()) {
+    auto props_count = json::arrayLength(jprops, jreq.end());
+    for (size_t i = 0; i < props_count; ++i) {
+      auto jprop = json::arrayLookup(jprops, jreq.end(), i);
+      if (jprop == jreq.end()) {
+        res->setStatus(http::kStatusBadRequest);
+        res->addBody("invalid field: properties");
+        return;
+      }
+
+      auto prop_key = json::arrayGetString(jprop, jreq.end(), 0);
+      auto prop_value = json::arrayGetString(jprop, jreq.end(), 1);
+      if (prop_key.isEmpty() || prop_value.isEmpty()) {
+        res->setStatus(http::kStatusBadRequest);
+        res->addBody("invalid field: primary_key");
+        return;
+      }
+
+      properties.emplace_back(prop_key.get(), prop_value.get());
+    }
+  }
 
   try {
     msg::MessageSchema schema(nullptr);
     schema.fromJSON(jschema, jreq.end());
 
-    // legacy static tables
-    if (table_type == "static" || table_type == "static_fixed") {
-      TableDefinition td;
-      if (force) {
-        try {
-          auto old_td = dbctx->config_directory->getTableConfig(
-              session->getEffectiveNamespace(),
-              table_name.get());
+    auto rc = dbctx->table_service->createTable(
+        session->getEffectiveNamespace(),
+        table_name.get(),
+        schema,
+        primary_key,
+        properties);
 
-          td.set_version(old_td.version());
-        } catch (const std::exception& e) {
-          // ignore
-        }
-      }
-
-      td.set_customer(session->getEffectiveNamespace());
-      td.set_table_name(table_name.get());
-
-      auto tblcfg = td.mutable_config();
-      tblcfg->set_schema(schema.encode().toString());
-      tblcfg->set_num_shards(num_shards.isEmpty() ? 1 : num_shards.get());
-      tblcfg->set_partitioner(eventql::TBL_PARTITION_FIXED);
-      tblcfg->set_storage(eventql::TBL_STORAGE_STATIC);
-      dbctx->config_directory->updateTableConfig(td);
-    } else {
-      auto rc = dbctx->table_service->createTable(
-          session->getEffectiveNamespace(),
-          table_name.get(),
-          schema,
-          { "time" }); // FIXME
-
-      if (!rc.isSuccess()) {
-        RAISE(kRuntimeError, rc.message());
-      }
+    if (!rc.isSuccess()) {
+      RAISE(kRuntimeError, rc.message());
     }
 
     res->setStatus(http::kStatusCreated);

@@ -33,6 +33,7 @@ Create a file `/etc/evqld.conf` and put in these contents:
     name=mycluster
     coordinator=zookeeper
     zookeeper_hosts=localhost:2181
+    allowed_hosts=0.0.0.0/0
 
     [server]
     client_auth_backend=trust

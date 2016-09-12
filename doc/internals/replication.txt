@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 EVENTQL - SEGMENT BASED REPLICATION
 --------------------------------------------------------------------------------
-v0.1 - September, 2016                             Paul Asmuth <paul@eventql.io>
+v0.1 - September, 2016                             Paul Asmuth &lt;paul@eventql.io&gt;
 
 Table of Contents
 

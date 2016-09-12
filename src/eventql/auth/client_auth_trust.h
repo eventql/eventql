@@ -33,7 +33,7 @@ namespace eventql {
 class TrustClientAuth : public ClientAuth {
 public:
 
-  Status authenticateSession(
+  Status authenticateNonInteractive(
       Session* session,
       HashMap<String, String> auth_data) override;
 

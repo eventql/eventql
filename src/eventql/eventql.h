@@ -23,6 +23,7 @@
  */
 #pragma once
 #include <stdlib.h>
+#include <stdint.h>
 
 #ifdef __cplusplus
 #include <string>
@@ -50,18 +51,30 @@ extern "C" {
 #endif
 
 enum {
-  EVQL_OP_HELLO           = 0x5e00,
-  EVQL_OP_PING            = 0x0001,
-  EVQL_OP_PONG            = 0x0002,
-  EVQL_OP_ERROR           = 0x0003,
-  EVQL_OP_READY           = 0x0004,
-  EVQL_OP_BYE             = 0x0005,
-  EVQL_OP_QUERY           = 0x0006,
-  EVQL_OP_QUERY_RESULT    = 0x0007,
-  EVQL_OP_QUERY_CONTINUE  = 0x0008,
-  EVQL_OP_QUERY_DISCARD   = 0x0009,
-  EVQL_OP_QUERY_PROGRESS  = 0x0010,
-  EVQL_OP_QUERY_NEXT      = 0x0011
+  EVQL_OP_HELLO                      = 0x5e00,
+  EVQL_OP_PING                       = 0x0001,
+  EVQL_OP_HEARTBEAT                  = 0x0002,
+  EVQL_OP_ERROR                      = 0x0003,
+  EVQL_OP_READY                      = 0x0004,
+  EVQL_OP_BYE                        = 0x0005,
+  EVQL_OP_QUERY                      = 0x0006,
+  EVQL_OP_QUERY_RESULT               = 0x0007,
+  EVQL_OP_QUERY_CONTINUE             = 0x0008,
+  EVQL_OP_QUERY_DISCARD              = 0x0009,
+  EVQL_OP_QUERY_PROGRESS             = 0x0010,
+  EVQL_OP_QUERY_NEXT                 = 0x0011,
+  EVQL_OP_QUERY_PARTIALAGGR          = 0x0012,
+  EVQL_OP_QUERY_PARTIALAGGR_RESULT   = 0x0013
+};
+
+enum {
+  EVQL_ENDOFREQUEST                   = 0x1
+};
+
+enum {
+  EVQL_HELLO_INTERNAL                 = 0x1,
+  EVQL_HELLO_SWITCHDB                 = 0x2,
+  EVQL_HELLO_INTERACTIVEAUTH          = 0x4
 };
 
 enum {
@@ -78,6 +91,19 @@ enum {
   EVQL_QUERY_RESULT_PENDINGSTMT  = 0x8
 };
 
+
+enum {
+  EVQL_STAT_ROWSMODIFIED     = 0x1L,
+  EVQL_STAT_ROWSSCANNED      = 0x2L,
+  EVQL_STAT_BYTESSCANNED     = 0x3L,
+  EVQL_STAT_PROGRESSPERMILL  = 0x4L,
+  EVQL_STAT_TIMEELAPSED_MS   = 0x5L,
+  EVQL_STAT_ETA_MS           = 0x6L,
+  EVQL_STAT_TASKSRUNNING     = 0x7L,
+  EVQL_STAT_TASKSTOTAL       = 0x8L,
+  EVQL_STAT_TASKSCOMPLETED   = 0x9L
+};
+
 /**
  * The EventQL client handle
  */
@@ -90,12 +116,34 @@ typedef struct evql_client_s evql_client_t;
 evql_client_t* evql_client_init();
 
 /**
+ * Set an auth parameter
+ */
+int evql_client_setauth(
+    evql_client_t* client,
+    const char* key,
+    size_t key_len,
+    const char* val,
+    size_t val_len,
+    long flags);
+
+/**
+ * Set an option
+ */
+int evql_client_setopt(
+    evql_client_t* client,
+    int opt,
+    const char* val,
+    size_t val_len,
+    long flags);
+
+/**
  * Connect to an eventql server
  */
 int evql_client_connect(
     evql_client_t* client,
     const char* host,
     unsigned int port,
+    const char* database,
     long flags);
 
 /**
@@ -156,6 +204,24 @@ int evql_discard_result(evql_client_t* client);
  * is available for reading.
  */
 int evql_next_result(evql_client_t* client);
+
+/**
+ * Set a callback function that is periodically called while the query is
+ * running. This can be used in conjunction with the evql_client_getstat method
+ * to e.g. print a progress indicator.
+ *
+ * NOTE that in order to actually receive progress events, the caller has to
+ * set the EVQL_QUERY_PROGRESS flag when calling evql_query
+ *
+ * @param cb the callback function
+ * @param privdata an opaque user-data pointer
+ */
+void evql_client_setprogresscb(
+    evql_client_t* client,
+    void (*cb) (evql_client_t* client, void* privdata),
+    void* privdata);
+
+uint64_t evql_client_getstat(evql_client_t* client, uint64_t stat);
 
 /**
  * Free the current result

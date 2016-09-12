@@ -25,6 +25,7 @@
 #include <zookeeper.h>
 #include <eventql/config/config_directory_zookeeper.h>
 #include <eventql/util/protobuf/msg.h>
+#include <eventql/util/logging.h>
 
 namespace eventql {
 
@@ -892,9 +893,6 @@ ClusterConfig ZookeeperConfigDirectory::getPatchedClusterConfig() const {
       dhtnode->set_addr(live_server->second);
     } else {
       dhtnode->set_addr(old_addrs[s.second.server_id()]);
-    }
-    for (const auto& t : s.second.sha1_tokens()) {
-      dhtnode->add_sha1_tokens(t);
     }
   }
 

@@ -26,6 +26,7 @@
 #include "eventql/server/session.h"
 #include "eventql/util/stdtypes.h"
 #include "eventql/util/status.h"
+#include "eventql/transport/native/connection.h"
 
 namespace eventql {
 
@@ -34,9 +35,19 @@ public:
 
   virtual ~ClientAuth() = default;
 
-  virtual Status authenticateSession(
+  virtual Status authenticateNonInteractive(
       Session* session,
       HashMap<String, String> auth_data) = 0;
+
+  virtual bool authenticateInteractiveSupported() {
+    return false;
+  }
+
+  virtual Status authenticateInteractive(
+      Session* session,
+      native_transport::NativeConnection* connection) {
+    return Status(eRuntimeError, "interactive auth not supported");
+  }
 
   virtual Status changeNamespace(
       Session* session,

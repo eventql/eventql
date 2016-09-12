@@ -4,15 +4,8 @@ ACLOCAL_AMFLAGS = -I m4
 AUTOMAKE_OPTIONS = foreign
 
 SUBDIRS = \
+    deps \
     . \
-    deps/3rdparty/spidermonkey \
-    deps/3rdparty/pcre \
-    deps/3rdparty/linenoise \
-    deps/3rdparty/libsimdcomp \
-    deps/3rdparty/protobuf \
-    deps/3rdparty/liblmdb \
-    deps/3rdparty/inih \
-    deps/3rdparty/zookeeper \
     src \
     test
 
