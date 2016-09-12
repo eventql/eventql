@@ -586,7 +586,7 @@ void APIServlet::createTable(
 
   try {
     msg::MessageSchema schema(nullptr);
-    schema.fromJSON(jschema, jreq.end());
+    schema.fromJSON(jcolumns, jreq.end());
 
     auto rc = dbctx->table_service->createTable(
         session->getEffectiveNamespace(),
@@ -598,19 +598,21 @@ void APIServlet::createTable(
     if (!rc.isSuccess()) {
       RAISE(kRuntimeError, rc.message());
     }
-  }
 
-  auto rc = dbctx->table_service->createTable(
-      database.get(),
-      table_name.get(),
-      schema,
-      primary_key);
+    auto rc = dbctx->table_service->createTable(
+        database.get(),
+        table_name.get(),
+        schema,
+        primary_key);
 
-  if (!rc.isSuccess()) {
-    logError("eventql", rc.message(), "error");
-    res->setStatus(http::kStatusInternalServerError);
-    res->addBody(StringUtil::format("error: $0", rc.message()));
-    return;
+    if (!rc.isSuccess()) {
+      logError("eventql", rc.message(), "error");
+      res->setStatus(http::kStatusInternalServerError);
+      res->addBody(StringUtil::format("error: $0", rc.message()));
+      return;
+    }
+  } catch (const std::exception& e) {
+    return RAISE(kRuntimeError, e.what());
   }
 
   res->setStatus(http::kStatusCreated);
