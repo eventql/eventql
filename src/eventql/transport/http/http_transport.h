@@ -24,9 +24,6 @@
 #pragma once
 #include "eventql/eventql.h"
 #include "eventql/db/database.h"
-#include "eventql/util/http/httpserver.h"
-#include "eventql/util/http/httprouter.h"
-#include "eventql/util/thread/eventloop.h"
 #include "eventql/transport/http/default_servlet.h"
 #include "eventql/transport/http/status_servlet.h"
 #include "eventql/transport/http/api_servlet.h"
