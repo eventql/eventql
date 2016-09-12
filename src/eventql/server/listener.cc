@@ -111,8 +111,6 @@ ReturnCode Listener::bind(int listen_port) {
 }
 
 void Listener::run() {
-  http_transport_.startIOThread();
-
   while (running_.load()) {
     fd_set op_read, op_write, op_error;
     FD_ZERO(&op_read);
@@ -209,7 +207,6 @@ void Listener::run() {
   }
 
 exit:
-  http_transport_.stopIOThread();
   return;
 }
 
