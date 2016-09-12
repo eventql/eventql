@@ -280,12 +280,8 @@ Table of Contents
       - If yes, decline with INFLIGHT and abort
 
     - Check if we are the leader for this partition
-      - If yes, check if the segments base_segment_id equals the local root
-        segment id
+      - Check if the partition state is LOADING and the root segment id is NULL
         - If yes, accept and fast-forward-add the segment
-        - If no, check if the partition state is LOADING and the root segment id
-          is NULL
-          - If yes, accept and fast-forward-add the segment
         - If no, check if is_referenced(P, S)
           - If yes, decline with EXISTS
           - If no, accept and merge the segment into the partition
@@ -305,6 +301,9 @@ Table of Contents
               - If no, decline with OUT_OF_ORDER
         - If no, decline with INVALID
 
+
+  FIXME: how to handle in-memory data in follower? (we don't accept writes
+  as the follower, but when we loose our leader status this could happen)
 
 3.6 ABA Considerations
 

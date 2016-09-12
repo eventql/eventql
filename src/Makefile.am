@@ -77,14 +77,23 @@ evql_protos = \
 
 EVQL_PROTO_SOURCES_ = \
     eventql/auth/client_auth_legacy_protos.pb.cc \
+    eventql/auth/client_auth_legacy_protos.pb.h \
     eventql/config/namespace_config_protos.pb.cc \
+    eventql/config/namespace_config_protos.pb.h \
     eventql/db/metadata_operations.pb.cc \
+    eventql/db/metadata_operations.pb.h \
     eventql/db/cluster_config.pb.cc \
+    eventql/db/cluster_config.pb.h \
     eventql/db/partition_info.pb.cc \
+    eventql/db/partition_info.pb.h \
     eventql/db/partition_state.pb.cc \
+    eventql/db/partition_state.pb.h \
     eventql/db/record_envelope.pb.cc \
+    eventql/db/record_envelope.pb.h \
     eventql/db/replication_state.pb.cc \
-    eventql/db/table_config.pb.cc
+    eventql/db/replication_state.pb.h \
+    eventql/db/table_config.pb.cc \
+    eventql/db/table_config.pb.h
 
 BUILT_SOURCES = ${EVQL_PROTO_SOURCES_} eventql/mapreduce/mapreduce_preludejs.cc
 dist_noinst_DATA = $(evql_protos)

@@ -145,24 +145,24 @@ Status TableService::createTable(
   }
 
   for (const auto& p : properties) {
-    if (p.first == "fixed_partition_size") {
+    if (p.first == "finite_partition_size") {
       uint64_t val = 0;
       try {
         val = std::stoull(p.second);
       } catch (...) {}
 
-      tblcfg->set_enable_fixed_partitions(true);
-      tblcfg->set_fixed_partition_size(val);
+      tblcfg->set_enable_finite_partitions(true);
+      tblcfg->set_finite_partition_size(val);
       continue;
     }
   }
 
   // check preconditions
-  if (tblcfg->enable_fixed_partitions()) {
-    if (tblcfg->fixed_partition_size() < 1) {
+  if (tblcfg->enable_finite_partitions()) {
+    if (tblcfg->finite_partition_size() < 1) {
         return Status(
             eIllegalArgumentError,
-            "fixed partition size must be > 0");
+            "finite partition size must be > 0");
     }
 
     switch (keyspace_type) {
@@ -171,7 +171,7 @@ Status TableService::createTable(
       case KEYSPACE_STRING:
         return Status(
             eIllegalArgumentError,
-            "can't set fixed partition size for string partition keys");
+            "can't set finite partition size for string partition keys");
     }
   }
 
@@ -187,7 +187,7 @@ Status TableService::createTable(
 
   auto txnid = Random::singleton()->sha1();
   std::unique_ptr<MetadataFile> metadata_file;
-  if (tblcfg->enable_fixed_partitions()) {
+  if (tblcfg->enable_finite_partitions()) {
     metadata_file.reset(
         new MetadataFile(
             txnid,

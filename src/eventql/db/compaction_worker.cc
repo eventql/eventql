@@ -144,7 +144,7 @@ void CompactionWorker::work() {
       } catch (const StandardException& e) {
         auto snap = partition->getSnapshot();
 
-        logError(
+        logCritical(
             "tsdb",
             e,
             "CompactionWorker error for partition $0/$1/$2",

@@ -100,9 +100,9 @@ message TableConfig {
 
   optional uint64 override_partition_split_threshold = 15;
 
-  optional bool enable_fixed_partitions = 16 [default = false];
+  optional bool enable_finite_partitions = 16 [default = false];
 
-  optional uint64 fixed_partition_size = 17;
+  optional uint64 finite_partition_size = 17;
 
 };
 
