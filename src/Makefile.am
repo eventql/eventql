@@ -1019,8 +1019,7 @@ evqlctl_LDADD = \
 ################## BIN: evqlbenchmark ####################
 evqlbenchmark_SOURCES = \
     ${EVQL_CORE_SOURCES_} \
-    eventql/cli/cli_config.cc \
-    eventql/cli/cli_config.h \
+    $(EVQL_PROTO_SOURCES_) \
     eventql/evql_benchmark.cc
 
 evqlbenchmark_LDADD = \
@@ -1031,8 +1030,7 @@ evqlbenchmark_LDADD = \
     $(SIMDCOMP_LDADD) \
     $(LMDB_LDADD) \
     $(PROTOBUF_LDADD) \
-    $(SPIDERMONKEY_LDADD) \
-    $(PCRE_LDADD)
+    $(SPIDERMONKEY_LDADD)
 
 evqlbenchmark_LDFLAGS = -static
 
