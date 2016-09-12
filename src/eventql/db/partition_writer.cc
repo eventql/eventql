@@ -21,6 +21,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#include <assert.h>
 #include <eventql/util/io/fileutil.h>
 #include <eventql/db/partition.h>
 #include <eventql/db/partition_writer.h>
@@ -144,10 +145,14 @@ Set<SHA1Hash> LSMPartitionWriter::insertRecords(
         const auto& record_id = records.getRecordID(i);
         auto headv = rec_versions[record_id];
         if (headv > 0) {
+          assert(headv > 1400000000000000);
           record_flags_update[i] = true;
         }
 
-        if (records.getRecordVersion(i) <= headv) {
+        auto thisv = records.getRecordVersion(i);
+        assert(thisv > 1400000000000000);
+
+        if (thisv <= headv) {
           record_flags_skip[i] = true;
           continue;
         }
