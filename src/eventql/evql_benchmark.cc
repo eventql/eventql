@@ -21,10 +21,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include <stdlib.h>
-#include <unistd.h>
-#include <signal.h>
-#include <poll.h>
+#include <queue>
 #include <thread>
 #include "eventql/eventql.h"
 #include "eventql/util/application.h"
@@ -40,47 +37,6 @@
 
 struct Waiter { //FIXME better naming
   uint64_t num_requests;
-};
-
-struct TimeWindow {
-  static constexpr auto kMillisPerWindow = 1 * kMillisPerSecond;
-
-  TimeWindow(size_t requests_per_window) :
-      requests_per_window_(requests_per_window),
-      requests_done_(0) {}
-
-  void addRequest() {
-    ++requests_done_;
-  }
-
-  uint64_t getRemainingMillis() {
-    UnixTime now;
-    auto duration = now - start_;
-    if (kMillisPerWindow < duration.milliseconds()) {
-      return 0;
-    } else {
-      return kMillisPerWindow - duration.milliseconds();
-    }
-  }
-
-  size_t getRemainingRequests() {
-    if (requests_per_window_ < requests_done_) {
-      return 0;
-    } else {
-      return requests_per_window_ - requests_done_;
-    }
-  }
-
-  void clear() {
-    requests_done_ = 0;
-    UnixTime now;
-    start_ = now;
-  }
-
-protected:
-  size_t requests_per_window_;
-  size_t requests_done_;
-  UnixTime start_;
 };
 
 static constexpr auto kMaxErrors = 10;
@@ -274,16 +230,16 @@ int main(int argc, const char** argv) {
     qry_db = flags.getString("database");
   }
 
-  uint64_t num_threads;
+  uint64_t num_threads = flags.getInt("threads");
+  uint64_t rate = flags.getInt("rate");
+  /* request duration per microsecond */
+  auto target_duration = 1 * kMicrosPerSecond / rate;
+
   uint64_t max_requests;
   bool has_max_requests = false;
-  try {
-    num_threads = flags.getInt("threads");
+  if (flags.isSet("max")) {
     max_requests = flags.getInt("max");
     has_max_requests = true;
-  } catch (const std::exception& e) {
-    logFatal("evqlbenchmark", e.what());
-    return 0;
   }
 
   auto qry_str = flags.getString("query");
@@ -298,7 +254,7 @@ int main(int argc, const char** argv) {
   Vector<Waiter> waiters;
 
   auto num_stored_times = 10;
-  std::queue<uint64_t> times(num_stored_times);
+  std::queue<uint64_t> times;
 
   Vector<std::thread> threads;
   for (size_t i = 0; i < num_threads; ++i) {
@@ -334,10 +290,24 @@ int main(int argc, const char** argv) {
       }
 
       for (;;) {
-        /* insert time of current request */
-        m.lock();
+        /* calculate sleep time */
         auto now = WallClock::now();
+        uint64_t sleep = 0;
+        m.lock();
+        if (times.size() > 0) {
+          auto total_duration = times.back() - times.front();
+          auto avg_duration = total_duration / times.size();
+          sleep = target_duration - avg_duration;
+        }
+
+        if (times.size() == 10) {
+          times.pop();
+        }
+
+        times.push(now.unixMicros()); //push after sleep?
+
         m.unlock();
+        usleep(sleep);
 
         auto rc = sendQuery(qry_str, qry_db, client);
         if (!rc.isSuccess()) {
