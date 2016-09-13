@@ -17,6 +17,9 @@ EventQL v0.4.0 beta;
     whitelisted using the cluster.allowed_hosts option. In standalone mode,
     the whitelist is defaulted to 0.0.0.0/0
 
+  * Changed the HTTP transport to run fully within the database thread (i.e.
+    removed the dependency on an external event loop) and added http timeouts
+
   * Removed the obsolete "sha1_tokens" field from the cluster/server config
 
   * Removed the PCRE dependency
@@ -32,7 +35,7 @@ EventQL v0.4.0 beta;
 
   * Added the following new configuration options: server.c2s_io_timeout,
     server.c2s_idle_timeout, server.s2s_io_timeout, server.s2s_idle_timeout,
-    server.heartbeat_interval, cluster.allowed_hosts,
+    server.heartbeat_interval, cluster.allowed_hosts, server.http_io_timeout,
     server.query_progress_rate_limit
 
 

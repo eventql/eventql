@@ -39,9 +39,11 @@ void HTTPTransport::handleConnection(int fd, std::string prelude_bytes) {
   database_->startThread([this, fd, prelude_bytes] (Session* session) {
     logDebug("eventql", "Opening new http connection; fd=$0", fd);
 
+    auto dbctx = session->getDatabaseContext();
+
     http::HTTPServerConnection conn(
         fd,
-        kMicrosPerSecond,
+        dbctx->config->getInt("server.http_io_timeout").get(),
         prelude_bytes);
 
     http::HTTPRequest request;
