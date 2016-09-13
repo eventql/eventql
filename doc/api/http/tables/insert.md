@@ -1,23 +1,20 @@
 POST /api/v1/tables/insert
 ==========================
 
-Insert rows into an existing table. The request should be a JSON
-array containing a list of objects. Each object represents one row to be
-inserted. You may therefore insert one or more rows per request.
+Insert rows one or more into an existing table. 
 
 ###Resource Information
 <table class='http_api create_table'>
   <tr>
-    <td>Authentication required?</td>
-    <td>Yes</td>
-  </tr>
-  <tr>
-    <td>Content-Type</td>
+    <td>Request Content-Type</td>
     <td>application/json</td>
   </tr>
 </table>
 
-###Parameters
+###Request Body
+The body is a JSON array of one or more row objects.
+Each object represents a row to insert and consists of the following properties:
+
 <table class='http_api create_table'>
   <tr>
     <td>database</td>
@@ -25,7 +22,7 @@ inserted. You may therefore insert one or more rows per request.
   </tr>
   <tr>
     <td>table</td>
-    <td>Name of the table into which the row should be inserted.</td>
+    <td>Name of the table to insert the row to.</td>
   </tr>
   <tr>
     <td>data</td>
@@ -36,7 +33,6 @@ inserted. You may therefore insert one or more rows per request.
 ### Request Example
 
         >> POST /api/v1/tables/insert HTTP/1.1
-        >> Authorization: Token <authtoken>
         >> Content-Type: application/json
         >> Content-Length: ...
         >>
