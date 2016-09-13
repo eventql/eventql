@@ -679,7 +679,7 @@
               source: "/api/http/tables/list.md"
             -
               url: "/api/http/sql"
-              title: "GET sql"
+              title: "POST sql"
               type: page
               visible_in_menu: false
               visible_in_toc: false
