@@ -70,22 +70,20 @@ FIXME: document how to create nested columns
         >> {
         >>   "table_name": "my_sensor_table",
         >>   "primary_key": ["time", "sensor_name"],
-        >>   "schema": {
-        >>      "columns": [
-        >>          {
-        >>             "name": "time",
-        >>             "type": "DATETIME"
-        >>          },
-        >>          {
-        >>             "name": "sensor_name",
-        >>             "type": "STRING"
-        >>          },
-        >>          {
-        >>             "name": "sensor_value",
-        >>             "type": "DOUBLE"
-        >>          }
-        >>      ]
-        >>   },
+        >>   "columns": [
+        >>       {
+        >>          "name": "time",
+        >>          "type": "DATETIME"
+        >>       },
+        >>       {
+        >>          "name": "sensor_name",
+        >>          "type": "STRING"
+        >>       },
+        >>       {
+        >>          "name": "sensor_value",
+        >>          "type": "DOUBLE"
+        >>       }
+        >>   ],
         >>   "properties": [
         >>      [ "finite_partition_size", "300000000" ]
         >>   ]
