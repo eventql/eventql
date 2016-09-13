@@ -524,7 +524,6 @@ void MapReduceAPIServlet::fetchResult(
       buf.append(key, key_size);
       buf.append(data, data_size);
       res_stream->writeBodyChunk(Buffer(buf.data(), buf.size()));
-      res_stream->waitForReader();
     }
 
     if (!cursor->next()) {

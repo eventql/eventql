@@ -447,11 +447,6 @@ EVQL_CORE_SOURCES_ = \
     eventql/util/http/httpresponsefuture.cc \
     eventql/util/http/httpresponsefuture.h \
     eventql/util/http/httpresponsehandler.h \
-    eventql/util/http/httprouter.cc \
-    eventql/util/http/httprouter.h \
-    eventql/util/http/httprouter_impl.h \
-    eventql/util/http/httpserver.cc \
-    eventql/util/http/httpserver.h \
     eventql/util/http/httpserverconnection.cc \
     eventql/util/http/httpserverconnection.h \
     eventql/util/http/httpstats.h \

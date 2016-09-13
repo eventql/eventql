@@ -21,6 +21,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#include <assert.h>
 #include <eventql/util/io/fileutil.h>
 #include <eventql/db/partition.h>
 #include <eventql/db/partition_writer.h>
@@ -69,10 +70,12 @@ LSMPartitionWriter::LSMPartitionWriter(
     file_tracker_(cfg->file_tracker),
     cdir_(cfg->config_directory),
     partition_split_threshold_(kDefaultPartitionSplitThresholdBytes) {
-  const auto& table_cfg = partition_->getTable()->config().config();
+  auto table = partition_->getTable();
+  auto table_cfg = table->config();
 
-  if (table_cfg.override_partition_split_threshold() > 0) {
-    partition_split_threshold_ = table_cfg.override_partition_split_threshold();
+  if (table_cfg.config().override_partition_split_threshold() > 0) {
+    partition_split_threshold_ =
+        table_cfg.config().override_partition_split_threshold();
   }
 }
 
@@ -144,10 +147,14 @@ Set<SHA1Hash> LSMPartitionWriter::insertRecords(
         const auto& record_id = records.getRecordID(i);
         auto headv = rec_versions[record_id];
         if (headv > 0) {
+          assert(headv > 1400000000000000);
           record_flags_update[i] = true;
         }
 
-        if (records.getRecordVersion(i) <= headv) {
+        auto thisv = records.getRecordVersion(i);
+        assert(thisv > 1400000000000000);
+
+        if (thisv <= headv) {
           record_flags_skip[i] = true;
           continue;
         }

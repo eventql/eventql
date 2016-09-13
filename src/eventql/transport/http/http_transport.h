@@ -24,29 +24,12 @@
 #pragma once
 #include "eventql/eventql.h"
 #include "eventql/db/database.h"
-#include "eventql/util/http/httpserver.h"
-#include "eventql/util/http/httprouter.h"
-#include "eventql/util/thread/eventloop.h"
 #include "eventql/transport/http/default_servlet.h"
 #include "eventql/transport/http/status_servlet.h"
 #include "eventql/transport/http/api_servlet.h"
 #include "eventql/transport/http/rpc_servlet.h"
 
 namespace eventql {
-
-class SessionTaskScheduler : public TaskScheduler {
-public:
-  SessionTaskScheduler(Database* db);
-  void run(std::function<void()> task) override;
-  void runOnReadable(std::function<void()> task, int fd) override;
-  void runOnWritable(std::function<void()> task, int fd) override;
-  void runOnWakeup(
-      std::function<void()> task,
-      Wakeup* wakeup,
-      long generation) override;
-protected:
-  Database* db_;
-};
 
 class HTTPTransport {
 public:
@@ -55,20 +38,15 @@ public:
 
   void handleConnection(int fd, std::string prelude_bytes);
 
-  void startIOThread();
-  void stopIOThread();
-
 protected:
+
+  http::StreamingHTTPService* getServlet(const http::HTTPRequest& request);
+
   Database* database_;
-  thread::EventLoop ev_;
-  http::HTTPRouter http_router_;
-  http::HTTPServerStats http_stats_;
   DefaultServlet default_servlet_;
   StatusServlet status_servlet_;
   APIServlet api_servlet_;
   RPCServlet rpc_servlet_;
-  std::thread io_thread_;
-  SessionTaskScheduler session_scheduler_;
 };
 
 } // namespace eventql
