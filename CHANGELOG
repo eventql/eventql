@@ -1,4 +1,4 @@
-EventQL v0.3.2 beta;
+EventQL v0.3.2 (v0.3.2, gitb0ea6bc) beta; 2016-09-13 15:23:08 +0000
 
   * Fixed a bug in the eventql client (evql) where missing HOME and end USER
     env variables would lead to an assertion on some libc++ implementations
