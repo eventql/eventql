@@ -1,7 +1,7 @@
 POST /api/v1/tables/insert
 ==========================
 
-Insert rows one or more into an existing table. 
+Insert one or more rows into an existing table. 
 
 ###Resource Information
 <table class='http_api create_table'>

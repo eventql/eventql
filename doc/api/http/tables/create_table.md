@@ -13,10 +13,6 @@ best performance, read on the [Partitioning](../../../../tables/partitioning/) p
 ###Resource Information
 <table class='http_api create_table'>
   <tr>
-    <td>Authentication required?</td>
-    <td>Yes</td>
-  </tr>
-  <tr>
     <td>Content-Type</td>
     <td>application/json</td>
   </tr>
@@ -63,7 +59,6 @@ FIXME: document how to create nested columns
 ### Example Request
 
         >> POST /api/v1/tables/create_table HTTP/1.1
-        >> Authorization: Token <authtoken>
         >> Content-Type: application/json
         >> Content-Length: ...
         >>
