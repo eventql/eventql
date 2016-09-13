@@ -65,7 +65,8 @@ public:
 
   TableService(
       ConfigDirectory* cdir,
-      PartitionMap* pmap);
+      PartitionMap* pmap,
+      ProcessConfig* config);
 
   Status createTable(
       const String& db_namespace,
@@ -163,6 +164,7 @@ protected:
 
   ConfigDirectory* cdir_;
   PartitionMap* pmap_;
+  ProcessConfig* config_;
 };
 
 } // namespace tdsb
