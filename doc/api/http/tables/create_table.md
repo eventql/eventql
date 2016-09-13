@@ -1,4 +1,4 @@
-POST /api/v1/tables/create_table
+POST /api/v1/tables/create
 ================
 
 Create a new EventQL table.<br>

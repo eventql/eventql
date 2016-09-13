@@ -1,4 +1,4 @@
-GET /api/v1/tables/[table]
+POST /api/v1/tables/describe
 ==========================
 
 Fetch the definition of the table indicated by the table parameter.
@@ -6,10 +6,6 @@ The definition is returned as a JSON object including meta information about the
 
 ###Resource Information
 <table class='http_api create_table'>
-  <tr>
-    <td>Authentication required?</td>
-    <td>Yes</td>
-  </tr>
   <tr>
     <td>Response Content-Type</td>
     <td>application/json</td>
@@ -26,8 +22,13 @@ The definition is returned as a JSON object including meta information about the
 
 ###Example Request
 
-        >> GET /api/v1/tables/my_sensor_table HTTP/1.1
-        >> Authorization: Token <authtoken> ...
+        >> POST /api/v1/tables/describe HTTP/1.1
+        >> Content-Type: application/json
+        >> Content-Length: ...
+        >>
+        >> {
+        >>   "table": "my_sensor_table"
+        >> }
 
 
 ###Example Response
