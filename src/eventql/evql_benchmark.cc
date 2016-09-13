@@ -35,11 +35,14 @@
 #include "eventql/util/thread/threadpool.h"
 #include "eventql/cli/cli_config.h"
 
-struct Waiter { //FIXME better naming
+static constexpr auto kMaxErrors = 10;
+static constexpr auto kNumRequestStarts = 10;
+
+struct Waiter {
+  size_t id;
   uint64_t num_requests;
 };
 
-static constexpr auto kMaxErrors = 10;
 struct RequestStats {
   uint64_t failed_requests;
   uint64_t successful_requests;
@@ -236,19 +239,11 @@ int main(int argc, const char** argv) {
   RequestStats rstats;
   rstats.successful_requests = 0;
   rstats.failed_requests = 0;
-
-  Vector<Waiter> waiters;
-
-  auto num_stored_times = 10;
-  std::queue<uint64_t> times;
+  Vector<Waiter*> waiters;
+  std::queue<uint64_t> request_starts;
 
   Vector<std::thread> threads;
   for (size_t i = 0; i < num_threads; ++i) {
-    /* init waiter */
-    Waiter waiter;
-    waiter.num_requests = 0;
-    waiters.emplace_back(waiter);
-
     threads.emplace_back(std::thread([&] () {
 
       /* connect to eventql client */
@@ -280,20 +275,21 @@ int main(int argc, const char** argv) {
         auto now = WallClock::now();
         uint64_t sleep = 0;
         m.lock();
-        if (times.size() > 0) {
-          auto total_duration = times.back() - times.front();
-          auto avg_duration = total_duration / times.size();
+        if (request_starts.size() > 0) {
+          auto total_duration = request_starts.back() - request_starts.front();
+          auto avg_duration = total_duration / request_starts.size();
           sleep = target_duration - avg_duration;
         }
 
-        if (times.size() == 10) {
-          times.pop();
+        if (request_starts.size() == kNumRequestStarts) {
+          request_starts.pop();
         }
-
-        times.push(now.unixMicros()); //push after sleep?
+        request_starts.push(now.unixMicros()); //push after sleep?
 
         m.unlock();
         usleep(sleep);
+
+        //FIXME check waiter->num_requests
 
         auto rc = sendQuery(qry_str, qry_db, client);
         if (!rc.isSuccess()) {
@@ -303,6 +299,7 @@ int main(int argc, const char** argv) {
           ++rstats.successful_requests;
         }
 
+        /* print stats */
         auto stats_line = StringUtil::format(
             "total: $0  --  successful: $1  --  failed: $2", //Add rate
             rstats.successful_requests + rstats.failed_requests,
@@ -315,7 +312,8 @@ int main(int argc, const char** argv) {
         } else {
           stdout_os->print(stats_line + "\n");
         }
-        /* stop */
+
+        /* stop if too many errors occured or the max num of requests was reached */
         if (rstats.failed_requests > kMaxErrors ||
             (has_max_requests &&
             rstats.failed_requests + rstats.successful_requests >= max_requests)) {
