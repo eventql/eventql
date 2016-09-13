@@ -37,7 +37,7 @@ public:
 
   LegacyClientAuth(const String& secret);
 
-  Status authenticateSession(
+  Status authenticateNonInteractive(
       Session* session,
       HashMap<String, String> auth_data) override;
 

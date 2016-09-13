@@ -78,6 +78,10 @@ bool ResultList::addRow(const csql::SValue* row, int row_len) {
   return true;
 }
 
+void ResultList::addRow(const std::vector<std::string>& row) {
+  rows_.emplace_back(row);
+}
+
 void ResultList::debugPrint() const {
   auto os = OutputStream::getStderr();
   debugPrint(os.get());

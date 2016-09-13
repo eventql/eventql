@@ -45,10 +45,14 @@ public:
   RefPtr<QueryTreeNode> deepCopy() const;
   String toString() const;
 
+  const std::vector<std::pair<std::string, std::string>>& getProperties() const;
+  void addProperty(const std::string& key, const std::string& value);
+
 protected:
   String table_name_;
   TableSchema table_schema_;
   Vector<String> primary_key_;
+  std::vector<std::pair<std::string, std::string>> properties_;
 };
 
 } // namespace csql

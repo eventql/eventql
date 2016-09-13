@@ -21,6 +21,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#include "eventql/eventql.h"
 #include "eventql/util/wallclock.h"
 #include "eventql/util/assets.h"
 #include <eventql/util/fnv.h>
@@ -29,19 +30,10 @@
 #include "eventql/transport/http/mapreduce_servlet.h"
 #include "eventql/mapreduce/mapreduce_task.h"
 #include "eventql/io/sstable/sstablereader.h"
-#include "eventql/eventql.h"
+#include "eventql/db/database.h"
 
 namespace eventql {
 
-MapReduceAPIServlet::MapReduceAPIServlet(
-    MapReduceService* service,
-    ConfigDirectory* cdir,
-    ClientAuth* client_auth,
-    const String& cachedir) :
-    service_(service),
-    cdir_(cdir),
-    client_auth_(client_auth),
-    cachedir_(cachedir) {}
 
 static const String kResultPathPrefix = "/api/v1/mapreduce/result/";
 
@@ -111,6 +103,8 @@ void MapReduceAPIServlet::executeMapPartitionTask(
     const URI& uri,
     http::HTTPRequestStream* req_stream,
     http::HTTPResponseStream* res_stream) {
+  auto dbctx = session->getDatabaseContext();
+
   req_stream->readBody();
 
   URI::ParamList params;
@@ -167,7 +161,7 @@ void MapReduceAPIServlet::executeMapPartitionTask(
 
   String cache_only;
   if (URI::getParam(params, "cache_only", &cache_only)) {
-    auto shard_id = service_->mapPartition(
+    auto shard_id = dbctx->mapreduce_service->mapPartition(
         session,
         job_spec,
         table_name,
@@ -207,7 +201,7 @@ void MapReduceAPIServlet::executeMapPartitionTask(
   });
 
   try {
-    auto shard_id = service_->mapPartition(
+    auto shard_id = dbctx->mapreduce_service->mapPartition(
         session,
         job_spec,
         table_name,
@@ -235,6 +229,8 @@ void MapReduceAPIServlet::executeReduceTask(
     const URI& uri,
     http::HTTPRequestStream* req_stream,
     http::HTTPResponseStream* res_stream) {
+  auto dbctx = session->getDatabaseContext();
+
   req_stream->readBody();
 
   URI::ParamList params;
@@ -276,7 +272,7 @@ void MapReduceAPIServlet::executeReduceTask(
   });
 
   try {
-    auto shard_id = service_->reduceTables(
+    auto shard_id = dbctx->mapreduce_service->reduceTables(
       session,
       job_spec,
       input_tables,
@@ -302,6 +298,8 @@ void MapReduceAPIServlet::executeSaveToTableTask(
     const URI& uri,
     const http::HTTPRequest* req,
     http::HTTPResponse* res) {
+  auto dbctx = session->getDatabaseContext();
+
   URI::ParamList params;
   URI::parseQueryString(req->body().toString(), &params);
 
@@ -319,7 +317,7 @@ void MapReduceAPIServlet::executeSaveToTableTask(
     return;
   }
 
-  bool saved = service_->saveResultToTable(
+  bool saved = dbctx->mapreduce_service->saveResultToTable(
       session,
       table_name,
       SHA1Hash::fromHexString(result_id));
@@ -336,12 +334,14 @@ void MapReduceAPIServlet::executeMapReduceScript(
     const URI& uri,
     http::HTTPRequestStream* req_stream,
     http::HTTPResponseStream* res_stream) {
+  auto dbctx = session->getDatabaseContext();
+
   req_stream->readBody();
 
   const auto& params = uri.queryParams();
   String database;
   if (URI::getParam(params, "database", &database) && !database.empty()) {
-    auto rc = client_auth_->changeNamespace(session, database);
+    auto rc = dbctx->client_auth->changeNamespace(session, database);
     if (!rc.isSuccess()) {
       http::HTTPResponse res;
       res.populateFromRequest(req_stream->request());
@@ -416,7 +416,7 @@ void MapReduceAPIServlet::executeMapReduceScript(
 
   bool error = false;
   try {
-    service_->executeScript(session, job_spec, program_source);
+    dbctx->mapreduce_service->executeScript(session, job_spec, program_source);
   } catch (const StandardException& e) {
     Buffer buf;
     json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
@@ -462,6 +462,8 @@ void MapReduceAPIServlet::fetchResult(
     const String& result_id,
     http::HTTPRequestStream* req_stream,
     http::HTTPResponseStream* res_stream) {
+  auto dbctx = session->getDatabaseContext();
+
   http::HTTPResponse res;
   res.populateFromRequest(req_stream->request());
   req_stream->readBody();
@@ -469,7 +471,7 @@ void MapReduceAPIServlet::fetchResult(
   URI uri(req_stream->request().uri());
   const auto& params = uri.queryParams();
 
-  auto filename = service_->getResultFilename(
+  auto filename = dbctx->mapreduce_service->getResultFilename(
       SHA1Hash::fromHexString(result_id));
 
   if (filename.isEmpty()) {
@@ -522,7 +524,6 @@ void MapReduceAPIServlet::fetchResult(
       buf.append(key, key_size);
       buf.append(data, data_size);
       res_stream->writeBodyChunk(Buffer(buf.data(), buf.size()));
-      res_stream->waitForReader();
     }
 
     if (!cursor->next()) {

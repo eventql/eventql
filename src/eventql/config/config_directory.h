@@ -26,7 +26,6 @@
 #include "eventql/config/process_config.h"
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/SHA1.h>
-#include <eventql/util/mdb/MDB.h>
 #include <eventql/util/net/inetaddr.h>
 #include <eventql/util/http/httpclient.h>
 #include <eventql/config/namespace_config.h>

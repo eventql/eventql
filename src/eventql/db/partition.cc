@@ -218,12 +218,10 @@ PartitionInfo Partition::getInfo() const {
   return pi;
 }
 
-RefPtr<PartitionReplication> Partition::getReplicationStrategy(
-    http::HTTPConnectionPool* http) {
+RefPtr<PartitionReplication> Partition::getReplicationStrategy() {
   return new LSMPartitionReplication(
       this,
-      cfg_->config_directory,
-      http);
+      cfg_->config_directory);
 }
 
 bool Partition::upgradeToLSMv2() const {

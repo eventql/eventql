@@ -79,6 +79,8 @@ Status MetadataOperation::perform(
       return performSplitPartition(input, output);
     case METAOP_FINALIZE_SPLIT:
       return performFinalizeSplit(input, output);
+    case METAOP_CREATE_PARTITION:
+      return performCreatePartition(input, output);
     case METAOP_JOIN_SERVERS:
       return performJoinServers(input, output);
     case METAOP_FINALIZE_JOIN:
@@ -146,7 +148,9 @@ Status MetadataOperation::performSplitPartition(
     }
 
     String iter_end;
-    {
+    if (input.hasFinitePartitions() & MFILE_FINITE) {
+      iter_end = iter->end;
+    } else {
       auto iter_next = iter + 1;
       if (iter_next != pmap.end()) {
         iter_end = iter_next->begin;
@@ -181,6 +185,10 @@ Status MetadataOperation::performSplitPartition(
             opdata.split_partition_id_low().data(),
             opdata.split_partition_id_low().size());
 
+        if (input.hasFinitePartitions()) {
+          lower_split.end = opdata.split_point();
+        }
+
         for (const auto& s : opdata.split_servers_low()) {
           MetadataFile::PartitionPlacement p;
           p.server_id = s;
@@ -196,6 +204,10 @@ Status MetadataOperation::performSplitPartition(
         higher_split.partition_id = SHA1Hash(
             opdata.split_partition_id_high().data(),
             opdata.split_partition_id_high().size());
+
+        if (input.hasFinitePartitions()) {
+          higher_split.end = iter->end;
+        }
 
         for (const auto& s : opdata.split_servers_high()) {
           MetadataFile::PartitionPlacement p;
@@ -273,20 +285,26 @@ Status MetadataOperation::performFinalizeSplit(
 
     {
       lower_split.partition_id = iter->split_partition_id_low;
+      lower_split.splitting = false;
       lower_split.begin = iter->begin;
+      if (input.hasFinitePartitions()) {
+        lower_split.end = iter->split_point;
+      }
       for (const auto& s : iter->split_servers_low) {
         lower_split.servers.emplace_back(s);
       }
-      lower_split.splitting = false;
     }
 
     {
       higher_split.partition_id = iter->split_partition_id_high;
       higher_split.begin = iter->split_point;
+      higher_split.splitting = false;
+      if (input.hasFinitePartitions()) {
+        higher_split.end = iter->end;
+      }
       for (const auto& s : iter->split_servers_high) {
         higher_split.servers.emplace_back(s);
       }
-      higher_split.splitting = false;
     }
 
     iter = pmap.erase(iter);
@@ -303,6 +321,56 @@ Status MetadataOperation::performFinalizeSplit(
   } else {
     return Status(eNotFoundError, "partition not found");
   }
+}
+
+Status MetadataOperation::performCreatePartition(
+    const MetadataFile& input,
+    Vector<MetadataFile::PartitionMapEntry>* output) const {
+  if (!input.hasFinitePartitions()) {
+    return Status(eIllegalArgumentError, "partitions not finite");
+  }
+
+  auto opdata = msg::decode<CreatePartitionOperation>(
+      data_.opdata().data(),
+      data_.opdata().size());
+
+  SHA1Hash new_partition_id(
+      opdata.partition_id().data(),
+      opdata.partition_id().size());
+
+  MetadataFile::PartitionMapEntry new_entry;
+  new_entry.partition_id = new_partition_id;
+  new_entry.splitting = false;
+  new_entry.begin = opdata.begin();
+  new_entry.end = opdata.end();
+  for (const auto& s : opdata.servers()) {
+    MetadataFile::PartitionPlacement p;
+    p.server_id = s;
+    p.placement_id = opdata.placement_id();
+    new_entry.servers.emplace_back(p);
+  }
+
+  auto pmap = input.getPartitionMap();
+  auto iter = pmap.begin();
+  while (iter != pmap.end()) {
+    if (input.compareKeys(iter->begin, new_entry.end) >= 0) {
+      break;
+    } else {
+      ++iter;
+    }
+  }
+
+  if (iter != pmap.begin()) {
+    auto prev = iter - 1;
+    if (input.compareKeys(prev->end, new_entry.begin) > 0) {
+      return Status(eIllegalArgumentError, "overlapping partitions");
+    }
+  }
+
+  iter = pmap.insert(iter, new_entry);
+
+  *output = pmap;
+  return Status::success();
 }
 
 static bool hasServer(

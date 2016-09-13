@@ -32,10 +32,14 @@
 
 namespace eventql {
 
+enum {
+  MFILE_FINITE = 1
+};
+
 class MetadataFile : public RefCounted {
 public:
 
-  static const uint32_t kBinaryFormatVersion = 2;
+  static const uint32_t kBinaryFormatVersion = 3;
 
   struct PartitionPlacement {
     String server_id;
@@ -46,6 +50,7 @@ public:
     PartitionMapEntry();
 
     String begin;
+    String end;
     SHA1Hash partition_id;
     Vector<PartitionPlacement> servers;
     Vector<PartitionPlacement> servers_joining;
@@ -66,7 +71,8 @@ public:
       const SHA1Hash& transaction_id,
       uint64_t transaction_seq,
       KeyspaceType keyspace_type,
-      const Vector<PartitionMapEntry>& partition_map);
+      const Vector<PartitionMapEntry>& partition_map,
+      uint64_t flags);
 
   const SHA1Hash& getTransactionID() const;
   uint64_t getSequenceNumber() const;
@@ -105,7 +111,13 @@ public:
 
   Status computeChecksum(SHA1Hash* checksum) const;
 
+  uint64_t getFlags() const;
+  bool hasFinitePartitions() const;
+
 protected:
+  PartitionMapIter lookup(const String& key) const;
+
+  uint64_t flags_;
   SHA1Hash transaction_id_;
   uint64_t transaction_seq_;
   KeyspaceType keyspace_type_;

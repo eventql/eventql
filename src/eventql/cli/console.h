@@ -31,6 +31,7 @@
 #include "eventql/server/sql/codec/binary_codec.h"
 #include "eventql/sql/result_list.h"
 #include "eventql/util/io/TerminalOutputStream.h"
+#include "eventql/util/return_code.h"
 
 namespace eventql {
 namespace cli {
@@ -49,6 +50,17 @@ class Console {
 public:
 
   Console(const CLIConfig cli_cfg);
+  ~Console();
+
+  /**
+   * Connect to the server
+   */
+  ReturnCode connect();
+
+  /**
+   * Close the server connection
+   */
+  void close();
 
   /**
    * Start an interactive shell. This method will never return
@@ -66,11 +78,11 @@ public:
   Status runJS(const String& query);
 
 protected:
-  Status runQueryBatch(const String& query);
-  Status runQueryTable(const String& query);
+
   Status sendRequest(const String& query, csql::BinaryResultParser* res_parser);
 
   CLIConfig cfg_;
+  evql_client_t* client_;
 };
 
 } // namespace cli

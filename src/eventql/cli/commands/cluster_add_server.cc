@@ -75,10 +75,6 @@ Status ClusterAddServer::execute(
 
     ServerConfig cfg;
     cfg.set_server_id(flags.getString("server_name"));
-    for (size_t i = 0; i < 128; ++i) {
-      cfg.add_sha1_tokens(Random::singleton()->sha1().toString());
-    }
-
     cdir->updateServerConfig(cfg);
     cdir->stop();
 

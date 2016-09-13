@@ -97,10 +97,8 @@ String ReplicationInfo::toString() const {
 }
 
 ReplicationWorker::ReplicationWorker(
-    PartitionMap* pmap,
-    http::HTTPConnectionPool* http) :
+    PartitionMap* pmap) :
     pmap_(pmap),
-    http_(http),
     queue_([] (
         const Pair<uint64_t, RefPtr<Partition>>& a,
         const Pair<uint64_t, RefPtr<Partition>>& b) {
@@ -113,8 +111,6 @@ ReplicationWorker::ReplicationWorker(
       RefPtr<eventql::PartitionChangeNotification> change) {
     enqueuePartition(change->partition);
   });
-
-  start();
 }
 
 ReplicationWorker::~ReplicationWorker() {
@@ -222,7 +218,7 @@ void ReplicationWorker::work(size_t thread_id) {
           snap->key));
 
       try {
-        repl = partition->getReplicationStrategy(http_);
+        repl = partition->getReplicationStrategy();
         success = repl->replicate(replication_info);
       } catch (const StandardException& e) {
         logError("evqld", e, "ReplicationWorker error");
@@ -236,13 +232,13 @@ void ReplicationWorker::work(size_t thread_id) {
     if (success) {
       waitset_.erase(partition->uuid());
 
-      repl = partition->getReplicationStrategy(http_);
+      repl = partition->getReplicationStrategy();
       if (repl->needsReplication()) {
         enqueuePartitionWithLock(
             partition,
             (uint64_t) ReplicationOptions::CORK);
       } else {
-        repl = partition->getReplicationStrategy(http_);
+        repl = partition->getReplicationStrategy();
         if (repl->shouldDropPartition()) {
           auto snap = partition->getSnapshot();
           auto dropped =

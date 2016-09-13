@@ -2,7 +2,7 @@
 ## In general, the safest way to proceed is to run ./autogen.sh
 
 AC_PREREQ(2.59)
-AC_INIT([EventQL],[0.3.2],[authors@eventql.io],[eventql])
+AC_INIT([EventQL],[0.4.0-dev],[authors@eventql.io],[eventql])
 AM_INIT_AUTOMAKE([foreign subdir-objects serial-tests])
 AM_MAINTAINER_MODE([enable])
 AC_CONFIG_SRCDIR([configure.ac])
@@ -19,14 +19,24 @@ else
   AC_MSG_RESULT(["disabled"])
 fi
 
+# --enable-embedded-server
+AC_MSG_CHECKING([Feature: Build Embedded Server: libevql_server.a])
+AC_ARG_ENABLE([embedded-server], AS_HELP_STRING([--enable-embedded-server], [Enable embedded server]))
+AM_CONDITIONAL([ENABLE_EMBEDDED_SERVER], [test "x$enable_embedded_server" = "xyes"])
+AC_SUBST(ENABLE_EMBEDDED_SERVER)
+if test "x$enable_embedded_server" = "xyes"; then
+  AC_MSG_RESULT(["enabled"])
+else
+  AC_MSG_RESULT(["disabled"])
+fi
+
 # Check for build env
 AC_PROG_CC
 AC_PROG_CC_FOR_BUILD
 AC_PROG_CXX
 AC_PROG_CXX_FOR_BUILD
-AC_PROG_RANLIB
-AM_PROG_AR
 AM_PROG_AS
+LT_INIT
 
 # Check for header files
 AC_HEADER_STDC
@@ -81,15 +91,5 @@ AM_CONDITIONAL([HAVE_PTHREAD], [test "x$acx_pthread_ok" = "xyes"])
 AC_SUBST(MOZJS_CXXFLAGS)
 AC_SUBST(EVQL_BUILDID)
 
-# Options of pcre
-AM_CONDITIONAL(WITH_PCRE_CPP, false)
-AM_CONDITIONAL(WITH_VALGRIND, false)
-AM_CONDITIONAL(WITH_GCOV, false)
-AM_CONDITIONAL(WITH_REBUILD_CHARTABLES, false)
-AM_CONDITIONAL(WITH_PCRE8, false)
-AM_CONDITIONAL(WITH_PCRE32, false)
-AM_CONDITIONAL(WITH_PCRE16, false)
-AM_CONDITIONAL(WITH_JIT, false)
-
-AC_CONFIG_FILES([Makefile src/Makefile deps/3rdparty/protobuf/Makefile deps/3rdparty/linenoise/Makefile deps/3rdparty/libsimdcomp/Makefile deps/3rdparty/liblmdb/Makefile deps/3rdparty/spidermonkey/Makefile deps/3rdparty/pcre/Makefile deps/3rdparty/zookeeper/Makefile deps/3rdparty/inih/Makefile build/osxpkg/distribution.xml build/osxpkg/package_info.xml])
+AC_CONFIG_FILES([Makefile src/Makefile test/Makefile deps/Makefile deps/3rdparty/protobuf/Makefile deps/3rdparty/linenoise/Makefile deps/3rdparty/libsimdcomp/Makefile deps/3rdparty/liblmdb/Makefile deps/3rdparty/spidermonkey/Makefile deps/3rdparty/zookeeper/Makefile deps/3rdparty/inih/Makefile build/osxpkg/distribution.xml build/osxpkg/package_info.xml])
 AC_OUTPUT

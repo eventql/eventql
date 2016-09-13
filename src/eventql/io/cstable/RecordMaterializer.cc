@@ -217,9 +217,9 @@ void RecordMaterializer::insertValue(
 
     case msg::FieldType::BOOLEAN:
       if (column->getUnsignedInteger() == 1) {
-        record->addChild(column->field_id, msg::TRUE);
+        record->addChild(column->field_id, msg::MSG_TRUE);
       } else {
-        record->addChild(column->field_id, msg::FALSE);
+        record->addChild(column->field_id, msg::MSG_FALSE);
       }
       break;
 

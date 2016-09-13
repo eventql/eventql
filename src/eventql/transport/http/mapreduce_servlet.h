@@ -35,12 +35,6 @@ namespace eventql {
 class MapReduceAPIServlet {
 public:
 
-  MapReduceAPIServlet(
-      MapReduceService* service,
-      ConfigDirectory* cdir,
-      ClientAuth* client_auth,
-      const String& cachedir);
-
   void handle(
       Session* session,
       RefPtr<http::HTTPRequestStream> req_stream,
@@ -95,10 +89,6 @@ protected:
       const http::HTTPRequest* req,
       http::HTTPResponse* res);
 
-  MapReduceService* service_;
-  ConfigDirectory* cdir_;
-  ClientAuth* client_auth_;
-  String cachedir_;
 };
 
 }

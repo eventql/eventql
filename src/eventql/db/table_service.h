@@ -65,15 +65,14 @@ public:
 
   TableService(
       ConfigDirectory* cdir,
-      PartitionMap* pmap,
-      thread::EventLoop* ev,
-      http::HTTPClientStats* http_stats);
+      PartitionMap* pmap);
 
   Status createTable(
       const String& db_namespace,
       const String& table_name,
       const msg::MessageSchema& schema,
-      Vector<String> primary_key);
+      Vector<String> primary_key,
+      const std::vector<std::pair<std::string, std::string>>& properties);
 
   Status alterTable(
       const String& db_namespace,
@@ -160,7 +159,6 @@ protected:
 
   ConfigDirectory* cdir_;
   PartitionMap* pmap_;
-  http::HTTPConnectionPool http_;
 };
 
 } // namespace tdsb
