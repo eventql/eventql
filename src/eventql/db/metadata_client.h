@@ -63,6 +63,12 @@ public:
       const String& key,
       PartitionFindResponse* res);
 
+  Status findOrCreatePartition(
+      const String& ns,
+      const String& table_id,
+      const String& key,
+      PartitionFindResponse* res);
+
 protected:
   ConfigDirectory* cdir_;
 };

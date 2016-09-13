@@ -98,7 +98,7 @@ TEST_CASE(MetadataStoreTest, TestStoreMetadataFile, [] () {
     }
 
 
-    MetadataFile file(SHA1::compute("mytx"), 7, KEYSPACE_STRING, pmap);
+    MetadataFile file(SHA1::compute("mytx"), 7, KEYSPACE_STRING, pmap, 0);
     auto rc = metadata_store.storeMetadataFile(
         "ns",
         "mytbl",
@@ -166,7 +166,7 @@ TEST_CASE(MetadataStoreTest, TestMetadataCache, [] () {
 
   for (size_t i = 0; i < 20; ++i) {
     auto txid = SHA1::compute(StringUtil::format("file$0", i % 20));
-    MetadataFile file(txid, 1, KEYSPACE_STRING, {});
+    MetadataFile file(txid, 1, KEYSPACE_STRING, {}, 0);
     auto rc = metadata_store.storeMetadataFile("ns", "mytbl", file);
     EXPECT(rc.isSuccess());
   }

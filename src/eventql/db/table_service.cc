@@ -127,6 +127,54 @@ Status TableService::createTable(
   }
 
   auto replication_factor = cdir_->getClusterConfig().replication_factor();
+
+  // generate new table config
+  TableDefinition td;
+  td.set_customer(db_namespace);
+  td.set_table_name(table_name);
+
+  auto tblcfg = td.mutable_config();
+  tblcfg->set_schema(schema.encode().toString());
+  tblcfg->set_num_shards(1);
+  tblcfg->set_partitioner(partitioner_type);
+  tblcfg->set_storage(eventql::TBL_STORAGE_COLSM);
+  tblcfg->set_partition_key(partition_key);
+
+  for (const auto& col : primary_key) {
+    tblcfg->add_primary_key(col);
+  }
+
+  for (const auto& p : properties) {
+    if (p.first == "finite_partition_size") {
+      uint64_t val = 0;
+      try {
+        val = std::stoull(p.second);
+      } catch (...) {}
+
+      tblcfg->set_enable_finite_partitions(true);
+      tblcfg->set_finite_partition_size(val);
+      continue;
+    }
+  }
+
+  // check preconditions
+  if (tblcfg->enable_finite_partitions()) {
+    if (tblcfg->finite_partition_size() < 1) {
+        return Status(
+            eIllegalArgumentError,
+            "finite partition size must be > 0");
+    }
+
+    switch (keyspace_type) {
+      case KEYSPACE_UINT64:
+        break;
+      case KEYSPACE_STRING:
+        return Status(
+            eIllegalArgumentError,
+            "can't set finite partition size for string partition keys");
+    }
+  }
+
   // generate new metadata file
   Set<String> servers;
   ServerAllocator server_alloc(cdir_);
@@ -137,38 +185,36 @@ Status TableService::createTable(
     }
   }
 
-  MetadataFile::PartitionMapEntry initial_partition;
-  initial_partition.begin = "";
-  initial_partition.partition_id = Random::singleton()->sha1();
-  initial_partition.splitting = false;
-  for (const auto& s : servers) {
-    MetadataFile::PartitionPlacement p;
-    p.server_id = s;
-    p.placement_id = Random::singleton()->random64();
-    initial_partition.servers.emplace_back(p);
+  auto txnid = Random::singleton()->sha1();
+  std::unique_ptr<MetadataFile> metadata_file;
+  if (tblcfg->enable_finite_partitions()) {
+    metadata_file.reset(
+        new MetadataFile(
+            txnid,
+            1,
+            keyspace_type,
+            { },
+            MFILE_FINITE));
+  } else {
+    MetadataFile::PartitionMapEntry initial_partition;
+    initial_partition.begin = "";
+    initial_partition.partition_id = Random::singleton()->sha1();
+    initial_partition.splitting = false;
+    for (const auto& s : servers) {
+      MetadataFile::PartitionPlacement p;
+      p.server_id = s;
+      p.placement_id = Random::singleton()->random64();
+      initial_partition.servers.emplace_back(p);
+    }
+
+    metadata_file.reset(
+        new MetadataFile(txnid, 1, keyspace_type, { initial_partition }, 0));
   }
 
-  auto txnid = Random::singleton()->sha1();
-  MetadataFile metadata_file(txnid, 1, keyspace_type, { initial_partition });
-
-  // generate new table config
-  TableDefinition td;
-  td.set_customer(db_namespace);
-  td.set_table_name(table_name);
   td.set_metadata_txnid(txnid.data(), txnid.size());
   td.set_metadata_txnseq(1);
   for (const auto& s : servers) {
     td.add_metadata_servers(s);
-  }
-
-  auto tblcfg = td.mutable_config();
-  tblcfg->set_schema(schema.encode().toString());
-  tblcfg->set_num_shards(1);
-  tblcfg->set_partitioner(partitioner_type);
-  tblcfg->set_storage(eventql::TBL_STORAGE_COLSM);
-  tblcfg->set_partition_key(partition_key);
-  for (const auto& col : primary_key) {
-    tblcfg->add_primary_key(col);
   }
 
   // create metadata file on metadata servers
@@ -176,7 +222,7 @@ Status TableService::createTable(
   auto rc = coordinator.createFile(
       db_namespace,
       table_name,
-      metadata_file,
+      std::move(*metadata_file),
       Vector<String>(servers.begin(), servers.end()));
 
   if (!rc.isSuccess()) {
@@ -333,8 +379,6 @@ Status TableService::alterTable(
     }
   }
 
-  td.set_version(td.version() + 1);
-
   try {
     cdir_->updateTableConfig(td);
   } catch (const Exception& e) {
@@ -441,7 +485,7 @@ void TableService::insertRecords(
         break;
       }
 
-      // compund primary key, key value is chained SHA1 of column values
+      // compound primary key, key value is chained SHA1 of column values
       default: {
         for (const auto& c : primary_key_columns) {
           auto f = record->getField(c);
@@ -463,7 +507,7 @@ void TableService::insertRecords(
     // lookup partition
     PartitionFindResponse find_res;
     {
-      auto rc = metadata_client.findPartition(
+      auto rc = metadata_client.findOrCreatePartition(
           tsdb_namespace,
           table_name,
           encodePartitionKey(

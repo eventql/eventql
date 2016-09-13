@@ -28,88 +28,63 @@
 
 namespace eventql {
 
-SessionTaskScheduler::SessionTaskScheduler(Database* db) : db_(db) {}
-
-void SessionTaskScheduler::run(std::function<void()> task) {
-  db_->startThread([task] (Session* session) {
-    task();
-  });
-}
-
-void SessionTaskScheduler::runOnReadable(std::function<void()> task, int fd) {
-  abort();
-}
-
-void SessionTaskScheduler::runOnWritable(std::function<void()> task, int fd) {
-  abort();
-}
-
-void SessionTaskScheduler::runOnWakeup(
-    std::function<void()> task,
-    Wakeup* wakeup,
-    long generation) {
-  abort();
-}
-
 HTTPTransport::HTTPTransport(
     Database* database) :
     database_(database),
     status_servlet_(database),
     api_servlet_(database),
-    rpc_servlet_(database),
-    session_scheduler_(database) {
-  http_router_.addRouteByPrefixMatch(
-      "/rpc/",
-      &rpc_servlet_,
-      &session_scheduler_);
-
-  http_router_.addRouteByPrefixMatch(
-      "/tsdb/",
-      &rpc_servlet_,
-      &session_scheduler_);
-
-  http_router_.addRouteByPrefixMatch(
-      "/api/",
-      &api_servlet_,
-      &session_scheduler_);
-
-  http_router_.addRouteByPrefixMatch(
-      "/eventql",
-      &status_servlet_,
-      &session_scheduler_);
-
-  http_router_.addRouteByPrefixMatch("/", &default_servlet_);
-}
+    rpc_servlet_(database) {}
 
 void HTTPTransport::handleConnection(int fd, std::string prelude_bytes) {
-  logDebug("eventql", "Opening new http connection; fd=$0", fd);
+  database_->startThread([this, fd, prelude_bytes] (Session* session) {
+    logDebug("eventql", "Opening new http connection; fd=$0", fd);
 
-  try {
-        http::HTTPServerConnection::start(
-            &http_router_,
-            ScopedPtr<net::TCPConnection>(new net::TCPConnection(fd)),
-            &ev_,
-            &http_stats_,
-            prelude_bytes);
+    auto dbctx = session->getDatabaseContext();
 
-    //http_conn->start(prelude_bytes);
-  } catch (const std::exception& e){
-    logError(
-        "eventql",
-        "HTTP connection error: $0",
-        e.what());
-  }
-}
+    http::HTTPServerConnection conn(
+        fd,
+        dbctx->config->getInt("server.http_io_timeout").get(),
+        prelude_bytes);
 
-void HTTPTransport::startIOThread() {
-  io_thread_ = std::thread([this] () {
-    ev_.run();
+    http::HTTPRequest request;
+    auto rc = conn.recvRequest(&request);
+    if (!rc.isSuccess()) {
+      logError("evqld", "HTTP Error: $0", rc.getMessage());
+      return;
+    }
+
+    logInfo("evqld", "HTTP Request: $0", request.uri());
+
+    auto req_stream = mkRef(new http::HTTPRequestStream(&request));
+    auto res_stream = mkRef(new http::HTTPResponseStream(&conn));
+
+    try {
+      auto servlet = getServlet(request);
+      servlet->handleHTTPRequest(req_stream, res_stream);
+    } catch (const std::exception& e) {
+      logError("evqld", "HTTP Error: $0", e.what());
+    }
   });
 }
 
-void HTTPTransport::stopIOThread() {
-  ev_.shutdown();
-  io_thread_.join();
+http::StreamingHTTPService* HTTPTransport::getServlet(
+    const http::HTTPRequest& request) {
+  auto path = request.uri();
+
+  if (StringUtil::beginsWith(path, "/api/")) {
+    return &api_servlet_;
+  }
+
+  if (StringUtil::beginsWith(path, "/rpc/") ||
+      StringUtil::beginsWith(path, "/tsdb/")) {
+    return &rpc_servlet_;
+  }
+
+  if (StringUtil::beginsWith(path, "/eventql/")) {
+    return &status_servlet_;
+  }
+
+  return &default_servlet_;
 }
 
 } // namespace eventql

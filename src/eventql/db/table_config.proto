@@ -41,7 +41,7 @@ enum KeyspaceType {
   KEYSPACE_STRING = 2;
 };
 
-// next id: 15
+// next id: 18
 message TableConfig {
 
   /**
@@ -99,6 +99,10 @@ message TableConfig {
   optional bool enable_async_split = 14 [default = false];
 
   optional uint64 override_partition_split_threshold = 15;
+
+  optional bool enable_finite_partitions = 16 [default = false];
+
+  optional uint64 finite_partition_size = 17;
 
 };
 

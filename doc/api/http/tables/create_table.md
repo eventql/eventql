@@ -87,7 +87,7 @@ FIXME: document how to create nested columns
         >>      ]
         >>   },
         >>   "properties": [
-        >>      [ "fixed_partition_size", "300000000" ]
+        >>      [ "finite_partition_size", "300000000" ]
         >>   ]
         >> }
 

@@ -23,6 +23,7 @@
  */
 #pragma once
 #include <stdlib.h>
+#include <stdint.h>
 
 #ifdef __cplusplus
 #include <string>
@@ -88,6 +89,19 @@ enum {
   EVQL_QUERY_RESULT_HASSTATS     = 0x2,
   EVQL_QUERY_RESULT_HASCOLNAMES  = 0x4,
   EVQL_QUERY_RESULT_PENDINGSTMT  = 0x8
+};
+
+
+enum {
+  EVQL_STAT_ROWSMODIFIED     = 0x1L,
+  EVQL_STAT_ROWSSCANNED      = 0x2L,
+  EVQL_STAT_BYTESSCANNED     = 0x3L,
+  EVQL_STAT_PROGRESSPERMILL  = 0x4L,
+  EVQL_STAT_TIMEELAPSED_MS   = 0x5L,
+  EVQL_STAT_ETA_MS           = 0x6L,
+  EVQL_STAT_TASKSRUNNING     = 0x7L,
+  EVQL_STAT_TASKSTOTAL       = 0x8L,
+  EVQL_STAT_TASKSCOMPLETED   = 0x9L
 };
 
 /**
@@ -206,6 +220,8 @@ void evql_client_setprogresscb(
     evql_client_t* client,
     void (*cb) (evql_client_t* client, void* privdata),
     void* privdata);
+
+uint64_t evql_client_getstat(evql_client_t* client, uint64_t stat);
 
 /**
  * Free the current result

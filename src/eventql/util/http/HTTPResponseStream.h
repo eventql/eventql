@@ -35,7 +35,7 @@ class HTTPResponseStream : public RefCounted {
 public:
   static const size_t kMaxWriteBufferSize = 4 * 1024 * 1024;
 
-  HTTPResponseStream(RefPtr<HTTPServerConnection> conn);
+  HTTPResponseStream(HTTPServerConnection* conn);
 
   /**
    * Write the provided http response (including headers and body) and then
@@ -97,20 +97,7 @@ public:
   bool isClosed() const;
 
 protected:
-
-  void onCallbackCompleted();
-  void onCallbackError();
-  void onStateChanged(std::unique_lock<std::mutex>* lk);
-
-  mutable std::mutex mutex_;
-  mutable std::condition_variable cv_;
-  RefPtr<HTTPServerConnection> conn_;
-  bool callback_running_;
-  bool headers_written_;
-  bool response_finished_;
-  Buffer buf_;
-  Function<void ()> on_body_written_;
-  bool error_;
+  HTTPServerConnection* conn_;
 };
 
 }

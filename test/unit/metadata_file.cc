@@ -62,8 +62,9 @@ TEST_CASE(MetadataFileTest, TestMetadataFileStringLookups, [] () {
     pmap.emplace_back(e);
   }
 
-  MetadataFile file(SHA1::compute("mytx"), 0, KEYSPACE_STRING, pmap);
+  MetadataFile file(SHA1::compute("mytx"), 0, KEYSPACE_STRING, pmap, 0);
 
+  EXPECT(file.hasFinitePartitions() == false);
   EXPECT(file.getPartitionMapAt("a") == file.getPartitionMapBegin());
   EXPECT(file.getPartitionMapAt("b") == file.getPartitionMapBegin() + 1);
   EXPECT(file.getPartitionMapAt("bx") == file.getPartitionMapBegin() + 1);
@@ -72,6 +73,68 @@ TEST_CASE(MetadataFileTest, TestMetadataFileStringLookups, [] () {
   EXPECT(file.getPartitionMapAt("e") == file.getPartitionMapBegin() + 3);
   EXPECT(file.getPartitionMapAt("ex") == file.getPartitionMapBegin() + 3);
   EXPECT(file.getPartitionMapAt("z") == file.getPartitionMapBegin() + 3);
+});
+
+TEST_CASE(MetadataFileTest, TestMetadataFileFiniteUIntLookups, [] () {
+  Vector<MetadataFile::PartitionMapEntry> pmap;
+
+  {
+    MetadataFile::PartitionMapEntry e;
+    e.begin = encodePartitionKey(KEYSPACE_UINT64, "1");
+    e.end = encodePartitionKey(KEYSPACE_UINT64, "3");
+    e.partition_id = SHA1::compute("A");
+    e.splitting = false;
+    pmap.emplace_back(e);
+  }
+
+  {
+    MetadataFile::PartitionMapEntry e;
+    e.begin = encodePartitionKey(KEYSPACE_UINT64, "3");
+    e.end = encodePartitionKey(KEYSPACE_UINT64, "5");
+    e.partition_id = SHA1::compute("B");
+    e.splitting = false;
+    pmap.emplace_back(e);
+  }
+
+  {
+    MetadataFile::PartitionMapEntry e;
+    e.begin = encodePartitionKey(KEYSPACE_UINT64, "8");
+    e.end = encodePartitionKey(KEYSPACE_UINT64, "12");
+    e.partition_id = SHA1::compute("C");
+    e.splitting = false;
+    pmap.emplace_back(e);
+  }
+
+  {
+    MetadataFile::PartitionMapEntry e;
+    e.begin = encodePartitionKey(KEYSPACE_UINT64, "14");
+    e.end = encodePartitionKey(KEYSPACE_UINT64, "99");
+    e.partition_id = SHA1::compute("D");
+    e.splitting = false;
+    pmap.emplace_back(e);
+  }
+
+  MetadataFile file(
+      SHA1::compute("mytx"),
+      0,
+      KEYSPACE_UINT64,
+      pmap,
+      MFILE_FINITE);
+
+  EXPECT(file.hasFinitePartitions() == true);
+  EXPECT(file.getPartitionMapAt(encodePartitionKey(KEYSPACE_UINT64, "0")) == file.getPartitionMapEnd());
+  EXPECT(file.getPartitionMapAt(encodePartitionKey(KEYSPACE_UINT64, "1")) == file.getPartitionMapBegin());
+  EXPECT(file.getPartitionMapAt(encodePartitionKey(KEYSPACE_UINT64, "2")) == file.getPartitionMapBegin());
+  EXPECT(file.getPartitionMapAt(encodePartitionKey(KEYSPACE_UINT64, "3")) == file.getPartitionMapBegin() + 1);
+  EXPECT(file.getPartitionMapAt(encodePartitionKey(KEYSPACE_UINT64, "4")) == file.getPartitionMapBegin() + 1);
+  EXPECT(file.getPartitionMapAt(encodePartitionKey(KEYSPACE_UINT64, "5")) == file.getPartitionMapEnd());
+  EXPECT(file.getPartitionMapAt(encodePartitionKey(KEYSPACE_UINT64, "7")) == file.getPartitionMapEnd());
+  EXPECT(file.getPartitionMapAt(encodePartitionKey(KEYSPACE_UINT64, "6")) == file.getPartitionMapEnd());
+  EXPECT(file.getPartitionMapAt(encodePartitionKey(KEYSPACE_UINT64, "8")) == file.getPartitionMapBegin() + 2);
+  EXPECT(file.getPartitionMapAt(encodePartitionKey(KEYSPACE_UINT64, "11")) == file.getPartitionMapBegin() + 2);
+  EXPECT(file.getPartitionMapAt(encodePartitionKey(KEYSPACE_UINT64, "12")) == file.getPartitionMapEnd());
+  EXPECT(file.getPartitionMapAt(encodePartitionKey(KEYSPACE_UINT64, "13")) == file.getPartitionMapEnd());
+  EXPECT(file.getPartitionMapAt(encodePartitionKey(KEYSPACE_UINT64, "50")) == file.getPartitionMapBegin() + 3);
 });
 
 static String uint_encode(uint64_t v) {
@@ -109,8 +172,9 @@ TEST_CASE(MetadataFileTest, TestMetadataFileUIntLookups, [] () {
     pmap.emplace_back(e);
   }
 
-  MetadataFile file(SHA1::compute("mytx"), 0, KEYSPACE_UINT64, pmap);
+  MetadataFile file(SHA1::compute("mytx"), 0, KEYSPACE_UINT64, pmap, 0);
 
+  EXPECT(file.hasFinitePartitions() == false);
   EXPECT(file.getPartitionMapAt(uint_encode(0)) == file.getPartitionMapBegin());
   EXPECT(file.getPartitionMapAt(uint_encode(1)) == file.getPartitionMapBegin());
   EXPECT(file.getPartitionMapAt(uint_encode(2)) == file.getPartitionMapBegin() + 1);
@@ -151,8 +215,8 @@ TEST_CASE(MetadataFileTest, TestMetadataFileRangeLookups, [] () {
     pmap.emplace_back(e);
   }
 
-  MetadataFile file(SHA1::compute("mytx"), 0, KEYSPACE_STRING, pmap);
-
+  MetadataFile file(SHA1::compute("mytx"), 0, KEYSPACE_STRING, pmap, 0);
+  EXPECT(file.hasFinitePartitions() == false);
   EXPECT(file.getPartitionMapRangeBegin("") == file.getPartitionMapBegin());
   EXPECT(file.getPartitionMapRangeBegin("a") == file.getPartitionMapBegin());
   EXPECT(file.getPartitionMapRangeBegin("b") == file.getPartitionMapBegin() + 1);
@@ -167,6 +231,89 @@ TEST_CASE(MetadataFileTest, TestMetadataFileRangeLookups, [] () {
   EXPECT(file.getPartitionMapRangeEnd("z") == file.getPartitionMapBegin() + 4);
   EXPECT(file.getPartitionMapRangeEnd("") == file.getPartitionMapBegin() + 4);
   EXPECT(file.getPartitionMapRangeEnd("") == file.getPartitionMapEnd());
+});
+
+TEST_CASE(MetadataFileTest, TestMetadataFileFiniteUIntRangeLookups, [] () {
+  Vector<MetadataFile::PartitionMapEntry> pmap;
+
+  {
+    MetadataFile::PartitionMapEntry e;
+    e.begin = encodePartitionKey(KEYSPACE_UINT64, "1");
+    e.end = encodePartitionKey(KEYSPACE_UINT64, "3");
+    e.partition_id = SHA1::compute("A");
+    e.splitting = false;
+    pmap.emplace_back(e);
+  }
+
+  {
+    MetadataFile::PartitionMapEntry e;
+    e.begin = encodePartitionKey(KEYSPACE_UINT64, "3");
+    e.end = encodePartitionKey(KEYSPACE_UINT64, "5");
+    e.partition_id = SHA1::compute("B");
+    e.splitting = false;
+    pmap.emplace_back(e);
+  }
+
+  {
+    MetadataFile::PartitionMapEntry e;
+    e.begin = encodePartitionKey(KEYSPACE_UINT64, "8");
+    e.end = encodePartitionKey(KEYSPACE_UINT64, "12");
+    e.partition_id = SHA1::compute("C");
+    e.splitting = false;
+    pmap.emplace_back(e);
+  }
+
+  {
+    MetadataFile::PartitionMapEntry e;
+    e.begin = encodePartitionKey(KEYSPACE_UINT64, "14");
+    e.end = encodePartitionKey(KEYSPACE_UINT64, "99");
+    e.partition_id = SHA1::compute("D");
+    e.splitting = false;
+    pmap.emplace_back(e);
+  }
+
+  MetadataFile file(
+      SHA1::compute("mytx"),
+      0,
+      KEYSPACE_UINT64,
+      pmap,
+      MFILE_FINITE);
+
+  EXPECT(file.hasFinitePartitions() == true);
+  EXPECT(file.getPartitionMapRangeBegin("") == file.getPartitionMapBegin());
+  EXPECT(file.getPartitionMapRangeBegin(encodePartitionKey(KEYSPACE_UINT64, "0")) == file.getPartitionMapBegin());
+  EXPECT(file.getPartitionMapRangeBegin(encodePartitionKey(KEYSPACE_UINT64, "1")) == file.getPartitionMapBegin());
+  EXPECT(file.getPartitionMapRangeBegin(encodePartitionKey(KEYSPACE_UINT64, "2")) == file.getPartitionMapBegin());
+  EXPECT(file.getPartitionMapRangeBegin(encodePartitionKey(KEYSPACE_UINT64, "3")) == file.getPartitionMapBegin() + 1);
+  EXPECT(file.getPartitionMapRangeBegin(encodePartitionKey(KEYSPACE_UINT64, "4")) == file.getPartitionMapBegin() + 1);
+  EXPECT(file.getPartitionMapRangeBegin(encodePartitionKey(KEYSPACE_UINT64, "5")) == file.getPartitionMapBegin() + 2);
+  EXPECT(file.getPartitionMapRangeBegin(encodePartitionKey(KEYSPACE_UINT64, "7")) == file.getPartitionMapBegin() + 2);
+  EXPECT(file.getPartitionMapRangeBegin(encodePartitionKey(KEYSPACE_UINT64, "6")) == file.getPartitionMapBegin() + 2);
+  EXPECT(file.getPartitionMapRangeBegin(encodePartitionKey(KEYSPACE_UINT64, "8")) == file.getPartitionMapBegin() + 2);
+  EXPECT(file.getPartitionMapRangeBegin(encodePartitionKey(KEYSPACE_UINT64, "11")) == file.getPartitionMapBegin() + 2);
+  EXPECT(file.getPartitionMapRangeBegin(encodePartitionKey(KEYSPACE_UINT64, "12")) == file.getPartitionMapBegin() + 3);
+  EXPECT(file.getPartitionMapRangeBegin(encodePartitionKey(KEYSPACE_UINT64, "13")) == file.getPartitionMapBegin() + 3);
+  EXPECT(file.getPartitionMapRangeBegin(encodePartitionKey(KEYSPACE_UINT64, "50")) == file.getPartitionMapBegin() + 3);
+  EXPECT(file.getPartitionMapRangeBegin(encodePartitionKey(KEYSPACE_UINT64, "800")) == file.getPartitionMapEnd());
+  EXPECT(file.getPartitionMapRangeEnd("") == file.getPartitionMapEnd());
+  EXPECT(file.getPartitionMapRangeEnd(encodePartitionKey(KEYSPACE_UINT64, "0")) == file.getPartitionMapBegin());
+  EXPECT(file.getPartitionMapRangeEnd(encodePartitionKey(KEYSPACE_UINT64, "1")) == file.getPartitionMapBegin());
+  EXPECT(file.getPartitionMapRangeEnd(encodePartitionKey(KEYSPACE_UINT64, "2")) == file.getPartitionMapBegin() + 1);
+  EXPECT(file.getPartitionMapRangeEnd(encodePartitionKey(KEYSPACE_UINT64, "3")) == file.getPartitionMapBegin() + 1);
+  EXPECT(file.getPartitionMapRangeEnd(encodePartitionKey(KEYSPACE_UINT64, "4")) == file.getPartitionMapBegin() + 2);
+  EXPECT(file.getPartitionMapRangeEnd(encodePartitionKey(KEYSPACE_UINT64, "5")) == file.getPartitionMapBegin() + 2);
+  EXPECT(file.getPartitionMapRangeEnd(encodePartitionKey(KEYSPACE_UINT64, "7")) == file.getPartitionMapBegin() + 2);
+  EXPECT(file.getPartitionMapRangeEnd(encodePartitionKey(KEYSPACE_UINT64, "6")) == file.getPartitionMapBegin() + 2);
+  EXPECT(file.getPartitionMapRangeEnd(encodePartitionKey(KEYSPACE_UINT64, "8")) == file.getPartitionMapBegin() + 2);
+  EXPECT(file.getPartitionMapRangeEnd(encodePartitionKey(KEYSPACE_UINT64, "9")) == file.getPartitionMapBegin() + 3);
+  EXPECT(file.getPartitionMapRangeEnd(encodePartitionKey(KEYSPACE_UINT64, "10")) == file.getPartitionMapBegin() + 3);
+  EXPECT(file.getPartitionMapRangeEnd(encodePartitionKey(KEYSPACE_UINT64, "11")) == file.getPartitionMapBegin() + 3);
+  EXPECT(file.getPartitionMapRangeEnd(encodePartitionKey(KEYSPACE_UINT64, "12")) == file.getPartitionMapBegin() + 3);
+  EXPECT(file.getPartitionMapRangeEnd(encodePartitionKey(KEYSPACE_UINT64, "13")) == file.getPartitionMapBegin() +  3);
+  EXPECT(file.getPartitionMapRangeEnd(encodePartitionKey(KEYSPACE_UINT64, "14")) == file.getPartitionMapBegin() + 3);
+  EXPECT(file.getPartitionMapRangeEnd(encodePartitionKey(KEYSPACE_UINT64, "50")) == file.getPartitionMapEnd());
+  EXPECT(file.getPartitionMapRangeEnd(encodePartitionKey(KEYSPACE_UINT64, "99")) == file.getPartitionMapEnd());
+  EXPECT(file.getPartitionMapRangeEnd(encodePartitionKey(KEYSPACE_UINT64, "800")) == file.getPartitionMapEnd());
 });
 
 TEST_CASE(MetadataFileTest, TestKeyCompare, [] () {
@@ -188,3 +335,29 @@ TEST_CASE(MetadataFileTest, TestKeyCompare, [] () {
           encodePartitionKey(KEYSPACE_UINT64, "2"),
           encodePartitionKey(KEYSPACE_UINT64, "400")) == -1);
 });
+
+TEST_CASE(MetadataFileTest, TestMetadataFileEmptyRangeLookups, [] () {
+  Vector<MetadataFile::PartitionMapEntry> pmap;
+
+  MetadataFile file(
+      SHA1::compute("mytx"),
+      0,
+      KEYSPACE_UINT64,
+      pmap,
+      MFILE_FINITE);
+
+  EXPECT(file.hasFinitePartitions() == true);
+  EXPECT(file.getPartitionMapAt("") == file.getPartitionMapEnd());
+  EXPECT(file.getPartitionMapAt("0") == file.getPartitionMapEnd());
+  EXPECT(file.getPartitionMapAt("10") == file.getPartitionMapEnd());
+  EXPECT(file.getPartitionMapAt("99") == file.getPartitionMapEnd());
+  EXPECT(file.getPartitionMapRangeBegin("") == file.getPartitionMapBegin());
+  EXPECT(file.getPartitionMapRangeBegin("0") == file.getPartitionMapBegin());
+  EXPECT(file.getPartitionMapRangeBegin("10") == file.getPartitionMapBegin());
+  EXPECT(file.getPartitionMapRangeBegin("99") == file.getPartitionMapBegin());
+  EXPECT(file.getPartitionMapRangeEnd("") == file.getPartitionMapEnd());
+  EXPECT(file.getPartitionMapRangeEnd("0") == file.getPartitionMapEnd());
+  EXPECT(file.getPartitionMapRangeEnd("10") == file.getPartitionMapEnd());
+  EXPECT(file.getPartitionMapRangeEnd("99") == file.getPartitionMapEnd());
+});
+

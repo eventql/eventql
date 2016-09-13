@@ -63,6 +63,7 @@ AM_CXXFLAGS = -DEVQL_VERSION=\"v@PACKAGE_VERSION@\" -DEVQL_BUILDID=\"$(EVQL_BUIL
 AM_CFLAGS = $(SPIDERMONKEY_CFLAGS) $(MYSQL_CFLAGS) $(ZOOKEEPER_CFLAGS) $(INIH_CFLAGS) $(SIMDCOMP_CFLAGS) $(LINENOISE_CLFAGS) $(PROTOBUF_CFLAGS) $(PTHREAD_CFLAGS) $(PTHREAD_DEF) $(SYSLOG_DEF) $(ZLIB_DEF) $(GETHOSTBYNAME_R_DEF) -std=c11 -D_GNU_SOURCE -mno-omit-leaf-frame-pointer -fno-omit-frame-pointer -Wall -pedantic -g
 AM_LDFLAGS = $(PTHREAD_CFLAGS) -ldl
 
+
 evql_protos = \
     eventql/auth/client_auth_legacy_protos.proto \
     eventql/config/namespace_config_protos.proto \
@@ -76,20 +77,31 @@ evql_protos = \
 
 EVQL_PROTO_SOURCES_ = \
     eventql/auth/client_auth_legacy_protos.pb.cc \
+    eventql/auth/client_auth_legacy_protos.pb.h \
     eventql/config/namespace_config_protos.pb.cc \
+    eventql/config/namespace_config_protos.pb.h \
     eventql/db/metadata_operations.pb.cc \
+    eventql/db/metadata_operations.pb.h \
     eventql/db/cluster_config.pb.cc \
+    eventql/db/cluster_config.pb.h \
     eventql/db/partition_info.pb.cc \
+    eventql/db/partition_info.pb.h \
     eventql/db/partition_state.pb.cc \
+    eventql/db/partition_state.pb.h \
     eventql/db/record_envelope.pb.cc \
+    eventql/db/record_envelope.pb.h \
     eventql/db/replication_state.pb.cc \
-    eventql/db/table_config.pb.cc
+    eventql/db/replication_state.pb.h \
+    eventql/db/table_config.pb.cc \
+    eventql/db/table_config.pb.h
 
 BUILT_SOURCES = ${EVQL_PROTO_SOURCES_} eventql/mapreduce/mapreduce_preludejs.cc
 dist_noinst_DATA = $(evql_protos)
 
 %.pb.cc %.pb.h: %.proto
-	$(top_builddir)/deps/3rdparty/protobuf/protoc --proto_path=$(srcdir) --cpp_out=$(srcdir) $^
+	@$(top_builddir)/deps/3rdparty/protobuf/protoc --proto_path=$(srcdir) --cpp_out=$(srcdir) $^
+	@echo "  PROTOC   $^"
+
 
 EVQL_CORE_SOURCES_ = \
     eventql/util/CivilTime.cc \
@@ -435,11 +447,6 @@ EVQL_CORE_SOURCES_ = \
     eventql/util/http/httpresponsefuture.cc \
     eventql/util/http/httpresponsefuture.h \
     eventql/util/http/httpresponsehandler.h \
-    eventql/util/http/httprouter.cc \
-    eventql/util/http/httprouter.h \
-    eventql/util/http/httprouter_impl.h \
-    eventql/util/http/httpserver.cc \
-    eventql/util/http/httpserver.h \
     eventql/util/http/httpserverconnection.cc \
     eventql/util/http/httpserverconnection.h \
     eventql/util/http/httpstats.h \
@@ -843,6 +850,8 @@ EVQL_CORE_SOURCES_ = \
     eventql/transport/native/client_tcp.h \
     eventql/transport/native/frames/hello.cc \
     eventql/transport/native/frames/hello.h \
+    eventql/transport/native/frames/query_progress.cc \
+    eventql/transport/native/frames/query_progress.h \
     eventql/transport/native/frames/ready.cc \
     eventql/transport/native/frames/ready.h \
     eventql/transport/native/frames/query_partialaggr.cc \
@@ -944,8 +953,7 @@ eventql/mapreduce/mapreduce_preludejs.cc:
 	echo 'eventql/mapreduce/prelude.js:${srcdir}/eventql/mapreduce/prelude.js' | ${srcdir}/eventql/util/assets.sh $(builddir)/eventql/mapreduce/mapreduce_preludejs.cc
 
 ################# BIN: evqld ####################
-evqld_SOURCES = ${EVQL_CORE_SOURCES_} eventql/evqld.cc
-nodist_evqld_SOURCES = ${EVQL_PROTO_SOURCES_}
+evqld_SOURCES = ${EVQL_CORE_SOURCES_} ${EVQL_PROTO_SOURCES_} eventql/evqld.cc
 
 evqld_LDADD = \
     $(ZOOKEEPER_LDADD) \
@@ -959,6 +967,7 @@ evqld_LDADD = \
 ################## BIN: evql ####################
 evql_SOURCES = \
     ${EVQL_CORE_SOURCES_} \
+    $(EVQL_PROTO_SOURCES_) \
     eventql/cli/console.cc \
     eventql/cli/console.h \
     eventql/cli/cli_config.cc \
@@ -980,6 +989,7 @@ evql_LDFLAGS = -static
 ################ BIN: evqlctl ###################
 evqlctl_SOURCES = \
     ${EVQL_CORE_SOURCES_} \
+    $(EVQL_PROTO_SOURCES_) \
     eventql/cli/commands/cli_command.h \
     eventql/cli/commands/cli_command.cc \
     eventql/cli/commands/cluster_add_server.h \

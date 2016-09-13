@@ -69,6 +69,10 @@ protected:
       const MetadataFile& input,
       Vector<MetadataFile::PartitionMapEntry>* output) const;
 
+  Status performCreatePartition(
+      const MetadataFile& input,
+      Vector<MetadataFile::PartitionMapEntry>* output) const;
+
   Status performJoinServers(
       const MetadataFile& input,
       Vector<MetadataFile::PartitionMapEntry>* output) const;

@@ -22,30 +22,37 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include "ReadStreamServlet.h"
+#pragma once
+#include "eventql/eventql.h"
+#include "eventql/util/io/outputstream.h"
 
+namespace eventql {
+namespace native_transport {
 
-namespace http {
+class QueryProgressFrame {
+public:
 
-void ReadStreamServlet::handleHTTPRequest(
-      RefPtr<http::HTTPRequestStream> req_stream,
-      RefPtr<http::HTTPResponseStream> res_stream) {
+  QueryProgressFrame();
 
-  Buffer body;
+  void setNumRowsModified(uint64_t num_rows_modified);
+  void setNumRowsScanned(uint64_t num_rows_scanned);
+  void setNumBytesScanned(uint64_t num_bytes_scanned);
+  void setQueryProgressPermill(uint64_t query_progress_permill);
+  void setQueryElapsedMillis(uint64_t query_elapsed_ms);
+  void setQueryETAMillis(uint64_t query_eta_ms);
 
-  auto bodyChunkRead = [body] (const void* data, size_t size) mutable {
-    Buffer chunk;
-    chunk.append(data, size);
-    body.append(data, size);
-    iputs("Request Body Chunk read: $0", chunk.toString());
-  };
+  void writeTo(OutputStream* os);
+  void clear();
 
-  req_stream->readBody(bodyChunkRead);
-  iputs("Request Body: $0", body.toString());
+protected:
+  uint64_t num_rows_modified_;
+  uint64_t num_rows_scanned_;
+  uint64_t num_bytes_scanned_;
+  uint64_t query_progress_permill_;
+  uint64_t query_elapsed_ms_;
+  uint64_t query_eta_ms_;
+};
 
-}
-
-}
-
-
+} // namespace native_transport
+} // namespace eventql
 

@@ -187,6 +187,17 @@ The EventQL configuration options are grouped in three sections: `client`, `serv
     </td>
   </tr>
   <tr>
+    <td><b>server.http_io_timeout</b></td>
+    <td>1s</td>
+    <td>
+      Configures the HTTP I/O timeout. The timeout controls how long the
+      server will wait for the client to send the next byte of the request
+      while reading the http request as well as how long the server will wait
+      for the client to read the next byte of the response while writing the
+      response. (optional, unit: microseconds)
+    </td>
+  </tr>
+  <tr>
     <td><b>server.heartbeat_interval</b></td>
     <td>1s</td>
     <td>
@@ -194,6 +205,14 @@ The EventQL configuration options are grouped in three sections: `client`, `serv
       connection. Note that this value must be lower than the idle timeout and
       also puts a lower limit on the idle timeout that a connection client may
       choose. (optional, unit: microseconds)
+    </td>
+  </tr>
+  <tr>
+    <td><b>server.query_progress_rate_limit</b></td>
+    <td>250ms</td>
+    <td>
+      How often should the server send a progress event.
+      (optional, unit: microseconds)
     </td>
   </tr>
   <tr>

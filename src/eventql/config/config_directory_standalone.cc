@@ -206,23 +206,31 @@ void StandaloneConfigDirectory::updateTableConfig(
     bool force /* = false */) {
   std::unique_lock<std::mutex> lk(mutex_);
   auto table_id = table.customer() + "~" + table.table_name();
-  if (table.version() == 0 && tables_.find(table_id) != tables_.end()) {
+  auto old_table_version = 0;
+  auto old_table = tables_.find(table_id);
+  if (old_table != tables_.end()) {
+    old_table_version = old_table->second.version();
+  }
+
+  if (table.version() != old_table_version) {
     RAISEF(
         kIllegalArgumentError,
-        "table already exists: $0",
+        "conflicting update to table config: $0",
         table.table_name());
   }
 
-  tables_.emplace(table_id, table);
-  auto callbacks = on_table_change_;
+  auto new_table = table;
+  new_table.set_version(old_table_version + 1);
+
+  tables_[table_id] = new_table;
 
   if (db_.get()) {
     auto db_key = StringUtil::format(
         "tbl~$0~$1",
-        table.customer(),
-        table.table_name());
+        new_table.customer(),
+        new_table.table_name());
 
-    auto db_val = *msg::encode(table);
+    auto db_val = *msg::encode(new_table);
     auto txn = db_->startTransaction(false);
     txn->update(
         db_key.data(),
@@ -233,9 +241,10 @@ void StandaloneConfigDirectory::updateTableConfig(
     txn->commit();
   }
 
+  auto callbacks = on_table_change_;
   lk.unlock();
   for (const auto& cb : callbacks) {
-    cb(table);
+    cb(new_table);
   }
 }
 
