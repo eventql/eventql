@@ -38,11 +38,9 @@ namespace eventql {
 const char PartitionReplication::kStateFileName[] = "_repl";
 
 PartitionReplication::PartitionReplication(
-    RefPtr<Partition> partition,
-    http::HTTPConnectionPool* http) :
+    RefPtr<Partition> partition) :
     partition_(partition),
-    snap_(partition_->getSnapshot()),
-    http_(http) {}
+    snap_(partition_->getSnapshot()) {}
 
 ReplicationState PartitionReplication::fetchReplicationState(
     RefPtr<PartitionSnapshot> snap) {
@@ -87,9 +85,8 @@ const size_t LSMPartitionReplication::kMaxBatchSizeBytes = 1024 * 1024 * 2; // 2
 
 LSMPartitionReplication::LSMPartitionReplication(
     RefPtr<Partition> partition,
-    ConfigDirectory* cdir,
-    http::HTTPConnectionPool* http) :
-    PartitionReplication(partition, http), cdir_(cdir) {}
+    ConfigDirectory* cdir) :
+    PartitionReplication(partition), cdir_(cdir) {}
 
 bool LSMPartitionReplication::needsReplication() const {
   // check if we have seen the latest metadata transaction, otherwise enqueue
@@ -647,10 +644,8 @@ size_t LSMPartitionReplication::uploadBatchTo(
   req.addHeader("Host", uri.hostAndPort());
   req.addBody(body.data(), body.size());
 
-  auto res = http_->executeRequest(req);
-  res.wait();
-
-  const auto& r = res.get();
+  http::HTTPClient http;
+  auto r = http.executeRequest(req);
   if (r.statusCode() != 201) {
     RAISEF(kRuntimeError, "received non-201 response: $0", r.body().toString());
   }

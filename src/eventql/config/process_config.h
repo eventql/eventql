@@ -35,6 +35,8 @@ class ProcessConfig : public RefCounted {
 friend class ProcessConfigBuilder;
 public:
 
+  const char* getCString(const String& key) const;
+  const char* getCString(const String& section, const String& key) const;
   Option<String> getString(const String& key) const;
   Option<String> getString(const String& section, const String& key) const;
   Option<int64_t> getInt(const String& key) const;

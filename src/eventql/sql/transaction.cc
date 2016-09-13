@@ -76,4 +76,16 @@ void* Transaction::getUserData() {
   return user_data_;
 }
 
+void Transaction::setHeartbeatCallback(std::function<ReturnCode ()> cb) {
+  heartbeat_cb_ = cb;
+}
+
+ReturnCode Transaction::triggerHeartbeat() {
+  if (heartbeat_cb_) {
+    return heartbeat_cb_();
+  } else {
+    return ReturnCode::success();
+  }
+}
+
 } // namespace csql

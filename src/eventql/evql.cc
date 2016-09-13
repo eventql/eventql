@@ -162,6 +162,24 @@ int main(int argc, const char** argv) {
       "<token>");
 
   flags.defineFlag(
+      "history_file",
+      cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      NULL,
+      "history path",
+      "<path>");
+
+  flags.defineFlag(
+      "history_maxlen",
+      cli::FlagParser::T_INTEGER,
+      false,
+      NULL,
+      NULL,
+      "history length",
+      "<number of history entries>");
+
+  flags.defineFlag(
       "loglevel",
       cli::FlagParser::T_STRING,
       false,
@@ -226,6 +244,8 @@ int main(int argc, const char** argv) {
         "   --password <password>     Set the auth password (if required)\n"
         "   --auth_token <token>      Set the auth token (if required)\n"
         "   -B, --batch               Run in batch mode (streaming result output)\n"
+        "   --history_file <path>     Set the history file path\n"
+        "   --history_max_len <len>   Set the maximum length of the history\n"
         "   -q, --quiet               Be quiet (disables query progress)\n"
         "   --verbose                 Print debug output to STDERR\n"
         "   -v, --version             Display the version of this binary and exit\n"
@@ -288,6 +308,20 @@ int main(int argc, const char** argv) {
     cfg_builder.setProperty("evql", "quiet", "true");
   }
 
+  if (flags.isSet("history_file")) {
+    cfg_builder.setProperty(
+        "evql",
+        "history_file",
+        flags.getString("history_file"));
+  }
+
+  if (flags.isSet("history_maxlen")) {
+    cfg_builder.setProperty(
+        "evql",
+        "history_maxlen",
+        StringUtil::toString(flags.getInt("history_maxlen")));
+  }
+
   /* cli config */
   eventql::cli::CLIConfig cli_cfg(cfg_builder.getConfig());
 
@@ -302,38 +336,53 @@ int main(int argc, const char** argv) {
   /* cli */
   eventql::cli::Console console(cli_cfg);
 
+  {
+    auto rc = console.connect();
+    if (!rc.isSuccess()) {
+      logFatal("evql", "error while connecting to server: $0", rc.getMessage());
+      return 1;
+    }
+  }
+
+  int rc = 0;
+
   auto file = cli_cfg.getFile();
   auto language = cli_cfg.getLanguage();
   if (file.isEmpty() &&
       !language.isEmpty() &&
       language.get() == eventql::cli::CLIConfig::kLanguage::JAVASCRIPT) {
     logFatal("evql", "missing --file flag. Set --file for javascript");
-    return 1;
+    rc = 1;
+    goto exit;
   }
 
   if (!file.isEmpty()) {
     if (language.isEmpty()) {
       logFatal("evql", "invalid --lang flag. Must be one of 'sql', 'js' or 'javascript'");
-      return 1;
+      rc = 1;
+      goto exit;
     }
 
     auto query = FileUtil::read(file.get());
     switch (language.get()) {
       case eventql::cli::CLIConfig::kLanguage::SQL: {
         Status ret = console.runQuery(query.toString());
-        return ret.isSuccess() ? 0 : 1;
+        rc = ret.isSuccess() ? 0 : 1;
+        goto exit;
       }
 
       case eventql::cli::CLIConfig::kLanguage::JAVASCRIPT: {
         Status ret = console.runJS(query.toString());
-        return ret.isSuccess() ? 0 : 1;
+        rc = ret.isSuccess() ? 0 : 1;
+        goto exit;
       }
     }
   }
 
   if (flags.isSet("exec")) {
     auto ret = console.runQuery(flags.getString("exec"));
-    return ret.isSuccess() ? 0 : 1;
+    rc = ret.isSuccess() ? 0 : 1;
+    goto exit;
   }
 
   if (hasSTDIN() || flags.isSet("batch") || !stdout_os->isTTY()) {
@@ -342,13 +391,16 @@ int main(int argc, const char** argv) {
       auto ret = console.runQuery(query);
       query = "";
       if (ret.isError()) {
-        return 1;
+        rc = 1;
+        goto exit;
       }
     }
   } else {
     console.startInteractiveShell();
   }
 
-  return 0;
+exit:
+  console.close();
+  return rc;
 }
 

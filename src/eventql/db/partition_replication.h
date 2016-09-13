@@ -38,8 +38,7 @@ public:
   static const char kStateFileName[];
 
   PartitionReplication(
-      RefPtr<Partition> partition,
-      http::HTTPConnectionPool* http);
+      RefPtr<Partition> partition);
 
   /**
    * Returns true if we need still need to replicate some data to one or more
@@ -80,7 +79,6 @@ protected:
 
   RefPtr<Partition> partition_;
   RefPtr<PartitionSnapshot> snap_;
-  http::HTTPConnectionPool* http_;
 };
 
 class LSMPartitionReplication : public PartitionReplication {
@@ -90,8 +88,7 @@ public:
 
   LSMPartitionReplication(
       RefPtr<Partition> partition,
-      ConfigDirectory* cdir,
-      http::HTTPConnectionPool* http);
+      ConfigDirectory* cdir);
 
   bool needsReplication() const override;
 

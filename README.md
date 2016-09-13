@@ -1,5 +1,7 @@
 # EventQL
 
+[![Build Status](https://secure.travis-ci.org/eventql/eventql.png)](http://travis-ci.org/eventql/eventql)
+
 EventQL is a distributed, column-oriented database built for large-scale event
 collection and analytics. It runs super-fast SQL and JavaScript queries.
 
@@ -47,7 +49,7 @@ To build EventQL from a git checkout:
 To run EventQL Server with Docker:
 
     $ git clone git@github.com:eventql/eventql.git
-    $ cd eventql/docker/server
+    $ cd eventql/contrib/docker/server
     $ chmod +x run.sh && ./run.sh
 
 Running on port 9175

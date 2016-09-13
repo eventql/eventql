@@ -21,6 +21,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#include <assert.h>
 #include <eventql/util/io/fileutil.h>
 #include <eventql/db/partition.h>
 #include <eventql/db/partition_writer.h>
@@ -69,10 +70,12 @@ LSMPartitionWriter::LSMPartitionWriter(
     file_tracker_(cfg->file_tracker),
     cdir_(cfg->config_directory),
     partition_split_threshold_(kDefaultPartitionSplitThresholdBytes) {
-  const auto& table_cfg = partition_->getTable()->config().config();
+  auto table = partition_->getTable();
+  auto table_cfg = table->config();
 
-  if (table_cfg.override_partition_split_threshold() > 0) {
-    partition_split_threshold_ = table_cfg.override_partition_split_threshold();
+  if (table_cfg.config().override_partition_split_threshold() > 0) {
+    partition_split_threshold_ =
+        table_cfg.config().override_partition_split_threshold();
   }
 }
 
@@ -115,49 +118,59 @@ Set<SHA1Hash> LSMPartitionWriter::insertRecords(
       snap->state.table_key(),
       snap->key.toString());
 
-  if (snap->compacting_arena.get() != nullptr) {
-    for (auto& r : rec_versions) {
-      auto v = snap->compacting_arena->fetchRecordVersion(r.first);
-      if (v > r.second) {
-        r.second = v;
+  Set<SHA1Hash> inserted_ids;
+  try {
+    if (snap->compacting_arena.get() != nullptr) {
+      for (auto& r : rec_versions) {
+        auto v = snap->compacting_arena->fetchRecordVersion(r.first);
+        if (v > r.second) {
+          r.second = v;
+        }
       }
     }
-  }
 
-  for (auto tbl = tables.rbegin(); tbl != tables.rend(); ++tbl) {
-    auto idx_path = FileUtil::joinPaths(snap->rel_path, tbl->filename());
-    if (prepared_indexes.count(idx_path) > 0) {
-      continue;
-    }
-
-    auto idx = idx_cache_->lookup(idx_path);
-    idx->lookup(&rec_versions);
-  }
-
-  Vector<bool> record_flags_skip(records.getNumRecords(), false);
-  Vector<bool> record_flags_update(records.getNumRecords(), false);
-
-  if (!rec_versions.empty()) {
-    for (size_t i = 0; i < records.getNumRecords(); ++i) {
-      const auto& record_id = records.getRecordID(i);
-      auto headv = rec_versions[record_id];
-      if (headv > 0) {
-        record_flags_update[i] = true;
-      }
-
-      if (records.getRecordVersion(i) <= headv) {
-        record_flags_skip[i] = true;
+    for (auto tbl = tables.rbegin(); tbl != tables.rend(); ++tbl) {
+      auto idx_path = FileUtil::joinPaths(snap->rel_path, tbl->filename());
+      if (prepared_indexes.count(idx_path) > 0) {
         continue;
       }
+
+      auto idx = idx_cache_->lookup(idx_path);
+      idx->lookup(&rec_versions);
     }
+
+    Vector<bool> record_flags_skip(records.getNumRecords(), false);
+    Vector<bool> record_flags_update(records.getNumRecords(), false);
+
+    if (!rec_versions.empty()) {
+      for (size_t i = 0; i < records.getNumRecords(); ++i) {
+        const auto& record_id = records.getRecordID(i);
+        auto headv = rec_versions[record_id];
+        if (headv > 0) {
+          assert(headv > 1400000000000000);
+          record_flags_update[i] = true;
+        }
+
+        auto thisv = records.getRecordVersion(i);
+        assert(thisv > 1400000000000000);
+
+        if (thisv <= headv) {
+          record_flags_skip[i] = true;
+          continue;
+        }
+      }
+    }
+
+    inserted_ids = snap->head_arena->insertRecords(
+        records,
+        record_flags_skip,
+        record_flags_update);
+
+    lk.unlock();
+  } catch (const std::exception& e) {
+    logFatal("evqld", "error in insert routine: $0", e.what());
+    abort();
   }
-
-  auto inserted_ids = snap->head_arena->insertRecords(
-      records,
-      record_flags_skip,
-      record_flags_update);
-
-  lk.unlock();
 
   if (needsUrgentCommit()) {
     commit();

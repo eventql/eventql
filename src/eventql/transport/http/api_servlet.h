@@ -22,6 +22,7 @@
  * code of your own applications
  */
 #pragma once
+#include "eventql/eventql.h"
 #include "eventql/util/VFS.h"
 #include "eventql/util/http/httpservice.h"
 #include "eventql/util/http/HTTPSSEStream.h"
@@ -35,28 +36,14 @@
 #include "eventql/auth/client_auth.h"
 #include "eventql/auth/internal_auth.h"
 #include "eventql/server/sql_service.h"
-
-#include "eventql/eventql.h"
+#include "eventql/db/database.h"
 
 namespace eventql {
 
-struct AnalyticsQuery;
-
-class AnalyticsServlet : public http::StreamingHTTPService {
+class APIServlet : public http::StreamingHTTPService {
 public:
 
-  AnalyticsServlet(
-      const String& cachedir,
-      InternalAuth* auth,
-      ClientAuth* client_auth,
-      InternalAuth* internal_auth,
-      csql::Runtime* sql,
-      eventql::TableService* tsdb,
-      ConfigDirectory* customer_dir,
-      PartitionMap* pmap,
-      SQLService* sql_service,
-      MapReduceService* mapreduce_service,
-      TableService* table_service);
+  APIServlet(Database* db);
 
   void handleHTTPRequest(
       RefPtr<http::HTTPRequestStream> req_stream,
@@ -91,7 +78,6 @@ protected:
 
   void fetchTableDefinition(
       Session* session,
-      const String& table_name,
       const http::HTTPRequest* req,
       http::HTTPResponse* res);
 
@@ -110,16 +96,6 @@ protected:
       const http::HTTPRequest* req,
       http::HTTPResponse* res);
 
-  void addTableTag(
-      Session* session,
-      const http::HTTPRequest* req,
-      http::HTTPResponse* res);
-
-  void removeTableTag(
-      Session* session,
-      const http::HTTPRequest* req,
-      http::HTTPResponse* res);
-
   void insertIntoTable(
       Session* session,
       const http::HTTPRequest* req,
@@ -132,34 +108,28 @@ protected:
       RefPtr<http::HTTPResponseStream> res_stream);
 
   void executeSQL_ASCII(
-      const URI::ParamList& params,
+      const json::JSONObject jreq,
       Session* session,
       const http::HTTPRequest* req,
       http::HTTPResponse* res,
       RefPtr<http::HTTPResponseStream> res_stream);
 
   void executeSQL_BINARY(
-      const URI::ParamList& params,
+      const json::JSONObject jreq,
       Session* session,
       const http::HTTPRequest* req,
       http::HTTPResponse* res,
       RefPtr<http::HTTPResponseStream> res_stream);
 
   void executeSQL_JSON(
-      const URI::ParamList& params,
+      const json::JSONObject jreq,
       Session* session,
       const http::HTTPRequest* req,
       http::HTTPResponse* res,
       RefPtr<http::HTTPResponseStream> res_stream);
 
   void executeSQL_JSONSSE(
-      const URI::ParamList& params,
-      Session* session,
-      const http::HTTPRequest* req,
-      http::HTTPResponse* res,
-      RefPtr<http::HTTPResponseStream> res_stream);
-
-  void executeQTree(
+      const json::JSONObject jreq,
       Session* session,
       const http::HTTPRequest* req,
       http::HTTPResponse* res,
@@ -268,20 +238,7 @@ protected:
     }
   }
 
-  String cachedir_;
-  InternalAuth* auth_;
-  ClientAuth* client_auth_;
-  InternalAuth* internal_auth_;
-  csql::Runtime* sql_;
-  eventql::TableService* tsdb_;
-  ConfigDirectory* customer_dir_;
-
-  PartitionMap* pmap_;
-
-  SQLService* sql_service_;
-  MapReduceService* mapreduce_service_;
-  TableService* table_service_;
-
+  Database* db_;
   MapReduceAPIServlet mapreduce_api_;
 };
 

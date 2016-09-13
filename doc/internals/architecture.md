@@ -23,7 +23,7 @@ used to automatically split a table into many partitions of roughly 500MB.
 Each partition is then stored on N servers in the cluster.
 
 Partioning is fully transparent to the user -- from a user perspective
-interacting with an EventQL cluter feels just like interacting with an ordinary
+interacting with an EventQL cluster feels just like interacting with an ordinary
 SQL database.
 
 Each copy of a partition is stored on the respective server's disk as a log

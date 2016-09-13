@@ -64,7 +64,7 @@
           type: page
           visible_in_menu: true
           visible_in_toc: true
-          source: "/api/config_file.md"
+          source: "/deployment/configuration.md"
         -
           url: "/deployment/components"
           title: "Components"

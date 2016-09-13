@@ -24,6 +24,7 @@
 #include <eventql/db/rebalance.h>
 #include <eventql/db/server_allocator.h>
 #include <eventql/util/random.h>
+#include <eventql/util/logging.h>
 
 namespace eventql {
 

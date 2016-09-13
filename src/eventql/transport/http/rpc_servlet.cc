@@ -21,8 +21,10 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#include "eventql/eventql.h"
 #include "eventql/util/util/binarymessagewriter.h"
 #include "eventql/transport/http/rpc_servlet.h"
+#include "eventql/transport/http/http_auth.h"
 #include "eventql/db/record_envelope.pb.h"
 #include "eventql/util/json/json.h"
 #include <eventql/util/wallclock.h>
@@ -33,18 +35,14 @@
 #include <eventql/util/util/Base64.h>
 #include <eventql/util/fnv.h>
 #include <eventql/io/sstable/sstablereader.h>
-
-#include "eventql/eventql.h"
+#include "eventql/server/session.h"
+#include "eventql/server/sql_service.h"
+#include "eventql/server/sql/codec/binary_codec.h"
+#include "eventql/sql/runtime/runtime.h"
 
 namespace eventql {
 
-RPCServlet::RPCServlet(
-    TableService* node,
-    MetadataService* metadata_service,
-    const String& tmpdir) :
-    node_(node),
-    metadata_service_(metadata_service),
-    tmpdir_(tmpdir) {}
+RPCServlet::RPCServlet(Database* database) : db_(database) {}
 
 void RPCServlet::handleHTTPRequest(
     RefPtr<http::HTTPRequestStream> req_stream,
@@ -53,6 +51,9 @@ void RPCServlet::handleHTTPRequest(
   URI uri(req.uri());
 
   logDebug("eventql", "HTTP Request: $0 $1", req.method(), req.uri());
+
+  auto session = db_->getSession();
+  auto dbctx = session->getDatabaseContext();
 
   http::HTTPResponse res;
   res.populateFromRequest(req);
@@ -67,6 +68,23 @@ void RPCServlet::handleHTTPRequest(
     res_stream->writeResponse(res);
     return;
   }
+
+  auto auth_rc = dbctx->internal_auth->verifyRequest(session, req);
+  if (!auth_rc.isSuccess()) {
+    auth_rc = HTTPAuth::authenticateRequest(
+        session,
+        dbctx->client_auth,
+        req);
+  }
+
+  //if (!auth_rc.isSuccess()) {
+  //  res.setStatus(http::kStatusUnauthorized);
+  //  res.addHeader("WWW-Authenticate", "Token");
+  //  res.addHeader("Content-Type", "text/plain; charset=utf-8");
+  //  res.addBody(auth_rc.message());
+  //  res_stream->writeResponse(res);
+  //  return;
+  //}
 
   try {
     if (uri.path() == "/tsdb/insert") {
@@ -146,6 +164,13 @@ void RPCServlet::handleHTTPRequest(
       return;
     }
 
+    if (uri.path() == "/rpc/execute_qtree") {
+      req_stream->readBody();
+      executeQTree(uri, &req, &res, res_stream);
+      res_stream->writeResponse(res);
+      return;
+    }
+
     res.setStatus(http::kStatusNotFound);
     res.addBody("not found");
     res_stream->writeResponse(res);
@@ -171,7 +196,7 @@ void RPCServlet::insertRecords(
     http::HTTPResponse* res,
     URI* uri) {
   //auto record_list = msg::decode<RecordEnvelopeList>(req->body());
-  //node_->insertRecords(record_list);
+  //dbctx->table_service->insertRecords(record_list);
   res->addBody("deprecated call");
   res->setStatus(http::kStatusInternalServerError);
 }
@@ -180,6 +205,9 @@ void RPCServlet::compactPartition(
     const http::HTTPRequest* req,
     http::HTTPResponse* res,
     URI* uri) {
+  auto session = db_->getSession();
+  auto dbctx = session->getDatabaseContext();
+
   const auto& params = uri->queryParams();
 
   String tsdb_namespace;
@@ -203,7 +231,7 @@ void RPCServlet::compactPartition(
     return;
   }
 
-  node_->compactPartition(
+  dbctx->table_service->compactPartition(
       tsdb_namespace,
       table_name,
       SHA1Hash::fromHexString(partition_key));
@@ -215,6 +243,9 @@ void RPCServlet::commitPartition(
     const http::HTTPRequest* req,
     http::HTTPResponse* res,
     URI* uri) {
+  auto session = db_->getSession();
+  auto dbctx = session->getDatabaseContext();
+
   const auto& params = uri->queryParams();
 
   String tsdb_namespace;
@@ -238,7 +269,7 @@ void RPCServlet::commitPartition(
     return;
   }
 
-  node_->commitPartition(
+  dbctx->table_service->commitPartition(
       tsdb_namespace,
       table_name,
       SHA1Hash::fromHexString(partition_key));
@@ -250,6 +281,9 @@ void RPCServlet::replicateRecords(
     const http::HTTPRequest* req,
     http::HTTPResponse* res,
     URI* uri) {
+  auto session = db_->getSession();
+  auto dbctx = session->getDatabaseContext();
+
   const auto& params = uri->queryParams();
 
   String tsdb_namespace;
@@ -277,7 +311,7 @@ void RPCServlet::replicateRecords(
   auto body_is = req->getBodyInputStream();
   records.decode(body_is.get());
 
-  node_->insertReplicatedRecords(
+  dbctx->table_service->insertReplicatedRecords(
       tsdb_namespace,
       table_name,
       SHA1Hash::fromHexString(partition_key),
@@ -290,6 +324,9 @@ void RPCServlet::createMetadataFile(
     const URI& uri,
     const http::HTTPRequest* req,
     http::HTTPResponse* res) {
+  auto session = db_->getSession();
+  auto dbctx = session->getDatabaseContext();
+
   const auto& params = uri.queryParams();
 
   String db_namespace;
@@ -309,7 +346,7 @@ void RPCServlet::createMetadataFile(
   auto rc = file.decode(is.get());
 
   if (rc.isSuccess()) {
-    rc = metadata_service_->createMetadataFile(
+    rc = dbctx->metadata_service->createMetadataFile(
         db_namespace,
         table_name,
         file);
@@ -328,6 +365,9 @@ void RPCServlet::performMetadataOperation(
     const URI& uri,
     const http::HTTPRequest* req,
     http::HTTPResponse* res) {
+  auto session = db_->getSession();
+  auto dbctx = session->getDatabaseContext();
+
   const auto& params = uri.queryParams();
 
   String db_namespace;
@@ -354,7 +394,7 @@ void RPCServlet::performMetadataOperation(
   }
 
   MetadataOperationResult result;
-  auto rc = metadata_service_->performMetadataOperation(
+  auto rc = dbctx->metadata_service->performMetadataOperation(
       db_namespace,
       table_name,
       op,
@@ -374,11 +414,14 @@ void RPCServlet::discoverPartitionMetadata(
     const URI& uri,
     const http::HTTPRequest* req,
     http::HTTPResponse* res) {
+  auto session = db_->getSession();
+  auto dbctx = session->getDatabaseContext();
+
   PartitionDiscoveryRequest request;
   msg::decode(req->body(), &request);
 
   PartitionDiscoveryResponse response;
-  auto rc = metadata_service_->discoverPartition(request, &response);
+  auto rc = dbctx->metadata_service->discoverPartition(request, &response);
 
   if (rc.isSuccess()) {
     res->setStatus(http::kStatusOK);
@@ -394,6 +437,9 @@ void RPCServlet::fetchMetadataFile(
     const URI& uri,
     const http::HTTPRequest* req,
     http::HTTPResponse* res) {
+  auto session = db_->getSession();
+  auto dbctx = session->getDatabaseContext();
+
   const auto& params = uri.queryParams();
 
   String db_namespace;
@@ -416,7 +462,7 @@ void RPCServlet::fetchMetadataFile(
   }
 
   RefPtr<MetadataFile> file;
-  auto rc = metadata_service_->getMetadataFile(
+  auto rc = dbctx->metadata_service->getMetadataFile(
       db_namespace,
       table_name,
       SHA1Hash::fromHexString(txid),
@@ -440,6 +486,9 @@ void RPCServlet::fetchLatestMetadataFile(
     const URI& uri,
     const http::HTTPRequest* req,
     http::HTTPResponse* res) {
+  auto session = db_->getSession();
+  auto dbctx = session->getDatabaseContext();
+
   const auto& params = uri.queryParams();
 
   String db_namespace;
@@ -455,7 +504,7 @@ void RPCServlet::fetchLatestMetadataFile(
   }
 
   RefPtr<MetadataFile> file;
-  auto rc = metadata_service_->getMetadataFile(
+  auto rc = dbctx->metadata_service->getMetadataFile(
       db_namespace,
       table_name,
       &file);
@@ -478,11 +527,14 @@ void RPCServlet::listPartitions(
     const URI& uri,
     const http::HTTPRequest* req,
     http::HTTPResponse* res) {
+  auto session = db_->getSession();
+  auto dbctx = session->getDatabaseContext();
+
   PartitionListRequest request;
   msg::decode(req->body(), &request);
 
   PartitionListResponse response;
-  auto rc = metadata_service_->listPartitions(request, &response);
+  auto rc = dbctx->metadata_service->listPartitions(request, &response);
 
   if (rc.isSuccess()) {
     res->setStatus(http::kStatusOK);
@@ -498,11 +550,14 @@ void RPCServlet::findPartition(
     const URI& uri,
     const http::HTTPRequest* req,
     http::HTTPResponse* res) {
+  auto session = db_->getSession();
+  auto dbctx = session->getDatabaseContext();
+
   PartitionFindRequest request;
   msg::decode(req->body(), &request);
 
   PartitionFindResponse response;
-  auto rc = metadata_service_->findPartition(request, &response);
+  auto rc = dbctx->metadata_service->findPartition(request, &response);
 
   if (rc.isSuccess()) {
     res->setStatus(http::kStatusOK);
@@ -514,5 +569,60 @@ void RPCServlet::findPartition(
   }
 }
 
+void RPCServlet::executeQTree(
+    const URI& uri,
+    const http::HTTPRequest* req,
+    http::HTTPResponse* res,
+    RefPtr<http::HTTPResponseStream> res_stream) {
+  auto session = db_->getSession();
+  auto dbctx = session->getDatabaseContext();
+
+  res->setStatus(http::kStatusOK);
+  res->setHeader("Connection", "close");
+  res->setHeader("Content-Type", "application/octet-stream");
+  res->setHeader("Cache-Control", "no-cache");
+  res->setHeader("Access-Control-Allow-Origin", "*");
+  res_stream->startResponse(*res);
+
+  {
+    csql::BinaryResultFormat result_format(
+        [res_stream] (const void* data, size_t size) {
+      res_stream->writeBodyChunk(data, size);
+    });
+
+    //String database;
+    //if (URI::getParam(params, "database", &database) && !database.empty()) {
+    //  auto rc = dbctx->client_auth->changeNamespace(session, database);
+    //  if (!rc.isSuccess()) {
+    //    result_format.sendError(rc.message());
+    //    res_stream->finishResponse();
+    //    return;
+    //  }
+    //}
+
+    if (session->getEffectiveNamespace().empty()) {
+      result_format.sendError("No database selected");
+      res_stream->finishResponse();
+      return;
+    }
+
+    try {
+      auto txn = dbctx->sql_service->startTransaction(session);
+
+      csql::QueryTreeCoder coder(txn.get());
+      auto req_body_is = BufferInputStream::fromBuffer(&req->body());
+      auto qtree = coder.decode(req_body_is.get());
+      auto qplan = dbctx->sql_runtime->buildQueryPlan(txn.get(), { qtree });
+
+      result_format.sendResults(qplan.get());
+    } catch (const StandardException& e) {
+      logError("evql", "SQL Error: $0", e.what());
+      result_format.sendError(e.what());
+    }
+  }
+
+  res_stream->finishResponse();
+
+}
 }
 

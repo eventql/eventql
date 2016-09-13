@@ -39,9 +39,9 @@ public:
    * Run the provided task as soon as possible, but make sure not to run it
    * immediately from the same stack (to prevent deadlocks)
    */
-  virtual void runAsync(std::function<void()> task) {
-    run(task);
-  }
+  //virtual void runAsync(std::function<void()> task) {
+  //  run(task);
+  //}
 
   /**
    * Run the provided task when the provided filedescriptor becomes readable

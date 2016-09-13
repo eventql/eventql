@@ -40,6 +40,7 @@ public:
   const size_t kMaxConcurrency = 48;
 
   Scheduler(
+      ProcessConfig* config,
       PartitionMap* pmap,
       ConfigDirectory* cdir,
       InternalAuth* auth);
@@ -82,6 +83,7 @@ protected:
   void rewriteTableTimeSuffix(
       RefPtr<csql::QueryTreeNode> node);
 
+  ProcessConfig* config_;
   PartitionMap* pmap_;
   ConfigDirectory* cdir_;
   InternalAuth* auth_;

@@ -28,16 +28,14 @@
 #include <eventql/util/http/HTTPSSEStream.h>
 #include "eventql/eventql.h"
 #include "eventql/db/metadata_service.h"
+#include "eventql/db/database.h"
 
 namespace eventql {
 
 class RPCServlet : public http::StreamingHTTPService {
 public:
 
-  RPCServlet(
-      TableService* node,
-      MetadataService* metadata_service,
-      const String& tmpdir);
+  RPCServlet(Database* database);
 
   void handleHTTPRequest(
       RefPtr<http::HTTPRequestStream> req_stream,
@@ -100,9 +98,13 @@ protected:
       const http::HTTPRequest* req,
       http::HTTPResponse* res);
 
-  TableService* node_;
-  MetadataService* metadata_service_;
-  String tmpdir_;
+  void executeQTree(
+      const URI& uri,
+      const http::HTTPRequest* req,
+      http::HTTPResponse* res,
+      RefPtr<http::HTTPResponseStream> res_stream);
+
+  Database* db_;
   Random rnd_;
 };
 

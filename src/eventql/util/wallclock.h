@@ -37,4 +37,9 @@ public:
   static uint64_t unixMicros();
 };
 
+class MonotonicClock {
+public:
+  static uint64_t now();
+};
+
 #endif

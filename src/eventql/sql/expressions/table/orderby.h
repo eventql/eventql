@@ -62,6 +62,7 @@ protected:
   Vector<Vector<SValue>> rows_;
   size_t num_rows_;
   size_t pos_;
+  size_t cnt_;
 };
 
 }

@@ -30,6 +30,7 @@ enum MetadataOperationType {
   METAOP_FINALIZE_SPLIT = 6;
   METAOP_JOIN_SERVERS = 7;
   METAOP_FINALIZE_JOIN = 8;
+  METAOP_CREATE_PARTITION = 9;
 };
 
 message PartitionDiscoveryRequest {
@@ -86,6 +87,7 @@ message PartitionFindRequest {
   required string db_namespace = 1;
   required string table_id = 2;
   required bytes key = 3;
+  required bool allow_create = 4;
 };
 
 message PartitionFindResponse {
@@ -140,3 +142,13 @@ message FinalizeJoinOperation {
   required string server_id = 2;
   required uint64 placement_id = 3;
 };
+
+message CreatePartitionOperation {
+  required bytes partition_id = 1;
+  required bytes begin = 2;
+  required bytes end = 3;
+  repeated string servers = 4;
+  required uint64 placement_id = 5;
+};
+
+

@@ -29,6 +29,8 @@ and for executing SQL and MapReduce queries.
        --password <password>     Set the auth password (if required)
        --auth_token <token>      Set the auth token (if required)
        -B, --batch               Run in batch mode (streaming result output)
+       --history_file <path>     Set the history file path
+       --history_maxlen <len>    Set the maximum length of the history
        -q, --quiet               Be quiet (disables query progress)
        --verbose                 Print debug output to STDERR
        -v, --version             Display the version of this binary and exit

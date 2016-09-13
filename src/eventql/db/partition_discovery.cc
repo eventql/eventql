@@ -49,11 +49,15 @@ static void addReplicationTarget(
   t->set_keyrange_begin(e->begin);
   t->set_is_joining(is_joining);
 
-  auto n = e + 1;
-  if (n == file->getPartitionMapEnd()) {
-    t->set_keyrange_end("");
+  if (file->hasFinitePartitions()) {
+    t->set_keyrange_end(e->end);
   } else {
-    t->set_keyrange_end(n->begin);
+    auto n = e + 1;
+    if (n == file->getPartitionMapEnd()) {
+      t->set_keyrange_end("");
+    } else {
+      t->set_keyrange_end(n->begin);
+    }
   }
 }
 
@@ -62,9 +66,13 @@ static void addSplittingReplicationTargets(
     const MetadataFile* file,
     MetadataFile::PartitionMapIter e) {
   String e_end;
-  auto n = e + 1;
-  if (n != file->getPartitionMapEnd()) {
-    e_end = n->begin;
+  if (file->hasFinitePartitions()) {
+    e_end = e->end;
+  } else {
+    auto n = e + 1;
+    if (n != file->getPartitionMapEnd()) {
+      e_end = n->begin;
+    }
   }
 
   for (const auto& s : e->split_servers_low) {
@@ -106,13 +114,15 @@ Status PartitionDiscovery::discoverPartitionByKeyRange(
   auto pmap_end = file->getPartitionMapEnd();
   auto iter = file->getPartitionMapRangeBegin(request.keyrange_begin());
   if (iter == pmap_end) {
-    return Status(eIllegalStateError, "invalid partition map");
+    return Status(eIllegalStateError, "invalid key range requested");
   }
 
   if (iter->partition_id == req_partition_id) {
     //valid partition
     response->set_keyrange_begin(iter->begin);
-    if (iter + 1 != pmap_end) {
+    if (file->hasFinitePartitions()) {
+      response->set_keyrange_end(iter->end);
+    } else if (iter + 1 != pmap_end) {
       response->set_keyrange_end(iter[1].begin);
     }
 
@@ -188,7 +198,9 @@ Status PartitionDiscovery::discoverPartitionByKeyRange(
     response->set_code(PDISCOVERY_LOAD);
 
     String iter_end;
-    {
+    if (file->hasFinitePartitions()) {
+      iter_end = iter->end;
+    } else {
       auto iter_next = iter + 1;
       if (iter_next != file->getPartitionMapEnd()) {
         iter_end = iter_next->begin;
@@ -256,9 +268,11 @@ Status PartitionDiscovery::discoverPartitionByID(
     // found valid partition
     if (iter->partition_id == req_partition_id) {
       response->set_keyrange_begin(iter->begin);
-      if (iter + 1 != pmap_end) {
+      if (file->hasFinitePartitions()) {
+        response->set_keyrange_end(iter->end);
+      } else if (iter + 1 != pmap_end) {
         response->set_keyrange_end(iter[1].begin);
-      }
+    }
 
       // check the list of active servers
       for (const auto& s : iter->servers) {
@@ -323,7 +337,9 @@ Status PartitionDiscovery::discoverPartitionByID(
       response->set_code(PDISCOVERY_LOAD);
 
       String iter_end;
-      {
+      if (file->hasFinitePartitions()) {
+        iter_end = iter->end;
+      } else {
         auto iter_next = iter + 1;
         if (iter_next != file->getPartitionMapEnd()) {
           iter_end = iter_next->begin;

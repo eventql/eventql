@@ -91,8 +91,7 @@ public:
   RefPtr<Table> getTable();
   PartitionInfo getInfo() const;
 
-  RefPtr<PartitionReplication> getReplicationStrategy(
-      http::HTTPConnectionPool* http);
+  RefPtr<PartitionReplication> getReplicationStrategy();
 
   String getRelativePath() const;
   String getAbsolutePath() const;

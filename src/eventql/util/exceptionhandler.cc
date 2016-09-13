@@ -29,7 +29,6 @@
 #include <eventql/util/exceptionhandler.h>
 #include <eventql/util/inspect.h>
 #include <eventql/util/logging.h>
-#include <eventql/util/StackTrace.h>
 
 CatchAndLogExceptionHandler::CatchAndLogExceptionHandler(
     const String& component) :
@@ -64,9 +63,6 @@ static std::string globalEHandlerMessage;
 static void globalSEGVHandler(int sig, siginfo_t* siginfo, void* ctx) {
   fprintf(stderr, "%s\n", globalEHandlerMessage.c_str());
   fprintf(stderr, "signal: %s\n", strsignal(sig));
-
-  StackTrace strace;
-  strace.debugPrint(2);
 
   exit(EXIT_FAILURE);
 }
