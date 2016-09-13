@@ -140,7 +140,15 @@ DatabaseImpl::~DatabaseImpl() {
 }
 
 ReturnCode DatabaseImpl::start() {
-  /* data directory */
+  /* check preconditions */
+  if (cfg_->getString("cluster.allowed_hosts").isEmpty()) {
+    return ReturnCode::error(
+        "EARG",
+        "cluster.allowed_hosts can't be empty "
+        "(no server would be allowed to join)");
+  }
+
+  /* data directories */
   auto server_datadir = cfg_->getString("server.datadir").get();
   if (!FileUtil::exists(server_datadir)) {
     return ReturnCode::error(
