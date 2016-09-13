@@ -669,7 +669,7 @@
               type: page
               visible_in_menu: false
               visible_in_toc: false
-              source: "/api/http/tables/table.md"
+              source: "/api/http/tables/describe.md"
             -
               url: "/api/http/tables/list"
               title: "POST tables/list"
