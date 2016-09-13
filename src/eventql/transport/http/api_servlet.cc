@@ -596,16 +596,6 @@ void APIServlet::createTable(
         properties);
 
     if (!rc.isSuccess()) {
-      RAISE(kRuntimeError, rc.message());
-    }
-
-    auto rc = dbctx->table_service->createTable(
-        database.get(),
-        table_name.get(),
-        schema,
-        primary_key);
-
-    if (!rc.isSuccess()) {
       logError("eventql", rc.message(), "error");
       res->setStatus(http::kStatusInternalServerError);
       res->addBody(StringUtil::format("error: $0", rc.message()));
