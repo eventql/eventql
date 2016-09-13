@@ -388,6 +388,26 @@ Status TableService::alterTable(
   return Status::success();
 }
 
+Status TableService::dropTable(
+    const String& db_namespace,
+    const String& table_name) {
+  auto table = pmap_->findTable(db_namespace, table_name);
+  if (table.isEmpty()) {
+    return Status(eNotFoundError, "table not found");
+  }
+
+  auto td = table.get()->config();
+  td.set_deleted(true);
+
+  try {
+    cdir_->updateTableConfig(td);
+  } catch (const Exception& e) {
+    return Status(eRuntimeError, e.getMessage());
+  }
+
+  return Status::success();
+}
+
 void TableService::listTables(
     const String& tsdb_namespace,
     Function<void (const TSDBTableInfo& table)> fn) const {

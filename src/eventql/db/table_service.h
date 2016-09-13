@@ -79,6 +79,10 @@ public:
       const String& table_name,
       Vector<AlterTableOperation> operations);
 
+  Status dropTable(
+      const String& db_namespace,
+      const String& table_name);
+
   void listTables(
       const String& tsdb_namespace,
       Function<void (const TSDBTableInfo& table)> fn) const;
