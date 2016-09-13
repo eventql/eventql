@@ -238,34 +238,6 @@ protected:
     }
   }
 
-  Option<String> getRequestDatabase(
-      Session* session,
-      const http::HTTPRequest* req,
-      const json::JSONObject& json) {
-    {
-      auto database = json::objectGetString(json, "database");
-      if (!database.isEmpty()) {
-        return database;
-      }
-    }
-
-    {
-      auto hdrval = req->getHeader("X-Z1-Namespace");
-      if (!hdrval.empty()) {
-        return hdrval;
-      }
-    }
-
-    {
-      String database = session->getEffectiveNamespace();
-      if (!database.empty()) {
-        return Some(database);
-      }
-    }
-
-    return None<String>();
-  }
-
   Database* db_;
   MapReduceAPIServlet mapreduce_api_;
 };

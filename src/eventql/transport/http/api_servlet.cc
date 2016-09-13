@@ -91,49 +91,31 @@ void APIServlet::handle(
     return;
   }
 
-  if (!dbctx->process_config->getBool("server.anonymous")) {
-    auto internal_auth_rc = dbctx->internal_auth->verifyRequest(session, req);
-    auto auth_rc = internal_auth_rc;
-    if (!auth_rc.isSuccess()) {
-      auth_rc = HTTPAuth::authenticateRequest(
-          session,
-          dbctx->client_auth,
-          req);
-    }
+  auto auth_rc = HTTPAuth::authenticateRequest(
+        session,
+        dbctx->client_auth,
+        req);
 
-    if (!auth_rc.isSuccess()) {
-      req_stream->readBody();
+  if (!auth_rc.isSuccess()) {
+    res.setStatus(http::kStatusForbidden);
+    res.addHeader("WWW-Authenticate", "Token");
+    res.addHeader("Content-Type", "text/plain; charset=utf-8");
+    res.addBody(auth_rc.message());
+    res_stream->writeResponse(res);
+    return;
+  }
 
-      if (uri.path() == "/api/v1/sql") {
-        util::BinaryMessageWriter writer;
-        res.setStatus(http::kStatusOK);
-        writer.appendUInt8(0xf4);
-        writer.appendLenencString(auth_rc.message());
-        writer.appendUInt8(0xff);
-        res.addBody(writer.data(), writer.size());
-        res_stream->writeResponse(res);
-      } else {
-        res.setStatus(http::kStatusUnauthorized);
-        res.addHeader("WWW-Authenticate", "Token");
-        res.addHeader("Content-Type", "text/plain; charset=utf-8");
-        res.addBody(auth_rc.message());
-        res_stream->writeResponse(res);
-        return;
-      }
-    }
-
-    if (session->getEffectiveNamespace().empty()) {
-      res.setStatus(http::kStatusUnauthorized);
-      res.addHeader("WWW-Authenticate", "Token");
-      res.addHeader("Content-Type", "text/plain; charset=utf-8");
-      res.addBody("unauthorized");
-      res_stream->writeResponse(res);
-      return;
-    }
+  if (session->getEffectiveNamespace().empty() &&
+      !dbctx->process_config->getBool("server.allow_anonymous")) {
+    res.setStatus(http::kStatusUnauthorized);
+    res.addHeader("WWW-Authenticate", "Token");
+    res.addHeader("Content-Type", "text/plain; charset=utf-8");
+    res.addBody("unauthorized");
+    res_stream->writeResponse(res);
+    return;
   }
 
   if (uri.path() == "/api/v1/tables/insert") {
-    req_stream->readBody();
     catchAndReturnErrors(&res, [this, session, &req, &res] {
       insertIntoTable(session, &req, &res);
     });
@@ -144,13 +126,11 @@ void APIServlet::handle(
   /* SQL */
   if (uri.path() == "/api/v1/sql" ||
       uri.path() == "/api/v1/sql_stream") {
-    req_stream->readBody();
     executeSQL(session, &req, &res, res_stream);
     return;
   }
 
   if (uri.path() == "/api/v1/auth/info") {
-    req_stream->readBody();
     getAuthInfo(session, &req, &res);
     res_stream->writeResponse(res);
     return;
@@ -162,8 +142,7 @@ void APIServlet::handle(
   }
 
   /* TABLES */
-  if (uri.path() == "/api/v1/tables") {
-    req_stream->readBody();
+  if (uri.path() == "/api/v1/tables/list") {
     catchAndReturnErrors(&res, [this, session, &req, &res] {
       listTables(session, &req, &res);
     });
@@ -171,8 +150,7 @@ void APIServlet::handle(
     return;
   }
 
-  if (uri.path() == "/api/v1/tables/create_table") {
-    req_stream->readBody();
+  if (uri.path() == "/api/v1/tables/create") {
     catchAndReturnErrors(&res, [this, &session, &req, &res] {
       createTable(session, &req, &res);
     });
@@ -181,7 +159,6 @@ void APIServlet::handle(
   }
 
   if (uri.path() == "/api/v1/tables/add_field") {
-    req_stream->readBody();
     catchAndReturnErrors(&res, [this, &session, &req, &res] {
       addTableField(session, &req, &res);
     });
@@ -190,7 +167,6 @@ void APIServlet::handle(
   }
 
   if (uri.path() == "/api/v1/tables/remove_field") {
-    req_stream->readBody();
     catchAndReturnErrors(&res, [this, &session, &req, &res] {
       removeTableField(session, &req, &res);
     });
@@ -199,15 +175,8 @@ void APIServlet::handle(
   }
 
   if (uri.path() == "/api/v1/tables/describe") {
-    req_stream->readBody();
     fetchTableDefinition(session, &req, &res);
     res_stream->writeResponse(res);
-    return;
-  }
-
-  if (uri.path() == "/api/v1/sql/scan_partition") {
-    req_stream->readBody();
-    //executeSQLScanPartition(session, &req, &res, res_stream);
     return;
   }
 
@@ -225,9 +194,22 @@ void APIServlet::listTables(
   auto jreq = json::parseJSON(req->body());
 
   /* database */
-  auto database = getRequestDatabase(session, req, jreq);
-  if (database.isEmpty()) {
-    RAISE(kRuntimeError, "missing field: database");
+  auto database = json::objectGetString(jreq, "database");
+  if (!database.isEmpty()) {
+    auto auth_rc = dbctx->client_auth->changeNamespace(session, database.get());
+    if (!auth_rc.isSuccess()) {
+      res->setStatus(http::kStatusForbidden);
+      res->addHeader("Content-Type", "text/plain; charset=utf-8");
+      res->addBody(auth_rc.message());
+      return;
+    }
+  }
+
+  if (session->getEffectiveNamespace().empty()) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addHeader("Content-Type", "text/plain; charset=utf-8");
+    res->addBody("no database selected");
+    return;
   }
 
   /* param tag */
@@ -280,9 +262,13 @@ void APIServlet::listTables(
   };
 
   if (!order_filter.isEmpty() && order_filter.get() == "desc") {
-    dbctx->table_service->listTablesReverse(database.get(), writeTableJSON);
+    dbctx->table_service->listTablesReverse(
+        session->getEffectiveNamespace(),
+        writeTableJSON);
   } else {
-    dbctx->table_service->listTables(database.get(), writeTableJSON);
+    dbctx->table_service->listTables(
+        session->getEffectiveNamespace(),
+        writeTableJSON);
   }
 
   json.endArray();
@@ -301,9 +287,22 @@ void APIServlet::fetchTableDefinition(
   auto jreq = json::parseJSON(req->body());
 
   /* database */
-  auto database = getRequestDatabase(session, req, jreq);
-  if (database.isEmpty()) {
-    RAISE(kRuntimeError, "missing field: database");
+  auto database = json::objectGetString(jreq, "database");
+  if (!database.isEmpty()) {
+    auto auth_rc = dbctx->client_auth->changeNamespace(session, database.get());
+    if (!auth_rc.isSuccess()) {
+      res->setStatus(http::kStatusForbidden);
+      res->addHeader("Content-Type", "text/plain; charset=utf-8");
+      res->addBody(auth_rc.message());
+      return;
+    }
+  }
+
+  if (session->getEffectiveNamespace().empty()) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addHeader("Content-Type", "text/plain; charset=utf-8");
+    res->addBody("no database selected");
+    return;
   }
 
   auto table_name = json::objectGetString(jreq, "table");
@@ -313,7 +312,9 @@ void APIServlet::fetchTableDefinition(
 
   Buffer buf;
   json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
-  auto schema = dbctx->table_service->tableSchema(database.get(), table_name.get());
+  auto schema = dbctx->table_service->tableSchema(
+      session->getEffectiveNamespace(),
+      table_name.get());
   if (schema.isEmpty()) {
     res->setStatus(http::kStatusNotFound);
     res->addBody("table not found");
@@ -514,9 +515,22 @@ void APIServlet::createTable(
 
   auto jreq = json::parseJSON(req->body());
 
-  auto database = getRequestDatabase(session, req, jreq);
-  if (database.isEmpty()) {
-    RAISE(kRuntimeError, "missing field: database");
+  auto database = json::objectGetString(jreq, "database");
+  if (!database.isEmpty()) {
+    auto auth_rc = dbctx->client_auth->changeNamespace(session, database.get());
+    if (!auth_rc.isSuccess()) {
+      res->setStatus(http::kStatusForbidden);
+      res->addHeader("Content-Type", "text/plain; charset=utf-8");
+      res->addBody(auth_rc.message());
+      return;
+    }
+  }
+
+  if (session->getEffectiveNamespace().empty()) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addHeader("Content-Type", "text/plain; charset=utf-8");
+    res->addBody("no database selected");
+    return;
   }
 
   auto table_name = json::objectGetString(jreq, "table_name");
@@ -609,20 +623,33 @@ void APIServlet::createTable(
 }
 
 void APIServlet::addTableField(
-  Session* session,
-  const http::HTTPRequest* req,
-  http::HTTPResponse* res) {
-auto dbctx = session->getDatabaseContext();
-auto jreq = json::parseJSON(req->body());
+    Session* session,
+    const http::HTTPRequest* req,
+    http::HTTPResponse* res) {
+  auto dbctx = session->getDatabaseContext();
+  auto jreq = json::parseJSON(req->body());
 
-/* database */
-auto database = getRequestDatabase(session, req, jreq);
-if (database.isEmpty()) {
-  RAISE(kRuntimeError, "missing field: database");
-}
+  /* database */
+  auto database = json::objectGetString(jreq, "database");
+  if (!database.isEmpty()) {
+    auto auth_rc = dbctx->client_auth->changeNamespace(session, database.get());
+    if (!auth_rc.isSuccess()) {
+      res->setStatus(http::kStatusForbidden);
+      res->addHeader("Content-Type", "text/plain; charset=utf-8");
+      res->addBody(auth_rc.message());
+      return;
+    }
+  }
 
-auto table_name = json::objectGetString(jreq, "table");
-if (table_name.isEmpty()) {
+  if (session->getEffectiveNamespace().empty()) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addHeader("Content-Type", "text/plain; charset=utf-8");
+    res->addBody("no database selected");
+    return;
+  }
+
+  auto table_name = json::objectGetString(jreq, "table");
+  if (table_name.isEmpty()) {
   res->setStatus(http::kStatusBadRequest);
     res->addBody("missing field: table");
     return;
@@ -655,7 +682,7 @@ if (table_name.isEmpty()) {
   operations.emplace_back(operation);
 
   auto rc = dbctx->table_service->alterTable(
-      database.get(),
+      session->getEffectiveNamespace(),
       table_name.get(),
       operations);
 
@@ -678,9 +705,22 @@ void APIServlet::removeTableField(
   auto jreq = json::parseJSON(req->body());
 
   /* database */
-  auto database = getRequestDatabase(session, req, jreq);
-  if (database.isEmpty()) {
-    RAISE(kRuntimeError, "missing field: database");
+  auto database = json::objectGetString(jreq, "database");
+  if (!database.isEmpty()) {
+    auto auth_rc = dbctx->client_auth->changeNamespace(session, database.get());
+    if (!auth_rc.isSuccess()) {
+      res->setStatus(http::kStatusForbidden);
+      res->addHeader("Content-Type", "text/plain; charset=utf-8");
+      res->addBody(auth_rc.message());
+      return;
+    }
+  }
+
+  if (session->getEffectiveNamespace().empty()) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addHeader("Content-Type", "text/plain; charset=utf-8");
+    res->addBody("no database selected");
+    return;
   }
 
   auto table_name = json::objectGetString(jreq, "table");
@@ -704,7 +744,7 @@ void APIServlet::removeTableField(
   operations.emplace_back(operation);
 
   auto rc = dbctx->table_service->alterTable(
-      database.get(),
+      session->getEffectiveNamespace(),
       table_name.get(),
       operations);
 
@@ -911,7 +951,7 @@ void APIServlet::executeSQL_BINARY(
 
     csql::BinaryResultFormat result_format(write_cb, true);
 
-    auto database = getRequestDatabase(session, req, jreq);
+    auto database = json::objectGetString(jreq, "database");
     if (!database.isEmpty()) {
       auto rc = dbctx->client_auth->changeNamespace(session, database.get());
       if (!rc.isSuccess()) {
@@ -959,7 +999,7 @@ void APIServlet::executeSQL_JSON(
     return;
   }
 
-  auto database = getRequestDatabase(session, req, jreq);
+  auto database = json::objectGetString(jreq, "database");
   if (!database.isEmpty()) {
     auto rc = dbctx->client_auth->changeNamespace(session, database.get());
     if (!rc.isSuccess()) {
@@ -1055,7 +1095,7 @@ void APIServlet::executeSQL_JSONSSE(
   auto sse_stream = mkRef(new http::HTTPSSEStream(res, res_stream));
   sse_stream->start();
 
-  auto database = getRequestDatabase(session, req, jreq);
+  auto database = json::objectGetString(jreq, "database");
   if (!database.isEmpty()) {
     auto rc = dbctx->client_auth->changeNamespace(session, database.get());
     if (!rc.isSuccess()) {
