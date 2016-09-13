@@ -24,6 +24,7 @@
 #include "eventql/eventql.h"
 #include "eventql/util/util/binarymessagewriter.h"
 #include "eventql/transport/http/rpc_servlet.h"
+#include "eventql/transport/http/http_auth.h"
 #include "eventql/db/record_envelope.pb.h"
 #include "eventql/util/json/json.h"
 #include <eventql/util/wallclock.h>
@@ -51,6 +52,9 @@ void RPCServlet::handleHTTPRequest(
 
   logDebug("eventql", "HTTP Request: $0 $1", req.method(), req.uri());
 
+  auto session = db_->getSession();
+  auto dbctx = session->getDatabaseContext();
+
   http::HTTPResponse res;
   res.populateFromRequest(req);
 
@@ -61,6 +65,23 @@ void RPCServlet::handleHTTPRequest(
   if (req.method() == http::HTTPMessage::M_OPTIONS) {
     req_stream->readBody();
     res.setStatus(http::kStatusOK);
+    res_stream->writeResponse(res);
+    return;
+  }
+
+  auto auth_rc = dbctx->internal_auth->verifyRequest(session, req);
+  if (!auth_rc.isSuccess()) {
+    auth_rc = HTTPAuth::authenticateRequest(
+        session,
+        dbctx->client_auth,
+        req);
+  }
+
+  if (!auth_rc.isSuccess()) {
+    res.setStatus(http::kStatusUnauthorized);
+    res.addHeader("WWW-Authenticate", "Token");
+    res.addHeader("Content-Type", "text/plain; charset=utf-8");
+    res.addBody(auth_rc.message());
     res_stream->writeResponse(res);
     return;
   }
