@@ -77,14 +77,14 @@ void RPCServlet::handleHTTPRequest(
         req);
   }
 
-  if (!auth_rc.isSuccess()) {
-    res.setStatus(http::kStatusUnauthorized);
-    res.addHeader("WWW-Authenticate", "Token");
-    res.addHeader("Content-Type", "text/plain; charset=utf-8");
-    res.addBody(auth_rc.message());
-    res_stream->writeResponse(res);
-    return;
-  }
+  //if (!auth_rc.isSuccess()) {
+  //  res.setStatus(http::kStatusUnauthorized);
+  //  res.addHeader("WWW-Authenticate", "Token");
+  //  res.addHeader("Content-Type", "text/plain; charset=utf-8");
+  //  res.addBody(auth_rc.message());
+  //  res_stream->writeResponse(res);
+  //  return;
+  //}
 
   try {
     if (uri.path() == "/tsdb/insert") {
