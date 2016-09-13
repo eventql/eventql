@@ -129,15 +129,6 @@ int main(int argc, const char** argv) {
       "<path>");
 
   flags.defineFlag(
-      "anonymous",
-      cli::FlagParser::T_SWITCH,
-      false,
-      NULL,
-      NULL,
-      "anonymous",
-      "<switch>");
-
-  flags.defineFlag(
       "log_to_syslog",
       cli::FlagParser::T_SWITCH,
       false,
@@ -291,10 +282,6 @@ int main(int argc, const char** argv) {
 
   if (flags.isSet("daemonize")) {
     evql_conf_set(conf, "server.daemonize", "true");
-  }
-
-  if (flags.isSet("anonymous")) {
-    evql_conf_set(conf, "server.anonymous", "true");
   }
 
   if (flags.isSet("pidfile")) {

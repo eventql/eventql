@@ -60,7 +60,6 @@ struct DatabaseContext {
   TableService* table_service;
   MapReduceService* mapreduce_service;
   MetadataService* metadata_service;
-  ProcessConfig* process_config;
 };
 
 class Database {

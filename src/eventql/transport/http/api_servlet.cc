@@ -106,7 +106,7 @@ void APIServlet::handle(
   }
 
   if (session->getEffectiveNamespace().empty() &&
-      !dbctx->process_config->getBool("server.allow_anonymous")) {
+      !dbctx->config->getBool("cluster.allow_anonymous")) {
     res.setStatus(http::kStatusUnauthorized);
     res.addHeader("WWW-Authenticate", "Token");
     res.addHeader("Content-Type", "text/plain; charset=utf-8");
