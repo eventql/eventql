@@ -33,24 +33,8 @@ best performance, read on the [Partitioning](../../../../tables/partitioning/) p
     <td>An array of column names that should be the primary key for this table</td>
   </tr>
   <tr>
-    <td>database (optional)</td>
-    <td>The name of the database.
-  </tr>
-  <tr>
-    <td>columns.name</td>
-    <td>The name of the column</td>
-  </tr>
-  <tr>
-    <td>columns.type</td>
-    <td>The SQL data type of the column</td>
-  </tr>
-  <tr>
-    <td>columns.optional</td>
-    <td>True if the column is optional, false otherwise</td>
-  </tr>
-  <tr>
-    <td>columns.repeated</td>
-    <td>True if the column is repeated, false otherwise</td>
+    <td>schema</td>
+    <td>The json schema of the table.</td>
   </tr>
   <tr>
     <td>properties (optional)</td>
@@ -58,7 +42,6 @@ best performance, read on the [Partitioning](../../../../tables/partitioning/) p
   </tr>
 </table>
 
-FIXME: document how to create nested columns
 
 ### Example Request
 
@@ -68,19 +51,22 @@ FIXME: document how to create nested columns
         >> Content-Length: ...
         >>
         >> {
-        >>   "table_name": "my_sensor_table",
+        >>   "table_name": "sensors",
         >>   "primary_key": ["time", "sensor_name"],
         >>   "schema": {
         >>      "columns": [
         >>          {
+        >>             "id": 1,
         >>             "name": "time",
         >>             "type": "DATETIME"
         >>          },
         >>          {
+        >>             "id": 2,
         >>             "name": "sensor_name",
         >>             "type": "STRING"
         >>          },
         >>          {
+        >>             "id": 3,
         >>             "name": "sensor_value",
         >>             "type": "DOUBLE"
         >>          }
@@ -95,4 +81,3 @@ FIXME: document how to create nested columns
 
         << HTTP/1.1 201 CREATED
         << Content-Length: 0
-
