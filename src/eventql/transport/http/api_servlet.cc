@@ -96,7 +96,8 @@ void APIServlet::handle(
         dbctx->client_auth,
         req);
 
-  if (!auth_rc.isSuccess()) {
+  if (!auth_rc.isSuccess() &&
+      !dbctx->config->getBool("cluster.allow_anonymous")) {
     res.setStatus(http::kStatusForbidden);
     res.addHeader("WWW-Authenticate", "Token");
     res.addHeader("Content-Type", "text/plain; charset=utf-8");
