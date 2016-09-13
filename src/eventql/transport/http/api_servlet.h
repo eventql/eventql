@@ -108,30 +108,30 @@ protected:
       RefPtr<http::HTTPResponseStream> res_stream);
 
   void executeSQL_ASCII(
-      const json::JSONObject jreq,
+      const std::string& query,
+      const std::string& database,
       Session* session,
-      const http::HTTPRequest* req,
       http::HTTPResponse* res,
       RefPtr<http::HTTPResponseStream> res_stream);
 
   void executeSQL_BINARY(
-      const json::JSONObject jreq,
+      const std::string& query,
+      const std::string& database,
       Session* session,
-      const http::HTTPRequest* req,
       http::HTTPResponse* res,
       RefPtr<http::HTTPResponseStream> res_stream);
 
   void executeSQL_JSON(
-      const json::JSONObject jreq,
+      const std::string& query,
+      const std::string& database,
       Session* session,
-      const http::HTTPRequest* req,
       http::HTTPResponse* res,
       RefPtr<http::HTTPResponseStream> res_stream);
 
   void executeSQL_JSONSSE(
-      const json::JSONObject jreq,
+      const std::string& query,
+      const std::string& database,
       Session* session,
-      const http::HTTPRequest* req,
       http::HTTPResponse* res,
       RefPtr<http::HTTPResponseStream> res_stream);
 
