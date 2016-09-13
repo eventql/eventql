@@ -8,7 +8,7 @@ env:
 script:
   - ./autogen.sh
   - ./configure
-  - make
+  - make check
 
 before_install:
   - sudo apt-get -qq update
