@@ -235,6 +235,7 @@ int main(int argc, const char** argv) {
   const UnixTime global_start;
 
   std::mutex m;
+  std::condition_variable cv;
 
   RequestStats rstats;
   rstats.successful_requests = 0;
@@ -245,6 +246,9 @@ int main(int argc, const char** argv) {
   Vector<std::thread> threads;
   for (size_t i = 0; i < num_threads; ++i) {
     threads.emplace_back(std::thread([&] () {
+      auto waiter = new Waiter;
+      waiter->num_requests = 0;
+      waiters.emplace_back(waiter);
 
       /* connect to eventql client */
       auto client = evql_client_init();
@@ -287,10 +291,23 @@ int main(int argc, const char** argv) {
         request_starts.push(now.unixMicros()); //push after sleep?
 
         m.unlock();
-        usleep(sleep);
+        std::this_thread::sleep_for(std::chrono::microseconds(sleep));
 
-        //FIXME check waiter->num_requests
+        auto cont = false;
+        for (const auto w : waiters) {
+          if (w->num_requests < waiter->num_requests) {
+            cont = true;
+            break;
+          }
+        }
 
+        if (cont) {
+          cv.notify_one();
+            //TODO clear from list and notify al
+          continue;
+        }
+
+        ++waiter->num_requests;
         auto rc = sendQuery(qry_str, qry_db, client);
         if (!rc.isSuccess()) {
           logFatal("evqlbenchmark", "executing query failed: $0", rc.getMessage());
