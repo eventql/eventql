@@ -89,3 +89,37 @@ FIXME: document how to create nested columns
         << HTTP/1.1 201 CREATED
         << Content-Length: 0
 
+
+### Example Request
+
+        >> POST /api/v1/tables/create_table HTTP/1.1
+        >> Content-Type: application/json
+        >> Content-Length: ...
+        >>
+        >> {
+        >>   "table_name": "my_sensor_table",
+        >>   "primary_key": ["time", "sensor_name"],
+        >>   "columns": [
+        >>       {
+        >>          "name": "time",
+        >>          "type": "DATETIME"
+        >>       },
+        >>       {
+        >>          "name": "sensor_name",
+        >>          "type": "STRING"
+        >>       },
+        >>       {
+        >>          "name": "sensor_value",
+        >>          "type": "DOUBLE"
+        >>       }
+        >>   ],
+        >>   "properties": [
+        >>      [ "finite_partition_size", "300000000" ]
+        >>   ]
+        >> }
+
+### Example Response
+
+        << HTTP/1.1 201 CREATED
+        << Content-Length: 0
+
