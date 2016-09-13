@@ -80,6 +80,15 @@ The EventQL configuration options are grouped in three sections: `client`, `serv
     </td>
   </tr>
   <tr>
+    <td><b>cluster.allow_anonymous</b></td>
+    <td>true</td>
+    <td>
+      Allow anonymous users to connect to the cluster Note: this does not
+      circumvent client auth or any other ACLs. It merely controls if an
+      anonymous user is even allowed to connect, let alone execute an operation.
+    </td>
+  </tr>
+  <tr>
     <th colspan="3" align="left">server.*</th>
   </tr>
   <tr>

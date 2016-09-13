@@ -78,7 +78,6 @@ protected:
 
   void fetchTableDefinition(
       Session* session,
-      const String& table_name,
       const http::HTTPRequest* req,
       http::HTTPResponse* res);
 
@@ -97,16 +96,6 @@ protected:
       const http::HTTPRequest* req,
       http::HTTPResponse* res);
 
-  void addTableTag(
-      Session* session,
-      const http::HTTPRequest* req,
-      http::HTTPResponse* res);
-
-  void removeTableTag(
-      Session* session,
-      const http::HTTPRequest* req,
-      http::HTTPResponse* res);
-
   void insertIntoTable(
       Session* session,
       const http::HTTPRequest* req,
@@ -119,34 +108,28 @@ protected:
       RefPtr<http::HTTPResponseStream> res_stream);
 
   void executeSQL_ASCII(
-      const URI::ParamList& params,
+      const json::JSONObject jreq,
       Session* session,
       const http::HTTPRequest* req,
       http::HTTPResponse* res,
       RefPtr<http::HTTPResponseStream> res_stream);
 
   void executeSQL_BINARY(
-      const URI::ParamList& params,
+      const json::JSONObject jreq,
       Session* session,
       const http::HTTPRequest* req,
       http::HTTPResponse* res,
       RefPtr<http::HTTPResponseStream> res_stream);
 
   void executeSQL_JSON(
-      const URI::ParamList& params,
+      const json::JSONObject jreq,
       Session* session,
       const http::HTTPRequest* req,
       http::HTTPResponse* res,
       RefPtr<http::HTTPResponseStream> res_stream);
 
   void executeSQL_JSONSSE(
-      const URI::ParamList& params,
-      Session* session,
-      const http::HTTPRequest* req,
-      http::HTTPResponse* res,
-      RefPtr<http::HTTPResponseStream> res_stream);
-
-  void executeQTree(
+      const json::JSONObject jreq,
       Session* session,
       const http::HTTPRequest* req,
       http::HTTPResponse* res,

@@ -24,6 +24,7 @@
 #include "eventql/eventql.h"
 #include "eventql/util/util/binarymessagewriter.h"
 #include "eventql/transport/http/rpc_servlet.h"
+#include "eventql/transport/http/http_auth.h"
 #include "eventql/db/record_envelope.pb.h"
 #include "eventql/util/json/json.h"
 #include <eventql/util/wallclock.h>
@@ -35,6 +36,9 @@
 #include <eventql/util/fnv.h>
 #include <eventql/io/sstable/sstablereader.h>
 #include "eventql/server/session.h"
+#include "eventql/server/sql_service.h"
+#include "eventql/server/sql/codec/binary_codec.h"
+#include "eventql/sql/runtime/runtime.h"
 
 namespace eventql {
 
@@ -48,6 +52,9 @@ void RPCServlet::handleHTTPRequest(
 
   logDebug("eventql", "HTTP Request: $0 $1", req.method(), req.uri());
 
+  auto session = db_->getSession();
+  auto dbctx = session->getDatabaseContext();
+
   http::HTTPResponse res;
   res.populateFromRequest(req);
 
@@ -58,6 +65,23 @@ void RPCServlet::handleHTTPRequest(
   if (req.method() == http::HTTPMessage::M_OPTIONS) {
     req_stream->readBody();
     res.setStatus(http::kStatusOK);
+    res_stream->writeResponse(res);
+    return;
+  }
+
+  auto auth_rc = dbctx->internal_auth->verifyRequest(session, req);
+  if (!auth_rc.isSuccess()) {
+    auth_rc = HTTPAuth::authenticateRequest(
+        session,
+        dbctx->client_auth,
+        req);
+  }
+
+  if (!auth_rc.isSuccess()) {
+    res.setStatus(http::kStatusUnauthorized);
+    res.addHeader("WWW-Authenticate", "Token");
+    res.addHeader("Content-Type", "text/plain; charset=utf-8");
+    res.addBody(auth_rc.message());
     res_stream->writeResponse(res);
     return;
   }
@@ -136,6 +160,13 @@ void RPCServlet::handleHTTPRequest(
     if (uri.path() == "/rpc/find_partition") {
       req_stream->readBody();
       findPartition(uri, &req, &res);
+      res_stream->writeResponse(res);
+      return;
+    }
+
+    if (uri.path() == "/rpc/execute_qtree") {
+      req_stream->readBody();
+      executeQTree(uri, &req, &res, res_stream);
       res_stream->writeResponse(res);
       return;
     }
@@ -538,5 +569,60 @@ void RPCServlet::findPartition(
   }
 }
 
+void RPCServlet::executeQTree(
+    const URI& uri,
+    const http::HTTPRequest* req,
+    http::HTTPResponse* res,
+    RefPtr<http::HTTPResponseStream> res_stream) {
+  auto session = db_->getSession();
+  auto dbctx = session->getDatabaseContext();
+
+  res->setStatus(http::kStatusOK);
+  res->setHeader("Connection", "close");
+  res->setHeader("Content-Type", "application/octet-stream");
+  res->setHeader("Cache-Control", "no-cache");
+  res->setHeader("Access-Control-Allow-Origin", "*");
+  res_stream->startResponse(*res);
+
+  {
+    csql::BinaryResultFormat result_format(
+        [res_stream] (const void* data, size_t size) {
+      res_stream->writeBodyChunk(data, size);
+    });
+
+    //String database;
+    //if (URI::getParam(params, "database", &database) && !database.empty()) {
+    //  auto rc = dbctx->client_auth->changeNamespace(session, database);
+    //  if (!rc.isSuccess()) {
+    //    result_format.sendError(rc.message());
+    //    res_stream->finishResponse();
+    //    return;
+    //  }
+    //}
+
+    if (session->getEffectiveNamespace().empty()) {
+      result_format.sendError("No database selected");
+      res_stream->finishResponse();
+      return;
+    }
+
+    try {
+      auto txn = dbctx->sql_service->startTransaction(session);
+
+      csql::QueryTreeCoder coder(txn.get());
+      auto req_body_is = BufferInputStream::fromBuffer(&req->body());
+      auto qtree = coder.decode(req_body_is.get());
+      auto qplan = dbctx->sql_runtime->buildQueryPlan(txn.get(), { qtree });
+
+      result_format.sendResults(qplan.get());
+    } catch (const StandardException& e) {
+      logError("evql", "SQL Error: $0", e.what());
+      result_format.sendError(e.what());
+    }
+  }
+
+  res_stream->finishResponse();
+
+}
 }
 
