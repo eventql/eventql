@@ -387,7 +387,7 @@ static ReturnCode subSchemaFromJSON(
   return ReturnCode::success();
 }
 
-static ReturnCode TableSchemaFromJSON(
+static ReturnCode tableSchemaFromJSON(
     msg::MessageSchema* schema,
     json::JSONObject::const_iterator begin,
     json::JSONObject::const_iterator end) {
@@ -538,7 +538,7 @@ void APIServlet::createTable(
 
   /* build table schema */
   msg::MessageSchema schema(nullptr);
-  auto schema_rc = TableSchemaFromJSON(&schema, jcolumns, jreq.end());
+  auto schema_rc = tableSchemaFromJSON(&schema, jcolumns, jreq.end());
   if (!schema_rc.isSuccess()) {
     res->setStatus(http::kStatusBadRequest);
     res->addBody(schema_rc.getMessage());
