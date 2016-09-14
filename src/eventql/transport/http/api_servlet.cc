@@ -329,6 +329,122 @@ void APIServlet::fetchTableDefinition(
   res->addBody(buf);
 }
 
+static ReturnCode subSchemaFromJSON(
+    msg::MessageSchema* schema,
+    json::JSONObject::const_iterator begin,
+    json::JSONObject::const_iterator end,
+    size_t* id) {
+  auto ncols = json::arrayLength(begin, end);
+
+  for (size_t i = 0; i < ncols; ++i) {
+    auto col = json::arrayLookup(begin, end, i); // O(N^2) but who cares...
+    *id += 1;
+    auto name = json::objectGetString(col, end, "name");
+    if (name.isEmpty()) {
+      return ReturnCode::error("kRuntimeError", "missing field: name");
+    }
+
+    auto type = json::objectGetString(col, end, "type");
+    if (type.isEmpty()) {
+      return ReturnCode::error("kRuntimeError", "missing field: type");
+    }
+
+    auto type_size = json::objectGetUInt64(col, end, "type_size");
+    auto optional = json::objectGetBool(col, end, "optional");
+    auto repeated = json::objectGetBool(col, end, "repeated");
+
+    auto field_type = msg::fieldTypeFromString(type.get());
+
+    if (field_type == msg::FieldType::OBJECT) {
+      auto child_schema_json = json::objectLookup(col, end, "subcolumns");
+      if (child_schema_json == end) {
+        return ReturnCode::error("kRuntimeError", "missing field: subcolumns");
+      }
+
+      auto p_id = *id;
+      auto child_schema = new msg::MessageSchema(nullptr);
+      auto rc = subSchemaFromJSON(child_schema, child_schema_json, end, id);
+
+      schema->addField(
+          msg::MessageSchemaField::mkObjectField(
+              p_id,
+              name.get(),
+              repeated.isEmpty() ? false : repeated.get(),
+              optional.isEmpty() ? false : optional.get(),
+              child_schema));
+    } else {
+      schema->addField(
+          msg::MessageSchemaField(
+              *id,
+              name.get(),
+              field_type,
+              type_size.isEmpty() ? 0 : type_size.get(),
+              repeated.isEmpty() ? false : repeated.get(),
+              optional.isEmpty() ? false : optional.get()));
+    }
+  }
+
+  return ReturnCode::success();
+}
+
+static ReturnCode TableSchemaFromJSON(
+    msg::MessageSchema* schema,
+    json::JSONObject::const_iterator begin,
+    json::JSONObject::const_iterator end) {
+  auto ncols = json::arrayLength(begin, end);
+
+  size_t id = 0;
+  for (size_t i = 0; i < ncols; ++i) {
+    auto col = json::arrayLookup(begin, end, i); // O(N^2) but who cares...
+
+    auto name = json::objectGetString(col, end, "name");
+    if (name.isEmpty()) {
+      return ReturnCode::error("kRuntimeError", "missing field: name");
+    }
+
+    auto type = json::objectGetString(col, end, "type");
+    if (type.isEmpty()) {
+      return ReturnCode::error("kRuntimeError", "missing field: type");
+    }
+
+    auto type_size = json::objectGetUInt64(col, end, "type_size");
+    auto optional = json::objectGetBool(col, end, "optional");
+    auto repeated = json::objectGetBool(col, end, "repeated");
+
+    auto field_type = msg::fieldTypeFromString(type.get());
+
+    if (field_type == msg::FieldType::OBJECT) {
+      auto child_schema_json = json::objectLookup(col, end, "columns");
+      if (child_schema_json == end) {
+        return ReturnCode::error("kRuntimeError", "missing field: columns");
+      }
+
+      auto p_id = ++id;
+      auto child_schema = new msg::MessageSchema(nullptr);
+      auto rc = subSchemaFromJSON(child_schema, child_schema_json, end, &id);
+
+      schema->addField(
+          msg::MessageSchemaField::mkObjectField(
+              p_id,
+              name.get(),
+              repeated.isEmpty() ? false : repeated.get(),
+              optional.isEmpty() ? false : optional.get(),
+              child_schema));
+    } else {
+      schema->addField(
+          msg::MessageSchemaField(
+              ++id,
+              name.get(),
+              field_type,
+              type_size.isEmpty() ? 0 : type_size.get(),
+              repeated.isEmpty() ? false : repeated.get(),
+              optional.isEmpty() ? false : optional.get()));
+    }
+  }
+
+  return ReturnCode::success();
+}
+
 void APIServlet::createTable(
     Session* session,
     const http::HTTPRequest* req,
@@ -420,25 +536,27 @@ void APIServlet::createTable(
     }
   }
 
-  try {
-    msg::MessageSchema schema(nullptr);
-    schema.fromJSON(jcolumns, jreq.end());
+  /* build table schema */
+  msg::MessageSchema schema(nullptr);
+  auto schema_rc = TableSchemaFromJSON(&schema, jcolumns, jreq.end());
+  if (!schema_rc.isSuccess()) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody(schema_rc.getMessage());
+    return;
+  }
 
-    auto rc = dbctx->table_service->createTable(
-        session->getEffectiveNamespace(),
-        table_name.get(),
-        schema,
-        primary_key,
-        properties);
+  auto rc = dbctx->table_service->createTable(
+      session->getEffectiveNamespace(),
+      table_name.get(),
+      schema,
+      primary_key,
+      properties);
 
-    if (!rc.isSuccess()) {
-      logError("eventql", rc.message(), "error");
-      res->setStatus(http::kStatusInternalServerError);
-      res->addBody(StringUtil::format("error: $0", rc.message()));
-      return;
-    }
-  } catch (const std::exception& e) {
-    return RAISE(kRuntimeError, e.what());
+  if (!rc.isSuccess()) {
+    logError("eventql", rc.message(), "error");
+    res->setStatus(http::kStatusInternalServerError);
+    res->addBody(StringUtil::format("error: $0", rc.message()));
+    return;
   }
 
   res->setStatus(http::kStatusCreated);
