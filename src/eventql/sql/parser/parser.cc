@@ -591,8 +591,17 @@ ASTNode* Parser::tablePropertyDefinition() {
   property->appendChild(property_key);
 
   expectAndConsume(Token::T_EQUAL);
-  assertExpectation(Token::T_STRING);
+
   auto property_value = new ASTNode(ASTNode::T_TABLE_PROPERTY_VALUE);
+  switch (cur_token_->getType()) {
+    case Token::T_STRING:
+    case Token::T_NUMERIC:
+      break;
+
+    default:
+      assertExpectation(Token::T_STRING);
+  }
+
   property_value->setToken(cur_token_);
   property->appendChild(property_value);
   consumeToken();
