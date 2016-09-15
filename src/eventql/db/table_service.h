@@ -65,7 +65,8 @@ public:
 
   TableService(
       ConfigDirectory* cdir,
-      PartitionMap* pmap);
+      PartitionMap* pmap,
+      ProcessConfig* config);
 
   Status createTable(
       const String& db_namespace,
@@ -78,6 +79,10 @@ public:
       const String& db_namespace,
       const String& table_name,
       Vector<AlterTableOperation> operations);
+
+  Status dropTable(
+      const String& db_namespace,
+      const String& table_name);
 
   void listTables(
       const String& tsdb_namespace,
@@ -159,6 +164,7 @@ protected:
 
   ConfigDirectory* cdir_;
   PartitionMap* pmap_;
+  ProcessConfig* config_;
 };
 
 } // namespace tdsb

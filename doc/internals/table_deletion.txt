@@ -1,0 +1,22 @@
+
+questions:
+
+ when to actually delete? what about running queruies?
+ how to handle recreates?
+ who is unloading the partitions?
+ how are servers notified of delete?
+ time delay before actual deletion?
+ do we even actually delete? or wait until explicit gc?
+ what about metadata servers? and metadata file?
+
+
+design:
+
+  - set table config deleted field to true
+  - remove metadata servers from table config
+  - let normal table lifecyle take care of removing the old partitions (or not)
+
+pieces touched:
+
+  - leader must not add new metadata server
+

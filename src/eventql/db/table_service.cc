@@ -44,9 +44,11 @@ namespace eventql {
 
 TableService::TableService(
     ConfigDirectory* cdir,
-    PartitionMap* pmap) :
+    PartitionMap* pmap,
+    ProcessConfig* config) :
     cdir_(cdir),
-    pmap_(pmap) {}
+    pmap_(pmap),
+    config_(config) {}
 
 Status TableService::createTable(
     const String& db_namespace,
@@ -378,6 +380,32 @@ Status TableService::alterTable(
       }
     }
   }
+
+  try {
+    cdir_->updateTableConfig(td);
+  } catch (const Exception& e) {
+    return Status(eRuntimeError, e.getMessage());
+  }
+
+  return Status::success();
+}
+
+Status TableService::dropTable(
+    const String& db_namespace,
+    const String& table_name) {
+  if (!config_->getBool("cluster.allow_drop_table")) {
+    return Status(
+        eRuntimeError,
+        "drop table not allowed (cluster.allow_drop_table=false)");
+  }
+
+  auto table = pmap_->findTable(db_namespace, table_name);
+  if (table.isEmpty()) {
+    return Status(eNotFoundError, "table not found");
+  }
+
+  auto td = table.get()->config();
+  td.set_deleted(true);
 
   try {
     cdir_->updateTableConfig(td);

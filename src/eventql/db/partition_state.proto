@@ -50,7 +50,7 @@ enum PartitionLifecycleState {
   PDISCOVERY_UNLOAD = 3;
 };
 
-// next id: 31
+// next id: 32
 message PartitionState {
 
   /**
@@ -128,5 +128,7 @@ message PartitionState {
   repeated bytes split_partition_ids = 24;
 
   optional bool has_joining_servers = 30;
+
+  optional uint64 table_generation = 32 [default = 0];
 
 };

@@ -288,7 +288,7 @@ ReturnCode DatabaseImpl::start() {
   partition_map_.reset(new PartitionMap(server_cfg_.get()));
 
   table_service_.reset(
-      new TableService(config_dir_.get(), partition_map_.get()));
+      new TableService(config_dir_.get(), partition_map_.get(), cfg_));
 
   replication_worker_.reset(
       new ReplicationWorker(partition_map_.get()));
