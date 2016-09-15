@@ -2,6 +2,7 @@
  * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
  *   - Paul Asmuth <paul@eventql.io>
+ *   - Laura Schlimmer <laura@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -64,6 +65,17 @@ void APIServlet::handleHTTPRequest(
     res.setStatus(http::kStatusInternalServerError);
     res.addBody(e.what());
     res_stream->writeResponse(res);
+  }
+}
+
+static void catchAndReturnErrors(
+    http::HTTPResponse* resp,
+    Function<void ()> fn) {
+  try {
+    fn();
+  } catch (const StandardException& e) {
+    resp->setStatus(http::kStatusInternalServerError);
+    resp->addBody(e.what());
   }
 }
 
