@@ -89,6 +89,15 @@ LSMPartitionReplication::LSMPartitionReplication(
     PartitionReplication(partition), cdir_(cdir) {}
 
 bool LSMPartitionReplication::needsReplication() const {
+  auto table_config = cdir_->getTableConfig(
+      snap_->state.tsdb_namespace(),
+      snap_->state.table_key());
+
+  // check if we are dropped (if so, enqueue)
+  if (snap_->state.table_generation() < table_config.generation()) {
+    return true;
+  }
+
   // check if we have seen the latest metadata transaction, otherwise enqueue
   if (snap_->state.last_metadata_txnid().empty()) {
     return true;
@@ -98,8 +107,11 @@ bool LSMPartitionReplication::needsReplication() const {
       snap_->state.last_metadata_txnid().data(),
       snap_->state.last_metadata_txnid().size());
 
-  auto last_txid = partition_->getTable()->getLastMetadataTransaction();
-  if (last_txid.getTransactionID() != last_seen_txid) {
+  SHA1Hash latest_txid(
+      table_config.metadata_txnid().data(),
+      table_config.metadata_txnid().size());
+
+  if (latest_txid != last_seen_txid) {
     return true;
   }
 
@@ -216,6 +228,17 @@ bool LSMPartitionReplication::replicate(ReplicationInfo* replication_info) {
       snap_->state.tsdb_namespace(),
       snap_->state.table_key(),
       snap_->key.toString());
+
+  auto table_config = cdir_->getTableConfig(
+      snap_->state.tsdb_namespace(),
+      snap_->state.table_key());
+
+  // if the partition generation is smaller than the table generation, this
+  // means that the table was dropped and we should not replicate the partition
+  // anymore
+  if (snap_->state.table_generation() < table_config.generation()) {
+    return true;
+  }
 
   // if there is a new metadata transaction, fetch and apply it
   auto rc = fetchAndApplyMetadataTransaction();
