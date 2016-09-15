@@ -62,8 +62,14 @@ Status TableService::createTable(
         "can't create table without PRIMARY KEY");
   }
 
-  if (!pmap_->findTable(db_namespace, table_name).isEmpty()) {
-    return Status(eIllegalArgumentError, "table already exists");
+  uint64_t recreate_version = 0;
+  auto old_table = pmap_->findTable(db_namespace, table_name);
+  if (!old_table.isEmpty()) {
+    if (old_table.get()->config().deleted()) {
+      recreate_version = old_table.get()->config().version();
+    } else {
+      return Status(eIllegalArgumentError, "table already exists");
+    }
   }
 
   auto fields = schema.fields();
@@ -132,6 +138,7 @@ Status TableService::createTable(
 
   // generate new table config
   TableDefinition td;
+  td.set_version(recreate_version);
   td.set_customer(db_namespace);
   td.set_table_name(table_name);
 
