@@ -23,7 +23,8 @@ TESTS = \
   unit_metadata_store \
   unit_metadata_operation_split \
   unit_metadata_operation_createpartition \
-  unit_partition_discovery
+  unit_partition_discovery \
+  unit_sql_parser
 
 check_PROGRAMS = $(TESTS)
 
@@ -74,6 +75,15 @@ unit_metadata_operation_createpartition_LDADD = \
 
 unit_partition_discovery_SOURCES = unit/partition_discovery.cc
 unit_partition_discovery_LDADD = \
+    @top_builddir@/src/libevqlcore.a \
+    @top_builddir@/src/libevqlclient.la \
+    $(INIH_LDADD) \
+    $(SIMDCOMP_LDADD) \
+    $(LMDB_LDADD) \
+    $(PROTOBUF_LDADD)
+
+unit_sql_parser_SOURCES = unit/sql_parser_test.cc
+unit_sql_parser_LDADD = \
     @top_builddir@/src/libevqlcore.a \
     @top_builddir@/src/libevqlclient.la \
     $(INIH_LDADD) \
