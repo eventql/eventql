@@ -10,7 +10,6 @@ MAINTAINERCLEANFILES =   \
 EXTRA_DIST = \
   eventql/util/assets.sh \
   eventql/util/charts/testdata \
-  eventql/sql/testdata \
   eventql/mapreduce/prelude.js
 
 ################# DEPENDENCIES ####################

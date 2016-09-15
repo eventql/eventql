@@ -360,6 +360,18 @@ void ASTNode::debugPrint(int indent /* = 0 */) const {
     case T_COLUMN_TYPE:
       printf("- T_COLUMN_TYPE");
       break;
+    case T_TABLE_PROPERTY_LIST:
+      printf("- T_TABLE_PROPERTY_LIST");
+      break;
+    case T_TABLE_PROPERTY:
+      printf("- T_TABLE_PROPERTY");
+      break;
+    case T_TABLE_PROPERTY_KEY:
+      printf("- T_TABLE_PROPERTY_KEY");
+      break;
+    case T_TABLE_PROPERTY_VALUE:
+      printf("- T_TABLE_PROPERTY_VALUE");
+      break;
     case T_DATABASE_NAME:
       printf("- T_DATABASE_NAME");
       break;

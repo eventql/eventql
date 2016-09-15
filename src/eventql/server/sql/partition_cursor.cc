@@ -219,6 +219,9 @@ RemotePartitionCursor::RemotePartitionCursor(
     row_buf_pos_(0),
     running_(false),
     done_(false),
+    timeout_(
+        session->getDatabaseContext()->config->getInt(
+            "server.s2s_idle_timeout").get()),
     client_(
         session->getDatabaseContext()->config,
         session->getDatabaseContext()->config_directory) {}
@@ -288,7 +291,6 @@ ReturnCode RemotePartitionCursor::fetchRows() {
     }
   }
 
-  auto timeout = kMicrosPerSecond;
   uint16_t ret_opcode = 0;
   uint16_t ret_flags;
   std::string ret_payload;
@@ -298,7 +300,7 @@ ReturnCode RemotePartitionCursor::fetchRows() {
       return rc;
     }
 
-    rc = client_.recvFrame(&ret_opcode, &ret_flags, &ret_payload, timeout);
+    rc = client_.recvFrame(&ret_opcode, &ret_flags, &ret_payload, timeout_);
     if (!rc.isSuccess()) {
       return rc;
     }
