@@ -193,6 +193,7 @@ void APIServlet::listTables(
   if (req->method() != http::HTTPMessage::kHTTPMethod::M_POST) {
     res->setStatus(http::kStatusMethodNotAllowed);
     res->addHeader("Content-Type", "text/plain; charset=utf-8");
+    res->addBody("expected POST request");
     return;
   }
 
@@ -292,6 +293,7 @@ void APIServlet::fetchTableDefinition(
   if (req->method() != http::HTTPMessage::kHTTPMethod::M_POST) {
     res->setStatus(http::kStatusMethodNotAllowed);
     res->addHeader("Content-Type", "text/plain; charset=utf-8");
+    res->addBody("expected POST request");
     return;
   }
 
@@ -403,6 +405,7 @@ void APIServlet::createTable(
   if (req->method() != http::HTTPMessage::kHTTPMethod::M_POST) {
     res->setStatus(http::kStatusMethodNotAllowed);
     res->addHeader("Content-Type", "text/plain; charset=utf-8");
+    res->addBody("expected POST request");
     return;
   }
 
@@ -520,6 +523,7 @@ void APIServlet::addTableField(
   if (req->method() != http::HTTPMessage::kHTTPMethod::M_POST) {
     res->setStatus(http::kStatusMethodNotAllowed);
     res->addHeader("Content-Type", "text/plain; charset=utf-8");
+    res->addBody("expected POST request");
     return;
   }
 
@@ -601,6 +605,7 @@ void APIServlet::removeTableField(
   if (req->method() != http::HTTPMessage::kHTTPMethod::M_POST) {
     res->setStatus(http::kStatusMethodNotAllowed);
     res->addHeader("Content-Type", "text/plain; charset=utf-8");
+    res->addBody("expected POST request");
     return;
   }
 
@@ -669,6 +674,7 @@ void APIServlet::insertIntoTable(
   if (req->method() != http::HTTPMessage::kHTTPMethod::M_POST) {
     res->setStatus(http::kStatusMethodNotAllowed);
     res->addHeader("Content-Type", "text/plain; charset=utf-8");
+    res->addBody("expected POST request");
     return;
   }
 
