@@ -49,12 +49,14 @@ best performance, read on the [Partitioning](../../../../tables/partitioning/) p
     <td>True if the column is repeated, false otherwise</td>
   </tr>
   <tr>
+    <td>columns.subcolumns</td>
+    <td>The child columns of an OBJECT column.</td>
+  </tr>
+  <tr>
     <td>properties (optional)</td>
     <td>A list of key=value property pairs, encoded as an array of 2-element string arrays</td>
   </tr>
 </table>
-
-FIXME: document how to create nested columns
 
 ### Example Request
 
@@ -84,13 +86,8 @@ FIXME: document how to create nested columns
         >>   ]
         >> }
 
-### Example Response
 
-        << HTTP/1.1 201 CREATED
-        << Content-Length: 0
-
-
-### Example Request
+### Example Request of a table with nested columns
 
         >> POST /api/v1/tables/create_table HTTP/1.1
         >> Content-Type: application/json
@@ -109,9 +106,20 @@ FIXME: document how to create nested columns
         >>          "type": "STRING"
         >>       },
         >>       {
-        >>          "name": "sensor_value",
-        >>          "type": "DOUBLE"
-        >>       }
+        >>          "name": "measurements",
+        >>          "type": "OBJECT",
+        >>          "repeated": true,
+        >>          "subcolumns": [
+        >>              {
+        >>                "name": "id",
+        >>                "type": "STRING",
+        >>              },
+        >>              {
+        >>                "name": "value",
+        >>                "type": "DOUBLE",
+        >>              }
+        >>          ]
+        >>        }
         >>   ],
         >>   "properties": [
         >>      [ "finite_partition_size", "300000000" ]
