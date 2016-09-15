@@ -166,13 +166,13 @@
             visible_in_menu: true
             visible_in_toc: true
             source: "tables/modifying-tables.md"
-          #-
-          #  url: "/tables/deleting-tables"
-          #  title: "Deleting Tables"
-          #  type: page
-          #  visible_in_menu: true
-          #  visible_in_toc: true
-          #  source: "tables/deleting-tables.md"
+          -
+            url: "/tables/deleting-tables"
+            title: "Deleting Tables"
+            type: page
+            visible_in_menu: true
+            visible_in_toc: true
+            source: "tables/deleting-tables.md"
           -
             url: "/tables/inserting-rows"
             title: "Inserting Rows"
@@ -590,6 +590,13 @@
             visible_in_toc: true
             source: "/sql/statements/alter_table.md"
           -
+            url: "/sql/statements/drop-table"
+            title: "DROP TABLE"
+            type: page
+            visible_in_menu: true
+            visible_in_toc: true
+            source: "/sql/statements/drop_table.md"
+          -
             url: "/sql/statements/describe"
             title: "DESCRIBE"
             type: page
@@ -663,6 +670,13 @@
               visible_in_menu: false
               visible_in_toc: false
               source: "/api/http/tables/insert.md"
+            -
+              url: "/api/http/tables/drop"
+              title: "POST tables/drop"
+              type: page
+              visible_in_menu: false
+              visible_in_toc: false
+              source: "/api/http/tables/drop.md"
             -
               url: "/api/http/tables/describe"
               title: "POST tables/describe"
