@@ -203,6 +203,11 @@ ReturnCode DatabaseImpl::start() {
     return ReturnCode::error("EIO", e.what());
   }
 
+  /* database context */
+  database_context_.reset(new DatabaseContext());
+  database_context_->db_path = tsdb_dir;
+  database_context_->config = cfg_;
+
   /* file tracker */
   file_tracker_.reset(new FileTracker(trash_dir));
 
@@ -285,7 +290,7 @@ ReturnCode DatabaseImpl::start() {
   server_cfg_->file_tracker = file_tracker_.get();
 
   /* core */
-  partition_map_.reset(new PartitionMap(server_cfg_.get()));
+  partition_map_.reset(new PartitionMap(database_context_.get()));
 
   table_service_.reset(
       new TableService(config_dir_.get(), partition_map_.get(), cfg_));
@@ -360,22 +365,19 @@ ReturnCode DatabaseImpl::start() {
 
   /* database context */
   {
-    std::unique_ptr<DatabaseContext> dbctx(new DatabaseContext());
-    dbctx->config = cfg_;
-    dbctx->partition_map = partition_map_.get();
-    dbctx->file_tracker = file_tracker_.get();
-    dbctx->config_directory = config_dir_.get();
-    dbctx->replication_worker = replication_worker_.get();
-    dbctx->lsm_index_cache = server_cfg_->idx_cache.get();
-    dbctx->metadata_store = metadata_store_.get();
-    dbctx->internal_auth = internal_auth_.get();
-    dbctx->client_auth = client_auth_.get();
-    dbctx->sql_runtime = sql_.get();
-    dbctx->sql_service = sql_service_.get();
-    dbctx->table_service = table_service_.get();
-    dbctx->mapreduce_service = mapreduce_service_.get();
-    dbctx->metadata_service = metadata_service_.get();
-    database_context_ = std::move(dbctx);
+    database_context_->partition_map = partition_map_.get();
+    database_context_->file_tracker = file_tracker_.get();
+    database_context_->config_directory = config_dir_.get();
+    database_context_->replication_worker = replication_worker_.get();
+    database_context_->lsm_index_cache = server_cfg_->idx_cache.get();
+    database_context_->metadata_store = metadata_store_.get();
+    database_context_->internal_auth = internal_auth_.get();
+    database_context_->client_auth = client_auth_.get();
+    database_context_->sql_runtime = sql_.get();
+    database_context_->sql_service = sql_service_.get();
+    database_context_->table_service = table_service_.get();
+    database_context_->mapreduce_service = mapreduce_service_.get();
+    database_context_->metadata_service = metadata_service_.get();
   }
 
   /* open tables */

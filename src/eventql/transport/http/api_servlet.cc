@@ -2,6 +2,7 @@
  * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
  *   - Paul Asmuth <paul@eventql.io>
+ *   - Laura Schlimmer <laura@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -64,6 +65,17 @@ void APIServlet::handleHTTPRequest(
     res.setStatus(http::kStatusInternalServerError);
     res.addBody(e.what());
     res_stream->writeResponse(res);
+  }
+}
+
+static void catchAndReturnErrors(
+    http::HTTPResponse* resp,
+    Function<void ()> fn) {
+  try {
+    fn();
+  } catch (const StandardException& e) {
+    resp->setStatus(http::kStatusInternalServerError);
+    resp->addBody(e.what());
   }
 }
 
@@ -169,6 +181,14 @@ void APIServlet::handle(
   if (uri.path() == "/api/v1/tables/remove_field") {
     catchAndReturnErrors(&res, [this, &session, &req, &res] {
       removeTableField(session, &req, &res);
+    });
+    res_stream->writeResponse(res);
+    return;
+  }
+
+  if (uri.path() == "/api/v1/tables/drop") {
+    catchAndReturnErrors(&res, [this, &session, &req, &res] {
+      dropTable(session, &req, &res);
     });
     res_stream->writeResponse(res);
     return;
@@ -620,6 +640,55 @@ void APIServlet::removeTableField(
       session->getEffectiveNamespace(),
       table_name.get(),
       operations);
+
+  if (!rc.isSuccess()) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody(StringUtil::format("error: $0", rc.message()));
+    return;
+  }
+
+  res->setStatus(http::kStatusCreated);
+  res->addBody("ok");
+  return;
+}
+
+void APIServlet::dropTable(
+    Session* session,
+    const http::HTTPRequest* req,
+    http::HTTPResponse* res) {
+  auto dbctx = session->getDatabaseContext();
+  auto jreq = json::parseJSON(req->body());
+
+  /* database */
+  auto database = json::objectGetString(jreq, "database");
+  if (!database.isEmpty()) {
+    auto auth_rc = dbctx->client_auth->changeNamespace(session, database.get());
+    if (!auth_rc.isSuccess()) {
+      res->setStatus(http::kStatusForbidden);
+      res->addHeader("Content-Type", "text/plain; charset=utf-8");
+      res->addBody(auth_rc.message());
+      return;
+    }
+  }
+
+  if (session->getEffectiveNamespace().empty()) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addHeader("Content-Type", "text/plain; charset=utf-8");
+    res->addBody("no database selected");
+    return;
+  }
+
+  auto table_name = json::objectGetString(jreq, "table");
+  if (table_name.isEmpty()) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody("missing field: table");
+    return;
+  }
+
+
+  auto rc = dbctx->table_service->dropTable(
+      session->getEffectiveNamespace(),
+      table_name.get());
 
   if (!rc.isSuccess()) {
     res->setStatus(http::kStatusBadRequest);

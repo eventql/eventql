@@ -62,4 +62,9 @@ message ReplicationState {
    */
   repeated ReplicaState replicas = 2;
 
+  /**
+   * If true, the cleanup/drop routine for this partition has completed
+   */
+  optional bool dropped = 3;
+
 };
