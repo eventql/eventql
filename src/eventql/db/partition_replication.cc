@@ -85,11 +85,12 @@ const size_t LSMPartitionReplication::kMaxBatchSizeBytes = 1024 * 1024 * 2; // 2
 
 LSMPartitionReplication::LSMPartitionReplication(
     RefPtr<Partition> partition,
-    ConfigDirectory* cdir) :
-    PartitionReplication(partition), cdir_(cdir) {}
+    DatabaseContext* dbctx) :
+    PartitionReplication(partition),
+    dbctx_(dbctx) {}
 
 bool LSMPartitionReplication::needsReplication() const {
-  auto table_config = cdir_->getTableConfig(
+  auto table_config = dbctx_->config_directory->getTableConfig(
       snap_->state.tsdb_namespace(),
       snap_->state.table_key());
 
@@ -144,7 +145,9 @@ void LSMPartitionReplication::replicateTo(
     const ReplicationTarget& replica,
     uint64_t replicated_offset,
     ReplicationInfo* replication_info) {
-  auto server_cfg = cdir_->getServerConfig(replica.server_id());
+  auto server_cfg = dbctx_->config_directory->getServerConfig(
+      replica.server_id());
+
   if (server_cfg.server_status() != SERVER_UP) {
     RAISE(kRuntimeError, "server is down");
   }
@@ -229,7 +232,7 @@ bool LSMPartitionReplication::replicate(ReplicationInfo* replication_info) {
       snap_->state.table_key(),
       snap_->key.toString());
 
-  auto table_config = cdir_->getTableConfig(
+  auto table_config = dbctx_->config_directory->getTableConfig(
       snap_->state.tsdb_namespace(),
       snap_->state.table_key());
 
@@ -237,12 +240,10 @@ bool LSMPartitionReplication::replicate(ReplicationInfo* replication_info) {
   // means that the table was dropped and we should not replicate the partition
   // anymore
   if (snap_->state.table_generation() < table_config.generation()) {
-    logInfo(
-        "evqld",
-        "Dropping partition $0/$1/$2",
+    dbctx_->partition_map->dropPartition(
         snap_->state.tsdb_namespace(),
         snap_->state.table_key(),
-        snap_->key.toString());
+        snap_->key);
 
     return true;
   }
@@ -410,7 +411,7 @@ Status LSMPartitionReplication::fetchAndApplyMetadataTransaction(
   discovery_request.set_keyrange_begin(snap_->state.partition_keyrange_begin());
   discovery_request.set_keyrange_end(snap_->state.partition_keyrange_end());
 
-  MetadataCoordinator coordinator(cdir_);
+  MetadataCoordinator coordinator(dbctx_->config_directory);
   PartitionDiscoveryResponse discovery_response;
   auto rc = coordinator.discoverPartition(
       discovery_request,
@@ -435,7 +436,7 @@ Status LSMPartitionReplication::finalizeSplit() {
   FinalizeSplitOperation op;
   op.set_partition_id(snap_->key.data(), snap_->key.size());
 
-  auto table_config = cdir_->getTableConfig(
+  auto table_config = dbctx_->config_directory->getTableConfig(
       snap_->state.tsdb_namespace(),
       snap_->state.table_key());
   MetadataOperation envelope(
@@ -448,7 +449,7 @@ Status LSMPartitionReplication::finalizeSplit() {
       Random::singleton()->sha1(),
       *msg::encode(op));
 
-  MetadataCoordinator coordinator(cdir_);
+  MetadataCoordinator coordinator(dbctx_->config_directory);
   return coordinator.performAndCommitOperation(
       snap_->state.tsdb_namespace(),
       snap_->state.table_key(),
@@ -469,7 +470,7 @@ Status LSMPartitionReplication::finalizeJoin(const ReplicationTarget& target) {
   op.set_server_id(target.server_id());
   op.set_placement_id(target.placement_id());
 
-  auto table_config = cdir_->getTableConfig(
+  auto table_config = dbctx_->config_directory->getTableConfig(
       snap_->state.tsdb_namespace(),
       snap_->state.table_key());
   MetadataOperation envelope(
@@ -482,7 +483,7 @@ Status LSMPartitionReplication::finalizeJoin(const ReplicationTarget& target) {
       Random::singleton()->sha1(),
       *msg::encode(op));
 
-  MetadataCoordinator coordinator(cdir_);
+  MetadataCoordinator coordinator(dbctx_->config_directory);
   return coordinator.performAndCommitOperation(
       snap_->state.tsdb_namespace(),
       snap_->state.table_key(),
