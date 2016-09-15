@@ -359,7 +359,7 @@ Status TableService::alterTable(
     const String& table_name,
     Vector<TableService::AlterTableOperation> operations) {
   auto table = pmap_->findTable(db_namespace, table_name);
-  if (table.isEmpty()) {
+  if (table.isEmpty() || table.get()->config().deleted()) {
     return Status(eNotFoundError, "table not found");
   }
 
@@ -399,7 +399,7 @@ Status TableService::dropTable(
   }
 
   auto table = pmap_->findTable(db_namespace, table_name);
-  if (table.isEmpty()) {
+  if (table.isEmpty() || table.get()->config().deleted()) {
     return Status(eNotFoundError, "table not found");
   }
 
@@ -439,7 +439,7 @@ void TableService::insertRecord(
     const json::JSONObject::const_iterator& data_end,
     uint64_t flags /* = 0 */) {
   auto table = pmap_->findTable(tsdb_namespace, table_name);
-  if (table.isEmpty()) {
+  if (table.isEmpty() || table.get()->config().deleted()) {
     RAISEF(kNotFoundError, "table not found: $0", table_name);
   }
 
@@ -476,7 +476,7 @@ void TableService::insertRecords(
   HashMap<SHA1Hash, Set<String>> servers;
 
   auto table = pmap_->findTable(tsdb_namespace, table_name);
-  if (table.isEmpty()) {
+  if (table.isEmpty() || table.get()->config().deleted()) {
     RAISEF(kNotFoundError, "table not found: $0", table_name);
   }
 
@@ -739,7 +739,7 @@ Option<RefPtr<msg::MessageSchema>> TableService::tableSchema(
       tsdb_namespace,
       table_key);
 
-  if (table.isEmpty()) {
+  if (table.isEmpty() || table.get()->config().deleted()) {
     return None<RefPtr<msg::MessageSchema>>();
   } else {
     return Some(table.get()->schema());
@@ -753,7 +753,7 @@ Option<TableDefinition> TableService::tableConfig(
       tsdb_namespace,
       table_key);
 
-  if (table.isEmpty()) {
+  if (table.isEmpty() || table.get()->config().deleted()) {
     return None<TableDefinition>();
   } else {
     return Some(table.get()->config());
