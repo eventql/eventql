@@ -233,6 +233,24 @@ The EventQL configuration options are grouped in three sections: `client`, `serv
     </td>
   </tr>
   <tr>
+    <td><b>server.query_max_concurrent_shards</b></td>
+    <td>256</td>
+    <td>
+      The default maximum number of shards to be executed in parallel/
+      concurrently for a single query. In other words this setting limits the
+      maximum parallelism for a query. You should consider increasing the value
+      if you're running on more than 64 machines.
+    </td>
+  </tr>
+  <tr>
+    <td><b>server.query_max_concurrent_shards_per_host</b></td>
+    <td>4</td>
+    <td>
+      The default maximum number of shards to be executed on any given host
+      for a single query.
+    </td>
+  </tr>
+  <tr>
     <th colspan="3" align="left">client.*</th>
   </tr>
   <tr>
