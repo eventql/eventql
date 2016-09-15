@@ -250,7 +250,12 @@ size_t RemotePartitionCursor::getNumColumns() {
 }
 
 ReturnCode RemotePartitionCursor::fetchRows() {
-  if (!running_) {
+  if (running_) {
+    auto rc = client_.sendFrame(EVQL_OP_QUERY_CONTINUE, 0, nullptr, 0);
+    if (!rc.isSuccess()) {
+      return rc;
+    }
+  } else {
     std::string qtree_coded;
     auto qtree_coded_os = StringOutputStream::fromString(&qtree_coded);
     csql::QueryTreeCoder qtree_coder(txn_);
@@ -287,7 +292,7 @@ ReturnCode RemotePartitionCursor::fetchRows() {
   uint16_t ret_opcode = 0;
   uint16_t ret_flags;
   std::string ret_payload;
-  while (ret_opcode != EVQL_OP_QUERY_RESULT) {
+  while (ret_opcode != EVQL_OP_QUERY_REMOTE_RESULT) {
     auto rc = txn_->triggerHeartbeat();
     if (!rc.isSuccess()) {
       return rc;
@@ -305,13 +310,15 @@ ReturnCode RemotePartitionCursor::fetchRows() {
     switch (ret_opcode) {
       case EVQL_OP_HEARTBEAT:
         continue;
-      case EVQL_OP_QUERY_RESULT:
+      case EVQL_OP_QUERY_REMOTE_RESULT:
         break;
       case EVQL_OP_ERROR: {
         native_transport::ErrorFrame eframe;
         eframe.parseFrom(ret_payload.data(), ret_payload.size());
         return ReturnCode::error("ERUNTIME", eframe.getError());
       }
+      default:
+        return ReturnCode::error("ERUNTIME", "invalid opcode");
     }
   }
 
