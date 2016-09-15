@@ -102,7 +102,8 @@ public:
       ProcessConfig* config,
       ConfigDirectory* config_dir,
       size_t max_concurrent_tasks,
-      size_t max_concurrent_tasks_per_host);
+      size_t max_concurrent_tasks_per_host,
+      bool tolerate_failures);
 
   ~TCPAsyncClient();
 
@@ -190,11 +191,13 @@ protected:
   std::map<std::string, size_t> connections_per_host_;
   size_t max_concurrent_tasks_;
   size_t max_concurrent_tasks_per_host_;
+  bool tolerate_failures_;
   size_t num_tasks_;
   size_t num_tasks_complete_;
   size_t num_tasks_running_;
   size_t io_timeout_;
   size_t idle_timeout_;
+  bool tolerate_failed_shards_;
 };
 
 } // namespace native_transport

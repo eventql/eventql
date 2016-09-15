@@ -251,6 +251,17 @@ The EventQL configuration options are grouped in three sections: `client`, `serv
     </td>
   </tr>
   <tr>
+    <td><b>server.query_failed_shard_policy</b></td>
+    <td>tolerate</td>
+    <td>
+      The failed shard policy can either be "tolerate" or "error". If the
+      value is "tolerate" failed shards will be ignore/excluded from the query
+      result (the percentage of 'missing data' will be returned with each
+      result). If the value is "error" any failed shard will result in a query
+      error. Valid values: "tolerate", "error"
+    </td>
+  </tr>
+  <tr>
     <th colspan="3" align="left">client.*</th>
   </tr>
   <tr>

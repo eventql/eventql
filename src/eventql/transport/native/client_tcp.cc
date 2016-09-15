@@ -187,10 +187,12 @@ TCPAsyncClient::TCPAsyncClient(
     ProcessConfig* config,
     ConfigDirectory* config_dir,
     size_t max_concurrent_tasks,
-    size_t max_concurrent_tasks_per_host) :
+    size_t max_concurrent_tasks_per_host,
+    bool tolerate_failures) :
     config_(config_dir),
     max_concurrent_tasks_(max_concurrent_tasks),
     max_concurrent_tasks_per_host_(max_concurrent_tasks_per_host),
+    tolerate_failures_(tolerate_failures),
     num_tasks_(0),
     num_tasks_complete_(0),
     num_tasks_running_(0),
@@ -679,8 +681,7 @@ ReturnCode TCPAsyncClient::failTask(Task* task) {
 
   completeTask(task);
 
-  auto tolerate_failures = true;
-  if (tolerate_failures) {
+  if (tolerate_failures_) {
     return ReturnCode::success();
   } else {
     return ReturnCode::error("ERUNTIME", "aggregation failed");

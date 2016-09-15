@@ -346,7 +346,8 @@ GroupByMergeExpression::GroupByMergeExpression(
         config,
         config_dir,
         max_concurrent_tasks,
-        max_concurrent_tasks_per_host),
+        max_concurrent_tasks_per_host,
+        config->getString("server.query_failed_shard_policy").get() == "tolerate"),
     freed_(false),
     num_parts_(0) {
   execution_context_->incrementNumTasks();
