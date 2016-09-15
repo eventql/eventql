@@ -1125,30 +1125,6 @@ TEST_CASE(ParserTest, TestCreateTableStatement2, [] () {
   EXPECT(stmt->getChildren()[1]->getChildren().size() == 6);
 });
 
-TEST_CASE(ParserTest, TestCreateTableWithStatement, [] () {
-  auto runtime = Runtime::getDefaultRuntime();
-  auto txn = runtime->newTransaction();
-  auto parser = parseTestQuery(
-      R"(
-        CREATE TABLE fnord (
-            time DATETIME Primary Key,
-            name STRING)
-        WITH key="value"
-        AND other.key = "other_value"
-        )
-      )");
-
-  EXPECT(parser.getStatements().size() == 1);
-  const auto& stmt = parser.getStatements()[0];
-  EXPECT(*stmt == ASTNode::T_CREATE_TABLE);
-  EXPECT(stmt->getChildren().size() == 2);
-  EXPECT_EQ(*stmt->getChildren()[0], ASTNode::T_TABLE_NAME);
-  EXPECT_EQ(*stmt->getChildren()[0]->getToken(), Token::T_IDENTIFIER);
-  EXPECT_EQ(stmt->getChildren()[0]->getToken()->getString(), "fnord");
-  EXPECT(*stmt->getChildren()[1] == ASTNode::T_COLUMN_LIST);
-  EXPECT(stmt->getChildren()[1]->getChildren().size() == 6);
-});
-
 TEST_CASE(ParserTest, TestInsertIntoStatement, [] () {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
