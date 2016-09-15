@@ -33,8 +33,7 @@ Please note, that fields that are part of the primary key can't be deleted.
 
 ###Example Request
 
-        >> POST /api/v1/tables/create_table HTTP/1.1
-        >> Authorization: Token <authtoken>
+        >> POST /api/v1/tables/remove_field HTTP/1.1
         >> Content-Type: application/json
         >> Content-Length: ...
         >>

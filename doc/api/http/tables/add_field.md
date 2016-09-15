@@ -43,7 +43,6 @@ Add a new field to an existing table.
 ###Example Request
 
         >> POST /api/v1/tables/add_field HTTP/1.1
-        >> Authorization: Token <authtoken>
         >> Content-Type: application/json
         >> Content-Length: ...
         >>

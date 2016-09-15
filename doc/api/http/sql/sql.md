@@ -1,4 +1,4 @@
-POST /api/v1/sql
+POST/GET /api/v1/sql
 =======================
 
 Perform a query against the EventQL database. The query string to execute can 
@@ -29,9 +29,9 @@ contain multiple queries that should each end with a semicolon.
   </tr>
 </table>
 
-##### Example
+### Example Request
 
-        >> POST /api/v1/tables/create_table HTTP/1.1
+        >> POST /api/v1/sql HTTP/1.1
         >> Content-Type: application/json
         >> Content-Length: ...
         >>
@@ -39,6 +39,9 @@ contain multiple queries that should each end with a semicolon.
         >>   "query": "SELECT * from my_sensor_table",
         >>   "format": "json"
         >> }
+
+
+### Example Response
 
         << HTTP/1.1 200 OK
         << Content-Type: application/json
@@ -57,21 +60,18 @@ contain multiple queries that should each end with a semicolon.
         << }
 
 
-#### json_sse
+### json_sse
 
 To obtain continuous query status updates, EventQL supports Server-Sent Events.
 Three different event types can be sent: `status`, `result` and `error`.
 
-##### Example
+### Example Request
 
-        >> POST /api/v1/tables/create_table HTTP/1.1
+        >> GET /api/v1/sql?format=json_sse&query=SELECT%20*%20from%20my_sensor_table HTTP/1.1
         >> Content-Type: application/json
         >> Content-Length: ...
-        >>
-        >> {
-        >>   "query": "SELECT * from my_sensor_table",
-        >>   "format": "json_sse"
-        >> }
+
+### Example Response
 
         << HTTP/1.1 200 OK
         << Content-Type: text/event-stream
