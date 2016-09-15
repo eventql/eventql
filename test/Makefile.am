@@ -24,7 +24,8 @@ TESTS = \
   unit_metadata_operation_split \
   unit_metadata_operation_createpartition \
   unit_partition_discovery \
-  unit_sql_parser
+  unit_sql_parser \
+  unit_sql_qtree
 
 check_PROGRAMS = $(TESTS)
 
@@ -82,8 +83,17 @@ unit_partition_discovery_LDADD = \
     $(LMDB_LDADD) \
     $(PROTOBUF_LDADD)
 
-unit_sql_parser_SOURCES = unit/sql_parser_test.cc
+unit_sql_parser_SOURCES = unit/sql_parser.cc
 unit_sql_parser_LDADD = \
+    @top_builddir@/src/libevqlcore.a \
+    @top_builddir@/src/libevqlclient.la \
+    $(INIH_LDADD) \
+    $(SIMDCOMP_LDADD) \
+    $(LMDB_LDADD) \
+    $(PROTOBUF_LDADD)
+
+unit_sql_qtree_SOURCES = unit/sql_qtree.cc
+unit_sql_qtree_LDADD = \
     @top_builddir@/src/libevqlcore.a \
     @top_builddir@/src/libevqlclient.la \
     $(INIH_LDADD) \
