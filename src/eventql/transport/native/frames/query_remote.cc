@@ -22,42 +22,53 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#pragma once
-#include <string>
-#include <vector>
-#include "eventql/eventql.h"
-#include "eventql/util/return_code.h"
-#include "eventql/util/util/binarymessagewriter.h"
-#include "eventql/transport/native/connection_tcp.h"
-#include "eventql/sql/svalue.h"
+#include "eventql/transport/native/frames/query_remote.h"
+#include "eventql/util/util/binarymessagereader.h"
 
 namespace eventql {
 namespace native_transport {
 
-class QueryRemoteFrame {
-public:
+QueryRemoteFrame::QueryRemoteFrame() : flags_(0) {};
 
-  static const uint16_t kOpcode = EVQL_OP_QUERY_REMOTE;
+void QueryRemoteFrame::setDatabase(const std::string& database) {
+  database_ = database;
+}
 
-  QueryRemoteFrame();
+const std::string& QueryRemoteFrame::getDatabase() const {
+  return database_;
+}
 
-  const std::string& getDatabase() const;
-  const std::string& getEncodedQTree() const;
+const std::string& QueryRemoteFrame::getEncodedQTree() const {
+  return encoded_qtree_;
+}
 
-  void setDatabase(const std::string& database);
-  void setEncodedQtree(const std::string& encoded_qtree);
+void QueryRemoteFrame::setEncodedQtree(const std::string& encoded_qtree) {
+  encoded_qtree_ = encoded_qtree;
+}
 
-  ReturnCode parseFrom(InputStream* is);
-  ReturnCode parseFrom(const char* payload, size_t payload_size);
-  void writeTo(OutputStream* os);
-  void writeToString(std::string* str);
-  void clear();
+ReturnCode QueryRemoteFrame::parseFrom(const char* data, size_t size) {
+  MemoryInputStream is(data, size);
+  return parseFrom(&is);
+}
 
-protected:
-  uint64_t flags_;
-  std::string database_;
-  std::string encoded_qtree_;
-};
+ReturnCode QueryRemoteFrame::parseFrom(InputStream* is) {
+  flags_ = is->readVarUInt();
+  database_ = is->readLenencString();
+  encoded_qtree_ = is->readLenencString();
+  return ReturnCode::success();
+}
+
+void QueryRemoteFrame::writeToString(std::string* string) {
+  auto os = StringOutputStream::fromString(string);
+  writeTo(os.get());
+}
+
+void QueryRemoteFrame::writeTo(OutputStream* os) {
+  os->appendVarUInt(flags_);
+  os->appendLenencString(database_);
+  os->appendLenencString(encoded_qtree_);
+}
 
 } // namespace native_transport
 } // namespace eventql
+

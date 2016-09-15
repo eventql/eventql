@@ -23,6 +23,9 @@
  * code of your own applications
  */
 #include "eventql/server/sql/partition_cursor.h"
+#include "eventql/transport/native/frames/error.h"
+#include "eventql/transport/native/frames/query_remote.h"
+#include "eventql/transport/native/frames/query_remote_result.h"
 #include "eventql/db/database.h"
 
 namespace eventql {
