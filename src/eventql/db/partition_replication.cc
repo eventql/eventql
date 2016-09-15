@@ -237,6 +237,13 @@ bool LSMPartitionReplication::replicate(ReplicationInfo* replication_info) {
   // means that the table was dropped and we should not replicate the partition
   // anymore
   if (snap_->state.table_generation() < table_config.generation()) {
+    logInfo(
+        "evqld",
+        "Dropping partition $0/$1/$2",
+        snap_->state.tsdb_namespace(),
+        snap_->state.table_key(),
+        snap_->key.toString());
+
     return true;
   }
 
