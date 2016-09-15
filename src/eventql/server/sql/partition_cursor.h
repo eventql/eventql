@@ -94,6 +94,7 @@ protected:
   size_t ncols_;
   size_t row_buf_pos_;
   bool running_;
+  bool done_;
   native_transport::TCPClient client_;
 };
 
