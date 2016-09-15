@@ -43,6 +43,11 @@ ReturnCode performOperation_QUERY_PARTIALAGGR(
     NativeConnection* conn,
     const char* payload,
     size_t payload_size) {
+  /* check internal */
+  if (!session->isInternal()) {
+    return conn->sendErrorFrame("internal method called");
+  }
+
   QueryPartialAggrFrame frame;
   {
     auto rc = frame.parseFrom(payload, payload_size);
