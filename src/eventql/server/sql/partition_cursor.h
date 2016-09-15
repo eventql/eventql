@@ -95,6 +95,7 @@ protected:
   size_t row_buf_pos_;
   bool running_;
   bool done_;
+  uint64_t timeout_;
   native_transport::TCPClient client_;
 };
 
