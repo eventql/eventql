@@ -500,38 +500,36 @@ Status TSDBTableProvider::insertRecord(
 
 void TSDBTableProvider::listTables(
     Function<void (const csql::TableInfo& table)> fn) const {
-  partition_map_->listTables(
+  table_service_->listTables(
       tsdb_namespace_,
-      [this, fn] (const TSDBTableInfo& table) {
-    fn(tableInfoForTable(table));
-  });
+      [this, fn] (const TableDefinition& table) {
+        fn(tableInfoForTable(table));
+      });
 }
 
 Option<csql::TableInfo> TSDBTableProvider::describe(
     const String& table_name) const {
   auto table_ref = TSDBTableRef::parse(table_name);
 
-  auto table = partition_map_->tableInfo(tsdb_namespace_, table_ref.table_key);
-  if (table.isEmpty()) {
+  auto table = cdir_->getTableConfig(tsdb_namespace_, table_ref.table_key);
+
+  if (table.deleted()) {
     return None<csql::TableInfo>();
   } else {
-    auto tblinfo = tableInfoForTable(table.get());
+    auto tblinfo = tableInfoForTable(table);
     tblinfo.table_name = table_name;
     return Some(tblinfo);
   }
 }
 
 csql::TableInfo TSDBTableProvider::tableInfoForTable(
-    const TSDBTableInfo& table) const {
+    const TableDefinition& table) const {
   csql::TableInfo ti;
-  ti.table_name = table.table_name;
+  ti.table_name = table.table_name();
 
-  for (const auto& tag : table.config.tags()) {
-    ti.tags.insert(tag);
-  }
-
-  auto pkey = table.config.config().primary_key();
-  for (const auto& col : table.schema->columns()) {
+  auto schema = msg::MessageSchema::decode(table.config().schema());
+  auto pkey = table.config().primary_key();
+  for (const auto& col : schema->columns()) {
     csql::ColumnInfo ci;
     ci.column_name = col.first;
     ci.type = col.second.typeName();

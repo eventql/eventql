@@ -244,13 +244,13 @@ bool LSMPartitionReplication::replicate(ReplicationInfo* replication_info) {
   // means that the table was dropped and we should not replicate the partition
   // anymore
   if (snap_->state.table_generation() < table_config.generation()) {
-    repl_state.set_dropped(true);
-    writer.commitReplicationState(repl_state);
-
     dbctx_->partition_map->dropPartition(
         snap_->state.tsdb_namespace(),
         snap_->state.table_key(),
         snap_->key);
+
+    repl_state.set_dropped(true);
+    writer.commitReplicationState(repl_state);
 
     return true;
   }
