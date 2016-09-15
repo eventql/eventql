@@ -240,7 +240,6 @@ Status TableService::createTable(
   }
 }
 
-
 static Status addColumn(
     TableDefinition* td,
     TableService::AlterTableOperation operation) {
@@ -419,21 +418,17 @@ Status TableService::dropTable(
 
 void TableService::listTables(
     const String& tsdb_namespace,
-    Function<void (const TSDBTableInfo& table)> fn) const {
-  pmap_->listTables(
-      tsdb_namespace,
-      [this, fn] (const TSDBTableInfo& table) {
-    fn(table);
-  });
-}
+    Function<void (const TableDefinition& table)> fn) const {
+  cdir_->listTables([this, tsdb_namespace, fn] (const TableDefinition& td) {
+    if (td.customer() != tsdb_namespace) {
+      return;
+    }
 
-void TableService::listTablesReverse(
-    const String& tsdb_namespace,
-    Function<void (const TSDBTableInfo& table)> fn) const {
-  pmap_->listTablesReverse(
-      tsdb_namespace,
-      [this, fn] (const TSDBTableInfo& table) {
-    fn(table);
+    if (td.deleted()) {
+      return;
+    }
+
+    fn(td);
   });
 }
 

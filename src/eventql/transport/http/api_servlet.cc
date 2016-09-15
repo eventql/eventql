@@ -258,19 +258,7 @@ void APIServlet::listTables(
 
   size_t ntable = 0;
 
-  auto writeTableJSON = [&json, &ntable, &tag_filter] (const TSDBTableInfo& table) {
-
-    Set<String> tags;
-    for (const auto& tag : table.config.tags()) {
-      tags.insert(tag);
-    }
-
-    if (!tag_filter.empty()) {
-      if (tags.count(tag_filter) == 0) {
-        return;
-      }
-    }
-
+  auto writeTableJSON = [&json, &ntable] (const TableDefinition& table) {
     if (++ntable > 1) {
       json.addComma();
     }
@@ -278,25 +266,16 @@ void APIServlet::listTables(
     json.beginObject();
 
     json.addObjectEntry("name");
-    json.addString(table.table_name);
+    json.addString(table.table_name());
     json.addComma();
-
-    json.addObjectEntry("tags");
-    json::toJSON(tags, &json);
 
     json.endObject();
 
   };
 
-  if (!order_filter.isEmpty() && order_filter.get() == "desc") {
-    dbctx->table_service->listTablesReverse(
-        session->getEffectiveNamespace(),
-        writeTableJSON);
-  } else {
-    dbctx->table_service->listTables(
-        session->getEffectiveNamespace(),
-        writeTableJSON);
-  }
+  dbctx->table_service->listTables(
+      session->getEffectiveNamespace(),
+      writeTableJSON);
 
   json.endArray();
   json.endObject();

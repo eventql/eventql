@@ -86,11 +86,7 @@ public:
 
   void listTables(
       const String& tsdb_namespace,
-      Function<void (const TSDBTableInfo& table)> fn) const;
-
-  void listTablesReverse(
-      const String& tsdb_namespace,
-      Function<void (const TSDBTableInfo& table)> fn) const;
+      Function<void (const TableDefinition& table)> fn) const;
 
   // insert one record
   void insertRecord(

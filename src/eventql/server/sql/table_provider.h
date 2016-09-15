@@ -80,7 +80,7 @@ public:
 
 protected:
 
-  csql::TableInfo tableInfoForTable(const TSDBTableInfo& table) const;
+  csql::TableInfo tableInfoForTable(const TableDefinition& table) const;
 
   RefPtr<csql::ValueExpressionNode> simplifyWhereExpression(
       RefPtr<Table> table,
