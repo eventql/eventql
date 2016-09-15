@@ -1,7 +1,7 @@
 POST /api/v1/tables/insert
 ==========================
 
-Insert rows one or more into an existing table. 
+Insert one or more rows into an existing table. 
 
 ###Resource Information
 <table class='http_api create_table'>
@@ -11,9 +11,8 @@ Insert rows one or more into an existing table.
   </tr>
 </table>
 
-###Request Body
-The body is a JSON array of one or more row objects.
-Each object represents a row to insert and consists of the following properties:
+###Parameters
+The body consist of one or more row object with the following properties:
 
 <table class='http_api create_table'>
   <tr>
@@ -30,7 +29,7 @@ Each object represents a row to insert and consists of the following properties:
   </tr>
 </table>
 
-### Request Example
+### Example Request
 
         >> POST /api/v1/tables/insert HTTP/1.1
         >> Content-Type: application/json
@@ -58,7 +57,7 @@ Each object represents a row to insert and consists of the following properties:
         >> ]
 
 
-###Response Example
+### Example Response
 
         << HTTP/1.1 201 CREATED
         << Content-Length: 0

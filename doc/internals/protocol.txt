@@ -30,6 +30,8 @@ Table of Contents
     6.2 Server-to-Server (S2S) Messages
       6.2.1 QUERY_PARTIALAGGR
       6.2.2 QUERY_PARTIALAGGR_RESULT
+      6.2.3 QUERY_REMOTE
+      6.2.4 QUERY_REMOTE_RESULT
 
 1. Preface
 
@@ -410,6 +412,58 @@ Binary Protocols.
     flags          Currently unused
     num_rows       The number of result rows in this frame
     body           A list of group, scratch pairs (num_rows * 2 strings)
+
+  Response:
+    No response.
+
+
+6.2.3 QUERY_REMOTE
+
+  FIXME
+
+  Payload:
+    lenencint      flags
+    lenencstr      database
+    lenencstr      encoded_qtree
+
+  Fields:
+    flags          Currently unused
+    datbase        The database on which the query should be executed
+    encoded_qtree  The encoded query tree
+
+  Response:
+    After sending a QUERY_PARTIALAGGR message, the client should expect to
+    receive one of these response messages:
+      - ERROR
+      - HEARTBEAT
+      - QUERY_REMOTE_RESULT
+
+    The request is considered completed once the client has received a response
+    frame with the EVQL_ENDOFREQUEST flag set.  After the request is complete,
+    the server will not send any further messages.
+
+
+6.2.4 QUERY_REMOTE_RESULT
+
+  The QUERY_REMOTE_RESULT message contains a the result of a successful
+  QUERY_REMOTE call. Results may be paged, i.e. depending on the result size
+  the result will be split into many QUERY_REMOTE_RESULT frames.
+
+  After receiving a QUERY_REMOTE_RESULT frame, the client must check if the
+  EVQL_ENDOFREQUEST flag is set. If the flag is set, the request can be
+  considered complete and the client should not expect any further frames from
+  the server. If the flag is not set, the client must wait for the next
+  QUERY_REMOTE_RESULT frame.
+
+  Payload:
+    lenencint      flags
+    lenencint      column_count
+    lenencint      row_count
+    lenencstr      row_data
+
+  Fields:
+    flags          Currently unused
+    num_rows       The number of result rows in this frame
 
   Response:
     No response.

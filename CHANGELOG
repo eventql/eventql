@@ -20,6 +20,8 @@ EventQL v0.4.0 beta;
   * Changed the HTTP transport to run fully within the database thread (i.e.
     removed the dependency on an external event loop) and added http timeouts
 
+  * Changed the SQL engine to use the new native transport
+
   * Removed the obsolete "sha1_tokens" field from the cluster/server config
 
   * Removed the PCRE dependency

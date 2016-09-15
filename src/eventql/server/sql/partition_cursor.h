@@ -30,6 +30,7 @@
 #include <eventql/db/partition_map.h>
 #include <eventql/db/partition_reader.h>
 #include <eventql/server/sql/table_provider.h>
+#include <eventql/transport/native/client_tcp.h>
 
 #include "eventql/eventql.h"
 
@@ -63,6 +64,38 @@ protected:
   ScopedPtr<csql::ResultCursor> cur_cursor_;
   ScopedPtr<csql::CSTableScan> cur_scan_;
   ScopedPtr<PartitionArena::SkiplistReader> cur_skiplist_;
+};
+
+class RemotePartitionCursor : public csql::ResultCursor {
+public:
+
+  RemotePartitionCursor(
+      Session* session,
+      csql::Transaction* txn,
+      csql::ExecutionContext* execution_context,
+      const std::string& database,
+      RefPtr<csql::SequentialScanNode> stmt,
+      const std::vector<std::string>& servers);
+
+  bool next(csql::SValue* row, int row_len) override;
+
+  size_t getNumColumns() override;
+
+protected:
+
+  ReturnCode fetchRows();
+
+  csql::Transaction* txn_;
+  csql::ExecutionContext* execution_context_;
+  std::string database_;
+  RefPtr<csql::SequentialScanNode> stmt_;
+  std::vector<std::string> servers_;
+  std::vector<csql::SValue> row_buf_;
+  size_t ncols_;
+  size_t row_buf_pos_;
+  bool running_;
+  bool done_;
+  native_transport::TCPClient client_;
 };
 
 class StaticPartitionCursor : public csql::ResultCursor {

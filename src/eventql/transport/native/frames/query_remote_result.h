@@ -33,39 +33,34 @@
 namespace eventql {
 namespace native_transport {
 
-class HelloFrame {
+class QueryRemoteResultFrame {
 public:
 
-  static const uint16_t kOpcode = EVQL_OP_HELLO;
+  static const uint16_t kOpcode = EVQL_OP_QUERY_REMOTE_RESULT;
 
-  HelloFrame();
+  QueryRemoteResultFrame();
 
-  void setIsInternal(bool is_internal);
-  bool isInternal() const;
+  size_t getColumnCount() const;
+  void setColumnCount(size_t column_count);
 
-  void setInteractiveAuth(bool enable_interactive);
-  bool getInteractiveAuth() const;
+  size_t getRowCount() const;
+  size_t getRowBytes() const;
+  void setRowCount(size_t row_count);
 
-  void setIdleTimeout(uint64_t timeout_us);
-  uint64_t getIdleTimeout() const;
+  std::unique_ptr<InputStream> getRowDataInputStream();
+  std::unique_ptr<OutputStream> getRowDataOutputStream();
 
-  void addAuthData(const std::string& key, const std::string& value);
-  const std::vector<std::pair<std::string, std::string>>& getAuthData() const;
-
-  void setDatabase(const std::string& database);
-  const std::string& getDatabase() const;
-  bool hasDatabase() const;
-
-  ReturnCode readFrom(InputStream* is);
+  ReturnCode parseFrom(InputStream* is);
+  ReturnCode parseFrom(const char* payload, size_t payload_size);
   void writeTo(OutputStream* os) const;
-
+  void writeToString(std::string* str) const;
   void clear();
 
 protected:
   uint64_t flags_;
-  uint64_t idle_timeout_;
-  std::string database_;
-  std::vector<std::pair<std::string, std::string>> auth_data_;
+  size_t column_count_;
+  size_t row_count_;
+  std::string row_data_;
 };
 
 } // namespace native_transport

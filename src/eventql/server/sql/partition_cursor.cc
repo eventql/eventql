@@ -23,6 +23,10 @@
  * code of your own applications
  */
 #include "eventql/server/sql/partition_cursor.h"
+#include "eventql/transport/native/frames/error.h"
+#include "eventql/transport/native/frames/query_remote.h"
+#include "eventql/transport/native/frames/query_remote_result.h"
+#include "eventql/db/database.h"
 
 namespace eventql {
 
@@ -197,6 +201,148 @@ bool PartitionCursor::openNextTable() {
 
 size_t PartitionCursor::getNumColumns() {
   return stmt_->getNumComputedColumns();
+}
+
+RemotePartitionCursor::RemotePartitionCursor(
+    Session* session,
+    csql::Transaction* txn,
+    csql::ExecutionContext* execution_context,
+    const std::string& database,
+    RefPtr<csql::SequentialScanNode> stmt,
+    const std::vector<std::string>& servers) :
+    txn_(txn),
+    execution_context_(execution_context),
+    database_(database),
+    stmt_(stmt),
+    servers_(servers),
+    ncols_(stmt->getNumComputedColumns()),
+    row_buf_pos_(0),
+    running_(false),
+    done_(false),
+    client_(
+        session->getDatabaseContext()->config,
+        session->getDatabaseContext()->config_directory) {}
+
+bool RemotePartitionCursor::next(csql::SValue* row, int row_len) {
+  if (row_buf_pos_ == row_buf_.size() && !done_) {
+    auto rc = fetchRows();
+    if (!rc.isSuccess()) {
+      RAISE(kRuntimeError, rc.getMessage());
+    }
+  }
+
+  if (row_buf_pos_ == row_buf_.size()) {
+    return false;
+  } else {
+    assert(row_buf_pos_ + ncols_ <= row_buf_.size());
+    auto n = std::min(ncols_, (size_t) row_len);
+    for (size_t i = 0; i < n; ++i) {
+      row[i] = row_buf_[row_buf_pos_ + i];
+    }
+
+    row_buf_pos_ += ncols_;
+    return true;
+  }
+}
+
+size_t RemotePartitionCursor::getNumColumns() {
+  return ncols_;
+}
+
+ReturnCode RemotePartitionCursor::fetchRows() {
+  if (running_) {
+    auto rc = client_.sendFrame(EVQL_OP_QUERY_CONTINUE, 0, nullptr, 0);
+    if (!rc.isSuccess()) {
+      return rc;
+    }
+  } else {
+    std::string qtree_coded;
+    auto qtree_coded_os = StringOutputStream::fromString(&qtree_coded);
+    csql::QueryTreeCoder qtree_coder(txn_);
+    qtree_coder.encode(stmt_.get(), qtree_coded_os.get());
+
+    native_transport::QueryRemoteFrame q_frame;
+    q_frame.setEncodedQtree(std::move(qtree_coded));
+    q_frame.setDatabase(
+        static_cast<eventql::Session*>(
+            txn_->getUserData())->getEffectiveNamespace());
+
+    for (const auto& s : servers_) {
+      auto rc = client_.connect(s);
+      if (!rc.isSuccess()) {
+        logError("evqld", "Remote SQL Error: $0", rc.getMessage());
+        continue;
+      }
+
+      rc = client_.sendFrame(&q_frame, 0);
+      if (rc.isSuccess()) {
+        running_ = true;
+      } else {
+        logError("evqld", "Remote SQL Error: $0", rc.getMessage());
+        continue;
+      }
+    }
+
+    if (!running_) {
+      return ReturnCode::error("ERUNTIME", "no server available for query");
+    }
+  }
+
+  auto timeout = kMicrosPerSecond;
+  uint16_t ret_opcode = 0;
+  uint16_t ret_flags;
+  std::string ret_payload;
+  while (ret_opcode != EVQL_OP_QUERY_REMOTE_RESULT) {
+    auto rc = txn_->triggerHeartbeat();
+    if (!rc.isSuccess()) {
+      return rc;
+    }
+
+    rc = client_.recvFrame(&ret_opcode, &ret_flags, &ret_payload, timeout);
+    if (!rc.isSuccess()) {
+      return rc;
+    }
+
+    if (ret_flags & EVQL_ENDOFREQUEST) {
+      done_ = true;
+    }
+
+    switch (ret_opcode) {
+      case EVQL_OP_HEARTBEAT:
+        continue;
+      case EVQL_OP_QUERY_REMOTE_RESULT:
+        break;
+      case EVQL_OP_ERROR: {
+        native_transport::ErrorFrame eframe;
+        eframe.parseFrom(ret_payload.data(), ret_payload.size());
+        return ReturnCode::error("ERUNTIME", eframe.getError());
+      }
+      default:
+        return ReturnCode::error("ERUNTIME", "invalid opcode");
+    }
+  }
+
+  native_transport::QueryRemoteResultFrame r_frame;
+  auto rc = r_frame.parseFrom(ret_payload.data(), ret_payload.size());
+
+  if (r_frame.getColumnCount() != ncols_) {
+    return ReturnCode::error("ERUNTIME", "invalid column count");
+  }
+
+  auto is = r_frame.getRowDataInputStream();
+  auto n = r_frame.getRowCount() * ncols_;
+  row_buf_.clear();
+  row_buf_.resize(n);
+  row_buf_pos_ = 0;
+  try {
+    for (size_t i = 0; i < n; ++i) {
+        row_buf_[i].decode(is.get());
+    }
+  } catch (const std::exception& e) {
+    return ReturnCode::error("ERUNTIME", e.what());
+  }
+
+  return ReturnCode::success();
 }
 
 StaticPartitionCursor::StaticPartitionCursor(

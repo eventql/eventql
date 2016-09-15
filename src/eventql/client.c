@@ -796,7 +796,7 @@ static void evql_client_cbuf_alloc(evql_client_t* client, size_t cbuf_len) {
     return;
   }
 
-  if (client->cbuf) {
+  if (client->cbuf && (void*) client->cbuf != (void*) client->cbuf_inline) {
     free(client->cbuf);
   }
 

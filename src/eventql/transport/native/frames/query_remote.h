@@ -2,6 +2,7 @@
  * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
  *   - Paul Asmuth <paul@eventql.io>
+ *   - Laura Schlimmer <laura@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -33,39 +34,29 @@
 namespace eventql {
 namespace native_transport {
 
-class HelloFrame {
+class QueryRemoteFrame {
 public:
 
-  static const uint16_t kOpcode = EVQL_OP_HELLO;
+  static const uint16_t kOpcode = EVQL_OP_QUERY_REMOTE;
 
-  HelloFrame();
+  QueryRemoteFrame();
 
-  void setIsInternal(bool is_internal);
-  bool isInternal() const;
-
-  void setInteractiveAuth(bool enable_interactive);
-  bool getInteractiveAuth() const;
-
-  void setIdleTimeout(uint64_t timeout_us);
-  uint64_t getIdleTimeout() const;
-
-  void addAuthData(const std::string& key, const std::string& value);
-  const std::vector<std::pair<std::string, std::string>>& getAuthData() const;
+  const std::string& getDatabase() const;
+  const std::string& getEncodedQTree() const;
 
   void setDatabase(const std::string& database);
-  const std::string& getDatabase() const;
-  bool hasDatabase() const;
+  void setEncodedQtree(const std::string& encoded_qtree);
 
-  ReturnCode readFrom(InputStream* is);
+  ReturnCode parseFrom(InputStream* is);
+  ReturnCode parseFrom(const char* payload, size_t payload_size);
   void writeTo(OutputStream* os) const;
-
+  void writeToString(std::string* str) const;
   void clear();
 
 protected:
   uint64_t flags_;
-  uint64_t idle_timeout_;
   std::string database_;
-  std::vector<std::pair<std::string, std::string>> auth_data_;
+  std::string encoded_qtree_;
 };
 
 } // namespace native_transport

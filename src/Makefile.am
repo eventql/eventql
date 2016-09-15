@@ -848,6 +848,7 @@ EVQL_CORE_SOURCES_ = \
     eventql/transport/native/server.h \
     eventql/transport/native/client_tcp.cc \
     eventql/transport/native/client_tcp.h \
+    eventql/transport/native/client_tcp_impl.h \
     eventql/transport/native/frames/hello.cc \
     eventql/transport/native/frames/hello.h \
     eventql/transport/native/frames/query_progress.cc \
@@ -858,12 +859,17 @@ EVQL_CORE_SOURCES_ = \
     eventql/transport/native/frames/query_partialaggr.h \
     eventql/transport/native/frames/query_partialaggr_result.cc \
     eventql/transport/native/frames/query_partialaggr_result.h \
+    eventql/transport/native/frames/query_remote.cc \
+    eventql/transport/native/frames/query_remote.h \
+    eventql/transport/native/frames/query_remote_result.cc \
+    eventql/transport/native/frames/query_remote_result.h \
     eventql/transport/native/frames/query_result.cc \
     eventql/transport/native/frames/query_result.h \
     eventql/transport/native/frames/error.cc \
     eventql/transport/native/frames/error.h \
     eventql/transport/native/ops/query.cc \
     eventql/transport/native/ops/query_partialaggr.cc \
+    eventql/transport/native/ops/query_remote.cc \
     eventql/db/table_ref.cc \
     eventql/db/table_ref.h \
     eventql/db/table.cc \
@@ -916,8 +922,6 @@ EVQL_CORE_SOURCES_ = \
     eventql/server/sql/codec/json_sse_codec.h \
     eventql/server/sql/partition_cursor.cc \
     eventql/server/sql/partition_cursor.h \
-    eventql/server/sql/pipelined_expression.cc \
-    eventql/server/sql/pipelined_expression.h \
     eventql/server/sql/scheduler.cc \
     eventql/server/sql/scheduler.h \
     eventql/server/sql/table_provider.cc \

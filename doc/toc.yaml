@@ -636,8 +636,8 @@
           source: "/api/http/index.html"
           children:
             -
-              url: "/api/http/tables/create_table"
-              title: "POST tables/create_table"
+              url: "/api/http/tables/create"
+              title: "POST tables/create"
               type: page
               visible_in_menu: false
               visible_in_toc: false
@@ -664,40 +664,26 @@
               visible_in_toc: false
               source: "/api/http/tables/insert.md"
             -
-              url: "/api/http/tables/table"
-              title: "GET tables/[table]"
+              url: "/api/http/tables/describe"
+              title: "POST tables/describe"
               type: page
               visible_in_menu: false
               visible_in_toc: false
-              source: "/api/http/tables/table.md"
+              source: "/api/http/tables/describe.md"
             -
-              url: "/api/http/tables/"
-              title: "GET tables"
+              url: "/api/http/tables/list"
+              title: "POST tables/list"
               type: page
               visible_in_menu: false
               visible_in_toc: false
-              source: "/api/http/tables/tables.md"
+              source: "/api/http/tables/list.md"
             -
               url: "/api/http/sql"
-              title: "GET sql"
+              title: "POST/GET sql"
               type: page
               visible_in_menu: false
               visible_in_toc: false
               source: "/api/http/sql/sql.md"
-            -
-              url: "/api/http/sql/scan_partition"
-              title": "GET sql/scan_partition"
-              type: page
-              visible_in_menu: false
-              visible_in_toc: false
-              source: "/api/http/sql/scan_partition.md"
-            -
-              url: "/api/http/auth/login"
-              title: "POST auth/login"
-              type: page
-              visible_in_menu: false
-              visible_in_toc: false
-              source: "/api/http/auth/login.md"
         -
           url: "/api/javascript_mapreduce"
           title: "MapReduce API (JavaScript)"

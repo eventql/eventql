@@ -32,6 +32,7 @@
 #include <sys/select.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <poll.h>
 #include "eventql/util/logging.h"
 #include "eventql/util/wallclock.h"
 #include "eventql/util/util/binarymessagereader.h"
@@ -41,6 +42,146 @@
 
 namespace eventql {
 namespace native_transport {
+
+TCPClient::TCPClient(
+    ProcessConfig* config,
+    ConfigDirectory* config_dir) :
+    config_(config),
+    cdir_(config_dir),
+    io_timeout_(config->getInt("server.s2s_io_timeout").get()),
+    idle_timeout_(config->getInt("server.s2s_idle_timeout").get()) {}
+
+ReturnCode TCPClient::connect(const std::string& server) {
+  auto server_cfg = cdir_->getServerConfig(server);
+  if (server_cfg.server_status() != SERVER_UP) {
+    return ReturnCode::error("ERUNTIME", "server is down");
+  }
+
+  auto server_addr = InetAddr::resolve(server_cfg.server_addr()); // FIXME
+  auto server_ip = server_addr.ip();
+
+  logDebug("evql", "Opening connection to $0", server);
+  auto fd = socket(AF_INET, SOCK_STREAM, 0);
+  if (fd == -1) {
+    return ReturnCode::error(
+        "EIO",
+        "socket() creation failed: %s",
+        strerror(errno));
+  }
+
+  if (fcntl(fd, F_SETFL, fcntl(fd, F_GETFL, 0) | O_NONBLOCK) != 0) {
+    ::close(fd);
+    return ReturnCode::error(
+        "EIO",
+        "fcntl() failed: %s",
+        strerror(errno));
+  }
+
+  struct sockaddr_in saddr;
+  saddr.sin_family = AF_INET;
+  saddr.sin_port = htons(server_addr.port());
+  inet_aton(server_ip.c_str(), &(saddr.sin_addr));
+  memset(&(saddr.sin_zero), 0, 8);
+
+  if (::connect(fd, (const struct sockaddr *) &saddr, sizeof(saddr)) < 0 &&
+      errno != EINPROGRESS) {
+    ::close(fd);
+    return ReturnCode::error(
+        "EIO",
+        "connect() failed: %s",
+        strerror(errno));
+  }
+
+  struct pollfd p;
+  p.fd = fd;
+  p.events = POLLOUT;
+  int poll_rc = poll(&p, 1, io_timeout_ / 1000);
+  switch (poll_rc) {
+    case -1:
+      if (errno == EAGAIN || errno == EINTR) {
+        /* fallthrough */
+      } else {
+        ::close(fd);
+        return ReturnCode::error("EIO", "poll() failed: %s", strerror(errno));
+      }
+    case 0:
+      ::close(fd);
+      return ReturnCode::error("EIO", "operation timed out");
+  }
+
+  conn_.reset(new TCPConnection(fd, io_timeout_));
+
+  auto handshake_rc = performHandshake();
+  if (!handshake_rc.isSuccess()) {
+    close();
+  }
+
+  return handshake_rc;
+}
+
+ReturnCode TCPClient::performHandshake() {
+  native_transport::HelloFrame f_hello;
+  f_hello.setIsInternal(true);
+  f_hello.setIdleTimeout(idle_timeout_);
+
+  auto rc = sendFrame(&f_hello, 0);
+  if (!rc.isSuccess()) {
+    return rc;
+  }
+
+  uint16_t res_opcode;
+  uint16_t res_flags;
+  std::string res_payload;
+  rc = recvFrame(&res_opcode, &res_flags, &res_payload, io_timeout_);
+  if (!rc.isSuccess()) {
+    return rc;
+  }
+
+  switch (res_opcode) {
+    case EVQL_OP_READY:
+      break;
+    case EVQL_OP_ERROR: {
+      ErrorFrame error;
+      error.parseFrom(res_payload.data(), res_payload.size());
+      return ReturnCode::error("ERUNTIME", error.getError());
+    }
+    default:
+      return ReturnCode::error("ERUNTIME", "invalid opcide");
+  }
+
+  return ReturnCode::success();
+}
+
+ReturnCode TCPClient::recvFrame(
+    uint16_t* opcode,
+    uint16_t* flags,
+    std::string* payload,
+    uint64_t timeout_us) {
+  if (!conn_.get()) {
+    return ReturnCode::error("ERUNTIME", "not connected");
+  }
+
+  return conn_->recvFrame(opcode, flags, payload, timeout_us);
+}
+
+ReturnCode TCPClient::sendFrame(
+    uint16_t opcode,
+    uint16_t flags,
+    const void* payload,
+    size_t payload_len) {
+  if (!conn_.get()) {
+    return ReturnCode::error("ERUNTIME", "not connected");
+  }
+
+  return conn_->sendFrame(opcode, flags, payload, payload_len);
+}
+
+void TCPClient::close() {
+  if (!conn_.get()) {
+    conn_->close();
+    conn_.reset(nullptr);
+  }
+}
 
 TCPAsyncClient::TCPAsyncClient(
     ProcessConfig* config,

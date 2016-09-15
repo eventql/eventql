@@ -328,6 +328,62 @@ void APIServlet::fetchTableDefinition(
   res->addBody(buf);
 }
 
+static ReturnCode tableSchemaFromJSON(
+    msg::MessageSchema* schema,
+    json::JSONObject::const_iterator begin,
+    json::JSONObject::const_iterator end,
+    size_t* id) {
+  auto ncols = json::arrayLength(begin, end);
+
+  for (size_t i = 0; i < ncols; ++i) {
+    auto col = json::arrayLookup(begin, end, i); // O(N^2) but who cares...
+
+    auto name = json::objectGetString(col, end, "name");
+    if (name.isEmpty()) {
+      return ReturnCode::error("ERUNTIME", "missing field: name");
+    }
+
+    auto type = json::objectGetString(col, end, "type");
+    if (type.isEmpty()) {
+      return ReturnCode::error("ERUNTIME", "missing field: type");
+    }
+
+    auto optional = json::objectGetBool(col, end, "optional");
+    auto repeated = json::objectGetBool(col, end, "repeated");
+
+    auto field_type = msg::fieldTypeFromString(type.get());
+
+    if (field_type == msg::FieldType::OBJECT) {
+      auto child_schema_json = json::objectLookup(col, end, "columns");
+      if (child_schema_json == end) {
+        return ReturnCode::error("ERUNTIME", "missing field: columns");
+      }
+
+      auto child_schema = new msg::MessageSchema(nullptr);
+      auto rc = tableSchemaFromJSON(child_schema, child_schema_json, end, id);
+
+      schema->addField(
+          msg::MessageSchemaField::mkObjectField(
+              ++(*id),
+              name.get(),
+              repeated.isEmpty() ? false : repeated.get(),
+              optional.isEmpty() ? false : optional.get(),
+              child_schema));
+    } else {
+      schema->addField(
+          msg::MessageSchemaField(
+              ++(*id),
+              name.get(),
+              field_type,
+              0,
+              repeated.isEmpty() ? false : repeated.get(),
+              optional.isEmpty() ? false : optional.get()));
+    }
+  }
+
+  return ReturnCode::success();
+}
+
 void APIServlet::createTable(
     Session* session,
     const http::HTTPRequest* req,
@@ -365,13 +421,6 @@ void APIServlet::createTable(
   if (jcolumns == jreq.end()) {
     res->setStatus(http::kStatusBadRequest);
     res->addBody("missing field: columns");
-    return;
-  }
-
-  auto jprimary_key = json::objectLookup(jreq, "primary_key");
-  if (jprimary_key == jreq.end()) {
-    res->setStatus(http::kStatusBadRequest);
-    res->addBody("missing field: primary_key");
     return;
   }
 
@@ -419,25 +468,28 @@ void APIServlet::createTable(
     }
   }
 
-  try {
-    msg::MessageSchema schema(nullptr);
-    schema.fromJSON(jcolumns, jreq.end());
+  /* build table schema */
+  msg::MessageSchema schema(nullptr);
+  size_t id = 0;
+  auto schema_rc = tableSchemaFromJSON(&schema, jcolumns, jreq.end(), &id);
+  if (!schema_rc.isSuccess()) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody(schema_rc.getMessage());
+    return;
+  }
 
-    auto rc = dbctx->table_service->createTable(
-        session->getEffectiveNamespace(),
-        table_name.get(),
-        schema,
-        primary_key,
-        properties);
+  auto rc = dbctx->table_service->createTable(
+      session->getEffectiveNamespace(),
+      table_name.get(),
+      schema,
+      primary_key,
+      properties);
 
-    if (!rc.isSuccess()) {
-      logError("eventql", rc.message(), "error");
-      res->setStatus(http::kStatusInternalServerError);
-      res->addBody(StringUtil::format("error: $0", rc.message()));
-      return;
-    }
-  } catch (const std::exception& e) {
-    return RAISE(kRuntimeError, e.what());
+  if (!rc.isSuccess()) {
+    logError("eventql", rc.message(), "error");
+    res->setStatus(http::kStatusInternalServerError);
+    res->addBody(StringUtil::format("error: $0", rc.message()));
+    return;
   }
 
   res->setStatus(http::kStatusCreated);
@@ -680,17 +732,52 @@ void APIServlet::executeSQL(
     http::HTTPResponse* res,
     RefPtr<http::HTTPResponseStream> res_stream) {
   try {
-    auto jreq = json::parseJSON(req->body());
+    std::string format = "json";
+    std::string query;
+    std::string database;
+    if (req->method() == http::HTTPMessage::kHTTPMethod::M_GET) {
+      URI uri(req->uri());
+      URI::ParamList params = uri.queryParams();
+      URI::parseQueryString(req->body().toString(), &params);
+      URI::getParam(params, "format", &format);
+      URI::getParam(params, "database", &database);
 
-    auto format_opt = json::objectGetString(jreq, "format");
-    auto format = format_opt.isEmpty() ? "json" : format_opt.get();
+      if (!URI::getParam(params, "query", &query)) {
+        res->setStatus(http::kStatusBadRequest);
+        res->addBody("missing ?query=... parameter");
+        res_stream->writeResponse(*res);
+        return;
+      }
+
+    } else {
+      auto jreq = json::parseJSON(req->body());
+      auto format_opt = json::objectGetString(jreq, "format");
+      if (!format_opt.isEmpty()) {
+        format = format_opt.get();
+      }
+
+      auto query_opt = json::objectGetString(jreq, "query");
+      if (query_opt.isEmpty()) {
+        res->setStatus(http::kStatusBadRequest);
+        res->addBody("missing field: query");
+        res_stream->writeResponse(*res);
+        return;
+      } else {
+        query = query_opt.get();
+      }
+
+      auto db_opt = json::objectGetString(jreq, "database");
+      if (!db_opt.isEmpty()) {
+        database = db_opt.get();
+      }
+    }
 
     if (format == "binary") {
-      executeSQL_BINARY(jreq, session, req, res, res_stream);
+      executeSQL_BINARY(query, database, session, res, res_stream);
     } else if (format == "json") {
-      executeSQL_JSON(jreq, session, req, res, res_stream);
+      executeSQL_JSON(query, database, session, res, res_stream);
     } else if (format == "json_sse") {
-      executeSQL_JSONSSE(jreq, session, req, res, res_stream);
+      executeSQL_JSONSSE(query, database, session, res, res_stream);
     } else {
       res->setStatus(http::kStatusBadRequest);
       res->addBody("invalid format: " + format);
@@ -705,9 +792,9 @@ void APIServlet::executeSQL(
 }
 
 void APIServlet::executeSQL_ASCII(
-    const json::JSONObject jreq,
+    const std::string& query,
+    const std::string& database,
     Session* session,
-    const http::HTTPRequest* req,
     http::HTTPResponse* res,
     RefPtr<http::HTTPResponseStream> res_stream) {
 //  String query;
@@ -743,20 +830,12 @@ void APIServlet::executeSQL_ASCII(
 }
 
 void APIServlet::executeSQL_BINARY(
-    const json::JSONObject jreq,
+    const std::string& query,
+    const std::string& database,
     Session* session,
-    const http::HTTPRequest* req,
     http::HTTPResponse* res,
     RefPtr<http::HTTPResponseStream> res_stream) {
   auto dbctx = session->getDatabaseContext();
-
-  auto query = json::objectGetString(jreq, "query");
-  if (query.isEmpty()) {
-    res->setStatus(http::kStatusBadRequest);
-    res->addBody("missing ?query=... parameter");
-    res_stream->writeResponse(*res);
-    return;
-  }
 
   res->setStatus(http::kStatusOK);
   res->setHeader("Connection", "close");
@@ -772,9 +851,8 @@ void APIServlet::executeSQL_BINARY(
 
     csql::BinaryResultFormat result_format(write_cb, true);
 
-    auto database = json::objectGetString(jreq, "database");
-    if (!database.isEmpty()) {
-      auto rc = dbctx->client_auth->changeNamespace(session, database.get());
+    if (!database.empty()) {
+      auto rc = dbctx->client_auth->changeNamespace(session, database);
       if (!rc.isSuccess()) {
         result_format.sendError(rc.message());
         res_stream->finishResponse();
@@ -790,7 +868,7 @@ void APIServlet::executeSQL_BINARY(
 
     try {
       auto txn = dbctx->sql_service->startTransaction(session);
-      auto qplan = dbctx->sql_runtime->buildQueryPlan(txn.get(), query.get());
+      auto qplan = dbctx->sql_runtime->buildQueryPlan(txn.get(), query);
       qplan->setProgressCallback([&result_format, &qplan] () {
         result_format.sendProgress(qplan->getProgress());
       });
@@ -805,24 +883,16 @@ void APIServlet::executeSQL_BINARY(
 }
 
 void APIServlet::executeSQL_JSON(
-    const json::JSONObject jreq,
+    const std::string& query,
+    const std::string& database,
     Session* session,
-    const http::HTTPRequest* req,
     http::HTTPResponse* res,
     RefPtr<http::HTTPResponseStream> res_stream) {
   auto dbctx = session->getDatabaseContext();
 
-  auto query = json::objectGetString(jreq, "query");
-  if (query.isEmpty()) {
-    res->setStatus(http::kStatusBadRequest);
-    res->addBody("missing ?query=... parameter");
-    res_stream->writeResponse(*res);
-    return;
-  }
-
-  auto database = json::objectGetString(jreq, "database");
-  if (!database.isEmpty()) {
-    auto rc = dbctx->client_auth->changeNamespace(session, database.get());
+  iputs("database $0", database);
+  if (!database.empty()) {
+    auto rc = dbctx->client_auth->changeNamespace(session, database);
     if (!rc.isSuccess()) {
       Buffer buf;
       json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
@@ -856,7 +926,7 @@ void APIServlet::executeSQL_JSON(
 
   try {
     auto txn = dbctx->sql_service->startTransaction(session);
-    auto qplan = dbctx->sql_runtime->buildQueryPlan(txn.get(), query.get());
+    auto qplan = dbctx->sql_runtime->buildQueryPlan(txn.get(), query);
 
     Buffer result;
     json::JSONOutputStream json(BufferOutputStream::fromBuffer(&result));
@@ -898,27 +968,18 @@ void APIServlet::executeSQL_JSON(
 }
 
 void APIServlet::executeSQL_JSONSSE(
-    const json::JSONObject jreq,
+    const std::string& query,
+    const std::string& database,
     Session* session,
-    const http::HTTPRequest* req,
     http::HTTPResponse* res,
     RefPtr<http::HTTPResponseStream> res_stream) {
   auto dbctx = session->getDatabaseContext();
 
-  auto query = json::objectGetString(jreq, "query");
-  if (query.isEmpty()) {
-    res->setStatus(http::kStatusBadRequest);
-    res->addBody("missing ?query=... parameter");
-    res_stream->writeResponse(*res);
-    return;
-  }
-
   auto sse_stream = mkRef(new http::HTTPSSEStream(res, res_stream));
   sse_stream->start();
 
-  auto database = json::objectGetString(jreq, "database");
-  if (!database.isEmpty()) {
-    auto rc = dbctx->client_auth->changeNamespace(session, database.get());
+  if (!database.empty()) {
+    auto rc = dbctx->client_auth->changeNamespace(session, database);
     if (!rc.isSuccess()) {
       Buffer buf;
       json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
@@ -948,7 +1009,7 @@ void APIServlet::executeSQL_JSONSSE(
 
   try {
     auto txn = dbctx->sql_service->startTransaction(session);
-    auto qplan = dbctx->sql_runtime->buildQueryPlan(txn.get(), query.get());
+    auto qplan = dbctx->sql_runtime->buildQueryPlan(txn.get(), query);
 
     JSONSSECodec json_sse_codec(sse_stream);
     qplan->setProgressCallback([&json_sse_codec, &qplan] () {
