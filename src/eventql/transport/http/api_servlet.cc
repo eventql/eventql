@@ -341,15 +341,14 @@ static ReturnCode tableSchemaFromJSON(
 
     auto name = json::objectGetString(col, end, "name");
     if (name.isEmpty()) {
-      return ReturnCode::error("kRuntimeError", "missing field: name");
+      return ReturnCode::error("ERUNTIME", "missing field: name");
     }
 
     auto type = json::objectGetString(col, end, "type");
     if (type.isEmpty()) {
-      return ReturnCode::error("kRuntimeError", "missing field: type");
+      return ReturnCode::error("ERUNTIME", "missing field: type");
     }
 
-    auto type_size = json::objectGetUInt64(col, end, "type_size");
     auto optional = json::objectGetBool(col, end, "optional");
     auto repeated = json::objectGetBool(col, end, "repeated");
 
@@ -358,7 +357,7 @@ static ReturnCode tableSchemaFromJSON(
     if (field_type == msg::FieldType::OBJECT) {
       auto child_schema_json = json::objectLookup(col, end, "columns");
       if (child_schema_json == end) {
-        return ReturnCode::error("kRuntimeError", "missing field: columns");
+        return ReturnCode::error("ERUNTIME", "missing field: columns");
       }
 
       auto child_schema = new msg::MessageSchema(nullptr);
