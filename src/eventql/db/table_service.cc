@@ -406,6 +406,7 @@ Status TableService::dropTable(
 
   auto td = table.get()->config();
   td.set_deleted(true);
+  td.set_generation(td.generation() + 1);
 
   try {
     cdir_->updateTableConfig(td);
