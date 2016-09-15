@@ -62,8 +62,7 @@ void APIServlet::handleHTTPRequest(
     http::HTTPResponse res;
     res.populateFromRequest(req_stream->request());
     res.setStatus(http::kStatusInternalServerError);
-    res.addHeader("Content-Type", "text/html; charset=utf-8");
-    res.addBody(Assets::getAsset("eventql/webui/500.html"));
+    res.addBody(e.what());
     res_stream->writeResponse(res);
   }
 }
@@ -183,7 +182,7 @@ void APIServlet::handle(
 
   res.setStatus(http::kStatusNotFound);
   res.addHeader("Content-Type", "text/html; charset=utf-8");
-  res.addBody(Assets::getAsset("eventql/webui/404.html"));
+  res.addBody("not found");
   res_stream->writeResponse(res);
 }
 
