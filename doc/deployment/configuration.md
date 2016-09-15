@@ -155,7 +155,7 @@ The EventQL configuration options are grouped in three sections: `client`, `serv
   </tr>
   <tr>
     <td><b>server.gc_mode</b></td>
-    <td>AUTOMATIC</td>
+    <td>MANUAL</td>
     <td></td>
   </tr>
   <tr>
