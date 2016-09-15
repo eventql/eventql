@@ -105,6 +105,7 @@ protected:
   ASTNode* createDatabaseStatement();
   ASTNode* columnDefinition();
   ASTNode* primaryKeyDefinition();
+  ASTNode* tablePropertyDefinition();
   ASTNode* tableName();
   ASTNode* insertStatement();
   ASTNode* insertIntoStatement();

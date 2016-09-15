@@ -471,23 +471,11 @@ ASTNode* Parser::createTableStatement() {
     create_table->appendChild(property_list);
 
     while (*cur_token_ != Token::T_SEMICOLON) {
-      auto property = new ASTNode(ASTNode::T_TABLE_PROPERTY);
-      property_list->appendChild(property);
+      property_list->appendChild(tablePropertyDefinition());
 
-      assertExpectation(Token::T_IDENTIFIER);
-      auto property_key = new ASTNode(ASTNode::T_TABLE_PROPERTY_KEY);
-      property->appendChild(property_key);
-      property_key->setToken(cur_token_);
-      consumeToken();
-      //FIXME allow other.key
-
-      expectAndConsume(Token::T_EQUAL);
-      assertExpectation(Token::T_STRING);
-      auto property_value = new ASTNode(ASTNode::T_LITERAL);
-      property_value->setToken(cur_token_);
-      consumeToken();
-
-      if (*cur_token_ != Token::T_AND) {
+      if (*cur_token_ == Token::T_AND) {
+        consumeToken();
+      } else {
         break;
       }
     }
@@ -577,6 +565,41 @@ ASTNode* Parser::primaryKeyDefinition() {
 
   return primary_key;
 }
+
+ASTNode* Parser::tablePropertyDefinition() {
+  auto property = new ASTNode(ASTNode::T_TABLE_PROPERTY);
+
+  switch (cur_token_->getType()) {
+    case Token::T_IDENTIFIER:
+    case Token::T_STRING:
+      break;
+
+    default:
+      assertExpectation(Token::T_IDENTIFIER);
+  }
+
+  auto name_str = consumeToken()->getString();
+  while (lookahead(0, Token::T_DOT)) {
+    consumeToken();
+    assertExpectation(Token::T_IDENTIFIER);
+    name_str += "." + cur_token_->getString();
+    consumeToken();
+  }
+
+  auto property_key = new ASTNode(ASTNode::T_TABLE_PROPERTY_KEY);
+  property_key->setToken(new Token(Token::T_IDENTIFIER, name_str));
+  property->appendChild(property_key);
+
+  expectAndConsume(Token::T_EQUAL);
+  assertExpectation(Token::T_STRING);
+  auto property_value = new ASTNode(ASTNode::T_LITERAL);
+  property_value->setToken(cur_token_);
+  property->appendChild(property_value);
+  consumeToken();
+
+  return property;
+}
+
 
 ASTNode* Parser::createDatabaseStatement() {
   expectAndConsume(Token::T_DATABASE);
