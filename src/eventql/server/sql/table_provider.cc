@@ -435,6 +435,10 @@ Status TSDBTableProvider::alterTable(const csql::AlterTableNode& alter_table) {
       tbl_operations);
 }
 
+Status TSDBTableProvider::dropTable(const String& table_name) {
+  return table_service_->dropTable(tsdb_namespace_, table_name);
+}
+
 Status TSDBTableProvider::insertRecord(
     const String& table_name,
     Vector<Pair<String, csql::SValue>> data) {

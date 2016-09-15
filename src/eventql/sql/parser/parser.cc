@@ -313,6 +313,8 @@ ASTNode* Parser::statement() {
       return selectStatement();
     case Token::T_CREATE:
       return createStatement();
+    case Token::T_DROP:
+      return dropStatement();
     case Token::T_INSERT:
       return insertStatement();
     case Token::T_ALTER:
@@ -332,7 +334,7 @@ ASTNode* Parser::statement() {
 
   RAISE(
       kParseError,
-      "unexpected token %s%s%s, expected one of SELECT, CREATE, INSERT, ALTER, DRAW or IMPORT",
+      "unexpected token %s%s%s, expected one of SELECT, CREATE, INSERT, ALTER, DROP, DRAW or IMPORT",
         Token::getTypeName(cur_token_->getType()),
         cur_token_->getString().size() > 0 ? ": " : "",
         cur_token_->getString().c_str());
@@ -624,6 +626,24 @@ ASTNode* Parser::createDatabaseStatement() {
   }
 
   return create_database;
+}
+
+ASTNode* Parser::dropStatement() {
+  return dropTableStatement();
+}
+
+ASTNode* Parser::dropTableStatement() {
+  consumeToken();
+  expectAndConsume(Token::T_TABLE);
+
+  auto drop_table = new ASTNode(ASTNode::T_DROP_TABLE);
+  drop_table->appendChild(tableName());
+
+  if (*cur_token_ == Token::T_SEMICOLON) {
+    consumeToken();
+  }
+
+  return drop_table;
 }
 
 ASTNode* Parser::insertStatement() {

@@ -37,6 +37,7 @@
 #include "eventql/sql/qtree/nodes/create_database.h"
 #include "eventql/sql/qtree/nodes/alter_table.h"
 #include "eventql/sql/qtree/nodes/create_table.h"
+#include "eventql/sql/qtree/nodes/drop_table.h"
 #include "eventql/sql/qtree/nodes/insert_into.h"
 #include "eventql/sql/qtree/nodes/insert_json.h"
 #include "eventql/sql/CSTableScanProvider.h"
@@ -855,6 +856,25 @@ TEST_CASE(QTreeTest, TestInsertIntoFromJSON, [] () {
 
   RefPtr<InsertJSONNode> qtree = qtrees[0].asInstanceOf<InsertJSONNode>();
   EXPECT_EQ(qtree->getTableName(), "evtbl");
+});
+
+TEST_CASE(QTreeTest, TestDropTable, [] () {
+  auto runtime = Runtime::getDefaultRuntime();
+  auto txn = runtime->newTransaction();
+
+  String query = "DROP TABLE test;";
+
+  csql::Parser parser;
+  parser.parse(query.data(), query.size());
+
+  auto qtree_builder = runtime->queryPlanBuilder();
+  Vector<RefPtr<QueryTreeNode>> qtrees = qtree_builder->build(
+      txn.get(),
+      parser.getStatements(),
+      txn->getTableProvider());
+
+  RefPtr<DropTableNode> qtree = qtrees[0].asInstanceOf<DropTableNode>();
+  EXPECT_EQ(qtree->getTableName(), "test");
 });
 
 TEST_CASE(QTreeTest, TestCreateDatabase, [] () {
