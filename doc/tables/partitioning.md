@@ -82,16 +82,19 @@ of each partition that you expect. The configuration option is called
 `finite partition size` and setting it allows an optimization to kick in that
 reduces the number of splits performed and therefore the total network bandwith.
 
-The finite partition size is a duration in microseconds. You should ideally
-choose this value so that roughly 500MB-1GB of new data will arrive in that
-window. However, note that EventQL will still dynamically split and re-partition
-the table if it becomes necessary -- the finite partition size is merely a hint.
-You can update the finite partition size hint at any time.
+The finite partition size is a time window/duration in microseconds. You should
+ideally choose this value so that roughly 500MB-1GB of new data will arrive in
+the time window.
 
 So, for example, if you expect around 10GB of data a day, 2 hours would be a
 good value. If you expect 1000GB of new data a day, 1 minute is a good value.
 If you expect 10TB of new data a day, set the finite partition size to 10
 seconds.
+
+Note that EventQL will still dynamically split and re-partition the table if it
+becomes necessary -- the finite partition size is merely a hint. You can update
+the finite partition size hint at any time and it won't cause trouble if your
+estimation is off.
 
 For high-volume timeseries data, it is _highly recommended_ to set the finite
 partition size.
