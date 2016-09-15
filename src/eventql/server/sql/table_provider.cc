@@ -508,9 +508,14 @@ Option<csql::TableInfo> TSDBTableProvider::describe(
   auto table_ref = TSDBTableRef::parse(table_name);
 
   auto table = cdir_->getTableConfig(tsdb_namespace_, table_ref.table_key);
-  auto tblinfo = tableInfoForTable(table);
-  tblinfo.table_name = table_name;
-  return Some(tblinfo);
+
+  if (table.deleted()) {
+    return None<csql::TableInfo>();
+  } else {
+    auto tblinfo = tableInfoForTable(table);
+    tblinfo.table_name = table_name;
+    return Some(tblinfo);
+  }
 }
 
 csql::TableInfo TSDBTableProvider::tableInfoForTable(
