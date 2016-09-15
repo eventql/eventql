@@ -121,9 +121,9 @@ ScopedPtr<csql::TableExpression> Scheduler::buildPipelineGroupByExpression(
     csql::ExecutionContext* execution_context,
     RefPtr<csql::GroupByNode> node) {
   size_t max_concurrent_tasks =
-      config_->getInt("server.max_concurrent_tasks").get();
+      config_->getInt("server.query_max_concurrent_shards").get();
   size_t max_concurrent_tasks_per_host =
-      config_->getInt("server.max_concurrent_tasks_per_host").get();
+      config_->getInt("server.query_max_concurrent_shards_per_host").get();
 
   Vector<csql::ValueExpression> select_expressions;
   for (const auto& slnode : node->selectList()) {
