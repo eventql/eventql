@@ -376,7 +376,7 @@ static ReturnCode tableSchemaFromJSON(
               ++(*id),
               name.get(),
               field_type,
-              type_size.isEmpty() ? 0 : type_size.get(),
+              0,
               repeated.isEmpty() ? false : repeated.get(),
               optional.isEmpty() ? false : optional.get()));
     }
