@@ -123,7 +123,7 @@ Status TableService::createTable(
     default:
       return Status(
           eIllegalArgumentError,
-          "first column in the PRIMARY KEY must be of type DATETIME, STRNG or UINT64");
+          "first column in the PRIMARY KEY must be of type DATETIME, STRING or UINT64");
   }
 
   auto replication_factor = cdir_->getClusterConfig().replication_factor();
