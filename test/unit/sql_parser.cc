@@ -385,7 +385,7 @@ TEST_CASE(ParserTest, TestSelectWithQuotedTableName, [] () {
 
 TEST_CASE(ParserTest, TestSelectMustBeFirstAssert, [] () {
   const char* err_msg = "unexpected token T_GROUP, expected one of SELECT, "
-      "CREATE, INSERT, ALTER, DRAW or IMPORT";
+      "CREATE, INSERT, ALTER, DROP, DRAW or IMPORT";
 
   EXPECT_EXCEPTION(err_msg, [] () {
     auto parser = parseTestQuery("GROUP BY SELECT");
@@ -1174,6 +1174,19 @@ TEST_CASE(ParserTest, TestCreateTableWithStatement, [] () {
   EXPECT_EQ(
       properties[1]->getChildren()[1]->getToken()->getString(),
       "1");
+});
+
+TEST_CASE(ParserTest, TestDropTableStatement, [] () {
+  auto runtime = Runtime::getDefaultRuntime();
+  auto txn = runtime->newTransaction();
+  auto parser = parseTestQuery("DROP TABLE fnord");
+  EXPECT(parser.getStatements().size() == 1);
+  const auto& stmt = parser.getStatements()[0];
+  EXPECT(*stmt == ASTNode::T_DROP_TABLE);
+  EXPECT(stmt->getChildren().size() == 1);
+  EXPECT_EQ(*stmt->getChildren()[0], ASTNode::T_TABLE_NAME);
+  EXPECT_EQ(*stmt->getChildren()[0]->getToken(), Token::T_IDENTIFIER);
+  EXPECT_EQ(stmt->getChildren()[0]->getToken()->getString(), "fnord");
 });
 
 TEST_CASE(ParserTest, TestInsertIntoStatement, [] () {
