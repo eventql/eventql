@@ -1,4 +1,4 @@
-POST /api/v1/tables/create_table
+POST /api/v1/tables/create
 ================
 
 Create a new EventQL table.<br>
@@ -12,10 +12,6 @@ best performance, read on the [Partitioning](../../../../tables/partitioning/) p
 
 ###Resource Information
 <table class='http_api create_table'>
-  <tr>
-    <td>Authentication required?</td>
-    <td>Yes</td>
-  </tr>
   <tr>
     <td>Content-Type</td>
     <td>application/json</td>
@@ -53,17 +49,18 @@ best performance, read on the [Partitioning](../../../../tables/partitioning/) p
     <td>True if the column is repeated, false otherwise</td>
   </tr>
   <tr>
+    <td>columns.subcolumns</td>
+    <td>The child columns of an OBJECT column.</td>
+  </tr>
+  <tr>
     <td>properties (optional)</td>
     <td>A list of key=value property pairs, encoded as an array of 2-element string arrays</td>
   </tr>
 </table>
 
-FIXME: document how to create nested columns
-
 ### Example Request
 
         >> POST /api/v1/tables/create_table HTTP/1.1
-        >> Authorization: Token <authtoken>
         >> Content-Type: application/json
         >> Content-Length: ...
         >>
@@ -83,6 +80,46 @@ FIXME: document how to create nested columns
         >>          "name": "sensor_value",
         >>          "type": "DOUBLE"
         >>       }
+        >>   ],
+        >>   "properties": [
+        >>      [ "finite_partition_size", "300000000" ]
+        >>   ]
+        >> }
+
+
+### Example Request of a table with nested columns
+
+        >> POST /api/v1/tables/create_table HTTP/1.1
+        >> Content-Type: application/json
+        >> Content-Length: ...
+        >>
+        >> {
+        >>   "table_name": "my_sensor_table",
+        >>   "primary_key": ["time", "sensor_name"],
+        >>   "columns": [
+        >>       {
+        >>          "name": "time",
+        >>          "type": "DATETIME"
+        >>       },
+        >>       {
+        >>          "name": "sensor_name",
+        >>          "type": "STRING"
+        >>       },
+        >>       {
+        >>          "name": "measurements",
+        >>          "type": "OBJECT",
+        >>          "repeated": true,
+        >>          "subcolumns": [
+        >>              {
+        >>                "name": "id",
+        >>                "type": "STRING",
+        >>              },
+        >>              {
+        >>                "name": "value",
+        >>                "type": "DOUBLE",
+        >>              }
+        >>          ]
+        >>        }
         >>   ],
         >>   "properties": [
         >>      [ "finite_partition_size", "300000000" ]
