@@ -51,8 +51,8 @@ public:
 
   ReturnCode parseFrom(InputStream* is);
   ReturnCode parseFrom(const char* payload, size_t payload_size);
-  void writeTo(OutputStream* os);
-  void writeToString(std::string* str);
+  void writeTo(OutputStream* os) const;
+  void writeToString(std::string* str) const;
   void clear();
 
 protected:

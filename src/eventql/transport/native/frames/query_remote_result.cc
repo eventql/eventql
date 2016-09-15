@@ -67,12 +67,12 @@ ReturnCode QueryRemoteResultFrame::parseFrom(InputStream* is) {
   return ReturnCode::success();
 }
 
-void QueryRemoteResultFrame::writeToString(std::string* string) {
+void QueryRemoteResultFrame::writeToString(std::string* string) const {
   auto os = StringOutputStream::fromString(string);
   writeTo(os.get());
 }
 
-void QueryRemoteResultFrame::writeTo(OutputStream* os) {
+void QueryRemoteResultFrame::writeTo(OutputStream* os) const {
   os->appendVarUInt(flags_);
   os->appendVarUInt(column_count_);
   os->appendVarUInt(row_count_);

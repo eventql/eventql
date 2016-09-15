@@ -58,12 +58,12 @@ ReturnCode QueryRemoteFrame::parseFrom(InputStream* is) {
   return ReturnCode::success();
 }
 
-void QueryRemoteFrame::writeToString(std::string* string) {
+void QueryRemoteFrame::writeToString(std::string* string) const {
   auto os = StringOutputStream::fromString(string);
   writeTo(os.get());
 }
 
-void QueryRemoteFrame::writeTo(OutputStream* os) {
+void QueryRemoteFrame::writeTo(OutputStream* os) const {
   os->appendVarUInt(flags_);
   os->appendLenencString(database_);
   os->appendLenencString(encoded_qtree_);
