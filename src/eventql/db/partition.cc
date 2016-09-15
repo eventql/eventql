@@ -74,6 +74,7 @@ RefPtr<Partition> Partition::create(
   state.set_uuid(uuid.data(), uuid.size());
   state.set_partition_keyrange_begin(discovery_info.keyrange_begin());
   state.set_partition_keyrange_end(discovery_info.keyrange_end());
+  state.set_table_generation(table->config().generation());
 
   auto snap = mkRef(
     new PartitionSnapshot(table.get(), state, pdir, pdir_rel, cfg, 0));
