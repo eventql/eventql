@@ -44,6 +44,7 @@ public:
   void setColumnCount(size_t column_count);
 
   size_t getRowCount() const;
+  size_t getRowBytes() const;
   void setRowCount(size_t row_count);
 
   std::unique_ptr<InputStream> getRowDataInputStream();

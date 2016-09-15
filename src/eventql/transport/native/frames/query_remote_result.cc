@@ -28,7 +28,10 @@
 namespace eventql {
 namespace native_transport {
 
-QueryRemoteResultFrame::QueryRemoteResultFrame() : flags_(0) {};
+QueryRemoteResultFrame::QueryRemoteResultFrame() :
+    flags_(0),
+    column_count_(0),
+    row_count_(0) {}
 
 size_t QueryRemoteResultFrame::getColumnCount() const {
   return column_count_;
@@ -40,6 +43,10 @@ void QueryRemoteResultFrame::setColumnCount(size_t column_count) {
 
 size_t QueryRemoteResultFrame::getRowCount() const {
   return row_count_;
+}
+
+size_t QueryRemoteResultFrame::getRowBytes() const {
+  return row_data_.size();
 }
 
 void QueryRemoteResultFrame::setRowCount(size_t row_count) {
@@ -77,6 +84,13 @@ void QueryRemoteResultFrame::writeTo(OutputStream* os) const {
   os->appendVarUInt(column_count_);
   os->appendVarUInt(row_count_);
   os->appendLenencString(row_data_);
+}
+
+void QueryRemoteResultFrame::clear() {
+  flags_ = 0;
+  column_count_ = 0;
+  row_count_ = 0;
+  row_data_.clear();
 }
 
 } // namespace native_transport

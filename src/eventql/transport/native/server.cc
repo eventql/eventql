@@ -231,6 +231,12 @@ ReturnCode Server::performOperation(
           conn,
           payload.data(),
           payload.size());
+    case EVQL_OP_QUERY_REMOTE:
+      return performOperation_QUERY_REMOTE(
+          db_,
+          conn,
+          payload.data(),
+          payload.size());
     default:
       conn->sendErrorFrame("invalid opcode");
       conn->close();
