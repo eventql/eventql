@@ -199,6 +199,27 @@ size_t PartitionCursor::getNumColumns() {
   return stmt_->getNumComputedColumns();
 }
 
+RemotePartitionCursor::RemotePartitionCursor(
+    csql::Transaction* txn,
+    csql::ExecutionContext* execution_context,
+    const std::string& database,
+    RefPtr<csql::SequentialScanNode> stmt,
+    const std::vector<std::string>& servers) :
+    txn_(txn),
+    execution_context_(execution_context),
+    database_(database),
+    stmt_(stmt),
+    servers_(servers) {}
+
+bool RemotePartitionCursor::next(csql::SValue* row, int row_len) {
+  RAISE(kRuntimeError, "not yet implemented");
+  return false;
+}
+
+size_t RemotePartitionCursor::getNumColumns() {
+  return stmt_->getNumComputedColumns();
+}
+
 StaticPartitionCursor::StaticPartitionCursor(
     csql::Transaction* txn,
     csql::ExecutionContext* execution_context,

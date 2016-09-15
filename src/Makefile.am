@@ -916,8 +916,6 @@ EVQL_CORE_SOURCES_ = \
     eventql/server/sql/codec/json_sse_codec.h \
     eventql/server/sql/partition_cursor.cc \
     eventql/server/sql/partition_cursor.h \
-    eventql/server/sql/pipelined_expression.cc \
-    eventql/server/sql/pipelined_expression.h \
     eventql/server/sql/scheduler.cc \
     eventql/server/sql/scheduler.h \
     eventql/server/sql/table_provider.cc \

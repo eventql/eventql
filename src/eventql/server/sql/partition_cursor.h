@@ -65,6 +65,29 @@ protected:
   ScopedPtr<PartitionArena::SkiplistReader> cur_skiplist_;
 };
 
+class RemotePartitionCursor : public csql::ResultCursor {
+public:
+
+  RemotePartitionCursor(
+      csql::Transaction* txn,
+      csql::ExecutionContext* execution_context,
+      const std::string& database,
+      RefPtr<csql::SequentialScanNode> stmt,
+      const std::vector<std::string>& servers);
+
+  bool next(csql::SValue* row, int row_len) override;
+
+  size_t getNumColumns() override;
+
+protected:
+
+  csql::Transaction* txn_;
+  csql::ExecutionContext* execution_context_;
+  std::string database_;
+  RefPtr<csql::SequentialScanNode> stmt_;
+  std::vector<std::string> servers_;
+};
+
 class StaticPartitionCursor : public csql::ResultCursor {
 public:
 

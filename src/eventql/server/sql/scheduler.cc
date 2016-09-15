@@ -24,7 +24,6 @@
  */
 #include <eventql/server/sql/scheduler.h>
 #include <eventql/server/sql/table_provider.h>
-#include <eventql/server/sql/pipelined_expression.h>
 #include <eventql/sql/qtree/QueryTreeUtil.h>
 #include <eventql/db/metadata_client.h>
 #include "eventql/eventql.h"
