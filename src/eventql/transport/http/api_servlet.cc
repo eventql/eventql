@@ -190,6 +190,13 @@ void APIServlet::listTables(
     Session* session,
     const http::HTTPRequest* req,
     http::HTTPResponse* res) {
+  if (req->method() != http::HTTPMessage::kHTTPMethod::M_POST) {
+    res->setStatus(http::kStatusMethodNotAllowed);
+    res->addHeader("Content-Type", "text/plain; charset=utf-8");
+    res->addBody("expected POST request");
+    return;
+  }
+
   auto dbctx = session->getDatabaseContext();
   auto jreq = json::parseJSON(req->body());
 
@@ -283,6 +290,13 @@ void APIServlet::fetchTableDefinition(
     Session* session,
     const http::HTTPRequest* req,
     http::HTTPResponse* res) {
+  if (req->method() != http::HTTPMessage::kHTTPMethod::M_POST) {
+    res->setStatus(http::kStatusMethodNotAllowed);
+    res->addHeader("Content-Type", "text/plain; charset=utf-8");
+    res->addBody("expected POST request");
+    return;
+  }
+
   auto dbctx = session->getDatabaseContext();
   auto jreq = json::parseJSON(req->body());
 
@@ -388,8 +402,15 @@ void APIServlet::createTable(
     Session* session,
     const http::HTTPRequest* req,
     http::HTTPResponse* res) {
-  auto dbctx = session->getDatabaseContext();
+  if (req->method() != http::HTTPMessage::kHTTPMethod::M_POST) {
+    res->setStatus(http::kStatusMethodNotAllowed);
+    res->addHeader("Content-Type", "text/plain; charset=utf-8");
+    res->addBody("expected POST request");
+    return;
+  }
 
+
+  auto dbctx = session->getDatabaseContext();
   auto jreq = json::parseJSON(req->body());
 
   auto database = json::objectGetString(jreq, "database");
@@ -499,6 +520,13 @@ void APIServlet::addTableField(
     Session* session,
     const http::HTTPRequest* req,
     http::HTTPResponse* res) {
+  if (req->method() != http::HTTPMessage::kHTTPMethod::M_POST) {
+    res->setStatus(http::kStatusMethodNotAllowed);
+    res->addHeader("Content-Type", "text/plain; charset=utf-8");
+    res->addBody("expected POST request");
+    return;
+  }
+
   auto dbctx = session->getDatabaseContext();
   auto jreq = json::parseJSON(req->body());
 
@@ -574,6 +602,13 @@ void APIServlet::removeTableField(
     Session* session,
     const http::HTTPRequest* req,
     http::HTTPResponse* res) {
+  if (req->method() != http::HTTPMessage::kHTTPMethod::M_POST) {
+    res->setStatus(http::kStatusMethodNotAllowed);
+    res->addHeader("Content-Type", "text/plain; charset=utf-8");
+    res->addBody("expected POST request");
+    return;
+  }
+
   auto dbctx = session->getDatabaseContext();
   auto jreq = json::parseJSON(req->body());
 
@@ -636,8 +671,14 @@ void APIServlet::insertIntoTable(
     Session* session,
     const http::HTTPRequest* req,
     http::HTTPResponse* res) {
-  auto dbctx = session->getDatabaseContext();
+  if (req->method() != http::HTTPMessage::kHTTPMethod::M_POST) {
+    res->setStatus(http::kStatusMethodNotAllowed);
+    res->addHeader("Content-Type", "text/plain; charset=utf-8");
+    res->addBody("expected POST request");
+    return;
+  }
 
+  auto dbctx = session->getDatabaseContext();
   auto jreq = json::parseJSON(req->body());
 
   auto ncols = json::arrayLength(jreq.begin(), jreq.end());

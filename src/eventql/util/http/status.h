@@ -39,6 +39,7 @@ const HTTPStatus kStatusBadRequest(400, "Bad request");
 const HTTPStatus kStatusUnauthorized(401, "Unauthorized");
 const HTTPStatus kStatusForbidden(403, "Forbidden");
 const HTTPStatus kStatusNotFound(404, "Not found");
+const HTTPStatus kStatusMethodNotAllowed(405, "Method not allowed");
 const HTTPStatus kStatusMovedPermanently(301, "Moved permanently");
 const HTTPStatus kStatusFound(302, "Found");
 const HTTPStatus kStatusInternalServerError(500, "Internal Server Error");
