@@ -41,7 +41,7 @@ public:
   QueryRemoteResultFrame();
 
   size_t getColumnCount() const;
-  void setColumnCount(size_t row_count);
+  void setColumnCount(size_t column_count);
 
   size_t getRowCount() const;
   void setRowCount(size_t row_count);
@@ -49,8 +49,10 @@ public:
   std::unique_ptr<InputStream> getRowDataInputStream();
   std::unique_ptr<OutputStream> getRowDataOutputStream();
 
+  ReturnCode parseFrom(InputStream* is);
   ReturnCode parseFrom(const char* payload, size_t payload_size);
-  ReturnCode writeTo(OutputStream* os);
+  void writeTo(OutputStream* os);
+  void writeToString(std::string* str);
   void clear();
 
 protected:

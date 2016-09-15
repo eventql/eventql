@@ -457,8 +457,9 @@ Binary Protocols.
 
   Payload:
     lenencint      flags
+    lenencint      column_count
     lenencint      row_count
-    bytes          row_data
+    lenencstr      row_data
 
   Fields:
     flags          Currently unused

@@ -860,6 +860,8 @@ EVQL_CORE_SOURCES_ = \
     eventql/transport/native/frames/query_partialaggr_result.h \
     eventql/transport/native/frames/query_remote.cc \
     eventql/transport/native/frames/query_remote.h \
+    eventql/transport/native/frames/query_remote_result.cc \
+    eventql/transport/native/frames/query_remote_result.h \
     eventql/transport/native/frames/query_result.cc \
     eventql/transport/native/frames/query_result.h \
     eventql/transport/native/frames/error.cc \
