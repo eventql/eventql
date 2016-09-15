@@ -395,10 +395,6 @@ TEST_CASE(QTreeTest, TestPruneConstraints, [] () {
   auto seqscan = qtree.asInstanceOf<SequentialScanNode>();
   auto where_expr = seqscan->whereExpression().get();
 
-  EXPECT_EQ(
-      where_expr->toSQL(),
-      "logical_and(logical_and(gt(1234,`time`),neq(`session_id`,444)),gte(`time`,6666))");
-
   {
     ScanConstraint constraint;
     constraint.column_name = "time";
@@ -410,7 +406,7 @@ TEST_CASE(QTreeTest, TestPruneConstraints, [] () {
 
     EXPECT_EQ(
         pruned_expr->toSQL(),
-        "logical_and(logical_and(gt(1234,`time`),neq(`session_id`,444)),true)");
+        "logical_and(gt(1234,`time`),neq(`session_id`,444))");
   }
 
   {
@@ -424,7 +420,7 @@ TEST_CASE(QTreeTest, TestPruneConstraints, [] () {
 
     EXPECT_EQ(
         pruned_expr->toSQL(),
-        "logical_and(logical_and(true,neq(`session_id`,444)),gte(`time`,6666))");
+        "logical_and(neq(`session_id`,444),gte(`time`,6666))");
   }
 });
 
