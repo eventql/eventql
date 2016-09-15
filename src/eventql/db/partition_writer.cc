@@ -57,7 +57,7 @@ void PartitionWriter::freeze() {
 }
 
 LSMPartitionWriter::LSMPartitionWriter(
-    ServerCfg* cfg,
+    DatabaseContext* cfg,
     RefPtr<Partition> partition,
     PartitionSnapshotRef* head) :
     PartitionWriter(head),
@@ -65,8 +65,8 @@ LSMPartitionWriter::LSMPartitionWriter(
     compaction_strategy_(
         new SimpleCompactionStrategy(
             partition_,
-            cfg->idx_cache.get())),
-    idx_cache_(cfg->idx_cache.get()),
+            cfg->lsm_index_cache)),
+    idx_cache_(cfg->lsm_index_cache),
     file_tracker_(cfg->file_tracker),
     cdir_(cfg->config_directory),
     partition_split_threshold_(kDefaultPartitionSplitThresholdBytes) {

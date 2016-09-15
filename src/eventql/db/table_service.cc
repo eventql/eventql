@@ -62,8 +62,14 @@ Status TableService::createTable(
         "can't create table without PRIMARY KEY");
   }
 
-  if (!pmap_->findTable(db_namespace, table_name).isEmpty()) {
-    return Status(eIllegalArgumentError, "table already exists");
+  uint64_t recreate_version = 0;
+  auto old_table = pmap_->findTable(db_namespace, table_name);
+  if (!old_table.isEmpty()) {
+    if (old_table.get()->config().deleted()) {
+      recreate_version = old_table.get()->config().version();
+    } else {
+      return Status(eIllegalArgumentError, "table already exists");
+    }
   }
 
   auto fields = schema.fields();
@@ -132,6 +138,7 @@ Status TableService::createTable(
 
   // generate new table config
   TableDefinition td;
+  td.set_version(recreate_version);
   td.set_customer(db_namespace);
   td.set_table_name(table_name);
 
@@ -239,7 +246,6 @@ Status TableService::createTable(
     return Status(e);
   }
 }
-
 
 static Status addColumn(
     TableDefinition* td,
@@ -360,7 +366,7 @@ Status TableService::alterTable(
     const String& table_name,
     Vector<TableService::AlterTableOperation> operations) {
   auto table = pmap_->findTable(db_namespace, table_name);
-  if (table.isEmpty()) {
+  if (table.isEmpty() || table.get()->config().deleted()) {
     return Status(eNotFoundError, "table not found");
   }
 
@@ -400,12 +406,13 @@ Status TableService::dropTable(
   }
 
   auto table = pmap_->findTable(db_namespace, table_name);
-  if (table.isEmpty()) {
+  if (table.isEmpty() || table.get()->config().deleted()) {
     return Status(eNotFoundError, "table not found");
   }
 
   auto td = table.get()->config();
   td.set_deleted(true);
+  td.set_generation(td.generation() + 1);
 
   try {
     cdir_->updateTableConfig(td);
@@ -418,21 +425,17 @@ Status TableService::dropTable(
 
 void TableService::listTables(
     const String& tsdb_namespace,
-    Function<void (const TSDBTableInfo& table)> fn) const {
-  pmap_->listTables(
-      tsdb_namespace,
-      [this, fn] (const TSDBTableInfo& table) {
-    fn(table);
-  });
-}
+    Function<void (const TableDefinition& table)> fn) const {
+  cdir_->listTables([this, tsdb_namespace, fn] (const TableDefinition& td) {
+    if (td.customer() != tsdb_namespace) {
+      return;
+    }
 
-void TableService::listTablesReverse(
-    const String& tsdb_namespace,
-    Function<void (const TSDBTableInfo& table)> fn) const {
-  pmap_->listTablesReverse(
-      tsdb_namespace,
-      [this, fn] (const TSDBTableInfo& table) {
-    fn(table);
+    if (td.deleted()) {
+      return;
+    }
+
+    fn(td);
   });
 }
 
@@ -443,7 +446,7 @@ void TableService::insertRecord(
     const json::JSONObject::const_iterator& data_end,
     uint64_t flags /* = 0 */) {
   auto table = pmap_->findTable(tsdb_namespace, table_name);
-  if (table.isEmpty()) {
+  if (table.isEmpty() || table.get()->config().deleted()) {
     RAISEF(kNotFoundError, "table not found: $0", table_name);
   }
 
@@ -480,7 +483,7 @@ void TableService::insertRecords(
   HashMap<SHA1Hash, Set<String>> servers;
 
   auto table = pmap_->findTable(tsdb_namespace, table_name);
-  if (table.isEmpty()) {
+  if (table.isEmpty() || table.get()->config().deleted()) {
     RAISEF(kNotFoundError, "table not found: $0", table_name);
   }
 
@@ -743,7 +746,7 @@ Option<RefPtr<msg::MessageSchema>> TableService::tableSchema(
       tsdb_namespace,
       table_key);
 
-  if (table.isEmpty()) {
+  if (table.isEmpty() || table.get()->config().deleted()) {
     return None<RefPtr<msg::MessageSchema>>();
   } else {
     return Some(table.get()->schema());
@@ -757,7 +760,7 @@ Option<TableDefinition> TableService::tableConfig(
       tsdb_namespace,
       table_key);
 
-  if (table.isEmpty()) {
+  if (table.isEmpty() || table.get()->config().deleted()) {
     return None<TableDefinition>();
   } else {
     return Some(table.get()->config());

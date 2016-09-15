@@ -2,6 +2,7 @@
  * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
  *   - Paul Asmuth <paul@eventql.io>
+ *   - Laura Schlimmer <laura@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -64,6 +65,17 @@ void APIServlet::handleHTTPRequest(
     res.setStatus(http::kStatusInternalServerError);
     res.addBody(e.what());
     res_stream->writeResponse(res);
+  }
+}
+
+static void catchAndReturnErrors(
+    http::HTTPResponse* resp,
+    Function<void ()> fn) {
+  try {
+    fn();
+  } catch (const StandardException& e) {
+    resp->setStatus(http::kStatusInternalServerError);
+    resp->addBody(e.what());
   }
 }
 
@@ -174,6 +186,14 @@ void APIServlet::handle(
     return;
   }
 
+  if (uri.path() == "/api/v1/tables/drop") {
+    catchAndReturnErrors(&res, [this, &session, &req, &res] {
+      dropTable(session, &req, &res);
+    });
+    res_stream->writeResponse(res);
+    return;
+  }
+
   if (uri.path() == "/api/v1/tables/describe") {
     fetchTableDefinition(session, &req, &res);
     res_stream->writeResponse(res);
@@ -190,6 +210,13 @@ void APIServlet::listTables(
     Session* session,
     const http::HTTPRequest* req,
     http::HTTPResponse* res) {
+  if (req->method() != http::HTTPMessage::kHTTPMethod::M_POST) {
+    res->setStatus(http::kStatusMethodNotAllowed);
+    res->addHeader("Content-Type", "text/plain; charset=utf-8");
+    res->addBody("expected POST request");
+    return;
+  }
+
   auto dbctx = session->getDatabaseContext();
   auto jreq = json::parseJSON(req->body());
 
@@ -231,19 +258,7 @@ void APIServlet::listTables(
 
   size_t ntable = 0;
 
-  auto writeTableJSON = [&json, &ntable, &tag_filter] (const TSDBTableInfo& table) {
-
-    Set<String> tags;
-    for (const auto& tag : table.config.tags()) {
-      tags.insert(tag);
-    }
-
-    if (!tag_filter.empty()) {
-      if (tags.count(tag_filter) == 0) {
-        return;
-      }
-    }
-
+  auto writeTableJSON = [&json, &ntable] (const TableDefinition& table) {
     if (++ntable > 1) {
       json.addComma();
     }
@@ -251,25 +266,16 @@ void APIServlet::listTables(
     json.beginObject();
 
     json.addObjectEntry("name");
-    json.addString(table.table_name);
+    json.addString(table.table_name());
     json.addComma();
-
-    json.addObjectEntry("tags");
-    json::toJSON(tags, &json);
 
     json.endObject();
 
   };
 
-  if (!order_filter.isEmpty() && order_filter.get() == "desc") {
-    dbctx->table_service->listTablesReverse(
-        session->getEffectiveNamespace(),
-        writeTableJSON);
-  } else {
-    dbctx->table_service->listTables(
-        session->getEffectiveNamespace(),
-        writeTableJSON);
-  }
+  dbctx->table_service->listTables(
+      session->getEffectiveNamespace(),
+      writeTableJSON);
 
   json.endArray();
   json.endObject();
@@ -283,6 +289,13 @@ void APIServlet::fetchTableDefinition(
     Session* session,
     const http::HTTPRequest* req,
     http::HTTPResponse* res) {
+  if (req->method() != http::HTTPMessage::kHTTPMethod::M_POST) {
+    res->setStatus(http::kStatusMethodNotAllowed);
+    res->addHeader("Content-Type", "text/plain; charset=utf-8");
+    res->addBody("expected POST request");
+    return;
+  }
+
   auto dbctx = session->getDatabaseContext();
   auto jreq = json::parseJSON(req->body());
 
@@ -388,8 +401,15 @@ void APIServlet::createTable(
     Session* session,
     const http::HTTPRequest* req,
     http::HTTPResponse* res) {
-  auto dbctx = session->getDatabaseContext();
+  if (req->method() != http::HTTPMessage::kHTTPMethod::M_POST) {
+    res->setStatus(http::kStatusMethodNotAllowed);
+    res->addHeader("Content-Type", "text/plain; charset=utf-8");
+    res->addBody("expected POST request");
+    return;
+  }
 
+
+  auto dbctx = session->getDatabaseContext();
   auto jreq = json::parseJSON(req->body());
 
   auto database = json::objectGetString(jreq, "database");
@@ -499,6 +519,13 @@ void APIServlet::addTableField(
     Session* session,
     const http::HTTPRequest* req,
     http::HTTPResponse* res) {
+  if (req->method() != http::HTTPMessage::kHTTPMethod::M_POST) {
+    res->setStatus(http::kStatusMethodNotAllowed);
+    res->addHeader("Content-Type", "text/plain; charset=utf-8");
+    res->addBody("expected POST request");
+    return;
+  }
+
   auto dbctx = session->getDatabaseContext();
   auto jreq = json::parseJSON(req->body());
 
@@ -574,6 +601,13 @@ void APIServlet::removeTableField(
     Session* session,
     const http::HTTPRequest* req,
     http::HTTPResponse* res) {
+  if (req->method() != http::HTTPMessage::kHTTPMethod::M_POST) {
+    res->setStatus(http::kStatusMethodNotAllowed);
+    res->addHeader("Content-Type", "text/plain; charset=utf-8");
+    res->addBody("expected POST request");
+    return;
+  }
+
   auto dbctx = session->getDatabaseContext();
   auto jreq = json::parseJSON(req->body());
 
@@ -632,12 +666,74 @@ void APIServlet::removeTableField(
   return;
 }
 
+void APIServlet::dropTable(
+    Session* session,
+    const http::HTTPRequest* req,
+    http::HTTPResponse* res) {
+  if (req->method() != http::HTTPMessage::kHTTPMethod::M_POST) {
+    res->setStatus(http::kStatusMethodNotAllowed);
+    res->addHeader("Content-Type", "text/plain; charset=utf-8");
+    res->addBody("expected POST request");
+    return;
+  }
+
+  auto dbctx = session->getDatabaseContext();
+  auto jreq = json::parseJSON(req->body());
+
+  /* database */
+  auto database = json::objectGetString(jreq, "database");
+  if (!database.isEmpty()) {
+    auto auth_rc = dbctx->client_auth->changeNamespace(session, database.get());
+    if (!auth_rc.isSuccess()) {
+      res->setStatus(http::kStatusForbidden);
+      res->addHeader("Content-Type", "text/plain; charset=utf-8");
+      res->addBody(auth_rc.message());
+      return;
+    }
+  }
+
+  if (session->getEffectiveNamespace().empty()) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addHeader("Content-Type", "text/plain; charset=utf-8");
+    res->addBody("no database selected");
+    return;
+  }
+
+  auto table_name = json::objectGetString(jreq, "table");
+  if (table_name.isEmpty()) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody("missing field: table");
+    return;
+  }
+
+
+  auto rc = dbctx->table_service->dropTable(
+      session->getEffectiveNamespace(),
+      table_name.get());
+
+  if (!rc.isSuccess()) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody(StringUtil::format("error: $0", rc.message()));
+    return;
+  }
+
+  res->setStatus(http::kStatusCreated);
+  res->addBody("ok");
+  return;
+}
+
 void APIServlet::insertIntoTable(
     Session* session,
     const http::HTTPRequest* req,
     http::HTTPResponse* res) {
-  auto dbctx = session->getDatabaseContext();
+  if (req->method() != http::HTTPMessage::kHTTPMethod::M_POST) {
+    res->setStatus(http::kStatusMethodNotAllowed);
+    res->addHeader("Content-Type", "text/plain; charset=utf-8");
+    res->addBody("expected POST request");
+    return;
+  }
 
+  auto dbctx = session->getDatabaseContext();
   auto jreq = json::parseJSON(req->body());
 
   auto ncols = json::arrayLength(jreq.begin(), jreq.end());

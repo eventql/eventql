@@ -84,7 +84,7 @@ public:
   static const size_t kMaxLSMTables = 12;
 
   LSMPartitionWriter(
-      ServerCfg* cfg,
+      DatabaseContext* cfg,
       RefPtr<Partition> partition,
       PartitionSnapshotRef* head);
 
