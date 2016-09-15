@@ -19,7 +19,7 @@ primary key value (i.e. the same value in all columns that are included in the
 primary key) in the same table.
 
 Two consecutive writes with the same primary key value are treated as an insert
-followed by an update 0 that is, every insert with a primary key value equal to
+followed by an update - that is, every insert with a primary key value equal to
 that of another row that already exists will replace that original row.
 
 #### Partitioning Key
