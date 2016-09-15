@@ -691,6 +691,13 @@ void APIServlet::dropTable(
     Session* session,
     const http::HTTPRequest* req,
     http::HTTPResponse* res) {
+  if (req->method() != http::HTTPMessage::kHTTPMethod::M_POST) {
+    res->setStatus(http::kStatusMethodNotAllowed);
+    res->addHeader("Content-Type", "text/plain; charset=utf-8");
+    res->addBody("expected POST request");
+    return;
+  }
+
   auto dbctx = session->getDatabaseContext();
   auto jreq = json::parseJSON(req->body());
 
