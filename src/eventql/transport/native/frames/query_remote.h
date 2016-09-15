@@ -2,6 +2,7 @@
  * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
  *   - Paul Asmuth <paul@eventql.io>
+ *   - Laura Schlimmer <laura@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -33,30 +34,27 @@
 namespace eventql {
 namespace native_transport {
 
-class QueryResultFrame {
+class QueryRemoteFrame {
 public:
 
-  static const uint16_t kOpcode = EVQL_OP_QUERY_RESULT;
+  static const uint16_t kOpcode = EVQL_OP_QUERY_REMOTE;
 
-  QueryResultFrame(const std::vector<std::string>& columns);
+  QueryRemoteFrame();
 
-  size_t getRowCount() const;
-  size_t getRowBytes() const;
+  const std::string& getDatabase() const;
+  const std::string& getEncodedQTree() const;
 
-  void addRow(const std::vector<csql::SValue>& row);
-  void setIsLast(bool is_last);
-  void setHasPendingStatement(bool has_pending_stmt);
+  void setDatabase(const std::string& database);
+  void setEncodedQtree(const std::string& encoded_qtree);
 
   ReturnCode parseFrom(const char* payload, size_t payload_size);
-  ReturnCode writeTo(NativeConnection* conn);
+  void writeToString(std::string* str);
   void clear();
 
 protected:
-  std::vector<std::string> columns_;
-  bool is_last_;
-  bool has_pending_stmt_;
-  size_t num_rows_;
-  util::BinaryMessageWriter data_;
+  uint64_t flags_;
+  std::string database_;
+  std::string encoded_qtree_;
 };
 
 } // namespace native_transport

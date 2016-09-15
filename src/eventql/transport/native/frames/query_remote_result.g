@@ -33,30 +33,27 @@
 namespace eventql {
 namespace native_transport {
 
-class QueryResultFrame {
+class QueryRemoteResult {
 public:
 
-  static const uint16_t kOpcode = EVQL_OP_QUERY_RESULT;
+  static const uint16_t kOpcode = EVQL_OP_QUERY_REMOTE_RESULT;
 
-  QueryResultFrame(const std::vector<std::string>& columns);
+  QueryRemoteResultFrame();
 
   size_t getRowCount() const;
-  size_t getRowBytes() const;
+  void setRowCount(size_t row_count);
 
-  void addRow(const std::vector<csql::SValue>& row);
-  void setIsLast(bool is_last);
-  void setHasPendingStatement(bool has_pending_stmt);
+  std::unique_ptr<InputStream> getRowDataInputStream();
+  std::unique_ptr<OutputStream> getRowDataOutputStream();
 
   ReturnCode parseFrom(const char* payload, size_t payload_size);
-  ReturnCode writeTo(NativeConnection* conn);
+  ReturnCode writeTo(OutputStream* os);
   void clear();
 
 protected:
-  std::vector<std::string> columns_;
-  bool is_last_;
-  bool has_pending_stmt_;
-  size_t num_rows_;
-  util::BinaryMessageWriter data_;
+  uint64_t flags_;
+  size_t row_count_;
+  std::string row_data_;
 };
 
 } // namespace native_transport
