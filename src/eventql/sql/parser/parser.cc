@@ -465,6 +465,34 @@ ASTNode* Parser::createTableStatement() {
 
   expectAndConsume(Token::T_RPAREN);
 
+  if (*cur_token_ == Token::T_WITH) {
+    consumeToken();
+    auto property_list = new ASTNode(ASTNode::T_TABLE_PROPERTY_LIST);
+    create_table->appendChild(property_list);
+
+    while (*cur_token_ != Token::T_SEMICOLON) {
+      auto property = new ASTNode(ASTNode::T_TABLE_PROPERTY);
+      property_list->appendChild(property);
+
+      assertExpectation(Token::T_IDENTIFIER);
+      auto property_key = new ASTNode(ASTNode::T_TABLE_PROPERTY_KEY);
+      property->appendChild(property_key);
+      property_key->setToken(cur_token_);
+      consumeToken();
+      //FIXME allow other.key
+
+      expectAndConsume(Token::T_EQUAL);
+      assertExpectation(Token::T_STRING);
+      auto property_value = new ASTNode(ASTNode::T_LITERAL);
+      property_value->setToken(cur_token_);
+      consumeToken();
+
+      if (*cur_token_ != Token::T_AND) {
+        break;
+      }
+    }
+  }
+
   if (*cur_token_ == Token::T_SEMICOLON) {
     consumeToken();
   }
