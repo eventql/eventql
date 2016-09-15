@@ -86,6 +86,8 @@ The finite partition size is a time window/duration in microseconds. You should
 ideally choose this value so that roughly 500MB-1GB of new data will arrive in
 the time window.
 
+    $finite_partition_size = (750MB / $new_data_per_day) * 86400000000
+
 So, for example, if you expect around 10GB of data a day, 2 hours would be a
 good value. If you expect 1000GB of new data a day, 1 minute is a good value.
 If you expect 10TB of new data a day, set the finite partition size to 10
@@ -109,7 +111,6 @@ pages for detailed information.
       value           DOUBLE,
       PRIMARY KEY(time, event_id)
     ) WITH finite_partition_size = 600000000; -- 10 minutes ~ 100GB/day
-
 
 ## Secondary indexes
 
