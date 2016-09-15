@@ -223,7 +223,7 @@ int main(int argc, const char** argv) {
   evql_conf_set(conf, "cluster.allow_drop_table", "false");
   evql_conf_set(conf, "server.listen", "localhost:9175");
   evql_conf_set(conf, "server.indexbuild_threads", "2");
-  evql_conf_set(conf, "server.gc_mode", "AUTOMATIC");
+  evql_conf_set(conf, "server.gc_mode", "MANUAL");
   evql_conf_set(conf, "server.gc_interval", "30000000");
   evql_conf_set(conf, "server.cachedir_maxsize", "68719476736");
   evql_conf_set(conf, "server.noleader", "false");
