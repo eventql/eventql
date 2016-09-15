@@ -848,6 +848,7 @@ EVQL_CORE_SOURCES_ = \
     eventql/transport/native/server.h \
     eventql/transport/native/client_tcp.cc \
     eventql/transport/native/client_tcp.h \
+    eventql/transport/native/client_tcp_impl.h \
     eventql/transport/native/frames/hello.cc \
     eventql/transport/native/frames/hello.h \
     eventql/transport/native/frames/query_progress.cc \
