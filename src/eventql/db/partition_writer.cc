@@ -458,6 +458,7 @@ Status LSMPartitionWriter::split() {
       snap->key.toString(),
       midpoint);
 
+  auto cconf = cdir_->getClusterConfig();
   auto split_partition_id_low = Random::singleton()->sha1();
   auto split_partition_id_high = Random::singleton()->sha1();
 
@@ -478,9 +479,13 @@ Status LSMPartitionWriter::split() {
 
   ServerAllocator server_alloc(cdir_);
 
-  Set<String> split_servers_low;
+  std::vector<String> split_servers_low;
   {
-    auto rc = server_alloc.allocateServers(3, &split_servers_low);
+    auto rc = server_alloc.allocateServers(
+        ServerAllocator::MUST_ALLOCATE,
+        cconf.replication_factor(),
+        Set<String>{},
+        &split_servers_low);
     if (!rc.isSuccess()) {
       return rc;
     }
@@ -490,9 +495,13 @@ Status LSMPartitionWriter::split() {
     op.add_split_servers_low(s);
   }
 
-  Set<String> split_servers_high;
+  std::vector<String> split_servers_high;
   {
-    auto rc = server_alloc.allocateServers(3, &split_servers_high);
+    auto rc = server_alloc.allocateServers(
+        ServerAllocator::MUST_ALLOCATE,
+        cconf.replication_factor(),
+        Set<String>{},
+        &split_servers_high);
     if (!rc.isSuccess()) {
       return rc;
     }

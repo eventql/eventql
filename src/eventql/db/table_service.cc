@@ -134,8 +134,6 @@ Status TableService::createTable(
           "first column in the PRIMARY KEY must be of type DATETIME, STRNG or UINT64");
   }
 
-  auto replication_factor = cdir_->getClusterConfig().replication_factor();
-
   // generate new table config
   TableDefinition td;
   td.set_version(recreate_version);
@@ -184,11 +182,17 @@ Status TableService::createTable(
     }
   }
 
+  auto cconf = cdir_->getClusterConfig();
+
   // generate new metadata file
-  Set<String> servers;
+  std::vector<String> servers;
   ServerAllocator server_alloc(cdir_);
   {
-    auto rc = server_alloc.allocateServers(replication_factor, &servers);
+    auto rc = server_alloc.allocateServers(
+        ServerAllocator::MUST_ALLOCATE,
+        cconf.replication_factor(),
+        Set<String>{},
+        &servers);
     if (!rc.isSuccess()) {
       return rc;
     }

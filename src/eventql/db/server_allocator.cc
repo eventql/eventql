@@ -46,8 +46,10 @@ ServerAllocator::ServerAllocator(ConfigDirectory* cdir) : cdir_(cdir) {}
  *    - Pick a given server with probability P_server = min(1, log(L_server) * -0.5)
  */
 Status ServerAllocator::allocateServers(
+    AllocationPolicy policy,
     size_t num_servers,
-    Set<String>* servers) const {
+    const Set<String>& exclude_servers,
+    Vector<String>* out) const {
   size_t num_alloced = 0;
   auto all_servers = cdir_->listServers();
   uint64_t idx = Random::singleton()->random64();
@@ -61,17 +63,18 @@ Status ServerAllocator::allocateServers(
       continue;
     }
 
-    if (servers->count(s.server_id()) > 0) {
+    if (exclude_servers.count(s.server_id()) > 0) {
       continue;
     }
 
-    servers->emplace(s.server_id());
+    out->emplace_back(s.server_id());
     if (++num_alloced == num_servers) {
       break;
     }
   }
 
-  if (num_alloced < num_servers) {
+  if (num_alloced < num_servers &&
+      policy == MUST_ALLOCATE) {
     return Status(eRuntimeError, "not enough live servers");
   }
 
