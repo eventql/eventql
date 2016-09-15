@@ -700,6 +700,44 @@ TEST_CASE(QTreeTest, TestCreateTable, [] () {
   EXPECT(qtree->getPrimaryKey() == pkey);
 });
 
+TEST_CASE(QTreeTest, TestCreateTableWith, [] () {
+  auto runtime = Runtime::getDefaultRuntime();
+  auto txn = runtime->newTransaction();
+
+  String query =
+    "  CREATE TABLE fnord ("
+    "      time DATETIME NOT NULL,"
+    "      location string,"
+    "      PRIMARY KEY (time, location))"
+    "      WITH akey = \"value\" "
+    "      AND test.some_key = \"some value\" ";
+
+  csql::Parser parser;
+  parser.parse(query.data(), query.size());
+
+  auto qtree_builder = runtime->queryPlanBuilder();
+  Vector<RefPtr<QueryTreeNode>> qtrees = qtree_builder->build(
+      txn.get(),
+      parser.getStatements(),
+      txn->getTableProvider());
+
+  EXPECT_EQ(qtrees.size(), 1);
+  RefPtr<CreateTableNode> qtree = qtrees[0].asInstanceOf<CreateTableNode>();
+  EXPECT_EQ(qtree->getTableName(), "fnord");
+
+  auto table_schema = qtree->getTableSchema();
+
+  auto fcolumns = table_schema.getFlatColumnList();
+  EXPECT_EQ(fcolumns.size(), 2);
+
+  auto property_list = qtree->getProperties();
+  EXPECT_EQ(property_list.size(), 2);
+  EXPECT_EQ(property_list[0].first, "akey");
+  EXPECT_EQ(property_list[0].second, "value");
+  EXPECT_EQ(property_list[1].first, "test.some_key");
+  EXPECT_EQ(property_list[1].second, "some value");
+});
+
 TEST_CASE(QTreeTest, TestInsertInto, [] () {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
