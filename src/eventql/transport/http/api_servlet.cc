@@ -426,13 +426,6 @@ void APIServlet::createTable(
     return;
   }
 
-  auto jprimary_key = json::objectLookup(jreq, "primary_key");
-  if (jprimary_key == jreq.end()) {
-    res->setStatus(http::kStatusBadRequest);
-    res->addBody("missing field: primary_key");
-    return;
-  }
-
   auto jpkey = json::objectLookup(jreq, "primary_key");
   if (jpkey == jreq.end()) {
     res->setStatus(http::kStatusBadRequest);
