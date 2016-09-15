@@ -592,7 +592,7 @@ ASTNode* Parser::tablePropertyDefinition() {
 
   expectAndConsume(Token::T_EQUAL);
   assertExpectation(Token::T_STRING);
-  auto property_value = new ASTNode(ASTNode::T_LITERAL);
+  auto property_value = new ASTNode(ASTNode::T_TABLE_PROPERTY_VALUE);
   property_value->setToken(cur_token_);
   property->appendChild(property_value);
   consumeToken();

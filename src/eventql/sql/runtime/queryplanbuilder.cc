@@ -1895,7 +1895,7 @@ QueryTreeNode* QueryPlanBuilder::buildCreateTable(
 
       if (cld->getChildren().size() != 2 ||
           cld->getChildren()[0]->getType() != ASTNode::T_TABLE_PROPERTY_KEY ||
-          cld->getChildren()[1]->getType() != ASTNode::T_LITERAL) {
+          cld->getChildren()[1]->getType() != ASTNode::T_TABLE_PROPERTY_VALUE) {
         RAISE(kRuntimeError, "corrupt AST");
       }
 
