@@ -1,6 +1,7 @@
 /**
  * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
+ *   - Laura Schlimmer <laura@eventql.io>
  *   - Paul Asmuth <paul@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
@@ -22,51 +23,25 @@
  * code of your own applications
  */
 #pragma once
-#include <string>
-#include <vector>
-#include "eventql/eventql.h"
-#include "eventql/util/return_code.h"
-#include "eventql/util/util/binarymessagewriter.h"
-#include "eventql/transport/native/connection_tcp.h"
-#include "eventql/sql/svalue.h"
 
 namespace eventql {
 namespace native_transport {
 
-class HelloFrame {
-public:
+template <class FrameType>
+ReturnCode TCPClient::sendFrame(
+    const FrameType* frame,
+    uint16_t flags) {
+  std::string payload;
+  auto os = StringOutputStream::fromString(&payload);
+  frame->writeTo(os.get());
 
-  static const uint16_t kOpcode = EVQL_OP_HELLO;
-
-  HelloFrame();
-
-  void setIsInternal(bool is_internal);
-  bool isInternal() const;
-
-  void setInteractiveAuth(bool enable_interactive);
-  bool getInteractiveAuth() const;
-
-  void setIdleTimeout(uint64_t timeout_us);
-  uint64_t getIdleTimeout() const;
-
-  void addAuthData(const std::string& key, const std::string& value);
-  const std::vector<std::pair<std::string, std::string>>& getAuthData() const;
-
-  void setDatabase(const std::string& database);
-  const std::string& getDatabase() const;
-  bool hasDatabase() const;
-
-  ReturnCode readFrom(InputStream* is);
-  void writeTo(OutputStream* os) const;
-
-  void clear();
-
-protected:
-  uint64_t flags_;
-  uint64_t idle_timeout_;
-  std::string database_;
-  std::vector<std::pair<std::string, std::string>> auth_data_;
-};
+  return sendFrame(
+      FrameType::kOpcode,
+      flags,
+      payload.data(),
+      payload.size());
+}
 
 } // namespace native_transport
 } // namespace eventql
+

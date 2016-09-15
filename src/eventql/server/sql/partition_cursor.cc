@@ -269,7 +269,7 @@ ReturnCode RemotePartitionCursor::fetchRows() {
         continue;
       }
 
-      rc = client_.sendFrame(&q_frame);
+      rc = client_.sendFrame(&q_frame, 0);
       if (rc.isSuccess()) {
         running_ = true;
       } else {
