@@ -96,6 +96,11 @@ protected:
       const http::HTTPRequest* req,
       http::HTTPResponse* res);
 
+  void dropTable(
+      Session* session,
+      const http::HTTPRequest* req,
+      http::HTTPResponse* res);
+
   void insertIntoTable(
       Session* session,
       const http::HTTPRequest* req,

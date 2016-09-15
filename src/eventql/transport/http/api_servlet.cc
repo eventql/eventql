@@ -174,6 +174,14 @@ void APIServlet::handle(
     return;
   }
 
+  if (uri.path() == "/api/v1/tables/drop") {
+    catchAndReturnErrors(&res, [this, &session, &req, &res] {
+      dropTable(session, &req, &res);
+    });
+    res_stream->writeResponse(res);
+    return;
+  }
+
   if (uri.path() == "/api/v1/tables/describe") {
     fetchTableDefinition(session, &req, &res);
     res_stream->writeResponse(res);
@@ -620,6 +628,55 @@ void APIServlet::removeTableField(
       session->getEffectiveNamespace(),
       table_name.get(),
       operations);
+
+  if (!rc.isSuccess()) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody(StringUtil::format("error: $0", rc.message()));
+    return;
+  }
+
+  res->setStatus(http::kStatusCreated);
+  res->addBody("ok");
+  return;
+}
+
+void APIServlet::dropTable(
+    Session* session,
+    const http::HTTPRequest* req,
+    http::HTTPResponse* res) {
+  auto dbctx = session->getDatabaseContext();
+  auto jreq = json::parseJSON(req->body());
+
+  /* database */
+  auto database = json::objectGetString(jreq, "database");
+  if (!database.isEmpty()) {
+    auto auth_rc = dbctx->client_auth->changeNamespace(session, database.get());
+    if (!auth_rc.isSuccess()) {
+      res->setStatus(http::kStatusForbidden);
+      res->addHeader("Content-Type", "text/plain; charset=utf-8");
+      res->addBody(auth_rc.message());
+      return;
+    }
+  }
+
+  if (session->getEffectiveNamespace().empty()) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addHeader("Content-Type", "text/plain; charset=utf-8");
+    res->addBody("no database selected");
+    return;
+  }
+
+  auto table_name = json::objectGetString(jreq, "table");
+  if (table_name.isEmpty()) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody("missing field: table");
+    return;
+  }
+
+
+  auto rc = dbctx->table_service->dropTable(
+      session->getEffectiveNamespace(),
+      table_name.get());
 
   if (!rc.isSuccess()) {
     res->setStatus(http::kStatusBadRequest);
