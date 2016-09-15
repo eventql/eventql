@@ -68,7 +68,7 @@ re-partition the table as you add more data to keep each partition in the 500MB
 to 1GB range. So there is no need to specify a maximum/total number of shards at
 creation time.
 
-This is good because you usually don't need to know how many rows with which
+This is good because you don't need to know how many rows with which
 primary key distribution you'll eventually insert from the get-go. With
 dynamic partitioning, you just create a table and start inserting data and the
 partitioning will adapt to the distribution of the data over time.
