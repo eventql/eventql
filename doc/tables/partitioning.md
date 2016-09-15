@@ -78,13 +78,15 @@ a single partition and then subdiving ("splitting") the partition(s) into equal
 parts as they get too large.
 
 However, you can optionally give EventQL an "educated guess" about the size
-of each partition that you expect. The setting is called "finite_partition_size"
-and setting it allows an optimization to kick in that reduces the number of
-splits performed and therefore the total network bandwith.
+of each partition that you expect. The configuration option is called
+`finite partition size` and setting it allows an optimization to kick in that
+reduces the number of splits performed and therefore the total network bandwith.
 
 The finite partition size is a duration in microseconds. You should ideally
 choose this value so that roughly 500MB-1GB of new data will arrive in that
-window.
+window. However, note that EventQL will still dynamically split and re-partition
+the table if it becomes necessary -- the finite partition size is merely a hint.
+You can update the finite partition size hint at any time.
 
 So, for example, if you expect around 10GB of data a day, 2 hours would be a
 good value. If you expect 1000GB of new data a day, 1 minute is a good value.
