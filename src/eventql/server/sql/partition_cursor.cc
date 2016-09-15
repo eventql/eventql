@@ -209,15 +209,39 @@ RemotePartitionCursor::RemotePartitionCursor(
     execution_context_(execution_context),
     database_(database),
     stmt_(stmt),
-    servers_(servers) {}
+    servers_(servers),
+    ncols_(stmt->getNumComputedColumns()),
+    row_buf_pos_(0),
+    running_(false) {}
 
 bool RemotePartitionCursor::next(csql::SValue* row, int row_len) {
-  RAISE(kRuntimeError, "not yet implemented");
-  return false;
+  if (row_buf_pos_ == row_buf_.size()) {
+    auto rc = fetchRows();
+    if (!rc.isSuccess()) {
+      RAISE(kRuntimeError, rc.getMessage());
+    }
+  }
+
+  if (row_buf_pos_ == row_buf_.size()) {
+    return false;
+  } else {
+    assert(row_buf_pos_ + ncols_ <= row_buf_.size());
+    auto n = std::min(ncols_, (size_t) row_len);
+    for (size_t i = 0; i < n; ++i) {
+      row[i] = row_buf_[row_buf_pos_ + i];
+    }
+
+    row_buf_pos_ += ncols_;
+    return true;
+  }
 }
 
 size_t RemotePartitionCursor::getNumColumns() {
-  return stmt_->getNumComputedColumns();
+  return ncols_;
+}
+
+ReturnCode RemotePartitionCursor::fetchRows() {
+  return ReturnCode::error("ERUNTIME", "not yet implemented");
 }
 
 StaticPartitionCursor::StaticPartitionCursor(

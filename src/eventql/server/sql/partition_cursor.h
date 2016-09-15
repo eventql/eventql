@@ -81,11 +81,17 @@ public:
 
 protected:
 
+  ReturnCode fetchRows();
+
   csql::Transaction* txn_;
   csql::ExecutionContext* execution_context_;
   std::string database_;
   RefPtr<csql::SequentialScanNode> stmt_;
   std::vector<std::string> servers_;
+  std::vector<csql::SValue> row_buf_;
+  size_t ncols_;
+  size_t row_buf_pos_;
+  bool running_;
 };
 
 class StaticPartitionCursor : public csql::ResultCursor {
