@@ -6,7 +6,7 @@
 
 It removes an existing table and all the table data.
 Please note, this statement can only be performed if the configuration option
-`cluster.allow_drop_table` is set true.
+`cluster.allow_drop_table` is set to true.
 
 #### Example:
 
@@ -15,5 +15,5 @@ Please note, this statement can only be performed if the configuration option
 
 ### HTTP API
 
-You can also create tables using the HTTP API. Please refer to the [HTTP API reference](/documentation/api/http/).
+You can also delete tables using the HTTP API. Please refer to the [HTTP API reference](/documentation/api/http/).
 
