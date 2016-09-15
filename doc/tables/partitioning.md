@@ -2,7 +2,7 @@
 ================
 
 Tables in EventQL are internally split into many partitions that can be distributed
-over many machines and queried in parallel, allowing you to horizontally scale
+among many machines and queried in parallel, allowing you to horizontally scale
 tables far beyond what a single machine could handle. This concept is sometimes referred
 to as "massively parallel database architecture".
 
@@ -61,12 +61,57 @@ at the same time, so we also include the sensor_id in the primary key. Now we
 can have one measurement per sensor_id and time combination.
 
 
-## No secondary indexes
+## Finite Partitions & Timeseries Data
 
-EventQL does not support secondary indexes. Lookup by partition/primary key is
-the only optimized operation. That means every query that is not restricted on
-the primary key requires a full table scan. Note that a full table scan is
-parallelized and distributed across many machines so it's still very fast.
+The partitioning of a table is fully dynamic. EventQL will dynamically
+re-partition the table as you add more data to keep each partition in the 500MB
+to 1GB range. So there is no need to specify a maximum/total number of shards at
+creation time.
+
+This is good because you usually don't need to know how many rows with which
+primary key distribution you'll eventually insert from the get-go. With
+dynamic partitioning, you just create a table and start inserting data and the
+partitioning will adapt to the distribution of the data over time.
+
+The way EventQL achieves this is in principle by starting each table with
+a single partition and then subdiving ("splitting") the partition(s) into equal
+parts as they get too large.
+
+However, you can optionally give EventQL an "educated guess" about the size
+of each partition that you expect. The setting is called "finite_partition_size"
+and setting it allows an optimization to kick in that reduces the number of
+splits performed and therefore the total network bandwith.
+
+The finite partition size is a duration in microseconds. You should ideally
+choose this value so that roughly 500MB-1GB of new data will arrive in that
+window.
+
+So, for example, if you expect around 10GB of data a day, 2 hours would be a
+good value. If you expect 1000GB of new data a day, 1 minute is a good value.
+If you expect 10TB of new data a day, set the finite partition size to 10
+seconds.
+
+For high-volume timeseries data, it is _highly recommended_ to set the finite
+partition size.
+
+To set the finite partition size when creating a table using SQL you can use
+this syntax. Please refer to the "Creating Tables" and "HTTP API Reference"
+pages for detailed information.
+
+    CREATE TABLE high_volume_logging_Data (
+      collected_at    DATETIME,
+      event_id        STRING,
+      value           DOUBLE,
+      PRIMARY KEY(time, event_id)
+    ) WITH finite_partition_size = 600000000; -- 10 minutes ~ 100GB/day
+
+
+## Secondary indexes
+
+EventQL does not currently support secondary indexes. Lookup by partition/primary
+key is the only optimized operation. That means every query that is not restricted
+on the primary key requires a full table scan. Note that a full table scan is
+parallelized and distributed among many machines so it's still very fast.
 
 Also, not supporting secondary indexes does _not_ imply that you can't filter by
 anything other than the primary key like in some key value stores. You can. All
@@ -76,6 +121,3 @@ If you need to have fast access to _individual_ records by _more than one_ dimen
 you have to denormalize and insert the record multiple times in different tables
 that are indexed in those respective dimensions.
 
-However, most users probably won't need this. Access by a single primary key is
-always fast and if all you care about are aggregate queries for analytics use cases
-and retrieving and updating invdividual events by id, you're good to go.
