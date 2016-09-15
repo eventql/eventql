@@ -490,13 +490,6 @@ void PartitionMap::dropPartition(
   partition_writer->freeze();
   partition_writer->unlock();
 
-  /* write deletion marker to disk */
-  auto deletion_marker = File::openFile(
-      FileUtil::joinPaths(partition->getSnapshot()->base_path, "_delete"),
-      File::O_WRITE | File::O_CREATE);
-
-  deletion_marker.write(partition_key.toString());
-
   /* prepare access keys */
   auto db_key = tsdb_namespace + "~";
   db_key.append((char*) partition_key.data(), partition_key.size());

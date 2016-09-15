@@ -50,7 +50,7 @@ enum PartitionLifecycleState {
   PDISCOVERY_UNLOAD = 3;
 };
 
-// next id: 32
+// next id: 34
 message PartitionState {
 
   /**

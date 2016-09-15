@@ -94,9 +94,12 @@ bool LSMPartitionReplication::needsReplication() const {
       snap_->state.tsdb_namespace(),
       snap_->state.table_key());
 
-  // check if we are dropped (if so, enqueue)
+  auto& writer = dynamic_cast<LSMPartitionWriter&>(*partition_->getWriter());
+  auto repl_state = writer.fetchReplicationState();
+
+  // check if we are dropped
   if (snap_->state.table_generation() < table_config.generation()) {
-    return true;
+    return !repl_state.dropped();
   }
 
   // check if we have seen the latest metadata transaction, otherwise enqueue
@@ -128,8 +131,6 @@ bool LSMPartitionReplication::needsReplication() const {
 
   // check if all replicas named in the current metadata transaction have seen
   // the latest sequence, otherwise enqueue
-  auto& writer = dynamic_cast<LSMPartitionWriter&>(*partition_->getWriter());
-  auto repl_state = writer.fetchReplicationState();
   auto head_offset = snap_->state.lsm_sequence();
   for (const auto& r : snap_->state.replication_targets()) {
     auto replica_offset = replicatedOffsetFor(repl_state, r);
@@ -236,10 +237,16 @@ bool LSMPartitionReplication::replicate(ReplicationInfo* replication_info) {
       snap_->state.tsdb_namespace(),
       snap_->state.table_key());
 
+  auto& writer = dynamic_cast<LSMPartitionWriter&>(*partition_->getWriter());
+  auto repl_state = writer.fetchReplicationState();
+
   // if the partition generation is smaller than the table generation, this
   // means that the table was dropped and we should not replicate the partition
   // anymore
   if (snap_->state.table_generation() < table_config.generation()) {
+    repl_state.set_dropped(true);
+    writer.commitReplicationState(repl_state);
+
     dbctx_->partition_map->dropPartition(
         snap_->state.tsdb_namespace(),
         snap_->state.table_key(),
@@ -258,8 +265,6 @@ bool LSMPartitionReplication::replicate(ReplicationInfo* replication_info) {
   }
 
   // push all outstanding data to all replication targets
-  auto& writer = dynamic_cast<LSMPartitionWriter&>(*partition_->getWriter());
-  auto repl_state = writer.fetchReplicationState();
   auto head_offset = snap_->state.lsm_sequence();
   bool dirty = false;
   bool success = true;
