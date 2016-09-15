@@ -986,7 +986,6 @@ void APIServlet::executeSQL_JSON(
     RefPtr<http::HTTPResponseStream> res_stream) {
   auto dbctx = session->getDatabaseContext();
 
-  iputs("database $0", database);
   if (!database.empty()) {
     auto rc = dbctx->client_auth->changeNamespace(session, database);
     if (!rc.isSuccess()) {
