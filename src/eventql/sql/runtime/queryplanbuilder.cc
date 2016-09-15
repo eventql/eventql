@@ -1886,6 +1886,25 @@ QueryTreeNode* QueryPlanBuilder::buildCreateTable(
     node->setPrimaryKey(primary_key_columns);
   }
 
+  std::vector<std::pair<std::string, std::string>> properties;
+  if (ast->getChildren().size() >= 3) {
+    for (const auto& cld : ast->getChildren()[2]->getChildren()) {
+      if (cld->getType() != ASTNode::T_TABLE_PROPERTY) {
+        continue;
+      }
+
+      if (cld->getChildren().size() != 2 ||
+          cld->getChildren()[0]->getType() != ASTNode::T_TABLE_PROPERTY_KEY ||
+          cld->getChildren()[1]->getType() != ASTNode::T_TABLE_PROPERTY_VALUE) {
+        RAISE(kRuntimeError, "corrupt AST");
+      }
+
+      node->addProperty(
+          cld->getChildren()[0]->getToken()->getString(),
+          cld->getChildren()[1]->getToken()->getString());
+    }
+  }
+
   return node;
 }
 

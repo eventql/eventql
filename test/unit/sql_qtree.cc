@@ -54,7 +54,7 @@ TEST_CASE(QTreeTest, TestExtractEqualsConstraint, [] () {
   txn->setTableProvider(
       new CSTableScanProvider(
           "testtable",
-          "eventql/sql/testdata/testtbl.cst"));
+          "sql_testdata/testtbl.cst"));
 
   Vector<String> queries;
   queries.push_back("select 1 from testtable where time = 1234;");
@@ -94,7 +94,7 @@ TEST_CASE(QTreeTest, TestExtractNotEqualsConstraint, [] () {
   txn->setTableProvider(
       new CSTableScanProvider(
           "testtable",
-          "eventql/sql/testdata/testtbl.cst"));
+          "sql_testdata/testtbl.cst"));
 
   Vector<String> queries;
   queries.push_back("select 1 from testtable where time != 1234;");
@@ -134,7 +134,7 @@ TEST_CASE(QTreeTest, TestExtractLessThanConstraint, [] () {
   txn->setTableProvider(
       new CSTableScanProvider(
           "testtable",
-          "eventql/sql/testdata/testtbl.cst"));
+          "sql_testdata/testtbl.cst"));
 
   Vector<String> queries;
   queries.push_back("select 1 from testtable where time < 1234;");
@@ -174,7 +174,7 @@ TEST_CASE(QTreeTest, TestExtractLessThanOrEqualToConstraint, [] () {
   txn->setTableProvider(
       new CSTableScanProvider(
           "testtable",
-          "eventql/sql/testdata/testtbl.cst"));
+          "sql_testdata/testtbl.cst"));
 
   Vector<String> queries;
   queries.push_back("select 1 from testtable where time <= 1234;");
@@ -214,7 +214,7 @@ TEST_CASE(QTreeTest, TestExtractGreaterThanConstraint, [] () {
   txn->setTableProvider(
       new CSTableScanProvider(
           "testtable",
-          "eventql/sql/testdata/testtbl.cst"));
+          "sql_testdata/testtbl.cst"));
 
   Vector<String> queries;
   queries.push_back("select 1 from testtable where time > 1234;");
@@ -254,7 +254,7 @@ TEST_CASE(QTreeTest, TestExtractGreaterThanOrEqualToConstraint, [] () {
   txn->setTableProvider(
       new CSTableScanProvider(
           "testtable",
-          "eventql/sql/testdata/testtbl.cst"));
+          "sql_testdata/testtbl.cst"));
 
   Vector<String> queries;
   queries.push_back("select 1 from testtable where time >= 1234;");
@@ -294,7 +294,7 @@ TEST_CASE(QTreeTest, TestExtractMultipleConstraints, [] () {
   txn->setTableProvider(
       new CSTableScanProvider(
           "testtable",
-          "eventql/sql/testdata/testtbl.cst"));
+          "sql_testdata/testtbl.cst"));
 
   String query = "select 1 from testtable where 1000 + 200 + 30 + 4 > time AND session_id != 400 + 44 AND time >= 1111 * 6;";
 
@@ -345,7 +345,7 @@ TEST_CASE(QTreeTest, TestSimpleConstantFolding, [] () {
   txn->setTableProvider(
       new CSTableScanProvider(
           "testtable",
-          "eventql/sql/testdata/testtbl.cst"));
+          "sql_testdata/testtbl.cst"));
 
   String query = "select 1 + 2 + 3 from testtable where time > ucase('fu') + lcase('Bar');";
 
@@ -376,7 +376,7 @@ TEST_CASE(QTreeTest, TestPruneConstraints, [] () {
   txn->setTableProvider(
       new CSTableScanProvider(
           "testtable",
-          "eventql/sql/testdata/testtbl.cst"));
+          "sql_testdata/testtbl.cst"));
 
   String query = "select 1 from testtable where 1000 + 200 + 30 + 4 > time AND session_id != 400 + 44 AND time >= 1111 * 6;";
   csql::Parser parser;
@@ -434,7 +434,7 @@ TEST_CASE(QTreeTest, TestSerialization, [] () {
   txn->setTableProvider(
       new CSTableScanProvider(
           "testtable",
-          "eventql/sql/testdata/testtbl.cst"));
+          "sql_testdata/testtbl.cst"));
 
   String query = "select 1 + 2 + 3 from testtable where time > ucase('fu') + lcase('Bar') limit 10;";
 
@@ -472,13 +472,13 @@ TEST_CASE(QTreeTest, TestSerializationJoinAndSubquery, [] () {
   tables->addProvider(
     new backends::csv::CSVTableProvider(
         "customers",
-        "eventql/sql/testdata/testtbl2.csv",
+        "sql_testdata/testtbl2.csv",
         '\t'));
 
   tables->addProvider(
       new backends::csv::CSVTableProvider(
           "orders",
-          "eventql/sql/testdata/testtbl3.csv",
+          "sql_testdata/testtbl3.csv",
           '\t'));
 
   String query =
@@ -698,6 +698,44 @@ TEST_CASE(QTreeTest, TestCreateTable, [] () {
   pkey.emplace_back("time");
   pkey.emplace_back("myvalue");
   EXPECT(qtree->getPrimaryKey() == pkey);
+});
+
+TEST_CASE(QTreeTest, TestCreateTableWith, [] () {
+  auto runtime = Runtime::getDefaultRuntime();
+  auto txn = runtime->newTransaction();
+
+  String query =
+    "  CREATE TABLE fnord ("
+    "      time DATETIME NOT NULL,"
+    "      location string,"
+    "      PRIMARY KEY (time, location))"
+    "      WITH akey = \"value\" "
+    "      AND test.some_key = \"some value\" ";
+
+  csql::Parser parser;
+  parser.parse(query.data(), query.size());
+
+  auto qtree_builder = runtime->queryPlanBuilder();
+  Vector<RefPtr<QueryTreeNode>> qtrees = qtree_builder->build(
+      txn.get(),
+      parser.getStatements(),
+      txn->getTableProvider());
+
+  EXPECT_EQ(qtrees.size(), 1);
+  RefPtr<CreateTableNode> qtree = qtrees[0].asInstanceOf<CreateTableNode>();
+  EXPECT_EQ(qtree->getTableName(), "fnord");
+
+  auto table_schema = qtree->getTableSchema();
+
+  auto fcolumns = table_schema.getFlatColumnList();
+  EXPECT_EQ(fcolumns.size(), 2);
+
+  auto property_list = qtree->getProperties();
+  EXPECT_EQ(property_list.size(), 2);
+  EXPECT_EQ(property_list[0].first, "akey");
+  EXPECT_EQ(property_list[0].second, "value");
+  EXPECT_EQ(property_list[1].first, "test.some_key");
+  EXPECT_EQ(property_list[1].second, "some value");
 });
 
 TEST_CASE(QTreeTest, TestInsertInto, [] () {

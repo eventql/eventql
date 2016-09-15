@@ -1125,6 +1125,57 @@ TEST_CASE(ParserTest, TestCreateTableStatement2, [] () {
   EXPECT(stmt->getChildren()[1]->getChildren().size() == 6);
 });
 
+TEST_CASE(ParserTest, TestCreateTableWithStatement, [] () {
+  auto runtime = Runtime::getDefaultRuntime();
+  auto txn = runtime->newTransaction();
+  auto parser = parseTestQuery(
+      R"(
+        CREATE TABLE fnord (
+            time DATETIME NOT NULL,
+            myvalue string,
+            PRIMARY KEY (time, myvalue)
+        )
+        WITH some_prop = "blah"
+        AND other.prop = 1
+      )");
+
+  EXPECT(parser.getStatements().size() == 1);
+  const auto& stmt = parser.getStatements()[0];
+  EXPECT(*stmt == ASTNode::T_CREATE_TABLE);
+  EXPECT(stmt->getChildren().size() == 3);
+  EXPECT_EQ(*stmt->getChildren()[0], ASTNode::T_TABLE_NAME);
+  EXPECT_EQ(*stmt->getChildren()[0]->getToken(), Token::T_IDENTIFIER);
+  EXPECT_EQ(stmt->getChildren()[0]->getToken()->getString(), "fnord");
+
+  EXPECT(*stmt->getChildren()[1] == ASTNode::T_COLUMN_LIST);
+
+
+  EXPECT(*stmt->getChildren()[2] == ASTNode::T_TABLE_PROPERTY_LIST);
+  auto properties = stmt->getChildren()[2]->getChildren();
+  EXPECT_EQ(properties.size(), 2);
+  EXPECT(*properties[0] == ASTNode::T_TABLE_PROPERTY);
+  EXPECT_EQ(properties[0]->getChildren().size(), 2);
+  EXPECT(*properties[0]->getChildren()[0] == ASTNode::T_TABLE_PROPERTY_KEY);
+  EXPECT_EQ(
+      properties[0]->getChildren()[0]->getToken()->getString(),
+      "some_prop");
+  EXPECT(*properties[0]->getChildren()[1] == ASTNode::T_TABLE_PROPERTY_VALUE);
+  EXPECT_EQ(
+      properties[0]->getChildren()[1]->getToken()->getString(),
+      "blah");
+
+  EXPECT(*properties[1] == ASTNode::T_TABLE_PROPERTY);
+  EXPECT_EQ(properties[1]->getChildren().size(), 2);
+  EXPECT(*properties[1]->getChildren()[0] == ASTNode::T_TABLE_PROPERTY_KEY);
+  EXPECT_EQ(
+      properties[1]->getChildren()[0]->getToken()->getString(),
+      "other.prop");
+  EXPECT(*properties[1]->getChildren()[1] == ASTNode::T_TABLE_PROPERTY_VALUE);
+  EXPECT_EQ(
+      properties[1]->getChildren()[1]->getToken()->getString(),
+      "1");
+});
+
 TEST_CASE(ParserTest, TestInsertIntoStatement, [] () {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
