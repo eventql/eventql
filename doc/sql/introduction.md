@@ -33,6 +33,9 @@ and functions you'd expect (including JOINs) are implemented.
         <a href="/documentation/sql/statements/alter-table">ALTER TABLE</a>
       </li>
       <li>
+        <a href="/documentation/sql/statements/drop-table">DROP TABLE</a>
+      </li>
+      <li>
         <a href="/documentation/sql/statements/describe">DESCRIBE</a>
       </li>
       <li>

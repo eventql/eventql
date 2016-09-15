@@ -1,4 +1,19 @@
-2.1.5 Deleting Tables
-=====================
+3.5 Deleting Tables
+===================
 
-Deleting tables is currently not implemented and expected to land in EventQL 0.5.x.
+    DROP TABLE table_name
+
+
+It removes an existing table and all the table data.
+Please note, this statement can only be performed if the configuration option
+`cluster.allow_drop_table` is set true.
+
+#### Example:
+
+    DROP TABLE sensors;
+
+
+### HTTP API
+
+You can also create tables using the HTTP API. Please refer to the [HTTP API reference](/documentation/api/http/).
+
