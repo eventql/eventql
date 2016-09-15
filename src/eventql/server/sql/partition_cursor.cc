@@ -23,6 +23,7 @@
  * code of your own applications
  */
 #include "eventql/server/sql/partition_cursor.h"
+#include "eventql/db/database.h"
 
 namespace eventql {
 
@@ -200,6 +201,7 @@ size_t PartitionCursor::getNumColumns() {
 }
 
 RemotePartitionCursor::RemotePartitionCursor(
+    Session* session,
     csql::Transaction* txn,
     csql::ExecutionContext* execution_context,
     const std::string& database,
@@ -212,7 +214,10 @@ RemotePartitionCursor::RemotePartitionCursor(
     servers_(servers),
     ncols_(stmt->getNumComputedColumns()),
     row_buf_pos_(0),
-    running_(false) {}
+    running_(false),
+    client_(
+        session->getDatabaseContext()->config,
+        session->getDatabaseContext()->config_directory) {}
 
 bool RemotePartitionCursor::next(csql::SValue* row, int row_len) {
   if (row_buf_pos_ == row_buf_.size()) {

@@ -30,6 +30,7 @@
 #include <eventql/db/partition_map.h>
 #include <eventql/db/partition_reader.h>
 #include <eventql/server/sql/table_provider.h>
+#include <eventql/transport/native/client_tcp.h>
 
 #include "eventql/eventql.h"
 
@@ -69,6 +70,7 @@ class RemotePartitionCursor : public csql::ResultCursor {
 public:
 
   RemotePartitionCursor(
+      Session* session,
       csql::Transaction* txn,
       csql::ExecutionContext* execution_context,
       const std::string& database,
@@ -92,6 +94,7 @@ protected:
   size_t ncols_;
   size_t row_buf_pos_;
   bool running_;
+  native_transport::TCPClient client_;
 };
 
 class StaticPartitionCursor : public csql::ResultCursor {

@@ -153,6 +153,7 @@ ScopedPtr<csql::ResultCursor> TableScan::openRemotePartition(
 
   return mkScoped(
       new RemotePartitionCursor(
+          static_cast<Session*>(txn_->getUserData()),
           txn_,
           &child_execution_context_,
           tsdb_namespace_,
