@@ -32,6 +32,47 @@
 namespace eventql {
 namespace native_transport {
 
+// A TCP Client is _not_ thread safe
+class TCPClient {
+public:
+
+  using ResultCallbackType =
+      std::function<
+          ReturnCode (
+              void* privdata,
+              uint16_t opcode,
+              uint16_t flags,
+              const char* payload,
+              size_t payload_len)>;
+
+  TCPClient(
+      ProcessConfig* config,
+      ConfigDirectory* config_dir);
+
+  ~TCPClient();
+
+  ReturnCode connect(const std::string& server);
+
+  ReturnCode recvFrame(
+      uint16_t* opcode,
+      uint16_t* flags,
+      std::string* payload,
+      uint64_t timeout_us);
+
+  ReturnCode sendFrame(
+      uint16_t opcode,
+      uint16_t flags,
+      const void* payload,
+      size_t payload_len);
+
+  void close();
+
+protected:
+  ProcessConfig* config_;
+  ConfigDirectory* cdir_;
+};
+
+// A AsyncTCPClient is _not_ thread safe
 class TCPAsyncClient {
 public:
 
