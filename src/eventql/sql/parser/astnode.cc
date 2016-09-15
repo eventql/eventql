@@ -378,6 +378,9 @@ void ASTNode::debugPrint(int indent /* = 0 */) const {
     case T_CREATE_DATABASE:
       printf("- T_CREATE_DATABASE");
       break;
+    case T_DROP_TABLE:
+      printf("- T_DROP_TABLE");
+      break;
     case T_INSERT_INTO:
       printf("- T_INSERT_INTO");
       break;
