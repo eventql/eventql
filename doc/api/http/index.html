@@ -20,12 +20,7 @@ when this policy changes. We expect we'll reach API stability by EventQL 1.0.
 <table class="api_reference http">
   <tr>
     <td><span class="tag">POST</span></td>
-    <td>/api/v1/tables/upload_table</td>
-    <td>Upload a table</td>
-  </tr>
-  <tr>
-    <td><span class="tag">POST</span></td>
-    <td><a href="tables/create_table">/api/v1/tables/create_table</a></td>
+    <td><a href="tables/create">/api/v1/tables/create</a></td>
     <td>Create a new table (or overwrite an existing table).</td>
   </tr>
   <tr>
@@ -45,12 +40,12 @@ when this policy changes. We expect we'll reach API stability by EventQL 1.0.
   </tr>
   <tr>
     <td><span class="tag">POST</span></td>
-    <td><a href="tables/">/api/v1/tables</a></td>
+    <td><a href="tables/list">/api/v1/tables/list</a></td>
     <td>List existing tables.</td>
   </tr>
   <tr>
-    <td><span class="tag">GET</span></td>
-    <td><a href="tables/table">/api/v1/tables/[table]</a></td>
+    <td><span class="tag">POST</span></td>
+    <td><a href="tables/describe">/api/v1/tables/describe</a></td>
     <td>Obtain information about the table and its columns</td>
   </tr>
 </table>
@@ -58,32 +53,8 @@ when this policy changes. We expect we'll reach API stability by EventQL 1.0.
 <h3>SQL</h3>
 <table class="api_reference http">
   <tr>
-    <td><span class="tag">GET</span></td>
+    <td><span class="tag">POST/GET</span></td>
     <td><a href="sql">/api/v1/sql</a></td>
     <td>Execute SQL</td>
-  </tr>
-  <tr>
-    <td><span class="tag">POST</span></td>
-    <td>/api/v1/sql/aggregate_partition</td>
-    <td>Insert or update row(s)</td>
-  </tr>
-  <tr>
-    <td><span class="tag">GET</span></td>
-    <td><a href="sql/scan_partition">/api/v1/sql/scan_partition</a></td>
-    <td>Insert or update row(s)</td>
-  </tr>
-</table>
-
-<h3>Auth</h3>
-<table class="api_reference http">
-  <tr>
-    <td><span class="tag">POST</span></td>
-    <td><a href="auth/login">/api/v1/auth/login</a></td>
-    <td>Login</td>
-  </tr>
-  <tr>
-    <td><span class="tag">POST</span></td>
-    <td><a href="sql">/api/v1/auth/logout</a></td>
-    <td>Logout</td>
   </tr>
 </table>

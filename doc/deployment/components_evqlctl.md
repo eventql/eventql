@@ -3,7 +3,7 @@
 
 evqlctl is a client command line utility for performing administrative operations
 on an EventQL server or cluster. You can use it to check and change a clusters
-configuragtion and current status, to add and remove servers and more.
+configuration and current status, to add and remove servers and more.
 
 Most of the evqlctl commands are only applicable when running an EventQL cluster
 and speak directly to the coordination service (e.g. Zookeeper) rather than the

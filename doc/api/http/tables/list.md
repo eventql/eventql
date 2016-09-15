@@ -1,4 +1,4 @@
-POST /api/v1/tables
+POST /api/v1/tables/list
 ==========================
 
 Retrieve an ordered list of all existing tables.
@@ -6,11 +6,7 @@ Retrieve an ordered list of all existing tables.
 ###Resource Information
 <table class='http_api'>
   <tr>
-    <td>Request Content-Type</td>
-    <td>application/json</td>
-  </tr>
-  <tr>
-    <td>Response Content-Type</td>
+    <td>Content-Type</td>
     <td>application/json</td>
   </tr>
 </table>
@@ -18,14 +14,18 @@ Retrieve an ordered list of all existing tables.
 ###Parameters
 <table class='http_api'>
   <tr>
-    <td>order</td>
-    <td>How the list should be ordered. Must be "desc" or "asc". Defaults to "asc"</td>
+    <td>database (optional)</td>
+    <td>The name of the database.
+  </tr>
+  <tr>
+    <td>order (optional)</td>
+    <td>The order of the table names ("desc" or "asc"). Defaults to "asc".</td>
   </tr>
 </table>
 
 ###Example Request
 
-        >> POST /api/v1/tables HTTP/1.1
+        >> POST /api/v1/tables/list HTTP/1.1
         >> Content-Type: application/json
         >> Content-Length: ...
         >>
@@ -37,11 +37,14 @@ Retrieve an ordered list of all existing tables.
 
 ###Example Response
 
+        << HTTP/1.1 200 OK
+        << Content-Type: application/json
+        << Content-Length: ...
+        <<
         << {
         <<   "tables": [
         <<     {
-        <<       "name": "my_sensor_table",
-        <<       "tags": []
+        <<       "name": "my_sensor_table"
         <<     }
         <<   ]
         << }
