@@ -50,7 +50,7 @@ the [Partitioning page] (../../tables/partitioning/).
 #### 3. Enable the async_split option
 
 Another recommended setting for handling high volumes of inserts is enabling the
-"enable_async_split" option. This allows a splitting partition to immediately
+`enable_async_split` switch. This allows a splitting partition to immediately
 redirect all inserts to the new targets once it has started the split.
 
 To apply the async split option to a table, you can use this simple SQL
