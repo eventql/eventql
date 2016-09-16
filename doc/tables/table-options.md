@@ -56,7 +56,7 @@ the `ALTER TABLE SET PROPERTY key=val` SQL statements or the HTTP API.
         quicker. The downside of setting the value however is that it becomes
         more likely that you'll temporarily see a stale view of the data while
         the split is running (also see the notes on eventual consistency in the
-        architecture documenttation).
+        architecture documentation).
       </p>
     </td>
   </tr>
