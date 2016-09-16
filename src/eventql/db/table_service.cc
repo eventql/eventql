@@ -85,7 +85,7 @@ Status TableService::createTable(
     uint32_t field_id;
     try {
       field_id = schema.fieldId(col);
-    } catch (Exception& e) {
+    } catch (const Exception& e) {
       return Status(
           eIllegalArgumentError,
           StringUtil::format("column not found: '$0'", col));
