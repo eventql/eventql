@@ -1,11 +1,11 @@
 # EventQL
 
-[![Build Status](https://secure.travis-ci.org/eventql/eventql.png)](http://travis-ci.org/eventql/eventql)
-
 EventQL is a distributed, column-oriented database built for large-scale event
 collection and analytics. It runs super-fast SQL and JavaScript queries.
 
 Documentation & Examples: [eventql.io](http://eventql.io/)
+
+[![Build Status](https://secure.travis-ci.org/eventql/eventql.png)](http://travis-ci.org/eventql/eventql)
 
 ## Features
 
