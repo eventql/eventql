@@ -7,6 +7,11 @@ A table must have a unique primary key whose first column is treated as
 partition key to distribute the rows among the hosts. The partition key can be
 of type `string`, `uint64` or `datetime`. 
 
+**NOTE for high-volume timeseries:** If you are planning to store large volumes
+timeseries-structured data in the table, please see the
+[Timeseries & Logs page](../../../../collecting-data/high-volume-timeseries-logs) for
+tips to get the best performance.
+
 To learn more about primary keys and understand how to choose one to get the
 best performance, read on the [Partitioning](../../../../tables/partitioning/) page.
 

@@ -29,7 +29,7 @@ To set the hint you have to specifty a `finite_partition_size` when creating a
 table.
 
     CREATE TABLE high_volume_logging_data (
-      collected_at    DATETIME,
+      time            DATETIME,
       event_id        STRING,
       ...
       PRIMARY KEY(time, event_id)
