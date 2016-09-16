@@ -718,6 +718,8 @@ EVQL_CORE_SOURCES_ = \
     eventql/sql/qtree/nodes/insert_into.h \
     eventql/sql/qtree/nodes/insert_json.cc \
     eventql/sql/qtree/nodes/insert_json.h \
+    eventql/sql/qtree/nodes/describe_partitions.cc \
+    eventql/sql/qtree/nodes/describe_partitions.h \
     eventql/sql/qtree/qtree_coder.cc \
     eventql/sql/qtree/qtree_coder.h \
     eventql/sql/qtree/qtree_coder_impl.h \
