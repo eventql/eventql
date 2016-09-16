@@ -12,7 +12,7 @@ Use the following scripts to invoke the respective test suites:
     test/run_smoke_test.sh               # Run the smoke test suite
 
     test/run_unit_tests.sh               # Run all unit tests
-    test/run_system_tests.sh [target]    # Run all systems tests on a server/cluster
+    test/run_system_tests.sh [target]    # Run all system tests on a target server/cluster
     test/run_cluster_tests.sh            # Run all cluster tests
 
 
