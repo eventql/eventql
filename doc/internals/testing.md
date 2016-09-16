@@ -16,6 +16,17 @@ Use the following scripts to invoke the respective test suites:
     test/run_cluster_tests.sh            # Run all cluster tests
 
 
+Note that the test suite scripts expects the test drivers and tests to be built.
+To build the tests, you can use make:
+
+    $ cd test && make
+
+You can also use make to run the test suite
+
+    $ make test                          # Run the full test suite
+    $ make test-smoke                    # Run the smoke test suite
+
+
 ### Unit Tests
 
 Unit tests are built as standalone programs that link directly against the core
