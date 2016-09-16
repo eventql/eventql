@@ -126,6 +126,7 @@ protected:
   ASTNode* showStatement();
   ASTNode* explainStatement();
   ASTNode* explainQueryStatement();
+  ASTNode* describePartitionsStatement();
   ASTNode* describeTableStatement();
 
   ASTNode* fromClause();

@@ -126,6 +126,7 @@ const char* Token::getTypeName(kTokenType type) {
     case T_SHOW: return "T_SHOW";
     case T_DESCRIBE: return "T_DESCRIBE";
     case T_EXPLAIN: return "T_EXPLAIN";
+    case T_PARTITIONS: return "T_PARTITIONS";
     case T_EOF: return "T_EOF";
     case T_DRAW: return "T_DRAW";
     case T_LINECHART: return "T_LINECHART";
