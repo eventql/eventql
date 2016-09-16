@@ -1,4 +1,4 @@
-4.2.8 SHOW TABLES
+5.2.8 SHOW TABLES
 =================
 
     SHOW TABLES;

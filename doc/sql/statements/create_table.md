@@ -1,4 +1,4 @@
-4.2.4 CREATE TABLE
+5.2.4 CREATE TABLE
 ==================
 
     CREATE TABLE table_name

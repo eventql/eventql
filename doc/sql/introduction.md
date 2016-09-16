@@ -1,4 +1,4 @@
-4. SQL Queries
+5. SQL Queries
 ==============
 
 EventQL implements the standard SQL language with some extensions, so if you

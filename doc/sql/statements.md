@@ -1,4 +1,4 @@
-4.2 Statements
+5.2 Statements
 ===============
 
 The following SQL statements are currently supported.
