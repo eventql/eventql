@@ -18,9 +18,9 @@ the `ALTER TABLE SET PROPERTY key=val` SQL statements or the HTTP API.
       <p>
         When set, enables finite partitioning for a table. See the
         <a href="../partitioning/"> partitioning page</a> and
-        <a href="...">timeseries page</a> for more details. The value of the
-        option is an integer (the partition size). For timeseries tables the
-        integer is a microsecond time duration.
+        <a href="../../collecting-data/high-volume-timeseries-logs/">timeseries page</a>
+        for more details. The value of the option is an integer (the partition size).
+        For timeseries tables the integer is a microsecond time duration.
       </p>
       <p>
         Note that while the finite_partition_size can be changed at any time, it
