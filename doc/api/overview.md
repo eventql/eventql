@@ -1,4 +1,4 @@
-6. API Reference
+7. API Reference
 ================
 
 EventQL supports a number of APIs that allow you to programmatically insert
