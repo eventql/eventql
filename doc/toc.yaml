@@ -194,6 +194,28 @@
           #  visible_in_menu: true
           #  visible_in_toc: true
           #  source: "tables/deleting-rows.md"
+          -
+            url: "/tables/table-options"
+            title: "Table Options"
+            type: page
+            visible_in_menu: true
+            visible_in_toc: true
+            source: "tables/table-options.md"
+    -
+      url: "/collecting-data/"
+      title: "Collecting Data"
+      type: redirect
+      visible_in_menu: true
+      visible_in_toc: true
+      location: "/collecting-data/large-volume-timeseries-logs"
+      children:
+        -
+          url: "/collecting-data/high-volume-timseries-logs"
+          title: "High Volume Timeseries & Logs"
+          type: page
+          visible_in_menu: true
+          visible_in_toc: true
+          source: "/collecting-data/high-volume-timeseries.md"
     -
       url: "/sql"
       title: "SQL Queries"
