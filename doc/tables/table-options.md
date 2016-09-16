@@ -87,7 +87,7 @@ the `ALTER TABLE SET PROPERTY key=val` SQL statements or the HTTP API.
     </td>
   </tr>
   <tr>
-    <td><b>disable_replication/b></td>
+    <td><b>disable_replication</b></td>
     <td>false</td>
     <td>
       If set to true, disable replication for the table. This setting may be
