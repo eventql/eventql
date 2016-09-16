@@ -61,7 +61,18 @@ KeyRange TSDBTableProvider::findKeyRange(
 
     String val;
     try {
-      val = encodePartitionKey(keyspace, c.value.getString());
+      switch (c.value.getType()) {
+        case SQL_STRING:
+        case SQL_INTEGER:
+        case SQL_FLOAT:
+          val = encodePartitionKey(keyspace, c.value.getString());
+          break;
+        case SQL_TIMESTAMP:
+          val = encodePartitionKey(keyspace, c.value.toInteger().getString());
+          break;
+        default:
+          continue;
+      }
     } catch (const StandardException& e) {
       continue;
     }
