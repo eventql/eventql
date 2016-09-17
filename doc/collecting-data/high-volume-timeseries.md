@@ -16,7 +16,7 @@ of data that was written in the last 24 hours, regardless of the total table
 size:
 
     SELECT time, event_id, ...
-    FROM high_volume_logging_data
+    FROM twitter_firehose
     WHERE time > time_at("-24h") and time < time_at("now");
 
 Using the ChartSQL extensions, you can quickly get a chart of some data, for
@@ -27,7 +27,7 @@ per minute for the last 3 days:
     DRAW LINECHART AXIS LEFT AXIS BOTTOM;
 
     SELECT count(1) y, date_trunc("1m", time) x
-    FROM high_volume_logging_data
+    FROM twitter_firehose
     WHERE time > time_at("-3d")
     GROUP BY date_trunc("1m", time)
     ORDER BY time desc;
@@ -62,10 +62,11 @@ much quicker.
 To set the hint you have to specifty a `finite_partition_size` when creating a
 table.
 
-    CREATE TABLE high_volume_logging_data (
+    CREATE TABLE twitter_firehose (
       time            DATETIME,
       event_id        STRING,
-      ...
+      author          STRING,
+      tweet           STRING,
       PRIMARY KEY(time, event_id)
     ) WITH finite_partition_size = 600000000;
 
@@ -90,7 +91,7 @@ redirect all inserts to the new targets once it has started the split.
 To apply the async split option to a table, you can use this simple SQL
 statement
 
-    ALTER TABLE high_volume_logging_data SET PROPERTY enable_async_split="true";
+    ALTER TABLE twitter_firehose SET PROPERTY enable_async_split="true";
 
 To read more about the finite partition size setting check out the
 [Table Options page] (../../tables/table-options/).
