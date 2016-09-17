@@ -36,6 +36,7 @@
 #include <eventql/db/record_envelope.pb.h>
 #include <eventql/db/partition_map.h>
 #include <eventql/db/shredded_record.h>
+#include <eventql/db/metadata_file.h>
 #include <eventql/config/config_directory.h>
 
 #include "eventql/eventql.h"
@@ -66,7 +67,8 @@ public:
   TableService(
       ConfigDirectory* cdir,
       PartitionMap* pmap,
-      ProcessConfig* config);
+      ProcessConfig* config,
+      DatabaseContext* dbctx);
 
   Status createTable(
       const String& db_namespace,
@@ -87,6 +89,10 @@ public:
   void listTables(
       const String& tsdb_namespace,
       Function<void (const TableDefinition& table)> fn) const;
+
+  Status listPartitions(
+    const String& table_name,
+    Function<void (const MetadataFile::PartitionMapEntry& partition)> fn) const;
 
   // insert one record
   void insertRecord(
@@ -161,6 +167,7 @@ protected:
   ConfigDirectory* cdir_;
   PartitionMap* pmap_;
   ProcessConfig* config_;
+  DatabaseContext* dbctx_;
 };
 
 } // namespace tdsb

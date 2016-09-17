@@ -46,6 +46,9 @@ public:
       RefPtr<SequentialScanNode> seqscan) const = 0;
 
   virtual void listTables(Function<void (const TableInfo& table)> fn) const = 0;
+  virtual Status listPartitions(
+    const String& table_name,
+    Function<void (const MetadataFile::PartitionMapEntry& partition)> fn) const = 0;
 
   virtual Option<TableInfo> describe(const String& table_name) const = 0;
 

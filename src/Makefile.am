@@ -614,6 +614,8 @@ EVQL_CORE_SOURCES_ = \
     eventql/sql/expressions/string.h \
     eventql/sql/expressions/table/describe_table.cc \
     eventql/sql/expressions/table/describe_table.h \
+    eventql/sql/expressions/table/describe_partitions.cc \
+    eventql/sql/expressions/table/describe_partitions.h \
     eventql/sql/expressions/table/groupby.cc \
     eventql/sql/expressions/table/groupby.h \
     eventql/sql/expressions/table/limit.cc \
