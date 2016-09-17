@@ -23,6 +23,7 @@
  */
 #include <regex>
 #include <unistd.h>
+#include <stdio.h>
 #include <zookeeper.h>
 #include <eventql/config/config_directory_zookeeper.h>
 #include <eventql/util/protobuf/msg.h>
@@ -57,13 +58,35 @@ ZookeeperConfigDirectory::ZookeeperConfigDirectory(
     global_prefix_("/eventql"),
     state_(ZKState::INIT),
     zk_(nullptr),
-    is_leader_(false) {
+    is_leader_(false),
+    logfile_(nullptr) {
+  if (pipe(logpipe_) != 0) {
+    RAISE_ERRNO(kRuntimeError, "pipe() failed");
+  }
+
+  logfile_ = fdopen(logpipe_[1], "w");
+  if (!logfile_) {
+    RAISE_ERRNO(kRuntimeError, "fdopen() failed");
+  }
+
+  logtail_ = std::thread(
+      std::bind(&ZookeeperConfigDirectory::runLogtail, this));
+
   zoo_set_debug_level(ZOO_LOG_LEVEL_ERROR);
+  zoo_set_log_stream(logfile_);
 }
 
 ZookeeperConfigDirectory::~ZookeeperConfigDirectory() {
   if (zk_) {
     zookeeper_close(zk_);
+  }
+
+  fclose(logfile_);
+  close(logpipe_[0]);
+  close(logpipe_[1]);
+
+  if (logtail_.joinable()) {
+    logtail_.join();
   }
 }
 
@@ -1273,6 +1296,26 @@ void ZookeeperConfigDirectory::runWatchdog() {
 
     }
   }
+}
+
+void ZookeeperConfigDirectory::runLogtail() {
+  auto logfile = fdopen(logpipe_[0], "r");
+  if (!logfile) {
+    return;
+  }
+
+  for (;;) {
+    char* line = nullptr;
+    size_t line_len = 0;
+    if (getline(&line, &line_len, logfile) < 0) {
+      break;
+    }
+
+    logDebug("evqld", "[ZOOKEEPER] $0", std::string(line, line_len));
+    free(line);
+  }
+
+  fclose(logfile);
 }
 
 const char* ZookeeperConfigDirectory::getErrorString(int err) const {

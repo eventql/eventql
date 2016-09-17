@@ -155,6 +155,7 @@ protected:
       bool watch = false);
 
   void runWatchdog();
+  void runLogtail();
 
   const char* getErrorString(int code) const;
 
@@ -170,6 +171,8 @@ protected:
   bool is_leader_;
   mutable std::mutex mutex_;
   std::condition_variable cv_;
+  int logpipe_[2];
+  FILE* logfile_;
 
   ClusterConfig cluster_config_;
   HashMap<String, ServerConfig> servers_;
@@ -183,6 +186,7 @@ protected:
   Vector<Function<void (const TableDefinition& cfg)>> on_table_change_;
 
   std::thread watchdog_;
+  std::thread logtail_;
 };
 
 template <typename T>
