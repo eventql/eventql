@@ -24,24 +24,46 @@
 #pragma once
 #include "eventql/eventql.h"
 #include <eventql/util/stdtypes.h>
-#include <eventql/sql/qtree/QueryTreeNode.h>
+#include <eventql/sql/qtree/TableExpressionNode.h>
+#include <eventql/sql/qtree/qtree_coder.h>
 
 namespace csql {
 
-class DescribePartitionsNode : public QueryTreeNode {
+class DescribePartitionsNode : public TableExpressionNode {
 public:
 
   DescribePartitionsNode(const String& table_name);
-  DescribePartitionsNode(const DescribePartitionsNode& node);
 
-  const String& getTableName() const;
+  Vector<RefPtr<QueryTreeNode>> inputTables() const;
 
-  RefPtr<QueryTreeNode> deepCopy() const;
-  String toString() const;
+  Vector<String> getResultColumns() const override;
 
+  Vector<QualifiedColumn> getAvailableColumns() const override;
+
+  RefPtr<QueryTreeNode> deepCopy() const override;
+
+  const String& tableName() const;
+
+  String toString() const override;
+
+  size_t getComputedColumnIndex(
+      const String& column_name,
+      bool allow_add = false) override;
+
+  size_t getNumComputedColumns() const override;
+
+  static void encode(
+      QueryTreeCoder* coder,
+      const DescribePartitionsNode& node,
+      OutputStream* os);
+
+  static RefPtr<QueryTreeNode> decode (
+      QueryTreeCoder* coder,
+      InputStream* is);
 protected:
   String table_name_;
 };
+
 
 } // namespace csql
 

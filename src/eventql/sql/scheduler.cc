@@ -257,9 +257,9 @@ ScopedPtr<TableExpression> DefaultScheduler::buildTableExpression(
   }
 
   if (dynamic_cast<DescribePartitionsNode*>(node.get())) {
-    return mkScoped(new DescribePartitionsStatement(
+    return mkScoped(new DescribePartitionsExpression(
         ctx,
-        node.asInstanceOf<DescribePartitionsNode>()->getTableName()));
+        node.asInstanceOf<DescribePartitionsNode>()->tableName()));
   }
 
   if (dynamic_cast<JoinNode*>(node.get())) {

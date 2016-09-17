@@ -26,82 +26,63 @@
 
 namespace csql {
 
-DescribePartitionsStatement::DescribePartitionsStatement(
+DescribePartitionsExpression::DescribePartitionsExpression(
     Transaction* txn,
     const String& table_name) :
     txn_(txn),
     table_name_(table_name),
     counter_(0) {}
 
-ScopedPtr<ResultCursor> DescribePartitionsStatement::execute() {
+ScopedPtr<ResultCursor> DescribePartitionsExpression::execute() {
   txn_->getTableProvider()->listPartitions(
       table_name_,
-      [this] (const MetadataFile::PartitionMapEntry& partition) {
-    std::vector<SValue> row;
-
-    std::string server_id_str;
-    for (const auto& s : partition.servers) {
-      server_id_str += s.server_id;
-    }
-    row.emplace_back(server_id_str); //FIXME
-    row.emplace_back(partition.partition_id);
-    switch (metadata_file.getKeyspaceType()) {
-      case KEYSPACE_UINT64: {
-        uint64_t keyrange_uint = -1;
-        memcpy((char*) &keyrange_uint, e.begin.data(), sizeof(e.begin));
-        row.emplace_back(StringUtil::format(
-            "$0 [$1]",
-            UnixTime(keyrange_uint),
-            keyrange_uint_);
-        break;
-      }
-      case KEYSPACE_STRING: {
-        row.emplace_back(e.begin);
-        break;
-      }
-    }
-
-    buf_.emplace_back(row);
+      [this] (const TablePartitionInfo& p_info) {
+    rows_.emplace_back(p_info);
   });
 
   return mkScoped(
       new DefaultResultCursor(
           kNumColumns,
           std::bind(
-              &DescribePartitionsStatement::next,
+              &DescribePartitionsExpression::next,
               this,
               std::placeholders::_1,
               std::placeholders::_2)));
 
 }
 
-size_t DescribePartitionsStatement::getNumColumns() const {
+size_t DescribePartitionsExpression::getNumColumns() const {
   return kNumColumns;
 }
 
-bool DescribePartitionsStatement::next(SValue* row, size_t row_len) {
-  return false;
-  //if (counter_ < rows_.size()) {
-  //  const auto& col = rows_[counter_];
-  //  switch (row_len) {
-  //    default:
-  //    case 4:
-  //      row[3] = SValue::newString(col.server_id); //Server id
-  //    case 3:
-  //      row[2] = SValue::newString(col.keyrange_end); //Keyrange end
-  //    case 2:
-  //      row[1] = SValue::newString(col.keyrange_begin); //Keyrange begin
-  //    case 1:
-  //      row[0] = SValue::newString(col.partition_id); //Partition id
-  //    case 0:
-  //      break;
-  //  }
+bool DescribePartitionsExpression::next(SValue* row, size_t row_len) {
+  if (counter_ < rows_.size()) {
+    const auto& col = rows_[counter_];
+    switch (row_len) {
+      default:
+      case 3: {
+        std::string server_ids;
+        for (size_t i = 0; i < col.server_ids.size(); ++i) {
+          if (i > 0) {
+            server_ids += ", ";
+          }
+          server_ids += col.server_ids[i];
+        }
+        row[2] = SValue::newString(server_ids); //Server id
+      }
+      case 2:
+        row[1] = SValue::newString(col.keyrange_begin); //Keyrange begin
+      case 1:
+        row[0] = SValue::newString(col.partition_id); //Partition id
+      case 0:
+        break;
+    }
 
-  //  ++counter_;
-  //  return true;
-  //} else {
-  //  return false;
-  //}
+    ++counter_;
+    return true;
+  } else {
+    return false;
+  }
 }
 
 } //csql

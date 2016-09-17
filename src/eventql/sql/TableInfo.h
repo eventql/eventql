@@ -44,4 +44,10 @@ struct TableInfo {
   Set<String> tags;
 };
 
+struct TablePartitionInfo {
+  std::vector<std::string> server_ids;
+  std::string partition_id;
+  std::string keyrange_begin;
+};
+
 } // namespace csql

@@ -37,6 +37,7 @@
 #include <eventql/db/partition_map.h>
 #include <eventql/db/shredded_record.h>
 #include <eventql/db/metadata_file.h>
+#include <eventql/sql/TableInfo.h>
 #include <eventql/config/config_directory.h>
 
 #include "eventql/eventql.h"
@@ -91,8 +92,9 @@ public:
       Function<void (const TableDefinition& table)> fn) const;
 
   Status listPartitions(
+    const String& db_namespace,
     const String& table_name,
-    Function<void (const MetadataFile::PartitionMapEntry& partition)> fn) const;
+    Function<void (const csql::TablePartitionInfo& partition)> fn) const;
 
   // insert one record
   void insertRecord(

@@ -22,17 +22,19 @@
  * code of your own applications
  */
 #pragma once
+#include "eventql/eventql.h"
 #include <eventql/util/stdtypes.h>
+#include <eventql/sql/qtree/ShowTablesNode.h>
 #include <eventql/sql/runtime/tablerepository.h>
 
 namespace csql {
 
-class DescribePartitionsStatement : public TableExpression {
+class DescribePartitionsExpression : public TableExpression {
 public:
 
-  static const size_t kNumColumns = 4;
+  static const size_t kNumColumns = 3;
 
-  DescribePartitionsStatement(
+  DescribePartitionsExpression(
       Transaction* txn,
       const String& table_name);
 
@@ -46,7 +48,7 @@ protected:
 
   Transaction* txn_;
   String table_name_;
-  Vector<ColumnInfo> rows_;
+  Vector<TablePartitionInfo> rows_;
   size_t counter_;
 };
 

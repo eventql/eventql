@@ -29,19 +29,64 @@ DescribePartitionsNode::DescribePartitionsNode(
         const String& table_name) :
         table_name_(table_name) {}
 
-DescribePartitionsNode::DescribePartitionsNode(
-    const DescribePartitionsNode& node) {}
-
-const String& DescribePartitionsNode::getTableName() const {
-  return table_name_;
+Vector<RefPtr<QueryTreeNode>> DescribePartitionsNode::inputTables() const {
+  return Vector<RefPtr<QueryTreeNode>>{};
 }
 
 RefPtr<QueryTreeNode> DescribePartitionsNode::deepCopy() const {
-  return new DescribePartitionsNode(*this);
+  return new DescribePartitionsNode(table_name_);
+}
+
+const String& DescribePartitionsNode::tableName() const {
+  return table_name_;
+}
+
+Vector<String> DescribePartitionsNode::getResultColumns() const {
+  return Vector<String> {
+    "servers",
+    "keyrange_begin",
+    "partition_id"
+  };
+}
+
+Vector<QualifiedColumn> DescribePartitionsNode::getAvailableColumns() const {
+  Vector<QualifiedColumn> cols;
+
+  for (const auto& c : getResultColumns()) {
+    QualifiedColumn  qc;
+    qc.short_name = c;
+    qc.qualified_name = c;
+    cols.emplace_back(qc);
+  }
+
+  return cols;
+}
+
+size_t DescribePartitionsNode::getComputedColumnIndex(
+    const String& column_name,
+    bool allow_add /* = false */) {
+  return -1; // FIXME
+}
+
+size_t DescribePartitionsNode::getNumComputedColumns() const {
+  return 4;
 }
 
 String DescribePartitionsNode::toString() const {
-  return "(describe-partitions)";
+  return StringUtil::format("(describe-partitions $0)", table_name_);;
+}
+
+void DescribePartitionsNode::encode(
+    QueryTreeCoder* coder,
+    const DescribePartitionsNode& node,
+    OutputStream* os) {
+  os->appendLenencString(node.table_name_);
+}
+
+RefPtr<QueryTreeNode> DescribePartitionsNode::decode (
+    QueryTreeCoder* coder,
+    InputStream* is) {
+  return new DescribePartitionsNode(is->readLenencString());
 }
 
 } // namespace csql
