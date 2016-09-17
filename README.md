@@ -5,7 +5,7 @@ collection and analytics. It runs super-fast SQL and JavaScript queries.
 
 Documentation & Examples: [eventql.io](http://eventql.io/)
 
-[![Build Status](https://secure.travis-ci.org/eventql/eventql.png)](http://travis-ci.org/eventql/eventql)
+[![Build Status](https://travis-ci.org/eventql/eventql.png?branch=master)](http://travis-ci.org/eventql/eventql)
 
 ## Features
 
