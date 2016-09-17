@@ -81,6 +81,10 @@ bool CLIConfig::getQuietMode() const {
   return cfg_->getBool("client.quiet");
 }
 
+uint64_t CLIConfig::getTimeout() const {
+  return cfg_->getInt("client.timeout").get();
+}
+
 Option<String> CLIConfig::getDatabase() const {
   return cfg_->getString("client.database");
 }
