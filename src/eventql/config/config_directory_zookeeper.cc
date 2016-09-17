@@ -728,25 +728,12 @@ Status ZookeeperConfigDirectory::handleChangeEvent(
  */
 
 void ZookeeperConfigDirectory::handleSessionEvent(int state) {
-  if (state == ZOO_EXPIRED_SESSION_STATE ||
-      state == ZOO_EXPIRED_SESSION_STATE ||
-      state == ZOO_AUTH_FAILED_STATE) {
-    handleConnectionLost();
-    return;
-  }
-
   if (state == ZOO_CONNECTED_STATE) {
     handleConnectionEstablished();
     return;
+  } else if (state_ == ZKState::CONNECTED) {
+    handleConnectionLost();
   }
-
-  if (state == ZOO_CONNECTING_STATE ||
-      state == ZOO_ASSOCIATING_STATE) {
-    return;
-  }
-
-  logCritical("evqld", "ERROR: invalid zookeeper state: $0", state);
-  handleConnectionLost();
 }
 
 void ZookeeperConfigDirectory::handleConnectionEstablished() {
@@ -809,6 +796,10 @@ ClusterConfig ZookeeperConfigDirectory::getClusterConfig() const {
 // PRECONDITION: must NOT hold mutex
 void ZookeeperConfigDirectory::updateClusterConfig(ClusterConfig config) {
   std::unique_lock<std::mutex> lk(mutex_);
+  if (state_ != ZKState::CONNECTED) {
+    RAISE(kRuntimeError, "zookeeper is down");
+  }
+
   updateClusterConfigWithLock(config);
 }
 
@@ -889,6 +880,10 @@ bool ZookeeperConfigDirectory::hasServerID() const {
 bool ZookeeperConfigDirectory::electLeader() {
   std::unique_lock<std::mutex> lk(mutex_);
 
+  if (state_ != ZKState::CONNECTED) {
+    RAISE(kRuntimeError, "zookeeper is down");
+  }
+
   if (is_leader_) {
     return true;
   }
@@ -921,6 +916,10 @@ bool ZookeeperConfigDirectory::electLeader() {
 
 String ZookeeperConfigDirectory::getLeader() const {
   std::unique_lock<std::mutex> lk(mutex_);
+
+  if (state_ != ZKState::CONNECTED) {
+    RAISE(kRuntimeError, "zookeeper is down");
+  }
 
   Buffer leader_name(1024);
   auto key = StringUtil::format("$0/leader", path_prefix_);
@@ -979,6 +978,9 @@ void ZookeeperConfigDirectory::setServerConfigChangeCallback(
 
 void ZookeeperConfigDirectory::updateServerConfig(ServerConfig cfg) {
   std::unique_lock<std::mutex> lk(mutex_);
+  if (state_ != ZKState::CONNECTED) {
+    RAISE(kRuntimeError, "zookeeper is down");
+  }
 
   cfg.clear_server_addr();
   cfg.clear_server_status();
@@ -1046,6 +1048,10 @@ void ZookeeperConfigDirectory::setNamespaceConfigChangeCallback(
 
 void ZookeeperConfigDirectory::updateNamespaceConfig(NamespaceConfig cfg) {
   std::unique_lock<std::mutex> lk(mutex_);
+  if (state_ != ZKState::CONNECTED) {
+    RAISE(kRuntimeError, "zookeeper is down");
+  }
+
   auto buf = msg::encode(cfg);
 
   if (cfg.version() == 0) {
@@ -1149,6 +1155,9 @@ void ZookeeperConfigDirectory::updateTableConfig(
     const TableDefinition& table,
     bool force /* = false */) {
   std::unique_lock<std::mutex> lk(mutex_);
+  if (state_ != ZKState::CONNECTED) {
+    RAISE(kRuntimeError, "zookeeper is down");
+  }
 
   auto buf = msg::encode(table);
   auto path = StringUtil::format(
@@ -1212,7 +1221,7 @@ const char* ZookeeperConfigDirectory::getErrorString(int err) const {
     case ZUNIMPLEMENTED: return "Operation is unimplemented";
     case ZOPERATIONTIMEOUT: return "Operation timeout";
     case ZBADARGUMENTS: return "Invalid arguments";
-    case ZINVALIDSTATE: return "Invliad zhandle state";
+    case ZINVALIDSTATE: return "Invalid zhandle state";
     case ZAPIERROR: return "API Error";
     case ZNONODE: return "Node does not exist";
     case ZNOAUTH: return "Not authenticated";
