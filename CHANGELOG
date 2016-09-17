@@ -22,6 +22,9 @@ EventQL v0.4.0 beta;
 
   * Changed the SQL engine to use the new native transport
 
+  * Changed the zookeeper backend to explicitly reconnect on session timeouts
+    and not rely on the built-in reconnect mechanism
+
   * Removed the obsolete "sha1_tokens" field from the cluster/server config
 
   * Removed the PCRE dependency
