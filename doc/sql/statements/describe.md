@@ -1,6 +1,6 @@
 5.2.7 DESCRIBE
 ==============
 
-    DESCRIBE table_name
+    DESCRIBE [PARTITIONS] table_name
 
 

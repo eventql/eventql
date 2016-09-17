@@ -9,6 +9,6 @@ The following SQL statements are currently supported.
   - [CREATE TABLE](./create-table/) is used to create a new table
   - [ALTER TABLE](./alter-table/) is used to modify an existing table's schema
   - [DROP TABLE](./drop-table/) is used to drop an existing table
-  - [DESCRIBE](./describe/) shows the structure of a table
+  - [DESCRIBE](./describe/) shows the structure of a table or its partitions
   - [SHOW TABLES](./show-tables/) lists the tables in a database
 
