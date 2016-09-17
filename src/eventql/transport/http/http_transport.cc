@@ -53,7 +53,7 @@ void HTTPTransport::handleConnection(int fd, std::string prelude_bytes) {
       return;
     }
 
-    logInfo("evqld", "HTTP Request: $0", request.uri());
+    logDebug("evqld", "HTTP Request: $0", request.uri());
 
     auto req_stream = mkRef(new http::HTTPRequestStream(&request));
     auto res_stream = mkRef(new http::HTTPResponseStream(&conn));
