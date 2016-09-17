@@ -30,7 +30,7 @@ namespace cli {
 
 const String& CLIConfig::kDefaultHost = "localhost";
 const int CLIConfig::kDefaultPort = 9175;
-const uint64_t CLIConfig::kDefaultHistoryMaxSize = 100;
+const uint64_t CLIConfig::kDefaultHistoryMaxSize = 1024;
 
 CLIConfig::CLIConfig(RefPtr<ProcessConfig> cfg) : cfg_(cfg) {
   auto user = getenv("USER");
@@ -45,7 +45,7 @@ CLIConfig::CLIConfig(RefPtr<ProcessConfig> cfg) : cfg_(cfg) {
 }
 
 String CLIConfig::getHost() const {
-  auto host = cfg_->getString("evql", "host");
+  auto host = cfg_->getString("client.host");
   if (host.isEmpty()) {
     return kDefaultHost;
   } else {
@@ -54,7 +54,7 @@ String CLIConfig::getHost() const {
 }
 
 int CLIConfig::getPort() const {
-  auto port = cfg_->getInt("evql", "port");
+  auto port = cfg_->getInt("client.port");
   if (port.isEmpty()) {
     return kDefaultPort;
   } else {
@@ -63,7 +63,7 @@ int CLIConfig::getPort() const {
 }
 
 Option<String> CLIConfig::getUser() const {
-  auto user = cfg_->getString("evql", "user");
+  auto user = cfg_->getString("client.user");
   if (!user.isEmpty()) {
     return Some(user.get());
   } else if (!default_user_.empty()) {
@@ -74,31 +74,31 @@ Option<String> CLIConfig::getUser() const {
 }
 
 bool CLIConfig::getBatchMode() const {
-  return cfg_->getBool("evql", "batch");
+  return cfg_->getBool("client.batch");
 }
 
 bool CLIConfig::getQuietMode() const {
-  return cfg_->getBool("evql", "quiet");
+  return cfg_->getBool("client.quiet");
 }
 
 Option<String> CLIConfig::getDatabase() const {
-  return cfg_->getString("evql", "database");
+  return cfg_->getString("client.database");
 }
 
 Option<String> CLIConfig::getPassword() const {
-  return cfg_->getString("evql", "password");
+  return cfg_->getString("client.password");
 }
 
 Option<String> CLIConfig::getAuthToken() const {
-  return cfg_->getString("evql", "auth_token");
+  return cfg_->getString("client.auth_token");
 }
 
 Option<String> CLIConfig::getFile() const {
-  return cfg_->getString("evql", "file");
+  return cfg_->getString("client.file");
 }
 
 Option<CLIConfig::kLanguage> CLIConfig::getLanguage() {
-  auto l = cfg_->getString("evql", "lang");
+  auto l = cfg_->getString("client.lang");
   if (!l.isEmpty()) {
     auto language = l.get();
     StringUtil::toUpper(&language);
@@ -111,7 +111,7 @@ Option<CLIConfig::kLanguage> CLIConfig::getLanguage() {
 
   } else {
 
-    auto file = cfg_->getString("evql", "file");
+    auto file = cfg_->getString("client.file");
     if (!file.isEmpty()) {
       if (StringUtil::endsWith(file.get(), ".sql")) {
         return Some(CLIConfig::kLanguage::SQL);
@@ -125,11 +125,11 @@ Option<CLIConfig::kLanguage> CLIConfig::getLanguage() {
 }
 
 Option<String> CLIConfig::getExec() const {
-  return cfg_->getString("evql", "exec");
+  return cfg_->getString("client.exec");
 }
 
 Option<String> CLIConfig::getHistoryPath() const {
-  auto path = cfg_->getString("evql", "history_file");
+  auto path = cfg_->getString("client.history_file");
   if (!path.isEmpty()) {
     return Some(path.get());
   } else if (!default_history_path_.empty()) {
@@ -140,7 +140,7 @@ Option<String> CLIConfig::getHistoryPath() const {
 }
 
 uint64_t CLIConfig::getHistoryMaxSize() const {
-  auto max_size = cfg_->getInt("evql", "history_maxlen");
+  auto max_size = cfg_->getInt("client.history_maxlen");
   if (max_size.isEmpty()) {
     return kDefaultHistoryMaxSize;
   } else {
@@ -150,6 +150,4 @@ uint64_t CLIConfig::getHistoryMaxSize() const {
 
 } // namespace cli
 } // namespace eventql
-
-
 

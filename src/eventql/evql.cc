@@ -244,8 +244,6 @@ int main(int argc, const char** argv) {
         "   --password <password>     Set the auth password (if required)\n"
         "   --auth_token <token>      Set the auth token (if required)\n"
         "   -B, --batch               Run in batch mode (streaming result output)\n"
-        "   --history_file <path>     Set the history file path\n"
-        "   --history_max_len <len>   Set the maximum length of the history\n"
         "   -q, --quiet               Be quiet (disables query progress)\n"
         "   --verbose                 Print debug output to STDERR\n"
         "   -v, --version             Display the version of this binary and exit\n"
@@ -264,6 +262,8 @@ int main(int argc, const char** argv) {
 
   /* console options */
   eventql::ProcessConfigBuilder cfg_builder;
+  cfg_builder.setProperty("client.timeout", "5000000");
+
   {
     auto status = cfg_builder.loadDefaultConfigFile("evql");
     if (!status.isSuccess()) {
@@ -273,53 +273,25 @@ int main(int argc, const char** argv) {
   }
 
   if (flags.isSet("host")) {
-    cfg_builder.setProperty("evql", "host", flags.getString("host"));
-  }
-
-  if (flags.isSet("auth_token")) {
-    cfg_builder.setProperty("evql", "auth_token", flags.getString("auth_token"));
+    cfg_builder.setProperty("client.host", flags.getString("host"));
   }
 
   if (flags.isSet("port")) {
-    cfg_builder.setProperty("evql", "port", StringUtil::toString(flags.getInt("port")));
-  }
-
-  if (flags.isSet("user")) {
-    cfg_builder.setProperty("evql", "user", flags.getString("user"));
+    cfg_builder.setProperty(
+        "client.port",
+        StringUtil::toString(flags.getInt("port")));
   }
 
   if (flags.isSet("database")) {
-    cfg_builder.setProperty("evql", "database", flags.getString("database"));
+    cfg_builder.setProperty("client.database", flags.getString("database"));
   }
 
-  if (flags.isSet("file")) {
-    cfg_builder.setProperty("evql", "file", flags.getString("file"));
+  if (flags.isSet("user")) {
+    cfg_builder.setProperty("client.user", flags.getString("user"));
   }
 
-  if (flags.isSet("lang")) {
-    cfg_builder.setProperty("evql", "lang", flags.getString("lang"));
-  }
-
-  if (flags.isSet("batch")) {
-    cfg_builder.setProperty("evql", "batch", "true");
-  }
-
-  if (flags.isSet("quiet")) {
-    cfg_builder.setProperty("evql", "quiet", "true");
-  }
-
-  if (flags.isSet("history_file")) {
-    cfg_builder.setProperty(
-        "evql",
-        "history_file",
-        flags.getString("history_file"));
-  }
-
-  if (flags.isSet("history_maxlen")) {
-    cfg_builder.setProperty(
-        "evql",
-        "history_maxlen",
-        StringUtil::toString(flags.getInt("history_maxlen")));
+  if (flags.isSet("auth_token")) {
+    cfg_builder.setProperty("client.auth_token", flags.getString("auth_token"));
   }
 
   /* cli config */
