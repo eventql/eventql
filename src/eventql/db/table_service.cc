@@ -152,7 +152,7 @@ Status TableService::createTable(
   }
 
   for (const auto& p : properties) {
-    if (p.first == "finite_partition_size") {
+    if (p.first == "partition_size_hint") {
       uint64_t val = 0;
       try {
         val = std::stoull(p.second);

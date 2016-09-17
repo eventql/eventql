@@ -59,7 +59,7 @@ about the amount of writes you expect. Specifying this hint will minimize the
 number of re-partitioning operations and allow you to ramp up the insert rate
 much quicker.
 
-To set the hint you have to specifty a `finite_partition_size` when creating a
+To set the hint you have to specifty a `partition_size_hint` when creating a
 table.
 
     CREATE TABLE twitter_firehose (
@@ -68,18 +68,18 @@ table.
       author          STRING,
       tweet           STRING,
       PRIMARY KEY(time, event_id)
-    ) WITH finite_partition_size = 600000000;
+    ) WITH partition_size_hint = 600000000;
 
 Use this formula to calculate the value:
 
-    $finite_partition_size = (750MB / $expected_new_data_per_day) * 86400000000
+    $partition_size_hint = (750MB / $expected_new_data_per_day) * 86400000000
 
 So, for example, if you expect around 10GB of new data a day, `7200000000` would be
 a good value. If you expect 1000GB of new data a day, `60000000` is a good value.
-If you expect 10TB of new data a day, set the finite partition size to `10000000`.
+If you expect 10TB of new data a day, set the partition size hint to `10000000`.
 
 If your estimation is off, it will not cause any problems. You can update the
-hint at any time. To read more about the finite partition size setting check out
+hint at any time. To read more about the partition size hint setting check out
 the [Partitioning page] (../../tables/partitioning/).
 
 #### 3. Enable the async_split option
@@ -93,7 +93,7 @@ statement
 
     ALTER TABLE twitter_firehose SET PROPERTY enable_async_split="true";
 
-To read more about the finite partition size setting check out the
+To read more about the enable async splits setting check out the
 [Table Options page] (../../tables/table-options/).
 
 
