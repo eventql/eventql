@@ -44,8 +44,9 @@ EventQL v0.4.0 beta;
     session. This also adds a new requirement that all operations must be
     executed from within a valid database thread.
 
-  * Added support for setting/overring configuration parameters using the '-C'
-    flag in the EventQL client (evql) binary
+  * Added support for loading configuration files using the '-c' flag and for
+    setting/overring individual configuration parameters using the '-C' flags
+    in the EventQL client (evql) binary
 
   * Added the following new configuration options: server.c2s_io_timeout,
     server.c2s_idle_timeout, server.s2s_io_timeout, server.s2s_idle_timeout,

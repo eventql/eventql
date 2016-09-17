@@ -90,6 +90,24 @@ int main(int argc, const char** argv) {
       "<switch>");
 
   flags.defineFlag(
+      "config",
+      ::cli::FlagParser::T_STRING,
+      false,
+      "c",
+      NULL,
+      "path to config file",
+      "<config_file>");
+
+  flags.defineFlag(
+      "config_set",
+      ::cli::FlagParser::T_STRING,
+      false,
+      "C",
+      NULL,
+      "set config option",
+      "<key>=<val>");
+
+  flags.defineFlag(
       "file",
       cli::FlagParser::T_STRING,
       false,
@@ -243,6 +261,8 @@ int main(int argc, const char** argv) {
         "   -u, --user <user>         Set the auth username\n"
         "   --password <password>     Set the auth password (if required)\n"
         "   --auth_token <token>      Set the auth token (if required)\n"
+        "   -c, --config <file>       Load config from file\n"
+        "   -C name=value             Define a config value on the command line\n"
         "   -B, --batch               Run in batch mode (streaming result output)\n"
         "   -q, --quiet               Be quiet (disables query progress)\n"
         "   --verbose                 Print debug output to STDERR\n"
@@ -263,6 +283,27 @@ int main(int argc, const char** argv) {
   /* console options */
   eventql::ProcessConfigBuilder cfg_builder;
   cfg_builder.setProperty("client.timeout", "5000000");
+
+  if (flags.isSet("config")) {
+    auto config_file_path = flags.getString("config");
+    auto rc = cfg_builder.loadFile(config_file_path);
+    if (!rc.isSuccess()) {
+      printError("error while loading config file: " + rc.message());
+      return 1;
+    }
+  }
+
+  for (const auto& opt : flags.getStrings("config_set")) {
+    auto opt_key_end = opt.find("=");
+    if (opt_key_end == String::npos) {
+      printError(StringUtil::format("invalid config option: $0", opt));;
+      return 1;
+    }
+
+    auto opt_key = opt.substr(0, opt_key_end);
+    auto opt_value = opt.substr(opt_key_end + 1);
+    cfg_builder.setProperty(opt_key, opt_value);
+  }
 
   {
     auto status = cfg_builder.loadDefaultConfigFile("evql");
