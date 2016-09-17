@@ -109,8 +109,9 @@ protected:
 
   using CallbackList = Vector<Function<void()>>;
 
+  void reconnect(std::unique_lock<std::mutex>* lk);
   Status connect(std::unique_lock<std::mutex>* lk);
-  Status load(bool create);
+  Status load(CallbackList* events);
 
   void updateClusterConfigWithLock(ClusterConfig config);
 
@@ -153,6 +154,8 @@ protected:
       Vector<String>* children,
       bool watch = false);
 
+  void runWatchdog();
+
   const char* getErrorString(int code) const;
 
   String zookeeper_addrs_;
@@ -179,6 +182,7 @@ protected:
   Vector<Function<void (const NamespaceConfig& cfg)>> on_namespace_change_;
   Vector<Function<void (const TableDefinition& cfg)>> on_table_change_;
 
+  std::thread watchdog_;
 };
 
 template <typename T>

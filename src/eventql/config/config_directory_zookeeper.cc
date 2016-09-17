@@ -22,6 +22,7 @@
  * code of your own applications
  */
 #include <regex>
+#include <unistd.h>
 #include <zookeeper.h>
 #include <eventql/config/config_directory_zookeeper.h>
 #include <eventql/util/protobuf/msg.h>
@@ -40,6 +41,8 @@ static int free_String_vector(struct String_vector *v) {
   }
   return 0;
 }
+
+static const size_t kReconnectRateLimit = kMillisPerSecond * 5;
 
 ZookeeperConfigDirectory::ZookeeperConfigDirectory(
     const String& zookeeper_addrs,
@@ -91,13 +94,50 @@ Status ZookeeperConfigDirectory::start(bool create /* = false */) {
   }
 
   {
-    auto rc = load(create);
+    auto rc = load(nullptr);
     if (!rc.isSuccess()) {
       return rc;
     }
   }
 
+  watchdog_ = std::thread(
+      std::bind(&ZookeeperConfigDirectory::runWatchdog, this));
+
   return Status::success();
+}
+
+void ZookeeperConfigDirectory::reconnect(std::unique_lock<std::mutex>* lk) {
+  if (zk_) {
+    zookeeper_close(zk_);
+    zk_ = nullptr;
+  }
+
+  {
+    auto rc = connect(lk);
+    if (!rc.isSuccess()) {
+      return;
+    }
+  }
+
+  {
+    CallbackList events;
+    auto rc = load(&events);
+    if (!rc.isSuccess()) {
+      return;
+    }
+
+    lk->unlock();
+    try {
+      for (const auto& ev : events) {
+        ev();
+      }
+    } catch (...) {
+      /* ignore */
+    }
+    lk->lock();
+  }
+
+  logInfo("evqld", "Zookeeper connection successfully re-established");
 }
 
 Status ZookeeperConfigDirectory::connect(std::unique_lock<std::mutex>* lk) {
@@ -142,45 +182,39 @@ Status ZookeeperConfigDirectory::connect(std::unique_lock<std::mutex>* lk) {
 }
 
 // PRECONDITION: must hold mutex
-Status ZookeeperConfigDirectory::load(bool create) {
+Status ZookeeperConfigDirectory::load(CallbackList* cb) {
   if (!hasNode(path_prefix_ + "/config")) {
-    if (create) {
-      auto rc = zoo_create(
-          zk_,
-          path_prefix_.c_str(),
-          nullptr,
-          0,
-          &ZOO_OPEN_ACL_UNSAFE,
-          0,
-          nullptr, /* path_buffer */
-          0 /* path_buffer_len */);
+    auto rc = zoo_create(
+        zk_,
+        path_prefix_.c_str(),
+        nullptr,
+        0,
+        &ZOO_OPEN_ACL_UNSAFE,
+        0,
+        nullptr, /* path_buffer */
+        0 /* path_buffer_len */);
 
-      if (rc && rc != ZNODEEXISTS) {
-        return Status(
-            eIOError,
-            StringUtil::format("zoo_create() failed: $0", getErrorString(rc)));
-      }
-
-      String config_path = path_prefix_ + "/config";
-      rc = zoo_create(
-          zk_,
-          config_path.c_str(),
-          nullptr,
-          0,
-          &ZOO_OPEN_ACL_UNSAFE,
-          0,
-          nullptr, /* path_buffer */
-          0 /* path_buffer_len */);
-
-      if (rc && rc != ZNODEEXISTS) {
-        return Status(
-            eIOError,
-            StringUtil::format("zoo_create() failed: $0", getErrorString(rc)));
-      }
-    } else {
+    if (rc && rc != ZNODEEXISTS) {
       return Status(
           eIOError,
-          StringUtil::format("cluster doesn't exit: $0", cluster_name_));
+          StringUtil::format("zoo_create() failed: $0", getErrorString(rc)));
+    }
+
+    String config_path = path_prefix_ + "/config";
+    rc = zoo_create(
+        zk_,
+        config_path.c_str(),
+        nullptr,
+        0,
+        &ZOO_OPEN_ACL_UNSAFE,
+        0,
+        nullptr, /* path_buffer */
+        0 /* path_buffer_len */);
+
+    if (rc && rc != ZNODEEXISTS) {
+      return Status(
+          eIOError,
+          StringUtil::format("zoo_create() failed: $0", getErrorString(rc)));
     }
   }
 
@@ -275,28 +309,28 @@ Status ZookeeperConfigDirectory::load(bool create) {
   logInfo("evqld", "Loading config from zookeeper...");
 
   {
-    auto rc = syncClusterConfig(nullptr);
+    auto rc = syncClusterConfig(cb);
     if (!rc.isSuccess()) {
       return rc;
     }
   }
 
   {
-    auto rc = syncLiveServers(nullptr);
+    auto rc = syncLiveServers(cb);
     if (!rc.isSuccess()) {
       return rc;
     }
   }
 
   {
-    auto rc = syncServers(nullptr);
+    auto rc = syncServers(cb);
     if (!rc.isSuccess()) {
       return rc;
     }
   }
 
   {
-    auto rc = syncNamespaces(nullptr);
+    auto rc = syncNamespaces(cb);
     if (!rc.isSuccess()) {
       return rc;
     }
@@ -567,10 +601,19 @@ Status ZookeeperConfigDirectory::syncTable(
   return Status::success();
 }
 
-// PRECONDITION: must NOT hold mutex
 void ZookeeperConfigDirectory::stop() {
-  zookeeper_close(zk_);
-  zk_ = nullptr;
+  std::unique_lock<std::mutex> lk(mutex_);
+  if (zk_) {
+    zookeeper_close(zk_);
+    zk_ = nullptr;
+  }
+  state_ = ZKState::CLOSED;
+  cv_.notify_all();
+  lk.unlock();
+
+  if (watchdog_.joinable()) {
+    watchdog_.join();
+  }
 }
 
 bool ZookeeperConfigDirectory::getNode(
@@ -763,17 +806,17 @@ void ZookeeperConfigDirectory::handleConnectionLost() {
 
   switch (state_) {
     case ZKState::CONNECTING:
-      logError("evqld", "Zookeeper connection failed");
+      logCritical("evqld", "Zookeeper connection failed");
       return;
 
     case ZKState::LOADING:
-      logInfo("evqld", "Zookeeper connection lost while loading");
+      logCritical("evqld", "Zookeeper connection lost while loading");
       state_ = ZKState::CONNECTING;
       return;
 
     case ZKState::CONNECTED:
     case ZKState::CONNECTION_LOST:
-      logWarning("evqld", "Zookeeper connection lost");
+      logCritical("evqld", "Zookeeper connection lost");
       state_ = ZKState::CONNECTION_LOST;
       return;
 
@@ -1208,6 +1251,28 @@ void ZookeeperConfigDirectory::setTableConfigChangeCallback(
     Function<void (const TableDefinition& tbl)> fn) {
   std::unique_lock<std::mutex> lk(mutex_);
   on_table_change_.emplace_back(fn);
+}
+
+void ZookeeperConfigDirectory::runWatchdog() {
+  std::unique_lock<std::mutex> lk(mutex_);
+  while (state_ != ZKState::CLOSED) {
+    switch (state_) {
+      case ZKState::CONNECTED:
+        cv_.wait(lk);
+        continue;
+
+      case ZKState::CLOSED:
+        break;
+
+      default:
+        reconnect(&lk);
+        lk.unlock();
+        usleep(kReconnectRateLimit);
+        lk.lock();
+        continue;
+
+    }
+  }
 }
 
 const char* ZookeeperConfigDirectory::getErrorString(int err) const {
