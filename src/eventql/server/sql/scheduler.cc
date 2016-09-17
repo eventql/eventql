@@ -235,7 +235,6 @@ Vector<Scheduler::PipelinedQueryTree> Scheduler::pipelineExpression(
       replicas.emplace_back(rref);
     }
 
-    std::random_shuffle(replicas.begin(), replicas.end());
     partitions.emplace(pid, replicas);
   }
 
