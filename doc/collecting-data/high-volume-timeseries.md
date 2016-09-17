@@ -2,16 +2,18 @@
 =====================
 
 EventQL is an excellent fit to store high volumes of timeseries-structured data
-like metric, tracking data, logfiles, sensor measurements or other
+like metrics, tracking data, logfiles, sensor measurements or other
 machine-generated data.
+
+*To get the best performance when handling large arrival rates of new data, please
+see the "Settings for High Volume Timeseries Data" section below.*
 
 ### Timeseries Queries
 
 When you have set up the table as described below, EventQL can perform efficient
-scans on time ranges.
-
-For example, this query will only have to read the subset of data that was
-written in the last 24 hours:
+scans on time ranges. For example, this query will only have to read the subset
+of data that was written in the last 24 hours, regardless of the total table
+size:
 
     SELECT time, event_id, ...
     FROM high_volume_logging_data
@@ -40,7 +42,7 @@ Settings for High Volume Timeseries Data
 ----------------------------------------
 
 To get the best performance when handling large arrival rates of new events,
-consider these settings.
+we recommend these settings:
 
 #### 1. Use a datetime field as the partitioning key
 
