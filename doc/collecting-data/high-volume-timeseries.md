@@ -27,7 +27,7 @@ per minute for the last 3 days:
     DRAW LINECHART AXIS LEFT AXIS BOTTOM;
 
     SELECT count(1) y, date_trunc("1m", time) x
-    FROM tracker_log
+    FROM high_volume_logging_data
     WHERE time > time_at("-3d")
     GROUP BY date_trunc("1m", time)
     ORDER BY time desc;
