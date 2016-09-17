@@ -366,9 +366,11 @@ Status ZookeeperConfigDirectory::load(CallbackList* cb) {
 // PRECONDITION: must hold mutex
 Status ZookeeperConfigDirectory::syncClusterConfig(CallbackList* events) {
   struct Stat stat;
+  auto old_version = cluster_config_.version();
   if (getProtoNode(path_prefix_ + "/config", &cluster_config_, true, &stat)) {
+    bool changed = old_version != stat.version + 1;
     cluster_config_.set_version(stat.version + 1);
-    if (events) {
+    if (changed && events) {
       for (const auto& cb : on_cluster_change_) {
         events->emplace_back(std::bind(cb, cluster_config_));
       }
@@ -543,10 +545,12 @@ Status ZookeeperConfigDirectory::syncNamespace(
           StringUtil::format("namespace '$0' does not exist", ns));
     }
 
+    auto& ns_iter = namespaces_[ns];
+    bool changed = ns_iter.version() != stat.version + 1;
     ns_config.set_version(stat.version + 1);
-    namespaces_[ns] = ns_config;
+    ns_iter = ns_config;
 
-    if (events) {
+    if (changed && events) {
       for (const auto& cb : on_namespace_change_) {
         events->emplace_back(std::bind(cb, ns_config));
       }
@@ -612,10 +616,12 @@ Status ZookeeperConfigDirectory::syncTable(
         StringUtil::format("table '$0/$1' does not exist", ns, table_name));
   }
 
+  auto& tbl_iter = tables_[ns + "~" + table_name];
+  bool changed = tbl_iter.version() != stat.version + 1;
   tbl_config.set_version(stat.version + 1);
-  tables_[ns + "~" + table_name] = tbl_config;
+  tbl_iter = tbl_config;
 
-  if (events) {
+  if (changed && events) {
     for (const auto& cb : on_table_change_) {
       events->emplace_back(std::bind(cb, tbl_config));
     }
