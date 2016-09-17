@@ -50,6 +50,9 @@ static const std::string kBuildID = "unknown";
 extern "C" {
 #endif
 
+/**
+ * Native Protocol enums
+ */
 enum {
   EVQL_OP_HELLO                      = 0x5e00,
   EVQL_OP_PING                       = 0x0001,
@@ -93,6 +96,13 @@ enum {
   EVQL_QUERY_RESULT_PENDINGSTMT  = 0x8
 };
 
+/**
+ * EventQL Client enums
+ */
+enum {
+  EVQL_CLIENT_OPT_TIMEOUT       = 1L,
+  EVQL_CLIENT_OPT_ROWBUFLEN     = 2L
+};
 
 enum {
   EVQL_STAT_ROWSMODIFIED     = 0x1L,
@@ -105,6 +115,7 @@ enum {
   EVQL_STAT_TASKSTOTAL       = 0x8L,
   EVQL_STAT_TASKSCOMPLETED   = 0x9L
 };
+
 
 /**
  * The EventQL client handle
