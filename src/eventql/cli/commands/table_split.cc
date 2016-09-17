@@ -118,8 +118,6 @@ Status TableSplit::execute(
 
     KeyspaceType keyspace;
     switch (table_cfg.config().partitioner()) {
-      case TBL_PARTITION_FIXED:
-        RAISE(kIllegalArgumentError);
       case TBL_PARTITION_UINT64:
       case TBL_PARTITION_TIMEWINDOW:
         keyspace = KEYSPACE_UINT64;
@@ -127,6 +125,9 @@ Status TableSplit::execute(
       case TBL_PARTITION_STRING:
         keyspace = KEYSPACE_STRING;
         break;
+      case TBL_PARTITION_FIXED:
+      default:
+        RAISE(kIllegalArgumentError);
     }
 
     auto cconf = cdir->getClusterConfig();

@@ -330,7 +330,7 @@ void StatusServlet::renderTablePage(
       switch (metadata_file.getKeyspaceType()) {
         case KEYSPACE_UINT64: {
           uint64_t keyrange_uint = -1;
-          memcpy((char*) &keyrange_uint, e.begin.data(), sizeof(e.begin));
+          memcpy((char*) &keyrange_uint, e.begin.data(), sizeof(uint64_t));
           keyrange = StringUtil::format(
               "$0 [$1]",
               UnixTime(keyrange_uint),

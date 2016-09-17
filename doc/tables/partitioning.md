@@ -107,8 +107,8 @@ To set the finite partition size when creating a table using SQL you can use
 this syntax. Please refer to the "Creating Tables" and "HTTP API Reference"
 pages for detailed information.
 
-    CREATE TABLE high_volume_logging_Data (
-      collected_at    DATETIME,
+    CREATE TABLE high_volume_logging_data (
+      time            DATETIME,
       event_id        STRING,
       value           DOUBLE,
       PRIMARY KEY(time, event_id)

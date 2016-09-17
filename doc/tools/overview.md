@@ -1,4 +1,4 @@
-7. Drivers &amp; Tools
+8. Drivers &amp; Tools
 ======================
 
 This chapter lists a number of tools and drivers that allow you to easily
