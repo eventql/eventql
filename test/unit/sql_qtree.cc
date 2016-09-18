@@ -959,6 +959,6 @@ TEST_CASE(QTreeTest, TestDescribePartitions, [] () {
 
   RefPtr<DescribePartitionsNode> qtree =
       qtrees[0].asInstanceOf<DescribePartitionsNode>();
-  EXPECT_EQ(qtree->getTableName(), "evtbl");
+  EXPECT_EQ(qtree->tableName(), "evtbl");
 
 });
