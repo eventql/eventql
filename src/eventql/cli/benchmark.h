@@ -37,20 +37,19 @@ public:
   Benchmark();
 
   ReturnCode run();
-
   void kill();
 
 protected:
 
   void runThread(size_t idx);
-  ReturnCode runRequest();
   bool getRequestSlot(size_t idx);
 
   size_t num_threads_;
   std::mutex mutex_;
   std::condition_variable cv_;
-  std::vector<std::thread> threads_;
   ReturnCode status_;
+  std::vector<std::thread> threads_;
+  size_t threads_running_;
   uint64_t last_request_time_;
   uint64_t rate_limit_interval_;
 };

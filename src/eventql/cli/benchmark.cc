@@ -28,8 +28,10 @@
 /**
  * TODO:
  *   - impl max request exit condition
+ *   -----
+ *   - Benchmark.setProgressCB(Fun<void (BenchmarkStats*>)
  *   - pass arguments
- *   - store benchmark stats
+ *   - benchmark stats: Benchmark::getStats()
  *   - print benchmark stats
  *   - Benchmark::connect()
  *   -----
@@ -44,6 +46,7 @@ namespace cli {
 Benchmark::Benchmark() :
     num_threads_(4),
     status_(ReturnCode::success()),
+    threads_running_(0),
     last_request_time_(0),
     rate_limit_interval_(1000000) {
   threads_.resize(num_threads_);
@@ -52,6 +55,16 @@ Benchmark::Benchmark() :
 ReturnCode Benchmark::run() {
   for (size_t i = 0; i < num_threads_; ++i) {
     threads_[i] = std::thread(std::bind(&Benchmark::runThread, this, i));
+    ++threads_running_;
+  }
+
+  {
+    std::unique_lock<std::mutex> lk(mutex_);
+    while (threads_running_ > 0) {
+      cv_.wait_for(lk, std::chrono::microseconds(kMicrosPerSecond / 10)); // FIXME
+      // FIXME rate limit progress callback?
+      // FIXME call progress cb
+    }
   }
 
   for (auto& t : threads_) {
@@ -72,23 +85,22 @@ void Benchmark::kill() {
 void Benchmark::runThread(size_t idx) {
   while (getRequestSlot(idx)) {
     // FIXME record start time
-    auto rc = runRequest();
+    auto rc = ReturnCode::success(); // FIXME call request handler/cb
     // FIXME record end time
 
     std::unique_lock<std::mutex> lk(mutex_);
-    // FIXME addToStats(rc, runtime)...
+    // FIXME stats.addRequst(rc.isSu, idx, runtime)...
 
     if (!rc.isSuccess()) {
       status_ = rc;
       cv_.notify_all();
-      return;
+      break;
     }
   }
-}
 
-ReturnCode Benchmark::runRequest() {
-  usleep(500000);
-  return ReturnCode::success();
+  std::unique_lock<std::mutex> lk(mutex_);
+  --threads_running_;
+  cv_.notify_all();
 }
 
 // FIXME: this will "randomly" (not really) select one of our threads to run
