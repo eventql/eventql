@@ -27,8 +27,6 @@
 
 /**
  * TODO:
- *   - impl max request exit condition
- *   -----
  *   - Benchmark.setProgressCB(Fun<void (BenchmarkStats*>)
  *   - pass arguments
  *   - benchmark stats: Benchmark::getStats()
@@ -48,7 +46,8 @@ Benchmark::Benchmark() :
     status_(ReturnCode::success()),
     threads_running_(0),
     last_request_time_(0),
-    rate_limit_interval_(1000000) {
+    rate_limit_interval_(1000000),
+    remaining_requests_(5) {
   threads_.resize(num_threads_);
 }
 
@@ -113,6 +112,10 @@ bool Benchmark::getRequestSlot(size_t idx) {
       return false;
     }
 
+    if (remaining_requests_ == 0) {
+      return false;
+    }
+
     if (rate_limit_interval_ == 0) {
       return true;
     }
@@ -120,6 +123,9 @@ bool Benchmark::getRequestSlot(size_t idx) {
     auto now = MonotonicClock::now();
     if (last_request_time_ + rate_limit_interval_ <= now) {
       last_request_time_ = now;
+      if (remaining_requests_ != size_t(-1)) {
+        --remaining_requests_;
+      }
       break;
     }
 
