@@ -27,7 +27,6 @@
 
 /**
  * TODO:
- *   - Benchmark.setProgressCB(Fun<void (BenchmarkStats*>)
  *   - pass arguments
  *   - benchmark stats: Benchmark::getStats()
  *   - print benchmark stats
@@ -55,6 +54,10 @@ void Benchmark::setRequestHandler(std::function<ReturnCode ()> handler) {
   request_handler_ = handler;
 }
 
+void Benchmark::setProgressCallback(std::function<void ()> cb) {
+  on_progress_ = cb;
+}
+
 ReturnCode Benchmark::run() {
   if (!request_handler_) {
     return ReturnCode::error("ERUNTIME", "no request handler set");
@@ -69,8 +72,10 @@ ReturnCode Benchmark::run() {
     std::unique_lock<std::mutex> lk(mutex_);
     while (threads_running_ > 0) {
       cv_.wait_for(lk, std::chrono::microseconds(kMicrosPerSecond / 10)); // FIXME
+      if (on_progress_) {
+        on_progress_(); //FIXME pass BenchmarkStats
+      }
       // FIXME rate limit progress callback?
-      // FIXME call progress cb
     }
   }
 
@@ -99,10 +104,10 @@ void Benchmark::runThread(size_t idx) {
       rc = ReturnCode::error("ERUNTIME", e.what());
     }
     // FIXME record end time
+    std::unique_lock<std::mutex> lk(mutex_);
 
     // FIXME stats.addRequst(rc.isSu, idx, runtime)...
     if (!rc.isSuccess()) {
-      std::unique_lock<std::mutex> lk(mutex_);
       status_ = rc;
       cv_.notify_all();
       break;
