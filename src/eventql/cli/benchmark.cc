@@ -41,8 +41,11 @@ namespace eventql {
 namespace cli {
 
 // FIXME pass proper arguments
-Benchmark::Benchmark() :
-    num_threads_(4),
+Benchmark::Benchmark(
+    size_t num_threads,
+    size_t rate,
+    size_t remaining_requests /* = -1*/) :
+    num_threads_(num_threads),
     status_(ReturnCode::success()),
     threads_running_(0),
     last_request_time_(0),
