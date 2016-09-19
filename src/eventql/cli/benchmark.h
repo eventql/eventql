@@ -36,7 +36,7 @@ public:
 
   Benchmark();
 
-  void setRequestHandler(Function<ReturnCode ()> handler);
+  void setRequestHandler(std::function<ReturnCode ()> handler);
 
   ReturnCode run();
   void kill();
