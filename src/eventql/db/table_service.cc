@@ -621,43 +621,48 @@ ReturnCode TableService::insertRecords(
     const SHA1Hash& partition_key,
     const Set<String>& servers,
     const ShreddedRecordList& records) {
-//  Vector<String> errors;
-//
-//  size_t nconfirmations = 0;
-//  for (const auto& server : servers) {
-//    try {
-//      if (server == cdir_->getServerID()) {
-//        insertRecordsLocal(
-//            tsdb_namespace,
-//            table_name,
-//            partition_key,
-//            records);
-//      } else {
-//        insertRecordsRemote(
-//            tsdb_namespace,
-//            table_name,
-//            partition_key,
-//            records,
-//            server);
-//      }
-//
-//      ++nconfirmations;
-//    } catch (const StandardException& e) {
-//      logError(
-//          "eventql",
-//          e,
-//          "TableService::insertRecordsRemote failed");
-//
-//      errors.emplace_back(e.what());
-//    }
-//  }
-//
-//  if (nconfirmations < 1) { // FIXME min consistency level
-//    RAISEF(
-//        kRuntimeError,
-//        "TableService::insertRecordsRemote failed: $0",
-//        StringUtil::join(errors, ", "));
-//  }
+  size_t nconfirmations = 0;
+  std::vector<std::string> remote_servers;
+  for (const auto& server : servers) {
+    if (server == cdir_->getServerID()) {
+      logDebug(
+          "evqld",
+          "Inserting $0 records into evql://localhost/$1/$2/$3",
+          records.getNumRecords(),
+          tsdb_namespace,
+          table_name,
+          partition_key.toString());
+
+      auto rc = insertRecordsLocal(
+          tsdb_namespace,
+          table_name,
+          partition_key,
+          records);
+
+      if (rc.isSuccess()) {
+        ++nconfirmations;
+      } else {
+        logError("evqld", "Insert failed: $0", rc.getMessage());
+      }
+    } else {
+      logDebug(
+          "evqld",
+          "Inserting $0 records into evql://$4/$1/$2/$3",
+          records.getNumRecords(),
+          tsdb_namespace,
+          table_name,
+          partition_key.toString(),
+          server);
+
+      remote_servers.emplace_back(server);
+    }
+  }
+
+  if (nconfirmations >= 1) { // FIXME min consistency level
+    return ReturnCode::success();
+  } else {
+    return ReturnCode::error("ERUNTIME", "not enough live servers for insert");
+  }
 }
 
 ReturnCode TableService::insertRecordsLocal(
@@ -665,14 +670,6 @@ ReturnCode TableService::insertRecordsLocal(
     const String& table_name,
     const SHA1Hash& partition_key,
     const ShreddedRecordList& records) try {
-  logDebug(
-      "evqld",
-      "Inserting $0 records into tsdb://localhost/$1/$2/$3",
-      records.getNumRecords(),
-      tsdb_namespace,
-      table_name,
-      partition_key.toString());
-
   auto partition = pmap_->findOrCreatePartition(
       tsdb_namespace,
       table_name,
@@ -686,6 +683,8 @@ ReturnCode TableService::insertRecordsLocal(
     change->partition = partition;
     pmap_->publishPartitionChange(change);
   }
+
+  return ReturnCode::success();
 } catch (const std::exception& e) {
   return ReturnCode::exception(e);
 }
