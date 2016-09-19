@@ -1,5 +1,11 @@
 EventQL v0.4.0 beta;
 
+  * Changed the DESCRIBE TABLE statement to return a new "encoding" column that
+    contains information about the column's encoding settings
+
+
+EventQL v0.4.0 beta;
+
   * Changed the parallel GROUP BY operation to use the new native protocol and
     to schedule all remote partial group bys from a a single thread using
     asynchronous I/O (currently via poll()).
