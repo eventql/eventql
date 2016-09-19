@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in
 
-bin_PROGRAMS = evql evqld evqlctl evqlbenchmark
+bin_PROGRAMS = evql evqld evqlctl evqlslap
 lib_LTLIBRARIES = libevqlclient.la
 check_LIBRARIES = libevqlcore.a
 
@@ -1020,13 +1020,13 @@ evqlctl_LDADD = \
     $(PROTOBUF_LDADD) \
     $(SPIDERMONKEY_LDADD)
 
-################## BIN: evqlbenchmark ####################
-evqlbenchmark_SOURCES = \
+################## BIN: evqlslap ####################
+evqlslap_SOURCES = \
     ${EVQL_CORE_SOURCES_} \
     $(EVQL_PROTO_SOURCES_) \
-    eventql/evql_benchmark.cc
+    eventql/evqlslap.cc
 
-evqlbenchmark_LDADD = \
+evqlslap_LDADD = \
     libevqlclient.la \
     $(ZOOKEEPER_LDADD) \
     $(LINENOISE_LDADD) \
@@ -1036,7 +1036,7 @@ evqlbenchmark_LDADD = \
     $(PROTOBUF_LDADD) \
     $(SPIDERMONKEY_LDADD)
 
-evqlbenchmark_LDFLAGS = -static
+evqlslap_LDFLAGS = -static
 
 ################ LIB: libevqlclient.a ###################
 libevqlclient_la_SOURCES = eventql/client.c
