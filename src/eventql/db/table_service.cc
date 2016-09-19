@@ -728,49 +728,6 @@ ReturnCode TableService::insertRecordsLocal(
   return ReturnCode::exception(e);
 }
 
-//void TableService::insertRecordsRemote(
-//    const String& tsdb_namespace,
-//    const String& table_name,
-//    const SHA1Hash& partition_key,
-//    const ShreddedRecordList& records,
-//    const String& server_id) {
-//  auto server_cfg = cdir_->getServerConfig(server_id);
-//  if (server_cfg.server_status() != SERVER_UP) {
-//    RAISE(kRuntimeError, "server is down");
-//  }
-//
-//  logDebug(
-//      "evqld",
-//      "Inserting $0 records into $1:$2/$3/$4",
-//      records.getNumRecords(),
-//      server_id,
-//      tsdb_namespace,
-//      table_name,
-//      partition_key.toString());
-//
-//  Buffer body;
-//  auto body_os = BufferOutputStream::fromBuffer(&body);
-//  records.encode(body_os.get());
-//
-//  auto uri = URI(
-//      StringUtil::format(
-//          "http://$0/tsdb/replicate?namespace=$1&table=$2&partition=$3",
-//          server_cfg.server_addr(),
-//          URI::urlEncode(tsdb_namespace),
-//          URI::urlEncode(table_name),
-//          partition_key.toString()));
-//
-//  http::HTTPRequest req(http::HTTPMessage::M_POST, uri.pathAndQuery());
-//  req.addHeader("Host", uri.hostAndPort());
-//  req.addBody(body);
-//
-//  http::HTTPClient http;
-//  auto r = http.executeRequest(req);
-//  if (r.statusCode() != 201) {
-//    RAISEF(kRuntimeError, "received non-201 response: $0", r.body().toString());
-//  }
-//}
-
 void TableService::compactPartition(
     const String& tsdb_namespace,
     const String& table_name,
