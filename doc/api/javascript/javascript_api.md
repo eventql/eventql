@@ -146,7 +146,7 @@ be global variables (i.e. defined in the global scope).
 `shards`<br>
 &nbsp;&nbsp;&nbsp;(optional)
 
-    var page_vies = EVQL.mapTable({
+    var page_views = EVQL.mapTable({
       //
     });
 
