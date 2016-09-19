@@ -27,11 +27,13 @@ Table of Contents
       6.1.10 QUERY_DISCARD
       6.1.11 QUERY_PROGRESS
       6.1.12 QUERY_NEXT
+      6.1.13 INSERT
     6.2 Server-to-Server (S2S) Messages
       6.2.1 QUERY_PARTIALAGGR
       6.2.2 QUERY_PARTIALAGGR_RESULT
       6.2.3 QUERY_REMOTE
       6.2.4 QUERY_REMOTE_RESULT
+      6.2.5 REPL_INSERT
 
 1. Preface
 
@@ -138,10 +140,12 @@ Binary Protocols.
     0x0009   QUERY_DISCARD
     0x000a   QUERY_PROGRESS
     0x000b   QUERY_NEXT
+    0x0010   INSERT
     0x0101   QUERY_PARTIALAGGR
     0x0102   QUERY_PARTIALAGGR_RESULT
     0x0103   QUERY_REMOTE
     0x0104   QUERY_REMOTE_RESULT
+    0x0110   REPL_INSERT
 
   Messages are described in Section 6.
 

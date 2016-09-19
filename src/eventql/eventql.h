@@ -66,10 +66,12 @@ enum {
   EVQL_OP_QUERY_DISCARD              = 0x0009,
   EVQL_OP_QUERY_PROGRESS             = 0x000a,
   EVQL_OP_QUERY_NEXT                 = 0x000b,
+  EVQL_OP_INSERT                     = 0x0010,
   EVQL_OP_QUERY_PARTIALAGGR          = 0x0101,
   EVQL_OP_QUERY_PARTIALAGGR_RESULT   = 0x0102,
   EVQL_OP_QUERY_REMOTE               = 0x0103,
-  EVQL_OP_QUERY_REMOTE_RESULT        = 0x0104
+  EVQL_OP_QUERY_REMOTE_RESULT        = 0x0104,
+  EVQL_OP_REPL_INSERT                = 0x0110
 };
 
 enum {
