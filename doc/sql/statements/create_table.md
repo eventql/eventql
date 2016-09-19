@@ -3,6 +3,7 @@
 
     CREATE TABLE table_name
     ( column_definition, column_definition, ...)
+    [table_properties]
 
     column_definition is:
 
@@ -11,6 +12,10 @@
     | column_name REPEATED column_type
     | column_name [REPEATED] RECORD ( column_definition, column_definition, ...)
     | PRIMARY KEY ( column_name [, column_name1 , column_name2, ... ] )
+
+    table_properties:
+
+    partition_size_hint = value
 
 
 **NOTE for high-volume timeseries:** If you are planning to store large volumes
