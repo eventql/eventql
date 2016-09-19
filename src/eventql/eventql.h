@@ -66,6 +66,7 @@ enum {
   EVQL_OP_QUERY_DISCARD              = 0x0009,
   EVQL_OP_QUERY_PROGRESS             = 0x000a,
   EVQL_OP_QUERY_NEXT                 = 0x000b,
+  EVQL_OP_ACK                        = 0x000f,
   EVQL_OP_INSERT                     = 0x0010,
   EVQL_OP_QUERY_PARTIALAGGR          = 0x0101,
   EVQL_OP_QUERY_PARTIALAGGR_RESULT   = 0x0102,
