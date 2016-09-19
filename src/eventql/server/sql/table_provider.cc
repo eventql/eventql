@@ -578,6 +578,20 @@ RefPtr<csql::ValueExpressionNode> TSDBTableProvider::simplifyWhereExpression(
       continue;
     }
 
+    std::string c_val;
+    switch (c.value.getType()) {
+      case SQL_STRING:
+      case SQL_INTEGER:
+      case SQL_FLOAT:
+        c_val = encodePartitionKey(pkeyspace, c.value.getString());
+        break;
+      case SQL_TIMESTAMP:
+        c_val = encodePartitionKey(pkeyspace, c.value.toInteger().getString());
+        break;
+      default:
+        continue;
+    }
+
     switch (c.type) {
 
       case csql::ScanConstraintType::EQUAL_TO:
@@ -587,10 +601,7 @@ RefPtr<csql::ValueExpressionNode> TSDBTableProvider::simplifyWhereExpression(
       case csql::ScanConstraintType::LESS_THAN:
       case csql::ScanConstraintType::LESS_THAN_OR_EQUAL_TO:
         if (keyrange_end.size() > 0 &&
-            comparePartitionKeys(
-                pkeyspace,
-                encodePartitionKey(pkeyspace, c.value.getString()),
-                keyrange_end) >= 0) {
+            comparePartitionKeys(pkeyspace, c_val, keyrange_end) >= 0) {
           break;
         } else {
           continue;
@@ -599,10 +610,7 @@ RefPtr<csql::ValueExpressionNode> TSDBTableProvider::simplifyWhereExpression(
       case csql::ScanConstraintType::GREATER_THAN:
       case csql::ScanConstraintType::GREATER_THAN_OR_EQUAL_TO:
         if (keyrange_begin.size() > 0 &&
-            comparePartitionKeys(
-                pkeyspace,
-                encodePartitionKey(pkeyspace, c.value.getString()),
-                keyrange_begin) <= 0) {
+            comparePartitionKeys( pkeyspace, c_val, keyrange_begin) <= 0) {
           break;
         } else {
           continue;
