@@ -287,13 +287,19 @@ void RPCServlet::replicateRecords(
   auto body_is = req->getBodyInputStream();
   records.decode(body_is.get());
 
-  dbctx->table_service->insertReplicatedRecords(
+  auto rc = dbctx->table_service->insertReplicatedRecords(
       tsdb_namespace,
       table_name,
       SHA1Hash::fromHexString(partition_key),
       records);
 
-  res->setStatus(http::kStatusCreated);
+  if (rc.isSuccess()) {
+    res->setStatus(http::kStatusCreated);
+  } else {
+    res->setStatus(http::kStatusInternalServerError);
+    res->addBody("ERROR: " + rc.getMessage());
+    return;
+  }
 }
 
 void RPCServlet::createMetadataFile(

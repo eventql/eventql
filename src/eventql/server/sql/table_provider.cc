@@ -478,35 +478,27 @@ Status TSDBTableProvider::insertRecord(
     }
   }
 
-  try {
-    table_service_->insertRecord(
-        tsdb_namespace_,
-        table_name,
-        *msg);
-
-  } catch (const Exception& e) {
-    return Status(eRuntimeError, e.getMessage());
-  }
-
-  return Status::success();
+  return table_service_->insertRecord(
+      tsdb_namespace_,
+      table_name,
+      *msg);
 }
 
 Status TSDBTableProvider::insertRecord(
     const String& table_name,
     const String& json_str) {
-
-  auto json = json::parseJSON(json_str);
+  json::JSONObject json;
   try {
-    table_service_->insertRecord(
-        tsdb_namespace_,
-        table_name,
-        json.begin(),
-        json.end());
-  } catch (const Exception& e) {
-    return Status(eRuntimeError, e.getMessage());
+    json = json::parseJSON(json_str);
+  } catch (const std::exception& e) {
+    return ReturnCode::exception(e);
   }
 
-  return Status::success();
+  return table_service_->insertRecord(
+      tsdb_namespace_,
+      table_name,
+      json.begin(),
+      json.end());
 }
 
 void TSDBTableProvider::listTables(

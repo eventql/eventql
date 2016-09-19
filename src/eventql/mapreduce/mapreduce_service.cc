@@ -466,11 +466,15 @@ bool MapReduceService::saveResultToTable(
 
     auto json = json::parseJSON(String((const char*) data, data_size));
 
-    tsdb_->insertRecord(
-      session->getEffectiveNamespace(),
-      table_name,
-      json.begin(),
-      json.end());
+    auto rc = tsdb_->insertRecord(
+        session->getEffectiveNamespace(),
+        table_name,
+        json.begin(),
+        json.end());
+
+    if (!rc.isSuccess()) {
+      RAISE(kRuntimeError, rc.getMessage());
+    }
 
     if (!cursor->next()) {
       break;

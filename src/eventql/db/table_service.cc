@@ -443,7 +443,7 @@ void TableService::listTables(
   });
 }
 
-void TableService::insertRecord(
+ReturnCode TableService::insertRecord(
     const String& tsdb_namespace,
     const String& table_name,
     const json::JSONObject::const_iterator& data_begin,
@@ -451,24 +451,29 @@ void TableService::insertRecord(
     uint64_t flags /* = 0 */) {
   auto table = pmap_->findTable(tsdb_namespace, table_name);
   if (table.isEmpty() || table.get()->config().deleted()) {
-    RAISEF(kNotFoundError, "table not found: $0", table_name);
+    return ReturnCode::errorf("ENOTFOUND", "table not found: $0", table_name);
   }
 
   msg::DynamicMessage record(table.get()->schema());
-  record.fromJSON(data_begin, data_end);
-  insertRecord(
+  try {
+    record.fromJSON(data_begin, data_end);
+  } catch (const std::exception& e) {
+    return ReturnCode::exception(e);
+  }
+
+  return insertRecord(
       tsdb_namespace,
       table_name,
       record,
       flags);
 }
 
-void TableService::insertRecord(
+ReturnCode TableService::insertRecord(
     const String& tsdb_namespace,
     const String& table_name,
     const msg::DynamicMessage& data,
     uint64_t flags /* = 0 */) {
-  insertRecords(
+  return insertRecords(
       tsdb_namespace,
       table_name,
       &data,
@@ -476,7 +481,7 @@ void TableService::insertRecord(
       flags);
 }
 
-void TableService::insertRecords(
+ReturnCode TableService::insertRecords(
     const String& tsdb_namespace,
     const String& table_name,
     const msg::DynamicMessage* begin,
@@ -488,7 +493,7 @@ void TableService::insertRecords(
 
   auto table = pmap_->findTable(tsdb_namespace, table_name);
   if (table.isEmpty() || table.get()->config().deleted()) {
-    RAISEF(kNotFoundError, "table not found: $0", table_name);
+    return ReturnCode::errorf("ENOTFOUND", "table not found: $0", table_name);
   }
 
   for (auto record = begin; record != end; ++record) {
@@ -496,7 +501,10 @@ void TableService::insertRecords(
     auto partition_key_field_name = table.get()->getPartitionKey();
     auto partition_key_field = record->getField(partition_key_field_name);
     if (partition_key_field.isEmpty()) {
-      RAISEF(kNotFoundError, "missing field: $0", partition_key_field_name);
+      return ReturnCode::errorf(
+          "EARG",
+          "missing field: $0",
+          partition_key_field_name);
     }
 
     // calculate primary key
@@ -514,7 +522,10 @@ void TableService::insertRecords(
       case 1: {
         auto f = record->getField(primary_key_columns[0]);
         if (f.isEmpty()) {
-          RAISEF(kNotFoundError, "missing field: $0", primary_key_columns[0]);
+          return ReturnCode::errorf(
+              "EARG",
+              "missing field: $0",
+              primary_key_columns[0]);
         }
         primary_key = SHA1::compute(f.get());
         break;
@@ -525,7 +536,7 @@ void TableService::insertRecords(
         for (const auto& c : primary_key_columns) {
           auto f = record->getField(c);
           if (f.isEmpty()) {
-            RAISEF(kNotFoundError, "missing field: $0", c);
+            return ReturnCode::errorf("EARG", "missing field: $0", c);
           }
 
           auto chash = SHA1::compute(f.get());
@@ -551,7 +562,7 @@ void TableService::insertRecords(
           &find_res);
 
       if (!rc.isSuccess()) {
-        RAISE(kRuntimeError, rc.message());
+        return rc;
       }
     }
 
@@ -565,84 +576,95 @@ void TableService::insertRecords(
 
     servers[partition_id] = partition_servers;
     auto& record_list_builder = records[partition_id];
-    record_list_builder.addRecordFromProtobuf(
-        primary_key,
-        WallClock::unixMicros(),
-        *record);
+
+    try {
+      record_list_builder.addRecordFromProtobuf(
+          primary_key,
+          WallClock::unixMicros(),
+          *record);
+    } catch (const std::exception& e) {
+      return ReturnCode::exception(e);
+    }
   }
 
   for (auto& p : records) {
-    insertRecords(
+    auto rc = insertRecords(
         tsdb_namespace,
         table_name,
         p.first,
         servers[p.first],
         p.second.get());
+
+    if (!rc.isSuccess()) {
+      return rc;
+    }
   }
+
+  return ReturnCode::success();
 }
 
-void TableService::insertReplicatedRecords(
+ReturnCode TableService::insertReplicatedRecords(
     const String& tsdb_namespace,
     const String& table_name,
     const SHA1Hash& partition_key,
     const ShreddedRecordList& records) {
-  insertRecordsLocal(
+  return insertRecordsLocal(
       tsdb_namespace,
       table_name,
       partition_key,
       records);
 }
 
-void TableService::insertRecords(
+ReturnCode TableService::insertRecords(
     const String& tsdb_namespace,
     const String& table_name,
     const SHA1Hash& partition_key,
     const Set<String>& servers,
     const ShreddedRecordList& records) {
-  Vector<String> errors;
-
-  size_t nconfirmations = 0;
-  for (const auto& server : servers) {
-    try {
-      if (server == cdir_->getServerID()) {
-        insertRecordsLocal(
-            tsdb_namespace,
-            table_name,
-            partition_key,
-            records);
-      } else {
-        insertRecordsRemote(
-            tsdb_namespace,
-            table_name,
-            partition_key,
-            records,
-            server);
-      }
-
-      ++nconfirmations;
-    } catch (const StandardException& e) {
-      logError(
-          "eventql",
-          e,
-          "TableService::insertRecordsRemote failed");
-
-      errors.emplace_back(e.what());
-    }
-  }
-
-  if (nconfirmations < 1) { // FIXME min consistency level
-    RAISEF(
-        kRuntimeError,
-        "TableService::insertRecordsRemote failed: $0",
-        StringUtil::join(errors, ", "));
-  }
+//  Vector<String> errors;
+//
+//  size_t nconfirmations = 0;
+//  for (const auto& server : servers) {
+//    try {
+//      if (server == cdir_->getServerID()) {
+//        insertRecordsLocal(
+//            tsdb_namespace,
+//            table_name,
+//            partition_key,
+//            records);
+//      } else {
+//        insertRecordsRemote(
+//            tsdb_namespace,
+//            table_name,
+//            partition_key,
+//            records,
+//            server);
+//      }
+//
+//      ++nconfirmations;
+//    } catch (const StandardException& e) {
+//      logError(
+//          "eventql",
+//          e,
+//          "TableService::insertRecordsRemote failed");
+//
+//      errors.emplace_back(e.what());
+//    }
+//  }
+//
+//  if (nconfirmations < 1) { // FIXME min consistency level
+//    RAISEF(
+//        kRuntimeError,
+//        "TableService::insertRecordsRemote failed: $0",
+//        StringUtil::join(errors, ", "));
+//  }
 }
 
-void TableService::insertRecordsLocal(
+ReturnCode TableService::insertRecordsLocal(
     const String& tsdb_namespace,
     const String& table_name,
     const SHA1Hash& partition_key,
-    const ShreddedRecordList& records) {
+    const ShreddedRecordList& records) try {
   logDebug(
       "evqld",
       "Inserting $0 records into tsdb://localhost/$1/$2/$3",
@@ -664,50 +686,52 @@ void TableService::insertRecordsLocal(
     change->partition = partition;
     pmap_->publishPartitionChange(change);
   }
+} catch (const std::exception& e) {
+  return ReturnCode::exception(e);
 }
 
-void TableService::insertRecordsRemote(
-    const String& tsdb_namespace,
-    const String& table_name,
-    const SHA1Hash& partition_key,
-    const ShreddedRecordList& records,
-    const String& server_id) {
-  auto server_cfg = cdir_->getServerConfig(server_id);
-  if (server_cfg.server_status() != SERVER_UP) {
-    RAISE(kRuntimeError, "server is down");
-  }
-
-  logDebug(
-      "evqld",
-      "Inserting $0 records into $1:$2/$3/$4",
-      records.getNumRecords(),
-      server_id,
-      tsdb_namespace,
-      table_name,
-      partition_key.toString());
-
-  Buffer body;
-  auto body_os = BufferOutputStream::fromBuffer(&body);
-  records.encode(body_os.get());
-
-  auto uri = URI(
-      StringUtil::format(
-          "http://$0/tsdb/replicate?namespace=$1&table=$2&partition=$3",
-          server_cfg.server_addr(),
-          URI::urlEncode(tsdb_namespace),
-          URI::urlEncode(table_name),
-          partition_key.toString()));
-
-  http::HTTPRequest req(http::HTTPMessage::M_POST, uri.pathAndQuery());
-  req.addHeader("Host", uri.hostAndPort());
-  req.addBody(body);
-
-  http::HTTPClient http;
-  auto r = http.executeRequest(req);
-  if (r.statusCode() != 201) {
-    RAISEF(kRuntimeError, "received non-201 response: $0", r.body().toString());
-  }
-}
+//void TableService::insertRecordsRemote(
+//    const String& tsdb_namespace,
+//    const String& table_name,
+//    const SHA1Hash& partition_key,
+//    const ShreddedRecordList& records,
+//    const String& server_id) {
+//  auto server_cfg = cdir_->getServerConfig(server_id);
+//  if (server_cfg.server_status() != SERVER_UP) {
+//    RAISE(kRuntimeError, "server is down");
+//  }
+//
+//  logDebug(
+//      "evqld",
+//      "Inserting $0 records into $1:$2/$3/$4",
+//      records.getNumRecords(),
+//      server_id,
+//      tsdb_namespace,
+//      table_name,
+//      partition_key.toString());
+//
+//  Buffer body;
+//  auto body_os = BufferOutputStream::fromBuffer(&body);
+//  records.encode(body_os.get());
+//
+//  auto uri = URI(
+//      StringUtil::format(
+//          "http://$0/tsdb/replicate?namespace=$1&table=$2&partition=$3",
+//          server_cfg.server_addr(),
+//          URI::urlEncode(tsdb_namespace),
+//          URI::urlEncode(table_name),
+//          partition_key.toString()));
+//
+//  http::HTTPRequest req(http::HTTPMessage::M_POST, uri.pathAndQuery());
+//  req.addHeader("Host", uri.hostAndPort());
+//  req.addBody(body);
+//
+//  http::HTTPClient http;
+//  auto r = http.executeRequest(req);
+//  if (r.statusCode() != 201) {
+//    RAISEF(kRuntimeError, "received non-201 response: $0", r.body().toString());
+//  }
+//}
 
 void TableService::compactPartition(
     const String& tsdb_namespace,
