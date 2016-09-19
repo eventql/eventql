@@ -38,6 +38,7 @@
 #include "eventql/db/metadata_client.h"
 #include "eventql/db/server_allocator.h"
 #include <eventql/transport/native/client_tcp.h>
+#include <eventql/transport/native/frames/repl_insert.h>
 
 #include "eventql/eventql.h"
 
@@ -663,6 +664,20 @@ ReturnCode TableService::insertRecords(
 
   /* build rpc payload */
   std::string rpc_payload;
+  {
+    std::string rpc_body;
+    auto rpc_body_os = StringOutputStream::fromString(&rpc_body);
+    records.encode(rpc_body_os.get());
+
+    native_transport::ReplInsertFrame i_frame;
+    i_frame.setDatabase(tsdb_namespace);
+    i_frame.setTable(table_name);
+    i_frame.setPartitionID(partition_key.toString());
+    i_frame.setBody(rpc_body);
+
+    auto rpc_payload_os = StringOutputStream::fromString(&rpc_payload);
+    i_frame.writeTo(rpc_payload_os.get());
+  }
 
   /* execute rpcs */
   native_transport::TCPAsyncClient rpc_client(

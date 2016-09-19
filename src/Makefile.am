@@ -868,6 +868,8 @@ EVQL_CORE_SOURCES_ = \
     eventql/transport/native/frames/query_result.h \
     eventql/transport/native/frames/error.cc \
     eventql/transport/native/frames/error.h \
+    eventql/transport/native/frames/repl_insert.cc \
+    eventql/transport/native/frames/repl_insert.h \
     eventql/transport/native/ops/query.cc \
     eventql/transport/native/ops/query_partialaggr.cc \
     eventql/transport/native/ops/query_remote.cc \
