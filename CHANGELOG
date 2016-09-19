@@ -3,6 +3,8 @@ EventQL v0.4.0 beta;
   * Changed the DESCRIBE TABLE statement to return a new "encoding" column that
     contains information about the column's encoding settings
 
+  * Added new frames to native protocol: ACK, INSERT, REPL_INSERT
+
 
 EventQL v0.4.0 beta;
 
