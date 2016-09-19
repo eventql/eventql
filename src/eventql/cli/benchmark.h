@@ -36,7 +36,7 @@ public:
 
   Benchmark();
 
-  void setProgressCallback(Function<void ()> cb);
+  void setProgressCallback(std::function<void ()> cb);
 
   ReturnCode run();
   void kill();
