@@ -28,7 +28,6 @@
 /**
  * TODO:
  *   - Benchmark.setRequestHandler(Fun<void (BenchmarkStats*>)
- *   - Benchmark.setProgressCB(Fun<void (BenchmarkStats*>)
  *   - pass arguments
  *   - benchmark stats: Benchmark::getStats()
  *   - print benchmark stats
@@ -52,6 +51,10 @@ Benchmark::Benchmark() :
   threads_.resize(num_threads_);
 }
 
+void Benchmark::setProgressCallback(std::function<void ()> cb) {
+  on_progress_ = cb;
+}
+
 ReturnCode Benchmark::run() {
   for (size_t i = 0; i < num_threads_; ++i) {
     threads_[i] = std::thread(std::bind(&Benchmark::runThread, this, i));
@@ -62,8 +65,10 @@ ReturnCode Benchmark::run() {
     std::unique_lock<std::mutex> lk(mutex_);
     while (threads_running_ > 0) {
       cv_.wait_for(lk, std::chrono::microseconds(kMicrosPerSecond / 10)); // FIXME
+      if (on_progress_) {
+        on_progress_(); //FIXME pass BenchmarkStats
+      }
       // FIXME rate limit progress callback?
-      // FIXME call progress cb
     }
   }
 
