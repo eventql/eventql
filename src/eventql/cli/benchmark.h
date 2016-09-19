@@ -43,8 +43,7 @@ public:
 protected:
 
   void runThread(size_t idx);
-  void runRequest();
-  void stopWithError(ReturnCode rc);
+  ReturnCode runRequest();
   bool getRequestSlot(size_t idx);
 
   size_t num_threads_;
@@ -52,6 +51,8 @@ protected:
   std::condition_variable cv_;
   std::vector<std::thread> threads_;
   ReturnCode status_;
+  uint64_t last_request_time_;
+  uint64_t rate_limit_interval_;
 };
 
 } //cli

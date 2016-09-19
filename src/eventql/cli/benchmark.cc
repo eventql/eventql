@@ -22,14 +22,18 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include <eventql/cli/benchmark.h>
+#include "eventql/cli/benchmark.h"
+#include "eventql/util/wallclock.h"
 
 namespace eventql {
 namespace cli {
 
+// FIXME pass proper arguments
 Benchmark::Benchmark() :
     num_threads_(4),
-    status_(ReturnCode::success()) {
+    status_(ReturnCode::success()),
+    last_request_time_(0),
+    rate_limit_interval_(1000000) {
   threads_.resize(num_threads_);
 }
 
@@ -49,34 +53,55 @@ ReturnCode Benchmark::run() {
 
 void Benchmark::kill() {
   std::unique_lock<std::mutex> lk(mutex_);
-  stopWithError(ReturnCode::error("ERUNTIME", "Benchmark aborted..."));
+  status_ = ReturnCode::error("ERUNTIME", "Benchmark aborted...");
+  cv_.notify_all();
 }
 
 void Benchmark::runThread(size_t idx) {
   while (getRequestSlot(idx)) {
+    // FIXME record start time
+    auto rc = runRequest();
+    // FIXME record end time
 
     std::unique_lock<std::mutex> lk(mutex_);
-    // check for exit conditions
-    // increase num requests
-    lk.unlock();
+    // FIXME addToStats(rc, runtime)...
 
-    runRequest();
-    lk.lock();
+    if (!rc.isSuccess()) {
+      status_ = rc;
+      cv_.notify_all();
+      return;
+    }
   }
 }
 
-void Benchmark::runRequest() {
-  printf("run request\n");
+ReturnCode Benchmark::runRequest() {
+  return ReturnCode::success();
 }
 
-// PRECONDITION: must hold mutex_
-void Benchmark::stopWithError(ReturnCode rc) {
-  status_ = rc;
-  cv_.notify_all();
-}
-
+// FIXME: this will "randomly" (not really) select one of our threads to run
+// the next request. we should improve this to do some kind of best-effort
+// round robin/load balancing
 bool Benchmark::getRequestSlot(size_t idx) {
-  usleep(100000);
+  std::unique_lock<std::mutex> lk(mutex_);
+  for (;;) {
+    if (!status_.isSuccess()) {
+      return false;
+    }
+
+    if (rate_limit_interval_ == 0) {
+      return true;
+    }
+
+    auto now = MonotonicClock::now();
+    if (last_request_time_ + rate_limit_interval_ <= now) {
+      last_request_time_ = now;
+      break;
+    }
+
+    auto wait = (last_request_time_ + rate_limit_interval_) - now;
+    cv_.wait_for(lk, std::chrono::microseconds(wait));
+  }
+
   return true;
 }
 
