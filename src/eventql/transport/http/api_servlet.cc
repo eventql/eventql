@@ -480,7 +480,7 @@ void APIServlet::createTable(
       auto prop_value = json::arrayGetString(jprop, jreq.end(), 1);
       if (prop_key.isEmpty() || prop_value.isEmpty()) {
         res->setStatus(http::kStatusBadRequest);
-        res->addBody("invalid field: primary_key");
+        res->addBody("invalid field: properties");
         return;
       }
 
