@@ -331,8 +331,20 @@ int main(int argc, const char** argv) {
     cfg_builder.setProperty("client.user", flags.getString("user"));
   }
 
+  if (flags.isSet("password")) {
+    cfg_builder.setProperty("client.password", flags.getString("password"));
+  }
+
   if (flags.isSet("auth_token")) {
     cfg_builder.setProperty("client.auth_token", flags.getString("auth_token"));
+  }
+
+  if (flags.isSet("lang")) {
+    cfg_builder.setProperty("client.lang", flags.getString("lang"));
+  }
+
+  if (flags.isSet("batch")) {
+    cfg_builder.setProperty("client.batch", "true");
   }
 
   /* cli config */
