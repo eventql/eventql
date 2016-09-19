@@ -241,8 +241,6 @@ Option<SHA1Hash> MapReduceService::reduceTables(
       input_tables.size(),
       output_id.toString());
 
-  std::random_shuffle(input_tables.begin(), input_tables.end());
-
   // FIXME MOST NAIVE IN MEMORY MERGE AHEAD !!
   size_t num_input_tables_read = 0;
   size_t num_bytes_read = 0;

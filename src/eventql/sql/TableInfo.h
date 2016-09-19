@@ -35,6 +35,7 @@ struct ColumnInfo {
   bool is_nullable;
   size_t type_size;
   bool is_primary_key;
+  std::string encoding;
 };
 
 struct TableInfo {
