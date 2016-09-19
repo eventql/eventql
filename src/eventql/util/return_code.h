@@ -27,6 +27,7 @@
 #include <stdlib.h>
 #include <string>
 #include <stdarg.h>
+#include "stringutil.h"
 
 class ReturnCode {
 public:
@@ -41,6 +42,17 @@ public:
     ReturnCode rc(false);
     rc.code_ = code;
     rc.message_ = message;
+    return rc;
+  }
+
+  template <typename... T>
+  inline static ReturnCode errorf(
+      const std::string& code,
+      const std::string& message,
+      T... args) {
+    ReturnCode rc(false);
+    rc.code_ = code;
+    rc.message_ = StringUtil::format(message, args...);
     return rc;
   }
 
@@ -59,6 +71,14 @@ public:
     rc.message_.resize(bufsize);
     va_end(args);
 
+    return rc;
+  }
+
+  inline static ReturnCode exception(
+      const std::exception& e) {
+    ReturnCode rc(false);
+    rc.code_ = "ERUNTIME";
+    rc.message_ = e.what();
     return rc;
   }
 
