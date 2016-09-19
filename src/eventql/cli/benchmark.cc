@@ -27,6 +27,7 @@
 
 /**
  * TODO:
+ *   - Benchmark.setRequestHandler(Fun<void (BenchmarkStats*>)
  *   - Benchmark.setProgressCB(Fun<void (BenchmarkStats*>)
  *   - pass arguments
  *   - benchmark stats: Benchmark::getStats()
