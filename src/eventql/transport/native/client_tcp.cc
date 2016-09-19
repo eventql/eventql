@@ -418,12 +418,12 @@ ReturnCode TCPAsyncClient::execute() {
     for (auto conn = connections_.begin(); conn != connections_.end(); ) {
       if ((conn->read_timeout > 0 && conn->read_timeout <= now) ||
           (conn->write_timeout > 0 && conn->write_timeout <= now)) {
-        logDebug("evqld", "Client connection timed out");
-
         auto task = conn->task;
         closeConnection(&*conn);
         conn = connections_.erase(conn);
-        auto rc = failTask(task);
+        auto rc = failTask(
+            task,
+            ReturnCode::error("EIO", "Client connection timeout out"));
         if (rc.isSuccess()) {
           continue;
         } else {
@@ -437,11 +437,10 @@ ReturnCode TCPAsyncClient::execute() {
 
         auto rc = performRead(&*conn);
         if (!rc.isSuccess()) {
-          logDebug("evqld", "Client error: $0", rc.getMessage());
           auto task = conn->task;
           closeConnection(&*conn);
           conn = connections_.erase(conn);
-          rc = failTask(task);
+          rc = failTask(task, rc);
           if (rc.isSuccess()) {
             continue;
           } else {
@@ -462,11 +461,10 @@ ReturnCode TCPAsyncClient::execute() {
 
         auto rc = performWrite(&*conn);
         if (!rc.isSuccess()) {
-          logDebug("evqld", "Client error: $0", rc.getMessage());
           auto task = conn->task;
           closeConnection(&*conn);
           conn = connections_.erase(conn);
-          rc = failTask(task);
+          rc = failTask(task, rc);
           if (rc.isSuccess()) {
             continue;
           } else {
@@ -619,8 +617,7 @@ ReturnCode TCPAsyncClient::startNextTask() {
 
   auto rc = startConnection(task);
   if (!rc.isSuccess()) {
-    logDebug("evqld", "Client error: $0", rc.getMessage());
-    rc = failTask(task);
+    rc = failTask(task, rc);
   }
 
   return rc;
@@ -660,7 +657,7 @@ TCPAsyncClient::Task* TCPAsyncClient::popTask(
   return task;
 }
 
-ReturnCode TCPAsyncClient::failTask(Task* task) {
+ReturnCode TCPAsyncClient::failTask(Task* task, const ReturnCode& fail_rc) {
   while (task->hosts.size() > 1) {
     task->hosts.erase(task->hosts.begin());
 
@@ -675,16 +672,17 @@ ReturnCode TCPAsyncClient::failTask(Task* task) {
     if (rc.isSuccess()) {
       return rc;
     } else {
-      logDebug("evqld", "Client error: $0", rc.getMessage());
+      logError("evqld", "Client error: $0", rc.getMessage());
     }
   }
 
   completeTask(task);
 
   if (tolerate_failures_) {
+    logError("evqld", "Client error: $0", fail_rc.getMessage());
     return ReturnCode::success();
   } else {
-    return ReturnCode::error("ERUNTIME", "aggregation failed");
+    return fail_rc;
   }
 }
 

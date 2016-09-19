@@ -167,7 +167,7 @@ protected:
       size_t payload_size);
 
   Task* popTask(const std::string* hostname = nullptr);
-  ReturnCode failTask(Task* task);
+  ReturnCode failTask(Task* task, const ReturnCode& fail_rc);
   void completeTask(Task* task);
 
   ReturnCode startNextTask();
