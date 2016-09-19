@@ -27,9 +27,17 @@
 namespace eventql {
 namespace cli {
 
-Benchmark::Benchmark() : status_(ReturnCode::success()) {}
+Benchmark::Benchmark() :
+    num_threads_(4),
+    status_(ReturnCode::success()) {
+  threads_.resize(num_threads_);
+}
 
 ReturnCode Benchmark::run() {
+  for (size_t i = 0; i < num_threads_; ++i) {
+    threads_[i] = std::thread(std::bind(&Benchmark::runThread, this, i));
+  }
+
   for (auto& t : threads_) {
     if (t.joinable()) {
       t.join();
@@ -40,11 +48,36 @@ ReturnCode Benchmark::run() {
 }
 
 void Benchmark::kill() {
-
+  std::unique_lock<std::mutex> lk(mutex_);
+  stopWithError(ReturnCode::error("ERUNTIME", "Benchmark aborted..."));
 }
 
-void Benchmark::runThread() {
+void Benchmark::runThread(size_t idx) {
+  while (getRequestSlot(idx)) {
 
+    std::unique_lock<std::mutex> lk(mutex_);
+    // check for exit conditions
+    // increase num requests
+    lk.unlock();
+
+    runRequest();
+    lk.lock();
+  }
+}
+
+void Benchmark::runRequest() {
+  printf("run request\n");
+}
+
+// PRECONDITION: must hold mutex_
+void Benchmark::stopWithError(ReturnCode rc) {
+  status_ = rc;
+  cv_.notify_all();
+}
+
+bool Benchmark::getRequestSlot(size_t idx) {
+  usleep(100000);
+  return true;
 }
 
 } //cli

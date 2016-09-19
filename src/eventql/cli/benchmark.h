@@ -42,8 +42,12 @@ public:
 
 protected:
 
-  void runThread();
+  void runThread(size_t idx);
+  void runRequest();
+  void stopWithError(ReturnCode rc);
+  bool getRequestSlot(size_t idx);
 
+  size_t num_threads_;
   std::mutex mutex_;
   std::condition_variable cv_;
   std::vector<std::thread> threads_;
