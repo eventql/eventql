@@ -1024,6 +1024,8 @@ evqlctl_LDADD = \
 evqlslap_SOURCES = \
     ${EVQL_CORE_SOURCES_} \
     $(EVQL_PROTO_SOURCES_) \
+    eventql/cli/benchmark.h \
+    eventql/cli/benchmark.cc \
     eventql/evqlslap.cc
 
 evqlslap_LDADD = \

@@ -33,7 +33,7 @@
 #include "eventql/util/cli/term.h"
 #include "eventql/util/cli/flagparser.h"
 #include "eventql/util/thread/threadpool.h"
-#include "eventql/cli/cli_config.h"
+#include "eventql/cli/benchmark.h"
 
 int main(int argc, const char** argv) {
   cli::FlagParser flags;
@@ -148,6 +148,15 @@ int main(int argc, const char** argv) {
         "   -?, --help                Display a command's help text and exit\n"
         "   -v, --version             Display the version of this binary and exit\n");
 
+    return 1;
+  }
+
+  eventql::cli::Benchmark benchmark;
+  auto rc = benchmark.run();
+  if (rc.isSuccess()) {
+    return 0;
+  } else {
+    std::cerr << rc.getMessage() << std::endl;
     return 1;
   }
 
