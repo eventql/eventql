@@ -32,7 +32,7 @@ namespace csql {
 class DescribeTableStatement : public TableExpression {
 public:
 
-  static const size_t kNumColumns = 5;
+  static const size_t kNumColumns = 6;
 
   DescribeTableStatement(
       Transaction* txn,

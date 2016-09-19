@@ -549,6 +549,17 @@ csql::TableInfo TSDBTableProvider::tableInfoForTable(
     ci.is_primary_key = std::find(
       pkey.begin(), pkey.end(), col.first) != pkey.end();
 
+    switch (col.second.encoding) {
+      case msg::EncodingHint::BITPACK:
+        ci.encoding = "BITPACK";
+        break;
+      case msg::EncodingHint::LEB128:
+        ci.encoding = "LEB128";
+        break;
+      default:
+        ci.encoding = "NONE";
+    }
+
     ti.columns.emplace_back(ci);
   }
 
