@@ -51,7 +51,10 @@ Status::Status(
     type_(type),
     message_(message) {}
 
-Status::Status(const ReturnCode& rc) : Status(eRuntimeError, rc.getMessage()) {}
+Status::Status(const ReturnCode& rc) :
+    Status(
+        rc.isSuccess() ? eSuccess : eRuntimeError,
+        rc.getMessage()) {}
 
 bool Status::isError() const {
   return type_ != eSuccess;
@@ -121,7 +124,11 @@ void Status::raiseIfError() const {
 }
 
 Status::operator ReturnCode() const {
-  return ReturnCode::error(
-      StringUtil::toString(type_),
-      message_);
+  if (type_ == eSuccess) {
+    return ReturnCode::success();
+  } else {
+    return ReturnCode::error(
+        StringUtil::toString(type_),
+        message_);
+  }
 }
