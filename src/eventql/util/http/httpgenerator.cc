@@ -27,7 +27,7 @@
 
 namespace http {
 
-void HTTPGenerator::generate(const HTTPRequest& req, OutputStream* os) {
+void HTTPGenerator::generateHeaders(const HTTPRequest& req, OutputStream* os) {
   os->write(
       StringUtil::format(
           "$0 $1 $2\r\n",
@@ -44,6 +44,10 @@ void HTTPGenerator::generate(const HTTPRequest& req, OutputStream* os) {
   }
 
   os->write("\r\n");
+}
+
+void HTTPGenerator::generate(const HTTPRequest& req, OutputStream* os) {
+  generateHeaders(req, os);
 
   const auto& body = req.body();
   if (body.size() > 0) {
@@ -51,7 +55,7 @@ void HTTPGenerator::generate(const HTTPRequest& req, OutputStream* os) {
   }
 }
 
-void HTTPGenerator::generate(const HTTPResponse& res, OutputStream* os) {
+void HTTPGenerator::generateHeaders(const HTTPResponse& res, OutputStream* os) {
   if (res.version().length() < 4) {
     RAISEF(kRuntimeError, "invalid http version: $0", res.version());
   }
@@ -68,6 +72,10 @@ void HTTPGenerator::generate(const HTTPResponse& res, OutputStream* os) {
   }
 
   os->write("\r\n");
+}
+
+void HTTPGenerator::generate(const HTTPResponse& res, OutputStream* os) {
+  generateHeaders(res, os);
 
   const auto& body = res.body();
   if (body.size() > 0) {
@@ -76,3 +84,4 @@ void HTTPGenerator::generate(const HTTPResponse& res, OutputStream* os) {
 }
 
 }
+
