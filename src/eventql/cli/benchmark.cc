@@ -25,6 +25,18 @@
 #include "eventql/cli/benchmark.h"
 #include "eventql/util/wallclock.h"
 
+/**
+ * TODO:
+ *   - impl max request exit condition
+ *   - pass arguments
+ *   - store benchmark stats
+ *   - print benchmark stats
+ *   - Benchmark::connect()
+ *   -----
+ *   - Benchmark::runRequest()
+ *   - improve thread load balancing/scheudling
+ */
+
 namespace eventql {
 namespace cli {
 
@@ -75,6 +87,7 @@ void Benchmark::runThread(size_t idx) {
 }
 
 ReturnCode Benchmark::runRequest() {
+  usleep(500000);
   return ReturnCode::success();
 }
 
