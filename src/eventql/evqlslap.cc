@@ -153,6 +153,7 @@ int main(int argc, const char** argv) {
 
   auto request_handler = []() {
     //FIXME send request
+    return ReturnCode::success();
   };
 
   eventql::cli::Benchmark benchmark;

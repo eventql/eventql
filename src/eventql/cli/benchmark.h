@@ -36,7 +36,7 @@ public:
 
   Benchmark();
 
-  void setRequestHandler(Function<void ()> handler);
+  void setRequestHandler(Function<ReturnCode ()> handler);
 
   ReturnCode run();
   void kill();
@@ -55,7 +55,7 @@ protected:
   uint64_t last_request_time_;
   uint64_t rate_limit_interval_;
   size_t remaining_requests_;
-  std::function<void ()> request_handler_;
+  std::function<ReturnCode ()> request_handler_;
 };
 
 } //cli
