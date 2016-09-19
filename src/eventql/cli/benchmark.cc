@@ -52,6 +52,10 @@ Benchmark::Benchmark() :
   threads_.resize(num_threads_);
 }
 
+void Benchmark::setRequestHandler(std::function<void ()> handler) {
+  request_handler_ = handler;
+}
+
 ReturnCode Benchmark::run() {
   for (size_t i = 0; i < num_threads_; ++i) {
     threads_[i] = std::thread(std::bind(&Benchmark::runThread, this, i));
@@ -85,17 +89,26 @@ void Benchmark::kill() {
 void Benchmark::runThread(size_t idx) {
   while (getRequestSlot(idx)) {
     // FIXME record start time
-    auto rc = ReturnCode::success(); // FIXME call request handler/cb
-    // FIXME record end time
-
-    std::unique_lock<std::mutex> lk(mutex_);
-    // FIXME stats.addRequst(rc.isSu, idx, runtime)...
-
-    if (!rc.isSuccess()) {
-      status_ = rc;
+    auto rc = ReturnCode::success();
+    if (!request_handler_) {
+      std::unique_lock<std::mutex> lk(mutex_);
+      status_ = ReturnCode::error("ERUNTIME", "no request handler set");
       cv_.notify_all();
       break;
     }
+
+    try {
+      request_handler_();
+    } catch (const std::exception& e) {
+      std::unique_lock<std::mutex> lk(mutex_);
+      status_ = ReturnCode::error("ERUNTIME", e.what());
+      cv_.notify_all();
+      break;
+    }
+    // FIXME record end time
+
+    // FIXME stats.addRequst(rc.isSu, idx, runtime)...
+
   }
 
   std::unique_lock<std::mutex> lk(mutex_);

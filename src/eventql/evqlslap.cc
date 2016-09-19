@@ -151,7 +151,12 @@ int main(int argc, const char** argv) {
     return 1;
   }
 
+  auto request_handler = []() {
+    //FIXME send request
+  };
+
   eventql::cli::Benchmark benchmark;
+  benchmark.setRequestHandler(request_handler);
   auto rc = benchmark.run();
   if (rc.isSuccess()) {
     return 0;
