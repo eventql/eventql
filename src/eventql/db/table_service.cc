@@ -37,6 +37,7 @@
 #include "eventql/db/metadata_file.h"
 #include "eventql/db/metadata_client.h"
 #include "eventql/db/server_allocator.h"
+#include <eventql/transport/native/client_tcp.h>
 
 #include "eventql/eventql.h"
 
@@ -622,6 +623,8 @@ ReturnCode TableService::insertRecords(
     const Set<String>& servers,
     const ShreddedRecordList& records) {
   size_t nconfirmations = 0;
+
+  /* perform local inserts */
   std::vector<std::string> remote_servers;
   for (const auto& server : servers) {
     if (server == cdir_->getServerID()) {
@@ -658,6 +661,42 @@ ReturnCode TableService::insertRecords(
     }
   }
 
+  /* build rpc payload */
+  std::string rpc_payload;
+
+  /* execute rpcs */
+  native_transport::TCPAsyncClient rpc_client(
+      config_,
+      cdir_,
+      remote_servers.size(), /* max_concurrent_tasks */
+      1,                     /* max_concurrent_tasks_per_host */
+      true);                 /* tolerate failures */
+
+  rpc_client.setResultCallback([&nconfirmations] (
+      void* priv,
+      uint16_t opcode,
+      uint16_t flags,
+      const char* payload,
+      size_t payload_size) -> ReturnCode {
+    switch (opcode) {
+      case EVQL_OP_ACK:
+        ++nconfirmations;
+        return ReturnCode::success();
+      default:
+        return ReturnCode::error("ERUNTIME", "unexpected opcode");
+    }
+  });
+
+  for (const auto& s : remote_servers) {
+    rpc_client.addRPC(EVQL_OP_REPL_INSERT, 0, std::string(rpc_payload), { s });
+  }
+
+  auto rc = rpc_client.execute();
+  if (!rc.isSuccess()) {
+    return rc;
+  }
+
+  /* check if at least N inserts were successful */
   if (nconfirmations >= 1) { // FIXME min consistency level
     return ReturnCode::success();
   } else {
