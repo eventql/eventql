@@ -34,6 +34,9 @@
 #include "eventql/util/io/FileLock.h"
 #include "eventql/util/io/fileutil.h"
 
+int shutdown_pipe[2];
+void shutdown(int);
+
 int main(int argc, const char** argv) {
   Application::init();
   cli::FlagParser flags;
@@ -293,6 +296,17 @@ int main(int argc, const char** argv) {
     evql_conf_set(conf, "server.pidfile", pidfile.c_str());
   }
 
+  /* init shutdown handler */
+  if (pipe(shutdown_pipe) != 0) {
+    logCritical("evqld", "error while initializing evqld: pipe failed()");
+    return 1;
+  }
+
+  signal(SIGTERM, shutdown);
+  signal(SIGINT, shutdown);
+  signal(SIGHUP, shutdown);
+  signal(SIGPIPE, SIG_IGN);
+
   /* init server */
   auto server = evql_server_init(conf);
   if (!server) {
@@ -337,7 +351,7 @@ int main(int argc, const char** argv) {
   /* start database */
   int rc = evql_server_start(server);
   if (!rc) {
-    rc = evql_server_listen(server, -1);
+    rc = evql_server_listen(server, shutdown_pipe[0]);
   }
 
   if (rc) {
@@ -348,6 +362,12 @@ int main(int argc, const char** argv) {
   logInfo("eventql", "Exiting...");
   evql_server_shutdown(server);
 
+  signal(SIGTERM, SIG_IGN);
+  signal(SIGINT, SIG_IGN);
+  signal(SIGHUP, SIG_IGN);
+  close(shutdown_pipe[0]);
+  close(shutdown_pipe[1]);
+
   if (pidfile_lock.get()) {
     pidfile_lock.reset(nullptr);
     FileUtil::rm(pidfile_path);
@@ -357,5 +377,10 @@ int main(int argc, const char** argv) {
   evql_conf_free(conf);
 
   return rc;
+}
+
+void shutdown(int) {
+  unsigned char one = 1;
+  write(shutdown_pipe[1], &one, 1);
 }
 

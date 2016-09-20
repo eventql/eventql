@@ -649,16 +649,31 @@ Status ZookeeperConfigDirectory::syncTable(
 
 void ZookeeperConfigDirectory::stop() {
   std::unique_lock<std::mutex> lk(mutex_);
-  if (zk_) {
-    zookeeper_close(zk_);
-    zk_ = nullptr;
+
+  if (zk_ && state_ == ZKState::CONNECTED && !server_name_.isEmpty()) {
+    auto server_path = StringUtil::format(
+        "$0/servers-online/$1",
+        path_prefix_,
+        server_name_.get());
+
+    auto rc = zoo_delete(zk_, server_path.c_str(), server_stats_version_);
+    if (rc) {
+      logError("evqld", "zoo_delete() failed: $0", getErrorString(rc));
+    }
   }
+
   state_ = ZKState::CLOSED;
   cv_.notify_all();
   lk.unlock();
+  cv_.notify_all();
 
   if (watchdog_.joinable()) {
     watchdog_.join();
+  }
+
+  if (zk_) {
+    zookeeper_close(zk_);
+    zk_ = nullptr;
   }
 }
 
@@ -1326,13 +1341,11 @@ void ZookeeperConfigDirectory::runWatchdog() {
         continue;
 
       case ZKState::CLOSED:
-        break;
+        return;
 
       default:
         reconnect(&lk);
-        lk.unlock();
-        usleep(kReconnectRateLimit);
-        lk.lock();
+        cv_.wait_for(lk, std::chrono::microseconds(kReconnectRateLimit));
         continue;
 
     }

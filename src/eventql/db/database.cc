@@ -474,6 +474,7 @@ void DatabaseImpl::shutdown() {
     config_dir_->stop();
   }
 
+  exit(0); // FIXME remove me once clean shutdown works
   monitor_.reset(nullptr);
   leader_.reset(nullptr);
   mapreduce_service_.reset(nullptr);
