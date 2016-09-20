@@ -145,19 +145,22 @@ int main(int argc, const char** argv) {
         "   -c, --connections <num>   Number of concurrent connections\n"
         "   -r, --rate <rate>         Maximum rate of requests in RPS\n"
         "   -n, --num <num>           Maximum total number of request (default is inifite)\n"
-        "   -?, --help                Display a command's help text and exit\n"
+        "   -?, --help                Display the help text and exit\n"
         "   -v, --version             Display the version of this binary and exit\n");
 
     return 1;
   }
 
+  eventql::cli::Benchmark benchmark;
+
   auto on_progress = []() {
+
   };
 
-  eventql::cli::Benchmark benchmark;
   benchmark.setProgressCallback(on_progress);
   auto rc = benchmark.run();
   if (rc.isSuccess()) {
+    stdout_os->print(benchmark.getStats()->toString() + "\n");
     return 0;
   } else {
     std::cerr << rc.getMessage() << std::endl;

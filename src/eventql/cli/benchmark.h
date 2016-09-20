@@ -34,23 +34,17 @@ namespace cli {
 class BenchmarkStats {
 public:
 
+  BenchmarkStats();
+
   void addRequest(bool is_success, size_t t_id, uint64_t start_time);
 
   std::string toString() const;
 
 protected:
 
-  struct RequestStats {
-    uint64_t start_time;
-    bool is_success;
-  };
-
-  struct ThreadStats {
-    size_t t_id;
-    std::vector<RequestStats> requests;
-  };
-
-  std::vector<ThreadStats> t_stats_;
+  uint64_t total_requests_;
+  uint64_t min_rate_;
+  uint64_t max_rate_;
   std::mutex mutex_;
 };
 

@@ -41,40 +41,18 @@
 namespace eventql {
 namespace cli {
 
+BenchmarkStats::BenchmarkStats() : total_requests_(0) {}
+
 void BenchmarkStats::addRequest(
     bool is_success,
     size_t t_id,
     uint64_t start_time) {
-  RequestStats request;
-  request.is_success = is_success;
-  request.start_time = start_time;
-
-  for (auto t_stat : t_stats_) {
-    if (t_stat.t_id == t_id) {
-      t_stat.requests.emplace_back(request);
-      return;
-    }
-  }
-
-  ThreadStats thread;
-  thread.t_id = t_id;
-  thread.requests.emplace_back(request);
-  t_stats_.emplace_back(thread);
+  ++total_requests_;
 }
 
 std::string BenchmarkStats::toString() const {
-  auto total = 0;
-  std::string str = "total: $0";
 
-  for (const auto& stat : t_stats_) {
-    total += stat.requests.size();
-    str.append(StringUtil::format(
-        " --- t-$0: $1",
-        stat.t_id,
-        stat.requests.size()));
-  }
-
-  return StringUtil::format(str, total);
+  return StringUtil::format("total $0", total_requests_);
 }
 
 // FIXME pass proper arguments
