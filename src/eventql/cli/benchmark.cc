@@ -28,7 +28,6 @@
 /**
  * TODO:
  *   - Benchmark.setRequestHandler(Fun<void (BenchmarkStats*>)
- *   - pass arguments
  *   - benchmark stats: Benchmark::getStats()
  *   - print benchmark stats
  *   - Benchmark::connect()
@@ -47,10 +46,10 @@ Benchmark::Benchmark(
     size_t remaining_requests /* = -1*/) :
     num_threads_(num_threads),
     status_(ReturnCode::success()),
+    remaining_requests_(remaining_requests),
     threads_running_(0),
     last_request_time_(0),
-    rate_limit_interval_(1000000),
-    remaining_requests_(5) {
+    rate_limit_interval_(1 * kMicrosPerSecond / rate) {
   threads_.resize(num_threads_);
 }
 

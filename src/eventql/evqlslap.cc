@@ -152,11 +152,14 @@ int main(int argc, const char** argv) {
   }
 
   auto on_progress = []() {
+    iputs("progress", 1);
   };
 
   eventql::cli::Benchmark benchmark(
       flags.getInt("connections"),
-      flags.getInt("rate"));
+      flags.getInt("rate"),
+      flags.isSet("num") ? flags.getInt("num") : -1);
+
   benchmark.setProgressCallback(on_progress);
   auto rc = benchmark.run();
   if (rc.isSuccess()) {
