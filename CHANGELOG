@@ -1,7 +1,10 @@
-EventQL v0.4.0 beta;
+EventQL v0.5.0 beta;
 
   * Changed the DESCRIBE TABLE statement to return a new "encoding" column that
     contains information about the column's encoding settings
+
+  * Added a new monitor thread that publishes disk usage and other load
+    information to the coordination service
 
   * Added new frames to native protocol: ACK, INSERT, REPL_INSERT
 
