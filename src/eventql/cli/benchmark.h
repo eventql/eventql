@@ -42,7 +42,7 @@ public:
 
 protected:
 
-  static const uint64_t kNumBuckets = 10;
+  static const uint64_t kNumBuckets = 6;
   static const auto kTimeWindowSize = 10000000; //10 seconds
 
   struct Bucket {

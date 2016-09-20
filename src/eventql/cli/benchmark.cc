@@ -53,10 +53,17 @@ void BenchmarkStats::addRequest(
   ++total_requests_;
 
   auto twindow = start_time / kTimeWindowSize * kTimeWindowSize;
+  //start first time window
   if (buckets_[buckets_begin_].time == 0) {
     buckets_[buckets_begin_].time = twindow;
+
+  //start new time window
   } else if (buckets_[buckets_begin_].time != twindow) {
-    ++buckets_begin_;
+    if (buckets_begin_ == kNumBuckets - 1) {
+      buckets_begin_ = 0;
+    } else {
+      ++buckets_begin_;
+    }
     buckets_[buckets_begin_].time = twindow;
   }
 
@@ -66,16 +73,21 @@ void BenchmarkStats::addRequest(
 std::string BenchmarkStats::toString() const {
   //calculate moving average for the last minute
   auto start = MonotonicClock::now() - kMicrosPerMinute;
-  uint64_t total_last_minute = 0;
-  for (size_t i = 0; i <= buckets_begin_; ++i) {
+  double total_last_minute = 0;
+  size_t bucket_ctr = 0;
+  for (size_t i = 0; i <= buckets_.size(); ++i) {
     if (buckets_[i].time < start) {
       continue;
     }
 
+    ++bucket_ctr;
     total_last_minute += buckets_[i].num_requests;
   }
 
-  return StringUtil::format("total $0 --- requests per 10s $1", total_requests_, (double) (total_last_minute / 10) / (buckets_begin_ + 1));
+  return StringUtil::format(
+      "total $0 --- avg rps $1",
+      total_requests_,
+      total_last_minute / (bucket_ctr * 10));
 }
 
 // FIXME pass proper arguments
