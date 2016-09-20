@@ -215,7 +215,7 @@ void StatusServlet::renderDashboard(
   html += "<h3>Servers</h3>";
   html += "<table cellspacing=0 border=1>";
   html += "<tr><th>Name</th><th>Status</th><th>ListenAddr</th>"
-          "<th>BuildInfo</th><th>Load</th><th>Disk Used</th><th>Disk Free</th>"
+          "<th>BuildInfo</th><th>Disk %</th><th>Disk Used</th><th>Disk Free</th>"
           "<th>Partitions</th></tr>";
 
   for (const auto& server : cdir->listServers()) {
@@ -223,20 +223,33 @@ void StatusServlet::renderDashboard(
       continue;
     }
 
+    const auto& sstats = server.server_stats();
+    auto disk_capacity = sstats.disk_used() + sstats.disk_available();
+
     html += StringUtil::format(
         "<tr><td>$0</td><td>$1</td><td>$2</td><td>$3</td><td>$4</td>"
-        "<td>$5MB</td><td>$6MB</td><td>$7/$8</td></tr>",
+        "<td>$5</td><td>$6</td><td>$7/$8</td></tr>",
         server.server_id(),
         ServerStatus_Name(server.server_status()),
         server.server_addr(),
-        server.server_stats().buildinfo(),
-        server.server_stats().has_load_factor() ?
-            StringUtil::toString(server.server_stats().load_factor()) :
+        sstats.buildinfo(),
+        sstats.has_disk_used() && sstats.has_disk_available() ?
+            StringUtil::format(
+                "$0MB",
+                (double) sstats.disk_used() / (double) disk_capacity) :
             "-",
-        server.server_stats().disk_used() / 0x100000,
-        server.server_stats().disk_available() / 0x100000,
-        server.server_stats().partitions_loaded(),
-        server.server_stats().partitions_assigned());
+        sstats.has_disk_used() ?
+            StringUtil::format("$0MB", sstats.disk_used() / 0x100000) :
+            "-",
+        sstats.has_disk_available() ?
+            StringUtil::format("$0MB", sstats.disk_available() / 0x100000) :
+            "-",
+        sstats.has_partitions_loaded() ?
+            StringUtil::format("$0MB", sstats.partitions_loaded() / 0x100000) :
+            "-",
+        sstats.has_partitions_assigned() ?
+            StringUtil::format("$0MB", sstats.partitions_assigned() / 0x100000) :
+            "-");
   }
   html += "</table>";
 

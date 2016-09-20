@@ -75,26 +75,16 @@ ReturnCode Monitor::runMonitorProcedure() {
     partitions_loaded -= partitions_loading;
   }
 
-  double p_factor = 1.0f;
-  if (partitions_loaded > 0 && partitions_assigned > 0) {
-    p_factor = (double) partitions_assigned / (double) partitions_loaded;
-  }
-
-  double load_factor =
-      ((double) disk_used / (double) (disk_used + disk_available)) * p_factor;
-
   /* publish server stats */
   logDebug(
       "evqld",
-      "LOAD INFO: load=$0 disk_used=$1MB disk_avail=$2MB partitions=$3/$4",
-      load_factor,
+      "LOAD INFO: disk_used=$0MB disk_avail=$1MB partitions=$2/$3",
       disk_used / 0x100000,
       disk_available / 0x100000,
       partitions_loaded,
       partitions_assigned);
 
   ServerStats sstats;
-  sstats.set_load_factor(load_factor);
   sstats.set_disk_used(disk_used);
   sstats.set_disk_available(disk_available);
   sstats.set_partitions_loaded(partitions_loaded);
