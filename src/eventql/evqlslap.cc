@@ -26,7 +26,7 @@
 #include <iostream>
 #include "eventql/eventql.h"
 #include "eventql/util/application.h"
-#include "eventql/util/WallClock.h"
+#include "eventql/util/wallclock.h"
 #include "eventql/util/return_code.h"
 #include "eventql/util/cli/CLI.h"
 #include "eventql/util/io/inputstream.h"
