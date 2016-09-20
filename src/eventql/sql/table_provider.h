@@ -32,6 +32,7 @@
 #include <eventql/sql/scheduler/execution_context.h>
 #include "eventql/sql/qtree/nodes/alter_table.h"
 #include "eventql/sql/qtree/nodes/create_table.h"
+#include "eventql/db/table_info.h"
 
 namespace csql {
 
@@ -49,7 +50,7 @@ public:
 
   Status listPartitions(
       const String& table_name,
-      Function<void (const csql::TablePartitionInfo& partition)> fn) const {
+      Function<void (const ::eventql::TablePartitionInfo& partition)> fn) const {
     return Status(eRuntimeError, "not yet implemented");
   }
 

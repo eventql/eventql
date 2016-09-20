@@ -450,7 +450,7 @@ void TableService::listTables(
 Status TableService::listPartitions(
     const String& db_namespace,
     const String& table_name,
-    Function<void (const csql::TablePartitionInfo& partition)> fn) const {
+    Function<void (const TablePartitionInfo& partition)> fn) const {
   auto table = pmap_->findTable(db_namespace, table_name);
   MetadataClient metadata_client(cdir_);
   MetadataFile metadata_file;
@@ -464,7 +464,7 @@ Status TableService::listPartitions(
   }
 
   for (const auto& e : metadata_file.getPartitionMap()) {
-    csql::TablePartitionInfo p_info;
+    TablePartitionInfo p_info;
     p_info.partition_id = e.partition_id.toString();
 
     for (const auto& s : e.servers) {

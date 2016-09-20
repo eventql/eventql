@@ -94,7 +94,7 @@ public:
   Status listPartitions(
     const String& db_namespace,
     const String& table_name,
-    Function<void (const csql::TablePartitionInfo& partition)> fn) const;
+    Function<void (const TablePartitionInfo& partition)> fn) const;
 
   // insert one record
   ReturnCode insertRecord(

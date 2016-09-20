@@ -512,13 +512,12 @@ void TSDBTableProvider::listTables(
 
 Status TSDBTableProvider::listPartitions(
     const String& table_name,
-    Function<void (const csql::TablePartitionInfo& partition)> fn) const {
+    Function<void (const TablePartitionInfo& partition)> fn) const {
   return table_service_->listPartitions(
       tsdb_namespace_,
       table_name,
       fn);
 }
-
 
 Option<csql::TableInfo> TSDBTableProvider::describe(
     const String& table_name) const {

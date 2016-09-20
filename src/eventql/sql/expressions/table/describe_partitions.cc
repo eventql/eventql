@@ -36,7 +36,7 @@ DescribePartitionsExpression::DescribePartitionsExpression(
 ScopedPtr<ResultCursor> DescribePartitionsExpression::execute() {
   txn_->getTableProvider()->listPartitions(
       table_name_,
-      [this] (const TablePartitionInfo& p_info) {
+      [this] (const eventql::TablePartitionInfo& p_info) {
     rows_.emplace_back(p_info);
   });
 

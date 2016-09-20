@@ -48,7 +48,7 @@ protected:
 
   Transaction* txn_;
   String table_name_;
-  Vector<TablePartitionInfo> rows_;
+  Vector<eventql::TablePartitionInfo> rows_;
   size_t counter_;
 };
 
