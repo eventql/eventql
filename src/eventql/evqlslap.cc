@@ -21,18 +21,12 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include <queue>
-#include <thread>
 #include <iostream>
 #include "eventql/eventql.h"
 #include "eventql/util/application.h"
-#include "eventql/util/WallClock.h"
-#include "eventql/util/return_code.h"
-#include "eventql/util/cli/CLI.h"
 #include "eventql/util/io/inputstream.h"
-#include "eventql/util/cli/term.h"
+#include "eventql/util/io/TerminalOutputStream.h"
 #include "eventql/util/cli/flagparser.h"
-#include "eventql/util/thread/threadpool.h"
 #include "eventql/cli/benchmark.h"
 
 int main(int argc, const char** argv) {
