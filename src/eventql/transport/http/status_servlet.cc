@@ -189,8 +189,11 @@ void StatusServlet::renderDashboard(
       "<span><em>Number of Partitions:</em> $0</span> &mdash; ",
       zs->num_partitions.get());
   html += StringUtil::format(
-      "<span><em>Number of Partitions - Loaded:</em> $0</span> &mdash; ",
-      zs->num_partitions_loaded.get());
+      "<span><em>Number of Partitions - Opened:</em> $0</span> &mdash; ",
+      zs->num_partitions_opened.get());
+  html += StringUtil::format(
+      "<span><em>Number of Partitions - Loading:</em> $0</span> &mdash; ",
+      zs->num_partitions_loading.get());
   html += StringUtil::format(
       "<span><em>Number of Dirty Partitions:</em> $0</span> &mdash; ",
       zs->compaction_queue_length.get());

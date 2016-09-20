@@ -31,6 +31,11 @@ enum ServerStatus {
 message ServerStats {
   optional string listen_addr = 1;
   optional double load_factor = 2;
+  optional uint64 disk_used = 3;
+  optional uint64 disk_available = 4;
+  optional uint64 partitions_loaded = 5;
+  optional uint64 partitions_assigned = 6;
+  optional string buildinfo = 7;
 };
 
 message ServerConfig {

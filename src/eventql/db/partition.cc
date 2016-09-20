@@ -138,11 +138,11 @@ Partition::Partition(
     dbctx_(dbctx),
     head_(head),
     table_(table) {
-  evqld_stats()->num_partitions_loaded.incr(1);
+  evqld_stats()->num_partitions_opened.incr(1);
 }
 
 Partition::~Partition() {
-  evqld_stats()->num_partitions_loaded.decr(1);
+  evqld_stats()->num_partitions_opened.decr(1);
 }
 
 SHA1Hash Partition::uuid() const {
