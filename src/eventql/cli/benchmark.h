@@ -31,6 +31,27 @@
 namespace eventql {
 namespace cli {
 
+class BenchmarkStats {
+public:
+
+  void addRequest(bool is_success, size_t t_id, uint64_t start_time);
+
+protected:
+
+  struct RequestStats {
+    uint64_t start_time;
+    bool is_success;
+  };
+
+  struct ThreadStats {
+    size_t t_id;
+    std::vector<RequestStats> requests;
+  };
+
+  std::vector<ThreadStats> t_stats_;
+  std::mutex mutex_;
+};
+
 class Benchmark {
 public:
 
@@ -40,6 +61,8 @@ public:
 
   ReturnCode run();
   void kill();
+
+  BenchmarkStats* getStats();
 
 protected:
 
@@ -54,6 +77,7 @@ protected:
   size_t threads_running_;
   uint64_t last_request_time_;
   uint64_t rate_limit_interval_;
+  BenchmarkStats stats_;
   size_t remaining_requests_;
   std::function<void ()> on_progress_;
 };

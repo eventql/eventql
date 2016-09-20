@@ -32,6 +32,7 @@
  *   - benchmark stats: Benchmark::getStats()
  *   - print benchmark stats
  *   - Benchmark::connect()
+ *   - benchmark stats: moving average
  *   -----
  *   - Benchmark::runRequest()
  *   - improve thread load balancing/scheudling
@@ -39,6 +40,26 @@
 
 namespace eventql {
 namespace cli {
+
+void BenchmarkStats::addRequest(
+    bool is_success,
+    size_t t_id,
+    uint64_t start_time) {
+  RequestStats request;
+  request.is_success = is_success;
+  request.start_time = start_time;
+
+  for (auto t_stat : t_stats_) {
+    if (t_stat.t_id == t_id) {
+      t_stat.requests.emplace_back(request);
+      return;
+    }
+  }
+
+  ThreadStats thread;
+  thread.t_id = t_id;
+  thread.requests.emplace_back(request);
+}
 
 // FIXME pass proper arguments
 Benchmark::Benchmark() :
@@ -94,7 +115,7 @@ void Benchmark::runThread(size_t idx) {
     // FIXME record end time
 
     std::unique_lock<std::mutex> lk(mutex_);
-    // FIXME stats.addRequst(rc.isSu, idx, runtime)...
+    stats_.addRequest(rc.isSuccess(), idx, 0); //FIXME add start/runtime
 
     if (!rc.isSuccess()) {
       status_ = rc;
