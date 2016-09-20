@@ -478,35 +478,27 @@ Status TSDBTableProvider::insertRecord(
     }
   }
 
-  try {
-    table_service_->insertRecord(
-        tsdb_namespace_,
-        table_name,
-        *msg);
-
-  } catch (const Exception& e) {
-    return Status(eRuntimeError, e.getMessage());
-  }
-
-  return Status::success();
+  return table_service_->insertRecord(
+      tsdb_namespace_,
+      table_name,
+      *msg);
 }
 
 Status TSDBTableProvider::insertRecord(
     const String& table_name,
     const String& json_str) {
-
-  auto json = json::parseJSON(json_str);
+  json::JSONObject json;
   try {
-    table_service_->insertRecord(
-        tsdb_namespace_,
-        table_name,
-        json.begin(),
-        json.end());
-  } catch (const Exception& e) {
-    return Status(eRuntimeError, e.getMessage());
+    json = json::parseJSON(json_str);
+  } catch (const std::exception& e) {
+    return ReturnCode::exception(e);
   }
 
-  return Status::success();
+  return table_service_->insertRecord(
+      tsdb_namespace_,
+      table_name,
+      json.begin(),
+      json.end());
 }
 
 void TSDBTableProvider::listTables(
@@ -559,6 +551,17 @@ csql::TableInfo TSDBTableProvider::tableInfoForTable(
     ci.is_primary_key = std::find(
       pkey.begin(), pkey.end(), col.first) != pkey.end();
 
+    switch (col.second.encoding) {
+      case msg::EncodingHint::BITPACK:
+        ci.encoding = "BITPACK";
+        break;
+      case msg::EncodingHint::LEB128:
+        ci.encoding = "LEB128";
+        break;
+      default:
+        ci.encoding = "NONE";
+    }
+
     ti.columns.emplace_back(ci);
   }
 
@@ -585,6 +588,20 @@ RefPtr<csql::ValueExpressionNode> TSDBTableProvider::simplifyWhereExpression(
       continue;
     }
 
+    std::string c_val;
+    switch (c.value.getType()) {
+      case SQL_STRING:
+      case SQL_INTEGER:
+      case SQL_FLOAT:
+        c_val = encodePartitionKey(pkeyspace, c.value.getString());
+        break;
+      case SQL_TIMESTAMP:
+        c_val = encodePartitionKey(pkeyspace, c.value.toInteger().getString());
+        break;
+      default:
+        continue;
+    }
+
     switch (c.type) {
 
       case csql::ScanConstraintType::EQUAL_TO:
@@ -594,10 +611,7 @@ RefPtr<csql::ValueExpressionNode> TSDBTableProvider::simplifyWhereExpression(
       case csql::ScanConstraintType::LESS_THAN:
       case csql::ScanConstraintType::LESS_THAN_OR_EQUAL_TO:
         if (keyrange_end.size() > 0 &&
-            comparePartitionKeys(
-                pkeyspace,
-                encodePartitionKey(pkeyspace, c.value.getString()),
-                keyrange_end) >= 0) {
+            comparePartitionKeys(pkeyspace, c_val, keyrange_end) >= 0) {
           break;
         } else {
           continue;
@@ -606,10 +620,7 @@ RefPtr<csql::ValueExpressionNode> TSDBTableProvider::simplifyWhereExpression(
       case csql::ScanConstraintType::GREATER_THAN:
       case csql::ScanConstraintType::GREATER_THAN_OR_EQUAL_TO:
         if (keyrange_begin.size() > 0 &&
-            comparePartitionKeys(
-                pkeyspace,
-                encodePartitionKey(pkeyspace, c.value.getString()),
-                keyrange_begin) <= 0) {
+            comparePartitionKeys( pkeyspace, c_val, keyrange_begin) <= 0) {
           break;
         } else {
           continue;

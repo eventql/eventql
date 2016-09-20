@@ -43,8 +43,7 @@
 
 static const size_t EVQL_FRAME_MAX_SIZE = 1024 * 1024 * 256;
 static const size_t EVQL_FRAME_HEADER_SIZE = 8;
-static const size_t EVQL_CLIENT_DEFAULT_IO_TIMEOUT_US = 1000 * 1000  * 1; // 1 second
-static const size_t EVQL_CLIENT_DEFAULT_IDLE_TIMEOUT_US = 1000 * 1000  * 5; // 5 seconds
+static const size_t EVQL_CLIENT_DEFAULT_TIMEOUT_US = 1000 * 1000  * 5; // 5 seconds
 static const size_t EVQL_CLIENT_DEFAULT_BATCH_SIZE = 1024;
 #define EVQL_CLIENT_INLINE_RBUF_SIZE 64
 #define EVQL_CLIENT_INLINE_CBUF_SIZE 1024
@@ -69,9 +68,8 @@ struct evql_client_s {
   char* authdata;
   size_t authdata_len;
   size_t authdata_capacity;
-  uint64_t io_timeout_us;
-  uint64_t idle_timeout_us;
-  size_t batch_size;
+  uint64_t timeout_us;
+  uint64_t batch_size;
   evql_framebuf_t recv_buf;
   int qbuf_valid;
   int qbuf_islast;
@@ -417,7 +415,7 @@ static int evql_client_sendframe(
       client,
       frame->header,
       frame->length + 8,
-      client->io_timeout_us);
+      client->timeout_us);
 
   if (ret == -1) {
     return -1;
@@ -464,7 +462,7 @@ static int evql_client_recvframe(
       client,
       client->recv_buf.data,
       payload_len,
-      client->io_timeout_us);
+      client->timeout_us);
 
   if (rc == -1) {
     return -1;
@@ -487,7 +485,7 @@ static int evql_client_handshake(evql_client_t* client, const char* database) {
     evql_framebuf_writelenencint(&hello_frame, 1); // protocol version
     evql_framebuf_writelenencstr(&hello_frame, "eventql", 7); // eventql version
     evql_framebuf_writelenencint(&hello_frame, hello_flags); // flags
-    evql_framebuf_writelenencint(&hello_frame, client->idle_timeout_us);
+    evql_framebuf_writelenencint(&hello_frame, client->timeout_us);
     evql_framebuf_writelenencint(&hello_frame, client->authdata_len);
     if (client->authdata) {
       evql_framebuf_write(&hello_frame, client->authdata, client->authdata_len);
@@ -518,7 +516,7 @@ static int evql_client_handshake(evql_client_t* client, const char* database) {
         client,
         &response_opcode,
         &response_frame,
-        client->idle_timeout_us,
+        client->timeout_us,
         NULL);
 
     if (rc < 0) {
@@ -601,7 +599,7 @@ static int evql_client_query_readresultframe(evql_client_t* client) {
         client,
         &response_opcode,
         &r_buf,
-        client->idle_timeout_us,
+        client->timeout_us,
         NULL);
 
     if (rc < 0) {
@@ -896,8 +894,7 @@ evql_client_t* evql_client_init() {
   client->authdata = NULL;
   client->authdata_len = 0;
   client->authdata_capacity = 0;
-  client->io_timeout_us = EVQL_CLIENT_DEFAULT_IO_TIMEOUT_US;
-  client->idle_timeout_us = EVQL_CLIENT_DEFAULT_IDLE_TIMEOUT_US;
+  client->timeout_us = EVQL_CLIENT_DEFAULT_TIMEOUT_US;
   client->batch_size = EVQL_CLIENT_DEFAULT_BATCH_SIZE;
   memset(client->rbuf_inline, 0, sizeof(client->rbuf_inline));
   client->rbuf_ptrs = (const char**) client->rbuf_inline;
@@ -965,8 +962,25 @@ int evql_client_setopt(
     size_t val_len,
     long flags) {
   switch (opt) {
-    //case EVQL_CLIENT_IOTIMEOUT:
-    // return 0;
+
+    case EVQL_CLIENT_OPT_TIMEOUT:
+      if (val_len == sizeof(uint64_t)) {
+        client->timeout_us = *((const uint64_t*) val);
+        return 0;
+      } else {
+        evql_client_seterror(client, "invalid option value");
+        return -1;
+      }
+
+    case EVQL_CLIENT_OPT_ROWBUFLEN:
+      if (val_len == sizeof(uint64_t)) {
+        client->batch_size = *((const uint64_t*) val);
+        return 0;
+      } else {
+        evql_client_seterror(client, "invalid option value");
+        return -1;
+      }
+
     default:
       break;
   }

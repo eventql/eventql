@@ -23,24 +23,35 @@
  */
 #pragma once
 #include <eventql/util/stdtypes.h>
-#include <eventql/util/stats/counter.h>
-#include <eventql/util/http/httpstats.h>
+#include <eventql/util/autoref.h>
+#include <eventql/db/file_tracker.h>
+#include <eventql/config/config_directory.h>
+#include "eventql/eventql.h"
+#include <thread>
+#include <condition_variable>
 
 namespace eventql {
+struct DatabaseContext;
 
-struct evqld_stats {
-  stats::Counter<uint64_t> num_partitions;
-  stats::Counter<uint64_t> num_partitions_opened;
-  stats::Counter<uint64_t> num_partitions_loading;
-  stats::Counter<uint64_t> replication_queue_length;
-  stats::Counter<uint64_t> compaction_queue_length;
-  stats::Counter<uint64_t> mapreduce_reduce_memory;
-  stats::Counter<uint64_t> mapreduce_num_map_tasks;
-  stats::Counter<uint64_t> mapreduce_num_reduce_tasks;
-  stats::Counter<uint64_t> cache_size;
-  http::HTTPClientStats http_client_stats;
+class Monitor {
+public:
+
+  Monitor(DatabaseContext* dbctx);
+  ~Monitor();
+
+  ReturnCode runMonitorProcedure();
+
+  void startMonitorThread();
+  void stopMonitorThread();
+
+protected:
+
+  DatabaseContext* dbctx_;
+  std::thread thread_;
+  bool thread_running_;
+  std::mutex mutex_;
+  std::condition_variable cv_;
 };
 
-struct evqld_stats* evqld_stats();
+} // namespace eventql
 
-}

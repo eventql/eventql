@@ -39,7 +39,7 @@ tips to get the best performance.
       author          STRING,
       tweet           STRING,
       PRIMARY KEY(time, event_id)
-    ) WITH finite_partition_size = 600000000;
+    ) WITH partition_size_hint = 600000000;
 
 
 ### HTTP API

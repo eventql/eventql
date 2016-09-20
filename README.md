@@ -52,7 +52,7 @@ To run EventQL Server with Docker:
     $ cd eventql/contrib/docker/server
     $ chmod +x run.sh && ./run.sh
 
-Running on port 9175
+The server will start on port 9175
 
 To run the test suite:
 

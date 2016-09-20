@@ -276,25 +276,38 @@ The EventQL configuration options are grouped in three sections: `client`, `serv
   </tr>
   <tr>
     <td><b>client.database</b></td>
-    <td>&mdash;</td>
+    <td></td>
     <td>The database that should be used for following queries (optional)</td>
   </tr>
   <tr>
     <td><b>client.user</b></td>
-    <td>&mdash;</td>
+    <td>$USER</td>
     <td>Username to use when connecting to server (optional)</td>
   </tr>
   <tr>
     <td><b>client.password</b></td>
-    <td>&mdash;</td>
+    <td></td>
     <td>Password to use when connecting to server (optional)</td>
   </tr>
   <tr>
     <td><b>client.auth_token</b></td>
-    <td>&mdash;</td>
+    <td></td>
     <td>Auth-Token to use when connecting to server (optional)</td>
   </tr>
+  <tr>
+    <td><b>client.timeout</b></td>
+    <td>5s</td>
+    <td>Timeout to use when connecting to server (unit is microseconds)</td>
+  </tr>
+  <tr>
+    <td><b>client.history_file</b></td>
+    <td>$HOME/.evql_history</td>
+    <td>Where to write the interactive shell history file</td>
+  </tr>
+  <tr>
+    <td><b>client.history_maxlen</b></td>
+    <td>1024</td>
+    <td>Maximum number of entries in the interactive shell history file</td>
+  </tr>
 </table>
-
-
 

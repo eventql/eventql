@@ -22,6 +22,8 @@
  * code of your own applications
  */
 #include <regex>
+#include <unistd.h>
+#include <stdio.h>
 #include <zookeeper.h>
 #include <eventql/config/config_directory_zookeeper.h>
 #include <eventql/util/protobuf/msg.h>
@@ -41,6 +43,8 @@ static int free_String_vector(struct String_vector *v) {
   return 0;
 }
 
+static const size_t kReconnectRateLimit = kMillisPerSecond * 5;
+
 ZookeeperConfigDirectory::ZookeeperConfigDirectory(
     const String& zookeeper_addrs,
     const String& cluster_name,
@@ -50,17 +54,40 @@ ZookeeperConfigDirectory::ZookeeperConfigDirectory(
     zookeeper_timeout_(10000),
     cluster_name_(cluster_name),
     server_name_(server_name),
+    server_stats_version_(0),
     listen_addr_(listen_addr),
     global_prefix_("/eventql"),
     state_(ZKState::INIT),
     zk_(nullptr),
-    is_leader_(false) {
+    is_leader_(false),
+    logfile_(nullptr) {
+  if (pipe(logpipe_) != 0) {
+    RAISE_ERRNO(kRuntimeError, "pipe() failed");
+  }
+
+  logfile_ = fdopen(logpipe_[1], "w");
+  if (!logfile_) {
+    RAISE_ERRNO(kRuntimeError, "fdopen() failed");
+  }
+
+  logtail_ = std::thread(
+      std::bind(&ZookeeperConfigDirectory::runLogtail, this));
+
   zoo_set_debug_level(ZOO_LOG_LEVEL_ERROR);
+  zoo_set_log_stream(logfile_);
 }
 
 ZookeeperConfigDirectory::~ZookeeperConfigDirectory() {
   if (zk_) {
     zookeeper_close(zk_);
+  }
+
+  fclose(logfile_);
+  close(logpipe_[0]);
+  close(logpipe_[1]);
+
+  if (logtail_.joinable()) {
+    logtail_.join();
   }
 }
 
@@ -91,13 +118,50 @@ Status ZookeeperConfigDirectory::start(bool create /* = false */) {
   }
 
   {
-    auto rc = load(create);
+    auto rc = load(nullptr);
     if (!rc.isSuccess()) {
       return rc;
     }
   }
 
+  watchdog_ = std::thread(
+      std::bind(&ZookeeperConfigDirectory::runWatchdog, this));
+
   return Status::success();
+}
+
+void ZookeeperConfigDirectory::reconnect(std::unique_lock<std::mutex>* lk) {
+  if (zk_) {
+    zookeeper_close(zk_);
+    zk_ = nullptr;
+  }
+
+  {
+    auto rc = connect(lk);
+    if (!rc.isSuccess()) {
+      return;
+    }
+  }
+
+  {
+    CallbackList events;
+    auto rc = load(&events);
+    if (!rc.isSuccess()) {
+      return;
+    }
+
+    lk->unlock();
+    try {
+      for (const auto& ev : events) {
+        ev();
+      }
+    } catch (...) {
+      /* ignore */
+    }
+    lk->lock();
+  }
+
+  logInfo("evqld", "Zookeeper connection successfully re-established");
 }
 
 Status ZookeeperConfigDirectory::connect(std::unique_lock<std::mutex>* lk) {
@@ -142,45 +206,39 @@ Status ZookeeperConfigDirectory::connect(std::unique_lock<std::mutex>* lk) {
 }
 
 // PRECONDITION: must hold mutex
-Status ZookeeperConfigDirectory::load(bool create) {
+Status ZookeeperConfigDirectory::load(CallbackList* cb) {
   if (!hasNode(path_prefix_ + "/config")) {
-    if (create) {
-      auto rc = zoo_create(
-          zk_,
-          path_prefix_.c_str(),
-          nullptr,
-          0,
-          &ZOO_OPEN_ACL_UNSAFE,
-          0,
-          nullptr, /* path_buffer */
-          0 /* path_buffer_len */);
+    auto rc = zoo_create(
+        zk_,
+        path_prefix_.c_str(),
+        nullptr,
+        0,
+        &ZOO_OPEN_ACL_UNSAFE,
+        0,
+        nullptr, /* path_buffer */
+        0 /* path_buffer_len */);
 
-      if (rc && rc != ZNODEEXISTS) {
-        return Status(
-            eIOError,
-            StringUtil::format("zoo_create() failed: $0", getErrorString(rc)));
-      }
-
-      String config_path = path_prefix_ + "/config";
-      rc = zoo_create(
-          zk_,
-          config_path.c_str(),
-          nullptr,
-          0,
-          &ZOO_OPEN_ACL_UNSAFE,
-          0,
-          nullptr, /* path_buffer */
-          0 /* path_buffer_len */);
-
-      if (rc && rc != ZNODEEXISTS) {
-        return Status(
-            eIOError,
-            StringUtil::format("zoo_create() failed: $0", getErrorString(rc)));
-      }
-    } else {
+    if (rc && rc != ZNODEEXISTS) {
       return Status(
           eIOError,
-          StringUtil::format("cluster doesn't exit: $0", cluster_name_));
+          StringUtil::format("zoo_create() failed: $0", getErrorString(rc)));
+    }
+
+    String config_path = path_prefix_ + "/config";
+    rc = zoo_create(
+        zk_,
+        config_path.c_str(),
+        nullptr,
+        0,
+        &ZOO_OPEN_ACL_UNSAFE,
+        0,
+        nullptr, /* path_buffer */
+        0 /* path_buffer_len */);
+
+    if (rc && rc != ZNODEEXISTS) {
+      return Status(
+          eIOError,
+          StringUtil::format("zoo_create() failed: $0", getErrorString(rc)));
     }
   }
 
@@ -222,7 +280,7 @@ Status ZookeeperConfigDirectory::load(bool create) {
     }
   }
 
-  auto servers_live_path = StringUtil::format("$0/servers-live", path_prefix_);
+  auto servers_live_path = StringUtil::format("$0/servers-online", path_prefix_);
   if (!hasNode(servers_live_path)) {
     auto rc = zoo_create(
         zk_,
@@ -255,11 +313,14 @@ Status ZookeeperConfigDirectory::load(bool create) {
     }
 
     auto server_path = servers_live_path + "/" + server_name_.get();
+    ServerStats server_stats;
+    server_stats.set_listen_addr(listen_addr_);
+    auto buf = msg::encode(server_stats);
     auto rc = zoo_create(
         zk_,
         server_path.c_str(),
-        listen_addr_.data(),
-        listen_addr_.size(),
+        (const char*) buf->data(),
+        buf->size(),
         &ZOO_OPEN_ACL_UNSAFE,
         ZOO_EPHEMERAL,
         nullptr, /* path_buffer */
@@ -275,28 +336,28 @@ Status ZookeeperConfigDirectory::load(bool create) {
   logInfo("evqld", "Loading config from zookeeper...");
 
   {
-    auto rc = syncClusterConfig(nullptr);
+    auto rc = syncClusterConfig(cb);
     if (!rc.isSuccess()) {
       return rc;
     }
   }
 
   {
-    auto rc = syncLiveServers(nullptr);
+    auto rc = syncLiveServers(cb);
     if (!rc.isSuccess()) {
       return rc;
     }
   }
 
   {
-    auto rc = syncServers(nullptr);
+    auto rc = syncServers(cb);
     if (!rc.isSuccess()) {
       return rc;
     }
   }
 
   {
-    auto rc = syncNamespaces(nullptr);
+    auto rc = syncNamespaces(cb);
     if (!rc.isSuccess()) {
       return rc;
     }
@@ -309,9 +370,11 @@ Status ZookeeperConfigDirectory::load(bool create) {
 // PRECONDITION: must hold mutex
 Status ZookeeperConfigDirectory::syncClusterConfig(CallbackList* events) {
   struct Stat stat;
+  auto old_version = cluster_config_.version();
   if (getProtoNode(path_prefix_ + "/config", &cluster_config_, true, &stat)) {
+    bool changed = old_version != stat.version + 1;
     cluster_config_.set_version(stat.version + 1);
-    if (events) {
+    if (changed && events) {
       for (const auto& cb : on_cluster_change_) {
         events->emplace_back(std::bind(cb, cluster_config_));
       }
@@ -331,7 +394,7 @@ Status ZookeeperConfigDirectory::syncClusterConfig(CallbackList* events) {
 Status ZookeeperConfigDirectory::syncLiveServers(CallbackList* events) {
   Vector<String> servers;
   {
-    auto rc = listChildren(path_prefix_ + "/servers-live", &servers, true);
+    auto rc = listChildren(path_prefix_ + "/servers-online", &servers, true);
     if (!rc.isSuccess()) {
       return rc;
     }
@@ -356,17 +419,24 @@ Status ZookeeperConfigDirectory::syncLiveServers(CallbackList* events) {
 Status ZookeeperConfigDirectory::syncLiveServer(
     CallbackList* events,
     const String& server) {
-  auto key = StringUtil::format("$0/servers-live/$1", path_prefix_, server);
+  auto key = StringUtil::format("$0/servers-online/$1", path_prefix_, server);
   bool exists = hasNode(key);
-  Buffer server_addr(1024);
+  ServerStats sstats;
   if (exists) {
-    if (!getNode(key, &server_addr, true)) {
+    Buffer server_stats(8192);
+    if (!getNode(key, &server_stats, true)) {
       return Status(
           eNotFoundError,
           StringUtil::format("server '$0' does not exist", server));
     }
 
-    servers_live_[server] = server_addr.toString();
+    try {
+      msg::decode(server_stats, &sstats);
+    } catch (const std::exception e) {
+      return ReturnCode::exception(e);
+    }
+
+    servers_live_[server] = sstats;
   } else {
     servers_live_.erase(server);
   }
@@ -379,12 +449,15 @@ Status ZookeeperConfigDirectory::syncLiveServer(
           StringUtil::format("server '$0' does not exist", server));
     }
 
-    auto server_config = iter->second;
+    auto& server_config = iter->second;
     if (exists) {
       server_config.set_server_status(SERVER_UP);
-      server_config.set_server_addr(server_addr.toString());
+      server_config.set_server_addr(sstats.listen_addr());
+      *server_config.mutable_server_stats() = sstats;
     } else {
       server_config.set_server_status(SERVER_DOWN);
+      server_config.clear_server_addr();
+      server_config.clear_server_stats();
     }
 
     for (const auto& cb : on_server_change_) {
@@ -430,16 +503,19 @@ Status ZookeeperConfigDirectory::syncServer(
         StringUtil::format("server '$0' does not exist", server));
   }
 
-  server_config.set_version(stat.version + 1);
-  servers_[server] = server_config;
-
   const auto& live_server = servers_live_.find(server);
   if (live_server != servers_live_.end()) {
     server_config.set_server_status(SERVER_UP);
-    server_config.set_server_addr(live_server->second);
+    server_config.set_server_addr(live_server->second.listen_addr());
+    *server_config.mutable_server_stats() = live_server->second;
   } else {
     server_config.set_server_status(SERVER_DOWN);
+    server_config.clear_server_addr();
+    server_config.clear_server_stats();
   }
+
+  server_config.set_version(stat.version + 1);
+  servers_[server] = server_config;
 
   if (events) {
     for (const auto& cb : on_server_change_) {
@@ -486,10 +562,12 @@ Status ZookeeperConfigDirectory::syncNamespace(
           StringUtil::format("namespace '$0' does not exist", ns));
     }
 
+    auto& ns_iter = namespaces_[ns];
+    bool changed = ns_iter.version() != stat.version + 1;
     ns_config.set_version(stat.version + 1);
-    namespaces_[ns] = ns_config;
+    ns_iter = ns_config;
 
-    if (events) {
+    if (changed && events) {
       for (const auto& cb : on_namespace_change_) {
         events->emplace_back(std::bind(cb, ns_config));
       }
@@ -555,10 +633,12 @@ Status ZookeeperConfigDirectory::syncTable(
         StringUtil::format("table '$0/$1' does not exist", ns, table_name));
   }
 
+  auto& tbl_iter = tables_[ns + "~" + table_name];
+  bool changed = tbl_iter.version() != stat.version + 1;
   tbl_config.set_version(stat.version + 1);
-  tables_[ns + "~" + table_name] = tbl_config;
+  tbl_iter = tbl_config;
 
-  if (events) {
+  if (changed && events) {
     for (const auto& cb : on_table_change_) {
       events->emplace_back(std::bind(cb, tbl_config));
     }
@@ -567,10 +647,19 @@ Status ZookeeperConfigDirectory::syncTable(
   return Status::success();
 }
 
-// PRECONDITION: must NOT hold mutex
 void ZookeeperConfigDirectory::stop() {
-  zookeeper_close(zk_);
-  zk_ = nullptr;
+  std::unique_lock<std::mutex> lk(mutex_);
+  if (zk_) {
+    zookeeper_close(zk_);
+    zk_ = nullptr;
+  }
+  state_ = ZKState::CLOSED;
+  cv_.notify_all();
+  lk.unlock();
+
+  if (watchdog_.joinable()) {
+    watchdog_.join();
+  }
 }
 
 bool ZookeeperConfigDirectory::getNode(
@@ -688,11 +777,11 @@ Status ZookeeperConfigDirectory::handleChangeEvent(
     return syncServers(events);
   }
 
-  if (vpath == "/servers-live") {
+  if (vpath == "/servers-online") {
     return syncLiveServers(events);
   }
 
-  std::regex live_server_regex("/servers-live/([0-9A-Za-z_.-]+)");
+  std::regex live_server_regex("/servers-online/([0-9A-Za-z_.-]+)");
   if (std::regex_match(vpath, m, live_server_regex)) {
     return syncLiveServer(events, m[1].str());
   }
@@ -728,25 +817,12 @@ Status ZookeeperConfigDirectory::handleChangeEvent(
  */
 
 void ZookeeperConfigDirectory::handleSessionEvent(int state) {
-  if (state == ZOO_EXPIRED_SESSION_STATE ||
-      state == ZOO_EXPIRED_SESSION_STATE ||
-      state == ZOO_AUTH_FAILED_STATE) {
-    handleConnectionLost();
-    return;
-  }
-
   if (state == ZOO_CONNECTED_STATE) {
     handleConnectionEstablished();
     return;
+  } else if (state_ == ZKState::CONNECTED) {
+    handleConnectionLost();
   }
-
-  if (state == ZOO_CONNECTING_STATE ||
-      state == ZOO_ASSOCIATING_STATE) {
-    return;
-  }
-
-  logCritical("evqld", "ERROR: invalid zookeeper state: $0", state);
-  handleConnectionLost();
 }
 
 void ZookeeperConfigDirectory::handleConnectionEstablished() {
@@ -776,17 +852,17 @@ void ZookeeperConfigDirectory::handleConnectionLost() {
 
   switch (state_) {
     case ZKState::CONNECTING:
-      logError("evqld", "Zookeeper connection failed");
+      logCritical("evqld", "Zookeeper connection failed");
       return;
 
     case ZKState::LOADING:
-      logInfo("evqld", "Zookeeper connection lost while loading");
+      logCritical("evqld", "Zookeeper connection lost while loading");
       state_ = ZKState::CONNECTING;
       return;
 
     case ZKState::CONNECTED:
     case ZKState::CONNECTION_LOST:
-      logWarning("evqld", "Zookeeper connection lost");
+      logCritical("evqld", "Zookeeper connection lost");
       state_ = ZKState::CONNECTION_LOST;
       return;
 
@@ -809,6 +885,10 @@ ClusterConfig ZookeeperConfigDirectory::getClusterConfig() const {
 // PRECONDITION: must NOT hold mutex
 void ZookeeperConfigDirectory::updateClusterConfig(ClusterConfig config) {
   std::unique_lock<std::mutex> lk(mutex_);
+  if (state_ != ZKState::CONNECTED) {
+    RAISE(kRuntimeError, "zookeeper is down");
+  }
+
   updateClusterConfigWithLock(config);
 }
 
@@ -889,6 +969,10 @@ bool ZookeeperConfigDirectory::hasServerID() const {
 bool ZookeeperConfigDirectory::electLeader() {
   std::unique_lock<std::mutex> lk(mutex_);
 
+  if (state_ != ZKState::CONNECTED) {
+    RAISE(kRuntimeError, "zookeeper is down");
+  }
+
   if (is_leader_) {
     return true;
   }
@@ -922,6 +1006,10 @@ bool ZookeeperConfigDirectory::electLeader() {
 String ZookeeperConfigDirectory::getLeader() const {
   std::unique_lock<std::mutex> lk(mutex_);
 
+  if (state_ != ZKState::CONNECTED) {
+    RAISE(kRuntimeError, "zookeeper is down");
+  }
+
   Buffer leader_name(1024);
   auto key = StringUtil::format("$0/leader", path_prefix_);
   if (getNode(key, &leader_name, true)) {
@@ -939,16 +1027,7 @@ ServerConfig ZookeeperConfigDirectory::getServerConfig(
     RAISEF(kNotFoundError, "server not found: $0", server_name);
   }
 
-  auto server_config = iter->second;
-  const auto& live_server = servers_live_.find(server_name);
-  if (live_server != servers_live_.end()) {
-    server_config.set_server_status(SERVER_UP);
-    server_config.set_server_addr(live_server->second);
-  } else {
-    server_config.set_server_status(SERVER_DOWN);
-  }
-
-  return server_config;
+  return iter->second;
 }
 
 Vector<ServerConfig> ZookeeperConfigDirectory::listServers() const {
@@ -957,15 +1036,6 @@ Vector<ServerConfig> ZookeeperConfigDirectory::listServers() const {
   std::unique_lock<std::mutex> lk(mutex_);
   for (const auto& server : servers_) {
     servers.emplace_back(server.second);
-
-    auto& server_config = servers.back();
-    const auto& live_server = servers_live_.find(server_config.server_id());
-    if (live_server != servers_live_.end()) {
-      server_config.set_server_status(SERVER_UP);
-      server_config.set_server_addr(live_server->second);
-    } else {
-      server_config.set_server_status(SERVER_DOWN);
-    }
   }
 
   return servers;
@@ -979,9 +1049,13 @@ void ZookeeperConfigDirectory::setServerConfigChangeCallback(
 
 void ZookeeperConfigDirectory::updateServerConfig(ServerConfig cfg) {
   std::unique_lock<std::mutex> lk(mutex_);
+  if (state_ != ZKState::CONNECTED) {
+    RAISE(kRuntimeError, "zookeeper is down");
+  }
 
   cfg.clear_server_addr();
   cfg.clear_server_status();
+  cfg.clear_server_stats();
 
   auto buf = msg::encode(cfg);
   auto path = StringUtil::format(
@@ -1019,6 +1093,41 @@ void ZookeeperConfigDirectory::updateServerConfig(ServerConfig cfg) {
   }
 }
 
+ReturnCode ZookeeperConfigDirectory::publishServerStats(
+    ServerStats stats) {
+  std::unique_lock<std::mutex> lk(mutex_);
+  if (state_ != ZKState::CONNECTED) {
+    return ReturnCode::error("ERUNTIME", "zookeeper is down");
+  }
+
+  if (server_name_.isEmpty()) {
+    return ReturnCode::error("EARG", "can't publish stats for anonymous");
+  }
+
+  stats.set_listen_addr(listen_addr_);
+  auto buf = msg::encode(stats);
+  auto path = StringUtil::format(
+      "$0/servers-online/$1",
+      path_prefix_,
+      server_name_.get());
+
+  auto rc = zoo_set(
+      zk_,
+      path.c_str(),
+      (const char*) buf->data(),
+      buf->size(),
+      server_stats_version_++);
+
+  if (rc) {
+    return ReturnCode::errorf(
+        "ERUNTIME",
+        "zoo_set() failed: $0",
+        getErrorString(rc));
+  } else {
+    return ReturnCode::success();
+  }
+}
+
 RefPtr<NamespaceConfigRef> ZookeeperConfigDirectory::getNamespaceConfig(
     const String& customer_key) const {
   std::unique_lock<std::mutex> lk(mutex_);
@@ -1046,6 +1155,10 @@ void ZookeeperConfigDirectory::setNamespaceConfigChangeCallback(
 
 void ZookeeperConfigDirectory::updateNamespaceConfig(NamespaceConfig cfg) {
   std::unique_lock<std::mutex> lk(mutex_);
+  if (state_ != ZKState::CONNECTED) {
+    RAISE(kRuntimeError, "zookeeper is down");
+  }
+
   auto buf = msg::encode(cfg);
 
   if (cfg.version() == 0) {
@@ -1149,6 +1262,9 @@ void ZookeeperConfigDirectory::updateTableConfig(
     const TableDefinition& table,
     bool force /* = false */) {
   std::unique_lock<std::mutex> lk(mutex_);
+  if (state_ != ZKState::CONNECTED) {
+    RAISE(kRuntimeError, "zookeeper is down");
+  }
 
   auto buf = msg::encode(table);
   auto path = StringUtil::format(
@@ -1201,6 +1317,48 @@ void ZookeeperConfigDirectory::setTableConfigChangeCallback(
   on_table_change_.emplace_back(fn);
 }
 
+void ZookeeperConfigDirectory::runWatchdog() {
+  std::unique_lock<std::mutex> lk(mutex_);
+  while (state_ != ZKState::CLOSED) {
+    switch (state_) {
+      case ZKState::CONNECTED:
+        cv_.wait(lk);
+        continue;
+
+      case ZKState::CLOSED:
+        break;
+
+      default:
+        reconnect(&lk);
+        lk.unlock();
+        usleep(kReconnectRateLimit);
+        lk.lock();
+        continue;
+
+    }
+  }
+}
+
+void ZookeeperConfigDirectory::runLogtail() {
+  auto logfile = fdopen(logpipe_[0], "r");
+  if (!logfile) {
+    return;
+  }
+
+  for (;;) {
+    char* line = nullptr;
+    size_t line_len = 0;
+    if (getline(&line, &line_len, logfile) < 0) {
+      break;
+    }
+
+    logDebug("evqld", "[ZOOKEEPER] $0", std::string(line, line_len));
+    free(line);
+  }
+
+  fclose(logfile);
+}
+
 const char* ZookeeperConfigDirectory::getErrorString(int err) const {
   switch (err) {
     case ZOK: return "Everything is OK";
@@ -1212,7 +1370,7 @@ const char* ZookeeperConfigDirectory::getErrorString(int err) const {
     case ZUNIMPLEMENTED: return "Operation is unimplemented";
     case ZOPERATIONTIMEOUT: return "Operation timeout";
     case ZBADARGUMENTS: return "Invalid arguments";
-    case ZINVALIDSTATE: return "Invliad zhandle state";
+    case ZINVALIDSTATE: return "Invalid zhandle state";
     case ZAPIERROR: return "API Error";
     case ZNONODE: return "Node does not exist";
     case ZNOAUTH: return "Not authenticated";

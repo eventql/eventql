@@ -783,6 +783,8 @@ EVQL_CORE_SOURCES_ = \
     eventql/db/garbage_collector.cc \
     eventql/db/leader.h \
     eventql/db/leader.cc \
+    eventql/db/monitor.h \
+    eventql/db/monitor.cc \
     eventql/db/database.h \
     eventql/db/database.cc \
     eventql/config/config_directory.cc \
@@ -872,9 +874,12 @@ EVQL_CORE_SOURCES_ = \
     eventql/transport/native/frames/query_result.h \
     eventql/transport/native/frames/error.cc \
     eventql/transport/native/frames/error.h \
+    eventql/transport/native/frames/repl_insert.cc \
+    eventql/transport/native/frames/repl_insert.h \
     eventql/transport/native/ops/query.cc \
     eventql/transport/native/ops/query_partialaggr.cc \
     eventql/transport/native/ops/query_remote.cc \
+    eventql/transport/native/ops/repl_insert.cc \
     eventql/db/table_ref.cc \
     eventql/db/table_ref.h \
     eventql/db/table.cc \
@@ -935,8 +940,6 @@ EVQL_CORE_SOURCES_ = \
     eventql/server/sql/table_scan.h \
     eventql/server/listener.cc \
     eventql/server/listener.h \
-    eventql/server/rpc/partial_aggregate.cc \
-    eventql/server/rpc/partial_aggregate.h \
     eventql/transport/http/mapreduce_servlet.cc \
     eventql/transport/http/mapreduce_servlet.h \
     eventql/mapreduce/mapreduce_service.cc \

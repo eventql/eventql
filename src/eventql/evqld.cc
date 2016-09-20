@@ -218,7 +218,6 @@ int main(int argc, const char** argv) {
   }
 
   evql_conf_set(conf, "cluster.rebalance_interval", "60000000");
-  evql_conf_set(conf, "cluster.allowed_hosts", "");
   evql_conf_set(conf, "cluster.allow_anonymous", "true");
   evql_conf_set(conf, "cluster.allow_drop_table", "false");
   evql_conf_set(conf, "server.listen", "localhost:9175");

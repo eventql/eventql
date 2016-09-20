@@ -79,31 +79,29 @@ parts as they get too large.
 
 However, you can optionally give EventQL an "educated guess" about the size
 of each partition that you expect. The configuration option is called
-`finite partition size` and setting it allows an optimization to kick in that
+`partition_size_hint` and setting it allows an optimization to kick in that
 reduces the number of splits performed and therefore the total network bandwith.
 
-You can use the finite partition size optimization on tables that have a partition
-key of type uint64 or datetime. In the datetime case, the finite partition size
+You can use the partition size hint optimization on tables that have a partition
+key of type uint64 or datetime. In the datetime case, the partition size hint
 represents a time window/duration in microseconds. You should ideally choose
 this value so that roughly 500MB-1GB of new data will arrive in the time window.
 
-    $finite_partition_size = (750MB / $new_data_per_day) * 86400000000
+    $partition_size_hint = (750MB / $new_data_per_day) * 86400000000
 
 So, for example, if you expect around 10GB of data a day, 2 hours would be a
 good value. If you expect 1000GB of new data a day, 1 minute is a good value.
-If you expect 10TB of new data a day, set the finite partition size to 10
-seconds.
+If you expect 10TB of new data a day, set the partition size hint to 10 seconds.
 
 
 Note that EventQL will still dynamically split and re-partition the table if it
-becomes necessary -- the finite partition size is merely a hint. You can update
-the finite partition size hint at any time and it won't cause trouble if your
-estimation is off.
+becomes necessary. You can also update the partition size hint at any time and
+it won't cause trouble if your estimation is off.
 
-For high-volume timeseries data, it is _highly recommended_ to set the finite
-partition size.
+For high-volume timeseries data, it is _highly recommended_ to set the partition
+size hint.
 
-To set the finite partition size when creating a table using SQL you can use
+To set the partition size hint when creating a table using SQL you can use
 this syntax. Please refer to the "Creating Tables" and "HTTP API Reference"
 pages for detailed information.
 
@@ -112,7 +110,7 @@ pages for detailed information.
       event_id        STRING,
       value           DOUBLE,
       PRIMARY KEY(time, event_id)
-    ) WITH finite_partition_size = 600000000; -- 10 minutes ~ 100GB/day
+    ) WITH partition_size_hint = 600000000; -- 10 minutes ~ 100GB/day
 
 ## Secondary indexes
 

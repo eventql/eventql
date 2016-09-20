@@ -12,22 +12,22 @@ the `ALTER TABLE SET PROPERTY key=val` SQL statements or the HTTP API.
     <th>Description</th>
   </tr>
   <tr>
-    <td><b>finite_partition_size</b></td>
+    <td><b>partition_size_hint</b></td>
     <td>NULL</td>
     <td>
       <p>
-        When set, enables finite partitioning for a table. See the
+        When set, enables hinted partitioning for a table. See the
         <a href="../partitioning/"> partitioning page</a> and
         <a href="../../collecting-data/high-volume-timeseries-logs/">timeseries page</a>
         for more details. The value of the option is an integer (the partition size).
         For timeseries tables the integer is a microsecond time duration.
       </p>
       <p>
-        Note that while the finite_partition_size can be changed at any time, it
+        Note that while the partition_size_hint can be changed at any time, it
         can only be initially set when creating a table. I.e. when a table was
-        created without a finite partition size it can't be later added. When a
-        table was created with a finite partition size the finite partition size
-        may be updated at any time.
+        created without a partition size hint it can't be later added. When a
+        table was created with a partition size hint the hint may be updated at
+        any time.
       </p>
     </td>
   </tr>

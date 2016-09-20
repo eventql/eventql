@@ -50,6 +50,9 @@ static const std::string kBuildID = "unknown";
 extern "C" {
 #endif
 
+/**
+ * Native Protocol enums
+ */
 enum {
   EVQL_OP_HELLO                      = 0x5e00,
   EVQL_OP_PING                       = 0x0001,
@@ -61,12 +64,15 @@ enum {
   EVQL_OP_QUERY_RESULT               = 0x0007,
   EVQL_OP_QUERY_CONTINUE             = 0x0008,
   EVQL_OP_QUERY_DISCARD              = 0x0009,
-  EVQL_OP_QUERY_PROGRESS             = 0x0010,
-  EVQL_OP_QUERY_NEXT                 = 0x0011,
-  EVQL_OP_QUERY_PARTIALAGGR          = 0x0012,
-  EVQL_OP_QUERY_PARTIALAGGR_RESULT   = 0x0013,
-  EVQL_OP_QUERY_REMOTE               = 0x0014,
-  EVQL_OP_QUERY_REMOTE_RESULT        = 0x0015
+  EVQL_OP_QUERY_PROGRESS             = 0x000a,
+  EVQL_OP_QUERY_NEXT                 = 0x000b,
+  EVQL_OP_ACK                        = 0x000f,
+  EVQL_OP_INSERT                     = 0x0010,
+  EVQL_OP_QUERY_PARTIALAGGR          = 0x0101,
+  EVQL_OP_QUERY_PARTIALAGGR_RESULT   = 0x0102,
+  EVQL_OP_QUERY_REMOTE               = 0x0103,
+  EVQL_OP_QUERY_REMOTE_RESULT        = 0x0104,
+  EVQL_OP_REPL_INSERT                = 0x0110
 };
 
 enum {
@@ -93,6 +99,13 @@ enum {
   EVQL_QUERY_RESULT_PENDINGSTMT  = 0x8
 };
 
+/**
+ * EventQL Client enums
+ */
+enum {
+  EVQL_CLIENT_OPT_TIMEOUT       = 1L,
+  EVQL_CLIENT_OPT_ROWBUFLEN     = 2L
+};
 
 enum {
   EVQL_STAT_ROWSMODIFIED     = 0x1L,
@@ -105,6 +118,7 @@ enum {
   EVQL_STAT_TASKSTOTAL       = 0x8L,
   EVQL_STAT_TASKSCOMPLETED   = 0x9L
 };
+
 
 /**
  * The EventQL client handle

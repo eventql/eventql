@@ -21,17 +21,20 @@ Table of Contents
       6.1.4 ERROR
       6.1.5 READY
       6.1.6 BYE
-      6.1.7 QUERY
-      6.1.8 QUERY_RESULT
-      6.1.9 QUERY_CONTINUE
-      6.1.10 QUERY_DISCARD
-      6.1.11 QUERY_PROGRESS
-      6.1.12 QUERY_NEXT
+      6.1.7 ACK
+      6.1.8 QUERY
+      6.1.9 QUERY_RESULT
+      6.1.10 QUERY_CONTINUE
+      6.1.11 QUERY_DISCARD
+      6.1.12 QUERY_PROGRESS
+      6.1.13 QUERY_NEXT
+      6.1.14 INSERT
     6.2 Server-to-Server (S2S) Messages
       6.2.1 QUERY_PARTIALAGGR
       6.2.2 QUERY_PARTIALAGGR_RESULT
       6.2.3 QUERY_REMOTE
       6.2.4 QUERY_REMOTE_RESULT
+      6.2.5 REPL_INSERT
 
 1. Preface
 
@@ -136,10 +139,15 @@ Binary Protocols.
     0x0007   QUERY_RESULT
     0x0008   QUERY_CONTINUE
     0x0009   QUERY_DISCARD
-    0x0010   QUERY_PROGRESS
-    0x0011   QUERY_NEXT
-    0x0012   QUERY_PARTIALAGGR
-    0x0013   QUERY_PARTIALAGGR_RESULT
+    0x000a   QUERY_PROGRESS
+    0x000b   QUERY_NEXT
+    0x000f   ACK
+    0x0010   INSERT
+    0x0101   QUERY_PARTIALAGGR
+    0x0102   QUERY_PARTIALAGGR_RESULT
+    0x0103   QUERY_REMOTE
+    0x0104   QUERY_REMOTE_RESULT
+    0x0110   REPL_INSERT
 
   Messages are described in Section 6.
 
@@ -219,7 +227,7 @@ Binary Protocols.
     <no response>
 
 
-6.1.7 QUERY
+6.1.8 QUERY
 
   The QUERY message initiates a new request and is only sent by the client.
   A QUERY message must not be sent while another request is still running.
@@ -260,7 +268,7 @@ Binary Protocols.
     After the request is complete, the server will not send any further messages.
 
 
-6.1.8 QUERY_RESULT
+6.1.9 QUERY_RESULT
 
   The QUERY_RESULT message contains a description of the result table as well
   as zero or more rows from the result tables. Results are always paged, i.e.
@@ -305,7 +313,7 @@ Binary Protocols.
     Otherwise, the client must not send any response.
 
 
-6.1.9 QUERY_CONTINUE
+6.1.10 QUERY_CONTINUE
 
   The QUERY_CONTINUE message may be sent by the client in response to a
   QUERY_RESULT message that did not have the COMPLETED flag set.
@@ -321,7 +329,7 @@ Binary Protocols.
       - QUERY_RESULT
 
 
-6.1.10 QUERY_DISCARD
+6.1.11 QUERY_DISCARD
 
   The QUERY_DISCARD message may be sent by the client in response to a
   QUERY_RESULT message that did not have the COMPLETED flag set.
@@ -337,7 +345,7 @@ Binary Protocols.
       - QUERY_RESULT
 
 
-6.1.11 QUERY_PROGRESS
+6.1.12 QUERY_PROGRESS
 
   The QUERY_PROGRESS message is an information message from the server to the
   client. It contains information about the progress of query execution and
@@ -467,4 +475,34 @@ Binary Protocols.
 
   Response:
     No response.
+
+
+6.2.5 REPL_INSERT
+
+  FIXME
+
+  Payload:
+    lenencint      flags
+    lenencstr      database
+    lenencstr      table
+    lenencstr      partition_id
+    lenencstr      body
+
+  Fields:
+    flags          Currently unused
+    database       Database for insert
+    table          Table for insert
+    partition_id   Partition for insert
+    body           Encoded shredded record list
+
+  Response:
+    After sending a REPL_INSERT message, the client should expect to receive
+    one of these response messages:
+      - ERROR
+      - HEARTBEAT
+      - ACK
+
+    The request is considered completed once the client has received a response
+    frame with the EVQL_ENDOFREQUEST flag set.  After the request is complete,
+    the server will not send any further messages.
 

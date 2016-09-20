@@ -1,3 +1,14 @@
+EventQL v0.5.0 beta;
+
+  * Changed the DESCRIBE TABLE statement to return a new "encoding" column that
+    contains information about the column's encoding settings
+
+  * Added a new monitor thread that publishes disk usage and other load
+    information to the coordination service
+
+  * Added new frames to native protocol: ACK, INSERT, REPL_INSERT
+
+
 EventQL v0.4.0 beta;
 
   * Changed the parallel GROUP BY operation to use the new native protocol and
@@ -22,6 +33,9 @@ EventQL v0.4.0 beta;
 
   * Changed the SQL engine to use the new native transport
 
+  * Changed the zookeeper backend to explicitly reconnect on session timeouts
+    and not rely on the built-in reconnect mechanism
+
   * Removed the obsolete "sha1_tokens" field from the cluster/server config
 
   * Removed the PCRE dependency
@@ -31,11 +45,22 @@ EventQL v0.4.0 beta;
 
   * Added a c client driver library (libevqlclient)
 
+  * Added a new table config option that allows to set a finite partition size
+    (called a "partition size hint" in the user facing documentation). A table
+    with a finite partition size will initially have zero partitions but
+    instead add (finite) partitions as it receives inserts for the respective
+    chunks of the keyspace (without splitting the new partition from a larger
+    partition)
+
   * Added the DROP TABLE statement
 
   * Added a thread-local storage and retrieval mechanism for the current
     session. This also adds a new requirement that all operations must be
     executed from within a valid database thread.
+
+  * Added support for loading configuration files using the '-c' flag and for
+    setting/overring individual configuration parameters using the '-C' flags
+    in the EventQL client (evql) binary
 
   * Added the following new configuration options: server.c2s_io_timeout,
     server.c2s_idle_timeout, server.s2s_io_timeout, server.s2s_idle_timeout,
@@ -43,7 +68,7 @@ EventQL v0.4.0 beta;
     server.query_progress_rate_limit, cluster.allow_anonymous,
     cluster.allow_drop_table, server.query_max_concurrent_shards,
     server.query_max_concurrent_shards_per_host,
-    server.query_failed_shard_policy
+    server.query_failed_shard_policy, client.timeout
 
 
 EventQL v0.3.2 (v0.3.2, gitb0ea6bc) beta; 2016-09-13 15:23:08 +0000
@@ -51,7 +76,8 @@ EventQL v0.3.2 (v0.3.2, gitb0ea6bc) beta; 2016-09-13 15:23:08 +0000
   * Fixed a bug in the eventql client (evql) where missing HOME and USER
     env variables would lead to an assertion on some libc++ implementations
 
-  * Added --history_file and --history_maxlen flags to the eventql client (evql)
+  * Added the client.history_file and client.history_maxlen options to the
+    eventql client (evql)
 
 
 EventQL v0.3.1 (v0.3.1, git2da7f66) beta; 2016-09-04 16:11:19 +0000

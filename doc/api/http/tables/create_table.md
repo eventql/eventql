@@ -87,7 +87,7 @@ best performance, read on the [Partitioning](../../../../tables/partitioning/) p
         >>       }
         >>   ],
         >>   "properties": [
-        >>      [ "finite_partition_size", "300000000" ]
+        >>      [ "partition_size_hint", "300000000" ]
         >>   ]
         >> }
 
@@ -127,7 +127,7 @@ best performance, read on the [Partitioning](../../../../tables/partitioning/) p
         >>        }
         >>   ],
         >>   "properties": [
-        >>      [ "finite_partition_size", "300000000" ]
+        >>      [ "partition_size_hint", "300000000" ]
         >>   ]
         >> }
 

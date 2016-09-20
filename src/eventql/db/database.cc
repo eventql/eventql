@@ -58,6 +58,7 @@
 #include "eventql/db/compaction_worker.h"
 #include "eventql/db/garbage_collector.h"
 #include "eventql/db/leader.h"
+#include "eventql/db/monitor.h"
 #include "eventql/db/database.h"
 #include "eventql/transport/http/default_servlet.h"
 #include "eventql/sql/defaults.h"
@@ -121,6 +122,7 @@ protected:
   std::unique_ptr<SQLService> sql_service_;
   std::unique_ptr<MapReduceService> mapreduce_service_;
   std::unique_ptr<Leader> leader_;
+  std::unique_ptr<Monitor> monitor_;
   std::unique_ptr<DatabaseContext> database_context_;
   pthread_key_t local_session_;
 };
@@ -445,10 +447,17 @@ ReturnCode DatabaseImpl::start() {
     leader_->startLeaderThread();
   }
 
+  monitor_.reset(new Monitor(database_context_.get()));
+  monitor_->startMonitorThread();
+
   return ReturnCode::success();
 }
 
 void DatabaseImpl::shutdown() {
+  if (monitor_) {
+    monitor_->stopMonitorThread();
+  }
+
   if (leader_) {
     leader_->stopLeaderThread();
   }
@@ -469,6 +478,7 @@ void DatabaseImpl::shutdown() {
     config_dir_->stop();
   }
 
+  monitor_.reset(nullptr);
   leader_.reset(nullptr);
   mapreduce_service_.reset(nullptr);
   sql_service_.reset(nullptr);

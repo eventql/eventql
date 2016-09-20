@@ -25,29 +25,40 @@
 #include <string>
 #include <vector>
 #include "eventql/eventql.h"
+#include "eventql/util/io/inputstream.h"
+#include "eventql/util/io/outputstream.h"
 #include "eventql/util/return_code.h"
-#include "eventql/db/database.h"
-#include "eventql/sql/transaction.h"
 
 namespace eventql {
-namespace rpc {
+namespace native_transport {
 
-class PartialAggregationOperation {
+class ReplInsertFrame {
 public:
 
-  PartialAggregationOperation(Database* db);
+  ReplInsertFrame();
 
-  ReturnCode parseFrom(const char* data, size_t len);
+  void setDatabase(const std::string& database);
+  void setTable(const std::string& table);
+  void setPartitionID(const std::string& partition_id);
+  void setBody(const std::string& body);
 
-  ReturnCode execute(OutputStream* os);
+  const std::string& getDatabase() const;
+  const std::string& getTable() const;
+  const std::string& getPartitionID() const;
+  const std::string& getBody() const;
 
+  ReturnCode parseFrom(InputStream* is);
+  ReturnCode writeTo(OutputStream* os) const;
   void clear();
 
 protected:
-  std::unique_ptr<csql::Transaction> txn_;
-  RefPtr<csql::QueryTreeNode> qtree_;
+  uint64_t flags_;
+  std::string database_;
+  std::string table_;
+  std::string partition_id_;
+  std::string body_;
 };
 
-} // namespace rpc
+} // namespace native_transport
 } // namespace eventql
 

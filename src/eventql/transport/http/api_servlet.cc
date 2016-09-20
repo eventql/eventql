@@ -480,7 +480,7 @@ void APIServlet::createTable(
       auto prop_value = json::arrayGetString(jprop, jreq.end(), 1);
       if (prop_key.isEmpty() || prop_value.isEmpty()) {
         res->setStatus(http::kStatusBadRequest);
-        res->addBody("invalid field: primary_key");
+        res->addBody("invalid field: properties");
         return;
       }
 
@@ -781,19 +781,32 @@ void APIServlet::insertIntoTable(
       RAISE(kRuntimeError, "missing field: data");
     }
 
+    auto rc = ReturnCode::success();
     if (data->type == json::JSON_STRING) {
-      auto data_parsed = json::parseJSON(data->data);
-      dbctx->table_service->insertRecord(
-          insert_database,
-          table.get(),
-          data_parsed.begin(),
-          data_parsed.end());
+      try {
+        auto data_parsed = json::parseJSON(data->data);
+        rc = dbctx->table_service->insertRecord(
+            insert_database,
+            table.get(),
+            data_parsed.begin(),
+            data_parsed.end());
+      } catch (const std::exception& e) {
+        rc = ReturnCode::exception(e);
+      }
     } else {
-      dbctx->table_service->insertRecord(
+      rc = dbctx->table_service->insertRecord(
           insert_database,
           table.get(),
           data,
           data + data->size);
+    }
+
+    if (rc.isSuccess()) {
+      res->setStatus(http::kStatusCreated);
+    } else {
+      res->setStatus(http::kStatusInternalServerError);
+      res->addBody("ERROR: " + rc.getMessage());
+      return;
     }
   }
 

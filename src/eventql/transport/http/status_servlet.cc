@@ -157,74 +157,80 @@ void StatusServlet::renderDashboard(
   memset(&fd_limit, 0, sizeof(fd_limit));
   ::getrlimit(RLIMIT_NOFILE, &fd_limit);
 
+  html += "<pre>";
+
+  html += StringUtil::format("Version: $0\n", kVersionString);
+  html += StringUtil::format("Build-ID: $0\n", kBuildID);
   html += StringUtil::format(
-      "<span><em>Version:</em> $0</span> &mdash; ",
-      kVersionString);
-  html += StringUtil::format(
-      "<span><em>Build-ID:</em> $0</span> &mdash; ",
-      kBuildID);
-  html += StringUtil::format(
-      "<span><em>Memory Usage - Current:</em> $0 MB</span> &mdash; ",
+      "Memory Usage - Current: $0 MB\n",
       Application::getCurrentMemoryUsage() / (1024.0 * 1024.0));
   html += StringUtil::format(
-      "<span><em>Memory Usage - Peak:</em> $0 MB</span> &mdash; ",
+      "Memory Usage - Peak: $0 MB\n",
       Application::getPeakMemoryUsage() / (1024.0 * 1024.0));
   html += StringUtil::format(
-      "<span><em>Max FDs:</em> $0 (soft) / $1 (hard)</span> &mdash; ",
+      "Max FDs: $0 (soft) / $1 (hard)\n",
       fd_limit.rlim_cur,
       fd_limit.rlim_max);
   html += StringUtil::format(
-      "<span><em>Referenced Files:</em> $0</span> &mdash; ",
+      "Referenced Files: $0\n",
       ctx->file_tracker->getNumReferencedFiles());
   html += StringUtil::format(
-      "<span><em>Disk Cache Size:</em> $0 MB</span> &mdash; ",
+      "Disk Cache Size: $0 MB\n",
       zs->cache_size.get() / (1024.0 * 1024.0));
   html += StringUtil::format(
-      "<span><em>LSMTableIndexCache size:</em> $0 MB</span> &mdash; ",
+      "LSMTableIndexCache size: $0 MB\n",
       ctx->lsm_index_cache->size() / (1024.0 * 1024.0));
   html += StringUtil::format(
-      "<span><em>MetadataStore cache size:</em> $0 MB</span> &mdash; ",
+      "MetadataStore cache size: $0 MB\n",
       ctx->metadata_store->getCacheSize() / (1024.0 * 1024.0));
   html += StringUtil::format(
-      "<span><em>Number of Partitions:</em> $0</span> &mdash; ",
+      "Number of Partitions: $0\n",
       zs->num_partitions.get());
   html += StringUtil::format(
-      "<span><em>Number of Partitions - Loaded:</em> $0</span> &mdash; ",
-      zs->num_partitions_loaded.get());
+      "Number of Partitions - Opened: $0\n",
+      zs->num_partitions_opened.get());
   html += StringUtil::format(
-      "<span><em>Number of Dirty Partitions:</em> $0</span> &mdash; ",
+      "Number of Partitions - Loading: $0\n",
+      zs->num_partitions_loading.get());
+  html += StringUtil::format(
+      "Number of Dirty Partitions: $0\n",
       zs->compaction_queue_length.get());
   html += StringUtil::format(
-      "<span><em>Replication Queue Length:</em> $0</span>",
+      "Replication Queue Length: $0</p>",
       zs->replication_queue_length.get());
-
-  html += "<h3>MapReduce</h3>";
   html += StringUtil::format(
-      "<span><em>Number of Map Tasks - Running:</em> $0</span> &mdash; ",
+      "Number of Map Tasks - Running: $0\n",
       zs->mapreduce_num_map_tasks.get());
   html += StringUtil::format(
-      "<span><em>Number of Reduce Tasks - Running:</em> $0</span> &mdash; ",
+      "Number of Reduce Tasks - Running: $0\n",
       zs->mapreduce_num_reduce_tasks.get());
   html += StringUtil::format(
-      "<span><em>Reduce Memory Used:</em> $0 MB</span>",
+      "Reduce Memory Used: $0 MB</p>",
       zs->mapreduce_reduce_memory.get() / (1024.0 * 1024.0));
-
-  html += "<h3>Cluster</h3>";
-  html += "<table cellspacing=0 border=1>";
   html += StringUtil::format(
-      "<span><em>Cluster Leader:</em> $0</span>",
+      "Cluster Leader: $0</p>",
       cdir->getLeader());
-  html += StringUtil::format(
-      "<div><em>Cluster Config:</em></div><pre>$0</pre>",
-      cdir->getClusterConfig().DebugString());
+  html += "</pre>";
 
   html += "<h3>Servers</h3>";
   html += "<table cellspacing=0 border=1>";
+  html += "<tr><th>Name</th><th>Status</th><th>ListenAddr</th>"
+          "<th>BuildInfo</th><th>Load</th><th>Disk Used</th><th>Disk Free</th>"
+          "<th>Partitions</th></tr>";
+
   for (const auto& server : cdir->listServers()) {
   html += StringUtil::format(
-      "<tr><td><em>$0:</em></td><td><pre>$1</pre></td></tr>",
+      "<tr><td>$0</td><td>$1</td><td>$2</td><td>$3</td><td>$4</td><td>$5MB</td>"
+      "<td>$6MB</td><td>$7/$8</td></tr>",
       server.server_id(),
-      server.DebugString());
+      ServerStatus_Name(server.server_status()),
+      server.server_addr(),
+      server.server_stats().buildinfo(),
+      server.server_stats().load_factor(),
+      server.server_stats().disk_used() / 0x100000,
+      server.server_stats().disk_available() / 0x100000,
+      server.server_stats().partitions_loaded(),
+      server.server_stats().partitions_assigned());
   }
   html += "</table>";
 
@@ -253,7 +259,7 @@ void StatusServlet::renderNamespacePage(
   //html += kMainMenu;
 
   html += StringUtil::format(
-      "<h2>Namespace: &nbsp; <span style='font-weight:normal'>$0</span></h2>",
+      "<h2>Namespace: &nbsp; <p style='font-weight:normal'>$0</p></h2>",
       db_namespace);
 
   response->setStatus(http::kStatusOK);
@@ -274,9 +280,9 @@ void StatusServlet::renderTablePage(
   //html += kMainMenu;
 
   html += StringUtil::format(
-      "<h2>Table: &nbsp; <span style='font-weight:normal'>"
+      "<h2>Table: &nbsp; <p style='font-weight:normal'>"
       "<a href='/zstatus/db/$0'>$0</a> &mdash;"
-      "$1</span></h2>",
+      "$1</p></h2>",
       db_namespace,
       table_name);
 
@@ -293,7 +299,7 @@ void StatusServlet::renderTablePage(
 
   const auto& table_cfg = table.get()->config();
   html += StringUtil::format(
-      "<span><em>Metatdata TXNID:</em> $0 [$1]</span> &mdash; ",
+      "<p><em>Metatdata TXNID:</em> $0 [$1]</p> &mdash; ",
       SHA1Hash(
           table_cfg.metadata_txnid().data(),
           table_cfg.metadata_txnid().size()).toString(),
@@ -403,10 +409,10 @@ void StatusServlet::renderPartitionPage(
   //html += kMainMenu;
 
   html += StringUtil::format(
-      "<h2>Partition: &nbsp; <span style='font-weight:normal'>"
+      "<h2>Partition: &nbsp; <p style='font-weight:normal'>"
       "<a href='/zstatus/db/$0'>$0</a> &mdash;"
       "<a href='/zstatus/db/$0/$1'>$1</a> &mdash;"
-      "$2</span></h2>",
+      "$2</p></h2>",
       db_namespace,
       table_name,
       partition_key.toString());
@@ -433,7 +439,7 @@ void StatusServlet::renderPartitionPage(
       memcpy((char*) &ts_end, state.partition_keyrange_end().data(), 8);
 
       html += StringUtil::format(
-          "<span><em>Keyrange:</em> $0 [$1] - $2 [$3]</span> &mdash; ",
+          "<p><em>Keyrange:</em> $0 [$1] - $2 [$3]</p> &mdash; ",
           UnixTime(ts_begin),
           ts_begin,
           UnixTime(ts_end),
@@ -449,36 +455,36 @@ void StatusServlet::renderPartitionPage(
       memcpy((char*) &range_end, state.partition_keyrange_end().data(), 8);
 
       html += StringUtil::format(
-          "<span><em>Keyrange:</em> $0 - $1</span> &mdash; ",
+          "<p><em>Keyrange:</em> $0 - $1</p> &mdash; ",
           range_begin,
           range_end);
     }
 
     if (table->partitionerType() == TBL_PARTITION_STRING) {
       html += StringUtil::format(
-          "<span><em>Keyrange:</em> $0 - $1</span> &mdash; ",
+          "<p><em>Keyrange:</em> $0 - $1</p> &mdash; ",
           state.partition_keyrange_begin(),
           state.partition_keyrange_end());
     }
 
     html += StringUtil::format(
-        "<span><em>Lifecycle State</em>: $0</span> &mdash; ",
+        "<p><em>Lifecycle State</em>: $0</p> &mdash; ",
         PartitionLifecycleState_Name(snap->state.lifecycle_state()));
 
     html += StringUtil::format(
-        "<span><em>Needs Replication?</em>: $0</span> &mdash; ",
+        "<p><em>Needs Replication?</em>: $0</p> &mdash; ",
         repl->needsReplication());
 
     html += StringUtil::format(
-        "<span><em>Splitting?</em>: $0</span> &mdash; ",
+        "<p><em>Splitting?</em>: $0</p> &mdash; ",
         partition.get()->isSplitting());
 
     html += StringUtil::format(
-        "<span><em>Joining Servers?</em>: $0</span> &mdash; ",
+        "<p><em>Joining Servers?</em>: $0</p> &mdash; ",
         snap->state.has_joining_servers());
 
     html += StringUtil::format(
-        "<span><em>Size (Disk)</em>: $0MB</span> &mdash; ",
+        "<p><em>Size (Disk)</em>: $0MB</p> &mdash; ",
         partition.get()->getTotalDiskSize() / 1024.0 / 1024.0);
 
     html += "<h3>PartitionInfo</h3>";

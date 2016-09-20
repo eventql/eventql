@@ -87,13 +87,6 @@ void RPCServlet::handleHTTPRequest(
   //}
 
   try {
-    if (uri.path() == "/tsdb/insert") {
-      req_stream->readBody();
-      insertRecords(&req, &res, &uri);
-      res_stream->writeResponse(res);
-      return;
-    }
-
     if (uri.path() == "/tsdb/replicate") {
       req_stream->readBody();
       replicateRecords(&req, &res, &uri);
@@ -182,16 +175,6 @@ void RPCServlet::handleHTTPRequest(
   }
 
   res_stream->finishResponse();
-}
-
-void RPCServlet::insertRecords(
-    const http::HTTPRequest* req,
-    http::HTTPResponse* res,
-    URI* uri) {
-  //auto record_list = msg::decode<RecordEnvelopeList>(req->body());
-  //dbctx->table_service->insertRecords(record_list);
-  res->addBody("deprecated call");
-  res->setStatus(http::kStatusInternalServerError);
 }
 
 void RPCServlet::compactPartition(
@@ -304,13 +287,19 @@ void RPCServlet::replicateRecords(
   auto body_is = req->getBodyInputStream();
   records.decode(body_is.get());
 
-  dbctx->table_service->insertReplicatedRecords(
+  auto rc = dbctx->table_service->insertReplicatedRecords(
       tsdb_namespace,
       table_name,
       SHA1Hash::fromHexString(partition_key),
       records);
 
-  res->setStatus(http::kStatusCreated);
+  if (rc.isSuccess()) {
+    res->setStatus(http::kStatusCreated);
+  } else {
+    res->setStatus(http::kStatusInternalServerError);
+    res->addBody("ERROR: " + rc.getMessage());
+    return;
+  }
 }
 
 void RPCServlet::createMetadataFile(
