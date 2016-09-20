@@ -99,7 +99,9 @@ public:
   }
 
 protected:
-  ReturnCode(bool success) : success_(success) {}
+
+  explicit ReturnCode(bool success) : success_(success) {}
+
   bool success_;
   std::string code_;
   std::string message_;

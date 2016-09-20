@@ -60,6 +60,8 @@ public:
 
   void updateServerConfig(ServerConfig config) override;
 
+  ReturnCode publishServerStats(ServerStats stats) override;
+
   Vector<ServerConfig> listServers() const override;
 
   void setServerConfigChangeCallback(
@@ -163,6 +165,7 @@ protected:
   size_t zookeeper_timeout_;
   String cluster_name_;
   Option<String> server_name_;
+  size_t server_stats_version_;
   String listen_addr_;
   String global_prefix_;
   String path_prefix_;
@@ -176,7 +179,7 @@ protected:
 
   ClusterConfig cluster_config_;
   HashMap<String, ServerConfig> servers_;
-  HashMap<String, String> servers_live_;
+  HashMap<String, ServerStats> servers_live_;
   HashMap<String, NamespaceConfig> namespaces_;
   HashMap<String, TableDefinition> tables_;
 

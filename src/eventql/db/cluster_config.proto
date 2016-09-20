@@ -28,6 +28,11 @@ enum ServerStatus {
   SERVER_UP = 1;
 };
 
+message ServerStats {
+  optional string listen_addr = 1;
+  optional double load_factor = 2;
+};
+
 message ServerConfig {
   optional uint64 version = 1;
   required string server_id = 2;
@@ -36,5 +41,6 @@ message ServerConfig {
   optional bool is_leaving = 6;
   optional bool is_dead = 7;
   optional AllocationPolicy allocation_policy = 8;
+  optional ServerStats server_stats = 9;
 };
 
