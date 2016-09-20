@@ -147,8 +147,8 @@ int main(int argc, const char** argv) {
 
   eventql::cli::Benchmark benchmark;
 
-  auto on_progress = []() {
-
+  auto on_progress = [&benchmark, &stdout_os]() {
+    stdout_os->print(benchmark.getStats()->toString() + "\n");
   };
 
   benchmark.setProgressCallback(on_progress);

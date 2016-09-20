@@ -41,18 +41,41 @@
 namespace eventql {
 namespace cli {
 
-BenchmarkStats::BenchmarkStats() : total_requests_(0) {}
+BenchmarkStats::BenchmarkStats() : total_requests_(0) {
+  buckets_.resize(kNumBuckets);
+  buckets_begin_ = 0;
+}
 
 void BenchmarkStats::addRequest(
     bool is_success,
     size_t t_id,
     uint64_t start_time) {
   ++total_requests_;
+
+  auto twindow = start_time / kTimeWindowSize * kTimeWindowSize;
+  if (buckets_[buckets_begin_].time == 0) {
+    buckets_[buckets_begin_].time = twindow;
+  } else if (buckets_[buckets_begin_].time != twindow) {
+    ++buckets_begin_;
+    buckets_[buckets_begin_].time = twindow;
+  }
+
+  buckets_[buckets_begin_].num_requests += 1;
 }
 
 std::string BenchmarkStats::toString() const {
+  //calculate moving average for the last minute
+  auto start = MonotonicClock::now() - kMicrosPerMinute;
+  uint64_t total_last_minute = 0;
+  for (size_t i = 0; i <= buckets_begin_; ++i) {
+    if (buckets_[i].time < start) {
+      continue;
+    }
 
-  return StringUtil::format("total $0", total_requests_);
+    total_last_minute += buckets_[i].num_requests;
+  }
+
+  return StringUtil::format("total $0 --- requests per 10s $1", total_requests_, (double) (total_last_minute / 10) / (buckets_begin_ + 1));
 }
 
 // FIXME pass proper arguments
@@ -62,7 +85,7 @@ Benchmark::Benchmark() :
     threads_running_(0),
     last_request_time_(0),
     rate_limit_interval_(1000000),
-    remaining_requests_(5) {
+    remaining_requests_(20) {
   threads_.resize(num_threads_);
 }
 
@@ -113,7 +136,7 @@ void Benchmark::runThread(size_t idx) {
     // FIXME record end time
 
     std::unique_lock<std::mutex> lk(mutex_);
-    stats_.addRequest(rc.isSuccess(), idx, 0); //FIXME add start/runtime
+    stats_.addRequest(rc.isSuccess(), idx, MonotonicClock::now());
 
     if (!rc.isSuccess()) {
       status_ = rc;

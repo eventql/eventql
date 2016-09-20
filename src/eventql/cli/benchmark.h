@@ -42,9 +42,22 @@ public:
 
 protected:
 
+  static const uint64_t kNumBuckets = 10;
+  static const auto kTimeWindowSize = 10000000; //10 seconds
+
+  struct Bucket {
+    Bucket() : time(0), num_requests(0) {}
+
+    uint64_t time;
+    uint64_t num_requests;
+  };
+
   uint64_t total_requests_;
   uint64_t min_rate_;
   uint64_t max_rate_;
+
+  std::vector<Bucket> buckets_;
+  size_t buckets_begin_;
   std::mutex mutex_;
 };
 
