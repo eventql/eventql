@@ -219,18 +219,24 @@ void StatusServlet::renderDashboard(
           "<th>Partitions</th></tr>";
 
   for (const auto& server : cdir->listServers()) {
-  html += StringUtil::format(
-      "<tr><td>$0</td><td>$1</td><td>$2</td><td>$3</td><td>$4</td><td>$5MB</td>"
-      "<td>$6MB</td><td>$7/$8</td></tr>",
-      server.server_id(),
-      ServerStatus_Name(server.server_status()),
-      server.server_addr(),
-      server.server_stats().buildinfo(),
-      server.server_stats().load_factor(),
-      server.server_stats().disk_used() / 0x100000,
-      server.server_stats().disk_available() / 0x100000,
-      server.server_stats().partitions_loaded(),
-      server.server_stats().partitions_assigned());
+    if (server.is_dead()) {
+      continue;
+    }
+
+    html += StringUtil::format(
+        "<tr><td>$0</td><td>$1</td><td>$2</td><td>$3</td><td>$4</td>"
+        "<td>$5MB</td><td>$6MB</td><td>$7/$8</td></tr>",
+        server.server_id(),
+        ServerStatus_Name(server.server_status()),
+        server.server_addr(),
+        server.server_stats().buildinfo(),
+        server.server_stats().has_load_factor() ?
+            StringUtil::toString(server.server_stats().load_factor()) :
+            "-",
+        server.server_stats().disk_used() / 0x100000,
+        server.server_stats().disk_available() / 0x100000,
+        server.server_stats().partitions_loaded(),
+        server.server_stats().partitions_assigned());
   }
   html += "</table>";
 
