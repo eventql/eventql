@@ -245,10 +245,10 @@ void StatusServlet::renderDashboard(
             StringUtil::format("$0MB", sstats.disk_available() / 0x100000) :
             "-",
         sstats.has_partitions_loaded() ?
-            StringUtil::format("$0MB", sstats.partitions_loaded() / 0x100000) :
+            StringUtil::toString(sstats.partitions_loaded()) :
             "-",
         sstats.has_partitions_assigned() ?
-            StringUtil::format("$0MB", sstats.partitions_assigned() / 0x100000) :
+            StringUtil::toString(sstats.partitions_assigned()) :
             "-");
   }
   html += "</table>";
