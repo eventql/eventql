@@ -36,6 +36,8 @@ public:
 
   void addRequest(bool is_success, size_t t_id, uint64_t start_time);
 
+  std::string toString() const;
+
 protected:
 
   struct RequestStats {

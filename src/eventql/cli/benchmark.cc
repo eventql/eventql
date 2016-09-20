@@ -59,6 +59,22 @@ void BenchmarkStats::addRequest(
   ThreadStats thread;
   thread.t_id = t_id;
   thread.requests.emplace_back(request);
+  t_stats_.emplace_back(thread);
+}
+
+std::string BenchmarkStats::toString() const {
+  auto total = 0;
+  std::string str = "total: $0";
+
+  for (const auto& stat : t_stats_) {
+    total += stat.requests.size();
+    str.append(StringUtil::format(
+        " --- t-$0: $1",
+        stat.t_id,
+        stat.requests.size()));
+  }
+
+  return StringUtil::format(str, total);
 }
 
 // FIXME pass proper arguments
@@ -106,6 +122,10 @@ void Benchmark::kill() {
   std::unique_lock<std::mutex> lk(mutex_);
   status_ = ReturnCode::error("ERUNTIME", "Benchmark aborted...");
   cv_.notify_all();
+}
+
+BenchmarkStats* Benchmark::getStats() {
+  return &stats_; //FIXME
 }
 
 void Benchmark::runThread(size_t idx) {
