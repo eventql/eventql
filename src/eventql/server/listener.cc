@@ -106,7 +106,7 @@ ReturnCode Listener::bind(int listen_port) {
         strerror(errno));
   }
 
-  logNotice("eventql", "Listening on port $0", listen_port);
+  logInfo("eventql", "Listening on port $0", listen_port);
   return ReturnCode::success();
 }
 

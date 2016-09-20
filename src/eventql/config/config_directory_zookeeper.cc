@@ -180,7 +180,7 @@ Status ZookeeperConfigDirectory::connect(std::unique_lock<std::mutex>* lk) {
   }
 
   while (state_ < ZKState::LOADING) {
-    logInfo("evqld", "Waiting for zookeeper ($0)", zookeeper_addrs_);
+    logInfo("evqld", "Connecting to zookeeper ($0)", zookeeper_addrs_);
     cv_.wait_for(*lk, std::chrono::seconds(1));
   }
 
@@ -300,7 +300,7 @@ Status ZookeeperConfigDirectory::load(CallbackList* cb) {
   }
 
   if (!server_name_.isEmpty()) {
-    logInfo("evqld", "Registering with zookeeper...");
+    logDebug("evqld", "Registering with zookeeper...");
     auto server_cfg_path = StringUtil::format(
         "$0/servers/$1",
         path_prefix_,
@@ -333,7 +333,7 @@ Status ZookeeperConfigDirectory::load(CallbackList* cb) {
     }
   }
 
-  logInfo("evqld", "Loading config from zookeeper...");
+  logDebug("evqld", "Loading config from zookeeper...");
 
   {
     auto rc = syncClusterConfig(cb);
@@ -828,7 +828,7 @@ void ZookeeperConfigDirectory::handleSessionEvent(int state) {
 void ZookeeperConfigDirectory::handleConnectionEstablished() {
   switch (state_) {
     case ZKState::CONNECTING:
-      logInfo("evqld", "Zookeeper connection established");
+      logDebug("evqld", "Zookeeper connection established");
       state_ = ZKState::LOADING;
       return;
 

@@ -168,7 +168,7 @@ Set<SHA1Hash> LSMPartitionWriter::insertRecords(
 
     lk.unlock();
   } catch (const std::exception& e) {
-    logFatal("evqld", "error in insert routine: $0", e.what());
+    logCritical("evqld", "error in insert routine: $0", e.what());
     abort();
   }
 

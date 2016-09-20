@@ -213,7 +213,7 @@ int main(int argc, const char** argv) {
   /* conf */
   auto conf = evql_conf_init();
   if (!conf) {
-    logFatal("evqld", "error while initializing EventQL server");
+    logCritical("evqld", "error while initializing EventQL server");
     return 1;
   }
 
@@ -252,7 +252,7 @@ int main(int argc, const char** argv) {
         config_file_path.empty() ? nullptr : config_file_path.c_str());
 
     if (rc) {
-      logFatal(
+      logCritical(
           "evqld",
           "error while loading config file");
 
@@ -264,7 +264,7 @@ int main(int argc, const char** argv) {
   for (const auto& opt : flags.getStrings("config_set")) {
     auto opt_key_end = opt.find("=");
     if (opt_key_end == String::npos) {
-      logFatal("invalid config option: $0", opt);
+      logCritical("invalid config option: $0", opt);
       evql_conf_free(conf);
       return 1;
     }
@@ -296,13 +296,13 @@ int main(int argc, const char** argv) {
   /* init server */
   auto server = evql_server_init(conf);
   if (!server) {
-    logFatal("evqld", "error while initializing EventQL server");
+    logCritical("evqld", "error while initializing EventQL server");
     evql_conf_free(conf);
     return 1;
   }
 
   if (!evql_server_getconf(server, "server.datadir")) {
-    logFatal("evqld", "missing 'server.datadir' option or --datadir flag");
+    logCritical("evqld", "missing 'server.datadir' option or --datadir flag");
     evql_server_free(server);
     evql_conf_free(conf);
     return 1;
@@ -341,7 +341,7 @@ int main(int argc, const char** argv) {
   }
 
   if (rc) {
-    logAlert("eventql", "FATAL ERROR: $0", evql_server_geterror(server));
+    logCritical("eventql", evql_server_geterror(server));
   }
 
   /* shutdown */
