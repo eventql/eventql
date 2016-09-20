@@ -234,8 +234,7 @@ void StatusServlet::renderDashboard(
         server.server_addr(),
         sstats.buildinfo(),
         sstats.has_disk_used() && sstats.has_disk_available() ?
-            StringUtil::format(
-                "$0MB",
+            StringUtil::toString(
                 (double) sstats.disk_used() / (double) disk_capacity) :
             "-",
         sstats.has_disk_used() ?
