@@ -1,4 +1,4 @@
-3.6 Updating Rows
+3.7 Updating Rows
 =================
 
 EventQL supports updating a row/event after it was written. Like inserts,

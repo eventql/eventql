@@ -106,19 +106,22 @@ ReturnCode Listener::bind(int listen_port) {
         strerror(errno));
   }
 
-  logNotice("eventql", "Listening on port $0", listen_port);
+  logInfo("eventql", "Listening on port $0", listen_port);
   return ReturnCode::success();
 }
 
-void Listener::run() {
+void Listener::run(int kill_fd /* = -1 */) {
   while (running_.load()) {
     fd_set op_read, op_write, op_error;
     FD_ZERO(&op_read);
     FD_ZERO(&op_write);
     FD_ZERO(&op_error);
 
-    int max_fd = ssock_;
+    int max_fd = std::max(kill_fd, ssock_);
     FD_SET(ssock_, &op_read);
+    if (kill_fd >= 0) {
+      FD_SET(kill_fd, &op_read);
+    }
 
     auto now = MonotonicClock::now();
     while (!connections_.empty()) {
@@ -167,6 +170,10 @@ void Listener::run() {
 
         logError("eventql", "select() failed");
         goto exit;
+    }
+
+    if (kill_fd >= 0 && FD_ISSET(kill_fd, &op_read)) {
+      return;
     }
 
     if (FD_ISSET(ssock_, &op_read)) {

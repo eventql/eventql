@@ -24,7 +24,6 @@
  */
 #include <eventql/server/sql/scheduler.h>
 #include <eventql/server/sql/table_provider.h>
-#include <eventql/server/sql/pipelined_expression.h>
 #include <eventql/sql/qtree/QueryTreeUtil.h>
 #include <eventql/db/metadata_client.h>
 #include "eventql/eventql.h"
@@ -121,8 +120,10 @@ ScopedPtr<csql::TableExpression> Scheduler::buildPipelineGroupByExpression(
     csql::Transaction* txn,
     csql::ExecutionContext* execution_context,
     RefPtr<csql::GroupByNode> node) {
-  size_t max_concurrent_tasks = 100; //FIXME
-  size_t max_concurrent_tasks_per_host = 4; //FIXME
+  size_t max_concurrent_tasks =
+      config_->getInt("server.query_max_concurrent_shards").get();
+  size_t max_concurrent_tasks_per_host =
+      config_->getInt("server.query_max_concurrent_shards_per_host").get();
 
   Vector<csql::ValueExpression> select_expressions;
   for (const auto& slnode : node->selectList()) {
@@ -234,7 +235,6 @@ Vector<Scheduler::PipelinedQueryTree> Scheduler::pipelineExpression(
       replicas.emplace_back(rref);
     }
 
-    std::random_shuffle(replicas.begin(), replicas.end());
     partitions.emplace(pid, replicas);
   }
 

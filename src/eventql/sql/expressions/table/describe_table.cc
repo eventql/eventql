@@ -60,6 +60,8 @@ bool DescribeTableStatement::next(SValue* row, size_t row_len) {
     const auto& col = rows_[counter_];
     switch (row_len) {
       default:
+      case 6:
+        row[5] = SValue::newString(col.encoding); //Encoding
       case 5:
         row[4] = SValue::newNull(); //Description
       case 4:

@@ -1,4 +1,4 @@
-4.2.3 INSERT
+5.2.3 INSERT
 ============
 
     INSERT INTO table_name

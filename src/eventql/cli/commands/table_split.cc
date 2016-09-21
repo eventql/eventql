@@ -118,8 +118,6 @@ Status TableSplit::execute(
 
     KeyspaceType keyspace;
     switch (table_cfg.config().partitioner()) {
-      case TBL_PARTITION_FIXED:
-        RAISE(kIllegalArgumentError);
       case TBL_PARTITION_UINT64:
       case TBL_PARTITION_TIMEWINDOW:
         keyspace = KEYSPACE_UINT64;
@@ -127,8 +125,12 @@ Status TableSplit::execute(
       case TBL_PARTITION_STRING:
         keyspace = KEYSPACE_STRING;
         break;
+      case TBL_PARTITION_FIXED:
+      default:
+        RAISE(kIllegalArgumentError);
     }
 
+    auto cconf = cdir->getClusterConfig();
     auto partition_id = SHA1Hash::fromHexString(flags.getString("partition_id"));
     auto split_partition_id_low = Random::singleton()->sha1();
     auto split_partition_id_high = Random::singleton()->sha1();
@@ -151,11 +153,14 @@ Status TableSplit::execute(
 
     ServerAllocator server_alloc(cdir.get());
 
-    Set<String> split_servers_low;
+    std::vector<String> split_servers_low;
     {
-      auto rc = server_alloc.allocateServers(3, &split_servers_low);
+      auto rc = server_alloc.allocateServers(
+          ServerAllocator::MUST_ALLOCATE,
+          cconf.replication_factor(),
+          Set<String>{},
+          &split_servers_low);
       if (!rc.isSuccess()) {
-        stderr_os->write(StringUtil::format("ERROR: $0\n", rc.message()));
         return rc;
       }
     }
@@ -164,11 +169,14 @@ Status TableSplit::execute(
       op.add_split_servers_low(s);
     }
 
-    Set<String> split_servers_high;
+    std::vector<String> split_servers_high;
     {
-      auto rc = server_alloc.allocateServers(3, &split_servers_high);
+      auto rc = server_alloc.allocateServers(
+          ServerAllocator::MUST_ALLOCATE,
+          cconf.replication_factor(),
+          Set<String>{},
+          &split_servers_high);
       if (!rc.isSuccess()) {
-        stderr_os->write(StringUtil::format("ERROR: $0\n", rc.message()));
         return rc;
       }
     }

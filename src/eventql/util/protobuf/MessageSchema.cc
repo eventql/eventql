@@ -407,7 +407,16 @@ void MessageSchema::toJSON(json::JSONOutputStream* json) const {
     json->addComma();
 
     json->addObjectEntry("encoding_hint");
-    json->addString("NONE");
+    switch (field.encoding) {
+      case EncodingHint::BITPACK:
+        json->addString("BITPACK");
+        break;
+      case EncodingHint::LEB128:
+        json->addString("LEB128");
+        break;
+      default:
+        json->addString("NONE");
+    }
 
     if (field.type == FieldType::OBJECT) {
       json->addComma();

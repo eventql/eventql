@@ -37,7 +37,7 @@ public:
 
   ReturnCode bind(int listen_port);
 
-  void run();
+  void run(int kill_fd = -1);
   void shutdown();
 
 protected:

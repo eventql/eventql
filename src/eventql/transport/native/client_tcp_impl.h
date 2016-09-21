@@ -1,6 +1,7 @@
 /**
  * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
+ *   - Laura Schlimmer <laura@eventql.io>
  *   - Paul Asmuth <paul@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
@@ -22,32 +23,25 @@
  * code of your own applications
  */
 #pragma once
-#include <string>
-#include <vector>
-#include "eventql/eventql.h"
-#include "eventql/util/return_code.h"
-#include "eventql/db/database.h"
-#include "eventql/sql/transaction.h"
 
 namespace eventql {
-namespace rpc {
+namespace native_transport {
 
-class PartialAggregationOperation {
-public:
+template <class FrameType>
+ReturnCode TCPClient::sendFrame(
+    const FrameType* frame,
+    uint16_t flags) {
+  std::string payload;
+  auto os = StringOutputStream::fromString(&payload);
+  frame->writeTo(os.get());
 
-  PartialAggregationOperation(Database* db);
+  return sendFrame(
+      FrameType::kOpcode,
+      flags,
+      payload.data(),
+      payload.size());
+}
 
-  ReturnCode parseFrom(const char* data, size_t len);
-
-  ReturnCode execute(OutputStream* os);
-
-  void clear();
-
-protected:
-  std::unique_ptr<csql::Transaction> txn_;
-  RefPtr<csql::QueryTreeNode> qtree_;
-};
-
-} // namespace rpc
+} // namespace native_transport
 } // namespace eventql
 

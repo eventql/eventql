@@ -1,4 +1,4 @@
-6.2 JavaScript (MapReduce) API
+7.2 JavaScript (MapReduce) API
 ==============================
 
 ### Logging

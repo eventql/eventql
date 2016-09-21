@@ -88,7 +88,7 @@ public:
 
   LSMPartitionReplication(
       RefPtr<Partition> partition,
-      ConfigDirectory* cdir);
+      DatabaseContext* ctx);
 
   bool needsReplication() const override;
 
@@ -135,7 +135,7 @@ protected:
       const SHA1Hash& target_partition_id,
       const ShreddedRecordList& batch);
 
-  ConfigDirectory* cdir_;
+  DatabaseContext* dbctx_;
 };
 
 

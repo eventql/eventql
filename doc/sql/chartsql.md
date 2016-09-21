@@ -1,4 +1,4 @@
-4.2.2 DRAW
+5.2.2 DRAW
 ==========
 
 The DRAW statement allows you to specify that the query result should be

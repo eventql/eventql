@@ -67,6 +67,7 @@ public:
   Status createTable(const csql::CreateTableNode& req) override;
   Status createDatabase(const String& database_name) override;
   Status alterTable(const csql::AlterTableNode& alter_table) override;
+  Status dropTable(const std::string& table_name) override;
 
   Status insertRecord(
       const String& table_name,
@@ -80,7 +81,7 @@ public:
 
 protected:
 
-  csql::TableInfo tableInfoForTable(const TSDBTableInfo& table) const;
+  csql::TableInfo tableInfoForTable(const TableDefinition& table) const;
 
   RefPtr<csql::ValueExpressionNode> simplifyWhereExpression(
       RefPtr<Table> table,

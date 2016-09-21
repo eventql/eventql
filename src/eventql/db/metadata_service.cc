@@ -256,12 +256,14 @@ Status MetadataService::createPartition(
       p_begin,
       p_end);
 
-  Set<String> new_servers;
+  std::vector<String> new_servers;
   {
     auto cconf = cdir_->getClusterConfig();
     ServerAllocator server_alloc(cdir_);
     auto rc = server_alloc.allocateServers(
+        ServerAllocator::MUST_ALLOCATE,
         cconf.replication_factor(),
+        Set<String>{},
         &new_servers);
 
     if (!rc.isSuccess()) {

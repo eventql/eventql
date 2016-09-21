@@ -5,6 +5,8 @@ collection and analytics. It runs super-fast SQL and JavaScript queries.
 
 Documentation & Examples: [eventql.io](http://eventql.io/)
 
+[![Build Status](https://travis-ci.org/eventql/eventql.png?branch=master)](http://travis-ci.org/eventql/eventql)
+
 ## Features
 
 * Tables are transparently split into ordered partitions by primary key and distributed onto many machines
@@ -47,10 +49,10 @@ To build EventQL from a git checkout:
 To run EventQL Server with Docker:
 
     $ git clone git@github.com:eventql/eventql.git
-    $ cd eventql/docker/server
+    $ cd eventql/contrib/docker/server
     $ chmod +x run.sh && ./run.sh
 
-Running on port 9175
+The server will start on port 9175
 
 To run the test suite:
 

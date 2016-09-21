@@ -67,7 +67,7 @@ ScopedPtr<ResultCursor> GroupByExpression::execute() {
   Vector<SValue> row(input_cursor->getNumColumns());
   size_t cnt = 0;
   while (input_cursor->next(row.data(), row.size())) {
-    if (++cnt % 512 == 0) {
+    if (++cnt % 4096 == 0) {
       auto rc = txn_->triggerHeartbeat();
       if (!rc.isSuccess()) {
         RAISE(kRuntimeError, rc.getMessage());
@@ -346,7 +346,8 @@ GroupByMergeExpression::GroupByMergeExpression(
         config,
         config_dir,
         max_concurrent_tasks,
-        max_concurrent_tasks_per_host),
+        max_concurrent_tasks_per_host,
+        config->getString("server.query_failed_shard_policy").get() == "tolerate"),
     freed_(false),
     num_parts_(0) {
   execution_context_->incrementNumTasks();

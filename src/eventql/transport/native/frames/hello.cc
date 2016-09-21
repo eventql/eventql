@@ -108,7 +108,7 @@ ReturnCode HelloFrame::readFrom(InputStream* is) {
   return ReturnCode::success();
 }
 
-void HelloFrame::writeTo(OutputStream* os) {
+void HelloFrame::writeTo(OutputStream* os) const {
   os->appendVarUInt(1);
   os->appendLenencString(EVQL_VERSION);
   os->appendVarUInt(flags_);

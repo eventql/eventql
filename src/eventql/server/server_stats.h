@@ -30,7 +30,8 @@ namespace eventql {
 
 struct evqld_stats {
   stats::Counter<uint64_t> num_partitions;
-  stats::Counter<uint64_t> num_partitions_loaded;
+  stats::Counter<uint64_t> num_partitions_opened;
+  stats::Counter<uint64_t> num_partitions_loading;
   stats::Counter<uint64_t> replication_queue_length;
   stats::Counter<uint64_t> compaction_queue_length;
   stats::Counter<uint64_t> mapreduce_reduce_memory;

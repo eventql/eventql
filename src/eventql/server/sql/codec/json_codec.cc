@@ -57,7 +57,8 @@ void JSONCodec::printResultTable(
     }
 
     json_->beginArray();
-    for (size_t n = 0; n < row.size(); ++n) {
+    auto n_max = std::min(row.size(), header.size());
+    for (size_t n = 0; n < n_max; ++n) {
       if (n > 0) {
         json_->addComma();
       }

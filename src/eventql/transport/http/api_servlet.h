@@ -2,6 +2,7 @@
  * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
  *   - Paul Asmuth <paul@eventql.io>
+ *   - Laura Schlimmer <laura@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -60,17 +61,6 @@ protected:
       const http::HTTPRequest* req,
       http::HTTPResponse* res);
 
-  void pushEvents(
-      const URI& uri,
-      const http::HTTPRequest* req,
-      http::HTTPResponse* res);
-
-  void insertIntoMetric(
-      const URI& uri,
-      Session* session,
-      const http::HTTPRequest* req,
-      http::HTTPResponse* res);
-
   void listTables(
       Session* session,
       const http::HTTPRequest* req,
@@ -78,7 +68,6 @@ protected:
 
   void fetchTableDefinition(
       Session* session,
-      const String& table_name,
       const http::HTTPRequest* req,
       http::HTTPResponse* res);
 
@@ -97,12 +86,7 @@ protected:
       const http::HTTPRequest* req,
       http::HTTPResponse* res);
 
-  void addTableTag(
-      Session* session,
-      const http::HTTPRequest* req,
-      http::HTTPResponse* res);
-
-  void removeTableTag(
+  void dropTable(
       Session* session,
       const http::HTTPRequest* req,
       http::HTTPResponse* res);
@@ -119,141 +103,32 @@ protected:
       RefPtr<http::HTTPResponseStream> res_stream);
 
   void executeSQL_ASCII(
-      const URI::ParamList& params,
+      const std::string& query,
+      const std::string& database,
       Session* session,
-      const http::HTTPRequest* req,
       http::HTTPResponse* res,
       RefPtr<http::HTTPResponseStream> res_stream);
 
   void executeSQL_BINARY(
-      const URI::ParamList& params,
+      const std::string& query,
+      const std::string& database,
       Session* session,
-      const http::HTTPRequest* req,
       http::HTTPResponse* res,
       RefPtr<http::HTTPResponseStream> res_stream);
 
   void executeSQL_JSON(
-      const URI::ParamList& params,
+      const std::string& query,
+      const std::string& database,
       Session* session,
-      const http::HTTPRequest* req,
       http::HTTPResponse* res,
       RefPtr<http::HTTPResponseStream> res_stream);
 
   void executeSQL_JSONSSE(
-      const URI::ParamList& params,
+      const std::string& query,
+      const std::string& database,
       Session* session,
-      const http::HTTPRequest* req,
       http::HTTPResponse* res,
       RefPtr<http::HTTPResponseStream> res_stream);
-
-  void executeQTree(
-      Session* session,
-      const http::HTTPRequest* req,
-      http::HTTPResponse* res,
-      RefPtr<http::HTTPResponseStream> res_stream);
-
-  void executeSQLAggregatePartition(
-      Session* session,
-      const http::HTTPRequest* req,
-      http::HTTPResponse* res);
-
-  void executeSQLScanPartition(
-      Session* session,
-      const http::HTTPRequest* req,
-      http::HTTPResponse* res,
-      RefPtr<http::HTTPResponseStream> res_stream);
-
-  void executeDrilldownQuery(
-      Session* session,
-      const http::HTTPRequest* req,
-      http::HTTPResponse* res,
-      RefPtr<http::HTTPResponseStream> res_stream);
-
-  void pipelineInfo(
-      Session* session,
-      const http::HTTPRequest* req,
-      http::HTTPResponse* res);
-
-  void sessionTrackingListEvents(
-      Session* session,
-      const http::HTTPRequest* req,
-      http::HTTPResponse* res);
-
-  void sessionTrackingEventInfo(
-      Session* session,
-      const http::HTTPRequest* req,
-      http::HTTPResponse* res);
-
-  void sessionTrackingEventAdd(
-      Session* session,
-      const http::HTTPRequest* req,
-      http::HTTPResponse* res);
-
-  void sessionTrackingEventRemove(
-      Session* session,
-      const http::HTTPRequest* req,
-      http::HTTPResponse* res);
-
-  void sessionTrackingEventAddField(
-      Session* session,
-      const http::HTTPRequest* req,
-      http::HTTPResponse* res);
-
-  void sessionTrackingEventRemoveField(
-      Session* session,
-      const http::HTTPRequest* req,
-      http::HTTPResponse* res);
-
-  void sessionTrackingListAttributes(
-      Session* session,
-      const http::HTTPRequest* req,
-      http::HTTPResponse* res);
-
-  void performLogin(
-      const URI& uri,
-      const http::HTTPRequest* req,
-      http::HTTPResponse* res);
-
-  void performLogout(
-      const URI& uri,
-      const http::HTTPRequest* req,
-      http::HTTPResponse* res);
-
-  inline void expectHTTPPost(const http::HTTPRequest& req) {
-    if (req.method() != http::HTTPMessage::M_POST) {
-      RAISE(kIllegalArgumentError, "expected HTTP POST request");
-    }
-  }
-
-  String getCookieDomain(const http::HTTPRequest& req) {
-    auto domain = req.getHeader("Host");
-    auto ppos = domain.find(":");
-    if (ppos != String::npos) {
-      domain.erase(domain.begin() + ppos, domain.end());
-    }
-
-    auto parts = StringUtil::split(domain, ".");
-    if (parts.size() > 2) {
-      parts.erase(parts.begin(), parts.end() - 2);
-    }
-
-    if (parts.size() == 2) {
-      return "." + StringUtil::join(parts, ".");
-    } else {
-      return "";
-    }
-  }
-
-  void catchAndReturnErrors(
-      http::HTTPResponse* resp,
-      Function<void ()> fn) const {
-    try {
-      fn();
-    } catch (const StandardException& e) {
-      resp->setStatus(http::kStatusInternalServerError);
-      resp->addBody(e.what());
-    }
-  }
 
   Database* db_;
   MapReduceAPIServlet mapreduce_api_;

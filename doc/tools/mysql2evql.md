@@ -1,4 +1,4 @@
-7.1 mysql2evql
+8.1 mysql2evql
 ==============
 
 mysql2evql is a command line tool that allows you to import a MySQL table into

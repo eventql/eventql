@@ -53,6 +53,8 @@ public:
 
   bool getQuietMode() const;
 
+  uint64_t getTimeout() const;
+
   Option<String> getDatabase() const;
 
   Option<String> getPassword() const;

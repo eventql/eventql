@@ -42,8 +42,10 @@ public:
   ServerAllocator(ConfigDirectory* cdir);
 
   Status allocateServers(
+      AllocationPolicy policy,
       size_t num_servers,
-      Set<String>* servers) const;
+      const Set<String>& exclude_servers,
+      Vector<String>* out) const;
 
   Status allocateStable(
       AllocationPolicy policy,

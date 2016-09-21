@@ -84,7 +84,7 @@ And an example JSON message that is valid for the above schema:
 
 ### The RECORD Type
 
-The record type allows you to define nesting within column. Its most useful in
+The record type allows you to define nesting within a column. Its most useful in
 combination with repeated fields as this allows you to build schemas that can
 properly represent arbitrary JSON objects.
 

@@ -28,10 +28,61 @@
 #include "eventql/util/return_code.h"
 #include "eventql/util/buffer.h"
 #include "eventql/config/config_directory.h"
+#include "eventql/transport/native/connection_tcp.h"
 
 namespace eventql {
 namespace native_transport {
 
+// A TCP Client is _not_ thread safe
+class TCPClient {
+public:
+
+  using ResultCallbackType =
+      std::function<
+          ReturnCode (
+              void* privdata,
+              uint16_t opcode,
+              uint16_t flags,
+              const char* payload,
+              size_t payload_len)>;
+
+  TCPClient(
+      ProcessConfig* config,
+      ConfigDirectory* config_dir);
+
+  ReturnCode connect(const std::string& server);
+
+  ReturnCode recvFrame(
+      uint16_t* opcode,
+      uint16_t* flags,
+      std::string* payload,
+      uint64_t timeout_us);
+
+  ReturnCode sendFrame(
+      uint16_t opcode,
+      uint16_t flags,
+      const void* payload,
+      size_t payload_len);
+
+  template <class FrameType>
+  ReturnCode sendFrame(
+      const FrameType* frame,
+      uint16_t flags);
+
+  void close();
+
+protected:
+
+  ReturnCode performHandshake();
+
+  ProcessConfig* config_;
+  ConfigDirectory* cdir_;
+  uint64_t io_timeout_;
+  uint64_t idle_timeout_;
+  std::unique_ptr<TCPConnection> conn_;
+};
+
+// A AsyncTCPClient is _not_ thread safe
 class TCPAsyncClient {
 public:
 
@@ -51,7 +102,8 @@ public:
       ProcessConfig* config,
       ConfigDirectory* config_dir,
       size_t max_concurrent_tasks,
-      size_t max_concurrent_tasks_per_host);
+      size_t max_concurrent_tasks_per_host,
+      bool tolerate_failures);
 
   ~TCPAsyncClient();
 
@@ -115,7 +167,7 @@ protected:
       size_t payload_size);
 
   Task* popTask(const std::string* hostname = nullptr);
-  ReturnCode failTask(Task* task);
+  ReturnCode failTask(Task* task, const ReturnCode& fail_rc);
   void completeTask(Task* task);
 
   ReturnCode startNextTask();
@@ -139,13 +191,16 @@ protected:
   std::map<std::string, size_t> connections_per_host_;
   size_t max_concurrent_tasks_;
   size_t max_concurrent_tasks_per_host_;
+  bool tolerate_failures_;
   size_t num_tasks_;
   size_t num_tasks_complete_;
   size_t num_tasks_running_;
   size_t io_timeout_;
   size_t idle_timeout_;
+  bool tolerate_failed_shards_;
 };
 
 } // namespace native_transport
 } // namespace eventql
 
+#include "client_tcp_impl.h"

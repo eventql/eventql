@@ -28,6 +28,7 @@
 #include <mutex>
 #include <stdlib.h>
 #include <string>
+#include "return_code.h"
 
 enum kStatusType {
   eSuccess,
@@ -68,6 +69,7 @@ public:
   Status(const std::exception& e);
   Status(kStatusType type);
   Status(kStatusType type, const std::string& message);
+  Status(const ReturnCode& rc);
 
   bool isError() const;
   bool isSuccess() const;
@@ -76,6 +78,8 @@ public:
   const std::string& message() const;
 
   void raiseIfError() const;
+
+  operator ReturnCode() const;
 
 protected:
   kStatusType type_;

@@ -53,8 +53,12 @@ public:
     RAISE(kRuntimeError, "can't create tables");
   }
 
-  virtual Status createDatabase(const String& database_name) {
+  virtual Status createDatabase(const std::string& database_name) {
     RAISE(kRuntimeError, "can't create databases");
+  }
+
+  virtual Status dropTable(const String& table_name) {
+    RAISE(kRuntimeError, "can't drop table");
   }
 
   virtual Status alterTable(const AlterTableNode& alter_table) {
