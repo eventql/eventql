@@ -63,8 +63,8 @@ public:
       Function<void (const csql::TableInfo& table)> fn) const override;
 
   Status listPartitions(
-    const String& table_name,
-    Function<void (const TablePartitionInfo& partition)> fn) const;
+      const String& table_name,
+      Function<void (const TablePartitionInfo& partition)> fn) const override;
 
   Option<csql::TableInfo> describe(const String& table_name) const override;
 
