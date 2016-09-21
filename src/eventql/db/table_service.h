@@ -65,11 +65,7 @@ public:
     bool is_optional;
   };
 
-  TableService(
-      ConfigDirectory* cdir,
-      PartitionMap* pmap,
-      ProcessConfig* config,
-      DatabaseContext* dbctx);
+  TableService(DatabaseContext* dbctx);
 
   Status createTable(
       const String& db_namespace,
@@ -159,9 +155,6 @@ protected:
       const SHA1Hash& partition_key,
       const ShreddedRecordList& records);
 
-  ConfigDirectory* cdir_;
-  PartitionMap* pmap_;
-  ProcessConfig* config_;
   DatabaseContext* dbctx_;
 };
 

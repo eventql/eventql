@@ -151,7 +151,7 @@ Status TableSplit::execute(
       op.set_finalize_immediately(true);
     }
 
-    ServerAllocator server_alloc(cdir.get());
+    ServerAllocator server_alloc(cdir.get(), nullptr);
 
     std::vector<String> split_servers_low;
     {

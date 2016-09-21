@@ -60,6 +60,7 @@
 #include "eventql/db/leader.h"
 #include "eventql/db/monitor.h"
 #include "eventql/db/database.h"
+#include "eventql/db/server_allocator.h"
 #include "eventql/transport/http/default_servlet.h"
 #include "eventql/sql/defaults.h"
 #include "eventql/sql/runtime/query_cache.h"
@@ -124,6 +125,7 @@ protected:
   std::unique_ptr<Leader> leader_;
   std::unique_ptr<Monitor> monitor_;
   std::unique_ptr<DatabaseContext> database_context_;
+  std::unique_ptr<ServerAllocator> server_alloc_;
   pthread_key_t local_session_;
 };
 
@@ -205,10 +207,29 @@ ReturnCode DatabaseImpl::start() {
     return ReturnCode::error("EIO", e.what());
   }
 
+  /* config dir */
+  {
+    auto rc = ConfigDirectoryFactory::getConfigDirectoryForServer(
+        cfg_,
+        &config_dir_);
+
+    if (rc.isSuccess()) {
+      rc = config_dir_->start();
+    }
+
+    if (!rc.isSuccess()) {
+      shutdown();
+      return ReturnCode::error(
+          "ERUNTIME",
+          "Can't connect to config backend: %s", rc.message().c_str());
+    }
+  }
+
   /* database context */
   database_context_.reset(new DatabaseContext());
   database_context_->db_path = tsdb_dir;
   database_context_->config = cfg_;
+  database_context_->config_directory = config_dir_.get();
 
   /* file tracker */
   file_tracker_.reset(new FileTracker(trash_dir));
@@ -230,24 +251,6 @@ ReturnCode DatabaseImpl::start() {
   } catch (const std::exception& e) {
     shutdown();
     return ReturnCode::error("ERUNTIME", e.what());
-  }
-
-  /* config dir */
-  {
-    auto rc = ConfigDirectoryFactory::getConfigDirectoryForServer(
-        cfg_,
-        &config_dir_);
-
-    if (rc.isSuccess()) {
-      rc = config_dir_->start();
-    }
-
-    if (!rc.isSuccess()) {
-      shutdown();
-      return ReturnCode::error(
-          "ERUNTIME",
-          "Can't connect to config backend: %s", rc.message().c_str());
-    }
   }
 
   /* client auth */
@@ -278,10 +281,13 @@ ReturnCode DatabaseImpl::start() {
   /* internal auth */
   internal_auth_.reset(new TrustInternalAuth());
 
+  /* server allocator */
+  server_alloc_.reset(new ServerAllocator(config_dir_.get(), cfg_));
+
   /* metadata service */
   metadata_store_.reset(new MetadataStore(metadata_dir));
   metadata_service_.reset(
-      new MetadataService(config_dir_.get(), metadata_store_.get()));
+      new MetadataService(database_context_.get(), metadata_store_.get()));
 
   /* server config */
   server_cfg_.reset(new ServerCfg());
@@ -292,14 +298,7 @@ ReturnCode DatabaseImpl::start() {
   server_cfg_->file_tracker = file_tracker_.get();
 
   /* core */
-  partition_map_.reset(new PartitionMap(database_context_.get()));
-
-  table_service_.reset(
-      new TableService(
-          config_dir_.get(),
-          partition_map_.get(),
-          cfg_,
-          database_context_.get()));
+  table_service_.reset(new TableService(database_context_.get()));
 
   replication_worker_.reset(
       new ReplicationWorker(partition_map_.get()));
@@ -373,7 +372,6 @@ ReturnCode DatabaseImpl::start() {
   {
     database_context_->partition_map = partition_map_.get();
     database_context_->file_tracker = file_tracker_.get();
-    database_context_->config_directory = config_dir_.get();
     database_context_->replication_worker = replication_worker_.get();
     database_context_->lsm_index_cache = server_cfg_->idx_cache.get();
     database_context_->metadata_store = metadata_store_.get();
@@ -384,6 +382,7 @@ ReturnCode DatabaseImpl::start() {
     database_context_->table_service = table_service_.get();
     database_context_->mapreduce_service = mapreduce_service_.get();
     database_context_->metadata_service = metadata_service_.get();
+    database_context_->server_alloc = server_alloc_.get();
   }
 
   /* open tables */
@@ -442,6 +441,7 @@ ReturnCode DatabaseImpl::start() {
     leader_.reset(
         new Leader(
             config_dir_.get(),
+            server_alloc_.get(),
             cfg_->getInt("cluster.rebalance_interval").get()));
 
     leader_->startLeaderThread();
@@ -495,6 +495,7 @@ void DatabaseImpl::shutdown() {
   metadata_store_.reset(nullptr);
   internal_auth_.reset(nullptr);
   client_auth_.reset(nullptr);
+  server_alloc_.reset(nullptr);
   config_dir_.reset(nullptr);
   garbage_collector_.reset(nullptr);
   file_tracker_.reset(nullptr);

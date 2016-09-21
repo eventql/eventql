@@ -29,8 +29,10 @@
 namespace eventql {
 
 Rebalance::Rebalance(
-    ConfigDirectory* cdir) :
+    ConfigDirectory* cdir,
+    ServerAllocator* server_alloc) :
     cdir_(cdir),
+    server_alloc_(server_alloc),
     metadata_coordinator_(cdir),
     metadata_client_(cdir),
     replication_factor_(3),
@@ -77,8 +79,6 @@ Status Rebalance::rebalanceTable(TableDefinition tbl_cfg) {
       "Rebalancing table '$0/$1'",
       tbl_cfg.customer(),
       tbl_cfg.table_name());
-
-  ServerAllocator server_alloc(cdir_);
 
   // fetch latest metadata file
   MetadataFile metadata;
@@ -149,7 +149,7 @@ Status Rebalance::rebalanceTable(TableDefinition tbl_cfg) {
     if (nservers < metadata_replication_factor_) {
       std::vector<std::string> new_metadata_servers;
       {
-        auto rc = server_alloc.allocateServers(
+        auto rc = server_alloc_->allocateServers(
             ServerAllocator::BEST_EFFORT,
             metadata_replication_factor_ - nservers,
             current_metadata_servers,
@@ -250,7 +250,7 @@ Status Rebalance::rebalanceTable(TableDefinition tbl_cfg) {
       if (cur_servers.size() < replication_factor_) {
         std::vector<std::string> new_servers;
         {
-          auto rc = server_alloc.allocateServers(
+          auto rc = server_alloc_->allocateServers(
               ServerAllocator::BEST_EFFORT,
               replication_factor_ - cur_servers.size(),
               cur_servers,

@@ -240,6 +240,10 @@ int main(int argc, const char** argv) {
   evql_conf_set(conf, "server.query_max_concurrent_shards_per_host", "4");
   evql_conf_set(conf, "server.query_failed_shard_policy", "tolerate");
   evql_conf_set(conf, "server.loadinfo_publish_interval", "900000000");
+  evql_conf_set(conf, "server.load_limit_hard", "0.98");
+  evql_conf_set(conf, "server.load_limit_soft", "0.95");
+  evql_conf_set(conf, "server.partitions_loading_limit_soft", "4");
+  evql_conf_set(conf, "server.partitions_loading_limit_hard", "64");
 
   if (flags.isSet("standalone")) {
     evql_conf_set(conf, "cluster.coordinator", "standalone");
