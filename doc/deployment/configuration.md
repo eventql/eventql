@@ -175,7 +175,7 @@ The EventQL configuration options are grouped in three sections: `client`, `serv
   </tr>
   <tr>
     <td><b>server.disk_capacity</b></td>
-    <td>/td>
+    <td></td>
     <td>
       The maximum number of bytes that the server is allowed to write/use
       on disk. Unit is Bytes. This is an optional limit, if it is unset, the
@@ -216,7 +216,7 @@ The EventQL configuration options are grouped in three sections: `client`, `serv
   </td>
   <tr>
     <td><b>server.load_limit_hard</b></td>
-    <td>0.97</td>
+    <td>0.98</td>
     <td>
       This value controls the upper limit on a servers disk utilization. If the
       soft load limit was reached, now new partitions will be allocated on the
