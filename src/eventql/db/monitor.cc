@@ -29,6 +29,7 @@
 #include "eventql/eventql.h"
 #include "eventql/db/monitor.h"
 #include <eventql/db/database.h>
+#include <eventql/util/wallclock.h>
 #include <eventql/server/server_stats.h>
 
 namespace eventql {
@@ -104,11 +105,13 @@ void Monitor::startMonitorThread() {
       lk.unlock();
 
       auto rc = ReturnCode::success();
+      auto t0 = MonotonicClock::now();
       try {
         rc = runMonitorProcedure();
       } catch (const std::exception& e) {
         rc = ReturnCode::exception(e);
       }
+      auto t1 = MonotonicClock::now();
 
       if (!rc.isSuccess()) {
         logError("evqld", "Error in Monitor thread: $0", rc.getMessage());
@@ -116,10 +119,19 @@ void Monitor::startMonitorThread() {
 
       lk.lock();
 
-      auto interval = kMicrosPerSecond * 5;
+      auto runtime = t1 - t0;
+      auto delay = dbctx_->config->getInt(
+          "server.loadinfo_publish_interval").get();
+
+      if (runtime > delay) {
+        delay = 0;
+      } else {
+        delay -= runtime;
+      }
+
       cv_.wait_for(
           lk,
-          std::chrono::microseconds(interval),
+          std::chrono::microseconds(delay),
           [this] () { return !thread_running_; });
     }
   });

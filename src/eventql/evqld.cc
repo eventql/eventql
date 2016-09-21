@@ -239,6 +239,7 @@ int main(int argc, const char** argv) {
   evql_conf_set(conf, "server.query_max_concurrent_shards", "256");
   evql_conf_set(conf, "server.query_max_concurrent_shards_per_host", "4");
   evql_conf_set(conf, "server.query_failed_shard_policy", "tolerate");
+  evql_conf_set(conf, "server.loadinfo_publish_interval", "900000000");
 
   if (flags.isSet("standalone")) {
     evql_conf_set(conf, "cluster.coordinator", "standalone");
