@@ -46,7 +46,7 @@ bool Leader::runLeaderProcedure() {
     return false;
   }
 
-  logInfo("evqld", "Local node is running the leader procedure");
+  logDebug("evqld", "Local node is running the leader procedure");
 
   auto rc = rebalance_.runOnce();
   if (!rc.isSuccess()) {

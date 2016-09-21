@@ -44,7 +44,7 @@ String garbageCollectorModeToString(GarbageCollectorMode mode) {
   switch (mode) {
     case GarbageCollectorMode::DISABLED: return "DISABLED";
     case GarbageCollectorMode::MANUAL: return "MANUAL";
-    case GarbageCollectorMode::AUTOMATIC: return "AUTOMATIC";
+    //case GarbageCollectorMode::AUTOMATIC: return "AUTOMATIC";
   }
 }
 
@@ -59,9 +59,9 @@ GarbageCollectorMode garbageCollectorModeFromString(String str) {
     return GarbageCollectorMode::MANUAL;
   }
 
-  if (str == "AUTOMATIC") {
-    return GarbageCollectorMode::AUTOMATIC;
-  }
+  //if (str == "AUTOMATIC") {
+  //  return GarbageCollectorMode::AUTOMATIC;
+  //}
 
   RAISEF(kRuntimeError, "invalid garbage collector mode: $0", str);
 }
@@ -95,10 +95,6 @@ void GarbageCollector::runGC() {
 }
 
 void GarbageCollector::startGCThread() {
-  if (mode_ != GarbageCollectorMode::AUTOMATIC) {
-    return;
-  }
-
   thread_running_ = true;
 
   thread_ = std::thread([this] {

@@ -57,7 +57,7 @@ void PartitionWriter::freeze() {
 }
 
 LSMPartitionWriter::LSMPartitionWriter(
-    ServerCfg* cfg,
+    DatabaseContext* cfg,
     RefPtr<Partition> partition,
     PartitionSnapshotRef* head) :
     PartitionWriter(head),
@@ -65,8 +65,8 @@ LSMPartitionWriter::LSMPartitionWriter(
     compaction_strategy_(
         new SimpleCompactionStrategy(
             partition_,
-            cfg->idx_cache.get())),
-    idx_cache_(cfg->idx_cache.get()),
+            cfg->lsm_index_cache)),
+    idx_cache_(cfg->lsm_index_cache),
     file_tracker_(cfg->file_tracker),
     cdir_(cfg->config_directory),
     partition_split_threshold_(kDefaultPartitionSplitThresholdBytes) {
@@ -168,7 +168,7 @@ Set<SHA1Hash> LSMPartitionWriter::insertRecords(
 
     lk.unlock();
   } catch (const std::exception& e) {
-    logFatal("evqld", "error in insert routine: $0", e.what());
+    logCritical("evqld", "error in insert routine: $0", e.what());
     abort();
   }
 
@@ -458,6 +458,7 @@ Status LSMPartitionWriter::split() {
       snap->key.toString(),
       midpoint);
 
+  auto cconf = cdir_->getClusterConfig();
   auto split_partition_id_low = Random::singleton()->sha1();
   auto split_partition_id_high = Random::singleton()->sha1();
 
@@ -478,9 +479,13 @@ Status LSMPartitionWriter::split() {
 
   ServerAllocator server_alloc(cdir_);
 
-  Set<String> split_servers_low;
+  std::vector<String> split_servers_low;
   {
-    auto rc = server_alloc.allocateServers(3, &split_servers_low);
+    auto rc = server_alloc.allocateServers(
+        ServerAllocator::MUST_ALLOCATE,
+        cconf.replication_factor(),
+        Set<String>{},
+        &split_servers_low);
     if (!rc.isSuccess()) {
       return rc;
     }
@@ -490,9 +495,13 @@ Status LSMPartitionWriter::split() {
     op.add_split_servers_low(s);
   }
 
-  Set<String> split_servers_high;
+  std::vector<String> split_servers_high;
   {
-    auto rc = server_alloc.allocateServers(3, &split_servers_high);
+    auto rc = server_alloc.allocateServers(
+        ServerAllocator::MUST_ALLOCATE,
+        cconf.replication_factor(),
+        Set<String>{},
+        &split_servers_high);
     if (!rc.isSuccess()) {
       return rc;
     }

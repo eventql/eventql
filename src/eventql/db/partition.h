@@ -28,6 +28,8 @@
 #include <eventql/util/UnixTime.h>
 #include <eventql/util/protobuf/MessageSchema.h>
 #include <eventql/util/http/httpconnectionpool.h>
+#include "eventql/eventql.h"
+#include <eventql/db/database.h>
 #include <eventql/db/server_config.h>
 #include <eventql/db/table.h>
 #include <eventql/db/record_ref.h>
@@ -36,8 +38,6 @@
 #include <eventql/db/metadata_transaction.h>
 #include <eventql/db/metadata_operations.pb.h>
 #include <eventql/io/cstable/cstable_reader.h>
-
-#include "eventql/eventql.h"
 
 namespace eventql {
 class Table;
@@ -66,17 +66,17 @@ public:
       RefPtr<Table> table,
       const SHA1Hash& partition_key,
       const PartitionDiscoveryResponse& discovery_info,
-      ServerCfg* cfg);
+      DatabaseContext* cfg);
 
   static RefPtr<Partition> reopen(
       const String& tsdb_namespace,
       RefPtr<Table> table,
       const SHA1Hash& partition_key,
-      ServerCfg* cfg);
+      DatabaseContext* cfg);
 
   Partition(
       SHA1Hash partition_id,
-      ServerCfg* cfg,
+      DatabaseContext* cfg,
       RefPtr<PartitionSnapshot> snap,
       RefPtr<Table> table);
 
@@ -106,7 +106,7 @@ protected:
   bool upgradeToLSMv2() const;
 
   SHA1Hash partition_id_;
-  ServerCfg* cfg_;
+  DatabaseContext* dbctx_;
   PartitionSnapshotRef head_;
   RefPtr<Table> table_;
   RefPtr<PartitionWriter> writer_;
@@ -124,7 +124,7 @@ public:
       const String& tsdb_namespace,
       RefPtr<Table> table,
       const SHA1Hash& partition_key,
-      ServerCfg* cfg,
+      DatabaseContext* dbctx,
       PartitionMap* pmap);
 
   RefPtr<Partition> getPartition();

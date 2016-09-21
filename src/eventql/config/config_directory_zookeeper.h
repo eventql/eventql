@@ -60,6 +60,8 @@ public:
 
   void updateServerConfig(ServerConfig config) override;
 
+  ReturnCode publishServerStats(ServerStats stats) override;
+
   Vector<ServerConfig> listServers() const override;
 
   void setServerConfigChangeCallback(
@@ -109,8 +111,9 @@ protected:
 
   using CallbackList = Vector<Function<void()>>;
 
+  void reconnect(std::unique_lock<std::mutex>* lk);
   Status connect(std::unique_lock<std::mutex>* lk);
-  Status load(bool create);
+  Status load(CallbackList* events);
 
   void updateClusterConfigWithLock(ClusterConfig config);
 
@@ -153,12 +156,16 @@ protected:
       Vector<String>* children,
       bool watch = false);
 
+  void runWatchdog();
+  void runLogtail();
+
   const char* getErrorString(int code) const;
 
   String zookeeper_addrs_;
   size_t zookeeper_timeout_;
   String cluster_name_;
   Option<String> server_name_;
+  size_t server_stats_version_;
   String listen_addr_;
   String global_prefix_;
   String path_prefix_;
@@ -167,10 +174,12 @@ protected:
   bool is_leader_;
   mutable std::mutex mutex_;
   std::condition_variable cv_;
+  int logpipe_[2];
+  FILE* logfile_;
 
   ClusterConfig cluster_config_;
   HashMap<String, ServerConfig> servers_;
-  HashMap<String, String> servers_live_;
+  HashMap<String, ServerStats> servers_live_;
   HashMap<String, NamespaceConfig> namespaces_;
   HashMap<String, TableDefinition> tables_;
 
@@ -179,6 +188,8 @@ protected:
   Vector<Function<void (const NamespaceConfig& cfg)>> on_namespace_change_;
   Vector<Function<void (const TableDefinition& cfg)>> on_table_change_;
 
+  std::thread watchdog_;
+  std::thread logtail_;
 };
 
 template <typename T>

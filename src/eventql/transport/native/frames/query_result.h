@@ -36,15 +36,18 @@ namespace native_transport {
 class QueryResultFrame {
 public:
 
+  static const uint16_t kOpcode = EVQL_OP_QUERY_RESULT;
+
   QueryResultFrame(const std::vector<std::string>& columns);
 
-  void addRow(const std::vector<csql::SValue>& row);
   size_t getRowCount() const;
   size_t getRowBytes() const;
 
+  void addRow(const std::vector<csql::SValue>& row);
   void setIsLast(bool is_last);
   void setHasPendingStatement(bool has_pending_stmt);
 
+  ReturnCode parseFrom(const char* payload, size_t payload_size);
   ReturnCode writeTo(NativeConnection* conn);
   void clear();
 

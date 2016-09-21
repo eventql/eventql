@@ -1,4 +1,4 @@
-3.5 Inserting Rows
+3.6 Inserting Rows
 ==================
 
 Before you can insert rows, you need to [create a table](../creating-tables/).

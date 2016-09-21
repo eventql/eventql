@@ -30,7 +30,6 @@
 
 const char* logLevelToStr(LogLevel log_level) {
   switch (log_level) {
-    case LogLevel::kFatal: return "FATAL";
     case LogLevel::kEmergency: return "EMERGENCY";
     case LogLevel::kAlert: return "ALERT";
     case LogLevel::kCritical: return "CRITICAL";
@@ -45,7 +44,6 @@ const char* logLevelToStr(LogLevel log_level) {
 }
 
 LogLevel strToLogLevel(const String& log_level) {
-  if (log_level == "FATAL") return LogLevel::kFatal;
   if (log_level == "EMERGENCY") return LogLevel::kEmergency;
   if (log_level == "ALERT") return LogLevel::kAlert;
   if (log_level == "CRITICAL") return LogLevel::kCritical;

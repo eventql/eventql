@@ -46,6 +46,7 @@ class MapReduceService;
 class MetadataService;
 
 struct DatabaseContext {
+  std::string db_path;
   ProcessConfig* config;
   PartitionMap* partition_map;
   FileTracker* file_tracker;

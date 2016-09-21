@@ -30,10 +30,4 @@
 
 namespace eventql {
 
-struct TSDBTableInfo {
-  String table_name;
-  RefPtr<msg::MessageSchema> schema;
-  TableDefinition config;
-};
-
 }

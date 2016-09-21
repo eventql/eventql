@@ -65,7 +65,8 @@ public:
 
   TableService(
       ConfigDirectory* cdir,
-      PartitionMap* pmap);
+      PartitionMap* pmap,
+      ProcessConfig* config);
 
   Status createTable(
       const String& db_namespace,
@@ -79,23 +80,23 @@ public:
       const String& table_name,
       Vector<AlterTableOperation> operations);
 
+  Status dropTable(
+      const String& db_namespace,
+      const String& table_name);
+
   void listTables(
       const String& tsdb_namespace,
-      Function<void (const TSDBTableInfo& table)> fn) const;
-
-  void listTablesReverse(
-      const String& tsdb_namespace,
-      Function<void (const TSDBTableInfo& table)> fn) const;
+      Function<void (const TableDefinition& table)> fn) const;
 
   // insert one record
-  void insertRecord(
+  ReturnCode insertRecord(
       const String& tsdb_namespace,
       const String& table_name,
       const msg::DynamicMessage& data,
       uint64_t flags = 0);
 
   // insert a batch of records
-  void insertRecords(
+  ReturnCode insertRecords(
       const String& tsdb_namespace,
       const String& table_name,
       const msg::DynamicMessage* begin,
@@ -103,7 +104,7 @@ public:
       uint64_t flags = 0);
 
   // insert a single record from json
-  void insertRecord(
+  ReturnCode insertRecord(
       const String& tsdb_namespace,
       const String& table_name,
       const json::JSONObject::const_iterator& data_begin,
@@ -111,7 +112,7 @@ public:
       uint64_t flags = 0);
 
   // internal method, don't use
-  void insertReplicatedRecords(
+  ReturnCode insertReplicatedRecords(
       const String& tsdb_namespace,
       const String& table_name,
       const SHA1Hash& partition_key,
@@ -137,28 +138,22 @@ public:
 
 protected:
 
-  void insertRecords(
+  ReturnCode insertRecords(
       const String& tsdb_namespace,
       const String& table_name,
       const SHA1Hash& partition_key,
       const Set<String>& servers,
       const ShreddedRecordList& records);
 
-  void insertRecordsLocal(
+  ReturnCode insertRecordsLocal(
       const String& tsdb_namespace,
       const String& table_name,
       const SHA1Hash& partition_key,
       const ShreddedRecordList& records);
 
-  void insertRecordsRemote(
-      const String& tsdb_namespace,
-      const String& table_name,
-      const SHA1Hash& partition_key,
-      const ShreddedRecordList& records,
-      const String& server_id);
-
   ConfigDirectory* cdir_;
   PartitionMap* pmap_;
+  ProcessConfig* config_;
 };
 
 } // namespace tdsb

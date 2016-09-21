@@ -339,6 +339,21 @@ ScopedPtr<ResultCursor> DefaultScheduler::executeCreateDatabase(
   return mkScoped(new EmptyResultCursor());
 }
 
+
+ScopedPtr<ResultCursor> DefaultScheduler::executeDropTable(
+      Transaction* txn,
+      ExecutionContext* execution_context,
+      RefPtr<DropTableNode> drop_table) {
+  auto res = txn->getTableProvider()->dropTable(
+      drop_table->getTableName());
+  if (!res.isSuccess()) {
+    RAISE(kRuntimeError, res.message());
+  }
+
+  // FIXME return result...
+  return mkScoped(new EmptyResultCursor());
+}
+
 ScopedPtr<ResultCursor> DefaultScheduler::executeInsertInto(
     Transaction* txn,
     ExecutionContext* execution_context,
@@ -429,6 +444,13 @@ ScopedPtr<ResultCursor> DefaultScheduler::execute(
         query_plan->getTransaction(),
         execution_context,
         stmt.asInstanceOf<CreateDatabaseNode>());
+  }
+
+  if (stmt.isInstanceOf<DropTableNode>()) {
+    return executeDropTable(
+        query_plan->getTransaction(),
+        execution_context,
+        stmt.asInstanceOf<DropTableNode>());
   }
 
   if (stmt.isInstanceOf<InsertIntoNode>()) {

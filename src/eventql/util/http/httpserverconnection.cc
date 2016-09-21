@@ -174,7 +174,7 @@ ReturnCode HTTPServerConnection::sendResponse(const HTTPResponse& res) {
 ReturnCode HTTPServerConnection::sendResponseHeaders(const HTTPResponse& res) {
   Buffer write_buf;
   BufferOutputStream os(&write_buf);
-  HTTPGenerator::generate(res, &os);
+  HTTPGenerator::generateHeaders(res, &os);
 
   return write((const char*) write_buf.data(), write_buf.size());
 }

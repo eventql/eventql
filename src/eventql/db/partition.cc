@@ -48,7 +48,7 @@ RefPtr<Partition> Partition::create(
     RefPtr<Table> table,
     const SHA1Hash& partition_key,
     const PartitionDiscoveryResponse& discovery_info,
-    ServerCfg* cfg) {
+    DatabaseContext* dbctx) {
   logDebug(
       "tsdb",
       "Creating new partition; stream='$0' partition='$1'",
@@ -61,7 +61,7 @@ RefPtr<Partition> Partition::create(
       SHA1::compute(table->name()).toString(),
       partition_key.toString());
 
-  auto pdir = FileUtil::joinPaths(cfg->db_path, pdir_rel);
+  auto pdir = FileUtil::joinPaths(dbctx->db_path, pdir_rel);
 
   FileUtil::mkdir_p(pdir);
 
@@ -74,12 +74,13 @@ RefPtr<Partition> Partition::create(
   state.set_uuid(uuid.data(), uuid.size());
   state.set_partition_keyrange_begin(discovery_info.keyrange_begin());
   state.set_partition_keyrange_end(discovery_info.keyrange_end());
+  state.set_table_generation(table->config().generation());
 
   auto snap = mkRef(
-    new PartitionSnapshot(table.get(), state, pdir, pdir_rel, cfg, 0));
+    new PartitionSnapshot(table.get(), state, pdir, pdir_rel, dbctx, 0));
   snap->writeToDisk();
 
-  auto partition = mkRef(new Partition(partition_key, cfg, snap, table));
+  auto partition = mkRef(new Partition(partition_key, dbctx, snap, table));
 
   {
     auto rc = partition->getWriter()->applyMetadataChange(discovery_info);
@@ -95,50 +96,17 @@ RefPtr<Partition> Partition::reopen(
     const String& tsdb_namespace,
     RefPtr<Table> table,
     const SHA1Hash& partition_key,
-    ServerCfg* cfg) {
+    DatabaseContext* dbctx) {
   auto pdir_rel = StringUtil::format(
       "$0/$1/$2",
       tsdb_namespace,
       SHA1::compute(table->name()).toString(),
       partition_key.toString());
 
-  auto pdir = FileUtil::joinPaths(cfg->db_path, pdir_rel);
+  auto pdir = FileUtil::joinPaths(dbctx->db_path, pdir_rel);
 
   auto state = msg::decode<PartitionState>(
       FileUtil::read(FileUtil::joinPaths(pdir, "_snapshot")));
-
-  // backfill
-  if (table->partitionerType() == TBL_PARTITION_TIMEWINDOW &&
-      state.has_partition_keyrange_begin() &&
-      state.partition_keyrange_begin().size() == sizeof(uint64_t) &&
-      !state.has_partition_keyrange_end()) {
-    uint64_t pbegin;
-    memcpy((void*) &pbegin, state.partition_keyrange_begin().data(), sizeof(uint64_t));
-    uint64_t pend = pbegin;
-    pend += kMicrosPerDay * 14;
-    state.set_partition_keyrange_end((const char*) &pend, sizeof(uint64_t));
-  }
-
-  // end of backfill
-
-  // find orphaned files
-  if (table->storage() == TBL_STORAGE_COLSM) {
-    Set<String> orphaned_files;
-    FileUtil::ls(pdir, [&orphaned_files] (const String& filename) -> bool {
-      orphaned_files.insert(filename);
-      return true;
-    });
-
-    for (const auto& tbl : state.lsm_tables()) {
-      orphaned_files.erase(tbl.filename() + ".cst");
-      orphaned_files.erase(tbl.filename() + ".idx");
-      orphaned_files.erase("_snapshot");
-    }
-
-    for (const auto& f : orphaned_files) {
-      logInfo("evqld", "Found orphaned file: $0", FileUtil::joinPaths(pdir, f));
-    }
-  }
 
   auto nrecs = 0;
   const auto& files = state.sstable_files();
@@ -157,24 +125,24 @@ RefPtr<Partition> Partition::reopen(
       nrecs);
 
   auto snap = mkRef(
-      new PartitionSnapshot(table.get(), state, pdir, pdir_rel, cfg, nrecs));
-  return new Partition(partition_key, cfg, snap, table);
+      new PartitionSnapshot(table.get(), state, pdir, pdir_rel, dbctx, nrecs));
+  return new Partition(partition_key, dbctx, snap, table);
 }
 
 Partition::Partition(
     SHA1Hash partition_id,
-    ServerCfg* cfg,
+    DatabaseContext* dbctx,
     RefPtr<PartitionSnapshot> head,
     RefPtr<Table> table) :
     partition_id_(partition_id),
-    cfg_(cfg),
+    dbctx_(dbctx),
     head_(head),
     table_(table) {
-  evqld_stats()->num_partitions_loaded.incr(1);
+  evqld_stats()->num_partitions_opened.incr(1);
 }
 
 Partition::~Partition() {
-  evqld_stats()->num_partitions_loaded.decr(1);
+  evqld_stats()->num_partitions_opened.decr(1);
 }
 
 SHA1Hash Partition::uuid() const {
@@ -185,7 +153,7 @@ SHA1Hash Partition::uuid() const {
 RefPtr<PartitionWriter> Partition::getWriter() {
   std::unique_lock<std::mutex> lk(writer_lock_);
   if (writer_.get() == nullptr) {
-    writer_ = mkRef<PartitionWriter>(new LSMPartitionWriter(cfg_, this, &head_));
+    writer_ = mkRef<PartitionWriter>(new LSMPartitionWriter(dbctx_, this, &head_));
   }
 
   return writer_;
@@ -219,9 +187,7 @@ PartitionInfo Partition::getInfo() const {
 }
 
 RefPtr<PartitionReplication> Partition::getReplicationStrategy() {
-  return new LSMPartitionReplication(
-      this,
-      cfg_->config_directory);
+  return new LSMPartitionReplication(this, dbctx_);
 }
 
 bool Partition::upgradeToLSMv2() const {
@@ -301,7 +267,7 @@ RefPtr<Partition> LazyPartition::getPartition(
     const String& tsdb_namespace,
     RefPtr<Table> table,
     const SHA1Hash& partition_key,
-    ServerCfg* cfg,
+    DatabaseContext* dbctx,
     PartitionMap* pmap) {
   std::unique_lock<std::mutex> lk(mutex_);
   if (partition_.get() != nullptr) {
@@ -313,7 +279,7 @@ RefPtr<Partition> LazyPartition::getPartition(
       tsdb_namespace,
       table,
       partition_key,
-      cfg);
+      dbctx);
 
   auto partition = partition_;
   lk.unlock();

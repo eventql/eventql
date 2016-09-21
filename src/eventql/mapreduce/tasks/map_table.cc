@@ -87,7 +87,6 @@ MapTableTask::MapTableTask(
     shard->table_ref = table_ref_;
     shard->table_ref.partition_key = pid;
     shard->servers = Vector<String>(p.servers().begin(), p.servers().end());
-    std::random_shuffle(shard->servers.begin(), shard->servers.end());
     addShard(shard.get(), shards);
   }
 }

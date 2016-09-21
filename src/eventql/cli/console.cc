@@ -107,6 +107,20 @@ ReturnCode Console::connect() {
     }
   }
 
+  {
+    uint64_t timeout = cfg_.getTimeout();
+    auto rc = evql_client_setopt(
+        client_,
+        EVQL_CLIENT_OPT_TIMEOUT,
+        (const char*) &timeout,
+        sizeof(timeout),
+        0);
+
+    if (rc != 0) {
+      return ReturnCode::error("ERUNTIME", "can't initialize eventql client");
+    }
+  }
+
   if (!cfg_.getUser().isEmpty()) {
     std::string akey = "user";
     std::string aval = cfg_.getUser().get();

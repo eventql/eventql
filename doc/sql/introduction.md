@@ -1,4 +1,4 @@
-4. SQL Queries
+5. SQL Queries
 ==============
 
 EventQL implements the standard SQL language with some extensions, so if you
@@ -31,6 +31,9 @@ and functions you'd expect (including JOINs) are implemented.
       </li>
       <li>
         <a href="/documentation/sql/statements/alter-table">ALTER TABLE</a>
+      </li>
+      <li>
+        <a href="/documentation/sql/statements/drop-table">DROP TABLE</a>
       </li>
       <li>
         <a href="/documentation/sql/statements/describe">DESCRIBE</a>

@@ -39,9 +39,11 @@ void HTTPTransport::handleConnection(int fd, std::string prelude_bytes) {
   database_->startThread([this, fd, prelude_bytes] (Session* session) {
     logDebug("eventql", "Opening new http connection; fd=$0", fd);
 
+    auto dbctx = session->getDatabaseContext();
+
     http::HTTPServerConnection conn(
         fd,
-        kMicrosPerSecond,
+        dbctx->config->getInt("server.http_io_timeout").get(),
         prelude_bytes);
 
     http::HTTPRequest request;
@@ -51,7 +53,7 @@ void HTTPTransport::handleConnection(int fd, std::string prelude_bytes) {
       return;
     }
 
-    logInfo("evqld", "HTTP Request: $0", request.uri());
+    logDebug("evqld", "HTTP Request: $0", request.uri());
 
     auto req_stream = mkRef(new http::HTTPRequestStream(&request));
     auto res_stream = mkRef(new http::HTTPResponseStream(&conn));

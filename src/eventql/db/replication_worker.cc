@@ -255,7 +255,7 @@ void ReplicationWorker::work(size_t thread_id) {
         }
       }
     } else {
-      auto delay = 30 * kMicrosPerSecond; // FIXPAUL increasing delay..
+      auto delay = 30 * kMicrosPerSecond; // FIXME increasing delay..
       queue_.emplace(now + delay, partition);
     }
 

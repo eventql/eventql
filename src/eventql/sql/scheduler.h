@@ -35,6 +35,7 @@
 #include <eventql/sql/qtree/nodes/create_table.h>
 #include <eventql/sql/qtree/nodes/insert_into.h>
 #include <eventql/sql/qtree/nodes/insert_json.h>
+#include <eventql/sql/qtree/nodes/drop_table.h>
 #include <eventql/sql/qtree/TableExpressionNode.h>
 #include <eventql/sql/expressions/table_expression.h>
 #include <eventql/sql/qtree/QueryTreeNode.h>
@@ -97,6 +98,11 @@ protected:
       Transaction* txn,
       ExecutionContext* execution_context,
       RefPtr<CreateDatabaseNode> create_database);
+
+  virtual ScopedPtr<ResultCursor> executeDropTable(
+      Transaction* txn,
+      ExecutionContext* execution_context,
+      RefPtr<DropTableNode> drop_table);
 
   virtual ScopedPtr<ResultCursor> executeInsertInto(
       Transaction* txn,

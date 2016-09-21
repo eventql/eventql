@@ -3,6 +3,8 @@
 MAINTAINERCLEANFILES =   \
   Makefile.in
 
+EXTRA_DIST = sql_testdata
+
 AM_CXXFLAGS = -std=c++0x -ftemplate-depth=500 -mno-omit-leaf-frame-pointer -fno-omit-frame-pointer -Wall -Wextra -Wno-unused-parameter -Wno-sign-compare -Wdelete-non-virtual-dtor -Wno-predefined-identifier-outside-function -Wno-invalid-offsetof -g -I@builddir@ -I@top_srcdir@/src -I@top_srcdir@/deps/3rdparty/protobuf
 
 SIMDCOMP_CFLAGS = -I$(top_srcdir)/deps/3rdparty
@@ -23,7 +25,9 @@ TESTS = \
   unit_metadata_store \
   unit_metadata_operation_split \
   unit_metadata_operation_createpartition \
-  unit_partition_discovery
+  unit_partition_discovery \
+  unit_sql_parser \
+  unit_sql_qtree
 
 check_PROGRAMS = $(TESTS)
 
@@ -74,6 +78,24 @@ unit_metadata_operation_createpartition_LDADD = \
 
 unit_partition_discovery_SOURCES = unit/partition_discovery.cc
 unit_partition_discovery_LDADD = \
+    @top_builddir@/src/libevqlcore.a \
+    @top_builddir@/src/libevqlclient.la \
+    $(INIH_LDADD) \
+    $(SIMDCOMP_LDADD) \
+    $(LMDB_LDADD) \
+    $(PROTOBUF_LDADD)
+
+unit_sql_parser_SOURCES = unit/sql_parser.cc
+unit_sql_parser_LDADD = \
+    @top_builddir@/src/libevqlcore.a \
+    @top_builddir@/src/libevqlclient.la \
+    $(INIH_LDADD) \
+    $(SIMDCOMP_LDADD) \
+    $(LMDB_LDADD) \
+    $(PROTOBUF_LDADD)
+
+unit_sql_qtree_SOURCES = unit/sql_qtree.cc
+unit_sql_qtree_LDADD = \
     @top_builddir@/src/libevqlcore.a \
     @top_builddir@/src/libevqlclient.la \
     $(INIH_LDADD) \

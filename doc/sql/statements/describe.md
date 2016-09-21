@@ -1,4 +1,4 @@
-4.2.6 DESCRIBE
+5.2.7 DESCRIBE
 ==============
 
     DESCRIBE table_name

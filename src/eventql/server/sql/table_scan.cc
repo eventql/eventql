@@ -24,7 +24,6 @@
  */
 #include "eventql/server/sql/table_scan.h"
 #include "eventql/server/sql/partition_cursor.h"
-#include "eventql/server/sql/pipelined_expression.h"
 
 namespace eventql {
 
@@ -147,20 +146,19 @@ ScopedPtr<csql::ResultCursor> TableScan::openRemotePartition(
   auto seqscan_copy = qtree->template deepCopyAs<csql::SequentialScanNode>();
   seqscan_copy->setTableName(table_name);
 
-  auto remote_expr = mkScoped(
-      new PipelinedExpression(
+  std::vector<std::string> server_names;
+  for (const auto& s : servers) {
+    server_names.emplace_back(s.name);
+  }
+
+  return mkScoped(
+      new RemotePartitionCursor(
+          static_cast<Session*>(txn_->getUserData()),
           txn_,
           &child_execution_context_,
           tsdb_namespace_,
-          auth_,
-          1));
-
-  remote_expr->addRemoteQuery(
-      seqscan_copy.get(),
-      servers);
-
-  return mkScoped(
-      new csql::TableExpressionResultCursor(std::move(remote_expr)));
+          seqscan_copy.get(),
+          server_names));
 }
 
 Option<SHA1Hash> TableScan::getCacheKey() const {

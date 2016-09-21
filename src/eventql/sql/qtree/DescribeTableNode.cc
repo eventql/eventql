@@ -50,7 +50,8 @@ Vector<String> DescribeTableNode::getResultColumns() const {
     "type",
     "nullable",
     "primary_key",
-    "description"
+    "description",
+    "encoding"
   };
 }
 
