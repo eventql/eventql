@@ -442,8 +442,8 @@ Status TableService::listPartitions(
     const String& db_namespace,
     const String& table_name,
     Function<void (const TablePartitionInfo& partition)> fn) const {
-  auto table = pmap_->findTable(db_namespace, table_name);
-  MetadataClient metadata_client(cdir_);
+  auto table = dbctx_->partition_map->findTable(db_namespace, table_name);
+  MetadataClient metadata_client(dbctx_->config_directory);
   MetadataFile metadata_file;
   auto rc = metadata_client.fetchLatestMetadataFile(
       db_namespace,
