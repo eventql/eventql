@@ -139,20 +139,42 @@ int main(int argc, const char** argv) {
         "   -c, --connections <num>   Number of concurrent connections\n"
         "   -r, --rate <rate>         Maximum rate of requests in RPS\n"
         "   -n, --num <num>           Maximum total number of request (default is inifite)\n"
-        "   -?, --help                Display a command's help text and exit\n"
+        "   -?, --help                Display the help text and exit\n"
         "   -v, --version             Display the version of this binary and exit\n");
 
     return 1;
   }
 
-  auto on_progress = []() {
+  eventql::cli::Benchmark benchmark;
+  bool line_dirty = false;
+
+  auto on_progress = [&benchmark, &stdout_os, &line_dirty]() {
+    if (line_dirty) {
+      stdout_os->eraseLine();
+    }
+
+    try {
+      stdout_os->print("\r" + benchmark.getStats()->toString());
+      line_dirty = true;
+    } catch (const std::exception& e) {
+      /* fallthrough */
+    }
   };
 
-  eventql::cli::Benchmark benchmark;
   benchmark.setProgressCallback(on_progress);
   auto rc = benchmark.run();
   if (rc.isSuccess()) {
-    return 0;
+    if (line_dirty) {
+      stdout_os->eraseLine();
+    }
+    try {
+      stdout_os->print("\r" + benchmark.getStats()->toString() + "\n");
+      return 0;
+    } catch (const std::exception& e) {
+      std::cerr << e.what() << std::endl;
+      return 1;
+    }
+
   } else {
     std::cerr << rc.getMessage() << std::endl;
     return 1;

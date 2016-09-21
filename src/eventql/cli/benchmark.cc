@@ -32,6 +32,7 @@
  *   - benchmark stats: Benchmark::getStats()
  *   - print benchmark stats
  *   - Benchmark::connect()
+ *   - benchmark stats: moving average
  *   -----
  *   - Benchmark::runRequest()
  *   - improve thread load balancing/scheudling
@@ -40,6 +41,76 @@
 namespace eventql {
 namespace cli {
 
+BenchmarkStats::BenchmarkStats() :
+    total_requests_(0),
+    min_rate_(-1),
+    max_rate_(0),
+    mvg_avg_rate_(0),
+    buckets_begin_(0) {
+  buckets_.resize(kNumBuckets);
+}
+
+void BenchmarkStats::addRequest(
+    bool is_success,
+    size_t t_id,
+    uint64_t start_time) {
+  ++total_requests_;
+
+  auto twindow = start_time / kTimeWindowSize * kTimeWindowSize;
+  //start first time window
+  if (buckets_[buckets_begin_].time == 0) {
+    buckets_[buckets_begin_].time = twindow;
+    buckets_[buckets_begin_].num_requests = 0;
+
+  //start new time window
+  } else if (buckets_[buckets_begin_].time != twindow) {
+    if (buckets_begin_ == kNumBuckets - 1) {
+      buckets_begin_ = 0;
+    } else {
+      ++buckets_begin_;
+    }
+    buckets_[buckets_begin_].time = twindow;
+    buckets_[buckets_begin_].num_requests = 0;
+  }
+
+  buckets_[buckets_begin_].num_requests += 1;
+}
+
+std::string BenchmarkStats::toString() {
+  calculate();
+
+  return StringUtil::format(
+      "total requests $0 --- avg rps $1 --- min rps $2 --- max rps $3",
+      total_requests_,
+      mvg_avg_rate_,
+      min_rate_,
+      max_rate_);
+}
+
+void BenchmarkStats::calculate() {
+  //calculate moving average for the last minute
+  auto start = MonotonicClock::now() - kMicrosPerMinute;
+  uint64_t num_requests = 0;
+  size_t bucket_ctr = 0;
+  for (size_t i = 0; i < buckets_.size(); ++i) {
+    if (buckets_[i].time < start) {
+      continue;
+    }
+
+    ++bucket_ctr;
+    num_requests += buckets_[i].num_requests;
+  }
+
+  mvg_avg_rate_ = (double) num_requests / (bucket_ctr * 10);
+  if (mvg_avg_rate_ < min_rate_ || min_rate_ < 0) {
+    min_rate_ = mvg_avg_rate_;
+  }
+
+  if (mvg_avg_rate_ > max_rate_) {
+    max_rate_ = mvg_avg_rate_;
+  }
+}
+
 // FIXME pass proper arguments
 Benchmark::Benchmark() :
     num_threads_(4),
@@ -47,7 +118,8 @@ Benchmark::Benchmark() :
     threads_running_(0),
     last_request_time_(0),
     rate_limit_interval_(1000000),
-    remaining_requests_(5) {
+    remaining_requests_(20) {
+  stats_ = new BenchmarkStats();
   threads_.resize(num_threads_);
 }
 
@@ -87,6 +159,10 @@ void Benchmark::kill() {
   cv_.notify_all();
 }
 
+BenchmarkStats* Benchmark::getStats() {
+  return stats_;
+}
+
 void Benchmark::runThread(size_t idx) {
   while (getRequestSlot(idx)) {
     // FIXME record start time
@@ -94,7 +170,7 @@ void Benchmark::runThread(size_t idx) {
     // FIXME record end time
 
     std::unique_lock<std::mutex> lk(mutex_);
-    // FIXME stats.addRequst(rc.isSu, idx, runtime)...
+    stats_->addRequest(rc.isSuccess(), idx, MonotonicClock::now());
 
     if (!rc.isSuccess()) {
       status_ = rc;

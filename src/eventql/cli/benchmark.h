@@ -31,6 +31,39 @@
 namespace eventql {
 namespace cli {
 
+class BenchmarkStats {
+public:
+
+  BenchmarkStats();
+
+  void addRequest(bool is_success, size_t t_id, uint64_t start_time);
+
+  std::string toString();
+
+protected:
+
+  void calculate();
+
+  static const uint64_t kNumBuckets = 6;
+  static const auto kTimeWindowSize = 10000000; //10 seconds
+
+  struct Bucket {
+    Bucket() : time(0), num_requests(0) {}
+
+    uint64_t time;
+    uint64_t num_requests;
+  };
+
+  uint64_t total_requests_;
+  double min_rate_;
+  double max_rate_;
+  double mvg_avg_rate_;
+
+  std::vector<Bucket> buckets_;
+  size_t buckets_begin_;
+  std::mutex mutex_;
+};
+
 class Benchmark {
 public:
 
@@ -40,6 +73,8 @@ public:
 
   ReturnCode run();
   void kill();
+
+  BenchmarkStats* getStats();
 
 protected:
 
@@ -54,6 +89,7 @@ protected:
   size_t threads_running_;
   uint64_t last_request_time_;
   uint64_t rate_limit_interval_;
+  BenchmarkStats* stats_;
   size_t remaining_requests_;
   std::function<void ()> on_progress_;
 };
