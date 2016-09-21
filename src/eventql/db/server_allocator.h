@@ -57,7 +57,6 @@ public:
 protected:
 
   struct ServerSlot {
-    double load_factor;
     uint64_t disk_free;
     uint64_t partitions_loading;
   };
@@ -67,6 +66,10 @@ protected:
   mutable std::mutex mutex_;
   std::map<std::string, ServerSlot> primary_servers_;
   std::set<std::string> backup_servers_;
+  uint64_t partitions_loading_limit_hard_;
+  uint64_t partitions_loading_limit_soft_;
+  double load_limit_soft_;
+  double load_limit_hard_;
 };
 
 } // namespace eventql
