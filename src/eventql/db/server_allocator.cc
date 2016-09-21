@@ -44,9 +44,9 @@ void ServerAllocator::updateServerSlot(const ServerConfig& s) {
   const auto& sstats = s.server_stats();
 
   bool is_eligible =
-    s.server_status() == SERVER_UP &&
-    !s.is_dead() &&
-    !s.is_leaving();
+      s.server_status() == SERVER_UP &&
+      !s.is_dead() &&
+      !s.is_leaving();
 
   if (is_eligible) {
     backup_servers_.insert(s.server_id());
@@ -54,7 +54,7 @@ void ServerAllocator::updateServerSlot(const ServerConfig& s) {
     backup_servers_.erase(s.server_id());
   }
 
-  if (s.server_status() == SERVER_UP && sstats.has_load_factor()) {
+  if (is_eligible && sstats.has_load_factor()) {
     auto& slot = primary_servers_[s.server_id()];
     slot.load_factor = sstats.load_factor();
     slot.disk_free = sstats.disk_available();
