@@ -364,7 +364,8 @@ int main(int argc, const char** argv) {
   {
     auto rc = console.connect();
     if (!rc.isSuccess()) {
-      logFatal("evql", "error while connecting to server: $0", rc.getMessage());
+      printError(StringUtil::format(
+          "error while connecting to server: $0", rc.getMessage()));
       return 1;
     }
   }
@@ -376,14 +377,15 @@ int main(int argc, const char** argv) {
   if (file.isEmpty() &&
       !language.isEmpty() &&
       language.get() == eventql::cli::CLIConfig::kLanguage::JAVASCRIPT) {
-    logFatal("evql", "missing --file flag. Set --file for javascript");
+    printError("missing --file flag. Set --file for javascript");
     rc = 1;
     goto exit;
   }
 
   if (!file.isEmpty()) {
     if (language.isEmpty()) {
-      logFatal("evql", "invalid --lang flag. Must be one of 'sql', 'js' or 'javascript'");
+      printError(
+          "invalid --lang flag. Must be one of 'sql', 'js' or 'javascript'");
       rc = 1;
       goto exit;
     }

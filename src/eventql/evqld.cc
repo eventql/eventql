@@ -34,6 +34,9 @@
 #include "eventql/util/io/FileLock.h"
 #include "eventql/util/io/fileutil.h"
 
+int shutdown_pipe[2];
+void shutdown(int);
+
 int main(int argc, const char** argv) {
   Application::init();
   cli::FlagParser flags;
@@ -213,7 +216,7 @@ int main(int argc, const char** argv) {
   /* conf */
   auto conf = evql_conf_init();
   if (!conf) {
-    logFatal("evqld", "error while initializing EventQL server");
+    logCritical("evqld", "error while initializing EventQL server");
     return 1;
   }
 
@@ -236,6 +239,7 @@ int main(int argc, const char** argv) {
   evql_conf_set(conf, "server.query_max_concurrent_shards", "256");
   evql_conf_set(conf, "server.query_max_concurrent_shards_per_host", "4");
   evql_conf_set(conf, "server.query_failed_shard_policy", "tolerate");
+  evql_conf_set(conf, "server.loadinfo_publish_interval", "900000000");
 
   if (flags.isSet("standalone")) {
     evql_conf_set(conf, "cluster.coordinator", "standalone");
@@ -252,7 +256,7 @@ int main(int argc, const char** argv) {
         config_file_path.empty() ? nullptr : config_file_path.c_str());
 
     if (rc) {
-      logFatal(
+      logCritical(
           "evqld",
           "error while loading config file");
 
@@ -264,7 +268,7 @@ int main(int argc, const char** argv) {
   for (const auto& opt : flags.getStrings("config_set")) {
     auto opt_key_end = opt.find("=");
     if (opt_key_end == String::npos) {
-      logFatal("invalid config option: $0", opt);
+      logCritical("invalid config option: $0", opt);
       evql_conf_free(conf);
       return 1;
     }
@@ -293,16 +297,27 @@ int main(int argc, const char** argv) {
     evql_conf_set(conf, "server.pidfile", pidfile.c_str());
   }
 
+  /* init shutdown handler */
+  if (pipe(shutdown_pipe) != 0) {
+    logCritical("evqld", "error while initializing evqld: pipe failed()");
+    return 1;
+  }
+
+  signal(SIGTERM, shutdown);
+  signal(SIGINT, shutdown);
+  signal(SIGHUP, shutdown);
+  signal(SIGPIPE, SIG_IGN);
+
   /* init server */
   auto server = evql_server_init(conf);
   if (!server) {
-    logFatal("evqld", "error while initializing EventQL server");
+    logCritical("evqld", "error while initializing EventQL server");
     evql_conf_free(conf);
     return 1;
   }
 
   if (!evql_server_getconf(server, "server.datadir")) {
-    logFatal("evqld", "missing 'server.datadir' option or --datadir flag");
+    logCritical("evqld", "missing 'server.datadir' option or --datadir flag");
     evql_server_free(server);
     evql_conf_free(conf);
     return 1;
@@ -337,16 +352,22 @@ int main(int argc, const char** argv) {
   /* start database */
   int rc = evql_server_start(server);
   if (!rc) {
-    rc = evql_server_listen(server, -1);
+    rc = evql_server_listen(server, shutdown_pipe[0]);
   }
 
   if (rc) {
-    logAlert("eventql", "FATAL ERROR: $0", evql_server_geterror(server));
+    logCritical("eventql", evql_server_geterror(server));
   }
 
   /* shutdown */
   logInfo("eventql", "Exiting...");
   evql_server_shutdown(server);
+
+  signal(SIGTERM, SIG_IGN);
+  signal(SIGINT, SIG_IGN);
+  signal(SIGHUP, SIG_IGN);
+  close(shutdown_pipe[0]);
+  close(shutdown_pipe[1]);
 
   if (pidfile_lock.get()) {
     pidfile_lock.reset(nullptr);
@@ -357,5 +378,10 @@ int main(int argc, const char** argv) {
   evql_conf_free(conf);
 
   return rc;
+}
+
+void shutdown(int) {
+  unsigned char one = 1;
+  write(shutdown_pipe[1], &one, 1);
 }
 

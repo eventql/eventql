@@ -180,7 +180,7 @@ Status ZookeeperConfigDirectory::connect(std::unique_lock<std::mutex>* lk) {
   }
 
   while (state_ < ZKState::LOADING) {
-    logInfo("evqld", "Waiting for zookeeper ($0)", zookeeper_addrs_);
+    logInfo("evqld", "Connecting to zookeeper ($0)", zookeeper_addrs_);
     cv_.wait_for(*lk, std::chrono::seconds(1));
   }
 
@@ -300,7 +300,7 @@ Status ZookeeperConfigDirectory::load(CallbackList* cb) {
   }
 
   if (!server_name_.isEmpty()) {
-    logInfo("evqld", "Registering with zookeeper...");
+    logDebug("evqld", "Registering with zookeeper...");
     auto server_cfg_path = StringUtil::format(
         "$0/servers/$1",
         path_prefix_,
@@ -333,7 +333,7 @@ Status ZookeeperConfigDirectory::load(CallbackList* cb) {
     }
   }
 
-  logInfo("evqld", "Loading config from zookeeper...");
+  logDebug("evqld", "Loading config from zookeeper...");
 
   {
     auto rc = syncClusterConfig(cb);
@@ -649,16 +649,31 @@ Status ZookeeperConfigDirectory::syncTable(
 
 void ZookeeperConfigDirectory::stop() {
   std::unique_lock<std::mutex> lk(mutex_);
-  if (zk_) {
-    zookeeper_close(zk_);
-    zk_ = nullptr;
+
+  if (zk_ && state_ == ZKState::CONNECTED && !server_name_.isEmpty()) {
+    auto server_path = StringUtil::format(
+        "$0/servers-online/$1",
+        path_prefix_,
+        server_name_.get());
+
+    auto rc = zoo_delete(zk_, server_path.c_str(), server_stats_version_);
+    if (rc) {
+      logError("evqld", "zoo_delete() failed: $0", getErrorString(rc));
+    }
   }
+
   state_ = ZKState::CLOSED;
   cv_.notify_all();
   lk.unlock();
+  cv_.notify_all();
 
   if (watchdog_.joinable()) {
     watchdog_.join();
+  }
+
+  if (zk_) {
+    zookeeper_close(zk_);
+    zk_ = nullptr;
   }
 }
 
@@ -828,7 +843,7 @@ void ZookeeperConfigDirectory::handleSessionEvent(int state) {
 void ZookeeperConfigDirectory::handleConnectionEstablished() {
   switch (state_) {
     case ZKState::CONNECTING:
-      logInfo("evqld", "Zookeeper connection established");
+      logDebug("evqld", "Zookeeper connection established");
       state_ = ZKState::LOADING;
       return;
 
@@ -1326,13 +1341,11 @@ void ZookeeperConfigDirectory::runWatchdog() {
         continue;
 
       case ZKState::CLOSED:
-        break;
+        return;
 
       default:
         reconnect(&lk);
-        lk.unlock();
-        usleep(kReconnectRateLimit);
-        lk.lock();
+        cv_.wait_for(lk, std::chrono::microseconds(kReconnectRateLimit));
         continue;
 
     }

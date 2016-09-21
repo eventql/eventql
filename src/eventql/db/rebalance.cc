@@ -37,7 +37,7 @@ Rebalance::Rebalance(
     metadata_replication_factor_(3) {}
 
 Status Rebalance::runOnce() {
-  logInfo("evqld", "Rebalancing cluster...");
+  logDebug("evqld", "Rebalancing cluster...");
 
   all_servers_.clear();
   for (const auto& s : cdir_->listServers()) {
@@ -72,7 +72,7 @@ Status Rebalance::runOnce() {
 }
 
 Status Rebalance::rebalanceTable(TableDefinition tbl_cfg) {
-  logInfo(
+  logDebug(
       "evqld",
       "Rebalancing table '$0/$1'",
       tbl_cfg.customer(),
