@@ -29,6 +29,7 @@
 #include "eventql/eventql.h"
 #include "eventql/db/monitor.h"
 #include <eventql/db/database.h>
+#include <eventql/db/partition_map.h>
 #include <eventql/util/wallclock.h>
 #include <eventql/server/server_stats.h>
 
@@ -108,6 +109,10 @@ void Monitor::startMonitorThread() {
 
   thread_ = std::thread([this] {
     Application::setCurrentThreadName("evqld-monitor");
+
+    // wait until all partitions have finished loading before starting to
+    // report local load info
+    dbctx_->partition_map->waitUntilAllLoaded();
 
     std::unique_lock<std::mutex> lk(mutex_);
     while (thread_running_) {

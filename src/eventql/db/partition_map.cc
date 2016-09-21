@@ -48,7 +48,8 @@ static mdb::MDBOptions tsdb_mdb_opts() {
 PartitionMap::PartitionMap(
     DatabaseContext* cfg) :
     cfg_(cfg),
-    db_(mdb::MDB::open(cfg_->db_path, tsdb_mdb_opts())) {}
+    db_(mdb::MDB::open(cfg_->db_path, tsdb_mdb_opts())),
+    load_complete_(false) {}
 
 Option<RefPtr<Table>> PartitionMap::findTable(
     const String& stream_ns,
@@ -197,6 +198,10 @@ void PartitionMap::loadPartitions(const Vector<PartitionKey>& partitions) {
           std::get<2>(p).toString());
     }
   }
+
+  std::unique_lock<std::mutex> lk(load_complete_mutex_);
+  load_complete_ = true;
+  load_complete_cv_.notify_all();
 }
 
 RefPtr<Partition> PartitionMap::findOrCreatePartition(
@@ -528,6 +533,12 @@ void PartitionMap::publishPartitionChange(
   }
 }
 
+void PartitionMap::waitUntilAllLoaded() {
+  std::unique_lock<std::mutex> lk(load_complete_mutex_);
+  while (!load_complete_) {
+    load_complete_cv_.wait(lk);
+  }
+}
 
 } // namespace tdsb
 
