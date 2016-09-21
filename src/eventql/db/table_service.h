@@ -108,6 +108,14 @@ public:
       const json::JSONObject::const_iterator& data_end,
       uint64_t flags = 0);
 
+  // insert a batch of records from json
+  ReturnCode insertRecords(
+      const String& tsdb_namespace,
+      const String& table_name,
+      const json::JSONObject* begin,
+      const json::JSONObject* end,
+      uint64_t flags = 0);
+
   // internal method, don't use
   ReturnCode insertReplicatedRecords(
       const String& tsdb_namespace,

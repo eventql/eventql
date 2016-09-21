@@ -463,6 +463,35 @@ ReturnCode TableService::insertRecord(
       flags);
 }
 
+ReturnCode TableService::insertRecords(
+    const String& tsdb_namespace,
+    const String& table_name,
+    const json::JSONObject* begin,
+    const json::JSONObject* end,
+    uint64_t flags /* = 0 */) {
+  auto table = dbctx_->partition_map->findTable(tsdb_namespace, table_name);
+  if (table.isEmpty() || table.get()->config().deleted()) {
+    return ReturnCode::errorf("ENOTFOUND", "table not found: $0", table_name);
+  }
+
+  std::vector<msg::DynamicMessage> records;
+  for (auto iter = begin; iter != end; ++iter) {
+    try {
+      records.emplace_back(table.get()->schema());
+      records.back().fromJSON(iter->begin(), iter->end());
+    } catch (const std::exception& e) {
+      return ReturnCode::exception(e);
+    }
+  }
+
+  return insertRecords(
+      tsdb_namespace,
+      table_name,
+      &*records.begin(),
+      &*records.end(),
+      flags);
+}
+
 ReturnCode TableService::insertRecord(
     const String& tsdb_namespace,
     const String& table_name,
