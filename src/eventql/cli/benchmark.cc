@@ -100,6 +100,7 @@ Benchmark::Benchmark() :
     last_request_time_(0),
     rate_limit_interval_(1000000),
     remaining_requests_(20) {
+  stats_ = new BenchmarkStats();
   threads_.resize(num_threads_);
 }
 
@@ -140,7 +141,7 @@ void Benchmark::kill() {
 }
 
 BenchmarkStats* Benchmark::getStats() {
-  return &stats_; //FIXME
+  return stats_;
 }
 
 void Benchmark::runThread(size_t idx) {
@@ -150,7 +151,7 @@ void Benchmark::runThread(size_t idx) {
     // FIXME record end time
 
     std::unique_lock<std::mutex> lk(mutex_);
-    stats_.addRequest(rc.isSuccess(), idx, MonotonicClock::now());
+    stats_->addRequest(rc.isSuccess(), idx, MonotonicClock::now());
 
     if (!rc.isSuccess()) {
       status_ = rc;

@@ -146,16 +146,35 @@ int main(int argc, const char** argv) {
   }
 
   eventql::cli::Benchmark benchmark;
+  bool line_dirty = false;
 
-  auto on_progress = [&benchmark, &stdout_os]() {
-    stdout_os->print(benchmark.getStats()->toString() + "\n");
+  auto on_progress = [&benchmark, &stdout_os, &line_dirty]() {
+    if (line_dirty) {
+      stdout_os->eraseLine();
+    }
+
+    try {
+      stdout_os->print("\r" + benchmark.getStats()->toString());
+      line_dirty = true;
+    } catch (const std::exception& e) {
+      /* fallthrough */
+    }
   };
 
   benchmark.setProgressCallback(on_progress);
   auto rc = benchmark.run();
   if (rc.isSuccess()) {
-    stdout_os->print(benchmark.getStats()->toString() + "\n");
-    return 0;
+    if (line_dirty) {
+      stdout_os->eraseLine();
+    }
+    try {
+      stdout_os->print("\r" + benchmark.getStats()->toString() + "\n");
+      return 0;
+    } catch (const std::exception& e) {
+      std::cerr << e.what() << std::endl;
+      return 1;
+    }
+
   } else {
     std::cerr << rc.getMessage() << std::endl;
     return 1;
