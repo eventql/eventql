@@ -101,6 +101,11 @@ ReturnCode Monitor::runMonitorProcedure() {
   sstats.set_partitions_loaded(partitions_loaded);
   sstats.set_partitions_assigned(partitions_assigned);
   sstats.set_buildinfo(StringUtil::format("$0 ($1)", kVersionString, kBuildID));
+
+  if (dbctx_->config->getBool("server.noalloc")) {
+    sstats.set_noalloc(true);
+  }
+
   return dbctx_->config_directory->publishServerStats(sstats);
 }
 

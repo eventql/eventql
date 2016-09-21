@@ -55,6 +55,8 @@ void ServerAllocator::updateServerSlot(const ServerConfig& s) {
       s.server_status() == SERVER_UP &&
       !s.is_dead() &&
       !s.is_leaving() &&
+      sstats.has_load_factor() &&
+      !sstats.noalloc() &&
       sstats.load_factor() < load_limit_hard_;
 
   if (is_eligible) {
@@ -65,7 +67,6 @@ void ServerAllocator::updateServerSlot(const ServerConfig& s) {
 
   bool is_primary =
       is_eligible &&
-      sstats.has_load_factor() &&
       sstats.load_factor() < load_limit_soft_;
 
   if (is_primary) {

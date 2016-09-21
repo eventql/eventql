@@ -151,7 +151,12 @@ The EventQL configuration options are grouped in three sections: `client`, `serv
   <tr>
     <td><b>server.noleader</b></td>
     <td>false</td>
-    <td></td>
+    <td>If set to true, this server will not partake in leader election</td>
+  </tr>
+  <tr>
+    <td><b>server.noalloc</b></td>
+    <td>false</td>
+    <td>If set to true, no partitions/data will be allocated to this server</td>
   </tr>
   <tr>
     <td><b>server.gc_mode</b></td>

@@ -31,6 +31,7 @@ message ServerStats {
   optional uint64 partitions_loaded = 5;
   optional uint64 partitions_assigned = 6;
   optional string buildinfo = 7;
+  optional bool noalloc = 8;
 };
 
 message ServerConfig {
