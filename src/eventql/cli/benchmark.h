@@ -36,6 +36,7 @@ public:
 
   Benchmark();
 
+  void setRequestHandler(std::function<ReturnCode ()> handler);
   void setProgressCallback(std::function<void ()> cb);
 
   ReturnCode run();
@@ -55,6 +56,7 @@ protected:
   uint64_t last_request_time_;
   uint64_t rate_limit_interval_;
   size_t remaining_requests_;
+  std::function<ReturnCode ()> request_handler_;
   std::function<void ()> on_progress_;
 };
 

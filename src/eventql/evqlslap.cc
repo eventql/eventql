@@ -145,10 +145,16 @@ int main(int argc, const char** argv) {
     return 1;
   }
 
+  auto request_handler = []() {
+    //FIXME send request
+    return ReturnCode::success();
+  };
+
   auto on_progress = []() {
   };
 
   eventql::cli::Benchmark benchmark;
+  benchmark.setRequestHandler(request_handler);
   benchmark.setProgressCallback(on_progress);
   auto rc = benchmark.run();
   if (rc.isSuccess()) {

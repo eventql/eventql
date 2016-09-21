@@ -27,7 +27,6 @@
 
 /**
  * TODO:
- *   - Benchmark.setRequestHandler(Fun<void (BenchmarkStats*>)
  *   - pass arguments
  *   - benchmark stats: Benchmark::getStats()
  *   - print benchmark stats
@@ -51,11 +50,19 @@ Benchmark::Benchmark() :
   threads_.resize(num_threads_);
 }
 
+void Benchmark::setRequestHandler(std::function<ReturnCode ()> handler) {
+  request_handler_ = handler;
+}
+
 void Benchmark::setProgressCallback(std::function<void ()> cb) {
   on_progress_ = cb;
 }
 
 ReturnCode Benchmark::run() {
+  if (!request_handler_) {
+    return ReturnCode::error("ERUNTIME", "no request handler set");
+  }
+
   for (size_t i = 0; i < num_threads_; ++i) {
     threads_[i] = std::thread(std::bind(&Benchmark::runThread, this, i));
     ++threads_running_;
@@ -90,12 +97,16 @@ void Benchmark::kill() {
 void Benchmark::runThread(size_t idx) {
   while (getRequestSlot(idx)) {
     // FIXME record start time
-    auto rc = ReturnCode::success(); // FIXME call request handler/cb
+    auto rc = ReturnCode::success();
+    try {
+      rc = request_handler_();
+    } catch (const std::exception& e) {
+      rc = ReturnCode::error("ERUNTIME", e.what());
+    }
     // FIXME record end time
-
     std::unique_lock<std::mutex> lk(mutex_);
-    // FIXME stats.addRequst(rc.isSu, idx, runtime)...
 
+    // FIXME stats.addRequst(rc.isSu, idx, runtime)...
     if (!rc.isSuccess()) {
       status_ = rc;
       cv_.notify_all();
