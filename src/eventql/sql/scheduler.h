@@ -37,6 +37,7 @@
 #include <eventql/sql/qtree/nodes/insert_json.h>
 #include <eventql/sql/qtree/nodes/drop_table.h>
 #include <eventql/sql/qtree/nodes/describe_partitions.h>
+#include <eventql/sql/qtree/nodes/describe_servers.h>
 #include <eventql/sql/qtree/TableExpressionNode.h>
 #include <eventql/sql/expressions/table_expression.h>
 #include <eventql/sql/qtree/QueryTreeNode.h>
@@ -47,6 +48,7 @@
 #include <eventql/sql/expressions/table/limit.h>
 #include <eventql/sql/expressions/table/describe_table.h>
 #include <eventql/sql/expressions/table/describe_partitions.h>
+#include <eventql/sql/expressions/table/describe_servers.h>
 #include <eventql/sql/expressions/table/groupby.h>
 #include <eventql/sql/expressions/table/nested_loop_join.h>
 #include <eventql/sql/extensions/chartsql/chart_expression.h>

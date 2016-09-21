@@ -33,6 +33,7 @@
 #include "eventql/sql/qtree/nodes/alter_table.h"
 #include "eventql/sql/qtree/nodes/create_table.h"
 #include "eventql/db/table_info.h"
+#include "eventql/config/config_directory.h"
 
 namespace csql {
 
@@ -52,6 +53,11 @@ public:
       const String& table_name,
       Function<void (const ::eventql::TablePartitionInfo& partition)> fn) const {
     return Status(eRuntimeError, "not yet implemented");
+  }
+
+  Status listServers(
+      Function<void (const ::eventql::ServerConfig& server)> fn) const {
+    return Status(eNotImplementedError, "not implemented");
   }
 
   virtual Option<TableInfo> describe(const String& table_name) const = 0;

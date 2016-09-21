@@ -519,6 +519,20 @@ Status TSDBTableProvider::listPartitions(
       fn);
 }
 
+Status TSDBTableProvider::listServers(
+    Function<void (const ServerConfig& server)> fn) const {
+  try {
+    auto servers = cdir_->listServers();
+    for (const auto& s : servers) {
+      fn(s);
+    }
+    return Status::success();
+
+  } catch (const std::exception& e) {
+    return Status(eRuntimeError, e.what());
+  }
+}
+
 Option<csql::TableInfo> TSDBTableProvider::describe(
     const String& table_name) const {
   auto table_ref = TSDBTableRef::parse(table_name);
