@@ -169,6 +169,17 @@ The EventQL configuration options are grouped in three sections: `client`, `serv
     <td>Unit: Bytes</td>
   </tr>
   <tr>
+    <td><b>server.disk_capacity</b></td>
+    <td>/td>
+    <td>
+      The maximum number of bytes that the server is allowed to write/use
+      on disk. Unit is Bytes. This is an optional limit, if it is unset, the
+      server will use the actual number of free bytes on disk as the limit.
+      Even if the limit is set and allows using more disk space than is
+      actually available, the server will use the (smaller) real limit.
+    </td>
+  </tr>
+  <tr>
     <td><b>server.loadinfo_publish_interval</b></td>
     <td>15m</td>
     <td>
