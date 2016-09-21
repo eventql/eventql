@@ -60,16 +60,9 @@ bool DescribePartitionsExpression::next(SValue* row, size_t row_len) {
     const auto& col = rows_[counter_];
     switch (row_len) {
       default:
-      case 3: {
-        std::string server_ids;
-        for (size_t i = 0; i < col.server_ids.size(); ++i) {
-          if (i > 0) {
-            server_ids += ", ";
-          }
-          server_ids += col.server_ids[i];
-        }
-        row[2] = SValue::newString(server_ids); //Server id
-      }
+      case 3: 
+        row[2] = SValue::newString(
+            StringUtil::join(col.server_ids, ",")); //Server id
       case 2:
         row[1] = SValue::newString(col.keyrange_begin); //Keyrange begin
       case 1:
