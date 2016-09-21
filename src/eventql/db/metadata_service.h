@@ -29,6 +29,7 @@
 #include "eventql/db/metadata_file.h"
 #include "eventql/db/metadata_store.h"
 #include "eventql/db/metadata_operation.h"
+#include "eventql/db/database.h"
 #include "eventql/config/config_directory.h"
 
 namespace eventql {
@@ -37,7 +38,7 @@ class MetadataService {
 public:
 
   MetadataService(
-      ConfigDirectory* cdir,
+      DatabaseContext* dbctx,
       MetadataStore* metadata_store);
 
   Status getMetadataFile(
@@ -79,7 +80,7 @@ public:
       PartitionFindResponse* response);
 
 protected:
-  ConfigDirectory* cdir_;
+  DatabaseContext* dbctx_;
   MetadataStore* metadata_store_;
 };
 

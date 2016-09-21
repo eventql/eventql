@@ -31,9 +31,9 @@
 namespace eventql {
 
 MetadataService::MetadataService(
-    ConfigDirectory* cdir,
+    DatabaseContext* dbctx,
     MetadataStore* metadata_store) :
-    cdir_(cdir),
+    dbctx_(dbctx),
     metadata_store_(metadata_store) {}
 
 Status MetadataService::getMetadataFile(
@@ -52,7 +52,7 @@ Status MetadataService::getMetadataFile(
     const String& ns,
     const String& table_name,
     RefPtr<MetadataFile>* file) const {
-  auto table_cfg = cdir_->getTableConfig(ns, table_name);
+  auto table_cfg = dbctx_->config_directory->getTableConfig(ns, table_name);
   return metadata_store_->getMetadataFile(
       ns,
       table_name,
@@ -221,7 +221,7 @@ Status MetadataService::findPartition(
 Status MetadataService::createPartition(
     const PartitionFindRequest& request,
     PartitionFindResponse* response) {
-  auto table_config = cdir_->getTableConfig(
+  auto table_config = dbctx_->config_directory->getTableConfig(
       request.db_namespace(),
       request.table_id());
 
@@ -258,9 +258,8 @@ Status MetadataService::createPartition(
 
   std::vector<String> new_servers;
   {
-    auto cconf = cdir_->getClusterConfig();
-    ServerAllocator server_alloc(cdir_);
-    auto rc = server_alloc.allocateServers(
+    auto cconf = dbctx_->config_directory->getClusterConfig();
+    auto rc = dbctx_->server_alloc->allocateServers(
         ServerAllocator::MUST_ALLOCATE,
         cconf.replication_factor(),
         Set<String>{},
@@ -292,7 +291,7 @@ Status MetadataService::createPartition(
       Random::singleton()->sha1(),
       *msg::encode(op));
 
-  MetadataCoordinator coordinator(cdir_);
+  MetadataCoordinator coordinator(dbctx_->config_directory);
   auto create_rc = coordinator.performAndCommitOperation(
       request.db_namespace(),
       request.table_id(),

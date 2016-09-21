@@ -84,7 +84,7 @@ public:
   static const size_t kMaxLSMTables = 12;
 
   LSMPartitionWriter(
-      DatabaseContext* cfg,
+      DatabaseContext* dbctx,
       RefPtr<Partition> partition,
       PartitionSnapshotRef* head);
 
@@ -112,9 +112,7 @@ protected:
 
   RefPtr<Partition> partition_;
   RefPtr<CompactionStrategy> compaction_strategy_;
-  LSMTableIndexCache* idx_cache_;
-  FileTracker* file_tracker_;
-  ConfigDirectory* cdir_;
+  DatabaseContext* dbctx_;
   size_t partition_split_threshold_;
   std::mutex commit_mutex_;
   std::mutex compaction_mutex_;

@@ -151,7 +151,12 @@ The EventQL configuration options are grouped in three sections: `client`, `serv
   <tr>
     <td><b>server.noleader</b></td>
     <td>false</td>
-    <td></td>
+    <td>If set to true, this server will not partake in leader election</td>
+  </tr>
+  <tr>
+    <td><b>server.noalloc</b></td>
+    <td>false</td>
+    <td>If set to true, no partitions/data will be allocated to this server</td>
   </tr>
   <tr>
     <td><b>server.gc_mode</b></td>
@@ -170,7 +175,7 @@ The EventQL configuration options are grouped in three sections: `client`, `serv
   </tr>
   <tr>
     <td><b>server.disk_capacity</b></td>
-    <td>/td>
+    <td></td>
     <td>
       The maximum number of bytes that the server is allowed to write/use
       on disk. Unit is Bytes. This is an optional limit, if it is unset, the
@@ -200,6 +205,45 @@ The EventQL configuration options are grouped in three sections: `client`, `serv
       </p>
     </td>
   </tr>
+  <tr>
+    <td><b>server.load_limit_soft</b></td>
+    <td>0.95</td>
+    <td>
+      This value controls the upper limit on a servers disk utilization. If the
+      soft load limit was reached, now new partitions will be allocated on the
+      server. (Default: 95%)
+    </td>
+  </td>
+  <tr>
+    <td><b>server.load_limit_hard</b></td>
+    <td>0.98</td>
+    <td>
+      This value controls the upper limit on a servers disk utilization. If the
+      soft load limit was reached, now new partitions will be allocated on the
+      server and the cluster will slowly start to remove existing partitions
+      from the server until the disk usage falls below the soft limit.
+    </td>
+  </td>
+  <tr>
+    <td><b>server.partitions_loading_limit_soft</b></td>
+    <td>4</td>
+    <td>
+      The maximum number of partitions that can be loading on a server at the
+      same time before allocations with priorty "IDLE" will stop being placed
+      on the server. Allocations with priorty "BEST_EFFORT" or "MUST_ALLOCATE"
+      may still be placed on the server even after the soft limit was reached.
+    </td>
+  </td>
+  <tr>
+    <td><b>server.partitions_loading_limit_hard</b></td>
+    <td>64</td>
+    <td>
+      The maximum number of partitions that can be loading on a server at the
+      same time before allocations with priorty "IDLE" and "BEST_EFFORT" will
+      stop being placed on the server. Allocations with priority "MUST_ALLOCATE"
+      may still be placed on the server even after the soft limit was reached.
+    </td>
+  </td>
   <tr>
     <td><b>server.c2s_io_timeout</b></td>
     <td>1s</td>
