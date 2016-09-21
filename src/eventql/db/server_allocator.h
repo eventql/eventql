@@ -55,7 +55,18 @@ public:
       Vector<String>* out) const;
 
 protected:
-  ConfigDirectory* cdir_;
+
+  struct ServerSlot {
+    double load_factor;
+    uint64_t disk_free;
+    uint64_t partitions_loading;
+  };
+
+  void updateServerSlot(const ServerConfig& cfg);
+
+  mutable std::mutex mutex_;
+  std::map<std::string, ServerSlot> primary_servers_;
+  std::set<std::string> backup_servers_;
 };
 
 } // namespace eventql
