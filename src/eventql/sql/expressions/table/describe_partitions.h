@@ -1,7 +1,7 @@
 /**
  * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@eventql.io>
+ *   - Laura Schlimmer <laura@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -22,18 +22,35 @@
  * code of your own applications
  */
 #pragma once
-#include <eventql/util/stdtypes.h>
-#include <eventql/util/protobuf/MessageSchema.h>
-#include <eventql/db/table_config.pb.h>
-
 #include "eventql/eventql.h"
+#include <eventql/util/stdtypes.h>
+#include <eventql/sql/qtree/ShowTablesNode.h>
+#include <eventql/sql/runtime/tablerepository.h>
 
-namespace eventql {
+namespace csql {
 
-struct TablePartitionInfo {
-  std::vector<std::string> server_ids;
-  std::string partition_id;
-  std::string keyrange_begin;
+class DescribePartitionsExpression : public TableExpression {
+public:
+
+  static const size_t kNumColumns = 3;
+
+  DescribePartitionsExpression(
+      Transaction* txn,
+      const String& table_name);
+
+  ScopedPtr<ResultCursor> execute() override;
+
+  size_t getNumColumns() const override;
+
+protected:
+
+  bool next(SValue* row, size_t row_len);
+
+  Transaction* txn_;
+  String table_name_;
+  Vector<eventql::TablePartitionInfo> rows_;
+  size_t counter_;
 };
 
-}
+} //csql
+

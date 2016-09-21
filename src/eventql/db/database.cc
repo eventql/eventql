@@ -295,7 +295,11 @@ ReturnCode DatabaseImpl::start() {
   partition_map_.reset(new PartitionMap(database_context_.get()));
 
   table_service_.reset(
-      new TableService(config_dir_.get(), partition_map_.get(), cfg_));
+      new TableService(
+          config_dir_.get(),
+          partition_map_.get(),
+          cfg_,
+          database_context_.get()));
 
   replication_worker_.reset(
       new ReplicationWorker(partition_map_.get()));

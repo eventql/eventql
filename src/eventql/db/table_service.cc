@@ -47,10 +47,12 @@ namespace eventql {
 TableService::TableService(
     ConfigDirectory* cdir,
     PartitionMap* pmap,
-    ProcessConfig* config) :
+    ProcessConfig* config,
+    DatabaseContext* dbctx) :
     cdir_(cdir),
     pmap_(pmap),
-    config_(config) {}
+    config_(config),
+    dbctx_(dbctx) {}
 
 Status TableService::createTable(
     const String& db_namespace,
@@ -443,6 +445,50 @@ void TableService::listTables(
 
     fn(td);
   });
+}
+
+Status TableService::listPartitions(
+    const String& db_namespace,
+    const String& table_name,
+    Function<void (const TablePartitionInfo& partition)> fn) const {
+  auto table = pmap_->findTable(db_namespace, table_name);
+  MetadataClient metadata_client(cdir_);
+  MetadataFile metadata_file;
+  auto rc = metadata_client.fetchLatestMetadataFile(
+      db_namespace,
+      table_name,
+      &metadata_file);
+
+  if (!rc.isSuccess()) {
+    return rc;
+  }
+
+  for (const auto& e : metadata_file.getPartitionMap()) {
+    TablePartitionInfo p_info;
+    p_info.partition_id = e.partition_id.toString();
+
+    for (const auto& s : e.servers) {
+      p_info.server_ids.emplace_back(s.server_id);
+    }
+
+    String keyrange;
+    switch (metadata_file.getKeyspaceType()) {
+      case KEYSPACE_UINT64: {
+        uint64_t keyrange_uint = -1;
+        memcpy((char*) &keyrange_uint, e.begin.data(), sizeof(e.begin));
+        p_info.keyrange_begin = UnixTime(keyrange_uint).toString();
+        break;
+      }
+      case KEYSPACE_STRING: {
+        p_info.keyrange_begin = e.begin;
+        break;
+      }
+    }
+
+    fn(p_info);
+  }
+
+  return Status::success();
 }
 
 ReturnCode TableService::insertRecord(

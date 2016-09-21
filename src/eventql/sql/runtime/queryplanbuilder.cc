@@ -48,6 +48,7 @@
 #include <eventql/sql/qtree/nodes/drop_table.h>
 #include <eventql/sql/qtree/nodes/insert_into.h>
 #include <eventql/sql/qtree/nodes/insert_json.h>
+#include <eventql/sql/qtree/nodes/describe_partitions.h>
 #include <eventql/sql/table_schema.h>
 
 namespace csql {
@@ -107,6 +108,10 @@ RefPtr<QueryTreeNode> QueryPlanBuilder::build(
     return node;
   }
 
+  if ((node = buildDescribePartitions(txn, ast)) != nullptr) {
+    return node;
+  }
+
   if ((node = buildCreateTable(txn, ast)) != nullptr) {
     return node;
   }
@@ -144,6 +149,7 @@ Vector<RefPtr<QueryTreeNode>> QueryPlanBuilder::build(
       case ASTNode::T_SELECT_DEEP:
       case ASTNode::T_SHOW_TABLES:
       case ASTNode::T_DESCRIBE_TABLE:
+      case ASTNode::T_DESCRIBE_PARTITIONS:
       case ASTNode::T_CREATE_TABLE:
       case ASTNode::T_CREATE_DATABASE:
       case ASTNode::T_DROP_TABLE:
@@ -1730,6 +1736,23 @@ QueryTreeNode* QueryPlanBuilder::buildDescribeTable(
   }
 
   return new DescribeTableNode(table_name->getToken()->getString());
+}
+
+QueryTreeNode* QueryPlanBuilder::buildDescribePartitions(
+    Transaction* txn,
+    ASTNode* ast) {
+  if (!(*ast == ASTNode::T_DESCRIBE_PARTITIONS) ||
+        ast->getChildren().size() != 1) {
+    return nullptr;
+  }
+
+  auto table_name = ast->getChildren()[0];
+  if (table_name->getType() != ASTNode::T_TABLE_NAME ||
+      table_name->getToken() == nullptr) {
+    RAISE(kRuntimeError, "corrupt AST");
+  }
+
+  return new DescribePartitionsNode(table_name->getToken()->getString());
 }
 
 static TableSchema buildCreateTableSchema(ASTNode* ast);

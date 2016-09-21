@@ -510,6 +510,15 @@ void TSDBTableProvider::listTables(
       });
 }
 
+Status TSDBTableProvider::listPartitions(
+    const String& table_name,
+    Function<void (const TablePartitionInfo& partition)> fn) const {
+  return table_service_->listPartitions(
+      tsdb_namespace_,
+      table_name,
+      fn);
+}
+
 Option<csql::TableInfo> TSDBTableProvider::describe(
     const String& table_name) const {
   auto table_ref = TSDBTableRef::parse(table_name);

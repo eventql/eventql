@@ -8,6 +8,9 @@ EventQL v0.5.0 beta;
 
   * Added new frames to native protocol: ACK, INSERT, REPL_INSERT
 
+  * Added the DESCRIBE PARTITIONS table statement to obtain information about
+    the partitions of a table
+
 
 EventQL v0.4.0 beta;
 
