@@ -56,7 +56,9 @@ public:
   }
 
   virtual Status listServers(
-      Function<void (const ::eventql::ServerConfig& server)> fn) const = 0;
+      Function<void (const ::eventql::ServerConfig& server)> fn) const {
+    return Status(eNotImplementedError, "not implemented");
+  }
 
   virtual Option<TableInfo> describe(const String& table_name) const = 0;
 
