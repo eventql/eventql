@@ -46,8 +46,8 @@ ReturnCode Monitor::runMonitorProcedure() {
   /* get disk used and capacity */
   uint64_t disk_used = FileUtil::du_c(dbctx_->db_path);
   uint64_t disk_available = 0;
+  uint64_t disk_capacity = 0;
   {
-    uint64_t disk_capacity = 0;
     auto disk_capacity_cfg = dbctx_->config->getInt("server.disk_capacity");
     if (!disk_capacity_cfg.isEmpty()) {
       disk_capacity = disk_capacity_cfg.get();
@@ -76,6 +76,14 @@ ReturnCode Monitor::runMonitorProcedure() {
     partitions_loaded -= partitions_loading;
   }
 
+  double p_factor = 1.0f;
+  if (partitions_loaded > 0 && partitions_assigned > 0) {
+    p_factor = (double) partitions_assigned / (double) partitions_loaded;
+  }
+
+  double load_factor =
+      ((double) disk_used / (double) (disk_capacity)) * p_factor;
+
   /* publish server stats */
   logDebug(
       "evqld",
@@ -86,6 +94,7 @@ ReturnCode Monitor::runMonitorProcedure() {
       partitions_assigned);
 
   ServerStats sstats;
+  sstats.set_load_factor(load_factor);
   sstats.set_disk_used(disk_used);
   sstats.set_disk_available(disk_available);
   sstats.set_partitions_loaded(partitions_loaded);
