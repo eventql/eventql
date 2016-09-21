@@ -224,8 +224,6 @@ void StatusServlet::renderDashboard(
     }
 
     const auto& sstats = server.server_stats();
-    auto disk_capacity = sstats.disk_used() + sstats.disk_available();
-
     html += StringUtil::format(
         "<tr><td>$0</td><td>$1</td><td>$2</td><td>$3</td><td>$4</td>"
         "<td>$5</td><td>$6</td><td>$7/$8</td></tr>",
@@ -233,9 +231,8 @@ void StatusServlet::renderDashboard(
         ServerStatus_Name(server.server_status()),
         server.server_addr(),
         sstats.buildinfo(),
-        sstats.has_disk_used() && sstats.has_disk_available() ?
-            StringUtil::toString(
-                (double) sstats.disk_used() / (double) disk_capacity) :
+        sstats.has_load_factor() ?
+            StringUtil::toString(sstats.load_factor()) :
             "-",
         sstats.has_disk_used() ?
             StringUtil::format("$0MB", sstats.disk_used() / 0x100000) :
