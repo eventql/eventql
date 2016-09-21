@@ -1382,3 +1382,13 @@ TEST_CASE(ParserTest, TestDescribePartitionsStatement, [] () {
   EXPECT_EQ(stmt->getChildren()[0]->getToken()->getString(), "my_tbl");
 });
 
+TEST_CASE(ParserTest, TestDescribeServersStatement, [] () {
+  auto runtime = Runtime::getDefaultRuntime();
+  auto txn = runtime->newTransaction();
+  auto parser = parseTestQuery("DESCRIBE servers;");
+
+  EXPECT(parser.getStatements().size() == 1);
+  const auto& stmt = parser.getStatements()[0];
+  EXPECT_EQ(*stmt, ASTNode::T_DESCRIBE_SERVERS);
+});
+

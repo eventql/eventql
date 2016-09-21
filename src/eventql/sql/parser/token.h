@@ -93,6 +93,7 @@ public:
     T_DESCRIBE,
     T_EXPLAIN,
     T_PARTITIONS,
+    T_SERVERS,
     T_PRIMARY,
     T_KEY,
     T_REPEATED,

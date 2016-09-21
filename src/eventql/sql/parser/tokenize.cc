@@ -567,6 +567,11 @@ next:
     goto next;
   }
 
+  if (token == "SERVERS") {
+    token_list->emplace_back(Token::T_SERVERS);
+    goto next;
+  }
+
   if (token == "PRIMARY") {
     token_list->emplace_back(Token::T_PRIMARY);
     goto next;

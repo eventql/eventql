@@ -882,6 +882,8 @@ ASTNode* Parser::explainStatement() {
       return explainQueryStatement();
     case Token::T_PARTITIONS:
       return describePartitionsStatement();
+    case Token::T_SERVERS:
+      return describeServersStatement();
     default:
       return describeTableStatement();
   }
@@ -898,6 +900,13 @@ ASTNode* Parser::describePartitionsStatement() {
   consumeToken();
   auto stmt = new ASTNode(ASTNode::T_DESCRIBE_PARTITIONS);
   stmt->appendChild(tableName());
+  consumeIf(Token::T_SEMICOLON);
+  return stmt;
+}
+
+ASTNode* Parser::describeServersStatement() {
+  consumeToken();
+  auto stmt = new ASTNode(ASTNode::T_DESCRIBE_SERVERS);
   consumeIf(Token::T_SEMICOLON);
   return stmt;
 }
