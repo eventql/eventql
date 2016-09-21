@@ -41,9 +41,13 @@
 namespace eventql {
 namespace cli {
 
-BenchmarkStats::BenchmarkStats() : total_requests_(0) {
+BenchmarkStats::BenchmarkStats() :
+    total_requests_(0),
+    min_rate_(-1),
+    max_rate_(0),
+    mvg_avg_rate_(0),
+    buckets_begin_(0) {
   buckets_.resize(kNumBuckets);
-  buckets_begin_ = 0;
 }
 
 void BenchmarkStats::addRequest(
@@ -72,7 +76,18 @@ void BenchmarkStats::addRequest(
   buckets_[buckets_begin_].num_requests += 1;
 }
 
-std::string BenchmarkStats::toString() const {
+std::string BenchmarkStats::toString() {
+  calculate();
+
+  return StringUtil::format(
+      "total requests $0 --- avg rps $1 --- min rps $2 --- max rps $3",
+      total_requests_,
+      mvg_avg_rate_,
+      min_rate_,
+      max_rate_);
+}
+
+void BenchmarkStats::calculate() {
   //calculate moving average for the last minute
   auto start = MonotonicClock::now() - kMicrosPerMinute;
   uint64_t num_requests = 0;
@@ -86,10 +101,14 @@ std::string BenchmarkStats::toString() const {
     num_requests += buckets_[i].num_requests;
   }
 
-  return StringUtil::format(
-      "total $0 --- avg rps $1",
-      total_requests_,
-      (double) num_requests / (bucket_ctr * 10));
+  mvg_avg_rate_ = (double) num_requests / (bucket_ctr * 10);
+  if (mvg_avg_rate_ < min_rate_ || min_rate_ < 0) {
+    min_rate_ = mvg_avg_rate_;
+  }
+
+  if (mvg_avg_rate_ > max_rate_) {
+    max_rate_ = mvg_avg_rate_;
+  }
 }
 
 // FIXME pass proper arguments

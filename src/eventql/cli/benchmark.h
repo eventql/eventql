@@ -38,9 +38,11 @@ public:
 
   void addRequest(bool is_success, size_t t_id, uint64_t start_time);
 
-  std::string toString() const;
+  std::string toString();
 
 protected:
+
+  void calculate();
 
   static const uint64_t kNumBuckets = 6;
   static const auto kTimeWindowSize = 10000000; //10 seconds
@@ -53,8 +55,9 @@ protected:
   };
 
   uint64_t total_requests_;
-  uint64_t min_rate_;
-  uint64_t max_rate_;
+  double min_rate_;
+  double max_rate_;
+  double mvg_avg_rate_;
 
   std::vector<Bucket> buckets_;
   size_t buckets_begin_;
