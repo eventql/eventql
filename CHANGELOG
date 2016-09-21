@@ -3,10 +3,18 @@ EventQL v0.5.0 beta;
   * Changed the DESCRIBE TABLE statement to return a new "encoding" column that
     contains information about the column's encoding settings
 
+  * Changed the server allocator to assign new partitions to servers using
+    a weighted random scheme, taking into a account the load facotr and the
+    number of available bytes on disk for each server
+
   * Added a new monitor thread that publishes disk usage and other load
     information to the coordination service
 
   * Added new frames to native protocol: ACK, INSERT, REPL_INSERT
+
+  * Added the following new configuration options: server.disk_capacity,
+    server.load_limit_{soft,hard}, server.partitions_loading_limit_{soft,hard},
+    server.loadinfo_publish_interval
 
 
 EventQL v0.4.0 beta;
