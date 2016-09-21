@@ -36,7 +36,7 @@ PartitionSnapshot::PartitionSnapshot(
     const PartitionState& _state,
     const String& _abs_path,
     const String& _rel_path,
-    ServerCfg* _server_cfg,
+    DatabaseContext* _server_cfg,
     size_t _nrecs) :
     PartitionSnapshot(_state, _abs_path, _rel_path, _server_cfg, _nrecs) {
   head_arena.reset(new PartitionArena(*table->schema()));
@@ -46,7 +46,7 @@ PartitionSnapshot::PartitionSnapshot(
     const PartitionState& _state,
     const String& _abs_path,
     const String& _rel_path,
-    ServerCfg* _server_cfg,
+    DatabaseContext* _server_cfg,
     size_t _nrecs) :
     key(
         _state.partition_key().data(),

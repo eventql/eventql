@@ -117,7 +117,7 @@ int evql_server_listen(evql_server_t* server, int kill_fd) {
     return 1;
   }
 
-  listener.run();
+  listener.run(kill_fd);
   return 0;
 }
 

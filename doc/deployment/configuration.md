@@ -80,6 +80,23 @@ The EventQL configuration options are grouped in three sections: `client`, `serv
     </td>
   </tr>
   <tr>
+    <td><b>cluster.allow_anonymous</b></td>
+    <td>true</td>
+    <td>
+      Allow anonymous users to connect to the cluster Note: this does not
+      circumvent client auth or any other ACLs. It merely controls if an
+      anonymous user is even allowed to connect, let alone execute an operation.
+    </td>
+  </tr>
+  <tr>
+    <td><b>cluster.allow_drop_table</b></td>
+    <td>false</td>
+    <td>
+      If false (the default), DROP TABLE is globally forbidden, regardless of
+      ACLs.
+    </td>
+  </tr>
+  <tr>
     <th colspan="3" align="left">server.*</th>
   </tr>
   <tr>
@@ -138,7 +155,7 @@ The EventQL configuration options are grouped in three sections: `client`, `serv
   </tr>
   <tr>
     <td><b>server.gc_mode</b></td>
-    <td>AUTOMATIC</td>
+    <td>MANUAL</td>
     <td></td>
   </tr>
   <tr>
@@ -187,6 +204,17 @@ The EventQL configuration options are grouped in three sections: `client`, `serv
     </td>
   </tr>
   <tr>
+    <td><b>server.http_io_timeout</b></td>
+    <td>1s</td>
+    <td>
+      Configures the HTTP I/O timeout. The timeout controls how long the
+      server will wait for the client to send the next byte of the request
+      while reading the http request as well as how long the server will wait
+      for the client to read the next byte of the response while writing the
+      response. (optional, unit: microseconds)
+    </td>
+  </tr>
+  <tr>
     <td><b>server.heartbeat_interval</b></td>
     <td>1s</td>
     <td>
@@ -205,6 +233,35 @@ The EventQL configuration options are grouped in three sections: `client`, `serv
     </td>
   </tr>
   <tr>
+    <td><b>server.query_max_concurrent_shards</b></td>
+    <td>256</td>
+    <td>
+      The default maximum number of shards to be executed in parallel/
+      concurrently for a single query. In other words this setting limits the
+      maximum parallelism for a query. You should consider increasing the value
+      if you're running on more than 64 machines.
+    </td>
+  </tr>
+  <tr>
+    <td><b>server.query_max_concurrent_shards_per_host</b></td>
+    <td>4</td>
+    <td>
+      The default maximum number of shards to be executed on any given host
+      for a single query.
+    </td>
+  </tr>
+  <tr>
+    <td><b>server.query_failed_shard_policy</b></td>
+    <td>tolerate</td>
+    <td>
+      The failed shard policy can either be "tolerate" or "error". If the
+      value is "tolerate" failed shards will be ignore/excluded from the query
+      result (the percentage of 'missing data' will be returned with each
+      result). If the value is "error" any failed shard will result in a query
+      error. Valid values: "tolerate", "error"
+    </td>
+  </tr>
+  <tr>
     <th colspan="3" align="left">client.*</th>
   </tr>
   <tr>
@@ -219,25 +276,38 @@ The EventQL configuration options are grouped in three sections: `client`, `serv
   </tr>
   <tr>
     <td><b>client.database</b></td>
-    <td>&mdash;</td>
+    <td></td>
     <td>The database that should be used for following queries (optional)</td>
   </tr>
   <tr>
     <td><b>client.user</b></td>
-    <td>&mdash;</td>
+    <td>$USER</td>
     <td>Username to use when connecting to server (optional)</td>
   </tr>
   <tr>
     <td><b>client.password</b></td>
-    <td>&mdash;</td>
+    <td></td>
     <td>Password to use when connecting to server (optional)</td>
   </tr>
   <tr>
     <td><b>client.auth_token</b></td>
-    <td>&mdash;</td>
+    <td></td>
     <td>Auth-Token to use when connecting to server (optional)</td>
   </tr>
+  <tr>
+    <td><b>client.timeout</b></td>
+    <td>5s</td>
+    <td>Timeout to use when connecting to server (unit is microseconds)</td>
+  </tr>
+  <tr>
+    <td><b>client.history_file</b></td>
+    <td>$HOME/.evql_history</td>
+    <td>Where to write the interactive shell history file</td>
+  </tr>
+  <tr>
+    <td><b>client.history_maxlen</b></td>
+    <td>1024</td>
+    <td>Maximum number of entries in the interactive shell history file</td>
+  </tr>
 </table>
-
-
 

@@ -58,6 +58,7 @@
 #include "eventql/db/compaction_worker.h"
 #include "eventql/db/garbage_collector.h"
 #include "eventql/db/leader.h"
+#include "eventql/db/monitor.h"
 #include "eventql/db/database.h"
 #include "eventql/transport/http/default_servlet.h"
 #include "eventql/sql/defaults.h"
@@ -121,6 +122,7 @@ protected:
   std::unique_ptr<SQLService> sql_service_;
   std::unique_ptr<MapReduceService> mapreduce_service_;
   std::unique_ptr<Leader> leader_;
+  std::unique_ptr<Monitor> monitor_;
   std::unique_ptr<DatabaseContext> database_context_;
   pthread_key_t local_session_;
 };
@@ -140,7 +142,15 @@ DatabaseImpl::~DatabaseImpl() {
 }
 
 ReturnCode DatabaseImpl::start() {
-  /* data directory */
+  /* check preconditions */
+  if (cfg_->getString("cluster.allowed_hosts").isEmpty()) {
+    return ReturnCode::error(
+        "EARG",
+        "cluster.allowed_hosts can't be empty "
+        "(no server would be allowed to join)");
+  }
+
+  /* data directories */
   auto server_datadir = cfg_->getString("server.datadir").get();
   if (!FileUtil::exists(server_datadir)) {
     return ReturnCode::error(
@@ -194,6 +204,11 @@ ReturnCode DatabaseImpl::start() {
     shutdown();
     return ReturnCode::error("EIO", e.what());
   }
+
+  /* database context */
+  database_context_.reset(new DatabaseContext());
+  database_context_->db_path = tsdb_dir;
+  database_context_->config = cfg_;
 
   /* file tracker */
   file_tracker_.reset(new FileTracker(trash_dir));
@@ -277,10 +292,10 @@ ReturnCode DatabaseImpl::start() {
   server_cfg_->file_tracker = file_tracker_.get();
 
   /* core */
-  partition_map_.reset(new PartitionMap(server_cfg_.get()));
+  partition_map_.reset(new PartitionMap(database_context_.get()));
 
   table_service_.reset(
-      new TableService(config_dir_.get(), partition_map_.get()));
+      new TableService(config_dir_.get(), partition_map_.get(), cfg_));
 
   replication_worker_.reset(
       new ReplicationWorker(partition_map_.get()));
@@ -352,22 +367,19 @@ ReturnCode DatabaseImpl::start() {
 
   /* database context */
   {
-    std::unique_ptr<DatabaseContext> dbctx(new DatabaseContext());
-    dbctx->config = cfg_;
-    dbctx->partition_map = partition_map_.get();
-    dbctx->file_tracker = file_tracker_.get();
-    dbctx->config_directory = config_dir_.get();
-    dbctx->replication_worker = replication_worker_.get();
-    dbctx->lsm_index_cache = server_cfg_->idx_cache.get();
-    dbctx->metadata_store = metadata_store_.get();
-    dbctx->internal_auth = internal_auth_.get();
-    dbctx->client_auth = client_auth_.get();
-    dbctx->sql_runtime = sql_.get();
-    dbctx->sql_service = sql_service_.get();
-    dbctx->table_service = table_service_.get();
-    dbctx->mapreduce_service = mapreduce_service_.get();
-    dbctx->metadata_service = metadata_service_.get();
-    database_context_ = std::move(dbctx);
+    database_context_->partition_map = partition_map_.get();
+    database_context_->file_tracker = file_tracker_.get();
+    database_context_->config_directory = config_dir_.get();
+    database_context_->replication_worker = replication_worker_.get();
+    database_context_->lsm_index_cache = server_cfg_->idx_cache.get();
+    database_context_->metadata_store = metadata_store_.get();
+    database_context_->internal_auth = internal_auth_.get();
+    database_context_->client_auth = client_auth_.get();
+    database_context_->sql_runtime = sql_.get();
+    database_context_->sql_service = sql_service_.get();
+    database_context_->table_service = table_service_.get();
+    database_context_->mapreduce_service = mapreduce_service_.get();
+    database_context_->metadata_service = metadata_service_.get();
   }
 
   /* open tables */
@@ -431,10 +443,17 @@ ReturnCode DatabaseImpl::start() {
     leader_->startLeaderThread();
   }
 
+  monitor_.reset(new Monitor(database_context_.get()));
+  monitor_->startMonitorThread();
+
   return ReturnCode::success();
 }
 
 void DatabaseImpl::shutdown() {
+  if (monitor_) {
+    monitor_->stopMonitorThread();
+  }
+
   if (leader_) {
     leader_->stopLeaderThread();
   }
@@ -455,6 +474,8 @@ void DatabaseImpl::shutdown() {
     config_dir_->stop();
   }
 
+  exit(0); // FIXME remove me once clean shutdown works
+  monitor_.reset(nullptr);
   leader_.reset(nullptr);
   mapreduce_service_.reset(nullptr);
   sql_service_.reset(nullptr);

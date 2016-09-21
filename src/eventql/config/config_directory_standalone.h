@@ -55,6 +55,10 @@ public:
 
   void updateServerConfig(ServerConfig config) override;
 
+  ReturnCode publishServerStats(ServerStats stats) override {
+    return ReturnCode::success();
+  }
+
   Vector<ServerConfig> listServers() const override;
 
   void setServerConfigChangeCallback(

@@ -1,4 +1,4 @@
-5.1 MapReduce
+6.1 MapReduce
 =============
 
 To enable the most complex queries and data processing pipelines, EventQL allows you

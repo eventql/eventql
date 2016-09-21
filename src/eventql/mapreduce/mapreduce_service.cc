@@ -241,8 +241,6 @@ Option<SHA1Hash> MapReduceService::reduceTables(
       input_tables.size(),
       output_id.toString());
 
-  std::random_shuffle(input_tables.begin(), input_tables.end());
-
   // FIXME MOST NAIVE IN MEMORY MERGE AHEAD !!
   size_t num_input_tables_read = 0;
   size_t num_bytes_read = 0;
@@ -468,11 +466,15 @@ bool MapReduceService::saveResultToTable(
 
     auto json = json::parseJSON(String((const char*) data, data_size));
 
-    tsdb_->insertRecord(
-      session->getEffectiveNamespace(),
-      table_name,
-      json.begin(),
-      json.end());
+    auto rc = tsdb_->insertRecord(
+        session->getEffectiveNamespace(),
+        table_name,
+        json.begin(),
+        json.end());
+
+    if (!rc.isSuccess()) {
+      RAISE(kRuntimeError, rc.getMessage());
+    }
 
     if (!cursor->next()) {
       break;

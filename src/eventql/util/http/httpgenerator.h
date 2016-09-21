@@ -34,7 +34,9 @@ namespace http {
 
 class HTTPGenerator {
 public:
+  static void generateHeaders(const HTTPRequest& req, OutputStream* os);
   static void generate(const HTTPRequest& req, OutputStream* os);
+  static void generateHeaders(const HTTPResponse& res, OutputStream* os);
   static void generate(const HTTPResponse& res, OutputStream* os);
 };
 

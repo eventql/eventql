@@ -43,7 +43,7 @@ namespace eventql {
 class PartitionMap {
 public:
 
-  PartitionMap(ServerCfg* cfg);
+  PartitionMap(DatabaseContext* cfg);
 
   void configureTable(
       const TableDefinition& config,
@@ -55,17 +55,13 @@ public:
       const String& tsdb_namespace,
       const String& table_name) const;
 
-  void listTables(
-      const String& tsdb_namespace,
-      Function<void (const TSDBTableInfo& table)> fn) const;
+  //void listTables(
+  //    const String& tsdb_namespace,
+  //    Function<void (const TSDBTableInfo& table)> fn) const;
 
-  void listTablesReverse(
-      const String& tsdb_namespace,
-      Function<void (const TSDBTableInfo& table)> fn) const;
-
-  Option<TSDBTableInfo> tableInfo(
-      const String& tsdb_namespace,
-      const String& table_key) const;
+  //void listTablesReverse(
+  //    const String& tsdb_namespace,
+  //    Function<void (const TSDBTableInfo& table)> fn) const;
 
   Option<RefPtr<Partition>> findPartition(
       const String& tsdb_namespace,
@@ -102,13 +98,21 @@ public:
    * before calling this method. However there is no way to ensure that no
    * intermittent stores happen in the partition (in between checking the
    * precondition and calling this method). So the method returns a boolean
-   * indicating success or failure. 
+   * indicating success or failure.
    *
    * The method will return true iff the partition was succesfully dropped. A
    * false return value indicates that one of the two conditions above weren't
    * met.
    */
   bool dropLocalPartition(
+      const String& tsdb_namespace,
+      const String& table_name,
+      const SHA1Hash& partition_key);
+
+  /**
+   * Drop a partition that was deleted using DROP TABLE
+   */
+  void dropPartition(
       const String& tsdb_namespace,
       const String& table_name,
       const SHA1Hash& partition_key);
@@ -121,11 +125,10 @@ protected:
 
   void loadPartitions(const Vector<PartitionKey>& partitions);
 
-  ServerCfg* cfg_;
+  DatabaseContext* cfg_;
   RefPtr<mdb::MDB> db_;
 
   mutable std::mutex mutex_;
-  ConfigDirectory* cdir_;
   OrderedMap<String, RefPtr<Table>> tables_;
   OrderedMap<String, ScopedPtr<LazyPartition>> partitions_;
   Vector<PartitionChangeCallbackFn> callbacks_;

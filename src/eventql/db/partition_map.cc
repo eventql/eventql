@@ -46,10 +46,9 @@ static mdb::MDBOptions tsdb_mdb_opts() {
 };
 
 PartitionMap::PartitionMap(
-    ServerCfg* cfg) :
+    DatabaseContext* cfg) :
     cfg_(cfg),
-    db_(mdb::MDB::open(cfg_->db_path, tsdb_mdb_opts())),
-    cdir_(cfg->config_directory) {}
+    db_(mdb::MDB::open(cfg_->db_path, tsdb_mdb_opts())) {}
 
 Option<RefPtr<Table>> PartitionMap::findTable(
     const String& stream_ns,
@@ -252,7 +251,7 @@ RefPtr<Partition> PartitionMap::findOrCreatePartition(
         partition_key.size());
     discovery_request.set_lookup_by_id(true);
 
-    MetadataCoordinator coordinator(cdir_);
+    MetadataCoordinator coordinator(cfg_->config_directory);
     PartitionDiscoveryResponse discovery_response;
     auto rc = coordinator.discoverPartition(
         discovery_request,
@@ -347,37 +346,37 @@ Option<RefPtr<Partition>> PartitionMap::findPartition(
   }
 }
 
-void PartitionMap::listTables(
-    const String& tsdb_namespace,
-    Function<void (const TSDBTableInfo& table)> fn) const {
-  for (const auto& tbl : tables_) {
-    if (tbl.second->tsdbNamespace() != tsdb_namespace) {
-      continue;
-    }
-
-    TSDBTableInfo ti;
-    ti.table_name = tbl.second->name();
-    ti.config = tbl.second->config();
-    ti.schema = tbl.second->schema();
-    fn(ti);
-  }
-}
-
-void PartitionMap::listTablesReverse(
-    const String& tsdb_namespace,
-    Function<void (const TSDBTableInfo& table)> fn) const {
-  for (auto cur = tables_.rbegin(); cur != tables_.rend(); ++cur) {
-    if (cur->second->tsdbNamespace() != tsdb_namespace) {
-      continue;
-    }
-
-    TSDBTableInfo ti;
-    ti.table_name = cur->second->name();
-    ti.config = cur->second->config();
-    ti.schema = cur->second->schema();
-    fn(ti);
-  }
-}
+//void PartitionMap::listTables(
+//    const String& tsdb_namespace,
+//    Function<void (const TSDBTableInfo& table)> fn) const {
+//  for (const auto& tbl : tables_) {
+//    if (tbl.second->tsdbNamespace() != tsdb_namespace) {
+//      continue;
+//    }
+//
+//    TSDBTableInfo ti;
+//    ti.table_name = tbl.second->name();
+//    ti.config = tbl.second->config();
+//    ti.schema = tbl.second->schema();
+//    fn(ti);
+//  }
+//}
+//
+//void PartitionMap::listTablesReverse(
+//    const String& tsdb_namespace,
+//    Function<void (const TSDBTableInfo& table)> fn) const {
+//  for (auto cur = tables_.rbegin(); cur != tables_.rend(); ++cur) {
+//    if (cur->second->tsdbNamespace() != tsdb_namespace) {
+//      continue;
+//    }
+//
+//    TSDBTableInfo ti;
+//    ti.table_name = cur->second->name();
+//    ti.config = cur->second->config();
+//    ti.schema = cur->second->schema();
+//    fn(ti);
+//  }
+//}
 
 bool PartitionMap::dropLocalPartition(
     const String& tsdb_namespace,
@@ -453,19 +452,69 @@ bool PartitionMap::dropLocalPartition(
   return true;
 }
 
-Option<TSDBTableInfo> PartitionMap::tableInfo(
-      const String& tsdb_namespace,
-      const String& table_key) const {
-  auto table = findTable(tsdb_namespace, table_key);
-  if (table.isEmpty()) {
-    return None<TSDBTableInfo>();
+void PartitionMap::dropPartition(
+    const String& tsdb_namespace,
+    const String& table_name,
+    const SHA1Hash& partition_key) {
+  auto partition_opt = findPartition(tsdb_namespace, table_name, partition_key);
+  if (partition_opt.isEmpty()) {
+    RAISE(kNotFoundError, "partition not found");
   }
 
-  TSDBTableInfo ti;
-  ti.table_name = table.get()->name();
-  ti.config = table.get()->config();
-  ti.schema = table.get()->schema();
-  return Some(ti);
+  auto table_config = cfg_->config_directory->getTableConfig(
+      tsdb_namespace,
+      table_name);
+
+  auto partition = partition_opt.get();
+  auto partition_writer = partition->getWriter();
+
+  /* lock partition */
+  partition_writer->lock();
+
+  /* check preconditions */
+  auto partition_gen = partition->getSnapshot()->state.table_generation();
+  if (partition_gen >= table_config.generation()) {
+    partition_writer->unlock();
+    return;
+  }
+
+  /* start deletion */
+  logInfo(
+      "evqld",
+      "Dropping partition $0/$1/$2",
+      tsdb_namespace,
+      table_name,
+      partition_key.toString());
+
+  /* freeze partition and unlock waiting writers (they will fail) */
+  partition_writer->freeze();
+  partition_writer->unlock();
+
+  /* prepare access keys */
+  auto db_key = tsdb_namespace + "~";
+  db_key.append((char*) partition_key.data(), partition_key.size());
+
+  auto mem_key = tsdb_namespace + "~" + table_name + "~";
+  mem_key.append((char*) partition_key.data(), partition_key.size());
+
+  /* grab the main lock */
+  std::unique_lock<std::mutex> lk(mutex_);
+
+  /* delete from in memory partition map */
+  auto iter = partitions_.find(mem_key);
+  if (iter == partitions_.end()) {
+    /* somebody else already deleted this partition */
+    return;
+  } else {
+    partitions_.erase(iter);
+  }
+
+  /* delete from on disk partition map */
+  auto txn = db_->startTransaction(false);
+  txn->del(db_key);
+  txn->commit();
+
+  return;
 }
 
 void PartitionMap::subscribeToPartitionChanges(PartitionChangeCallbackFn fn) {

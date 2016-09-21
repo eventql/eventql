@@ -32,7 +32,7 @@
 namespace eventql {
 
 enum class GarbageCollectorMode {
-  DISABLED, MANUAL, AUTOMATIC
+  DISABLED, MANUAL
 };
 
 String garbageCollectorModeToString(GarbageCollectorMode mode);

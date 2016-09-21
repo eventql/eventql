@@ -2,7 +2,7 @@
 ## In general, the safest way to proceed is to run ./autogen.sh
 
 AC_PREREQ(2.59)
-AC_INIT([EventQL],[0.4.0-dev],[authors@eventql.io],[eventql])
+AC_INIT([EventQL],[0.5.0-dev],[authors@eventql.io],[eventql])
 AM_INIT_AUTOMAKE([foreign subdir-objects serial-tests])
 AM_MAINTAINER_MODE([enable])
 AC_CONFIG_SRCDIR([configure.ac])

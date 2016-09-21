@@ -61,7 +61,18 @@ KeyRange TSDBTableProvider::findKeyRange(
 
     String val;
     try {
-      val = encodePartitionKey(keyspace, c.value.getString());
+      switch (c.value.getType()) {
+        case SQL_STRING:
+        case SQL_INTEGER:
+        case SQL_FLOAT:
+          val = encodePartitionKey(keyspace, c.value.getString());
+          break;
+        case SQL_TIMESTAMP:
+          val = encodePartitionKey(keyspace, c.value.toInteger().getString());
+          break;
+        default:
+          continue;
+      }
     } catch (const StandardException& e) {
       continue;
     }
@@ -435,6 +446,10 @@ Status TSDBTableProvider::alterTable(const csql::AlterTableNode& alter_table) {
       tbl_operations);
 }
 
+Status TSDBTableProvider::dropTable(const String& table_name) {
+  return table_service_->dropTable(tsdb_namespace_, table_name);
+}
+
 Status TSDBTableProvider::insertRecord(
     const String& table_name,
     Vector<Pair<String, csql::SValue>> data) {
@@ -463,71 +478,61 @@ Status TSDBTableProvider::insertRecord(
     }
   }
 
-  try {
-    table_service_->insertRecord(
-        tsdb_namespace_,
-        table_name,
-        *msg);
-
-  } catch (const Exception& e) {
-    return Status(eRuntimeError, e.getMessage());
-  }
-
-  return Status::success();
+  return table_service_->insertRecord(
+      tsdb_namespace_,
+      table_name,
+      *msg);
 }
 
 Status TSDBTableProvider::insertRecord(
     const String& table_name,
     const String& json_str) {
-
-  auto json = json::parseJSON(json_str);
+  json::JSONObject json;
   try {
-    table_service_->insertRecord(
-        tsdb_namespace_,
-        table_name,
-        json.begin(),
-        json.end());
-  } catch (const Exception& e) {
-    return Status(eRuntimeError, e.getMessage());
+    json = json::parseJSON(json_str);
+  } catch (const std::exception& e) {
+    return ReturnCode::exception(e);
   }
 
-  return Status::success();
+  return table_service_->insertRecord(
+      tsdb_namespace_,
+      table_name,
+      json.begin(),
+      json.end());
 }
 
 void TSDBTableProvider::listTables(
     Function<void (const csql::TableInfo& table)> fn) const {
-  partition_map_->listTables(
+  table_service_->listTables(
       tsdb_namespace_,
-      [this, fn] (const TSDBTableInfo& table) {
-    fn(tableInfoForTable(table));
-  });
+      [this, fn] (const TableDefinition& table) {
+        fn(tableInfoForTable(table));
+      });
 }
 
 Option<csql::TableInfo> TSDBTableProvider::describe(
     const String& table_name) const {
   auto table_ref = TSDBTableRef::parse(table_name);
 
-  auto table = partition_map_->tableInfo(tsdb_namespace_, table_ref.table_key);
-  if (table.isEmpty()) {
+  auto table = cdir_->getTableConfig(tsdb_namespace_, table_ref.table_key);
+
+  if (table.deleted()) {
     return None<csql::TableInfo>();
   } else {
-    auto tblinfo = tableInfoForTable(table.get());
+    auto tblinfo = tableInfoForTable(table);
     tblinfo.table_name = table_name;
     return Some(tblinfo);
   }
 }
 
 csql::TableInfo TSDBTableProvider::tableInfoForTable(
-    const TSDBTableInfo& table) const {
+    const TableDefinition& table) const {
   csql::TableInfo ti;
-  ti.table_name = table.table_name;
+  ti.table_name = table.table_name();
 
-  for (const auto& tag : table.config.tags()) {
-    ti.tags.insert(tag);
-  }
-
-  auto pkey = table.config.config().primary_key();
-  for (const auto& col : table.schema->columns()) {
+  auto schema = msg::MessageSchema::decode(table.config().schema());
+  auto pkey = table.config().primary_key();
+  for (const auto& col : schema->columns()) {
     csql::ColumnInfo ci;
     ci.column_name = col.first;
     ci.type = col.second.typeName();
@@ -535,6 +540,17 @@ csql::TableInfo TSDBTableProvider::tableInfoForTable(
     ci.is_nullable = col.second.optional;
     ci.is_primary_key = std::find(
       pkey.begin(), pkey.end(), col.first) != pkey.end();
+
+    switch (col.second.encoding) {
+      case msg::EncodingHint::BITPACK:
+        ci.encoding = "BITPACK";
+        break;
+      case msg::EncodingHint::LEB128:
+        ci.encoding = "LEB128";
+        break;
+      default:
+        ci.encoding = "NONE";
+    }
 
     ti.columns.emplace_back(ci);
   }
@@ -562,6 +578,20 @@ RefPtr<csql::ValueExpressionNode> TSDBTableProvider::simplifyWhereExpression(
       continue;
     }
 
+    std::string c_val;
+    switch (c.value.getType()) {
+      case SQL_STRING:
+      case SQL_INTEGER:
+      case SQL_FLOAT:
+        c_val = encodePartitionKey(pkeyspace, c.value.getString());
+        break;
+      case SQL_TIMESTAMP:
+        c_val = encodePartitionKey(pkeyspace, c.value.toInteger().getString());
+        break;
+      default:
+        continue;
+    }
+
     switch (c.type) {
 
       case csql::ScanConstraintType::EQUAL_TO:
@@ -571,10 +601,7 @@ RefPtr<csql::ValueExpressionNode> TSDBTableProvider::simplifyWhereExpression(
       case csql::ScanConstraintType::LESS_THAN:
       case csql::ScanConstraintType::LESS_THAN_OR_EQUAL_TO:
         if (keyrange_end.size() > 0 &&
-            comparePartitionKeys(
-                pkeyspace,
-                encodePartitionKey(pkeyspace, c.value.getString()),
-                keyrange_end) >= 0) {
+            comparePartitionKeys(pkeyspace, c_val, keyrange_end) >= 0) {
           break;
         } else {
           continue;
@@ -583,10 +610,7 @@ RefPtr<csql::ValueExpressionNode> TSDBTableProvider::simplifyWhereExpression(
       case csql::ScanConstraintType::GREATER_THAN:
       case csql::ScanConstraintType::GREATER_THAN_OR_EQUAL_TO:
         if (keyrange_begin.size() > 0 &&
-            comparePartitionKeys(
-                pkeyspace,
-                encodePartitionKey(pkeyspace, c.value.getString()),
-                keyrange_begin) <= 0) {
+            comparePartitionKeys( pkeyspace, c_val, keyrange_begin) <= 0) {
           break;
         } else {
           continue;

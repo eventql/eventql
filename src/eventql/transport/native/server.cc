@@ -29,7 +29,6 @@
 #include "eventql/util/util/binarymessagereader.h"
 #include "eventql/server/session.h"
 #include "eventql/server/sql_service.h"
-#include "eventql/server/rpc/partial_aggregate.h"
 #include "eventql/sql/runtime/runtime.h"
 #include "eventql/auth/client_auth.h"
 #include <string.h>
@@ -227,6 +226,18 @@ ReturnCode Server::performOperation(
       return performOperation_QUERY(db_, conn, payload);
     case EVQL_OP_QUERY_PARTIALAGGR:
       return performOperation_QUERY_PARTIALAGGR(
+          db_,
+          conn,
+          payload.data(),
+          payload.size());
+    case EVQL_OP_QUERY_REMOTE:
+      return performOperation_QUERY_REMOTE(
+          db_,
+          conn,
+          payload.data(),
+          payload.size());
+    case EVQL_OP_REPL_INSERT:
+      return performOperation_REPL_INSERT(
           db_,
           conn,
           payload.data(),

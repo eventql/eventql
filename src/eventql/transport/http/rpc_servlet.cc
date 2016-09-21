@@ -24,6 +24,7 @@
 #include "eventql/eventql.h"
 #include "eventql/util/util/binarymessagewriter.h"
 #include "eventql/transport/http/rpc_servlet.h"
+#include "eventql/transport/http/http_auth.h"
 #include "eventql/db/record_envelope.pb.h"
 #include "eventql/util/json/json.h"
 #include <eventql/util/wallclock.h>
@@ -35,6 +36,9 @@
 #include <eventql/util/fnv.h>
 #include <eventql/io/sstable/sstablereader.h>
 #include "eventql/server/session.h"
+#include "eventql/server/sql_service.h"
+#include "eventql/server/sql/codec/binary_codec.h"
+#include "eventql/sql/runtime/runtime.h"
 
 namespace eventql {
 
@@ -47,6 +51,9 @@ void RPCServlet::handleHTTPRequest(
   URI uri(req.uri());
 
   logDebug("eventql", "HTTP Request: $0 $1", req.method(), req.uri());
+
+  auto session = db_->getSession();
+  auto dbctx = session->getDatabaseContext();
 
   http::HTTPResponse res;
   res.populateFromRequest(req);
@@ -62,14 +69,24 @@ void RPCServlet::handleHTTPRequest(
     return;
   }
 
-  try {
-    if (uri.path() == "/tsdb/insert") {
-      req_stream->readBody();
-      insertRecords(&req, &res, &uri);
-      res_stream->writeResponse(res);
-      return;
-    }
+  auto auth_rc = dbctx->internal_auth->verifyRequest(session, req);
+  if (!auth_rc.isSuccess()) {
+    auth_rc = HTTPAuth::authenticateRequest(
+        session,
+        dbctx->client_auth,
+        req);
+  }
 
+  //if (!auth_rc.isSuccess()) {
+  //  res.setStatus(http::kStatusUnauthorized);
+  //  res.addHeader("WWW-Authenticate", "Token");
+  //  res.addHeader("Content-Type", "text/plain; charset=utf-8");
+  //  res.addBody(auth_rc.message());
+  //  res_stream->writeResponse(res);
+  //  return;
+  //}
+
+  try {
     if (uri.path() == "/tsdb/replicate") {
       req_stream->readBody();
       replicateRecords(&req, &res, &uri);
@@ -158,16 +175,6 @@ void RPCServlet::handleHTTPRequest(
   }
 
   res_stream->finishResponse();
-}
-
-void RPCServlet::insertRecords(
-    const http::HTTPRequest* req,
-    http::HTTPResponse* res,
-    URI* uri) {
-  //auto record_list = msg::decode<RecordEnvelopeList>(req->body());
-  //dbctx->table_service->insertRecords(record_list);
-  res->addBody("deprecated call");
-  res->setStatus(http::kStatusInternalServerError);
 }
 
 void RPCServlet::compactPartition(
@@ -280,13 +287,19 @@ void RPCServlet::replicateRecords(
   auto body_is = req->getBodyInputStream();
   records.decode(body_is.get());
 
-  dbctx->table_service->insertReplicatedRecords(
+  auto rc = dbctx->table_service->insertReplicatedRecords(
       tsdb_namespace,
       table_name,
       SHA1Hash::fromHexString(partition_key),
       records);
 
-  res->setStatus(http::kStatusCreated);
+  if (rc.isSuccess()) {
+    res->setStatus(http::kStatusCreated);
+  } else {
+    res->setStatus(http::kStatusInternalServerError);
+    res->addBody("ERROR: " + rc.getMessage());
+    return;
+  }
 }
 
 void RPCServlet::createMetadataFile(

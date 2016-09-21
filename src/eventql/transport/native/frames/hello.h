@@ -36,6 +36,8 @@ namespace native_transport {
 class HelloFrame {
 public:
 
+  static const uint16_t kOpcode = EVQL_OP_HELLO;
+
   HelloFrame();
 
   void setIsInternal(bool is_internal);
@@ -55,7 +57,7 @@ public:
   bool hasDatabase() const;
 
   ReturnCode readFrom(InputStream* is);
-  void writeTo(OutputStream* os);
+  void writeTo(OutputStream* os) const;
 
   void clear();
 

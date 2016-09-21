@@ -68,6 +68,8 @@ public:
 
   virtual void updateServerConfig(ServerConfig config) = 0;
 
+  virtual ReturnCode publishServerStats(ServerStats stats) = 0;
+
   virtual Vector<ServerConfig> listServers() const = 0;
 
   virtual void setServerConfigChangeCallback(

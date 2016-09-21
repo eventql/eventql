@@ -37,7 +37,7 @@ Rebalance::Rebalance(
     metadata_replication_factor_(3) {}
 
 Status Rebalance::runOnce() {
-  logInfo("evqld", "Rebalancing cluster...");
+  logDebug("evqld", "Rebalancing cluster...");
 
   all_servers_.clear();
   for (const auto& s : cdir_->listServers()) {
@@ -72,7 +72,7 @@ Status Rebalance::runOnce() {
 }
 
 Status Rebalance::rebalanceTable(TableDefinition tbl_cfg) {
-  logInfo(
+  logDebug(
       "evqld",
       "Rebalancing table '$0/$1'",
       tbl_cfg.customer(),
@@ -147,11 +147,14 @@ Status Rebalance::rebalanceTable(TableDefinition tbl_cfg) {
     }
 
     if (nservers < metadata_replication_factor_) {
-      auto new_metadata_servers = current_metadata_servers;
+      std::vector<std::string> new_metadata_servers;
       {
         auto rc = server_alloc.allocateServers(
+            ServerAllocator::BEST_EFFORT,
             metadata_replication_factor_ - nservers,
+            current_metadata_servers,
             &new_metadata_servers);
+
         if (!rc.isSuccess()) {
           return rc;
         }
@@ -245,11 +248,14 @@ Status Rebalance::rebalanceTable(TableDefinition tbl_cfg) {
       }
 
       if (cur_servers.size() < replication_factor_) {
-        auto new_servers = cur_servers;
+        std::vector<std::string> new_servers;
         {
           auto rc = server_alloc.allocateServers(
+              ServerAllocator::BEST_EFFORT,
               replication_factor_ - cur_servers.size(),
+              cur_servers,
               &new_servers);
+
           if (!rc.isSuccess()) {
             return rc;
           }
@@ -262,7 +268,7 @@ Status Rebalance::rebalanceTable(TableDefinition tbl_cfg) {
 
           logInfo(
               "evqld",
-              "Joining new servers to table '$0/$1/$2': $3",
+              "Joining new server to table '$0/$1/$2': $3",
               tbl_cfg.customer(),
               tbl_cfg.table_name(),
               e.partition_id,

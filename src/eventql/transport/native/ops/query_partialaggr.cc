@@ -43,6 +43,14 @@ ReturnCode performOperation_QUERY_PARTIALAGGR(
     NativeConnection* conn,
     const char* payload,
     size_t payload_size) {
+  auto session = database->getSession();
+  auto dbctx = session->getDatabaseContext();
+
+  /* check internal */
+  if (!session->isInternal()) {
+    return conn->sendErrorFrame("internal method called");
+  }
+
   QueryPartialAggrFrame frame;
   {
     auto rc = frame.parseFrom(payload, payload_size);
@@ -51,8 +59,6 @@ ReturnCode performOperation_QUERY_PARTIALAGGR(
     }
   }
 
-  auto session = database->getSession();
-  auto dbctx = session->getDatabaseContext();
   /* switch database */
   {
     auto rc = dbctx->client_auth->changeNamespace(session, frame.getDatabase());

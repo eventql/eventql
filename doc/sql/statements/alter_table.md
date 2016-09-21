@@ -1,4 +1,4 @@
-4.2.5 ALTER TABLE
+5.2.5 ALTER TABLE
 =================
 
     ALTER TABLE table_name

@@ -43,11 +43,6 @@ public:
 
 protected:
 
-  void insertRecords(
-      const http::HTTPRequest* req,
-      http::HTTPResponse* res,
-      URI* uri);
-
   void replicateRecords(
       const http::HTTPRequest* req,
       http::HTTPResponse* res,
@@ -99,7 +94,6 @@ protected:
       http::HTTPResponse* res);
 
   Database* db_;
-  Random rnd_;
 };
 
 }

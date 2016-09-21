@@ -10,12 +10,8 @@ Please note, that fields that are part of the primary key can't be deleted.
 ###Resource Information
 <table class='http_api'>
   <tr>
-    <td>Authentication required?</td>
-    <td>Yes</td>
-  </tr>
-  <tr>
     <td>Content-Type</td>
-    <td>text/plain</td>
+    <td>application/json</td>
   </tr>
 </table>
 
@@ -29,14 +25,22 @@ Please note, that fields that are part of the primary key can't be deleted.
     <td>field&#95;name</td>
     <td>The name of the field to remove.</td>
   </tr>
+  <tr>
+    <td>database (optional)</td>
+    <td>The name of the database.
+  </tr>
 </table>
 
 ###Example Request
 
-        >> POST /api/v1/tables/remove_field?table=my_sensor_table&field_name=sensor_location HTTP/1.1
-        >> Authorization: Token <authtoken>
-        >> Content-Type: text/plain
+        >> POST /api/v1/tables/remove_field HTTP/1.1
+        >> Content-Type: application/json
         >> Content-Length: ...
+        >>
+        >> {
+        >>   "table_name": "my_sensor_table",
+        >>   "field_name": "location"
+        >> }
 
 
 ###Example Response

@@ -186,7 +186,13 @@ bool CSTableScan::fetchNext(SValue* out, int out_len) {
   }
 
   while (cur_pos_ < num_records_) {
-    ++rows_scanned_;
+    if (++rows_scanned_ % 8192 == 0) {
+      auto rc = txn_->triggerHeartbeat();
+      if (!rc.isSuccess()) {
+        RAISE(kRuntimeError, rc.getMessage());
+      }
+    }
+
     uint64_t next_level = 0;
 
     if (cur_fetch_level_ == 0) {

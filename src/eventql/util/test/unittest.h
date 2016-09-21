@@ -105,13 +105,12 @@ void EXPECT_EQ(T1 left, T2 right) {
       bool raised = false; \
       try { \
         L(); \
-      } catch (Exception e) { \
+      } catch (const std::exception& e) { \
         raised = true; \
-        auto msg = e.getMessage().c_str(); \
-        if (strcmp(msg, E) != 0) { \
+        if (strcmp(e.what(), E) != 0) { \
           RAISE( \
               kExpectationFailed, \
-              "excepted exception '%s' but got '%s'", E, msg); \
+              "excepted exception '%s' but got '%s'", E, e.what()); \
         } \
       } \
       if (!raised) { \

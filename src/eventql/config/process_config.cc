@@ -42,12 +42,6 @@ ProcessConfig::ProcessConfig(
       HashMap<String, String> properties) :
       properties_(properties) {}
 
-const char* ProcessConfig::getCString(
-    const String& section,
-    const String& key) const {
-  return getCString(StringUtil::format("$0.$1", section, key));
-}
-
 const char* ProcessConfig::getCString(const String& key) const {
   auto p = properties_.find(key);
   if (p != properties_.end()) {
@@ -57,12 +51,6 @@ const char* ProcessConfig::getCString(const String& key) const {
   return nullptr;
 }
 
-Option<String> ProcessConfig::getString(
-    const String& section,
-    const String& key) const {
-  return getString(StringUtil::format("$0.$1", section, key));
-}
-
 Option<String> ProcessConfig::getString(const String& key) const {
   auto p = properties_.find(key);
   if (p != properties_.end()) {
@@ -70,12 +58,6 @@ Option<String> ProcessConfig::getString(const String& key) const {
   }
 
   return None<String>();
-}
-
-Option<int64_t> ProcessConfig::getInt(
-    const String& section,
-    const String& key) const {
-  return getInt(StringUtil::format("$0.$1", section, key));
 }
 
 Option<int64_t> ProcessConfig::getInt(const String& key) const {
@@ -91,12 +73,6 @@ Option<int64_t> ProcessConfig::getInt(const String& key) const {
   }
 
   return None<int64_t>();
-}
-
-bool ProcessConfig::getBool(
-    const String& section,
-    const String& key) const {
-  return getBool(StringUtil::format("$0.$1", section, key));
 }
 
 bool ProcessConfig::getBool(const String& key) const {

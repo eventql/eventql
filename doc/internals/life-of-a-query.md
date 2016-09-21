@@ -1,5 +1,5 @@
-8.3 Life of a Query
-===================
+9.2.5 Life of a Query
+=====================
 
 #### Step 1: Tokenizing (Query String -> Tokens)
 A `Tokenizer` splits the query string into tokens (e.g TOKEN_LPAREN and TOKEN_IDENTIFIER)

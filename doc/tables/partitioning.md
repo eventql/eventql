@@ -2,7 +2,7 @@
 ================
 
 Tables in EventQL are internally split into many partitions that can be distributed
-over many machines and queried in parallel, allowing you to horizontally scale
+among many machines and queried in parallel, allowing you to horizontally scale
 tables far beyond what a single machine could handle. This concept is sometimes referred
 to as "massively parallel database architecture".
 
@@ -19,7 +19,7 @@ primary key value (i.e. the same value in all columns that are included in the
 primary key) in the same table.
 
 Two consecutive writes with the same primary key value are treated as an insert
-followed by an update 0 that is, every insert with a primary key value equal to
+followed by an update - that is, every insert with a primary key value equal to
 that of another row that already exists will replace that original row.
 
 #### Partitioning Key
@@ -61,12 +61,63 @@ at the same time, so we also include the sensor_id in the primary key. Now we
 can have one measurement per sensor_id and time combination.
 
 
-## No secondary indexes
+## Finite Partitions & Timeseries Data
 
-EventQL does not support secondary indexes. Lookup by partition/primary key is
-the only optimized operation. That means every query that is not restricted on
-the primary key requires a full table scan. Note that a full table scan is
-parallelized and distributed across many machines so it's still very fast.
+The partitioning of a table is fully dynamic. EventQL will dynamically
+re-partition the table as you add more data to keep each partition in the 500MB
+to 1GB range. So there is no need to specify a maximum/total number of shards at
+creation time.
+
+This is good because you don't need to know how many rows with which
+primary key distribution you'll eventually insert from the get-go. With
+dynamic partitioning, you just create a table and start inserting data and the
+partitioning will adapt to the distribution of the data over time.
+
+The way EventQL achieves this is in principle by starting each table with
+a single partition and then subdiving ("splitting") the partition(s) into equal
+parts as they get too large.
+
+However, you can optionally give EventQL an "educated guess" about the size
+of each partition that you expect. The configuration option is called
+`partition_size_hint` and setting it allows an optimization to kick in that
+reduces the number of splits performed and therefore the total network bandwith.
+
+You can use the partition size hint optimization on tables that have a partition
+key of type uint64 or datetime. In the datetime case, the partition size hint
+represents a time window/duration in microseconds. You should ideally choose
+this value so that roughly 500MB-1GB of new data will arrive in the time window.
+
+    $partition_size_hint = (750MB / $new_data_per_day) * 86400000000
+
+So, for example, if you expect around 10GB of data a day, 2 hours would be a
+good value. If you expect 1000GB of new data a day, 1 minute is a good value.
+If you expect 10TB of new data a day, set the partition size hint to 10 seconds.
+
+
+Note that EventQL will still dynamically split and re-partition the table if it
+becomes necessary. You can also update the partition size hint at any time and
+it won't cause trouble if your estimation is off.
+
+For high-volume timeseries data, it is _highly recommended_ to set the partition
+size hint.
+
+To set the partition size hint when creating a table using SQL you can use
+this syntax. Please refer to the "Creating Tables" and "HTTP API Reference"
+pages for detailed information.
+
+    CREATE TABLE high_volume_logging_data (
+      time            DATETIME,
+      event_id        STRING,
+      value           DOUBLE,
+      PRIMARY KEY(time, event_id)
+    ) WITH partition_size_hint = 600000000; -- 10 minutes ~ 100GB/day
+
+## Secondary indexes
+
+EventQL does not currently support secondary indexes. Lookup by partition/primary
+key is the only optimized operation. That means every query that is not restricted
+on the primary key requires a full table scan. Note that a full table scan is
+parallelized and distributed among many machines so it's still very fast.
 
 Also, not supporting secondary indexes does _not_ imply that you can't filter by
 anything other than the primary key like in some key value stores. You can. All
@@ -76,6 +127,3 @@ If you need to have fast access to _individual_ records by _more than one_ dimen
 you have to denormalize and insert the record multiple times in different tables
 that are indexed in those respective dimensions.
 
-However, most users probably won't need this. Access by a single primary key is
-always fast and if all you care about are aggregate queries for analytics use cases
-and retrieving and updating invdividual events by id, you're good to go.

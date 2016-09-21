@@ -166,13 +166,13 @@
             visible_in_menu: true
             visible_in_toc: true
             source: "tables/modifying-tables.md"
-          #-
-          #  url: "/tables/deleting-tables"
-          #  title: "Deleting Tables"
-          #  type: page
-          #  visible_in_menu: true
-          #  visible_in_toc: true
-          #  source: "tables/deleting-tables.md"
+          -
+            url: "/tables/deleting-tables"
+            title: "Deleting Tables"
+            type: page
+            visible_in_menu: true
+            visible_in_toc: true
+            source: "tables/deleting-tables.md"
           -
             url: "/tables/inserting-rows"
             title: "Inserting Rows"
@@ -194,6 +194,37 @@
           #  visible_in_menu: true
           #  visible_in_toc: true
           #  source: "tables/deleting-rows.md"
+          -
+            url: "/tables/table-options"
+            title: "Table Options"
+            type: page
+            visible_in_menu: true
+            visible_in_toc: true
+            source: "tables/table-options.md"
+          #-
+          #  url: "/tables/encoding-options"
+          #  title: "Encoding Options"
+          #  type: page
+          #  visible_in_menu: true
+          #  visible_in_toc: true
+          #  source: "tables/encoding-options.md"
+    -
+      url: "/collecting-data/"
+      title: "Collecting Data"
+      type: redirect
+      visible_in_menu: true
+      visible_in_toc: true
+      location: "/collecting-data/high-volume-timeseries-logs"
+      children:
+        -
+          url: "/collecting-data/high-volume-timeseries-logs"
+          title: "Timeseries & Logs"
+          type: page
+          visible_in_menu: true
+          visible_in_toc: true
+          source: "/collecting-data/high-volume-timeseries.md"
+          files:
+            "example_timeseries_chart.png": "/collecting-data/high-volume-timeseries_example_timeseries_chart.png"
     -
       url: "/sql"
       title: "SQL Queries"
@@ -590,6 +621,13 @@
             visible_in_toc: true
             source: "/sql/statements/alter_table.md"
           -
+            url: "/sql/statements/drop-table"
+            title: "DROP TABLE"
+            type: page
+            visible_in_menu: true
+            visible_in_toc: true
+            source: "/sql/statements/drop_table.md"
+          -
             url: "/sql/statements/describe"
             title: "DESCRIBE"
             type: page
@@ -636,8 +674,8 @@
           source: "/api/http/index.html"
           children:
             -
-              url: "/api/http/tables/create_table"
-              title: "POST tables/create_table"
+              url: "/api/http/tables/create"
+              title: "POST tables/create"
               type: page
               visible_in_menu: false
               visible_in_toc: false
@@ -664,40 +702,33 @@
               visible_in_toc: false
               source: "/api/http/tables/insert.md"
             -
-              url: "/api/http/tables/table"
-              title: "GET tables/[table]"
+              url: "/api/http/tables/drop"
+              title: "POST tables/drop"
               type: page
               visible_in_menu: false
               visible_in_toc: false
-              source: "/api/http/tables/table.md"
+              source: "/api/http/tables/drop.md"
             -
-              url: "/api/http/tables/"
-              title: "GET tables"
+              url: "/api/http/tables/describe"
+              title: "POST tables/describe"
               type: page
               visible_in_menu: false
               visible_in_toc: false
-              source: "/api/http/tables/tables.md"
+              source: "/api/http/tables/describe.md"
+            -
+              url: "/api/http/tables/list"
+              title: "POST tables/list"
+              type: page
+              visible_in_menu: false
+              visible_in_toc: false
+              source: "/api/http/tables/list.md"
             -
               url: "/api/http/sql"
-              title: "GET sql"
+              title: "POST/GET sql"
               type: page
               visible_in_menu: false
               visible_in_toc: false
               source: "/api/http/sql/sql.md"
-            -
-              url: "/api/http/sql/scan_partition"
-              title": "GET sql/scan_partition"
-              type: page
-              visible_in_menu: false
-              visible_in_toc: false
-              source: "/api/http/sql/scan_partition.md"
-            -
-              url: "/api/http/auth/login"
-              title: "POST auth/login"
-              type: page
-              visible_in_menu: false
-              visible_in_toc: false
-              source: "/api/http/auth/login.md"
         -
           url: "/api/javascript_mapreduce"
           title: "MapReduce API (JavaScript)"
@@ -810,7 +841,7 @@
             url: "/internals/partitioning"
             title: "Table Partitioning"
             type: page
-            doctitle: "8.2.1 Table Partitioning"
+            doctitle: "9.2.1 Table Partitioning"
             content_type: txt
             visible_in_menu: true
             visible_in_toc: true
@@ -819,7 +850,7 @@
             url: "/internals/statement-based-replication"
             title: "Segment-Based Replication"
             type: page
-            doctitle: "8.2.2 Segment-Based Replication"
+            doctitle: "9.2.2 Segment-Based Replication"
             content_type: txt
             visible_in_menu: true
             visible_in_toc: true
@@ -828,7 +859,7 @@
             url: "/internals/binary-protocol"
             title: "Binary Protocol"
             type: page
-            doctitle: "8.2.3 Binary Protocol"
+            doctitle: "9.2.3 Binary Protocol"
             content_type: txt
             visible_in_menu: true
             visible_in_toc: true
@@ -837,7 +868,7 @@
             url: "/internals/preaggregation"
             title: "Pre-Aggregation"
             type: page
-            doctitle: "8.2.4 Preaggregation"
+            doctitle: "9.2.4 Preaggregation"
             content_type: txt
             visible_in_menu: true
             visible_in_toc: true
