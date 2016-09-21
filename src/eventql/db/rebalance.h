@@ -26,6 +26,7 @@
 #include "eventql/config/config_directory.h"
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/status.h>
+#include <eventql/db/server_allocator.h>
 #include <eventql/db/metadata_client.h>
 #include <eventql/db/metadata_coordinator.h>
 
@@ -34,7 +35,7 @@ namespace eventql {
 class Rebalance {
 public:
 
-  Rebalance(ConfigDirectory* cdir);
+  Rebalance(ConfigDirectory* cdir, ServerAllocator* server_alloc);
 
   Status runOnce();
 
@@ -49,6 +50,7 @@ protected:
       const Buffer& opdata);
 
   ConfigDirectory* cdir_;
+  ServerAllocator* server_alloc_;
   MetadataCoordinator metadata_coordinator_;
   MetadataClient metadata_client_;
   size_t replication_factor_;

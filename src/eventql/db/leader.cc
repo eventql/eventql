@@ -32,9 +32,10 @@ namespace eventql {
 
 Leader::Leader(
     ConfigDirectory* cdir,
+    ServerAllocator* server_alloc,
     uint64_t rebalance_interval) :
     cdir_(cdir),
-    rebalance_(cdir),
+    rebalance_(cdir, server_alloc),
     rebalance_interval_(rebalance_interval) {}
 
 Leader::~Leader() {
