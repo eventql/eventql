@@ -91,17 +91,15 @@ void BenchmarkStats::calculate() {
   //calculate moving average for the last minute
   auto start = MonotonicClock::now() - kMicrosPerMinute;
   uint64_t num_requests = 0;
-  size_t bucket_ctr = 0;
   for (size_t i = 0; i < buckets_.size(); ++i) {
     if (buckets_[i].time < start) {
       continue;
     }
 
-    ++bucket_ctr;
     num_requests += buckets_[i].num_requests;
   }
 
-  mvg_avg_rate_ = (double) num_requests / (bucket_ctr * 10);
+  mvg_avg_rate_ = (double) num_requests / kSecondsPerMinute;
   if (mvg_avg_rate_ < min_rate_ || min_rate_ < 0) {
     min_rate_ = mvg_avg_rate_;
   }
