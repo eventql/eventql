@@ -49,7 +49,7 @@ public:
 
   virtual void listTables(Function<void (const TableInfo& table)> fn) const = 0;
 
-  Status listPartitions(
+  virtual Status listPartitions(
       const String& table_name,
       Function<void (const ::eventql::TablePartitionInfo& partition)> fn) const {
     return Status(eRuntimeError, "not yet implemented");
