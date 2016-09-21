@@ -476,7 +476,8 @@ Status TableService::listPartitions(
       case KEYSPACE_UINT64: {
         uint64_t keyrange_uint = -1;
         memcpy((char*) &keyrange_uint, e.begin.data(), sizeof(e.begin));
-        p_info.keyrange_begin = UnixTime(keyrange_uint).toString();
+        p_info.keyrange_begin = keyrange_uint > -1 ?
+            UnixTime(keyrange_uint).toString() : "";
         break;
       }
       case KEYSPACE_STRING: {
