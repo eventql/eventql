@@ -877,6 +877,7 @@ EVQL_CORE_SOURCES_ = \
     eventql/transport/native/ops/query.cc \
     eventql/transport/native/ops/query_partialaggr.cc \
     eventql/transport/native/ops/query_remote.cc \
+    eventql/transport/native/ops/insert.cc \
     eventql/transport/native/ops/repl_insert.cc \
     eventql/db/table_ref.cc \
     eventql/db/table_ref.h \
