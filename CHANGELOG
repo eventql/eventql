@@ -19,6 +19,8 @@ EventQL v0.5.0 beta;
     server.load_limit_{soft,hard}, server.partitions_loading_limit_{soft,hard},
     server.loadinfo_publish_interval
 
+  * Added the DESCRIBE SERVERS statement.
+
 
 EventQL v0.4.0 beta;
 
