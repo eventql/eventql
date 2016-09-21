@@ -55,10 +55,8 @@ public:
     return Status(eRuntimeError, "not yet implemented");
   }
 
-  Status listServers(
-      Function<void (const ::eventql::ServerConfig& server)> fn) const {
-    return Status(eNotImplementedError, "not implemented");
-  }
+  virtual Status listServers(
+      Function<void (const ::eventql::ServerConfig& server)> fn) const = 0;
 
   virtual Option<TableInfo> describe(const String& table_name) const = 0;
 

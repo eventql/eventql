@@ -33,10 +33,14 @@ DescribeServersExpression::DescribeServersExpression(
     counter_(0) {}
 
 ScopedPtr<ResultCursor> DescribeServersExpression::execute() {
-  txn_->getTableProvider()->listServers(
+  auto rc = txn_->getTableProvider()->listServers(
       [this] (const eventql::ServerConfig& server) {
     rows_.emplace_back(server);
   });
+
+  if (!rc.isSuccess()) {
+    //FIXME handle error
+  }
 
   return mkScoped(
       new DefaultResultCursor(

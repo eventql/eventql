@@ -35,14 +35,14 @@ RefPtr<QueryTreeNode> DescribeServersNode::deepCopy() const {
 
 Vector<String> DescribeServersNode::getResultColumns() const {
   return Vector<String> {
-    "name",
-    "status",
-    "listen_addr",
-    "build_info",
-    "load",
-    "disk_used",
-    "disk_free",
-    "partitions"
+    "Name",
+    "Status",
+    "ListenAddr",
+    "BuildInfo",
+    "Load",
+    "Disk Used",
+    "Disk Free",
+    "Partitions"
   };
 }
 
