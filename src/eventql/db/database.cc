@@ -282,7 +282,7 @@ ReturnCode DatabaseImpl::start() {
   internal_auth_.reset(new TrustInternalAuth());
 
   /* server allocator */
-  server_alloc_.reset(new ServerAllocator(config_dir_.get()));
+  server_alloc_.reset(new ServerAllocator(config_dir_.get(), cfg_));
 
   /* metadata service */
   metadata_store_.reset(new MetadataStore(metadata_dir));

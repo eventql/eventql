@@ -39,7 +39,9 @@ public:
     IDLE
   };
 
-  ServerAllocator(ConfigDirectory* cdir);
+  ServerAllocator(
+      ConfigDirectory* cdir,
+      ProcessConfig* config);
 
   Status allocateServers(
       AllocationPolicy policy,

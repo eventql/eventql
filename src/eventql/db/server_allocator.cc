@@ -26,7 +26,15 @@
 
 namespace eventql {
 
-ServerAllocator::ServerAllocator(ConfigDirectory* cdir) {
+ServerAllocator::ServerAllocator(
+    ConfigDirectory* cdir,
+    ProcessConfig* config) :
+    load_limit_soft_(config->getDouble("server.load_limit_soft")),
+    load_limit_hard_(config->getDouble("server.load_limit_hard")),
+    partitions_loading_limit_hard_(
+        config->getInt("server.partitions_loading_limit_hard", 0)),
+    partitions_loading_limit_soft_(
+        config->getInt("server.partitions_loading_limit_soft", 0)) {
   cdir->setServerConfigChangeCallback(
       std::bind(
           &ServerAllocator::updateServerSlot,
