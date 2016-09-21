@@ -1,4 +1,4 @@
-## Process this file with automake to produce Makefile.in
+# Process this file with automake to produce Makefile.in
 
 bin_PROGRAMS = evql evqld evqlctl
 lib_LTLIBRARIES = libevqlclient.la
@@ -1016,8 +1016,6 @@ evqlctl_SOURCES = \
     eventql/cli/commands/cluster_status.cc \
     eventql/cli/commands/cluster_remove_server.h \
     eventql/cli/commands/cluster_remove_server.cc \
-    eventql/cli/commands/cluster_set_allocation_policy.h \
-    eventql/cli/commands/cluster_set_allocation_policy.cc \
     eventql/cli/commands/database_create.h \
     eventql/cli/commands/database_create.cc \
     eventql/cli/commands/table_config_set.h \

@@ -68,10 +68,17 @@ protected:
   mutable std::mutex mutex_;
   std::map<std::string, ServerSlot> primary_servers_;
   std::set<std::string> backup_servers_;
+<<<<<<< HEAD
   uint64_t partitions_loading_limit_hard_;
   uint64_t partitions_loading_limit_soft_;
   double load_limit_soft_;
   double load_limit_hard_;
+=======
+  double load_limit_soft_;
+  double load_limit_hard_;
+  uint64_t partitions_loading_limit_hard_;
+  uint64_t partitions_loading_limit_soft_;
+>>>>>>> 7bba93dcd74704371148e24b54091a01defe6bc5
 };
 
 } // namespace eventql

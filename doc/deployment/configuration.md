@@ -151,7 +151,12 @@ The EventQL configuration options are grouped in three sections: `client`, `serv
   <tr>
     <td><b>server.noleader</b></td>
     <td>false</td>
-    <td></td>
+    <td>If set to true, this server will not partake in leader election</td>
+  </tr>
+  <tr>
+    <td><b>server.noalloc</b></td>
+    <td>false</td>
+    <td>If set to true, no partitions/data will be allocated to this server</td>
   </tr>
   <tr>
     <td><b>server.gc_mode</b></td>
@@ -170,7 +175,7 @@ The EventQL configuration options are grouped in three sections: `client`, `serv
   </tr>
   <tr>
     <td><b>server.disk_capacity</b></td>
-    <td>/td>
+    <td></td>
     <td>
       The maximum number of bytes that the server is allowed to write/use
       on disk. Unit is Bytes. This is an optional limit, if it is unset, the
@@ -211,7 +216,11 @@ The EventQL configuration options are grouped in three sections: `client`, `serv
   </td>
   <tr>
     <td><b>server.load_limit_hard</b></td>
+<<<<<<< HEAD
     <td>0.97</td>
+=======
+    <td>0.98</td>
+>>>>>>> 7bba93dcd74704371148e24b54091a01defe6bc5
     <td>
       This value controls the upper limit on a servers disk utilization. If the
       soft load limit was reached, now new partitions will be allocated on the
