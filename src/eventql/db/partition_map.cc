@@ -156,11 +156,6 @@ void PartitionMap::open() {
     auto table_key = value.toString();
     auto table = findTableWithLock(tsdb_namespace, table_key);
 
-    auto mem_key = tsdb_namespace + "~" + table_key + "~";
-    mem_key.append((char*) partition_key.data(), partition_key.size());
-
-    partitions_.emplace(mem_key, mkScoped(new LazyPartition()));
-
     if (table.isEmpty()) {
       logWarning(
           "tsdb",
@@ -169,6 +164,11 @@ void PartitionMap::open() {
           partition_key.toString());
       continue;
     }
+
+    auto mem_key = tsdb_namespace + "~" + table_key + "~";
+    mem_key.append((char*) partition_key.data(), partition_key.size());
+
+    partitions_.emplace(mem_key, mkScoped(new LazyPartition()));
 
     partitions.emplace_back(
         std::make_tuple(tsdb_namespace, table_key, partition_key));
