@@ -41,6 +41,7 @@
 #include "eventql/sql/qtree/nodes/insert_into.h"
 #include "eventql/sql/qtree/nodes/insert_json.h"
 #include "eventql/sql/qtree/nodes/describe_partitions.h"
+#include "eventql/sql/qtree/nodes/describe_servers.h"
 #include "eventql/sql/CSTableScanProvider.h"
 #include "eventql/sql/backends/csv/CSVTableProvider.h"
 
@@ -962,3 +963,21 @@ TEST_CASE(QTreeTest, TestDescribePartitions, [] () {
   EXPECT_EQ(qtree->tableName(), "evtbl");
 
 });
+
+TEST_CASE(QTreeTest, TestDescribeServers, [] () {
+  auto runtime = Runtime::getDefaultRuntime();
+  auto txn = runtime->newTransaction();
+
+  String query = "DESCRIBE SERVERS";
+  csql::Parser parser;
+  parser.parse(query.data(), query.size());
+
+  auto qtree_builder = runtime->queryPlanBuilder();
+  Vector<RefPtr<QueryTreeNode>> qtrees = qtree_builder->build(
+      txn.get(),
+      parser.getStatements(),
+      txn->getTableProvider());
+  RefPtr<DescribeServersNode> qtree =
+      qtrees[0].asInstanceOf<DescribeServersNode>();
+});
+
