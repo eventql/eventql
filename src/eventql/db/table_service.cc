@@ -454,7 +454,10 @@ Status TableService::listPartitions(
     return rc;
   }
 
-  for (const auto& e : metadata_file.getPartitionMap()) {
+  auto partition_map = metadata_file.getPartitionMap();
+  for (size_t i = 0; i < partition_map.size(); ++i) {
+    const auto& e = partition_map[i];
+
     TablePartitionInfo p_info;
     p_info.partition_id = e.partition_id.toString();
 
@@ -462,13 +465,14 @@ Status TableService::listPartitions(
       p_info.server_ids.emplace_back(s.server_id);
     }
 
-    String keyrange;
     switch (metadata_file.getKeyspaceType()) {
       case KEYSPACE_UINT64: {
         uint64_t keyrange_uint = -1;
-        memcpy((char*) &keyrange_uint, e.begin.data(), sizeof(e.begin));
-        p_info.keyrange_begin = keyrange_uint > -1 ?
-            UnixTime(keyrange_uint).toString() : "";
+        memcpy((char*) &keyrange_uint, e.begin.data(), sizeof(uint64_t));
+        p_info.keyrange_begin = StringUtil::format(
+            "$0 [$1]",
+            UnixTime(keyrange_uint),
+            keyrange_uint / kMicrosPerSecond);
         break;
       }
       case KEYSPACE_STRING: {
@@ -477,7 +481,6 @@ Status TableService::listPartitions(
       }
     }
 
-    String extra_info;
     if (e.splitting) {
       Set<String> servers_low;
       for (const auto& s : e.split_servers_low) {
@@ -488,7 +491,7 @@ Status TableService::listPartitions(
         servers_high.emplace(s.server_id);
       }
 
-      extra_info += StringUtil::format(
+      p_info.extra_info += StringUtil::format(
           "SPLITTING @ $0 into $1 on $2, $3 on $4",
           decodePartitionKey(table.get()->getKeyspaceType(), e.split_point),
           e.split_partition_id_low,
@@ -496,7 +499,31 @@ Status TableService::listPartitions(
           e.split_partition_id_high,
           inspect(servers_high));
     }
-    p_info.extra_info = extra_info;
+
+    std::string keyrange_end;
+    if (metadata_file.hasFinitePartitions()) {
+      keyrange_end = e.end;
+    } else {
+      if (i < partition_map.size() - 1) {
+        keyrange_end = partition_map[i + 1].begin;
+      }
+    }
+
+    switch (metadata_file.getKeyspaceType()) {
+      case KEYSPACE_UINT64: {
+        uint64_t keyrange_uint = -1;
+        memcpy((char*) &keyrange_uint, keyrange_end.data(), sizeof(uint64_t));
+        p_info.keyrange_end = StringUtil::format(
+            "$0 [$1]",
+            UnixTime(keyrange_uint),
+            keyrange_uint / kMicrosPerSecond);
+        break;
+      }
+      case KEYSPACE_STRING: {
+        p_info.keyrange_end = keyrange_end;
+        break;
+      }
+    }
 
     fn(p_info);
   }

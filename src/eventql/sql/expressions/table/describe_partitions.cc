@@ -60,13 +60,15 @@ bool DescribePartitionsExpression::next(SValue* row, size_t row_len) {
     const auto& col = rows_[counter_];
     switch (row_len) {
       default:
+      case 5:
+        row[4] = SValue::newString(col.extra_info); //Extra info
       case 4:
-        row[3] = SValue::newString(col.extra_info);
+        row[3] = SValue::newString(col.keyrange_end); //Keyrange end
       case 3:
-        row[2] = SValue::newString(
-            StringUtil::join(col.server_ids, ",")); //Server id
+        row[2] = SValue::newString(col.keyrange_begin); //Keyrange begin
       case 2:
-        row[1] = SValue::newString(col.keyrange_begin); //Keyrange begin
+        row[1] = SValue::newString(
+            StringUtil::join(col.server_ids, ",")); //Server id
       case 1:
         row[0] = SValue::newString(col.partition_id); //Partition id
       case 0:
