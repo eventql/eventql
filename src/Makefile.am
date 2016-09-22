@@ -858,6 +858,8 @@ EVQL_CORE_SOURCES_ = \
     eventql/transport/native/client_tcp_impl.h \
     eventql/transport/native/frames/hello.cc \
     eventql/transport/native/frames/hello.h \
+    eventql/transport/native/frames/insert.cc \
+    eventql/transport/native/frames/insert.h \
     eventql/transport/native/frames/query_progress.cc \
     eventql/transport/native/frames/query_progress.h \
     eventql/transport/native/frames/ready.cc \
@@ -879,6 +881,7 @@ EVQL_CORE_SOURCES_ = \
     eventql/transport/native/ops/query.cc \
     eventql/transport/native/ops/query_partialaggr.cc \
     eventql/transport/native/ops/query_remote.cc \
+    eventql/transport/native/ops/insert.cc \
     eventql/transport/native/ops/repl_insert.cc \
     eventql/db/table_ref.cc \
     eventql/db/table_ref.h \
