@@ -151,19 +151,28 @@ int main(int argc, const char** argv) {
     return ReturnCode::success();
   };
 
-
-  auto on_progress = [&stdout_os](eventql::cli::BenchmarkStats* stats) {
+  auto num = flags.isSet("num") ? flags.getInt("num") : -1;
+  auto on_progress = [&stdout_os, &num](eventql::cli::BenchmarkStats* stats) {
     try {
       stdout_os->eraseLine();
-      stdout_os->print(StringUtil::format(
-          "\rRunning... rate=$0r/s, avg_runtime=$1ms, total=$2, running=$3, "
-          "errors=$4 ($5%)",
+      auto line = StringUtil::format(
+          "\rRunning... rate=$0r/s, avg_runtime=$1ms, total=$2 ",
           stats->getRollingRPS(),
           stats->getRollingAverageRuntime() / double(kMicrosPerMilli),
-          stats->getTotalRequestCount(),
+          stats->getTotalRequestCount());
+
+      if (num > 0) {
+        line += StringUtil::format(
+            "($0%) ",
+            double(stats->getTotalRequestCount()) / double(num));
+      }
+
+      line += StringUtil::format(
+          ",running=$0, errors=$1 ($2%)",
           stats->getRunningRequestCount(),
           stats->getTotalErrorCount(),
-          stats->getTotalErrorRate() * 100.0f));
+          stats->getTotalErrorRate() * 100.0f);
+      stdout_os->print(line);
     } catch (const std::exception& e) {
       /* fallthrough */
     }
@@ -172,7 +181,7 @@ int main(int argc, const char** argv) {
   eventql::cli::Benchmark benchmark(
       flags.getInt("connections"),
       flags.getInt("rate"),
-      flags.isSet("num") ? flags.getInt("num") : -1);
+      num);
 
   benchmark.setRequestHandler(request_handler);
   benchmark.setProgressCallback(on_progress);
