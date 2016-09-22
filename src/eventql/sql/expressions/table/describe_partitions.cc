@@ -60,7 +60,9 @@ bool DescribePartitionsExpression::next(SValue* row, size_t row_len) {
     const auto& col = rows_[counter_];
     switch (row_len) {
       default:
-      case 3: 
+      case 4:
+        row[3] = SValue::newString(col.extra_info);
+      case 3:
         row[2] = SValue::newString(
             StringUtil::join(col.server_ids, ",")); //Server id
       case 2:

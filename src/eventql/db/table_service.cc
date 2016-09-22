@@ -477,6 +477,27 @@ Status TableService::listPartitions(
       }
     }
 
+    String extra_info;
+    if (e.splitting) {
+      Set<String> servers_low;
+      for (const auto& s : e.split_servers_low) {
+        servers_low.emplace(s.server_id);
+      }
+      Set<String> servers_high;
+      for (const auto& s : e.split_servers_high) {
+        servers_high.emplace(s.server_id);
+      }
+
+      extra_info += StringUtil::format(
+          "SPLITTING @ $0 into $1 on $2, $3 on $4",
+          decodePartitionKey(table.get()->getKeyspaceType(), e.split_point),
+          e.split_partition_id_low,
+          inspect(servers_low),
+          e.split_partition_id_high,
+          inspect(servers_high));
+    }
+    p_info.extra_info = extra_info;
+
     fn(p_info);
   }
 
