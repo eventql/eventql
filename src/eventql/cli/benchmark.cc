@@ -43,13 +43,17 @@ namespace cli {
 Benchmark::Benchmark(
     size_t num_threads,
     size_t rate,
-    size_t remaining_requests /* = -1*/) :
+    size_t remaining_requests /* = size_t(-1) */) :
     num_threads_(num_threads),
     status_(ReturnCode::success()),
     remaining_requests_(remaining_requests),
     threads_running_(0),
     last_request_time_(0),
-    rate_limit_interval_(1 * kMicrosPerSecond / rate) {
+    rate_limit_interval_(0) {
+  if (rate > 0 && rate < kMicrosPerSecond) {
+    rate_limit_interval_ = kMicrosPerSecond / rate;
+  }
+
   threads_.resize(num_threads_);
 }
 

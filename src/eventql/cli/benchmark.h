@@ -34,7 +34,10 @@ namespace cli {
 class Benchmark {
 public:
 
-  Benchmark(size_t num_threads, size_t rate, size_t remaining_requests = -1);
+  Benchmark(
+      size_t num_threads,
+      size_t rate,
+      size_t remaining_requests = size_t(-1));
 
   void setProgressCallback(std::function<void ()> cb);
 
