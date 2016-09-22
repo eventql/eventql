@@ -1,4 +1,4 @@
-## Process this file with automake to produce Makefile.in
+# Process this file with automake to produce Makefile.in
 
 bin_PROGRAMS = evql evqld evqlctl evqlslap
 lib_LTLIBRARIES = libevqlclient.la
@@ -854,6 +854,8 @@ EVQL_CORE_SOURCES_ = \
     eventql/transport/native/client_tcp_impl.h \
     eventql/transport/native/frames/hello.cc \
     eventql/transport/native/frames/hello.h \
+    eventql/transport/native/frames/insert.cc \
+    eventql/transport/native/frames/insert.h \
     eventql/transport/native/frames/query_progress.cc \
     eventql/transport/native/frames/query_progress.h \
     eventql/transport/native/frames/ready.cc \
@@ -875,6 +877,7 @@ EVQL_CORE_SOURCES_ = \
     eventql/transport/native/ops/query.cc \
     eventql/transport/native/ops/query_partialaggr.cc \
     eventql/transport/native/ops/query_remote.cc \
+    eventql/transport/native/ops/insert.cc \
     eventql/transport/native/ops/repl_insert.cc \
     eventql/db/table_ref.cc \
     eventql/db/table_ref.h \
@@ -1008,8 +1011,6 @@ evqlctl_SOURCES = \
     eventql/cli/commands/cluster_status.cc \
     eventql/cli/commands/cluster_remove_server.h \
     eventql/cli/commands/cluster_remove_server.cc \
-    eventql/cli/commands/cluster_set_allocation_policy.h \
-    eventql/cli/commands/cluster_set_allocation_policy.cc \
     eventql/cli/commands/database_create.h \
     eventql/cli/commands/database_create.cc \
     eventql/cli/commands/table_config_set.h \

@@ -99,6 +99,10 @@ enum {
   EVQL_QUERY_RESULT_PENDINGSTMT  = 0x8
 };
 
+enum {
+  EVQL_INSERT_CTYPE_JSON   = 0x01
+};
+
 /**
  * EventQL Client enums
  */

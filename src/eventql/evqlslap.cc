@@ -145,6 +145,11 @@ int main(int argc, const char** argv) {
     return 1;
   }
 
+  auto request_handler = []() {
+    //FIXME send request
+    return ReturnCode::success();
+  };
+
   auto on_progress = []() {
     iputs("progress", 1);
   };
@@ -154,7 +159,9 @@ int main(int argc, const char** argv) {
       flags.getInt("rate"),
       flags.isSet("num") ? flags.getInt("num") : -1);
 
+  benchmark.setRequestHandler(request_handler);
   benchmark.setProgressCallback(on_progress);
+
   auto rc = benchmark.run();
   if (rc.isSuccess()) {
     return 0;

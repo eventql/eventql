@@ -44,6 +44,7 @@ class SQLService;
 class TableService;
 class MapReduceService;
 class MetadataService;
+class ServerAllocator;
 
 struct DatabaseContext {
   std::string db_path;
@@ -51,6 +52,7 @@ struct DatabaseContext {
   PartitionMap* partition_map;
   FileTracker* file_tracker;
   ConfigDirectory* config_directory;
+  ServerAllocator* server_alloc;
   ReplicationWorker* replication_worker;
   LSMTableIndexCache* lsm_index_cache;
   MetadataStore* metadata_store;

@@ -236,6 +236,12 @@ ReturnCode Server::performOperation(
           conn,
           payload.data(),
           payload.size());
+    case EVQL_OP_INSERT:
+      return performOperation_INSERT(
+          db_,
+          conn,
+          payload.data(),
+          payload.size());
     case EVQL_OP_REPL_INSERT:
       return performOperation_REPL_INSERT(
           db_,

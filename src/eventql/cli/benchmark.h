@@ -39,6 +39,7 @@ public:
       size_t rate,
       size_t remaining_requests = size_t(-1));
 
+  void setRequestHandler(std::function<ReturnCode ()> handler);
   void setProgressCallback(std::function<void ()> cb);
 
   ReturnCode run();
@@ -50,14 +51,15 @@ protected:
   bool getRequestSlot(size_t idx);
 
   size_t num_threads_;
-  ReturnCode status_;
+  uint64_t rate_limit_interval_;
   size_t remaining_requests_;
+  ReturnCode status_;
   std::mutex mutex_;
   std::condition_variable cv_;
   std::vector<std::thread> threads_;
   size_t threads_running_;
   uint64_t last_request_time_;
-  uint64_t rate_limit_interval_;
+  std::function<ReturnCode ()> request_handler_;
   std::function<void ()> on_progress_;
 };
 

@@ -29,6 +29,8 @@
 #include "eventql/eventql.h"
 #include "eventql/db/monitor.h"
 #include <eventql/db/database.h>
+#include <eventql/db/partition_map.h>
+#include <eventql/util/wallclock.h>
 #include <eventql/server/server_stats.h>
 
 namespace eventql {
@@ -45,8 +47,8 @@ ReturnCode Monitor::runMonitorProcedure() {
   /* get disk used and capacity */
   uint64_t disk_used = FileUtil::du_c(dbctx_->db_path);
   uint64_t disk_available = 0;
+  uint64_t disk_capacity = 0;
   {
-    uint64_t disk_capacity = 0;
     auto disk_capacity_cfg = dbctx_->config->getInt("server.disk_capacity");
     if (!disk_capacity_cfg.isEmpty()) {
       disk_capacity = disk_capacity_cfg.get();
@@ -75,6 +77,14 @@ ReturnCode Monitor::runMonitorProcedure() {
     partitions_loaded -= partitions_loading;
   }
 
+  double p_factor = 1.0f;
+  if (partitions_loaded > 0 && partitions_assigned > 0) {
+    p_factor = (double) partitions_assigned / (double) partitions_loaded;
+  }
+
+  double load_factor =
+      ((double) disk_used / (double) (disk_capacity)) * p_factor;
+
   /* publish server stats */
   logDebug(
       "evqld",
@@ -85,11 +95,17 @@ ReturnCode Monitor::runMonitorProcedure() {
       partitions_assigned);
 
   ServerStats sstats;
+  sstats.set_load_factor(load_factor);
   sstats.set_disk_used(disk_used);
   sstats.set_disk_available(disk_available);
   sstats.set_partitions_loaded(partitions_loaded);
   sstats.set_partitions_assigned(partitions_assigned);
   sstats.set_buildinfo(StringUtil::format("$0 ($1)", kVersionString, kBuildID));
+
+  if (dbctx_->config->getBool("server.noalloc")) {
+    sstats.set_noalloc(true);
+  }
+
   return dbctx_->config_directory->publishServerStats(sstats);
 }
 
@@ -99,16 +115,22 @@ void Monitor::startMonitorThread() {
   thread_ = std::thread([this] {
     Application::setCurrentThreadName("evqld-monitor");
 
+    // wait until all partitions have finished loading before starting to
+    // report local load info
+    dbctx_->partition_map->waitUntilAllLoaded();
+
     std::unique_lock<std::mutex> lk(mutex_);
     while (thread_running_) {
       lk.unlock();
 
       auto rc = ReturnCode::success();
+      auto t0 = MonotonicClock::now();
       try {
         rc = runMonitorProcedure();
       } catch (const std::exception& e) {
         rc = ReturnCode::exception(e);
       }
+      auto t1 = MonotonicClock::now();
 
       if (!rc.isSuccess()) {
         logError("evqld", "Error in Monitor thread: $0", rc.getMessage());
@@ -116,10 +138,19 @@ void Monitor::startMonitorThread() {
 
       lk.lock();
 
-      auto interval = kMicrosPerSecond * 5;
+      auto runtime = t1 - t0;
+      auto delay = dbctx_->config->getInt(
+          "server.loadinfo_publish_interval").get();
+
+      if (runtime > delay) {
+        delay = 0;
+      } else {
+        delay -= runtime;
+      }
+
       cv_.wait_for(
           lk,
-          std::chrono::microseconds(interval),
+          std::chrono::microseconds(delay),
           [this] () { return !thread_running_; });
     }
   });
