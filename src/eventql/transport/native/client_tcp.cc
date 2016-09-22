@@ -44,23 +44,30 @@ namespace eventql {
 namespace native_transport {
 
 TCPClient::TCPClient(
-    ProcessConfig* config,
-    ConfigDirectory* config_dir) :
-    config_(config),
-    cdir_(config_dir),
-    io_timeout_(config->getInt("server.s2s_io_timeout").get()),
-    idle_timeout_(config->getInt("server.s2s_idle_timeout").get()) {}
+    uint64_t io_timeout /* = kDefaultIOTimeout */,
+    uint64_t idle_timeout /* = kDefaultIdleTimeout */) :
+    io_timeout_(io_timeout),
+    idle_timeout_(idle_timeout) {}
 
-ReturnCode TCPClient::connect(const std::string& server) {
-  auto server_cfg = cdir_->getServerConfig(server);
-  if (server_cfg.server_status() != SERVER_UP) {
-    return ReturnCode::error("ERUNTIME", "server is down");
-  }
+ReturnCode TCPClient::connect(
+    const std::string& host,
+    uint64_t port,
+    bool is_internal,
+    const AuthDataType& auth_data /* = AuthDataType{} */) {
+  return connect(
+      StringUtil::format("$0:$1", host, port),
+      is_internal,
+      auth_data);
+}
 
-  auto server_addr = InetAddr::resolve(server_cfg.server_addr()); // FIXME
+ReturnCode TCPClient::connect(
+    const std::string& addr_str,
+    bool is_internal,
+    const AuthDataType& auth_data /* = AuthDataType{} */) {
+  auto server_addr = InetAddr::resolve(addr_str); // FIXME
   auto server_ip = server_addr.ip();
 
-  logDebug("evql", "Opening connection to $0", server);
+  logDebug("evql", "Opening connection to $0", addr_str);
   auto fd = socket(AF_INET, SOCK_STREAM, 0);
   if (fd == -1) {
     return ReturnCode::error(
