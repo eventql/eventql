@@ -299,6 +299,8 @@ EVQL_CORE_SOURCES_ = \
     eventql/util/reflect/property_impl.h \
     eventql/util/reflect/reflect.h \
     eventql/util/return_code.h \
+    eventql/util/rolling_stat.cc \
+    eventql/util/rolling_stat.h \
     eventql/util/traits.h \
     eventql/util/protobuf/msg.h \
     eventql/util/protobuf/DynamicMessage.cc \
