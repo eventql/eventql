@@ -8,10 +8,6 @@
 *.so
 *.pb.h
 *.pb.cc
-src/evql
-src/evqld
-src/evql-mysql-import
-src/evqlbenchmark
 /config.h
 Makefile
 Makefile.in
