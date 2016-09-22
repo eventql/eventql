@@ -22,60 +22,42 @@
  * code of your own applications
  */
 #pragma once
+#include <string>
+#include <vector>
 #include "eventql/eventql.h"
-#include "eventql/db/database.h"
+#include "eventql/util/io/inputstream.h"
+#include "eventql/util/io/outputstream.h"
 #include "eventql/util/return_code.h"
 
 namespace eventql {
 namespace native_transport {
-class NativeConnection;
 
-class Server {
+class InsertFrame {
 public:
 
-  Server(Database* db);
+  InsertFrame();
 
-  void startConnection(std::unique_ptr<NativeConnection> connection);
+  void setDatabase(const std::string& database);
+  void setTable(const std::string& table);
+  void setRecordEncoding(uint64_t encoding);
+  void addRecord(const std::string& record);
 
-  ReturnCode performHandshake(NativeConnection* conn);
+  const std::string& getDatabase() const;
+  const std::string& getTable() const;
+  uint64_t getRecordEncoding() const;
+  const std::vector<std::string>& getRecords() const;
 
-  ReturnCode performOperation(
-      NativeConnection* conn,
-      uint16_t opcode,
-      const std::string& payload);
+  ReturnCode parseFrom(InputStream* is);
+  ReturnCode writeTo(OutputStream* os) const;
+  void clear();
 
 protected:
-  Database* db_;
+  uint64_t flags_;
+  std::string database_;
+  std::string table_;
+  uint64_t record_encoding_;
+  std::vector<std::string> records_;
 };
-
-ReturnCode performOperation_QUERY(
-    Database* database,
-    NativeConnection* conn,
-    const std::string& payload);
-
-ReturnCode performOperation_QUERY_REMOTE(
-    Database* database,
-    NativeConnection* conn,
-    const char* payload,
-    size_t payload_size);
-
-ReturnCode performOperation_QUERY_PARTIALAGGR(
-    Database* database,
-    NativeConnection* conn,
-    const char* payload,
-    size_t payload_size);
-
-ReturnCode performOperation_INSERT(
-    Database* database,
-    NativeConnection* conn,
-    const char* payload,
-    size_t payload_size);
-
-ReturnCode performOperation_REPL_INSERT(
-    Database* database,
-    NativeConnection* conn,
-    const char* payload,
-    size_t payload_size);
 
 } // namespace native_transport
 } // namespace eventql
