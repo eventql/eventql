@@ -61,6 +61,33 @@ int main(int argc, const char** argv) {
       "<db>");
 
   flags.defineFlag(
+      "user",
+      cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      NULL,
+      "username",
+      "<user>");
+
+  flags.defineFlag(
+      "password",
+      cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      NULL,
+      "password",
+      "<password>");
+
+  flags.defineFlag(
+      "auth_token",
+      cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      NULL,
+      "auth token",
+      "<auth_token>");
+
+  flags.defineFlag(
       "connections",
       cli::FlagParser::T_INTEGER,
       false,
@@ -136,7 +163,10 @@ int main(int argc, const char** argv) {
         "Usage: $ evqlslap [OPTIONS]\n\n"
         "   -h, --host <hostname>     Set the EventQL server hostname\n"
         "   -p, --port <port>         Set the EventQL server port\n"
-        "   -D, --database <db>       Select a database\n"
+        "   -d, --database <db>       Select a database\n"
+        "   --user <user>             Set the EventQL username\n"
+        "   --password <password>     Set the password\n"
+        "   --auth_token <token>      Set the EventQL auth token\n"
         "   -c, --connections <num>   Number of concurrent connections\n"
         "   -r, --rate <rate>         Maximum rate of requests in RPS\n"
         "   -n, --num <num>           Maximum total number of request (default is inifite)\n"
@@ -144,6 +174,19 @@ int main(int argc, const char** argv) {
         "   -v, --version             Display the version of this binary and exit\n");
 
     return 1;
+  }
+
+  std::vector<std::pair<std::string, std::string>> auth_data;
+  if (flags.isSet("auth_token")) {
+    auth_data.emplace_back("auth_token", flags.getString("auth_token"));
+  }
+
+  if (flags.isSet("user")) {
+    auth_data.emplace_back("user", flags.getString("user"));
+  }
+
+  if (flags.isSet("password")) {
+    auth_data.emplace_back("password", flags.getString("password"));
   }
 
   auto request_handler = []() {
@@ -181,7 +224,7 @@ int main(int argc, const char** argv) {
   auto rc = benchmark.connect(
       flags.getString("host"),
       flags.getInt("port"),
-      {});
+      auth_data);
 
   if (rc.isSuccess()) {
     rc = benchmark.run();
