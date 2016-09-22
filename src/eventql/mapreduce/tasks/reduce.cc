@@ -26,8 +26,8 @@
 #include "eventql/mapreduce/mapreduce_scheduler.h"
 #include <eventql/server/server_stats.h>
 #include <eventql/db/server_allocator.h>
-#include <eventql/util/wallclock.h>
 #include "eventql/eventql.h"
+#include "eventql/util/wallclock.h"
 
 namespace eventql {
 
@@ -96,8 +96,7 @@ Option<MapReduceShardResult> ReduceTask::execute(
   Vector<String> errors;
   Vector<String> servers;
   auto repl_factor = cdir_->getClusterConfig().replication_factor();
-  ServerAllocator alloc(cdir_);
-  auto rc = alloc.allocateStable(
+  auto rc = session_->getDatabaseContext()->server_alloc->allocateStable(
       ServerAllocator::BEST_EFFORT,
       placement_id,
       repl_factor,

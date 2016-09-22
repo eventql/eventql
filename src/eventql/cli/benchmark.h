@@ -36,45 +36,30 @@ public:
 
   BenchmarkStats();
 
-  void addRequest(bool is_success, size_t t_id, uint64_t start_time);
+  void addRequestStart();
+  void addRequestComplete(bool is_success, uint64_t runtime_us);
 
-  std::string toString();
+  std::string toString() const;
 
 protected:
-
-  void calculate();
-
-  static const uint64_t kNumBuckets = 6;
-  static const auto kTimeWindowSize = 10000000; //10 seconds
-
-  struct Bucket {
-    Bucket() : time(0), num_requests(0) {}
-
-    uint64_t time;
-    uint64_t num_requests;
-  };
-
-  uint64_t total_requests_;
-  double min_rate_;
-  double max_rate_;
-  double mvg_avg_rate_;
-
-  std::vector<Bucket> buckets_;
-  size_t buckets_begin_;
   std::mutex mutex_;
 };
 
 class Benchmark {
 public:
 
-  Benchmark();
+  Benchmark(
+      size_t num_threads,
+      size_t rate,
+      size_t remaining_requests = size_t(-1));
 
+  void setRequestHandler(std::function<ReturnCode ()> handler);
   void setProgressCallback(std::function<void ()> cb);
 
   ReturnCode run();
   void kill();
 
-  BenchmarkStats* getStats();
+  const BenchmarkStats* getStats() const;
 
 protected:
 
@@ -82,16 +67,17 @@ protected:
   bool getRequestSlot(size_t idx);
 
   size_t num_threads_;
+  uint64_t rate_limit_interval_;
+  size_t remaining_requests_;
+  ReturnCode status_;
   std::mutex mutex_;
   std::condition_variable cv_;
-  ReturnCode status_;
   std::vector<std::thread> threads_;
   size_t threads_running_;
   uint64_t last_request_time_;
-  uint64_t rate_limit_interval_;
-  BenchmarkStats* stats_;
-  size_t remaining_requests_;
+  std::function<ReturnCode ()> request_handler_;
   std::function<void ()> on_progress_;
+  BenchmarkStats stats_;
 };
 
 } //cli

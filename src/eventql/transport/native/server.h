@@ -65,6 +65,12 @@ ReturnCode performOperation_QUERY_PARTIALAGGR(
     const char* payload,
     size_t payload_size);
 
+ReturnCode performOperation_INSERT(
+    Database* database,
+    NativeConnection* conn,
+    const char* payload,
+    size_t payload_size);
+
 ReturnCode performOperation_REPL_INSERT(
     Database* database,
     NativeConnection* conn,

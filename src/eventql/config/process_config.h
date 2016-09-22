@@ -38,6 +38,8 @@ public:
   const char* getCString(const String& key) const;
   Option<String> getString(const String& key) const;
   Option<int64_t> getInt(const String& key) const;
+  int64_t getInt(const String& key, int64_t or_else) const;
+  double getDouble(const String& key, double or_else = 0.0f) const;
   bool getBool(const String& key) const;
   bool hasProperty(const String& key) const;
 

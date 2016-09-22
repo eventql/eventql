@@ -44,13 +44,7 @@
 
 namespace eventql {
 
-TableService::TableService(
-    ConfigDirectory* cdir,
-    PartitionMap* pmap,
-    ProcessConfig* config) :
-    cdir_(cdir),
-    pmap_(pmap),
-    config_(config) {}
+TableService::TableService(DatabaseContext* dbctx) : dbctx_(dbctx) {}
 
 Status TableService::createTable(
     const String& db_namespace,
@@ -65,7 +59,7 @@ Status TableService::createTable(
   }
 
   uint64_t recreate_version = 0;
-  auto old_table = pmap_->findTable(db_namespace, table_name);
+  auto old_table = dbctx_->partition_map->findTable(db_namespace, table_name);
   if (!old_table.isEmpty()) {
     if (old_table.get()->config().deleted()) {
       recreate_version = old_table.get()->config().version();
@@ -184,13 +178,12 @@ Status TableService::createTable(
     }
   }
 
-  auto cconf = cdir_->getClusterConfig();
+  auto cconf = dbctx_->config_directory->getClusterConfig();
 
   // generate new metadata file
   std::vector<String> servers;
-  ServerAllocator server_alloc(cdir_);
   {
-    auto rc = server_alloc.allocateServers(
+    auto rc = dbctx_->server_alloc->allocateServers(
         ServerAllocator::MUST_ALLOCATE,
         cconf.replication_factor(),
         Set<String>{},
@@ -233,7 +226,7 @@ Status TableService::createTable(
   }
 
   // create metadata file on metadata servers
-  eventql::MetadataCoordinator coordinator(cdir_);
+  eventql::MetadataCoordinator coordinator(dbctx_->config_directory);
   auto rc = coordinator.createFile(
       db_namespace,
       table_name,
@@ -246,7 +239,7 @@ Status TableService::createTable(
 
   try {
     // create table config
-    cdir_->updateTableConfig(td);
+    dbctx_->config_directory->updateTableConfig(td);
     return Status::success();
   } catch (const Exception& e) {
     return Status(e);
@@ -371,7 +364,7 @@ Status TableService::alterTable(
     const String& db_namespace,
     const String& table_name,
     Vector<TableService::AlterTableOperation> operations) {
-  auto table = pmap_->findTable(db_namespace, table_name);
+  auto table = dbctx_->partition_map->findTable(db_namespace, table_name);
   if (table.isEmpty() || table.get()->config().deleted()) {
     return Status(eNotFoundError, "table not found");
   }
@@ -394,7 +387,7 @@ Status TableService::alterTable(
   }
 
   try {
-    cdir_->updateTableConfig(td);
+    dbctx_->config_directory->updateTableConfig(td);
   } catch (const Exception& e) {
     return Status(eRuntimeError, e.getMessage());
   }
@@ -405,13 +398,13 @@ Status TableService::alterTable(
 Status TableService::dropTable(
     const String& db_namespace,
     const String& table_name) {
-  if (!config_->getBool("cluster.allow_drop_table")) {
+  if (!dbctx_->config->getBool("cluster.allow_drop_table")) {
     return Status(
         eRuntimeError,
         "drop table not allowed (cluster.allow_drop_table=false)");
   }
 
-  auto table = pmap_->findTable(db_namespace, table_name);
+  auto table = dbctx_->partition_map->findTable(db_namespace, table_name);
   if (table.isEmpty() || table.get()->config().deleted()) {
     return Status(eNotFoundError, "table not found");
   }
@@ -421,7 +414,7 @@ Status TableService::dropTable(
   td.set_generation(td.generation() + 1);
 
   try {
-    cdir_->updateTableConfig(td);
+    dbctx_->config_directory->updateTableConfig(td);
   } catch (const Exception& e) {
     return Status(eRuntimeError, e.getMessage());
   }
@@ -432,7 +425,7 @@ Status TableService::dropTable(
 void TableService::listTables(
     const String& tsdb_namespace,
     Function<void (const TableDefinition& table)> fn) const {
-  cdir_->listTables([this, tsdb_namespace, fn] (const TableDefinition& td) {
+  dbctx_->config_directory->listTables([this, tsdb_namespace, fn] (const TableDefinition& td) {
     if (td.customer() != tsdb_namespace) {
       return;
     }
@@ -451,7 +444,7 @@ ReturnCode TableService::insertRecord(
     const json::JSONObject::const_iterator& data_begin,
     const json::JSONObject::const_iterator& data_end,
     uint64_t flags /* = 0 */) {
-  auto table = pmap_->findTable(tsdb_namespace, table_name);
+  auto table = dbctx_->partition_map->findTable(tsdb_namespace, table_name);
   if (table.isEmpty() || table.get()->config().deleted()) {
     return ReturnCode::errorf("ENOTFOUND", "table not found: $0", table_name);
   }
@@ -467,6 +460,35 @@ ReturnCode TableService::insertRecord(
       tsdb_namespace,
       table_name,
       record,
+      flags);
+}
+
+ReturnCode TableService::insertRecords(
+    const String& tsdb_namespace,
+    const String& table_name,
+    const json::JSONObject* begin,
+    const json::JSONObject* end,
+    uint64_t flags /* = 0 */) {
+  auto table = dbctx_->partition_map->findTable(tsdb_namespace, table_name);
+  if (table.isEmpty() || table.get()->config().deleted()) {
+    return ReturnCode::errorf("ENOTFOUND", "table not found: $0", table_name);
+  }
+
+  std::vector<msg::DynamicMessage> records;
+  for (auto iter = begin; iter != end; ++iter) {
+    try {
+      records.emplace_back(table.get()->schema());
+      records.back().fromJSON(iter->begin(), iter->end());
+    } catch (const std::exception& e) {
+      return ReturnCode::exception(e);
+    }
+  }
+
+  return insertRecords(
+      tsdb_namespace,
+      table_name,
+      &*records.begin(),
+      &*records.end(),
       flags);
 }
 
@@ -489,11 +511,11 @@ ReturnCode TableService::insertRecords(
     const msg::DynamicMessage* begin,
     const msg::DynamicMessage* end,
     uint64_t flags /* = 0 */) {
-  MetadataClient metadata_client(cdir_);
+  MetadataClient metadata_client(dbctx_->config_directory);
   HashMap<SHA1Hash, ShreddedRecordListBuilder> records;
   HashMap<SHA1Hash, Set<String>> servers;
 
-  auto table = pmap_->findTable(tsdb_namespace, table_name);
+  auto table = dbctx_->partition_map->findTable(tsdb_namespace, table_name);
   if (table.isEmpty() || table.get()->config().deleted()) {
     return ReturnCode::errorf("ENOTFOUND", "table not found: $0", table_name);
   }
@@ -628,7 +650,7 @@ ReturnCode TableService::insertRecords(
   /* perform local inserts */
   std::vector<std::string> remote_servers;
   for (const auto& server : servers) {
-    if (server == cdir_->getServerID()) {
+    if (server == dbctx_->config_directory->getServerID()) {
       logDebug(
           "evqld",
           "Inserting $0 records into evql://localhost/$1/$2/$3",
@@ -681,8 +703,8 @@ ReturnCode TableService::insertRecords(
 
   /* execute rpcs */
   native_transport::TCPAsyncClient rpc_client(
-      config_,
-      cdir_,
+      dbctx_->config,
+      dbctx_->config_directory,
       remote_servers.size(), /* max_concurrent_tasks */
       1,                     /* max_concurrent_tasks_per_host */
       true);                 /* tolerate failures */
@@ -724,7 +746,7 @@ ReturnCode TableService::insertRecordsLocal(
     const String& table_name,
     const SHA1Hash& partition_key,
     const ShreddedRecordList& records) try {
-  auto partition = pmap_->findOrCreatePartition(
+  auto partition = dbctx_->partition_map->findOrCreatePartition(
       tsdb_namespace,
       table_name,
       partition_key);
@@ -735,7 +757,7 @@ ReturnCode TableService::insertRecordsLocal(
   if (!inserted_ids.empty()) {
     auto change = mkRef(new PartitionChangeNotification());
     change->partition = partition;
-    pmap_->publishPartitionChange(change);
+    dbctx_->partition_map->publishPartitionChange(change);
   }
 
   return ReturnCode::success();
@@ -747,7 +769,7 @@ void TableService::compactPartition(
     const String& tsdb_namespace,
     const String& table_name,
     const SHA1Hash& partition_key) {
-  auto partition = pmap_->findOrCreatePartition(
+  auto partition = dbctx_->partition_map->findOrCreatePartition(
       tsdb_namespace,
       table_name,
       partition_key);
@@ -756,7 +778,7 @@ void TableService::compactPartition(
   if (writer->compact(true)) {
     auto change = mkRef(new PartitionChangeNotification());
     change->partition = partition;
-    pmap_->publishPartitionChange(change);
+    dbctx_->partition_map->publishPartitionChange(change);
   }
 }
 
@@ -764,7 +786,7 @@ void TableService::commitPartition(
     const String& tsdb_namespace,
     const String& table_name,
     const SHA1Hash& partition_key) {
-  auto partition = pmap_->findOrCreatePartition(
+  auto partition = dbctx_->partition_map->findOrCreatePartition(
       tsdb_namespace,
       table_name,
       partition_key);
@@ -773,14 +795,14 @@ void TableService::commitPartition(
   if (writer->commit()) {
     auto change = mkRef(new PartitionChangeNotification());
     change->partition = partition;
-    pmap_->publishPartitionChange(change);
+    dbctx_->partition_map->publishPartitionChange(change);
   }
 }
 
 Option<RefPtr<msg::MessageSchema>> TableService::tableSchema(
     const String& tsdb_namespace,
     const String& table_key) {
-  auto table = pmap_->findTable(
+  auto table = dbctx_->partition_map->findTable(
       tsdb_namespace,
       table_key);
 
@@ -794,7 +816,7 @@ Option<RefPtr<msg::MessageSchema>> TableService::tableSchema(
 Option<TableDefinition> TableService::tableConfig(
     const String& tsdb_namespace,
     const String& table_key) {
-  auto table = pmap_->findTable(
+  auto table = dbctx_->partition_map->findTable(
       tsdb_namespace,
       table_key);
 

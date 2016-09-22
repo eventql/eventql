@@ -369,10 +369,45 @@ Binary Protocols.
     <no response>
 
 
+6.1.14 INSERT
+
+  The INSERT frame is sent from a client to a server to start an insert
+  operation. The INSERT message initiates a new request. A INSERT message must
+  not be sent while another request is still running.
+
+  Payload:
+    lenencint      flags
+    lenencstr      database
+    lenencstr      table
+    lenencint      records_encoding
+    lenencint      records_count
+    lenenecstr     *records
+
+  Fields:
+    flags              Currently unused
+    database           The database in which the records should be inserted
+    table              The table in which the records should be inserted
+    records_count      The number of records in this INSERT frame
+    records            The list of records
+    records_encoding   The record encoding:
+                         0x01  JSON
+
+  Response:
+    After sending an INSERT message, the client should expect to receive one of
+    these response messages:
+      - ERROR
+      - HEARTBEAT
+      - ACK
+
+    The request is considered completed once the client has received a response
+    frame with the EVQL_ENDOFREQUEST flag set.  After the request is complete,
+    the server will not send any further messages.
+
+
 6.2.1 QUERY_PARTIALAGGR
 
-  The QUERY_PARTIALAGGR is used to execute a partial aggregation on a remote
-  server.
+  The QUERY_PARTIALAGGR frame is used to execute a partial aggregation on a
+  remote server.
 
   The QUERY_PARTIALAGGR message initiates a new request. A QUERY_PARTIALAGGR
   message must not be sent while another request is still running.

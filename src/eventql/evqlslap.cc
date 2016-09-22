@@ -145,28 +145,41 @@ int main(int argc, const char** argv) {
     return 1;
   }
 
-  eventql::cli::Benchmark benchmark;
+  auto request_handler = []() {
+    //FIXME send request
+    return ReturnCode::success();
+  };
+
   bool line_dirty = false;
 
-  auto on_progress = [&benchmark, &stdout_os, &line_dirty]() {
+  auto on_progress = [&stdout_os, &line_dirty]() {
     if (line_dirty) {
       stdout_os->eraseLine();
     }
 
     try {
-      stdout_os->print("\r" + benchmark.getStats()->toString());
+      //stdout_os->print("\r" + benchmark.getStats()->toString());
       line_dirty = true;
     } catch (const std::exception& e) {
       /* fallthrough */
     }
   };
 
+  eventql::cli::Benchmark benchmark(
+      flags.getInt("connections"),
+      flags.getInt("rate"),
+      flags.isSet("num") ? flags.getInt("num") : -1);
+
+  benchmark.setRequestHandler(request_handler);
   benchmark.setProgressCallback(on_progress);
+
   auto rc = benchmark.run();
+
+  if (line_dirty) {
+    stdout_os->eraseLine();
+  }
+
   if (rc.isSuccess()) {
-    if (line_dirty) {
-      stdout_os->eraseLine();
-    }
     try {
       stdout_os->print("\r" + benchmark.getStats()->toString() + "\n");
       return 0;

@@ -57,7 +57,7 @@ void PartitionWriter::freeze() {
 }
 
 LSMPartitionWriter::LSMPartitionWriter(
-    DatabaseContext* cfg,
+    DatabaseContext* dbctx,
     RefPtr<Partition> partition,
     PartitionSnapshotRef* head) :
     PartitionWriter(head),
@@ -65,10 +65,8 @@ LSMPartitionWriter::LSMPartitionWriter(
     compaction_strategy_(
         new SimpleCompactionStrategy(
             partition_,
-            cfg->lsm_index_cache)),
-    idx_cache_(cfg->lsm_index_cache),
-    file_tracker_(cfg->file_tracker),
-    cdir_(cfg->config_directory),
+            dbctx->lsm_index_cache)),
+    dbctx_(dbctx),
     partition_split_threshold_(kDefaultPartitionSplitThresholdBytes) {
   auto table = partition_->getTable();
   auto table_cfg = table->config();
@@ -93,7 +91,7 @@ Set<SHA1Hash> LSMPartitionWriter::insertRecords(
     const auto& tables = snap->state.lsm_tables();
     for (auto tbl = tables.rbegin(); tbl != tables.rend(); ++tbl) {
       auto idx_path = FileUtil::joinPaths(snap->rel_path, tbl->filename());
-      auto idx = idx_cache_->lookup(idx_path);
+      auto idx = dbctx_->lsm_index_cache->lookup(idx_path);
       idx->lookup(&rec_versions);
       prepared_indexes.insert(idx_path);
     }
@@ -135,7 +133,7 @@ Set<SHA1Hash> LSMPartitionWriter::insertRecords(
         continue;
       }
 
-      auto idx = idx_cache_->lookup(idx_path);
+      auto idx = dbctx_->lsm_index_cache->lookup(idx_path);
       idx->lookup(&rec_versions);
     }
 
@@ -373,10 +371,10 @@ bool LSMPartitionWriter::compact(bool force /* = false */) {
       auto fpath = FileUtil::joinPaths(snap->rel_path, f);
       delete_filenames_full.insert(fpath + ".cst");
       delete_filenames_full.insert(fpath + ".idx");
-      idx_cache_->flush(fpath);
+      dbctx_->lsm_index_cache->flush(fpath);
     }
 
-    file_tracker_->deleteFiles(delete_filenames_full);
+    dbctx_->file_tracker->deleteFiles(delete_filenames_full);
   }
 
   // maybe split this partition
@@ -458,7 +456,7 @@ Status LSMPartitionWriter::split() {
       snap->key.toString(),
       midpoint);
 
-  auto cconf = cdir_->getClusterConfig();
+  auto cconf = dbctx_->config_directory->getClusterConfig();
   auto split_partition_id_low = Random::singleton()->sha1();
   auto split_partition_id_high = Random::singleton()->sha1();
 
@@ -477,11 +475,9 @@ Status LSMPartitionWriter::split() {
     op.set_finalize_immediately(true);
   }
 
-  ServerAllocator server_alloc(cdir_);
-
   std::vector<String> split_servers_low;
   {
-    auto rc = server_alloc.allocateServers(
+    auto rc = dbctx_->server_alloc->allocateServers(
         ServerAllocator::MUST_ALLOCATE,
         cconf.replication_factor(),
         Set<String>{},
@@ -497,7 +493,7 @@ Status LSMPartitionWriter::split() {
 
   std::vector<String> split_servers_high;
   {
-    auto rc = server_alloc.allocateServers(
+    auto rc = dbctx_->server_alloc->allocateServers(
         ServerAllocator::MUST_ALLOCATE,
         cconf.replication_factor(),
         Set<String>{},
@@ -511,7 +507,7 @@ Status LSMPartitionWriter::split() {
     op.add_split_servers_high(s);
   }
 
-  auto table_config = cdir_->getTableConfig(
+  auto table_config = dbctx_->config_directory->getTableConfig(
       snap->state.tsdb_namespace(),
       snap->state.table_key());
   MetadataOperation envelope(
@@ -524,7 +520,7 @@ Status LSMPartitionWriter::split() {
       Random::singleton()->sha1(),
       *msg::encode(op));
 
-  MetadataCoordinator coordinator(cdir_);
+  MetadataCoordinator coordinator(dbctx_->config_directory);
   return coordinator.performAndCommitOperation(
       snap->state.tsdb_namespace(),
       snap->state.table_key(),
