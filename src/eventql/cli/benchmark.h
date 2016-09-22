@@ -82,6 +82,7 @@ protected:
   bool getRequestSlot(size_t idx);
 
   size_t num_threads_;
+  uint64_t rate_;
   uint64_t rate_limit_interval_;
   size_t remaining_requests_;
   ReturnCode status_;

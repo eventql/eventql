@@ -44,6 +44,7 @@ Benchmark::Benchmark(
     size_t rate,
     size_t remaining_requests /* = size_t(-1) */) :
     num_threads_(num_threads),
+    rate_(rate),
     rate_limit_interval_(0),
     remaining_requests_(remaining_requests),
     status_(ReturnCode::success()),
@@ -153,8 +154,16 @@ bool Benchmark::getRequestSlot(size_t idx) {
       return true;
     }
 
-    auto now = MonotonicClock::now();
-    if (last_request_time_ + rate_limit_interval_ <= now) {
+    double real_rate  = stats_.getRollingRPS();
+    double target_rate = rate_;
+    uint64_t delay_comp = 0;
+    if (real_rate < target_rate) {
+      delay_comp = kMicrosPerSecond * (1.0f - (real_rate / target_rate));
+    }
+
+    auto now = MonotonicClock::now() ;
+    if (delay_comp > rate_limit_interval_||
+        last_request_time_ + (rate_limit_interval_ - delay_comp) <= now) {
       last_request_time_ = now;
       if (remaining_requests_ != size_t(-1)) {
         --remaining_requests_;
@@ -162,7 +171,7 @@ bool Benchmark::getRequestSlot(size_t idx) {
       break;
     }
 
-    auto wait = (last_request_time_ + rate_limit_interval_) - now;
+    auto wait = (last_request_time_ + rate_limit_interval_ - delay_comp) - now;
     cv_.wait_for(lk, std::chrono::microseconds(wait));
   }
 
