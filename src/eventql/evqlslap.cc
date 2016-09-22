@@ -156,19 +156,19 @@ int main(int argc, const char** argv) {
     try {
       stdout_os->eraseLine();
       auto line = StringUtil::format(
-          "\rRunning... rate=$0r/s, avg_runtime=$1ms, total=$2 ",
+          "\rRunning... rate=$0r/s, avg_runtime=$1ms, total=$2",
           stats->getRollingRPS(),
           stats->getRollingAverageRuntime() / double(kMicrosPerMilli),
           stats->getTotalRequestCount());
 
       if (num > 0) {
         line += StringUtil::format(
-            "($0%) ",
-            double(stats->getTotalRequestCount()) / double(num));
+            " ($0%)",
+            double(stats->getTotalRequestCount()) / double(num) * 100.0);
       }
 
       line += StringUtil::format(
-          ",running=$0, errors=$1 ($2%)",
+          ", running=$0, errors=$1 ($2%)",
           stats->getRunningRequestCount(),
           stats->getTotalErrorCount(),
           stats->getTotalErrorRate() * 100.0f);
