@@ -87,7 +87,9 @@ public:
 
 protected:
 
-  ReturnCode performHandshake();
+  ReturnCode performHandshake(
+      bool is_internal,
+      const AuthDataType& auth_data);
 
   ProcessConfig* config_;
   ConfigDirectory* cdir_;

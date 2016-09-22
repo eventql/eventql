@@ -77,9 +77,12 @@ void HelloFrame::addAuthData(const std::string& key, const std::string& value) {
   auth_data_.emplace_back(key, value);
 }
 
-const std::vector<std::pair<std::string, std::string>>&
-    HelloFrame::getAuthData() const {
+const HelloFrame::AuthDataType& HelloFrame::getAuthData() const {
   return auth_data_;
+}
+
+void HelloFrame::setAuthData(const HelloFrame::AuthDataType& auth_data) {
+  auth_data_ = auth_data;
 }
 
 ReturnCode HelloFrame::readFrom(InputStream* is) {

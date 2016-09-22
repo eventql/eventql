@@ -118,7 +118,7 @@ ReturnCode TCPClient::connect(
 
   conn_.reset(new TCPConnection(fd, io_timeout_));
 
-  auto handshake_rc = performHandshake();
+  auto handshake_rc = performHandshake(is_internal, auth_data);
   if (!handshake_rc.isSuccess()) {
     close();
   }
@@ -126,10 +126,14 @@ ReturnCode TCPClient::connect(
   return handshake_rc;
 }
 
-ReturnCode TCPClient::performHandshake() {
+ReturnCode TCPClient::performHandshake(
+    bool is_internal,
+    const AuthDataType& auth_data) {
   native_transport::HelloFrame f_hello;
-  f_hello.setIsInternal(true);
+  f_hello.setIsInternal(is_internal);
+  f_hello.setInteractiveAuth(false);
   f_hello.setIdleTimeout(idle_timeout_);
+  f_hello.setAuthData(auth_data);
 
   auto rc = sendFrame(&f_hello, 0);
   if (!rc.isSuccess()) {
