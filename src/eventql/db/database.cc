@@ -298,10 +298,7 @@ ReturnCode DatabaseImpl::start() {
   server_cfg_->file_tracker = file_tracker_.get();
 
   /* core */
-<<<<<<< HEAD
-=======
   partition_map_.reset(new PartitionMap(database_context_.get()));
->>>>>>> 7bba93dcd74704371148e24b54091a01defe6bc5
   table_service_.reset(new TableService(database_context_.get()));
 
   replication_worker_.reset(

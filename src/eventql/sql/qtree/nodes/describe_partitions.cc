@@ -44,8 +44,10 @@ const String& DescribePartitionsNode::tableName() const {
 Vector<String> DescribePartitionsNode::getResultColumns() const {
   return Vector<String> {
     "Partition id",
+    "Servers",
     "Keyrange Begin",
-    "Servers"
+    "Keyrange End",
+    "Extra info"
   };
 }
 

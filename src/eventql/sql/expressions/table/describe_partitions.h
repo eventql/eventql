@@ -32,7 +32,7 @@ namespace csql {
 class DescribePartitionsExpression : public TableExpression {
 public:
 
-  static const size_t kNumColumns = 3;
+  static const size_t kNumColumns = 5;
 
   DescribePartitionsExpression(
       Transaction* txn,
