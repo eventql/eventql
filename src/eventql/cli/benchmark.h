@@ -63,6 +63,8 @@ public:
   using RequestCallbackType = std::function<ReturnCode ()>;
   using ProgressCallbackType = std::function<void (BenchmarkStats* stats)>;
 
+  static const uint64_t kDefaultProgressRateLimit = kMicrosPerSecond;
+
   Benchmark(
       size_t num_threads,
       size_t rate,
@@ -70,6 +72,7 @@ public:
 
   void setRequestHandler(RequestCallbackType handler);
   void setProgressCallback(ProgressCallbackType cb);
+  void setProgressRateLimit(uint64_t rate_limit_us);
 
   ReturnCode run();
   void kill();
@@ -81,8 +84,8 @@ protected:
   void runThread(size_t idx);
   bool getRequestSlot(size_t idx);
 
-  size_t num_threads_;
-  uint64_t rate_;
+  const size_t num_threads_;
+  const uint64_t rate_;
   uint64_t rate_limit_interval_;
   size_t remaining_requests_;
   ReturnCode status_;
@@ -93,6 +96,7 @@ protected:
   uint64_t last_request_time_;
   RequestCallbackType request_handler_;
   ProgressCallbackType on_progress_;
+  uint64_t progress_rate_limit_;
   BenchmarkStats stats_;
 };
 

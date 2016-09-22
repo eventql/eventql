@@ -147,7 +147,7 @@ int main(int argc, const char** argv) {
   }
 
   auto request_handler = []() {
-    usleep(100000);
+    usleep(1000);
     return ReturnCode::success();
   };
 
@@ -176,6 +176,7 @@ int main(int argc, const char** argv) {
 
   benchmark.setRequestHandler(request_handler);
   benchmark.setProgressCallback(on_progress);
+  benchmark.setProgressRateLimit(kMicrosPerSecond / 10);
 
   auto rc = benchmark.run();
   stdout_os->eraseLine();

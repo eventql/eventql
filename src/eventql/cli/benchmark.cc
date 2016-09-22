@@ -49,7 +49,8 @@ Benchmark::Benchmark(
     remaining_requests_(remaining_requests),
     status_(ReturnCode::success()),
     threads_running_(0),
-    last_request_time_(0) {
+    last_request_time_(0),
+    progress_rate_limit_(kDefaultProgressRateLimit) {
   if (rate > 0 && rate < kMicrosPerSecond) {
     rate_limit_interval_ = kMicrosPerSecond / rate;
   }
@@ -65,6 +66,10 @@ void Benchmark::setProgressCallback(ProgressCallbackType cb) {
   on_progress_ = cb;
 }
 
+void Benchmark::setProgressRateLimit(uint64_t rate_limit_us) {
+  progress_rate_limit_ = rate_limit_us;
+}
+
 ReturnCode Benchmark::run() {
   if (!request_handler_) {
     return ReturnCode::error("ERUNTIME", "no request handler set");
@@ -78,14 +83,13 @@ ReturnCode Benchmark::run() {
   {
     std::unique_lock<std::mutex> lk(mutex_);
     while (threads_running_ > 0) {
-      cv_.wait_for(lk, std::chrono::microseconds(kMicrosPerSecond / 10)); // FIXME
+      cv_.wait_for(lk, std::chrono::microseconds(progress_rate_limit_));
       lk.unlock();
       if (on_progress_) {
-        on_progress_(&stats_); //FIXME pass BenchmarkStats
+        on_progress_(&stats_);
       }
 
       lk.lock();
-      // FIXME rate limit progress callback?
     }
   }
 
