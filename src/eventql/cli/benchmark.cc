@@ -56,11 +56,11 @@ Benchmark::Benchmark(
   threads_.resize(num_threads_);
 }
 
-void Benchmark::setRequestHandler(std::function<ReturnCode ()> handler) {
+void Benchmark::setRequestHandler(RequestCallbackType handler) {
   request_handler_ = handler;
 }
 
-void Benchmark::setProgressCallback(std::function<void ()> cb) {
+void Benchmark::setProgressCallback(ProgressCallbackType cb) {
   on_progress_ = cb;
 }
 
@@ -78,9 +78,12 @@ ReturnCode Benchmark::run() {
     std::unique_lock<std::mutex> lk(mutex_);
     while (threads_running_ > 0) {
       cv_.wait_for(lk, std::chrono::microseconds(kMicrosPerSecond / 10)); // FIXME
+      lk.unlock();
       if (on_progress_) {
-        on_progress_(); //FIXME pass BenchmarkStats
+        on_progress_(&stats_); //FIXME pass BenchmarkStats
       }
+
+      lk.lock();
       // FIXME rate limit progress callback?
     }
   }
@@ -164,6 +167,72 @@ bool Benchmark::getRequestSlot(size_t idx) {
   }
 
   return true;
+}
+
+BenchmarkStats::BenchmarkStats() :
+    total_request_count_(0),
+    running_request_count_(0),
+    total_error_count_(0) {}
+
+void BenchmarkStats::addRequestStart() {
+  std::unique_lock<std::mutex> lk(mutex_);
+  auto b = rolling_rps_.getCurrent();
+  ++b->value;
+  b->count = 1;
+
+  ++total_request_count_;
+  ++running_request_count_;
+}
+
+void BenchmarkStats::addRequestComplete(bool is_success, uint64_t runtime_us) {
+  std::unique_lock<std::mutex> lk(mutex_);
+  auto b = rolling_avg_runtime_.getCurrent();
+  b->value += runtime_us;
+  ++(b->count);
+
+  --running_request_count_;
+
+  if (!is_success) {
+    ++total_error_count_;
+  }
+}
+
+double BenchmarkStats::getRollingRPS() const {
+  std::unique_lock<std::mutex> lk(mutex_);
+  double interval =
+      double(rolling_rps_.getBucketInterval()) /
+      double(kMicrosPerSecond);
+
+  double q;
+  rolling_rps_.computeAggregate(&q);
+  return q / interval;
+}
+
+double BenchmarkStats::getRollingAverageRuntime() const {
+  std::unique_lock<std::mutex> lk(mutex_);
+  double q;
+  rolling_avg_runtime_.computeAggregate(&q);
+  return q;
+}
+
+uint64_t BenchmarkStats::getTotalRequestCount() const {
+  std::unique_lock<std::mutex> lk(mutex_);
+  return total_request_count_;
+}
+
+uint64_t BenchmarkStats::getRunningRequestCount() const {
+  std::unique_lock<std::mutex> lk(mutex_);
+  return running_request_count_;
+}
+
+uint64_t BenchmarkStats::getTotalErrorCount() const {
+  std::unique_lock<std::mutex> lk(mutex_);
+  return total_error_count_;
+}
+
+double BenchmarkStats::getTotalErrorRate() const {
+  std::unique_lock<std::mutex> lk(mutex_);
+  return (double) total_error_count_ / (double) total_request_count_;
 }
 
 } //cli

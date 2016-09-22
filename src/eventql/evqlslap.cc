@@ -22,6 +22,7 @@
  * code of your own applications
  */
 #include <iostream>
+#include <unistd.h>
 #include "eventql/eventql.h"
 #include "eventql/util/application.h"
 #include "eventql/util/io/inputstream.h"
@@ -146,20 +147,23 @@ int main(int argc, const char** argv) {
   }
 
   auto request_handler = []() {
-    //FIXME send request
+    usleep(100000);
     return ReturnCode::success();
   };
 
-  bool line_dirty = false;
 
-  auto on_progress = [&stdout_os, &line_dirty]() {
-    if (line_dirty) {
-      stdout_os->eraseLine();
-    }
-
+  auto on_progress = [&stdout_os](eventql::cli::BenchmarkStats* stats) {
     try {
-      //stdout_os->print("\r" + benchmark.getStats()->toString());
-      line_dirty = true;
+      stdout_os->eraseLine();
+      stdout_os->print(StringUtil::format(
+          "\rRunning... rate=$0r/s, avg_runtime=$1ms, total=$2, running=$3, "
+          "errors=$4 ($5%)",
+          stats->getRollingRPS(),
+          stats->getRollingAverageRuntime() / double(kMicrosPerMilli),
+          stats->getTotalRequestCount(),
+          stats->getRunningRequestCount(),
+          stats->getTotalErrorCount(),
+          stats->getTotalErrorRate() * 100.0f));
     } catch (const std::exception& e) {
       /* fallthrough */
     }
@@ -174,14 +178,11 @@ int main(int argc, const char** argv) {
   benchmark.setProgressCallback(on_progress);
 
   auto rc = benchmark.run();
-
-  if (line_dirty) {
-    stdout_os->eraseLine();
-  }
+  stdout_os->eraseLine();
 
   if (rc.isSuccess()) {
     try {
-      stdout_os->print("\r" + benchmark.getStats()->toString() + "\n");
+      std::cout << "success" << std::endl;
       return 0;
     } catch (const std::exception& e) {
       std::cerr << e.what() << std::endl;

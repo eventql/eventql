@@ -24,9 +24,10 @@
  */
 #pragma once
 #include <thread>
-#include <eventql/eventql.h>
-#include <eventql/util/stdtypes.h>
-#include <eventql/util/return_code.h>
+#include "eventql/eventql.h"
+#include "eventql/util/stdtypes.h"
+#include "eventql/util/return_code.h"
+#include "eventql/util/rolling_stat.h"
 
 namespace eventql {
 namespace cli {
@@ -39,22 +40,36 @@ public:
   void addRequestStart();
   void addRequestComplete(bool is_success, uint64_t runtime_us);
 
-  std::string toString() const;
+  double getRollingRPS() const;
+  double getRollingAverageRuntime() const;
+  uint64_t getTotalRequestCount() const;
+  uint64_t getRunningRequestCount() const;
+  uint64_t getTotalErrorCount() const;
+  double getTotalErrorRate() const;
 
 protected:
-  std::mutex mutex_;
+
+  RollingStat rolling_rps_;
+  RollingStat rolling_avg_runtime_;
+  uint64_t total_request_count_;
+  uint64_t running_request_count_;
+  uint64_t total_error_count_;
+  mutable std::mutex mutex_;
 };
 
 class Benchmark {
 public:
+
+  using RequestCallbackType = std::function<ReturnCode ()>;
+  using ProgressCallbackType = std::function<void (BenchmarkStats* stats)>;
 
   Benchmark(
       size_t num_threads,
       size_t rate,
       size_t remaining_requests = size_t(-1));
 
-  void setRequestHandler(std::function<ReturnCode ()> handler);
-  void setProgressCallback(std::function<void ()> cb);
+  void setRequestHandler(RequestCallbackType handler);
+  void setProgressCallback(ProgressCallbackType cb);
 
   ReturnCode run();
   void kill();
@@ -75,10 +90,11 @@ protected:
   std::vector<std::thread> threads_;
   size_t threads_running_;
   uint64_t last_request_time_;
-  std::function<ReturnCode ()> request_handler_;
-  std::function<void ()> on_progress_;
+  RequestCallbackType request_handler_;
+  ProgressCallbackType on_progress_;
   BenchmarkStats stats_;
 };
+
 
 } //cli
 } //eventql
