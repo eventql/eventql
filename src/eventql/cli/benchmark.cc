@@ -185,22 +185,15 @@ BenchmarkStats::BenchmarkStats() :
 
 void BenchmarkStats::addRequestStart() {
   std::unique_lock<std::mutex> lk(mutex_);
-  auto b = rolling_rps_.getCurrent();
-  ++b->value;
-  b->count = 1;
-
+  rolling_rps_.addValue(1);
   ++total_request_count_;
   ++running_request_count_;
 }
 
 void BenchmarkStats::addRequestComplete(bool is_success, uint64_t runtime_us) {
   std::unique_lock<std::mutex> lk(mutex_);
-  auto b = rolling_avg_runtime_.getCurrent();
-  b->value += runtime_us;
-  ++(b->count);
-
+  rolling_avg_runtime_.addValue(runtime_us);
   --running_request_count_;
-
   if (!is_success) {
     ++total_error_count_;
   }
@@ -208,20 +201,24 @@ void BenchmarkStats::addRequestComplete(bool is_success, uint64_t runtime_us) {
 
 double BenchmarkStats::getRollingRPS() const {
   std::unique_lock<std::mutex> lk(mutex_);
-  double interval =
-      double(rolling_rps_.getBucketInterval()) /
-      double(kMicrosPerSecond);
 
-  double q;
-  rolling_rps_.computeAggregate(&q);
-  return q / interval;
+  uint64_t value;
+  uint64_t count;
+  uint64_t interval_us;
+  rolling_rps_.computeAggregate(&value, &count, &interval_us);
+
+  return double(value) / (double(interval_us) / kMicrosPerSecond);
 }
 
 double BenchmarkStats::getRollingAverageRuntime() const {
   std::unique_lock<std::mutex> lk(mutex_);
-  double q;
-  rolling_avg_runtime_.computeAggregate(&q);
-  return q;
+
+  uint64_t value;
+  uint64_t count;
+  uint64_t interval_us;
+  rolling_avg_runtime_.computeAggregate(&value, &count, &interval_us);
+
+  return double(value) / double(count);
 }
 
 uint64_t BenchmarkStats::getTotalRequestCount() const {

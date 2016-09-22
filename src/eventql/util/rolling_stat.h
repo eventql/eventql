@@ -42,15 +42,14 @@ public:
       uint64_t buckets_capacity = kDefaultNumBuckets,
       uint64_t bucket_interval_us = kDefaultBucketIntervalUs);
 
-  Bucket* getCurrent();
+  void addValue(uint64_t val);
 
-  void computeAggregate(uint64_t* value, uint64_t* count) const;
-  void computeAggregate(double* quotient) const;
-
-  uint64_t getBucketInterval() const;
+  void computeAggregate(
+      uint64_t* value,
+      uint64_t* count,
+      uint64_t* interval_us) const;
 
 protected:
-
   uint64_t buckets_capacity_;
   std::vector<Bucket> buckets_;
   uint64_t bucket_interval_us_;

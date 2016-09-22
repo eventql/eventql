@@ -35,7 +35,7 @@ RollingStat::RollingStat(
     buckets_idx_(0),
     buckets_size_(0) {}
 
-RollingStat::Bucket* RollingStat::getCurrent() {
+void RollingStat::addValue(uint64_t val) {
   auto cur_time =
       (MonotonicClock::now() / bucket_interval_us_) * bucket_interval_us_;
 
@@ -51,12 +51,17 @@ RollingStat::Bucket* RollingStat::getCurrent() {
   }
 
   assert(buckets_idx_ < buckets_.size());
-  return &buckets_[buckets_idx_];
+  buckets_[buckets_idx_].value += val;
+  ++buckets_[buckets_idx_].count;
 }
 
-void RollingStat::computeAggregate(uint64_t* value, uint64_t* count) const {
+void RollingStat::computeAggregate(
+    uint64_t* value,
+    uint64_t* count,
+    uint64_t* interval_us) const {
+  auto time_now = MonotonicClock::now();
   auto time_range = bucket_interval_us_ * buckets_capacity_;
-  auto time_begin = MonotonicClock::now();
+  auto time_begin = time_now;
   if (time_begin >= time_range) {
     time_begin -= time_range;
   } else {
@@ -69,6 +74,12 @@ void RollingStat::computeAggregate(uint64_t* value, uint64_t* count) const {
       (buckets_idx_ + (buckets_capacity_ - buckets_size_) + 1) %
       buckets_capacity_;
 
+  if (buckets_size_ == 0) {
+    *interval_us = 0;
+  } else {
+    *interval_us = time_now - buckets_[idx].time;
+  }
+
   for (uint64_t i = 0; i < buckets_size_; ++i) {
     if (buckets_[idx].time >= time_begin) {
       *value += buckets_[idx].value;
@@ -77,16 +88,5 @@ void RollingStat::computeAggregate(uint64_t* value, uint64_t* count) const {
 
     idx = (idx + 1) % buckets_capacity_;
   }
-}
-
-void RollingStat::computeAggregate(double* quotient) const {
-  uint64_t value;
-  uint64_t count;
-  computeAggregate(&value, &count);
-  *quotient = (double) value / (double) count;
-}
-
-uint64_t RollingStat::getBucketInterval() const {
-  return bucket_interval_us_;
 }
 
