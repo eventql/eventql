@@ -178,20 +178,22 @@ int main(int argc, const char** argv) {
   benchmark.setProgressCallback(on_progress);
   benchmark.setProgressRateLimit(kMicrosPerSecond / 10);
 
-  auto rc = benchmark.run();
+  auto rc = benchmark.connect(
+      flags.getString("host"),
+      flags.getInt("port"),
+      {});
+
+  if (rc.isSuccess()) {
+    rc = benchmark.run();
+  }
+
   stdout_os->eraseLine();
 
   if (rc.isSuccess()) {
-    try {
-      std::cout << "success" << std::endl;
-      return 0;
-    } catch (const std::exception& e) {
-      std::cerr << e.what() << std::endl;
-      return 1;
-    }
-
+    std::cout << "success" << std::endl;
+    return 0;
   } else {
-    std::cerr << rc.getMessage() << std::endl;
+    std::cerr << "ERROR: " << rc.getMessage() << std::endl;
     return 1;
   }
 

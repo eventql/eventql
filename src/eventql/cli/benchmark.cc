@@ -50,12 +50,12 @@ Benchmark::Benchmark(
     status_(ReturnCode::success()),
     threads_running_(0),
     last_request_time_(0),
-    progress_rate_limit_(kDefaultProgressRateLimit) {
+    progress_rate_limit_(kDefaultProgressRateLimit),
+    threads_(num_threads_),
+    clients_(num_threads_) {
   if (rate > 0 && rate < kMicrosPerSecond) {
     rate_limit_interval_ = kMicrosPerSecond / rate;
   }
-
-  threads_.resize(num_threads_);
 }
 
 void Benchmark::setRequestHandler(RequestCallbackType handler) {
@@ -68,6 +68,20 @@ void Benchmark::setProgressCallback(ProgressCallbackType cb) {
 
 void Benchmark::setProgressRateLimit(uint64_t rate_limit_us) {
   progress_rate_limit_ = rate_limit_us;
+}
+
+ReturnCode Benchmark::connect(
+    const std::string& host,
+    uint64_t port,
+    const std::vector<std::pair<std::string, std::string>>& auth_data) {
+  for (size_t i = 0; i < num_threads_; ++i) {
+    auto rc = clients_[i].connect(host, port, false, auth_data);
+    if (!rc.isSuccess()) {
+      return rc;
+    }
+  }
+
+  return ReturnCode::success();
 }
 
 ReturnCode Benchmark::run() {

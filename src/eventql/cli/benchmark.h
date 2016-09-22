@@ -28,6 +28,7 @@
 #include "eventql/util/stdtypes.h"
 #include "eventql/util/return_code.h"
 #include "eventql/util/rolling_stat.h"
+#include "eventql/transport/native/client_tcp.h"
 
 namespace eventql {
 namespace cli {
@@ -74,6 +75,11 @@ public:
   void setProgressCallback(ProgressCallbackType cb);
   void setProgressRateLimit(uint64_t rate_limit_us);
 
+  ReturnCode connect(
+      const std::string& host,
+      uint64_t port,
+      const std::vector<std::pair<std::string, std::string>>& auth_data);
+
   ReturnCode run();
   void kill();
 
@@ -89,14 +95,15 @@ protected:
   uint64_t rate_limit_interval_;
   size_t remaining_requests_;
   ReturnCode status_;
-  std::mutex mutex_;
-  std::condition_variable cv_;
-  std::vector<std::thread> threads_;
   size_t threads_running_;
   uint64_t last_request_time_;
   RequestCallbackType request_handler_;
   ProgressCallbackType on_progress_;
   uint64_t progress_rate_limit_;
+  std::mutex mutex_;
+  std::condition_variable cv_;
+  std::vector<std::thread> threads_;
+  std::vector<native_transport::TCPClient> clients_;
   BenchmarkStats stats_;
 };
 
