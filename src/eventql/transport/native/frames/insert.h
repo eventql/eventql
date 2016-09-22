@@ -2,7 +2,6 @@
  * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
  *   - Paul Asmuth <paul@eventql.io>
- *   - Laura Schlimmer <laura@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -23,38 +22,43 @@
  * code of your own applications
  */
 #pragma once
-#include <eventql/eventql.h>
-#include "eventql/cli/commands/cli_command.h"
-#include "eventql/config/process_config.h"
+#include <string>
+#include <vector>
+#include "eventql/eventql.h"
+#include "eventql/util/io/inputstream.h"
+#include "eventql/util/io/outputstream.h"
+#include "eventql/util/return_code.h"
 
 namespace eventql {
-namespace cli {
+namespace native_transport {
 
-class ClusterSetAllocationPolicy : public CLICommand {
+class InsertFrame {
 public:
-  ClusterSetAllocationPolicy(RefPtr<ProcessConfig> process_cfg);
 
-  Status execute(
-      const std::vector<std::string>& argv,
-      FileInputStream* stdin_is,
-      OutputStream* stdout_os,
-      OutputStream* stderr_os) override;
+  InsertFrame();
 
+  void setDatabase(const std::string& database);
+  void setTable(const std::string& table);
+  void setRecordEncoding(uint64_t encoding);
+  void addRecord(const std::string& record);
 
-  const String& getName() const override;
-  const String& getDescription() const override;
-  void printHelp(OutputStream* stdout_os) const override;
+  const std::string& getDatabase() const;
+  const std::string& getTable() const;
+  uint64_t getRecordEncoding() const;
+  const std::vector<std::string>& getRecords() const;
+
+  ReturnCode parseFrom(InputStream* is);
+  ReturnCode writeTo(OutputStream* os) const;
+  void clear();
 
 protected:
-  static const String kName_;
-  static const String kDescription_;
-  RefPtr<ProcessConfig> process_cfg_;
+  uint64_t flags_;
+  std::string database_;
+  std::string table_;
+  uint64_t record_encoding_;
+  std::vector<std::string> records_;
 };
 
-} // namespace cli
+} // namespace native_transport
 } // namespace eventql
-
-
-
-
 

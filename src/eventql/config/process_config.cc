@@ -75,6 +75,32 @@ Option<int64_t> ProcessConfig::getInt(const String& key) const {
   return None<int64_t>();
 }
 
+int64_t ProcessConfig::getInt(const String& key, int64_t or_else) const {
+  auto p = properties_.find(key);
+  if (p != properties_.end() && StringUtil::isNumber(p->second)) {
+    try {
+      return std::stoll(p->second);
+    } catch (std::exception e) {
+      /* fallthrough */
+    }
+  }
+
+  return or_else;
+}
+
+double ProcessConfig::getDouble(const String& key, double or_else) const {
+  auto p = properties_.find(key);
+  if (p != properties_.end()) {
+    try {
+      return std::stod(p->second);
+    } catch (std::exception e) {
+      /* fallthrough */
+    }
+  }
+
+  return or_else;
+}
+
 bool ProcessConfig::getBool(const String& key) const {
   auto p = properties_.find(key);
   if (p != properties_.end()) {

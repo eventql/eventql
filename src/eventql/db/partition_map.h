@@ -117,6 +117,11 @@ public:
       const String& table_name,
       const SHA1Hash& partition_key);
 
+  /**
+   * Blocks the calling thread until all partitions have been loaded
+   */
+  void waitUntilAllLoaded();
+
 protected:
 
   Option<RefPtr<Table>> findTableWithLock(
@@ -132,6 +137,9 @@ protected:
   OrderedMap<String, RefPtr<Table>> tables_;
   OrderedMap<String, ScopedPtr<LazyPartition>> partitions_;
   Vector<PartitionChangeCallbackFn> callbacks_;
+  bool load_complete_;
+  std::mutex load_complete_mutex_;
+  std::condition_variable load_complete_cv_;
 };
 
 } // namespace tdsb
