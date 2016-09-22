@@ -27,7 +27,6 @@
 
 /**
  * TODO:
- *   - pass arguments
  *   - benchmark stats: Benchmark::getStats()
  *   - print benchmark stats
  *   - Benchmark::connect()
@@ -40,13 +39,20 @@ namespace eventql {
 namespace cli {
 
 // FIXME pass proper arguments
-Benchmark::Benchmark() :
-    num_threads_(4),
+Benchmark::Benchmark(
+    size_t num_threads,
+    size_t rate,
+    size_t remaining_requests /* = size_t(-1) */) :
+    num_threads_(num_threads),
+    rate_limit_interval_(0),
+    remaining_requests_(remaining_requests),
     status_(ReturnCode::success()),
     threads_running_(0),
-    last_request_time_(0),
-    rate_limit_interval_(1000000),
-    remaining_requests_(5) {
+    last_request_time_(0) {
+  if (rate > 0 && rate < kMicrosPerSecond) {
+    rate_limit_interval_ = kMicrosPerSecond / rate;
+  }
+
   threads_.resize(num_threads_);
 }
 
