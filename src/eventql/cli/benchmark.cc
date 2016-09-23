@@ -41,9 +41,11 @@ namespace cli {
 // FIXME pass proper arguments
 Benchmark::Benchmark(
     size_t num_threads,
+    bool ignore_errors,
     size_t rate,
     size_t remaining_requests /* = size_t(-1) */) :
     num_threads_(num_threads),
+    ignore_errors_(ignore_errors),
     rate_(rate),
     rate_limit_interval_(0),
     remaining_requests_(remaining_requests),
@@ -133,7 +135,7 @@ void Benchmark::runThread(size_t idx) {
     auto rc = ReturnCode::success();
     auto t0 = MonotonicClock::now();
     try {
-      rc = request_handler_();
+      rc = request_handler_(&clients_[idx]);
     } catch (const std::exception& e) {
       rc = ReturnCode::error("ERUNTIME", e.what());
     }
@@ -142,7 +144,7 @@ void Benchmark::runThread(size_t idx) {
     std::unique_lock<std::mutex> lk(mutex_);
     stats_.addRequestComplete(rc.isSuccess(), t1 - t0);
 
-    if (!rc.isSuccess()) {
+    if (!ignore_errors_ && !rc.isSuccess()) {
       status_ = rc;
       cv_.notify_all();
       break;
@@ -169,7 +171,7 @@ bool Benchmark::getRequestSlot(size_t idx) {
     }
 
     if (rate_limit_interval_ == 0) {
-      return true;
+      break;
     }
 
     double real_rate  = stats_.getRollingRPS();
@@ -183,14 +185,15 @@ bool Benchmark::getRequestSlot(size_t idx) {
     if (delay_comp > rate_limit_interval_||
         last_request_time_ + (rate_limit_interval_ - delay_comp) <= now) {
       last_request_time_ = now;
-      if (remaining_requests_ != size_t(-1)) {
-        --remaining_requests_;
-      }
       break;
     }
 
     auto wait = (last_request_time_ + rate_limit_interval_ - delay_comp) - now;
     cv_.wait_for(lk, std::chrono::microseconds(wait));
+  }
+
+  if (remaining_requests_ != size_t(-1)) {
+    --remaining_requests_;
   }
 
   return true;
@@ -204,7 +207,6 @@ BenchmarkStats::BenchmarkStats() :
 void BenchmarkStats::addRequestStart() {
   std::unique_lock<std::mutex> lk(mutex_);
   rolling_rps_.addValue(1);
-  ++total_request_count_;
   ++running_request_count_;
 }
 
@@ -212,6 +214,7 @@ void BenchmarkStats::addRequestComplete(bool is_success, uint64_t runtime_us) {
   std::unique_lock<std::mutex> lk(mutex_);
   rolling_avg_runtime_.addValue(runtime_us);
   --running_request_count_;
+  ++total_request_count_;
   if (!is_success) {
     ++total_error_count_;
   }

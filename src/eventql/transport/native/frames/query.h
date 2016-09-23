@@ -2,6 +2,7 @@
  * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
  *   - Paul Asmuth <paul@eventql.io>
+ *   - Laura Schlimmer <laura@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -25,40 +26,35 @@
 #include <string>
 #include <vector>
 #include "eventql/eventql.h"
+#include "eventql/util/return_code.h"
 #include "eventql/util/io/inputstream.h"
 #include "eventql/util/io/outputstream.h"
-#include "eventql/util/return_code.h"
 
 namespace eventql {
 namespace native_transport {
 
-class InsertFrame {
+class QueryFrame {
 public:
 
-  static const uint16_t kOpcode = EVQL_OP_INSERT;
+  static const uint16_t kOpcode = EVQL_OP_QUERY;
 
-  InsertFrame();
+  QueryFrame();
 
-  void setDatabase(const std::string& database);
-  void setTable(const std::string& table);
-  void setRecordEncoding(uint64_t encoding);
-  void addRecord(const std::string& record);
-
+  const std::string& getQuery() const;
   const std::string& getDatabase() const;
-  const std::string& getTable() const;
-  uint64_t getRecordEncoding() const;
-  const std::vector<std::string>& getRecords() const;
+
+  void setQuery(const std::string& query);
+  void setDatabase(const std::string& database);
 
   ReturnCode parseFrom(InputStream* is);
-  ReturnCode writeTo(OutputStream* os) const;
+  void writeTo(OutputStream* os) const;
   void clear();
 
 protected:
   uint64_t flags_;
+  std::string query_;
+  uint64_t maxrows_;
   std::string database_;
-  std::string table_;
-  uint64_t record_encoding_;
-  std::vector<std::string> records_;
 };
 
 } // namespace native_transport

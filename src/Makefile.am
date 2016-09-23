@@ -858,6 +858,8 @@ EVQL_CORE_SOURCES_ = \
     eventql/transport/native/frames/hello.h \
     eventql/transport/native/frames/insert.cc \
     eventql/transport/native/frames/insert.h \
+    eventql/transport/native/frames/query.cc \
+    eventql/transport/native/frames/query.h \
     eventql/transport/native/frames/query_progress.cc \
     eventql/transport/native/frames/query_progress.h \
     eventql/transport/native/frames/ready.cc \
@@ -1037,6 +1039,8 @@ evqlslap_SOURCES = \
     $(EVQL_PROTO_SOURCES_) \
     eventql/cli/benchmark.h \
     eventql/cli/benchmark.cc \
+    eventql/cli/benchmark_insert.cc \
+    eventql/cli/benchmark_query.cc \
     eventql/evqlslap.cc
 
 evqlslap_LDADD = \

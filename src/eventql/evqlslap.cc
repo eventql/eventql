@@ -56,15 +56,6 @@ int main(int argc, const char** argv) {
       "<port>");
 
   flags.defineFlag(
-      "database",
-      cli::FlagParser::T_STRING,
-      false,
-      "d",
-      NULL,
-      "database",
-      "<db>");
-
-  flags.defineFlag(
       "connections",
       cli::FlagParser::T_INTEGER,
       false,
@@ -90,6 +81,69 @@ int main(int argc, const char** argv) {
       NULL,
       "total number of request (inifite if unset)",
       "<rate>");
+
+  flags.defineFlag(
+      "ignore_errors",
+      cli::FlagParser::T_SWITCH,
+      false,
+      "i",
+      NULL,
+      "ignore errors",
+      "<switch>");
+
+  flags.defineFlag(
+      "mode",
+      cli::FlagParser::T_STRING,
+      false,
+      "m",
+      "query",
+      "mode",
+      "<mode>");
+
+  flags.defineFlag(
+      "payload",
+      cli::FlagParser::T_STRING,
+      false,
+      "x",
+      NULL,
+      "payload",
+      "<payload>");
+
+  flags.defineFlag(
+      "database",
+      cli::FlagParser::T_STRING,
+      false,
+      "d",
+      NULL,
+      "database",
+      "<db>");
+
+  flags.defineFlag(
+      "user",
+      cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      NULL,
+      "username",
+      "<user>");
+
+  flags.defineFlag(
+      "password",
+      cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      NULL,
+      "password",
+      "<password>");
+
+  flags.defineFlag(
+      "auth_token",
+      cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      NULL,
+      "auth token",
+      "<auth_token>");
 
   flags.defineFlag(
       "help",
@@ -136,23 +190,43 @@ int main(int argc, const char** argv) {
   if (print_help) {
     std::cout <<
         "Usage: $ evqlslap [OPTIONS]\n\n"
-        "   -h, --host <hostname>     Set the EventQL server hostname\n"
-        "   -p, --port <port>         Set the EventQL server port\n"
-        "   -D, --database <db>       Select a database\n"
         "   -c, --connections <num>   Number of concurrent connections\n"
         "   -r, --rate <rate>         Maximum rate of requests in RPS\n"
-        "   -n, --num <num>           Maximum total number of request (default is inifite)\n"
+        "   -n, --num <num>           Maximum total number of request (default is infinite)\n"
+        "   -i, --ignore_errors       Ignore errors (i.e. continue to run after an error)\n"
+        "   -h, --host <hostname>     Set the EventQL server hostname\n"
+        "   -p, --port <port>         Set the EventQL server port\n"
+        "   -x, --payload <data>      Set the payload (i.e. the sql query)\n"
+        "   -d, --database <db>       Select a database\n"
+        "   --user <user>             Set the EventQL username\n"
+        "   --password <password>     Set the password\n"
+        "   --auth_token <token>      Set the EventQL auth token\n"
         "   -?, --help                Display the help text and exit\n"
         "   -v, --version             Display the version of this binary and exit\n";
 
     return 1;
   }
 
-  auto request_handler = []() {
-    usleep(1000);
-    return ReturnCode::success();
-  };
 
+  /* set up request callback */
+  eventql::cli::Benchmark::RequestCallbackType request_handler;
+  auto mode = flags.getString("mode");
+
+  if (!request_handler && mode == "query") {
+    request_handler = std::bind(
+        eventql::cli::benchmark_query,
+        std::placeholders::_1,
+        flags.getString("database"),
+        flags.getString("payload"));
+  }
+
+  if (!request_handler) {
+    std::cerr << "ERROR: invalid mode: " << mode << std::endl;
+    return 1;
+  }
+
+
+  /* set up progress callback */
   const bool is_tty = ::isatty(STDERR_FILENO);
   auto num = flags.isSet("num") ? flags.getInt("num") : -1;
 
@@ -196,8 +270,26 @@ int main(int argc, const char** argv) {
     std::cerr << line.str();
   };
 
+
+  /* load auth data */
+  std::vector<std::pair<std::string, std::string>> auth_data;
+  if (flags.isSet("auth_token")) {
+    auth_data.emplace_back("auth_token", flags.getString("auth_token"));
+  }
+
+  if (flags.isSet("user")) {
+    auth_data.emplace_back("user", flags.getString("user"));
+  }
+
+  if (flags.isSet("password")) {
+    auth_data.emplace_back("password", flags.getString("password"));
+  }
+
+
+  /* run benchmark */
   eventql::cli::Benchmark benchmark(
       flags.getInt("connections"),
+      flags.isSet("ignore_errors"),
       flags.getInt("rate"),
       num);
 
@@ -208,7 +300,7 @@ int main(int argc, const char** argv) {
   auto rc = benchmark.connect(
       flags.getString("host"),
       flags.getInt("port"),
-      {});
+      auth_data);
 
   if (rc.isSuccess()) {
     rc = benchmark.run();
@@ -218,6 +310,7 @@ int main(int argc, const char** argv) {
     std::cerr << kEraseEscapeSequence << "\r";
   }
 
+  /* print results */
   if (rc.isSuccess()) {
     std::cout << "success" << std::endl;
     return 0;

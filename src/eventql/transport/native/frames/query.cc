@@ -2,6 +2,7 @@
  * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
  *   - Paul Asmuth <paul@eventql.io>
+ *   - Laura Schlimmer <laura@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -21,45 +22,50 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#pragma once
-#include <string>
-#include <vector>
-#include "eventql/eventql.h"
-#include "eventql/util/io/inputstream.h"
-#include "eventql/util/io/outputstream.h"
-#include "eventql/util/return_code.h"
+#include "eventql/transport/native/frames/query.h"
 
 namespace eventql {
 namespace native_transport {
 
-class InsertFrame {
-public:
+QueryFrame::QueryFrame() : flags_(0), maxrows_(0) {};
 
-  static const uint16_t kOpcode = EVQL_OP_INSERT;
+void QueryFrame::setQuery(const std::string& query) {
+  query_ = query;
+}
 
-  InsertFrame();
+const std::string& QueryFrame::getQuery() const {
+  return query_;
+}
 
-  void setDatabase(const std::string& database);
-  void setTable(const std::string& table);
-  void setRecordEncoding(uint64_t encoding);
-  void addRecord(const std::string& record);
+void QueryFrame::setDatabase(const std::string& database) {
+  database_ = database;
+  flags_ |= EVQL_QUERY_SWITCHDB;
+}
 
-  const std::string& getDatabase() const;
-  const std::string& getTable() const;
-  uint64_t getRecordEncoding() const;
-  const std::vector<std::string>& getRecords() const;
+const std::string& QueryFrame::getDatabase() const {
+  return database_;
+}
 
-  ReturnCode parseFrom(InputStream* is);
-  ReturnCode writeTo(OutputStream* os) const;
-  void clear();
+ReturnCode QueryFrame::parseFrom(InputStream* is) {
+  query_ = is->readLenencString();
+  flags_ = is->readVarUInt();
+  maxrows_ = is->readVarUInt();
 
-protected:
-  uint64_t flags_;
-  std::string database_;
-  std::string table_;
-  uint64_t record_encoding_;
-  std::vector<std::string> records_;
-};
+  if (flags_ & EVQL_QUERY_SWITCHDB) {
+    database_ = is->readLenencString();
+  }
+
+  return ReturnCode::success();
+}
+
+void QueryFrame::writeTo(OutputStream* os) const {
+  os->appendLenencString(query_);
+  os->appendVarUInt(flags_);
+  os->appendVarUInt(maxrows_);
+  if (flags_ & EVQL_QUERY_SWITCHDB) {
+    os->appendLenencString(database_);
+  }
+}
 
 } // namespace native_transport
 } // namespace eventql
