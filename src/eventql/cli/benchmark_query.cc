@@ -56,7 +56,7 @@ ReturnCode benchmark_query(
         &ret_opcode,
         &ret_flags,
         &ret_payload,
-        kMicrosPerSecond); // FIXME
+        kMicrosPerSecond * 10); // FIXME
 
     if (!rc.isSuccess()) {
       return rc;
