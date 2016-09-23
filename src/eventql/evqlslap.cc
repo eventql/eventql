@@ -22,6 +22,8 @@
  * code of your own applications
  */
 #include <iostream>
+#include <sstream>
+#include <iomanip>
 #include <unistd.h>
 #include "eventql/eventql.h"
 #include "eventql/util/application.h"
@@ -29,6 +31,8 @@
 #include "eventql/util/io/TerminalOutputStream.h"
 #include "eventql/util/cli/flagparser.h"
 #include "eventql/cli/benchmark.h"
+
+static const char kEraseEscapeSequence[] = "\e[2K";
 
 int main(int argc, const char** argv) {
   cli::FlagParser flags;
@@ -160,7 +164,6 @@ int main(int argc, const char** argv) {
       "<switch>");
 
   Application::init();
-  auto stdout_os = TerminalOutputStream::fromStream(OutputStream::getStdout());
 
   try {
     flags.parseArgv(argc, argv);
@@ -173,12 +176,11 @@ int main(int argc, const char** argv) {
   bool print_help = flags.isSet("help");
   bool print_version = flags.isSet("version");
   if (print_version || print_help) {
-    stdout_os->print(
-        StringUtil::format(
-            "EventQL $0 ($1)\n"
-            "Copyright (c) 2016, DeepCortex GmbH. All rights reserved.\n\n",
-            eventql::kVersionString,
-            eventql::kBuildID));
+    std::cout << StringUtil::format(
+        "EventQL $0 ($1)\n"
+        "Copyright (c) 2016, DeepCortex GmbH. All rights reserved.\n\n",
+        eventql::kVersionString,
+        eventql::kBuildID);
   }
 
   if (print_version) {
@@ -186,7 +188,7 @@ int main(int argc, const char** argv) {
   }
 
   if (print_help) {
-    stdout_os->print(
+    std::cout <<
         "Usage: $ evqlslap [OPTIONS]\n\n"
         "   -c, --connections <num>   Number of concurrent connections\n"
         "   -r, --rate <rate>         Maximum rate of requests in RPS\n"
@@ -200,7 +202,7 @@ int main(int argc, const char** argv) {
         "   --password <password>     Set the password\n"
         "   --auth_token <token>      Set the EventQL auth token\n"
         "   -?, --help                Display the help text and exit\n"
-        "   -v, --version             Display the version of this binary and exit\n");
+        "   -v, --version             Display the version of this binary and exit\n";
 
     return 1;
   }
@@ -226,21 +228,47 @@ int main(int argc, const char** argv) {
 
 
   /* set up progress callback */
-  auto on_progress = [&stdout_os](eventql::cli::BenchmarkStats* stats) {
-    try {
-      stdout_os->eraseLine();
-      stdout_os->print(StringUtil::format(
-          "\rRunning... rate=$0r/s, avg_runtime=$1ms, total=$2, running=$3, "
-          "errors=$4 ($5%)",
-          stats->getRollingRPS(),
-          stats->getRollingAverageRuntime() / double(kMicrosPerMilli),
-          stats->getTotalRequestCount(),
-          stats->getRunningRequestCount(),
-          stats->getTotalErrorCount(),
-          stats->getTotalErrorRate() * 100.0f));
-    } catch (const std::exception& e) {
-      /* fallthrough */
+  const bool is_tty = ::isatty(STDERR_FILENO);
+  auto num = flags.isSet("num") ? flags.getInt("num") : -1;
+
+  auto on_progress = [&num, &is_tty](eventql::cli::BenchmarkStats* stats) {
+    std::stringstream line;
+    if (is_tty) {
+      line << kEraseEscapeSequence << "\r";
     }
+
+    line << std::fixed
+         << "Running..."
+         << " rate="
+         << std::setprecision(2) << stats->getRollingRPS()
+         << "r/s"
+         << ", avg_runtime="
+         << std::setprecision(2)
+         << stats->getRollingAverageRuntime() / double(kMicrosPerMilli)
+         << "ms"
+         << ", total="
+         << stats->getTotalRequestCount();
+
+    if (num > 0) {
+      line << " ("
+           << std::setprecision(2)
+           << double(stats->getTotalRequestCount()) / double(num) * 100.0
+           << "%)";
+    }
+
+    line << ", running="
+         << stats->getRunningRequestCount()
+         << ", errors="
+         << stats->getTotalErrorCount()
+         << "("
+         << std::setprecision(2) << stats->getTotalErrorRate() * 100.0f
+         << "%)";
+
+    if (!is_tty) {
+      line << "\n";
+    }
+
+    std::cerr << line.str();
   };
 
 
@@ -264,7 +292,7 @@ int main(int argc, const char** argv) {
       flags.getInt("connections"),
       flags.isSet("ignore_errors"),
       flags.getInt("rate"),
-      flags.isSet("num") ? flags.getInt("num") : -1);
+      num);
 
   benchmark.setRequestHandler(request_handler);
   benchmark.setProgressCallback(on_progress);
@@ -279,10 +307,11 @@ int main(int argc, const char** argv) {
     rc = benchmark.run();
   }
 
+  if (is_tty) {
+    std::cerr << kEraseEscapeSequence << "\r";
+  }
 
   /* print results */
-  stdout_os->eraseLine();
-
   if (rc.isSuccess()) {
     std::cout << "success" << std::endl;
     return 0;
