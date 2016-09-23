@@ -7,6 +7,8 @@ EventQL v0.5.0 beta;
     a weighted random scheme, taking into a account the load facotr and the
     number of available bytes on disk for each server
 
+  * Added the evqlslap benchmark and load testing tool
+
   * Added a new monitor thread that publishes disk usage and other load
     information to the coordination service
 
