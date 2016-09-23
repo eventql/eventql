@@ -32,6 +32,7 @@ namespace cli {
 
 ReturnCode benchmark_insert(
     native_transport::TCPClient* conn,
+    uint64_t sequence,
     const std::string& database,
     const std::string& table,
     const std::string& payload,

@@ -62,7 +62,9 @@ class Benchmark {
 public:
 
   using RequestCallbackType =
-      std::function<ReturnCode (native_transport::TCPClient* conn)>;
+      std::function<ReturnCode (
+          native_transport::TCPClient* conn,
+          uint64_t sequence)>;
 
   using ProgressCallbackType = std::function<void (BenchmarkStats* stats)>;
 
@@ -101,6 +103,7 @@ protected:
   ReturnCode status_;
   size_t threads_running_;
   uint64_t last_request_time_;
+  std::atomic<uint64_t> sequence_;
   RequestCallbackType request_handler_;
   ProgressCallbackType on_progress_;
   uint64_t progress_rate_limit_;
@@ -113,6 +116,7 @@ protected:
 
 ReturnCode benchmark_insert(
     native_transport::TCPClient* conn,
+    uint64_t sequence,
     const std::string& database,
     const std::string& table,
     const std::string& payload,
@@ -120,6 +124,7 @@ ReturnCode benchmark_insert(
 
 ReturnCode benchmark_query(
     native_transport::TCPClient* conn,
+    uint64_t sequence,
     const std::string& database,
     const std::string& payload);
 

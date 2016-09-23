@@ -32,11 +32,15 @@ namespace cli {
 
 ReturnCode benchmark_query(
     native_transport::TCPClient* conn,
+    uint64_t sequence,
     const std::string& database,
     const std::string& payload) {
+  auto query = payload;
+  StringUtil::replaceAll(&query, "{{seq}}", StringUtil::toString(sequence));
+
   native_transport::QueryFrame q_frame;
   q_frame.setDatabase(database);
-  q_frame.setQuery(payload);
+  q_frame.setQuery(query);
 
   auto rc = conn->sendFrame(&q_frame, 0);
   if (!rc.isSuccess()) {

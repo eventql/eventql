@@ -52,6 +52,7 @@ Benchmark::Benchmark(
     status_(ReturnCode::success()),
     threads_running_(0),
     last_request_time_(0),
+    sequence_(0),
     progress_rate_limit_(kDefaultProgressRateLimit),
     threads_(num_threads_),
     clients_(num_threads_) {
@@ -135,7 +136,7 @@ void Benchmark::runThread(size_t idx) {
     auto rc = ReturnCode::success();
     auto t0 = MonotonicClock::now();
     try {
-      rc = request_handler_(&clients_[idx]);
+      rc = request_handler_(&clients_[idx], sequence_.fetch_add(1));
     } catch (const std::exception& e) {
       rc = ReturnCode::error("ERUNTIME", e.what());
     }

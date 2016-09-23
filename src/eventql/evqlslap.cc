@@ -214,6 +214,7 @@ int main(int argc, const char** argv) {
     request_handler = std::bind(
         eventql::cli::benchmark_query,
         std::placeholders::_1,
+        std::placeholders::_2,
         flags.getString("database"),
         flags.getString("payload"));
   }
