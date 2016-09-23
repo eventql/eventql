@@ -22,6 +22,7 @@
  * code of your own applications
  */
 #include <iostream>
+#include <sstream>
 #include <iomanip>
 #include <unistd.h>
 #include "eventql/eventql.h"
@@ -31,7 +32,7 @@
 #include "eventql/util/cli/flagparser.h"
 #include "eventql/cli/benchmark.h"
 
-static const char kEscapeSequence[] = "\e[2K";
+static const char kEraseEscapeSequence[] = "\e[2K";
 
 int main(int argc, const char** argv) {
   cli::FlagParser flags;
@@ -155,30 +156,47 @@ int main(int argc, const char** argv) {
   bool line_dirty = false;
   const bool is_tty = ::isatty(STDOUT_FILENO);
   auto num = flags.isSet("num") ? flags.getInt("num") : -1;
-  auto on_progress = [&num, &is_tty, &line_dirty](eventql::cli::BenchmarkStats* stats) {
-    std::string completed_percent = num > 0 ?
-        StringUtil::format(
-            " ($0%)",
-            double(stats->getTotalRequestCount()) / double(num) * 100.0) :
-        "";
 
+  auto on_progress = [&num, &is_tty, &line_dirty](
+      eventql::cli::BenchmarkStats* stats) {
+    std::stringstream line;
     if (line_dirty && is_tty) {
-      std::cerr << kEscapeSequence << "\r";
+      line << kEraseEscapeSequence << "\r";
     }
 
-    std::cerr << std::fixed << std::setprecision(4) << "Running... rate=" <<
-    stats->getRollingRPS() << "r/s, avg_runtime=" <<
-    stats->getRollingAverageRuntime() / double(kMicrosPerMilli) <<
-    ", total=" << stats->getTotalRequestCount() << completed_percent.c_str() <<
-    ", running=" << stats->getRunningRequestCount() << ", errors=" <<
-    stats->getTotalErrorCount() << " (" << stats->getTotalErrorRate() * 100.0f <<
-    "%)";
+    line << std::fixed
+         << "Running..."
+         << " rate="
+         << std::setprecision(2) << stats->getRollingRPS()
+         << "r/s"
+         << ", avg_runtime="
+         << std::setprecision(2)
+         << stats->getRollingAverageRuntime() / double(kMicrosPerMilli)
+         << "ms"
+         << ", total="
+         << stats->getTotalRequestCount();
+
+    if (num > 0) {
+      line << " ("
+           << std::setprecision(2)
+           << double(stats->getTotalRequestCount()) / double(num) * 100.0
+           << "%)";
+    }
+
+    line << ", running="
+         << stats->getRunningRequestCount()
+         << ", errors="
+         << stats->getTotalErrorCount()
+         << "("
+         << std::setprecision(2) << stats->getTotalErrorRate() * 100.0f
+         << "%)";
 
     if (!is_tty) {
-      std::cerr << "\n";
+      line << "\n";
     }
 
     line_dirty = true;
+    std::cerr << line.str();
   };
 
   eventql::cli::Benchmark benchmark(
