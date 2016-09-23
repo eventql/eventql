@@ -153,29 +153,27 @@ int main(int argc, const char** argv) {
 
   auto num = flags.isSet("num") ? flags.getInt("num") : -1;
   auto on_progress = [&stdout_os, &num](eventql::cli::BenchmarkStats* stats) {
-    try {
-      stdout_os->eraseLine();
-      auto line = StringUtil::format(
-          "\rRunning... rate=$0r/s, avg_runtime=$1ms, total=$2",
-          stats->getRollingRPS(),
-          stats->getRollingAverageRuntime() / double(kMicrosPerMilli),
-          stats->getTotalRequestCount());
+    fprintf(
+        stdout,
+        "\rRunning... rate=%7.4fr/s, avg_runtime=%4.4fms, total=%llu",
+        stats->getRollingRPS(),
+        stats->getRollingAverageRuntime() / double(kMicrosPerMilli),
+        stats->getTotalRequestCount());
 
-      if (num > 0) {
-        line += StringUtil::format(
-            " ($0%)",
-            double(stats->getTotalRequestCount()) / double(num) * 100.0);
-      }
-
-      line += StringUtil::format(
-          ", running=$0, errors=$1 ($2%)",
-          stats->getRunningRequestCount(),
-          stats->getTotalErrorCount(),
-          stats->getTotalErrorRate() * 100.0f);
-      stdout_os->print(line);
-    } catch (const std::exception& e) {
-      /* fallthrough */
+    if (num > 0) {
+      fprintf(
+          stdout,
+          " (%2.2f%%)",
+          double(stats->getTotalRequestCount()) / double(num) * 100.0);
     }
+
+    fprintf(
+        stdout,
+        ", running=%llu, errors=%llu (%2.3f%%)",
+        stats->getRunningRequestCount(),
+        stats->getTotalErrorCount(),
+        stats->getTotalErrorRate() * 100.0f);
+    fflush(stdout);
   };
 
   eventql::cli::Benchmark benchmark(
@@ -196,10 +194,8 @@ int main(int argc, const char** argv) {
     rc = benchmark.run();
   }
 
-  stdout_os->eraseLine();
-
   if (rc.isSuccess()) {
-    std::cout << "success" << std::endl;
+    std::cout << "\nsuccess" << std::endl;
     return 0;
   } else {
     std::cerr << "ERROR: " << rc.getMessage() << std::endl;
