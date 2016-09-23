@@ -151,28 +151,37 @@ int main(int argc, const char** argv) {
     return ReturnCode::success();
   };
 
+  auto num = flags.isSet("num") ? flags.getInt("num") : -1;
+  auto on_progress = [&stdout_os, &num](eventql::cli::BenchmarkStats* stats) {
+    UnixTime now;
+    fprintf(
+        stdout,
+        "\r%s [evqlslap] Running... rate=%7.4fr/s, avg_runtime=%4.4fms, total=%llu",
+        now.toString().c_str(),
+        stats->getRollingRPS(),
+        stats->getRollingAverageRuntime() / double(kMicrosPerMilli),
+        stats->getTotalRequestCount());
 
-  auto on_progress = [&stdout_os](eventql::cli::BenchmarkStats* stats) {
-    try {
-      stdout_os->eraseLine();
-      stdout_os->print(StringUtil::format(
-          "\rRunning... rate=$0r/s, avg_runtime=$1ms, total=$2, running=$3, "
-          "errors=$4 ($5%)",
-          stats->getRollingRPS(),
-          stats->getRollingAverageRuntime() / double(kMicrosPerMilli),
-          stats->getTotalRequestCount(),
-          stats->getRunningRequestCount(),
-          stats->getTotalErrorCount(),
-          stats->getTotalErrorRate() * 100.0f));
-    } catch (const std::exception& e) {
-      /* fallthrough */
+    if (num > 0) {
+      fprintf(
+          stdout,
+          " (%2.2f%%)",
+          double(stats->getTotalRequestCount()) / double(num) * 100.0);
     }
+
+    fprintf(
+        stdout,
+        ", running=%llu, errors=%llu (%2.3f%%)",
+        stats->getRunningRequestCount(),
+        stats->getTotalErrorCount(),
+        stats->getTotalErrorRate() * 100.0f);
+    fflush(stdout);
   };
 
   eventql::cli::Benchmark benchmark(
       flags.getInt("connections"),
       flags.getInt("rate"),
-      flags.isSet("num") ? flags.getInt("num") : -1);
+      num);
 
   benchmark.setRequestHandler(request_handler);
   benchmark.setProgressCallback(on_progress);
@@ -183,14 +192,18 @@ int main(int argc, const char** argv) {
       flags.getInt("port"),
       {});
 
+  UnixTime now;
+  std::cout <<
+      now.toString().c_str() <<
+      " [evqlslap] Starting benchmark" <<
+      std::endl;
+
   if (rc.isSuccess()) {
     rc = benchmark.run();
   }
 
-  stdout_os->eraseLine();
-
   if (rc.isSuccess()) {
-    std::cout << "success" << std::endl;
+    std::cout << "\nsuccess" << std::endl;
     return 0;
   } else {
     std::cerr << "ERROR: " << rc.getMessage() << std::endl;
