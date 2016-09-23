@@ -79,6 +79,15 @@ int main(int argc, const char** argv) {
       "<rate>");
 
   flags.defineFlag(
+      "ignore_errors",
+      cli::FlagParser::T_SWITCH,
+      false,
+      "i",
+      NULL,
+      "ignore errors",
+      "<switch>");
+
+  flags.defineFlag(
       "mode",
       cli::FlagParser::T_STRING,
       false,
@@ -182,6 +191,7 @@ int main(int argc, const char** argv) {
         "   -c, --connections <num>   Number of concurrent connections\n"
         "   -r, --rate <rate>         Maximum rate of requests in RPS\n"
         "   -n, --num <num>           Maximum total number of request (default is infinite)\n"
+        "   -i, --ignore_errors       Ignore errors (i.e. continue to run after an error)\n"
         "   -h, --host <hostname>     Set the EventQL server hostname\n"
         "   -p, --port <port>         Set the EventQL server port\n"
         "   -x, --payload <data>      Set the payload (i.e. the sql query)\n"
@@ -251,6 +261,7 @@ int main(int argc, const char** argv) {
   /* run benchmark */
   eventql::cli::Benchmark benchmark(
       flags.getInt("connections"),
+      flags.isSet("ignore_errors"),
       flags.getInt("rate"),
       flags.isSet("num") ? flags.getInt("num") : -1);
 

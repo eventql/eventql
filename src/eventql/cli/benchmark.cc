@@ -41,9 +41,11 @@ namespace cli {
 // FIXME pass proper arguments
 Benchmark::Benchmark(
     size_t num_threads,
+    bool ignore_errors,
     size_t rate,
     size_t remaining_requests /* = size_t(-1) */) :
     num_threads_(num_threads),
+    ignore_errors_(ignore_errors),
     rate_(rate),
     rate_limit_interval_(0),
     remaining_requests_(remaining_requests),
@@ -142,7 +144,7 @@ void Benchmark::runThread(size_t idx) {
     std::unique_lock<std::mutex> lk(mutex_);
     stats_.addRequestComplete(rc.isSuccess(), t1 - t0);
 
-    if (!rc.isSuccess()) {
+    if (!ignore_errors_ && !rc.isSuccess()) {
       status_ = rc;
       cv_.notify_all();
       break;
@@ -204,7 +206,6 @@ BenchmarkStats::BenchmarkStats() :
 void BenchmarkStats::addRequestStart() {
   std::unique_lock<std::mutex> lk(mutex_);
   rolling_rps_.addValue(1);
-  ++total_request_count_;
   ++running_request_count_;
 }
 
@@ -212,6 +213,7 @@ void BenchmarkStats::addRequestComplete(bool is_success, uint64_t runtime_us) {
   std::unique_lock<std::mutex> lk(mutex_);
   rolling_avg_runtime_.addValue(runtime_us);
   --running_request_count_;
+  ++total_request_count_;
   if (!is_success) {
     ++total_error_count_;
   }

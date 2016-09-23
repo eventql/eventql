@@ -70,6 +70,7 @@ public:
 
   Benchmark(
       size_t num_threads,
+      bool ignore_errors,
       size_t rate,
       size_t remaining_requests = size_t(-1));
 
@@ -93,6 +94,7 @@ protected:
   bool getRequestSlot(size_t idx);
 
   const size_t num_threads_;
+  bool ignore_errors_;
   const uint64_t rate_;
   uint64_t rate_limit_interval_;
   size_t remaining_requests_;
