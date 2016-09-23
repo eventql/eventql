@@ -133,7 +133,7 @@ void Benchmark::runThread(size_t idx) {
     auto rc = ReturnCode::success();
     auto t0 = MonotonicClock::now();
     try {
-      rc = request_handler_();
+      rc = request_handler_(&clients_[idx]);
     } catch (const std::exception& e) {
       rc = ReturnCode::error("ERUNTIME", e.what());
     }

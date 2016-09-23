@@ -216,24 +216,26 @@ int main(int argc, const char** argv) {
     return 1;
   }
 
-  std::vector<std::pair<std::string, std::string>> auth_data;
-  if (flags.isSet("auth_token")) {
-    auth_data.emplace_back("auth_token", flags.getString("auth_token"));
+
+  /* set up request callback */
+  eventql::cli::Benchmark::RequestCallbackType request_handler;
+  auto mode = flags.getString("mode");
+  if (!request_handler && mode == "insert") {
+    request_handler = std::bind(
+        eventql::cli::benchmark_insert,
+        std::placeholders::_1,
+        flags.getString("database"),
+        flags.getString("table"),
+        flags.getString("payload"),
+        flags.getInt("batch"));
   }
 
-  if (flags.isSet("user")) {
-    auth_data.emplace_back("user", flags.getString("user"));
+  if (!request_handler) {
+    std::cerr << "ERROR: invalid mode: " << mode << std::endl;
   }
 
-  if (flags.isSet("password")) {
-    auth_data.emplace_back("password", flags.getString("password"));
-  }
 
-  auto request_handler = []() {
-    usleep(1000);
-    return ReturnCode::success();
-  };
-
+  /* set up progress callback */
   auto on_progress = [&stdout_os](eventql::cli::BenchmarkStats* stats) {
     try {
       stdout_os->eraseLine();
@@ -251,6 +253,23 @@ int main(int argc, const char** argv) {
     }
   };
 
+
+  /* load auth data */
+  std::vector<std::pair<std::string, std::string>> auth_data;
+  if (flags.isSet("auth_token")) {
+    auth_data.emplace_back("auth_token", flags.getString("auth_token"));
+  }
+
+  if (flags.isSet("user")) {
+    auth_data.emplace_back("user", flags.getString("user"));
+  }
+
+  if (flags.isSet("password")) {
+    auth_data.emplace_back("password", flags.getString("password"));
+  }
+
+
+  /* run benchmark */
   eventql::cli::Benchmark benchmark(
       flags.getInt("connections"),
       flags.getInt("rate"),
@@ -269,6 +288,8 @@ int main(int argc, const char** argv) {
     rc = benchmark.run();
   }
 
+
+  /* print results */
   stdout_os->eraseLine();
 
   if (rc.isSuccess()) {

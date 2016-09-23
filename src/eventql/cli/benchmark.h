@@ -61,7 +61,9 @@ protected:
 class Benchmark {
 public:
 
-  using RequestCallbackType = std::function<ReturnCode ()>;
+  using RequestCallbackType =
+      std::function<ReturnCode (native_transport::TCPClient* conn)>;
+
   using ProgressCallbackType = std::function<void (BenchmarkStats* stats)>;
 
   static const uint64_t kDefaultProgressRateLimit = kMicrosPerSecond;
@@ -107,6 +109,12 @@ protected:
   BenchmarkStats stats_;
 };
 
+ReturnCode benchmark_insert(
+    native_transport::TCPClient* conn,
+    const std::string& database,
+    const std::string& table,
+    const std::string& payload,
+    size_t batch_size);
 
 } //cli
 } //eventql

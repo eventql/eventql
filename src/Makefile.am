@@ -1037,6 +1037,7 @@ evqlslap_SOURCES = \
     $(EVQL_PROTO_SOURCES_) \
     eventql/cli/benchmark.h \
     eventql/cli/benchmark.cc \
+    eventql/cli/benchmark_insert.cc \
     eventql/evqlslap.cc
 
 evqlslap_LDADD = \
