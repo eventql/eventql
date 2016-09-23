@@ -171,7 +171,7 @@ bool Benchmark::getRequestSlot(size_t idx) {
     }
 
     if (rate_limit_interval_ == 0) {
-      return true;
+      break;
     }
 
     double real_rate  = stats_.getRollingRPS();
@@ -185,14 +185,15 @@ bool Benchmark::getRequestSlot(size_t idx) {
     if (delay_comp > rate_limit_interval_||
         last_request_time_ + (rate_limit_interval_ - delay_comp) <= now) {
       last_request_time_ = now;
-      if (remaining_requests_ != size_t(-1)) {
-        --remaining_requests_;
-      }
       break;
     }
 
     auto wait = (last_request_time_ + rate_limit_interval_ - delay_comp) - now;
     cv_.wait_for(lk, std::chrono::microseconds(wait));
+  }
+
+  if (remaining_requests_ != size_t(-1)) {
+    --remaining_requests_;
   }
 
   return true;
