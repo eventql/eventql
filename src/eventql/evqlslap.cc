@@ -155,7 +155,7 @@ int main(int argc, const char** argv) {
   auto on_progress = [&stdout_os, &num](eventql::cli::BenchmarkStats* stats) {
     try {
       stdout_os->eraseLine();
-      auto completed_line = num > 0 ?
+      auto completed_percent = num > 0 ?
           StringUtil::format(
               " ($0%)",
               double(stats->getTotalRequestCount()) / double(num) * 100.0) :
@@ -167,7 +167,7 @@ int main(int argc, const char** argv) {
           stats->getRollingRPS(),
           stats->getRollingAverageRuntime() / double(kMicrosPerMilli),
           stats->getTotalRequestCount(),
-          completed_line,
+          completed_percent,
           stats->getRunningRequestCount(),
           stats->getTotalErrorCount(),
           stats->getTotalErrorRate() * 100.0f));
