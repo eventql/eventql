@@ -52,6 +52,60 @@ int main(int argc, const char** argv) {
       "<port>");
 
   flags.defineFlag(
+      "connections",
+      cli::FlagParser::T_INTEGER,
+      false,
+      "c",
+      "10",
+      "number of connections",
+      "<threads>");
+
+  flags.defineFlag(
+      "rate",
+      cli::FlagParser::T_INTEGER,
+      false,
+      "r",
+      "1",
+      "number of requests per second",
+      "<rate>");
+
+  flags.defineFlag(
+      "batch",
+      cli::FlagParser::T_INTEGER,
+      false,
+      "b",
+      "1",
+      "batch size",
+      "<num>");
+
+  flags.defineFlag(
+      "num",
+      cli::FlagParser::T_INTEGER,
+      false,
+      "n",
+      NULL,
+      "total number of request (inifite if unset)",
+      "<rate>");
+
+  flags.defineFlag(
+      "mode",
+      cli::FlagParser::T_STRING,
+      false,
+      "m",
+      NULL,
+      "mode",
+      "<mode>");
+
+  flags.defineFlag(
+      "payload",
+      cli::FlagParser::T_STRING,
+      false,
+      "x",
+      NULL,
+      "payload",
+      "<payload>");
+
+  flags.defineFlag(
       "database",
       cli::FlagParser::T_STRING,
       false,
@@ -59,6 +113,15 @@ int main(int argc, const char** argv) {
       NULL,
       "database",
       "<db>");
+
+  flags.defineFlag(
+      "table",
+      cli::FlagParser::T_STRING,
+      false,
+      "t",
+      NULL,
+      "table",
+      "<tbl>");
 
   flags.defineFlag(
       "user",
@@ -86,33 +149,6 @@ int main(int argc, const char** argv) {
       NULL,
       "auth token",
       "<auth_token>");
-
-  flags.defineFlag(
-      "connections",
-      cli::FlagParser::T_INTEGER,
-      false,
-      "c",
-      "10",
-      "number of connections",
-      "<threads>");
-
-  flags.defineFlag(
-      "rate",
-      cli::FlagParser::T_INTEGER,
-      false,
-      "r",
-      "1",
-      "number of requests per second",
-      "<rate>");
-
-  flags.defineFlag(
-      "num",
-      cli::FlagParser::T_INTEGER,
-      false,
-      "n",
-      NULL,
-      "total number of request (inifite if unset)",
-      "<rate>");
 
   flags.defineFlag(
       "help",
@@ -161,15 +197,19 @@ int main(int argc, const char** argv) {
   if (print_help) {
     stdout_os->print(
         "Usage: $ evqlslap [OPTIONS]\n\n"
-        "   -h, --host <hostname>     Set the EventQL server hostname\n"
-        "   -p, --port <port>         Set the EventQL server port\n"
-        "   -d, --database <db>       Select a database\n"
-        "   --user <user>             Set the EventQL username\n"
-        "   --password <password>     Set the password\n"
-        "   --auth_token <token>      Set the EventQL auth token\n"
         "   -c, --connections <num>   Number of concurrent connections\n"
         "   -r, --rate <rate>         Maximum rate of requests in RPS\n"
         "   -n, --num <num>           Maximum total number of request (default is inifite)\n"
+        "   -b, --batch <num>\n       Send operations in batches of N"
+        "   -h, --host <hostname>     Set the EventQL server hostname\n"
+        "   -p, --port <port>         Set the EventQL server port\n"
+        "   -m, --mode <mode>         Select the benchmark mode (insert or query)\n"
+        "   -x, --payload <data>      Set the payload\n"
+        "   -d, --database <db>       Select a database\n"
+        "   -t, --table <table>       Select a target table (INSERT only)\n"
+        "   --user <user>             Set the EventQL username\n"
+        "   --password <password>     Set the password\n"
+        "   --auth_token <token>      Set the EventQL auth token\n"
         "   -?, --help                Display the help text and exit\n"
         "   -v, --version             Display the version of this binary and exit\n");
 
@@ -193,7 +233,6 @@ int main(int argc, const char** argv) {
     usleep(1000);
     return ReturnCode::success();
   };
-
 
   auto on_progress = [&stdout_os](eventql::cli::BenchmarkStats* stats) {
     try {
