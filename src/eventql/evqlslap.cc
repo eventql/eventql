@@ -153,14 +153,12 @@ int main(int argc, const char** argv) {
     return ReturnCode::success();
   };
 
-  bool line_dirty = false;
-  const bool is_tty = ::isatty(STDOUT_FILENO);
+  const bool is_tty = ::isatty(STDERR_FILENO);
   auto num = flags.isSet("num") ? flags.getInt("num") : -1;
 
-  auto on_progress = [&num, &is_tty, &line_dirty](
-      eventql::cli::BenchmarkStats* stats) {
+  auto on_progress = [&num, &is_tty](eventql::cli::BenchmarkStats* stats) {
     std::stringstream line;
-    if (line_dirty && is_tty) {
+    if (is_tty) {
       line << kEraseEscapeSequence << "\r";
     }
 
@@ -195,7 +193,6 @@ int main(int argc, const char** argv) {
       line << "\n";
     }
 
-    line_dirty = true;
     std::cerr << line.str();
   };
 
@@ -217,8 +214,12 @@ int main(int argc, const char** argv) {
     rc = benchmark.run();
   }
 
+  if (is_tty) {
+    std::cerr << kEraseEscapeSequence << "\r";
+  }
+
   if (rc.isSuccess()) {
-    std::cout << "\nsuccess" << std::endl;
+    std::cout << "success" << std::endl;
     return 0;
   } else {
     std::cerr << "ERROR: " << rc.getMessage() << std::endl;
