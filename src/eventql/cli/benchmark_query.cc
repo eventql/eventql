@@ -24,7 +24,7 @@
  */
 #include "eventql/eventql.h"
 #include "eventql/cli/benchmark.h"
-#include "eventql/transport/native/frames/insert.h"
+#include "eventql/transport/native/frames/query.h"
 #include "eventql/transport/native/frames/error.h"
 
 namespace eventql {
@@ -34,6 +34,56 @@ ReturnCode benchmark_query(
     native_transport::TCPClient* conn,
     const std::string& database,
     const std::string& payload) {
+  native_transport::QueryFrame q_frame;
+  q_frame.setDatabase(database);
+  q_frame.setQuery(payload);
+
+  auto rc = conn->sendFrame(&q_frame, 0);
+  if (!rc.isSuccess()) {
+    return rc;
+  }
+
+  uint16_t ret_opcode = 0;
+  uint16_t ret_flags;
+  std::string ret_payload;
+  bool ret_done = false;
+  while (!ret_done) {
+    rc = conn->recvFrame(
+        &ret_opcode,
+        &ret_flags,
+        &ret_payload,
+        kMicrosPerSecond); // FIXME
+
+    if (!rc.isSuccess()) {
+      return rc;
+    }
+
+    switch (ret_opcode) {
+      case EVQL_OP_HEARTBEAT:
+        continue;
+      case EVQL_OP_QUERY_RESULT: {
+        if (ret_flags & EVQL_ENDOFREQUEST) {
+          ret_done = true;
+        } else {
+          auto rc = conn->sendFrame(EVQL_OP_QUERY_DISCARD, 0, nullptr, 0);
+          if (!rc.isSuccess()) {
+            return rc;
+          }
+        }
+
+        continue;
+      }
+      case EVQL_OP_ERROR: {
+        native_transport::ErrorFrame eframe;
+        eframe.parseFrom(ret_payload.data(), ret_payload.size());
+        return ReturnCode::error("ERUNTIME", eframe.getError());
+      }
+      default:
+        return ReturnCode::error("ERUNTIME", "unexpected opcode");
+    }
+  }
+
+  return ReturnCode::success();
   return ReturnCode::success();
 }
 
