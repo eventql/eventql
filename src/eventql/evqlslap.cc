@@ -155,24 +155,22 @@ int main(int argc, const char** argv) {
   auto on_progress = [&stdout_os, &num](eventql::cli::BenchmarkStats* stats) {
     try {
       stdout_os->eraseLine();
-      auto line = StringUtil::format(
-          "\rRunning... rate=$0r/s, avg_runtime=$1ms, total=$2",
+      auto completed_line = num > 0 ?
+          StringUtil::format(
+              " ($0%)",
+              double(stats->getTotalRequestCount()) / double(num) * 100.0) :
+          "";
+
+      stdout_os->print(StringUtil::format(
+          "\rRunning... rate=$0r/s, avg_runtime=$1ms, total=$2$3, running=$4, errors=$5 ($6%)",
           stats->getRollingRPS(),
           stats->getRollingAverageRuntime() / double(kMicrosPerMilli),
-          stats->getTotalRequestCount());
-
-      if (num > 0) {
-        line += StringUtil::format(
-            " ($0%)",
-            double(stats->getTotalRequestCount()) / double(num) * 100.0);
-      }
-
-      line += StringUtil::format(
-          ", running=$0, errors=$1 ($2%)",
+          stats->getTotalRequestCount(),
+          completed_line,
           stats->getRunningRequestCount(),
           stats->getTotalErrorCount(),
-          stats->getTotalErrorRate() * 100.0f);
-      stdout_os->print(line);
+          stats->getTotalErrorRate() * 100.0f));
+
     } catch (const std::exception& e) {
       /* fallthrough */
     }
