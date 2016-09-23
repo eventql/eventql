@@ -162,7 +162,8 @@ int main(int argc, const char** argv) {
           "";
 
       stdout_os->print(StringUtil::format(
-          "\rRunning... rate=$0r/s, avg_runtime=$1ms, total=$2$3, running=$4, errors=$5 ($6%)",
+          "\rRunning... rate=$0r/s, avg_runtime=$1ms, total=$2$3, "
+          "running=$4, errors=$5 ($6%)",
           stats->getRollingRPS(),
           stats->getRollingAverageRuntime() / double(kMicrosPerMilli),
           stats->getTotalRequestCount(),
