@@ -70,15 +70,6 @@ int main(int argc, const char** argv) {
       "<rate>");
 
   flags.defineFlag(
-      "batch",
-      cli::FlagParser::T_INTEGER,
-      false,
-      "b",
-      "1",
-      "batch size",
-      "<num>");
-
-  flags.defineFlag(
       "num",
       cli::FlagParser::T_INTEGER,
       false,
@@ -92,7 +83,7 @@ int main(int argc, const char** argv) {
       cli::FlagParser::T_STRING,
       false,
       "m",
-      NULL,
+      "query",
       "mode",
       "<mode>");
 
@@ -113,15 +104,6 @@ int main(int argc, const char** argv) {
       NULL,
       "database",
       "<db>");
-
-  flags.defineFlag(
-      "table",
-      cli::FlagParser::T_STRING,
-      false,
-      "t",
-      NULL,
-      "table",
-      "<tbl>");
 
   flags.defineFlag(
       "user",
@@ -199,14 +181,11 @@ int main(int argc, const char** argv) {
         "Usage: $ evqlslap [OPTIONS]\n\n"
         "   -c, --connections <num>   Number of concurrent connections\n"
         "   -r, --rate <rate>         Maximum rate of requests in RPS\n"
-        "   -n, --num <num>           Maximum total number of request (default is inifite)\n"
-        "   -b, --batch <num>\n       Send operations in batches of N"
+        "   -n, --num <num>           Maximum total number of request (default is infinite)\n"
         "   -h, --host <hostname>     Set the EventQL server hostname\n"
         "   -p, --port <port>         Set the EventQL server port\n"
-        "   -m, --mode <mode>         Select the benchmark mode (insert or query)\n"
-        "   -x, --payload <data>      Set the payload\n"
+        "   -x, --payload <data>      Set the payload (i.e. the sql query)\n"
         "   -d, --database <db>       Select a database\n"
-        "   -t, --table <table>       Select a target table (INSERT only)\n"
         "   --user <user>             Set the EventQL username\n"
         "   --password <password>     Set the password\n"
         "   --auth_token <token>      Set the EventQL auth token\n"
@@ -220,18 +199,18 @@ int main(int argc, const char** argv) {
   /* set up request callback */
   eventql::cli::Benchmark::RequestCallbackType request_handler;
   auto mode = flags.getString("mode");
-  if (!request_handler && mode == "insert") {
+
+  if (!request_handler && mode == "query") {
     request_handler = std::bind(
-        eventql::cli::benchmark_insert,
+        eventql::cli::benchmark_query,
         std::placeholders::_1,
         flags.getString("database"),
-        flags.getString("table"),
-        flags.getString("payload"),
-        flags.getInt("batch"));
+        flags.getString("payload"));
   }
 
   if (!request_handler) {
     std::cerr << "ERROR: invalid mode: " << mode << std::endl;
+    return 1;
   }
 
 

@@ -116,6 +116,11 @@ ReturnCode benchmark_insert(
     const std::string& payload,
     size_t batch_size);
 
+ReturnCode benchmark_query(
+    native_transport::TCPClient* conn,
+    const std::string& database,
+    const std::string& payload);
+
 } //cli
 } //eventql
 
