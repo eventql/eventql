@@ -226,7 +226,10 @@ Status TableService::createTable(
   }
 
   // create metadata file on metadata servers
-  eventql::MetadataCoordinator coordinator(dbctx_->config_directory);
+  MetadataCoordinator coordinator(
+      dbctx_->config_directory,
+      dbctx_->config);
+
   auto rc = coordinator.createFile(
       db_namespace,
       table_name,

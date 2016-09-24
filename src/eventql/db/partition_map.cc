@@ -256,7 +256,10 @@ RefPtr<Partition> PartitionMap::findOrCreatePartition(
         partition_key.size());
     discovery_request.set_lookup_by_id(true);
 
-    MetadataCoordinator coordinator(cfg_->config_directory);
+    MetadataCoordinator coordinator(
+        cfg_->config_directory,
+        cfg_->config);
+
     PartitionDiscoveryResponse discovery_response;
     auto rc = coordinator.discoverPartition(
         discovery_request,

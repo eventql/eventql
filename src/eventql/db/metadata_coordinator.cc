@@ -26,7 +26,11 @@
 
 namespace eventql {
 
-MetadataCoordinator::MetadataCoordinator(ConfigDirectory* cdir) : cdir_(cdir) {}
+MetadataCoordinator::MetadataCoordinator(
+    ConfigDirectory* cdir,
+    ProcessConfig* config) :
+    cdir_(cdir),
+    config_(config) {}
 
 Status MetadataCoordinator::performAndCommitOperation(
     const String& ns,
