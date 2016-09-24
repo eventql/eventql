@@ -115,13 +115,10 @@ Status MetadataReplication::replicate(const ReplicationJob& job) {
   auto idle_timeout = config_->getInt("server.s2s_idle_timeout", 0);
   auto io_timeout = config_->getInt("server.s2s_io_timeout", 0);
 
-  const auto& txnid = job.transaction_id;
-
   native_transport::MetaGetfileFrame m_frame;
   m_frame.setDatabase(job.db_namespace);
   m_frame.setTable(job.table_id);
-  m_frame.setTransactionID(
-      std::string((const char*) txnid.data(), txnid.size()));
+  m_frame.setTransactionID(job.transaction_id);
 
   for (const auto& s : job.servers) {
     auto server = cdir_->getServerConfig(s);

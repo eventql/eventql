@@ -36,7 +36,7 @@ void MetaGetfileFrame::setTable(const std::string& table) {
   table_ = table;
 }
 
-void MetaGetfileFrame::setTransactionID(const std::string& txid) {
+void MetaGetfileFrame::setTransactionID(const SHA1Hash& txid) {
   txid_ = txid;
 }
 
@@ -56,11 +56,11 @@ const std::string& MetaGetfileFrame::getTable() const {
   return table_;
 }
 
-const std::string& MetaGetfileFrame::getTransactionID() const {
+const SHA1Hash& MetaGetfileFrame::getTransactionID() const {
   return txid_;
 }
 
-bool MetaGetfileFrame::getLatestTransactionFlag() {
+bool MetaGetfileFrame::getLatestTransactionFlag() const {
   return flags_ & EVQL_META_GETFILE_LATESTTXN;
 }
 
@@ -68,7 +68,9 @@ ReturnCode MetaGetfileFrame::parseFrom(InputStream* is) try {
   flags_ = is->readVarUInt();
   database_ = is->readLenencString();
   table_ = is->readLenencString();
-  txid_ = is->readLenencString();
+
+  auto txid_str = is->readLenencString();
+  txid_ = SHA1Hash(txid_str.data(), txid_str.size());
 
   return ReturnCode::success();
 } catch (const std::exception& e) {
@@ -79,7 +81,7 @@ ReturnCode MetaGetfileFrame::writeTo(OutputStream* os) const try {
   os->appendVarUInt(flags_);
   os->appendLenencString(database_);
   os->appendLenencString(table_);
-  os->appendLenencString(txid_);
+  os->appendLenencString(std::string((const char*) txid_.data(), txid_.size()));
 
   return ReturnCode::success();
 } catch (const std::exception& e) {
@@ -90,7 +92,6 @@ void MetaGetfileFrame::clear() {
   flags_ = 0;
   database_.clear();
   table_.clear();
-  txid_.clear();
 }
 
 } // namespace native_transport

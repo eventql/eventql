@@ -23,8 +23,10 @@
  */
 #include "eventql/transport/native/server.h"
 #include "eventql/transport/native/connection.h"
+#include "eventql/transport/native/frames/meta_getfile.h"
 #include "eventql/util/logging.h"
 #include "eventql/server/session.h"
+#include "eventql/db/metadata_service.h"
 
 namespace eventql {
 namespace native_transport {
@@ -42,7 +44,52 @@ ReturnCode performOperation_META_GETFILE(
     return conn->sendErrorFrame("internal method called");
   }
 
-  return ReturnCode::success();
+  /* parse request */
+  MetaGetfileFrame m_frame;
+  {
+    MemoryInputStream is(payload, payload_size);
+    auto rc = m_frame.parseFrom(&is);
+    if (!rc.isSuccess()) {
+      return conn->sendErrorFrame("invalid frame");
+    }
+  }
+
+  /* execute operation */
+  RefPtr<MetadataFile> file;
+  if (m_frame.getLatestTransactionFlag()) {
+    auto rc = dbctx->metadata_service->getMetadataFile(
+        m_frame.getDatabase(),
+        m_frame.getTable(),
+        &file);
+
+    if (!rc.isSuccess()) {
+      return conn->sendErrorFrame(rc.message());
+    }
+  } else {
+    auto rc = dbctx->metadata_service->getMetadataFile(
+        m_frame.getDatabase(),
+        m_frame.getTable(),
+        m_frame.getTransactionID(),
+        &file);
+
+    if (!rc.isSuccess()) {
+      return conn->sendErrorFrame(rc.message());
+    }
+  }
+
+  /* send response */
+  std::string res_payload;
+  auto os = StringOutputStream::fromString(&res_payload);
+  auto rc = file->encode(os.get());
+  if (rc.isSuccess()) {
+    return conn->sendFrame(
+        EVQL_OP_META_GETFILE_RESULT,
+        EVQL_ENDOFREQUEST,
+        res_payload.data(),
+        res_payload.size());
+  } else {
+    return conn->sendErrorFrame(rc.message());
+  }
 }
 
 } // namespace native_transport

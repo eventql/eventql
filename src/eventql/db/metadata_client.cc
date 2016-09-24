@@ -126,8 +126,7 @@ Status MetadataClient::fetchMetadataFile(
   native_transport::MetaGetfileFrame m_frame;
   m_frame.setDatabase(ns);
   m_frame.setTable(table_id);
-  m_frame.setTransactionID(
-      std::string((const char*) txnid.data(), txnid.size()));
+  m_frame.setTransactionID(txnid);
 
   for (const auto& s : table_cfg.metadata_servers()) {
     auto server = cdir_->getServerConfig(s);

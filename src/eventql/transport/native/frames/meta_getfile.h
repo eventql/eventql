@@ -28,6 +28,7 @@
 #include "eventql/util/io/inputstream.h"
 #include "eventql/util/io/outputstream.h"
 #include "eventql/util/return_code.h"
+#include "eventql/util/sha1.h"
 
 namespace eventql {
 namespace native_transport {
@@ -41,13 +42,13 @@ public:
 
   void setDatabase(const std::string& database);
   void setTable(const std::string& table);
-  void setTransactionID(const std::string& txid);
+  void setTransactionID(const SHA1Hash& txid);
   void setLatestTransactionFlag(bool flag);
 
   const std::string& getDatabase() const;
   const std::string& getTable() const;
-  const std::string& getTransactionID() const;
-  bool getLatestTransactionFlag();
+  const SHA1Hash& getTransactionID() const;
+  bool getLatestTransactionFlag() const;
 
   ReturnCode parseFrom(InputStream* is);
   ReturnCode writeTo(OutputStream* os) const;
@@ -57,7 +58,7 @@ protected:
   uint64_t flags_;
   std::string database_;
   std::string table_;
-  std::string txid_;
+  SHA1Hash txid_;
 };
 
 } // namespace native_transport
