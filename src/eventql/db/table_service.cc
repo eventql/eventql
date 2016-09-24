@@ -770,7 +770,7 @@ ReturnCode TableService::insertRecordsLocal(
   }
 
   auto t1 = MonotonicClock::now();
-  logInfo("evqld", "Insert took $0ms", (t1-t0) / 1000.0f);
+  logInfo("evqld", "Insert took $0ms", double(t1-t0) / 1000.0f);
 
   return ReturnCode::success();
 } catch (const std::exception& e) {
