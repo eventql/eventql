@@ -257,7 +257,7 @@ Status MetadataService::findPartition(
     response->add_servers_for_insert(s.server_id);
   }
 
-  cache_->store(response);
+  cache_->store(request, *response);
   return Status::success();
 }
 
@@ -390,7 +390,7 @@ Status MetadataService::createPartition(
     }
   }
 
-  cache_->store(response);
+  cache_->store(request, *response);
   return Status::success();
 }
 

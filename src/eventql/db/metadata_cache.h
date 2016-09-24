@@ -36,12 +36,28 @@ public:
 
   bool get(
       const PartitionFindRequest& request,
-      PartitionFindResponse* response);
+      PartitionFindResponse* response) const;
 
-  void store(const PartitionFindResponse* response);
+  void store(
+      const PartitionFindRequest& request,
+      const PartitionFindResponse& response);
 
 protected:
-  std::mutex mutex_;
+
+  struct CachedPartitionMapEntry {
+    std::string partition_id;
+    std::string begin;
+    std::string end;
+    std::vector<std::string> servers;
+  };
+
+  struct CachedPartitionMap {
+    uint64_t sequence_number;
+    std::vector<CachedPartitionMapEntry> partitions;
+  };
+
+  mutable std::mutex mutex_;
+  std::map<std::string, CachedPartitionMap> cache_;
 };
 
 } // namespace eventql

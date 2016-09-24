@@ -479,5 +479,18 @@ String decodePartitionKey(
   }
 }
 
+KeyspaceType getKeyspace(const TableConfig& table_cfg) {
+  switch (table_cfg.partitioner()) {
+    case TBL_PARTITION_UINT64:
+    case TBL_PARTITION_TIMEWINDOW:
+      return KEYSPACE_UINT64;
+    case TBL_PARTITION_STRING:
+      return KEYSPACE_STRING;
+    case TBL_PARTITION_FIXED:
+    default:
+      RAISE(kIllegalArgumentError);
+  }
+}
+
 } // namespace eventql
 

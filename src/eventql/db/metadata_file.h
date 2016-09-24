@@ -140,4 +140,6 @@ String decodePartitionKey(
     KeyspaceType keyspace_type,
     const String& key);
 
+KeyspaceType getKeyspace(const TableConfig& table_cfg);
+
 } // namespace eventql

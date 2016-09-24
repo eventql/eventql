@@ -274,6 +274,7 @@ Status MetadataClient::findPartition(
   req.set_table_id(table_id);
   req.set_key(key);
   req.set_min_sequence_number(table_cfg.metadata_txnseq());
+  req.set_keyspace(getKeyspace(table_cfg.config()));
 
   if (cache_->get(req, res)) {
     return Status::success();
@@ -335,7 +336,7 @@ Status MetadataClient::findPartition(
     }
 
     msg::decode<PartitionFindResponse>(ret_payload, res);
-    cache_->store(res);
+    cache_->store(req, *res);
     return Status::success();
   }
 
@@ -357,6 +358,7 @@ Status MetadataClient::findOrCreatePartition(
   req.set_key(key);
   req.set_allow_create(true);
   req.set_min_sequence_number(table_cfg.metadata_txnseq());
+  req.set_keyspace(getKeyspace(table_cfg.config()));
 
   if (cache_->get(req, res)) {
     return Status::success();
@@ -418,7 +420,7 @@ Status MetadataClient::findOrCreatePartition(
     }
 
     msg::decode<PartitionFindResponse>(ret_payload, res);
-    cache_->store(res);
+    cache_->store(req, *res);
     return Status::success();
   }
 
