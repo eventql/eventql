@@ -22,58 +22,43 @@
  * code of your own applications
  */
 #pragma once
+#include <string>
+#include <vector>
 #include "eventql/eventql.h"
-#include "eventql/util/status.h"
-#include "eventql/db/metadata_operation.h"
-#include "eventql/db/metadata_file.h"
-#include "eventql/db/partition.h"
-#include "eventql/config/config_directory.h"
+#include "eventql/util/io/inputstream.h"
+#include "eventql/util/io/outputstream.h"
+#include "eventql/util/return_code.h"
+#include "eventql/util/sha1.h"
 
 namespace eventql {
+namespace native_transport {
 
-class MetadataClient {
+class MetaPerformopFrame {
 public:
 
-  MetadataClient(
-      ConfigDirectory* cdir,
-      ProcessConfig* config);
+  static const uint16_t kOpcode = EVQL_OP_META_PERFORMOP;
 
-  Status fetchLatestMetadataFile(
-      const String& ns,
-      const String& table_id,
-      MetadataFile* file);
+  MetaPerformopFrame();
 
-  Status fetchMetadataFile(
-      const TableDefinition& table_config,
-      MetadataFile* file);
+  void setDatabase(const std::string& database);
+  void setTable(const std::string& table);
+  void setOperation(const std::string& body);
 
-  Status fetchMetadataFile(
-      const String& ns,
-      const String& table_id,
-      const SHA1Hash& txnid,
-      MetadataFile* file);
+  const std::string& getDatabase() const;
+  const std::string& getTable() const;
+  const std::string& getOperation() const;
 
-  Status listPartitions(
-      const String& ns,
-      const String& table_id,
-      const KeyRange& keyrange,
-      PartitionListResponse* res);
-
-  Status findPartition(
-      const String& ns,
-      const String& table_id,
-      const String& key,
-      PartitionFindResponse* res);
-
-  Status findOrCreatePartition(
-      const String& ns,
-      const String& table_id,
-      const String& key,
-      PartitionFindResponse* res);
+  ReturnCode parseFrom(InputStream* is);
+  ReturnCode writeTo(OutputStream* os) const;
+  void clear();
 
 protected:
-  ConfigDirectory* cdir_;
-  ProcessConfig* config_;
+  uint64_t flags_;
+  std::string database_;
+  std::string table_;
+  std::string body_;
 };
 
+} // namespace native_transport
 } // namespace eventql
+

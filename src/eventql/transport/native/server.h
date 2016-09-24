@@ -77,6 +77,42 @@ ReturnCode performOperation_REPL_INSERT(
     const char* payload,
     size_t payload_size);
 
+ReturnCode performOperation_META_PERFORMOP(
+    Database* database,
+    NativeConnection* conn,
+    const char* payload,
+    size_t payload_size);
+
+ReturnCode performOperation_META_CREATEFILE(
+    Database* database,
+    NativeConnection* conn,
+    const char* payload,
+    size_t payload_size);
+
+ReturnCode performOperation_META_GETFILE(
+    Database* database,
+    NativeConnection* conn,
+    const char* payload,
+    size_t payload_size);
+
+ReturnCode performOperation_META_DISCOVER(
+    Database* database,
+    NativeConnection* conn,
+    const char* payload,
+    size_t payload_size);
+
+ReturnCode performOperation_META_FINDPARTITION(
+    Database* database,
+    NativeConnection* conn,
+    const char* payload,
+    size_t payload_size);
+
+ReturnCode performOperation_META_LISTPARTITIONS(
+    Database* database,
+    NativeConnection* conn,
+    const char* payload,
+    size_t payload_size);
+
 } // namespace native_transport
 } // namespace eventql
 

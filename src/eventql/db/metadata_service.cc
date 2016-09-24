@@ -291,7 +291,10 @@ Status MetadataService::createPartition(
       Random::singleton()->sha1(),
       *msg::encode(op));
 
-  MetadataCoordinator coordinator(dbctx_->config_directory);
+  MetadataCoordinator coordinator(
+      dbctx_->config_directory,
+      dbctx_->config);
+
   auto create_rc = coordinator.performAndCommitOperation(
       request.db_namespace(),
       request.table_id(),

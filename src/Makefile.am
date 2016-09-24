@@ -858,6 +858,12 @@ EVQL_CORE_SOURCES_ = \
     eventql/transport/native/frames/hello.h \
     eventql/transport/native/frames/insert.cc \
     eventql/transport/native/frames/insert.h \
+    eventql/transport/native/frames/meta_createfile.cc \
+    eventql/transport/native/frames/meta_createfile.h \
+    eventql/transport/native/frames/meta_getfile.cc \
+    eventql/transport/native/frames/meta_getfile.h \
+    eventql/transport/native/frames/meta_performop.cc \
+    eventql/transport/native/frames/meta_performop.h \
     eventql/transport/native/frames/query.cc \
     eventql/transport/native/frames/query.h \
     eventql/transport/native/frames/query_progress.cc \
@@ -883,6 +889,12 @@ EVQL_CORE_SOURCES_ = \
     eventql/transport/native/ops/query_remote.cc \
     eventql/transport/native/ops/insert.cc \
     eventql/transport/native/ops/repl_insert.cc \
+    eventql/transport/native/ops/meta_performop.cc \
+    eventql/transport/native/ops/meta_createfile.cc \
+    eventql/transport/native/ops/meta_getfile.cc \
+    eventql/transport/native/ops/meta_discover.cc \
+    eventql/transport/native/ops/meta_findpartition.cc \
+    eventql/transport/native/ops/meta_listpartitions.cc \
     eventql/db/table_ref.cc \
     eventql/db/table_ref.h \
     eventql/db/table.cc \

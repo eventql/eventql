@@ -43,7 +43,8 @@ MapTableTask::MapTableTask(
     MapReduceShardList* shards,
     InternalAuth* auth,
     eventql::PartitionMap* pmap,
-    eventql::ConfigDirectory* cdir) :
+    eventql::ConfigDirectory* cdir,
+    ProcessConfig* config) :
     session_(session),
     table_ref_(table_ref),
     map_function_(map_function),
@@ -51,7 +52,8 @@ MapTableTask::MapTableTask(
     params_(params),
     auth_(auth),
     pmap_(pmap),
-    cdir_(cdir) {
+    cdir_(cdir),
+    config_(config) {
   auto table = pmap_->findTable(session_->getEffectiveNamespace(), table_ref_.table_key);
   if (table.isEmpty()) {
     RAISEF(kNotFoundError, "table not found: $0", table_ref_.table_key);
@@ -68,7 +70,7 @@ MapTableTask::MapTableTask(
     kr.end = encodePartitionKey(keyspace, table_ref_.keyrange_limit.get());
   }
 
-  MetadataClient metadata_client(cdir_);
+  MetadataClient metadata_client(cdir_, config_);
   PartitionListResponse partition_list;
   auto rc = metadata_client.listPartitions(
       session->getEffectiveNamespace(),

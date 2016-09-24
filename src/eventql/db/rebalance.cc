@@ -30,11 +30,13 @@ namespace eventql {
 
 Rebalance::Rebalance(
     ConfigDirectory* cdir,
+    ProcessConfig* config,
     ServerAllocator* server_alloc) :
     cdir_(cdir),
+    config_(config),
     server_alloc_(server_alloc),
-    metadata_coordinator_(cdir),
-    metadata_client_(cdir),
+    metadata_coordinator_(cdir, config),
+    metadata_client_(cdir, config),
     replication_factor_(3),
     metadata_replication_factor_(3) {}
 

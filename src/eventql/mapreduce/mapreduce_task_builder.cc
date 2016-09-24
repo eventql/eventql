@@ -162,7 +162,8 @@ RefPtr<MapReduceTask> MapReduceTaskBuilder::buildMapTableTask(
       shards,
       auth_,
       pmap_,
-      cdir_);
+      cdir_,
+      session_->getDatabaseContext()->config);
 
   auto required_columns = json::objectLookup(job, "required_columns");
   if (required_columns != job.end()) {

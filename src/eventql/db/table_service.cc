@@ -226,7 +226,10 @@ Status TableService::createTable(
   }
 
   // create metadata file on metadata servers
-  eventql::MetadataCoordinator coordinator(dbctx_->config_directory);
+  MetadataCoordinator coordinator(
+      dbctx_->config_directory,
+      dbctx_->config);
+
   auto rc = coordinator.createFile(
       db_namespace,
       table_name,
@@ -511,7 +514,10 @@ ReturnCode TableService::insertRecords(
     const msg::DynamicMessage* begin,
     const msg::DynamicMessage* end,
     uint64_t flags /* = 0 */) {
-  MetadataClient metadata_client(dbctx_->config_directory);
+  MetadataClient metadata_client(
+      dbctx_->config_directory,
+      dbctx_->config);
+
   HashMap<SHA1Hash, ShreddedRecordListBuilder> records;
   HashMap<SHA1Hash, Set<String>> servers;
 

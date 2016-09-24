@@ -58,41 +58,6 @@ protected:
       http::HTTPResponse* res,
       URI* uri);
 
-  void createMetadataFile(
-      const URI& uri,
-      const http::HTTPRequest* req,
-      http::HTTPResponse* res);
-
-  void performMetadataOperation(
-      const URI& uri,
-      const http::HTTPRequest* req,
-      http::HTTPResponse* res);
-
-  void discoverPartitionMetadata(
-      const URI& uri,
-      const http::HTTPRequest* req,
-      http::HTTPResponse* res);
-
-  void fetchMetadataFile(
-      const URI& uri,
-      const http::HTTPRequest* req,
-      http::HTTPResponse* res);
-
-  void fetchLatestMetadataFile(
-      const URI& uri,
-      const http::HTTPRequest* req,
-      http::HTTPResponse* res);
-
-  void listPartitions(
-      const URI& uri,
-      const http::HTTPRequest* req,
-      http::HTTPResponse* res);
-
-  void findPartition(
-      const URI& uri,
-      const http::HTTPRequest* req,
-      http::HTTPResponse* res);
-
   Database* db_;
 };
 

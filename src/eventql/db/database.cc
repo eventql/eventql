@@ -314,6 +314,7 @@ ReturnCode DatabaseImpl::start() {
     metadata_replication_.reset(
         new MetadataReplication(
             config_dir_.get(),
+            cfg_,
             server_name.get(),
             metadata_store_.get()));
   }
@@ -442,6 +443,7 @@ ReturnCode DatabaseImpl::start() {
     leader_.reset(
         new Leader(
             config_dir_.get(),
+            cfg_,
             server_alloc_.get(),
             cfg_->getInt("cluster.rebalance_interval").get()));
 
