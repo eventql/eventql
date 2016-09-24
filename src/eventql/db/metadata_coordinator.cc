@@ -341,7 +341,7 @@ Status MetadataCoordinator::discoverPartition(
     }
 
     switch (ret_opcode) {
-      case EVQL_OP_META_FINDPARTITION_RESULT:
+      case EVQL_OP_META_DISCOVER_RESULT:
         break;
       case EVQL_OP_ERROR: {
         native_transport::ErrorFrame eframe;

@@ -25,6 +25,7 @@
 #include "eventql/transport/native/connection.h"
 #include "eventql/util/logging.h"
 #include "eventql/server/session.h"
+#include "eventql/db/metadata_service.h"
 
 namespace eventql {
 namespace native_transport {
@@ -42,7 +43,34 @@ ReturnCode performOperation_META_DISCOVER(
     return conn->sendErrorFrame("internal method called");
   }
 
-  return ReturnCode::success();
+  /* parse request */
+  PartitionDiscoveryRequest request;
+  if (payload_size > 1 && payload[0] == 0) {
+    try {
+      msg::decode(payload + 1, payload_size - 1, &request);
+    } catch (const std::exception& e) {
+      return conn->sendErrorFrame("invalid frame encoding");
+    }
+  } else {
+    return conn->sendErrorFrame("invalid frame encoding");
+  }
+
+  /* execute operation */
+  PartitionDiscoveryResponse response;
+  auto rc = dbctx->metadata_service->discoverPartition(request, &response);
+
+  /* send response */
+  if (rc.isSuccess()) {
+    auto payload = *msg::encode(response);
+
+    return conn->sendFrame(
+        EVQL_OP_META_DISCOVER_RESULT,
+        EVQL_ENDOFREQUEST,
+        payload.data(),
+        payload.size());
+  } else {
+    return conn->sendErrorFrame(rc.message());
+  }
 }
 
 } // namespace native_transport
