@@ -23,8 +23,10 @@
  */
 #include "eventql/transport/native/server.h"
 #include "eventql/transport/native/connection.h"
+#include "eventql/transport/native/frames/meta_performop.h"
 #include "eventql/util/logging.h"
 #include "eventql/server/session.h"
+#include "eventql/db/metadata_service.h"
 
 namespace eventql {
 namespace native_transport {
@@ -40,6 +42,46 @@ ReturnCode performOperation_META_PERFORMOP(
   /* check internal */
   if (!session->isInternal()) {
     return conn->sendErrorFrame("internal method called");
+  }
+
+  /* parse request */
+  MetaPerformopFrame m_frame;
+  {
+    MemoryInputStream is(payload, payload_size);
+    auto rc = m_frame.parseFrom(&is);
+    if (!rc.isSuccess()) {
+      return conn->sendErrorFrame("invalid frame");
+    }
+  }
+
+  MetadataOperation op;
+  {
+    auto is = StringInputStream::fromString(m_frame.getOperation());
+    auto rc = op.decode(is.get());
+    if (!rc.isSuccess()) {
+      return conn->sendErrorFrame("invalid frame");
+    }
+  }
+
+  /* execute operation */
+  MetadataOperationResult result;
+  auto rc = dbctx->metadata_service->performMetadataOperation(
+      m_frame.getDatabase(),
+      m_frame.getTable(),
+      op,
+      &result);
+
+  /* send response */
+  if (rc.isSuccess()) {
+    auto payload = *msg::encode(result);
+
+    return conn->sendFrame(
+        EVQL_OP_META_PERFORMOP_RESULT,
+        EVQL_ENDOFREQUEST,
+        payload.data(),
+        payload.size());
+  } else {
+    return conn->sendErrorFrame(rc.message());
   }
 
   return ReturnCode::success();
