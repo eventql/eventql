@@ -13,8 +13,8 @@ EventQL v0.5.0 beta;
     information to the coordination service
 
   * Added new frames to native protocol: ACK, INSERT, REPL_INSERT, META_GETFILE,
-    META_PERFORMOP, META_CREATEFILE, META_DISCOVER, META_LISTPARTITIONS,
-    META_FINDPARTITION
+    META_CREATEFILE, META_PERFORMOP{_RESULT}, META_DISCOVER{_RESULT},
+    META_LISTPARTITIONS{_RESULT}, META_FINDPARTITION{_RESULT}
 
   * Added the following new configuration options: server.disk_capacity,
     server.load_limit_{soft,hard}, server.partitions_loading_limit_{soft,hard},
