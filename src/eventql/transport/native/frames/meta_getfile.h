@@ -28,7 +28,7 @@
 #include "eventql/util/io/inputstream.h"
 #include "eventql/util/io/outputstream.h"
 #include "eventql/util/return_code.h"
-#include "eventql/util/sha1.h"
+#include "eventql/util/SHA1.h"
 
 namespace eventql {
 namespace native_transport {
