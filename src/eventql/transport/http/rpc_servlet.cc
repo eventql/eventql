@@ -143,20 +143,6 @@ void RPCServlet::handleHTTPRequest(
       return;
     }
 
-    if (uri.path() == "/rpc/list_partitions") {
-      req_stream->readBody();
-      listPartitions(uri, &req, &res);
-      res_stream->writeResponse(res);
-      return;
-    }
-
-    if (uri.path() == "/rpc/find_partition") {
-      req_stream->readBody();
-      findPartition(uri, &req, &res);
-      res_stream->writeResponse(res);
-      return;
-    }
-
     res.setStatus(http::kStatusNotFound);
     res.addBody("not found");
     res_stream->writeResponse(res);
@@ -498,52 +484,6 @@ void RPCServlet::fetchLatestMetadataFile(
 
   if (rc.isSuccess()) {
     res->setStatus(http::kStatusOK);
-  } else {
-    res->setStatus(http::kStatusInternalServerError);
-    res->addBody("ERROR: " + rc.message());
-    return;
-  }
-}
-
-void RPCServlet::listPartitions(
-    const URI& uri,
-    const http::HTTPRequest* req,
-    http::HTTPResponse* res) {
-  auto session = db_->getSession();
-  auto dbctx = session->getDatabaseContext();
-
-  PartitionListRequest request;
-  msg::decode(req->body(), &request);
-
-  PartitionListResponse response;
-  auto rc = dbctx->metadata_service->listPartitions(request, &response);
-
-  if (rc.isSuccess()) {
-    res->setStatus(http::kStatusOK);
-    res->addBody(*msg::encode(response));
-  } else {
-    res->setStatus(http::kStatusInternalServerError);
-    res->addBody("ERROR: " + rc.message());
-    return;
-  }
-}
-
-void RPCServlet::findPartition(
-    const URI& uri,
-    const http::HTTPRequest* req,
-    http::HTTPResponse* res) {
-  auto session = db_->getSession();
-  auto dbctx = session->getDatabaseContext();
-
-  PartitionFindRequest request;
-  msg::decode(req->body(), &request);
-
-  PartitionFindResponse response;
-  auto rc = dbctx->metadata_service->findPartition(request, &response);
-
-  if (rc.isSuccess()) {
-    res->setStatus(http::kStatusOK);
-    res->addBody(*msg::encode(response));
   } else {
     res->setStatus(http::kStatusInternalServerError);
     res->addBody("ERROR: " + rc.message());

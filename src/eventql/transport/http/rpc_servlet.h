@@ -83,16 +83,6 @@ protected:
       const http::HTTPRequest* req,
       http::HTTPResponse* res);
 
-  void listPartitions(
-      const URI& uri,
-      const http::HTTPRequest* req,
-      http::HTTPResponse* res);
-
-  void findPartition(
-      const URI& uri,
-      const http::HTTPRequest* req,
-      http::HTTPResponse* res);
-
   Database* db_;
 };
 
