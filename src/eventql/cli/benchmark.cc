@@ -148,7 +148,7 @@ void Benchmark::runThread(size_t idx) {
       rc = clients_[idx].connect(host_, port_, false, auth_data_);
     }
 
-    if (!rc.isSuccess()) {
+    if (rc.isSuccess()) {
       try {
         rc = request_handler_(&clients_[idx], sequence_.fetch_add(1));
       } catch (const std::exception& e) {
