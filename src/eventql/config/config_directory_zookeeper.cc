@@ -119,7 +119,7 @@ Status ZookeeperConfigDirectory::start(bool create /* = false */) {
   }
 
   {
-    auto rc = load(nullptr);
+    auto rc = load(false);
     if (!rc.isSuccess()) {
       return rc;
     }
