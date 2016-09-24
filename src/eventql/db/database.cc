@@ -314,6 +314,7 @@ ReturnCode DatabaseImpl::start() {
     metadata_replication_.reset(
         new MetadataReplication(
             config_dir_.get(),
+            cfg_,
             server_name.get(),
             metadata_store_.get()));
   }
