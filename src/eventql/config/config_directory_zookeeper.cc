@@ -945,6 +945,12 @@ void ZookeeperConfigDirectory::updateClusterConfigWithLock(
       RAISEF(kRuntimeError, "zoo_create() failed: $0", getErrorString(rc));
     }
   }
+
+  cluster_config_ = config;
+  cluster_config_.set_version(config.version() + 1);
+  for (const auto& cb : on_cluster_change_) {
+    callback_scheduler_.run(std::bind(cb, cluster_config_));
+  }
 }
 
 // PRECONDITION: must NOT hold mutex
@@ -1244,6 +1250,13 @@ void ZookeeperConfigDirectory::updateNamespaceConfig(NamespaceConfig cfg) {
       RAISEF(kRuntimeError, "zoo_create() failed: $0", getErrorString(rc));
     }
   }
+
+  auto new_cfg = cfg;
+  new_cfg.set_version(cfg.version() + 1);
+  namespaces_[cfg.customer()] = new_cfg;
+  for (const auto& cb : on_namespace_change_) {
+    callback_scheduler_.run(std::bind(cb, new_cfg));
+  }
 }
 
 TableDefinition ZookeeperConfigDirectory::getTableConfig(
@@ -1300,6 +1313,13 @@ void ZookeeperConfigDirectory::updateTableConfig(
     if (rc) {
       RAISEF(kRuntimeError, "zoo_create() failed: $0", getErrorString(rc));
     }
+  }
+
+  auto new_table = table;
+  new_table.set_version(table.version() + 1);
+  tables_[table.customer() + "~" + table.table_name()] = new_table;
+  for (const auto& cb : on_table_change_) {
+    callback_scheduler_.run(std::bind(cb, new_table));
   }
 }
 
