@@ -34,7 +34,9 @@ namespace eventql {
 class MetadataClient {
 public:
 
-  MetadataClient(ConfigDirectory* cdir);
+  MetadataClient(
+      ConfigDirectory* cdir,
+      ProcessConfig* config);
 
   Status fetchLatestMetadataFile(
       const String& ns,
@@ -71,6 +73,7 @@ public:
 
 protected:
   ConfigDirectory* cdir_;
+  ProcessConfig* config_;
 };
 
 } // namespace eventql

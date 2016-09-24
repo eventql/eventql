@@ -38,6 +38,7 @@ public:
 
   Leader(
       ConfigDirectory* cdir,
+      ProcessConfig* config,
       ServerAllocator* server_alloc,
       uint64_t rebalance_interval);
 

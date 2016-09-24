@@ -26,7 +26,11 @@
 
 namespace eventql {
 
-MetadataClient::MetadataClient(ConfigDirectory* cdir) : cdir_(cdir) {}
+MetadataClient::MetadataClient(
+    ConfigDirectory* cdir,
+    ProcessConfig* config) :
+    cdir_(cdir),
+    config_(config) {}
 
 Status MetadataClient::fetchLatestMetadataFile(
     const String& ns,

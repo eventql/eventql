@@ -35,7 +35,10 @@ namespace eventql {
 class Rebalance {
 public:
 
-  Rebalance(ConfigDirectory* cdir, ServerAllocator* server_alloc);
+  Rebalance(
+      ConfigDirectory* cdir,
+      ProcessConfig* config,
+      ServerAllocator* server_alloc);
 
   Status runOnce();
 
@@ -50,6 +53,7 @@ protected:
       const Buffer& opdata);
 
   ConfigDirectory* cdir_;
+  ProcessConfig* config_;
   ServerAllocator* server_alloc_;
   MetadataCoordinator metadata_coordinator_;
   MetadataClient metadata_client_;
