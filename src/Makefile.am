@@ -1,6 +1,6 @@
 # Process this file with automake to produce Makefile.in
 
-bin_PROGRAMS = evql evqld evqlctl
+bin_PROGRAMS = evql evqld evqlctl evqlslap
 lib_LTLIBRARIES = libevqlclient.la
 check_LIBRARIES = libevqlcore.a
 
@@ -299,6 +299,8 @@ EVQL_CORE_SOURCES_ = \
     eventql/util/reflect/property_impl.h \
     eventql/util/reflect/reflect.h \
     eventql/util/return_code.h \
+    eventql/util/rolling_stat.cc \
+    eventql/util/rolling_stat.h \
     eventql/util/traits.h \
     eventql/util/protobuf/msg.h \
     eventql/util/protobuf/DynamicMessage.cc \
@@ -864,6 +866,8 @@ EVQL_CORE_SOURCES_ = \
     eventql/transport/native/frames/hello.h \
     eventql/transport/native/frames/insert.cc \
     eventql/transport/native/frames/insert.h \
+    eventql/transport/native/frames/query.cc \
+    eventql/transport/native/frames/query.h \
     eventql/transport/native/frames/query_progress.cc \
     eventql/transport/native/frames/query_progress.h \
     eventql/transport/native/frames/ready.cc \
@@ -1036,6 +1040,28 @@ evqlctl_LDADD = \
     $(LMDB_LDADD) \
     $(PROTOBUF_LDADD) \
     $(SPIDERMONKEY_LDADD)
+
+################## BIN: evqlslap ####################
+evqlslap_SOURCES = \
+    ${EVQL_CORE_SOURCES_} \
+    $(EVQL_PROTO_SOURCES_) \
+    eventql/cli/benchmark.h \
+    eventql/cli/benchmark.cc \
+    eventql/cli/benchmark_insert.cc \
+    eventql/cli/benchmark_query.cc \
+    eventql/evqlslap.cc
+
+evqlslap_LDADD = \
+    libevqlclient.la \
+    $(ZOOKEEPER_LDADD) \
+    $(LINENOISE_LDADD) \
+    $(INIH_LDADD) \
+    $(SIMDCOMP_LDADD) \
+    $(LMDB_LDADD) \
+    $(PROTOBUF_LDADD) \
+    $(SPIDERMONKEY_LDADD)
+
+evqlslap_LDFLAGS = -static
 
 ################ LIB: libevqlclient.a ###################
 libevqlclient_la_SOURCES = eventql/client.c

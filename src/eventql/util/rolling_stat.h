@@ -2,6 +2,7 @@
  * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
  *   - Paul Asmuth <paul@eventql.io>
+ *   - Laura Schlimmer <laura@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -22,45 +23,37 @@
  * code of your own applications
  */
 #pragma once
-#include <string>
-#include <vector>
-#include "eventql/eventql.h"
-#include "eventql/util/io/inputstream.h"
-#include "eventql/util/io/outputstream.h"
-#include "eventql/util/return_code.h"
+#include "eventql/util/stdtypes.h"
+#include "eventql/util/time_constants.h"
 
-namespace eventql {
-namespace native_transport {
-
-class InsertFrame {
+class RollingStat {
 public:
 
-  static const uint16_t kOpcode = EVQL_OP_INSERT;
+  struct Bucket {
+    uint64_t time;
+    uint64_t value;
+    uint64_t count;
+  };
 
-  InsertFrame();
+  static const uint64_t kDefaultNumBuckets = 1000;
+  static const uint64_t kDefaultBucketIntervalUs = kMicrosPerSecond / 100;
 
-  void setDatabase(const std::string& database);
-  void setTable(const std::string& table);
-  void setRecordEncoding(uint64_t encoding);
-  void addRecord(const std::string& record);
+  RollingStat(
+      uint64_t buckets_capacity = kDefaultNumBuckets,
+      uint64_t bucket_interval_us = kDefaultBucketIntervalUs);
 
-  const std::string& getDatabase() const;
-  const std::string& getTable() const;
-  uint64_t getRecordEncoding() const;
-  const std::vector<std::string>& getRecords() const;
+  void addValue(uint64_t val);
 
-  ReturnCode parseFrom(InputStream* is);
-  ReturnCode writeTo(OutputStream* os) const;
-  void clear();
+  void computeAggregate(
+      uint64_t* value,
+      uint64_t* count,
+      uint64_t* interval_us) const;
 
 protected:
-  uint64_t flags_;
-  std::string database_;
-  std::string table_;
-  uint64_t record_encoding_;
-  std::vector<std::string> records_;
+  uint64_t buckets_capacity_;
+  std::vector<Bucket> buckets_;
+  uint64_t bucket_interval_us_;
+  uint64_t buckets_idx_;
+  uint64_t buckets_size_;
 };
-
-} // namespace native_transport
-} // namespace eventql
 

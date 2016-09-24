@@ -2,6 +2,7 @@
  * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
  *   - Paul Asmuth <paul@eventql.io>
+ *   - Laura Schlimmer <laura@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -21,54 +22,51 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#pragma once
-#include <string>
-#include <vector>
-#include "eventql/eventql.h"
-#include "eventql/util/return_code.h"
-#include "eventql/util/util/binarymessagewriter.h"
-#include "eventql/transport/native/connection_tcp.h"
-#include "eventql/sql/svalue.h"
+#include "eventql/transport/native/frames/query.h"
 
 namespace eventql {
 namespace native_transport {
 
-class HelloFrame {
-public:
+QueryFrame::QueryFrame() : flags_(0), maxrows_(0) {};
 
-  using AuthDataType = std::vector<std::pair<std::string, std::string>>;
-  static const uint16_t kOpcode = EVQL_OP_HELLO;
+void QueryFrame::setQuery(const std::string& query) {
+  query_ = query;
+}
 
-  HelloFrame();
+const std::string& QueryFrame::getQuery() const {
+  return query_;
+}
 
-  void setIsInternal(bool is_internal);
-  bool isInternal() const;
+void QueryFrame::setDatabase(const std::string& database) {
+  database_ = database;
+  flags_ |= EVQL_QUERY_SWITCHDB;
+}
 
-  void setInteractiveAuth(bool enable_interactive);
-  bool getInteractiveAuth() const;
+const std::string& QueryFrame::getDatabase() const {
+  return database_;
+}
 
-  void setIdleTimeout(uint64_t timeout_us);
-  uint64_t getIdleTimeout() const;
+ReturnCode QueryFrame::parseFrom(InputStream* is) {
+  query_ = is->readLenencString();
+  flags_ = is->readVarUInt();
+  maxrows_ = is->readVarUInt();
 
-  void addAuthData(const std::string& key, const std::string& value);
-  void setAuthData(const AuthDataType& auth_data);
-  const AuthDataType& getAuthData() const;
+  if (flags_ & EVQL_QUERY_SWITCHDB) {
+    database_ = is->readLenencString();
+  }
 
-  void setDatabase(const std::string& database);
-  const std::string& getDatabase() const;
-  bool hasDatabase() const;
+  return ReturnCode::success();
+}
 
-  ReturnCode readFrom(InputStream* is);
-  void writeTo(OutputStream* os) const;
-
-  void clear();
-
-protected:
-  uint64_t flags_;
-  uint64_t idle_timeout_;
-  std::string database_;
-  AuthDataType auth_data_;
-};
+void QueryFrame::writeTo(OutputStream* os) const {
+  os->appendLenencString(query_);
+  os->appendVarUInt(flags_);
+  os->appendVarUInt(maxrows_);
+  if (flags_ & EVQL_QUERY_SWITCHDB) {
+    os->appendLenencString(database_);
+  }
+}
 
 } // namespace native_transport
 } // namespace eventql
+

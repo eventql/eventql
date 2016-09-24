@@ -3,5 +3,6 @@ test_evql_*
 evql
 evqld
 evqlctl
+evqlslap
 cstable_tool
 mysql2evql
