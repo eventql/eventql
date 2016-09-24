@@ -11,6 +11,8 @@ EventQL v0.5.0 beta;
 
   * Added the evqlslap benchmark and load testing tool
 
+  * Added caching for metadata lookups
+
   * Added a new monitor thread that publishes disk usage and other load
     information to the coordination service
 
