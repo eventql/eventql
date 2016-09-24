@@ -108,13 +108,6 @@ void RPCServlet::handleHTTPRequest(
       return;
     }
 
-    if (uri.path() == "/rpc/create_metadata_file") {
-      req_stream->readBody();
-      createMetadataFile(uri, &req, &res);
-      res_stream->writeResponse(res);
-      return;
-    }
-
     if (uri.path() == "/rpc/perform_metadata_operation") {
       req_stream->readBody();
       performMetadataOperation(uri, &req, &res);
@@ -270,47 +263,6 @@ void RPCServlet::replicateRecords(
   } else {
     res->setStatus(http::kStatusInternalServerError);
     res->addBody("ERROR: " + rc.getMessage());
-    return;
-  }
-}
-
-void RPCServlet::createMetadataFile(
-    const URI& uri,
-    const http::HTTPRequest* req,
-    http::HTTPResponse* res) {
-  auto session = db_->getSession();
-  auto dbctx = session->getDatabaseContext();
-
-  const auto& params = uri.queryParams();
-
-  String db_namespace;
-  if (!URI::getParam(params, "namespace", &db_namespace)) {
-    RAISE(kRuntimeError, "missing ?namespace=... parameter");
-  }
-
-  String table_name;
-  if (!URI::getParam(params, "table", &table_name)) {
-    res->setStatus(http::kStatusBadRequest);
-    res->addBody("error: missing ?table=... parameter");
-    return;
-  }
-
-  MetadataFile file;
-  auto is = req->getBodyInputStream();
-  auto rc = file.decode(is.get());
-
-  if (rc.isSuccess()) {
-    rc = dbctx->metadata_service->createMetadataFile(
-        db_namespace,
-        table_name,
-        file);
-  }
-
-  if (rc.isSuccess()) {
-    res->setStatus(http::kStatusCreated);
-  } else {
-    res->setStatus(http::kStatusInternalServerError);
-    res->addBody("ERROR: " + rc.message());
     return;
   }
 }
