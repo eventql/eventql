@@ -73,16 +73,6 @@ protected:
       const http::HTTPRequest* req,
       http::HTTPResponse* res);
 
-  void fetchMetadataFile(
-      const URI& uri,
-      const http::HTTPRequest* req,
-      http::HTTPResponse* res);
-
-  void fetchLatestMetadataFile(
-      const URI& uri,
-      const http::HTTPRequest* req,
-      http::HTTPResponse* res);
-
   Database* db_;
 };
 
