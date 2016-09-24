@@ -72,7 +72,13 @@ enum {
   EVQL_OP_QUERY_PARTIALAGGR_RESULT   = 0x0102,
   EVQL_OP_QUERY_REMOTE               = 0x0103,
   EVQL_OP_QUERY_REMOTE_RESULT        = 0x0104,
-  EVQL_OP_REPL_INSERT                = 0x0110
+  EVQL_OP_REPL_INSERT                = 0x0110,
+  EVQL_OP_META_PERFORMOP             = 0x0200,
+  EVQL_OP_META_CREATEFILE            = 0x0201,
+  EVQL_OP_META_GETFILE               = 0x0202,
+  EVQL_OP_META_DISCOVER              = 0x0203,
+  EVQL_OP_META_LISTPARTITIONS        = 0x0204,
+  EVQL_OP_META_FINDPARTITION         = 0x0205
 };
 
 enum {
