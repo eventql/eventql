@@ -25,6 +25,7 @@
 #include "eventql/transport/native/client_tcp.h"
 #include "eventql/transport/native/frames/error.h"
 #include "eventql/transport/native/frames/meta_createfile.h"
+#include "eventql/transport/native/frames/meta_performop.h"
 #include <eventql/util/logging.h>
 
 namespace eventql {
@@ -131,37 +132,55 @@ Status MetadataCoordinator::performOperation(
       server,
       server_cfg.server_addr());
 
-  auto url = StringUtil::format(
-      "http://$0/rpc/perform_metadata_operation?namespace=$1&table=$2",
-      server_cfg.server_addr(),
-      URI::urlEncode(ns),
-      URI::urlEncode(table_name));
-
-  Buffer req_body;
+  std::string req_body;
   {
-    auto os = BufferOutputStream::fromBuffer(&req_body);
+    auto os = StringOutputStream::fromString(&req_body);
     auto rc = op.encode(os.get());
     if (!rc.isSuccess()) {
       return rc;
     }
   }
 
-  auto req = http::HTTPRequest::mkPost(url, req_body);
-  //auth_->signRequest(static_cast<Session*>(txn_->getUserData()), &req);
+  native_transport::MetaPerformopFrame m_frame;
+  m_frame.setDatabase(ns);
+  m_frame.setTable(table_name);
+  m_frame.setOperation(req_body);
 
-  http::HTTPClient http_client;
-  http::HTTPResponse res;
-  auto rc = http_client.executeRequest(req, &res);
+  auto idle_timeout = config_->getInt("server.s2s_idle_timeout", 0);
+  auto io_timeout = config_->getInt("server.s2s_io_timeout", 0);
+  native_transport::TCPClient client(io_timeout, idle_timeout);
+  auto rc = client.connect(server_cfg.server_addr(), true);
   if (!rc.isSuccess()) {
     return rc;
   }
 
-  if (res.statusCode() == 201) {
-    *result = msg::decode<MetadataOperationResult>(res.body());
-    return Status::success();
-  } else {
-    return Status(eIOError, res.body().toString());
+  rc = client.sendFrame(&m_frame, 0);
+  if (!rc.isSuccess()) {
+    return rc;
   }
+
+  uint16_t ret_opcode = 0;
+  uint16_t ret_flags;
+  std::string ret_payload;
+  rc = client.recvFrame(&ret_opcode, &ret_flags, &ret_payload, idle_timeout);
+  if (!rc.isSuccess()) {
+    return rc;
+  }
+
+  switch (ret_opcode) {
+    case EVQL_OP_META_PERFORMOP_RESULT:
+      break;
+    case EVQL_OP_ERROR: {
+      native_transport::ErrorFrame eframe;
+      eframe.parseFrom(ret_payload.data(), ret_payload.size());
+      return ReturnCode::error("ERUNTIME", eframe.getError());
+    }
+    default:
+      return ReturnCode::error("ERUNTIME", "invalid opcode");
+  }
+
+  *result = msg::decode<MetadataOperationResult>(ret_payload);
+  return ReturnCode::success();
 }
 
 Status MetadataCoordinator::createFile(
@@ -267,6 +286,9 @@ Status MetadataCoordinator::createFile(
 Status MetadataCoordinator::discoverPartition(
     PartitionDiscoveryRequest request,
     PartitionDiscoveryResponse* response) {
+  auto idle_timeout = config_->getInt("server.s2s_idle_timeout", 0);
+  auto io_timeout = config_->getInt("server.s2s_io_timeout", 0);
+
   auto table_cfg = cdir_->getTableConfig(
       request.db_namespace(),
       request.table_id());
@@ -277,40 +299,66 @@ Status MetadataCoordinator::discoverPartition(
 
   request.set_requester_id(cdir_->getServerID());
 
-  http::HTTPClient http_client;
+  Buffer req_payload;
+  req_payload.append((char) 0);
+  msg::encode(request, &req_payload);
+
   for (const auto& s : table_cfg.metadata_servers()) {
     auto server = cdir_->getServerConfig(s);
     if (server.server_status() != SERVER_UP) {
+      logWarning("evqld", "metadata server is down: $0", s);
       continue;
     }
 
-    auto url = StringUtil::format(
-        "http://$0/rpc/discover_partition_metadata",
-        server.server_addr());
-
-    Buffer req_body;
-    auto req = http::HTTPRequest::mkPost(url, *msg::encode(request));
-    //auth_->signRequest(static_cast<Session*>(txn_->getUserData()), &req);
-
-    http::HTTPResponse res;
-    auto rc = http_client.executeRequest(req, &res);
+    native_transport::TCPClient client(io_timeout, idle_timeout);
+    auto rc = client.connect(server.server_addr(), true);
     if (!rc.isSuccess()) {
-      logDebug("evqld", "metadata discovery failed: $0", rc.message());
+      logWarning(
+          "evqld",
+          "can't connect to metadata server: $0",
+          rc.getMessage());
       continue;
     }
 
-    if (res.statusCode() == 200) {
-      *response = msg::decode<PartitionDiscoveryResponse>(res.body());
-      return Status::success();
-    } else {
-      logDebug(
-          "evqld",
-          "metadata discovery failed: $0",
-          res.body().toString());
+    rc = client.sendFrame(
+        EVQL_OP_META_DISCOVER,
+        0,
+        req_payload.data(),
+        req_payload.size());
+
+    if (!rc.isSuccess()) {
+      logWarning("evqld", "metadata discovery failed: $0", rc.getMessage());
+      continue;
     }
+
+    uint16_t ret_opcode = 0;
+    uint16_t ret_flags;
+    std::string ret_payload;
+    rc = client.recvFrame(&ret_opcode, &ret_flags, &ret_payload, idle_timeout);
+    if (!rc.isSuccess()) {
+      logWarning("evqld", "metadata discovery failed: $0", rc.getMessage());
+      continue;
+    }
+
+    switch (ret_opcode) {
+      case EVQL_OP_META_FINDPARTITION_RESULT:
+        break;
+      case EVQL_OP_ERROR: {
+        native_transport::ErrorFrame eframe;
+        eframe.parseFrom(ret_payload.data(), ret_payload.size());
+        logWarning("evqld", "metadata discovery failed: $0", eframe.getError());
+        continue;
+      }
+      default:
+        logWarning("evqld", "metadata discovery failed: invalid opcode");
+        continue;
+    }
+
+    msg::decode<PartitionDiscoveryResponse>(ret_payload, response);
+    return Status::success();
   }
 
-  return Status(eIOError, "no metadata server has the request transaction");
+  return Status(eIOError, "no metadata server has the requested transaction");
 }
 
 } // namespace eventql
