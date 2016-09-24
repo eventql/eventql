@@ -184,6 +184,7 @@ Status MetadataService::listPartitions(
 Status MetadataService::findPartition(
     const PartitionFindRequest& request,
     PartitionFindResponse* response) {
+
   RefPtr<MetadataFile> file;
   {
     auto rc = getMetadataFile(
@@ -221,6 +222,55 @@ Status MetadataService::findPartition(
 Status MetadataService::createPartition(
     const PartitionFindRequest& request,
     PartitionFindResponse* response) {
+  /* grab advisory create lock */
+  auto lock_key = StringUtil::format(
+      "$0~$1",
+       request.db_namespace(),
+       request.table_id());
+
+  std::mutex* lock;
+  {
+    std::unique_lock<std::mutex> lockmap_mutex_holder(lockmap_mutex_);
+    auto& lock_iter = lockmap_[lock_key];
+    if (!lock_iter) {
+      lock_iter.reset(new std::mutex());
+    }
+    lock = lock_iter.get();
+  }
+
+  std::unique_lock<std::mutex> lock_holder(*lock);
+
+  /* check that partition does not exist already */
+  {
+    RefPtr<MetadataFile> file;
+    {
+      auto rc = getMetadataFile(
+          request.db_namespace(),
+          request.table_id(),
+          &file);
+      if (!rc.isSuccess()) {
+        return rc;
+      }
+    }
+
+    auto partition = file->getPartitionMapAt(request.key());
+    if (partition != file->getPartitionMapEnd()) {
+      response->set_partition_id(
+          partition->partition_id.data(),
+          partition->partition_id.size());
+
+      for (const auto& s : partition->servers) {
+        response->add_servers_for_insert(s.server_id);
+      }
+      for (const auto& s : partition->servers_leaving) {
+        response->add_servers_for_insert(s.server_id);
+      }
+
+      return Status::success();
+    }
+  }
+
+  /* create new partition */
   auto table_config = dbctx_->config_directory->getTableConfig(
       request.db_namespace(),
       request.table_id());

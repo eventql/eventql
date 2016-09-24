@@ -82,6 +82,8 @@ public:
 protected:
   DatabaseContext* dbctx_;
   MetadataStore* metadata_store_;
+  std::mutex lockmap_mutex_;
+  std::map<std::string, std::unique_ptr<std::mutex>> lockmap_;
 };
 
 } // namespace eventql
