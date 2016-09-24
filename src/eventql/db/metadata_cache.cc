@@ -66,7 +66,7 @@ bool MetadataCache::get(
     response->add_servers_for_insert(s);
   }
 
-  return false;
+  return true;
 }
 
 void MetadataCache::store(
