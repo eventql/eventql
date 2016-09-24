@@ -48,16 +48,6 @@ protected:
       http::HTTPResponse* res,
       URI* uri);
 
-  void commitPartition(
-      const http::HTTPRequest* req,
-      http::HTTPResponse* res,
-      URI* uri);
-
-  void compactPartition(
-      const http::HTTPRequest* req,
-      http::HTTPResponse* res,
-      URI* uri);
-
   Database* db_;
 };
 
