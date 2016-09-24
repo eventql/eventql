@@ -862,6 +862,8 @@ EVQL_CORE_SOURCES_ = \
     eventql/transport/native/frames/meta_createfile.h \
     eventql/transport/native/frames/meta_getfile.cc \
     eventql/transport/native/frames/meta_getfile.h \
+    eventql/transport/native/frames/meta_performop.cc \
+    eventql/transport/native/frames/meta_performop.h \
     eventql/transport/native/frames/query.cc \
     eventql/transport/native/frames/query.h \
     eventql/transport/native/frames/query_progress.cc \
