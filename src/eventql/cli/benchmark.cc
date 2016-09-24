@@ -43,12 +43,14 @@ Benchmark::Benchmark(
     size_t num_threads,
     bool ignore_errors,
     size_t rate,
-    size_t remaining_requests /* = size_t(-1) */) :
+    size_t remaining_requests /* = size_t(-1) */,
+    bool disable_keepalive /* = false */) :
     num_threads_(num_threads),
     ignore_errors_(ignore_errors),
     rate_(rate),
     rate_limit_interval_(0),
     remaining_requests_(remaining_requests),
+    disable_keepalive_(disable_keepalive),
     status_(ReturnCode::success()),
     threads_running_(0),
     last_request_time_(0),
@@ -77,10 +79,16 @@ ReturnCode Benchmark::connect(
     const std::string& host,
     uint64_t port,
     const std::vector<std::pair<std::string, std::string>>& auth_data) {
-  for (size_t i = 0; i < num_threads_; ++i) {
-    auto rc = clients_[i].connect(host, port, false, auth_data);
-    if (!rc.isSuccess()) {
-      return rc;
+  host_ = host;
+  port_ = port;
+  auth_data_ = auth_data;
+
+  if (!disable_keepalive_) {
+    for (size_t i = 0; i < num_threads_; ++i) {
+      auto rc = clients_[i].connect(host_, port_, false, auth_data_);
+      if (!rc.isSuccess()) {
+        return rc;
+      }
     }
   }
 
@@ -133,14 +141,26 @@ void Benchmark::runThread(size_t idx) {
   while (getRequestSlot(idx)) {
     stats_.addRequestStart();
 
-    auto rc = ReturnCode::success();
     auto t0 = MonotonicClock::now();
-    try {
-      rc = request_handler_(&clients_[idx], sequence_.fetch_add(1));
-    } catch (const std::exception& e) {
-      rc = ReturnCode::error("ERUNTIME", e.what());
+    auto rc = ReturnCode::success();
+
+    if (disable_keepalive_) {
+      rc = clients_[idx].connect(host_, port_, false, auth_data_);
     }
+
+    if (!rc.isSuccess()) {
+      try {
+        rc = request_handler_(&clients_[idx], sequence_.fetch_add(1));
+      } catch (const std::exception& e) {
+        rc = ReturnCode::error("ERUNTIME", e.what());
+      }
+    }
+
     auto t1 = MonotonicClock::now();
+
+    if (disable_keepalive_) {
+      clients_[idx].close();
+    }
 
     std::unique_lock<std::mutex> lk(mutex_);
     stats_.addRequestComplete(rc.isSuccess(), t1 - t0);
