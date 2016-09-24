@@ -108,20 +108,6 @@ void RPCServlet::handleHTTPRequest(
       return;
     }
 
-    if (uri.path() == "/rpc/perform_metadata_operation") {
-      req_stream->readBody();
-      performMetadataOperation(uri, &req, &res);
-      res_stream->writeResponse(res);
-      return;
-    }
-
-    if (uri.path() == "/rpc/discover_partition_metadata") {
-      req_stream->readBody();
-      discoverPartitionMetadata(uri, &req, &res);
-      res_stream->writeResponse(res);
-      return;
-    }
-
     res.setStatus(http::kStatusNotFound);
     res.addBody("not found");
     res_stream->writeResponse(res);
@@ -263,78 +249,6 @@ void RPCServlet::replicateRecords(
   } else {
     res->setStatus(http::kStatusInternalServerError);
     res->addBody("ERROR: " + rc.getMessage());
-    return;
-  }
-}
-
-void RPCServlet::performMetadataOperation(
-    const URI& uri,
-    const http::HTTPRequest* req,
-    http::HTTPResponse* res) {
-  auto session = db_->getSession();
-  auto dbctx = session->getDatabaseContext();
-
-  const auto& params = uri.queryParams();
-
-  String db_namespace;
-  if (!URI::getParam(params, "namespace", &db_namespace)) {
-    RAISE(kRuntimeError, "missing ?namespace=... parameter");
-  }
-
-  String table_name;
-  if (!URI::getParam(params, "table", &table_name)) {
-    res->setStatus(http::kStatusBadRequest);
-    res->addBody("error: missing ?table=... parameter");
-    return;
-  }
-
-  MetadataOperation op;
-  {
-    auto is = req->getBodyInputStream();
-    auto rc = op.decode(is.get());
-    if (!rc.isSuccess()) {
-      res->setStatus(http::kStatusInternalServerError);
-      res->addBody("ERROR: " + rc.message());
-      return;
-    }
-  }
-
-  MetadataOperationResult result;
-  auto rc = dbctx->metadata_service->performMetadataOperation(
-      db_namespace,
-      table_name,
-      op,
-      &result);
-
-  if (rc.isSuccess()) {
-    res->setStatus(http::kStatusCreated);
-    res->addBody(*msg::encode(result));
-  } else {
-    res->setStatus(http::kStatusInternalServerError);
-    res->addBody("ERROR: " + rc.message());
-    return;
-  }
-}
-
-void RPCServlet::discoverPartitionMetadata(
-    const URI& uri,
-    const http::HTTPRequest* req,
-    http::HTTPResponse* res) {
-  auto session = db_->getSession();
-  auto dbctx = session->getDatabaseContext();
-
-  PartitionDiscoveryRequest request;
-  msg::decode(req->body(), &request);
-
-  PartitionDiscoveryResponse response;
-  auto rc = dbctx->metadata_service->discoverPartition(request, &response);
-
-  if (rc.isSuccess()) {
-    res->setStatus(http::kStatusOK);
-    res->addBody(*msg::encode(response));
-  } else {
-    res->setStatus(http::kStatusInternalServerError);
-    res->addBody("ERROR: " + rc.message());
     return;
   }
 }

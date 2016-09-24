@@ -58,16 +58,6 @@ protected:
       http::HTTPResponse* res,
       URI* uri);
 
-  void performMetadataOperation(
-      const URI& uri,
-      const http::HTTPRequest* req,
-      http::HTTPResponse* res);
-
-  void discoverPartitionMetadata(
-      const URI& uri,
-      const http::HTTPRequest* req,
-      http::HTTPResponse* res);
-
   Database* db_;
 };
 
