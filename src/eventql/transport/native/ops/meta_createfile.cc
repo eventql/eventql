@@ -23,8 +23,10 @@
  */
 #include "eventql/transport/native/server.h"
 #include "eventql/transport/native/connection.h"
+#include "eventql/transport/native/frames/meta_createfile.h"
 #include "eventql/util/logging.h"
 #include "eventql/server/session.h"
+#include "eventql/db/metadata_service.h"
 
 namespace eventql {
 namespace native_transport {
@@ -42,7 +44,37 @@ ReturnCode performOperation_META_CREATEFILE(
     return conn->sendErrorFrame("internal method called");
   }
 
-  return ReturnCode::success();
+  /* parse request */
+  MetaCreatefileFrame m_frame;
+  {
+    MemoryInputStream is(payload, payload_size);
+    auto rc = m_frame.parseFrom(&is);
+    if (!rc.isSuccess()) {
+      return conn->sendErrorFrame("invalid frame");
+    }
+  }
+
+  MetadataFile file;
+  {
+    auto is = StringInputStream::fromString(m_frame.getBody());
+    auto rc = file.decode(is.get());
+    if (!rc.isSuccess()) {
+      return conn->sendErrorFrame("invalid frame");
+    }
+  }
+
+  /* execute operation */
+  auto rc = dbctx->metadata_service->createMetadataFile(
+      m_frame.getDatabase(),
+      m_frame.getTable(),
+      file);
+
+  /* send response */
+  if (rc.isSuccess()) {
+    return conn->sendFrame(EVQL_OP_ACK, EVQL_ENDOFREQUEST, nullptr, 0);
+  } else {
+    return conn->sendErrorFrame(rc.message());
+  }
 }
 
 } // namespace native_transport
