@@ -22,6 +22,9 @@
  * code of your own applications
  */
 #include "eventql/db/metadata_coordinator.h"
+#include "eventql/transport/native/client_tcp.h"
+#include "eventql/transport/native/frames/error.h"
+#include "eventql/transport/native/frames/meta_createfile.h"
 #include <eventql/util/logging.h>
 
 namespace eventql {
@@ -196,9 +199,9 @@ Status MetadataCoordinator::createFile(
     const String& ns,
     const String& table_name,
     const MetadataFile& file,
-    const String& server) {
-  auto server_cfg = cdir_->getServerConfig(server);
-  if (server_cfg.server_addr().empty()) {
+    const String& server_id) {
+  auto server = cdir_->getServerConfig(server_id);
+  if (server.server_addr().empty()) {
     return Status(eRuntimeError, "server is offline");
   }
 
@@ -208,39 +211,57 @@ Status MetadataCoordinator::createFile(
       ns,
       table_name,
       file.getTransactionID(),
-      server,
-      server_cfg.server_addr());
+      server_id,
+      server.server_addr());
 
-  auto url = StringUtil::format(
-      "http://$0/rpc/create_metadata_file?namespace=$1&table=$2",
-      server_cfg.server_addr(),
-      URI::urlEncode(ns),
-      URI::urlEncode(table_name));
-
-  Buffer req_body;
+  std::string req_body;
   {
-    auto os = BufferOutputStream::fromBuffer(&req_body);
+    auto os = StringOutputStream::fromString(&req_body);
     auto rc = file.encode(os.get());
     if (!rc.isSuccess()) {
       return rc;
     }
   }
 
-  auto req = http::HTTPRequest::mkPost(url, req_body);
-  //auth_->signRequest(static_cast<Session*>(txn_->getUserData()), &req);
+  native_transport::MetaCreatefileFrame m_frame;
+  m_frame.setDatabase(ns);
+  m_frame.setTable(table_name);
+  m_frame.setBody(req_body);
 
-  http::HTTPClient http_client;
-  http::HTTPResponse res;
-  auto rc = http_client.executeRequest(req, &res);
+  auto idle_timeout = config_->getInt("server.s2s_idle_timeout", 0);
+  auto io_timeout = config_->getInt("server.s2s_io_timeout", 0);
+  native_transport::TCPClient client(io_timeout, idle_timeout);
+  auto rc = client.connect(server.server_addr(), true);
   if (!rc.isSuccess()) {
     return rc;
   }
 
-  if (res.statusCode() == 201) {
-    return Status::success();
-  } else {
-    return Status(eIOError, res.body().toString());
+  rc = client.sendFrame(&m_frame, 0);
+  if (!rc.isSuccess()) {
+    return rc;
   }
+
+  uint16_t ret_opcode = 0;
+  uint16_t ret_flags;
+  std::string ret_payload;
+  rc = client.recvFrame(&ret_opcode, &ret_flags, &ret_payload, idle_timeout);
+  if (!rc.isSuccess()) {
+    return rc;
+  }
+
+  switch (ret_opcode) {
+    case EVQL_OP_ACK:
+      break;
+    case EVQL_OP_ERROR: {
+      native_transport::ErrorFrame eframe;
+      eframe.parseFrom(ret_payload.data(), ret_payload.size());
+      return ReturnCode::error("ERUNTIME", eframe.getError());
+    }
+    default:
+      return ReturnCode::error("ERUNTIME", "invalid opcode");
+  }
+
+  return ReturnCode::success();
 }
 
 Status MetadataCoordinator::discoverPartition(
