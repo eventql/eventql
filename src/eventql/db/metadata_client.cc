@@ -31,9 +31,11 @@ namespace eventql {
 
 MetadataClient::MetadataClient(
     ConfigDirectory* cdir,
-    ProcessConfig* config) :
+    ProcessConfig* config,
+    MetadataCache* cache) :
     cdir_(cdir),
-    config_(config) {}
+    config_(config),
+    cache_(cache) {}
 
 Status MetadataClient::fetchLatestMetadataFile(
     const String& ns,
@@ -271,6 +273,11 @@ Status MetadataClient::findPartition(
   req.set_db_namespace(ns);
   req.set_table_id(table_id);
   req.set_key(key);
+  req.set_min_sequence_number(table_cfg.metadata_txnseq());
+
+  if (cache_->get(req, res)) {
+    return Status::success();
+  }
 
   Buffer req_payload;
   req_payload.append((char) 0);
@@ -328,6 +335,7 @@ Status MetadataClient::findPartition(
     }
 
     msg::decode<PartitionFindResponse>(ret_payload, res);
+    cache_->store(res);
     return Status::success();
   }
 
@@ -348,6 +356,11 @@ Status MetadataClient::findOrCreatePartition(
   req.set_table_id(table_id);
   req.set_key(key);
   req.set_allow_create(true);
+  req.set_min_sequence_number(table_cfg.metadata_txnseq());
+
+  if (cache_->get(req, res)) {
+    return Status::success();
+  }
 
   Buffer req_payload;
   req_payload.append((char) 0);
@@ -405,6 +418,7 @@ Status MetadataClient::findOrCreatePartition(
     }
 
     msg::decode<PartitionFindResponse>(ret_payload, res);
+    cache_->store(res);
     return Status::success();
   }
 

@@ -320,7 +320,11 @@ void StatusServlet::renderTablePage(
           table_cfg.metadata_txnid().size()).toString(),
       table_cfg.metadata_txnseq());
 
-  MetadataClient metadata_client(ctx->config_directory, ctx->config);
+  MetadataClient metadata_client(
+      ctx->config_directory,
+      ctx->config,
+      ctx->metadata_cache);
+
   MetadataFile metadata_file;
   auto rc = metadata_client.fetchLatestMetadataFile(
       db_namespace,

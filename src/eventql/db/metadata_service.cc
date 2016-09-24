@@ -32,9 +32,11 @@ namespace eventql {
 
 MetadataService::MetadataService(
     DatabaseContext* dbctx,
-    MetadataStore* metadata_store) :
+    MetadataStore* metadata_store,
+    MetadataCache* cache) :
     dbctx_(dbctx),
-    metadata_store_(metadata_store) {}
+    metadata_store_(metadata_store),
+    cache_(cache) {}
 
 Status MetadataService::getMetadataFile(
     const String& ns,
@@ -119,6 +121,11 @@ Status MetadataService::performMetadataOperation(
       output_file_checksum.data(),
       output_file_checksum.size());
 
+  result->set_metadata_txnseq(input_file->getSequenceNumber() + 1);
+  result->set_metadata_txnid(
+      op.getOutputTransactionID().data(),
+      op.getOutputTransactionID().size());
+
   return metadata_store_->storeMetadataFile(ns, table_name, output_file);
 }
 
@@ -184,6 +191,27 @@ Status MetadataService::listPartitions(
 Status MetadataService::findPartition(
     const PartitionFindRequest& request,
     PartitionFindResponse* response) {
+  /* grab advisory create lock */
+  auto lock_key = StringUtil::format(
+      "$0~$1",
+       request.db_namespace(),
+       request.table_id());
+
+  std::mutex* lock;
+  {
+    std::unique_lock<std::mutex> lockmap_mutex_holder(lockmap_mutex_);
+    auto& lock_iter = lockmap_[lock_key];
+    if (!lock_iter) {
+      lock_iter.reset(new std::mutex());
+    }
+    lock = lock_iter.get();
+  }
+
+  std::unique_lock<std::mutex> lock_holder(*lock);
+
+  if (cache_->get(request, response)) {
+    return Status::success();
+  }
 
   RefPtr<MetadataFile> file;
   {
@@ -205,9 +233,22 @@ Status MetadataService::findPartition(
     }
   }
 
+  response->set_sequence_number(file->getSequenceNumber());
   response->set_partition_id(
       partition->partition_id.data(),
       partition->partition_id.size());
+
+  response->set_partition_keyrange_begin(partition->begin);
+  if (file->hasFinitePartitions()) {
+    response->set_partition_keyrange_end(partition->end);
+  } else {
+    auto next = partition + 1;
+    if (next == file->getPartitionMapEnd()) {
+      response->set_partition_keyrange_end("");
+    } else {
+      response->set_partition_keyrange_end(next->begin);
+    }
+  }
 
   for (const auto& s : partition->servers) {
     response->add_servers_for_insert(s.server_id);
@@ -216,60 +257,13 @@ Status MetadataService::findPartition(
     response->add_servers_for_insert(s.server_id);
   }
 
+  cache_->store(response);
   return Status::success();
 }
 
 Status MetadataService::createPartition(
     const PartitionFindRequest& request,
     PartitionFindResponse* response) {
-  /* grab advisory create lock */
-  auto lock_key = StringUtil::format(
-      "$0~$1",
-       request.db_namespace(),
-       request.table_id());
-
-  std::mutex* lock;
-  {
-    std::unique_lock<std::mutex> lockmap_mutex_holder(lockmap_mutex_);
-    auto& lock_iter = lockmap_[lock_key];
-    if (!lock_iter) {
-      lock_iter.reset(new std::mutex());
-    }
-    lock = lock_iter.get();
-  }
-
-  std::unique_lock<std::mutex> lock_holder(*lock);
-
-  /* check that partition does not exist already */
-  {
-    RefPtr<MetadataFile> file;
-    {
-      auto rc = getMetadataFile(
-          request.db_namespace(),
-          request.table_id(),
-          &file);
-      if (!rc.isSuccess()) {
-        return rc;
-      }
-    }
-
-    auto partition = file->getPartitionMapAt(request.key());
-    if (partition != file->getPartitionMapEnd()) {
-      response->set_partition_id(
-          partition->partition_id.data(),
-          partition->partition_id.size());
-
-      for (const auto& s : partition->servers) {
-        response->add_servers_for_insert(s.server_id);
-      }
-      for (const auto& s : partition->servers_leaving) {
-        response->add_servers_for_insert(s.server_id);
-      }
-
-      return Status::success();
-    }
-  }
-
   /* create new partition */
   auto table_config = dbctx_->config_directory->getTableConfig(
       request.db_namespace(),
@@ -345,15 +339,21 @@ Status MetadataService::createPartition(
       dbctx_->config_directory,
       dbctx_->config);
 
+  MetadataOperationResult create_result;
   auto create_rc = coordinator.performAndCommitOperation(
       request.db_namespace(),
       request.table_id(),
-      envelope);
+      envelope,
+      &create_result);
 
   if (create_rc.isSuccess()) {
+    response->set_sequence_number(create_result.metadata_txnseq());
     response->set_partition_id(
         partition_id.data(),
         partition_id.size());
+
+    response->set_partition_keyrange_begin(op.begin());
+    response->set_partition_keyrange_end(op.end());
 
     for (const auto& s : new_servers) {
       response->add_servers_for_insert(s);
@@ -374,9 +374,13 @@ Status MetadataService::createPartition(
       return Status(eRuntimeError, "partition create failed");
     }
 
+    response->set_sequence_number(file->getSequenceNumber());
     response->set_partition_id(
         partition->partition_id.data(),
         partition->partition_id.size());
+
+    response->set_partition_keyrange_begin(partition->begin);
+    response->set_partition_keyrange_end(partition->end);
 
     for (const auto& s : partition->servers) {
       response->add_servers_for_insert(s.server_id);
@@ -386,6 +390,7 @@ Status MetadataService::createPartition(
     }
   }
 
+  cache_->store(response);
   return Status::success();
 }
 

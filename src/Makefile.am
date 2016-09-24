@@ -801,6 +801,8 @@ EVQL_CORE_SOURCES_ = \
     eventql/db/tablet_index.h \
     eventql/db/tablet_index_cache.cc \
     eventql/db/tablet_index_cache.h \
+    eventql/db/metadata_cache.cc \
+    eventql/db/metadata_cache.h \
     eventql/db/metadata_client.cc \
     eventql/db/metadata_client.h \
     eventql/db/metadata_coordinator.cc \

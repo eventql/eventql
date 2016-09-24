@@ -111,6 +111,7 @@ protected:
   std::unique_ptr<ClientAuth> client_auth_;
   std::unique_ptr<InternalAuth> internal_auth_;
   std::unique_ptr<MetadataStore> metadata_store_;
+  std::unique_ptr<MetadataCache> metadata_cache_;
   std::unique_ptr<MetadataService> metadata_service_;
   std::unique_ptr<PartitionMap> partition_map_;
   std::unique_ptr<TableService> table_service_;
@@ -286,8 +287,12 @@ ReturnCode DatabaseImpl::start() {
 
   /* metadata service */
   metadata_store_.reset(new MetadataStore(metadata_dir));
+  metadata_cache_.reset(new MetadataCache());
   metadata_service_.reset(
-      new MetadataService(database_context_.get(), metadata_store_.get()));
+      new MetadataService(
+          database_context_.get(),
+          metadata_store_.get(),
+          metadata_cache_.get()));
 
   /* server config */
   server_cfg_.reset(new ServerCfg());
@@ -377,6 +382,7 @@ ReturnCode DatabaseImpl::start() {
     database_context_->replication_worker = replication_worker_.get();
     database_context_->lsm_index_cache = server_cfg_->idx_cache.get();
     database_context_->metadata_store = metadata_store_.get();
+    database_context_->metadata_cache = metadata_cache_.get();
     database_context_->internal_auth = internal_auth_.get();
     database_context_->client_auth = client_auth_.get();
     database_context_->sql_runtime = sql_.get();
@@ -445,6 +451,7 @@ ReturnCode DatabaseImpl::start() {
             config_dir_.get(),
             cfg_,
             server_alloc_.get(),
+            metadata_cache_.get(),
             cfg_->getInt("cluster.rebalance_interval").get()));
 
     leader_->startLeaderThread();
@@ -496,6 +503,7 @@ void DatabaseImpl::shutdown() {
   partition_map_.reset(nullptr);
   metadata_service_.reset(nullptr);
   metadata_store_.reset(nullptr);
+  metadata_cache_.reset(nullptr);
   internal_auth_.reset(nullptr);
   client_auth_.reset(nullptr);
   server_alloc_.reset(nullptr);

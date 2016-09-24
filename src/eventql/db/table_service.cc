@@ -516,7 +516,8 @@ ReturnCode TableService::insertRecords(
     uint64_t flags /* = 0 */) {
   MetadataClient metadata_client(
       dbctx_->config_directory,
-      dbctx_->config);
+      dbctx_->config,
+      dbctx_->metadata_cache);
 
   HashMap<SHA1Hash, ShreddedRecordListBuilder> records;
   HashMap<SHA1Hash, Set<String>> servers;

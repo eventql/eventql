@@ -39,7 +39,8 @@ MetadataCoordinator::MetadataCoordinator(
 Status MetadataCoordinator::performAndCommitOperation(
     const String& ns,
     const String& table_name,
-    MetadataOperation op) {
+    MetadataOperation op,
+    MetadataOperationResult* res /* = nullptr */) {
   auto table_config = cdir_->getTableConfig(ns, table_name);
   SHA1Hash input_txid(
       table_config.metadata_txnid().data(),
@@ -54,7 +55,7 @@ Status MetadataCoordinator::performAndCommitOperation(
     servers.emplace_back(s);
   }
 
-  auto rc = performOperation(ns, table_name, op, servers);
+  auto rc = performOperation(ns, table_name, op, servers, res);
   if (!rc.isSuccess()) {
     return rc;
   }
@@ -70,7 +71,8 @@ Status MetadataCoordinator::performOperation(
     const String& ns,
     const String& table_name,
     MetadataOperation op,
-    const Vector<String>& servers) {
+    const Vector<String>& servers,
+    MetadataOperationResult* res /* = nullptr */) {
   size_t num_servers = servers.size();
   if (num_servers == 0) {
     return Status(eIllegalArgumentError, "server list can't be empty");
@@ -86,6 +88,10 @@ Status MetadataCoordinator::performOperation(
           SHA1Hash(
               result.metadata_file_checksum().data(),
               result.metadata_file_checksum().size()));
+
+      if (res) {
+        *res = result;
+      }
     } else {
       logDebug(
           "evqld",

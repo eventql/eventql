@@ -26,6 +26,7 @@
 #include "eventql/util/status.h"
 #include "eventql/db/metadata_operation.h"
 #include "eventql/db/metadata_file.h"
+#include "eventql/db/metadata_cache.h"
 #include "eventql/db/partition.h"
 #include "eventql/config/config_directory.h"
 
@@ -36,7 +37,8 @@ public:
 
   MetadataClient(
       ConfigDirectory* cdir,
-      ProcessConfig* config);
+      ProcessConfig* config,
+      MetadataCache* cache);
 
   Status fetchLatestMetadataFile(
       const String& ns,
@@ -74,6 +76,7 @@ public:
 protected:
   ConfigDirectory* cdir_;
   ProcessConfig* config_;
+  MetadataCache* cache_;
 };
 
 } // namespace eventql

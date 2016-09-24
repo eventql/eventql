@@ -34,9 +34,10 @@ Leader::Leader(
     ConfigDirectory* cdir,
     ProcessConfig* config,
     ServerAllocator* server_alloc,
+    MetadataCache* metadata_cache,
     uint64_t rebalance_interval) :
     cdir_(cdir),
-    rebalance_(cdir, config, server_alloc),
+    rebalance_(cdir, config, server_alloc, metadata_cache),
     rebalance_interval_(rebalance_interval) {}
 
 Leader::~Leader() {

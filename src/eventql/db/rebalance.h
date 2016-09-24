@@ -38,7 +38,8 @@ public:
   Rebalance(
       ConfigDirectory* cdir,
       ProcessConfig* config,
-      ServerAllocator* server_alloc);
+      ServerAllocator* server_alloc,
+      MetadataCache* metadata_cache);
 
   Status runOnce();
 

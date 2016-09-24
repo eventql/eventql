@@ -40,13 +40,15 @@ public:
   Status performAndCommitOperation(
       const String& ns,
       const String& table_name,
-      MetadataOperation op);
+      MetadataOperation op,
+      MetadataOperationResult* res = nullptr);
 
   Status performOperation(
       const String& ns,
       const String& table_name,
       MetadataOperation op,
-      const Vector<String>& servers);
+      const Vector<String>& servers,
+      MetadataOperationResult* res = nullptr);
 
   Status createFile(
       const String& ns,

@@ -22,43 +22,26 @@
  * code of your own applications
  */
 #pragma once
-#include <eventql/util/stdtypes.h>
-#include <eventql/util/autoref.h>
-#include <eventql/db/file_tracker.h>
-#include <eventql/db/rebalance.h>
-#include <eventql/config/config_directory.h>
 #include "eventql/eventql.h"
-#include <thread>
-#include <condition_variable>
+#include "eventql/util/stdtypes.h"
+#include "eventql/util/return_code.h"
+#include "eventql/util/SHA1.h"
+#include "eventql/db/metadata_file.h"
+#include "eventql/db/metadata_operation.h"
 
 namespace eventql {
 
-class Leader {
+class MetadataCache {
 public:
 
-  Leader(
-      ConfigDirectory* cdir,
-      ProcessConfig* config,
-      ServerAllocator* server_alloc,
-      MetadataCache* metadata_cache,
-      uint64_t rebalance_interval);
+  bool get(
+      const PartitionFindRequest& request,
+      PartitionFindResponse* response);
 
-  ~Leader();
-
-  bool runLeaderProcedure();
-
-  void startLeaderThread();
-  void stopLeaderThread();
+  void store(const PartitionFindResponse* response);
 
 protected:
-
-  ConfigDirectory* cdir_;
-  Rebalance rebalance_;
-  uint64_t rebalance_interval_;
-  std::thread thread_;
-  bool thread_running_;
   std::mutex mutex_;
-  std::condition_variable cv_;
 };
 
 } // namespace eventql
