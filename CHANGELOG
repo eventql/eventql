@@ -12,9 +12,10 @@ EventQL v0.5.0 beta;
   * Added a new monitor thread that publishes disk usage and other load
     information to the coordination service
 
-  * Added new frames to native protocol: ACK, INSERT, REPL_INSERT, META_GETFILE,
-    META_CREATEFILE, META_PERFORMOP{_RESULT}, META_DISCOVER{_RESULT},
-    META_LISTPARTITIONS{_RESULT}, META_FINDPARTITION{_RESULT}
+  * Added new frames to native protocol: ACK, INSERT, REPL_INSERT,
+    META_GETFILE{_RESULT}, META_CREATEFILE, META_PERFORMOP{_RESULT},
+    META_DISCOVER{_RESULT}, META_LISTPARTITIONS{_RESULT},
+    META_FINDPARTITION{_RESULT}
 
   * Added the following new configuration options: server.disk_capacity,
     server.load_limit_{soft,hard}, server.partitions_loading_limit_{soft,hard},
