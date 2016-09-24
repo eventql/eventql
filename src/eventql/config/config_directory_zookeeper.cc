@@ -60,7 +60,8 @@ ZookeeperConfigDirectory::ZookeeperConfigDirectory(
     state_(ZKState::INIT),
     zk_(nullptr),
     is_leader_(false),
-    logfile_(nullptr) {
+    logfile_(nullptr),
+    callback_scheduler_({}) {
   if (pipe(logpipe_) != 0) {
     RAISE_ERRNO(kRuntimeError, "pipe() failed");
   }
@@ -144,21 +145,10 @@ void ZookeeperConfigDirectory::reconnect(std::unique_lock<std::mutex>* lk) {
   }
 
   {
-    CallbackList events;
-    auto rc = load(&events);
+    auto rc = load(true);
     if (!rc.isSuccess()) {
       return;
     }
-
-    lk->unlock();
-    try {
-      for (const auto& ev : events) {
-        ev();
-      }
-    } catch (...) {
-      /* ignore */
-    }
-    lk->lock();
   }
 
   logInfo("evqld", "Zookeeper connection successfully re-established");
@@ -206,7 +196,7 @@ Status ZookeeperConfigDirectory::connect(std::unique_lock<std::mutex>* lk) {
 }
 
 // PRECONDITION: must hold mutex
-Status ZookeeperConfigDirectory::load(CallbackList* cb) {
+Status ZookeeperConfigDirectory::load(bool run_callbacks) {
   if (!hasNode(path_prefix_ + "/config")) {
     auto rc = zoo_create(
         zk_,
@@ -336,28 +326,28 @@ Status ZookeeperConfigDirectory::load(CallbackList* cb) {
   logDebug("evqld", "Loading config from zookeeper...");
 
   {
-    auto rc = syncClusterConfig(cb);
+    auto rc = syncClusterConfig(run_callbacks);
     if (!rc.isSuccess()) {
       return rc;
     }
   }
 
   {
-    auto rc = syncLiveServers(cb);
+    auto rc = syncLiveServers(run_callbacks);
     if (!rc.isSuccess()) {
       return rc;
     }
   }
 
   {
-    auto rc = syncServers(cb);
+    auto rc = syncServers(run_callbacks);
     if (!rc.isSuccess()) {
       return rc;
     }
   }
 
   {
-    auto rc = syncNamespaces(cb);
+    auto rc = syncNamespaces(run_callbacks);
     if (!rc.isSuccess()) {
       return rc;
     }
@@ -368,15 +358,15 @@ Status ZookeeperConfigDirectory::load(CallbackList* cb) {
 }
 
 // PRECONDITION: must hold mutex
-Status ZookeeperConfigDirectory::syncClusterConfig(CallbackList* events) {
+Status ZookeeperConfigDirectory::syncClusterConfig(bool run_callbacks) {
   struct Stat stat;
   auto old_version = cluster_config_.version();
   if (getProtoNode(path_prefix_ + "/config", &cluster_config_, true, &stat)) {
     bool changed = old_version != stat.version + 1;
     cluster_config_.set_version(stat.version + 1);
-    if (changed && events) {
+    if (changed && run_callbacks) {
       for (const auto& cb : on_cluster_change_) {
-        events->emplace_back(std::bind(cb, cluster_config_));
+        callback_scheduler_.run(std::bind(cb, cluster_config_));
       }
     }
 
@@ -391,7 +381,7 @@ Status ZookeeperConfigDirectory::syncClusterConfig(CallbackList* events) {
 }
 
 // PRECONDITION: must hold mutex
-Status ZookeeperConfigDirectory::syncLiveServers(CallbackList* events) {
+Status ZookeeperConfigDirectory::syncLiveServers(bool run_callbacks) {
   Vector<String> servers;
   {
     auto rc = listChildren(path_prefix_ + "/servers-online", &servers, true);
@@ -406,7 +396,7 @@ Status ZookeeperConfigDirectory::syncLiveServers(CallbackList* events) {
   }
 
   for (const auto& server : all_servers) {
-    auto rc = syncLiveServer(events, server);
+    auto rc = syncLiveServer(run_callbacks, server);
     if (!rc.isSuccess()) {
       return rc;
     }
@@ -417,7 +407,7 @@ Status ZookeeperConfigDirectory::syncLiveServers(CallbackList* events) {
 
 // PRECONDITION: must hold mutex
 Status ZookeeperConfigDirectory::syncLiveServer(
-    CallbackList* events,
+    bool run_callbacks,
     const String& server) {
   auto key = StringUtil::format("$0/servers-online/$1", path_prefix_, server);
   bool exists = hasNode(key);
@@ -441,7 +431,7 @@ Status ZookeeperConfigDirectory::syncLiveServer(
     servers_live_.erase(server);
   }
 
-  if (events) {
+  if (run_callbacks) {
     const auto& iter = servers_.find(server);
     if (iter == servers_.end()) {
       return Status(
@@ -461,7 +451,7 @@ Status ZookeeperConfigDirectory::syncLiveServer(
     }
 
     for (const auto& cb : on_server_change_) {
-      events->emplace_back(std::bind(cb, server_config));
+      callback_scheduler_.run(std::bind(cb, server_config));
     }
   }
 
@@ -469,7 +459,7 @@ Status ZookeeperConfigDirectory::syncLiveServer(
 }
 
 // PRECONDITION: must hold mutex
-Status ZookeeperConfigDirectory::syncServers(CallbackList* events) {
+Status ZookeeperConfigDirectory::syncServers(bool run_callbacks) {
   Vector<String> servers;
   {
     auto rc = listChildren(path_prefix_ + "/servers", &servers, true);
@@ -479,7 +469,7 @@ Status ZookeeperConfigDirectory::syncServers(CallbackList* events) {
   }
 
   for (const auto& server : servers) {
-    auto rc = syncServer(events, server);
+    auto rc = syncServer(run_callbacks, server);
     if (!rc.isSuccess()) {
       return rc;
     }
@@ -490,7 +480,7 @@ Status ZookeeperConfigDirectory::syncServers(CallbackList* events) {
 
 // PRECONDITION: must hold mutex
 Status ZookeeperConfigDirectory::syncServer(
-    CallbackList* events,
+    bool run_callbacks,
     const String& server) {
   logDebug("evqld", "Loading server config from zookeeper: '$0'", server);
 
@@ -517,9 +507,9 @@ Status ZookeeperConfigDirectory::syncServer(
   server_config.set_version(stat.version + 1);
   servers_[server] = server_config;
 
-  if (events) {
+  if (run_callbacks) {
     for (const auto& cb : on_server_change_) {
-      events->emplace_back(std::bind(cb, server_config));
+      callback_scheduler_.run(std::bind(cb, server_config));
     }
   }
 
@@ -527,7 +517,7 @@ Status ZookeeperConfigDirectory::syncServer(
 }
 
 // PRECONDITION: must hold mutex
-Status ZookeeperConfigDirectory::syncNamespaces(CallbackList* events) {
+Status ZookeeperConfigDirectory::syncNamespaces(bool run_callbacks) {
   Vector<String> namespaces;
   {
     auto rc = listChildren(path_prefix_ + "/namespaces", &namespaces, true);
@@ -537,7 +527,7 @@ Status ZookeeperConfigDirectory::syncNamespaces(CallbackList* events) {
   }
 
   for (const auto& ns : namespaces) {
-    auto rc = syncNamespace(events, ns);
+    auto rc = syncNamespace(run_callbacks, ns);
     if (!rc.isSuccess()) {
       return rc;
     }
@@ -548,7 +538,7 @@ Status ZookeeperConfigDirectory::syncNamespaces(CallbackList* events) {
 
 // PRECONDITION: must hold mutex
 Status ZookeeperConfigDirectory::syncNamespace(
-    CallbackList* events,
+    bool run_callbacks,
     const String& ns) {
   logDebug("evqld", "Loading namespace config from zookeeper: '$0'", ns);
 
@@ -567,15 +557,15 @@ Status ZookeeperConfigDirectory::syncNamespace(
     ns_config.set_version(stat.version + 1);
     ns_iter = ns_config;
 
-    if (changed && events) {
+    if (changed && run_callbacks) {
       for (const auto& cb : on_namespace_change_) {
-        events->emplace_back(std::bind(cb, ns_config));
+        callback_scheduler_.run(std::bind(cb, ns_config));
       }
     }
   }
 
   {
-    auto rc = syncTables(events, ns);
+    auto rc = syncTables(run_callbacks, ns);
     if (!rc.isSuccess()) {
       return rc;
     }
@@ -586,7 +576,7 @@ Status ZookeeperConfigDirectory::syncNamespace(
 
 // PRECONDITION: must hold mutex
 Status ZookeeperConfigDirectory::syncTables(
-    CallbackList* events,
+    bool run_callbacks,
     const String& ns) {
   Vector<String> tables;
 
@@ -599,7 +589,7 @@ Status ZookeeperConfigDirectory::syncTables(
   }
 
   for (const auto& table : tables) {
-    auto rc = syncTable(events, ns, table);
+    auto rc = syncTable(run_callbacks, ns, table);
     if (!rc.isSuccess()) {
       return rc;
     }
@@ -610,7 +600,7 @@ Status ZookeeperConfigDirectory::syncTables(
 
 // PRECONDITION: must hold mutex
 Status ZookeeperConfigDirectory::syncTable(
-    CallbackList* events,
+    bool run_callbacks,
     const String& ns,
     const String& table_name) {
   logDebug(
@@ -638,9 +628,9 @@ Status ZookeeperConfigDirectory::syncTable(
   tbl_config.set_version(stat.version + 1);
   tbl_iter = tbl_config;
 
-  if (changed && events) {
+  if (changed && run_callbacks) {
     for (const auto& cb : on_table_change_) {
-      events->emplace_back(std::bind(cb, tbl_config));
+      callback_scheduler_.run(std::bind(cb, tbl_config));
     }
   }
 
@@ -752,7 +742,6 @@ void ZookeeperConfigDirectory::handleZookeeperWatch(
     int state,
     String path) {
   std::unique_lock<std::mutex> lk(mutex_);
-  CallbackList events;
 
   if (StringUtil::beginsWith(path, path_prefix_)) {
     path = path.substr(path_prefix_.size());
@@ -764,61 +753,57 @@ void ZookeeperConfigDirectory::handleZookeeperWatch(
 
   if (type == ZOO_CHILD_EVENT ||
       type == ZOO_CHANGED_EVENT) {
-    handleChangeEvent(path, &events);
+    handleChangeEvent(path, true);
   }
 
   cv_.notify_all();
   lk.unlock();
-
-  for (const auto& ev : events) {
-    ev();
-  }
 }
 
 Status ZookeeperConfigDirectory::handleChangeEvent(
     const String& vpath,
-    CallbackList* events) {
+    bool run_callbacks) {
   std::smatch m;
 
   if (vpath == "/config") {
-    return syncClusterConfig(events);
+    return syncClusterConfig(run_callbacks);
   }
 
   if (vpath == "/namespaces") {
-    return syncNamespaces(events);
+    return syncNamespaces(run_callbacks);
   }
 
   if (vpath == "/servers") {
-    return syncServers(events);
+    return syncServers(run_callbacks);
   }
 
   if (vpath == "/servers-online") {
-    return syncLiveServers(events);
+    return syncLiveServers(run_callbacks);
   }
 
   std::regex live_server_regex("/servers-online/([0-9A-Za-z_.-]+)");
   if (std::regex_match(vpath, m, live_server_regex)) {
-    return syncLiveServer(events, m[1].str());
+    return syncLiveServer(run_callbacks, m[1].str());
   }
 
   std::regex server_regex("/servers/([0-9A-Za-z_.-]+)");
   if (std::regex_match(vpath, m, server_regex)) {
-    return syncServer(events, m[1].str());
+    return syncServer(run_callbacks, m[1].str());
   }
 
   std::regex namespace_regex("/namespaces/([0-9A-Za-z_.-]+)/config");
   if (std::regex_match(vpath, m, namespace_regex)) {
-    return syncNamespace(events, m[1].str());
+    return syncNamespace(run_callbacks, m[1].str());
   }
 
   std::regex tables_path_regex("/namespaces/([0-9A-Za-z_.-]+)/tables");
   if (std::regex_match(vpath, m, tables_path_regex)) {
-    return syncTables(events, m[1].str());
+    return syncTables(run_callbacks, m[1].str());
   }
 
   std::regex table_path_regex("/namespaces/([0-9A-Za-z_.-]+)/tables/([0-9A-Za-z_.-]+)");
   if (std::regex_match(vpath, m, table_path_regex)) {
-    return syncTable(events, m[1].str(), m[2].str());
+    return syncTable(run_callbacks, m[1].str(), m[2].str());
   }
 
   logWarning("evqld", "received zookeper watch on unknown path: $0", vpath);

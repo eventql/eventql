@@ -25,6 +25,7 @@
 #include "eventql/eventql.h"
 #include "eventql/config/config_directory.h"
 #include "eventql/util/protobuf/msg.h"
+#include "eventql/util/thread/threadpool.h"
 
 typedef struct _zhandle zhandle_t;
 
@@ -109,30 +110,28 @@ protected:
     CLOSED = 5
   };
 
-  using CallbackList = Vector<Function<void()>>;
-
   void reconnect(std::unique_lock<std::mutex>* lk);
   Status connect(std::unique_lock<std::mutex>* lk);
-  Status load(CallbackList* events);
+  Status load(bool run_callbacks);
 
   void updateClusterConfigWithLock(ClusterConfig config);
 
   void handleSessionEvent(int state);
   void handleConnectionEstablished();
   void handleConnectionLost();
-  Status handleChangeEvent(const String& vpath, CallbackList* events);
+  Status handleChangeEvent(const String& vpath, bool run_callbacks);
 
-  Status sync(CallbackList* events);
-  Status syncClusterConfig(CallbackList* events);
-  Status syncLiveServers(CallbackList* events);
-  Status syncLiveServer(CallbackList* events, const String& server);
-  Status syncServers(CallbackList* events);
-  Status syncServer(CallbackList* events, const String& server);
-  Status syncNamespaces(CallbackList* events);
-  Status syncNamespace(CallbackList* events, const String& ns);
-  Status syncTables(CallbackList* events, const String& ns);
+  Status sync(bool run_callbacks);
+  Status syncClusterConfig(bool run_callbacks);
+  Status syncLiveServers(bool run_callbacks);
+  Status syncLiveServer(bool run_callbacks, const String& server);
+  Status syncServers(bool run_callbacks);
+  Status syncServer(bool run_callbacks, const String& server);
+  Status syncNamespaces(bool run_callbacks);
+  Status syncNamespace(bool run_callbacks, const String& ns);
+  Status syncTables(bool run_callbacks, const String& ns);
   Status syncTable(
-      CallbackList* events,
+      bool run_callbacks,
       const String& ns,
       const String& table_name);
 
@@ -190,6 +189,7 @@ protected:
 
   std::thread watchdog_;
   std::thread logtail_;
+  thread::ThreadPool callback_scheduler_;
 };
 
 template <typename T>
