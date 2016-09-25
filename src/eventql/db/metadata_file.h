@@ -33,7 +33,8 @@
 namespace eventql {
 
 enum {
-  MFILE_FINITE = 1
+  MFILE_FINITE = 1,
+  MFILE_USERDEFINED = 2
 };
 
 class MetadataFile : public RefCounted {

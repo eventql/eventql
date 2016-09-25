@@ -159,9 +159,22 @@ Status TableService::createTable(
       tblcfg->set_finite_partition_size(val);
       continue;
     }
+
+    if (p.first == "user_defined_partitions" && p.second == "true") {
+      tblcfg->set_enable_user_defined_partitions(true);
+      continue;
+    }
   }
 
   // check preconditions
+  if (tblcfg->enable_finite_partitions() &&
+      tblcfg->enable_user_defined_partitions()) {
+    return Status(
+        eIllegalArgumentError,
+        "partition_size_hint and user_defined_partitions are mutually "
+        "exclusive");
+  }
+
   if (tblcfg->enable_finite_partitions()) {
     if (tblcfg->finite_partition_size() < 1) {
         return Status(
@@ -204,6 +217,14 @@ Status TableService::createTable(
             keyspace_type,
             { },
             MFILE_FINITE));
+  } else if (tblcfg->enable_user_defined_partitions()) {
+    metadata_file.reset(
+        new MetadataFile(
+            txnid,
+            1,
+            keyspace_type,
+            { },
+            MFILE_USERDEFINED));
   } else {
     MetadataFile::PartitionMapEntry initial_partition;
     initial_partition.begin = "";
