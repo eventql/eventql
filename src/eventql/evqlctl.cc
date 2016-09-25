@@ -150,7 +150,7 @@ int main(int argc, const char** argv) {
   }
 
   if (print_version) {
-    return 1;
+    return 0;
   }
 
   if (print_help) {
@@ -190,38 +190,36 @@ int main(int argc, const char** argv) {
   }
 
   /* execute command */
-  {
-    String cmd_name;
-    if (cmd_argv.empty()) {
-      stderr_os->write(
-        "evqlctl: command is not specified. See 'evqlctl --help'.\n");
-      return 1;
-    } else {
-      cmd_name = cmd_argv.front();
-      cmd_argv.erase(cmd_argv.begin());
-    }
-
-    for (auto c : commands) {
-      if (c->getName() == cmd_name) {
-        auto ret = c->execute(
-            cmd_argv,
-            stdin_is.get(),
-            stdout_os.get(),
-            stderr_os.get());
-
-        if (!ret.isSuccess()) {
-          stderr_os->write(StringUtil::format("ERROR: $0\n", ret.message()));
-        }
-
-        return ret.isSuccess() ? 0 : 1;
-      }
-    }
-
-    stderr_os->write(StringUtil::format(
-        "evqlctl: '$0' is not a evqlctl command. See 'evqlctl --help'.\n",
-        cmd_name));
+  String cmd_name;
+  if (cmd_argv.empty()) {
+    stderr_os->write(
+      "evqlctl: command is not specified. See 'evqlctl --help'.\n");
     return 1;
+  } else {
+    cmd_name = cmd_argv.front();
+    cmd_argv.erase(cmd_argv.begin());
   }
 
+  for (auto c : commands) {
+    if (c->getName() == cmd_name) {
+      auto rc = c->execute(
+          cmd_argv,
+          stdin_is.get(),
+          stdout_os.get(),
+          stderr_os.get());
+
+      if (!rc.isSuccess()) {
+        stderr_os->write(StringUtil::format("ERROR: $0\n", rc.message()));
+      }
+
+      return rc.isSuccess() ? 0 : 1;
+    }
+  }
+
+  stderr_os->write(StringUtil::format(
+      "evqlctl: '$0' is not a evqlctl command. See 'evqlctl --help'.\n",
+      cmd_name));
+
+  return 1;
 }
 
