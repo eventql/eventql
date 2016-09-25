@@ -35,6 +35,8 @@ namespace native_transport {
 class InsertFrame {
 public:
 
+  static const uint16_t kOpcode = EVQL_OP_INSERT;
+
   InsertFrame();
 
   void setDatabase(const std::string& database);

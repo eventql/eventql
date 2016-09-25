@@ -44,6 +44,7 @@ class SQLService;
 class TableService;
 class MapReduceService;
 class MetadataService;
+class MetadataCache;
 class ServerAllocator;
 
 struct DatabaseContext {
@@ -56,6 +57,7 @@ struct DatabaseContext {
   ReplicationWorker* replication_worker;
   LSMTableIndexCache* lsm_index_cache;
   MetadataStore* metadata_store;
+  MetadataCache* metadata_cache;
   InternalAuth* internal_auth;
   ClientAuth* client_auth;
   csql::Runtime* sql_runtime;

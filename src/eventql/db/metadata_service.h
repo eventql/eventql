@@ -28,6 +28,7 @@
 #include "eventql/util/SHA1.h"
 #include "eventql/db/metadata_file.h"
 #include "eventql/db/metadata_store.h"
+#include "eventql/db/metadata_cache.h"
 #include "eventql/db/metadata_operation.h"
 #include "eventql/db/database.h"
 #include "eventql/config/config_directory.h"
@@ -39,7 +40,8 @@ public:
 
   MetadataService(
       DatabaseContext* dbctx,
-      MetadataStore* metadata_store);
+      MetadataStore* metadata_store,
+      MetadataCache* cache);
 
   Status getMetadataFile(
       const String& ns,
@@ -82,6 +84,9 @@ public:
 protected:
   DatabaseContext* dbctx_;
   MetadataStore* metadata_store_;
+  MetadataCache* cache_;
+  std::mutex lockmap_mutex_;
+  std::map<std::string, std::unique_ptr<std::mutex>> lockmap_;
 };
 
 } // namespace eventql

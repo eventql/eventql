@@ -1,6 +1,6 @@
 # Process this file with automake to produce Makefile.in
 
-bin_PROGRAMS = evql evqld evqlctl
+bin_PROGRAMS = evql evqld evqlctl evqlslap
 lib_LTLIBRARIES = libevqlclient.la
 check_LIBRARIES = libevqlcore.a
 
@@ -299,6 +299,8 @@ EVQL_CORE_SOURCES_ = \
     eventql/util/reflect/property_impl.h \
     eventql/util/reflect/reflect.h \
     eventql/util/return_code.h \
+    eventql/util/rolling_stat.cc \
+    eventql/util/rolling_stat.h \
     eventql/util/traits.h \
     eventql/util/protobuf/msg.h \
     eventql/util/protobuf/DynamicMessage.cc \
@@ -803,6 +805,8 @@ EVQL_CORE_SOURCES_ = \
     eventql/db/tablet_index.h \
     eventql/db/tablet_index_cache.cc \
     eventql/db/tablet_index_cache.h \
+    eventql/db/metadata_cache.cc \
+    eventql/db/metadata_cache.h \
     eventql/db/metadata_client.cc \
     eventql/db/metadata_client.h \
     eventql/db/metadata_coordinator.cc \
@@ -860,6 +864,14 @@ EVQL_CORE_SOURCES_ = \
     eventql/transport/native/frames/hello.h \
     eventql/transport/native/frames/insert.cc \
     eventql/transport/native/frames/insert.h \
+    eventql/transport/native/frames/meta_createfile.cc \
+    eventql/transport/native/frames/meta_createfile.h \
+    eventql/transport/native/frames/meta_getfile.cc \
+    eventql/transport/native/frames/meta_getfile.h \
+    eventql/transport/native/frames/meta_performop.cc \
+    eventql/transport/native/frames/meta_performop.h \
+    eventql/transport/native/frames/query.cc \
+    eventql/transport/native/frames/query.h \
     eventql/transport/native/frames/query_progress.cc \
     eventql/transport/native/frames/query_progress.h \
     eventql/transport/native/frames/ready.cc \
@@ -883,6 +895,12 @@ EVQL_CORE_SOURCES_ = \
     eventql/transport/native/ops/query_remote.cc \
     eventql/transport/native/ops/insert.cc \
     eventql/transport/native/ops/repl_insert.cc \
+    eventql/transport/native/ops/meta_performop.cc \
+    eventql/transport/native/ops/meta_createfile.cc \
+    eventql/transport/native/ops/meta_getfile.cc \
+    eventql/transport/native/ops/meta_discover.cc \
+    eventql/transport/native/ops/meta_findpartition.cc \
+    eventql/transport/native/ops/meta_listpartitions.cc \
     eventql/db/table_ref.cc \
     eventql/db/table_ref.h \
     eventql/db/table.cc \
@@ -1032,6 +1050,28 @@ evqlctl_LDADD = \
     $(LMDB_LDADD) \
     $(PROTOBUF_LDADD) \
     $(SPIDERMONKEY_LDADD)
+
+################## BIN: evqlslap ####################
+evqlslap_SOURCES = \
+    ${EVQL_CORE_SOURCES_} \
+    $(EVQL_PROTO_SOURCES_) \
+    eventql/cli/benchmark.h \
+    eventql/cli/benchmark.cc \
+    eventql/cli/benchmark_insert.cc \
+    eventql/cli/benchmark_query.cc \
+    eventql/evqlslap.cc
+
+evqlslap_LDADD = \
+    libevqlclient.la \
+    $(ZOOKEEPER_LDADD) \
+    $(LINENOISE_LDADD) \
+    $(INIH_LDADD) \
+    $(SIMDCOMP_LDADD) \
+    $(LMDB_LDADD) \
+    $(PROTOBUF_LDADD) \
+    $(SPIDERMONKEY_LDADD)
+
+evqlslap_LDFLAGS = -static
 
 ################ LIB: libevqlclient.a ###################
 libevqlclient_la_SOURCES = eventql/client.c

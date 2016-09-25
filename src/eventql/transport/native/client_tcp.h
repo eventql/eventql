@@ -46,11 +46,25 @@ public:
               const char* payload,
               size_t payload_len)>;
 
-  TCPClient(
-      ProcessConfig* config,
-      ConfigDirectory* config_dir);
+  using AuthDataType = std::vector<std::pair<std::string, std::string>>;
 
-  ReturnCode connect(const std::string& server);
+  const static uint64_t kDefaultIOTimeout = kMicrosPerSecond;
+  const static uint64_t kDefaultIdleTimeout = 5 * kMicrosPerSecond;
+
+  TCPClient(
+      uint64_t io_timeout = kDefaultIOTimeout,
+      uint64_t idle_timeout = kDefaultIdleTimeout);
+
+  ReturnCode connect(
+      const std::string& host,
+      uint64_t port,
+      bool is_internal,
+      const AuthDataType& auth_data = AuthDataType{});
+
+  ReturnCode connect(
+      const std::string& addr_str,
+      bool is_internal,
+      const AuthDataType& auth_data = AuthDataType{});
 
   ReturnCode recvFrame(
       uint16_t* opcode,
@@ -73,7 +87,9 @@ public:
 
 protected:
 
-  ReturnCode performHandshake();
+  ReturnCode performHandshake(
+      bool is_internal,
+      const AuthDataType& auth_data);
 
   ProcessConfig* config_;
   ConfigDirectory* cdir_;

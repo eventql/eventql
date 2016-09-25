@@ -38,7 +38,9 @@ public:
 
   Leader(
       ConfigDirectory* cdir,
+      ProcessConfig* config,
       ServerAllocator* server_alloc,
+      MetadataCache* metadata_cache,
       uint64_t rebalance_interval);
 
   ~Leader();

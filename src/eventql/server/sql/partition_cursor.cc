@@ -223,8 +223,12 @@ RemotePartitionCursor::RemotePartitionCursor(
         session->getDatabaseContext()->config->getInt(
             "server.s2s_idle_timeout").get()),
     client_(
-        session->getDatabaseContext()->config,
-        session->getDatabaseContext()->config_directory) {}
+        session->getDatabaseContext()->config->getInt(
+            "server.s2s_io_timeout",
+            0),
+        session->getDatabaseContext()->config->getInt(
+            "server.s2s_idle_timeout",
+            0)) {}
 
 bool RemotePartitionCursor::next(csql::SValue* row, int row_len) {
   if (row_buf_pos_ == row_buf_.size() && !done_) {
@@ -259,6 +263,9 @@ ReturnCode RemotePartitionCursor::fetchRows() {
       return rc;
     }
   } else {
+    auto session = static_cast<eventql::Session*>(txn_->getUserData());
+    auto cdir = session->getDatabaseContext()->config_directory;
+
     std::string qtree_coded;
     auto qtree_coded_os = StringOutputStream::fromString(&qtree_coded);
     csql::QueryTreeCoder qtree_coder(txn_);
@@ -266,12 +273,16 @@ ReturnCode RemotePartitionCursor::fetchRows() {
 
     native_transport::QueryRemoteFrame q_frame;
     q_frame.setEncodedQtree(std::move(qtree_coded));
-    q_frame.setDatabase(
-        static_cast<eventql::Session*>(
-            txn_->getUserData())->getEffectiveNamespace());
+    q_frame.setDatabase(session->getEffectiveNamespace());
 
     for (const auto& s : servers_) {
-      auto rc = client_.connect(s);
+      auto server_cfg = cdir->getServerConfig(s);
+      if (server_cfg.server_status() != SERVER_UP) {
+        logError("evqld", "server is down: $0", s);
+        continue;
+      }
+
+      auto rc = client_.connect(server_cfg.server_addr(), true);
       if (!rc.isSuccess()) {
         logError("evqld", "Remote SQL Error: $0", rc.getMessage());
         continue;

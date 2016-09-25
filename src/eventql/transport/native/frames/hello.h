@@ -36,6 +36,7 @@ namespace native_transport {
 class HelloFrame {
 public:
 
+  using AuthDataType = std::vector<std::pair<std::string, std::string>>;
   static const uint16_t kOpcode = EVQL_OP_HELLO;
 
   HelloFrame();
@@ -50,7 +51,8 @@ public:
   uint64_t getIdleTimeout() const;
 
   void addAuthData(const std::string& key, const std::string& value);
-  const std::vector<std::pair<std::string, std::string>>& getAuthData() const;
+  void setAuthData(const AuthDataType& auth_data);
+  const AuthDataType& getAuthData() const;
 
   void setDatabase(const std::string& database);
   const std::string& getDatabase() const;
@@ -65,7 +67,7 @@ protected:
   uint64_t flags_;
   uint64_t idle_timeout_;
   std::string database_;
-  std::vector<std::pair<std::string, std::string>> auth_data_;
+  AuthDataType auth_data_;
 };
 
 } // namespace native_transport

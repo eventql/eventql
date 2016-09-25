@@ -49,7 +49,8 @@ public:
       MapReduceShardList* shards,
       InternalAuth* auth,
       PartitionMap* pmap,
-      ConfigDirectory* cdir);
+      ConfigDirectory* cdir,
+      ProcessConfig* config);
 
   Option<MapReduceShardResult> execute(
       RefPtr<MapReduceTaskShard> shard,
@@ -73,6 +74,7 @@ protected:
   InternalAuth* auth_;
   PartitionMap* pmap_;
   ConfigDirectory* cdir_;
+  ProcessConfig* config_;
   Set<String> required_columns_;
 };
 

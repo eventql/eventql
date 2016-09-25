@@ -54,25 +54,36 @@ extern "C" {
  * Native Protocol enums
  */
 enum {
-  EVQL_OP_HELLO                      = 0x5e00,
-  EVQL_OP_PING                       = 0x0001,
-  EVQL_OP_HEARTBEAT                  = 0x0002,
-  EVQL_OP_ERROR                      = 0x0003,
-  EVQL_OP_READY                      = 0x0004,
-  EVQL_OP_BYE                        = 0x0005,
-  EVQL_OP_QUERY                      = 0x0006,
-  EVQL_OP_QUERY_RESULT               = 0x0007,
-  EVQL_OP_QUERY_CONTINUE             = 0x0008,
-  EVQL_OP_QUERY_DISCARD              = 0x0009,
-  EVQL_OP_QUERY_PROGRESS             = 0x000a,
-  EVQL_OP_QUERY_NEXT                 = 0x000b,
-  EVQL_OP_ACK                        = 0x000f,
-  EVQL_OP_INSERT                     = 0x0010,
-  EVQL_OP_QUERY_PARTIALAGGR          = 0x0101,
-  EVQL_OP_QUERY_PARTIALAGGR_RESULT   = 0x0102,
-  EVQL_OP_QUERY_REMOTE               = 0x0103,
-  EVQL_OP_QUERY_REMOTE_RESULT        = 0x0104,
-  EVQL_OP_REPL_INSERT                = 0x0110
+  EVQL_OP_HELLO                        = 0x5e00,
+  EVQL_OP_PING                         = 0x0001,
+  EVQL_OP_HEARTBEAT                    = 0x0002,
+  EVQL_OP_ERROR                        = 0x0003,
+  EVQL_OP_READY                        = 0x0004,
+  EVQL_OP_BYE                          = 0x0005,
+  EVQL_OP_QUERY                        = 0x0006,
+  EVQL_OP_QUERY_RESULT                 = 0x0007,
+  EVQL_OP_QUERY_CONTINUE               = 0x0008,
+  EVQL_OP_QUERY_DISCARD                = 0x0009,
+  EVQL_OP_QUERY_PROGRESS               = 0x000a,
+  EVQL_OP_QUERY_NEXT                   = 0x000b,
+  EVQL_OP_ACK                          = 0x000f,
+  EVQL_OP_INSERT                       = 0x0010,
+  EVQL_OP_QUERY_PARTIALAGGR            = 0x0101,
+  EVQL_OP_QUERY_PARTIALAGGR_RESULT     = 0x0102,
+  EVQL_OP_QUERY_REMOTE                 = 0x0103,
+  EVQL_OP_QUERY_REMOTE_RESULT          = 0x0104,
+  EVQL_OP_REPL_INSERT                  = 0x0110,
+  EVQL_OP_META_PERFORMOP               = 0x0200,
+  EVQL_OP_META_PERFORMOP_RESULT        = 0x0201,
+  EVQL_OP_META_CREATEFILE              = 0x0202,
+  EVQL_OP_META_GETFILE                 = 0x0203,
+  EVQL_OP_META_GETFILE_RESULT          = 0x0204,
+  EVQL_OP_META_DISCOVER                = 0x0205,
+  EVQL_OP_META_DISCOVER_RESULT         = 0x0206,
+  EVQL_OP_META_LISTPARTITIONS          = 0x0207,
+  EVQL_OP_META_LISTPARTITIONS_RESULT   = 0x0208,
+  EVQL_OP_META_FINDPARTITION           = 0x0209,
+  EVQL_OP_META_FINDPARTITION_RESULT    = 0x020a
 };
 
 enum {
@@ -101,6 +112,10 @@ enum {
 
 enum {
   EVQL_INSERT_CTYPE_JSON   = 0x01
+};
+
+enum {
+  EVQL_META_GETFILE_LATESTTXN = 0x01
 };
 
 /**

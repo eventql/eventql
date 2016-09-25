@@ -27,6 +27,7 @@
 #include "eventql/transport/native/frames/insert.h"
 #include "eventql/auth/client_auth.h"
 #include "eventql/util/logging.h"
+#include "eventql/util/wallclock.h"
 #include "eventql/server/session.h"
 #include <eventql/db/shredded_record.h>
 #include <eventql/db/table_service.h>
@@ -76,15 +77,18 @@ ReturnCode performOperation_INSERT(
         try {
           records.emplace_back(json::parseJSON(r));
         } catch (const std::exception& e) {
-          return ReturnCode::exception(e);
+          rc = ReturnCode::exception(e);
+          break;
         }
       }
 
-      rc = dbctx->table_service->insertRecords(
-          session->getEffectiveNamespace(),
-          i_frame.getTable(),
-          &*records.begin(),
-          &*records.end());
+      if (rc.isSuccess()) {
+        rc = dbctx->table_service->insertRecords(
+            session->getEffectiveNamespace(),
+            i_frame.getTable(),
+            &*records.begin(),
+            &*records.end());
+      }
 
       break;
     }

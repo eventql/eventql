@@ -44,23 +44,34 @@ namespace eventql {
 namespace native_transport {
 
 TCPClient::TCPClient(
-    ProcessConfig* config,
-    ConfigDirectory* config_dir) :
-    config_(config),
-    cdir_(config_dir),
-    io_timeout_(config->getInt("server.s2s_io_timeout").get()),
-    idle_timeout_(config->getInt("server.s2s_idle_timeout").get()) {}
+    uint64_t io_timeout /* = kDefaultIOTimeout */,
+    uint64_t idle_timeout /* = kDefaultIdleTimeout */) :
+    io_timeout_(io_timeout),
+    idle_timeout_(idle_timeout) {}
 
-ReturnCode TCPClient::connect(const std::string& server) {
-  auto server_cfg = cdir_->getServerConfig(server);
-  if (server_cfg.server_status() != SERVER_UP) {
-    return ReturnCode::error("ERUNTIME", "server is down");
+ReturnCode TCPClient::connect(
+    const std::string& host,
+    uint64_t port,
+    bool is_internal,
+    const AuthDataType& auth_data /* = AuthDataType{} */) {
+  return connect(
+      StringUtil::format("$0:$1", host, port),
+      is_internal,
+      auth_data);
+}
+
+ReturnCode TCPClient::connect(
+    const std::string& addr_str,
+    bool is_internal,
+    const AuthDataType& auth_data /* = AuthDataType{} */) {
+  if (conn_) {
+    conn_->close();
   }
 
-  auto server_addr = InetAddr::resolve(server_cfg.server_addr()); // FIXME
+  auto server_addr = InetAddr::resolve(addr_str); // FIXME
   auto server_ip = server_addr.ip();
 
-  logDebug("evql", "Opening connection to $0", server);
+  logDebug("evql", "Opening connection to $0", addr_str);
   auto fd = socket(AF_INET, SOCK_STREAM, 0);
   if (fd == -1) {
     return ReturnCode::error(
@@ -111,7 +122,7 @@ ReturnCode TCPClient::connect(const std::string& server) {
 
   conn_.reset(new TCPConnection(fd, io_timeout_));
 
-  auto handshake_rc = performHandshake();
+  auto handshake_rc = performHandshake(is_internal, auth_data);
   if (!handshake_rc.isSuccess()) {
     close();
   }
@@ -119,10 +130,14 @@ ReturnCode TCPClient::connect(const std::string& server) {
   return handshake_rc;
 }
 
-ReturnCode TCPClient::performHandshake() {
+ReturnCode TCPClient::performHandshake(
+    bool is_internal,
+    const AuthDataType& auth_data) {
   native_transport::HelloFrame f_hello;
-  f_hello.setIsInternal(true);
+  f_hello.setIsInternal(is_internal);
+  f_hello.setInteractiveAuth(false);
   f_hello.setIdleTimeout(idle_timeout_);
+  f_hello.setAuthData(auth_data);
 
   auto rc = sendFrame(&f_hello, 0);
   if (!rc.isSuccess()) {
