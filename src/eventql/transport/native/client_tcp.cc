@@ -192,7 +192,7 @@ ReturnCode TCPClient::sendFrame(
 }
 
 void TCPClient::close() {
-  if (!conn_.get()) {
+  if (conn_.get()) {
     conn_->close();
     conn_.reset(nullptr);
   }
