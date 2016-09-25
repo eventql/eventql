@@ -1,7 +1,7 @@
 /**
  * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@eventql.io>
+ *   - Laura Schlimmer <laura@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -22,21 +22,15 @@
  * code of your own applications
  */
 #pragma once
-#include <eventql/util/stdtypes.h>
-#include <eventql/sql/runtime/runtime.h>
-#include <eventql/sql/expressions/aggregate.h>
-#include <eventql/sql/expressions/boolean.h>
-#include <eventql/sql/expressions/conversion.h>
-#include <eventql/sql/expressions/datetime.h>
-#include <eventql/sql/expressions/internal.h>
-#include <eventql/sql/expressions/math.h>
-#include <eventql/sql/expressions/miscellaneous.h>
-#include <eventql/sql/expressions/string.h>
-
-#include "eventql/eventql.h"
+#include <eventql/sql/svalue.h>
+#include <eventql/sql/transaction.h>
 
 namespace csql {
+namespace expressions {
 
-void installDefaultSymbols(SymbolTable* rt);
+static const uint64_t kUSleepTime = 100;
+void usleepExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out);
 
-} // namespace csql
+}
+}
+

@@ -118,8 +118,12 @@ void installDefaultSymbols(SymbolTable* rt) {
   rt->registerFunction("ltrim", PureFunction(&expressions::ltrimExpr));
   rt->registerFunction("rtrim", PureFunction(&expressions::rtrimExpr));
 
+  /* expressions/miscellaneous.h */
+  rt->registerFunction("usleep", PureFunction(&expressions::usleepExpr));
+
   /* expressions/internal.h */
   rt->registerFunction("repeat_value", expressions::kRepeatValueExpr);
+
 }
 
 } // namespace csql

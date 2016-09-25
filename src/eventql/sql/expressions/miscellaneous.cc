@@ -1,7 +1,7 @@
 /**
  * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@eventql.io>
+ *   - Laura Schlimmer <laura@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -21,22 +21,43 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#pragma once
-#include <eventql/util/stdtypes.h>
-#include <eventql/sql/runtime/runtime.h>
-#include <eventql/sql/expressions/aggregate.h>
-#include <eventql/sql/expressions/boolean.h>
-#include <eventql/sql/expressions/conversion.h>
-#include <eventql/sql/expressions/datetime.h>
-#include <eventql/sql/expressions/internal.h>
-#include <eventql/sql/expressions/math.h>
+#include <stdlib.h>
 #include <eventql/sql/expressions/miscellaneous.h>
-#include <eventql/sql/expressions/string.h>
-
-#include "eventql/eventql.h"
+#include <eventql/util/exception.h>
 
 namespace csql {
+namespace expressions {
 
-void installDefaultSymbols(SymbolTable* rt);
+void usleepExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
+  if (argc != 1) {
+    RAISE(
+        kRuntimeError,
+        "wrong number of arguments for usleep expected: 1, got: %i", argc);
+  }
 
-} // namespace csql
+  auto total_sleep = argv[0].getInteger();
+  if (total_sleep < 0) {
+    RAISE(
+        kRuntimeError,
+        "wrong argument for usleep, must be positive integer, got %i",
+        total_sleep);
+  }
+
+  auto sleep_count = total_sleep / kUSleepTime;
+  for (auto i = 0; i < sleep_count; ++i) {
+    usleep(kUSleepTime);
+
+    auto rc = ((Transaction*) *ctx)->triggerHeartbeat();
+    if (!rc.isSuccess()) {
+      *out = SValue::newInteger(1);
+      return;
+    }
+  }
+
+  usleep(total_sleep % kUSleepTime);
+  *out = SValue::newInteger(0);
+}
+
+} //expressions
+} //csql
+
