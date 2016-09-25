@@ -131,6 +131,10 @@ Status MetadataOperation::performRemoveDeadServers(
 Status MetadataOperation::performSplitPartition(
     const MetadataFile& input,
     Vector<MetadataFile::PartitionMapEntry>* output) const {
+  if (input.hasUserDefinedPartitions()) {
+    return Status(eIllegalArgumentError, "can't split user defined partitions");
+  }
+
   auto opdata = msg::decode<SplitPartitionOperation>(
       data_.opdata().data(),
       data_.opdata().size());
