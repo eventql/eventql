@@ -154,7 +154,7 @@ message FinalizeJoinOperation {
 message CreatePartitionOperation {
   required bytes partition_id = 1;
   required bytes begin = 2;
-  required bytes end = 3;
+  optional bytes end = 3;
   repeated string servers = 4;
   required uint64 placement_id = 5;
 };

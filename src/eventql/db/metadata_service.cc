@@ -226,8 +226,16 @@ Status MetadataService::findPartition(
 
   auto partition = file->getPartitionMapAt(request.key());
   if (partition == file->getPartitionMapEnd()) {
-    if (request.allow_create()) {
-      return createPartition(request, response);
+    auto table_config = dbctx_->config_directory->getTableConfig(
+        request.db_namespace(),
+        request.table_id());
+
+    if (request.allow_create() &&
+        table_config.config().enable_finite_partitions()) {
+      return createFinitePartition(request, response, table_config);
+    } else if (request.allow_create() &&
+        table_config.config().enable_user_defined_partitions()) {
+      return createUserDefinedPartition(request, response, table_config);
     } else {
       return Status(eRuntimeError, "partition not found");
     }
@@ -241,6 +249,8 @@ Status MetadataService::findPartition(
   response->set_partition_keyrange_begin(partition->begin);
   if (file->hasFinitePartitions()) {
     response->set_partition_keyrange_end(partition->end);
+  } else if (file->hasUserDefinedPartitions()) {
+    response->set_partition_keyrange_end(partition->begin);
   } else {
     auto next = partition + 1;
     if (next == file->getPartitionMapEnd()) {
@@ -261,18 +271,10 @@ Status MetadataService::findPartition(
   return Status::success();
 }
 
-Status MetadataService::createPartition(
+Status MetadataService::createFinitePartition(
     const PartitionFindRequest& request,
-    PartitionFindResponse* response) {
-  /* create new partition */
-  auto table_config = dbctx_->config_directory->getTableConfig(
-      request.db_namespace(),
-      request.table_id());
-
-  if (!table_config.config().enable_finite_partitions()) {
-    return Status(eRuntimeError, "partition not found");
-  }
-
+    PartitionFindResponse* response,
+    const TableDefinition& table_config) {
   assert(
       table_config.config().partitioner() == TBL_PARTITION_TIMEWINDOW ||
       table_config.config().partitioner() == TBL_PARTITION_UINT64);
@@ -393,6 +395,114 @@ Status MetadataService::createPartition(
   cache_->store(request, *response);
   return Status::success();
 }
+
+Status MetadataService::createUserDefinedPartition(
+    const PartitionFindRequest& request,
+    PartitionFindResponse* response,
+    const TableDefinition& table_config) {
+  auto partition_id = Random::singleton()->sha1();
+
+  logDebug(
+      "evqld",
+      "Creating new user defined partition; db=$0 table=$1 partition_id=$2 "
+      "key=$3",
+      request.db_namespace(),
+      request.table_id(),
+      partition_id.toString(),
+      decodePartitionKey(request.keyspace(), request.key()));
+
+  std::vector<String> new_servers;
+  {
+    auto cconf = dbctx_->config_directory->getClusterConfig();
+    auto rc = dbctx_->server_alloc->allocateServers(
+        ServerAllocator::MUST_ALLOCATE,
+        cconf.replication_factor(),
+        Set<String>{},
+        &new_servers);
+
+    if (!rc.isSuccess()) {
+      return rc;
+    }
+  }
+
+  CreatePartitionOperation op;
+  op.set_partition_id(partition_id.data(), partition_id.size());
+  op.set_begin(request.key());
+  op.set_end(request.key());
+  op.set_placement_id(Random::singleton()->random64());
+  for (const auto& s : new_servers) {
+    *op.add_servers() = s;
+  }
+
+  MetadataOperation envelope(
+      request.db_namespace(),
+      request.table_id(),
+      METAOP_CREATE_PARTITION,
+      SHA1Hash(
+          table_config.metadata_txnid().data(),
+          table_config.metadata_txnid().size()),
+      Random::singleton()->sha1(),
+      *msg::encode(op));
+
+  MetadataCoordinator coordinator(
+      dbctx_->config_directory,
+      dbctx_->config);
+
+  MetadataOperationResult create_result;
+  auto create_rc = coordinator.performAndCommitOperation(
+      request.db_namespace(),
+      request.table_id(),
+      envelope,
+      &create_result);
+
+  if (create_rc.isSuccess()) {
+    response->set_sequence_number(create_result.metadata_txnseq());
+    response->set_partition_id(
+        partition_id.data(),
+        partition_id.size());
+
+    response->set_partition_keyrange_begin(op.begin());
+    response->set_partition_keyrange_end(op.begin());
+
+    for (const auto& s : new_servers) {
+      response->add_servers_for_insert(s);
+    }
+  } else {
+    RefPtr<MetadataFile> file;
+    auto rc = getMetadataFile(
+        request.db_namespace(),
+        request.table_id(),
+        &file);
+
+    if (!rc.isSuccess()) {
+      return rc;
+    }
+
+    auto partition = file->getPartitionMapAt(request.key());
+    if (partition == file->getPartitionMapEnd()) {
+      return Status(eRuntimeError, "partition create failed");
+    }
+
+    response->set_sequence_number(file->getSequenceNumber());
+    response->set_partition_id(
+        partition->partition_id.data(),
+        partition->partition_id.size());
+
+    response->set_partition_keyrange_begin(partition->begin);
+    response->set_partition_keyrange_end(partition->end);
+
+    for (const auto& s : partition->servers) {
+      response->add_servers_for_insert(s.server_id);
+    }
+    for (const auto& s : partition->servers_leaving) {
+      response->add_servers_for_insert(s.server_id);
+    }
+  }
+
+  cache_->store(request, *response);
+  return Status::success();
+}
+
 
 } // namespace eventql
 

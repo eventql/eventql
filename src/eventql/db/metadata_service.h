@@ -77,11 +77,18 @@ public:
       const PartitionFindRequest& request,
       PartitionFindResponse* response);
 
-  Status createPartition(
-      const PartitionFindRequest& request,
-      PartitionFindResponse* response);
-
 protected:
+
+  Status createFinitePartition(
+      const PartitionFindRequest& request,
+      PartitionFindResponse* response,
+      const TableDefinition& table_config);
+
+  Status createUserDefinedPartition(
+      const PartitionFindRequest& request,
+      PartitionFindResponse* response,
+      const TableDefinition& table_config);
+
   DatabaseContext* dbctx_;
   MetadataStore* metadata_store_;
   MetadataCache* cache_;
