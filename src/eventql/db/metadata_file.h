@@ -114,6 +114,7 @@ public:
 
   uint64_t getFlags() const;
   bool hasFinitePartitions() const;
+  bool hasUserDefinedPartitions() const;
 
 protected:
   PartitionMapIter lookup(const String& key) const;
