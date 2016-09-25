@@ -515,6 +515,7 @@ ReturnCode TableService::insertRecords(
     const msg::DynamicMessage* begin,
     const msg::DynamicMessage* end,
     uint64_t flags /* = 0 */) {
+  auto t0 = MonotonicClock::now();
   MetadataClient metadata_client(
       dbctx_->config_directory,
       dbctx_->config,
@@ -619,6 +620,7 @@ ReturnCode TableService::insertRecords(
     }
   }
 
+  auto t_performstart = MonotonicClock::now();
   for (auto& p : records) {
     auto rc = insertRecords(
         tsdb_namespace,
@@ -631,6 +633,14 @@ ReturnCode TableService::insertRecords(
       return rc;
     }
   }
+
+  auto t1 = MonotonicClock::now();
+  logInfo(
+      "evqld",
+      "Insert timing; total=$0ms meta=$1ms, perform=$2ms",
+      double(t1-t0) / 1000.0f,
+      double(t_performstart-t0) / 1000.0f,
+      double(t1-t_performstart) / 1000.0f);
 
   return ReturnCode::success();
 }
@@ -770,7 +780,7 @@ ReturnCode TableService::insertRecordsLocal(
   }
 
   auto t1 = MonotonicClock::now();
-  logInfo("evqld", "Insert took $0ms", double(t1-t0) / 1000.0f);
+  logInfo("evqld", "Local insert took $0ms", double(t1-t0) / 1000.0f);
 
   return ReturnCode::success();
 } catch (const std::exception& e) {
