@@ -32,6 +32,7 @@
 #include <eventql/cli/commands/cluster_add_server.h>
 #include <eventql/cli/commands/cluster_create.h>
 #include <eventql/cli/commands/cluster_status.h>
+#include <eventql/cli/commands/cluster_list.h>
 #include <eventql/cli/commands/cluster_remove_server.h>
 #include <eventql/cli/commands/database_create.h>
 #include <eventql/cli/commands/table_split.h>
@@ -117,64 +118,13 @@ int main(int argc, const char** argv) {
 
   auto process_config = config_builder.getConfig();
 
-  auto client = evql_client_init();
-  if (!client) {
-    stderr_os->write("ERROR: can't initialize eventql client");
-    return 1;
-  }
-
-  //FIXME configure timeout
-  if (!process_config->getString("user").isEmpty()) {
-    std::string akey = "user";
-    std::string aval = process_config->getString("user").get();
-    evql_client_setauth(
-        client,
-        akey.data(),
-        akey.size(),
-        aval.data(),
-        aval.size(),
-        0);
-  }
-
-  if (!process_config->getString("password").isEmpty()) {
-    std::string akey = "password";
-    std::string aval = process_config->getString("password").get();
-    evql_client_setauth(
-        client,
-        akey.data(),
-        akey.size(),
-        aval.data(),
-        aval.size(),
-        0);
-  }
-
-  if (!process_config->getString("auth_token").isEmpty()) {
-    std::string akey = "auth_token";
-    std::string aval = process_config->getString("auth_token").get();
-    evql_client_setauth(
-        client,
-        akey.data(),
-        akey.size(),
-        aval.data(),
-        aval.size(),
-        0);
-  }
-
-  std::string database;
-  bool switch_database = false;
-  if (!process_config->getString("database").isEmpty()) {
-    switch_database = true;
-    database = process_config->getString("database").get();
-  }
-
-  int rc = 0;
-
   /* init commands */
   List<eventql::cli::CLICommand*> commands;
   commands.emplace_back(new eventql::cli::ClusterAddServer(process_config));
   commands.emplace_back(new eventql::cli::ClusterCreate(process_config));
   commands.emplace_back(new eventql::cli::ClusterRemoveServer(process_config));
   commands.emplace_back(new eventql::cli::ClusterStatus(process_config));
+  commands.emplace_back(new eventql::cli::ClusterList(process_config));
   commands.emplace_back(new eventql::cli::DatabaseCreate(process_config));
   commands.emplace_back(new eventql::cli::TableSplit(process_config));
   commands.emplace_back(new eventql::cli::TableSplitFinalize(process_config));
@@ -200,8 +150,7 @@ int main(int argc, const char** argv) {
   }
 
   if (print_version) {
-    rc = 0;
-    goto exit;
+    return 1;
   }
 
   if (print_help) {
@@ -224,23 +173,20 @@ int main(int argc, const char** argv) {
         "\nSee 'evqlctl help <command>' to read about a specific subcommand.\n"
       );
 
-      rc = 0;
-      goto exit;
+      return 0;
     }
 
     for (auto c : commands) {
       if (c->getName() == help_topic) {
         c->printHelp(stdout_os.get());
-        rc = 0;
-        goto exit;
+        return 0;
       }
     }
 
     stderr_os->write(StringUtil::format(
         "evqlctl: No manual entry for evqlctl '$0'\n",
         help_topic));
-    rc = 1;
-    goto exit;
+    return 1;
   }
 
   /* execute command */
@@ -249,8 +195,7 @@ int main(int argc, const char** argv) {
     if (cmd_argv.empty()) {
       stderr_os->write(
         "evqlctl: command is not specified. See 'evqlctl --help'.\n");
-      rc = 1;
-      goto exit;
+      return 1;
     } else {
       cmd_name = cmd_argv.front();
       cmd_argv.erase(cmd_argv.begin());
@@ -268,20 +213,15 @@ int main(int argc, const char** argv) {
           stderr_os->write(StringUtil::format("ERROR: $0\n", ret.message()));
         }
 
-        rc = ret.isSuccess() ? 0 : 1;
-        goto exit;
+        return ret.isSuccess() ? 0 : 1;
       }
     }
 
     stderr_os->write(StringUtil::format(
         "evqlctl: '$0' is not a evqlctl command. See 'evqlctl --help'.\n",
         cmd_name));
-    rc = 1;
-    goto exit;
+    return 1;
   }
 
-exit:
-  evql_client_destroy(client);
-  return rc;
 }
 

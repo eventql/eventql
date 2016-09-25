@@ -1015,6 +1015,8 @@ evqlctl_SOURCES = \
     $(EVQL_PROTO_SOURCES_) \
     eventql/cli/commands/cli_command.h \
     eventql/cli/commands/cli_command.cc \
+    eventql/cli/cli_config.cc \
+    eventql/cli/cli_config.h \
     eventql/cli/commands/cluster_add_server.h \
     eventql/cli/commands/cluster_add_server.cc \
     eventql/cli/commands/cluster_create.h \
@@ -1023,6 +1025,8 @@ evqlctl_SOURCES = \
     eventql/cli/commands/cluster_status.cc \
     eventql/cli/commands/cluster_remove_server.h \
     eventql/cli/commands/cluster_remove_server.cc \
+    eventql/cli/commands/cluster_list.h \
+    eventql/cli/commands/cluster_list.cc \
     eventql/cli/commands/database_create.h \
     eventql/cli/commands/database_create.cc \
     eventql/cli/commands/table_config_set.h \
@@ -1034,6 +1038,7 @@ evqlctl_SOURCES = \
     eventql/evqlctl.cc
 
 evqlctl_LDADD = \
+    libevqlclient.la \
     $(SIMDCOMP_LDADD) \
     $(INIH_LDADD) \
     $(ZOOKEEPER_LDADD) \
