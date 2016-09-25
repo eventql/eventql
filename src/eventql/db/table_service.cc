@@ -730,7 +730,11 @@ ReturnCode TableService::insertRecords(
   auto t0 = MonotonicClock::now();
   rpc_client.setRPCStartedCallback([t0] (void* priv) {
     auto t1 = MonotonicClock::now();
-    logInfo("evqld", "Remote connect took $0ms", double(t1-t0) / 1000.0f);
+    logInfo(
+        "evqld",
+        "Remote connect to $1 took $0ms", 
+        double(t1-t0) / 1000.0f,
+        (const char*) priv);
   });
 
   rpc_client.setResultCallback([&nconfirmations, t0] (
@@ -742,7 +746,11 @@ ReturnCode TableService::insertRecords(
     switch (opcode) {
       case EVQL_OP_ACK: {
         auto t1 = MonotonicClock::now();
-        logInfo("evqld", "Remote insert took $0ms", double(t1-t0) / 1000.0f);
+        logInfo(
+            "evqld",
+            "Remote insert on $1 took $0ms",
+            double(t1-t0) / 1000.0f,
+            (const char*) priv);
         ++nconfirmations;
         return ReturnCode::success();
       }
@@ -752,7 +760,12 @@ ReturnCode TableService::insertRecords(
   });
 
   for (const auto& s : remote_servers) {
-    rpc_client.addRPC(EVQL_OP_REPL_INSERT, 0, std::string(rpc_payload), { s });
+    rpc_client.addRPC(
+        EVQL_OP_REPL_INSERT,
+        0,
+        std::string(rpc_payload),
+        { s },
+        (void*) s.c_str());
   }
 
   auto rc = rpc_client.execute();
