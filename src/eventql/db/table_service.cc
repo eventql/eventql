@@ -727,16 +727,20 @@ ReturnCode TableService::insertRecords(
       1,                     /* max_concurrent_tasks_per_host */
       true);                 /* tolerate failures */
 
-  rpc_client.setResultCallback([&nconfirmations] (
+  auto t0 = MonotonicClock::now();
+  rpc_client.setResultCallback([&nconfirmations, t0] (
       void* priv,
       uint16_t opcode,
       uint16_t flags,
       const char* payload,
       size_t payload_size) -> ReturnCode {
     switch (opcode) {
-      case EVQL_OP_ACK:
+      case EVQL_OP_ACK: {
+        auto t1 = MonotonicClock::now();
+        logInfo("evqld", "Remote insert took $0ms", double(t1-t0) / 1000.0f);
         ++nconfirmations;
         return ReturnCode::success();
+      }
       default:
         return ReturnCode::error("ERUNTIME", "unexpected opcode");
     }

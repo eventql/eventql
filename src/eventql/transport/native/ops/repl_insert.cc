@@ -27,6 +27,7 @@
 #include "eventql/transport/native/frames/repl_insert.h"
 #include "eventql/auth/client_auth.h"
 #include "eventql/util/logging.h"
+#include "eventql/util/wallclock.h"
 #include "eventql/server/session.h"
 #include <eventql/db/shredded_record.h>
 #include <eventql/db/table_service.h>
@@ -39,6 +40,7 @@ ReturnCode performOperation_REPL_INSERT(
     NativeConnection* conn,
     const char* payload,
     size_t payload_size) {
+  auto t0 = MonotonicClock::now();
   auto session = database->getSession();
   auto dbctx = session->getDatabaseContext();
 
@@ -89,6 +91,8 @@ ReturnCode performOperation_REPL_INSERT(
     conn->sendErrorFrame(rc.getMessage());
   }
 
+  auto t1 = MonotonicClock::now();
+  logInfo("evqld", "Replicated insert took $0ms", double(t1-t0) / 1000.0f);
   return ReturnCode::success();
 }
 
