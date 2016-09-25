@@ -33,18 +33,22 @@ namespace eventql {
 class MetadataCoordinator {
 public:
 
-  MetadataCoordinator(ConfigDirectory* cdir);
+  MetadataCoordinator(
+      ConfigDirectory* cdir,
+      ProcessConfig* config);
 
   Status performAndCommitOperation(
       const String& ns,
       const String& table_name,
-      MetadataOperation op);
+      MetadataOperation op,
+      MetadataOperationResult* res = nullptr);
 
   Status performOperation(
       const String& ns,
       const String& table_name,
       MetadataOperation op,
-      const Vector<String>& servers);
+      const Vector<String>& servers,
+      MetadataOperationResult* res = nullptr);
 
   Status createFile(
       const String& ns,
@@ -72,6 +76,7 @@ protected:
       MetadataOperationResult* result);
 
   ConfigDirectory* cdir_;
+  ProcessConfig* config_;
 };
 
 

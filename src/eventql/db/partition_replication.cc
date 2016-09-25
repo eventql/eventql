@@ -416,7 +416,10 @@ Status LSMPartitionReplication::fetchAndApplyMetadataTransaction(
   discovery_request.set_keyrange_begin(snap_->state.partition_keyrange_begin());
   discovery_request.set_keyrange_end(snap_->state.partition_keyrange_end());
 
-  MetadataCoordinator coordinator(dbctx_->config_directory);
+  MetadataCoordinator coordinator(
+      dbctx_->config_directory,
+      dbctx_->config);
+
   PartitionDiscoveryResponse discovery_response;
   auto rc = coordinator.discoverPartition(
       discovery_request,
@@ -454,7 +457,10 @@ Status LSMPartitionReplication::finalizeSplit() {
       Random::singleton()->sha1(),
       *msg::encode(op));
 
-  MetadataCoordinator coordinator(dbctx_->config_directory);
+  MetadataCoordinator coordinator(
+      dbctx_->config_directory,
+      dbctx_->config);
+
   return coordinator.performAndCommitOperation(
       snap_->state.tsdb_namespace(),
       snap_->state.table_key(),
@@ -488,7 +494,10 @@ Status LSMPartitionReplication::finalizeJoin(const ReplicationTarget& target) {
       Random::singleton()->sha1(),
       *msg::encode(op));
 
-  MetadataCoordinator coordinator(dbctx_->config_directory);
+  MetadataCoordinator coordinator(
+      dbctx_->config_directory,
+      dbctx_->config);
+
   return coordinator.performAndCommitOperation(
       snap_->state.tsdb_namespace(),
       snap_->state.table_key(),

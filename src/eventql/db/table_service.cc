@@ -24,6 +24,7 @@
 #include <eventql/util/util/Base64.h>
 #include <algorithm>
 #include <eventql/util/fnv.h>
+#include <eventql/util/logging.h>
 #include <eventql/util/protobuf/msg.h>
 #include <eventql/util/protobuf/MessageEncoder.h>
 #include <eventql/util/io/fileutil.h>
@@ -226,7 +227,10 @@ Status TableService::createTable(
   }
 
   // create metadata file on metadata servers
-  eventql::MetadataCoordinator coordinator(dbctx_->config_directory);
+  MetadataCoordinator coordinator(
+      dbctx_->config_directory,
+      dbctx_->config);
+
   auto rc = coordinator.createFile(
       db_namespace,
       table_name,
@@ -604,7 +608,11 @@ ReturnCode TableService::insertRecords(
     const msg::DynamicMessage* begin,
     const msg::DynamicMessage* end,
     uint64_t flags /* = 0 */) {
-  MetadataClient metadata_client(dbctx_->config_directory);
+  MetadataClient metadata_client(
+      dbctx_->config_directory,
+      dbctx_->config,
+      dbctx_->metadata_cache);
+
   HashMap<SHA1Hash, ShreddedRecordListBuilder> records;
   HashMap<SHA1Hash, Set<String>> servers;
 
@@ -839,6 +847,7 @@ ReturnCode TableService::insertRecordsLocal(
     const String& table_name,
     const SHA1Hash& partition_key,
     const ShreddedRecordList& records) try {
+  auto t0 = MonotonicClock::now();
   auto partition = dbctx_->partition_map->findOrCreatePartition(
       tsdb_namespace,
       table_name,
@@ -852,6 +861,9 @@ ReturnCode TableService::insertRecordsLocal(
     change->partition = partition;
     dbctx_->partition_map->publishPartitionChange(change);
   }
+
+  auto t1 = MonotonicClock::now();
+  logInfo("evqld", "Insert took $0ms", double(t1-t0) / 1000.0f);
 
   return ReturnCode::success();
 } catch (const std::exception& e) {

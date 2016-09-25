@@ -164,7 +164,12 @@ Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
         table.get()->config().config().partition_key(),
         seqscan->constraints());
 
-    MetadataClient metadata_client(cdir_);
+    auto session = static_cast<Session*>(ctx->getUserData());
+    MetadataClient metadata_client(
+        cdir_,
+        session->getDatabaseContext()->config,
+        session->getDatabaseContext()->metadata_cache);
+
     PartitionListResponse partition_list;
     auto rc = metadata_client.listPartitions(
         tsdb_namespace_,

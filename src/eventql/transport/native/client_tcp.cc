@@ -64,6 +64,10 @@ ReturnCode TCPClient::connect(
     const std::string& addr_str,
     bool is_internal,
     const AuthDataType& auth_data /* = AuthDataType{} */) {
+  if (conn_) {
+    conn_->close();
+  }
+
   auto server_addr = InetAddr::resolve(addr_str); // FIXME
   auto server_ip = server_addr.ip();
 

@@ -24,69 +24,40 @@
 #pragma once
 #include "eventql/eventql.h"
 #include "eventql/util/stdtypes.h"
-#include "eventql/util/status.h"
+#include "eventql/util/return_code.h"
 #include "eventql/util/SHA1.h"
 #include "eventql/db/metadata_file.h"
-#include "eventql/db/metadata_store.h"
-#include "eventql/db/metadata_cache.h"
 #include "eventql/db/metadata_operation.h"
-#include "eventql/db/database.h"
-#include "eventql/config/config_directory.h"
 
 namespace eventql {
 
-class MetadataService {
+class MetadataCache {
 public:
 
-  MetadataService(
-      DatabaseContext* dbctx,
-      MetadataStore* metadata_store,
-      MetadataCache* cache);
-
-  Status getMetadataFile(
-      const String& ns,
-      const String& table_name,
-      RefPtr<MetadataFile>* file) const;
-
-  Status getMetadataFile(
-      const String& ns,
-      const String& table_name,
-      const SHA1Hash& transaction_id,
-      RefPtr<MetadataFile>* file) const;
-
-  Status createMetadataFile(
-      const String& ns,
-      const String& table_name,
-      const MetadataFile& file) const;
-
-  Status performMetadataOperation(
-      const String& ns,
-      const String& table_name,
-      const MetadataOperation& op,
-      MetadataOperationResult* result);
-
-  Status discoverPartition(
-      const PartitionDiscoveryRequest& request,
-      PartitionDiscoveryResponse* response);
-
-  Status listPartitions(
-      const PartitionListRequest& request,
-      PartitionListResponse* response);
-
-  Status findPartition(
+  bool get(
       const PartitionFindRequest& request,
-      PartitionFindResponse* response);
+      PartitionFindResponse* response) const;
 
-  Status createPartition(
+  void store(
       const PartitionFindRequest& request,
-      PartitionFindResponse* response);
+      const PartitionFindResponse& response);
 
 protected:
-  DatabaseContext* dbctx_;
-  MetadataStore* metadata_store_;
-  MetadataCache* cache_;
-  std::mutex lockmap_mutex_;
-  std::map<std::string, std::unique_ptr<std::mutex>> lockmap_;
+
+  struct CachedPartitionMapEntry {
+    std::string partition_id;
+    std::string begin;
+    std::string end;
+    std::vector<std::string> servers;
+  };
+
+  struct CachedPartitionMap {
+    uint64_t sequence_number;
+    std::vector<CachedPartitionMapEntry> partitions;
+  };
+
+  mutable std::mutex mutex_;
+  std::map<std::string, CachedPartitionMap> cache_;
 };
 
 } // namespace eventql

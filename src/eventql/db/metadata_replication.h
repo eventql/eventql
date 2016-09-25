@@ -39,6 +39,7 @@ public:
 
   MetadataReplication(
       ConfigDirectory* cdir,
+      ProcessConfig* config,
       const String& server_name,
       MetadataStore* metadata_store);
 
@@ -62,6 +63,7 @@ protected:
   Status replicate(const ReplicationJob& job);
 
   ConfigDirectory* cdir_;
+  ProcessConfig* config_;
   String server_name_;
   MetadataStore* metadata_store_;
   std::atomic<bool> running_;

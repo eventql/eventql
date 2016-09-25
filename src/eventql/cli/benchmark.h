@@ -74,7 +74,8 @@ public:
       size_t num_threads,
       bool ignore_errors,
       size_t rate,
-      size_t remaining_requests = size_t(-1));
+      size_t remaining_requests = size_t(-1),
+      bool disable_keepalive = false);
 
   void setRequestHandler(RequestCallbackType handler);
   void setProgressCallback(ProgressCallbackType cb);
@@ -100,6 +101,7 @@ protected:
   const uint64_t rate_;
   uint64_t rate_limit_interval_;
   size_t remaining_requests_;
+  bool disable_keepalive_;
   ReturnCode status_;
   size_t threads_running_;
   uint64_t last_request_time_;
@@ -112,6 +114,9 @@ protected:
   std::vector<std::thread> threads_;
   std::vector<native_transport::TCPClient> clients_;
   BenchmarkStats stats_;
+  std::string host_;
+  uint64_t port_;
+  std::vector<std::pair<std::string, std::string>> auth_data_;
 };
 
 ReturnCode benchmark_insert(

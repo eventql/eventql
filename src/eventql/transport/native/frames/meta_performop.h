@@ -22,44 +22,43 @@
  * code of your own applications
  */
 #pragma once
-#include <eventql/util/stdtypes.h>
-#include <eventql/util/autoref.h>
-#include <eventql/db/file_tracker.h>
-#include <eventql/db/rebalance.h>
-#include <eventql/config/config_directory.h>
+#include <string>
+#include <vector>
 #include "eventql/eventql.h"
-#include <thread>
-#include <condition_variable>
+#include "eventql/util/io/inputstream.h"
+#include "eventql/util/io/outputstream.h"
+#include "eventql/util/return_code.h"
+#include "eventql/util/SHA1.h"
 
 namespace eventql {
+namespace native_transport {
 
-class Leader {
+class MetaPerformopFrame {
 public:
 
-  Leader(
-      ConfigDirectory* cdir,
-      ProcessConfig* config,
-      ServerAllocator* server_alloc,
-      MetadataCache* metadata_cache,
-      uint64_t rebalance_interval);
+  static const uint16_t kOpcode = EVQL_OP_META_PERFORMOP;
 
-  ~Leader();
+  MetaPerformopFrame();
 
-  bool runLeaderProcedure();
+  void setDatabase(const std::string& database);
+  void setTable(const std::string& table);
+  void setOperation(const std::string& body);
 
-  void startLeaderThread();
-  void stopLeaderThread();
+  const std::string& getDatabase() const;
+  const std::string& getTable() const;
+  const std::string& getOperation() const;
+
+  ReturnCode parseFrom(InputStream* is);
+  ReturnCode writeTo(OutputStream* os) const;
+  void clear();
 
 protected:
-
-  ConfigDirectory* cdir_;
-  Rebalance rebalance_;
-  uint64_t rebalance_interval_;
-  std::thread thread_;
-  bool thread_running_;
-  std::mutex mutex_;
-  std::condition_variable cv_;
+  uint64_t flags_;
+  std::string database_;
+  std::string table_;
+  std::string body_;
 };
 
+} // namespace native_transport
 } // namespace eventql
 

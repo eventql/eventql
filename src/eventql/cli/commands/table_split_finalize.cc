@@ -112,7 +112,7 @@ Status TableSplitFinalize::execute(
         Random::singleton()->sha1(),
         *msg::encode(op));
 
-    MetadataCoordinator coordinator(cdir.get());
+    MetadataCoordinator coordinator(cdir.get(), nullptr);
     {
       auto rc = coordinator.performAndCommitOperation(
           flags.getString("database"),

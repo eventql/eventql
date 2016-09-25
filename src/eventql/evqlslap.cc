@@ -92,6 +92,15 @@ int main(int argc, const char** argv) {
       "<switch>");
 
   flags.defineFlag(
+      "disable_keepalive",
+      cli::FlagParser::T_SWITCH,
+      false,
+      "k",
+      NULL,
+      "disable keepalive",
+      "<switch>");
+
+  flags.defineFlag(
       "mode",
       cli::FlagParser::T_STRING,
       false,
@@ -292,7 +301,8 @@ int main(int argc, const char** argv) {
       flags.getInt("connections"),
       flags.isSet("ignore_errors"),
       flags.getInt("rate"),
-      num);
+      num,
+      flags.isSet("disable_keepalive"));
 
   benchmark.setRequestHandler(request_handler);
   benchmark.setProgressCallback(on_progress);

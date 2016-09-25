@@ -189,8 +189,8 @@ Vector<Scheduler::PipelinedQueryTree> Scheduler::pipelineExpression(
     RAISE(kIllegalStateError, "can't pipeline query tree");
   }
 
-  auto db_namespace =
-      static_cast<Session*>(txn->getUserData())->getEffectiveNamespace();
+  auto session = static_cast<Session*>(txn->getUserData());
+  auto db_namespace = session->getEffectiveNamespace();
 
   String local_server_id;
   if (cdir_->hasServerID()) {
@@ -202,7 +202,11 @@ Vector<Scheduler::PipelinedQueryTree> Scheduler::pipelineExpression(
       table.get()->config().config().partition_key(),
       seqscan->constraints());
 
-  MetadataClient metadata_client(cdir_);
+  MetadataClient metadata_client(
+      cdir_,
+      session->getDatabaseContext()->config,
+      session->getDatabaseContext()->metadata_cache);
+
   PartitionListResponse partition_list;
   auto rc = metadata_client.listPartitions(
       db_namespace,

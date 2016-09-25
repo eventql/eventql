@@ -248,6 +248,42 @@ ReturnCode Server::performOperation(
           conn,
           payload.data(),
           payload.size());
+    case EVQL_OP_META_PERFORMOP:
+      return performOperation_META_PERFORMOP(
+          db_,
+          conn,
+          payload.data(),
+          payload.size());
+    case EVQL_OP_META_GETFILE:
+      return performOperation_META_GETFILE(
+          db_,
+          conn,
+          payload.data(),
+          payload.size());
+    case EVQL_OP_META_CREATEFILE:
+      return performOperation_META_CREATEFILE(
+          db_,
+          conn,
+          payload.data(),
+          payload.size());
+    case EVQL_OP_META_DISCOVER:
+      return performOperation_META_DISCOVER(
+          db_,
+          conn,
+          payload.data(),
+          payload.size());
+    case EVQL_OP_META_FINDPARTITION:
+      return performOperation_META_FINDPARTITION(
+          db_,
+          conn,
+          payload.data(),
+          payload.size());
+    case EVQL_OP_META_LISTPARTITIONS:
+      return performOperation_META_LISTPARTITIONS(
+          db_,
+          conn,
+          payload.data(),
+          payload.size());
     default:
       conn->sendErrorFrame("invalid opcode");
       conn->close();
