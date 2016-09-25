@@ -305,6 +305,10 @@ ReturnCode TCPAsyncClient::handleReady(Connection* connection) {
       connection->task->payload.data(),
       connection->task->payload.size());
 
+  if (rpc_started_cb_) {
+    rpc_started_cb_(connection->task->privdata);
+  }
+
   return ReturnCode::success();
 }
 
@@ -371,6 +375,10 @@ ReturnCode TCPAsyncClient::handleIdle(Connection* connection) {
         connection->task->flags,
         connection->task->payload.data(),
         connection->task->payload.size());
+
+    if (rpc_started_cb_) {
+      rpc_started_cb_(connection->task->privdata);
+    }
   } else {
     connection->state = ConnectionState::CLOSE;
   }
@@ -664,10 +672,6 @@ TCPAsyncClient::Task* TCPAsyncClient::popTask(
   auto task = *iter;
   runq_.erase(iter);
   ++num_tasks_running_;
-
-  if (rpc_started_cb_) {
-    rpc_started_cb_(task->privdata);
-  }
 
   return task;
 }
