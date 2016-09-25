@@ -728,6 +728,11 @@ ReturnCode TableService::insertRecords(
       true);                 /* tolerate failures */
 
   auto t0 = MonotonicClock::now();
+  rpc_client.setRPCStartedCallback([t0] (void* priv) {
+    auto t1 = MonotonicClock::now();
+    logInfo("evqld", "Remote connect took $0ms", double(t1-t0) / 1000.0f);
+  });
+
   rpc_client.setResultCallback([&nconfirmations, t0] (
       void* priv,
       uint16_t opcode,
