@@ -63,6 +63,9 @@ public:
    */
   void checkErrors() const;
 
+  const std::string& getRemoteAddress() const;
+  bool isClosed() const;
+
 protected:
   void connectImpl(const InetAddr& addr);
 

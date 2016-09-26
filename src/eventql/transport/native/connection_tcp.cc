@@ -44,10 +44,14 @@ namespace native_transport {
 
 TCPConnection::TCPConnection(
     int fd,
+    const std::string remote_host,
+    bool is_internal,
     uint64_t io_timeout,
     const std::string& prelude_bytes /* = "" */) :
     fd_(fd),
     read_buf_(prelude_bytes),
+    remote_host_(remote_host),
+    is_internal_(is_internal),
     io_timeout_(io_timeout) {
   logTrace("eventql", "Opening new tcp connection; fd=$1", fd);
 
@@ -279,12 +283,30 @@ void TCPConnection::close() {
   fd_ = -1;
 }
 
+int TCPConnection::releaseFD() {
+  if (fd_ < 0) {
+    return -1;
+  }
+
+  auto fd = fd_;
+  fd = -1;
+  return fd;
+}
+
 void TCPConnection::setIOTimeout(uint64_t timeout_us) {
   io_timeout_ = timeout_us;
 }
 
 std::string TCPConnection::getRemoteHost() const {
   return remote_host_;
+}
+
+bool TCPConnection::isInternal() const {
+  return is_internal_;
+}
+
+bool TCPConnection::isClosed() const {
+  return fd_ < 0;
 }
 
 } // namespace native_connection

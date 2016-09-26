@@ -59,6 +59,8 @@ public:
       uint64_t io_timeout = kDefaultIOTimeout,
       uint64_t idle_timeout = kDefaultIdleTimeout);
 
+  ~TCPClient();
+
   ReturnCode connect(
       const std::string& host,
       uint64_t port,
@@ -160,6 +162,7 @@ protected:
   struct Connection {
     ConnectionState state;
     std::string host;
+    std::string host_addr;
     int fd;
     std::string read_buf;
     std::string write_buf;
@@ -194,7 +197,7 @@ protected:
 
   ReturnCode startNextTask();
   ReturnCode startConnection(Task* task);
-  void closeConnection(Connection* connection);
+  void closeConnection(Connection* connection, bool graceful);
   ReturnCode performWrite(Connection* connection);
   ReturnCode performRead(Connection* connection);
   void sendFrame(
@@ -230,12 +233,17 @@ public:
   TCPConnectionPool();
 
   bool getConnection(
-      const std::string& server,
+      const std::string& addr,
       std::unique_ptr<TCPConnection>* connection);
 
+  int getFD(const std::string& server);
+
   void storeConnection(
-      const std::string& server,
       std::unique_ptr<TCPConnection>&& connection);
+
+  void storeFD(
+      int fd,
+      const std::string& server);
 
 };
 

@@ -254,6 +254,8 @@ void Listener::open(int fd) {
           std::unique_ptr<native_transport::NativeConnection>(
               new native_transport::TCPConnection(
                   fd,
+                  "",
+                  false,
                   io_timeout_,
                   std::string(&first_byte, 1))));
       break;
