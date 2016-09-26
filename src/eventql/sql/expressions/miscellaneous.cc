@@ -38,17 +38,17 @@ void usleepExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
         "wrong number of arguments for usleep expected: 1, got: %i", argc);
   }
 
-  auto total_sleep = argv[0].getInteger();
-  if (total_sleep < 0) {
+  if (argv[0].getInteger() < 0) {
     RAISE(
         kRuntimeError,
         "wrong argument for usleep, must be positive integer, got %i",
-        total_sleep);
+        argv[0].getInteger());
   }
 
-  auto begin = MonotonicClock::now();
+  uint64_t total_sleep = argv[0].getInteger();
+  uint64_t begin = MonotonicClock::now();
   for (;;) {
-    auto now = MonotonicClock::now();
+    uint64_t now = MonotonicClock::now();
     if (begin + total_sleep <= now) {
       break;
     }
@@ -58,9 +58,8 @@ void usleepExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
       RAISE(kRuntimeError, rc.getMessage());
     }
 
-    auto remaining = total_sleep - (now - begin);
-    auto sleep = remaining < kUSleepIntervalUs ? remaining : kUSleepIntervalUs;
-    usleep(sleep);
+    uint64_t remaining = total_sleep - (now - begin);
+    usleep(std::min(remaining, kUSleepIntervalUs));
   }
 
   *out = SValue::newInteger(0);
