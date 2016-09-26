@@ -347,6 +347,7 @@ Status MetadataOperation::performCreatePartition(
   new_entry.partition_id = new_partition_id;
   new_entry.splitting = false;
   new_entry.begin = opdata.begin();
+  new_entry.end = opdata.end();
   for (const auto& s : opdata.servers()) {
     MetadataFile::PartitionPlacement p;
     p.server_id = s;
