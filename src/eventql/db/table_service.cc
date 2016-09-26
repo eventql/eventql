@@ -538,7 +538,6 @@ ReturnCode TableService::insertRecords(
     const msg::DynamicMessage* begin,
     const msg::DynamicMessage* end,
     uint64_t flags /* = 0 */) {
-  auto t0 = MonotonicClock::now();
   MetadataClient metadata_client(
       dbctx_->config_directory,
       dbctx_->config,
@@ -645,7 +644,6 @@ ReturnCode TableService::insertRecords(
     }
   }
 
-  auto t_performstart = MonotonicClock::now();
   for (auto& p : records) {
     auto rc = insertRecords(
         tsdb_namespace,
@@ -658,14 +656,6 @@ ReturnCode TableService::insertRecords(
       return rc;
     }
   }
-
-  auto t1 = MonotonicClock::now();
-  logInfo(
-      "evqld",
-      "Insert timing; total=$0ms meta=$1ms, perform=$2ms",
-      double(t1-t0) / 1000.0f,
-      double(t_performstart-t0) / 1000.0f,
-      double(t1-t_performstart) / 1000.0f);
 
   return ReturnCode::success();
 }
@@ -754,17 +744,7 @@ ReturnCode TableService::insertRecords(
       1,                     /* max_concurrent_tasks_per_host */
       true);                 /* tolerate failures */
 
-  auto t0 = MonotonicClock::now();
-  rpc_client.setRPCStartedCallback([t0] (void* priv) {
-    auto t1 = MonotonicClock::now();
-    logInfo(
-        "evqld",
-        "Remote connect to $1 took $0ms", 
-        double(t1-t0) / 1000.0f,
-        (const char*) priv);
-  });
-
-  rpc_client.setResultCallback([&nconfirmations, t0] (
+  rpc_client.setResultCallback([&nconfirmations] (
       void* priv,
       uint16_t opcode,
       uint16_t flags,
@@ -772,12 +752,6 @@ ReturnCode TableService::insertRecords(
       size_t payload_size) -> ReturnCode {
     switch (opcode) {
       case EVQL_OP_ACK: {
-        auto t1 = MonotonicClock::now();
-        logInfo(
-            "evqld",
-            "Remote insert on $1 took $0ms",
-            double(t1-t0) / 1000.0f,
-            (const char*) priv);
         ++nconfirmations;
         return ReturnCode::success();
       }
@@ -787,12 +761,7 @@ ReturnCode TableService::insertRecords(
   });
 
   for (const auto& s : remote_servers) {
-    rpc_client.addRPC(
-        EVQL_OP_REPL_INSERT,
-        0,
-        std::string(rpc_payload),
-        { s },
-        (void*) s.c_str());
+    rpc_client.addRPC(EVQL_OP_REPL_INSERT, 0, std::string(rpc_payload), { s });
   }
 
   auto rc = rpc_client.execute();
@@ -813,7 +782,6 @@ ReturnCode TableService::insertRecordsLocal(
     const String& table_name,
     const SHA1Hash& partition_key,
     const ShreddedRecordList& records) try {
-  auto t0 = MonotonicClock::now();
   auto partition = dbctx_->partition_map->findOrCreatePartition(
       tsdb_namespace,
       table_name,
@@ -827,9 +795,6 @@ ReturnCode TableService::insertRecordsLocal(
     change->partition = partition;
     dbctx_->partition_map->publishPartitionChange(change);
   }
-
-  auto t1 = MonotonicClock::now();
-  logInfo("evqld", "Local insert took $0ms", double(t1-t0) / 1000.0f);
 
   return ReturnCode::success();
 } catch (const std::exception& e) {
