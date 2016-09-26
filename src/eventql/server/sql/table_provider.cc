@@ -411,15 +411,11 @@ Status TSDBTableProvider::createTable(
 }
 
 Status TSDBTableProvider::createDatabase(const String& database_name) {
-  bool db_exists = false;
-  cdir_->listNamespaces([&db_exists, database_name](NamespaceConfig cfg) {
-    if (database_name == cfg.customer()) {
-      db_exists = true;
-    }
-  });
-
-  if (db_exists) {
+  try {
+    auto c = cdir_->getNamespaceConfig(database_name);
     return Status(eRuntimeError, "database already exists");
+  } catch (const std::exception& e) {
+    /* fallthrough */
   }
 
   NamespaceConfig cfg;
