@@ -25,7 +25,9 @@ EventQL v0.5.0 beta;
     server.load_limit_{soft,hard}, server.partitions_loading_limit_{soft,hard},
     server.loadinfo_publish_interval, server.noalloc
 
-  * Added new sql functions: usleep(microseconds), fnv32(string)
+  * Added new sql functions: usleep, fnv32
+
+>>>>>>> 2733e8edec47714da68bcd6a31e90cd8dc6044ea
 
 EventQL v0.4.0 beta;
 
