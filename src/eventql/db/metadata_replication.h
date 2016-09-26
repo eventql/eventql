@@ -29,6 +29,7 @@
 #include "eventql/db/metadata_file.h"
 #include "eventql/db/metadata_store.h"
 #include "eventql/config/config_directory.h"
+#include "eventql/transport/native/client_tcp.h"
 
 namespace eventql {
 
@@ -41,7 +42,9 @@ public:
       ConfigDirectory* cdir,
       ProcessConfig* config,
       const String& server_name,
-      MetadataStore* metadata_store);
+      MetadataStore* metadata_store,
+      native_transport::TCPConnectionPool* conn_pool,
+      net::DNSCache* dns_cache);
 
   ~MetadataReplication();
 
@@ -66,6 +69,8 @@ protected:
   ProcessConfig* config_;
   String server_name_;
   MetadataStore* metadata_store_;
+  native_transport::TCPConnectionPool* conn_pool_;
+  net::DNSCache* dns_cache_;
   std::atomic<bool> running_;
   Vector<std::thread> threads_;
   thread::DelayedQueue<ReplicationJob> queue_;

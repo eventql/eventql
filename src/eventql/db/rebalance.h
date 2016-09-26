@@ -39,7 +39,9 @@ public:
       ConfigDirectory* cdir,
       ProcessConfig* config,
       ServerAllocator* server_alloc,
-      MetadataCache* metadata_cache);
+      MetadataCache* metadata_cache,
+      native_transport::TCPConnectionPool* conn_pool,
+      net::DNSCache* dns_cache);
 
   Status runOnce();
 

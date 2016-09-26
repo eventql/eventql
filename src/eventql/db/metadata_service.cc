@@ -339,7 +339,9 @@ Status MetadataService::createFinitePartition(
 
   MetadataCoordinator coordinator(
       dbctx_->config_directory,
-      dbctx_->config);
+      dbctx_->config,
+      dbctx_->connection_pool,
+      dbctx_->dns_cache);
 
   MetadataOperationResult create_result;
   auto create_rc = coordinator.performAndCommitOperation(
@@ -446,7 +448,9 @@ Status MetadataService::createUserDefinedPartition(
 
   MetadataCoordinator coordinator(
       dbctx_->config_directory,
-      dbctx_->config);
+      dbctx_->config,
+      dbctx_->connection_pool,
+      dbctx_->dns_cache);
 
   MetadataOperationResult create_result;
   auto create_rc = coordinator.performAndCommitOperation(

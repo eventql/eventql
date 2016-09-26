@@ -258,7 +258,9 @@ RefPtr<Partition> PartitionMap::findOrCreatePartition(
 
     MetadataCoordinator coordinator(
         cfg_->config_directory,
-        cfg_->config);
+        cfg_->config,
+        cfg_->connection_pool,
+        cfg_->dns_cache);
 
     PartitionDiscoveryResponse discovery_response;
     auto rc = coordinator.discoverPartition(

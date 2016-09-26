@@ -250,7 +250,9 @@ Status TableService::createTable(
   // create metadata file on metadata servers
   MetadataCoordinator coordinator(
       dbctx_->config_directory,
-      dbctx_->config);
+      dbctx_->config,
+      dbctx_->connection_pool,
+      dbctx_->dns_cache);
 
   auto rc = coordinator.createFile(
       db_namespace,
@@ -540,7 +542,9 @@ ReturnCode TableService::insertRecords(
   MetadataClient metadata_client(
       dbctx_->config_directory,
       dbctx_->config,
-      dbctx_->metadata_cache);
+      dbctx_->metadata_cache,
+      dbctx_->connection_pool,
+      dbctx_->dns_cache);
 
   HashMap<SHA1Hash, ShreddedRecordListBuilder> records;
   HashMap<SHA1Hash, Set<String>> servers;
@@ -744,6 +748,8 @@ ReturnCode TableService::insertRecords(
   native_transport::TCPAsyncClient rpc_client(
       dbctx_->config,
       dbctx_->config_directory,
+      dbctx_->connection_pool,
+      dbctx_->dns_cache,
       remote_servers.size(), /* max_concurrent_tasks */
       1,                     /* max_concurrent_tasks_per_host */
       true);                 /* tolerate failures */

@@ -41,7 +41,9 @@ public:
       ProcessConfig* config,
       ServerAllocator* server_alloc,
       MetadataCache* metadata_cache,
-      uint64_t rebalance_interval);
+      uint64_t rebalance_interval,
+      native_transport::TCPConnectionPool* conn_pool,
+      net::DNSCache* dns_cache);
 
   ~Leader();
 

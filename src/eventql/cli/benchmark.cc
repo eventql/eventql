@@ -56,10 +56,13 @@ Benchmark::Benchmark(
     last_request_time_(0),
     sequence_(0),
     progress_rate_limit_(kDefaultProgressRateLimit),
-    threads_(num_threads_),
-    clients_(num_threads_) {
+    threads_(num_threads_) {
   if (rate > 0 && rate < kMicrosPerSecond) {
     rate_limit_interval_ = kMicrosPerSecond / rate;
+  }
+
+  for (size_t i = 0; i < num_threads_; ++i) {
+    clients_.emplace_back(nullptr, nullptr);
   }
 }
 

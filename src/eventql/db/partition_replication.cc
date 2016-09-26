@@ -418,7 +418,9 @@ Status LSMPartitionReplication::fetchAndApplyMetadataTransaction(
 
   MetadataCoordinator coordinator(
       dbctx_->config_directory,
-      dbctx_->config);
+      dbctx_->config,
+      dbctx_->connection_pool,
+      dbctx_->dns_cache);
 
   PartitionDiscoveryResponse discovery_response;
   auto rc = coordinator.discoverPartition(
@@ -459,7 +461,9 @@ Status LSMPartitionReplication::finalizeSplit() {
 
   MetadataCoordinator coordinator(
       dbctx_->config_directory,
-      dbctx_->config);
+      dbctx_->config,
+      dbctx_->connection_pool,
+      dbctx_->dns_cache);
 
   return coordinator.performAndCommitOperation(
       snap_->state.tsdb_namespace(),
@@ -496,7 +500,9 @@ Status LSMPartitionReplication::finalizeJoin(const ReplicationTarget& target) {
 
   MetadataCoordinator coordinator(
       dbctx_->config_directory,
-      dbctx_->config);
+      dbctx_->config,
+      dbctx_->connection_pool,
+      dbctx_->dns_cache);
 
   return coordinator.performAndCommitOperation(
       snap_->state.tsdb_namespace(),

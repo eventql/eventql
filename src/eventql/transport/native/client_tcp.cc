@@ -44,8 +44,12 @@ namespace eventql {
 namespace native_transport {
 
 TCPClient::TCPClient(
+    TCPConnectionPool* conn_pool,
+    net::DNSCache* dns_cache,
     uint64_t io_timeout /* = kDefaultIOTimeout */,
     uint64_t idle_timeout /* = kDefaultIdleTimeout */) :
+    conn_pool_(conn_pool),
+    dns_cache_(dns_cache),
     io_timeout_(io_timeout),
     idle_timeout_(idle_timeout) {}
 
@@ -201,10 +205,14 @@ void TCPClient::close() {
 TCPAsyncClient::TCPAsyncClient(
     ProcessConfig* config,
     ConfigDirectory* config_dir,
+    TCPConnectionPool* conn_pool,
+    net::DNSCache* dns_cache,
     size_t max_concurrent_tasks,
     size_t max_concurrent_tasks_per_host,
     bool tolerate_failures) :
     config_(config_dir),
+    conn_pool_(conn_pool),
+    dns_cache_(dns_cache),
     max_concurrent_tasks_(max_concurrent_tasks),
     max_concurrent_tasks_per_host_(max_concurrent_tasks_per_host),
     tolerate_failures_(tolerate_failures),
@@ -773,6 +781,8 @@ void TCPAsyncClient::closeConnection(Connection* connection) {
   --connections_per_host_[connection->host];
   ::close(connection->fd);
 }
+
+TCPConnectionPool::TCPConnectionPool() {}
 
 } // namespace native_transport
 } // namespace eventql

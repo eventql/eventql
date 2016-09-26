@@ -32,10 +32,14 @@ namespace eventql {
 MetadataClient::MetadataClient(
     ConfigDirectory* cdir,
     ProcessConfig* config,
-    MetadataCache* cache) :
+    MetadataCache* cache,
+    native_transport::TCPConnectionPool* conn_pool,
+    net::DNSCache* dns_cache) :
     cdir_(cdir),
     config_(config),
-    cache_(cache) {}
+    cache_(cache),
+    conn_pool_(conn_pool),
+    dns_cache_(dns_cache) {}
 
 Status MetadataClient::fetchLatestMetadataFile(
     const String& ns,
@@ -57,7 +61,12 @@ Status MetadataClient::fetchLatestMetadataFile(
       continue;
     }
 
-    native_transport::TCPClient client(io_timeout, idle_timeout);
+    native_transport::TCPClient client(
+        conn_pool_,
+        dns_cache_,
+        io_timeout,
+        idle_timeout);
+
     auto rc = client.connect(server.server_addr(), true);
     if (!rc.isSuccess()) {
       logWarning(
@@ -137,7 +146,12 @@ Status MetadataClient::fetchMetadataFile(
       continue;
     }
 
-    native_transport::TCPClient client(io_timeout, idle_timeout);
+    native_transport::TCPClient client(
+        conn_pool_,
+        dns_cache_,
+        io_timeout,
+        idle_timeout);
+
     auto rc = client.connect(server.server_addr(), true);
     if (!rc.isSuccess()) {
       logWarning(
@@ -209,7 +223,12 @@ Status MetadataClient::listPartitions(
       continue;
     }
 
-    native_transport::TCPClient client(io_timeout, idle_timeout);
+    native_transport::TCPClient client(
+        conn_pool_,
+        dns_cache_,
+        io_timeout,
+        idle_timeout);
+
     auto rc = client.connect(server.server_addr(), true);
     if (!rc.isSuccess()) {
       logWarning(
@@ -291,7 +310,12 @@ Status MetadataClient::findPartition(
       continue;
     }
 
-    native_transport::TCPClient client(io_timeout, idle_timeout);
+    native_transport::TCPClient client(
+        conn_pool_,
+        dns_cache_,
+        io_timeout,
+        idle_timeout);
+
     auto rc = client.connect(server.server_addr(), true);
     if (!rc.isSuccess()) {
       logWarning(
@@ -375,7 +399,12 @@ Status MetadataClient::findOrCreatePartition(
       continue;
     }
 
-    native_transport::TCPClient client(io_timeout, idle_timeout);
+    native_transport::TCPClient client(
+        conn_pool_,
+        dns_cache_,
+        io_timeout,
+        idle_timeout);
+
     auto rc = client.connect(server.server_addr(), true);
     if (!rc.isSuccess()) {
       logWarning(

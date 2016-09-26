@@ -223,6 +223,8 @@ RemotePartitionCursor::RemotePartitionCursor(
         session->getDatabaseContext()->config->getInt(
             "server.s2s_idle_timeout").get()),
     client_(
+        session->getDatabaseContext()->connection_pool,
+        session->getDatabaseContext()->dns_cache,
         session->getDatabaseContext()->config->getInt(
             "server.s2s_io_timeout",
             0),
