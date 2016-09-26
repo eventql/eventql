@@ -62,7 +62,7 @@ void Server::startConnection(std::unique_ptr<NativeConnection> connection) {
       return;
     }
 
-    logDebug(
+    logInfo(
         "eventql",
         "Native connection established; remote=$0",
         conn->getRemoteHost());
@@ -219,7 +219,11 @@ ReturnCode Server::performOperation(
     NativeConnection* conn,
     uint16_t opcode,
     const std::string& payload) {
-  logDebug("eventql", "Performing operation; opcode=$0", opcode);
+  logDebug(
+      "eventql",
+      "Performing operation; opcode=$0, remote=$1",
+      opcode,
+      conn->getRemoteHost());
 
   switch (opcode) {
     case EVQL_OP_QUERY:
