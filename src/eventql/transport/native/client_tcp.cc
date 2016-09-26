@@ -77,17 +77,18 @@ ReturnCode TCPClient::connect(
     close();
   }
 
+  if (is_internal &&
+      conn_pool_ &&
+      conn_pool_->getConnection(addr_str, &conn_)) {
+    printf("conn pool hit\n");
+    return ReturnCode::success();
+  }
+
   InetAddr server_addr;
   if (dns_cache_) {
     server_addr = dns_cache_->resolve(addr_str);
   } else {
     server_addr = InetAddr::resolve(addr_str);
-  }
-
-  if (is_internal &&
-      conn_pool_ &&
-      conn_pool_->getConnection(addr_str, &conn_)) {
-    return ReturnCode::success();
   }
 
   auto server_ip = server_addr.ip();
@@ -841,10 +842,12 @@ void TCPAsyncClient::closeConnection(Connection* connection, bool graceful) {
 TCPConnectionPool::TCPConnectionPool(
     uint64_t max_conns,
     uint64_t max_conns_per_host,
-    uint64_t max_conn_age) :
+    uint64_t max_conn_age,
+    uint64_t io_timeout) :
     max_conns_(max_conns),
     max_conns_per_host_(max_conns_per_host),
     max_conn_age_(max_conn_age),
+    io_timeout_(io_timeout),
     num_conns_(0) {
   struct rlimit fd_limit;
   memset(&fd_limit, 0, sizeof(fd_limit));
@@ -881,7 +884,7 @@ bool TCPConnectionPool::getConnection(
             fd,
             addr,
             true,
-            0)); // FIXME
+            io_timeout_));
 
     return true;
   } else {
