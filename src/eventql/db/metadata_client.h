@@ -38,7 +38,9 @@ public:
   MetadataClient(
       ConfigDirectory* cdir,
       ProcessConfig* config,
-      MetadataCache* cache);
+      MetadataCache* cache,
+      native_transport::TCPConnectionPool* conn_pool,
+      net::DNSCache* dns_cache);
 
   Status fetchLatestMetadataFile(
       const String& ns,
@@ -77,6 +79,8 @@ protected:
   ConfigDirectory* cdir_;
   ProcessConfig* config_;
   MetadataCache* cache_;
+  native_transport::TCPConnectionPool* conn_pool_;
+  net::DNSCache* dns_cache_;
 };
 
 } // namespace eventql

@@ -23,7 +23,9 @@ EventQL v0.5.0 beta;
 
   * Added the following new configuration options: server.disk_capacity,
     server.load_limit_{soft,hard}, server.partitions_loading_limit_{soft,hard},
-    server.loadinfo_publish_interval, server.noalloc
+    server.loadinfo_publish_interval, server.noalloc,
+    server.s2s_pool_max_connections, server.s2s_pool_max_connections_per_host,
+    server.s2s_pool_linger_timeout
 
   * Added new sql functions: usleep, fnv32
 

@@ -159,9 +159,22 @@ Status TableService::createTable(
       tblcfg->set_finite_partition_size(val);
       continue;
     }
+
+    if (p.first == "user_defined_partitions" && p.second == "true") {
+      tblcfg->set_enable_user_defined_partitions(true);
+      continue;
+    }
   }
 
   // check preconditions
+  if (tblcfg->enable_finite_partitions() &&
+      tblcfg->enable_user_defined_partitions()) {
+    return Status(
+        eIllegalArgumentError,
+        "partition_size_hint and user_defined_partitions are mutually "
+        "exclusive");
+  }
+
   if (tblcfg->enable_finite_partitions()) {
     if (tblcfg->finite_partition_size() < 1) {
         return Status(
@@ -204,6 +217,14 @@ Status TableService::createTable(
             keyspace_type,
             { },
             MFILE_FINITE));
+  } else if (tblcfg->enable_user_defined_partitions()) {
+    metadata_file.reset(
+        new MetadataFile(
+            txnid,
+            1,
+            keyspace_type,
+            { },
+            MFILE_USERDEFINED));
   } else {
     MetadataFile::PartitionMapEntry initial_partition;
     initial_partition.begin = "";
@@ -229,7 +250,9 @@ Status TableService::createTable(
   // create metadata file on metadata servers
   MetadataCoordinator coordinator(
       dbctx_->config_directory,
-      dbctx_->config);
+      dbctx_->config,
+      dbctx_->connection_pool,
+      dbctx_->dns_cache);
 
   auto rc = coordinator.createFile(
       db_namespace,
@@ -515,11 +538,12 @@ ReturnCode TableService::insertRecords(
     const msg::DynamicMessage* begin,
     const msg::DynamicMessage* end,
     uint64_t flags /* = 0 */) {
-  auto t0 = MonotonicClock::now();
   MetadataClient metadata_client(
       dbctx_->config_directory,
       dbctx_->config,
-      dbctx_->metadata_cache);
+      dbctx_->metadata_cache,
+      dbctx_->connection_pool,
+      dbctx_->dns_cache);
 
   HashMap<SHA1Hash, ShreddedRecordListBuilder> records;
   HashMap<SHA1Hash, Set<String>> servers;
@@ -620,7 +644,6 @@ ReturnCode TableService::insertRecords(
     }
   }
 
-  auto t_performstart = MonotonicClock::now();
   for (auto& p : records) {
     auto rc = insertRecords(
         tsdb_namespace,
@@ -633,14 +656,6 @@ ReturnCode TableService::insertRecords(
       return rc;
     }
   }
-
-  auto t1 = MonotonicClock::now();
-  logInfo(
-      "evqld",
-      "Insert timing; total=$0ms meta=$1ms, perform=$2ms",
-      double(t1-t0) / 1000.0f,
-      double(t_performstart-t0) / 1000.0f,
-      double(t1-t_performstart) / 1000.0f);
 
   return ReturnCode::success();
 }
@@ -723,17 +738,13 @@ ReturnCode TableService::insertRecords(
   native_transport::TCPAsyncClient rpc_client(
       dbctx_->config,
       dbctx_->config_directory,
+      dbctx_->connection_pool,
+      dbctx_->dns_cache,
       remote_servers.size(), /* max_concurrent_tasks */
       1,                     /* max_concurrent_tasks_per_host */
       true);                 /* tolerate failures */
 
-  auto t0 = MonotonicClock::now();
-  rpc_client.setRPCStartedCallback([t0] (void* priv) {
-    auto t1 = MonotonicClock::now();
-    logInfo("evqld", "Remote connect took $0ms", double(t1-t0) / 1000.0f);
-  });
-
-  rpc_client.setResultCallback([&nconfirmations, t0] (
+  rpc_client.setResultCallback([&nconfirmations] (
       void* priv,
       uint16_t opcode,
       uint16_t flags,
@@ -741,8 +752,6 @@ ReturnCode TableService::insertRecords(
       size_t payload_size) -> ReturnCode {
     switch (opcode) {
       case EVQL_OP_ACK: {
-        auto t1 = MonotonicClock::now();
-        logInfo("evqld", "Remote insert took $0ms", double(t1-t0) / 1000.0f);
         ++nconfirmations;
         return ReturnCode::success();
       }
@@ -773,7 +782,6 @@ ReturnCode TableService::insertRecordsLocal(
     const String& table_name,
     const SHA1Hash& partition_key,
     const ShreddedRecordList& records) try {
-  auto t0 = MonotonicClock::now();
   auto partition = dbctx_->partition_map->findOrCreatePartition(
       tsdb_namespace,
       table_name,
@@ -787,9 +795,6 @@ ReturnCode TableService::insertRecordsLocal(
     change->partition = partition;
     dbctx_->partition_map->publishPartitionChange(change);
   }
-
-  auto t1 = MonotonicClock::now();
-  logInfo("evqld", "Local insert took $0ms", double(t1-t0) / 1000.0f);
 
   return ReturnCode::success();
 } catch (const std::exception& e) {

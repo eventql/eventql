@@ -106,6 +106,12 @@ MetadataFile::PartitionMapIter MetadataFile::getPartitionMapAt(
     } else {
       return partition_map_.end();
     }
+  } else if (flags_ & MFILE_USERDEFINED) {
+    if (compareKeys(iter->begin, key) == 0) {
+      return iter;
+    } else {
+      return partition_map_.end();
+    }
   } else {
     return iter;
   }
@@ -396,6 +402,10 @@ uint64_t MetadataFile::getFlags() const {
 
 bool MetadataFile::hasFinitePartitions() const {
   return flags_ & MFILE_FINITE;
+}
+
+bool MetadataFile::hasUserDefinedPartitions() const {
+  return flags_ & MFILE_USERDEFINED;
 }
 
 MetadataFile::PartitionMapEntry::PartitionMapEntry() : splitting(false) {}

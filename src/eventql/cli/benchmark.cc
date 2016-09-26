@@ -56,10 +56,13 @@ Benchmark::Benchmark(
     last_request_time_(0),
     sequence_(0),
     progress_rate_limit_(kDefaultProgressRateLimit),
-    threads_(num_threads_),
-    clients_(num_threads_) {
+    threads_(num_threads_) {
   if (rate > 0 && rate < kMicrosPerSecond) {
     rate_limit_interval_ = kMicrosPerSecond / rate;
+  }
+
+  for (size_t i = 0; i < num_threads_; ++i) {
+    clients_.emplace_back(new native_transport::TCPClient(nullptr, nullptr));
   }
 }
 
@@ -85,7 +88,7 @@ ReturnCode Benchmark::connect(
 
   if (!disable_keepalive_) {
     for (size_t i = 0; i < num_threads_; ++i) {
-      auto rc = clients_[i].connect(host_, port_, false, auth_data_);
+      auto rc = clients_[i]->connect(host_, port_, false, auth_data_);
       if (!rc.isSuccess()) {
         return rc;
       }
@@ -145,12 +148,12 @@ void Benchmark::runThread(size_t idx) {
     auto rc = ReturnCode::success();
 
     if (disable_keepalive_) {
-      rc = clients_[idx].connect(host_, port_, false, auth_data_);
+      rc = clients_[idx]->connect(host_, port_, false, auth_data_);
     }
 
     if (rc.isSuccess()) {
       try {
-        rc = request_handler_(&clients_[idx], sequence_.fetch_add(1));
+        rc = request_handler_(clients_[idx].get(), sequence_.fetch_add(1));
       } catch (const std::exception& e) {
         rc = ReturnCode::error("ERUNTIME", e.what());
       }
@@ -159,7 +162,7 @@ void Benchmark::runThread(size_t idx) {
     auto t1 = MonotonicClock::now();
 
     if (disable_keepalive_) {
-      clients_[idx].close();
+      clients_[idx]->close();
     }
 
     std::unique_lock<std::mutex> lk(mutex_);

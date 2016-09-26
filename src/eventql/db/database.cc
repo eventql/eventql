@@ -127,6 +127,8 @@ protected:
   std::unique_ptr<Monitor> monitor_;
   std::unique_ptr<DatabaseContext> database_context_;
   std::unique_ptr<ServerAllocator> server_alloc_;
+  std::unique_ptr<native_transport::TCPConnectionPool> connection_pool_;
+  std::unique_ptr<net::DNSCache> dns_cache_;
   pthread_key_t local_session_;
 };
 
@@ -285,6 +287,14 @@ ReturnCode DatabaseImpl::start() {
   /* server allocator */
   server_alloc_.reset(new ServerAllocator(config_dir_.get(), cfg_));
 
+  /* connection pool */
+  dns_cache_.reset(new net::DNSCache());
+  connection_pool_.reset(
+      new native_transport::TCPConnectionPool(
+          cfg_->getInt("server.s2s_pool_max_connections", 0),
+          cfg_->getInt("server.s2s_pool_max_connections_per_host", 0),
+          cfg_->getInt("server.s2s_pool_linger_timeout", 0)));
+
   /* metadata service */
   metadata_store_.reset(new MetadataStore(metadata_dir));
   metadata_cache_.reset(new MetadataCache());
@@ -321,7 +331,9 @@ ReturnCode DatabaseImpl::start() {
             config_dir_.get(),
             cfg_,
             server_name.get(),
-            metadata_store_.get()));
+            metadata_store_.get(),
+            connection_pool_.get(),
+            dns_cache_.get()));
   }
 
   /* sql */
@@ -391,6 +403,8 @@ ReturnCode DatabaseImpl::start() {
     database_context_->mapreduce_service = mapreduce_service_.get();
     database_context_->metadata_service = metadata_service_.get();
     database_context_->server_alloc = server_alloc_.get();
+    database_context_->connection_pool = connection_pool_.get();
+    database_context_->dns_cache = dns_cache_.get();
   }
 
   /* open tables */
@@ -452,7 +466,9 @@ ReturnCode DatabaseImpl::start() {
             cfg_,
             server_alloc_.get(),
             metadata_cache_.get(),
-            cfg_->getInt("cluster.rebalance_interval").get()));
+            cfg_->getInt("cluster.rebalance_interval").get(),
+            connection_pool_.get(),
+            dns_cache_.get()));
 
     leader_->startLeaderThread();
   }
@@ -507,6 +523,8 @@ void DatabaseImpl::shutdown() {
   internal_auth_.reset(nullptr);
   client_auth_.reset(nullptr);
   server_alloc_.reset(nullptr);
+  connection_pool_.reset(nullptr);
+  dns_cache_.reset(nullptr);
   config_dir_.reset(nullptr);
   garbage_collector_.reset(nullptr);
   file_tracker_.reset(nullptr);

@@ -44,10 +44,18 @@ namespace eventql {
 namespace native_transport {
 
 TCPClient::TCPClient(
+    TCPConnectionPool* conn_pool,
+    net::DNSCache* dns_cache,
     uint64_t io_timeout /* = kDefaultIOTimeout */,
     uint64_t idle_timeout /* = kDefaultIdleTimeout */) :
+    conn_pool_(conn_pool),
+    dns_cache_(dns_cache),
     io_timeout_(io_timeout),
     idle_timeout_(idle_timeout) {}
+
+TCPClient::~TCPClient() {
+  close();
+}
 
 ReturnCode TCPClient::connect(
     const std::string& host,
@@ -65,10 +73,22 @@ ReturnCode TCPClient::connect(
     bool is_internal,
     const AuthDataType& auth_data /* = AuthDataType{} */) {
   if (conn_) {
-    conn_->close();
+    close();
   }
 
-  auto server_addr = InetAddr::resolve(addr_str); // FIXME
+  InetAddr server_addr;
+  if (dns_cache_) {
+    server_addr = dns_cache_->resolve(addr_str);
+  } else {
+    server_addr = InetAddr::resolve(addr_str);
+  }
+
+  if (is_internal &&
+      conn_pool_ &&
+      conn_pool_->getConnection(addr_str, &conn_)) {
+    return ReturnCode::success();
+  }
+
   auto server_ip = server_addr.ip();
 
   logDebug("evql", "Opening connection to $0", addr_str);
@@ -120,10 +140,11 @@ ReturnCode TCPClient::connect(
       return ReturnCode::error("EIO", "operation timed out");
   }
 
-  conn_.reset(new TCPConnection(fd, io_timeout_));
+  conn_.reset(new TCPConnection(fd, addr_str, is_internal, io_timeout_));
 
   auto handshake_rc = performHandshake(is_internal, auth_data);
   if (!handshake_rc.isSuccess()) {
+    conn_->close();
     close();
   }
 
@@ -192,7 +213,13 @@ ReturnCode TCPClient::sendFrame(
 }
 
 void TCPClient::close() {
-  if (!conn_.get()) {
+  if (!conn_) {
+    return;
+  }
+
+  if (conn_pool_) {
+    conn_pool_->storeConnection(std::move(conn_));
+  } else {
     conn_->close();
     conn_.reset(nullptr);
   }
@@ -201,10 +228,14 @@ void TCPClient::close() {
 TCPAsyncClient::TCPAsyncClient(
     ProcessConfig* config,
     ConfigDirectory* config_dir,
+    TCPConnectionPool* conn_pool,
+    net::DNSCache* dns_cache,
     size_t max_concurrent_tasks,
     size_t max_concurrent_tasks_per_host,
     bool tolerate_failures) :
     config_(config_dir),
+    conn_pool_(conn_pool),
+    dns_cache_(dns_cache),
     max_concurrent_tasks_(max_concurrent_tasks),
     max_concurrent_tasks_per_host_(max_concurrent_tasks_per_host),
     tolerate_failures_(tolerate_failures),
@@ -442,7 +473,7 @@ ReturnCode TCPAsyncClient::execute() {
       if ((conn->read_timeout > 0 && conn->read_timeout <= now) ||
           (conn->write_timeout > 0 && conn->write_timeout <= now)) {
         auto task = conn->task;
-        closeConnection(&*conn);
+        closeConnection(&*conn, false);
         conn = connections_.erase(conn);
         auto rc = failTask(
             task,
@@ -461,7 +492,7 @@ ReturnCode TCPAsyncClient::execute() {
         auto rc = performRead(&*conn);
         if (!rc.isSuccess()) {
           auto task = conn->task;
-          closeConnection(&*conn);
+          closeConnection(&*conn, false);
           conn = connections_.erase(conn);
           rc = failTask(task, rc);
           if (rc.isSuccess()) {
@@ -473,7 +504,7 @@ ReturnCode TCPAsyncClient::execute() {
         }
 
         if (conn->state == ConnectionState::CLOSE) {
-          closeConnection(&*conn);
+          closeConnection(&*conn, true);
           conn = connections_.erase(conn);
           continue;
         }
@@ -485,7 +516,7 @@ ReturnCode TCPAsyncClient::execute() {
         auto rc = performWrite(&*conn);
         if (!rc.isSuccess()) {
           auto task = conn->task;
-          closeConnection(&*conn);
+          closeConnection(&*conn, false);
           conn = connections_.erase(conn);
           rc = failTask(task, rc);
           if (rc.isSuccess()) {
@@ -514,7 +545,7 @@ void TCPAsyncClient::shutdown() {
 
   auto connections_iter = connections_.begin();
   while (connections_iter != connections_.end()) {
-    closeConnection(&*connections_iter);
+    closeConnection(&*connections_iter, true);
     connections_iter = connections_.erase(connections_iter);
   }
 }
@@ -557,7 +588,11 @@ ReturnCode TCPAsyncClient::performRead(Connection* connection) {
   }
 
   if (connection->read_buf.size() < 8) {
-    return ReturnCode::success();
+    if (eof) {
+      return ReturnCode::error("EIO", "connection to server lost");
+    } else {
+      return ReturnCode::success(); // wait for more data
+    }
   }
 
   auto frame_len = ntohl(*((uint32_t*) &connection->read_buf[4]));
@@ -723,55 +758,194 @@ ReturnCode TCPAsyncClient::startConnection(Task* task) {
   connection.state = ConnectionState::CONNECTING;
   connection.write_timeout = MonotonicClock::now() + io_timeout_;
   connection.read_timeout = 0;
+  connection.fd = -1;
 
   auto server_cfg = config_->getServerConfig(connection.host);
   if (server_cfg.server_status() != SERVER_UP) {
     return ReturnCode::error("ERUNTIME", "server is down");
   }
 
-  auto server_addr = InetAddr::resolve(server_cfg.server_addr()); // FIXME
-  auto server_ip = server_addr.ip();
+  connection.host_addr = server_cfg.server_addr();
 
-  logDebug("evql", "Opening connection to $0", connection.host);
-  auto fd = connection.fd = socket(AF_INET, SOCK_STREAM, 0);
-  if (fd == -1) {
-    return ReturnCode::error(
-        "EIO",
-        "socket() creation failed: %s",
-        strerror(errno));
+  if (conn_pool_) {
+    connection.fd = conn_pool_->getFD(server_cfg.server_addr());
+    if (connection.fd >= 0) {
+      connection.state = ConnectionState::READY;
+    }
   }
 
-  if (fcntl(fd, F_SETFL, fcntl(fd, F_GETFL, 0) | O_NONBLOCK) != 0) {
-    close(fd);
-    return ReturnCode::error(
-        "EIO",
-        "fcntl() failed: %s",
-        strerror(errno));
-  }
+  if (connection.fd < 0) {
+    InetAddr server_addr;
+    if (dns_cache_) {
+      server_addr = dns_cache_->resolve(server_cfg.server_addr());
+    } else {
+      server_addr = InetAddr::resolve(server_cfg.server_addr());
+    }
 
-  struct sockaddr_in saddr;
-  saddr.sin_family = AF_INET;
-  saddr.sin_port = htons(server_addr.port());
-  inet_aton(server_ip.c_str(), &(saddr.sin_addr));
-  memset(&(saddr.sin_zero), 0, 8);
+    auto server_ip = server_addr.ip();
 
-  if (::connect(fd, (const struct sockaddr *) &saddr, sizeof(saddr)) < 0 &&
-      errno != EINPROGRESS) {
-    close(fd);
-    return ReturnCode::error(
-        "EIO",
-        "connect() failed: %s",
-        strerror(errno));
+    logDebug("evql", "Opening connection to $0", connection.host);
+    auto fd = connection.fd = socket(AF_INET, SOCK_STREAM, 0);
+    if (fd == -1) {
+      return ReturnCode::error(
+          "EIO",
+          "socket() creation failed: %s",
+          strerror(errno));
+    }
+
+    if (fcntl(fd, F_SETFL, fcntl(fd, F_GETFL, 0) | O_NONBLOCK) != 0) {
+      close(fd);
+      return ReturnCode::error(
+          "EIO",
+          "fcntl() failed: %s",
+          strerror(errno));
+    }
+
+    struct sockaddr_in saddr;
+    saddr.sin_family = AF_INET;
+    saddr.sin_port = htons(server_addr.port());
+    inet_aton(server_ip.c_str(), &(saddr.sin_addr));
+    memset(&(saddr.sin_zero), 0, 8);
+
+    if (::connect(fd, (const struct sockaddr *) &saddr, sizeof(saddr)) < 0 &&
+        errno != EINPROGRESS) {
+      close(fd);
+      return ReturnCode::error(
+          "EIO",
+          "connect() failed: %s",
+          strerror(errno));
+    }
   }
 
   ++connections_per_host_[connection.host];
   connections_.push_back(connection);
-  return ReturnCode::success();
+
+  if (connection.state == ConnectionState::READY) {
+    return handleReady(&connections_.back());
+  } else {
+    return ReturnCode::success();
+  }
 }
 
-void TCPAsyncClient::closeConnection(Connection* connection) {
+void TCPAsyncClient::closeConnection(Connection* connection, bool graceful) {
   --connections_per_host_[connection->host];
-  ::close(connection->fd);
+
+  if (graceful && conn_pool_) {
+    conn_pool_->storeFD(connection->fd, connection->host_addr);
+  } else {
+    ::close(connection->fd);
+  }
+}
+
+TCPConnectionPool::TCPConnectionPool(
+  uint64_t max_conns,
+  uint64_t max_conns_per_host,
+  uint64_t max_conn_age) :
+  max_conns_(max_conns),
+  max_conns_per_host_(max_conns_per_host),
+  max_conn_age_(max_conn_age),
+  num_conns_(0) {}
+
+bool TCPConnectionPool::getConnection(
+    const std::string& addr,
+    std::unique_ptr<TCPConnection>* connection) {
+  auto fd = getFD(addr);
+  if (fd >= 0) {
+    connection->reset(
+        new TCPConnection(
+            fd,
+            addr,
+            true,
+            0)); // FIXME
+
+    return true;
+  } else {
+    return false;
+  }
+}
+
+int TCPConnectionPool::getFD(const std::string& server) {
+  auto now = MonotonicClock::now();
+  auto cutoff = now;
+  if (cutoff > max_conn_age_) {
+    cutoff -= max_conn_age_;
+  } else {
+    cutoff = 0;
+  }
+
+  std::unique_lock<std::mutex> lk(mutex_);
+  auto iter = conns_.find(server);
+  if (iter == conns_.end()) {
+    return -1;
+  }
+
+  auto& conns = iter->second;
+  for (size_t i = conns.size(); i-- > 0; ) {
+    if (conns[i].time > cutoff) {
+      auto fd = conns[i].fd;
+      conns.erase(conns.begin() + i);
+      --num_conns_;
+      return fd;
+    }
+  }
+
+  return -1;
+}
+
+void TCPConnectionPool::storeConnection(
+    std::unique_ptr<TCPConnection>&& connection) {
+  auto c = std::move(connection);
+
+  if (c->isClosed() || !c->isInternal()) {
+    return;
+  }
+
+  storeFD(c->releaseFD(), c->getRemoteHost());
+}
+
+void TCPConnectionPool::storeFD(
+    int fd,
+    const std::string& server) {
+  auto now = MonotonicClock::now();
+  auto cutoff = now;
+  if (cutoff > max_conn_age_) {
+    cutoff -= max_conn_age_;
+  } else {
+    cutoff = 0;
+  }
+
+  if (fd < 0) {
+    return;
+  }
+
+  std::set<int> close_fds;
+  {
+    std::unique_lock<std::mutex> lk(mutex_);
+    if (num_conns_ >= max_conns_) {
+      lk.unlock();
+      close(fd);
+      return;
+    }
+
+    auto& connlist = conns_[server];
+    while (
+        connlist.size() >= max_conns_per_host_ ||
+        (!connlist.empty() && connlist.back().time < now)) {
+      close_fds.insert(connlist.back().fd);
+      connlist.pop_back();
+      --num_conns_;
+    }
+
+    CachedConnection c;
+    c.fd = fd;
+    c.time = now;
+    connlist.insert(connlist.begin(), c);
+    ++num_conns_;
+  }
+
+  for (const auto& close_fd : close_fds) {
+    close(close_fd);
+  }
 }
 
 } // namespace native_transport

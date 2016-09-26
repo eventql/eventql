@@ -30,6 +30,7 @@ public:
 
   static InetAddr resolve(const std::string& addr_str);
 
+  InetAddr();
   InetAddr(
       const std::string& hostname,
       unsigned port);

@@ -21,6 +21,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#include <algorithm>
 #include "eventql/db/metadata_operation.h"
 #include "eventql/util/random.h"
 #include "eventql/util/logging.h"
@@ -131,6 +132,10 @@ Status MetadataOperation::performRemoveDeadServers(
 Status MetadataOperation::performSplitPartition(
     const MetadataFile& input,
     Vector<MetadataFile::PartitionMapEntry>* output) const {
+  if (input.hasUserDefinedPartitions()) {
+    return Status(eIllegalArgumentError, "can't split user defined partitions");
+  }
+
   auto opdata = msg::decode<SplitPartitionOperation>(
       data_.opdata().data(),
       data_.opdata().size());
@@ -326,8 +331,8 @@ Status MetadataOperation::performFinalizeSplit(
 Status MetadataOperation::performCreatePartition(
     const MetadataFile& input,
     Vector<MetadataFile::PartitionMapEntry>* output) const {
-  if (!input.hasFinitePartitions()) {
-    return Status(eIllegalArgumentError, "partitions not finite");
+  if (!input.hasFinitePartitions() && !input.hasUserDefinedPartitions()) {
+    return Status(eIllegalArgumentError, "partition create not allowed");
   }
 
   auto opdata = msg::decode<CreatePartitionOperation>(
@@ -352,17 +357,37 @@ Status MetadataOperation::performCreatePartition(
 
   auto pmap = input.getPartitionMap();
   auto iter = pmap.begin();
-  while (iter != pmap.end()) {
-    if (input.compareKeys(iter->begin, new_entry.end) >= 0) {
-      break;
-    } else {
-      ++iter;
+
+  if (input.hasFinitePartitions()) {
+    while (iter != pmap.end()) {
+      if (input.compareKeys(iter->begin, new_entry.end) >= 0) {
+        break;
+      } else {
+        ++iter;
+      }
+    }
+
+    if (iter != pmap.begin()) {
+      auto prev = iter - 1;
+      if (input.compareKeys(prev->end, new_entry.begin) > 0) {
+        return Status(eIllegalArgumentError, "overlapping partitions");
+      }
     }
   }
 
-  if (iter != pmap.begin()) {
-    auto prev = iter - 1;
-    if (input.compareKeys(prev->end, new_entry.begin) > 0) {
+  if (input.hasUserDefinedPartitions()) {
+    iter = std::lower_bound(
+        pmap.begin(),
+        pmap.end(),
+        new_entry,
+        [&input] (
+            const MetadataFile::PartitionMapEntry& a,
+            const MetadataFile::PartitionMapEntry& b) {
+          return input.compareKeys(a.begin, b.begin) < 0;
+        });
+
+    if (iter != pmap.end() &&
+        input.compareKeys(iter->begin, new_entry.begin) == 0) {
       return Status(eIllegalArgumentError, "overlapping partitions");
     }
   }

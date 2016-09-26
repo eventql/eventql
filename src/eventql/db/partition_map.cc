@@ -258,7 +258,9 @@ RefPtr<Partition> PartitionMap::findOrCreatePartition(
 
     MetadataCoordinator coordinator(
         cfg_->config_directory,
-        cfg_->config);
+        cfg_->config,
+        cfg_->connection_pool,
+        cfg_->dns_cache);
 
     PartitionDiscoveryResponse discovery_response;
     auto rc = coordinator.discoverPartition(
@@ -392,7 +394,7 @@ bool PartitionMap::dropLocalPartition(
     const SHA1Hash& partition_key) {
   auto partition_opt = findPartition(tsdb_namespace, table_name, partition_key);
   if (partition_opt.isEmpty()) {
-    RAISE(kNotFoundError, "partition not found");
+    return true;
   }
 
   auto partition = partition_opt.get();
@@ -466,7 +468,7 @@ void PartitionMap::dropPartition(
     const SHA1Hash& partition_key) {
   auto partition_opt = findPartition(tsdb_namespace, table_name, partition_key);
   if (partition_opt.isEmpty()) {
-    RAISE(kNotFoundError, "partition not found");
+    return;
   }
 
   auto table_config = cfg_->config_directory->getTableConfig(

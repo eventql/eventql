@@ -73,7 +73,9 @@ MapTableTask::MapTableTask(
   MetadataClient metadata_client(
       cdir_,
       config_,
-      session->getDatabaseContext()->metadata_cache);
+      session->getDatabaseContext()->metadata_cache,
+      session->getDatabaseContext()->connection_pool,
+      session->getDatabaseContext()->dns_cache);
 
   PartitionListResponse partition_list;
   auto rc = metadata_client.listPartitions(

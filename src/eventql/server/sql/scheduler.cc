@@ -205,7 +205,9 @@ Vector<Scheduler::PipelinedQueryTree> Scheduler::pipelineExpression(
   MetadataClient metadata_client(
       cdir_,
       session->getDatabaseContext()->config,
-      session->getDatabaseContext()->metadata_cache);
+      session->getDatabaseContext()->metadata_cache,
+      session->getDatabaseContext()->connection_pool,
+      session->getDatabaseContext()->dns_cache);
 
   PartitionListResponse partition_list;
   auto rc = metadata_client.listPartitions(

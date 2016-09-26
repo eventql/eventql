@@ -32,6 +32,7 @@
 #include <eventql/util/logging.h>
 #include <eventql/server/session.h>
 #include <eventql/transport/native/frames/query_partialaggr.h>
+#include <eventql/db/database.h>
 #include <sys/fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -345,6 +346,8 @@ GroupByMergeExpression::GroupByMergeExpression(
     rpc_scheduler_(
         config,
         config_dir,
+        static_cast<eventql::Session*>(txn->getUserData())->getDatabaseContext()->connection_pool,
+        static_cast<eventql::Session*>(txn->getUserData())->getDatabaseContext()->dns_cache,
         max_concurrent_tasks,
         max_concurrent_tasks_per_host,
         config->getString("server.query_failed_shard_policy").get() == "tolerate"),

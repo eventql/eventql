@@ -51,6 +51,8 @@ static void addReplicationTarget(
 
   if (file->hasFinitePartitions()) {
     t->set_keyrange_end(e->end);
+  } else if (file->hasUserDefinedPartitions()) {
+    /* user defined partitions have no defined "end" */
   } else {
     auto n = e + 1;
     if (n == file->getPartitionMapEnd()) {
@@ -68,6 +70,8 @@ static void addSplittingReplicationTargets(
   String e_end;
   if (file->hasFinitePartitions()) {
     e_end = e->end;
+  } else if (file->hasUserDefinedPartitions()) {
+    /* user defined partitions have no defined "end" */
   } else {
     auto n = e + 1;
     if (n != file->getPartitionMapEnd()) {
@@ -122,6 +126,8 @@ Status PartitionDiscovery::discoverPartitionByKeyRange(
     response->set_keyrange_begin(iter->begin);
     if (file->hasFinitePartitions()) {
       response->set_keyrange_end(iter->end);
+    } else if (file->hasUserDefinedPartitions()) {
+      /* user defined partitions have no defined "end" */
     } else if (iter + 1 != pmap_end) {
       response->set_keyrange_end(iter[1].begin);
     }
@@ -200,6 +206,8 @@ Status PartitionDiscovery::discoverPartitionByKeyRange(
     String iter_end;
     if (file->hasFinitePartitions()) {
       iter_end = iter->end;
+    } else if (file->hasUserDefinedPartitions()) {
+      /* user defined partitions have no defined "end" */
     } else {
       auto iter_next = iter + 1;
       if (iter_next != file->getPartitionMapEnd()) {
@@ -270,9 +278,11 @@ Status PartitionDiscovery::discoverPartitionByID(
       response->set_keyrange_begin(iter->begin);
       if (file->hasFinitePartitions()) {
         response->set_keyrange_end(iter->end);
+      } else if (file->hasUserDefinedPartitions()) {
+        /* user defined partitions have no defined "end" */
       } else if (iter + 1 != pmap_end) {
         response->set_keyrange_end(iter[1].begin);
-    }
+      }
 
       // check the list of active servers
       for (const auto& s : iter->servers) {
@@ -339,6 +349,8 @@ Status PartitionDiscovery::discoverPartitionByID(
       String iter_end;
       if (file->hasFinitePartitions()) {
         iter_end = iter->end;
+      } else if (file->hasUserDefinedPartitions()) {
+        /* user defined partitions have no defined "end" */
       } else {
         auto iter_next = iter + 1;
         if (iter_next != file->getPartitionMapEnd()) {

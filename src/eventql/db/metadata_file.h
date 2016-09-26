@@ -33,7 +33,8 @@
 namespace eventql {
 
 enum {
-  MFILE_FINITE = 1
+  MFILE_FINITE = 1,
+  MFILE_USERDEFINED = 2
 };
 
 class MetadataFile : public RefCounted {
@@ -113,6 +114,7 @@ public:
 
   uint64_t getFlags() const;
   bool hasFinitePartitions() const;
+  bool hasUserDefinedPartitions() const;
 
 protected:
   PartitionMapIter lookup(const String& key) const;

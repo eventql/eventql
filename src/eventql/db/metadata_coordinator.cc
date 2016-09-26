@@ -32,9 +32,13 @@ namespace eventql {
 
 MetadataCoordinator::MetadataCoordinator(
     ConfigDirectory* cdir,
-    ProcessConfig* config) :
+    ProcessConfig* config,
+    native_transport::TCPConnectionPool* conn_pool,
+    net::DNSCache* dns_cache) :
     cdir_(cdir),
-    config_(config) {}
+    config_(config),
+    conn_pool_(conn_pool),
+    dns_cache_(dns_cache) {}
 
 Status MetadataCoordinator::performAndCommitOperation(
     const String& ns,
@@ -154,7 +158,12 @@ Status MetadataCoordinator::performOperation(
 
   auto idle_timeout = config_->getInt("server.s2s_idle_timeout", 0);
   auto io_timeout = config_->getInt("server.s2s_io_timeout", 0);
-  native_transport::TCPClient client(io_timeout, idle_timeout);
+  native_transport::TCPClient client(
+      conn_pool_,
+      dns_cache_,
+      io_timeout,
+      idle_timeout);
+
   auto rc = client.connect(server_cfg.server_addr(), true);
   if (!rc.isSuccess()) {
     return rc;
@@ -182,7 +191,10 @@ Status MetadataCoordinator::performOperation(
       return ReturnCode::error("ERUNTIME", eframe.getError());
     }
     default:
-      return ReturnCode::error("ERUNTIME", "invalid opcode");
+      return ReturnCode::errorf(
+          "ERUNTIME",
+          "invalid opcode for META_PERFORMOP: $0",
+          ret_opcode);
   }
 
   *result = msg::decode<MetadataOperationResult>(ret_payload);
@@ -255,7 +267,12 @@ Status MetadataCoordinator::createFile(
 
   auto idle_timeout = config_->getInt("server.s2s_idle_timeout", 0);
   auto io_timeout = config_->getInt("server.s2s_io_timeout", 0);
-  native_transport::TCPClient client(io_timeout, idle_timeout);
+  native_transport::TCPClient client(
+      conn_pool_,
+      dns_cache_,
+      io_timeout,
+      idle_timeout);
+
   auto rc = client.connect(server.server_addr(), true);
   if (!rc.isSuccess()) {
     return rc;
@@ -283,7 +300,10 @@ Status MetadataCoordinator::createFile(
       return ReturnCode::error("ERUNTIME", eframe.getError());
     }
     default:
-      return ReturnCode::error("ERUNTIME", "invalid opcode");
+      return ReturnCode::errorf(
+          "ERUNTIME",
+          "invalid opcode for META_CREATEFILE: $0",
+          ret_opcode);
   }
 
   return ReturnCode::success();
@@ -316,7 +336,12 @@ Status MetadataCoordinator::discoverPartition(
       continue;
     }
 
-    native_transport::TCPClient client(io_timeout, idle_timeout);
+    native_transport::TCPClient client(
+        conn_pool_,
+        dns_cache_,
+        io_timeout,
+        idle_timeout);
+
     auto rc = client.connect(server.server_addr(), true);
     if (!rc.isSuccess()) {
       logWarning(

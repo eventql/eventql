@@ -280,6 +280,30 @@ The EventQL configuration options are grouped in three sections: `client`, `serv
     </td>
   </tr>
   <tr>
+    <td><b>server.s2s_pool_max_connections</b></td>
+    <td>256</td>
+    <td>
+      Limit how many (internal) connections each server should keep in its
+      connection pool. Set this value to zero to turn off connection pooling.
+    </td>
+  </tr>
+  <tr>
+    <td><b>server.s2s_pool_max_connections_per_host</b></td>
+    <td>4</td>
+    <td>
+      Limit how many (internal) connections each server should keep in its
+      connection pool per each distinct remote endpoint.
+    </td>
+  </tr>
+  <tr>
+    <td><b>server.s2s_pool_linger_timeout</b></td>
+    <td>2s</td>
+    <td>
+      Controls after which time an idle connection is removed (and closed) from
+      the connection pool. Unit is microseconds.
+    </td>
+  </tr>
+  <tr>
     <td><b>server.http_io_timeout</b></td>
     <td>1s</td>
     <td>

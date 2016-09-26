@@ -24,6 +24,7 @@
 #pragma once
 #include <eventql/eventql.h>
 #include <eventql/util/return_code.h>
+#include "eventql/util/net/dnscache.h"
 
 namespace csql {
 class Runtime;
@@ -46,6 +47,9 @@ class MapReduceService;
 class MetadataService;
 class MetadataCache;
 class ServerAllocator;
+namespace native_transport {
+class TCPConnectionPool;
+}
 
 struct DatabaseContext {
   std::string db_path;
@@ -65,6 +69,8 @@ struct DatabaseContext {
   TableService* table_service;
   MapReduceService* mapreduce_service;
   MetadataService* metadata_service;
+  net::DNSCache* dns_cache;
+  native_transport::TCPConnectionPool* connection_pool;
 };
 
 class Database {

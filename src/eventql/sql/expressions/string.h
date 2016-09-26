@@ -41,5 +41,7 @@ void subStringExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out);
 void ltrimExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out);
 void rtrimExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out);
 
+void concatExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out);
+
 }
 }
