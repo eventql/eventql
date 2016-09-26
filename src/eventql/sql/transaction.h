@@ -45,6 +45,10 @@ public:
     return (sql_txn*) ctx;
   }
 
+  static inline Transaction* get(sql_txn* ctx) {
+    return (Transaction*) ctx;
+  }
+
   Transaction(Runtime* runtime);
 
   ~Transaction();

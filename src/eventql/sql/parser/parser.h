@@ -129,6 +129,7 @@ protected:
   ASTNode* describePartitionsStatement();
   ASTNode* describeServersStatement();
   ASTNode* describeTableStatement();
+  ASTNode* useStatement();
 
   ASTNode* fromClause();
   ASTNode* tableReference();

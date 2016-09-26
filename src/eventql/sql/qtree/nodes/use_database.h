@@ -1,7 +1,7 @@
 /**
  * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@eventql.io>
+ *   - Laura Schlimmer <laura@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -24,57 +24,24 @@
 #pragma once
 #include "eventql/eventql.h"
 #include <eventql/util/stdtypes.h>
-#include <eventql/util/duration.h>
-#include <eventql/db/partition.h>
-#include <eventql/util/protobuf/MessageSchema.h>
-#include <eventql/db/table_config.pb.h>
-#include <eventql/db/metadata_transaction.h>
+#include <eventql/sql/qtree/QueryTreeNode.h>
 
-namespace eventql {
+namespace csql {
 
-class Table : public RefCounted{
+class UseDatabaseNode : public QueryTreeNode {
 public:
 
-  Table(const TableDefinition& config);
+  UseDatabaseNode(const String& db_name);
+  UseDatabaseNode(const UseDatabaseNode& node);
 
-  String name() const;
+  const String& getDatabaseName() const;
 
-  String tsdbNamespace() const;
-
-  Duration partitionSize() const;
-
-  size_t sstableSize() const;
-
-  size_t numShards() const;
-
-  Duration commitInterval() const;
-
-  RefPtr<msg::MessageSchema> schema() const;
-
-  TableDefinition config() const;
-
-  TableStorage storage() const;
-
-  const String& getPartitionKey() const;
-  TablePartitionerType partitionerType() const;
-
-  KeyspaceType getKeyspaceType() const;
-  Vector<String> getPrimaryKey() const;
-
-  MetadataTransaction getLastMetadataTransaction() const;
-
-  bool hasUserDefinedPartitions() const;
-
-  void updateConfig(TableDefinition new_config);
+  RefPtr<QueryTreeNode> deepCopy() const;
+  String toString() const;
 
 protected:
-
-  void loadConfig();
-
-  mutable std::mutex mutex_;
-  TableDefinition config_;
-  RefPtr<msg::MessageSchema> schema_;
+  String db_name_;
 };
 
-}
+} // namespace csql
 

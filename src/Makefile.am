@@ -612,6 +612,8 @@ EVQL_CORE_SOURCES_ = \
     eventql/sql/expressions/internal.h \
     eventql/sql/expressions/math.cc \
     eventql/sql/expressions/math.h \
+    eventql/sql/expressions/miscellaneous.cc \
+    eventql/sql/expressions/miscellaneous.h \
     eventql/sql/expressions/string.cc \
     eventql/sql/expressions/string.h \
     eventql/sql/expressions/table/describe_table.cc \
@@ -714,6 +716,8 @@ EVQL_CORE_SOURCES_ = \
     eventql/sql/qtree/ValueExpressionNode.h \
     eventql/sql/qtree/nodes/create_database.cc \
     eventql/sql/qtree/nodes/create_database.h \
+    eventql/sql/qtree/nodes/use_database.cc \
+    eventql/sql/qtree/nodes/use_database.h \
     eventql/sql/qtree/nodes/drop_table.cc \
     eventql/sql/qtree/nodes/drop_table.h \
     eventql/sql/qtree/nodes/alter_table.cc \

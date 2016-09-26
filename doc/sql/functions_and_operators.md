@@ -232,6 +232,20 @@ Users can also define their own functions and operators.
   </tr>
 </table>
 
+###### Miscellaneous Functions
+<table class="small functions_and_operators">
+  <tr>
+    <td><a class="link" href="/documentation/sql/functions-and-operators/fnv32">fnv32</a></td>
+    <td>Calculate a FNV32 hash.</td>
+    <td><code>fnv32("test")</code></td>
+  </tr>
+  <tr>
+    <td><a class="link" href="/documentation/sql/functions-and-operators/usleep">usleep</a></td>
+    <td>Sleep for a number of microseconds</td>
+    <td><code>usleep(1000)</code></td>
+  </tr>
+</table>
+
 ---
 ##### Operator Precedence
 

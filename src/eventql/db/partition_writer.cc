@@ -389,6 +389,10 @@ bool LSMPartitionWriter::compact(bool force /* = false */) {
 }
 
 bool LSMPartitionWriter::needsSplit() const {
+  if (partition_->getTable()->hasUserDefinedPartitions()) {
+    return false;
+  }
+
   auto snap = head_->getSnapshot();
   if (snap->state.is_splitting()) {
     return false;
