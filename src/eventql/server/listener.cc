@@ -249,6 +249,30 @@ bool Listener::open(int fd) {
     return true;
   }
 
+  std::string remote_host;
+  struct sockaddr_storage saddr;
+  socklen_t slen = sizeof(saddr);
+  if (getpeername(fd, (struct sockaddr*) &saddr, &slen) == 0) {
+    char ipstr[INET6_ADDRSTRLEN];
+    switch (saddr.ss_family) {
+      case AF_INET: {
+        struct sockaddr_in* s = (struct sockaddr_in*) &saddr;
+        if (inet_ntop(AF_INET, &s->sin_addr, ipstr, sizeof(ipstr))) {
+          remote_host = std::string(ipstr);
+        }
+        break;
+      }
+      case AF_INET6: {
+        struct sockaddr_in6* s = (struct sockaddr_in6*) &saddr;
+        if (inet_ntop(AF_INET6, &s->sin6_addr, ipstr, sizeof(ipstr))) {
+          remote_host = std::string(ipstr);
+        }
+        break;
+      }
+    }
+  }
+
+
   switch (first_byte) {
 
     // native
@@ -257,7 +281,7 @@ bool Listener::open(int fd) {
           std::unique_ptr<native_transport::NativeConnection>(
               new native_transport::TCPConnection(
                   fd,
-                  "",
+                  remote_host,
                   false,
                   io_timeout_,
                   std::string(&first_byte, 1))));
