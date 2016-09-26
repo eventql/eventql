@@ -349,20 +349,15 @@ ScopedPtr<ResultCursor> DefaultScheduler::executeUseDatabase(
   auto session = static_cast<eventql::Session*>(txn->getUserData());
   auto dbctx = session->getDatabaseContext();
 
-  auto db_exists = false;
-  dbctx->config_directory->listNamespaces(
-      [use_database, &db_exists] (const eventql::NamespaceConfig& ns) {
-    if (use_database->getDatabaseName() == ns.customer()) {
-      db_exists = true;
-    }
-  });
-
-  if (!db_exists) {
+  try {
+    auto ns = dbctx->config_directory->getNamespaceConfig(
+        use_database->getDatabaseName());
+  } catch (const std::exception& e) {
     RAISE(
-        kRuntimeError,
-        StringUtil::format(
-            "Unknown database $0",
-            use_database->getDatabaseName()));
+          kRuntimeError,
+          StringUtil::format(
+              "Unknown database $0",
+              use_database->getDatabaseName()));
   }
 
   auto rc = dbctx->client_auth->changeNamespace(
