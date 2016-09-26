@@ -13,6 +13,13 @@ EventQL v0.5.0 beta;
 
   * Added caching for metadata lookups
 
+  * Added internal (server-to-server) connection pooling for native TCP
+    connections
+
+  * Added a new "user defined partitioning" mode that can be enabled by setting
+    user_defined_partitioning=true on a table and allows to explicitly specify
+    the partition key for each row
+
   * Added a new monitor thread that publishes disk usage and other load
     information to the coordination service
 
