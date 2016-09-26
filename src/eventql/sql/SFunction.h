@@ -43,8 +43,11 @@ enum kFunctionType {
  */
 struct PureFunction {
   PureFunction();
-  PureFunction(void (*_call)(sql_txn* ctx, int argc, SValue* in, SValue* out));
+  PureFunction(
+      void (*_call)(sql_txn* ctx, int argc, SValue* in, SValue* out),
+      bool _has_side_effects = false);
   void (*call)(sql_txn* ctx, int argc, SValue* in, SValue* out);
+  bool has_side_effects;
 };
 
 /**
@@ -68,6 +71,7 @@ struct SFunction {
   SFunction(AggregateFunction fn);
 
   bool isAggregate() const;
+  bool hasSideEffects() const;
 
   kFunctionType type;
   union {

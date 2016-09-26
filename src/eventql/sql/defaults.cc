@@ -119,7 +119,7 @@ void installDefaultSymbols(SymbolTable* rt) {
   rt->registerFunction("rtrim", PureFunction(&expressions::rtrimExpr));
 
   /* expressions/miscellaneous.h */
-  rt->registerFunction("usleep", PureFunction(&expressions::usleepExpr));
+  rt->registerFunction("usleep", PureFunction(&expressions::usleepExpr, true));
 
   /* expressions/internal.h */
   rt->registerFunction("repeat_value", expressions::kRepeatValueExpr);
