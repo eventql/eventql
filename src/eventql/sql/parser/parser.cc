@@ -328,6 +328,8 @@ ASTNode* Parser::statement() {
     case Token::T_DESCRIBE:
     case Token::T_EXPLAIN:
       return explainStatement();
+    case Token::T_USE:
+      return useStatement();
     default:
       break;
   }
@@ -897,6 +899,21 @@ ASTNode* Parser::describeTableStatement() {
   stmt->appendChild(tableName());
   consumeIf(Token::T_SEMICOLON);
   return stmt;
+}
+
+ASTNode* Parser::useStatement() {
+  consumeToken();
+  auto use_database = new ASTNode(ASTNode::T_USE_DATABASE);
+  auto name = new ASTNode(ASTNode::T_DATABASE_NAME);
+  name->setToken(cur_token_);
+  use_database->appendChild(name);
+  consumeToken();
+
+  if (*cur_token_ == Token::T_SEMICOLON) {
+    consumeToken();
+  }
+
+  return use_database;
 }
 
 // FIXPAUL move this into sql extensions

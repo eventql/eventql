@@ -88,6 +88,7 @@ public:
     T_TABLE,
     T_TABLES,
     T_DATABASE,
+    T_USE,
     T_EOF,
     T_SHOW,
     T_DESCRIBE,
