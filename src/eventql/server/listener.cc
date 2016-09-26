@@ -204,8 +204,7 @@ void Listener::run(int kill_fd /* = -1 */) {
 
     auto iter = connections_.begin();
     while (iter != connections_.end()) {
-      if (FD_ISSET(iter->fd, &op_read)) {
-        open(iter->fd);
+      if (FD_ISSET(iter->fd, &op_read) && open(iter->fd)) {
         iter = connections_.erase(iter);
       } else {
         iter++;
@@ -220,17 +219,21 @@ exit:
 void Listener::shutdown() {
 }
 
-void Listener::open(int fd) {
+bool Listener::open(int fd) {
   char first_byte;
   auto res = ::read(fd, &first_byte, 1);
   if (res != 1) {
+    if (errno == EAGAIN) {
+      return false;
+    }
+
     logError(
         "eventql",
         "error while reading first byte, closing connection: $0",
         strerror(errno));
 
     close(fd);
-    return;
+    return true;
   }
 
   int flags = ::fcntl(fd, F_GETFL, 0);
@@ -243,7 +246,7 @@ void Listener::open(int fd) {
         strerror(errno));
 
     close(fd);
-    return;
+    return true;
   }
 
   switch (first_byte) {
@@ -267,6 +270,8 @@ void Listener::open(int fd) {
       break;
 
   }
+
+  return true;
 }
 
 } // namespace eventql

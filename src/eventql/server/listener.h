@@ -42,7 +42,7 @@ public:
 
 protected:
 
-  void open(int fd);
+  bool open(int fd);
 
   struct EstablishingConnection {
     int fd;
