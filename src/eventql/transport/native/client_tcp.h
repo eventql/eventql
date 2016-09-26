@@ -230,7 +230,10 @@ protected:
 class TCPConnectionPool {
 public:
 
-  TCPConnectionPool();
+  TCPConnectionPool(
+      uint64_t max_conns,
+      uint64_t max_conns_per_host,
+      uint64_t max_conn_age);
 
   bool getConnection(
       const std::string& addr,

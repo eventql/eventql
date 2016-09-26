@@ -289,7 +289,11 @@ ReturnCode DatabaseImpl::start() {
 
   /* connection pool */
   dns_cache_.reset(new net::DNSCache());
-  connection_pool_.reset(new native_transport::TCPConnectionPool());
+  connection_pool_.reset(
+      new native_transport::TCPConnectionPool(
+          cfg_->getInt("server.s2s_pool_max_connections", 0),
+          cfg_->getInt("server.s2s_pool_max_connections_per_host", 0),
+          cfg_->getInt("server.s2s_pool_linger_timeout", 0)));
 
   /* metadata service */
   metadata_store_.reset(new MetadataStore(metadata_dir));

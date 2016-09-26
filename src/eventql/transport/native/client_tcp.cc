@@ -837,10 +837,13 @@ void TCPAsyncClient::closeConnection(Connection* connection, bool graceful) {
   }
 }
 
-TCPConnectionPool::TCPConnectionPool() :
-  max_conns_(16),
-  max_conns_per_host_(4),
-  max_conn_age_(kMicrosPerSecond),
+TCPConnectionPool::TCPConnectionPool(
+  uint64_t max_conns,
+  uint64_t max_conns_per_host,
+  uint64_t max_conn_age) :
+  max_conns_(max_conns),
+  max_conns_per_host_(max_conns_per_host),
+  max_conn_age_(max_conn_age),
   num_conns_(0) {}
 
 bool TCPConnectionPool::getConnection(
