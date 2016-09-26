@@ -930,7 +930,7 @@ void TCPConnectionPool::storeFD(
     auto& connlist = conns_[server];
     while (
         connlist.size() >= max_conns_per_host_ ||
-        (!connlist.empty() && connlist.back().time < now)) {
+        (!connlist.empty() && connlist.back().time < cutoff)) {
       close_fds.insert(connlist.back().fd);
       connlist.pop_back();
       --num_conns_;
