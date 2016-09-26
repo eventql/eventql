@@ -354,10 +354,7 @@ ScopedPtr<ResultCursor> DefaultScheduler::executeUseDatabase(
       [use_database, &db_exists] (const eventql::NamespaceConfig& ns) {
     if (use_database->getDatabaseName() == ns.customer()) {
       db_exists = true;
-      return false;
     }
-
-    return true;
   });
 
   if (!db_exists) {
