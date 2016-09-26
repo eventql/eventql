@@ -25,6 +25,9 @@
 #include "eventql/eventql.h"
 #include <eventql/sql/scheduler.h>
 #include <eventql/sql/query_plan.h>
+#include "eventql/server/session.h"
+#include "eventql/db/database.h"
+#include "eventql/auth/client_auth.h"
 
 namespace csql {
 
@@ -339,6 +342,42 @@ ScopedPtr<ResultCursor> DefaultScheduler::executeCreateDatabase(
   return mkScoped(new EmptyResultCursor());
 }
 
+ScopedPtr<ResultCursor> DefaultScheduler::executeUseDatabase(
+    Transaction* txn,
+    ExecutionContext* execution_context,
+    RefPtr<UseDatabaseNode> use_database) {
+  auto session = static_cast<eventql::Session*>(txn->getUserData());
+  auto dbctx = session->getDatabaseContext();
+
+  auto db_exists = false;
+  dbctx->config_directory->listNamespaces(
+      [use_database, &db_exists] (const eventql::NamespaceConfig& ns) {
+    if (use_database->getDatabaseName() == ns.customer()) {
+      db_exists = true;
+      return false;
+    }
+
+    return true;
+  });
+
+  if (!db_exists) {
+    RAISE(
+        kRuntimeError,
+        StringUtil::format(
+            "Unknown database $0",
+            use_database->getDatabaseName()));
+  }
+
+  auto rc = dbctx->client_auth->changeNamespace(
+      session,
+      use_database->getDatabaseName());
+  if (!rc.isSuccess()) {
+    RAISE(kRuntimeError, rc.message());
+  }
+
+  // FIXME return result...
+  return mkScoped(new EmptyResultCursor());
+}
 
 ScopedPtr<ResultCursor> DefaultScheduler::executeDropTable(
       Transaction* txn,
@@ -444,6 +483,13 @@ ScopedPtr<ResultCursor> DefaultScheduler::execute(
         query_plan->getTransaction(),
         execution_context,
         stmt.asInstanceOf<CreateDatabaseNode>());
+  }
+
+  if (stmt.isInstanceOf<UseDatabaseNode>()) {
+    return executeUseDatabase(
+        query_plan->getTransaction(),
+        execution_context,
+        stmt.asInstanceOf<UseDatabaseNode>());
   }
 
   if (stmt.isInstanceOf<DropTableNode>()) {
