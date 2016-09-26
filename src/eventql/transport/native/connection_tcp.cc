@@ -289,7 +289,7 @@ int TCPConnection::releaseFD() {
   }
 
   auto fd = fd_;
-  fd = -1;
+  fd_ = -1;
   return fd;
 }
 

@@ -80,7 +80,6 @@ ReturnCode TCPClient::connect(
   if (is_internal &&
       conn_pool_ &&
       conn_pool_->getConnection(addr_str, &conn_)) {
-    printf("conn pool hit\n");
     return ReturnCode::success();
   }
 
