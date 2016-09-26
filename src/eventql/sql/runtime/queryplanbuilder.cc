@@ -43,6 +43,7 @@
 #include <eventql/sql/qtree/ValueExpressionNode.h>
 #include <eventql/sql/qtree/JoinNode.h>
 #include <eventql/sql/qtree/nodes/create_database.h>
+#include <eventql/sql/qtree/nodes/use_database.h>
 #include <eventql/sql/qtree/nodes/alter_table.h>
 #include <eventql/sql/qtree/nodes/create_table.h>
 #include <eventql/sql/qtree/nodes/drop_table.h>
@@ -123,6 +124,10 @@ RefPtr<QueryTreeNode> QueryPlanBuilder::build(
     return node;
   }
 
+  if ((node = buildUseDatabase(txn, ast)) != nullptr) {
+    return node;
+  }
+
   if ((node = buildAlterTable(txn, ast)) != nullptr) {
     return node;
   }
@@ -146,6 +151,7 @@ Vector<RefPtr<QueryTreeNode>> QueryPlanBuilder::build(
       case ASTNode::T_DESCRIBE_TABLE:
       case ASTNode::T_CREATE_TABLE:
       case ASTNode::T_CREATE_DATABASE:
+      case ASTNode::T_USE_DATABASE:
       case ASTNode::T_DROP_TABLE:
       case ASTNode::T_INSERT_INTO:
       case ASTNode::T_ALTER_TABLE:
@@ -1928,6 +1934,22 @@ QueryTreeNode* QueryPlanBuilder::buildCreateDatabase(
   }
 
   return new CreateDatabaseNode(db_name->getToken()->getString());
+}
+
+QueryTreeNode* QueryPlanBuilder::buildUseDatabase(
+    Transaction* txn,
+    ASTNode* ast) {
+  if (!(*ast == ASTNode::T_USE_DATABASE) || ast->getChildren().size() != 1) {
+    return nullptr;
+  }
+
+  auto db_name = ast->getChildren()[0];
+  if (db_name->getType() != ASTNode::T_DATABASE_NAME ||
+      db_name->getToken() == nullptr) {
+    RAISE(kRuntimeError, "corrupt AST");
+  }
+
+  return new UseDatabaseNode(db_name->getToken()->getString());
 }
 
 QueryTreeNode* QueryPlanBuilder::buildDropTable(

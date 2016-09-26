@@ -35,6 +35,7 @@
 #include "eventql/sql/qtree/QueryTreeUtil.h"
 #include "eventql/sql/qtree/qtree_coder.h"
 #include "eventql/sql/qtree/nodes/create_database.h"
+#include "eventql/sql/qtree/nodes/use_database.h"
 #include "eventql/sql/qtree/nodes/alter_table.h"
 #include "eventql/sql/qtree/nodes/create_table.h"
 #include "eventql/sql/qtree/nodes/drop_table.h"
@@ -889,6 +890,25 @@ TEST_CASE(QTreeTest, TestCreateDatabase, [] () {
       txn->getTableProvider());
 
   RefPtr<CreateDatabaseNode> qtree = qtrees[0].asInstanceOf<CreateDatabaseNode>();
+  EXPECT_EQ(qtree->getDatabaseName(), "test");
+});
+
+TEST_CASE(QTreeTest, TestUseDatabase, [] () {
+  auto runtime = Runtime::getDefaultRuntime();
+  auto txn = runtime->newTransaction();
+
+  String query = "USE test;";
+
+  csql::Parser parser;
+  parser.parse(query.data(), query.size());
+
+  auto qtree_builder = runtime->queryPlanBuilder();
+  Vector<RefPtr<QueryTreeNode>> qtrees = qtree_builder->build(
+      txn.get(),
+      parser.getStatements(),
+      txn->getTableProvider());
+
+  RefPtr<UseDatabaseNode> qtree = qtrees[0].asInstanceOf<UseDatabaseNode>();
   EXPECT_EQ(qtree->getDatabaseName(), "test");
 });
 

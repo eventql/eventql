@@ -204,6 +204,10 @@ public:
       Transaction* txn,
       ASTNode* ast);
 
+  QueryTreeNode* buildUseDatabase(
+      Transaction* txn,
+      ASTNode* ast);
+
   QueryTreeNode* buildDropTable(
       Transaction* txn,
       ASTNode* ast);
