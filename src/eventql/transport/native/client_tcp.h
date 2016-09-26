@@ -245,6 +245,20 @@ public:
       int fd,
       const std::string& server);
 
+protected:
+
+  struct CachedConnection {
+    int fd;
+    uint64_t time;
+  };
+
+  uint64_t max_conns_;
+  uint64_t max_conns_per_host_;
+  uint64_t max_conn_age_;
+  uint64_t num_conns_;
+
+  std::mutex mutex_;
+  std::map<std::string, std::vector<CachedConnection>> conns_;
 };
 
 } // namespace native_transport

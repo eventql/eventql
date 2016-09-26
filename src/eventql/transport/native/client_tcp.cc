@@ -769,6 +769,9 @@ ReturnCode TCPAsyncClient::startConnection(Task* task) {
 
   if (conn_pool_) {
     connection.fd = conn_pool_->getFD(server_cfg.server_addr());
+    if (connection.fd >= 0) {
+      connection.state = ConnectionState::READY;
+    }
   }
 
   if (connection.fd < 0) {
@@ -816,7 +819,12 @@ ReturnCode TCPAsyncClient::startConnection(Task* task) {
 
   ++connections_per_host_[connection.host];
   connections_.push_back(connection);
-  return ReturnCode::success();
+
+  if (connection.state == ConnectionState::READY) {
+    return handleReady(&connections_.back());
+  } else {
+    return ReturnCode::success();
+  }
 }
 
 void TCPAsyncClient::closeConnection(Connection* connection, bool graceful) {
@@ -829,7 +837,11 @@ void TCPAsyncClient::closeConnection(Connection* connection, bool graceful) {
   }
 }
 
-TCPConnectionPool::TCPConnectionPool() {}
+TCPConnectionPool::TCPConnectionPool() :
+  max_conns_(16),
+  max_conns_per_host_(4),
+  max_conn_age_(kMicrosPerSecond),
+  num_conns_(0) {}
 
 bool TCPConnectionPool::getConnection(
     const std::string& addr,
@@ -850,6 +862,30 @@ bool TCPConnectionPool::getConnection(
 }
 
 int TCPConnectionPool::getFD(const std::string& server) {
+  auto now = MonotonicClock::now();
+  auto cutoff = now;
+  if (cutoff > max_conn_age_) {
+    cutoff -= max_conn_age_;
+  } else {
+    cutoff = 0;
+  }
+
+  std::unique_lock<std::mutex> lk(mutex_);
+  auto iter = conns_.find(server);
+  if (iter == conns_.end()) {
+    return -1;
+  }
+
+  auto& conns = iter->second;
+  for (size_t i = conns.size(); i-- > 0; ) {
+    if (conns[i].time > cutoff) {
+      auto fd = conns[i].fd;
+      conns.erase(conns.begin() + i);
+      --num_conns_;
+      return fd;
+    }
+  }
+
   return -1;
 }
 
@@ -867,11 +903,46 @@ void TCPConnectionPool::storeConnection(
 void TCPConnectionPool::storeFD(
     int fd,
     const std::string& server) {
+  auto now = MonotonicClock::now();
+  auto cutoff = now;
+  if (cutoff > max_conn_age_) {
+    cutoff -= max_conn_age_;
+  } else {
+    cutoff = 0;
+  }
+
   if (fd < 0) {
     return;
   }
 
-  close(fd);
+  std::set<int> close_fds;
+  {
+    std::unique_lock<std::mutex> lk(mutex_);
+    if (num_conns_ >= max_conns_) {
+      lk.unlock();
+      close(fd);
+      return;
+    }
+
+    auto& connlist = conns_[server];
+    while (
+        connlist.size() >= max_conns_per_host_ ||
+        (!connlist.empty() && connlist.back().time < now)) {
+      close_fds.insert(connlist.back().fd);
+      connlist.pop_back();
+      --num_conns_;
+    }
+
+    CachedConnection c;
+    c.fd = fd;
+    c.time = now;
+    connlist.insert(connlist.begin(), c);
+    ++num_conns_;
+  }
+
+  for (const auto& close_fd : close_fds) {
+    close(close_fd);
+  }
 }
 
 } // namespace native_transport
