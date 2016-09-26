@@ -232,6 +232,15 @@ Users can also define their own functions and operators.
   </tr>
 </table>
 
+###### Miscellaneous Functions
+<table class="small functions_and_operators">
+  <tr>
+    <td><a class="link" href="/documentation/sql/functions-and-operators/usleep">usleep</a></td>
+    <td>Sleep for a number of microseconds</td>
+    <td><code>usleep(1000)</code></td>
+  </tr>
+</table>
+
 ---
 ##### Operator Precedence
 

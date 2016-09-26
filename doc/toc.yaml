@@ -577,6 +577,14 @@
               visible_in_menu: false
               visible_in_toc: false
               source: "/sql/functions_and_operators/ucase.md"
+            -
+              url: "/sql/functions-and-operators/usleep"
+              title: "usleep"
+              type: page
+              doc_type: "sql_function"
+              visible_in_menu: false
+              visible_in_toc: false
+              source: "/sql/functions_and_operators/usleep.md"
         -
           url: "/sql/statements"
           title: "Statements"
