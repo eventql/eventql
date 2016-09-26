@@ -473,7 +473,10 @@ Status TableService::listPartitions(
   MetadataClient metadata_client(
       dbctx_->config_directory,
       dbctx_->config,
-      dbctx_->metadata_cache);
+      dbctx_->metadata_cache,
+      dbctx_->connection_pool,
+      dbctx_->dns_cache);
+
   MetadataFile metadata_file;
   auto rc = metadata_client.fetchLatestMetadataFile(
       db_namespace,
