@@ -29,8 +29,6 @@ EventQL v0.5.0 beta;
 
   * Added new sql functions: usleep, fnv32
 
->>>>>>> 2733e8edec47714da68bcd6a31e90cd8dc6044ea
-
 EventQL v0.4.0 beta;
 
   * Changed the parallel GROUP BY operation to use the new native protocol and
