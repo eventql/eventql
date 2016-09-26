@@ -191,7 +191,10 @@ Status MetadataCoordinator::performOperation(
       return ReturnCode::error("ERUNTIME", eframe.getError());
     }
     default:
-      return ReturnCode::error("ERUNTIME", "invalid opcode");
+      return ReturnCode::errorf(
+          "ERUNTIME",
+          "invalid opcode for META_PERFORMOP: $0",
+          ret_opcode);
   }
 
   *result = msg::decode<MetadataOperationResult>(ret_payload);
@@ -297,7 +300,10 @@ Status MetadataCoordinator::createFile(
       return ReturnCode::error("ERUNTIME", eframe.getError());
     }
     default:
-      return ReturnCode::error("ERUNTIME", "invalid opcode");
+      return ReturnCode::errorf(
+          "ERUNTIME",
+          "invalid opcode for META_CREATEFILE: $0",
+          ret_opcode);
   }
 
   return ReturnCode::success();
