@@ -635,6 +635,13 @@
             visible_in_toc: true
             source: "/sql/statements/describe.md"
           -
+            url: "/sql/statements/describe-partitions"
+            title: "DESCRIBE PARTITIONS"
+            type: page
+            visible_in_menu: true
+            visible_in_toc: true
+            source: "/sql/statements/describe_partitions.md"
+          -
             url: "/sql/statements/show-tables"
             title: "SHOW TABLES"
             type: page

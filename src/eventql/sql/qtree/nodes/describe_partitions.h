@@ -1,7 +1,7 @@
 /**
  * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@eventql.io>
+ *   - Laura Schlimmer <laura@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -22,20 +22,48 @@
  * code of your own applications
  */
 #pragma once
-#include <eventql/util/stdtypes.h>
-#include <eventql/util/protobuf/MessageSchema.h>
-#include <eventql/db/table_config.pb.h>
-
 #include "eventql/eventql.h"
+#include <eventql/util/stdtypes.h>
+#include <eventql/sql/qtree/TableExpressionNode.h>
+#include <eventql/sql/qtree/qtree_coder.h>
 
-namespace eventql {
+namespace csql {
 
-struct TablePartitionInfo {
-  std::vector<std::string> server_ids;
-  std::string partition_id;
-  std::string keyrange_begin;
-  std::string keyrange_end;
-  std::string extra_info;
+class DescribePartitionsNode : public TableExpressionNode {
+public:
+
+  DescribePartitionsNode(const String& table_name);
+
+  Vector<RefPtr<QueryTreeNode>> inputTables() const;
+
+  Vector<String> getResultColumns() const override;
+
+  Vector<QualifiedColumn> getAvailableColumns() const override;
+
+  RefPtr<QueryTreeNode> deepCopy() const override;
+
+  const String& tableName() const;
+
+  String toString() const override;
+
+  size_t getComputedColumnIndex(
+      const String& column_name,
+      bool allow_add = false) override;
+
+  size_t getNumComputedColumns() const override;
+
+  static void encode(
+      QueryTreeCoder* coder,
+      const DescribePartitionsNode& node,
+      OutputStream* os);
+
+  static RefPtr<QueryTreeNode> decode (
+      QueryTreeCoder* coder,
+      InputStream* is);
+protected:
+  String table_name_;
 };
 
-}
+
+} // namespace csql
+

@@ -880,6 +880,8 @@ ASTNode* Parser::explainStatement() {
   switch (cur_token_->getType()) {
     case Token::T_SELECT:
       return explainQueryStatement();
+    case Token::T_PARTITIONS:
+      return describePartitionsStatement();
     default:
       return describeTableStatement();
   }
@@ -888,6 +890,14 @@ ASTNode* Parser::explainStatement() {
 ASTNode* Parser::explainQueryStatement() {
   auto stmt = new ASTNode(ASTNode::T_EXPLAIN_QUERY);
   stmt->appendChild(selectStatement());
+  consumeIf(Token::T_SEMICOLON);
+  return stmt;
+}
+
+ASTNode* Parser::describePartitionsStatement() {
+  consumeToken();
+  auto stmt = new ASTNode(ASTNode::T_DESCRIBE_PARTITIONS);
+  stmt->appendChild(tableName());
   consumeIf(Token::T_SEMICOLON);
   return stmt;
 }

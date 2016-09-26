@@ -3,4 +3,3 @@
 
     DESCRIBE table_name
 
-

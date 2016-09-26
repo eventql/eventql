@@ -28,6 +28,9 @@ EventQL v0.5.0 beta;
     META_DISCOVER{_RESULT}, META_LISTPARTITIONS{_RESULT},
     META_FINDPARTITION{_RESULT}
 
+  * Added the DESCRIBE PARTITIONS table statement to obtain information about
+    the partitions of a table
+
   * Added the following new configuration options: server.disk_capacity,
     server.load_limit_{soft,hard}, server.partitions_loading_limit_{soft,hard},
     server.loadinfo_publish_interval, server.noalloc,

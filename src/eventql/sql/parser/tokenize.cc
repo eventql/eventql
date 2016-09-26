@@ -562,6 +562,11 @@ next:
     goto next;
   }
 
+  if (token == "PARTITIONS") {
+    token_list->emplace_back(Token::T_PARTITIONS);
+    goto next;
+  }
+
   if (token == "PRIMARY") {
     token_list->emplace_back(Token::T_PRIMARY);
     goto next;
