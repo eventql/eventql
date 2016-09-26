@@ -41,7 +41,6 @@ ReturnCode performOperation_QUERY(
     Database* database,
     NativeConnection* conn,
     const std::string& payload) {
-  auto t0 = MonotonicClock::now();
   auto session = database->getSession();
   auto dbctx = session->getDatabaseContext();
 
@@ -136,9 +135,6 @@ ReturnCode performOperation_QUERY(
       /* execute query */
       auto result_cursor = qplan->execute(i);
       auto result_ncols = result_cursor->getNumColumns();
-
-      auto t1 = MonotonicClock::now();
-      logInfo("evqld", "Frontend query took $0ms", double(t1-t0) / 1000.0f);
 
       /* send response frames */
       QueryResultFrame r_frame(qplan->getStatementgetResultColumns(i));
