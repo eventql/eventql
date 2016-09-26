@@ -571,7 +571,11 @@ ReturnCode TCPAsyncClient::performRead(Connection* connection) {
   }
 
   if (connection->read_buf.size() < 8) {
-    return ReturnCode::success();
+    if (eof) {
+      return ReturnCode::error("EIO", "connection to server lost");
+    } else {
+      return ReturnCode::success(); // wait for more data
+    }
   }
 
   auto frame_len = ntohl(*((uint32_t*) &connection->read_buf[4]));
