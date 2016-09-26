@@ -27,6 +27,7 @@
 #include "eventql/transport/native/frames/repl_insert.h"
 #include "eventql/auth/client_auth.h"
 #include "eventql/util/logging.h"
+#include "eventql/util/wallclock.h"
 #include "eventql/server/session.h"
 #include <eventql/db/shredded_record.h>
 #include <eventql/db/table_service.h>

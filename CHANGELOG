@@ -13,6 +13,13 @@ EventQL v0.5.0 beta;
 
   * Added caching for metadata lookups
 
+  * Added internal (server-to-server) connection pooling for native TCP
+    connections
+
+  * Added a new "user defined partitioning" mode that can be enabled by setting
+    user_defined_partitioning=true on a table and allows to explicitly specify
+    the partition key for each row
+
   * Added a new monitor thread that publishes disk usage and other load
     information to the coordination service
 
@@ -26,7 +33,9 @@ EventQL v0.5.0 beta;
 
   * Added the following new configuration options: server.disk_capacity,
     server.load_limit_{soft,hard}, server.partitions_loading_limit_{soft,hard},
-    server.loadinfo_publish_interval, server.noalloc
+    server.loadinfo_publish_interval, server.noalloc,
+    server.s2s_pool_max_connections, server.s2s_pool_max_connections_per_host,
+    server.s2s_pool_linger_timeout
 
   * Added the DESCRIBE SERVERS statement and the cluster-list command to obtain
     information about the servers of the current cluster.

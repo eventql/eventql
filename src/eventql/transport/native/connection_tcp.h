@@ -34,6 +34,8 @@ public:
 
   TCPConnection(
       int fd,
+      const std::string remote_host,
+      bool is_internal,
       uint64_t io_timeout,
       const std::string& prelude_bytes = "");
 
@@ -61,8 +63,11 @@ public:
   ReturnCode flushOutbox(bool block, uint64_t timeout_us = 0) override;
 
   void close() override;
+  int releaseFD();
 
-  std::string getRemoteHost() const override;
+  std::string getRemoteHost() const;
+  bool isInternal() const;
+  bool isClosed() const;
 
   void setIOTimeout(uint64_t timeout_us) override;
 
@@ -80,8 +85,9 @@ protected:
   int fd_;
   std::string read_buf_;
   std::string write_buf_;
-  uint64_t io_timeout_;
   std::string remote_host_;
+  bool is_internal_;
+  uint64_t io_timeout_;
 };
 
 } // namespace native_transport

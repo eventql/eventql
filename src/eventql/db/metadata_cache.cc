@@ -49,12 +49,18 @@ bool MetadataCache::get(
       entry.partitions.end(),
       request.key(),
       [ks] (const std::string& a, const CachedPartitionMapEntry& b) {
-        return comparePartitionKeys(ks, a, b.end) < 0;
+        return comparePartitionKeys(ks, a, b.begin) < 0;
       });
 
-  if (iter == entry.partitions.end() ||
-      comparePartitionKeys(ks, iter->begin, request.key()) > 0 ||
-      comparePartitionKeys(ks, iter->end, request.key()) <= 0) {
+  if (iter != entry.partitions.begin()) {
+    --iter;
+  }
+
+  auto begin_cmp = comparePartitionKeys(ks, iter->begin, request.key());
+  auto end_cmp = comparePartitionKeys(ks, iter->end, request.key());
+  bool matches = begin_cmp == 0 || (begin_cmp <= 0 && end_cmp > 0);
+
+  if (!matches) {
     return false;
   }
 

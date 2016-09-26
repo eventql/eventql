@@ -44,10 +44,14 @@ namespace native_transport {
 
 TCPConnection::TCPConnection(
     int fd,
+    const std::string remote_host,
+    bool is_internal,
     uint64_t io_timeout,
     const std::string& prelude_bytes /* = "" */) :
     fd_(fd),
     read_buf_(prelude_bytes),
+    remote_host_(remote_host),
+    is_internal_(is_internal),
     io_timeout_(io_timeout) {
   logTrace("eventql", "Opening new tcp connection; fd=$1", fd);
 
@@ -55,28 +59,6 @@ TCPConnection::TCPConnection(
 
   size_t nodelay = 1;
   setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, &nodelay, sizeof(nodelay));
-
-  struct sockaddr_storage saddr;
-  socklen_t slen = sizeof(saddr);
-  if (getpeername(fd, (struct sockaddr*) &saddr, &slen) == 0) {
-    char ipstr[INET6_ADDRSTRLEN];
-    switch (saddr.ss_family) {
-      case AF_INET: {
-        struct sockaddr_in* s = (struct sockaddr_in*) &saddr;
-        if (inet_ntop(AF_INET, &s->sin_addr, ipstr, sizeof(ipstr))) {
-          remote_host_ = std::string(ipstr);
-        }
-        break;
-      }
-      case AF_INET6: {
-        struct sockaddr_in6* s = (struct sockaddr_in6*) &saddr;
-        if (inet_ntop(AF_INET6, &s->sin6_addr, ipstr, sizeof(ipstr))) {
-          remote_host_ = std::string(ipstr);
-        }
-        break;
-      }
-    }
-  }
 }
 
 TCPConnection::~TCPConnection() {
@@ -279,12 +261,30 @@ void TCPConnection::close() {
   fd_ = -1;
 }
 
+int TCPConnection::releaseFD() {
+  if (fd_ < 0) {
+    return -1;
+  }
+
+  auto fd = fd_;
+  fd_ = -1;
+  return fd;
+}
+
 void TCPConnection::setIOTimeout(uint64_t timeout_us) {
   io_timeout_ = timeout_us;
 }
 
 std::string TCPConnection::getRemoteHost() const {
   return remote_host_;
+}
+
+bool TCPConnection::isInternal() const {
+  return is_internal_;
+}
+
+bool TCPConnection::isClosed() const {
+  return fd_ < 0;
 }
 
 } // namespace native_connection

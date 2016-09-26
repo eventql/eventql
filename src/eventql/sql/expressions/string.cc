@@ -137,5 +137,14 @@ void rtrimExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
   *out = SValue::newString(str);
 }
 
+void concatExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
+  std::string str;
+  for (int i = 0; i < argc; ++i) {
+    str += argv[i].getString();
+  }
+
+  *out = SValue::newString(str);
+}
+
 }
 }

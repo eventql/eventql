@@ -1602,3 +1602,83 @@ TEST_CASE(MetadataOperationSplit, TestFiniteSplitEndImmediate, [] () {
   EXPECT_EQ(output[4].servers[2].placement_id, 42);
 });
 
+TEST_CASE(MetadataOperationSplit, TestUserDefinedSplit, [] () {
+  Vector<MetadataFile::PartitionMapEntry> pmap;
+
+  {
+    MetadataFile::PartitionMapEntry e;
+    e.begin = encodePartitionKey(KEYSPACE_UINT64, "1");
+    e.partition_id = SHA1::compute("A");
+    e.splitting = false;
+    pmap.emplace_back(e);
+  }
+
+  {
+    MetadataFile::PartitionMapEntry e;
+    e.begin = encodePartitionKey(KEYSPACE_UINT64, "3");
+    e.partition_id = SHA1::compute("B");
+    e.splitting = false;
+    pmap.emplace_back(e);
+  }
+
+  {
+    MetadataFile::PartitionMapEntry e;
+    e.begin = encodePartitionKey(KEYSPACE_UINT64, "8");
+    e.partition_id = SHA1::compute("C");
+    e.splitting = false;
+    pmap.emplace_back(e);
+  }
+
+  {
+    MetadataFile::PartitionMapEntry e;
+    e.begin = encodePartitionKey(KEYSPACE_UINT64, "14");
+    e.partition_id = SHA1::compute("D");
+    e.splitting = false;
+    pmap.emplace_back(e);
+  }
+
+  MetadataFile input(
+      SHA1::compute("mytx"),
+      0,
+      KEYSPACE_UINT64,
+      pmap,
+      MFILE_USERDEFINED);
+
+  auto split_partition_id = SHA1::compute("A");
+  auto split_partition_id_low = SHA1::compute("X1");
+  auto split_partition_id_high = SHA1::compute("X2");
+
+  SplitPartitionOperation op;
+  op.set_partition_id(split_partition_id.data(), split_partition_id.size());
+  op.set_split_point(encodePartitionKey(KEYSPACE_UINT64, "2"));
+  op.set_split_partition_id_low(
+      split_partition_id_low.data(),
+      split_partition_id_low.size());
+  op.set_split_partition_id_high(
+      split_partition_id_high.data(),
+      split_partition_id_high.size());
+  op.set_placement_id(42);
+  *op.add_split_servers_low() = "l1";
+  *op.add_split_servers_low() = "l2";
+  *op.add_split_servers_low() = "l3";
+  *op.add_split_servers_high() = "h1";
+  *op.add_split_servers_high() = "h2";
+  *op.add_split_servers_high() = "h3";
+
+  std::string opdata_buf;
+  op.SerializeToString(&opdata_buf);
+
+  MetadataOperation openv(
+      "test",
+      "test",
+      METAOP_SPLIT_PARTITION,
+      SHA1::compute("mytx"),
+      SHA1::compute("mytxout"),
+      Buffer(opdata_buf));
+
+  Vector<MetadataFile::PartitionMapEntry> output;
+  auto rc = openv.perform(input, &output);
+  EXPECT(!rc.isSuccess());
+  EXPECT(rc.message() == "can't split user defined partitions");
+});
+

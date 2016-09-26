@@ -89,6 +89,8 @@ InetAddr InetAddr::resolve(const std::string& addr_str) {
   return InetAddr(hostname, ip, port);
 }
 
+InetAddr::InetAddr() {}
+
 InetAddr::InetAddr(
     const std::string& hostname,
     const std::string& ip,
@@ -102,7 +104,6 @@ InetAddr::InetAddr(
     unsigned port) :
     hostname_(hostname),
     port_(port) {}
-
 
 const std::string& InetAddr::ip() const {
   if (ip_.length() == 0) {

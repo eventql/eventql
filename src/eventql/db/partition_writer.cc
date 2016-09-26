@@ -522,7 +522,9 @@ Status LSMPartitionWriter::split() {
 
   MetadataCoordinator coordinator(
       dbctx_->config_directory,
-      dbctx_->config);
+      dbctx_->config,
+      dbctx_->connection_pool,
+      dbctx_->dns_cache);
 
   return coordinator.performAndCommitOperation(
       snap->state.tsdb_namespace(),

@@ -204,8 +204,7 @@ void Listener::run(int kill_fd /* = -1 */) {
 
     auto iter = connections_.begin();
     while (iter != connections_.end()) {
-      if (FD_ISSET(iter->fd, &op_read)) {
-        open(iter->fd);
+      if (FD_ISSET(iter->fd, &op_read) && open(iter->fd)) {
         iter = connections_.erase(iter);
       } else {
         iter++;
@@ -220,17 +219,21 @@ exit:
 void Listener::shutdown() {
 }
 
-void Listener::open(int fd) {
+bool Listener::open(int fd) {
   char first_byte;
   auto res = ::read(fd, &first_byte, 1);
   if (res != 1) {
+    if (errno == EAGAIN) {
+      return false;
+    }
+
     logError(
         "eventql",
         "error while reading first byte, closing connection: $0",
         strerror(errno));
 
     close(fd);
-    return;
+    return true;
   }
 
   int flags = ::fcntl(fd, F_GETFL, 0);
@@ -243,8 +246,32 @@ void Listener::open(int fd) {
         strerror(errno));
 
     close(fd);
-    return;
+    return true;
   }
+
+  std::string remote_host;
+  struct sockaddr_storage saddr;
+  socklen_t slen = sizeof(saddr);
+  if (getpeername(fd, (struct sockaddr*) &saddr, &slen) == 0) {
+    char ipstr[INET6_ADDRSTRLEN];
+    switch (saddr.ss_family) {
+      case AF_INET: {
+        struct sockaddr_in* s = (struct sockaddr_in*) &saddr;
+        if (inet_ntop(AF_INET, &s->sin_addr, ipstr, sizeof(ipstr))) {
+          remote_host = std::string(ipstr);
+        }
+        break;
+      }
+      case AF_INET6: {
+        struct sockaddr_in6* s = (struct sockaddr_in6*) &saddr;
+        if (inet_ntop(AF_INET6, &s->sin6_addr, ipstr, sizeof(ipstr))) {
+          remote_host = std::string(ipstr);
+        }
+        break;
+      }
+    }
+  }
+
 
   switch (first_byte) {
 
@@ -254,6 +281,8 @@ void Listener::open(int fd) {
           std::unique_ptr<native_transport::NativeConnection>(
               new native_transport::TCPConnection(
                   fd,
+                  remote_host,
+                  false,
                   io_timeout_,
                   std::string(&first_byte, 1))));
       break;
@@ -265,6 +294,8 @@ void Listener::open(int fd) {
       break;
 
   }
+
+  return true;
 }
 
 } // namespace eventql

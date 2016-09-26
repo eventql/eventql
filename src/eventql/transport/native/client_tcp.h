@@ -27,11 +27,13 @@
 #include "eventql/sql/qtree/GroupByNode.h"
 #include "eventql/util/return_code.h"
 #include "eventql/util/buffer.h"
+#include "eventql/util/net/dnscache.h"
 #include "eventql/config/config_directory.h"
 #include "eventql/transport/native/connection_tcp.h"
 
 namespace eventql {
 namespace native_transport {
+class TCPConnectionPool;
 
 // A TCP Client is _not_ thread safe
 class TCPClient {
@@ -52,8 +54,12 @@ public:
   const static uint64_t kDefaultIdleTimeout = 5 * kMicrosPerSecond;
 
   TCPClient(
+      TCPConnectionPool* conn_pool,
+      net::DNSCache* dns_cache,
       uint64_t io_timeout = kDefaultIOTimeout,
       uint64_t idle_timeout = kDefaultIdleTimeout);
+
+  ~TCPClient();
 
   ReturnCode connect(
       const std::string& host,
@@ -91,8 +97,8 @@ protected:
       bool is_internal,
       const AuthDataType& auth_data);
 
-  ProcessConfig* config_;
-  ConfigDirectory* cdir_;
+  TCPConnectionPool* conn_pool_;
+  net::DNSCache* dns_cache_;
   uint64_t io_timeout_;
   uint64_t idle_timeout_;
   std::unique_ptr<TCPConnection> conn_;
@@ -117,6 +123,8 @@ public:
   TCPAsyncClient(
       ProcessConfig* config,
       ConfigDirectory* config_dir,
+      TCPConnectionPool* conn_pool,
+      net::DNSCache* dns_cache,
       size_t max_concurrent_tasks,
       size_t max_concurrent_tasks_per_host,
       bool tolerate_failures);
@@ -154,6 +162,7 @@ protected:
   struct Connection {
     ConnectionState state;
     std::string host;
+    std::string host_addr;
     int fd;
     std::string read_buf;
     std::string write_buf;
@@ -188,7 +197,7 @@ protected:
 
   ReturnCode startNextTask();
   ReturnCode startConnection(Task* task);
-  void closeConnection(Connection* connection);
+  void closeConnection(Connection* connection, bool graceful);
   ReturnCode performWrite(Connection* connection);
   ReturnCode performRead(Connection* connection);
   void sendFrame(
@@ -204,6 +213,8 @@ protected:
   std::deque<Task*> runq_;
   std::list<Connection> connections_;
   ConfigDirectory* config_;
+  TCPConnectionPool* conn_pool_;
+  net::DNSCache* dns_cache_;
   std::map<std::string, size_t> connections_per_host_;
   size_t max_concurrent_tasks_;
   size_t max_concurrent_tasks_per_host_;
@@ -214,6 +225,45 @@ protected:
   size_t io_timeout_;
   size_t idle_timeout_;
   bool tolerate_failed_shards_;
+};
+
+class TCPConnectionPool {
+public:
+
+  TCPConnectionPool(
+      uint64_t max_conns,
+      uint64_t max_conns_per_host,
+      uint64_t max_conn_age,
+      uint64_t io_timeout);
+
+  bool getConnection(
+      const std::string& addr,
+      std::unique_ptr<TCPConnection>* connection);
+
+  int getFD(const std::string& server);
+
+  void storeConnection(
+      std::unique_ptr<TCPConnection>&& connection);
+
+  void storeFD(
+      int fd,
+      const std::string& server);
+
+protected:
+
+  struct CachedConnection {
+    int fd;
+    uint64_t time;
+  };
+
+  uint64_t max_conns_;
+  uint64_t max_conns_per_host_;
+  uint64_t max_conn_age_;
+  uint64_t io_timeout_;
+  uint64_t num_conns_;
+
+  std::mutex mutex_;
+  std::map<std::string, std::vector<CachedConnection>> conns_;
 };
 
 } // namespace native_transport

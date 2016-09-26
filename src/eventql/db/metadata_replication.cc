@@ -33,11 +33,15 @@ MetadataReplication::MetadataReplication(
     ConfigDirectory* cdir,
     ProcessConfig* config,
     const String& server_name,
-    MetadataStore* store) :
+    MetadataStore* store,
+    native_transport::TCPConnectionPool* conn_pool,
+    net::DNSCache* dns_cache) :
     cdir_(cdir),
     config_(config),
     server_name_(server_name),
-    metadata_store_(store) {
+    metadata_store_(store),
+    conn_pool_(conn_pool),
+    dns_cache_(dns_cache) {
   cdir_->setTableConfigChangeCallback([this] (const TableDefinition& tbl) {
     applyTableConfigChange(tbl);
   });
@@ -127,7 +131,12 @@ Status MetadataReplication::replicate(const ReplicationJob& job) {
       continue;
     }
 
-    native_transport::TCPClient client(io_timeout, idle_timeout);
+    native_transport::TCPClient client(
+        conn_pool_,
+        dns_cache_,
+        io_timeout,
+        idle_timeout);
+
     auto rc = client.connect(server.server_addr(), true);
     if (!rc.isSuccess()) {
       logWarning(

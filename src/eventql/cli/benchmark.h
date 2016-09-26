@@ -112,7 +112,7 @@ protected:
   std::mutex mutex_;
   std::condition_variable cv_;
   std::vector<std::thread> threads_;
-  std::vector<native_transport::TCPClient> clients_;
+  std::vector<std::unique_ptr<native_transport::TCPClient>> clients_;
   BenchmarkStats stats_;
   std::string host_;
   uint64_t port_;

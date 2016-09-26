@@ -159,9 +159,22 @@ Status TableService::createTable(
       tblcfg->set_finite_partition_size(val);
       continue;
     }
+
+    if (p.first == "user_defined_partitions" && p.second == "true") {
+      tblcfg->set_enable_user_defined_partitions(true);
+      continue;
+    }
   }
 
   // check preconditions
+  if (tblcfg->enable_finite_partitions() &&
+      tblcfg->enable_user_defined_partitions()) {
+    return Status(
+        eIllegalArgumentError,
+        "partition_size_hint and user_defined_partitions are mutually "
+        "exclusive");
+  }
+
   if (tblcfg->enable_finite_partitions()) {
     if (tblcfg->finite_partition_size() < 1) {
         return Status(
@@ -204,6 +217,14 @@ Status TableService::createTable(
             keyspace_type,
             { },
             MFILE_FINITE));
+  } else if (tblcfg->enable_user_defined_partitions()) {
+    metadata_file.reset(
+        new MetadataFile(
+            txnid,
+            1,
+            keyspace_type,
+            { },
+            MFILE_USERDEFINED));
   } else {
     MetadataFile::PartitionMapEntry initial_partition;
     initial_partition.begin = "";
@@ -229,7 +250,9 @@ Status TableService::createTable(
   // create metadata file on metadata servers
   MetadataCoordinator coordinator(
       dbctx_->config_directory,
-      dbctx_->config);
+      dbctx_->config,
+      dbctx_->connection_pool,
+      dbctx_->dns_cache);
 
   auto rc = coordinator.createFile(
       db_namespace,
@@ -447,7 +470,13 @@ Status TableService::listPartitions(
     const String& table_name,
     Function<void (const TablePartitionInfo& partition)> fn) const {
   auto table = dbctx_->partition_map->findTable(db_namespace, table_name);
-  MetadataClient metadata_client(dbctx_->config_directory);
+  MetadataClient metadata_client(
+      dbctx_->config_directory,
+      dbctx_->config,
+      dbctx_->metadata_cache,
+      dbctx_->connection_pool,
+      dbctx_->dns_cache);
+
   MetadataFile metadata_file;
   auto rc = metadata_client.fetchLatestMetadataFile(
       db_namespace,
@@ -611,7 +640,9 @@ ReturnCode TableService::insertRecords(
   MetadataClient metadata_client(
       dbctx_->config_directory,
       dbctx_->config,
-      dbctx_->metadata_cache);
+      dbctx_->metadata_cache,
+      dbctx_->connection_pool,
+      dbctx_->dns_cache);
 
   HashMap<SHA1Hash, ShreddedRecordListBuilder> records;
   HashMap<SHA1Hash, Set<String>> servers;
@@ -806,6 +837,8 @@ ReturnCode TableService::insertRecords(
   native_transport::TCPAsyncClient rpc_client(
       dbctx_->config,
       dbctx_->config_directory,
+      dbctx_->connection_pool,
+      dbctx_->dns_cache,
       remote_servers.size(), /* max_concurrent_tasks */
       1,                     /* max_concurrent_tasks_per_host */
       true);                 /* tolerate failures */
@@ -817,9 +850,10 @@ ReturnCode TableService::insertRecords(
       const char* payload,
       size_t payload_size) -> ReturnCode {
     switch (opcode) {
-      case EVQL_OP_ACK:
+      case EVQL_OP_ACK: {
         ++nconfirmations;
         return ReturnCode::success();
+      }
       default:
         return ReturnCode::error("ERUNTIME", "unexpected opcode");
     }
@@ -847,7 +881,6 @@ ReturnCode TableService::insertRecordsLocal(
     const String& table_name,
     const SHA1Hash& partition_key,
     const ShreddedRecordList& records) try {
-  auto t0 = MonotonicClock::now();
   auto partition = dbctx_->partition_map->findOrCreatePartition(
       tsdb_namespace,
       table_name,
@@ -861,9 +894,6 @@ ReturnCode TableService::insertRecordsLocal(
     change->partition = partition;
     dbctx_->partition_map->publishPartitionChange(change);
   }
-
-  auto t1 = MonotonicClock::now();
-  logInfo("evqld", "Insert took $0ms", double(t1-t0) / 1000.0f);
 
   return ReturnCode::success();
 } catch (const std::exception& e) {

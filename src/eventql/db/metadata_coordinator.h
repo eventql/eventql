@@ -27,6 +27,7 @@
 #include "eventql/db/metadata_operation.h"
 #include "eventql/db/metadata_file.h"
 #include "eventql/config/config_directory.h"
+#include "eventql/transport/native/client_tcp.h"
 
 namespace eventql {
 
@@ -35,7 +36,9 @@ public:
 
   MetadataCoordinator(
       ConfigDirectory* cdir,
-      ProcessConfig* config);
+      ProcessConfig* config,
+      native_transport::TCPConnectionPool* conn_pool,
+      net::DNSCache* dns_cache);
 
   Status performAndCommitOperation(
       const String& ns,
@@ -77,6 +80,8 @@ protected:
 
   ConfigDirectory* cdir_;
   ProcessConfig* config_;
+  native_transport::TCPConnectionPool* conn_pool_;
+  net::DNSCache* dns_cache_;
 };
 
 
