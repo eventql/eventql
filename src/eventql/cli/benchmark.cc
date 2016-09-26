@@ -62,7 +62,7 @@ Benchmark::Benchmark(
   }
 
   for (size_t i = 0; i < num_threads_; ++i) {
-    clients_.emplace_back(nullptr, nullptr);
+    clients_.emplace_back(new native_transport::TCPClient(nullptr, nullptr));
   }
 }
 
@@ -88,7 +88,7 @@ ReturnCode Benchmark::connect(
 
   if (!disable_keepalive_) {
     for (size_t i = 0; i < num_threads_; ++i) {
-      auto rc = clients_[i].connect(host_, port_, false, auth_data_);
+      auto rc = clients_[i]->connect(host_, port_, false, auth_data_);
       if (!rc.isSuccess()) {
         return rc;
       }
@@ -148,12 +148,12 @@ void Benchmark::runThread(size_t idx) {
     auto rc = ReturnCode::success();
 
     if (disable_keepalive_) {
-      rc = clients_[idx].connect(host_, port_, false, auth_data_);
+      rc = clients_[idx]->connect(host_, port_, false, auth_data_);
     }
 
     if (rc.isSuccess()) {
       try {
-        rc = request_handler_(&clients_[idx], sequence_.fetch_add(1));
+        rc = request_handler_(clients_[idx].get(), sequence_.fetch_add(1));
       } catch (const std::exception& e) {
         rc = ReturnCode::error("ERUNTIME", e.what());
       }
@@ -162,7 +162,7 @@ void Benchmark::runThread(size_t idx) {
     auto t1 = MonotonicClock::now();
 
     if (disable_keepalive_) {
-      clients_[idx].close();
+      clients_[idx]->close();
     }
 
     std::unique_lock<std::mutex> lk(mutex_);
