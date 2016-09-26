@@ -22,6 +22,7 @@
  * code of your own applications
  */
 #include <stdlib.h>
+#include <unistd.h>
 #include <eventql/sql/expressions/miscellaneous.h>
 #include <eventql/util/exception.h>
 #include "eventql/util/wallclock.h"
