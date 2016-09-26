@@ -411,7 +411,26 @@ Status TSDBTableProvider::createTable(
 }
 
 Status TSDBTableProvider::createDatabase(const String& database_name) {
-  return Status(eRuntimeError, "permission denied");
+  bool db_exists = false;
+  cdir_->listNamespaces([&db_exists, database_name](NamespaceConfig cfg) {
+    if (database_name == cfg.customer()) {
+      db_exists = true;
+    }
+  });
+
+  if (db_exists) {
+    return Status(eRuntimeError, "database already exists");
+  }
+
+  NamespaceConfig cfg;
+  cfg.set_customer(database_name);
+  try {
+    cdir_->updateNamespaceConfig(cfg);
+  } catch (const std::exception& e) {
+    return Status(e);
+  }
+
+  return Status::success();
 }
 
 Status TSDBTableProvider::alterTable(const csql::AlterTableNode& alter_table) {
