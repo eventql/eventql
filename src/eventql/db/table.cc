@@ -123,6 +123,11 @@ MetadataTransaction Table::getLastMetadataTransaction() const {
       config_.metadata_txnseq());
 }
 
+bool Table::hasUserDefinedPartitions() const {
+  std::unique_lock<std::mutex> lk(mutex_);
+  return config_.config().enable_user_defined_partitions();
+}
+
 void Table::updateConfig(TableDefinition new_config) {
   std::unique_lock<std::mutex> lk(mutex_);
   config_ = new_config;

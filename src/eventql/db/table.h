@@ -63,6 +63,8 @@ public:
 
   MetadataTransaction getLastMetadataTransaction() const;
 
+  bool hasUserDefinedPartitions() const;
+
   void updateConfig(TableDefinition new_config);
 
 protected:
