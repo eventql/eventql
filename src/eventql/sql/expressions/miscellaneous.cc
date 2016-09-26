@@ -24,10 +24,12 @@
 #include <stdlib.h>
 #include <eventql/sql/expressions/miscellaneous.h>
 #include <eventql/util/exception.h>
+#include "eventql/util/wallclock.h"
 
 namespace csql {
 namespace expressions {
 
+static const uint64_t kUSleepIntervalUs = 1000;
 void usleepExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
   if (argc != 1) {
     RAISE(
@@ -43,18 +45,23 @@ void usleepExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
         total_sleep);
   }
 
-  auto sleep_count = total_sleep / kUSleepTime;
-  for (auto i = 0; i < sleep_count; ++i) {
-    usleep(kUSleepTime);
-
-    auto rc = ((Transaction*) *ctx)->triggerHeartbeat();
-    if (!rc.isSuccess()) {
-      *out = SValue::newInteger(1);
-      return;
+  auto begin = MonotonicClock::now();
+  for (;;) {
+    auto now = MonotonicClock::now();
+    if (begin + total_sleep <= now) {
+      break;
     }
+
+    auto rc = Transaction::get(ctx)->triggerHeartbeat();
+    if (!rc.isSuccess()) {
+      RAISE(kRuntimeError, rc.getMessage());
+    }
+
+    auto remaining = total_sleep - (now - begin);
+    auto sleep = remaining < kUSleepIntervalUs ? remaining : kUSleepIntervalUs;
+    usleep(sleep);
   }
 
-  usleep(total_sleep % kUSleepTime);
   *out = SValue::newInteger(0);
 }
 

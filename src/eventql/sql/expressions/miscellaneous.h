@@ -28,7 +28,6 @@
 namespace csql {
 namespace expressions {
 
-static const uint64_t kUSleepTime = 100;
 void usleepExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out);
 
 }
