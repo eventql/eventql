@@ -25,6 +25,7 @@
 #include <eventql/sql/expressions/miscellaneous.h>
 #include <eventql/util/exception.h>
 #include "eventql/util/wallclock.h"
+#include "eventql/util/fnv.h"
 
 namespace csql {
 namespace expressions {
@@ -63,6 +64,17 @@ void usleepExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
   }
 
   *out = SValue::newInteger(0);
+}
+
+void fnv32Expr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
+  if (argc != 1) {
+    RAISE(
+        kRuntimeError,
+        "wrong number of arguments for usleep expected: 1, got: %i", argc);
+  }
+
+  FNV<uint32_t> fnv;
+  *out = SValue::newInteger(fnv.hash(argv[0].getString()));
 }
 
 } //expressions

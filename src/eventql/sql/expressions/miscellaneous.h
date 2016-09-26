@@ -29,6 +29,7 @@ namespace csql {
 namespace expressions {
 
 void usleepExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out);
+void fnv32Expr(sql_txn* ctx, int argc, SValue* argv, SValue* out);
 
 }
 }

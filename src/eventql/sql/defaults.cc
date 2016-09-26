@@ -120,6 +120,7 @@ void installDefaultSymbols(SymbolTable* rt) {
 
   /* expressions/miscellaneous.h */
   rt->registerFunction("usleep", PureFunction(&expressions::usleepExpr, true));
+  rt->registerFunction("fnv32", PureFunction(&expressions::fnv32Expr));
 
   /* expressions/internal.h */
   rt->registerFunction("repeat_value", expressions::kRepeatValueExpr);
