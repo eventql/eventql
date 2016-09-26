@@ -72,7 +72,13 @@ ReturnCode TCPClient::connect(
     conn_->close();
   }
 
-  auto server_addr = InetAddr::resolve(addr_str); // FIXME
+  InetAddr server_addr;
+  if (dns_cache_) {
+    server_addr = dns_cache_->resolve(addr_str);
+  } else {
+    server_addr = InetAddr::resolve(addr_str);
+  }
+
   auto server_ip = server_addr.ip();
 
   logDebug("evql", "Opening connection to $0", addr_str);
@@ -737,7 +743,13 @@ ReturnCode TCPAsyncClient::startConnection(Task* task) {
     return ReturnCode::error("ERUNTIME", "server is down");
   }
 
-  auto server_addr = InetAddr::resolve(server_cfg.server_addr()); // FIXME
+  InetAddr server_addr;
+  if (dns_cache_) {
+    server_addr = dns_cache_->resolve(server_cfg.server_addr());
+  } else {
+    server_addr = InetAddr::resolve(server_cfg.server_addr());
+  }
+
   auto server_ip = server_addr.ip();
 
   logDebug("evql", "Opening connection to $0", connection.host);
