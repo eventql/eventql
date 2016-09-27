@@ -42,7 +42,7 @@
 #include "eventql/sql/qtree/nodes/insert_into.h"
 #include "eventql/sql/qtree/nodes/insert_json.h"
 #include "eventql/sql/qtree/nodes/describe_partitions.h"
-#include "eventql/sql/qtree/nodes/describe_servers.h"
+#include "eventql/sql/qtree/nodes/cluster_show_servers.h"
 #include "eventql/sql/CSTableScanProvider.h"
 #include "eventql/sql/backends/csv/CSVTableProvider.h"
 
@@ -984,11 +984,11 @@ TEST_CASE(QTreeTest, TestDescribePartitions, [] () {
 
 });
 
-TEST_CASE(QTreeTest, TestDescribeServers, [] () {
+TEST_CASE(QTreeTest, TestClusterShowServers, [] () {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
-  String query = "DESCRIBE SERVERS";
+  String query = "CLUSTER SHOW SERVERS";
   csql::Parser parser;
   parser.parse(query.data(), query.size());
 
@@ -997,7 +997,7 @@ TEST_CASE(QTreeTest, TestDescribeServers, [] () {
       txn.get(),
       parser.getStatements(),
       txn->getTableProvider());
-  RefPtr<DescribeServersNode> qtree =
-      qtrees[0].asInstanceOf<DescribeServersNode>();
+  RefPtr<ClusterShowServersNode> qtree =
+      qtrees[0].asInstanceOf<ClusterShowServersNode>();
 });
 

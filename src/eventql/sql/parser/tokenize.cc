@@ -572,6 +572,11 @@ next:
     goto next;
   }
 
+  if (token == "CLUSTER") {
+    token_list->emplace_back(Token::T_CLUSTER);
+    goto next;
+  }
+
   if (token == "SERVERS") {
     token_list->emplace_back(Token::T_SERVERS);
     goto next;

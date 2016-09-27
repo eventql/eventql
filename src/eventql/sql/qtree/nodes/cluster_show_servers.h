@@ -24,30 +24,39 @@
 #pragma once
 #include "eventql/eventql.h"
 #include <eventql/util/stdtypes.h>
-#include <eventql/sql/qtree/ShowTablesNode.h>
-#include <eventql/sql/runtime/tablerepository.h>
+#include <eventql/sql/qtree/TableExpressionNode.h>
+#include <eventql/sql/qtree/qtree_coder.h>
 
 namespace csql {
 
-class DescribeServersExpression : public TableExpression {
+class ClusterShowServersNode : public TableExpressionNode {
 public:
 
-  static const size_t kNumColumns = 8;
+  Vector<RefPtr<QueryTreeNode>> inputTables() const;
 
-  DescribeServersExpression(Transaction* txn);
+  Vector<String> getResultColumns() const override;
 
-  ScopedPtr<ResultCursor> execute() override;
+  Vector<QualifiedColumn> getAvailableColumns() const override;
 
-  size_t getNumColumns() const override;
+  RefPtr<QueryTreeNode> deepCopy() const override;
 
-protected:
+  String toString() const override;
 
-  bool next(SValue* row, size_t row_len);
+  size_t getComputedColumnIndex(
+      const String& column_name,
+      bool allow_add = false) override;
 
-  Transaction* txn_;
-  Vector<eventql::ServerConfig> rows_;
-  size_t counter_;
+  size_t getNumComputedColumns() const override;
+
+  static void encode(
+      QueryTreeCoder* coder,
+      const ClusterShowServersNode& node,
+      OutputStream* os);
+
+  static RefPtr<QueryTreeNode> decode (
+      QueryTreeCoder* coder,
+      InputStream* is);
 };
 
-} //csql
+} // namespace csql
 

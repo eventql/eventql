@@ -32,7 +32,7 @@ namespace cli {
 const std::string ClusterList::kName_ = "cluster-list";
 const std::string ClusterList::kDescription_ =
     "List the servers of an existing cluster.";
-const std::string ClusterList::kQuery_ = "DESCRIBE SERVERS;";
+const std::string ClusterList::kQuery_ = "CLUSTER SHOW SERVERS;";
 
 ClusterList::ClusterList(
     RefPtr<ProcessConfig> process_cfg) :

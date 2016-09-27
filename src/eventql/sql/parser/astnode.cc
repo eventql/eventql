@@ -336,8 +336,8 @@ void ASTNode::debugPrint(int indent /* = 0 */) const {
     case T_DESCRIBE_PARTITIONS:
       printf("- T_DESCRIBE_PARTITIONS");
       break;
-    case T_DESCRIBE_SERVERS:
-      printf("- T_DESCRIBE_SERVERS");
+    case T_CLUSTER_SHOW_SERVERS:
+      printf("- T_CLUSTER_SHOW_SERVERS");
       break;
     case T_EXPLAIN_QUERY:
       printf("- T_EXPLAIN_QUERY");

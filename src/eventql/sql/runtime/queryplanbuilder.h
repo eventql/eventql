@@ -200,7 +200,7 @@ public:
       Transaction* txn,
       ASTNode* ast);
 
-  QueryTreeNode* buildDescribeServers(
+  QueryTreeNode* buildClusterShowServers(
       Transaction* txn,
       ASTNode* ast);
 

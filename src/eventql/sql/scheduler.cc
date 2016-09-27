@@ -265,8 +265,8 @@ ScopedPtr<TableExpression> DefaultScheduler::buildTableExpression(
         node.asInstanceOf<DescribePartitionsNode>()->tableName()));
   }
 
-  if (dynamic_cast<DescribeServersNode*>(node.get())) {
-    return mkScoped(new DescribeServersExpression(ctx));
+  if (dynamic_cast<ClusterShowServersNode*>(node.get())) {
+    return mkScoped(new ClusterShowServersExpression(ctx));
   }
 
   if (dynamic_cast<JoinNode*>(node.get())) {

@@ -21,19 +21,19 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include <eventql/sql/qtree/nodes/describe_servers.h>
+#include <eventql/sql/qtree/nodes/cluster_show_servers.h>
 
 namespace csql {
 
-Vector<RefPtr<QueryTreeNode>> DescribeServersNode::inputTables() const {
+Vector<RefPtr<QueryTreeNode>> ClusterShowServersNode::inputTables() const {
   return Vector<RefPtr<QueryTreeNode>>{};
 }
 
-RefPtr<QueryTreeNode> DescribeServersNode::deepCopy() const {
-  return new DescribeServersNode();
+RefPtr<QueryTreeNode> ClusterShowServersNode::deepCopy() const {
+  return new ClusterShowServersNode();
 }
 
-Vector<String> DescribeServersNode::getResultColumns() const {
+Vector<String> ClusterShowServersNode::getResultColumns() const {
   return Vector<String> {
     "Name",
     "Status",
@@ -46,7 +46,7 @@ Vector<String> DescribeServersNode::getResultColumns() const {
   };
 }
 
-Vector<QualifiedColumn> DescribeServersNode::getAvailableColumns() const {
+Vector<QualifiedColumn> ClusterShowServersNode::getAvailableColumns() const {
   Vector<QualifiedColumn> cols;
 
   for (const auto& c : getResultColumns()) {
@@ -59,33 +59,31 @@ Vector<QualifiedColumn> DescribeServersNode::getAvailableColumns() const {
   return cols;
 }
 
-size_t DescribeServersNode::getComputedColumnIndex(
+size_t ClusterShowServersNode::getComputedColumnIndex(
     const String& column_name,
     bool allow_add /* = false */) {
   return -1; // FIXME
 }
 
-size_t DescribeServersNode::getNumComputedColumns() const {
+size_t ClusterShowServersNode::getNumComputedColumns() const {
   return 4;
 }
 
-String DescribeServersNode::toString() const {
+String ClusterShowServersNode::toString() const {
   return "(describe-servers)";
 }
 
-void DescribeServersNode::encode(
+void ClusterShowServersNode::encode(
     QueryTreeCoder* coder,
-    const DescribeServersNode& node,
+    const ClusterShowServersNode& node,
     OutputStream* os) {
 }
 
-RefPtr<QueryTreeNode> DescribeServersNode::decode (
+RefPtr<QueryTreeNode> ClusterShowServersNode::decode (
     QueryTreeCoder* coder,
     InputStream* is) {
-  return new DescribeServersNode();
+  return new ClusterShowServersNode();
 }
 
 } // namespace csql
-
-
 

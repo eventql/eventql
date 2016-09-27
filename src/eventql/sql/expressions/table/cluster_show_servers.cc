@@ -22,17 +22,17 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include "eventql/sql/expressions/table/describe_servers.h"
+#include "eventql/sql/expressions/table/cluster_show_servers.h"
 #include "eventql/sql/transaction.h"
 
 namespace csql {
 
-DescribeServersExpression::DescribeServersExpression(
+ClusterShowServersExpression::ClusterShowServersExpression(
     Transaction* txn) :
     txn_(txn),
     counter_(0) {}
 
-ScopedPtr<ResultCursor> DescribeServersExpression::execute() {
+ScopedPtr<ResultCursor> ClusterShowServersExpression::execute() {
   auto rc = txn_->getTableProvider()->listServers(
       [this] (const eventql::ServerConfig& server) {
     rows_.emplace_back(server);
@@ -46,18 +46,18 @@ ScopedPtr<ResultCursor> DescribeServersExpression::execute() {
       new DefaultResultCursor(
           kNumColumns,
           std::bind(
-              &DescribeServersExpression::next,
+              &ClusterShowServersExpression::next,
               this,
               std::placeholders::_1,
               std::placeholders::_2)));
 
 }
 
-size_t DescribeServersExpression::getNumColumns() const {
+size_t ClusterShowServersExpression::getNumColumns() const {
   return kNumColumns;
 }
 
-bool DescribeServersExpression::next(SValue* row, size_t row_len) {
+bool ClusterShowServersExpression::next(SValue* row, size_t row_len) {
   if (counter_ < rows_.size()) {
     const auto& server = rows_[counter_];
     const auto& sstats = server.server_stats();

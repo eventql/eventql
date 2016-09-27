@@ -385,7 +385,7 @@ TEST_CASE(ParserTest, TestSelectWithQuotedTableName, [] () {
 
 TEST_CASE(ParserTest, TestSelectMustBeFirstAssert, [] () {
   const char* err_msg = "unexpected token T_GROUP, expected one of SELECT, "
-      "CREATE, INSERT, ALTER, DROP, DRAW or IMPORT";
+      "CREATE, INSERT, ALTER, DROP, CLUSTER, DRAW or IMPORT";
 
   EXPECT_EXCEPTION(err_msg, [] () {
     auto parser = parseTestQuery("GROUP BY SELECT");
@@ -1401,10 +1401,10 @@ TEST_CASE(ParserTest, TestDescribePartitionsStatement, [] () {
 TEST_CASE(ParserTest, TestDescribeServersStatement, [] () {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
-  auto parser = parseTestQuery("DESCRIBE servers;");
+  auto parser = parseTestQuery("CLUSTER SHOW SERVERS;");
 
   EXPECT(parser.getStatements().size() == 1);
   const auto& stmt = parser.getStatements()[0];
-  EXPECT_EQ(*stmt, ASTNode::T_DESCRIBE_SERVERS);
+  EXPECT_EQ(*stmt, ASTNode::T_CLUSTER_SHOW_SERVERS);
 });
 
