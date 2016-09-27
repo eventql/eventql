@@ -77,7 +77,8 @@ public:
 
   TableDefinition getTableConfig(
       const String& db_namespace,
-      const String& table_name) const override;
+      const String& table_name,
+      bool allow_cache = true) override;
 
   void updateTableConfig(
       const TableDefinition& table,
