@@ -73,6 +73,13 @@ public:
       PartitionFindResponse* res);
 
 protected:
+
+  ReturnCode downloadMetadataFile(
+      const String& ns,
+      const String& table_id,
+      const SHA1Hash& txnid,
+      RefPtr<MetadataFile>* file);
+
   ConfigDirectory* cdir_;
   ProcessConfig* config_;
   MetadataCache* cache_;

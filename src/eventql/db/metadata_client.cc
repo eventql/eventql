@@ -42,161 +42,99 @@ MetadataClient::MetadataClient(
     conn_pool_(conn_pool),
     dns_cache_(dns_cache) {}
 
-//Status MetadataClient::fetchLatestMetadataFile(
-//    const String& ns,
-//    const String& table_id,
-//    MetadataFile* file) {
-//  auto table_cfg = cdir_->getTableConfig(ns, table_id);
-//  auto idle_timeout = config_->getInt("server.s2s_idle_timeout", 0);
-//  auto io_timeout = config_->getInt("server.s2s_io_timeout", 0);
-//
-//  native_transport::MetaGetfileFrame m_frame;
-//  m_frame.setDatabase(ns);
-//  m_frame.setTable(table_id);
-//  m_frame.setLatestTransactionFlag(true);
-//
-//  for (const auto& s : table_cfg.metadata_servers()) {
-//    auto server = cdir_->getServerConfig(s);
-//    if (server.server_status() != SERVER_UP) {
-//      logWarning("evqld", "metadata server is down: $0", s);
-//      continue;
-//    }
-//
-//    native_transport::TCPClient client(
-//        conn_pool_,
-//        dns_cache_,
-//        io_timeout,
-//        idle_timeout);
-//
-//    auto rc = client.connect(server.server_addr(), true);
-//    if (!rc.isSuccess()) {
-//      logWarning(
-//          "evqld",
-//          "can't connect to metadata server: $0",
-//          rc.getMessage());
-//      continue;
-//    }
-//
-//    rc = client.sendFrame(&m_frame, 0);
-//    if (!rc.isSuccess()) {
-//      logWarning("evqld", "metadata request failed: $0", rc.getMessage());
-//      continue;
-//    }
-//
-//    uint16_t ret_opcode = 0;
-//    uint16_t ret_flags;
-//    std::string ret_payload;
-//    rc = client.recvFrame(&ret_opcode, &ret_flags, &ret_payload, idle_timeout);
-//    if (!rc.isSuccess()) {
-//      logWarning("evqld", "metadata request failed: $0", rc.getMessage());
-//      continue;
-//    }
-//
-//    switch (ret_opcode) {
-//      case EVQL_OP_META_GETFILE_RESULT:
-//        break;
-//      case EVQL_OP_ERROR: {
-//        native_transport::ErrorFrame eframe;
-//        eframe.parseFrom(ret_payload.data(), ret_payload.size());
-//        logWarning("evqld", "metadata request failed: $0", eframe.getError());
-//        continue;
-//      }
-//      default:
-//        logWarning("evqld", "metadata request failed: invalid opcode");
-//        continue;
-//    }
-//
-//    auto is = StringInputStream::fromString(ret_payload);
-//    return file->decode(is.get());
-//  }
-//
-//  return Status(eIOError, "no metadata server responded");
-//
-//}
-//
-//Status MetadataClient::fetchMetadataFile(
-//    const TableDefinition& table_config,
-//    MetadataFile* file) {
-//  return fetchMetadataFile(
-//      table_config.customer(),
-//      table_config.table_name(),
-//      SHA1Hash(
-//          table_config.metadata_txnid().data(),
-//          table_config.metadata_txnid().size()),
-//      file);
-//}
+Status MetadataClient::fetchLatestMetadataFile(
+    const String& ns,
+    const String& table_id,
+    RefPtr<MetadataFile>* file) {
+  auto table_cfg = cdir_->getTableConfig(ns, table_id);
 
-//Status MetadataClient::fetchMetadataFile(
-//    const String& ns,
-//    const String& table_id,
-//    const SHA1Hash& txnid,
-//    MetadataFile* file) {
-//  auto table_cfg = cdir_->getTableConfig(ns, table_id);
-//  auto idle_timeout = config_->getInt("server.s2s_idle_timeout", 0);
-//  auto io_timeout = config_->getInt("server.s2s_io_timeout", 0);
-//
-//  native_transport::MetaGetfileFrame m_frame;
-//  m_frame.setDatabase(ns);
-//  m_frame.setTable(table_id);
-//  m_frame.setTransactionID(txnid);
-//
-//  for (const auto& s : table_cfg.metadata_servers()) {
-//    auto server = cdir_->getServerConfig(s);
-//    if (server.server_status() != SERVER_UP) {
-//      logWarning("evqld", "metadata server is down: $0", s);
-//      continue;
-//    }
-//
-//    native_transport::TCPClient client(
-//        conn_pool_,
-//        dns_cache_,
-//        io_timeout,
-//        idle_timeout);
-//
-//    auto rc = client.connect(server.server_addr(), true);
-//    if (!rc.isSuccess()) {
-//      logWarning(
-//          "evqld",
-//          "can't connect to metadata server: $0",
-//          rc.getMessage());
-//      continue;
-//    }
-//
-//    rc = client.sendFrame(&m_frame, 0);
-//    if (!rc.isSuccess()) {
-//      logWarning("evqld", "metadata request failed: $0", rc.getMessage());
-//      continue;
-//    }
-//
-//    uint16_t ret_opcode = 0;
-//    uint16_t ret_flags;
-//    std::string ret_payload;
-//    rc = client.recvFrame(&ret_opcode, &ret_flags, &ret_payload, idle_timeout);
-//    if (!rc.isSuccess()) {
-//      logWarning("evqld", "metadata request failed: $0", rc.getMessage());
-//      continue;
-//    }
-//
-//    switch (ret_opcode) {
-//      case EVQL_OP_META_GETFILE_RESULT:
-//        break;
-//      case EVQL_OP_ERROR: {
-//        native_transport::ErrorFrame eframe;
-//        eframe.parseFrom(ret_payload.data(), ret_payload.size());
-//        logWarning("evqld", "metadata request failed: $0", eframe.getError());
-//        continue;
-//      }
-//      default:
-//        logWarning("evqld", "metadata request failed: invalid opcode");
-//        continue;
-//    }
-//
-//    auto is = StringInputStream::fromString(ret_payload);
-//    return file->decode(is.get());
-//  }
-//
-//  return Status(eIOError, "no metadata server responded");
-//}
+  SHA1Hash txid(
+      table_cfg.metadata_txnid().data(),
+      table_cfg.metadata_txnid().size());
+
+  return fetchMetadataFile(ns, table_id, txid, file);
+}
+
+Status MetadataClient::fetchMetadataFile(
+    const String& ns,
+    const String& table_id,
+    const SHA1Hash& txnid,
+    RefPtr<MetadataFile>* file) {
+  return downloadMetadataFile(ns, table_id, txnid, file);
+}
+
+ReturnCode MetadataClient::downloadMetadataFile(
+    const String& ns,
+    const String& table_id,
+    const SHA1Hash& txnid,
+    RefPtr<MetadataFile>* file) {
+  auto table_cfg = cdir_->getTableConfig(ns, table_id);
+  auto idle_timeout = config_->getInt("server.s2s_idle_timeout", 0);
+  auto io_timeout = config_->getInt("server.s2s_io_timeout", 0);
+
+  native_transport::MetaGetfileFrame m_frame;
+  m_frame.setDatabase(ns);
+  m_frame.setTable(table_id);
+  m_frame.setTransactionID(txnid);
+
+  for (const auto& s : table_cfg.metadata_servers()) {
+    auto server = cdir_->getServerConfig(s);
+    if (server.server_status() != SERVER_UP) {
+      logWarning("evqld", "metadata server is down: $0", s);
+      continue;
+    }
+
+    native_transport::TCPClient client(
+        conn_pool_,
+        dns_cache_,
+        io_timeout,
+        idle_timeout);
+
+    auto rc = client.connect(server.server_addr(), true);
+    if (!rc.isSuccess()) {
+      logWarning(
+          "evqld",
+          "can't connect to metadata server: $0",
+          rc.getMessage());
+      continue;
+    }
+
+    rc = client.sendFrame(&m_frame, 0);
+    if (!rc.isSuccess()) {
+      logWarning("evqld", "metadata request failed: $0", rc.getMessage());
+      continue;
+    }
+
+    uint16_t ret_opcode = 0;
+    uint16_t ret_flags;
+    std::string ret_payload;
+    rc = client.recvFrame(&ret_opcode, &ret_flags, &ret_payload, idle_timeout);
+    if (!rc.isSuccess()) {
+      logWarning("evqld", "metadata request failed: $0", rc.getMessage());
+      continue;
+    }
+
+    switch (ret_opcode) {
+      case EVQL_OP_META_GETFILE_RESULT:
+        break;
+      case EVQL_OP_ERROR: {
+        native_transport::ErrorFrame eframe;
+        eframe.parseFrom(ret_payload.data(), ret_payload.size());
+        logWarning("evqld", "metadata request failed: $0", eframe.getError());
+        continue;
+      }
+      default:
+        logWarning("evqld", "metadata request failed: invalid opcode");
+        continue;
+    }
+
+    auto is = StringInputStream::fromString(ret_payload);
+    file->reset(new MetadataFile());
+    return (*file)->decode(is.get());
+  }
+
+  return Status(eIOError, "no metadata server responded");
+}
 
 Status MetadataClient::listPartitions(
     const String& ns,
