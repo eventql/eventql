@@ -24,7 +24,12 @@
  */
 #include <eventql/cli/commands/table_import.h>
 #include <eventql/util/cli/flagparser.h>
+#include "eventql/util/io/fileutil.h"
+#include "eventql/util/json/json.h"
 #include "eventql/util/logging.h"
+#include "eventql/transport/native/client_tcp.h"
+#include "eventql/transport/native/frames/insert.h"
+#include "eventql/transport/native/frames/error.h"
 
 namespace eventql {
 namespace cli {
@@ -67,11 +72,16 @@ Status TableImport::execute(
       true,
       "f",
       NULL,
-      "table name",
+      "file path",
       "<string>");
 
+  Buffer buf;
+  json::JSONObject json;
   try {
     flags.parseArgv(argv);
+
+    buf = FileUtil::read(flags.getString("file")); //FIXME read as input stream?
+    json = json::parseJSON(buf);
 
   } catch (const Exception& e) {
 
@@ -82,9 +92,67 @@ Status TableImport::execute(
     return Status(e);
   }
 
-  iputs("import table", 1);
+  std::vector<std::pair<std::string, std::string>> auth_data{}; //FIXME get host, port, auth data from config
 
-  return Status::success();
+  auto rc = Status::success();
+
+  /* connect */
+  native_transport::TCPClient client(nullptr, nullptr);
+  rc = client.connect("localhost", 10001, false, auth_data);
+  if (!rc.isSuccess()) {
+    goto exit;
+  }
+
+  /* insert */
+  {
+    native_transport::InsertFrame i_frame;
+    i_frame.setDatabase(flags.getString("database"));
+    i_frame.setTable(flags.getString("table"));
+    i_frame.setRecordEncoding(EVQL_INSERT_CTYPE_JSON);
+    i_frame.addRecord(buf.toString());
+
+    rc = client.sendFrame(&i_frame, 0);
+    if (!rc.isSuccess()) {
+      goto exit;
+    }
+  }
+
+  {
+    uint16_t ret_opcode = 0;
+    uint16_t ret_flags;
+    std::string ret_payload;
+    while (ret_opcode != EVQL_OP_ACK) {
+      rc = client.recvFrame(
+          &ret_opcode,
+          &ret_flags,
+          &ret_payload,
+          kMicrosPerSecond); // FIXME
+
+      if (!rc.isSuccess()) {
+        goto exit;
+      }
+
+      switch (ret_opcode) {
+        case EVQL_OP_ACK:
+        case EVQL_OP_HEARTBEAT:
+          continue;
+        case EVQL_OP_ERROR: {
+          native_transport::ErrorFrame eframe;
+          eframe.parseFrom(ret_payload.data(), ret_payload.size());
+          rc = ReturnCode::error("ERUNTIME", eframe.getError());
+          goto exit;
+        }
+        default:
+          rc = ReturnCode::error("ERUNTIME", "unexpected opcode");
+          goto exit;
+      }
+    }
+  }
+
+
+exit:
+  client.close();
+  return rc;
 }
 
 const String& TableImport::getName() const {
