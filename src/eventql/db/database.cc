@@ -448,7 +448,9 @@ ReturnCode DatabaseImpl::start() {
             tbl.table_name(),
             partition_id);
 
-        replication_worker_->enqueuePartition(partition.get(), 0);
+        replication_worker_->enqueuePartition(
+            partition.get(),
+            ReplicationOptions::CORK);
       } catch (const std::exception& e) {
         logError(
             "evqld",
