@@ -75,12 +75,11 @@ Status TableImport::execute(
       "file path",
       "<string>");
 
-  Buffer buf;
   json::JSONObject json;
   try {
     flags.parseArgv(argv);
 
-    buf = FileUtil::read(flags.getString("file")); //FIXME read as input stream?
+    Buffer buf = FileUtil::read(flags.getString("file")); //FIXME read as input stream?
     json = json::parseJSON(buf);
 
   } catch (const Exception& e) {
@@ -109,7 +108,18 @@ Status TableImport::execute(
     i_frame.setDatabase(flags.getString("database"));
     i_frame.setTable(flags.getString("table"));
     i_frame.setRecordEncoding(EVQL_INSERT_CTYPE_JSON);
-    i_frame.addRecord(buf.toString());
+
+    const auto num_records = json::arrayLength(json);
+    for (size_t i = 0; i < num_records; ++i) {
+      auto record = json::arrayLookup(json.begin(), json.end(), i);
+      if (record == json.end()) {
+        break;
+      }
+
+      //FIXME
+      //auto jstr = json::toJSONString(record)
+      //i_frame.addRecord(buf.toString());
+    }
 
     rc = client.sendFrame(&i_frame, 0);
     if (!rc.isSuccess()) {
