@@ -696,12 +696,13 @@ ReturnCode TableService::insertRecords(
     // lookup partition
     PartitionFindResponse find_res;
     {
-      auto rc = dbctx_->metadata_client->findOrCreatePartition(
+      auto rc = dbctx_->metadata_client->findPartition(
           tsdb_namespace,
           table_name,
           encodePartitionKey(
               table.get()->getKeyspaceType(),
               partition_key_field.get()),
+          true, /* allow create */
           &find_res);
 
       if (!rc.isSuccess()) {

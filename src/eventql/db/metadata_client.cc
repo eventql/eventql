@@ -219,6 +219,7 @@ Status MetadataClient::findPartition(
     const String& ns,
     const String& table_id,
     const String& key,
+    bool allow_create,
     PartitionFindResponse* res) {
   auto table_cfg = cdir_->getTableConfig(ns, table_id);
   auto idle_timeout = config_->getInt("server.s2s_idle_timeout", 0);
@@ -228,95 +229,7 @@ Status MetadataClient::findPartition(
   req.set_db_namespace(ns);
   req.set_table_id(table_id);
   req.set_key(key);
-  req.set_min_sequence_number(table_cfg.metadata_txnseq());
-  req.set_keyspace(getKeyspace(table_cfg.config()));
-
-  if (cache_->get(req, res)) {
-    return Status::success();
-  }
-
-  Buffer req_payload;
-  req_payload.append((char) 0);
-  msg::encode(req, &req_payload);
-
-  for (const auto& s : table_cfg.metadata_servers()) {
-    auto server = cdir_->getServerConfig(s);
-    if (server.server_status() != SERVER_UP) {
-      logWarning("evqld", "metadata server is down: $0", s);
-      continue;
-    }
-
-    native_transport::TCPClient client(
-        conn_pool_,
-        dns_cache_,
-        io_timeout,
-        idle_timeout);
-
-    auto rc = client.connect(server.server_addr(), true);
-    if (!rc.isSuccess()) {
-      logWarning(
-          "evqld",
-          "can't connect to metadata server: $0",
-          rc.getMessage());
-      continue;
-    }
-
-    rc = client.sendFrame(
-        EVQL_OP_META_FINDPARTITION,
-        0,
-        req_payload.data(),
-        req_payload.size());
-
-    if (!rc.isSuccess()) {
-      logWarning("evqld", "metadata request failed: $0", rc.getMessage());
-      continue;
-    }
-
-    uint16_t ret_opcode = 0;
-    uint16_t ret_flags;
-    std::string ret_payload;
-    rc = client.recvFrame(&ret_opcode, &ret_flags, &ret_payload, idle_timeout);
-    if (!rc.isSuccess()) {
-      logWarning("evqld", "metadata request failed: $0", rc.getMessage());
-      continue;
-    }
-
-    switch (ret_opcode) {
-      case EVQL_OP_META_FINDPARTITION_RESULT:
-        break;
-      case EVQL_OP_ERROR: {
-        native_transport::ErrorFrame eframe;
-        eframe.parseFrom(ret_payload.data(), ret_payload.size());
-        logWarning("evqld", "metadata request failed: $0", eframe.getError());
-        continue;
-      }
-      default:
-        logWarning("evqld", "metadata request failed: invalid opcode");
-        continue;
-    }
-
-    msg::decode<PartitionFindResponse>(ret_payload, res);
-    cache_->store(req, *res);
-    return Status::success();
-  }
-
-  return Status(eIOError, "no metadata server responded");
-}
-
-Status MetadataClient::findOrCreatePartition(
-    const String& ns,
-    const String& table_id,
-    const String& key,
-    PartitionFindResponse* res) {
-  auto table_cfg = cdir_->getTableConfig(ns, table_id);
-  auto idle_timeout = config_->getInt("server.s2s_idle_timeout", 0);
-  auto io_timeout = config_->getInt("server.s2s_io_timeout", 0);
-
-  PartitionFindRequest req;
-  req.set_db_namespace(ns);
-  req.set_table_id(table_id);
-  req.set_key(key);
-  req.set_allow_create(true);
+  req.set_allow_create(allow_create);
   req.set_min_sequence_number(table_cfg.metadata_txnseq());
   req.set_keyspace(getKeyspace(table_cfg.config()));
 

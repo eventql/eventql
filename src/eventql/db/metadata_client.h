@@ -68,12 +68,7 @@ public:
       const String& ns,
       const String& table_id,
       const String& key,
-      PartitionFindResponse* res);
-
-  Status findOrCreatePartition(
-      const String& ns,
-      const String& table_id,
-      const String& key,
+      bool allow_create,
       PartitionFindResponse* res);
 
 protected:
