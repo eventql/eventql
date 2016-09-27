@@ -404,6 +404,8 @@ Status MetadataClient::createPartition(
 Status MetadataClient::discoverPartition(
     PartitionDiscoveryRequest request,
     PartitionDiscoveryResponse* response) {
+  request.set_requester_id(cdir_->getServerID());
+
   RefPtr<MetadataFile> file;
   {
     auto rc = fetchLatestMetadataFile(
