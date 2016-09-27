@@ -23,6 +23,7 @@
  */
 #include "eventql/db/metadata_client.h"
 #include "eventql/db/metadata_store.h"
+#include "eventql/db/partition_discovery.h"
 #include "eventql/transport/native/client_tcp.h"
 #include "eventql/transport/native/frames/error.h"
 #include "eventql/transport/native/frames/meta_getfile.h"
@@ -398,6 +399,27 @@ Status MetadataClient::createPartition(
   }
 
   return Status(eIOError, "no metadata server responded");
+}
+
+Status MetadataClient::discoverPartition(
+    PartitionDiscoveryRequest request,
+    PartitionDiscoveryResponse* response) {
+  RefPtr<MetadataFile> file;
+  {
+    auto rc = fetchLatestMetadataFile(
+        request.db_namespace(),
+        request.table_id(),
+        &file);
+    if (!rc.isSuccess()) {
+      return rc;
+    }
+  }
+
+  if (file->getSequenceNumber() < request.min_txnseq()) {
+    return Status(eRuntimeError, "metadata file is too old");
+  }
+
+  return PartitionDiscovery::discoverPartition(file.get(), request, response);
 }
 
 } // namespace eventql
