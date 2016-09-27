@@ -21,6 +21,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#include <algorithm>
 #include "eventql/db/metadata_client.h"
 #include "eventql/db/metadata_store.h"
 #include "eventql/db/partition_discovery.h"
@@ -114,7 +115,13 @@ ReturnCode MetadataClient::downloadMetadataFile(
   m_frame.setTable(table_id);
   m_frame.setTransactionID(txnid);
 
-  for (const auto& s : table_cfg.metadata_servers()) {
+  std::vector<std::string> servers(
+      table_cfg.metadata_servers().begin(),
+      table_cfg.metadata_servers().end());
+
+  std::random_shuffle(servers.begin(), servers.end());
+
+  for (const auto& s : servers) {
     auto server = cdir_->getServerConfig(s);
     if (server.server_status() != SERVER_UP) {
       logWarning("evqld", "metadata server is down: $0", s);
