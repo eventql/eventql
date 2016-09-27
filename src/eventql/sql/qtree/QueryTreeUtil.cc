@@ -84,7 +84,7 @@ bool QueryTreeUtil::isConstantExpression(
   auto call_expr = dynamic_cast<CallExpressionNode*>(expr.get());
   if (call_expr) {
     auto symbol = txn->getSymbolTable()->lookup(call_expr->symbol());
-    if (symbol.isAggregate()) {
+    if (symbol.isAggregate() || symbol.hasSideEffects()) {
       return false;
     }
   }

@@ -293,7 +293,8 @@ ReturnCode DatabaseImpl::start() {
       new native_transport::TCPConnectionPool(
           cfg_->getInt("server.s2s_pool_max_connections", 0),
           cfg_->getInt("server.s2s_pool_max_connections_per_host", 0),
-          cfg_->getInt("server.s2s_pool_linger_timeout", 0)));
+          cfg_->getInt("server.s2s_pool_linger_timeout", 0),
+          cfg_->getInt("server.s2s_io_timeout", 0)));
 
   /* metadata service */
   metadata_store_.reset(new MetadataStore(metadata_dir));

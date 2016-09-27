@@ -333,6 +333,9 @@ void ASTNode::debugPrint(int indent /* = 0 */) const {
     case T_DESCRIBE_TABLE:
       printf("- T_DESCRIBE_TABLE");
       break;
+    case T_DESCRIBE_PARTITIONS:
+      printf("- T_DESCRIBE_PARTITIONS");
+      break;
     case T_EXPLAIN_QUERY:
       printf("- T_EXPLAIN_QUERY");
       break;
@@ -377,6 +380,9 @@ void ASTNode::debugPrint(int indent /* = 0 */) const {
       break;
     case T_CREATE_DATABASE:
       printf("- T_CREATE_DATABASE");
+      break;
+    case T_USE_DATABASE:
+      printf("- T_USE_DATABASE");
       break;
     case T_DROP_TABLE:
       printf("- T_DROP_TABLE");

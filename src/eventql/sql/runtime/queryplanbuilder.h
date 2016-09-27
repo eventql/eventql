@@ -196,11 +196,19 @@ public:
       Transaction* txn,
       ASTNode* ast);
 
+  QueryTreeNode* buildDescribePartitions(
+      Transaction* txn,
+      ASTNode* ast);
+
   QueryTreeNode* buildCreateTable(
       Transaction* txn,
       ASTNode* ast);
 
   QueryTreeNode* buildCreateDatabase(
+      Transaction* txn,
+      ASTNode* ast);
+
+  QueryTreeNode* buildUseDatabase(
       Transaction* txn,
       ASTNode* ast);
 

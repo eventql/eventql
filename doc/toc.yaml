@@ -378,6 +378,14 @@
               visible_in_toc: false
               source: "/sql/functions_and_operators/endswith.md"
             -
+              url: "/sql/functions-and-operators/fnv32"
+              title: "fnv32"
+              type: page
+              doc_type: "sql_function"
+              visible_in_menu: false
+              visible_in_toc: false
+              source: "/sql/functions_and_operators/fnv32.md"
+            -
               url: "/sql/functions-and-operators/from_timestamp"
               title: "from_timestamp"
               type: page
@@ -577,6 +585,14 @@
               visible_in_menu: false
               visible_in_toc: false
               source: "/sql/functions_and_operators/ucase.md"
+            -
+              url: "/sql/functions-and-operators/usleep"
+              title: "usleep"
+              type: page
+              doc_type: "sql_function"
+              visible_in_menu: false
+              visible_in_toc: false
+              source: "/sql/functions_and_operators/usleep.md"
         -
           url: "/sql/statements"
           title: "Statements"
@@ -634,6 +650,13 @@
             visible_in_menu: true
             visible_in_toc: true
             source: "/sql/statements/describe.md"
+          -
+            url: "/sql/statements/describe-partitions"
+            title: "DESCRIBE PARTITIONS"
+            type: page
+            visible_in_menu: true
+            visible_in_toc: true
+            source: "/sql/statements/describe_partitions.md"
           -
             url: "/sql/statements/show-tables"
             title: "SHOW TABLES"

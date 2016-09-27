@@ -1,7 +1,7 @@
 /**
  * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@eventql.io>
+ *   - Laura Schlimmer <laura@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -22,20 +22,15 @@
  * code of your own applications
  */
 #pragma once
-#include <eventql/util/stdtypes.h>
-#include <eventql/util/protobuf/MessageSchema.h>
-#include <eventql/db/table_config.pb.h>
+#include <eventql/sql/svalue.h>
+#include <eventql/sql/transaction.h>
 
-#include "eventql/eventql.h"
+namespace csql {
+namespace expressions {
 
-namespace eventql {
-
-struct TablePartitionInfo {
-  std::vector<std::string> server_ids;
-  std::string partition_id;
-  std::string keyrange_begin;
-  std::string keyrange_end;
-  std::string extra_info;
-};
+void usleepExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out);
+void fnv32Expr(sql_txn* ctx, int argc, SValue* argv, SValue* out);
 
 }
+}
+

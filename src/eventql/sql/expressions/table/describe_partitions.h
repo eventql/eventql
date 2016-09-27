@@ -1,7 +1,7 @@
 /**
  * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@eventql.io>
+ *   - Laura Schlimmer <laura@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -24,57 +24,33 @@
 #pragma once
 #include "eventql/eventql.h"
 #include <eventql/util/stdtypes.h>
-#include <eventql/util/duration.h>
-#include <eventql/db/partition.h>
-#include <eventql/util/protobuf/MessageSchema.h>
-#include <eventql/db/table_config.pb.h>
-#include <eventql/db/metadata_transaction.h>
+#include <eventql/sql/qtree/ShowTablesNode.h>
+#include <eventql/sql/runtime/tablerepository.h>
 
-namespace eventql {
+namespace csql {
 
-class Table : public RefCounted{
+class DescribePartitionsExpression : public TableExpression {
 public:
 
-  Table(const TableDefinition& config);
+  static const size_t kNumColumns = 5;
 
-  String name() const;
+  DescribePartitionsExpression(
+      Transaction* txn,
+      const String& table_name);
 
-  String tsdbNamespace() const;
+  ScopedPtr<ResultCursor> execute() override;
 
-  Duration partitionSize() const;
-
-  size_t sstableSize() const;
-
-  size_t numShards() const;
-
-  Duration commitInterval() const;
-
-  RefPtr<msg::MessageSchema> schema() const;
-
-  TableDefinition config() const;
-
-  TableStorage storage() const;
-
-  const String& getPartitionKey() const;
-  TablePartitionerType partitionerType() const;
-
-  KeyspaceType getKeyspaceType() const;
-  Vector<String> getPrimaryKey() const;
-
-  MetadataTransaction getLastMetadataTransaction() const;
-
-  bool hasUserDefinedPartitions() const;
-
-  void updateConfig(TableDefinition new_config);
+  size_t getNumColumns() const override;
 
 protected:
 
-  void loadConfig();
+  bool next(SValue* row, size_t row_len);
 
-  mutable std::mutex mutex_;
-  TableDefinition config_;
-  RefPtr<msg::MessageSchema> schema_;
+  Transaction* txn_;
+  String table_name_;
+  Vector<eventql::TablePartitionInfo> rows_;
+  size_t counter_;
 };
 
-}
+} //csql
 

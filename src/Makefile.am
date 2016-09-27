@@ -612,10 +612,14 @@ EVQL_CORE_SOURCES_ = \
     eventql/sql/expressions/internal.h \
     eventql/sql/expressions/math.cc \
     eventql/sql/expressions/math.h \
+    eventql/sql/expressions/miscellaneous.cc \
+    eventql/sql/expressions/miscellaneous.h \
     eventql/sql/expressions/string.cc \
     eventql/sql/expressions/string.h \
     eventql/sql/expressions/table/describe_table.cc \
     eventql/sql/expressions/table/describe_table.h \
+    eventql/sql/expressions/table/describe_partitions.cc \
+    eventql/sql/expressions/table/describe_partitions.h \
     eventql/sql/expressions/table/groupby.cc \
     eventql/sql/expressions/table/groupby.h \
     eventql/sql/expressions/table/limit.cc \
@@ -710,6 +714,8 @@ EVQL_CORE_SOURCES_ = \
     eventql/sql/qtree/ValueExpressionNode.h \
     eventql/sql/qtree/nodes/create_database.cc \
     eventql/sql/qtree/nodes/create_database.h \
+    eventql/sql/qtree/nodes/use_database.cc \
+    eventql/sql/qtree/nodes/use_database.h \
     eventql/sql/qtree/nodes/drop_table.cc \
     eventql/sql/qtree/nodes/drop_table.h \
     eventql/sql/qtree/nodes/alter_table.cc \
@@ -720,6 +726,8 @@ EVQL_CORE_SOURCES_ = \
     eventql/sql/qtree/nodes/insert_into.h \
     eventql/sql/qtree/nodes/insert_json.cc \
     eventql/sql/qtree/nodes/insert_json.h \
+    eventql/sql/qtree/nodes/describe_partitions.cc \
+    eventql/sql/qtree/nodes/describe_partitions.h \
     eventql/sql/qtree/qtree_coder.cc \
     eventql/sql/qtree/qtree_coder.h \
     eventql/sql/qtree/qtree_coder_impl.h \

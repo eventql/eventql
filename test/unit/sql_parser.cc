@@ -1331,6 +1331,22 @@ TEST_CASE(ParserTest, TestCreateDatabaseStatement, [] () {
   EXPECT_EQ(stmt->getChildren()[0]->getToken()->getString(), "events");
 });
 
+TEST_CASE(ParserTest, TestUseDatabaseStatement, [] () {
+  auto runtime = Runtime::getDefaultRuntime();
+  auto txn = runtime->newTransaction();
+
+  auto parser = parseTestQuery("USE events;");
+
+  EXPECT(parser.getStatements().size() == 1);
+  const auto& stmt = parser.getStatements()[0];
+  EXPECT(*stmt == ASTNode::T_USE_DATABASE);
+
+  EXPECT_EQ(stmt->getChildren().size(), 1);
+  EXPECT(*stmt->getChildren()[0] == ASTNode::T_DATABASE_NAME);
+  EXPECT_EQ(*stmt->getChildren()[0]->getToken(), Token::T_IDENTIFIER);
+  EXPECT_EQ(stmt->getChildren()[0]->getToken()->getString(), "events");
+});
+
 TEST_CASE(ParserTest, TestAlterTableStatement, [] () {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
@@ -1367,5 +1383,18 @@ TEST_CASE(ParserTest, TestAlterTableStatement, [] () {
   EXPECT_EQ(children[3]->getToken()->getString(), "place");
   EXPECT_EQ(*children[4], ASTNode::T_COLUMN_NAME);
   EXPECT_EQ(children[4]->getToken()->getString(), "version");
+});
+
+TEST_CASE(ParserTest, TestDescribePartitionsStatement, [] () {
+  auto runtime = Runtime::getDefaultRuntime();
+  auto txn = runtime->newTransaction();
+  auto parser = parseTestQuery("DESCRIBE PARTITIONS my_tbl;");
+
+  EXPECT(parser.getStatements().size() == 1);
+  const auto& stmt = parser.getStatements()[0];
+  EXPECT_EQ(*stmt, ASTNode::T_DESCRIBE_PARTITIONS);
+  EXPECT_EQ(stmt->getChildren().size(), 1);
+  EXPECT_EQ(*stmt->getChildren()[0], ASTNode::T_TABLE_NAME);
+  EXPECT_EQ(stmt->getChildren()[0]->getToken()->getString(), "my_tbl");
 });
 

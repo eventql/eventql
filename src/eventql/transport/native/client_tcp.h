@@ -233,7 +233,8 @@ public:
   TCPConnectionPool(
       uint64_t max_conns,
       uint64_t max_conns_per_host,
-      uint64_t max_conn_age);
+      uint64_t max_conn_age,
+      uint64_t io_timeout);
 
   bool getConnection(
       const std::string& addr,
@@ -258,6 +259,7 @@ protected:
   uint64_t max_conns_;
   uint64_t max_conns_per_host_;
   uint64_t max_conn_age_;
+  uint64_t io_timeout_;
   uint64_t num_conns_;
 
   std::mutex mutex_;

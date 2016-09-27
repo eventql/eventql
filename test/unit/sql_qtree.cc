@@ -35,11 +35,13 @@
 #include "eventql/sql/qtree/QueryTreeUtil.h"
 #include "eventql/sql/qtree/qtree_coder.h"
 #include "eventql/sql/qtree/nodes/create_database.h"
+#include "eventql/sql/qtree/nodes/use_database.h"
 #include "eventql/sql/qtree/nodes/alter_table.h"
 #include "eventql/sql/qtree/nodes/create_table.h"
 #include "eventql/sql/qtree/nodes/drop_table.h"
 #include "eventql/sql/qtree/nodes/insert_into.h"
 #include "eventql/sql/qtree/nodes/insert_json.h"
+#include "eventql/sql/qtree/nodes/describe_partitions.h"
 #include "eventql/sql/CSTableScanProvider.h"
 #include "eventql/sql/backends/csv/CSVTableProvider.h"
 
@@ -892,6 +894,25 @@ TEST_CASE(QTreeTest, TestCreateDatabase, [] () {
   EXPECT_EQ(qtree->getDatabaseName(), "test");
 });
 
+TEST_CASE(QTreeTest, TestUseDatabase, [] () {
+  auto runtime = Runtime::getDefaultRuntime();
+  auto txn = runtime->newTransaction();
+
+  String query = "USE test;";
+
+  csql::Parser parser;
+  parser.parse(query.data(), query.size());
+
+  auto qtree_builder = runtime->queryPlanBuilder();
+  Vector<RefPtr<QueryTreeNode>> qtrees = qtree_builder->build(
+      txn.get(),
+      parser.getStatements(),
+      txn->getTableProvider());
+
+  RefPtr<UseDatabaseNode> qtree = qtrees[0].asInstanceOf<UseDatabaseNode>();
+  EXPECT_EQ(qtree->getDatabaseName(), "test");
+});
+
 TEST_CASE(QTreeTest, TestAlterTable, [] () {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
@@ -940,4 +961,24 @@ TEST_CASE(QTreeTest, TestAlterTable, [] () {
   EXPECT(
     operations[3].optype == AlterTableNode::AlterTableOperationType::OP_REMOVE_COLUMN);
   EXPECT_EQ(operations[3].column_name, "version");
+});
+
+TEST_CASE(QTreeTest, TestDescribePartitions, [] () {
+  auto runtime = Runtime::getDefaultRuntime();
+  auto txn = runtime->newTransaction();
+
+  String query = "DESCRIBE PARTITIONS evtbl";
+  csql::Parser parser;
+  parser.parse(query.data(), query.size());
+
+  auto qtree_builder = runtime->queryPlanBuilder();
+  Vector<RefPtr<QueryTreeNode>> qtrees = qtree_builder->build(
+      txn.get(),
+      parser.getStatements(),
+      txn->getTableProvider());
+
+  RefPtr<DescribePartitionsNode> qtree =
+      qtrees[0].asInstanceOf<DescribePartitionsNode>();
+  EXPECT_EQ(qtree->tableName(), "evtbl");
+
 });

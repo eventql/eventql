@@ -465,6 +465,105 @@ void TableService::listTables(
   });
 }
 
+Status TableService::listPartitions(
+    const String& db_namespace,
+    const String& table_name,
+    Function<void (const TablePartitionInfo& partition)> fn) const {
+  auto table = dbctx_->partition_map->findTable(db_namespace, table_name);
+  MetadataClient metadata_client(
+      dbctx_->config_directory,
+      dbctx_->config,
+      dbctx_->metadata_cache,
+      dbctx_->connection_pool,
+      dbctx_->dns_cache);
+
+  MetadataFile metadata_file;
+  auto rc = metadata_client.fetchLatestMetadataFile(
+      db_namespace,
+      table_name,
+      &metadata_file);
+
+  if (!rc.isSuccess()) {
+    return rc;
+  }
+
+  auto partition_map = metadata_file.getPartitionMap();
+  for (size_t i = 0; i < partition_map.size(); ++i) {
+    const auto& e = partition_map[i];
+
+    TablePartitionInfo p_info;
+    p_info.partition_id = e.partition_id.toString();
+
+    for (const auto& s : e.servers) {
+      p_info.server_ids.emplace_back(s.server_id);
+    }
+
+    switch (metadata_file.getKeyspaceType()) {
+      case KEYSPACE_UINT64: {
+        uint64_t keyrange_uint = -1;
+        memcpy((char*) &keyrange_uint, e.begin.data(), sizeof(uint64_t));
+        p_info.keyrange_begin = StringUtil::format(
+            "$0 [$1]",
+            UnixTime(keyrange_uint),
+            keyrange_uint / kMicrosPerSecond);
+        break;
+      }
+      case KEYSPACE_STRING: {
+        p_info.keyrange_begin = e.begin;
+        break;
+      }
+    }
+
+    if (e.splitting) {
+      Set<String> servers_low;
+      for (const auto& s : e.split_servers_low) {
+        servers_low.emplace(s.server_id);
+      }
+      Set<String> servers_high;
+      for (const auto& s : e.split_servers_high) {
+        servers_high.emplace(s.server_id);
+      }
+
+      p_info.extra_info += StringUtil::format(
+          "SPLITTING @ $0 into $1 on $2, $3 on $4",
+          decodePartitionKey(table.get()->getKeyspaceType(), e.split_point),
+          e.split_partition_id_low,
+          inspect(servers_low),
+          e.split_partition_id_high,
+          inspect(servers_high));
+    }
+
+    std::string keyrange_end;
+    if (metadata_file.hasFinitePartitions()) {
+      keyrange_end = e.end;
+    } else {
+      if (i < partition_map.size() - 1) {
+        keyrange_end = partition_map[i + 1].begin;
+      }
+    }
+
+    switch (metadata_file.getKeyspaceType()) {
+      case KEYSPACE_UINT64: {
+        uint64_t keyrange_uint = -1;
+        memcpy((char*) &keyrange_uint, keyrange_end.data(), sizeof(uint64_t));
+        p_info.keyrange_end = StringUtil::format(
+            "$0 [$1]",
+            UnixTime(keyrange_uint),
+            keyrange_uint / kMicrosPerSecond);
+        break;
+      }
+      case KEYSPACE_STRING: {
+        p_info.keyrange_end = keyrange_end;
+        break;
+      }
+    }
+
+    fn(p_info);
+  }
+
+  return Status::success();
+}
+
 ReturnCode TableService::insertRecord(
     const String& tsdb_namespace,
     const String& table_name,

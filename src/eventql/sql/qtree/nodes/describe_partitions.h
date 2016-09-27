@@ -1,7 +1,7 @@
 /**
  * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@eventql.io>
+ *   - Laura Schlimmer <laura@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -24,57 +24,46 @@
 #pragma once
 #include "eventql/eventql.h"
 #include <eventql/util/stdtypes.h>
-#include <eventql/util/duration.h>
-#include <eventql/db/partition.h>
-#include <eventql/util/protobuf/MessageSchema.h>
-#include <eventql/db/table_config.pb.h>
-#include <eventql/db/metadata_transaction.h>
+#include <eventql/sql/qtree/TableExpressionNode.h>
+#include <eventql/sql/qtree/qtree_coder.h>
 
-namespace eventql {
+namespace csql {
 
-class Table : public RefCounted{
+class DescribePartitionsNode : public TableExpressionNode {
 public:
 
-  Table(const TableDefinition& config);
+  DescribePartitionsNode(const String& table_name);
 
-  String name() const;
+  Vector<RefPtr<QueryTreeNode>> inputTables() const;
 
-  String tsdbNamespace() const;
+  Vector<String> getResultColumns() const override;
 
-  Duration partitionSize() const;
+  Vector<QualifiedColumn> getAvailableColumns() const override;
 
-  size_t sstableSize() const;
+  RefPtr<QueryTreeNode> deepCopy() const override;
 
-  size_t numShards() const;
+  const String& tableName() const;
 
-  Duration commitInterval() const;
+  String toString() const override;
 
-  RefPtr<msg::MessageSchema> schema() const;
+  size_t getComputedColumnIndex(
+      const String& column_name,
+      bool allow_add = false) override;
 
-  TableDefinition config() const;
+  size_t getNumComputedColumns() const override;
 
-  TableStorage storage() const;
+  static void encode(
+      QueryTreeCoder* coder,
+      const DescribePartitionsNode& node,
+      OutputStream* os);
 
-  const String& getPartitionKey() const;
-  TablePartitionerType partitionerType() const;
-
-  KeyspaceType getKeyspaceType() const;
-  Vector<String> getPrimaryKey() const;
-
-  MetadataTransaction getLastMetadataTransaction() const;
-
-  bool hasUserDefinedPartitions() const;
-
-  void updateConfig(TableDefinition new_config);
-
+  static RefPtr<QueryTreeNode> decode (
+      QueryTreeCoder* coder,
+      InputStream* is);
 protected:
-
-  void loadConfig();
-
-  mutable std::mutex mutex_;
-  TableDefinition config_;
-  RefPtr<msg::MessageSchema> schema_;
+  String table_name_;
 };
 
-}
+
+} // namespace csql
 

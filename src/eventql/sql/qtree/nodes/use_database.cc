@@ -1,7 +1,7 @@
 /**
  * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@eventql.io>
+ *   - Laura Schlimmer <laura@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -21,21 +21,27 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#pragma once
-#include <eventql/util/stdtypes.h>
-#include <eventql/util/protobuf/MessageSchema.h>
-#include <eventql/db/table_config.pb.h>
+#include <eventql/sql/qtree/nodes/use_database.h>
 
-#include "eventql/eventql.h"
+namespace csql {
 
-namespace eventql {
+UseDatabaseNode::UseDatabaseNode(
+    const String& db_name) :
+    db_name_(db_name) {}
 
-struct TablePartitionInfo {
-  std::vector<std::string> server_ids;
-  std::string partition_id;
-  std::string keyrange_begin;
-  std::string keyrange_end;
-  std::string extra_info;
-};
+UseDatabaseNode::UseDatabaseNode(const UseDatabaseNode& node) {}
 
+const String& UseDatabaseNode::getDatabaseName() const {
+  return db_name_;
 }
+
+RefPtr<QueryTreeNode> UseDatabaseNode::deepCopy() const {
+  return new UseDatabaseNode(*this);
+}
+
+String UseDatabaseNode::toString() const {
+  return "(use-database)";
+}
+
+} // namespace csql
+

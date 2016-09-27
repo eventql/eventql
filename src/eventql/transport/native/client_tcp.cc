@@ -33,6 +33,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <poll.h>
+#include <sys/resource.h>
 #include "eventql/util/logging.h"
 #include "eventql/util/wallclock.h"
 #include "eventql/util/util/binarymessagereader.h"
@@ -76,17 +77,17 @@ ReturnCode TCPClient::connect(
     close();
   }
 
+  if (is_internal &&
+      conn_pool_ &&
+      conn_pool_->getConnection(addr_str, &conn_)) {
+    return ReturnCode::success();
+  }
+
   InetAddr server_addr;
   if (dns_cache_) {
     server_addr = dns_cache_->resolve(addr_str);
   } else {
     server_addr = InetAddr::resolve(addr_str);
-  }
-
-  if (is_internal &&
-      conn_pool_ &&
-      conn_pool_->getConnection(addr_str, &conn_)) {
-    return ReturnCode::success();
   }
 
   auto server_ip = server_addr.ip();
@@ -838,13 +839,39 @@ void TCPAsyncClient::closeConnection(Connection* connection, bool graceful) {
 }
 
 TCPConnectionPool::TCPConnectionPool(
-  uint64_t max_conns,
-  uint64_t max_conns_per_host,
-  uint64_t max_conn_age) :
-  max_conns_(max_conns),
-  max_conns_per_host_(max_conns_per_host),
-  max_conn_age_(max_conn_age),
-  num_conns_(0) {}
+    uint64_t max_conns,
+    uint64_t max_conns_per_host,
+    uint64_t max_conn_age,
+    uint64_t io_timeout) :
+    max_conns_(max_conns),
+    max_conns_per_host_(max_conns_per_host),
+    max_conn_age_(max_conn_age),
+    io_timeout_(io_timeout),
+    num_conns_(0) {
+  struct rlimit fd_limit;
+  memset(&fd_limit, 0, sizeof(fd_limit));
+  ::getrlimit(RLIMIT_NOFILE, &fd_limit);
+
+  static const size_t kReservedFDs = 64;
+  size_t maxfds = fd_limit.rlim_cur;
+  if (maxfds > kReservedFDs) {
+    maxfds -= kReservedFDs;
+  } else {
+    maxfds = 0;
+  }
+
+  if (maxfds < max_conns_) {
+    logWarning(
+        "evlqd",
+        "RLIMIT_NOFILE is too small ($0), reducing maximum connection pool "
+        "size from $1 to $2. Consider increasing the file descriptor limit.",
+        fd_limit.rlim_cur,
+        max_conns_,
+        maxfds);
+
+    max_conns_ = maxfds;
+  }
+}
 
 bool TCPConnectionPool::getConnection(
     const std::string& addr,
@@ -856,7 +883,7 @@ bool TCPConnectionPool::getConnection(
             fd,
             addr,
             true,
-            0)); // FIXME
+            io_timeout_));
 
     return true;
   } else {
@@ -930,7 +957,7 @@ void TCPConnectionPool::storeFD(
     auto& connlist = conns_[server];
     while (
         connlist.size() >= max_conns_per_host_ ||
-        (!connlist.empty() && connlist.back().time < now)) {
+        (!connlist.empty() && connlist.back().time < cutoff)) {
       close_fds.insert(connlist.back().fd);
       connlist.pop_back();
       --num_conns_;

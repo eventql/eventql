@@ -30,6 +30,7 @@
 #include <eventql/sql/expressions/datetime.h>
 #include <eventql/sql/expressions/internal.h>
 #include <eventql/sql/expressions/math.h>
+#include <eventql/sql/expressions/miscellaneous.h>
 #include <eventql/sql/expressions/string.h>
 
 #include "eventql/eventql.h"

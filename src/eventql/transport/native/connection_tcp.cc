@@ -59,28 +59,6 @@ TCPConnection::TCPConnection(
 
   size_t nodelay = 1;
   setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, &nodelay, sizeof(nodelay));
-
-  struct sockaddr_storage saddr;
-  socklen_t slen = sizeof(saddr);
-  if (getpeername(fd, (struct sockaddr*) &saddr, &slen) == 0) {
-    char ipstr[INET6_ADDRSTRLEN];
-    switch (saddr.ss_family) {
-      case AF_INET: {
-        struct sockaddr_in* s = (struct sockaddr_in*) &saddr;
-        if (inet_ntop(AF_INET, &s->sin_addr, ipstr, sizeof(ipstr))) {
-          remote_host_ = std::string(ipstr);
-        }
-        break;
-      }
-      case AF_INET6: {
-        struct sockaddr_in6* s = (struct sockaddr_in6*) &saddr;
-        if (inet_ntop(AF_INET6, &s->sin6_addr, ipstr, sizeof(ipstr))) {
-          remote_host_ = std::string(ipstr);
-        }
-        break;
-      }
-    }
-  }
 }
 
 TCPConnection::~TCPConnection() {
@@ -289,7 +267,7 @@ int TCPConnection::releaseFD() {
   }
 
   auto fd = fd_;
-  fd = -1;
+  fd_ = -1;
   return fd;
 }
 

@@ -482,6 +482,11 @@ next:
     goto next;
   }
 
+  if (token == "USE") {
+    token_list->emplace_back(Token::T_USE);
+    goto next;
+  }
+
   if (token == "AXIS") {
     token_list->emplace_back(Token::T_AXIS);
     goto next;
@@ -559,6 +564,11 @@ next:
 
   if (token == "EXPLAIN") {
     token_list->emplace_back(Token::T_EXPLAIN);
+    goto next;
+  }
+
+  if (token == "PARTITIONS") {
+    token_list->emplace_back(Token::T_PARTITIONS);
     goto next;
   }
 

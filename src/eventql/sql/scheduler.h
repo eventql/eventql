@@ -31,11 +31,13 @@
 #include <eventql/sql/runtime/ValueExpression.h>
 #include <eventql/sql/scheduler/execution_context.h>
 #include <eventql/sql/qtree/nodes/create_database.h>
+#include <eventql/sql/qtree/nodes/use_database.h>
 #include <eventql/sql/qtree/nodes/alter_table.h>
 #include <eventql/sql/qtree/nodes/create_table.h>
 #include <eventql/sql/qtree/nodes/insert_into.h>
 #include <eventql/sql/qtree/nodes/insert_json.h>
 #include <eventql/sql/qtree/nodes/drop_table.h>
+#include <eventql/sql/qtree/nodes/describe_partitions.h>
 #include <eventql/sql/qtree/TableExpressionNode.h>
 #include <eventql/sql/expressions/table_expression.h>
 #include <eventql/sql/qtree/QueryTreeNode.h>
@@ -45,6 +47,7 @@
 #include <eventql/sql/expressions/table/show_tables.h>
 #include <eventql/sql/expressions/table/limit.h>
 #include <eventql/sql/expressions/table/describe_table.h>
+#include <eventql/sql/expressions/table/describe_partitions.h>
 #include <eventql/sql/expressions/table/groupby.h>
 #include <eventql/sql/expressions/table/nested_loop_join.h>
 #include <eventql/sql/extensions/chartsql/chart_expression.h>
@@ -98,6 +101,11 @@ protected:
       Transaction* txn,
       ExecutionContext* execution_context,
       RefPtr<CreateDatabaseNode> create_database);
+
+  virtual ScopedPtr<ResultCursor> executeUseDatabase(
+      Transaction* txn,
+      ExecutionContext* execution_context,
+      RefPtr<UseDatabaseNode> use_database);
 
   virtual ScopedPtr<ResultCursor> executeDropTable(
       Transaction* txn,
