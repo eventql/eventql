@@ -76,6 +76,10 @@ public:
       const PartitionFindRequest& request,
       PartitionFindResponse* res);
 
+  Status discoverPartition(
+      PartitionDiscoveryRequest request,
+      PartitionDiscoveryResponse* response);
+
 protected:
 
   MetadataClientLocks* getAdvisoryLocks(

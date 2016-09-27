@@ -59,10 +59,6 @@ public:
       const MetadataFile& file,
       const Vector<String>& servers);
 
-  Status discoverPartition(
-      PartitionDiscoveryRequest request,
-      PartitionDiscoveryResponse* response);
-
 protected:
 
   Status createFile(
