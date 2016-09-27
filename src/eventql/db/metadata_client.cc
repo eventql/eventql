@@ -22,6 +22,7 @@
  * code of your own applications
  */
 #include "eventql/db/metadata_client.h"
+#include "eventql/db/metadata_store.h"
 #include "eventql/transport/native/client_tcp.h"
 #include "eventql/transport/native/frames/error.h"
 #include "eventql/transport/native/frames/meta_getfile.h"
@@ -39,6 +40,7 @@ MetadataClient::MetadataClient(
     cdir_(cdir),
     config_(config),
     cache_(cache),
+    store_(store),
     conn_pool_(conn_pool),
     dns_cache_(dns_cache) {}
 
@@ -60,7 +62,33 @@ Status MetadataClient::fetchMetadataFile(
     const String& table_id,
     const SHA1Hash& txnid,
     RefPtr<MetadataFile>* file) {
-  return downloadMetadataFile(ns, table_id, txnid, file);
+  /* check if a local copy of the file exists */
+  if (store_->hasMetadataFile(ns, table_id, txnid)) {
+    return store_->getMetadataFile(ns, table_id, txnid, file);
+  }
+
+  /* grab advisory download lock */
+  auto locks = getAdvisoryLocks(ns, table_id);
+  std::unique_lock<std::mutex> lock_holder(locks->download_lock);
+
+  /* double-check if a local copy of the file exists */
+  if (store_->hasMetadataFile(ns, table_id, txnid)) {
+    return store_->getMetadataFile(ns, table_id, txnid, file);
+  }
+
+  /* download the file */
+  auto download_rc = downloadMetadataFile(ns, table_id, txnid, file);
+  if (!download_rc.isSuccess()) {
+    return download_rc;
+  }
+
+  /* store the downloaded file locally */
+  auto store_rc = store_->storeMetadataFile(ns, table_id, **file);
+  if (!store_rc.isSuccess()) {
+    logWarning("evqld", "metadata file store failed: $0", store_rc.message());
+  }
+
+  return ReturnCode::success();
 }
 
 ReturnCode MetadataClient::downloadMetadataFile(
@@ -134,6 +162,20 @@ ReturnCode MetadataClient::downloadMetadataFile(
   }
 
   return Status(eIOError, "no metadata server responded");
+}
+
+MetadataClientLocks* MetadataClient::getAdvisoryLocks(
+    const String& ns,
+    const String& table_id) {
+  auto lock_key = StringUtil::format("$0~$1", ns, table_id);
+
+  std::unique_lock<std::mutex> lockmap_mutex_holder(lockmap_mutex_);
+  auto& lock_iter = lockmap_[lock_key];
+  if (!lock_iter) {
+    lock_iter.reset(new MetadataClientLocks());
+  }
+
+  return lock_iter.get();
 }
 
 Status MetadataClient::listPartitions(

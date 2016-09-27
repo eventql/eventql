@@ -87,6 +87,8 @@ protected:
   mutable CacheEntry* cache_tail_;
   mutable size_t cache_size_bytes_;
   mutable size_t cache_numentries_;
+  std::mutex lockmap_mutex_;
+  std::map<std::string, std::unique_ptr<std::mutex>> lockmap_;
 };
 
 } // namespace eventql

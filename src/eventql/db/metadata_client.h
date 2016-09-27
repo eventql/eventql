@@ -32,6 +32,10 @@
 
 namespace eventql {
 
+struct MetadataClientLocks {
+  std::mutex download_lock;
+};
+
 class MetadataClient {
 public:
 
@@ -74,6 +78,10 @@ public:
 
 protected:
 
+  MetadataClientLocks* getAdvisoryLocks(
+      const String& ns,
+      const String& table_id);
+
   ReturnCode downloadMetadataFile(
       const String& ns,
       const String& table_id,
@@ -83,8 +91,11 @@ protected:
   ConfigDirectory* cdir_;
   ProcessConfig* config_;
   MetadataCache* cache_;
+  MetadataStore* store_;
   native_transport::TCPConnectionPool* conn_pool_;
   net::DNSCache* dns_cache_;
+  std::mutex lockmap_mutex_;
+  std::map<std::string, std::unique_ptr<MetadataClientLocks>> lockmap_;
 };
 
 } // namespace eventql
