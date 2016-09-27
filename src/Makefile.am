@@ -714,6 +714,8 @@ EVQL_CORE_SOURCES_ = \
     eventql/sql/qtree/ValueExpressionNode.h \
     eventql/sql/qtree/nodes/create_database.cc \
     eventql/sql/qtree/nodes/create_database.h \
+    eventql/sql/qtree/nodes/use_database.cc \
+    eventql/sql/qtree/nodes/use_database.h \
     eventql/sql/qtree/nodes/drop_table.cc \
     eventql/sql/qtree/nodes/drop_table.h \
     eventql/sql/qtree/nodes/alter_table.cc \
