@@ -46,17 +46,13 @@ public:
   Status fetchLatestMetadataFile(
       const String& ns,
       const String& table_id,
-      MetadataFile* file);
-
-  Status fetchMetadataFile(
-      const TableDefinition& table_config,
-      MetadataFile* file);
+      RefPtr<MetadataFile>* file);
 
   Status fetchMetadataFile(
       const String& ns,
       const String& table_id,
       const SHA1Hash& txnid,
-      MetadataFile* file);
+      RefPtr<MetadataFile>* file);
 
   Status listPartitions(
       const String& ns,

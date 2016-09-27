@@ -51,7 +51,7 @@ protected:
 
   Status performMetadataOperation(
       TableDefinition* table_cfg,
-      MetadataFile* metadata_file,
+      RefPtr<MetadataFile>* metadata_file,
       MetadataOperationType optype,
       const Buffer& opdata);
 

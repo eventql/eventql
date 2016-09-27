@@ -320,7 +320,7 @@ void StatusServlet::renderTablePage(
           table_cfg.metadata_txnid().size()).toString(),
       table_cfg.metadata_txnseq());
 
-  MetadataFile metadata_file;
+  RefPtr<MetadataFile> metadata_file;
   auto rc = ctx->metadata_client->fetchLatestMetadataFile(
       db_namespace,
       table_name,
@@ -334,7 +334,7 @@ void StatusServlet::renderTablePage(
     html += "<h3>Partition Map:</h3>";
     html += "<table cellspacing=0 border=1>";
     html += "<thead><tr><td>Keyrange</td><td>Partition ID</td><td>Servers</td><td></td></tr></thead>";
-    for (const auto& e : metadata_file.getPartitionMap()) {
+    for (const auto& e : metadata_file->getPartitionMap()) {
       Vector<String> servers;
       for (const auto& s : e.servers) {
         servers.emplace_back(s.server_id);
@@ -347,7 +347,7 @@ void StatusServlet::renderTablePage(
       }
 
       String keyrange;
-      switch (metadata_file.getKeyspaceType()) {
+      switch (metadata_file->getKeyspaceType()) {
         case KEYSPACE_UINT64: {
           uint64_t keyrange_uint = -1;
           memcpy((char*) &keyrange_uint, e.begin.data(), sizeof(uint64_t));

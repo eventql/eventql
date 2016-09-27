@@ -471,7 +471,7 @@ Status TableService::listPartitions(
     Function<void (const TablePartitionInfo& partition)> fn) const {
   auto table = dbctx_->partition_map->findTable(db_namespace, table_name);
 
-  MetadataFile metadata_file;
+  RefPtr<MetadataFile> metadata_file;
   auto rc = dbctx_->metadata_client->fetchLatestMetadataFile(
       db_namespace,
       table_name,
@@ -481,7 +481,7 @@ Status TableService::listPartitions(
     return rc;
   }
 
-  auto partition_map = metadata_file.getPartitionMap();
+  auto partition_map = metadata_file->getPartitionMap();
   for (size_t i = 0; i < partition_map.size(); ++i) {
     const auto& e = partition_map[i];
 
@@ -492,7 +492,7 @@ Status TableService::listPartitions(
       p_info.server_ids.emplace_back(s.server_id);
     }
 
-    switch (metadata_file.getKeyspaceType()) {
+    switch (metadata_file->getKeyspaceType()) {
       case KEYSPACE_UINT64: {
         uint64_t keyrange_uint = -1;
         memcpy((char*) &keyrange_uint, e.begin.data(), sizeof(uint64_t));
@@ -528,7 +528,7 @@ Status TableService::listPartitions(
     }
 
     std::string keyrange_end;
-    if (metadata_file.hasFinitePartitions()) {
+    if (metadata_file->hasFinitePartitions()) {
       keyrange_end = e.end;
     } else {
       if (i < partition_map.size() - 1) {
@@ -536,7 +536,7 @@ Status TableService::listPartitions(
       }
     }
 
-    switch (metadata_file.getKeyspaceType()) {
+    switch (metadata_file->getKeyspaceType()) {
       case KEYSPACE_UINT64: {
         uint64_t keyrange_uint = -1;
         memcpy((char*) &keyrange_uint, keyrange_end.data(), sizeof(uint64_t));

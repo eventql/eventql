@@ -86,8 +86,12 @@ Status Rebalance::rebalanceTable(TableDefinition tbl_cfg) {
       tbl_cfg.table_name());
 
   // fetch latest metadata file
-  MetadataFile metadata;
-  auto rc = metadata_client_->fetchMetadataFile(tbl_cfg, &metadata);
+  RefPtr<MetadataFile> metadata;
+  auto rc = metadata_client_->fetchMetadataFile(
+      tbl_cfg.customer(),
+      tbl_cfg.table_name(),
+      SHA1Hash(tbl_cfg.metadata_txnid().data(), tbl_cfg.metadata_txnid().size()),
+      &metadata);
   if (!rc.isSuccess()) {
     return rc;
   }
@@ -195,7 +199,7 @@ Status Rebalance::rebalanceTable(TableDefinition tbl_cfg) {
   // remove dead servers from the metadata file
   {
     Set<String> dead_servers;
-    for (const auto& e : metadata.getPartitionMap()) {
+    for (const auto& e : metadata->getPartitionMap()) {
       for (const auto& s : e.servers) {
         if (all_servers_.count(s.server_id) == 0) {
           dead_servers.emplace(s.server_id);
@@ -243,7 +247,7 @@ Status Rebalance::rebalanceTable(TableDefinition tbl_cfg) {
   {
     JoinServersOperation ops;
 
-    for (const auto& e : metadata.getPartitionMap()) {
+    for (const auto& e : metadata->getPartitionMap()) {
       Set<String> cur_servers;
       for (const auto& s : e.servers) {
         cur_servers.emplace(s.server_id);
@@ -314,7 +318,7 @@ Status Rebalance::rebalanceTable(TableDefinition tbl_cfg) {
 
 Status Rebalance::performMetadataOperation(
     TableDefinition* table_cfg,
-    MetadataFile* metadata_file,
+    RefPtr<MetadataFile>* metadata_file,
     MetadataOperationType optype,
     const Buffer& opdata) {
   auto new_txnid = Random::singleton()->sha1();
@@ -344,7 +348,13 @@ Status Rebalance::performMetadataOperation(
   table_cfg->set_metadata_txnid(new_txnid.data(), new_txnid.size());
   table_cfg->set_metadata_txnseq(table_cfg->metadata_txnseq() + 1);
 
-  return metadata_client_->fetchMetadataFile(*table_cfg, metadata_file);
+  return metadata_client_->fetchMetadataFile(
+      table_cfg->customer(),
+      table_cfg->table_name(),
+      SHA1Hash(
+          table_cfg->metadata_txnid().data(),
+          table_cfg->metadata_txnid().size()),
+      metadata_file);
 }
 
 
