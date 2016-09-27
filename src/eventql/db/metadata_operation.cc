@@ -53,6 +53,10 @@ SHA1Hash MetadataOperation::getOutputTransactionID() const {
   return SHA1Hash(data_.output_txid().data(), data_.output_txid().size());
 }
 
+MetadataOperationType MetadataOperation::getOperationType() const {
+  return data_.optype();
+}
+
 Status MetadataOperation::decode(InputStream* is) {
   auto len = is->readVarUInt();
   Buffer buf(len);

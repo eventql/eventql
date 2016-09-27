@@ -31,6 +31,8 @@ EventQL v0.5.0 beta;
   * Added the DESCRIBE PARTITIONS table statement to obtain information about
     the partitions of a table
 
+  * Added the USE statement to switch databases
+
   * Added the following new configuration options: server.disk_capacity,
     server.load_limit_{soft,hard}, server.partitions_loading_limit_{soft,hard},
     server.loadinfo_publish_interval, server.noalloc,

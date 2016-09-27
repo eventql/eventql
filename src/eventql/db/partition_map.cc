@@ -33,6 +33,7 @@
 #include <eventql/db/metadata_coordinator.h>
 #include <eventql/db/partition_reader.h>
 #include <eventql/db/partition_writer.h>
+#include <eventql/db/metadata_client.h>
 #include "eventql/eventql.h"
 #include "eventql/db/file_tracker.h"
 
@@ -256,14 +257,7 @@ RefPtr<Partition> PartitionMap::findOrCreatePartition(
         partition_key.size());
     discovery_request.set_lookup_by_id(true);
 
-    MetadataCoordinator coordinator(
-        cfg_->config_directory,
-        cfg_->config,
-        cfg_->connection_pool,
-        cfg_->dns_cache);
-
-    PartitionDiscoveryResponse discovery_response;
-    auto rc = coordinator.discoverPartition(
+    auto rc = cfg_->metadata_client->discoverPartition(
         discovery_request,
         &discovery_info);
 

@@ -45,7 +45,23 @@ Status MetadataCoordinator::performAndCommitOperation(
     const String& table_name,
     MetadataOperation op,
     MetadataOperationResult* res /* = nullptr */) {
-  auto table_config = cdir_->getTableConfig(ns, table_name);
+  /* grab advisory lock */
+  auto lock_key = StringUtil::format("$0~$1", ns, table_name);
+
+  std::mutex* lock;
+  {
+    std::unique_lock<std::mutex> lockmap_mutex_holder(lockmap_mutex_);
+    auto& lock_iter = lockmap_[lock_key];
+    if (!lock_iter) {
+      lock_iter.reset(new std::mutex());
+    }
+    lock = lock_iter.get();
+  }
+
+  std::unique_lock<std::mutex> lock_holder(*lock);
+
+  /* get latest config */
+  auto table_config = cdir_->getTableConfig(ns, table_name, false);
   SHA1Hash input_txid(
       table_config.metadata_txnid().data(),
       table_config.metadata_txnid().size());
@@ -54,6 +70,7 @@ Status MetadataCoordinator::performAndCommitOperation(
     return Status(eConcurrentModificationError, "concurrent modification");
   }
 
+  /* perform operation */
   Vector<String> servers;
   for (const auto& s : table_config.metadata_servers()) {
     servers.emplace_back(s);
@@ -64,6 +81,7 @@ Status MetadataCoordinator::performAndCommitOperation(
     return rc;
   }
 
+  /* commit transaction */
   auto output_txid = op.getOutputTransactionID();
   table_config.set_metadata_txnid(output_txid.data(), output_txid.size());
   table_config.set_metadata_txnseq(table_config.metadata_txnseq() + 1);
@@ -309,87 +327,5 @@ Status MetadataCoordinator::createFile(
   return ReturnCode::success();
 }
 
-Status MetadataCoordinator::discoverPartition(
-    PartitionDiscoveryRequest request,
-    PartitionDiscoveryResponse* response) {
-  auto idle_timeout = config_->getInt("server.s2s_idle_timeout", 0);
-  auto io_timeout = config_->getInt("server.s2s_io_timeout", 0);
-
-  auto table_cfg = cdir_->getTableConfig(
-      request.db_namespace(),
-      request.table_id());
-
-  if (table_cfg.metadata_txnseq() < request.min_txnseq()) {
-    return Status(eConcurrentModificationError, "concurrent modification");
-  }
-
-  request.set_requester_id(cdir_->getServerID());
-
-  Buffer req_payload;
-  req_payload.append((char) 0);
-  msg::encode(request, &req_payload);
-
-  for (const auto& s : table_cfg.metadata_servers()) {
-    auto server = cdir_->getServerConfig(s);
-    if (server.server_status() != SERVER_UP) {
-      logWarning("evqld", "metadata server is down: $0", s);
-      continue;
-    }
-
-    native_transport::TCPClient client(
-        conn_pool_,
-        dns_cache_,
-        io_timeout,
-        idle_timeout);
-
-    auto rc = client.connect(server.server_addr(), true);
-    if (!rc.isSuccess()) {
-      logWarning(
-          "evqld",
-          "can't connect to metadata server: $0",
-          rc.getMessage());
-      continue;
-    }
-
-    rc = client.sendFrame(
-        EVQL_OP_META_DISCOVER,
-        0,
-        req_payload.data(),
-        req_payload.size());
-
-    if (!rc.isSuccess()) {
-      logWarning("evqld", "metadata discovery failed: $0", rc.getMessage());
-      continue;
-    }
-
-    uint16_t ret_opcode = 0;
-    uint16_t ret_flags;
-    std::string ret_payload;
-    rc = client.recvFrame(&ret_opcode, &ret_flags, &ret_payload, idle_timeout);
-    if (!rc.isSuccess()) {
-      logWarning("evqld", "metadata discovery failed: $0", rc.getMessage());
-      continue;
-    }
-
-    switch (ret_opcode) {
-      case EVQL_OP_META_DISCOVER_RESULT:
-        break;
-      case EVQL_OP_ERROR: {
-        native_transport::ErrorFrame eframe;
-        eframe.parseFrom(ret_payload.data(), ret_payload.size());
-        logWarning("evqld", "metadata discovery failed: $0", eframe.getError());
-        continue;
-      }
-      default:
-        logWarning("evqld", "metadata discovery failed: invalid opcode");
-        continue;
-    }
-
-    msg::decode<PartitionDiscoveryResponse>(ret_payload, response);
-    return Status::success();
-  }
-
-  return Status(eIOError, "no metadata server has the requested transaction");
-}
-
 } // namespace eventql
+

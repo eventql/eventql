@@ -32,12 +32,19 @@
 
 namespace eventql {
 
+struct MetadataClientLocks {
+  std::mutex download_lock;
+  std::mutex create_lock;
+  std::mutex discover_lock;
+};
+
 class MetadataClient {
 public:
 
   MetadataClient(
       ConfigDirectory* cdir,
       ProcessConfig* config,
+      MetadataStore* store,
       MetadataCache* cache,
       native_transport::TCPConnectionPool* conn_pool,
       net::DNSCache* dns_cache);
@@ -45,17 +52,14 @@ public:
   Status fetchLatestMetadataFile(
       const String& ns,
       const String& table_id,
-      MetadataFile* file);
-
-  Status fetchMetadataFile(
-      const TableDefinition& table_config,
-      MetadataFile* file);
+      RefPtr<MetadataFile>* file,
+      bool allow_cache = true);
 
   Status fetchMetadataFile(
       const String& ns,
       const String& table_id,
       const SHA1Hash& txnid,
-      MetadataFile* file);
+      RefPtr<MetadataFile>* file);
 
   Status listPartitions(
       const String& ns,
@@ -67,20 +71,41 @@ public:
       const String& ns,
       const String& table_id,
       const String& key,
+      bool allow_create,
       PartitionFindResponse* res);
 
-  Status findOrCreatePartition(
-      const String& ns,
-      const String& table_id,
-      const String& key,
+  Status findPartition(
+      const PartitionFindRequest& request,
       PartitionFindResponse* res);
+
+  Status discoverPartition(
+      PartitionDiscoveryRequest request,
+      PartitionDiscoveryResponse* response);
 
 protected:
+
+  MetadataClientLocks* getAdvisoryLocks(
+      const String& ns,
+      const String& table_id);
+
+  ReturnCode downloadMetadataFile(
+      const String& ns,
+      const String& table_id,
+      const SHA1Hash& txnid,
+      RefPtr<MetadataFile>* file);
+
+  Status createPartition(
+      const PartitionFindRequest& request,
+      PartitionFindResponse* res);
+
   ConfigDirectory* cdir_;
   ProcessConfig* config_;
   MetadataCache* cache_;
+  MetadataStore* store_;
   native_transport::TCPConnectionPool* conn_pool_;
   net::DNSCache* dns_cache_;
+  std::mutex lockmap_mutex_;
+  std::map<std::string, std::unique_ptr<MetadataClientLocks>> lockmap_;
 };
 
 } // namespace eventql

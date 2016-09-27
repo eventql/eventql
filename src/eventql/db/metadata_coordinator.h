@@ -59,10 +59,6 @@ public:
       const MetadataFile& file,
       const Vector<String>& servers);
 
-  Status discoverPartition(
-      PartitionDiscoveryRequest request,
-      PartitionDiscoveryResponse* response);
-
 protected:
 
   Status createFile(
@@ -82,6 +78,8 @@ protected:
   ProcessConfig* config_;
   native_transport::TCPConnectionPool* conn_pool_;
   net::DNSCache* dns_cache_;
+  std::mutex lockmap_mutex_;
+  std::map<std::string, std::unique_ptr<std::mutex>> lockmap_;
 };
 
 
