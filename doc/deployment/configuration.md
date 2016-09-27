@@ -97,6 +97,13 @@ The EventQL configuration options are grouped in three sections: `client`, `serv
     </td>
   </tr>
   <tr>
+    <td><b>cluster.allow_create_database</b></td>
+    <td>true</td>
+    <td>
+      If false, CREATE DATABASE is globally forbidden, regardless of ACLs.
+    </td>
+  </tr>
+  <tr>
     <th colspan="3" align="left">server.*</th>
   </tr>
   <tr>

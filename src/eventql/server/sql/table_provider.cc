@@ -405,7 +405,7 @@ Status TSDBTableProvider::createTable(
 }
 
 Status TSDBTableProvider::createDatabase(const String& database_name) {
-  return Status(eRuntimeError, "permission denied");
+  return table_service_->createDatabase(database_name);
 }
 
 Status TSDBTableProvider::alterTable(const csql::AlterTableNode& alter_table) {
