@@ -450,7 +450,7 @@ ReturnCode DatabaseImpl::start() {
 
         replication_worker_->enqueuePartition(
             partition.get(),
-            ReplicationOptions::CORK);
+            (uint64_t) ReplicationWorker::ReplicationOptions::CORK);
       } catch (const std::exception& e) {
         logError(
             "evqld",
