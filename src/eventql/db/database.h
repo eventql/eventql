@@ -47,6 +47,7 @@ class MapReduceService;
 class MetadataService;
 class MetadataCache;
 class MetadataClient;
+class MetadataCoordinator;
 class ServerAllocator;
 namespace native_transport {
 class TCPConnectionPool;
@@ -64,6 +65,7 @@ struct DatabaseContext {
   MetadataStore* metadata_store;
   MetadataCache* metadata_cache;
   MetadataClient* metadata_client;
+  MetadataCoordinator* metadata_coordinator;
   InternalAuth* internal_auth;
   ClientAuth* client_auth;
   csql::Runtime* sql_runtime;

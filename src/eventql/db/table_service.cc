@@ -248,13 +248,7 @@ Status TableService::createTable(
   }
 
   // create metadata file on metadata servers
-  MetadataCoordinator coordinator(
-      dbctx_->config_directory,
-      dbctx_->config,
-      dbctx_->connection_pool,
-      dbctx_->dns_cache);
-
-  auto rc = coordinator.createFile(
+  auto rc = dbctx_->metadata_coordinator->createFile(
       db_namespace,
       table_name,
       std::move(*metadata_file),

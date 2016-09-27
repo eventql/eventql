@@ -524,13 +524,7 @@ Status LSMPartitionWriter::split() {
       Random::singleton()->sha1(),
       *msg::encode(op));
 
-  MetadataCoordinator coordinator(
-      dbctx_->config_directory,
-      dbctx_->config,
-      dbctx_->connection_pool,
-      dbctx_->dns_cache);
-
-  return coordinator.performAndCommitOperation(
+  return dbctx_->metadata_coordinator->performAndCommitOperation(
       snap->state.tsdb_namespace(),
       snap->state.table_key(),
       envelope);

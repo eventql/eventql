@@ -114,6 +114,7 @@ protected:
   std::unique_ptr<MetadataCache> metadata_cache_;
   std::unique_ptr<MetadataService> metadata_service_;
   std::unique_ptr<MetadataClient> metadata_client_;
+  std::unique_ptr<MetadataCoordinator> metadata_coordinator_;
   std::unique_ptr<PartitionMap> partition_map_;
   std::unique_ptr<TableService> table_service_;
   std::unique_ptr<ReplicationWorker> replication_worker_;
@@ -315,6 +316,13 @@ ReturnCode DatabaseImpl::start() {
           connection_pool_.get(),
           dns_cache_.get()));
 
+  metadata_coordinator_.reset(
+      new MetadataCoordinator(
+          config_dir_.get(),
+          cfg_,
+          connection_pool_.get(),
+          dns_cache_.get()));
+
   /* server config */
   server_cfg_.reset(new ServerCfg());
   server_cfg_->db_path = tsdb_dir;
@@ -407,6 +415,7 @@ ReturnCode DatabaseImpl::start() {
     database_context_->metadata_store = metadata_store_.get();
     database_context_->metadata_cache = metadata_cache_.get();
     database_context_->metadata_client = metadata_client_.get();
+    database_context_->metadata_coordinator = metadata_coordinator_.get();
     database_context_->internal_auth = internal_auth_.get();
     database_context_->client_auth = client_auth_.get();
     database_context_->sql_runtime = sql_.get();
