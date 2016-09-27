@@ -1045,6 +1045,8 @@ evqlctl_SOURCES = \
     eventql/cli/commands/table_split.cc \
     eventql/cli/commands/table_split_finalize.h \
     eventql/cli/commands/table_split_finalize.cc \
+    eventql/cli/commands/table_import.h \
+    eventql/cli/commands/table_import.cc \
     eventql/evqlctl.cc
 
 evqlctl_LDADD = \
