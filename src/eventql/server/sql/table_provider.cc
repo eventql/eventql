@@ -411,22 +411,7 @@ Status TSDBTableProvider::createTable(
 }
 
 Status TSDBTableProvider::createDatabase(const String& database_name) {
-  try {
-    auto c = cdir_->getNamespaceConfig(database_name);
-    return Status(eRuntimeError, "database already exists");
-  } catch (const std::exception& e) {
-    /* fallthrough */
-  }
-
-  NamespaceConfig cfg;
-  cfg.set_customer(database_name);
-  try {
-    cdir_->updateNamespaceConfig(cfg);
-  } catch (const std::exception& e) {
-    return Status(e);
-  }
-
-  return Status::success();
+  return table_service_->createDatabase(database_name);
 }
 
 Status TSDBTableProvider::alterTable(const csql::AlterTableNode& alter_table) {

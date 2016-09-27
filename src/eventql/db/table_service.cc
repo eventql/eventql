@@ -47,6 +47,30 @@ namespace eventql {
 
 TableService::TableService(DatabaseContext* dbctx) : dbctx_(dbctx) {}
 
+Status TableService::createDatabase(const String& db_name) {
+  if (!dbctx_->config->getBool("cluster.allow_create_database")) {
+    return Status(eRuntimeError, "create database not allowed");
+  }
+
+  try {
+    auto c = dbctx_->config_directory->getNamespaceConfig(db_name);
+    return Status(eRuntimeError, "database already exists");
+  } catch (const std::exception& e) {
+    /* fallthrough */
+  }
+
+  NamespaceConfig cfg;
+  cfg.set_customer(db_name);
+  try {
+    dbctx_->config_directory->updateNamespaceConfig(cfg);
+  } catch (const std::exception& e) {
+    return Status(e);
+  }
+
+  return Status::success();
+
+}
+
 Status TableService::createTable(
     const String& db_namespace,
     const String& table_name,
