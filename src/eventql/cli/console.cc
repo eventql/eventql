@@ -33,7 +33,6 @@
 #include "eventql/util/io/TerminalOutputStream.h"
 #include "eventql/util/wallclock.h"
 #include "eventql/util/json/json.h"
-#include "eventql/util/json/jsonrpc.h"
 #include "eventql/util/http/httpclient.h"
 #include "eventql/util/http/HTTPSSEResponseHandler.h"
 #include "eventql/util/cli/CLI.h"

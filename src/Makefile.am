@@ -250,17 +250,6 @@ EVQL_CORE_SOURCES_ = \
     eventql/util/json/jsonoutputstream_impl.h \
     eventql/util/json/jsonpointer.cc \
     eventql/util/json/jsonpointer.h \
-    eventql/util/json/jsonrpc.cc \
-    eventql/util/json/jsonrpc.h \
-    eventql/util/json/jsonrpc_impl.h \
-    eventql/util/json/jsonrpchttpadapter.cc \
-    eventql/util/json/jsonrpchttpadapter.h \
-    eventql/util/json/jsonrpcrequest.cc \
-    eventql/util/json/jsonrpcrequest.h \
-    eventql/util/json/jsonrpcrequest_impl.h \
-    eventql/util/json/jsonrpcresponse.cc \
-    eventql/util/json/jsonrpcresponse.h \
-    eventql/util/json/jsonrpcresponse_impl.h \
     eventql/util/json/jsonutil.cc \
     eventql/util/json/jsonutil.h \
     eventql/util/logging.cc \
@@ -322,22 +311,6 @@ EVQL_CORE_SOURCES_ = \
     eventql/util/random.cc \
     eventql/util/random.h \
     eventql/util/Serializable.h \
-    eventql/util/rpc/RPCContext.cc \
-    eventql/util/rpc/RPCContext.h \
-    eventql/util/rpc/RPCRequest.cc \
-    eventql/util/rpc/RPCRequest.h \
-    eventql/util/rpc/RPCService.cc \
-    eventql/util/rpc/RPCService.h \
-    eventql/util/rpc/RPCService_impl.h \
-    eventql/util/rpc/RPCStub.cc \
-    eventql/util/rpc/RPCStub.h \
-    eventql/util/rpc/RPC.cc \
-    eventql/util/rpc/RPCClient.cc \
-    eventql/util/rpc/RPCClient.h \
-    eventql/util/rpc/ServerGroup.cc \
-    eventql/util/rpc/ServerGroup.h \
-    eventql/util/rpc/RPC.h \
-    eventql/util/rpc/RPC_impl.h \
     eventql/util/stats/counter.h \
     eventql/util/stats/counter_impl.h \
     eventql/util/stats/counterstat.h \
