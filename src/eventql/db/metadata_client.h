@@ -35,6 +35,7 @@ namespace eventql {
 struct MetadataClientLocks {
   std::mutex download_lock;
   std::mutex create_lock;
+  std::mutex discover_lock;
 };
 
 class MetadataClient {
@@ -51,7 +52,8 @@ public:
   Status fetchLatestMetadataFile(
       const String& ns,
       const String& table_id,
-      RefPtr<MetadataFile>* file);
+      RefPtr<MetadataFile>* file,
+      bool allow_cache = true);
 
   Status fetchMetadataFile(
       const String& ns,

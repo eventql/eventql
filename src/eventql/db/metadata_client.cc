@@ -48,7 +48,8 @@ MetadataClient::MetadataClient(
 Status MetadataClient::fetchLatestMetadataFile(
     const String& ns,
     const String& table_id,
-    RefPtr<MetadataFile>* file) {
+    RefPtr<MetadataFile>* file,
+    bool allow_cache /* = true */) {
   auto table_cfg = cdir_->getTableConfig(ns, table_id);
 
   SHA1Hash txid(
@@ -406,6 +407,7 @@ Status MetadataClient::discoverPartition(
     PartitionDiscoveryResponse* response) {
   request.set_requester_id(cdir_->getServerID());
 
+  /* try discovery without lock */
   RefPtr<MetadataFile> file;
   {
     auto rc = fetchLatestMetadataFile(
@@ -417,11 +419,63 @@ Status MetadataClient::discoverPartition(
     }
   }
 
-  if (file->getSequenceNumber() < request.min_txnseq()) {
-    return Status(eRuntimeError, "metadata file is too old");
+  if (file->getSequenceNumber() >= request.min_txnseq()) {
+    PartitionDiscoveryResponse res;
+    auto rc = PartitionDiscovery::discoverPartition(
+        file.get(),
+        request,
+        &res);
+
+    if (rc.isSuccess() && res.code() != PDISCOVERY_UNKNOWN) {
+      *response = res;
+      return rc;
+    }
   }
 
-  return PartitionDiscovery::discoverPartition(file.get(), request, response);
+  /* if this fails, grab a lock and try to retrieve the latest file */
+  auto locks = getAdvisoryLocks(
+       request.db_namespace(),
+       request.table_id());
+
+  std::unique_lock<std::mutex> lock_holder(locks->discover_lock);
+
+  /* after we have the lock, try loading the latest file again */
+  RefPtr<MetadataFile> latest_file;
+  {
+    auto rc = fetchLatestMetadataFile(
+        request.db_namespace(),
+        request.table_id(),
+        &latest_file);
+    if (!rc.isSuccess()) {
+      return rc;
+    }
+  }
+
+  /* if the id has changed, somebody else has probably gotten the latest file */
+  if (latest_file->getSequenceNumber() > file->getSequenceNumber()) {
+    return PartitionDiscovery::discoverPartition(
+        latest_file.get(),
+        request,
+        response);
+  }
+
+  /* otherwise, we load the latest file, but this time disable local caching */
+  {
+    auto rc = fetchLatestMetadataFile(
+        request.db_namespace(),
+        request.table_id(),
+        &latest_file,
+        false);
+
+    if (!rc.isSuccess()) {
+      return rc;
+    }
+  }
+
+  return PartitionDiscovery::discoverPartition(
+      latest_file.get(),
+      request,
+      response);
 }
 
 } // namespace eventql
