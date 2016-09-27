@@ -66,6 +66,9 @@ public:
       const String& table_name,
       Function<void (const TablePartitionInfo& partition)> fn) const override;
 
+  Status listServers(
+      Function<void (const ServerConfig& server)> fn) const override;
+
   Option<csql::TableInfo> describe(const String& table_name) const override;
 
   Status createTable(const csql::CreateTableNode& req) override;

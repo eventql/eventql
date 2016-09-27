@@ -328,6 +328,8 @@ ASTNode* Parser::statement() {
     case Token::T_DESCRIBE:
     case Token::T_EXPLAIN:
       return explainStatement();
+    case Token::T_CLUSTER:
+      return clusterStatement();
     case Token::T_USE:
       return useStatement();
     default:
@@ -336,7 +338,7 @@ ASTNode* Parser::statement() {
 
   RAISE(
       kParseError,
-      "unexpected token %s%s%s, expected one of SELECT, CREATE, INSERT, ALTER, DROP, DRAW or IMPORT",
+      "unexpected token %s%s%s, expected one of SELECT, CREATE, INSERT, ALTER, DROP, CLUSTER, DRAW or IMPORT",
         Token::getTypeName(cur_token_->getType()),
         cur_token_->getString().size() > 0 ? ": " : "",
         cur_token_->getString().c_str());
@@ -907,6 +909,21 @@ ASTNode* Parser::describePartitionsStatement() {
 ASTNode* Parser::describeTableStatement() {
   auto stmt = new ASTNode(ASTNode::T_DESCRIBE_TABLE);
   stmt->appendChild(tableName());
+  consumeIf(Token::T_SEMICOLON);
+  return stmt;
+}
+
+ASTNode* Parser::clusterStatement() {
+  consumeToken();
+
+  return clusterShowServersStatement();
+};
+
+ASTNode* Parser::clusterShowServersStatement() {
+  expectAndConsume(Token::T_SHOW);
+  expectAndConsume(Token::T_SERVERS);
+
+  auto stmt = new ASTNode(ASTNode::T_CLUSTER_SHOW_SERVERS);
   consumeIf(Token::T_SEMICOLON);
   return stmt;
 }
