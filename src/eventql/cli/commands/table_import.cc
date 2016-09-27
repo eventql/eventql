@@ -35,7 +35,7 @@ namespace eventql {
 namespace cli {
 
 const String TableImport::kName_ = "table-import";
-const String TableImport::kDescription_ = "Import table";
+const String TableImport::kDescription_ = "Import json or csv data to a table.";
 
 TableImport::TableImport(
     RefPtr<ProcessConfig> process_cfg) :
@@ -52,7 +52,7 @@ Status TableImport::execute(
       "database",
       ::cli::FlagParser::T_STRING,
       true,
-      NULL,
+      "d",
       NULL,
       "database",
       "<string>");
@@ -61,10 +61,28 @@ Status TableImport::execute(
       "table",
       ::cli::FlagParser::T_STRING,
       true,
-      NULL,
+      "t",
       NULL,
       "table name",
       "<string>");
+
+  flags.defineFlag(
+      "host",
+      ::cli::FlagParser::T_STRING,
+      true,
+      "h",
+      NULL,
+      "host name",
+      "<string>");
+
+  flags.defineFlag(
+      "port",
+      ::cli::FlagParser::T_INTEGER,
+      true,
+      "p",
+      NULL,
+      "port",
+      "<integer>");
 
   flags.defineFlag(
       "file",
@@ -91,13 +109,35 @@ Status TableImport::execute(
     return Status(e);
   }
 
-  std::vector<std::pair<std::string, std::string>> auth_data{}; //FIXME get host, port, auth data from config
+  /* auth data */
+  std::vector<std::pair<std::string, std::string>> auth_data;
+  if (process_cfg_->hasProperty("client.user")) {
+    auth_data.emplace_back(
+        "user",
+        process_cfg_->getString("client.user").get());
+  }
+
+  if (process_cfg_->hasProperty("client.password")) {
+    auth_data.emplace_back(
+        "password",
+        process_cfg_->getString("client.").get());
+  }
+
+  if (process_cfg_->hasProperty("client.auth_token")) {
+    auth_data.emplace_back(
+        "auth_token",
+        process_cfg_->getString("client.auth_token").get());
+  }
 
   auto rc = Status::success();
 
   /* connect */
   native_transport::TCPClient client(nullptr, nullptr);
-  rc = client.connect("localhost", 10001, false, auth_data);
+  rc = client.connect(
+      flags.getString("host"),
+      flags.getInt("port"),
+      false,
+      auth_data);
   if (!rc.isSuccess()) {
     goto exit;
   }
@@ -159,7 +199,6 @@ Status TableImport::execute(
     }
   }
 
-
 exit:
   client.close();
   return rc;
@@ -179,9 +218,11 @@ void TableImport::printHelp(OutputStream* stdout_os) const {
 
   stdout_os->write(
       "Usage: evqlctl table-import [OPTIONS]\n"
-      "  --database               The name of the database.\n"
-      "  --table                  The name of the table.\n"
-      "  -f, --file               The path of the file to import.\n");
+      "  -d, --database <db>          Select a database.\n"
+      "  -t, --table <tbl>            Select a destination table.\n"
+      "  -f, --file <file>            Set the path of the file to import.\n"
+      "  -h, --host <hostname>        Set the EventQL hostname.\n"
+      "  -p, --port <port>            Set the EventQL port.\n");
 }
 
 } // namespace cli
