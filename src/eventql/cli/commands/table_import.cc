@@ -24,8 +24,6 @@
  */
 #include <eventql/cli/commands/table_import.h>
 #include <eventql/util/cli/flagparser.h>
-#include "eventql/util/io/fileutil.h"
-#include "eventql/util/json/json.h"
 #include "eventql/util/logging.h"
 #include "eventql/transport/native/client_tcp.h"
 #include "eventql/transport/native/frames/insert.h"
@@ -93,12 +91,10 @@ Status TableImport::execute(
       "file path",
       "<string>");
 
-  json::JSONObject json;
+  std::unique_ptr<FileInputStream> is;
   try {
     flags.parseArgv(argv);
-
-    Buffer buf = FileUtil::read(flags.getString("file")); //FIXME read as input stream?
-    json = json::parseJSON(buf);
+    is = FileInputStream::openFile(flags.getString("file"));
 
   } catch (const Exception& e) {
 
@@ -149,16 +145,10 @@ Status TableImport::execute(
     i_frame.setTable(flags.getString("table"));
     i_frame.setRecordEncoding(EVQL_INSERT_CTYPE_JSON);
 
-    const auto num_records = json::arrayLength(json);
-    for (size_t i = 0; i < num_records; ++i) {
-      auto record = json::arrayLookup(json.begin(), json.end(), i);
-      if (record == json.end()) {
-        break;
-      }
-
-      //FIXME
-      //auto jstr = json::toJSONString(record)
-      //i_frame.addRecord(buf.toString());
+    std::string line;
+    while (is->readLine(&line)) {
+      i_frame.addRecord(line);
+      line.clear();
     }
 
     rc = client.sendFrame(&i_frame, 0);
