@@ -25,6 +25,7 @@
 #include "eventql/transport/native/connection.h"
 #include "eventql/transport/native/frames/meta_performop.h"
 #include "eventql/util/logging.h"
+#include "eventql/util/wallclock.h"
 #include "eventql/server/session.h"
 #include "eventql/db/metadata_service.h"
 
@@ -64,12 +65,24 @@ ReturnCode performOperation_META_PERFORMOP(
   }
 
   /* execute operation */
+  auto t0 = MonotonicClock::now();
   MetadataOperationResult result;
   auto rc = dbctx->metadata_service->performMetadataOperation(
       m_frame.getDatabase(),
       m_frame.getTable(),
       op,
       &result);
+  auto t1 = MonotonicClock::now();
+
+  logInfo(
+      "evqld",
+      "Performing metadata operation $0 on $1/$2 ($3->$4), took $5ms",
+      MetadataOperationType_Name(op.getOperationType()),
+      m_frame.getDatabase(),
+      m_frame.getTable(),
+      op.getInputTransactionID(),
+      op.getOutputTransactionID(),
+      double(t1-t0)/1000.f);
 
   /* send response */
   if (rc.isSuccess()) {

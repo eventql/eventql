@@ -202,15 +202,8 @@ Vector<Scheduler::PipelinedQueryTree> Scheduler::pipelineExpression(
       table.get()->config().config().partition_key(),
       seqscan->constraints());
 
-  MetadataClient metadata_client(
-      cdir_,
-      session->getDatabaseContext()->config,
-      session->getDatabaseContext()->metadata_cache,
-      session->getDatabaseContext()->connection_pool,
-      session->getDatabaseContext()->dns_cache);
-
   PartitionListResponse partition_list;
-  auto rc = metadata_client.listPartitions(
+  auto rc = session->getDatabaseContext()->metadata_client->listPartitions(
       db_namespace,
       table_ref.table_key,
       keyrange,

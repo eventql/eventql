@@ -337,14 +337,8 @@ Status MetadataService::createFinitePartition(
       Random::singleton()->sha1(),
       *msg::encode(op));
 
-  MetadataCoordinator coordinator(
-      dbctx_->config_directory,
-      dbctx_->config,
-      dbctx_->connection_pool,
-      dbctx_->dns_cache);
-
   MetadataOperationResult create_result;
-  auto create_rc = coordinator.performAndCommitOperation(
+  auto create_rc = dbctx_->metadata_coordinator->performAndCommitOperation(
       request.db_namespace(),
       request.table_id(),
       envelope,
@@ -446,14 +440,8 @@ Status MetadataService::createUserDefinedPartition(
       Random::singleton()->sha1(),
       *msg::encode(op));
 
-  MetadataCoordinator coordinator(
-      dbctx_->config_directory,
-      dbctx_->config,
-      dbctx_->connection_pool,
-      dbctx_->dns_cache);
-
   MetadataOperationResult create_result;
-  auto create_rc = coordinator.performAndCommitOperation(
+  auto create_rc = dbctx_->metadata_coordinator->performAndCommitOperation(
       request.db_namespace(),
       request.table_id(),
       envelope,

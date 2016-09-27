@@ -25,6 +25,7 @@
 #include <eventql/db/partition_writer.h>
 #include <eventql/db/metadata_operations.pb.h>
 #include <eventql/db/metadata_coordinator.h>
+#include <eventql/db/metadata_client.h>
 #include <eventql/db/replication_state.h>
 #include <eventql/db/replication_worker.h>
 #include <eventql/config/config_directory.h>
@@ -416,14 +417,8 @@ Status LSMPartitionReplication::fetchAndApplyMetadataTransaction(
   discovery_request.set_keyrange_begin(snap_->state.partition_keyrange_begin());
   discovery_request.set_keyrange_end(snap_->state.partition_keyrange_end());
 
-  MetadataCoordinator coordinator(
-      dbctx_->config_directory,
-      dbctx_->config,
-      dbctx_->connection_pool,
-      dbctx_->dns_cache);
-
   PartitionDiscoveryResponse discovery_response;
-  auto rc = coordinator.discoverPartition(
+  auto rc = dbctx_->metadata_client->discoverPartition(
       discovery_request,
       &discovery_response);
 
@@ -459,13 +454,7 @@ Status LSMPartitionReplication::finalizeSplit() {
       Random::singleton()->sha1(),
       *msg::encode(op));
 
-  MetadataCoordinator coordinator(
-      dbctx_->config_directory,
-      dbctx_->config,
-      dbctx_->connection_pool,
-      dbctx_->dns_cache);
-
-  return coordinator.performAndCommitOperation(
+  return dbctx_->metadata_coordinator->performAndCommitOperation(
       snap_->state.tsdb_namespace(),
       snap_->state.table_key(),
       envelope);
@@ -498,13 +487,7 @@ Status LSMPartitionReplication::finalizeJoin(const ReplicationTarget& target) {
       Random::singleton()->sha1(),
       *msg::encode(op));
 
-  MetadataCoordinator coordinator(
-      dbctx_->config_directory,
-      dbctx_->config,
-      dbctx_->connection_pool,
-      dbctx_->dns_cache);
-
-  return coordinator.performAndCommitOperation(
+  return dbctx_->metadata_coordinator->performAndCommitOperation(
       snap_->state.tsdb_namespace(),
       snap_->state.table_key(),
       envelope);
@@ -524,6 +507,11 @@ bool LSMPartitionReplication::shouldDropPartition() const {
   }
 
   if (needsReplication()) {
+    return false;
+  }
+
+  if (snap_->state.replication_targets().size() == 0) {
+    logWarning("evqld", "partition has no replication targets");
     return false;
   }
 
