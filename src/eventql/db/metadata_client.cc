@@ -96,6 +96,13 @@ ReturnCode MetadataClient::downloadMetadataFile(
     const String& table_id,
     const SHA1Hash& txnid,
     RefPtr<MetadataFile>* file) {
+  logDebug(
+      "evqld",
+      "Downloading metadata file); db=$0 table=$1 txnid=$2",
+      ns,
+      table_id,
+      txnid.toString());
+
   auto table_cfg = cdir_->getTableConfig(ns, table_id);
   auto idle_timeout = config_->getInt("server.s2s_idle_timeout", 0);
   auto io_timeout = config_->getInt("server.s2s_io_timeout", 0);
@@ -222,8 +229,11 @@ Status MetadataClient::findPartition(
     bool allow_create,
     PartitionFindResponse* res) {
   auto table_cfg = cdir_->getTableConfig(ns, table_id);
-  auto idle_timeout = config_->getInt("server.s2s_idle_timeout", 0);
-  auto io_timeout = config_->getInt("server.s2s_io_timeout", 0);
+
+  if (!table_cfg.config().enable_finite_partitions() &&
+      !table_cfg.config().enable_user_defined_partitions()) {
+    allow_create = false;
+  }
 
   PartitionFindRequest req;
   req.set_db_namespace(ns);
@@ -233,13 +243,98 @@ Status MetadataClient::findPartition(
   req.set_min_sequence_number(table_cfg.metadata_txnseq());
   req.set_keyspace(getKeyspace(table_cfg.config()));
 
-  if (cache_->get(req, res)) {
+  return findPartition(req, res);
+}
+
+Status MetadataClient::findPartition(
+    const PartitionFindRequest& request,
+    PartitionFindResponse* response) {
+  if (cache_->get(request, response)) {
     return Status::success();
   }
 
+  RefPtr<MetadataFile> file;
+  {
+    auto rc = fetchLatestMetadataFile(
+        request.db_namespace(),
+        request.table_id(),
+        &file);
+    if (!rc.isSuccess()) {
+      return rc;
+    }
+  }
+
+  auto partition = file->getPartitionMapAt(request.key());
+  if (partition == file->getPartitionMapEnd()) {
+    if (!request.allow_create()) {
+      return Status(eRuntimeError, "partition not found");
+    }
+
+    return createPartition(request, response);
+  }
+
+  if (request.min_sequence_number() > file->getSequenceNumber()) {
+      return Status(eRuntimeError, "metadata file is too old");
+  }
+
+  response->set_sequence_number(file->getSequenceNumber());
+  response->set_partition_id(
+      partition->partition_id.data(),
+      partition->partition_id.size());
+
+  response->set_partition_keyrange_begin(partition->begin);
+  if (file->hasFinitePartitions()) {
+    response->set_partition_keyrange_end(partition->end);
+  } else if (file->hasUserDefinedPartitions()) {
+    response->set_partition_keyrange_end(partition->begin);
+  } else {
+    auto next = partition + 1;
+    if (next == file->getPartitionMapEnd()) {
+      response->set_partition_keyrange_end("");
+    } else {
+      response->set_partition_keyrange_end(next->begin);
+    }
+  }
+
+  for (const auto& s : partition->servers) {
+    response->add_servers_for_insert(s.server_id);
+  }
+  for (const auto& s : partition->servers_leaving) {
+    response->add_servers_for_insert(s.server_id);
+  }
+
+  cache_->store(request, *response);
+  return Status::success();
+}
+
+Status MetadataClient::createPartition(
+    const PartitionFindRequest& request,
+    PartitionFindResponse* response) {
+  auto locks = getAdvisoryLocks(
+       request.db_namespace(),
+       request.table_id());
+
+  std::unique_lock<std::mutex> lock_holder(locks->create_lock);
+
+  if (cache_->get(request, response)) {
+    return Status::success();
+  }
+
+  logDebug(
+      "evqld",
+      "Creating new partition (remote); db=$0 table=$1",
+      request.db_namespace(),
+      request.table_id());
+
+  auto idle_timeout = config_->getInt("server.s2s_idle_timeout", 0);
+  auto io_timeout = config_->getInt("server.s2s_io_timeout", 0);
+  auto table_cfg = cdir_->getTableConfig(
+      request.db_namespace(),
+      request.table_id());
+
   Buffer req_payload;
   req_payload.append((char) 0);
-  msg::encode(req, &req_payload);
+  msg::encode(request, &req_payload);
 
   for (const auto& s : table_cfg.metadata_servers()) {
     auto server = cdir_->getServerConfig(s);
@@ -297,8 +392,8 @@ Status MetadataClient::findPartition(
         continue;
     }
 
-    msg::decode<PartitionFindResponse>(ret_payload, res);
-    cache_->store(req, *res);
+    msg::decode<PartitionFindResponse>(ret_payload, response);
+    cache_->store(request, *response);
     return Status::success();
   }
 

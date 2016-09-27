@@ -34,6 +34,7 @@ namespace eventql {
 
 struct MetadataClientLocks {
   std::mutex download_lock;
+  std::mutex create_lock;
 };
 
 class MetadataClient {
@@ -71,6 +72,10 @@ public:
       bool allow_create,
       PartitionFindResponse* res);
 
+  Status findPartition(
+      const PartitionFindRequest& request,
+      PartitionFindResponse* res);
+
 protected:
 
   MetadataClientLocks* getAdvisoryLocks(
@@ -82,6 +87,10 @@ protected:
       const String& table_id,
       const SHA1Hash& txnid,
       RefPtr<MetadataFile>* file);
+
+  Status createPartition(
+      const PartitionFindRequest& request,
+      PartitionFindResponse* res);
 
   ConfigDirectory* cdir_;
   ProcessConfig* config_;
