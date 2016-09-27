@@ -853,8 +853,6 @@ EVQL_CORE_SOURCES_ = \
     eventql/db/table_service.h \
     eventql/transport/http/http_transport.cc \
     eventql/transport/http/http_transport.h \
-    eventql/transport/http/rpc_servlet.cc \
-    eventql/transport/http/rpc_servlet.h \
     eventql/transport/native/connection.cc \
     eventql/transport/native/connection.h \
     eventql/transport/native/connection_tcp.cc \
