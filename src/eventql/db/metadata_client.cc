@@ -182,82 +182,37 @@ Status MetadataClient::listPartitions(
     const String& ns,
     const String& table_id,
     const KeyRange& keyrange,
-    PartitionListResponse* res) {
-  auto table_cfg = cdir_->getTableConfig(ns, table_id);
-  auto idle_timeout = config_->getInt("server.s2s_idle_timeout", 0);
-  auto io_timeout = config_->getInt("server.s2s_io_timeout", 0);
-
-  PartitionListRequest req;
-  req.set_db_namespace(ns);
-  req.set_table_id(table_id);
-  req.set_keyrange_begin(keyrange.begin);
-  req.set_keyrange_end(keyrange.end);
-
-  Buffer req_payload;
-  req_payload.append((char) 0);
-  msg::encode(req, &req_payload);
-
-  for (const auto& s : table_cfg.metadata_servers()) {
-    auto server = cdir_->getServerConfig(s);
-    if (server.server_status() != SERVER_UP) {
-      logWarning("evqld", "metadata server is down: $0", s);
-      continue;
-    }
-
-    native_transport::TCPClient client(
-        conn_pool_,
-        dns_cache_,
-        io_timeout,
-        idle_timeout);
-
-    auto rc = client.connect(server.server_addr(), true);
+    PartitionListResponse* response) {
+  RefPtr<MetadataFile> file;
+  {
+    auto rc = fetchLatestMetadataFile(
+        ns,
+        table_id,
+        &file);
     if (!rc.isSuccess()) {
-      logWarning(
-          "evqld",
-          "can't connect to metadata server: $0",
-          rc.getMessage());
-      continue;
+      return rc;
     }
-
-    rc = client.sendFrame(
-        EVQL_OP_META_LISTPARTITIONS,
-        0,
-        req_payload.data(),
-        req_payload.size());
-
-    if (!rc.isSuccess()) {
-      logWarning("evqld", "metadata request failed: $0", rc.getMessage());
-      continue;
-    }
-
-    uint16_t ret_opcode = 0;
-    uint16_t ret_flags;
-    std::string ret_payload;
-    rc = client.recvFrame(&ret_opcode, &ret_flags, &ret_payload, idle_timeout);
-    if (!rc.isSuccess()) {
-      logWarning("evqld", "metadata request failed: $0", rc.getMessage());
-      continue;
-    }
-
-    switch (ret_opcode) {
-      case EVQL_OP_META_LISTPARTITIONS_RESULT:
-        break;
-      case EVQL_OP_ERROR: {
-        native_transport::ErrorFrame eframe;
-        eframe.parseFrom(ret_payload.data(), ret_payload.size());
-        logWarning("evqld", "metadata request failed: $0", eframe.getError());
-        continue;
-      }
-      default:
-        logWarning("evqld", "metadata request failed: invalid opcode");
-        continue;
-    }
-
-    msg::decode<PartitionListResponse>(ret_payload, res);
-    return Status::success();
   }
 
-  return Status(eIOError, "no metadata server responded");
+  auto iter = file->getPartitionMapRangeBegin(keyrange.begin);
+  auto end = file->getPartitionMapRangeEnd(keyrange.end);
+  for (; iter != end; ++iter) {
+    auto e = response->add_partitions();
+    e->set_partition_id(iter->partition_id.data(), iter->partition_id.size());
+    e->set_keyrange_begin(iter->begin);
+    if (iter + 1 != file->getPartitionMapEnd()) {
+      e->set_keyrange_end(iter[1].begin);
+    }
+
+    for (const auto& s : iter->servers) {
+      e->add_servers(s.server_id);
+    }
+    for (const auto& s : iter->servers_leaving) {
+      e->add_servers(s.server_id);
+    }
+  }
+
+  return Status::success();
 }
 
 Status MetadataClient::findPartition(
