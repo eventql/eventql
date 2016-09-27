@@ -45,7 +45,23 @@ Status MetadataCoordinator::performAndCommitOperation(
     const String& table_name,
     MetadataOperation op,
     MetadataOperationResult* res /* = nullptr */) {
-  auto table_config = cdir_->getTableConfig(ns, table_name);
+  /* grab advisory lock */
+  auto lock_key = StringUtil::format("$0~$1", ns, table_name);
+
+  std::mutex* lock;
+  {
+    std::unique_lock<std::mutex> lockmap_mutex_holder(lockmap_mutex_);
+    auto& lock_iter = lockmap_[lock_key];
+    if (!lock_iter) {
+      lock_iter.reset(new std::mutex());
+    }
+    lock = lock_iter.get();
+  }
+
+  std::unique_lock<std::mutex> lock_holder(*lock);
+
+  /* get latest config */
+  auto table_config = cdir_->getTableConfig(ns, table_name, false);
   SHA1Hash input_txid(
       table_config.metadata_txnid().data(),
       table_config.metadata_txnid().size());
@@ -54,6 +70,7 @@ Status MetadataCoordinator::performAndCommitOperation(
     return Status(eConcurrentModificationError, "concurrent modification");
   }
 
+  /* perform operation */
   Vector<String> servers;
   for (const auto& s : table_config.metadata_servers()) {
     servers.emplace_back(s);
@@ -64,6 +81,7 @@ Status MetadataCoordinator::performAndCommitOperation(
     return rc;
   }
 
+  /* commit transaction */
   auto output_txid = op.getOutputTransactionID();
   table_config.set_metadata_txnid(output_txid.data(), output_txid.size());
   table_config.set_metadata_txnseq(table_config.metadata_txnseq() + 1);

@@ -78,6 +78,8 @@ protected:
   ProcessConfig* config_;
   native_transport::TCPConnectionPool* conn_pool_;
   net::DNSCache* dns_cache_;
+  std::mutex lockmap_mutex_;
+  std::map<std::string, std::unique_ptr<std::mutex>> lockmap_;
 };
 
 
