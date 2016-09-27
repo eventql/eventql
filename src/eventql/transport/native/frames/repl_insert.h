@@ -35,6 +35,8 @@ namespace native_transport {
 class ReplInsertFrame {
 public:
 
+  static const uint16_t kOpcode = EVQL_OP_REPL_INSERT;
+
   ReplInsertFrame();
 
   void setDatabase(const std::string& database);
