@@ -113,11 +113,10 @@ Status TableService::createTable(
   TablePartitionerType partitioner_type;
   KeyspaceType keyspace_type;
   switch (schema.fieldType(schema.fieldId(partition_key))) {
-    case msg::FieldType::DATETIME: {
+    case msg::FieldType::DATETIME:
       partitioner_type = TBL_PARTITION_TIMEWINDOW;
       keyspace_type = KEYSPACE_UINT64;
       break;
-    }
     case msg::FieldType::STRING:
       partitioner_type = TBL_PARTITION_STRING;
       keyspace_type = KEYSPACE_STRING;
@@ -145,6 +144,10 @@ Status TableService::createTable(
   tblcfg->set_storage(eventql::TBL_STORAGE_COLSM);
   tblcfg->set_partition_key(partition_key);
 
+  for (const auto& col : primary_key) {
+    tblcfg->add_primary_key(col);
+  }
+
   for (const auto& p : properties) {
     if (p.first == "partition_size_hint") {
       uint64_t val = 0;
@@ -163,15 +166,11 @@ Status TableService::createTable(
             eIllegalArgumentError,
             "user defined partition key must be of type STRING or UINT64");
       }
+
       tblcfg->set_enable_user_defined_partitions(true);
       continue;
     }
   }
-
-  for (const auto& col : primary_key) {
-    tblcfg->add_primary_key(col);
-  }
-
 
   // check preconditions
   if (tblcfg->enable_finite_partitions() &&
