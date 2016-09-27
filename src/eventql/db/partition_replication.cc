@@ -522,6 +522,11 @@ bool LSMPartitionReplication::shouldDropPartition() const {
     return false;
   }
 
+  if (snap_->state.replication_targets().size() == 0) {
+    logWarning("evqld", "partition has no replication targets");
+    return false;
+  }
+
   return true;
 }
 
