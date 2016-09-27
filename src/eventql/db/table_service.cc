@@ -109,14 +109,42 @@ Status TableService::createTable(
     }
   }
 
+  bool enable_finite_partitions = false;
+  uint64_t finite_partition_size;
+  bool enable_user_defined_partitions = false;
+  for (const auto& p : properties) {
+    if (p.first == "partition_size_hint") {
+      uint64_t val = 0;
+      try {
+        val = std::stoull(p.second);
+      } catch (...) {}
+
+      enable_finite_partitions = true;
+      finite_partition_size = val;
+      continue;
+    }
+
+    if (p.first == "user_defined_partitions" && p.second == "true") {
+      enable_user_defined_partitions = true;
+      continue;
+    }
+  }
+
   String partition_key = primary_key[0];
   TablePartitionerType partitioner_type;
   KeyspaceType keyspace_type;
   switch (schema.fieldType(schema.fieldId(partition_key))) {
-    case msg::FieldType::DATETIME:
+    case msg::FieldType::DATETIME: {
+      if (enable_user_defined_partitions) {
+        return Status(
+            eIllegalArgumentError,
+            "user defined partition key must be of type STRING or UINT64");
+      }
+
       partitioner_type = TBL_PARTITION_TIMEWINDOW;
       keyspace_type = KEYSPACE_UINT64;
       break;
+    }
     case msg::FieldType::STRING:
       partitioner_type = TBL_PARTITION_STRING;
       keyspace_type = KEYSPACE_STRING;
@@ -143,28 +171,17 @@ Status TableService::createTable(
   tblcfg->set_partitioner(partitioner_type);
   tblcfg->set_storage(eventql::TBL_STORAGE_COLSM);
   tblcfg->set_partition_key(partition_key);
+  tblcfg->set_enable_user_defined_partitions(enable_user_defined_partitions);
+
+  if (enable_finite_partitions) {
+    tblcfg->set_enable_finite_partitions(true);
+    tblcfg->set_finite_partition_size(finite_partition_size);
+  }
 
   for (const auto& col : primary_key) {
     tblcfg->add_primary_key(col);
   }
 
-  for (const auto& p : properties) {
-    if (p.first == "partition_size_hint") {
-      uint64_t val = 0;
-      try {
-        val = std::stoull(p.second);
-      } catch (...) {}
-
-      tblcfg->set_enable_finite_partitions(true);
-      tblcfg->set_finite_partition_size(val);
-      continue;
-    }
-
-    if (p.first == "user_defined_partitions" && p.second == "true") {
-      tblcfg->set_enable_user_defined_partitions(true);
-      continue;
-    }
-  }
 
   // check preconditions
   if (tblcfg->enable_finite_partitions() &&
