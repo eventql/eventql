@@ -470,15 +470,9 @@ Status TableService::listPartitions(
     const String& table_name,
     Function<void (const TablePartitionInfo& partition)> fn) const {
   auto table = dbctx_->partition_map->findTable(db_namespace, table_name);
-  MetadataClient metadata_client(
-      dbctx_->config_directory,
-      dbctx_->config,
-      dbctx_->metadata_cache,
-      dbctx_->connection_pool,
-      dbctx_->dns_cache);
 
   MetadataFile metadata_file;
-  auto rc = metadata_client.fetchLatestMetadataFile(
+  auto rc = dbctx_->metadata_client->fetchLatestMetadataFile(
       db_namespace,
       table_name,
       &metadata_file);
@@ -637,13 +631,6 @@ ReturnCode TableService::insertRecords(
     const msg::DynamicMessage* begin,
     const msg::DynamicMessage* end,
     uint64_t flags /* = 0 */) {
-  MetadataClient metadata_client(
-      dbctx_->config_directory,
-      dbctx_->config,
-      dbctx_->metadata_cache,
-      dbctx_->connection_pool,
-      dbctx_->dns_cache);
-
   HashMap<SHA1Hash, ShreddedRecordListBuilder> records;
   HashMap<SHA1Hash, Set<String>> servers;
 
@@ -709,7 +696,7 @@ ReturnCode TableService::insertRecords(
     // lookup partition
     PartitionFindResponse find_res;
     {
-      auto rc = metadata_client.findOrCreatePartition(
+      auto rc = dbctx_->metadata_client->findOrCreatePartition(
           tsdb_namespace,
           table_name,
           encodePartitionKey(

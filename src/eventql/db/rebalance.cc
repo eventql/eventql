@@ -32,14 +32,14 @@ Rebalance::Rebalance(
     ConfigDirectory* cdir,
     ProcessConfig* config,
     ServerAllocator* server_alloc,
-    MetadataCache* metadata_cache,
+    MetadataClient* metadata_client,
     native_transport::TCPConnectionPool* conn_pool,
     net::DNSCache* dns_cache) :
     cdir_(cdir),
     config_(config),
     server_alloc_(server_alloc),
     metadata_coordinator_(cdir, config, conn_pool, dns_cache),
-    metadata_client_(cdir, config, metadata_cache, conn_pool, dns_cache),
+    metadata_client_(metadata_client),
     replication_factor_(3),
     metadata_replication_factor_(3) {}
 
@@ -87,7 +87,7 @@ Status Rebalance::rebalanceTable(TableDefinition tbl_cfg) {
 
   // fetch latest metadata file
   MetadataFile metadata;
-  auto rc = metadata_client_.fetchMetadataFile(tbl_cfg, &metadata);
+  auto rc = metadata_client_->fetchMetadataFile(tbl_cfg, &metadata);
   if (!rc.isSuccess()) {
     return rc;
   }
@@ -344,7 +344,7 @@ Status Rebalance::performMetadataOperation(
   table_cfg->set_metadata_txnid(new_txnid.data(), new_txnid.size());
   table_cfg->set_metadata_txnseq(table_cfg->metadata_txnseq() + 1);
 
-  return metadata_client_.fetchMetadataFile(*table_cfg, metadata_file);
+  return metadata_client_->fetchMetadataFile(*table_cfg, metadata_file);
 }
 
 

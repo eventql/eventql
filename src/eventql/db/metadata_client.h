@@ -38,6 +38,7 @@ public:
   MetadataClient(
       ConfigDirectory* cdir,
       ProcessConfig* config,
+      MetadataStore* store,
       MetadataCache* cache,
       native_transport::TCPConnectionPool* conn_pool,
       net::DNSCache* dns_cache);

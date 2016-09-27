@@ -34,12 +34,12 @@ Leader::Leader(
     ConfigDirectory* cdir,
     ProcessConfig* config,
     ServerAllocator* server_alloc,
-    MetadataCache* metadata_cache,
+    MetadataClient* metadata_client,
     uint64_t rebalance_interval,
     native_transport::TCPConnectionPool* conn_pool,
     net::DNSCache* dns_cache) :
     cdir_(cdir),
-    rebalance_(cdir, config, server_alloc, metadata_cache, conn_pool, dns_cache),
+    rebalance_(cdir, config, server_alloc, metadata_client, conn_pool, dns_cache),
     rebalance_interval_(rebalance_interval) {}
 
 Leader::~Leader() {

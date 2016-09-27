@@ -39,7 +39,7 @@ public:
       ConfigDirectory* cdir,
       ProcessConfig* config,
       ServerAllocator* server_alloc,
-      MetadataCache* metadata_cache,
+      MetadataClient* metadata_client,
       native_transport::TCPConnectionPool* conn_pool,
       net::DNSCache* dns_cache);
 
@@ -59,7 +59,7 @@ protected:
   ProcessConfig* config_;
   ServerAllocator* server_alloc_;
   MetadataCoordinator metadata_coordinator_;
-  MetadataClient metadata_client_;
+  MetadataClient* metadata_client_;
   size_t replication_factor_;
   size_t metadata_replication_factor_;
   Set<String> all_servers_;
