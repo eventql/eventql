@@ -1938,7 +1938,6 @@ QueryTreeNode* QueryPlanBuilder::buildCreateTable(
     node->setPrimaryKey(primary_key_columns);
   }
 
-  std::vector<std::pair<std::string, std::string>> properties;
   if (ast->getChildren().size() >= 3) {
     for (const auto& cld : ast->getChildren()[2]->getChildren()) {
       if (cld->getType() != ASTNode::T_TABLE_PROPERTY) {
@@ -1951,9 +1950,22 @@ QueryTreeNode* QueryPlanBuilder::buildCreateTable(
         RAISE(kRuntimeError, "corrupt AST");
       }
 
+      std::string value;
+      switch (cld->getChildren()[1]->getToken()->getType()) {
+        case Token::T_TRUE:
+          value = "true";
+          break;
+        case Token::T_FALSE:
+          value = "false";
+          break;
+        default:
+          value = cld->getChildren()[1]->getToken()->getString();
+          break;
+      }
+
       node->addProperty(
           cld->getChildren()[0]->getToken()->getString(),
-          cld->getChildren()[1]->getToken()->getString());
+          value);
     }
   }
 
@@ -2156,9 +2168,22 @@ QueryTreeNode* QueryPlanBuilder::buildAlterTable(
           RAISE(kRuntimeError, "corrupt AST");
         }
 
+        std::string value;
+        switch (cld->getChildren()[1]->getToken()->getType()) {
+          case Token::T_TRUE:
+            value = "true";
+            break;
+          case Token::T_FALSE:
+            value = "false";
+            break;
+          default:
+            value = cld->getChildren()[1]->getToken()->getString();
+            break;
+        }
+
         properties.emplace_back(
             cld->getChildren()[0]->getToken()->getString(),
-            cld->getChildren()[1]->getToken()->getString());
+            value);
         break;
       }
 

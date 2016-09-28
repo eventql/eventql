@@ -990,7 +990,7 @@ TEST_CASE(QTreeTest, TestAlterTableSetProperty, [] () {
   auto properties = qtree->getProperties();
   EXPECT_EQ(properties.size(), 2);
   EXPECT_EQ(properties[0].first, "disable_split");
-  //EXPECT_EQ(properties[0].second, "false"); FIXME
+  EXPECT_EQ(properties[0].second, "false");
 
   EXPECT_EQ(properties[1].first, "split_point");
   EXPECT_EQ(properties[1].second, "1000");
