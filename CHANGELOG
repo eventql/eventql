@@ -46,6 +46,8 @@ EventQL v0.5.0 beta;
   * Added the CLUSTER SHOW SERVERS statement and the cluster-list command to
     obtain information about the servers of the current cluster.
 
+  * Made table properties enable_async_split, partition_split_threshold and
+    disable_replication updateable via ALTER TABLE SET PROPERTY
 
 EventQL v0.4.0 beta;
 
