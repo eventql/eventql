@@ -964,6 +964,38 @@ TEST_CASE(QTreeTest, TestAlterTable, [] () {
   EXPECT_EQ(operations[3].column_name, "version");
 });
 
+TEST_CASE(QTreeTest, TestAlterTableSetProperty, [] () {
+  auto runtime = Runtime::getDefaultRuntime();
+  auto txn = runtime->newTransaction();
+
+  String query = R"(
+      ALTER TABLE evtbl
+        ADD description REPEATED String,
+        SET PROPERTY disable_split = false,
+        SET PROPERTY split_point = 1000;
+  )";
+
+  csql::Parser parser;
+  parser.parse(query.data(), query.size());
+
+  auto qtree_builder = runtime->queryPlanBuilder();
+  Vector<RefPtr<QueryTreeNode>> qtrees = qtree_builder->build(
+      txn.get(),
+      parser.getStatements(),
+      txn->getTableProvider());
+
+  RefPtr<AlterTableNode> qtree = qtrees[0].asInstanceOf<AlterTableNode>();
+  EXPECT_EQ(qtree->getTableName(), "evtbl");
+
+  auto properties = qtree->getProperties();
+  EXPECT_EQ(properties.size(), 2);
+  EXPECT_EQ(properties[0].first, "disable_split");
+  //EXPECT_EQ(properties[0].second, "false"); FIXME
+
+  EXPECT_EQ(properties[1].first, "split_point");
+  EXPECT_EQ(properties[1].second, "1000");
+});
+
 TEST_CASE(QTreeTest, TestDescribePartitions, [] () {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
