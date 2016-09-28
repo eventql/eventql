@@ -33,6 +33,9 @@
 #include <eventql/util/io/fileutil.h>
 #include <eventql/util/protobuf/msg.h>
 #include "eventql/eventql.h"
+#include "eventql/transport/native/client_tcp.h"
+#include "eventql/transport/native/frames/error.h"
+#include "eventql/transport/native/frames/repl_insert.h"
 
 namespace eventql {
 
@@ -215,10 +218,14 @@ void LSMPartitionReplication::replicateTo(
       }
 
       // upload batch
-      bytes_sent += uploadBatchTo(
+      auto rc = uploadBatchTo(
           server_cfg.server_addr(),
           SHA1Hash(replica.partition_id().data(), replica.partition_id().size()),
           upload_builder.get());
+
+      if (!rc.isSuccess()) {
+        RAISE(kRuntimeError, rc.getMessage());
+      }
 
       records_sent += upload_batchsize - upload_nskipped;
       replication_info->setTargetHostStatus(bytes_sent, records_sent);
@@ -663,33 +670,64 @@ void LSMPartitionReplication::readBatchPayload(
   }
 }
 
-size_t LSMPartitionReplication::uploadBatchTo(
+ReturnCode LSMPartitionReplication::uploadBatchTo(
     const String& host,
     const SHA1Hash& target_partition_id,
     const ShreddedRecordList& batch) {
-  Buffer body;
-  auto body_os = BufferOutputStream::fromBuffer(&body);
-  batch.encode(body_os.get());
+  auto io_timeout = dbctx_->config->getInt("server.s2s_io_timeout", 0);
+  auto idle_timeout = dbctx_->config->getInt("server.s2s_idle_timeout", 0);
 
-  URI uri(
-      StringUtil::format(
-          "http://$0/tsdb/replicate?namespace=$1&table=$2&partition=$3",
-          host,
-          URI::urlEncode(snap_->state.tsdb_namespace()),
-          URI::urlEncode(snap_->state.table_key()),
-          target_partition_id.toString()));
+  /* connect to host */
+  native_transport::TCPClient client(
+      dbctx_->connection_pool,
+      dbctx_->dns_cache,
+      io_timeout,
+      idle_timeout);
 
-  http::HTTPRequest req(http::HTTPMessage::M_POST, uri.pathAndQuery());
-  req.addHeader("Host", uri.hostAndPort());
-  req.addBody(body.data(), body.size());
-
-  http::HTTPClient http;
-  auto r = http.executeRequest(req);
-  if (r.statusCode() != 201) {
-    RAISEF(kRuntimeError, "received non-201 response: $0", r.body().toString());
+  auto rc = client.connect(host, true);
+  if (!rc.isSuccess()) {
+    return rc;
   }
 
-  return body.size();
+  /* build rpc payload */
+  std::string rpc_body;
+  auto rpc_body_os = StringOutputStream::fromString(&rpc_body);
+  batch.encode(rpc_body_os.get());
+
+  native_transport::ReplInsertFrame i_frame;
+  i_frame.setDatabase(snap_->state.tsdb_namespace());
+  i_frame.setTable(snap_->state.table_key());
+  i_frame.setPartitionID(target_partition_id.toString());
+  i_frame.setBody(rpc_body);
+
+  /* send insert frame */
+  rc = client.sendFrame(&i_frame, 0);
+  if (!rc.isSuccess()) {
+    return rc;
+  }
+
+  /* receive result */
+  uint16_t ret_opcode = 0;
+  uint16_t ret_flags;
+  std::string ret_payload;
+  rc = client.recvFrame(&ret_opcode, &ret_flags, &ret_payload, idle_timeout);
+  if (!rc.isSuccess()) {
+    return rc;
+  }
+
+  switch (ret_opcode) {
+    case EVQL_OP_ACK:
+      break;
+    case EVQL_OP_ERROR: {
+      native_transport::ErrorFrame eframe;
+      eframe.parseFrom(ret_payload.data(), ret_payload.size());
+      return ReturnCode::error("ERUNTIME", eframe.getError());
+    }
+    default:
+      return ReturnCode::error("ERUNTIME", "invalid opcode");
+  }
+
+  return ReturnCode::success();
 }
 
 } // namespace tdsb

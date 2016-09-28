@@ -32,8 +32,7 @@ HTTPTransport::HTTPTransport(
     Database* database) :
     database_(database),
     status_servlet_(database),
-    api_servlet_(database),
-    rpc_servlet_(database) {}
+    api_servlet_(database) {}
 
 void HTTPTransport::handleConnection(int fd, std::string prelude_bytes) {
   database_->startThread([this, fd, prelude_bytes] (Session* session) {
@@ -73,11 +72,6 @@ http::StreamingHTTPService* HTTPTransport::getServlet(
 
   if (StringUtil::beginsWith(path, "/api/")) {
     return &api_servlet_;
-  }
-
-  if (StringUtil::beginsWith(path, "/rpc/") ||
-      StringUtil::beginsWith(path, "/tsdb/")) {
-    return &rpc_servlet_;
   }
 
   if (StringUtil::beginsWith(path, "/eventql/")) {

@@ -51,6 +51,13 @@ Display the current cluster status.
       Usage: evqlctl cluster-status [OPTIONS]
 
 
+### cluster-list
+
+List the servers of the current cluster.
+
+    Usage:: evqlctl cluster-list
+
+
 ### database-create
 
 Create a new database.

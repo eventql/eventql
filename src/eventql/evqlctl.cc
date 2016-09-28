@@ -32,6 +32,7 @@
 #include <eventql/cli/commands/cluster_add_server.h>
 #include <eventql/cli/commands/cluster_create.h>
 #include <eventql/cli/commands/cluster_status.h>
+#include <eventql/cli/commands/cluster_list.h>
 #include <eventql/cli/commands/cluster_remove_server.h>
 #include <eventql/cli/commands/database_create.h>
 #include <eventql/cli/commands/table_split.h>
@@ -123,6 +124,7 @@ int main(int argc, const char** argv) {
   commands.emplace_back(new eventql::cli::ClusterCreate(process_config));
   commands.emplace_back(new eventql::cli::ClusterRemoveServer(process_config));
   commands.emplace_back(new eventql::cli::ClusterStatus(process_config));
+  commands.emplace_back(new eventql::cli::ClusterList(process_config));
   commands.emplace_back(new eventql::cli::DatabaseCreate(process_config));
   commands.emplace_back(new eventql::cli::TableSplit(process_config));
   commands.emplace_back(new eventql::cli::TableSplitFinalize(process_config));

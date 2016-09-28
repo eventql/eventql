@@ -405,7 +405,7 @@ Status TSDBTableProvider::createTable(
 }
 
 Status TSDBTableProvider::createDatabase(const String& database_name) {
-  return Status(eRuntimeError, "permission denied");
+  return table_service_->createDatabase(database_name);
 }
 
 Status TSDBTableProvider::alterTable(const csql::AlterTableNode& alter_table) {
@@ -518,6 +518,20 @@ Status TSDBTableProvider::listPartitions(
       tsdb_namespace_,
       table_name,
       fn);
+}
+
+Status TSDBTableProvider::listServers(
+    Function<void (const ServerConfig& server)> fn) const {
+  try {
+    auto servers = cdir_->listServers();
+    for (const auto& s : servers) {
+      fn(s);
+    }
+    return Status::success();
+
+  } catch (const std::exception& e) {
+    return Status(eRuntimeError, e.what());
+  }
 }
 
 Option<csql::TableInfo> TSDBTableProvider::describe(

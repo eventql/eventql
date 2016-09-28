@@ -1,7 +1,7 @@
 /**
  * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@eventql.io>
+ *   - Laura Schlimmer <laura@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -21,33 +21,42 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#ifndef _STX_RPCCLIENT_H
-#define _STX_RPCCLIENT_H
-#include <functional>
-#include <stdlib.h>
-#include <string>
-#include <unordered_map>
-#include <vector>
-#include "eventql/util/autoref.h"
-#include "eventql/util/thread/taskscheduler.h"
-#include "eventql/util/uri.h"
-#include "eventql/util/rpc/RPC.h"
-#include "eventql/util/http/httpconnectionpool.h"
+#pragma once
+#include "eventql/eventql.h"
+#include <eventql/util/stdtypes.h>
+#include <eventql/sql/qtree/TableExpressionNode.h>
+#include <eventql/sql/qtree/qtree_coder.h>
 
-class RPCClient {
+namespace csql {
+
+class ClusterShowServersNode : public TableExpressionNode {
 public:
-  virtual ~RPCClient() {}
 
-  virtual void call(const URI& uri, RefPtr<AnyRPC> rpc) = 0;
+  Vector<RefPtr<QueryTreeNode>> inputTables() const;
 
+  Vector<String> getResultColumns() const override;
+
+  Vector<QualifiedColumn> getAvailableColumns() const override;
+
+  RefPtr<QueryTreeNode> deepCopy() const override;
+
+  String toString() const override;
+
+  size_t getComputedColumnIndex(
+      const String& column_name,
+      bool allow_add = false) override;
+
+  size_t getNumComputedColumns() const override;
+
+  static void encode(
+      QueryTreeCoder* coder,
+      const ClusterShowServersNode& node,
+      OutputStream* os);
+
+  static RefPtr<QueryTreeNode> decode (
+      QueryTreeCoder* coder,
+      InputStream* is);
 };
 
-class HTTPRPCClient : public RPCClient {
-public:
-  HTTPRPCClient(TaskScheduler* sched);
-  void call(const URI& uri, RefPtr<AnyRPC> rpc) override;
-protected:
-  http::HTTPConnectionPool http_pool_;
-};
+} // namespace csql
 
-#endif
