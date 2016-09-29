@@ -36,9 +36,7 @@ const String TableImport::kDescription_ = "Import json or csv data to a table.";
 
 TableImport::TableImport(
     RefPtr<ProcessConfig> process_cfg) :
-    process_cfg_(process_cfg),
-    done_(false),
-    status_(Status::success()) {}
+    process_cfg_(process_cfg) {}
 
 Status TableImport::execute(
     const std::vector<std::string>& argv,
@@ -115,16 +113,6 @@ Status TableImport::execute(
     return Status(e);
   }
 
-  /* init threads */
-  num_threads_ = flags.isSet("connections") ?
-      flags.getInt("connections") :
-      kDefaultNumThreads;
-
-  threads_.resize(num_threads_);
-  for (size_t i = 0; i < num_threads_; ++i) {
-    clients_.emplace_back(new native_transport::TCPClient(nullptr, nullptr));
-  }
-
   database_ = flags.getString("database");
   table_ = flags.getString("table");
 
@@ -151,31 +139,28 @@ Status TableImport::execute(
   auto host = flags.getString("host");
   auto port = flags.getInt("port");
 
+  client_ = new native_transport::TCPClient(nullptr, nullptr);
   /* connect */
-  for (size_t i = 0; i < num_threads_; ++i) {
-    auto rc = clients_[i]->connect(
-        host,
-        port,
-        false,
-        auth_data);
-    if (!rc.isSuccess()) {
-      return rc;
-    }
+  auto rc = client_->connect(
+      host,
+      port,
+      false,
+      auth_data);
+  if (!rc.isSuccess()) {
+    return rc;
   }
 
-  /* run */
-  for (size_t i = 0; i < num_threads_; ++i) {
-    threads_[i] = std::thread(std::bind(&TableImport::runThread, this, i));
-  }
-
-  /* push line batches into the queue */
   std::vector<std::string> batch;
   std::string line;
   uint64_t cur_size = 0;
   while (is->readLine(&line)) {
     if (cur_size + line.size() > kDefaultBatchSize) {
-      std::unique_lock<std::mutex> lk(mutex_);
-      batches_.push(batch);
+      auto rc = uploadBatch(batch);
+      if (!rc.isSuccess()) {
+        client_->close();
+        return rc;
+      }
+
       batch.clear();
       cur_size = 0;
     }
@@ -184,104 +169,64 @@ Status TableImport::execute(
     cur_size += line.size();
     line.clear();
   }
-  batches_.push(batch);
 
-  {
-    std::unique_lock<std::mutex> lk(mutex_);
-    done_ = true;
-    cv_.notify_all();
-  }
-
-  for (auto& t : threads_) {
-    if (t.joinable()) {
-      t.join();
+  if (batch.size() > 0) {
+    auto rc = uploadBatch(batch);
+    if (!rc.isSuccess()) {
+      client_->close();
+      return rc;
     }
   }
 
-  for (size_t i = 0; i < clients_.size(); ++i) {
-    clients_[i]->close();
-  }
-
-  return status_;
+  client_->close();
+  return Status::success();
 }
 
-void TableImport::runThread(size_t idx) {
-  for (;;) {
-    std::unique_lock<std::mutex> lk(mutex_);
-    if (status_.isSuccess()) { //FIXME condition variable
-      return;
-    }
+Status TableImport::uploadBatch(std::vector<std::string> batch) {
+  /* insert */
+  native_transport::InsertFrame i_frame;
+  i_frame.setDatabase(database_);
+  i_frame.setTable(table_);
+  i_frame.setRecordEncoding(EVQL_INSERT_CTYPE_JSON);
 
-    if (batches_.size() == 0) {
-      if (done_) {
-        return;
-      }
+  for (auto l : batch) {
+    i_frame.addRecord(l);
+  }
 
-      //FIXME wait?
-      continue;
-    }
+  auto rc = client_->sendFrame(&i_frame, 0);
+  if (!rc.isSuccess()) {
+    return rc;
+  }
 
-    std::vector<std::string> batch;
-    batch = batches_.front();
-    batches_.pop();
+  uint16_t ret_opcode = 0;
+  uint16_t ret_flags;
+  std::string ret_payload;
+  while (ret_opcode != EVQL_OP_ACK) {
+    auto rc = client_->recvFrame(
+        &ret_opcode,
+        &ret_flags,
+        &ret_payload,
+        kMicrosPerSecond); // FIXME
 
-    lk.unlock();
-
-    /* insert */
-    native_transport::InsertFrame i_frame;
-    i_frame.setDatabase(database_);
-    i_frame.setTable(table_);
-    i_frame.setRecordEncoding(EVQL_INSERT_CTYPE_JSON);
-
-    for (auto l : batch) {
-      i_frame.addRecord(l);
-    }
-
-    auto rc = clients_[idx]->sendFrame(&i_frame, 0);
     if (!rc.isSuccess()) {
-      clients_[idx]->close();
-      std::unique_lock<std::mutex> lk(mutex_);
-      status_ = rc; //FIXME notify_all?
-      return;
+      return rc;
     }
 
-    uint16_t ret_opcode = 0;
-    uint16_t ret_flags;
-    std::string ret_payload;
-    while (ret_opcode != EVQL_OP_ACK) {
-      auto rc = clients_[idx]->recvFrame(
-          &ret_opcode,
-          &ret_flags,
-          &ret_payload,
-          kMicrosPerSecond); // FIXME
-
-      if (!rc.isSuccess()) {
-        clients_[idx]->close();
-        std::unique_lock<std::mutex> lk(mutex_);
-        status_ = rc; //FIXME notify_all?
-        return;
+    switch (ret_opcode) {
+      case EVQL_OP_ACK:
+      case EVQL_OP_HEARTBEAT:
+        continue;
+      case EVQL_OP_ERROR: {
+        native_transport::ErrorFrame eframe;
+        eframe.parseFrom(ret_payload.data(), ret_payload.size());
+        return ReturnCode::error("ERUNTIME", eframe.getError());
       }
-
-      switch (ret_opcode) {
-        case EVQL_OP_ACK:
-        case EVQL_OP_HEARTBEAT:
-          continue;
-        case EVQL_OP_ERROR: {
-          native_transport::ErrorFrame eframe;
-          eframe.parseFrom(ret_payload.data(), ret_payload.size());
-          clients_[idx]->close();
-          std::unique_lock<std::mutex> lk(mutex_);
-          status_ = ReturnCode::error("ERUNTIME", eframe.getError()); //FIXME notify_all?
-          return;
-        }
-        default:
-          clients_[idx]->close();
-          std::unique_lock<std::mutex> lk(mutex_);
-          status_ = ReturnCode::error("ERUNTIME", "unexpected opcode");
-          return;
-      }
+      default:
+        return ReturnCode::error("ERUNTIME", "unexpected opcode");
     }
   }
+
+  return Status::success();
 }
 
 const String& TableImport::getName() const {
